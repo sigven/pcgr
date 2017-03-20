@@ -1,2 +1,0 @@
-WARNING: Specified reference allele T does not match Ensembl reference allele N on line 15
-WARNING: Specified reference allele T does not match Ensembl reference allele N on line 479
