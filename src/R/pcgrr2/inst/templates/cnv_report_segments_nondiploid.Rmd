@@ -1,0 +1,10 @@
+## Somatic CNA analysis
+
+### All copy-number segments (non-diploid state)
+<br>
+```{r cna_segments_nondiploid, echo=F}
+myOptions <- list(paging = T,pageLength=20, searching=T,caching=F)
+DT::datatable(cnv_data$ranked_segments, options = myOptions, escape=F, extensions = "Responsive")
+```
+
+<br><br>

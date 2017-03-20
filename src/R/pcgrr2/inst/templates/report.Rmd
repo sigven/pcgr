@@ -1,0 +1,106 @@
+---
+title: "Cancer genome sequencing report for precision oncology - `r sample_name`"
+date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
+bibliography: bibliography.bib
+#runtime: shiny
+output: 
+  html_document:
+    toc: true
+    theme: default
+    number_sections: false
+    toc_float: true
+    toc_depth: 4
+    fig_width: 5
+    fig_height: 4
+params:
+  tier1_report: FALSE
+  tier2_report: FALSE
+  tier3_report: FALSE
+  tier4_report: FALSE
+  tier5_report: FALSE
+  signature_report: FALSE
+  cnv_report_segments: FALSE
+  cnv_report_oncogene_gain: FALSE
+  cnv_report_tsgene_loss: FALSE
+  cnv_report_biomarkers: FALSE
+  missing_signature_data: FALSE
+  show_data_sources: TRUE
+  snapshot: !r as.POSIXct("2015-01-01 12:30:00")
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(echo = F,warning=FALSE, dpi=300)
+```
+
+## Annotation sources
+
+```{r conditional_print0, child='data_sources.Rmd', eval = show_data_sources}
+```
+
+## Somatic SNVs/InDels
+
+### Tier 1 - genomic biomarkers for diagnosis, prognosis, and drug sensitivity {.tabset}
+
+- A total of __`r nrow(report_data$variants_tier1_display)`__ unique, somatic variant(s) in the tumor sample can be mapped to genomic biomarkers in the [database for clinical interpretations of variants in cancer, CIViC](https://civic.genome.wustl.edu/#/home) or [Cancer bioMarkers database](https://www.cancergenomeinterpreter.org/biomarkers), with the following number of evidence items:
+    * Tier 1A: __`r nrow(report_data$clinical_evidence_items_tier1A)`__ evidence items linked to specific amino acid changes
+    * Tier 1B: __`r nrow(report_data$clinical_evidence_items_tier1B)`__ evidence items linked to codon alterations
+    * Tier 1C: __`r nrow(report_data$clinical_evidence_items_tier1C)`__ evidence items linked to exon alterations
+
+<br>
+```{r conditional_print1, child='tier1.Rmd', eval = tier1_report}
+```
+
+### Tier 2 - other cancer mutation hotspots, curated mutations or predicted driver mutations
+
+- A total of __`r nrow(report_data$variants_tier2_display)`__ unique, somatic variant(s) in the tumor sample are curated as disease-causing, predicted as driver mutations, or occur in previously detected mutation hotspots:
+<br>
+```{r conditional_print2, child='tier2.Rmd', eval = tier2_report}
+```
+
+### Tier 3 - other coding mutations in proto-oncogenes/tumor suppressors/cancer census genes
+
+- A total of __`r nrow(report_data$variants_tier3_display)`__ unique, somatic variant(s) in the tumor sample are found within known proto-oncogenes, tumor suppressor genes or cancer census genes:
+<br>
+```{r conditional_print3, child='tier3.Rmd', eval = tier3_report}
+```
+
+<br>
+
+### Tier 4 - other coding mutations
+
+- A total of __`r nrow(report_data$variants_tier4_display)`__ unique, somatic variant(s) are also found in the tumor sample:
+<br>
+```{r conditional_print4, child='tier4.Rmd', eval = tier4_report}
+```
+<br>
+
+### Tier 5 - non-coding mutations
+
+- A total of __`r nrow(report_data$variants_tier5_display)`__ unique, somatic variant(s) are also found in the tumor sample:
+<br>
+```{r conditional_print5, child='tier5.Rmd', eval = tier5_report}
+```
+<br>
+
+
+```{r conditional_print6b, child='cnv_report_segments_nondiploid.Rmd', eval = cnv_report_segments}
+```
+
+
+```{r conditional_print7, child='cnv_report_oncogene_gain.Rmd', eval = cnv_report_oncogene_gain}
+```
+
+```{r conditional_print8, child='cnv_report_tsgene_loss.Rmd', eval = cnv_report_tsgene_loss}
+```
+
+```{r conditional_print9, child='cnv_report_biomarkers.Rmd', eval = cnv_report_biomarkers}
+```
+<br>
+
+```{r conditional_print10, child='mutational_signature.Rmd', eval = signature_report}
+```
+
+```{r conditional_print11, child='limited_signature_data.Rmd', eval = missing_signature_data}
+```
+
+## References

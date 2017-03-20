@@ -1,0 +1,7 @@
+
+```{r tier5, echo=F}
+
+myOptions <- list(paging = T,pageLength=10, searching=T,caching=F,DT.warn.size=F)
+DT::datatable(report_data$variants_tier5_display, options = myOptions, escape=F, extensions = "Responsive")
+
+```

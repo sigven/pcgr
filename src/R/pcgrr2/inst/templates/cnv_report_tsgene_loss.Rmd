@@ -1,0 +1,9 @@
+### Tumor suppressor genes subject to homozygous deletions
+<br>
+
+```{r cna_tsgene_loss, echo=F}
+myOptions <- list(paging = T,pageLength=10, searching=T,caching=F)
+DT::datatable(cnv_data$tsgene_homozygous_deletion, options = myOptions, escape=F, extensions = "Responsive")
+```
+
+<br><br>

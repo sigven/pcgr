@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "Package: pcgrr2\nType: Package\nTitle: Personal Cancer Genome Reporter (v2)\nVersion: 0.1.0\nAuthor: Sigve Nakken\nMaintainer: Sigve Nakken <sigven@ifi.uio.no>\nDescription: A toolset for generation of clinically interpretable reports of\n    tumor genome variants\nLicense: What license is it under?\nEncoding: UTF-8\nLazyData: true\nRoxygenNote: 6.0.1\n",
+    "created" : 1489671172268.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3835419324",
+    "id" : "C3BB2840",
+    "lastKnownWriteTime" : 1489671203,
+    "last_content_update" : 1489671203104,
+    "path" : "~/research/docker/pcgr/src/R/pcgrr2/DESCRIPTION",
+    "project_path" : "DESCRIPTION",
+    "properties" : {
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "dcf"
+}
