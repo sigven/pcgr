@@ -50,11 +50,20 @@ def index_clinvar(clinvar_tsv_file_path):
       for rec in cv_reader:
          
          unique_traits = {}
-         traits = rec['trait']
+         traits = ''
+         if not rec.has_key('trait'):
+            traits = rec['all_traits']
+         else:
+            traits = rec['trait']
+         #traits = rec['all_traits']
          for t in traits.split(';'):
             t_lc = str(t).lower()
             unique_traits[t_lc] = 1
-         origin = rec['variant_origin']            
+         origin = ''
+         if not rec.has_key('variant_origin'):
+            origin = rec['origin']
+         else:
+            origin = rec['variant_origin']
          
          traits_curated = ';'.join(unique_traits.keys())
          traits_origin = traits_curated + ' - ' + str(origin)
@@ -68,9 +77,9 @@ def index_clinvar(clinvar_tsv_file_path):
    return clinvar_xref
 
 
-def map_variant_effect_predictors(rec, vep_info_tags, protein_info_tags, variant_prediction_tags):
+def map_variant_effect_predictors(rec, vep_info_tags, protein_info_tags, variant_prediction_tags, algorithms):
 	
-	dbnsfp_predictions = dbnsfp.map_dbnsfp_predictions(rec.INFO['DBNSFP'])
+	dbnsfp_predictions = dbnsfp.map_dbnsfp_predictions(rec.INFO['DBNSFP'], algorithms)
 	variant_prediction_tags['EFFECT_PREDICTIONS'] = {}
 	
 	for alt_allele in vep_info_tags['Feature'].keys():
@@ -266,6 +275,15 @@ def extend_vcf_annotations(query_vcf,pcgr_directory):
       logger.warning('VCF does not have CSQ tag in its meta information lines')
       no_csq = 1
    
+   dbnsfp_prediction_algorithms = []
+   if 'DBNSFP' in vcf_reader.infos.keys():
+      if 'Format:' in vcf_reader.infos['DBNSFP'].desc:
+         tmp = vcf_reader.infos['DBNSFP'].desc.split('Format:')[1].split('@')
+         i = 7
+         while(i < len(tmp)):
+            dbnsfp_prediction_algorithms.append(str(re.sub(r'((_score)|(_pred))$','',tmp[i])))
+            i = i + 1
+
    for tag in vep_infotags_desc:
       if not tag in vcf_reader.infos.keys():
          vcf_reader.infos[tag] = [tag,str(vep_infotags_desc[tag]['number']),str(vep_infotags_desc[tag]['type']),str(vep_infotags_desc[tag]['description'])]
@@ -351,7 +369,7 @@ def extend_vcf_annotations(query_vcf,pcgr_directory):
          get_protein_change_info(up_xref, uniprot_feature_xref, swissprot_features,vep_info_tags,extended_protein_info_tags)
       get_gene_data(gene_xref, vep_info_tags, extended_gene_oncorelevance_tags)
       if rec.INFO.has_key('DBNSFP'):
-         map_variant_effect_predictors(rec, vep_info_tags, extended_protein_info_tags, variant_effect_prediction_tags)
+         map_variant_effect_predictors(rec, vep_info_tags, extended_protein_info_tags, variant_effect_prediction_tags, dbnsfp_prediction_algorithms)
       all_info_vals = []
       
       if extended_protein_info_tags.has_key('PROTEIN_POSITIONS'):

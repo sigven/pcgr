@@ -14,8 +14,10 @@ def __main__():
    parser.add_argument('--input_vcf', dest="input_vcf",help='VCF input file with somatic query variants (SNVs/InDels)')
    parser.add_argument('--input_cnv_segments', dest="input_cnv_segments",help='Somatic copy number query segments (tab-separated values)')
    parser.add_argument('--no_html_report', action = "store_true",help='Skip generation of HTML reports, output will consist of annotated VCF/TSV files')
-   parser.add_argument('--logR_threshold_amplification', dest = "logR_threshold_amplification",help='Log2 ratio treshold for copy number amplification')
-   parser.add_argument('--logR_threshold_loss', dest = "logR_treshold_loss",help='Log2 ratio treshold for homozygous deletion')
+   parser.add_argument('--logR_threshold_amplification', dest = "logR_threshold_amplification",default=0.8, help='Log2 ratio treshold for copy number amplification')
+   parser.add_argument('--logR_threshold_homozygous_deletion', dest = "logR_threshold_homozygous_deletion", default=-2, help='Log2 ratio treshold for homozygous deletion')
+   parser.add_argument('--num_vcfanno_processes', dest = "num_vcfanno_processes", default=4, help='Number of processes used during vcfanno annotation')
+   parser.add_argument('--num_vep_forks', dest = "num_vep_forks", default=4, help='Number of forks (--forks) used during VEP annotation')
    parser.add_argument('pcgr_directory',help='PCGR base directory')
    parser.add_argument('working_directory',help="Working directory")
    parser.add_argument('sample_id',help="Tumor sample/cancer genome identifier - prefix for output files")
@@ -30,7 +32,7 @@ def __main__():
    ## 3. make custom check of CNV segment file
    ## 4. ensure that either input_vcf or input_cnv is not NULL
 
-   run_pcgr(args.input_vcf, args.input_cnv_segments, args.pcgr_directory, args.working_directory, args.no_html_report, args.sample_id)
+   run_pcgr(args.input_vcf, args.input_cnv_segments, args.logR_threshold_amplification, args.logR_threshold_homozygous_deletion, args.num_vcfanno_processes, args.num_vep_forks, args.pcgr_directory, args.working_directory, args.no_html_report, args.sample_id)
 
 def getlogger(logger_name):
    logger = logging.getLogger(logger_name)
@@ -51,7 +53,7 @@ def getlogger(logger_name):
    
    return logger
 
-def run_pcgr(input_vcf, input_cnv_segments, pcgr_directory, working_directory, no_html_report, sample_id):
+def run_pcgr(input_vcf, input_cnv_segments, logR_threshold_amplification, logR_threshold_homozygous_deletion, num_vcfanno_processes, num_vep_forks, pcgr_directory, working_directory, no_html_report, sample_id):
    
    
    
@@ -59,7 +61,8 @@ def run_pcgr(input_vcf, input_cnv_segments, pcgr_directory, working_directory, n
    vepdb_directory = pcgr_directory + "/data/.vep"
    if not os.path.exists(vepdb_directory):
    ## logger - error - PCGR data directory not installed or EMPTY (TODO)
-      return 
+     print str(vepdb_directory) + ' does not exist' 
+     return 
    
    output_vcf = str(sample_id) + '.pcgr.vcf.gz'
    vep_vcf = re.sub(r'(\.vcf$|\.vcf\.gz$)','.pcgr_vep.vcf',input_vcf)
@@ -76,11 +79,12 @@ def run_pcgr(input_vcf, input_cnv_segments, pcgr_directory, working_directory, n
    logger = getlogger('pcgr-check-input')
    logger.info("STEP 0: Validate input data")
    vcf_validate_command = str(docker_command_run3) + "pcgr_check_input.py " + str(input_vcf) + " " + str(input_cnv_segments) + "\""
-   subprocess.check_call(str(vcf_validate_command), shell=True)
+   if subprocess.check_call(str(vcf_validate_command), shell=True) != 0:
+      return
    logger.info('Finished')
 
    
-   vep_main_command = str(docker_command_run1) + "variant_effect_predictor.pl --input_file " + str(input_vcf) + " --output_file " + str(vep_tmp_vcf) + " --vcf --check_ref --flag_pick_allele --force_overwrite --species homo_sapiens --assembly GRCh37 --offline --fork 4 --no_progress --variant_class --regulatory --domains --shift_hgvs 1 --hgvs --symbol --protein --ccds --uniprot --appris --biotype --canonical --gencode_basic --cache --numbers --check_alleles --total_length --allele_number --no_escape --xref_refseq --dir /usr/local/share/vep/data --fasta /usr/local/share/vep/data/homo_sapiens/85_GRCh37/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz\""
+   vep_main_command = str(docker_command_run1) + "variant_effect_predictor.pl --input_file " + str(input_vcf) + " --output_file " + str(vep_tmp_vcf) + " --vcf --check_ref --flag_pick_allele --force_overwrite --species homo_sapiens --assembly GRCh37 --offline --fork " + str(num_vep_forks) + " --no_progress --variant_class --regulatory --domains --shift_hgvs 1 --hgvs --symbol --protein --ccds --uniprot --appris --biotype --canonical --gencode_basic --cache --numbers --check_alleles --total_length --allele_number --no_escape --xref_refseq --dir /usr/local/share/vep/data --fasta /usr/local/share/vep/data/homo_sapiens/85_GRCh37/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz\""
    vep_sed_command =  str(docker_command_run1) + "sed -r 's/\(p\.=\)|polyphen=2.2.2 |ClinVar=201507 |dbSNP=144 |ESP=20141103|sift=sift5.2.2 |COSMIC=71 | HGMD-PUBLIC=20152//g' " + str(vep_tmp_vcf) + " > " + str(vep_vcf) + "\""
    vep_bgzip_command = str(docker_command_run1) + "bgzip -f " + str(vep_vcf) + "\""
    vep_tabix_command = str(docker_command_run1) + "tabix -f -p vcf " + str(vep_vcf) + ".gz" + "\""
@@ -96,8 +100,8 @@ def run_pcgr(input_vcf, input_cnv_segments, pcgr_directory, working_directory, n
 
    print
    logger = getlogger('pcgr-vcfanno')
-   logger.info("STEP 2: Annotation for precision oncology with pcgr-vcfanno (ClinVar,dbSNP,dbNSFP,1000Genomes Project,ExAC,CiVIC,CBMDB,DoCM,COSMIC,Intogen_driver_mutations,ICGC)")
-   pcgr_vcfanno_command = str(docker_command_run2) + "pcgr_vcfanno.py --dbsnp --dbnsfp --oneKG --docm --clinvar --exac --icgc --civic --cbmdb --intogen_driver_mut --cosmic " + str(vep_vcf_gz) + " " + str(vep_vcfanno_vcf) + " /data\""
+   logger.info("STEP 2: Annotation for precision oncology with pcgr-vcfanno (ClinVar, dbSNP, dbNSFP, 1000Genomes Project, ExAC, gnomAD, CiVIC, CBMDB, DoCM, COSMIC, Intogen_driver_mutations, ICGC)")
+   pcgr_vcfanno_command = str(docker_command_run2) + "pcgr_vcfanno.py --num_processes " + str(num_vcfanno_processes) + " --dbsnp --dbnsfp --oneKG --docm --clinvar --exac --gnomad --icgc --civic --cbmdb --intogen_driver_mut --cosmic " + str(vep_vcf_gz) + " " + str(vep_vcfanno_vcf) + " /data\""
    subprocess.check_call(str(pcgr_vcfanno_command), shell=True)
    logger.info("Finished")
    
@@ -107,6 +111,7 @@ def run_pcgr(input_vcf, input_cnv_segments, pcgr_directory, working_directory, n
    logger.info("STEP 3: Cancer gene annotations with pcgr-summarise")
    subprocess.check_call(str(pcgr_summarise_command), shell=True)
    logger.info("Finished")
+   #return
    
    #print str(vep_vcfanno_annotated_vcf)
    create_output_vcf_command1 = str(docker_command_run3) + 'mv ' + str(vep_vcfanno_annotated_vcf) + ' ' + str(output_vcf) + "\""
@@ -119,7 +124,7 @@ def run_pcgr(input_vcf, input_cnv_segments, pcgr_directory, working_directory, n
    logger.info("STEP 4: Generation of output files")
       
    #pcgr_report_command = str(docker_command_run3) + "/pcgr.R /workdir " + str(output_vcf) + " " + str(input_cnv_segments) + " "  + str(sample_id)  + " " + str(no_html_report) + "\""
-   pcgr_report_command = str(docker_command_run2) + "/pcgr_v2.R /workdir " + str(output_vcf) + " " + str(input_cnv_segments) + " "  + str(sample_id)  + " " + str(no_html_report) + "\""
+   pcgr_report_command = str(docker_command_run2) + "/pcgr_v2.R /workdir " + str(output_vcf) + " " + str(input_cnv_segments) + " "  + str(sample_id)  + " " + str(logR_threshold_amplification) + " " + str(logR_threshold_homozygous_deletion) +  " " + str(no_html_report) + "\""
 
    subprocess.check_call(str(pcgr_report_command), shell=True)
    logger.info("Finished")

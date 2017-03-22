@@ -4,7 +4,8 @@
 \alias{generate_pcg_report}
 \title{Function that generates cancer genome report}
 \usage{
-generate_pcg_report(project_directory, query_vcf, cnv_segments_tsv = NULL,
+generate_pcg_report(project_directory, query_vcf, logR_threshold_amplification,
+  logR_threshold_homozygous_deletion, cnv_segments_tsv = NULL,
   sample_name = "SampleX", signatures_limit = 6, print_biomarkers = TRUE,
   print_tier_variants = TRUE, print_mutational_signatures = TRUE,
   print_cnv_segments = TRUE, print_maf = TRUE, print_html_report = TRUE)
@@ -13,6 +14,10 @@ generate_pcg_report(project_directory, query_vcf, cnv_segments_tsv = NULL,
 \item{project_directory}{name of project directory}
 
 \item{query_vcf}{name of VCF file with annotated query SNVs/InDels}
+
+\item{logR_threshold_amplification}{logR treshold for annotating copy number amplifications}
+
+\item{logR_threshold_homozygous_deletion}{logR threshold for annotating homozygous deletions}
 
 \item{cnv_segments_tsv}{name of CNV segments file (tab-separated values)}
 

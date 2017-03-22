@@ -116,6 +116,8 @@ signature_contributions_single_sample <- function(mut_data, sample_name, signatu
 #'
 #' @param project_directory name of project directory
 #' @param query_vcf name of VCF file with annotated query SNVs/InDels
+#' @param logR_threshold_amplification logR treshold for annotating copy number amplifications
+#' @param logR_threshold_homozygous_deletion logR threshold for annotating homozygous deletions
 #' @param cnv_segments_tsv name of CNV segments file (tab-separated values)
 #' @param sample_name sample identifier
 #' @param signatures-limit Number of signatures to limit mutational signature analysis
@@ -128,7 +130,7 @@ signature_contributions_single_sample <- function(mut_data, sample_name, signatu
 #' @return p
 #'
 
-generate_pcg_report <- function(project_directory, query_vcf, cnv_segments_tsv = NULL, sample_name = 'SampleX', signatures_limit = 6, print_biomarkers = TRUE, print_tier_variants = TRUE, print_mutational_signatures = TRUE, print_cnv_segments = TRUE, print_maf = TRUE, print_html_report = TRUE){
+generate_pcg_report <- function(project_directory, query_vcf, logR_threshold_amplification, logR_threshold_homozygous_deletion, cnv_segments_tsv = NULL, sample_name = 'SampleX', signatures_limit = 6, print_biomarkers = TRUE, print_tier_variants = TRUE, print_mutational_signatures = TRUE, print_cnv_segments = TRUE, print_maf = TRUE, print_html_report = TRUE){
   sample_calls <- pcgrr2::get_calls(query_vcf, sample_id = sample_name)
   report_data <- pcgrr2::generate_report_data(sample_calls, sample_name = sample_name, minimum_n_signature_analysis = 50, signatures_limit = signatures_limit)
   report_data$sample_name <- sample_name
@@ -146,7 +148,7 @@ generate_pcg_report <- function(project_directory, query_vcf, cnv_segments_tsv =
 
   if(!is.null(cnv_segments_tsv)){
     if(file.exists(cnv_segments_tsv)){
-      cnv_data <- pcgrr2::cnv_segment_annotation(cnv_segments_tsv, format='tcga')
+      cnv_data <- pcgrr2::cnv_segment_annotation(cnv_segments_tsv, logR_threshold_amplification, logR_threshold_homozygous_deletion, format='tcga')
       if(nrow(cnv_data$ranked_segments) > 0){
         cnv_report_segments <- TRUE
       }
@@ -222,14 +224,12 @@ generate_pcg_report <- function(project_directory, query_vcf, cnv_segments_tsv =
 #' @return cnv_data
 #'
 
-cnv_segment_annotation <- function(cnv_file, format = 'tcga_legacy', logR_amplification_threshold = 0.8, logR_deletion_threshold = -0.8){
+cnv_segment_annotation <- function(cnv_file, logR_amplification_threshold, logR_homozygous_deletion_threshold, format = 'tcga_legacy'){
 
   cnv_df <- read.table(file=cnv_file,header = T,stringsAsFactors = F,comment.char="", quote="")
   cnv_df <- dplyr::rename(cnv_df, chromosome = Chromosome, LogR = Segment_Mean, segment_start = Start, segment_end = End) %>% dplyr::distinct()
   cnv_df$chromosome <- paste0("chr",cnv_df$chromosome)
-  cnv_df$cnTotal <- NA
-  cnv_df$cnMinor <- NA
-  cnv_df$cf <- NA
+  cnv_df$LogR <- as.numeric(cnv_df$LogR)
 
   if(nrow(cnv_df[cnv_df$chromosome == 'chr23',])){
     cnv_df[cnv_df$chromosome == 'chr23',]$chromosome <- 'chrX'
@@ -299,7 +299,7 @@ cnv_segment_annotation <- function(cnv_file, format = 'tcga_legacy', logR_amplif
     oncogene_amplified$CNA_TYPE <- 'gain'
   }
   tsgene_homozygous_deletion <- NULL
-  tsgene_homozygous_deletion <- dplyr::filter(df, !is.na(TUMOR_SUPPRESSOR) & (logR <= logR_loss_threshold))
+  tsgene_homozygous_deletion <- dplyr::filter(df, !is.na(TUMOR_SUPPRESSOR) & (logR <= logR_homozygous_deletion_threshold))
   tsgene_homozygous_deletion <- dplyr::select(tsgene_homozygous_deletion, -c(TUMOR_SUPPRESSOR, ONCOGENE))
   tsgene_homozygous_deletion <- tsgene_homozygous_deletion %>% dplyr::arrange(CANCER_CENSUS_SOMATIC)
   if(nrow(tsgene_homozygous_deletion) > 0){
@@ -511,13 +511,13 @@ generate_report_data <- function(sample_calls, sample_name = NULL, minimum_n_sig
   variants_tier1 <- rbind(clinical_evidence_items_tier1A$clinical_evidence_items,clinical_evidence_items_tier1B$clinical_evidence_items,clinical_evidence_items_tier1C$clinical_evidence_items)
   biomarker_descriptions <- rbind(clinical_evidence_items_tier1A$biomarker_descriptions,clinical_evidence_items_tier1B$biomarker_descriptions,clinical_evidence_items_tier1C$biomarker_descriptions)
   if(nrow(clinical_evidence_items_tier1B$clinical_evidence_items) > 0){
-    clinical_evidence_items_tier1B$clinical_evidence_items <- dplyr::select(clinical_evidence_items_tier1B$clinical_evidence_items, dplyr::one_of(tier1_tags_display))
+    clinical_evidence_items_tier1B$clinical_evidence_items <- dplyr::select(clinical_evidence_items_tier1B$clinical_evidence_items, dplyr::one_of(pcgr_data$tier1_tags_display))
   }
   if(nrow(clinical_evidence_items_tier1A$clinical_evidence_items) > 0){
-    clinical_evidence_items_tier1A$clinical_evidence_items <- dplyr::select(clinical_evidence_items_tier1A$clinical_evidence_items, dplyr::one_of(tier1_tags_display))
+    clinical_evidence_items_tier1A$clinical_evidence_items <- dplyr::select(clinical_evidence_items_tier1A$clinical_evidence_items, dplyr::one_of(pcgr_data$tier1_tags_display))
   }
   if(nrow(clinical_evidence_items_tier1C$clinical_evidence_items) > 0){
-    clinical_evidence_items_tier1C$clinical_evidence_items <- dplyr::select(clinical_evidence_items_tier1C$clinical_evidence_items, dplyr::one_of(tier1_tags_display))
+    clinical_evidence_items_tier1C$clinical_evidence_items <- dplyr::select(clinical_evidence_items_tier1C$clinical_evidence_items, dplyr::one_of(pcgr_data$tier1_tags_display))
   }
 
   if(nrow(variants_tier1) > 0){
@@ -864,7 +864,7 @@ get_clinical_associations_civic_cbmdb <- function(vcf_data_df, mapping = 'exact'
       civic_calls <- dplyr::select(vcf_data_df_civic,dplyr::one_of(pcgr_data$pcgr_all_annotation_columns))
       eitems <- NULL
       if(any(stringr::str_detect(civic_calls$CIVIC_ID,"EID"))){
-        eitems <- dplyr::left_join(civic_calls,dplyr::filter(dplyr::select(pcgr_data$civic_biomarkers,-c(civic_exon,civic_consequence,civic_codon,transvar_id)),alteration_type == 'MUT'),by=c("CIVIC_ID" = "evidence_id"))
+        eitems <- dplyr::left_join(civic_calls,dplyr::filter(dplyr::select(pcgr_data$civic_biomarkers,-c(civic_exon,civic_consequence,civic_codon,transvar_id,civic_id)),alteration_type == 'MUT'),by=c("CIVIC_ID" = "evidence_id"))
       }
       else{
         eitems <- dplyr::left_join(civic_calls,dplyr::filter(dplyr::select(pcgr_data$civic_biomarkers,-c(civic_exon,civic_consequence,civic_codon,transvar_id)),alteration_type == 'MUT'),by=c("CIVIC_ID" = "civic_id"))
@@ -900,7 +900,7 @@ get_clinical_associations_civic_cbmdb <- function(vcf_data_df, mapping = 'exact'
       civic_calls <- dplyr::select(vcf_data_df_civic,dplyr::one_of(pcgr_data$pcgr_all_annotation_columns))
       clinical_evidence_items <- NULL
       if(any(stringr::str_detect(civic_calls$CIVIC_ID_2,"EID"))){
-        clinical_evidence_items <- dplyr::left_join(civic_calls,dplyr::filter(pcgr_data$civic_biomarkers,alteration_type == 'MUT'),by=c("CIVIC_ID_2" = "evidence_id"))
+        clinical_evidence_items <- dplyr::left_join(civic_calls,dplyr::filter(dplyr::select(pcgr_data$civic_biomarkers,-civic_id),alteration_type == 'MUT'),by=c("CIVIC_ID_2" = "evidence_id"))
       }
       else{
         clinical_evidence_items <- dplyr::left_join(civic_calls,dplyr::filter(pcgr_data$civic_biomarkers,alteration_type == 'MUT'),by=c("CIVIC_ID_2" = "civic_id"))
@@ -968,7 +968,7 @@ get_clinical_associations_civic_cbmdb <- function(vcf_data_df, mapping = 'exact'
   if(nrow(clinical_evidence_items) > 0){
     pcgr_all_annotation_columns_reduced <- pcgr_data$pcgr_all_annotation_columns[-which(pcgr_data$pcgr_all_annotation_columns == 'EXON' | pcgr_data$pcgr_all_annotation_columns == 'CIVIC_ID' | pcgr_data$pcgr_all_annotation_columns == 'CIVIC_ID_2' | pcgr_data$pcgr_all_annotation_columns == 'CBMDB_ID')]
 
-    all_tier1_tags <- c(pcgr_data$pcgr_all_annotation_columns_reduced,c("CLINICAL_SIGNIFICANCE","EVIDENCE_LEVEL","EVIDENCE_TYPE","EVIDENCE_DIRECTION","DISEASE_NAME","DESCRIPTION","CITATION","DRUG_NAMES","RATING"))
+    all_tier1_tags <- c(pcgr_all_annotation_columns_reduced,c("CLINICAL_SIGNIFICANCE","EVIDENCE_LEVEL","EVIDENCE_TYPE","EVIDENCE_DIRECTION","DISEASE_NAME","DESCRIPTION","CITATION","DRUG_NAMES","RATING"))
     clinical_evidence_items <- dplyr::select(clinical_evidence_items, dplyr::one_of(all_tier1_tags))
     unique_variants <- clinical_evidence_items %>% dplyr::select(SYMBOL,CONSEQUENCE,PROTEIN_CHANGE,CDS_CHANGE) %>% dplyr::distinct()
     clinical_evidence_items <- clinical_evidence_items %>% dplyr::arrange(EVIDENCE_LEVEL,RATING)

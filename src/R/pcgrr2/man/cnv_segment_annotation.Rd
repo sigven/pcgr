@@ -4,8 +4,8 @@
 \alias{cnv_segment_annotation}
 \title{Function that annotates CNV segment files (FACETS)}
 \usage{
-cnv_segment_annotation(cnv_file, format = "tcga_legacy",
-  logR_amplification_threshold = 0.8, logR_deletion_threshold = -0.8)
+cnv_segment_annotation(cnv_file, logR_amplification_threshold,
+  logR_homozygous_deletion_threshold, format = "tcga_legacy")
 }
 \arguments{
 \item{cnv_file}{CNV file name}

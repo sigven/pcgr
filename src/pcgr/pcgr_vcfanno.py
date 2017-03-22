@@ -17,26 +17,17 @@ def __main__():
    parser.add_argument('query_vcf', help='Bgzipped input VCF file with query variants (SNVs/InDels)')
    parser.add_argument('out_vcf', help='Output VCF file with appended annotations from multiple VCF files')
    parser.add_argument('pcgr_dir', help='PCGR base directory')
-   #parser.add_argument("--cosmic",action = "store_true", help="Annotate VCF with annotations from Catalogue of somatic mutations in cancer (COSMIC v78, September 2016)")
-   #parser.add_argument("--icgc",action = "store_true", help="Annotate VCF with annotations from all simple somatic mutations in ICGC projects (ICGC release 22, August 2016)")
-   #parser.add_argument("--exac",action = "store_true", help="Annotate VCF with annotations from Exome Aggregation Consortium (release 0.3.1)")
-   #parser.add_argument("--docm",action = "store_true", help="Annotate VCF with annotations from Database of Curated Mutations (DoCM 3.2, May 2016)")
-   #parser.add_argument("--intogen_driver_mut",action = "store_true", help="Annotate VCF with predicted cancer driver mutations from IntoGen's Catalog of Driver Mutations (2016.5 release)")
-   #parser.add_argument("--clinvar",action = "store_true", help="Annotate VCF with annotations from ClinVar (October 2016)")
-   #parser.add_argument("--dbsnp",action = "store_true", help="Annotate VCF with annotations from database of short genetic variations (dbSNP b147)")
-   #parser.add_argument("--dbnsfp",action = "store_true", help="Annotate VCF with annotations from database of non-synonymous functional predictions (dbNSFP v3.2)")
-   #parser.add_argument("--oneKG",action = "store_true", help="Annotate VCF with annotations from the 1000 Genome Project (1000GProject wgs phase 3)")
-   #parser.add_argument("--civic",action = "store_true", help="Annotate VCF with annotations from the Clinical Interpretation of Variants in Cancer (CIViC, November 12th 2016) database")
-   #parser.add_argument("--cbmdb",action = "store_true", help="Annotate VCF with annotations from the Cancer bioMarkers database (October 28th 2016)")
+   parser.add_argument('--num_processes', help="Number of processes vcfanno can use during annotation", default=4)
    parser.add_argument("--cosmic",action = "store_true", help="Annotate VCF with annotations from Catalogue of somatic mutations in cancer")
    parser.add_argument("--icgc",action = "store_true", help="Annotate VCF with annotations from all simple somatic mutations in ICGC projects")
-   parser.add_argument("--exac",action = "store_true", help="Annotate VCF with annotations from Exome Aggregation Consortium (release 0.3.1)")
+   parser.add_argument("--exac",action = "store_true", help="Annotate VCF with allele frequencies from Exome Aggregation Consortium")
+   parser.add_argument("--gnomad",action = "store_true", help="Annotate VCF with allele frequencies (exome) from genome Aggregation Database")
    parser.add_argument("--docm",action = "store_true", help="Annotate VCF with annotations from Database of Curated Mutations")
    parser.add_argument("--intogen_driver_mut",action = "store_true", help="Annotate VCF with predicted cancer driver mutations from IntoGen's Catalog of Driver Mutations")
    parser.add_argument("--clinvar",action = "store_true", help="Annotate VCF with annotations from ClinVar")
    parser.add_argument("--dbsnp",action = "store_true", help="Annotate VCF with annotations from database of short genetic variations")
    parser.add_argument("--dbnsfp",action = "store_true", help="Annotate VCF with annotations from database of non-synonymous functional predictions")
-   parser.add_argument("--oneKG",action = "store_true", help="Annotate VCF with annotations from the 1000 Genome Project")
+   parser.add_argument("--oneKG",action = "store_true", help="Annotate VCF with allele frequencies from the 1000 Genome Project")
    parser.add_argument("--civic",action = "store_true", help="Annotate VCF with annotations from the Clinical Interpretation of Variants in Cancer database")
    parser.add_argument("--cbmdb",action = "store_true", help="Annotate VCF with annotations from the Cancer bioMarkers database")
       
@@ -46,9 +37,9 @@ def __main__():
    vcfheader_file = args.out_vcf + '.tmp.' + str(random.randrange(0,10000000)) + '.header.txt'
    conf_fname = args.out_vcf + '.tmp.conf.toml'
    print_vcf_header(args.query_vcf, vcfheader_file, chromline_only = False)
-   run_vcfanno(args.query_vcf, query_info_tags, vcfheader_file, args.pcgr_dir, conf_fname, args.out_vcf, args.cosmic, args.icgc, args.exac, args.docm, args.intogen_driver_mut, args.clinvar, args.dbsnp, args.dbnsfp, args.oneKG, args.civic, args.cbmdb)
+   run_vcfanno(args.num_processes, args.query_vcf, query_info_tags, vcfheader_file, args.pcgr_dir, conf_fname, args.out_vcf, args.cosmic, args.icgc, args.exac, args.docm, args.intogen_driver_mut, args.clinvar, args.dbsnp, args.dbnsfp, args.oneKG, args.civic, args.cbmdb, args.gnomad)
 
-def run_vcfanno(query_vcf, query_info_tags, vcfheader_file, pcgr_directory, conf_fname, output_vcf, cosmic, icgc, exac, docm, intogen_driver_mut, clinvar, dbsnp, dbnsfp, oneKG, civic, cbmdb):
+def run_vcfanno(num_processes, query_vcf, query_info_tags, vcfheader_file, pcgr_directory, conf_fname, output_vcf, cosmic, icgc, exac, docm, intogen_driver_mut, clinvar, dbsnp, dbnsfp, oneKG, civic, cbmdb, gnomad):
    
    pcgr_db_directory = pcgr_directory + '/data'
    if cosmic is True:
@@ -88,6 +79,15 @@ def run_vcfanno(query_vcf, query_info_tags, vcfheader_file, pcgr_directory, conf
             logger.warning("Query VCF has INFO tag " + str(t) + ' - this is also present in the ExAC VCF annotation file. This tag will be overwritten if not renamed in the query VCF')
       append_to_conf_file("exac",pcgr_db_directory, conf_fname)
       append_to_vcf_header(pcgr_db_directory, "exac", vcfheader_file)
+   
+   if gnomad is True:
+      gnomad_tags = ["AMR_AF_GNOMAD","AFR_AF_GNOMAD","NFE_AF_GNOMAD","FIN_AF_GNOMAD","ASJ_AF_GNOMAD","OTH_AF_GNOMAD","GLOBAL_AF_GNOMAD","EAS_AF_GNOMAD","SAS_AF_GNOMAD"]
+      for t in gnomad_tags:
+         if query_info_tags.has_key(t):
+            logger.warning("Query VCF has INFO tag " + str(t) + ' - this is also present in the GNOMAD VCF annotation file. This tag will be overwritten if not renamed in the query VCF')
+      append_to_conf_file("gnomad",pcgr_db_directory, conf_fname)
+      append_to_vcf_header(pcgr_db_directory, "gnomad", vcfheader_file)
+   
    if docm is True:
       docm_tags = ["DOCM_DISEASE","DOCM_PMID"]
       for t in docm_tags:
@@ -137,14 +137,14 @@ def run_vcfanno(query_vcf, query_info_tags, vcfheader_file, pcgr_directory, conf
    out_vcf_vcfanno_sorted = output_vcf + '.tmp.sorted.1'
    query_prefix = re.sub('\.vcf.gz$','',query_vcf)
    print_vcf_header(query_vcf, vcfheader_file, chromline_only = True)
-   command1 = "vcfanno -p=4 " + str(conf_fname) + " " + str(query_vcf) + " > " + str(out_vcf_vcfanno_unsorted1) + " 2> " + str(query_prefix) + '.vcfanno.log'
+   command1 = "vcfanno -p=" + str(num_processes) + " " + str(conf_fname) + " " + str(query_vcf) + " > " + str(out_vcf_vcfanno_unsorted1) + " 2> " + str(query_prefix) + '.vcfanno.log'
    os.system(command1)
    
    os.system('cat ' + str(vcfheader_file) + ' > ' + str(output_vcf))
    os.system('cat ' + str(out_vcf_vcfanno_unsorted1) + ' | grep -v \'^#\' >> ' + str(output_vcf))
    os.system('rm -f ' + str(output_vcf) + '.tmp*')
-   os.system('bgzip ' + str(output_vcf))
-   os.system('tabix -p vcf ' + str(output_vcf) + '.gz')
+   os.system('bgzip -f ' + str(output_vcf))
+   os.system('tabix -f -p vcf ' + str(output_vcf) + '.gz')
    return 0
    
 def append_to_vcf_header(pcgr_db_directory, dbsource, vcfheader_file):
@@ -172,6 +172,10 @@ def append_to_conf_file(dbsource, pcgr_db_directory, conf_fname):
    if dbsource == 'exac':
       fh.write('fields = ["AMR_AF_EXAC","AFR_AF_EXAC","NFE_AF_EXAC","FIN_AF_EXAC","OTH_AF_EXAC","GLOBAL_AF_EXAC","EAS_AF_EXAC","SAS_AF_EXAC"]\n')
       fh.write('ops=["concat","concat","concat","concat","concat","concat","concat","concat"]\n\n')
+   
+   if dbsource == 'gnomad':
+      fh.write('fields = ["AMR_AF_GNOMAD","AFR_AF_GNOMAD","NFE_AF_GNOMAD","FIN_AF_GNOMAD","ASJ_AF_GNOMAD","OTH_AF_GNOMAD","GLOBAL_AF_GNOMAD","EAS_AF_GNOMAD","SAS_AF_GNOMAD"]\n')
+      fh.write('ops=["concat","concat","concat","concat","concat","concat","concat","concat","concat"]\n\n')
    
    if dbsource == 'intogen_driver_mut':
       fh.write('fields = ["INTOGEN_DRIVER_MUT"]\n')
