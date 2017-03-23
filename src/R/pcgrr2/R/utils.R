@@ -321,13 +321,13 @@ cnv_segment_annotation <- function(cnv_file, logR_amplification_threshold, logR_
   cna_biomarkers <- NULL
   if(!is.null(tsgene_homozygous_deletion)){
     if(nrow(tsgene_homozygous_deletion) > 0){
-      civic_biomarker_hits1 <- dplyr::inner_join(tsgene_homozygous_deletion, civic_cna_biomarkers)
+      civic_biomarker_hits1 <- dplyr::inner_join(tsgene_homozygous_deletion, civic_cna_biomarkers, by=c("GENE","CNA_TYPE"))
       cna_biomarkers <- rbind(cna_biomarkers,civic_biomarker_hits1)
     }
   }
   if(!is.null(oncogene_amplified)){
     if(nrow(oncogene_amplified) > 0){
-      civic_biomarker_hits2 <- dplyr::inner_join(oncogene_amplified, civic_cna_biomarkers)
+      civic_biomarker_hits2 <- dplyr::inner_join(oncogene_amplified, civic_cna_biomarkers, by=c("GENE","CNA_TYPE"))
       cna_biomarkers <- rbind(cna_biomarkers,civic_biomarker_hits2)
     }
   }

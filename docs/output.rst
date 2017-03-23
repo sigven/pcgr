@@ -240,26 +240,50 @@ processing with the PCGR annotation pipeline:
 
 -  AFR\_AF\_EXAC - African/American germline allele frequency (`Exome
    Aggregation Consortium release
-   0.3.1 <http://exac.broadinstitute.org/>`__)
+   1 <http://exac.broadinstitute.org/>`__)
 -  AMR\_AF\_EXAC - American germline allele frequency (`Exome
    Aggregation Consortium release
-   0.3.1 <http://exac.broadinstitute.org/>`__)
+   1 <http://exac.broadinstitute.org/>`__)
 -  GLOBAL\_AF\_EXAC - Adjusted global germline allele frequency (`Exome
    Aggregation Consortium release
-   0.3.1 <http://exac.broadinstitute.org/>`__)
+   1 <http://exac.broadinstitute.org/>`__)
 -  EAS\_AF\_EXAC - East Asian germline allele frequency (`Exome
    Aggregation Consortium release
-   0.3.1 <http://exac.broadinstitute.org/>`__)
+   1 <http://exac.broadinstitute.org/>`__)
 -  FIN\_AF\_EXAC - Finnish germline allele frequency (`Exome Aggregation
-   Consortium release 0.3.1 <http://exac.broadinstitute.org/>`__)
+   Consortium release 1 <http://exac.broadinstitute.org/>`__)
 -  NFE\_AF\_EXAC - Non-Finnish European germline allele frequency
    (`Exome Aggregation Consortium release
-   0.3.1 <http://exac.broadinstitute.org/>`__)
+   1 <http://exac.broadinstitute.org/>`__)
 -  OTH\_AF\_EXAC - Other germline allele frequency (`Exome Aggregation
-   Consortium release 0.3.1 <http://exac.broadinstitute.org/>`__)
+   Consortium release 1 <http://exac.broadinstitute.org/>`__)
 -  SAS\_AF\_EXAC - South Asian germline allele frequency (`Exome
    Aggregation Consortium release
-   0.3 <http://exac.broadinstitute.org/>`__)
+   1 <http://exac.broadinstitute.org/>`__)
+-  AFR\_AF\_GNOMAD - African/American germline allele frequency (`Genome
+   Aggregation Database release
+   1 <http://gnomad.broadinstitute.org/>`__)
+-  AMR\_AF\_GNOMAD - American germline allele frequency (`Genome
+   Aggregation Database release
+   1 <http://gnomad.broadinstitute.org/>`__)
+-  GLOBAL\_AF\_GNOMAD - Adjusted global germline allele frequency
+   (`Genome Aggregation Database release
+   1 <http://gnomad.broadinstitute.org/>`__)
+-  SAS\_AF\_GNOMAD - South Asian germline allele frequency (`Genome
+   Aggregation Database release
+   1 <http://gnomad.broadinstitute.org/>`__)
+-  EAS\_AF\_GNOMAD - East Asian germline allele frequency (`Genome
+   Aggregation Database release
+   11 <http://gnomad.broadinstitute.org/>`__)
+-  FIN\_AF\_GNOMAD - Finnish germline allele frequency (`Genome
+   Aggregation Database release
+   1 <http://gnomad.broadinstitute.org/>`__)
+-  NFE\_AF\_GNOMAD - Non-Finnish European germline allele frequency
+   (`Genome Aggregation Database release
+   1 <http://gnomad.broadinstitute.org/>`__)
+-  OTH\_AF\_GNOMAD - Other germline allele frequency (`Genome
+   Aggregation Database release
+   1 <http://gnomad.broadinstitute.org/>`__)
 -  AFR\_AF\_1KG - `1000G Project - phase
    3 <http://www.1000genomes.org>`__ germline allele frequency for
    samples from AFR (African)

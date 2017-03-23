@@ -3,8 +3,11 @@
 ### Segments - amplifications and homozygous deletions
 <br>
 ```{r cna_segments_nondiploid, echo=F}
-myOptions <- list(paging = T,pageLength=20, searching=T,caching=F)
-DT::datatable(cnv_data$ranked_segments, options = myOptions, escape=F, extensions = "Responsive")
+myOptions <- list(paging = F, searching=F,caching=F)
+if(nrow(cnv_data$ranked_segments) >= 10){
+  myOptions <- list(paging = T,pageLength=10, searching=F,caching=F)
+}
+DT::datatable(cnv_data$ranked_segments, options = myOptions, escape=F, extensions = "Responsive") %>% DT::formatStyle('LogR',backgroundColor = DT::styleInterval(0.8, c('gray', 'yellow')))
 ```
 
 <br><br>
