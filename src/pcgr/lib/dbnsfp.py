@@ -35,6 +35,8 @@ def map_dbnsfp_predictions(dbnsfp_tag, algorithms):
    for v in dbnsfp_tag.split(','):
    
       dbnsfp_info = v.split('@')
+      if len(dbnsfp_info) == 1:
+         dbnsfp_info = v.split('#')
       ref_aa = dbnsfp_info[0]
       alt_aa = dbnsfp_info[1]
       all_ids = dbnsfp_info[4].split('___')

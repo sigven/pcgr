@@ -73,6 +73,7 @@ def verify_input(input_vcf, input_cnv_segments):
    
    os.system(command_v42)
    validation_results = is_valid_vcf(vcf_validation_output_file)
+   
    if not validation_results['validation_status']:
       error_string_42 = '\n'.join(validation_results['error_messages'])
       validation_status = 'VCF file is NOT valid according to v4.2 specification'
@@ -98,6 +99,7 @@ def verify_input(input_vcf, input_cnv_segments):
             logger.error(error_message_multiallelic)
             multiallelic_alt = 1
             sys.exit(1)
+         
    
 if __name__=="__main__": __main__()
 

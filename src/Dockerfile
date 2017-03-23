@@ -67,7 +67,7 @@ RUN R -e "source(\"https://bioconductor.org/biocLite.R\"); biocLite(c('deconstru
 RUN R -e "library(devtools); devtools::install_github('mjkallen/rlogging')"
 RUN R -e "devtools::install_github('tidyverse/forcats')"
 ADD R/ /
-RUN R -e "devtools::install('pcgrr2'); devtools::install_github('hadley/testthat')"
+RUN R -e "devtools::install('pcgrr2')"
 
 
 

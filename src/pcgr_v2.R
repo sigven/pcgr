@@ -12,8 +12,8 @@ dir <- as.character(args[1])
 query_vcf <- as.character(args[2])
 query_cnv <- as.character(args[3])
 sample_name <- as.character(args[4])
-logR_threshold_amplification <- as.integer(args[5])
-logR_threshold_homozygous_deletion <- as.integer(args[6])
+logR_threshold_amplification <- as.numeric(args[5])
+logR_threshold_homozygous_deletion <- as.numeric(args[6])
 no_html <- as.character(args[7])
 
 print_html_report <- TRUE 

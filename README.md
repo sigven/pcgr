@@ -46,7 +46,7 @@ The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package int
 
 1. Download and unpack the [latest release](https://github.com/sigven/pcgr/releases/tag/v1.2)
 2. Download and unpack the data bundle (approx. 17Gb) in the PCGR directory
-   * Download [data bundle](https://drive.google.com/open?id=0B8aYD2TJ472mUFVXcmo1ZXY0OWM) from Google Drive to `~/pcgr-X.X` (replace _X.X_ with the version number)
+   * Download [data bundle](https://drive.google.com/open?id=0B8aYD2TJ472mb1dqZlpJM2w4aE0) from Google Drive to `~/pcgr-X.X` (replace _X.X_ with the version number)
    * Decompress and untar the bundle, e.g. `gzip -dc pcgr.databundle.vX.X.GRCh37.tgz | tar xvf -`
 
     A _data/_ folder within the _pcgr-X.X_ software folder should now have been produced
@@ -71,14 +71,14 @@ The following requirements __MUST__ be met by the input VCF for PCGR to work pro
 
 #### STEP 4: Run example
 
-Generate report for the example tumor genome (VCF file with SNVs/InDels only) present in the _examples/_ folder with the following command (_X.X_ should be replaced with the PCGR version number):
+Generate report for the example tumor genome (VCF file with SNVs/InDels only and CNV segment file) present in the _examples/_ folder with the following command (_X.X_ should be replaced with the PCGR version number):
 
-`python run_pcgr.py --input_vcf test.vcf ~/pcgr-X.X ~/pcgr-X.X/examples test_sample`
+`python run_pcgr.py --input_vcf tumor_sample.COAD.vcf.gz --input_cnv_segments tumor_sample.COAD.cna.tsv ~/pcgr-X.X ~/pcgr-X.X/examples tumor_sample.COAD`
 
 This command will run the Docker-based PCGR workflow and produce the following output files in the _examples_ folder:
 
-  1. __test_sample.pcgr.html__ - An interactive HTML report for clinical interpretation
-  2. __test_sample.pcgr.vcf.gz__ - VCF file with rich set of annotations for precision oncology
-  2. __test_sample.pcgr.snvs_indels.tiers.tsv__ - Tab-separated values file with variants organized according to tiers of functional relevance
-  3. __test_sample.pcgr.mutational_signatures.tsv__ - Tab-separated values file with estimated contributions by known mutational signatures and associated underlying etiologies
-  4. __test_sample.pcgr.snvs_indels.biomarkers.tsv__ - Tab-separated values file with clinical evidence items associated with biomarkers for diagnosis, prognosis or drug sensitivity/resistance
+  1. __tumor_sample.COAD.pcgr.html__ - An interactive HTML report for clinical interpretation
+  2. __tumor_sample.COAD.pcgr.vcf.gz__ - VCF file with rich set of annotations for precision oncology
+  2. __tumor_sample.COAD.pcgr.snvs_indels.tiers.tsv__ - Tab-separated values file with variants organized according to tiers of functional relevance
+  3. __tumor_sample.COAD.pcgr.mutational_signatures.tsv__ - Tab-separated values file with estimated contributions by known mutational signatures and associated underlying etiologies
+  4. __tumor_sample.COAD.pcgr.snvs_indels.biomarkers.tsv__ - Tab-separated values file with clinical evidence items associated with biomarkers for diagnosis, prognosis or drug sensitivity/resistance

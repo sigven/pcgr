@@ -228,7 +228,9 @@ cnv_segment_annotation <- function(cnv_file, logR_amplification_threshold, logR_
 
   cnv_df <- read.table(file=cnv_file,header = T,stringsAsFactors = F,comment.char="", quote="")
   cnv_df <- dplyr::rename(cnv_df, chromosome = Chromosome, LogR = Segment_Mean, segment_start = Start, segment_end = End) %>% dplyr::distinct()
-  cnv_df$chromosome <- paste0("chr",cnv_df$chromosome)
+  if(!any(stringr::str_detect(cnv_df$chromosome,"chr"))){
+    cnv_df$chromosome <- paste0("chr",cnv_df$chromosome)
+  }
   cnv_df$LogR <- as.numeric(cnv_df$LogR)
 
   if(nrow(cnv_df[cnv_df$chromosome == 'chr23',])){
@@ -238,10 +240,10 @@ cnv_segment_annotation <- function(cnv_file, logR_amplification_threshold, logR_
     cnv_df[cnv_df$chromosome == 'chr24',]$chromosome <- 'chrY'
   }
 
-  cnv_gr <- GenomicRanges::makeGRangesFromDataFrame(cnv_df, keep.extra.columns = T, seqinfo = seqinfo_hg19, seqnames.field = 'chromosome',start.field = 'segment_start', end.field = 'segment_end', ignore.strand = T, starts.in.df.are.0based = T)
+  cnv_gr <- GenomicRanges::makeGRangesFromDataFrame(cnv_df, keep.extra.columns = T, seqinfo = pcgr_data$seqinfo_hg19, seqnames.field = 'chromosome',start.field = 'segment_start', end.field = 'segment_end', ignore.strand = T, starts.in.df.are.0based = T)
 
   hits <- GenomicRanges::findOverlaps(cnv_gr, pcgr_data$ensembl_genes_gr, type="any", select="all")
-  ranges <- ensembl_genes_gr[subjectHits(hits)]
+  ranges <- pcgr_data$ensembl_genes_gr[subjectHits(hits)]
   mcols(ranges) <- c(mcols(ranges),mcols(cnv_gr[queryHits(hits)]))
 
   df <- as.data.frame(mcols(ranges))
@@ -274,6 +276,10 @@ cnv_segment_annotation <- function(cnv_file, logR_amplification_threshold, logR_
     }
   }
 
+  df_print_sorted$cancer_census_somatic <- stringr::str_replace_all(df_print_sorted$cancer_census_somatic,"&",", ")
+  df_print_sorted$cancer_census_germline <- stringr::str_replace_all(df_print_sorted$cancer_census_germline,"&",", ")
+  df_print_sorted$antineoplastic_drugs_dgidb <- stringr::str_replace_all(df_print_sorted$antineoplastic_drugs_dgidb,"&",", ")
+
   df <- dplyr::select(df, -ensembl_transcript_id) %>% dplyr::filter(gene_biotype == 'protein_coding') %>% dplyr::distinct()
   df$cancer_census_somatic <- stringr::str_replace_all(df$cancer_census_somatic,"&",", ")
 
@@ -289,17 +295,20 @@ cnv_segment_annotation <- function(cnv_file, logR_amplification_threshold, logR_
 
   segments <- NULL
   segments <- dplyr::select(df, SEGMENT, SEGMENT_LENGTH, LogR) %>% dplyr::distinct()
-  segments <- segments %>% dplyr::arrange(desc(LogR))
+  if(nrow(segments) > 0){
+    segments <- dplyr::filter(segments, LogR >= logR_amplification_threshold | LogR <= logR_threshold_homozygous_deletion)
+    segments <- segments %>% dplyr::arrange(desc(LogR))
+  }
 
   oncogene_amplified <- NULL
-  oncogene_amplified <- dplyr::filter(df, !is.na(ONCOGENE) & (logR >= logR_amplification_threshold))
+  oncogene_amplified <- dplyr::filter(df, !is.na(ONCOGENE) & (LogR >= logR_amplification_threshold))
   oncogene_amplified <- dplyr::select(oncogene_amplified, -c(TUMOR_SUPPRESSOR, ONCOGENE))
   oncogene_amplified <- oncogene_amplified %>% dplyr::arrange(ANTINEOPLASTIC_DRUG_INTERACTIONS)
   if(nrow(oncogene_amplified) > 0){
     oncogene_amplified$CNA_TYPE <- 'gain'
   }
   tsgene_homozygous_deletion <- NULL
-  tsgene_homozygous_deletion <- dplyr::filter(df, !is.na(TUMOR_SUPPRESSOR) & (logR <= logR_homozygous_deletion_threshold))
+  tsgene_homozygous_deletion <- dplyr::filter(df, !is.na(TUMOR_SUPPRESSOR) & (LogR <= logR_homozygous_deletion_threshold))
   tsgene_homozygous_deletion <- dplyr::select(tsgene_homozygous_deletion, -c(TUMOR_SUPPRESSOR, ONCOGENE))
   tsgene_homozygous_deletion <- tsgene_homozygous_deletion %>% dplyr::arrange(CANCER_CENSUS_SOMATIC)
   if(nrow(tsgene_homozygous_deletion) > 0){

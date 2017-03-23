@@ -279,6 +279,9 @@ def extend_vcf_annotations(query_vcf,pcgr_directory):
    if 'DBNSFP' in vcf_reader.infos.keys():
       if 'Format:' in vcf_reader.infos['DBNSFP'].desc:
          tmp = vcf_reader.infos['DBNSFP'].desc.split('Format:')[1].split('@')
+         if len(tmp) == 1:
+            ## v3.2
+            tmp = vcf_reader.infos['DBNSFP'].desc.split('Format:')[1].split('#')
          i = 7
          while(i < len(tmp)):
             dbnsfp_prediction_algorithms.append(str(re.sub(r'((_score)|(_pred))$','',tmp[i])))
