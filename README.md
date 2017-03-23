@@ -11,23 +11,24 @@ The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package int
 [![Documentation Status](https://readthedocs.org/projects/pcgr/badge/?version=latest)](http://pcgr.readthedocs.io/en/latest/?badge=latest)
 
 
-### Annotation resources included in PCGR (v0.2)
+### Annotation resources included in PCGR (v1.2)
 
-* [VEP v85](http://www.ensembl.org/info/docs/tools/vep/index.html) - Variant Effect Predictor release 85 (GENCODE v19 as the gene model)
-* [COSMIC v78](http://cancer.sanger.ac.uk/cosmic/) - Catalogue of somatic mutations in cancer (Sep 2016)
-* [dBNSFP v3.2](https://sites.google.com/site/jpopgen/dbNSFP) - Database of non-synonymous functional predictions (March 2016)
-* [ICGC v22](https://dcc.icgc.org/) - Somatic mutations discovered in all ICGC (International Cancer Genomics Consortium) tumor cohorts (Aug 2016)
-* [ExAC r0.3.1](http://exac.broadinstitute.org/) - Germline variant frequencies exome-wide (March 2016)
+* [VEP v85](http://www.ensembl.org/info/docs/tools/vep/index.html) - Variant Effect Predictor release 85 (GENCODE v19 as the gene reference dataset)
+* [COSMIC v80](http://cancer.sanger.ac.uk/cosmic/) - Catalogue of somatic mutations in cancer (February 2017)
+* [dBNSFP v3.4](https://sites.google.com/site/jpopgen/dbNSFP) - Database of non-synonymous functional predictions (March 2017)
+* [ICGC v23](https://dcc.icgc.org/) - Somatic mutations discovered in all ICGC (International Cancer Genomics Consortium) tumor cohorts (Dec 2016)
+* [ExAC r1](http://exac.broadinstitute.org/) - Germline variant frequencies exome-wide (February 2017)
+* [gnomAD r1](http://gnomad.broadinstitute.org/) - Germline variant frequencies exome-wide (March 2017)
 * [dbSNP b147](http://www.ncbi.nlm.nih.gov/SNP/) - Database of short genetic variants (April 2016)
 * [1000Genomes phase3](ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/) - Germline variant frequencies genome-wide (May 2013)
-* [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - Database of clinically related variants (Nov 2016)
+* [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - Database of clinically related variants (March 2017)
 * [DoCM](http://docm.genome.wustl.edu) - Database of curated mutations (v3.2, April 2016)
-* [CIViC](http://civic.genome.wustl.edu) - Clinical interpretations of variants in cancer (Nov 12th 2016)
-* [CBMDB](http://www.cancergenomeinterpreter.org/biomarkers) - Cancer Biomarkers database (Oct 28th 2016)
+* [CIViC](http://civic.genome.wustl.edu) - Clinical interpretations of variants in cancer (March 17th 2017)
+* [CBMDB](http://www.cancergenomeinterpreter.org/biomarkers) - Cancer Biomarkers database (Feb 8th 2017)
 * [IntOGen catalog of driver mutations](https://www.intogen.org/downloads) - (May 2016)
 * [Cancer Hotspots](http://cancerhotspots.org) - Resource for statistically significant mutations in cancer (2016)
-* [UniProt/SwissProt KnowledgeBase 2016_09](http://www.uniprot.org) - Resource on protein sequence and functional information (Sep 2016)
-* [Pfam v30](http://pfam.xfam.org) - Database of protein families and domains (June 2016)
+* [UniProt/SwissProt KnowledgeBase 2016_09](http://www.uniprot.org) - Resource on protein sequence and functional information (March 2017)
+* [Pfam v30](http://pfam.xfam.org) - Database of protein families and domains (March 2017)
 * [DGIdb](http://dgidb.genome.wustl.edu) - Database of interactions betweeen antineoplastic drugs and human proteins (v2.22, February 2016)
 * [TSGene v2.0](http://bioinfo.mc.vanderbilt.edu/TSGene/) - Tumor suppressor/oncogene database (November 2015)
 
@@ -43,10 +44,10 @@ The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package int
 
 #### STEP 2: Installation of PCGR
 
-1. Download and unpack the [latest release](https://github.com/sigven/pcgr/releases/tag/v0.2)
-2. Download and unpack the data bundle (approx. 16Gb) in the PCGR directory
+1. Download and unpack the [latest release](https://github.com/sigven/pcgr/releases/tag/v1.2)
+2. Download and unpack the data bundle (approx. 17Gb) in the PCGR directory
    * Download [data bundle](https://drive.google.com/open?id=0B8aYD2TJ472mUFVXcmo1ZXY0OWM) from Google Drive to `~/pcgr-X.X` (replace _X.X_ with the version number)
-   * Decompress and untar the bundle, e.g. `gzip -dc pcgr.bundle.latest.grch37.tgz | tar xvf -`
+   * Decompress and untar the bundle, e.g. `gzip -dc pcgr.databundle.vX.X.GRCh37.tgz | tar xvf -`
 
     A _data/_ folder within the _pcgr-X.X_ software folder should now have been produced
 3. Pull the PCGR Docker image from DockerHub:
