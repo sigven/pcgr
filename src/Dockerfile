@@ -65,7 +65,6 @@ RUN R -e "install.packages(c('dplyr','stringr','tidyr','ggplot2','httr','git2r',
 RUN R -e "source(\"https://bioconductor.org/biocLite.R\"); biocLite(c('deconstructSigs', 'KEGGREST','VariantAnnotation','BSgenome.Hsapiens.UCSC.hg19','GenomeInfoDb','GenomicRanges','S4Vectors'))"
 
 RUN R -e "library(devtools); devtools::install_github('mjkallen/rlogging')"
-RUN R -e "devtools::install_github('tidyverse/forcats')"
 ADD R/ /
 RUN R -e "devtools::install('pcgrr2')"
 

@@ -2,7 +2,10 @@
 <br>
 
 ```{r cna_tsgene_loss, echo=F}
-myOptions <- list(paging = T,pageLength=10, searching=T,caching=F)
+myOptions <- list(paging = F, searching=T,caching=F)
+if(nrow(cnv_data$tsgene_homozygous_deletion) >= 10){
+  myOptions <- list(paging = T,pageLength=10, searching=T,caching=F)
+}
 DT::datatable(cnv_data$tsgene_homozygous_deletion, options = myOptions, escape=F, extensions = "Responsive")
 ```
 

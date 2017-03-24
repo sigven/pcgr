@@ -1,9 +1,10 @@
 ### Proto-oncogenes subject to copy number amplifications
 <br>
-Copy number amplifications are here limited to segments with total copy number >= 5.
-<br>
 ```{r cna_oncogenes_amplified, echo=F}
-myOptions <- list(paging = T,pageLength=10, searching=T,caching=F)
+myOptions <- list(paging = F, searching=T,caching=F)
+if(nrow(cnv_data$oncogene_amplified) >= 10){
+  myOptions <- list(paging = T,pageLength=10, searching=T,caching=F)
+}
 DT::datatable(cnv_data$oncogene_amplified, options = myOptions, escape=F, extensions = "Responsive")
 ```
 

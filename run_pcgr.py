@@ -15,7 +15,7 @@ def __main__():
    parser.add_argument('--input_cnv_segments', dest="input_cnv_segments",help='Somatic copy number query segments (tab-separated values)')
    parser.add_argument('--no_html_report', action = "store_true",help='Skip generation of HTML reports, output will consist of annotated VCF/TSV files')
    parser.add_argument('--logR_threshold_amplification', dest = "logR_threshold_amplification",default=0.8, help='Log2 ratio treshold for copy number amplification')
-   parser.add_argument('--logR_threshold_homozygous_deletion', dest = "logR_threshold_homozygous_deletion", default=-2, help='Log2 ratio treshold for homozygous deletion')
+   parser.add_argument('--logR_threshold_homozygous_deletion', dest = "logR_threshold_homozygous_deletion", default=-0.8   , help='Log2 ratio treshold for homozygous deletion')
    parser.add_argument('--num_vcfanno_processes', dest = "num_vcfanno_processes", default=4, help='Number of processes used during vcfanno annotation')
    parser.add_argument('--num_vep_forks', dest = "num_vep_forks", default=4, help='Number of forks (--forks) used during VEP annotation')
    parser.add_argument('pcgr_directory',help='PCGR base directory')
@@ -23,6 +23,15 @@ def __main__():
    parser.add_argument('sample_id',help="Tumor sample/cancer genome identifier - prefix for output files")
    
    args = parser.parse_args()
+   
+   if(args.input_vcf is None and args.input_cnv_segments is None):
+      print 
+      print "ERROR: Please specifiy either a VCF input file or a copy number segment file"
+      print "Either --input_vcf OR --input_cnv_segments must be set"
+      print
+      return
+
+   
    
    ##TODO: implement method validate_arguments()
    ## 1. check that input files exist and are > 0 in size
@@ -79,8 +88,7 @@ def run_pcgr(input_vcf, input_cnv_segments, logR_threshold_amplification, logR_t
    logger = getlogger('pcgr-check-input')
    logger.info("STEP 0: Validate input data")
    vcf_validate_command = str(docker_command_run3) + "pcgr_check_input.py " + str(input_vcf) + " " + str(input_cnv_segments) + "\""
-   if subprocess.check_call(str(vcf_validate_command), shell=True) != 0:
-      return
+   subprocess.check_call(str(vcf_validate_command), shell=True)
    logger.info('Finished')
 
    

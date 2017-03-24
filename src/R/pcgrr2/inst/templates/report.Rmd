@@ -25,6 +25,8 @@ params:
   cnv_report_biomarkers: FALSE
   missing_signature_data: FALSE
   show_data_sources: TRUE
+  logR_threshold_amplification: 1
+  logR_threshold_homozygous_deletion: -1
   snapshot: !r as.POSIXct("2015-01-01 12:30:00")
 ---
 

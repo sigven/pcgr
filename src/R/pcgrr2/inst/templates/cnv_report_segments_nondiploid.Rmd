@@ -1,13 +1,20 @@
 ## Somatic CNA analysis
 
 ### Segments - amplifications and homozygous deletions
+
+The following user-defined thresholds determine copy number aberrations analyzed here: 
+
+* Copy number amplifications: LogR >= `r logR_threshold_amplification`
+* Homozygous deletions: LogR <= `r logR_threshold_homozygous_deletion`
+
 <br>
+  
 ```{r cna_segments_nondiploid, echo=F}
 myOptions <- list(paging = F, searching=F,caching=F)
 if(nrow(cnv_data$ranked_segments) >= 10){
   myOptions <- list(paging = T,pageLength=10, searching=F,caching=F)
 }
-DT::datatable(cnv_data$ranked_segments, options = myOptions, escape=F, extensions = "Responsive") %>% DT::formatStyle('LogR',backgroundColor = DT::styleInterval(0.8, c('gray', 'yellow')))
+DT::datatable(cnv_data$ranked_segments, options = myOptions, escape=F, extensions = "Responsive") %>% DT::formatStyle('LogR',backgroundColor = DT::styleInterval(0.8, c('red', '#009E73')))
 ```
 
 <br><br>

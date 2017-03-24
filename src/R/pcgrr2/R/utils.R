@@ -211,7 +211,7 @@ generate_pcg_report <- function(project_directory, query_vcf, logR_threshold_amp
   show_data_sources <- TRUE
 
   if(print_html_report == TRUE){
-    rmarkdown::render(system.file("templates","report.Rmd", package="pcgrr2"), output_file = paste0(sample_name,'.pcgr.html'), output_dir = project_directory, params = list(signature_report = signature_report, tier1_report = tier1_report, tier2_report = tier2_report, tier3_report = tier3_report, tier4_report = tier4_report, tier5_report = tier5_report, cnv_report_tsgene_loss = cnv_report_tsgene_loss, cnv_report_oncogene_gain = cnv_report_oncogene_gain, cnv_report_segments = cnv_report_segments, cnv_report_biomarkers = cnv_report_biomarkers, show_data_sources = show_data_sources),quiet=T)
+    rmarkdown::render(system.file("templates","report.Rmd", package="pcgrr2"), output_file = paste0(sample_name,'.pcgr.html'), output_dir = project_directory, params = list(signature_report = signature_report, tier1_report = tier1_report, tier2_report = tier2_report, tier3_report = tier3_report, tier4_report = tier4_report, tier5_report = tier5_report, cnv_report_tsgene_loss = cnv_report_tsgene_loss, cnv_report_oncogene_gain = cnv_report_oncogene_gain, cnv_report_segments = cnv_report_segments, cnv_report_biomarkers = cnv_report_biomarkers, show_data_sources = show_data_sources, logR_threshold_amplification = logR_threshold_amplification, logR_threshold_homozygous_deletion = logR_threshold_homozygous_deletion),quiet=T)
   }
 
 }
@@ -224,7 +224,7 @@ generate_pcg_report <- function(project_directory, query_vcf, logR_threshold_amp
 #' @return cnv_data
 #'
 
-cnv_segment_annotation <- function(cnv_file, logR_amplification_threshold, logR_homozygous_deletion_threshold, format = 'tcga_legacy'){
+cnv_segment_annotation <- function(cnv_file, logR_threshold_amplification, logR_threshold_homozygous_deletion, format = 'tcga_legacy'){
 
   cnv_df <- read.table(file=cnv_file,header = T,stringsAsFactors = F,comment.char="", quote="")
   cnv_df <- dplyr::rename(cnv_df, chromosome = Chromosome, LogR = Segment_Mean, segment_start = Start, segment_end = End) %>% dplyr::distinct()
@@ -249,12 +249,13 @@ cnv_segment_annotation <- function(cnv_file, logR_amplification_threshold, logR_
   df <- as.data.frame(mcols(ranges))
   df$segment_start <- start(ranges(cnv_gr[queryHits(hits)]))
   df$segment_end <- end(ranges(cnv_gr[queryHits(hits)]))
-  df$segment_length <- paste(round((as.numeric((df$segment_end - df$segment_start)/1000000)),digits = 2),"Mb")
+  df$segment_length <- paste(round((as.numeric((df$segment_end - df$segment_start)/1000000)),digits = 3),"Mb")
 
   df$transcript_start <- start(ranges)
   df$transcript_end <- end(ranges)
   df$chrom <- as.character(seqnames(ranges))
-  df <- as.data.frame(df %>% dplyr::rowwise() %>% dplyr::mutate(transcript_overlap_percent = min(100,round(as.numeric((segment_end - segment_start)/(transcript_end - transcript_start)) * 100,digits=1))))
+  df <- as.data.frame(df %>% dplyr::rowwise() %>% dplyr::mutate(transcript_overlap_percent = round(as.numeric((min(transcript_end,segment_end) - max(segment_start,transcript_start)) / (transcript_end - transcript_start)) * 100, digits = 2)))
+  #df <- as.data.frame(df %>% dplyr::rowwise() %>% dplyr::mutate(transcript_overlap_percent = min(100,round(as.numeric((segment_end - segment_start)/(transcript_end - transcript_start)) * 100,digits=1))))
 
   df$segment_link <- paste0("<a href='",paste0('http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=',paste0(df$chrom,':',df$segment_start,'-',df$segment_end)),"' target=\"_blank\">",paste0(df$chrom,':',df$segment_start,'-',df$segment_end),"</a>")
   df_print <- df
@@ -286,29 +287,32 @@ cnv_segment_annotation <- function(cnv_file, logR_amplification_threshold, logR_
   df <- dplyr::rename(df, ANTINEOPLASTIC_DRUG_INTERACTION = antineoplastic_drugs_dgidb)
   df$VAR_ID <- rep(1:nrow(df))
   df <- pcgrr2::annotate_variant_link(df, vardb = 'DGIDB')
-  df <- dplyr::rename(df, ONCOGENE = ts_oncogene, TUMOR_SUPPRESSOR = tsgene, ENTREZ_ID = entrezgene, CANCER_CENSUS_SOMATIC = cancer_census_somatic, GENE = symbol, CHROMOSOME = chrom, GENENAME = name, ANTINEOPLASTIC_DRUG_INTERACTIONS = DGIDBLINK, SEGMENT_LENGTH = segment_length, SEGMENT = segment_link)
+  df <- dplyr::rename(df, ONCOGENE = ts_oncogene, TUMOR_SUPPRESSOR = tsgene, ENTREZ_ID = entrezgene, CANCER_CENSUS_SOMATIC = cancer_census_somatic, GENE = symbol, CHROMOSOME = chrom, GENENAME = name, ANTINEOPLASTIC_DRUG_INTERACTIONS = DGIDBLINK, SEGMENT_LENGTH = segment_length, SEGMENT = segment_link, TRANSCRIPT_OVERLAP = transcript_overlap_percent)
+  df$ENTREZ_ID <- as.character(df$ENTREZ_ID)
+  df <- dplyr::left_join(df,pcgr_data$kegg_gene_pathway_links, by=c("ENTREZ_ID" = "gene_id"))
+  df <- dplyr::rename(df, KEGG_PATHWAY = kegg_pathway_urls)
   df <- pcgrr2::annotate_variant_link(df, vardb = 'NCBI_GENE')
   df <- dplyr::rename(df, GENE_NAME = NCBI_GENE_LINK)
 
-  df <- dplyr::select(df, CHROMOSOME, GENE, GENE_NAME, CANCER_CENSUS_SOMATIC, TUMOR_SUPPRESSOR, ONCOGENE, ANTINEOPLASTIC_DRUG_INTERACTIONS,SEGMENT_LENGTH, SEGMENT, LogR) %>% dplyr::distinct()
+  df <- dplyr::select(df, CHROMOSOME, GENE, GENE_NAME, CANCER_CENSUS_SOMATIC, KEGG_PATHWAY, TUMOR_SUPPRESSOR, ONCOGENE, ANTINEOPLASTIC_DRUG_INTERACTIONS,SEGMENT_LENGTH, SEGMENT, LogR, TRANSCRIPT_OVERLAP) %>% dplyr::distinct()
   df <- df %>% dplyr::distinct()
 
   segments <- NULL
   segments <- dplyr::select(df, SEGMENT, SEGMENT_LENGTH, LogR) %>% dplyr::distinct()
   if(nrow(segments) > 0){
-    segments <- dplyr::filter(segments, LogR >= logR_amplification_threshold | LogR <= logR_threshold_homozygous_deletion)
+    segments <- dplyr::filter(segments, LogR >= logR_threshold_amplification | LogR <= logR_threshold_homozygous_deletion)
     segments <- segments %>% dplyr::arrange(desc(LogR))
   }
 
   oncogene_amplified <- NULL
-  oncogene_amplified <- dplyr::filter(df, !is.na(ONCOGENE) & (LogR >= logR_amplification_threshold))
+  oncogene_amplified <- dplyr::filter(df, !is.na(ONCOGENE) & TRANSCRIPT_OVERLAP == 100 & LogR >= logR_threshold_amplification)
   oncogene_amplified <- dplyr::select(oncogene_amplified, -c(TUMOR_SUPPRESSOR, ONCOGENE))
   oncogene_amplified <- oncogene_amplified %>% dplyr::arrange(ANTINEOPLASTIC_DRUG_INTERACTIONS)
   if(nrow(oncogene_amplified) > 0){
     oncogene_amplified$CNA_TYPE <- 'gain'
   }
   tsgene_homozygous_deletion <- NULL
-  tsgene_homozygous_deletion <- dplyr::filter(df, !is.na(TUMOR_SUPPRESSOR) & (LogR <= logR_homozygous_deletion_threshold))
+  tsgene_homozygous_deletion <- dplyr::filter(df, !is.na(TUMOR_SUPPRESSOR) & TRANSCRIPT_OVERLAP == 100  & LogR <= logR_threshold_homozygous_deletion)
   tsgene_homozygous_deletion <- dplyr::select(tsgene_homozygous_deletion, -c(TUMOR_SUPPRESSOR, ONCOGENE))
   tsgene_homozygous_deletion <- tsgene_homozygous_deletion %>% dplyr::arrange(CANCER_CENSUS_SOMATIC)
   if(nrow(tsgene_homozygous_deletion) > 0){
@@ -333,7 +337,7 @@ cnv_segment_annotation <- function(cnv_file, logR_amplification_threshold, logR_
   }
 
   if(!is.null(cna_biomarkers)){
-    cna_biomarkers <- cna_biomarkers[c("CHROMOSOME","GENE","CNA_TYPE","EVIDENCE_LEVEL","CLINICAL_SIGNIFICANCE","EVIDENCE_TYPE","DESCRIPTION","DISEASE_NAME","EVIDENCE_DIRECTION","DRUG_NAMES","CITATION","RATING","GENE_NAME","CANCER_CENSUS_SOMATIC","ANTINEOPLASTIC_DRUG_INTERACTIONS","SEGMENT_LENGTH", "SEGMENT","LogR")]
+    cna_biomarkers <- cna_biomarkers[c("CHROMOSOME","GENE","CNA_TYPE","EVIDENCE_LEVEL","CLINICAL_SIGNIFICANCE","EVIDENCE_TYPE","DESCRIPTION","DISEASE_NAME","EVIDENCE_DIRECTION","DRUG_NAMES","CITATION","RATING","GENE_NAME","CANCER_CENSUS_SOMATIC","KEGG_PATHWAY","ANTINEOPLASTIC_DRUG_INTERACTIONS","SEGMENT_LENGTH", "SEGMENT","LogR")]
     cna_biomarkers <- cna_biomarkers %>% dplyr::arrange(EVIDENCE_LEVEL,RATING)
   }
 
