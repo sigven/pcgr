@@ -10,12 +10,11 @@ import sys
 
 def __main__():
    
-   parser = argparse.ArgumentParser(description='Personal Cancer Genome Reporter (PCGR) workflow for clinical interpretation of somatic nucleotide variants and copy number segments')
+   parser = argparse.ArgumentParser(description='Personal Cancer Genome Reporter (PCGR) workflow for clinical interpretation of somatic nucleotide variants and copy number segments',formatter_class=argparse.ArgumentDefaultsHelpFormatter)
    parser.add_argument('--input_vcf', dest="input_vcf",help='VCF input file with somatic query variants (SNVs/InDels)')
-   parser.add_argument('--input_cnv_segments', dest="input_cnv_segments",help='Somatic copy number query segments (tab-separated values)')
-   parser.add_argument('--no_html_report', action = "store_true",help='Skip generation of HTML reports, output will consist of annotated VCF/TSV files')
-   parser.add_argument('--logR_threshold_amplification', dest = "logR_threshold_amplification",default=0.8, help='Log2 ratio treshold for copy number amplification')
-   parser.add_argument('--logR_threshold_homozygous_deletion', dest = "logR_threshold_homozygous_deletion", default=-0.8   , help='Log2 ratio treshold for homozygous deletion')
+   parser.add_argument('--input_cna_segments', dest="input_cna_segments",help='Somatic copy number alteration segments (tab-separated values)')
+   parser.add_argument('--logR_threshold_amplification', dest = "logR_threshold_amplification",default=0.8, help='Log(2) ratio treshold for copy number amplification')
+   parser.add_argument('--logR_threshold_homozygous_deletion', dest = "logR_threshold_homozygous_deletion", default=-0.8, help='Log(2) ratio treshold for homozygous deletion')
    parser.add_argument('--num_vcfanno_processes', dest = "num_vcfanno_processes", default=4, help='Number of processes used during vcfanno annotation')
    parser.add_argument('--num_vep_forks', dest = "num_vep_forks", default=4, help='Number of forks (--forks) used during VEP annotation')
    parser.add_argument('pcgr_directory',help='PCGR base directory')
@@ -24,24 +23,27 @@ def __main__():
    
    args = parser.parse_args()
    
-   if(args.input_vcf is None and args.input_cnv_segments is None):
+   if(args.input_vcf is None and args.input_cna_segments is None):
       print 
-      print "ERROR: Please specifiy either a VCF input file or a copy number segment file"
-      print "Either --input_vcf OR --input_cnv_segments must be set"
+      print "ERROR: Please specifiy either a VCF input file (--input_vcf) or a copy number segment file (input_cna_segments)"
+      print
+      return
+   
+   fname_vcf = str(args.working_directory) + '/' + str(args.input_vcf)
+   fname_cna = str(args.working_directory) + '/' + str(args.input_cna_segments)
+   if not os.path.exists(fname_vcf) or os.path.getsize(fname_vcf) == 0:
+      print 
+      print "ERROR: VCF input file (", args.input_vcf,") is empty or does not exist"
+      print
+      return
+   
+   if not os.path.exists(fname_cna) or os.path.getsize(fname_cna) == 0:
+      print 
+      print "ERROR: Input copy number segment file (", args.input_cna_segments,") is empty or does not exist"
       print
       return
 
-   
-   
-   ##TODO: implement method validate_arguments()
-   ## 1. check that input files exist and are > 0 in size
-   ## 2. verify that VCF is properly formatted (vcf-validate?), IMPORTANT: no multi-allelic calls
-   ## 3. Chromosomes should not have 'chr' prefix
-
-   ## 3. make custom check of CNV segment file
-   ## 4. ensure that either input_vcf or input_cnv is not NULL
-
-   run_pcgr(args.input_vcf, args.input_cnv_segments, args.logR_threshold_amplification, args.logR_threshold_homozygous_deletion, args.num_vcfanno_processes, args.num_vep_forks, args.pcgr_directory, args.working_directory, args.no_html_report, args.sample_id)
+   run_pcgr(args.input_vcf, args.input_cna_segments, args.logR_threshold_amplification, args.logR_threshold_homozygous_deletion, args.num_vcfanno_processes, args.num_vep_forks, args.pcgr_directory, args.working_directory, args.sample_id)
 
 def getlogger(logger_name):
    logger = logging.getLogger(logger_name)
@@ -62,9 +64,7 @@ def getlogger(logger_name):
    
    return logger
 
-def run_pcgr(input_vcf, input_cnv_segments, logR_threshold_amplification, logR_threshold_homozygous_deletion, num_vcfanno_processes, num_vep_forks, pcgr_directory, working_directory, no_html_report, sample_id):
-   
-   
+def run_pcgr(input_vcf, input_cna_segments, logR_threshold_amplification, logR_threshold_homozygous_deletion, num_vcfanno_processes, num_vep_forks, pcgr_directory, working_directory, sample_id):
    
    ## MOVE TO validate_arguments
    vepdb_directory = pcgr_directory + "/data/.vep"
@@ -87,7 +87,7 @@ def run_pcgr(input_vcf, input_cnv_segments, logR_threshold_amplification, logR_t
    print
    logger = getlogger('pcgr-check-input')
    logger.info("STEP 0: Validate input data")
-   vcf_validate_command = str(docker_command_run3) + "pcgr_check_input.py " + str(input_vcf) + " " + str(input_cnv_segments) + "\""
+   vcf_validate_command = str(docker_command_run3) + "pcgr_check_input.py " + str(input_vcf) + " " + str(input_cna_segments) + "\""
    subprocess.check_call(str(vcf_validate_command), shell=True)
    logger.info('Finished')
 
@@ -119,9 +119,7 @@ def run_pcgr(input_vcf, input_cnv_segments, logR_threshold_amplification, logR_t
    logger.info("STEP 3: Cancer gene annotations with pcgr-summarise")
    subprocess.check_call(str(pcgr_summarise_command), shell=True)
    logger.info("Finished")
-   #return
    
-   #print str(vep_vcfanno_annotated_vcf)
    create_output_vcf_command1 = str(docker_command_run3) + 'mv ' + str(vep_vcfanno_annotated_vcf) + ' ' + str(output_vcf) + "\""
    create_output_vcf_command2 = str(docker_command_run3) + 'mv ' + str(vep_vcfanno_annotated_vcf) + '.tbi ' + str(output_vcf) + '.tbi' + "\""
    subprocess.check_call(create_output_vcf_command1, shell=True)
@@ -130,10 +128,7 @@ def run_pcgr(input_vcf, input_cnv_segments, logR_threshold_amplification, logR_t
    print
    logger = getlogger('pcgr-writer')
    logger.info("STEP 4: Generation of output files")
-      
-   #pcgr_report_command = str(docker_command_run3) + "/pcgr.R /workdir " + str(output_vcf) + " " + str(input_cnv_segments) + " "  + str(sample_id)  + " " + str(no_html_report) + "\""
-   pcgr_report_command = str(docker_command_run2) + "/pcgr_v2.R /workdir " + str(output_vcf) + " " + str(input_cnv_segments) + " "  + str(sample_id)  + " " + str(logR_threshold_amplification) + " " + str(logR_threshold_homozygous_deletion) +  " " + str(no_html_report) + "\""
-
+   pcgr_report_command = str(docker_command_run2) + "/pcgr.R /workdir " + str(output_vcf) + " " + str(input_cna_segments) + " "  + str(sample_id)  + " " + str(logR_threshold_amplification) + " " + str(logR_threshold_homozygous_deletion) + "\""
    subprocess.check_call(str(pcgr_report_command), shell=True)
    logger.info("Finished")
    

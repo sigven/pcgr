@@ -1,5 +1,4 @@
 
-
 ```{r tier3, echo=F}
 myOptions <- list(paging = F,pageLength=10, searching=T,caching=F)
 if(nrow(report_data$variants_tier3_display) > 10){

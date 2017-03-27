@@ -5,10 +5,10 @@
 \title{Function that generates cancer genome report}
 \usage{
 generate_pcg_report(project_directory, query_vcf, logR_threshold_amplification,
-  logR_threshold_homozygous_deletion, cnv_segments_tsv = NULL,
+  logR_threshold_homozygous_deletion, cna_segments_tsv = NULL,
   sample_name = "SampleX", signatures_limit = 6, print_biomarkers = TRUE,
   print_tier_variants = TRUE, print_mutational_signatures = TRUE,
-  print_cnv_segments = TRUE, print_maf = TRUE, print_html_report = TRUE)
+  print_cna_segments = TRUE, print_maf = TRUE, print_html_report = TRUE)
 }
 \arguments{
 \item{project_directory}{name of project directory}
@@ -19,9 +19,11 @@ generate_pcg_report(project_directory, query_vcf, logR_threshold_amplification,
 
 \item{logR_threshold_homozygous_deletion}{logR threshold for annotating homozygous deletions}
 
-\item{cnv_segments_tsv}{name of CNV segments file (tab-separated values)}
+\item{cna_segments_tsv}{name of CNA segments file (tab-separated values)}
 
 \item{sample_name}{sample identifier}
+
+\item{signatures_limit}{Limit mutational signature analysis to a given number of signatures}
 
 \item{print_biomarkers}{Logical indicating if biomarker data is to be written to file}
 
@@ -29,11 +31,9 @@ generate_pcg_report(project_directory, query_vcf, logR_threshold_amplification,
 
 \item{print_mutational_signatures}{Logical indicating if mutational signature data is to be written to file}
 
-\item{print_cnv_segments}{Logical indicating if annotated cnv segment data is to be written to file}
+\item{print_cna_segments}{Logical indicating if annotated cnv segment data is to be written to file}
 
 \item{print_html_report}{Logical indicating if HTML report is to be printed}
-
-\item{signatures-limit}{Number of signatures to limit mutational signature analysis}
 }
 \value{
 p

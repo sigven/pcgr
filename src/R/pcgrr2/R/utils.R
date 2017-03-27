@@ -118,54 +118,54 @@ signature_contributions_single_sample <- function(mut_data, sample_name, signatu
 #' @param query_vcf name of VCF file with annotated query SNVs/InDels
 #' @param logR_threshold_amplification logR treshold for annotating copy number amplifications
 #' @param logR_threshold_homozygous_deletion logR threshold for annotating homozygous deletions
-#' @param cnv_segments_tsv name of CNV segments file (tab-separated values)
+#' @param cna_segments_tsv name of CNA segments file (tab-separated values)
 #' @param sample_name sample identifier
-#' @param signatures-limit Number of signatures to limit mutational signature analysis
+#' @param signatures_limit Limit mutational signature analysis to a given number of signatures
 #' @param print_biomarkers Logical indicating if biomarker data is to be written to file
 #' @param print_tier_variants Logical indicating if tiered variant data is to be written to file
 #' @param print_mutational_signatures Logical indicating if mutational signature data is to be written to file
-#' @param print_cnv_segments Logical indicating if annotated cnv segment data is to be written to file
+#' @param print_cna_segments Logical indicating if annotated cnv segment data is to be written to file
 #' @param print_html_report Logical indicating if HTML report is to be printed
 #'
 #' @return p
 #'
 
-generate_pcg_report <- function(project_directory, query_vcf, logR_threshold_amplification, logR_threshold_homozygous_deletion, cnv_segments_tsv = NULL, sample_name = 'SampleX', signatures_limit = 6, print_biomarkers = TRUE, print_tier_variants = TRUE, print_mutational_signatures = TRUE, print_cnv_segments = TRUE, print_maf = TRUE, print_html_report = TRUE){
+generate_pcg_report <- function(project_directory, query_vcf, logR_threshold_amplification, logR_threshold_homozygous_deletion, cna_segments_tsv = NULL, sample_name = 'SampleX', signatures_limit = 6, print_biomarkers = TRUE, print_tier_variants = TRUE, print_mutational_signatures = TRUE, print_cna_segments = TRUE, print_maf = TRUE, print_html_report = TRUE){
   sample_calls <- pcgrr2::get_calls(query_vcf, sample_id = sample_name)
   report_data <- pcgrr2::generate_report_data(sample_calls, sample_name = sample_name, minimum_n_signature_analysis = 50, signatures_limit = signatures_limit)
   report_data$sample_name <- sample_name
 
-  cnv_report_tsgene_loss <- FALSE
-  cnv_report_oncogene_gain <- FALSE
-  cnv_report_biomarkers <- FALSE
-  cnv_report_segments <- FALSE
+  cna_report_tsgene_loss <- FALSE
+  cna_report_oncogene_gain <- FALSE
+  cna_report_biomarkers <- FALSE
+  cna_report_segments <- FALSE
 
   tier_tsv_fname <- paste0(project_directory, '/',sample_name,'.pcgr.snvs_indels.tiers.tsv')
   msig_tsv_fname <- paste0(project_directory, '/',sample_name,'.pcgr.mutational_signatures.tsv')
   biomarker_tsv_fname <- paste0(project_directory, '/',sample_name,'.pcgr.snvs_indels.biomarkers.tsv')
-  cnv_tsv_fname <- paste0(project_directory, '/',sample_name,'.pcgr.cnv_segments.tsv')
+  cna_tsv_fname <- paste0(project_directory, '/',sample_name,'.pcgr.cna_segments.tsv')
   maf_fname <- paste0(project_directory, '/',sample_name,'.pcgr.maf')
 
-  if(!is.null(cnv_segments_tsv)){
-    if(file.exists(cnv_segments_tsv)){
-      cnv_data <- pcgrr2::cnv_segment_annotation(cnv_segments_tsv, logR_threshold_amplification, logR_threshold_homozygous_deletion, format='tcga')
-      if(nrow(cnv_data$ranked_segments) > 0){
-        cnv_report_segments <- TRUE
+  if(!is.null(cna_segments_tsv)){
+    if(file.exists(cna_segments_tsv)){
+      cna_data <- pcgrr2::cna_segment_annotation(cna_segments_tsv, logR_threshold_amplification, logR_threshold_homozygous_deletion, format='tcga')
+      if(nrow(cna_data$ranked_segments) > 0){
+        cna_report_segments <- TRUE
       }
-      if(nrow(cnv_data$tsgene_homozygous_deletion) > 0){
-        cnv_report_tsgene_loss <- TRUE
+      if(nrow(cna_data$tsgene_homozygous_deletion) > 0){
+        cna_report_tsgene_loss <- TRUE
       }
-      if(nrow(cnv_data$oncogene_amplified) > 0){
-        cnv_report_oncogene_gain <- TRUE
+      if(nrow(cna_data$oncogene_amplified) > 0){
+        cna_report_oncogene_gain <- TRUE
       }
-      if(nrow(cnv_data$cnv_df_for_print) > 0 & print_cnv_segments == TRUE){
-        write.table(cnv_data$cnv_df_for_print,file=cnv_tsv_fname,col.names = T,row.names = F,quote=F,sep="\t")
-        gzip_command <- paste0('gzip -f ',cnv_tsv_fname)
+      if(nrow(cna_data$cna_df_for_print) > 0 & print_cna_segments == TRUE){
+        write.table(cna_data$cna_df_for_print,file=cna_tsv_fname,col.names = T,row.names = F,quote=F,sep="\t")
+        gzip_command <- paste0('gzip -f ',cna_tsv_fname)
         system(gzip_command, intern=F)
       }
-      if(!is.null(cnv_data$cna_biomarkers)){
-        if(nrow(cnv_data$cna_biomarkers) > 0){
-          cnv_report_biomarkers <- TRUE
+      if(!is.null(cna_data$cna_biomarkers)){
+        if(nrow(cna_data$cna_biomarkers) > 0){
+          cna_report_biomarkers <- TRUE
         }
       }
     }
@@ -211,55 +211,54 @@ generate_pcg_report <- function(project_directory, query_vcf, logR_threshold_amp
   show_data_sources <- TRUE
 
   if(print_html_report == TRUE){
-    rmarkdown::render(system.file("templates","report.Rmd", package="pcgrr2"), output_file = paste0(sample_name,'.pcgr.html'), output_dir = project_directory, params = list(signature_report = signature_report, tier1_report = tier1_report, tier2_report = tier2_report, tier3_report = tier3_report, tier4_report = tier4_report, tier5_report = tier5_report, cnv_report_tsgene_loss = cnv_report_tsgene_loss, cnv_report_oncogene_gain = cnv_report_oncogene_gain, cnv_report_segments = cnv_report_segments, cnv_report_biomarkers = cnv_report_biomarkers, show_data_sources = show_data_sources, logR_threshold_amplification = logR_threshold_amplification, logR_threshold_homozygous_deletion = logR_threshold_homozygous_deletion),quiet=T)
+    rmarkdown::render(system.file("templates","report.Rmd", package="pcgrr2"), output_file = paste0(sample_name,'.pcgr.html'), output_dir = project_directory, params = list(signature_report = signature_report, tier1_report = tier1_report, tier2_report = tier2_report, tier3_report = tier3_report, tier4_report = tier4_report, tier5_report = tier5_report, cna_report_tsgene_loss = cna_report_tsgene_loss, cna_report_oncogene_gain = cna_report_oncogene_gain, cna_report_segments = cna_report_segments, cna_report_biomarkers = cna_report_biomarkers, show_data_sources = show_data_sources, logR_threshold_amplification = logR_threshold_amplification, logR_threshold_homozygous_deletion = logR_threshold_homozygous_deletion),quiet=T)
   }
 
 }
 
 #' Function that annotates CNV segment files (FACETS)
 #'
-#' @param cnv_file CNV file name
+#' @param cna_file CNV file name
 #' @param format CNV call format
 #'
-#' @return cnv_data
+#' @return cna_data
 #'
 
-cnv_segment_annotation <- function(cnv_file, logR_threshold_amplification, logR_threshold_homozygous_deletion, format = 'tcga_legacy'){
+cna_segment_annotation <- function(cna_file, logR_threshold_amplification, logR_threshold_homozygous_deletion, format = 'tcga_legacy'){
 
-  cnv_df <- read.table(file=cnv_file,header = T,stringsAsFactors = F,comment.char="", quote="")
-  cnv_df <- dplyr::rename(cnv_df, chromosome = Chromosome, LogR = Segment_Mean, segment_start = Start, segment_end = End) %>% dplyr::distinct()
-  if(!any(stringr::str_detect(cnv_df$chromosome,"chr"))){
-    cnv_df$chromosome <- paste0("chr",cnv_df$chromosome)
+  cna_df <- read.table(file=cna_file,header = T,stringsAsFactors = F,comment.char="", quote="")
+  cna_df <- dplyr::rename(cna_df, chromosome = Chromosome, LogR = Segment_Mean, segment_start = Start, segment_end = End) %>% dplyr::distinct()
+  if(!any(stringr::str_detect(cna_df$chromosome,"chr"))){
+    cna_df$chromosome <- paste0("chr",cna_df$chromosome)
   }
-  cnv_df$LogR <- as.numeric(cnv_df$LogR)
+  cna_df$LogR <- as.numeric(cna_df$LogR)
 
-  if(nrow(cnv_df[cnv_df$chromosome == 'chr23',])){
-    cnv_df[cnv_df$chromosome == 'chr23',]$chromosome <- 'chrX'
+  if(nrow(cna_df[cna_df$chromosome == 'chr23',])){
+    cna_df[cna_df$chromosome == 'chr23',]$chromosome <- 'chrX'
   }
-  if(nrow(cnv_df[cnv_df$chromosome == 'chr24',])){
-    cnv_df[cnv_df$chromosome == 'chr24',]$chromosome <- 'chrY'
+  if(nrow(cna_df[cna_df$chromosome == 'chr24',])){
+    cna_df[cna_df$chromosome == 'chr24',]$chromosome <- 'chrY'
   }
 
-  cnv_gr <- GenomicRanges::makeGRangesFromDataFrame(cnv_df, keep.extra.columns = T, seqinfo = pcgr_data$seqinfo_hg19, seqnames.field = 'chromosome',start.field = 'segment_start', end.field = 'segment_end', ignore.strand = T, starts.in.df.are.0based = T)
+  cna_gr <- GenomicRanges::makeGRangesFromDataFrame(cna_df, keep.extra.columns = T, seqinfo = pcgr_data$seqinfo_hg19, seqnames.field = 'chromosome',start.field = 'segment_start', end.field = 'segment_end', ignore.strand = T, starts.in.df.are.0based = T)
 
-  hits <- GenomicRanges::findOverlaps(cnv_gr, pcgr_data$ensembl_genes_gr, type="any", select="all")
+  hits <- GenomicRanges::findOverlaps(cna_gr, pcgr_data$ensembl_genes_gr, type="any", select="all")
   ranges <- pcgr_data$ensembl_genes_gr[subjectHits(hits)]
-  mcols(ranges) <- c(mcols(ranges),mcols(cnv_gr[queryHits(hits)]))
+  mcols(ranges) <- c(mcols(ranges),mcols(cna_gr[queryHits(hits)]))
 
   df <- as.data.frame(mcols(ranges))
-  df$segment_start <- start(ranges(cnv_gr[queryHits(hits)]))
-  df$segment_end <- end(ranges(cnv_gr[queryHits(hits)]))
+  df$segment_start <- start(ranges(cna_gr[queryHits(hits)]))
+  df$segment_end <- end(ranges(cna_gr[queryHits(hits)]))
   df$segment_length <- paste(round((as.numeric((df$segment_end - df$segment_start)/1000000)),digits = 3),"Mb")
 
   df$transcript_start <- start(ranges)
   df$transcript_end <- end(ranges)
   df$chrom <- as.character(seqnames(ranges))
   df <- as.data.frame(df %>% dplyr::rowwise() %>% dplyr::mutate(transcript_overlap_percent = round(as.numeric((min(transcript_end,segment_end) - max(segment_start,transcript_start)) / (transcript_end - transcript_start)) * 100, digits = 2)))
-  #df <- as.data.frame(df %>% dplyr::rowwise() %>% dplyr::mutate(transcript_overlap_percent = min(100,round(as.numeric((segment_end - segment_start)/(transcript_end - transcript_start)) * 100,digits=1))))
 
   df$segment_link <- paste0("<a href='",paste0('http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=',paste0(df$chrom,':',df$segment_start,'-',df$segment_end)),"' target=\"_blank\">",paste0(df$chrom,':',df$segment_start,'-',df$segment_end),"</a>")
   df_print <- df
-  df_print <- dplyr::select(df_print,chrom,segment_start,segment_end,segment_length,LogR,ensembl_gene_id,symbol,ensembl_transcript_id,transcript_start,transcript_end,transcript_overlap_percent,name,gene_biotype,cancer_census_germline,cancer_census_somatic,tsgene,ts_oncogene,intogen_drivers,antineoplastic_drugs_dgidb,gencode_v19)
+  df_print <- dplyr::select(df_print,chrom,segment_start,segment_end,segment_length,LogR,ensembl_gene_id,symbol,ensembl_transcript_id,transcript_start,transcript_end,transcript_overlap_percent,name,gene_biotype,cancer_census_germline,cancer_census_somatic,tsgene,ts_oncogene,intogen_drivers,antineoplastic_drugs_dgidb,gencode_transcript_type,gencode_tag,gencode_v19)
 
 
   chrOrder <- c(as.character(paste0('chr',c(1:22))),"chrX","chrY")
@@ -294,7 +293,7 @@ cnv_segment_annotation <- function(cnv_file, logR_threshold_amplification, logR_
   df <- pcgrr2::annotate_variant_link(df, vardb = 'NCBI_GENE')
   df <- dplyr::rename(df, GENE_NAME = NCBI_GENE_LINK)
 
-  df <- dplyr::select(df, CHROMOSOME, GENE, GENE_NAME, CANCER_CENSUS_SOMATIC, KEGG_PATHWAY, TUMOR_SUPPRESSOR, ONCOGENE, ANTINEOPLASTIC_DRUG_INTERACTIONS,SEGMENT_LENGTH, SEGMENT, LogR, TRANSCRIPT_OVERLAP) %>% dplyr::distinct()
+  df <- dplyr::select(df, CHROMOSOME, GENE, GENE_NAME, CANCER_CENSUS_SOMATIC, KEGG_PATHWAY, TUMOR_SUPPRESSOR, ONCOGENE, ANTINEOPLASTIC_DRUG_INTERACTIONS,SEGMENT_LENGTH, SEGMENT, gencode_transcript_type,LogR, TRANSCRIPT_OVERLAP) %>% dplyr::distinct()
   df <- df %>% dplyr::distinct()
 
   segments <- NULL
@@ -305,18 +304,20 @@ cnv_segment_annotation <- function(cnv_file, logR_threshold_amplification, logR_
   }
 
   oncogene_amplified <- NULL
-  oncogene_amplified <- dplyr::filter(df, !is.na(ONCOGENE) & TRANSCRIPT_OVERLAP == 100 & LogR >= logR_threshold_amplification)
-  oncogene_amplified <- dplyr::select(oncogene_amplified, -c(TUMOR_SUPPRESSOR, ONCOGENE))
+  oncogene_amplified <- dplyr::filter(df, !is.na(ONCOGENE) & TRANSCRIPT_OVERLAP == 100 & LogR >= logR_threshold_amplification & gencode_transcript_type == 'protein_coding')
+  oncogene_amplified <- dplyr::select(oncogene_amplified, -c(TUMOR_SUPPRESSOR, ONCOGENE,TRANSCRIPT_OVERLAP,gencode_transcript_type))
   oncogene_amplified <- oncogene_amplified %>% dplyr::arrange(ANTINEOPLASTIC_DRUG_INTERACTIONS)
   if(nrow(oncogene_amplified) > 0){
     oncogene_amplified$CNA_TYPE <- 'gain'
+    rlogging::message(paste0("Detected proto-oncogene(s) subject to amplification (log(2) ratio >= ",logR_threshold_amplification,"): ",paste0(oncogene_amplified$GENE,collapse=", ")))
   }
   tsgene_homozygous_deletion <- NULL
-  tsgene_homozygous_deletion <- dplyr::filter(df, !is.na(TUMOR_SUPPRESSOR) & TRANSCRIPT_OVERLAP == 100  & LogR <= logR_threshold_homozygous_deletion)
-  tsgene_homozygous_deletion <- dplyr::select(tsgene_homozygous_deletion, -c(TUMOR_SUPPRESSOR, ONCOGENE))
+  tsgene_homozygous_deletion <- dplyr::filter(df, !is.na(TUMOR_SUPPRESSOR) & TRANSCRIPT_OVERLAP == 100  & LogR <= logR_threshold_homozygous_deletion & gencode_transcript_type == 'protein_coding')
+  tsgene_homozygous_deletion <- dplyr::select(tsgene_homozygous_deletion, -c(TUMOR_SUPPRESSOR, ONCOGENE,TRANSCRIPT_OVERLAP,gencode_transcript_type))
   tsgene_homozygous_deletion <- tsgene_homozygous_deletion %>% dplyr::arrange(CANCER_CENSUS_SOMATIC)
   if(nrow(tsgene_homozygous_deletion) > 0){
     tsgene_homozygous_deletion$CNA_TYPE <- 'loss'
+    rlogging::message(paste0("Detected tumor suppressor gene(s) subject to homozygous deletions (log(2) ratio <= ",logR_threshold_homozygous_deletion,"): ",paste0(tsgene_homozygous_deletion$GENE,collapse=", ")))
   }
   civic_cna_biomarkers <- dplyr::filter(pcgr_data$civic_biomarkers, alteration_type == 'CNA') %>% dplyr::select(genesymbol,evidence_type,evidence_level,evidence_description,disease_name,evidence_direction,pubmed_html_link,drug_names,rating,clinical_significance,civic_consequence)
   names(civic_cna_biomarkers) <- toupper(names(civic_cna_biomarkers))
@@ -341,8 +342,8 @@ cnv_segment_annotation <- function(cnv_file, logR_threshold_amplification, logR_
     cna_biomarkers <- cna_biomarkers %>% dplyr::arrange(EVIDENCE_LEVEL,RATING)
   }
 
-  cnv_data <- list('ranked_segments' = segments, 'oncogene_amplified' = oncogene_amplified, 'tsgene_homozygous_deletion' = tsgene_homozygous_deletion,'cnv_df_for_print' = df_print_sorted, 'cna_biomarkers' = cna_biomarkers)
-  return(cnv_data)
+  cna_data <- list('ranked_segments' = segments, 'oncogene_amplified' = oncogene_amplified, 'tsgene_homozygous_deletion' = tsgene_homozygous_deletion,'cna_df_for_print' = df_print_sorted, 'cna_biomarkers' = cna_biomarkers)
+  return(cna_data)
 }
 
 #' Function that generates a data frame with basic biomarker annotations from tier1 variants
@@ -652,6 +653,38 @@ annotate_variant_link <- function(var_df, vardb = "DBSNP", linktype = "dbsource"
       var_df$DBSNPLINK <- NA
     }
   }
+
+  if(vardb == 'DBNSFP'){
+    if(any(grepl(paste0("EFFECT_PREDICTIONS"),names(var_df)))){
+      var_df$PREDICTED_EFFECT <- var_df$EFFECT_PREDICTIONS
+      var_df$PREDICTED_EFFECT <- stringr::str_replace(var_df$PREDICTED_EFFECT,"metalr:","<a href='https://www.ncbi.nlm.nih.gov/pubmed/25552646' target=\"_blank\">Ensembl-LogisticRegression</a>:")
+      var_df$PREDICTED_EFFECT <- stringr::str_replace(var_df$PREDICTED_EFFECT,"metasvm:","<a href='https://www.ncbi.nlm.nih.gov/pubmed/25552646' target=\"_blank\">Ensembl-SVM</a>:")
+      var_df$PREDICTED_EFFECT <- stringr::str_replace(var_df$PREDICTED_EFFECT,"mutationassessor:","<a href='http://mutationassessor.org' target=\"_blank\">MutationAssessor</a>:")
+      var_df$PREDICTED_EFFECT <- stringr::str_replace(var_df$PREDICTED_EFFECT,"mutationtaster:","<a href='http://www.mutationtaster.org' target=\"_blank\">MutationTaster</a>:")
+      var_df$PREDICTED_EFFECT <- stringr::str_replace(var_df$PREDICTED_EFFECT,"fathmm:","<a href='http://fathmm.biocompute.org.uk' target=\"_blank\">FATHMM</a>:")
+      var_df$PREDICTED_EFFECT <- stringr::str_replace(var_df$PREDICTED_EFFECT,"fathmm_mkl_coding:","<a href='http://fathmm.biocompute.org.uk/fathmmMKL.htm' target=\"_blank\">FATHMM-mkl</a>:")
+      var_df$PREDICTED_EFFECT <- stringr::str_replace(var_df$PREDICTED_EFFECT,"sift:","<a href='http://provean.jcvi.org/index.php' target=\"_blank\">SIFT</a>:")
+      var_df$PREDICTED_EFFECT <- stringr::str_replace(var_df$PREDICTED_EFFECT,"polyphen2_hdiv:","<a href='http://genetics.bwh.harvard.edu/pph2/' target=\"_blank\">PolyPhen2-HDIV</a>:")
+      var_df$PREDICTED_EFFECT <- stringr::str_replace(var_df$PREDICTED_EFFECT,"polyphen2_hvar:","<a href='http://genetics.bwh.harvard.edu/pph2/' target=\"_blank\">PolyPhen2-HVAR</a>:")
+      var_df$PREDICTED_EFFECT <- stringr::str_replace(var_df$PREDICTED_EFFECT,"sift:","<a href='http://genetics.bwh.harvard.edu/pph2/' target=\"_blank\">SIFT</a>:")
+      var_df$PREDICTED_EFFECT <- stringr::str_replace(var_df$PREDICTED_EFFECT,"lrt:","<a href='http://www.genetics.wustl.edu/jflab/lrt_query.html' target=\"_blank\">LRT</a>:")
+      var_df$PREDICTED_EFFECT <- stringr::str_replace(var_df$PREDICTED_EFFECT,"provean:","<a href='http://provean.jcvi.org/index.php' target=\"_blank\">PROVEAN</a>:")
+      var_df$PREDICTED_EFFECT <- stringr::str_replace(var_df$PREDICTED_EFFECT,"mutpred:","<a href='http://mutpred.mutdb.org' target=\"_blank\">MutPred</a>:")
+      var_df$PREDICTED_EFFECT <- stringr::str_replace(var_df$PREDICTED_EFFECT,"m-cap:","<a href='http://bejerano.stanford.edu/MCAP/' target=\"_blank\">M-CAP</a>:")
+      var_df$PREDICTED_EFFECT <- stringr::str_replace(var_df$PREDICTED_EFFECT,"splice_site_rf:","<a href='http://nar.oxfordjournals.org/content/42/22/13534' target=\"_blank\">Splice site effect (Random forest)</a>:")
+      var_df$PREDICTED_EFFECT <- stringr::str_replace(var_df$PREDICTED_EFFECT,"splice_site_ada:","<a href='http://nar.oxfordjournals.org/content/42/22/13534' target=\"_blank\">Splice site effect (Adaptive boosting)</a>:")
+      var_df$PREDICTED_EFFECT <- stringr::str_replace(var_df$PREDICTED_EFFECT,"cadd_phred:","<a href='http://cadd.gs.washington.edu' target=\"_blank\">CADD Phred</a>:")
+      var_df$PREDICTED_EFFECT <- stringr::str_replace(var_df$PREDICTED_EFFECT,"revel:","<a href='https://www.ncbi.nlm.nih.gov/pubmed/27666373' target=\"_blank\">REVEL</a>:")
+      var_df$PREDICTED_EFFECT <- stringr::str_replace(var_df$PREDICTED_EFFECT,"gerp_rs:","<a href='http://mendel.stanford.edu/SidowLab/downloads/gerp/' target=\"_blank\">GERP++ RS score</a>:")
+    }
+    else{
+      var_df$PREDICTED_EFFECT <- NA
+    }
+  }
+
+
+
+
   if(vardb == 'CLINVAR'){
 
     if(any(grepl(paste0("^CLINVAR_MSID$"),names(var_df))) & any(grepl(paste0("^VAR_ID$"),names(var_df))) & any(grepl(paste0("^CLINVAR_TRAITS_ALL$"),names(var_df)))){
@@ -1140,6 +1173,8 @@ get_calls <- function(vcf_gz_file, sample_id = NULL){
     vcf_data_df$EFFECT_PREDICTIONS <- stringr::str_replace_all(vcf_data_df$EFFECT_PREDICTIONS,"\\.&|\\.$","NA&")
     vcf_data_df$EFFECT_PREDICTIONS <- stringr::str_replace_all(vcf_data_df$EFFECT_PREDICTIONS,"&$","")
     vcf_data_df$EFFECT_PREDICTIONS <- stringr::str_replace_all(vcf_data_df$EFFECT_PREDICTIONS,"&",", ")
+    vcf_data_df <- pcgrr2::annotate_variant_link(vcf_data_df, vardb = 'DBNSFP')
+
   }
   if("INTOGEN_DRIVER_MUT" %in% colnames(vcf_data_df)){
     vcf_data_df$INTOGEN_DRIVER_MUT <- stringr::str_replace_all(vcf_data_df$INTOGEN_DRIVER_MUT,"&",", ")

@@ -3,10 +3,10 @@
 
 ```{r cna_biomarkers, echo=F}
 
-if(nrow(cnv_data$cna_biomarkers) > 0){
+if(nrow(cna_data$cna_biomarkers) > 0){
   myOptions <- list(paging = T,pageLength=10, searching=T,caching=F)
   
-  DT::datatable(cnv_data$cna_biomarkers, options = myOptions, escape=F, extensions = "Responsive") %>%
+  DT::datatable(cna_data$cna_biomarkers, options = myOptions, escape=F, extensions = "Responsive") %>%
   DT::formatStyle('EVIDENCE_LEVEL', backgroundColor = DT::styleEqual(c('A: Validated','B: Clinical evidence','C: Case study','D: Preclinical evidence','E: Indirect evidence'), c("#009E73","#56B4E9", "#0072B2","#E69F00", "#F0E442")))
 }
 ```

@@ -9,12 +9,12 @@ The following user-defined thresholds determine copy number aberrations analyzed
 
 <br>
   
-```{r cna_segments_nondiploid, echo=F}
+```{r cna_segments_ampl_del, echo=F}
 myOptions <- list(paging = F, searching=F,caching=F)
-if(nrow(cnv_data$ranked_segments) >= 10){
+if(nrow(cna_data$ranked_segments) >= 10){
   myOptions <- list(paging = T,pageLength=10, searching=F,caching=F)
 }
-DT::datatable(cnv_data$ranked_segments, options = myOptions, escape=F, extensions = "Responsive") %>% DT::formatStyle('LogR',backgroundColor = DT::styleInterval(0.8, c('red', '#009E73')))
+DT::datatable(cna_data$ranked_segments, options = myOptions, escape=F, extensions = "Responsive") %>% DT::formatStyle('LogR',backgroundColor = DT::styleInterval(0.8, c('red', '#009E73')))
 ```
 
 <br><br>

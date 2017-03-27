@@ -5,6 +5,15 @@ myOptions <- list(paging = F,pageLength=10, searching=T,caching=F)
 if(nrow(report_data$variants_tier2_display) > 10){
   myOptions <- list(paging = T,pageLength=10, searching=T,caching=F)
 }
+#colnames(report_data$variants_tier2_display) <- paste0("<span style=\"color:red\">",colnames(report_data$variants_tier2_display),"</span>")
+
+mutation_hotspots <- dplyr::filter(report_data$variants_tier2_display, !is.na(CANCER_MUTATION_HOTSPOT))
+non_hotspots <- dplyr::filter(report_data$variants_tier2_display, is.na(CANCER_MUTATION_HOTSPOT))
+
+#if(nrow(mutation_hotspots) > 0){
+  
+#}
+
 DT::datatable(report_data$variants_tier2_display, options = myOptions, escape=F, extensions = "Responsive")
 
 ```

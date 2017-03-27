@@ -1,0 +1,7 @@
+[2017-03-28 00:06:34][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - ../../../examples/tumor_sample.BRCA.vcf.gz
+[2017-03-28 00:07:15][INFO] Extending annotation descriptions related to PFAM protein domains
+[2017-03-28 00:07:15][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2017-03-28 00:07:15][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2017-03-28 00:08:00][INFO] Extending annotation descriptions related to PFAM protein domains
+[2017-03-28 00:08:00][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2017-03-28 00:08:02][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)

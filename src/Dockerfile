@@ -55,26 +55,23 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 	&& rm -rf /tmp/downloaded_packages/ /tmp/*.rds \
 	&& rm -rf /var/lib/apt/lists/*
 
+# Install pandoc
 RUN wget https://github.com/jgm/pandoc/releases/download/1.19.1/pandoc-1.19.1-1-amd64.deb && \
       dpkg -i pandoc* && \
       rm pandoc* && \
       apt-get clean
 
+# Install necessary R packages
 RUN R -e "install.packages(c('dplyr','stringr','tidyr','ggplot2','httr','git2r','data.table','magrittr','devtools','DT'), dependencies = T, repos = 'http://cran.us.r-project.org')"
-
 RUN R -e "source(\"https://bioconductor.org/biocLite.R\"); biocLite(c('deconstructSigs', 'KEGGREST','VariantAnnotation','BSgenome.Hsapiens.UCSC.hg19','GenomeInfoDb','GenomicRanges','S4Vectors'))"
-
 RUN R -e "library(devtools); devtools::install_github('mjkallen/rlogging')"
-ADD R/ /
-RUN R -e "devtools::install('pcgrr2')"
-
 
 
 # Install tools used for compilation
 RUN pip install -U setuptools
 RUN pip install $PYTHON_MODULES
 
-# FROM VCFANNO DOCKERFILE: Install vcfanno version 0.0.11
+# Install vcfanno version 0.0.11
 RUN wget https://github.com/brentp/vcfanno/releases/download/v0.0.11/vcfanno_0.0.11_linux_amd64.tar.gz && \
     tar xvzf vcfanno_0.0.11_linux_amd64.tar.gz && \
     mv vcfanno_0.0.11_linux_amd64/vcfanno /usr/local/bin && \
@@ -121,23 +118,16 @@ RUN cpanm File::ShareDir::Install \
  WORKDIR $VEP_INSTDIR
  RUN printf 'y\n' | perl INSTALL.pl --AUTO a --SPECIES $SPECIES --ASSEMBLY $ASSEMBLY --PLUGINS $VEPPLUGIN --DESTDIR $VEP_PATH --CACHEDIR $VEP_DATA
  RUN cp *.pl /usr/local/bin/
- #RUN git clone -b master --depth=1 https://github.com/samtools/htslib.git
- #WORKDIR $VEP_INSTDIR/htslib
- #RUN make
- #WORKDIR $VEP_INSTDIR
- #RUN git clone https://github.com/Ensembl/Bio-HTS.git biodbhts
- ############### FIX FOR VERSION 84 ##############
  WORKDIR /
 
+# Install local R report engine
+ADD R/ /
+RUN R -e "devtools::install('pcgrr2')"
 
- ### FROM VCFANNO DOCKERFILE
  ADD pcgr.tgz /
  ENV PATH=$PATH:/pcgr
- #ENV PATH=$PATH:/htslib
  ENV PYTHONPATH=:/pcgr/lib:${PYTHONPATH}
  ENV VCFANNO_DATA_DOCKER="/data"
- # Install Additional PLUGINS
- # Ensembl List : https://github.com/Ensembl/VEP_plugins
 
 # Clean Up
 RUN apt-get clean autoclean
@@ -148,6 +138,7 @@ VOLUME /workdir
 WORKDIR /workdir/
 
 
+
 ### FROM VCFANNO DOCKERFILE
 USER root
 RUN mkdir /data && chmod 777 /data
@@ -155,4 +146,3 @@ WORKDIR /data
 VOLUME /data
 WORKDIR /
 ADD pcgr.R /
-ADD pcgr_v2.R /

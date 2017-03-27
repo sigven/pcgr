@@ -19,10 +19,10 @@ params:
   tier4_report: FALSE
   tier5_report: FALSE
   signature_report: FALSE
-  cnv_report_segments: FALSE
-  cnv_report_oncogene_gain: FALSE
-  cnv_report_tsgene_loss: FALSE
-  cnv_report_biomarkers: FALSE
+  cna_report_segments: FALSE
+  cna_report_oncogene_gain: FALSE
+  cna_report_tsgene_loss: FALSE
+  cna_report_biomarkers: FALSE
   missing_signature_data: FALSE
   show_data_sources: TRUE
   logR_threshold_amplification: 1
@@ -68,7 +68,7 @@ knitr::opts_chunk$set(echo = F,warning=FALSE, dpi=300)
 ### Tier 3 - other coding mutations in proto-oncogenes/tumor suppressors/cancer census genes
 
 - A total of __`r nrow(report_data$variants_tier3_display)`__ unique, somatic variant(s) in the tumor sample are found within known proto-oncogenes, tumor suppressor genes or cancer census genes:
-<br>
+<br><br>
 
 ```{r conditional_print3, child='tier3.Rmd', eval = tier3_report}
 ```
@@ -96,17 +96,17 @@ knitr::opts_chunk$set(echo = F,warning=FALSE, dpi=300)
 <br><br>
 
 
-```{r conditional_print6b, child='cnv_report_segments_nondiploid.Rmd', eval = cnv_report_segments}
+```{r conditional_print6b, child='cna_report_segments_nondiploid.Rmd', eval = cna_report_segments}
 ```
 
 
-```{r conditional_print7, child='cnv_report_oncogene_gain.Rmd', eval = cnv_report_oncogene_gain}
+```{r conditional_print7, child='cna_report_oncogene_gain.Rmd', eval = cna_report_oncogene_gain}
 ```
 
-```{r conditional_print8, child='cnv_report_tsgene_loss.Rmd', eval = cnv_report_tsgene_loss}
+```{r conditional_print8, child='cna_report_tsgene_loss.Rmd', eval = cna_report_tsgene_loss}
 ```
 
-```{r conditional_print9, child='cnv_report_biomarkers.Rmd', eval = cnv_report_biomarkers}
+```{r conditional_print9, child='cna_report_biomarkers.Rmd', eval = cna_report_biomarkers}
 ```
 <br>
 
