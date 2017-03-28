@@ -54,7 +54,7 @@ insertion/deletions) that has the following naming convention:
 
 Here, the **sample\_id** is provided as input by the user, and reflects
 a unique identifier of the tumor-normal sample pair to be analyzed.
-Following common standards, all VCF files are compressed with
+Following common standards, the annotated VCF file is compressed with
 `bgzip <http://www.htslib.org/doc/tabix.html>`__ and indexed with
 `tabix <http://www.htslib.org/doc/tabix.html>`__. Below follows a
 description of all annotations/tags present in the VCF INFO column after

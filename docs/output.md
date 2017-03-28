@@ -33,7 +33,7 @@ Each tumor-normal sample pair is provided with a VCF file containing annotated, 
 
 __sample_id__.pcgr.vcf.gz
 
-Here, the __sample_id__ is provided as input by the user, and reflects a unique identifier of the tumor-normal sample pair to be analyzed. Following common standards, all VCF files are compressed with [bgzip](http://www.htslib.org/doc/tabix.html) and indexed with [tabix](http://www.htslib.org/doc/tabix.html). Below follows a description of all annotations/tags present in the VCF INFO column after processing with the PCGR annotation pipeline:
+Here, the __sample_id__ is provided as input by the user, and reflects a unique identifier of the tumor-normal sample pair to be analyzed. Following common standards, the annotated VCF file is compressed with [bgzip](http://www.htslib.org/doc/tabix.html) and indexed with [tabix](http://www.htslib.org/doc/tabix.html). Below follows a description of all annotations/tags present in the VCF INFO column after processing with the PCGR annotation pipeline:
 
 ##### _VEP consequence annotations_
   - CSQ - Complete consequence annotations from VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature\_type|Feature|BIOTYPE| EXON|INTRON|HGVSc|HGVSp|cDNA\_position|CDS\_position|Protein\_position|Amino\_acids| Codons|Existing\_variation|ALLELE\_NUM|DISTANCE|STRAND|FLAGS|PICK|VARIANT\_CLASS| SYMBOL\_SOURCE|HGNC\_ID|CANONICAL|APPRIS|CCDS|ENSP|SWISSPROT|TREMBL| UNIPARC|RefSeq|DOMAINS|HGVS\_OFFSET|CLIN\_SIG|SOMATIC|PHENO|MOTIF_NAME| MOTIF\_POS|HIGH\_INF\_POS|MOTIF\_SCORE\_CHANGE
