@@ -47,7 +47,7 @@ The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package int
 1. Download and unpack the [latest release](https://github.com/sigven/pcgr/releases/tag/v1.2)
 2. Download and unpack the data bundle (approx. 17Gb) in the PCGR directory
    * Download [the data bundle](https://drive.google.com/open?id=0B8aYD2TJ472mb1dqZlpJM2w4aE0) from Google Drive to `~/pcgr-X.X` (replace _X.X_ with the version number)
-   * Unpack the data bundle, e.g. through the following Unix command: `gzip -dc pcgr.databundle.YYYYMMDD.GRCh37.tgz | tar xvf -`
+   * Unpack the data bundle, e.g. through the following Unix command: `gzip -dc pcgr.databundle.GRCh37.YYYYMMDD.tgz | tar xvf -`
 
     A _data/_ folder within the _pcgr-X.X_ software folder should now have been produced
 3. Pull the PCGR Docker image from DockerHub:
