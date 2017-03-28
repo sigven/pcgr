@@ -91,11 +91,10 @@
 <li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Getting started</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#prerequisites">Prerequisites</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#docker">Docker</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#installation-of-pcgr">Installation of PCGR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#installation-of-docker">Installation of Docker</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test-pcgr-package-generation-of-clinical-report-for-a-cancer-genome">Test PCGR package - generation of clinical report for a cancer genome</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#test-pcgr-package-generation-of-clinical-report-for-a-cancer-genome">Test PCGR package - generation of clinical report for a cancer genome</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="annotation_resources.html">Annotation resources</a></li>
@@ -148,54 +147,127 @@
 <h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="prerequisites">
 <h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="docker">
-<h3>Docker<a class="headerlink" href="#docker" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="installation-of-docker">
+<h3>Installation of Docker<a class="headerlink" href="#installation-of-docker" title="Permalink to this headline">¶</a></h3>
+<ul>
+<li><p class="first">Running PCGR requires that Docker is set up on your host. Docker has
+very complete installation instructions for different platforms:</p>
 <ul class="simple">
-<li>Running PCGR requires that Docker is set up on your host. Docker has
-very complete installation instructions for different platforms:<ul>
 <li>installing <a class="reference external" href="https://docs.docker.com/engine/installation/linux/">Docker on
 Linux</a></li>
 <li>installing <a class="reference external" href="https://docs.docker.com/engine/installation/mac/">Docker on Mac
 OS</a></li>
 </ul>
 </li>
-<li>TODO: Check that Docker is running</li>
-<li>Adjust the computing resources dedicated to the Docker, i.e.:<ul>
-<li>Memory: minimum 5GB</li>
-<li>CPUs: minimum 4</li>
+<li><p class="first">Check that Docker is running</p>
+</li>
+<li><p class="first"><strong>IMPORTANT</strong>: The following represent the <em>minimal</em> computing
+resources that must be assigned to the Docker virtual machine:</p>
+<ul class="simple">
+<li>Memory: 5GB</li>
+<li>CPUs: 4</li>
 </ul>
+<p>For Docker version 1.13 on Mac OSX there is an option to change CPU&#8217;s
+and RAM from the UI and restart Docker. This can be found through
+Docker Preferences (Advanced) in the toolbar:</p>
 </li>
 </ul>
-</div>
-<div class="section" id="installation-of-pcgr">
-<h3>Installation of PCGR<a class="headerlink" href="#installation-of-pcgr" title="Permalink to this headline">¶</a></h3>
-<p>Below follows step-by-step instructions for installation, using standard
-Unix/command line utilities:</p>
+<blockquote>
+<div>#### Download PCGR</div></blockquote>
+<p>Below follows step-by-step instructions, using standard Unix/command
+line utilities:</p>
+<ul>
+<li><p class="first">Download and unpack the <a class="reference external" href="https://github.com/sigven/pcgr/releases/tag/v1.2">latest
+release</a></p>
+</li>
+<li><p class="first">Download and unpack the data bundle (approx. 17Gb) in the PCGR
+directory</p>
 <ul class="simple">
-<li>Download and unpack the <a class="reference external" href="https://github.com/sigven/pcgr/releases/tag/v0.2">latest
-release</a></li>
-<li>Download and unpack the data bundle (approx. 16Gb) in the PCGR
-directory<ul>
-<li>Download <a class="reference external" href="https://drive.google.com/open?id=0B8aYD2TJ472mUFVXcmo1ZXY0OWM">data
+<li>Download <a class="reference external" href="https://drive.google.com/open?id=0B8aYD2TJ472mUFVXcmo1ZXY0OWM">the data
 bundle</a>
 from Google Drive to <code class="docutils literal"><span class="pre">~/pcgr-X.X</span></code> (replace <em>X.X</em> with the
 version number)</li>
 <li>Decompress and untar the bundle, e.g.
-<code class="docutils literal"><span class="pre">gzip</span> <span class="pre">-dc</span> <span class="pre">pcgr.bundle.latest.grch37.tgz</span> <span class="pre">|</span> <span class="pre">tar</span> <span class="pre">xvf</span> <span class="pre">-</span></code></li>
+<code class="docutils literal"><span class="pre">gzip</span> <span class="pre">-dc</span> <span class="pre">pcgr.databundle.vX.X.GRCh37.tgz</span> <span class="pre">|</span> <span class="pre">tar</span> <span class="pre">xvf</span> <span class="pre">-</span></code></li>
 </ul>
+<p>A <em>data/</em> folder within the <em>pcgr-X.X</em> software folder should now
+have been produced</p>
 </li>
-<li>Pull the PCGR Docker image from DockerHub:<ul>
+<li><p class="first">Pull the PCGR Docker image from DockerHub:</p>
+<ul class="simple">
 <li><code class="docutils literal"><span class="pre">docker</span> <span class="pre">pull</span> <span class="pre">sigven/pcgr:latest</span></code> (PCGR annotation engine)</li>
 </ul>
 </li>
 </ul>
 </div>
-</div>
 <div class="section" id="test-pcgr-package-generation-of-clinical-report-for-a-cancer-genome">
-<h2>Test PCGR package - generation of clinical report for a cancer genome<a class="headerlink" href="#test-pcgr-package-generation-of-clinical-report-for-a-cancer-genome" title="Permalink to this headline">¶</a></h2>
-<p>Generate report for the example tumor genome (SNVs/InDels only) present
-in the <em>examples/</em> folder:</p>
-<p><code class="docutils literal"><span class="pre">python</span> <span class="pre">run_pcgr.py</span> <span class="pre">--input_vcf</span> <span class="pre">test.vcf</span> <span class="pre">~/pcgr-X.X</span> <span class="pre">~/pcgr-X.X/examples</span> <span class="pre">test_sample</span></code></p>
+<h3>Test PCGR package - generation of clinical report for a cancer genome<a class="headerlink" href="#test-pcgr-package-generation-of-clinical-report-for-a-cancer-genome" title="Permalink to this headline">¶</a></h3>
+<p>A tumor sample report is generated by calling the Python script
+<strong>run_pcgr.py</strong>, which takes the following arguments and options:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">run_pcgr</span><span class="o">.</span><span class="n">py</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">input_vcf</span> <span class="n">INPUT_VCF</span><span class="p">]</span>
+               <span class="p">[</span><span class="o">--</span><span class="n">input_cna_segments</span> <span class="n">INPUT_CNA_SEGMENTS</span><span class="p">]</span>
+               <span class="p">[</span><span class="o">--</span><span class="n">logR_threshold_amplification</span> <span class="n">LOGR_THRESHOLD_AMPLIFICATION</span><span class="p">]</span>
+               <span class="p">[</span><span class="o">--</span><span class="n">logR_threshold_homozygous_deletion</span> <span class="n">LOGR_THRESHOLD_HOMOZYGOUS_DELETION</span><span class="p">]</span>
+               <span class="p">[</span><span class="o">--</span><span class="n">num_vcfanno_processes</span> <span class="n">NUM_VCFANNO_PROCESSES</span><span class="p">]</span>
+               <span class="p">[</span><span class="o">--</span><span class="n">num_vep_forks</span> <span class="n">NUM_VEP_FORKS</span><span class="p">]</span>
+               <span class="n">pcgr_directory</span> <span class="n">working_directory</span> <span class="n">sample_id</span>
+
+<span class="n">Personal</span> <span class="n">Cancer</span> <span class="n">Genome</span> <span class="n">Reporter</span> <span class="p">(</span><span class="n">PCGR</span><span class="p">)</span> <span class="n">workflow</span> <span class="k">for</span> <span class="n">clinical</span> <span class="n">interpretation</span> <span class="n">of</span>
+<span class="n">somatic</span> <span class="n">nucleotide</span> <span class="n">variants</span> <span class="ow">and</span> <span class="n">copy</span> <span class="n">number</span> <span class="n">aberration</span> <span class="n">segments</span>
+
+<span class="n">positional</span> <span class="n">arguments</span><span class="p">:</span>
+  <span class="n">pcgr_directory</span>        <span class="n">PCGR</span> <span class="n">base</span> <span class="n">directory</span>
+  <span class="n">working_directory</span>     <span class="n">Working</span> <span class="n">directory</span>
+  <span class="n">sample_id</span>             <span class="n">Tumor</span> <span class="n">sample</span><span class="o">/</span><span class="n">cancer</span> <span class="n">genome</span> <span class="n">identifier</span> <span class="o">-</span> <span class="n">prefix</span> <span class="k">for</span>
+                    <span class="n">output</span> <span class="n">files</span>
+
+<span class="n">optional</span> <span class="n">arguments</span><span class="p">:</span>
+  <span class="o">-</span><span class="n">h</span><span class="p">,</span> <span class="o">--</span><span class="n">help</span>            <span class="n">show</span> <span class="n">this</span> <span class="n">help</span> <span class="n">message</span> <span class="ow">and</span> <span class="n">exit</span>
+  <span class="o">--</span><span class="n">input_vcf</span> <span class="n">INPUT_VCF</span>
+                    <span class="n">VCF</span> <span class="nb">input</span> <span class="n">file</span> <span class="k">with</span> <span class="n">somatic</span> <span class="n">query</span> <span class="n">variants</span>
+                    <span class="p">(</span><span class="n">SNVs</span><span class="o">/</span><span class="n">InDels</span><span class="p">)</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span>
+  <span class="o">--</span><span class="n">input_cna_segments</span> <span class="n">INPUT_CNA_SEGMENTS</span>
+                    <span class="n">Somatic</span> <span class="n">copy</span> <span class="n">number</span> <span class="n">alteration</span> <span class="n">segments</span> <span class="p">(</span><span class="n">tab</span><span class="o">-</span><span class="n">separated</span>
+                    <span class="n">values</span><span class="p">)</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span>
+  <span class="o">--</span><span class="n">logR_threshold_amplification</span> <span class="n">LOGR_THRESHOLD_AMPLIFICATION</span>
+                    <span class="n">Log</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="n">ratio</span> <span class="n">treshold</span> <span class="k">for</span> <span class="n">copy</span> <span class="n">number</span> <span class="n">amplification</span>
+                    <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">)</span>
+  <span class="o">--</span><span class="n">logR_threshold_homozygous_deletion</span> <span class="n">LOGR_THRESHOLD_HOMOZYGOUS_DELETION</span>
+                    <span class="n">Log</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="n">ratio</span> <span class="n">treshold</span> <span class="k">for</span> <span class="n">homozygous</span> <span class="n">deletion</span>
+                    <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.8</span><span class="p">)</span>
+  <span class="o">--</span><span class="n">num_vcfanno_processes</span> <span class="n">NUM_VCFANNO_PROCESSES</span>
+                    <span class="n">Number</span> <span class="n">of</span> <span class="n">processes</span> <span class="n">used</span> <span class="n">during</span> <span class="n">vcfanno</span> <span class="n">annotation</span>
+                    <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="mi">4</span><span class="p">)</span>
+  <span class="o">--</span><span class="n">num_vep_forks</span> <span class="n">NUM_VEP_FORKS</span>
+                    <span class="n">Number</span> <span class="n">of</span> <span class="n">forks</span> <span class="p">(</span><span class="o">--</span><span class="n">forks</span><span class="p">)</span> <span class="n">used</span> <span class="n">during</span> <span class="n">VEP</span> <span class="n">annotation</span>
+                    <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="mi">4</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <em>examples</em> folder contain sample files from TCGA. A report for a
+colorectal tumor case can be generated through the following command:</p>
+<p><code class="docutils literal"><span class="pre">python</span> <span class="pre">run_pcgr.py</span> <span class="pre">--input_vcf</span> <span class="pre">tumor_sample.COAD.vcf.gz</span> <span class="pre">--input_cna_segments</span> <span class="pre">tumor_sample.COAD.cna.tsv</span> <span class="pre">~/pcgr-X.X</span> <span class="pre">~/pcgr-X.X/examples</span> <span class="pre">tumor_sample.COAD</span></code></p>
+<p>This command will run the Docker-based PCGR workflow and produce the
+following output files in the <em>examples</em> folder:</p>
+<ol class="arabic simple">
+<li><strong>tumor_sample.COAD.pcgr.html</strong> - An interactive HTML report for
+clinical interpretation</li>
+<li><strong>tumor_sample.COAD.pcgr.vcf.gz</strong> - VCF file with rich set of
+annotations for precision oncology</li>
+<li><strong>tumor_sample.COAD.pcgr.snvs_indels.tiers.tsv</strong> - Tab-separated
+values file with variants organized according to tiers of functional
+relevance</li>
+<li><strong>tumor_sample.COAD.pcgr.mutational_signatures.tsv</strong> -
+Tab-separated values file with estimated contributions by known
+mutational signatures and associated underlying etiologies</li>
+<li><strong>tumor_sample.COAD.pcgr.snvs_indels.biomarkers.tsv</strong> -
+Tab-separated values file with clinical evidence items associated
+with biomarkers for diagnosis, prognosis or drug
+sensitivity/resistance</li>
+<li><strong>tumor_sample.COAD.pcgr.cna_segments.tsv.gz</strong> - Tab-separated
+values file with annotations of gene transcripts that overlap with
+somatic copy number aberrations</li>
+</ol>
+</div>
 </div>
 </div>
 
