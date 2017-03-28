@@ -66,6 +66,15 @@ def path_leaf(path):
    head, tail = ntpath.split(path)
    return tail or ntpath.basename(head)
 
+
+def check_subprocess(command):
+   try:
+      output = subprocess.check_output(str(command), stderr=subprocess.STDOUT, shell=True)
+      print str(output)
+   except subprocess.CalledProcessError as e:
+      print e.output
+      exit(0)
+
 def getlogger(logger_name):
    logger = logging.getLogger(logger_name)
    logger.setLevel(logging.DEBUG)
@@ -93,13 +102,12 @@ def run_pcgr(input_vcf, input_cna_segments, logR_threshold_amplification, logR_t
    docker_command_run2 = "docker run -t -v=" + str(pcgr_directory) + ":/data -v=" + str(working_directory) + ":/workdir -w=/workdir sigven/pcgr:latest sh -c \""
    docker_command_run3 = "docker run -t -v=" + str(working_directory) + ":/workdir -w=/workdir sigven/pcgr:latest sh -c \""
    
-   print
    logger = getlogger('pcgr-check-input')
    logger.info("STEP 0: Validate input data")
    vcf_validate_command = str(docker_command_run3) + "pcgr_check_input.py " + str(input_vcf) + " " + str(input_cna_segments) + "\""
-   subprocess.check_call(str(vcf_validate_command), shell=True)
+   check_subprocess(vcf_validate_command)
    logger.info('Finished')
-   
+
    if not input_vcf is None:
       output_vcf = str(sample_id) + '.pcgr.vcf.gz'
       input_vcf_pcgr_ready = re.sub(r'(\.vcf$|\.vcf\.gz$)','.pcgr_ready.vcf.gz',input_vcf)
@@ -116,38 +124,37 @@ def run_pcgr(input_vcf, input_cna_segments, logR_threshold_amplification, logR_t
    
       print
       logger.info("STEP 1: Basic variant annotation with Variant Effect Predictor (v85, GENCODE, GRCh37)")
-      subprocess.check_call(str(vep_main_command), shell=True)
-      subprocess.check_call(str(vep_sed_command), shell=True)
-      subprocess.check_call(str(vep_bgzip_command), shell=True)
-      subprocess.check_call(str(vep_tabix_command), shell=True)
+      check_subprocess(vep_main_command)
+      check_subprocess(vep_sed_command)
+      check_subprocess(vep_bgzip_command)
+      check_subprocess(vep_tabix_command)
    
       print
       logger = getlogger('pcgr-vcfanno')
       logger.info("STEP 2: Annotation for precision oncology with pcgr-vcfanno (ClinVar, dbSNP, dbNSFP, 1000Genomes Project, ExAC, gnomAD, CiVIC, CBMDB, DoCM, COSMIC, Intogen_driver_mutations, ICGC)")
       pcgr_vcfanno_command = str(docker_command_run2) + "pcgr_vcfanno.py --num_processes " + str(num_vcfanno_processes) + " --dbsnp --dbnsfp --oneKG --docm --clinvar --exac --gnomad --icgc --civic --cbmdb --intogen_driver_mut --cosmic " + str(vep_vcf_gz) + " " + str(vep_vcfanno_vcf) + " /data\""
-      subprocess.check_call(str(pcgr_vcfanno_command), shell=True)
+      check_subprocess(pcgr_vcfanno_command)
       logger.info("Finished")
       
       print
       logger = getlogger("pcgr-summarise")
       pcgr_summarise_command = str(docker_command_run2) + "pcgr_summarise.py " + str(vep_vcfanno_vcf) + ".gz /data\""
       logger.info("STEP 3: Cancer gene annotations with pcgr-summarise")
-      subprocess.check_call(str(pcgr_summarise_command), shell=True)
+      check_subprocess(pcgr_summarise_command)
       logger.info("Finished")
       
       create_output_vcf_command1 = str(docker_command_run3) + 'mv ' + str(vep_vcfanno_annotated_vcf) + ' ' + str(output_vcf) + "\""
       create_output_vcf_command2 = str(docker_command_run3) + 'mv ' + str(vep_vcfanno_annotated_vcf) + '.tbi ' + str(output_vcf) + '.tbi' + "\""
-      subprocess.check_call(create_output_vcf_command1, shell=True)
-      subprocess.check_call(create_output_vcf_command2, shell=True)
-      
       clean_command = str(docker_command_run3) + 'rm -f ' + str(vep_vcf) + '* ' +  str(input_vcf_pcgr_ready) + "* " + str(input_vcf) + "*_validator_output" + "\""
-      subprocess.check_call(str(clean_command), shell=True)
+      check_subprocess(create_output_vcf_command1)
+      check_subprocess(create_output_vcf_command2)
+      check_subprocess(clean_command)
   
    print
    logger = getlogger('pcgr-writer')
    logger.info("STEP 4: Generation of output files")
    pcgr_report_command = str(docker_command_run2) + "/pcgr.R /workdir " + str(output_vcf) + " " + str(input_cna_segments) + " "  + str(sample_id)  + " " + str(logR_threshold_amplification) + " " + str(logR_threshold_homozygous_deletion) + "\""
-   subprocess.check_call(str(pcgr_report_command), shell=True)
+   check_subprocess(pcgr_report_command)
    logger.info("Finished")
    
    
