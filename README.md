@@ -11,7 +11,7 @@ The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package int
 [![Documentation Status](https://readthedocs.org/projects/pcgr/badge/?version=latest)](http://pcgr.readthedocs.io/en/latest/?badge=latest)
 
 
-### Annotation resources included in PCGR (v1.2)
+### Annotation resources included in PCGR (v0.2)
 
 * [VEP v85](http://www.ensembl.org/info/docs/tools/vep/index.html) - Variant Effect Predictor release 85 (GENCODE v19 as the gene reference dataset)
 * [COSMIC v80](http://cancer.sanger.ac.uk/cosmic/) - Catalogue of somatic mutations in cancer (February 2017)
@@ -37,16 +37,16 @@ The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package int
 #### STEP 1: Installation of Docker
 
 1. [Install the Docker engine](https://docs.docker.com/engine/installation/) on your preferred platform
-2. Test that Docker is running
-2. Adjust the computing resources dedicated to the Docker, i.e.:
+2. Test that Docker is running, e.g. by typing `docker ps` or `docker images` in your terminal window
+3. Adjust the computing resources dedicated to the Docker, i.e.:
    - Memory: minimum 5GB
    - CPUs: minimum 4
 
 #### STEP 2: Download PCGR
 
-1. Download and unpack the [latest release](https://github.com/sigven/pcgr/releases/tag/v1.2)
+1. Download and unpack the [latest release](https://github.com/sigven/pcgr/releases/latest)
 2. Download and unpack the data bundle (approx. 17Gb) in the PCGR directory
-   * Download [the data bundle](https://drive.google.com/open?id=0B8aYD2TJ472mb1dqZlpJM2w4aE0) from Google Drive to `~/pcgr-X.X` (replace _X.X_ with the version number)
+   * Download [the data bundle](https://drive.google.com/file/d/0B8aYD2TJ472mN2ZONy1uOXNNMFU) from Google Drive to `~/pcgr-X.X` (replace _X.X_ with the version number)
    * Unpack the data bundle, e.g. through the following Unix command: `gzip -dc pcgr.databundle.GRCh37.YYYYMMDD.tgz | tar xvf -`
 
     A _data/_ folder within the _pcgr-X.X_ software folder should now have been produced
@@ -75,7 +75,7 @@ The tab-separated values file with copy number aberrations __MUST__ contain the 
   * _End_
   * _Segment_Mean_
 
-Here, _Segment_Mean_ denotes the log(2) ratio for a particular segment, which is a common output of somatic copy number alteration callers. Below shows the initial part of a copy number segment file that is formatted correctly according to PCGR's requirements:
+Here, _Chromosome_, _Start_, and _End_ denote the chromosomal segment (GRCh37), and _Segment_Mean_ denotes the log(2) ratio for a particular segment, which is a common output of somatic copy number alteration callers. Below shows the initial part of a copy number segment file that is formatted correctly according to PCGR's requirements:
 
     Chromosome	Start	End	Segment_Mean
     1	3218329	5782169	-0.0328

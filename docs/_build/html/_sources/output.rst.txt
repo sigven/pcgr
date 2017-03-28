@@ -14,8 +14,8 @@ PCGR can be run with either or both of the two input files present.
 **IMPORTANT NOTE**: Only the GRCh37 version of the human genome is
 currently supported.
 
-VCF preprocessing
-^^^^^^^^^^^^^^^^^
+VCF
+^^^
 
 The following requirements **MUST** be met by the input VCF for PCGR to
 work properly:
@@ -34,6 +34,26 @@ work properly:
       `bgzip <http://www.htslib.org/doc/tabix.html>`__ and
       `tabix <http://www.htslib.org/doc/tabix.html>`__
    -  'chr' must be stripped from the chromosome names
+
+Copy number segments
+^^^^^^^^^^^^^^^^^^^^
+
+The tab-separated values file with copy number aberrations **MUST**
+contain the following four columns: \* *Chromosome* \* *Start* \* *End*
+\* *Segment\_Mean*
+
+Here, *Chromosome*, *Start*, and *End* denote the chromosomal segment
+(GRCh37), and *Segment\_Mean* denotes the log(2) ratio for a particular
+segment, which is a common output of somatic copy number alteration
+callers. Below shows the initial part of a copy number segment file that
+is formatted correctly according to PCGR's requirements:
+
+::
+
+      Chromosome    Start   End Segment_Mean
+      1 3218329 5782169 -0.0328
+      1 5782721 5782769 -1.9684
+      1 5785135 22937448 -0.0451
 
 Output - Interactive HTML report
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -472,10 +492,6 @@ The following variables are included in the tiered TSV file:
     30. GLOBAL_AF_EXAC - adjusted global germline allele frequency in ExAC release 0.3.1
     31. GLOBAL_AF_1KG - 1000G Project - phase 3, germline allele frequency
         for all 1000G project samples (global)
-    32. DP_TUMOR - tumor depth
-    33. AF_TUMOR - allelic fraction tumor
-    34. DP_NORMAL - normal depth
-    35. AF_NORMAL - allelic fraction normal
     36. TIER
     37. TIER_DESCRIPTION
 
@@ -543,7 +559,7 @@ adddition, we attach cancer-relevant annotations for the affected
 transcripts. The naming convention of the compressed TSV file is as
 follows:
 
-**sample\_id**.pcgr.cnv.tsv.gz
+**sample\_id**.pcgr.cna\_segments.tsv.gz
 
 The format of the compressed TSV file is the following:
 
@@ -568,4 +584,6 @@ The format of the compressed TSV file is the following:
     17. tsgene_oncogene - oncogene status (TSgene 2.0 database)
     18. intogen_drivers - predicted driver gene status (IntoGen Cancer Drivers Database)
     19. antineoplastic_drugs_dgidb - validated and experimental antineoplastic drugs interacting with gene
-    20. gencode_v19 - transcript is part of GENCODE V19
+    20. gencode_transcript_type -
+    21. gencode_tag -
+    22. gencode_v19 - transcript is part of GENCODE V19

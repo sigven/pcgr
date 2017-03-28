@@ -11,7 +11,7 @@ PCGR can be run with either or both of the two input files present.
 
 __IMPORTANT NOTE__: Only the GRCh37 version of the human genome is currently supported.
 
-#### VCF preprocessing
+#### VCF
 
 The following requirements __MUST__ be met by the input VCF for PCGR to work properly:
 
@@ -19,6 +19,21 @@ The following requirements __MUST__ be met by the input VCF for PCGR to work pro
 2. The contents of the VCF must be sorted correctly (i.e. according to chromosomal order and chromosomal position). This can be obtained by [vcftools](https://vcftools.github.io/perl_module.html#vcf-sort).
     * We recommend that the input VCF is compressed and indexed using [bgzip](http://www.htslib.org/doc/tabix.html) and [tabix](http://www.htslib.org/doc/tabix.html)
     * 'chr' must be stripped from the chromosome names
+
+#### Copy number segments
+
+The tab-separated values file with copy number aberrations __MUST__ contain the following four columns:
+  * _Chromosome_
+  * _Start_
+  * _End_
+  * _Segment_Mean_
+
+Here, _Chromosome_, _Start_, and _End_ denote the chromosomal segment (GRCh37), and _Segment_Mean_ denotes the log(2) ratio for a particular segment, which is a common output of somatic copy number alteration callers. Below shows the initial part of a copy number segment file that is formatted correctly according to PCGR's requirements:
+
+      Chromosome	Start	End	Segment_Mean
+      1	3218329	5782169	-0.0328
+      1	5782721	5782769	-1.9684
+      1	5785135	22937448 -0.0451
 
 
 ### Output - Interactive HTML report
@@ -239,10 +254,6 @@ The following variables are included in the tiered TSV file:
     30. GLOBAL_AF_EXAC - adjusted global germline allele frequency in ExAC release 0.3.1
     31. GLOBAL_AF_1KG - 1000G Project - phase 3, germline allele frequency
         for all 1000G project samples (global)
-    32. DP_TUMOR - tumor depth
-    33. AF_TUMOR - allelic fraction tumor
-    34. DP_NORMAL - normal depth
-    35. AF_NORMAL - allelic fraction normal
     36. TIER
     37. TIER_DESCRIPTION
 
@@ -291,7 +302,7 @@ The format of the mutational signatures TSV file is as follows:
 
  Copy number segments are intersected with the genomic coordinates of all transcripts from ([ENSEMBL/GENCODE's basic gene annotation](https://www.gencodegenes.org/releases/25lift37.html). In adddition, we attach cancer-relevant annotations for the affected transcripts. The naming convention of the compressed TSV file is as follows:
 
-__sample_id__.pcgr.cnv.tsv.gz
+__sample_id__.pcgr.cna_segments.tsv.gz
 
 The format of the compressed TSV file is the following:
 
@@ -314,4 +325,6 @@ The format of the compressed TSV file is the following:
     17. tsgene_oncogene - oncogene status (TSgene 2.0 database)
     18. intogen_drivers - predicted driver gene status (IntoGen Cancer Drivers Database)
     19. antineoplastic_drugs_dgidb - validated and experimental antineoplastic drugs interacting with gene
-    20. gencode_v19 - transcript is part of GENCODE V19
+    20. gencode_transcript_type -
+    21. gencode_tag -
+    22. gencode_v19 - transcript is part of GENCODE V19

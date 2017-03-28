@@ -92,7 +92,8 @@
 <li class="toctree-l1"><a class="reference internal" href="annotation_resources.html">Annotation resources</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Input &amp; output</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#input">Input</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#vcf-preprocessing">VCF preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#vcf">VCF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#copy-number-segments">Copy number segments</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#output-interactive-html-report">Output - Interactive HTML report</a></li>
@@ -176,8 +177,8 @@
 <p>PCGR can be run with either or both of the two input files present.</p>
 <p><strong>IMPORTANT NOTE</strong>: Only the GRCh37 version of the human genome is
 currently supported.</p>
-<div class="section" id="vcf-preprocessing">
-<h3>VCF preprocessing<a class="headerlink" href="#vcf-preprocessing" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="vcf">
+<h3>VCF<a class="headerlink" href="#vcf" title="Permalink to this headline">¶</a></h3>
 <p>The following requirements <strong>MUST</strong> be met by the input VCF for PCGR to
 work properly:</p>
 <ol class="arabic simple">
@@ -197,6 +198,23 @@ chromosomal order and chromosomal position). This can be obtained by
 </ul>
 </li>
 </ol>
+</div>
+<div class="section" id="copy-number-segments">
+<h3>Copy number segments<a class="headerlink" href="#copy-number-segments" title="Permalink to this headline">¶</a></h3>
+<p>The tab-separated values file with copy number aberrations <strong>MUST</strong>
+contain the following four columns: * <em>Chromosome</em> * <em>Start</em> * <em>End</em>
+* <em>Segment_Mean</em></p>
+<p>Here, <em>Chromosome</em>, <em>Start</em>, and <em>End</em> denote the chromosomal segment
+(GRCh37), and <em>Segment_Mean</em> denotes the log(2) ratio for a particular
+segment, which is a common output of somatic copy number alteration
+callers. Below shows the initial part of a copy number segment file that
+is formatted correctly according to PCGR&#8217;s requirements:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Chromosome</span>    <span class="n">Start</span>   <span class="n">End</span> <span class="n">Segment_Mean</span>
+<span class="mi">1</span> <span class="mi">3218329</span> <span class="mi">5782169</span> <span class="o">-</span><span class="mf">0.0328</span>
+<span class="mi">1</span> <span class="mi">5782721</span> <span class="mi">5782769</span> <span class="o">-</span><span class="mf">1.9684</span>
+<span class="mi">1</span> <span class="mi">5785135</span> <span class="mi">22937448</span> <span class="o">-</span><span class="mf">0.0451</span>
+</pre></div>
+</div>
 </div>
 </div>
 <div class="section" id="output-interactive-html-report">
@@ -630,10 +648,6 @@ variants</p>
 <span class="mf">30.</span> <span class="n">GLOBAL_AF_EXAC</span> <span class="o">-</span> <span class="n">adjusted</span> <span class="k">global</span> <span class="n">germline</span> <span class="n">allele</span> <span class="n">frequency</span> <span class="ow">in</span> <span class="n">ExAC</span> <span class="n">release</span> <span class="mf">0.3</span><span class="o">.</span><span class="mi">1</span>
 <span class="mf">31.</span> <span class="n">GLOBAL_AF_1KG</span> <span class="o">-</span> <span class="mi">1000</span><span class="n">G</span> <span class="n">Project</span> <span class="o">-</span> <span class="n">phase</span> <span class="mi">3</span><span class="p">,</span> <span class="n">germline</span> <span class="n">allele</span> <span class="n">frequency</span>
     <span class="k">for</span> <span class="nb">all</span> <span class="mi">1000</span><span class="n">G</span> <span class="n">project</span> <span class="n">samples</span> <span class="p">(</span><span class="k">global</span><span class="p">)</span>
-<span class="mf">32.</span> <span class="n">DP_TUMOR</span> <span class="o">-</span> <span class="n">tumor</span> <span class="n">depth</span>
-<span class="mf">33.</span> <span class="n">AF_TUMOR</span> <span class="o">-</span> <span class="n">allelic</span> <span class="n">fraction</span> <span class="n">tumor</span>
-<span class="mf">34.</span> <span class="n">DP_NORMAL</span> <span class="o">-</span> <span class="n">normal</span> <span class="n">depth</span>
-<span class="mf">35.</span> <span class="n">AF_NORMAL</span> <span class="o">-</span> <span class="n">allelic</span> <span class="n">fraction</span> <span class="n">normal</span>
 <span class="mf">36.</span> <span class="n">TIER</span>
 <span class="mf">37.</span> <span class="n">TIER_DESCRIPTION</span>
 </pre></div>
@@ -694,7 +708,7 @@ annotation</a>. In
 adddition, we attach cancer-relevant annotations for the affected
 transcripts. The naming convention of the compressed TSV file is as
 follows:</p>
-<p><strong>sample_id</strong>.pcgr.cnv.tsv.gz</p>
+<p><strong>sample_id</strong>.pcgr.cna_segments.tsv.gz</p>
 <p>The format of the compressed TSV file is the following:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="mf">1.</span> <span class="n">chrom</span> <span class="o">-</span> <span class="n">chromosome</span>
 <span class="mf">2.</span> <span class="n">segment_start</span> <span class="o">-</span> <span class="n">start</span> <span class="n">of</span> <span class="n">copy</span> <span class="n">number</span> <span class="n">segment</span>
@@ -715,7 +729,9 @@ follows:</p>
 <span class="mf">17.</span> <span class="n">tsgene_oncogene</span> <span class="o">-</span> <span class="n">oncogene</span> <span class="n">status</span> <span class="p">(</span><span class="n">TSgene</span> <span class="mf">2.0</span> <span class="n">database</span><span class="p">)</span>
 <span class="mf">18.</span> <span class="n">intogen_drivers</span> <span class="o">-</span> <span class="n">predicted</span> <span class="n">driver</span> <span class="n">gene</span> <span class="n">status</span> <span class="p">(</span><span class="n">IntoGen</span> <span class="n">Cancer</span> <span class="n">Drivers</span> <span class="n">Database</span><span class="p">)</span>
 <span class="mf">19.</span> <span class="n">antineoplastic_drugs_dgidb</span> <span class="o">-</span> <span class="n">validated</span> <span class="ow">and</span> <span class="n">experimental</span> <span class="n">antineoplastic</span> <span class="n">drugs</span> <span class="n">interacting</span> <span class="k">with</span> <span class="n">gene</span>
-<span class="mf">20.</span> <span class="n">gencode_v19</span> <span class="o">-</span> <span class="n">transcript</span> <span class="ow">is</span> <span class="n">part</span> <span class="n">of</span> <span class="n">GENCODE</span> <span class="n">V19</span>
+<span class="mf">20.</span> <span class="n">gencode_transcript_type</span> <span class="o">-</span>
+<span class="mf">21.</span> <span class="n">gencode_tag</span> <span class="o">-</span>
+<span class="mf">22.</span> <span class="n">gencode_v19</span> <span class="o">-</span> <span class="n">transcript</span> <span class="ow">is</span> <span class="n">part</span> <span class="n">of</span> <span class="n">GENCODE</span> <span class="n">V19</span>
 </pre></div>
 </div>
 </div>

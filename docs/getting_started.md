@@ -9,7 +9,7 @@
     - installing [Docker on Linux](https://docs.docker.com/engine/installation/linux/)
     - installing [Docker on Mac OS](https://docs.docker.com/engine/installation/mac/)
 
-  * Check that Docker is running
+  * Check that Docker is running, e.g by typing `docker ps` or `docker images` in your terminal window
 
   * __IMPORTANT__: The following represent the _minimal_ computing resources that must be assigned to the Docker virtual machine:
      * Memory: 5GB
@@ -20,20 +20,24 @@
      <img src="Docker_VM_compute_config_MacOSX.png" height="450px" width="400px">
 
 <br>
+#### Python
+
+An installation of Python (2.7 or higher) is required to run PCGR. Check that Python is installed by typing `which python` or `python --version` in your terminal window
+
 #### Download PCGR
 
 Below follows step-by-step instructions:
 
-  * Download and unpack the [latest release](https://github.com/sigven/pcgr/releases/tag/v1.2)
+  * Download and unpack the [latest release](https://github.com/sigven/pcgr/releases/latest)
 
   * Download and unpack the data bundle (approx. 17Gb) in the PCGR directory
-    * Download [the data bundle](https://drive.google.com/open?id=0B8aYD2TJ472mUFVXcmo1ZXY0OWM) from Google Drive to `~/pcgr-X.X` (replace _X.X_ with the version number)
+    * Download [the data bundle](https://drive.google.com/file/d/0B8aYD2TJ472mN2ZONy1uOXNNMFU) from Google Drive to `~/pcgr-X.X` (replace _X.X_ with the version number)
     * Decompress and untar the bundle, e.g. through the following Unix command: `gzip -dc pcgr.databundle.GRCh37.YYYYMMDD.tgz | tar xvf -`
 
     A _data/_ folder within the _pcgr-X.X_ software folder should now have been produced
 
-  * Pull the PCGR Docker image from DockerHub:
-    * `docker pull sigven/pcgr:latest` (PCGR annotation engine)
+  * Pull the PCGR Docker image (3.2Gb) from [DockerHub](https://hub.docker.com/r/sigven/pcgr/):
+    * `docker pull sigven/pcgr` (PCGR annotation engine)
 
 
 #### Test PCGR - generation of clinical report for a cancer genome
@@ -87,7 +91,8 @@ This command will run the Docker-based PCGR workflow and produce the following o
 
   1. __tumor_sample.COAD.pcgr.html__ - An interactive HTML report for clinical interpretation
   2. __tumor_sample.COAD.pcgr.vcf.gz__ - VCF file with rich set of annotations for precision oncology
-  3. __tumor_sample.COAD.pcgr.snvs_indels.tiers.tsv__ - Tab-separated values file with variants organized according to tiers of functional relevance
-  4. __tumor_sample.COAD.pcgr.mutational_signatures.tsv__ - Tab-separated values file with estimated contributions by known mutational signatures and associated underlying etiologies
-  5. __tumor_sample.COAD.pcgr.snvs_indels.biomarkers.tsv__ - Tab-separated values file with clinical evidence items associated with biomarkers for diagnosis, prognosis or drug sensitivity/resistance
-  6. __tumor_sample.COAD.pcgr.cna_segments.tsv.gz__ - Tab-separated values file with annotations of gene transcripts that overlap with somatic copy number aberrations
+  3.  __tumor_sample.COAD.pcgr.maf__ - A basic MAF file for use as input in downstream analyses with other tools (e.g. [2020plus](https://github.com/KarchinLab/2020plus), MutSigCV)
+  4. __tumor_sample.COAD.pcgr.snvs_indels.tiers.tsv__ - Tab-separated values file with variants organized according to tiers of functional relevance
+  5. __tumor_sample.COAD.pcgr.mutational_signatures.tsv__ - Tab-separated values file with estimated contributions by known mutational signatures and associated underlying etiologies
+  6. __tumor_sample.COAD.pcgr.snvs_indels.biomarkers.tsv__ - Tab-separated values file with clinical evidence items associated with biomarkers for diagnosis, prognosis or drug sensitivity/resistance
+  7. __tumor_sample.COAD.pcgr.cna_segments.tsv.gz__ - Tab-separated values file with annotations of gene transcripts that overlap with somatic copy number aberrations

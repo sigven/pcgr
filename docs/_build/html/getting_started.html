@@ -92,6 +92,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Getting started</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#prerequisites">Prerequisites</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#installation-of-docker">Installation of Docker</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#download-pcgr">Download PCGR</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#test-pcgr-generation-of-clinical-report-for-a-cancer-genome">Test PCGR - generation of clinical report for a cancer genome</a></li>
 </ul>
 </li>
@@ -159,7 +160,8 @@ Linux</a></li>
 OS</a></li>
 </ul>
 </li>
-<li><p class="first">Check that Docker is running</p>
+<li><p class="first">Check that Docker is running, e.g by typing <code class="docutils literal"><span class="pre">docker</span> <span class="pre">ps</span></code> or
+<code class="docutils literal"><span class="pre">docker</span> <span class="pre">images</span></code> in your terminal window</p>
 </li>
 <li><p class="first"><strong>IMPORTANT</strong>: The following represent the <em>minimal</em> computing
 resources that must be assigned to the Docker virtual machine:</p>
@@ -173,16 +175,22 @@ Docker Preferences (Advanced) in the toolbar:</p>
 </li>
 </ul>
 <blockquote>
-<div>#### Download PCGR</div></blockquote>
+<div>#### Python</div></blockquote>
+<p>An installation of Python (2.7 or higher) is required to run PCGR. Check
+that Python is installed by typing <code class="docutils literal"><span class="pre">which</span> <span class="pre">python</span></code> or
+<code class="docutils literal"><span class="pre">python</span> <span class="pre">--version</span></code> in your terminal window</p>
+</div>
+<div class="section" id="download-pcgr">
+<h3>Download PCGR<a class="headerlink" href="#download-pcgr" title="Permalink to this headline">¶</a></h3>
 <p>Below follows step-by-step instructions:</p>
 <ul>
-<li><p class="first">Download and unpack the <a class="reference external" href="https://github.com/sigven/pcgr/releases/tag/v1.2">latest
+<li><p class="first">Download and unpack the <a class="reference external" href="https://github.com/sigven/pcgr/releases/latest">latest
 release</a></p>
 </li>
 <li><p class="first">Download and unpack the data bundle (approx. 17Gb) in the PCGR
 directory</p>
 <ul class="simple">
-<li>Download <a class="reference external" href="https://drive.google.com/open?id=0B8aYD2TJ472mUFVXcmo1ZXY0OWM">the data
+<li>Download <a class="reference external" href="https://drive.google.com/file/d/0B8aYD2TJ472mN2ZONy1uOXNNMFU">the data
 bundle</a>
 from Google Drive to <code class="docutils literal"><span class="pre">~/pcgr-X.X</span></code> (replace <em>X.X</em> with the
 version number)</li>
@@ -193,9 +201,10 @@ command:
 <p>A <em>data/</em> folder within the <em>pcgr-X.X</em> software folder should now
 have been produced</p>
 </li>
-<li><p class="first">Pull the PCGR Docker image from DockerHub:</p>
+<li><p class="first">Pull the PCGR Docker image (3.2Gb) from
+<a class="reference external" href="https://hub.docker.com/r/sigven/pcgr/">DockerHub</a>:</p>
 <ul class="simple">
-<li><code class="docutils literal"><span class="pre">docker</span> <span class="pre">pull</span> <span class="pre">sigven/pcgr:latest</span></code> (PCGR annotation engine)</li>
+<li><code class="docutils literal"><span class="pre">docker</span> <span class="pre">pull</span> <span class="pre">sigven/pcgr</span></code> (PCGR annotation engine)</li>
 </ul>
 </li>
 </ul>
@@ -253,6 +262,9 @@ following output files in the <em>examples</em> folder:</p>
 clinical interpretation</li>
 <li><strong>tumor_sample.COAD.pcgr.vcf.gz</strong> - VCF file with rich set of
 annotations for precision oncology</li>
+<li><strong>tumor_sample.COAD.pcgr.maf</strong> - A basic MAF file for use as input
+in downstream analyses with other tools (e.g.
+<a class="reference external" href="https://github.com/KarchinLab/2020plus">2020plus</a>, MutSigCV)</li>
 <li><strong>tumor_sample.COAD.pcgr.snvs_indels.tiers.tsv</strong> - Tab-separated
 values file with variants organized according to tiers of functional
 relevance</li>

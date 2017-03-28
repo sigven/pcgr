@@ -17,7 +17,9 @@ def __main__():
    parser.add_argument('input_cna_segments', help='Somatic copy number query segments (tab-separated values)')   
    args = parser.parse_args()
    
-   verify_input(args.input_vcf, args.input_cna_segments)
+   ret = verify_input(args.input_vcf, args.input_cna_segments)
+   if ret != 0:
+      sys.exit(-1)
 
 def getlogger(logger_name):
    logger = logging.getLogger(logger_name)
@@ -119,6 +121,7 @@ def verify_input(input_vcf, input_cna_segments):
             if len(rec.ALT) > 1:
                error_message_multiallelic = "Multiallelic site detected:" + str(rec.CHROM) + '\t' + str(POS) + '\t' + str(rec.REF) + '\t' + str(alt)
                logger.error(error_message_multiallelic)
+               logger.error('Alternative alleles must be decomposed and normalized, see http://pcgr.readthedocs.io/en/latest/output.html#vcf-preprocessing')
                multiallelic_alt = 1
                return -1
          command_vcf_sample_free1 = 'egrep \'^#\' ' + str(input_vcf) + ' > ' + str(input_vcf_pcgr_ready)
