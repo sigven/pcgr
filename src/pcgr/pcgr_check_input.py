@@ -75,7 +75,7 @@ def is_valid_vcf(vcf_validator_output_file):
          if line.endswith('the input file is not valid'):
             valid_vcf = 0
    f.close()
-   
+   os.system('rm -f ' + str(vcf_validator_output_file))
    ret = {}
    ret['error_messages'] = error_messages
    ret['validation_status'] = valid_vcf
@@ -102,7 +102,7 @@ def verify_input(input_vcf, input_cna_segments):
          logger.error(validation_status + ':\n' + str(error_string_42))
          return -1
       else:
-         validation_status = 'VCF file is valid according to v4.2 specification'
+         validation_status = 'VCF file ' + str(input_vcf) + ' is valid according to v4.2 specification'
          logger.info(validation_status)
    
       if validation_results['validation_status']:
