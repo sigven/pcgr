@@ -131,20 +131,63 @@ signature_contributions_single_sample <- function(mut_data, sample_name, signatu
 #'
 
 generate_pcg_report <- function(project_directory, query_vcf, logR_threshold_amplification, logR_threshold_homozygous_deletion, cna_segments_tsv = NULL, sample_name = 'SampleX', signatures_limit = 6, print_biomarkers = TRUE, print_tier_variants = TRUE, print_mutational_signatures = TRUE, print_cna_segments = TRUE, print_maf = TRUE, print_html_report = TRUE){
-  sample_calls <- pcgrr2::get_calls(query_vcf, sample_id = sample_name)
-  report_data <- pcgrr2::generate_report_data(sample_calls, sample_name = sample_name, minimum_n_signature_analysis = 50, signatures_limit = signatures_limit)
-  report_data$sample_name <- sample_name
 
-  cna_report_tsgene_loss <- FALSE
-  cna_report_oncogene_gain <- FALSE
-  cna_report_biomarkers <- FALSE
-  cna_report_segments <- FALSE
+  tier1_report <- FALSE
+  tier2_report <- FALSE
+  tier3_report <- FALSE
+  tier4_report <- FALSE
+  tier5_report <- FALSE
+  signature_report <- FALSE
+  missing_signature_data <- FALSE
+  show_data_sources <- TRUE
 
   tier_tsv_fname <- paste0(project_directory, '/',sample_name,'.pcgr.snvs_indels.tiers.tsv')
   msig_tsv_fname <- paste0(project_directory, '/',sample_name,'.pcgr.mutational_signatures.tsv')
   biomarker_tsv_fname <- paste0(project_directory, '/',sample_name,'.pcgr.snvs_indels.biomarkers.tsv')
   cna_tsv_fname <- paste0(project_directory, '/',sample_name,'.pcgr.cna_segments.tsv')
   maf_fname <- paste0(project_directory, '/',sample_name,'.pcgr.maf')
+
+  if(query_vcf != 'None'){
+    sample_calls <- pcgrr2::get_calls(query_vcf, sample_id = sample_name)
+    report_data <- pcgrr2::generate_report_data(sample_calls, sample_name = sample_name, minimum_n_signature_analysis = 50, signatures_limit = signatures_limit)
+    report_data$sample_name <- sample_name
+
+    if(!is.null(report_data$tsv_variants) & print_tier_variants == TRUE){
+      write.table(report_data$tsv_variants,file=tier_tsv_fname, sep="\t",col.names = T,row.names = F,quote = F)
+    }
+    if(!is.null(report_data$tsv_biomarkers) & print_biomarkers == TRUE){
+      write.table(report_data$tsv_biomarkers,file=biomarker_tsv_fname, sep="\t",col.names = T,row.names = F,quote = F)
+    }
+
+    if(!is.null(report_data$signature_data) & print_mutational_signatures == TRUE){
+      if(length(report_data$signature_data) > 1){
+        sample_mutational_signatures <- report_data$signature_data$signatures_cancertypes_aetiologies
+        sample_mutational_signatures$SampleID <- sample_name
+        sample_mutational_signatures <- dplyr::select(sample_mutational_signatures,-Comments)
+        write.table(sample_mutational_signatures,file=msig_tsv_fname, sep="\t",col.names = T,row.names = F,quote = F)
+      }
+    }
+    if(!is.null(report_data$maf_df) & print_maf == TRUE){
+      write.table(report_data$maf_df,file=maf_fname, sep="\t",col.names = T,row.names = F,quote = F)
+    }
+    tier1_report <- report_data$tier1_report
+    tier2_report <- report_data$tier2_report
+    tier3_report <- report_data$tier3_report
+    tier4_report <- report_data$tier4_report
+    tier5_report <- report_data$tier5_report
+    signature_report <- report_data$signature_report
+    if(signature_report == FALSE){
+      missing_signature_data <- TRUE
+    }
+  }
+
+
+  cna_report_tsgene_loss <- FALSE
+  cna_report_oncogene_gain <- FALSE
+  cna_report_biomarkers <- FALSE
+  cna_report_segments <- FALSE
+
+
 
   if(!is.null(cna_segments_tsv)){
     if(file.exists(cna_segments_tsv)){
@@ -171,45 +214,6 @@ generate_pcg_report <- function(project_directory, query_vcf, logR_threshold_amp
     }
   }
 
-  if(!is.null(report_data$tsv_variants) & print_tier_variants == TRUE){
-    write.table(report_data$tsv_variants,file=tier_tsv_fname, sep="\t",col.names = T,row.names = F,quote = F)
-  }
-  if(!is.null(report_data$tsv_biomarkers) & print_biomarkers == TRUE){
-    write.table(report_data$tsv_biomarkers,file=biomarker_tsv_fname, sep="\t",col.names = T,row.names = F,quote = F)
-  }
-
-  if(!is.null(report_data$signature_data) & print_mutational_signatures == TRUE){
-    if(length(report_data$signature_data) > 1){
-      sample_mutational_signatures <- report_data$signature_data$signatures_cancertypes_aetiologies
-      sample_mutational_signatures$SampleID <- sample_name
-      sample_mutational_signatures <- dplyr::select(sample_mutational_signatures,-Comments)
-      write.table(sample_mutational_signatures,file=msig_tsv_fname, sep="\t",col.names = T,row.names = F,quote = F)
-    }
-  }
-
-  if(!is.null(report_data$maf_df) & print_maf == TRUE){
-    write.table(report_data$maf_df,file=maf_fname, sep="\t",col.names = T,row.names = F,quote = F)
-  }
-
-  tier1_report <- FALSE
-  tier2_report <- FALSE
-  tier3_report <- FALSE
-  tier4_report <- FALSE
-  tier5_report <- FALSE
-  signature_report <- FALSE
-  missing_signature_data <- FALSE
-
-  tier1_report <- report_data$tier1_report
-  tier2_report <- report_data$tier2_report
-  tier3_report <- report_data$tier3_report
-  tier4_report <- report_data$tier4_report
-  tier5_report <- report_data$tier5_report
-  signature_report <- report_data$signature_report
-  if(signature_report == FALSE){
-    missing_signature_data <- TRUE
-  }
-  show_data_sources <- TRUE
-
   if(print_html_report == TRUE){
     rmarkdown::render(system.file("templates","report.Rmd", package="pcgrr2"), output_file = paste0(sample_name,'.pcgr.html'), output_dir = project_directory, params = list(signature_report = signature_report, tier1_report = tier1_report, tier2_report = tier2_report, tier3_report = tier3_report, tier4_report = tier4_report, tier5_report = tier5_report, cna_report_tsgene_loss = cna_report_tsgene_loss, cna_report_oncogene_gain = cna_report_oncogene_gain, cna_report_segments = cna_report_segments, cna_report_biomarkers = cna_report_biomarkers, show_data_sources = show_data_sources, logR_threshold_amplification = logR_threshold_amplification, logR_threshold_homozygous_deletion = logR_threshold_homozygous_deletion),quiet=T)
   }
@@ -226,6 +230,7 @@ generate_pcg_report <- function(project_directory, query_vcf, logR_threshold_amp
 
 cna_segment_annotation <- function(cna_file, logR_threshold_amplification, logR_threshold_homozygous_deletion, format = 'tcga_legacy'){
 
+  rlogging::message(paste0("Annotation of copy number segment file ",cna_file))
   cna_df <- read.table(file=cna_file,header = T,stringsAsFactors = F,comment.char="", quote="")
   cna_df <- dplyr::rename(cna_df, chromosome = Chromosome, LogR = Segment_Mean, segment_start = Start, segment_end = End) %>% dplyr::distinct()
   if(!any(stringr::str_detect(cna_df$chromosome,"chr"))){
@@ -301,6 +306,7 @@ cna_segment_annotation <- function(cna_file, logR_threshold_amplification, logR_
   if(nrow(segments) > 0){
     segments <- dplyr::filter(segments, LogR >= logR_threshold_amplification | LogR <= logR_threshold_homozygous_deletion)
     segments <- segments %>% dplyr::arrange(desc(LogR))
+    rlogging::message(paste0("Detected ",nrow(segments)," segments subject to amplification/deletion"))
   }
 
   oncogene_amplified <- NULL
@@ -1041,17 +1047,21 @@ get_clinical_associations_civic_cbmdb <- function(vcf_data_df, mapping = 'exact'
 #'
 #' @return vcf_data_df
 #'
-add_read_support <- function(vcf_data_df){
+add_read_support <- function(vcf_data_df,allelic_depth_normal_tag = 'ADC', allelic_depth_tumor_tag = 'ADT'){
   for(v in c('DP_TUMOR','AF_TUMOR','DP_NORMAL','AF_NORMAL')){
     vcf_data_df[v] <- NA
   }
-  if(!is.null(vcf_data_df$ADT) && !is.null(vcf_data_df$ADC) && !is.null(vcf_data_df$DPT) && !is.null(vcf_data_df$DPC)){
+  if(!is.null(vcf_data_df$ADT) && !is.null(vcf_data_df$ADC)){
     tmp_tumor <- dplyr::select(tidyr::separate(vcf_data_df,ADT, c('refn','altn'),convert=T), refn, altn)
     tmp_normal <- dplyr::select(tidyr::separate(vcf_data_df,ADC, c('refn','altn'),convert=T), refn, altn)
 
-    vcf_data_df$DP_TUMOR <- vcf_data_df$DPT
+    tmp_normal$refn <- as.integer(tmp_normal$refn)
+    tmp_normal$altn <- as.integer(tmp_normal$altn)
+    tmp_tumor$refn <- as.integer(tmp_tumor$refn)
+    tmp_tumor$altn <- as.integer(tmp_tumor$altn)
+    vcf_data_df$DP_TUMOR <- tmp_tumor$refn + tmp_tumor$altn
     vcf_data_df$AF_TUMOR <- round(tmp_tumor$altn / vcf_data_df$DP_TUMOR, digits=4)
-    vcf_data_df$DP_NORMAL <- vcf_data_df$DPC
+    vcf_data_df$DP_NORMAL <- tmp_normal$refn + tmp_tumor$altn
     vcf_data_df$AF_NORMAL <- round(tmp_normal$altn / vcf_data_df$DP_NORMAL, digits=4)
   }
 
@@ -1110,13 +1120,14 @@ get_calls <- function(vcf_gz_file, sample_id = NULL){
   }
   rlogging::message(paste0("Reading and parsing VEP/vcfanno-annotated VCF file - ",vcf_gz_file))
   vcf_data_vr <- VariantAnnotation::readVcfAsVRanges(vcf_gz_file,genome = "hg19")
-  vcf_data_vr <- vcf_data_vr[!is.na(vcf_data_vr$GT) & !(vcf_data_vr$GT == '.'),]
+  #vcf_data_vr <- vcf_data_vr[!is.na(vcf_data_vr$GT) & !(vcf_data_vr$GT == '.'),]
+  vcf_data_vr <- vcf_data_vr[VariantAnnotation::called(vcf_data_vr)]
   vcf_data_vr <- pcgrr2::postprocess_vranges_info(vcf_data_vr)
   vcf_data_df <- as.data.frame(vcf_data_vr)
   if(!is.null(sample_id)){
     vcf_data_df$VCF_SAMPLE_ID <- sample_id
   }
-  rlogging::message(paste0("Number of variants read: ",nrow(vcf_data_df)))
+  rlogging::message(paste0("Number of PASS variants: ",nrow(vcf_data_df)))
   if(any(grepl(paste0("VARIANT_CLASS$"),names(vcf_data_df)))){
     n_snvs <- nrow(vcf_data_df[vcf_data_df$VARIANT_CLASS == 'SNV',])
     n_deletions <- nrow(vcf_data_df[vcf_data_df$VARIANT_CLASS == 'deletion',])
@@ -1129,12 +1140,12 @@ get_calls <- function(vcf_gz_file, sample_id = NULL){
     for(col in c('GENOME_VERSION','GENOMIC_CHANGE','PROTEIN_DOMAIN','PROTEIN_FEATURE','OTHER_LITERATURE_DOCM','OTHER_DISEASE_DOCM','GENENAME','GENE_NAME','CLINVAR_TRAITS_ALL','CLINVAR','COSMIC','DBSNP','KEGG_PATHWAY','ANTINEOPLASTIC_DRUG_INTERACTIONS')){
       vcf_data_df[col] <- character(nrow(vcf_data_df))
     }
-    for(col in c('DP_TUMOR','DP_NORMAL')){
-      vcf_data_df[col] <- integer(nrow(vcf_data_df))
-    }
-    for (col in c('AF_TUMOR','AF_NORMAL')){
-      vcf_data_df[col] <- numeric(nrow(vcf_data_df))
-    }
+    # for(col in c('DP_TUMOR','DP_NORMAL')){
+    #   vcf_data_df[col] <- integer(nrow(vcf_data_df))
+    # }
+    # for (col in c('AF_TUMOR','AF_NORMAL')){
+    #   vcf_data_df[col] <- numeric(nrow(vcf_data_df))
+    # }
     vcf_data_df <- dplyr::rename(vcf_data_df, CHROM = seqnames, POS = start, REF = ref, ALT = alt, CONSEQUENCE = Consequence, PROTEIN_CHANGE = HGVSp_short)
     return(vcf_data_df)
   }
@@ -1145,7 +1156,7 @@ get_calls <- function(vcf_gz_file, sample_id = NULL){
 
   vcf_data_df <- pcgrr2::add_pfam_domain_links(vcf_data_df)
   vcf_data_df <- pcgrr2::add_swissprot_feature_descriptions(vcf_data_df)
-  vcf_data_df <- pcgrr2::add_read_support(vcf_data_df)
+  #vcf_data_df <- pcgrr2::add_read_support(vcf_data_df)
   rlogging::message("Extending annotation descriptions related to Database of Curated Mutations (DoCM)")
   vcf_data_df <- dplyr::left_join(vcf_data_df, pcgr_data$docm_literature, by=c("VAR_ID"))
 
@@ -1178,6 +1189,10 @@ get_calls <- function(vcf_gz_file, sample_id = NULL){
   }
   if("INTOGEN_DRIVER_MUT" %in% colnames(vcf_data_df)){
     vcf_data_df$INTOGEN_DRIVER_MUT <- stringr::str_replace_all(vcf_data_df$INTOGEN_DRIVER_MUT,"&",", ")
+  }
+
+  if("CONSEQUENCE" %in% colnames(vcf_data_df)){
+    vcf_data_df$CONSEQUENCE <- stringr::str_replace_all(vcf_data_df$CONSEQUENCE,"&",", ")
   }
   if("CANCER_CENSUS_SOMATIC" %in% colnames(vcf_data_df)){
     vcf_data_df$CANCER_CENSUS_SOMATIC <- stringr::str_replace_all(vcf_data_df$CANCER_CENSUS_SOMATIC,"&",", ")

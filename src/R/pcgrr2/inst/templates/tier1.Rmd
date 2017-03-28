@@ -1,3 +1,13 @@
+## Somatic SNVs/InDels
+
+### Tier 1 - genomic biomarkers for diagnosis, prognosis, and drug sensitivity {.tabset}
+
+- A total of __`r nrow(report_data$variants_tier1_display)`__ unique, somatic variant(s) in the tumor sample can be mapped to genomic biomarkers in the [database for clinical interpretations of variants in cancer, CIViC](https://civic.genome.wustl.edu/#/home) or [Cancer bioMarkers database](https://www.cancergenomeinterpreter.org/biomarkers), with the following number of evidence items:
+    * Tier 1A: __`r nrow(report_data$clinical_evidence_items_tier1A)`__ evidence items linked to specific amino acid changes
+    * Tier 1B: __`r nrow(report_data$clinical_evidence_items_tier1B)`__ evidence items linked to codon alterations
+    * Tier 1C: __`r nrow(report_data$clinical_evidence_items_tier1C)`__ evidence items linked to exon alterations
+
+<br><br>
 
 #### Tier 1A biomarkers
 

@@ -75,7 +75,7 @@ The tab-separated values file with copy number aberrations __MUST__ contain the 
   * _End_
   * _Segment_Mean_
 
-Here, _Segment_Mean_ denotes the log(2) ratio for a particular segment, which is a common output of somatic copy alteration callers. Below shows the initial part of a copy number segment file that is formatted correctly according to PCGR's requirements:
+Here, _Segment_Mean_ denotes the log(2) ratio for a particular segment, which is a common output of somatic copy number alteration callers. Below shows the initial part of a copy number segment file that is formatted correctly according to PCGR's requirements:
 
     Chromosome	Start	End	Segment_Mean
     1	3218329	5782169	-0.0328

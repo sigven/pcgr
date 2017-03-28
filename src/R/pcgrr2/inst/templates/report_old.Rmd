@@ -39,24 +39,62 @@ knitr::opts_chunk$set(echo = F,warning=FALSE, dpi=300)
 ```{r conditional_print0, child='data_sources.Rmd', eval = show_data_sources}
 ```
 
+## Somatic SNVs/InDels
+
+### Tier 1 - genomic biomarkers for diagnosis, prognosis, and drug sensitivity {.tabset}
+
+- A total of __`r nrow(report_data$variants_tier1_display)`__ unique, somatic variant(s) in the tumor sample can be mapped to genomic biomarkers in the [database for clinical interpretations of variants in cancer, CIViC](https://civic.genome.wustl.edu/#/home) or [Cancer bioMarkers database](https://www.cancergenomeinterpreter.org/biomarkers), with the following number of evidence items:
+    * Tier 1A: __`r nrow(report_data$clinical_evidence_items_tier1A)`__ evidence items linked to specific amino acid changes
+    * Tier 1B: __`r nrow(report_data$clinical_evidence_items_tier1B)`__ evidence items linked to codon alterations
+    * Tier 1C: __`r nrow(report_data$clinical_evidence_items_tier1C)`__ evidence items linked to exon alterations
+
+<br>
 
 ```{r conditional_print1, child='tier1.Rmd', eval = tier1_report}
 ```
 
+<br><br>
+
+### Tier 2 - other cancer mutation hotspots, curated mutations or predicted driver mutations
+
+- A total of __`r nrow(report_data$variants_tier2_display)`__ unique, somatic variant(s) in the tumor sample are curated as disease-causing, predicted as driver mutations, or occur in previously detected mutation hotspots:
+<br><br>
 
 ```{r conditional_print2, child='tier2.Rmd', eval = tier2_report}
 ```
 
+<br><br>
+
+### Tier 3 - other coding mutations in proto-oncogenes/tumor suppressors/cancer census genes
+
+- A total of __`r nrow(report_data$variants_tier3_display)`__ unique, somatic variant(s) in the tumor sample are found within known proto-oncogenes, tumor suppressor genes or cancer census genes:
+<br><br>
+
 ```{r conditional_print3, child='tier3.Rmd', eval = tier3_report}
 ```
 
+<br>
+
+### Tier 4 - other coding mutations
+
+- A total of __`r nrow(report_data$variants_tier4_display)`__ unique, somatic variant(s) are also found in the tumor sample:
+
+<br><br>
 
 ```{r conditional_print4, child='tier4.Rmd', eval = tier4_report}
 ```
+<br><br>
 
+### Tier 5 - non-coding mutations
+
+- A total of __`r nrow(report_data$variants_tier5_display)`__ unique, somatic variant(s) are also found in the tumor sample:
+<br>
 
 ```{r conditional_print5, child='tier5.Rmd', eval = tier5_report}
 ```
+
+<br><br>
+
 
 ```{r conditional_print6b, child='cna_report_segments_nondiploid.Rmd', eval = cna_report_segments}
 ```

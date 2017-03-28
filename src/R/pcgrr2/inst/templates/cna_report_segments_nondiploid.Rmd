@@ -2,10 +2,10 @@
 
 ### Segments - amplifications and homozygous deletions
 
-The following user-defined thresholds determine copy number aberrations analyzed here: 
+The following user-defined thresholds determine copy number aberrations shown here: 
 
-* Copy number amplifications: LogR >= `r logR_threshold_amplification`
-* Homozygous deletions: LogR <= `r logR_threshold_homozygous_deletion`
+* <span style="color:#009E73"><b>Copy number amplifications</b></span>: Log(2) ratio >= `r logR_threshold_amplification`
+* <span style="color:red"><b>Homozygous deletions</b></span>: Log(2) ratio <= `r logR_threshold_homozygous_deletion`
 
 <br>
   

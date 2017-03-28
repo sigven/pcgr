@@ -4,7 +4,8 @@
 \alias{add_read_support}
 \title{Function that adds read support (depth, allelic fraction) for tumor and normal}
 \usage{
-add_read_support(vcf_data_df)
+add_read_support(vcf_data_df, allelic_depth_normal_tag = "ADC",
+  allelic_depth_tumor_tag = "ADT")
 }
 \arguments{
 \item{vcf_data_df}{}

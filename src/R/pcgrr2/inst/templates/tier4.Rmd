@@ -1,4 +1,8 @@
+### Tier 4 - other coding mutations
 
+- A total of __`r nrow(report_data$variants_tier4_display)`__ unique, somatic variant(s) are also found in the tumor sample:
+
+<br><br>
 ```{r tier4, echo=F}
 
 myOptions <- list(paging = F,pageLength=10, searching=T,caching=F)
@@ -8,3 +12,4 @@ if(nrow(report_data$variants_tier4_display) > 10){
 DT::datatable(report_data$variants_tier4_display, options = myOptions, escape=F, extensions = "Responsive")
 
 ```
+<br><br>

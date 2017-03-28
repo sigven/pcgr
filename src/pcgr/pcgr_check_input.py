@@ -7,6 +7,7 @@ import os
 import subprocess
 import logging
 import sys
+import pandas as np
 from cyvcf2 import VCF
 
 def __main__():
@@ -16,9 +17,6 @@ def __main__():
    parser.add_argument('input_cna_segments', help='Somatic copy number query segments (tab-separated values)')   
    args = parser.parse_args()
    
-   ## 3. make custom check of CNV segment file
-   ## 4. ensure that either input_vcf or input_cnv is not NULL
-
    verify_input(args.input_vcf, args.input_cna_segments)
 
 def getlogger(logger_name):
@@ -41,8 +39,25 @@ def getlogger(logger_name):
    return logger
 
 
-def is_valid_cna_segment_file(cna_segment_file):
-   return
+def is_valid_cna_segment_file(cna_segment_file, logger):
+   cna_dataframe = np.read_csv(cna_segment_file, sep="\t")
+   if not cna_dataframe['Start'].dtype.kind in 'i':
+      logger.error('')
+      logger.error('\'Start\' column of copy number segment file contains non-integer values')
+      logger.error('')
+      return -1
+   if not cna_dataframe['End'].dtype.kind in 'i':
+      logger.error('')
+      logger.error('\'End\' column of copy number segment file contains non-integer values')
+      logger.error('')
+      return -1
+   if not cna_dataframe['Segment_Mean'].dtype.kind in 'if':
+      logger.error('')
+      logger.error('\'Segment_Mean\' column of copy number segment file contains non-numerical values')
+      logger.error('')
+      return -1
+   logger.info('Copy number segment file ' + str(cna_segment_file) + ') adheres to the correct format')
+   return 0
 
 
 
@@ -70,7 +85,8 @@ def is_valid_vcf(vcf_validator_output_file):
 def verify_input(input_vcf, input_cna_segments):
    
    logger = getlogger('pcgr-check-input')
-   if not input_vcf is None:
+   input_vcf_pcgr_ready = re.sub(r'(\.vcf$|\.vcf\.gz$)','.pcgr_ready.vcf',input_vcf)
+   if not input_vcf == 'None':
       logger.info('Validating VCF file with EBIvariation/vcf-validator')
       vcf_validation_output_file = re.sub(r'(\.vcf$|\.vcf\.gz$)','.vcf_validator_output',input_vcf)
       command_v42 = 'vcf_validator --input ' + str(input_vcf) + ' --version v4.2 > ' + str(vcf_validation_output_file)
@@ -105,14 +121,26 @@ def verify_input(input_vcf, input_cna_segments):
                logger.error(error_message_multiallelic)
                multiallelic_alt = 1
                return -1
+         command_vcf_sample_free1 = 'egrep \'^#\' ' + str(input_vcf) + ' > ' + str(input_vcf_pcgr_ready)
+         command_vcf_sample_free2 = 'egrep -v \'^#\' ' + str(input_vcf) + ' | cut -f1-8 > ' + str(input_vcf_pcgr_ready)
+         if input_vcf.endswith('.gz'):
+            command_vcf_sample_free1 = 'bgzip -dc ' + str(input_vcf) + ' | egrep \'^#\' > ' + str(input_vcf_pcgr_ready)
+            command_vcf_sample_free2 = 'bgzip -dc ' + str(input_vcf) + ' | egrep -v \'^#\' | cut -f1-8 > ' + str(input_vcf_pcgr_ready)
+         os.system(command_vcf_sample_free1)
+         os.system(command_vcf_sample_free2)
+         os.system('bgzip -f ' + str(input_vcf_pcgr_ready))
+         os.system('tabix -p vcf ' + str(input_vcf_pcgr_ready) + '.gz')
       
-      if not input_cna_segments == 'None':
-         with open(input_cna_segments, 'rb') as tsvfile:
-            cna_reader = csv.DictReader(tsvfile, delimiter='\t')
-            if not ('Chromosome' in cna_reader.fieldnames and 'Segment_Mean' in cna_reader.fieldnames and 'Start' in cna_reader.fieldnames and 'End' in cna_reader.fieldnames):
-               error_message_cnv = "Copy number segment file is missing required column(s): 'Chromosome', 'Start', 'End', or  'Segment_Mean'"
-               logger.error(error_message_cnv)
-               return -1
+   if not input_cna_segments == 'None':
+      with open(input_cna_segments, 'rb') as tsvfile:
+         cna_reader = csv.DictReader(tsvfile, delimiter='\t')
+         if not ('Chromosome' in cna_reader.fieldnames and 'Segment_Mean' in cna_reader.fieldnames and 'Start' in cna_reader.fieldnames and 'End' in cna_reader.fieldnames):
+            error_message_cnv = "Copy number segment file (" + str(input_cna_segments) + ") is missing required column(s): 'Chromosome', 'Start', 'End', or  'Segment_Mean'"
+            logger.error(error_message_cnv)
+            return -1
+         else:
+            ret = is_valid_cna_segment_file(input_cna_segments, logger)
+            return ret
    
    return 0
    
