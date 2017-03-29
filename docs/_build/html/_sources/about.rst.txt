@@ -15,23 +15,27 @@ oncology-relevant, up-to-date annotations retrieved flexibly through
 reports that can be navigated by clinical oncologists (Figure 1).
 
 .. figure:: PCGR_workflow.png
-   :alt: PCGR overview
+   :alt: 
 
-   PCGR overview
+The Personal Cancer Genome Reporter has been developed by scientists
+affiliated with the `Norwegian Cancer Genomics
+Consortium <http://cancergenomics.no>`__, at the `Institute for Cancer
+Research/Oslo University Hospital <http://radium.no>`__.
 
 Why use PCGR?
 ~~~~~~~~~~~~~
 
 The great complexity of acquired mutations in individual tumor genomes
 poses a severe challenge for clinical interpretation. There is a general
-scarcity of tools that can i) systematically interrogate cancer genomes
-in the context of diagnostic, prognostic, and therapeutic biomarkers,
-ii) prioritize and highlight the most important findings, and iii)
-present the results in a format accessible to clinical experts. PCGR
-integrates a comprehensive set of knowledge resources related to tumor
-biology and therapeutic biomarkers, both at the gene and variant level.
-The application generates a tiered report that will aid the
-interpretation of individual cancer genomes in a clinical setting.
+scarcity of tools that can *i)* systematically interrogate cancer
+genomes in the context of diagnostic, prognostic, and therapeutic
+biomarkers, *ii)* prioritize and highlight the most important findings,
+and *iii)* present the results in a format accessible to clinical
+experts. PCGR integrates a comprehensive set of knowledge resources
+related to tumor biology and therapeutic biomarkers, both at the gene
+and variant level. The application generates a tiered report that will
+aid the interpretation of individual cancer genomes in a clinical
+setting.
 
 Docker-based technology
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -42,4 +46,7 @@ packaged into isolated containers, in which the installation of all
 software libraries/tools and required dependencies have been taken care
 of. In addition to the bundled software, in the form of a Docker image,
 the workflow only needs to be attached with an `annotation data bundle
-for precision oncology <annotation_resources.md>`__.
+for precision oncology <annotation_resources.html>`__.
+
+.. figure:: docker-logo50.png
+   :alt: 

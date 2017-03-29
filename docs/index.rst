@@ -1,6 +1,6 @@
 
-Welcome to PCGR's documentation!
-================================
+Welcome to Personal Cancer Genome Reporter's documentation!
+===========================================================
 
 .. toctree:: 
    :maxdepth: 2 

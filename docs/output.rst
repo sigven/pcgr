@@ -6,7 +6,8 @@ Input
 
 The PCGR workflow accepts two types of input files:
 
--  A single-sample VCF file with somatic variants (SNVs/InDels)
+-  An unannotated, single-sample VCF file with called somatic variants
+   (SNVs/InDels)
 -  A copy number segment file
 
 PCGR can be run with either or both of the two input files present.
@@ -87,6 +88,10 @@ unique identifier of the tumor-normal sample pair to be analyzed.
    (TCGA) <http://folk.uio.no/sigven/tumor_sample.BRCA.pcgr.html>`__
 -  `View an example report for a colorectal tumor sample
    (TCGA) <http://folk.uio.no/sigven/tumor_sample.COAD.pcgr.html>`__
+
+The HTML reports have been tested using the following browsers: \*
+Safari (10.0.3) \* Mozilla Firefox (52.0.2) \* Google Chrome
+(57.0.2987.110)
 
 Output - Somatic SNVs/InDels
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -225,43 +225,48 @@ DockerHub):</p>
                <span class="p">[</span><span class="o">--</span><span class="n">logR_threshold_amplification</span> <span class="n">LOGR_THRESHOLD_AMPLIFICATION</span><span class="p">]</span>
                <span class="p">[</span><span class="o">--</span><span class="n">logR_threshold_homozygous_deletion</span> <span class="n">LOGR_THRESHOLD_HOMOZYGOUS_DELETION</span><span class="p">]</span>
                <span class="p">[</span><span class="o">--</span><span class="n">num_vcfanno_processes</span> <span class="n">NUM_VCFANNO_PROCESSES</span><span class="p">]</span>
-               <span class="p">[</span><span class="o">--</span><span class="n">num_vep_forks</span> <span class="n">NUM_VEP_FORKS</span><span class="p">]</span>
+               <span class="p">[</span><span class="o">--</span><span class="n">num_vep_forks</span> <span class="n">NUM_VEP_FORKS</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">force_overwrite</span><span class="p">]</span>
                <span class="n">pcgr_directory</span> <span class="n">working_directory</span> <span class="n">sample_id</span>
 
 <span class="n">Personal</span> <span class="n">Cancer</span> <span class="n">Genome</span> <span class="n">Reporter</span> <span class="p">(</span><span class="n">PCGR</span><span class="p">)</span> <span class="n">workflow</span> <span class="k">for</span> <span class="n">clinical</span> <span class="n">interpretation</span> <span class="n">of</span>
 <span class="n">somatic</span> <span class="n">nucleotide</span> <span class="n">variants</span> <span class="ow">and</span> <span class="n">copy</span> <span class="n">number</span> <span class="n">aberration</span> <span class="n">segments</span>
 
 <span class="n">positional</span> <span class="n">arguments</span><span class="p">:</span>
-  <span class="n">pcgr_directory</span>        <span class="n">PCGR</span> <span class="n">base</span> <span class="n">directory</span>
-  <span class="n">working_directory</span>     <span class="n">Working</span> <span class="n">directory</span>
-  <span class="n">sample_id</span>             <span class="n">Tumor</span> <span class="n">sample</span><span class="o">/</span><span class="n">cancer</span> <span class="n">genome</span> <span class="n">identifier</span> <span class="o">-</span> <span class="n">prefix</span> <span class="k">for</span>
+<span class="n">pcgr_directory</span>        <span class="n">PCGR</span> <span class="n">base</span> <span class="n">directory</span>
+<span class="n">working_directory</span>     <span class="n">Working</span> <span class="n">directory</span> <span class="o">-</span> <span class="n">directory</span> <span class="k">with</span> <span class="nb">input</span><span class="o">/</span><span class="n">output</span> <span class="n">files</span>
+<span class="n">sample_id</span>             <span class="n">Tumor</span> <span class="n">sample</span><span class="o">/</span><span class="n">cancer</span> <span class="n">genome</span> <span class="n">identifier</span> <span class="o">-</span> <span class="n">prefix</span> <span class="k">for</span>
                     <span class="n">output</span> <span class="n">files</span>
 
 <span class="n">optional</span> <span class="n">arguments</span><span class="p">:</span>
-  <span class="o">-</span><span class="n">h</span><span class="p">,</span> <span class="o">--</span><span class="n">help</span>            <span class="n">show</span> <span class="n">this</span> <span class="n">help</span> <span class="n">message</span> <span class="ow">and</span> <span class="n">exit</span>
-  <span class="o">--</span><span class="n">input_vcf</span> <span class="n">INPUT_VCF</span>
+<span class="o">-</span><span class="n">h</span><span class="p">,</span> <span class="o">--</span><span class="n">help</span>            <span class="n">show</span> <span class="n">this</span> <span class="n">help</span> <span class="n">message</span> <span class="ow">and</span> <span class="n">exit</span>
+<span class="o">--</span><span class="n">input_vcf</span> <span class="n">INPUT_VCF</span>
                     <span class="n">VCF</span> <span class="nb">input</span> <span class="n">file</span> <span class="k">with</span> <span class="n">somatic</span> <span class="n">query</span> <span class="n">variants</span>
                     <span class="p">(</span><span class="n">SNVs</span><span class="o">/</span><span class="n">InDels</span><span class="p">)</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span>
-  <span class="o">--</span><span class="n">input_cna_segments</span> <span class="n">INPUT_CNA_SEGMENTS</span>
+<span class="o">--</span><span class="n">input_cna_segments</span> <span class="n">INPUT_CNA_SEGMENTS</span>
                     <span class="n">Somatic</span> <span class="n">copy</span> <span class="n">number</span> <span class="n">alteration</span> <span class="n">segments</span> <span class="p">(</span><span class="n">tab</span><span class="o">-</span><span class="n">separated</span>
                     <span class="n">values</span><span class="p">)</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span>
-  <span class="o">--</span><span class="n">logR_threshold_amplification</span> <span class="n">LOGR_THRESHOLD_AMPLIFICATION</span>
-                    <span class="n">Log</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="n">ratio</span> <span class="n">treshold</span> <span class="k">for</span> <span class="n">copy</span> <span class="n">number</span> <span class="n">amplification</span>
-                    <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">)</span>
-  <span class="o">--</span><span class="n">logR_threshold_homozygous_deletion</span> <span class="n">LOGR_THRESHOLD_HOMOZYGOUS_DELETION</span>
-                    <span class="n">Log</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="n">ratio</span> <span class="n">treshold</span> <span class="k">for</span> <span class="n">homozygous</span> <span class="n">deletion</span>
-                    <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.8</span><span class="p">)</span>
-  <span class="o">--</span><span class="n">num_vcfanno_processes</span> <span class="n">NUM_VCFANNO_PROCESSES</span>
+<span class="o">--</span><span class="n">logR_threshold_amplification</span> <span class="n">LOGR_THRESHOLD_AMPLIFICATION</span>
+                    <span class="n">Log</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="n">ratio</span> <span class="n">treshold</span> <span class="k">for</span> <span class="n">calling</span> <span class="n">copy</span> <span class="n">number</span>
+                    <span class="n">amplifications</span> <span class="ow">in</span> <span class="n">HTML</span> <span class="n">report</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">)</span>
+<span class="o">--</span><span class="n">logR_threshold_homozygous_deletion</span> <span class="n">LOGR_THRESHOLD_HOMOZYGOUS_DELETION</span>
+                    <span class="n">Log</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="n">ratio</span> <span class="n">treshold</span> <span class="k">for</span> <span class="n">calling</span> <span class="n">homozygous</span> <span class="n">deletions</span>
+                    <span class="ow">in</span> <span class="n">HTML</span> <span class="n">report</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.8</span><span class="p">)</span>
+<span class="o">--</span><span class="n">num_vcfanno_processes</span> <span class="n">NUM_VCFANNO_PROCESSES</span>
                     <span class="n">Number</span> <span class="n">of</span> <span class="n">processes</span> <span class="n">used</span> <span class="n">during</span> <span class="n">vcfanno</span> <span class="n">annotation</span>
                     <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="mi">4</span><span class="p">)</span>
-  <span class="o">--</span><span class="n">num_vep_forks</span> <span class="n">NUM_VEP_FORKS</span>
-                    <span class="n">Number</span> <span class="n">of</span> <span class="n">forks</span> <span class="p">(</span><span class="o">--</span><span class="n">forks</span><span class="p">)</span> <span class="n">used</span> <span class="n">during</span> <span class="n">VEP</span> <span class="n">annotation</span>
-                    <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="mi">4</span><span class="p">)</span>
+<span class="o">--</span><span class="n">num_vep_forks</span> <span class="n">NUM_VEP_FORKS</span>
+                    <span class="n">Number</span> <span class="n">of</span> <span class="n">forks</span> <span class="p">(</span><span class="o">--</span><span class="n">forks</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">VEP</span><span class="p">)</span> <span class="n">used</span> <span class="n">during</span>
+                    <span class="n">VEP</span> <span class="n">annotation</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="mi">4</span><span class="p">)</span>
+<span class="o">--</span><span class="n">force_overwrite</span>     <span class="n">By</span> <span class="n">default</span><span class="p">,</span> <span class="n">the</span> <span class="n">script</span> <span class="n">will</span> <span class="n">fail</span> <span class="k">with</span> <span class="n">an</span> <span class="n">error</span> <span class="k">if</span> <span class="nb">any</span>
+                    <span class="n">output</span> <span class="n">file</span> <span class="n">already</span> <span class="n">exists</span><span class="o">.</span> <span class="n">You</span> <span class="n">can</span> <span class="n">force</span> <span class="n">the</span>
+                    <span class="n">overwrite</span> <span class="n">of</span> <span class="n">existing</span> <span class="n">result</span> <span class="n">files</span> <span class="n">by</span> <span class="n">using</span> <span class="n">this</span> <span class="n">flag</span>
+                    <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The <em>examples</em> folder contain sample files from TCGA. A report for a
 colorectal tumor case can be generated through the following command:</p>
-<p><code class="docutils literal"><span class="pre">python</span> <span class="pre">run_pcgr.py</span> <span class="pre">--input_vcf</span> <span class="pre">tumor_sample.COAD.vcf.gz</span> <span class="pre">--input_cna_segments</span> <span class="pre">tumor_sample.COAD.cna.tsv</span> <span class="pre">~/pcgr-X.X</span> <span class="pre">~/pcgr-X.X/examples</span> <span class="pre">tumor_sample.COAD</span></code></p>
+<p><code class="docutils literal"><span class="pre">python</span> <span class="pre">run_pcgr.py</span> <span class="pre">--input_vcf</span> <span class="pre">tumor_sample.COAD.vcf.gz</span> <span class="pre">--input_cna_segments</span></code>
+<code class="docutils literal"><span class="pre">tumor_sample.COAD.cna.tsv</span> <span class="pre">~/pcgr-X.X</span> <span class="pre">~/pcgr-X.X/examples</span> <span class="pre">tumor_sample.COAD</span></code></p>
 <p>This command will run the Docker-based PCGR workflow and produce the
 following output files in the <em>examples</em> folder:</p>
 <ol class="arabic simple">
