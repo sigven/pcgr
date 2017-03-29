@@ -30,35 +30,63 @@ work properly:
    chromosomal order and chromosomal position). This can be obtained by
    `vcftools <https://vcftools.github.io/perl_module.html#vcf-sort>`__.
 
-   -  We recommend that the input VCF is compressed and indexed using
-      `bgzip <http://www.htslib.org/doc/tabix.html>`__ and
+   -  We **strongly** recommend that the input VCF is compressed and
+      indexed using `bgzip <http://www.htslib.org/doc/tabix.html>`__ and
       `tabix <http://www.htslib.org/doc/tabix.html>`__
    -  'chr' must be stripped from the chromosome names
+
+**IMPORTANT NOTE**: Considering the VCF output for the `numerous somatic
+SNV/InDel callers <https://www.biostars.org/p/19104/>`__ that have been
+developed, we have a experienced a general lack of uniformity and
+robustness for the representation of somatic variant genotype data (e.g.
+variant allelic depths (tumor/normal), genotype quality etc.). In the
+output results provided within the current version of PCGR, we are
+considering PASSed variants only, and variant genotype data (i.e. as
+found in the VCF SAMPLE columns) are not handled or parsed. As improved
+standards for this matter may emerge, we will strive to include this
+information in the annotated output files.
 
 Copy number segments
 ^^^^^^^^^^^^^^^^^^^^
 
 The tab-separated values file with copy number aberrations **MUST**
-contain the following four columns: \* *Chromosome* \* *Start* \* *End*
-\* *Segment\_Mean*
+contain the following four columns:
+
+-  Chromosome
+-  Start
+-  End
+-  Segment\_Mean
 
 Here, *Chromosome*, *Start*, and *End* denote the chromosomal segment
-(GRCh37), and *Segment\_Mean* denotes the log(2) ratio for a particular
-segment, which is a common output of somatic copy number alteration
-callers. Below shows the initial part of a copy number segment file that
-is formatted correctly according to PCGR's requirements:
+(GRCh37), and **Segment\_Mean** denotes the log(2) ratio for a
+particular segment, which is a common output of somatic copy number
+alteration callers. Below shows the initial part of a copy number
+segment file that is formatted correctly according to PCGR's
+requirements:
 
 ::
 
       Chromosome    Start   End Segment_Mean
-      1 3218329 5782169 -0.0328
-      1 5782721 5782769 -1.9684
-      1 5785135 22937448 -0.0451
+      1 3218329 3550598 0.0024
+      1 3552451 4593614 0.1995
+      1 4593663 6433129 -1.0277
 
 Output - Interactive HTML report
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-TODO
+An interactive and tier-structured HTML report that shows the most
+relevant findings in the query cancer genome is provided with the
+following naming convention:
+
+**sample\_id**.pcgr.html
+
+The **sample\_id** is provided as input by the user, and reflects a
+unique identifier of the tumor-normal sample pair to be analyzed.
+
+-  `View an example report for a breast tumor sample
+   (TCGA) <http://folk.uio.no/sigven/tumor_sample.BRCA.pcgr.html>`__
+-  `View an example report for a colorectal tumor sample
+   (TCGA) <http://folk.uio.no/sigven/tumor_sample.COAD.pcgr.html>`__
 
 Output - Somatic SNVs/InDels
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -66,9 +94,9 @@ Output - Somatic SNVs/InDels
 Variant call format - VCF
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Each tumor-normal sample pair is provided with a VCF file containing
-annotated, somatic calls (single nucleotide variants and
-insertion/deletions) that has the following naming convention:
+A VCF file containing annotated, somatic calls (single nucleotide
+variants and insertion/deletions) is generated with the following naming
+convention:
 
 **sample\_id**.pcgr.vcf.gz
 
@@ -227,33 +255,38 @@ processing with the PCGR annotation pipeline:
 -  EFFECT\_PREDICTIONS - Predictions of effect of variant on protein
    function and pre-mRNA splicing from `database of non-synonymous
    functional predictions - dbNSFP
-   v3.2 <https://sites.google.com/site/jpopgen/dbNSFP>`__. Predicted
-   effects are provided by 14 different sources/algorithms (separated by
+   v3.4 <https://sites.google.com/site/jpopgen/dbNSFP>`__. Predicted
+   effects are provided by different sources/algorithms (separated by
    '&'):
 
    1.  `SIFT <http://provean.jcvi.org/index.php>`__ (Jan 2015)
-   2.  `PolyPhen2 <http://genetics.bwh.harvard.edu/pph2/>`__ (v 2.2.2,
-       predictions based on
-       `HumDiv <http://genetics.bwh.harvard.edu/pph2/dokuwiki/overview#prediction>`__)
-   3.  `LRT <http://www.genetics.wustl.edu/jflab/lrt_query.html>`__
+   2.  `PolyPhen2-HDIV <http://genetics.bwh.harvard.edu/pph2/>`__ (v
+       2.2.2)
+   3.  `PolyPhen2-HVAR <http://genetics.bwh.harvard.edu/pph2/>`__ (v
+       2.2.2)
+   4.  `LRT <http://www.genetics.wustl.edu/jflab/lrt_query.html>`__
        (2009)
-   4.  `MutationTaster <http://www.mutationtaster.org/>`__ (data release
+   5.  `MutationTaster <http://www.mutationtaster.org/>`__ (data release
        Nov 2015)
-   5.  `MutationAssessor <http://mutationassessor.org/>`__ (release 3)
-   6.  [FATHMM] (http://fathmm.biocompute.org.uk) (v2.3)
-   7.  `PROVEAN <http://provean.jcvi.org/index.php>`__ (v1.1 Jan 2015)
-   8.  `FATHMM\_MKL <http://fathmm.biocompute.org.uk/fathmmMKL.htm>`__
-   9.  `CADD <http://cadd.gs.washington.edu/>`__ (v1.3)
-   10. `DBNSFP\_CONSENSUS\_SVM <https://www.ncbi.nlm.nih.gov/pubmed/25552646>`__
+   6.  `MutationAssessor <http://mutationassessor.org/>`__ (release 3)
+   7.  [FATHMM] (http://fathmm.biocompute.org.uk) (v2.3)
+   8.  `PROVEAN <http://provean.jcvi.org/index.php>`__ (v1.1 Jan 2015)
+   9.  `FATHMM\_MKL <http://fathmm.biocompute.org.uk/fathmmMKL.htm>`__
+   10. `CADD <http://cadd.gs.washington.edu/>`__ (v1.3)
+   11. `DBNSFP\_CONSENSUS\_SVM <https://www.ncbi.nlm.nih.gov/pubmed/25552646>`__
        (Ensembl/consensus prediction, based on support vector machines)
-   11. `DBNSFP\_CONSENSUS\_LR <https://www.ncbi.nlm.nih.gov/pubmed/25552646>`__
+   12. `DBNSFP\_CONSENSUS\_LR <https://www.ncbi.nlm.nih.gov/pubmed/25552646>`__
        (Ensembl/consensus prediction, logistic regression based)
-   12. `SPLICE\_SITE\_EFFECT\_ADA <http://nar.oxfordjournals.org/content/42/22/13534>`__
+   13. `SPLICE\_SITE\_EFFECT\_ADA <http://nar.oxfordjournals.org/content/42/22/13534>`__
        (Ensembl/consensus prediction of splice-altering SNVs, based on
        adaptive boosting)
-   13. `SPLICE\_SITE\_EFFECT\_RF <http://nar.oxfordjournals.org/content/42/22/13534>`__
+   14. `SPLICE\_SITE\_EFFECT\_RF <http://nar.oxfordjournals.org/content/42/22/13534>`__
        (Ensembl/consensus prediction of splice-altering SNVs, based on
        adaptive boosting)
+   15. `M-CAP <http://bejerano.stanford.edu/MCAP>`__
+   16. `REVEL <https://www.ncbi.nlm.nih.gov/pubmed/27666373>`__
+   17. `MutPred <http://mutpred.mutdb.org>`__
+   18. `GERP <http://mendel.stanford.edu/SidowLab/downloads/gerp/>`__
 
 *Variant frequencies/annotations in germline/somatic databases*
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -492,8 +525,8 @@ The following variables are included in the tiered TSV file:
     30. GLOBAL_AF_EXAC - adjusted global germline allele frequency in ExAC release 0.3.1
     31. GLOBAL_AF_1KG - 1000G Project - phase 3, germline allele frequency
         for all 1000G project samples (global)
-    36. TIER
-    37. TIER_DESCRIPTION
+    32. TIER
+    33. TIER_DESCRIPTION
 
 Biomarkers among SNVs/InDEls
 ''''''''''''''''''''''''''''

@@ -15,13 +15,7 @@
      * Memory: 5GB
      * CPUs: 4
 
-     For Docker version 1.13 on [Mac OS X](https://docs.docker.com/docker-for-mac/#advanced) there is an option to change CPU's and RAM from the UI and restart Docker. This can be found through Docker Preferences (Advanced) in the toolbar:
-<br>
-     <img src="Docker_VM_compute_config_MacOSX.png" height="450px" width="400px">
-
-<br>
-
-  These options can be set similarly for [Docker for Windows](https://docs.docker.com/docker-for-windows/#advanced).
+     For Docker version 1.13 on [Mac OS X](https://docs.docker.com/docker-for-mac/#advanced) there is an option to change CPU's and RAM from the UI and restart Docker. This can be found through [Docker Preferences (Advanced)](https://docs.docker.com/docker-for-windows/#advanced) in the toolbar. Similarly for [Docker for Windows](https://docs.docker.com/docker-for-windows/#advanced).
 
 #### Python
 

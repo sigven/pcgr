@@ -191,43 +191,70 @@ vcfanno</a></li>
 <li>The contents of the VCF must be sorted correctly (i.e. according to
 chromosomal order and chromosomal position). This can be obtained by
 <a class="reference external" href="https://vcftools.github.io/perl_module.html#vcf-sort">vcftools</a>.<ul>
-<li>We recommend that the input VCF is compressed and indexed using
-<a class="reference external" href="http://www.htslib.org/doc/tabix.html">bgzip</a> and
+<li>We <strong>strongly</strong> recommend that the input VCF is compressed and
+indexed using <a class="reference external" href="http://www.htslib.org/doc/tabix.html">bgzip</a> and
 <a class="reference external" href="http://www.htslib.org/doc/tabix.html">tabix</a></li>
 <li>&#8216;chr&#8217; must be stripped from the chromosome names</li>
 </ul>
 </li>
 </ol>
+<p><strong>IMPORTANT NOTE</strong>: Considering the VCF output for the <a class="reference external" href="https://www.biostars.org/p/19104/">numerous somatic
+SNV/InDel callers</a> that have been
+developed, we have a experienced a general lack of uniformity and
+robustness for the representation of somatic variant genotype data (e.g.
+variant allelic depths (tumor/normal), genotype quality etc.). In the
+output results provided within the current version of PCGR, we are
+considering PASSed variants only, and variant genotype data (i.e. as
+found in the VCF SAMPLE columns) are not handled or parsed. As improved
+standards for this matter may emerge, we will strive to include this
+information in the annotated output files.</p>
 </div>
 <div class="section" id="copy-number-segments">
 <h3>Copy number segments<a class="headerlink" href="#copy-number-segments" title="Permalink to this headline">¶</a></h3>
 <p>The tab-separated values file with copy number aberrations <strong>MUST</strong>
-contain the following four columns: * <em>Chromosome</em> * <em>Start</em> * <em>End</em>
-* <em>Segment_Mean</em></p>
+contain the following four columns:</p>
+<ul class="simple">
+<li>Chromosome</li>
+<li>Start</li>
+<li>End</li>
+<li>Segment_Mean</li>
+</ul>
 <p>Here, <em>Chromosome</em>, <em>Start</em>, and <em>End</em> denote the chromosomal segment
-(GRCh37), and <em>Segment_Mean</em> denotes the log(2) ratio for a particular
-segment, which is a common output of somatic copy number alteration
-callers. Below shows the initial part of a copy number segment file that
-is formatted correctly according to PCGR&#8217;s requirements:</p>
+(GRCh37), and <strong>Segment_Mean</strong> denotes the log(2) ratio for a
+particular segment, which is a common output of somatic copy number
+alteration callers. Below shows the initial part of a copy number
+segment file that is formatted correctly according to PCGR&#8217;s
+requirements:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Chromosome</span>    <span class="n">Start</span>   <span class="n">End</span> <span class="n">Segment_Mean</span>
-<span class="mi">1</span> <span class="mi">3218329</span> <span class="mi">5782169</span> <span class="o">-</span><span class="mf">0.0328</span>
-<span class="mi">1</span> <span class="mi">5782721</span> <span class="mi">5782769</span> <span class="o">-</span><span class="mf">1.9684</span>
-<span class="mi">1</span> <span class="mi">5785135</span> <span class="mi">22937448</span> <span class="o">-</span><span class="mf">0.0451</span>
+<span class="mi">1</span> <span class="mi">3218329</span> <span class="mi">3550598</span> <span class="mf">0.0024</span>
+<span class="mi">1</span> <span class="mi">3552451</span> <span class="mi">4593614</span> <span class="mf">0.1995</span>
+<span class="mi">1</span> <span class="mi">4593663</span> <span class="mi">6433129</span> <span class="o">-</span><span class="mf">1.0277</span>
 </pre></div>
 </div>
 </div>
 </div>
 <div class="section" id="output-interactive-html-report">
 <h2>Output - Interactive HTML report<a class="headerlink" href="#output-interactive-html-report" title="Permalink to this headline">¶</a></h2>
-<p>TODO</p>
+<p>An interactive and tier-structured HTML report that shows the most
+relevant findings in the query cancer genome is provided with the
+following naming convention:</p>
+<p><strong>sample_id</strong>.pcgr.html</p>
+<p>The <strong>sample_id</strong> is provided as input by the user, and reflects a
+unique identifier of the tumor-normal sample pair to be analyzed.</p>
+<ul class="simple">
+<li><a class="reference external" href="http://folk.uio.no/sigven/tumor_sample.BRCA.pcgr.html">View an example report for a breast tumor sample
+(TCGA)</a></li>
+<li><a class="reference external" href="http://folk.uio.no/sigven/tumor_sample.COAD.pcgr.html">View an example report for a colorectal tumor sample
+(TCGA)</a></li>
+</ul>
 </div>
 <div class="section" id="output-somatic-snvs-indels">
 <h2>Output - Somatic SNVs/InDels<a class="headerlink" href="#output-somatic-snvs-indels" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="variant-call-format-vcf">
 <h3>Variant call format - VCF<a class="headerlink" href="#variant-call-format-vcf" title="Permalink to this headline">¶</a></h3>
-<p>Each tumor-normal sample pair is provided with a VCF file containing
-annotated, somatic calls (single nucleotide variants and
-insertion/deletions) that has the following naming convention:</p>
+<p>A VCF file containing annotated, somatic calls (single nucleotide
+variants and insertion/deletions) is generated with the following naming
+convention:</p>
 <p><strong>sample_id</strong>.pcgr.vcf.gz</p>
 <p>Here, the <strong>sample_id</strong> is provided as input by the user, and reflects
 a unique identifier of the tumor-normal sample pair to be analyzed.
@@ -385,13 +412,14 @@ driver mutation from IntoGen Catalog of Driver Mutations</li>
 <li>EFFECT_PREDICTIONS - Predictions of effect of variant on protein
 function and pre-mRNA splicing from <a class="reference external" href="https://sites.google.com/site/jpopgen/dbNSFP">database of non-synonymous
 functional predictions - dbNSFP
-v3.2</a>. Predicted
-effects are provided by 14 different sources/algorithms (separated by
+v3.4</a>. Predicted
+effects are provided by different sources/algorithms (separated by
 &#8216;&amp;&#8217;):<ol class="arabic">
 <li><a class="reference external" href="http://provean.jcvi.org/index.php">SIFT</a> (Jan 2015)</li>
-<li><a class="reference external" href="http://genetics.bwh.harvard.edu/pph2/">PolyPhen2</a> (v 2.2.2,
-predictions based on
-<a class="reference external" href="http://genetics.bwh.harvard.edu/pph2/dokuwiki/overview#prediction">HumDiv</a>)</li>
+<li><a class="reference external" href="http://genetics.bwh.harvard.edu/pph2/">PolyPhen2-HDIV</a> (v
+2.2.2)</li>
+<li><a class="reference external" href="http://genetics.bwh.harvard.edu/pph2/">PolyPhen2-HVAR</a> (v
+2.2.2)</li>
 <li><a class="reference external" href="http://www.genetics.wustl.edu/jflab/lrt_query.html">LRT</a>
 (2009)</li>
 <li><a class="reference external" href="http://www.mutationtaster.org/">MutationTaster</a> (data release
@@ -411,6 +439,10 @@ adaptive boosting)</li>
 <li><a class="reference external" href="http://nar.oxfordjournals.org/content/42/22/13534">SPLICE_SITE_EFFECT_RF</a>
 (Ensembl/consensus prediction of splice-altering SNVs, based on
 adaptive boosting)</li>
+<li><a class="reference external" href="http://bejerano.stanford.edu/MCAP">M-CAP</a></li>
+<li><a class="reference external" href="https://www.ncbi.nlm.nih.gov/pubmed/27666373">REVEL</a></li>
+<li><a class="reference external" href="http://mutpred.mutdb.org">MutPred</a></li>
+<li><a class="reference external" href="http://mendel.stanford.edu/SidowLab/downloads/gerp/">GERP</a></li>
 </ol>
 </li>
 </ul>
@@ -648,8 +680,8 @@ variants</p>
 <span class="mf">30.</span> <span class="n">GLOBAL_AF_EXAC</span> <span class="o">-</span> <span class="n">adjusted</span> <span class="k">global</span> <span class="n">germline</span> <span class="n">allele</span> <span class="n">frequency</span> <span class="ow">in</span> <span class="n">ExAC</span> <span class="n">release</span> <span class="mf">0.3</span><span class="o">.</span><span class="mi">1</span>
 <span class="mf">31.</span> <span class="n">GLOBAL_AF_1KG</span> <span class="o">-</span> <span class="mi">1000</span><span class="n">G</span> <span class="n">Project</span> <span class="o">-</span> <span class="n">phase</span> <span class="mi">3</span><span class="p">,</span> <span class="n">germline</span> <span class="n">allele</span> <span class="n">frequency</span>
     <span class="k">for</span> <span class="nb">all</span> <span class="mi">1000</span><span class="n">G</span> <span class="n">project</span> <span class="n">samples</span> <span class="p">(</span><span class="k">global</span><span class="p">)</span>
-<span class="mf">36.</span> <span class="n">TIER</span>
-<span class="mf">37.</span> <span class="n">TIER_DESCRIPTION</span>
+<span class="mf">32.</span> <span class="n">TIER</span>
+<span class="mf">33.</span> <span class="n">TIER_DESCRIPTION</span>
 </pre></div>
 </div>
 </div>

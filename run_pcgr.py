@@ -14,15 +14,20 @@ def __main__():
    parser = argparse.ArgumentParser(description='Personal Cancer Genome Reporter (PCGR) workflow for clinical interpretation of somatic nucleotide variants and copy number aberration segments',formatter_class=argparse.ArgumentDefaultsHelpFormatter)
    parser.add_argument('--input_vcf', dest="input_vcf",help='VCF input file with somatic query variants (SNVs/InDels)')
    parser.add_argument('--input_cna_segments', dest="input_cna_segments",help='Somatic copy number alteration segments (tab-separated values)')
-   parser.add_argument('--logR_threshold_amplification', dest = "logR_threshold_amplification",default=0.8, help='Log(2) ratio treshold for copy number amplification')
-   parser.add_argument('--logR_threshold_homozygous_deletion', dest = "logR_threshold_homozygous_deletion", default=-0.8, help='Log(2) ratio treshold for homozygous deletion')
-   parser.add_argument('--num_vcfanno_processes', dest = "num_vcfanno_processes", default=4, help='Number of processes used during vcfanno annotation')
-   parser.add_argument('--num_vep_forks', dest = "num_vep_forks", default=4, help='Number of forks (--forks) used during VEP annotation')
-   parser.add_argument('pcgr_directory',help='PCGR base directory')
-   parser.add_argument('working_directory',help="Working directory - directory with input/output files")
+   parser.add_argument('--logR_threshold_amplification', dest = "logR_threshold_amplification",default=0.8, type=float, help='Log(2) ratio treshold for calling copy number amplifications in HTML report')
+   parser.add_argument('--logR_threshold_homozygous_deletion', dest = "logR_threshold_homozygous_deletion", default=-0.8, type=float, help='Log(2) ratio treshold for calling homozygous deletions in HTML report')
+   parser.add_argument('--num_vcfanno_processes', dest = "num_vcfanno_processes", default=4, type=int, help='Number of processes used during vcfanno annotation')
+   parser.add_argument('--num_vep_forks', dest = "num_vep_forks", default=4, type=int, help='Number of forks (--forks option in VEP) used during VEP annotation')
+   parser.add_argument('--force_overwrite', action = "store_true", help='By default, the script will fail with an error if any output file already exists. You can force the overwrite of existing result files by using this flag')
+   parser.add_argument('pcgr_directory',help='Full path of PCGR base directory')
+   parser.add_argument('working_directory',help="Full path of working directory - directory with input/output files")
    parser.add_argument('sample_id',help="Tumor sample/cancer genome identifier - prefix for output files")
    
    args = parser.parse_args()
+   
+   overwrite = 0
+   if args.force_overwrite is True:
+      overwrite = 1
    
    fname_cna = None
    fname_vcf = None
@@ -45,22 +50,39 @@ def __main__():
    if not args.input_vcf is None:
       fname_vcf_full = str(args.working_directory) + '/' + path_leaf(str(args.input_vcf))
       fname_vcf = path_leaf(str(args.input_vcf))
+      if not (fname_vcf.endswith('.vcf') or fname_vcf.endswith('.vcf.gz')):
+         logger.error('')
+         logger.error('Input VCF does not have the correct file extension (.vcf or .vcf.gz)')
+         logger.error('')
+         return
+      output_vcf = str(args.working_directory) + '/' + str(args.sample_id) + '.pcgr.vcf.gz'
       if not os.path.exists(fname_vcf_full) or os.path.getsize(fname_vcf_full) == 0:
          logger.error("") 
          logger.error("VCF input file (" + fname_vcf_full +") is empty or does not exist")
          logger.error("")
          return
+      if os.path.exists(output_vcf) and overwrite == 0:
+         logger.error('')
+         logger.error("Output files (e.g. " + str(output_vcf) + ") already exist - please specify different sample_id or add option --force_overwrite")
+         logger.error('')
+         return
          
    if not args.input_cna_segments is None:
       fname_cna_full = str(args.working_directory) + '/' + path_leaf(str(args.input_cna_segments))
       fname_cna = path_leaf(str(args.input_cna_segments))
+      output_cna = str(args.working_directory) + '/' + str(args.sample_id) + '.pcgr.cna_segments.tsv.gz'
       if not os.path.exists(fname_cna_full) or os.path.getsize(fname_cna_full) == 0:
          logger.error("") 
          logger.error("Input copy number segment file (" + fname_cna_full + ") is empty or does not exist")
          logger.error("") 
          return
+      if os.path.exists(output_cna) and overwrite == 0:
+         logger.error('')
+         logger.error("Output files (e.g. " + str(output_cna) + ") already exist - please specify different sample_id or add option --force_overwrite")
+         logger.error('')
+         return
 
-   run_pcgr(fname_vcf, fname_cna, args.logR_threshold_amplification, args.logR_threshold_homozygous_deletion, args.num_vcfanno_processes, args.num_vep_forks, args.pcgr_directory, args.working_directory, args.sample_id)
+   run_pcgr(fname_vcf, fname_cna, args.logR_threshold_amplification, args.logR_threshold_homozygous_deletion, args.num_vcfanno_processes, args.num_vep_forks, args.pcgr_directory, args.working_directory, args.sample_id, overwrite)
 
 def path_leaf(path):
    head, tail = ntpath.split(path)
@@ -70,7 +92,8 @@ def path_leaf(path):
 def check_subprocess(command):
    try:
       output = subprocess.check_output(str(command), stderr=subprocess.STDOUT, shell=True)
-      print str(output)
+      if len(output) > 0:
+         print str(output).rstrip()
    except subprocess.CalledProcessError as e:
       print e.output
       exit(0)
@@ -94,14 +117,16 @@ def getlogger(logger_name):
    
    return logger
 
-def run_pcgr(input_vcf, input_cna_segments, logR_threshold_amplification, logR_threshold_homozygous_deletion, num_vcfanno_processes, num_vep_forks, pcgr_directory, working_directory, sample_id):
+def run_pcgr(input_vcf, input_cna_segments, logR_threshold_amplification, logR_threshold_homozygous_deletion, num_vcfanno_processes, num_vep_forks, pcgr_directory, working_directory, sample_id, overwrite):
    
+   ## set basic Docker run commands
    output_vcf = 'None'
    vepdb_directory = str(pcgr_directory) + '/data/.vep'
    docker_command_run1 = "docker run -t -v=" + str(vepdb_directory) + ":/usr/local/share/vep/data -v=" + str(working_directory) + ":/workdir -w=/workdir sigven/pcgr:latest sh -c \""
    docker_command_run2 = "docker run -t -v=" + str(pcgr_directory) + ":/data -v=" + str(working_directory) + ":/workdir -w=/workdir sigven/pcgr:latest sh -c \""
    docker_command_run3 = "docker run -t -v=" + str(working_directory) + ":/workdir -w=/workdir sigven/pcgr:latest sh -c \""
    
+   ## verify VCF and CNA segment file
    logger = getlogger('pcgr-check-input')
    logger.info("STEP 0: Validate input data")
    vcf_validate_command = str(docker_command_run3) + "pcgr_check_input.py " + str(input_vcf) + " " + str(input_cna_segments) + "\""
@@ -109,8 +134,9 @@ def run_pcgr(input_vcf, input_cna_segments, logR_threshold_amplification, logR_t
    logger.info('Finished')
 
    if not input_vcf is None:
+      
+      ## Run VEP + vcfanno + summarise
       output_vcf = str(sample_id) + '.pcgr.vcf.gz'
-      #if os.path.exists(output_vf)
       input_vcf_pcgr_ready = re.sub(r'(\.vcf$|\.vcf\.gz$)','.pcgr_ready.vcf.gz',input_vcf)
       vep_vcf = re.sub(r'(\.vcf$|\.vcf\.gz$)','.pcgr_vep.vcf',input_vcf_pcgr_ready)
       vep_vcfanno_vcf = re.sub(r'(\.vcf$|\.vcf\.gz$)','.pcgr_vep.vcfanno.vcf',input_vcf_pcgr_ready)
@@ -152,6 +178,8 @@ def run_pcgr(input_vcf, input_cna_segments, logR_threshold_amplification, logR_t
       check_subprocess(clean_command)
   
    print
+   
+   ## Generation of HTML reports for VEP/vcfanno-annotated VCF and copy number segment file
    logger = getlogger('pcgr-writer')
    logger.info("STEP 4: Generation of output files")
    pcgr_report_command = str(docker_command_run2) + "/pcgr.R /workdir " + str(output_vcf) + " " + str(input_cna_segments) + " "  + str(sample_id)  + " " + str(logR_threshold_amplification) + " " + str(logR_threshold_homozygous_deletion) + "\""

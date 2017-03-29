@@ -35,3 +35,11 @@ interpretation of individual cancer genomes in a clinical setting.
 
 Docker-based technology
 ~~~~~~~~~~~~~~~~~~~~~~~
+
+The PCGR workflow is developed using the `Docker
+technology <https://www.docker.com/what-docker>`__. The software is thus
+packaged into isolated containers, in which the installation of all
+software libraries/tools and required dependencies have been taken care
+of. In addition to the bundled software, in the form of a Docker image,
+the workflow only needs to be attached with an `annotation data bundle
+for precision oncology <annotation_resources.md>`__.

@@ -17,34 +17,45 @@ The following requirements __MUST__ be met by the input VCF for PCGR to work pro
 
 1. Variants in the raw VCF that contain multiple alternative alleles (e.g. "multiple ALTs") must be split into variants with a single alternative allele. A description on how this can be done with the help of [vt](https://github.com/atks/vt) is described within the [documentation page for vcfanno](http://brentp.github.io/vcfanno/#preprocessing)
 2. The contents of the VCF must be sorted correctly (i.e. according to chromosomal order and chromosomal position). This can be obtained by [vcftools](https://vcftools.github.io/perl_module.html#vcf-sort).
-    * We recommend that the input VCF is compressed and indexed using [bgzip](http://www.htslib.org/doc/tabix.html) and [tabix](http://www.htslib.org/doc/tabix.html)
+    * We __strongly__ recommend that the input VCF is compressed and indexed using [bgzip](http://www.htslib.org/doc/tabix.html) and [tabix](http://www.htslib.org/doc/tabix.html)
     * 'chr' must be stripped from the chromosome names
+
+__IMPORTANT NOTE__: Considering the VCF output for the [numerous somatic SNV/InDel callers](https://www.biostars.org/p/19104/) that have been developed, we have a experienced a general lack of uniformity and robustness for the representation of somatic variant genotype data (e.g. variant allelic depths (tumor/normal), genotype quality etc.). In the output results provided within the current version of PCGR, we are considering PASSed variants only, and variant genotype data (i.e. as found in the VCF SAMPLE columns) are not handled or parsed. As improved standards for this matter may emerge, we will strive to include this information in the annotated output files.
 
 #### Copy number segments
 
 The tab-separated values file with copy number aberrations __MUST__ contain the following four columns:
-  * _Chromosome_
-  * _Start_
-  * _End_
-  * _Segment_Mean_
 
-Here, _Chromosome_, _Start_, and _End_ denote the chromosomal segment (GRCh37), and _Segment_Mean_ denotes the log(2) ratio for a particular segment, which is a common output of somatic copy number alteration callers. Below shows the initial part of a copy number segment file that is formatted correctly according to PCGR's requirements:
+* Chromosome
+* Start
+* End
+* Segment_Mean
+
+Here, _Chromosome_, _Start_, and _End_ denote the chromosomal segment (GRCh37), and __Segment_Mean__ denotes the log(2) ratio for a particular segment, which is a common output of somatic copy number alteration callers. Below shows the initial part of a copy number segment file that is formatted correctly according to PCGR's requirements:
 
       Chromosome	Start	End	Segment_Mean
-      1	3218329	5782169	-0.0328
-      1	5782721	5782769	-1.9684
-      1	5785135	22937448 -0.0451
+      1 3218329 3550598 0.0024
+      1 3552451 4593614 0.1995
+      1 4593663 6433129 -1.0277
 
 
 ### Output - Interactive HTML report
 
-TODO
+An interactive and tier-structured HTML report that shows the most relevant findings in the query cancer genome is provided with the following naming convention:
+
+__sample_id__.pcgr.html
+
+The __sample_id__ is provided as input by the user, and reflects a unique identifier of the tumor-normal sample pair to be analyzed.
+
+* [View an example report for a breast tumor sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.BRCA.pcgr.html)
+* [View an example report for a colorectal tumor sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.COAD.pcgr.html)
+
 
 ### Output - Somatic SNVs/InDels
 
 #### Variant call format - VCF
 
-Each tumor-normal sample pair is provided with a VCF file containing annotated, somatic calls (single nucleotide variants and insertion/deletions) that has the following naming convention:
+A VCF file containing annotated, somatic calls (single nucleotide variants and insertion/deletions) is generated with the following naming convention:
 
 __sample_id__.pcgr.vcf.gz
 
@@ -113,21 +124,26 @@ Here, the __sample_id__ is provided as input by the user, and reflects a unique 
   - CANCER\_MUTATION\_HOTSPOT - mutation hotspot codon in [cancerhotspots.org](http://cancerhotspots.org/). Format: gene_symbol | codon | q-value
   - UNIPROT\_FEATURE - Overlapping protein annotations from [UniProt KB](http://www.uniprot.org)
   - INTOGEN\_DRIVER\_MUT - Indicates if existing variant is predicted as driver mutation from IntoGen Catalog of Driver Mutations
-  - EFFECT\_PREDICTIONS - Predictions of effect of variant on protein function and pre-mRNA splicing from [database of non-synonymous functional predictions - dbNSFP v3.2](https://sites.google.com/site/jpopgen/dbNSFP). Predicted effects are provided by 14 different sources/algorithms (separated by '&'):
+  - EFFECT\_PREDICTIONS - Predictions of effect of variant on protein function and pre-mRNA splicing from [database of non-synonymous functional predictions - dbNSFP v3.4](https://sites.google.com/site/jpopgen/dbNSFP). Predicted effects are provided by different sources/algorithms (separated by '&'):
 
-  	1. [SIFT](http://provean.jcvi.org/index.php) (Jan 2015)
-  	2. [PolyPhen2](http://genetics.bwh.harvard.edu/pph2/) (v 2.2.2, predictions based on [HumDiv](http://genetics.bwh.harvard.edu/pph2/dokuwiki/overview#prediction))
-  	3. [LRT](http://www.genetics.wustl.edu/jflab/lrt_query.html) (2009)
-  	4. [MutationTaster](http://www.mutationtaster.org/) (data release Nov 2015)
-  	5. [MutationAssessor](http://mutationassessor.org/) (release 3)
-  	6. [FATHMM] (http://fathmm.biocompute.org.uk) (v2.3)
-  	7. [PROVEAN](http://provean.jcvi.org/index.php) (v1.1 Jan 2015)
-  	8. [FATHMM_MKL](http://fathmm.biocompute.org.uk/fathmmMKL.htm)
-  	9. [CADD](http://cadd.gs.washington.edu/) (v1.3)
-  	10. [DBNSFP\_CONSENSUS\_SVM](https://www.ncbi.nlm.nih.gov/pubmed/25552646) (Ensembl/consensus prediction, based on support vector machines)
-  	11. [DBNSFP\_CONSENSUS\_LR](https://www.ncbi.nlm.nih.gov/pubmed/25552646) (Ensembl/consensus prediction, logistic regression based)
-  	12. [SPLICE\_SITE\_EFFECT_ADA](http://nar.oxfordjournals.org/content/42/22/13534) (Ensembl/consensus prediction of splice-altering SNVs, based on adaptive boosting)
-  	13. [SPLICE\_SITE\_EFFECT_RF](http://nar.oxfordjournals.org/content/42/22/13534) (Ensembl/consensus prediction of splice-altering SNVs, based on adaptive boosting)
+    1. [SIFT](http://provean.jcvi.org/index.php) (Jan 2015)
+    2. [PolyPhen2-HDIV](http://genetics.bwh.harvard.edu/pph2/) (v 2.2.2)
+    3. [PolyPhen2-HVAR](http://genetics.bwh.harvard.edu/pph2/) (v 2.2.2)
+    4. [LRT](http://www.genetics.wustl.edu/jflab/lrt_query.html) (2009)
+    5. [MutationTaster](http://www.mutationtaster.org/) (data release Nov 2015)
+    6. [MutationAssessor](http://mutationassessor.org/) (release 3)
+    7. [FATHMM] (http://fathmm.biocompute.org.uk) (v2.3)
+    8. [PROVEAN](http://provean.jcvi.org/index.php) (v1.1 Jan 2015)
+    9. [FATHMM_MKL](http://fathmm.biocompute.org.uk/fathmmMKL.htm)
+    10. [CADD](http://cadd.gs.washington.edu/) (v1.3)
+    11. [DBNSFP\_CONSENSUS\_SVM](https://www.ncbi.nlm.nih.gov/pubmed/25552646) (Ensembl/consensus prediction, based on support vector machines)
+    12. [DBNSFP\_CONSENSUS\_LR](https://www.ncbi.nlm.nih.gov/pubmed/25552646) (Ensembl/consensus prediction, logistic regression based)
+    13. [SPLICE\_SITE\_EFFECT_ADA](http://nar.oxfordjournals.org/content/42/22/13534) (Ensembl/consensus prediction of splice-altering SNVs, based on adaptive boosting)
+    14. [SPLICE\_SITE\_EFFECT_RF](http://nar.oxfordjournals.org/content/42/22/13534) (Ensembl/consensus prediction of splice-altering SNVs, based on adaptive boosting)
+    15. [M-CAP](http://bejerano.stanford.edu/MCAP)
+    16. [REVEL](https://www.ncbi.nlm.nih.gov/pubmed/27666373)
+    17. [MutPred](http://mutpred.mutdb.org)
+    18. [GERP](http://mendel.stanford.edu/SidowLab/downloads/gerp/)
 
 
 ##### _Variant frequencies/annotations in germline/somatic databases_
@@ -254,8 +270,8 @@ The following variables are included in the tiered TSV file:
     30. GLOBAL_AF_EXAC - adjusted global germline allele frequency in ExAC release 0.3.1
     31. GLOBAL_AF_1KG - 1000G Project - phase 3, germline allele frequency
         for all 1000G project samples (global)
-    36. TIER
-    37. TIER_DESCRIPTION
+    32. TIER
+    33. TIER_DESCRIPTION
 
 ##### Biomarkers among SNVs/InDEls
 

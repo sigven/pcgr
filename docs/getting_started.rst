@@ -27,10 +27,10 @@ Installation of Docker
    For Docker version 1.13 on `Mac OS
    X <https://docs.docker.com/docker-for-mac/#advanced>`__ there is an
    option to change CPU's and RAM from the UI and restart Docker. This
-   can be found through Docker Preferences (Advanced) in the toolbar:
-
-These options can be set similarly for `Docker for
-Windows <https://docs.docker.com/docker-for-windows/#advanced>`__.
+   can be found through `Docker Preferences
+   (Advanced) <https://docs.docker.com/docker-for-windows/#advanced>`__
+   in the toolbar. Similarly for `Docker for
+   Windows <https://docs.docker.com/docker-for-windows/#advanced>`__.
 
 Python
 ^^^^^^
