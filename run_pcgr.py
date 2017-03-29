@@ -110,6 +110,7 @@ def run_pcgr(input_vcf, input_cna_segments, logR_threshold_amplification, logR_t
 
    if not input_vcf is None:
       output_vcf = str(sample_id) + '.pcgr.vcf.gz'
+      #if os.path.exists(output_vf)
       input_vcf_pcgr_ready = re.sub(r'(\.vcf$|\.vcf\.gz$)','.pcgr_ready.vcf.gz',input_vcf)
       vep_vcf = re.sub(r'(\.vcf$|\.vcf\.gz$)','.pcgr_vep.vcf',input_vcf_pcgr_ready)
       vep_vcfanno_vcf = re.sub(r'(\.vcf$|\.vcf\.gz$)','.pcgr_vep.vcfanno.vcf',input_vcf_pcgr_ready)
