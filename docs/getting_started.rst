@@ -48,8 +48,8 @@ Download PCGR
 -  Download and unpack the data bundle (approx. 17Gb) in the PCGR
    directory
 
-   -  Download `the data
-      bundle <https://drive.google.com/file/d/0B8aYD2TJ472mN2ZONy1uOXNNMFU>`__
+   -  Download `the latest data
+      bundle <https://drive.google.com/file/d/0B8aYD2TJ472mRjkxMXVaNm1zQ1U/>`__
       from Google Drive to ``~/pcgr-X.X`` (replace *X.X* with the
       version number)
    -  Decompress and untar the bundle, e.g. through the following Unix

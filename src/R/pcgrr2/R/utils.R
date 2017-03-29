@@ -187,29 +187,17 @@ generate_pcg_report <- function(project_directory, query_vcf, logR_threshold_amp
   cna_report_biomarkers <- FALSE
   cna_report_segments <- FALSE
 
-
-
   if(!is.null(cna_segments_tsv)){
     if(file.exists(cna_segments_tsv)){
+      cna_report_segments <- TRUE
+      cna_report_tsgene_loss <- TRUE
+      cna_report_oncogene_gain <- TRUE
+      cna_report_biomarkers <- TRUE
       cna_data <- pcgrr2::cna_segment_annotation(cna_segments_tsv, logR_threshold_amplification, logR_threshold_homozygous_deletion, format='tcga')
-      if(nrow(cna_data$ranked_segments) > 0){
-        cna_report_segments <- TRUE
-      }
-      if(nrow(cna_data$tsgene_homozygous_deletion) > 0){
-        cna_report_tsgene_loss <- TRUE
-      }
-      if(nrow(cna_data$oncogene_amplified) > 0){
-        cna_report_oncogene_gain <- TRUE
-      }
       if(nrow(cna_data$cna_df_for_print) > 0 & print_cna_segments == TRUE){
         write.table(cna_data$cna_df_for_print,file=cna_tsv_fname,col.names = T,row.names = F,quote=F,sep="\t")
         gzip_command <- paste0('gzip -f ',cna_tsv_fname)
         system(gzip_command, intern=F)
-      }
-      if(!is.null(cna_data$cna_biomarkers)){
-        if(nrow(cna_data$cna_biomarkers) > 0){
-          cna_report_biomarkers <- TRUE
-        }
       }
     }
   }
@@ -236,14 +224,13 @@ cna_segment_annotation <- function(cna_file, logR_threshold_amplification, logR_
   if(!any(stringr::str_detect(cna_df$chromosome,"chr"))){
     cna_df$chromosome <- paste0("chr",cna_df$chromosome)
   }
+  cna_df <- cna_df %>% dplyr::filter(!is.na(LogR))
   cna_df$LogR <- as.numeric(cna_df$LogR)
-
-  if(nrow(cna_df[cna_df$chromosome == 'chr23',])){
-    cna_df[cna_df$chromosome == 'chr23',]$chromosome <- 'chrX'
-  }
-  if(nrow(cna_df[cna_df$chromosome == 'chr24',])){
-    cna_df[cna_df$chromosome == 'chr24',]$chromosome <- 'chrY'
-  }
+  cna_segments <- cna_df
+  cna_segments$segment_link <- paste0("<a href='",paste0('http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=',paste0(cna_segments$chromosome,':',cna_segments$segment_start,'-',cna_segments$segment_end)),"' target=\"_blank\">",paste0(cna_segments$chromosome,':',cna_segments$segment_start,'-',cna_segments$segment_end),"</a>")
+  cna_segments$segment_length <- paste(round((as.numeric((cna_segments$segment_end - cna_segments$segment_start)/1000000)),digits = 3),"Mb")
+  cna_segments <- dplyr::rename(cna_segments, SEGMENT_LENGTH = segment_length, SEGMENT = segment_link)
+  cna_segments <- dplyr::select(cna_segments, SEGMENT, SEGMENT_LENGTH, LogR) %>% dplyr::distinct()
 
   cna_gr <- GenomicRanges::makeGRangesFromDataFrame(cna_df, keep.extra.columns = T, seqinfo = pcgr_data$seqinfo_hg19, seqnames.field = 'chromosome',start.field = 'segment_start', end.field = 'segment_end', ignore.strand = T, starts.in.df.are.0based = T)
 
@@ -301,27 +288,24 @@ cna_segment_annotation <- function(cna_file, logR_threshold_amplification, logR_
   df <- dplyr::select(df, CHROMOSOME, GENE, GENE_NAME, CANCER_CENSUS_SOMATIC, KEGG_PATHWAY, TUMOR_SUPPRESSOR, ONCOGENE, ANTINEOPLASTIC_DRUG_INTERACTIONS,SEGMENT_LENGTH, SEGMENT, gencode_transcript_type,LogR, TRANSCRIPT_OVERLAP) %>% dplyr::distinct()
   df <- df %>% dplyr::distinct()
 
-  segments <- NULL
-  segments <- dplyr::select(df, SEGMENT, SEGMENT_LENGTH, LogR) %>% dplyr::distinct()
-  if(nrow(segments) > 0){
-    segments <- dplyr::filter(segments, LogR >= logR_threshold_amplification | LogR <= logR_threshold_homozygous_deletion)
-    segments <- segments %>% dplyr::arrange(desc(LogR))
-    rlogging::message(paste0("Detected ",nrow(segments)," segments subject to amplification/deletion"))
-  }
+  cna_segments_filtered <- NULL
+  cna_segments_filtered <- dplyr::filter(cna_segments, LogR >= logR_threshold_amplification | LogR <= logR_threshold_homozygous_deletion)
+  cna_segments_filtered <- cna_segments_filtered %>% dplyr::arrange(desc(LogR))
+  rlogging::message(paste0("Detected ",nrow(cna_segments_filtered)," segments subject to amplification/deletion"))
 
   oncogene_amplified <- NULL
   oncogene_amplified <- dplyr::filter(df, !is.na(ONCOGENE) & TRANSCRIPT_OVERLAP == 100 & LogR >= logR_threshold_amplification & gencode_transcript_type == 'protein_coding')
-  oncogene_amplified <- dplyr::select(oncogene_amplified, -c(TUMOR_SUPPRESSOR, ONCOGENE,TRANSCRIPT_OVERLAP,gencode_transcript_type))
-  oncogene_amplified <- oncogene_amplified %>% dplyr::arrange(ANTINEOPLASTIC_DRUG_INTERACTIONS)
   if(nrow(oncogene_amplified) > 0){
+    oncogene_amplified <- dplyr::select(oncogene_amplified, -c(TUMOR_SUPPRESSOR, ONCOGENE,TRANSCRIPT_OVERLAP,gencode_transcript_type))
+    oncogene_amplified <- oncogene_amplified %>% dplyr::arrange(ANTINEOPLASTIC_DRUG_INTERACTIONS)
     oncogene_amplified$CNA_TYPE <- 'gain'
     rlogging::message(paste0("Detected proto-oncogene(s) subject to amplification (log(2) ratio >= ",logR_threshold_amplification,"): ",paste0(oncogene_amplified$GENE,collapse=", ")))
   }
   tsgene_homozygous_deletion <- NULL
   tsgene_homozygous_deletion <- dplyr::filter(df, !is.na(TUMOR_SUPPRESSOR) & TRANSCRIPT_OVERLAP == 100  & LogR <= logR_threshold_homozygous_deletion & gencode_transcript_type == 'protein_coding')
-  tsgene_homozygous_deletion <- dplyr::select(tsgene_homozygous_deletion, -c(TUMOR_SUPPRESSOR, ONCOGENE,TRANSCRIPT_OVERLAP,gencode_transcript_type))
-  tsgene_homozygous_deletion <- tsgene_homozygous_deletion %>% dplyr::arrange(CANCER_CENSUS_SOMATIC)
   if(nrow(tsgene_homozygous_deletion) > 0){
+    tsgene_homozygous_deletion <- dplyr::select(tsgene_homozygous_deletion, -c(TUMOR_SUPPRESSOR, ONCOGENE,TRANSCRIPT_OVERLAP,gencode_transcript_type))
+    tsgene_homozygous_deletion <- tsgene_homozygous_deletion %>% dplyr::arrange(CANCER_CENSUS_SOMATIC)
     tsgene_homozygous_deletion$CNA_TYPE <- 'loss'
     rlogging::message(paste0("Detected tumor suppressor gene(s) subject to homozygous deletions (log(2) ratio <= ",logR_threshold_homozygous_deletion,"): ",paste0(tsgene_homozygous_deletion$GENE,collapse=", ")))
   }
@@ -330,6 +314,7 @@ cna_segment_annotation <- function(cna_file, logR_threshold_amplification, logR_
   civic_cna_biomarkers <- dplyr::rename(civic_cna_biomarkers, GENE = GENESYMBOL, CNA_TYPE = CIVIC_CONSEQUENCE, DESCRIPTION = EVIDENCE_DESCRIPTION, CITATION = PUBMED_HTML_LINK)
 
   cna_biomarkers <- NULL
+  cna_biomarker_segments <- NULL
   if(!is.null(tsgene_homozygous_deletion)){
     if(nrow(tsgene_homozygous_deletion) > 0){
       civic_biomarker_hits1 <- dplyr::inner_join(tsgene_homozygous_deletion, civic_cna_biomarkers, by=c("GENE","CNA_TYPE"))
@@ -346,9 +331,10 @@ cna_segment_annotation <- function(cna_file, logR_threshold_amplification, logR_
   if(!is.null(cna_biomarkers)){
     cna_biomarkers <- cna_biomarkers[c("CHROMOSOME","GENE","CNA_TYPE","EVIDENCE_LEVEL","CLINICAL_SIGNIFICANCE","EVIDENCE_TYPE","DESCRIPTION","DISEASE_NAME","EVIDENCE_DIRECTION","DRUG_NAMES","CITATION","RATING","GENE_NAME","CANCER_CENSUS_SOMATIC","KEGG_PATHWAY","ANTINEOPLASTIC_DRUG_INTERACTIONS","SEGMENT_LENGTH", "SEGMENT","LogR")]
     cna_biomarkers <- cna_biomarkers %>% dplyr::arrange(EVIDENCE_LEVEL,RATING)
+    cna_biomarker_segments <- dplyr::select(cna_biomarkers, SEGMENT, LogR) %>% dplyr::distinct()
   }
 
-  cna_data <- list('ranked_segments' = segments, 'oncogene_amplified' = oncogene_amplified, 'tsgene_homozygous_deletion' = tsgene_homozygous_deletion,'cna_df_for_print' = df_print_sorted, 'cna_biomarkers' = cna_biomarkers)
+  cna_data <- list('ranked_segments' = cna_segments_filtered, 'oncogene_amplified' = oncogene_amplified, 'tsgene_homozygous_deletion' = tsgene_homozygous_deletion,'cna_df_for_print' = df_print_sorted, 'cna_biomarkers' = cna_biomarkers, 'cna_biomarker_segments' = cna_biomarker_segments)
   return(cna_data)
 }
 
@@ -461,11 +447,11 @@ generate_tier_tsv <- function(tier1_variants, tier2_variants, tier3_variants, ti
 generate_report_data <- function(sample_calls, sample_name = NULL, minimum_n_signature_analysis = 50, signatures_limit = 6){
 
   rlogging::message("Generating data for tiered cancer genome report")
-  tier1_report <- FALSE
-  tier2_report <- FALSE
-  tier3_report <- FALSE
-  tier4_report <- FALSE
-  tier5_report <- FALSE
+  tier1_report <- TRUE
+  tier2_report <- TRUE
+  tier3_report <- TRUE
+  tier4_report <- TRUE
+  tier5_report <- TRUE
   clinical_evidence_items_tier1A <- data.frame()
   clinical_evidence_items_tier1B <- data.frame()
   clinical_evidence_items_tier1C <- data.frame()
@@ -483,6 +469,8 @@ generate_report_data <- function(sample_calls, sample_name = NULL, minimum_n_sig
   rlogging::message(paste0("Number of coding variants: ",nrow(sample_calls_coding)))
   sample_calls_noncoding <- sample_calls %>% dplyr::filter(!stringr::str_detect(CONSEQUENCE,"stop_gained|stop_lost|start_lost|frameshift_variant|missense_variant|splice_donor|splice_acceptor|inframe_deletion|inframe_insertion"))
   rlogging::message(paste0("Number of noncoding variants: ",nrow(sample_calls_noncoding)))
+  sample_calls_SNVs <- sample_calls %>% dplyr::filter(VARIANT_CLASS == 'SNV')
+  sample_calls_INDELs <- sample_calls %>% dplyr::filter(VARIANT_CLASS != 'SNV')
 
   #sample_stats_plot_all <- OncoVarReporter::plot_call_statistics(sample_calls,"Somatic calls - all")
   #sample_stats_plot_coding <- OncoVarReporter::plot_call_statistics(sample_calls_coding,"Somatic calls - coding")
@@ -620,7 +608,7 @@ generate_report_data <- function(sample_calls, sample_name = NULL, minimum_n_sig
 
   tsv_biomarkers <- pcgrr2::generate_biomarker_tsv(variants_tier1, sample_name = sample_name)
 
-  report_data <- list('tier1_report' = tier1_report, 'tier2_report' = tier2_report, 'tier3_report' = tier3_report, 'tier4_report' = tier4_report, 'tier5_report' = tier5_report, 'clinical_evidence_items_tier1A' = clinical_evidence_items_tier1A$clinical_evidence_items, 'clinical_evidence_items_tier1B' = clinical_evidence_items_tier1B$clinical_evidence_items, 'clinical_evidence_items_tier1C' = clinical_evidence_items_tier1C$clinical_evidence_items, 'biomarker_descriptions' = biomarker_descriptions, 'tsv_variants' = tsv_variants, 'tsv_biomarkers' = tsv_biomarkers, 'variants_tier1_display' = variants_tier1_display, 'variants_tier2_display' = variants_tier2_display, 'variants_tier3_display' = variants_tier3_display, 'variants_tier4_display' = variants_tier4_display,'variants_tier5_display' = variants_tier5_display, 'signature_report' = signature_report, 'missing_signature_data' = missing_signature_data, 'signature_data' = signature_data, 'signatures_limit' = signatures_limit, 'maf_df' = maf_df, 'sample_name' = sample_name)
+  report_data <- list('tier1_report' = tier1_report, 'tier2_report' = tier2_report, 'tier3_report' = tier3_report, 'tier4_report' = tier4_report, 'tier5_report' = tier5_report, 'clinical_evidence_items_tier1A' = clinical_evidence_items_tier1A$clinical_evidence_items, 'clinical_evidence_items_tier1B' = clinical_evidence_items_tier1B$clinical_evidence_items, 'clinical_evidence_items_tier1C' = clinical_evidence_items_tier1C$clinical_evidence_items, 'biomarker_descriptions' = biomarker_descriptions, 'tsv_variants' = tsv_variants, 'tsv_biomarkers' = tsv_biomarkers, 'variants_tier1_display' = variants_tier1_display, 'variants_tier2_display' = variants_tier2_display, 'variants_tier3_display' = variants_tier3_display, 'variants_tier4_display' = variants_tier4_display,'variants_tier5_display' = variants_tier5_display, 'sample_calls_coding' = sample_calls_coding, 'sample_calls_noncoding' = sample_calls_noncoding, 'sample_calls_SNVs' = sample_calls_SNVs, 'sample_calls_INDELs' = sample_calls_INDELs, 'signature_report' = signature_report, 'missing_signature_data' = missing_signature_data, 'signature_data' = signature_data, 'signatures_limit' = signatures_limit, 'maf_df' = maf_df, 'sample_name' = sample_name)
 
 
   return(report_data)

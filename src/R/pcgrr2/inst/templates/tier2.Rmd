@@ -1,6 +1,6 @@
 ### Tier 2 - other cancer mutation hotspots, curated mutations or predicted driver mutations
 
-- A total of __`r nrow(report_data$variants_tier2_display)`__ unique, somatic variant(s) in the tumor sample are curated as disease-causing, predicted as driver mutations, or occur in previously detected mutation hotspots:
+- A total of __`r nrow(report_data$variants_tier2_display)`__ unique, somatic variant(s) in the tumor sample are curated as disease-causing, predicted as driver mutations, or occur in previously detected mutation hotspots.
 <br><br>
 
 ```{r tier2, echo=F}
@@ -17,8 +17,9 @@ non_hotspots <- dplyr::filter(report_data$variants_tier2_display, is.na(CANCER_M
 #if(nrow(mutation_hotspots) > 0){
   
 #}
-
-DT::datatable(report_data$variants_tier2_display, options = myOptions, escape=F, extensions = "Responsive")
+if(nrow(report_data$variants_tier2_display) > 0){
+  DT::datatable(report_data$variants_tier2_display, options = myOptions, escape=F, extensions = "Responsive")
+}
 
 ```
 <br><br>

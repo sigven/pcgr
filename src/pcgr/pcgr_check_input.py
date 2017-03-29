@@ -42,6 +42,14 @@ def getlogger(logger_name):
 
 
 def is_valid_cna_segment_file(cna_segment_file, logger):
+   cna_reader = csv.DictReader(open(cna_segment_file,'r'), delimiter='\t')
+   if not ('Chromosome' in cna_reader.fieldnames and 'Segment_Mean' in cna_reader.fieldnames and 'Start' in cna_reader.fieldnames and 'End' in cna_reader.fieldnames):
+      error_message_cnv = "Copy number segment file (" + str(cna_segment_file) + ") is missing required column(s): 'Chromosome', 'Start', 'End', or  'Segment_Mean'"
+      error_message_cnv2 = "Column names present in file: " + str(cna_reader.fieldnames)
+      logger.error(error_message_cnv)
+      logger.error(error_message_cnv2)
+      return -1
+   
    cna_dataframe = np.read_csv(cna_segment_file, sep="\t")
    if not cna_dataframe['Start'].dtype.kind in 'i':
       logger.error('')
@@ -58,7 +66,15 @@ def is_valid_cna_segment_file(cna_segment_file, logger):
       logger.error('\'Segment_Mean\' column of copy number segment file contains non-numerical values')
       logger.error('')
       return -1
-   logger.info('Copy number segment file ' + str(cna_segment_file) + ') adheres to the correct format')
+
+   for rec in cna_reader:
+      if int(rec['End']) < int(rec['Start']):
+         logger.error('Detected wrongly formatted chromosomal segment - \'Start\' is greater than \'End\' (' + str(rec['Chromosome']) + ':' + str(rec['Start']) + '-' + str(rec['End']) + ')')
+         return -1
+      if rec['End'] < 1 or rec['Start'] < 1:
+         logger.error('Detected wrongly formatted chromosomal segment - \'Start\' or \'End\' is less than or equal to zero (' + str(rec['Chromosome']) + ':' + str(rec['Start']) + '-' + str(rec['End']) + ')')
+         return -1
+   logger.info('Copy number segment file (' + str(cna_segment_file) + ') adheres to the correct format')
    return 0
 
 
@@ -135,15 +151,8 @@ def verify_input(input_vcf, input_cna_segments):
          os.system('tabix -p vcf ' + str(input_vcf_pcgr_ready) + '.gz')
       
    if not input_cna_segments == 'None':
-      with open(input_cna_segments, 'rb') as tsvfile:
-         cna_reader = csv.DictReader(tsvfile, delimiter='\t')
-         if not ('Chromosome' in cna_reader.fieldnames and 'Segment_Mean' in cna_reader.fieldnames and 'Start' in cna_reader.fieldnames and 'End' in cna_reader.fieldnames):
-            error_message_cnv = "Copy number segment file (" + str(input_cna_segments) + ") is missing required column(s): 'Chromosome', 'Start', 'End', or  'Segment_Mean'"
-            logger.error(error_message_cnv)
-            return -1
-         else:
-            ret = is_valid_cna_segment_file(input_cna_segments, logger)
-            return ret
+      ret = is_valid_cna_segment_file(input_cna_segments, logger)
+      return ret
    
    return 0
    

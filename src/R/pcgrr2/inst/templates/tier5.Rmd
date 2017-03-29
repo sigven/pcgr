@@ -1,6 +1,6 @@
 ### Tier 5 - non-coding mutations
 
-- A total of __`r nrow(report_data$variants_tier5_display)`__ unique, somatic variant(s) are also found in the tumor sample:
+- A total of __`r nrow(report_data$variants_tier5_display)`__ unique, somatic variant(s) are also found in the tumor sample.
 <br>
 
 ```{r tier5, echo=F}
@@ -9,7 +9,9 @@ myOptions <- list(paging = F,pageLength=10, searching=T,caching=F)
 if(nrow(report_data$variants_tier5_display) > 10){
   myOptions <- list(paging = T,pageLength=10, searching=T,caching=F)
 }
-DT::datatable(report_data$variants_tier5_display, options = myOptions, escape=F, extensions = "Responsive")
+if(nrow(report_data$variants_tier5_display) > 0){
+  DT::datatable(report_data$variants_tier5_display, options = myOptions, escape=F, extensions = "Responsive")
+}
 
 ```
 <br><br>

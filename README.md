@@ -55,7 +55,7 @@ An installation of Python (version 2.7.10 or higher) is required to run PCGR. Ch
 
 1. Download and unpack the [latest release](https://github.com/sigven/pcgr/releases/latest)
 2. Download and unpack the data bundle (approx. 17Gb) in the PCGR directory
-   * Download [the data bundle](https://drive.google.com/file/d/0B8aYD2TJ472mN2ZONy1uOXNNMFU) from Google Drive to `~/pcgr-X.X` (replace _X.X_ with the version number)
+   * Download [the latest data bundle](https://drive.google.com/file/d/0B8aYD2TJ472mRjkxMXVaNm1zQ1U/) from Google Drive to `~/pcgr-X.X` (replace _X.X_ with the version number)
    * Unpack the data bundle, e.g. through the following Unix command: `gzip -dc pcgr.databundle.GRCh37.YYYYMMDD.tgz | tar xvf -`
 
     A _data/_ folder within the _pcgr-X.X_ software folder should now have been produced
@@ -66,7 +66,7 @@ An installation of Python (version 2.7.10 or higher) is required to run PCGR. Ch
 
 The PCGR workflow accepts two types of input files:
 
-  * A single-sample VCF file with somatic variants (SNVs/InDels)
+  * An unannotated, single-sample VCF file with called somatic variants (SNVs/InDels)
   * A copy number segment file
 
 PCGR can be run with either or both of the two input files present.

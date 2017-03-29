@@ -1,5 +1,23 @@
 ## Somatic SNVs/InDels
 
+### Summary statistics
+
+* Number of SNVs: __`r nrow(report_data$sample_calls_SNVs)`__
+* Number of InDels: __`r nrow(report_data$sample_calls_INDELs)`__
+* Number of coding variants: __`r nrow(report_data$sample_calls_coding)`__
+* Number of noncoding variants: __`r nrow(report_data$sample_calls_noncoding)`__
+<br>
+
+### Tier statistics
+
+* Tier 1 variants: __`r nrow(report_data$variants_tier1_display)`__
+* Tier 2 variants: __`r nrow(report_data$variants_tier2_display)`__
+* Tier 3 variants: __`r nrow(report_data$variants_tier3_display)`__
+* Tier 4 variants: __`r nrow(report_data$variants_tier4_display)`__
+* Tier 5 variants: __`r nrow(report_data$variants_tier5_display)`__
+<br>
+
+
 ### Tier 1 - genomic biomarkers for diagnosis, prognosis, and drug sensitivity {.tabset}
 
 - A total of __`r nrow(report_data$variants_tier1_display)`__ unique, somatic variant(s) in the tumor sample can be mapped to genomic biomarkers in the [database for clinical interpretations of variants in cancer, CIViC](https://civic.genome.wustl.edu/#/home) or [Cancer bioMarkers database](https://www.cancergenomeinterpreter.org/biomarkers), with the following number of evidence items:
@@ -11,7 +29,7 @@
 
 #### Tier 1A biomarkers
 
-The table below lists all variant-evidence item associations:
+The table below lists all variant-evidence item associations.
 
 ```{r tier1A, echo=F}
 

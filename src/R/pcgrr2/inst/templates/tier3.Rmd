@@ -1,7 +1,7 @@
 
 ### Tier 3 - other coding mutations in proto-oncogenes/tumor suppressors/cancer census genes
 
-- A total of __`r nrow(report_data$variants_tier3_display)`__ unique, somatic variant(s) in the tumor sample are found within known proto-oncogenes, tumor suppressor genes or cancer census genes:
+- A total of __`r nrow(report_data$variants_tier3_display)`__ unique, somatic variant(s) in the tumor sample are found within known proto-oncogenes, tumor suppressor genes or cancer census genes.
 <br><br>
 
 ```{r tier3, echo=F}
@@ -9,7 +9,9 @@ myOptions <- list(paging = F,pageLength=10, searching=T,caching=F)
 if(nrow(report_data$variants_tier3_display) > 10){
   myOptions <- list(paging = T,pageLength=10, searching=T,caching=F)
 }
-DT::datatable(report_data$variants_tier3_display, options = myOptions, escape=F, extensions = "Responsive")
+if(nrow(report_data$variants_tier3_display) > 0){
+  DT::datatable(report_data$variants_tier3_display, options = myOptions, escape=F, extensions = "Responsive")
+}
 
 ```
 <br>

@@ -276,9 +276,12 @@ def extend_vcf_annotations(query_vcf,pcgr_directory):
       no_csq = 1
    
    dbnsfp_prediction_algorithms = []
+   effect_predictions_desc = ""
    if 'DBNSFP' in vcf_reader.infos.keys():
       if 'Format:' in vcf_reader.infos['DBNSFP'].desc:
          tmp = vcf_reader.infos['DBNSFP'].desc.split('Format:')[1].split('@')
+         if len(tmp) > 7:
+            effect_predictions_desc = "Format: " + '&'.join(tmp[7:])
          if len(tmp) == 1:
             ## v3.2
             tmp = vcf_reader.infos['DBNSFP'].desc.split('Format:')[1].split('#')
@@ -286,6 +289,9 @@ def extend_vcf_annotations(query_vcf,pcgr_directory):
          while(i < len(tmp)):
             dbnsfp_prediction_algorithms.append(str(re.sub(r'((_score)|(_pred))$','',tmp[i])))
             i = i + 1
+
+   if not 'EFFECT_PREDICTIONS' in vcf_reader.infos.keys():
+      vcf_reader.infos['EFFECT_PREDICTIONS'] = ['EFFECT_PREDICTIONS','.',str(vcf_reader.infos['DBNSFP'].type), effect_predictions_desc]
 
    for tag in vep_infotags_desc:
       if not tag in vcf_reader.infos.keys():

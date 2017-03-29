@@ -7,6 +7,8 @@ The following user-defined thresholds determine copy number aberrations shown he
 * <span style="color:#009E73"><b>Copy number amplifications</b></span>: Log(2) ratio >= `r logR_threshold_amplification`
 * <span style="color:red"><b>Homozygous deletions</b></span>: Log(2) ratio <= `r logR_threshold_homozygous_deletion`
 
+A total of __`r nrow(cna_data$ranked_segments)`__ aberration segments satisfied the above criteria.
+
 <br>
   
 ```{r cna_segments_ampl_del, echo=F}
@@ -14,7 +16,9 @@ myOptions <- list(paging = F, searching=F,caching=F)
 if(nrow(cna_data$ranked_segments) >= 10){
   myOptions <- list(paging = T,pageLength=10, searching=F,caching=F)
 }
-DT::datatable(cna_data$ranked_segments, options = myOptions, escape=F, extensions = "Responsive") %>% DT::formatStyle('LogR',backgroundColor = DT::styleInterval(0.8, c('red', '#009E73')))
+if(nrow(cna_data$ranked_segments) > 0){
+  DT::datatable(cna_data$ranked_segments, options = myOptions, escape=F, extensions = "Responsive") %>% DT::formatStyle('LogR',color='white', backgroundColor = DT::styleInterval(0.8, c('red', '#009E73')))
+}
 ```
 
 <br><br>
