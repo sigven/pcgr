@@ -40,12 +40,12 @@ The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package int
 
 #### STEP 0: Python
 
-An installation of Python (version 2.7.10 or higher) is required to run PCGR. Check that Python is installed by typing `python --version` in our terminal window.
+An installation of Python ([version 2.7.10 or higher](https://www.python.org/downloads/) is required to run PCGR. Check that Python is installed by typing `python --version` in a terminal window.
 
 #### STEP 1: Installation of Docker
 
 1. [Install the Docker engine](https://docs.docker.com/engine/installation/) on your preferred platform
-2. Test that Docker is running, e.g. by typing `docker ps` or `docker images` in your terminal window
+2. Test that Docker is running, e.g. by typing `docker ps` or `docker images` in the terminal window
 3. Adjust the computing resources dedicated to the Docker, i.e.:
    - Memory: minimum 5GB
    - CPUs: minimum 4
