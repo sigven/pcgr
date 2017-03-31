@@ -333,7 +333,7 @@ def extend_vcf_annotations(query_vcf,pcgr_directory):
       num_chromosome_records_processed += 1
       
       fixed_fields_string = vcfutils.get_vcf_fixed_columns(rec)
-      sample_string = vcfutils.get_vcf_sample_columns(rec, vcf_reader)
+      #sample_string = vcfutils.get_vcf_sample_columns(rec, vcf_reader)
       vep_info_tags = {}
       existing_info_tags = {}
       extended_gene_oncorelevance_tags = {}
@@ -435,13 +435,13 @@ def extend_vcf_annotations(query_vcf,pcgr_directory):
 
       info_string = ';'.join(all_info_vals)
       vcfline = fixed_fields_string + '\t' + str(info_string)
-      if sample_string != '.':
-         vcfline = vcfline + '\t' + str(sample_string)
+      #if sample_string != '.':
+         #vcfline = vcfline + '\t' + str(sample_string)
       vcf_content.append(vcfline)
    
    if len(vcf_content) > 0:
       if header_printed == 0:
-         vcfutils.print_vcf_meta(out_prefix, vcf_reader)
+         vcfutils.print_vcf_meta(out_prefix, vcf_reader, print_sample_data = 0)
          header_printed = 1
       out = open(out_prefix, 'a')
       out.write('\n'.join(vcf_content))

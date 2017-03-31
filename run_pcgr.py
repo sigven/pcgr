@@ -34,10 +34,17 @@ def __main__():
    
    logger = getlogger('pcgr-prepare')
    
-   pcgr_db_directory = str(args.pcgr_directory) + "/data"
-   if not os.path.exists(pcgr_db_directory):
+   
+   pcgr_db_directory = os.path.join(str(args.pcgr_directory),"data")
+   if not os.path.isdir(pcgr_db_directory):
       logger.error("") 
       logger.error("PCGR data directory (" + str(pcgr_db_directory) + ") does not exist")
+      logger.error("")
+      return
+   
+   if not os.path.isdir(args.working_directory):
+      logger.error("") 
+      logger.error("Working directory (" + str(args.working_directory) + ") does not exist")
       logger.error("")
       return
    
@@ -48,14 +55,14 @@ def __main__():
       return
    
    if not args.input_vcf is None:
-      fname_vcf_full = str(args.working_directory) + '/' + path_leaf(str(args.input_vcf))
-      fname_vcf = path_leaf(str(args.input_vcf))
+      fname_vcf_full = os.path.join(str(args.working_directory), os.path.basename(str(args.input_vcf)))
+      fname_vcf = os.path.basename(str(args.input_vcf))
       if not (fname_vcf.endswith('.vcf') or fname_vcf.endswith('.vcf.gz')):
          logger.error('')
-         logger.error('Input VCF does not have the correct file extension (.vcf or .vcf.gz)')
+         logger.error("VCF input file (" + fname_vcf_full + ") does not have the correct file extension (.vcf or .vcf.gz)")
          logger.error('')
          return
-      output_vcf = str(args.working_directory) + '/' + str(args.sample_id) + '.pcgr.vcf.gz'
+      output_vcf = os.path.join(str(args.working_directory),str(args.sample_id)) + '.pcgr.vcf.gz'
       if not os.path.exists(fname_vcf_full) or os.path.getsize(fname_vcf_full) == 0:
          logger.error("") 
          logger.error("VCF input file (" + fname_vcf_full +") is empty or does not exist")
@@ -68,9 +75,9 @@ def __main__():
          return
          
    if not args.input_cna_segments is None:
-      fname_cna_full = str(args.working_directory) + '/' + path_leaf(str(args.input_cna_segments))
-      fname_cna = path_leaf(str(args.input_cna_segments))
-      output_cna = str(args.working_directory) + '/' + str(args.sample_id) + '.pcgr.cna_segments.tsv.gz'
+      fname_cna_full = os.path.join(str(args.working_directory), os.path.basename(str(args.input_cna_segments)))
+      fname_cna = os.path.basename(str(args.input_cna_segments))
+      output_cna = os.path.join(str(args.working_directory),str(args.sample_id)) + '.pcgr.cna_segments.tsv.gz'
       if not os.path.exists(fname_cna_full) or os.path.getsize(fname_cna_full) == 0:
          logger.error("") 
          logger.error("Input copy number segment file (" + fname_cna_full + ") is empty or does not exist")
@@ -84,9 +91,9 @@ def __main__():
 
    run_pcgr(fname_vcf, fname_cna, args.logR_threshold_amplification, args.logR_threshold_homozygous_deletion, args.num_vcfanno_processes, args.num_vep_forks, args.pcgr_directory, args.working_directory, args.sample_id, overwrite)
 
-def path_leaf(path):
-   head, tail = ntpath.split(path)
-   return tail or ntpath.basename(head)
+#def path_leaf(path):
+   #head, tail = ntpath.split(path)
+   #return tail or ntpath.basename(head)
 
 
 def check_subprocess(command):
@@ -172,7 +179,7 @@ def run_pcgr(input_vcf, input_cna_segments, logR_threshold_amplification, logR_t
       
       create_output_vcf_command1 = str(docker_command_run3) + 'mv ' + str(vep_vcfanno_annotated_vcf) + ' ' + str(output_vcf) + "\""
       create_output_vcf_command2 = str(docker_command_run3) + 'mv ' + str(vep_vcfanno_annotated_vcf) + '.tbi ' + str(output_vcf) + '.tbi' + "\""
-      clean_command = str(docker_command_run3) + 'rm -f ' + str(vep_vcf) + '* ' +  str(input_vcf_pcgr_ready) + "* " + str(input_vcf) + "*_validator_output" + "\""
+      clean_command = str(docker_command_run3) + 'rm -f ' + str(vep_vcf) + '* ' + str(vep_vcfanno_annotated_vcf) + ' ' + str(vep_vcfanno_vcf) + '* ' +  str(input_vcf_pcgr_ready) + "* "  + "\""
       check_subprocess(create_output_vcf_command1)
       check_subprocess(create_output_vcf_command2)
       check_subprocess(clean_command)

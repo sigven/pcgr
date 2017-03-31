@@ -14,7 +14,7 @@ import pcgr
 
 logger = pcgr.getlogger('vcfutils')
 
-def print_vcf_meta(outfile,vcf_reader, print_sample_data=True, sample_id = None):
+def print_vcf_meta(outfile,vcf_reader, print_sample_data=0, sample_id = None):
    out = open(outfile,'a')
    info_strings = []
    filter_strings = []
@@ -49,7 +49,7 @@ def print_vcf_meta(outfile,vcf_reader, print_sample_data=True, sample_id = None)
    for filter_tag in sorted(vcf_reader.filters.keys()):
       filter_line = '##FILTER=<ID=' + filter_tag + ',' + 'Description="' + vcf_reader.filters[filter_tag][1] + '">'
       filter_strings.append(filter_line)
-   if print_sample_data == True:
+   if print_sample_data == 1:
       for format_tag in sorted(vcf_reader.formats.keys()):
          if str(vcf_reader.formats[format_tag][1]) == 'None':
             format_line = '##FORMAT=<ID=' + format_tag + ',' + 'Number=.,Type=' + str(vcf_reader.formats[format_tag][2]) + ',' + 'Description="' + str(vcf_reader.formats[format_tag][3]) + '">'
@@ -71,7 +71,7 @@ def print_vcf_meta(outfile,vcf_reader, print_sample_data=True, sample_id = None)
       out.write('\n'.join(info_strings))
       out.write('\n')
    out.write('#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO')
-   if print_sample_data == True:
+   if print_sample_data == 1:
       if len(vcf_reader.formats.keys()) > 0:
          out.write('\tFORMAT\t')
       if len(vcf_reader.samples) > 0:
@@ -89,7 +89,7 @@ def print_vcf_content(outfile,vcf_lines):
       out.write('\n'.join(vcf_lines))
       out.write('\n')
 
-def get_vcf_line(rec,vcf_reader,print_sample_data=True,vcf_library_type='cyvcf',append_chr=True):
+def get_vcf_line(rec,vcf_reader,print_sample_data=0,vcf_library_type='cyvcf',append_chr=True):
    vcf_content = []
    chrom = str(rec.CHROM)
    if rec.CHROM.find('chr') < 0 and append_chr is True:
@@ -148,7 +148,7 @@ def get_vcf_line(rec,vcf_reader,print_sample_data=True,vcf_library_type='cyvcf',
    infostring = ';'.join(infocolumn)
 
    vcfline = '\t'.join(vcf_content) + '\t' + infostring
-   if print_sample_data == True:
+   if print_sample_data == 1:
       if rec.FORMAT != None:
          vcfline = '\t'.join(vcf_content) + '\t' + infostring + '\t' + rec.FORMAT
       if len(vcf_reader.samples) > 0:
