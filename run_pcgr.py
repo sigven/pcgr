@@ -139,7 +139,8 @@ def run_pcgr(input_vcf, input_cna_segments, logR_threshold_amplification, logR_t
    vcf_validate_command = str(docker_command_run3) + "pcgr_check_input.py " + str(input_vcf) + " " + str(input_cna_segments) + "\""
    check_subprocess(vcf_validate_command)
    logger.info('Finished')
-
+   return
+   
    if not input_vcf is None:
       
       ## Run VEP + vcfanno + summarise

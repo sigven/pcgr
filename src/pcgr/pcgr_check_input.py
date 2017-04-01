@@ -136,7 +136,7 @@ def verify_input(input_vcf, input_cna_segments):
          for rec in vcf:
             chrom = rec.CHROM
             if chrom.startswith('chr'):
-               error_message_chrom = "'chr' must be stripped from chromosome names: " + str(rec.CHROM)
+               error_message_chrom = "'chr' must be stripped from chromosome names: " + str(rec.CHROM + ", see http://pcgr.readthedocs.io/en/latest/output.html#vcf-preprocessing")
                logger.error(error_message_chrom)
                return -1
             POS = rec.start + 1
@@ -144,20 +144,23 @@ def verify_input(input_vcf, input_cna_segments):
             if len(rec.ALT) > 1:
                logger.error('')
                logger.error("Multiallelic site detected:" + str(rec.CHROM) + '\t' + str(POS) + '\t' + str(rec.REF) + '\t' + str(alt))
-               logger.error('Alternative alleles must be decomposed and normalized, see http://pcgr.readthedocs.io/en/latest/output.html#vcf-preprocessing')
+               logger.error('Alternative alleles must be decomposed, see http://pcgr.readthedocs.io/en/latest/output.html#vcf-preprocessing')
                logger.error('')
                multiallelic_alt = 1
                return -1
          command_vcf_sample_free1 = 'egrep \'^##\' ' + str(input_vcf) + ' > ' + str(input_vcf_pcgr_ready)
          command_vcf_sample_free2 = 'egrep \'^#CHROM\' ' + str(input_vcf) + ' | cut -f1-8 >> ' + str(input_vcf_pcgr_ready)
-         command_vcf_sample_free3 = 'egrep -v \'^#\' ' + str(input_vcf) + ' | cut -f1-8 >> ' + str(input_vcf_pcgr_ready)
+         command_vcf_sample_free3 = 'egrep -v \'^#\' ' + str(input_vcf) + ' | cut -f1-8 | egrep -v \'^[XYM]\' | sort -k1,1n -k2,2n -k3,3 -k4,4 >> ' + str(input_vcf_pcgr_ready)
+         command_vcf_sample_free4 = 'egrep -v \'^#\' ' + str(input_vcf) + ' | cut -f1-8 | egrep \'^[XYM]\' | sort -k1,1 -k2,2n -k3,3 -k4,4 >> ' + str(input_vcf_pcgr_ready)
          if input_vcf.endswith('.gz'):
             command_vcf_sample_free1 = 'bgzip -dc ' + str(input_vcf) + ' | egrep \'^##\' > ' + str(input_vcf_pcgr_ready)
             command_vcf_sample_free2 = 'bgzip -dc ' + str(input_vcf) + ' | egrep \'^#CHROM\' | cut -f1-8 >> ' + str(input_vcf_pcgr_ready)
-            command_vcf_sample_free3 = 'bgzip -dc ' + str(input_vcf) + ' | egrep -v \'^#\' | cut -f1-8 >> ' + str(input_vcf_pcgr_ready)
+            command_vcf_sample_free3 = 'bgzip -dc ' + str(input_vcf) + ' | egrep -v \'^#\' | cut -f1-8 | egrep -v \'^[XYM]\' | sort -k1,1n -k2,2n -k3,3 -k4,4 >> ' + str(input_vcf_pcgr_ready)
+            command_vcf_sample_free4 = 'bgzip -dc ' + str(input_vcf) + ' | egrep -v \'^#\' | cut -f1-8 | egrep \'^[XYM]\' | sort -k1,1 -k2,2n -k3,3 -k4,4 >> ' + str(input_vcf_pcgr_ready)
          os.system(command_vcf_sample_free1)
          os.system(command_vcf_sample_free2)
          os.system(command_vcf_sample_free3)
+         os.system(command_vcf_sample_free4)
          os.system('bgzip -f ' + str(input_vcf_pcgr_ready))
          os.system('tabix -p vcf ' + str(input_vcf_pcgr_ready) + '.gz')
       

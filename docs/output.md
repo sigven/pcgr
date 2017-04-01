@@ -4,7 +4,7 @@
 
 The PCGR workflow accepts two types of input files:
 
-  * An unannotated, single-sample VCF file with called somatic variants (SNVs/InDels)
+  * An unannotated, single-sample VCF file (>= v4.2) with called somatic variants (SNVs/InDels)
   * A copy number segment file
 
 PCGR can be run with either or both of the two input files present.
@@ -15,7 +15,7 @@ __IMPORTANT NOTE__: Only the GRCh37 version of the human genome is currently sup
 
 The following requirements __MUST__ be met by the input VCF for PCGR to work properly:
 
-1. Variants in the raw VCF that contain multiple alternative alleles (e.g. "multiple ALTs") must be split into variants with a single alternative allele. A description on how this can be done with the help of [vt](https://github.com/atks/vt) is described within the [documentation page for vcfanno](http://brentp.github.io/vcfanno/#preprocessing)
+1. Variants in the raw VCF that contain multiple alternative alleles (e.g. "multiple ALTs") must be split into variants with a single alternative allele. This can be done with the help of either [vt decompose](http://genome.sph.umich.edu/wiki/Vt#Decompose) or [vcflib's vcfbreakmulti](https://github.com/vcflib/vcflib#vcflib). We will add integrated support for this in an upcoming release
 2. The contents of the VCF must be sorted correctly (i.e. according to chromosomal order and chromosomal position). This can be obtained by [vcftools](https://vcftools.github.io/perl_module.html#vcf-sort).
     * We __strongly__ recommend that the input VCF is compressed and indexed using [bgzip](http://www.htslib.org/doc/tabix.html) and [tabix](http://www.htslib.org/doc/tabix.html)
     * 'chr' must be stripped from the chromosome names

@@ -171,8 +171,8 @@
 <h2>Input<a class="headerlink" href="#input" title="Permalink to this headline">¶</a></h2>
 <p>The PCGR workflow accepts two types of input files:</p>
 <ul class="simple">
-<li>An unannotated, single-sample VCF file with called somatic variants
-(SNVs/InDels)</li>
+<li>An unannotated, single-sample VCF file (&gt;= v4.2) with called somatic
+variants (SNVs/InDels)</li>
 <li>A copy number segment file</li>
 </ul>
 <p>PCGR can be run with either or both of the two input files present.</p>
@@ -185,10 +185,10 @@ work properly:</p>
 <ol class="arabic simple">
 <li>Variants in the raw VCF that contain multiple alternative alleles
 (e.g. &#8220;multiple ALTs&#8221;) must be split into variants with a single
-alternative allele. A description on how this can be done with the
-help of <a class="reference external" href="https://github.com/atks/vt">vt</a> is described within the
-<a class="reference external" href="http://brentp.github.io/vcfanno/#preprocessing">documentation page for
-vcfanno</a></li>
+alternative allele. This can be done with the help of either <a class="reference external" href="http://genome.sph.umich.edu/wiki/Vt#Decompose">vt
+decompose</a> or
+<a class="reference external" href="https://github.com/vcflib/vcflib#vcflib">vcflib&#8217;s vcfbreakmulti</a>.
+We will add integrated support for this in an upcoming release</li>
 <li>The contents of the VCF must be sorted correctly (i.e. according to
 chromosomal order and chromosomal position). This can be obtained by
 <a class="reference external" href="https://vcftools.github.io/perl_module.html#vcf-sort">vcftools</a>.<ul>
