@@ -242,21 +242,21 @@ def get_gene_data(gene_xref, vep_info_tags, extended_gene_oncorelevance_tags, id
 
 def extend_vcf_annotations(query_vcf,pcgr_directory):
    
-   pfam_domain_names = uniprot.index_pfam_names(pcgr_directory + '/data/pfam/pfam.domains.tsv.gz', ignore_versions = True)
-   swissprot_features = uniprot.index_uniprot_feature_names(pcgr_directory + '/data/uniprot/uniprot.features.tsv.gz')
-   pfam_xref = uniprot.index_pfam(pcgr_directory + '/data/pfam/pfam.uniprot.tsv.gz')
-   uniprot_feature_xref = uniprot.index_uniprot_features(pcgr_directory + '/data/uniprot/uniprot.features.tsv.gz')
+   pfam_domain_names = uniprot.index_pfam_names(os.path.join(pcgr_directory,'data','pfam','pfam.domains.tsv.gz'), ignore_versions = True)
+   swissprot_features = uniprot.index_uniprot_feature_names(os.path.join(pcgr_directory,'data','uniprot','uniprot.features.tsv.gz'))
+   pfam_xref = uniprot.index_pfam(os.path.join(pcgr_directory,'data','pfam','pfam.uniprot.tsv.gz'))
+   uniprot_feature_xref = uniprot.index_uniprot_features(os.path.join(pcgr_directory,'data','uniprot','uniprot.features.tsv.gz'))
 
    gene_xref = None
    up_xref = None
-   gene_xref = transcript.index_gene(pcgr_directory + '/data/gene.transcript.onco_xref.GRCh37.tsv.gz', index = 'ensGene_transcript')
-   up_xref = uniprot.index_uniprot(pcgr_directory + '/data/uniprot/uniprot.xref.tsv.gz',index = 'ensGene_transcript')
-   clinvar_data = index_clinvar(pcgr_directory + '/data/clinvar/clinvar.tsv.gz')
+   gene_xref = transcript.index_gene(os.path.join(pcgr_directory,'data','gene.transcript.onco_xref.GRCh37.tsv.gz'), index = 'ensGene_transcript')
+   up_xref = uniprot.index_uniprot(os.path.join(pcgr_directory, 'data','uniprot','uniprot.xref.tsv.gz'), index = 'ensGene_transcript')
+   clinvar_data = index_clinvar(os.path.join(pcgr_directory,'data','clinvar/clinvar.tsv.gz'))
    out_prefix = re.sub(r'\.vcf(\.gz){0,}$','.annotated.vcf',query_vcf)
-   cancer_hotspot_xref = utils.index_cancer_hotspots(pcgr_directory + '/data/cancerhotspots.org/cancer_hotspots.tsv')
+   cancer_hotspot_xref = utils.index_cancer_hotspots(os.path.join(pcgr_directory,'data','cancerhotspots.org','cancer_hotspots.tsv'))
   
-   vep_infotags_desc = utils.read_infotag_file(pcgr_directory + '/data/vep_infotags.tsv')
-   pcgr_infotags_desc = utils.read_infotag_file(pcgr_directory + '/data/pcgr_infotags.tsv')
+   vep_infotags_desc = utils.read_infotag_file(os.path.join(pcgr_directory,'data','vep_infotags.tsv'))
+   pcgr_infotags_desc = utils.read_infotag_file(os.path.join(pcgr_directory,'data','pcgr_infotags.tsv'))
 
    vcf_reader = cyvcf.Reader(open(query_vcf, 'r'))
    logger.info('Read query file')
@@ -305,7 +305,6 @@ def extend_vcf_annotations(query_vcf,pcgr_directory):
    num_chromosome_records_processed = 0
    header_printed = 0
    for rec in vcf_reader:
-      
       if not rec.INFO.has_key('CSQ'):
          variant_id = 'g.chr' + str(rec.CHROM) + ':' + str(rec.POS) + ':' + str(rec.REF) + '>' + str(rec.ALT)
          logger.warning('Variant record ' + str(variant_id) + ' does not have CSQ tag from Variant Effect Predictor - variant will be skipped')

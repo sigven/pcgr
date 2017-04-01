@@ -1,5 +1,5 @@
 
-### Tier 3 - other coding mutations in proto-oncogenes/tumor suppressors/cancer census genes
+### Tier 3 - Other coding mutations in proto-oncogenes, tumor suppressor genes or cancer census genes
 
 - A total of __`r nrow(report_data$variants_tier3_display)`__ unique, somatic variant(s) in the tumor sample are found within known proto-oncogenes, tumor suppressor genes or cancer census genes.
 <br><br>
@@ -14,4 +14,4 @@ if(nrow(report_data$variants_tier3_display) > 0){
 }
 
 ```
-<br>
+<br><br>

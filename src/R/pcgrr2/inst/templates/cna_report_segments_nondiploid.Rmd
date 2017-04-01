@@ -17,7 +17,7 @@ if(nrow(cna_data$ranked_segments) >= 10){
   myOptions <- list(paging = T,pageLength=10, searching=F,caching=F)
 }
 if(nrow(cna_data$ranked_segments) > 0){
-  DT::datatable(cna_data$ranked_segments, options = myOptions, escape=F, extensions = "Responsive") %>% DT::formatStyle('LogR',color='white', backgroundColor = DT::styleInterval(0.8, c('red', '#009E73')))
+  DT::datatable(cna_data$ranked_segments, options = myOptions, escape=F, extensions = "Responsive") %>% DT::formatStyle('LogR',color='white', backgroundColor = DT::styleInterval(logR_threshold_homozygous_deletion, c('red', '#009E73')))
 }
 ```
 

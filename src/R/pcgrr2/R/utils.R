@@ -457,6 +457,9 @@ generate_report_data <- function(sample_calls, sample_name = NULL, minimum_n_sig
   clinical_evidence_items_tier1C <- data.frame()
   variants_tier1_display <- data.frame()
   variants_tier2_display <- data.frame()
+  variants_tier2_hotspots <- data.frame()
+  variants_tier2_curated_mutations <- data.frame()
+  variants_tier2_predicted_drivers <- data.frame()
   variants_tier3_display <- data.frame()
   variants_tier4_display <- data.frame()
   variants_tier5_display <- data.frame()
@@ -543,13 +546,17 @@ generate_report_data <- function(sample_calls, sample_name = NULL, minimum_n_sig
   }
   tier12 <- variants_tier1_display
   if(nrow(variants_tier2) > 0){
-    tier2_report <- TRUE
     if(nrow(variants_tier2[is.na(variants_tier2$ONCOSCORE),]) > 0){
       variants_tier2[is.na(variants_tier2$ONCOSCORE),]$ONCOSCORE <- 0
     }
     variants_tier2 <- variants_tier2 %>% dplyr::arrange(desc(ONCOSCORE))
     tier12 <- rbind(variants_tier1_display,dplyr::select(variants_tier2,GENOMIC_CHANGE)) %>% dplyr::distinct()
     variants_tier2_display <- dplyr::select(variants_tier2, dplyr::one_of(pcgr_data$tier2_tags_display))
+
+    variants_tier2_hotspots <- variants_tier2_display %>% dplyr::filter(!is.na(CANCER_MUTATION_HOTSPOT))
+    variants_tier2_curated_mutations <- variants_tier2_display %>% dplyr::filter(is.na(CANCER_MUTATION_HOTSPOT) & !is.na(OTHER_DISEASE_DOCM))
+    variants_tier2_predicted_drivers <- variants_tier2_display %>% dplyr::filter(is.na(CANCER_MUTATION_HOTSPOT) & is.na(OTHER_DISEASE_DOCM) & !is.na(INTOGEN_DRIVER_MUT))
+
   }
 
   ## Analyze Tier 3: coding mutations in oncogenes/tumor suppressors/cancer census genes
@@ -560,7 +567,6 @@ generate_report_data <- function(sample_calls, sample_name = NULL, minimum_n_sig
   }
   tier123 <- tier12
   if(nrow(variants_tier3) > 0){
-    tier3_report <- TRUE
     if(nrow(variants_tier3[is.na(variants_tier3$ONCOSCORE),]) > 0){
       variants_tier3[is.na(variants_tier3$ONCOSCORE),]$ONCOSCORE <- 0
     }
@@ -579,7 +585,6 @@ generate_report_data <- function(sample_calls, sample_name = NULL, minimum_n_sig
       variants_tier4[is.na(variants_tier4$ONCOSCORE),]$ONCOSCORE <- 0
     }
     variants_tier4 <- variants_tier4 %>% dplyr::arrange(desc(ONCOSCORE))
-    tier4_report <- TRUE
     variants_tier4_display <- dplyr::select(variants_tier4, dplyr::one_of(pcgr_data$tier4_tags_display))
   }
 
@@ -591,7 +596,6 @@ generate_report_data <- function(sample_calls, sample_name = NULL, minimum_n_sig
       variants_tier5[is.na(variants_tier5$ONCOSCORE),]$ONCOSCORE <- 0
     }
     variants_tier5 <- variants_tier5 %>% dplyr::arrange(desc(ONCOSCORE))
-    tier5_report <- TRUE
     variants_tier5_display <- dplyr::select(variants_tier5, dplyr::one_of(pcgr_data$tier5_tags_display))
   }
 
@@ -608,7 +612,7 @@ generate_report_data <- function(sample_calls, sample_name = NULL, minimum_n_sig
 
   tsv_biomarkers <- pcgrr2::generate_biomarker_tsv(variants_tier1, sample_name = sample_name)
 
-  report_data <- list('tier1_report' = tier1_report, 'tier2_report' = tier2_report, 'tier3_report' = tier3_report, 'tier4_report' = tier4_report, 'tier5_report' = tier5_report, 'clinical_evidence_items_tier1A' = clinical_evidence_items_tier1A$clinical_evidence_items, 'clinical_evidence_items_tier1B' = clinical_evidence_items_tier1B$clinical_evidence_items, 'clinical_evidence_items_tier1C' = clinical_evidence_items_tier1C$clinical_evidence_items, 'biomarker_descriptions' = biomarker_descriptions, 'tsv_variants' = tsv_variants, 'tsv_biomarkers' = tsv_biomarkers, 'variants_tier1_display' = variants_tier1_display, 'variants_tier2_display' = variants_tier2_display, 'variants_tier3_display' = variants_tier3_display, 'variants_tier4_display' = variants_tier4_display,'variants_tier5_display' = variants_tier5_display, 'sample_calls_coding' = sample_calls_coding, 'sample_calls_noncoding' = sample_calls_noncoding, 'sample_calls_SNVs' = sample_calls_SNVs, 'sample_calls_INDELs' = sample_calls_INDELs, 'signature_report' = signature_report, 'missing_signature_data' = missing_signature_data, 'signature_data' = signature_data, 'signatures_limit' = signatures_limit, 'maf_df' = maf_df, 'sample_name' = sample_name)
+  report_data <- list('tier1_report' = tier1_report, 'tier2_report' = tier2_report, 'tier3_report' = tier3_report, 'tier4_report' = tier4_report, 'tier5_report' = tier5_report, 'clinical_evidence_items_tier1A' = clinical_evidence_items_tier1A$clinical_evidence_items, 'clinical_evidence_items_tier1B' = clinical_evidence_items_tier1B$clinical_evidence_items, 'clinical_evidence_items_tier1C' = clinical_evidence_items_tier1C$clinical_evidence_items, 'biomarker_descriptions' = biomarker_descriptions, 'tsv_variants' = tsv_variants, 'tsv_biomarkers' = tsv_biomarkers, 'variants_tier1_display' = variants_tier1_display, 'variants_tier2_display' = variants_tier2_display, 'variants_tier2_hotspots' = variants_tier2_hotspots, 'variants_tier2_curated_mutations' = variants_tier2_curated_mutations, 'variants_tier2_predicted_drivers' = variants_tier2_predicted_drivers, 'variants_tier3_display' = variants_tier3_display, 'variants_tier4_display' = variants_tier4_display,'variants_tier5_display' = variants_tier5_display, 'sample_calls_coding' = sample_calls_coding, 'sample_calls_noncoding' = sample_calls_noncoding, 'sample_calls_SNVs' = sample_calls_SNVs, 'sample_calls_INDELs' = sample_calls_INDELs, 'signature_report' = signature_report, 'missing_signature_data' = missing_signature_data, 'signature_data' = signature_data, 'signatures_limit' = signatures_limit, 'maf_df' = maf_df, 'sample_name' = sample_name)
 
 
   return(report_data)

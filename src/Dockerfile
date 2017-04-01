@@ -120,14 +120,24 @@ RUN cpanm File::ShareDir::Install \
  RUN cp *.pl /usr/local/bin/
  WORKDIR /
 
+RUN git clone --recursive https://github.com/ekg/vcflib.git
+WORKDIR vcflib
+RUN make
+#WORKDIR 
+RUN cp bin/vcfbreakmulti /usr/local/bin
+RUN rm -rf /vcflib
+
 # Install local R report engine
+WORKDIR /
 ADD R/ /
 RUN R -e "devtools::install('pcgrr2')"
 
- ADD pcgr.tgz /
- ENV PATH=$PATH:/pcgr
- ENV PYTHONPATH=:/pcgr/lib:${PYTHONPATH}
- ENV VCFANNO_DATA_DOCKER="/data"
+ADD pcgr.tgz /
+ENV PATH=$PATH:/pcgr
+ENV PYTHONPATH=:/pcgr/lib:${PYTHONPATH}
+ENV VCFANNO_DATA_DOCKER="/data"
+
+
 
 # Clean Up
 RUN apt-get clean autoclean

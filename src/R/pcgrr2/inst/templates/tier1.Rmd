@@ -18,7 +18,7 @@
 <br>
 
 
-### Tier 1 - genomic biomarkers for diagnosis, prognosis, and drug sensitivity {.tabset}
+### Tier 1 - Genomic biomarkers for diagnosis, prognosis, and drug sensitivity {.tabset}
 
 - A total of __`r nrow(report_data$variants_tier1_display)`__ unique, somatic variant(s) in the tumor sample can be mapped to genomic biomarkers in the [database for clinical interpretations of variants in cancer, CIViC](https://civic.genome.wustl.edu/#/home) or [Cancer bioMarkers database](https://www.cancergenomeinterpreter.org/biomarkers), with the following number of evidence items:
     * Tier 1A: __`r nrow(report_data$clinical_evidence_items_tier1A)`__ evidence items linked to specific amino acid changes
@@ -29,54 +29,75 @@
 
 #### Tier 1A biomarkers
 
-The table below lists all variant-evidence item associations.
-
-```{r tier1A, echo=F}
+<br>
+```{r tier1A, echo=F, results = 'asis'}
 
 if(nrow(report_data$clinical_evidence_items_tier1A) > 0){
-  
+  cat('The table below lists all variant-evidence item associations:',sep='\n')
+  cat('\n')
   myOptions <- list(paging = F, searching=T,caching=F)
   if(nrow(report_data$clinical_evidence_items_tier1A) > 10){
     myOptions <- list(paging = T,pageLength=10, searching=T,caching=F)
   }
+  report_data$clinical_evidence_items_tier1A <- dplyr::rename(report_data$clinical_evidence_items_tier1A, DOCM_DISEASE = OTHER_DISEASE_DOCM, DOCM_LITERATURE = OTHER_LITERATURE_DOCM)
+  if(nrow(report_data$clinical_evidence_items_tier1A[!is.na(report_data$clinical_evidence_items_tier1A$INTOGEN_DRIVER_MUT),]) > 0){
+    report_data$clinical_evidence_items_tier1A[!is.na(report_data$clinical_evidence_items_tier1A$INTOGEN_DRIVER_MUT),]$INTOGEN_DRIVER_MUT <- TRUE
+  }
   DT::datatable(report_data$clinical_evidence_items_tier1A, options = myOptions, escape=F, extensions = "Responsive") %>%
   DT::formatStyle('EVIDENCE_LEVEL', backgroundColor = DT::styleEqual(c('A: Validated','B: Clinical evidence','C: Case study','D: Preclinical evidence','E: Indirect evidence'), c("#009E73","#56B4E9", "#0072B2","#E69F00", "#F0E442")))
+}else{
+  cat('<i>No variant-evidence item associations found.</i>',sep='\n')
+  cat('\n')
 }
 ```
 
 #### Tier 1B biomarkers
 
-The table below lists all variant-evidence item associations:
+<br>
 
-```{r tier1B, echo=F}
+```{r tier1B, echo=F, results='asis'}
 
 if(nrow(report_data$clinical_evidence_items_tier1B) > 0){
+  cat('The table below lists all variant-evidence item associations:',sep='\n')
+  cat('\n')
   myOptions <- list(paging = F, searching=T,caching=F)
   if(nrow(report_data$clinical_evidence_items_tier1B) > 10){
     myOptions <- list(paging = T,pageLength=10, searching=T,caching=F)
   }
-  #myOptions <- list(paging = T,pageLength=10, searching=T,caching=F)
-
+  report_data$clinical_evidence_items_tier1B <- dplyr::rename(report_data$clinical_evidence_items_tier1B, DOCM_DISEASE = OTHER_DISEASE_DOCM, DOCM_LITERATURE = OTHER_LITERATURE_DOCM)
+  if(nrow(report_data$clinical_evidence_items_tier1B[!is.na(report_data$clinical_evidence_items_tier1B$INTOGEN_DRIVER_MUT),]) > 0){
+    report_data$clinical_evidence_items_tier1B[!is.na(report_data$clinical_evidence_items_tier1B$INTOGEN_DRIVER_MUT),]$INTOGEN_DRIVER_MUT <- TRUE
+  }
   DT::datatable(report_data$clinical_evidence_items_tier1B, options = myOptions, escape=F, extensions = "Responsive") %>%
   DT::formatStyle('EVIDENCE_LEVEL', backgroundColor = DT::styleEqual(c('A: Validated','B: Clinical evidence','C: Case study','D: Preclinical evidence','E: Indirect evidence'), c("#009E73","#56B4E9", "#0072B2","#E69F00", "#F0E442")))
+}else{
+  cat('<i>No variant-evidence item associations found.</i>',sep='\n')
+  cat('\n')
 }
 ```
 
 #### Tier 1C biomarkers
 
-The table below lists all variant-evidence item associations:
-
-```{r tier1C, echo=F}
+```{r tier1C, echo=F,results='asis'}
 
 if(nrow(report_data$clinical_evidence_items_tier1C) > 0){
+  cat('The table below lists all variant-evidence item associations:',sep='\n')
+  cat('\n')
+  
   myOptions <- list(paging = F, searching=T,caching=F)
   if(nrow(report_data$clinical_evidence_items_tier1C) > 10){
     myOptions <- list(paging = T,pageLength=10, searching=T,caching=F)
   }
-  #myOptions <- list(paging = T,pageLength=10, searching=T,caching=F)
+  report_data$clinical_evidence_items_tier1C <- dplyr::rename(report_data$clinical_evidence_items_tier1C, DOCM_DISEASE = OTHER_DISEASE_DOCM, DOCM_LITERATURE = OTHER_LITERATURE_DOCM)
+  if(nrow(report_data$clinical_evidence_items_tier1C[!is.na(report_data$clinical_evidence_items_tier1C$INTOGEN_DRIVER_MUT),]) > 0){
+    report_data$clinical_evidence_items_tier1C[!is.na(report_data$clinical_evidence_items_tier1C$INTOGEN_DRIVER_MUT),]$INTOGEN_DRIVER_MUT <- TRUE
+  }
 
   DT::datatable(report_data$clinical_evidence_items_tier1C, options = myOptions, escape=F, extensions = "Responsive") %>%
   DT::formatStyle('EVIDENCE_LEVEL', backgroundColor = DT::styleEqual(c('A: Validated','B: Clinical evidence','C: Case study','D: Preclinical evidence','E: Indirect evidence'), c("#009E73","#56B4E9", "#0072B2","#E69F00", "#F0E442")))
+}else{
+  cat('<i>No variant-evidence item associations found.</i>',sep='\n')
+  cat('\n')
 }
 ```
 

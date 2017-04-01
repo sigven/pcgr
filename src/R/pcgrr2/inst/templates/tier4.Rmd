@@ -1,4 +1,4 @@
-### Tier 4 - other coding mutations
+### Tier 4 - Other coding mutations
 
 - A total of __`r nrow(report_data$variants_tier4_display)`__ unique, coding somatic variant(s) are also found in the tumor sample.
 

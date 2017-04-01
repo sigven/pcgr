@@ -1,7 +1,7 @@
-### Tier 5 - non-coding mutations
+### Tier 5 - Non-coding mutations
 
 - A total of __`r nrow(report_data$variants_tier5_display)`__ unique, somatic variant(s) are also found in the tumor sample.
-<br>
+<br><br>
 
 ```{r tier5, echo=F}
 

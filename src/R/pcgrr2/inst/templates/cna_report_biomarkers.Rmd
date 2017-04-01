@@ -1,7 +1,7 @@
 
 ### Copy number aberrations as markers for drug sensivitity/prognosis/diagnosis:
 
-A total of __`r nrow(cna_data$cna_biomarker_segments)`__ unique, copy number aberration(s) in the tumor sample can be mapped to genomic biomarkers in the [database for clinical interpretations of variants in cancer, CIViC](https://civic.genome.wustl.edu/#/home), with a total of __`r nrow(cna_data$cna_biomarkers)`__ evidence items:
+A total of __`r nrow(cna_data$cna_biomarker_segments)`__ unique, copy number aberration(s) in the tumor sample can be mapped to genomic biomarkers in the [database for clinical interpretations of variants in cancer, CIViC](https://civic.genome.wustl.edu/#/home), with a total of __`r nrow(cna_data$cna_biomarkers)`__ evidence items.
 <br>
 
 ```{r cna_biomarkers, echo=F}
