@@ -248,9 +248,12 @@ unique identifier of the tumor-normal sample pair to be analyzed.</p>
 <li><a class="reference external" href="http://folk.uio.no/sigven/tumor_sample.COAD.pcgr.html">View an example report for a colorectal tumor sample
 (TCGA)</a></li>
 </ul>
-<p>The HTML reports have been tested using the following browsers: *
-Safari (10.0.3) * Mozilla Firefox (52.0.2) * Google Chrome
-(57.0.2987.110)</p>
+<p>The HTML reports have been tested using the following browsers:</p>
+<ul class="simple">
+<li>Safari (10.0.3)</li>
+<li>Mozilla Firefox (52.0.2)</li>
+<li>Google Chrome (57.0.2987.110)</li>
+</ul>
 </div>
 <div class="section" id="output-somatic-snvs-indels">
 <h2>Output - Somatic SNVs/InDels<a class="headerlink" href="#output-somatic-snvs-indels" title="Permalink to this headline">¶</a></h2>
@@ -532,51 +535,48 @@ list</li>
 <li>GWAS_CATALOG_TRAIT_URI - List of trait URIs for GWAS-associated
 variant</li>
 <li>COSMIC_MUTATION_ID - Mutation identifier in <a class="reference external" href="http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/">Catalog of somatic
-mutations in cancer - COSMIC
-v78</a>
+mutations in
+cancer</a>
 database</li>
 <li>COSMIC_CODON_FRAC_GW - For different tumor types, number of
 samples mutated at associated codon position (format:
 codon_number:tumor_type:fraction_mutated). Samples subject to
 exome/genome-wide screens only <a class="reference external" href="http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/">Catalog of somatic mutations in
-cancer - COSMIC
-v78</a>.</li>
+cancer</a>.</li>
 <li>COSMIC_CODON_COUNT_GW - For different tumor types, number of
 samples mutated at associated codon position (format:
 codon_number:tumor_type:frequency). Samples subject to
 exome/genome-wide screens only <a class="reference external" href="http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/">Catalog of somatic mutations in
-cancer - COSMIC
-v78</a></li>
+cancer</a></li>
 <li>COSMIC_COUNT_GW - Global frequency of variant in <a class="reference external" href="http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/">Catalog of
-somatic mutations in cancer - COSMIC
-v78</a>.</li>
+somatic mutations in
+cancer</a>.</li>
 <li>COSMIC_SITE_HISTOLOGY - Primary site/histology distribution across
-tumor types in <a class="reference external" href="http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/">Catalog of somatic mutations in cancer - COSMIC
-v78</a>.</li>
+tumor types in <a class="reference external" href="http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/">Catalog of somatic mutations in
+cancer</a>.</li>
 <li>COSMIC_CANCER_TYPE_GW - Frequency of variant across different
-tumor types in <a class="reference external" href="http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/">Catalog of somatic mutations in cancer - COSMIC
-v78</a> -
-samples subject to exome/genome-wide screens only</li>
+tumor types in <a class="reference external" href="http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/">Catalog of somatic mutations in
+cancer</a>
+- samples subject to exome/genome-wide screens only</li>
 <li>COSMIC_CANCER_TYPE_ALL - Frequency of variant across different
-tumor types in <a class="reference external" href="http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/">Catalog of somatic mutations in cancer - COSMIC
-v78</a></li>
+tumor types in <a class="reference external" href="http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/">Catalog of somatic mutations in
+cancer</a></li>
 <li>COSMIC_SAMPLE_SOURCE - Sample source distribution for variant in
-<a class="reference external" href="http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/">Catalog of somatic mutations in cancer - COSMIC
-v78</a>.</li>
+<a class="reference external" href="http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/">Catalog of somatic mutations in
+cancer</a>.</li>
 <li>COSMIC_DRUG_RESISTANCE - Targeted drugs/therapies subject to
 resistance in tumors that carry the mutation. <a class="reference external" href="http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/">Catalog of somatic
-mutations in cancer - COSMIC
-v78</a>.</li>
+mutations in
+cancer</a>.</li>
 <li>COSMIC_FATHMM_PRED - Variant effect prediction from COSMIC&#8217;s FATHMM
 algorithm (COSMIC variants only) <a class="reference external" href="http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/">Catalog of somatic mutations in
-cancer - COSMIC
-v78</a>.</li>
+cancer</a>.</li>
 <li>COSMIC_VARTYPE - COSMIC variant type <a class="reference external" href="http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/">Catalog of somatic mutations
-in cancer - COSMIC
-v78</a>.</li>
+in
+cancer</a>.</li>
 <li>COSMIC_CONSEQUENCE - COSMIC consequence type <a class="reference external" href="http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/">Catalog of somatic
-mutations in cancer - COSMIC
-v78</a>.</li>
+mutations in
+cancer</a>.</li>
 <li>ICGC_PROJECTS - Variant frequency count in different <a class="reference external" href="https://dcc.icgc.org/repository/current/Projects">ICGC Project
 IDs</a></li>
 </ul>
@@ -681,7 +681,7 @@ variants</p>
     <span class="n">particular</span> <span class="n">antineoplastic</span> <span class="n">drug</span>
 <span class="mf">28.</span> <span class="n">CLINVAR</span> <span class="o">-</span> <span class="n">variant</span> <span class="n">origin</span> <span class="ow">and</span> <span class="n">associated</span> <span class="n">traits</span> <span class="n">associated</span> <span class="k">with</span> <span class="n">variant</span>
 <span class="mf">29.</span> <span class="n">CLINVAR_SIG</span> <span class="o">-</span> <span class="n">clinical</span> <span class="n">significance</span> <span class="n">of</span> <span class="n">CLINVAR</span> <span class="n">variant</span>
-<span class="mf">30.</span> <span class="n">GLOBAL_AF_EXAC</span> <span class="o">-</span> <span class="n">adjusted</span> <span class="k">global</span> <span class="n">germline</span> <span class="n">allele</span> <span class="n">frequency</span> <span class="ow">in</span> <span class="n">ExAC</span> <span class="n">release</span> <span class="mf">0.3</span><span class="o">.</span><span class="mi">1</span>
+<span class="mf">30.</span> <span class="n">GLOBAL_AF_EXAC</span> <span class="o">-</span> <span class="n">adjusted</span> <span class="k">global</span> <span class="n">germline</span> <span class="n">allele</span> <span class="n">frequency</span> <span class="ow">in</span> <span class="n">ExAC</span>
 <span class="mf">31.</span> <span class="n">GLOBAL_AF_1KG</span> <span class="o">-</span> <span class="mi">1000</span><span class="n">G</span> <span class="n">Project</span> <span class="o">-</span> <span class="n">phase</span> <span class="mi">3</span><span class="p">,</span> <span class="n">germline</span> <span class="n">allele</span> <span class="n">frequency</span>
     <span class="k">for</span> <span class="nb">all</span> <span class="mi">1000</span><span class="n">G</span> <span class="n">project</span> <span class="n">samples</span> <span class="p">(</span><span class="k">global</span><span class="p">)</span>
 <span class="mf">32.</span> <span class="n">TIER</span>
@@ -761,8 +761,8 @@ follows:</p>
 <span class="mf">13.</span> <span class="n">gene_biotype</span> <span class="o">-</span> <span class="nb">type</span> <span class="n">of</span> <span class="n">gene</span>
 <span class="mf">14.</span> <span class="n">cancer_census_germline</span> <span class="o">-</span> <span class="n">gene</span> <span class="n">implicated</span> <span class="k">with</span> <span class="n">germline</span> <span class="n">predisposition</span> <span class="n">to</span> <span class="n">various</span> <span class="n">cancer</span> <span class="n">subtypes</span>
 <span class="mf">15.</span> <span class="n">cancer_census_somatic</span> <span class="o">-</span> <span class="n">gene</span> <span class="k">for</span> <span class="n">which</span> <span class="n">somatic</span> <span class="n">mutations</span> <span class="n">have</span> <span class="n">been</span> <span class="n">causally</span> <span class="n">implicated</span> <span class="ow">in</span> <span class="n">tumor</span> <span class="n">development</span>
-<span class="mf">16.</span> <span class="n">tsgene</span> <span class="o">-</span> <span class="n">tumor</span> <span class="n">suppressor</span> <span class="n">gene</span> <span class="n">status</span> <span class="p">(</span><span class="n">TSgene</span> <span class="mf">2.0</span> <span class="n">database</span><span class="p">)</span>
-<span class="mf">17.</span> <span class="n">tsgene_oncogene</span> <span class="o">-</span> <span class="n">oncogene</span> <span class="n">status</span> <span class="p">(</span><span class="n">TSgene</span> <span class="mf">2.0</span> <span class="n">database</span><span class="p">)</span>
+<span class="mf">16.</span> <span class="n">tsgene</span> <span class="o">-</span> <span class="n">tumor</span> <span class="n">suppressor</span> <span class="n">gene</span> <span class="n">status</span> <span class="p">(</span><span class="n">TSgene</span> <span class="n">database</span><span class="p">)</span>
+<span class="mf">17.</span> <span class="n">tsgene_oncogene</span> <span class="o">-</span> <span class="n">oncogene</span> <span class="n">status</span> <span class="p">(</span><span class="n">TSgene</span> <span class="n">database</span><span class="p">)</span>
 <span class="mf">18.</span> <span class="n">intogen_drivers</span> <span class="o">-</span> <span class="n">predicted</span> <span class="n">driver</span> <span class="n">gene</span> <span class="n">status</span> <span class="p">(</span><span class="n">IntoGen</span> <span class="n">Cancer</span> <span class="n">Drivers</span> <span class="n">Database</span><span class="p">)</span>
 <span class="mf">19.</span> <span class="n">antineoplastic_drugs_dgidb</span> <span class="o">-</span> <span class="n">validated</span> <span class="ow">and</span> <span class="n">experimental</span> <span class="n">antineoplastic</span> <span class="n">drugs</span> <span class="n">interacting</span> <span class="k">with</span> <span class="n">gene</span>
 <span class="mf">20.</span> <span class="n">gencode_transcript_type</span> <span class="o">-</span>

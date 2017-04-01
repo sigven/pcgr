@@ -51,10 +51,10 @@ The __sample_id__ is provided as input by the user, and reflects a unique identi
 * [View an example report for a colorectal tumor sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.COAD.pcgr.html)
 
 The HTML reports have been tested using the following browsers:
+
 * Safari (10.0.3)
 * Mozilla Firefox (52.0.2)
 * Google Chrome (57.0.2987.110)
-
 
 ### Output - Somatic SNVs/InDels
 
@@ -181,18 +181,18 @@ Here, the __sample_id__ is provided as input by the user, and reflects a unique 
   - DBSNP_SUBMISSIONS - Number of individual submissions to rsID
   - GWAS\_CATALOG_PMID - Variant is linked to phenotype through the [GWAS Catalog](https://www.ebi.ac.uk/gwas/), literature in PMID list
   - GWAS\_CATALOG\_TRAIT_URI - List of trait URIs for GWAS-associated variant
-  - COSMIC\_MUTATION_ID - Mutation identifier in [Catalog of somatic mutations in cancer - COSMIC v78](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/) database
-  - COSMIC\_CODON\_FRAC\_GW - For different tumor types, number of samples mutated at associated codon position (format: codon\_number:tumor\_type:fraction_mutated). Samples subject to exome/genome-wide screens only [Catalog of somatic mutations in cancer - COSMIC v78](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/).
-  - COSMIC\_CODON\_COUNT\_GW - For different tumor types, number of samples mutated at associated codon position (format: codon\_number:tumor\_type:frequency). Samples subject to exome/genome-wide screens only [Catalog of somatic mutations in cancer - COSMIC v78](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/)
-  - COSMIC\_COUNT\_GW - Global frequency of variant in [Catalog of somatic mutations in cancer - COSMIC v78](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/).
-  - COSMIC\_SITE\_HISTOLOGY - Primary site/histology distribution across tumor types in [Catalog of somatic mutations in cancer - COSMIC v78](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/).
-  - COSMIC\_CANCER\_TYPE\_GW - Frequency of variant across different tumor types in [Catalog of somatic mutations in cancer - COSMIC v78](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/) - samples subject to exome/genome-wide screens only
-  - COSMIC\_CANCER\_TYPE\_ALL - Frequency of variant across different tumor types in [Catalog of somatic mutations in cancer - COSMIC v78](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/)
-  - COSMIC\_SAMPLE\_SOURCE - Sample source distribution for variant in [Catalog of somatic mutations in cancer - COSMIC v78](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/).
-  - COSMIC\_DRUG\_RESISTANCE - Targeted drugs/therapies subject to resistance in tumors that carry the mutation. [Catalog of somatic mutations in cancer - COSMIC v78](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/).
-  - COSMIC\_FATHMM\_PRED - Variant effect prediction from COSMIC's FATHMM algorithm (COSMIC variants only) [Catalog of somatic mutations in cancer - COSMIC v78](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/).
-  - COSMIC_VARTYPE - COSMIC variant type [Catalog of somatic mutations in cancer - COSMIC v78](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/).
-  - COSMIC_CONSEQUENCE - COSMIC consequence type [Catalog of somatic mutations in cancer - COSMIC v78](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/).
+  - COSMIC\_MUTATION_ID - Mutation identifier in [Catalog of somatic mutations in cancer](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/) database
+  - COSMIC\_CODON\_FRAC\_GW - For different tumor types, number of samples mutated at associated codon position (format: codon\_number:tumor\_type:fraction_mutated). Samples subject to exome/genome-wide screens only [Catalog of somatic mutations in cancer](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/).
+  - COSMIC\_CODON\_COUNT\_GW - For different tumor types, number of samples mutated at associated codon position (format: codon\_number:tumor\_type:frequency). Samples subject to exome/genome-wide screens only [Catalog of somatic mutations in cancer](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/)
+  - COSMIC\_COUNT\_GW - Global frequency of variant in [Catalog of somatic mutations in cancer](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/).
+  - COSMIC\_SITE\_HISTOLOGY - Primary site/histology distribution across tumor types in [Catalog of somatic mutations in cancer](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/).
+  - COSMIC\_CANCER\_TYPE\_GW - Frequency of variant across different tumor types in [Catalog of somatic mutations in cancer](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/) - samples subject to exome/genome-wide screens only
+  - COSMIC\_CANCER\_TYPE\_ALL - Frequency of variant across different tumor types in [Catalog of somatic mutations in cancer](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/)
+  - COSMIC\_SAMPLE\_SOURCE - Sample source distribution for variant in [Catalog of somatic mutations in cancer](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/).
+  - COSMIC\_DRUG\_RESISTANCE - Targeted drugs/therapies subject to resistance in tumors that carry the mutation. [Catalog of somatic mutations in cancer](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/).
+  - COSMIC\_FATHMM\_PRED - Variant effect prediction from COSMIC's FATHMM algorithm (COSMIC variants only) [Catalog of somatic mutations in cancer](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/).
+  - COSMIC_VARTYPE - COSMIC variant type [Catalog of somatic mutations in cancer](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/).
+  - COSMIC_CONSEQUENCE - COSMIC consequence type [Catalog of somatic mutations in cancer](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/).
   - ICGC_PROJECTS - Variant frequency count in different [ICGC Project IDs](https://dcc.icgc.org/repository/current/Projects)
 
 
@@ -272,7 +272,7 @@ The following variables are included in the tiered TSV file:
         particular antineoplastic drug
     28. CLINVAR - variant origin and associated traits associated with variant
     29. CLINVAR_SIG - clinical significance of CLINVAR variant
-    30. GLOBAL_AF_EXAC - adjusted global germline allele frequency in ExAC release 0.3.1
+    30. GLOBAL_AF_EXAC - adjusted global germline allele frequency in ExAC
     31. GLOBAL_AF_1KG - 1000G Project - phase 3, germline allele frequency
         for all 1000G project samples (global)
     32. TIER
@@ -342,8 +342,8 @@ The format of the compressed TSV file is the following:
     13. gene_biotype - type of gene
     14. cancer_census_germline - gene implicated with germline predisposition to various cancer subtypes
     15. cancer_census_somatic - gene for which somatic mutations have been causally implicated in tumor development
-    16. tsgene - tumor suppressor gene status (TSgene 2.0 database)
-    17. tsgene_oncogene - oncogene status (TSgene 2.0 database)
+    16. tsgene - tumor suppressor gene status (TSgene database)
+    17. tsgene_oncogene - oncogene status (TSgene database)
     18. intogen_drivers - predicted driver gene status (IntoGen Cancer Drivers Database)
     19. antineoplastic_drugs_dgidb - validated and experimental antineoplastic drugs interacting with gene
     20. gencode_transcript_type -
