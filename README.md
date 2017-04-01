@@ -7,8 +7,8 @@ The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package int
 ![PCGR overview](PCGR_workflow.png)
 
 ### Example reports
-* [View an example report for a breast tumor sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.BRCA.pcgr.html){:target="_blank"}
-* [View an example report for a colorectal tumor sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.COAD.pcgr.html){:target="_blank"}
+* <a href='http://folk.uio.no/sigven/tumor_sample.COAD.pcgr.html' target='_blank'>View an example report for a colorectal tumor sample (TCGA)<a/>
+* <a href='http://folk.uio.no/sigven/tumor_sample.BRCA.pcgr.html' target='_blank'>View an example report for a breast tumor sample (TCGA)<a/>
 
 ### PCGR documentation
 
