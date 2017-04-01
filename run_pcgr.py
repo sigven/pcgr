@@ -7,7 +7,6 @@ import os
 import subprocess
 import logging
 import sys
-import ntpath
 
 def __main__():
    
