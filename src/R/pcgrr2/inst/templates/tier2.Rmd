@@ -28,6 +28,8 @@ if(nrow(report_data$variants_tier2_hotspots) > 0){
 }
 ```
 
+<br><br>
+
 #### Other disease-causing mutations
 
 <br>
@@ -52,9 +54,10 @@ if(nrow(report_data$variants_tier2_curated_mutations) > 0){
 }else{
   cat('<i>No variants found.</i>',sep='\n')
   cat('\n')
-  cat('\n')
 }
 ```
+
+<br><br>
 
 #### Other predicted driver mutations
 

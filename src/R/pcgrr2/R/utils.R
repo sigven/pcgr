@@ -680,9 +680,6 @@ annotate_variant_link <- function(var_df, vardb = "DBSNP", linktype = "dbsource"
     }
   }
 
-
-
-
   if(vardb == 'CLINVAR'){
 
     if(any(grepl(paste0("^CLINVAR_MSID$"),names(var_df))) & any(grepl(paste0("^VAR_ID$"),names(var_df))) & any(grepl(paste0("^CLINVAR_TRAITS_ALL$"),names(var_df)))){

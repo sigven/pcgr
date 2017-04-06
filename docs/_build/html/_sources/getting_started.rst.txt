@@ -49,7 +49,7 @@ Download PCGR
    directory
 
    -  Download `the latest data
-      bundle <https://drive.google.com/file/d/0B8aYD2TJ472mRjkxMXVaNm1zQ1U/>`__
+      bundle <https://drive.google.com/file/d/0B8aYD2TJ472mQjZOMmg4djZfT1k/>`__
       from Google Drive to ``~/pcgr-X.X`` (replace *X.X* with the
       version number)
    -  Decompress and untar the bundle, e.g. through the following Unix

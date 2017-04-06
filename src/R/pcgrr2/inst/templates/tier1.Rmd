@@ -6,6 +6,7 @@
 * Number of InDels: __`r nrow(report_data$sample_calls_INDELs)`__
 * Number of coding variants: __`r nrow(report_data$sample_calls_coding)`__
 * Number of noncoding variants: __`r nrow(report_data$sample_calls_noncoding)`__
+
 <br>
 
 ### Tier statistics
@@ -15,6 +16,7 @@
 * Tier 3 variants: __`r nrow(report_data$variants_tier3_display)`__
 * Tier 4 variants: __`r nrow(report_data$variants_tier4_display)`__
 * Tier 5 variants: __`r nrow(report_data$variants_tier5_display)`__
+
 <br>
 
 
@@ -30,6 +32,7 @@
 #### Tier 1A biomarkers
 
 <br>
+
 ```{r tier1A, echo=F, results = 'asis'}
 
 if(nrow(report_data$clinical_evidence_items_tier1A) > 0){
@@ -50,6 +53,8 @@ if(nrow(report_data$clinical_evidence_items_tier1A) > 0){
   cat('\n')
 }
 ```
+
+<br><br>
 
 #### Tier 1B biomarkers
 
@@ -76,7 +81,11 @@ if(nrow(report_data$clinical_evidence_items_tier1B) > 0){
 }
 ```
 
+<br><br>
+
 #### Tier 1C biomarkers
+
+<br>
 
 ```{r tier1C, echo=F,results='asis'}
 

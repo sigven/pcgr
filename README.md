@@ -55,7 +55,7 @@ A local installation of Python (it has been tested with [version 2.7.13](https:/
 
 1. Download and unpack the [latest release](https://github.com/sigven/pcgr/releases/latest)
 2. Download and unpack the data bundle (approx. 17Gb) in the PCGR directory
-   * Download [the latest data bundle](https://drive.google.com/file/d/0B8aYD2TJ472mRjkxMXVaNm1zQ1U/) from Google Drive to `~/pcgr-X.X` (replace _X.X_ with the version number)
+   * Download [the latest data bundle](https://drive.google.com/file/d/0B8aYD2TJ472mQjZOMmg4djZfT1k/) from Google Drive to `~/pcgr-X.X` (replace _X.X_ with the version number)
    * Unpack the data bundle, e.g. through the following Unix command: `gzip -dc pcgr.databundle.GRCh37.YYYYMMDD.tgz | tar xvf -`
 
     A _data/_ folder within the _pcgr-X.X_ software folder should now have been produced

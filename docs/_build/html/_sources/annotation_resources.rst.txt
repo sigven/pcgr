@@ -71,3 +71,40 @@ Cancer gene knowledge bases
    suppressor/oncogene database (November 2015)
 -  `Cancer Gene Cencus <http://cancer.sanger.ac.uk/cosmic/>`__ -
    (February 2017)
+
+Notes on variant annotation datasets
+------------------------------------
+
+Genome mapping
+~~~~~~~~~~~~~~
+
+A requirement for all variant annotation datasets used in PCGR is that
+they have been mapped unambiguously to the human genome (GRCh37). For
+most datasets this is already the case (i.e. dbSNP, COSMIC, ClinVar
+etc.). A significant proportion of variants in the annotation datasets
+related to clinical interpretation, CIViC and CBMDB, are however not
+mapped to the genome. Whenever possible, we have utilized
+`TransVar <http://bioinformatics.mdanderson.org/transvarweb/>`__ to
+identify the actual genomic variants (e.g. *g.chr7:140453136A>T*) that
+corresponds to variants reported with other HGVS nomenclature (e.g.
+*p.V600E*).
+
+Other data quality concerns
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Clinical biomarkers** Clinical biomarkers included in PCGR is limited
+to the following: \* Markers reported at the variant level (e.g. **BRAF
+p.V600E**) \* Markers reported at the codon level (e.g. **KRAS p.G12**)
+\* Markers reported at the exon level (e.g. **KIT exon 11 mutation**) \*
+Within CBMDB, only markers collected from FDA/NCCN guidelines,
+scientific literature and clinical trials are included (markers
+collected from conference abstracts are not included)
+
+**COSMIC variants** The COSMIC dataset that is part of the PCGR
+annotation bundle is the subset of variants that satisfy the following
+criteria: \* **Mutation somatic status** is either
+'*confirmed\_somatic*' or
+'*reported\_in\_another\_cancer\_sample\_as\_somatic*'. \*
+**Site/histology** must be known and the sample must come from a
+malignant tumor (i.e. not polyps/adenomas, which are also found in
+COSMIC)

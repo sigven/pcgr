@@ -5,6 +5,7 @@ The annotated variants are based on the following underlying tools and knowledge
 * [dBNSFP](https://sites.google.com/site/jpopgen/dbNSFP) - database of non-synonymous functional predictions (`r pcgr_data$database_versions$dbnsfp$version`)
 * [ICGC](https://dcc.icgc.org/) - Somatic mutations discovered in all ICGC tumor cohorts (`r pcgr_data$database_versions$icgc$version`)
 * [ExAC](http://exac.broadinstitute.org/) - germline variant frequencies exome-wide (`r pcgr_data$database_versions$exac$version`)
+* [gnomAD](http://exac.broadinstitute.org/) - germline variant frequencies exome-wide (`r pcgr_data$database_versions$gnomad$version`)
 * [dbSNP](http://www.ncbi.nlm.nih.gov/SNP/) - database of short genetic variants (`r pcgr_data$database_versions$dbsnp$version`)
 * [1000Genomes](ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/) - germline variant (`r pcgr_data$database_versions$onekg$version`)
 * [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - database of clinically related variants (`r pcgr_data$database_versions$clinvar$version`)
