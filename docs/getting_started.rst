@@ -42,8 +42,10 @@ terminal window.
 Download PCGR
 ^^^^^^^^^^^^^
 
-April 12th 2017: New release (v0.3) \* Download and unpack the `latest
-release (v0.3) <https://github.com/sigven/pcgr/releases/latest>`__
+**April 12th 2017**: New release (v0.3)
+
+-  Download and unpack the `latest release
+   (v0.3) <https://github.com/sigven/pcgr/releases/latest>`__
 
 -  Download and unpack the data bundle (approx. 17Gb) in the PCGR
    directory

@@ -23,7 +23,8 @@ An installation of Python (version 2.7.13) is required to run PCGR. Check that P
 
 #### Download PCGR
 
-<font color="red"><b>April 12th 2017</b>: New release (v0.3)</font>
+__April 12th 2017__: New release (v0.3)</font>
+
 * Download and unpack the [latest release (v0.3)](https://github.com/sigven/pcgr/releases/latest)
 
 * Download and unpack the data bundle (approx. 17Gb) in the PCGR directory
