@@ -92,19 +92,24 @@ corresponds to variants reported with other HGVS nomenclature (e.g.
 Other data quality concerns
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Clinical biomarkers** Clinical biomarkers included in PCGR is limited
-to the following: \* Markers reported at the variant level (e.g. **BRAF
-p.V600E**) \* Markers reported at the codon level (e.g. **KRAS p.G12**)
-\* Markers reported at the exon level (e.g. **KIT exon 11 mutation**) \*
-Within CBMDB, only markers collected from FDA/NCCN guidelines,
-scientific literature and clinical trials are included (markers
-collected from conference abstracts are not included)
+**Clinical biomarkers**
 
-**COSMIC variants** The COSMIC dataset that is part of the PCGR
-annotation bundle is the subset of variants that satisfy the following
-criteria: \* **Mutation somatic status** is either
-'*confirmed\_somatic*' or
-'*reported\_in\_another\_cancer\_sample\_as\_somatic*'. \*
-**Site/histology** must be known and the sample must come from a
-malignant tumor (i.e. not polyps/adenomas, which are also found in
-COSMIC)
+Clinical biomarkers included in PCGR is limited to the following:
+
+-  Markers reported at the variant level (e.g. **BRAF p.V600E**)
+-  Markers reported at the codon level (e.g. **KRAS p.G12**)
+-  Markers reported at the exon level (e.g. **KIT exon 11 mutation**)
+-  Within CBMDB, only markers collected from FDA/NCCN guidelines,
+   scientific literature and clinical trials are included (markers
+   collected from conference abstracts are not included)
+
+**COSMIC variants**
+
+The COSMIC dataset that is part of the PCGR annotation bundle is the
+subset of variants that satisfy the following criteria:
+
+-  **Mutation somatic status** is either '*confirmed\_somatic*' or
+   '*reported\_in\_another\_cancer\_sample\_as\_somatic*'.
+-  **Site/histology** must be known and the sample must come from a
+   malignant tumor (i.e. not polyps/adenomas, which are also found in
+   COSMIC)

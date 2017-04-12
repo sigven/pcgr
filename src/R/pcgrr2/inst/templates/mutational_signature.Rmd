@@ -1,9 +1,9 @@
 `r library(deconstructSigs)`
 ## Mutational signatures
 
-The set of somatic mutations observed in a tumor reflects the varied mutational processes that have been active during its life history, providing insights into the routes taken to carcinogenesis. Exogenous mutagens, such as tobacco smoke and ultraviolet light, and endogenous processes, such as APOBEC enzymatic family functional activity or DNA mismatch repair deficiency, result in characteristic patterns of mutation (i.e. distinct patterns of substitution types in specific seqence contexts). Importantly, recent studies show that mutational signatures could have significant clinical impact in certain tumor types [@Dong2016-hf; @Secrier2016-hc; @Kim2016-od] 
+The set of somatic mutations observed in a tumor reflects the varied mutational processes that have been active during its life history, providing insights into the routes taken to carcinogenesis. Exogenous mutagens, such as tobacco smoke and ultraviolet light, and endogenous processes, such as APOBEC enzymatic family functional activity or DNA mismatch repair deficiency, result in characteristic patterns of mutation (i.e. distinct patterns of substitution types in specific seqence contexts). Importantly, recent studies show that mutational signatures could have significant clinical impact in certain tumor types [@Dong2016-sb; @Secrier2016-qo; @Kim2016-od] 
 
-Here, we apply the [deconstructSigs package](https://github.com/raerose01/deconstructSigs) [@Rosenthal2016-cn] to delineate the known mutational signatures in a single tumor. This package compares the patterns of mutations observed in a single tumor with a large set of estimated signatures found across tumor types [@Alexandrov2013-uh; @Alexandrov2013-an]. 
+Here, we apply the [deconstructSigs package](https://github.com/raerose01/deconstructSigs) [@Rosenthal2016-cn] to delineate the known mutational signatures in a single tumor. This package compares the patterns of mutations observed in a single tumor with a large set of estimated signatures found across tumor types [@Alexandrov2013-uh; @Alexandrov2013-gs]. 
 
 A total of __n = `r nrow(report_data$signature_data$signature_call_set)`__ SNVs were used for the mutational signature analysis of this tumor.
 

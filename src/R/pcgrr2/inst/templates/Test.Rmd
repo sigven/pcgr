@@ -1,0 +1,48 @@
+---
+title: "TEST"
+date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
+output: 
+  html_document:
+    toc: true
+    theme: default
+    number_sections: false
+    toc_float: true
+    toc_depth: 4
+    fig_width: 5
+    fig_height: 4
+params:
+  tier1_report: FALSE
+  tier2_report: FALSE
+  tier3_report: FALSE
+  tier4_report: FALSE
+  tier5_report: FALSE
+  signature_report: FALSE
+  cna_report_segments: FALSE
+  cna_report_oncogene_gain: FALSE
+  cna_report_tsgene_loss: FALSE
+  cna_report_biomarkers: FALSE
+  missing_signature_data: FALSE
+  logR_threshold_amplification: 0.8
+  logR_threshold_homozygous_deletion: -0.8
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(echo = F,warning=FALSE, dpi=72, error=F, eval=T)
+
+```
+
+```{r eval_tags}
+eval1 = params$tier1_report
+```
+
+
+## Annotation sources
+
+```{r conditional_print0}
+cat('test1')
+```
+
+
+```{r conditional_print1, eval = as.logical(eval1), include = params$tier1_report}
+cat('test2')
+```

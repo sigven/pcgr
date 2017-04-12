@@ -41,13 +41,17 @@ A requirement for all variant annotation datasets used in PCGR is that they have
 ### Other data quality concerns
 
 __Clinical biomarkers__
+
 Clinical biomarkers included in PCGR is limited to the following:
+
 * Markers reported at the variant level (e.g. __BRAF p.V600E__)
 * Markers reported at the codon level (e.g. __KRAS p.G12__)
 * Markers reported at the exon level (e.g. __KIT exon 11 mutation__)
 * Within CBMDB, only markers collected from FDA/NCCN guidelines, scientific literature and clinical trials are included (markers collected from conference abstracts are not included)
 
 __COSMIC variants__
+
 The COSMIC dataset that is part of the PCGR annotation bundle is the subset of variants that satisfy the following criteria:
+
 * __Mutation somatic status__ is either '_confirmed_somatic_' or '_reported_in_another_cancer_sample_as_somatic_'.
 * __Site/histology__ must be known and the sample must come from a malignant tumor (i.e. not polyps/adenomas, which are also found in COSMIC)

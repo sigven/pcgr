@@ -2,7 +2,6 @@
 title: "Cancer genome sequencing report for precision oncology - `r sample_name`"
 date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
 bibliography: bibliography.bib
-#runtime: shiny
 output: 
   html_document:
     toc: true
@@ -13,6 +12,9 @@ output:
     fig_width: 5
     fig_height: 4
 params:
+  eval_tier1: FALSE
+  eval_tier2: FALSE
+  eval_tier3: FALSE
   tier1_report: FALSE
   tier2_report: FALSE
   tier3_report: FALSE
@@ -24,58 +26,56 @@ params:
   cna_report_tsgene_loss: FALSE
   cna_report_biomarkers: FALSE
   missing_signature_data: FALSE
-  show_data_sources: TRUE
   logR_threshold_amplification: 0.8
   logR_threshold_homozygous_deletion: -0.8
-  snapshot: !r as.POSIXct("2015-01-01 12:30:00")
 ---
 
 ```{r global_options, include=FALSE}
-knitr::opts_chunk$set(echo = F,warning=FALSE, dpi=300)
+knitr::opts_chunk$set(echo = F,warning=FALSE, dpi=72, error=F, eval=T)
 ```
 
 ## Annotation sources
 
-```{r conditional_print0, child='data_sources.Rmd', eval = show_data_sources}
+```{r conditional_print0, child='data_sources.Rmd'}
 ```
 
 
-```{r conditional_print1, child='tier1.Rmd', eval = tier1_report}
+```{r conditional_print1, child='tier1.Rmd', eval = eval_tier1}
 ```
 
 
-```{r conditional_print2, child='tier2.Rmd', eval = tier2_report}
+```{r conditional_print2, child='tier2.Rmd', eval = eval_tier2}
 ```
 
-```{r conditional_print3, child='tier3.Rmd', eval = tier3_report}
-```
-
-
-```{r conditional_print4, child='tier4.Rmd', eval = tier4_report}
+```{r conditional_print3, child='tier3.Rmd', eval = eval_tier3}
 ```
 
 
-```{r conditional_print5, child='tier5.Rmd', eval = tier5_report}
-```
-
-```{r conditional_print6b, child='cna_report_segments_nondiploid.Rmd', eval = cna_report_segments}
+```{r conditional_print4, child='tier4.Rmd', eval = eval_tier4}
 ```
 
 
-```{r conditional_print7, child='cna_report_oncogene_gain.Rmd', eval = cna_report_oncogene_gain}
+```{r conditional_print5, child='tier5.Rmd', eval = eval_tier5}
 ```
 
-```{r conditional_print8, child='cna_report_tsgene_loss.Rmd', eval = cna_report_tsgene_loss}
+```{r conditional_print6b, child='cna_report_segments_nondiploid.Rmd', eval = eval_cna_segments}
 ```
 
-```{r conditional_print9, child='cna_report_biomarkers.Rmd', eval = cna_report_biomarkers}
+
+```{r conditional_print7, child='cna_report_oncogene_gain.Rmd', eval = eval_cna_gain}
+```
+
+```{r conditional_print8, child='cna_report_tsgene_loss.Rmd', eval = eval_cna_loss}
+```
+
+```{r conditional_print9, child='cna_report_biomarkers.Rmd', eval = eval_cna_biomarker}
 ```
 <br>
 
-```{r conditional_print10, child='mutational_signature.Rmd', eval = signature_report}
+```{r conditional_print10, child='mutational_signature.Rmd', eval = eval_signature_report}
 ```
 
-```{r conditional_print11, child='limited_signature_data.Rmd', eval = missing_signature_data}
+```{r conditional_print11, child='limited_signature_data.Rmd', eval = eval_missing_signature_data}
 ```
 
 ## References

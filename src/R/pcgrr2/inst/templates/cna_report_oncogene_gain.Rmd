@@ -3,6 +3,7 @@
 A total of __`r nrow(cna_data$oncogene_amplified)`__ proto-oncogenes are completely covered (i.e. transcript overlapping 100%) by genomic segments subject to amplifications.
 
 ```{r cna_oncogenes_amplified, echo=F}
+
 myOptions <- list(paging = F, searching=T,caching=F)
 if(nrow(cna_data$oncogene_amplified) >= 10){
   myOptions <- list(paging = T,pageLength=10, searching=T,caching=F)

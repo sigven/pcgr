@@ -132,14 +132,7 @@ signature_contributions_single_sample <- function(mut_data, sample_name, signatu
 
 generate_pcg_report <- function(project_directory, query_vcf, logR_threshold_amplification, logR_threshold_homozygous_deletion, cna_segments_tsv = NULL, sample_name = 'SampleX', signatures_limit = 6, print_biomarkers = TRUE, print_tier_variants = TRUE, print_mutational_signatures = TRUE, print_cna_segments = TRUE, print_maf = TRUE, print_html_report = TRUE){
 
-  tier1_report <- FALSE
-  tier2_report <- FALSE
-  tier3_report <- FALSE
-  tier4_report <- FALSE
-  tier5_report <- FALSE
-  signature_report <- FALSE
-  missing_signature_data <- FALSE
-  show_data_sources <- TRUE
+  report_data <- list(tier1_report = FALSE, tier2_report = FALSE, tier3_report = FALSE, tier4_report = FALSE, tier5_report = FALSE, signature_report = FALSE, missing_signature_data = FALSE, cna_report_oncogene_gain = FALSE, cna_report_tsgene_loss = FALSE, cna_report_biomarkers = FALSE, cna_report_segments = FALSE, missing_signature_data = FALSE)
 
   tier_tsv_fname <- paste0(project_directory, '/',sample_name,'.pcgr.snvs_indels.tiers.tsv')
   msig_tsv_fname <- paste0(project_directory, '/',sample_name,'.pcgr.mutational_signatures.tsv')
@@ -170,29 +163,20 @@ generate_pcg_report <- function(project_directory, query_vcf, logR_threshold_amp
     if(!is.null(report_data$maf_df) & print_maf == TRUE){
       write.table(report_data$maf_df,file=maf_fname, sep="\t",col.names = T,row.names = F,quote = F)
     }
-    tier1_report <- report_data$tier1_report
-    tier2_report <- report_data$tier2_report
-    tier3_report <- report_data$tier3_report
-    tier4_report <- report_data$tier4_report
-    tier5_report <- report_data$tier5_report
-    signature_report <- report_data$signature_report
-    if(signature_report == FALSE){
-      missing_signature_data <- TRUE
-    }
+    report_data$cna_report_tsgene_loss <- FALSE
+    report_data$cna_report_oncogene_gain <- FALSE
+    report_data$cna_report_biomarkers <- FALSE
+    report_data$cna_report_segments <- FALSE
   }
-
-
-  cna_report_tsgene_loss <- FALSE
-  cna_report_oncogene_gain <- FALSE
-  cna_report_biomarkers <- FALSE
-  cna_report_segments <- FALSE
+  cna_data <- list(ranked_segments = data.frame(), oncogene_amplified = data.frame(), tsgene_homozygous_deletion = data.frame(),cna_df_for_print = data.frame(), cna_biomarkers = data.frame(), cna_biomarker_segments = data.frame())
 
   if(!is.null(cna_segments_tsv)){
     if(file.exists(cna_segments_tsv)){
-      cna_report_segments <- TRUE
-      cna_report_tsgene_loss <- TRUE
-      cna_report_oncogene_gain <- TRUE
-      cna_report_biomarkers <- TRUE
+      report_data$cna_report_tsgene_loss <- TRUE
+      report_data$cna_report_oncogene_gain <- TRUE
+      report_data$cna_report_biomarkers <- TRUE
+      report_data$cna_report_segments <- TRUE
+
       cna_data <- pcgrr2::cna_segment_annotation(cna_segments_tsv, logR_threshold_amplification, logR_threshold_homozygous_deletion, format='tcga')
       if(nrow(cna_data$cna_df_for_print) > 0 & print_cna_segments == TRUE){
         write.table(cna_data$cna_df_for_print,file=cna_tsv_fname,col.names = T,row.names = F,quote=F,sep="\t")
@@ -203,7 +187,21 @@ generate_pcg_report <- function(project_directory, query_vcf, logR_threshold_amp
   }
 
   if(print_html_report == TRUE){
-    rmarkdown::render(system.file("templates","report.Rmd", package="pcgrr2"), output_file = paste0(sample_name,'.pcgr.html'), output_dir = project_directory, params = list(signature_report = signature_report, tier1_report = tier1_report, tier2_report = tier2_report, tier3_report = tier3_report, tier4_report = tier4_report, tier5_report = tier5_report, cna_report_tsgene_loss = cna_report_tsgene_loss, cna_report_oncogene_gain = cna_report_oncogene_gain, cna_report_segments = cna_report_segments, cna_report_biomarkers = cna_report_biomarkers, show_data_sources = show_data_sources, logR_threshold_amplification = logR_threshold_amplification, logR_threshold_homozygous_deletion = logR_threshold_homozygous_deletion),quiet=T)
+
+    ## set eval values for markdown report (todo: use params for this?)
+    eval_tier1 <- report_data$tier1_report
+    eval_tier2 <- report_data$tier2_report
+    eval_tier3 <- report_data$tier3_report
+    eval_tier4 <- report_data$tier4_report
+    eval_tier5 <- report_data$tier5_report
+    eval_signature_report <- report_data$signature_report
+    eval_missing_signature_data <- report_data$missing_signature_data
+    eval_cna_segments <- report_data$cna_report_segments
+    eval_cna_loss <- report_data$cna_report_tsgene_loss
+    eval_cna_gain <- report_data$cna_report_oncogene_gain
+    eval_cna_biomarker <- report_data$cna_report_biomarkers
+
+    rmarkdown::render(system.file("templates","report.Rmd", package="pcgrr2"), output_file = paste0(sample_name,'.pcgr.html'), output_dir = project_directory, intermediates_dir = project_directory, params = list(logR_threshold_amplification = logR_threshold_amplification, logR_threshold_homozygous_deletion = logR_threshold_homozygous_deletion, tier1_report = report_data$tier1_report, tier2_report = report_data$tier2_report, tier3_report = report_data$tier3_report, tier4_report = report_data$tier4_report, tier5_report = report_data$tier5_report, cna_report_tsgene_loss = report_data$cna_report_tsgene_loss, cna_report_oncogene_gain = report_data$cna_report_oncogene_gain, cna_report_biomarkers = report_data$cna_report_biomarkers, cna_report_segments = report_data$cna_report_segments, signature_report = report_data$signature_report, missing_signature_data = report_data$missing_signature_data), quiet=T)
   }
 
 }
@@ -288,12 +286,12 @@ cna_segment_annotation <- function(cna_file, logR_threshold_amplification, logR_
   df <- dplyr::select(df, CHROMOSOME, GENE, GENE_NAME, CANCER_CENSUS_SOMATIC, KEGG_PATHWAY, TUMOR_SUPPRESSOR, ONCOGENE, ANTINEOPLASTIC_DRUG_INTERACTIONS,SEGMENT_LENGTH, SEGMENT, gencode_transcript_type,LogR, TRANSCRIPT_OVERLAP) %>% dplyr::distinct()
   df <- df %>% dplyr::distinct()
 
-  cna_segments_filtered <- NULL
+  cna_segments_filtered <- data.frame()
   cna_segments_filtered <- dplyr::filter(cna_segments, LogR >= logR_threshold_amplification | LogR <= logR_threshold_homozygous_deletion)
   cna_segments_filtered <- cna_segments_filtered %>% dplyr::arrange(desc(LogR))
   rlogging::message(paste0("Detected ",nrow(cna_segments_filtered)," segments subject to amplification/deletion"))
 
-  oncogene_amplified <- NULL
+  oncogene_amplified <- data.frame()
   oncogene_amplified <- dplyr::filter(df, !is.na(ONCOGENE) & TRANSCRIPT_OVERLAP == 100 & LogR >= logR_threshold_amplification & gencode_transcript_type == 'protein_coding')
   if(nrow(oncogene_amplified) > 0){
     oncogene_amplified <- dplyr::select(oncogene_amplified, -c(TUMOR_SUPPRESSOR, ONCOGENE,TRANSCRIPT_OVERLAP,gencode_transcript_type))
@@ -301,7 +299,7 @@ cna_segment_annotation <- function(cna_file, logR_threshold_amplification, logR_
     oncogene_amplified$CNA_TYPE <- 'gain'
     rlogging::message(paste0("Detected proto-oncogene(s) subject to amplification (log(2) ratio >= ",logR_threshold_amplification,"): ",paste0(oncogene_amplified$GENE,collapse=", ")))
   }
-  tsgene_homozygous_deletion <- NULL
+  tsgene_homozygous_deletion <- data.frame()
   tsgene_homozygous_deletion <- dplyr::filter(df, !is.na(TUMOR_SUPPRESSOR) & TRANSCRIPT_OVERLAP == 100  & LogR <= logR_threshold_homozygous_deletion & gencode_transcript_type == 'protein_coding')
   if(nrow(tsgene_homozygous_deletion) > 0){
     tsgene_homozygous_deletion <- dplyr::select(tsgene_homozygous_deletion, -c(TUMOR_SUPPRESSOR, ONCOGENE,TRANSCRIPT_OVERLAP,gencode_transcript_type))
@@ -334,7 +332,7 @@ cna_segment_annotation <- function(cna_file, logR_threshold_amplification, logR_
     cna_biomarker_segments <- dplyr::select(cna_biomarkers, SEGMENT, LogR) %>% dplyr::distinct()
   }
 
-  cna_data <- list('ranked_segments' = cna_segments_filtered, 'oncogene_amplified' = oncogene_amplified, 'tsgene_homozygous_deletion' = tsgene_homozygous_deletion,'cna_df_for_print' = df_print_sorted, 'cna_biomarkers' = cna_biomarkers, 'cna_biomarker_segments' = cna_biomarker_segments)
+  cna_data <- list(ranked_segments = cna_segments_filtered, oncogene_amplified = oncogene_amplified, tsgene_homozygous_deletion = tsgene_homozygous_deletion,cna_df_for_print = df_print_sorted, cna_biomarkers = cna_biomarkers, cna_biomarker_segments = cna_biomarker_segments)
   return(cna_data)
 }
 

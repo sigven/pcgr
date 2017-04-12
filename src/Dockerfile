@@ -2,12 +2,12 @@
 # Dockerfile to build Personal Cancer Genome Reporter (PCGR)
 # Main software components:
 #  1. Variant Effect Predictor (VEP)
-#  2. vcfanno
+#  2. vcfanno (0.0.11)
 #  3. custom scripts (pcgr.tgz)
 ############################################################
 
-# use Debian as base image
-FROM debian:testing
+# use Debian:testing as base image
+FROM debian:jessie-backports
 
 # set non interactive
 ENV DEBIAN_FRONTEND=noninteractive
@@ -15,7 +15,7 @@ ENV PACKAGE_BIO="tabix samtools libhts1 bedtools"
 ENV PACKAGE_DEV="perl debconf-utils build-essential gfortran python-dev python-pip gcc-multilib autoconf zlib1g-dev git libncurses5-dev libblas-dev liblapack-dev cpanminus libcurl4-gnutls-dev libssh2-1-dev libxml2-dev vim libssl-dev openssl libcairo2-dev"
 ENV PYTHON_MODULES="numpy cython scipy transvar bx-python pyvcf cyvcf cyvcf2 biopython crossmap pandas"
 
-ENV R_BASE_VERSION 3.3.3
+ENV R_BASE_VERSION 3.3.2
 
 USER root
 WORKDIR /
@@ -33,15 +33,17 @@ RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
 
 ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
-
-RUN echo "deb http://http.debian.net/debian sid main" > /etc/apt/sources.list.d/debian-unstable.list \
-	&& echo 'APT::Default-Release "testing";' > /etc/apt/apt.conf.d/default
+#deb http://ftp.debian.org/debian jessie-backports main
+RUN echo "deb http://http.debian.net/debian jessie-backports main" > /etc/apt/sources.list.d/debian-jessie-backports.list \
+	&& echo 'APT::Default-Release "jessie-backports";' > /etc/apt/apt.conf.d/default
+#RUN echo "deb http://http.debian.net/debian sid main" > /etc/apt/sources.list.d/debian-unstable.list \
+	#&& echo 'APT::Default-Release "testing";' > /etc/apt/apt.conf.d/default
 
 ## Now install R and littler, and create a link for littler in /usr/local/bin
 ## Also set a default CRAN repo, and make sure littler knows about it too
 RUN apt-get update && apt-get install -y --no-install-recommends \
 		littler \
-    r-cran-littler \
+    #r-cran-littler \
 		r-base=${R_BASE_VERSION}* \
 		r-base-dev=${R_BASE_VERSION}* \
 		r-recommended=${R_BASE_VERSION}* \
@@ -55,7 +57,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 	&& rm -rf /tmp/downloaded_packages/ /tmp/*.rds \
 	&& rm -rf /var/lib/apt/lists/*
 
-# Install pandoc
+# Install pandoc (for HTML reports)
 RUN wget https://github.com/jgm/pandoc/releases/download/1.19.1/pandoc-1.19.1-1-amd64.deb && \
       dpkg -i pandoc* && \
       rm pandoc* && \
@@ -85,7 +87,7 @@ mv vcf_validator /usr/local/bin && \
 chmod 755 /usr/local/bin/vcf_validator
 
 # Install VEP
-# https://gist.github.com/ckandoth/57d189f018b448774704d3b2191720a6
+# Necessary Perl modules
 RUN cpanm File::ShareDir::Install \
  && cpanm Data::UUID \
  && cpanm autodie \
@@ -100,44 +102,42 @@ RUN cpanm File::ShareDir::Install \
  && cpanm CGI \
  && cpanm DBI \
  && cpanm Archive::Tar
-
 # && cpanm Bio::DB::HTS \
 
- VOLUME        /usr/local/share/vep/data
- ENV VEP_DATA="/usr/local/share/vep/data"
- ENV VEP_DATA_DOCKER="/usr/local/share/vep/data"
- ENV VEP_PATH="/usr/local/share/vep/vep"
- ENV VEP_PLUGINS="/usr/local/share/vep/Plugins"
- ENV VEP_INSTDIR="/ensembl-tools/scripts/variant_effect_predictor/"
- ENV PERL5LIB=$PERL5LIB:$VEP_PATH:$VEP_PLUGINS
- ENV PATH=$PATH:$VEP_PATH/htslib
- ENV SPECIES="homo_sapiens"
- ENV ASSEMBLY="GRCh37"
- ENV VEPPLUGIN="LoF,TSSDistance"
- RUN git clone -b release/85 https://github.com/Ensembl/ensembl-tools.git
- WORKDIR $VEP_INSTDIR
- RUN printf 'y\n' | perl INSTALL.pl --AUTO a --SPECIES $SPECIES --ASSEMBLY $ASSEMBLY --PLUGINS $VEPPLUGIN --DESTDIR $VEP_PATH --CACHEDIR $VEP_DATA
- RUN cp *.pl /usr/local/bin/
- WORKDIR /
+VOLUME        /usr/local/share/vep/data
+ENV VEP_DATA="/usr/local/share/vep/data"
+ENV VEP_DATA_DOCKER="/usr/local/share/vep/data"
+ENV VEP_PATH="/usr/local/share/vep/vep"
+ENV VEP_PLUGINS="/usr/local/share/vep/Plugins"
+ENV VEP_INSTDIR="/ensembl-tools/scripts/variant_effect_predictor/"
+ENV PERL5LIB=$PERL5LIB:$VEP_PATH:$VEP_PLUGINS
+ENV PATH=$PATH:$VEP_PATH/htslib
+ENV SPECIES="homo_sapiens"
+ENV ASSEMBLY="GRCh37"
+ENV VEPPLUGIN="LoF,TSSDistance"
+RUN git clone -b release/85 https://github.com/Ensembl/ensembl-tools.git
+WORKDIR $VEP_INSTDIR
+RUN printf 'y\n' | perl INSTALL.pl --AUTO a --SPECIES $SPECIES --ASSEMBLY $ASSEMBLY --PLUGINS $VEPPLUGIN --DESTDIR $VEP_PATH --CACHEDIR $VEP_DATA
+RUN cp *.pl /usr/local/bin/
+WORKDIR /
 
+## Add vcfbreakmulti (for future preprocessing of input)
 RUN git clone --recursive https://github.com/ekg/vcflib.git
 WORKDIR vcflib
 RUN make
-#WORKDIR 
 RUN cp bin/vcfbreakmulti /usr/local/bin
 RUN rm -rf /vcflib
 
-# Install local R report engine
+# Add local PCGR R package
 WORKDIR /
 ADD R/ /
 RUN R -e "devtools::install('pcgrr2')"
 
+# Add local PCGR Python scripts/libraries
 ADD pcgr.tgz /
 ENV PATH=$PATH:/pcgr
 ENV PYTHONPATH=:/pcgr/lib:${PYTHONPATH}
 ENV VCFANNO_DATA_DOCKER="/data"
-
-
 
 # Clean Up
 RUN apt-get clean autoclean
@@ -146,10 +146,6 @@ RUN rm -rf /var/lib/{dpkg,cache,log}
 
 VOLUME /workdir
 WORKDIR /workdir/
-
-
-
-### FROM VCFANNO DOCKERFILE
 USER root
 RUN mkdir /data && chmod 777 /data
 WORKDIR /data

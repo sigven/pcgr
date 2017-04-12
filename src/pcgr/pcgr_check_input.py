@@ -110,10 +110,10 @@ def is_valid_vcf(vcf_validator_output_file):
 def verify_input(input_vcf, input_cna_segments):
    
    logger = getlogger('pcgr-check-input')
-   input_vcf_pcgr_ready = re.sub(r'(\.vcf$|\.vcf\.gz$)','.pcgr_ready.vcf',input_vcf)
+   input_vcf_pcgr_ready = '/workdir/output/' + re.sub(r'(\.vcf$|\.vcf\.gz$)','.pcgr_ready.vcf',os.path.basename(input_vcf))
    if not input_vcf == 'None':
       logger.info('Validating VCF file with EBIvariation/vcf-validator')
-      vcf_validation_output_file = re.sub(r'(\.vcf$|\.vcf\.gz$)','.vcf_validator_output',input_vcf)
+      vcf_validation_output_file = '/workdir/output/' + re.sub(r'(\.vcf$|\.vcf\.gz$)','.vcf_validator_output',os.path.basename(input_vcf))
       command_v42 = 'vcf_validator --input ' + str(input_vcf) + ' --version v4.2 > ' + str(vcf_validation_output_file)
       if input_vcf.endswith('.gz'):
          command_v42 = 'bgzip -dc ' + str(input_vcf) + ' | vcf_validator --version v4.2 > ' + str(vcf_validation_output_file)
