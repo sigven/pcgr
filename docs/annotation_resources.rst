@@ -13,7 +13,7 @@ Basic variant consequence annotation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  `dBNSFP v3.4 <https://sites.google.com/site/jpopgen/dbNSFP>`__ -
-   database of non-synonymous functional predictions (March 2016)
+   database of non-synonymous functional predictions (March 2017)
 -  `IntOGen catalogs of driver
    mutations/genes <https://www.intogen.org/downloads>`__ - (May 2016)
 
@@ -45,7 +45,7 @@ Variant databases of clinical utility
 -  `DoCM <http://docm.genome.wustl.edu>`__ - database of curated
    mutations (v3.2, April 2016)
 -  `CIViC <http://civic.genome.wustl.edu>`__ - clinical interpretations
-   of variants in cancer (March 17th 2016)
+   of variants in cancer (April 5th 2017)
 -  `CBMDB <http://www.cancergenomeinterpreter.org/biomarkers>`__ -
    Cancer BioMarkers database (Februay 8th 2017)
 -  `DGIdb <http://dgidb.genome.wustl.edu>`__ - database of interactions
@@ -60,9 +60,6 @@ Protein domains/functional features
    2017)
 -  `Pfam v31 <http://pfam.xfam.org>`__ - database of protein families
    and domains (March 2017)
--  `Appris 2016\_03.v15 <http://appris.bioinfo.cnio.es/#/>`__ -
-   annotation of prinicipal human transcript isoforms database (March
-   2016)
 
 Cancer gene knowledge bases
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -99,9 +96,11 @@ Clinical biomarkers included in PCGR is limited to the following:
 -  Markers reported at the variant level (e.g. **BRAF p.V600E**)
 -  Markers reported at the codon level (e.g. **KRAS p.G12**)
 -  Markers reported at the exon level (e.g. **KIT exon 11 mutation**)
--  Within CBMDB, only markers collected from FDA/NCCN guidelines,
-   scientific literature and clinical trials are included (markers
-   collected from conference abstracts are not included)
+-  Within the `Cancer bioMarkers database
+   (CBMDB) <https://www.cancergenomeinterpreter.org/biomarkers>`__, only
+   markers collected from FDA/NCCN guidelines, scientific literature,
+   and clinical trials are included (markers collected from conference
+   abstracts etc. are not included)
 
 **COSMIC variants**
 
