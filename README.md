@@ -53,7 +53,7 @@ A local installation of Python (it has been tested with [version 2.7.13](https:/
 
 #### STEP 2: Download PCGR
 
-<font color="red"><b>April 12th 2017</b>: New release (0.3.1)</font>
+<font color="red"><b>April 14th 2017</b>: New release (0.3.1)</font>
 
 1. Download and unpack the [latest release (0.3.1)](https://github.com/sigven/pcgr/releases/latest)
 2. Download and unpack the data bundle (approx. 17Gb) in the PCGR directory
