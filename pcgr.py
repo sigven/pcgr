@@ -18,12 +18,12 @@ def __main__():
    parser.add_argument('--num_vcfanno_processes', dest = "num_vcfanno_processes", default=4, type=int, help='Number of processes used during vcfanno annotation')
    parser.add_argument('--num_vep_forks', dest = "num_vep_forks", default=4, type=int, help='Number of forks (--forks option in VEP) used during VEP annotation')
    parser.add_argument('--force_overwrite', action = "store_true", help='By default, the script will fail with an error if any output file already exists. You can force the overwrite of existing result files by using this flag')
-   parser.add_argument('--version', action='version', version='%(prog)s 0.3')
-   parser.add_argument('pcgr_dir',help='PCGR base directory with accompanying data directory, e.g. ~/pcgr-0.3')
+   parser.add_argument('--version', action='version', version='%(prog)s 0.3.1')
+   parser.add_argument('pcgr_dir',help='PCGR base directory with accompanying data directory, e.g. ~/pcgr-0.3.1')
    parser.add_argument('output_dir',help='Output directory')
    parser.add_argument('sample_id',help="Tumor sample/cancer genome identifier - prefix for output files")
    
-   docker_image_version = 'sigven/pcgr:0.3'
+   docker_image_version = 'sigven/pcgr:0.3.1'
    args = parser.parse_args()
    
    overwrite = 0

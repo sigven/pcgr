@@ -311,8 +311,8 @@ cna_segment_annotation <- function(cna_file, logR_threshold_amplification, logR_
   names(civic_cna_biomarkers) <- toupper(names(civic_cna_biomarkers))
   civic_cna_biomarkers <- dplyr::rename(civic_cna_biomarkers, GENE = GENESYMBOL, CNA_TYPE = CIVIC_CONSEQUENCE, DESCRIPTION = EVIDENCE_DESCRIPTION, CITATION = PUBMED_HTML_LINK)
 
-  cna_biomarkers <- NULL
-  cna_biomarker_segments <- NULL
+  cna_biomarkers <- data.frame()
+  cna_biomarker_segments <- data.frame()
   if(!is.null(tsgene_homozygous_deletion)){
     if(nrow(tsgene_homozygous_deletion) > 0){
       civic_biomarker_hits1 <- dplyr::inner_join(tsgene_homozygous_deletion, civic_cna_biomarkers, by=c("GENE","CNA_TYPE"))
@@ -327,9 +327,11 @@ cna_segment_annotation <- function(cna_file, logR_threshold_amplification, logR_
   }
 
   if(!is.null(cna_biomarkers)){
-    cna_biomarkers <- cna_biomarkers[c("CHROMOSOME","GENE","CNA_TYPE","EVIDENCE_LEVEL","CLINICAL_SIGNIFICANCE","EVIDENCE_TYPE","DESCRIPTION","DISEASE_NAME","EVIDENCE_DIRECTION","DRUG_NAMES","CITATION","RATING","GENE_NAME","CANCER_CENSUS_SOMATIC","KEGG_PATHWAY","ANTINEOPLASTIC_DRUG_INTERACTIONS","SEGMENT_LENGTH", "SEGMENT","LogR")]
-    cna_biomarkers <- cna_biomarkers %>% dplyr::arrange(EVIDENCE_LEVEL,RATING)
-    cna_biomarker_segments <- dplyr::select(cna_biomarkers, SEGMENT, LogR) %>% dplyr::distinct()
+    if(nrow(cna_biomarkers) > 0){
+      cna_biomarkers <- cna_biomarkers[c("CHROMOSOME","GENE","CNA_TYPE","EVIDENCE_LEVEL","CLINICAL_SIGNIFICANCE","EVIDENCE_TYPE","DESCRIPTION","DISEASE_NAME","EVIDENCE_DIRECTION","DRUG_NAMES","CITATION","RATING","GENE_NAME","CANCER_CENSUS_SOMATIC","KEGG_PATHWAY","ANTINEOPLASTIC_DRUG_INTERACTIONS","SEGMENT_LENGTH", "SEGMENT","LogR")]
+      cna_biomarkers <- cna_biomarkers %>% dplyr::arrange(EVIDENCE_LEVEL,RATING)
+      cna_biomarker_segments <- dplyr::select(cna_biomarkers, SEGMENT, LogR) %>% dplyr::distinct()
+    }
   }
 
   cna_data <- list(ranked_segments = cna_segments_filtered, oncogene_amplified = oncogene_amplified, tsgene_homozygous_deletion = tsgene_homozygous_deletion,cna_df_for_print = df_print_sorted, cna_biomarkers = cna_biomarkers, cna_biomarker_segments = cna_biomarker_segments)

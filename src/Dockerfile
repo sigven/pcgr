@@ -15,7 +15,7 @@ ENV PACKAGE_BIO="tabix samtools libhts1 bedtools"
 ENV PACKAGE_DEV="perl debconf-utils build-essential gfortran python-dev python-pip gcc-multilib autoconf zlib1g-dev git libncurses5-dev libblas-dev liblapack-dev cpanminus libcurl4-gnutls-dev libssh2-1-dev libxml2-dev vim libssl-dev openssl libcairo2-dev"
 ENV PYTHON_MODULES="numpy cython scipy transvar bx-python pyvcf cyvcf cyvcf2 biopython crossmap pandas"
 
-ENV R_BASE_VERSION 3.3.2
+ENV R_BASE_VERSION 3.3.3
 
 USER root
 WORKDIR /
