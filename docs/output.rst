@@ -36,16 +36,23 @@ work properly:
       `tabix <http://www.htslib.org/doc/tabix.html>`__
    -  'chr' must be stripped from the chromosome names
 
-**IMPORTANT NOTE**: Considering the VCF output for the `numerous somatic
-SNV/InDel callers <https://www.biostars.org/p/19104/>`__ that have been
-developed, we have a experienced a general lack of uniformity and
-robustness for the representation of somatic variant genotype data (e.g.
-variant allelic depths (tumor/normal), genotype quality etc.). In the
-output results provided within the current version of PCGR, we are
+**IMPORTANT NOTE 1**: Considering the VCF output for the `numerous
+somatic SNV/InDel callers <https://www.biostars.org/p/19104/>`__ that
+have been developed, we have a experienced a general lack of uniformity
+and robustness for the representation of somatic variant genotype data
+(e.g. variant allelic depths (tumor/normal), genotype quality etc.). In
+the output results provided within the current version of PCGR, we are
 considering PASSed variants only, and variant genotype data (i.e. as
 found in the VCF SAMPLE columns) are not handled or parsed. As improved
 standards for this matter may emerge, we will strive to include this
 information in the annotated output files.
+
+**IMPORTANT NOTE 2**: PCGR generates a number of VCF INFO annotation
+tags that is appended to the query VCF. We will therefore encourage the
+users to submit query VCF files that have not been subject to
+annotations by other means, but rather a VCF file that comes directly
+from variant calling. If not, there are likely to be INFO tags in the
+query VCF file that coincide with those produced by PCGR.
 
 Copy number segments
 ^^^^^^^^^^^^^^^^^^^^

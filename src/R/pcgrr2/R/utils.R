@@ -89,7 +89,7 @@ tier_to_maf <- function(tier_df){
 
 #' Function that retrieves relative estimates of known somatic signatures from a single tumor
 #'
-#' @param mut_data data frame with somatic mutations (VCF_SAMPLE_ID, CHROM, POS, REF, ALT)
+#' @param mut_data data frame with somatic mutations (VCF_SAMPLE_ID, chrom, pos, ref, alt)
 #' @param sample_name sample name
 #' @param signatures_limit max number of contributing signatures
 #'
@@ -97,7 +97,7 @@ tier_to_maf <- function(tier_df){
 signature_contributions_single_sample <- function(mut_data, sample_name, signatures_limit = 6){
   n_muts = nrow(mut_data)
   rlogging::message(paste0("Identifying weighted contributions of known mutational signatures using deconstructSigs (n = ",n_muts," SNVs)"))
-  sigs.input <- deconstructSigs::mut.to.sigs.input(mut.ref = mut_data, sample.id = "VCF_SAMPLE_ID",chr = "CHROM",pos = "POS", ref = "REF", alt = "ALT")
+  sigs.input <- deconstructSigs::mut.to.sigs.input(mut.ref = mut_data, sample.id = "VCF_SAMPLE_ID",chr = "chrom",pos = "pos", ref = "ref", alt = "alt")
   sample_1 <- deconstructSigs::whichSignatures(tumor.ref = sigs.input, sample.id = sample_name, signatures.limit = signatures_limit, signatures.ref = signatures.cosmic,contexts.needed = T,tri.counts.method = 'exome')
   nonzero_signatures <- sample_1$weights[which(colSums(sample_1$weights != 0) > 0)]
   n <- 1
@@ -486,7 +486,7 @@ generate_report_data <- function(sample_calls, sample_name = NULL, minimum_n_sig
   if(any(grepl(paste0("VARIANT_CLASS$"),names(sample_calls)))){
     if(nrow(sample_calls[sample_calls$VARIANT_CLASS == 'SNV',]) >= min_variants_for_signature){
       signature_call_set <- sample_calls[sample_calls$VARIANT_CLASS == 'SNV',]
-      signature_call_set <- dplyr::filter(signature_call_set, CHROM != 'MT')
+      signature_call_set <- dplyr::filter(signature_call_set, chrom != 'MT')
       signature_call_set$VCF_SAMPLE_ID <- sample_name
       signature_report <- TRUE
 
@@ -506,7 +506,7 @@ generate_report_data <- function(sample_calls, sample_name = NULL, minimum_n_sig
     else{
       if(nrow(sample_calls[sample_calls$VARIANT_CLASS == 'SNV',]) > 0){
         signature_call_set <- sample_calls[sample_calls$VARIANT_CLASS == 'SNV',]
-        signature_call_set <- dplyr::filter(signature_call_set, CHROM != 'MT')
+        signature_call_set <- dplyr::filter(signature_call_set, chrom != 'MT')
       }
       rlogging::message(paste0("Too few variants (n = ",nrow(signature_call_set),") for reconstruction of mutational signatures by deconstructSigs"))
       missing_signature_data <- TRUE
@@ -1135,13 +1135,13 @@ get_calls <- function(vcf_gz_file, sample_id = NULL){
     # for (col in c('AF_TUMOR','AF_NORMAL')){
     #   vcf_data_df[col] <- numeric(nrow(vcf_data_df))
     # }
-    vcf_data_df <- dplyr::rename(vcf_data_df, CHROM = seqnames, POS = start, REF = ref, ALT = alt, CONSEQUENCE = Consequence, PROTEIN_CHANGE = HGVSp_short)
+    vcf_data_df <- dplyr::rename(vcf_data_df, chrom = seqnames, pos = start, CONSEQUENCE = Consequence, PROTEIN_CHANGE = HGVSp_short)
     return(vcf_data_df)
   }
 
   vcf_data_df$GENOME_VERSION <- 'GRCh37'
-  vcf_data_df <- dplyr::rename(vcf_data_df, CHROM = seqnames, POS = start, REF = ref, ALT = alt, CONSEQUENCE = Consequence, PROTEIN_CHANGE = HGVSp_short)
-  vcf_data_df$GENOMIC_CHANGE <- paste(paste(paste(paste0("g.chr",vcf_data_df$CHROM),vcf_data_df$POS,sep=":"),vcf_data_df$REF,sep=":"),vcf_data_df$ALT,sep=">")
+  vcf_data_df <- dplyr::rename(vcf_data_df, chrom = seqnames, pos = start, CONSEQUENCE = Consequence, PROTEIN_CHANGE = HGVSp_short)
+  vcf_data_df$GENOMIC_CHANGE <- paste(paste(paste(paste0("g.chr",vcf_data_df$chrom),vcf_data_df$pos,sep=":"),vcf_data_df$ref,sep=":"),vcf_data_df$alt,sep=">")
 
   vcf_data_df <- pcgrr2::add_pfam_domain_links(vcf_data_df)
   vcf_data_df <- pcgrr2::add_swissprot_feature_descriptions(vcf_data_df)

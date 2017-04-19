@@ -35,13 +35,13 @@
 
 ### Genome mapping
 
-A requirement for all variant annotation datasets used in PCGR is that they have been mapped unambiguously to the human genome (GRCh37). For most datasets this is already the case (i.e. dbSNP, COSMIC, ClinVar etc.). A significant proportion of variants in the annotation datasets related to clinical interpretation, CIViC and CBMDB, are however not mapped to the genome. Whenever possible, we have utilized [TransVar](http://bioinformatics.mdanderson.org/transvarweb/) to identify the actual genomic variants (e.g. _g.chr7:140453136A>T_) that corresponds to variants reported with other HGVS nomenclature (e.g. _p.V600E_).
+A requirement for all variant annotation datasets used in PCGR is that they have been mapped unambiguously to the human genome (GRCh37). For most datasets this is already the case (i.e. dbSNP, COSMIC, ClinVar etc.). A significant proportion of variants in the annotation datasets related to clinical interpretation, CIViC and CBMDB, is however not mapped to the genome. Whenever possible, we have utilized [TransVar](http://bioinformatics.mdanderson.org/transvarweb/) to identify the actual genomic variants (e.g. _g.chr7:140453136A>T_) that correspond to variants reported with other HGVS nomenclature (e.g. _p.V600E_).
 
 ### Other data quality concerns
 
 __Clinical biomarkers__
 
-Clinical biomarkers included in PCGR is limited to the following:
+Clinical biomarkers included in PCGR are limited to the following:
 
 * Markers reported at the variant level (e.g. __BRAF p.V600E__)
 * Markers reported at the codon level (e.g. __KRAS p.G12__)

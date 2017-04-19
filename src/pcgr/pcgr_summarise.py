@@ -5,16 +5,14 @@ import re
 import argparse
 import pcgr
 from itertools import izip, imap
-import transcript
-import uniprot
 import cyvcf
 import gzip
 import dbnsfp
 import os
-import utils
+import pcgrutils
 import vcfutils
 
-logger = pcgr.getlogger('pcgr-gene-annotate')
+logger = pcgrutils.getlogger('pcgr-gene-annotate')
 csv.field_size_limit(500 * 1024 * 1024)
 threeLettertoOneLetterAA = {'Ala':'A','Arg':'R','Asn':'N','Asp':'D','Cys':'C','Glu':'E','Gln':'Q','Gly':'G','His':'H','Ile':'I','Leu':'L','Lys':'K', 'Met':'M','Phe':'F','Pro':'P','Ser':'S','Thr':'T','Trp':'W','Tyr':'Y','Val':'V','Ter':'X'}
 
@@ -36,46 +34,6 @@ def threeToOneAA(aa_change):
 
 	aa_change = re.sub(r'[A-Z]{1}fsX([0-9]{1,}|\?)','fs',aa_change)
 	return aa_change
-
-def hamming_distance(str1, str2):
-   """hamming1(str1, str2): Hamming distance. Count the number of differences
-   between equal length strings str1 and str2."""
-   assert len(str1) == len(str2)
-   return sum(c1 != c2 for c1, c2 in izip(str1, str2))
-
-def index_clinvar(clinvar_tsv_file_path):
-   clinvar_xref = {}
-   with gzip.open(clinvar_tsv_file_path, 'rb') as tsvfile:
-      cv_reader = csv.DictReader(tsvfile, delimiter='\t')
-      for rec in cv_reader:
-         
-         unique_traits = {}
-         traits = ''
-         if not rec.has_key('trait'):
-            traits = rec['all_traits']
-         else:
-            traits = rec['trait']
-         #traits = rec['all_traits']
-         for t in traits.split(';'):
-            t_lc = str(t).lower()
-            unique_traits[t_lc] = 1
-         origin = ''
-         if not rec.has_key('variant_origin'):
-            origin = rec['origin']
-         else:
-            origin = rec['variant_origin']
-         
-         traits_curated = ';'.join(unique_traits.keys())
-         traits_origin = traits_curated + ' - ' + str(origin)
-         
-         clinvar_xref[rec['measureset_id']] = {}
-         clinvar_xref[rec['measureset_id']]['phenotype_origin'] = traits_origin
-         if rec['symbol'] == '-' or rec['symbol'] == 'more than 10':
-            rec['symbol'] = 'NA'
-         clinvar_xref[rec['measureset_id']]['genesymbol'] = rec['symbol']
-         
-   return clinvar_xref
-
 
 def map_variant_effect_predictors(rec, vep_info_tags, protein_info_tags, variant_prediction_tags, algorithms):
 	
@@ -99,7 +57,7 @@ def map_variant_effect_predictors(rec, vep_info_tags, protein_info_tags, variant
 			if dbnsfp_predictions.has_key(dbnsfp_key):
 				variant_prediction_tags['EFFECT_PREDICTIONS'][alt_allele] = dbnsfp_predictions[dbnsfp_key]
 
-def get_protein_change_info(up_xref, up_feature_xref, swissprot_features, vep_info_tags, protein_info_tags):
+def get_protein_change_info(up_xref, up_feature_xref, uniprot_feature_names, vep_info_tags, protein_info_tags):
    
    for alt_allele in vep_info_tags['Feature'].keys():
       tmp = {}
@@ -129,22 +87,22 @@ def get_protein_change_info(up_xref, up_feature_xref, swissprot_features, vep_in
          protein_info_tags[m][alt_allele] = {}
 
 
-      uniprot.get_uniprot_data_by_transcript(up_xref, vep_info_tags['Feature'][alt_allele], tmp)
+      pcgrutils.get_uniprot_data_by_transcript(up_xref, vep_info_tags['Feature'][alt_allele], tmp)
       if '/' in vep_info_tags['Protein_position'][alt_allele]:
          tmp['AA_position'] = vep_info_tags['Protein_position'][alt_allele].split('/')[0]
-      uniprot.get_domains_features_by_aapos(up_feature_xref, tmp, qtype = 'feature')
+      pcgrutils.get_domains_features_by_aapos(up_feature_xref, tmp, qtype = 'feature')
       if tmp.has_key('UNIPROT_FEATURE'):
          for feature in tmp['UNIPROT_FEATURE'].split('&'):
             spkey = str(tmp['UNIPROT_ID']) + ':' + str(feature)
-            if swissprot_features.has_key(spkey):
-               if swissprot_features[spkey]['type_description'].startswith('Disulfide bond'):
-                  disulfid_start = int(swissprot_features[spkey]['aa_start'])
-                  disulfid_stop = int(swissprot_features[spkey]['aa_stop'])
+            if uniprot_feature_names.has_key(spkey):
+               if uniprot_feature_names[spkey]['type_description'].startswith('Disulfide bond'):
+                  disulfid_start = int(uniprot_feature_names[spkey]['aa_start'])
+                  disulfid_stop = int(uniprot_feature_names[spkey]['aa_stop'])
                   for aa_pos in aa_positions.keys():
                      if aa_pos == disulfid_start or aa_pos == disulfid_stop:
-                        protein_info_tags['UNIPROT_FEATURE'][alt_allele][str(tmp['UNIPROT_ID'])	 + ':' + swissprot_features[spkey]['feature_type'] + ':' + str(disulfid_start) + '-' + str(disulfid_stop)] = 1
+                        protein_info_tags['UNIPROT_FEATURE'][alt_allele][str(tmp['UNIPROT_ID'])	 + ':' + uniprot_feature_names[spkey]['feature_type'] + ':' + str(disulfid_start) + '-' + str(disulfid_stop)] = 1
                else:
-                  protein_info_tags['UNIPROT_FEATURE'][alt_allele][str(tmp['UNIPROT_ID']) + ':' + swissprot_features[spkey]['feature_type'] + ':' + str(swissprot_features[spkey]['aa_start']) + '-' + str(swissprot_features[spkey]['aa_stop'])] = 1
+                  protein_info_tags['UNIPROT_FEATURE'][alt_allele][str(tmp['UNIPROT_ID']) + ':' + uniprot_feature_names[spkey]['feature_type'] + ':' + str(uniprot_feature_names[spkey]['aa_start']) + '-' + str(uniprot_feature_names[spkey]['aa_stop'])] = 1
       if vep_info_tags['HGVSp'][alt_allele] != '':
          if ':' in vep_info_tags['HGVSp'][alt_allele]:
             protein_identifier = vep_info_tags['HGVSp'][alt_allele].split(':')[0]
@@ -189,74 +147,74 @@ def get_protein_change_info(up_xref, up_feature_xref, swissprot_features, vep_in
             protein_info_tags['CDS_CHANGE'][alt_allele] = key
 
 
-def get_gene_data(gene_xref, vep_info_tags, extended_gene_oncorelevance_tags, idtype = 'transcript'):
+def get_gene_data(transcript_xref, vep_info_tags, pcgr_gene_info_tags):
   
    for alt_allele in vep_info_tags['Feature'].keys():
-      annotations = ['gene_biotype','ccds','entrezgene','principal_isoform_flag','ensembl_gene_id','symbol','cancer_census_somatic','oncoscore','cancer_census_germline','intogen_drivers','tsgene','ts_oncogene','antineoplastic_drugs_dgidb']
+      pcgr_gene_annotations = ['gene_biotype','ccds','entrezgene','principal_isoform_flag','ensembl_gene_id','symbol','cancer_census_somatic','oncoscore','cancer_census_germline','intogen_drivers','tsgene','ts_oncogene','antineoplastic_drugs_dgidb']
       gene_values = {}
-      for ann in annotations:
+      for ann in pcgr_gene_annotations:
          gene_values[ann] = {}
       
-      tid = re.sub(r'\.[0-9]{1,}$','',vep_info_tags['Feature'][alt_allele])
-      if gene_xref.has_key(tid):
-         gene_trans_mappings = gene_xref[tid]
-         for k in gene_trans_mappings:
-            for ann in annotations:
-               if k[ann] != 'NA':
-                  gene_values[ann][re.sub(r' ','_',k[ann])] = 1
+      tid = re.sub(r'\.[0-9]{1,}$','',vep_info_tags['Feature'][alt_allele]) ## ignore Ensembl transcript version when annotating gene annotations (should be similar across transcript versions)
+      if transcript_xref.has_key(tid):
+         transcript_gene_annotations = transcript_xref[tid]
+         for tanno in transcript_gene_annotations:
+            for ann in pcgr_gene_annotations:
+               if tanno[ann] != 'NA':
+                  gene_values[ann][re.sub(r' ','_',tanno[ann])] = 1
       else:
          if tid.startswith('NM_') or tid.startswith('ENST'):
             logger.info("Could not find gene cross-reference information for transcript " + str(tid))
    
       for ann in ['ENTREZ_ID','APPRIS','CANCER_CENSUS_SOMATIC','CANCER_CENSUS_GERMLINE','INTOGEN_DRIVER','ANTINEOPLASTIC_DRUG_INTERACTION','TUMOR_SUPPRESSOR','ONCOGENE','ONCOSCORE']:
-         extended_gene_oncorelevance_tags[ann] = {}
-         extended_gene_oncorelevance_tags[ann][alt_allele] = {}
+         pcgr_gene_info_tags[ann] = {}
+         pcgr_gene_info_tags[ann][alt_allele] = {}
       
       for v in gene_values['entrezgene'].keys():
-         extended_gene_oncorelevance_tags['ENTREZ_ID'][alt_allele][v] = 1
+         pcgr_gene_info_tags['ENTREZ_ID'][alt_allele][v] = 1
       
       for v in gene_values['principal_isoform_flag'].keys():
-         extended_gene_oncorelevance_tags['APPRIS'][alt_allele][v] = 1
+         pcgr_gene_info_tags['APPRIS'][alt_allele][v] = 1
       
       for v in gene_values['cancer_census_somatic'].keys():
-         extended_gene_oncorelevance_tags['CANCER_CENSUS_SOMATIC'][alt_allele][v] = 1
+         pcgr_gene_info_tags['CANCER_CENSUS_SOMATIC'][alt_allele][v] = 1
       
       for v in gene_values['cancer_census_germline'].keys():
-         extended_gene_oncorelevance_tags['CANCER_CENSUS_GERMLINE'][alt_allele][v] = 1
+         pcgr_gene_info_tags['CANCER_CENSUS_GERMLINE'][alt_allele][v] = 1
       
       for v in gene_values['intogen_drivers'].keys():
-         extended_gene_oncorelevance_tags['INTOGEN_DRIVER'][alt_allele][v] = 1
+         pcgr_gene_info_tags['INTOGEN_DRIVER'][alt_allele][v] = 1
          
       for v in gene_values['tsgene'].keys():
-         extended_gene_oncorelevance_tags['TUMOR_SUPPRESSOR'][alt_allele][v] = 1
+         pcgr_gene_info_tags['TUMOR_SUPPRESSOR'][alt_allele][v] = 1
       
       for v in gene_values['ts_oncogene'].keys():
-         extended_gene_oncorelevance_tags['ONCOGENE'][alt_allele][v] = 1
+         pcgr_gene_info_tags['ONCOGENE'][alt_allele][v] = 1
          
       for v in gene_values['antineoplastic_drugs_dgidb'].keys():
-         extended_gene_oncorelevance_tags['ANTINEOPLASTIC_DRUG_INTERACTION'][alt_allele][v] = 1
+         pcgr_gene_info_tags['ANTINEOPLASTIC_DRUG_INTERACTION'][alt_allele][v] = 1
       
       for v in gene_values['oncoscore'].keys():
-         extended_gene_oncorelevance_tags['ONCOSCORE'][alt_allele][v] = 1
+         pcgr_gene_info_tags['ONCOSCORE'][alt_allele][v] = 1
   
 
-def extend_vcf_annotations(query_vcf,pcgr_directory):
+def extend_vcf_annotations(query_vcf, pcgr_directory):
    
-   pfam_domain_names = uniprot.index_pfam_names(os.path.join(pcgr_directory,'data','pfam','pfam.domains.tsv.gz'), ignore_versions = True)
-   swissprot_features = uniprot.index_uniprot_feature_names(os.path.join(pcgr_directory,'data','uniprot','uniprot.features.tsv.gz'))
-   pfam_xref = uniprot.index_pfam(os.path.join(pcgr_directory,'data','pfam','pfam.uniprot.tsv.gz'))
-   uniprot_feature_xref = uniprot.index_uniprot_features(os.path.join(pcgr_directory,'data','uniprot','uniprot.features.tsv.gz'))
+   ## read datasets
+   pfam_domain_names = pcgrutils.index_pfam_names(os.path.join(pcgr_directory,'data','pfam','pfam.domains.tsv.gz'), ignore_versions = True)
+   uniprot_feature_names = pcgrutils.index_uniprot_feature_names(os.path.join(pcgr_directory,'data','uniprot','uniprot.features.tsv.gz'))
+   pfam_xref = pcgrutils.index_pfam(os.path.join(pcgr_directory,'data','pfam','pfam.uniprot.tsv.gz'))
+   uniprot_feature_xref = pcgrutils.index_uniprot_features(os.path.join(pcgr_directory,'data','uniprot','uniprot.features.tsv.gz'))
+   gene_xref = pcgrutils.index_gene_transcripts(os.path.join(pcgr_directory,'data','gene.transcript.onco_xref.GRCh37.tsv.gz'), index = 'ensGene_transcript')
+   up_xref = pcgrutils.index_uniprot(os.path.join(pcgr_directory, 'data','uniprot','uniprot.xref.tsv.gz'), index = 'ensGene_transcript')
+   cancer_hotspot_xref = pcgrutils.index_cancer_hotspots(os.path.join(pcgr_directory,'data','cancerhotspots.org','cancer_hotspots.tsv'))
 
-   gene_xref = None
-   up_xref = None
-   gene_xref = transcript.index_gene(os.path.join(pcgr_directory,'data','gene.transcript.onco_xref.GRCh37.tsv.gz'), index = 'ensGene_transcript')
-   up_xref = uniprot.index_uniprot(os.path.join(pcgr_directory, 'data','uniprot','uniprot.xref.tsv.gz'), index = 'ensGene_transcript')
-   clinvar_data = index_clinvar(os.path.join(pcgr_directory,'data','clinvar/clinvar.tsv.gz'))
+   ##output VCF fname
    out_prefix = re.sub(r'\.vcf(\.gz){0,}$','.annotated.vcf',query_vcf)
-   cancer_hotspot_xref = utils.index_cancer_hotspots(os.path.join(pcgr_directory,'data','cancerhotspots.org','cancer_hotspots.tsv'))
   
-   vep_infotags_desc = utils.read_infotag_file(os.path.join(pcgr_directory,'data','vep_infotags.tsv'))
-   pcgr_infotags_desc = utils.read_infotag_file(os.path.join(pcgr_directory,'data','pcgr_infotags.tsv'))
+   ## read VEP and PCGR tags to be appended to VCF file
+   vep_infotags_desc = pcgrutils.read_infotag_file(os.path.join(pcgr_directory,'data','vep_infotags.tsv'))
+   pcgr_infotags_desc = pcgrutils.read_infotag_file(os.path.join(pcgr_directory,'data','pcgr_infotags.tsv'))
 
    vcf_reader = cyvcf.Reader(open(query_vcf, 'r'))
    logger.info('Read query file')
@@ -294,11 +252,9 @@ def extend_vcf_annotations(query_vcf,pcgr_directory):
       vcf_reader.infos['EFFECT_PREDICTIONS'] = ['EFFECT_PREDICTIONS','.',str(vcf_reader.infos['DBNSFP'].type), effect_predictions_desc]
 
    for tag in vep_infotags_desc:
-      if not tag in vcf_reader.infos.keys():
-         vcf_reader.infos[tag] = [tag,str(vep_infotags_desc[tag]['number']),str(vep_infotags_desc[tag]['type']),str(vep_infotags_desc[tag]['description'])]
+      vcf_reader.infos[tag] = [tag,str(vep_infotags_desc[tag]['number']),str(vep_infotags_desc[tag]['type']),str(vep_infotags_desc[tag]['description'])]
    for tag in pcgr_infotags_desc:
-      if not tag in vcf_reader.infos.keys():
-         vcf_reader.infos[tag] = [tag,str(pcgr_infotags_desc[tag]['number']),str(pcgr_infotags_desc[tag]['type']),str(pcgr_infotags_desc[tag]['description'])]
+      vcf_reader.infos[tag] = [tag,str(pcgr_infotags_desc[tag]['number']),str(pcgr_infotags_desc[tag]['type']),str(pcgr_infotags_desc[tag]['description'])]
    
    vcf_content = []
    current_chrom = None
@@ -335,8 +291,8 @@ def extend_vcf_annotations(query_vcf,pcgr_directory):
       #sample_string = vcfutils.get_vcf_sample_columns(rec, vcf_reader)
       vep_info_tags = {}
       existing_info_tags = {}
-      extended_gene_oncorelevance_tags = {}
-      extended_protein_info_tags = {}
+      pcgr_gene_info_tags = {}
+      pcgr_protein_info_tags = {}
       variant_effect_prediction_tags = {}
       consequence_all = {}
       
@@ -374,14 +330,14 @@ def extend_vcf_annotations(query_vcf,pcgr_directory):
       for alt_allele in consequence_all.keys():
          vep_info_tags['VEP_ALL_CONSEQUENCE'][alt_allele] = ','.join(consequence_all[alt_allele].keys())
       if vep_info_tags.has_key('Protein_position') and vep_info_tags.has_key('Amino_acids'):
-         get_protein_change_info(up_xref, uniprot_feature_xref, swissprot_features,vep_info_tags,extended_protein_info_tags)
-      get_gene_data(gene_xref, vep_info_tags, extended_gene_oncorelevance_tags)
+         get_protein_change_info(up_xref, uniprot_feature_xref, uniprot_feature_names,vep_info_tags,pcgr_protein_info_tags)
+      get_gene_data(gene_xref, vep_info_tags, pcgr_gene_info_tags)
       if rec.INFO.has_key('DBNSFP'):
-         map_variant_effect_predictors(rec, vep_info_tags, extended_protein_info_tags, variant_effect_prediction_tags, dbnsfp_prediction_algorithms)
+         map_variant_effect_predictors(rec, vep_info_tags, pcgr_protein_info_tags, variant_effect_prediction_tags, dbnsfp_prediction_algorithms)
       all_info_vals = []
       
-      if extended_protein_info_tags.has_key('PROTEIN_POSITIONS'):
-         utils.map_cancer_hotspots(cancer_hotspot_xref, vep_info_tags, extended_protein_info_tags)
+      if pcgr_protein_info_tags.has_key('PROTEIN_POSITIONS'):
+         pcgrutils.map_cancer_hotspots(cancer_hotspot_xref, vep_info_tags, pcgr_protein_info_tags)
        
       for k in vep_info_tags.keys():
          values = []
@@ -407,28 +363,28 @@ def extend_vcf_annotations(query_vcf,pcgr_directory):
                all_info_vals.append(str(k) + '=' + str(existing_info_tags[k]))
          
       
-      for k in extended_gene_oncorelevance_tags.keys():
+      for k in pcgr_gene_info_tags.keys():
          values = []
-         for alt_allele in sorted(extended_gene_oncorelevance_tags[k].keys()):
-            if len(extended_gene_oncorelevance_tags[k][alt_allele].keys()) != 0:
-               values.append('&'.join(extended_gene_oncorelevance_tags[k][alt_allele].keys()))
+         for alt_allele in sorted(pcgr_gene_info_tags[k].keys()):
+            if len(pcgr_gene_info_tags[k][alt_allele].keys()) != 0:
+               values.append('&'.join(pcgr_gene_info_tags[k][alt_allele].keys()))
          if(len(values) > 0):
             if k == 'ONCOGENE' or k == 'TUMOR_SUPPRESSOR':
                all_info_vals.append(str(k))
             else:
                all_info_vals.append(str(k) + '=' + ','.join(values))
          
-      for k in extended_protein_info_tags.keys():
+      for k in pcgr_protein_info_tags.keys():
          values = []
          if k == 'PROTEIN_POSITIONS':
             continue
-         for alt_allele in sorted(extended_protein_info_tags[k].keys()):
+         for alt_allele in sorted(pcgr_protein_info_tags[k].keys()):
             if k == 'UNIPROT_FEATURE':
-               if len(extended_protein_info_tags[k][alt_allele].keys()) != 0:
-                  values.append('&'.join(extended_protein_info_tags[k][alt_allele].keys()))
+               if len(pcgr_protein_info_tags[k][alt_allele].keys()) != 0:
+                  values.append('&'.join(pcgr_protein_info_tags[k][alt_allele].keys()))
             else:
-               if extended_protein_info_tags[k][alt_allele] != '.':
-                  values.append(extended_protein_info_tags[k][alt_allele])
+               if pcgr_protein_info_tags[k][alt_allele] != '.':
+                  values.append(pcgr_protein_info_tags[k][alt_allele])
          if(len(values) > 0):
             all_info_vals.append(str(k) + '=' + ','.join(values))
 

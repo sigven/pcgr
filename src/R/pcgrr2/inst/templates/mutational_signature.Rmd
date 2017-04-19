@@ -9,11 +9,11 @@ A total of __n = `r nrow(report_data$signature_data$signature_call_set)`__ SNVs 
 
 Given an input tumor profile and reference input signatures (i.e. [30 mutational signatures detected by Sanger/COSMIC](http://cancer.sanger.ac.uk/cosmic/signatures)), deconstructSigs iteratively infers the weighted contributions of each reference signature until an empirically chosen error threshold is reached. In the plots below, the _top panel_ is the tumor mutational profile displaying the fraction of mutations found in each trinucleotide context, the _middle panel_ is the reconstructed mutational profile created by multiplying the calculated weights by the signatures, and the _bottom panel_ is the error between the tumor mutational profile and reconstructed mutational profile. The piechart shows the relative contribution of each signature in the sample.
 
-```{r sigplot, echo=F, fig.width=12,fig.height = 11}
+```{r sigplot, echo=F, fig.width=12,fig.height = 12, dpi=200}
 deconstructSigs::plotSignatures(report_data$signature_data$mut_signature_contributions$which_signatures_obj)
 ```
 
-```{r sigpie, echo=F, fig.width=12,fig.height = 6}
+```{r sigpie, echo=F, fig.width=12,fig.height = 6, dpi=200}
 deconstructSigs::makePie(report_data$signature_data$mut_signature_contributions$which_signatures_obj)
 ```
 

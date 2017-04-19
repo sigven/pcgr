@@ -8,6 +8,8 @@ import subprocess
 import logging
 import sys
 
+version = '0.3.2'
+
 def __main__():
    
    parser = argparse.ArgumentParser(description='Personal Cancer Genome Reporter (PCGR) workflow for clinical interpretation of somatic nucleotide variants and copy number aberration segments',formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -18,12 +20,12 @@ def __main__():
    parser.add_argument('--num_vcfanno_processes', dest = "num_vcfanno_processes", default=4, type=int, help='Number of processes used during vcfanno annotation')
    parser.add_argument('--num_vep_forks', dest = "num_vep_forks", default=4, type=int, help='Number of forks (--forks option in VEP) used during VEP annotation')
    parser.add_argument('--force_overwrite', action = "store_true", help='By default, the script will fail with an error if any output file already exists. You can force the overwrite of existing result files by using this flag')
-   parser.add_argument('--version', action='version', version='%(prog)s 0.3.1')
+   parser.add_argument('--version', action='version', version='%(prog)s ' + str(version))
    parser.add_argument('pcgr_dir',help='PCGR base directory with accompanying data directory, e.g. ~/pcgr-0.3.1')
    parser.add_argument('output_dir',help='Output directory')
    parser.add_argument('sample_id',help="Tumor sample/cancer genome identifier - prefix for output files")
    
-   docker_image_version = 'sigven/pcgr:0.3.1'
+   docker_image_version = 'sigven/pcgr:' + str(version)
    args = parser.parse_args()
    
    overwrite = 0
@@ -199,7 +201,7 @@ def run_pcgr(host_directories, docker_image_version, logR_threshold_amplificatio
    ## verify VCF and CNA segment file
    logger = getlogger('pcgr-validate-input')
    logger.info("STEP 0: Validate input data")
-   vcf_validate_command = str(docker_command_run1) + "pcgr_check_input.py " + str(input_vcf_docker) + " " + str(input_cna_segments_docker) + "\""
+   vcf_validate_command = str(docker_command_run1) + "pcgr_check_input.py /data " + str(input_vcf_docker) + " " + str(input_cna_segments_docker) + "\""
    check_subprocess(vcf_validate_command)
    logger.info('Finished')
    
@@ -252,7 +254,6 @@ def run_pcgr(host_directories, docker_image_version, logR_threshold_amplificatio
    logger = getlogger('pcgr-writer')
    logger.info("STEP 4: Generation of output files")
    pcgr_report_command = str(docker_command_run1) + "/pcgr.R /workdir/output " + str(output_vcf) + " " + str(input_cna_segments_docker) + " "  + str(sample_id)  + " " + str(logR_threshold_amplification) + " " + str(logR_threshold_homozygous_deletion) + "\""
-   #print str(pcgr_report_command)
    check_subprocess(pcgr_report_command)
    logger.info("Finished")
    

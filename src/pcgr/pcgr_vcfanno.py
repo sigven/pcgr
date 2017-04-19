@@ -40,6 +40,9 @@ def __main__():
    run_vcfanno(args.num_processes, args.query_vcf, query_info_tags, vcfheader_file, args.pcgr_dir, conf_fname, args.out_vcf, args.cosmic, args.icgc, args.exac, args.docm, args.intogen_driver_mut, args.clinvar, args.dbsnp, args.dbnsfp, args.oneKG, args.civic, args.cbmdb, args.gnomad)
 
 def run_vcfanno(num_processes, query_vcf, query_info_tags, vcfheader_file, pcgr_directory, conf_fname, output_vcf, cosmic, icgc, exac, docm, intogen_driver_mut, clinvar, dbsnp, dbnsfp, oneKG, civic, cbmdb, gnomad):
+   """
+   Function that annotates a VCF file with vcfanno against a user-defined set of germline and somatic VCF files
+   """
    
    pcgr_db_directory = pcgr_directory + '/data'
    if cosmic is True:
@@ -148,12 +151,17 @@ def run_vcfanno(num_processes, query_vcf, query_info_tags, vcfheader_file, pcgr_
    return 0
    
 def append_to_vcf_header(pcgr_db_directory, dbsource, vcfheader_file):
-   
+   """
+   Function that appends the VCF header information for a given 'dbsource' (containing INFO tag formats/descriptions, and dbsource version)
+   """
    vcf_info_tags_file = str(pcgr_db_directory) + '/' + str(dbsource) + '/' + str(dbsource) + '.vcfanno.vcf_info_tags.txt'
    os.system('cat ' + str(vcf_info_tags_file) + ' >> ' + str(vcfheader_file))
 
 
 def append_to_conf_file(dbsource, pcgr_db_directory, conf_fname):
+   """
+   Function that appends data to a vcfanno conf file ('conf_fname') according to user-defined ('dbsource'). The dbsource defines the set of tags that will be appended during annotation
+   """
    fh = open(conf_fname,'a')
    if dbsource != 'civic':
       fh.write('[[annotation]]\n')

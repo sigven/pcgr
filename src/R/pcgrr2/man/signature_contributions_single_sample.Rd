@@ -8,7 +8,7 @@ signature_contributions_single_sample(mut_data, sample_name,
   signatures_limit = 6)
 }
 \arguments{
-\item{mut_data}{data frame with somatic mutations (VCF_SAMPLE_ID, CHROM, POS, REF, ALT)}
+\item{mut_data}{data frame with somatic mutations (VCF_SAMPLE_ID, chrom, pos, ref, alt)}
 
 \item{sample_name}{sample name}
 
