@@ -89,9 +89,13 @@
                 <p class="caption"><span class="caption-text">Table of Contents</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">About</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#what-is-the-personal-cancer-genome-reporter-pcgr">What is the Personal Cancer Genome Reporter (PCGR)?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-is-the-personal-cancer-genome-reporter-pcgr">What is the Personal Cancer Genome Reporter (PCGR)?</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#example-reports">Example reports</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#why-use-pcgr">Why use PCGR?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#docker-based-technology">Docker-based technology</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contact">Contact</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a></li>
@@ -147,14 +151,15 @@
 <div class="section" id="what-is-the-personal-cancer-genome-reporter-pcgr">
 <h2>What is the Personal Cancer Genome Reporter (PCGR)?<a class="headerlink" href="#what-is-the-personal-cancer-genome-reporter-pcgr" title="Permalink to this headline">¶</a></h2>
 <p>The Personal Cancer Genome Reporter (PCGR) is a stand-alone software
-package intended for analysis and clinical interpretation of individual
-cancer genomes. It interprets both somatic SNVs/InDels and copy number
-aberrations. The software extends basic gene and variant annotations
-from the <a class="reference external" href="http://www.ensembl.org/info/docs/tools/vep/index.html">Ensembl’s Variant Effect Predictor
+package for functional annotation and translation of individual cancer
+genomes for precision oncology. It interprets both somatic SNVs/InDels
+and copy number aberrations. The software extends basic gene and variant
+annotations from the <a class="reference external" href="http://www.ensembl.org/info/docs/tools/vep/index.html">Ensembl’s Variant Effect Predictor
 (VEP)</a> with
 oncology-relevant, up-to-date annotations retrieved flexibly through
-<a class="reference external" href="https://github.com/brentp/vcfanno">vcfanno</a>, and produces HTML
-reports that can be navigated by clinical oncologists (Figure 1).</p>
+<a class="reference external" href="https://github.com/brentp/vcfanno">vcfanno</a>, and produces
+interactive HTML reports intended for clinical interpretation (Figure
+1).</p>
 <div class="figure">
 <img alt="" src="_images/PCGR_workflow.png" />
 </div>
@@ -162,6 +167,13 @@ reports that can be navigated by clinical oncologists (Figure 1).</p>
 affiliated with the <a class="reference external" href="http://cancergenomics.no">Norwegian Cancer Genomics
 Consortium</a>, at the <a class="reference external" href="http://radium.no">Institute for Cancer
 Research/Oslo University Hospital</a>.</p>
+<div class="section" id="example-reports">
+<h3>Example reports<a class="headerlink" href="#example-reports" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Report for a colorectal tumor sample (TCGA)</li>
+<li>Report for a breast tumor sample (TCGA)</li>
+</ul>
+</div>
 </div>
 <div class="section" id="why-use-pcgr">
 <h2>Why use PCGR?<a class="headerlink" href="#why-use-pcgr" title="Permalink to this headline">¶</a></h2>
@@ -176,6 +188,11 @@ related to tumor biology and therapeutic biomarkers, both at the gene
 and variant level. The application generates a tiered report that will
 aid the interpretation of individual cancer genomes in a clinical
 setting.</p>
+<p>If you use PCGR, please cite our paper:</p>
+<p>Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, and
+Eivind Hovig. <strong>Personal Cancer Genome Reporter: Variant Interpretation
+Report For Precision Oncology</strong> (2017). bioRxiv.
+doi:<a class="reference external" href="https://doi.org/10.1101/122366">10.1101/122366</a></p>
 </div>
 <div class="section" id="docker-based-technology">
 <h2>Docker-based technology<a class="headerlink" href="#docker-based-technology" title="Permalink to this headline">¶</a></h2>
@@ -189,6 +206,10 @@ for precision oncology</a>.</p>
 <div class="figure">
 <img alt="" src="_images/docker-logo50.png" />
 </div>
+</div>
+<div class="section" id="contact">
+<h2>Contact<a class="headerlink" href="#contact" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="mailto:sigven&#37;&#52;&#48;ifi&#46;uio&#46;no">sigven<span>&#64;</span>ifi<span>&#46;</span>uio<span>&#46;</span>no</a></p>
 </div>
 </div>
 

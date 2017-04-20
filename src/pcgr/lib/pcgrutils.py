@@ -166,6 +166,9 @@ def index_uniprot_features(uniprot_feature_fname):
    return uniprot_features 
 
 def get_uniprot_data_by_transcript(up_xref, transcript_id, csq):
+   """
+   Function that retrieves UniProt annotation (uniprot id and protein sequence match) for a given transcript
+   """
    
    uniprot_mappings = None
    uniprot_ids = {}
@@ -252,33 +255,6 @@ def index_uniprot_feature_names(sp_features_fname):
          sp_key = rec['uniprot_id'] + ':' + re.sub(r'#',':',rec['key'])
          swissprot_features[sp_key] = rec
    return swissprot_features
-
-
-def index_clinvar(clinvar_tsv_fname):
-   clinvar_xref = {}
-   with gzip.open(clinvar_tsv_fname, 'rb') as tsvfile:
-      cv_reader = csv.DictReader(tsvfile, delimiter='\t')
-      for rec in cv_reader:
-         
-         unique_traits = {}
-         traits = ''
-         traits = rec['all_traits']
-         for t in traits.split(';'):
-            t_lc = str(t).lower()
-            unique_traits[t_lc] = 1
-         origin = ''
-         origin = rec['origin']
-         
-         traits_curated = ';'.join(unique_traits.keys())
-         traits_origin = traits_curated + ' - ' + str(origin)
-         
-         clinvar_xref[rec['measureset_id']] = {}
-         clinvar_xref[rec['measureset_id']]['phenotype_origin'] = traits_origin
-         if rec['symbol'] == '-' or rec['symbol'] == 'more than 10':
-            rec['symbol'] = 'NA'
-         clinvar_xref[rec['measureset_id']]['genesymbol'] = rec['symbol']
-         
-   return clinvar_xref
 
 
 def getlogger(logger_name):

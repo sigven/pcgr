@@ -18,23 +18,11 @@ currently supported.
 VCF
 ^^^
 
-The following requirements **MUST** be met by the input VCF for PCGR to
-work properly:
-
-1. Variants in the raw VCF that contain multiple alternative alleles
-   (e.g. "multiple ALTs") must be split into variants with a single
-   alternative allele. This can be done with the help of either `vt
-   decompose <http://genome.sph.umich.edu/wiki/Vt#Decompose>`__ or
-   `vcflib's vcfbreakmulti <https://github.com/vcflib/vcflib#vcflib>`__.
-   We will add integrated support for this in an upcoming release
-2. The contents of the VCF must be sorted correctly (i.e. according to
-   chromosomal order and chromosomal position). This can be obtained by
-   `vcftools <https://vcftools.github.io/perl_module.html#vcf-sort>`__.
-
-   -  We **strongly** recommend that the input VCF is compressed and
-      indexed using `bgzip <http://www.htslib.org/doc/tabix.html>`__ and
-      `tabix <http://www.htslib.org/doc/tabix.html>`__
-   -  'chr' must be stripped from the chromosome names
+-  We **strongly** recommend that the input VCF is compressed and
+   indexed using `bgzip <http://www.htslib.org/doc/tabix.html>`__ and
+   `tabix <http://www.htslib.org/doc/tabix.html>`__
+-  If the input VCF contains multi-allelic sites, these will be subject
+   to `decomposition <http://genome.sph.umich.edu/wiki/Vt#Decompose>`__
 
 **IMPORTANT NOTE 1**: Considering the VCF output for the `numerous
 somatic SNV/InDel callers <https://www.biostars.org/p/19104/>`__ that

@@ -13,12 +13,8 @@ __IMPORTANT NOTE__: Only the GRCh37 version of the human genome is currently sup
 
 #### VCF
 
-The following requirements __MUST__ be met by the input VCF for PCGR to work properly:
-
-1. Variants in the raw VCF that contain multiple alternative alleles (e.g. "multiple ALTs") must be split into variants with a single alternative allele. This can be done with the help of either [vt decompose](http://genome.sph.umich.edu/wiki/Vt#Decompose) or [vcflib's vcfbreakmulti](https://github.com/vcflib/vcflib#vcflib). We will add integrated support for this in an upcoming release
-2. The contents of the VCF must be sorted correctly (i.e. according to chromosomal order and chromosomal position). This can be obtained by [vcftools](https://vcftools.github.io/perl_module.html#vcf-sort).
-    * We __strongly__ recommend that the input VCF is compressed and indexed using [bgzip](http://www.htslib.org/doc/tabix.html) and [tabix](http://www.htslib.org/doc/tabix.html)
-    * 'chr' must be stripped from the chromosome names
+* We __strongly__ recommend that the input VCF is compressed and indexed using [bgzip](http://www.htslib.org/doc/tabix.html) and [tabix](http://www.htslib.org/doc/tabix.html)
+* If the input VCF contains multi-allelic sites, these will be subject to [decomposition](http://genome.sph.umich.edu/wiki/Vt#Decompose)
 
 __IMPORTANT NOTE 1__: Considering the VCF output for the [numerous somatic SNV/InDel callers](https://www.biostars.org/p/19104/) that have been developed, we have a experienced a general lack of uniformity and robustness for the representation of somatic variant genotype data (e.g. variant allelic depths (tumor/normal), genotype quality etc.). In the output results provided within the current version of PCGR, we are considering PASSed variants only, and variant genotype data (i.e. as found in the VCF SAMPLE columns) are not handled or parsed. As improved standards for this matter may emerge, we will strive to include this information in the annotated output files.
 

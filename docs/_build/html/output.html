@@ -181,25 +181,13 @@ variants (SNVs/InDels)</li>
 currently supported.</p>
 <div class="section" id="vcf">
 <h3>VCF<a class="headerlink" href="#vcf" title="Permalink to this headline">¶</a></h3>
-<p>The following requirements <strong>MUST</strong> be met by the input VCF for PCGR to
-work properly:</p>
-<ol class="arabic simple">
-<li>Variants in the raw VCF that contain multiple alternative alleles
-(e.g. &#8220;multiple ALTs&#8221;) must be split into variants with a single
-alternative allele. This can be done with the help of either <a class="reference external" href="http://genome.sph.umich.edu/wiki/Vt#Decompose">vt
-decompose</a> or
-<a class="reference external" href="https://github.com/vcflib/vcflib#vcflib">vcflib&#8217;s vcfbreakmulti</a>.
-We will add integrated support for this in an upcoming release</li>
-<li>The contents of the VCF must be sorted correctly (i.e. according to
-chromosomal order and chromosomal position). This can be obtained by
-<a class="reference external" href="https://vcftools.github.io/perl_module.html#vcf-sort">vcftools</a>.<ul>
+<ul class="simple">
 <li>We <strong>strongly</strong> recommend that the input VCF is compressed and
 indexed using <a class="reference external" href="http://www.htslib.org/doc/tabix.html">bgzip</a> and
 <a class="reference external" href="http://www.htslib.org/doc/tabix.html">tabix</a></li>
-<li>&#8216;chr&#8217; must be stripped from the chromosome names</li>
+<li>If the input VCF contains multi-allelic sites, these will be subject
+to <a class="reference external" href="http://genome.sph.umich.edu/wiki/Vt#Decompose">decomposition</a></li>
 </ul>
-</li>
-</ol>
 <p><strong>IMPORTANT NOTE 1</strong>: Considering the VCF output for the <a class="reference external" href="https://www.biostars.org/p/19104/">numerous
 somatic SNV/InDel callers</a> that
 have been developed, we have a experienced a general lack of uniformity

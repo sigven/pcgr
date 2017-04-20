@@ -8,7 +8,7 @@ import subprocess
 import logging
 import sys
 
-version = '0.3.2'
+version = '0.3.3'
 
 def __main__():
    
@@ -32,6 +32,7 @@ def __main__():
    if args.force_overwrite is True:
       overwrite = 1
    
+   ## check that script and Docker image version correspond
    check_docker_command = 'docker images -q ' + str(docker_image_version)
    output = subprocess.check_output(str(check_docker_command), stderr=subprocess.STDOUT, shell=True)
    if(len(output) == 0):
@@ -47,6 +48,9 @@ def __main__():
 
 
 def check_input_files(input_vcf, input_cna_segments, base_pcgr_dir, output_dir, overwrite, sample_id, logger):
+   """
+   Function that checks the input files and directories provided by the user and checks for their existence
+   """
    
    input_vcf_dir = "NA"
    input_cna_dir = "NA"
@@ -176,6 +180,9 @@ def getlogger(logger_name):
    return logger
 
 def run_pcgr(host_directories, docker_image_version, logR_threshold_amplification, logR_threshold_homozygous_deletion, num_vcfanno_processes, num_vep_forks, sample_id):
+   """
+   Main function to run the PCGR workflow using Docker
+   """
    
    ## set basic Docker run commands
    output_vcf = 'None'

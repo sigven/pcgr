@@ -5,14 +5,15 @@ What is the Personal Cancer Genome Reporter (PCGR)?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The Personal Cancer Genome Reporter (PCGR) is a stand-alone software
-package intended for analysis and clinical interpretation of individual
-cancer genomes. It interprets both somatic SNVs/InDels and copy number
-aberrations. The software extends basic gene and variant annotations
-from the `Ensembl’s Variant Effect Predictor
+package for functional annotation and translation of individual cancer
+genomes for precision oncology. It interprets both somatic SNVs/InDels
+and copy number aberrations. The software extends basic gene and variant
+annotations from the `Ensembl’s Variant Effect Predictor
 (VEP) <http://www.ensembl.org/info/docs/tools/vep/index.html>`__ with
 oncology-relevant, up-to-date annotations retrieved flexibly through
-`vcfanno <https://github.com/brentp/vcfanno>`__, and produces HTML
-reports that can be navigated by clinical oncologists (Figure 1).
+`vcfanno <https://github.com/brentp/vcfanno>`__, and produces
+interactive HTML reports intended for clinical interpretation (Figure
+1).
 
 .. figure:: PCGR_workflow.png
    :alt: 
@@ -21,6 +22,12 @@ The Personal Cancer Genome Reporter has been developed by scientists
 affiliated with the `Norwegian Cancer Genomics
 Consortium <http://cancergenomics.no>`__, at the `Institute for Cancer
 Research/Oslo University Hospital <http://radium.no>`__.
+
+Example reports
+^^^^^^^^^^^^^^^
+
+-  Report for a colorectal tumor sample (TCGA)
+-  Report for a breast tumor sample (TCGA)
 
 Why use PCGR?
 ~~~~~~~~~~~~~
@@ -37,6 +44,13 @@ and variant level. The application generates a tiered report that will
 aid the interpretation of individual cancer genomes in a clinical
 setting.
 
+If you use PCGR, please cite our paper:
+
+Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, and
+Eivind Hovig. **Personal Cancer Genome Reporter: Variant Interpretation
+Report For Precision Oncology** (2017). bioRxiv.
+doi:\ `10.1101/122366 <https://doi.org/10.1101/122366>`__
+
 Docker-based technology
 ~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -50,3 +64,8 @@ for precision oncology <annotation_resources.html>`__.
 
 .. figure:: docker-logo50.png
    :alt: 
+
+Contact
+~~~~~~~
+
+sigven@ifi.uio.no

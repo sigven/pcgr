@@ -2,20 +2,23 @@
 
 ### Overview
 
-The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package intended for analysis and clinical interpretation of individual cancer genomes. It interprets both somatic SNVs/InDels and copy number aberrations. The software extends basic gene and variant annotations from the [Ensembl’s Variant Effect Predictor (VEP)](http://www.ensembl.org/info/docs/tools/vep/index.html) with oncology-relevant, up-to-date annotations retrieved flexibly through [vcfanno](https://github.com/brentp/vcfanno), and produces HTML reports that can be navigated by clinical oncologists (Figure 1).
+The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for functional annotation and translation of individual cancer genomes for precision oncology. It interprets both somatic SNVs/InDels and copy number aberrations. The software extends basic gene and variant annotations from the [Ensembl’s Variant Effect Predictor (VEP)](http://www.ensembl.org/info/docs/tools/vep/index.html) with oncology-relevant, up-to-date annotations retrieved flexibly through [vcfanno](https://github.com/brentp/vcfanno), and produces interactive HTML reports intended for clinical interpretation (Figure 1).
 
 ![PCGR overview](PCGR_workflow.png)
 
 ### Example reports
-* <a href="http://folk.uio.no/sigven/tumor_sample.COAD.pcgr.html" target="_blank">View an example report for a colorectal tumor sample (TCGA)</a>
-* <a href="http://folk.uio.no/sigven/tumor_sample.BRCA.pcgr.html" target="_blank">View an example report for a breast tumor sample (TCGA)</a>
+* <a href="http://folk.uio.no/sigven/tumor_sample.COAD.pcgr.html" target="_blank">Report for a colorectal tumor sample (TCGA)</a>
+* <a href="http://folk.uio.no/sigven/tumor_sample.BRCA.pcgr.html" target="_blank">Report for a breast tumor sample (TCGA)</a>
 
 ### PCGR documentation
 
 [![Documentation Status](https://readthedocs.org/projects/pcgr/badge/?version=latest)](http://pcgr.readthedocs.io/en/latest/?badge=latest)
 
+If you use PCGR, please cite our paper:
 
-### Annotation resources included in PCGR (v0.3.2)
+Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, and Eivind Hovig. __Personal Cancer Genome Reporter: Variant Interpretation Report For Precision Oncology__ (2017). bioRxiv. doi:[10.1101/122366](https://doi.org/10.1101/122366)
+
+### Annotation resources included in PCGR (v0.3.3)
 
 * [VEP v85](http://www.ensembl.org/info/docs/tools/vep/index.html) - Variant Effect Predictor release 85 (GENCODE v19 as the gene reference dataset)
 * [COSMIC v80](http://cancer.sanger.ac.uk/cosmic/) - Catalogue of somatic mutations in cancer (February 2017)
@@ -53,16 +56,16 @@ A local installation of Python (it has been tested with [version 2.7.13](https:/
 
 #### STEP 2: Download PCGR
 
-<font color="red"><b>April 19th 2017</b>: New release (0.3.2)</font>
+<font color="red"><b>April 20th 2017</b>: New release (0.3.3)</font>
 
-1. Download and unpack the [latest release (0.3.2)](https://github.com/sigven/pcgr/releases/latest)
+1. Download and unpack the [latest release (0.3.3)](https://github.com/sigven/pcgr/releases/latest)
 2. Download and unpack the data bundle (approx. 17Gb) in the PCGR directory
-   * Download [the latest data bundle](https://drive.google.com/file/d/0B8aYD2TJ472mQjZOMmg4djZfT1k/) from Google Drive to `~/pcgr-X.X` (replace _X.X_ with the version number, e.g `~/pcgr-0.3.2`)
+   * Download [the latest data bundle](https://drive.google.com/file/d/0B8aYD2TJ472mQjZOMmg4djZfT1k/) from Google Drive to `~/pcgr-X.X` (replace _X.X_ with the version number, e.g `~/pcgr-0.3.3`)
    * Unpack the data bundle, e.g. through the following Unix command: `gzip -dc pcgr.databundle.GRCh37.YYYYMMDD.tgz | tar xvf -`
 
     A _data/_ folder within the _pcgr-X.X_ software folder should now have been produced
-3. Pull the [PCGR Docker image (0.3.2)](https://hub.docker.com/r/sigven/pcgr/) from DockerHub (3.1Gb):
-   * `docker pull sigven/pcgr:0.3.2` (PCGR annotation engine)
+3. Pull the [PCGR Docker image (0.3.3)](https://hub.docker.com/r/sigven/pcgr/) from DockerHub (3.2Gb):
+   * `docker pull sigven/pcgr:0.3.3` (PCGR annotation engine)
 
 #### STEP 3: Input preprocessing
 
@@ -73,12 +76,9 @@ The PCGR workflow accepts two types of input files:
 
 PCGR can be run with either or both of the two input files present.
 
-The following requirements __MUST__ be met by the input VCF for PCGR to work properly:
+* We __strongly__ recommend that the input VCF is compressed and indexed using [bgzip](http://www.htslib.org/doc/tabix.html) and [tabix](http://www.htslib.org/doc/tabix.html)
+* If the input VCF contains multi-allelic sites, these will be subject to [decomposition](http://genome.sph.umich.edu/wiki/Vt#Decompose)
 
-1. Variants in the raw VCF that contain multiple alternative alleles (e.g. "multiple ALTs") must be split into variants with a single alternative allele. This can be done with the help of either [vt decompose](http://genome.sph.umich.edu/wiki/Vt#Decompose) or [vcflib's vcfbreakmulti](https://github.com/vcflib/vcflib#vcflib). We will add integrated support for this in an upcoming release
-2. The contents of the VCF must be sorted correctly (i.e. according to chromosomal order and chromosomal position). This can be obtained by [vcftools](https://vcftools.github.io/perl_module.html#vcf-sort).
-   * We strongly recommend that the input VCF is compressed and indexed using [bgzip](http://www.htslib.org/doc/tabix.html) and [tabix](http://www.htslib.org/doc/tabix.html)
-   * 'chr' must be stripped from the chromosome names
 
 The tab-separated values file with copy number aberrations __MUST__ contain the following four columns:
 * Chromosome
@@ -112,7 +112,7 @@ A tumor sample report is generated by calling the Python script __pcgr.py__ in t
 
       positional arguments:
       pcgr_dir              PCGR base directory with accompanying data directory,
-                          e.g. ~/pcgr-0.3.2
+                          e.g. ~/pcgr-0.3.3
       output_dir            Output directory
       sample_id             Tumor sample/cancer genome identifier - prefix for
                           output files
@@ -146,7 +146,7 @@ A tumor sample report is generated by calling the Python script __pcgr.py__ in t
 
 The _examples_ folder contain sample files from TCGA. A report for a colorectal tumor case can be generated through the following command:
 
-`python pcgr.py --input_vcf tumor_sample.COAD.vcf.gz --input_cna_segments tumor_sample.COAD.cna.tsv ~/pcgr-0.3.2 ~/pcgr-0.3.2/examples tumor_sample.COAD`
+`python pcgr.py --input_vcf tumor_sample.COAD.vcf.gz --input_cna_segments tumor_sample.COAD.cna.tsv ~/pcgr-0.3.3 ~/pcgr-0.3.3/examples tumor_sample.COAD`
 
 This command will run the Docker-based PCGR workflow and produce the following output files in the _examples_ folder:
 
@@ -157,3 +157,7 @@ This command will run the Docker-based PCGR workflow and produce the following o
 5. __tumor_sample.COAD.pcgr.mutational_signatures.tsv__ - Tab-separated values file with estimated contributions by known mutational signatures and associated underlying etiologies
 6. __tumor_sample.COAD.pcgr.snvs_indels.biomarkers.tsv__ - Tab-separated values file with clinical evidence items associated with biomarkers for diagnosis, prognosis or drug sensitivity/resistance
 7. __tumor_sample.COAD.pcgr.cna_segments.tsv.gz__ - Tab-separated values file with annotations of gene transcripts that overlap with somatic copy number aberrations
+
+## Contact
+
+sigven@ifi.uio.no
