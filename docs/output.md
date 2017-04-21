@@ -9,7 +9,7 @@ The PCGR workflow accepts two types of input files:
 
 PCGR can be run with either or both of the two input files present.
 
-__IMPORTANT NOTE__: Only the GRCh37 version of the human genome is currently supported.
+__IMPORTANT NOTE__: Only the GRCh37 version of the human genome is currently supported. This is primarily due to the fact that a number of the clinical annotation sets are still only available with GRCh37 mapping. Offering support for GRCh38 will have priority in upcoming releases.
 
 #### VCF
 

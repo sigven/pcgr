@@ -28,7 +28,7 @@ __April 20th 2017__: New release (0.3.3)</font>
 * Download and unpack the [latest release (0.3.3)](https://github.com/sigven/pcgr/releases/latest)
 
 * Download and unpack the data bundle (approx. 17Gb) in the PCGR directory
-    * Download [the latest data bundle](https://drive.google.com/file/d/0B8aYD2TJ472mQjZOMmg4djZfT1k/) from Google Drive to `~/pcgr-X.X` (replace _X.X_ with the version number, e.g. `~/pcgr-0.3.3`)
+    * Download [the latest data bundle](https://drive.google.com/open?id=0B8aYD2TJ472mOXZYbGYzaDE0MEk) from Google Drive to `~/pcgr-X.X` (replace _X.X_ with the version number, e.g. `~/pcgr-0.3.3`)
     * Decompress and untar the bundle, e.g. through the following Unix command: `gzip -dc pcgr.databundle.GRCh37.YYYYMMDD.tgz | tar xvf -`
 
     A _data/_ folder within the _pcgr-X.X_ software folder should now have been produced
