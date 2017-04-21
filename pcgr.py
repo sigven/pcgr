@@ -8,7 +8,7 @@ import subprocess
 import logging
 import sys
 
-version = '0.3.3'
+version = '0.3.4'
 
 def __main__():
    
@@ -214,13 +214,15 @@ def run_pcgr(host_directories, docker_image_version, logR_threshold_amplificatio
    
    if not input_vcf_docker == 'None':
       
-      ## Run VEP + vcfanno + summarise
+      ## Define input, output and temporary file names
       output_vcf = '/workdir/output/' + str(sample_id) + '.pcgr.vcf.gz'
       input_vcf_pcgr_ready = '/workdir/output/' + re.sub(r'(\.vcf$|\.vcf\.gz$)','.pcgr_ready.vcf.gz',host_directories['input_vcf_basename_host'])
       vep_vcf = re.sub(r'(\.vcf$|\.vcf\.gz$)','.pcgr_vep.vcf',input_vcf_pcgr_ready)
       vep_vcfanno_vcf = re.sub(r'(\.vcf$|\.vcf\.gz$)','.pcgr_vep.vcfanno.vcf',input_vcf_pcgr_ready)
       vep_tmp_vcf = vep_vcf + '.tmp'
       vep_vcfanno_annotated_vcf = re.sub(r'\.vcfanno','.vcfanno.annotated',vep_vcfanno_vcf) + '.gz'
+      
+      ## VEP command
       vep_main_command = str(docker_command_run1) + "variant_effect_predictor.pl --input_file " + str(input_vcf_pcgr_ready) + " --output_file " + str(vep_tmp_vcf) + " --vcf --check_ref --flag_pick_allele --force_overwrite --species homo_sapiens --assembly GRCh37 --offline --fork " + str(num_vep_forks) + " --no_progress --variant_class --regulatory --domains --shift_hgvs 1 --hgvs --symbol --protein --ccds --uniprot --appris --biotype --canonical --gencode_basic --cache --numbers --check_alleles --total_length --allele_number --no_escape --xref_refseq --dir /usr/local/share/vep/data --fasta /usr/local/share/vep/data/homo_sapiens/85_GRCh37/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz\""
       vep_sed_command =  str(docker_command_run1) + "sed -r 's/\(p\.=\)|polyphen=2.2.2 |ClinVar=201507 |dbSNP=144 |ESP=20141103|sift=sift5.2.2 |COSMIC=71 | HGMD-PUBLIC=20152//g' " + str(vep_tmp_vcf) + " > " + str(vep_vcf) + "\""
       vep_bgzip_command = str(docker_command_run1) + "bgzip -f " + str(vep_vcf) + "\""
@@ -234,6 +236,7 @@ def run_pcgr(host_directories, docker_image_version, logR_threshold_amplificatio
       check_subprocess(vep_bgzip_command)
       check_subprocess(vep_tabix_command)
    
+      ## vcfanno command
       print
       logger = getlogger('pcgr-vcfanno')
       logger.info("STEP 2: Annotation for precision oncology with pcgr-vcfanno (ClinVar, dbSNP, dbNSFP, 1000Genomes Project, ExAC, gnomAD, CiVIC, CBMDB, DoCM, COSMIC, Intogen_driver_mutations, ICGC)")
@@ -241,6 +244,7 @@ def run_pcgr(host_directories, docker_image_version, logR_threshold_amplificatio
       check_subprocess(pcgr_vcfanno_command)
       logger.info("Finished")
       
+      ## summarise command
       print
       logger = getlogger("pcgr-summarise")
       pcgr_summarise_command = str(docker_command_run2) + "pcgr_summarise.py " + str(vep_vcfanno_vcf) + ".gz /data\""
