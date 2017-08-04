@@ -3,14 +3,19 @@
 - A total of __`r nrow(report_data$variants_tier5_display)`__ unique, somatic variant(s) are also found in the tumor sample.
 <br><br>
 
-```{r tier5, echo=F}
+```{r tier5, results='asis',echo=F}
 
-myOptions <- list(paging = F,pageLength=10, searching=T,caching=F)
+myOptions <- list(paging = F,pageLength=10, searching=T,caching=F,buttons = c('csv','excel'),dom = 'Bfrtip')
 if(nrow(report_data$variants_tier5_display) > 10){
-  myOptions <- list(paging = T,pageLength=10, searching=T,caching=F)
+  myOptions <- list(paging = T,pageLength=10, searching=T,caching=F,buttons = c('csv','excel'),dom = 'Bfrtip')
 }
 if(nrow(report_data$variants_tier5_display) > 0){
-  DT::datatable(report_data$variants_tier5_display, options = myOptions, escape=F, extensions = "Responsive")
+  if(nrow(report_data$variants_tier5_display) > 2000){
+    cat('<b>NOTE - listing top 2000 variants according to ONCOSCORE</b><br>',sep="\n")
+    cat('<br>')
+    report_data$variants_tier5_display <- head(report_data$variants_tier5_display, 2000)
+  }
+  DT::datatable(report_data$variants_tier5_display, options = myOptions, escape=F, extensions = c("Buttons","Responsive"))
 }
 
 ```

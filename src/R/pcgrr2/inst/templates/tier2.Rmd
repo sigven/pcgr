@@ -1,6 +1,6 @@
-### Tier 2 - Other cancer mutation hotspots, curated mutations or predicted driver mutations {.tabset}
+### Tier 2 - Other cancer mutation hotspots, curated mutations, or predicted driver mutations {.tabset}
 
-- A total of __`r nrow(report_data$variants_tier2_display)`__ unique, somatic variant(s) in the tumor sample are curated as disease-causing, predicted as driver mutations, or occur in previously detected mutation hotspots.
+- A total of __`r nrow(report_data$variants_tier2_display)`__ unique, somatic variant(s) in the tumor sample are curated as disease-causing, predicted as driver mutations, or occur in known cancer mutation hotspots.
 <br><br>
 
 #### Known mutation hotspots
@@ -12,15 +12,15 @@
  cat('The table below lists variants detected as mutation hotspots according to <a href="http:/cancerhotspots.org/" target="_blank">cancerhotspots.org<a/>:',sep='\n')
 if(nrow(report_data$variants_tier2_hotspots) > 0){
   cat('\n')
-  myOptions <- list(paging = F, searching=F,caching=F)
+  myOptions <- list(paging = F, searching=F,caching=F,buttons = c('csv','excel'),dom = 'Bfrtip')
   if(nrow(report_data$variants_tier2_hotspots) > 10){
-    myOptions <- list(paging = T,pageLength=10, searching=T,caching=F)
+    myOptions <- list(paging = T,pageLength=10, searching=T,caching=F,buttons = c('csv','excel'),dom = 'Bfrtip')
   }
   report_data$variants_tier2_hotspots <- dplyr::rename(report_data$variants_tier2_hotspots, DOCM_DISEASE = OTHER_DISEASE_DOCM, DOCM_LITERATURE = OTHER_LITERATURE_DOCM)
   if(nrow(report_data$variants_tier2_hotspots[!is.na(report_data$variants_tier2_hotspots$INTOGEN_DRIVER_MUT),]) > 0){
     report_data$variants_tier2_hotspots[!is.na(report_data$variants_tier2_hotspots$INTOGEN_DRIVER_MUT),]$INTOGEN_DRIVER_MUT <- TRUE
   }
-  DT::datatable(dplyr::select(report_data$variants_tier2_hotspots, CANCER_MUTATION_HOTSPOT,dplyr::everything()), options = myOptions, escape=F, extensions = "Responsive") %>%
+  DT::datatable(dplyr::select(report_data$variants_tier2_hotspots, CANCER_MUTATION_HOTSPOT,dplyr::everything()), options = myOptions, escape=F, extensions = c("Buttons","Responsive")) %>%
   DT::formatStyle('CANCER_MUTATION_HOTSPOT', backgroundColor = 'black', color='white')
 }else{
   cat('<i>No variants found.</i>',sep='\n')
@@ -39,9 +39,9 @@ if(nrow(report_data$variants_tier2_hotspots) > 0){
 if(nrow(report_data$variants_tier2_curated_mutations) > 0){
   cat('\n')
   cat('The table below lists all other variants in Tier 2 curated as disease-causing in the <a href="http://docm.genome.wustl.edu/" target="_blank">Database of Curated Mutations<a/>:',sep='\n')
-  myOptions <- list(paging = F, searching=F,caching=F)
+  myOptions <- list(paging = F, searching=F,caching=F,buttons = c('csv','excel'),dom = 'Bfrtip')
   if(nrow(report_data$variants_tier2_curated_mutations) > 10){
-    myOptions <- list(paging = T,pageLength=10, searching=T,caching=F)
+    myOptions <- list(paging = T,pageLength=10, searching=T,caching=F,buttons = c('csv','excel'),dom = 'Bfrtip')
   }
 
   report_data$variants_tier2_curated_mutations <- dplyr::rename(report_data$variants_tier2_curated_mutations, DOCM_DISEASE = OTHER_DISEASE_DOCM, DOCM_LITERATURE = OTHER_LITERATURE_DOCM)
@@ -49,7 +49,7 @@ if(nrow(report_data$variants_tier2_curated_mutations) > 0){
     report_data$variants_tier2_curated_mutations[!is.na(report_data$variants_tier2_curated_mutations$INTOGEN_DRIVER_MUT),]$INTOGEN_DRIVER_MUT <- TRUE
   }
   report_data$variants_tier2_curated_mutations <- dplyr::select(report_data$variants_tier2_curated_mutations, -CANCER_MUTATION_HOTSPOT)
-  DT::datatable(dplyr::select(report_data$variants_tier2_curated_mutations, DOCM_DISEASE, dplyr::everything()), options = myOptions, escape=F, extensions = "Responsive") %>%
+  DT::datatable(dplyr::select(report_data$variants_tier2_curated_mutations, DOCM_DISEASE, dplyr::everything()), options = myOptions, escape=F, extensions = c("Buttons","Responsive")) %>%
   DT::formatStyle('DOCM_DISEASE', backgroundColor = 'black', color = 'white')
 }else{
   cat('<i>No variants found.</i>',sep='\n')
@@ -68,14 +68,14 @@ if(nrow(report_data$variants_tier2_curated_mutations) > 0){
 if(nrow(report_data$variants_tier2_predicted_drivers) > 0){
   cat('The table below lists all other variants in Tier 2 predicted as cancer driver mutations in <a href="https://www.intogen.org/downloads" target="_blank">Intogen\'s catalog of driver mutations</a>:',sep='\n')
   
-  myOptions <- list(paging = F, searching=F,caching=F)
+  myOptions <- list(paging = F, searching=F,caching=F,buttons = c('csv','excel'),dom = 'Bfrtip')
   if(nrow(report_data$variants_tier2_predicted_drivers) > 10){
-    myOptions <- list(paging = T,pageLength=10, searching=T,caching=F)
+    myOptions <- list(paging = T,pageLength=10, searching=T,caching=F,buttons = c('csv','excel'),dom = 'Bfrtip')
   }
   #myOptions <- list(paging = T,pageLength=10, searching=T,caching=F)
   report_data$variants_tier2_predicted_drivers <- dplyr::rename(report_data$variants_tier2_predicted_drivers, DOCM_DISEASE = OTHER_DISEASE_DOCM, DOCM_LITERATURE = OTHER_LITERATURE_DOCM)
   report_data$variants_tier2_predicted_drivers <- dplyr::select(report_data$variants_tier2_predicted_drivers, -c(INTOGEN_DRIVER_MUT, CANCER_MUTATION_HOTSPOT, DOCM_DISEASE, DOCM_LITERATURE))
-  DT::datatable(dplyr::select(report_data$variants_tier2_predicted_drivers, SYMBOL, CONSEQUENCE, dplyr::everything()),options = myOptions, escape=F, extensions = "Responsive") %>%
+  DT::datatable(dplyr::select(report_data$variants_tier2_predicted_drivers, SYMBOL, CONSEQUENCE, dplyr::everything()),options = myOptions, escape=F, extensions = c("Buttons","Responsive")) %>%
   DT::formatStyle(columns = c('SYMBOL','CONSEQUENCE'), backgroundColor = 'black',color = 'white')
 }else{
   cat('<i>No variants found.</i>',sep='\n')

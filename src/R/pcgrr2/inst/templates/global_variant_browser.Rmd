@@ -1,0 +1,38 @@
+
+### Global variant browser
+
+The table below permits filtering of the total SNV/InDel set by various criteria (Filtering on sequencing depth/variant allelic fraction depends on input provided by user). __NOTE__: The filtering done here only applies to this table, and not not to the tier-specific tables provided in other parts of the report. 
+
+<br>
+
+```{r table_browse_allelic_depth, echo=F, results = "asis"}
+library(crosstalk)
+library(summarywidget)
+
+vars <- report_data$tsv_variants %>% dplyr::select(SYMBOL, CONSEQUENCE, PROTEIN_CHANGE, VARIANT_CLASS, TIER, TIER_DESCRIPTION, GENE_NAME, dplyr::everything())
+vars$CONSEQUENCE <- stringr::str_replace_all(vars$CONSEQUENCE,"&",",")
+variants_shared <- crosstalk::SharedData$new(vars)
+  
+crosstalk::bscols(
+  list(
+    crosstalk::filter_slider("DP_TUMOR", "Tumor sequencing depth", variants_shared, ~DP_TUMOR, ticks = F),
+    crosstalk::filter_slider("DP_NORMAL", "Normal sequencing depth", variants_shared, ~DP_NORMAL, ticks = F),
+    crosstalk::filter_checkbox("CALL_CONFIDENCE", "Call confidence", variants_shared, ~CALL_CONFIDENCE)
+  ),
+  list(
+    crosstalk::filter_slider("AF_TUMOR", "Allelic fraction tumor", variants_shared, ~AF_TUMOR, sep=F, ticks = F),
+    crosstalk::filter_slider("AF_NORMAL", "Allelic fraction normal", variants_shared, ~AF_NORMAL, sep = F, ticks = F),
+    crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_shared, ~CONSEQUENCE)
+  )
+)
+  
+htmltools::br()
+crosstalk::bscols(
+  DT::datatable(variants_shared, extensions=c("Buttons","Responsive"), width = "100%",
+    options=list(buttons = c('csv','excel'),dom = 'Bfrtip')
+  )
+)
+
+```
+
+<br><br>

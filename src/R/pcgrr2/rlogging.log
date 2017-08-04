@@ -1,485 +1,502 @@
-[2017-03-28 00:06:34][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - ../../../examples/tumor_sample.BRCA.vcf.gz
-[2017-03-28 00:07:15][INFO] Extending annotation descriptions related to PFAM protein domains
-[2017-03-28 00:07:15][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
-[2017-03-28 00:07:15][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
-[2017-03-28 00:08:00][INFO] Extending annotation descriptions related to PFAM protein domains
-[2017-03-28 00:08:00][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
-[2017-03-28 00:08:02][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
-[2017-03-29 22:54:02][INFO] Detected 75 segments subject to amplification/deletion
-[2017-03-31 23:28:32][STOP] File tumor_sample.COAD.pcgr.vcf.gz does not exist or has zero size
-[2017-03-31 23:30:29][STOP] File /Users/sigven/research/docker/pcgr/src/R/pcgrr2/tumor_sample.COAD.pcgr.vcf.gz does not exist or has zero size
-[2017-03-31 23:30:54][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/tumor_sample.COAD.pcgr.vcf.gz
-[2017-03-31 23:31:05][INFO] Number of PASS variants: 3248
-[2017-03-31 23:31:05][INFO] Number of SNVs: 2475
-[2017-03-31 23:31:05][INFO] Number of deletions: 642
-[2017-03-31 23:31:05][INFO] Number of insertions 131
-[2017-03-31 23:31:05][INFO] Extending annotation descriptions related to PFAM protein domains
-[2017-03-31 23:31:05][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
-[2017-03-31 23:31:09][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
-[2017-03-31 23:31:11][INFO] Extending annotation descriptions related to ClinVar
-[2017-03-31 23:31:12][INFO] Generating data for tiered cancer genome report
-[2017-03-31 23:31:12][INFO] Number of coding variants: 2218
-[2017-03-31 23:31:12][INFO] Number of noncoding variants: 1030
-[2017-03-31 23:31:13][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs (n = 2475 SNVs)
-[2017-03-31 23:31:53][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/tumor_sample.COAD.pcgr.vcf.gz
-[2017-03-31 23:31:58][INFO] Number of PASS variants: 3248
-[2017-03-31 23:31:58][INFO] Number of SNVs: 2475
-[2017-03-31 23:31:58][INFO] Number of deletions: 642
-[2017-03-31 23:31:58][INFO] Number of insertions 131
-[2017-03-31 23:31:58][INFO] Extending annotation descriptions related to PFAM protein domains
-[2017-03-31 23:31:59][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
-[2017-03-31 23:32:02][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
-[2017-03-31 23:32:03][INFO] Extending annotation descriptions related to ClinVar
-[2017-03-31 23:32:05][INFO] Generating data for tiered cancer genome report
-[2017-03-31 23:32:05][INFO] Number of coding variants: 2218
-[2017-03-31 23:32:05][INFO] Number of noncoding variants: 1030
-[2017-03-31 23:32:06][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs (n = 2475 SNVs)
-[2017-03-31 23:32:07][INFO] Inferred weighted contribution of S1: 0.928
-[2017-03-31 23:32:07][INFO] Inferred weighted contribution of S6: 0.072
-[2017-03-31 23:32:08][INFO] 47 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
-[2017-03-31 23:32:08][INFO] Underlying variant(s):
-[2017-03-31 23:32:08][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
-[2017-03-31 23:32:08][INFO] 12 clinical evidence item(s) found .. (1 unique variant(s)), mapping = codon
-[2017-03-31 23:32:08][INFO] Underlying variant(s):
-[2017-03-31 23:32:08][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
-[2017-03-31 23:32:08][INFO] 0 clinical evidence item(s) found .. mapping = exon
-[2017-03-31 23:32:08][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
-[2017-03-31 23:36:06][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/tumor_sample.COAD.pcgr.vcf.gz
-[2017-03-31 23:36:13][INFO] Number of PASS variants: 3248
-[2017-03-31 23:36:13][INFO] Number of SNVs: 2475
-[2017-03-31 23:36:13][INFO] Number of deletions: 642
-[2017-03-31 23:36:13][INFO] Number of insertions 131
-[2017-03-31 23:36:13][INFO] Extending annotation descriptions related to PFAM protein domains
-[2017-03-31 23:36:13][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
-[2017-03-31 23:36:16][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
-[2017-03-31 23:36:17][INFO] Extending annotation descriptions related to ClinVar
-[2017-03-31 23:36:19][INFO] Generating data for tiered cancer genome report
-[2017-03-31 23:36:19][INFO] Number of coding variants: 2218
-[2017-03-31 23:36:19][INFO] Number of noncoding variants: 1030
-[2017-03-31 23:36:20][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs (n = 2475 SNVs)
-[2017-03-31 23:36:21][INFO] Inferred weighted contribution of S1: 0.928
-[2017-03-31 23:36:21][INFO] Inferred weighted contribution of S6: 0.072
-[2017-03-31 23:36:21][INFO] 47 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
-[2017-03-31 23:36:21][INFO] Underlying variant(s):
-[2017-03-31 23:36:21][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
-[2017-03-31 23:36:22][INFO] 12 clinical evidence item(s) found .. (1 unique variant(s)), mapping = codon
-[2017-03-31 23:36:22][INFO] Underlying variant(s):
-[2017-03-31 23:36:22][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
-[2017-03-31 23:36:22][INFO] 0 clinical evidence item(s) found .. mapping = exon
-[2017-03-31 23:36:22][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
-[2017-03-31 23:38:26][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/tumor_sample.COAD.pcgr.vcf.gz
-[2017-03-31 23:38:32][INFO] Number of PASS variants: 3248
-[2017-03-31 23:38:32][INFO] Number of SNVs: 2475
-[2017-03-31 23:38:32][INFO] Number of deletions: 642
-[2017-03-31 23:38:32][INFO] Number of insertions 131
-[2017-03-31 23:38:32][INFO] Extending annotation descriptions related to PFAM protein domains
-[2017-03-31 23:38:32][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
-[2017-03-31 23:38:35][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
-[2017-03-31 23:38:37][INFO] Extending annotation descriptions related to ClinVar
-[2017-03-31 23:38:39][INFO] Generating data for tiered cancer genome report
-[2017-03-31 23:38:39][INFO] Number of coding variants: 2218
-[2017-03-31 23:38:39][INFO] Number of noncoding variants: 1030
-[2017-03-31 23:38:40][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs (n = 2475 SNVs)
-[2017-03-31 23:38:41][INFO] Inferred weighted contribution of S1: 0.928
-[2017-03-31 23:38:41][INFO] Inferred weighted contribution of S6: 0.072
-[2017-03-31 23:38:41][INFO] 47 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
-[2017-03-31 23:38:41][INFO] Underlying variant(s):
-[2017-03-31 23:38:41][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
-[2017-03-31 23:38:42][INFO] 12 clinical evidence item(s) found .. (1 unique variant(s)), mapping = codon
-[2017-03-31 23:38:42][INFO] Underlying variant(s):
-[2017-03-31 23:38:42][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
-[2017-03-31 23:38:42][INFO] 0 clinical evidence item(s) found .. mapping = exon
-[2017-03-31 23:38:42][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
-[2017-03-31 23:40:35][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/tumor_sample.COAD.pcgr.vcf.gz
-[2017-03-31 23:40:42][INFO] Number of PASS variants: 3248
-[2017-03-31 23:40:42][INFO] Number of SNVs: 2475
-[2017-03-31 23:40:42][INFO] Number of deletions: 642
-[2017-03-31 23:40:42][INFO] Number of insertions 131
-[2017-03-31 23:40:42][INFO] Extending annotation descriptions related to PFAM protein domains
-[2017-03-31 23:40:43][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
-[2017-03-31 23:40:46][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
-[2017-03-31 23:40:47][INFO] Extending annotation descriptions related to ClinVar
-[2017-03-31 23:40:50][INFO] Generating data for tiered cancer genome report
-[2017-03-31 23:40:50][INFO] Number of coding variants: 2218
-[2017-03-31 23:40:50][INFO] Number of noncoding variants: 1030
-[2017-03-31 23:40:51][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs (n = 2475 SNVs)
-[2017-03-31 23:40:52][INFO] Inferred weighted contribution of S1: 0.928
-[2017-03-31 23:40:52][INFO] Inferred weighted contribution of S6: 0.072
-[2017-03-31 23:40:52][INFO] 47 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
-[2017-03-31 23:40:52][INFO] Underlying variant(s):
-[2017-03-31 23:40:52][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
-[2017-03-31 23:40:52][INFO] 12 clinical evidence item(s) found .. (1 unique variant(s)), mapping = codon
-[2017-03-31 23:40:52][INFO] Underlying variant(s):
-[2017-03-31 23:40:52][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
-[2017-03-31 23:40:52][INFO] 0 clinical evidence item(s) found .. mapping = exon
-[2017-03-31 23:40:52][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
-[2017-03-31 23:47:07][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/tumor_sample.COAD.pcgr.vcf.gz
-[2017-03-31 23:47:14][INFO] Number of PASS variants: 3248
-[2017-03-31 23:47:14][INFO] Number of SNVs: 2475
-[2017-03-31 23:47:14][INFO] Number of deletions: 642
-[2017-03-31 23:47:14][INFO] Number of insertions 131
-[2017-03-31 23:47:14][INFO] Extending annotation descriptions related to PFAM protein domains
-[2017-03-31 23:47:14][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
-[2017-03-31 23:47:17][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
-[2017-03-31 23:47:18][INFO] Extending annotation descriptions related to ClinVar
-[2017-03-31 23:47:20][INFO] Generating data for tiered cancer genome report
-[2017-03-31 23:47:20][INFO] Number of coding variants: 2218
-[2017-03-31 23:47:21][INFO] Number of noncoding variants: 1030
-[2017-03-31 23:47:22][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs (n = 2475 SNVs)
-[2017-03-31 23:47:23][INFO] Inferred weighted contribution of S1: 0.928
-[2017-03-31 23:47:23][INFO] Inferred weighted contribution of S6: 0.072
-[2017-03-31 23:47:23][INFO] 47 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
-[2017-03-31 23:47:23][INFO] Underlying variant(s):
-[2017-03-31 23:47:23][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
-[2017-03-31 23:47:23][INFO] 12 clinical evidence item(s) found .. (1 unique variant(s)), mapping = codon
-[2017-03-31 23:47:23][INFO] Underlying variant(s):
-[2017-03-31 23:47:23][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
-[2017-03-31 23:47:23][INFO] 0 clinical evidence item(s) found .. mapping = exon
-[2017-03-31 23:47:23][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
-[2017-03-31 23:52:46][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/tumor_sample.COAD.pcgr.vcf.gz
-[2017-03-31 23:52:53][INFO] Number of PASS variants: 3248
-[2017-03-31 23:52:53][INFO] Number of SNVs: 2475
-[2017-03-31 23:52:53][INFO] Number of deletions: 642
-[2017-03-31 23:52:53][INFO] Number of insertions 131
-[2017-03-31 23:52:53][INFO] Extending annotation descriptions related to PFAM protein domains
-[2017-03-31 23:52:54][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
-[2017-03-31 23:52:57][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
-[2017-03-31 23:52:58][INFO] Extending annotation descriptions related to ClinVar
-[2017-03-31 23:53:00][INFO] Generating data for tiered cancer genome report
-[2017-03-31 23:53:00][INFO] Number of coding variants: 2218
-[2017-03-31 23:53:00][INFO] Number of noncoding variants: 1030
-[2017-03-31 23:53:01][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs (n = 2475 SNVs)
-[2017-03-31 23:53:03][INFO] Inferred weighted contribution of S1: 0.928
-[2017-03-31 23:53:03][INFO] Inferred weighted contribution of S6: 0.072
-[2017-03-31 23:53:03][INFO] 47 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
-[2017-03-31 23:53:03][INFO] Underlying variant(s):
-[2017-03-31 23:53:03][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
-[2017-03-31 23:53:03][INFO] 12 clinical evidence item(s) found .. (1 unique variant(s)), mapping = codon
-[2017-03-31 23:53:03][INFO] Underlying variant(s):
-[2017-03-31 23:53:03][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
-[2017-03-31 23:53:03][INFO] 0 clinical evidence item(s) found .. mapping = exon
-[2017-03-31 23:53:03][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
-[2017-04-01 00:21:16][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/tumor_sample.COAD.pcgr.vcf.gz
-[2017-04-01 00:21:23][INFO] Number of PASS variants: 3248
-[2017-04-01 00:21:23][INFO] Number of SNVs: 2475
-[2017-04-01 00:21:23][INFO] Number of deletions: 642
-[2017-04-01 00:21:23][INFO] Number of insertions 131
-[2017-04-01 00:21:23][INFO] Extending annotation descriptions related to PFAM protein domains
-[2017-04-01 00:21:23][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
-[2017-04-01 00:21:26][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
-[2017-04-01 00:21:28][INFO] Extending annotation descriptions related to ClinVar
-[2017-04-01 00:21:30][INFO] Generating data for tiered cancer genome report
-[2017-04-01 00:21:30][INFO] Number of coding variants: 2218
-[2017-04-01 00:21:30][INFO] Number of noncoding variants: 1030
-[2017-04-01 00:21:31][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs (n = 2475 SNVs)
-[2017-04-01 00:21:32][INFO] Inferred weighted contribution of S1: 0.928
-[2017-04-01 00:21:32][INFO] Inferred weighted contribution of S6: 0.072
-[2017-04-01 00:21:32][INFO] 47 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
-[2017-04-01 00:21:32][INFO] Underlying variant(s):
-[2017-04-01 00:21:32][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
-[2017-04-01 00:21:33][INFO] 12 clinical evidence item(s) found .. (1 unique variant(s)), mapping = codon
-[2017-04-01 00:21:33][INFO] Underlying variant(s):
-[2017-04-01 00:21:33][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
-[2017-04-01 00:21:33][INFO] 0 clinical evidence item(s) found .. mapping = exon
-[2017-04-01 00:21:33][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
-[2017-04-01 00:22:50][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/tumor_sample.COAD.pcgr.vcf.gz
-[2017-04-01 00:22:57][INFO] Number of PASS variants: 3248
-[2017-04-01 00:22:57][INFO] Number of SNVs: 2475
-[2017-04-01 00:22:57][INFO] Number of deletions: 642
-[2017-04-01 00:22:57][INFO] Number of insertions 131
-[2017-04-01 00:22:57][INFO] Extending annotation descriptions related to PFAM protein domains
-[2017-04-01 00:22:57][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
-[2017-04-01 00:23:00][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
-[2017-04-01 00:23:01][INFO] Extending annotation descriptions related to ClinVar
-[2017-04-01 00:23:04][INFO] Generating data for tiered cancer genome report
-[2017-04-01 00:23:04][INFO] Number of coding variants: 2218
-[2017-04-01 00:23:04][INFO] Number of noncoding variants: 1030
-[2017-04-01 00:23:05][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs (n = 2475 SNVs)
-[2017-04-01 00:23:06][INFO] Inferred weighted contribution of S1: 0.928
-[2017-04-01 00:23:06][INFO] Inferred weighted contribution of S6: 0.072
-[2017-04-01 00:23:06][INFO] 47 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
-[2017-04-01 00:23:06][INFO] Underlying variant(s):
-[2017-04-01 00:23:06][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
-[2017-04-01 00:23:06][INFO] 12 clinical evidence item(s) found .. (1 unique variant(s)), mapping = codon
-[2017-04-01 00:23:06][INFO] Underlying variant(s):
-[2017-04-01 00:23:06][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
-[2017-04-01 00:23:06][INFO] 0 clinical evidence item(s) found .. mapping = exon
-[2017-04-01 00:23:07][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
-[2017-04-01 00:25:07][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/tumor_sample.COAD.pcgr.vcf.gz
-[2017-04-01 00:25:13][INFO] Number of PASS variants: 3248
-[2017-04-01 00:25:13][INFO] Number of SNVs: 2475
-[2017-04-01 00:25:13][INFO] Number of deletions: 642
-[2017-04-01 00:25:13][INFO] Number of insertions 131
-[2017-04-01 00:25:13][INFO] Extending annotation descriptions related to PFAM protein domains
-[2017-04-01 00:25:14][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
-[2017-04-01 00:25:16][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
-[2017-04-01 00:25:18][INFO] Extending annotation descriptions related to ClinVar
-[2017-04-01 00:25:20][INFO] Generating data for tiered cancer genome report
-[2017-04-01 00:25:20][INFO] Number of coding variants: 2218
-[2017-04-01 00:25:20][INFO] Number of noncoding variants: 1030
-[2017-04-01 00:25:21][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs (n = 2475 SNVs)
-[2017-04-01 00:25:21][INFO] Inferred weighted contribution of S1: 0.928
-[2017-04-01 00:25:22][INFO] Inferred weighted contribution of S6: 0.072
-[2017-04-01 00:25:22][INFO] 47 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
-[2017-04-01 00:25:22][INFO] Underlying variant(s):
-[2017-04-01 00:25:22][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
-[2017-04-01 00:25:22][INFO] 12 clinical evidence item(s) found .. (1 unique variant(s)), mapping = codon
-[2017-04-01 00:25:22][INFO] Underlying variant(s):
-[2017-04-01 00:25:22][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
-[2017-04-01 00:25:22][INFO] 0 clinical evidence item(s) found .. mapping = exon
-[2017-04-01 00:25:22][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
-[2017-04-01 00:27:05][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/tumor_sample.COAD.pcgr.vcf.gz
-[2017-04-01 00:27:11][INFO] Number of PASS variants: 3248
-[2017-04-01 00:27:12][INFO] Number of SNVs: 2475
-[2017-04-01 00:27:12][INFO] Number of deletions: 642
-[2017-04-01 00:27:12][INFO] Number of insertions 131
-[2017-04-01 00:27:12][INFO] Extending annotation descriptions related to PFAM protein domains
-[2017-04-01 00:27:12][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
-[2017-04-01 00:27:15][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
-[2017-04-01 00:27:17][INFO] Extending annotation descriptions related to ClinVar
-[2017-04-01 00:27:19][INFO] Generating data for tiered cancer genome report
-[2017-04-01 00:27:19][INFO] Number of coding variants: 2218
-[2017-04-01 00:27:19][INFO] Number of noncoding variants: 1030
-[2017-04-01 00:27:19][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs (n = 2475 SNVs)
-[2017-04-01 00:27:20][INFO] Inferred weighted contribution of S1: 0.928
-[2017-04-01 00:27:20][INFO] Inferred weighted contribution of S6: 0.072
-[2017-04-01 00:27:20][INFO] 47 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
-[2017-04-01 00:27:20][INFO] Underlying variant(s):
-[2017-04-01 00:27:20][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
-[2017-04-01 00:27:20][INFO] 12 clinical evidence item(s) found .. (1 unique variant(s)), mapping = codon
-[2017-04-01 00:27:20][INFO] Underlying variant(s):
-[2017-04-01 00:27:20][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
-[2017-04-01 00:27:20][INFO] 0 clinical evidence item(s) found .. mapping = exon
-[2017-04-01 00:27:21][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
-[2017-04-01 00:31:13][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/tumor_sample.COAD.pcgr.vcf.gz
-[2017-04-01 00:31:20][INFO] Number of PASS variants: 3248
-[2017-04-01 00:31:20][INFO] Number of SNVs: 2475
-[2017-04-01 00:31:20][INFO] Number of deletions: 642
-[2017-04-01 00:31:20][INFO] Number of insertions 131
-[2017-04-01 00:31:20][INFO] Extending annotation descriptions related to PFAM protein domains
-[2017-04-01 00:31:20][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
-[2017-04-01 00:31:23][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
-[2017-04-01 00:31:24][INFO] Extending annotation descriptions related to ClinVar
-[2017-04-01 00:31:26][INFO] Generating data for tiered cancer genome report
-[2017-04-01 00:31:26][INFO] Number of coding variants: 2218
-[2017-04-01 00:31:26][INFO] Number of noncoding variants: 1030
-[2017-04-01 00:31:27][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs (n = 2475 SNVs)
-[2017-04-01 00:31:29][INFO] Inferred weighted contribution of S1: 0.928
-[2017-04-01 00:31:29][INFO] Inferred weighted contribution of S6: 0.072
-[2017-04-01 00:31:29][INFO] 47 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
-[2017-04-01 00:31:29][INFO] Underlying variant(s):
-[2017-04-01 00:31:29][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
-[2017-04-01 00:31:29][INFO] 12 clinical evidence item(s) found .. (1 unique variant(s)), mapping = codon
-[2017-04-01 00:31:29][INFO] Underlying variant(s):
-[2017-04-01 00:31:29][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
-[2017-04-01 00:31:29][INFO] 0 clinical evidence item(s) found .. mapping = exon
-[2017-04-01 00:31:29][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
-[2017-04-01 15:33:58][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/tumor_sample.COAD.pcgr.vcf.gz
-[2017-04-01 15:34:04][INFO] Number of PASS variants: 3248
-[2017-04-01 15:34:04][INFO] Number of SNVs: 2475
-[2017-04-01 15:34:04][INFO] Number of deletions: 642
-[2017-04-01 15:34:04][INFO] Number of insertions 131
-[2017-04-01 15:34:04][INFO] Extending annotation descriptions related to PFAM protein domains
-[2017-04-01 15:34:05][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
-[2017-04-01 15:34:07][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
-[2017-04-01 15:34:09][INFO] Extending annotation descriptions related to ClinVar
-[2017-04-01 15:34:11][INFO] Generating data for tiered cancer genome report
-[2017-04-01 15:34:11][INFO] Number of coding variants: 2218
-[2017-04-01 15:34:11][INFO] Number of noncoding variants: 1030
-[2017-04-01 15:34:12][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs (n = 2475 SNVs)
-[2017-04-01 15:34:13][INFO] Inferred weighted contribution of S1: 0.928
-[2017-04-01 15:34:13][INFO] Inferred weighted contribution of S6: 0.072
-[2017-04-01 15:34:13][INFO] 47 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
-[2017-04-01 15:34:13][INFO] Underlying variant(s):
-[2017-04-01 15:34:13][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
-[2017-04-01 15:34:13][INFO] 12 clinical evidence item(s) found .. (1 unique variant(s)), mapping = codon
-[2017-04-01 15:34:13][INFO] Underlying variant(s):
-[2017-04-01 15:34:13][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
-[2017-04-01 15:34:13][INFO] 0 clinical evidence item(s) found .. mapping = exon
-[2017-04-01 15:34:13][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
-[2017-04-01 15:55:44][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/tumor_sample.COAD.pcgr.vcf.gz
-[2017-04-01 15:55:51][INFO] Number of PASS variants: 3248
-[2017-04-01 15:55:51][INFO] Number of SNVs: 2475
-[2017-04-01 15:55:51][INFO] Number of deletions: 642
-[2017-04-01 15:55:51][INFO] Number of insertions 131
-[2017-04-01 15:55:51][INFO] Extending annotation descriptions related to PFAM protein domains
-[2017-04-01 15:55:52][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
-[2017-04-01 15:55:54][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
-[2017-04-01 15:55:56][INFO] Extending annotation descriptions related to ClinVar
-[2017-04-01 15:55:58][INFO] Generating data for tiered cancer genome report
-[2017-04-01 15:55:58][INFO] Number of coding variants: 2218
-[2017-04-01 15:55:58][INFO] Number of noncoding variants: 1030
-[2017-04-01 15:55:59][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs (n = 2475 SNVs)
-[2017-04-01 15:56:00][INFO] Inferred weighted contribution of S1: 0.928
-[2017-04-01 15:56:00][INFO] Inferred weighted contribution of S6: 0.072
-[2017-04-01 15:56:00][INFO] 47 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
-[2017-04-01 15:56:00][INFO] Underlying variant(s):
-[2017-04-01 15:56:00][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
-[2017-04-01 15:56:00][INFO] 12 clinical evidence item(s) found .. (1 unique variant(s)), mapping = codon
-[2017-04-01 15:56:00][INFO] Underlying variant(s):
-[2017-04-01 15:56:00][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
-[2017-04-01 15:56:00][INFO] 0 clinical evidence item(s) found .. mapping = exon
-[2017-04-01 15:56:00][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
-[2017-04-01 15:57:51][STOP] File /Users/sigven/research/docker/examples/tumor_sample.BRCA.pcgr.vcf.gz does not exist or has zero size
-[2017-04-01 15:58:20][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/tumor_sample.BRCA.pcgr.vcf.gz
-[2017-04-01 15:58:22][INFO] Number of PASS variants: 199
-[2017-04-01 15:58:22][INFO] Number of SNVs: 195
-[2017-04-01 15:58:22][INFO] Number of deletions: 4
-[2017-04-01 15:58:22][INFO] Number of insertions 0
-[2017-04-01 15:58:22][INFO] Extending annotation descriptions related to PFAM protein domains
-[2017-04-01 15:58:22][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
-[2017-04-01 15:58:24][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
-[2017-04-01 15:58:26][INFO] Extending annotation descriptions related to ClinVar
-[2017-04-01 15:58:26][INFO] Generating data for tiered cancer genome report
-[2017-04-01 15:58:26][INFO] Number of coding variants: 139
-[2017-04-01 15:58:26][INFO] Number of noncoding variants: 60
-[2017-04-01 15:58:26][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs (n = 195 SNVs)
-[2017-04-01 15:58:28][INFO] Inferred weighted contribution of S1: 0.456
-[2017-04-01 15:58:28][INFO] Inferred weighted contribution of S2: 0.098
-[2017-04-01 15:58:28][INFO] Inferred weighted contribution of S7: 0.167
-[2017-04-01 15:58:28][INFO] Inferred weighted contribution of S13: 0.279
-[2017-04-01 15:58:28][INFO] 13 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
-[2017-04-01 15:58:28][INFO] Underlying variant(s):
-[2017-04-01 15:58:28][INFO] PIK3CA missense_variant p.H1047R missense_variant:ENST00000263967.3:c.3140A>G:exon21:p.H1047R
-[2017-04-01 15:58:28][INFO] 0 clinical evidence item(s) found .. mapping = codon
-[2017-04-01 15:58:28][INFO] 1 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exon
-[2017-04-01 15:58:28][INFO] Underlying variant(s):
-[2017-04-01 15:58:28][INFO] PIK3CA missense_variant p.H1047R missense_variant:ENST00000263967.3:c.3140A>G:exon21:p.H1047R
-[2017-04-01 15:58:28][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
-[2017-04-01 16:10:04][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/tumor_sample.BRCA.pcgr.vcf.gz
-[2017-04-01 16:10:06][INFO] Number of PASS variants: 199
-[2017-04-01 16:10:06][INFO] Number of SNVs: 195
-[2017-04-01 16:10:06][INFO] Number of deletions: 4
-[2017-04-01 16:10:06][INFO] Number of insertions 0
-[2017-04-01 16:10:06][INFO] Extending annotation descriptions related to PFAM protein domains
-[2017-04-01 16:10:06][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
-[2017-04-01 16:10:09][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
-[2017-04-01 16:10:11][INFO] Extending annotation descriptions related to ClinVar
-[2017-04-01 16:10:12][INFO] Generating data for tiered cancer genome report
-[2017-04-01 16:10:12][INFO] Number of coding variants: 139
-[2017-04-01 16:10:12][INFO] Number of noncoding variants: 60
-[2017-04-01 16:10:12][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs (n = 195 SNVs)
-[2017-04-01 16:10:13][INFO] Inferred weighted contribution of S1: 0.456
-[2017-04-01 16:10:13][INFO] Inferred weighted contribution of S2: 0.098
-[2017-04-01 16:10:13][INFO] Inferred weighted contribution of S7: 0.167
-[2017-04-01 16:10:13][INFO] Inferred weighted contribution of S13: 0.279
-[2017-04-01 16:10:13][INFO] 13 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
-[2017-04-01 16:10:13][INFO] Underlying variant(s):
-[2017-04-01 16:10:13][INFO] PIK3CA missense_variant p.H1047R missense_variant:ENST00000263967.3:c.3140A>G:exon21:p.H1047R
-[2017-04-01 16:10:14][INFO] 0 clinical evidence item(s) found .. mapping = codon
-[2017-04-01 16:10:14][INFO] 1 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exon
-[2017-04-01 16:10:14][INFO] Underlying variant(s):
-[2017-04-01 16:10:14][INFO] PIK3CA missense_variant p.H1047R missense_variant:ENST00000263967.3:c.3140A>G:exon21:p.H1047R
-[2017-04-01 16:10:14][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
-[2017-04-01 23:13:23][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/tumor_sample.BRCA.pcgr.vcf.gz
-[2017-04-01 23:13:28][INFO] Number of PASS variants: 199
-[2017-04-01 23:13:28][INFO] Number of SNVs: 195
-[2017-04-01 23:13:28][INFO] Number of deletions: 4
-[2017-04-01 23:13:28][INFO] Number of insertions 0
-[2017-04-01 23:13:28][INFO] Extending annotation descriptions related to PFAM protein domains
-[2017-04-01 23:13:28][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
-[2017-04-01 23:13:31][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
-[2017-04-01 23:13:33][INFO] Extending annotation descriptions related to ClinVar
-[2017-04-01 23:13:34][INFO] Generating data for tiered cancer genome report
-[2017-04-01 23:13:34][INFO] Number of coding variants: 139
-[2017-04-01 23:13:34][INFO] Number of noncoding variants: 60
-[2017-04-01 23:13:34][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs (n = 195 SNVs)
-[2017-04-01 23:13:36][INFO] Inferred weighted contribution of S1: 0.456
-[2017-04-01 23:13:36][INFO] Inferred weighted contribution of S2: 0.098
-[2017-04-01 23:13:36][INFO] Inferred weighted contribution of S7: 0.167
-[2017-04-01 23:13:36][INFO] Inferred weighted contribution of S13: 0.279
-[2017-04-01 23:13:36][INFO] 13 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
-[2017-04-01 23:13:36][INFO] Underlying variant(s):
-[2017-04-01 23:13:36][INFO] PIK3CA missense_variant p.H1047R missense_variant:ENST00000263967.3:c.3140A>G:exon21:p.H1047R
-[2017-04-01 23:13:36][INFO] 0 clinical evidence item(s) found .. mapping = codon
-[2017-04-01 23:13:36][INFO] 1 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exon
-[2017-04-01 23:13:36][INFO] Underlying variant(s):
-[2017-04-01 23:13:36][INFO] PIK3CA missense_variant p.H1047R missense_variant:ENST00000263967.3:c.3140A>G:exon21:p.H1047R
-[2017-04-01 23:13:36][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
-[2017-04-01 23:13:36][INFO] Annotation of copy number segment file /Users/sigven/research/docker/pcgr/examples/tumor_sample.BRCA.cna.tsv
-[2017-04-01 23:13:51][INFO] Detected 156 segments subject to amplification/deletion
-[2017-04-01 23:13:51][INFO] Detected proto-oncogene(s) subject to amplification (log(2) ratio >= 0.8): RARA, ERBB2, PHB, SPOP
-[2017-04-01 23:28:35][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/tumor_sample.BRCA.pcgr.vcf.gz
-[2017-04-01 23:28:38][INFO] Number of PASS variants: 199
-[2017-04-01 23:28:38][INFO] Number of SNVs: 195
-[2017-04-01 23:28:38][INFO] Number of deletions: 4
-[2017-04-01 23:28:38][INFO] Number of insertions 0
-[2017-04-01 23:28:38][INFO] Extending annotation descriptions related to PFAM protein domains
-[2017-04-01 23:28:38][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
-[2017-04-01 23:28:40][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
-[2017-04-01 23:28:42][INFO] Extending annotation descriptions related to ClinVar
-[2017-04-01 23:28:42][INFO] Generating data for tiered cancer genome report
-[2017-04-01 23:28:42][INFO] Number of coding variants: 139
-[2017-04-01 23:28:42][INFO] Number of noncoding variants: 60
-[2017-04-01 23:28:42][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs (n = 195 SNVs)
-[2017-04-01 23:28:44][INFO] Inferred weighted contribution of S1: 0.456
-[2017-04-01 23:28:44][INFO] Inferred weighted contribution of S2: 0.098
-[2017-04-01 23:28:44][INFO] Inferred weighted contribution of S7: 0.167
-[2017-04-01 23:28:44][INFO] Inferred weighted contribution of S13: 0.279
-[2017-04-01 23:28:44][INFO] 13 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
-[2017-04-01 23:28:44][INFO] Underlying variant(s):
-[2017-04-01 23:28:44][INFO] PIK3CA missense_variant p.H1047R missense_variant:ENST00000263967.3:c.3140A>G:exon21:p.H1047R
-[2017-04-01 23:28:44][INFO] 0 clinical evidence item(s) found .. mapping = codon
-[2017-04-01 23:28:44][INFO] 1 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exon
-[2017-04-01 23:28:44][INFO] Underlying variant(s):
-[2017-04-01 23:28:44][INFO] PIK3CA missense_variant p.H1047R missense_variant:ENST00000263967.3:c.3140A>G:exon21:p.H1047R
-[2017-04-01 23:28:44][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
-[2017-04-01 23:28:44][INFO] Annotation of copy number segment file /Users/sigven/research/docker/pcgr/examples/tumor_sample.BRCA.cna.tsv
-[2017-04-01 23:28:58][INFO] Detected 156 segments subject to amplification/deletion
-[2017-04-01 23:28:58][INFO] Detected proto-oncogene(s) subject to amplification (log(2) ratio >= 0.8): RARA, ERBB2, PHB, SPOP
-[2017-04-01 23:31:49][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/tumor_sample.BRCA.pcgr.vcf.gz
-[2017-04-01 23:31:54][INFO] Number of PASS variants: 199
-[2017-04-01 23:31:54][INFO] Number of SNVs: 195
-[2017-04-01 23:31:54][INFO] Number of deletions: 4
-[2017-04-01 23:31:54][INFO] Number of insertions 0
-[2017-04-01 23:31:55][INFO] Extending annotation descriptions related to PFAM protein domains
-[2017-04-01 23:31:55][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
-[2017-04-01 23:31:57][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
-[2017-04-01 23:31:59][INFO] Extending annotation descriptions related to ClinVar
-[2017-04-01 23:32:00][INFO] Generating data for tiered cancer genome report
-[2017-04-01 23:32:00][INFO] Number of coding variants: 139
-[2017-04-01 23:32:00][INFO] Number of noncoding variants: 60
-[2017-04-01 23:32:00][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs (n = 195 SNVs)
-[2017-04-01 23:32:01][INFO] Inferred weighted contribution of S1: 0.456
-[2017-04-01 23:32:01][INFO] Inferred weighted contribution of S2: 0.098
-[2017-04-01 23:32:01][INFO] Inferred weighted contribution of S7: 0.167
-[2017-04-01 23:32:01][INFO] Inferred weighted contribution of S13: 0.279
-[2017-04-01 23:32:01][INFO] 13 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
-[2017-04-01 23:32:01][INFO] Underlying variant(s):
-[2017-04-01 23:32:01][INFO] PIK3CA missense_variant p.H1047R missense_variant:ENST00000263967.3:c.3140A>G:exon21:p.H1047R
-[2017-04-01 23:32:01][INFO] 0 clinical evidence item(s) found .. mapping = codon
-[2017-04-01 23:32:01][INFO] 1 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exon
-[2017-04-01 23:32:01][INFO] Underlying variant(s):
-[2017-04-01 23:32:01][INFO] PIK3CA missense_variant p.H1047R missense_variant:ENST00000263967.3:c.3140A>G:exon21:p.H1047R
-[2017-04-01 23:32:01][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
-[2017-04-01 23:32:01][INFO] Annotation of copy number segment file /Users/sigven/research/docker/pcgr/examples/tumor_sample.BRCA.cna.tsv
-[2017-04-01 23:32:14][INFO] Detected 156 segments subject to amplification/deletion
-[2017-04-01 23:32:14][INFO] Detected proto-oncogene(s) subject to amplification (log(2) ratio >= 0.8): RARA, ERBB2, PHB, SPOP
-[2017-04-01 23:36:30][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/tumor_sample.BRCA.pcgr.vcf.gz
-[2017-04-01 23:36:34][INFO] Number of PASS variants: 199
-[2017-04-01 23:36:34][INFO] Number of SNVs: 195
-[2017-04-01 23:36:34][INFO] Number of deletions: 4
-[2017-04-01 23:36:34][INFO] Number of insertions 0
-[2017-04-01 23:36:34][INFO] Extending annotation descriptions related to PFAM protein domains
-[2017-04-01 23:36:34][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
-[2017-04-01 23:36:37][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
-[2017-04-01 23:36:40][INFO] Extending annotation descriptions related to ClinVar
-[2017-04-01 23:36:40][INFO] Generating data for tiered cancer genome report
-[2017-04-01 23:36:40][INFO] Number of coding variants: 139
-[2017-04-01 23:36:40][INFO] Number of noncoding variants: 60
-[2017-04-01 23:36:40][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs (n = 195 SNVs)
-[2017-04-01 23:36:41][INFO] Inferred weighted contribution of S1: 0.456
-[2017-04-01 23:36:41][INFO] Inferred weighted contribution of S2: 0.098
-[2017-04-01 23:36:41][INFO] Inferred weighted contribution of S7: 0.167
-[2017-04-01 23:36:41][INFO] Inferred weighted contribution of S13: 0.279
-[2017-04-01 23:36:41][INFO] 13 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
-[2017-04-01 23:36:41][INFO] Underlying variant(s):
-[2017-04-01 23:36:41][INFO] PIK3CA missense_variant p.H1047R missense_variant:ENST00000263967.3:c.3140A>G:exon21:p.H1047R
-[2017-04-01 23:36:41][INFO] 0 clinical evidence item(s) found .. mapping = codon
-[2017-04-01 23:36:41][INFO] 1 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exon
-[2017-04-01 23:36:41][INFO] Underlying variant(s):
-[2017-04-01 23:36:41][INFO] PIK3CA missense_variant p.H1047R missense_variant:ENST00000263967.3:c.3140A>G:exon21:p.H1047R
-[2017-04-01 23:36:41][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
-[2017-04-01 23:36:42][INFO] Annotation of copy number segment file /Users/sigven/research/docker/pcgr/examples/tumor_sample.BRCA.cna.tsv
-[2017-04-01 23:36:55][INFO] Detected 156 segments subject to amplification/deletion
-[2017-04-01 23:36:55][INFO] Detected proto-oncogene(s) subject to amplification (log(2) ratio >= 0.8): RARA, ERBB2, PHB, SPOP
+[2017-06-27 16:34:57][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/PEI_TEST.pcgr.vcf.gz
+[2017-06-27 16:35:10][INFO] Number of PASS variants: 259
+[2017-06-27 16:35:10][INFO] Number of SNVs: 246
+[2017-06-27 16:35:10][INFO] Number of deletions: 5
+[2017-06-27 16:35:10][INFO] Number of insertions 0
+[2017-06-27 16:35:10][INFO] Extending annotation descriptions related to PFAM protein domains
+[2017-06-27 16:35:10][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2017-06-27 16:35:13][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2017-06-27 16:35:16][INFO] Extending annotation descriptions related to ClinVar
+[2017-06-27 16:35:55][INFO] Generating data for tiered cancer genome report
+[2017-06-27 19:36:30][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/PEI_TEST.pcgr.vcf.gz
+[2017-06-27 19:36:42][INFO] Number of PASS variants: 259
+[2017-06-27 19:36:42][INFO] Number of SNVs: 246
+[2017-06-27 19:36:42][INFO] Number of deletions: 5
+[2017-06-27 19:36:42][INFO] Number of insertions 0
+[2017-06-27 19:36:42][INFO] Extending annotation descriptions related to PFAM protein domains
+[2017-06-27 19:36:43][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2017-06-27 19:36:45][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2017-06-27 19:36:47][INFO] Extending annotation descriptions related to ClinVar
+[2017-06-27 19:55:52][INFO] Generating data for tiered cancer genome report
+[2017-06-27 19:56:01][INFO] Number of coding variants: 121
+[2017-06-27 19:56:01][INFO] Number of noncoding variants: 138
+[2017-06-27 19:57:39][INFO] Looking up biomarkers for precision oncology
+[2017-06-27 19:59:01][INFO] Looking up biomarkers for precision oncology
+[2017-06-27 20:33:34][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/PEI_TEST.pcgr.vcf.gz
+[2017-06-27 20:33:37][INFO] Number of PASS variants: 259
+[2017-06-27 20:33:37][INFO] Number of SNVs: 246
+[2017-06-27 20:33:37][INFO] Number of deletions: 5
+[2017-06-27 20:33:37][INFO] Number of insertions 0
+[2017-06-27 20:33:37][INFO] Extending annotation descriptions related to PFAM protein domains
+[2017-06-27 20:33:37][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2017-06-27 20:33:39][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2017-06-27 20:33:41][INFO] Extending annotation descriptions related to ClinVar
+[2017-06-27 20:33:48][INFO] Generating data for tiered cancer genome report
+[2017-06-27 20:33:48][INFO] Number of coding variants: 121
+[2017-06-27 20:33:48][INFO] Number of noncoding variants: 138
+[2017-06-27 20:37:47][INFO] Generating data for tiered cancer genome report
+[2017-06-27 20:37:57][INFO] Number of coding variants: 121
+[2017-06-27 20:37:57][INFO] Number of noncoding variants: 138
+[2017-06-27 20:38:13][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs (n = 246 SNVs)
+[2017-06-27 20:38:13][INFO] deconstuctSigs normalization method ('tri.counts.method'): default
+[2017-06-27 20:42:57][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs (n = 246 SNVs)
+[2017-06-27 20:42:57][INFO] deconstuctSigs normalization method ('tri.counts.method'): default
+[2017-06-27 20:43:07][INFO] Inferred weighted contribution of S1: 0.358
+[2017-06-27 20:43:07][INFO] Inferred weighted contribution of S5: 0.328
+[2017-06-27 20:43:07][INFO] Inferred weighted contribution of S20: 0.156
+[2017-06-27 20:43:07][INFO] Inferred weighted contribution of S26: 0.065
+[2017-06-27 20:43:32][INFO] Looking up biomarkers for precision oncology
+[2017-06-27 20:45:31][INFO] Looking up biomarkers for precision oncology
+[2017-06-27 20:50:09][INFO] Looking up biomarkers for precision oncology
+[2017-06-27 20:52:39][INFO] Looking up biomarkers for precision oncology
+[2017-06-27 20:55:29][INFO] Looking up biomarkers for precision oncology
+[2017-06-27 21:06:24][INFO] Generating data for tiered cancer genome report
+[2017-06-27 21:06:25][INFO] Number of coding variants: 121
+[2017-06-27 21:06:25][INFO] Number of noncoding variants: 138
+[2017-06-27 21:06:25][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs (n = 246 SNVs)
+[2017-06-27 21:06:25][INFO] deconstuctSigs normalization method ('tri.counts.method'): default
+[2017-06-27 21:06:35][INFO] Inferred weighted contribution of S1: 0.358
+[2017-06-27 21:06:35][INFO] Inferred weighted contribution of S5: 0.328
+[2017-06-27 21:06:35][INFO] Inferred weighted contribution of S20: 0.156
+[2017-06-27 21:06:35][INFO] Inferred weighted contribution of S26: 0.065
+[2017-06-27 21:06:35][INFO] Looking up biomarkers for precision oncology
+[2017-06-27 21:07:11][INFO] Looking up biomarkers for precision oncology
+[2017-06-27 21:14:29][INFO] Looking up biomarkers for precision oncology
+[2017-06-27 22:19:42][INFO] Looking up biomarkers for precision oncology
+[2017-06-27 22:28:04][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/PEI_TEST.pcgr.vcf.gz
+[2017-06-27 22:28:16][INFO] Number of PASS variants: 259
+[2017-06-27 22:28:16][INFO] Number of SNVs: 246
+[2017-06-27 22:28:16][INFO] Number of deletions: 5
+[2017-06-27 22:28:16][INFO] Number of insertions 0
+[2017-06-27 22:28:16][INFO] Extending annotation descriptions related to PFAM protein domains
+[2017-06-27 22:28:16][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2017-06-27 22:28:18][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2017-06-27 22:28:20][INFO] Extending annotation descriptions related to ClinVar
+[2017-06-27 22:28:44][INFO] Generating data for tiered cancer genome report
+[2017-06-27 22:29:00][INFO] Number of coding variants: 121
+[2017-06-27 22:29:00][INFO] Number of noncoding variants: 138
+[2017-06-27 22:29:10][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs (n = 246 SNVs)
+[2017-06-27 22:29:10][INFO] deconstuctSigs normalization method ('tri.counts.method'): default
+[2017-06-27 22:29:12][INFO] Inferred weighted contribution of S1: 0.358
+[2017-06-27 22:29:12][INFO] Inferred weighted contribution of S5: 0.328
+[2017-06-27 22:29:12][INFO] Inferred weighted contribution of S20: 0.156
+[2017-06-27 22:29:12][INFO] Inferred weighted contribution of S26: 0.065
+[2017-06-27 22:29:22][INFO] Looking up biomarkers for precision oncology
+[2017-06-27 23:31:47][INFO] Looking up biomarkers for precision oncology
+[2017-06-27 23:45:25][INFO] Looking up biomarkers for precision oncology
+[2017-06-27 23:47:44][INFO] Looking up biomarkers for precision oncology
+[2017-06-27 23:52:30][INFO] Looking up biomarkers for precision oncology
+[2017-06-27 23:53:26][INFO] Looking up biomarkers for precision oncology
+[2017-06-28 00:01:40][INFO] Looking up biomarkers for precision oncology
+[2017-06-28 00:01:40][INFO] 4 clinical evidence item(s) found .. (2 unique variant(s)), mapping = exact
+[2017-06-28 00:01:40][INFO] Underlying variant(s):
+[2017-06-28 00:01:40][INFO] TP53 missense_variant p.P72R missense_variant:ENST00000269305.4:c.215C>G:exon4:p.P72R
+[2017-06-28 00:01:40][INFO] MET missense_variant p.T1010I missense_variant:ENST00000318493.6:c.3029C>T:exon14:p.T1010I
+[2017-06-28 00:01:41][INFO] 0 clinical evidence item(s) found .. mapping = codon
+[2017-06-28 00:01:41][INFO] 6 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exon
+[2017-06-28 00:01:41][INFO] Underlying variant(s):
+[2017-06-28 00:01:41][INFO] MET missense_variant p.T1010I missense_variant:ENST00000318493.6:c.3029C>T:exon14:p.T1010I
+[2017-06-28 15:45:48][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/pei_test_O018.pcgr.vcf.gz
+[2017-06-28 15:45:59][INFO] Number of PASS variants: 259
+[2017-06-28 15:45:59][INFO] Number of SNVs: 246
+[2017-06-28 15:45:59][INFO] Number of deletions: 5
+[2017-06-28 15:45:59][INFO] Number of insertions 0
+[2017-06-28 15:45:59][INFO] Extending annotation descriptions related to PFAM protein domains
+[2017-06-28 15:45:59][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2017-06-28 15:46:02][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2017-06-28 15:46:04][INFO] Extending annotation descriptions related to ClinVar
+[2017-06-28 15:46:59][INFO] Generating data for tiered cancer genome report
+[2017-06-29 11:05:03][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/cov50-ensemble-annotated-decomposed.vcf.gz
+[2017-06-29 11:05:49][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/cov50-ensemble-annotated-decomposed.pcgr.vcf.gz
+[2017-06-29 11:05:55][INFO] Number of PASS variants: 2232
+[2017-06-29 11:05:55][INFO] Number of SNVs: 1858
+[2017-06-29 11:05:55][INFO] Number of deletions: 107
+[2017-06-29 11:05:55][INFO] Number of insertions 267
+[2017-06-29 11:05:55][INFO] Extending annotation descriptions related to PFAM protein domains
+[2017-06-29 11:05:55][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2017-06-29 11:05:58][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2017-06-29 11:05:59][INFO] Extending annotation descriptions related to ClinVar
+[2017-06-29 11:06:48][INFO] Generating data for tiered cancer genome report
+[2017-06-29 14:26:59][WARN] Check chr names -- not all match BSgenome.Hsapiens.UCSC.hg19::Hsapiens object:
+ chr23
+[2017-06-29 14:59:09][WARN] Check chr names -- not all match BSgenome.Hsapiens.UCSC.hg19::Hsapiens object:
+ chr23
+[2017-07-09 20:48:42][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/cov50-ensemble-annotated-decomposed.pcgr.vcf.gz
+[2017-07-09 20:48:48][INFO] Number of PASS variants: 2232
+[2017-07-09 20:48:48][INFO] Number of SNVs: 1858
+[2017-07-09 20:48:48][INFO] Number of deletions: 107
+[2017-07-09 20:48:48][INFO] Number of insertions 267
+[2017-07-09 20:48:48][INFO] Number of block substitutions 0
+[2017-07-09 20:48:49][INFO] Determination of deletion mechanisms (repeat, microhomology etc) by investigation of junction sequence
+[2017-07-09 20:48:49][WARN] Check chr names -- not all match BSgenome.Hsapiens.UCSC.hg19::Hsapiens object:
+ chrUn_gl000192, chrUn_gl000193, chrUn_gl000194, chrUn_gl000195, chrUn_gl000199, chrUn_gl000204, chrUn_gl000209
+[2017-07-09 20:54:04][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/cov50-ensemble-annotated-decomposed.pcgr.vcf.gz
+[2017-07-09 20:54:12][INFO] Number of PASS variants: 2232
+[2017-07-09 20:54:12][INFO] Number of SNVs: 1858
+[2017-07-09 20:54:12][INFO] Number of deletions: 107
+[2017-07-09 20:54:12][INFO] Number of insertions 267
+[2017-07-09 20:54:12][INFO] Number of block substitutions 0
+[2017-07-09 20:54:12][INFO] Determination of deletion mechanisms (repeat, microhomology etc) by investigation of junction sequence
+[2017-07-09 20:54:12][WARN] Check chr names -- not all match BSgenome.Hsapiens.UCSC.hg19::Hsapiens object:
+ chrUn_gl000192, chrUn_gl000193, chrUn_gl000194, chrUn_gl000195, chrUn_gl000199, chrUn_gl000204, chrUn_gl000209
+[2017-07-09 20:54:14][INFO] Extending annotation descriptions related to PFAM protein domains
+[2017-07-09 20:54:14][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2017-07-09 20:54:16][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2017-07-09 20:54:18][INFO] Extending annotation descriptions related to ClinVar
+[2017-07-09 21:05:14][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/cov50-ensemble-annotated-decomposed.pcgr.vcf.gz
+[2017-07-09 21:05:38][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/cov50-ensemble-annotated-decomposed.pcgr.vcf.gz
+[2017-07-09 21:05:43][INFO] Number of PASS variants: 2232
+[2017-07-09 21:05:43][INFO] Number of SNVs: 1858
+[2017-07-09 21:05:43][INFO] Number of deletions: 107
+[2017-07-09 21:05:43][INFO] Number of insertions 267
+[2017-07-09 21:05:43][INFO] Number of block substitutions 0
+[2017-07-09 21:05:44][INFO] Determination of deletion mechanisms (repeat, microhomology etc) by investigation of junction sequence
+[2017-07-09 21:05:44][WARN] Check chr names -- not all match BSgenome.Hsapiens.UCSC.hg19::Hsapiens object:
+ chrUn_gl000192, chrUn_gl000193, chrUn_gl000194, chrUn_gl000195, chrUn_gl000199, chrUn_gl000204, chrUn_gl000209
+[2017-07-09 21:05:45][INFO] Extending annotation descriptions related to PFAM protein domains
+[2017-07-09 21:05:45][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2017-07-09 21:06:47][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/cov50-ensemble-annotated-decomposed.pcgr.vcf.gz
+[2017-07-09 21:06:52][INFO] Number of PASS variants: 2232
+[2017-07-09 21:06:52][INFO] Number of SNVs: 1858
+[2017-07-09 21:06:52][INFO] Number of deletions: 107
+[2017-07-09 21:06:52][INFO] Number of insertions 267
+[2017-07-09 21:06:52][INFO] Number of block substitutions 0
+[2017-07-09 21:06:52][INFO] Determination of deletion mechanisms (repeat, microhomology etc) by investigation of junction sequence
+[2017-07-09 21:06:52][WARN] Check chr names -- not all match BSgenome.Hsapiens.UCSC.hg19::Hsapiens object:
+ chrUn_gl000192, chrUn_gl000193, chrUn_gl000194, chrUn_gl000195, chrUn_gl000199, chrUn_gl000204, chrUn_gl000209
+[2017-07-09 21:06:53][INFO] Extending annotation descriptions related to PFAM protein domains
+[2017-07-09 21:06:53][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2017-07-09 21:06:56][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2017-07-09 21:06:58][INFO] Extending annotation descriptions related to ClinVar
+[2017-07-09 21:14:38][INFO] Determination of deletion mechanisms (repeat, microhomology etc) by investigation of junction sequence
+[2017-07-09 21:14:38][WARN] Check chr names -- not all match BSgenome.Hsapiens.UCSC.hg19::Hsapiens object:
+ chrUn_gl000192, chrUn_gl000193, chrUn_gl000194, chrUn_gl000195, chrUn_gl000199, chrUn_gl000204, chrUn_gl000209
+[2017-07-09 21:17:35][INFO] Determination of deletion mechanisms (repeat, microhomology etc) by investigation of junction sequence
+[2017-07-09 21:17:35][WARN] Check chr names -- not all match BSgenome.Hsapiens.UCSC.hg19::Hsapiens object:
+ chrUn_gl000192, chrUn_gl000193, chrUn_gl000194, chrUn_gl000195, chrUn_gl000199, chrUn_gl000204, chrUn_gl000209
+[2017-07-09 21:18:34][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/cov50-ensemble-annotated-decomposed.pcgr.vcf.gz
+[2017-07-09 21:18:40][INFO] Number of PASS variants: 2232
+[2017-07-09 21:18:40][INFO] Number of SNVs: 1858
+[2017-07-09 21:18:40][INFO] Number of deletions: 107
+[2017-07-09 21:18:40][INFO] Number of insertions 267
+[2017-07-09 21:18:40][INFO] Number of block substitutions 0
+[2017-07-09 21:18:40][INFO] Determination of deletion mechanisms (repeat, microhomology etc) by investigation of junction sequence
+[2017-07-09 21:18:40][WARN] Check chr names -- not all match BSgenome.Hsapiens.UCSC.hg19::Hsapiens object:
+ chrUn_gl000192, chrUn_gl000193, chrUn_gl000194, chrUn_gl000195, chrUn_gl000199, chrUn_gl000204, chrUn_gl000209
+[2017-07-09 21:18:41][INFO] Extending annotation descriptions related to PFAM protein domains
+[2017-07-09 21:18:41][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2017-07-09 21:18:44][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2017-07-09 21:18:46][INFO] Extending annotation descriptions related to ClinVar
+[2017-07-09 21:19:18][INFO] Generating data for tiered cancer genome report
+[2017-07-09 21:19:18][INFO] Predicting microsatellite instability status
+[2017-07-09 21:19:18][WARN] Check chr names -- not all match BSgenome.Hsapiens.UCSC.hg19::Hsapiens object:
+ chrUn_gl000192, chrUn_gl000193, chrUn_gl000194, chrUn_gl000195, chrUn_gl000199, chrUn_gl000204, chrUn_gl000209
+[2017-07-09 21:19:22][INFO] Predicted MSI status: MSI.H (Microsatellite instability - high)
+[2017-07-09 21:19:22][INFO] Number of coding variants: 14
+[2017-07-09 21:19:22][INFO] Number of noncoding variants: 2218
+[2017-07-09 21:19:22][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs (n = 1858 SNVs)
+[2017-07-09 21:19:22][INFO] deconstuctSigs normalization method ('tri.counts.method'): default
+[2017-07-09 21:22:31][INFO] Generating data for tiered cancer genome report
+[2017-07-09 21:22:37][INFO] Number of coding variants: 14
+[2017-07-09 21:22:38][INFO] Number of noncoding variants: 2218
+[2017-07-09 21:25:15][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs (n = 1858 SNVs)
+[2017-07-09 21:29:01][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/cov50-ensemble-annotated-decomposed.pcgr.vcf.gz
+[2017-07-09 21:29:08][INFO] Number of PASS variants: 2232
+[2017-07-09 21:29:08][INFO] Number of SNVs: 1858
+[2017-07-09 21:29:08][INFO] Number of deletions: 107
+[2017-07-09 21:29:08][INFO] Number of insertions 267
+[2017-07-09 21:29:08][INFO] Number of block substitutions 0
+[2017-07-09 21:29:08][INFO] Determination of deletion mechanisms (repeat, microhomology etc) by investigation of junction sequence
+[2017-07-09 21:29:08][WARN] Check chr names -- not all match BSgenome.Hsapiens.UCSC.hg19::Hsapiens object:
+ chrUn_gl000192, chrUn_gl000193, chrUn_gl000194, chrUn_gl000195, chrUn_gl000199, chrUn_gl000204, chrUn_gl000209
+[2017-07-09 21:29:10][INFO] Extending annotation descriptions related to PFAM protein domains
+[2017-07-09 21:29:10][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2017-07-09 21:29:13][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2017-07-09 21:29:15][INFO] Extending annotation descriptions related to ClinVar
+[2017-07-09 21:29:16][INFO] Generating data for tiered cancer genome report
+[2017-07-09 21:29:16][INFO] Predicting microsatellite instability status
+[2017-07-09 21:29:16][WARN] Check chr names -- not all match BSgenome.Hsapiens.UCSC.hg19::Hsapiens object:
+ chrUn_gl000192, chrUn_gl000193, chrUn_gl000194, chrUn_gl000195, chrUn_gl000199, chrUn_gl000204, chrUn_gl000209
+[2017-07-09 21:29:20][INFO] Predicted MSI status: MSI.H (Microsatellite instability - high)
+[2017-07-09 21:29:20][INFO] Number of coding variants: 14
+[2017-07-09 21:29:20][INFO] Number of noncoding variants: 2218
+[2017-07-09 21:29:21][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs (n = 1858 SNVs)
+[2017-07-09 21:29:21][INFO] deconstuctSigs normalization method ('tri.counts.method'): default
+[2017-07-09 21:29:22][INFO] Inferred weighted contribution of S1: 0.227
+[2017-07-09 21:29:22][INFO] Inferred weighted contribution of S5: 0.597
+[2017-07-09 21:29:22][INFO] Inferred weighted contribution of S8: 0.1
+[2017-07-09 21:29:22][INFO] Looking up biomarkers for precision oncology
+[2017-07-09 21:29:22][INFO] 0 clinical evidence item(s) found .. mapping = exact
+[2017-07-09 21:29:22][INFO] 0 clinical evidence item(s) found .. mapping = codon
+[2017-07-09 21:29:22][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2017-07-09 21:29:23][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2017-07-09 21:45:24][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/cov50-ensemble-annotated-decomposed.pcgr.vcf.gz
+[2017-07-09 21:45:33][INFO] Number of PASS variants: 2232
+[2017-07-09 21:45:33][INFO] Number of SNVs: 1858
+[2017-07-09 21:45:33][INFO] Number of deletions: 107
+[2017-07-09 21:45:33][INFO] Number of insertions 267
+[2017-07-09 21:45:33][INFO] Number of block substitutions 0
+[2017-07-09 21:45:33][INFO] Determination of deletion mechanisms (repeat, microhomology etc) by investigation of junction sequence
+[2017-07-09 21:45:33][WARN] Check chr names -- not all match BSgenome.Hsapiens.UCSC.hg19::Hsapiens object:
+ chrUn_gl000192, chrUn_gl000193, chrUn_gl000194, chrUn_gl000195, chrUn_gl000199, chrUn_gl000204, chrUn_gl000209
+[2017-07-09 21:45:34][INFO] Extending annotation descriptions related to PFAM protein domains
+[2017-07-09 21:45:34][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2017-07-09 21:45:38][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2017-07-09 21:45:40][INFO] Extending annotation descriptions related to ClinVar
+[2017-07-09 21:45:42][INFO] Generating data for tiered cancer genome report
+[2017-07-09 21:45:42][INFO] Predicting microsatellite instability status
+[2017-07-09 21:45:42][WARN] Check chr names -- not all match BSgenome.Hsapiens.UCSC.hg19::Hsapiens object:
+ chrUn_gl000192, chrUn_gl000193, chrUn_gl000194, chrUn_gl000195, chrUn_gl000199, chrUn_gl000204, chrUn_gl000209
+[2017-07-09 21:45:48][INFO] Predicted MSI status: MSI.H (Microsatellite instability - high)
+[2017-07-09 21:45:48][INFO] Number of coding variants: 14
+[2017-07-09 21:45:48][INFO] Number of noncoding variants: 2218
+[2017-07-09 21:45:48][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs (n = 1858 SNVs)
+[2017-07-09 21:45:48][INFO] deconstuctSigs normalization method ('tri.counts.method'): default
+[2017-07-09 21:45:50][INFO] Inferred weighted contribution of S1: 0.227
+[2017-07-09 21:45:50][INFO] Inferred weighted contribution of S5: 0.597
+[2017-07-09 21:45:50][INFO] Inferred weighted contribution of S8: 0.1
+[2017-07-09 21:45:50][INFO] Looking up biomarkers for precision oncology
+[2017-07-09 21:45:50][INFO] 0 clinical evidence item(s) found .. mapping = exact
+[2017-07-09 21:45:50][INFO] 0 clinical evidence item(s) found .. mapping = codon
+[2017-07-09 21:45:50][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2017-07-09 21:45:50][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2017-07-10 00:42:59][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/cov50-ensemble-annotated-decomposed.pcgr.vcf.gz
+[2017-07-10 00:43:06][INFO] Number of PASS variants: 2232
+[2017-07-10 00:43:06][INFO] Number of SNVs: 1858
+[2017-07-10 00:43:06][INFO] Number of deletions: 107
+[2017-07-10 00:43:06][INFO] Number of insertions 267
+[2017-07-10 00:43:06][INFO] Number of block substitutions 0
+[2017-07-10 00:43:06][INFO] Determination of deletion mechanisms (repeat, microhomology etc) by investigation of junction sequence
+[2017-07-10 00:43:06][WARN] Check chr names -- not all match BSgenome.Hsapiens.UCSC.hg19::Hsapiens object:
+ chrUn_gl000192, chrUn_gl000193, chrUn_gl000194, chrUn_gl000195, chrUn_gl000199, chrUn_gl000204, chrUn_gl000209
+[2017-07-10 00:43:08][INFO] Extending annotation descriptions related to PFAM protein domains
+[2017-07-10 00:43:08][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2017-07-10 00:43:11][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2017-07-10 00:43:13][INFO] Extending annotation descriptions related to ClinVar
+[2017-07-19 23:15:56][STOP] File test3.pcgr.vcf.gz does not exist or has zero size
+[2017-07-19 23:17:47][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/test3.pcgr.vcf.gz
+[2017-07-19 23:17:55][INFO] Number of PASS variants: 3316
+[2017-07-19 23:17:55][INFO] Number of SNVs: 2669
+[2017-07-19 23:17:55][INFO] Number of deletions: 541
+[2017-07-19 23:17:55][INFO] Number of insertions 103
+[2017-07-19 23:17:55][INFO] Number of block substitutions 0
+[2017-07-19 23:17:55][INFO] Determination of deletion mechanisms (repeat, microhomology etc) by investigation of junction sequence
+[2017-07-19 23:17:57][INFO] Extending annotation descriptions related to PFAM protein domains
+[2017-07-19 23:17:57][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2017-07-19 23:18:00][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2017-07-19 23:18:03][INFO] Extending annotation descriptions related to ClinVar
+[2017-07-19 23:18:04][INFO] Generating data for tiered cancer genome report
+[2017-07-19 23:18:04][INFO] Predicting microsatellite instability status
+[2017-07-19 23:18:08][INFO] Predicted MSI status: MSI.H (Microsatellite instability - high)
+[2017-07-19 23:18:08][INFO] Number of coding variants: 2065
+[2017-07-19 23:18:08][INFO] Number of noncoding variants: 1251
+[2017-07-19 23:18:08][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs (n = 2669 SNVs)
+[2017-07-19 23:18:08][INFO] deconstuctSigs normalization method ('tri.counts.method'): default
+[2017-07-19 23:18:10][INFO] Inferred weighted contribution of S1: 0.209
+[2017-07-19 23:18:10][INFO] Inferred weighted contribution of S6: 0.791
+[2017-07-19 23:18:10][INFO] Looking up biomarkers for precision oncology
+[2017-07-19 23:18:10][INFO] 48 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
+[2017-07-19 23:18:10][INFO] Underlying variant(s):
+[2017-07-19 23:18:10][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
+[2017-07-19 23:18:10][INFO] 12 clinical evidence item(s) found .. (1 unique variant(s)), mapping = codon
+[2017-07-19 23:18:10][INFO] Underlying variant(s):
+[2017-07-19 23:18:10][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
+[2017-07-19 23:18:10][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2017-07-19 23:18:10][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2017-07-19 23:20:34][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/test3.pcgr.vcf.gz
+[2017-07-19 23:20:42][INFO] Number of PASS variants: 3316
+[2017-07-19 23:20:42][INFO] Number of SNVs: 2669
+[2017-07-19 23:20:42][INFO] Number of deletions: 541
+[2017-07-19 23:20:42][INFO] Number of insertions 103
+[2017-07-19 23:20:42][INFO] Number of block substitutions 0
+[2017-07-19 23:20:42][INFO] Determination of deletion mechanisms (repeat, microhomology etc) by investigation of junction sequence
+[2017-07-19 23:20:44][INFO] Extending annotation descriptions related to PFAM protein domains
+[2017-07-19 23:20:44][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2017-07-19 23:20:47][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2017-07-19 23:20:50][INFO] Extending annotation descriptions related to ClinVar
+[2017-07-19 23:20:52][INFO] Generating data for tiered cancer genome report
+[2017-07-19 23:20:52][INFO] Predicting microsatellite instability status
+[2017-07-19 23:20:57][INFO] Predicted MSI status: MSI.H (Microsatellite instability - high)
+[2017-07-19 23:20:57][INFO] Number of coding variants: 2065
+[2017-07-19 23:20:57][INFO] Number of noncoding variants: 1251
+[2017-07-19 23:20:57][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs (n = 2669 SNVs)
+[2017-07-19 23:20:57][INFO] deconstuctSigs normalization method ('tri.counts.method'): default
+[2017-07-19 23:20:59][INFO] Inferred weighted contribution of S1: 0.209
+[2017-07-19 23:20:59][INFO] Inferred weighted contribution of S6: 0.791
+[2017-07-19 23:20:59][INFO] Looking up biomarkers for precision oncology
+[2017-07-19 23:20:59][INFO] 48 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
+[2017-07-19 23:20:59][INFO] Underlying variant(s):
+[2017-07-19 23:20:59][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
+[2017-07-19 23:21:00][INFO] 12 clinical evidence item(s) found .. (1 unique variant(s)), mapping = codon
+[2017-07-19 23:21:00][INFO] Underlying variant(s):
+[2017-07-19 23:21:00][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
+[2017-07-19 23:21:00][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2017-07-19 23:21:00][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2017-07-19 23:28:22][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/test3.pcgr.vcf.gz
+[2017-07-19 23:28:29][INFO] Number of PASS variants: 3316
+[2017-07-19 23:28:29][INFO] Number of SNVs: 2669
+[2017-07-19 23:28:29][INFO] Number of deletions: 541
+[2017-07-19 23:28:29][INFO] Number of insertions 103
+[2017-07-19 23:28:29][INFO] Number of block substitutions 0
+[2017-07-19 23:28:29][INFO] Determination of deletion mechanisms (repeat, microhomology etc) by investigation of junction sequence
+[2017-07-19 23:28:31][INFO] Extending annotation descriptions related to PFAM protein domains
+[2017-07-19 23:28:31][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2017-07-19 23:28:34][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2017-07-19 23:28:37][INFO] Extending annotation descriptions related to ClinVar
+[2017-07-19 23:28:39][INFO] Generating data for tiered cancer genome report
+[2017-07-19 23:28:39][INFO] Predicting microsatellite instability status
+[2017-07-19 23:28:43][INFO] Predicted MSI status: MSI.H (Microsatellite instability - high)
+[2017-07-19 23:28:43][INFO] Number of coding variants: 2065
+[2017-07-19 23:28:43][INFO] Number of noncoding variants: 1251
+[2017-07-19 23:28:43][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs (n = 2669 SNVs)
+[2017-07-19 23:28:43][INFO] deconstuctSigs normalization method ('tri.counts.method'): default
+[2017-07-19 23:28:45][INFO] Inferred weighted contribution of S1: 0.209
+[2017-07-19 23:28:45][INFO] Inferred weighted contribution of S6: 0.791
+[2017-07-19 23:28:45][INFO] Looking up biomarkers for precision oncology
+[2017-07-19 23:28:45][INFO] 48 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
+[2017-07-19 23:28:45][INFO] Underlying variant(s):
+[2017-07-19 23:28:45][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
+[2017-07-19 23:28:46][INFO] 12 clinical evidence item(s) found .. (1 unique variant(s)), mapping = codon
+[2017-07-19 23:28:46][INFO] Underlying variant(s):
+[2017-07-19 23:28:46][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
+[2017-07-19 23:28:46][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2017-07-19 23:28:46][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2017-07-20 20:37:40][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/test3.pcgr.vcf.gz
+[2017-07-20 20:37:47][INFO] Number of PASS variants: 3316
+[2017-07-20 20:37:47][INFO] Number of SNVs: 2669
+[2017-07-20 20:37:47][INFO] Number of deletions: 541
+[2017-07-20 20:37:47][INFO] Number of insertions 103
+[2017-07-20 20:37:47][INFO] Number of block substitutions 0
+[2017-07-20 20:37:47][INFO] Determination of deletion mechanisms (repeat, microhomology etc) by investigation of junction sequence
+[2017-07-20 20:37:49][INFO] Extending annotation descriptions related to PFAM protein domains
+[2017-07-20 20:37:49][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2017-07-20 20:37:52][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2017-07-20 20:37:55][INFO] Extending annotation descriptions related to ClinVar
+[2017-07-20 20:37:56][INFO] Generating data for tiered cancer genome report
+[2017-07-20 20:37:56][INFO] Predicting microsatellite instability status
+[2017-07-20 20:38:00][INFO] Predicted MSI status: MSI.H (Microsatellite instability - high)
+[2017-07-20 20:41:03][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/test3.pcgr.vcf.gz
+[2017-07-20 20:41:11][INFO] Number of PASS variants: 3316
+[2017-07-20 20:41:11][INFO] Number of SNVs: 2669
+[2017-07-20 20:41:11][INFO] Number of deletions: 541
+[2017-07-20 20:41:11][INFO] Number of insertions 103
+[2017-07-20 20:41:11][INFO] Number of block substitutions 0
+[2017-07-20 20:41:11][INFO] Determination of deletion mechanisms (repeat, microhomology etc) by investigation of junction sequence
+[2017-07-20 20:41:13][INFO] Extending annotation descriptions related to PFAM protein domains
+[2017-07-20 20:41:13][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2017-07-20 20:41:16][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2017-07-20 20:41:19][INFO] Extending annotation descriptions related to ClinVar
+[2017-07-20 20:41:21][INFO] Generating data for tiered cancer genome report
+[2017-07-20 20:41:21][INFO] Predicting microsatellite instability status
+[2017-07-20 20:41:26][INFO] Predicted MSI status: MSI.H (Microsatellite instability - high)
+[2017-07-20 20:41:26][INFO] Number of coding variants: 2065
+[2017-07-20 20:41:26][INFO] Number of noncoding variants: 1251
+[2017-07-20 20:41:26][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs (n = 2669 SNVs)
+[2017-07-20 20:41:26][INFO] deconstuctSigs normalization method ('tri.counts.method'): default
+[2017-07-20 20:41:28][INFO] Inferred weighted contribution of S1: 0.209
+[2017-07-20 20:41:28][INFO] Inferred weighted contribution of S6: 0.791
+[2017-07-20 20:41:28][INFO] Looking up biomarkers for precision oncology
+[2017-07-20 20:41:28][INFO] 48 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
+[2017-07-20 20:41:28][INFO] Underlying variant(s):
+[2017-07-20 20:41:28][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
+[2017-07-20 20:41:28][INFO] 12 clinical evidence item(s) found .. (1 unique variant(s)), mapping = codon
+[2017-07-20 20:41:28][INFO] Underlying variant(s):
+[2017-07-20 20:41:28][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
+[2017-07-20 20:41:28][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2017-07-20 20:41:28][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2017-07-20 21:06:13][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - /Users/sigven/research/docker/pcgr/examples/test3.pcgr.vcf.gz
+[2017-07-20 21:06:20][INFO] Number of PASS variants: 3316
+[2017-07-20 21:06:20][INFO] Number of SNVs: 2669
+[2017-07-20 21:06:20][INFO] Number of deletions: 541
+[2017-07-20 21:06:20][INFO] Number of insertions 103
+[2017-07-20 21:06:20][INFO] Number of block substitutions 0
+[2017-07-20 21:06:21][INFO] Determination of deletion mechanisms (repeat, microhomology etc) by investigation of junction sequence
+[2017-07-20 21:06:22][INFO] Extending annotation descriptions related to PFAM protein domains
+[2017-07-20 21:06:23][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2017-07-20 21:06:26][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2017-07-20 21:06:28][INFO] Extending annotation descriptions related to ClinVar
+[2017-07-20 21:06:30][INFO] Generating data for tiered cancer genome report
+[2017-07-20 21:06:30][INFO] Predicting microsatellite instability status
+[2017-07-20 21:06:35][INFO] Predicted MSI status: MSI.H (Microsatellite instability - high)
+[2017-07-20 21:06:35][INFO] Number of coding variants: 2065
+[2017-07-20 21:06:35][INFO] Number of noncoding variants: 1251
+[2017-07-20 21:06:35][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs (n = 2669 SNVs)
+[2017-07-20 21:06:35][INFO] deconstuctSigs normalization method ('tri.counts.method'): default
+[2017-07-20 21:06:36][INFO] Inferred weighted contribution of S1: 0.209
+[2017-07-20 21:06:36][INFO] Inferred weighted contribution of S6: 0.791
+[2017-07-20 21:06:36][INFO] Looking up biomarkers for precision oncology
+[2017-07-20 21:06:36][INFO] 48 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
+[2017-07-20 21:06:36][INFO] Underlying variant(s):
+[2017-07-20 21:06:36][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
+[2017-07-20 21:06:37][INFO] 12 clinical evidence item(s) found .. (1 unique variant(s)), mapping = codon
+[2017-07-20 21:06:37][INFO] Underlying variant(s):
+[2017-07-20 21:06:37][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
+[2017-07-20 21:06:37][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2017-07-20 21:06:37][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2017-07-20 23:21:43][STOP] File test3.pcgr.vcf.gz does not exist or has zero size
+[2017-07-20 23:22:41][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - test3.pcgr.vcf.gz
+[2017-07-20 23:23:03][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - test3.pcgr.vcf.gz
+[2017-07-20 23:23:07][INFO] Number of PASS variants: 3316
+[2017-07-20 23:23:07][INFO] Number of SNVs: 2669
+[2017-07-20 23:23:07][INFO] Number of deletions: 541
+[2017-07-20 23:23:07][INFO] Number of insertions 103
+[2017-07-20 23:23:07][INFO] Number of block substitutions 0
+[2017-07-20 23:23:08][INFO] Determination of deletion mechanisms (repeat, microhomology etc) by investigation of junction sequence
+[2017-07-20 23:23:20][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - test3.pcgr.vcf.gz
+[2017-07-20 23:23:24][INFO] Number of PASS variants: 3316
+[2017-07-20 23:23:24][INFO] Number of SNVs: 2669
+[2017-07-20 23:23:24][INFO] Number of deletions: 541
+[2017-07-20 23:23:24][INFO] Number of insertions 103
+[2017-07-20 23:23:24][INFO] Number of block substitutions 0
+[2017-07-20 23:23:24][INFO] Determination of deletion mechanisms (repeat, microhomology etc) by investigation of junction sequence
+[2017-07-20 23:23:25][INFO] Extending annotation descriptions related to PFAM protein domains
+[2017-07-20 23:23:25][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2017-07-20 23:23:28][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2017-07-20 23:23:31][INFO] Extending annotation descriptions related to ClinVar
+[2017-07-20 23:23:32][INFO] Generating data for tiered cancer genome report
+[2017-07-20 23:23:32][INFO] Predicting microsatellite instability status
+[2017-07-20 23:23:35][INFO] Predicted MSI status: MSI.H (Microsatellite instability - high)
+[2017-07-20 23:23:35][INFO] Number of coding variants: 2065
+[2017-07-20 23:23:35][INFO] Number of noncoding variants: 1251
+[2017-07-20 23:23:35][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs (n = 2669 SNVs)
+[2017-07-20 23:23:35][INFO] deconstuctSigs normalization method ('tri.counts.method'): default
+[2017-07-20 23:23:36][INFO] Inferred weighted contribution of S1: 0.209
+[2017-07-20 23:23:36][INFO] Inferred weighted contribution of S6: 0.791
+[2017-07-20 23:23:36][INFO] Looking up biomarkers for precision oncology
+[2017-07-20 23:23:36][INFO] 48 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
+[2017-07-20 23:23:36][INFO] Underlying variant(s):
+[2017-07-20 23:23:36][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
+[2017-07-20 23:23:37][INFO] 12 clinical evidence item(s) found .. (1 unique variant(s)), mapping = codon
+[2017-07-20 23:23:37][INFO] Underlying variant(s):
+[2017-07-20 23:23:37][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
+[2017-07-20 23:23:37][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2017-07-20 23:23:37][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2017-07-20 23:25:16][INFO] Reading and parsing VEP/vcfanno-annotated VCF file - test3.pcgr.vcf.gz
+[2017-07-20 23:25:20][INFO] Number of PASS variants: 3316
+[2017-07-20 23:25:20][INFO] Number of SNVs: 2669
+[2017-07-20 23:25:20][INFO] Number of deletions: 541
+[2017-07-20 23:25:20][INFO] Number of insertions 103
+[2017-07-20 23:25:20][INFO] Number of block substitutions 0
+[2017-07-20 23:25:20][INFO] Determination of deletion mechanisms (repeat, microhomology etc) by investigation of junction sequence
+[2017-07-20 23:25:21][INFO] Extending annotation descriptions related to PFAM protein domains
+[2017-07-20 23:25:21][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2017-07-20 23:25:24][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2017-07-20 23:25:26][INFO] Extending annotation descriptions related to ClinVar
+[2017-07-20 23:25:27][INFO] Generating data for tiered cancer genome report
+[2017-07-20 23:25:27][INFO] Predicting microsatellite instability status
+[2017-07-20 23:25:30][INFO] Predicted MSI status: MSI.H (Microsatellite instability - high)
+[2017-07-20 23:25:30][INFO] Number of coding variants: 2065
+[2017-07-20 23:25:31][INFO] Number of noncoding variants: 1251
+[2017-07-20 23:25:31][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs (n = 2669 SNVs)
+[2017-07-20 23:25:31][INFO] deconstuctSigs normalization method ('tri.counts.method'): default
+[2017-07-20 23:25:32][INFO] Inferred weighted contribution of S1: 0.209
+[2017-07-20 23:25:32][INFO] Inferred weighted contribution of S6: 0.791
+[2017-07-20 23:25:32][INFO] Looking up biomarkers for precision oncology
+[2017-07-20 23:25:32][INFO] 48 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
+[2017-07-20 23:25:32][INFO] Underlying variant(s):
+[2017-07-20 23:25:32][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
+[2017-07-20 23:25:32][INFO] 12 clinical evidence item(s) found .. (1 unique variant(s)), mapping = codon
+[2017-07-20 23:25:32][INFO] Underlying variant(s):
+[2017-07-20 23:25:32][INFO] BRAF missense_variant p.V600E missense_variant:ENST00000288602.6:c.1799T>A:exon15:p.V600E
+[2017-07-20 23:25:32][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2017-07-20 23:25:32][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file

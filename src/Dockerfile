@@ -16,7 +16,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 ## define packages to be installed
 ENV PACKAGE_BIO="tabix samtools libhts1 bedtools"
 ENV PACKAGE_DEV="perl debconf-utils build-essential gfortran python-dev python-pip gcc-multilib autoconf zlib1g-dev liblzma-dev git libncurses5-dev libblas-dev liblapack-dev cpanminus libcurl4-gnutls-dev libssh2-1-dev libxml2-dev vim libssl-dev openssl libcairo2-dev libbz2-dev"
-ENV PYTHON_MODULES="numpy cython scipy transvar bx-python pyvcf cyvcf cyvcf2 biopython crossmap pandas"
+#ENV PYTHON_MODULES="numpy cython scipy transvar bx-python pyvcf cyvcf cyvcf2 biopython crossmap pandas"
+ENV PYTHON_MODULES="numpy cython scipy bx-python pyvcf cyvcf biopython pandas"
+
 
 ENV R_BASE_VERSION 3.3.3
 
@@ -63,15 +65,16 @@ RUN wget https://github.com/jgm/pandoc/releases/download/1.19.1/pandoc-1.19.1-1-
       rm pandoc* && \
       apt-get clean
 
-## Install necessary R packages
-RUN R -e "install.packages(c('dplyr','stringr','tidyr','ggplot2','httr','git2r','data.table','magrittr','devtools','DT'), dependencies = T, repos = 'http://cran.us.r-project.org')"
-RUN R -e "source(\"https://bioconductor.org/biocLite.R\"); biocLite(c('deconstructSigs', 'KEGGREST','VariantAnnotation','BSgenome.Hsapiens.UCSC.hg19','GenomeInfoDb','GenomicRanges','S4Vectors'))"
-RUN R -e "library(devtools); devtools::install_github('mjkallen/rlogging')"
-
-
 ## Install tools used for compilation
 RUN pip install -U setuptools
+RUN pip install cyvcf2==0.7.4
 RUN pip install $PYTHON_MODULES
+
+
+## Install necessary R packages
+RUN R -e "install.packages(c('dplyr','stringr','tidyr','httr','git2r','data.table','magrittr','devtools','htmltools','caret','randomForest','plotly'), dependencies = T, repos = 'http://cran.us.r-project.org')"
+RUN R -e "source(\"https://bioconductor.org/biocLite.R\"); biocLite(c('deconstructSigs', 'VariantAnnotation','BSgenome.Hsapiens.UCSC.hg19','GenomeInfoDb','GenomicRanges','S4Vectors'))"
+RUN R -e "library(devtools); devtools::install_github('rstudio/DT'); devtools::install_github('hadley/ggplot2'); devtools::install_github('mjkallen/rlogging'); devtools::install_github('rstudio/crosstalk'); devtools::install_github('kent37/summarywidget')"
 
 ## Install vcfanno version 0.0.11
 RUN wget https://github.com/brentp/vcfanno/releases/download/v0.0.11/vcfanno_0.0.11_linux_amd64.tar.gz && \
@@ -129,11 +132,6 @@ RUN make
 RUN cp bin/vcfbreakmulti /usr/local/bin
 RUN rm -rf /vcflib
 
-## Add local PCGR R package
-WORKDIR /
-ADD R/ /
-RUN R -e "devtools::install('pcgrr2')"
-
 ## Add vt (for decomposition of multi-allelic sites in query VCF)
 RUN git clone https://github.com/atks/vt.git  
 WORKDIR vt 
@@ -141,6 +139,10 @@ RUN make
 RUN make test
 RUN cp vt /usr/local/bin
 
+## Add local PCGR R package
+WORKDIR /
+ADD R/ /
+RUN R -e "devtools::install('pcgrr2')"
 
 ## Add local PCGR Python scripts/libraries
 ADD pcgr.tgz /

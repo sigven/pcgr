@@ -24,7 +24,7 @@ deconstructSigs::makePie(report_data$signature_data$mut_signature_contributions$
 
 <br>
 ```{r aetiologies, echo=F}
-myOptions <- list(paging = F,pageLength=10, searching=F,caching=F)
-DT::datatable(report_data$signature_data$signatures_cancertypes_aetiologies,options = myOptions)
+myOptions <- list(paging = F,pageLength=10, searching=F,caching=F,buttons = c('csv','excel'),dom = 'Bfrtip')
+DT::datatable(report_data$signature_data$signatures_cancertypes_aetiologies,options = myOptions,extensions=c("Buttons","Responsive"))
 ```
 <br>

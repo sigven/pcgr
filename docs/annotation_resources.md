@@ -8,7 +8,7 @@
   * [IntOGen catalogs of driver mutations/genes](https://www.intogen.org/downloads) - (May 2016)
 
 ###  Variant frequency databases
-  * [COSMIC v80](http://cancer.sanger.ac.uk/cosmic/) - catalogue of somatic mutations in cancer (February 2017)
+  * [COSMIC v81](http://cancer.sanger.ac.uk/cosmic/) - catalogue of somatic mutations in cancer (May 2017)
   * [ICGC v23](https://dcc.icgc.org/) - Somatic mutations discovered in all ICGC (International Cancer Genomics Consortium) tumor cohorts (Dec 2016)
   * [ExAC r1](http://exac.broadinstitute.org/) - germline variant frequencies exome-wide (February 2017)
   * [gnomAD r1](http://exac.broadinstitute.org/) - germline variant frequencies exome-wide (March 2017)
@@ -19,17 +19,17 @@
 ### Variant databases of clinical utility
   * [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - database of clinically related variants (March 2017)
   * [DoCM](http://docm.genome.wustl.edu) - database of curated mutations (v3.2, April 2016)
-  * [CIViC](http://civic.genome.wustl.edu) - clinical interpretations of variants in cancer (April 5th 2017)
+  * [CIViC](http://civic.genome.wustl.edu) - clinical interpretations of variants in cancer (August 3rd 2017)
   * [CBMDB](http://www.cancergenomeinterpreter.org/biomarkers) - Cancer BioMarkers database (Februay 8th 2017)
   * [DGIdb](http://dgidb.genome.wustl.edu) - database of interactions betweeen antineoplastic drugs and human proteins (v2.22, February 2016)
 
 ### Protein domains/functional features
-  * [UniProt/SwissProt KnowledgeBase 2016_09](http://www.uniprot.org) - resource on protein sequence and functional information (March 2017)
+  * [UniProt/SwissProt KnowledgeBase 2016_09](http://www.uniprot.org) - resource on protein sequence and functional information (June 2017)
   * [Pfam v31](http://pfam.xfam.org) - database of protein families and domains (March 2017)
 
 ### Cancer gene knowledge bases
   * [TSGene v2.0](http://bioinfo.mc.vanderbilt.edu/TSGene/) - tumor suppressor/oncogene database (November 2015)
-  * [Cancer Gene Cencus](http://cancer.sanger.ac.uk/cosmic/) - (February 2017)
+  * [Cancer Gene Cencus](http://cancer.sanger.ac.uk/cosmic/) - (v81, May 2017)
 
 ## Notes on variant annotation datasets
 

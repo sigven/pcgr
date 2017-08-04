@@ -20,8 +20,8 @@ Basic variant consequence annotation
 Variant frequency databases
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--  `COSMIC v80 <http://cancer.sanger.ac.uk/cosmic/>`__ - catalogue of
-   somatic mutations in cancer (February 2017)
+-  `COSMIC v81 <http://cancer.sanger.ac.uk/cosmic/>`__ - catalogue of
+   somatic mutations in cancer (May 2017)
 -  `ICGC v23 <https://dcc.icgc.org/>`__ - Somatic mutations discovered
    in all ICGC (International Cancer Genomics Consortium) tumor cohorts
    (Dec 2016)
@@ -45,7 +45,7 @@ Variant databases of clinical utility
 -  `DoCM <http://docm.genome.wustl.edu>`__ - database of curated
    mutations (v3.2, April 2016)
 -  `CIViC <http://civic.genome.wustl.edu>`__ - clinical interpretations
-   of variants in cancer (April 5th 2017)
+   of variants in cancer (August 3rd 2017)
 -  `CBMDB <http://www.cancergenomeinterpreter.org/biomarkers>`__ -
    Cancer BioMarkers database (Februay 8th 2017)
 -  `DGIdb <http://dgidb.genome.wustl.edu>`__ - database of interactions
@@ -56,8 +56,7 @@ Protein domains/functional features
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  `UniProt/SwissProt KnowledgeBase 2016\_09 <http://www.uniprot.org>`__
-   - resource on protein sequence and functional information (March
-   2017)
+   - resource on protein sequence and functional information (June 2017)
 -  `Pfam v31 <http://pfam.xfam.org>`__ - database of protein families
    and domains (March 2017)
 
@@ -66,8 +65,8 @@ Cancer gene knowledge bases
 
 -  `TSGene v2.0 <http://bioinfo.mc.vanderbilt.edu/TSGene/>`__ - tumor
    suppressor/oncogene database (November 2015)
--  `Cancer Gene Cencus <http://cancer.sanger.ac.uk/cosmic/>`__ -
-   (February 2017)
+-  `Cancer Gene Cencus <http://cancer.sanger.ac.uk/cosmic/>`__ - (v81,
+   May 2017)
 
 Notes on variant annotation datasets
 ------------------------------------

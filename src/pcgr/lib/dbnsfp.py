@@ -7,8 +7,7 @@ from bx.intervals.intersection import IntervalTree
 
 def map_effect_abbreviation(abbrev, algo):
    
-
-   if algo == 'splice_site_ada' or algo == 'splice_site_rf' or algo == 'splice_site_global' or algo == 'cadd_phred':
+   if algo == 'splice_site_ada' or algo == 'splice_site_rf' or algo == 'splice_site_global' or algo == 'cadd_phred' or algo == 'gerp_rs' or algo == 'mutpred':
       return abbrev
    if abbrev == 'D':
       if algo == 'polyphen2_hdiv' or algo == 'polyphen2_hvar':

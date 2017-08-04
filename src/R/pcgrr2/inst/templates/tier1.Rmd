@@ -11,103 +11,459 @@
 
 ### Tier statistics
 
-* Tier 1 variants: __`r nrow(report_data$variants_tier1_display)`__
-* Tier 2 variants: __`r nrow(report_data$variants_tier2_display)`__
-* Tier 3 variants: __`r nrow(report_data$variants_tier3_display)`__
-* Tier 4 variants: __`r nrow(report_data$variants_tier4_display)`__
-* Tier 5 variants: __`r nrow(report_data$variants_tier5_display)`__
+```{r prepare_tier_data, echo=F, results='asis'}
+
+show_tier1_diagnostic_filters <- F
+missing_tier1_diagnostic_variants <- T
+if(nrow(report_data$clinical_evidence_items_diagnostic) > 0){
+  show_tier1_diagnostic_filters <- T
+  missing_tier1_diagnostic_variants <- F
+  report_data$clinical_evidence_items_diagnostic <- dplyr::rename(report_data$clinical_evidence_items_diagnostic, DOCM_DISEASE = OTHER_DISEASE_DOCM, DOCM_LITERATURE = OTHER_LITERATURE_DOCM)
+  if(nrow(report_data$clinical_evidence_items_diagnostic[!is.na(report_data$clinical_evidence_items_diagnostic$INTOGEN_DRIVER_MUT),]) > 0){
+    report_data$clinical_evidence_items_diagnostic[!is.na(report_data$clinical_evidence_items_diagnostic$INTOGEN_DRIVER_MUT),]$INTOGEN_DRIVER_MUT <- TRUE
+  }
+}
+
+show_tier1_prognostic_filters <- F
+missing_tier1_prognostic_variants <- T
+if(nrow(report_data$clinical_evidence_items_prognostic) > 0){
+  show_tier1_prognostic_filters <- T
+  missing_tier1_prognostic_variants <- F
+  report_data$clinical_evidence_items_prognostic <- dplyr::rename(report_data$clinical_evidence_items_prognostic, DOCM_DISEASE = OTHER_DISEASE_DOCM, DOCM_LITERATURE = OTHER_LITERATURE_DOCM)
+  if(nrow(report_data$clinical_evidence_items_prognostic[!is.na(report_data$clinical_evidence_items_prognostic$INTOGEN_DRIVER_MUT),]) > 0){
+    report_data$clinical_evidence_items_prognostic[!is.na(report_data$clinical_evidence_items_prognostic$INTOGEN_DRIVER_MUT),]$INTOGEN_DRIVER_MUT <- TRUE
+  }
+}
+
+show_tier1_predictive_filters <- F
+missing_tier1_predictive_variants <- T
+if(nrow(report_data$clinical_evidence_items_predictive) > 0){
+  show_tier1_predictive_filters <- T
+  missing_tier1_predictive_variants <- F
+  report_data$clinical_evidence_items_predictive <- dplyr::rename(report_data$clinical_evidence_items_predictive, DOCM_DISEASE = OTHER_DISEASE_DOCM, DOCM_LITERATURE = OTHER_LITERATURE_DOCM)
+  if(nrow(report_data$clinical_evidence_items_predictive[!is.na(report_data$clinical_evidence_items_predictive$INTOGEN_DRIVER_MUT),]) > 0){
+    report_data$clinical_evidence_items_predictive[!is.na(report_data$clinical_evidence_items_predictive$INTOGEN_DRIVER_MUT),]$INTOGEN_DRIVER_MUT <- TRUE
+  }
+}
+
+show_tier1_predisposing_filters <- F
+missing_tier1_predisposing_variants <- T
+if(nrow(report_data$clinical_evidence_items_predisposing) > 0){
+  show_tier1_predisposing_filters <- T
+  missing_tier1_predisposing_variants <- F
+  report_data$clinical_evidence_items_predisposing <- dplyr::rename(report_data$clinical_evidence_items_predisposing, DOCM_DISEASE = OTHER_DISEASE_DOCM, DOCM_LITERATURE = OTHER_LITERATURE_DOCM)
+  if(nrow(report_data$clinical_evidence_items_predisposing[!is.na(report_data$clinical_evidence_items_predisposing$INTOGEN_DRIVER_MUT),]) > 0){
+    report_data$clinical_evidence_items_predisposing[!is.na(report_data$clinical_evidence_items_predisposing$INTOGEN_DRIVER_MUT),]$INTOGEN_DRIVER_MUT <- TRUE
+  }
+}
+
+```
+
+The prioritization of SNV/InDels in the report is done according to a five-tiered structure, similar to proposed recommendations [[@Dienstmann2014-ou]](https://www.ncbi.nlm.nih.gov/pubmed/24768039), also adopting the MLVD framework for description of clinically relevant cancer variants [[@Ritter2016-by]](https://www.ncbi.nlm.nih.gov/pubmed/27814769).
+
+* Tier 1 - actionable variants: __`r nrow(report_data$variants_tier1_display)`__
+* Tier 2 - cancer hotspots, disease-causing, or predicted drivers: __`r nrow(report_data$variants_tier2_display)`__
+* Tier 3 - cancer gene variants: __`r nrow(report_data$variants_tier3_display)`__
+* Tier 4 - other coding variants: __`r nrow(report_data$variants_tier4_display)`__
+* Tier 5 - non-coding variantss: __`r nrow(report_data$variants_tier5_display)`__
+
+<br><br>
+
+
+```{r vaf_plot_prep, echo=F}
+tumor_af_plot <- F
+if(nrow(report_data$tsv_variants) > 0){
+  if(nrow(dplyr::filter(report_data$tsv_variants, !is.na(DP_TUMOR))) > 0 & nrow(dplyr::filter(report_data$tsv_variants, !is.na(AF_TUMOR))) > 0){
+    tumor_af_plot <- T
+  }
+}
+```
+
+
+```{r tumor_allelic_support_header, echo=F, results='asis', eval=tumor_af_plot}
+cat('<h3>Global distribution - allelic support</h3>',sep="\n")
+```
+
+
+
+```{r tumor_allelic_support, echo = F, fig.width=10, fig.height=7, eval=tumor_af_plot}
+histplot <- pcgrr2::tier_af_distribution(report_data$tsv_variants)
+plotly::ggplotly(histplot)
+htmltools::br()
+```
+
+
+### Global variant browser
+
+The table below permits filtering of the total SNV/InDel set by various criteria.
+
+__NOTE 1__: The filtering applies to this table only, and not to the tier-specific tables below. 
+
+__NOTE 2__: Filtering on sequencing depth/allelic fraction depends on input specified by user (VCF INFO tags). 
 
 <br>
 
 
-### Tier 1 - Genomic biomarkers for diagnosis, prognosis, and drug sensitivity {.tabset}
+```{r table_browse_prepare, echo=F}
+table_browse_basic <- F
+table_browse_basic_CC <- F
+table_browse_tumor_dp_af <- F
+table_browse_tumor_dp_af_CC <- F
+table_browse_tumor_dp_af_normal_dp_af <- F
+table_browse_tumor_dp_af_normal_dp_af_CC <- F
+
+if(nrow(report_data$tsv_variants) > 0){
+  table_browse_basic <- T
+
+  if(nrow(dplyr::filter(report_data$tsv_variants, !is.na(CALL_CONFIDENCE))) > 0){
+    table_browse_basic_CC <- T
+    table_browse_basic <- F
+  }
+  
+  if(nrow(dplyr::filter(report_data$tsv_variants, !is.na(DP_TUMOR))) > 0 & nrow(dplyr::filter(report_data$tsv_variants, !is.na(AF_TUMOR))) > 0){
+    table_browse_tumor_dp_af < T
+    if(table_browse_basic_CC == T){
+      table_browse_tumor_dp_af_CC <- T
+      table_browse_tumor_dp_af <- F
+      table_browse_basic_CC <- F
+    }
+    table_browse_basic <- F
+  }
+  
+  if((table_browse_tumor_dp_af == T | table_browse_tumor_dp_af_CC == T) & nrow(dplyr::filter(report_data$tsv_variants, !is.na(DP_NORMAL))) > 0 & nrow(dplyr::filter(report_data$tsv_variants, !is.na(AF_NORMAL))) > 0){
+    table_browse_tumor_dp_af <- F
+    table_browse_basic <- F
+    table_browse_tumor_dp_af_normal_dp_af <- T
+    if(table_browse_tumor_dp_af_CC == T){
+      table_browse_tumor_dp_af_CC <- F
+      table_browse_tumor_dp_af_normal_dp_af <- F
+      table_browse_tumor_dp_af_normal_dp_af_CC <- T
+    }
+  }
+  
+}
+
+
+```
+
+
+```{r table_browse_plain, echo=F, results = "asis", eval = table_browse_basic}
+library(crosstalk)
+library(summarywidget)
+
+vars <- report_data$tsv_variants %>% dplyr::select(SYMBOL, CONSEQUENCE, PROTEIN_CHANGE, VARIANT_CLASS, TIER, GENOMIC_CHANGE, GENOME_VERSION, CALL_CONFIDENCE, DP_TUMOR, AF_TUMOR, DP_NORMAL, AF_NORMAL)
+vars$CONSEQUENCE <- stringr::str_replace_all(vars$CONSEQUENCE,"&",",")
+variants_shared <- crosstalk::SharedData$new(vars)
+  
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("TIER", "Tier", variants_shared, ~TIER)
+  ),
+  list(
+    crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_shared, ~CONSEQUENCE)
+  )
+)
+  
+htmltools::br()
+crosstalk::bscols(
+  DT::datatable(variants_shared, extensions=c("Buttons","Responsive"), width = "100%",
+    options=list(buttons = c('csv','excel'),dom = 'Bfrtip')
+  )
+)
+
+```
+
+
+```{r table_browse_plain_CC, echo=F, results = "asis", eval = table_browse_basic_CC}
+library(crosstalk)
+library(summarywidget)
+
+vars <- report_data$tsv_variants %>% dplyr::select(SYMBOL, CONSEQUENCE, PROTEIN_CHANGE, VARIANT_CLASS, TIER, GENOMIC_CHANGE, GENOME_VERSION, CALL_CONFIDENCE, DP_TUMOR, AF_TUMOR, DP_NORMAL, AF_NORMAL)
+vars$CONSEQUENCE <- stringr::str_replace_all(vars$CONSEQUENCE,"&",",")
+variants_shared <- crosstalk::SharedData$new(vars)
+  
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("TIER", "Tier", variants_shared, ~TIER),
+    crosstalk::filter_select("CALL_CONFIDENCE", "Call confidence", variants_shared, ~CALL_CONFIDENCE)
+  ),
+  list(
+    crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_shared, ~CONSEQUENCE)
+  )
+)
+  
+htmltools::br()
+crosstalk::bscols(
+  DT::datatable(variants_shared, extensions=c("Buttons","Responsive"), width = "100%",
+    options=list(buttons = c('csv','excel'),dom = 'Bfrtip')
+  )
+)
+
+```
+
+
+
+```{r table_browse_tumor, echo=F, results = "asis", eval = table_browse_tumor_dp_af}
+library(crosstalk)
+library(summarywidget)
+
+vars <- report_data$tsv_variants %>% dplyr::select(SYMBOL, CONSEQUENCE, PROTEIN_CHANGE, VARIANT_CLASS, TIER, GENOMIC_CHANGE, GENOME_VERSION, CALL_CONFIDENCE, DP_TUMOR, AF_TUMOR, DP_NORMAL, AF_NORMAL) %>% dplyr::filter(!is.na(DP_TUMOR) & !is.na(AF_TUMOR))
+vars$CONSEQUENCE <- stringr::str_replace_all(vars$CONSEQUENCE,"&",",")
+variants_shared <- crosstalk::SharedData$new(vars)
+  
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("TIER", "Tier", variants_shared, ~TIER),
+    crosstalk::filter_slider("DP_TUMOR", "Sequencing depth tumor", variants_shared, ~DP_TUMOR, ticks = F, sep = F)
+  ),
+  list(
+    crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_shared, ~CONSEQUENCE),
+    crosstalk::filter_slider("AF_TUMOR", "Allelic fraction tumor", variants_shared, ~AF_TUMOR, ticks = F, sep = F)
+
+  )
+)
+  
+htmltools::br()
+crosstalk::bscols(
+  DT::datatable(variants_shared, extensions=c("Buttons","Responsive"), width = "100%",
+    options=list(buttons = c('csv','excel'),dom = 'Bfrtip')
+  )
+)
+
+```
+
+
+```{r table_browse_tumor_CC, echo=F, results = "asis", eval = table_browse_tumor_dp_af_CC}
+library(crosstalk)
+library(summarywidget)
+
+vars <- report_data$tsv_variants %>% dplyr::select(SYMBOL, CONSEQUENCE, PROTEIN_CHANGE, VARIANT_CLASS, TIER, GENOMIC_CHANGE, GENOME_VERSION, CALL_CONFIDENCE, DP_TUMOR, AF_TUMOR, DP_NORMAL, AF_NORMAL) %>% dplyr::filter(!is.na(DP_TUMOR) & !is.na(AF_TUMOR))
+vars$CONSEQUENCE <- stringr::str_replace_all(vars$CONSEQUENCE,"&",",")
+variants_shared <- crosstalk::SharedData$new(vars)
+  
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("TIER", "Tier", variants_shared, ~TIER),
+    crosstalk::filter_slider("DP_TUMOR", "Sequencing depth tumor", variants_shared, ~DP_TUMOR, ticks = F, sep = F),
+    crosstalk::filter_slider("AF_TUMOR", "Allelic fraction tumor", variants_shared, ~AF_TUMOR, ticks = F, sep = F)
+  ),
+  list(
+    crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_shared, ~CONSEQUENCE),
+    crosstalk::filter_select("CALL_CONFIDENCE", "Call confidence", variants_shared, ~CALL_CONFIDENCE)
+  )
+)
+  
+htmltools::br()
+crosstalk::bscols(
+  DT::datatable(variants_shared, extensions=c("Buttons","Responsive"), width = "100%",
+    options=list(buttons = c('csv','excel'),dom = 'Bfrtip')
+  )
+)
+
+```
+
+
+
+```{r table_browse_full, echo=F, results = "asis", eval = table_browse_tumor_dp_af_normal_dp_af}
+library(crosstalk)
+library(summarywidget)
+
+vars <- report_data$tsv_variants %>% dplyr::select(SYMBOL, CONSEQUENCE, PROTEIN_CHANGE, VARIANT_CLASS, TIER, GENOMIC_CHANGE, GENOME_VERSION, CALL_CONFIDENCE, DP_TUMOR, AF_TUMOR, DP_NORMAL, AF_NORMAL) %>% dplyr::filter(!is.na(DP_TUMOR) & !is.na(AF_TUMOR) & !is.na(AF_NORMAL) & !is.na(DP_NORMAL))
+vars$CONSEQUENCE <- stringr::str_replace_all(vars$CONSEQUENCE,"&",",")
+variants_shared <- crosstalk::SharedData$new(vars)
+  
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("TIER", "Tier", variants_shared, ~TIER),
+    crosstalk::filter_slider("DP_TUMOR", "Sequencing depth tumor", variants_shared, ~DP_TUMOR, sep=F, ticks = F),
+    crosstalk::filter_slider("AF_TUMOR", "Allelic fraction tumor", variants_shared, ~AF_TUMOR, sep=F, ticks = F)
+  ),
+  list(
+    crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_shared, ~CONSEQUENCE),
+    crosstalk::filter_select("CALL_CONFIDENCE", "Call confidence", variants_shared, ~CALL_CONFIDENCE),
+    crosstalk::filter_slider("DP_NORMAL", "Sequencing depth control", variants_shared, ~DP_NORMAL, sep=F, ticks = F),
+    crosstalk::filter_slider("AF_NORMAL", "Allelic fraction control", variants_shared, ~AF_NORMAL, sep=F, ticks = F)
+  )
+)
+  
+htmltools::br()
+crosstalk::bscols(
+  DT::datatable(variants_shared, extensions=c("Buttons","Responsive"), width = "100%",
+    options=list(buttons = c('csv','excel'),dom = 'Bfrtip')
+  )
+)
+
+```
+
+<br><br>
+
+
+### Tier 1 - Genomic biomarkers for diagnosis, prognosis, predisposition, and drug response {.tabset}
 
 - A total of __`r nrow(report_data$variants_tier1_display)`__ unique, somatic variant(s) in the tumor sample can be mapped to genomic biomarkers in the [database for clinical interpretations of variants in cancer, CIViC](https://civic.genome.wustl.edu/#/home) or [Cancer bioMarkers database](https://www.cancergenomeinterpreter.org/biomarkers), with the following number of evidence items:
-    * Tier 1A: __`r nrow(report_data$clinical_evidence_items_tier1A)`__ evidence items linked to specific amino acid changes
-    * Tier 1B: __`r nrow(report_data$clinical_evidence_items_tier1B)`__ evidence items linked to codon alterations
-    * Tier 1C: __`r nrow(report_data$clinical_evidence_items_tier1C)`__ evidence items linked to exon alterations
+    * Tier 1 - Predictive: __`r nrow(report_data$clinical_evidence_items_predictive)`__ evidence items linked to drug sensitivity/resistance
+    * Tier 1 - Prognostic: __`r nrow(report_data$clinical_evidence_items_prognostic)`__ evidence items linked to prognosis
+    * Tier 1 - Diagnostic: __`r nrow(report_data$clinical_evidence_items_diagnostic)`__ evidence items linked to diagnosis
+    * Tier 1 - Predisposing: __`r nrow(report_data$clinical_evidence_items_predisposing)`__ evidence items linked to predisposition
 
 <br><br>
 
-#### Tier 1A biomarkers
+#### Predictive biomarkers
 
 <br>
 
-```{r tier1A, echo=F, results = 'asis'}
+```{r tier1_predictive, echo=F, results = 'asis', eval = show_tier1_predictive_filters}
+library(summarywidget)
+library(crosstalk)
 
-if(nrow(report_data$clinical_evidence_items_tier1A) > 0){
-  cat('The table below lists all variant-evidence item associations:',sep='\n')
-  cat('\n')
-  myOptions <- list(paging = F, searching=T,caching=F)
-  if(nrow(report_data$clinical_evidence_items_tier1A) > 10){
-    myOptions <- list(paging = T,pageLength=10, searching=T,caching=F)
-  }
-  report_data$clinical_evidence_items_tier1A <- dplyr::rename(report_data$clinical_evidence_items_tier1A, DOCM_DISEASE = OTHER_DISEASE_DOCM, DOCM_LITERATURE = OTHER_LITERATURE_DOCM)
-  if(nrow(report_data$clinical_evidence_items_tier1A[!is.na(report_data$clinical_evidence_items_tier1A$INTOGEN_DRIVER_MUT),]) > 0){
-    report_data$clinical_evidence_items_tier1A[!is.na(report_data$clinical_evidence_items_tier1A$INTOGEN_DRIVER_MUT),]$INTOGEN_DRIVER_MUT <- TRUE
-  }
-  DT::datatable(report_data$clinical_evidence_items_tier1A, options = myOptions, escape=F, extensions = "Responsive") %>%
+variants_tier1_predictive_shared <- crosstalk::SharedData$new(report_data$clinical_evidence_items_predictive)
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("CANCER_TYPE", "Cancer type", variants_tier1_predictive_shared, ~CANCER_TYPE),
+    crosstalk::filter_select("CLINICAL_SIGNIFICANCE", "Clinical significance", variants_tier1_predictive_shared, ~CLINICAL_SIGNIFICANCE),
+    crosstalk::filter_select("EVIDENCE_LEVEL", "Evidence level", variants_tier1_predictive_shared, ~EVIDENCE_LEVEL)
+  ),
+  list(
+    crosstalk::filter_select("BIOMARKER_MAPPING", "Biomarker mapping", variants_tier1_predictive_shared, ~BIOMARKER_MAPPING),
+    crosstalk::filter_select("THERAPEUTIC_CONTEXT", "Therapeutic context", variants_tier1_predictive_shared, ~THERAPEUTIC_CONTEXT)
+  )
+)
+
+cat('The table below lists all variant-evidence item associations:',sep='\n')
+htmltools::br()
+htmltools::br()
+
+crosstalk::bscols(
+  DT::datatable(variants_tier1_predictive_shared, escape=F,extensions=c("Buttons","Responsive"), width = "100%",options=list(buttons = c('csv','excel'),dom = 'Bfrtip')) %>%
   DT::formatStyle('EVIDENCE_LEVEL', backgroundColor = DT::styleEqual(c('A: Validated','B: Clinical evidence','C: Case study','D: Preclinical evidence','E: Indirect evidence'), c("#009E73","#56B4E9", "#0072B2","#E69F00", "#F0E442")))
-}else{
-  cat('<i>No variant-evidence item associations found.</i>',sep='\n')
-  cat('\n')
-}
+)
+
+#htmltools::br()
+
+```
+
+```{r tier1_predictive_missing, echo=F, results = 'asis', eval = missing_tier1_predictive_variants}
+cat('<i>No variant-evidence item associations found.</i>',sep='\n')
+cat('\n')
 ```
 
 <br><br>
 
-#### Tier 1B biomarkers
+#### Prognostic biomarkers
 
 <br>
 
-```{r tier1B, echo=F, results='asis'}
+```{r tier1_prognostic, echo=F, results='asis', eval = show_tier1_prognostic_filters}
 
-if(nrow(report_data$clinical_evidence_items_tier1B) > 0){
-  cat('The table below lists all variant-evidence item associations:',sep='\n')
-  cat('\n')
-  myOptions <- list(paging = F, searching=T,caching=F)
-  if(nrow(report_data$clinical_evidence_items_tier1B) > 10){
-    myOptions <- list(paging = T,pageLength=10, searching=T,caching=F)
-  }
-  report_data$clinical_evidence_items_tier1B <- dplyr::rename(report_data$clinical_evidence_items_tier1B, DOCM_DISEASE = OTHER_DISEASE_DOCM, DOCM_LITERATURE = OTHER_LITERATURE_DOCM)
-  if(nrow(report_data$clinical_evidence_items_tier1B[!is.na(report_data$clinical_evidence_items_tier1B$INTOGEN_DRIVER_MUT),]) > 0){
-    report_data$clinical_evidence_items_tier1B[!is.na(report_data$clinical_evidence_items_tier1B$INTOGEN_DRIVER_MUT),]$INTOGEN_DRIVER_MUT <- TRUE
-  }
-  DT::datatable(report_data$clinical_evidence_items_tier1B, options = myOptions, escape=F, extensions = "Responsive") %>%
+library(summarywidget)
+library(crosstalk)
+
+variants_tier1_prognostic_shared <- crosstalk::SharedData$new(report_data$clinical_evidence_items_prognostic)
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("CANCER_TYPE", "Cancer type", variants_tier1_prognostic_shared, ~CANCER_TYPE),
+    crosstalk::filter_select("CLINICAL_SIGNIFICANCE", "Clinical significance", variants_tier1_prognostic_shared, ~CLINICAL_SIGNIFICANCE)
+  ),
+  list(
+    crosstalk::filter_select("EVIDENCE_LEVEL", "Evidence level", variants_tier1_prognostic_shared, ~EVIDENCE_LEVEL),
+    crosstalk::filter_select("BIOMARKER_MAPPING", "Biomarker mapping", variants_tier1_prognostic_shared, ~BIOMARKER_MAPPING)
+  )
+)
+cat('The table below lists all variant-evidence item associations:',sep='\n')
+htmltools::br()
+htmltools::br()
+
+crosstalk::bscols(
+  DT::datatable(variants_tier1_prognostic_shared, escape=F,extensions=c("Buttons","Responsive"), width = "100%",options=list(buttons = c('csv','excel'),dom = 'Bfrtip')) %>%
   DT::formatStyle('EVIDENCE_LEVEL', backgroundColor = DT::styleEqual(c('A: Validated','B: Clinical evidence','C: Case study','D: Preclinical evidence','E: Indirect evidence'), c("#009E73","#56B4E9", "#0072B2","#E69F00", "#F0E442")))
-}else{
-  cat('<i>No variant-evidence item associations found.</i>',sep='\n')
-  cat('\n')
-}
+)
+#htmltools::br()
+
+```
+
+```{r tier1_prognostic_missing, echo=F, results = 'asis', eval = missing_tier1_prognostic_variants}
+cat('<i>No variant-evidence item associations found.</i>',sep='\n')
+cat('\n')
 ```
 
 <br><br>
 
-#### Tier 1C biomarkers
+#### Diagnostic biomarkers
 
 <br>
 
-```{r tier1C, echo=F,results='asis'}
+```{r tier1_diagnostic, echo=F, results='asis', eval = show_tier1_diagnostic_filters}
 
-if(nrow(report_data$clinical_evidence_items_tier1C) > 0){
-  cat('The table below lists all variant-evidence item associations:',sep='\n')
-  cat('\n')
-  
-  myOptions <- list(paging = F, searching=T,caching=F)
-  if(nrow(report_data$clinical_evidence_items_tier1C) > 10){
-    myOptions <- list(paging = T,pageLength=10, searching=T,caching=F)
-  }
-  report_data$clinical_evidence_items_tier1C <- dplyr::rename(report_data$clinical_evidence_items_tier1C, DOCM_DISEASE = OTHER_DISEASE_DOCM, DOCM_LITERATURE = OTHER_LITERATURE_DOCM)
-  if(nrow(report_data$clinical_evidence_items_tier1C[!is.na(report_data$clinical_evidence_items_tier1C$INTOGEN_DRIVER_MUT),]) > 0){
-    report_data$clinical_evidence_items_tier1C[!is.na(report_data$clinical_evidence_items_tier1C$INTOGEN_DRIVER_MUT),]$INTOGEN_DRIVER_MUT <- TRUE
-  }
+library(summarywidget)
+library(crosstalk)
 
-  DT::datatable(report_data$clinical_evidence_items_tier1C, options = myOptions, escape=F, extensions = "Responsive") %>%
+variants_tier1_diagnostic_shared <- crosstalk::SharedData$new(report_data$clinical_evidence_items_diagnostic)
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("CANCER_TYPE", "Cancer type", variants_tier1_diagnostic_shared, ~CANCER_TYPE),
+    crosstalk::filter_select("CLINICAL_SIGNIFICANCE", "Clinical association", variants_tier1_diagnostic_shared, ~CLINICAL_SIGNIFICANCE)
+  ),
+  list(
+    crosstalk::filter_select("EVIDENCE_LEVEL", "Evidence level", variants_tier1_diagnostic_shared, ~EVIDENCE_LEVEL),
+    crosstalk::filter_select("BIOMARKER_MAPPING", "Biomarker mapping", variants_tier1_diagnostic_shared, ~BIOMARKER_MAPPING)
+  )
+)
+cat('The table below lists all variant-evidence item associations:',sep='\n')
+htmltools::br()
+htmltools::br()
+
+crosstalk::bscols(
+  DT::datatable(variants_tier1_diagnostic_shared, escape=F,extensions=c("Buttons","Responsive"), width = "100%",options=list(buttons = c('csv','excel'),dom = 'Bfrtip')) %>%
   DT::formatStyle('EVIDENCE_LEVEL', backgroundColor = DT::styleEqual(c('A: Validated','B: Clinical evidence','C: Case study','D: Preclinical evidence','E: Indirect evidence'), c("#009E73","#56B4E9", "#0072B2","#E69F00", "#F0E442")))
-}else{
-  cat('<i>No variant-evidence item associations found.</i>',sep='\n')
-  cat('\n')
-}
+)
+#htmltools::br()
+
+```
+
+```{r tier1_diagnostic_missing, echo=F, results = 'asis', eval = missing_tier1_diagnostic_variants}
+cat('<i>No variant-evidence item associations found.</i>',sep='\n')
+cat('\n')
 ```
 
 <br><br>
+
+#### Predisposition biomarkers
+
+<br>
+
+```{r tier1_predisposing, echo=F, results='asis', eval = show_tier1_predisposing_filters}
+
+library(summarywidget)
+library(crosstalk)
+
+variants_tier1_predisposing_shared <- crosstalk::SharedData$new(report_data$clinical_evidence_items_predisposing)
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("CANCER_TYPE", "Cancer type", variants_tier1_predisposing_shared, ~CANCER_TYPE),
+    crosstalk::filter_select("CLINICAL_SIGNIFICANCE", "Clinical significance", variants_tier1_predisposing_shared, ~CLINICAL_SIGNIFICANCE)
+  ),
+  list(
+    crosstalk::filter_select("EVIDENCE_LEVEL", "Evidence level", variants_tier1_predisposing_shared, ~EVIDENCE_LEVEL),
+    crosstalk::filter_select("BIOMARKER_MAPPING", "Biomarker mapping", variants_tier1_predisposing_shared, ~BIOMARKER_MAPPING)
+  )
+)
+cat('The table below lists all variant-evidence item associations:',sep='\n')
+htmltools::br()
+htmltools::br()
+
+crosstalk::bscols(
+  DT::datatable(variants_tier1_predisposing_shared, escape=F,extensions=c("Buttons","Responsive"), width = "100%",options=list(buttons = c('csv','excel'),dom = 'Bfrtip')) %>%
+  DT::formatStyle('EVIDENCE_LEVEL', backgroundColor = DT::styleEqual(c('A: Validated','B: Clinical evidence','C: Case study','D: Preclinical evidence','E: Indirect evidence'), c("#009E73","#56B4E9", "#0072B2","#E69F00", "#F0E442")))
+)
+#htmltools::br()
+
+```
+
+```{r tier1_predisposing_missing, echo=F, results = 'asis', eval = missing_tier1_predisposing_variants}
+cat('<i>No variant-evidence item associations found.</i>',sep='\n')
+cat('\n')
+```
+
+<br><br>
+
+
