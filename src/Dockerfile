@@ -126,11 +126,11 @@ RUN cp *.pl /usr/local/bin/
 WORKDIR /
 
 ## Add vcfbreakmulti (for future preprocessing of input)
-RUN git clone --recursive https://github.com/ekg/vcflib.git
-WORKDIR vcflib
-RUN make
-RUN cp bin/vcfbreakmulti /usr/local/bin
-RUN rm -rf /vcflib
+#RUN git clone --recursive https://github.com/vcflib/vcflib.git
+#WORKDIR vcflib
+#RUN make
+#RUN cp bin/vcfbreakmulti /usr/local/bin
+#RUN rm -rf /vcflib
 
 ## Add vt (for decomposition of multi-allelic sites in query VCF)
 RUN git clone https://github.com/atks/vt.git  

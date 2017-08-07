@@ -27,6 +27,7 @@ tumor_af_tag <- as.character(args[13])
 normal_dp_tag <- as.character(args[14])
 normal_af_tag <- as.character(args[15])
 call_conf_tag <- as.character(args[16])
+version <- as.character(args[17])
 
 rlogging::SetTimeStampFormat(ts.format="%Y-%m-%d %H:%M:%S ")
 rlogging::SetLogFile(NULL)
@@ -60,4 +61,4 @@ if(show_noncoding_variants == 1){
 }
 
 
-pcgrr2::generate_pcg_report(project_directory = dir, query_vcf = query_vcf, cna_segments_tsv = query_cnv, logR_gain = logR_gain, logR_homdel = logR_homdel, pcgr_data = pcgr_data, sample_name = sample_name, signature_normalization_method = signature_normalization, signatures_limit = signatures_limit, print_biomarkers = TRUE, print_tier_variants = TRUE, print_mutational_signatures = TRUE, print_cna_segments = TRUE, print_maf = TRUE, print_html_report = TRUE, show_noncoding = show_noncoding, predict_MSI = predict_MSI, identify_msigs = identify_msigs, tumor_dp_tag = tumor_dp_tag, tumor_af_tag = tumor_af_tag, normal_dp_tag = normal_dp_tag, normal_af_tag = normal_af_tag, call_conf_tag = call_conf_tag)
+pcgrr2::generate_pcg_report(project_directory = dir, query_vcf = query_vcf, cna_segments_tsv = query_cnv, logR_gain = logR_gain, logR_homdel = logR_homdel, pcgr_data = pcgr_data, sample_name = sample_name, signature_normalization_method = signature_normalization, signatures_limit = signatures_limit, print_biomarkers = TRUE, print_tier_variants = TRUE, print_mutational_signatures = TRUE, print_cna_segments = TRUE, print_maf = TRUE, print_html_report = TRUE, show_noncoding = show_noncoding, predict_MSI = predict_MSI, identify_msigs = identify_msigs, tumor_dp_tag = tumor_dp_tag, tumor_af_tag = tumor_af_tag, normal_dp_tag = normal_dp_tag, normal_af_tag = normal_af_tag, call_conf_tag = call_conf_tag, pcgr_version = version)

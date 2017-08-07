@@ -27,11 +27,11 @@ Example reports
 ~~~~~~~~~~~~~~~
 
 -  `Report for a breast tumor sample
-   (TCGA) <http://folk.uio.no/sigven/tumor_sample.BRCA.0.4.0.pcgr.html>`__
+   (TCGA) <http://folk.uio.no/sigven/tumor_sample.BRCA.0.4.1.pcgr.html>`__
 -  `Report for a colon adenocarcinoma sample
-   (TCGA) <http://folk.uio.no/sigven/tumor_sample.COAD.0.4.0.pcgr.html>`__
+   (TCGA) <http://folk.uio.no/sigven/tumor_sample.COAD.0.4.1.pcgr.html>`__
 -  `Report for a lung adenocarcinoma sample
-   (TCGA) <http://folk.uio.no/sigven/tumor_sample.LUAD.0.4.0.pcgr.html>`__
+   (TCGA) <http://folk.uio.no/sigven/tumor_sample.LUAD.0.4.1.pcgr.html>`__
 
 Why use PCGR?
 ~~~~~~~~~~~~~

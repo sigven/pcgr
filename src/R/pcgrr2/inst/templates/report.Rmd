@@ -11,6 +11,8 @@ output:
     toc_depth: 4
     fig_width: 5
     fig_height: 4
+    includes:
+      after_body: disclaimer.md
 params:
   eval_tier1: FALSE
   eval_tier2: FALSE
@@ -80,3 +82,4 @@ knitr::opts_chunk$set(echo = F,warning=FALSE, dpi=72, error=F, eval=T)
 ```
 
 ## References
+

@@ -21,3 +21,5 @@ The annotated variants are based on the following underlying tools and knowledge
 * [DGIdb](http://dgidb.genome.wustl.edu) - database of interactions betweeen antineoplastic drugs and human proteins (`r pcgr_data$database_versions$dgidb$version`)
 * [TSGene](http://bioinfo.mc.vanderbilt.edu/TSGene/) - tumor suppressor/oncogene database (`r pcgr_data$database_versions$tsgene$version`)
 * [KEGG pathways](http://www.genome.jp/kegg/pathway.html) - KEGG pathway database (`r pcgr_data$database_versions$kegg$version`)
+
+* _PCGR software version_: `r pcgr_version`

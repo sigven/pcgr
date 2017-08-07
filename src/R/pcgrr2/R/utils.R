@@ -213,7 +213,7 @@ tier_to_maf <- function(tier_df){
 #' @return p
 #'
 
-generate_pcg_report <- function(project_directory, query_vcf, logR_gain, logR_homdel, pcgr_data, sample_name = 'SampleX', signature_normalization_method = 'default', cna_segments_tsv = NULL, signatures_limit = 6, print_biomarkers = TRUE, print_tier_variants = TRUE, print_mutational_signatures = TRUE, print_cna_segments = TRUE, print_maf = TRUE, print_html_report = TRUE,show_noncoding = FALSE,predict_MSI = FALSE, identify_msigs = FALSE, tumor_dp_tag = '_na', tumor_af_tag = '_na', normal_dp_tag = '_na', normal_af_tag = '_na', call_conf_tag = '_na'){
+generate_pcg_report <- function(project_directory, query_vcf, logR_gain, logR_homdel, pcgr_data, sample_name = 'SampleX', signature_normalization_method = 'default', cna_segments_tsv = NULL, signatures_limit = 6, print_biomarkers = TRUE, print_tier_variants = TRUE, print_mutational_signatures = TRUE, print_cna_segments = TRUE, print_maf = TRUE, print_html_report = TRUE,show_noncoding = FALSE,predict_MSI = FALSE, identify_msigs = FALSE, tumor_dp_tag = '_na', tumor_af_tag = '_na', normal_dp_tag = '_na', normal_af_tag = '_na', call_conf_tag = '_na', pcgr_version = '0.4.1'){
 
   report_data <- list(tier1_report = FALSE, tier2_report = FALSE, tier3_report = FALSE, tier4_report = FALSE, tier5_report = FALSE, msi_report = FALSE, missing_msi_data = FALSE, signature_report = FALSE, cna_report_oncogene_gain = FALSE, cna_report_tsgene_loss = FALSE, cna_report_biomarkers = FALSE, cna_report_segments = FALSE, missing_signature_data = FALSE)
 
