@@ -8,7 +8,7 @@ import subprocess
 import logging
 import sys
 
-version = '0.4.0'
+version = '0.4.1'
 
 def __main__():
    
@@ -65,7 +65,7 @@ def __main__():
 
    host_directories = verify_arguments(args.input_vcf, args.input_cna, args.pcgr_dir, args.output_dir, overwrite, identify_msigs, args.msig_n, predict_msi_status, args.sample_id, version, logger)
 
-   run_pcgr(host_directories, docker_image_version, args.logR_gain, args.logR_homdel, identify_msigs, args.msig_n, args.msig_normalization, predict_msi_status, show_noncoding, args.tumor_dp_tag, args.tumor_af_tag, args.normal_dp_tag, args.normal_af_tag, args.call_conf_tag, args.n_vcfanno_proc, args.n_vep_forks, args.sample_id)
+   run_pcgr(host_directories, docker_image_version, args.logR_gain, args.logR_homdel, identify_msigs, args.msig_n, args.msig_normalization, predict_msi_status, show_noncoding, args.tumor_dp_tag, args.tumor_af_tag, args.normal_dp_tag, args.normal_af_tag, args.call_conf_tag, args.n_vcfanno_proc, args.n_vep_forks, args.sample_id, version)
 
 def pcgr_error_message(message, logger):
    logger.error('')
@@ -175,7 +175,7 @@ def verify_arguments(input_vcf, input_cna, base_pcgr_dir, output_dir, overwrite,
    f_rel_not = open(rel_notes_file,'r')
    compliant_data_bundle = 0
    for line in f_rel_not:
-      version_check = 'PCGR_SOFTWARE_VERSION = ' + str(version)
+      version_check = 'PCGR_SOFTWARE_VERSION = 0.4.'
       if version_check in line:
          compliant_data_bundle = 1
          
@@ -223,7 +223,7 @@ def getlogger(logger_name):
    
    return logger
 
-def run_pcgr(host_directories, docker_image_version,  logR_gain, logR_homdel, identify_msigs, msig_n, msig_normalization, predict_msi_status, show_noncoding, tumor_dp_tag, tumor_af_tag, normal_dp_tag, normal_af_tag, call_conf_tag, n_vcfanno_proc, n_vep_forks, sample_id):
+def run_pcgr(host_directories, docker_image_version,  logR_gain, logR_homdel, identify_msigs, msig_n, msig_normalization, predict_msi_status, show_noncoding, tumor_dp_tag, tumor_af_tag, normal_dp_tag, normal_af_tag, call_conf_tag, n_vcfanno_proc, n_vep_forks, sample_id, version):
    """
    Main function to run the PCGR workflow using Docker
    """
@@ -310,7 +310,7 @@ def run_pcgr(host_directories, docker_image_version,  logR_gain, logR_homdel, id
    ## Generation of HTML reports for VEP/vcfanno-annotated VCF and copy number segment file
    logger = getlogger('pcgr-writer')
    logger.info("STEP 4: Generation of output files")
-   pcgr_report_command = str(docker_command_run1) + "/pcgr.R /workdir/output " + str(output_vcf) + " " + str(input_cna_docker) + " "  + str(sample_id)  + " " + str(logR_gain) + " " + str(logR_homdel) + " " + str(predict_msi_status) + " " + str(identify_msigs) + " " + str(msig_n) + " " + str(msig_normalization) + " " +  str(show_noncoding) + " " + str(tumor_dp_tag) + " " + str(tumor_af_tag) + " " + str(normal_dp_tag) + " " + str(normal_af_tag) + " " + str(call_conf_tag) + "\""
+   pcgr_report_command = str(docker_command_run1) + "/pcgr.R /workdir/output " + str(output_vcf) + " " + str(input_cna_docker) + " "  + str(sample_id)  + " " + str(logR_gain) + " " + str(logR_homdel) + " " + str(predict_msi_status) + " " + str(identify_msigs) + " " + str(msig_n) + " " + str(msig_normalization) + " " +  str(show_noncoding) + " " + str(tumor_dp_tag) + " " + str(tumor_af_tag) + " " + str(normal_dp_tag) + " " + str(normal_af_tag) + " " + str(call_conf_tag) + " " + str(version) + "\""
    check_subprocess(pcgr_report_command)
    logger.info("Finished")
    
