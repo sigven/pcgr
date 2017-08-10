@@ -114,8 +114,9 @@ below:
          tumor suppressor genes, or cancer census genes
       -  *Tier 4* - includes other coding variants
       -  *Tier 5* - includes non-coding variants
-      -  will only present if specified by the user
-         ('--list\_noncoding')
+
+         -  will only present if specified by the user
+            ('--list\_noncoding')
 
       -  **NOTE**: The tier structure is inspired by recommended variant
          prioritization by `Dienstmann et al.,
@@ -134,8 +135,8 @@ below:
       | *Unknown*\ \*                                                                           | Tier 4 (Tier 5)   |
       +-----------------------------------------------------------------------------------------+-------------------+
 
-      While Dienstmann et al. suggest that the *Unknown* category should
-      be categorized according to pathways, the PCGR employs an
+      \*While Dienstmann et al. suggest that the *Unknown* category
+      should be categorized according to pathways, the PCGR employs an
       arrangement of variant results according to genes, using a
       literature-derived score of oncogenic potential (KEGG pathway
       information is also linked).
@@ -196,11 +197,11 @@ below:
    -  Supporting scientific literature (key report elements)
 
 -  `View an example report for a breast tumor sample
-   (TCGA) <http://folk.uio.no/sigven/tumor_sample.BRCA.0.4.1.pcgr.html>`__
+   (TCGA) <http://folk.uio.no/sigven/tumor_sample.BRCA.0.4.2.pcgr.html>`__
 -  `View an example report for a colon adenocarcinoma sample
-   (TCGA) <http://folk.uio.no/sigven/tumor_sample.COAD.0.4.1.pcgr.html>`__
+   (TCGA) <http://folk.uio.no/sigven/tumor_sample.COAD.0.4.2.pcgr.html>`__
 -  `View an example report for a lung adenocarcinoma sample
-   (TCGA) <http://folk.uio.no/sigven/tumor_sample.LUAD.0.4.1.pcgr.html>`__
+   (TCGA) <http://folk.uio.no/sigven/tumor_sample.LUAD.0.4.2.pcgr.html>`__
 
 The HTML reports have been tested using the following browsers:
 

@@ -8,7 +8,7 @@ import subprocess
 import logging
 import sys
 
-version = '0.4.1'
+version = '0.4.2'
 
 def __main__():
    
@@ -31,7 +31,7 @@ def __main__():
    parser.add_argument('--call_conf_tag', dest = "call_conf_tag", default='_na',help="Tag in input VCF (INFO column) that denotes level of confidence in variant call")
    parser.add_argument('--force_overwrite', action = "store_true", help='By default, the script will fail with an error if any output file already exists. You can force the overwrite of existing result files by using this flag')
    parser.add_argument('--version', action='version', version='%(prog)s ' + str(version))
-   parser.add_argument('pcgr_dir',help='PCGR base directory with accompanying data directory, e.g. ~/pcgr-0.4.0')
+   parser.add_argument('pcgr_dir',help='PCGR base directory with accompanying data directory, e.g. ~/pcgr-0.4.2')
    parser.add_argument('output_dir',help='Output directory')
    parser.add_argument('sample_id',help="Tumor sample/cancer genome identifier - prefix for output files")
    

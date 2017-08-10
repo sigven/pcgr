@@ -10,9 +10,9 @@ The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for
 The Personal Cancer Genome Reporter has been developed by scientists affiliated with the [Norwegian Cancer Genomics Consortium](http://cancergenomics.no), at the [Institute for Cancer Research/Oslo University Hospital](http://radium.no).
 
 ### Example reports
-* [Report for a breast tumor sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.BRCA.0.4.1.pcgr.html)
-* [Report for a colon adenocarcinoma sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.COAD.0.4.1.pcgr.html)
-* [Report for a lung adenocarcinoma sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.LUAD.0.4.1.pcgr.html)
+* [Report for a breast tumor sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.BRCA.0.4.2.pcgr.html)
+* [Report for a colon adenocarcinoma sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.COAD.0.4.2.pcgr.html)
+* [Report for a lung adenocarcinoma sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.LUAD.0.4.2.pcgr.html)
 
 
 

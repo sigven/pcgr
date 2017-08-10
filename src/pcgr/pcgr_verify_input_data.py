@@ -137,51 +137,51 @@ def check_ad_dp_tags(vcf, tumor_dp_tag, tumor_af_tag, normal_dp_tag, normal_af_t
          if header_element['HeaderType'] == 'INFO':
             if header_element['ID'] == tumor_dp_tag:
                if header_element['Type'] == 'Integer':
-                  logger.info('Found tag for tumor variant sequencing depth (--tumor_dp_tag ' + str(tumor_dp_tag) + ') in input VCF')
+                  logger.info('Found INFO tag for tumor variant sequencing depth (--tumor_dp_tag ' + str(tumor_dp_tag) + ') in input VCF')
                   found_tdp_tag = 1
                else:
-                  err_msg = 'Tag for tumor variant sequencing depth (--tumor_dp_tag ' + str(tumor_dp_tag) + ') is not correctly specified in input VCF (Type=' + str(header_element['Type']) + '), should be Type=Integer'
+                  err_msg = 'INFO tag for tumor variant sequencing depth (--tumor_dp_tag ' + str(tumor_dp_tag) + ') is not correctly specified in input VCF (Type=' + str(header_element['Type']) + '), should be Type=Integer'
                   pcgr_error_message(err_msg)
             if header_element['ID'] == tumor_af_tag:
                if header_element['Type'] == 'Float':
-                  logger.info('Found tag for tumor variant allelic fraction (--tumor_af_tag ' + str(tumor_af_tag) + ') in input VCF')
+                  logger.info('Found INFO tag for tumor variant allelic fraction (--tumor_af_tag ' + str(tumor_af_tag) + ') in input VCF')
                   found_taf_tag = 1
                else:
-                  err_msg = 'Tag for tumor variant allelic fraction (--tumor_af_tag ' + str(tumor_af_tag) + ') is not correctly specified in input VCF (Type=' + str(header_element['Type']) + '), should be Type=Float'
+                  err_msg = 'INFO tag for tumor variant allelic fraction (--tumor_af_tag ' + str(tumor_af_tag) + ') is not correctly specified in input VCF (Type=' + str(header_element['Type']) + '), should be Type=Float'
                   pcgr_error_message(err_msg)
             if header_element['ID'] == normal_dp_tag:
                if header_element['Type'] == 'Integer':
-                  logger.info('Found tag for normal/control variant sequencing depth (--normal_dp_tag ' + str(normal_dp_tag) + ') in input VCF')
+                  logger.info('Found INFO tag for normal/control variant sequencing depth (--normal_dp_tag ' + str(normal_dp_tag) + ') in input VCF')
                   found_ndp_tag = 1
                else:
-                  err_msg = 'Tag for normal/control variant sequencing depth (--normal_dp_tag ' + str(normal_dp_tag) + ') is not correctly specified in input VCF (Type=' + str(header_element['Type']) + '), should be Type=Integer'
+                  err_msg = 'INFO tag for normal/control variant sequencing depth (--normal_dp_tag ' + str(normal_dp_tag) + ') is not correctly specified in input VCF (Type=' + str(header_element['Type']) + '), should be Type=Integer'
                   pcgr_error_message(err_msg)
             if header_element['ID'] == normal_af_tag:
                if header_element['Type'] == 'Float':
-                  logger.info('Found tag for normal/control allelic fraction (--normal_af_tag ' + str(normal_af_tag) + ') in input VCF')
+                  logger.info('Found INFO tag for normal/control allelic fraction (--normal_af_tag ' + str(normal_af_tag) + ') in input VCF')
                   found_naf_tag = 1
                else:
-                  err_msg = 'Tag for for normal/control allelic fraction (--normal_af_tag ' + str(normal_af_tag) + ') is not correctly specified in input VCF (Type=' + str(header_element['Type']) + ') should be Type=Float'
+                  err_msg = 'INFO tag for for normal/control allelic fraction (--normal_af_tag ' + str(normal_af_tag) + ') is not correctly specified in input VCF (Type=' + str(header_element['Type']) + ') should be Type=Float'
                   pcgr_error_message(err_msg)
             if header_element['ID'] == call_conf_tag:
                if header_element['Type'] == 'String':
-                  logger.info('Found tag for variant call confidence (--call_conf_tag ' + str(call_conf_tag) + ') in input VCF')
+                  logger.info('Found INFO tag for variant call confidence (--call_conf_tag ' + str(call_conf_tag) + ') in input VCF')
                   found_call_conf_tag = 1
                else:
-                  err_msg = 'Tag for variant call confidence (--call_conf_tag) is not correctly specified in input VCF (Type=' + str(header_element['Type']) + '), should be Type=String'
+                  err_msg = 'INFO tag for variant call confidence (--call_conf_tag) is not correctly specified in input VCF (Type=' + str(header_element['Type']) + '), should be Type=String'
                   pcgr_error_message(err_msg)
    
    
    if call_conf_tag != '_na' and found_call_conf_tag == 0:
-      logger.warn('Could not find the specified --call_conf_tag (' + str(call_conf_tag) + ') in input VCF')
+      logger.warn('Could not find the specified --call_conf_tag (' + str(call_conf_tag) + ') in INFO column of input VCF')
    if tumor_dp_tag != '_na' and found_tdp_tag == 0:
-      logger.warn('Could not find the specified --tumor_dp_tag (' + str(tumor_dp_tag) + ') in input VCF')
+      logger.warn('Could not find the specified --tumor_dp_tag (' + str(tumor_dp_tag) + ') in INFO column of input VCF')
    if tumor_af_tag != '_na' and found_taf_tag == 0:
-      logger.warn('Could not find the specified --tumor_af_tag (' + str(tumor_af_tag) + ') in input VCF')
+      logger.warn('Could not find the specified --tumor_af_tag (' + str(tumor_af_tag) + ') in INFO column of input VCF')
    if normal_dp_tag != '_na' and found_ndp_tag == 0:
-      logger.warn('Could not find the specified --normal_dp_tag (' + str(normal_dp_tag) + ') in input VCF')
+      logger.warn('Could not find the specified --normal_dp_tag (' + str(normal_dp_tag) + ') in INFO column of input VCF')
    if normal_af_tag != '_na' and found_naf_tag == 0:
-      logger.warn('Could not find the specified --normal_af_tag (' + str(normal_af_tag) + ') in input VCF')
+      logger.warn('Could not find the specified --normal_af_tag (' + str(normal_af_tag) + ') in INFO column of input VCF')
    
    if found_tdp_tag == 1 and found_taf_tag == 0:
       logger.warn('BOTH \'--tumor_dp_tag\' AND \'--tumor_af_tag\' need to be specified for use in tumor report (\'--tumor_af_tag\' is missing)')

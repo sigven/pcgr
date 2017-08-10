@@ -55,8 +55,8 @@ Variant databases of clinical utility
 Protein domains/functional features
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--  `UniProt/SwissProt KnowledgeBase 2016\_09 <http://www.uniprot.org>`__
-   - resource on protein sequence and functional information (June 2017)
+-  `UniProt/SwissProt KnowledgeBase 2017\_07 <http://www.uniprot.org>`__
+   - resource on protein sequence and functional information (July 2017)
 -  `Pfam v31 <http://pfam.xfam.org>`__ - database of protein families
    and domains (March 2017)
 

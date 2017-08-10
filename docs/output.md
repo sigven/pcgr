@@ -61,8 +61,7 @@ The report is structured in six main sections, described in more detail below:
         - _Tier 3_ - includes other coding variants found in oncogenes, tumor suppressor genes, or cancer census genes
         - _Tier 4_ - includes other coding variants
         - _Tier 5_ - includes non-coding variants
-           - will only present if specified by the user ('--list_noncoding')
-
+            - will only present if specified by the user ('--list_noncoding')
         - __NOTE__: The tier structure is inspired by recommended variant prioritization by [Dienstmann et al., 2014](https://www.ncbi.nlm.nih.gov/pubmed/24768039). The table below shows the correspondence between the terminology for reportable variants used by Dienstmann et al. and the tiers in PCGR:
         <br><br>
 
@@ -72,7 +71,7 @@ The report is structured in six main sections, described in more detail below:
          _Other relevant variants_ | Tier 2 & Tier 3
          _Unknown_* | Tier 4 (Tier 5)
 
-         While Dienstmann et al. suggest that the _Unknown_ category should be categorized according to pathways, the PCGR employs an arrangement of variant results according to genes, using a literature-derived score of oncogenic potential (KEGG pathway information is also linked).
+         \*While Dienstmann et al. suggest that the _Unknown_ category should be categorized according to pathways, the PCGR employs an arrangement of variant results according to genes, using a literature-derived score of oncogenic potential (KEGG pathway information is also linked).
 
 
   3. __Somatic CNA analysis__
@@ -97,9 +96,9 @@ The report is structured in six main sections, described in more detail below:
       * Supporting scientific literature (key report elements)
 
 
-* [View an example report for a breast tumor sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.BRCA.0.4.1.pcgr.html)
-* [View an example report for a colon adenocarcinoma sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.COAD.0.4.1.pcgr.html)
-* [View an example report for a lung adenocarcinoma sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.LUAD.0.4.1.pcgr.html)
+* [View an example report for a breast tumor sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.BRCA.0.4.2.pcgr.html)
+* [View an example report for a colon adenocarcinoma sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.COAD.0.4.2.pcgr.html)
+* [View an example report for a lung adenocarcinoma sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.LUAD.0.4.2.pcgr.html)
 
 The HTML reports have been tested using the following browsers:
 

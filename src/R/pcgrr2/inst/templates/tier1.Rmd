@@ -121,7 +121,7 @@ if(nrow(report_data$tsv_variants) > 0){
   }
   
   if(nrow(dplyr::filter(report_data$tsv_variants, !is.na(DP_TUMOR))) > 0 & nrow(dplyr::filter(report_data$tsv_variants, !is.na(AF_TUMOR))) > 0){
-    table_browse_tumor_dp_af < T
+    table_browse_tumor_dp_af <- T
     if(table_browse_basic_CC == T){
       table_browse_tumor_dp_af_CC <- T
       table_browse_tumor_dp_af <- F

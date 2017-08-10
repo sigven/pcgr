@@ -24,7 +24,7 @@
   * [DGIdb](http://dgidb.genome.wustl.edu) - database of interactions betweeen antineoplastic drugs and human proteins (v2.22, February 2016)
 
 ### Protein domains/functional features
-  * [UniProt/SwissProt KnowledgeBase 2016_09](http://www.uniprot.org) - resource on protein sequence and functional information (June 2017)
+  * [UniProt/SwissProt KnowledgeBase 2017_07](http://www.uniprot.org) - resource on protein sequence and functional information (July 2017)
   * [Pfam v31](http://pfam.xfam.org) - database of protein families and domains (March 2017)
 
 ### Cancer gene knowledge bases
