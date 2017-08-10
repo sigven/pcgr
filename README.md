@@ -66,7 +66,7 @@ __August 10th 2017__: New release (0.4.2)
    * __IMPORTANT NOTE__: The data bundle contains elements (e.g. [COSMIC](http://cancer.sanger.ac.uk/cancergenome/assets/COSMIC_academic_license_march2015.pdf), [IntoGen driver mutations](https://www.intogen.org/downloads), [dbNSFP](https://sites.google.com/site/jpopgen/dbNSFP)) which are freely available for non-commercial use only
 
     A _data/_ folder within the _pcgr-X.X_ software folder should now have been produced
-3. Pull the [PCGR Docker image (0.4.2)](https://hub.docker.com/r/sigven/pcgr/) from DockerHub (3.01Gb):
+3. Pull the [PCGR Docker image (0.4.2)](https://hub.docker.com/r/sigven/pcgr/) from DockerHub (2.99Gb):
    * `docker pull sigven/pcgr:0.4.2` (PCGR annotation engine)
 
 #### STEP 3: Input preprocessing

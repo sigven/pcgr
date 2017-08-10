@@ -68,7 +68,7 @@ Download PCGR
 
 -  Pull the `PCGR Docker image -
    0.4.2 <https://hub.docker.com/r/sigven/pcgr/>`__ from DockerHub
-   (3.01Gb) :
+   (2.99Gb) :
 
    -  ``docker pull sigven/pcgr:0.4.2`` (PCGR annotation engine)
 

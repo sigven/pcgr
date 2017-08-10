@@ -34,7 +34,7 @@ __August 10th 2017__: New release (0.4.2)</font>
 
     A _data/_ folder within the _pcgr-X.X_ software folder should now have been produced
 
-* Pull the [PCGR Docker image - 0.4.2](https://hub.docker.com/r/sigven/pcgr/) from DockerHub (3.01Gb) :
+* Pull the [PCGR Docker image - 0.4.2](https://hub.docker.com/r/sigven/pcgr/) from DockerHub (2.99Gb) :
     * `docker pull sigven/pcgr:0.4.2` (PCGR annotation engine)
 
 
