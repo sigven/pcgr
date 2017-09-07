@@ -17,7 +17,7 @@ The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for
 
 If you use PCGR, please cite our preprint paper:
 
-Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, Ola Myklebost, and Eivind Hovig. __Personal Cancer Genome Reporter: Variant Interpretation Report For Precision Oncology__ (2017). bioRxiv. doi:[10.1101/122366](https://doi.org/10.1101/122366)
+Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, and Eivind Hovig. __Personal Cancer Genome Reporter: Variant Interpretation Report For Precision Oncology__ (2017). bioRxiv. doi:[10.1101/122366](https://doi.org/10.1101/122366)
 
 ### Annotation resources included in PCGR (v0.4.2)
 
@@ -49,6 +49,7 @@ A local installation of Python (it has been tested with [version 2.7.13](https:/
 #### STEP 1: Installation of Docker
 
 1. [Install the Docker engine](https://docs.docker.com/engine/installation/) on your preferred platform
+   - NOTE: We have not been able to perform extensive tests on the Windows platform, and we have received feedback that particular versions of Docker/Windows do not work with PCGR
 2. Test that Docker is running, e.g. by typing `docker ps` or `docker images` in the terminal window
 3. Adjust the computing resources dedicated to the Docker, i.e.:
    - Memory: minimum 5GB
