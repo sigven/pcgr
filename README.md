@@ -49,12 +49,14 @@ A local installation of Python (it has been tested with [version 2.7.13](https:/
 #### STEP 1: Installation of Docker
 
 1. [Install the Docker engine](https://docs.docker.com/engine/installation/) on your preferred platform
-   - NOTE: We have not been able to perform extensive tests on the Windows platform, and we have received feedback that particular versions of Docker/Windows do not work with PCGR
+   - installing [Docker on Linux](https://docs.docker.com/engine/installation/linux/)
+   - installing [Docker on Mac OS](https://docs.docker.com/engine/installation/mac/)
+   - NOTE: We have not yet been able to perform enough testing on the Windows platform, and we have received feedback that particular versions of Docker/Windows do not work with PCGR (an example being [mounting of data volumes](https://github.com/docker/toolbox/issues/607))
 2. Test that Docker is running, e.g. by typing `docker ps` or `docker images` in the terminal window
 3. Adjust the computing resources dedicated to the Docker, i.e.:
    - Memory: minimum 5GB
    - CPUs: minimum 4
-   - [How to - Windows](https://docs.docker.com/docker-for-windows/#advanced) / [How to - Mac OS X](https://docs.docker.com/docker-for-mac/#advanced)  
+   - [How to - Mac OS X](https://docs.docker.com/docker-for-mac/#advanced)  
 
 #### STEP 2: Download PCGR
 

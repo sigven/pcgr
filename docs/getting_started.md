@@ -8,6 +8,8 @@
 
     - installing [Docker on Linux](https://docs.docker.com/engine/installation/linux/)
     - installing [Docker on Mac OS](https://docs.docker.com/engine/installation/mac/)
+    - NOTE: We have not yet been able to perform enough testing on the Windows platform, and we have received feedback that particular versions of Docker/Windows do not work with PCGR (an example being [mounting of data volumes](https://github.com/docker/toolbox/issues/607))
+
 
   * Check that Docker is running, e.g by typing `docker ps` or `docker images` in your terminal window
 
