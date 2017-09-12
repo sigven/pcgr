@@ -22,7 +22,7 @@ The great complexity of acquired mutations in individual tumor genomes poses a s
 
 If you use PCGR, please cite our paper:
 
-Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, and Eivind Hovig. __Personal Cancer Genome Reporter: Variant Interpretation Report For Precision Oncology__ (2017). bioRxiv. doi:[10.1101/122366](https://doi.org/10.1101/122366)
+Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, Ola Myklebost, Eivind Hovig. __Personal Cancer Genome Reporter: Variant Interpretation Report For Precision Oncology__ (2017). bioRxiv. doi:[10.1101/122366](https://doi.org/10.1101/122366)
 
 ### Docker-based technology
 

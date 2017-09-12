@@ -50,9 +50,9 @@ setting.
 
 If you use PCGR, please cite our paper:
 
-Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, and
-Eivind Hovig. **Personal Cancer Genome Reporter: Variant Interpretation
-Report For Precision Oncology** (2017). bioRxiv.
+Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, Ola
+Myklebost, Eivind Hovig. **Personal Cancer Genome Reporter: Variant
+Interpretation Report For Precision Oncology** (2017). bioRxiv.
 doi:\ `10.1101/122366 <https://doi.org/10.1101/122366>`__
 
 Docker-based technology
