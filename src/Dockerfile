@@ -2,9 +2,9 @@
 # Dockerfile to build Personal Cancer Genome Reporter (PCGR)
 # Main software components:
 #  1. Variant Effect Predictor (VEP 85)
-#  2. vcfanno (0.0.11)
-# 	3. R (3.3.3) and R packages
-#  3. Custom Python scripts (pcgr.tgz) and R package (pcgrr2)
+#  2. vcfanno (0.2.8)
+#  3. R (3.3.3) and R packages
+#  4. Custom Python scripts (pcgr.tgz) and R package (pcgrr2)
 ############################################################
 
 ## use Debian:testing as base image
