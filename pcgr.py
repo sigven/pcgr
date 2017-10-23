@@ -8,7 +8,7 @@ import subprocess
 import logging
 import sys
 
-version = '0.4.2'
+version = '0.4.2.1'
 
 def __main__():
    

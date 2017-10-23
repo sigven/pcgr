@@ -70,6 +70,12 @@ RUN pip install -U setuptools
 RUN pip install cyvcf2==0.7.4
 RUN pip install $PYTHON_MODULES
 
+RUN wget http://ab-initio.mit.edu/nlopt/nlopt-2.4.2.tar.gz \
+		&& gzip -dc nlopt-2.4.2.tar.gz | tar xvf - \
+		&& cd nlopt-2.4.2 \
+    && ./configure \
+		&& make \
+		&& make install
 
 ## Install necessary R packages
 RUN R -e "install.packages(c('dplyr','stringr','tidyr','httr','git2r','data.table','magrittr','devtools','htmltools','caret','randomForest','plotly'), dependencies = T, repos = 'http://cran.us.r-project.org')"
@@ -77,12 +83,16 @@ RUN R -e "source(\"https://bioconductor.org/biocLite.R\"); biocLite(c('deconstru
 RUN R -e "library(devtools); devtools::install_github('rstudio/DT'); devtools::install_github('hadley/ggplot2'); devtools::install_github('mjkallen/rlogging'); devtools::install_github('rstudio/crosstalk'); devtools::install_github('kent37/summarywidget')"
 
 ## Install vcfanno version 0.0.11
-RUN wget https://github.com/brentp/vcfanno/releases/download/v0.0.11/vcfanno_0.0.11_linux_amd64.tar.gz && \
-    tar xvzf vcfanno_0.0.11_linux_amd64.tar.gz && \
-    mv vcfanno_0.0.11_linux_amd64/vcfanno /usr/local/bin && \
-    rm vcfanno_0.0.11_linux_amd64.tar.gz && \
-    rm -rf vcfanno_0.0.11_linux_amd64
+#RUN wget https://github.com/brentp/vcfanno/releases/download/v0.0.11/vcfanno_0.0.11_linux_amd64.tar.gz && \
+    #tar xvzf vcfanno_0.0.11_linux_amd64.tar.gz && \
+    #mv vcfanno_0.0.11_linux_amd64/vcfanno /usr/local/bin && \
+    #rm vcfanno_0.0.11_linux_amd64.tar.gz && \
+    #rm -rf vcfanno_0.0.11_linux_amd64
 
+RUN wget https://github.com/brentp/vcfanno/releases/download/v0.2.8/vcfanno_linux64 && \
+	mv vcfanno_linux64 vcfanno && \
+	mv vcfanno /usr/local/bin && \
+	chmod 755 /usr/local/bin/vcfanno
 
 ## Install Ensembl's Vcf-validator
 RUN wget https://github.com/EBIvariation/vcf-validator/releases/download/v0.4.2/vcf_validator && \
@@ -133,9 +143,9 @@ WORKDIR /
 #RUN rm -rf /vcflib
 
 ## Add vt (for decomposition of multi-allelic sites in query VCF)
-RUN git clone https://github.com/atks/vt.git  
-WORKDIR vt 
-RUN make 
+RUN git clone https://github.com/atks/vt.git
+WORKDIR vt
+RUN make
 RUN make test
 RUN cp vt /usr/local/bin
 
