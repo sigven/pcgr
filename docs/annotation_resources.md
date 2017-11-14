@@ -9,7 +9,6 @@
 
 ###  Variant frequency databases
   * *COSMIC - Deprecated in 0.5.0 due to COSMIC licensing restrictions*
-  * [ICGC v23](https://dcc.icgc.org/) - Somatic mutations discovered in all ICGC (International Cancer Genomics Consortium) tumor cohorts (Dec 2016)
   * [gnomAD r1](http://exac.broadinstitute.org/) - germline variant frequencies exome-wide (March 2017)
   * [dbSNP b147](http://www.ncbi.nlm.nih.gov/SNP/) - database of short genetic variants (April 2016)
   * [1000Genomes phase3](ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/) - germline variant frequencies genome-wide (May 2013)
