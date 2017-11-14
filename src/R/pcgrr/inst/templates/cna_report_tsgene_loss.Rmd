@@ -1,0 +1,16 @@
+### Tumor suppressor genes subject to homozygous deletions
+<br>
+
+A total of __`r nrow(report_data$cna_data$tsgene_homozygous_deletion)`__ tumor suppressor genes are completely covered (i.e. transcript overlapping 100%) by genomic segments subject to homozygous deletions.
+
+```{r cna_tsgene_loss, echo=F}
+myOptions <- list(paging = F, searching=T,caching=F)
+if(nrow(report_data$cna_data$tsgene_homozygous_deletion) >= 10){
+  myOptions <- list(paging = T,pageLength=10, searching=T,caching=F)
+}
+if(nrow(report_data$cna_data$tsgene_homozygous_deletion) > 0){
+  DT::datatable(report_data$cna_data$tsgene_homozygous_deletion, options = myOptions, escape=F, extensions = "Responsive")
+}
+```
+
+<br><br>

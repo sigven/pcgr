@@ -1,0 +1,72 @@
+## Somatic CNA analysis
+
+```{r cna_plot_custom, child='cna_plot.Rmd', eval = eval_cna_plot}
+```
+
+<br>
+
+### Segments - amplifications and homozygous deletions
+
+The following user-defined thresholds determine copy number aberrations shown here: 
+
+* <span style="color:#009E73"><b>Copy number amplifications</b></span>: Log(2) ratio >= `r pcgr_config$cna$logR_gain`
+* <span style="color:red"><b>Homozygous deletions</b></span>: Log(2) ratio <= `r pcgr_config$cna$logR_homdel`
+
+A total of __`r nrow(report_data$cna_data$ranked_segments)`__ unfiltered aberration segments satisfied the above criteria.
+
+<br>
+
+
+```{r cna_segments_setup, echo=F}
+show_segment_filter_table <- F
+if(nrow(report_data$cna_data$ranked_segments) > 0){
+  show_segment_filter_table <- T
+}
+
+```
+
+
+```{r cna_segments_sd_setup, echo = F, results = 'asis'}
+
+cna_segments_sd <- NULL
+
+if(nrow(report_data$cna_data$ranked_segments) > 0){
+  report_data$cna_data$ranked_segments <- dplyr::rename(report_data$cna_data$ranked_segments, Segment = SEGMENT, Length_Mb = SEGMENT_LENGTH_MB, Cytoband = cytoband, Event_type = event_type)
+  cna_segments_sd <- crosstalk::SharedData$new(report_data$cna_data$ranked_segments)
+}else{
+  cna_segments_sd <- crosstalk::SharedData$new(report_data$cna_data$ranked_segments)
+}
+
+```
+
+A total of __`r summarywidget::summarywidget(cna_segments_sd)`__ copy number segments satisfy the current filtering criteria.
+
+
+```{r cna_segments_ampl_del, echo=F, results = "asis", eval = show_segment_filter_table}
+library(summarywidget)
+library(crosstalk)
+myOptions <- list(paging = F, searching=F,caching=F,buttons = c('csv','excel'),dom = 'Bfrtip')
+if(nrow(report_data$cna_data$ranked_segments) >= 10){
+  myOptions <- list(paging = T,pageLength=10, searching=F,caching=F,buttons = c('csv','excel'),dom = 'Bfrtip')
+}
+
+crosstalk::bscols(
+  list(
+    crosstalk::filter_slider("LogR", "Log-ratio", cna_segments_sd, ~LogR, ticks = F),
+    crosstalk::filter_checkbox("Event", "Event type", cna_segments_sd, ~Event_type)
+  ),
+  list(
+    crosstalk::filter_select("Cytoband", "Cytoband", cna_segments_sd, ~Cytoband)
+  )
+)
+
+htmltools::br()
+crosstalk::bscols(
+  DT::datatable(cna_segments_sd, extensions=c("Buttons","Responsive"),escape = F, width = "100%",options=list(buttons = c('csv','excel'),dom = 'Bfrtip')) %>%
+  DT::formatStyle('LogR',color='white', backgroundColor = DT::styleInterval(pcgr_config$cna$logR_homdel, c('red', '#009E73')))
+)
+
+  
+```
+
+<br><br>

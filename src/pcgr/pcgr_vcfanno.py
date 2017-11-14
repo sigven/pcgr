@@ -1,15 +1,14 @@
 #!/usr/bin/env python
 
 import argparse
-import cyvcf
-import vcfutils
+from cyvcf2 import VCF
 import random
-import pcgr
+import pcgrutils
 import os
 import re
 import sys
 
-logger = pcgr.getlogger('pcgr-vcfanno')
+logger = pcgrutils.getlogger('pcgr-vcfanno')
 
 
 def __main__():
@@ -18,123 +17,78 @@ def __main__():
    parser.add_argument('out_vcf', help='Output VCF file with appended annotations from multiple VCF files')
    parser.add_argument('pcgr_dir', help='PCGR base directory')
    parser.add_argument('--num_processes', help="Number of processes vcfanno can use during annotation", default=4)
-   parser.add_argument("--cosmic",action = "store_true", help="Annotate VCF with annotations from Catalogue of somatic mutations in cancer")
-   parser.add_argument("--icgc",action = "store_true", help="Annotate VCF with annotations from all simple somatic mutations in ICGC projects")
-   parser.add_argument("--exac",action = "store_true", help="Annotate VCF with allele frequencies from Exome Aggregation Consortium")
-   parser.add_argument("--gnomad",action = "store_true", help="Annotate VCF with allele frequencies (exome) from genome Aggregation Database")
+   #parser.add_argument("--cosmic",action = "store_true", help="Annotate VCF with annotations from Catalogue of somatic mutations in cancer")
    parser.add_argument("--docm",action = "store_true", help="Annotate VCF with annotations from Database of Curated Mutations")
    parser.add_argument("--intogen_driver_mut",action = "store_true", help="Annotate VCF with predicted cancer driver mutations from IntoGen's Catalog of Driver Mutations")
    parser.add_argument("--clinvar",action = "store_true", help="Annotate VCF with annotations from ClinVar")
    parser.add_argument("--dbsnp",action = "store_true", help="Annotate VCF with annotations from database of short genetic variations")
    parser.add_argument("--dbnsfp",action = "store_true", help="Annotate VCF with annotations from database of non-synonymous functional predictions")
-   parser.add_argument("--oneKG",action = "store_true", help="Annotate VCF with allele frequencies from the 1000 Genome Project")
+   parser.add_argument("--tcga",action = "store_true", help="Annotate VCF with variant frequencies from the The Cancer Genome Atlas")
    parser.add_argument("--civic",action = "store_true", help="Annotate VCF with annotations from the Clinical Interpretation of Variants in Cancer database")
    parser.add_argument("--cbmdb",action = "store_true", help="Annotate VCF with annotations from the Cancer bioMarkers database")
-      
+   parser.add_argument("--cancer_hotspots",action = "store_true", help="Annotate VCF with mutation hotspots from cancerhotspots.org")
+   parser.add_argument("--uniprot",action = "store_true", help="Annotate VCF with protein functional features from the UniProt Knowledgebase")
+   parser.add_argument("--pcgr_onco_xref",action = "store_true", help="Annotate VCF with transcript annotations from PCGR (targeted drugs, protein complexes, cancer gene associations, etc)")
+   
    args = parser.parse_args()
-
    query_info_tags = get_vcf_info_tags(args.query_vcf)
    vcfheader_file = args.out_vcf + '.tmp.' + str(random.randrange(0,10000000)) + '.header.txt'
    conf_fname = args.out_vcf + '.tmp.conf.toml'
    print_vcf_header(args.query_vcf, vcfheader_file, chromline_only = False)
-   run_vcfanno(args.num_processes, args.query_vcf, query_info_tags, vcfheader_file, args.pcgr_dir, conf_fname, args.out_vcf, args.cosmic, args.icgc, args.exac, args.docm, args.intogen_driver_mut, args.clinvar, args.dbsnp, args.dbnsfp, args.oneKG, args.civic, args.cbmdb, args.gnomad)
+   run_vcfanno(args.num_processes, args.query_vcf, query_info_tags, vcfheader_file, args.pcgr_dir, conf_fname, args.out_vcf, args.docm, args.intogen_driver_mut, args.clinvar, args.tcga, args.dbsnp, args.dbnsfp, args.civic, args.cbmdb, args.uniprot, args.cancer_hotspots, args.pcgr_onco_xref)
 
-def run_vcfanno(num_processes, query_vcf, query_info_tags, vcfheader_file, pcgr_directory, conf_fname, output_vcf, cosmic, icgc, exac, docm, intogen_driver_mut, clinvar, dbsnp, dbnsfp, oneKG, civic, cbmdb, gnomad):
+
+def prepare_vcfanno_configuration(vcfanno_data_directory, conf_fname, vcfheader_file, logger, datasource_info_tags, query_info_tags, datasource):
+   for t in datasource_info_tags:
+      if query_info_tags.has_key(t):
+         logger.warning("Query VCF has INFO tag " + str(t) + ' - this is also present in the ' + str(datasource) + ' VCF/BED annotation file. This tag will be overwritten if not renamed in the query VCF')
+   append_to_conf_file(datasource, datasource_info_tags, vcfanno_data_directory, conf_fname)
+   append_to_vcf_header(vcfanno_data_directory, datasource, vcfheader_file)
+
+def run_vcfanno(num_processes, query_vcf, query_info_tags, vcfheader_file, pcgr_directory, conf_fname, output_vcf, docm, intogen_driver_mut, clinvar, tcga, dbsnp, dbnsfp, civic, cbmdb, uniprot, cancer_hotspots, pcgr_onco_xref):
    """
    Function that annotates a VCF file with vcfanno against a user-defined set of germline and somatic VCF files
    """
+   #cosmic_info_tags = ["COSMIC_MUTATION_ID","COSMIC_COUNT_GW","COSMIC_DRUG_RESISTANCE","COSMIC_FATHMM_PRED","COSMIC_CANCER_TYPE_ALL","COSMIC_CANCER_TYPE_GW","COSMIC_SITE_HISTOLOGY","COSMIC_VARTYPE","COSMIC_SAMPLE_SOURCE"]
+   civic_info_tags = ["CIVIC_ID","CIVIC_ID_2"]
+   cbmdb_info_tags = ["CBMDB_ID"]
+   docm_info_tags = ["DOCM_DISEASE","DOCM_PMID"]
+   tcga_info_tags = ["TCGA_FREQUENCY","TCGA_PANCANCER_COUNT"]
+   intogen_driver_mut_info_tags = ["INTOGEN_DRIVER_MUT"]
+   clinvar_info_tags = ["CLINVAR_MSID","CLINVAR_PMIDS","CLINVAR_SIG","CLINVAR_VARIANT_ORIGIN"]
+   cancer_hotspots_info_tags = ["CANCER_MUTATION_HOTSPOT"]
+   dbsnp_info_tags = ["GWAS_CATALOG_PMID","GWAS_CATALOG_TRAIT_URI","DBSNPRSID", "DBSNPBUILDID", "DBSNP_VALIDATION","DBSNP_MAPPINGSTATUS","DBSNP_SUBMISSIONS"]
+   dbnsfp_info_tags = ["DBNSFP"]
+   uniprot_info_tags = ["UNIPROT_FEATURE"]
+   pcgr_onco_xref_info_tags = ["PCGR_ONCO_XREF"]
    
    pcgr_db_directory = pcgr_directory + '/data'
-   if cosmic is True:
-      cosmic_tags = ["COSMIC_MUTATION_ID","COSMIC_COUNT_GW","COSMIC_DRUG_RESISTANCE","COSMIC_FATHMM_PRED","COSMIC_CANCER_TYPE_ALL","COSMIC_CANCER_TYPE_GW","COSMIC_CODON_COUNT_GW","COSMIC_CODON_FRAC_GW","COSMIC_SITE_HISTOLOGY","COSMIC_CONSEQUENCE","COSMIC_VARTYPE","COSMIC_SAMPLE_SOURCE"]
-      for t in cosmic_tags:
-         if query_info_tags.has_key(t):
-            logger.warning("Query VCF has INFO tag " + str(t) + ' - this is also present in the COSMIC VCF annotation file. This tag will be overwritten if not renamed in the query VCF')
-      append_to_conf_file("cosmic",pcgr_db_directory, conf_fname)
-      append_to_vcf_header(pcgr_db_directory, "cosmic", vcfheader_file)
-   if icgc is True:
-      icgc_tags = ["ICGC_PROJECTS"]
-      for t in icgc_tags:
-         if query_info_tags.has_key(t):
-            logger.warning("Query VCF has INFO tag " + str(t) + ' - this is also present in the ICGC VCF annotation file. This tag will be overwritten if not renamed in the query VCF')
-      append_to_conf_file("icgc",pcgr_db_directory, conf_fname)
-      append_to_vcf_header(pcgr_db_directory, "icgc", vcfheader_file)
-   if civic is True:
-      civic_tags = ["CIVIC_ID"]
-      for t in civic_tags:
-         if query_info_tags.has_key(t):
-            logger.warning("Query VCF has INFO tag " + str(t) + ' - this is also present in the CIVIC VCF annotation file. This tag will be overwritten if not renamed in the query VCF')
-      append_to_conf_file("civic",pcgr_db_directory, conf_fname)
-      append_to_vcf_header(pcgr_db_directory, "civic", vcfheader_file)
    
-   if cbmdb is True:
-      cbmdb_tags = ["CBMDB_ID"]
-      for t in cbmdb_tags:
-         if query_info_tags.has_key(t):
-            logger.warning("Query VCF has INFO tag " + str(t) + ' - this is also present in the CBMDB VCF annotation file. This tag will be overwritten if not renamed in the query VCF')
-      append_to_conf_file("cbmdb",pcgr_db_directory, conf_fname)
-      append_to_vcf_header(pcgr_db_directory, "cbmdb", vcfheader_file)
-
-   if exac is True:
-      exac_tags = ["AMR_AF_EXAC","AFR_AF_EXAC","NFE_AF_EXAC","FIN_AF_EXAC","OTH_AF_EXAC","GLOBAL_AF_EXAC","EAS_AF_EXAC","SAS_AF_EXAC"]
-      for t in exac_tags:
-         if query_info_tags.has_key(t):
-            logger.warning("Query VCF has INFO tag " + str(t) + ' - this is also present in the ExAC VCF annotation file. This tag will be overwritten if not renamed in the query VCF')
-      append_to_conf_file("exac",pcgr_db_directory, conf_fname)
-      append_to_vcf_header(pcgr_db_directory, "exac", vcfheader_file)
-   
-   if gnomad is True:
-      gnomad_tags = ["AMR_AF_GNOMAD","AFR_AF_GNOMAD","NFE_AF_GNOMAD","FIN_AF_GNOMAD","ASJ_AF_GNOMAD","OTH_AF_GNOMAD","GLOBAL_AF_GNOMAD","EAS_AF_GNOMAD","SAS_AF_GNOMAD"]
-      for t in gnomad_tags:
-         if query_info_tags.has_key(t):
-            logger.warning("Query VCF has INFO tag " + str(t) + ' - this is also present in the GNOMAD VCF annotation file. This tag will be overwritten if not renamed in the query VCF')
-      append_to_conf_file("gnomad",pcgr_db_directory, conf_fname)
-      append_to_vcf_header(pcgr_db_directory, "gnomad", vcfheader_file)
-   
-   if docm is True:
-      docm_tags = ["DOCM_DISEASE","DOCM_PMID"]
-      for t in docm_tags:
-         if query_info_tags.has_key(t):
-            logger.warning("Query VCF has INFO tag " + str(t) + ' - this is also present in the DoCM VCF annotation file. This tag will be overwritten if not renamed in the query VCF')
-      append_to_conf_file("docm",pcgr_db_directory, conf_fname)
-      append_to_vcf_header(pcgr_db_directory, "docm", vcfheader_file)
-   if intogen_driver_mut is True:
-      intogen_driver_mut_tags = ["INTOGEN_DRIVER_MUT"]
-      for t in intogen_driver_mut_tags:
-         if query_info_tags.has_key(t):
-            logger.warning("Query VCF has INFO tag " + str(t) + ' - this is also present in the Intogen Driver Mutations VCF annotation file. This tag will be overwritten if not renamed in the query VCF')
-      append_to_conf_file("intogen_driver_mut",pcgr_db_directory, conf_fname)
-      append_to_vcf_header(pcgr_db_directory, "intogen_driver_mut", vcfheader_file)
-
+   #if cosmic is True:
+      #prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file, logger, cosmic_info_tags, query_info_tags, "cosmic")
    if clinvar is True:
-      clinvar_tags = ["CLINVAR_MSID","CLINVAR_PMIDS","CLINVAR_SIG","CLINVAR_VARIANT_ORIGIN"]
-      for t in clinvar_tags:
-         if query_info_tags.has_key(t):
-            logger.warning("Query VCF has INFO tag " + str(t) + ' - this is also present in the ClinVar VCF annotation file. This tag will be overwritten if not renamed in the query VCF')
-      append_to_conf_file("clinvar",pcgr_db_directory, conf_fname)
-      append_to_vcf_header(pcgr_db_directory, "clinvar", vcfheader_file)
+      prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file, logger, clinvar_info_tags, query_info_tags, "clinvar")
    if dbsnp is True:
-      dbsnp_tags = ["GWAS_CATALOG_PMID","GWAS_CATALOG_TRAIT_URI","DBSNPRSID", "DBSNPBUILDID", "DBSNP_VALIDATION","DBSNP_MAPPINGSTATUS","DBSNP_SUBMISSIONS"]
-      for t in dbsnp_tags:
-         if query_info_tags.has_key(t):
-            logger.warning("Query VCF has INFO tag " + str(t) + ' - this is also present in the dbSNP VCF annotation file. This tag will be overwritten if not renamed in the query VCF')
-      append_to_conf_file("dbsnp",pcgr_db_directory, conf_fname)
-      append_to_vcf_header(pcgr_db_directory, "dbsnp", vcfheader_file)
+      prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file, logger, dbsnp_info_tags, query_info_tags, "dbsnp")
    if dbnsfp is True:
-      dbnsfp_tags = ["DBNSFP"]
-      for t in dbnsfp_tags:
-         if query_info_tags.has_key(t):
-            logger.warning("Query VCF has INFO tag " + str(t) + ' - this is also present in the dbNSFP VCF annotation file. This tag will be overwritten if not renamed in the query VCF')
-      append_to_conf_file("dbnsfp",pcgr_db_directory, conf_fname)
-      append_to_vcf_header(pcgr_db_directory, "dbnsfp", vcfheader_file)
-   if oneKG is True:
-      oneKG_tags = ["EAS_AF_1KG","EUR_AF_1KG","AMR_AF_1KG","AFR_AF_1KG","SAS_AF_1KG","GLOBAL_AF_1KG"]
-      for t in oneKG_tags:
-         if query_info_tags.has_key(t):
-            logger.warning("Query VCF has INFO tag " + str(t) + ' - this is also present in the 1000Genomes Project VCF annotation file. This tag will be overwritten if not renamed in the query VCF')
-      append_to_conf_file("oneKG",pcgr_db_directory, conf_fname)
-      append_to_vcf_header(pcgr_db_directory, "oneKG", vcfheader_file)
-
+      prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file, logger, dbnsfp_info_tags, query_info_tags, "dbnsfp")
+   if cbmdb is True:
+      prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file, logger, cbmdb_info_tags, query_info_tags, "cbmdb")
+   if tcga is True:
+      prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file, logger, tcga_info_tags, query_info_tags, "tcga")
+   if civic is True:
+      prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file, logger, civic_info_tags, query_info_tags, "civic")
+   if cancer_hotspots is True:
+      prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file, logger, cancer_hotspots_info_tags, query_info_tags, "cancer_hotspots")
+   if uniprot is True:
+      prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file, logger, uniprot_info_tags, query_info_tags, "uniprot")
+   if docm is True:
+      prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file, logger, docm_info_tags, query_info_tags, "docm")
+   if intogen_driver_mut is True:
+      prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file, logger, intogen_driver_mut_info_tags, query_info_tags, "intogen_driver_mut")
+   if pcgr_onco_xref is True:
+      prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file, logger, pcgr_onco_xref_info_tags, query_info_tags, "pcgr_onco_xref")
+   
    out_vcf_vcfanno_unsorted1 = output_vcf + '.tmp.unsorted.1'
    out_vcf_vcfanno_unsorted2 = output_vcf + '.tmp.unsorted.2'
    out_vcf_vcfanno_sorted = output_vcf + '.tmp.sorted.1'
@@ -150,82 +104,57 @@ def run_vcfanno(num_processes, query_vcf, query_info_tags, vcfheader_file, pcgr_
    os.system('tabix -f -p vcf ' + str(output_vcf) + '.gz')
    return 0
    
-def append_to_vcf_header(pcgr_db_directory, dbsource, vcfheader_file):
+def append_to_vcf_header(pcgr_db_directory, datasource, vcfheader_file):
    """
-   Function that appends the VCF header information for a given 'dbsource' (containing INFO tag formats/descriptions, and dbsource version)
+   Function that appends the VCF header information for a given 'datasource' (containing INFO tag formats/descriptions, and datasource version)
    """
-   vcf_info_tags_file = str(pcgr_db_directory) + '/' + str(dbsource) + '/' + str(dbsource) + '.vcfanno.vcf_info_tags.txt'
+   vcf_info_tags_file = str(pcgr_db_directory) + '/' + str(datasource) + '/' + str(datasource) + '.vcfanno.vcf_info_tags.txt'
    os.system('cat ' + str(vcf_info_tags_file) + ' >> ' + str(vcfheader_file))
 
 
-def append_to_conf_file(dbsource, pcgr_db_directory, conf_fname):
+def append_to_conf_file(datasource, datasource_info_tags, pcgr_db_directory, conf_fname):
    """
-   Function that appends data to a vcfanno conf file ('conf_fname') according to user-defined ('dbsource'). The dbsource defines the set of tags that will be appended during annotation
+   Function that appends data to a vcfanno conf file ('conf_fname') according to user-defined ('datasource'). The datasource defines the set of tags that will be appended during annotation
    """
    fh = open(conf_fname,'a')
-   if dbsource != 'civic':
+   if datasource != 'civic' and datasource != 'uniprot' and datasource != 'pcgr_onco_xref':
       fh.write('[[annotation]]\n')
-      fh.write('file="' + str(pcgr_db_directory) + '/' + str(dbsource) + '/' + str(dbsource) + '.vcf.gz"\n')
-   if dbsource == 'cosmic':
-      fh.write('fields = ["COSMIC_MUTATION_ID","COSMIC_DRUG_RESISTANCE","COSMIC_FATHMM_PRED","COSMIC_CANCER_TYPE_ALL","COSMIC_CANCER_TYPE_GW", "COSMIC_COUNT_GW", "COSMIC_CODON_COUNT_GW","COSMIC_CODON_FRAC_GW","COSMIC_SITE_HISTOLOGY","COSMIC_CONSEQUENCE","COSMIC_VARTYPE","COSMIC_SAMPLE_SOURCE"]\n')
-      fh.write('ops=["concat","concat","concat","concat","concat","concat","concat","concat","concat","concat","concat","concat"]\n\n')
-   if dbsource == 'dbsnp':
-      fh.write('fields = ["GWAS_CATALOG_PMID","GWAS_CATALOG_TRAIT_URI","DBSNPRSID", "DBSNPBUILDID", "DBSNP_VALIDATION","DBSNP_MAPPINGSTATUS","DBSNP_SUBMISSIONS"]\n')
-      fh.write('ops=["concat","concat", "concat", "concat", "concat", "concat","concat"]\n\n')
-   if dbsource == 'dbnsfp':
-      
-      fh.write('fields = ["DBNSFP"]\n')
-      fh.write('ops=["concat"]\n\n')
-      
-   if dbsource == 'exac':
-      fh.write('fields = ["AMR_AF_EXAC","AFR_AF_EXAC","NFE_AF_EXAC","FIN_AF_EXAC","OTH_AF_EXAC","GLOBAL_AF_EXAC","EAS_AF_EXAC","SAS_AF_EXAC"]\n')
-      fh.write('ops=["concat","concat","concat","concat","concat","concat","concat","concat"]\n\n')
-   
-   if dbsource == 'gnomad':
-      fh.write('fields = ["AMR_AF_GNOMAD","AFR_AF_GNOMAD","NFE_AF_GNOMAD","FIN_AF_GNOMAD","ASJ_AF_GNOMAD","OTH_AF_GNOMAD","GLOBAL_AF_GNOMAD","EAS_AF_GNOMAD","SAS_AF_GNOMAD"]\n')
-      fh.write('ops=["concat","concat","concat","concat","concat","concat","concat","concat","concat"]\n\n')
-   
-   if dbsource == 'intogen_driver_mut':
-      fh.write('fields = ["INTOGEN_DRIVER_MUT"]\n')
-      fh.write('ops=["concat"]\n\n')
-      
-   if dbsource == 'cbmdb':
-      fh.write('fields = ["CBMDB_ID"]\n')
-      fh.write('ops=["concat"]\n\n')
-      
-   if dbsource == 'oneKG':
-      fh.write('fields = ["EAS_AF_1KG","EUR_AF_1KG","AMR_AF_1KG","AFR_AF_1KG","SAS_AF_1KG","GLOBAL_AF_1KG"]\n')
-      fh.write('ops=["concat","concat","concat","concat","concat","concat"]\n\n')
+      fh.write('file="' + str(pcgr_db_directory) + '/' + str(datasource) + '/' + str(datasource) + '.vcf.gz"\n')
+      fields_string = 'fields = ["' + '","'.join(datasource_info_tags) + '"]'
+      ops = ['concat'] * len(datasource_info_tags)
+      ops_string = 'ops=["' + '","'.join(ops) + '"]'
+      fh.write(fields_string + '\n')
+      fh.write(ops_string + '\n\n')
+   else:
+      if datasource == 'uniprot' or datasource == 'pcgr_onco_xref':
+         fh.write('[[annotation]]\n')
+         fh.write('file="' + str(pcgr_db_directory) + '/' + str(datasource) + '/' + str(datasource) + '.bed.gz"\n')
+         fh.write('columns=[4]\n')
+         names_string = 'names=["' + '","'.join(datasource_info_tags) + '"]'
+         fh.write(names_string +'\n')
+         fh.write('ops=["concat"]\n\n')
+      if datasource == 'civic':
+         fh.write('[[annotation]]\n')
+         fh.write('file="' + str(pcgr_db_directory) + '/' + str(datasource) + '/' + str(datasource) + '.bed.gz"\n')
+         fh.write('columns=[4]\n')
+         fh.write('names=["CIVIC_ID_2"]\n')
+         fh.write('ops=["concat"]\n\n')
 
-   if dbsource == 'docm':
-      fh.write('fields = ["DOCM_DISEASE","DOCM_PMID"]\n')
-      fh.write('ops=["concat","concat"]\n\n')
-   if dbsource == 'civic':
-      fh.write('[[annotation]]\n')
-      fh.write('file="' + str(pcgr_db_directory) + '/' + str(dbsource) + '/' + str(dbsource) + '.bed.gz"\n')
-      fh.write('columns=[4]\n')
-      fh.write('names=["CIVIC_ID_2"]\n')
-      fh.write('ops=["concat"]\n\n')
-
-      fh.write('[[annotation]]\n')
-      fh.write('file="' + str(pcgr_db_directory) + '/' + str(dbsource) + '/' + str(dbsource) + '.vcf.gz"\n')
-      fh.write('fields = ["CIVIC_ID"]\n')
-      fh.write('ops=["concat"]\n\n')
-      
-   if dbsource == 'clinvar':
-      fh.write('fields = ["CLINVAR_MSID","CLINVAR_PMIDS","CLINVAR_SIG","CLINVAR_VARIANT_ORIGIN"]\n')
-      fh.write('ops=["concat","concat","concat","concat"]\n\n')
-   if dbsource == 'icgc':
-      fh.write('fields = ["ICGC_PROJECTS"]\n')
-      fh.write('ops=["concat"]\n\n')
+         fh.write('[[annotation]]\n')
+         fh.write('file="' + str(pcgr_db_directory) + '/' + str(datasource) + '/' + str(datasource) + '.vcf.gz"\n')
+         fh.write('fields = ["CIVIC_ID"]\n')
+         fh.write('ops=["concat"]\n\n')
    fh.close()
    return
 
 def get_vcf_info_tags(vcffile):
-   vcf_reader = cyvcf.Reader(open(vcffile, 'r'))
+   vcf = VCF(vcffile)
    info_tags = {}
-   for info_tag in sorted(vcf_reader.infos.keys()):
-      info_tags[str(info_tag)] = 1
+   for e in vcf.header_iter():
+      header_element = e.info()
+      if 'ID' in header_element.keys() and 'HeaderType' in header_element.keys():
+         if header_element['HeaderType'] == 'INFO':
+            info_tags[str(header_element['ID'])] = 1
    
    return info_tags
 

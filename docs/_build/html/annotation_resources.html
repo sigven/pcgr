@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Annotation resources &mdash; Personal Cancer Genome Reporter 0.4.1 documentation</title>
+  <title>Annotation resources &mdash; Personal Cancer Genome Reporter 0.5.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Personal Cancer Genome Reporter 0.4.1 documentation" href="index.html"/>
+    <link rel="top" title="Personal Cancer Genome Reporter 0.5.0 documentation" href="index.html"/>
         <link rel="next" title="Input &amp; output" href="output.html"/>
         <link rel="prev" title="Getting started" href="getting_started.html"/> 
 
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.4.1
+                0.5.0
               </div>
             
           
@@ -97,11 +97,12 @@
 <li class="toctree-l2"><a class="reference internal" href="#variant-databases-of-clinical-utility">Variant databases of clinical utility</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#protein-domains-functional-features">Protein domains/functional features</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#cancer-gene-knowledge-bases">Cancer gene knowledge bases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pathway-databases">Pathway databases</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="#notes-on-variant-annotation-datasets">Notes on variant annotation datasets</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#genome-mapping">Genome mapping</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#other-data-quality-concerns">Other data quality concerns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#data-quality">Data quality</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="output.html">Input &amp; output</a></li>
@@ -154,9 +155,9 @@
 <div class="section" id="basic-variant-consequence-annotation">
 <h2>Basic variant consequence annotation<a class="headerlink" href="#basic-variant-consequence-annotation" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><a class="reference external" href="http://www.ensembl.org/info/docs/tools/vep/index.html">VEP v85</a> -
-Variant Effect Predictor release 85 (<a class="reference external" href="https://www.gencodegenes.org/releases/19.html">GENCODE
-v19</a> as gene
+<li><a class="reference external" href="http://www.ensembl.org/info/docs/tools/vep/index.html">VEP v90</a> -
+Variant Effect Predictor release 90 (<a class="reference external" href="https://www.gencodegenes.org/releases/27.html">GENCODE
+v27</a> as gene
 reference database)</li>
 </ul>
 </div>
@@ -172,13 +173,10 @@ mutations/genes</a> - (May 2016)</li>
 <div class="section" id="variant-frequency-databases">
 <h2>Variant frequency databases<a class="headerlink" href="#variant-frequency-databases" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><a class="reference external" href="http://cancer.sanger.ac.uk/cosmic/">COSMIC v81</a> - catalogue of
-somatic mutations in cancer (May 2017)</li>
+<li><em>COSMIC - Deprecated in 0.5.0 due to COSMIC licensing restrictions</em></li>
 <li><a class="reference external" href="https://dcc.icgc.org/">ICGC v23</a> - Somatic mutations discovered
 in all ICGC (International Cancer Genomics Consortium) tumor cohorts
 (Dec 2016)</li>
-<li><a class="reference external" href="http://exac.broadinstitute.org/">ExAC r1</a> - germline variant
-frequencies exome-wide (February 2017)</li>
 <li><a class="reference external" href="http://exac.broadinstitute.org/">gnomAD r1</a> - germline variant
 frequencies exome-wide (March 2017)</li>
 <li><a class="reference external" href="http://www.ncbi.nlm.nih.gov/SNP/">dbSNP b147</a> - database of short
@@ -188,29 +186,32 @@ phase3</a>
 - germline variant frequencies genome-wide (May 2013)</li>
 <li><a class="reference external" href="http://cancerhotspots.org">Cancer Hotspots</a> - a resource for
 statistically significant mutations in cancer (2016)</li>
+<li><a class="reference external" href="https://portal.gdc.cancer.gov/">TCGA release 9.0</a> - somatic
+mutations discovered across 33 tumor type cohorts (The Cancer Genome
+Atlas)</li>
 </ul>
 </div>
 <div class="section" id="variant-databases-of-clinical-utility">
 <h2>Variant databases of clinical utility<a class="headerlink" href="#variant-databases-of-clinical-utility" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><a class="reference external" href="http://www.ncbi.nlm.nih.gov/clinvar/">ClinVar</a> - database of
-clinically related variants (March 2017)</li>
+clinically related variants (November 2017)</li>
 <li><a class="reference external" href="http://docm.genome.wustl.edu">DoCM</a> - database of curated
 mutations (v3.2, April 2016)</li>
 <li><a class="reference external" href="http://civic.genome.wustl.edu">CIViC</a> - clinical interpretations
-of variants in cancer (August 3rd 2017)</li>
+of variants in cancer (November 11th 2017)</li>
 <li><a class="reference external" href="http://www.cancergenomeinterpreter.org/biomarkers">CBMDB</a> -
-Cancer BioMarkers database (Februay 8th 2017)</li>
-<li><a class="reference external" href="http://dgidb.genome.wustl.edu">DGIdb</a> - database of interactions
-betweeen antineoplastic drugs and human proteins (v2.22, February
-2016)</li>
+Cancer BioMarkers database (November 11th 2017)</li>
+<li><a class="reference external" href="http://dgidb.genome.wustl.edu">DGIdb</a> - database of targeted
+antineoplastic drugs (v3.0, September 2017)</li>
 </ul>
 </div>
 <div class="section" id="protein-domains-functional-features">
 <h2>Protein domains/functional features<a class="headerlink" href="#protein-domains-functional-features" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><a class="reference external" href="http://www.uniprot.org">UniProt/SwissProt KnowledgeBase 2017_07</a>
-- resource on protein sequence and functional information (July 2017)</li>
+<li><a class="reference external" href="http://www.uniprot.org">UniProt/SwissProt KnowledgeBase 2017_10</a>
+- resource on protein sequence and functional information (October
+2017)</li>
 <li><a class="reference external" href="http://pfam.xfam.org">Pfam v31</a> - database of protein families
 and domains (March 2017)</li>
 </ul>
@@ -220,8 +221,17 @@ and domains (March 2017)</li>
 <ul class="simple">
 <li><a class="reference external" href="http://bioinfo.mc.vanderbilt.edu/TSGene/">TSGene v2.0</a> - tumor
 suppressor/oncogene database (November 2015)</li>
-<li><a class="reference external" href="http://cancer.sanger.ac.uk/cosmic/">Cancer Gene Cencus</a> - (v81,
-May 2017)</li>
+<li><em>Cancer Gene Census - Deprecated in 0.5.0 due to COSMIC licensing
+restrictions</em></li>
+<li><a class="reference external" href="http://www.disgenet.org">DisGeNET v5.0</a> - curated associations
+between human genes and different tumor types</li>
+</ul>
+</div>
+<div class="section" id="pathway-databases">
+<h2>Pathway databases<a class="headerlink" href="#pathway-databases" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="http://www.genome.jp/kegg/pathway.htm">KEGG PATHWAY Database</a> -
+September 29th 2017</li>
 </ul>
 </div>
 </div>
@@ -229,19 +239,20 @@ May 2017)</li>
 <h1>Notes on variant annotation datasets<a class="headerlink" href="#notes-on-variant-annotation-datasets" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="genome-mapping">
 <h2>Genome mapping<a class="headerlink" href="#genome-mapping" title="Permalink to this headline">¶</a></h2>
-<p>A requirement for all variant annotation datasets used in PCGR is that
-they have been mapped unambiguously to the human genome (GRCh37). For
-most datasets this is already the case (i.e. dbSNP, COSMIC, ClinVar
-etc.). A significant proportion of variants in the annotation datasets
-related to clinical interpretation, CIViC and CBMDB, is however not
-mapped to the genome. Whenever possible, we have utilized
+<p>A requirement for PCGR variant annotation datasets is that variants have
+been mapped unambiguously to the reference human genome (GRCh37 is
+currently the only supported build). For most datasets this requirement
+is not an issue (i.e. dbSNP, ClinVar etc.). A fraction of variants in
+the annotation datasets related to clinical interpretation, CIViC and
+CBMDB, has however not been mapped to the genome. Whenever possible, we
+have utilized
 <a class="reference external" href="http://bioinformatics.mdanderson.org/transvarweb/">TransVar</a> to
 identify the actual genomic variants (e.g. <em>g.chr7:140453136A&gt;T</em>) that
-correspond to variants reported with other HGVS nomenclature (e.g.
-<em>p.V600E</em>).</p>
+correspond to variants reported at the amino acid level or with other
+HGVS nomenclature (e.g. <em>p.V600E</em>).</p>
 </div>
-<div class="section" id="other-data-quality-concerns">
-<h2>Other data quality concerns<a class="headerlink" href="#other-data-quality-concerns" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="data-quality">
+<h2>Data quality<a class="headerlink" href="#data-quality" title="Permalink to this headline">¶</a></h2>
 <p><strong>Clinical biomarkers</strong></p>
 <p>Clinical biomarkers included in PCGR are limited to the following:</p>
 <ul class="simple">
@@ -254,17 +265,35 @@ markers collected from FDA/NCCN guidelines, scientific literature,
 and clinical trials are included (markers collected from conference
 abstracts etc. are not included)</li>
 </ul>
-<p><strong>COSMIC variants</strong></p>
-<p>The COSMIC dataset that is part of the PCGR annotation bundle is the
-subset of variants that satisfy the following criteria:</p>
+<p><strong>Antineoplastic drugs</strong></p>
 <ul class="simple">
-<li><strong>Mutation somatic status</strong> is either &#8216;<em>confirmed_somatic</em>&#8216; or
-&#8216;<em>reported_in_another_cancer_sample_as_somatic</em>&#8216;.</li>
-<li><strong>Site/histology</strong> must be known and the sample must come from a
-malignant tumor (i.e. not polyps/adenomas, which are also found in
-COSMIC)</li>
+<li>For drugs extracted from <a class="reference external" href="http://dgidb.genome.wustl.edu">DGIdb</a>,
+we only include antineoplastic drugs subject to direct interaction
+with a target (i.e. as found in ChEMBL)</li>
 </ul>
-</div>
+<p><strong>Gene-disease associations</strong></p>
+<ul class="simple">
+<li>For gene-disease associations extracted from DisGeNET 5.0, we require
+a <a class="reference external" href="http://www.disgenet.org/web/DisGeNET/menu/dbinfo#score">score</a>
+greater than 0.2 and that the association is suppported by at least
+one PMID (PubMed article). Associations involving non-cancer type of
+diseases are not included.</li>
+</ul>
+<p><strong>TCGA somatic calls</strong></p>
+<ul class="simple">
+<li>TCGA employs four different variant callers for detection of somatic
+variants (SNVs/InDels), <em>mutect2, varscan2, somaticsniper and muse</em>.
+In the TCGA dataset bundled with PCGR, somatic SNVs are restricted to
+those that are detected by at least two independent callers (i.e.
+calls found by a single algorithm are considered low-confident and
+disregarded)</li>
+</ul>
+<!--__COSMIC variants__
+
+The COSMIC dataset that is part of the PCGR annotation bundle is the subset of variants that satisfy the following criteria:
+
+* __Mutation somatic status__ is either '_confirmed_somatic_' or '_reported_in_another_cancer_sample_as_somatic_'.
+* __Site/histology__ must be known and the sample must come from a malignant tumor (i.e. not polyps/adenomas, which are also found in COSMIC)--></div>
 </div>
 
 
@@ -308,7 +337,7 @@ COSMIC)</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.4.1',
+            VERSION:'0.5.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -1,3 +1,4 @@
+#cp -LR ../../../ncgc/R/pcgrr R/
 tar czvfh pcgr.tgz pcgr/
 echo "Build the Docker Image"
 TAG=`date "+%Y%m%d"`

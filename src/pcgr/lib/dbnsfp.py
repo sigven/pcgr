@@ -10,10 +10,10 @@ def map_effect_abbreviation(abbrev, algo):
    if algo == 'splice_site_ada' or algo == 'splice_site_rf' or algo == 'splice_site_global' or algo == 'cadd_phred' or algo == 'gerp_rs' or algo == 'mutpred':
       return abbrev
    if abbrev == 'D':
-      if algo == 'polyphen2_hdiv' or algo == 'polyphen2_hvar':
-         return 'probably_damaging'
-      else:
-         return 'damaging'
+      #if algo == 'polyphen2_hdiv' or algo == 'polyphen2_hvar':
+         #return 'probably_damaging'
+      #else:
+      return 'damaging'
    if abbrev == 'P':
       return 'possibly_damaging'
    if abbrev == 'H' or abbrev == 'M' or abbrev == 'A':
@@ -33,19 +33,19 @@ def map_dbnsfp_predictions(dbnsfp_tag, algorithms):
    
    for v in dbnsfp_tag.split(','):
    
-      dbnsfp_info = v.split('@')
+      dbnsfp_info = v.split('|')
       if len(dbnsfp_info) == 1:
          dbnsfp_info = v.split('#')
       ref_aa = dbnsfp_info[0]
       alt_aa = dbnsfp_info[1]
-      all_ids = dbnsfp_info[4].split('___')
+      all_ids = dbnsfp_info[4].split('&')
       unique_ids = {}
       for s in all_ids:
          unique_ids[s] = 1
          
       isoform_aa_keys = []
       if ref_aa != '.' and alt_aa != '.':
-         aa_pos = dbnsfp_info[6].split('___')
+         aa_pos = dbnsfp_info[6].split('&')
          num_aapos = len(aa_pos)
          for pos in aa_pos:
             for gene_id in unique_ids:
@@ -60,11 +60,12 @@ def map_dbnsfp_predictions(dbnsfp_tag, algorithms):
    
       i = 7
       v = 0
+      
       if len(algorithms) != len(dbnsfp_info[7:]):
          return effect_predictions
       
       while i < len(dbnsfp_info):
-         algorithm_raw_predictions[str(algorithms[v]).lower()] = dbnsfp_info[i].split('___')
+         algorithm_raw_predictions[str(algorithms[v]).lower()] = dbnsfp_info[i].split('&')
          i = i + 1
          v = v + 1
       dbnsfp_predictions = {}
@@ -76,7 +77,7 @@ def map_dbnsfp_predictions(dbnsfp_tag, algorithms):
          for algo in algorithm_raw_predictions.keys():
             unique_algo_predictions = {}
             for pred in algorithm_raw_predictions[algo]:
-               if pred != '.':
+               if pred != '':
                   if not unique_algo_predictions.has_key(map_effect_abbreviation(pred,algo)):
                      unique_algo_predictions[map_effect_abbreviation(pred,algo)] = 1
                else:
