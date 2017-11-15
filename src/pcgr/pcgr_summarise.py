@@ -108,7 +108,29 @@ def set_coding_change(rec):
             rec.INFO['CDS_CHANGE'] = key
 
    return
- 
+
+def write_pass_vcf(annotated_vcf):
+	
+	out_vcf = re.sub(r'\.annotated\.vcf\.gz$','.annotated.pass.vcf',annotated_vcf)
+	vcf = VCF(annotated_vcf)
+	w = Writer(out_vcf, vcf)
+
+	num_pass = 0
+	for rec in vcf:
+		if rec.FILTER is None:
+			w.write_record(rec)
+			num_pass += 1
+
+	if num_pass == 0:
+		logger.warning('There are zero variants with a \'PASS\' filter in the VCF file')
+	else:
+		os.system('bgzip -f ' + str(out_vcf))
+		os.system('tabix -f -p vcf ' + str(out_vcf) + '.gz')
+		
+	vcf.close()
+	w.close()
+			
+
 def extend_vcf_annotations(query_vcf, pcgr_directory):
    """
    Function that reads VEP/vcfanno-annotated VCF and extends the VCF INFO column with tags from
@@ -249,6 +271,9 @@ def extend_vcf_annotations(query_vcf, pcgr_directory):
 
    os.system('bgzip -f ' + str(out_vcf))
    os.system('tabix -f -p vcf ' + str(out_vcf) + '.gz')
+
+   annotated_vcf = out_vcf + '.gz'
+   write_pass_vcf(annotated_vcf)
 
 if __name__=="__main__": __main__()
 

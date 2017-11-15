@@ -15,6 +15,7 @@ predict_msi_status <- function(vcf_data_df, simpleRepeats_gr, windowMasker_gr, m
   mutations_valid <- dplyr::select(mutations_valid, CHROM,POS,end,REF,ALT,CONSEQUENCE,SYMBOL,GENOMIC_CHANGE,VARIANT_CLASS,PROTEIN_DOMAIN,GENE_NAME,PROTEIN_CHANGE,PROTEIN_FEATURE,CANCER_MUTATION_HOTSPOT,OTHER_DISEASE_DOCM,OTHER_LITERATURE_DOCM,CLINVAR,TCGA_FREQUENCY,CANCER_ASSOCIATIONS,AF_TUMOR, DP_TUMOR,AF_NORMAL,DP_NORMAL,CALL_CONFIDENCE)
   mutations_valid$start_field <- mutations_valid$POS
   mutations_valid$end_field <- NA
+  mutations_valid <- dplyr::filter(mutations_valid, !is.na(VARIANT_CLASS))
   if(nrow(mutations_valid[mutations_valid$VARIANT_CLASS == 'deletion',]) > 0){
     mutations_valid[mutations_valid$VARIANT_CLASS == 'deletion',]$end_field <- mutations_valid[mutations_valid$VARIANT_CLASS == 'deletion',]$end
   }

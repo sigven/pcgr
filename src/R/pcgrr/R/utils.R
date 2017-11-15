@@ -307,73 +307,80 @@ generate_report <- function(project_directory, query_vcf, pcgr_data, sample_name
     }
   }
 
-  if(!is.null(pcgr_config) & query_vcf != 'None'){
-    if(pcgr_config$tumor_only$vcf_tumor_only == TRUE){
-      sample_calls_unfiltered <- pcgrr::get_calls(query_vcf, pcgr_data, sample_id = sample_name, tumor_dp_tag = pcgr_config$allelic_support$tumor_dp_tag , tumor_af_tag = pcgr_config$allelic_support$tumor_af_tag, normal_dp_tag =  pcgr_config$allelic_support$normal_dp_tag, normal_af_tag = pcgr_config$allelic_support$normal_af_tag, call_conf_tag = pcgr_config$allelic_support$call_conf_tag)
-      filtered_callset <- pcgrr::filter_no_control_calls(sample_calls_unfiltered, sample_name = sample_name, pcgr_config = pcgr_config)
+  if(query_vcf != 'None'){
+    if(!file.exists(query_vcf) | file.size(query_vcf) == 0){
+      rlogging::warning(paste0("File ",query_vcf," does not exist or has zero size"))
+    }
+    else{
+      if(!is.null(pcgr_config) & query_vcf != 'None'){
+        if(pcgr_config$tumor_only$vcf_tumor_only == TRUE){
+          sample_calls_unfiltered <- pcgrr::get_calls(query_vcf, pcgr_data, sample_id = sample_name, tumor_dp_tag = pcgr_config$allelic_support$tumor_dp_tag , tumor_af_tag = pcgr_config$allelic_support$tumor_af_tag, normal_dp_tag =  pcgr_config$allelic_support$normal_dp_tag, normal_af_tag = pcgr_config$allelic_support$normal_af_tag, call_conf_tag = pcgr_config$allelic_support$call_conf_tag)
+          filtered_callset <- pcgrr::filter_no_control_calls(sample_calls_unfiltered, sample_name = sample_name, pcgr_config = pcgr_config)
 
-      ## Override MSI/mutational signature analysis when running tumor only (set to FALSE)
-      pcgr_config$msi$msi <- FALSE
-      pcgr_config$mutational_signatures$mutsignatures <- FALSE
+          ## Override MSI/mutational signature analysis when running tumor only (set to FALSE)
+          pcgr_config$msi$msi <- FALSE
+          pcgr_config$mutational_signatures$mutsignatures <- FALSE
 
-      report_data_unfiltered <- pcgrr::generate_report_data(sample_calls_unfiltered, pcgr_data = pcgr_data, sample_name = sample_name, minimum_n_signature_analysis = pcgr_config$mutational_signatures$mutsignatures_mutation_limit, signature_normalization_method = pcgr_config$mutational_signatures$mutsignatures_normalization, signatures_limit = pcgr_config$mutational_signatures$mutsignatures_signature_limit, predict_MSI = pcgr_config$msi$msi, identify_msigs = pcgr_config$mutational_signatures$mutsignatures, callset = 'unfiltered callset')
-      report_data <- pcgrr::generate_report_data(filtered_callset$sample_calls, pcgr_data = pcgr_data, sample_name = sample_name, minimum_n_signature_analysis = pcgr_config$mutational_signatures$mutsignatures_mutation_limit, signature_normalization_method = pcgr_config$mutational_signatures$mutsignatures_normalization, signatures_limit = pcgr_config$mutational_signatures$mutsignatures_signature_limit, predict_MSI = pcgr_config$msi$msi, identify_msigs = pcgr_config$mutational_signatures$mutsignatures, callset = 'germline-filtered callset')
-      report_data$sample_name <- sample_name
-      report_data$vcf_run_mode <- 'tumor-only'
-      report_data$pcgr_config <- pcgr_config
-      report_data$unfiltered_snv_indels_n <- nrow(sample_calls_unfiltered)
-      for(filter_db in c('onekg','gnomad','dbsnp','noncoding')){
-        n_remain <- paste0(filter_db,'_filter_n_remain')
-        report_data[[n_remain]] <- filtered_callset[[n_remain]]
-        if(report_data[[n_remain]] > 0 & report_data$unfiltered_snv_indels_n > 0){
-          frac_remain <- paste0(filter_db,'_filter_frac')
-          report_data[[frac_remain]] <- round(as.numeric((report_data[[n_remain]] / report_data$unfiltered_snv_indels_n) * 100), digits = 2)
+          report_data_unfiltered <- pcgrr::generate_report_data(sample_calls_unfiltered, pcgr_data = pcgr_data, sample_name = sample_name, minimum_n_signature_analysis = pcgr_config$mutational_signatures$mutsignatures_mutation_limit, signature_normalization_method = pcgr_config$mutational_signatures$mutsignatures_normalization, signatures_limit = pcgr_config$mutational_signatures$mutsignatures_signature_limit, predict_MSI = pcgr_config$msi$msi, identify_msigs = pcgr_config$mutational_signatures$mutsignatures, callset = 'unfiltered callset')
+          report_data <- pcgrr::generate_report_data(filtered_callset$sample_calls, pcgr_data = pcgr_data, sample_name = sample_name, minimum_n_signature_analysis = pcgr_config$mutational_signatures$mutsignatures_mutation_limit, signature_normalization_method = pcgr_config$mutational_signatures$mutsignatures_normalization, signatures_limit = pcgr_config$mutational_signatures$mutsignatures_signature_limit, predict_MSI = pcgr_config$msi$msi, identify_msigs = pcgr_config$mutational_signatures$mutsignatures, callset = 'germline-filtered callset')
+          report_data$sample_name <- sample_name
+          report_data$vcf_run_mode <- 'tumor-only'
+          report_data$pcgr_config <- pcgr_config
+          report_data$unfiltered_snv_indels_n <- nrow(sample_calls_unfiltered)
+          for(filter_db in c('onekg','gnomad','dbsnp','noncoding')){
+            n_remain <- paste0(filter_db,'_filter_n_remain')
+            report_data[[n_remain]] <- filtered_callset[[n_remain]]
+            if(report_data[[n_remain]] > 0 & report_data$unfiltered_snv_indels_n > 0){
+              frac_remain <- paste0(filter_db,'_filter_frac')
+              report_data[[frac_remain]] <- round(as.numeric((report_data[[n_remain]] / report_data$unfiltered_snv_indels_n) * 100), digits = 2)
+            }
+          }
+          if(!is.null(report_data_unfiltered$tsv_variants)){
+            write.table(report_data_unfiltered$tsv_variants,file=tier_tsv_unfiltered_fname, sep="\t",col.names = T,row.names = F,quote = F)
+          }
+          if(!is.null(report_data$tsv_variants)){
+            write.table(report_data$tsv_variants,file=tier_tsv_fname, sep="\t",col.names = T,row.names = F,quote = F)
+          }
+          if(!is.null(report_data$tsv_biomarkers)){
+            write.table(report_data$tsv_biomarkers,file=biomarker_tsv_fname, sep="\t",col.names = T,row.names = F,quote = F)
+          }
+
+          if(!is.null(report_data$signature_data)){
+            if(length(report_data$signature_data) > 1){
+              sample_mutational_signatures <- report_data$signature_data$signatures_cancertypes_aetiologies
+              sample_mutational_signatures$SampleID <- sample_name
+              sample_mutational_signatures <- dplyr::select(sample_mutational_signatures,-Comments)
+              write.table(sample_mutational_signatures,file=msig_tsv_fname, sep="\t",col.names = T,row.names = F,quote = F)
+            }
+          }
+          if(!is.null(report_data$maf_df)){
+            write.table(report_data$maf_df,file=maf_fname, sep="\t",col.names = T,row.names = F,quote = F)
+          }
+        }else{
+          sample_calls <- pcgrr::get_calls(query_vcf, pcgr_data, sample_id = sample_name, tumor_dp_tag = pcgr_config$allelic_support$tumor_dp_tag, tumor_af_tag = pcgr_config$allelic_support$tumor_af_tag, normal_dp_tag =  pcgr_config$allelic_support$normal_dp_tag, normal_af_tag = pcgr_config$allelic_support$normal_af_tag, call_conf_tag = pcgr_config$allelic_support$call_conf_tag)
+          report_data <- pcgrr::generate_report_data(sample_calls, pcgr_data = pcgr_data, sample_name = sample_name, minimum_n_signature_analysis = pcgr_config$mutational_signatures$mutsignatures_mutation_limit, signature_normalization_method = pcgr_config$mutational_signatures$mutsignatures_normalization, signatures_limit = pcgr_config$mutational_signatures$mutsignatures_signature_limit, predict_MSI = pcgr_config$msi$msi, identify_msigs = pcgr_config$mutational_signatures$mutsignatures)
+          report_data$sample_name <- sample_name
+          report_data$vcf_run_mode <- 'tumor vs. control'
+
+          if(!is.null(report_data$tsv_variants)){
+            write.table(report_data$tsv_variants,file=tier_tsv_fname, sep="\t",col.names = T,row.names = F,quote = F)
+          }
+          if(!is.null(report_data$tsv_biomarkers)){
+            write.table(report_data$tsv_biomarkers,file=biomarker_tsv_fname, sep="\t",col.names = T,row.names = F,quote = F)
+          }
+
+          if(!is.null(report_data$signature_data)){
+            if(length(report_data$signature_data) > 1){
+              sample_mutational_signatures <- report_data$signature_data$signatures_cancertypes_aetiologies
+              sample_mutational_signatures$SampleID <- sample_name
+              sample_mutational_signatures <- dplyr::select(sample_mutational_signatures,-Comments)
+              write.table(sample_mutational_signatures,file=msig_tsv_fname, sep="\t",col.names = T,row.names = F,quote = F)
+            }
+          }
+          if(!is.null(report_data$maf_df)){
+            write.table(report_data$maf_df,file=maf_fname, sep="\t",col.names = T,row.names = F,quote = F)
+          }
         }
-      }
-      if(!is.null(report_data_unfiltered$tsv_variants)){
-        write.table(report_data_unfiltered$tsv_variants,file=tier_tsv_unfiltered_fname, sep="\t",col.names = T,row.names = F,quote = F)
-      }
-      if(!is.null(report_data$tsv_variants)){
-        write.table(report_data$tsv_variants,file=tier_tsv_fname, sep="\t",col.names = T,row.names = F,quote = F)
-      }
-      if(!is.null(report_data$tsv_biomarkers)){
-        write.table(report_data$tsv_biomarkers,file=biomarker_tsv_fname, sep="\t",col.names = T,row.names = F,quote = F)
-      }
-
-      if(!is.null(report_data$signature_data)){
-        if(length(report_data$signature_data) > 1){
-          sample_mutational_signatures <- report_data$signature_data$signatures_cancertypes_aetiologies
-          sample_mutational_signatures$SampleID <- sample_name
-          sample_mutational_signatures <- dplyr::select(sample_mutational_signatures,-Comments)
-          write.table(sample_mutational_signatures,file=msig_tsv_fname, sep="\t",col.names = T,row.names = F,quote = F)
-        }
-      }
-      if(!is.null(report_data$maf_df)){
-        write.table(report_data$maf_df,file=maf_fname, sep="\t",col.names = T,row.names = F,quote = F)
-      }
-    }else{
-      sample_calls <- pcgrr::get_calls(query_vcf, pcgr_data, sample_id = sample_name, tumor_dp_tag = pcgr_config$allelic_support$tumor_dp_tag, tumor_af_tag = pcgr_config$allelic_support$tumor_af_tag, normal_dp_tag =  pcgr_config$allelic_support$normal_dp_tag, normal_af_tag = pcgr_config$allelic_support$normal_af_tag, call_conf_tag = pcgr_config$allelic_support$call_conf_tag)
-      report_data <- pcgrr::generate_report_data(sample_calls, pcgr_data = pcgr_data, sample_name = sample_name, minimum_n_signature_analysis = pcgr_config$mutational_signatures$mutsignatures_mutation_limit, signature_normalization_method = pcgr_config$mutational_signatures$mutsignatures_normalization, signatures_limit = pcgr_config$mutational_signatures$mutsignatures_signature_limit, predict_MSI = pcgr_config$msi$msi, identify_msigs = pcgr_config$mutational_signatures$mutsignatures)
-      report_data$sample_name <- sample_name
-      report_data$vcf_run_mode <- 'tumor vs. control'
-
-      if(!is.null(report_data$tsv_variants)){
-        write.table(report_data$tsv_variants,file=tier_tsv_fname, sep="\t",col.names = T,row.names = F,quote = F)
-      }
-      if(!is.null(report_data$tsv_biomarkers)){
-        write.table(report_data$tsv_biomarkers,file=biomarker_tsv_fname, sep="\t",col.names = T,row.names = F,quote = F)
-      }
-
-      if(!is.null(report_data$signature_data)){
-        if(length(report_data$signature_data) > 1){
-          sample_mutational_signatures <- report_data$signature_data$signatures_cancertypes_aetiologies
-          sample_mutational_signatures$SampleID <- sample_name
-          sample_mutational_signatures <- dplyr::select(sample_mutational_signatures,-Comments)
-          write.table(sample_mutational_signatures,file=msig_tsv_fname, sep="\t",col.names = T,row.names = F,quote = F)
-        }
-      }
-      if(!is.null(report_data$maf_df)){
-        write.table(report_data$maf_df,file=maf_fname, sep="\t",col.names = T,row.names = F,quote = F)
       }
     }
   }
@@ -1203,20 +1210,35 @@ add_read_support <- function(vcf_data_df,tumor_dp_tag = '_na', tumor_af_tag = '_
   for(v in c('DP_TUMOR','AF_TUMOR','DP_NORMAL','AF_NORMAL')){
     vcf_data_df[v] <- NA
   }
-  if(tumor_dp_tag != '_na' & tumor_dp_tag %in% colnames(vcf_data_df)){
-    vcf_data_df[,'DP_TUMOR'] <- as.integer(vcf_data_df[,tumor_dp_tag])
+  if(tumor_dp_tag != '_na'){
+    tumor_dp_tag <- stringr::str_replace_all(tumor_dp_tag,"-",".")
+    if(tumor_dp_tag %in% colnames(vcf_data_df)){
+      vcf_data_df[,'DP_TUMOR'] <- as.integer(vcf_data_df[,tumor_dp_tag])
+    }
   }
-  if(tumor_af_tag != '_na' & tumor_af_tag %in% colnames(vcf_data_df)){
-    vcf_data_df[,'AF_TUMOR'] <- round(as.numeric(vcf_data_df[,tumor_af_tag]), digits=3)
+  if(tumor_af_tag != '_na'){
+    tumor_af_tag <- stringr::str_replace_all(tumor_af_tag,"-",".")
+    if(tumor_af_tag %in% colnames(vcf_data_df)){
+      vcf_data_df[,'AF_TUMOR'] <- as.integer(vcf_data_df[,tumor_af_tag])
+    }
   }
-  if(normal_dp_tag != '_na' & normal_dp_tag %in% colnames(vcf_data_df)){
-    vcf_data_df[,'DP_NORMAL'] <- as.integer(vcf_data_df[,normal_dp_tag])
+  if(normal_dp_tag != '_na'){
+    normal_dp_tag <- stringr::str_replace_all(normal_dp_tag,"-",".")
+    if(normal_dp_tag %in% colnames(vcf_data_df)){
+      vcf_data_df[,'DP_NORMAL'] <- as.integer(vcf_data_df[,normal_dp_tag])
+    }
   }
-  if(normal_af_tag != '_na' & normal_af_tag %in% colnames(vcf_data_df)){
-    vcf_data_df[,'AF_NORMAL'] <- round(as.numeric(vcf_data_df[,normal_af_tag]), digits=3)
+  if(normal_af_tag != '_na'){
+    normal_af_tag <- stringr::str_replace_all(normal_af_tag,"-",".")
+    if(normal_af_tag %in% colnames(vcf_data_df)){
+      vcf_data_df[,'AF_NORMAL'] <- as.integer(vcf_data_df[,normal_af_tag])
+    }
   }
-  if(call_conf_tag != '_na' & call_conf_tag %in% colnames(vcf_data_df)){
-    vcf_data_df[,'CALL_CONFIDENCE'] <- as.character(vcf_data_df[,call_conf_tag])
+  if(call_conf_tag != '_na'){
+    call_conf_tag <- stringr::str_replace_all(call_conf_tag,"-",".")
+    if(call_conf_tag %in% colnames(vcf_data_df)){
+      vcf_data_df[,'CALL_CONFIDENCE'] <- as.character(vcf_data_df[,call_conf_tag])
+    }
   }
   else{
     vcf_data_df$CALL_CONFIDENCE <- NA

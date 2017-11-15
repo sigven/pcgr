@@ -482,29 +482,29 @@ processing with the PCGR annotation pipeline:
    mutations in
    cancer <http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/>`__
    database, as provided by VEP
--  *COSMIC\_CODON\_FRAC\_GW - Deprecated in 0.5.0 due to COSMIC
+-  *COSMIC\_CODON\_FRAC\_GW - Deprecated in 0.5.1 due to COSMIC
    licensing restrictions*
--  *COSMIC\_CODON\_COUNT\_GW - Deprecated in 0.5.0 due to COSMIC
+-  *COSMIC\_CODON\_COUNT\_GW - Deprecated in 0.5.1 due to COSMIC
    licensing restrictions*
--  *COSMIC\_SITE\_HISTOLOGY - Deprecated in 0.5.0 due to COSMIC
+-  *COSMIC\_SITE\_HISTOLOGY - Deprecated in 0.5.1 due to COSMIC
    licensing restrictions*
--  *COSMIC\_CANCER\_TYPE\_GW - Deprecated in 0.5.0 due to COSMIC
+-  *COSMIC\_CANCER\_TYPE\_GW - Deprecated in 0.5.1 due to COSMIC
    licensing restrictions*
--  *COSMIC\_CANCER\_TYPE\_ALL - Deprecated in 0.5.0 due to COSMIC
+-  *COSMIC\_CANCER\_TYPE\_ALL - Deprecated in 0.5.1 due to COSMIC
    licensing restrictions*
--  *COSMIC\_SITE\_HISTOLOGY - Deprecated in 0.5.0 due to COSMIC
+-  *COSMIC\_SITE\_HISTOLOGY - Deprecated in 0.5.1 due to COSMIC
    licensing restrictions*
--  *COSMIC\_CANCER\_TYPE\_GW - Deprecated in 0.5.0 due to COSMIC
+-  *COSMIC\_CANCER\_TYPE\_GW - Deprecated in 0.5.1 due to COSMIC
    licensing restrictions*
--  *COSMIC\_SAMPLE\_SOURCE - Deprecated in 0.5.0 due to COSMIC licensing
+-  *COSMIC\_SAMPLE\_SOURCE - Deprecated in 0.5.1 due to COSMIC licensing
    restrictions*
--  *COSMIC\_DRUG\_RESISTANCE - Deprecated in 0.5.0 due to COSMIC
+-  *COSMIC\_DRUG\_RESISTANCE - Deprecated in 0.5.1 due to COSMIC
    licensing restrictions*
--  *COSMIC\_FATHMM\_PRED - Deprecated in 0.5.0 due to COSMIC licensing
+-  *COSMIC\_FATHMM\_PRED - Deprecated in 0.5.1 due to COSMIC licensing
    restrictions*
--  *COSMIC\_VARTYPE - Deprecated in 0.5.0 due to COSMIC licensing
+-  *COSMIC\_VARTYPE - Deprecated in 0.5.1 due to COSMIC licensing
    restrictions*
--  *COSMIC\_CONSEQUENCE - Deprecated in 0.5.0 due to COSMIC licensing
+-  *COSMIC\_CONSEQUENCE - Deprecated in 0.5.1 due to COSMIC licensing
    restrictions*
 
 .. raw:: html

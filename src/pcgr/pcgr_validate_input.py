@@ -85,10 +85,10 @@ def is_valid_vcf(input_vcf, logger):
       for line in f:
          if not re.search(r' \(warning\)$|^Reading from ',line.rstrip()): ## ignore warnings
             if line.startswith('Line '):
-               validation_results['error_messages'].append(line.rstrip())
-            if line.endswith('the input file is valid'): ## valid VCF
+               validation_results['error_messages'].append('ERROR: ' + line.rstrip())
+            if 'the input file is valid' in line.rstrip(): ## valid VCF
                validation_results['validation_status'] = 1
-            if line.endswith('the input file is not valid'):  ## non-valid VCF
+            if 'the input file is not valid' in line.rstrip():  ## non-valid VCF
                validation_results['validation_status'] = 0
       f.close()
       os.system('rm -f ' + str(vcf_validation_output_file))
@@ -96,13 +96,13 @@ def is_valid_vcf(input_vcf, logger):
       err_msg = str(vcf_validation_output_file) + ' does not exist'
       return pcgr_error_message(err_msg, logger)
    
-   if validation_results['validation_status'] == 1:
+   if validation_results['validation_status'] == 0:
       error_string_42 = '\n'.join(validation_results['error_messages'])
-      validation_status = 'VCF file is NOT valid according to v4.2 specification'
+      validation_status = 'According to the VCF specification, the VCF file is NOT valid'
       err_msg = validation_status + ':\n' + str(error_string_42)
       return pcgr_error_message(err_msg, logger)
    else:
-      validation_status = 'VCF file ' + str(input_vcf) + ' is valid according to v4.2 specification'
+      validation_status = 'According to the VCF specification, the VCF file ' + str(input_vcf) + ' is valid'
       logger.info(validation_status)
    return 0
 

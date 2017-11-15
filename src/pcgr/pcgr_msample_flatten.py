@@ -70,7 +70,7 @@ def flatten_vcf(query_vcf, output_postfix):
             if line.startswith('#'):
                if printed == 0 and not line.startswith('##FORMAT'):
                   if line.startswith('#CHROM'):
-                     vcf_lines.append('#CHROM\tPOS\tID\tALT\tREF\tQUAL\tFILTER\tINFO')
+                     vcf_lines.append('#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO')
                   else:
                      vcf_lines.append(line.rstrip())
             else:

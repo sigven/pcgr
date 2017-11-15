@@ -11,7 +11,7 @@ import getpass
 import platform
 import toml
 
-version = '0.5.0'
+version = '0.5.1'
 
 def __main__():
    
@@ -317,6 +317,7 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
    
    ## set basic Docker run commands
    output_vcf = 'None'
+   output_pass_vcf = 'None'
    uid = ''
    logger = getlogger('pcgr-get-OS')
    if platform.system() == 'Linux' or platform.system() == 'Darwin' or sys.platform == 'darwin' or sys.platform == 'linux2' or sys.platform == 'linux':
@@ -372,11 +373,13 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       
       ## Define input, output and temporary file names
       output_vcf = '/workdir/output/' + str(sample_id) + '.pcgr.vcf.gz'
+      output_pass_vcf = '/workdir/output/' + str(sample_id) + '.pcgr.pass.vcf.gz'
       input_vcf_pcgr_ready = '/workdir/output/' + re.sub(r'(\.vcf$|\.vcf\.gz$)','.pcgr_ready.vcf.gz',host_directories['input_vcf_basename_host'])
       vep_vcf = re.sub(r'(\.vcf$|\.vcf\.gz$)','.pcgr_vep.vcf',input_vcf_pcgr_ready)
       vep_vcfanno_vcf = re.sub(r'(\.vcf$|\.vcf\.gz$)','.pcgr_vep.vcfanno.vcf',input_vcf_pcgr_ready)
       vep_tmp_vcf = vep_vcf + '.tmp'
       vep_vcfanno_annotated_vcf = re.sub(r'\.vcfanno','.vcfanno.annotated',vep_vcfanno_vcf) + '.gz'
+      vep_vcfanno_annotated_pass_vcf = re.sub(r'\.vcfanno','.vcfanno.annotated.pass',vep_vcfanno_vcf) + '.gz'
       
       vep_main_command = str(docker_command_run1) + "vep --input_file " + str(input_vcf_pcgr_ready) + " --output_file " + str(vep_tmp_vcf) + " --vcf --check_ref --flag_pick_allele --force_overwrite --species homo_sapiens --assembly GRCh37 --offline --fork " + str(config_options['other']['n_vep_forks']) + " --af --af_1kg --af_gnomad --variant_class --regulatory --domains --hgvs --hgvsg --symbol --protein --ccds --uniprot --appris --biotype --canonical --gencode_basic --cache --numbers --total_length --allele_number --no_escape --xref_refseq --dir /usr/local/share/vep/data --fasta /usr/local/share/vep/data/homo_sapiens/90_GRCh37/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz\""
       if config_options['other']['vep_skip_intergenic'] == 1:
@@ -413,17 +416,22 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       
       create_output_vcf_command1 = str(docker_command_run2) + 'mv ' + str(vep_vcfanno_annotated_vcf) + ' ' + str(output_vcf) + "\""
       create_output_vcf_command2 = str(docker_command_run2) + 'mv ' + str(vep_vcfanno_annotated_vcf) + '.tbi ' + str(output_vcf) + '.tbi' + "\""
-      clean_command = str(docker_command_run2) + 'rm -f ' + str(vep_vcf) + '* ' + str(vep_vcfanno_annotated_vcf) + ' ' + str(vep_vcfanno_vcf) + '* ' +  str(input_vcf_pcgr_ready) + "* "  + "\""
+      create_output_vcf_command3 = str(docker_command_run2) + 'mv ' + str(vep_vcfanno_annotated_pass_vcf) + ' ' + str(output_pass_vcf) + "\""
+      create_output_vcf_command4 = str(docker_command_run2) + 'mv ' + str(vep_vcfanno_annotated_pass_vcf) + '.tbi ' + str(output_pass_vcf) + '.tbi' + "\""
+      clean_command = str(docker_command_run2) + 'rm -f ' + str(vep_vcf) + '* ' + str(vep_vcfanno_annotated_vcf) + ' ' + str(vep_vcfanno_annotated_pass_vcf) + '* ' + str(vep_vcfanno_vcf) + '* ' +  str(input_vcf_pcgr_ready) + "* "  + "\""
       check_subprocess(create_output_vcf_command1)
       check_subprocess(create_output_vcf_command2)
+      check_subprocess(create_output_vcf_command3)
+      check_subprocess(create_output_vcf_command4)
       check_subprocess(clean_command)
+      #return
   
    print
    
    ## Generation of HTML reports for VEP/vcfanno-annotated VCF and copy number segment file
    logger = getlogger('pcgr-writer')
    logger.info("STEP 4: Generation of output files")
-   pcgr_report_command = str(docker_command_run1) + "/pcgr.R /workdir/output " + str(output_vcf) + " " + str(input_cna_docker) + " "  + str(sample_id)  + " " + str(input_conf_docker) + " " + str(version) + "\""
+   pcgr_report_command = str(docker_command_run1) + "/pcgr.R /workdir/output " + str(output_pass_vcf) + " " + str(input_cna_docker) + " "  + str(sample_id)  + " " + str(input_conf_docker) + " " + str(version) + "\""
    check_subprocess(pcgr_report_command)
    logger.info("Finished")
    
