@@ -8,7 +8,7 @@ The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for
 
 ### News
 
-* _November 14th 2017_: **0.5.1 release**
+* _November 14th 2017_: **0.5.0 release**
   * Updated version of VEP (v90)
   * Updated versions of ClinVar, Uniprot KB, CIViC, CBMDB
   * Removal of ExAC (replaced by gnomAD), removal of COSMIC due to licensing restrictions
