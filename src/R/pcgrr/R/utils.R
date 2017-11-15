@@ -1350,8 +1350,8 @@ get_calls <- function(vcf_gz_file, pcgr_data, sample_id = NULL, tumor_dp_tag = '
     vcf_data_df[!is.na(vcf_data_df$PROTEIN_CHANGE) & stringr::str_detect(vcf_data_df$PROTEIN_CHANGE,"^ENSP"),]$PROTEIN_CHANGE <- NA
   }
   vcf_data_df$CODING_STATUS <- 'noncoding'
-  if(nrow(vcf_data_df[stringr::str_detect(vcf_data_df$CONSEQUENCE,"^(stop_gained|stop_lost|start_lost|frameshift_variant|missense_variant|splice_donor|splice_acceptor|inframe_deletion|inframe_insertion)"),]) > 0){
-    vcf_data_df[stringr::str_detect(vcf_data_df$CONSEQUENCE,"^(stop_gained|stop_lost|start_lost|frameshift_variant|missense_variant|splice_donor|splice_acceptor|inframe_deletion|inframe_insertion)"),]$CODING_STATUS <- 'coding'
+  if(nrow(vcf_data_df[!is.na(vcf_data_df$CONSEQUENCE) & stringr::str_detect(vcf_data_df$CONSEQUENCE,"^(stop_gained|stop_lost|start_lost|frameshift_variant|missense_variant|splice_donor|splice_acceptor|inframe_deletion|inframe_insertion)"),]) > 0){
+    vcf_data_df[!is.na(vcf_data_df$CONSEQUENCE) & stringr::str_detect(vcf_data_df$CONSEQUENCE,"^(stop_gained|stop_lost|start_lost|frameshift_variant|missense_variant|splice_donor|splice_acceptor|inframe_deletion|inframe_insertion)"),]$CODING_STATUS <- 'coding'
   }
 
   for(col in c('width','strand','totalDepth','refDepth','altDepth','sampleNames')){
