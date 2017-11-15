@@ -16,7 +16,7 @@ The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for
   * PCGR pipeline is now configured through a [TOML-based configuration file](https://github.com/toml-lang/toml)
   * Bug fixes / general speed improvements
   * _Work in progress: Export of report data through JSON_
-* _November 14th 2017_: **0.5.1 release**
+* _November 15th 2017_: **0.5.1 release**
   * Bug fixing (VCF validation)
 
 ### Example reports
