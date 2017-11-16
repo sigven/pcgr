@@ -89,13 +89,17 @@ def flatten_vcf(query_vcf, output_postfix):
                      if format_tag == 'ADT':
                         read_support_tumor = format_data[i].split(',')
                         if read_support_tumor[0] != '.' and read_support_tumor[1] != '.':
-                           tvaf = round(float(float(read_support_tumor[1]) / read_depth_tumor),3)
+                           tvaf = 0
+                           if read_depth_tumor > 0:
+                              tvaf = round(float(float(read_support_tumor[1]) / read_depth_tumor),3)
                            info_data.append('TVAF=' + str(tvaf))
 
                      if format_tag == 'ADC':
                         read_support_normal = format_data[i].split(',')
                         if read_support_normal[0] != '.' and read_support_normal[1] != '.':
-                           cvaf = round(float(float(read_support_normal[1]) / read_depth_normal),3)
+                           cvaf = 0
+                           if read_depth_normal > 0:
+                              cvaf = round(float(float(read_support_normal[1]) / read_depth_normal),3)
                            info_data.append('CVAF=' + str(cvaf))
                            #info_data.append('CVAF=.')
                      

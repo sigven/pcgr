@@ -1219,7 +1219,7 @@ add_read_support <- function(vcf_data_df,tumor_dp_tag = '_na', tumor_af_tag = '_
   if(tumor_af_tag != '_na'){
     tumor_af_tag <- stringr::str_replace_all(tumor_af_tag,"-",".")
     if(tumor_af_tag %in% colnames(vcf_data_df)){
-      vcf_data_df[,'AF_TUMOR'] <- as.integer(vcf_data_df[,tumor_af_tag])
+      vcf_data_df[,'AF_TUMOR'] <- as.float(vcf_data_df[,tumor_af_tag])
     }
   }
   if(normal_dp_tag != '_na'){
@@ -1231,7 +1231,7 @@ add_read_support <- function(vcf_data_df,tumor_dp_tag = '_na', tumor_af_tag = '_
   if(normal_af_tag != '_na'){
     normal_af_tag <- stringr::str_replace_all(normal_af_tag,"-",".")
     if(normal_af_tag %in% colnames(vcf_data_df)){
-      vcf_data_df[,'AF_NORMAL'] <- as.integer(vcf_data_df[,normal_af_tag])
+      vcf_data_df[,'AF_NORMAL'] <- as.float(vcf_data_df[,normal_af_tag])
     }
   }
   if(call_conf_tag != '_na'){
