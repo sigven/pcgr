@@ -381,9 +381,9 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       vep_vcfanno_annotated_vcf = re.sub(r'\.vcfanno','.vcfanno.annotated',vep_vcfanno_vcf) + '.gz'
       vep_vcfanno_annotated_pass_vcf = re.sub(r'\.vcfanno','.vcfanno.annotated.pass',vep_vcfanno_vcf) + '.gz'
       
-      vep_main_command = str(docker_command_run1) + "vep --input_file " + str(input_vcf_pcgr_ready) + " --output_file " + str(vep_tmp_vcf) + " --vcf --check_ref --flag_pick_allele --force_overwrite --species homo_sapiens --assembly GRCh37 --offline --fork " + str(config_options['other']['n_vep_forks']) + " --af --af_1kg --af_gnomad --variant_class --regulatory --domains --hgvs --hgvsg --symbol --protein --ccds --uniprot --appris --biotype --canonical --gencode_basic --cache --numbers --total_length --allele_number --no_escape --xref_refseq --dir /usr/local/share/vep/data --fasta /usr/local/share/vep/data/homo_sapiens/90_GRCh37/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz\""
+      vep_main_command = str(docker_command_run1) + "vep --input_file " + str(input_vcf_pcgr_ready) + " --output_file " + str(vep_tmp_vcf) + " --vcf --check_ref --flag_pick_allele --force_overwrite --species homo_sapiens --assembly GRCh37 --offline --fork " + str(config_options['other']['n_vep_forks']) + " --failed 1 --af --af_1kg --af_gnomad --variant_class --regulatory --domains --hgvs --hgvsg --symbol --protein --ccds --uniprot --appris --biotype --canonical --gencode_basic --cache --numbers --total_length --allele_number --no_escape --xref_refseq --dir /usr/local/share/vep/data --fasta /usr/local/share/vep/data/homo_sapiens/90_GRCh37/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz\""
       if config_options['other']['vep_skip_intergenic'] == 1:
-         vep_main_command = str(docker_command_run1) + "vep --input_file " + str(input_vcf_pcgr_ready) + " --output_file " + str(vep_tmp_vcf) + " --no_intergenic --vcf --check_ref --flag_pick_allele --force_overwrite --species homo_sapiens --assembly GRCh37 --offline --fork " + str(config_options['other']['n_vep_forks']) + " --af --af_1kg --af_gnomad --variant_class --regulatory --domains --hgvs --hgvsg --symbol --protein --ccds --uniprot --appris --biotype --canonical --gencode_basic --cache --numbers --total_length --allele_number --no_escape --xref_refseq --dir /usr/local/share/vep/data --fasta /usr/local/share/vep/data/homo_sapiens/90_GRCh37/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz\""
+         vep_main_command = str(docker_command_run1) + "vep --input_file " + str(input_vcf_pcgr_ready) + " --output_file " + str(vep_tmp_vcf) + " --no_intergenic --vcf --check_ref --flag_pick_allele --force_overwrite --species homo_sapiens --assembly GRCh37 --offline --fork " + str(config_options['other']['n_vep_forks']) + " --failed 1 --af --af_1kg --af_gnomad --variant_class --regulatory --domains --hgvs --hgvsg --symbol --protein --ccds --uniprot --appris --biotype --canonical --gencode_basic --cache --numbers --total_length --allele_number --no_escape --xref_refseq --dir /usr/local/share/vep/data --fasta /usr/local/share/vep/data/homo_sapiens/90_GRCh37/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz\""
 
       vep_sed_command =  str(docker_command_run1) + "sed -r 's/:p\.[A-Z]{1}[a-z]{2}[0-9]+=//g' " + str(vep_tmp_vcf) + " > " + str(vep_vcf) + "\""
       vep_bgzip_command = str(docker_command_run1) + "bgzip -f " + str(vep_vcf) + "\""
@@ -424,7 +424,7 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       check_subprocess(create_output_vcf_command3)
       check_subprocess(create_output_vcf_command4)
       check_subprocess(clean_command)
-      #return
+      return
   
    print
    
