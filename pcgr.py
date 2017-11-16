@@ -424,7 +424,7 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       check_subprocess(create_output_vcf_command3)
       check_subprocess(create_output_vcf_command4)
       check_subprocess(clean_command)
-      return
+      
   
    print
    
