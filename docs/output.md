@@ -101,8 +101,8 @@ The report is structured in six main sections, described in more detail below:
       * Supporting scientific literature (key report elements)
 
 
-* [View an example report for a breast tumor sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.BRCA.0.5.0.pcgr.html)
-* [View an example report for a colon adenocarcinoma sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.COAD.0.5.0.pcgr.html)
+* [View an example report for a breast tumor sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.BRCA.0.5.1.1.pcgr.html)
+* [View an example report for a colon adenocarcinoma sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.COAD.0.5.1.1.pcgr.html)
 
 
 The HTML reports have been tested using the following browsers:
@@ -234,18 +234,18 @@ Here, the __sample_id__ is provided as input by the user, and reflects a unique 
   - GWAS\_CATALOG_PMID - Variant is linked to phenotype through the [GWAS Catalog](https://www.ebi.ac.uk/gwas/), literature in PMID list
   - GWAS\_CATALOG\_TRAIT_URI - List of trait URIs for GWAS-associated variant
   - COSMIC\_MUTATION\_ID - Mutation identifier in [Catalog of somatic mutations in cancer](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/) database, as provided by VEP
-  - *COSMIC\_CODON_FRAC\_GW - Deprecated in 0.5.1 due to COSMIC licensing restrictions*
-  - *COSMIC\_CODON_COUNT\_GW - Deprecated in 0.5.1 due to COSMIC licensing restrictions*
-  - *COSMIC\_SITE\_HISTOLOGY - Deprecated in 0.5.1 due to COSMIC licensing restrictions*
-  - *COSMIC\_CANCER\_TYPE\_GW - Deprecated in 0.5.1 due to COSMIC licensing restrictions*
-  - *COSMIC\_CANCER\_TYPE\_ALL - Deprecated in 0.5.1 due to COSMIC licensing restrictions*
-  - *COSMIC\_SITE\_HISTOLOGY - Deprecated in 0.5.1 due to COSMIC licensing restrictions*
-  - *COSMIC\_CANCER_TYPE\_GW - Deprecated in 0.5.1 due to COSMIC licensing restrictions*
-  - *COSMIC_SAMPLE_SOURCE - Deprecated in 0.5.1 due to COSMIC licensing restrictions*
-  - *COSMIC\_DRUG\_RESISTANCE - Deprecated in 0.5.1 due to COSMIC licensing restrictions*
-  - *COSMIC_FATHMM_PRED - Deprecated in 0.5.1 due to COSMIC licensing restrictions*
-  - *COSMIC_VARTYPE - Deprecated in 0.5.1 due to COSMIC licensing restrictions*
-  - *COSMIC_CONSEQUENCE - Deprecated in 0.5.1 due to COSMIC licensing restrictions*
+  - *COSMIC\_CODON_FRAC\_GW - Deprecated in 0.5.0 due to COSMIC licensing restrictions*
+  - *COSMIC\_CODON_COUNT\_GW - Deprecated in 0.5.0 due to COSMIC licensing restrictions*
+  - *COSMIC\_SITE\_HISTOLOGY - Deprecated in 0.5.0 due to COSMIC licensing restrictions*
+  - *COSMIC\_CANCER\_TYPE\_GW - Deprecated in 0.5.0 due to COSMIC licensing restrictions*
+  - *COSMIC\_CANCER\_TYPE\_ALL - Deprecated in 0.5.0 due to COSMIC licensing restrictions*
+  - *COSMIC\_SITE\_HISTOLOGY - Deprecated in 0.5.0 due to COSMIC licensing restrictions*
+  - *COSMIC\_CANCER_TYPE\_GW - Deprecated in 0.5.0 due to COSMIC licensing restrictions*
+  - *COSMIC_SAMPLE_SOURCE - Deprecated in 0.5.0 due to COSMIC licensing restrictions*
+  - *COSMIC\_DRUG\_RESISTANCE - Deprecated in 0.5.0 due to COSMIC licensing restrictions*
+  - *COSMIC_FATHMM_PRED - Deprecated in 0.5.0 due to COSMIC licensing restrictions*
+  - *COSMIC_VARTYPE - Deprecated in 0.5.0 due to COSMIC licensing restrictions*
+  - *COSMIC_CONSEQUENCE - Deprecated in 0.5.0 due to COSMIC licensing restrictions*
 
 
 <!--- COSMIC\_MUTATION_ID - Mutation identifier in [Catalog of somatic mutations in cancer](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/) database
