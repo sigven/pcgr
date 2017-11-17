@@ -11,7 +11,7 @@ import getpass
 import platform
 import toml
 
-version = '0.5.1'
+version = '0.5.1.1'
 
 def __main__():
    
@@ -259,7 +259,7 @@ def verify_input_files(input_vcf, input_cna, configuration_file, pcgr_config_opt
    f_rel_not = open(rel_notes_file,'r')
    compliant_data_bundle = 0
    for line in f_rel_not:
-      version_check = 'PCGR_SOFTWARE_VERSION = 0.5.'
+      version_check = 'PCGR_SOFTWARE_VERSION = 0.5.1.1'
       if version_check in line:
          compliant_data_bundle = 1
          
@@ -423,8 +423,8 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       check_subprocess(create_output_vcf_command2)
       check_subprocess(create_output_vcf_command3)
       check_subprocess(create_output_vcf_command4)
-      check_subprocess(clean_command)
-      
+      #check_subprocess(clean_command)
+      #return
   
    print
    
