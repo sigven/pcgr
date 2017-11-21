@@ -101,8 +101,8 @@ The report is structured in six main sections, described in more detail below:
       * Supporting scientific literature (key report elements)
 
 
-* [View an example report for a breast tumor sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.BRCA.0.5.1.1.pcgr.html)
-* [View an example report for a colon adenocarcinoma sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.COAD.0.5.1.1.pcgr.html)
+* [View an example report for a breast tumor sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.BRCA.0.5.1.2.pcgr.html)
+* [View an example report for a colon adenocarcinoma sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.COAD.0.5.1.2.pcgr.html)
 
 
 The HTML reports have been tested using the following browsers:
