@@ -18,8 +18,8 @@ get_cna_cytoband <- function(cna_gr, cytoband_gr){
   cyto_df$segment_length <- width(ranges(cna_gr[queryHits(cyto_hits)]))
 
   cyto_stats <- as.data.frame(dplyr::group_by(cyto_df,segmentID,segment_length) %>% dplyr::summarise(cytoband = paste(name, collapse=", "), chromosome_arm = paste(unique(arm), collapse=","), focalCNAthresholds = paste(unique(focalCNAthreshold), collapse=",")))
-  if(nrow(cyto_stats[stringr::str_detect(cyto_stats$focalCNAthresholds,","),]) > 0){
-    cyto_stats[stringr::str_detect(cyto_stats$focalCNAthresholds,","),]$focalCNAthresholds <- NA
+  if(nrow(cyto_stats[!is.na(cyto_stats$focalCNAthresholds) & stringr::str_detect(cyto_stats$focalCNAthresholds,","),]) > 0){
+    cyto_stats[!is.na(cyto_stats$focalCNAthresholds) & stringr::str_detect(cyto_stats$focalCNAthresholds,","),]$focalCNAthresholds <- NA
   }
   cyto_stats$focalCNAthresholds <- as.numeric(cyto_stats$focalCNAthresholds)
   cyto_stats$event_type <- 'broad'
@@ -51,8 +51,7 @@ cna_segment_annotation <- function(cna_file, logR_gain, logR_homdel, pcgr_data, 
 
   rlogging::message(paste0("Annotation of copy number segment file ",cna_file))
   cna_df_raw <- read.table(file=cna_file,header = T,stringsAsFactors = F,comment.char="", quote="")
-  cna_df_raw <- dplyr::rename(cna_df_raw, chromosome = Chromosome, LogR = Segment_Mean, segment_start = Start, segment_end = End) %>%
-    dplyr::distinct()
+  cna_df_raw <- dplyr::rename(cna_df_raw, chromosome = Chromosome, LogR = Segment_Mean, segment_start = Start, segment_end = End) %>% dplyr::distinct()
   cna_df_raw$chromosome <- stringr::str_replace(cna_df_raw$chromosome,"^chr","")
 
   ## VALIDATE INPUT CHROMOSOMES
@@ -93,7 +92,6 @@ cna_segment_annotation <- function(cna_file, logR_gain, logR_homdel, pcgr_data, 
   df_print <- df
   df_print <- dplyr::select(df_print,chrom,segment_start,segment_end,segment_length_Mb,event_type,cytoband,LogR,ensembl_gene_id,symbol,ensembl_transcript_id,transcript_start,transcript_end,transcript_overlap_percent,name,biotype,disgenet_cui,tsgene,ts_oncogene,intogen_drivers,chembl_compound_id,gencode_gene_biotype,gencode_tag,gencode_release)
 
-
   chrOrder <- c(as.character(paste0('chr',c(1:22))),"chrX","chrY")
   df_print$chrom <- factor(df_print$chrom, levels=chrOrder)
   df_print <- df_print[order(df_print$chrom),]
@@ -102,7 +100,7 @@ cna_segment_annotation <- function(cna_file, logR_gain, logR_homdel, pcgr_data, 
 
   df_print_sorted <- NULL
   for(chrom in chrOrder){
-    if(nrow(df_print[df_print$chrom == chrom,]) > 0){
+    if(nrow(df_print[!is.na(df_print$chrom) & df_print$chrom == chrom,]) > 0){
       chrom_regions <- df_print[df_print$chrom == chrom,]
       chrom_regions_sorted <- chrom_regions[with(chrom_regions, order(segment_start, segment_end)),]
       df_print_sorted <- rbind(df_print_sorted, chrom_regions_sorted)

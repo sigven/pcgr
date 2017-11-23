@@ -75,7 +75,7 @@ htmltools::br()
 
 ### Tumor mutational burden (TMB)
 
-The size of the targeted genomic region has been defined as: __`r pcgr_config$mutational_burden$target_size_mb` Mb__. For estimation of TMB, we used same approach as was outlined in a recent study [[@Chalmers2017-cz]](https://www.ncbi.nlm.nih.gov/pubmed/28420421), i.e. counting all coding, somatic base substitutions and indels in the targeted regions, including synonymous alterations. 
+The size of the targeted genomic region has been defined as: __`r report_data$pcgr_config$mutational_burden$target_size_mb` Mb__. For estimation of TMB, we used same approach as was outlined in a recent study [[@Chalmers2017-cz]](https://www.ncbi.nlm.nih.gov/pubmed/28420421), i.e. counting all coding, somatic base substitutions and indels in the targeted regions, including synonymous alterations. 
 
 Estimated mutational burden: __`r report_data$tmb_estimate`__ __mutations/Mb__
 

@@ -98,7 +98,7 @@ def is_valid_vcf(input_vcf, logger):
    
    if validation_results['validation_status'] == 0:
       error_string_42 = '\n'.join(validation_results['error_messages'])
-      validation_status = 'According to the VCF specification, the VCF file is NOT valid'
+      validation_status = 'According to the VCF specification, the VCF file (' + str(input_vcf) + ') is NOT valid'
       err_msg = validation_status + ':\n' + str(error_string_42)
       return pcgr_error_message(err_msg, logger)
    else:

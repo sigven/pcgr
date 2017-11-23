@@ -9,8 +9,8 @@
 
 The following user-defined thresholds determine copy number aberrations shown here: 
 
-* <span style="color:#009E73"><b>Copy number amplifications</b></span>: Log(2) ratio >= `r pcgr_config$cna$logR_gain`
-* <span style="color:red"><b>Homozygous deletions</b></span>: Log(2) ratio <= `r pcgr_config$cna$logR_homdel`
+* <span style="color:#009E73"><b>Copy number amplifications</b></span>: Log(2) ratio >= `r report_data$pcgr_config$cna$logR_gain`
+* <span style="color:red"><b>Homozygous deletions</b></span>: Log(2) ratio <= `r report_data$pcgr_config$cna$logR_homdel`
 
 A total of __`r nrow(report_data$cna_data$ranked_segments)`__ unfiltered aberration segments satisfied the above criteria.
 
@@ -63,7 +63,7 @@ crosstalk::bscols(
 htmltools::br()
 crosstalk::bscols(
   DT::datatable(cna_segments_sd, extensions=c("Buttons","Responsive"),escape = F, width = "100%",options=list(buttons = c('csv','excel'),dom = 'Bfrtip')) %>%
-  DT::formatStyle('LogR',color='white', backgroundColor = DT::styleInterval(pcgr_config$cna$logR_homdel, c('red', '#009E73')))
+  DT::formatStyle('LogR',color='white', backgroundColor = DT::styleInterval(report_data$pcgr_config$cna$logR_homdel, c('red', '#009E73')))
 )
 
   

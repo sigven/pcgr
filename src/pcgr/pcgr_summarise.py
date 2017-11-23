@@ -115,20 +115,26 @@ def write_pass_vcf(annotated_vcf):
    vcf = VCF(annotated_vcf)
    w = Writer(out_vcf, vcf)
 
+   num_rejected = 0
    num_pass = 0
    for rec in vcf:
       if rec.FILTER is None or rec.FILTER == 'None':
          w.write_record(rec)
          num_pass += 1
+      else:
+         num_rejected +=1
 
    vcf.close()
    w.close()
    
+   logger.info('Number of non-PASS/REJECTED variant calls: ' + str(num_rejected))
+   logger.info('Number of PASSed variant calls: ' + str(num_pass))
    if num_pass == 0:
       logger.warning('There are zero variants with a \'PASS\' filter in the VCF file')
-   else:
-      os.system('bgzip -f ' + str(out_vcf))
-      os.system('tabix -f -p vcf ' + str(out_vcf) + '.gz')
+      os.system('bgzip -dc ' + str(annotated_vcf) + ' egrep \'^#\' > ' + str(out_vcf))
+   #else:
+   os.system('bgzip -f ' + str(out_vcf))
+   os.system('tabix -f -p vcf ' + str(out_vcf) + '.gz')
 
    return
 
@@ -193,13 +199,6 @@ def extend_vcf_annotations(query_vcf, pcgr_directory):
                          'DISGENET_CUI':10,'CHEMBL_COMPOUND_ID':11,'INTOGEN_DRIVER':12,'ONCOSCORE':13}
    for rec in vcf:
       all_transcript_consequences = []
-      if rec.INFO.get('CSQ') is None:
-         alt_allele = ','.join(rec.ALT).encode('utf-8')
-         pos = rec.start + 1
-         variant_id = 'g.' + str(rec.CHROM) + ':' + str(pos) + str(rec.REF) + '>' + alt_allele
-         logger.warning('Variant record ' + str(variant_id) + ' does not have CSQ tag from Variant Effect Predictor - variant will be skipped')
-         continue
-      pcgr_onco_xref = {}
       if current_chrom is None:
          current_chrom = str(rec.CHROM)
          num_chromosome_records_processed = 0
@@ -208,6 +207,21 @@ def extend_vcf_annotations(query_vcf, pcgr_directory):
             logger.info('Completed summary of functional annotations for ' + str(num_chromosome_records_processed) + ' variants on chromosome ' + str(current_chrom))
             current_chrom = str(rec.CHROM)
             num_chromosome_records_processed = 0
+      if rec.INFO.get('CSQ') is None:
+         alt_allele = ','.join(rec.ALT).encode('utf-8')
+         pos = rec.start + 1
+         variant_id = 'g.' + str(rec.CHROM) + ':' + str(pos) + str(rec.REF) + '>' + alt_allele
+         logger.warning('Variant record ' + str(variant_id) + ' does not have CSQ tag from Variant Effect Predictor (vep_skip_intergenic in config set to true?)  - variant will be skipped')
+         continue
+      pcgr_onco_xref = {}
+      # if current_chrom is None:
+      #    current_chrom = str(rec.CHROM)
+      #    num_chromosome_records_processed = 0
+      # else:
+      #    if str(rec.CHROM) != current_chrom:
+      #       logger.info('Completed summary of functional annotations for ' + str(num_chromosome_records_processed) + ' variants on chromosome ' + str(current_chrom))
+      #       current_chrom = str(rec.CHROM)
+      #       num_chromosome_records_processed = 0
       num_chromosome_records_processed += 1
       if not rec.INFO.get('PCGR_ONCO_XREF') is None:
          for transcript_onco_xref in rec.INFO.get('PCGR_ONCO_XREF').encode('utf-8').split(','):
@@ -270,11 +284,19 @@ def extend_vcf_annotations(query_vcf, pcgr_directory):
    logger.info('Completed summary of functional annotations for ' + str(num_chromosome_records_processed) + ' variants on chromosome ' + str(current_chrom))
    vcf.close()
 
-   os.system('bgzip -f ' + str(out_vcf))
-   os.system('tabix -f -p vcf ' + str(out_vcf) + '.gz')
+   if os.path.exists(out_vcf):
+      if os.path.getsize(out_vcf) > 0:
+         os.system('bgzip -f ' + str(out_vcf))
+         os.system('tabix -f -p vcf ' + str(out_vcf) + '.gz')
+         annotated_vcf = out_vcf + '.gz'
+         write_pass_vcf(annotated_vcf)
+      else:
+         pcgrutils.pcgr_error_message('No remaining PASS variants found in query VCF - exiting and skipping STEP 4 (pcgr-writer)', logger)
+   else:
+      pcgrutils.pcgr_error_message('No remaining PASS variants found in query VCF - exiting and skipping STEP 4 (pcgr-writer)', logger)
 
-   annotated_vcf = out_vcf + '.gz'
-   write_pass_vcf(annotated_vcf)
+   #annotated_vcf = out_vcf + '.gz'
+   #write_pass_vcf(annotated_vcf)
 
 if __name__=="__main__": __main__()
 

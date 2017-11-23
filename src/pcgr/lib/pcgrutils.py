@@ -35,7 +35,7 @@ def pcgr_error_message(message, logger):
    logger.error('')
    logger.error(message)
    logger.error('')
-   exit(0)
+   exit(1)
 
 def getlogger(logger_name):
 	logger = logging.getLogger(logger_name)

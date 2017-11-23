@@ -212,9 +212,9 @@ below:
    -  Supporting scientific literature (key report elements)
 
 -  `View an example report for a breast tumor sample
-   (TCGA) <http://folk.uio.no/sigven/tumor_sample.BRCA.0.5.1.2.pcgr.html>`__
+   (TCGA) <http://folk.uio.no/sigven/tumor_sample.BRCA.0.5.2.pcgr.html>`__
 -  `View an example report for a colon adenocarcinoma sample
-   (TCGA) <http://folk.uio.no/sigven/tumor_sample.COAD.0.5.1.2.pcgr.html>`__
+   (TCGA) <http://folk.uio.no/sigven/tumor_sample.COAD.0.5.2.pcgr.html>`__
 
 The HTML reports have been tested using the following browsers:
 

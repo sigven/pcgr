@@ -10,7 +10,7 @@ filter_no_control_calls(sample_calls_df, sample_name = NULL,
 \arguments{
 \item{sample_calls_df}{data frame with mix of germline + somatic mutations (run using tumor only)}
 
-\item{pcgr_config}{list with germline filter parameters}
+\item{pcgr_config}{list with PCGR configuration parameters}
 }
 \value{
 sample_calls filtered call set

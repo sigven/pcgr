@@ -12,7 +12,7 @@ library(RcppTOML)
 #' Function that excludes germline variants from an annotated callset with mix of somatic and germline variants
 #'
 #' @param sample_calls_df data frame with mix of germline + somatic mutations (run using tumor only)
-#' @param pcgr_config list with germline filter parameters
+#' @param pcgr_config list with PCGR configuration parameters
 #' @return sample_calls filtered call set
 #'
 #'
@@ -25,22 +25,23 @@ filter_no_control_calls <- function(sample_calls_df, sample_name = NULL, pcgr_co
   noncoding_filter_n_remain <- unfiltered_n
   sample_calls <- sample_calls_df
 
-  sample_calls$dbsnp_nonclinical <- NA
+  sample_calls$dbsnp_germline <- FALSE
   if(nrow(sample_calls[!is.na(sample_calls$DBSNPRSID),]) > 0){
-    sample_calls[!is.na(sample_calls$DBSNPRSID),]$dbsnp_nonclinical <- 'dbsnp_nonclinical'
+    sample_calls[!is.na(sample_calls$DBSNPRSID),]$dbsnp_germline <- TRUE
   }
-  if(nrow(sample_calls[sample_calls$dbsnp_nonclinical == 'dbsnp_nonclinical' & !is.na(sample_calls$DOCM_DISEASE),]) > 0){
-    sample_calls[sample_calls$dbsnp_nonclinical == 'dbsnp_nonclinical' & !is.na(sample_calls$DOCM_DISEASE),]$dbsnp_nonclinical <- 'docm_clinical'
+  if(nrow(sample_calls[!is.na(sample_calls$dbsnp_germline) & sample_calls$dbsnp_germline == TRUE & !is.na(sample_calls$DOCM_DISEASE),]) > 0){
+    sample_calls[!is.na(sample_calls$dbsnp_germline) & sample_calls$dbsnp_germline == TRUE & !is.na(sample_calls$DOCM_DISEASE),]$dbsnp_germline <- FALSE
   }
-  if(nrow(sample_calls[sample_calls$dbsnp_nonclinical == 'dbsnp_nonclinical' & (!is.na(sample_calls$CLINVAR_MSID) & stringr::str_detect(sample_calls$CLINVAR_VARIANT_ORIGIN,"somatic")),]) > 0){
-    sample_calls[sample_calls$dbsnp_nonclinical == 'dbsnp_nonclinical' & (!is.na(sample_calls$CLINVAR_MSID) & stringr::str_detect(sample_calls$CLINVAR_VARIANT_ORIGIN,"somatic")),]$dbsnp_nonclinical <- 'nondocm_clinvar_clinical'
+  if(nrow(sample_calls[!is.na(sample_calls$dbsnp_germline) & sample_calls$dbsnp_germline == TRUE & (!is.na(sample_calls$CLINVAR_MSID) & !is.na(sample_calls$CLINVAR_VARIANT_ORIGIN) & stringr::str_detect(sample_calls$CLINVAR_VARIANT_ORIGIN,"somatic")),]) > 0){
+    sample_calls[!is.na(sample_calls$dbsnp_germline) & sample_calls$dbsnp_germline == TRUE & (!is.na(sample_calls$CLINVAR_MSID) & !is.na(sample_calls$CLINVAR_VARIANT_ORIGIN) & stringr::str_detect(sample_calls$CLINVAR_VARIANT_ORIGIN,"somatic")),]$dbsnp_germline <- FALSE
   }
-  sample_calls$known_tcga <- NA
+
+  sample_calls$known_tcga <- FALSE
   if(nrow(sample_calls[!is.na(sample_calls$TCGA_FREQUENCY),]) > 0){
-    sample_calls[!is.na(sample_calls$TCGA_FREQUENCY),]$known_tcga <- 'tcga_keep'
+    sample_calls[!is.na(sample_calls$TCGA_FREQUENCY),]$known_tcga <- TRUE
   }
   if(nrow(sample_calls[!is.na(sample_calls$TCGA_PANCANCER_COUNT) & sample_calls$TCGA_PANCANCER_COUNT < pcgr_config$tumor_only$tcga_recurrence,]) > 0){
-    sample_calls[!is.na(sample_calls$TCGA_PANCANCER_COUNT) & sample_calls$TCGA_PANCANCER_COUNT < pcgr_config$tumor_only$tcga_recurrence,]$known_tcga <- 'tcga_too_low_recurrence'
+    sample_calls[!is.na(sample_calls$TCGA_PANCANCER_COUNT) & sample_calls$TCGA_PANCANCER_COUNT < pcgr_config$tumor_only$tcga_recurrence,]$known_tcga <- FALSE
   }
 
   rlogging::message(paste0('Total sample calls (', sample_name,'): ',nrow(sample_calls)))
@@ -65,12 +66,14 @@ filter_no_control_calls <- function(sample_calls_df, sample_name = NULL, pcgr_co
 
     if(pcgr_config$tumor_only$keep_known_tcga == TRUE){
       rlogging::message(paste0('Excluding non-clinically associated dbSNP variants (dbSNP - not recorded as somatic in DoCM/ClinVar, and not in TCGA with recurrence >= ',pcgr_config$tumor_only$tcga_recurrence,')'))
-      sample_calls <- dplyr::filter(sample_calls, !(dbsnp_nonclinical == 'dbsnp_nonclinical' & known_tcga != 'tcga_keep') | is.na(dbsnp_nonclinical))
+      sample_calls <- dplyr::filter(sample_calls, dbsnp_germline == FALSE | (dbsnp_germline == TRUE & known_tcga == TRUE))
+      #sample_calls <- dplyr::filter(sample_calls, !(dbsnp_nonclinical == 'dbsnp_nonclinical' & (!is.na(known_tcga) & known_tcga == 'tcga_too_low_recurrence')) | is.na(dbsnp_nonclinical))
       rlogging::message(paste0('Total sample calls remaining: ', nrow(sample_calls)))
     }
     else{
       rlogging::message('Excluding non-clinically associated dbSNP variants (dbSNP - not recorded as somatic in DoCM/ClinVar)')
-      sample_calls <- dplyr::filter(sample_calls, is.na(dbsnp_nonclinical) | dbsnp_nonclinical != 'dbsnp_nonclinical')
+      sample_calls <- dplyr::filter(sample_calls, dbsnp_germline == FALSE)
+      #sample_calls <- dplyr::filter(sample_calls, is.na(dbsnp_nonclinical) | dbsnp_nonclinical != 'dbsnp_nonclinical')
       rlogging::message(paste0('Total sample calls remaining: ', nrow(sample_calls)))
     }
 
@@ -213,6 +216,7 @@ tier_to_maf <- function(tier_df){
   maf_df$Amino_Acid_Change <- maf_df$PROTEIN_CHANGE
 
   maf_df$Variant_Classification <- character(nrow(maf_df))
+  maf_df <- dplyr::filter(maf_df, !is.na(CONSEQUENCE))
   if(nrow(maf_df[stringr::str_detect(maf_df$CONSEQUENCE,"^(splice_acceptor_variant|splice_donor_variant|transcript_ablation|exon_loss_variant)"),]) > 0){
     maf_df[stringr::str_detect(maf_df$CONSEQUENCE,"^(splice_acceptor_variant|splice_donor_variant|transcript_ablation|exon_loss_variant)"),]$Variant_Classification <- 'Splice_Site'
   }
@@ -222,7 +226,7 @@ tier_to_maf <- function(tier_df){
   if(nrow(maf_df[stringr::str_detect(maf_df$CONSEQUENCE,"frameshift_variant") & maf_df$VARIANT_CLASS == 'deletion',]) > 0){
     maf_df[stringr::str_detect(maf_df$CONSEQUENCE,"frameshift_variant") & maf_df$VARIANT_CLASS == 'deletion',]$Variant_Classification <- 'Frame_Shift_Del'
   }
-  if(nrow( maf_df[stringr::str_detect(maf_df$CONSEQUENCE,"frameshift_variant") & maf_df$VARIANT_CLASS == 'insertion',]) > 0){
+  if(nrow(maf_df[stringr::str_detect(maf_df$CONSEQUENCE,"frameshift_variant") & maf_df$VARIANT_CLASS == 'insertion',]) > 0){
     maf_df[stringr::str_detect(maf_df$CONSEQUENCE,"frameshift_variant") & maf_df$VARIANT_CLASS == 'insertion',]$Variant_Classification <- 'Frame_Shift_Ins'
   }
   if(nrow(maf_df[stringr::str_detect(maf_df$CONSEQUENCE,"stop_lost"),]) > 0){
@@ -290,7 +294,7 @@ tier_to_maf <- function(tier_df){
 
 generate_report <- function(project_directory, query_vcf, pcgr_data, sample_name = 'SampleX',configuration_file = NULL, cna_segments_tsv = NULL, pcgr_version = '0.5.0'){
 
-  report_data <- list(tier1_report = FALSE, tier2_report = FALSE, tier3_report = FALSE, tier4_report = FALSE, tier5_report = FALSE, msi_report = FALSE, missing_msi_data = FALSE, signature_report = FALSE, cna_report_oncogene_gain = FALSE, cna_report_tsgene_loss = FALSE, cna_plot = FALSE, cna_report_biomarkers = FALSE, cna_report_segments = FALSE, missing_signature_data = FALSE)
+  report_data <- list(tier1_report = FALSE, tier2_report = FALSE, tier3_report = FALSE, tier4_report = FALSE, tier5_report = FALSE, msi_report = FALSE, missing_msi_data = FALSE, signature_report = FALSE, cna_report_oncogene_gain = FALSE, cna_report_tsgene_loss = FALSE, cna_plot = FALSE, cna_report_biomarkers = FALSE, cna_report_segments = FALSE, missing_signature_data = FALSE, pcgr_config = NULL)
 
   tier_tsv_unfiltered_fname <- paste0(project_directory, '/',sample_name,'.pcgr.snvs_indels.tiers.unfiltered.tsv')
   tier_tsv_fname <- paste0(project_directory, '/',sample_name,'.pcgr.snvs_indels.tiers.tsv')
@@ -303,7 +307,6 @@ generate_report <- function(project_directory, query_vcf, pcgr_data, sample_name
   if(!is.null(configuration_file)){
     if(configr::is.toml.file(configuration_file)){
       pcgr_config <- RcppTOML::parseTOML(configuration_file, fromFile = T)
-      eval_tumor_only <- pcgr_config$tumor_only$vcf_tumor_only
     }
   }
 
@@ -314,6 +317,7 @@ generate_report <- function(project_directory, query_vcf, pcgr_data, sample_name
     else{
       if(!is.null(pcgr_config) & query_vcf != 'None'){
         if(pcgr_config$tumor_only$vcf_tumor_only == TRUE){
+          eval_tumor_only <- TRUE
           sample_calls_unfiltered <- pcgrr::get_calls(query_vcf, pcgr_data, sample_id = sample_name, tumor_dp_tag = pcgr_config$allelic_support$tumor_dp_tag , tumor_af_tag = pcgr_config$allelic_support$tumor_af_tag, normal_dp_tag =  pcgr_config$allelic_support$normal_dp_tag, normal_af_tag = pcgr_config$allelic_support$normal_af_tag, call_conf_tag = pcgr_config$allelic_support$call_conf_tag)
           filtered_callset <- pcgrr::filter_no_control_calls(sample_calls_unfiltered, sample_name = sample_name, pcgr_config = pcgr_config)
 
@@ -361,6 +365,7 @@ generate_report <- function(project_directory, query_vcf, pcgr_data, sample_name
           report_data <- pcgrr::generate_report_data(sample_calls, pcgr_data = pcgr_data, sample_name = sample_name, minimum_n_signature_analysis = pcgr_config$mutational_signatures$mutsignatures_mutation_limit, signature_normalization_method = pcgr_config$mutational_signatures$mutsignatures_normalization, signatures_limit = pcgr_config$mutational_signatures$mutsignatures_signature_limit, predict_MSI = pcgr_config$msi$msi, identify_msigs = pcgr_config$mutational_signatures$mutsignatures)
           report_data$sample_name <- sample_name
           report_data$vcf_run_mode <- 'tumor vs. control'
+          report_data$pcgr_config <- pcgr_config
 
           if(!is.null(report_data$tsv_variants)){
             write.table(report_data$tsv_variants,file=tier_tsv_fname, sep="\t",col.names = T,row.names = F,quote = F)
@@ -384,6 +389,12 @@ generate_report <- function(project_directory, query_vcf, pcgr_data, sample_name
       }
     }
   }
+  else{
+    report_data$pcgr_config <- pcgr_config
+    report_data$sample_name <- sample_name
+  }
+
+
 
   report_data$cna_data <- list(ranked_segments = data.frame(), oncogene_amplified = data.frame(), tsgene_homozygous_deletion = data.frame(),cna_df_for_print = data.frame(), cna_biomarkers = data.frame(), cna_biomarker_segments = data.frame())
 
@@ -394,7 +405,7 @@ generate_report <- function(project_directory, query_vcf, pcgr_data, sample_name
       report_data$cna_report_biomarkers <- TRUE
       report_data$cna_report_segments <- TRUE
 
-      report_data$cna_data <- pcgrr::cna_segment_annotation(cna_segments_tsv, pcgr_config$cna$logR_gain, pcgr_config$cna$logR_homdel, pcgr_data)
+      report_data$cna_data <- pcgrr::cna_segment_annotation(cna_segments_tsv, report_data$pcgr_config$cna$logR_gain, report_data$pcgr_config$cna$logR_homdel, pcgr_data)
       if(nrow(report_data$cna_data$cna_df_for_print) > 0){
         write.table(report_data$cna_data$cna_df_for_print,file=cna_tsv_fname,col.names = T,row.names = F,quote=F,sep="\t")
         gzip_command <- paste0('gzip -f ',cna_tsv_fname)
@@ -418,12 +429,12 @@ generate_report <- function(project_directory, query_vcf, pcgr_data, sample_name
   eval_msi_report <- report_data$msi_report
   eval_missing_msi_data <- report_data$missing_msi_data
 
-  if(pcgr_config$other$list_noncoding == FALSE){
+  if(report_data$pcgr_config$other$list_noncoding == FALSE){
     eval_tier5 <- FALSE
   }
 
 
-  rmarkdown::render(system.file("templates","report.Rmd", package="pcgrr"), output_file = paste0(sample_name,'.pcgr.html'), output_dir = project_directory, intermediates_dir = project_directory, params = list(logR_gain = pcgr_config$cna$logR_gain, logR_homdel = pcgr_config$cna$logR_homdel, tier1_report = report_data$tier1_report, tier2_report = report_data$tier2_report, tier3_report = report_data$tier3_report, tier4_report = report_data$tier4_report, tier5_report = report_data$tier5_report, msi_report = report_data$msi_report, missing_msi_data = report_data$missing_msi_data, cna_report_tsgene_loss = report_data$cna_report_tsgene_loss, cna_report_oncogene_gain = report_data$cna_report_oncogene_gain, cna_report_biomarkers = report_data$cna_report_biomarkers, cna_report_segments = report_data$cna_report_segments, signature_report = report_data$signature_report, missing_signature_data = report_data$missing_signature_data), quiet=T)
+  rmarkdown::render(system.file("templates","report.Rmd", package="pcgrr"), output_file = paste0(sample_name,'.pcgr.html'), output_dir = project_directory, intermediates_dir = project_directory, params = list(logR_gain = report_data$pcgr_config$cna$logR_gain, logR_homdel = report_data$pcgr_config$cna$logR_homdel, tier1_report = report_data$tier1_report, tier2_report = report_data$tier2_report, tier3_report = report_data$tier3_report, tier4_report = report_data$tier4_report, tier5_report = report_data$tier5_report, msi_report = report_data$msi_report, missing_msi_data = report_data$missing_msi_data, cna_report_tsgene_loss = report_data$cna_report_tsgene_loss, cna_report_oncogene_gain = report_data$cna_report_oncogene_gain, cna_report_biomarkers = report_data$cna_report_biomarkers, cna_report_segments = report_data$cna_report_segments, signature_report = report_data$signature_report, missing_signature_data = report_data$missing_signature_data), quiet=T)
 
 }
 
@@ -604,8 +615,8 @@ generate_report_data <- function(sample_calls, pcgr_data, sample_name = NULL,  m
 
     if(identify_msigs == TRUE){
       if(any(grepl(paste0("VARIANT_CLASS$"),names(sample_calls)))){
-        if(nrow(sample_calls[sample_calls$VARIANT_CLASS == 'SNV',]) >= minimum_n_signature_analysis){
-          signature_call_set <- sample_calls[sample_calls$VARIANT_CLASS == 'SNV',]
+        if(nrow(sample_calls[!is.na(sample_calls$VARIANT_CLASS) & sample_calls$VARIANT_CLASS == 'SNV',]) >= minimum_n_signature_analysis){
+          signature_call_set <- sample_calls[!is.na(sample_calls$VARIANT_CLASS) & sample_calls$VARIANT_CLASS == 'SNV',]
           signature_call_set <- dplyr::filter(signature_call_set, CHROM != 'MT')
           signature_call_set$VCF_SAMPLE_ID <- sample_name
           signature_call_set <- dplyr::select(signature_call_set, CHROM, POS, REF, ALT, VCF_SAMPLE_ID)
@@ -615,8 +626,8 @@ generate_report_data <- function(sample_calls, pcgr_data, sample_name = NULL,  m
 
         }
         else{
-          if(nrow(sample_calls[sample_calls$VARIANT_CLASS == 'SNV',]) > 0){
-            signature_call_set <- sample_calls[sample_calls$VARIANT_CLASS == 'SNV',]
+          if(nrow(sample_calls[!is.na(sample_calls$VARIANT_CLASS) & sample_calls$VARIANT_CLASS == 'SNV',]) > 0){
+            signature_call_set <- sample_calls[!is.na(sample_calls$VARIANT_CLASS) & sample_calls$VARIANT_CLASS == 'SNV',]
             signature_call_set <- dplyr::filter(signature_call_set, CHROM != 'MT')
           }
           rlogging::message(paste0("Too few variants (n = ",nrow(signature_call_set),") for reconstruction of mutational signatures by deconstructSigs, limit set to ", minimum_n_signature_analysis))
@@ -1272,8 +1283,8 @@ add_swissprot_feature_descriptions <- function(vcf_data_df, pcgr_data){
     feature_df <- dplyr::filter(feature_df, !is.na(PF))
     feature_df <- as.data.frame(dplyr::group_by(feature_df, VAR_ID) %>% dplyr::summarise(PROTEIN_FEATURE = paste(PF, collapse=", ")))
     if(nrow(feature_df) > 0){
-      if(nrow(feature_df[feature_df$PROTEIN_FEATURE == "NA",]) > 0){
-        feature_df[feature_df$PROTEIN_FEATURE == "NA",]$PROTEIN_FEATURE <- NA
+      if(nrow(feature_df[!is.na(feature_df$PROTEIN_FEATURE) & feature_df$PROTEIN_FEATURE == "NA",]) > 0){
+        feature_df[!is.na(feature_df$PROTEIN_FEATURE) & feature_df$PROTEIN_FEATURE == "NA",]$PROTEIN_FEATURE <- NA
       }
       vcf_data_df <- dplyr::left_join(dplyr::select(vcf_data_df,-UNIPROT_FEATURE),feature_df, by=c("VAR_ID" = "VAR_ID"))
     }
@@ -1312,13 +1323,13 @@ get_calls <- function(vcf_gz_file, pcgr_data, sample_id = NULL, tumor_dp_tag = '
     vcf_data_df$VCF_SAMPLE_ID <- sample_id
   }
   rlogging::message(paste0("Number of PASS variants: ",nrow(vcf_data_df)))
-  rlogging::message(paste0("Number of non-PASS variants: ",n_all_unfiltered_calls - nrow(vcf_data_df)))
-  rlogging::message("Now considering PASS variants only")
+  #rlogging::message(paste0("Number of non-PASS variants: ",n_all_unfiltered_calls - nrow(vcf_data_df)))
+  #rlogging::message("Now considering PASS variants only")
   if(any(grepl(paste0("VARIANT_CLASS$"),names(vcf_data_df)))){
-    n_snvs <- nrow(vcf_data_df[vcf_data_df$VARIANT_CLASS == 'SNV',])
-    n_deletions <- nrow(vcf_data_df[vcf_data_df$VARIANT_CLASS == 'deletion',])
-    n_insertions <- nrow(vcf_data_df[vcf_data_df$VARIANT_CLASS == 'insertion',])
-    n_substitutions <- nrow(vcf_data_df[vcf_data_df$VARIANT_CLASS == 'substitution',])
+    n_snvs <- nrow(vcf_data_df[!is.na(vcf_data_df$VARIANT_CLASS) & vcf_data_df$VARIANT_CLASS == 'SNV',])
+    n_deletions <- nrow(vcf_data_df[!is.na(vcf_data_df$VARIANT_CLASS) & vcf_data_df$VARIANT_CLASS == 'deletion',])
+    n_insertions <- nrow(vcf_data_df[!is.na(vcf_data_df$VARIANT_CLASS) & vcf_data_df$VARIANT_CLASS == 'insertion',])
+    n_substitutions <- nrow(vcf_data_df[!is.na(vcf_data_df$VARIANT_CLASS) & vcf_data_df$VARIANT_CLASS == 'substitution',])
     rlogging::message(paste0("Number of SNVs: ",n_snvs))
     rlogging::message(paste0("Number of deletions: ",n_deletions))
     rlogging::message(paste0("Number of insertions: ",n_insertions))

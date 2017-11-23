@@ -1,5 +1,5 @@
 ---
-title: "Cancer genome sequencing report for precision oncology - `r sample_name`"
+title: "Cancer genome sequencing report for precision oncology - `r report_data$sample_name`"
 date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
 bibliography: bibliography.bib
 nocite: |
