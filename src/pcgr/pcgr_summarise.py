@@ -188,7 +188,7 @@ def extend_vcf_annotations(query_vcf, pcgr_directory):
    
    for tag in pcgr_vcf_infotags_meta:
       vcf.add_info_to_header({'ID': tag, 'Description': str(pcgr_vcf_infotags_meta[tag]['description']),'Type':str(pcgr_vcf_infotags_meta[tag]['type']), 'Number': str(pcgr_vcf_infotags_meta[tag]['number'])})
-   vcf.add_info_to_header({'ID':'EFFECT_PREDICTIONS', 'Description':'test','Type':'String', 'Number':'.'})
+   vcf.add_info_to_header({'ID':'EFFECT_PREDICTIONS', 'Description':'Variant effect predictions from different algorithms, as provided by dbNSFP','Type':'String', 'Number':'.'})
    
    w = Writer(out_vcf, vcf)
    vcf_content = []

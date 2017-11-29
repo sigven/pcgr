@@ -113,7 +113,7 @@ def check_existing_vcf_info_tags(input_vcf, pcgr_directory, logger):
    If any coinciding tags, an error will be returned
    """
    
-   vep_infotags_desc = pcgrutils.read_infotag_file(os.path.join(pcgr_directory,'data','vep_infotags.tsv'))
+   #vep_infotags_desc = pcgrutils.read_infotag_file(os.path.join(pcgr_directory,'data','vep_infotags.tsv'))
    pcgr_infotags_desc = pcgrutils.read_infotag_file(os.path.join(pcgr_directory,'data','pcgr_infotags.tsv'))
 
    vcfanno_tags = {}
@@ -136,7 +136,10 @@ def check_existing_vcf_info_tags(input_vcf, pcgr_directory, logger):
       header_element = e.info()
       if 'ID' in header_element.keys() and 'HeaderType' in header_element.keys():
          if header_element['HeaderType'] == 'INFO':
-            if header_element['ID'] in vep_infotags_desc.keys() or header_element['ID'] in pcgr_infotags_desc.keys() or header_element['ID'] in vcfanno_tags.keys() or header_element['ID'] == 'EFFECT_PREDICTIONS':
+            if header_element['ID'] in pcgr_infotags_desc.keys() or header_element['ID'] in vcfanno_tags.keys() or header_element['ID'] == 'EFFECT_PREDICTIONS':
+               err_msg = 'INFO tag ' + str(header_element['ID']) + ' in the query VCF coincides with a VCF annotation tag produced by PCGR - please remove or rename this tag in your query VCF'
+               return pcgr_error_message(err_msg, logger)
+            if header_element['ID'] == 'DP_TUMOR' or header_element['ID'] == 'AF_TUMOR' or header_element['ID'] == 'AF_NORMAL' or header_element['ID'] == 'DP_NORMAL':
                err_msg = 'INFO tag ' + str(header_element['ID']) + ' in the query VCF coincides with a VCF annotation tag produced by PCGR - please remove or rename this tag in your query VCF'
                return pcgr_error_message(err_msg, logger)
    

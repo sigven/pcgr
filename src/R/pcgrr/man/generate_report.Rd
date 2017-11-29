@@ -4,9 +4,9 @@
 \alias{generate_report}
 \title{Function that generates cancer genome report}
 \usage{
-generate_report(project_directory, query_vcf, pcgr_data,
-  sample_name = "SampleX", configuration_file = NULL,
-  cna_segments_tsv = NULL, pcgr_version = "0.5.0")
+generate_report(project_directory, query_vcf, pcgr_data, pcgr_config = NULL,
+  sample_name = "SampleX", cna_segments_tsv = NULL,
+  pcgr_version = "0.5.2")
 }
 \arguments{
 \item{project_directory}{name of project directory}
@@ -17,11 +17,13 @@ generate_report(project_directory, query_vcf, pcgr_data,
 
 \item{sample_name}{sample identifier}
 
-\item{configuration_file}{Configuration file (TOML) for germline variant exclusion criteria (tumor_only mode)}
-
 \item{cna_segments_tsv}{name of CNA segments file (tab-separated values)}
 
 \item{pcgr_version}{PCGR software version}
+
+\item{pcg_config}{Object with PCGR configuration parameters}
+
+\item{configuration_file}{Configuration file (TOML) for germline variant exclusion criteria (tumor_only mode)}
 }
 \value{
 p

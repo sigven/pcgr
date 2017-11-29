@@ -11,7 +11,7 @@ import getpass
 import platform
 import toml
 
-version = '0.5.2'
+version = '0.5.3'
 
 def __main__():
    
@@ -262,7 +262,9 @@ def verify_input_files(input_vcf, input_cna, configuration_file, pcgr_config_opt
       version_check = 'PCGR_DB_VERSION = 20171117'
       if version_check in line:
          compliant_data_bundle = 1
-         
+   
+   f_rel_not.close()
+    
    if compliant_data_bundle == 0:
       err_msg = 'The PCGR data bundle is not compliant with the software version - please download the latest software and data bundle (see https://github.com/sigven/pcgr for instructions)'
       pcgr_error_message(err_msg,logger)

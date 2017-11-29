@@ -27,9 +27,9 @@ Example reports
 ~~~~~~~~~~~~~~~
 
 -  `Report for a breast tumor sample
-   (TCGA) <http://folk.uio.no/sigven/tumor_sample.BRCA.0.5.2.pcgr.html>`__
+   (TCGA) <http://folk.uio.no/sigven/tumor_sample.BRCA.0.5.3.pcgr.html>`__
 -  `Report for a colon adenocarcinoma sample
-   (TCGA) <http://folk.uio.no/sigven/tumor_sample.COAD.0.5.2.pcgr.html>`__
+   (TCGA) <http://folk.uio.no/sigven/tumor_sample.COAD.0.5.3.pcgr.html>`__
 
 Why use PCGR?
 ~~~~~~~~~~~~~

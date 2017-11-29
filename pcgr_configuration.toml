@@ -1,0 +1,77 @@
+# PCGR configuration options (TOML).
+
+[tumor_only]
+# If input VCF contains mix of germline/somatic (variants called with no matching control, i.e. tumor-only) set vcf_tumor_only to true
+vcf_tumor_only = false
+
+# if vcf_tumor_only = true, remove variants (SNVs/InDels) with minor allele frequency above the following population-specific thresholds
+# 1000 Genomes Project - WGS data
+maf_onekg_eur = 0.01
+maf_onekg_amr = 0.01
+maf_onekg_afr = 0.01
+maf_onekg_sas = 0.01
+maf_onekg_eas = 0.01
+maf_onekg_global = 0.01
+
+# remove variants with minor allele frequency above the following population-specific thresholds
+# gnomAD - WES data
+maf_gnomad_nfe = 0.01
+maf_gnomad_amr = 0.01
+maf_gnomad_afr = 0.01
+maf_gnomad_sas = 0.01
+maf_gnomad_eas = 0.01
+maf_gnomad_fin = 0.01
+maf_gnomad_oth = 0.01
+maf_gnomad_global = 0.01
+
+# exclude variants found in dbSNP (only those not that are not found
+# clinically related and somatic in ClinVar/DoCM)
+exclude_dbsnp_nonclinical = true
+
+# in variant exclusion from dbSNP, set whether those found in TCGA should be kept (at
+# desired recurrence level) E.g. 'keep_known_tcga = true' and 'tcga_recurrence = 2' keeps
+# all TCGA variants (that intersect dbSNP_nonclinical) found in at least two samples
+keep_known_tcga = true
+tcga_recurrence = 2
+
+## exclude all non protein-coding variants
+exclude_noncoding = true
+
+# set VCF INFO columns (tags) that contains tumor sequencing depth at variant
+# site (tumor_dp_tag), tumor variant allelic fraction (tumor_af_tag) etc.
+[allelic_support]
+tumor_dp_tag = "_na"
+tumor_af_tag = "_na"
+normal_dp_tag = "_na"
+normal_af_tag = "_na"
+call_conf_tag = "_na"
+
+[mutational_burden]
+# size of coding target region in megabases
+target_size_mb = 40
+
+[cna]
+# thresholds for determination of copy number gains and homozygous deletions
+logR_gain = 0.8
+logR_homdel = -0.8
+
+[msi]
+msi = true
+
+[mutational_signatures]
+# Identify relative contribution of 30 known mutational signatures (COSMIC) through the deconstructSigs framework
+mutsignatures = true
+# deconstructSigs option: number of mutational signatures to limit the search to ('signatures.limit' in whichSignatures)
+mutsignatures_signature_limit = 5
+# deconstructSigs option: type of trimer count normalization for inference of known mutational signatures, see explanation at https://github.com/raerose01/deconstructSigs"
+# options = 'default', 'exome', 'genome', 'exome2genome'
+# NOTE: If your data (VCF) is from exome sequencing, 'default' or 'exome2genome' should be used. See https://github.com/raerose01/deconstructSigs/issues/2
+mutsignatures_normalization = "default"
+# Require a minimum number of mutations for signature estimation
+mutsignatures_mutation_limit = 100
+
+[other]
+list_noncoding = true
+n_vcfanno_proc = 4
+n_vep_forks = 4
+vep_skip_intergenic = false

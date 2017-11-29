@@ -284,6 +284,7 @@ tier_to_maf <- function(tier_df){
 #' @param project_directory name of project directory
 #' @param query_vcf name of VCF file with annotated query SNVs/InDels
 #' @param pcgr_data List of data frames with PCGR data annotations
+#' @param pcg_config Object with PCGR configuration parameters
 #' @param cna_segments_tsv name of CNA segments file (tab-separated values)
 #' @param sample_name sample identifier
 #' @param configuration_file Configuration file (TOML) for germline variant exclusion criteria (tumor_only mode)
@@ -292,8 +293,7 @@ tier_to_maf <- function(tier_df){
 #' @return p
 #'
 
-generate_report <- function(project_directory, query_vcf, pcgr_data, sample_name = 'SampleX',configuration_file = NULL, cna_segments_tsv = NULL, pcgr_version = '0.5.0'){
-
+generate_report <- function(project_directory, query_vcf, pcgr_data, pcgr_config = NULL, sample_name = 'SampleX',cna_segments_tsv = NULL, pcgr_version = '0.5.2'){
   report_data <- list(tier1_report = FALSE, tier2_report = FALSE, tier3_report = FALSE, tier4_report = FALSE, tier5_report = FALSE, msi_report = FALSE, missing_msi_data = FALSE, signature_report = FALSE, cna_report_oncogene_gain = FALSE, cna_report_tsgene_loss = FALSE, cna_plot = FALSE, cna_report_biomarkers = FALSE, cna_report_segments = FALSE, missing_signature_data = FALSE, pcgr_config = NULL)
 
   tier_tsv_unfiltered_fname <- paste0(project_directory, '/',sample_name,'.pcgr.snvs_indels.tiers.unfiltered.tsv')
@@ -302,13 +302,6 @@ generate_report <- function(project_directory, query_vcf, pcgr_data, sample_name
   biomarker_tsv_fname <- paste0(project_directory, '/',sample_name,'.pcgr.snvs_indels.biomarkers.tsv')
   cna_tsv_fname <- paste0(project_directory, '/',sample_name,'.pcgr.cna_segments.tsv')
   maf_fname <- paste0(project_directory, '/',sample_name,'.pcgr.maf')
-
-  pcgr_config <- NULL
-  if(!is.null(configuration_file)){
-    if(configr::is.toml.file(configuration_file)){
-      pcgr_config <- RcppTOML::parseTOML(configuration_file, fromFile = T)
-    }
-  }
 
   if(query_vcf != 'None'){
     if(!file.exists(query_vcf) | file.size(query_vcf) == 0){
@@ -1249,6 +1242,9 @@ add_read_support <- function(vcf_data_df,tumor_dp_tag = '_na', tumor_af_tag = '_
     call_conf_tag <- stringr::str_replace_all(call_conf_tag,"-",".")
     if(call_conf_tag %in% colnames(vcf_data_df)){
       vcf_data_df[,'CALL_CONFIDENCE'] <- as.character(vcf_data_df[,call_conf_tag])
+    }
+    else{
+      vcf_data_df$CALL_CONFIDENCE <- NA
     }
   }
   else{
