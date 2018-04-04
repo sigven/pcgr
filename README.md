@@ -7,6 +7,18 @@ The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for
 ![PCGR overview](PCGR_workflow.png)
 
 ### News
+* _April 4th 2018_: **Coming soon, 0.6.0**:
+   * Updated data sources
+   * Enabling specification of tumor type of input sample
+   * New tier system for classification of variants (ACMG-like)
+   * VCF validation can be skipped
+   * Tumor DP/AF presets
+   * JSON dump of report content
+   * GRCh38 support
+   * Runs under Python3
+   * Example reports:
+   	  * [Colorectal adenocarcinoma](http://folk.uio.no/sigven/tumor_sample.COAD.pcgr_acmg.0.6.0rc.html)
+	  * [Breast adenocarcinoma](http://folk.uio.no/sigven/tumor_sample.BRCA.pcgr_acmg.0.6.0rc.html)
 * _November 29th 2017_: **0.5.3 release**
    * Fixed bug with propagation of default options
 * _November 23rd 2017_: **0.5.2 release**
@@ -23,8 +35,8 @@ The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for
 
 
 ### Example reports
-* [Report for a breast tumor sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.BRCA.0.5.3.pcgr.html)
-* [Report for a colon adenocarcinoma sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.COAD.0.5.3.pcgr.html)
+* [Report for a breast tumor sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.BRCA.0.6.0.pcgr.html)
+* [Report for a colon adenocarcinoma sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.COAD.0.6.0.pcgr.html)
 
 
 ### PCGR documentation
@@ -35,22 +47,19 @@ If you use PCGR, please cite our recent publication:
 
 Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, Ola Myklebost, and Eivind Hovig. __Personal Cancer Genome Reporter: variant interpretation report for precision oncology__ (2017). _Bioinformatics (in press)_. doi:[10.1093/bioinformatics/btx817](https://doi.org/10.1093/bioinformatics/btx817)
 
-### Annotation resources included in PCGR (v0.5.3)
+### Annotation resources included in PCGR (v0.6.0)
 
-* [VEP v90](http://www.ensembl.org/info/docs/tools/vep/index.html) - Variant Effect Predictor release 90 (GENCODE v27 as the gene reference dataset)
-* [dBNSFP v3.4](https://sites.google.com/site/jpopgen/dbNSFP) - Database of non-synonymous functional predictions (March 2017)
-* [gnomAD r1](http://gnomad.broadinstitute.org/) - Germline variant frequencies exome-wide (March 2017)
-* [dbSNP b147](http://www.ncbi.nlm.nih.gov/SNP/) - Database of short genetic variants (April 2016)
-* [1000 Genomes Project - phase3](ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/) - Germline variant frequencies genome-wide (May 2013)
-* [TCGA release 9.0](https://portal.gdc.cancer.gov/) - somatic mutations discovered across 33 tumor type cohorts (The Cancer Genome Atlas)
-* [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - Database of clinically related variants (November 2017)
+* [VEP v91](http://www.ensembl.org/info/docs/tools/vep/index.html) - Variant Effect Predictor release 91 (GENCODE v27 as the gene reference dataset)
+* [CIViC](http://civic.genome.wustl.edu) - Clinical interpretations of variants in cancer (February 26th 2018)
+* [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - Database of clinically related variants (January 2018)
 * [DoCM](http://docm.genome.wustl.edu) - Database of curated mutations (v3.2, April 2016)
-* [CIViC](http://civic.genome.wustl.edu) - Clinical interpretations of variants in cancer (November 11th 2017)
 * [CBMDB](http://www.cancergenomeinterpreter.org/biomarkers) - Cancer Biomarkers database (November 11th 2017)
 * [IntOGen catalog of driver mutations](https://www.intogen.org/downloads) - (May 2016)
 * [DisGeNET](http://www.disgenet.org) - Database of curated gene-tumor type associations (May 2017)
-* [Cancer Hotspots](http://cancerhotspots.org) - Resource for statistically significant mutations in cancer (2016)
-* [UniProt/SwissProt KnowledgeBase 2017_10](http://www.uniprot.org) - Resource on protein sequence and functional information (October 2017)
+* [Cancer Hotspots](http://cancerhotspots.org) - Resource for statistically significant mutations in cancer (v2 - 2017)
+* [dBNSFP v3.5](https://sites.google.com/site/jpopgen/dbNSFP) - Database of non-synonymous functional predictions (August 2017)
+* [TCGA release 10.1](https://portal.gdc.cancer.gov/) - somatic mutations discovered across 33 tumor type cohorts (The Cancer Genome Atlas)
+* [UniProt/SwissProt KnowledgeBase 2018_01](http://www.uniprot.org) - Resource on protein sequence and functional information (October 2017)
 * [Pfam v31](http://pfam.xfam.org) - Database of protein families and domains (March 2017)
 * [DGIdb](http://dgidb.genome.wustl.edu) - Database of targeted cancer drugs  (v3.0, September 2017)
 * [TSGene v2.0](http://bioinfo.mc.vanderbilt.edu/TSGene/) - Tumor suppressor/oncogene database (November 2015)
@@ -77,14 +86,14 @@ A local installation of Python (it has been tested with [version 2.7.13](https:/
 
 #### STEP 2: Download PCGR
 
-1. Download and unpack the [latest software release (0.5.3)](https://github.com/sigven/pcgr/releases/tag/v0.5.3)
+1. Download and unpack the [latest software release (0.6.0)](https://github.com/sigven/pcgr/releases/tag/v0.6.0)
 2. Download and unpack the data bundle (approx. 16Gb) in the PCGR directory
-   * Download [the accompanying data bundle](https://drive.google.com/file/d/1NSeMWpLVMBcCEDYpOLsuWSnKfZEaamip/) from Google Drive to `~/pcgr-X.X` (replace _X.X_ with the version number, e.g `~/pcgr-0.5.3`)
+   * Download [the accompanying data bundle](https://drive.google.com/file/d/1NSeMWpLVMBcCEDYpOLsuWSnKfZEaamip/) from Google Drive to `~/pcgr-X.X` (replace _X.X_ with the version number, e.g `~/pcgr-0.6.0`)
    * Unpack the data bundle, e.g. through the following Unix command: `gzip -dc pcgr.databundle.GRCh37.YYYYMMDD.tgz | tar xvf -`
 
     A _data/_ folder within the _pcgr-X.X_ software folder should now have been produced
-3. Pull the [PCGR Docker image (0.5.3)](https://hub.docker.com/r/sigven/pcgr/) from DockerHub (approx 4.2Gb):
-   * `docker pull sigven/pcgr:0.5.3` (PCGR annotation engine)
+3. Pull the [PCGR Docker image (0.6.0)](https://hub.docker.com/r/sigven/pcgr/) from DockerHub (approx 4.2Gb):
+   * `docker pull sigven/pcgr:0.6.0` (PCGR annotation engine)
 
 #### STEP 3: Input preprocessing
 
@@ -92,8 +101,6 @@ The PCGR workflow accepts two types of input files:
 
   * An unannotated, single-sample VCF file (>= v4.2) with called somatic variants (SNVs/InDels)
   * A copy number segment file
-
-  __NOTE: GRCh37 is currently supported as the reference genome build__
 
 PCGR can be run with either or both of the two input files present.
 
@@ -109,7 +116,7 @@ The tab-separated values file with copy number aberrations __MUST__ contain the 
 * End
 * Segment_Mean
 
-Here, _Chromosome_, _Start_, and _End_ denote the chromosomal segment (GRCh37), and __Segment_Mean__ denotes the log(2) ratio for a particular segment, which is a common output of somatic copy number alteration callers. Below shows the initial part of a copy number segment file that is formatted correctly according to PCGR's requirements:
+Here, _Chromosome_, _Start_, and _End_ denote the chromosomal segment, and __Segment_Mean__ denotes the log(2) ratio for a particular segment, which is a common output of somatic copy number alteration callers. Below shows the initial part of a copy number segment file that is formatted correctly according to PCGR's requirements:
 
     Chromosome	Start	End	Segment_Mean
     1 3218329 3550598 0.0024
@@ -117,7 +124,9 @@ Here, _Chromosome_, _Start_, and _End_ denote the chromosomal segment (GRCh37), 
     1 4593663 6433129 -1.0277
 
 
-#### STEP 4: Run example
+#### STEP 4: Configure PCGR parameters
+
+#### STEP 5: Run example
 
 A tumor sample report is generated by calling the Python script __pcgr.py__, which takes the following arguments and options:
 
@@ -130,7 +139,7 @@ A tumor sample report is generated by calling the Python script __pcgr.py__, whi
 
 	positional arguments:
 	pcgr_dir              PCGR base directory with accompanying data directory,
-					e.g. ~/pcgr-0.5.3
+					e.g. ~/pcgr-0.6.0
 	output_dir            Output directory
 	configuration_file    PCGR configuration file (TOML format)
 	sample_id             Tumor sample/cancer genome identifier - prefix for
@@ -164,9 +173,9 @@ The configuration file, formatted using [TOML](https://github.com/toml-lang/toml
 
 The _examples_ folder contain input files from two tumor samples sequenced within TCGA. It also contains a PCGR configuration file. A report for a colorectal tumor case can be generated by running the following command in your terminal window:
 
-`python pcgr.py --input_vcf ~/pcgr-0.5.3/examples/tumor_sample.COAD.vcf.gz`
-`--input_cna ~/pcgr-0.5.3/examples/tumor_sample.COAD.cna.tsv`
-` ~/pcgr-0.5.3 ~/pcgr-0.5.3/examples ~/pcgr-0.5.3/examples/pcgr_configuration_examples.toml tumor_sample.COAD`
+`python pcgr.py --input_vcf ~/pcgr-0.6.0/examples/tumor_sample.COAD.vcf.gz`
+`--input_cna ~/pcgr-0.6.0/examples/tumor_sample.COAD.cna.tsv`
+` ~/pcgr-0.6.0 ~/pcgr-0.6.0/examples ~/pcgr-0.6.0/examples/pcgr_configuration_examples.toml tumor_sample.COAD`
 
 This command will run the Docker-based PCGR workflow and produce the following output files in the _examples_ folder:
 
