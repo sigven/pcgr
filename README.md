@@ -7,7 +7,7 @@ The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for
 ![PCGR overview](PCGR_workflow.png)
 
 ### News
-* _April 4th 2018_: **Coming soon, 0.6.0**:
+* _April 4th 2018_: **Coming soon, 0.6.0rc**:
    * Updated data sources
    * Enabling specification of tumor type of input sample
    * New tier system for classification of variants (ACMG-like)
@@ -47,19 +47,19 @@ If you use PCGR, please cite our recent publication:
 
 Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, Ola Myklebost, and Eivind Hovig. __Personal Cancer Genome Reporter: variant interpretation report for precision oncology__ (2017). _Bioinformatics (in press)_. doi:[10.1093/bioinformatics/btx817](https://doi.org/10.1093/bioinformatics/btx817)
 
-### Annotation resources included in PCGR (v0.6.0)
+### Annotation resources included in PCGR (in 0.6.0rc)
 
 * [VEP v91](http://www.ensembl.org/info/docs/tools/vep/index.html) - Variant Effect Predictor release 91 (GENCODE v27 as the gene reference dataset)
-* [CIViC](http://civic.genome.wustl.edu) - Clinical interpretations of variants in cancer (February 26th 2018)
-* [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - Database of clinically related variants (January 2018)
+* [CIViC](http://civic.genome.wustl.edu) - Clinical interpretations of variants in cancer (March 19th 2018)
+* [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - Database of clinically related variants (March 2018)
 * [DoCM](http://docm.genome.wustl.edu) - Database of curated mutations (v3.2, April 2016)
-* [CBMDB](http://www.cancergenomeinterpreter.org/biomarkers) - Cancer Biomarkers database (November 11th 2017)
+* [CBMDB](http://www.cancergenomeinterpreter.org/biomarkers) - Cancer Biomarkers database (January 17th 2017)
 * [IntOGen catalog of driver mutations](https://www.intogen.org/downloads) - (May 2016)
 * [DisGeNET](http://www.disgenet.org) - Database of curated gene-tumor type associations (May 2017)
 * [Cancer Hotspots](http://cancerhotspots.org) - Resource for statistically significant mutations in cancer (v2 - 2017)
 * [dBNSFP v3.5](https://sites.google.com/site/jpopgen/dbNSFP) - Database of non-synonymous functional predictions (August 2017)
 * [TCGA release 10.1](https://portal.gdc.cancer.gov/) - somatic mutations discovered across 33 tumor type cohorts (The Cancer Genome Atlas)
-* [UniProt/SwissProt KnowledgeBase 2018_01](http://www.uniprot.org) - Resource on protein sequence and functional information (October 2017)
+* [UniProt/SwissProt KnowledgeBase 2018_03](http://www.uniprot.org) - Resource on protein sequence and functional information (March 2018)
 * [Pfam v31](http://pfam.xfam.org) - Database of protein families and domains (March 2017)
 * [DGIdb](http://dgidb.genome.wustl.edu) - Database of targeted cancer drugs  (v3.0, September 2017)
 * [TSGene v2.0](http://bioinfo.mc.vanderbilt.edu/TSGene/) - Tumor suppressor/oncogene database (November 2015)
