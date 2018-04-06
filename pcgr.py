@@ -24,7 +24,8 @@ def __main__():
    parser.add_argument('output_dir',help='Output directory')
    parser.add_argument('configuration_file',help='PCGR configuration file (TOML format)')
    parser.add_argument('sample_id',help="Tumor sample/cancer genome identifier - prefix for output files")
-   
+   parser.add_argument('--no_validate', dest="no_validate", action = "store_true")
+
    docker_image_version = 'sigven/pcgr:' + str(version)
    args = parser.parse_args()
    
@@ -49,7 +50,7 @@ def __main__():
       pcgr_error_message(err_msg,logger)
    host_directories = verify_input_files(args.input_vcf, args.input_cna, args.configuration_file, config_options, args.pcgr_dir, args.output_dir, args.sample_id, overwrite, logger)
 
-   run_pcgr(host_directories, docker_image_version, config_options, args.sample_id, version)
+   run_pcgr(host_directories, docker_image_version, config_options, args.sample_id, version, no_validate=args.no_validate)
 
 
 def read_config_options(configuration_file, pcgr_dir, logger):
@@ -62,14 +63,14 @@ def read_config_options(configuration_file, pcgr_dir, logger):
       pcgr_error_message(err_msg,logger)
    try:
       pcgr_config_options = toml.load(pcgr_configuration_file_default)
-   except IndexError,TypeError:
+   except(IndexError,TypeError):
       err_msg = 'Configuration file ' + str(configuration_file) + ' is not formatted correctly'
       pcgr_error_message(err_msg, logger)
 
    ## override with options set by the users
    try:
       toml_options = toml.load(configuration_file)
-   except IndexError,TypeError:
+   except(IndexError,TypeError):
       err_msg = 'Configuration file ' + str(configuration_file) + ' is not formatted correctly'
       pcgr_error_message(err_msg, logger)
    
@@ -78,36 +79,36 @@ def read_config_options(configuration_file, pcgr_dir, logger):
    integer_tags = ['n_vcfanno_proc','n_vep_forks','tcga_recurrence','mutsignatures_signature_limit','mutsignatures_mutation_limit']
    string_tags = ['normal_dp_tag','normal_af_tag','tumor_dp_tag','tumor_af_tag','call_conf_tag','mutsignatures_normalization']
    for section in ['tumor_only','allelic_support','mutational_burden','cna','msi','mutational_signatures','other']:
-      if toml_options.has_key(section):
+      if section in toml_options:
          for t in float_tags:
-            if toml_options[section].has_key(t):
+            if t in toml_options[section]:
                if not isinstance(toml_options[section][t],float) and not isinstance(toml_options[section][t],int):
                   err_msg = 'Configuration value ' + str(toml_options[section][t]) + ' for ' + str(t) + ' cannot be parsed properly (expecting float)'
                   pcgr_error_message(err_msg, logger)
                pcgr_config_options[section][t] = toml_options[section][t]
          for t in boolean_tags:
-            if toml_options[section].has_key(t):
+            if t in toml_options[section]:
                if not isinstance(toml_options[section][t],bool):
                   err_msg = 'Configuration value ' + str(toml_options[section][t]) + ' for ' + str(t) + ' cannot be parsed properly (expecting true/false)'
                   pcgr_error_message(err_msg, logger)
                pcgr_config_options[section][t] = int(toml_options[section][t])
          for t in integer_tags:
-            if toml_options[section].has_key(t):
+            if t in toml_options[section]:
                if not isinstance(toml_options[section][t],int):
                   err_msg = 'Configuration value ' + str(toml_options[section][t]) + ' for ' + str(t) + ' cannot be parsed properly (expecting integer)'
                   pcgr_error_message(err_msg, logger)
                pcgr_config_options[section][t] = toml_options[section][t]
          
          for t in string_tags:
-            if toml_options[section].has_key(t):
-               if not isinstance(toml_options[section][t],basestring):
+            if t in toml_options[section]:
+               if not isinstance(toml_options[section][t], str):
                   err_msg = 'Configuration value "' + str(toml_options[section][t]) + '" for ' + str(t) + ' cannot be parsed properly (expecting string)'
                   pcgr_error_message(err_msg, logger)
                normalization_options = ['default','exome','genome','exome2genome']
-               if t == 'mutsignatures_normalization' and not str(toml_options[section][t]).encode('utf-8') in normalization_options:
+               if t == 'mutsignatures_normalization' and not str(toml_options[section][t]) in normalization_options:
                   err_msg = 'Configuration value ' + str(toml_options[section][t]) + ' for ' + str(t) + ' cannot be parsed properly (expecting \'default\', \'exome\', \'genome\', or \'exome2genome\')'
                   pcgr_error_message(err_msg, logger)
-               pcgr_config_options[section][t] = str(toml_options[section][t]).encode('utf-8')
+               pcgr_config_options[section][t] = str(toml_options[section][t])
    
    ## check that msig_n is greater than zero and less than 30
    if pcgr_config_options['mutational_signatures']['mutsignatures_signature_limit'] < 0 or pcgr_config_options['mutational_signatures']['mutsignatures_signature_limit'] > 30:
@@ -288,9 +289,9 @@ def check_subprocess(command):
    try:
       output = subprocess.check_output(str(command), stderr=subprocess.STDOUT, shell=True)
       if len(output) > 0:
-         print str(output).rstrip()
+         print(str(output).rstrip())
    except subprocess.CalledProcessError as e:
-      print e.output
+      print(e.output)
       exit(0)
 
 def getlogger(logger_name):
@@ -312,7 +313,7 @@ def getlogger(logger_name):
    
    return logger
 
-def run_pcgr(host_directories, docker_image_version, config_options, sample_id, version):
+def run_pcgr(host_directories, docker_image_version, config_options, sample_id, version, no_validate=False):
    """
    Main function to run the PCGR workflow using Docker
    """
@@ -363,13 +364,13 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       
    docker_command_run2 = "docker run --rm -t -u " + str(uid) + " -v=" + str(host_directories['base_dir_host']) + ":/data -v=" + str(host_directories['output_dir_host']) + ":/workdir/output -w=/workdir " + str(docker_image_version) + " sh -c \""
    
-   
-   ## verify VCF and CNA segment file
-   logger = getlogger('pcgr-validate-input')
-   logger.info("STEP 0: Validate input data")
-   vcf_validate_command = str(docker_command_run1) + "pcgr_validate_input.py /data " + str(input_vcf_docker) + " " + str(input_cna_docker) + " " + str(input_conf_docker) + "\""
-   check_subprocess(vcf_validate_command)
-   logger.info('Finished')
+   if not no_validate:
+      # verify VCF and CNA segment file
+      logger = getlogger('pcgr-validate-input')
+      logger.info("STEP 0: Validate input data")
+      vcf_validate_command = str(docker_command_run1) + "pcgr_validate_input.py /data " + str(input_vcf_docker) + " " + str(input_cna_docker) + " " + str(input_conf_docker) + "\""
+      check_subprocess(vcf_validate_command)
+      logger.info('Finished')
    
    if not input_vcf_docker == 'None':
       
@@ -392,7 +393,7 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       vep_tabix_command = str(docker_command_run1) + "tabix -f -p vcf " + str(vep_vcf) + ".gz" + "\""
       logger = getlogger('pcgr-vep')
    
-      print
+      print()
       logger.info("STEP 1: Basic variant annotation with Variant Effect Predictor (v90, GENCODE v27, GRCh37)")
       check_subprocess(vep_main_command)
       check_subprocess(vep_sed_command)
@@ -401,7 +402,7 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       logger.info("Finished")
    
       ## vcfanno command
-      print
+      print()
       logger = getlogger('pcgr-vcfanno')
       logger.info("STEP 2: Annotation for precision oncology with pcgr-vcfanno (ClinVar, dbSNP, dbNSFP, UniProtKB, cancerhotspots.org, CiVIC, CBMDB, DoCM, TCGA, IntoGen_drivers)")
       pcgr_vcfanno_command = str(docker_command_run2) + "pcgr_vcfanno.py --num_processes "  + str(config_options['other']['n_vcfanno_proc']) + " --dbsnp --dbnsfp --docm --clinvar --civic --cbmdb --intogen_driver_mut --tcga --uniprot --cancer_hotspots --pcgr_onco_xref " + str(vep_vcf) + ".gz " + str(vep_vcfanno_vcf) + " /data\""
@@ -409,7 +410,7 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       logger.info("Finished")
    
       ## summarise command
-      print
+      print()
       logger = getlogger("pcgr-summarise")
       pcgr_summarise_command = str(docker_command_run2) + "pcgr_summarise.py " + str(vep_vcfanno_vcf) + ".gz /data\""
       logger.info("STEP 3: Cancer gene annotations with pcgr-summarise")
@@ -428,7 +429,7 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       check_subprocess(clean_command)
       #return
   
-   print
+   print()
    
    ## Generation of HTML reports for VEP/vcfanno-annotated VCF and copy number segment file
    logger = getlogger('pcgr-writer')
