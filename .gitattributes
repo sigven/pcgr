@@ -1,2 +1,2 @@
-docs/_build/html/*.html linguist-vendored
+docs/_build/html/*.html linguist-documentation
 src/R/pcgrr/inst/templates/*.bib linguist-vendored
