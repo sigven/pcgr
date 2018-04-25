@@ -1,1 +1,2 @@
-src/R/pcgrr2/inst/templates/*.bib linguist-vendored
+docs/* linguist-vendored
+src/R/pcgrr/inst/templates/*.bib linguist-vendored
