@@ -1,16 +1,16 @@
 
 ### Tier 3 - Other coding mutations in proto-oncogenes or tumor suppressor genes
 
-- A total of __`r nrow(report_data$variants_tier3_display)`__ unique, somatic variant(s) in the tumor sample are found within known proto-oncogenes or tumor suppressor genes.
+- A total of __`r nrow(pcg_report[['snv_indel']][['variant_display']][['tier3']])`__ unique, somatic variant(s) in the tumor sample are found within known proto-oncogenes or tumor suppressor genes.
 <br><br>
 
 ```{r tier3, echo=F}
 myOptions <- list(paging = F,pageLength=10, searching=T,caching=F,buttons = c('csv','excel'),dom = 'Bfrtip')
-if(nrow(report_data$variants_tier3_display) > 10){
+if(nrow(pcg_report[['snv_indel']][['variant_display']][['tier3']]) > 10){
   myOptions <- list(paging = T,pageLength=10, searching=T,caching=F,buttons = c('csv','excel'),dom = 'Bfrtip')
 }
-if(nrow(report_data$variants_tier3_display) > 0){
-  DT::datatable(report_data$variants_tier3_display, options = myOptions, escape=F, extensions = c("Buttons","Responsive"))
+if(nrow(pcg_report[['snv_indel']][['variant_display']][['tier3']]) > 0){
+  DT::datatable(pcg_report[['snv_indel']][['variant_display']][['tier3']], options = myOptions, escape=F, extensions = c("Buttons","Responsive"))
 }
 
 ```

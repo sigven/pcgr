@@ -6,44 +6,27 @@ args = commandArgs(trailingOnly=TRUE)
 suppressWarnings(suppressPackageStartupMessages(library(pcgrr)))
 suppressWarnings(suppressPackageStartupMessages(library(magrittr)))
 suppressWarnings(suppressPackageStartupMessages(library(BSgenome.Hsapiens.UCSC.hg19)))
+suppressWarnings(suppressPackageStartupMessages(library(BSgenome.Hsapiens.UCSC.hg38)))
 suppressWarnings(suppressPackageStartupMessages(library(deconstructSigs)))
 suppressWarnings(suppressPackageStartupMessages(library(randomForest)))
 suppressWarnings(suppressPackageStartupMessages(library(caret)))
 suppressWarnings(suppressPackageStartupMessages(library(RcppTOML)))
 
-
-
 dir <- as.character(args[1])
-query_vcf <- as.character(args[2])
+query_vcf2tsv <- as.character(args[2])
 query_cnv <- as.character(args[3])
 sample_name <- as.character(args[4])
 configuration_file <- as.character(args[5])
 version <- as.character(args[6])
+genome_assembly <- as.character(args[7])
 
 rlogging::SetTimeStampFormat(ts.format="%Y-%m-%d %H:%M:%S ")
 rlogging::SetLogFile(NULL)
 
-load('/data/data/rda/pcgr_data.rda')
-
-eval_tier1 <- FALSE
-eval_tier2 <- FALSE
-eval_tier3 <- FALSE
-eval_tier4 <- FALSE
-eval_tier5 <- FALSE
-eval_signature_report <- FALSE
-eval_missing_signature_data <- FALSE
-eval_cna_segments <- FALSE
-eval_cna_plot <- FALSE
-eval_cna_loss <- FALSE
-eval_cna_gain <- FALSE
-eval_cna_biomarker <- FALSE
-eval_msi_report <- FALSE
-eval_missing_msi_data <- FALSE
-eval_tumor_only <- FALSE
-
+load(paste0('/data/data/',genome_assembly,'/rda/pcgr_data.rda'))
 
 pcgr_config <- NULL
-default_configuration_file <- '/data/data/pcgr_configuration_default.toml'
+default_configuration_file <- paste0('/data/data/',genome_assembly,'/pcgr_configuration_somatic_default.toml')
 if(file.exists(default_configuration_file)){
 	pcgr_config <- RcppTOML::parseTOML(default_configuration_file, fromFile = T)
 }
@@ -60,5 +43,8 @@ for(section in names(pcgr_config)){
   }
 }
 
-
-pcgrr::generate_report(project_directory = dir, query_vcf = query_vcf, cna_segments_tsv = query_cnv, pcgr_data = pcgr_data, pcgr_config = pcgr_config, sample_name = sample_name, pcgr_version = version)
+if(pcgr_config$tier_model$tier_model == 'pcgr'){
+  pcgrr::generate_report(dir, query_vcf2tsv, pcgr_data, pcgr_config, sample_name, query_cnv, version, genome_assembly = genome_assembly)
+}else{
+  pcgrr::generate_report_acmg(dir, query_vcf2tsv, pcgr_data, pcgr_config, sample_name, query_cnv, version, genome_assembly = genome_assembly)
+}

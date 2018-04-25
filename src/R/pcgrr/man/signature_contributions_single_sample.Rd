@@ -6,7 +6,8 @@
 \usage{
 signature_contributions_single_sample(mut_data, sample_name,
   normalization_method = "default", cosmic_signatures_aetiologies = NULL,
-  signatures_limit = 6, bsg = BSgenome.Hsapiens.UCSC.hg19)
+  signature_limit = 6, skip_signatures = NULL, signature_cutoff = 0.06,
+  bsg = BSgenome.Hsapiens.UCSC.hg19)
 }
 \arguments{
 \item{mut_data}{data frame with somatic mutations (VCF_SAMPLE_ID, CHROM, POS, REF, ALT)}
@@ -15,7 +16,13 @@ signature_contributions_single_sample(mut_data, sample_name,
 
 \item{normalization_method}{metod for normalization of context counts (deconstructSigs)}
 
-\item{signatures_limit}{max number of contributing signatures}
+\item{signature_limit}{max number of contributing signatures}
+
+\item{skip_signatures}{vector of signatures that are skipped in search space, e.g. c('Signature.29','Signature.23')}
+
+\item{signature_cutoff}{discard any signature contributions with weight less than this amount}
+
+\item{bsg}{genome sequence object (BSgenome.Hsapiens.UCSC)}
 
 \item{cosmic_cancertypes_aetiologies}{list of known signaturea and associated etiologies/cancertypes}
 }

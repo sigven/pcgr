@@ -4,9 +4,8 @@
 \alias{get_calls}
 \title{Function that reads a VCF from pcgr pipeline}
 \usage{
-get_calls(vcf_gz_file, pcgr_data, sample_id = NULL, tumor_dp_tag = "_na",
-  tumor_af_tag = "_na", normal_dp_tag = "_na", normal_af_tag = "_na",
-  call_conf_tag = "_na")
+get_calls(vcf_gz_file, pcgr_data, pcgr_config, sample_id = NULL,
+  genome_assembly = "hg19")
 }
 \arguments{
 \item{vcf_gz_file}{Bgzipped VCF file}

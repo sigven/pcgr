@@ -6,7 +6,7 @@
 \usage{
 generate_report(project_directory, query_vcf, pcgr_data, pcgr_config = NULL,
   sample_name = "SampleX", cna_segments_tsv = NULL,
-  pcgr_version = "0.5.2")
+  pcgr_version = "0.6.0", genome_assembly = "grch37")
 }
 \arguments{
 \item{project_directory}{name of project directory}

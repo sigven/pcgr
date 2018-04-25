@@ -1,0 +1,43 @@
+---
+title: "Germline sequencing report - cancer predisposition - `r pcg_report$sample_name`"
+date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
+bibliography: bibliography.bib
+output: 
+  html_document:
+    fig_width: 5
+    fig_height: 4
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(echo = F,warning=FALSE, dpi=72, error=F, eval=T)
+```
+
+```{r settings_data_sources, child='predispose/settings_data_sources_predispose.Rmd'}
+```
+## Introduction
+
+This report lists __ONLY__ variants in the input VCF that are either
+
+1. Classified without conflicting interpretations in ClinVar (pathogenic/likely pathogenic/VUS), or
+2. Novel or rare in the European population (gnomAD) 
+
+Variants in the the following list of cancer predisposition genes are reported:
+
+*`r paste(sort(pcg_report[['snv_indel']][['predisposition_genes']]$symbol),collapse=", ")`*
+
+
+## Germline SNVs/InDels
+
+```{r conditional_tier1, child='predispose/tier1_predispose.Rmd', eval = pcg_report[['snv_indel']][['eval']]}
+```
+
+```{r conditional_tier2, child='predispose/tier2_predispose.Rmd', eval = pcg_report[['snv_indel']][['eval']]}
+```
+
+```{r conditional_tier3, child='predispose/tier3_predispose.Rmd', eval = pcg_report[['snv_indel']][['eval']]}
+```
+
+```{r conditional_unclassified, child='predispose/unclassified_predispose.Rmd', eval = pcg_report[['snv_indel']][['eval']]}
+```
+
+

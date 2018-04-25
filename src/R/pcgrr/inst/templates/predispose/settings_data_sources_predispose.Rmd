@@ -1,0 +1,20 @@
+## Settings & annotation sources
+
+The annotated variants are based on the following underlying tools and knowledge resources:
+
+```{r list_resources, echo=F,results='asis'}
+for(n in names(pcg_report$pcgr_db_release)){
+  if(n == 'vep' | n == 'gencode' | n == 'clinvar' | n == 'dbnsfp' | n == 'pfam' | n == 'gnomad' | n == 'dbsnp' | n == 'onekg' | n == 'uniprot' | n == 'disgenet' | n == 'do'){
+    s <- paste0('* [',pcg_report$pcgr_db_release[[n]]$name,'](',pcg_report$pcgr_db_release[[n]]$url,') - ',pcg_report$pcgr_db_release[[n]]$description, ' (',pcg_report$pcgr_db_release[[n]]$version,')')
+    cat(s,sep="\n")
+  }
+}
+
+```
+
+The report is generated with _[pcgr_predispose](https://github.com/sigven/pcgr_predispose)_ version `r pcg_report[['pcgr_version']]`, using the following key settings:
+
+* Genome assembly: __`r pcg_report[['genome_assembly']]`__
+* Report theme (Bootstrap): __`r pcg_report[['pcgr_config']][['visual']][['report_theme']]`__
+
+

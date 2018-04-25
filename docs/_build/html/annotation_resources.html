@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Annotation resources &mdash; Personal Cancer Genome Reporter 0.5.3 documentation</title>
+  <title>Annotation resources &mdash; Personal Cancer Genome Reporter 0.6.0 documentation</title>
   
 
   
@@ -35,8 +35,8 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Personal Cancer Genome Reporter 0.5.3 documentation" href="index.html"/>
-        <link rel="next" title="Input &amp; output" href="output.html"/>
+    <link rel="top" title="Personal Cancer Genome Reporter 0.6.0 documentation" href="index.html"/>
+        <link rel="next" title="Input" href="input.html"/>
         <link rel="prev" title="Getting started" href="getting_started.html"/> 
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.5.3
+                0.6.0
               </div>
             
           
@@ -98,14 +98,17 @@
 <li class="toctree-l2"><a class="reference internal" href="#protein-domains-functional-features">Protein domains/functional features</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#cancer-gene-knowledge-bases">Cancer gene knowledge bases</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pathway-databases">Pathway databases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#notes-on-variant-annotation-datasets">Notes on variant annotation datasets</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#genome-mapping">Genome mapping</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-quality">Data quality</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="#notes-on-variant-annotation-datasets">Notes on variant annotation datasets</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#genome-mapping">Genome mapping</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#data-quality">Data quality</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="output.html">Input &amp; output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="input.html">Input</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tier_systems.html">Tier models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CHANGELOG.html">CHANGELOG</a></li>
 </ul>
 
             
@@ -155,17 +158,17 @@
 <div class="section" id="basic-variant-consequence-annotation">
 <h2>Basic variant consequence annotation<a class="headerlink" href="#basic-variant-consequence-annotation" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><a class="reference external" href="http://www.ensembl.org/info/docs/tools/vep/index.html">VEP v90</a> -
-Variant Effect Predictor release 90 (<a class="reference external" href="https://www.gencodegenes.org/releases/27.html">GENCODE
-v27</a> as gene
+<li><a class="reference external" href="http://www.ensembl.org/info/docs/tools/vep/index.html">VEP v92</a> -
+Variant Effect Predictor release 92 (<a class="reference external" href="https://www.gencodegenes.org/releases/28.html">GENCODE
+v28</a> as gene
 reference database)</li>
 </ul>
 </div>
 <div class="section" id="insilico-predictions-of-effect-of-coding-variants">
 <h2><em>Insilico</em> predictions of effect of coding variants<a class="headerlink" href="#insilico-predictions-of-effect-of-coding-variants" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><a class="reference external" href="https://sites.google.com/site/jpopgen/dbNSFP">dBNSFP v3.4</a> -
-database of non-synonymous functional predictions (March 2017)</li>
+<li><a class="reference external" href="https://sites.google.com/site/jpopgen/dbNSFP">dBNSFP v3.5</a> -
+database of non-synonymous functional predictions (August 2017)</li>
 <li><a class="reference external" href="https://www.intogen.org/downloads">IntOGen catalogs of driver
 mutations/genes</a> - (May 2016)</li>
 </ul>
@@ -173,32 +176,33 @@ mutations/genes</a> - (May 2016)</li>
 <div class="section" id="variant-frequency-databases">
 <h2>Variant frequency databases<a class="headerlink" href="#variant-frequency-databases" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><em>COSMIC - Deprecated in 0.5.0 due to COSMIC licensing restrictions</em></li>
-<li><a class="reference external" href="http://exac.broadinstitute.org/">gnomAD r1</a> - germline variant
-frequencies exome-wide (March 2017)</li>
-<li><a class="reference external" href="http://www.ncbi.nlm.nih.gov/SNP/">dbSNP b147</a> - database of short
-genetic variants (April 2016)</li>
+<li><a class="reference external" href="http://exac.broadinstitute.org/">gnomAD r2</a> - germline variant
+frequencies exome-wide (October 2017)</li>
+<li><a class="reference external" href="http://www.ncbi.nlm.nih.gov/SNP/">dbSNP b150</a> - database of short
+genetic variants (February 2017)</li>
 <li><a class="reference external" href="ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/">1000Genomes
 phase3</a>
 - germline variant frequencies genome-wide (May 2013)</li>
 <li><a class="reference external" href="http://cancerhotspots.org">Cancer Hotspots</a> - a resource for
-statistically significant mutations in cancer (2016)</li>
-<li><a class="reference external" href="https://portal.gdc.cancer.gov/">TCGA release 9.0</a> - somatic
+statistically significant mutations in cancer (2017)</li>
+<li><a class="reference external" href="https://portal.gdc.cancer.gov/">TCGA release 10.1</a> - somatic
 mutations discovered across 33 tumor type cohorts (The Cancer Genome
 Atlas)</li>
+<li><a class="reference external" href="http://docs.icgc.org/pcawg/">ICGC-PCAWG</a> - ICGC Pancancer
+Analysis of Whole Genomes - release 26, December 7th 2017</li>
 </ul>
 </div>
 <div class="section" id="variant-databases-of-clinical-utility">
 <h2>Variant databases of clinical utility<a class="headerlink" href="#variant-databases-of-clinical-utility" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><a class="reference external" href="http://www.ncbi.nlm.nih.gov/clinvar/">ClinVar</a> - database of
-clinically related variants (November 2017)</li>
+clinically related variants (April 2018)</li>
 <li><a class="reference external" href="http://docm.genome.wustl.edu">DoCM</a> - database of curated
 mutations (v3.2, April 2016)</li>
 <li><a class="reference external" href="http://civic.genome.wustl.edu">CIViC</a> - clinical interpretations
-of variants in cancer (November 11th 2017)</li>
+of variants in cancer (April 16th 2018)</li>
 <li><a class="reference external" href="http://www.cancergenomeinterpreter.org/biomarkers">CBMDB</a> -
-Cancer BioMarkers database (November 11th 2017)</li>
+Cancer BioMarkers database (January 17th 2018)</li>
 <li><a class="reference external" href="http://dgidb.genome.wustl.edu">DGIdb</a> - database of targeted
 antineoplastic drugs (v3.0, September 2017)</li>
 </ul>
@@ -206,9 +210,9 @@ antineoplastic drugs (v3.0, September 2017)</li>
 <div class="section" id="protein-domains-functional-features">
 <h2>Protein domains/functional features<a class="headerlink" href="#protein-domains-functional-features" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><a class="reference external" href="http://www.uniprot.org">UniProt/SwissProt KnowledgeBase 2017_10</a>
-- resource on protein sequence and functional information (October
-2017)</li>
+<li><a class="reference external" href="http://www.uniprot.org">UniProt/SwissProt KnowledgeBase 2018_03</a>
+- resource on protein sequence and functional information (March
+2018)</li>
 <li><a class="reference external" href="http://pfam.xfam.org">Pfam v31</a> - database of protein families
 and domains (March 2017)</li>
 </ul>
@@ -218,8 +222,6 @@ and domains (March 2017)</li>
 <ul class="simple">
 <li><a class="reference external" href="http://bioinfo.mc.vanderbilt.edu/TSGene/">TSGene v2.0</a> - tumor
 suppressor/oncogene database (November 2015)</li>
-<li><em>Cancer Gene Census - Deprecated in 0.5.0 due to COSMIC licensing
-restrictions</em></li>
 <li><a class="reference external" href="http://www.disgenet.org">DisGeNET v5.0</a> - curated associations
 between human genes and different tumor types</li>
 </ul>
@@ -228,14 +230,13 @@ between human genes and different tumor types</li>
 <h2>Pathway databases<a class="headerlink" href="#pathway-databases" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><a class="reference external" href="http://www.genome.jp/kegg/pathway.htm">KEGG PATHWAY Database</a> -
-September 29th 2017</li>
+March 30th 2018</li>
 </ul>
 </div>
-</div>
 <div class="section" id="notes-on-variant-annotation-datasets">
-<h1>Notes on variant annotation datasets<a class="headerlink" href="#notes-on-variant-annotation-datasets" title="Permalink to this headline">¶</a></h1>
+<h2>Notes on variant annotation datasets<a class="headerlink" href="#notes-on-variant-annotation-datasets" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="genome-mapping">
-<h2>Genome mapping<a class="headerlink" href="#genome-mapping" title="Permalink to this headline">¶</a></h2>
+<h3>Genome mapping<a class="headerlink" href="#genome-mapping" title="Permalink to this headline">¶</a></h3>
 <p>A requirement for PCGR variant annotation datasets is that variants have
 been mapped unambiguously to the reference human genome (GRCh37 is
 currently the only supported build). For most datasets this requirement
@@ -249,7 +250,7 @@ correspond to variants reported at the amino acid level or with other
 HGVS nomenclature (e.g. <em>p.V600E</em>).</p>
 </div>
 <div class="section" id="data-quality">
-<h2>Data quality<a class="headerlink" href="#data-quality" title="Permalink to this headline">¶</a></h2>
+<h3>Data quality<a class="headerlink" href="#data-quality" title="Permalink to this headline">¶</a></h3>
 <p><strong>Clinical biomarkers</strong></p>
 <p>Clinical biomarkers included in PCGR are limited to the following:</p>
 <ul class="simple">
@@ -261,6 +262,7 @@ HGVS nomenclature (e.g. <em>p.V600E</em>).</p>
 markers collected from FDA/NCCN guidelines, scientific literature,
 and clinical trials are included (markers collected from conference
 abstracts etc. are not included)</li>
+<li>Copy number gains/losses</li>
 </ul>
 <p><strong>Antineoplastic drugs</strong></p>
 <ul class="simple">
@@ -285,12 +287,8 @@ those that are detected by at least two independent callers (i.e.
 calls found by a single algorithm are considered low-confident and
 disregarded)</li>
 </ul>
-<!--__COSMIC variants__
-
-The COSMIC dataset that is part of the PCGR annotation bundle is the subset of variants that satisfy the following criteria:
-
-* __Mutation somatic status__ is either '_confirmed_somatic_' or '_reported_in_another_cancer_sample_as_somatic_'.
-* __Site/histology__ must be known and the sample must come from a malignant tumor (i.e. not polyps/adenomas, which are also found in COSMIC)--></div>
+</div>
+</div>
 </div>
 
 
@@ -300,7 +298,7 @@ The COSMIC dataset that is part of the PCGR annotation bundle is the subset of v
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="output.html" class="btn btn-neutral float-right" title="Input &amp; output" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="input.html" class="btn btn-neutral float-right" title="Input" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="getting_started.html" class="btn btn-neutral" title="Getting started" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -312,7 +310,7 @@ The COSMIC dataset that is part of the PCGR annotation bundle is the subset of v
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Sigve Nakken.
+        &copy; Copyright 2017/2018, Sigve Nakken.
 
     </p>
   </div>
@@ -334,7 +332,7 @@ The COSMIC dataset that is part of the PCGR annotation bundle is the subset of v
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.5.3',
+            VERSION:'0.6.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

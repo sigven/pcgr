@@ -5,7 +5,9 @@
 \title{Function that predicts MSI status based on fraction of indels among calls}
 \usage{
 predict_msi_status(vcf_data_df, simpleRepeats_gr, windowMasker_gr,
-  msi_prediction_model, indelFracPlot_template, sample_name = "Test")
+  msi_prediction_model, indelFracPlot_template,
+  bsg = BSgenome.Hsapiens.UCSC.hg19, genome_assembly = "hg19",
+  sample_name = "Test")
 }
 \arguments{
 \item{vcf_data_df}{data frame with somatic mutations/indels}
@@ -15,6 +17,10 @@ predict_msi_status(vcf_data_df, simpleRepeats_gr, windowMasker_gr,
 \item{windowMasker_gr}{Genomic Ranges object with}
 
 \item{msi_prediction_model}{statistical model for MSI prediction/classification}
+
+\item{bsg}{BSgenome data object in Biostrings objects (e.g. BSgenome.Hsapiens.UCSC.hg19)}
+
+\item{genome_assembly}{hg19/hg38}
 
 \item{sample_name}{name of sample}
 

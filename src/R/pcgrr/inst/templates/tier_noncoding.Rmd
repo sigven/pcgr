@@ -1,0 +1,22 @@
+### Noncoding mutations
+
+- A total of __`r nrow(pcg_report[['snv_indel']][['variant_display']][['noncoding']])`__ unique, somatic variant(s) are also found in the tumor sample.
+<br><br>
+
+```{r noncoding, results='asis',echo=F}
+
+myOptions <- list(paging = F,pageLength=10, searching=T,caching=F,buttons = c('csv','excel'),dom = 'Bfrtip')
+if(nrow(pcg_report[['snv_indel']][['variant_display']][['noncoding']]) > 10){
+  myOptions <- list(paging = T,pageLength=10, searching=T,caching=F,buttons = c('csv','excel'),dom = 'Bfrtip')
+}
+if(nrow(pcg_report[['snv_indel']][['variant_display']][['noncoding']]) > 0){
+  if(nrow(pcg_report[['snv_indel']][['variant_display']][['noncoding']]) > 2000){
+    cat('<b>NOTE - listing top 2000 variants according to ONCOSCORE</b><br>',sep="\n")
+    cat('<br>')
+    pcg_report[['snv_indel']][['variant_display']][['noncoding']] <- head(pcg_report[['snv_indel']][['variant_display']][['noncoding']], 2000)
+  }
+  DT::datatable(pcg_report[['snv_indel']][['variant_display']][['noncoding']], options = myOptions, escape=F, extensions = c("Buttons","Responsive"))
+}
+
+```
+<br><br>

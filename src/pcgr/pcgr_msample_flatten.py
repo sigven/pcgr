@@ -2,7 +2,7 @@
 
 import argparse
 import pcgrutils
-import cyvcf
+from cyvcf2 import VCF, Writer
 import os
 
 logger = pcgrutils.getlogger('pcgr-flatten-multisample')
@@ -19,12 +19,13 @@ def __main__():
 def flatten_vcf(query_vcf, output_postfix):
 
    logger.info('Read query VCF using cyvcf - ' + str(query_vcf))
-   vcf_reader = cyvcf.Reader(open(query_vcf, 'r'))
+   vcf = VCF(query_vcf)
+   #vcf_reader = cyvcf.Reader(open(query_vcf, 'r'))
 
    #info_tags = info_tags_from_format.split(',')
 
    k = 0
-   for sample_id in vcf_reader.samples:
+   for sample_id in vcf.samples:
 
       file_prefix = str(sample_id) + '.' + str(output_postfix)
       if os.path.exists(file_prefix):

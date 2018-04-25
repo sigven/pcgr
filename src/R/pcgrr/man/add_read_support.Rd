@@ -4,11 +4,12 @@
 \alias{add_read_support}
 \title{Function that adds read support (depth, allelic fraction) for tumor and normal}
 \usage{
-add_read_support(vcf_data_df, tumor_dp_tag = "_na", tumor_af_tag = "_na",
-  normal_dp_tag = "_na", normal_af_tag = "_na", call_conf_tag = "_na")
+add_read_support(vcf_data_df, pcgr_config)
 }
 \arguments{
-\item{vcf_data_df}{}
+\item{vcf_data_df}{data frame with variants}
+
+\item{pcgr_config}{list with configuration values}
 }
 \value{
 vcf_data_df

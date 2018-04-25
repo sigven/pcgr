@@ -12,8 +12,7 @@ annotations from the `Ensembl’s Variant Effect Predictor
 (VEP) <http://www.ensembl.org/info/docs/tools/vep/index.html>`__ with
 oncology-relevant, up-to-date annotations retrieved flexibly through
 `vcfanno <https://github.com/brentp/vcfanno>`__, and produces
-interactive HTML reports intended for clinical interpretation (Figure
-1).
+interactive HTML reports intended for clinical interpretation.
 
 .. figure:: PCGR_workflow.png
    :alt: 
@@ -27,9 +26,9 @@ Example reports
 ~~~~~~~~~~~~~~~
 
 -  `Report for a breast tumor sample
-   (TCGA) <http://folk.uio.no/sigven/tumor_sample.BRCA.0.5.3.pcgr.html>`__
+   (TCGA) <http://folk.uio.no/sigven/tumor_sample.BRCA.pcgr_acmg.0.6.0.html>`__
 -  `Report for a colon adenocarcinoma sample
-   (TCGA) <http://folk.uio.no/sigven/tumor_sample.COAD.0.5.3.pcgr.html>`__
+   (TCGA) <http://folk.uio.no/sigven/tumor_sample.COAD.pcgr_acmg.0.6.0.html>`__
 
 Why use PCGR?
 ~~~~~~~~~~~~~
@@ -46,12 +45,13 @@ and variant level. The application generates a tiered report that will
 aid the interpretation of individual cancer genomes in a clinical
 setting.
 
-If you use PCGR, please cite our paper:
+If you use PCGR, please cite our recent publication:
 
 Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, Ola
-Myklebost, Eivind Hovig. **Personal Cancer Genome Reporter: Variant
-Interpretation Report For Precision Oncology** (2017). bioRxiv.
-doi:\ `10.1101/122366 <https://doi.org/10.1101/122366>`__
+Myklebost, and Eivind Hovig. **Personal Cancer Genome Reporter: variant
+interpretation report for precision oncology** (2017). *Bioinformatics
+(in press)*.
+doi:\ `10.1093/bioinformatics/btx817 <https://doi.org/10.1093/bioinformatics/btx817>`__
 
 Docker-based technology
 ~~~~~~~~~~~~~~~~~~~~~~~

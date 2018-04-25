@@ -1,0 +1,7 @@
+## Main results
+
+```{r value_box_plot, echo=F, fig.width=12, fig.height=6}
+p <- pcgrr::plot_value_boxes(pcg_report)
+p
+
+```

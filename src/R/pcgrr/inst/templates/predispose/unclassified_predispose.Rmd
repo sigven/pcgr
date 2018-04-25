@@ -1,0 +1,54 @@
+### Unclassified protein-coding variants
+
+<br>
+
+```{r prepare_unclassified_data, echo=F, results='asis'}
+
+show_tier_filters <- F
+missing_unclassified <- T
+if(nrow(pcg_report[['snv_indel']][['variant_display']][['unclassified']]) > 0){
+  show_tier_filters <- T
+  missing_unclassified <- F
+}
+
+
+```
+
+
+```{r unclassified, echo=F, results = 'asis', eval = show_tier_filters}
+library(summarywidget)
+library(crosstalk)
+
+
+cat('A total of ',nrow(pcg_report[['snv_indel']][['variant_display']][['unclassified']]),' unique and protein-coding germline variant(s) are also found in the selected cancer predisposition genes. This subset is limited to variants that are *novel* (i.e. not found in gnomAD) or *rare* in the European population (i.e. MAF <= 0.001 in gnomAD):')
+cat('\n')
+    
+htmltools::br()
+htmltools::br()
+
+variants_unclassified_shared <- crosstalk::SharedData$new(pcg_report[['snv_indel']][['variant_display']][['unclassified']])
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_unclassified_shared, ~CONSEQUENCE),
+    crosstalk::filter_slider("NFE_AF_GNOMAD", "Minor allele frequency Europeans (gnomAD-NFE)", variants_unclassified_shared, ~NFE_AF_GNOMAD, sep="", ticks = F)
+  ),
+  list(
+    crosstalk::filter_slider("GLOBAL_AF_GNOMAD", "Minor allele frequency global (gnomAD)", variants_unclassified_shared, ~GLOBAL_AF_GNOMAD, sep="", ticks = F)
+  )
+)
+
+
+crosstalk::bscols(
+  DT::datatable(variants_unclassified_shared, escape=F,extensions=c("Buttons","Responsive"), width = "100%",options=list(buttons = c('csv','excel'),dom = 'Bfrtip'))
+)
+
+```
+
+```{r unclassified_missing, echo=F, results = 'asis', eval = missing_unclassified}
+cat('<i>No variants found.</i>',sep='\n')
+cat('\n')
+```
+
+<br><br>
+
+<br>

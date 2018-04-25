@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Welcome to Personal Cancer Genome Reporter’s documentation! &mdash; Personal Cancer Genome Reporter 0.5.3 documentation</title>
+  <title>Welcome to Personal Cancer Genome Reporter’s documentation! &mdash; Personal Cancer Genome Reporter 0.6.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Personal Cancer Genome Reporter 0.5.3 documentation" href="#"/>
+    <link rel="top" title="Personal Cancer Genome Reporter 0.6.0 documentation" href="#"/>
         <link rel="next" title="About" href="about.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                0.5.3
+                0.6.0
               </div>
             
           
@@ -90,8 +90,10 @@
 <li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="annotation_resources.html">Annotation resources</a></li>
-<li class="toctree-l1"><a class="reference internal" href="annotation_resources.html#notes-on-variant-annotation-datasets">Notes on variant annotation datasets</a></li>
-<li class="toctree-l1"><a class="reference internal" href="output.html">Input &amp; output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="input.html">Input</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tier_systems.html">Tier models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CHANGELOG.html">CHANGELOG</a></li>
 </ul>
 
             
@@ -150,8 +152,12 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="getting_started.html#prerequisites">Prerequisites</a></li>
-<li class="toctree-l2"><a class="reference internal" href="getting_started.html#run-test-generation-of-clinical-report-for-a-cancer-genome">Run test - generation of clinical report for a cancer genome</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#step-0-python">STEP 0: Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#step-1-installation-of-docker">STEP 1: Installation of Docker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#step-2-download-pcgr-and-data-bundle">STEP 2: Download PCGR and data bundle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#step-3-input-preprocessing">STEP 3: Input preprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#step-4-configure-pcgr">STEP 4: Configure PCGR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#step-5-run-example">STEP 5: Run example</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="annotation_resources.html">Annotation resources</a><ul>
@@ -162,18 +168,29 @@
 <li class="toctree-l2"><a class="reference internal" href="annotation_resources.html#protein-domains-functional-features">Protein domains/functional features</a></li>
 <li class="toctree-l2"><a class="reference internal" href="annotation_resources.html#cancer-gene-knowledge-bases">Cancer gene knowledge bases</a></li>
 <li class="toctree-l2"><a class="reference internal" href="annotation_resources.html#pathway-databases">Pathway databases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="annotation_resources.html#notes-on-variant-annotation-datasets">Notes on variant annotation datasets</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="annotation_resources.html#notes-on-variant-annotation-datasets">Notes on variant annotation datasets</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="annotation_resources.html#genome-mapping">Genome mapping</a></li>
-<li class="toctree-l2"><a class="reference internal" href="annotation_resources.html#data-quality">Data quality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="input.html">Input</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="input.html#vcf">VCF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input.html#copy-number-segments">Copy number segments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input.html#pcgr-configuration-file">PCGR configuration file</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="output.html">Input &amp; output</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="output.html#input">Input</a></li>
-<li class="toctree-l2"><a class="reference internal" href="output.html#output-interactive-html-report">Output - Interactive HTML report</a></li>
-<li class="toctree-l2"><a class="reference internal" href="output.html#output-somatic-snvs-indels">Output - Somatic SNVs/InDels</a></li>
-<li class="toctree-l2"><a class="reference internal" href="output.html#output-somatic-copy-number-aberrations">Output - Somatic copy number aberrations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Output</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="output.html#interactive-html-report">Interactive HTML report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output.html#json-beta">JSON (beta)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output.html#output-files-somatic-snvs-indels">Output files - somatic SNVs/InDels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output.html#output-files-somatic-copy-number-aberrations">Output files - somatic copy number aberrations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tier_systems.html">Tier models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tier_systems.html#tier-model-1-pcgr">Tier model 1 - <em>pcgr</em></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tier_systems.html#tier-model-2-pcgr-acmg">Tier model 2 - <em>pcgr_acmg</em></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="CHANGELOG.html">CHANGELOG</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="CHANGELOG.html#april-25th-2018">0.6.0 - April 25th 2018</a></li>
 </ul>
 </li>
 </ul>
@@ -197,7 +214,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Sigve Nakken.
+        &copy; Copyright 2017/2018, Sigve Nakken.
 
     </p>
   </div>
@@ -219,7 +236,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.5.3',
+            VERSION:'0.6.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

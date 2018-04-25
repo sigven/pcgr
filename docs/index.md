@@ -13,7 +13,9 @@ Welcome to PCGR's documentation!
    about
    getting_started
    annotation_resources
+   input
    output
+      tier_systems
 
 Indices and tables
 ==================

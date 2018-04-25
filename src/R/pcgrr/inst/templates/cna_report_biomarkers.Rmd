@@ -1,46 +1,27 @@
 
-### Copy number aberrations as biomarkers for prognosis, diagnosis, predisposition, and drug response {.tabset}
+### Copy number aberrations as biomarkers for prognosis, diagnosis, and drug response {.tabset}
 
-A total of __`r nrow(report_data$cna_data$cna_biomarker_segments)`__ aberrations are associated with clinical evidence items in the [database for clinical interpretations of variants in cancer, CIViC](https://civic.genome.wustl.edu/#/home), with the following number of evidence items:
+A total of __`r length(unique(pcg_report[['cna']][['variant_display']][['biomarker']]$SEGMENT))`__ aberrations are associated with clinical evidence items in the [database for clinical interpretations of variants in cancer, CIViC](https://civic.genome.wustl.edu/#/home), with the following number of evidence items:
 
- *  Predictive: __`r nrow(report_data$cna_data$cna_evidence_items_predictive)`__ evidence items linked to drug sensitivity/resistance
- *  Prognostic: __`r nrow(report_data$cna_data$cna_evidence_items_prognostic)`__ evidence items
- *  Diagnostic: __`r nrow(report_data$cna_data$cna_evidence_items_diagnostic)`__ evidence items
- *  Predisposing: __`r nrow(report_data$cna_data$cna_evidence_items_predisposing)`__ evidence items
+ *  Predictive: __`r nrow(pcg_report[['cna']][['clinical_evidence_item']][['any_tumortype']][['predictive']][['any']])`__ evidence items linked to drug sensitivity/resistance
+ *  Prognostic: __`r nrow(pcg_report[['cna']][['clinical_evidence_item']][['any_tumortype']][['prognostic']][['any']])`__ evidence items
+ *  Diagnostic: __`r nrow(pcg_report[['cna']][['clinical_evidence_item']][['any_tumortype']][['diagnostic']][['any']])`__ evidence items
 
 <br><br>
 ```{r prepare_cna_clin_data, echo=F, results='asis'}
 
-show_cna_diagnostic_filters <- F
-missing_cna_diagnostic_variants <- T
-if(nrow(report_data$cna_data$cna_evidence_items_diagnostic) > 0){
-  show_cna_diagnostic_filters <- T
-  missing_cna_diagnostic_variants <- F
-  report_data$cna_data$cna_evidence_items_diagnostic <- dplyr::rename(report_data$cna_data$cna_evidence_items_diagnostic, Segment = SEGMENT, Length_Mb = SEGMENT_LENGTH_MB)
-}
-
-show_cna_prognostic_filters <- F
-missing_cna_prognostic_variants <- T
-if(nrow(report_data$cna_data$cna_evidence_items_prognostic) > 0){
-  show_cna_prognostic_filters <- T
-  missing_cna_prognostic_variants <- F
-  report_data$cna_data$cna_evidence_items_prognostic <- dplyr::rename(report_data$cna_data$cna_evidence_items_prognostic, Segment = SEGMENT, Length_Mb = SEGMENT_LENGTH_MB)
-}
-
-show_cna_predictive_filters <- F
-missing_cna_predictive_variants <- T
-if(nrow(report_data$cna_data$cna_evidence_items_predictive) > 0){
-  show_cna_predictive_filters <- T
-  missing_cna_predictive_variants <- F
-  report_data$cna_data$cna_evidence_items_predictive <- dplyr::rename(report_data$cna_data$cna_evidence_items_predictive, Segment = SEGMENT, Length_Mb = SEGMENT_LENGTH_MB)
-}
-
-show_cna_predisposing_filters <- F
-missing_cna_predisposing_variants <- T
-if(nrow(report_data$cna_data$cna_evidence_items_predisposing) > 0){
-  show_cna_predisposing_filters <- T
-  missing_cna_predisposing_variants <- F
-  report_data$cna_data$cna_evidence_items_predisposing <- dplyr::rename(report_data$cna_data$cna_evidence_items_predisposing, Segment = SEGMENT, Length_Mb = SEGMENT_LENGTH_MB)
+show_cna_filters <- list()
+missing_cna_variants <- list()
+for(type in c('diagnostic','prognostic','predictive')){
+  show_cna_filters[[type]] <- F
+  missing_cna_variants[[type]] <- T
+  if(nrow(pcg_report[['cna']][['clinical_evidence_item']][['any_tumortype']][[type]][['any']]) > 0){
+    show_cna_filters[[type]] <- T
+    missing_cna_variants[[type]] <- F
+    if('Segment' %in% colnames(pcg_report[['cna']][['clinical_evidence_item']][['any_tumortype']][[type]][['any']]) & 'SEGMENT_LENGTH_MB' %in% colnames(pcg_report[['cna']][['clinical_evidence_item']][['any_tumortype']][[type]][['any']])){
+      pcg_report[['cna']][['clinical_evidence_item']][['any_tumortype']][[type]][['any']] <- dplyr::rename(pcg_report[['cna']][['clinical_evidence_item']][['any_tumortype']][[type]][['any']], Segment = SEGMENT, Length_Mb = SEGMENT_LENGTH_MB)
+    }
+  }
 }
 
 ```
@@ -50,11 +31,11 @@ if(nrow(report_data$cna_data$cna_evidence_items_predisposing) > 0){
 
 <br>
 
-```{r cna_predictive, echo=F, results = 'asis', eval = show_cna_predictive_filters}
+```{r cna_predictive, echo=F, results = 'asis', eval = show_cna_filters[['predictive']]}
 library(summarywidget)
 library(crosstalk)
 
-cna_predictive_shared <- crosstalk::SharedData$new(report_data$cna_data$cna_evidence_items_predictive)
+cna_predictive_shared <- crosstalk::SharedData$new(pcg_report[['cna']][['clinical_evidence_item']][['any_tumortype']][['predictive']][['any']])
 crosstalk::bscols(
   list(
     crosstalk::filter_select("CANCER_TYPE", "Cancer type", cna_predictive_shared, ~CANCER_TYPE),
@@ -73,14 +54,14 @@ htmltools::br()
 
 crosstalk::bscols(
   DT::datatable(cna_predictive_shared, escape=F,extensions=c("Buttons","Responsive"), width = "100%",options=list(buttons = c('csv','excel'),dom = 'Bfrtip')) %>%
-  DT::formatStyle('EVIDENCE_LEVEL', backgroundColor = DT::styleEqual(c('A: Validated','B: Clinical evidence','C: Case study','D: Preclinical evidence','E: Indirect evidence'), c("#009E73","#56B4E9", "#0072B2","#E69F00", "#F0E442")))
+  DT::formatStyle('EVIDENCE_LEVEL', backgroundColor = DT::styleEqual(c('A: Validated','A: FDA/NCCN/ELN guidelines','B: Clinical evidence','B1: Clinical evidence: late trials','B2: Clinical evidence: early trials','C: Case study','D: Preclinical evidence','E: Indirect evidence'), c("#009E73","#009E73","#56B4E9", "#56B4E9","#56B4E9","#0072B2","#E69F00", "#F0E442")))
 )
 
 #htmltools::br()
 
 ```
 
-```{r cna_predictive_missing, echo=F, results = 'asis', eval = missing_cna_predictive_variants}
+```{r cna_predictive_missing, echo=F, results = 'asis', eval = missing_cna_variants[['predictive']]}
 cat('<i>No variant-evidence item associations found.</i>',sep='\n')
 cat('\n')
 ```
@@ -91,12 +72,12 @@ cat('\n')
 
 <br>
 
-```{r cna_prognostic, echo=F, results='asis', eval = show_cna_prognostic_filters}
+```{r cna_prognostic, echo=F, results='asis', eval = show_cna_filters[['prognostic']]}
 
 library(summarywidget)
 library(crosstalk)
 
-cna_prognostic_shared <- crosstalk::SharedData$new(report_data$cna_data$cna_evidence_items_prognostic)
+cna_prognostic_shared <- crosstalk::SharedData$new(pcg_report[['cna']][['clinical_evidence_item']][['any_tumortype']][['prognostic']][['any']])
 crosstalk::bscols(
   list(
     crosstalk::filter_select("CANCER_TYPE", "Cancer type", cna_prognostic_shared, ~CANCER_TYPE),
@@ -113,13 +94,13 @@ htmltools::br()
 
 crosstalk::bscols(
   DT::datatable(cna_prognostic_shared, escape=F,extensions=c("Buttons","Responsive"), width = "100%",options=list(buttons = c('csv','excel'),dom = 'Bfrtip')) %>%
-  DT::formatStyle('EVIDENCE_LEVEL', backgroundColor = DT::styleEqual(c('A: Validated','B: Clinical evidence','C: Case study','D: Preclinical evidence','E: Indirect evidence'), c("#009E73","#56B4E9", "#0072B2","#E69F00", "#F0E442")))
+  DT::formatStyle('EVIDENCE_LEVEL', backgroundColor = DT::styleEqual(c('A: Validated','A: FDA/NCCN/ELN guidelines','B: Clinical evidence','B1: Clinical evidence: late trials','B2: Clinical evidence: early trials','C: Case study','D: Preclinical evidence','E: Indirect evidence'), c("#009E73","#009E73","#56B4E9", "#56B4E9","#56B4E9","#0072B2","#E69F00", "#F0E442")))
 )
 #htmltools::br()
 
 ```
 
-```{r cna_prognostic_missing, echo=F, results = 'asis', eval = missing_cna_prognostic_variants}
+```{r cna_prognostic_missing, echo=F, results = 'asis', eval = missing_cna_variants[['prognostic']]}
 cat('<i>No variant-evidence item associations found.</i>',sep='\n')
 cat('\n')
 ```
@@ -130,12 +111,12 @@ cat('\n')
 
 <br>
 
-```{r cna_diagnostic, echo=F, results='asis', eval = show_cna_diagnostic_filters}
+```{r cna_diagnostic, echo=F, results='asis', eval = show_cna_filters[['diagnostic']]}
 
 library(summarywidget)
 library(crosstalk)
 
-cna_diagnostic_shared <- crosstalk::SharedData$new(report_data$cna_data$cna_evidence_items_diagnostic)
+cna_diagnostic_shared <- crosstalk::SharedData$new(pcg_report[['cna']][['clinical_evidence_item']][['any_tumortype']][['diagnostic']])
 crosstalk::bscols(
   list(
     crosstalk::filter_select("CANCER_TYPE", "Cancer type", cna_diagnostic_shared, ~CANCER_TYPE),
@@ -152,52 +133,13 @@ htmltools::br()
 
 crosstalk::bscols(
   DT::datatable(cna_diagnostic_shared, escape=F,extensions=c("Buttons","Responsive"), width = "100%",options=list(buttons = c('csv','excel'),dom = 'Bfrtip')) %>%
-  DT::formatStyle('EVIDENCE_LEVEL', backgroundColor = DT::styleEqual(c('A: Validated','B: Clinical evidence','C: Case study','D: Preclinical evidence','E: Indirect evidence'), c("#009E73","#56B4E9", "#0072B2","#E69F00", "#F0E442")))
+  DT::formatStyle('EVIDENCE_LEVEL', backgroundColor = DT::styleEqual(c('A: Validated','A: FDA/NCCN/ELN guidelines','B: Clinical evidence','B1: Clinical evidence: late trials','B2: Clinical evidence: early trials','C: Case study','D: Preclinical evidence','E: Indirect evidence'), c("#009E73","#009E73","#56B4E9", "#56B4E9","#56B4E9","#0072B2","#E69F00", "#F0E442")))
 )
 #htmltools::br()
 
 ```
 
-```{r cna_diagnostic_missing, echo=F, results = 'asis', eval = missing_cna_diagnostic_variants}
-cat('<i>No variant-evidence item associations found.</i>',sep='\n')
-cat('\n')
-```
-
-<br><br>
-
-#### Predisposition biomarkers
-
-<br>
-
-```{r cna_predisposing, echo=F, results='asis', eval = show_cna_predisposing_filters}
-
-library(summarywidget)
-library(crosstalk)
-
-cna_predisposing_shared <- crosstalk::SharedData$new(report_data$cna_data$cna_evidence_items_predisposing)
-crosstalk::bscols(
-  list(
-    crosstalk::filter_select("CANCER_TYPE", "Cancer type", cna_predisposing_shared, ~CANCER_TYPE),
-    crosstalk::filter_select("CLINICAL_SIGNIFICANCE", "Clinical significance", cna_predisposing_shared, ~CLINICAL_SIGNIFICANCE)
-  ),
-  list(
-    crosstalk::filter_select("EVIDENCE_LEVEL", "Evidence level", cna_predisposing_shared, ~EVIDENCE_LEVEL),
-    crosstalk::filter_slider("LogR", "Log-ratio", cna_predisposing_shared, ~LogR, ticks = F)
-  )
-)
-cat('The table below lists all variant-evidence item associations:',sep='\n')
-htmltools::br()
-htmltools::br()
-
-crosstalk::bscols(
-  DT::datatable(cna_predisposing_shared, escape=F,extensions=c("Buttons","Responsive"), width = "100%",options=list(buttons = c('csv','excel'),dom = 'Bfrtip')) %>%
-  DT::formatStyle('EVIDENCE_LEVEL', backgroundColor = DT::styleEqual(c('A: Validated','B: Clinical evidence','C: Case study','D: Preclinical evidence','E: Indirect evidence'), c("#009E73","#56B4E9", "#0072B2","#E69F00", "#F0E442")))
-)
-#htmltools::br()
-
-```
-
-```{r cna_predisposing_missing, echo=F, results = 'asis', eval = missing_cna_predisposing_variants}
+```{r cna_diagnostic_missing, echo=F, results = 'asis', eval = missing_cna_variants[['diagnostic']]}
 cat('<i>No variant-evidence item associations found.</i>',sep='\n')
 cat('\n')
 ```

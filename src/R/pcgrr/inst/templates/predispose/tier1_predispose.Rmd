@@ -1,0 +1,57 @@
+
+### Tier 1 - Pathogenic ClinVar variants
+
+<br>
+
+```{r prepare_tier1_data, echo=F, results='asis'}
+
+show_tier_filters <- F
+missing_tier1 <- T
+if(nrow(pcg_report[['snv_indel']][['variant_display']][['tier1']]) > 0){
+  show_tier_filters <- T
+  missing_tier1 <- F
+}
+
+
+```
+
+
+```{r tier1, echo=F, results = 'asis', eval = show_tier_filters}
+library(summarywidget)
+library(crosstalk)
+
+
+cat('A total of ',nrow(pcg_report[['snv_indel']][['variant_display']][['tier1']]), ' unique, germline variant(s) are found as pathogenic in ClinVar for the selected cancer predisposition genes:')
+cat('\n')
+htmltools::br()
+htmltools::br()
+
+variants_tier1_shared <- crosstalk::SharedData$new(pcg_report[['snv_indel']][['variant_display']][['tier1']])
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_tier1_shared, ~CONSEQUENCE),
+    crosstalk::filter_slider("NFE_AF_GNOMAD", "Minor allele frequency Europeans (gnomAD-NFE)", variants_tier1_shared, ~NFE_AF_GNOMAD,sep="", ticks = F)
+  ),
+  list(
+    crosstalk::filter_slider("GLOBAL_AF_GNOMAD", "Minor allele frequency global (gnomAD)", variants_tier1_shared, ~GLOBAL_AF_GNOMAD, sep="",ticks = F)
+  )
+)
+
+    
+
+htmltools::br()
+htmltools::br()
+
+crosstalk::bscols(
+  DT::datatable(variants_tier1_shared, escape=F,extensions=c("Buttons","Responsive"), width = "100%",options=list(buttons = c('csv','excel'),dom = 'Bfrtip'))
+)
+
+#htmltools::br()
+
+```
+
+```{r tier1_missing, echo=F, results = 'asis', eval = missing_tier1}
+cat('<i>No variants found.</i>',sep='\n')
+cat('\n')
+```
+<br><br>

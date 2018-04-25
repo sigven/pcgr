@@ -1,0 +1,274 @@
+### Tier & variant statistics
+
+* Number of SNVs: __`r pcg_report[['snv_indel']][['variant_statistic']][['n_snv']]`__
+* Number of InDels: __`r pcg_report[['snv_indel']][['variant_statistic']][['n_indel']]`__
+* Number of protein-coding variants: __`r pcg_report[['snv_indel']][['variant_statistic']][['n_coding']]`__
+
+The prioritization of SNV/InDels is here done according to a four-tiered structure, adopting the joint consensus recommendation by the ACMG [[@Li2017-ew]](https://www.ncbi.nlm.nih.gov/pubmed/27993330).
+
+* Tier 1 - variants of strong clinical significance: __`r pcg_report[['snv_indel']][['variant_statistic']][['n_tier1']]`__
+* Tier 2 - variants of potential clinical significance: __`r pcg_report[['snv_indel']][['variant_statistic']][['n_tier2']]`__
+* Tier 3 - variants of unknown clinical significance: __`r pcg_report[['snv_indel']][['variant_statistic']][['n_tier3']]`__
+* Tier 4 - other coding variants: __`r pcg_report[['snv_indel']][['variant_statistic']][['n_tier4']]`__
+* Noncoding variants: __`r pcg_report[['snv_indel']][['variant_statistic']][['n_noncoding']]`__
+
+<br><br>
+
+
+```{r vaf_plot_prep, echo=F}
+tumor_af_plot <- F
+if(nrow(pcg_report[['snv_indel']][['variant_set']][['tsv']]) > 0){
+  if(nrow(dplyr::filter(pcg_report[['snv_indel']][['variant_set']][['tsv']], !is.na(DP_TUMOR))) > 0 & nrow(dplyr::filter(pcg_report[['snv_indel']][['variant_set']][['tsv']], !is.na(AF_TUMOR))) > 0){
+    tumor_af_plot <- T
+  }
+}
+```
+
+
+```{r tumor_allelic_support_header, echo=F, results='asis', eval=tumor_af_plot}
+cat('<h3>Global distribution - allelic support</h3>',sep="\n")
+```
+
+
+
+```{r tumor_allelic_support, echo = F, fig.width=10, fig.height=7, eval=tumor_af_plot}
+histplot <- pcgrr::tier_af_distribution(pcg_report[['snv_indel']][['variant_set']][['tsv']])
+plotly::ggplotly(histplot)
+htmltools::br()
+```
+
+
+### Global variant browser
+
+The table below permits filtering of the total SNV/InDel set by various criteria.
+
+__NOTE 1__: The filtering applies to this table only, and not to the tier-specific tables below. 
+
+__NOTE 2__: Filtering on sequencing depth/allelic fraction depends on input specified by user (VCF INFO tags). 
+
+<br>
+
+
+```{r table_browse_prepare, echo=F}
+table_browse_basic <- F
+table_browse_basic_CC <- F
+table_browse_tumor_dp_af <- F
+table_browse_tumor_dp_af_CC <- F
+table_browse_tumor_dp_af_normal_dp_af <- F
+table_browse_tumor_dp_af_normal_dp_af_CC <- F
+
+if(nrow(pcg_report[['snv_indel']][['variant_set']][['tsv']]) > 0){
+  table_browse_basic <- T
+
+  if(nrow(dplyr::filter(pcg_report[['snv_indel']][['variant_set']][['tsv']], !is.na(CALL_CONFIDENCE))) > 0){
+    table_browse_basic_CC <- T
+    table_browse_basic <- F
+  }
+  
+  if(nrow(dplyr::filter(pcg_report[['snv_indel']][['variant_set']][['tsv']], !is.na(DP_TUMOR))) > 0 & nrow(dplyr::filter(pcg_report[['snv_indel']][['variant_set']][['tsv']], !is.na(AF_TUMOR))) > 0){
+    table_browse_tumor_dp_af <- T
+    if(table_browse_basic_CC == T){
+      table_browse_tumor_dp_af_CC <- T
+      table_browse_tumor_dp_af <- F
+      table_browse_basic_CC <- F
+    }
+    table_browse_basic <- F
+  }
+  
+  if((table_browse_tumor_dp_af == T | table_browse_tumor_dp_af_CC == T) & nrow(dplyr::filter(pcg_report[['snv_indel']][['variant_set']][['tsv']], !is.na(DP_NORMAL))) > 0 & nrow(dplyr::filter(pcg_report[['snv_indel']][['variant_set']][['tsv']], !is.na(AF_NORMAL))) > 0){
+    table_browse_tumor_dp_af <- F
+    table_browse_basic <- F
+    table_browse_tumor_dp_af_normal_dp_af <- T
+    if(table_browse_tumor_dp_af_CC == T){
+      table_browse_tumor_dp_af_CC <- F
+      table_browse_tumor_dp_af_normal_dp_af <- F
+      table_browse_tumor_dp_af_normal_dp_af_CC <- T
+    }
+  }
+  
+}
+
+
+```
+
+
+```{r table_browse_plain, echo=F, results = "asis", eval = table_browse_basic}
+library(crosstalk)
+library(summarywidget)
+
+vars <- pcg_report[['snv_indel']][['variant_set']][['tsv']] %>% dplyr::select(SYMBOL, CONSEQUENCE, PROTEIN_CHANGE, VARIANT_CLASS, TIER, GENOMIC_CHANGE, GENOME_VERSION, CALL_CONFIDENCE, DP_TUMOR, AF_TUMOR, DP_NORMAL, AF_NORMAL)
+vars$CONSEQUENCE <- stringr::str_replace_all(vars$CONSEQUENCE,"&",",")
+variants_shared <- crosstalk::SharedData$new(vars)
+  
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("TIER", "Tier", variants_shared, ~TIER)
+  ),
+  list(
+    crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_shared, ~CONSEQUENCE)
+  )
+)
+  
+htmltools::br()
+crosstalk::bscols(
+  DT::datatable(variants_shared, extensions=c("Buttons","Responsive"), width = "100%",
+    options=list(buttons = c('csv','excel'),dom = 'Bfrtip')
+  )
+)
+
+```
+
+
+```{r table_browse_plain_CC, echo=F, results = "asis", eval = table_browse_basic_CC}
+library(crosstalk)
+library(summarywidget)
+
+vars <- pcg_report[['snv_indel']][['variant_set']][['tsv']] %>% dplyr::select(SYMBOL, CONSEQUENCE, PROTEIN_CHANGE, VARIANT_CLASS, TIER, GENOMIC_CHANGE, GENOME_VERSION, CALL_CONFIDENCE, DP_TUMOR, AF_TUMOR, DP_NORMAL, AF_NORMAL)
+vars$CONSEQUENCE <- stringr::str_replace_all(vars$CONSEQUENCE,"&",",")
+variants_shared <- crosstalk::SharedData$new(vars)
+  
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("TIER", "Tier", variants_shared, ~TIER),
+    crosstalk::filter_select("CALL_CONFIDENCE", "Call confidence", variants_shared, ~CALL_CONFIDENCE)
+  ),
+  list(
+    crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_shared, ~CONSEQUENCE)
+  )
+)
+  
+htmltools::br()
+crosstalk::bscols(
+  DT::datatable(variants_shared, extensions=c("Buttons","Responsive"), width = "100%",
+    options=list(buttons = c('csv','excel'),dom = 'Bfrtip')
+  )
+)
+
+```
+
+
+
+```{r table_browse_tumor, echo=F, results = "asis", eval = table_browse_tumor_dp_af}
+library(crosstalk)
+library(summarywidget)
+
+vars <- pcg_report[['snv_indel']][['variant_set']][['tsv']] %>% dplyr::select(SYMBOL, CONSEQUENCE, PROTEIN_CHANGE, VARIANT_CLASS, TIER, GENOMIC_CHANGE, GENOME_VERSION, CALL_CONFIDENCE, DP_TUMOR, AF_TUMOR, DP_NORMAL, AF_NORMAL) %>% dplyr::filter(!is.na(DP_TUMOR) & !is.na(AF_TUMOR))
+vars$CONSEQUENCE <- stringr::str_replace_all(vars$CONSEQUENCE,"&",",")
+variants_shared <- crosstalk::SharedData$new(vars)
+  
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("TIER", "Tier", variants_shared, ~TIER),
+    crosstalk::filter_slider("DP_TUMOR", "Sequencing depth tumor", variants_shared, ~DP_TUMOR, ticks = F, sep = F)
+  ),
+  list(
+    crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_shared, ~CONSEQUENCE),
+    crosstalk::filter_slider_allelic_fraction("AF_TUMOR", "Allelic fraction tumor", variants_shared, ~AF_TUMOR, step=0.05, ticks = T, sep = F)
+
+  )
+)
+  
+htmltools::br()
+crosstalk::bscols(
+  DT::datatable(variants_shared, extensions=c("Buttons","Responsive"), width = "100%",
+    options=list(buttons = c('csv','excel'),dom = 'Bfrtip')
+  )
+)
+
+```
+
+
+```{r table_browse_tumor_CC, echo=F, results = "asis", eval = table_browse_tumor_dp_af_CC}
+library(crosstalk)
+library(summarywidget)
+
+vars <- pcg_report[['snv_indel']][['variant_set']][['tsv']] %>% dplyr::select(SYMBOL, CONSEQUENCE, PROTEIN_CHANGE, VARIANT_CLASS, TIER, GENOMIC_CHANGE, GENOME_VERSION, CALL_CONFIDENCE, DP_TUMOR, AF_TUMOR, DP_NORMAL, AF_NORMAL) %>% dplyr::filter(!is.na(DP_TUMOR) & !is.na(AF_TUMOR))
+vars$CONSEQUENCE <- stringr::str_replace_all(vars$CONSEQUENCE,"&",",")
+variants_shared <- crosstalk::SharedData$new(vars)
+  
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("TIER", "Tier", variants_shared, ~TIER),
+    crosstalk::filter_slider("DP_TUMOR", "Sequencing depth tumor", variants_shared, ~DP_TUMOR, ticks = F, sep = F),
+    crosstalk::filter_slider_allelic_fraction("AF_TUMOR", "Allelic fraction tumor", variants_shared, ~AF_TUMOR, step=0.05, ticks = T, sep = F)
+  ),
+  list(
+    crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_shared, ~CONSEQUENCE),
+    crosstalk::filter_select("CALL_CONFIDENCE", "Call confidence", variants_shared, ~CALL_CONFIDENCE)
+  )
+)
+  
+htmltools::br()
+crosstalk::bscols(
+  DT::datatable(variants_shared, extensions=c("Buttons","Responsive"), width = "100%",
+    options=list(buttons = c('csv','excel'),dom = 'Bfrtip')
+  )
+)
+
+```
+
+
+
+```{r table_browse_full, echo=F, results = "asis", eval = table_browse_tumor_dp_af_normal_dp_af}
+library(crosstalk)
+library(summarywidget)
+
+vars <- pcg_report[['snv_indel']][['variant_set']][['tsv']] %>% dplyr::select(SYMBOL, CONSEQUENCE, PROTEIN_CHANGE, VARIANT_CLASS, TIER, GENOMIC_CHANGE, GENOME_VERSION, CALL_CONFIDENCE, DP_TUMOR, AF_TUMOR, DP_NORMAL, AF_NORMAL) %>% dplyr::filter(!is.na(DP_TUMOR) & !is.na(AF_TUMOR) & !is.na(AF_NORMAL) & !is.na(DP_NORMAL))
+vars$CONSEQUENCE <- stringr::str_replace_all(vars$CONSEQUENCE,"&",",")
+variants_shared <- crosstalk::SharedData$new(vars)
+  
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("TIER", "Tier", variants_shared, ~TIER),
+    crosstalk::filter_slider("DP_TUMOR", "Sequencing depth tumor", variants_shared, ~DP_TUMOR, sep=F, ticks = F),
+    crosstalk::filter_slider_allelic_fraction("AF_TUMOR", "Allelic fraction tumor", variants_shared, ~AF_TUMOR, step=0.05, sep=F, ticks = T)
+  ),
+  list(
+    crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_shared, ~CONSEQUENCE),
+    crosstalk::filter_slider("DP_NORMAL", "Sequencing depth control", variants_shared, ~DP_NORMAL, sep=F, ticks = F),
+    crosstalk::filter_slider_allelic_fraction("AF_NORMAL", "Allelic fraction control", variants_shared, ~AF_NORMAL, step=0.05, sep=F, ticks = T)
+  )
+)
+  
+htmltools::br()
+crosstalk::bscols(
+  DT::datatable(variants_shared, extensions=c("Buttons","Responsive"), width = "100%",
+    options=list(buttons = c('csv','excel'),dom = 'Bfrtip')
+  )
+)
+
+```
+
+
+```{r table_browse_full_CC, echo=F, results = "asis", eval = table_browse_tumor_dp_af_normal_dp_af_CC}
+library(crosstalk)
+library(summarywidget)
+
+vars <- pcg_report[['snv_indel']][['variant_set']][['tsv']] %>% dplyr::select(SYMBOL, CONSEQUENCE, PROTEIN_CHANGE, VARIANT_CLASS, TIER, GENOMIC_CHANGE, GENOME_VERSION, CALL_CONFIDENCE, DP_TUMOR, AF_TUMOR, DP_NORMAL, AF_NORMAL) %>% dplyr::filter(!is.na(DP_TUMOR) & !is.na(AF_TUMOR) & !is.na(AF_NORMAL) & !is.na(DP_NORMAL))
+vars$CONSEQUENCE <- stringr::str_replace_all(vars$CONSEQUENCE,"&",",")
+variants_shared <- crosstalk::SharedData$new(vars)
+  
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("TIER", "Tier", variants_shared, ~TIER),
+    crosstalk::filter_slider("DP_TUMOR", "Sequencing depth tumor", variants_shared, ~DP_TUMOR, sep=F, ticks = F),
+    crosstalk::filter_slider_allelic_fraction("AF_TUMOR", "Allelic fraction tumor", variants_shared, ~AF_TUMOR, step=0.05, sep=F, ticks = T)
+  ),
+  list(
+    crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_shared, ~CONSEQUENCE),
+    crosstalk::filter_select("CALL_CONFIDENCE", "Call confidence", variants_shared, ~CALL_CONFIDENCE),
+    crosstalk::filter_slider("DP_NORMAL", "Sequencing depth control", variants_shared, ~DP_NORMAL, sep=F, ticks = F),
+    crosstalk::filter_slider_allelic_fraction("AF_NORMAL", "Allelic fraction control", variants_shared, ~AF_NORMAL, step=0.05, sep=F, ticks = T)
+  )
+)
+  
+htmltools::br()
+crosstalk::bscols(
+  DT::datatable(variants_shared, extensions=c("Buttons","Responsive"), width = "100%",
+    options=list(buttons = c('csv','excel'),dom = 'Bfrtip')
+  )
+)
+
+```
+
+<br><br>

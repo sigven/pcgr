@@ -1,5 +1,5 @@
 ---
-title: "Cancer genome sequencing report for precision oncology - `r report_data$sample_name`"
+title: "Cancer genome sequencing report for precision oncology - `r pcg_report$sample_name`"
 date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
 bibliography: bibliography.bib
 nocite: |
@@ -15,72 +15,70 @@ output:
     fig_height: 4
     includes:
       after_body: disclaimer.md
-params:
-  eval_tier1: FALSE
-  eval_tier2: FALSE
-  eval_tier3: FALSE
-  tier1_report: FALSE
-  tier2_report: FALSE
-  tier3_report: FALSE
-  tier4_report: FALSE
-  tier5_report: FALSE
-  msi_report: FALSE
-  signature_report: FALSE
-  cna_report_segments: FALSE
-  cna_report_oncogene_gain: FALSE
-  cna_report_tsgene_loss: FALSE
-  cna_report_biomarkers: FALSE
-  missing_signature_data: FALSE
-  missing_msi_data: FALSE
-  logR_gain: 0.8
-  logR_homdel: -0.8
 ---
 
 ```{r global_options, include=FALSE}
 knitr::opts_chunk$set(echo = F,warning=FALSE, dpi=72, error=F, eval=T)
 ```
 
-```{r conditional_print0, child='data_sources.Rmd'}
+```{r settings_data_sources, child='settings_data_sources.Rmd'}
 ```
 
-```{r conditional_tier1, child='tier1.Rmd', eval = eval_tier1}
+```{r conditional_seq_mode, child='value_boxes.Rmd', eval = pcg_report[['value_box']][['eval']]}
 ```
 
-```{r conditional_tier2, child='tier2.Rmd', eval = eval_tier2}
+```{r conditional_seq_mode, child='snv_indel_header.Rmd', eval = pcg_report[['sequencing_mode']][['eval']]}
 ```
 
-```{r conditional_tier3, child='tier3.Rmd', eval = eval_tier3}
+```{r conditional_seq_mode, child='snv_indel_zero.Rmd', eval = pcg_report[['snv_indel']][['zero']]}
 ```
 
-```{r conditional_tier4, child='tier4.Rmd', eval = eval_tier4}
+```{r conditional_tumor_only, child='tumor_only_statistics.Rmd', eval = pcg_report[['tumor_only']][['eval']]}
 ```
 
-```{r conditional_tier5, child='tier5.Rmd', eval = eval_tier5}
+```{r conditional_mutational_burden, child='mutational_burden.Rmd', eval = pcg_report[['tmb']][['eval']]}
 ```
 
-```{r conditional_cna_overview, child='cna_report_segments_nondiploid.Rmd', eval = eval_cna_segments}
+```{r conditional_var_stats, child='variant_statistics_browser.Rmd', eval = pcg_report[['snv_indel']][['eval']]}
 ```
 
-```{r conditional_cna_oncogene, child='cna_report_oncogene_gain.Rmd', eval = eval_cna_gain}
+```{r conditional_tier1, child='tier1.Rmd', eval = pcg_report[['snv_indel']][['eval']]}
 ```
 
-```{r conditional_cna_tsgene, child='cna_report_tsgene_loss.Rmd', eval = eval_cna_loss}
+```{r conditional_tier2, child='tier2.Rmd', eval = pcg_report[['snv_indel']][['eval']]}
 ```
 
-```{r conditional_cna_biomarker, child='cna_report_biomarkers.Rmd', eval = eval_cna_biomarker}
-```
-<br>
-
-```{r conditional_msi, child='msi.Rmd', eval = eval_msi_report}
+```{r conditional_tier3, child='tier3.Rmd', eval = pcg_report[['snv_indel']][['eval']]}
 ```
 
-```{r conditional_msi_2, child='msi_missing.Rmd', eval = eval_missing_msi_data}
+```{r conditional_tier4, child='tier4.Rmd', eval = pcg_report[['snv_indel']][['eval']]}
 ```
 
-```{r conditional_msig, child='mutational_signature.Rmd', eval = eval_signature_report}
+```{r conditional_tier_noncoding, child='tier_noncoding.Rmd', eval = pcg_report[['pcgr_config']][['other']][['list_noncoding']]}
 ```
 
-```{r conditional_msig_2, child='msig_missing.Rmd', eval = eval_missing_signature_data}
+```{r conditional_cna_overview, child='cna_report_segments_nondiploid.Rmd', eval = pcg_report[['cna']][['eval']]}
+```
+
+```{r conditional_cna_oncogene, child='cna_report_oncogene_gain.Rmd', eval = pcg_report[['cna']][['eval']]}
+```
+
+```{r conditional_cna_tsgene, child='cna_report_tsgene_loss.Rmd', eval = pcg_report[['cna']][['eval']]}
+```
+
+```{r conditional_cna_biomarker, child='cna_report_biomarkers.Rmd', eval = pcg_report[['cna']][['eval']]}
+```
+
+```{r conditional_msi, child='msi.Rmd', eval = pcg_report[['msi']][['eval']]}
+```
+
+```{r conditional_msi_missing, child='msi_missing.Rmd', eval = pcg_report[['msi']][['missing_data']]}
+```
+
+```{r conditional_msig, child='mutational_signature.Rmd', eval = pcg_report[['m_signature']][['eval']]}
+```
+
+```{r conditional_msig_missing, child='msig_missing.Rmd', eval = pcg_report[['m_signature']][['missing_data']]}
 ```
 
 ## References

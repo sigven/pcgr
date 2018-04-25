@@ -1,0 +1,154 @@
+
+### Tier 2 - Variants of potential clinical significance {.tabset}
+
+- Tier 2 considers evidence items of _i)_ strong evidence levels (A & B) in other tumor types, and _ii)_ weak evidence levels (C, D & E) in the query tumor type (_`r pcg_report[['tumor_class']]`_). Using the [database for clinical interpretations of variants in cancer (CIViC) ](https://civic.genome.wustl.edu/#/home) and [Cancer Biomarkers database](https://www.cancergenomeinterpreter.org/biomarkers), a total of __`r nrow(pcg_report[['snv_indel']][['variant_display']][['tier2']])`__ unique, somatic variants were found in the tumor sample:
+    * Tier 2 - Predictive/Therapeutic: __`r nrow(pcg_report[['snv_indel']][['clinical_evidence_item']][['other_tumortype']][['predictive']][['A_B']]) + nrow(pcg_report[['snv_indel']][['clinical_evidence_item']][['specific_tumortype']][['predictive']][['C_D_E']])`__ evidence items
+    * Tier 2 - Prognostic: __`r nrow(pcg_report[['snv_indel']][['clinical_evidence_item']][['other_tumortype']][['prognostic']][['A_B']]) + nrow(pcg_report[['snv_indel']][['clinical_evidence_item']][['specific_tumortype']][['prognostic']][['C_D_E']])`__ evidence items
+    * Tier 2 - Diagnostic: __`r nrow(pcg_report[['snv_indel']][['clinical_evidence_item']][['other_tumortype']][['diagnostic']][['A_B']]) + nrow(pcg_report[['snv_indel']][['clinical_evidence_item']][['specific_tumortype']][['diagnostic']][['C_D_E']])`__ evidence items
+
+<br><br>
+
+
+```{r prepare_tier2_data, echo=F, results='asis'}
+
+show_tier2_filters <- list()
+missing_tier2_items <- list()
+eitems <- list()
+for(type in c('diagnostic','prognostic','predictive')){
+  show_tier2_filters[[type]] <- F
+  missing_tier2_items[[type]] <- T
+  eitems[[type]] <- data.frame()
+  if(nrow(pcg_report[['snv_indel']][['clinical_evidence_item']][['other_tumortype']][[type]][['A_B']]) > 0 | nrow(pcg_report[['snv_indel']][['clinical_evidence_item']][['specific_tumortype']][[type]][['C_D_E']]) > 0){
+    eitems[[type]] <- rbind(pcg_report[['snv_indel']][['clinical_evidence_item']][['other_tumortype']][[type]][['A_B']], pcg_report[['snv_indel']][['clinical_evidence_item']][['specific_tumortype']][[type]][['C_D_E']])
+    show_tier2_filters[[type]] <- T
+    missing_tier2_items[[type]] <- F
+  }
+}
+
+```
+
+
+#### Predictive biomarkers
+
+<br>
+
+```{r tier2_predictive, echo=F, results = 'asis', eval = show_tier2_filters[['predictive']]}
+library(summarywidget)
+library(crosstalk)
+
+variants_tier2_predictive_shared <- crosstalk::SharedData$new(eitems[['predictive']])
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("CANCER_TYPE", "Cancer type", variants_tier2_predictive_shared, ~CANCER_TYPE),
+    crosstalk::filter_select("CLINICAL_SIGNIFICANCE", "Clinical significance", variants_tier2_predictive_shared, ~CLINICAL_SIGNIFICANCE),
+    crosstalk::filter_select("EVIDENCE_LEVEL", "Evidence level", variants_tier2_predictive_shared, ~EVIDENCE_LEVEL)
+  ),
+  list(
+    crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_tier2_predictive_shared, ~CONSEQUENCE),
+    crosstalk::filter_select("BIOMARKER_MAPPING", "Biomarker mapping", variants_tier2_predictive_shared, ~BIOMARKER_MAPPING),
+    crosstalk::filter_select("THERAPEUTIC_CONTEXT", "Therapeutic context", variants_tier2_predictive_shared, ~THERAPEUTIC_CONTEXT)
+  )
+)
+
+cat('The table below lists all variant-evidence item associations:',sep='\n')
+htmltools::br()
+htmltools::br()
+
+crosstalk::bscols(
+  DT::datatable(variants_tier2_predictive_shared, escape=F,extensions=c("Buttons","Responsive"), width = "100%",options=list(buttons = c('csv','excel'),dom = 'Bfrtip')) %>%
+ DT::formatStyle('EVIDENCE_LEVEL', backgroundColor = DT::styleEqual(c('A: Validated','A: FDA/NCCN/ELN guidelines','B: Clinical evidence','B1: Clinical evidence: late trials','B2: Clinical evidence: early trials','C: Case study','D: Preclinical evidence','E: Indirect evidence'), c("#009E73","#009E73","#56B4E9", "#56B4E9","#56B4E9","#0072B2","#E69F00", "#F0E442")))
+)
+
+#htmltools::br()
+
+```
+
+```{r tier2_predictive_missing, echo=F, results = 'asis', eval = missing_tier2_items[['predictive']]}
+cat('<i>No variant-evidence item associations found.</i>',sep='\n')
+cat('\n')
+```
+
+<br><br>
+
+#### Prognostic biomarkers
+
+<br>
+
+```{r tier2_prognostic, echo=F, results='asis', eval = show_tier2_filters[['prognostic']]}
+
+library(summarywidget)
+library(crosstalk)
+
+variants_tier2_prognostic_shared <- crosstalk::SharedData$new(eitems[['prognostic']])
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_tier2_prognostic_shared, ~CONSEQUENCE),
+    crosstalk::filter_select("CANCER_TYPE", "Cancer type", variants_tier2_prognostic_shared, ~CANCER_TYPE),
+    crosstalk::filter_select("CLINICAL_SIGNIFICANCE", "Clinical significance", variants_tier2_prognostic_shared, ~CLINICAL_SIGNIFICANCE)
+  ),
+  list(
+    crosstalk::filter_select("EVIDENCE_LEVEL", "Evidence level", variants_tier2_prognostic_shared, ~EVIDENCE_LEVEL),
+    crosstalk::filter_select("BIOMARKER_MAPPING", "Biomarker mapping", variants_tier2_prognostic_shared, ~BIOMARKER_MAPPING)
+  )
+)
+cat('The table below lists all variant-evidence item associations:',sep='\n')
+htmltools::br()
+htmltools::br()
+
+crosstalk::bscols(
+  DT::datatable(variants_tier2_prognostic_shared, escape=F,extensions=c("Buttons","Responsive"), width = "100%",options=list(buttons = c('csv','excel'),dom = 'Bfrtip')) %>%
+  DT::formatStyle('EVIDENCE_LEVEL', backgroundColor = DT::styleEqual(c('A: Validated','A: FDA/NCCN/ELN guidelines','B: Clinical evidence','B1: Clinical evidence: late trials','B2: Clinical evidence: early trials','C: Case study','D: Preclinical evidence','E: Indirect evidence'), c("#009E73","#009E73","#56B4E9", "#56B4E9","#56B4E9","#0072B2","#E69F00", "#F0E442")))
+)
+#htmltools::br()
+
+```
+
+```{r tier2_prognostic_missing, echo=F, results = 'asis', eval = missing_tier2_items[['prognostic']]}
+cat('<i>No variant-evidence item associations found.</i>',sep='\n')
+cat('\n')
+```
+
+<br><br>
+
+#### Diagnostic biomarkers
+
+<br>
+
+```{r tier2_diagnostic, echo=F, results='asis', eval = show_tier2_filters[['diagnostic']]}
+
+library(summarywidget)
+library(crosstalk)
+
+variants_tier2_diagnostic_shared <- crosstalk::SharedData$new(eitems[['diagnostic']])
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_tier2_diagnostic_shared, ~CONSEQUENCE),
+    crosstalk::filter_select("CANCER_TYPE", "Cancer type", variants_tier2_diagnostic_shared, ~CANCER_TYPE),
+    crosstalk::filter_select("CLINICAL_SIGNIFICANCE", "Clinical association", variants_tier2_diagnostic_shared, ~CLINICAL_SIGNIFICANCE)
+
+  ),
+  list(
+    crosstalk::filter_select("EVIDENCE_LEVEL", "Evidence level", variants_tier2_diagnostic_shared, ~EVIDENCE_LEVEL),
+    crosstalk::filter_select("BIOMARKER_MAPPING", "Biomarker mapping", variants_tier2_diagnostic_shared, ~BIOMARKER_MAPPING)
+  )
+)
+cat('The table below lists all variant-evidence item associations:',sep='\n')
+htmltools::br()
+htmltools::br()
+
+crosstalk::bscols(
+  DT::datatable(variants_tier2_diagnostic_shared, escape=F,extensions=c("Buttons","Responsive"), width = "100%",options=list(buttons = c('csv','excel'),dom = 'Bfrtip')) %>%
+  DT::formatStyle('EVIDENCE_LEVEL', backgroundColor = DT::styleEqual(c('A: Validated','A: FDA/NCCN/ELN guidelines','B: Clinical evidence','B1: Clinical evidence: late trials','B2: Clinical evidence: early trials','C: Case study','D: Preclinical evidence','E: Indirect evidence'), c("#009E73","#009E73","#56B4E9", "#56B4E9","#56B4E9","#0072B2","#E69F00", "#F0E442")))
+)
+#htmltools::br()
+
+```
+
+```{r tier2_diagnostic_missing, echo=F, results = 'asis', eval = missing_tier2_items[['diagnostic']]}
+cat('<i>No variant-evidence item associations found.</i>',sep='\n')
+cat('\n')
+```
+
+<br><br>
+
+

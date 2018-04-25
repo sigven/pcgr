@@ -1,14 +1,26 @@
 Getting started
 ---------------
 
-Prerequisites
-~~~~~~~~~~~~~
+STEP 0: Python
+~~~~~~~~~~~~~~
 
-Installation of Docker
-^^^^^^^^^^^^^^^^^^^^^^
+An installation of Python (version *3.6*) is required to run PCGR. Check
+that Python is installed by typing ``python --version`` in your terminal
+window. In addition, a `Python library <https://github.com/uiri/toml>`__
+for parsing configuration files encoded with
+`TOML <https://github.com/toml-lang/toml>`__ is needed. To install,
+simply run the following command:
 
--  Running PCGR requires that Docker is set up on your host. Docker has
-   very complete installation instructions for different platforms:
+::
+
+    pip install toml
+
+STEP 1: Installation of Docker
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1. `Install the Docker
+   engine <https://docs.docker.com/engine/installation/>`__ on your
+   preferred platform
 
    -  installing `Docker on
       Linux <https://docs.docker.com/engine/installation/linux/>`__
@@ -20,65 +32,104 @@ Installation of Docker
       `mounting of data
       volumes <https://github.com/docker/toolbox/issues/607>`__)
 
--  Check that Docker is running, e.g by typing ``docker ps`` or
-   ``docker images`` in your terminal window
+2. Test that Docker is running, e.g. by typing ``docker ps`` or
+   ``docker images`` in the terminal window
+3. Adjust the computing resources dedicated to the Docker, i.e.:
 
--  **IMPORTANT**: The following represent the *minimal* computing
-   resources that must be assigned to the Docker virtual machine:
+   -  Memory: minimum 5GB
+   -  CPUs: minimum 4
+   -  `How to - Mac OS
+      X <https://docs.docker.com/docker-for-mac/#advanced>`__
 
-   -  Memory: 5GB
-   -  CPUs: 4
+STEP 2: Download PCGR and data bundle
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-   For Docker version 1.13 on `Mac OS
-   X <https://docs.docker.com/docker-for-mac/#advanced>`__ there is an
-   option to change CPU's and RAM from the UI and restart Docker. This
-   can be found through `Docker Preferences
-   (Advanced) <https://docs.docker.com/docker-for-windows/#advanced>`__
-   in the toolbar. Similarly for `Docker for
-   Windows <https://docs.docker.com/docker-for-windows/#advanced>`__.
-
-Python
-^^^^^^
-
-An installation of Python (version 2.7.13) is required to run PCGR.
-Check that Python is installed by typing ``python --version`` in your
-terminal window. In addition, a `Python
-library <https://github.com/uiri/toml>`__ for parsing configuration
-files encoded with `TOML <https://github.com/toml-lang/toml>`__ is
-needed. To install, simply run the following command:
-
-::
-
-    pip install toml
-
-Download PCGR
-^^^^^^^^^^^^^
-
--  Download and unpack the `latest software release
-   (0.5.3) <https://github.com/sigven/pcgr/releases/latest>`__
-
--  Download and unpack the data bundle (approx. 16Gb) in the PCGR
+1. Download and unpack the `latest software release
+   (0.6.0) <https://github.com/sigven/pcgr/releases/tag/v0.6.0>`__
+2. Download and unpack the assembly-specific data bundle in the PCGR
    directory
 
-   -  Download `the accompanying data
-      bundle <https://drive.google.com/file/d/1NSeMWpLVMBcCEDYpOLsuWSnKfZEaamip/>`__
-      from Google Drive to ``~/pcgr-X.X`` (replace *X.X* with the
-      version number, e.g. ``~/pcgr-0.5.3``)
-   -  Decompress and untar the bundle, e.g. through the following Unix
-      command:
-      ``gzip -dc pcgr.databundle.GRCh37.YYYYMMDD.tgz | tar xvf -``
+   -  `grch37 data
+      bundle <https://drive.google.com/open?id=1tOyPmzgXkSZjPJQOojFQxUP8JlQuQqLq>`__
+      (approx 9Gb)
+   -  `grch38 data
+      bundle <https://drive.google.com/open?id=1cKq-rgSNCYPCUJ38pCi_xy6_PJH-FZWD>`__
+      (approx 9Gb)
+   -  *Unpacking*:
+      ``gzip -dc pcgr.databundle.grch37.YYYYMMDD.tgz | tar xvf -``
 
    A *data/* folder within the *pcgr-X.X* software folder should now
    have been produced
+3. Pull the `PCGR Docker image
+   (0.6.0) <https://hub.docker.com/r/sigven/pcgr/>`__ from DockerHub
+   (approx 5.1Gb):
 
--  Pull the `PCGR Docker image -
-   0.5.3 <https://hub.docker.com/r/sigven/pcgr/>`__ from DockerHub
-   (approx 4.2Gb) :
+   -  ``docker pull sigven/pcgr:0.6.0`` (PCGR annotation engine)
 
-   -  ``docker pull sigven/pcgr:0.5.3`` (PCGR annotation engine)
+STEP 3: Input preprocessing
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Run test - generation of clinical report for a cancer genome
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The PCGR workflow accepts two types of input files:
+
+-  An unannotated, single-sample VCF file (>= v4.2) with called somatic
+   variants (SNVs/InDels)
+-  A copy number segment file
+
+PCGR can be run with either or both of the two input files present.
+
+-  We **strongly** recommend that the input VCF is compressed and
+   indexed using `bgzip <http://www.htslib.org/doc/tabix.html>`__ and
+   `tabix <http://www.htslib.org/doc/tabix.html>`__
+-  If the input VCF contains multi-allelic sites, these will be subject
+   to `decomposition <http://genome.sph.umich.edu/wiki/Vt#Decompose>`__
+-  Variants used for reporting should be designated as 'PASS' in the VCF
+   FILTER column
+
+The tab-separated values file with copy number aberrations **MUST**
+contain the following four columns:
+
+-  Chromosome
+-  Start
+-  End
+-  Segment\_Mean
+
+Here, *Chromosome*, *Start*, and *End* denote the chromosomal segment,
+and **Segment\_Mean** denotes the log(2) ratio for a particular segment,
+which is a common output of somatic copy number alteration callers.
+Below shows the initial part of a copy number segment file that is
+formatted correctly according to PCGR's requirements:
+
+::
+
+     Chromosome Start   End Segment_Mean
+     1 3218329 3550598 0.0024
+     1 3552451 4593614 0.1995
+     1 4593663 6433129 -1.0277
+
+STEP 4: Configure PCGR
+~~~~~~~~~~~~~~~~~~~~~~
+
+The PCGR configuration file, formatted using
+`TOML <https://github.com/toml-lang/toml>`__ (an easy to read file
+format) enables the user to configure a number of options in the PCGR
+workflow, related to the following:
+
+-  Tumor type of input sample
+-  Tier model
+-  Sequencing depth/allelic support thresholds
+-  MSI prediction
+-  Mutational signatures analysis
+-  Coding target size - for mutational burden analysis
+-  Tumor-only analysis options (i.e. exclusion of germline
+   variants/enrichment for somatic calls)
+-  VEP/\ *vcfanno* options
+-  Log-ratio thresholds for gains/losses in CNA analysis
+
+More details about the exact `usage of the configuration
+options <http://pcgr.readthedocs.io/en/latest/input.html#PCGR-configuration-file>`__.
+
+STEP 5: Run example
+~~~~~~~~~~~~~~~~~~~
 
 A tumor sample report is generated by calling the Python script
 **pcgr.py**, which takes the following arguments and options:
@@ -86,16 +137,18 @@ A tumor sample report is generated by calling the Python script
 ::
 
     usage: pcgr.py [-h] [--input_vcf INPUT_VCF] [--input_cna INPUT_CNA]
-             [--force_overwrite] [--version]
-             pcgr_dir output_dir configuration_file sample_id
+            [--force_overwrite] [--version] [--basic]
+            pcgr_dir output_dir {grch37,grch38} configuration_file
+            sample_id
 
     Personal Cancer Genome Reporter (PCGR) workflow for clinical interpretation of
     somatic nucleotide variants and copy number aberration segments
 
     positional arguments:
     pcgr_dir              PCGR base directory with accompanying data directory,
-                    e.g. ~/pcgr-0.5.3
+                    e.g. ~/pcgr-0.6.0
     output_dir            Output directory
+    {grch37,grch38}       Genome assembly build: grch37 or grch38
     configuration_file    PCGR configuration file (TOML format)
     sample_id             Tumor sample/cancer genome identifier - prefix for
                     output files
@@ -104,8 +157,7 @@ A tumor sample report is generated by calling the Python script
     -h, --help            show this help message and exit
     --input_vcf INPUT_VCF
                     VCF input file with somatic query variants
-                    (SNVs/InDels). Note: GRCh37 is currently the only
-                    reference genome build supported (default: None)
+                    (SNVs/InDels). (default: None)
     --input_cna INPUT_CNA
                     Somatic copy number alteration segments (tab-separated
                     values) (default: None)
@@ -114,52 +166,34 @@ A tumor sample report is generated by calling the Python script
                     overwrite of existing result files by using this flag
                     (default: False)
     --version             show program's version number and exit
-
-The configuration file, formatted using
-`TOML <https://github.com/toml-lang/toml>`__ (an easy to read file
-format) enables the user to configure a number of options in the PCGR
-workflow, related to the following:
-
--  MSI prediction
--  Mutational signatures analysis
--  Coding target size - for mutational burden analysis
--  Tumor-only analysis options (i.e. exclusion of germline
-   variants/enrichment for somatic calls)
--  VEP/vcfanno options
--  Specification of INFO tags in VCF that denote sequencing
-   depth/allelic support of variants
--  Log-ratio thresholds for gains/losses in CNA analysis
+    --basic               Run functional variant annotation on VCF through
+                    VEP/vcfanno, omit other analyses (i.e. CNA, MSI,
+                    report generation etc. (STEP 4) (default: False)
 
 The *examples* folder contain input files from two tumor samples
-sequenced within TCGA. It also contains a PCGR configuration file. A
+sequenced within TCGA. It also contains PCGR configuration files. A
 report for a colorectal tumor case can be generated by running the
 following command in your terminal window:
 
-``python pcgr.py --input_vcf ~/pcgr-0.5.3/examples/tumor_sample.COAD.vcf.gz``
-``--input_cna ~/pcgr-0.5.3/examples/tumor_sample.COAD.cna.tsv``
-``~/pcgr-0.5.3 ~/pcgr-0.5.3/examples``
-\`\ ``~/pcgr-0.5.3/examples/pcgr_configuration_examples.toml tumor_sample.COAD``
+``python pcgr.py --input_vcf ~/pcgr-0.6.0/examples/tumor_sample.COAD.vcf.gz``
+``--input_cna ~/pcgr-0.6.0/examples/tumor_sample.COAD.cna.tsv``
+``~/pcgr-0.6.0 ~/pcgr-0.6.0/examples grch37 ~/pcgr-0.6.0/examples/pcgr_conf.COAD.toml tumor_sample.COAD``
 
 This command will run the Docker-based PCGR workflow and produce the
 following output files in the *examples* folder:
 
-1. **tumor\_sample.COAD.pcgr.html** - An interactive HTML report for
-   clinical interpretation
-2. **tumor\_sample.COAD.pcgr.vcf.gz** - VCF file with rich set of
-   annotations for precision oncology
-3. **tumor\_sample.COAD.pcgr.maf** - A basic MAF file for use as input
-   in downstream analyses with other tools (e.g.
-   `2020plus <https://github.com/KarchinLab/2020plus>`__, MutSigCV)
-4. **tumor\_sample.COAD.pcgr.snvs\_indels.tiers.tsv** - Tab-separated
-   values file with variants organized according to tiers of functional
-   relevance
-5. **tumor\_sample.COAD.pcgr.mutational\_signatures.tsv** -
-   Tab-separated values file with estimated contributions by known
-   mutational signatures and associated underlying etiologies
-6. **tumor\_sample.COAD.pcgr.snvs\_indels.biomarkers.tsv** -
-   Tab-separated values file with clinical evidence items associated
-   with biomarkers for diagnosis, prognosis or drug
-   sensitivity/resistance
-7. **tumor\_sample.COAD.pcgr.cna\_segments.tsv.gz** - Tab-separated
-   values file with annotations of gene transcripts that overlap with
-   somatic copy number aberrations
+1. **tumor\_sample.COAD.pcgr\_acmg.html** - An interactive HTML report
+   for clinical interpretation
+2. **tumor\_sample.COAD.pcgr\_acmg.pass.vcf.gz** - Bgzipped VCF file
+   with rich set of annotations for precision oncology
+3. **tumor\_sample.COAD.pcgr\_acmg.pass.tsv.gz** - Compressed
+   vcf2tsv-converted file with rich set of annotations for precision
+   oncology
+4. **tumor\_sample.COAD.pcgr\_acmg.snvs\_indels.tiers.tsv** -
+   Tab-separated values file with variants organized according to tiers
+   of functional relevance
+5. **tumor\_sample.COAD.pcgr\_acmg.json** - JSON dump of HTML report
+   content
+6. **tumor\_sample.COAD.pcgr\_acmg.cna\_segments.tsv.gz** - Compressed
+   tab-separated values file with annotations of gene transcripts that
+   overlap with somatic copy number aberrations

@@ -1,5 +1,10 @@
 # PCGR configuration options (TOML).
 
+[tier_model]
+## tier model for prioritization of SNVs/InDels ("pcgr_acmg" or "pcgr")
+## the original "pcgr" model did not incorporate tumor type of the query tumor
+tier_model = "pcgr_acmg"
+
 [tumor_only]
 # If input VCF contains mix of germline/somatic (variants called with no matching control, i.e. tumor-only) set vcf_tumor_only to true
 vcf_tumor_only = false
@@ -37,18 +42,24 @@ tcga_recurrence = 2
 ## exclude all non protein-coding variants
 exclude_noncoding = true
 
-# set VCF INFO columns that contains tumor sequencing depth at variant
+# set VCF INFO columns (tags) that contains tumor sequencing depth at variant
 # site (tumor_dp_tag), tumor variant allelic fraction (tumor_af_tag) etc.
 [allelic_support]
 tumor_dp_tag = "TDP"
 tumor_af_tag = "TVAF"
-normal_dp_tag = "_na"
-normal_af_tag = "_na"
+normal_dp_tag = ""
+normal_af_tag = ""
 call_conf_tag = "TAL"
 
+tumor_dp_min = 0
+tumor_af_min = 0.0
+normal_dp_min = 0
+normal_af_max = 1.0
+
 [mutational_burden]
+mutational_burden = true
 # size of coding target region in megabases
-target_size_mb = 40
+target_size_mb = 36
 
 [cna]
 # thresholds for determination of copy number gains and homozygous deletions
@@ -62,15 +73,61 @@ msi = true
 # Identify relative contribution of 30 known mutational signatures (COSMIC) through the deconstructSigs framework
 mutsignatures = true
 # deconstructSigs option: number of mutational signatures to limit the search to ('signatures.limit' in whichSignatures)
-mutsignatures_signature_limit = 5
+mutsignatures_signature_limit = 6
 # deconstructSigs option: type of trimer count normalization for inference of known mutational signatures, see explanation at https://github.com/raerose01/deconstructSigs"
 # options = 'default', 'exome', 'genome', 'exome2genome'
 # NOTE: If your data (VCF) is from exome sequencing, 'default' or 'exome2genome' should be used. See https://github.com/raerose01/deconstructSigs/issues/2
 mutsignatures_normalization = "default"
 # Require a minimum number of mutations for signature estimation
 mutsignatures_mutation_limit = 100
+# deconstructSigs option: discard any signature contributions with a weight less than this amount
+mutsignatures_cutoff = 0.06
+
+[tumor_type]
+Adrenal_Gland_Cancer_NOS = false
+Ampullary_Carcinoma_NOS = false
+Biliary_Tract_Cancer_NOS = false
+Bladder_Urinary_Tract_Cancer_NOS = false
+Blood_Cancer_NOS = false
+Bone_Cancer_NOS = false
+Breast_Cancer_NOS = true
+CNS_Brain_Cancer_NOS = false
+Colorectal_Cancer_NOS = false
+Cervical_Cancer_NOS = false
+DNA_Repair_Deficiency_Disorders = false
+Esophageal_Stomach_Cancer_NOS = false
+Head_And_Neck_Cancer_NOS = false
+Hereditary_Cancer_NOS = false
+Kidney_Cancer_NOS = false
+Leukemia_NOS = false
+Liver_Cancer_NOS = false
+Lung_Cancer_NOS = false
+Lymphoma_Hodgkin_NOS = false
+Lymphoma_Non_Hodgkin_NOS = false
+Mesothelioma = false
+Multiple_Myeloma = false
+Ovarian_Fallopian_Tube_Cancer_NOS = false
+Pancreatic_Cancer_NOS = false
+Penile_Cancer_NOS = false
+Peripheral_Nervous_System_Cancer_NOS = false
+Peritoneal_Cancer_NOS = false
+Pleural_Cancer_NOS = false
+Prostate_Cancer_NOS = false
+Skin_Cancer_NOS = false
+Soft_Tissue_Cancer_NOS = false
+Stomach_Cancer_NOS = false
+Testicular_Cancer_NOS = false
+Thymic_Cancer_NOS = false
+Thyroid_Cancer_NOS = false
+Uterine_Cancer_NOS = false
+Vulvar_Vaginal_Cancer_NOS = false
+
+[visual]
+# Choose visual theme of report, any of: "default", "cerulean", "journal", "flatly", "readable", "spacelab", "united", "cosmo", "lumen", "paper", "sandstone", "simplex", or "yeti" (https://bootswatch.com/)
+report_theme = "default"
 
 [other]
+vcf_validation = true
 list_noncoding = true
 n_vcfanno_proc = 4
 n_vep_forks = 4

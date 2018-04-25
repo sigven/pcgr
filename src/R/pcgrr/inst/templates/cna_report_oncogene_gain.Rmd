@@ -1,15 +1,15 @@
 ### Proto-oncogenes subject to copy number amplifications
 <br>
-A total of __`r nrow(report_data$cna_data$oncogene_amplified)`__ proto-oncogenes are completely covered (i.e. transcript overlapping 100%) by genomic segments subject to amplifications.
+A total of __`r nrow(pcg_report[['cna']][['variant_display']][['oncogene_gain']])`__ proto-oncogenes are covered (i.e. transcript overlapping  >= `r pcg_report[['pcgr_config']][['cna']][['cna_overlap_pct']]`%) by genomic segments subject to amplifications.
 
 ```{r cna_oncogenes_amplified, echo=F}
 
 myOptions <- list(paging = F, searching=T,caching=F)
-if(nrow(report_data$cna_data$oncogene_amplified) >= 10){
+if(nrow(pcg_report[['cna']][['variant_display']][['oncogene_gain']]) >= 10){
   myOptions <- list(paging = T,pageLength=10, searching=T,caching=F)
 }
-if(nrow(report_data$cna_data$oncogene_amplified) > 0){
-  DT::datatable(report_data$cna_data$oncogene_amplified, options = myOptions, escape=F, extensions = "Responsive")
+if(nrow(pcg_report[['cna']][['variant_display']][['oncogene_gain']]) > 0){
+  DT::datatable(pcg_report[['cna']][['variant_display']][['oncogene_gain']], options = myOptions, escape=F, extensions = "Responsive")
 }
 ```
 

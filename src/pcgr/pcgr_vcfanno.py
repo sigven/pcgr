@@ -15,17 +15,16 @@ def __main__():
    parser = argparse.ArgumentParser(description='Run brentp/vcfanno - annotate a VCF file against multiple VCF files in parallel', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
    parser.add_argument('query_vcf', help='Bgzipped input VCF file with query variants (SNVs/InDels)')
    parser.add_argument('out_vcf', help='Output VCF file with appended annotations from multiple VCF files')
-   parser.add_argument('pcgr_dir', help='PCGR base directory')
+   parser.add_argument('pcgr_db_dir', help='PCGR data directory')
    parser.add_argument('--num_processes', help="Number of processes vcfanno can use during annotation", default=4)
-   #parser.add_argument("--cosmic",action = "store_true", help="Annotate VCF with annotations from Catalogue of somatic mutations in cancer")
    parser.add_argument("--docm",action = "store_true", help="Annotate VCF with annotations from Database of Curated Mutations")
    parser.add_argument("--intogen_driver_mut",action = "store_true", help="Annotate VCF with predicted cancer driver mutations from IntoGen's Catalog of Driver Mutations")
    parser.add_argument("--clinvar",action = "store_true", help="Annotate VCF with annotations from ClinVar")
-   parser.add_argument("--dbsnp",action = "store_true", help="Annotate VCF with annotations from database of short genetic variations")
    parser.add_argument("--dbnsfp",action = "store_true", help="Annotate VCF with annotations from database of non-synonymous functional predictions")
    parser.add_argument("--tcga",action = "store_true", help="Annotate VCF with variant frequencies from the The Cancer Genome Atlas")
    parser.add_argument("--civic",action = "store_true", help="Annotate VCF with annotations from the Clinical Interpretation of Variants in Cancer database")
    parser.add_argument("--cbmdb",action = "store_true", help="Annotate VCF with annotations from the Cancer bioMarkers database")
+   parser.add_argument("--icgc",action = "store_true", help="Annotate VCF with known variants found in the ICGC-PCAWG sequencing project")
    parser.add_argument("--cancer_hotspots",action = "store_true", help="Annotate VCF with mutation hotspots from cancerhotspots.org")
    parser.add_argument("--uniprot",action = "store_true", help="Annotate VCF with protein functional features from the UniProt Knowledgebase")
    parser.add_argument("--pcgr_onco_xref",action = "store_true", help="Annotate VCF with transcript annotations from PCGR (targeted drugs, protein complexes, cancer gene associations, etc)")
@@ -35,41 +34,37 @@ def __main__():
    vcfheader_file = args.out_vcf + '.tmp.' + str(random.randrange(0,10000000)) + '.header.txt'
    conf_fname = args.out_vcf + '.tmp.conf.toml'
    print_vcf_header(args.query_vcf, vcfheader_file, chromline_only = False)
-   run_vcfanno(args.num_processes, args.query_vcf, query_info_tags, vcfheader_file, args.pcgr_dir, conf_fname, args.out_vcf, args.docm, args.intogen_driver_mut, args.clinvar, args.tcga, args.dbsnp, args.dbnsfp, args.civic, args.cbmdb, args.uniprot, args.cancer_hotspots, args.pcgr_onco_xref)
+   run_vcfanno(args.num_processes, args.query_vcf, query_info_tags, vcfheader_file, args.pcgr_db_dir, conf_fname, args.out_vcf, args.docm, args.intogen_driver_mut, args.clinvar, args.tcga, args.dbnsfp, args.civic, args.cbmdb, args.icgc, args.uniprot, args.cancer_hotspots, args.pcgr_onco_xref)
 
 
 def prepare_vcfanno_configuration(vcfanno_data_directory, conf_fname, vcfheader_file, logger, datasource_info_tags, query_info_tags, datasource):
    for t in datasource_info_tags:
-      if query_info_tags.has_key(t):
+      if t in query_info_tags:
          logger.warning("Query VCF has INFO tag " + str(t) + ' - this is also present in the ' + str(datasource) + ' VCF/BED annotation file. This tag will be overwritten if not renamed in the query VCF')
    append_to_conf_file(datasource, datasource_info_tags, vcfanno_data_directory, conf_fname)
    append_to_vcf_header(vcfanno_data_directory, datasource, vcfheader_file)
 
-def run_vcfanno(num_processes, query_vcf, query_info_tags, vcfheader_file, pcgr_directory, conf_fname, output_vcf, docm, intogen_driver_mut, clinvar, tcga, dbsnp, dbnsfp, civic, cbmdb, uniprot, cancer_hotspots, pcgr_onco_xref):
+def run_vcfanno(num_processes, query_vcf, query_info_tags, vcfheader_file, pcgr_db_directory, conf_fname, output_vcf, docm, intogen_driver_mut, clinvar, tcga, dbnsfp, civic, cbmdb, icgc, uniprot, cancer_hotspots, pcgr_onco_xref):
    """
    Function that annotates a VCF file with vcfanno against a user-defined set of germline and somatic VCF files
    """
-   #cosmic_info_tags = ["COSMIC_MUTATION_ID","COSMIC_COUNT_GW","COSMIC_DRUG_RESISTANCE","COSMIC_FATHMM_PRED","COSMIC_CANCER_TYPE_ALL","COSMIC_CANCER_TYPE_GW","COSMIC_SITE_HISTOLOGY","COSMIC_VARTYPE","COSMIC_SAMPLE_SOURCE"]
+   
    civic_info_tags = ["CIVIC_ID","CIVIC_ID_2"]
    cbmdb_info_tags = ["CBMDB_ID"]
-   docm_info_tags = ["DOCM_DISEASE","DOCM_PMID"]
+   icgc_info_tags = ["ICGC_PCAWG_OCCURRENCE","ICGC_PCAWG_AFFECTED_DONORS"]
+   docm_info_tags = ["DOCM_PMID"]
    tcga_info_tags = ["TCGA_FREQUENCY","TCGA_PANCANCER_COUNT"]
    intogen_driver_mut_info_tags = ["INTOGEN_DRIVER_MUT"]
-   clinvar_info_tags = ["CLINVAR_MSID","CLINVAR_PMIDS","CLINVAR_SIG","CLINVAR_VARIANT_ORIGIN"]
+   clinvar_info_tags = ["CLINVAR_MSID","CLINVAR_PMIDS","CLINVAR_SIG","CLINVAR_VARIANT_ORIGIN","CLINVAR_MEDGEN_CUI"]
    cancer_hotspots_info_tags = ["CANCER_MUTATION_HOTSPOT"]
-   dbsnp_info_tags = ["GWAS_CATALOG_PMID","GWAS_CATALOG_TRAIT_URI","DBSNPRSID", "DBSNPBUILDID", "DBSNP_VALIDATION","DBSNP_MAPPINGSTATUS","DBSNP_SUBMISSIONS"]
    dbnsfp_info_tags = ["DBNSFP"]
    uniprot_info_tags = ["UNIPROT_FEATURE"]
    pcgr_onco_xref_info_tags = ["PCGR_ONCO_XREF"]
-   
-   pcgr_db_directory = pcgr_directory + '/data'
-   
-   #if cosmic is True:
-      #prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file, logger, cosmic_info_tags, query_info_tags, "cosmic")
+      
+   if icgc is True:
+      prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file, logger, icgc_info_tags, query_info_tags, "icgc")
    if clinvar is True:
       prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file, logger, clinvar_info_tags, query_info_tags, "clinvar")
-   if dbsnp is True:
-      prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file, logger, dbsnp_info_tags, query_info_tags, "dbsnp")
    if dbnsfp is True:
       prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file, logger, dbnsfp_info_tags, query_info_tags, "dbnsfp")
    if cbmdb is True:
@@ -90,9 +85,9 @@ def run_vcfanno(num_processes, query_vcf, query_info_tags, vcfheader_file, pcgr_
       prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file, logger, pcgr_onco_xref_info_tags, query_info_tags, "pcgr_onco_xref")
    
    out_vcf_vcfanno_unsorted1 = output_vcf + '.tmp.unsorted.1'
-   out_vcf_vcfanno_unsorted2 = output_vcf + '.tmp.unsorted.2'
-   out_vcf_vcfanno_sorted = output_vcf + '.tmp.sorted.1'
-   query_prefix = re.sub('\.vcf.gz$','',query_vcf)
+   #out_vcf_vcfanno_unsorted2 = output_vcf + '.tmp.unsorted.2'
+   #out_vcf_vcfanno_sorted = output_vcf + '.tmp.sorted.1'
+   query_prefix = re.sub(r'\.vcf.gz$','',query_vcf)
    print_vcf_header(query_vcf, vcfheader_file, chromline_only = True)
    command1 = "vcfanno -p=" + str(num_processes) + " " + str(conf_fname) + " " + str(query_vcf) + " > " + str(out_vcf_vcfanno_unsorted1) + " 2> " + str(query_prefix) + '.vcfanno.log'
    os.system(command1)

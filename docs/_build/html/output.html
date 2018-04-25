@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Input &amp; output &mdash; Personal Cancer Genome Reporter 0.5.3 documentation</title>
+  <title>Output &mdash; Personal Cancer Genome Reporter 0.6.0 documentation</title>
   
 
   
@@ -35,8 +35,9 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Personal Cancer Genome Reporter 0.5.3 documentation" href="index.html"/>
-        <link rel="prev" title="Annotation resources" href="annotation_resources.html"/> 
+    <link rel="top" title="Personal Cancer Genome Reporter 0.6.0 documentation" href="index.html"/>
+        <link rel="next" title="Tier models" href="tier_systems.html"/>
+        <link rel="prev" title="Input" href="input.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -64,7 +65,7 @@
             
             
               <div class="version">
-                0.5.3
+                0.6.0
               </div>
             
           
@@ -90,15 +91,14 @@
 <li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="annotation_resources.html">Annotation resources</a></li>
-<li class="toctree-l1"><a class="reference internal" href="annotation_resources.html#notes-on-variant-annotation-datasets">Notes on variant annotation datasets</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Input &amp; output</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#input">Input</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#vcf">VCF</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#copy-number-segments">Copy number segments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="input.html">Input</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Output</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#interactive-html-report">Interactive HTML report</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#interactive-datatables">Interactive datatables</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#output-interactive-html-report">Output - Interactive HTML report</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#output-somatic-snvs-indels">Output - Somatic SNVs/InDels</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#json-beta">JSON (beta)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#output-files-somatic-snvs-indels">Output files - somatic SNVs/InDels</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#variant-call-format-vcf">Variant call format - VCF</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#vep-consequence-annotations"><em>VEP consequence annotations</em></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#gene-information"><em>Gene information</em></a></li>
@@ -110,18 +110,18 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#tab-separated-values-tsv">Tab-separated values (TSV)</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#annotated-list-of-all-snvs-indels">Annotated List of all SNVs/InDels</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#biomarkers-among-snvs-indels">Biomarkers among SNVs/InDEls</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mutational-signatures">Mutational signatures</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#output-somatic-copy-number-aberrations">Output - Somatic copy number aberrations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#output-files-somatic-copy-number-aberrations">Output files - somatic copy number aberrations</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id1">1. Tab-separated values (TSV)</a></li>
 </ul>
 </li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="tier_systems.html">Tier models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CHANGELOG.html">CHANGELOG</a></li>
 </ul>
 
             
@@ -152,7 +152,7 @@
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
       
-    <li>Input &amp; output</li>
+    <li>Output</li>
       <li class="wy-breadcrumbs-aside">
         
           
@@ -166,168 +166,90 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="input-output">
-<h1>Input &amp; output<a class="headerlink" href="#input-output" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="input">
-<h2>Input<a class="headerlink" href="#input" title="Permalink to this headline">¶</a></h2>
-<p>The PCGR workflow accepts two types of input files:</p>
-<ul class="simple">
-<li>An unannotated, single-sample VCF file (&gt;= v4.2) with called somatic
-variants (SNVs/InDels)</li>
-<li>A copy number segment file</li>
-</ul>
-<p><strong>IMPORTANT NOTE: GRCh37 is the reference genome build currently
-supported by PCGR</strong></p>
-<p>PCGR can be run with either or both of the two input files present.</p>
-<div class="section" id="vcf">
-<h3>VCF<a class="headerlink" href="#vcf" title="Permalink to this headline">¶</a></h3>
-<ul class="simple">
-<li>We <strong>strongly</strong> recommend that the input VCF is compressed and
-indexed using <a class="reference external" href="http://www.htslib.org/doc/tabix.html">bgzip</a> and
-<a class="reference external" href="http://www.htslib.org/doc/tabix.html">tabix</a></li>
-<li>If the input VCF contains multi-allelic sites, these will be subject
-to <a class="reference external" href="http://genome.sph.umich.edu/wiki/Vt#Decompose">decomposition</a></li>
-<li>Variants used for reporting should be designated as &#8216;PASS&#8217; in the VCF
-FILTER column</li>
-</ul>
-<p><strong>IMPORTANT NOTE 1</strong>: Considering the VCF output for the <a class="reference external" href="https://www.biostars.org/p/19104/">numerous
-somatic SNV/InDel callers</a> that
-have been developed, we have a experienced a general lack of uniformity
-and robustness for the representation of somatic variant genotype data
-(e.g. variant allelic depths (tumor/normal), genotype quality etc.).
-Variant genotype data found as INFO tags in the input VCF can be
-specified as optional arguments to the PCGR workflow, which in turn can
-be used for interactive filtering in the tumor report.</p>
-<p><strong>IMPORTANT NOTE 2</strong>: PCGR generates a number of VCF INFO annotation
-tags that is appended to the query VCF. We will therefore encourage the
-users to submit query VCF files that have not been subject to
-annotations by other means, but rather a VCF file that comes directly
-from variant calling. If not, there are likely to be INFO tags in the
-query VCF file that coincide with those produced by PCGR.</p>
-</div>
-<div class="section" id="copy-number-segments">
-<h3>Copy number segments<a class="headerlink" href="#copy-number-segments" title="Permalink to this headline">¶</a></h3>
-<p>The tab-separated values file with copy number aberrations <strong>MUST</strong>
-contain the following four columns:</p>
-<ul class="simple">
-<li>Chromosome</li>
-<li>Start</li>
-<li>End</li>
-<li>Segment_Mean</li>
-</ul>
-<p>Here, <em>Chromosome</em>, <em>Start</em>, and <em>End</em> denote the chromosomal segment
-(GRCh37), and <strong>Segment_Mean</strong> denotes the log(2) ratio for a
-particular segment, which is a common output of somatic copy number
-alteration callers. Below shows the initial part of a copy number
-segment file that is formatted correctly according to PCGR&#8217;s
-requirements:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Chromosome</span>    <span class="n">Start</span>   <span class="n">End</span> <span class="n">Segment_Mean</span>
-<span class="mi">1</span> <span class="mi">3218329</span> <span class="mi">3550598</span> <span class="mf">0.0024</span>
-<span class="mi">1</span> <span class="mi">3552451</span> <span class="mi">4593614</span> <span class="mf">0.1995</span>
-<span class="mi">1</span> <span class="mi">4593663</span> <span class="mi">6433129</span> <span class="o">-</span><span class="mf">1.0277</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="section" id="output-interactive-html-report">
-<h2>Output - Interactive HTML report<a class="headerlink" href="#output-interactive-html-report" title="Permalink to this headline">¶</a></h2>
+  <div class="section" id="output">
+<h1>Output<a class="headerlink" href="#output" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="interactive-html-report">
+<h2>Interactive HTML report<a class="headerlink" href="#interactive-html-report" title="Permalink to this headline">¶</a></h2>
 <p>An interactive and tier-structured HTML report that shows the most
 relevant findings in the query cancer genome is provided with the
 following naming convention:</p>
-<p><strong>sample_id</strong>.pcgr.html</p>
-<p>The <strong>sample_id</strong> is provided as input by the user, and reflects a
-unique identifier of the tumor-normal sample pair to be analyzed.</p>
-<p>The report is structured in six main sections, described in more detail
-below:</p>
-<ol class="arabic">
-<li><p class="first"><strong>Annotation sources</strong></p>
+<p><strong>sample_id</strong>.<strong>tier_model</strong>.html</p>
 <ul class="simple">
-<li>Lists underlying tools and annotation sources (versions)</li>
+<li>The <strong>sample_id</strong> is provided as input by the user, and reflects a
+unique identifier of the tumor-normal sample pair to be analyzed.</li>
+<li>The <strong>tier_model</strong> is provided by the user and will be either
+<em>&#8216;pcgr&#8217;</em> or <em>&#8216;pcgr_acmg&#8217;</em></li>
+</ul>
+<p>The report is structured in seven main sections, described in more
+detail below:</p>
+<ol class="arabic simple">
+<li><strong>Settings &amp; annotation sources</strong><ul>
+<li>Lists underlying tools and annotation sources (links and versions)</li>
+<li>Lists key configurations provided by user</li>
 </ul>
 </li>
-<li><p class="first"><strong>Somatic SNVs/InDels</strong></p>
-<ul>
-<li><p class="first"><em>Summary statistics</em> - indicate number of SNVs/InDels as well as
-number of coding/non-coding variants</p>
-<ul class="simple">
-<li>Note that coding refers to protein-altering and variants at
-canonical splice-sites (donor, acceptor)</li>
-</ul>
-</li>
-<li><p class="first"><em>Mutational burden (TMB)</em> - given a coding target region size
-specified by the user, an estimate of the mutational burden is
-provided</p>
-</li>
-<li><p class="first"><em>Tier statistics</em> - indicate number of variant found in each tier
-(see below)</p>
-</li>
-<li><p class="first"><em>Global distribution - allelic support</em> - distribution (histogram)
-of variant allelic support for somatic variants (will only be
-present in the report if specific fields in input VCF is defined
-and specified by the user)</p>
-</li>
-<li><p class="first"><em>Global variant browser</em> - permits filtering of the whole
-SNV/Indel dataset by various criteria (call confidence, variant
-sequencing depth, variant consequence etc.)</p>
-</li>
-<li><p class="first">Variants are organized into five tiers (interactive datatables)
-according to clinical utility</p>
-<ul class="simple">
-<li><em>Tier 1</em> - constitutes variants linked to predictive,
-prognostic, diagnostic, and predisposision biomarkers in the
-<a class="reference external" href="http://civic.genome.wustl.edu">CIViC database</a> and the
-<a class="reference external" href="https://www.cancergenomeinterpreter.org/biomarkers">Cancer Biomarkers
-Database</a></li>
-<li><em>Tier 2</em> - includes other coding variants that are found in
-known cancer mutation hotspots, predicted as cancer driver
-mutations, or curated as disease-causing</li>
-<li><em>Tier 3</em> - includes other coding variants found in oncogenes or
-tumor suppressor genes</li>
-<li><em>Tier 4</em> - includes other coding variants</li>
-<li><em>Tier 5</em> - includes non-coding variants<ul>
-<li>will only present if specified by the user
-(&#8216;&#8211;list_noncoding&#8217;)</li>
-</ul>
-</li>
-<li><strong>NOTE</strong>: The tier structure is inspired by recommended variant
-prioritization by <a class="reference external" href="https://www.ncbi.nlm.nih.gov/pubmed/24768039">Dienstmann et al.,
-2014</a>. The
-table below shows the correspondence between the terminology
-for reportable variants used by Dienstmann et al. and the tiers
-in PCGR:</li>
-</ul>
-<table border="1" class="docutils">
-<colgroup>
-<col width="82%" />
-<col width="18%" />
-</colgroup>
-<thead valign="bottom">
-<tr class="row-odd"><th class="head"><a class="reference external" href="https://www.ncbi.nlm.nih.gov/pubmed/24768039">Dienstmann et al., 2014</a> (Figure 2)</th>
-<th class="head">PCGR</th>
-</tr>
-</thead>
-<tbody valign="top">
-<tr class="row-even"><td><em>Actionable</em></td>
-<td>Tier 1</td>
-</tr>
-<tr class="row-odd"><td><em>Other relevant variants</em></td>
-<td>Tier 2 &amp; Tier 3</td>
-</tr>
-<tr class="row-even"><td><em>Unknown</em>*</td>
-<td>Tier 4 (Tier 5)</td>
-</tr>
-</tbody>
-</table>
-<p>*While Dienstmann et al. suggest that the <em>Unknown</em> category
-should be categorized according to pathways, the PCGR employs an
-arrangement of variant results according to genes, using a
-literature-derived score of oncogenic potential (KEGG pathway
-information is also linked).</p>
+<li><strong>Main results</strong><ul>
+<li>Six value boxes that highlight the main findings of clinical
+relevance in the tumor:<ol class="arabic">
+<li>Mutational signatures - two most prevalent signatures (other
+than aging)</li>
+<li>Tier 1 variants (top four)</li>
+<li>Tier 2 variants (top four)</li>
+<li>Tumor mutational burden</li>
+<li>Microsatellite instability prediction</li>
+<li>Somatic copy number aberrations of clinical significance</li>
+</ol>
 </li>
 </ul>
 </li>
-<li><p class="first"><strong>Somatic CNA analysis</strong></p>
-<ul class="simple">
+<li><strong>Somatic SNVs/InDels</strong><ul>
+<li><em>Mutational burden (TMB)</em><ul>
+<li>given a coding target region size specified by the user
+(ideally the <strong>callable target size</strong>), an estimate of the
+mutational burden is provided</li>
+<li>is presently only computed for tumor-normal input (e.g.
+<em>vcf_tumor_only = false</em>)</li>
+<li>The estimated mutational burden is assigned a descriptive
+<em>tertile</em> based on thresholds defined by the user (these should
+reflect thresholds of clinical significance, and may vary for
+different tumor types)</li>
+</ul>
+</li>
+<li><em>Variant &amp; tier statistics</em><ul>
+<li>indicate total variant numbers across variant types, coding
+types and tiers</li>
+</ul>
+</li>
+<li><em>Global distribution - allelic support</em><ul>
+<li>distribution (histogram) of variant allelic support for somatic
+variants (will only be present in the report if specific fields
+in input VCF is defined and specified by the user)</li>
+</ul>
+</li>
+<li><em>Global variant browser</em><ul>
+<li>permits exploration of the whole SNV/InDel dataset by filtering
+along several dimensions (call confidence, variant sequencing
+depth/support, variant consequence etc.)</li>
+</ul>
+</li>
+<li><em>Tier tables</em><ul>
+<li>Variants are organized into four tiers (interactive datatables)
+according to clinical utility</li>
+<li>Users can choose between two <a class="reference external" href="tier_systems.html">tier
+models</a>:<ul>
+<li>the original model (<em>pcgr</em>) that do not take into account
+tumor type of input when assigning variants to (top) tiers</li>
+<li>the new model (<em>pcgr_acmg</em>) that takes into account tumor
+type of input and strength of clinical evidence when
+assigning variants to (top) tiers</li>
+</ul>
+</li>
+<li>Contents of the tier tables are outlined below</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>Somatic CNAs</strong><ul>
 <li><em>Segments - amplifications and homozygous deletions</em><ul>
 <li>Based on user-defined/default log-ratio thresholds of
 gains/losses, the whole CNA dataset can be navigated further
@@ -350,27 +272,26 @@ user-defined/default losses and potential targeted therapies</li>
 </ul>
 </li>
 <li><em>Copy number aberrations as biomarkers for prognosis, diagnosis,
-predisposition, and drug response</em><ul>
+and drug response</em><ul>
 <li>Interactive data table where the user can navigate aberrations
 acting as biomarkers across therapeutic contexts, tumor types,
-evidence level etc.</li>
+evidence levels etc.</li>
 </ul>
 </li>
 </ul>
 </li>
-<li><p class="first"><strong>MSI status</strong></p>
-<ul class="simple">
+<li><strong>MSI status</strong><ul>
 <li>Indicates predicted microsatellite stability from the somatic
 mutation profile and supporting evidence (details of the
 underlying MSI statistical classifier can be found
 <a class="reference external" href="http://rpubs.com/sigven/msi">here</a>)</li>
-<li>Note that the MSI classifier was trained on exome samples.</li>
+<li>The MSI classifier was trained on TCGA exome samples.</li>
 <li>Will only be present in the report if specified by the user in the
-configuration file (&#8216;msi = true&#8217;)</li>
+configuration file (i.e. <em>msi = true</em>) and if the input is
+tumor-normal (i.e. <em>vcf_tumor_only = false</em>)</li>
 </ul>
 </li>
-<li><p class="first"><strong>Mutational signatures</strong></p>
-<ul class="simple">
+<li><strong>Mutational signatures</strong><ul>
 <li>Estimation of relative contribution of <a class="reference external" href="http://cancer.sanger.ac.uk/cosmic/signatures">30 known mutational
 signatures</a> in
 tumor sample (using
@@ -378,27 +299,95 @@ tumor sample (using
 as the underlying framework)</li>
 <li>Datatable with signatures and proposed underlying etiologies</li>
 <li>Will only be present in the report if specified by the user in the
-configuration file (&#8216;mutsignatures = true&#8217;)</li>
+configuration file (i.e. <em>mutsignatures = true</em>) and if the input
+is tumor-normal (i.e. <em>vcf_tumor_only = false</em>)</li>
 <li><a class="reference external" href="https://github.com/raerose01/deconstructSigs">Trimer (i.e. DNA 3-mer)
 normalization</a>
 can be configured according to sequencing approach used (WES, WXS
-etc.) using the &#8216;mutsignatures_normalization&#8217; option, as can the
-minimum number of mutations required for analysis (option
-&#8216;mutsignatures_mutation_limit&#8217;) and the maximum number of
-mutational signatures in the search space (option
-&#8216;mutsignatures_signature_limit&#8217;)</li>
+etc.) using the &#8216;mutsignatures_normalization&#8217; option, as can the<ul>
+<li>minimum number of mutations required for analysis (option
+&#8216;mutsignatures_mutation_limit&#8217;)</li>
+<li>the maximum number of mutational signatures in the search space
+(option &#8216;mutsignatures_signature_limit&#8217;)</li>
+<li>possibility to discard any signature contributions with a
+weight less than a given cutoff (option
+&#8216;mutsignatures_cutoff&#8217;)</li>
 </ul>
 </li>
-<li><p class="first"><strong>References</strong></p>
-<ul class="simple">
+</ul>
+</li>
+<li><strong>References</strong><ul>
 <li>Supporting scientific literature (key report elements)</li>
 </ul>
 </li>
 </ol>
+<div class="section" id="interactive-datatables">
+<h3>Interactive datatables<a class="headerlink" href="#interactive-datatables" title="Permalink to this headline">¶</a></h3>
+<p>The interactive datatables contain a number of hyperlinked annotations
+similar to those defined for the annotated VCF file, including the
+following:</p>
 <ul class="simple">
-<li><a class="reference external" href="http://folk.uio.no/sigven/tumor_sample.BRCA.0.5.3.pcgr.html">View an example report for a breast tumor sample
+<li>SYMBOL - Gene symbol (Entrez/NCBI)</li>
+<li>PROTEIN_CHANGE - Amino acid change (VEP)</li>
+<li>CANCER_TYPE - Biomarker (tier 1/2): associated cancer type</li>
+<li>EVIDENCE_LEVEL - Biomarker (tier 1/2): evidence level (A,B,C,D,E)</li>
+<li>CLINICAL_SIGNIFICANCE - Biomarker (tier 1/2): drug sensitivity,
+poor/better outcome etc</li>
+<li>EVIDENCE_TYPE - Biomarker (tier 1/2):
+predictive/diagnostic/therapeutic</li>
+<li>DISEASE_ONTOLOGY_ID - Biomarker (tier 1/2): associated cancer type
+(Disease Ontology)</li>
+<li>EVIDENCE_DIRECTION - Biomarker (tier 1/2): supports/does not support</li>
+<li>DESCRIPTION - Biomarker (tier 1/2): description</li>
+<li>VARIANT_ORIGIN - Biomarker (tier 1/2): variant origin
+(germline/somatic)</li>
+<li>BIOMARKER_MAPPING - Biomarker (tier 1/2): accuracy of genomic
+mapping (exact,codon,exon)</li>
+<li>CITATION - Biomarker (tier 1/2): supporting literature</li>
+<li>THERAPEUTIC_CONTEXT - Biomarker (tier 1/2): associated drugs</li>
+<li>RATING - Biomarker (tier 1/2): trust rating from 1 to 5 (CIVIC)</li>
+<li>GENE_NAME - gene name description (Entrez/NCBI)</li>
+<li>PROTEIN_DOMAIN - PFAM protein domain</li>
+<li>PROTEIN_FEATURE - UniProt feature overlapping variant site</li>
+<li>CDS_CHANGE - Coding sequence change</li>
+<li>CANCER_MUTATION_HOTSPOT - Known cancer mutation hotspot</li>
+<li>TCGA_FREQUENCY - Frequency of variant in TCGA cohorts</li>
+<li>ICGC_PCAWG_OCCURRENCE - Frequency of variant in ICGC-PCAWG cohorts</li>
+<li>DOCM_LITERATURE - Literature links - DoCM</li>
+<li>DOCM_DISEASE - Associated diseases - DoCM</li>
+<li>INTOGEN_DRIVER_MUT - predicted driver mutation - IntOGen</li>
+<li>CONSEQUENCE - VEP consequence (primary transcript)</li>
+<li>HGVSc - from VEP</li>
+<li>HGVSp - from VEP</li>
+<li>ONCOGENE - Known proto-oncogene</li>
+<li>TUMOR_SUPPRESSOR - known tumor suppressor gene</li>
+<li>ONCOSCORE - Literature-derived score for oncogenic potential (gene
+level)</li>
+<li>PREDICTED_EFFECT - Effect predictions from dbNSFP</li>
+<li>VEP_ALL_CONSEQUENCE - All VEP consequences (multiple transcripts)</li>
+<li>DBSNP - dbSNP rsID</li>
+<li>COSMIC - Cosmic mutation IDs</li>
+<li>CLINVAR - ClinVar variant origin and associated phenotypes</li>
+<li>CANCER_ASSOCIATIONS - Gene-associated cancer types from DisGenet</li>
+<li>TARGETED_DRUGS - Targeted drugs from DGIdb-ChEMBL</li>
+<li>KEGG_PATHWAY - Gene-associated pathways from KEGG</li>
+<li>CALL_CONFIDENCE - Variant confidence (as set by user in input VCF)</li>
+<li>DP_TUMOR - Variant sequencing depth in tumor (as set by user in
+input VCF)</li>
+<li>AF_TUMOR - Variant allelic fraction in tumor (as set by user in
+input VCF)</li>
+<li>DP_NORMAL - Variant sequencing depth in normal (as set by user in
+input VCF)</li>
+<li>AF_NORMAL - Variant allelic fraction in tumor (as set by user in
+input VCF)</li>
+<li>GENOMIC_CHANGE - Variant ID</li>
+<li>GENOME_VERSION - Genome assembly</li>
+</ul>
+<p>Example reports:</p>
+<ul class="simple">
+<li><a class="reference external" href="http://folk.uio.no/sigven/tumor_sample.BRCA.pcgr_acmg.0.6.0.html">View an example report for a breast tumor sample
 (TCGA)</a></li>
-<li><a class="reference external" href="http://folk.uio.no/sigven/tumor_sample.COAD.0.5.3.pcgr.html">View an example report for a colon adenocarcinoma sample
+<li><a class="reference external" href="http://folk.uio.no/sigven/tumor_sample.COAD.pcgr_acmg.0.6.0.html">View an example report for a colon adenocarcinoma sample
 (TCGA)</a></li>
 </ul>
 <p>The HTML reports have been tested using the following browsers:</p>
@@ -408,14 +397,23 @@ mutational signatures in the search space (option
 <li>Google Chrome (57.0.2987.110)</li>
 </ul>
 </div>
-<div class="section" id="output-somatic-snvs-indels">
-<h2>Output - Somatic SNVs/InDels<a class="headerlink" href="#output-somatic-snvs-indels" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="json-beta">
+<h2>JSON (beta)<a class="headerlink" href="#json-beta" title="Permalink to this headline">¶</a></h2>
+<p>A JSON file that stores the HTML report content is provided. This file
+will easen the process of extracting particular parts of the report for
+further analysis. Presently, there is no detailed schema documented for
+the PCGR JSON structure. Some examples are shown below (using R) on how
+to extract information from the JSON file.</p>
+</div>
+<div class="section" id="output-files-somatic-snvs-indels">
+<h2>Output files - somatic SNVs/InDels<a class="headerlink" href="#output-files-somatic-snvs-indels" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="variant-call-format-vcf">
 <h3>Variant call format - VCF<a class="headerlink" href="#variant-call-format-vcf" title="Permalink to this headline">¶</a></h3>
 <p>A VCF file containing annotated, somatic calls (single nucleotide
 variants and insertion/deletions) is generated with the following naming
 convention:</p>
-<p><strong>sample_id</strong>.pcgr.vcf.gz</p>
+<p><strong>sample_id</strong>.<strong>tier_model</strong>.vcf.gz</p>
 <p>Here, the <strong>sample_id</strong> is provided as input by the user, and reflects
 a unique identifier of the tumor-normal sample pair to be analyzed.
 Following common standards, the annotated VCF file is compressed with
@@ -427,15 +425,14 @@ processing with the PCGR annotation pipeline:</p>
 <h4><em>VEP consequence annotations</em><a class="headerlink" href="#vep-consequence-annotations" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
 <li>CSQ - Complete consequence annotations from VEP. Format:
-Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|
-EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|
-Amino_acids|Codons|Existing_variation|ALLELE_NUM|DISTANCE|STRAND|
-FLAGS|PICK|VARIANT_CLASS|SYMBOL_SOURCE|HGNC_ID|CANONICAL|APPRIS|CCDS|
-ENSP|SWISSPROT|TREMBL|UNIPARC|RefSeq|DOMAINS|HGVS_OFFSET|HGVSg|AF|
-AFR_AF|AMR_AF|EAS_AF|EUR_AF|SAS_AF|gnomAD_AF|gnomAD_AFR_AF|
-gnomAD_AMR_AF|gnomAD_ASJ_AF|gnomAD_EAS_AF|gnomAD_FIN_AF|gnomAD_NFE_AF|
-gnomAD_OTH_AF|gnomAD_SAS_AF|CLIN_SIG|SOMATIC|PHENO|MOTIF_NAME|
-MOTIF_POS|HIGH_INF_POS|MOTIF_SCORE_CHANGE</li>
+Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|
+INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|
+Codons|Existing_variation|ALLELE_NUM|DISTANCE|STRAND|FLAGS|PICK|VARIANT_CLASS|
+SYMBOL_SOURCE|HGNC_ID|CANONICAL|APPRIS|CCDS|ENSP|SWISSPROT|TREMBL|UNIPARC|
+RefSeq|DOMAINS|HGVS_OFFSET|AF|AFR_AF|AMR_AF|EAS_AF|EUR_AF|SAS_AF|gnomAD_AF|
+gnomAD_AFR_AF|gnomAD_AMR_AF|gnomAD_ASJ_AF|gnomAD_EAS_AF|gnomAD_FIN_AF|
+gnomAD_NFE_AF|gnomAD_OTH_AF|gnomAD_SAS_AF|CLIN_SIG|SOMATIC|PHENO|
+MOTIF_NAME|MOTIF_POS|HIGH_INF_POS|MOTIF_SCORE_CHANGE</li>
 <li>Consequence - Impact modifier for the consequence type (picked by
 VEP&#8217;s &#8211;flag_pick_allele option)</li>
 <li>Gene - Ensembl stable ID of affected gene (picked by VEP&#8217;s
@@ -451,9 +448,9 @@ option)</li>
 (picked by VEP&#8217;s &#8211;flag_pick_allele option)</li>
 <li>CDS_CHANGE - Coding, transcript-specific sequence annotation (picked
 by VEP&#8217;s &#8211;flag_pick_allele option)</li>
-<li>Amino_acid_start - Protein position indicating absolute start of
+<li>AMINO_ACID_START - Protein position indicating absolute start of
 amino acid altered (fetched from Protein_position)</li>
-<li>Amino_acid_end - Protein position indicating absolute end of amino
+<li>AMINO_ACID_END - Protein position indicating absolute end of amino
 acid altered (fetched from Protein_position)</li>
 <li>Protein_position - Relative position of amino acid in protein
 (picked by VEP&#8217;s &#8211;flag_pick_allele option)</li>
@@ -547,13 +544,15 @@ identifier</li>
 isoform database</a></li>
 <li>UNIPROT_ID - <a class="reference external" href="http://www.uniprot.org">UniProt</a> identifier</li>
 <li>DISGENET_CUI - Tumor types associated with gene, as found in
-DisGeNET. Tumor types are listed as
-<a class="reference external" href="https://www.ncbi.nlm.nih.gov/medgen/">MedGen</a> concept IDs</li>
+DisGeNET. Tumor types are listed as unique
+<a class="reference external" href="https://www.ncbi.nlm.nih.gov/medgen/">MedGen</a> concept IDs
+(<em>CUIs</em>)</li>
 <li>TUMOR_SUPPRESSOR - Gene is predicted as tumor suppressor candidate
 according to (<a class="reference external" href="http://bioinfo.mc.vanderbilt.edu/TSGene/">TSGene
 v2.0</a>)</li>
 <li>ONCOGENE - Gene is curated as an oncogene according to (<a class="reference external" href="http://bioinfo.mc.vanderbilt.edu/TSGene/">TSGene
 v2.0</a>)</li>
+<li>CANCER_PREDISPOSITION - Gene flagged as a cancer predisposition gene</li>
 <li>ONCOSCORE - Literature-derived score for cancer gene relevance
 <a class="reference external" href="http://bioconductor.org/packages/release/bioc/html/OncoScore.html">Bioconductor/OncoScore</a>,
 range from 0 (low oncogenic potential) to 1 (high oncogenic
@@ -571,6 +570,7 @@ potential)</li>
 gene_symbol | codon | q-value</li>
 <li>UNIPROT_FEATURE - Overlapping protein annotations from <a class="reference external" href="http://www.uniprot.org">UniProt
 KB</a></li>
+<li>PFAM_DOMAIN - Pfam domain identifier (from VEP)</li>
 <li>INTOGEN_DRIVER_MUT - Indicates if existing variant is predicted as
 driver mutation from IntoGen Catalog of Driver Mutations</li>
 <li>EFFECT_PREDICTIONS - Predictions of effect of variant on protein
@@ -610,28 +610,28 @@ random forest)</li>
 <ul class="simple">
 <li>AFR_AF_GNOMAD - African/American germline allele frequency (<a class="reference external" href="http://gnomad.broadinstitute.org/">Genome
 Aggregation Database release
-1</a>)</li>
+2</a>)</li>
 <li>AMR_AF_GNOMAD - American germline allele frequency (<a class="reference external" href="http://gnomad.broadinstitute.org/">Genome
 Aggregation Database release
-1</a>)</li>
+2</a>)</li>
 <li>GLOBAL_AF_GNOMAD - Adjusted global germline allele frequency
 (<a class="reference external" href="http://gnomad.broadinstitute.org/">Genome Aggregation Database release
-1</a>)</li>
+2</a>)</li>
 <li>SAS_AF_GNOMAD - South Asian germline allele frequency (<a class="reference external" href="http://gnomad.broadinstitute.org/">Genome
 Aggregation Database release
-1</a>)</li>
+2</a>)</li>
 <li>EAS_AF_GNOMAD - East Asian germline allele frequency (<a class="reference external" href="http://gnomad.broadinstitute.org/">Genome
 Aggregation Database release
-11</a>)</li>
+21</a>)</li>
 <li>FIN_AF_GNOMAD - Finnish germline allele frequency (<a class="reference external" href="http://gnomad.broadinstitute.org/">Genome
 Aggregation Database release
-1</a>)</li>
+2</a>)</li>
 <li>NFE_AF_GNOMAD - Non-Finnish European germline allele frequency
 (<a class="reference external" href="http://gnomad.broadinstitute.org/">Genome Aggregation Database release
-1</a>)</li>
+2</a>)</li>
 <li>OTH_AF_GNOMAD - Other germline allele frequency (<a class="reference external" href="http://gnomad.broadinstitute.org/">Genome
 Aggregation Database release
-1</a>)</li>
+2</a>)</li>
 <li>AFR_AF_1KG - <a class="reference external" href="http://www.1000genomes.org">1000G Project - phase
 3</a> germline allele frequency for
 samples from AFR (African)</li>
@@ -650,76 +650,40 @@ samples from SAS (South Asian)</li>
 <li>GLOBAL_AF_1KG - <a class="reference external" href="http://www.1000genomes.org">1000G Project - phase
 3</a> germline allele frequency for all
 1000G project samples (global)</li>
-<li>DBSNPRSID - <a class="reference external" href="http://www.ncbi.nlm.nih.gov/SNP/">dbSNP</a> reference ID</li>
-<li>DBSNPBUILDID - Initial <a class="reference external" href="http://www.ncbi.nlm.nih.gov/SNP/">dbSNP</a>
-build ID for rsID</li>
-<li>DBSNP_MAPPINGSTATUS - Status with respect to the genomic mappability
-of the flanking sequence of the rsID</li>
-<li>DBSNP_VALIDATION - Categories of evidence that support the variant
-in <a class="reference external" href="http://www.ncbi.nlm.nih.gov/SNP/">dbSNP</a></li>
-<li>DBSNP_SUBMISSIONS - Number of individual submissions to rsID</li>
-<li>GWAS_CATALOG_PMID - Variant is linked to phenotype through the
-<a class="reference external" href="https://www.ebi.ac.uk/gwas/">GWAS Catalog</a>, literature in PMID
-list</li>
-<li>GWAS_CATALOG_TRAIT_URI - List of trait URIs for GWAS-associated
-variant</li>
+<li>DBSNPRSID - <a class="reference external" href="http://www.ncbi.nlm.nih.gov/SNP/">dbSNP</a> reference
+ID, as provided by VEP</li>
 <li>COSMIC_MUTATION_ID - Mutation identifier in <a class="reference external" href="http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/">Catalog of somatic
 mutations in
 cancer</a>
 database, as provided by VEP</li>
-<li><em>COSMIC_CODON_FRAC_GW - Deprecated in 0.5.0 due to COSMIC
-licensing restrictions</em></li>
-<li><em>COSMIC_CODON_COUNT_GW - Deprecated in 0.5.0 due to COSMIC
-licensing restrictions</em></li>
-<li><em>COSMIC_SITE_HISTOLOGY - Deprecated in 0.5.0 due to COSMIC
-licensing restrictions</em></li>
-<li><em>COSMIC_CANCER_TYPE_GW - Deprecated in 0.5.0 due to COSMIC
-licensing restrictions</em></li>
-<li><em>COSMIC_CANCER_TYPE_ALL - Deprecated in 0.5.0 due to COSMIC
-licensing restrictions</em></li>
-<li><em>COSMIC_SITE_HISTOLOGY - Deprecated in 0.5.0 due to COSMIC
-licensing restrictions</em></li>
-<li><em>COSMIC_CANCER_TYPE_GW - Deprecated in 0.5.0 due to COSMIC
-licensing restrictions</em></li>
-<li><em>COSMIC_SAMPLE_SOURCE - Deprecated in 0.5.0 due to COSMIC licensing
-restrictions</em></li>
-<li><em>COSMIC_DRUG_RESISTANCE - Deprecated in 0.5.0 due to COSMIC
-licensing restrictions</em></li>
-<li><em>COSMIC_FATHMM_PRED - Deprecated in 0.5.0 due to COSMIC licensing
-restrictions</em></li>
-<li><em>COSMIC_VARTYPE - Deprecated in 0.5.0 due to COSMIC licensing
-restrictions</em></li>
-<li><em>COSMIC_CONSEQUENCE - Deprecated in 0.5.0 due to COSMIC licensing
-restrictions</em></li>
+<li>TCGA_PANCANCER_COUNT - Raw variant count across all TCGA tumor
+types</li>
+<li>TCGA_FREQUENCY - Frequency of variant across TCGA tumor types.
+Format: tumortype| percent affected|affected cases|total cases</li>
+<li>ICGC_PCAWG_OCCURRENCE - Mutation occurrence in
+<a class="reference external" href="http://docs.icgc.org/pcawg/">ICGC-PCAWG</a>. By project:
+project_code|affected_donors|tested_donors|frequency)</li>
+<li>ICGC_PCAWG_AFFECTED_DONORS - Number of donors with the current
+mutation in <a class="reference external" href="http://docs.icgc.org/pcawg/">ICGC-PCAWG</a></li>
 </ul>
-<!--- COSMIC\_MUTATION_ID - Mutation identifier in [Catalog of somatic mutations in cancer](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/) database
-  - COSMIC\_CODON\_FRAC\_GW - For different tumor types, number of samples mutated at associated codon position (format: codon\_number:tumor\_type:fraction_mutated). Samples subject to exome/genome-wide screens only [Catalog of somatic mutations in cancer](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/).
-  - COSMIC\_CODON\_COUNT\_GW - For different tumor types, number of samples mutated at associated codon position (format: codon\_number:tumor\_type:frequency). Samples subject to exome/genome-wide screens only [Catalog of somatic mutations in cancer](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/)
-  - COSMIC\_COUNT\_GW - Global frequency of variant in [Catalog of somatic mutations in cancer](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/).
-  - COSMIC\_SITE\_HISTOLOGY - Primary site/histology distribution across tumor types in [Catalog of somatic mutations in cancer](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/).
-  - COSMIC\_CANCER\_TYPE\_GW - Frequency of variant across different tumor types in [Catalog of somatic mutations in cancer](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/) - samples subject to exome/genome-wide screens only
-  - COSMIC\_CANCER\_TYPE\_ALL - Frequency of variant across different tumor types in [Catalog of somatic mutations in cancer](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/)
-  - COSMIC\_SAMPLE\_SOURCE - Sample source distribution for variant in [Catalog of somatic mutations in cancer](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/).
-  - COSMIC\_DRUG\_RESISTANCE - Targeted drugs/therapies subject to resistance in tumors that carry the mutation. [Catalog of somatic mutations in cancer](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/).
-  - COSMIC\_FATHMM\_PRED - Variant effect prediction from COSMIC's FATHMM algorithm (COSMIC variants only) [Catalog of somatic mutations in cancer](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/).
-  - COSMIC_VARTYPE - COSMIC variant type [Catalog of somatic mutations in cancer](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/).
-  - COSMIC_CONSEQUENCE - COSMIC consequence type [Catalog of somatic mutations in cancer](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/)
-  - ICGC_PROJECTS - Variant frequency count in different [ICGC Project IDs](https://dcc.icgc.org/repository/current/Projects)
----></div>
+</div>
 <div class="section" id="clinical-associations">
 <h4><em>Clinical associations</em><a class="headerlink" href="#clinical-associations" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
 <li>CLINVAR_MSID - <a class="reference external" href="http://www.ncbi.nlm.nih.gov/clinvar">ClinVar</a>
 Measure Set/Variant ID</li>
+<li>CLINVAR_ALLELE_ID -
+<a class="reference external" href="http://www.ncbi.nlm.nih.gov/clinvar">ClinVar</a> allele ID</li>
 <li>CLINVAR_PMIDS - Associated Pubmed IDs for variant in
 <a class="reference external" href="http://www.ncbi.nlm.nih.gov/clinvar">ClinVar</a></li>
 <li>CLINVAR_SIG - Clinical significance for variant in
 <a class="reference external" href="http://www.ncbi.nlm.nih.gov/clinvar">ClinVar</a></li>
+<li>CLINVAR_MEDGEN_CUI - Associated
+<a class="reference external" href="https://www.ncbi.nlm.nih.gov/medgen/">MedGen</a> concept identifiers
+(<em>CUIs</em>)</li>
 <li>CLINVAR_VARIANT_ORIGIN - Origin of variant (somatic, germline, de
 novo etc.) for variant in
 <a class="reference external" href="http://www.ncbi.nlm.nih.gov/clinvar">ClinVar</a></li>
-<li>DOCM_DISEASE - Associated disease types for variant in <a class="reference external" href="http://docm.genome.wustl.edu">Database of
-Curated Mutations</a></li>
 <li>DOCM_PMID - Associated Pubmed IDs for variant in <a class="reference external" href="http://docm.genome.wustl.edu">Database of
 Curated Mutations</a></li>
 </ul>
@@ -746,7 +710,7 @@ database</a></li>
 <h4>Annotated List of all SNVs/InDels<a class="headerlink" href="#annotated-list-of-all-snvs-indels" title="Permalink to this headline">¶</a></h4>
 <p>We provide a tab-separated values file with most important annotations
 for SNVs/InDels. The file has the following naming convention:</p>
-<p><strong>sample_id</strong>.pcgr.snvs_indels.tiers.tsv</p>
+<p><strong>sample_id</strong>.<strong>tier_model</strong>.snvs_indels.tiers.tsv</p>
 <p>The SNVs/InDels are organized into different <strong>tiers</strong> (as defined above
 for the HTML report)</p>
 <p>The following variables are included in the tiered TSV file:</p>
@@ -764,101 +728,59 @@ for the HTML report)</p>
 <span class="mf">11.</span> <span class="n">ONCOGENE</span> <span class="o">-</span> <span class="n">Gene</span> <span class="ow">is</span> <span class="n">curated</span> <span class="k">as</span> <span class="n">an</span> <span class="n">oncogene</span> <span class="n">according</span> <span class="n">to</span> <span class="n">TSGene</span>
 <span class="mf">12.</span> <span class="n">TUMOR_SUPPRESSOR</span> <span class="o">-</span> <span class="n">Gene</span> <span class="ow">is</span> <span class="n">predicted</span> <span class="k">as</span> <span class="n">tumor</span> <span class="n">suppressor</span>
     <span class="n">candidate</span> <span class="n">according</span> <span class="n">to</span> <span class="n">TSGene</span>
-<span class="mf">13.</span> <span class="n">DISGENET_CUI</span> <span class="o">-</span> <span class="n">Associated</span> <span class="n">tumor</span> <span class="n">types</span> <span class="kn">from</span> <span class="nn">DisGeNET</span> <span class="p">(</span><span class="n">MedGen</span> <span class="n">concept</span> <span class="n">IDs</span><span class="p">)</span>
-<span class="mf">14.</span> <span class="n">DISGENET_TERMS</span> <span class="o">-</span> <span class="n">Associated</span> <span class="n">tumor</span> <span class="n">types</span> <span class="kn">from</span> <span class="nn">DisGeNET</span> <span class="p">(</span><span class="n">MedGen</span> <span class="n">concept</span> <span class="n">terms</span><span class="p">)</span>
-<span class="mf">15.</span> <span class="n">CONSEQUENCE</span> <span class="o">-</span> <span class="n">Variant</span> <span class="n">consequence</span> <span class="p">(</span><span class="k">as</span> <span class="n">defined</span> <span class="n">above</span> <span class="k">for</span> <span class="n">VCF</span> <span class="n">output</span><span class="p">:</span>
+<span class="mf">13.</span> <span class="n">CANCER_PREDISPOSITION</span> <span class="o">-</span> <span class="n">Cancer</span> <span class="n">predisposition</span> <span class="n">gene</span>
+<span class="mf">14.</span> <span class="n">DISGENET_CUI</span> <span class="o">-</span> <span class="n">Associated</span> <span class="n">tumor</span> <span class="n">types</span> <span class="kn">from</span> <span class="nn">DisGeNET</span> <span class="p">(</span><span class="n">MedGen</span> <span class="n">concept</span> <span class="n">IDs</span><span class="p">)</span>
+<span class="mf">15.</span> <span class="n">DISGENET_TERMS</span> <span class="o">-</span> <span class="n">Associated</span> <span class="n">tumor</span> <span class="n">types</span> <span class="kn">from</span> <span class="nn">DisGeNET</span> <span class="p">(</span><span class="n">MedGen</span> <span class="n">concept</span> <span class="n">terms</span><span class="p">)</span>
+<span class="mf">16.</span> <span class="n">CONSEQUENCE</span> <span class="o">-</span> <span class="n">Variant</span> <span class="n">consequence</span> <span class="p">(</span><span class="k">as</span> <span class="n">defined</span> <span class="n">above</span> <span class="k">for</span> <span class="n">VCF</span> <span class="n">output</span><span class="p">:</span>
     <span class="n">Consequence</span><span class="p">)</span>
-<span class="mf">16.</span> <span class="n">PROTEIN_CHANGE</span> <span class="o">-</span> <span class="n">Protein</span> <span class="n">change</span> <span class="p">(</span><span class="n">HGVSp</span> <span class="n">without</span> <span class="n">reference</span> <span class="n">accession</span><span class="p">)</span>
-<span class="mf">17.</span> <span class="n">PROTEIN_DOMAIN</span> <span class="o">-</span> <span class="n">Protein</span> <span class="n">domain</span>
-<span class="mf">18.</span> <span class="n">CDS_CHANGE</span> <span class="o">-</span> <span class="n">composite</span> <span class="n">VEP</span><span class="o">-</span><span class="n">based</span> <span class="n">variable</span> <span class="k">for</span> <span class="n">coding</span> <span class="n">change</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span>
+<span class="mf">17.</span> <span class="n">PROTEIN_CHANGE</span> <span class="o">-</span> <span class="n">Protein</span> <span class="n">change</span> <span class="p">(</span><span class="n">HGVSp</span> <span class="n">without</span> <span class="n">reference</span> <span class="n">accession</span><span class="p">)</span>
+<span class="mf">18.</span> <span class="n">PROTEIN_DOMAIN</span> <span class="o">-</span> <span class="n">Protein</span> <span class="n">domain</span>
+<span class="mf">19.</span> <span class="n">CDS_CHANGE</span> <span class="o">-</span> <span class="n">composite</span> <span class="n">VEP</span><span class="o">-</span><span class="n">based</span> <span class="n">variable</span> <span class="k">for</span> <span class="n">coding</span> <span class="n">change</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span>
     <span class="n">Consequence</span><span class="p">:</span><span class="n">Feature</span><span class="p">:</span><span class="n">cDNA_position</span><span class="p">:</span><span class="n">EXON</span><span class="p">:</span><span class="n">HGVSp_short</span>
-<span class="mf">19.</span> <span class="n">HGVSp</span>
-<span class="mf">20.</span> <span class="n">HGVSc</span>
-<span class="mf">21.</span> <span class="n">EFFECT_PREDICTIONS</span> <span class="o">-</span> <span class="k">as</span> <span class="n">defined</span> <span class="n">above</span> <span class="k">for</span> <span class="n">VCF</span>
-<span class="mf">22.</span> <span class="n">CANCER_MUTATION_HOTSPOT</span> <span class="o">-</span> <span class="n">mutation</span> <span class="n">hotspot</span> <span class="n">codon</span> <span class="ow">in</span>
+<span class="mf">20.</span> <span class="n">HGVSp</span>
+<span class="mf">21.</span> <span class="n">HGVSc</span>
+<span class="mf">22.</span> <span class="n">EFFECT_PREDICTIONS</span> <span class="o">-</span> <span class="k">as</span> <span class="n">defined</span> <span class="n">above</span> <span class="k">for</span> <span class="n">VCF</span>
+<span class="mf">23.</span> <span class="n">CANCER_MUTATION_HOTSPOT</span> <span class="o">-</span> <span class="n">mutation</span> <span class="n">hotspot</span> <span class="n">codon</span> <span class="ow">in</span>
     <span class="n">cancerhotspots</span><span class="o">.</span><span class="n">org</span><span class="o">.</span> <span class="n">Format</span><span class="p">:</span> <span class="n">gene_symbol</span> <span class="o">|</span> <span class="n">codon</span> <span class="o">|</span> <span class="n">q</span><span class="o">-</span><span class="n">value</span>
-<span class="mf">23.</span> <span class="n">INTOGEN_DRIVER_MUT</span> <span class="o">-</span> <span class="n">Indicates</span> <span class="k">if</span> <span class="n">existing</span> <span class="n">variant</span> <span class="ow">is</span> <span class="n">predicted</span> <span class="k">as</span>
+<span class="mf">24.</span> <span class="n">INTOGEN_DRIVER_MUT</span> <span class="o">-</span> <span class="n">Indicates</span> <span class="k">if</span> <span class="n">existing</span> <span class="n">variant</span> <span class="ow">is</span> <span class="n">predicted</span> <span class="k">as</span>
     <span class="n">driver</span> <span class="n">mutation</span> <span class="kn">from</span> <span class="nn">IntoGen</span> <span class="n">Catalog</span> <span class="n">of</span> <span class="n">Driver</span> <span class="n">Mutations</span>
-<span class="mf">24.</span> <span class="n">VEP_ALL_CONSEQUENCE</span> <span class="o">-</span> <span class="nb">all</span> <span class="n">VEP</span> <span class="n">consequences</span>
-<span class="mf">25.</span> <span class="n">DBSNP</span> <span class="o">-</span> <span class="n">dbSNP</span> <span class="n">reference</span> <span class="n">cluster</span> <span class="n">ID</span>
-<span class="mf">26.</span> <span class="n">DBSNPBUILDID</span> <span class="o">-</span> <span class="n">initial</span> <span class="n">dbSNP</span> <span class="n">build</span> <span class="n">ID</span> <span class="k">for</span> <span class="n">rsID</span>
+<span class="mf">25.</span> <span class="n">VEP_ALL_CONSEQUENCE</span> <span class="o">-</span> <span class="nb">all</span> <span class="n">VEP</span> <span class="n">consequences</span>
+<span class="mf">26.</span> <span class="n">DBSNP</span> <span class="o">-</span> <span class="n">dbSNP</span> <span class="n">reference</span> <span class="n">cluster</span> <span class="n">ID</span>
 <span class="mf">27.</span> <span class="n">COSMIC_MUTATION_ID</span> <span class="o">-</span> <span class="n">COSMIC</span> <span class="n">mutation</span> <span class="n">ID</span>
-<span class="mf">28.</span> <span class="n">TCGA_PANCANCER_COUNT</span> <span class="o">-</span> <span class="n">Global</span> <span class="n">count</span> <span class="n">of</span> <span class="n">variant</span> <span class="n">across</span> <span class="n">TCGA</span> <span class="n">cohorts</span>
-<span class="mf">29.</span> <span class="n">CHEMBL_COMPOUND_ID</span> <span class="o">-</span> <span class="n">Compounds</span> <span class="p">(</span><span class="k">as</span> <span class="n">ChEMBL</span> <span class="n">IDs</span><span class="p">)</span> <span class="n">that</span> <span class="n">target</span> <span class="n">the</span> <span class="n">encoded</span> <span class="n">protein</span> <span class="p">(</span><span class="kn">from</span> <span class="nn">DGIdb</span><span class="p">)</span>
-<span class="mf">30.</span> <span class="n">CHEMBL_COMPOUND_TERMS</span> <span class="o">-</span> <span class="n">Compounds</span> <span class="p">(</span><span class="k">as</span> <span class="n">drug</span> <span class="n">names</span><span class="p">)</span> <span class="n">that</span> <span class="n">target</span> <span class="n">the</span> <span class="n">encoded</span> <span class="n">protein</span> <span class="p">(</span><span class="kn">from</span> <span class="nn">DGIdb</span><span class="p">)</span>
-<span class="mf">31.</span> <span class="n">CLINVAR</span> <span class="o">-</span> <span class="n">variant</span> <span class="n">origin</span> <span class="ow">and</span> <span class="n">associated</span> <span class="n">traits</span> <span class="n">associated</span> <span class="k">with</span> <span class="n">variant</span>
-<span class="mf">32.</span> <span class="n">CLINVAR_SIG</span> <span class="o">-</span> <span class="n">clinical</span> <span class="n">significance</span> <span class="n">of</span> <span class="n">CLINVAR</span> <span class="n">variant</span>
-<span class="mf">33.</span> <span class="n">GLOBAL_AF_GNOMAD</span> <span class="o">-</span> <span class="k">global</span> <span class="n">germline</span> <span class="n">allele</span> <span class="n">frequency</span> <span class="ow">in</span> <span class="n">gnomAD</span>
-<span class="mf">34.</span> <span class="n">GLOBAL_AF_1KG</span> <span class="o">-</span> <span class="mi">1000</span><span class="n">G</span> <span class="n">Project</span> <span class="o">-</span> <span class="n">phase</span> <span class="mi">3</span><span class="p">,</span> <span class="n">germline</span> <span class="n">allele</span> <span class="n">frequency</span>
-    <span class="k">for</span> <span class="nb">all</span> <span class="mi">1000</span><span class="n">G</span> <span class="n">project</span> <span class="n">samples</span> <span class="p">(</span><span class="k">global</span><span class="p">)</span>
-<span class="mf">35.</span> <span class="n">CALL_CONFIDENCE</span> <span class="o">-</span> <span class="n">confidence</span> <span class="n">indicator</span> <span class="k">for</span> <span class="n">somatic</span> <span class="n">variant</span>
-<span class="mf">36.</span> <span class="n">DP_TUMOR</span> <span class="o">-</span> <span class="n">sequencing</span> <span class="n">depth</span> <span class="n">at</span> <span class="n">variant</span> <span class="n">site</span> <span class="p">(</span><span class="n">tumor</span><span class="p">)</span>
-<span class="mf">37.</span> <span class="n">AF_TUMOR</span> <span class="o">-</span> <span class="n">allelic</span> <span class="n">fraction</span> <span class="n">of</span> <span class="n">alternate</span> <span class="n">allele</span> <span class="p">(</span><span class="n">tumor</span><span class="p">)</span>
-<span class="mf">38.</span> <span class="n">DP_NORMAL</span> <span class="o">-</span> <span class="n">sequencing</span> <span class="n">depth</span> <span class="n">at</span> <span class="n">variant</span> <span class="n">site</span> <span class="p">(</span><span class="n">normal</span><span class="p">)</span>
-<span class="mf">39.</span> <span class="n">AF_NORMAL</span> <span class="o">-</span> <span class="n">allelic</span> <span class="n">fraction</span> <span class="n">of</span> <span class="n">alternate</span> <span class="n">allele</span> <span class="p">(</span><span class="n">normal</span><span class="p">)</span>
-<span class="mf">40.</span> <span class="n">TIER</span>
-<span class="mf">41.</span> <span class="n">TIER_DESCRIPTION</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="biomarkers-among-snvs-indels">
-<h4>Biomarkers among SNVs/InDEls<a class="headerlink" href="#biomarkers-among-snvs-indels" title="Permalink to this headline">¶</a></h4>
-<p>For tumor samples that have variant hits in <strong>Tier 1</strong> we provide an
-additional file with all associated <a class="reference external" href="https://civic.genome.wustl.edu/#/help/evidence/overview">clinical evidence
-items</a>. The
-file has the following naming convention:</p>
-<p><strong>sample_id</strong>.pcgr.snvs_indels.biomarkers.tsv</p>
-<p>The format of the biomarker TSV file is as follows:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="mf">1.</span> <span class="n">GENOMIC_CHANGE</span> <span class="o">-</span> <span class="n">Identifier</span> <span class="k">for</span> <span class="n">variant</span> <span class="n">at</span> <span class="n">the</span> <span class="n">genome</span> <span class="p">(</span><span class="n">VCF</span><span class="p">)</span> <span class="n">level</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span> <span class="mi">1</span><span class="p">:</span><span class="n">g</span><span class="o">.</span><span class="mi">152382569</span><span class="n">A</span><span class="o">&gt;</span><span class="n">G</span>
-      <span class="n">Format</span><span class="p">:</span> <span class="p">(</span><span class="o">&lt;</span><span class="n">chrom</span><span class="o">&gt;</span><span class="p">:</span><span class="n">g</span><span class="o">.&lt;</span><span class="n">position</span><span class="o">&gt;&lt;</span><span class="n">ref_allele</span><span class="o">&gt;&gt;&lt;</span><span class="n">alt_allele</span><span class="o">&gt;</span><span class="p">)</span>
-<span class="mf">2.</span> <span class="n">GENOME_VERSION</span> <span class="o">-</span> <span class="n">Assembly</span> <span class="n">version</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span> <span class="n">GRCh37</span>
-<span class="mf">3.</span> <span class="n">VCF_SAMPLE_ID</span> <span class="o">-</span> <span class="n">Sample</span> <span class="n">identifier</span>
-<span class="mf">4.</span> <span class="n">SYMBOL</span> <span class="o">-</span> <span class="n">Gene</span> <span class="n">symbol</span>
-<span class="mf">5.</span> <span class="n">CONSEQUENCE</span> <span class="o">-</span> <span class="n">Variant</span> <span class="n">consequence</span>
-<span class="mf">6.</span> <span class="n">BM_CLINICAL_SIGNIFICANCE</span> <span class="o">-</span> <span class="n">The</span> <span class="n">association</span> <span class="k">with</span> <span class="n">diagnostic</span><span class="o">/</span><span class="n">prognostic</span> <span class="n">end</span> <span class="n">point</span> <span class="ow">or</span> <span class="n">treatment</span>
-<span class="mf">7.</span> <span class="n">BM_EVIDENCE_LEVEL</span> <span class="o">-</span> <span class="n">The</span> <span class="nb">type</span> <span class="n">of</span> <span class="n">experiment</span> <span class="kn">from</span> <span class="nn">which</span> <span class="n">the</span> <span class="n">evidence</span> <span class="ow">is</span> <span class="n">curated</span> <span class="p">(</span><span class="n">validated</span><span class="p">,</span> <span class="n">clinical</span><span class="p">,</span> <span class="n">pre</span><span class="o">-</span><span class="n">clinical</span><span class="p">,</span> <span class="n">case</span> <span class="n">study</span><span class="p">,</span> <span class="ow">and</span> <span class="n">inferential</span><span class="p">)</span>
-<span class="mf">8.</span> <span class="n">BM_EVIDENCE_TYPE</span> <span class="o">-</span> <span class="n">Category</span> <span class="n">of</span> <span class="n">clinical</span> <span class="n">action</span><span class="o">/</span><span class="n">relevance</span> <span class="n">implicated</span> <span class="n">by</span> <span class="n">event</span> <span class="p">(</span><span class="n">Predictive</span><span class="p">,</span> <span class="n">Prognostic</span><span class="p">,</span> <span class="n">Predisposing</span> <span class="ow">and</span> <span class="n">Diagnostic</span><span class="p">)</span>
-<span class="mf">9.</span> <span class="n">BM_EVIDENCE_DIRECTION</span> <span class="o">-</span> <span class="n">An</span> <span class="n">indicator</span> <span class="n">of</span> <span class="n">whether</span> <span class="n">the</span> <span class="n">evidence</span> <span class="n">statement</span> <span class="n">supports</span> <span class="ow">or</span> <span class="n">refutes</span> <span class="n">the</span> <span class="n">clinical</span> <span class="n">significance</span> <span class="n">of</span> <span class="n">an</span> <span class="n">event</span>
-<span class="mf">10.</span> <span class="n">BM_CANCER_TYPE</span> <span class="o">-</span> <span class="n">Specific</span> <span class="n">disease</span> <span class="ow">or</span> <span class="n">disease</span> <span class="n">subtype</span> <span class="n">that</span> <span class="ow">is</span> <span class="n">associated</span> <span class="k">with</span> <span class="n">this</span> <span class="n">event</span> <span class="ow">and</span> <span class="n">its</span> <span class="n">clinical</span> <span class="n">implication</span>
-<span class="mf">11.</span> <span class="n">BM_THERAPEUTIC_CONTEXT</span> <span class="o">-</span> <span class="n">For</span> <span class="n">predictive</span> <span class="n">evidence</span><span class="p">,</span> <span class="n">indicates</span> <span class="n">the</span> <span class="n">therapy</span> <span class="k">for</span> <span class="n">which</span> <span class="n">sensitivity</span> <span class="ow">or</span> <span class="n">resistance</span> <span class="ow">is</span> <span class="n">indicated</span>
-<span class="mf">12.</span> <span class="n">BM_RATING</span> <span class="o">-</span> <span class="n">A</span> <span class="n">rating</span> <span class="n">on</span> <span class="n">a</span> <span class="mi">5</span><span class="o">-</span><span class="n">star</span> <span class="n">scale</span><span class="p">,</span> <span class="n">portraying</span> <span class="n">the</span> <span class="n">curators</span> <span class="n">trust</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">experiments</span> <span class="kn">from</span> <span class="nn">which</span> <span class="n">the</span> <span class="n">evidence</span> <span class="ow">is</span> <span class="n">curated</span>
-<span class="mf">13.</span> <span class="n">BM_CITATION</span> <span class="o">-</span> <span class="n">Publication</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="n">where</span> <span class="n">the</span> <span class="n">event</span> <span class="n">was</span> <span class="n">described</span><span class="o">/</span><span class="n">explored</span><span class="o">/</span><span class="n">guidelines</span><span class="o">/</span><span class="n">trials</span>
-<span class="mf">14.</span> <span class="n">TIER</span>
-<span class="mf">15.</span> <span class="n">TIER_DESCRIPTION</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="mutational-signatures">
-<h4>Mutational signatures<a class="headerlink" href="#mutational-signatures" title="Permalink to this headline">¶</a></h4>
-<p>For each tumor sample, we apply the <a class="reference external" href="https://github.com/raerose01/deconstructSigs">deconstructSigs
-package</a> to delineate
-the known mutational signatures. The inferred, weighted contributions by
-each signature and their underlying, proposed etiologies are given in a
-TSV file with the following naming convention:</p>
-<p><strong>sample_id</strong>.pcgr.mutational_signatures.tsv</p>
-<p>The format of the mutational signatures TSV file is as follows:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="mf">1.</span> <span class="n">Signature_ID</span> <span class="o">-</span> <span class="n">ID</span> <span class="n">of</span> <span class="n">signature</span> <span class="kn">from</span> <span class="nn">COSMIC</span><span class="s1">&#39;s 30 reference signatures</span>
-<span class="mf">2.</span> <span class="n">Weight</span> <span class="o">-</span> <span class="n">inferred</span> <span class="n">weight</span> <span class="n">of</span> <span class="n">signature</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">tumor</span> <span class="n">sample</span>
-<span class="mf">3.</span> <span class="n">Cancer_types</span> <span class="o">-</span> <span class="n">cancer</span> <span class="n">types</span> <span class="ow">in</span> <span class="n">which</span> <span class="n">the</span> <span class="n">signature</span> <span class="n">has</span> <span class="n">been</span> <span class="n">observed</span>
-<span class="mf">4.</span> <span class="n">Proposed_aetiology</span> <span class="o">-</span> <span class="n">proposed</span> <span class="n">underlying</span> <span class="n">etiology</span>
- <span class="mf">5.</span> <span class="n">Trimer_normalization_method</span> <span class="o">-</span> <span class="n">method</span> <span class="n">used</span> <span class="k">for</span> <span class="n">trimer</span> <span class="n">count</span> <span class="n">normalization</span> <span class="p">(</span><span class="n">deconstructSigs</span><span class="p">)</span>
-<span class="mf">6.</span> <span class="n">SampleID</span> <span class="o">-</span> <span class="n">Sample</span> <span class="n">identifier</span>
+<span class="mf">28.</span> <span class="n">TCGA_PANCANCER_COUNT</span> <span class="o">-</span> <span class="n">Raw</span> <span class="n">variant</span> <span class="n">count</span> <span class="n">across</span> <span class="nb">all</span> <span class="n">TCGA</span> <span class="n">tumor</span> <span class="n">types</span>
+<span class="mf">29.</span> <span class="n">TCGA_FREQUENCY</span> <span class="o">-</span> <span class="n">Frequency</span> <span class="n">of</span> <span class="n">variant</span> <span class="n">across</span> <span class="n">TCGA</span> <span class="n">tumor</span> <span class="n">types</span><span class="o">.</span> <span class="n">Format</span><span class="p">:</span> <span class="n">tumortype</span><span class="o">|</span>
+<span class="n">percent</span> <span class="n">affected</span><span class="o">|</span><span class="n">affected</span> <span class="n">cases</span><span class="o">|</span><span class="n">total</span> <span class="n">cases</span>
+<span class="mf">30.</span> <span class="n">ICGC_PCAWG_OCCURRENCE</span> <span class="o">-</span> <span class="n">Mutation</span> <span class="n">occurrence</span> <span class="ow">in</span> <span class="n">ICGC</span><span class="o">-</span><span class="n">PCAWG</span> <span class="n">by</span> <span class="n">project</span><span class="p">:</span>
+<span class="n">project_code</span><span class="o">|</span><span class="n">affected_donors</span><span class="o">|</span><span class="n">tested_donors</span><span class="o">|</span><span class="n">frequency</span>
+<span class="mf">31.</span> <span class="n">CHEMBL_COMPOUND_ID</span> <span class="o">-</span> <span class="n">Compounds</span> <span class="p">(</span><span class="k">as</span> <span class="n">ChEMBL</span> <span class="n">IDs</span><span class="p">)</span> <span class="n">that</span> <span class="n">target</span> <span class="n">the</span> <span class="n">encoded</span> <span class="n">protein</span> <span class="p">(</span><span class="kn">from</span> <span class="nn">DGIdb</span><span class="p">)</span>
+<span class="mf">32.</span> <span class="n">CHEMBL_COMPOUND_TERMS</span> <span class="o">-</span> <span class="n">Compounds</span> <span class="p">(</span><span class="k">as</span> <span class="n">drug</span> <span class="n">names</span><span class="p">)</span> <span class="n">that</span> <span class="n">target</span> <span class="n">the</span> <span class="n">encoded</span> <span class="n">protein</span> <span class="p">(</span><span class="kn">from</span> <span class="nn">DGIdb</span><span class="p">)</span>
+<span class="mf">33.</span> <span class="n">CLINVAR</span> <span class="o">-</span> <span class="n">ClinVar</span> <span class="n">association</span><span class="p">:</span> <span class="n">variant</span> <span class="n">origin</span> <span class="ow">and</span> <span class="n">associated</span> <span class="n">traits</span>
+<span class="mf">34.</span> <span class="n">CLINVAR_SIG</span> <span class="o">-</span> <span class="n">clinical</span> <span class="n">significance</span> <span class="n">of</span> <span class="n">ClinVar</span> <span class="n">variant</span>
+<span class="mf">35.</span> <span class="n">GLOBAL_AF_GNOMAD</span> <span class="o">-</span> <span class="k">global</span> <span class="n">germline</span> <span class="n">allele</span> <span class="n">frequency</span> <span class="ow">in</span> <span class="n">gnomAD</span>
+<span class="mf">36.</span> <span class="n">GLOBAL_AF_1KG</span> <span class="o">-</span> <span class="mi">1000</span><span class="n">G</span> <span class="n">Project</span> <span class="o">-</span> <span class="n">phase</span> <span class="mi">3</span><span class="p">,</span> <span class="n">germline</span> <span class="n">allele</span> <span class="n">frequency</span>
+<span class="mf">37.</span> <span class="n">CALL_CONFIDENCE</span> <span class="o">-</span> <span class="n">confidence</span> <span class="n">indicator</span> <span class="k">for</span> <span class="n">somatic</span> <span class="n">variant</span>
+<span class="mf">38.</span> <span class="n">DP_TUMOR</span> <span class="o">-</span> <span class="n">sequencing</span> <span class="n">depth</span> <span class="n">at</span> <span class="n">variant</span> <span class="n">site</span> <span class="p">(</span><span class="n">tumor</span><span class="p">)</span>
+<span class="mf">39.</span> <span class="n">AF_TUMOR</span> <span class="o">-</span> <span class="n">allelic</span> <span class="n">fraction</span> <span class="n">of</span> <span class="n">alternate</span> <span class="n">allele</span> <span class="p">(</span><span class="n">tumor</span><span class="p">)</span>
+<span class="mf">40.</span> <span class="n">DP_NORMAL</span> <span class="o">-</span> <span class="n">sequencing</span> <span class="n">depth</span> <span class="n">at</span> <span class="n">variant</span> <span class="n">site</span> <span class="p">(</span><span class="n">normal</span><span class="p">)</span>
+<span class="mf">41.</span> <span class="n">AF_NORMAL</span> <span class="o">-</span> <span class="n">allelic</span> <span class="n">fraction</span> <span class="n">of</span> <span class="n">alternate</span> <span class="n">allele</span> <span class="p">(</span><span class="n">normal</span><span class="p">)</span>
+<span class="mf">42.</span> <span class="n">TIER</span>
+<span class="mf">43.</span> <span class="n">TIER_DESCRIPTION</span>
 </pre></div>
 </div>
 </div>
 </div>
 </div>
-<div class="section" id="output-somatic-copy-number-aberrations">
-<h2>Output - Somatic copy number aberrations<a class="headerlink" href="#output-somatic-copy-number-aberrations" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="output-files-somatic-copy-number-aberrations">
+<h2>Output files - somatic copy number aberrations<a class="headerlink" href="#output-files-somatic-copy-number-aberrations" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="id1">
 <h3>1. Tab-separated values (TSV)<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
 <p>Copy number segments are intersected with the genomic coordinates of all
-transcripts from (<a class="reference external" href="https://www.gencodegenes.org/releases/27lift37.html">ENSEMBL/GENCODE&#8217;s basic gene
-annotation</a>). In
+transcripts from <a class="reference external" href="https://www.gencodegenes.org/releases/current.html">GENCODE&#8217;s basic gene
+annotation</a>. In
 addition, we attach cancer-relevant annotations for the affected
 transcripts. The naming convention of the compressed TSV file is as
 follows:</p>
-<p><strong>sample_id</strong>.pcgr.cna_segments.tsv.gz</p>
+<p><strong>sample_id</strong>.<strong>tier_model</strong>.cna_segments.tsv.gz</p>
 <p>The format of the compressed TSV file is the following:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="mf">1.</span> <span class="n">chrom</span> <span class="o">-</span> <span class="n">chromosome</span>
 <span class="mf">2.</span> <span class="n">segment_start</span> <span class="o">-</span> <span class="n">start</span> <span class="n">of</span> <span class="n">copy</span> <span class="n">number</span> <span class="n">segment</span>
@@ -898,8 +820,10 @@ follows:</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
+        <a href="tier_systems.html" class="btn btn-neutral float-right" title="Tier models" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
-        <a href="annotation_resources.html" class="btn btn-neutral" title="Annotation resources" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+        <a href="input.html" class="btn btn-neutral" title="Input" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -908,7 +832,7 @@ follows:</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Sigve Nakken.
+        &copy; Copyright 2017/2018, Sigve Nakken.
 
     </p>
   </div>
@@ -930,7 +854,7 @@ follows:</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.5.3',
+            VERSION:'0.6.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

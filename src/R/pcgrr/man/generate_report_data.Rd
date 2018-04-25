@@ -6,9 +6,10 @@
 \usage{
 generate_report_data(sample_calls, pcgr_data, sample_name = NULL,
   minimum_n_signature_analysis = 50,
-  signature_normalization_method = "default", signatures_limit = 6,
+  signature_normalization_method = "default", signature_limit = 6,
   target_size_mb = 40, predict_MSI = FALSE, identify_msigs = FALSE,
-  callset = "somatic calls", biomarker_mapping_stringency = 1)
+  callset = "somatic calls", biomarker_mapping_stringency = 1,
+  bsg = BSgenome.Hsapiens.UCSC.hg19, genome_assembly = "hg19")
 }
 \arguments{
 \item{sample_calls}{data frame with list of variant calls}
@@ -17,9 +18,25 @@ generate_report_data(sample_calls, pcgr_data, sample_name = NULL,
 
 \item{minimum_n_signature_analysis}{minimum number of mutations for signature analysis}
 
-\item{signatures_limit}{limit the number of possible mutational signatures}
+\item{signature_limit}{limit the number of possible mutational signatures}
+
+\item{target_size_mb}{size of targeted coding region (default 40 ~ full exome)}
+
+\item{predict_MSI}{TRUE/FALSE for prediction of MSI status}
+
+\item{callset}{type of calls}
+
+\item{biomarker_mapping_stringency}{quality level for biomarkers}
+
+\item{bsg}{genome sequence object (BSgenome.Hsapiens.UCSC)}
+
+\item{genome_assembly}{grch37/grch38}
 
 \item{sample_id}{sample identifier}
+
+\item{signature_cutoff}{discard any signature contributions with weight less than this amount}
+
+\item{identify_msgis}{TRUE/FALSE for estimating contributions of known mutational signatures}
 }
 \value{
 report_data data frame with all report elements

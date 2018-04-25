@@ -4,7 +4,6 @@ import os,re,sys
 import csv
 import logging
 import gzip
-from bx.intervals.intersection import IntervalTree
 import toml
 
 csv.field_size_limit(500 * 1024 * 1024)
@@ -14,19 +13,19 @@ def read_infotag_file(vcf_info_tags_tsv):
    Function that reads a VCF info tag file that denotes annotation tags produced by PCGR.
    An example of the VCF info tag file is the following:
    
-   tag	number	type	description
-   Consequence	.	String	"Impact modifier for the consequence type (picked by VEP's --flag_pick_allele option)."
+   tag	number	type	description category
+   Consequence	.	String	"Impact modifier for the consequence type (picked by VEP's --flag_pick_allele option)."   vep
    
    A dictionary is returned, with the tag as the key, and the full dictionary record as the value
    """
    info_tag_xref = {} ##dictionary returned
    if not os.path.exists(vcf_info_tags_tsv):
       return info_tag_xref
-   with open(vcf_info_tags_tsv, 'rb') as tsvfile:
-      reader = csv.DictReader(tsvfile, delimiter='\t')
-      for rec in reader:
-         if not info_tag_xref.has_key(rec['tag']):
-            info_tag_xref[rec['tag']] = rec
+   tsvfile = open(vcf_info_tags_tsv, 'r')
+   reader = csv.DictReader(tsvfile, delimiter='\t')
+   for row in reader:
+      if not row['tag'] in info_tag_xref:
+         info_tag_xref[row['tag']] = row
    
    return info_tag_xref
 
@@ -36,6 +35,9 @@ def pcgr_error_message(message, logger):
    logger.error(message)
    logger.error('')
    exit(1)
+
+def pcgr_warn_message(message, logger):
+   logger.warning(message)
 
 def getlogger(logger_name):
 	logger = logging.getLogger(logger_name)
@@ -57,96 +59,119 @@ def getlogger(logger_name):
 	return logger
 
 
-
-def read_config_options(configuration_file, logger):
+def read_config_options(configuration_file, pcgr_dir, genome_assembly, logger):
+   
+   ## read default options
    pcgr_config_options = {}
-   for section in ['tumor_only','allelic_support','mutational_burden','cna','msi','mutational_signatures','other']:
-      pcgr_config_options[section] = {}
-   for tag in ['maf_onekg_eur','maf_onekg_amr','maf_onekg_afr','maf_onekg_sas','maf_onekg_eas','maf_onekg_global','maf_gnomad_nfe','maf_gnomad_amr','maf_gnomad_afr','maf_gnomad_sas','maf_gnomad_eas','maf_gnomad_global']:
-      pcgr_config_options['tumor_only'][tag] = 0.01
-   pcgr_config_options['tumor_only']['exclude_dbsnp_nonclinical'] = 1
-   pcgr_config_options['tumor_only']['keep_known_tcga'] = 0
-   pcgr_config_options['tumor_only']['tcga_recurrence'] = 2
-   pcgr_config_options['tumor_only']['vcf_tumor_only'] = 0
-   pcgr_config_options['tumor_only']['exclude_noncoding'] = 1
-   for tag in ['normal_dp_tag','normal_af_tag','tumor_dp_tag','tumor_af_tag','call_conf_tag']:
-      pcgr_config_options['allelic_support'][tag] = "_na"
-   pcgr_config_options['mutational_burden']['target_size_mb'] = 40
-   pcgr_config_options['cna']['logR_gain'] = 0.8
-   pcgr_config_options['cna']['logR_homdel'] = -0.8
-   pcgr_config_options['mutational_signatures']['mutsignatures'] = 1
-   pcgr_config_options['mutational_signatures']['mutsignatures_signature_limit'] = 6
-   pcgr_config_options['mutational_signatures']['mutsignatures_mutation_limit'] = 50
-   pcgr_config_options['mutational_signatures']['mutsignatures_normalization'] = "default"
-   pcgr_config_options['msi']['msi'] = 1
-   pcgr_config_options['other']['n_vcfanno_proc'] = 4
-   pcgr_config_options['other']['n_vep_forks'] = 4
-   pcgr_config_options['other']['list_noncoding'] = 1
-
+   pcgr_configuration_file_default = os.path.join(pcgr_dir,'data',str(genome_assembly),'pcgr_configuration_somatic_default.toml')
+   if not os.path.exists(pcgr_configuration_file_default):
+      err_msg = "Default PCGR configuration file " + str(pcgr_configuration_file_default) + " does not exist - exiting"
+      pcgr_error_message(err_msg,logger)
    try:
-      toml_options = toml.load(configuration_file)
-   except IndexError,TypeError:
+      pcgr_config_options = toml.load(pcgr_configuration_file_default)
+   except (IndexError,TypeError):
+      err_msg = 'Configuration file ' + str(configuration_file) + ' is not formatted correctly'
+      pcgr_error_message(err_msg, logger)
+
+   ## override with options set by the users
+   try:
+      user_options = toml.load(configuration_file)
+   except (IndexError,TypeError):
       err_msg = 'Configuration file ' + str(configuration_file) + ' is not formatted correctly'
       pcgr_error_message(err_msg, logger)
    
-   float_tags = ['logR_homdel','logR_gain','target_size_mb','maf_onekg_eur','maf_onekg_amr','maf_onekg_afr','maf_onekg_sas','maf_onekg_eas','maf_onekg_global','maf_gnomad_nfe','maf_gnomad_amr','maf_gnomad_afr','maf_gnomad_sas','maf_gnomad_eas','maf_gnomad_global']
-   boolean_tags = ['mutsignatures','msi','keep_known_tcga','exclude_dbsnp_nonclinical','exclude_noncoding','vcf_tumor_only','list_noncoding']
-   integer_tags = ['n_vcfanno_proc','n_vep_forks','mutsignatures_signature_limit','mutsignatures_mutation_limit','tcga_recurrence']
-   string_tags = ['normal_dp_tag','normal_af_tag','tumor_dp_tag','tumor_af_tag','call_conf_tag','mutsignatures_normalization']
-   for section in ['tumor_only','allelic_support','mutational_burden','cna','msi','mutational_signatures','other']:
-      if toml_options.has_key(section):
-         for t in float_tags:
-            if toml_options[section].has_key(t):
-               if not isinstance(toml_options[section][t],float) and not isinstance(toml_options[section][t],int):
-                  err_msg = 'Configuration value ' + str(toml_options[section][t]) + ' for ' + str(t) + ' cannot be parsed properly (expecting float)'
-                  pcgr_error_message(err_msg, logger)
-               pcgr_config_options[section][t] = toml_options[section][t]
-         for t in boolean_tags:
-            if toml_options[section].has_key(t):
-               if not isinstance(toml_options[section][t],bool):
-                  err_msg = 'Configuration value ' + str(toml_options[section][t]) + ' for ' + str(t) + ' cannot be parsed properly (expecting true/false)'
-                  pcgr_error_message(err_msg, logger)
-               pcgr_config_options[section][t] = int(toml_options[section][t])
-         for t in integer_tags:
-            if toml_options[section].has_key(t):
-               if not isinstance(toml_options[section][t],int):
-                  err_msg = 'Configuration value ' + str(toml_options[section][t]) + ' for ' + str(t) + ' cannot be parsed properly (expecting integer)'
-                  pcgr_error_message(err_msg, logger)
-               pcgr_config_options[section][t] = toml_options[section][t]
-         
-         for t in string_tags:
-            if toml_options[section].has_key(t):
-               if not isinstance(toml_options[section][t],basestring):
-                  err_msg = 'Configuration value "' + str(toml_options[section][t]) + '" for ' + str(t) + ' cannot be parsed properly (expecting string)'
-                  pcgr_error_message(err_msg, logger)
-               normalization_options = ['default','exome','genome','exome2genome']
-               if tag == 'mutsignatures_normalization' and not str(toml_options[section][t]).encode('utf-8') in normalization_options:
-                  err_msg = 'Configuration value ' + str(toml_options[section][t]) + ' for ' + str(t) + ' cannot be parsed properly (expecting \'default\', \'exome\', \'genome\', or \'exome2genome\')'
-                  pcgr_error_message(err_msg, logger)
-               pcgr_config_options[section][t] = str(toml_options[section][t]).encode('utf-8')
-   
-   ## check that msig_n is greater than zero and less than 30
-   if pcgr_config_options['mutational_signatures']['mutsignatures_signature_limit'] < 0 or pcgr_config_options['mutational_signatures']['mutsignatures_signature_limit'] > 30:
-      err_msg = "Number of mutational signatures in search space ('mutsignatures_signature_limit') must be positive and not more than 30 (retrieved value: " + pcgr_config_options['mutational_signatures']['mutsignatures_signature_limit'] + ")"
-      pcgr_error_message(err_msg,logger)
+   tumor_types = []
+   for section in pcgr_config_options:
+      if section in user_options:
+         for var in pcgr_config_options[section]:
+            if not var in user_options[section]:
+               continue
+            if isinstance(pcgr_config_options[section][var],bool) and not isinstance(user_options[section][var],bool):
+               err_msg = 'Configuration value ' + str(user_options[section][var]) + ' for ' + str(var) + ' cannot be parsed properly (expecting boolean)'
+               pcgr_error_message(err_msg, logger)
+            if isinstance(pcgr_config_options[section][var],int) and not isinstance(user_options[section][var],int):
+               err_msg = 'Configuration value \"' + str(user_options[section][var]) + '\" for ' + str(var) + ' cannot be parsed properly (expecting integer)'
+               pcgr_error_message(err_msg, logger)
+            if isinstance(pcgr_config_options[section][var],float) and (not isinstance(user_options[section][var],float) and not isinstance(user_options[section][var],int)):
+               err_msg = 'Configuration value ' + str(user_options[section][var]) + ' for ' + str(var) + ' cannot be parsed properly (expecting float)'
+               pcgr_error_message(err_msg, logger)
+            if isinstance(pcgr_config_options[section][var],str) and not isinstance(user_options[section][var],str):
+               err_msg = 'Configuration value ' + str(user_options[section][var]) + ' for ' + str(var) + ' cannot be parsed properly (expecting string)'
+               pcgr_error_message(err_msg, logger)
+            if section == 'tumor_type':
+               if user_options[section][var]:
+                  tumor_types.append(str(var))
+            tier_options = ['pcgr','pcgr_acmg']
+            normalization_options = ['default','exome','genome','exome2genome']
+            theme_options = ['default', 'cerulean', 'journal', 'flatly', 'readable', 'spacelab', 'united', 'cosmo', 'lumen', 'paper', 'sandstone', 'simplex','yeti']
+            if var == 'mutsignatures_normalization' and not str(user_options[section][var]) in normalization_options:
+               err_msg = 'Configuration value ' + str(user_options[section][var]) + ' for ' + str(var) + ' cannot be parsed properly (expecting \'default\', \'exome\', \'genome\', or \'exome2genome\')'
+               pcgr_error_message(err_msg, logger)
+            if var == 'mutsignatures_cutoff' and (float(user_options[section][var]) > 1 or float(user_options[section][var]) < 0) :
+               err_msg = 'Configuration value ' + str(user_options[section][var]) + " must be within the [0,1] range"
+               pcgr_error_message(err_msg, logger)
+            if var == 'mutsignatures_signature_limit':
+               if int(user_options[section][var]) < 1 or int(user_options[section][var]) > 30:
+                  err_msg = "Number of mutational signatures in search space ('mutsignatures_signature_limit') must be positive and not more than 30 (retrieved value: " + str(user_options[section][var]) + ")"
+                  pcgr_error_message(err_msg,logger)
+            if var == 'tier_model' and not str(user_options[section][var]) in tier_options:
+               err_msg = 'Configuration value ' + str(user_options[section][var]) + ' for ' + str(var) + ' cannot be parsed properly (expecting \'pcgr\', or \'pcgr_acmg\')'
+               pcgr_error_message(err_msg, logger)
+            if var == 'report_theme' and not str(user_options[section][var]) in theme_options:
+               err_msg = 'Configuration value ' + str(user_options[section][var]) + ' for ' + str(var) + ' cannot be parsed properly (expecting \'default\', \'cerulean\', \'journal\', \'flatly\', \'readable\', \'spacelab\', \'united\', \'cosmo\', \'lumen\', \'paper\', \'sandstone\', \'simplex\',or \'yeti\')'
+               pcgr_error_message(err_msg, logger)
+            if var.startswith('maf_'):
+               if user_options['tumor_only'][var] < 0 or user_options[section][var] > 1:
+                  err_msg = "MAF value: " + str(var) + " must be within the [0,1] range, current value is " + str(user_options[section][var]) + ")"
+                  pcgr_error_message(err_msg,logger)
+            if var == 'min_af_tumor':
+               if user_options['allelic_support'][var] < 0 or user_options[section][var] > 1:
+                  err_msg = "Minimum AF tumor: " + str(var) + " must be within the [0,1] range, current value is " + str(user_options[section][var]) + ")"
+                  pcgr_error_message(err_msg,logger)
+            if var == 'max_af_normal':
+               if user_options['allelic_support'][var] < 0 or user_options[section][var] > 1:
+                  err_msg = "Maximum AF normal: " + str(var) + " must be within the [0,1] range, current value is " + str(user_options[section][var]) + ")"
+                  pcgr_error_message(err_msg,logger)
+            if var == 'target_size_mb':
+               if user_options[section][var] < 0 or user_options['mutational_burden'][var] > 50:
+                  err_msg = "Target size region in Mb (" + str(user_options[section][var]) + ") is not positive or larger than the likely maximum size of the coding human genome (50 Mb))"
+                  pcgr_error_message(err_msg,logger)
+               if user_options[section][var] < 1:
+                  warn_msg = "Target size region in Mb (" + str(user_options[section][var]) + ") must be greater than 1 for mutational burden estimate to be robust (ignoring TMB calculation)"
+                  pcgr_warn_message(warn_msg,logger)
+                  pcgr_config_options[section]['mutational_burden'] = False
+            if var == 'cna_overlap_pct':
+               if user_options['cna'][var] > 100 or user_options['cna'][var] <= 0:
+                  err_msg = "Minimum percent overlap between copy number segment and gene transcript (" + str(user_options[section][var]) + ") should be greater than zero and less than 100"
+                  pcgr_error_message(err_msg,logger)
+            if var == 'logR_homdel':
+               if user_options['cna'][var] > 0:
+                  err_msg = "Log ratio for homozygous deletions (" + str(user_options[section][var]) + ") should be less than zero"
+                  pcgr_error_message(err_msg,logger)
+            if var == 'logR_gain':
+               if user_options['cna'][var] < 0:
+                  err_msg = "Log ratio for copy number amplifications (" + str(user_options[section][var]) + ") should be greater than zero"
+                  pcgr_error_message(err_msg,logger)
+            pcgr_config_options[section][var] = user_options[section][var]
 
-   for t in float_tags:
-      if t.startswith('maf_'):
-         if pcgr_config_options['tumor_only'][t] < 0 or pcgr_config_options['tumor_only'][t] > 1:
-            err_msg = "MAF value: " + str(t) + " must be within the [0,1] range, current value " + pcgr_config_options['tumor_only'][t] + ")"
-            pcgr_error_message(err_msg,logger)
-      if t == 'target_size_mb':
-         if pcgr_config_options['mutational_burden'][t] < 0 or pcgr_config_options['mutational_burden'][t] > 50:
-            err_msg = "Coding target size value (" + pcgr_config_options['mutational_burden'][t] + ") is not positive or larger than the likely maximum protein-coding size of the human genome (~50Mb))"
-            pcgr_error_message(err_msg,logger)
-      if t == 'logR_homdel':
-         if pcgr_config_options['cna'][t] > 0:
-            err_msg = "Log ratio for homozygous deletions (" + pcgr_config_options['cna'][t] + ") should be less than zero"
-            pcgr_error_message(err_msg,logger)
-      if t == 'logR_gain':
-         if pcgr_config_options['cna'][t] < 0:
-            err_msg = "Log ratio for copy number amplifications (" + pcgr_config_options['cna'][t] + ") should be greater than zero"
-            pcgr_error_message(err_msg,logger)
-   
+   if len(tumor_types) > 2:
+      err_msg = "Two many tumor types (", str(",".join(tumor_types)) + ")  set to True - limit is set to two"
+      pcgr_error_message(err_msg,logger)
+   if pcgr_config_options['msi']['msi'] == 1 and pcgr_config_options['mutational_burden']['mutational_burden'] == 0:
+      err_msg = "Prediction of MSI status (msi = true) requires mutational burden/target_size input (mutational_burden = true) - this is currently set as false"
+      pcgr_error_message(err_msg,logger)
+#    if pcgr_config_options['tumor_only']['vcf_tumor_only'] == 1:
+#       if pcgr_config_options['msi']['msi'] == 1:
+#          warn_msg = 'Prediction of MSI status is not perfomed in tumor-only mode (vcf_tumor_only = true)'
+#          pcgr_warn_message(warn_msg,logger)
+#       if pcgr_config_options['mutational_burden']['mutational_burden'] == 1:
+#          warn_msg = 'Estimation of mutational burden is not performed in tumor-only mode (vcf_tumor_only = true)'
+#          pcgr_warn_message(warn_msg,logger)
+#       if pcgr_config_options['mutational_signatures']['mutsignatures'] == 1:
+#          warn_msg = 'Estimation of mutational signatures is not perfomed in tumor-only mode (vcf_tumor_only = true)'
+#          pcgr_warn_message(warn_msg,logger)
+
+      
+
    return pcgr_config_options
 

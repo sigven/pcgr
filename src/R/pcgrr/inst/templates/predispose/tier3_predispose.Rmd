@@ -1,0 +1,57 @@
+### Tier 3 - ClinVar variants of uncertain significance
+
+<br>
+
+```{r prepare_tier3_data, echo=F, results='asis'}
+
+show_tier_filters <- F
+missing_tier3 <- T
+if(nrow(pcg_report[['snv_indel']][['variant_display']][['tier3']]) > 0){
+  show_tier_filters <- T
+  missing_tier3 <- F
+}
+
+
+```
+
+
+```{r tier3, echo=F, results = 'asis', eval = show_tier_filters}
+library(summarywidget)
+library(crosstalk)
+
+
+cat('A total of ',nrow(pcg_report[['snv_indel']][['variant_display']][['tier3']]),' unique, germline variant(s) are found as variants of uncertain significance (VUS) in ClinVar for the selected cancer predisposition genes:')
+cat('\n')
+  
+htmltools::br()
+htmltools::br()
+
+variants_tier3_shared <- crosstalk::SharedData$new(pcg_report[['snv_indel']][['variant_display']][['tier3']])
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_tier3_shared, ~CONSEQUENCE),
+    crosstalk::filter_slider("NFE_AF_GNOMAD", "Minor allele frequency Europeans (gnomAD-NFE)", variants_tier3_shared, ~NFE_AF_GNOMAD,sep="", ticks = F)
+  ),
+  list(
+    crosstalk::filter_slider("GLOBAL_AF_GNOMAD", "Minor allele frequency global (gnomAD)", variants_tier3_shared, ~GLOBAL_AF_GNOMAD,sep="", ticks = F)
+  )
+)
+
+    
+htmltools::br()
+htmltools::br()
+
+crosstalk::bscols(
+  DT::datatable(variants_tier3_shared, escape=F,extensions=c("Buttons","Responsive"), width = "100%",options=list(buttons = c('csv','excel'),dom = 'Bfrtip'))
+)
+
+#htmltools::br()
+
+```
+
+```{r tier3_missing, echo=F, results = 'asis', eval = missing_tier3}
+cat('<i>No variants found.</i>',sep='\n')
+cat('\n')
+```
+
+<br><br>

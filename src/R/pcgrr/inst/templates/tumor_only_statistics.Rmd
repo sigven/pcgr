@@ -1,0 +1,60 @@
+
+### Tumor-only filtering statistics
+
+```{r tumor_only, echo=F, results='asis'}
+
+cat('Germline variant filter settings:\n')
+htmltools::br()
+htmltools::br()
+cat('<ul>')
+cat(paste0('<li>Exclude 1000 Genomes Project variants (global): MAF >= <b>',pcg_report$pcgr_config$tumor_only$maf_onekg_global),'</li></b>\n')
+cat(paste0('<li>Exclude 1000 Genomes Project variants (EUR): MAF >= <b>',pcg_report$pcgr_config$tumor_only$maf_onekg_eur),'</li></b>\n')
+cat(paste0('<li>Exclude 1000 Genomes Project variants (AMR): MAF >= <b>',pcg_report$pcgr_config$tumor_only$maf_onekg_amr),'</li></b>\n')
+cat(paste0('<li>Exclude 1000 Genomes Project variants (AFR): MAF >= <b>',pcg_report$pcgr_config$tumor_only$maf_onekg_afr),'</li></b>\n')
+cat(paste0('<li>Exclude 1000 Genomes Project variants (EAS): MAF >= <b>',pcg_report$pcgr_config$tumor_only$maf_onekg_eas),'</li></b>\n')
+cat(paste0('<li>Exclude 1000 Genomes Project variants (SAS): MAF >= <b>',pcg_report$pcgr_config$tumor_only$maf_onekg_sas),'</li></b>\n')
+cat(paste0('<li>Exclude gnomAD variants (global): MAF >= <b>',pcg_report$pcgr_config$tumor_only$maf_gnomad_global),'</li></b>\n')
+cat(paste0('<li>Exclude gnomAD variants (NFE): MAF >= <b>',pcg_report$pcgr_config$tumor_only$maf_gnomad_nfe),'</li></b>\n')
+cat(paste0('<li>Exclude gnomAD variants (AMR): MAF >= <b>',pcg_report$pcgr_config$tumor_only$maf_gnomad_amr),'</li></b>\n')
+cat(paste0('<li>Exclude gnomAD variants (AFR): MAF >= <b>',pcg_report$pcgr_config$tumor_only$maf_gnomad_afr),'</li></b>\n')
+cat(paste0('<li>Exclude gnomAD variants (EAS): MAF >= <b>',pcg_report$pcgr_config$tumor_only$maf_gnomad_eas),'</li></b>\n')
+cat(paste0('<li>Exclude gnomAD variants (SAS): MAF >= <b>',pcg_report$pcgr_config$tumor_only$maf_gnomad_sas),'</li></b>\n')
+cat(paste0('<li>Exclude gnomAD variants (FIN): MAF >= <b>',pcg_report$pcgr_config$tumor_only$maf_gnomad_fin),'</li></b>\n')
+cat(paste0('<li>Exclude gnomAD variants (OTH): MAF >= <b>',pcg_report$pcgr_config$tumor_only$maf_gnomad_oth),'</li></b>\n')
+cat(paste0('<li>Exclude nonclinically associated dbSNP variants: <b>',pcg_report$pcgr_config$tumor_only$exclude_dbsnp_nonclinical),'</li></b>\n')
+cat(paste0('<ul><li>Keep known TCGA variants: <b>',pcg_report$pcgr_config$tumor_only$keep_known_tcga),'</li></b>\n')
+cat(paste0('<li>Minimum TCGA variant recurrence: <b>',pcg_report$pcgr_config$tumor_only$tcga_recurrence),'</li></ul></b>\n')
+cat(paste0('<li>Exclude non-coding variants: <b>',pcg_report$pcgr_config$tumor_only$exclude_noncoding),'</li></b>\n')
+cat('</ul>')
+
+htmltools::br()
+
+
+cat('Total number of (unfiltered, non-rejected) calls: <b>',pcg_report[['tumor_only']][['variant_statistic']][['unfiltered_n']],'</b><br>')
+
+cat('Number of calls remaining after successive filtering steps:<br>')
+htmltools::br()
+cat('<ol>')
+cat('<li>Exclusion of variants found in 1000 Genomes Project: <b>',pcg_report[['tumor_only']][['variant_statistic']][['onekg_n_remain']],'</b> (',pcg_report[['tumor_only']][['variant_statistic']][['onekg_frac_remain']],' % of unfiltered calls)</li>\n')
+cat('<li>Exclusion of variants found in gnomAD: <b>',pcg_report[['tumor_only']][['variant_statistic']][['gnomad_n_remain']],'</b> (',pcg_report[['tumor_only']][['variant_statistic']][['gnomad_n_remain']],' % of unfiltered calls)</li>\n')
+if(pcg_report$pcgr_config$tumor_only$exclude_dbsnp_nonclinical == TRUE){
+  cat('<li>Exclusion of nonclinically associated dbSNP variants (FILTER = ON): <b>',pcg_report[['tumor_only']][['variant_statistic']][['dbsnp_n_remain']],'</b> (',pcg_report[['tumor_only']][['variant_statistic']][['dbsnp_frac_remain']],' % of unfiltered calls)</li>\n')
+}
+if(pcg_report$pcgr_config$tumor_only$exclude_dbsnp_nonclinical == FALSE){
+  cat('<li>Exclusion of nonclinically associated dbSNP variants (FILTER = OFF): <b>',pcg_report[['tumor_only']][['variant_statistic']][['dbsnp_n_remain']],'</b> (',pcg_report[['tumor_only']][['variant_statistic']][['dbsnp_frac_remain']],' % of unfiltered calls)</li>\n')
+}
+if(pcg_report$pcgr_config$tumor_only$exclude_noncoding == TRUE){
+  cat('<li>Exclusion of non-coding variants (FILTER = ON): <b>',pcg_report[['tumor_only']][['variant_statistic']][['noncoding_n_remain']], '</b> (',pcg_report[['tumor_only']][['variant_statistic']][['noncoding_frac_remain']],' % of unfiltered calls)</li>\n')
+}
+if(pcg_report$pcgr_config$tumor_only$exclude_noncoding == FALSE){
+  cat('<li>Exclusion of non-coding variants (FILTER = OFF): <b>',pcg_report[['tumor_only']][['variant_statistic']][['noncoding_n_remain']], '</b> (',pcg_report[['tumor_only']][['variant_statistic']][['noncoding_frac_remain']],' % of unfiltered calls)</li>\n')
+}
+
+cat('</ol>')
+htmltools::br()
+cat('<i><b>IMPORTANT NOTE: All SNV/InDel analyses below are considering the filtered callset only, n =',pcg_report[['tumor_only']][['variant_statistic']][['noncoding_n_remain']],'</b></i>')
+htmltools::br()
+
+
+```
+
