@@ -133,9 +133,7 @@ The HTML reports have been tested using the following browsers:
 
 ### JSON (beta)
 
-A JSON file that stores the HTML report content is provided. This file will easen the process of extracting particular parts of the report for further analysis. Presently, there is no detailed schema documented for the PCGR JSON structure. Some examples are shown below (using R) on how to extract information from the JSON file.
-
-
+A JSON file that stores the HTML report content is provided. This file will easen the process of extracting particular parts of the report for further analysis. Presently, there is no detailed schema documented for the PCGR JSON structure. Examples (using R) on how to extract information from the JSON file will soon be posted here.
 
 ### Output files - somatic SNVs/InDels
 
