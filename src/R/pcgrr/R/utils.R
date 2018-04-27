@@ -902,6 +902,9 @@ get_calls <- function(tsv_gz_file, pcgr_data, pcgr_version, sample_name, pcgr_co
   vcf_data_df_1 <- dplyr::left_join(dplyr::filter(vcf_data_df,!is.na(ENTREZ_ID)), dplyr::filter(pcgr_data$gene_xref,!is.na(ENTREZ_ID)),by=c("ENTREZ_ID","Gene"))
   vcf_data_df_2 <- dplyr::left_join(dplyr::filter(vcf_data_df,is.na(ENTREZ_ID)), dplyr::select(pcgr_data$gene_xref,-ENTREZ_ID) ,by=c("Gene"))
   vcf_data_df <- rbind(vcf_data_df_1, vcf_data_df_2)
+  #vcf_data_df$CHROM <- ordered(vcf_data_df$CHROM, levels = c('1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','X','Y'))
+  #vcf_data_df <- dplyr::arrange(vcf_data_df, CHROM, POS)
+  #vcf_data_df$CHROM <- as.character(vcf_data_df$CHROM)
 
   rlogging::message("Extending annotation descriptions related to KEGG pathways")
   vcf_data_df <- dplyr::left_join(vcf_data_df,pcgr_data$kegg_gene_pathway_links, by=c("ENTREZ_ID" = "gene_id")) %>%

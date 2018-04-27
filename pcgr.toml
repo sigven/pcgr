@@ -145,7 +145,7 @@ report_theme = "default"
 ## that the input VCF is properly encoded. Since the vcf-validator is strict, and with error messages
 ## that is not always self-explanatory, the users can skip validation if they are confident that the
 ## most critical parts of the VCF are properly encoded
-vcf_validation = true
+vcf_validation = false
 ## list/do not list noncoding variants
 list_noncoding = true
 ## VEP/vcfanno processing options
