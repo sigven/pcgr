@@ -476,7 +476,7 @@ generate_report_data_snv_indel_pcgr <- function(sample_calls, pcgr_data, pcgr_ve
 
     ## Analyze Tier 3: coding mutations in oncogenes/tumor suppressors/cancer census genes
     pcg_report_snv_indel[['variant_set']][['tier3']] <- dplyr::select(pcg_report_snv_indel[['variant_set']][['all']], dplyr::one_of(pcgr_data$pcgr_all_annotation_columns)) %>% dplyr::filter(CODING_STATUS == 'coding') %>% dplyr::filter(ONCOGENE == TRUE | TUMOR_SUPPRESSOR == TRUE)
-    if(nrow(tier12) > 0){
+    if(nrow(tier12) > 0 & nrow(pcg_report_snv_indel[['variant_set']][['tier3']]) > 0){
       pcg_report_snv_indel[['variant_set']][['tier3']] <- dplyr::anti_join(pcg_report_snv_indel[['variant_set']][['tier3']],tier12, by=c("GENOMIC_CHANGE"))
     }
     tier123 <- tier12
@@ -488,7 +488,7 @@ generate_report_data_snv_indel_pcgr <- function(sample_calls, pcgr_data, pcgr_ve
 
     ## Analyze Tier 4: Other coding mutations
     pcg_report_snv_indel[['variant_set']][['tier4']] <- dplyr::select(pcg_report_snv_indel[['variant_set']][['all']], dplyr::one_of(pcgr_data$pcgr_all_annotation_columns)) %>% dplyr::filter(CODING_STATUS == 'coding')
-    if(nrow(tier123) > 0){
+    if(nrow(tier123) > 0 & nrow(pcg_report_snv_indel[['variant_set']][['tier4']]) > 0){
       pcg_report_snv_indel[['variant_set']][['tier4']] <- dplyr::anti_join(pcg_report_snv_indel[['variant_set']][['tier4']],tier123, by=c("GENOMIC_CHANGE"))
     }
     if(nrow(pcg_report_snv_indel[['variant_set']][['tier4']]) > 0){
@@ -499,7 +499,9 @@ generate_report_data_snv_indel_pcgr <- function(sample_calls, pcgr_data, pcgr_ve
     ## Analyze noncoding mutations
     pcg_report_snv_indel[['variant_set']][['noncoding']] <- dplyr::select(pcg_report_snv_indel[['variant_set']][['all']], dplyr::one_of(pcgr_data$pcgr_all_annotation_columns)) %>% dplyr::filter(CODING_STATUS == 'noncoding')
     if(nrow(pcg_report_snv_indel[['variant_set']][['noncoding']]) > 0){
-      pcg_report_snv_indel[['variant_set']][['noncoding']] <- dplyr::anti_join(pcg_report_snv_indel[['variant_set']][['noncoding']],tier123, by=c("GENOMIC_CHANGE"))
+      if(nrow(tier123) > 0){
+        pcg_report_snv_indel[['variant_set']][['noncoding']] <- dplyr::anti_join(pcg_report_snv_indel[['variant_set']][['noncoding']],tier123, by=c("GENOMIC_CHANGE"))
+      }
       pcg_report_snv_indel[['variant_set']][['noncoding']] <- pcg_report_snv_indel[['variant_set']][['noncoding']] %>% dplyr::arrange(desc(ONCOSCORE))
       pcg_report_snv_indel[['variant_display']][['noncoding']] <- dplyr::select(pcg_report_snv_indel[['variant_set']][['noncoding']], dplyr::one_of(pcgr_data$tier5_tags_display))
     }
@@ -824,10 +826,10 @@ get_calls <- function(tsv_gz_file, pcgr_data, pcgr_version, sample_name, pcgr_co
   if(nrow(vcf_data_df) == 0){
     return(vcf_data_df)
   }
-  vcf_data_df$CHROM <- ordered(vcf_data_df$CHROM, levels = c('1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','X','Y'))
-  vcf_data_df <- dplyr::arrange(vcf_data_df, CHROM, POS)
-  vcf_data_df$CHROM <- as.character(vcf_data_df$CHROM)
-
+  vcf_data_df <- pcgrr::order_variants(vcf_data_df)
+  #vcf_data_df$CHROM <- ordered(vcf_data_df$CHROM, levels = c('1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','X','Y'))
+  #vcf_data_df <- dplyr::arrange(vcf_data_df, CHROM, POS)
+  #vcf_data_df$CHROM <- as.character(vcf_data_df$CHROM)
 
   hg_version <- 'grch38'
   if(genome_assembly == 'hg19'){
@@ -902,6 +904,7 @@ get_calls <- function(tsv_gz_file, pcgr_data, pcgr_version, sample_name, pcgr_co
   vcf_data_df_1 <- dplyr::left_join(dplyr::filter(vcf_data_df,!is.na(ENTREZ_ID)), dplyr::filter(pcgr_data$gene_xref,!is.na(ENTREZ_ID)),by=c("ENTREZ_ID","Gene"))
   vcf_data_df_2 <- dplyr::left_join(dplyr::filter(vcf_data_df,is.na(ENTREZ_ID)), dplyr::select(pcgr_data$gene_xref,-ENTREZ_ID) ,by=c("Gene"))
   vcf_data_df <- rbind(vcf_data_df_1, vcf_data_df_2)
+  vcf_data_df <- pcgrr::order_variants(vcf_data_df)
   #vcf_data_df$CHROM <- ordered(vcf_data_df$CHROM, levels = c('1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','X','Y'))
   #vcf_data_df <- dplyr::arrange(vcf_data_df, CHROM, POS)
   #vcf_data_df$CHROM <- as.character(vcf_data_df$CHROM)
@@ -1012,3 +1015,13 @@ get_calls <- function(tsv_gz_file, pcgr_data, pcgr_version, sample_name, pcgr_co
   return(vcf_data_df)
 
 }
+
+order_variants <- function(df){
+  if('CHROM' %in% colnames(df) & 'POS' %in% colnames(df)){
+    df$CHROM <- ordered(df$CHROM, levels = c('1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','X','Y'))
+    df <- dplyr::arrange(df, CHROM, POS)
+    df$CHROM <- as.character(df$CHROM)
+  }
+  return(df)
+}
+

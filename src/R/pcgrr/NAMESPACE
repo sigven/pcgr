@@ -12,6 +12,7 @@ export(generate_annotation_link)
 export(generate_report_acmg)
 
 export(get_calls)
+export(order_variants)
 
 export(get_clinical_associations_snv_indel)
 export(get_clinical_associations_cna)
