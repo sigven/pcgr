@@ -1,0 +1,417 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Getting started &mdash; Personal Cancer Genome Reporter 0.6.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="author" title="About these documents"
+              href="about.html"/>
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Personal Cancer Genome Reporter 0.6.0 documentation" href="index.html"/>
+        <link rel="next" title="Annotation resources" href="annotation_resources.html"/>
+        <link rel="prev" title="About" href="about.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Personal Cancer Genome Reporter
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.6.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <p class="caption"><span class="caption-text">Table of Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#step-0-python">STEP 0: Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-1-installation-of-docker">STEP 1: Installation of Docker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-2-download-pcgr-and-data-bundle">STEP 2: Download PCGR and data bundle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-3-input-preprocessing">STEP 3: Input preprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-4-configure-pcgr">STEP 4: Configure PCGR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-5-run-example">STEP 5: Run example</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="annotation_resources.html">Annotation resources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="input.html">Input</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tier_systems.html">Tier models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CHANGELOG.html">CHANGELOG</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Personal Cancer Genome Reporter</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Getting started</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/getting_started.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="getting-started">
+<h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="step-0-python">
+<h2>STEP 0: Python<a class="headerlink" href="#step-0-python" title="Permalink to this headline">¶</a></h2>
+<p>An installation of Python (version <em>3.6</em>) is required to run PCGR. Check
+that Python is installed by typing <code class="docutils literal"><span class="pre">python</span> <span class="pre">--version</span></code> in your terminal
+window. In addition, a <a class="reference external" href="https://github.com/uiri/toml">Python library</a>
+for parsing configuration files encoded with
+<a class="reference external" href="https://github.com/toml-lang/toml">TOML</a> is needed. To install,
+simply run the following command:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">toml</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="step-1-installation-of-docker">
+<h2>STEP 1: Installation of Docker<a class="headerlink" href="#step-1-installation-of-docker" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li><a class="reference external" href="https://docs.docker.com/engine/installation/">Install the Docker
+engine</a> on your
+preferred platform<ul>
+<li>installing <a class="reference external" href="https://docs.docker.com/engine/installation/linux/">Docker on
+Linux</a></li>
+<li>installing <a class="reference external" href="https://docs.docker.com/engine/installation/mac/">Docker on Mac
+OS</a></li>
+<li>NOTE: We have not yet been able to perform enough testing on the
+Windows platform, and we have received feedback that particular
+versions of Docker/Windows do not work with PCGR (an example being
+<a class="reference external" href="https://github.com/docker/toolbox/issues/607">mounting of data
+volumes</a>)</li>
+</ul>
+</li>
+<li>Test that Docker is running, e.g. by typing <code class="docutils literal"><span class="pre">docker</span> <span class="pre">ps</span></code> or
+<code class="docutils literal"><span class="pre">docker</span> <span class="pre">images</span></code> in the terminal window</li>
+<li>Adjust the computing resources dedicated to the Docker, i.e.:<ul>
+<li>Memory: minimum 5GB</li>
+<li>CPUs: minimum 4</li>
+<li><a class="reference external" href="https://docs.docker.com/docker-for-mac/#advanced">How to - Mac OS
+X</a></li>
+</ul>
+</li>
+</ol>
+</div>
+<div class="section" id="step-2-download-pcgr-and-data-bundle">
+<h2>STEP 2: Download PCGR and data bundle<a class="headerlink" href="#step-2-download-pcgr-and-data-bundle" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic">
+<li><p class="first">Download and unpack the <a class="reference external" href="https://github.com/sigven/pcgr/releases/tag/v0.6.0">latest software release
+(0.6.0)</a></p>
+</li>
+<li><p class="first">Download and unpack the assembly-specific data bundle in the PCGR
+directory</p>
+<ul class="simple">
+<li><a class="reference external" href="https://drive.google.com/open?id=1tOyPmzgXkSZjPJQOojFQxUP8JlQuQqLq">grch37 data
+bundle</a>
+(approx 9Gb)</li>
+<li><a class="reference external" href="https://drive.google.com/open?id=1cKq-rgSNCYPCUJ38pCi_xy6_PJH-FZWD">grch38 data
+bundle</a>
+(approx 9Gb)</li>
+<li><em>Unpacking</em>:
+<code class="docutils literal"><span class="pre">gzip</span> <span class="pre">-dc</span> <span class="pre">pcgr.databundle.grch37.YYYYMMDD.tgz</span> <span class="pre">|</span> <span class="pre">tar</span> <span class="pre">xvf</span> <span class="pre">-</span></code></li>
+</ul>
+<p>A <em>data/</em> folder within the <em>pcgr-X.X</em> software folder should now
+have been produced</p>
+</li>
+<li><p class="first">Pull the <a class="reference external" href="https://hub.docker.com/r/sigven/pcgr/">PCGR Docker image
+(0.6.0)</a> from DockerHub
+(approx 5.1Gb):</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">docker</span> <span class="pre">pull</span> <span class="pre">sigven/pcgr:0.6.0</span></code> (PCGR annotation engine)</li>
+</ul>
+</li>
+</ol>
+</div>
+<div class="section" id="step-3-input-preprocessing">
+<h2>STEP 3: Input preprocessing<a class="headerlink" href="#step-3-input-preprocessing" title="Permalink to this headline">¶</a></h2>
+<p>The PCGR workflow accepts two types of input files:</p>
+<ul class="simple">
+<li>An unannotated, single-sample VCF file (&gt;= v4.2) with called somatic
+variants (SNVs/InDels)</li>
+<li>A copy number segment file</li>
+</ul>
+<p>PCGR can be run with either or both of the two input files present.</p>
+<ul class="simple">
+<li>We <strong>strongly</strong> recommend that the input VCF is compressed and
+indexed using <a class="reference external" href="http://www.htslib.org/doc/tabix.html">bgzip</a> and
+<a class="reference external" href="http://www.htslib.org/doc/tabix.html">tabix</a></li>
+<li>If the input VCF contains multi-allelic sites, these will be subject
+to <a class="reference external" href="http://genome.sph.umich.edu/wiki/Vt#Decompose">decomposition</a></li>
+<li>Variants used for reporting should be designated as &#8216;PASS&#8217; in the VCF
+FILTER column</li>
+</ul>
+<p>The tab-separated values file with copy number aberrations <strong>MUST</strong>
+contain the following four columns:</p>
+<ul class="simple">
+<li>Chromosome</li>
+<li>Start</li>
+<li>End</li>
+<li>Segment_Mean</li>
+</ul>
+<p>Here, <em>Chromosome</em>, <em>Start</em>, and <em>End</em> denote the chromosomal segment,
+and <strong>Segment_Mean</strong> denotes the log(2) ratio for a particular segment,
+which is a common output of somatic copy number alteration callers.
+Below shows the initial part of a copy number segment file that is
+formatted correctly according to PCGR&#8217;s requirements:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Chromosome</span> <span class="n">Start</span>   <span class="n">End</span> <span class="n">Segment_Mean</span>
+<span class="mi">1</span> <span class="mi">3218329</span> <span class="mi">3550598</span> <span class="mf">0.0024</span>
+<span class="mi">1</span> <span class="mi">3552451</span> <span class="mi">4593614</span> <span class="mf">0.1995</span>
+<span class="mi">1</span> <span class="mi">4593663</span> <span class="mi">6433129</span> <span class="o">-</span><span class="mf">1.0277</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="step-4-configure-pcgr">
+<h2>STEP 4: Configure PCGR<a class="headerlink" href="#step-4-configure-pcgr" title="Permalink to this headline">¶</a></h2>
+<p>The PCGR configuration file, formatted using
+<a class="reference external" href="https://github.com/toml-lang/toml">TOML</a> (an easy to read file
+format) enables the user to configure a number of options in the PCGR
+workflow, related to the following:</p>
+<ul class="simple">
+<li>Tumor type of input sample</li>
+<li>Tier model</li>
+<li>Sequencing depth/allelic support thresholds</li>
+<li>MSI prediction</li>
+<li>Mutational signatures analysis</li>
+<li>Coding target size - for mutational burden analysis</li>
+<li>Tumor-only analysis options (i.e. exclusion of germline
+variants/enrichment for somatic calls)</li>
+<li>VEP/<em>vcfanno</em> options</li>
+<li>Log-ratio thresholds for gains/losses in CNA analysis</li>
+</ul>
+<p>More details about the exact <a class="reference external" href="http://pcgr.readthedocs.io/en/latest/input.html#PCGR-configuration-file">usage of the configuration
+options</a>.</p>
+</div>
+<div class="section" id="step-5-run-example">
+<h2>STEP 5: Run example<a class="headerlink" href="#step-5-run-example" title="Permalink to this headline">¶</a></h2>
+<p>A tumor sample report is generated by calling the Python script
+<strong>pcgr.py</strong>, which takes the following arguments and options:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">pcgr</span><span class="o">.</span><span class="n">py</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">input_vcf</span> <span class="n">INPUT_VCF</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">input_cna</span> <span class="n">INPUT_CNA</span><span class="p">]</span>
+        <span class="p">[</span><span class="o">--</span><span class="n">force_overwrite</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">version</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">basic</span><span class="p">]</span>
+        <span class="n">pcgr_dir</span> <span class="n">output_dir</span> <span class="p">{</span><span class="n">grch37</span><span class="p">,</span><span class="n">grch38</span><span class="p">}</span> <span class="n">configuration_file</span>
+        <span class="n">sample_id</span>
+
+<span class="n">Personal</span> <span class="n">Cancer</span> <span class="n">Genome</span> <span class="n">Reporter</span> <span class="p">(</span><span class="n">PCGR</span><span class="p">)</span> <span class="n">workflow</span> <span class="k">for</span> <span class="n">clinical</span> <span class="n">interpretation</span> <span class="n">of</span>
+<span class="n">somatic</span> <span class="n">nucleotide</span> <span class="n">variants</span> <span class="ow">and</span> <span class="n">copy</span> <span class="n">number</span> <span class="n">aberration</span> <span class="n">segments</span>
+
+<span class="n">positional</span> <span class="n">arguments</span><span class="p">:</span>
+<span class="n">pcgr_dir</span>              <span class="n">PCGR</span> <span class="n">base</span> <span class="n">directory</span> <span class="k">with</span> <span class="n">accompanying</span> <span class="n">data</span> <span class="n">directory</span><span class="p">,</span>
+                <span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span> <span class="o">~/</span><span class="n">pcgr</span><span class="o">-</span><span class="mf">0.6</span><span class="o">.</span><span class="mi">0</span>
+<span class="n">output_dir</span>            <span class="n">Output</span> <span class="n">directory</span>
+<span class="p">{</span><span class="n">grch37</span><span class="p">,</span><span class="n">grch38</span><span class="p">}</span>       <span class="n">Genome</span> <span class="n">assembly</span> <span class="n">build</span><span class="p">:</span> <span class="n">grch37</span> <span class="ow">or</span> <span class="n">grch38</span>
+<span class="n">configuration_file</span>    <span class="n">PCGR</span> <span class="n">configuration</span> <span class="n">file</span> <span class="p">(</span><span class="n">TOML</span> <span class="nb">format</span><span class="p">)</span>
+<span class="n">sample_id</span>             <span class="n">Tumor</span> <span class="n">sample</span><span class="o">/</span><span class="n">cancer</span> <span class="n">genome</span> <span class="n">identifier</span> <span class="o">-</span> <span class="n">prefix</span> <span class="k">for</span>
+                <span class="n">output</span> <span class="n">files</span>
+
+<span class="n">optional</span> <span class="n">arguments</span><span class="p">:</span>
+<span class="o">-</span><span class="n">h</span><span class="p">,</span> <span class="o">--</span><span class="n">help</span>            <span class="n">show</span> <span class="n">this</span> <span class="n">help</span> <span class="n">message</span> <span class="ow">and</span> <span class="n">exit</span>
+<span class="o">--</span><span class="n">input_vcf</span> <span class="n">INPUT_VCF</span>
+                <span class="n">VCF</span> <span class="nb">input</span> <span class="n">file</span> <span class="k">with</span> <span class="n">somatic</span> <span class="n">query</span> <span class="n">variants</span>
+                <span class="p">(</span><span class="n">SNVs</span><span class="o">/</span><span class="n">InDels</span><span class="p">)</span><span class="o">.</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span>
+<span class="o">--</span><span class="n">input_cna</span> <span class="n">INPUT_CNA</span>
+                <span class="n">Somatic</span> <span class="n">copy</span> <span class="n">number</span> <span class="n">alteration</span> <span class="n">segments</span> <span class="p">(</span><span class="n">tab</span><span class="o">-</span><span class="n">separated</span>
+                <span class="n">values</span><span class="p">)</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span>
+<span class="o">--</span><span class="n">force_overwrite</span>     <span class="n">By</span> <span class="n">default</span><span class="p">,</span> <span class="n">the</span> <span class="n">script</span> <span class="n">will</span> <span class="n">fail</span> <span class="k">with</span> <span class="n">an</span> <span class="n">error</span> <span class="k">if</span> <span class="nb">any</span>
+                <span class="n">output</span> <span class="n">file</span> <span class="n">already</span> <span class="n">exists</span><span class="o">.</span> <span class="n">You</span> <span class="n">can</span> <span class="n">force</span> <span class="n">the</span>
+                <span class="n">overwrite</span> <span class="n">of</span> <span class="n">existing</span> <span class="n">result</span> <span class="n">files</span> <span class="n">by</span> <span class="n">using</span> <span class="n">this</span> <span class="n">flag</span>
+                <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="kc">False</span><span class="p">)</span>
+<span class="o">--</span><span class="n">version</span>             <span class="n">show</span> <span class="n">program</span><span class="s1">&#39;s version number and exit</span>
+<span class="o">--</span><span class="n">basic</span>               <span class="n">Run</span> <span class="n">functional</span> <span class="n">variant</span> <span class="n">annotation</span> <span class="n">on</span> <span class="n">VCF</span> <span class="n">through</span>
+                <span class="n">VEP</span><span class="o">/</span><span class="n">vcfanno</span><span class="p">,</span> <span class="n">omit</span> <span class="n">other</span> <span class="n">analyses</span> <span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">e</span><span class="o">.</span> <span class="n">CNA</span><span class="p">,</span> <span class="n">MSI</span><span class="p">,</span>
+                <span class="n">report</span> <span class="n">generation</span> <span class="n">etc</span><span class="o">.</span> <span class="p">(</span><span class="n">STEP</span> <span class="mi">4</span><span class="p">)</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <em>examples</em> folder contain input files from two tumor samples
+sequenced within TCGA. It also contains PCGR configuration files. A
+report for a colorectal tumor case can be generated by running the
+following command in your terminal window:</p>
+<p><code class="docutils literal"><span class="pre">python</span> <span class="pre">pcgr.py</span> <span class="pre">--input_vcf</span> <span class="pre">~/pcgr-0.6.0/examples/tumor_sample.COAD.vcf.gz</span></code>
+<code class="docutils literal"><span class="pre">--input_cna</span> <span class="pre">~/pcgr-0.6.0/examples/tumor_sample.COAD.cna.tsv</span></code>
+<code class="docutils literal"><span class="pre">~/pcgr-0.6.0</span> <span class="pre">~/pcgr-0.6.0/examples</span> <span class="pre">grch37</span> <span class="pre">~/pcgr-0.6.0/examples/pcgr_conf.COAD.toml</span> <span class="pre">tumor_sample.COAD</span></code></p>
+<p>This command will run the Docker-based PCGR workflow and produce the
+following output files in the <em>examples</em> folder:</p>
+<ol class="arabic simple">
+<li><strong>tumor_sample.COAD.pcgr_acmg.html</strong> - An interactive HTML report
+for clinical interpretation</li>
+<li><strong>tumor_sample.COAD.pcgr_acmg.pass.vcf.gz</strong> - Bgzipped VCF file
+with rich set of annotations for precision oncology</li>
+<li><strong>tumor_sample.COAD.pcgr_acmg.pass.tsv.gz</strong> - Compressed
+vcf2tsv-converted file with rich set of annotations for precision
+oncology</li>
+<li><strong>tumor_sample.COAD.pcgr_acmg.snvs_indels.tiers.tsv</strong> -
+Tab-separated values file with variants organized according to tiers
+of functional relevance</li>
+<li><strong>tumor_sample.COAD.pcgr_acmg.json</strong> - JSON dump of HTML report
+content</li>
+<li><strong>tumor_sample.COAD.pcgr_acmg.cna_segments.tsv.gz</strong> - Compressed
+tab-separated values file with annotations of gene transcripts that
+overlap with somatic copy number aberrations</li>
+</ol>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="annotation_resources.html" class="btn btn-neutral float-right" title="Annotation resources" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="about.html" class="btn btn-neutral" title="About" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017/2018, Sigve Nakken.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.6.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
