@@ -1,2 +1,1 @@
-docs/_build/html/* linguist-documentation=true
 src/R/pcgrr/inst/templates/*.bib linguist-vendored=true
