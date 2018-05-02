@@ -1,6 +1,14 @@
 
 ## CHANGELOG
 
+#### 0.6.1 - May 2nd 2018
+
+##### Fixed
+ * Bug in tier assignment 'pcgr_acmg' (case for no variants in tier1,2,3)
+ * Bug in tier assignment 'pcgr_acmg' (no tumor type specified, evidence items with weak support detected)
+ * Bug: duplicated variants in 'Tier 3' resulting from genes encoded with dual roles as tumor suppressor genes/oncogenes
+ * Bug: duplicated variants in 'Tier 1/Noncoding variants' resulting from rare cases of noncoding variants occurring in Tier 1 (synonymous variants with biomarker role)
+
 #### 0.6.0 - April 25th 2018
 
 ##### Added

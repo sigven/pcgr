@@ -121,8 +121,8 @@ The interactive datatables contain a number of hyperlinked annotations similar t
 
 Example reports:
 
-* [View an example report for a breast tumor sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.BRCA.pcgr_acmg.0.6.0.html)
-* [View an example report for a colon adenocarcinoma sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.COAD.pcgr_acmg.0.6.0.html)
+* [View an example report for a breast tumor sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.BRCA.pcgr_acmg.0.6.1.html)
+* [View an example report for a colon adenocarcinoma sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.COAD.pcgr_acmg.0.6.1.html)
 
 
 The HTML reports have been tested using the following browsers:
