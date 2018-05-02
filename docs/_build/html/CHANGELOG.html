@@ -94,6 +94,10 @@
 <li class="toctree-l1"><a class="reference internal" href="output.html">Output</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tier_systems.html">Tier models</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">CHANGELOG</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#may-2nd-2018">0.6.1 - May 2nd 2018</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#fixed">Fixed</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#april-25th-2018">0.6.0 - April 25th 2018</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#added">Added</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#removed">Removed</a></li>
@@ -148,6 +152,23 @@
             
   <div class="section" id="changelog">
 <h1>CHANGELOG<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="may-2nd-2018">
+<h2>0.6.1 - May 2nd 2018<a class="headerlink" href="#may-2nd-2018" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="fixed">
+<h3>Fixed<a class="headerlink" href="#fixed" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Bug in tier assignment &#8216;pcgr_acmg&#8217; (case for no variants in
+tier1,2,3)</li>
+<li>Bug in tier assignment &#8216;pcgr_acmg&#8217; (no tumor type specified,
+evidence items with weak support detected)</li>
+<li>Bug: duplicated variants in &#8216;Tier 3&#8217; resulting from genes encoded
+with dual roles as tumor suppressor genes/oncogenes</li>
+<li>Bug: duplicated variants in &#8216;Tier 1/Noncoding variants&#8217; resulting
+from rare cases of noncoding variants occurring in Tier 1 (synonymous
+variants with biomarker role)</li>
+</ul>
+</div>
+</div>
 <div class="section" id="april-25th-2018">
 <h2>0.6.0 - April 25th 2018<a class="headerlink" href="#april-25th-2018" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="added">
