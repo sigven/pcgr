@@ -1,0 +1,68 @@
+name: pcgr
+
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+  - anaconda
+
+dependencies:
+  #
+  # PCGR: python
+  - python>=3.6
+  - pip
+  - numpy
+  - cython
+  - scipy
+  - pandas
+  - cyvcf2
+  - toml
+  #
+  # PCGR: other tools
+  - tabix
+  - samtools
+  - bedtools
+  - vcfanno
+  - vt
+  - htslib
+  - vcf2maf
+  - nlopt
+  #
+  # Perl (for VEP)
+  - perl-dbi
+  - perl-dbd-mysql
+  - perl-bioperl
+  #
+  # PCGR: R packages
+  - pandoc<2  # r-rmarkdown 1.6 doesn't support pandoc 2, and a more recent r-rmarkdown is not available on conda
+  - r
+  - bioconductor-biocinstaller
+  - r-dplyr
+  - r-devtools
+  - r-stringr
+  - r-tidyr
+  - r-httr
+  - r-git2r
+  - r-data.table
+  - r-magrittr
+  - r-htmltools
+  - r-caret
+  - r-randomforest
+  - r-plotly
+  - r-rcpptoml
+  - r-ggplot2
+  - r-dt
+  - r-htmlwidgets>=1.0  # dependency requirement for DT (by default, 0.9 is getting installed)
+  - r-crosstalk
+  - r-deconstructsigs
+  - r-configr  # vladsaveliev
+  - bioconductor-variantannotation
+  - bioconductor-bsgenome.hsapiens.ucsc.hg19
+  - bioconductor-bsgenome.hsapiens.ucsc.hg38
+  - bioconductor-genomeinfodb
+  - bioconductor-genomicranges  # GenomicRangesS4Vectors
+
+
+
+# cpanm:
+# Test::Object PPI::Document Task::Weaken Test::SubCalls Test::Object Archive::Zip Perl::Critic
