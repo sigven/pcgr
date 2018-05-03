@@ -61,8 +61,3 @@ dependencies:
   - bioconductor-bsgenome.hsapiens.ucsc.hg38
   - bioconductor-genomeinfodb
   - bioconductor-genomicranges  # GenomicRangesS4Vectors
-
-
-
-# cpanm:
-# Test::Object PPI::Document Task::Weaken Test::SubCalls Test::Object Archive::Zip Perl::Critic
