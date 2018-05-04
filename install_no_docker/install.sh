@@ -19,10 +19,9 @@ then
     conda env create -n pcgr --file ${THIS_DIR}/conda_environment.yml
     source activate pcgr
 else
-    echo "Installing into existing environemnt ${CONDA_ENV_PARAM}"
-    conda env update -n ${CONDA_ENV_PARAM} --file ${THIS_DIR}/conda_environment.yml
+    echo "Installing into existing environemnt ${CONDA_DEFAULT_ENV}"
+    conda env update -n ${CONDA_DEFAULT_ENV} --file ${THIS_DIR}/conda_environment.yml
 fi
-
 
 SRC_DIR=${THIS_DIR}/../src
 
