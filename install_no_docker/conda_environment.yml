@@ -55,7 +55,9 @@ dependencies:
   - r-htmlwidgets>=1.0  # dependency requirement for DT (by default, 0.9 is getting installed)
   - r-crosstalk
   - r-deconstructsigs
-  - r-configr  # vladsaveliev
+  - r-knitr>=1.17
+  - r-rmarkdown
+  - r-configr  # https://anaconda.org/vladsaveliev/
   - bioconductor-variantannotation
   - bioconductor-bsgenome.hsapiens.ucsc.hg19
   - bioconductor-bsgenome.hsapiens.ucsc.hg38
