@@ -394,11 +394,11 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
 
    vepdb_dir_host = os.path.join(str(host_directories['db_dir_host']),'.vep')
 
-   if docker_image_version:
-      input_vcf_docker = 'None'
-      input_cna_docker = 'None'
-      input_conf_docker = 'None'
+   input_vcf_docker = 'None'
+   input_cna_docker = 'None'
+   input_conf_docker = 'None'
 
+   if docker_image_version:
       if host_directories['input_vcf_basename_host'] != 'NA':
          input_vcf_docker = '/workdir/input_vcf/' + str(host_directories['input_vcf_basename_host'])
       if host_directories['input_cna_basename_host'] != 'NA':
@@ -422,30 +422,39 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
          if host_directories['input_conf_dir_host'] != 'NA':
             docker_command_run1 = "docker run --rm -t -u " + str(uid) + " -v=" + str(host_directories['base_dir_host']) + ":/data -v=" + str(vepdb_dir_host) + ":/usr/local/share/vep/data -v=" + str(host_directories['input_cna_dir_host']) + ":/workdir/input_cna -v=" + str(host_directories['input_vcf_dir_host']) + ":/workdir/input_vcf -v=" + str(host_directories['input_conf_dir_host']) + ":/workdir/input_conf -v=" + str(host_directories['output_dir_host']) + ":/workdir/output -w=/workdir/output " + str(docker_image_version) + " sh -c \""
       docker_command_run2 = "docker run --rm -t -u " + str(uid) + " -v=" + str(host_directories['base_dir_host']) + ":/data -v=" + str(host_directories['output_dir_host']) + ":/workdir/output -w=/workdir " + str(docker_image_version) + " sh -c \""
-
       docker_command_run_end = '\"'
+
       data_dir = '/data'
       outpur_dir = '/workdir/output'
       vep_dir = '/usr/local/share/vep/data'
-      r_sciprts_dir = '/'
+      r_scripts_dir = '/'
+      python_scripts_dir = ''
 
    else:
-      input_vcf_docker = os.path.join(host_directories['input_vcf_dir_host'], host_directories['input_vcf_basename_host'])
-      input_cna_docker = os.path.join(host_directories['input_cna_dir_host'], host_directories['input_cna_basename_host'])
-      input_conf_docker = os.path.join(host_directories['input_conf_dir_host'], host_directories['input_conf_basename_host'])
+      if host_directories['input_vcf_basename_host'] != 'NA':
+         input_vcf_docker = os.path.join(host_directories['input_vcf_dir_host'], host_directories['input_vcf_basename_host'])
+      if host_directories['input_cna_basename_host'] != 'NA':
+         input_cna_docker = os.path.join(host_directories['input_cna_dir_host'], host_directories['input_cna_basename_host'])
+      if host_directories['input_conf_basename_host'] != 'NA':
+         input_conf_docker = os.path.join(host_directories['input_conf_dir_host'], host_directories['input_conf_basename_host'])
+
       docker_command_run1 = ''
       docker_command_run2 = ''
       docker_command_run_end = ''
-      r_sciprts_dir = './src/'
 
-      data_dir = '.'
+      data_dir = host_directories['base_dir_host']
       outpur_dir = host_directories['output_dir_host']
       vep_dir = vepdb_dir_host
+
+      src_dir = os.path.join(host_directories['base_dir_host'], 'src')
+      python_scripts_dir = os.path.join(src_dir, 'pcgr')
+      os.environ['PYTHONPATH'] = os.path.join(python_scripts_dir, 'lib') + ((':' + os.environ['PYTHONPATH']) if 'PYTHONPATH' in os.environ else '')
+      r_scripts_dir = src_dir
 
    ## verify VCF and CNA segment file
    logger = getlogger('pcgr-validate-input')
    logger.info("STEP 0: Validate input data")
-   vcf_validate_command = str(docker_command_run1) + "pcgr_validate_input.py " + data_dir + " " + str(input_vcf_docker) + " " + str(input_cna_docker) + " " + outpur_dir + " " + str(input_conf_docker) + " " + str(genome_assembly) + docker_command_run_end
+   vcf_validate_command = str(docker_command_run1) + os.path.join(python_scripts_dir, "pcgr_validate_input.py") + " " + data_dir + " " + str(input_vcf_docker) + " " + str(input_cna_docker) + " " + outpur_dir + " " + str(input_conf_docker) + " " + str(genome_assembly) + docker_command_run_end
    check_subprocess(vcf_validate_command)
    ## Log tumor type of query genome
    logger.info('Finished')
@@ -497,14 +506,14 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       print()
       logger = getlogger('pcgr-vcfanno')
       logger.info("STEP 2: Annotation for precision oncology with pcgr-vcfanno (ClinVar, dbNSFP, UniProtKB, cancerhotspots.org, CiVIC, CBMDB, DoCM, TCGA, ICGC-PCAWG, IntoGen_drivers)")
-      pcgr_vcfanno_command = str(docker_command_run2) + "pcgr_vcfanno.py --num_processes "  + str(config_options['other']['n_vcfanno_proc']) + " --dbnsfp --docm --clinvar --icgc --civic --cbmdb --intogen_driver_mut --tcga --uniprot --cancer_hotspots --pcgr_onco_xref " + str(vep_vcf) + ".gz " + str(vep_vcfanno_vcf) + " " + data_dir + "/data/" + str(genome_assembly) + docker_command_run_end
+      pcgr_vcfanno_command = str(docker_command_run2) + os.path.join(python_scripts_dir, "pcgr_vcfanno.py") + " --num_processes "  + str(config_options['other']['n_vcfanno_proc']) + " --dbnsfp --docm --clinvar --icgc --civic --cbmdb --intogen_driver_mut --tcga --uniprot --cancer_hotspots --pcgr_onco_xref " + str(vep_vcf) + ".gz " + str(vep_vcfanno_vcf) + " " + data_dir + "/data/" + str(genome_assembly) + docker_command_run_end
       check_subprocess(pcgr_vcfanno_command)
       logger.info("Finished")
 
       ## summarise command
       print()
       logger = getlogger("pcgr-summarise")
-      pcgr_summarise_command = str(docker_command_run2) + "pcgr_summarise.py " + str(vep_vcfanno_vcf) + ".gz " + data_dir + "/data/" + str(genome_assembly) + docker_command_run_end
+      pcgr_summarise_command = str(docker_command_run2) + os.path.join(python_scripts_dir, "pcgr_summarise.py") + " " + str(vep_vcfanno_vcf) + ".gz " + data_dir + "/data/" + str(genome_assembly) + docker_command_run_end
       logger.info("STEP 3: Cancer gene annotations with pcgr-summarise")
       check_subprocess(pcgr_summarise_command)
 
@@ -517,7 +526,7 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       check_subprocess(create_output_vcf_command2)
       check_subprocess(create_output_vcf_command3)
       check_subprocess(create_output_vcf_command4)
-      pcgr_vcf2tsv_command = str(docker_command_run2) + "vcf2tsv.py " + str(output_pass_vcf) + " --compress " + str(output_pass_tsv) + docker_command_run_end
+      pcgr_vcf2tsv_command = str(docker_command_run2) + os.path.join(python_scripts_dir, "vcf2tsv.py") + " " + str(output_pass_vcf) + " --compress " + str(output_pass_tsv) + docker_command_run_end
       logger.info("Converting VCF to TSV with https://github.com/sigven/vcf2tsv")
       check_subprocess(pcgr_vcf2tsv_command)
       check_subprocess(clean_command)
@@ -531,7 +540,7 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
    if not basic:
       logger = getlogger('pcgr-writer')
       logger.info("STEP 4: Generation of output files - variant interpretation report for precision oncology")
-      pcgr_report_command = str(docker_command_run1) + r_sciprts_dir + "pcgr.R " + outpur_dir + " " + str(output_pass_tsv) + ".gz " + str(input_cna_docker) + " " + str(sample_id)  + " " + str(input_conf_docker) + " " + str(version) + " " + str(genome_assembly) + " " + data_dir + docker_command_run_end
+      pcgr_report_command = str(docker_command_run1) + os.path.join(r_scripts_dir, "pcgr.R") + " " + outpur_dir + " " + str(output_pass_tsv) + ".gz " + str(input_cna_docker) + " " + str(sample_id)  + " " + str(input_conf_docker) + " " + str(version) + " " + str(genome_assembly) + " " + data_dir + docker_command_run_end
       #print(pcgr_report_command)
       check_subprocess(pcgr_report_command)
       logger.info("Finished")
