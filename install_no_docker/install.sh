@@ -20,7 +20,12 @@ then
     source activate pcgr
 else
     echo "Installing into existing environemnt ${CONDA_DEFAULT_ENV}"
-    conda env update -n ${CONDA_DEFAULT_ENV} --file ${THIS_DIR}/conda_environment.yml
+    if [[ ${CONDA_DEFAULT_ENV} = *"/"* ]]; then
+        PARAM="-p"
+    else
+        PARAM="-n"
+    fi
+    conda env update ${PARAM} ${CONDA_DEFAULT_ENV} --file ${THIS_DIR}/conda_environment.yml
 fi
 
 SRC_DIR=${THIS_DIR}/../src
