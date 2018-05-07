@@ -34,9 +34,6 @@ R -e "library(devtools); devtools::install('${SRC_DIR}/R/pcgrr')"
 
 # Install VEP separately (doesn't work when within the envirnoment file, for some reason):
 conda install -c vladsaveliev -y ensembl-vep
-vep_install -a ap -g miRNA -l -n
-
-# Install VEP separately (doesn't work when within the envirnoment file, for some reason).
 # Installs plugins (--AUTO p)
 vep_install --AUTO p --PLUGINS miRNA --NO_HTSLIB --NO_UPDATE
 
