@@ -65,7 +65,7 @@ def read_config_options(configuration_file, pcgr_dir, genome_assembly, logger):
    
    ## read default options
    pcgr_config_options = {}
-   pcgr_configuration_file_default = os.path.join(pcgr_dir,'data',str(genome_assembly),'pcgr_configuration_somatic_default.toml')
+   pcgr_configuration_file_default = os.path.join(pcgr_dir, 'data', str(genome_assembly), 'pcgr_configuration_somatic_default.toml')
    if not os.path.exists(pcgr_configuration_file_default):
       err_msg = "Default PCGR configuration file " + str(pcgr_configuration_file_default) + " does not exist - exiting"
       pcgr_error_message(err_msg,logger)
@@ -279,7 +279,7 @@ def verify_input_files(input_vcf, input_cna, configuration_file, pcgr_config_opt
       input_cna_dir = os.path.dirname(os.path.abspath(input_cna))
 
       ## if output cna segments exist and overwrite not set
-      output_cna_segments = os.path.join(str(output_dir_full),str(sample_id)) + '.' + str(pcgr_config_options['tier_model']['tier_model']) + '.' + str(genome_assembly) + '.cna_segments.tsv.gz'
+      output_cna_segments = os.path.join(str(output_dir_full), str(sample_id)) + '.' + str(pcgr_config_options['tier_model']['tier_model']) + '.' + str(genome_assembly) + '.cna_segments.tsv.gz'
       if os.path.exists(output_cna_segments) and overwrite == 0:
          err_msg = "Output files (e.g. " + str(output_cna_segments) + ") already exist - please specify different sample_id or add option --force_overwrite"
          pcgr_error_message(err_msg,logger)
@@ -291,19 +291,19 @@ def verify_input_files(input_vcf, input_cna, configuration_file, pcgr_config_opt
       pcgr_error_message(err_msg,logger)
    
    ## check the existence of data folder within the base folder
-   db_dir = os.path.join(os.path.abspath(base_pcgr_dir),'data')
+   db_dir = os.path.join(os.path.abspath(base_pcgr_dir), 'data')
    if not os.path.isdir(db_dir):
       err_msg = "Data directory (" + str(db_dir) + ") does not exist"
       pcgr_error_message(err_msg,logger)
    
    ## check the existence of specified assembly data folder within the base folder
-   db_assembly_dir = os.path.join(os.path.abspath(base_pcgr_dir),'data',genome_assembly)
+   db_assembly_dir = os.path.join(os.path.abspath(base_pcgr_dir), 'data', genome_assembly)
    if not os.path.isdir(db_assembly_dir):
       err_msg = "Data directory for the specified genome assembly (" + str(db_assembly_dir) + ") does not exist"
       pcgr_error_message(err_msg,logger)
    
    ## check the existence of RELEASE_NOTES (starting from 0.4.0)
-   rel_notes_file = os.path.join(os.path.abspath(base_pcgr_dir),'data',genome_assembly,'RELEASE_NOTES')
+   rel_notes_file = os.path.join(os.path.abspath(base_pcgr_dir), 'data', genome_assembly, 'RELEASE_NOTES')
    if not os.path.exists(rel_notes_file):
       err_msg = 'The PCGR data bundle is outdated - please download the latest data bundle (see github.com/sigven/pcgr for instructions)'
       pcgr_error_message(err_msg,logger)
@@ -425,7 +425,7 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       docker_command_run_end = '\"'
 
       data_dir = '/data'
-      outpur_dir = '/workdir/output'
+      output_dir = '/workdir/output'
       vep_dir = '/usr/local/share/vep/data'
       r_scripts_dir = '/'
       python_scripts_dir = ''
@@ -443,7 +443,7 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       docker_command_run_end = ''
 
       data_dir = host_directories['base_dir_host']
-      outpur_dir = host_directories['output_dir_host']
+      output_dir = host_directories['output_dir_host']
       vep_dir = vepdb_dir_host
 
       src_dir = os.path.join(host_directories['base_dir_host'], 'src')
@@ -454,7 +454,7 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
    ## verify VCF and CNA segment file
    logger = getlogger('pcgr-validate-input')
    logger.info("STEP 0: Validate input data")
-   vcf_validate_command = str(docker_command_run1) + os.path.join(python_scripts_dir, "pcgr_validate_input.py") + " " + data_dir + " " + str(input_vcf_docker) + " " + str(input_cna_docker) + " " + outpur_dir + " " + str(input_conf_docker) + " " + str(genome_assembly) + docker_command_run_end
+   vcf_validate_command = docker_command_run1 + os.path.join(python_scripts_dir, "pcgr_validate_input.py") + " " + data_dir + " " + str(input_vcf_docker) + " " + str(input_cna_docker) + " " + output_dir + " " + str(input_conf_docker) + " " + str(genome_assembly) + docker_command_run_end
    check_subprocess(vcf_validate_command)
    ## Log tumor type of query genome
    logger.info('Finished')
@@ -462,30 +462,30 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
    if not input_vcf_docker == 'None':
 
       ## Define input, output and temporary file names
-      output_vcf = outpur_dir + str(sample_id) + '.' + str(config_options['tier_model']['tier_model']) + '.' + str(genome_assembly) + '.vcf.gz'
-      #output_maf = outpur_dir + str(sample_id) + '.' + str(config_options['tier_model']['tier_model']) + '.' + str(genome_assembly) + '.maf'
-      output_pass_vcf = outpur_dir + str(sample_id) + '.' + str(config_options['tier_model']['tier_model']) + '.' + str(genome_assembly) + '.pass.vcf.gz'
-      output_pass_tsv = outpur_dir + str(sample_id) + '.' + str(config_options['tier_model']['tier_model']) + '.' + str(genome_assembly) + '.pass.tsv'
-      input_vcf_pcgr_ready = outpur_dir + re.sub(r'(\.vcf$|\.vcf\.gz$)','.pcgr_ready.vcf.gz',host_directories['input_vcf_basename_host'])
-      input_vcf_pcgr_ready_uncompressed = outpur_dir + re.sub(r'(\.vcf$|\.vcf\.gz$)','.pcgr_ready.vcf',host_directories['input_vcf_basename_host'])
-      vep_vcf = re.sub(r'(\.vcf$|\.vcf\.gz$)','.pcgr_vep.vcf',input_vcf_pcgr_ready)
-      vep_vcfanno_vcf = re.sub(r'(\.vcf$|\.vcf\.gz$)','.pcgr_vep.vcfanno.vcf',input_vcf_pcgr_ready)
+      output_vcf = os.path.join(output_dir, str(sample_id) + '.' + str(config_options['tier_model']['tier_model']) + str(genome_assembly) + '.vcf.gz')
+      #output_maf = os.path.join(output_dir, str(sample_id) + '.' + str(config_options['tier_model']['tier_model']) + str(genome_assembly) + '.maf')
+      output_pass_vcf = os.path.join(output_dir, str(sample_id) + '.' + str(config_options['tier_model']['tier_model']) + '.' + str(genome_assembly) + '.pass.vcf.gz')
+      output_pass_tsv = os.path.join(output_dir, str(sample_id) + '.' + str(config_options['tier_model']['tier_model']) + '.' + str(genome_assembly) + '.pass.tsv')
+      input_vcf_pcgr_ready = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)', '.pcgr_ready.vcf.gz', host_directories['input_vcf_basename_host']))
+      input_vcf_pcgr_ready_uncompressed = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)', '.pcgr_ready.vcf', host_directories['input_vcf_basename_host']))
+      vep_vcf = re.sub(r'(\.vcf$|\.vcf\.gz$)', '.pcgr_vep.vcf', input_vcf_pcgr_ready)
+      vep_vcfanno_vcf = re.sub(r'(\.vcf$|\.vcf\.gz$)', '.pcgr_vep.vcfanno.vcf', input_vcf_pcgr_ready)
       vep_tmp_vcf = vep_vcf + '.tmp'
-      vep_vcfanno_annotated_vcf = re.sub(r'\.vcfanno','.vcfanno.annotated',vep_vcfanno_vcf) + '.gz'
-      vep_vcfanno_annotated_pass_vcf = re.sub(r'\.vcfanno','.vcfanno.annotated.pass',vep_vcfanno_vcf) + '.gz'
+      vep_vcfanno_annotated_vcf = re.sub(r'\.vcfanno', '.vcfanno.annotated', vep_vcfanno_vcf) + '.gz'
+      vep_vcfanno_annotated_pass_vcf = re.sub(r'\.vcfanno', '.vcfanno.annotated.pass', vep_vcfanno_vcf) + '.gz'
 
-      fasta_assembly = vep_dir + "/homo_sapiens/92_GRCh37/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz"
+      fasta_assembly = os.path.join(vep_dir, "homo_sapiens/92_GRCh37/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz")
       vep_assembly = 'GRCh37'
       if genome_assembly == 'grch38':
          vep_assembly = 'GRCh38'
-         fasta_assembly = vep_dir + "/homo_sapiens/92_GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz"
+         fasta_assembly = os.path.join(vep_dir, "homo_sapiens/92_GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz")
       vep_options = "--vcf --check_ref --flag_pick_allele --force_overwrite --species homo_sapiens --assembly " + str(vep_assembly) + " --offline --fork " + str(config_options['other']['n_vep_forks']) + " --hgvs --dont_skip --failed 1 --af --af_1kg --af_gnomad --variant_class --regulatory --domains --symbol --protein --ccds --uniprot --appris --biotype --canonical --gencode_basic --cache --numbers --total_length --allele_number --no_escape --xref_refseq --dir " + vep_dir
       if config_options['other']['vep_skip_intergenic'] == 1:
          vep_options = vep_options + " --no_intergenic"
-      vep_main_command = str(docker_command_run1) + "vep --input_file " + str(input_vcf_pcgr_ready) + " --output_file " + str(vep_tmp_vcf) + " " + str(vep_options) + " --fasta " + str(fasta_assembly) + docker_command_run_end
-      vep_sed_command =  str(docker_command_run1) + "sed -r 's/:p\.[A-Z]{1}[a-z]{2}[0-9]+=//g' " + str(vep_tmp_vcf) + " > " + str(vep_vcf) + docker_command_run_end
-      vep_bgzip_command = str(docker_command_run1) + "bgzip -f " + str(vep_vcf) + docker_command_run_end
-      vep_tabix_command = str(docker_command_run1) + "tabix -f -p vcf " + str(vep_vcf) + ".gz" + docker_command_run_end
+      vep_main_command = docker_command_run1 + "vep --input_file " + str(input_vcf_pcgr_ready) + " --output_file " + str(vep_tmp_vcf) + " " + str(vep_options) + " --fasta " + str(fasta_assembly) + docker_command_run_end
+      vep_sed_command =  docker_command_run1 + "sed -r 's/:p\.[A-Z]{1}[a-z]{2}[0-9]+=//g' " + str(vep_tmp_vcf) + " > " + str(vep_vcf) + docker_command_run_end
+      vep_bgzip_command = docker_command_run1 + "bgzip -f " + str(vep_vcf) + docker_command_run_end
+      vep_tabix_command = docker_command_run1 + "tabix -f -p vcf " + str(vep_vcf) + ".gz" + docker_command_run_end
       logger = getlogger('pcgr-vep')
 
       #logger = getlogger('pcgr-vcf2maf')
@@ -506,14 +506,14 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       print()
       logger = getlogger('pcgr-vcfanno')
       logger.info("STEP 2: Annotation for precision oncology with pcgr-vcfanno (ClinVar, dbNSFP, UniProtKB, cancerhotspots.org, CiVIC, CBMDB, DoCM, TCGA, ICGC-PCAWG, IntoGen_drivers)")
-      pcgr_vcfanno_command = str(docker_command_run2) + os.path.join(python_scripts_dir, "pcgr_vcfanno.py") + " --num_processes "  + str(config_options['other']['n_vcfanno_proc']) + " --dbnsfp --docm --clinvar --icgc --civic --cbmdb --intogen_driver_mut --tcga --uniprot --cancer_hotspots --pcgr_onco_xref " + str(vep_vcf) + ".gz " + str(vep_vcfanno_vcf) + " " + data_dir + "/data/" + str(genome_assembly) + docker_command_run_end
+      pcgr_vcfanno_command = str(docker_command_run2) + os.path.join(python_scripts_dir, "pcgr_vcfanno.py") + " --num_processes " + str(config_options['other']['n_vcfanno_proc']) + " --dbnsfp --docm --clinvar --icgc --civic --cbmdb --intogen_driver_mut --tcga --uniprot --cancer_hotspots --pcgr_onco_xref " + str(vep_vcf) + ".gz " + str(vep_vcfanno_vcf) + " " + os.path.join(data_dir, "data", str(genome_assembly)) + docker_command_run_end
       check_subprocess(pcgr_vcfanno_command)
       logger.info("Finished")
 
       ## summarise command
       print()
       logger = getlogger("pcgr-summarise")
-      pcgr_summarise_command = str(docker_command_run2) + os.path.join(python_scripts_dir, "pcgr_summarise.py") + " " + str(vep_vcfanno_vcf) + ".gz " + data_dir + "/data/" + str(genome_assembly) + docker_command_run_end
+      pcgr_summarise_command = str(docker_command_run2) + os.path.join(python_scripts_dir, "pcgr_summarise.py") + " " + str(vep_vcfanno_vcf) + ".gz " + os.path.join(data_dir, "data", str(genome_assembly)) + docker_command_run_end
       logger.info("STEP 3: Cancer gene annotations with pcgr-summarise")
       check_subprocess(pcgr_summarise_command)
 
@@ -540,7 +540,7 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
    if not basic:
       logger = getlogger('pcgr-writer')
       logger.info("STEP 4: Generation of output files - variant interpretation report for precision oncology")
-      pcgr_report_command = str(docker_command_run1) + os.path.join(r_scripts_dir, "pcgr.R") + " " + outpur_dir + " " + str(output_pass_tsv) + ".gz " + str(input_cna_docker) + " " + str(sample_id)  + " " + str(input_conf_docker) + " " + str(version) + " " + str(genome_assembly) + " " + data_dir + docker_command_run_end
+      pcgr_report_command = (docker_command_run1 + os.path.join(r_scripts_dir, "pcgr.R") + " " + output_dir + " " + str(output_pass_tsv) + ".gz" + " " + input_cna_docker + " " + str(sample_id) + " " + input_conf_docker + " " + str(version) + " " + genome_assembly + " " + os.path.join(data_dir, docker_command_run_end))
       #print(pcgr_report_command)
       check_subprocess(pcgr_report_command)
       logger.info("Finished")

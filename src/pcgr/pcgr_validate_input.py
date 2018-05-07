@@ -71,7 +71,7 @@ def is_valid_vcf(input_vcf, output_dir, logger):
    """
    
    logger.info('Validating VCF file with EBIvariation/vcf-validator')
-   vcf_validation_output_file = output_dir + re.sub(r'(\.vcf$|\.vcf\.gz$)','.vcf_validator_output',os.path.basename(input_vcf))
+   vcf_validation_output_file = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)','.vcf_validator_output',os.path.basename(input_vcf)))
    command_v42 = 'vcf_validator --input ' + str(input_vcf) + ' > ' + str(vcf_validation_output_file)
    if input_vcf.endswith('.gz'):
       command_v42 = 'bgzip -dc ' + str(input_vcf) + ' | vcf_validator  > ' + str(vcf_validation_output_file)
@@ -237,8 +237,8 @@ def simplify_vcf(input_vcf, vcf, output_dir, logger):
    3. Final VCF file is sorted and indexed (bgzip + tabix)
    """
    
-   input_vcf_pcgr_ready = output_dir + re.sub(r'(\.vcf$|\.vcf\.gz$)','.pcgr_ready.tmp.vcf',os.path.basename(input_vcf))
-   input_vcf_pcgr_ready_decomposed = output_dir + re.sub(r'(\.vcf$|\.vcf\.gz$)','.pcgr_ready.vcf',os.path.basename(input_vcf))
+   input_vcf_pcgr_ready = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)','.pcgr_ready.tmp.vcf',os.path.basename(input_vcf)))
+   input_vcf_pcgr_ready_decomposed = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)','.pcgr_ready.vcf',os.path.basename(input_vcf)))
    
    multiallelic_alt = 0
    for rec in vcf:
@@ -267,14 +267,14 @@ def simplify_vcf(input_vcf, vcf, output_dir, logger):
 
    if multiallelic_alt == 1:
       logger.info('Decomposing multi-allelic sites in input VCF file using \'vt decompose\'')
-      command_decompose = 'vt decompose -s ' + str(input_vcf_pcgr_ready) + ' > ' + str(input_vcf_pcgr_ready_decomposed) + ' 2> ' + output_dir + '/decompose.log'
+      command_decompose = 'vt decompose -s ' + str(input_vcf_pcgr_ready) + ' > ' + str(input_vcf_pcgr_ready_decomposed) + ' 2> ' + os.path.join(output_dir, 'decompose.log')
       os.system(command_decompose)
    else:
       command_copy = 'cp ' + str(input_vcf_pcgr_ready) + ' ' + str(input_vcf_pcgr_ready_decomposed)
       os.system(command_copy)
    os.system('bgzip -cf ' + str(input_vcf_pcgr_ready_decomposed) + ' > ' + str(input_vcf_pcgr_ready_decomposed) + '.gz')
    os.system('tabix -p vcf ' + str(input_vcf_pcgr_ready_decomposed) + '.gz')
-   os.system('rm -f ' + str(input_vcf_pcgr_ready) + ' ' + output_dir + '/decompose.log')
+   os.system('rm -f ' + str(input_vcf_pcgr_ready) + ' ' + os.path.join(output_dir, 'decompose.log'))
 
 def validate_pcgr_input(pcgr_directory, input_vcf, input_cna, output_dir, configuration_file, genome_assembly):
    """
