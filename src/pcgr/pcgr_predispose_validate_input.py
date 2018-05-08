@@ -17,12 +17,12 @@ def __main__():
    parser = argparse.ArgumentParser(description='Verify input data for PCGR_predispose')
    parser.add_argument('pcgr_dir',help='Docker location of PCGR base directory with accompanying data directory, e.g. /data')
    parser.add_argument('input_vcf', help='VCF input file with query variants (SNVs/InDels)')
-   parser.add_argument('output_dir',help='Output directory')
    parser.add_argument('configuration_file', help='Configuration file (TOML-formatted, e.g. pcgr_conf.toml)')
    parser.add_argument('genome_assembly',help='grch37 or grch38')
+   parser.add_argument('output_dir',help='Output directory')
    args = parser.parse_args()
    
-   ret = validate_pcgr_input(args.pcgr_dir, args.input_vcf, args.output_dir, args.configuration_file, args.genome_assembly)
+   ret = validate_pcgr_input(args.pcgr_dir, args.input_vcf, args.configuration_file, args.genome_assembly, args.output_dir)
    if ret != 0:
       sys.exit(1)
 
