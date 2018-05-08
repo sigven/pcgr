@@ -26,6 +26,7 @@ def __main__():
    parser.add_argument('genome_assembly',choices = ['grch37','grch38'], help='Genome assembly build: grch37 or grch38')
    parser.add_argument('configuration_file',help='PCGR configuration file (TOML format)')
    parser.add_argument('sample_id',help="Tumor sample/cancer genome identifier - prefix for output files")
+   parser.add_argument('--docker-uid', dest='docker_user_id')
 
    docker_image_version = 'sigven/pcgr:' + str(version)
    args = parser.parse_args()
@@ -58,7 +59,7 @@ def __main__():
    logger = getlogger('pcgr-check-files')
    host_directories = verify_input_files(args.input_vcf, args.input_cna, args.configuration_file, config_options, args.pcgr_dir, args.output_dir, args.sample_id, args.genome_assembly, overwrite, logger)
 
-   run_pcgr(host_directories, docker_image_version, config_options, args.sample_id, args.genome_assembly, version, args.basic)
+   run_pcgr(host_directories, docker_image_version, config_options, args.sample_id, args.genome_assembly, version, args.basic, docker_user_id=args.docker_user_id)
 
 
 def read_config_options(configuration_file, pcgr_dir, genome_assembly, logger):
@@ -365,7 +366,7 @@ def getlogger(logger_name):
 
    return logger
 
-def run_pcgr(host_directories, docker_image_version, config_options, sample_id, genome_assembly, version, basic):
+def run_pcgr(host_directories, docker_image_version, config_options, sample_id, genome_assembly, version, basic, docker_user_id=None):
    """
    Main function to run the PCGR workflow using Docker
    """
@@ -382,7 +383,10 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       ncbi_build_maf = 'GRCh37'
       gencode_version = 'release 19'
    logger = getlogger('pcgr-get-OS')
-   if platform.system() == 'Linux' or platform.system() == 'Darwin' or sys.platform == 'darwin' or sys.platform == 'linux2' or sys.platform == 'linux':
+
+   if docker_user_id:
+      uid = docker_user_id
+   elif platform.system() == 'Linux' or platform.system() == 'Darwin' or sys.platform == 'darwin' or sys.platform == 'linux2' or sys.platform == 'linux':
       uid = os.getuid()
    else:
       if platform.system() == 'Windows' or sys.platform == 'win32' or sys.platform == 'cygwin':
@@ -451,10 +455,12 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       os.environ['PYTHONPATH'] = os.path.join(python_scripts_dir, 'lib') + ((':' + os.environ['PYTHONPATH']) if 'PYTHONPATH' in os.environ else '')
       r_scripts_dir = src_dir
 
+   check_subprocess(docker_command_run1.replace("-u " + str(uid), "") + 'mkdir -p ' + output_dir + docker_command_run_end)
+
    ## verify VCF and CNA segment file
    logger = getlogger('pcgr-validate-input')
    logger.info("STEP 0: Validate input data")
-   vcf_validate_command = docker_command_run1 + os.path.join(python_scripts_dir, "pcgr_validate_input.py") + " " + data_dir + " " + str(input_vcf_docker) + " " + str(input_cna_docker) + " " + output_dir + " " + str(input_conf_docker) + " " + str(genome_assembly) + docker_command_run_end
+   vcf_validate_command = docker_command_run1 + os.path.join(python_scripts_dir, "pcgr_validate_input.py") + " " + data_dir + " " + str(input_vcf_docker) + " " + str(input_cna_docker) + " " + str(input_conf_docker) + " " + str(genome_assembly) + ' --output_dir ' + output_dir + docker_command_run_end
    check_subprocess(vcf_validate_command)
    ## Log tumor type of query genome
    logger.info('Finished')
