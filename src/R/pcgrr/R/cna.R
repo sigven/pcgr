@@ -1,4 +1,22 @@
 
+#' Function that removes copy number segments that go beyond chrosomal lengths for the given assembly
+#'
+#' @param cna_segments_df genomic segments with CNA
+#' @param genome_assembly genome assembly (grch37/grch38)
+#' @param bsg BSgenome object
+#'
+get_valid_chromosome_segments <- function(cna_segments_df, genome_assembly = 'grch37', bsg = BSgenome.Hsapiens.UCSC.hg19){
+  chromosome_lengths <- data.frame('chromosome' = head(names(seqlengths(bsg)),24), 'chrom_length' = head(seqlengths(bsg),24), stringsAsFactors = F, row.names = NULL)
+  cna_segments_df <- dplyr::left_join(cna_segments_df, chromosome_lengths,by=c("chromosome"))
+  cna_segments_df <- as.data.frame(cna_segments_df %>% dplyr::rowwise() %>% dplyr::mutate(segment_error = segment_end > chrom_length))
+  if(nrow(dplyr::filter(cna_segments_df, segment_error == T)) > 0){
+    n_removed <- nrow(dplyr::filter(cna_segments_df, segment_error == T))
+    rlogging::warning('Skipping ',n_removed,' copy number segments that span beyond chromosomal lengths for ', genome_assembly,' (make sure chromosomal segments are consistent with assembly)')
+  }
+  cna_segments_df <- dplyr::filter(cna_segments_df, segment_error == F) %>% dplyr::select(-c(segment_error,chrom_length))
+  return(cna_segments_df)
+}
+
 #' Function that gets the chromosome bands of copy number segments
 #'
 #' @param cna_gr genomic ranges object with copy number aberrations
@@ -21,10 +39,11 @@ get_cna_cytoband <- function(cna_gr, cytoband_gr){
     cyto_stats[!is.na(cyto_stats$focalCNAthresholds) & stringr::str_detect(cyto_stats$focalCNAthresholds,","),]$focalCNAthresholds <- NA
   }
   cyto_stats$focalCNAthresholds <- as.numeric(cyto_stats$focalCNAthresholds)
+  cyto_stats <- as.data.frame(cyto_stats %>% dplyr::rowwise() %>% dplyr::mutate(broad_cnv_event = segment_length > focalCNAthresholds))
+
   cyto_stats$event_type <- 'broad'
-  if(nrow(cyto_stats[!is.na(cyto_stats$focalCNAthresholds) & cyto_stats$segment_length < cyto_stats$focalCNAthresholds,]) > 0){
-    cyto_stats[!is.na(cyto_stats$focalCNAthresholds) & cyto_stats$segment_length < cyto_stats$focalCNAthresholds,]$event_type <- 'focal'
-  }
+  cyto_stats[!is.na(cyto_stats$broad_cnv_event) & cyto_stats$broad_cnv_event == F,]$event_type <- 'focal'
+  cyto_stats[is.na(cyto_stats$broad_cnv_event),]$event_type <- NA
 
   cyto_stats <- pcgrr::df_string_replace(cyto_stats, c("cytoband"), pattern = ", (\\S+, ){0,}", replacement = " - ")
   cyto_stats <- tidyr::separate(cyto_stats,segmentID,sep=":",into = c('chrom','start','stop'),remove=F)
@@ -69,6 +88,7 @@ generate_report_data_cna <- function(cna_file, pcgr_data, pcgr_version, sample_n
 
   ## VALIDATE INPUT CHROMOSOMES
   cna_df <- pcgrr::get_valid_chromosomes(cna_df_raw, chromosome_column = 'chromosome', bsg = genome_seq)
+  cna_df <- pcgrr::get_valid_chromosome_segments(cna_df, genome_assembly, bsg = genome_seq)
   cna_df <- cna_df %>% dplyr::filter(!is.na(LogR))
   cna_df$LogR <- round(as.numeric(cna_df$LogR),digits=3)
   cna_df$segmentID <- paste0(cna_df$chromosome,":",cna_df$segment_start,":",cna_df$segment_end)
@@ -94,14 +114,12 @@ generate_report_data_cna <- function(cna_file, pcgr_data, pcgr_version, sample_n
   local_df$segment_start <- start(ranges(cna_gr[queryHits(hits)]))
   local_df$segment_end <- end(ranges(cna_gr[queryHits(hits)]))
   local_df$segment_length_Mb <- round((as.numeric((local_df$segment_end - local_df$segment_start)/1000000)),digits = 4)
-  #local_df <- dplyr::filter(local_df, gencode_tag == 'basic')
 
   local_df$transcript_start <- start(ranges)
   local_df$transcript_end <- end(ranges)
   local_df$chrom <- as.character(seqnames(ranges))
   local_df <- as.data.frame(local_df %>% dplyr::rowwise() %>% dplyr::mutate(transcript_overlap_percent = round(as.numeric((min(transcript_end,segment_end) - max(segment_start,transcript_start)) / (transcript_end - transcript_start)) * 100, digits = 2)))
   local_df$segment_link <- paste0("<a href='",paste0(ucsc_browser_prefix,paste0(local_df$chrom,':',local_df$segment_start,'-',local_df$segment_end)),"' target=\"_blank\">",paste0(local_df$chrom,':',local_df$segment_start,'-',local_df$segment_end),"</a>")
-  local_df <- dplyr::filter(local_df, gencode_tag == 'basic')
 
   local_df_print <- local_df
   local_df_print <- dplyr::select(local_df_print,chrom,segment_start,segment_end,segment_length_Mb,event_type,cytoband,LogR,ensembl_gene_id,symbol,ensembl_transcript_id,transcript_start,transcript_end,transcript_overlap_percent,name,biotype,disgenet_cui,tsgene,ts_oncogene,intogen_drivers,chembl_compound_id,gencode_gene_biotype,gencode_tag,gencode_release)
@@ -121,10 +139,10 @@ generate_report_data_cna <- function(cna_file, pcgr_data, pcgr_version, sample_n
     }
   }
 
-  avg_transcript_overlap <- as.data.frame(dplyr::filter(local_df, gencode_gene_biotype == 'protein_coding' & gencode_tag == 'basic') %>% dplyr::group_by(segmentID, symbol) %>% dplyr::summarise(MEAN_TRANSCRIPT_CNA_OVERLAP = mean(transcript_overlap_percent), TRANSCRIPTS = paste0(ensembl_transcript_id, collapse=", "))) %>% dplyr::rename(SYMBOL = symbol)
+  avg_transcript_overlap <- as.data.frame(dplyr::filter(local_df, biotype == 'protein_coding') %>% dplyr::group_by(segmentID, symbol) %>% dplyr::summarise(MEAN_TRANSCRIPT_CNA_OVERLAP = mean(transcript_overlap_percent), TRANSCRIPTS = paste0(ensembl_transcript_id, collapse=", "))) %>% dplyr::rename(SYMBOL = symbol)
   avg_transcript_overlap$MEAN_TRANSCRIPT_CNA_OVERLAP <- round(avg_transcript_overlap$MEAN_TRANSCRIPT_CNA_OVERLAP, digits=2)
 
-  local_df <- dplyr::select(local_df, -ensembl_transcript_id) %>% dplyr::filter(gencode_gene_biotype == 'protein_coding' & gencode_tag == 'basic') %>% dplyr::distinct()
+  local_df <- dplyr::select(local_df, -ensembl_transcript_id) %>% dplyr::filter(biotype == 'protein_coding') %>% dplyr::distinct()
 
   local_df <- dplyr::rename(local_df, CHEMBL_COMPOUND_ID = chembl_compound_id, SYMBOL = symbol) %>% dplyr::mutate(VAR_ID = as.character(rep(1:nrow(local_df))))
   local_df <- pcgrr::annotate_variant_link(local_df, vardb = 'DGIDB', pcgr_data = pcgr_data)
@@ -139,7 +157,7 @@ generate_report_data_cna <- function(cna_file, pcgr_data, pcgr_version, sample_n
                                                                  link_display_var = "GENENAME")
   local_df <- dplyr::left_join(local_df, dplyr::rename(entrezgene_annotation_links,GENE_NAME = link),by=c("VAR_ID"))
 
-  local_df <- dplyr::select(local_df, segmentID, CHROMOSOME, SYMBOL, GENE_NAME, KEGG_PATHWAY, TUMOR_SUPPRESSOR, ONCOGENE, TARGETED_DRUGS,SEGMENT_LENGTH_MB, SEGMENT, gencode_gene_biotype,LogR, TRANSCRIPT_OVERLAP) %>% dplyr::distinct()
+  local_df <- dplyr::select(local_df, segmentID, CHROMOSOME, SYMBOL, GENE_NAME, KEGG_PATHWAY, TUMOR_SUPPRESSOR, ONCOGENE, TARGETED_DRUGS,SEGMENT_LENGTH_MB, SEGMENT, biotype,LogR) %>% dplyr::distinct()
   local_df <- dplyr::left_join(local_df, avg_transcript_overlap,by=c("segmentID","SYMBOL"))
   targeted_drugs <- dplyr::select(local_df, SYMBOL, TARGETED_DRUGS) %>% dplyr::filter(!is.na(TARGETED_DRUGS)) %>% dplyr::distinct()
 
@@ -153,12 +171,12 @@ generate_report_data_cna <- function(cna_file, pcgr_data, pcgr_version, sample_n
 
   onco_ts_sets <- list()
   onco_ts_sets[['oncogene_gain']] <- data.frame()
-  onco_ts_sets[['oncogene_gain']] <- dplyr::filter(local_df, ONCOGENE == T & MEAN_TRANSCRIPT_CNA_OVERLAP >= transcript_overlap_pct & LogR >= logR_gain & gencode_gene_biotype == 'protein_coding')
+  onco_ts_sets[['oncogene_gain']] <- dplyr::filter(local_df, ONCOGENE == T & MEAN_TRANSCRIPT_CNA_OVERLAP >= transcript_overlap_pct & LogR >= logR_gain)
   onco_ts_sets[['tsgene_loss']] <- data.frame()
-  onco_ts_sets[['tsgene_loss']] <- dplyr::filter(local_df, TUMOR_SUPPRESSOR == T & MEAN_TRANSCRIPT_CNA_OVERLAP >= transcript_overlap_pct  & LogR <= logR_homdel & gencode_gene_biotype == 'protein_coding')
+  onco_ts_sets[['tsgene_loss']] <- dplyr::filter(local_df, TUMOR_SUPPRESSOR == T & MEAN_TRANSCRIPT_CNA_OVERLAP >= transcript_overlap_pct  & LogR <= logR_homdel)
   for(t in c('oncogene_gain','tsgene_loss')){
     if(nrow(onco_ts_sets[[t]]) > 0){
-      onco_ts_sets[[t]] <- dplyr::select(onco_ts_sets[[t]], -c(segmentID, TUMOR_SUPPRESSOR, ONCOGENE,TRANSCRIPT_OVERLAP,gencode_gene_biotype,TARGETED_DRUGS)) %>% dplyr::distinct()
+      onco_ts_sets[[t]] <- dplyr::select(onco_ts_sets[[t]], -c(segmentID, TUMOR_SUPPRESSOR, ONCOGENE,TARGETED_DRUGS)) %>% dplyr::distinct()
       onco_ts_sets[[t]] <- dplyr::left_join(onco_ts_sets[[t]], targeted_drugs, by="SYMBOL")
       onco_ts_sets[[t]] <- dplyr::arrange(onco_ts_sets[[t]], TARGETED_DRUGS, LogR)
       onco_ts_sets[[t]] <- dplyr::select(onco_ts_sets[[t]], CHROMOSOME, SYMBOL, GENE_NAME, KEGG_PATHWAY, TARGETED_DRUGS, dplyr::everything())

@@ -39,11 +39,11 @@ Variant databases of clinical utility
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  `ClinVar <http://www.ncbi.nlm.nih.gov/clinvar/>`__ - database of
-   clinically related variants (April 2018)
+   clinically related variants (May 2018)
 -  `DoCM <http://docm.genome.wustl.edu>`__ - database of curated
    mutations (v3.2, April 2016)
 -  `CIViC <http://civic.genome.wustl.edu>`__ - clinical interpretations
-   of variants in cancer (April 16th 2018)
+   of variants in cancer (May 9th 2018)
 -  `CBMDB <http://www.cancergenomeinterpreter.org/biomarkers>`__ -
    Cancer BioMarkers database (January 17th 2018)
 -  `DGIdb <http://dgidb.genome.wustl.edu>`__ - database of targeted
@@ -52,8 +52,8 @@ Variant databases of clinical utility
 Protein domains/functional features
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--  `UniProt/SwissProt KnowledgeBase 2018\_03 <http://www.uniprot.org>`__
-   - resource on protein sequence and functional information (March
+-  `UniProt/SwissProt KnowledgeBase 2018\_04 <http://www.uniprot.org>`__
+   - resource on protein sequence and functional information (April
    2018)
 -  `Pfam v31 <http://pfam.xfam.org>`__ - database of protein families
    and domains (March 2017)
@@ -70,7 +70,7 @@ Pathway databases
 ~~~~~~~~~~~~~~~~~
 
 -  `KEGG PATHWAY Database <http://www.genome.jp/kegg/pathway.htm>`__ -
-   March 30th 2018
+   April 16th 2018
 
 Notes on variant annotation datasets
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

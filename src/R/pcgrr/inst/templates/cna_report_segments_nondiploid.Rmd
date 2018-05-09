@@ -29,6 +29,7 @@ if(nrow(pcg_report[['cna']][['variant_display']][['segment']]) > 0){
 ```{r cna_segments_sd_setup, echo = F, results = 'asis'}
 
 cna_segments_sd <- NULL
+cna_segments <- data.frame()
 
 if(nrow(pcg_report[['cna']][['variant_display']][['segment']]) > 0){
   cna_segments <- dplyr::rename(pcg_report[['cna']][['variant_display']][['segment']], Segment = SEGMENT, Length_Mb = SEGMENT_LENGTH_MB, Cytoband = cytoband, Event_type = event_type)

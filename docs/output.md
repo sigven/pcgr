@@ -4,7 +4,7 @@
 
 An interactive and tier-structured HTML report that shows the most relevant findings in the query cancer genome is provided with the following naming convention:
 
-__sample_id__.__tier_model__.html
+__sample_id__.__tier_model__.__genome_assembly__.html
 
  - The __sample_id__ is provided as input by the user, and reflects a unique identifier of the tumor-normal sample pair to be analyzed.
 - The __tier_model__ is provided by the user and will be either _'pcgr'_ or _'pcgr_acmg'_
@@ -121,8 +121,8 @@ The interactive datatables contain a number of hyperlinked annotations similar t
 
 Example reports:
 
-* [View an example report for a breast tumor sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.BRCA.pcgr_acmg.0.6.1.html)
-* [View an example report for a colon adenocarcinoma sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.COAD.pcgr_acmg.0.6.1.html)
+* [View an example report for a breast tumor sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.BRCA.pcgr_acmg.grch37.0.6.2.html)
+* [View an example report for a colon adenocarcinoma sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.COAD.pcgr_acmg.grch37.0.6.2.html)
 
 
 The HTML reports have been tested using the following browsers:
@@ -141,7 +141,7 @@ A JSON file that stores the HTML report content is provided. This file will ease
 
 A VCF file containing annotated, somatic calls (single nucleotide variants and insertion/deletions) is generated with the following naming convention:
 
-__sample_id__.__tier_model__.vcf.gz
+__sample_id__.__tier_model__.__genome_assembly__.vcf.gz
 
 Here, the __sample_id__ is provided as input by the user, and reflects a unique identifier of the tumor-normal sample pair to be analyzed. Following common standards, the annotated VCF file is compressed with [bgzip](http://www.htslib.org/doc/tabix.html) and indexed with [tabix](http://www.htslib.org/doc/tabix.html). Below follows a description of all annotations/tags present in the VCF INFO column after processing with the PCGR annotation pipeline:
 
@@ -280,7 +280,7 @@ Here, the __sample_id__ is provided as input by the user, and reflects a unique 
 ##### Annotated List of all SNVs/InDels
 We provide a tab-separated values file with most important annotations for SNVs/InDels. The file has the following naming convention:
 
-__sample_id__.__tier_model__.snvs\_indels.tiers.tsv
+__sample_id__.__tier_model__.__genome_assembly__.snvs\_indels.tiers.tsv
 
 The SNVs/InDels are organized into different __tiers__ (as defined above for the HTML report)
 
@@ -345,7 +345,7 @@ The following variables are included in the tiered TSV file:
 
  Copy number segments are intersected with the genomic coordinates of all transcripts from [GENCODE's basic gene annotation](https://www.gencodegenes.org/releases/current.html). In addition, we attach cancer-relevant annotations for the affected transcripts. The naming convention of the compressed TSV file is as follows:
 
-__sample_id__.__tier_model__.cna_segments.tsv.gz
+__sample_id__.__tier_model__.__genome_assembly__.cna_segments.tsv.gz
 
 The format of the compressed TSV file is the following:
 

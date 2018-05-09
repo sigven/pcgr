@@ -41,7 +41,6 @@ generate_report_data_snv_indel_acmg <- function(sample_calls, pcgr_data, pcgr_ve
     pcg_report_snv_indel[['variant_set']][['tier1']] <- biomarker_hits_snv_indels_specific$variant_set
     pcg_report_snv_indel[['variant_set']][['tier2']] <- biomarker_hits_snv_indels_any$variant_set
 
-
     pcg_report_snv_indel <- pcgrr::assign_tier1_tier2_acmg(pcg_report_snv_indel)
     tier12 <- rbind(pcg_report_snv_indel[['variant_display']][['tier1']],pcg_report_snv_indel[['variant_display']][['tier2']])
 
@@ -57,7 +56,6 @@ generate_report_data_snv_indel_acmg <- function(sample_calls, pcgr_data, pcgr_ve
       pcg_report_snv_indel[['variant_display']][['tier3']][['proto_oncogene']] <- dplyr::select(pcg_report_snv_indel[['variant_set']][['tier3']], dplyr::one_of(pcgr_data$tier2_tags_display)) %>% dplyr::filter(ONCOGENE == TRUE & (is.na(TUMOR_SUPPRESSOR) | TUMOR_SUPPRESSOR == FALSE))
       pcg_report_snv_indel[['variant_display']][['tier3']][['tumor_suppressor']] <- dplyr::select(pcg_report_snv_indel[['variant_set']][['tier3']], dplyr::one_of(pcgr_data$tier2_tags_display)) %>% dplyr::filter(TUMOR_SUPPRESSOR == TRUE)
     }
-
     ## Analyze Tier 4: Other coding mutations
     pcg_report_snv_indel[['variant_set']][['tier4']] <- dplyr::select(pcg_report_snv_indel[['variant_set']][['all']], dplyr::one_of(pcgr_data$pcgr_all_annotation_columns)) %>% dplyr::filter(CODING_STATUS == 'coding')
     if(nrow(tier123) > 0 & nrow(pcg_report_snv_indel[['variant_set']][['tier4']]) > 0){
@@ -131,7 +129,6 @@ assign_tier1_tier2_acmg <- function(pcg_report_snv_indel){
     }
   }
 
-
   pcg_report_snv_indel[['variant_display']][['tier1']] <- unique_variants_tier1
   pcg_report_snv_indel[['variant_display']][['tier2']] <- unique_variants_tier2
 
@@ -139,7 +136,9 @@ assign_tier1_tier2_acmg <- function(pcg_report_snv_indel){
     pcg_report_snv_indel[['variant_set']][['tier1']] <- dplyr::semi_join(pcg_report_snv_indel[['variant_set']][['tier1']], unique_variants_tier1, by=c("GENOMIC_CHANGE"))
     pcg_report_snv_indel[['variant_set']][['tier2']] <- dplyr::anti_join(pcg_report_snv_indel[['variant_set']][['tier2']], unique_variants_tier1, by=c("GENOMIC_CHANGE"))
   }
-  if(nrow(pcg_report_snv_indel[['variant_set']][['tier2']]) > 0){
+  if(nrow(unique_variants_tier2) == 0){
+    pcg_report_snv_indel[['variant_set']][['tier2']] <- data.frame()
+  }else{
     pcg_report_snv_indel[['variant_set']][['tier2']] <- dplyr::semi_join(pcg_report_snv_indel[['variant_set']][['tier2']], unique_variants_tier2, by=c("GENOMIC_CHANGE"))
   }
 
@@ -223,18 +222,18 @@ generate_report_acmg <- function(project_directory, query_vcf2tsv, pcgr_data, pc
   }
 
   fnames <- list()
-  fnames[['tsv_unfiltered']] <- paste0(project_directory, '/',sample_name,'.pcgr_acmg.snvs_indels.tiers.unfiltered.tsv')
-  fnames[['tsv']] <- paste0(project_directory, '/',sample_name,'.pcgr_acmg.snvs_indels.tiers.tsv')
-  fnames[['cna_print']] <- paste0(project_directory, '/',sample_name,'.pcgr_acmg.cna_segments.tsv')
-  #fnames[['maf']] <- paste0(project_directory, '/',sample_name,'.pcgr.maf')
-  fnames[['json']] <- paste0(project_directory, '/',sample_name,'.pcgr_acmg.json')
+  fnames[['tsv_unfiltered']] <- paste0(project_directory, '/',sample_name,'.pcgr_acmg.',genome_assembly,'.snvs_indels.tiers.unfiltered.tsv')
+  fnames[['tsv']] <- paste0(project_directory, '/',sample_name,'.pcgr_acmg.',genome_assembly,'.snvs_indels.tiers.tsv')
+  fnames[['cna_print']] <- paste0(project_directory, '/',sample_name,'.pcgr_acmg.',genome_assembly,'.cna_segments.tsv')
+  fnames[['maf']] <- paste0(project_directory, '/',sample_name,'.pcgr_acmg.',genome_assembly,'.maf')
+  fnames[['json']] <- paste0(project_directory, '/',sample_name,'.pcgr_acmg.',genome_assembly,'.json')
 
-  if(query_vcf2tsv != 'None'){
+  if(query_vcf2tsv != 'None.gz'){
     if(!file.exists(query_vcf2tsv) | file.size(query_vcf2tsv) == 0){
       rlogging::warning(paste0("File ",query_vcf2tsv," does not exist or has zero size"))
     }
     else{
-      if(!is.null(pcgr_config) & query_vcf2tsv != 'None'){
+      if(!is.null(pcgr_config) & query_vcf2tsv != 'None.gz'){
         sample_calls <- pcgrr::get_calls(query_vcf2tsv, pcgr_data, pcgr_version, sample_name, pcgr_config, genome_seq, assembly)
         pcg_report_seqmode <- pcgrr::init_pcg_report(pcgr_config, sample_name, pcgr_version, genome_assembly, class = "sequencing_mode")
         pcg_report_seqmode[['eval']] <- TRUE
@@ -279,6 +278,9 @@ generate_report_acmg <- function(project_directory, query_vcf2tsv, pcgr_data, pc
       }
     }
   }
+  else{
+    pcg_report[['pcgr_config']][['other']][['list_noncoding']] <- F
+  }
 
   if(!is.null(cna_segments_tsv)){
     if(file.exists(cna_segments_tsv)){
@@ -319,7 +321,7 @@ generate_report_acmg <- function(project_directory, query_vcf2tsv, pcgr_data, pc
 
   pcgr_json <- jsonlite::toJSON(pcg_report, pretty=T,na='string',null = 'null')
   write(pcgr_json, fnames[['json']])
-  rmarkdown::render(system.file("templates","report_acmg.Rmd", package="pcgrr"), output_format = rmarkdown::html_document(theme = pcg_report[['pcgr_config']][['visual']][['report_theme']], toc = T, toc_depth = 3, toc_float = T, number_sections = F, includes = rmarkdown::includes(after_body = 'disclaimer.md')), output_file = paste0(sample_name,'.pcgr_acmg.html'), clean = T, output_dir = project_directory, intermediates_dir = project_directory, quiet=T)
+  rmarkdown::render(system.file("templates","report_acmg.Rmd", package="pcgrr"), output_format = rmarkdown::html_document(theme = pcg_report[['pcgr_config']][['visual']][['report_theme']], toc = T, toc_depth = 3, toc_float = T, number_sections = F, includes = rmarkdown::includes(after_body = 'disclaimer.md')), output_file = paste0(sample_name,'.pcgr_acmg.',genome_assembly,'.html'), clean = T, output_dir = project_directory, intermediates_dir = project_directory, quiet=T)
 
 
 }

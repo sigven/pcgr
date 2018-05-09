@@ -11,7 +11,7 @@ import getpass
 import platform
 import toml
 
-version = '0.6.1'
+version = '0.6.2'
 
 def __main__():
    
@@ -274,7 +274,7 @@ def verify_input_files(input_vcf, input_cna, configuration_file, pcgr_config_opt
       input_cna_dir = os.path.dirname(os.path.abspath(input_cna))
 
       ## if output cna segments exist and overwrite not set
-      output_cna_segments = os.path.join(str(output_dir_full),str(sample_id)) + '.' + str(pcgr_config_options['tier_model']['tier_model']) + '.cna_segments.tsv.gz'
+      output_cna_segments = os.path.join(str(output_dir_full),str(sample_id)) + '.' + str(pcgr_config_options['tier_model']['tier_model']) + '.' + str(genome_assembly) + '.cna_segments.tsv.gz'
       if os.path.exists(output_cna_segments) and overwrite == 0:
          err_msg = "Output files (e.g. " + str(output_cna_segments) + ") already exist - please specify different sample_id or add option --force_overwrite"
          pcgr_error_message(err_msg,logger)
@@ -306,7 +306,7 @@ def verify_input_files(input_vcf, input_cna, configuration_file, pcgr_config_opt
    f_rel_not = open(rel_notes_file,'r')
    compliant_data_bundle = 0
    for line in f_rel_not:
-      version_check = 'PCGR_DB_VERSION = 20180422'
+      version_check = 'PCGR_DB_VERSION = 20180509'
       if version_check in line:
          compliant_data_bundle = 1
    
@@ -428,10 +428,10 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
    if not input_vcf_docker == 'None':
       
       ## Define input, output and temporary file names
-      output_vcf = '/workdir/output/' + str(sample_id) + '.' + str(config_options['tier_model']['tier_model']) + '.vcf.gz'
-      #output_maf = '/workdir/output/' + str(sample_id) + '.pcgr.maf'
-      output_pass_vcf = '/workdir/output/' + str(sample_id) + '.' + str(config_options['tier_model']['tier_model']) + '.pass.vcf.gz'
-      output_pass_tsv = '/workdir/output/' + str(sample_id) + '.' + str(config_options['tier_model']['tier_model']) + '.pass.tsv'
+      output_vcf = '/workdir/output/' + str(sample_id) + '.' + str(config_options['tier_model']['tier_model']) + '.' + str(genome_assembly) + '.vcf.gz'
+      #output_maf = '/workdir/output/' + str(sample_id) + '.' + str(config_options['tier_model']['tier_model']) + '.' + str(genome_assembly) + '.maf'
+      output_pass_vcf = '/workdir/output/' + str(sample_id) + '.' + str(config_options['tier_model']['tier_model']) + '.' + str(genome_assembly) + '.pass.vcf.gz'
+      output_pass_tsv = '/workdir/output/' + str(sample_id) + '.' + str(config_options['tier_model']['tier_model']) + '.' + str(genome_assembly) + '.pass.tsv'
       input_vcf_pcgr_ready = '/workdir/output/' + re.sub(r'(\.vcf$|\.vcf\.gz$)','.pcgr_ready.vcf.gz',host_directories['input_vcf_basename_host'])
       input_vcf_pcgr_ready_uncompressed = '/workdir/output/' + re.sub(r'(\.vcf$|\.vcf\.gz$)','.pcgr_ready.vcf',host_directories['input_vcf_basename_host'])
       vep_vcf = re.sub(r'(\.vcf$|\.vcf\.gz$)','.pcgr_vep.vcf',input_vcf_pcgr_ready)

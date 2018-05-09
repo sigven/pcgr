@@ -14,6 +14,8 @@ export(generate_report_acmg)
 export(get_calls)
 export(order_variants)
 
+export(filter_slider_allelic_fraction)
+
 export(get_clinical_associations_snv_indel)
 export(get_clinical_associations_cna)
 

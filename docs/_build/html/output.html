@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Output &mdash; Personal Cancer Genome Reporter 0.6.0 documentation</title>
+  <title>Output &mdash; Personal Cancer Genome Reporter 0.6.2 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Personal Cancer Genome Reporter 0.6.0 documentation" href="index.html"/>
+    <link rel="top" title="Personal Cancer Genome Reporter 0.6.2 documentation" href="index.html"/>
         <link rel="next" title="Tier models" href="tier_systems.html"/>
         <link rel="prev" title="Input" href="input.html"/> 
 
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.6.0
+                0.6.2
               </div>
             
           
@@ -173,7 +173,7 @@
 <p>An interactive and tier-structured HTML report that shows the most
 relevant findings in the query cancer genome is provided with the
 following naming convention:</p>
-<p><strong>sample_id</strong>.<strong>tier_model</strong>.html</p>
+<p><strong>sample_id</strong>.<strong>tier_model</strong>.<strong>genome_assembly</strong>.html</p>
 <ul class="simple">
 <li>The <strong>sample_id</strong> is provided as input by the user, and reflects a
 unique identifier of the tumor-normal sample pair to be analyzed.</li>
@@ -385,9 +385,9 @@ input VCF)</li>
 </ul>
 <p>Example reports:</p>
 <ul class="simple">
-<li><a class="reference external" href="http://folk.uio.no/sigven/tumor_sample.BRCA.pcgr_acmg.0.6.1.html">View an example report for a breast tumor sample
+<li><a class="reference external" href="http://folk.uio.no/sigven/tumor_sample.BRCA.pcgr_acmg.grch37.0.6.2.html">View an example report for a breast tumor sample
 (TCGA)</a></li>
-<li><a class="reference external" href="http://folk.uio.no/sigven/tumor_sample.COAD.pcgr_acmg.0.6.1.html">View an example report for a colon adenocarcinoma sample
+<li><a class="reference external" href="http://folk.uio.no/sigven/tumor_sample.COAD.pcgr_acmg.grch37.0.6.2.html">View an example report for a colon adenocarcinoma sample
 (TCGA)</a></li>
 </ul>
 <p>The HTML reports have been tested using the following browsers:</p>
@@ -413,7 +413,7 @@ information from the JSON file will soon be posted here.</p>
 <p>A VCF file containing annotated, somatic calls (single nucleotide
 variants and insertion/deletions) is generated with the following naming
 convention:</p>
-<p><strong>sample_id</strong>.<strong>tier_model</strong>.vcf.gz</p>
+<p><strong>sample_id</strong>.<strong>tier_model</strong>.<strong>genome_assembly</strong>.vcf.gz</p>
 <p>Here, the <strong>sample_id</strong> is provided as input by the user, and reflects
 a unique identifier of the tumor-normal sample pair to be analyzed.
 Following common standards, the annotated VCF file is compressed with
@@ -710,7 +710,7 @@ database</a></li>
 <h4>Annotated List of all SNVs/InDels<a class="headerlink" href="#annotated-list-of-all-snvs-indels" title="Permalink to this headline">¶</a></h4>
 <p>We provide a tab-separated values file with most important annotations
 for SNVs/InDels. The file has the following naming convention:</p>
-<p><strong>sample_id</strong>.<strong>tier_model</strong>.snvs_indels.tiers.tsv</p>
+<p><strong>sample_id</strong>.<strong>tier_model</strong>.<strong>genome_assembly</strong>.snvs_indels.tiers.tsv</p>
 <p>The SNVs/InDels are organized into different <strong>tiers</strong> (as defined above
 for the HTML report)</p>
 <p>The following variables are included in the tiered TSV file:</p>
@@ -780,7 +780,7 @@ annotation</a>. In
 addition, we attach cancer-relevant annotations for the affected
 transcripts. The naming convention of the compressed TSV file is as
 follows:</p>
-<p><strong>sample_id</strong>.<strong>tier_model</strong>.cna_segments.tsv.gz</p>
+<p><strong>sample_id</strong>.<strong>tier_model</strong>.<strong>genome_assembly</strong>.cna_segments.tsv.gz</p>
 <p>The format of the compressed TSV file is the following:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="mf">1.</span> <span class="n">chrom</span> <span class="o">-</span> <span class="n">chromosome</span>
 <span class="mf">2.</span> <span class="n">segment_start</span> <span class="o">-</span> <span class="n">start</span> <span class="n">of</span> <span class="n">copy</span> <span class="n">number</span> <span class="n">segment</span>
@@ -854,7 +854,7 @@ follows:</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.6.0',
+            VERSION:'0.6.2',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

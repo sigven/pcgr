@@ -1,6 +1,23 @@
 
 ## CHANGELOG
 
+#### 0.6.2 - May 9th 2018
+
+##### Fixed
+ * Bug in copy number segment display (missing variable initalization)
+ * Typo in gnomAD filter statistic (fraction)
+ * Bug in mutational signature analysis for grch38 (forgot to pass BSgenome object)
+ * Missing proper ASCII-encoding in vcf2tsv conversion
+ * Removed 'Noncoding mutations' section when no input VCF is present
+ * Bug in annotation of copy number event type (focal/broad)
+ * Bug in copy number annotation (missing protein-coding transcripts)
+ * Updated MSI prediction (variable importance, performance measures)
+
+##### Added
+ * Genome assembly is appended to every output file
+ * Issue warning for copy number segment that goes beyond chromosomal lengths of specified assembly (segments will be skipped)
+ * Added missing subtypes for 'Skin_Cancer_NOS' in the cancer phenotype dataset
+
 #### 0.6.1 - May 2nd 2018
 
 ##### Fixed

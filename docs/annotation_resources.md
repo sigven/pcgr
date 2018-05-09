@@ -16,14 +16,14 @@
   * [ICGC-PCAWG](http://docs.icgc.org/pcawg/) - ICGC Pancancer Analysis of Whole Genomes - release 26, December 7th 2017
 
 ### Variant databases of clinical utility
-  * [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - database of clinically related variants (April 2018)
+  * [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - database of clinically related variants (May 2018)
   * [DoCM](http://docm.genome.wustl.edu) - database of curated mutations (v3.2, April 2016)
-  * [CIViC](http://civic.genome.wustl.edu) - clinical interpretations of variants in cancer (April 16th 2018)
+  * [CIViC](http://civic.genome.wustl.edu) - clinical interpretations of variants in cancer (May 9th 2018)
   * [CBMDB](http://www.cancergenomeinterpreter.org/biomarkers) - Cancer BioMarkers database (January 17th 2018)
   * [DGIdb](http://dgidb.genome.wustl.edu) - database of targeted antineoplastic drugs (v3.0, September 2017)
 
 ### Protein domains/functional features
-  * [UniProt/SwissProt KnowledgeBase 2018_03](http://www.uniprot.org) - resource on protein sequence and functional information (March 2018)
+  * [UniProt/SwissProt KnowledgeBase 2018_04](http://www.uniprot.org) - resource on protein sequence and functional information (April 2018)
   * [Pfam v31](http://pfam.xfam.org) - database of protein families and domains (March 2017)
 
 ### Cancer gene knowledge bases
@@ -31,7 +31,7 @@
   * [DisGeNET v5.0](http://www.disgenet.org) - curated associations between human genes and different tumor types
 
 ### Pathway databases
-  * [KEGG PATHWAY Database](http://www.genome.jp/kegg/pathway.htm) - March 30th 2018
+  * [KEGG PATHWAY Database](http://www.genome.jp/kegg/pathway.htm) - April 16th 2018
 
 ### Notes on variant annotation datasets
 

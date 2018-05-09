@@ -1,0 +1,104 @@
+[2018-04-28 21:55:39][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-04-28 21:55:39][INFO] Number of PASS variants: 2
+[2018-04-28 21:55:39][INFO] Number of SNVs: 2
+[2018-04-28 21:55:39][INFO] Number of deletions: 0
+[2018-04-28 21:55:39][INFO] Number of insertions: 0
+[2018-04-28 21:55:39][INFO] Number of block substitutions: 0
+[2018-04-28 21:55:39][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-04-28 21:55:40][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-04-28 21:55:40][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-04-28 21:55:40][INFO] Extending annotation descriptions related to ClinVar
+[2018-04-28 21:56:30][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-04-28 21:56:30][INFO] Number of PASS variants: 2
+[2018-04-28 21:56:30][INFO] Number of SNVs: 2
+[2018-04-28 21:56:30][INFO] Number of deletions: 0
+[2018-04-28 21:56:30][INFO] Number of insertions: 0
+[2018-04-28 21:56:30][INFO] Number of block substitutions: 0
+[2018-04-28 21:56:30][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-04-28 21:56:31][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-04-28 21:56:31][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-04-28 21:56:32][INFO] Extending annotation descriptions related to ClinVar
+[2018-04-28 21:56:39][INFO] ------
+[2018-04-28 21:56:39][INFO] Generating data for tiered cancer genome report - somatic calls tier model pcgr_acmg'
+[2018-04-28 21:56:39][INFO] Number of protein-coding variants: 1
+[2018-04-28 21:56:39][INFO] Looking up SNV/InDel biomarkers for precision oncology - any tumortype
+[2018-04-28 21:56:39][INFO] 1 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
+[2018-04-28 21:56:39][INFO] Underlying variant(s):
+[2018-04-28 21:56:39][INFO] FGFR3 missense_variant missense_variant:ENST00000340107.4:c.746C>G:exon7:p.S249C 4:g.1803568C>G
+[2018-04-28 21:56:39][INFO] 0 clinical evidence item(s) found .. mapping = codon
+[2018-04-28 21:56:39][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2018-04-28 21:59:32][INFO] ------
+[2018-04-28 21:59:32][INFO] Generating data for tiered cancer genome report - somatic_calls tier model pcgr_acmg'
+[2018-04-28 21:59:32][INFO] Number of protein-coding variants: 0
+[2018-04-28 21:59:40][INFO] ------
+[2018-04-28 21:59:40][INFO] Generating data for tiered cancer genome report - somatic_calls tier model pcgr_acmg'
+[2018-04-28 21:59:41][INFO] Number of protein-coding variants: 1
+[2018-04-28 21:59:48][INFO] Looking up SNV/InDel biomarkers for precision oncology - any tumortype
+[2018-04-28 21:59:48][INFO] 1 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
+[2018-04-28 21:59:48][INFO] Underlying variant(s):
+[2018-04-28 21:59:48][INFO] FGFR3 missense_variant missense_variant:ENST00000340107.4:c.746C>G:exon7:p.S249C 4:g.1803568C>G
+[2018-04-28 21:59:48][INFO] 0 clinical evidence item(s) found .. mapping = codon
+[2018-04-28 21:59:48][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2018-04-28 21:59:56][INFO] DEBUG1
+[2018-04-28 21:59:56][INFO] DEBUG2
+[2018-04-28 22:02:13][INFO] diagnostic
+
+[2018-04-28 22:02:13][INFO] predictive
+
+[2018-04-28 22:02:13][INFO] prognostic
+
+[2018-04-28 22:07:44][INFO] ------
+[2018-04-28 22:07:44][INFO] Generating data for tiered cancer genome report - somatic_calls tier model pcgr_acmg'
+[2018-04-28 22:07:44][INFO] Number of protein-coding variants: 1
+[2018-04-28 22:07:58][INFO] Looking up SNV/InDel biomarkers for precision oncology - any tumortype
+[2018-04-28 22:07:58][INFO] 1 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
+[2018-04-28 22:07:58][INFO] Underlying variant(s):
+[2018-04-28 22:07:58][INFO] FGFR3 missense_variant missense_variant:ENST00000340107.4:c.746C>G:exon7:p.S249C 4:g.1803568C>G
+[2018-04-28 22:07:58][INFO] 0 clinical evidence item(s) found .. mapping = codon
+[2018-04-28 22:07:58][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2018-04-28 22:09:56][INFO] diagnostic
+
+[2018-04-28 22:09:56][INFO] predictive
+
+[2018-04-28 22:09:56][INFO] prognostic
+
+[2018-04-28 22:12:37][INFO] diagnostic
+
+[2018-04-28 22:12:37][INFO] predictive
+
+[2018-04-28 22:12:37][INFO] prognostic
+
+[2018-05-08 10:12:43][INFO] ------
+[2018-05-08 10:12:43][INFO] Generating report data for copy number segment file /Users/sigven/research/docker/pcgr/COLO829__COLO829T-somatic/COLO829__COLO829T-somatic.tsv
+[2018-05-08 10:16:18][INFO] ------
+[2018-05-08 10:16:18][INFO] Generating report data for copy number segment file /Users/sigven/research/docker/pcgr/COLO829__COLO829T-somatic/COLO829__COLO829T-somatic.tsv
+[2018-05-08 10:17:07][WARN] Skipping 21 copy number segments that span beyond chromosomal lengths for grch38 (make sure chromosomal segments are consistent with assembly)
+[2018-05-08 12:28:18][INFO] Excluding 1 variants from non-nuclear chromosomes/scaffolds
+[2018-05-08 12:28:20][INFO] Filtering tumor variants based on allelic depth/fraction (min_dp_tumor=0, min_af_tumor=0)
+[2018-05-08 12:28:20][INFO] Filtering tumor variants based on allelic depth/fraction (min_dp_normal=0, max_af_normal=1)
+[2018-05-08 12:28:21][INFO] Removed 0 tumor variants (0%) based on allelic depth/fraction
+[2018-05-08 12:28:21][INFO] Number of PASS variants: 42916
+[2018-05-08 12:28:21][INFO] Number of SNVs: 41365
+[2018-05-08 12:28:21][INFO] Number of deletions: 828
+[2018-05-08 12:28:21][INFO] Number of insertions: 723
+[2018-05-08 12:28:21][INFO] Number of block substitutions: 0
+[2018-05-08 12:28:22][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-05-08 12:28:24][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-05-08 12:28:26][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-05-08 12:28:26][INFO] Extending annotation descriptions related to ClinVar
+[2018-05-08 12:29:37][INFO] ------
+[2018-05-08 12:29:37][INFO] Generating data for tiered cancer genome report - somatic calls tier model pcgr_acmg'
+[2018-05-08 12:29:38][INFO] Number of protein-coding variants: 203
+[2018-05-08 12:32:55][INFO] Looking up SNV/InDel biomarkers for precision oncology - Skin_Cancer_NOS
+[2018-05-09 11:07:37][INFO] ------
+[2018-05-09 11:07:37][INFO] Generating report data for copy number segment file /Users/sigven/research/docker/pcgr/COLO829__COLO829T-somatic/COLO829__COLO829T-somatic.tsv
+[2018-05-09 11:22:55][INFO] ------
+[2018-05-09 11:22:55][INFO] Generating report data for copy number segment file /Users/sigven/research/docker/pcgr/COLO829__COLO829T-somatic/COLO829__COLO829T-somatic.tsv
+[2018-05-09 11:25:45][INFO] ------
+[2018-05-09 11:25:45][INFO] Generating report data for copy number segment file /Users/sigven/research/docker/pcgr/COLO829__COLO829T-somatic/COLO829__COLO829T-somatic.tsv
+[2018-05-09 11:28:52][INFO] ------
+[2018-05-09 11:28:52][INFO] Generating report data for copy number segment file /Users/sigven/research/docker/pcgr/COLO829__COLO829T-somatic/COLO829__COLO829T-somatic.tsv
+[2018-05-09 11:42:22][INFO] Detected 0 proto-oncogenes subject to amplification (log(2) ratio >= 0.7
+[2018-05-09 11:42:22][INFO] Detected 0 tumor suppressor genes subject to homozygous deletion (log(2) ratio <= -1.1
+[2018-05-09 11:43:35][INFO] Detected 4 proto-oncogene(s) subject to amplification (log(2) ratio >= 0.7): BRAF, SMO, CREB3L2, RARB
+[2018-05-09 11:43:35][INFO] Detected 0 tumor suppressor genes subject to homozygous deletion (log(2) ratio <= -1.1

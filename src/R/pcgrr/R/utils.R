@@ -84,6 +84,7 @@ get_valid_chromosomes <- function(vcf_data_df, chromosome_column = 'CHROM', bsg 
     rlogging::warning(paste('Check chr names -- not all match BSgenome.Hsapiens object:\n', unknown.regions, sep = ' '))
     vcf_data_df_valid <- vcf_data_df_valid[vcf_data_df_valid[, chromosome_column] %in% GenomeInfoDb::seqnames(bsg), ]
   }
+  vcf_data_df_valid[,chromosome_column] <- as.character(vcf_data_df_valid[,chromosome_column])
   return(vcf_data_df_valid)
 
 }
@@ -221,18 +222,18 @@ generate_report <- function(project_directory, query_vcf2tsv, pcgr_data, pcgr_co
   }
 
   fnames <- list()
-  fnames[['tsv_unfiltered']] <- paste0(project_directory, '/',sample_name,'.pcgr.snvs_indels.tiers.unfiltered.tsv')
-  fnames[['tsv']] <- paste0(project_directory, '/',sample_name,'.pcgr.snvs_indels.tiers.tsv')
-  fnames[['cna_print']] <- paste0(project_directory, '/',sample_name,'.pcgr.cna_segments.tsv')
-  fnames[['maf']] <- paste0(project_directory, '/',sample_name,'.pcgr.maf')
-  fnames[['json']] <- paste0(project_directory, '/',sample_name,'.pcgr.json')
+  fnames[['tsv_unfiltered']] <- paste0(project_directory, '/',sample_name,'.pcgr.',genome_assembly,'.snvs_indels.tiers.unfiltered.tsv')
+  fnames[['tsv']] <- paste0(project_directory, '/',sample_name,'.pcgr.',genome_assembly,'.snvs_indels.tiers.tsv')
+  fnames[['cna_print']] <- paste0(project_directory, '/',sample_name,'.pcgr.',genome_assembly,'.cna_segments.tsv')
+  fnames[['maf']] <- paste0(project_directory, '/',sample_name,'.pcgr.',genome_assembly,'.maf')
+  fnames[['json']] <- paste0(project_directory, '/',sample_name,'.pcgr.',genome_assembly,'.json')
 
-  if(query_vcf2tsv != 'None'){
+  if(query_vcf2tsv != 'None.gz'){
     if(!file.exists(query_vcf2tsv) | file.size(query_vcf2tsv) == 0){
       rlogging::warning(paste0("File ",query_vcf2tsv," does not exist or has zero size"))
     }
     else{
-      if(!is.null(pcgr_config) & query_vcf2tsv != 'None'){
+      if(!is.null(pcgr_config) & query_vcf2tsv != 'None.gz'){
         sample_calls <- pcgrr::get_calls(query_vcf2tsv, pcgr_data, pcgr_version, sample_name, pcgr_config, genome_seq, assembly)
         pcg_report_seqmode <- pcgrr::init_pcg_report(pcgr_config, sample_name, pcgr_version, genome_assembly, class = "sequencing_mode")
         pcg_report_seqmode[['eval']] <- TRUE
@@ -277,6 +278,9 @@ generate_report <- function(project_directory, query_vcf2tsv, pcgr_data, pcgr_co
       }
     }
   }
+  else{
+    pcg_report[['pcgr_config']][['other']][['list_noncoding']] <- F
+  }
 
   if(!is.null(cna_segments_tsv)){
     if(file.exists(cna_segments_tsv)){
@@ -318,7 +322,7 @@ generate_report <- function(project_directory, query_vcf2tsv, pcgr_data, pcgr_co
   pcgr_json <- jsonlite::toJSON(pcg_report, pretty=T,na='string',null='null')
   write(pcgr_json, fnames[['json']])
 
-  rmarkdown::render(system.file("templates","report.Rmd", package="pcgrr"), output_format = rmarkdown::html_document(theme = pcg_report[['pcgr_config']][['visual']][['report_theme']], toc = T, toc_depth = 3, toc_float = T, number_sections = F, includes = rmarkdown::includes(after_body = 'disclaimer.md')), output_file = paste0(sample_name,'.pcgr.html'), output_dir = project_directory, clean = T, intermediates_dir = project_directory, quiet=T)
+  rmarkdown::render(system.file("templates","report.Rmd", package="pcgrr"), output_format = rmarkdown::html_document(theme = pcg_report[['pcgr_config']][['visual']][['report_theme']], toc = T, toc_depth = 3, toc_float = T, number_sections = F, includes = rmarkdown::includes(after_body = 'disclaimer.md')), output_file = paste0(sample_name,'.pcgr.',genome_assembly,'.html'), output_dir = project_directory, clean = T, intermediates_dir = project_directory, quiet=T)
 
 
 }
@@ -827,9 +831,6 @@ get_calls <- function(tsv_gz_file, pcgr_data, pcgr_version, sample_name, pcgr_co
     return(vcf_data_df)
   }
   vcf_data_df <- pcgrr::order_variants(vcf_data_df)
-  #vcf_data_df$CHROM <- ordered(vcf_data_df$CHROM, levels = c('1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','X','Y'))
-  #vcf_data_df <- dplyr::arrange(vcf_data_df, CHROM, POS)
-  #vcf_data_df$CHROM <- as.character(vcf_data_df$CHROM)
 
   hg_version <- 'grch38'
   if(genome_assembly == 'hg19'){

@@ -20,6 +20,11 @@ This tier model is inspired by recommended variant prioritization by
    suppressor genes
 -  *Tier 4* - includes other coding variants
 
+For **copy number aberrations**, aberrations linked to Tier 1 are
+displayed (within the section entitled *Copy number aberrations as
+biomarkers for prognosis, diagnosis, and drug response* in the HTML
+report)
+
 Tier model 2 - *pcgr\_acmg*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -54,3 +59,9 @@ outlined in `Li et al.,
 -  *Tier 3: Variants of uncertain clinical significance* - includes
    other coding variants found in oncogenes or tumor suppressor genes
 -  *Tier 4* - includes other coding variants
+
+For **copy number aberrations**, aberrations linked to Tier 1 & 2 are
+displayed, within following sections in the HTML report: \* *Copy number
+aberrations as biomarkers: Aberrations of strong clinical significance*
+(Tier 1) \* *Copy number aberrations as biomarkers: Aberrations of
+potential clinical significance* (Tier 2)

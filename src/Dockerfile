@@ -178,7 +178,7 @@ RUN export PATH=/usr/local/bin:$PATH
 WORKDIR /
 ADD R/ /
 RUN R -e "install.packages('configr', dependencies = T, repos = 'http://cran.us.r-project.org')"
-RUN R -e "devtools::install('crosstalk')"
+RUN R -e "devtools::install_github('rstudio/crosstalk')"
 RUN R -e "devtools::install('pcgrr')"
 
 # Add local PCGR Python scripts/libraries

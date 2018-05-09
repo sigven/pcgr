@@ -36,7 +36,7 @@ cat('Number of calls remaining after successive filtering steps:<br>')
 htmltools::br()
 cat('<ol>')
 cat('<li>Exclusion of variants found in 1000 Genomes Project: <b>',pcg_report[['tumor_only']][['variant_statistic']][['onekg_n_remain']],'</b> (',pcg_report[['tumor_only']][['variant_statistic']][['onekg_frac_remain']],' % of unfiltered calls)</li>\n')
-cat('<li>Exclusion of variants found in gnomAD: <b>',pcg_report[['tumor_only']][['variant_statistic']][['gnomad_n_remain']],'</b> (',pcg_report[['tumor_only']][['variant_statistic']][['gnomad_n_remain']],' % of unfiltered calls)</li>\n')
+cat('<li>Exclusion of variants found in gnomAD: <b>',pcg_report[['tumor_only']][['variant_statistic']][['gnomad_n_remain']],'</b> (',pcg_report[['tumor_only']][['variant_statistic']][['gnomad_frac_remain']],' % of unfiltered calls)</li>\n')
 if(pcg_report$pcgr_config$tumor_only$exclude_dbsnp_nonclinical == TRUE){
   cat('<li>Exclusion of nonclinically associated dbSNP variants (FILTER = ON): <b>',pcg_report[['tumor_only']][['variant_statistic']][['dbsnp_n_remain']],'</b> (',pcg_report[['tumor_only']][['variant_statistic']][['dbsnp_frac_remain']],' % of unfiltered calls)</li>\n')
 }

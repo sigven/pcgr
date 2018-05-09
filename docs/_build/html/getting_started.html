@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Getting started &mdash; Personal Cancer Genome Reporter 0.6.0 documentation</title>
+  <title>Getting started &mdash; Personal Cancer Genome Reporter 0.6.2 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Personal Cancer Genome Reporter 0.6.0 documentation" href="index.html"/>
+    <link rel="top" title="Personal Cancer Genome Reporter 0.6.2 documentation" href="index.html"/>
         <link rel="next" title="Annotation resources" href="annotation_resources.html"/>
         <link rel="prev" title="About" href="about.html"/> 
 
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.6.0
+                0.6.2
               </div>
             
           
@@ -192,16 +192,16 @@ X</a></li>
 <div class="section" id="step-2-download-pcgr-and-data-bundle">
 <h2>STEP 2: Download PCGR and data bundle<a class="headerlink" href="#step-2-download-pcgr-and-data-bundle" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic">
-<li><p class="first">Download and unpack the <a class="reference external" href="https://github.com/sigven/pcgr/releases/tag/v0.6.1">latest software release
-(0.6.1)</a></p>
+<li><p class="first">Download and unpack the <a class="reference external" href="https://github.com/sigven/pcgr/releases/tag/v0.6.2">latest software release
+(0.6.2)</a></p>
 </li>
 <li><p class="first">Download and unpack the assembly-specific data bundle in the PCGR
 directory</p>
 <ul class="simple">
-<li><a class="reference external" href="https://drive.google.com/open?id=1tOyPmzgXkSZjPJQOojFQxUP8JlQuQqLq">grch37 data
+<li><a class="reference external" href="https://drive.google.com/open?id=1cGBAmAh5t4miIeRrrd0zHsPCFToOr0Lf">grch37 data
 bundle</a>
 (approx 9Gb)</li>
-<li><a class="reference external" href="https://drive.google.com/open?id=1cKq-rgSNCYPCUJ38pCi_xy6_PJH-FZWD">grch38 data
+<li><a class="reference external" href="https://drive.google.com/open?id=12q3rr7xpdBfaefRi0ysFHbH34kehNZOV">grch38 data
 bundle</a>
 (approx 9Gb)</li>
 <li><em>Unpacking</em>:
@@ -211,10 +211,10 @@ bundle</a>
 have been produced</p>
 </li>
 <li><p class="first">Pull the <a class="reference external" href="https://hub.docker.com/r/sigven/pcgr/">PCGR Docker image
-(0.6.1)</a> from DockerHub
+(0.6.2)</a> from DockerHub
 (approx 5.1Gb):</p>
 <ul class="simple">
-<li><code class="docutils literal"><span class="pre">docker</span> <span class="pre">pull</span> <span class="pre">sigven/pcgr:0.6.1</span></code> (PCGR annotation engine)</li>
+<li><code class="docutils literal"><span class="pre">docker</span> <span class="pre">pull</span> <span class="pre">sigven/pcgr:0.6.2</span></code> (PCGR annotation engine)</li>
 </ul>
 </li>
 </ol>
@@ -247,8 +247,9 @@ contain the following four columns:</p>
 </ul>
 <p>Here, <em>Chromosome</em>, <em>Start</em>, and <em>End</em> denote the chromosomal segment,
 and <strong>Segment_Mean</strong> denotes the log(2) ratio for a particular segment,
-which is a common output of somatic copy number alteration callers.
-Below shows the initial part of a copy number segment file that is
+which is a common output of somatic copy number alteration callers. Note
+that coordinates must be <strong>one-based</strong> (i.e. chromosomes start at 1, not
+0). Below shows the initial part of a copy number segment file that is
 formatted correctly according to PCGR&#8217;s requirements:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Chromosome</span> <span class="n">Start</span>   <span class="n">End</span> <span class="n">Segment_Mean</span>
 <span class="mi">1</span> <span class="mi">3218329</span> <span class="mi">3550598</span> <span class="mf">0.0024</span>
@@ -295,7 +296,7 @@ workflow.</p>
 
 <span class="n">positional</span> <span class="n">arguments</span><span class="p">:</span>
 <span class="n">pcgr_dir</span>              <span class="n">PCGR</span> <span class="n">base</span> <span class="n">directory</span> <span class="k">with</span> <span class="n">accompanying</span> <span class="n">data</span> <span class="n">directory</span><span class="p">,</span>
-                <span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span> <span class="o">~/</span><span class="n">pcgr</span><span class="o">-</span><span class="mf">0.6</span><span class="o">.</span><span class="mi">1</span>
+                <span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span> <span class="o">~/</span><span class="n">pcgr</span><span class="o">-</span><span class="mf">0.6</span><span class="o">.</span><span class="mi">2</span>
 <span class="n">output_dir</span>            <span class="n">Output</span> <span class="n">directory</span>
 <span class="p">{</span><span class="n">grch37</span><span class="p">,</span><span class="n">grch38</span><span class="p">}</span>       <span class="n">Genome</span> <span class="n">assembly</span> <span class="n">build</span><span class="p">:</span> <span class="n">grch37</span> <span class="ow">or</span> <span class="n">grch38</span>
 <span class="n">configuration_file</span>    <span class="n">PCGR</span> <span class="n">configuration</span> <span class="n">file</span> <span class="p">(</span><span class="n">TOML</span> <span class="nb">format</span><span class="p">)</span>
@@ -325,27 +326,29 @@ sequenced within TCGA (<strong>GRCh37</strong> only). It also contains PCGR
 configuration files customized for these samples. A report for a
 colorectal tumor case can be generated by running the following command
 in your terminal window:</p>
-<p><code class="docutils literal"><span class="pre">python</span> <span class="pre">pcgr.py</span> <span class="pre">--input_vcf</span> <span class="pre">~/pcgr-0.6.1/examples/tumor_sample.COAD.vcf.gz</span></code>
-<code class="docutils literal"><span class="pre">--input_cna</span> <span class="pre">~/pcgr-0.6.1/examples/tumor_sample.COAD.cna.tsv</span></code>
-<code class="docutils literal"><span class="pre">~/pcgr-0.6.1</span> <span class="pre">~/pcgr-0.6.1/examples</span> <span class="pre">grch37</span> <span class="pre">~/pcgr-0.6.1/examples/pcgr_conf.COAD.toml</span> <span class="pre">tumor_sample.COAD</span></code></p>
+<p><code class="docutils literal"><span class="pre">python</span> <span class="pre">pcgr.py</span> <span class="pre">--input_vcf</span> <span class="pre">~/pcgr-0.6.2/examples/tumor_sample.COAD.vcf.gz</span></code>
+<code class="docutils literal"><span class="pre">--input_cna</span> <span class="pre">~/pcgr-0.6.2/examples/tumor_sample.COAD.cna.tsv</span></code>
+<code class="docutils literal"><span class="pre">~/pcgr-0.6.2</span> <span class="pre">~/pcgr-0.6.2/examples</span> <span class="pre">grch37</span> <span class="pre">~/pcgr-0.6.2/examples/pcgr_conf.COAD.toml</span> <span class="pre">tumor_sample.COAD</span></code></p>
+<p>This command will run the Docker-based PCGR workflow and produce the
+following output files in the <em>examples</em> folder:</p>
 <p>This command will run the Docker-based PCGR workflow and produce the
 following output files in the <em>examples</em> folder:</p>
 <ol class="arabic simple">
-<li><strong>tumor_sample.COAD.pcgr_acmg.html</strong> - An interactive HTML report
-for clinical interpretation</li>
-<li><strong>tumor_sample.COAD.pcgr_acmg.pass.vcf.gz</strong> - Bgzipped VCF file
-with rich set of annotations for precision oncology</li>
-<li><strong>tumor_sample.COAD.pcgr_acmg.pass.tsv.gz</strong> - Compressed
+<li><strong>tumor_sample.COAD.pcgr_acmg.grch37.html</strong> - An interactive HTML
+report for clinical interpretation</li>
+<li><strong>tumor_sample.COAD.pcgr_acmg.grch37.pass.vcf.gz</strong> - Bgzipped VCF
+file with rich set of annotations for precision oncology</li>
+<li><strong>tumor_sample.COAD.pcgr_acmg.grch37.pass.tsv.gz</strong> - Compressed
 vcf2tsv-converted file with rich set of annotations for precision
 oncology</li>
-<li><strong>tumor_sample.COAD.pcgr_acmg.snvs_indels.tiers.tsv</strong> -
+<li><strong>tumor_sample.COAD.pcgr_acmg.grch37.snvs_indels.tiers.tsv</strong> -
 Tab-separated values file with variants organized according to tiers
 of functional relevance</li>
-<li><strong>tumor_sample.COAD.pcgr_acmg.json</strong> - JSON dump of HTML report
-content</li>
-<li><strong>tumor_sample.COAD.pcgr_acmg.cna_segments.tsv.gz</strong> - Compressed
-tab-separated values file with annotations of gene transcripts that
-overlap with somatic copy number aberrations</li>
+<li><strong>tumor_sample.COAD.pcgr_acmg.grch37.json</strong> - JSON dump of HTML
+report content</li>
+<li><strong>tumor_sample.COAD.pcgr_acmg.grch37.cna_segments.tsv.gz</strong> -
+Compressed tab-separated values file with annotations of gene
+transcripts that overlap with somatic copy number aberrations</li>
 </ol>
 </div>
 </div>
@@ -391,7 +394,7 @@ overlap with somatic copy number aberrations</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.6.0',
+            VERSION:'0.6.2',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

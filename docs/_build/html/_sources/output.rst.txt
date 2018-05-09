@@ -8,7 +8,7 @@ An interactive and tier-structured HTML report that shows the most
 relevant findings in the query cancer genome is provided with the
 following naming convention:
 
-**sample\_id**.\ **tier\_model**.html
+**sample\_id**.\ **tier\_model**.\ **genome\_assembly**.html
 
 -  The **sample\_id** is provided as input by the user, and reflects a
    unique identifier of the tumor-normal sample pair to be analyzed.
@@ -217,9 +217,9 @@ following:
 Example reports:
 
 -  `View an example report for a breast tumor sample
-   (TCGA) <http://folk.uio.no/sigven/tumor_sample.BRCA.pcgr_acmg.0.6.1.html>`__
+   (TCGA) <http://folk.uio.no/sigven/tumor_sample.BRCA.pcgr_acmg.grch37.0.6.2.html>`__
 -  `View an example report for a colon adenocarcinoma sample
-   (TCGA) <http://folk.uio.no/sigven/tumor_sample.COAD.pcgr_acmg.0.6.1.html>`__
+   (TCGA) <http://folk.uio.no/sigven/tumor_sample.COAD.pcgr_acmg.grch37.0.6.2.html>`__
 
 The HTML reports have been tested using the following browsers:
 
@@ -246,7 +246,7 @@ A VCF file containing annotated, somatic calls (single nucleotide
 variants and insertion/deletions) is generated with the following naming
 convention:
 
-**sample\_id**.\ **tier\_model**.vcf.gz
+**sample\_id**.\ **tier\_model**.\ **genome\_assembly**.vcf.gz
 
 Here, the **sample\_id** is provided as input by the user, and reflects
 a unique identifier of the tumor-normal sample pair to be analyzed.
@@ -540,7 +540,7 @@ Annotated List of all SNVs/InDels
 We provide a tab-separated values file with most important annotations
 for SNVs/InDels. The file has the following naming convention:
 
-**sample\_id**.\ **tier\_model**.snvs\_indels.tiers.tsv
+**sample\_id**.\ **tier\_model**.\ **genome\_assembly**.snvs\_indels.tiers.tsv
 
 The SNVs/InDels are organized into different **tiers** (as defined above
 for the HTML report)
@@ -614,7 +614,7 @@ addition, we attach cancer-relevant annotations for the affected
 transcripts. The naming convention of the compressed TSV file is as
 follows:
 
-**sample\_id**.\ **tier\_model**.cna\_segments.tsv.gz
+**sample\_id**.\ **tier\_model**.\ **genome\_assembly**.cna\_segments.tsv.gz
 
 The format of the compressed TSV file is the following:
 

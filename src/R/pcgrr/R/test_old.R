@@ -8,18 +8,21 @@
 # suppressWarnings(suppressPackageStartupMessages(library(randomForest)))
 # suppressWarnings(suppressPackageStartupMessages(library(caret)))
 # suppressWarnings(suppressPackageStartupMessages(library(RcppTOML)))
-# # # #
-# # # project_directory <- '/Users/sigven/research/docker/pcgr_predispose'
-#pcgr_config_file <- '/Users/sigven/research/docker/pcgr/examples/pcgr_conf.thymic_penile.toml'
-#pcgr_config <-  RcppTOML::parseTOML(pcgr_config_file, fromFile = T)
-# # # sample_name <- 'GCF0167-0001-N01'
-# # # pcgr_version <- '0.1.0'
-# # # query_vcf2tsv <- '/Users/sigven/research/docker/pcgr_predispose/GCF0167-0001-N01.pcgr_predispose.pass.tsv.gz'
-# # # tsv_gz_file <- query_vcf2tsv
-# # # load(file='/Users/sigven/research/docker/pcgr/data/grch37/rda/pcgr_data.rda')
-# # # genome_assembly <- 'grch37'
-# # # biomarker_mapping_stringency <- 1
-# # # callset <- 'somatic_calls'
+#
+# pcgr_config_file <- '/Users/sigven/research/docker/pcgr/COLO829__COLO829T-somatic/COLO829__COLO829T-somatic.toml'
+# pcgr_config <-  RcppTOML::parseTOML(pcgr_config_file, fromFile = T)
+# sample_name <- 'COLO829'
+# pcgr_version <- '0.6.2'
+# transcript_overlap_pct <- 50
+# cna_file <- '/Users/sigven/research/docker/pcgr/COLO829__COLO829T-somatic/COLO829__COLO829T-somatic.tsv'
+# #
+# load(file='/Users/sigven/research/docker/pcgr/data/grch38/rda/pcgr_data.rda')
+# genome_assembly <- 'grch38'
+# #
+# genome_seq <- BSgenome.Hsapiens.UCSC.hg38
+# query_vcf2tsv <- '/Users/sigven/research/docker/pcgr/COLO829.pcgr_acmg.grch38.pass.tsv.gz'
+# tsv_gz_file <- query_vcf2tsv
+# project_directory <- '/Users/sigven/research/docker/pcgr'
 # # #
 # # #
 # # ### TEST - TIER MODEL PCGR - COAD
@@ -27,8 +30,7 @@
 #pcgr_config <-  RcppTOML::parseTOML(pcgr_config_file, fromFile = T)
 # sample_name <- 'cov50-ensembl-annotated-decomposed'
 # pcgr_version <- '0.6.0'
-#query_vcf2tsv <- '/Users/sigven/research/tumor_seq_projects/mesothelioma_germline/GCF0167-0001-N01.pcgr_predispose.pass.tsv.gz'
-# tsv_gz_file <- query_vcf2tsv
+
 # # # query_cnv <- '/Users/sigven/research/tumor_seq_projects/mesothelioma_somatic/cnv/facets/GCF0167-0001-N01_GCF0167-0001-T01.cna.tsv'
 # # # cna_file <- query_cnv
 # # # # # # # # cna_segments_tsv <- query_cnv

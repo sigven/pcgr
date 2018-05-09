@@ -260,8 +260,10 @@ generate_report_data_msi <- function(sample_calls, pcgr_data, pcgr_version, samp
   rlogging::message('------')
   rlogging::message("Predicting microsatellite instability status")
 
-  if(nrow(sample_calls) > 30){
-    pcg_report_msi[['prediction']] <- pcgrr::predict_msi_status(sample_calls, simpleRepeats_gr = pcgr_data$simpleRepeats_gr, windowMasker_gr = pcgr_data$windowMasker_gr, msi_prediction_model = pcgr_data$msi_model$model, msi_prediction_dataset = pcgr_data$msi_model$tcga_dataset, target_size_mb = pcgr_config$mutational_burden$target_size_mb, bsg = genome_seq, genome_assembly = genome_assembly, sample_name = sample_name)
+  msi_sample_calls <- sample_calls %>% dplyr::filter(stringr::str_detect(CONSEQUENCE,"^(frameshift_|missense_|splice_|synonymous_|stop_|start_lost|inframe_)"))
+  rlogging::message(paste0("n = ",nrow(msi_sample_calls)," coding variants used for MSI prediction"))
+  if(nrow(msi_sample_calls) > 30){
+    pcg_report_msi[['prediction']] <- pcgrr::predict_msi_status(msi_sample_calls, simpleRepeats_gr = pcgr_data$simpleRepeats_gr, windowMasker_gr = pcgr_data$windowMasker_gr, msi_prediction_model = pcgr_data$msi_model$model, msi_prediction_dataset = pcgr_data$msi_model$tcga_dataset, target_size_mb = pcgr_config$mutational_burden$target_size_mb, bsg = genome_seq, genome_assembly = genome_assembly, sample_name = sample_name)
     pcg_report_msi[['eval']] <- TRUE
   }
   else{

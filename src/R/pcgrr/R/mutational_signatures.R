@@ -14,7 +14,7 @@ signature_contributions_single_sample <- function(sample_calls, sample_name, nor
 
   n_muts <- nrow(sample_calls)
   sample_calls <- pcgrr::get_valid_chromosomes(sample_calls)
-  sigs.input <- deconstructSigs::mut.to.sigs.input(mut.ref = sample_calls, sample.id = "VCF_SAMPLE_ID",chr = "CHROM",pos = "POS", ref = "REF", alt = "ALT")
+  sigs.input <- deconstructSigs::mut.to.sigs.input(mut.ref = sample_calls, sample.id = "VCF_SAMPLE_ID",chr = "CHROM",pos = "POS", ref = "REF", alt = "ALT", bsg = bsg)
   all_signatures <- paste0("Signature.",rep(1:30))
   if(!is.null(skip_signatures))
     all_signatures <- setdiff(all_signatures,skip_signatures)
@@ -82,7 +82,8 @@ generate_report_data_signatures <- function(sample_calls, pcgr_data, pcgr_versio
                                                                                   normalization_method = pcgr_config$mutational_signatures$mutsignatures_normalization,
                                                                                   cosmic_signatures_aetiologies = pcgr_data$signatures_aetiologies,
                                                                                   signature_limit = pcgr_config$mutational_signatures$mutsignatures_signature_limit,
-                                                                                  signature_cutoff = pcgr_config$mutational_signatures$mutsignatures_cutoff)
+                                                                                  signature_cutoff = pcgr_config$mutational_signatures$mutsignatures_cutoff,
+                                                                                  bsg = genome_seq)
       pcg_report_signatures[['result']][['deconstructsigs_which_signatures']] <- mut_signature_contributions$deconstructsigs_which_signatures
       pcg_report_signatures[['result']][['cancertypes_aetiologies']] <- mut_signature_contributions$cancertypes_aetiologies
     }else{

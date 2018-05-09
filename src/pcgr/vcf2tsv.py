@@ -122,14 +122,15 @@ def vcf2tsv(query_vcf, out_tsv, skip_info_data, skip_genotype_data, keep_rejecte
                else:
                   vcf_info_data.append('True')
             elif column_types[info_field] == 'Float' or column_types[info_field] == 'Integer' or column_types[info_field] == 'String':
-               if type(variant_info.get(info_field)) is list:
-                  vcf_info_data.append(",".join(str(n) for n in variant_info.get(info_field).encode('utf-8')))
+               if type(variant_info.get(info_field)) is list or type(variant_info.get(info_field)) is tuple:
+                  vcf_info_data.append(",".join(str(n) for n in variant_info.get(info_field)))
                else:
                   if variant_info.get(info_field) is None:
                      vcf_info_data.append('.')
                   else:
                      if column_types[info_field] == 'Float':
                         if not isinstance(variant_info.get(info_field),float):
+                           print('vcf2tsv.py WARNING:\tINFO tag ' + str(info_field) + ' is defined in the VCF header as type \'Float\', yet parsed as other type:' + str(type(variant_info.get(info_field))))
                            if not ',' in str(alt):
                               print('Warning: Multiple values in INFO tag for single ALT allele (VCF multiallelic sites not decomposed properly?):' + str(fixed_fields_string) + '\t' + str(info_field) + '=' + str(variant_info.get(info_field)))
                            vcf_info_data.append('.')
@@ -138,9 +139,18 @@ def vcf2tsv(query_vcf, out_tsv, skip_info_data, skip_genotype_data, keep_rejecte
                            vcf_info_data.append(val)
                      else:
                         if column_types[info_field] == 'String':
-                           vcf_info_data.append(str(variant_info.get(info_field)))
+                           if isinstance(variant_info.get(info_field),str):
+                              #print(str(info_field) + '\t' + variant_info.get(info_field).encode('ascii','ignore').rstrip().decode('ascii'))
+                              vcf_info_data.append(variant_info.get(info_field).encode('ascii','ignore').decode('ascii'))
+                           else:
+                              vcf_info_data.append('.')
+                              print('vcf2tsv.py WARNING:\tINFO tag ' + str(info_field) + ' is defined in the VCF header as type \'String\', yet parsed as other type:' + str(type(variant_info.get(info_field))))
                         else:
-                           vcf_info_data.append(re.sub('\(|\)', '', str(variant_info.get(info_field))))
+                           if isinstance(variant_info.get(info_field),int):
+                              vcf_info_data.append(str(variant_info.get(info_field)))
+                           else:
+                              print('vcf2tsv.py WARNING:\tINFO tag ' + str(info_field) + ' is defined in the VCF header as type \'Integer\', yet parsed as other type:' + str(type(variant_info.get(info_field))))
+                              vcf_info_data.append(re.sub('\(|\)', '', variant_info.get(info_field).encode('ascii','ignore').decode('ascii')))
 
       
       #dictionary, with sample names as keys, values being genotype data (dictionary with format tags as keys)
@@ -194,7 +204,8 @@ def vcf2tsv(query_vcf, out_tsv, skip_info_data, skip_genotype_data, keep_rejecte
       if skip_info_data is False:
          if skip_genotype_data is False:
             if len(sample_columns_header) > 0:
-               tsv_elements.append('\t'.join(vcf_info_data))
+               tsv_elements.append("\t".join(str(n) for n in vcf_info_data))
+               #tsv_elements.append('\t'.join(vcf_info_data))
                ## one line per sample variant
                for s in sorted(vcf_sample_genotype_data.keys()):
                   sample = s
@@ -204,22 +215,26 @@ def vcf2tsv(query_vcf, out_tsv, skip_info_data, skip_genotype_data, keep_rejecte
                   gt_tag = '.'
                   for tag in sorted(vcf_sample_genotype_data[sample].keys()):
                      if tag != 'GT':
-                        line_elements.append(vcf_sample_genotype_data[sample][tag])
+                        line_elements.append(vcf_sample_genotype_data[sample][tag].encode('ascii','ignore').decode('ascii'))
                      else:
-                        gt_tag = vcf_sample_genotype_data[sample][tag]
+                        gt_tag = vcf_sample_genotype_data[sample][tag].encode('ascii','ignore').decode('ascii')
                   line_elements.append(gt_tag)
                   if gt_tag == './.' or gt_tag == '.':
                      if keep_rejected_calls:
                         out.write('\t'.join(line_elements) + '\n')
                   else:
-                     out.write('\t'.join(line_elements) + '\n')
+                     out.write("\t".join(str(n) for n in line_elements) + '\n')
+                     #print(str(line_elements))
+                     #out.write('\t'.join(line_elements) + '\n')
             else:
-               tsv_elements.append('\t'.join(vcf_info_data))
+               tsv_elements.append("\t".join(str(n) for n in vcf_info_data))
+               #tsv_elements.append('\t'.join(vcf_info_data))
                line_elements = []
                line_elements.extend(tsv_elements)
                out.write('\t'.join(line_elements) + '\n')
          else:
-            tsv_elements.append('\t'.join(vcf_info_data))
+            tsv_elements.append("\t".join(str(n) for n in vcf_info_data))
+            #tsv_elements.append('\t'.join(vcf_info_data))
             line_elements = []
             line_elements.extend(tsv_elements)
             out.write('\t'.join(line_elements) + '\n')

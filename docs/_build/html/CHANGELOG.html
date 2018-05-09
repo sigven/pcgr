@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>CHANGELOG &mdash; Personal Cancer Genome Reporter 0.6.0 documentation</title>
+  <title>CHANGELOG &mdash; Personal Cancer Genome Reporter 0.6.2 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Personal Cancer Genome Reporter 0.6.0 documentation" href="index.html"/>
+    <link rel="top" title="Personal Cancer Genome Reporter 0.6.2 documentation" href="index.html"/>
         <link rel="prev" title="Tier models" href="tier_systems.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                0.6.0
+                0.6.2
               </div>
             
           
@@ -94,12 +94,17 @@
 <li class="toctree-l1"><a class="reference internal" href="output.html">Output</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tier_systems.html">Tier models</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">CHANGELOG</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#may-2nd-2018">0.6.1 - May 2nd 2018</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#may-9th-2018">0.6.2 - May 9th 2018</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#fixed">Fixed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#added">Added</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#may-2nd-2018">0.6.1 - May 2nd 2018</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Fixed</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#april-25th-2018">0.6.0 - April 25th 2018</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#added">Added</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Added</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#removed">Removed</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#changed">Changed</a></li>
 </ul>
@@ -152,10 +157,37 @@
             
   <div class="section" id="changelog">
 <h1>CHANGELOG<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="may-2nd-2018">
-<h2>0.6.1 - May 2nd 2018<a class="headerlink" href="#may-2nd-2018" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="may-9th-2018">
+<h2>0.6.2 - May 9th 2018<a class="headerlink" href="#may-9th-2018" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="fixed">
 <h3>Fixed<a class="headerlink" href="#fixed" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Bug in copy number segment display (missing variable initalization)</li>
+<li>Typo in gnomAD filter statistic (fraction)</li>
+<li>Bug in mutational signature analysis for grch38 (forgot to pass
+BSgenome object)</li>
+<li>Missing proper ASCII-encoding in vcf2tsv conversion</li>
+<li>Removed &#8216;Noncoding mutations&#8217; section when no input VCF is present</li>
+<li>Bug in annotation of copy number event type (focal/broad)</li>
+<li>Bug in copy number annotation (missing protein-coding transcripts)</li>
+<li>Updated MSI prediction (variable importance, performance measures)</li>
+</ul>
+</div>
+<div class="section" id="added">
+<h3>Added<a class="headerlink" href="#added" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Genome assembly is appended to every output file</li>
+<li>Issue warning for copy number segment that goes beyond chromosomal
+lengths of specified assembly (segments will be skipped)</li>
+<li>Added missing subtypes for &#8216;Skin_Cancer_NOS&#8217; in the cancer
+phenotype dataset</li>
+</ul>
+</div>
+</div>
+<div class="section" id="may-2nd-2018">
+<h2>0.6.1 - May 2nd 2018<a class="headerlink" href="#may-2nd-2018" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id1">
+<h3>Fixed<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>Bug in tier assignment &#8216;pcgr_acmg&#8217; (case for no variants in
 tier1,2,3)</li>
@@ -171,8 +203,8 @@ variants with biomarker role)</li>
 </div>
 <div class="section" id="april-25th-2018">
 <h2>0.6.0 - April 25th 2018<a class="headerlink" href="#april-25th-2018" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="added">
-<h3>Added<a class="headerlink" href="#added" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id2">
+<h3>Added<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>New argument in pcgr.py<ul>
 <li><em>assembly</em> (grch37/grch38)</li>
@@ -391,7 +423,7 @@ now fixed from 0 to 1 (0.05 intervals)</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.6.0',
+            VERSION:'0.6.2',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

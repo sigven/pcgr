@@ -50,12 +50,12 @@ generate_predisposition_report <- function(project_directory, query_vcf2tsv, pcg
                           "GENOME_VERSION")
 
 
-  if(query_vcf2tsv != 'None'){
+  if(query_vcf2tsv != 'None.gz'){
     if(!file.exists(query_vcf2tsv) | file.size(query_vcf2tsv) == 0){
       rlogging::warning(paste0("File ",query_vcf2tsv," does not exist or has zero size"))
     }
     else{
-      if(!is.null(pcgr_config) & query_vcf2tsv != 'None'){
+      if(!is.null(pcgr_config) & query_vcf2tsv != 'None.gz'){
         sample_calls <- pcgrr::get_calls(query_vcf2tsv, pcgr_data, pcgr_version, sample_name, pcgr_config, genome_seq, assembly)
         rlogging::message("Filtering against cancer predisposition genes:")
         sample_calls <- dplyr::semi_join(sample_calls,pcg_report[['snv_indel']][['predisposition_genes']],by=c("SYMBOL" = "symbol"))
@@ -98,7 +98,7 @@ generate_predisposition_report <- function(project_directory, query_vcf2tsv, pcg
 
   pcgr_json <- jsonlite::toJSON(pcg_report, pretty=T,na='string',null='null')
   write(pcgr_json, fnames[['json']])
-  rmarkdown::render(system.file("templates","report_predispose.Rmd", package="pcgrr"), output_format = rmarkdown::html_document(theme = pcg_report[['pcgr_config']][['visual']][['report_theme']], toc = T, toc_depth = 3, toc_float = T, number_sections = F), output_file = paste0(sample_name,'.pcgr_predispose.html'), output_dir = project_directory, clean = T, intermediates_dir = project_directory, quiet=T)
+  rmarkdown::render(system.file("templates","report_predispose.Rmd", package="pcgrr"), output_format = rmarkdown::html_document(theme = pcg_report[['pcgr_config']][['visual']][['report_theme']], toc = T, toc_depth = 3, toc_float = T, number_sections = F), output_file = paste0(sample_name,'.pcgr_predispose.',genome_assembly,'.html'), output_dir = project_directory, clean = T, intermediates_dir = project_directory, quiet=T)
 
 
 }
