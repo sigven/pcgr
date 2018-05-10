@@ -153,7 +153,7 @@ def simplify_vcf(input_vcf, vcf, output_dir, logger):
    os.system('tabix -p vcf ' + str(input_vcf_pcgr_predispose_ready_decomposed) + '.gz')
    os.system('rm -f ' + str(input_vcf_pcgr_predispose_ready) + ' ' + os.path.join(output_dir, 'decompose.log'))
 
-def validate_pcgr_input(pcgr_directory, input_vcf, output_dir, configuration_file, genome_assembly):
+def validate_pcgr_input(pcgr_directory, input_vcf, configuration_file, genome_assembly, output_dir):
    """
    Function that reads the input files to PCGR_predispose (VCF file) and performs the following checks:
    1. Check that VCF file is properly formatted (according to EBIvariation/vcf-validator - VCF v4.2) - optional (vcf_validation in config file)

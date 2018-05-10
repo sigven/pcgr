@@ -460,7 +460,11 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
    ## verify VCF and CNA segment file
    logger = getlogger('pcgr-validate-input')
    logger.info("STEP 0: Validate input data")
-   vcf_validate_command = docker_command_run1 + os.path.join(python_scripts_dir, "pcgr_validate_input.py") + " " + data_dir + " " + str(input_vcf_docker) + " " + str(input_cna_docker) + " " + str(input_conf_docker) + " " + str(genome_assembly) + ' --output_dir ' + output_dir + docker_command_run_end
+   vcf_validate_command = docker_command_run1 + os.path.join(python_scripts_dir, "pcgr_validate_input.py") + " " + data_dir + " " + str(input_vcf_docker) + " " + str(input_cna_docker) + " " + str(input_conf_docker) + " " + str(genome_assembly)
+   if not docker_image_version:
+      vcf_validate_command += ' --output_dir ' + output_dir + docker_command_run_end
+   else:
+      vcf_validate_command += docker_command_run_end
    check_subprocess(vcf_validate_command)
    ## Log tumor type of query genome
    logger.info('Finished')
