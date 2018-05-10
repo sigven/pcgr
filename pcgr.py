@@ -27,6 +27,7 @@ def __main__():
    parser.add_argument('configuration_file',help='PCGR configuration file (TOML format)')
    parser.add_argument('sample_id',help="Tumor sample/cancer genome identifier - prefix for output files")
    parser.add_argument('--docker-uid', dest='docker_user_id')
+   parser.add_argument('--no-docker', action='store_true', dest='no_docker', default=False)
 
    docker_image_version = 'sigven/pcgr:' + str(version)
    args = parser.parse_args()
@@ -39,15 +40,18 @@ def __main__():
    check_docker_command = 'docker images -q ' + str(docker_image_version)
    logger = getlogger('pcgr-validate-config')
 
-   try:
-       output = subprocess.check_output(str(check_docker_command), stderr=subprocess.STDOUT, shell=True)
-   except:
+   if args.no_docker:
       docker_image_version = None
    else:
-      if(len(output) == 0):
-          err_msg = 'Docker image ' + str(docker_image_version) + ' does not exist, pull image from Dockerhub (docker pull ' + str(docker_image_version) + ')'
-          pcgr_error_message(err_msg,logger)
-          docker_image_version = None
+      try:
+         output = subprocess.check_output(str(check_docker_command), stderr=subprocess.STDOUT, shell=True)
+      except:
+         docker_image_version = None
+      else:
+         if(len(output) == 0):
+             err_msg = 'Docker image ' + str(docker_image_version) + ' does not exist, pull image from Dockerhub (docker pull ' + str(docker_image_version) + ')'
+             pcgr_error_message(err_msg,logger)
+             docker_image_version = None
 
    config_options = {}
    if os.path.exists(args.configuration_file):
@@ -472,7 +476,7 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
    if not input_vcf_docker == 'None':
 
       ## Define input, output and temporary file names
-      output_vcf = os.path.join(output_dir, str(sample_id) + '.' + str(config_options['tier_model']['tier_model']) + str(genome_assembly) + '.vcf.gz')
+      output_vcf = os.path.join(output_dir, str(sample_id) + '.' + str(config_options['tier_model']['tier_model']) + '.' + str(genome_assembly) + '.vcf.gz')
       #output_maf = os.path.join(output_dir, str(sample_id) + '.' + str(config_options['tier_model']['tier_model']) + str(genome_assembly) + '.maf')
       output_pass_vcf = os.path.join(output_dir, str(sample_id) + '.' + str(config_options['tier_model']['tier_model']) + '.' + str(genome_assembly) + '.pass.vcf.gz')
       output_pass_tsv = os.path.join(output_dir, str(sample_id) + '.' + str(config_options['tier_model']['tier_model']) + '.' + str(genome_assembly) + '.pass.tsv')
