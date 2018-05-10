@@ -79,16 +79,19 @@ Genome mapping
 ^^^^^^^^^^^^^^
 
 A requirement for PCGR variant annotation datasets is that variants have
-been mapped unambiguously to the reference human genome (GRCh37 is
-currently the only supported build). For most datasets this requirement
-is not an issue (i.e. dbSNP, ClinVar etc.). A fraction of variants in
-the annotation datasets related to clinical interpretation, CIViC and
-CBMDB, has however not been mapped to the genome. Whenever possible, we
-have utilized
+been mapped unambiguously to the reference human genome. For most
+datasets this requirement is not an issue (i.e. dbSNP, ClinVar etc.). A
+fraction of variants in the annotation datasets related to clinical
+interpretation, CIViC and CBMDB, has however not been mapped to the
+genome. Whenever possible, we have utilized
 `TransVar <http://bioinformatics.mdanderson.org/transvarweb/>`__ to
 identify the actual genomic variants (e.g. *g.chr7:140453136A>T*) that
 correspond to variants reported at the amino acid level or with other
 HGVS nomenclature (e.g. *p.V600E*).
+
+For variants that have been mapped to a specific build (GRCh37/GRCh38),
+we have utilized the `crossmap <http://crossmap.sourceforge.net/>`__
+package to lift the datasets to the other build.
 
 Data quality
 ^^^^^^^^^^^^

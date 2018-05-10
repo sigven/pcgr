@@ -49,8 +49,9 @@ contain the following four columns:
 
 Here, *Chromosome*, *Start*, and *End* denote the chromosomal segment,
 and **Segment\_Mean** denotes the log(2) ratio for a particular segment,
-which is a common output of somatic copy number alteration callers.
-Below shows the initial part of a copy number segment file that is
+which is a common output of somatic copy number alteration callers. Note
+that coordinates must be **one-based** (i.e. chromosomes start at 1, not
+0). Below shows the initial part of a copy number segment file that is
 formatted correctly according to PCGR's requirements:
 
 ::

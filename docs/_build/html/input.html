@@ -191,8 +191,9 @@ contain the following four columns:</p>
 </ul>
 <p>Here, <em>Chromosome</em>, <em>Start</em>, and <em>End</em> denote the chromosomal segment,
 and <strong>Segment_Mean</strong> denotes the log(2) ratio for a particular segment,
-which is a common output of somatic copy number alteration callers.
-Below shows the initial part of a copy number segment file that is
+which is a common output of somatic copy number alteration callers. Note
+that coordinates must be <strong>one-based</strong> (i.e. chromosomes start at 1, not
+0). Below shows the initial part of a copy number segment file that is
 formatted correctly according to PCGR&#8217;s requirements:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Chromosome</span>    <span class="n">Start</span>   <span class="n">End</span> <span class="n">Segment_Mean</span>
 <span class="mi">1</span> <span class="mi">3218329</span> <span class="mi">3550598</span> <span class="mf">0.0024</span>

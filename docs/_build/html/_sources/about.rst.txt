@@ -49,8 +49,8 @@ If you use PCGR, please cite our recent publication:
 
 Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, Ola
 Myklebost, and Eivind Hovig. **Personal Cancer Genome Reporter: variant
-interpretation report for precision oncology** (2017). *Bioinformatics
-(in press)*.
+interpretation report for precision oncology** (2017). *Bioinformatics*.
+34(10):1778–1780.
 doi:\ `10.1093/bioinformatics/btx817 <https://doi.org/10.1093/bioinformatics/btx817>`__
 
 Docker-based technology

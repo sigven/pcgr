@@ -89,10 +89,11 @@ detail below:
       -  Based on user-defined/default log-ratio thresholds of
          gains/losses, the whole CNA dataset can be navigated further
          through filters:
-      -  cytoband
-      -  type of CNA event - *focal* (less than 25% of chromosome arm
-         affected) or *broad*
-      -  log ratio
+
+         -  cytoband
+         -  type of CNA event - *focal* (less than 25% of chromosome arm
+            affected) or *broad*
+         -  log ratio
 
    -  *Proto-oncogenes subject to copy number amplifications*
 
@@ -409,7 +410,7 @@ processing with the PCGR annotation pipeline:
 -  EFFECT\_PREDICTIONS - Predictions of effect of variant on protein
    function and pre-mRNA splicing from `database of non-synonymous
    functional predictions - dbNSFP
-   v3.4 <https://sites.google.com/site/jpopgen/dbNSFP>`__. Predicted
+   v3.5 <https://sites.google.com/site/jpopgen/dbNSFP>`__. Predicted
    effects are provided by different sources/algorithms (separated by
    '&'):
 

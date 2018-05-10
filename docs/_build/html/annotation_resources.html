@@ -238,16 +238,18 @@ April 16th 2018</li>
 <div class="section" id="genome-mapping">
 <h3>Genome mapping<a class="headerlink" href="#genome-mapping" title="Permalink to this headline">¶</a></h3>
 <p>A requirement for PCGR variant annotation datasets is that variants have
-been mapped unambiguously to the reference human genome (GRCh37 is
-currently the only supported build). For most datasets this requirement
-is not an issue (i.e. dbSNP, ClinVar etc.). A fraction of variants in
-the annotation datasets related to clinical interpretation, CIViC and
-CBMDB, has however not been mapped to the genome. Whenever possible, we
-have utilized
+been mapped unambiguously to the reference human genome. For most
+datasets this requirement is not an issue (i.e. dbSNP, ClinVar etc.). A
+fraction of variants in the annotation datasets related to clinical
+interpretation, CIViC and CBMDB, has however not been mapped to the
+genome. Whenever possible, we have utilized
 <a class="reference external" href="http://bioinformatics.mdanderson.org/transvarweb/">TransVar</a> to
 identify the actual genomic variants (e.g. <em>g.chr7:140453136A&gt;T</em>) that
 correspond to variants reported at the amino acid level or with other
 HGVS nomenclature (e.g. <em>p.V600E</em>).</p>
+<p>For variants that have been mapped to a specific build (GRCh37/GRCh38),
+we have utilized the <a class="reference external" href="http://crossmap.sourceforge.net/">crossmap</a>
+package to lift the datasets to the other build.</p>
 </div>
 <div class="section" id="data-quality">
 <h3>Data quality<a class="headerlink" href="#data-quality" title="Permalink to this headline">¶</a></h3>

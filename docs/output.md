@@ -44,9 +44,9 @@ The report is structured in seven main sections, described in more detail below:
   4. __Somatic CNAs__
       * _Segments - amplifications and homozygous deletions_
          -  Based on user-defined/default log-ratio thresholds of gains/losses, the whole CNA dataset can be navigated further through filters:
-	      * cytoband
-		 * type of CNA event - *focal* (less than 25% of chromosome arm affected) or *broad*
-		 * log ratio
+	       	- cytoband
+			 - type of CNA event - *focal* (less than 25% of chromosome arm affected) or *broad*
+			 - log ratio
       * _Proto-oncogenes subject to copy number amplifications_
          - Datatable listing known proto-oncogenes covered by user-defined/default amplifications and potential targeted therapies
       * _Tumor suppressor genes subject to homozygous deletions_
@@ -218,7 +218,7 @@ Here, the __sample_id__ is provided as input by the user, and reflects a unique 
   - UNIPROT\_FEATURE - Overlapping protein annotations from [UniProt KB](http://www.uniprot.org)
   - PFAM_DOMAIN - Pfam domain identifier (from VEP)
   - INTOGEN\_DRIVER\_MUT - Indicates if existing variant is predicted as driver mutation from IntoGen Catalog of Driver Mutations
-  - EFFECT\_PREDICTIONS - Predictions of effect of variant on protein function and pre-mRNA splicing from [database of non-synonymous functional predictions - dbNSFP v3.4](https://sites.google.com/site/jpopgen/dbNSFP). Predicted effects are provided by different sources/algorithms (separated by '&'):
+  - EFFECT\_PREDICTIONS - Predictions of effect of variant on protein function and pre-mRNA splicing from [database of non-synonymous functional predictions - dbNSFP v3.5](https://sites.google.com/site/jpopgen/dbNSFP). Predicted effects are provided by different sources/algorithms (separated by '&'):
 
     1. [SIFT](http://provean.jcvi.org/index.php) (Jan 2015)
     2. [LRT](http://www.genetics.wustl.edu/jflab/lrt_query.html) (2009)
