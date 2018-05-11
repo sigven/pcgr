@@ -118,7 +118,7 @@ detail below:
    -  Indicates predicted microsatellite stability from the somatic
       mutation profile and supporting evidence (details of the
       underlying MSI statistical classifier can be found
-      `here <http://rpubs.com/sigven/msi>`__)
+      `here <http://rpubs.com/sigven/msi2018>`__)
    -  The MSI classifier was trained on TCGA exome samples.
    -  Will only be present in the report if specified by the user in the
       configuration file (i.e. *msi = true*) and if the input is

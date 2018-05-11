@@ -54,7 +54,7 @@ The report is structured in seven main sections, described in more detail below:
       * _Copy number aberrations as biomarkers for prognosis, diagnosis, and drug response_
          - Interactive data table where the user can navigate aberrations acting as biomarkers across therapeutic contexts, tumor types, evidence levels etc.
   5. __MSI status__
-      * Indicates predicted microsatellite stability from the somatic mutation profile and supporting evidence (details of the underlying MSI statistical classifier can be found [here](http://rpubs.com/sigven/msi))
+      * Indicates predicted microsatellite stability from the somatic mutation profile and supporting evidence (details of the underlying MSI statistical classifier can be found [here](http://rpubs.com/sigven/msi2018))
       * The MSI classifier was trained on TCGA exome samples.
       * Will only be present in the report if specified by the user in the configuration file (i.e. _msi = true_) and if the input is tumor-normal (i.e. _vcf_tumor_only = false_)
   6. __Mutational signatures__
