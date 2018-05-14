@@ -11,7 +11,7 @@ import getpass
 import platform
 import toml
 
-version = '0.6.2'
+version = '0.6.2.1'
 
 def __main__():
    
