@@ -1,6 +1,14 @@
 CHANGELOG
 ---------
 
+0.6.2.1 - May 14th 2018
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Fixed
+'''''
+
+-  Bug in copy number annotation (broad/focal)
+
 0.6.2 - May 9th 2018
 ^^^^^^^^^^^^^^^^^^^^
 
