@@ -30,13 +30,15 @@ variants_unclassified_shared <- crosstalk::SharedData$new(pcg_report[['snv_indel
 crosstalk::bscols(
   list(
     crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_unclassified_shared, ~CONSEQUENCE),
-    crosstalk::filter_slider("NFE_AF_GNOMAD", "Minor allele frequency Europeans (gnomAD-NFE)", variants_unclassified_shared, ~NFE_AF_GNOMAD, sep="", ticks = F)
+    crosstalk::filter_select("SYMBOL", "Gene", variants_unclassified_shared, ~SYMBOL),
+    crosstalk::filter_select("PHENOTYPE", "Condition(s)", variants_unclassified_shared, ~PHENOTYPE)
   ),
   list(
-    crosstalk::filter_slider("GLOBAL_AF_GNOMAD", "Minor allele frequency global (gnomAD)", variants_unclassified_shared, ~GLOBAL_AF_GNOMAD, sep="", ticks = F)
+    crosstalk::filter_select("PROTEIN_DOMAIN", "Protein domain", variants_unclassified_shared, ~PROTEIN_DOMAIN),
+    crosstalk::filter_slider("NFE_AF_GNOMAD", "Minor allele frequency Europeans (gnomAD-NFE)", variants_unclassified_shared, ~NFE_AF_GNOMAD,sep="", ticks = F),
+    crosstalk::filter_slider("GLOBAL_AF_GNOMAD", "Minor allele frequency global (gnomAD)", variants_unclassified_shared, ~GLOBAL_AF_GNOMAD, sep="",ticks = F)
   )
 )
-
 
 crosstalk::bscols(
   DT::datatable(variants_unclassified_shared, escape=F,extensions=c("Buttons","Responsive"), width = "100%",options=list(buttons = c('csv','excel'),dom = 'Bfrtip'))

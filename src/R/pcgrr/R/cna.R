@@ -42,8 +42,12 @@ get_cna_cytoband <- function(cna_gr, cytoband_gr){
   cyto_stats <- as.data.frame(cyto_stats %>% dplyr::rowwise() %>% dplyr::mutate(broad_cnv_event = segment_length > focalCNAthresholds))
 
   cyto_stats$event_type <- 'broad'
-  cyto_stats[!is.na(cyto_stats$broad_cnv_event) & cyto_stats$broad_cnv_event == F,]$event_type <- 'focal'
-  cyto_stats[is.na(cyto_stats$broad_cnv_event),]$event_type <- NA
+  if(nrow(cyto_stats[!is.na(cyto_stats$broad_cnv_event) & cyto_stats$broad_cnv_event == F,]) > 0){
+    cyto_stats[!is.na(cyto_stats$broad_cnv_event) & cyto_stats$broad_cnv_event == F,]$event_type <- 'focal'
+  }
+  if(nrow(cyto_stats[is.na(cyto_stats$broad_cnv_event),]) > 0){
+    cyto_stats[is.na(cyto_stats$broad_cnv_event),]$event_type <- NA
+  }
 
   cyto_stats <- pcgrr::df_string_replace(cyto_stats, c("cytoband"), pattern = ", (\\S+, ){0,}", replacement = " - ")
   cyto_stats <- tidyr::separate(cyto_stats,segmentID,sep=":",into = c('chrom','start','stop'),remove=F)

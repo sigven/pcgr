@@ -30,9 +30,12 @@ variants_tier1_shared <- crosstalk::SharedData$new(pcg_report[['snv_indel']][['v
 crosstalk::bscols(
   list(
     crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_tier1_shared, ~CONSEQUENCE),
-    crosstalk::filter_slider("NFE_AF_GNOMAD", "Minor allele frequency Europeans (gnomAD-NFE)", variants_tier1_shared, ~NFE_AF_GNOMAD,sep="", ticks = F)
+    crosstalk::filter_select("SYMBOL", "Gene", variants_tier1_shared, ~SYMBOL),
+    crosstalk::filter_select("PHENOTYPE", "Condition(s)", variants_tier1_shared, ~PHENOTYPE)
   ),
   list(
+    crosstalk::filter_select("PROTEIN_DOMAIN", "Protein domain", variants_tier1_shared, ~PROTEIN_DOMAIN),
+    crosstalk::filter_slider("NFE_AF_GNOMAD", "Minor allele frequency Europeans (gnomAD-NFE)", variants_tier1_shared, ~NFE_AF_GNOMAD,sep="", ticks = F),
     crosstalk::filter_slider("GLOBAL_AF_GNOMAD", "Minor allele frequency global (gnomAD)", variants_tier1_shared, ~GLOBAL_AF_GNOMAD, sep="",ticks = F)
   )
 )

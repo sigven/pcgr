@@ -63,16 +63,50 @@ generate_predisposition_report <- function(project_directory, query_vcf2tsv, pcg
         gene_hits <- paste(unique(sample_calls$SYMBOL), collapse=", ")
         rlogging::message("Found variants in the following cancer predisposition genes: ", gene_hits)
         pcg_report$snv_indel$eval <- TRUE
-        if(nrow(sample_calls) > 0){
+
+
+        rlogging::message("Limiting variants to hereditary cancer-predisposing syndromes/cancer conditions")
+        phenotype_medgen_oncology <- read.table("../../../../../DB/var_annotation_tracks/phenotype_ontology/phenotype_ontology_oncology.tsv", header=T, stringsAsFactors = F, quote="", sep="\t",na.strings=c("","-",NA),comment.char="")
+        phenotype_medgen_oncology <- phenotype_medgen_oncology %>% dplyr::select(cui,cui_name) %>% dplyr::distinct()
+
+        sample_calls_per_trait <- tidyr::separate_rows(sample_calls, CLINVAR_MEDGEN_CUI, sep=",")
+        sample_calls_per_cancer_trait <- dplyr::inner_join(sample_calls_per_trait, phenotype_medgen_oncology, by=c("CLINVAR_MEDGEN_CUI" = "cui")) %>% dplyr::distinct()
+        # exclude 'Not provided' and 'Not specified'
+        sample_calls_per_cancer_trait <- sample_calls_per_cancer_trait %>% dplyr::filter(CLINVAR_MEDGEN_CUI != 'CN169374' & CLINVAR_MEDGEN_CUI != 'CN517202')
+        sample_calls_per_cancer_trait <- sample_calls_per_cancer_trait %>% dplyr::select(dplyr::one_of(predispose_tier_tags_display),cui_name)
+        sample_calls_traits <- as.data.frame(sample_calls_per_cancer_trait %>% dplyr::group_by(predispose_tier_tags_display) %>% dplyr::summarise(PHENOTYPE = paste(unique(cui_name), collapse="; "))) %>% dplyr::distinct()
+
+        # tmp <- dplyr::select(sample_calls, CLINVAR_MEDGEN_CUI, CLINVAR_TRAITS_ALL, VAR_ID, CLINVAR_SIG, CLINVAR_VARIANT_ORIGIN)
+        # tmp_all_traits <- tidyr::separate_rows(tmp, CLINVAR_MEDGEN_CUI, sep=",")
+        # all_cancer_traits <- dplyr::inner_join(tmp_all_traits, dplyr::select(phenotype_medgen_oncology,-c(parent_cui,top_cui)), by=c("CLINVAR_MEDGEN_CUI" = "cui")) %>% dplyr::distinct()
+        # non_cancer_traits <- dplyr::anti_join(tmp_all_traits, dplyr::select(phenotype_medgen_oncology,-c(parent_cui,top_cui)), by=c("CLINVAR_MEDGEN_CUI" = "cui")) %>% dplyr::distinct()
+        # ## exclude 'Not provided' and 'Not specified'
+        # non_cancer_traits <- non_cancer_traits %>% dplyr::filter(CLINVAR_MEDGEN_CUI != 'CN169374' & CLINVAR_MEDGEN_CUI != 'CN517202')
+        # non_cancer_traits <- dplyr::left_join(non_cancer_traits, medgen_map, by=c("CLINVAR_MEDGEN_CUI" = "cui"))
+        #
+        # all_cancer_traits$predisposition_stratification <- NA
+        # all_cancer_traits[!is.na(all_cancer_traits$group) & all_cancer_traits$group == 'Hereditary_Cancer_Susceptibility_NOS',]$predisposition_stratification <- 'Hereditary cancer-predisposing syndromes/cancer susceptibility'
+        # all_cancer_traits[!is.na(all_cancer_traits$group) & all_cancer_traits$group != 'Hereditary_Cancer_Susceptibility_NOS',]$predisposition_stratification <- 'Sporadic cancers'
+        # all_cancer_traits <- dplyr::select(all_cancer_traits,-c(group,top_name,do_id,do_name)) %>% dplyr::distinct()
+
+
+        # hereditary_cancer_traits <- dplyr::filter(all_cancer_traits, predisposition_stratification == 'Hereditary cancer-predisposing syndromes/cancer susceptibility') %>% dplyr::filter(!is.na(cui_name))
+        # other_cancer_traits <- dplyr::filter(all_cancer_traits, predisposition_stratification != 'Hereditary cancer-predisposing syndromes/cancer susceptibility')
+        # other_cancer_traits <- dplyr::anti_join(other_cancer_traits, dplyr::select(hereditary_cancer_traits, VAR_ID, CLINVAR_MEDGEN_CUI)) %>% dplyr::filter(!is.na(cui_name))
+        #
+        # cancer_traits <- rbind(hereditary_cancer_traits, other_cancer_traits)
+        # balle <- as.data.frame(cancer_traits %>% dplyr::group_by(CLINVAR_MEDGEN_CUI, predisposition_stratification, VAR_ID, CLINVAR_SIG, CLINVAR_VARIANT_ORIGIN) %>% dplyr::summarise(cui_names = paste(cui_name, collapse="; ")))
+
+        if(nrow(sample_calls_traits) > 0){
 
           rlogging::message("Assignment of variants to tier 1/tier 2/tier 3/unclassified")
 
-          pcg_report[['snv_indel']][['variant_display']][['tier1']] <-  dplyr::filter(sample_calls, stringr::str_detect(CLINVAR_VARIANT_ORIGIN,"germline") & !is.na(CLINVAR_SIG) & stringr::str_detect("^pathogenic$",CLINVAR_SIG)) %>% dplyr::select(dplyr::one_of(predispose_tier_tags_display)) %>% dplyr::rename(CLINVAR_SIGNIFICANCE = CLINVAR_SIG)
+          pcg_report[['snv_indel']][['variant_display']][['tier1']] <-  dplyr::filter(sample_calls_traits, stringr::str_detect(CLINVAR_VARIANT_ORIGIN,"germline|de_novo|inherited") & !is.na(CLINVAR_SIG) & stringr::str_detect("^pathogenic",CLINVAR_SIG)) %>% dplyr::select(dplyr::one_of(predispose_tier_tags_display)) %>% dplyr::rename(CLINVAR_SIGNIFICANCE = CLINVAR_SIG)
 
 
-          pcg_report[['snv_indel']][['variant_display']][['tier2']] <-  dplyr::filter(sample_calls, stringr::str_detect(CLINVAR_VARIANT_ORIGIN,"germline") & !is.na(CLINVAR_SIG) & stringr::str_detect("^likely_pathogenic$",CLINVAR_SIG)) %>% dplyr::select(dplyr::one_of(predispose_tier_tags_display)) %>% dplyr::rename(CLINVAR_SIGNIFICANCE = CLINVAR_SIG)
-          pcg_report[['snv_indel']][['variant_display']][['tier3']] <-  dplyr::filter(sample_calls, stringr::str_detect(CLINVAR_VARIANT_ORIGIN,"germline") & !is.na(CLINVAR_SIG) & stringr::str_detect("^uncertain_significance$",CLINVAR_SIG)) %>% dplyr::select(dplyr::one_of(predispose_tier_tags_display)) %>% dplyr::rename(CLINVAR_SIGNIFICANCE = CLINVAR_SIG)
-          pcg_report[['snv_indel']][['variant_display']][['unclassified']] <-  dplyr::filter(sample_calls, is.na(CLINVAR_SIG) & CODING_STATUS == 'coding' & (is.na(NFE_AF_GNOMAD) | NFE_AF_GNOMAD <= 0.001)) %>% dplyr::select(dplyr::one_of(predispose_tier_tags_display)) %>% dplyr::rename(CLINVAR_SIGNIFICANCE = CLINVAR_SIG)
+          pcg_report[['snv_indel']][['variant_display']][['tier2']] <-  dplyr::filter(sample_calls_traits, stringr::str_detect(CLINVAR_VARIANT_ORIGIN,"germline|de_novo|inherited") & !is.na(CLINVAR_SIG) & stringr::str_detect("^likely_pathogenic",CLINVAR_SIG)) %>% dplyr::select(dplyr::one_of(predispose_tier_tags_display)) %>% dplyr::rename(CLINVAR_SIGNIFICANCE = CLINVAR_SIG)
+          pcg_report[['snv_indel']][['variant_display']][['tier3']] <-  dplyr::filter(sample_calls_traits, stringr::str_detect(CLINVAR_VARIANT_ORIGIN,"germline|de_novo|inherited") & !is.na(CLINVAR_SIG) & stringr::str_detect("^(uncertain_significance|risk_factor)",CLINVAR_SIG)) %>% dplyr::select(dplyr::one_of(predispose_tier_tags_display)) %>% dplyr::rename(CLINVAR_SIGNIFICANCE = CLINVAR_SIG)
+          pcg_report[['snv_indel']][['variant_display']][['unclassified']] <-  dplyr::filter(sample_calls_traits, stringr::str_detect(CLINVAR_VARIANT_ORIGIN,"germline|de_novo|inherited")) %>% dplyr::filter(is.na(CLINVAR_SIG) & CODING_STATUS == 'coding' & (is.na(NFE_AF_GNOMAD) | NFE_AF_GNOMAD <= 0.001)) %>% dplyr::select(dplyr::one_of(predispose_tier_tags_display)) %>% dplyr::rename(CLINVAR_SIGNIFICANCE = CLINVAR_SIG)
 
           for(class in c('tier1','tier2','tier3','unclassified')){
             if(nrow(pcg_report[['snv_indel']][['variant_display']][[class]]) > 0){

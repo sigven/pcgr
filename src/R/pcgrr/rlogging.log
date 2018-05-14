@@ -102,3 +102,47 @@
 [2018-05-09 11:42:22][INFO] Detected 0 tumor suppressor genes subject to homozygous deletion (log(2) ratio <= -1.1
 [2018-05-09 11:43:35][INFO] Detected 4 proto-oncogene(s) subject to amplification (log(2) ratio >= 0.7): BRAF, SMO, CREB3L2, RARB
 [2018-05-09 11:43:35][INFO] Detected 0 tumor suppressor genes subject to homozygous deletion (log(2) ratio <= -1.1
+[2018-05-11 13:09:49][INFO] Excluding 538 variants from non-nuclear chromosomes/scaffolds
+[2018-05-11 13:10:05][INFO] Number of PASS variants: 370486
+[2018-05-11 13:10:07][INFO] Number of SNVs: 327901
+[2018-05-11 13:10:07][INFO] Number of deletions: 26425
+[2018-05-11 13:10:07][INFO] Number of insertions: 13347
+[2018-05-11 13:10:07][INFO] Number of block substitutions: 1245
+[2018-05-11 13:10:08][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-05-11 13:10:26][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-05-11 13:10:36][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-05-11 13:10:38][INFO] Extending annotation descriptions related to ClinVar
+[2018-05-11 13:15:04][INFO] Filtering against cancer predisposition genes:
+[2018-05-11 13:15:05][INFO] 85858 variants remaining
+[2018-05-11 14:46:39][INFO] Excluding 538 variants from non-nuclear chromosomes/scaffolds
+[2018-05-11 14:46:57][INFO] Number of PASS variants: 370486
+[2018-05-11 14:46:59][INFO] Number of SNVs: 327901
+[2018-05-11 14:46:59][INFO] Number of deletions: 26425
+[2018-05-11 14:46:59][INFO] Number of insertions: 13347
+[2018-05-11 14:46:59][INFO] Number of block substitutions: 1245
+[2018-05-11 14:47:01][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-05-11 14:47:26][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-05-11 14:47:36][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-05-11 14:47:37][INFO] Extending annotation descriptions related to ClinVar
+[2018-05-11 17:54:02][INFO] 85858 variants remaining
+[2018-05-11 17:54:02][INFO] Found variants in the following cancer predisposition genes: KIF1B, CTRC, SDHB, RCC2, PINK1, MUTYH, SDHC, CDC73, FH, ALK, MSH2, MSH6, FANCL, TMEM127, ERCC3, PMS1, BARD1, DIS3L2, OGG1, FANCD2, VHL, XPC, MLH1, CTNNB1, BAP1, MITF, CASR, GATA2, PIK3CA, PHOX2B, PDGFRA, KIT, ABRAXAS1, SDHA, TERT, MSH3, APC, RAD50, CTNNA1, SPINK1, NSD1, FANCE, PMS2, EGFR, SBDS, RINT1, MET, POT1, PRSS1, EZH2, XRCC2, WRN, NBN, EXT1, CDKN2A, FANCG, PAX5, FANCC, PTCH1, XPA, GALNT12, TSC1, RET, PRF1, BMPR1A, PTEN, SUFU, HABP2, HRAS, CDKN1C, FANCF, WT1, EXT2, DDB2, SDHAF2, MEN1, AIP, MRE11, CEP57, ATM, SDHD, ETV6, CDKN1B, CDK4, PTPN11, HNF1A, POLE, BRCA2, RB1, ERCC5, FANCM, MAX, RAD51B, DICER1, AKT1, SCG5, GREM1, SPRED1, BUB1B, RAD51, FANCI, BLM, NTHL1, TSC2, SLX4, ERCC4, PALB2, CYLD, ACD, CDH1, FANCA, TP53, FLCN, NF1, RAD51D, HNF1B, SMARCE1, BRCA1, HOXB13, RAD51C, PPM1D, BRIP1, AXIN2, PRKAR1A, RHBDF2, SMAD4, STK11, SMARCA4, CEBPA, ERCC2, ERCC1, POLD1, RUNX1, LZTR1, SMARCB1, CHEK2, NF2, FANCB, GPC3
+[2018-05-13 16:42:03][INFO] Excluding 538 variants from non-nuclear chromosomes/scaffolds
+[2018-05-13 16:42:19][INFO] Number of PASS variants: 370486
+[2018-05-13 16:42:23][INFO] Number of SNVs: 327901
+[2018-05-13 16:42:23][INFO] Number of deletions: 26425
+[2018-05-13 16:42:23][INFO] Number of insertions: 13347
+[2018-05-13 16:42:23][INFO] Number of block substitutions: 1245
+[2018-05-13 16:42:24][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-05-13 16:42:41][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-05-13 16:42:49][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-05-13 16:42:52][INFO] Extending annotation descriptions related to ClinVar
+[2018-05-13 16:45:39][INFO] Filtering against cancer predisposition genes:
+[2018-05-13 16:45:39][INFO] 85858 variants remaining
+[2018-05-13 16:45:39][INFO] Found variants in the following cancer predisposition genes: KIF1B, CTRC, SDHB, RCC2, PINK1, MUTYH, SDHC, CDC73, FH, ALK, MSH2, MSH6, FANCL, TMEM127, ERCC3, PMS1, BARD1, DIS3L2, OGG1, FANCD2, VHL, XPC, MLH1, CTNNB1, BAP1, MITF, CASR, GATA2, PIK3CA, PHOX2B, PDGFRA, KIT, ABRAXAS1, SDHA, TERT, MSH3, APC, RAD50, CTNNA1, SPINK1, NSD1, FANCE, PMS2, EGFR, SBDS, RINT1, MET, POT1, PRSS1, EZH2, XRCC2, WRN, NBN, EXT1, CDKN2A, FANCG, PAX5, FANCC, PTCH1, XPA, GALNT12, TSC1, RET, PRF1, BMPR1A, PTEN, SUFU, HABP2, HRAS, CDKN1C, FANCF, WT1, EXT2, DDB2, SDHAF2, MEN1, AIP, MRE11, CEP57, ATM, SDHD, ETV6, CDKN1B, CDK4, PTPN11, HNF1A, POLE, BRCA2, RB1, ERCC5, FANCM, MAX, RAD51B, DICER1, AKT1, SCG5, GREM1, SPRED1, BUB1B, RAD51, FANCI, BLM, NTHL1, TSC2, SLX4, ERCC4, PALB2, CYLD, ACD, CDH1, FANCA, TP53, FLCN, NF1, RAD51D, HNF1B, SMARCE1, BRCA1, HOXB13, RAD51C, PPM1D, BRIP1, AXIN2, PRKAR1A, RHBDF2, SMAD4, STK11, SMARCA4, CEBPA, ERCC2, ERCC1, POLD1, RUNX1, LZTR1, SMARCB1, CHEK2, NF2, FANCB, GPC3
+[2018-05-13 16:45:39][INFO] Limiting variants to hereditary cancer-predisposing syndromes/cancer conditions
+[2018-05-13 16:52:25][INFO] Limiting variants to hereditary cancer-predisposing syndromes/cancer conditions
+[2018-05-13 16:52:54][INFO] Limiting variants to hereditary cancer-predisposing syndromes/cancer conditions
+[2018-05-14 10:28:12][INFO] ------
+[2018-05-14 10:28:12][INFO] Generating report data for copy number segment file /Users/sigven/research/docker/pcgr/V-PH-19__PRJ170210_V-PH-19T-somatic-cna.tsv
+[2018-05-14 10:28:49][INFO] ------
+[2018-05-14 10:28:49][INFO] Generating report data for copy number segment file /Users/sigven/research/docker/pcgr/V-PH-19__PRJ170210_V-PH-19T-somatic-cna.tsv

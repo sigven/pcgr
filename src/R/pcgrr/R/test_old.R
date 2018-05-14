@@ -9,30 +9,29 @@
 # suppressWarnings(suppressPackageStartupMessages(library(caret)))
 # suppressWarnings(suppressPackageStartupMessages(library(RcppTOML)))
 #
-# pcgr_config_file <- '/Users/sigven/research/docker/pcgr/COLO829__COLO829T-somatic/COLO829__COLO829T-somatic.toml'
+# pcgr_config_file <- '/Users/sigven/research/docker/pcgr/pcgr_configuration_somatic.toml'
 # pcgr_config <-  RcppTOML::parseTOML(pcgr_config_file, fromFile = T)
-# sample_name <- 'COLO829'
+# sample_name <- 'example'
 # pcgr_version <- '0.6.2'
-# transcript_overlap_pct <- 50
-# cna_file <- '/Users/sigven/research/docker/pcgr/COLO829__COLO829T-somatic/COLO829__COLO829T-somatic.tsv'
+# query_vcf2tsv <- '/Users/sigven/research/docker/pcgr/V-PH-19.pcgr_acmg.grch37.pass.tsv.gz'
 # #
-# load(file='/Users/sigven/research/docker/pcgr/data/grch38/rda/pcgr_data.rda')
-# genome_assembly <- 'grch38'
+# load(file='/Users/sigven/research/docker/pcgr/data/grch37/rda/pcgr_data.rda')
+# genome_assembly <- 'grch37'
+# # #
+# genome_seq <- BSgenome.Hsapiens.UCSC.hg19
+# # query_vcf2tsv <- '/Users/sigven/research/docker/pcgr/COLO829.pcgr_acmg.grch38.pass.tsv.gz'
+# # tsv_gz_file <- query_vcf2tsv
+# project_directory <- '/Users/sigven/research/docker/pcgr_predispose'
+# # #
 # #
-# genome_seq <- BSgenome.Hsapiens.UCSC.hg38
-# query_vcf2tsv <- '/Users/sigven/research/docker/pcgr/COLO829.pcgr_acmg.grch38.pass.tsv.gz'
-# tsv_gz_file <- query_vcf2tsv
-# project_directory <- '/Users/sigven/research/docker/pcgr'
-# # #
-# # #
 # # ### TEST - TIER MODEL PCGR - COAD
 #pcgr_config_file <- '/Users/sigven/research/docker/pcgr_predispose/pcgr_predispose.toml'
 #pcgr_config <-  RcppTOML::parseTOML(pcgr_config_file, fromFile = T)
 # sample_name <- 'cov50-ensembl-annotated-decomposed'
 # pcgr_version <- '0.6.0'
 
-# # # query_cnv <- '/Users/sigven/research/tumor_seq_projects/mesothelioma_somatic/cnv/facets/GCF0167-0001-N01_GCF0167-0001-T01.cna.tsv'
-# # # cna_file <- query_cnv
+#query_cnv <- '/Users/sigven/research/docker/pcgr/V-PH-19__PRJ170210_V-PH-19T-somatic-cna.tsv'
+#cna_file <- query_cnv
 # # # # # # # # cna_segments_tsv <- query_cnv
 # # # # # load(file='/Users/sigven/research/docker/pcgr/data/grch37/rda/pcgr_data.rda')
 # # # # genome_assembly <- 'grch38'
@@ -49,7 +48,7 @@
 # genome_assembly <- 'grch37'
 # #genome_seq <- BSgenome.Hsapiens.UCSC.hg19
 # # # pcgr_version <- '0.6.0'
-# # transcript_overlap_pct <- pcgr_config$cna$cna_overlap_pct
+#transcript_overlap_pct <- pcgr_config$cna$cna_overlap_pct
 # #
 # #
 # #

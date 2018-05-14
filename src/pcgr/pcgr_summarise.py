@@ -20,9 +20,11 @@ def __main__():
    parser = argparse.ArgumentParser(description='Cancer gene annotations from PCGR pipeline (SNVs/InDels)')
    parser.add_argument('vcf_file', help='VCF file with VEP-annotated query variants (SNVs/InDels)')
    parser.add_argument('pcgr_db_dir',help='PCGR data directory')
+   parser.add_argument('--pcgr_predispose',action="store_true",help="Aggregate cancer gene annotations for predisposition reporting")
+
    args = parser.parse_args()
 
-   extend_vcf_annotations(args.vcf_file, args.pcgr_db_dir)
+   extend_vcf_annotations(args.vcf_file, args.pcgr_db_dir, args.pcgr_predispose)
 
 def threeToOneAA(aa_change):
 	
@@ -138,7 +140,7 @@ def write_pass_vcf(annotated_vcf):
 
    return
 
-def extend_vcf_annotations(query_vcf, pcgr_db_directory):
+def extend_vcf_annotations(query_vcf, pcgr_db_directory, pcgr_predispose):
    """
    Function that reads VEP/vcfanno-annotated VCF and extends the VCF INFO column with tags from
    1. CSQ elements within the primary transcript consequence picked by VEP, e.g. SYMBOL, Feature, Gene, Consequence etc.
@@ -149,6 +151,8 @@ def extend_vcf_annotations(query_vcf, pcgr_db_directory):
 
    ## read VEP and PCGR tags to be appended to VCF file
    pcgr_vcf_infotags_meta = pcgrutils.read_infotag_file(os.path.join(pcgr_db_directory,'pcgr_infotags.tsv'))
+   if pcgr_predispose is True:
+      pcgr_vcf_infotags_meta = pcgrutils.read_infotag_file(os.path.join(pcgr_db_directory,'pcgr_infotags_predisposition.tsv'))
 
    out_vcf = re.sub(r'\.vcf(\.gz){0,}$','.annotated.vcf',query_vcf)
 
@@ -295,9 +299,6 @@ def extend_vcf_annotations(query_vcf, pcgr_db_directory):
          pcgrutils.pcgr_error_message('No remaining PASS variants found in query VCF - exiting and skipping STEP 4 (pcgr-writer)', logger)
    else:
       pcgrutils.pcgr_error_message('No remaining PASS variants found in query VCF - exiting and skipping STEP 4 (pcgr-writer)', logger)
-
-   #annotated_vcf = out_vcf + '.gz'
-   #write_pass_vcf(annotated_vcf)
 
 if __name__=="__main__": __main__()
 
