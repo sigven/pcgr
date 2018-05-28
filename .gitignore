@@ -12,7 +12,3 @@ docs/_build/
 .DS_Store
 
 data
-install_no_docker/.Rhistory
-install_no_docker/env_macos.yaml
-install_no_docker/vep-install/
-install_no_docker/install_vep_macos.sh
