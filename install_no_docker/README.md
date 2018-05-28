@@ -26,12 +26,18 @@ gdown.pl/gdown.pl https://drive.google.com/file/d/1cGBAmAh5t4miIeRrrd0zHsPCFToOr
 gzip -dc pcgr.databundle.grch37.tgz | tar xvf -
 ```
 
-### Loading
+### Running
 
 The installation script will create the `load_pcgr.sh` script, that just loads the pcgr conda environment. 
 Use it before running PCGR:
 
 ```
 source install_no_docker/load_pcgr.sh
-./pcgr.py --input_vcf examples/tumor_sample.BRCA.vcf.gz --no-docker . test_out grch37 examples/pcgr_conf.BRCA.toml tumor_sample.BRCA
+```
+
+Then run with `--no-docker` flag:
+
+```
+./pcgr.py --input_vcf examples/tumor_sample.BRCA.vcf.gz . test_out grch37 examples/pcgr_conf.BRCA.toml \
+    tumor_sample.BRCA --no-docker
 ```
