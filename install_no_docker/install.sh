@@ -48,13 +48,16 @@ conda install -c bioconda -y ensembl-vep
 # Install VEP plugins:
 vep_install --AUTO p --PLUGINS miRNA --NO_HTSLIB --NO_UPDATE
 
+# Install the EBI vcf validator
+wget https://github.com/EBIvariation/vcf-validator/releases/download/v0.7/vcf_validator -O ${CONDA_PREFIX}/bin/vcf_validator
+chmod +x ${CONDA_PREFIX}/bin/vcf_validator
+
 # Access to src scripts
 chmod +x ${SRC_DIR}/pcgr/*.py
 chmod +x ${SRC_DIR}/*.R
 
 # Create a loader. Usage: `source load_pcgr.sh`
 cat <<EOT > load_pcgr.sh
-SCRIPTPATH=\$(dirname \$(readlink -e $(pwd)))
-export PATH=\$SCRIPTPATH/miniconda/bin:\$PATH
+export PATH=${THIS_DIR}/miniconda/bin:\$PATH
 source activate pcgr
 EOT
