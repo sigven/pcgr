@@ -37,6 +37,7 @@ dependencies:
   - pandoc<2  # r-rmarkdown 1.6 doesn't support pandoc 2, and a more recent r-rmarkdown is not available on conda
   - r
   - bioconductor-biocinstaller
+  - r-purrr>=0.2.4  # to force the one from conda-forge to address this issue https://github.com/jbkunst/highcharter/issues/285
   - r-dplyr
   - r-devtools
   - r-stringr

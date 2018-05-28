@@ -33,16 +33,19 @@ fi
 
 SRC_DIR=${THIS_DIR}/../src
 
-# Few more R packages that are not on yet conda (TODO: add them).
+# Few more R packages that are not on yet conda
 # The "options(unzip = )" hack to address the install_github issue under conda https://github.com/r-lib/devtools/issues/1722
 R -e "library(devtools); options(unzip = '$(which unzip)'); devtools::install_github('mjkallen/rlogging')"
 R -e "library(devtools); options(unzip = '$(which unzip)'); devtools::install_github('kent37/summarywidget')"
+R -e "install.packages('configr', dependencies = T, repos = 'http://cran.us.r-project.org')"
+# ggplot2 is available in package repositories, but dev version is recommended
+R -e "library(devtools); options(unzip = '$(which unzip)'); devtools::install_github('hadley/ggplot2')"
 # This one is local
 R -e "library(devtools); devtools::install('${SRC_DIR}/R/pcgrr')"
 
 # Install VEP separately (doesn't work when within the envirnoment file, for some reason):
 conda install -c vladsaveliev -y ensembl-vep
-# Installs plugins (--AUTO p)
+# Install VEP plugins:
 vep_install --AUTO p --PLUGINS miRNA --NO_HTSLIB --NO_UPDATE
 
 # Access to src scripts
