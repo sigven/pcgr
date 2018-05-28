@@ -36,22 +36,17 @@ def __main__():
    if args.force_overwrite is True:
       overwrite = 1
 
-   # check that script and Docker image version correspond
-   check_docker_command = 'docker images -q ' + str(docker_image_version)
    logger = getlogger('pcgr-validate-config')
 
    if args.no_docker:
       docker_image_version = None
    else:
-      try:
-         output = subprocess.check_output(str(check_docker_command), stderr=subprocess.STDOUT, shell=True)
-      except:
-         docker_image_version = None
-      else:
-         if(len(output) == 0):
-             err_msg = 'Docker image ' + str(docker_image_version) + ' does not exist, pull image from Dockerhub (docker pull ' + str(docker_image_version) + ')'
-             pcgr_error_message(err_msg,logger)
-             docker_image_version = None
+      # check that script and Docker image version correspond
+      check_docker_command = 'docker images -q ' + str(docker_image_version)
+      output = subprocess.check_output(str(check_docker_command), stderr=subprocess.STDOUT, shell=True)
+      if(len(output) == 0):
+         err_msg = 'Docker image ' + str(docker_image_version) + ' does not exist, pull image from Dockerhub (docker pull ' + str(docker_image_version) + ')'
+         pcgr_error_message(err_msg,logger)
 
    config_options = {}
    if os.path.exists(args.configuration_file):
