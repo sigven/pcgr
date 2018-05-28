@@ -58,7 +58,6 @@ dependencies:
   - r-deconstructsigs
   - r-knitr>=1.17
   - r-rmarkdown
-  - r-configr  # https://anaconda.org/vladsaveliev/
   - bioconductor-variantannotation
   - bioconductor-bsgenome.hsapiens.ucsc.hg19
   - bioconductor-bsgenome.hsapiens.ucsc.hg38

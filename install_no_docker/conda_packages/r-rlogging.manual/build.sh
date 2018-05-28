@@ -1,1 +1,0 @@
-R -e "library(devtools); source('http://www.bioconductor.org/biocLite.R'); devtools::install_github('mfrasca/r-logging')"
