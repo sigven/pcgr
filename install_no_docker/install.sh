@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Install all PCGR dependencies to avoid using the Docker image.
 # Suitable for HPC systems lacking Docker, and for debugging.
-# Works only for Linux due to unavaliability of few packages for MacOS (ensembl-vep -> perl-bio-db-hts)
+# Works only on Linux due to unavaliability of few packages for MacOS (ensembl-vep -> perl-bio-db-hts)
 
 set -e
 set -o pipefail
