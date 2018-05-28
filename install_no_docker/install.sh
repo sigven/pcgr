@@ -51,3 +51,10 @@ vep_install --AUTO p --PLUGINS miRNA --NO_HTSLIB --NO_UPDATE
 # Access to src scripts
 chmod +x ${SRC_DIR}/pcgr/*.py
 chmod +x ${SRC_DIR}/*.R
+
+# Create a loader. Usage: `source load_pcgr.sh`
+cat <<EOT > load_pcgr.sh
+SCRIPTPATH=\$(dirname \$(readlink -e $(pwd)))
+export PATH=\$SCRIPTPATH/miniconda/bin:\$PATH
+source activate pcgr
+EOT
