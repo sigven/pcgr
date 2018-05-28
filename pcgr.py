@@ -26,7 +26,7 @@ def __main__():
    parser.add_argument('genome_assembly',choices = ['grch37','grch38'], help='Genome assembly build: grch37 or grch38')
    parser.add_argument('configuration_file',help='PCGR configuration file (TOML format)')
    parser.add_argument('sample_id',help="Tumor sample/cancer genome identifier - prefix for output files")
-   parser.add_argument('--docker-uid', dest='docker_user_id')
+   parser.add_argument('--docker-uid', dest='docker_user_id', help='Docker user ID. Default is the host system user ID. If you are experiencing permission errors, try setting this up to root (`--docker-uid root`)')
    parser.add_argument('--no-docker', action='store_true', dest='no_docker', default=False)
 
    docker_image_version = 'sigven/pcgr:' + str(version)
