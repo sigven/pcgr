@@ -27,7 +27,7 @@
   * [Pfam v31](http://pfam.xfam.org) - database of protein families and domains (March 2017)
 
 ### Cancer gene knowledge bases
-  * [TSGene v2.0](http://bioinfo.mc.vanderbilt.edu/TSGene/) - tumor suppressor/oncogene database (November 2015)
+  * [TSGene v2.0](https://bioinfo.uth.edu/TSGene/) - tumor suppressor/oncogene database (November 2015)
   * [DisGeNET v5.0](http://www.disgenet.org) - curated associations between human genes and different tumor types
 
 ### Pathway databases

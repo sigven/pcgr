@@ -61,7 +61,7 @@ Protein domains/functional features
 Cancer gene knowledge bases
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--  `TSGene v2.0 <http://bioinfo.mc.vanderbilt.edu/TSGene/>`__ - tumor
+-  `TSGene v2.0 <https://bioinfo.uth.edu/TSGene/>`__ - tumor
    suppressor/oncogene database (November 2015)
 -  `DisGeNET v5.0 <http://www.disgenet.org>`__ - curated associations
    between human genes and different tumor types

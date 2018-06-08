@@ -66,7 +66,7 @@ Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, Ola Mykleb
 * [UniProt/SwissProt KnowledgeBase 2018_04](http://www.uniprot.org) - Resource on protein sequence and functional information (April 2018)
 * [Pfam v31](http://pfam.xfam.org) - Database of protein families and domains (March 2017)
 * [DGIdb](http://dgidb.genome.wustl.edu) - Database of targeted cancer drugs  (v3.0, September 2017)
-* [TSGene v2.0](http://bioinfo.mc.vanderbilt.edu/TSGene/) - Tumor suppressor/oncogene database (November 2015)
+* [TSGene v2.0](https://bioinfo.uth.edu/TSGene/) - Tumor suppressor/oncogene database (November 2015)
 
 ### Getting started
 

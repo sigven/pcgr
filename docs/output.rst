@@ -383,10 +383,9 @@ processing with the PCGR annotation pipeline:
    `MedGen <https://www.ncbi.nlm.nih.gov/medgen/>`__ concept IDs
    (*CUIs*)
 -  TUMOR\_SUPPRESSOR - Gene is predicted as tumor suppressor candidate
-   according to (`TSGene
-   v2.0 <http://bioinfo.mc.vanderbilt.edu/TSGene/>`__)
+   according to (`TSGene v2.0 <https://bioinfo.uth.edu/TSGene/>`__)
 -  ONCOGENE - Gene is curated as an oncogene according to (`TSGene
-   v2.0 <http://bioinfo.mc.vanderbilt.edu/TSGene/>`__)
+   v2.0 <https://bioinfo.uth.edu/TSGene/>`__)
 -  CANCER\_PREDISPOSITION - Gene flagged as a cancer predisposition gene
 -  ONCOSCORE - Literature-derived score for cancer gene relevance
    `Bioconductor/OncoScore <http://bioconductor.org/packages/release/bioc/html/OncoScore.html>`__,

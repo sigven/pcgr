@@ -206,8 +206,8 @@ Here, the __sample_id__ is provided as input by the user, and reflects a unique 
   - APPRIS - Principal isoform flags according to the [APPRIS principal isoform database](http://appris.bioinfo.cnio.es/#/downloads)
   - UNIPROT_ID - [UniProt](http://www.uniprot.org) identifier
   - DISGENET_CUI - Tumor types associated with gene, as found in DisGeNET. Tumor types are listed as unique [MedGen](https://www.ncbi.nlm.nih.gov/medgen/) concept IDs (_CUIs_)
-  - TUMOR_SUPPRESSOR - Gene is predicted as tumor suppressor candidate according to ([TSGene v2.0](http://bioinfo.mc.vanderbilt.edu/TSGene/))
-  - ONCOGENE - Gene is curated as an oncogene according to ([TSGene v2.0](http://bioinfo.mc.vanderbilt.edu/TSGene/))
+  - TUMOR_SUPPRESSOR - Gene is predicted as tumor suppressor candidate according to ([TSGene v2.0](https://bioinfo.uth.edu/TSGene/))
+  - ONCOGENE - Gene is curated as an oncogene according to ([TSGene v2.0](https://bioinfo.uth.edu/TSGene/))
   - CANCER_PREDISPOSITION - Gene flagged as a cancer predisposition gene
   - ONCOSCORE - Literature-derived score for cancer gene relevance [Bioconductor/OncoScore](http://bioconductor.org/packages/release/bioc/html/OncoScore.html), range from 0 (low oncogenic potential) to 1 (high oncogenic potential)
   - INTOGEN_DRIVER - Gene is predicted as a cancer driver in the [IntoGen Cancer Drivers Database - 2014.12](https://www.intogen.org/downloads)
