@@ -19,9 +19,10 @@ def __main__():
    parser.add_argument('input_vcf', help='VCF input file with query variants (SNVs/InDels)')
    parser.add_argument('configuration_file', help='Configuration file (TOML-formatted, e.g. pcgr_conf.toml)')
    parser.add_argument('genome_assembly',help='grch37 or grch38')
+   parser.add_argument('output_dir',help='Output directory')
    args = parser.parse_args()
    
-   ret = validate_pcgr_input(args.pcgr_dir, args.input_vcf, args.configuration_file, args.genome_assembly)
+   ret = validate_pcgr_input(args.pcgr_dir, args.input_vcf, args.configuration_file, args.genome_assembly, args.output_dir)
    if ret != 0:
       sys.exit(1)
 
@@ -31,13 +32,13 @@ def pcgr_error_message(message, logger):
    logger.error('')
    return -1
 
-def is_valid_vcf(input_vcf, logger):
+def is_valid_vcf(input_vcf, output_dir, logger):
    """
    Function that reads the output file of EBIvariation/vcf-validator and reports potential errors and validation status 
    """
    
    logger.info('Validating VCF file with EBIvariation/vcf-validator')
-   vcf_validation_output_file = '/workdir/output/' + re.sub(r'(\.vcf$|\.vcf\.gz$)','.vcf_validator_output',os.path.basename(input_vcf))
+   vcf_validation_output_file = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)', '.vcf_validator_output', os.path.basename(input_vcf)))
    command_v42 = 'vcf_validator --input ' + str(input_vcf) + ' > ' + str(vcf_validation_output_file)
    if input_vcf.endswith('.gz'):
       command_v42 = 'bgzip -dc ' + str(input_vcf) + ' | vcf_validator  > ' + str(vcf_validation_output_file)
@@ -49,7 +50,7 @@ def is_valid_vcf(input_vcf, logger):
    validation_results['validation_status'] = 0
    validation_results['error_messages'] = []
    if os.path.exists(vcf_validation_output_file):
-      f = open(vcf_validation_output_file,'r')
+      f = open(vcf_validation_output_file, 'r')
       for line in f:
          if not re.search(r' \(warning\)$|^Reading from ',line.rstrip()): ## ignore warnings
             if line.startswith('Line '):
@@ -104,7 +105,7 @@ def detect_reserved_info_tag(tag, tag_name, logger):
       return pcgr_error_message(err_msg, logger)
 
 
-def simplify_vcf(input_vcf, vcf, logger):
+def simplify_vcf(input_vcf, vcf, output_dir, logger):
    
    """
    Function that performs tre things on the validated input VCF:
@@ -113,8 +114,8 @@ def simplify_vcf(input_vcf, vcf, logger):
    3. Final VCF file is sorted and indexed (bgzip + tabix)
    """
    
-   input_vcf_pcgr_predispose_ready = '/workdir/output/' + re.sub(r'(\.vcf$|\.vcf\.gz$)','.pcgr_predispose_ready.tmp.vcf',os.path.basename(input_vcf))
-   input_vcf_pcgr_predispose_ready_decomposed = '/workdir/output/' + re.sub(r'(\.vcf$|\.vcf\.gz$)','.pcgr_predispose_ready.vcf',os.path.basename(input_vcf))
+   input_vcf_pcgr_predispose_ready = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)','.pcgr_predispose_ready.tmp.vcf', os.path.basename(input_vcf)))
+   input_vcf_pcgr_predispose_ready_decomposed = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)','.pcgr_predispose_ready.vcf', os.path.basename(input_vcf)))
    
    multiallelic_alt = 0
    for rec in vcf:
@@ -143,16 +144,16 @@ def simplify_vcf(input_vcf, vcf, logger):
 
    if multiallelic_alt == 1:
       logger.info('Decomposing multi-allelic sites in input VCF file using \'vt decompose\'')
-      command_decompose = 'vt decompose -s ' + str(input_vcf_pcgr_predispose_ready) + ' > ' + str(input_vcf_pcgr_predispose_ready_decomposed) + ' 2> /workdir/output/decompose.log'
+      command_decompose = 'vt decompose -s ' + str(input_vcf_pcgr_predispose_ready) + ' > ' + str(input_vcf_pcgr_predispose_ready_decomposed) + ' 2> ' + os.path.join(output_dir, 'decompose.log')
       os.system(command_decompose)
    else:
       command_copy = 'cp ' + str(input_vcf_pcgr_predispose_ready) + ' ' + str(input_vcf_pcgr_predispose_ready_decomposed)
       os.system(command_copy)
    os.system('bgzip -cf ' + str(input_vcf_pcgr_predispose_ready_decomposed) + ' > ' + str(input_vcf_pcgr_predispose_ready_decomposed) + '.gz')
    os.system('tabix -p vcf ' + str(input_vcf_pcgr_predispose_ready_decomposed) + '.gz')
-   os.system('rm -f ' + str(input_vcf_pcgr_predispose_ready) + ' /workdir/output/decompose.log')
+   os.system('rm -f ' + str(input_vcf_pcgr_predispose_ready) + ' ' + os.path.join(output_dir, 'decompose.log'))
 
-def validate_pcgr_input(pcgr_directory, input_vcf, configuration_file, genome_assembly):
+def validate_pcgr_input(pcgr_directory, input_vcf, configuration_file, genome_assembly, output_dir):
    """
    Function that reads the input files to PCGR_predispose (VCF file) and performs the following checks:
    1. Check that VCF file is properly formatted (according to EBIvariation/vcf-validator - VCF v4.2) - optional (vcf_validation in config file)
@@ -165,7 +166,7 @@ def validate_pcgr_input(pcgr_directory, input_vcf, configuration_file, genome_as
    #print str(config_options)
    if not input_vcf == 'None':
       if config_options['other']['vcf_validation']:
-         valid_vcf = is_valid_vcf(input_vcf, logger)
+         valid_vcf = is_valid_vcf(input_vcf, output_dir, logger)
          if valid_vcf == -1:
             return -1
       else:
@@ -175,7 +176,7 @@ def validate_pcgr_input(pcgr_directory, input_vcf, configuration_file, genome_as
          return -1
       
       vcf = VCF(input_vcf)
-      simplify_vcf(input_vcf, vcf, logger)
+      simplify_vcf(input_vcf, vcf, output_dir, logger)
    
    return 0
    
