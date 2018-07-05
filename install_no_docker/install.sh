@@ -7,6 +7,7 @@ set -e
 set -o pipefail
 
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SKIP_VALIDATOR=$1
 
 # Install conda if needed:
 if [ ! -x "$(command -v conda)" ]; then
@@ -48,9 +49,11 @@ conda install -c bioconda -y ensembl-vep
 # Install VEP plugins:
 vep_install --AUTO p --PLUGINS miRNA --NO_HTSLIB --NO_UPDATE
 
-# Install the EBI vcf validator
-wget https://github.com/EBIvariation/vcf-validator/releases/download/v0.7/vcf_validator -O ${CONDA_PREFIX}/bin/vcf_validator
-chmod +x ${CONDA_PREFIX}/bin/vcf_validator
+if [ -z $SKIP_VALIDATOR ] ; then
+    # Install the EBI vcf validator
+    wget https://github.com/EBIvariation/vcf-validator/releases/download/v0.7/vcf_validator -O ${CONDA_PREFIX}/bin/vcf_validator
+    chmod +x ${CONDA_PREFIX}/bin/vcf_validator
+fi
 
 # Access to src scripts
 chmod +x ${SRC_DIR}/pcgr/*.py
