@@ -32,6 +32,7 @@ dependencies:
   - perl-dbi
   - perl-dbd-mysql
   - perl-bioperl
+  - ensembl-vep>=92
   #
   # PCGR: R packages
   - pandoc<2  # r-rmarkdown 1.6 doesn't support pandoc 2, and a more recent r-rmarkdown is not available on conda
