@@ -23,11 +23,11 @@ before_install:
 
 install:
   # Installing (the non-docker version)
-  - cd install_no_docker ; bash install.sh ; cd ..
+  - source install_no_docker/install.sh
 
 
 script:
-  - source install_no_docker/load_pcgr.sh
+  - source load_pcgr.sh
   # - python pcgr.py \
   #   --input_vcf examples/tumor_sample.COAD.vcf.gz \
   #   --input_cna examples/tumor_sample.COAD.cna.tsv \
