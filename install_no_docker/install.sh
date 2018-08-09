@@ -45,7 +45,7 @@ R -e "library(devtools); options(unzip = '$(which unzip)'); devtools::install_gi
 R -e "library(devtools); devtools::install('${SRC_DIR}/R/pcgrr')"
 
 # Install VEP separately (doesn't work when within the envirnoment file, for some reason):
-conda install -c bioconda -y ensembl-vep
+conda install -c bioconda -y "ensembl-vep==88.9-0"
 # Install VEP plugins:
 vep_install --AUTO p --PLUGINS miRNA --NO_HTSLIB --NO_UPDATE
 
