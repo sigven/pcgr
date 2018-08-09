@@ -53,6 +53,7 @@ dependencies:
   - r-rcpptoml
   - r-ggplot2
   - r-dt
+  - r-stringi>=1.1.7  # for pcgrr
   - r-htmlwidgets>=1.0  # dependency requirement for DT (by default, 0.9 is getting installed)
   - r-crosstalk
   - r-deconstructsigs
