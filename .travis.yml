@@ -15,10 +15,10 @@ before_install:
   - sudo ln -s /run/shm /dev/shm
 
   # Download data bundles
-  - cd ..
-  - git clone https://github.com/circulosmeos/gdown.pl
-  - gdown.pl/gdown.pl https://drive.google.com/file/d/1cGBAmAh5t4miIeRrrd0zHsPCFToOr0Lf/view pcgr.databundle.grch37.tgz
-  - gzip -dc pcgr.databundle.grch37.tgz | tar xvf -
+  # - cd ..
+  # - git clone https://github.com/circulosmeos/gdown.pl
+  # - gdown.pl/gdown.pl https://drive.google.com/file/d/1cGBAmAh5t4miIeRrrd0zHsPCFToOr0Lf/view pcgr.databundle.grch37.tgz
+  # - gzip -dc pcgr.databundle.grch37.tgz | tar xvf -
 
 
 install:
@@ -27,16 +27,16 @@ install:
 
 
 script:
-  - source install_no_docker/load_pcgr.sh ; \ 
-    python pcgr.py \
-    --input_vcf examples/tumor_sample.COAD.vcf.gz \
-    --input_cna examples/tumor_sample.COAD.cna.tsv \
-    . \
-    examples \
-    grch37 \
-    examples/pcgr_conf.COAD.toml \
-    tumor_sample.COAD
-    --no-docker
+  - source install_no_docker/load_pcgr.sh
+  # - python pcgr.py \
+  #   --input_vcf examples/tumor_sample.COAD.vcf.gz \
+  #   --input_cna examples/tumor_sample.COAD.cna.tsv \
+  #   . \
+  #   examples \
+  #   grch37 \
+  #   examples/pcgr_conf.COAD.toml \
+  #   tumor_sample.COAD
+  #   --no-docker
 
 
 #notifications:
