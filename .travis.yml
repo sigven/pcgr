@@ -17,9 +17,8 @@ install:
   # Installing (the non-docker version)
   - source install_no_docker/install.sh
 
-
 script:
-  - source load_pcgr.sh
+  - source install_no_docker/load_pcgr.sh
   # (Skipping running an actual test because we don't have enough Travis disk space for full data bundles)
   # - python pcgr.py \
   #   --input_vcf examples/tumor_sample.COAD.vcf.gz \

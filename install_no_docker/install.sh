@@ -60,7 +60,7 @@ chmod +x ${SRC_DIR}/pcgr/*.py
 chmod +x ${SRC_DIR}/*.R
 
 # Create a loader. Usage: `source load_pcgr.sh`
-cat <<EOT > load_pcgr.sh
+cat <<EOT > ${THIS_DIR}/load_pcgr.sh
 export PATH=${THIS_DIR}/miniconda/bin:\$PATH
 source activate pcgr
 EOT
