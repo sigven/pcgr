@@ -5,20 +5,12 @@ python:
   # We don't actually use the Travis Python (since we are on conda), but this keeps it organized.
   - "3.6"
 
-before_install:
-  # Temporal fix for networking problem: https://github.com/travis-ci/travis-ci/issues/1484
-  - echo "127.0.1.1 "`hostname` | sudo tee /etc/hosts
-
-  # The next couple lines fix a crash with multiprocessing on Travis and
-  # are not specific to using Miniconda
-  - sudo rm -rf /dev/shm
-  - sudo ln -s /run/shm /dev/shm
-
-  # Download data bundles
-  # - cd ..
-  # - git clone https://github.com/circulosmeos/gdown.pl
-  # - gdown.pl/gdown.pl https://drive.google.com/file/d/1cGBAmAh5t4miIeRrrd0zHsPCFToOr0Lf/view pcgr.databundle.grch37.tgz
-  # - gzip -dc pcgr.databundle.grch37.tgz | tar xvf -
+## Download data bundles. (skipping this because of lack of disk space on Travis)
+#before_install:
+#  - cd ..
+#  - git clone https://github.com/circulosmeos/gdown.pl
+#  - gdown.pl/gdown.pl https://drive.google.com/file/d/1cGBAmAh5t4miIeRrrd0zHsPCFToOr0Lf/view pcgr.databundle.grch37.tgz
+#  - gzip -dc pcgr.databundle.grch37.tgz | tar xvf -
 
 
 install:
@@ -28,6 +20,7 @@ install:
 
 script:
   - source load_pcgr.sh
+  # (Skipping running an actual test because we don't have enough Travis disk space for full data bundles)
   # - python pcgr.py \
   #   --input_vcf examples/tumor_sample.COAD.vcf.gz \
   #   --input_cna examples/tumor_sample.COAD.cna.tsv \
@@ -37,10 +30,3 @@ script:
   #   examples/pcgr_conf.COAD.toml \
   #   tumor_sample.COAD
   #   --no-docker
-
-
-#notifications:
-#  on_success: always
-#  email: false
-#  slack:
-#    rooms:
