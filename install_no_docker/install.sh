@@ -51,7 +51,7 @@ vep_install --AUTO p --PLUGINS miRNA --NO_HTSLIB --NO_UPDATE
 
 if [ -z $SKIP_VALIDATOR ] ; then
     # Install the EBI vcf validator
-    wget https://github.com/EBIvariation/vcf-validator/releases/download/v0.7/vcf_validator -O ${CONDA_PREFIX}/bin/vcf_validator
+    wget https://github.com/EBIvariation/vcf-validator/releases/download/v0.6/vcf_validator -O ${CONDA_PREFIX}/bin/vcf_validator
     chmod +x ${CONDA_PREFIX}/bin/vcf_validator
 fi
 
