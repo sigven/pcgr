@@ -30,6 +30,19 @@ generate_report_data_snv_indel_acmg <- function(sample_calls, pcgr_data, pcgr_ve
   rlogging::message(paste0("Number of protein-coding variants: ",pcg_report_snv_indel[['variant_statistic']][['n_coding']]))
   #rlogging::message(paste0("Number of noncoding/silent variants: ",pcg_report_snv_indel[['variant_statistic']][['n_noncoding']]))
 
+  if(!is.null(pcgr_config[['custom_tags']])){
+    if(pcgr_config[['custom_tags']][['custom_tags']] != ""){
+      tags <- stringr::str_split(pcgr_config[['custom_tags']][['custom_tags']],pattern = ",")[[1]]
+      for(t in tags){
+        t <- stringr::str_trim(t)
+        if(t %in% colnames(sample_calls)){
+          pcgr_data$pcgr_all_annotation_columns <- c(pcgr_data$pcgr_all_annotation_columns,t)
+        }
+      }
+    }
+  }
+
+
   if(pcg_report_snv_indel[['variant_statistic']][['n']] > 0){
 
     ## Analyze Tier1: Variants of strong clinical significance (Evidence level A+B in tumor type, therapeutic/diagnosis/prognosis)
@@ -310,6 +323,7 @@ generate_report_acmg <- function(project_directory, query_vcf2tsv, pcgr_data, pc
   pcg_report_value_box <- pcgrr::generate_report_data_value_box(pcg_report, pcgr_data, pcgr_version, sample_name, pcgr_config, genome_seq, genome_assembly)
   pcg_report <- pcgrr::update_pcg_report(pcg_report, pcg_report_value_box, analysis_element = 'value_box')
 
+  ## set variant sets to NULL (decrease size of JSON object)
   for(elem in c('tier1','tier2','tier3','tier4')){
     stat <- paste0('n_',elem)
     pcg_report[['snv_indel']][['variant_statistic']][[stat]] <- nrow(pcg_report[['snv_indel']][['variant_set']][[elem]])
@@ -321,6 +335,8 @@ generate_report_acmg <- function(project_directory, query_vcf2tsv, pcgr_data, pc
 
   pcgr_json <- jsonlite::toJSON(pcg_report, pretty=T,na='string',null = 'null')
   write(pcgr_json, fnames[['json']])
+  gzip_command <- paste0("gzip -f ", fnames[['json']])
+  system(gzip_command, intern = F)
   rmarkdown::render(system.file("templates","report_acmg.Rmd", package="pcgrr"), output_format = rmarkdown::html_document(theme = pcg_report[['pcgr_config']][['visual']][['report_theme']], toc = T, toc_depth = 3, toc_float = T, number_sections = F, includes = rmarkdown::includes(after_body = 'disclaimer.md')), output_file = paste0(sample_name,'.pcgr_acmg.',genome_assembly,'.html'), clean = T, output_dir = project_directory, intermediates_dir = project_directory, quiet=T)
 
 

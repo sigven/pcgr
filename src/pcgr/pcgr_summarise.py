@@ -3,144 +3,29 @@
 import csv
 import re
 import argparse
-#from itertools import izip, imap
 from cyvcf2 import VCF, Writer
 import gzip
-import dbnsfp
 import os
-import pcgrutils
+import annoutils
 
-logger = pcgrutils.getlogger('pcgr-gene-annotate')
 csv.field_size_limit(500 * 1024 * 1024)
-threeLettertoOneLetterAA = {'Ala':'A','Arg':'R','Asn':'N','Asp':'D','Cys':'C','Glu':'E','Gln':'Q','Gly':'G','His':'H','Ile':'I','Leu':'L','Lys':'K', 'Met':'M','Phe':'F','Pro':'P','Ser':'S','Thr':'T','Trp':'W','Tyr':'Y','Val':'V','Ter':'X'}
-
 
 def __main__():
    
    parser = argparse.ArgumentParser(description='Cancer gene annotations from PCGR pipeline (SNVs/InDels)')
    parser.add_argument('vcf_file', help='VCF file with VEP-annotated query variants (SNVs/InDels)')
    parser.add_argument('pcgr_db_dir',help='PCGR data directory')
-   parser.add_argument('--pcgr_predispose',action="store_true",help="Aggregate cancer gene annotations for predisposition reporting")
-
+   parser.add_argument('--cpsr',action="store_true",help="Aggregate cancer gene annotations for Cancer Predisposition Sequencing Report (CPSR)")
    args = parser.parse_args()
 
-   extend_vcf_annotations(args.vcf_file, args.pcgr_db_dir, args.pcgr_predispose)
+   logger = annoutils.getlogger('pcgr-gene-annotate')
+   if args.cpsr is True:
+      logger = annoutils.getlogger('cpsr-gene-annotate')
 
-def threeToOneAA(aa_change):
-	
-	for three_letter_aa in threeLettertoOneLetterAA.keys():
-		aa_change = aa_change.replace(three_letter_aa,threeLettertoOneLetterAA[three_letter_aa])
+   extend_vcf_annotations(args.vcf_file, args.pcgr_db_dir, logger, args.cpsr)
 
-	aa_change = re.sub(r'[A-Z]{1}fsX([0-9]{1,}|\?)','fs',aa_change)
-	return aa_change
 
-def map_variant_effect_predictors(rec, algorithms):
-    
-   dbnsfp_predictions = dbnsfp.map_dbnsfp_predictions(str(rec.INFO.get('DBNSFP')), algorithms)
-   if rec.INFO.get('Gene') is None or rec.INFO.get('Consequence') is None:
-      return
-   gene_id = str(rec.INFO.get('Gene'))
-   consequence = str(rec.INFO.get('Consequence'))
-     
-   dbnsfp_key = ''
-     
-   if not rec.INFO.get('HGVSp_short') is None:
-      aa_change = str(rec.INFO.get('HGVSp_short'))
-      dbnsfp_key = gene_id + ':' + str(aa_change)
-   else:
-      if re.search('splice_site',consequence):
-         dbnsfp_key = gene_id
-   
-   if dbnsfp_key != '':
-      if dbnsfp_key in dbnsfp_predictions:
-         rec.INFO['EFFECT_PREDICTIONS'] = dbnsfp_predictions[dbnsfp_key]
-
-def set_coding_change(rec):
-   
-   for m in ['HGVSp_short','CDS_CHANGE']:
-      rec.INFO[m] = '.'
-   if not rec.INFO.get('HGVSc') is None:
-      if rec.INFO.get('HGVSc') != '.':
-         if 'splice_acceptor_variant' in rec.INFO.get('Consequence') or 'splice_donor_variant' in rec.INFO.get('Consequence'):
-            key = str(rec.INFO.get('Consequence')) + ':' + str(rec.INFO.get('HGVSc'))
-            rec.INFO['CDS_CHANGE'] = key
-   if rec.INFO.get('Amino_acids') is None or rec.INFO.get('Protein_position') is None or rec.INFO.get('Consequence') is None:
-      return
-   if not rec.INFO.get('Protein_position') is None:
-      if rec.INFO.get('Protein_position').startswith('-'):
-         return
-
-   protein_change = '.'
-   if '/' in rec.INFO.get('Protein_position'):
-      protein_position = str(rec.INFO.get('Protein_position').split('/')[0])
-      if '-' in protein_position:
-         if protein_position.split('-')[0].isdigit():
-            rec.INFO['AMINO_ACID_START'] = protein_position.split('-')[0]
-         if protein_position.split('-')[1].isdigit():
-            rec.INFO['AMINO_ACID_END'] = protein_position.split('-')[1]
-      else:
-         if protein_position.isdigit():
-            rec.INFO['AMINO_ACID_START'] = protein_position
-            rec.INFO['AMINO_ACID_END'] = protein_position
-   
-   if not rec.INFO.get('HGVSp') is None:
-      if rec.INFO.get('HGVSp') != '.':
-         if ':' in rec.INFO.get('HGVSp'):
-            protein_identifier = str(rec.INFO.get('HGVSp').split(':')[0])
-            if protein_identifier.startswith('ENSP'):
-               protein_change_VEP = str(rec.INFO.get('HGVSp').split(':')[1])
-               protein_change = threeToOneAA(protein_change_VEP)
-  
-   if 'synonymous_variant' in rec.INFO.get('Consequence'):
-      protein_change = 'p.' + str(rec.INFO.get('Amino_acids')) + str(protein_position) + str(rec.INFO.get('Amino_acids'))
-      if 'stop_lost' in str(rec.INFO.get('Consequence')) and '/' in str(rec.INFO.get('Amino_acids')):
-         protein_change = 'p.X' + str(protein_position) + str(rec.INFO.get('Amino_acids')).split('/')[1]
-    
-   rec.INFO['HGVSp_short'] = protein_change
-   exon_number = 'NA'
-   if not rec.INFO.get('EXON') is None:
-      if rec.INFO.get('EXON') != '.':
-         if '/' in rec.INFO.get('EXON'):
-            exon_number = str(rec.INFO.get('EXON')).split('/')[0]
-  
-   if not rec.INFO.get('HGVSc') is None:
-      if rec.INFO.get('HGVSc') != '.':
-         if protein_change != '.':
-            key = str(rec.INFO.get('Consequence')) + ':' + str(rec.INFO.get('HGVSc')) + ':exon' + str(exon_number) + ':' + str(protein_change)
-            rec.INFO['CDS_CHANGE'] = key
-
-   return
-
-def write_pass_vcf(annotated_vcf):
-   
-   out_vcf = re.sub(r'\.annotated\.vcf\.gz$','.annotated.pass.vcf',annotated_vcf)
-   vcf = VCF(annotated_vcf)
-   w = Writer(out_vcf, vcf)
-
-   num_rejected = 0
-   num_pass = 0
-   for rec in vcf:
-      if rec.FILTER is None or rec.FILTER == 'None':
-         w.write_record(rec)
-         num_pass += 1
-      else:
-         num_rejected +=1
-
-   vcf.close()
-   w.close()
-   
-   logger.info('Number of non-PASS/REJECTED variant calls: ' + str(num_rejected))
-   logger.info('Number of PASSed variant calls: ' + str(num_pass))
-   if num_pass == 0:
-      logger.warning('There are zero variants with a \'PASS\' filter in the VCF file')
-      os.system('bgzip -dc ' + str(annotated_vcf) + ' egrep \'^#\' > ' + str(out_vcf))
-   #else:
-   os.system('bgzip -f ' + str(out_vcf))
-   os.system('tabix -f -p vcf ' + str(out_vcf) + '.gz')
-
-   return
-
-def extend_vcf_annotations(query_vcf, pcgr_db_directory, pcgr_predispose):
+def extend_vcf_annotations(query_vcf, pcgr_db_directory, logger, cpsr):
    """
    Function that reads VEP/vcfanno-annotated VCF and extends the VCF INFO column with tags from
    1. CSQ elements within the primary transcript consequence picked by VEP, e.g. SYMBOL, Feature, Gene, Consequence etc.
@@ -150,9 +35,9 @@ def extend_vcf_annotations(query_vcf, pcgr_db_directory, pcgr_predispose):
    """
 
    ## read VEP and PCGR tags to be appended to VCF file
-   pcgr_vcf_infotags_meta = pcgrutils.read_infotag_file(os.path.join(pcgr_db_directory,'pcgr_infotags.tsv'))
-   if pcgr_predispose is True:
-      pcgr_vcf_infotags_meta = pcgrutils.read_infotag_file(os.path.join(pcgr_db_directory,'pcgr_infotags_predisposition.tsv'))
+   pcgr_vcf_infotags_meta = annoutils.read_infotag_file(os.path.join(pcgr_db_directory,'pcgr_infotags.tsv'))
+   if cpsr is True:
+      pcgr_vcf_infotags_meta = annoutils.read_infotag_file(os.path.join(pcgr_db_directory,'cpsr_infotags.tsv'))
 
    out_vcf = re.sub(r'\.vcf(\.gz){0,}$','.annotated.vcf',query_vcf)
 
@@ -192,14 +77,15 @@ def extend_vcf_annotations(query_vcf, pcgr_db_directory, pcgr_predispose):
                      i = i + 1
    
    for tag in pcgr_vcf_infotags_meta:
-      if not vcf.contains(tag):
-         vcf.add_info_to_header({'ID': tag, 'Description': str(pcgr_vcf_infotags_meta[tag]['description']),'Type':str(pcgr_vcf_infotags_meta[tag]['type']), 'Number': str(pcgr_vcf_infotags_meta[tag]['number'])})
+      #if not vcf.contains(tag):
+      vcf.add_info_to_header({'ID': tag, 'Description': str(pcgr_vcf_infotags_meta[tag]['description']),'Type':str(pcgr_vcf_infotags_meta[tag]['type']), 'Number': str(pcgr_vcf_infotags_meta[tag]['number'])})
       
    w = Writer(out_vcf, vcf)
    current_chrom = None
    num_chromosome_records_processed = 0
    pcgr_onco_xref_map = {'SYMBOL':1, 'ENTREZ_ID':2, 'UNIPROT_ID':3, 'APPRIS':4,'UNIPROT_ACC':5,'CHORUM_ID':6,'TUMOR_SUPPRESSOR':7,'ONCOGENE':8,'NETWORK_CG':9,
-                         'DISGENET_CUI':10,'CHEMBL_COMPOUND_ID':11,'INTOGEN_DRIVER':12,'ONCOSCORE':13, 'CANCER_PREDISPOSITION':14}
+                         'DISGENET_CUI':10,'CHEMBL_COMPOUND_ID':11,'INTOGEN_DRIVER':12,'ONCOSCORE':13, 'CANCER_PREDISPOSITION_SOURCE':15, 'CANCER_SUSCEPTIBILITY_CUI':16, 
+                         'CANCER_SYNDROME_CUI':17, 'CANCER_PREDISPOSITION_MOI': 18}
    for rec in vcf:
       all_transcript_consequences = []
       if current_chrom is None:
@@ -249,10 +135,14 @@ def extend_vcf_annotations(query_vcf, pcgr_db_directory, pcgr_predispose):
                                     if annotation == 'CHORUM_ID' or annotation == 'UNIPROT_ACC':
                                        continue
                                     if annotation in pcgr_onco_xref[ensembl_transcript_id]:
-                                       if annotation == 'TUMOR_SUPPRESSOR' or annotation == 'ONCOGENE' or annotation == 'NETWORK_CG' or annotation == 'CANCER_PREDISPOSITION':
+                                       if annotation == 'TUMOR_SUPPRESSOR' or annotation == 'ONCOGENE' or annotation == 'NETWORK_CG':
                                           rec.INFO[annotation] = True
                                        else:
-                                          rec.INFO[annotation] = pcgr_onco_xref[ensembl_transcript_id][annotation]
+                                          if annotation.startswith('CANCER_'):
+                                             if cpsr is True:
+                                                rec.INFO[annotation] = pcgr_onco_xref[ensembl_transcript_id][annotation]
+                                          else:
+                                             rec.INFO[annotation] = pcgr_onco_xref[ensembl_transcript_id][annotation]
                            if vep_csq_index2fields[j] == 'DOMAINS':
                               domain_identifiers = str(csq_fields[j]).split('&')
                               for v in domain_identifiers:
@@ -267,13 +157,13 @@ def extend_vcf_annotations(query_vcf, pcgr_db_directory, pcgr_predispose):
                                  if v.startswith('COSM'):
                                     cosmic_identifiers.append(v)
                                  if v.startswith('rs'):
-                                    dbsnp_identifiers.append(re.sub('^rs','',v))
+                                    dbsnp_identifiers.append(v)
                               if len(cosmic_identifiers) > 0:
                                  rec.INFO['COSMIC_MUTATION_ID'] = '&'.join(cosmic_identifiers)
                               if len(dbsnp_identifiers) > 0:
                                  rec.INFO['DBSNPRSID'] = '&'.join(dbsnp_identifiers)
                      j = j + 1
-                  set_coding_change(rec)
+                  annoutils.set_coding_change(rec)
                symbol = '.'
                if csq_fields[vep_csq_fields2index['SYMBOL']] != "":
                   symbol = str(csq_fields[vep_csq_fields2index['SYMBOL']])
@@ -282,7 +172,7 @@ def extend_vcf_annotations(query_vcf, pcgr_db_directory, pcgr_predispose):
 
          if identifier == 'DBNSFP':
             if not rec.INFO.get('DBNSFP') is None:
-               map_variant_effect_predictors(rec, dbnsfp_prediction_algorithms)
+               annoutils.map_variant_effect_predictors(rec, dbnsfp_prediction_algorithms)
       rec.INFO['VEP_ALL_CONSEQUENCE'] = ','.join(all_transcript_consequences)
       w.write_record(rec)
    w.close()
@@ -294,11 +184,11 @@ def extend_vcf_annotations(query_vcf, pcgr_db_directory, pcgr_predispose):
          os.system('bgzip -f ' + str(out_vcf))
          os.system('tabix -f -p vcf ' + str(out_vcf) + '.gz')
          annotated_vcf = out_vcf + '.gz'
-         write_pass_vcf(annotated_vcf)
+         annoutils.write_pass_vcf(annotated_vcf, logger)
       else:
-         pcgrutils.pcgr_error_message('No remaining PASS variants found in query VCF - exiting and skipping STEP 4 (pcgr-writer)', logger)
+         annoutils.error_message('No remaining PASS variants found in query VCF - exiting and skipping STEP 4 (pcgr-writer)', logger)
    else:
-      pcgrutils.pcgr_error_message('No remaining PASS variants found in query VCF - exiting and skipping STEP 4 (pcgr-writer)', logger)
+      annoutils.error_message('No remaining PASS variants found in query VCF - exiting and skipping STEP 4 (pcgr-writer)', logger)
 
 if __name__=="__main__": __main__()
 

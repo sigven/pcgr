@@ -1,0 +1,10 @@
+[2018-08-22 11:42:54][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-08-22 11:42:58][INFO] Number of PASS variants: 38715
+[2018-08-22 11:43:00][INFO] Number of SNVs: 36991
+[2018-08-22 11:43:00][INFO] Number of deletions: 801
+[2018-08-22 11:43:00][INFO] Number of insertions: 917
+[2018-08-22 11:43:00][INFO] Number of block substitutions: 0
+[2018-08-22 11:43:00][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-08-22 11:43:03][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-08-22 11:43:04][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-08-22 11:43:06][INFO] Extending annotation descriptions related to ClinVar

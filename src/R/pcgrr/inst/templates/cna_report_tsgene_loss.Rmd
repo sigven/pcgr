@@ -1,14 +1,14 @@
 ### Tumor suppressor genes subject to homozygous deletions
 <br>
 
-A total of __`r nrow(pcg_report[['cna']][['variant_display']][['tsgene_loss']])`__ tumor suppressor genes are covered (i.e. transcript overlapping >= `r pcg_report[['pcgr_config']][['cna']][['cna_overlap_pct']]`%) by genomic segments subject to homozygous deletions.
+A total of __`r NROW(pcg_report[['cna']][['variant_display']][['tsgene_loss']])`__ tumor suppressor genes are covered (i.e. transcript overlapping >= `r pcg_report[['pcgr_config']][['cna']][['cna_overlap_pct']]`%) by genomic segments subject to homozygous deletions.
 
 ```{r cna_tsgene_loss, echo=F}
 myOptions <- list(paging = F, searching=T,caching=F)
-if(nrow(pcg_report[['cna']][['variant_display']][['tsgene_loss']]) >= 10){
+if(NROW(pcg_report[['cna']][['variant_display']][['tsgene_loss']]) >= 10){
   myOptions <- list(paging = T,pageLength=10, searching=T,caching=F)
 }
-if(nrow(pcg_report[['cna']][['variant_display']][['tsgene_loss']]) > 0){
+if(NROW(pcg_report[['cna']][['variant_display']][['tsgene_loss']]) > 0){
   DT::datatable(pcg_report[['cna']][['variant_display']][['tsgene_loss']], options = myOptions, escape=F, extensions = "Responsive")
 }
 ```

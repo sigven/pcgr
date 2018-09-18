@@ -4,7 +4,8 @@
 \alias{generate_biomarker_tsv}
 \title{Function that generates a data frame with basic biomarker annotations from tier1 variants}
 \usage{
-generate_biomarker_tsv(tier1_variants, sample_name = "test")
+generate_biomarker_tsv(clinical_evidence_items, sample_name = "test",
+  tier = "tier 1")
 }
 \arguments{
 \item{tier1_variants}{df with tier 1 variants}

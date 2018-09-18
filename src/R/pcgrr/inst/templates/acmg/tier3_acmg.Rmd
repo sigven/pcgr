@@ -1,7 +1,7 @@
 
 ### Tier 3 - Variants of unknown clinical significance {.tabset}
 
-- A total of __`r nrow(pcg_report[['snv_indel']][['variant_display']][['tier3']][['proto_oncogene']]) + nrow(pcg_report[['snv_indel']][['variant_display']][['tier3']][['tumor_suppressor']])`__ unique, somatic variant(s) in the tumor sample are of unknown clinical significance, as found within known proto-oncogenes or tumor suppressor genes.
+- A total of __`r NROW(pcg_report[['snv_indel']][['variant_display']][['tier3']][['proto_oncogene']]) + NROW(pcg_report[['snv_indel']][['variant_display']][['tier3']][['tumor_suppressor']])`__ unique, somatic variant(s) in the tumor sample are of unknown clinical significance, as found within known proto-oncogenes or tumor suppressor genes.
 <br><br>
 
 
@@ -12,7 +12,7 @@ missing_tier3_items <- list()
 for(type in c('proto_oncogene','tumor_suppressor')){
   show_tier3_filters[[type]] <- F
   missing_tier3_items[[type]] <- T
-  if(nrow(pcg_report[['snv_indel']][['variant_display']][['tier3']][[type]]) > 0){
+  if(NROW(pcg_report[['snv_indel']][['variant_display']][['tier3']][[type]]) > 0){
     show_tier3_filters[[type]] <- T
     missing_tier3_items[[type]] <- F
   }

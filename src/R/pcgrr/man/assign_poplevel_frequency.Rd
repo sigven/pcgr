@@ -10,7 +10,7 @@ assign_poplevel_frequency(var_df, dbquery = "1KG", pop = "european",
 \arguments{
 \item{var_df}{data frame with variants}
 
-\item{dbquery}{1KG or exAC}
+\item{dbquery}{1KG or gnomAD}
 
 \item{pop}{population}
 

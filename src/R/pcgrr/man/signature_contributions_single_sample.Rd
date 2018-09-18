@@ -4,14 +4,13 @@
 \alias{signature_contributions_single_sample}
 \title{Function that retrieves relative estimates of known somatic signatures from a single tumor}
 \usage{
-signature_contributions_single_sample(mut_data, sample_name,
-  normalization_method = "default", cosmic_signatures_aetiologies = NULL,
-  signature_limit = 6, skip_signatures = NULL, signature_cutoff = 0.06,
+signature_contributions_single_sample(sample_calls, sample_name,
+  normalization_method = "default",
+  cosmic_signatures_aetiologies = NULL, signature_limit = 6,
+  skip_signatures = NULL, signature_cutoff = 0.06,
   bsg = BSgenome.Hsapiens.UCSC.hg19)
 }
 \arguments{
-\item{mut_data}{data frame with somatic mutations (VCF_SAMPLE_ID, CHROM, POS, REF, ALT)}
-
 \item{sample_name}{sample name}
 
 \item{normalization_method}{metod for normalization of context counts (deconstructSigs)}
@@ -23,6 +22,8 @@ signature_contributions_single_sample(mut_data, sample_name,
 \item{signature_cutoff}{discard any signature contributions with weight less than this amount}
 
 \item{bsg}{genome sequence object (BSgenome.Hsapiens.UCSC)}
+
+\item{mut_data}{data frame with somatic mutations (VCF_SAMPLE_ID, CHROM, POS, REF, ALT)}
 
 \item{cosmic_cancertypes_aetiologies}{list of known signaturea and associated etiologies/cancertypes}
 }

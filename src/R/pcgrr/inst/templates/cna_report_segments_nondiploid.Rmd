@@ -12,14 +12,14 @@ The following user-defined thresholds determine copy number aberrations shown he
 * <span style="color:#009E73"><b>Copy number amplifications</b></span>: Log(2) ratio >= `r pcg_report[['pcgr_config']][['cna']][['logR_gain']]`
 * <span style="color:red"><b>Homozygous deletions</b></span>: Log(2) ratio <= `r pcg_report[['pcgr_config']][['cna']][['logR_homdel']]`
 
-A total of __`r nrow(pcg_report[['cna']][['variant_display']][['segment']])`__ unfiltered aberration segments satisfied the above criteria.
+A total of __`r NROW(pcg_report[['cna']][['variant_display']][['segment']])`__ unfiltered aberration segments satisfied the above criteria.
 
 <br>
 
 
 ```{r cna_segments_setup, echo=F}
 show_segment_filter_table <- F
-if(nrow(pcg_report[['cna']][['variant_display']][['segment']]) > 0){
+if(NROW(pcg_report[['cna']][['variant_display']][['segment']]) > 0){
   show_segment_filter_table <- T
 }
 
@@ -31,7 +31,7 @@ if(nrow(pcg_report[['cna']][['variant_display']][['segment']]) > 0){
 cna_segments_sd <- NULL
 cna_segments <- data.frame()
 
-if(nrow(pcg_report[['cna']][['variant_display']][['segment']]) > 0){
+if(NROW(pcg_report[['cna']][['variant_display']][['segment']]) > 0){
   cna_segments <- dplyr::rename(pcg_report[['cna']][['variant_display']][['segment']], Segment = SEGMENT, Length_Mb = SEGMENT_LENGTH_MB, Cytoband = cytoband, Event_type = event_type)
   cna_segments_sd <- crosstalk::SharedData$new(cna_segments)
 }else{
@@ -47,7 +47,7 @@ A total of __`r summarywidget::summarywidget(cna_segments_sd)`__ copy number seg
 library(summarywidget)
 library(crosstalk)
 myOptions <- list(paging = F, searching=F,caching=F,buttons = c('csv','excel'),dom = 'Bfrtip')
-if(nrow(cna_segments) >= 10){
+if(NROW(cna_segments) >= 10){
   myOptions <- list(paging = T,pageLength=10, searching=F,caching=F,buttons = c('csv','excel'),dom = 'Bfrtip')
 }
 

@@ -1,10 +1,10 @@
 
 ### Tier 1 - Variants of strong clinical significance {.tabset}
 
-- Considering evidence items with strongest evidence levels (A & B) for the query tumor type (_`r pcg_report[['tumor_class']]`_)  in the [database for clinical interpretations of variants in cancer, CIViC](https://civic.genome.wustl.edu/#/home) or [Cancer Biomarkers database](https://www.cancergenomeinterpreter.org/biomarkers), a total of __`r nrow(pcg_report[['snv_indel']][['variant_display']][['tier1']])`__ unique, somatic variants were found, with the following number of evidence items:
-    * Tier 1 - Predictive/Therapeutic: __`r nrow(pcg_report[['snv_indel']][['clinical_evidence_item']][['specific_tumortype']][['predictive']][['A_B']])`__ evidence items
-    * Tier 1 - Prognostic: __`r nrow(pcg_report[['snv_indel']][['clinical_evidence_item']][['specific_tumortype']][['prognostic']][['A_B']])`__ evidence items
-    * Tier 1 - Diagnostic: __`r nrow(pcg_report[['snv_indel']][['clinical_evidence_item']][['specific_tumortype']][['diagnostic']][['A_B']])`__ evidence items
+- Considering evidence items with strongest evidence levels (A & B) for the query tumor type (_`r pcg_report[['tumor_class']]`_)  in the [database for clinical interpretations of variants in cancer, CIViC](https://civic.genome.wustl.edu/#/home) or [Cancer Biomarkers database](https://www.cancergenomeinterpreter.org/biomarkers), a total of __`r NROW(pcg_report[['snv_indel']][['variant_display']][['tier1']])`__ unique, somatic variants were found, with the following number of evidence items:
+    * Tier 1 - Predictive/Therapeutic: __`r NROW(pcg_report[['snv_indel']][['clinical_evidence_item']][['specific_tumortype']][['predictive']][['A_B']])`__ evidence items
+    * Tier 1 - Prognostic: __`r NROW(pcg_report[['snv_indel']][['clinical_evidence_item']][['specific_tumortype']][['prognostic']][['A_B']])`__ evidence items
+    * Tier 1 - Diagnostic: __`r NROW(pcg_report[['snv_indel']][['clinical_evidence_item']][['specific_tumortype']][['diagnostic']][['A_B']])`__ evidence items
 
 <br><br>
 
@@ -16,7 +16,7 @@ missing_tier1_items <- list()
 for(type in c('diagnostic','prognostic','predictive')){
   show_tier1_filters[[type]] <- F
   missing_tier1_items[[type]] <- T
-  if(nrow(pcg_report[['snv_indel']][['clinical_evidence_item']][['specific_tumortype']][[type]][['A_B']]) > 0){
+  if(NROW(pcg_report[['snv_indel']][['clinical_evidence_item']][['specific_tumortype']][[type]][['A_B']]) > 0){
     show_tier1_filters[[type]] <- T
     missing_tier1_items[[type]] <- F
   }

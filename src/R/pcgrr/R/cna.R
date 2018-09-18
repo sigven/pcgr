@@ -68,9 +68,8 @@ get_cna_cytoband <- function(cna_gr, cytoband_gr){
 #' @param genome_assembly human genome assembly version
 #' @param transcript_overlap_pct required aberration overlap fraction (percent) for reported transcripts (default 100%)
 #'
-#' @return cna_data
+#' @return pcg_report_cna
 #'
-
 generate_report_data_cna <- function(cna_file, pcgr_data, pcgr_version, sample_name, pcgr_config, genome_seq, genome_assembly, transcript_overlap_pct = 100){
 
   pcg_report_cna <- pcgrr::init_pcg_report(pcgr_config, sample_name, pcgr_version, genome_assembly, class = 'cna')
@@ -220,5 +219,95 @@ generate_report_data_cna <- function(cna_file, pcgr_data, pcgr_version, sample_n
   }
 
   return(pcg_report_cna)
+}
+
+
+
+annotate_facets_cna <- function(facets_cna_input_fname, facets_cna_output_fname, pcgr_data, sample_name, genome_seq, genome_assembly, transcript_overlap_pct = 50){
+
+  assembly <- 'hg38'
+  ucsc_browser_prefix <- 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&position='
+  if(genome_assembly == 'grch37'){
+    assembly <- 'hg19'
+    ucsc_browser_prefix <- 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position='
+  }
+
+  rlogging::message('------')
+  rlogging::message(paste0("Annotating copy number segment file from FACETS -  ",facets_cna_input_fname))
+  cna_df_raw <- read.table(file=facets_cna_input_fname,header = T,stringsAsFactors = F,comment.char="", quote="")
+  for(col in c('Cellular_Fraction','Total_CN','Minor_CN','Start','End','Segment_Mean','Chromosome')){
+    if(!(col %in% colnames(cna_df_raw))){
+      rlogging::stop('Missing required column ',col,' in cna input')
+    }
+  }
+
+  cna_df_raw <- dplyr::rename(cna_df_raw, chromosome = Chromosome, LogR = Segment_Mean, segment_start = Start, segment_end = End, cellular_fraction = Cellular_Fraction, total_cn = Total_CN, minor_cn = Minor_CN) %>% dplyr::distinct()
+  cna_df_raw$chromosome <- stringr::str_replace(cna_df_raw$chromosome,"^chr","")
+
+  ## VALIDATE INPUT CHROMOSOMES
+  cna_df <- pcgrr::get_valid_chromosomes(cna_df_raw, chromosome_column = 'chromosome', bsg = genome_seq)
+  cna_df <- pcgrr::get_valid_chromosome_segments(cna_df, genome_assembly, bsg = genome_seq)
+  cna_df <- cna_df %>% dplyr::filter(!is.na(LogR))
+  cna_df$LogR <- round(as.numeric(cna_df$LogR),digits=3)
+  cna_df$segmentID <- paste0(cna_df$chromosome,":",cna_df$segment_start,":",cna_df$segment_end)
+  cna_df$sample_id <- sample_name
+
+  ## MAKE GRANGES OBJECT OF INPUT
+  cna_gr <- GenomicRanges::makeGRangesFromDataFrame(cna_df, keep.extra.columns = T, seqinfo = pcgr_data$seqinfo, seqnames.field = 'chromosome',start.field = 'segment_start', end.field = 'segment_end', ignore.strand = T, starts.in.df.are.0based = T)
+  cytoband_df <- pcgrr::get_cna_cytoband(cna_gr, pcgr_data$cytoband_gr)
+  cna_df <- dplyr::left_join(cna_df, cytoband_df,by="segmentID")
+
+  cna_segments <- cna_df
+  #cna_segments$segment_link <- paste0("<a href='",paste0(ucsc_browser_prefix,paste0(cna_segments$chromosome,':',cna_segments$segment_start,'-',cna_segments$segment_end)),"' target=\"_blank\">",paste0(cna_segments$chromosome,':',cna_segments$segment_start,'-',cna_segments$segment_end),"</a>")
+  cna_segments$segment_length_Mb <- round((as.numeric((cna_segments$segment_end - cna_segments$segment_start)/1000000)),digits = 4)
+  #cna_segments <- dplyr::rename(cna_segments, SEGMENT_LENGTH_MB = segment_length_Mb, SEGMENT = segment_link)
+  #cna_segments <- dplyr::select(cna_segments, SEGMENT, SEGMENT_LENGTH_MB, cytoband, LogR, event_type) %>% dplyr::distinct()
+
+  cna_gr <- GenomicRanges::makeGRangesFromDataFrame(cna_df, keep.extra.columns = T, seqinfo = pcgr_data$seqinfo, seqnames.field = 'chromosome',start.field = 'segment_start', end.field = 'segment_end', ignore.strand = T, starts.in.df.are.0based = T)
+
+  hits <- GenomicRanges::findOverlaps(cna_gr, pcgr_data$gencode_genes_gr, type="any", select="all")
+  ranges <- pcgr_data$gencode_genes_gr[subjectHits(hits)]
+  mcols(ranges) <- c(mcols(ranges),mcols(cna_gr[queryHits(hits)]))
+
+  local_df <- as.data.frame(mcols(ranges))
+  local_df$segment_start <- start(ranges(cna_gr[queryHits(hits)]))
+  local_df$segment_end <- end(ranges(cna_gr[queryHits(hits)]))
+  local_df$segment_length_Mb <- round((as.numeric((local_df$segment_end - local_df$segment_start)/1000000)),digits = 4)
+
+  local_df$transcript_start <- start(ranges)
+  local_df$transcript_end <- end(ranges)
+  local_df$chrom <- as.character(seqnames(ranges))
+  local_df <- as.data.frame(local_df %>% dplyr::rowwise() %>% dplyr::mutate(transcript_overlap_percent = round(as.numeric((min(transcript_end,segment_end) - max(segment_start,transcript_start)) / (transcript_end - transcript_start)) * 100, digits = 2)))
+  #local_df$segment_link <- paste0("<a href='",paste0(ucsc_browser_prefix,paste0(local_df$chrom,':',local_df$segment_start,'-',local_df$segment_end)),"' target=\"_blank\">",paste0(local_df$chrom,':',local_df$segment_start,'-',local_df$segment_end),"</a>")
+
+  local_df_print <- local_df
+  local_df_print <- dplyr::select(local_df_print,chrom,segment_start,segment_end,segment_length_Mb,sample_id,event_type,cytoband,LogR,cellular_fraction,total_cn,minor_cn,ensembl_gene_id,symbol,ensembl_transcript_id,transcript_start,transcript_end,transcript_overlap_percent,name,biotype,tsgene,ts_oncogene,chembl_compound_id,gencode_gene_biotype,gencode_tag,gencode_release)
+
+  chrOrder <- c(as.character(paste0('chr',c(1:22))),"chrX","chrY")
+  local_df_print$chrom <- factor(local_df_print$chrom, levels=chrOrder)
+  local_df_print <- local_df_print[order(local_df_print$chrom),]
+  local_df_print$segment_start <- as.integer(local_df_print$segment_start)
+  local_df_print$segment_end <- as.integer(local_df_print$segment_end)
+
+  local_df_print_sorted <- NULL
+  for(chrom in chrOrder){
+    if(nrow(local_df_print[!is.na(local_df_print$chrom) & local_df_print$chrom == chrom,]) > 0){
+      chrom_regions <- local_df_print[local_df_print$chrom == chrom,]
+      chrom_regions_sorted <- chrom_regions[with(chrom_regions, order(segment_start, segment_end)),]
+      local_df_print_sorted <- rbind(local_df_print_sorted, chrom_regions_sorted)
+    }
+  }
+  write.table(local_df_print_sorted,file=facets_cna_output_fname,col.names = T,row.names = F,quote = F)
+  system(paste0('gzip ',facets_cna_output_fname))
+
+  homdel <- dplyr::filter(local_df_print_sorted, !is.na(minor_cn) & minor_cn == 0 & total_cn == 0)
+  ampl <- dplyr::filter(local_df_print_sorted, ((is.na(minor_cn) & total_cn >= 5) | (!is.na(minor_cn) & total_cn - minor_cn >= 5)))
+
+  homdel_ampl <- data.frame()
+  if(nrow(homdel) > 0 | nrow(ampl) > 0){
+    homdel_ampl <- dplyr::bind_rows(homdel,ampl)
+  }
+  return(homdel_ampl)
+
 }
 

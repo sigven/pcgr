@@ -1,0 +1,44 @@
+---
+title: "PCGR kataegis analysis - prototype"
+author: "Sigve Nakken"
+date: "8/22/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+# knitr::opts_chunk$set(echo = TRUE)
+# library(pcgrr)
+# load('/Users/sigven/research/docker/pcgr/data/grch37/rda/pcgr_data.rda')
+# library(SeqKat)
+# library(karyoploteR)
+# library(BSgenome.Hsapiens.UCSC.hg19)
+# genome_assembly <- 'hg19'
+# tsv_gz_file <- '/Users/sigven/research/docker/pcgr/WES012MVBL.pcgr_acmg.grch37.pass.tsv.gz'
+# pcgr_config_file <- '/Users/sigven/research/docker/pcgr/examples/pcgr_conf_default.toml'
+# pcgr_config <-  RcppTOML::parseTOML(pcgr_config_file, fromFile = T)
+# sample_name <- 'WES012MVBL'
+# pcgr_version <- '0.6.3'
+# 
+# pcgr_calls <- pcgrr::get_calls(tsv_gz_file, pcgr_data, pcgr_version, sample_name, pcgr_config)
+
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

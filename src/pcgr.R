@@ -27,7 +27,7 @@ rlogging::SetLogFile(NULL)
 load(paste0(data_dir,'/data/',genome_assembly,'/rda/pcgr_data.rda'))
 
 pcgr_config <- NULL
-default_configuration_file <- paste0(data_dir,'/data/',genome_assembly,'/pcgr_configuration_somatic_default.toml')
+default_configuration_file <- paste0(data_dir,'/data/',genome_assembly,'/pcgr_configuration_default.toml')
 if(file.exists(default_configuration_file)){
 	pcgr_config <- RcppTOML::parseTOML(default_configuration_file, fromFile = T)
 }

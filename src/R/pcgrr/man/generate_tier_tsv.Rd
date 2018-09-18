@@ -4,22 +4,15 @@
 \alias{generate_tier_tsv}
 \title{Function that generates dense and tiered annotated variant datasets}
 \usage{
-generate_tier_tsv(variant_sets, pcgr_data, sample_name = "test")
+generate_tier_tsv(variant_set, pcgr_data, pcgr_config,
+  sample_name = "test")
 }
 \arguments{
+\item{variant_set}{List with tiered variants}
+
 \item{pcgr_data}{List of data frames with PCGR data annotations}
 
 \item{sample_name}{Sample identifier}
-
-\item{tier1_variants}{df with tier 1 variants}
-
-\item{tier2_variants}{df with tier 2 variants}
-
-\item{tier3_variants}{df with tier 3 variants}
-
-\item{tier4_variants}{df with tier 4 variants}
-
-\item{tier5_variants}{df with tier 5 variants}
 }
 \value{
 tsv_variants data frame with tier-annotated list of variants for tab-separated output

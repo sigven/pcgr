@@ -2,16 +2,17 @@
 % Please edit documentation in R/utils.R
 \name{generate_report}
 \alias{generate_report}
-\title{Function that generates cancer genome report}
+\title{Function that generates cancer genome report - Tier model pcgr.0}
 \usage{
-generate_report(project_directory, query_vcf, pcgr_data, pcgr_config = NULL,
-  sample_name = "SampleX", cna_segments_tsv = NULL,
-  pcgr_version = "0.6.0", genome_assembly = "grch37")
+generate_report(project_directory, query_vcf2tsv, pcgr_data,
+  pcgr_config = NULL, sample_name = "SampleX",
+  cna_segments_tsv = NULL, pcgr_version = "0.6.0",
+  genome_assembly = "grch37")
 }
 \arguments{
 \item{project_directory}{name of project directory}
 
-\item{query_vcf}{name of VCF file with annotated query SNVs/InDels}
+\item{query_vcf2tsv}{name of gzipped TSV file (vcf2tsv) with annotated query SNVs/InDels}
 
 \item{pcgr_data}{List of data frames with PCGR data annotations}
 
@@ -21,13 +22,10 @@ generate_report(project_directory, query_vcf, pcgr_data, pcgr_config = NULL,
 
 \item{pcgr_version}{PCGR software version}
 
-\item{pcg_config}{Object with PCGR configuration parameters}
+\item{genome_assembly}{human genome assembly version}
 
-\item{configuration_file}{Configuration file (TOML) for germline variant exclusion criteria (tumor_only mode)}
-}
-\value{
-p
+\item{pcg_config}{Object with PCGR configuration parameters}
 }
 \description{
-Function that generates cancer genome report
+Function that generates cancer genome report - Tier model pcgr.0
 }

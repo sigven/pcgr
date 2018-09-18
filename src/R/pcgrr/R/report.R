@@ -31,17 +31,42 @@ init_pcg_report <- function(pcgr_config = NULL, sample_name = 'SampleX', pcgr_ve
     cancer_genes <- pcgrr::list_to_df(pcgr_config$cancer_predisposition_genes) %>% dplyr::filter(list.element == T) %>% dplyr::select(name) %>% dplyr::rename(symbol = name)
     pcg_report[[analysis_element]][['predisposition_genes']] <- cancer_genes
 
-    for(t in c('tier1','tier2','tier3','unclassified')){
+    for(t in c('tier1','tier2','tier3A','tier3B')){
       pcg_report[[analysis_element]][['variant_display']][[t]] <- data.frame()
+      if(t != 'tier3B'){
+        pcg_report[[analysis_element]][['variant_display']][[t]] <- list()
+        for(c in c('cancer_phenotype','noncancer_phenotype')){
+          pcg_report[[analysis_element]][['variant_display']][[t]][[c]] <- data.frame()
+        }
+      }
+
       pcg_report[[analysis_element]][['variant_set']][[t]] <- data.frame()
     }
+    pcg_report[[analysis_element]][['variant_set']][['tsv']] <- data.frame()
+
     for(t in c('n','n_snv','n_indel','n_coding','n_noncoding')){
       pcg_report[[analysis_element]][['variant_statistic']][[t]] <- 0
     }
+
+    if(!is.null(pcg_report[['pcgr_config']][['popgen']])){
+      if(pcg_report[['pcgr_config']][['popgen']][['pop_tgp']] != ""){
+        pop_tag_info <- pcgrr::get_population_tag(pcg_report[['pcgr_config']][['popgen']][['pop_tgp']], db = "1KG")
+        pcg_report[['pcgr_config']][['popgen']][['vcftag_tgp']] <- pop_tag_info$vcf_tag
+        pcg_report[['pcgr_config']][['popgen']][['popdesc_tgp']] <- pop_tag_info$pop_description
+      }
+      if(pcgr_config[['popgen']][['pop_gnomad']] != ""){
+        pop_tag_info <- pcgrr::get_population_tag(pcgr_config[['popgen']][['pop_gnomad']], db = "GNOMAD")
+        pcg_report[['pcgr_config']][['popgen']][['vcftag_gnomad']] <- pop_tag_info$vcf_tag
+        pcg_report[['pcgr_config']][['popgen']][['popdesc_gnomad']] <- pop_tag_info$pop_description
+      }
+    }
+
+    pcg_report[['summary']] <- list()
+    for(t in c("tier1","tier2","tier3A","tier3B")){
+      pcg_report[['summary']][[t]] <- data.frame()
+    }
     return(pcg_report)
   }
-
-
 
   pcg_report[['tier_model']] <- pcgr_config$tier_model$tier_model
 

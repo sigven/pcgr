@@ -3,12 +3,12 @@
 import argparse
 from cyvcf2 import VCF
 import random
-import pcgrutils
+import annoutils
 import os
 import re
 import sys
 
-logger = pcgrutils.getlogger('pcgr-vcfanno')
+logger = annoutils.getlogger('pcgr-vcfanno')
 
 
 def __main__():
@@ -55,7 +55,7 @@ def run_vcfanno(num_processes, query_vcf, query_info_tags, vcfheader_file, pcgr_
    docm_info_tags = ["DOCM_PMID"]
    tcga_info_tags = ["TCGA_FREQUENCY","TCGA_PANCANCER_COUNT"]
    intogen_driver_mut_info_tags = ["INTOGEN_DRIVER_MUT"]
-   clinvar_info_tags = ["CLINVAR_MSID","CLINVAR_PMIDS","CLINVAR_SIG","CLINVAR_VARIANT_ORIGIN","CLINVAR_MEDGEN_CUI"]
+   clinvar_info_tags = ["CLINVAR_MSID","CLINVAR_PMID","CLINVAR_CLNSIG","CLINVAR_VARIANT_ORIGIN","CLINVAR_CONFLICTED","CLINVAR_MEDGEN_CUI","CLINVAR_MEDGEN_CUI_SOMATIC","CLINVAR_CLNSIG_SOMATIC","CLINVAR_PMID_SOMATIC","CLINVAR_ALLELE_ID","CLINVAR_HGVSP"]
    cancer_hotspots_info_tags = ["CANCER_MUTATION_HOTSPOT"]
    dbnsfp_info_tags = ["DBNSFP"]
    uniprot_info_tags = ["UNIPROT_FEATURE"]

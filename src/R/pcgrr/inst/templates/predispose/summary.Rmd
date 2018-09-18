@@ -1,0 +1,102 @@
+
+## Summary of findings
+
+
+
+```{r summary_data_status, echo=F}
+
+empty_tiers <- list()
+nonempty_tiers <- list()
+for(type in c('tier1','tier2','tier3A','tier3B')){
+  empty_tiers[[type]] <- F    
+  nonempty_tiers[[type]] <- F
+  if(NROW(pcg_report[['summary']][[type]]) == 0){
+    empty_tiers[[type]] <- T
+  }else{
+    nonempty_tiers[[type]] <- T
+  }
+}
+
+```
+
+<ul><li><span style="color:#9E0142; font-size:13pt"><b>Pathogenic variants (ClinVar):</b></span></li>
+```{r tier1_summary, echo = F, results='asis',eval = nonempty_tiers[['tier1']]}
+
+i <- 1
+cat('<ul>\n')
+while(i <= NROW(pcg_report[['summary']][['tier1']])){
+  cat(paste0('<li><span style="color:#9E0142; font-size:13pt">',pcg_report[['summary']][['tier1']][i,]$CLINVAR_PHENOTYPE,'</span> - ',pcg_report[['summary']][['tier1']][i,]$VARIANTS),'</li>\n')
+  i <- i + 1
+}
+cat('</ul>\n')
+```
+
+```{r empty_tier1, echo = F, results='asis',eval = empty_tiers[['tier1']]}
+cat('<ul><li><i>No variants found.</i></li></ul>',sep='\n')
+cat('\n')
+```
+</ul>
+
+<br>
+
+<ul><li><span style="color:#D53E4F; font-size:13pt"><b>Likely pathogenic variants (ClinVar):</b></span></li>
+```{r tier2_summary, echo = F,results='asis',eval = nonempty_tiers[['tier2']]}
+
+i <- 1
+cat('<ul>\n')
+while(i <= NROW(pcg_report[['summary']][['tier2']])){
+  cat(paste0('<li><span style="color:#D53E4F; font-size:13pt">',pcg_report[['summary']][['tier2']][i,]$CLINVAR_PHENOTYPE,'</span> - ',pcg_report[['summary']][['tier2']][i,]$VARIANTS),'</li>\n')
+  i <- i + 1
+}
+cat('</ul>\n')
+
+```
+
+```{r empty_tier2, echo = F, results='asis',eval = empty_tiers[['tier2']]}
+cat('<ul><li><i>No variants found.</i></li></ul>',sep='\n')
+cat('\n')
+```
+</ul>
+
+<br>
+
+<ul><li><span style="color:#F46D43; font-size:13pt"><b>Unclassified variants (ClinVar) - HIGH predicted pathogenicity:</b></span></li> 
+```{r tier3A_summary, echo = F,results='asis',eval = nonempty_tiers[['tier3A']]}
+
+i <- 1
+cat('<ul>\n')
+while(i <= NROW(pcg_report[['summary']][['tier3A']])){
+  cat(paste0('<li><span style="color:#F46D43; font-size:13pt">',pcg_report[['summary']][['tier3A']][i,]$CLINVAR_PHENOTYPE,'</span> - ',pcg_report[['summary']][['tier3A']][i,]$VARIANTS),'</li>\n')
+  i <- i + 1
+}
+cat('</ul>\n')
+
+```
+
+```{r empty_tier3A, echo = F, results='asis',eval = empty_tiers[['tier3A']]}
+cat('<ul><li><i>No variants found.</i></li></ul>',sep='\n')
+cat('\n')
+```
+</ul>
+
+<br>
+
+<ul><li><span style="color:#F46D43; font-size:13pt"><b>Unclassified variants (not found in ClinVar) - HIGH predicted pathogenicity:</b></span></li> 
+```{r tier3B_summary, echo = F,results='asis',eval = nonempty_tiers[['tier3B']]}
+
+i <- 1
+cat('<ul>\n')
+while(i <= NROW(pcg_report[['summary']][['tier3B']])){
+  cat(paste0('<li><span style="color:#F46D43; font-size:13pt">',pcg_report[['summary']][['tier3B']][i,]$MUTATION,'</span></li>\n'))
+  i <- i + 1
+}
+cat('</ul>\n')
+
+```
+
+```{r empty_tier3B, echo = F, results='asis',eval = empty_tiers[['tier3B']]}
+cat('<ul><li><i>No variants found.</i></li></ul>',sep='\n')
+cat('\n')
+```
+</ul>
+<br>

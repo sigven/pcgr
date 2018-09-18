@@ -17,8 +17,8 @@ The prioritization of SNV/InDels is here done according to a four-tiered structu
 
 ```{r vaf_plot_prep, echo=F}
 tumor_af_plot <- F
-if(nrow(pcg_report[['snv_indel']][['variant_set']][['tsv']]) > 0){
-  if(nrow(dplyr::filter(pcg_report[['snv_indel']][['variant_set']][['tsv']], !is.na(DP_TUMOR))) > 0 & nrow(dplyr::filter(pcg_report[['snv_indel']][['variant_set']][['tsv']], !is.na(AF_TUMOR))) > 0){
+if(NROW(pcg_report[['snv_indel']][['variant_set']][['tsv']]) > 0){
+  if(NROW(dplyr::filter(pcg_report[['snv_indel']][['variant_set']][['tsv']], !is.na(DP_TUMOR))) > 0 & NROW(dplyr::filter(pcg_report[['snv_indel']][['variant_set']][['tsv']], !is.na(AF_TUMOR))) > 0){
     tumor_af_plot <- T
   }
 }
@@ -57,15 +57,15 @@ table_browse_tumor_dp_af_CC <- F
 table_browse_tumor_dp_af_normal_dp_af <- F
 table_browse_tumor_dp_af_normal_dp_af_CC <- F
 
-if(nrow(pcg_report[['snv_indel']][['variant_set']][['tsv']]) > 0){
+if(NROW(pcg_report[['snv_indel']][['variant_set']][['tsv']]) > 0){
   table_browse_basic <- T
 
-  if(nrow(dplyr::filter(pcg_report[['snv_indel']][['variant_set']][['tsv']], !is.na(CALL_CONFIDENCE))) > 0){
+  if(NROW(dplyr::filter(pcg_report[['snv_indel']][['variant_set']][['tsv']], !is.na(CALL_CONFIDENCE))) > 0){
     table_browse_basic_CC <- T
     table_browse_basic <- F
   }
   
-  if(nrow(dplyr::filter(pcg_report[['snv_indel']][['variant_set']][['tsv']], !is.na(DP_TUMOR))) > 0 & nrow(dplyr::filter(pcg_report[['snv_indel']][['variant_set']][['tsv']], !is.na(AF_TUMOR))) > 0){
+  if(NROW(dplyr::filter(pcg_report[['snv_indel']][['variant_set']][['tsv']], !is.na(DP_TUMOR))) > 0 & NROW(dplyr::filter(pcg_report[['snv_indel']][['variant_set']][['tsv']], !is.na(AF_TUMOR))) > 0){
     table_browse_tumor_dp_af <- T
     if(table_browse_basic_CC == T){
       table_browse_tumor_dp_af_CC <- T
@@ -75,7 +75,7 @@ if(nrow(pcg_report[['snv_indel']][['variant_set']][['tsv']]) > 0){
     table_browse_basic <- F
   }
   
-  if((table_browse_tumor_dp_af == T | table_browse_tumor_dp_af_CC == T) & nrow(dplyr::filter(pcg_report[['snv_indel']][['variant_set']][['tsv']], !is.na(DP_NORMAL))) > 0 & nrow(dplyr::filter(pcg_report[['snv_indel']][['variant_set']][['tsv']], !is.na(AF_NORMAL))) > 0){
+  if((table_browse_tumor_dp_af == T | table_browse_tumor_dp_af_CC == T) & NROW(dplyr::filter(pcg_report[['snv_indel']][['variant_set']][['tsv']], !is.na(DP_NORMAL))) > 0 & NROW(dplyr::filter(pcg_report[['snv_indel']][['variant_set']][['tsv']], !is.na(AF_NORMAL))) > 0){
     table_browse_tumor_dp_af <- F
     table_browse_basic <- F
     table_browse_tumor_dp_af_normal_dp_af <- T

@@ -1,11 +1,18 @@
 ---
-title: "Germline sequencing report - cancer predisposition - `r pcg_report$sample_name`"
+title: "Cancer Predisposition Sequencing Report - `r pcg_report$sample_name`"
 date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
 bibliography: bibliography.bib
 output: 
   html_document:
+    toc: true
+    theme: default
+    number_sections: false
+    toc_float: true
+    toc_depth: 3
     fig_width: 5
     fig_height: 4
+    includes:
+      after_body: disclaimer.md
 ---
 
 ```{r global_options, include=FALSE}
@@ -16,15 +23,20 @@ knitr::opts_chunk$set(echo = F,warning=FALSE, dpi=72, error=F, eval=T)
 ```
 ## Introduction
 
-This report lists __ONLY__ variants in the input VCF that are either
+This report is intended for interpretation of inherited DNA variants implicated with cancer susceptibility and inherited cancer syndromes. Variants shown are limited to a selected set of known cancer predisposition genes (shown below), for which the report lists __ONLY__ those variants that are
 
-1. Classified without conflicting interpretations in ClinVar (pathogenic/likely pathogenic/VUS), or
-2. Novel or rare in the European population (gnomAD) 
+1. Previously classified without conflicting interpretations in ClinVar (clinical significance - pathogenic/likely pathogenic), or
+2. Unclassified variants that are **novel** or associated with **rare** germline population frequency, i.e. 
+    * Minor allele frequency (MAF) < `r pcg_report[['pcgr_config']][['maf_limits']][['maf_gnomad']]`) in the user-defined population set in the gnomAD database, and
+    * Minor allele frequency (MAF) < `r pcg_report[['pcgr_config']][['maf_limits']][['maf_tgp']]`) in the user-defined population set in the 1000 Genomes Project
 
 Variants in the the following list of cancer predisposition genes are reported:
 
 *`r paste(sort(pcg_report[['snv_indel']][['predisposition_genes']]$symbol),collapse=", ")`*
 
+```{r summary, child='predispose/summary.Rmd'}
+```
+<br>
 
 ## Germline SNVs/InDels
 
@@ -37,7 +49,5 @@ Variants in the the following list of cancer predisposition genes are reported:
 ```{r conditional_tier3, child='predispose/tier3_predispose.Rmd', eval = pcg_report[['snv_indel']][['eval']]}
 ```
 
-```{r conditional_unclassified, child='predispose/unclassified_predispose.Rmd', eval = pcg_report[['snv_indel']][['eval']]}
-```
 
 

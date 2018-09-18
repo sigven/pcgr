@@ -25,22 +25,22 @@ rlogging::SetLogFile(NULL)
 
 load(paste0(data_dir,'/data/',genome_assembly,'/rda/pcgr_data.rda'))
 
-pcgr_config <- NULL
-default_configuration_file <- paste0(data_dir,'/data/',genome_assembly,'/pcgr_configuration_predisposition_default.toml')
+cpsr_config <- NULL
+default_configuration_file <- paste0(data_dir,'/data/',genome_assembly,'/cpsr_configuration_default.toml')
 if(file.exists(default_configuration_file)){
-	pcgr_config <- RcppTOML::parseTOML(default_configuration_file, fromFile = T)
+	cpsr_config <- RcppTOML::parseTOML(default_configuration_file, fromFile = T)
 }
 user_config <- RcppTOML::parseTOML(configuration_file, fromFile = T)
 
 ## overwrite default config
-for(section in names(pcgr_config)){
+for(section in names(cpsr_config)){
   if(!is.null(user_config[[section]])){
-    for(element in names(pcgr_config[[section]])){
+    for(element in names(cpsr_config[[section]])){
       if(!is.null(user_config[[section]][[element]])){
-        pcgr_config[[section]][[element]] <- user_config[[section]][[element]]
+        cpsr_config[[section]][[element]] <- user_config[[section]][[element]]
       }
     }
   }
 }
 
-pcgrr::generate_predisposition_report(dir, query_vcf2tsv, pcgr_data, pcgr_config, sample_name, version, genome_assembly = genome_assembly)
+pcgrr::generate_predisposition_report(dir, query_vcf2tsv, pcgr_data, cpsr_config, sample_name, version, genome_assembly = genome_assembly)

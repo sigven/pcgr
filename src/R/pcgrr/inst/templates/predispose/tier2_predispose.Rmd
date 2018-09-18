@@ -1,57 +1,121 @@
-
-### Tier 2 - Likely pathogenic ClinVar variants
+### Tier 2 - Likely pathogenic variants {.tabset}
 
 <br>
+
 ```{r prepare_tier2_data, echo=F, results='asis'}
 
-show_tier_filters <- F
-missing_tier2 <- T
-if(nrow(pcg_report[['snv_indel']][['variant_display']][['tier2']]) > 0){
-  show_tier_filters <- T
-  missing_tier2 <- F
+
+show_tier2_filters <- list()
+missing_tier2_items <- list()
+for(type in c('cancer_phenotype','noncancer_phenotype')){
+  show_tier2_filters[[type]] <- F
+  missing_tier2_items[[type]] <- T
+  if(NROW(pcg_report[['snv_indel']][['variant_display']][['tier2']][[type]]) > 0){
+    show_tier2_filters[[type]] <- T
+    missing_tier2_items[[type]] <- F
+  }
 }
 
+
+tag_tgp <- pcg_report[['pcgr_config']][['popgen']][['vcftag_tgp']]
+desc_tgp <- pcg_report[['pcgr_config']][['popgen']][['popdesc_tgp']]
+formula_tgp <- as.formula(paste0("~",rlang::sym(tag_tgp)))
+tag_gnomad <- pcg_report[['pcgr_config']][['popgen']][['vcftag_gnomad']]
+desc_gnomad <- pcg_report[['pcgr_config']][['popgen']][['popdesc_gnomad']]
+formula_gnomad <- as.formula(paste0("~",rlang::sym(tag_gnomad)))
 
 ```
 
 
-```{r tier2, echo=F, results = 'asis', eval = show_tier_filters}
+#### Cancer phenotypes
+
+```{r tier2_cancer, echo=F, results = 'asis', eval = show_tier2_filters[['cancer_phenotype']]}
 library(summarywidget)
 library(crosstalk)
 
-cat('A total of ',nrow(pcg_report[['snv_indel']][['variant_display']][['tier2']]),' unique, germline variant(s) are found as likely pathogenic in ClinVar for the selected cancer predisposition genes:')
+
+cat('A total of ',NROW(pcg_report[['snv_indel']][['variant_display']][['tier2']][['cancer_phenotype']]), ' unique, germline variant(s) are found as likely pathogenic and associated with cancer phenotypes in ClinVar for the selected predisposition genes:')
 cat('\n')
 htmltools::br()
 htmltools::br()
 
-variants_tier2_shared <- crosstalk::SharedData$new(pcg_report[['snv_indel']][['variant_display']][['tier2']])
+variants_tier2_cancer <- crosstalk::SharedData$new(pcg_report[['snv_indel']][['variant_display']][['tier2']][['cancer_phenotype']])
 crosstalk::bscols(
   list(
-    crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_tier2_shared, ~CONSEQUENCE),
-    crosstalk::filter_select("SYMBOL", "Gene", variants_tier2_shared, ~SYMBOL),
-    crosstalk::filter_select("PHENOTYPE", "Condition(s)", variants_tier2_shared, ~PHENOTYPE)
+    crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_tier2_cancer, ~CONSEQUENCE),
+    crosstalk::filter_checkbox("GENOTYPE", "Genotype", variants_tier2_cancer, ~GENOTYPE),
+    crosstalk::filter_select("SYMBOL", "Gene", variants_tier2_cancer, ~SYMBOL),
+    crosstalk::filter_select("CLINVAR_PHENOTYPE", "ClinVar phenotype(s)", variants_tier2_cancer, ~CLINVAR_PHENOTYPE)
   ),
   list(
-    crosstalk::filter_select("PROTEIN_DOMAIN", "Protein domain", variants_tier2_shared, ~PROTEIN_DOMAIN),
-    crosstalk::filter_slider("NFE_AF_GNOMAD", "Minor allele frequency Europeans (gnomAD-NFE)", variants_tier2_shared, ~NFE_AF_GNOMAD,sep="", ticks = F),
-    crosstalk::filter_slider("GLOBAL_AF_GNOMAD", "Minor allele frequency global (gnomAD)", variants_tier2_shared, ~GLOBAL_AF_GNOMAD, sep="",ticks = F)
+    crosstalk::filter_checkbox("LOSS_OF_FUNCTION", "Predicted loss-of-function variant", variants_tier2_cancer, ~LOSS_OF_FUNCTION),
+    crosstalk::filter_slider(tag_gnomad, paste0("MAF gnomAD (",desc_gnomad,")"), variants_tier2_cancer, formula_gnomad, sep="",ticks = F),
+    crosstalk::filter_slider(tag_tgp, paste0("MAF 1000 Genomes Project (",desc_tgp,")"), variants_tier2_cancer, formula_tgp, sep="",ticks = F)
   )
 )
 
+    
+
 htmltools::br()
 htmltools::br()
 
 crosstalk::bscols(
-  DT::datatable(variants_tier2_shared, escape=F,extensions=c("Buttons","Responsive"), width = "100%",options=list(buttons = c('csv','excel'),dom = 'Bfrtip'))
+  DT::datatable(variants_tier2_cancer, escape=F,extensions=c("Buttons","Responsive"), width = "100%",options=list(buttons = c('csv','excel'),dom = 'Bfrtip'))
 )
 
 #htmltools::br()
 
 ```
 
-```{r tier2_missing, echo=F, results = 'asis', eval = missing_tier2}
+```{r tier2_cancer_missing, echo=F, results = 'asis', eval = missing_tier2_items[['cancer_phenotype']]}
 cat('<i>No variants found.</i>',sep='\n')
 cat('\n')
 ```
-
 <br><br>
+
+#### Undefined/non-cancer phenotypes
+
+```{r tier2_noncancer, echo=F, results = 'asis', eval = show_tier2_filters[['noncancer_phenotype']]}
+library(summarywidget)
+library(crosstalk)
+
+
+cat('A total of ',NROW(pcg_report[['snv_indel']][['variant_display']][['tier2']][['noncancer_phenotype']]), ' unique, germline variant(s) are found as pathogenic and associated with undefined/non-cancer phenotypes in ClinVar for the selected predisposition genes:')
+cat('\n')
+htmltools::br()
+htmltools::br()
+
+variants_tier2_noncancer <- crosstalk::SharedData$new(pcg_report[['snv_indel']][['variant_display']][['tier2']][['noncancer_phenotype']])
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_tier2_noncancer, ~CONSEQUENCE),
+    crosstalk::filter_checkbox("GENOTYPE", "Genotype", variants_tier2_noncancer, ~GENOTYPE),
+    crosstalk::filter_select("SYMBOL", "Gene", variants_tier2_noncancer, ~SYMBOL),
+    crosstalk::filter_select("CLINVAR_PHENOTYPE", "ClinVar phenotype(s)", variants_tier2_noncancer, ~CLINVAR_PHENOTYPE)
+  ),
+  list(
+    crosstalk::filter_checkbox("LOSS_OF_FUNCTION", "Predicted loss-of-function variant", variants_tier2_noncancer, ~LOSS_OF_FUNCTION),
+    crosstalk::filter_slider(tag_gnomad, paste0("MAF gnomAD (",desc_gnomad,")"), variants_tier2_noncancer, formula_gnomad, sep="",ticks = F),
+    crosstalk::filter_slider(tag_tgp, paste0("MAF 1000 Genomes Project (",desc_tgp,")"), variants_tier2_noncancer, formula_tgp, sep="",ticks = F)
+  )
+)
+
+    
+
+htmltools::br()
+htmltools::br()
+
+crosstalk::bscols(
+  DT::datatable(variants_tier2_noncancer, escape=F,extensions=c("Buttons","Responsive"), width = "100%",options=list(buttons = c('csv','excel'),dom = 'Bfrtip'))
+)
+
+#htmltools::br()
+
+```
+
+```{r tier2_noncancer_missing, echo=F, results = 'asis', eval = missing_tier2_items[['noncancer_phenotype']]}
+cat('<i>No variants found.</i>',sep='\n')
+cat('\n')
+```
+<br><br>
+

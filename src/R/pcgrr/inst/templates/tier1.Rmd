@@ -1,10 +1,10 @@
 
 ### Tier 1 - Genomic biomarkers for diagnosis, prognosis, and drug response {.tabset}
 
-- A total of __`r nrow(pcg_report[['snv_indel']][['variant_display']][['tier1']])`__ unique, somatic variant(s) in the tumor sample can be mapped to genomic biomarkers in the [database for clinical interpretations of variants in cancer, CIViC](https://civic.genome.wustl.edu/#/home) or [Cancer bioMarkers database](https://www.cancergenomeinterpreter.org/biomarkers), with the following number of evidence items:
-    * Tier 1 - Predictive: __`r nrow(pcg_report[['snv_indel']][['clinical_evidence_item']][['any_tumortype']][['predictive']][['any']])`__ evidence items
-    * Tier 1 - Prognostic: __`r nrow(pcg_report[['snv_indel']][['clinical_evidence_item']][['any_tumortype']][['prognostic']][['any']])`__ evidence items
-    * Tier 1 - Diagnostic: __`r nrow(pcg_report[['snv_indel']][['clinical_evidence_item']][['any_tumortype']][['diagnostic']][['any']])`__ evidence items
+- A total of __`r NROW(pcg_report[['snv_indel']][['variant_display']][['tier1']])`__ unique, somatic variant(s) in the tumor sample can be mapped to genomic biomarkers in the [database for clinical interpretations of variants in cancer, CIViC](https://civic.genome.wustl.edu/#/home) or [Cancer bioMarkers database](https://www.cancergenomeinterpreter.org/biomarkers), with the following number of evidence items:
+    * Tier 1 - Predictive: __`r NROW(pcg_report[['snv_indel']][['clinical_evidence_item']][['any_tumortype']][['predictive']][['any']])`__ evidence items
+    * Tier 1 - Prognostic: __`r NROW(pcg_report[['snv_indel']][['clinical_evidence_item']][['any_tumortype']][['prognostic']][['any']])`__ evidence items
+    * Tier 1 - Diagnostic: __`r NROW(pcg_report[['snv_indel']][['clinical_evidence_item']][['any_tumortype']][['diagnostic']][['any']])`__ evidence items
 
 <br><br>
 
@@ -15,7 +15,7 @@ missing_tier1_items <- list()
 for(type in c('diagnostic','prognostic','predictive')){
   show_tier1_filters[[type]] <- F
   missing_tier1_items[[type]] <- T
-  if(nrow(pcg_report[['snv_indel']][['clinical_evidence_item']][['any_tumortype']][[type]][['any']]) > 0){
+  if(NROW(pcg_report[['snv_indel']][['clinical_evidence_item']][['any_tumortype']][[type]][['any']]) > 0){
     show_tier1_filters[[type]] <- T
     missing_tier1_items[[type]] <- F
   }

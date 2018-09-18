@@ -3,9 +3,9 @@
 
 A total of __`r length(unique(pcg_report[['cna']][['variant_display']][['biomarker']]$SEGMENT))`__ aberrations are associated with clinical evidence items in the [database for clinical interpretations of variants in cancer, CIViC](https://civic.genome.wustl.edu/#/home), with the following number of evidence items:
 
- *  Predictive: __`r nrow(pcg_report[['cna']][['clinical_evidence_item']][['any_tumortype']][['predictive']][['any']])`__ evidence items linked to drug sensitivity/resistance
- *  Prognostic: __`r nrow(pcg_report[['cna']][['clinical_evidence_item']][['any_tumortype']][['prognostic']][['any']])`__ evidence items
- *  Diagnostic: __`r nrow(pcg_report[['cna']][['clinical_evidence_item']][['any_tumortype']][['diagnostic']][['any']])`__ evidence items
+ *  Predictive: __`r NROW(pcg_report[['cna']][['clinical_evidence_item']][['any_tumortype']][['predictive']][['any']])`__ evidence items linked to drug sensitivity/resistance
+ *  Prognostic: __`r NROW(pcg_report[['cna']][['clinical_evidence_item']][['any_tumortype']][['prognostic']][['any']])`__ evidence items
+ *  Diagnostic: __`r NROW(pcg_report[['cna']][['clinical_evidence_item']][['any_tumortype']][['diagnostic']][['any']])`__ evidence items
 
 <br><br>
 ```{r prepare_cna_clin_data, echo=F, results='asis'}
@@ -15,7 +15,7 @@ missing_cna_variants <- list()
 for(type in c('diagnostic','prognostic','predictive')){
   show_cna_filters[[type]] <- F
   missing_cna_variants[[type]] <- T
-  if(nrow(pcg_report[['cna']][['clinical_evidence_item']][['any_tumortype']][[type]][['any']]) > 0){
+  if(NROW(pcg_report[['cna']][['clinical_evidence_item']][['any_tumortype']][[type]][['any']]) > 0){
     show_cna_filters[[type]] <- T
     missing_cna_variants[[type]] <- F
     if('Segment' %in% colnames(pcg_report[['cna']][['clinical_evidence_item']][['any_tumortype']][[type]][['any']]) & 'SEGMENT_LENGTH_MB' %in% colnames(pcg_report[['cna']][['clinical_evidence_item']][['any_tumortype']][[type]][['any']])){

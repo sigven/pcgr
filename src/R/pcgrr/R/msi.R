@@ -19,32 +19,6 @@ predict_msi_status <- function(vcf_data_df, simpleRepeats_gr, windowMasker_gr, m
   seqinfo <- GenomeInfoDb::Seqinfo(seqnames = GenomeInfoDb::seqlevels(GenomeInfoDb::seqinfo(bsg)), seqlengths = GenomeInfoDb::seqlengths(GenomeInfoDb::seqinfo(bsg)), genome = genome_assembly)
   vcf_df_gr <- GenomicRanges::makeGRangesFromDataFrame(mutations_valid, keep.extra.columns = T, seqinfo = seqinfo, seqnames.field = 'CHROM',start.field = 'POS', end.field = 'POS', ignore.strand = T, starts.in.df.are.0based = F)
 
-  # mutations_valid <- dplyr::select(mutations_valid, CHROM,POS,end,REF,ALT,CONSEQUENCE,SYMBOL,GENOMIC_CHANGE,VARIANT_CLASS,PROTEIN_DOMAIN,GENE_NAME,PROTEIN_CHANGE,PROTEIN_FEATURE,CANCER_MUTATION_HOTSPOT,DOCM_DISEASE,DOCM_LITERATURE,CLINVAR,TCGA_FREQUENCY,CANCER_ASSOCIATIONS,AF_TUMOR, DP_TUMOR,AF_NORMAL,DP_NORMAL,CALL_CONFIDENCE)
-  # mutations_valid$start_field <- mutations_valid$POS
-  # mutations_valid$end_field <- NA
-  # mutations_valid <- dplyr::filter(mutations_valid, !is.na(VARIANT_CLASS))
-  # if(nrow(mutations_valid[mutations_valid$VARIANT_CLASS == 'deletion',]) > 0){
-  #   mutations_valid[mutations_valid$VARIANT_CLASS == 'deletion',]$end_field <- mutations_valid[mutations_valid$VARIANT_CLASS == 'deletion',]$end
-  # }
-  # if(nrow(mutations_valid[mutations_valid$VARIANT_CLASS == 'substitution',]) > 0){
-  #   mutations_valid[mutations_valid$VARIANT_CLASS == 'substitution',]$end_field <- mutations_valid[mutations_valid$VARIANT_CLASS == 'substitution',]$end
-  # }
-  # if(nrow(mutations_valid[mutations_valid$VARIANT_CLASS == 'insertion',]) > 0){
-  #   mutations_valid[mutations_valid$VARIANT_CLASS == 'insertion',]$end_field <- mutations_valid[mutations_valid$VARIANT_CLASS == 'insertion',]$POS
-  # }
-  # if(nrow(mutations_valid[mutations_valid$VARIANT_CLASS == 'SNV',]) > 0){
-  #   mutations_valid[mutations_valid$VARIANT_CLASS == 'SNV',]$end_field <- mutations_valid[mutations_valid$VARIANT_CLASS == 'SNV',]$POS
-  # }
-  # if(nrow(mutations_valid[mutations_valid$VARIANT_CLASS == 'sequence_alteration',]) > 0){
-  #   mutations_valid[mutations_valid$VARIANT_CLASS == 'sequence_alteration',]$end_field <- mutations_valid[mutations_valid$VARIANT_CLASS == 'sequence_alteration',]$POS
-  # }
-  #
-  # mutations_valid <- dplyr::select(mutations_valid, -end)
-  # mutations_valid <- dplyr::filter(mutations_valid, !is.na(end_field) & !is.na(start_field))
-  #
-  # ## encode as GenomicRanges to enable intersection with repeats
-  # seqinfo <- GenomeInfoDb::Seqinfo(seqnames = GenomeInfoDb::seqlevels(GenomeInfoDb::seqinfo(bsg)), seqlengths = GenomeInfoDb::seqlengths(GenomeInfoDb::seqinfo(bsg)), genome = genome_assembly)
-  # vcf_df_gr <- GenomicRanges::makeGRangesFromDataFrame(mutations_valid, keep.extra.columns = T, seqinfo = seqinfo, seqnames.field = 'CHROM',start.field = 'start_field', end.field = 'end_field', ignore.strand = T, starts.in.df.are.0based = F)
   variant_repeat_hits <- GenomicRanges::findOverlaps(vcf_df_gr, simpleRepeats_gr, type="any", select="all", ignore.strand = T)
   ranges <- simpleRepeats_gr[subjectHits(variant_repeat_hits)]
   mcols(ranges) <- c(mcols(ranges),mcols(vcf_df_gr[queryHits(variant_repeat_hits)]))
@@ -125,39 +99,39 @@ predict_msi_status <- function(vcf_data_df, simpleRepeats_gr, windowMasker_gr, m
     dplyr::summarise(indelSNVs = n())
 
   msi_stats10 <- vcf_df_repeatAnnotated %>%
-    dplyr::filter(SYMBOL == 'MLH1' & stringr::str_detect(CONSEQUENCE,"frameshift_variant|missense_variant|splice_donor|splice_acceptor|stop_gained|stop_lost|start_lost|inframe_deletion|inframe_insertion")) %>%
+    dplyr::filter(SYMBOL == 'MLH1' & stringr::str_detect(CONSEQUENCE,"frameshift_|missense_|splice_|stop_|inframe_")) %>%
     dplyr::summarise(MLH1 = n())
 
   msi_stats11 <- vcf_df_repeatAnnotated %>%
-    dplyr::filter(SYMBOL == 'MLH3' & stringr::str_detect(CONSEQUENCE,"frameshift_variant|missense_variant|splice_donor|splice_acceptor|stop_gained|stop_lost|start_lost|inframe_deletion|inframe_insertion")) %>%
+    dplyr::filter(SYMBOL == 'MLH3' & stringr::str_detect(CONSEQUENCE,"frameshift_|missense_|splice_|stop_|inframe_")) %>%
     dplyr::summarise(MLH3 = n())
 
   msi_stats12 <- vcf_df_repeatAnnotated %>%
-    dplyr::filter(SYMBOL == 'MSH2' & stringr::str_detect(CONSEQUENCE,"frameshift_variant|missense_variant|splice_donor|splice_acceptor|stop_gained|stop_lost|start_lost|inframe_deletion|inframe_insertion")) %>%
+    dplyr::filter(SYMBOL == 'MSH2' & stringr::str_detect(CONSEQUENCE,"frameshift_|missense_|splice_|stop_|inframe_")) %>%
     dplyr::summarise(MSH2 = n())
 
   msi_stats13 <- vcf_df_repeatAnnotated %>%
-    dplyr::filter(SYMBOL == 'MSH3' & stringr::str_detect(CONSEQUENCE,"frameshift_variant|missense_variant|splice_donor|splice_acceptor|stop_gained|stop_lost|start_lost|inframe_deletion|inframe_insertion")) %>%
+    dplyr::filter(SYMBOL == 'MSH3' & stringr::str_detect(CONSEQUENCE,"frameshift_|missense_|splice_|stop_|inframe_")) %>%
     dplyr::summarise(MSH3 = n())
 
   msi_stats14 <- vcf_df_repeatAnnotated %>%
-    dplyr::filter(SYMBOL == 'MSH6' & stringr::str_detect(CONSEQUENCE,"frameshift_variant|missense_variant|splice_donor|splice_acceptor|stop_gained|stop_lost|start_lost|inframe_deletion|inframe_insertion")) %>%
+    dplyr::filter(SYMBOL == 'MSH6' & stringr::str_detect(CONSEQUENCE,"frameshift_|missense_|splice_|stop_|inframe_")) %>%
     dplyr::summarise(MSH6 = n())
 
   msi_stats15 <- vcf_df_repeatAnnotated %>%
-    dplyr::filter(SYMBOL == 'PMS1' & stringr::str_detect(CONSEQUENCE,"frameshift_variant|missense_variant|splice_donor|splice_acceptor|stop_gained|stop_lost|start_lost|inframe_deletion|inframe_insertion")) %>%
+    dplyr::filter(SYMBOL == 'PMS1' & stringr::str_detect(CONSEQUENCE,"frameshift_|missense_|splice_|stop_|inframe_")) %>%
     dplyr::summarise(PMS1 = n())
 
   msi_stats16 <- vcf_df_repeatAnnotated %>%
-    dplyr::filter(SYMBOL == 'PMS2' & stringr::str_detect(CONSEQUENCE,"frameshift_variant|missense_variant|splice_donor|splice_acceptor|stop_gained|stop_lost|start_lost|inframe_deletion|inframe_insertion")) %>%
+    dplyr::filter(SYMBOL == 'PMS2' & stringr::str_detect(CONSEQUENCE,"frameshift_|missense_|splice_|stop_|inframe_")) %>%
     dplyr::summarise(PMS2 = n())
 
   msi_stats17 <- vcf_df_repeatAnnotated %>%
-    dplyr::filter(SYMBOL == 'POLE' & stringr::str_detect(CONSEQUENCE,"frameshift_variant|missense_variant|splice_donor|splice_acceptor|stop_gained|stop_lost|start_lost|inframe_deletion|inframe_insertion")) %>%
+    dplyr::filter(SYMBOL == 'POLE' & stringr::str_detect(CONSEQUENCE,"frameshift_|missense_|splice_|stop_|inframe_")) %>%
     dplyr::summarise(POLE = n())
 
   msi_stats18 <- vcf_df_repeatAnnotated %>%
-    dplyr::filter(SYMBOL == 'POLD1' & stringr::str_detect(CONSEQUENCE,"frameshift_variant|missense_variant|splice_donor|splice_acceptor|stop_gained|stop_lost|start_lost|inframe_deletion|inframe_insertion")) %>%
+    dplyr::filter(SYMBOL == 'POLD1' & stringr::str_detect(CONSEQUENCE,"frameshift_|missense_|splice_|stop_|inframe_")) %>%
     dplyr::summarise(POLD1 = n())
 
 
@@ -219,7 +193,7 @@ predict_msi_status <- function(vcf_data_df, simpleRepeats_gr, windowMasker_gr, m
     }
   }
 
-  mmr_pol_df <- mutations_valid %>% dplyr::filter(stringr::str_detect(SYMBOL, "^(MLH1|MLH3|MSH2|MSH3|MSH6|PMS1|PMS2|POLD1|POLE)$") & stringr::str_detect(CONSEQUENCE,"frameshift_variant|missense_variant|splice_donor|splice_acceptor|stop_gained|stop_lost|start_lost|inframe_deletion|inframe_insertion"))
+  mmr_pol_df <- mutations_valid %>% dplyr::filter(stringr::str_detect(SYMBOL, "^(MLH1|MLH3|MSH2|MSH3|MSH6|PMS1|PMS2|POLD1|POLE)$") & stringr::str_detect(CONSEQUENCE,"frameshift_|missense_|splice_|stop_|inframe_"))
   #mmr_pol_df <- dplyr::select(mmr_pol_df, -c(CHROM,POS,REF,ALT,start_field,end_field))
   mmr_pol_df <- dplyr::select(mmr_pol_df, -c(CHROM,POS,REF,ALT))
   mmr_pol_df <- dplyr::rename(mmr_pol_df, GENE = SYMBOL)

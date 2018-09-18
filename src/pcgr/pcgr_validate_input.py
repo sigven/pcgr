@@ -7,7 +7,7 @@ import os
 import subprocess
 import logging
 import sys
-import pcgrutils
+import annoutils
 import pandas as np
 import toml
 from cyvcf2 import VCF
@@ -70,13 +70,12 @@ def is_valid_vcf(input_vcf, output_dir, logger):
    Function that reads the output file of EBIvariation/vcf-validator and reports potential errors and validation status 
    """
    
-   logger.info('Validating VCF file with EBIvariation/vcf-validator')
+   logger.info('Validating VCF file with EBIvariation/vcf-validator (version 0.6)')
    vcf_validation_output_file = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)','.vcf_validator_output',os.path.basename(input_vcf)))
-   command_v42 = 'vcf_validator --input ' + str(input_vcf) + ' > ' + str(vcf_validation_output_file)
+   command_v42 = 'vcf_validator --input ' + str(input_vcf) + ' > ' + str(vcf_validation_output_file) + ' 2>&1'
    if input_vcf.endswith('.gz'):
-      command_v42 = 'bgzip -dc ' + str(input_vcf) + ' | vcf_validator  > ' + str(vcf_validation_output_file)
+      command_v42 = 'bgzip -dc ' + str(input_vcf) + ' | vcf_validator  > ' + str(vcf_validation_output_file) + ' 2>&1'
    os.system(command_v42)
-   
    
    #is_valid_vcf = -1
    validation_results = {}
@@ -85,7 +84,7 @@ def is_valid_vcf(input_vcf, output_dir, logger):
    if os.path.exists(vcf_validation_output_file):
       f = open(vcf_validation_output_file,'r')
       for line in f:
-         if not re.search(r' \(warning\)$|^Reading from ',line.rstrip()): ## ignore warnings
+         if not re.search(r' \(warning\)$|Reading from ',line.rstrip()): ## ignore warnings
             if line.startswith('Line '):
                validation_results['error_messages'].append('ERROR: ' + line.rstrip())
             if 'the input file is valid' in line.rstrip(): ## valid VCF
@@ -115,7 +114,7 @@ def check_existing_vcf_info_tags(input_vcf, pcgr_directory, genome_assembly, log
    If any coinciding tags, an error will be returned
    """
    
-   pcgr_infotags_desc = pcgrutils.read_infotag_file(os.path.join(pcgr_directory,'data',genome_assembly, 'pcgr_infotags.tsv'))
+   pcgr_infotags_desc = annoutils.read_infotag_file(os.path.join(pcgr_directory,'data',genome_assembly, 'pcgr_infotags.tsv'))
          
    vcf = VCF(input_vcf)
    logger.info('Checking if existing INFO tags of query VCF file coincide with PCGR INFO tags')
@@ -134,13 +133,6 @@ def check_existing_vcf_info_tags(input_vcf, pcgr_directory, genome_assembly, log
    logger.info('No query VCF INFO tags coincide with PCGR INFO tags')
    return ret
 
-def detect_reserved_info_tag(tag, tag_name, logger):
-   reserved_tags = ['AA','AC','AF','AN','BQ','CIGAR','DB','DP','END','H2','H3','MQ','MQ0','NS','SB','SOMATIC','VALIDATED','1000G']
-   if tag in reserved_tags:
-      err_msg = 'Custom INFO tag (' + str(tag_name) + ') needs another name - ' + str(tag) + ' is a reserved field in the VCF specification'
-      return pcgr_error_message(err_msg, logger)
-
-
 def check_format_ad_dp_tags(vcf, pcgr_directory, config_options, logger):
    
    found_taf_tag = 0
@@ -155,11 +147,11 @@ def check_format_ad_dp_tags(vcf, pcgr_directory, config_options, logger):
    normal_af_tag = config_options['allelic_support']['normal_af_tag']
    call_conf_tag = config_options['allelic_support']['call_conf_tag']
    
-   detect_reserved_info_tag(tumor_dp_tag,'tumor_dp_tag', logger)
-   detect_reserved_info_tag(normal_dp_tag,'normal_dp_tag', logger)
-   detect_reserved_info_tag(tumor_af_tag,'tumor_af_tag', logger)
-   detect_reserved_info_tag(normal_af_tag,'normal_af_tag', logger)
-   detect_reserved_info_tag(call_conf_tag,'call_conf_tag', logger)
+   annoutils.detect_reserved_info_tag(tumor_dp_tag,'tumor_dp_tag', logger)
+   annoutils.detect_reserved_info_tag(normal_dp_tag,'normal_dp_tag', logger)
+   annoutils.detect_reserved_info_tag(tumor_af_tag,'tumor_af_tag', logger)
+   annoutils.detect_reserved_info_tag(normal_af_tag,'normal_af_tag', logger)
+   annoutils.detect_reserved_info_tag(call_conf_tag,'call_conf_tag', logger)
    
    for e in vcf.header_iter():
       header_element = e.info()
@@ -286,8 +278,8 @@ def validate_pcgr_input(pcgr_directory, input_vcf, input_cna, configuration_file
    5. Check that copy number segment file has required columns and correct data types (and range)
    6. Any genotype data from VCF input file is stripped, and the resulting VCF file is sorted and indexed (bgzip + tabix) 
    """
-   logger = pcgrutils.getlogger('pcgr-validate-input')
-   config_options = pcgrutils.read_config_options(configuration_file, pcgr_directory, genome_assembly, logger)
+   logger = annoutils.getlogger('pcgr-validate-input')
+   config_options = annoutils.read_config_options(configuration_file, pcgr_directory, genome_assembly, logger, wflow = 'pcgr')
    #print str(config_options)
    if not input_vcf == 'None':
       if config_options['other']['vcf_validation']:
