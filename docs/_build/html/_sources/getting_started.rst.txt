@@ -55,7 +55,7 @@ b. Download and unpack the latest data bundles in the PCGR directory
       20181004 <https://drive.google.com/open?id=1G34Cn2MO-NQ53cDdFvqNlg79YBZfQKfk>`__
       (approx 9.2Gb)
    -  `grch38 data bundle -
-      20181004 <https://drive.google.com/open?id=1G34Cn2MO-NQ53cDdFvqNlg79YBZfQKfk>`__
+      20181004 <https://drive.google.com/open?id=1zb7TgX0cLH02iGbsscm5JJnKi7WevtQg>`__
       (approx 13Gb)
    -  *Unpacking*:
       ``gzip -dc pcgr.databundle.grch37.YYYYMMDD.tgz | tar xvf -``

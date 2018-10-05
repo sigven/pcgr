@@ -41,6 +41,8 @@ Added
       predictions (SPLICE_SITE_RF_DBNSFP, SPLICE_SITE_ADA_DBNSFP)
 
 -  Upgraded samtools to v1.9 (makes vcf2maf work properly)
+-  Added Ensembl gene/transcript id and corresponding RefSeq mRNA id to
+   TSV/JSON
 -  Added for future implementation:
 
    -  SeqKat + karyoploteR for exploration of *kataegis/hypermutation*
