@@ -7,6 +7,7 @@ set -e
 set -o pipefail
 
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SKIP_VALIDATOR=$1
 
 # Install conda if needed:
 if [ ! -x "$(command -v conda)" ]; then
@@ -43,21 +44,21 @@ R -e "library(devtools); options(unzip = '$(which unzip)'); devtools::install_gi
 # This one is local
 R -e "library(devtools); devtools::install('${SRC_DIR}/R/pcgrr')"
 
-# Install VEP separately (doesn't work when within the envirnoment file, for some reason):
-conda install -c bioconda -y ensembl-vep
 # Install VEP plugins:
 vep_install --AUTO p --PLUGINS miRNA --NO_HTSLIB --NO_UPDATE
 
-# Install the EBI vcf validator
-wget https://github.com/EBIvariation/vcf-validator/releases/download/v0.7/vcf_validator -O ${CONDA_PREFIX}/bin/vcf_validator
-chmod +x ${CONDA_PREFIX}/bin/vcf_validator
+if [ -z ${SKIP_VALIDATOR} ] ; then
+    # Install the EBI vcf validator
+    wget https://github.com/EBIvariation/vcf-validator/releases/download/v0.6/vcf_validator -O ${CONDA_PREFIX}/bin/vcf_validator
+    chmod +x ${CONDA_PREFIX}/bin/vcf_validator
+fi
 
 # Access to src scripts
 chmod +x ${SRC_DIR}/pcgr/*.py
 chmod +x ${SRC_DIR}/*.R
 
 # Create a loader. Usage: `source load_pcgr.sh`
-cat <<EOT > load_pcgr.sh
+cat <<EOT > ${THIS_DIR}/load_pcgr.sh
 export PATH=${THIS_DIR}/miniconda/bin:\$PATH
 source activate pcgr
 EOT

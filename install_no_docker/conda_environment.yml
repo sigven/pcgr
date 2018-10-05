@@ -32,6 +32,7 @@ dependencies:
   - perl-dbi
   - perl-dbd-mysql
   - perl-bioperl
+  - ensembl-vep>=92
   #
   # PCGR: R packages
   - pandoc<2  # r-rmarkdown 1.6 doesn't support pandoc 2, and a more recent r-rmarkdown is not available on conda
@@ -53,6 +54,7 @@ dependencies:
   - r-rcpptoml
   - r-ggplot2
   - r-dt
+  - r-stringi>=1.1.7  # for pcgrr
   - r-htmlwidgets>=1.0  # dependency requirement for DT (by default, 0.9 is getting installed)
   - r-crosstalk
   - r-deconstructsigs
