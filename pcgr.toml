@@ -104,14 +104,13 @@ Biliary_Tract_Cancer_NOS = false
 Bladder_Urinary_Tract_Cancer_NOS = false
 Blood_Cancer_NOS = false
 Bone_Cancer_NOS = false
-Breast_Cancer_NOS = false
+Breast_Cancer_NOS = true
 CNS_Brain_Cancer_NOS = false
 Colorectal_Cancer_NOS = false
 Cervical_Cancer_NOS = false
 DNA_Repair_Deficiency_Disorders = false
 Esophageal_Stomach_Cancer_NOS = false
 Head_And_Neck_Cancer_NOS = false
-Hereditary_Cancer_NOS = false
 Kidney_Cancer_NOS = false
 Leukemia_NOS = false
 Liver_Cancer_NOS = false
@@ -140,6 +139,11 @@ Vulvar_Vaginal_Cancer_NOS = false
 ## Choose visual theme of report, any of: "default", "cerulean", "journal", "flatly", "readable", "spacelab", "united", "cosmo", "lumen", "paper", "sandstone", "simplex", or "yeti" (https://bootswatch.com/)
 report_theme = "default"
 
+[custom_tags]
+## list VCF info tags that should be present in JSON and TSV output
+## tags should be comma separated, i.e. custom_tags = "MUTECT2_FILTER,STRELKA_FILTER"
+custom_tags = ""
+
 [other]
 ## Keep/skip VCF validation by https://github.com/EBIvariation/vcf-validator. The vcf-validator checks
 ## that the input VCF is properly encoded. Since the vcf-validator is strict, and with error messages
@@ -153,3 +157,5 @@ n_vcfanno_proc = 4
 n_vep_forks = 4
 ## omit intergenic variants during VEP processing
 vep_skip_intergenic = false
+## generate a MAF for input VCF using https://github.com/mskcc/vcf2maf
+vcf2maf = false

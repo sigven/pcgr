@@ -1,7 +1,7 @@
 ## Annotation resources
 
 ### Basic variant consequence annotation
-  * [VEP v92](http://www.ensembl.org/info/docs/tools/vep/index.html) - Variant Effect Predictor release 92 ([GENCODE v28](https://www.gencodegenes.org/releases/28.html) as gene reference database)
+  * [VEP v94](http://www.ensembl.org/info/docs/tools/vep/index.html) - Variant Effect Predictor release 93 ([GENCODE v28](https://www.gencodegenes.org/releases/28.html) as gene reference database (v19 for grch37))
 
 ###  *Insilico* predictions of effect of coding variants
   * [dBNSFP v3.5](https://sites.google.com/site/jpopgen/dbNSFP) - database of non-synonymous functional predictions (August 2017)
@@ -9,29 +9,30 @@
 
 ###  Variant frequency databases
   * [gnomAD r2](http://exac.broadinstitute.org/) - germline variant frequencies exome-wide (October 2017)
-  * [dbSNP b150](http://www.ncbi.nlm.nih.gov/SNP/) - database of short genetic variants (February 2017)
+  * [dbSNP b151](http://www.ncbi.nlm.nih.gov/SNP/) - database of short genetic variants (build 150 for grch37)
   * [1000Genomes phase3](ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/) - germline variant frequencies genome-wide (May 2013)
   * [Cancer Hotspots](http://cancerhotspots.org) - a resource for statistically significant mutations in cancer (2017)
-  * [TCGA release 10.1](https://portal.gdc.cancer.gov/) - somatic mutations discovered across 33 tumor type cohorts (The Cancer Genome Atlas)
-  * [ICGC-PCAWG](http://docs.icgc.org/pcawg/) - ICGC Pancancer Analysis of Whole Genomes - release 26, December 7th 2017
+  * [TCGA release 12.0](https://portal.gdc.cancer.gov/) - somatic mutations discovered across 33 tumor type cohorts (The Cancer Genome Atlas)
+  * [ICGC-PCAWG](http://docs.icgc.org/pcawg/) - ICGC Pancancer Analysis of Whole Genomes - release 27, April 30th, 2018
 
 ### Variant databases of clinical utility
-  * [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - database of clinically related variants (May 2018)
+  * [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - database of clinically related variants (October 2018)
   * [DoCM](http://docm.genome.wustl.edu) - database of curated mutations (v3.2, April 2016)
-  * [CIViC](http://civic.genome.wustl.edu) - clinical interpretations of variants in cancer (May 9th 2018)
+  * [CIViC](http://civic.genome.wustl.edu) - clinical interpretations of variants in cancer (September 22nd 2018)
   * [CBMDB](http://www.cancergenomeinterpreter.org/biomarkers) - Cancer BioMarkers database (January 17th 2018)
-  * [DGIdb](http://dgidb.genome.wustl.edu) - database of targeted antineoplastic drugs (v3.0, September 2017)
+  * [DGIdb](http://dgidb.genome.wustl.edu) - database of targeted antineoplastic drugs (v3.0.2, January 2018)
 
 ### Protein domains/functional features
-  * [UniProt/SwissProt KnowledgeBase 2018_04](http://www.uniprot.org) - resource on protein sequence and functional information (April 2018)
-  * [Pfam v31](http://pfam.xfam.org) - database of protein families and domains (March 2017)
+  * [UniProt/SwissProt KnowledgeBase 2018_08](http://www.uniprot.org) - resource on protein sequence and functional information (September 2018)
+  * [Pfam v32](http://pfam.xfam.org) - database of protein families and domains (September 2018)
 
 ### Cancer gene knowledge bases
   * [TSGene v2.0](https://bioinfo.uth.edu/TSGene/) - tumor suppressor/oncogene database (November 2015)
   * [DisGeNET v5.0](http://www.disgenet.org) - curated associations between human genes and different tumor types
+  * [TCGA driver genes](https://www.ncbi.nlm.nih.gov/pubmed/29625053) - predicted cancer driver genes based on application of multiple driver gene prediction tools on TCGA pan-cancer cohort
 
 ### Pathway databases
-  * [KEGG PATHWAY Database](http://www.genome.jp/kegg/pathway.htm) - April 16th 2018
+  * [KEGG PATHWAY Database](http://www.genome.jp/kegg/pathway.htm) - August 15th 2018
 
 ### Notes on variant annotation datasets
 
@@ -47,15 +48,18 @@ __Clinical biomarkers__
 
 Clinical biomarkers included in PCGR are limited to the following:
 
+* Markers in CIViC must be *accepted* (*submitted* evidence items are not considered)
 * Markers reported at the variant level (e.g. __BRAF p.V600E__)
 * Markers reported at the codon level (e.g. __KRAS p.G12__)
 * Markers reported at the exon level (e.g. __KIT exon 11 mutation__)
 * Within the [Cancer bioMarkers database (CBMDB)](https://www.cancergenomeinterpreter.org/biomarkers), only markers collected from FDA/NCCN guidelines, scientific literature, and clinical trials are included (markers collected from conference abstracts etc. are not included)
 * Copy number gains/losses
 
+See also comment on a [closed GitHib issue](https://github.com/sigven/pcgr/issues/37#issuecomment-391966286)
+
 __Antineoplastic drugs__
 
-- For drugs extracted from [DGIdb](http://dgidb.genome.wustl.edu), we only include antineoplastic drugs subject to direct interaction with a target (i.e. as found in ChEMBL)
+- For drugs extracted from [DGIdb](http://dgidb.genome.wustl.edu), we only include antineoplastic drugs subject to direct interaction with a target (i.e. as recorded in ChEMBL)
 
 __Gene-disease associations__
 
@@ -63,4 +67,4 @@ __Gene-disease associations__
 
 __TCGA somatic calls__
 
-- TCGA employs four different variant callers for detection of somatic variants (SNVs/InDels), _mutect2, varscan2, somaticsniper and muse_. In the TCGA dataset bundled with PCGR, somatic SNVs are restricted to those that are detected by at least two independent callers (i.e. calls found by a single algorithm are considered low-confident and disregarded)
+- TCGA employs four different variant callers for detection of somatic variants (SNVs/InDels): _mutect2, varscan2, somaticsniper and muse_. In the TCGA dataset bundled with PCGR, somatic SNVs are restricted to those that are detected by at least two independent callers (i.e. calls found by a single algorithm are considered low-confident and disregarded)

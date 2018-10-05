@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Getting started &mdash; Personal Cancer Genome Reporter 0.6.2.1 documentation</title>
+  <title>Getting started &mdash; Personal Cancer Genome Reporter dev documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Personal Cancer Genome Reporter 0.6.2.1 documentation" href="index.html"/>
+    <link rel="top" title="Personal Cancer Genome Reporter dev documentation" href="index.html"/>
         <link rel="next" title="Annotation resources" href="annotation_resources.html"/>
         <link rel="prev" title="About" href="about.html"/> 
 
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.6.2.1
+                dev
               </div>
             
           
@@ -178,7 +178,7 @@ versions of Docker/Windows do not work with PCGR (an example being
 volumes</a>)</li>
 </ul>
 </li>
-<li>Test that Docker is running, e.g. by typing <code class="docutils literal"><span class="pre">docker</span> <span class="pre">ps</span></code> or
+<li>Test that Docker is running, e.g.&nbsp;by typing <code class="docutils literal"><span class="pre">docker</span> <span class="pre">ps</span></code> or
 <code class="docutils literal"><span class="pre">docker</span> <span class="pre">images</span></code> in the terminal window</li>
 <li>Adjust the computing resources dedicated to the Docker, i.e.:<ul>
 <li>Memory: minimum 5GB</li>
@@ -192,8 +192,8 @@ X</a></li>
 <div class="section" id="step-2-download-pcgr-and-data-bundle">
 <h2>STEP 2: Download PCGR and data bundle<a class="headerlink" href="#step-2-download-pcgr-and-data-bundle" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic">
-<li><p class="first">Download and unpack the <a class="reference external" href="https://github.com/sigven/pcgr/releases/tag/v0.6.2.1">latest software release
-(0.6.2.1)</a></p>
+<li><p class="first">Download and unpack the <a class="reference external" href="https://github.com/sigven/pcgr/releases/tag/v0.6.3">latest software release
+(0.6.3)</a></p>
 </li>
 <li><p class="first">Download and unpack the assembly-specific data bundle in the PCGR
 directory</p>
@@ -211,10 +211,10 @@ bundle</a>
 have been produced</p>
 </li>
 <li><p class="first">Pull the <a class="reference external" href="https://hub.docker.com/r/sigven/pcgr/">PCGR Docker image
-(0.6.2.1)</a> from DockerHub
+(0.6.3)</a> from DockerHub
 (approx 5.1Gb):</p>
 <ul class="simple">
-<li><code class="docutils literal"><span class="pre">docker</span> <span class="pre">pull</span> <span class="pre">sigven/pcgr:0.6.2.1</span></code> (PCGR annotation engine)</li>
+<li><code class="docutils literal"><span class="pre">docker</span> <span class="pre">pull</span> <span class="pre">sigven/pcgr:0.6.3</span></code> (PCGR annotation engine)</li>
 </ul>
 </li>
 </ol>
@@ -234,7 +234,7 @@ indexed using <a class="reference external" href="http://www.htslib.org/doc/tabi
 <a class="reference external" href="http://www.htslib.org/doc/tabix.html">tabix</a></li>
 <li>If the input VCF contains multi-allelic sites, these will be subject
 to <a class="reference external" href="http://genome.sph.umich.edu/wiki/Vt#Decompose">decomposition</a></li>
-<li>Variants used for reporting should be designated as &#8216;PASS&#8217; in the VCF
+<li>Variants used for reporting should be designated as ‘PASS’ in the VCF
 FILTER column</li>
 </ul>
 <p>The tab-separated values file with copy number aberrations <strong>MUST</strong>
@@ -248,9 +248,9 @@ contain the following four columns:</p>
 <p>Here, <em>Chromosome</em>, <em>Start</em>, and <em>End</em> denote the chromosomal segment,
 and <strong>Segment_Mean</strong> denotes the log(2) ratio for a particular segment,
 which is a common output of somatic copy number alteration callers. Note
-that coordinates must be <strong>one-based</strong> (i.e. chromosomes start at 1, not
+that coordinates must be <strong>one-based</strong> (i.e.&nbsp;chromosomes start at 1, not
 0). Below shows the initial part of a copy number segment file that is
-formatted correctly according to PCGR&#8217;s requirements:</p>
+formatted correctly according to PCGR’s requirements:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Chromosome</span> <span class="n">Start</span>   <span class="n">End</span> <span class="n">Segment_Mean</span>
 <span class="mi">1</span> <span class="mi">3218329</span> <span class="mi">3550598</span> <span class="mf">0.0024</span>
 <span class="mi">1</span> <span class="mi">3552451</span> <span class="mi">4593614</span> <span class="mf">0.1995</span>
@@ -270,8 +270,9 @@ workflow, related to the following:</p>
 <li>Sequencing depth/allelic support thresholds</li>
 <li>MSI prediction</li>
 <li>Mutational signatures analysis</li>
-<li>Coding target size - for mutational burden analysis</li>
-<li>Tumor-only analysis options (i.e. exclusion of germline
+<li>Mutational burden analysis (e.g.&nbsp;target size)</li>
+<li>VCF to MAF conversion</li>
+<li>Tumor-only analysis options (i.e.&nbsp;exclusion of germline
 variants/enrichment for somatic calls)</li>
 <li>VEP/<em>vcfanno</em> options</li>
 <li>Log-ratio thresholds for gains/losses in CNA analysis</li>
@@ -286,39 +287,47 @@ workflow.</p>
 <h2>STEP 5: Run example<a class="headerlink" href="#step-5-run-example" title="Permalink to this headline">¶</a></h2>
 <p>A tumor sample report is generated by calling the Python script
 <strong>pcgr.py</strong>, which takes the following arguments and options:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">pcgr</span><span class="o">.</span><span class="n">py</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">input_vcf</span> <span class="n">INPUT_VCF</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">input_cna</span> <span class="n">INPUT_CNA</span><span class="p">]</span>
-        <span class="p">[</span><span class="o">--</span><span class="n">force_overwrite</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">version</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">basic</span><span class="p">]</span>
-        <span class="n">pcgr_dir</span> <span class="n">output_dir</span> <span class="p">{</span><span class="n">grch37</span><span class="p">,</span><span class="n">grch38</span><span class="p">}</span> <span class="n">configuration_file</span>
-        <span class="n">sample_id</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span>usage: pcgr.py [-h] [--input_vcf INPUT_VCF] [--input_cna INPUT_CNA]
+        [--force_overwrite] [--version] [--basic]
+        [--docker-uid DOCKER_USER_ID] [--no-docker]
+        pcgr_dir output_dir {grch37,grch38} configuration_file
+        sample_id
 
-<span class="n">Personal</span> <span class="n">Cancer</span> <span class="n">Genome</span> <span class="n">Reporter</span> <span class="p">(</span><span class="n">PCGR</span><span class="p">)</span> <span class="n">workflow</span> <span class="k">for</span> <span class="n">clinical</span> <span class="n">interpretation</span> <span class="n">of</span>
-<span class="n">somatic</span> <span class="n">nucleotide</span> <span class="n">variants</span> <span class="ow">and</span> <span class="n">copy</span> <span class="n">number</span> <span class="n">aberration</span> <span class="n">segments</span>
+Personal Cancer Genome Reporter (PCGR) workflow for clinical interpretation of
+somatic nucleotide variants and copy number aberration segments
 
-<span class="n">positional</span> <span class="n">arguments</span><span class="p">:</span>
-<span class="n">pcgr_dir</span>              <span class="n">PCGR</span> <span class="n">base</span> <span class="n">directory</span> <span class="k">with</span> <span class="n">accompanying</span> <span class="n">data</span> <span class="n">directory</span><span class="p">,</span>
-                <span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span> <span class="o">~/</span><span class="n">pcgr</span><span class="o">-</span><span class="mf">0.6</span><span class="o">.</span><span class="mf">2.1</span>
-<span class="n">output_dir</span>            <span class="n">Output</span> <span class="n">directory</span>
-<span class="p">{</span><span class="n">grch37</span><span class="p">,</span><span class="n">grch38</span><span class="p">}</span>       <span class="n">Genome</span> <span class="n">assembly</span> <span class="n">build</span><span class="p">:</span> <span class="n">grch37</span> <span class="ow">or</span> <span class="n">grch38</span>
-<span class="n">configuration_file</span>    <span class="n">PCGR</span> <span class="n">configuration</span> <span class="n">file</span> <span class="p">(</span><span class="n">TOML</span> <span class="nb">format</span><span class="p">)</span>
-<span class="n">sample_id</span>             <span class="n">Tumor</span> <span class="n">sample</span><span class="o">/</span><span class="n">cancer</span> <span class="n">genome</span> <span class="n">identifier</span> <span class="o">-</span> <span class="n">prefix</span> <span class="k">for</span>
-                <span class="n">output</span> <span class="n">files</span>
+positional arguments:
+pcgr_dir              PCGR base directory with accompanying data directory,
+                e.g. ~/pcgr-0.6.2.1
+output_dir            Output directory
+{grch37,grch38}       Genome assembly build: grch37 or grch38
+configuration_file    PCGR configuration file (TOML format)
+sample_id             Tumor sample/cancer genome identifier - prefix for
+                output files
 
-<span class="n">optional</span> <span class="n">arguments</span><span class="p">:</span>
-<span class="o">-</span><span class="n">h</span><span class="p">,</span> <span class="o">--</span><span class="n">help</span>            <span class="n">show</span> <span class="n">this</span> <span class="n">help</span> <span class="n">message</span> <span class="ow">and</span> <span class="n">exit</span>
-<span class="o">--</span><span class="n">input_vcf</span> <span class="n">INPUT_VCF</span>
-                <span class="n">VCF</span> <span class="nb">input</span> <span class="n">file</span> <span class="k">with</span> <span class="n">somatic</span> <span class="n">query</span> <span class="n">variants</span>
-                <span class="p">(</span><span class="n">SNVs</span><span class="o">/</span><span class="n">InDels</span><span class="p">)</span><span class="o">.</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span>
-<span class="o">--</span><span class="n">input_cna</span> <span class="n">INPUT_CNA</span>
-                <span class="n">Somatic</span> <span class="n">copy</span> <span class="n">number</span> <span class="n">alteration</span> <span class="n">segments</span> <span class="p">(</span><span class="n">tab</span><span class="o">-</span><span class="n">separated</span>
-                <span class="n">values</span><span class="p">)</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span>
-<span class="o">--</span><span class="n">force_overwrite</span>     <span class="n">By</span> <span class="n">default</span><span class="p">,</span> <span class="n">the</span> <span class="n">script</span> <span class="n">will</span> <span class="n">fail</span> <span class="k">with</span> <span class="n">an</span> <span class="n">error</span> <span class="k">if</span> <span class="nb">any</span>
-                <span class="n">output</span> <span class="n">file</span> <span class="n">already</span> <span class="n">exists</span><span class="o">.</span> <span class="n">You</span> <span class="n">can</span> <span class="n">force</span> <span class="n">the</span>
-                <span class="n">overwrite</span> <span class="n">of</span> <span class="n">existing</span> <span class="n">result</span> <span class="n">files</span> <span class="n">by</span> <span class="n">using</span> <span class="n">this</span> <span class="n">flag</span>
-                <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="kc">False</span><span class="p">)</span>
-<span class="o">--</span><span class="n">version</span>             <span class="n">show</span> <span class="n">program</span><span class="s1">&#39;s version number and exit</span>
-<span class="o">--</span><span class="n">basic</span>               <span class="n">Run</span> <span class="n">functional</span> <span class="n">variant</span> <span class="n">annotation</span> <span class="n">on</span> <span class="n">VCF</span> <span class="n">through</span>
-                <span class="n">VEP</span><span class="o">/</span><span class="n">vcfanno</span><span class="p">,</span> <span class="n">omit</span> <span class="n">other</span> <span class="n">analyses</span> <span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">e</span><span class="o">.</span> <span class="n">CNA</span><span class="p">,</span> <span class="n">MSI</span><span class="p">,</span>
-                <span class="n">report</span> <span class="n">generation</span> <span class="n">etc</span><span class="o">.</span> <span class="p">(</span><span class="n">STEP</span> <span class="mi">4</span><span class="p">)</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="kc">False</span><span class="p">)</span>
+optional arguments:
+-h, --help            show this help message and exit
+--input_vcf INPUT_VCF
+                VCF input file with somatic query variants
+                (SNVs/InDels). (default: None)
+--input_cna INPUT_CNA
+                Somatic copy number alteration segments (tab-separated
+                values) (default: None)
+--force_overwrite     By default, the script will fail with an error if any
+                output file already exists. You can force the
+                overwrite of existing result files by using this flag
+                (default: False)
+--version             show program&#39;s version number and exit
+--basic               Run functional variant annotation on VCF through
+                VEP/vcfanno, omit other analyses (i.e. CNA, MSI,
+                report generation etc. (STEP 4) (default: False)
+--docker-uid DOCKER_USER_ID
+                Docker user ID. Default is the host system user ID. If
+                you are experiencing permission errors, try setting
+                this up to root (`--docker-uid root`) (default: None)
+--no-docker           Run the PCGR workflow in a non-Docker mode (see
+                install_no_docker/ folder for instructions (default:
+                False)
 </pre></div>
 </div>
 <p>The <em>examples</em> folder contain input files from two tumor samples
@@ -326,26 +335,24 @@ sequenced within TCGA (<strong>GRCh37</strong> only). It also contains PCGR
 configuration files customized for these samples. A report for a
 colorectal tumor case can be generated by running the following command
 in your terminal window:</p>
-<p><code class="docutils literal"><span class="pre">python</span> <span class="pre">pcgr.py</span> <span class="pre">--input_vcf</span> <span class="pre">~/pcgr-0.6.2.1/examples/tumor_sample.COAD.vcf.gz</span></code>
-<code class="docutils literal"><span class="pre">--input_cna</span> <span class="pre">~/pcgr-0.6.2.1/examples/tumor_sample.COAD.cna.tsv</span></code>
-<code class="docutils literal"><span class="pre">~/pcgr-0.6.2.1</span> <span class="pre">~/pcgr-0.6.2.1/examples</span> <span class="pre">grch37</span> <span class="pre">~/pcgr-0.6.2.1/examples/pcgr_conf.COAD.toml</span> <span class="pre">tumor_sample.COAD</span></code></p>
-<p>This command will run the Docker-based PCGR workflow and produce the
-following output files in the <em>examples</em> folder:</p>
+<p><code class="docutils literal"><span class="pre">python</span> <span class="pre">pcgr.py</span> <span class="pre">--input_vcf</span> <span class="pre">~/pcgr-0.6.3/examples/tumor_sample.COAD.vcf.gz</span></code>
+<code class="docutils literal"><span class="pre">--input_cna</span> <span class="pre">~/pcgr-0.6.3/examples/tumor_sample.COAD.cna.tsv</span></code>
+<code class="docutils literal"><span class="pre">~/pcgr-0.6.3</span> <span class="pre">~/pcgr-0.6.3/examples</span> <span class="pre">grch37</span> <span class="pre">~/pcgr-0.6.3/examples/pcgr_conf.COAD.toml</span> <span class="pre">tumor_sample.COAD</span></code></p>
 <p>This command will run the Docker-based PCGR workflow and produce the
 following output files in the <em>examples</em> folder:</p>
 <ol class="arabic simple">
 <li><strong>tumor_sample.COAD.pcgr_acmg.grch37.html</strong> - An interactive HTML
 report for clinical interpretation</li>
-<li><strong>tumor_sample.COAD.pcgr_acmg.grch37.pass.vcf.gz</strong> - Bgzipped VCF
-file with rich set of annotations for precision oncology</li>
+<li><strong>tumor_sample.COAD.pcgr_acmg.grch37.pass.vcf.gz (.tbi)</strong> - Bgzipped
+VCF file with rich set of annotations for precision oncology</li>
 <li><strong>tumor_sample.COAD.pcgr_acmg.grch37.pass.tsv.gz</strong> - Compressed
 vcf2tsv-converted file with rich set of annotations for precision
 oncology</li>
 <li><strong>tumor_sample.COAD.pcgr_acmg.grch37.snvs_indels.tiers.tsv</strong> -
 Tab-separated values file with variants organized according to tiers
 of functional relevance</li>
-<li><strong>tumor_sample.COAD.pcgr_acmg.grch37.json</strong> - JSON dump of HTML
-report content</li>
+<li><strong>tumor_sample.COAD.pcgr_acmg.grch37.json.gz</strong> - Compressed JSON dump
+of HTML report content</li>
 <li><strong>tumor_sample.COAD.pcgr_acmg.grch37.cna_segments.tsv.gz</strong> -
 Compressed tab-separated values file with annotations of gene
 transcripts that overlap with somatic copy number aberrations</li>
@@ -394,7 +401,7 @@ transcripts that overlap with somatic copy number aberrations</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.6.2.1',
+            VERSION:'dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

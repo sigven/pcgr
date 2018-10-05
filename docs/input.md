@@ -180,6 +180,11 @@ The cancer genome sequencing report can be flexibly configured in a TOML-formatt
 	## Choose visual theme of report, any of: "default", "cerulean", "journal", "flatly", "readable", "spacelab", "united", "cosmo", "lumen", "paper", "sandstone", "simplex", or "yeti" (https://bootswatch.com/)
 	report_theme = "default"
 
+	[custom_tags]
+	## list VCF info tags that should be present in JSON and TSV output
+	## tags should be comma separated, i.e. custom_tags = "MUTECT2_FILTER,STRELKA_FILTER"
+	custom_tags = ""
+
 	[other]
 	## Keep/skip VCF validation by https://github.com/EBIvariation/vcf-validator
 	## The vcf-validator checks that the input VCF is properly encoded. Since the
@@ -194,3 +199,5 @@ The cancer genome sequencing report can be flexibly configured in a TOML-formatt
 	n_vep_forks = 4
 	## omit intergenic variants during VEP processing
 	vep_skip_intergenic = false
+	## generate a MAF for input VCF using https://github.com/mskcc/vcf2maf
+	vcf2maf = false

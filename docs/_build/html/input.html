@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Input &mdash; Personal Cancer Genome Reporter 0.6.2.1 documentation</title>
+  <title>Input &mdash; Personal Cancer Genome Reporter dev documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Personal Cancer Genome Reporter 0.6.2.1 documentation" href="index.html"/>
+    <link rel="top" title="Personal Cancer Genome Reporter dev documentation" href="index.html"/>
         <link rel="next" title="Output" href="output.html"/>
         <link rel="prev" title="Annotation resources" href="annotation_resources.html"/> 
 
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.6.2.1
+                dev
               </div>
             
           
@@ -161,14 +161,14 @@ indexed using <a class="reference external" href="http://www.htslib.org/doc/tabi
 <a class="reference external" href="http://www.htslib.org/doc/tabix.html">tabix</a></li>
 <li>If the input VCF contains multi-allelic sites, these will be subject
 to <a class="reference external" href="http://genome.sph.umich.edu/wiki/Vt#Decompose">decomposition</a></li>
-<li>Variants used for reporting should be designated as &#8216;PASS&#8217; in the VCF
+<li>Variants used for reporting should be designated as ‘PASS’ in the VCF
 FILTER column</li>
 </ul>
 <p><strong>IMPORTANT NOTE 1</strong>: Considering the VCF output for the <a class="reference external" href="https://www.biostars.org/p/19104/">numerous
 somatic SNV/InDel callers</a> that
 have been developed, we have a experienced a general lack of uniformity
 and robustness for the representation of somatic variant genotype data
-(e.g. variant allelic depths (tumor/normal), genotype quality etc.).
+(e.g.&nbsp;variant allelic depths (tumor/normal), genotype quality etc.).
 Variant genotype data found as INFO tags in the input VCF can be
 specified as optional arguments to the PCGR workflow, which in turn can
 be used for interactive exploration in the tumor report.</p>
@@ -192,9 +192,9 @@ contain the following four columns:</p>
 <p>Here, <em>Chromosome</em>, <em>Start</em>, and <em>End</em> denote the chromosomal segment,
 and <strong>Segment_Mean</strong> denotes the log(2) ratio for a particular segment,
 which is a common output of somatic copy number alteration callers. Note
-that coordinates must be <strong>one-based</strong> (i.e. chromosomes start at 1, not
+that coordinates must be <strong>one-based</strong> (i.e.&nbsp;chromosomes start at 1, not
 0). Below shows the initial part of a copy number segment file that is
-formatted correctly according to PCGR&#8217;s requirements:</p>
+formatted correctly according to PCGR’s requirements:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Chromosome</span>    <span class="n">Start</span>   <span class="n">End</span> <span class="n">Segment_Mean</span>
 <span class="mi">1</span> <span class="mi">3218329</span> <span class="mi">3550598</span> <span class="mf">0.0024</span>
 <span class="mi">1</span> <span class="mi">3552451</span> <span class="mi">4593614</span> <span class="mf">0.1995</span>
@@ -349,6 +349,11 @@ with descriptive comments wrt. usage are shown below:</p>
 <span class="c1">## Choose visual theme of report, any of: &quot;default&quot;, &quot;cerulean&quot;, &quot;journal&quot;, &quot;flatly&quot;, &quot;readable&quot;, &quot;spacelab&quot;, &quot;united&quot;, &quot;cosmo&quot;, &quot;lumen&quot;, &quot;paper&quot;, &quot;sandstone&quot;, &quot;simplex&quot;, or &quot;yeti&quot; (https://bootswatch.com/)</span>
 <span class="n">report_theme</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span>
 
+<span class="p">[</span><span class="n">custom_tags</span><span class="p">]</span>
+<span class="c1">## list VCF info tags that should be present in JSON and TSV output</span>
+<span class="c1">## tags should be comma separated, i.e. custom_tags = &quot;MUTECT2_FILTER,STRELKA_FILTER&quot;</span>
+<span class="n">custom_tags</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
 <span class="p">[</span><span class="n">other</span><span class="p">]</span>
 <span class="c1">## Keep/skip VCF validation by https://github.com/EBIvariation/vcf-validator</span>
 <span class="c1">## The vcf-validator checks that the input VCF is properly encoded. Since the</span>
@@ -363,6 +368,8 @@ with descriptive comments wrt. usage are shown below:</p>
 <span class="n">n_vep_forks</span> <span class="o">=</span> <span class="mi">4</span>
 <span class="c1">## omit intergenic variants during VEP processing</span>
 <span class="n">vep_skip_intergenic</span> <span class="o">=</span> <span class="n">false</span>
+<span class="c1">## generate a MAF for input VCF using https://github.com/mskcc/vcf2maf</span>
+<span class="n">vcf2maf</span> <span class="o">=</span> <span class="n">false</span>
 </pre></div>
 </div>
 </div>
@@ -409,7 +416,7 @@ with descriptive comments wrt. usage are shown below:</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.6.2.1',
+            VERSION:'dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

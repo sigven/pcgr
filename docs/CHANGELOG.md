@@ -1,6 +1,32 @@
 
 ## CHANGELOG
 
+#### dev - Oct 5th 2018
+
+##### Fixed
+ * Bug in vcf2tsv (handling INFO tags encoded with 'Type = String')
+ * Bug in search of UniProt functional features (BED feature regions spanning exons are now handled)
+ * Stripped off HTML elements (TCGA_FREQUENCY, DBSNP) in TSV output
+ * Some effect predictions from dbNSFP were not properly parsed (e.g. multiple prediction entries from multiple transcript isoforms), these should now be retrieved correctly
+ * Removed 'COSM' prefix in COSMIC mutation links
+ * Bug in retrieval of splice site predictions from dbscSNV
+
+##### Added
+ * Possibility to run PCGR in a non-Docker environment (e.g. using the *--no-docker* option). Thanks to an excellent contribution by [Vlad Saveliev](https://github.com/vladsaveliev)
+	* Added possibility to add docker user-id
+ * Possibility for MAF file output (converted with vcf2maf), must be configured by the user in the TOML file (i.e. *vcf2maf = true*)
+ * Possibility for adding custom VCF INFO tags to PCGR output files (JSON/TSV), must be configured by the user in the TOML file (i.e. *custom_tags*)
+ * Included the 'rs' prefix for dbSNP identifiers (HTML and TSV output)
+ * Individual entries/columns for variant effect predictions:
+	 * Individual algorithms: SIFT_DBNSFP, M_CAP_DBNSFP, MUTPRED_DBNSFP, MUTATIONTASTER_DBNSFP, MUTATIONASSESSOR_DBNSFP, FATHMM_DBNSFP, FATHMM_MKL_DBNSFP, PROVEAN_DBNSFP
+	 * Ensemble predictions (META_LR_DBNSFP), dbscSNV splice site predictions (SPLICE_SITE_RF_DBNSFP, SPLICE_SITE_ADA_DBNSFP)
+ * Upgraded samtools to v1.9 (makes vcf2maf work properly)
+ * Added for future implementation:
+	 * SeqKat + karyoploteR for exploration of *kataegis/hypermutation*
+	 * CELLector - genomics-guided selection of cancer cell lines
+ * Upgraded VEP to v94
+
+
 #### 0.6.2.1 - May 14th 2018
 
 ##### Fixed
