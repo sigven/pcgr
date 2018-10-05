@@ -92,7 +92,11 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Getting started</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#step-0-python">STEP 0: Python</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#step-1-installation-of-docker">STEP 1: Installation of Docker</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#step-2-download-pcgr-and-data-bundle">STEP 2: Download PCGR and data bundle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-2-download-pcgr-and-data-bundle">STEP 2: Download PCGR and data bundle</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#development-version">Development version</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#latest-release">Latest release</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#step-3-input-preprocessing">STEP 3: Input preprocessing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#step-4-configure-pcgr">STEP 4: Configure PCGR</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#step-5-run-example">STEP 5: Run example</a></li>
@@ -191,19 +195,45 @@ X</a></li>
 </div>
 <div class="section" id="step-2-download-pcgr-and-data-bundle">
 <h2>STEP 2: Download PCGR and data bundle<a class="headerlink" href="#step-2-download-pcgr-and-data-bundle" title="Permalink to this headline">¶</a></h2>
-<ol class="arabic">
-<li><p class="first">Download and unpack the <a class="reference external" href="https://github.com/sigven/pcgr/releases/tag/v0.6.3">latest software release
-(0.6.3)</a></p>
+<div class="section" id="development-version">
+<h3>Development version<a class="headerlink" href="#development-version" title="Permalink to this headline">¶</a></h3>
+<ol class="loweralpha simple">
+<li>Clone the PCGR GitHub repository:
+<code class="docutils literal"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/sigven/pcgr.git</span></code></li>
+<li>Download and unpack the latest data bundles in the PCGR directory<ul>
+<li><a class="reference external" href="https://drive.google.com/open?id=1G34Cn2MO-NQ53cDdFvqNlg79YBZfQKfk">grch37 data bundle -
+20181004</a>
+(approx 9.2Gb)</li>
+<li><a class="reference external" href="https://drive.google.com/open?id=1G34Cn2MO-NQ53cDdFvqNlg79YBZfQKfk">grch38 data bundle -
+20181004</a>
+(approx 13Gb)</li>
+<li><em>Unpacking</em>:
+<code class="docutils literal"><span class="pre">gzip</span> <span class="pre">-dc</span> <span class="pre">pcgr.databundle.grch37.YYYYMMDD.tgz</span> <span class="pre">|</span> <span class="pre">tar</span> <span class="pre">xvf</span> <span class="pre">-</span></code></li>
+</ul>
+</li>
+<li>Pull the <a class="reference external" href="https://hub.docker.com/r/sigven/pcgr/">PCGR Docker image
+(dev)</a> from DockerHub
+(approx 5.1Gb):<ul>
+<li><code class="docutils literal"><span class="pre">docker</span> <span class="pre">pull</span> <span class="pre">sigven/pcgr:dev</span></code> (PCGR annotation engine)</li>
+</ul>
+</li>
+</ol>
+</div>
+<div class="section" id="latest-release">
+<h3>Latest release<a class="headerlink" href="#latest-release" title="Permalink to this headline">¶</a></h3>
+<ol class="loweralpha">
+<li><p class="first">Download and unpack the <a class="reference external" href="https://github.com/sigven/pcgr/releases/tag/v6.2.1">latest software release
+(0.6.2.1)</a></p>
 </li>
 <li><p class="first">Download and unpack the assembly-specific data bundle in the PCGR
 directory</p>
 <ul class="simple">
 <li><a class="reference external" href="https://drive.google.com/open?id=1cGBAmAh5t4miIeRrrd0zHsPCFToOr0Lf">grch37 data
 bundle</a>
-(approx 9Gb)</li>
+(approx 9.2Gb)</li>
 <li><a class="reference external" href="https://drive.google.com/open?id=12q3rr7xpdBfaefRi0ysFHbH34kehNZOV">grch38 data
 bundle</a>
-(approx 9Gb)</li>
+(approx 13Gb)</li>
 <li><em>Unpacking</em>:
 <code class="docutils literal"><span class="pre">gzip</span> <span class="pre">-dc</span> <span class="pre">pcgr.databundle.grch37.YYYYMMDD.tgz</span> <span class="pre">|</span> <span class="pre">tar</span> <span class="pre">xvf</span> <span class="pre">-</span></code></li>
 </ul>
@@ -211,13 +241,14 @@ bundle</a>
 have been produced</p>
 </li>
 <li><p class="first">Pull the <a class="reference external" href="https://hub.docker.com/r/sigven/pcgr/">PCGR Docker image
-(0.6.3)</a> from DockerHub
+(0.6.2.1)</a> from DockerHub
 (approx 5.1Gb):</p>
 <ul class="simple">
-<li><code class="docutils literal"><span class="pre">docker</span> <span class="pre">pull</span> <span class="pre">sigven/pcgr:0.6.3</span></code> (PCGR annotation engine)</li>
+<li><code class="docutils literal"><span class="pre">docker</span> <span class="pre">pull</span> <span class="pre">sigven/pcgr:0.6.2.1</span></code> (PCGR annotation engine)</li>
 </ul>
 </li>
 </ol>
+</div>
 </div>
 <div class="section" id="step-3-input-preprocessing">
 <h2>STEP 3: Input preprocessing<a class="headerlink" href="#step-3-input-preprocessing" title="Permalink to this headline">¶</a></h2>
@@ -335,9 +366,9 @@ sequenced within TCGA (<strong>GRCh37</strong> only). It also contains PCGR
 configuration files customized for these samples. A report for a
 colorectal tumor case can be generated by running the following command
 in your terminal window:</p>
-<p><code class="docutils literal"><span class="pre">python</span> <span class="pre">pcgr.py</span> <span class="pre">--input_vcf</span> <span class="pre">~/pcgr-0.6.3/examples/tumor_sample.COAD.vcf.gz</span></code>
-<code class="docutils literal"><span class="pre">--input_cna</span> <span class="pre">~/pcgr-0.6.3/examples/tumor_sample.COAD.cna.tsv</span></code>
-<code class="docutils literal"><span class="pre">~/pcgr-0.6.3</span> <span class="pre">~/pcgr-0.6.3/examples</span> <span class="pre">grch37</span> <span class="pre">~/pcgr-0.6.3/examples/pcgr_conf.COAD.toml</span> <span class="pre">tumor_sample.COAD</span></code></p>
+<p><code class="docutils literal"><span class="pre">python</span> <span class="pre">pcgr.py</span> <span class="pre">--input_vcf</span> <span class="pre">~/pcgr-0.6.2.1/examples/tumor_sample.COAD.vcf.gz</span></code>
+<code class="docutils literal"><span class="pre">--input_cna</span> <span class="pre">~/pcgr-0.6.2.1/examples/tumor_sample.COAD.cna.tsv</span></code>
+<code class="docutils literal"><span class="pre">~/pcgr-0.6.2.1</span> <span class="pre">~/pcgr-0.6.2.1/examples</span> <span class="pre">grch37</span> <span class="pre">~/pcgr-0.6.2.1/examples/pcgr_conf.COAD.toml</span> <span class="pre">tumor_sample.COAD</span></code></p>
 <p>This command will run the Docker-based PCGR workflow and produce the
 following output files in the <em>examples</em> folder:</p>
 <ol class="arabic simple">
