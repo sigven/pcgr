@@ -792,9 +792,10 @@ add_filter_read_support <- function(vcf_data_df, pcgr_config){
 
 #' Function that adds SwissProt feature descriptions based on keys coming from pcgr pipeline
 #'
-#' @param vcf_data_df
+#' @param vcf_data_df Data frame of sample variants from VCF
 #'
 #' @return vcf_data_df
+#'
 #'
 add_swissprot_feature_descriptions <- function(vcf_data_df, pcgr_data){
   rlogging::message("Extending annotation descriptions related to UniprotKB/SwissProt protein features")
@@ -818,6 +819,11 @@ add_swissprot_feature_descriptions <- function(vcf_data_df, pcgr_data){
         feature_df[!is.na(feature_df$PROTEIN_FEATURE) & feature_df$PROTEIN_FEATURE == "NA", ]$PROTEIN_FEATURE <- NA
       }
       vcf_data_df <- dplyr::left_join(dplyr::select(vcf_data_df, -UNIPROT_FEATURE), feature_df, by = c("VAR_ID" = "VAR_ID"))
+      if("CONSEQUENCE" %in% colnames(vcf_data_df)){
+        if(nrow(vcf_data_df[!is.na(vcf_data_df$PROTEIN_FEATURE) & !stringr::str_detect(vcf_data_df$CONSEQUENCE,"^(synonymous|missense|stop|start)"),]) > 0){
+          vcf_data_df[!is.na(vcf_data_df$PROTEIN_FEATURE) & !stringr::str_detect(vcf_data_df$CONSEQUENCE,"^(synonymous|missense|stop|start)"),]$PROTEIN_FEATURE <- NA
+        }
+      }
     }
     else{
       vcf_data_df$PROTEIN_FEATURE <- NA
@@ -830,6 +836,73 @@ add_swissprot_feature_descriptions <- function(vcf_data_df, pcgr_data){
   return(vcf_data_df)
 
 }
+
+#' Function that adds GWAS citation/phenotype to GWAS hit found through PCGR annotation
+#'
+#' @param vcf_data_df Data frame of sample variants from VCF
+#' @param pcgr_data PCGR data structure
+#' @param p_value_threshold Required p-value to report associations from GWAS catalog
+#'
+#' @return vcf_data_df
+#'
+#'
+add_gwas_citation_phenotype <- function(vcf_data_df, pcgr_data, p_value_threshold = 1e-6){
+  gwas_citations_phenotypes <- pcgr_data$gwas_citations_phenotypes
+
+  gwas_citations_phenotypes <- dplyr::filter(gwas_citations_phenotypes, p_value <= p_value_threshold)
+  gwas_citations_phenotypes$gwas_key <- paste(gwas_citations_phenotypes$rsid,gwas_citations_phenotypes$efo_id,gwas_citations_phenotypes$pmid,sep="_")
+  gwas_citations_phenotypes <- gwas_citations_phenotypes %>%
+    dplyr::mutate(GWAS_CIT = paste0(stringr::str_to_title(efo_name),", ",link," (association p-value = ",p_value,")")) %>%
+    dplyr::mutate(GWAS_PH = stringr::str_to_title(efo_name)) %>%
+    dplyr::filter(!is.na(GWAS_PH))
+  rlogging::message("Adding citations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)")
+
+  if ("GWAS_HIT" %in% colnames(vcf_data_df) & "VAR_ID" %in% colnames(vcf_data_df)){
+    feature_df <- dplyr::select(vcf_data_df, GWAS_HIT, VAR_ID) %>% dplyr::filter(!is.na(GWAS_HIT)) %>% dplyr::distinct()
+    if (nrow(feature_df) == 0){
+      vcf_data_df$GWAS_CITATION <- NA
+      vcf_data_df$GWAS_PHENOTYPE <- NA
+      return(vcf_data_df)
+    }
+    feature_df <- feature_df %>% tidyr::separate_rows(GWAS_HIT, sep = ",")
+    feature_df <- tidyr::separate(feature_df, GWAS_HIT, into = c("rsid", "pmid", "tagsnp","p_value","efo_id","do_id"), sep = "\\|", remove = F) %>%
+      dplyr::mutate(gwas_key = paste(rsid,efo_id,pmid, sep="_"))
+    feature_df <- as.data.frame(dplyr::left_join(feature_df, dplyr::select(gwas_citations_phenotypes, gwas_key, GWAS_PH, GWAS_CIT), by = c("gwas_key")))
+    feature_df <- as.data.frame(feature_df %>% dplyr::filter(!is.na(GWAS_PH)) %>% dplyr::group_by(VAR_ID) %>% dplyr::summarise(GWAS_PHENOTYPE = paste(unique(GWAS_PH), collapse = "; "), GWAS_CITATION = paste(unique(GWAS_CIT), collapse = "; ")))
+    if (nrow(feature_df) > 0){
+      for(c in c('GWAS_CITATION','GWAS_PHENOTYPE')){
+        if (nrow(feature_df[!is.na(feature_df[,c]) & feature_df[,c] == "NA", ]) > 0){
+          feature_df[!is.na(feature_df[,c]) & feature_df[,c] == "NA", ][,c] <- NA
+        }
+      }
+      vcf_data_df <- dplyr::left_join(vcf_data_df, feature_df, by = c("VAR_ID" = "VAR_ID"))
+    }else{
+      vcf_data_df$GWAS_CITATION <- NA
+      vcf_data_df$GWAS_PHENOTYPE <- NA
+    }
+  }else{
+    vcf_data_df$GWAS_CITATION <- NA
+    vcf_data_df$GWAS_PHENOTYPE <- NA
+  }
+
+  #if(nrow(vcf_data_df[is.na(vcf_data_df$GWAS_CITATION) & !is.na(vcf_data_df$GWAS_HIT),]) > 0){
+    #vcf_data_df[is.na(vcf_data_df$GWAS_CITATION) & !is.na(vcf_data_df$GWAS_HIT),]$GWAS_HIT <- NA
+  #}
+
+  return(vcf_data_df)
+
+}
+
+
+# convert_hgvs <- function(vcf_data_df){
+#   amino_acids_three <- c('Ala','Arg','Asn','Asp','Cys','Glu','Gln','Gly','His','Ile','Leu','Lys','Met','Phe','Pro','Ser','Thr','Trp','Tyr','Val','Ter')
+#   amino_acids_one <- c('A','R','N','D','C','E','Q','G','H','I','L','K','M','F','P','S','T','W','Y','V','X')
+#   amino_acids <- data.frame('aa_three_letter' = amino_acids_three, 'aa_one_letter' = amino_acids_one, stringsAsFactors = F)
+#
+#   if (nrow(vcf_data_df[stringr::str_detect(vcf_data_df$CONSEQUENCE, "^synonymous_variant$"), ]) > 0){
+#
+#   }
+# }
 
 #' Function that assigns genotype (het/hom) from VCF GT tag
 #'
@@ -884,7 +957,6 @@ determine_genotype <- function(vcf_data_df){
 #'
 #' @return vcf_data_df
 #'
-
 get_calls <- function(tsv_gz_file, pcgr_data, pcgr_version, sample_name, pcgr_config, genome_seq = BSgenome.Hsapiens.UCSC.hg19, genome_assembly = "hg19"){
 
   vcf_data_df <- read.table(gzfile(tsv_gz_file), skip = 1, sep = "\t", header = T, stringsAsFactors = F, quote = "", comment.char = "", na.strings = c("."))
@@ -912,7 +984,7 @@ get_calls <- function(tsv_gz_file, pcgr_data, pcgr_version, sample_name, pcgr_co
   pcgr_columns <- c("GENOME_VERSION", "PROTEIN_CHANGE", "CONSEQUENCE", "CODING_STATUS", "GENOMIC_CHANGE", "VAR_ID",
                     "DOCM_DISEASE", "DOCM_LITERATURE", "CLINVAR", "CLINVAR_TRAITS_ALL", "GENE_NAME", "GENENAME",
                     "TARGETED_DRUGS", "CANCER_ASSOCIATIONS", "DBSNP", "COSMIC", "PROTEIN_DOMAIN","GENOTYPE","CLINVAR_PHENOTYPE",
-                    "AF_TUMOR","DP_TUMOR","AF_NORMAL","DP_NORMAL","CALL_CONFIDENCE","PFAM_DOMAIN_NAME")
+                    "AF_TUMOR","DP_TUMOR","AF_NORMAL","DP_NORMAL","CALL_CONFIDENCE","PFAM_DOMAIN_NAME","GWAS_CITATION","GWAS_PHENOTYPE")
   vcf_data_df <- vcf_data_df[, !(colnames(vcf_data_df) %in% pcgr_columns)]
 
 
@@ -924,6 +996,12 @@ get_calls <- function(tsv_gz_file, pcgr_data, pcgr_version, sample_name, pcgr_co
   if (nrow(vcf_data_df[!is.na(vcf_data_df$PROTEIN_CHANGE) & stringr::str_detect(vcf_data_df$PROTEIN_CHANGE, "^ENSP"), ]) > 0){
     vcf_data_df[!is.na(vcf_data_df$PROTEIN_CHANGE) & stringr::str_detect(vcf_data_df$PROTEIN_CHANGE, "^ENSP"), ]$PROTEIN_CHANGE <- NA
   }
+  # if (nrow(vcf_data_df[is.na(vcf_data_df$PROTEIN_CHANGE) & stringr::str_detect(vcf_data_df$CONSEQUENCE, "^synonymous_variant$"), ]) > 0){
+  #   vcf_data_df[is.na(vcf_data_df$PROTEIN_CHANGE) & stringr::str_detect(vcf_data_df$CONSEQUENCE, "^synonymous_variant$"), ]$PROTEIN_CHANGE <-
+  #     vcf_data_df[is.na(vcf_data_df$PROTEIN_CHANGE) & stringr::str_detect(vcf_data_df$CONSEQUENCE, "^synonymous_variant$"), ]$HGVSp_short
+  # }
+
+
   vcf_data_df$CODING_STATUS <- "noncoding"
   coding_consequence_pattern <- "^(stop_|start_lost|frameshift_|missense_variant|splice_donor|splice_acceptor|inframe_)"
   if (nrow(vcf_data_df[!is.na(vcf_data_df$CONSEQUENCE) & stringr::str_detect(vcf_data_df$CONSEQUENCE, coding_consequence_pattern), ]) > 0){
@@ -985,12 +1063,17 @@ get_calls <- function(tsv_gz_file, pcgr_data, pcgr_version, sample_name, pcgr_co
     vcf_data_df$EXON <- as.integer(stringr::str_split_fixed(vcf_data_df$EXON, "/", 2)[, 1])
   }
   vcf_data_df <- pcgrr::add_swissprot_feature_descriptions(vcf_data_df, pcgr_data = pcgr_data)
-  vcf_data_df <- dplyr::left_join(vcf_data_df, dplyr::select(pcgr_data$pfam_domains, pfam_id, pfam_name), by = c("PFAM_DOMAIN" = "pfam_id")) %>% dplyr::rename(PFAM_DOMAIN_NAME = pfam_name)
+  if("GWAS_HIT" %in% colnames(vcf_data_df)){
+    vcf_data_df <- pcgrr::add_gwas_citation_phenotype(vcf_data_df, pcgr_data = pcgr_data, p_value_threshold = pcgr_config$gwas$p_value_min)
+  }
+  vcf_data_df <- dplyr::left_join(vcf_data_df, dplyr::select(pcgr_data$pfam_domains, pfam_id, pfam_name), by = c("PFAM_DOMAIN" = "pfam_id")) %>%
+    dplyr::rename(PFAM_DOMAIN_NAME = pfam_name)
 
   rlogging::message("Extending annotation descriptions related to Database of Curated Mutations (DoCM)")
   vcf_data_df <- dplyr::left_join(vcf_data_df, pcgr_data$docm_literature, by = c("VAR_ID"))
 
-  vcf_data_df_1 <- dplyr::left_join(dplyr::filter(vcf_data_df, !is.na(ENTREZ_ID)), dplyr::filter(dplyr::select(pcgr_data$gene_xref, ENTREZ_ID, Gene, GENENAME), !is.na(ENTREZ_ID)), by = c("ENTREZ_ID", "Gene"))
+  vcf_data_df_1 <- dplyr::left_join(dplyr::filter(vcf_data_df, !is.na(ENTREZ_ID)),
+                                    dplyr::filter(dplyr::select(pcgr_data$gene_xref, ENTREZ_ID, Gene, GENENAME), !is.na(ENTREZ_ID)), by = c("ENTREZ_ID", "Gene"))
   vcf_data_df_2 <- dplyr::left_join(dplyr::filter(vcf_data_df, is.na(ENTREZ_ID)), dplyr::select(pcgr_data$gene_xref, Gene, GENENAME), by = c("Gene"))
   vcf_data_df <- rbind(vcf_data_df_1, vcf_data_df_2)
   vcf_data_df <- pcgrr::order_variants(vcf_data_df)
@@ -1077,6 +1160,7 @@ get_calls <- function(tsv_gz_file, pcgr_data, pcgr_version, sample_name, pcgr_co
   }
   if (!("COSMIC" %in% colnames(vcf_data_df))){
     cosmic_annotation_links <- pcgrr::generate_annotation_link(vcf_data_df,
+                                                               vardb = "COSMIC",
                                                       group_by_var = "VAR_ID",
                                                       url_prefix = "http://cancer.sanger.ac.uk/cosmic/mutation/overview?id=",
                                                       link_key_var = "COSMIC_MUTATION_ID",

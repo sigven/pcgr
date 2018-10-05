@@ -1,0 +1,70 @@
+### GWAS hits 
+
+<br>
+
+```{r prepare_gwas_data, echo=F, results='asis'}
+
+
+show_gwas_filters <- F
+missing_gwas_items <- T
+if(NROW(pcg_report[['snv_indel']][['variant_display']][['gwas']]) > 0){
+  show_gwas_filters <- T
+  missing_gwas_items <- F
+}
+ 
+
+tag_tgp <- pcg_report[['pcgr_config']][['popgen']][['vcftag_tgp']]
+desc_tgp <- pcg_report[['pcgr_config']][['popgen']][['popdesc_tgp']]
+formula_tgp <- as.formula(paste0("~",rlang::sym(tag_tgp)))
+tag_gnomad <- pcg_report[['pcgr_config']][['popgen']][['vcftag_gnomad']]
+desc_gnomad <- pcg_report[['pcgr_config']][['popgen']][['popdesc_gnomad']]
+formula_gnomad <- as.formula(paste0("~",rlang::sym(tag_gnomad)))
+
+
+```
+
+```{r gwas_cancer, echo=F, results = 'asis', eval = show_gwas_filters}
+library(summarywidget)
+library(crosstalk)
+
+
+cat('A total of ',NROW(pcg_report[['snv_indel']][['variant_display']][['gwas']]), ' other germline variant(s) are associated with cancer phenotypes through genome-wide association studies (p-value < ',pcg_report[['pcgr_config']][['gwas']][['p_value_min']],'):')
+cat('\n')
+htmltools::br()
+htmltools::br()
+
+#col <- pcgr_config$custom_tags$custom_tags
+#as.formula(paste0("~",rlang::sym(col)))
+variants_gwas_cancer <- crosstalk::SharedData$new(pcg_report[['snv_indel']][['variant_display']][['gwas']])
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_gwas_cancer, ~CONSEQUENCE),
+    crosstalk::filter_checkbox("GENOTYPE", "Genotype", variants_gwas_cancer, ~GENOTYPE),
+    crosstalk::filter_select("SYMBOL", "Gene", variants_gwas_cancer, ~SYMBOL),
+    crosstalk::filter_select("GWAS_PHENOTYPE", "GWAS phenotype", variants_gwas_cancer, ~GWAS_PHENOTYPE)
+  ),
+  list(
+    crosstalk::filter_checkbox("LOSS_OF_FUNCTION", "Predicted loss-of-function variant", variants_gwas_cancer, ~LOSS_OF_FUNCTION),
+    crosstalk::filter_slider(tag_gnomad, paste0("MAF gnomAD (",desc_gnomad,")"), variants_gwas_cancer, formula_gnomad, sep="",ticks = F),
+    crosstalk::filter_slider(tag_tgp, paste0("MAF 1000 Genomes Project (",desc_tgp,")"), variants_gwas_cancer, formula_tgp, sep="",ticks = F)
+  )
+)
+
+    
+
+htmltools::br()
+htmltools::br()
+
+crosstalk::bscols(
+  DT::datatable(variants_gwas_cancer, escape=F,extensions=c("Buttons","Responsive"), width = "100%",options=list(buttons = c('csv','excel'),dom = 'Bfrtip'))
+)
+
+#htmltools::br()
+
+```
+
+```{r gwas_cancer_missing, echo=F, results = 'asis', eval = missing_gwas_items}
+cat('<i>No variants found.</i>',sep='\n')
+cat('\n')
+```
+<br><br>

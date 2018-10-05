@@ -4,7 +4,7 @@ The annotated variants are based on the following underlying tools and knowledge
 
 ```{r list_resources, echo=F,results='asis'}
 for(n in names(pcg_report$pcgr_db_release)){
-  if(n == 'vep' | n == 'gencode' | n == 'clinvar' | n == 'dbnsfp' | n == 'pfam' | n == 'gnomad' | n == 'cancerhotspots' | n == 'dbsnp' | n == 'onekg' | n == 'uniprot' | n == 'disgenet' | n == 'do'){
+  if(n == 'vep' | n == 'gencode' | n == 'clinvar' | n == 'dbnsfp' | n == 'pfam' | n == 'gnomad' | n == 'cancerhotspots' | n == 'dbsnp' | n == 'onekg' | n == 'uniprot' | n == 'do' | n == 'gwas'){
     s <- paste0('* [',pcg_report$pcgr_db_release[[n]]$name,'](',pcg_report$pcgr_db_release[[n]]$url,') - ',pcg_report$pcgr_db_release[[n]]$description, ' (',pcg_report$pcgr_db_release[[n]]$version,')')
     cat(s,sep="\n")
   }
@@ -16,7 +16,7 @@ The report is generated with _[cpsr](https://github.com/sigven/cpsr)_ version `r
 
 * Genome assembly: __`r pcg_report[['genome_assembly']]`__
 * Report theme (Bootstrap): __`r pcg_report[['pcgr_config']][['visual']][['report_theme']]`__
-* Population:
+* Control populations:
     * 1000 Genomes Project (__`r pcg_report[['pcgr_config']][['popgen']][['popdesc_tgp']]`__)
     * gnomAD (__`r pcg_report[['pcgr_config']][['popgen']][['popdesc_gnomad']]`__)
 * Minor allele frequency threshold (unclassified variants):

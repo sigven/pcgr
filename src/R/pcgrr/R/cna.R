@@ -66,9 +66,7 @@ get_cna_cytoband <- function(cna_gr, cytoband_gr){
 #' @param pcgr_config Object with PCGR configuration parameters
 #' @param genome_seq BSgenome object
 #' @param genome_assembly human genome assembly version
-#' @param transcript_overlap_pct required aberration overlap fraction (percent) for reported transcripts (default 100%)
-#'
-#' @return pcg_report_cna
+#' @param transcript_overlap_pct required aberration overlap fraction (percent) for reported transcripts (default 100 percent)
 #'
 generate_report_data_cna <- function(cna_file, pcgr_data, pcgr_version, sample_name, pcgr_config, genome_seq, genome_assembly, transcript_overlap_pct = 100){
 

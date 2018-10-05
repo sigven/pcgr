@@ -7,7 +7,7 @@
 add_swissprot_feature_descriptions(vcf_data_df, pcgr_data)
 }
 \arguments{
-\item{vcf_data_df}{}
+\item{vcf_data_df}{Data frame of sample variants from VCF}
 }
 \value{
 vcf_data_df

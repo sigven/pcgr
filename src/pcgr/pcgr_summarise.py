@@ -35,57 +35,27 @@ def extend_vcf_annotations(query_vcf, pcgr_db_directory, logger, cpsr):
    """
 
    ## read VEP and PCGR tags to be appended to VCF file
-   pcgr_vcf_infotags_meta = annoutils.read_infotag_file(os.path.join(pcgr_db_directory,'pcgr_infotags.tsv'))
+   vcf_infotags_meta = annoutils.read_infotag_file(os.path.join(pcgr_db_directory,'pcgr_infotags.tsv'))
    if cpsr is True:
-      pcgr_vcf_infotags_meta = annoutils.read_infotag_file(os.path.join(pcgr_db_directory,'cpsr_infotags.tsv'))
+      vcf_infotags_meta = annoutils.read_infotag_file(os.path.join(pcgr_db_directory,'cpsr_infotags.tsv'))
 
    out_vcf = re.sub(r'\.vcf(\.gz){0,}$','.annotated.vcf',query_vcf)
 
-   vep_to_pcgr_af = {'gnomAD_AMR_AF':'AMR_AF_GNOMAD','gnomAD_AFR_AF':'AFR_AF_GNOMAD','gnomAD_EAS_AF':'EAS_AF_GNOMAD','gnomAD_NFE_AF':'NFE_AF_GNOMAD','gnomAD_AF':'GLOBAL_AF_GNOMAD',
-                     'gnomAD_SAS_AF':'SAS_AF_GNOMAD','gnomAD_OTH_AF':'OTH_AF_GNOMAD','gnomAD_ASJ_AF':'ASJ_AF_GNOMAD','gnomAD_FIN_AF':'FIN_AF_GNOMAD','AFR_AF':'AFR_AF_1KG',
-                     'AMR_AF':'AMR_AF_1KG','SAS_AF':'SAS_AF_1KG','EUR_AF':'EUR_AF_1KG','EAS_AF':'EAS_AF_1KG', 'AF':'GLOBAL_AF_1KG'}
+   meta_vep_dbnsfp_info = annoutils.vep_dbnsfp_meta_vcf(query_vcf, vcf_infotags_meta)
+   vep_csq_index2fields = meta_vep_dbnsfp_info['vep_csq_index2fields']
+   vep_csq_fields2index = meta_vep_dbnsfp_info['vep_csq_fields2index']
+   dbnsfp_prediction_algorithms = meta_vep_dbnsfp_info['dbnsfp_prediction_algorithms']
 
    vcf = VCF(query_vcf)
-   vep_csq_index2fields = {}
-   vep_csq_fields2index = {}
-   dbnsfp_prediction_algorithms = []
-   effect_predictions_description = ""
-   for e in vcf.header_iter():
-      header_element = e.info()
-      if 'ID' in header_element.keys():
-         identifier = str(header_element['ID'])
-         if identifier == 'CSQ' or identifier == 'DBNSFP':
-            description = str(header_element['Description'])
-            if 'Format: ' in description:
-               subtags = description.split('Format: ')[1].split('|')
-               if identifier == 'CSQ':
-                  i = 0
-                  for t in subtags:
-                     v = t
-                     if t in vep_to_pcgr_af:
-                        v = str(vep_to_pcgr_af[t])
-                     if v in pcgr_vcf_infotags_meta:
-                        vep_csq_index2fields[i] = v
-                        vep_csq_fields2index[v] = i
-                     i = i + 1
-               if identifier == 'DBNSFP':
-                  if len(subtags) > 7:
-                     effect_predictions_description = "Format: " + '|'.join(subtags[7:])
-                  i = 7
-                  while(i < len(subtags)):
-                     dbnsfp_prediction_algorithms.append(str(re.sub(r'((_score)|(_pred))"*$','',subtags[i])))
-                     i = i + 1
-   
-   for tag in pcgr_vcf_infotags_meta:
-      #if not vcf.contains(tag):
-      vcf.add_info_to_header({'ID': tag, 'Description': str(pcgr_vcf_infotags_meta[tag]['description']),'Type':str(pcgr_vcf_infotags_meta[tag]['type']), 'Number': str(pcgr_vcf_infotags_meta[tag]['number'])})
-      
+   for tag in vcf_infotags_meta:
+      vcf.add_info_to_header({'ID': tag, 'Description': str(vcf_infotags_meta[tag]['description']),'Type':str(vcf_infotags_meta[tag]['type']), 'Number': str(vcf_infotags_meta[tag]['number'])})
+
    w = Writer(out_vcf, vcf)
    current_chrom = None
    num_chromosome_records_processed = 0
-   pcgr_onco_xref_map = {'SYMBOL':1, 'ENTREZ_ID':2, 'UNIPROT_ID':3, 'APPRIS':4,'UNIPROT_ACC':5,'CHORUM_ID':6,'TUMOR_SUPPRESSOR':7,'ONCOGENE':8,'NETWORK_CG':9,
-                         'DISGENET_CUI':10,'CHEMBL_COMPOUND_ID':11,'INTOGEN_DRIVER':12,'ONCOSCORE':13, 'CANCER_PREDISPOSITION_SOURCE':15, 'CANCER_SUSCEPTIBILITY_CUI':16, 
-                         'CANCER_SYNDROME_CUI':17, 'CANCER_PREDISPOSITION_MOI': 18}
+   pcgr_onco_xref_map = {'ENSEMBL_TRANSCRIPT_ID': 0, 'ENSEMBL_GENE_ID':1, 'SYMBOL':2, 'ENTREZ_ID':3, 'UNIPROT_ID':4, 'APPRIS':5,'UNIPROT_ACC':6,'REFSEQ_MRNA':7,'CORUM_ID':8,'TUMOR_SUPPRESSOR':9,
+                        'ONCOGENE':10,'NETWORK_CG':11,'DISGENET_CUI':12,'CHEMBL_COMPOUND_ID':13,'INTOGEN_DRIVER':14,'TCGA_DRIVER':15,'ONCOSCORE':16, 'CANCER_PREDISPOSITION_SOURCE':18, 
+                        'CANCER_SUSCEPTIBILITY_CUI':19, 'CANCER_SYNDROME_CUI':20, 'CANCER_PREDISPOSITION_MOI': 21}
    for rec in vcf:
       all_transcript_consequences = []
       if current_chrom is None:
@@ -132,8 +102,6 @@ def extend_vcf_annotations(query_vcf, pcgr_db_directory, logger, cpsr):
                               ensembl_transcript_id = str(csq_fields[j])
                               if ensembl_transcript_id in pcgr_onco_xref:
                                  for annotation in pcgr_onco_xref_map.keys():
-                                    if annotation == 'CHORUM_ID' or annotation == 'UNIPROT_ACC':
-                                       continue
                                     if annotation in pcgr_onco_xref[ensembl_transcript_id]:
                                        if annotation == 'TUMOR_SUPPRESSOR' or annotation == 'ONCOGENE' or annotation == 'NETWORK_CG':
                                           rec.INFO[annotation] = True

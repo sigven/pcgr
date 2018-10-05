@@ -22,10 +22,7 @@ generate_report_data_cna(cna_file, pcgr_data, pcgr_version, sample_name,
 
 \item{genome_assembly}{human genome assembly version}
 
-\item{transcript_overlap_pct}{required aberration overlap fraction (percent) for reported transcripts (default 100%)}
-}
-\value{
-pcg_report_cna
+\item{transcript_overlap_pct}{required aberration overlap fraction (percent) for reported transcripts (default 100 percent)}
 }
 \description{
 Function that annotates CNV segment files

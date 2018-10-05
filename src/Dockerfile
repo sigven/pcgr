@@ -247,16 +247,24 @@ USER root
 WORKDIR /
 WORKDIR /
 
-RUN R -e "source(\"https://bioconductor.org/biocLite.R\"); biocLite(c('regioneR'))"
+RUN R -e "source(\"https://bioconductor.org/biocLite.R\"); biocLite(c('regioneR','MutationalPatterns'))"
+RUN R -e "devtools::install_github('Francescojm/CELLector')"
+
 RUN rm -f nlopt-2.4.2.tar.gz
 RUN rm -rf $HOME/src/ensembl-vep/t/
 RUN rm -f $HOME/src/v335_base.tar.gz
 RUN rm -f $HOME/src/release-1-6-924.zip
 RUN rm -rf /vt
+RUN rm -rf /samtools-1.9.tar.bz2
+RUN rm -rf /mskcc-vcf2maf.tar.gz
 
-ENV PATH /usr/local/bin/bin:$PATH
+ENV PATH=/usr/local/bin/bin:$PATH
 
-
-#WORKDIR /
-#RUN curl -O https://repo.continuum.io/archive/Anaconda3-5.2.0-Linux-x86_64.sh
-#RUN bash Anaconda3-5.2.0-Linux-x86_64.sh -b
+# WORKDIR /
+# ENV HOME=/usr/local
+# RUN curl -O https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+# RUN bash Miniconda3-latest-Linux-x86_64.sh -b
+# ENV PATH=$PATH:/usr/local/miniconda3/bin:
+# RUN conda config --add channels bioconda
+# RUN conda install mosdepth
+# RUN rm -rf /Miniconda3-latest-Linux-x86_64.sh

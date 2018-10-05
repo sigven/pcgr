@@ -248,32 +248,18 @@ get_insilico_prediction_statistics <- function(sample_calls){
 
   insilico_pathogenicity_pred_algos <- c('SIFT_DBNSFP','PROVEAN_DBNSFP','META_LR_DBNSFP','FATHMM_DBNSFP','MUTATIONTASTER_DBNSFP',
                                          'MUTATIONASSESSOR_DBNSFP','FATHMM_MKL_DBNSF','M_CAP_DBNSFP','SPLICE_SITE_ADA_DBNSFP','SPLICE_SITE_RF_DBNSFP')
-  i <- 1
-  while(i <= nrow(sample_calls)){
-    for(v in c('called','damaging','tolerated','splicing_neutral','splicing_affected')){
-      colname <- paste0('n_insilico_',v)
-      sample_calls[i,colname] <- 0
+  for(v in c('called','damaging','tolerated','splicing_neutral','splicing_affected')){
+    sample_calls[,paste0('n_insilico_',v)] <- 0
+  }
+
+  for(algo in insilico_pathogenicity_pred_algos){
+    if(algo %in% colnames(sample_calls)){
+      sample_calls[!is.na(sample_calls[,algo]) & sample_calls[,algo] != '.','n_insilico_called'] <-  sample_calls[!is.na(sample_calls[,algo]) & sample_calls[,algo] != '.','n_insilico_called'] + 1
+      sample_calls[!is.na(sample_calls[,algo]) & (sample_calls[,algo] == 'damaging' | sample_calls[,algo] == 'possibly_damaging'),'n_insilico_damaging'] <-  sample_calls[!is.na(sample_calls[,algo]) & (sample_calls[,algo] == 'damaging' | sample_calls[,algo] == 'possibly_damaging'),'n_insilico_damaging'] + 1
+      sample_calls[!is.na(sample_calls[,algo]) & sample_calls[,algo] == 'tolerated','n_insilico_tolerated'] <-  sample_calls[!is.na(sample_calls[,algo]) & sample_calls[,algo] == 'tolerated','n_insilico_tolerated'] + 1
+      sample_calls[!is.na(sample_calls[,algo]) & sample_calls[,algo] == 'affect_splicing','n_insilico_splicing_affected'] <-  sample_calls[!is.na(sample_calls[,algo]) & sample_calls[,algo] == 'affect_splicing','n_insilico_splicing_affected'] + 1
+      sample_calls[!is.na(sample_calls[,algo]) & sample_calls[,algo] == 'splicing_neutral','n_insilico_splicing_neutral'] <-  sample_calls[!is.na(sample_calls[,algo]) & sample_calls[,algo] == 'splicing_neutral','n_insilico_splicing_neutral'] + 1
     }
-    for(algo in insilico_pathogenicity_pred_algos){
-      if(algo %in% colnames(sample_calls[i,])){
-        if(!is.na(sample_calls[i,algo]) & sample_calls[i,algo] != '.' ){
-          sample_calls[i,'n_insilico_called'] = sample_calls[i,'n_insilico_called'] + 1
-        }
-        if(!is.na(sample_calls[i,algo]) & (sample_calls[i,algo]  == 'damaging' | sample_calls[i,algo] == 'possibly_damaging')){
-          sample_calls[i,'n_insilico_damaging'] = sample_calls[i,'n_insilico_damaging'] + 1
-        }
-        if(!is.na(sample_calls[i,algo]) & sample_calls[i,algo]  == 'tolerated'){
-          sample_calls[i,'n_insilico_tolerated'] = sample_calls[i,'n_insilico_tolerated'] + 1
-        }
-        if(!is.na(sample_calls[i,algo]) & sample_calls[i,algo]  == 'affect_splicing'){
-          sample_calls[i,'n_insilico_splicing_affected'] = sample_calls[i,'n_insilico_splicing_affected'] + 1
-        }
-        if(!is.na(sample_calls[i,algo]) & sample_calls[i,algo]  == 'splicing_neutral'){
-          sample_calls[i,'n_insilico_splicing_neutral'] = sample_calls[i,'n_insilico_splicing_neutral'] + 1
-        }
-      }
-    }
-    i <- i + 1
   }
   return(sample_calls)
 }
@@ -484,7 +470,7 @@ assign_pathogenicity_score <- function(sample_calls, pcgr_config, pcgr_data){
 #'
 generate_tier_tsv_cpsr <- function(pcg_report, sample_name = "test"){
 
-  predispose_tsv_tags <- c("VAR_ID","VCF_SAMPLE_ID","CODING_STATUS","SYMBOL","GENOTYPE","CONSEQUENCE","PROTEIN_CHANGE",
+  predispose_tsv_tags <- c("VAR_ID","VCF_SAMPLE_ID","CODING_STATUS","SYMBOL","ENSEMBL_GENE_ID","ENSEMBL_TRANSCRIPT_ID","GENOTYPE","CONSEQUENCE","PROTEIN_CHANGE",
                            "GENE_NAME","PROTEIN_DOMAIN", "HGVSp","HGVSc", "CDS_CHANGE","PROTEIN_FEATURE","EFFECT_PREDICTIONS",
                            "LOSS_OF_FUNCTION", "DBSNP","CLINVAR_CLINICAL_SIGNIFICANCE", "CLINVAR_MSID","CLINVAR_VARIANT_ORIGIN",
                            "CLINVAR_CONFLICTED", "CLINVAR_PHENOTYPE","VEP_ALL_CONSEQUENCE", "ONCOGENE", "ONCOSCORE","TUMOR_SUPPRESSOR",
@@ -495,8 +481,8 @@ generate_tier_tsv_cpsr <- function(pcg_report, sample_name = "test"){
   rlogging::message("Generating tiered set of result variants for output in tab-separated values (TSV) file")
 
   tsv_variants <- data.frame()
-  for(tier in c("tier1", "tier2", "tier3A", "tier3B")){
-    if(tier != 'tier3B'){
+  for(tier in c("tier1", "tier2", "tier3A", "tier3B","gwas")){
+    if(tier != 'tier3B' & tier != "gwas"){
       predispose_tags <- predispose_tsv_tags
       for(ph in c('cancer_phenotype','noncancer_phenotype')){
         tierset <- data.frame()
@@ -559,8 +545,14 @@ generate_tier_tsv_cpsr <- function(pcg_report, sample_name = "test"){
       if(nrow(pcg_report[['snv_indel']][['variant_display']][[tier]]) > 0){
         tierset <- pcg_report[['snv_indel']][['variant_display']][[tier]]
         tierset$VCF_SAMPLE_ID <- sample_name
-        tierset$TIER_DESCRIPTION <- 'Tier 3B - Unclassified variants'
-        tierset$TIER <- 'TIER 3B'
+        if(tier == 'tier3B'){
+          tierset$TIER_DESCRIPTION <- 'Tier 3B - Unclassified variants'
+          tierset$TIER <- 'TIER 3B'
+        }
+        if(tier == 'gwas'){
+          tierset$TIER_DESCRIPTION <- 'GWAS hit'
+          tierset$TIER <- 'GWAS'
+        }
         if(nrow(tierset) > 0){
           tsv_variants <- as.data.frame(dplyr::bind_rows(tsv_variants, dplyr::select(tierset, dplyr::one_of(predispose_tags))))
         }
@@ -577,7 +569,7 @@ generate_tier_tsv_cpsr <- function(pcg_report, sample_name = "test"){
   tsv_variants <- tsv_variants %>% dplyr::distinct()
 
   pcg_report[['snv_indel']][['variant_set']][['tsv']] <- tsv_variants
-  for(t in c('TIER 1','TIER 2','TIER 3A','TIER 3B')){
+  for(t in c('TIER 1','TIER 2','TIER 3A','TIER 3B','GWAS')){
     if(t == 'TIER 1'){
       pcg_report[['snv_indel']][['variant_set']][['tier1']] <- dplyr::filter(tsv_variants, TIER == 'TIER 1')
     }
@@ -589,6 +581,9 @@ generate_tier_tsv_cpsr <- function(pcg_report, sample_name = "test"){
     }
     if(t == 'TIER 3B'){
       pcg_report[['snv_indel']][['variant_set']][['tier3B']] <- dplyr::filter(tsv_variants, TIER == 'TIER 3B')
+    }
+    if(t == 'GWAS'){
+      pcg_report[['snv_indel']][['variant_set']][['gwas']] <- dplyr::filter(tsv_variants, TIER == 'GWAS')
     }
   }
   return(pcg_report)

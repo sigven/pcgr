@@ -23,13 +23,13 @@ generate_predisposition_report <- function(project_directory, query_vcf2tsv, pcg
   }
 
   fnames <- list()
-  fnames[["tsv"]] <- paste0(project_directory, "/", sample_name, ".cpsr.snvs_indels.tiers.tsv")
+  fnames[["tsv"]] <- paste0(project_directory, "/", sample_name, ".cpsr.snvs_indels.tiers.",genome_assembly,".tsv")
   fnames[["json"]] <- paste0(project_directory, "/", sample_name, ".cpsr.",genome_assembly, ".json")
 
   ## define tags/variables to display in data tables (tier 1,2,3A,3B)
   predispose_tier1_2_display <- c("SYMBOL", "CONSEQUENCE", "PROTEIN_CHANGE", "CLINVAR_PHENOTYPE", "GENOTYPE", "GENE_NAME", "PROTEIN_DOMAIN",
                           "HGVSp", "HGVSc", "CDS_CHANGE", "PROTEIN_FEATURE", "PREDICTED_EFFECT", "LOSS_OF_FUNCTION", "DBSNP", "CLINVAR",
-                          "CLINVAR_CLINICAL_SIGNIFICANCE", "CLINVAR_VARIANT_ORIGIN", "ONCOGENE", "ONCOSCORE", "TUMOR_SUPPRESSOR",
+                          "CLINVAR_CLINICAL_SIGNIFICANCE", "CLINVAR_VARIANT_ORIGIN", "GWAS_CITATION","ONCOGENE", "ONCOSCORE", "TUMOR_SUPPRESSOR",
                           "GLOBAL_AF_GNOMAD", pcg_report[["pcgr_config"]][["popgen"]][["vcftag_gnomad"]], "GLOBAL_AF_1KG",
                           pcg_report[["pcgr_config"]][["popgen"]][["vcftag_tgp"]], "GENOMIC_CHANGE", "GENOME_VERSION")
 
@@ -40,6 +40,13 @@ generate_predisposition_report <- function(project_directory, query_vcf2tsv, pcg
                                                                                            "CLINVAR_VARIANT_ORIGIN")]
 
   predispose_tier3B_display <- unique(c("SYMBOL","CONSEQUENCE", "PROTEIN_CHANGE","PATHRANK","PATHSCORE","GENOTYPE","PATHDOC", predispose_tier3B_display))
+
+  predispose_gwas_display <- c("SYMBOL","CONSEQUENCE", "GWAS_CITATION","PROTEIN_CHANGE","GENOTYPE","LOSS_OF_FUNCTION",
+                                 "PROTEIN_CHANGE","GENE_NAME", "GWAS_PHENOTYPE","PROTEIN_DOMAIN","HGVSp", "HGVSc", "CDS_CHANGE", "PROTEIN_FEATURE", "PREDICTED_EFFECT",
+                                 "DBSNP","CLINVAR","CLINVAR_PHENOTYPE","CLINVAR_CLINICAL_SIGNIFICANCE","GLOBAL_AF_GNOMAD",
+                                  pcg_report[["pcgr_config"]][["popgen"]][["vcftag_gnomad"]],
+                                 "GLOBAL_AF_1KG",pcg_report[["pcgr_config"]][["popgen"]][["vcftag_tgp"]],"GENOMIC_CHANGE","GENOME_VERSION")
+
 
 
   if (query_vcf2tsv != "None.gz"){
@@ -94,36 +101,48 @@ generate_predisposition_report <- function(project_directory, query_vcf2tsv, pcg
 
           rlogging::message("Assignment of variants to tier 1/tier 2/tier 3")
 
+          pathogenic_clnsig_regex <- "^(pathogenic|pathogenic,_other|pathogenic,_risk_factor|pathogenic,_drug_response|pathogenic,_other,_risk_factor)$"
+          likely_pathogenic_clnsig_regex <- "^(likely_pathogenic|pathogenic,likely_pathogenic|pathogenic,likely_pathogenic,_risk_factor|likely_pathogenic,_other|likely_pathogenic,_risk_factor|pathogenic,likely_pathogenic,_other)$"
+          vus_clnsig_regex <- "^(uncertain_significance|risk_factor|uncertain_significance,_other)$"
+          all_hits <- data.frame()
+
           ## Assign TIER 1 variants to pcg_report object
           for (ph in c("cancer_phenotype", "noncancer_phenotype")){
-            pcg_report[["snv_indel"]][["variant_display"]][["tier1"]][[ph]] <-  dplyr::filter(sample_calls_all[[ph]], CLINVAR_CONFLICTED == 0 & stringr::str_detect(CLINVAR_VARIANT_ORIGIN,"germline") & !is.na(CLINVAR_CLINICAL_SIGNIFICANCE) & stringr::str_detect(CLINVAR_CLINICAL_SIGNIFICANCE, "^pathogenic$"))
+            pcg_report[["snv_indel"]][["variant_display"]][["tier1"]][[ph]] <-  dplyr::filter(sample_calls_all[[ph]], CLINVAR_CONFLICTED == 0 & stringr::str_detect(CLINVAR_VARIANT_ORIGIN,"germline") & !is.na(CLINVAR_CLINICAL_SIGNIFICANCE) & stringr::str_detect(CLINVAR_CLINICAL_SIGNIFICANCE, pathogenic_clnsig_regex))
             if(nrow(pcg_report[["snv_indel"]][["variant_display"]][["tier1"]][[ph]]) > 0){
               pcg_report[["snv_indel"]][["variant_display"]][["tier1"]][[ph]] <-
                 pcg_report[["snv_indel"]][["variant_display"]][["tier1"]][[ph]] %>%
                 dplyr::mutate(PATHRANK = NA, PATHSCORE = NA, PATHDOC = NA)
+              all_hits <- dplyr::bind_rows(all_hits, dplyr::select(pcg_report[["snv_indel"]][["variant_display"]][["tier1"]][[ph]],GENOMIC_CHANGE))
             }
+            rlogging::message(paste0("TIER 1: Pathogenic variants - ",ph,": n = ",nrow(pcg_report[["snv_indel"]][["variant_display"]][["tier1"]][[ph]])))
+
           }
 
           ## Assign TIER 2 variants (likely pathogenic) to pcg_report object
           for (ph in c("cancer_phenotype", "noncancer_phenotype")){
-            pcg_report[["snv_indel"]][["variant_display"]][["tier2"]][[ph]] <-  dplyr::filter(sample_calls_all[[ph]], CLINVAR_CONFLICTED == 0 & stringr::str_detect(CLINVAR_VARIANT_ORIGIN,"germline") & !is.na(CLINVAR_CLINICAL_SIGNIFICANCE) & stringr::str_detect(CLINVAR_CLINICAL_SIGNIFICANCE, "^(likely_pathogenic|pathogenic,likely_pathogenic)$"))
+            pcg_report[["snv_indel"]][["variant_display"]][["tier2"]][[ph]] <-  dplyr::filter(sample_calls_all[[ph]], CLINVAR_CONFLICTED == 0 & stringr::str_detect(CLINVAR_VARIANT_ORIGIN,"germline") & !is.na(CLINVAR_CLINICAL_SIGNIFICANCE) & stringr::str_detect(CLINVAR_CLINICAL_SIGNIFICANCE, likely_pathogenic_clnsig_regex))
             if(nrow(pcg_report[["snv_indel"]][["variant_display"]][["tier2"]][[ph]]) > 0){
               pcg_report[["snv_indel"]][["variant_display"]][["tier2"]][[ph]] <-
                 pcg_report[["snv_indel"]][["variant_display"]][["tier2"]][[ph]] %>%
                 dplyr::mutate(PATHRANK = NA, PATHSCORE = NA, PATHDOC = NA)
+              all_hits <- dplyr::bind_rows(all_hits, dplyr::select(pcg_report[["snv_indel"]][["variant_display"]][["tier2"]][[ph]],GENOMIC_CHANGE))
             }
+            rlogging::message(paste0("TIER 2: Likely pathogenic variants - ",ph,": n = ",nrow(pcg_report[["snv_indel"]][["variant_display"]][["tier2"]][[ph]])))
           }
 
           ## Assign TIER 3A (VUS in ClinVar) variants to pcg_report object
           for (ph in c("cancer_phenotype", "noncancer_phenotype")){
-            pcg_report[["snv_indel"]][["variant_display"]][["tier3A"]][[ph]] <-  dplyr::filter(sample_calls_all[[ph]], CLINVAR_CONFLICTED == 0 & stringr::str_detect(CLINVAR_VARIANT_ORIGIN, "germline") & !is.na(CLINVAR_CLINICAL_SIGNIFICANCE) & stringr::str_detect(CLINVAR_CLINICAL_SIGNIFICANCE, "^(uncertain_significance|risk_factor)$"))
+            pcg_report[["snv_indel"]][["variant_display"]][["tier3A"]][[ph]] <-  dplyr::filter(sample_calls_all[[ph]], CLINVAR_CONFLICTED == 0 & stringr::str_detect(CLINVAR_VARIANT_ORIGIN, "germline") & !is.na(CLINVAR_CLINICAL_SIGNIFICANCE) & stringr::str_detect(CLINVAR_CLINICAL_SIGNIFICANCE, vus_clnsig_regex))
             if(nrow(pcg_report[["snv_indel"]][["variant_display"]][["tier3A"]][[ph]]) > 0){
               pcg_report[["snv_indel"]][["variant_display"]][["tier3A"]][[ph]] <-
                 pcgrr::assign_pathogenicity_score(pcg_report[["snv_indel"]][["variant_display"]][["tier3A"]][[ph]], pcgr_config, pcgr_data)
               pcg_report[["snv_indel"]][["variant_display"]][["tier3A"]][[ph]] <-
                 pcg_report[["snv_indel"]][["variant_display"]][["tier3A"]][[ph]] %>%
                 dplyr::arrange(desc(PATHSCORE), LOSS_OF_FUNCTION, CODING_STATUS, desc(ONCOSCORE))
+              all_hits <- dplyr::bind_rows(all_hits, dplyr::select(pcg_report[["snv_indel"]][["variant_display"]][["tier3A"]][[ph]],GENOMIC_CHANGE))
             }
+            rlogging::message(paste0("TIER 3: Variants of uncertain significance - ",ph,": n = ",nrow(pcg_report[["snv_indel"]][["variant_display"]][["tier3A"]][[ph]])))
           }
 
           ## Assign TIER 3B (Non-classified variants) to pcg_report object
@@ -134,15 +153,31 @@ generate_predisposition_report <- function(project_directory, query_vcf2tsv, pcg
             pcg_report[["snv_indel"]][["variant_display"]][["tier3B"]] <-
               pcg_report[["snv_indel"]][["variant_display"]][["tier3B"]] %>%
               dplyr::arrange(desc(PATHSCORE), LOSS_OF_FUNCTION, CODING_STATUS, desc(ONCOSCORE))
+            all_hits <- dplyr::bind_rows(all_hits, dplyr::select(pcg_report[["snv_indel"]][["variant_display"]][["tier3B"]],GENOMIC_CHANGE))
           }
+          rlogging::message(paste0("TIER 3: Other unclassified variants - ",ph,": n = ",nrow(pcg_report[["snv_indel"]][["variant_display"]][["tier3B"]])))
+
+          rlogging::message("Assignment of other variants to hits from genome-wide association studies")
+
+          ## Assign GWAS hits to pcg_report object
+          pcg_report[["snv_indel"]][["variant_display"]][["gwas"]] <-  dplyr::filter(calls, !is.na(GWAS_HIT) & !is.na(GWAS_CITATION))
+          pcg_report[["snv_indel"]][["variant_display"]][["gwas"]] <- dplyr::anti_join(pcg_report[["snv_indel"]][["variant_display"]][["gwas"]], all_hits, by=c("GENOMIC_CHANGE"))
+          if(nrow(pcg_report[["snv_indel"]][["variant_display"]][["gwas"]]) > 0){
+            pcg_report[["snv_indel"]][["variant_display"]][["gwas"]] <-
+              pcg_report[["snv_indel"]][["variant_display"]][["gwas"]] %>%
+              dplyr::mutate(PATHRANK = NA, PATHSCORE = NA, PATHDOC = NA, CLINVAR_PHENOTYPE = NA) %>%
+              dplyr::rename(CLINVAR_CLINICAL_SIGNIFICANCE = CLINVAR_CLNSIG) %>%
+              dplyr::arrange(LOSS_OF_FUNCTION, CODING_STATUS, desc(ONCOSCORE))
+          }
+          rlogging::message(paste0("GWAS hits - cancer phenotypes: n = ",nrow(pcg_report[["snv_indel"]][["variant_display"]][["gwas"]])))
 
 
           pcg_report <- pcgrr::generate_tier_tsv_cpsr(pcg_report, sample_name = sample_name)
           pcg_report <- pcgrr::summary_findings_cpsr(pcg_report)
           population_tags <- unique(c("GLOBAL_AF_1KG", pcg_report[["pcgr_config"]][["popgen"]][["vcftag_tgp"]],
                                       "GLOBAL_AF_GNOMAD", pcg_report[["pcgr_config"]][["popgen"]][["vcftag_gnomad"]]))
-          for (class in c("tier1", "tier2", "tier3A", "tier3B")){
-            if (class != "tier3B"){
+          for (class in c("tier1", "tier2", "tier3A", "tier3B","gwas")){
+            if (class != "tier3B" & class != "gwas"){
               for (c in c("noncancer_phenotype", "cancer_phenotype")){
                 if (nrow(pcg_report[["snv_indel"]][["variant_display"]][[class]][[c]]) > 0){
                   pcg_report[["snv_indel"]][["variant_display"]][[class]][[c]] <- pcg_report[["snv_indel"]][["variant_display"]][[class]][[c]] %>%
@@ -168,7 +203,13 @@ generate_predisposition_report <- function(project_directory, query_vcf2tsv, pcg
                     pcg_report[["snv_indel"]][["variant_display"]][[class]][is.na(pcg_report[["snv_indel"]][["variant_display"]][[class]][, tag]), ][, tag] <- 0.00
                   }
                 }
-                pcg_report[["snv_indel"]][["variant_display"]][[class]] <- dplyr::select(pcg_report[["snv_indel"]][["variant_display"]][[class]], dplyr::one_of(predispose_tier3B_display))
+                if(class == "tier3B"){
+                  pcg_report[["snv_indel"]][["variant_display"]][[class]] <- dplyr::select(pcg_report[["snv_indel"]][["variant_display"]][[class]], dplyr::one_of(predispose_tier3B_display))
+                }
+                else{
+                  pcg_report[["snv_indel"]][["variant_display"]][[class]] <- dplyr::select(pcg_report[["snv_indel"]][["variant_display"]][[class]], dplyr::one_of(predispose_gwas_display))
+
+                }
               }
             }
           }
@@ -187,7 +228,7 @@ generate_predisposition_report <- function(project_directory, query_vcf2tsv, pcg
     write(pcgr_json, fnames[["json"]])
     gzip_command <- paste0("gzip -f ", fnames[["json"]])
     system(gzip_command, intern = F)
-    rmarkdown::render(system.file("templates", "report_predispose.Rmd", package = "pcgrr"), output_format = rmarkdown::html_document(theme = pcg_report[["pcgr_config"]][["visual"]][["report_theme"]], toc = T, toc_depth = 3, toc_float = T, number_sections = F, includes = rmarkdown::includes(after_body = "disclaimer.md")), output_file = paste0(sample_name, ".cpsr.", genome_assembly, ".html"), output_dir = project_directory, clean = T, intermediates_dir = project_directory, quiet = T)
+    rmarkdown::render(system.file("templates", "report_predispose.Rmd", package = "pcgrr"), output_format = rmarkdown::html_document(theme = pcg_report[["pcgr_config"]][["visual"]][["report_theme"]], toc = T, toc_depth = 3, toc_float = T, number_sections = F, includes = rmarkdown::includes(after_body = "disclaimer_predisposition.md")), output_file = paste0(sample_name, ".cpsr.", genome_assembly, ".html"), output_dir = project_directory, clean = T, intermediates_dir = project_directory, quiet = T)
   }
 }
 

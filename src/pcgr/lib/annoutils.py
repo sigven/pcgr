@@ -40,6 +40,104 @@ def error_message(message, logger):
    logger.error('')
    exit(1)
 
+# def verify_config_file(configuration_file, logger):
+#    if not os.path.exists(os.path.abspath(configuration_file)):
+#       err_msg = "Input file (" + str(configuration_file) + ") does not exist"
+#       error_message(err_msg,logger)
+
+#    if not os.path.abspath(configuration_file).endswith('.toml'):
+#       err_msg = "Configuration file (" + os.path.abspath(configuration_file) + ") does not have the correct file extension (.toml)"
+#       error_message(err_msg,logger)
+
+#    config_host_info = {'basename':os.path.basename(str(configuration_file)), 'dir':os.path.dirname(os.path.abspath(configuration_file))}
+#    return config_host_info
+
+# def verify_input_vcf(input_vcf, logger):
+#    if not os.path.exists(os.path.abspath(input_vcf)):
+#       err_msg = "Input file (" + str(input_vcf) + ") does not exist"
+#       error_message(err_msg,logger)
+
+#    if not (os.path.abspath(input_vcf).endswith('.vcf') or os.path.abspath(input_vcf).endswith('.vcf.gz')):
+#       err_msg = "VCF input file (" + os.path.abspath(input_vcf) + ") does not have the correct file extension (.vcf or .vcf.gz)"
+#       error_message(err_msg,logger)
+
+#    ## check that tabix file exist if bgzipped files is given
+#    if os.path.abspath(input_vcf).endswith('.vcf.gz'):
+#       tabix_file = input_vcf + '.tbi'
+#       if not os.path.exists(os.path.abspath(tabix_file)):
+#          err_msg = "Tabix file (i.e. '.gz.tbi') is not present for the bgzipped VCF input file (" + os.path.abspath(input_vcf) + "). Please make sure your input VCF is properly compressed and indexed (bgzip + tabix)"
+#          error_message(err_msg,logger)
+
+#    vcf_host_info = {'basename':os.path.basename(str(input_vcf)), 'dir':os.path.dirname(os.path.abspath(input_vcf))}
+#    return vcf_host_info
+
+# def verify_somatic_cna(input_cna, logger):
+#    if not os.path.exists(os.path.abspath(input_cna)):
+#       err_msg = "Input file (" + str(input_cna) + ") does not exist"
+#       error_message(err_msg,logger)
+#    if not (os.path.abspath(input_cna).endswith('.tsv') or os.path.abspath(input_cna).endswith('.txt')):
+#       err_msg = "CNA segment input file (" + os.path.abspath(input_cna) + ") does not have the correct file extension (.tsv or .txt)"
+#       error_message(err_msg,logger)
+   
+#    input_cna_basename = os.path.basename(str(input_cna))
+#    input_cna_dir = os.path.dirname(os.path.abspath(input_cna))
+
+#    cna_host_info = {'basename':os.path.basename(str(input_cna_basename)), 'dir':os.path.dirname(os.path.abspath(input_cna_dir))}
+#    return cna_host_info
+
+# def verify_output_folder(output_dir, logger):
+#    ## check the existence of given output folder
+#    output_dir_full = os.path.abspath(output_dir)
+#    if not os.path.isdir(output_dir_full):
+#       err_msg = "Output directory (" + str(output_dir_full) + ") does not exist"
+#       error_message(err_msg,logger)
+
+# def verify_databundle(directory, db_version, genome_assembly, logger, workflow = 'pcgr'):
+#    ## check the existence of base folder
+#    base_dir = os.path.abspath(directory)
+#    if not os.path.isdir(base_dir):
+#       err_msg = "Base directory (" + str(base_dir) + ") does not exist"
+#       error_message(err_msg,logger)
+   
+#    ## check the existence of data folder within the base folder
+#    db_dir = os.path.join(os.path.abspath(directory), 'data')
+#    if not os.path.isdir(db_dir):
+#       err_msg = "Data directory (" + str(db_dir) + ") does not exist"
+#       error_message(err_msg,logger)
+   
+#    ## check the existence of specified assembly data folder within the base folder
+#    db_assembly_dir = os.path.join(os.path.abspath(db_dir), genome_assembly)
+#    if not os.path.isdir(db_assembly_dir):
+#       err_msg = "Data directory for the specified genome assembly (" + str(db_assembly_dir) + ") does not exist"
+#       error_message(err_msg,logger)
+   
+#    ## check the existence of RELEASE_NOTES (starting from 0.4.0)
+#    rel_notes_file = os.path.join(os.path.abspath(db_assembly_dir), 'RELEASE_NOTES')
+#    if not os.path.exists(rel_notes_file):
+#       err_msg = 'The PCGR data bundle is outdated - please download the latest data bundle (see github.com/sigven/pcgr for instructions)'
+#       if workflow == 'gvanno':
+#          err_msg = 'The gvanno data bundle is outdated - please download the latest data bundle (see github.com/sigven/gvanno for instructions)'
+#       if workflow == 'cpsr':
+#          err_msg = 'The cpsr data bundle is outdated - please download the latest data bundle (see github.com/sigven/cpsr for instructions)'
+#       error_message(err_msg,logger)
+      
+#    release_notes = open(rel_notes_file,'r')
+#    compliant_data_bundle = 0
+#    for line in release_notes:
+#       if db_version in line:
+#          compliant_data_bundle = 1
+   
+#    release_notes.close()
+
+#    if compliant_data_bundle == 0:
+#       err_msg = 'The PCGR data bundle is not compliant with the software version - please download the latest software and data bundle (see https://github.com/sigven/pcgr for instructions)'
+#       if workflow == 'gvanno':
+#           err_msg = 'The gvanno data bundle is not compliant with the software version - please download the latest software and data bundle (see https://github.com/sigven/gvanno for instructions)'
+#       if workflow == 'cpsr':
+#           err_msg = 'The cpsr data bundle is not compliant with the software version - please download the latest software and data bundle (see https://github.com/sigven/cpsr for instructions)'
+#       error_message(err_msg,logger)
+#    return
+
 def write_pass_vcf(annotated_vcf, logger):
    
    out_vcf = re.sub(r'\.annotated\.vcf\.gz$','.annotated.pass.vcf',annotated_vcf)
@@ -238,18 +336,20 @@ def map_variant_effect_predictors(rec, algorithms):
    consequence = str(rec.INFO.get('Consequence'))
      
    dbnsfp_key = ''
-     
-   if not rec.INFO.get('HGVSp_short') is None:
+
+   found_key = 0
+   if not rec.INFO.get('HGVSp_short') is None and not rec.INFO.get('HGVSp_short') == '.':
       aa_change = str(rec.INFO.get('HGVSp_short'))
       dbnsfp_key = gene_id + ':' + str(aa_change)
-   else:
-      if re.search('splice_site',consequence):
-         dbnsfp_key = gene_id
+      if dbnsfp_key in dbnsfp_predictions:
+         found_key = 1
    
+   if found_key == 0 and re.search('splice_',consequence):
+      dbnsfp_key = gene_id
+
    if dbnsfp_key != '':
       if dbnsfp_key in dbnsfp_predictions:
          rec.INFO['EFFECT_PREDICTIONS'] = dbnsfp_predictions[dbnsfp_key]
-         
          for algo_pred in rec.INFO['EFFECT_PREDICTIONS'].split('&'):
             if algo_pred.startswith('sift:'):
                rec.INFO['SIFT_DBNSFP'] = str(algo_pred.split(':')[1])
@@ -402,6 +502,47 @@ def map_dbnsfp_predictions(dbnsfp_tag, algorithms):
             all_preds.append(dbnsfp_predictions[k][algo])
          effect_predictions[k] = '&'.join(all_preds)
 
-
-   
    return effect_predictions
+
+
+def vep_dbnsfp_meta_vcf(query_vcf, info_tags_wanted):
+   vep_to_pcgr_af = {'gnomAD_AMR_AF':'AMR_AF_GNOMAD','gnomAD_AFR_AF':'AFR_AF_GNOMAD','gnomAD_EAS_AF':'EAS_AF_GNOMAD','gnomAD_NFE_AF':'NFE_AF_GNOMAD','gnomAD_AF':'GLOBAL_AF_GNOMAD',
+                     'gnomAD_SAS_AF':'SAS_AF_GNOMAD','gnomAD_OTH_AF':'OTH_AF_GNOMAD','gnomAD_ASJ_AF':'ASJ_AF_GNOMAD','gnomAD_FIN_AF':'FIN_AF_GNOMAD','AFR_AF':'AFR_AF_1KG',
+                     'AMR_AF':'AMR_AF_1KG','SAS_AF':'SAS_AF_1KG','EUR_AF':'EUR_AF_1KG','EAS_AF':'EAS_AF_1KG', 'AF':'GLOBAL_AF_1KG'}
+
+   vcf = VCF(query_vcf)
+   vep_csq_index2fields = {}
+   vep_csq_fields2index = {}
+   dbnsfp_prediction_algorithms = []
+   for e in vcf.header_iter():
+      header_element = e.info()
+      if 'ID' in header_element.keys():
+         identifier = str(header_element['ID'])
+         if identifier == 'CSQ' or identifier == 'DBNSFP':
+            description = str(header_element['Description'])
+            if 'Format: ' in description:
+               subtags = description.split('Format: ')[1].split('|')
+               if identifier == 'CSQ':
+                  i = 0
+                  for t in subtags:
+                     v = t
+                     if t in vep_to_pcgr_af:
+                        v = str(vep_to_pcgr_af[t])
+                     if v in info_tags_wanted:
+                        vep_csq_index2fields[i] = v
+                        vep_csq_fields2index[v] = i
+                     i = i + 1
+               if identifier == 'DBNSFP':
+                  #if len(subtags) > 7:
+                     #effect_predictions_description = "Format: " + '|'.join(subtags[7:])
+                  i = 7
+                  while(i < len(subtags)):
+                     dbnsfp_prediction_algorithms.append(str(re.sub(r'((_score)|(_pred))"*$','',subtags[i])))
+                     i = i + 1
+
+   vep_dbnsfp_meta_info = {}
+   vep_dbnsfp_meta_info['vep_csq_index2fields'] = vep_csq_index2fields
+   vep_dbnsfp_meta_info['vep_csq_fields2index'] = vep_csq_fields2index
+   vep_dbnsfp_meta_info['dbnsfp_prediction_algorithms'] = dbnsfp_prediction_algorithms
+
+   return vep_dbnsfp_meta_info

@@ -4,8 +4,10 @@ The annotated variants are based on the following underlying tools and knowledge
 
 ```{r list_resources, echo=F,results='asis'}
 for(n in names(pcg_report$pcgr_db_release)){
-  s <- paste0('* [',pcg_report$pcgr_db_release[[n]]$name,'](',pcg_report$pcgr_db_release[[n]]$url,') - ',pcg_report$pcgr_db_release[[n]]$description, ' (',pcg_report$pcgr_db_release[[n]]$version,')')
-  cat(s,sep="\n")
+  if(n != 'gwas'){
+    s <- paste0('* [',pcg_report$pcgr_db_release[[n]]$name,'](',pcg_report$pcgr_db_release[[n]]$url,') - ',pcg_report$pcgr_db_release[[n]]$description, ' (',pcg_report$pcgr_db_release[[n]]$version,')')
+    cat(s,sep="\n")
+  }
 }
 
 ```

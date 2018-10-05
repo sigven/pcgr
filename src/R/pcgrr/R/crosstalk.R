@@ -107,7 +107,7 @@ formatNoSci_ct <- function(x) {
 #' filter_slider("mpg", "Miles per gallon", sd, "mpg")
 #'
 #' }
-#' @export
+#'
 filter_slider_allelic_fraction <- function(id, label, sharedData, column, step = NULL,
                                            round = FALSE, ticks = TRUE, animate = FALSE, width = NULL, sep = ",",
                                            pre = NULL, post = NULL, timeFormat = NULL,

@@ -78,4 +78,5 @@ sd <- SharedData$new(mtcars)
 filter_slider("mpg", "Miles per gallon", sd, "mpg")
 
 }
+
 }

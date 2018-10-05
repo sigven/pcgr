@@ -1456,3 +1456,325 @@
 [2018-09-16 11:51:18][INFO] Limiting variants to hereditary cancer-predisposing syndromes/cancer conditions
 [2018-09-16 11:51:19][INFO] Assignment of variants to tier 1/tier 2/tier 3
 [2018-09-16 11:51:22][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2018-09-20 10:22:14][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-09-20 10:22:14][INFO] Number of PASS variants: 1272
+[2018-09-20 10:22:14][INFO] Number of SNVs: 1222
+[2018-09-20 10:22:14][INFO] Number of deletions: 24
+[2018-09-20 10:22:14][INFO] Number of insertions: 0
+[2018-09-20 10:22:14][INFO] Number of block substitutions: 26
+[2018-09-20 10:22:14][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-09-20 10:22:15][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-09-20 10:22:16][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-09-20 10:22:16][INFO] Extending annotation descriptions related to ClinVar
+[2018-09-20 10:22:18][INFO] Filtering against cancer predisposition genes:
+[2018-09-20 10:22:18][INFO] 856 variants remaining
+[2018-09-20 10:22:18][INFO] Found coding variants in the following cancer predisposition genes: MPL, NRAS, ALK, SOS1, ERBB4, VHL, RAF1, MLH1, CTNNB1, GATA2, PIK3CA, PDGFRA, KIT, KDR, APC, EGFR, MET, BRAF, EZH2, CDKN2A, RET, PTEN, HRAS, ATM, CBL, KRAS, CDK4, PTPN11, POLE, RB1, AKT1, MAP2K1, TSC2, TP53, SPOP, SETBP1, SMAD4, STK11, MAP2K2, ERCC2, RUNX1, CHEK2, AR
+[2018-09-20 11:38:38][INFO] Adding ciations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-09-20 21:40:38][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-09-20 21:40:38][INFO] Number of PASS variants: 1272
+[2018-09-20 21:40:38][INFO] Number of SNVs: 1222
+[2018-09-20 21:40:38][INFO] Number of deletions: 24
+[2018-09-20 21:40:38][INFO] Number of insertions: 0
+[2018-09-20 21:40:38][INFO] Number of block substitutions: 26
+[2018-09-20 21:40:38][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-09-20 21:40:39][INFO] Adding ciations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-09-20 21:40:40][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-09-20 21:40:40][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-09-20 21:40:40][INFO] Extending annotation descriptions related to ClinVar
+[2018-09-20 21:41:35][INFO] Filtering against cancer predisposition genes:
+[2018-09-20 21:41:36][INFO] 856 variants remaining
+[2018-09-20 21:41:36][INFO] Found coding variants in the following cancer predisposition genes: MPL, NRAS, ALK, SOS1, ERBB4, VHL, RAF1, MLH1, CTNNB1, GATA2, PIK3CA, PDGFRA, KIT, KDR, APC, EGFR, MET, BRAF, EZH2, CDKN2A, RET, PTEN, HRAS, ATM, CBL, KRAS, CDK4, PTPN11, POLE, RB1, AKT1, MAP2K1, TSC2, TP53, SPOP, SETBP1, SMAD4, STK11, MAP2K2, ERCC2, RUNX1, CHEK2, AR
+[2018-09-20 21:41:36][INFO] Limiting variants to hereditary cancer-predisposing syndromes/cancer conditions
+[2018-09-20 21:41:50][INFO] Assignment of variants to tier 1/tier 2/tier 3
+[2018-09-20 21:43:09][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2018-09-20 21:48:40][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-09-20 21:48:40][INFO] Number of PASS variants: 1272
+[2018-09-20 21:48:40][INFO] Number of SNVs: 1222
+[2018-09-20 21:48:40][INFO] Number of deletions: 24
+[2018-09-20 21:48:40][INFO] Number of insertions: 0
+[2018-09-20 21:48:40][INFO] Number of block substitutions: 26
+[2018-09-20 21:48:40][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-09-20 21:48:41][INFO] Adding ciations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-09-20 21:48:41][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-09-20 21:48:41][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-09-20 21:48:42][INFO] Extending annotation descriptions related to ClinVar
+[2018-09-20 21:48:46][INFO] Filtering against cancer predisposition genes:
+[2018-09-20 21:48:46][INFO] 856 variants remaining
+[2018-09-20 21:48:46][INFO] Found coding variants in the following cancer predisposition genes: MPL, NRAS, ALK, SOS1, ERBB4, VHL, RAF1, MLH1, CTNNB1, GATA2, PIK3CA, PDGFRA, KIT, KDR, APC, EGFR, MET, BRAF, EZH2, CDKN2A, RET, PTEN, HRAS, ATM, CBL, KRAS, CDK4, PTPN11, POLE, RB1, AKT1, MAP2K1, TSC2, TP53, SPOP, SETBP1, SMAD4, STK11, MAP2K2, ERCC2, RUNX1, CHEK2, AR
+[2018-09-20 21:48:46][INFO] Limiting variants to hereditary cancer-predisposing syndromes/cancer conditions
+[2018-09-20 21:48:46][INFO] Assignment of variants to tier 1/tier 2/tier 3
+[2018-09-20 21:48:49][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2018-09-20 22:00:13][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-09-20 22:00:13][INFO] Number of PASS variants: 1272
+[2018-09-20 22:00:13][INFO] Number of SNVs: 1222
+[2018-09-20 22:00:13][INFO] Number of deletions: 24
+[2018-09-20 22:00:13][INFO] Number of insertions: 0
+[2018-09-20 22:00:13][INFO] Number of block substitutions: 26
+[2018-09-20 22:00:13][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-09-20 22:00:15][INFO] Adding ciations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-09-20 22:00:15][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-09-20 22:00:15][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-09-20 22:00:15][INFO] Extending annotation descriptions related to ClinVar
+[2018-09-20 22:00:18][INFO] Filtering against cancer predisposition genes:
+[2018-09-20 22:00:18][INFO] 856 variants remaining
+[2018-09-20 22:00:18][INFO] Found coding variants in the following cancer predisposition genes: MPL, NRAS, ALK, SOS1, ERBB4, VHL, RAF1, MLH1, CTNNB1, GATA2, PIK3CA, PDGFRA, KIT, KDR, APC, EGFR, MET, BRAF, EZH2, CDKN2A, RET, PTEN, HRAS, ATM, CBL, KRAS, CDK4, PTPN11, POLE, RB1, AKT1, MAP2K1, TSC2, TP53, SPOP, SETBP1, SMAD4, STK11, MAP2K2, ERCC2, RUNX1, CHEK2, AR
+[2018-09-20 22:00:18][INFO] Limiting variants to hereditary cancer-predisposing syndromes/cancer conditions
+[2018-09-20 22:00:19][INFO] Assignment of variants to tier 1/tier 2/tier 3
+[2018-09-20 22:00:54][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-09-20 22:00:54][INFO] Number of PASS variants: 1272
+[2018-09-20 22:00:54][INFO] Number of SNVs: 1222
+[2018-09-20 22:00:54][INFO] Number of deletions: 24
+[2018-09-20 22:00:54][INFO] Number of insertions: 0
+[2018-09-20 22:00:54][INFO] Number of block substitutions: 26
+[2018-09-20 22:00:54][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-09-20 22:00:56][INFO] Adding ciations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-09-20 22:00:56][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-09-20 22:00:56][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-09-20 22:00:56][INFO] Extending annotation descriptions related to ClinVar
+[2018-09-20 22:00:58][INFO] Filtering against cancer predisposition genes:
+[2018-09-20 22:00:58][INFO] 856 variants remaining
+[2018-09-20 22:00:58][INFO] Found coding variants in the following cancer predisposition genes: MPL, NRAS, ALK, SOS1, ERBB4, VHL, RAF1, MLH1, CTNNB1, GATA2, PIK3CA, PDGFRA, KIT, KDR, APC, EGFR, MET, BRAF, EZH2, CDKN2A, RET, PTEN, HRAS, ATM, CBL, KRAS, CDK4, PTPN11, POLE, RB1, AKT1, MAP2K1, TSC2, TP53, SPOP, SETBP1, SMAD4, STK11, MAP2K2, ERCC2, RUNX1, CHEK2, AR
+[2018-09-20 22:00:58][INFO] Limiting variants to hereditary cancer-predisposing syndromes/cancer conditions
+[2018-09-20 22:00:59][INFO] Assignment of variants to tier 1/tier 2/tier 3
+[2018-09-20 22:01:02][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2018-09-20 22:01:36][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2018-09-20 22:01:59][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-09-20 22:01:59][INFO] Number of PASS variants: 1272
+[2018-09-20 22:01:59][INFO] Number of SNVs: 1222
+[2018-09-20 22:01:59][INFO] Number of deletions: 24
+[2018-09-20 22:01:59][INFO] Number of insertions: 0
+[2018-09-20 22:01:59][INFO] Number of block substitutions: 26
+[2018-09-20 22:01:59][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-09-20 22:02:01][INFO] Adding ciations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-09-20 22:02:01][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-09-20 22:02:01][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-09-20 22:02:01][INFO] Extending annotation descriptions related to ClinVar
+[2018-09-20 22:02:03][INFO] Filtering against cancer predisposition genes:
+[2018-09-20 22:02:03][INFO] 856 variants remaining
+[2018-09-20 22:02:03][INFO] Found coding variants in the following cancer predisposition genes: MPL, NRAS, ALK, SOS1, ERBB4, VHL, RAF1, MLH1, CTNNB1, GATA2, PIK3CA, PDGFRA, KIT, KDR, APC, EGFR, MET, BRAF, EZH2, CDKN2A, RET, PTEN, HRAS, ATM, CBL, KRAS, CDK4, PTPN11, POLE, RB1, AKT1, MAP2K1, TSC2, TP53, SPOP, SETBP1, SMAD4, STK11, MAP2K2, ERCC2, RUNX1, CHEK2, AR
+[2018-09-20 22:02:03][INFO] Limiting variants to hereditary cancer-predisposing syndromes/cancer conditions
+[2018-09-20 22:02:16][INFO] Assignment of variants to tier 1/tier 2/tier 3
+[2018-09-20 22:02:20][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2018-09-20 22:06:33][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-09-20 22:06:33][INFO] Number of PASS variants: 1272
+[2018-09-20 22:06:33][INFO] Number of SNVs: 1222
+[2018-09-20 22:06:33][INFO] Number of deletions: 24
+[2018-09-20 22:06:33][INFO] Number of insertions: 0
+[2018-09-20 22:06:33][INFO] Number of block substitutions: 26
+[2018-09-20 22:06:33][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-09-20 22:06:34][INFO] Adding ciations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-09-20 22:06:34][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-09-20 22:06:35][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-09-20 22:06:35][INFO] Extending annotation descriptions related to ClinVar
+[2018-09-20 22:06:37][INFO] Filtering against cancer predisposition genes:
+[2018-09-20 22:06:37][INFO] 856 variants remaining
+[2018-09-20 22:06:37][INFO] Found coding variants in the following cancer predisposition genes: MPL, NRAS, ALK, SOS1, ERBB4, VHL, RAF1, MLH1, CTNNB1, GATA2, PIK3CA, PDGFRA, KIT, KDR, APC, EGFR, MET, BRAF, EZH2, CDKN2A, RET, PTEN, HRAS, ATM, CBL, KRAS, CDK4, PTPN11, POLE, RB1, AKT1, MAP2K1, TSC2, TP53, SPOP, SETBP1, SMAD4, STK11, MAP2K2, ERCC2, RUNX1, CHEK2, AR
+[2018-09-20 22:06:37][INFO] Limiting variants to hereditary cancer-predisposing syndromes/cancer conditions
+[2018-09-20 22:06:38][INFO] Assignment of variants to tier 1/tier 2/tier 3
+[2018-09-20 22:07:33][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-09-20 22:07:33][INFO] Number of PASS variants: 1272
+[2018-09-20 22:07:33][INFO] Number of SNVs: 1222
+[2018-09-20 22:07:33][INFO] Number of deletions: 24
+[2018-09-20 22:07:33][INFO] Number of insertions: 0
+[2018-09-20 22:07:33][INFO] Number of block substitutions: 26
+[2018-09-20 22:07:33][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-09-20 22:07:35][INFO] Adding ciations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-09-20 22:07:35][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-09-20 22:07:35][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-09-20 22:07:35][INFO] Extending annotation descriptions related to ClinVar
+[2018-09-20 22:07:37][INFO] Filtering against cancer predisposition genes:
+[2018-09-20 22:07:37][INFO] 856 variants remaining
+[2018-09-20 22:07:37][INFO] Found coding variants in the following cancer predisposition genes: MPL, NRAS, ALK, SOS1, ERBB4, VHL, RAF1, MLH1, CTNNB1, GATA2, PIK3CA, PDGFRA, KIT, KDR, APC, EGFR, MET, BRAF, EZH2, CDKN2A, RET, PTEN, HRAS, ATM, CBL, KRAS, CDK4, PTPN11, POLE, RB1, AKT1, MAP2K1, TSC2, TP53, SPOP, SETBP1, SMAD4, STK11, MAP2K2, ERCC2, RUNX1, CHEK2, AR
+[2018-09-20 22:07:37][INFO] Limiting variants to hereditary cancer-predisposing syndromes/cancer conditions
+[2018-09-20 22:07:38][INFO] Assignment of variants to tier 1/tier 2/tier 3
+[2018-09-20 22:07:41][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2018-09-20 22:14:13][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-09-20 22:14:13][INFO] Number of PASS variants: 1272
+[2018-09-20 22:14:13][INFO] Number of SNVs: 1222
+[2018-09-20 22:14:13][INFO] Number of deletions: 24
+[2018-09-20 22:14:13][INFO] Number of insertions: 0
+[2018-09-20 22:14:13][INFO] Number of block substitutions: 26
+[2018-09-20 22:14:14][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-09-20 22:14:15][INFO] Adding ciations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-09-20 22:14:15][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-09-20 22:14:15][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-09-20 22:14:16][INFO] Extending annotation descriptions related to ClinVar
+[2018-09-20 22:14:18][INFO] Filtering against cancer predisposition genes:
+[2018-09-20 22:14:18][INFO] 856 variants remaining
+[2018-09-20 22:14:18][INFO] Found coding variants in the following cancer predisposition genes: MPL, NRAS, ALK, SOS1, ERBB4, VHL, RAF1, MLH1, CTNNB1, GATA2, PIK3CA, PDGFRA, KIT, KDR, APC, EGFR, MET, BRAF, EZH2, CDKN2A, RET, PTEN, HRAS, ATM, CBL, KRAS, CDK4, PTPN11, POLE, RB1, AKT1, MAP2K1, TSC2, TP53, SPOP, SETBP1, SMAD4, STK11, MAP2K2, ERCC2, RUNX1, CHEK2, AR
+[2018-09-20 22:14:18][INFO] Limiting variants to hereditary cancer-predisposing syndromes/cancer conditions
+[2018-09-20 22:14:19][INFO] Assignment of variants to tier 1/tier 2/tier 3
+[2018-09-20 22:14:22][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2018-09-20 22:28:03][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-09-20 22:28:04][INFO] Number of PASS variants: 1272
+[2018-09-20 22:28:04][INFO] Number of SNVs: 1222
+[2018-09-20 22:28:04][INFO] Number of deletions: 24
+[2018-09-20 22:28:04][INFO] Number of insertions: 0
+[2018-09-20 22:28:04][INFO] Number of block substitutions: 26
+[2018-09-20 22:28:04][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-09-20 22:28:05][INFO] Adding ciations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-09-20 22:28:05][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-09-20 22:28:05][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-09-20 22:28:06][INFO] Extending annotation descriptions related to ClinVar
+[2018-09-20 22:28:08][INFO] Filtering against cancer predisposition genes:
+[2018-09-20 22:28:08][INFO] 856 variants remaining
+[2018-09-20 22:28:08][INFO] Found coding variants in the following cancer predisposition genes: MPL, NRAS, ALK, SOS1, ERBB4, VHL, RAF1, MLH1, CTNNB1, GATA2, PIK3CA, PDGFRA, KIT, KDR, APC, EGFR, MET, BRAF, EZH2, CDKN2A, RET, PTEN, HRAS, ATM, CBL, KRAS, CDK4, PTPN11, POLE, RB1, AKT1, MAP2K1, TSC2, TP53, SPOP, SETBP1, SMAD4, STK11, MAP2K2, ERCC2, RUNX1, CHEK2, AR
+[2018-09-20 22:28:08][INFO] Limiting variants to hereditary cancer-predisposing syndromes/cancer conditions
+[2018-09-20 22:28:10][INFO] Assignment of variants to tier 1/tier 2/tier 3
+[2018-09-20 22:28:13][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2018-09-21 14:58:14][INFO] Filtering against cancer predisposition genes:
+[2018-09-21 14:58:14][INFO] 856 variants remaining
+[2018-09-21 14:58:14][INFO] Found coding variants in the following cancer predisposition genes: MPL, NRAS, ALK, SOS1, ERBB4, VHL, RAF1, MLH1, CTNNB1, GATA2, PIK3CA, PDGFRA, KIT, KDR, APC, EGFR, MET, BRAF, EZH2, CDKN2A, RET, PTEN, HRAS, ATM, CBL, KRAS, CDK4, PTPN11, POLE, RB1, AKT1, MAP2K1, TSC2, TP53, SPOP, SETBP1, SMAD4, STK11, MAP2K2, ERCC2, RUNX1, CHEK2, AR
+[2018-09-21 14:58:14][INFO] Limiting variants to hereditary cancer-predisposing syndromes/cancer conditions
+[2018-09-21 14:59:18][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-09-21 14:59:19][INFO] Number of PASS variants: 16782
+[2018-09-21 14:59:19][INFO] Number of SNVs: 13686
+[2018-09-21 14:59:19][INFO] Number of deletions: 1595
+[2018-09-21 14:59:19][INFO] Number of insertions: 1501
+[2018-09-21 14:59:19][INFO] Number of block substitutions: 0
+[2018-09-21 14:59:19][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-09-21 14:59:21][INFO] Adding ciations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-09-21 14:59:21][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-09-21 14:59:22][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-09-21 14:59:22][INFO] Extending annotation descriptions related to ClinVar
+[2018-09-21 14:59:29][INFO] Filtering against cancer predisposition genes:
+[2018-09-21 14:59:29][INFO] 10286 variants remaining
+[2018-09-21 14:59:29][INFO] Found coding variants in the following cancer predisposition genes: MPL, ALK, EPCAM, MSH6, BARD1, FANCD2, XPC, ABRAXAS1, SDHA, PMS2, MET, WRN, EXT1, RECQL4, ATM, POLE, BRCA2, ERCC5, FANCM, TSHR, BUB1B, FANCI, FANCA, TP53, BRIP1, ERCC2, POLD1
+[2018-09-21 14:59:29][INFO] Limiting variants to hereditary cancer-predisposing syndromes/cancer conditions
+[2018-09-21 15:01:17][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-09-21 15:01:18][INFO] Number of PASS variants: 16782
+[2018-09-21 15:01:18][INFO] Number of SNVs: 13686
+[2018-09-21 15:01:18][INFO] Number of deletions: 1595
+[2018-09-21 15:01:18][INFO] Number of insertions: 1501
+[2018-09-21 15:01:18][INFO] Number of block substitutions: 0
+[2018-09-21 15:01:18][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-09-21 15:01:30][INFO] Adding ciations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-09-21 15:05:46][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-09-21 15:05:47][INFO] Number of PASS variants: 16782
+[2018-09-21 15:05:48][INFO] Number of SNVs: 13686
+[2018-09-21 15:05:48][INFO] Number of deletions: 1595
+[2018-09-21 15:05:48][INFO] Number of insertions: 1501
+[2018-09-21 15:05:48][INFO] Number of block substitutions: 0
+[2018-09-21 15:05:48][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-09-21 15:06:00][INFO] Adding ciations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-09-21 15:26:37][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-09-21 15:26:39][INFO] Number of PASS variants: 16782
+[2018-09-21 15:26:39][INFO] Number of SNVs: 13686
+[2018-09-21 15:26:39][INFO] Number of deletions: 1595
+[2018-09-21 15:26:39][INFO] Number of insertions: 1501
+[2018-09-21 15:26:39][INFO] Number of block substitutions: 0
+[2018-09-21 15:26:39][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-09-21 15:27:40][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-09-21 15:27:41][INFO] Number of PASS variants: 16782
+[2018-09-21 15:27:41][INFO] Number of SNVs: 13686
+[2018-09-21 15:27:41][INFO] Number of deletions: 1595
+[2018-09-21 15:27:41][INFO] Number of insertions: 1501
+[2018-09-21 15:27:41][INFO] Number of block substitutions: 0
+[2018-09-21 15:27:41][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-09-21 15:27:56][INFO] Adding ciations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-09-23 11:28:15][WARN] File /Users/sigven/research/docker/cpsr/COLO829__COLO829T-normal.cpsr.grch38.pass.tsv.gz does not exist or has zero size
+[2018-09-23 11:30:31][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-09-23 11:30:31][INFO] Number of PASS variants: 16782
+[2018-09-23 11:30:32][INFO] Number of SNVs: 13686
+[2018-09-23 11:30:32][INFO] Number of deletions: 1595
+[2018-09-23 11:30:32][INFO] Number of insertions: 1501
+[2018-09-23 11:30:32][INFO] Number of block substitutions: 0
+[2018-09-23 11:30:32][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-09-23 11:30:34][INFO] Adding ciations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-09-24 14:26:41][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-09-24 14:26:41][INFO] Number of PASS variants: 1272
+[2018-09-24 14:26:41][INFO] Number of SNVs: 1222
+[2018-09-24 14:26:41][INFO] Number of deletions: 24
+[2018-09-24 14:26:41][INFO] Number of insertions: 0
+[2018-09-24 14:26:41][INFO] Number of block substitutions: 26
+[2018-09-24 14:27:00][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-09-24 14:35:32][INFO] Adding ciations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-09-24 14:35:46][INFO] Adding ciations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-09-24 14:38:06][INFO] Adding ciations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-09-24 14:40:55][INFO] Adding ciations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-09-26 11:45:25][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-09-26 11:45:26][INFO] Number of PASS variants: 1272
+[2018-09-26 11:45:26][INFO] Number of SNVs: 1222
+[2018-09-26 11:45:26][INFO] Number of deletions: 24
+[2018-09-26 11:45:26][INFO] Number of insertions: 0
+[2018-09-26 11:45:26][INFO] Number of block substitutions: 26
+[2018-09-26 11:45:26][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-09-26 11:46:35][INFO] Adding ciations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-09-26 11:47:59][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-09-26 11:47:59][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-09-26 11:48:00][INFO] Extending annotation descriptions related to ClinVar
+[2018-09-26 11:48:52][INFO] Adding ciations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-09-26 11:49:12][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-09-28 09:08:27][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-09-28 09:08:27][INFO] Filtering tumor variants based on allelic depth/fraction (min_dp_tumor=0, min_af_tumor=0)
+[2018-09-28 09:08:27][INFO] Filtering tumor variants based on allelic depth/fraction (min_dp_normal=0, max_af_normal=1)
+[2018-09-28 09:08:27][INFO] Removed 0 tumor variants (0%) based on allelic depth/fraction
+[2018-09-28 09:08:27][INFO] Number of PASS variants: 195
+[2018-09-28 09:08:27][INFO] Number of SNVs: 195
+[2018-09-28 09:08:27][INFO] Number of deletions: 0
+[2018-09-28 09:08:27][INFO] Number of insertions: 0
+[2018-09-28 09:08:27][INFO] Number of block substitutions: 0
+[2018-09-28 09:08:27][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-09-28 11:59:36][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-09-28 12:00:32][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-09-28 12:13:20][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-09-28 13:02:19][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-09-28 13:02:19][INFO] Filtering tumor variants based on allelic depth/fraction (min_dp_tumor=0, min_af_tumor=0)
+[2018-09-28 13:02:19][INFO] Filtering tumor variants based on allelic depth/fraction (min_dp_normal=0, max_af_normal=1)
+[2018-09-28 13:02:19][INFO] Removed 0 tumor variants (0%) based on allelic depth/fraction
+[2018-09-28 13:02:19][INFO] Number of PASS variants: 195
+[2018-09-28 13:02:19][INFO] Number of SNVs: 195
+[2018-09-28 13:02:19][INFO] Number of deletions: 0
+[2018-09-28 13:02:19][INFO] Number of insertions: 0
+[2018-09-28 13:02:19][INFO] Number of block substitutions: 0
+[2018-09-28 13:29:28][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-10-05 19:46:17][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-10-05 19:47:04][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-10-05 19:48:06][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-10-05 19:48:08][INFO] Number of PASS variants: 16782
+[2018-10-05 19:48:08][INFO] Number of SNVs: 13686
+[2018-10-05 19:48:08][INFO] Number of deletions: 1595
+[2018-10-05 19:48:08][INFO] Number of insertions: 1501
+[2018-10-05 19:48:08][INFO] Number of block substitutions: 0
+[2018-10-05 19:48:08][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-10-05 19:48:51][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-10-05 19:48:52][INFO] Number of PASS variants: 16782
+[2018-10-05 19:48:52][INFO] Number of SNVs: 13686
+[2018-10-05 19:48:52][INFO] Number of deletions: 1595
+[2018-10-05 19:48:52][INFO] Number of insertions: 1501
+[2018-10-05 19:48:52][INFO] Number of block substitutions: 0
+[2018-10-05 19:48:52][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-10-05 19:49:19][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-10-05 19:49:20][INFO] Number of PASS variants: 16782
+[2018-10-05 19:49:20][INFO] Number of SNVs: 13686
+[2018-10-05 19:49:20][INFO] Number of deletions: 1595
+[2018-10-05 19:49:20][INFO] Number of insertions: 1501
+[2018-10-05 19:49:20][INFO] Number of block substitutions: 0
+[2018-10-05 19:49:43][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-10-05 19:50:30][INFO] Adding citations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-10-05 20:02:27][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-10-05 20:02:28][INFO] Number of PASS variants: 16782
+[2018-10-05 20:02:28][INFO] Number of SNVs: 13686
+[2018-10-05 20:02:28][INFO] Number of deletions: 1595
+[2018-10-05 20:02:28][INFO] Number of insertions: 1501
+[2018-10-05 20:02:28][INFO] Number of block substitutions: 0
+[2018-10-05 20:02:28][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-10-05 20:02:31][INFO] Adding citations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-10-05 20:02:31][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-10-05 20:02:32][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-10-05 20:02:33][INFO] Extending annotation descriptions related to ClinVar
+[2018-10-05 20:02:40][INFO] Filtering against cancer predisposition genes:
+[2018-10-05 20:02:40][INFO] 10211 variants remaining
+[2018-10-05 20:02:40][INFO] Found coding variants in the following cancer predisposition genes: MPL, ALK, EPCAM, MSH6, BARD1, FANCD2, XPC, SDHA, PMS2, MET, WRN, EXT1, RECQL4, ATM, POLE, BRCA2, ERCC5, FANCM, TSHR, BUB1B, FANCI, FANCA, TP53, BRIP1, ERCC2, POLD1
+[2018-10-05 20:02:40][INFO] Limiting variants to hereditary cancer-predisposing syndromes/cancer conditions
+[2018-10-05 20:02:44][INFO] Assignment of variants to tier 1/tier 2/tier 3
+[2018-10-05 20:02:44][INFO] TIER 1: Pathogenic variants - cancer_phenotype: n = 0
+[2018-10-05 20:02:44][INFO] TIER 1: Pathogenic variants - noncancer_phenotype: n = 0
+[2018-10-05 20:02:45][INFO] TIER 2: Likely pathogenic variants - cancer_phenotype: n = 0
+[2018-10-05 20:02:45][INFO] TIER 2: Likely pathogenic variants - noncancer_phenotype: n = 0
+[2018-10-05 20:02:45][INFO] TIER 3: Variants of uncertain significance - cancer_phenotype: n = 7
+[2018-10-05 20:02:46][INFO] TIER 3: Variants of uncertain significance - noncancer_phenotype: n = 2
+[2018-10-05 20:02:47][INFO] TIER 3: Other unclassified variants - noncancer_phenotype: n = 1
+[2018-10-05 20:02:47][INFO] Assignment of other variants to hits from genome-wide association studies
+[2018-10-05 20:02:47][INFO] GWAS hits - cancer phenotypes: n = 13
+[2018-10-05 20:02:47][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file

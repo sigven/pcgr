@@ -28,13 +28,14 @@ def __main__():
    parser.add_argument("--cancer_hotspots",action = "store_true", help="Annotate VCF with mutation hotspots from cancerhotspots.org")
    parser.add_argument("--uniprot",action = "store_true", help="Annotate VCF with protein functional features from the UniProt Knowledgebase")
    parser.add_argument("--pcgr_onco_xref",action = "store_true", help="Annotate VCF with transcript annotations from PCGR (targeted drugs, protein complexes, cancer gene associations, etc)")
+   parser.add_argument("--gwas",action = "store_true", help="Annotate VCF with against known loci associated with cancer, as identified from genome-wide association studies (GWAS)")
    
    args = parser.parse_args()
    query_info_tags = get_vcf_info_tags(args.query_vcf)
    vcfheader_file = args.out_vcf + '.tmp.' + str(random.randrange(0,10000000)) + '.header.txt'
    conf_fname = args.out_vcf + '.tmp.conf.toml'
    print_vcf_header(args.query_vcf, vcfheader_file, chromline_only = False)
-   run_vcfanno(args.num_processes, args.query_vcf, query_info_tags, vcfheader_file, args.pcgr_db_dir, conf_fname, args.out_vcf, args.docm, args.intogen_driver_mut, args.clinvar, args.tcga, args.dbnsfp, args.civic, args.cbmdb, args.icgc, args.uniprot, args.cancer_hotspots, args.pcgr_onco_xref)
+   run_vcfanno(args.num_processes, args.query_vcf, query_info_tags, vcfheader_file, args.pcgr_db_dir, conf_fname, args.out_vcf, args.docm, args.intogen_driver_mut, args.clinvar, args.tcga, args.dbnsfp, args.civic, args.cbmdb, args.icgc, args.uniprot, args.cancer_hotspots, args.pcgr_onco_xref, args.gwas)
 
 
 def prepare_vcfanno_configuration(vcfanno_data_directory, conf_fname, vcfheader_file, logger, datasource_info_tags, query_info_tags, datasource):
@@ -44,7 +45,7 @@ def prepare_vcfanno_configuration(vcfanno_data_directory, conf_fname, vcfheader_
    append_to_conf_file(datasource, datasource_info_tags, vcfanno_data_directory, conf_fname)
    append_to_vcf_header(vcfanno_data_directory, datasource, vcfheader_file)
 
-def run_vcfanno(num_processes, query_vcf, query_info_tags, vcfheader_file, pcgr_db_directory, conf_fname, output_vcf, docm, intogen_driver_mut, clinvar, tcga, dbnsfp, civic, cbmdb, icgc, uniprot, cancer_hotspots, pcgr_onco_xref):
+def run_vcfanno(num_processes, query_vcf, query_info_tags, vcfheader_file, pcgr_db_directory, conf_fname, output_vcf, docm, intogen_driver_mut, clinvar, tcga, dbnsfp, civic, cbmdb, icgc, uniprot, cancer_hotspots, pcgr_onco_xref, gwas):
    """
    Function that annotates a VCF file with vcfanno against a user-defined set of germline and somatic VCF files
    """
@@ -60,6 +61,7 @@ def run_vcfanno(num_processes, query_vcf, query_info_tags, vcfheader_file, pcgr_
    dbnsfp_info_tags = ["DBNSFP"]
    uniprot_info_tags = ["UNIPROT_FEATURE"]
    pcgr_onco_xref_info_tags = ["PCGR_ONCO_XREF"]
+   gwas_info_tags = ["GWAS_HIT"]
       
    if icgc is True:
       prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file, logger, icgc_info_tags, query_info_tags, "icgc")
@@ -83,6 +85,8 @@ def run_vcfanno(num_processes, query_vcf, query_info_tags, vcfheader_file, pcgr_
       prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file, logger, intogen_driver_mut_info_tags, query_info_tags, "intogen_driver_mut")
    if pcgr_onco_xref is True:
       prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file, logger, pcgr_onco_xref_info_tags, query_info_tags, "pcgr_onco_xref")
+   if gwas is True:
+      prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file, logger, gwas_info_tags, query_info_tags, "gwas")
    
    out_vcf_vcfanno_unsorted1 = output_vcf + '.tmp.unsorted.1'
    #out_vcf_vcfanno_unsorted2 = output_vcf + '.tmp.unsorted.2'

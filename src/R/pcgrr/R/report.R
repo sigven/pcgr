@@ -31,15 +31,14 @@ init_pcg_report <- function(pcgr_config = NULL, sample_name = 'SampleX', pcgr_ve
     cancer_genes <- pcgrr::list_to_df(pcgr_config$cancer_predisposition_genes) %>% dplyr::filter(list.element == T) %>% dplyr::select(name) %>% dplyr::rename(symbol = name)
     pcg_report[[analysis_element]][['predisposition_genes']] <- cancer_genes
 
-    for(t in c('tier1','tier2','tier3A','tier3B')){
+    for(t in c('tier1','tier2','tier3A','tier3B','gwas')){
       pcg_report[[analysis_element]][['variant_display']][[t]] <- data.frame()
-      if(t != 'tier3B'){
+      if(t != 'tier3B' & t != 'gwas'){
         pcg_report[[analysis_element]][['variant_display']][[t]] <- list()
         for(c in c('cancer_phenotype','noncancer_phenotype')){
           pcg_report[[analysis_element]][['variant_display']][[t]][[c]] <- data.frame()
         }
       }
-
       pcg_report[[analysis_element]][['variant_set']][[t]] <- data.frame()
     }
     pcg_report[[analysis_element]][['variant_set']][['tsv']] <- data.frame()
@@ -62,7 +61,7 @@ init_pcg_report <- function(pcgr_config = NULL, sample_name = 'SampleX', pcgr_ve
     }
 
     pcg_report[['summary']] <- list()
-    for(t in c("tier1","tier2","tier3A","tier3B")){
+    for(t in c("tier1","tier2","tier3A","tier3B","gwas")){
       pcg_report[['summary']][[t]] <- data.frame()
     }
     return(pcg_report)
