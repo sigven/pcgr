@@ -1,0 +1,10 @@
+image: ubuntu
+
+install:
+  # Installing (the non-docker version)
+  - bash -x install_no_docker/install.sh
+
+test_script:
+  - source install_no_docker/load_pcgr.sh
+
+build: off
