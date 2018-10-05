@@ -11,9 +11,9 @@ import getpass
 import platform
 import toml
 
-pcgr_version = '0.6.3'
-db_version = 'PCGR_DB_VERSION = 20180915'
-vep_version = '93'
+pcgr_version = 'dev'
+db_version = 'PCGR_DB_VERSION = 20181004'
+vep_version = '94'
 global vep_assembly
 
 def __main__():
@@ -230,6 +230,8 @@ def verify_input_files(input_vcf, input_cna, configuration_file, pcgr_config_opt
    if not os.path.isdir(output_dir_full):
       err_msg = "Output directory (" + str(output_dir_full) + ") does not exist"
       pcgr_error_message(err_msg,logger)
+
+   #verify_output_folder(output_dir, logger)
    
    ## check if input vcf exist
    if not input_vcf is None:
@@ -252,7 +254,7 @@ def verify_input_files(input_vcf, input_cna, configuration_file, pcgr_config_opt
       input_vcf_dir = os.path.dirname(os.path.abspath(input_vcf))
 
       ## if output vcf exist and overwrite not set
-      output_vcf = os.path.join(str(output_dir_full),str(sample_id)) + '.' + str(pcgr_config_options['tier_model']['tier_model']) + '.vcf.gz'
+      output_vcf = os.path.join(str(output_dir_full),str(sample_id)) + '.' + str(pcgr_config_options['tier_model']['tier_model']) + '.' + str(genome_assembly)  + '.vcf.gz'
       if os.path.exists(output_vcf) and overwrite == 0:
          err_msg = "Output files (e.g. " + str(output_vcf) + ") already exist - please specify different sample_id or add option --force_overwrite"
          pcgr_error_message(err_msg,logger)
@@ -404,6 +406,9 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
    input_vcf_docker = 'None'
    input_cna_docker = 'None'
    input_conf_docker = 'None'
+   docker_command_run1 = ''
+   docker_command_run2 = ''
+   docker_command_run_end = ''
 
    if docker_image_version:
       if host_directories['input_vcf_basename_host'] != 'NA':
@@ -445,10 +450,6 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       if host_directories['input_conf_basename_host'] != 'NA':
          input_conf_docker = os.path.join(host_directories['input_conf_dir_host'], host_directories['input_conf_basename_host'])
 
-      docker_command_run1 = ''
-      docker_command_run2 = ''
-      docker_command_run_end = ''
-
       data_dir = host_directories['base_dir_host']
       output_dir = host_directories['output_dir_host']
       vep_dir = vepdb_dir_host
@@ -469,7 +470,6 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
    else:
       vcf_validate_command += docker_command_run_end
    check_subprocess(vcf_validate_command)
-   ## Log tumor type of query genome
    logger.info('Finished')
 
    if not input_vcf_docker == 'None':
@@ -482,9 +482,8 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       output_vcf2maf_log = os.path.join(output_dir, str(sample_id) + '.' + str(genome_assembly) + '.maf.log')
       input_vcf_pcgr_ready = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)', '.pcgr_ready.vcf.gz', host_directories['input_vcf_basename_host']))
       input_vcf_pcgr_ready_uncompressed = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)', '.pcgr_ready.vcf', host_directories['input_vcf_basename_host']))
-      vep_vcf = re.sub(r'(\.vcf$|\.vcf\.gz$)', '.pcgr_vep.vcf', input_vcf_pcgr_ready)
-      vep_vcfanno_vcf = re.sub(r'(\.vcf$|\.vcf\.gz$)', '.pcgr_vep.vcfanno.vcf', input_vcf_pcgr_ready)
-      vep_tmp_vcf = vep_vcf + '.tmp'
+      vep_vcf = re.sub(r'(\.vcf$|\.vcf\.gz$)', '.vep.vcf', input_vcf_pcgr_ready)
+      vep_vcfanno_vcf = re.sub(r'(\.vcf$|\.vcf\.gz$)', '.vep.vcfanno.vcf', input_vcf_pcgr_ready)
       vep_vcfanno_annotated_vcf = re.sub(r'\.vcfanno', '.vcfanno.annotated', vep_vcfanno_vcf) + '.gz'
       vep_vcfanno_annotated_pass_vcf = re.sub(r'\.vcfanno', '.vcfanno.annotated.pass', vep_vcfanno_vcf) + '.gz'
 
@@ -492,26 +491,25 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       vep_options = "--vcf --check_ref --flag_pick_allele --force_overwrite --species homo_sapiens --assembly " + str(vep_assembly) + " --offline --fork " + str(config_options['other']['n_vep_forks']) + " --hgvs --dont_skip --failed 1 --af --af_1kg --af_gnomad --variant_class --regulatory --domains --symbol --protein --ccds --uniprot --appris --biotype --canonical --gencode_basic --cache --numbers --total_length --allele_number --no_stats --no_escape --xref_refseq --dir " + vep_dir
       if config_options['other']['vep_skip_intergenic'] == 1:
          vep_options = vep_options + " --no_intergenic"
-      vep_main_command = docker_command_run1 + "vep --input_file " + str(input_vcf_pcgr_ready) + " --output_file " + str(vep_tmp_vcf) + " " + str(vep_options) + " --fasta " + str(fasta_assembly) + docker_command_run_end
-      vep_sed_command =  docker_command_run1 + "sed -r 's/:p\.[A-Z]{1}[a-z]{2}[0-9]+=//g' " + str(vep_tmp_vcf) + " > " + str(vep_vcf) + docker_command_run_end
-      vep_bgzip_command = docker_command_run1 + "bgzip -f " + str(vep_vcf) + docker_command_run_end
+      vep_main_command = docker_command_run1 + "vep --input_file " + str(input_vcf_pcgr_ready) + " --output_file " + str(vep_vcf) + " " + str(vep_options) + " --fasta " + str(fasta_assembly) + docker_command_run_end
+      vep_bgzip_command = docker_command_run1 + "bgzip -f -c " + str(vep_vcf) + " > " + str(vep_vcf) + '.gz' + docker_command_run_end
       vep_tabix_command = docker_command_run1 + "tabix -f -p vcf " + str(vep_vcf) + ".gz" + docker_command_run_end
-
-      if config_options['other']['vcf2maf'] == 1:
-         logger.info('Converting input VCF to MAF with https://github.com/mskcc/vcf2maf')
-         vcf2maf_command = str(docker_command_run1) + "vcf2maf.pl --input-vcf " + str(input_vcf_pcgr_ready_uncompressed) + " --output-maf " + str(output_maf) + " --vep-path /opt/vep/src/ensembl-vep --vep-data " + str(vep_dir) + " --ref-fasta " + str(fasta_assembly) + " --filter-vcf 0 --ncbi-build " + str(ncbi_build_maf) + " > " + str(output_vcf2maf_log) + " 2>&1" + docker_command_run_end
-         clean_vcf2maf_command = str(docker_command_run1) + "rm -f " + str(output_vcf2maf_log) + " " + re.sub(r'(\.vcf$)', '.vep.vcf', input_vcf_pcgr_ready_uncompressed) + " " + docker_command_run_end
-         check_subprocess(vcf2maf_command)
-         check_subprocess(clean_vcf2maf_command)
 
       ## vep commands
       print()
       logger = getlogger('pcgr-vep')
       logger.info("STEP 1: Basic variant annotation with Variant Effect Predictor (" + str(vep_version) + ", GENCODE " + str(gencode_version) + ", " + str(genome_assembly) + ")")
       check_subprocess(vep_main_command)
-      check_subprocess(vep_sed_command)
       check_subprocess(vep_bgzip_command)
       check_subprocess(vep_tabix_command)
+
+      if config_options['other']['vcf2maf'] == 1:
+         logger.info('Converting input VCF to MAF with https://github.com/mskcc/vcf2maf')
+         vcf2maf_command = str(docker_command_run1) + "vcf2maf.pl --input-vcf " + str(input_vcf_pcgr_ready_uncompressed) + " --output-maf " + str(output_maf) + " --ref-fasta " + str(fasta_assembly) + " --filter-vcf 0 --ncbi-build " + str(ncbi_build_maf) + " > " + str(output_vcf2maf_log) + " 2>&1" + docker_command_run_end
+         clean_vcf2maf_command = str(docker_command_run1) + "rm -f " + str(output_vcf2maf_log) + " " + re.sub(r'(\.vcf$)', '.vep.vcf', input_vcf_pcgr_ready_uncompressed) + " " + docker_command_run_end
+         check_subprocess(vcf2maf_command)
+         check_subprocess(clean_vcf2maf_command)
+
       logger.info("Finished")
 
       ## vcfanno command
