@@ -94,26 +94,26 @@ An installation of Python (version _3.6_) is required to run PCGR. Check that Py
 
 #### STEP 2: Download PCGR and data bundle
 
-##### 1) Development version
+##### Development version
 
-1. Clone the PCGR GitHub repository: `git clone https://github.com/sigven/pcgr.git`
-2. Download and unpack the latest data bundles in the PCGR directory
+a. Clone the PCGR GitHub repository: `git clone https://github.com/sigven/pcgr.git`
+b. Download and unpack the latest data bundles in the PCGR directory
    * [grch37 data bundle - 20181004](https://drive.google.com/open?id=1G34Cn2MO-NQ53cDdFvqNlg79YBZfQKfk) (approx 9.2Gb)
    * [grch38 data bundle - 20181004](https://drive.google.com/open?id=1G34Cn2MO-NQ53cDdFvqNlg79YBZfQKfk) (approx 13Gb)
    * *Unpacking*: `gzip -dc pcgr.databundle.grch37.YYYYMMDD.tgz | tar xvf -`
-3. Pull the [PCGR Docker image (*dev*)](https://hub.docker.com/r/sigven/pcgr/) from DockerHub (approx 5.1Gb):
+c. Pull the [PCGR Docker image (*dev*)](https://hub.docker.com/r/sigven/pcgr/) from DockerHub (approx 5.1Gb):
       * `docker pull sigven/pcgr:dev` (PCGR annotation engine)
 
-##### 2) Latest release
+##### Latest release
 
-1. Download and unpack the [latest software release (0.6.2.1)](https://github.com/sigven/pcgr/releases/tag/v6.2.1)
-2. Download and unpack the assembly-specific data bundle in the PCGR directory
+a. Download and unpack the [latest software release (0.6.2.1)](https://github.com/sigven/pcgr/releases/tag/v6.2.1)
+b. Download and unpack the assembly-specific data bundle in the PCGR directory
    * [grch37 data bundle](https://drive.google.com/open?id=1cGBAmAh5t4miIeRrrd0zHsPCFToOr0Lf) (approx 9.2Gb)
    * [grch38 data bundle](https://drive.google.com/open?id=12q3rr7xpdBfaefRi0ysFHbH34kehNZOV) (approx 13Gb)
    * *Unpacking*: `gzip -dc pcgr.databundle.grch37.YYYYMMDD.tgz | tar xvf -`
 
     A _data/_ folder within the _pcgr-X.X_ software folder should now have been produced
-3. Pull the [PCGR Docker image (0.6.2.1)](https://hub.docker.com/r/sigven/pcgr/) from DockerHub (approx 5.1Gb):
+c. Pull the [PCGR Docker image (0.6.2.1)](https://hub.docker.com/r/sigven/pcgr/) from DockerHub (approx 5.1Gb):
    * `docker pull sigven/pcgr:0.6.2.1` (PCGR annotation engine)
 
 #### STEP 3: Input preprocessing
