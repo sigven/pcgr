@@ -244,8 +244,7 @@ generate_report_acmg <- function(project_directory, query_vcf2tsv, pcgr_data, pc
   if(query_vcf2tsv != 'None.gz'){
     if(!file.exists(query_vcf2tsv) | file.size(query_vcf2tsv) == 0){
       rlogging::warning(paste0("File ",query_vcf2tsv," does not exist or has zero size"))
-    }
-    else{
+    }else{
       if(!is.null(pcgr_config) & query_vcf2tsv != 'None.gz'){
         sample_calls <- pcgrr::get_calls(query_vcf2tsv, pcgr_data, pcgr_version, sample_name, pcgr_config, genome_seq, assembly)
         pcg_report_seqmode <- pcgrr::init_pcg_report(pcgr_config, sample_name, pcgr_version, genome_assembly, class = "sequencing_mode")
@@ -290,8 +289,7 @@ generate_report_acmg <- function(project_directory, query_vcf2tsv, pcgr_data, pc
         }
       }
     }
-  }
-  else{
+  }else{
     pcg_report[['pcgr_config']][['other']][['list_noncoding']] <- F
   }
 
@@ -310,8 +308,7 @@ generate_report_acmg <- function(project_directory, query_vcf2tsv, pcgr_data, pc
           system(gzip_command, intern=F)
         }
       }
-    }
-    else{
+    }else{
       if(!is.null(pcg_report[['snv_indel']][['variant_set']][[fname_key]])){
         if(nrow(pcg_report[['snv_indel']][['variant_set']][[fname_key]]) > 0){
           write.table(pcg_report[['snv_indel']][['variant_set']][[fname_key]],file=fnames[[fname_key]], sep="\t",col.names = T,row.names = F,quote = F)
@@ -333,11 +330,16 @@ generate_report_acmg <- function(project_directory, query_vcf2tsv, pcgr_data, pc
   pcg_report[['snv_indel']][['variant_set']][['coding']] <- NULL
   pcg_report[['snv_indel']][['variant_set']][['all']] <- NULL
 
-  pcgr_json <- jsonlite::toJSON(pcg_report, pretty=T,na='string',null = 'null')
+  rlogging::message('------')
+  rlogging::message("Writing JSON file with report contents")
+  pcgr_json <- jsonlite::toJSON(pcg_report, pretty=T,na='string',null = 'null',force=T)
   write(pcgr_json, fnames[['json']])
   gzip_command <- paste0("gzip -f ", fnames[['json']])
   system(gzip_command, intern = F)
-  rmarkdown::render(system.file("templates","report_acmg.Rmd", package="pcgrr"), output_format = rmarkdown::html_document(theme = pcg_report[['pcgr_config']][['visual']][['report_theme']], toc = T, toc_depth = 3, toc_float = T, number_sections = F, includes = rmarkdown::includes(after_body = 'disclaimer.md')), output_file = paste0(sample_name,'.pcgr_acmg.',genome_assembly,'.html'), clean = T, output_dir = project_directory, intermediates_dir = project_directory, quiet=T)
+
+  rlogging::message('------')
+  rlogging::message("Rendering HTML report with rmarkdown")
+  rmarkdown::render(system.file("templates","report_acmg.Rmd", package="pcgrr"), output_format = rmarkdown::html_document(theme = pcg_report[['pcgr_config']][['visual']][['report_theme']], toc = T, toc_depth = 3, toc_float = T, number_sections = F, includes = rmarkdown::includes(after_body = 'disclaimer.md')), output_file = paste0(sample_name,'.pcgr_acmg.',genome_assembly,'.html'), quiet = T, clean = T, output_dir = project_directory, intermediates_dir = project_directory)
 
 
 }

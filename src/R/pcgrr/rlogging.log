@@ -1778,3 +1778,498 @@
 [2018-10-05 20:02:47][INFO] Assignment of other variants to hits from genome-wide association studies
 [2018-10-05 20:02:47][INFO] GWAS hits - cancer phenotypes: n = 13
 [2018-10-05 20:02:47][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2018-10-08 19:54:44][INFO] ------
+[2018-10-08 19:54:44][INFO] Generating report data for copy number segment file /Users/sigven/Downloads/04TL_clean.called.txt
+[2018-10-08 19:54:44][WARN] Skipping 8 copy number segments that span beyond chromosomal lengths for grch37 (make sure chromosomal segments are consistent with assembly)
+[2018-10-08 19:55:08][INFO] Detected 21 segments subject to amplification/deletion (3 deletions, 18 gains according to user-defined log(2) ratio thresholds)
+[2018-10-08 19:55:08][INFO] Detected 0 proto-oncogenes subject to amplification (log(2) ratio >= 0.8
+[2018-10-08 19:55:08][INFO] Detected 0 tumor suppressor genes subject to homozygous deletion (log(2) ratio <= -0.8
+[2018-10-08 19:55:08][INFO] Looking up SCNA biomarkers for precision oncology - any tumortype
+[2018-10-08 19:55:08][INFO] Looking up SCNA biomarkers for precision oncology - Breast_Cancer_NOS
+[2018-10-08 19:58:12][INFO] ------
+[2018-10-08 19:58:12][INFO] Generating report data for copy number segment file /Users/sigven/Downloads/04TL_clean.called.txt
+[2018-10-08 19:58:40][INFO] Detected 21 segments subject to amplification/deletion (3 deletions, 18 gains according to user-defined log(2) ratio thresholds)
+[2018-10-08 19:58:40][INFO] Detected 0 proto-oncogenes subject to amplification (log(2) ratio >= 0.8
+[2018-10-08 19:58:40][INFO] Detected 0 tumor suppressor genes subject to homozygous deletion (log(2) ratio <= -0.8
+[2018-10-08 19:58:40][INFO] Looking up SCNA biomarkers for precision oncology - any tumortype
+[2018-10-08 19:58:40][INFO] Looking up SCNA biomarkers for precision oncology - Breast_Cancer_NOS
+[2018-10-08 20:29:21][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-10-08 20:29:22][INFO] Filtering tumor variants based on allelic depth/fraction (min_dp_tumor=0, min_af_tumor=0)
+[2018-10-08 20:29:22][INFO] Filtering tumor variants based on allelic depth/fraction (min_dp_normal=0, max_af_normal=1)
+[2018-10-08 20:29:22][INFO] Removed 0 tumor variants (0%) based on allelic depth/fraction
+[2018-10-08 20:29:22][INFO] Number of PASS variants: 16782
+[2018-10-08 20:29:22][INFO] Number of SNVs: 13686
+[2018-10-08 20:29:22][INFO] Number of deletions: 1595
+[2018-10-08 20:29:22][INFO] Number of insertions: 1501
+[2018-10-08 20:29:22][INFO] Number of block substitutions: 0
+[2018-10-08 20:29:22][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-10-08 20:29:24][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-10-08 20:29:24][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-10-08 20:29:25][INFO] Extending annotation descriptions related to ClinVar
+[2018-10-08 20:29:47][INFO] ------
+[2018-10-08 20:29:47][INFO] Generating data for tiered cancer genome report - somatic calls tier model 'pcgr_acmg'
+[2018-10-08 20:29:47][INFO] Number of protein-coding variants: 61
+[2018-10-08 20:29:47][INFO] Looking up SNV/InDel biomarkers for precision oncology - any tumortype
+[2018-10-08 20:29:47][INFO] 7 clinical evidence item(s) found .. (4 unique variant(s)), mapping = exact
+[2018-10-08 20:29:47][INFO] Underlying variant(s):
+[2018-10-08 20:29:47][INFO] TP53 missense_variant missense_variant:ENST00000269305.8:c.215C>G:exon4:p.P72R 17:g.7676154G>C
+[2018-10-08 20:29:47][INFO] TERT intron_variant NA 5:g.1286401C>A
+[2018-10-08 20:29:47][INFO] ERCC5 5_prime_UTR_variant NA 13:g.102845848A>G
+[2018-10-08 20:29:47][INFO] ERCC2 missense_variant missense_variant:ENST00000391945.9:c.2251A>C:exon23:p.K751Q 19:g.45351661T>G
+[2018-10-08 20:29:47][INFO] 0 clinical evidence item(s) found .. mapping = codon
+[2018-10-08 20:29:48][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2018-10-08 20:29:49][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2018-10-08 20:29:49][INFO] ------
+[2018-10-08 20:30:03][INFO] ------
+[2018-10-08 20:30:03][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs
+[2018-10-08 20:30:03][INFO] deconstructSigs normalization method ('tri.counts.method'): default
+[2018-10-08 20:30:06][INFO] Inferred weighted contribution of S1: 0.205
+[2018-10-08 20:30:06][INFO] Inferred weighted contribution of S5: 0.53
+[2018-10-08 20:30:06][INFO] Inferred weighted contribution of S12: 0.136
+[2018-10-08 20:30:06][INFO] Inferred weighted contribution of S20: 0.074
+[2018-10-08 20:30:06][INFO] ------
+[2018-10-08 20:30:11][INFO] ------
+[2018-10-08 20:30:11][INFO] Predicting microsatellite instability status
+[2018-10-08 20:30:11][INFO] n = 177 coding variants used for MSI prediction
+[2018-10-08 20:30:14][INFO] Predicted MSI status: MSS (Microsatellite stable)
+[2018-10-08 20:30:14][INFO] MSI - Indel fraction: 0.028
+[2018-10-08 20:30:20][INFO] ------
+[2018-10-08 20:30:20][INFO] Calculating tumor mutational burden
+[2018-10-08 20:39:38][INFO] ------
+[2018-10-08 20:39:38][INFO] Calculating tumor mutational burden
+[2018-10-08 20:39:38][INFO] Number of variants for mutational burden analysis: 148
+[2018-10-08 20:39:38][INFO] Estimated mutational burden: 4.11 mutations/Mb
+[2018-10-08 20:39:38][INFO] Mutational burden tertile: TMB - Low (0 - 5 mutations/Mb)
+[2018-10-08 20:39:38][INFO] ------
+[2018-10-08 20:40:16][INFO] ------
+[2018-10-08 20:40:16][INFO] Generating report data for copy number segment file /Users/sigven/research/docker/pcgr/04TL_clean.called.txt
+[2018-10-08 20:41:01][INFO] Detected 21 segments subject to amplification/deletion (3 deletions, 18 gains according to user-defined log(2) ratio thresholds)
+[2018-10-08 20:41:01][INFO] Detected 4 proto-oncogene(s) subject to amplification (log(2) ratio >= 0.8): FGF3, MYEOV, CCND1, FGF4
+[2018-10-08 20:41:01][INFO] Detected 0 tumor suppressor genes subject to homozygous deletion (log(2) ratio <= -0.8
+[2018-10-08 20:41:01][INFO] Looking up SCNA biomarkers for precision oncology - any tumortype
+[2018-10-08 20:41:01][INFO] Looking up SCNA biomarkers for precision oncology - Skin_Cancer_NOS
+[2018-10-08 20:43:06][INFO] ------
+[2018-10-08 20:43:06][INFO] Assigning elements to PCGR value boxes
+[2018-10-08 20:48:21][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-10-08 20:48:23][INFO] Filtering tumor variants based on allelic depth/fraction (min_dp_tumor=0, min_af_tumor=0)
+[2018-10-08 20:48:23][INFO] Filtering tumor variants based on allelic depth/fraction (min_dp_normal=0, max_af_normal=1)
+[2018-10-08 20:48:23][INFO] Removed 0 tumor variants (0%) based on allelic depth/fraction
+[2018-10-08 20:48:23][INFO] Number of PASS variants: 16782
+[2018-10-08 20:48:24][INFO] Number of SNVs: 13686
+[2018-10-08 20:48:24][INFO] Number of deletions: 1595
+[2018-10-08 20:48:24][INFO] Number of insertions: 1501
+[2018-10-08 20:48:24][INFO] Number of block substitutions: 0
+[2018-10-08 20:48:24][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-10-08 20:48:26][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-10-08 20:48:26][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-10-08 20:48:26][INFO] Extending annotation descriptions related to ClinVar
+[2018-10-08 20:48:32][INFO] ------
+[2018-10-08 20:48:32][INFO] Generating data for tiered cancer genome report - somatic calls tier model 'pcgr_acmg'
+[2018-10-08 20:48:32][INFO] Number of protein-coding variants: 61
+[2018-10-08 20:48:32][INFO] Looking up SNV/InDel biomarkers for precision oncology - any tumortype
+[2018-10-08 20:48:32][INFO] 7 clinical evidence item(s) found .. (4 unique variant(s)), mapping = exact
+[2018-10-08 20:48:32][INFO] Underlying variant(s):
+[2018-10-08 20:48:32][INFO] TP53 missense_variant missense_variant:ENST00000269305.8:c.215C>G:exon4:p.P72R 17:g.7676154G>C
+[2018-10-08 20:48:32][INFO] TERT intron_variant NA 5:g.1286401C>A
+[2018-10-08 20:48:32][INFO] ERCC5 5_prime_UTR_variant NA 13:g.102845848A>G
+[2018-10-08 20:48:32][INFO] ERCC2 missense_variant missense_variant:ENST00000391945.9:c.2251A>C:exon23:p.K751Q 19:g.45351661T>G
+[2018-10-08 20:48:32][INFO] 0 clinical evidence item(s) found .. mapping = codon
+[2018-10-08 20:48:33][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2018-10-08 20:48:33][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2018-10-08 20:48:36][INFO] ------
+[2018-10-08 20:48:36][INFO] ------
+[2018-10-08 20:48:36][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs
+[2018-10-08 20:48:36][INFO] deconstructSigs normalization method ('tri.counts.method'): default
+[2018-10-08 20:48:38][INFO] Inferred weighted contribution of S1: 0.205
+[2018-10-08 20:48:38][INFO] Inferred weighted contribution of S5: 0.53
+[2018-10-08 20:48:38][INFO] Inferred weighted contribution of S12: 0.136
+[2018-10-08 20:48:38][INFO] Inferred weighted contribution of S20: 0.074
+[2018-10-08 20:48:38][INFO] ------
+[2018-10-08 20:48:38][INFO] ------
+[2018-10-08 20:48:38][INFO] Predicting microsatellite instability status
+[2018-10-08 20:48:38][INFO] n = 177 coding variants used for MSI prediction
+[2018-10-08 20:48:40][INFO] Predicted MSI status: MSS (Microsatellite stable)
+[2018-10-08 20:48:40][INFO] MSI - Indel fraction: 0.028
+[2018-10-08 20:48:40][INFO] ------
+[2018-10-08 20:48:40][INFO] Calculating tumor mutational burden
+[2018-10-08 20:48:40][INFO] Number of variants for mutational burden analysis: 148
+[2018-10-08 20:48:40][INFO] Estimated mutational burden: 4.11 mutations/Mb
+[2018-10-08 20:48:40][INFO] Mutational burden tertile: TMB - Low (0 - 5 mutations/Mb)
+[2018-10-08 20:48:40][INFO] ------
+[2018-10-08 20:48:40][INFO] ------
+[2018-10-08 20:48:40][INFO] Generating report data for copy number segment file /Users/sigven/research/docker/pcgr/04TL_clean.called.txt
+[2018-10-08 20:49:07][INFO] Detected 21 segments subject to amplification/deletion (3 deletions, 18 gains according to user-defined log(2) ratio thresholds)
+[2018-10-08 20:49:07][INFO] Detected 4 proto-oncogene(s) subject to amplification (log(2) ratio >= 0.8): FGF3, MYEOV, CCND1, FGF4
+[2018-10-08 20:49:07][INFO] Detected 0 tumor suppressor genes subject to homozygous deletion (log(2) ratio <= -0.8
+[2018-10-08 20:49:07][INFO] Looking up SCNA biomarkers for precision oncology - any tumortype
+[2018-10-08 20:49:07][INFO] Looking up SCNA biomarkers for precision oncology - Skin_Cancer_NOS
+[2018-10-08 20:49:11][INFO] ------
+[2018-10-08 20:49:11][INFO] Assigning elements to PCGR value boxes
+[2018-10-08 20:58:44][WARN] File /Users/sigven/research/docker/pcgr/04TL.pcgr_acmg.grch38.pass.tsv.gz does not exist or has zero size
+[2018-10-08 20:58:45][INFO] ------
+[2018-10-08 20:58:45][INFO] Generating report data for copy number segment file /Users/sigven/research/docker/pcgr/04TL_clean.called.txt
+[2018-10-08 21:06:36][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-10-08 21:06:37][INFO] Filtering tumor variants based on allelic depth/fraction (min_dp_tumor=0, min_af_tumor=0)
+[2018-10-08 21:06:37][INFO] Filtering tumor variants based on allelic depth/fraction (min_dp_normal=0, max_af_normal=1)
+[2018-10-08 21:06:37][INFO] Removed 0 tumor variants (0%) based on allelic depth/fraction
+[2018-10-08 21:06:37][INFO] Number of PASS variants: 16782
+[2018-10-08 21:06:37][INFO] Number of SNVs: 13686
+[2018-10-08 21:06:37][INFO] Number of deletions: 1595
+[2018-10-08 21:06:37][INFO] Number of insertions: 1501
+[2018-10-08 21:06:37][INFO] Number of block substitutions: 0
+[2018-10-08 21:06:38][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-10-08 21:06:41][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-10-08 21:06:42][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-10-08 21:06:42][INFO] Extending annotation descriptions related to ClinVar
+[2018-10-08 21:06:47][INFO] ------
+[2018-10-08 21:06:47][INFO] Generating data for tiered cancer genome report - somatic calls tier model pcgr_acmg'
+[2018-10-08 21:06:48][INFO] Number of protein-coding variants: 61
+[2018-10-08 21:06:48][INFO] Looking up SNV/InDel biomarkers for precision oncology - Skin_Cancer_NOS
+[2018-10-08 21:06:48][INFO] 0 clinical evidence item(s) found .. mapping = exact
+[2018-10-08 21:06:49][INFO] 0 clinical evidence item(s) found .. mapping = codon
+[2018-10-08 21:06:50][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2018-10-08 21:06:50][INFO] Looking up SNV/InDel biomarkers for precision oncology - any tumortype
+[2018-10-08 21:06:50][INFO] 7 clinical evidence item(s) found .. (4 unique variant(s)), mapping = exact
+[2018-10-08 21:06:50][INFO] Underlying variant(s):
+[2018-10-08 21:06:50][INFO] TP53 missense_variant missense_variant:ENST00000269305.8:c.215C>G:exon4:p.P72R 17:g.7676154G>C
+[2018-10-08 21:06:50][INFO] TERT intron_variant NA 5:g.1286401C>A
+[2018-10-08 21:06:50][INFO] ERCC5 5_prime_UTR_variant NA 13:g.102845848A>G
+[2018-10-08 21:06:50][INFO] ERCC2 missense_variant missense_variant:ENST00000391945.9:c.2251A>C:exon23:p.K751Q 19:g.45351661T>G
+[2018-10-08 21:06:52][INFO] 0 clinical evidence item(s) found .. mapping = codon
+[2018-10-08 21:06:53][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2018-10-08 21:06:53][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2018-10-08 21:06:54][INFO] ------
+[2018-10-08 21:06:54][INFO] ------
+[2018-10-08 21:06:54][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs
+[2018-10-08 21:06:54][INFO] deconstructSigs normalization method ('tri.counts.method'): default
+[2018-10-08 21:06:56][INFO] Inferred weighted contribution of S1: 0.205
+[2018-10-08 21:06:56][INFO] Inferred weighted contribution of S5: 0.53
+[2018-10-08 21:06:56][INFO] Inferred weighted contribution of S12: 0.136
+[2018-10-08 21:06:56][INFO] Inferred weighted contribution of S20: 0.074
+[2018-10-08 21:06:56][INFO] ------
+[2018-10-08 21:06:56][INFO] ------
+[2018-10-08 21:06:56][INFO] Predicting microsatellite instability status
+[2018-10-08 21:06:56][INFO] n = 177 coding variants used for MSI prediction
+[2018-10-08 21:06:58][INFO] Predicted MSI status: MSS (Microsatellite stable)
+[2018-10-08 21:06:58][INFO] MSI - Indel fraction: 0.028
+[2018-10-08 21:06:58][INFO] ------
+[2018-10-08 21:06:58][INFO] Calculating tumor mutational burden
+[2018-10-08 21:06:58][INFO] Number of variants for mutational burden analysis: 148
+[2018-10-08 21:06:58][INFO] Estimated mutational burden: 4.11 mutations/Mb
+[2018-10-08 21:06:58][INFO] Mutational burden tertile: TMB - Low (0 - 5 mutations/Mb)
+[2018-10-08 21:06:58][INFO] ------
+[2018-10-08 21:06:58][INFO] ------
+[2018-10-08 21:06:58][INFO] Generating report data for copy number segment file /Users/sigven/research/docker/pcgr/04TL_clean.called.txt
+[2018-10-08 21:07:30][INFO] Detected 21 segments subject to amplification/deletion (3 deletions, 18 gains according to user-defined log(2) ratio thresholds)
+[2018-10-08 21:07:30][INFO] Detected 4 proto-oncogene(s) subject to amplification (log(2) ratio >= 0.8): FGF3, MYEOV, CCND1, FGF4
+[2018-10-08 21:07:30][INFO] Detected 0 tumor suppressor genes subject to homozygous deletion (log(2) ratio <= -0.8
+[2018-10-08 21:07:30][INFO] Looking up SCNA biomarkers for precision oncology - any tumortype
+[2018-10-08 21:07:30][INFO] Looking up SCNA biomarkers for precision oncology - Skin_Cancer_NOS
+[2018-10-08 21:07:33][INFO] ------
+[2018-10-08 21:07:33][INFO] Assigning elements to PCGR value boxes
+[2018-10-08 21:40:21][INFO] ------
+[2018-10-08 21:40:21][INFO] Generating report data for copy number segment file /Users/sigven/research/docker/pcgr/04TL_clean.called2.txt
+[2018-10-08 21:40:49][INFO] Detected 20 segments subject to amplification/deletion (3 deletions, 17 gains according to user-defined log(2) ratio thresholds)
+[2018-10-08 21:40:49][INFO] Detected 2 proto-oncogene(s) subject to amplification (log(2) ratio >= 0.8): FGF3, FGF4
+[2018-10-08 21:40:49][INFO] Detected 0 tumor suppressor genes subject to homozygous deletion (log(2) ratio <= -0.8
+[2018-10-08 21:40:49][INFO] Looking up SCNA biomarkers for precision oncology - any tumortype
+[2018-10-08 21:40:49][INFO] Looking up SCNA biomarkers for precision oncology - Skin_Cancer_NOS
+[2018-10-08 22:42:22][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-10-08 22:42:22][INFO] Filtering tumor variants based on allelic depth/fraction (min_dp_tumor=0, min_af_tumor=0)
+[2018-10-08 22:42:22][INFO] Filtering tumor variants based on allelic depth/fraction (min_dp_normal=0, max_af_normal=1)
+[2018-10-08 22:42:22][INFO] Removed 0 tumor variants (0%) based on allelic depth/fraction
+[2018-10-08 22:42:22][INFO] Number of PASS variants: 16782
+[2018-10-08 22:42:22][INFO] Number of SNVs: 13686
+[2018-10-08 22:42:22][INFO] Number of deletions: 1595
+[2018-10-08 22:42:22][INFO] Number of insertions: 1501
+[2018-10-08 22:42:22][INFO] Number of block substitutions: 0
+[2018-10-08 22:42:22][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-10-08 22:42:24][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-10-08 22:42:25][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-10-08 22:42:26][INFO] Extending annotation descriptions related to ClinVar
+[2018-10-08 22:42:32][INFO] ------
+[2018-10-08 22:42:32][INFO] Generating data for tiered cancer genome report - somatic calls tier model pcgr_acmg'
+[2018-10-08 22:42:32][INFO] Number of protein-coding variants: 61
+[2018-10-08 22:42:32][INFO] Looking up SNV/InDel biomarkers for precision oncology - Skin_Cancer_NOS
+[2018-10-08 22:42:32][INFO] 0 clinical evidence item(s) found .. mapping = exact
+[2018-10-08 22:42:32][INFO] 0 clinical evidence item(s) found .. mapping = codon
+[2018-10-08 22:42:33][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2018-10-08 22:42:33][INFO] Looking up SNV/InDel biomarkers for precision oncology - any tumortype
+[2018-10-08 22:42:33][INFO] 7 clinical evidence item(s) found .. (4 unique variant(s)), mapping = exact
+[2018-10-08 22:42:33][INFO] Underlying variant(s):
+[2018-10-08 22:42:33][INFO] TP53 missense_variant missense_variant:ENST00000269305.8:c.215C>G:exon4:p.P72R 17:g.7676154G>C
+[2018-10-08 22:42:33][INFO] TERT intron_variant NA 5:g.1286401C>A
+[2018-10-08 22:42:33][INFO] ERCC5 5_prime_UTR_variant NA 13:g.102845848A>G
+[2018-10-08 22:42:33][INFO] ERCC2 missense_variant missense_variant:ENST00000391945.9:c.2251A>C:exon23:p.K751Q 19:g.45351661T>G
+[2018-10-08 22:42:34][INFO] 0 clinical evidence item(s) found .. mapping = codon
+[2018-10-08 22:42:34][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2018-10-08 22:42:34][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2018-10-08 22:42:35][INFO] ------
+[2018-10-08 22:42:35][INFO] ------
+[2018-10-08 22:42:35][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs
+[2018-10-08 22:42:35][INFO] deconstructSigs normalization method ('tri.counts.method'): default
+[2018-10-08 22:42:38][INFO] Inferred weighted contribution of S1: 0.205
+[2018-10-08 22:42:38][INFO] Inferred weighted contribution of S5: 0.53
+[2018-10-08 22:42:38][INFO] Inferred weighted contribution of S12: 0.136
+[2018-10-08 22:42:38][INFO] Inferred weighted contribution of S20: 0.074
+[2018-10-08 22:42:38][INFO] ------
+[2018-10-08 22:42:38][INFO] ------
+[2018-10-08 22:42:38][INFO] Predicting microsatellite instability status
+[2018-10-08 22:42:38][INFO] n = 177 coding variants used for MSI prediction
+[2018-10-08 22:42:40][INFO] Predicted MSI status: MSS (Microsatellite stable)
+[2018-10-08 22:42:40][INFO] MSI - Indel fraction: 0.028
+[2018-10-08 22:42:40][INFO] ------
+[2018-10-08 22:42:40][INFO] Calculating tumor mutational burden
+[2018-10-08 22:42:40][INFO] Number of variants for mutational burden analysis: 148
+[2018-10-08 22:42:40][INFO] Estimated mutational burden: 4.11 mutations/Mb
+[2018-10-08 22:42:40][INFO] Mutational burden tertile: TMB - Low (0 - 5 mutations/Mb)
+[2018-10-08 22:42:40][INFO] ------
+[2018-10-08 22:42:41][INFO] ------
+[2018-10-08 22:42:41][INFO] Generating report data for copy number segment file /Users/sigven/research/docker/pcgr/04TL_clean.called2.txt
+[2018-10-08 22:43:08][INFO] Detected 20 segments subject to amplification/deletion (3 deletions, 17 gains according to user-defined log(2) ratio thresholds)
+[2018-10-08 22:43:08][INFO] Detected 2 proto-oncogene(s) subject to amplification (log(2) ratio >= 0.8): FGF3, FGF4
+[2018-10-08 22:43:08][INFO] Detected 0 tumor suppressor genes subject to homozygous deletion (log(2) ratio <= -0.8
+[2018-10-08 22:43:08][INFO] Looking up SCNA biomarkers for precision oncology - any tumortype
+[2018-10-08 22:43:08][INFO] Looking up SCNA biomarkers for precision oncology - Skin_Cancer_NOS
+[2018-10-08 22:43:11][INFO] ------
+[2018-10-08 22:43:11][INFO] Assigning elements to PCGR value boxes
+[2018-10-09 09:09:28][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-10-09 09:09:30][INFO] Filtering tumor variants based on allelic depth/fraction (min_dp_tumor=0, min_af_tumor=0)
+[2018-10-09 09:09:30][INFO] Filtering tumor variants based on allelic depth/fraction (min_dp_normal=0, max_af_normal=1)
+[2018-10-09 09:09:30][INFO] Removed 0 tumor variants (0%) based on allelic depth/fraction
+[2018-10-09 09:09:30][INFO] Number of PASS variants: 16782
+[2018-10-09 09:09:30][INFO] Number of SNVs: 13686
+[2018-10-09 09:09:30][INFO] Number of deletions: 1595
+[2018-10-09 09:09:30][INFO] Number of insertions: 1501
+[2018-10-09 09:09:30][INFO] Number of block substitutions: 0
+[2018-10-09 09:09:30][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-10-09 09:09:32][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-10-09 09:09:32][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-10-09 09:09:33][INFO] Extending annotation descriptions related to ClinVar
+[2018-10-09 09:09:39][INFO] ------
+[2018-10-09 09:09:39][INFO] Generating data for tiered cancer genome report - somatic calls tier model pcgr_acmg'
+[2018-10-09 09:09:39][INFO] Number of protein-coding variants: 61
+[2018-10-09 09:09:39][INFO] Looking up SNV/InDel biomarkers for precision oncology - Skin_Cancer_NOS
+[2018-10-09 09:09:39][INFO] 0 clinical evidence item(s) found .. mapping = exact
+[2018-10-09 09:09:39][INFO] 0 clinical evidence item(s) found .. mapping = codon
+[2018-10-09 09:09:40][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2018-10-09 09:09:40][INFO] Looking up SNV/InDel biomarkers for precision oncology - any tumortype
+[2018-10-09 09:09:40][INFO] 7 clinical evidence item(s) found .. (4 unique variant(s)), mapping = exact
+[2018-10-09 09:09:40][INFO] Underlying variant(s):
+[2018-10-09 09:09:40][INFO] TP53 missense_variant missense_variant:ENST00000269305.8:c.215C>G:exon4:p.P72R 17:g.7676154G>C
+[2018-10-09 09:09:40][INFO] TERT intron_variant NA 5:g.1286401C>A
+[2018-10-09 09:09:40][INFO] ERCC5 5_prime_UTR_variant NA 13:g.102845848A>G
+[2018-10-09 09:09:40][INFO] ERCC2 missense_variant missense_variant:ENST00000391945.9:c.2251A>C:exon23:p.K751Q 19:g.45351661T>G
+[2018-10-09 09:09:40][INFO] 0 clinical evidence item(s) found .. mapping = codon
+[2018-10-09 09:09:41][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2018-10-09 09:09:41][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2018-10-09 09:09:42][INFO] ------
+[2018-10-09 09:09:42][INFO] ------
+[2018-10-09 09:09:42][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs
+[2018-10-09 09:09:42][INFO] deconstructSigs normalization method ('tri.counts.method'): default
+[2018-10-09 09:09:45][INFO] Inferred weighted contribution of S1: 0.205
+[2018-10-09 09:09:45][INFO] Inferred weighted contribution of S5: 0.53
+[2018-10-09 09:09:45][INFO] Inferred weighted contribution of S12: 0.136
+[2018-10-09 09:09:45][INFO] Inferred weighted contribution of S20: 0.074
+[2018-10-09 09:09:45][INFO] ------
+[2018-10-09 09:09:45][INFO] ------
+[2018-10-09 09:09:45][INFO] Predicting microsatellite instability status
+[2018-10-09 09:09:45][INFO] n = 177 coding variants used for MSI prediction
+[2018-10-09 09:09:47][INFO] Predicted MSI status: MSS (Microsatellite stable)
+[2018-10-09 09:09:47][INFO] MSI - Indel fraction: 0.028
+[2018-10-09 09:09:47][INFO] ------
+[2018-10-09 09:09:47][INFO] Calculating tumor mutational burden
+[2018-10-09 09:09:47][INFO] Number of variants for mutational burden analysis: 148
+[2018-10-09 09:09:47][INFO] Estimated mutational burden: 4.11 mutations/Mb
+[2018-10-09 09:09:47][INFO] Mutational burden tertile: TMB - Low (0 - 5 mutations/Mb)
+[2018-10-09 09:09:47][INFO] ------
+[2018-10-09 09:09:47][INFO] ------
+[2018-10-09 09:09:47][INFO] Generating report data for copy number segment file /Users/sigven/research/docker/pcgr/04TL_clean.called.txt
+[2018-10-09 09:10:14][INFO] Detected 21 segments subject to amplification/deletion (3 deletions, 18 gains according to user-defined log(2) ratio thresholds)
+[2018-10-09 09:10:14][INFO] Detected 4 proto-oncogene(s) subject to amplification (log(2) ratio >= 0.8): FGF3, MYEOV, CCND1, FGF4
+[2018-10-09 09:10:14][INFO] Detected 0 tumor suppressor genes subject to homozygous deletion (log(2) ratio <= -0.8
+[2018-10-09 09:10:14][INFO] Looking up SCNA biomarkers for precision oncology - any tumortype
+[2018-10-09 09:10:14][INFO] Looking up SCNA biomarkers for precision oncology - Skin_Cancer_NOS
+[2018-10-09 09:10:18][INFO] ------
+[2018-10-09 09:10:18][INFO] Assigning elements to PCGR value boxes
+[2018-10-09 10:16:21][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-10-09 10:16:23][INFO] Filtering tumor variants based on allelic depth/fraction (min_dp_tumor=0, min_af_tumor=0)
+[2018-10-09 10:16:23][INFO] Filtering tumor variants based on allelic depth/fraction (min_dp_normal=0, max_af_normal=1)
+[2018-10-09 10:16:23][INFO] Removed 0 tumor variants (0%) based on allelic depth/fraction
+[2018-10-09 10:16:23][INFO] Number of PASS variants: 16782
+[2018-10-09 10:16:24][INFO] Number of SNVs: 13686
+[2018-10-09 10:16:24][INFO] Number of deletions: 1595
+[2018-10-09 10:16:24][INFO] Number of insertions: 1501
+[2018-10-09 10:16:24][INFO] Number of block substitutions: 0
+[2018-10-09 10:16:24][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-10-09 10:16:25][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-10-09 10:16:26][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-10-09 10:16:27][INFO] Extending annotation descriptions related to ClinVar
+[2018-10-09 10:16:33][INFO] ------
+[2018-10-09 10:16:33][INFO] Generating data for tiered cancer genome report - somatic calls tier model pcgr_acmg'
+[2018-10-09 10:16:33][INFO] Number of protein-coding variants: 61
+[2018-10-09 10:16:33][INFO] Looking up SNV/InDel biomarkers for precision oncology - Skin_Cancer_NOS
+[2018-10-09 10:16:34][INFO] 0 clinical evidence item(s) found .. mapping = exact
+[2018-10-09 10:16:34][INFO] 0 clinical evidence item(s) found .. mapping = codon
+[2018-10-09 10:16:34][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2018-10-09 10:16:34][INFO] Looking up SNV/InDel biomarkers for precision oncology - any tumortype
+[2018-10-09 10:16:34][INFO] 7 clinical evidence item(s) found .. (4 unique variant(s)), mapping = exact
+[2018-10-09 10:16:34][INFO] Underlying variant(s):
+[2018-10-09 10:16:34][INFO] TP53 missense_variant missense_variant:ENST00000269305.8:c.215C>G:exon4:p.P72R 17:g.7676154G>C
+[2018-10-09 10:16:34][INFO] TERT intron_variant NA 5:g.1286401C>A
+[2018-10-09 10:16:34][INFO] ERCC5 5_prime_UTR_variant NA 13:g.102845848A>G
+[2018-10-09 10:16:34][INFO] ERCC2 missense_variant missense_variant:ENST00000391945.9:c.2251A>C:exon23:p.K751Q 19:g.45351661T>G
+[2018-10-09 10:16:35][INFO] 0 clinical evidence item(s) found .. mapping = codon
+[2018-10-09 10:16:36][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2018-10-09 10:16:36][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2018-10-09 10:16:37][INFO] ------
+[2018-10-09 10:16:37][INFO] ------
+[2018-10-09 10:16:37][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs
+[2018-10-09 10:16:37][INFO] deconstructSigs normalization method ('tri.counts.method'): default
+[2018-10-09 10:16:39][INFO] Inferred weighted contribution of S1: 0.205
+[2018-10-09 10:16:39][INFO] Inferred weighted contribution of S5: 0.53
+[2018-10-09 10:16:39][INFO] Inferred weighted contribution of S12: 0.136
+[2018-10-09 10:16:39][INFO] Inferred weighted contribution of S20: 0.074
+[2018-10-09 10:16:39][INFO] ------
+[2018-10-09 10:16:39][INFO] ------
+[2018-10-09 10:16:39][INFO] Predicting microsatellite instability status
+[2018-10-09 10:16:39][INFO] n = 177 coding variants used for MSI prediction
+[2018-10-09 10:16:41][INFO] Predicted MSI status: MSS (Microsatellite stable)
+[2018-10-09 10:16:41][INFO] MSI - Indel fraction: 0.028
+[2018-10-09 10:16:41][INFO] ------
+[2018-10-09 10:16:41][INFO] Calculating tumor mutational burden
+[2018-10-09 10:16:41][INFO] Number of variants for mutational burden analysis: 148
+[2018-10-09 10:16:41][INFO] Estimated mutational burden: 4.11 mutations/Mb
+[2018-10-09 10:16:41][INFO] Mutational burden tertile: TMB - Low (0 - 5 mutations/Mb)
+[2018-10-09 10:16:41][INFO] ------
+[2018-10-09 10:16:41][INFO] ------
+[2018-10-09 10:16:41][INFO] Generating report data for copy number segment file /Users/sigven/research/docker/pcgr/04TL_clean.called.txt
+[2018-10-09 10:17:07][INFO] Detected 21 segments subject to amplification/deletion (3 deletions, 18 gains according to user-defined log(2) ratio thresholds)
+[2018-10-09 10:17:07][INFO] Detected 4 proto-oncogene(s) subject to amplification (log(2) ratio >= 0.8): FGF3, MYEOV, CCND1, FGF4
+[2018-10-09 10:17:07][INFO] Detected 0 tumor suppressor genes subject to homozygous deletion (log(2) ratio <= -0.8
+[2018-10-09 10:17:07][INFO] Looking up SCNA biomarkers for precision oncology - any tumortype
+[2018-10-09 10:17:07][INFO] Looking up SCNA biomarkers for precision oncology - Skin_Cancer_NOS
+[2018-10-09 10:17:10][INFO] ------
+[2018-10-09 10:17:10][INFO] Assigning elements to PCGR value boxes
+[2018-10-09 14:16:22][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-10-09 14:16:24][INFO] Filtering tumor variants based on allelic depth/fraction (min_dp_tumor=0, min_af_tumor=0)
+[2018-10-09 14:16:24][INFO] Filtering tumor variants based on allelic depth/fraction (min_dp_normal=0, max_af_normal=1)
+[2018-10-09 14:16:24][INFO] Removed 0 tumor variants (0%) based on allelic depth/fraction
+[2018-10-09 14:16:24][INFO] Number of PASS variants: 16782
+[2018-10-09 14:16:25][INFO] Number of SNVs: 13686
+[2018-10-09 14:16:25][INFO] Number of deletions: 1595
+[2018-10-09 14:16:25][INFO] Number of insertions: 1501
+[2018-10-09 14:16:25][INFO] Number of block substitutions: 0
+[2018-10-09 14:16:25][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-10-09 14:16:28][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-10-09 14:16:29][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-10-09 14:16:29][INFO] Extending annotation descriptions related to ClinVar
+[2018-10-09 14:16:35][INFO] ------
+[2018-10-09 14:16:35][INFO] Generating data for tiered cancer genome report - somatic calls tier model pcgr_acmg'
+[2018-10-09 14:16:35][INFO] Number of protein-coding variants: 61
+[2018-10-09 14:16:35][INFO] Looking up SNV/InDel biomarkers for precision oncology - Skin_Cancer_NOS
+[2018-10-09 14:16:35][INFO] 0 clinical evidence item(s) found .. mapping = exact
+[2018-10-09 14:16:37][INFO] 0 clinical evidence item(s) found .. mapping = codon
+[2018-10-09 14:16:37][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2018-10-09 14:16:37][INFO] Looking up SNV/InDel biomarkers for precision oncology - any tumortype
+[2018-10-09 14:16:37][INFO] 7 clinical evidence item(s) found .. (4 unique variant(s)), mapping = exact
+[2018-10-09 14:16:37][INFO] Underlying variant(s):
+[2018-10-09 14:16:37][INFO] TP53 missense_variant missense_variant:ENST00000269305.8:c.215C>G:exon4:p.P72R 17:g.7676154G>C
+[2018-10-09 14:16:37][INFO] TERT intron_variant NA 5:g.1286401C>A
+[2018-10-09 14:16:37][INFO] ERCC5 5_prime_UTR_variant NA 13:g.102845848A>G
+[2018-10-09 14:16:37][INFO] ERCC2 missense_variant missense_variant:ENST00000391945.9:c.2251A>C:exon23:p.K751Q 19:g.45351661T>G
+[2018-10-09 14:16:38][INFO] 0 clinical evidence item(s) found .. mapping = codon
+[2018-10-09 14:16:39][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2018-10-09 14:16:39][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2018-10-09 14:16:40][INFO] ------
+[2018-10-09 14:16:40][INFO] ------
+[2018-10-09 14:16:40][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs
+[2018-10-09 14:16:40][INFO] deconstructSigs normalization method ('tri.counts.method'): default
+[2018-10-09 14:16:42][INFO] Inferred weighted contribution of S1: 0.205
+[2018-10-09 14:16:42][INFO] Inferred weighted contribution of S5: 0.53
+[2018-10-09 14:16:42][INFO] Inferred weighted contribution of S12: 0.136
+[2018-10-09 14:16:42][INFO] Inferred weighted contribution of S20: 0.074
+[2018-10-09 14:16:43][INFO] ------
+[2018-10-09 14:16:43][INFO] ------
+[2018-10-09 14:16:43][INFO] Predicting microsatellite instability status
+[2018-10-09 14:16:43][INFO] n = 177 coding variants used for MSI prediction
+[2018-10-09 14:16:45][INFO] Predicted MSI status: MSS (Microsatellite stable)
+[2018-10-09 14:16:45][INFO] MSI - Indel fraction: 0.028
+[2018-10-09 14:16:45][INFO] ------
+[2018-10-09 14:16:45][INFO] Calculating tumor mutational burden
+[2018-10-09 14:16:45][INFO] Number of variants for mutational burden analysis: 148
+[2018-10-09 14:16:45][INFO] Estimated mutational burden: 4.11 mutations/Mb
+[2018-10-09 14:16:45][INFO] Mutational burden tertile: TMB - Low (0 - 5 mutations/Mb)
+[2018-10-09 14:16:45][INFO] ------
+[2018-10-09 14:16:45][INFO] ------
+[2018-10-09 14:16:45][INFO] Generating report data for copy number segment file /Users/sigven/research/docker/pcgr/04TL_clean.called.txt
+[2018-10-09 14:17:15][INFO] Detected 21 segments subject to amplification/deletion (3 deletions, 18 gains according to user-defined log(2) ratio thresholds)
+[2018-10-09 14:17:15][INFO] Detected 4 proto-oncogene(s) subject to amplification (log(2) ratio >= 0.8): FGF3, MYEOV, CCND1, FGF4
+[2018-10-09 14:17:15][INFO] Detected 0 tumor suppressor genes subject to homozygous deletion (log(2) ratio <= -0.8
+[2018-10-09 14:17:15][INFO] Looking up SCNA biomarkers for precision oncology - any tumortype
+[2018-10-09 14:17:16][INFO] Looking up SCNA biomarkers for precision oncology - Skin_Cancer_NOS
+[2018-10-09 14:17:19][INFO] ------
+[2018-10-09 14:17:19][INFO] Assigning elements to PCGR value boxes
+[2018-10-09 14:17:19][INFO] ------
+[2018-10-09 14:17:19][INFO] Writing JSON file with report contents
+[2018-10-09 14:17:34][INFO] ------
+[2018-10-09 14:17:34][INFO] Rendering HTML report with rmarkdown
+[2018-10-09 21:14:18][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-10-09 21:14:20][INFO] Filtering tumor variants based on allelic depth/fraction (min_dp_tumor=0, min_af_tumor=0)
+[2018-10-09 21:14:20][INFO] Filtering tumor variants based on allelic depth/fraction (min_dp_normal=0, max_af_normal=1)
+[2018-10-09 21:14:20][INFO] Removed 0 tumor variants (0%) based on allelic depth/fraction
+[2018-10-09 21:14:20][INFO] Number of PASS variants: 16782
+[2018-10-09 21:14:20][INFO] Number of SNVs: 13686
+[2018-10-09 21:14:20][INFO] Number of deletions: 1595
+[2018-10-09 21:14:20][INFO] Number of insertions: 1501
+[2018-10-09 21:14:20][INFO] Number of block substitutions: 0
+[2018-10-09 21:14:20][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-10-09 21:14:23][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-10-09 21:14:24][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-10-09 21:14:24][INFO] Extending annotation descriptions related to ClinVar
+[2018-10-09 21:14:31][INFO] ------
+[2018-10-09 21:14:31][INFO] Generating data for tiered cancer genome report - somatic calls tier model pcgr_acmg'
+[2018-10-09 21:14:31][INFO] Number of protein-coding variants: 61
+[2018-10-09 21:14:31][INFO] Looking up SNV/InDel biomarkers for precision oncology - Skin_Cancer_NOS
+[2018-10-09 21:14:31][INFO] 0 clinical evidence item(s) found .. mapping = exact
+[2018-10-09 21:14:32][INFO] 0 clinical evidence item(s) found .. mapping = codon
+[2018-10-09 21:14:33][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2018-10-09 21:14:33][INFO] Looking up SNV/InDel biomarkers for precision oncology - any tumortype
+[2018-10-09 21:14:33][INFO] 7 clinical evidence item(s) found .. (4 unique variant(s)), mapping = exact
+[2018-10-09 21:14:33][INFO] Underlying variant(s):
+[2018-10-09 21:14:33][INFO] TP53 missense_variant missense_variant:ENST00000269305.8:c.215C>G:exon4:p.P72R 17:g.7676154G>C
+[2018-10-09 21:14:33][INFO] TERT intron_variant NA 5:g.1286401C>A
+[2018-10-09 21:14:33][INFO] ERCC5 5_prime_UTR_variant NA 13:g.102845848A>G
+[2018-10-09 21:14:33][INFO] ERCC2 missense_variant missense_variant:ENST00000391945.9:c.2251A>C:exon23:p.K751Q 19:g.45351661T>G
+[2018-10-09 21:14:33][INFO] 0 clinical evidence item(s) found .. mapping = codon
+[2018-10-09 21:14:34][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2018-10-09 21:14:34][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2018-10-09 21:14:35][INFO] ------
+[2018-10-09 21:14:35][INFO] ------
+[2018-10-09 21:14:35][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs
+[2018-10-09 21:14:35][INFO] deconstructSigs normalization method ('tri.counts.method'): default
+[2018-10-09 21:14:38][INFO] Inferred weighted contribution of S1: 0.205
+[2018-10-09 21:14:38][INFO] Inferred weighted contribution of S5: 0.53
+[2018-10-09 21:14:38][INFO] Inferred weighted contribution of S12: 0.136
+[2018-10-09 21:14:38][INFO] Inferred weighted contribution of S20: 0.074
+[2018-10-09 21:14:38][INFO] ------
+[2018-10-09 21:14:38][INFO] ------
+[2018-10-09 21:14:38][INFO] Predicting microsatellite instability status
+[2018-10-09 21:14:38][INFO] n = 177 coding variants used for MSI prediction
+[2018-10-09 21:14:40][INFO] Predicted MSI status: MSS (Microsatellite stable)
+[2018-10-09 21:14:40][INFO] MSI - Indel fraction: 0.028
+[2018-10-09 21:14:40][INFO] ------
+[2018-10-09 21:14:40][INFO] Calculating tumor mutational burden
+[2018-10-09 21:14:40][INFO] Number of variants for mutational burden analysis: 148
+[2018-10-09 21:14:40][INFO] Estimated mutational burden: 4.11 mutations/Mb
+[2018-10-09 21:14:40][INFO] Mutational burden tertile: TMB - Low (0 - 5 mutations/Mb)
+[2018-10-09 21:14:40][INFO] ------
+[2018-10-09 21:14:40][INFO] ------
+[2018-10-09 21:14:40][INFO] Generating report data for copy number segment file /Users/sigven/research/docker/pcgr/04TL_clean.called.txt
+[2018-10-09 21:15:10][INFO] Detected 21 segments subject to amplification/deletion (3 deletions, 18 gains according to user-defined log(2) ratio thresholds)
+[2018-10-09 21:15:10][INFO] Detected 4 proto-oncogene(s) subject to amplification (log(2) ratio >= 0.8): FGF3, MYEOV, CCND1, FGF4
+[2018-10-09 21:15:10][INFO] Detected 0 tumor suppressor genes subject to homozygous deletion (log(2) ratio <= -0.8
+[2018-10-09 21:15:10][INFO] Looking up SCNA biomarkers for precision oncology - any tumortype
+[2018-10-09 21:15:10][INFO] Looking up SCNA biomarkers for precision oncology - Skin_Cancer_NOS
+[2018-10-09 21:15:13][INFO] ------
+[2018-10-09 21:15:13][INFO] Assigning elements to PCGR value boxes

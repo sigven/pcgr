@@ -9,7 +9,14 @@ The table below permits filtering of the total SNV/InDel set by various criteria
 library(crosstalk)
 library(summarywidget)
 
-vars <- report_data$tsv_variants %>% dplyr::select(SYMBOL, CONSEQUENCE, PROTEIN_CHANGE, VARIANT_CLASS, TIER, TIER_DESCRIPTION, GENE_NAME, dplyr::everything())
+if(NROW(pcg_report[['snv_indel']][['variant_set']][['tsv']]) > 2000){
+    cat('<b>NOTE - listing top 5000 variants</b><br>',sep="\n")
+    cat('<br>')
+    pcg_report[['snv_indel']][['variant_set']][['tsv']] <- head(pcg_report[['snv_indel']][['variant_set']][['tsv']], 5000)
+  }
+
+
+vars <- pcg_report[['snv_indel']][['variant_set']][['tsv']] %>% dplyr::select(SYMBOL, CONSEQUENCE, PROTEIN_CHANGE, VARIANT_CLASS, TIER, TIER_DESCRIPTION, GENE_NAME, dplyr::everything())
 vars$CONSEQUENCE <- stringr::str_replace_all(vars$CONSEQUENCE,"&",",")
 variants_shared <- crosstalk::SharedData$new(vars)
   

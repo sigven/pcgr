@@ -44,9 +44,10 @@ RUN cd samtools-1.9 && ./configure --prefix=/usr/local/bin && make && make insta
 
 WORKDIR /
 
-RUN R -e "source(\"https://bioconductor.org/biocLite.R\"); biocLite(c('deconstructSigs', 'VariantAnnotation','BSgenome.Hsapiens.UCSC.hg19','BSgenome.Hsapiens.UCSC.hg38','GenomeInfoDb','GenomicRanges','S4Vectors','karyoploteR'))"
-RUN R -e "install.packages(c('dplyr','stringr','tidyr','httr','git2r','data.table','magrittr','devtools','htmltools','caret','randomForest','plotly','RcppTOML','SeqKat'), dependencies = T, repos = 'http://cran.us.r-project.org')"
+RUN R -e "source(\"https://bioconductor.org/biocLite.R\"); biocLite(c('regioneR','MutationalPatterns','deconstructSigs', 'VariantAnnotation','BSgenome.Hsapiens.UCSC.hg19','BSgenome.Hsapiens.UCSC.hg38','GenomeInfoDb','GenomicRanges','S4Vectors','karyoploteR'))"
+RUN R -e "install.packages(c('configr','rmarkdown','dplyr','stringr','tidyr','httr','git2r','data.table','magrittr','devtools','htmltools','caret','randomForest','plotly','RcppTOML','SeqKat'), dependencies = T, repos = 'http://cran.us.r-project.org')"
 RUN R -e "library(devtools); devtools::install_github('rstudio/DT'); devtools::install_github('hadley/ggplot2'); devtools::install_github('mjkallen/rlogging'); devtools::install_github('kent37/summarywidget')"
+RUN R -e "library(devtools); devtools::install_github('Francescojm/CELLector'); devtools::install_github('rstudio/crosstalk')"
 RUN rm -rf /tmp/R*
 
 
@@ -62,7 +63,7 @@ mv vcf_validator /usr/local/bin/ && \
 chmod 755 /usr/local/bin/vcf_validator
 
 ## Install pandoc (for HTML report generation)
-RUN wget https://github.com/jgm/pandoc/releases/download/2.1.3/pandoc-2.1.3-1-amd64.deb && \
+RUN wget https://github.com/jgm/pandoc/releases/download/2.3.1/pandoc-2.3.1-1-amd64.deb && \
 #RUN wget https://github.com/jgm/pandoc/releases/download/1.19.1/pandoc-1.19.1-1-amd64.deb && \
       dpkg -i pandoc* && \
       rm pandoc* && \
@@ -212,8 +213,7 @@ RUN export PATH=/usr/local/bin:$PATH
 ## Add local PCGR R package
 WORKDIR /
 ADD R/ /
-RUN R -e "install.packages('configr', dependencies = T, repos = 'http://cran.us.r-project.org')"
-RUN R -e "devtools::install_github('rstudio/crosstalk')"
+RUN R -e "devtools::install_github('mjkallen/rlogging')"
 RUN R -e "devtools::install('pcgrr')"
 
 # Add local PCGR Python scripts/libraries
@@ -246,9 +246,6 @@ ADD cpsr.R /
 USER root
 WORKDIR /
 WORKDIR /
-
-RUN R -e "source(\"https://bioconductor.org/biocLite.R\"); biocLite(c('regioneR','MutationalPatterns'))"
-RUN R -e "devtools::install_github('Francescojm/CELLector')"
 
 RUN rm -f nlopt-2.4.2.tar.gz
 RUN rm -rf $HOME/src/ensembl-vep/t/

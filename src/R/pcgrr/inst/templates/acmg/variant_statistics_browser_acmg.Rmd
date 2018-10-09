@@ -56,9 +56,14 @@ table_browse_tumor_dp_af <- F
 table_browse_tumor_dp_af_CC <- F
 table_browse_tumor_dp_af_normal_dp_af <- F
 table_browse_tumor_dp_af_normal_dp_af_CC <- F
+reduced_table_set <- F
 
 if(NROW(pcg_report[['snv_indel']][['variant_set']][['tsv']]) > 0){
   table_browse_basic <- T
+  #if(NROW(pcg_report[['snv_indel']][['variant_set']][['tsv']]) > 5000){
+    #pcg_report[['snv_indel']][['variant_set']][['tsv']] <- head(pcg_report[['snv_indel']][['variant_set']][['tsv']],5000)
+  #}
+  #reduced_table_set 
 
   if(NROW(dplyr::filter(pcg_report[['snv_indel']][['variant_set']][['tsv']], !is.na(CALL_CONFIDENCE))) > 0){
     table_browse_basic_CC <- T

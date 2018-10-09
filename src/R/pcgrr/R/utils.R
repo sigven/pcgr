@@ -885,24 +885,21 @@ add_gwas_citation_phenotype <- function(vcf_data_df, pcgr_data, p_value_threshol
     vcf_data_df$GWAS_PHENOTYPE <- NA
   }
 
-  #if(nrow(vcf_data_df[is.na(vcf_data_df$GWAS_CITATION) & !is.na(vcf_data_df$GWAS_HIT),]) > 0){
-    #vcf_data_df[is.na(vcf_data_df$GWAS_CITATION) & !is.na(vcf_data_df$GWAS_HIT),]$GWAS_HIT <- NA
-  #}
-
   return(vcf_data_df)
 
 }
 
 
-# convert_hgvs <- function(vcf_data_df){
-#   amino_acids_three <- c('Ala','Arg','Asn','Asp','Cys','Glu','Gln','Gly','His','Ile','Leu','Lys','Met','Phe','Pro','Ser','Thr','Trp','Tyr','Val','Ter')
-#   amino_acids_one <- c('A','R','N','D','C','E','Q','G','H','I','L','K','M','F','P','S','T','W','Y','V','X')
-#   amino_acids <- data.frame('aa_three_letter' = amino_acids_three, 'aa_one_letter' = amino_acids_one, stringsAsFactors = F)
-#
-#   if (nrow(vcf_data_df[stringr::str_detect(vcf_data_df$CONSEQUENCE, "^synonymous_variant$"), ]) > 0){
-#
-#   }
-# }
+mutate_cond <- function(.data, condition, ..., new_init = NA, envir = parent.frame()) {
+  # Initialize any new variables as new_init
+  new_vars <- substitute(list(...))[-1]
+  new_vars %<>% sapply(deparse) %>% names %>% dplyr::setdiff(names(.data))
+  .data[, new_vars] <- new_init
+
+  condition <- eval(substitute(condition), .data, envir)
+  .data[condition, ] <- .data %>% dplyr::filter(condition) %>% dplyr::mutate(...)
+  .data
+}
 
 #' Function that assigns genotype (het/hom) from VCF GT tag
 #'
@@ -990,6 +987,12 @@ get_calls <- function(tsv_gz_file, pcgr_data, pcgr_version, sample_name, pcgr_co
 
   vcf_data_df <- dplyr::mutate(vcf_data_df, GENOME_VERSION = hg_version, PROTEIN_CHANGE = HGVSp) %>%
     dplyr::rename(CONSEQUENCE = Consequence)
+
+  #vcf_data_df <- dplyr::mutate(vcf_data_df, GENOME_VERSION = hg_version) %>%
+    #dplyr::rename(CONSEQUENCE = Consequence) %>%
+    #dplyr::mutate(PROTEIN_CHANGE = dplyr::if_else(stringr::str_detect(HGVSp,":"), stringr::str_split_fixed(HGVSp,":")[,2]))
+
+
   if (nrow(vcf_data_df[!is.na(vcf_data_df$PROTEIN_CHANGE) & stringr::str_detect(vcf_data_df$PROTEIN_CHANGE, ":"), ]) > 0){
     vcf_data_df[!is.na(vcf_data_df$PROTEIN_CHANGE) & stringr::str_detect(vcf_data_df$PROTEIN_CHANGE, ":"), ]$PROTEIN_CHANGE <- stringr::str_split_fixed(vcf_data_df[!is.na(vcf_data_df$PROTEIN_CHANGE) & stringr::str_detect(vcf_data_df$PROTEIN_CHANGE, ":"), ]$PROTEIN_CHANGE, pattern = ":", 2)[, 2]
   }
