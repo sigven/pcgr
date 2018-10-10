@@ -329,6 +329,8 @@ generate_report_acmg <- function(project_directory, query_vcf2tsv, pcgr_data, pc
   pcg_report[['snv_indel']][['variant_set']][['noncoding']] <- NULL
   pcg_report[['snv_indel']][['variant_set']][['coding']] <- NULL
   pcg_report[['snv_indel']][['variant_set']][['all']] <- NULL
+  pcg_report[['cna']][['variant_set']][['cna_print']] <- NULL
+
 
   rlogging::message('------')
   rlogging::message("Writing JSON file with report contents")

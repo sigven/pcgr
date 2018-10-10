@@ -161,14 +161,14 @@ indexed using <a class="reference external" href="http://www.htslib.org/doc/tabi
 <a class="reference external" href="http://www.htslib.org/doc/tabix.html">tabix</a></li>
 <li>If the input VCF contains multi-allelic sites, these will be subject
 to <a class="reference external" href="http://genome.sph.umich.edu/wiki/Vt#Decompose">decomposition</a></li>
-<li>Variants used for reporting should be designated as ‘PASS’ in the VCF
+<li>Variants used for reporting should be designated as &#8216;PASS&#8217; in the VCF
 FILTER column</li>
 </ul>
 <p><strong>IMPORTANT NOTE 1</strong>: Considering the VCF output for the <a class="reference external" href="https://www.biostars.org/p/19104/">numerous
 somatic SNV/InDel callers</a> that
 have been developed, we have a experienced a general lack of uniformity
 and robustness for the representation of somatic variant genotype data
-(e.g.&nbsp;variant allelic depths (tumor/normal), genotype quality etc.).
+(e.g. variant allelic depths (tumor/normal), genotype quality etc.).
 Variant genotype data found as INFO tags in the input VCF can be
 specified as optional arguments to the PCGR workflow, which in turn can
 be used for interactive exploration in the tumor report.</p>
@@ -192,9 +192,9 @@ contain the following four columns:</p>
 <p>Here, <em>Chromosome</em>, <em>Start</em>, and <em>End</em> denote the chromosomal segment,
 and <strong>Segment_Mean</strong> denotes the log(2) ratio for a particular segment,
 which is a common output of somatic copy number alteration callers. Note
-that coordinates must be <strong>one-based</strong> (i.e.&nbsp;chromosomes start at 1, not
+that coordinates must be <strong>one-based</strong> (i.e. chromosomes start at 1, not
 0). Below shows the initial part of a copy number segment file that is
-formatted correctly according to PCGR’s requirements:</p>
+formatted correctly according to PCGR&#8217;s requirements:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Chromosome</span>    <span class="n">Start</span>   <span class="n">End</span> <span class="n">Segment_Mean</span>
 <span class="mi">1</span> <span class="mi">3218329</span> <span class="mi">3550598</span> <span class="mf">0.0024</span>
 <span class="mi">1</span> <span class="mi">3552451</span> <span class="mi">4593614</span> <span class="mf">0.1995</span>

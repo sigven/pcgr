@@ -25,8 +25,8 @@ displayed (within the section entitled *Copy number aberrations as
 biomarkers for prognosis, diagnosis, and drug response* in the HTML
 report)
 
-Tier model 2 - *pcgr_acmg*
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tier model 2 - *pcgr\_acmg*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This tier model attempts to adopt concensus recommendations by ACMG, as
 outlined in `Li et al.,
@@ -41,7 +41,7 @@ outlined in `Li et al.,
 
    -  A: found within the same tumor type/class as specified by the
       user, AND
-   -  B: of strong clinical evidence (i.e. part of guidelines, validated
+   -  B: of strong clinical evidence (i.e. part of guidelines, validated
       or discovered in late clinical trials)
 
 -  *Tier 2: Variants of potential clinical significance* - constitutes

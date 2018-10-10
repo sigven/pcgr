@@ -2273,3 +2273,104 @@
 [2018-10-09 21:15:10][INFO] Looking up SCNA biomarkers for precision oncology - Skin_Cancer_NOS
 [2018-10-09 21:15:13][INFO] ------
 [2018-10-09 21:15:13][INFO] Assigning elements to PCGR value boxes
+[2018-10-10 11:48:29][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-10-10 11:48:29][INFO] Number of PASS variants: 1
+[2018-10-10 11:48:29][INFO] Number of SNVs: 0
+[2018-10-10 11:48:29][INFO] Number of deletions: 1
+[2018-10-10 11:48:29][INFO] Number of insertions: 0
+[2018-10-10 11:48:29][INFO] Number of block substitutions: 0
+[2018-10-10 11:48:29][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-10-10 11:48:31][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-10-10 11:48:31][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-10-10 11:48:31][INFO] Extending annotation descriptions related to ClinVar
+[2018-10-10 11:48:32][INFO] ------
+[2018-10-10 11:48:32][INFO] Generating data for tiered cancer genome report - somatic calls tier model pcgr_acmg'
+[2018-10-10 11:48:32][INFO] Number of protein-coding variants: 0
+[2018-10-10 11:48:32][INFO] Looking up SNV/InDel biomarkers for precision oncology - Skin_Cancer_NOS
+[2018-10-10 11:48:33][INFO] 0 clinical evidence item(s) found .. mapping = exact
+[2018-10-10 11:48:33][INFO] 0 clinical evidence item(s) found .. mapping = codon
+[2018-10-10 11:48:33][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2018-10-10 11:48:33][INFO] Looking up SNV/InDel biomarkers for precision oncology - any tumortype
+[2018-10-10 11:48:33][INFO] 0 clinical evidence item(s) found .. mapping = exact
+[2018-10-10 11:48:33][INFO] 0 clinical evidence item(s) found .. mapping = codon
+[2018-10-10 11:48:33][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2018-10-10 11:48:33][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2018-10-10 11:48:33][INFO] ------
+[2018-10-10 11:48:33][INFO] ------
+[2018-10-10 11:48:33][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs
+[2018-10-10 11:48:33][INFO] deconstructSigs normalization method ('tri.counts.method'): default
+[2018-10-10 11:48:34][INFO] Too few SNVs (n = 0) for reconstruction of mutational signatures by deconstructSigs, limit set to 100
+[2018-10-10 11:48:34][INFO] ------
+[2018-10-10 11:48:34][INFO] Predicting microsatellite instability status
+[2018-10-10 11:48:34][INFO] n = 0 coding variants used for MSI prediction
+[2018-10-10 11:48:34][INFO] Too few variants (n < 30) for robust MSI prediction:
+[2018-10-10 11:48:34][INFO] ------
+[2018-10-10 11:48:34][INFO] Calculating tumor mutational burden
+[2018-10-10 11:48:34][INFO] Number of variants for mutational burden analysis: 0
+[2018-10-10 11:48:34][INFO] Estimated mutational burden: 0 mutations/Mb
+[2018-10-10 11:48:34][INFO] Mutational burden tertile: TMB - not determined
+[2018-10-10 11:48:34][INFO] ------
+[2018-10-10 11:48:34][INFO] ------
+[2018-10-10 11:48:34][INFO] Generating report data for copy number segment file /Users/sigven/research/docker/pcgr/04TL_cna.tsv
+[2018-10-10 11:49:03][INFO] Detected 21 segments subject to amplification/deletion (3 deletions, 18 gains according to user-defined log(2) ratio thresholds)
+[2018-10-10 11:49:03][INFO] Detected 4 proto-oncogene(s) subject to amplification (log(2) ratio >= 0.8): FGF3, MYEOV, CCND1, FGF4
+[2018-10-10 11:49:03][INFO] Detected 0 tumor suppressor genes subject to homozygous deletion (log(2) ratio <= -0.8
+[2018-10-10 11:49:03][INFO] Looking up SCNA biomarkers for precision oncology - any tumortype
+[2018-10-10 11:49:03][INFO] Looking up SCNA biomarkers for precision oncology - Skin_Cancer_NOS
+[2018-10-10 11:49:03][INFO] ------
+[2018-10-10 11:49:03][INFO] Assigning elements to PCGR value boxes
+[2018-10-10 11:50:25][INFO] ------
+[2018-10-10 11:50:25][INFO] Writing JSON file with report contents
+[2018-10-10 12:13:40][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-10-10 12:13:40][INFO] Filtering tumor variants based on allelic depth/fraction (min_dp_tumor=0, min_af_tumor=0)
+[2018-10-10 12:13:40][INFO] Filtering tumor variants based on allelic depth/fraction (min_dp_normal=0, max_af_normal=1)
+[2018-10-10 12:13:40][INFO] Removed 0 tumor variants (0%) based on allelic depth/fraction
+[2018-10-10 12:13:40][INFO] Number of PASS variants: 1
+[2018-10-10 12:13:40][INFO] Number of SNVs: 0
+[2018-10-10 12:13:40][INFO] Number of deletions: 1
+[2018-10-10 12:13:40][INFO] Number of insertions: 0
+[2018-10-10 12:13:40][INFO] Number of block substitutions: 0
+[2018-10-10 12:13:40][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-10-10 12:13:41][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-10-10 12:13:41][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-10-10 12:13:42][INFO] Extending annotation descriptions related to ClinVar
+[2018-10-10 12:13:43][INFO] ------
+[2018-10-10 12:13:43][INFO] Generating data for tiered cancer genome report - somatic calls tier model pcgr_acmg'
+[2018-10-10 12:13:43][INFO] Number of protein-coding variants: 0
+[2018-10-10 12:13:43][INFO] Looking up SNV/InDel biomarkers for precision oncology - Breast_Cancer_NOS
+[2018-10-10 12:13:43][INFO] 0 clinical evidence item(s) found .. mapping = exact
+[2018-10-10 12:13:43][INFO] 0 clinical evidence item(s) found .. mapping = codon
+[2018-10-10 12:13:43][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2018-10-10 12:13:43][INFO] Looking up SNV/InDel biomarkers for precision oncology - any tumortype
+[2018-10-10 12:13:43][INFO] 0 clinical evidence item(s) found .. mapping = exact
+[2018-10-10 12:13:43][INFO] 0 clinical evidence item(s) found .. mapping = codon
+[2018-10-10 12:13:43][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2018-10-10 12:13:43][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2018-10-10 12:13:43][INFO] ------
+[2018-10-10 12:13:43][INFO] ------
+[2018-10-10 12:13:43][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs
+[2018-10-10 12:13:43][INFO] deconstructSigs normalization method ('tri.counts.method'): genome
+[2018-10-10 12:13:43][INFO] Too few SNVs (n = 0) for reconstruction of mutational signatures by deconstructSigs, limit set to 100
+[2018-10-10 12:13:43][INFO] ------
+[2018-10-10 12:13:43][INFO] Predicting microsatellite instability status
+[2018-10-10 12:13:43][INFO] n = 0 coding variants used for MSI prediction
+[2018-10-10 12:13:43][INFO] Too few variants (n < 30) for robust MSI prediction:
+[2018-10-10 12:13:43][INFO] ------
+[2018-10-10 12:13:43][INFO] Calculating tumor mutational burden
+[2018-10-10 12:13:43][INFO] Number of variants for mutational burden analysis: 0
+[2018-10-10 12:13:43][INFO] Estimated mutational burden: 0 mutations/Mb
+[2018-10-10 12:13:43][INFO] Mutational burden tertile: TMB - not determined
+[2018-10-10 12:13:43][INFO] ------
+[2018-10-10 12:13:43][INFO] ------
+[2018-10-10 12:13:43][INFO] Generating report data for copy number segment file /Users/sigven/research/docker/pcgr/04TL_cna.tsv
+[2018-10-10 12:14:11][INFO] Detected 21 segments subject to amplification/deletion (3 deletions, 18 gains according to user-defined log(2) ratio thresholds)
+[2018-10-10 12:14:11][INFO] Detected 4 proto-oncogene(s) subject to amplification (log(2) ratio >= 0.8): FGF3, MYEOV, CCND1, FGF4
+[2018-10-10 12:14:11][INFO] Detected 0 tumor suppressor genes subject to homozygous deletion (log(2) ratio <= -0.8
+[2018-10-10 12:14:11][INFO] Looking up SCNA biomarkers for precision oncology - any tumortype
+[2018-10-10 12:14:11][INFO] Looking up SCNA biomarkers for precision oncology - Breast_Cancer_NOS
+[2018-10-10 12:14:12][INFO] ------
+[2018-10-10 12:14:12][INFO] Assigning elements to PCGR value boxes
+[2018-10-10 12:14:12][INFO] ------
+[2018-10-10 12:14:12][INFO] Writing JSON file with report contents
+[2018-10-10 12:14:12][INFO] ------
+[2018-10-10 12:14:12][INFO] Rendering HTML report with rmarkdown

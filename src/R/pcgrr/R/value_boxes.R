@@ -75,7 +75,7 @@ generate_report_data_value_box <- function(pcg_report, pcgr_data, pcgr_version, 
   if(!is.null(pcg_report[['cna']])){
     if(pcg_report[['cna']][['eval']]){
       if(nrow(pcg_report[['cna']][['variant_display']][['biomarker']]) > 0){
-        pcg_report_value_box[['scna']] <- paste0('SCNAs:\n',paste(unique(head(pcg_report[['cna']][['variant_display']][['biomarker']]$SYMBOL,2),collapse=", ")))
+        pcg_report_value_box[['scna']] <- paste0('SCNAs:\n',paste(unique(head(pcg_report[['cna']][['variant_display']][['biomarker']]$SYMBOL,2)),collapse=", "))
       }
       else{
         pcg_report_value_box[['scna']] <- 'SCNAs:\nNone of strong\nclinical significance'

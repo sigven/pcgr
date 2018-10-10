@@ -318,6 +318,7 @@ generate_report <- function(project_directory, query_vcf2tsv, pcgr_data, pcgr_co
   pcg_report[["snv_indel"]][["variant_set"]][["noncoding"]] <- NULL
   pcg_report[["snv_indel"]][["variant_set"]][["coding"]] <- NULL
   pcg_report[["snv_indel"]][["variant_set"]][["all"]] <- NULL
+  pcg_report[['cna']][['variant_set']][['cna_print']] <- NULL
 
   pcgr_json <- jsonlite::toJSON(pcg_report, pretty = T, na = "string", null = "null")
   write(pcgr_json, fnames[["json"]])
@@ -987,11 +988,6 @@ get_calls <- function(tsv_gz_file, pcgr_data, pcgr_version, sample_name, pcgr_co
 
   vcf_data_df <- dplyr::mutate(vcf_data_df, GENOME_VERSION = hg_version, PROTEIN_CHANGE = HGVSp) %>%
     dplyr::rename(CONSEQUENCE = Consequence)
-
-  #vcf_data_df <- dplyr::mutate(vcf_data_df, GENOME_VERSION = hg_version) %>%
-    #dplyr::rename(CONSEQUENCE = Consequence) %>%
-    #dplyr::mutate(PROTEIN_CHANGE = dplyr::if_else(stringr::str_detect(HGVSp,":"), stringr::str_split_fixed(HGVSp,":")[,2]))
-
 
   if (nrow(vcf_data_df[!is.na(vcf_data_df$PROTEIN_CHANGE) & stringr::str_detect(vcf_data_df$PROTEIN_CHANGE, ":"), ]) > 0){
     vcf_data_df[!is.na(vcf_data_df$PROTEIN_CHANGE) & stringr::str_detect(vcf_data_df$PROTEIN_CHANGE, ":"), ]$PROTEIN_CHANGE <- stringr::str_split_fixed(vcf_data_df[!is.na(vcf_data_df$PROTEIN_CHANGE) & stringr::str_detect(vcf_data_df$PROTEIN_CHANGE, ":"), ]$PROTEIN_CHANGE, pattern = ":", 2)[, 2]

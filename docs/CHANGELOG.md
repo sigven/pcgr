@@ -1,9 +1,10 @@
 
 ## CHANGELOG
 
-#### dev - Oct 5th 2018
+#### dev - Oct 10th 2018
 
 ##### Fixed
+ * Bug in SCNA value box display for multiple copy number hits (paste error)
  * Bug in vcf2tsv (handling INFO tags encoded with 'Type = String')
  * Bug in search of UniProt functional features (BED feature regions spanning exons are now handled)
  * Stripped off HTML elements (TCGA_FREQUENCY, DBSNP) in TSV output

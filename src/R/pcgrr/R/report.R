@@ -154,7 +154,7 @@ init_pcg_report <- function(pcgr_config = NULL, sample_name = 'SampleX', pcgr_ve
       pcg_report[[analysis_element]][['variant_statistic']] <- list()
       pcg_report[[analysis_element]][['variant_statistic']][['n_tmb']] <- 0
       pcg_report[[analysis_element]][['variant_statistic']][['tmb_estimate']] <- 0
-      pcg_report[[analysis_element]][['variant_statistic']][['target_size_mb']] <- pcgr_config[['tmb']][['target_size_mb']]
+      pcg_report[[analysis_element]][['variant_statistic']][['target_size_mb']] <- pcgr_config[['mutational_burden']][['target_size_mb']]
       pcg_report[[analysis_element]][['variant_statistic']][['tmb_tertile']] <- 'TMB - not determined'
     }
     if(analysis_element == 'msi'){

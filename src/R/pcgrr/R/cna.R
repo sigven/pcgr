@@ -204,7 +204,7 @@ generate_report_data_cna <- function(cna_file, pcgr_data, pcgr_version, sample_n
   pcg_report_cna[['eval']] <- T
   pcg_report_cna[['clinical_evidence_item']][['any_tumortype']] <- biomarker_hits_any[['clinical_evidence_item']]
   pcg_report_cna[['clinical_evidence_item']][['specific_tumortype']] <- biomarker_hits_specific[['clinical_evidence_item']]
-  #pcg_report_cna[['variant_set']][['cna_print']] <- local_df_print_sorted
+  pcg_report_cna[['variant_set']][['cna_print']] <- local_df_print_sorted
   pcg_report_cna[['variant_statistic']][['n_cna_gain']] <- n_cna_gain
   pcg_report_cna[['variant_statistic']][['n_cna_loss']] <- n_cna_loss
   pcg_report_cna[['variant_display']][['segment']] <- cna_segments_filtered
