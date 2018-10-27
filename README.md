@@ -7,7 +7,7 @@ The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for
 ![PCGR overview](PCGR_workflow.png)
 
 ### News
-* _Oct 5th 2018_:
+* _Oct 27th 2018_:
    * Dev version is available for download (installation instructions below)
    * Reporting germline variants for cancer predisposition? Check out [github.com/sigven/cpsr](https://github.com/sigven/cpsr)
 * _May 14th 2018_: **0.6.2.1 release**
@@ -57,7 +57,7 @@ Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, Ola Mykleb
 ### Annotation resources included in PCGR
 
 * [VEP v94](http://www.ensembl.org/info/docs/tools/vep/index.html) - Variant Effect Predictor (GENCODE v28/v19 as the gene reference dataset)
-* [CIViC](http://civic.genome.wustl.edu) - Clinical interpretations of variants in cancer (August 22nd 2018)
+* [CIViC](http://civic.genome.wustl.edu) - Clinical interpretations of variants in cancer (October 17th 2018)
 * [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - Database of clinically related variants (October 2018)
 * [DoCM](http://docm.genome.wustl.edu) - Database of curated mutations (v3.2, April 2016)
 * [CBMDB](http://www.cancergenomeinterpreter.org/biomarkers) - Cancer Biomarkers database (January 17th 2018)
@@ -65,12 +65,13 @@ Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, Ola Mykleb
 * [DisGeNET](http://www.disgenet.org) - Database of curated gene-tumor type associations (May 2017)
 * [Cancer Hotspots](http://cancerhotspots.org) - Resource for statistically significant mutations in cancer (v2 - 2017)
 * [dBNSFP v3.5](https://sites.google.com/site/jpopgen/dbNSFP) - Database of non-synonymous functional predictions (August 2017)
-* [TCGA release 12](https://portal.gdc.cancer.gov/) - somatic mutations discovered across 33 tumor type cohorts (The Cancer Genome Atlas)
-* [UniProt/SwissProt KnowledgeBase 2018_08](http://www.uniprot.org) - Resource on protein sequence and functional information (September 2018)
+* [TCGA release 13](https://portal.gdc.cancer.gov/) - somatic mutations discovered across 33 tumor type cohorts (The Cancer Genome Atlas)
+* [UniProt/SwissProt KnowledgeBase 2018_09](http://www.uniprot.org) - Resource on protein sequence and functional information (October 2018)
 * [Pfam v32](http://pfam.xfam.org) - Database of protein families and domains (September 2018)
 * [DGIdb](http://dgidb.genome.wustl.edu) - Database of targeted cancer drugs  (v3.0.2, January 2018)
 * [ChEMBL](https://www.ebi.ac.uk/chembl/) - Manually curated database of bioactive molecules (v24.1, June 2018)
-* [TSGene v2.0](https://bioinfo.uth.edu/TSGene/) - Tumor suppressor/oncogene database (November 2015)
+* [CancerMine v5](https://zenodo.org/record/1336650#.W9QMdRMzaL4) - Literature-derived database of tumor suppressor genes/proto-oncogenes (October 2018)
+
 
 ### Getting started
 
@@ -99,8 +100,8 @@ An installation of Python (version _3.6_) is required to run PCGR. Check that Py
 a. Clone the PCGR GitHub repository (includes run script and configuration file): `git clone https://github.com/sigven/pcgr.git`
 
 b. Download and unpack the latest data bundles in the PCGR directory
-   * [grch37 data bundle - 20181004](https://drive.google.com/open?id=1G34Cn2MO-NQ53cDdFvqNlg79YBZfQKfk) (approx 9.2Gb)
-   * [grch38 data bundle - 20181004](https://drive.google.com/open?id=1zb7TgX0cLH02iGbsscm5JJnKi7WevtQg) (approx 13Gb)
+   * [grch37 data bundle - 20181026](https://drive.google.com/open?id=1MREECbygW47ttJySgfibBpX7romBrb_Q) (approx 9.2Gb)
+   * [grch38 data bundle - 20181026](https://drive.google.com/open?id=1Xsw0WcKPnWgJDolQfrZATU5suEFJ5BKG) (approx 13Gb)
    * *Unpacking*: `gzip -dc pcgr.databundle.grch37.YYYYMMDD.tgz | tar xvf -`
 
 c. Pull the [PCGR Docker image (*dev*)](https://hub.docker.com/r/sigven/pcgr/) from DockerHub (approx 5.1Gb):
@@ -111,8 +112,8 @@ c. Pull the [PCGR Docker image (*dev*)](https://hub.docker.com/r/sigven/pcgr/) f
 a. Download and unpack the [latest software release (0.6.2.1)](https://github.com/sigven/pcgr/releases/tag/v6.2.1)
 
 b. Download and unpack the assembly-specific data bundle in the PCGR directory
-   * [grch37 data bundle](https://drive.google.com/open?id=1cGBAmAh5t4miIeRrrd0zHsPCFToOr0Lf) (approx 9.2Gb)
-   * [grch38 data bundle](https://drive.google.com/open?id=12q3rr7xpdBfaefRi0ysFHbH34kehNZOV) (approx 13Gb)
+   * [grch37 data bundle - 20180509](https://drive.google.com/open?id=1cGBAmAh5t4miIeRrrd0zHsPCFToOr0Lf) (approx 9.2Gb)
+   * [grch38 data bundle - 20180509](https://drive.google.com/open?id=12q3rr7xpdBfaefRi0ysFHbH34kehNZOV) (approx 13Gb)
    * *Unpacking*: `gzip -dc pcgr.databundle.grch37.YYYYMMDD.tgz | tar xvf -`
 
     A _data/_ folder within the _pcgr-X.X_ software folder should now have been produced
