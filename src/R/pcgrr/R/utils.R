@@ -493,7 +493,7 @@ generate_report_data_snv_indel_pcgr <- function(sample_calls, pcgr_data, pcgr_ve
     }
 
     ## Analyze Tier 2: curated mutations, cancer mutation hotspots and predicted driver mutations
-    pcg_report_snv_indel[["variant_set"]][["tier2"]] <- dplyr::select(pcg_report_snv_indel[["variant_set"]][["all"]], dplyr::one_of(pcgr_data$pcgr_all_annotation_columns)) %>% dplyr::filter(CODING_STATUS == "coding") %>% dplyr::filter(INTOGEN_DRIVER_MUT == TRUE | !is.na(CANCER_MUTATION_HOTSPOT) | !is.na(DOCM_DISEASE))
+    pcg_report_snv_indel[["variant_set"]][["tier2"]] <- dplyr::select(pcg_report_snv_indel[["variant_set"]][["all"]], dplyr::one_of(pcgr_data$pcgr_all_annotation_columns)) %>% dplyr::filter(CODING_STATUS == "coding") %>% dplyr::filter(INTOGEN_DRIVER_MUT == TRUE | !is.na(MUTATION_HOTSPOT) | !is.na(DOCM_DISEASE))
     if(nrow(pcg_report_snv_indel[["variant_set"]][["tier1"]]) > 0){
       pcg_report_snv_indel[["variant_set"]][["tier2"]] <- dplyr::anti_join(pcg_report_snv_indel[["variant_set"]][["tier2"]], pcg_report_snv_indel[["variant_display"]][["tier1"]], by=c("GENOMIC_CHANGE"))
     }
@@ -502,9 +502,9 @@ generate_report_data_snv_indel_pcgr <- function(sample_calls, pcgr_data, pcgr_ve
       pcg_report_snv_indel[["variant_set"]][["tier2"]] <- pcg_report_snv_indel[["variant_set"]][["tier2"]] %>% dplyr::arrange(desc(ONCOSCORE))
       tier12 <- rbind(pcg_report_snv_indel[["variant_display"]][["tier1"]],dplyr::select(pcg_report_snv_indel[["variant_set"]][["tier2"]],GENOMIC_CHANGE)) %>% dplyr::distinct()
       all_tier2_variants_display <- dplyr::select(pcg_report_snv_indel[["variant_set"]][["tier2"]], dplyr::one_of(pcgr_data$tier2_tags_display))
-      pcg_report_snv_indel[["variant_display"]][["tier2"]][["hotspot"]] <- all_tier2_variants_display %>% dplyr::filter(!is.na(CANCER_MUTATION_HOTSPOT))
-      pcg_report_snv_indel[["variant_display"]][["tier2"]][["curated_mutation"]] <- all_tier2_variants_display %>% dplyr::filter(is.na(CANCER_MUTATION_HOTSPOT) & !is.na(DOCM_DISEASE))
-      pcg_report_snv_indel[["variant_display"]][["tier2"]][["predicted_driver"]] <- all_tier2_variants_display %>% dplyr::filter(is.na(CANCER_MUTATION_HOTSPOT) & is.na(DOCM_DISEASE) & INTOGEN_DRIVER_MUT == TRUE)
+      pcg_report_snv_indel[["variant_display"]][["tier2"]][["hotspot"]] <- all_tier2_variants_display %>% dplyr::filter(!is.na(MUTATION_HOTSPOT))
+      pcg_report_snv_indel[["variant_display"]][["tier2"]][["curated_mutation"]] <- all_tier2_variants_display %>% dplyr::filter(is.na(MUTATION_HOTSPOT) & !is.na(DOCM_DISEASE))
+      pcg_report_snv_indel[["variant_display"]][["tier2"]][["predicted_driver"]] <- all_tier2_variants_display %>% dplyr::filter(is.na(MUTATION_HOTSPOT) & is.na(DOCM_DISEASE) & INTOGEN_DRIVER_MUT == TRUE)
     }
 
     ## Analyze Tier 3: coding mutations in oncogenes/tumor suppressors/cancer census genes
@@ -1191,4 +1191,62 @@ order_variants <- function(df){
     df$CHROM <- as.character(df$CHROM)
   }
   return(df)
+}
+
+parse_transvar_file <- function(transvar_output_fname){
+
+  transvar_output_raw <- as.data.frame(
+    readr::read_tsv(transvar_output_fname,col_names = T) %>%
+    janitor::clean_names() %>%
+    tidyr::separate(coordinates_g_dna_c_dna_protein,c('gdna','cdna','hgvsp'),sep="/") %>%
+    dplyr::rename(transcript_id = transcript, transvar_id = input) %>%
+    dplyr::mutate(transcript_id = stringr::str_replace(transcript_id," \\(protein_coding\\)","")) %>%
+    dplyr::filter(stringr::str_detect(gdna,">|del[A-Z]{1,}ins[A-Z]{1,}")) %>%
+    dplyr::distinct()
+  )
+
+  transvar_gdna_snv <- transvar_output_raw %>%
+    dplyr::select(gdna, transcript_id, transvar_id) %>%
+    dplyr::distinct()
+
+  transvar_gdna_mnv <- dplyr::select(transvar_output_raw, transvar_id,transcript_id,info) %>%
+    dplyr::mutate(info = stringr::str_replace_all(info,"^CSQN=\\S+;reference_codon=\\S+;candidate_codons=((A|C|G|T){3},?){1,};","")) %>%
+    dplyr::mutate(info = stringr::str_replace_all(info,"^source=GENCODE$","NA")) %>%
+    dplyr::mutate(info = stringr::str_replace_all(info,"candidate_mnv_variants=|candidate_snv_variants=","")) %>%
+    dplyr::mutate(info = stringr::str_replace_all(info,";?aliases=ENSP[0-9]{1,}\\.[0-9]{1,}","")) %>%
+    dplyr::mutate(info = stringr::str_replace_all(info,";source=GENCODE$","")) %>%
+    dplyr::mutate(info = stringr::str_replace_all(info,";",",")) %>%
+    dplyr::filter(info != 'NA' & nchar(info) > 0) %>%
+    dplyr::rename(gdna = info) %>%
+    tidyr::separate_rows(gdna,sep=",")
+
+  transvar_output <- as.data.frame(
+      dplyr::bind_rows(transvar_gdna_snv, transvar_gdna_mnv) %>%
+      dplyr::group_by(gdna,transvar_id) %>%
+      dplyr::summarise(transvar_transcript_id = paste(transcript_id, collapse=",")))
+
+  ##insertion/deletions
+  transvar_output_indels <- transvar_output %>% dplyr::filter(stringr::str_detect(gdna,"del|ins"))
+  transvar_output_indels$chr_start <- stringr::str_split_fixed(stringr::str_replace(transvar_output_indels$gdna,"chr.{1,}:g\\.",''),"_",n=2)[,1]
+  alleles <- stringr::str_split_fixed(stringr::str_replace(transvar_output_indels$gdna,'chr([0-9]{1,}|X|Y):g\\.[0-9]{1,}_[0-9]{1,}del',''),'ins',2)
+  transvar_output_indels$refbase <- alleles[,1]
+  transvar_output_indels$altbase <- alleles[,2]
+  transvar_output_indels$chr_stop <- as.integer(transvar_output_indels$chr_start) + nchar(transvar_output_indels$altbase) - 1
+  transvar_output_indels$chromosome <- stringr::str_replace(stringr::str_split_fixed(transvar_output_indels$gdna,':',2)[,1],'chr','')
+
+  ##snvs
+  transvar_output_snvs <- transvar_output %>% dplyr::filter(!stringr::str_detect(gdna,"del|ins"))
+  transvar_output_snvs$chr_start <- stringr::str_replace(stringr::str_replace(transvar_output_snvs$gdna,'chr([0-9]{1,}|X|Y):g\\.',''),'(A|G|C|T)>(A|G|C|T)$','')
+  transvar_output_snvs$chr_stop <- transvar_output_snvs$chr_start
+  alleles <- stringr::str_split_fixed(stringr::str_replace(transvar_output_snvs$gdna,'chr([0-9]{1,}|X|Y):g\\.[0-9]{1,}',''),'>',2)
+  transvar_output_snvs$refbase <- alleles[,1]
+  transvar_output_snvs$altbase <- alleles[,2]
+  transvar_output_snvs$chromosome <- stringr::str_replace(stringr::str_split_fixed(transvar_output_snvs$gdna,':',2)[,1],'chr','')
+
+
+  all_transvar <- rbind(transvar_output_indels,transvar_output_snvs)
+  all_transvar <- dplyr::filter(all_transvar, !stringr::str_detect(gdna,"Error|no_valid_transcript_found"))
+
+  return(all_transvar)
+
 }

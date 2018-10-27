@@ -182,7 +182,8 @@ following:
 -  PROTEIN\_DOMAIN - PFAM protein domain
 -  PROTEIN\_FEATURE - UniProt feature overlapping variant site
 -  CDS\_CHANGE - Coding sequence change
--  CANCER\_MUTATION\_HOTSPOT - Known cancer mutation hotspot
+-  MUTATION\_HOTSPOT - Known cancer mutation hotspot
+-  MUTATION\_HOTSPOT\_CANCERTYPE - Hotspot-associated cancer types
 -  TCGA\_FREQUENCY - Frequency of variant in TCGA cohorts
 -  ICGC\_PCAWG\_OCCURRENCE - Frequency of variant in ICGC-PCAWG cohorts
 -  DOCM\_LITERATURE - Literature links - DoCM
@@ -191,8 +192,9 @@ following:
 -  CONSEQUENCE - VEP consequence (primary transcript)
 -  HGVSc - from VEP
 -  HGVSp - from VEP
--  ONCOGENE - Known proto-oncogene
--  TUMOR\_SUPPRESSOR - known tumor suppressor gene
+-  ONCOGENE - Predicted as proto-oncogene from literature mining
+-  TUMOR\_SUPPRESSOR - Predicted as tumor suppressor gene from
+   literature mining
 -  ONCOSCORE - Literature-derived score for oncogenic potential (gene
    level)
 -  PREDICTED\_EFFECT - Effect predictions from dbNSFP
@@ -409,9 +411,13 @@ processing with the PCGR annotation pipeline:
 *Variant effect and protein-coding information*
 '''''''''''''''''''''''''''''''''''''''''''''''
 
--  CANCER\_MUTATION\_HOTSPOT - mutation hotspot codon in
+-  MUTATION\_HOTSPOT - mutation hotspot codon in
    `cancerhotspots.org <http://cancerhotspots.org/>`__. Format:
    gene\_symbol \| codon \| q-value
+-  MUTATION\_HOTSPOT\_TRANSCRIPT - hotspot-associated transcripts
+   (Ensembl transcript ID)
+-  MUTATION\_HOTSPOT\_CANCERTYPE - hotspot-associated cancer types (from
+   cancerhotspots.org)
 -  UNIPROT\_FEATURE - Overlapping protein annotations from `UniProt
    KB <http://www.uniprot.org>`__
 -  PFAM\_DOMAIN - Pfam domain identifier (from VEP)
@@ -606,8 +612,8 @@ The following variables are included in the tiered TSV file:
     11. ENSEMBL_GENE_ID - Ensembl gene identifier
     12. REFSEQ_MRNA - RefSeq mRNA identifier
     13. ONCOSCORE - Literature-derived score for cancer gene relevance
-    14. ONCOGENE - Gene is curated as an oncogene according to TSGene
-    15. TUMOR_SUPPRESSOR - Gene is predicted as tumor suppressor
+    14. ONCOGENE - Gene is predicted as an oncogene according to literature mining (CancerMine)
+    15. TUMOR_SUPPRESSOR - Gene is predicted as tumor suppressor according to literature mining(CancerMine)
         candidate according to TSGene
     16. DISGENET_CUI - Associated tumor types from DisGeNET (MedGen concept IDs)
     17. DISGENET_TERMS - Associated tumor types from DisGeNET (MedGen concept terms)
@@ -620,31 +626,33 @@ The following variables are included in the tiered TSV file:
     22. HGVSp
     23. HGVSc
     24. EFFECT_PREDICTIONS - as defined above for VCF
-    25. CANCER_MUTATION_HOTSPOT - mutation hotspot codon in
+    25. MUTATION_HOTSPOT - mutation hotspot codon in
         cancerhotspots.org. Format: gene_symbol | codon | q-value
-    26. INTOGEN_DRIVER_MUT - Indicates if existing variant is predicted as
+    26. MUTATION_HOTSPOT_TRANSCRIPT - hotspot-associated transcripts (Ensembl transcript ID)
+    27. MUTATION_HOTSPOT_CANCERTYPE - hotspot-associated cancer types (from cancerhotspots.org)
+    28. INTOGEN_DRIVER_MUT - Indicates if existing variant is predicted as
         driver mutation from IntoGen Catalog of Driver Mutations
-    27. VEP_ALL_CONSEQUENCE - all VEP consequences
-    28. DBSNPRSID - dbSNP reference cluster ID
-    29. COSMIC_MUTATION_ID - COSMIC mutation ID
-    30. TCGA_PANCANCER_COUNT - Raw variant count across all TCGA tumor types
-    31. TCGA_FREQUENCY - Frequency of variant across TCGA tumor types. Format: tumortype|
+    29. VEP_ALL_CONSEQUENCE - all VEP consequences
+    30. DBSNPRSID - dbSNP reference cluster ID
+    31. COSMIC_MUTATION_ID - COSMIC mutation ID
+    32. TCGA_PANCANCER_COUNT - Raw variant count across all TCGA tumor types
+    33. TCGA_FREQUENCY - Frequency of variant across TCGA tumor types. Format: tumortype|
     percent affected|affected cases|total cases
-    32. ICGC_PCAWG_OCCURRENCE - Mutation occurrence in ICGC-PCAWG by project:
+    34. ICGC_PCAWG_OCCURRENCE - Mutation occurrence in ICGC-PCAWG by project:
     project_code|affected_donors|tested_donors|frequency
-    33. CHEMBL_COMPOUND_ID - Compounds (as ChEMBL IDs) that target the encoded protein (from DGIdb)
-    34. CHEMBL_COMPOUND_TERMS - Compounds (as drug names) that target the encoded protein (from DGIdb)
-    35. CLINVAR - ClinVar association: variant origin and associated traits
-    36. CLINVAR_CLNSIG - clinical significance of ClinVar variant
-    37. GLOBAL_AF_GNOMAD - global germline allele frequency in gnomAD
-    38. GLOBAL_AF_1KG - 1000G Project - phase 3, germline allele frequency
-    39. CALL_CONFIDENCE - confidence indicator for somatic variant
-    40. DP_TUMOR - sequencing depth at variant site (tumor)
-    41. AF_TUMOR - allelic fraction of alternate allele (tumor)
-    42. DP_NORMAL - sequencing depth at variant site (normal)
-    43. AF_NORMAL - allelic fraction of alternate allele (normal)
-    44. TIER
-    45. TIER_DESCRIPTION
+    35. CHEMBL_COMPOUND_ID - Compounds (as ChEMBL IDs) that target the encoded protein (from DGIdb)
+    36. CHEMBL_COMPOUND_TERMS - Compounds (as drug names) that target the encoded protein (from DGIdb)
+    37. CLINVAR - ClinVar association: variant origin and associated traits
+    38. CLINVAR_CLNSIG - clinical significance of ClinVar variant
+    39. GLOBAL_AF_GNOMAD - global germline allele frequency in gnomAD
+    40. GLOBAL_AF_1KG - 1000G Project - phase 3, germline allele frequency
+    41. CALL_CONFIDENCE - confidence indicator for somatic variant
+    42. DP_TUMOR - sequencing depth at variant site (tumor)
+    43. AF_TUMOR - allelic fraction of alternate allele (tumor)
+    44. DP_NORMAL - sequencing depth at variant site (normal)
+    45. AF_NORMAL - allelic fraction of alternate allele (normal)
+    46. TIER
+    47. TIER_DESCRIPTION
 
 **NOTE**: The user has the possibility to append the TSV file with data
 from other tags in the input VCF of interest (i.e. using the

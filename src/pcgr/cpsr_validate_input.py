@@ -89,7 +89,7 @@ def check_existing_vcf_info_tags(input_vcf, pcgr_directory, genome_assembly, log
                err_msg = 'INFO tag ' + str(header_element['ID']) + ' in the query VCF coincides with a VCF annotation tag produced by CPSR - please remove or rename this tag in your query VCF'
                return annoutils.error_message(err_msg, logger)
 
-   logger.info('No query VCF INFO tags coincide with PCGR INFO tags')
+   logger.info('No query VCF INFO tags coincide with CPSR INFO tags')
    return ret
 
 def simplify_vcf(input_vcf, vcf, output_dir, logger):

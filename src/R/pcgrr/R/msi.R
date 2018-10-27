@@ -15,7 +15,7 @@
 predict_msi_status <- function(vcf_data_df, simpleRepeats_gr, windowMasker_gr, msi_prediction_model, msi_prediction_dataset, target_size_mb, bsg = BSgenome.Hsapiens.UCSC.hg19, genome_assembly = 'hg19',sample_name = 'Test'){
 
   mutations_valid <- pcgrr::get_valid_chromosomes(vcf_data_df, chromosome_column = 'CHROM', bsg = bsg)
-  mutations_valid <- dplyr::select(mutations_valid, CHROM,POS,REF,ALT,CONSEQUENCE,SYMBOL,GENOMIC_CHANGE,VARIANT_CLASS,PROTEIN_DOMAIN,GENE_NAME,PROTEIN_CHANGE,PROTEIN_FEATURE,CANCER_MUTATION_HOTSPOT,DOCM_DISEASE,DOCM_LITERATURE,CLINVAR,TCGA_FREQUENCY,CANCER_ASSOCIATIONS,AF_TUMOR, DP_TUMOR,AF_NORMAL,DP_NORMAL,CALL_CONFIDENCE)
+  mutations_valid <- dplyr::select(mutations_valid, CHROM,POS,REF,ALT,CONSEQUENCE,SYMBOL,GENOMIC_CHANGE,VARIANT_CLASS,PROTEIN_DOMAIN,GENE_NAME,PROTEIN_CHANGE,PROTEIN_FEATURE,MUTATION_HOTSPOT,DOCM_DISEASE,DOCM_LITERATURE,CLINVAR,TCGA_FREQUENCY,CANCER_ASSOCIATIONS,AF_TUMOR, DP_TUMOR,AF_NORMAL,DP_NORMAL,CALL_CONFIDENCE)
   seqinfo <- GenomeInfoDb::Seqinfo(seqnames = GenomeInfoDb::seqlevels(GenomeInfoDb::seqinfo(bsg)), seqlengths = GenomeInfoDb::seqlengths(GenomeInfoDb::seqinfo(bsg)), genome = genome_assembly)
   vcf_df_gr <- GenomicRanges::makeGRangesFromDataFrame(mutations_valid, keep.extra.columns = T, seqinfo = seqinfo, seqnames.field = 'CHROM',start.field = 'POS', end.field = 'POS', ignore.strand = T, starts.in.df.are.0based = F)
 

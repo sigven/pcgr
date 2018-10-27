@@ -52,6 +52,7 @@ export(df_string_replace)
 export(get_valid_chromosomes)
 export(assign_mutation_type)
 export(get_proper_maf_alleles)
+export(parse_transvar_file)
 
 export(init_pcg_report)
 export(update_pcg_report)

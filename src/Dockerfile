@@ -51,8 +51,8 @@ RUN R -e "library(devtools); devtools::install_github('Francescojm/CELLector'); 
 RUN rm -rf /tmp/R*
 
 
-## Install vcfanno version 0.2.8
-RUN wget https://github.com/brentp/vcfanno/releases/download/v0.2.9/vcfanno_linux64 && \
+## Install vcfanno version 0.3.0
+RUN wget https://github.com/brentp/vcfanno/releases/download/v0.3.0/vcfanno_linux64 && \
     mv vcfanno_linux64 vcfanno && \
     mv vcfanno /usr/local/bin && \
     chmod 755 /usr/local/bin/vcfanno
@@ -64,10 +64,9 @@ chmod 755 /usr/local/bin/vcf_validator
 
 ## Install pandoc (for HTML report generation)
 RUN wget https://github.com/jgm/pandoc/releases/download/2.3.1/pandoc-2.3.1-1-amd64.deb && \
-#RUN wget https://github.com/jgm/pandoc/releases/download/1.19.1/pandoc-1.19.1-1-amd64.deb && \
-      dpkg -i pandoc* && \
-      rm pandoc* && \
-      apt-get clean
+    dpkg -i pandoc* && \
+    rm pandoc* && \
+    apt-get clean
 
 USER root
 WORKDIR /

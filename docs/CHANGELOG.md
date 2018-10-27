@@ -1,9 +1,11 @@
 
 ## CHANGELOG
 
-#### dev - Oct 10th 2018
+#### dev/unreleased - Oct 27th 2018
 
 ##### Fixed
+ * Bug in appending of custom VCF tags
+	 * Still unsolved: how to disambiguate identical FORMAT and INFO tags in vcf2tsv
  * Bug in SCNA value box display for multiple copy number hits (paste error)
  * Bug in vcf2tsv (handling INFO tags encoded with 'Type = String')
  * Bug in search of UniProt functional features (BED feature regions spanning exons are now handled)
@@ -17,6 +19,7 @@
 	* Added possibility to add docker user-id
  * Possibility for MAF file output (converted with vcf2maf), must be configured by the user in the TOML file (i.e. *vcf2maf = true*)
  * Possibility for adding custom VCF INFO tags to PCGR output files (JSON/TSV), must be configured by the user in the TOML file (i.e. *custom_tags*)
+ * Addded MUTATION_HOTSPOT_CANCERTYPES in data tables (i.e. listing tumor types in which hotspot mutations have been found)
  * Included the 'rs' prefix for dbSNP identifiers (HTML and TSV output)
  * Individual entries/columns for variant effect predictions:
 	 * Individual algorithms: SIFT_DBNSFP, M_CAP_DBNSFP, MUTPRED_DBNSFP, MUTATIONTASTER_DBNSFP, MUTATIONASSESSOR_DBNSFP, FATHMM_DBNSFP, FATHMM_MKL_DBNSFP, PROVEAN_DBNSFP
@@ -28,6 +31,10 @@
 	 * CELLector - genomics-guided selection of cancer cell lines
  * Upgraded VEP to v94
 
+##### Changed
+ * Changed CANCER_MUTATION_HOTSPOT to MUTATION_HOTSPOT
+ * Moved from [TSGene 2.0](https://bioinfo.uth.edu/TSGene/) to [CancerMine](https://zenodo.org/record/1336650#.W9QMdRMzaL4) for annotation of tumor suppressor genes and proto-oncogenes
+	 * A minimum of n=3 citations were required to include literatured-mined tumor suppressor genes and proto-oncogenes from CancerMine
 
 #### 0.6.2.1 - May 14th 2018
 

@@ -19,10 +19,11 @@ init_pcg_report <- function(pcgr_config = NULL, sample_name = 'SampleX', pcgr_ve
   pcg_report[['pcgr_version']] <- pcgr_version
   pcg_report[['pcgr_db_release']] <- pcgr_data$pcgr_db_release
 
-  if(type == 'predispose'){
+  if(type == 'predisposition'){
     analysis_element <- 'snv_indel'
     pcg_report[[analysis_element]] <- list()
     pcg_report[[analysis_element]][['eval']] <- FALSE
+    pcg_report[[analysis_element]][['eval_gwas']] <- pcg_report[['pcgr_config']][['gwas']][['gwas_hits']]
     pcg_report[[analysis_element]][['variant_display']] <- list()
     pcg_report[[analysis_element]][['variant_set']] <- list()
     pcg_report[[analysis_element]][['variant_statistic']] <- list()

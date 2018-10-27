@@ -28,8 +28,8 @@ Variant frequency databases
    phase3 <ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/>`__
    - germline variant frequencies genome-wide (May 2013)
 -  `Cancer Hotspots <http://cancerhotspots.org>`__ - a resource for
-   statistically significant mutations in cancer (2017)
--  `TCGA release 12.0 <https://portal.gdc.cancer.gov/>`__ - somatic
+   statistically significant mutations in cancer (v2, 2017)
+-  `TCGA release 13.0 <https://portal.gdc.cancer.gov/>`__ - somatic
    mutations discovered across 33 tumor type cohorts (The Cancer Genome
    Atlas)
 -  `ICGC-PCAWG <http://docs.icgc.org/pcawg/>`__ - ICGC Pancancer
@@ -43,7 +43,7 @@ Variant databases of clinical utility
 -  `DoCM <http://docm.genome.wustl.edu>`__ - database of curated
    mutations (v3.2, April 2016)
 -  `CIViC <http://civic.genome.wustl.edu>`__ - clinical interpretations
-   of variants in cancer (September 22nd 2018)
+   of variants in cancer (October 17th 2018)
 -  `CBMDB <http://www.cancergenomeinterpreter.org/biomarkers>`__ -
    Cancer BioMarkers database (January 17th 2018)
 -  `DGIdb <http://dgidb.genome.wustl.edu>`__ - database of targeted
@@ -52,8 +52,8 @@ Variant databases of clinical utility
 Protein domains/functional features
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--  `UniProt/SwissProt KnowledgeBase 2018\_08 <http://www.uniprot.org>`__
-   - resource on protein sequence and functional information (September
+-  `UniProt/SwissProt KnowledgeBase 2018\_09 <http://www.uniprot.org>`__
+   - resource on protein sequence and functional information (October
    2018)
 -  `Pfam v32 <http://pfam.xfam.org>`__ - database of protein families
    and domains (September 2018)
@@ -61,8 +61,9 @@ Protein domains/functional features
 Cancer gene knowledge bases
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--  `TSGene v2.0 <https://bioinfo.uth.edu/TSGene/>`__ - tumor
-   suppressor/oncogene database (November 2015)
+-  `CancerMine <https://bioinfo.uth.edu/TSGene/>`__ - Literature-mined
+   database of tumor suppressor genes/proto-oncogenes (release5, October
+   2018)
 -  `DisGeNET v5.0 <http://www.disgenet.org>`__ - curated associations
    between human genes and different tumor types
 -  `TCGA driver genes <https://www.ncbi.nlm.nih.gov/pubmed/29625053>`__
@@ -73,7 +74,7 @@ Pathway databases
 ~~~~~~~~~~~~~~~~~
 
 -  `KEGG PATHWAY Database <http://www.genome.jp/kegg/pathway.htm>`__ -
-   August 15th 2018
+   August 21st 2018
 
 Notes on variant annotation datasets
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

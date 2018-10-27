@@ -22,5 +22,6 @@ The report is generated with _[cpsr](https://github.com/sigven/cpsr)_ version `r
 * Minor allele frequency threshold (unclassified variants):
     * 1000 Genomes Project (__`r pcg_report[['pcgr_config']][['popgen']][['popdesc_tgp']]`__): __`r pcg_report[['pcgr_config']][['maf_limits']][['maf_tgp']]`__
     * gnomAD (__`r pcg_report[['pcgr_config']][['popgen']][['popdesc_gnomad']]`__): __`r pcg_report[['pcgr_config']][['maf_limits']][['maf_gnomad']]`__
-
+* Show GWAS hits: __`r pcg_report[['pcgr_config']][['gwas']][['gwas_hits']]`__
+    * Minimum p-value for association: __`r pcg_report[['pcgr_config']][['gwas']][['p_value_min']]`__
 

@@ -2,6 +2,8 @@
 title: "Cancer Predisposition Sequencing Report - `r pcg_report$sample_name`"
 date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
 bibliography: bibliography.bib
+nocite: |
+  @Huang2018-ah, @Richards2015-kj
 output: 
   html_document:
     toc: true
@@ -55,7 +57,8 @@ For variants associated with cancer phenotypes through genome-wide association s
 ```{r conditional_tier3, child='predispose/tier3_predispose.Rmd', eval = pcg_report[['snv_indel']][['eval']]}
 ```
 
-```{r conditional_gwas, child='predispose/gwas_predispose.Rmd', eval = pcg_report[['snv_indel']][['eval']]}
+```{r conditional_gwas, child='predispose/gwas_predispose.Rmd', eval = pcg_report[['snv_indel']][['eval_gwas']]}
 ```
 
+## References
 

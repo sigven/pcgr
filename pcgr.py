@@ -12,7 +12,7 @@ import platform
 import toml
 
 pcgr_version = 'dev'
-db_version = 'PCGR_DB_VERSION = 20181004'
+db_version = 'PCGR_DB_VERSION = 20181026'
 vep_version = '94'
 global vep_assembly
 
@@ -472,6 +472,8 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
    check_subprocess(vcf_validate_command)
    logger.info('Finished')
 
+   #Valid criteria are: [ canonical appris tsl biotype ccds rank length ]. e.g.:
+   #config_options['other']['vep_pick_order'] = canonical,appris,biotype,ccds,rank,tsl,length
    if not input_vcf_docker == 'None':
 
       ## Define input, output and temporary file names
@@ -488,7 +490,7 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       vep_vcfanno_annotated_pass_vcf = re.sub(r'\.vcfanno', '.vcfanno.annotated.pass', vep_vcfanno_vcf) + '.gz'
 
       fasta_assembly = os.path.join(vep_dir, "homo_sapiens", str(vep_version) + "_" + str(vep_assembly), "Homo_sapiens." + str(vep_assembly) + ".dna.primary_assembly.fa.gz")
-      vep_options = "--vcf --check_ref --flag_pick_allele --force_overwrite --species homo_sapiens --assembly " + str(vep_assembly) + " --offline --fork " + str(config_options['other']['n_vep_forks']) + " --hgvs --dont_skip --failed 1 --af --af_1kg --af_gnomad --variant_class --regulatory --domains --symbol --protein --ccds --uniprot --appris --biotype --canonical --gencode_basic --cache --numbers --total_length --allele_number --no_stats --no_escape --xref_refseq --dir " + vep_dir
+      vep_options = "--vcf --check_ref --flag_pick_allele --pick_order canonical,appris,biotype,ccds,rank,tsl,length --force_overwrite --species homo_sapiens --assembly " + str(vep_assembly) + " --offline --fork " + str(config_options['other']['n_vep_forks']) + " --hgvs --dont_skip --failed 1 --af --af_1kg --af_gnomad --variant_class --regulatory --domains --symbol --protein --ccds --uniprot --appris --biotype --canonical --gencode_basic --cache --numbers --total_length --allele_number --no_stats --no_escape --xref_refseq --dir " + vep_dir
       vep_options += " --cache_version " + str(vep_version)
       if config_options['other']['vep_skip_intergenic'] == 1:
          vep_options = vep_options + " --no_intergenic"
@@ -520,6 +522,7 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       pcgr_vcfanno_command = str(docker_command_run2) + os.path.join(python_scripts_dir, "pcgr_vcfanno.py") + " --num_processes " + str(config_options['other']['n_vcfanno_proc']) + " --dbnsfp --docm --clinvar --icgc --civic --cbmdb --intogen_driver_mut --tcga --uniprot --cancer_hotspots --pcgr_onco_xref " + str(vep_vcf) + ".gz " + str(vep_vcfanno_vcf) + " " + os.path.join(data_dir, "data", str(genome_assembly)) + docker_command_run_end
       check_subprocess(pcgr_vcfanno_command)
       logger.info("Finished")
+      #return
 
       ## summarise command
       print()

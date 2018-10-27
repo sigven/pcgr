@@ -94,9 +94,10 @@
 <li class="toctree-l1"><a class="reference internal" href="output.html">Output</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tier_systems.html">Tier models</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">CHANGELOG</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#dev-oct-10th-2018">dev - Oct 10th 2018</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#dev-unreleased-oct-27th-2018">dev/unreleased - Oct 27th 2018</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#fixed">Fixed</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#added">Added</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#changed">Changed</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#may-14th-2018">0.6.2.1 - May 14th 2018</a><ul>
@@ -115,7 +116,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#april-25th-2018">0.6.0 - April 25th 2018</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id5">Added</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#removed">Removed</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#changed">Changed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">Changed</a></li>
 </ul>
 </li>
 </ul>
@@ -166,11 +167,16 @@
             
   <div class="section" id="changelog">
 <h1>CHANGELOG<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="dev-oct-10th-2018">
-<h2>dev - Oct 10th 2018<a class="headerlink" href="#dev-oct-10th-2018" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="dev-unreleased-oct-27th-2018">
+<h2>dev/unreleased - Oct 27th 2018<a class="headerlink" href="#dev-unreleased-oct-27th-2018" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="fixed">
 <h3>Fixed<a class="headerlink" href="#fixed" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
+<li>Bug in appending of custom VCF tags<ul>
+<li>Still unsolved: how to disambiguate identical FORMAT and INFO tags
+in vcf2tsv</li>
+</ul>
+</li>
 <li>Bug in SCNA value box display for multiple copy number hits (paste
 error)</li>
 <li>Bug in vcf2tsv (handling INFO tags encoded with &#8216;Type = String&#8217;)</li>
@@ -198,6 +204,8 @@ configured by the user in the TOML file (i.e. <em>vcf2maf = true</em>)</li>
 <li>Possibility for adding custom VCF INFO tags to PCGR output files
 (JSON/TSV), must be configured by the user in the TOML file (i.e.
 <em>custom_tags</em>)</li>
+<li>Addded MUTATION_HOTSPOT_CANCERTYPES in data tables (i.e. listing
+tumor types in which hotspot mutations have been found)</li>
 <li>Included the &#8216;rs&#8217; prefix for dbSNP identifiers (HTML and TSV output)</li>
 <li>Individual entries/columns for variant effect predictions:<ul>
 <li>Individual algorithms: SIFT_DBNSFP, M_CAP_DBNSFP,
@@ -216,6 +224,20 @@ TSV/JSON</li>
 </ul>
 </li>
 <li>Upgraded VEP to v94</li>
+</ul>
+</div>
+<div class="section" id="changed">
+<h3>Changed<a class="headerlink" href="#changed" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Changed CANCER_MUTATION_HOTSPOT to MUTATION_HOTSPOT</li>
+<li>Moved from <a class="reference external" href="https://bioinfo.uth.edu/TSGene/">TSGene 2.0</a> to
+<a class="reference external" href="https://zenodo.org/record/1336650#.W9QMdRMzaL4">CancerMine</a> for
+annotation of tumor suppressor genes and proto-oncogenes<ul>
+<li>A minimum of n=3 citations were required to include
+literatured-mined tumor suppressor genes and proto-oncogenes from
+CancerMine</li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -438,8 +460,8 @@ next release</li>
 </li>
 </ul>
 </div>
-<div class="section" id="changed">
-<h3>Changed<a class="headerlink" href="#changed" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id6">
+<h3>Changed<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>HTML report sections<ul>
 <li><em>Tier statistics</em> and <em>Variant statistics</em> are now grouped into

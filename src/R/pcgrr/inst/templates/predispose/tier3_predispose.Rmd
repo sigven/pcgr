@@ -2,6 +2,37 @@
 
 <br>
 
+The unclassified, coding variants have all been assigned a composite <i>pathogenicity score</i> (coined <b>PATHSCORE</b> in the tables below) according to the prioritization scheme developed in [CharGer](https://github.com/ding-lab/charger/) ([Huang et al., 2018](https://www.ncbi.nlm.nih.gov/pubmed/29625052)). Specifially, a cancer-specific adoption of previously established <b>ACMG</b> criteria for variant classification ([Richards et al., 2015](https://www.ncbi.nlm.nih.gov/pubmed/25741868)) has been implemented. The following ACMG evidence items indicate support for pathogenic/benign variants, and have been implemented as follows (points in parenthesis indicate how they contribute to overall PATHSCORE):  
+
+* PVS1 (<b>8</b>) - null variant (nonsense, frameshift, canonical ±1 or 2 splice sites, initiation codon) in a gene where LoF is a known mechanism of disease (dominant mode of inheritance, tumor supressor genes only)
+* PS1 (<b>7</b>) - Same amino acid change as a previously established pathogenic variant ([ClinVar](https://www.ncbi.nlm.nih.gov/clinvar/)) regardless of nucleotide change
+* PSC1 (<b>4</b>) - null variant (nonsense, frameshift, canonical ±1 or 2 splice sites, initiation codon) in a gene where LoF is a known mechanism of disease (recessive mode of inheritance, tumor suppressor genes only)
+* PMC1 (<b>2</b>) - null variant (nonsense, frameshift, canonical ±1 or 2 splice sites, initiation codon) in known susceptibility gene (non-tumor suppressor)
+* PM1 (<b>2</b>) - Located in a somatic mutational hotspot (cancerhotspots.org) 
+* PM2 (<b>2</b>) - Absence/extremely low frequency (MAF < 0.0005 in [1000 Genomes Project](http://www.internationalgenome.org/)/[gnomAD](http://gnomad.broadinstitute.org/) global population)
+* PM4 (<b>2</b>) - Protein length changes due to inframe indels or stoploss variants in known susceptibility gene (dominant MOI)
+* PM5 (<b>2</b>) - Novel missense change at an amino acid residue where a different missense change determined to be pathogenic has been seen before ([ClinVar](https://www.ncbi.nlm.nih.gov/clinvar/))
+* PP2 (<b>1</b>) - Missense variant in known susceptibility gene
+* PP3 (<b>1</b>) - Multiple lines of computational evidence support a deleterious effect on the gene or gene product (conservation, evolutionary, splicing impact, etc., from [dbNSFP](https://sites.google.com/site/jpopgen/dbNSFP))
+* PPC1 (<b>1</b>) - Protein length changes due to inframe indels or stoploss variants in known susceptibility gene (recessive MOI)
+* BP4 (<b>-1</b>) - Multiple lines (>1) of in silico evidence of none deleterious effect.
+* BMC1 (<b>-2</b>) - Peptide change is at the same location of a known benign change ([ClinVar](https://www.ncbi.nlm.nih.gov/clinvar/))
+* BSC1 (<b>-6</b>) - Peptide change is known to be benign ([ClinVar](https://www.ncbi.nlm.nih.gov/clinvar/))
+* BA1 (<b>-8</b>) - High allele frequency in the general population (MAF > 0.05 in [1000 Genomes Project](http://www.internationalgenome.org/)/[gnomAD](http://gnomad.broadinstitute.org/) global population)
+
+
+The composite PATHSCORE is finally assigned one of four different <b>PATHRANK</b> levels:
+
+* <i>HIGH</i>: PATHSCORE > 8
+* <i>MODERATE</i>: PATHSCORE <= 8 AND PATHSCORE > 4
+* <i>LOW</i>: PATHSCORE <= 4 AND PATHSCORE >= 0
+* <i>BENIGN</i>: PATHSCORE < 0
+
+The contribution of evidence items pr. variant can be seen in the <b>PATHDOC</b> variable.
+
+
+<br>
+
 #### A: Variants registered as VUS in ClinVar {.tabset}
 
 <br>
@@ -76,7 +107,7 @@ htmltools::br()
 
 crosstalk::bscols(
   DT::datatable(variants_tier3_cancer, escape=F,extensions=c("Buttons","Responsive"), width = "100%",options=list(buttons = c('csv','excel'),dom = 'Bfrtip')) %>%
-  DT::formatStyle('PATHRANK', backgroundColor = DT::styleEqual(c('HIGH','MODERATE','LOW'), c("#F46D43","#FDAE61","#FEE08B")))
+  DT::formatStyle('PATHRANK', backgroundColor = DT::styleEqual(c('HIGH','MODERATE','LOW','BENIGN'), c("#F46D43","#FDAE61","#FEE08B","#78C679")))
 )
 
 #htmltools::br()
@@ -105,7 +136,7 @@ variants_tier3_noncancer <- crosstalk::SharedData$new(pcg_report[['snv_indel']][
 crosstalk::bscols(
   list(
     crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_tier3_noncancer, ~CONSEQUENCE),
-    crosstalk::filter_checkbox("GENOTYPE", "Genotype", variants_tier3_cancer, ~GENOTYPE),
+    crosstalk::filter_checkbox("GENOTYPE", "Genotype", variants_tier3_noncancer, ~GENOTYPE),
     crosstalk::filter_select("SYMBOL", "Gene", variants_tier3_noncancer, ~SYMBOL),
     crosstalk::filter_select("CLINVAR_PHENOTYPE", "ClinVar henotype(s)", variants_tier3_noncancer, ~CLINVAR_PHENOTYPE)
   ),
@@ -124,7 +155,7 @@ htmltools::br()
 
 crosstalk::bscols(
   DT::datatable(variants_tier3_noncancer, escape=F,extensions=c("Buttons","Responsive"), width = "100%",options=list(buttons = c('csv','excel'),dom = 'Bfrtip')) %>%
-  DT::formatStyle('PATHRANK', backgroundColor = DT::styleEqual(c('HIGH','MODERATE','LOW'), c("#F46D43","#FDAE61","#FEE08B")))
+  DT::formatStyle('PATHRANK', backgroundColor = DT::styleEqual(c('HIGH','MODERATE','LOW','BENIGN'), c("#F46D43","#FDAE61","#FEE08B","#78C679")))
 
 )
 
@@ -171,7 +202,7 @@ crosstalk::bscols(
 
 crosstalk::bscols(
   DT::datatable(variants_unclassified_shared, escape=F,extensions=c("Buttons","Responsive"), width = "100%",options=list(buttons = c('csv','excel'),dom = 'Bfrtip')) %>%
-  DT::formatStyle('PATHRANK', backgroundColor = DT::styleEqual(c('HIGH','MODERATE','LOW'), c("#F46D43","#FDAE61","#FEE08B")))
+  DT::formatStyle('PATHRANK', backgroundColor = DT::styleEqual(c('HIGH','MODERATE','LOW','BENIGN'), c("#F46D43","#FDAE61","#FEE08B","#78C679")))
 )
 
 ```
