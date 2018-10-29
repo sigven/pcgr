@@ -52,7 +52,7 @@ RUN rm -rf /tmp/R*
 
 
 ## Install vcfanno version 0.3.0
-RUN wget https://github.com/brentp/vcfanno/releases/download/v0.3.0/vcfanno_linux64 && \
+RUN wget https://github.com/brentp/vcfanno/releases/download/v0.3.1/vcfanno_linux64 && \
     mv vcfanno_linux64 vcfanno && \
     mv vcfanno /usr/local/bin && \
     chmod 755 /usr/local/bin/vcfanno

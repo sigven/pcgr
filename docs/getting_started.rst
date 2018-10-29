@@ -13,7 +13,7 @@ simply run the following command:
 
 ::
 
-    pip install toml
+   pip install toml
 
 STEP 1: Installation of Docker
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -32,7 +32,7 @@ STEP 1: Installation of Docker
       `mounting of data
       volumes <https://github.com/docker/toolbox/issues/607>`__)
 
-2. Test that Docker is running, e.g. by typing ``docker ps`` or
+2. Test that Docker is running, e.g. by typing ``docker ps`` or
    ``docker images`` in the terminal window
 3. Adjust the computing resources dedicated to the Docker, i.e.:
 
@@ -51,17 +51,17 @@ a. Clone the PCGR GitHub repository:
    ``git clone https://github.com/sigven/pcgr.git``
 b. Download and unpack the latest data bundles in the PCGR directory
 
--  `grch37 data bundle -
-   20181026 <https://drive.google.com/open?id=1MREECbygW47ttJySgfibBpX7romBrb_Q>`__
-   (approx 9.2Gb)
--  `grch38 data bundle -
-   20181026 <https://drive.google.com/open?id=1Xsw0WcKPnWgJDolQfrZATU5suEFJ5BKG>`__
-   (approx 13Gb)
--  *Unpacking*:
-   ``gzip -dc pcgr.databundle.grch37.YYYYMMDD.tgz | tar xvf -``
+   -  `grch37 data bundle -
+      20181026 <https://drive.google.com/open?id=1MREECbygW47ttJySgfibBpX7romBrb_Q>`__
+      (approx 9.2Gb)
+   -  `grch38 data bundle -
+      20181026 <https://drive.google.com/open?id=1Xsw0WcKPnWgJDolQfrZATU5suEFJ5BKG>`__
+      (approx 13Gb)
+   -  *Unpacking*:
+      ``gzip -dc pcgr.databundle.grch37.YYYYMMDD.tgz | tar xvf -``
 
 c. Pull the `PCGR Docker image
-   (*dev*) <https://hub.docker.com/r/sigven/pcgr/>`__ from DockerHub
+   (dev) <https://hub.docker.com/r/sigven/pcgr/>`__ from DockerHub
    (approx 5.1Gb):
 
    -  ``docker pull sigven/pcgr:dev`` (PCGR annotation engine)
@@ -74,23 +74,22 @@ a. Download and unpack the `latest software release
 b. Download and unpack the assembly-specific data bundle in the PCGR
    directory
 
--  `grch37 data
-   bundle <https://drive.google.com/open?id=1cGBAmAh5t4miIeRrrd0zHsPCFToOr0Lf>`__
-   (approx 9.2Gb)
--  `grch38 data
-   bundle <https://drive.google.com/open?id=12q3rr7xpdBfaefRi0ysFHbH34kehNZOV>`__
-   (approx 13Gb)
--  *Unpacking*:
-   ``gzip -dc pcgr.databundle.grch37.YYYYMMDD.tgz | tar xvf -``
+   -  `grch37 data
+      bundle <https://drive.google.com/open?id=1cGBAmAh5t4miIeRrrd0zHsPCFToOr0Lf>`__
+      (approx 9.2Gb)
+   -  `grch38 data
+      bundle <https://drive.google.com/open?id=12q3rr7xpdBfaefRi0ysFHbH34kehNZOV>`__
+      (approx 13Gb)
+   -  *Unpacking*:
+      ``gzip -dc pcgr.databundle.grch37.YYYYMMDD.tgz | tar xvf -``
 
    A *data/* folder within the *pcgr-X.X* software folder should now
    have been produced
-
 c. Pull the `PCGR Docker image
    (0.6.2.1) <https://hub.docker.com/r/sigven/pcgr/>`__ from DockerHub
    (approx 5.1Gb):
 
--  ``docker pull sigven/pcgr:0.6.2.1`` (PCGR annotation engine)
+   -  ``docker pull sigven/pcgr:0.6.2.1`` (PCGR annotation engine)
 
 STEP 3: Input preprocessing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -108,7 +107,7 @@ PCGR can be run with either or both of the two input files present.
    `tabix <http://www.htslib.org/doc/tabix.html>`__
 -  If the input VCF contains multi-allelic sites, these will be subject
    to `decomposition <http://genome.sph.umich.edu/wiki/Vt#Decompose>`__
--  Variants used for reporting should be designated as 'PASS' in the VCF
+-  Variants used for reporting should be designated as ‘PASS’ in the VCF
    FILTER column
 
 The tab-separated values file with copy number aberrations **MUST**
@@ -117,21 +116,21 @@ contain the following four columns:
 -  Chromosome
 -  Start
 -  End
--  Segment\_Mean
+-  Segment_Mean
 
 Here, *Chromosome*, *Start*, and *End* denote the chromosomal segment,
-and **Segment\_Mean** denotes the log(2) ratio for a particular segment,
+and **Segment_Mean** denotes the log(2) ratio for a particular segment,
 which is a common output of somatic copy number alteration callers. Note
-that coordinates must be **one-based** (i.e. chromosomes start at 1, not
+that coordinates must be **one-based** (i.e. chromosomes start at 1, not
 0). Below shows the initial part of a copy number segment file that is
-formatted correctly according to PCGR's requirements:
+formatted correctly according to PCGR’s requirements:
 
 ::
 
-     Chromosome Start   End Segment_Mean
-     1 3218329 3550598 0.0024
-     1 3552451 4593614 0.1995
-     1 4593663 6433129 -1.0277
+    Chromosome Start   End Segment_Mean
+    1 3218329 3550598 0.0024
+    1 3552451 4593614 0.1995
+    1 4593663 6433129 -1.0277
 
 STEP 4: Configure PCGR
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -146,9 +145,9 @@ workflow, related to the following:
 -  Sequencing depth/allelic support thresholds
 -  MSI prediction
 -  Mutational signatures analysis
--  Mutational burden analysis (e.g. target size)
+-  Mutational burden analysis (e.g. target size)
 -  VCF to MAF conversion
--  Tumor-only analysis options (i.e. exclusion of germline
+-  Tumor-only analysis options (i.e. exclusion of germline
    variants/enrichment for somatic calls)
 -  VEP/\ *vcfanno* options
 -  Log-ratio thresholds for gains/losses in CNA analysis
@@ -168,47 +167,47 @@ A tumor sample report is generated by calling the Python script
 
 ::
 
-    usage: pcgr.py [-h] [--input_vcf INPUT_VCF] [--input_cna INPUT_CNA]
-            [--force_overwrite] [--version] [--basic]
-            [--docker-uid DOCKER_USER_ID] [--no-docker]
-            pcgr_dir output_dir {grch37,grch38} configuration_file
-            sample_id
+   usage: pcgr.py [-h] [--input_vcf INPUT_VCF] [--input_cna INPUT_CNA]
+           [--force_overwrite] [--version] [--basic]
+           [--docker-uid DOCKER_USER_ID] [--no-docker]
+           pcgr_dir output_dir {grch37,grch38} configuration_file
+           sample_id
 
-    Personal Cancer Genome Reporter (PCGR) workflow for clinical interpretation of
-    somatic nucleotide variants and copy number aberration segments
+   Personal Cancer Genome Reporter (PCGR) workflow for clinical interpretation of
+   somatic nucleotide variants and copy number aberration segments
 
-    positional arguments:
-    pcgr_dir              PCGR base directory with accompanying data directory,
-                    e.g. ~/pcgr-0.6.2.1
-    output_dir            Output directory
-    {grch37,grch38}       Genome assembly build: grch37 or grch38
-    configuration_file    PCGR configuration file (TOML format)
-    sample_id             Tumor sample/cancer genome identifier - prefix for
-                    output files
+   positional arguments:
+   pcgr_dir              PCGR base directory with accompanying data directory,
+                   e.g. ~/pcgr-0.6.2.1
+   output_dir            Output directory
+   {grch37,grch38}       Genome assembly build: grch37 or grch38
+   configuration_file    PCGR configuration file (TOML format)
+   sample_id             Tumor sample/cancer genome identifier - prefix for
+                   output files
 
-    optional arguments:
-    -h, --help            show this help message and exit
-    --input_vcf INPUT_VCF
-                    VCF input file with somatic query variants
-                    (SNVs/InDels). (default: None)
-    --input_cna INPUT_CNA
-                    Somatic copy number alteration segments (tab-separated
-                    values) (default: None)
-    --force_overwrite     By default, the script will fail with an error if any
-                    output file already exists. You can force the
-                    overwrite of existing result files by using this flag
-                    (default: False)
-    --version             show program's version number and exit
-    --basic               Run functional variant annotation on VCF through
-                    VEP/vcfanno, omit other analyses (i.e. CNA, MSI,
-                    report generation etc. (STEP 4) (default: False)
-    --docker-uid DOCKER_USER_ID
-                    Docker user ID. Default is the host system user ID. If
-                    you are experiencing permission errors, try setting
-                    this up to root (`--docker-uid root`) (default: None)
-    --no-docker           Run the PCGR workflow in a non-Docker mode (see
-                    install_no_docker/ folder for instructions (default:
-                    False)
+   optional arguments:
+   -h, --help            show this help message and exit
+   --input_vcf INPUT_VCF
+                   VCF input file with somatic query variants
+                   (SNVs/InDels). (default: None)
+   --input_cna INPUT_CNA
+                   Somatic copy number alteration segments (tab-separated
+                   values) (default: None)
+   --force_overwrite     By default, the script will fail with an error if any
+                   output file already exists. You can force the
+                   overwrite of existing result files by using this flag
+                   (default: False)
+   --version             show program's version number and exit
+   --basic               Run functional variant annotation on VCF through
+                   VEP/vcfanno, omit other analyses (i.e. CNA, MSI,
+                   report generation etc. (STEP 4) (default: False)
+   --docker-uid DOCKER_USER_ID
+                   Docker user ID. Default is the host system user ID. If
+                   you are experiencing permission errors, try setting
+                   this up to root (`--docker-uid root`) (default: None)
+   --no-docker           Run the PCGR workflow in a non-Docker mode (see
+                   install_no_docker/ folder for instructions (default:
+                   False)
 
 The *examples* folder contain input files from two tumor samples
 sequenced within TCGA (**GRCh37** only). It also contains PCGR
@@ -223,18 +222,18 @@ in your terminal window:
 This command will run the Docker-based PCGR workflow and produce the
 following output files in the *examples* folder:
 
-1. **tumor\_sample.COAD.pcgr\_acmg.grch37.html** - An interactive HTML
+1. **tumor_sample.COAD.pcgr_acmg.grch37.html** - An interactive HTML
    report for clinical interpretation
-2. **tumor\_sample.COAD.pcgr\_acmg.grch37.pass.vcf.gz (.tbi)** -
-   Bgzipped VCF file with rich set of annotations for precision oncology
-3. **tumor\_sample.COAD.pcgr\_acmg.grch37.pass.tsv.gz** - Compressed
+2. **tumor_sample.COAD.pcgr_acmg.grch37.pass.vcf.gz (.tbi)** - Bgzipped
+   VCF file with rich set of annotations for precision oncology
+3. **tumor_sample.COAD.pcgr_acmg.grch37.pass.tsv.gz** - Compressed
    vcf2tsv-converted file with rich set of annotations for precision
    oncology
-4. **tumor\_sample.COAD.pcgr\_acmg.grch37.snvs\_indels.tiers.tsv** -
+4. **tumor_sample.COAD.pcgr_acmg.grch37.snvs_indels.tiers.tsv** -
    Tab-separated values file with variants organized according to tiers
    of functional relevance
-5. **tumor\_sample.COAD.pcgr\_acmg.grch37.json.gz** - Compressed JSON
-   dump of HTML report content
-6. **tumor\_sample.COAD.pcgr\_acmg.grch37.cna\_segments.tsv.gz** -
+5. **tumor_sample.COAD.pcgr_acmg.grch37.json.gz** - Compressed JSON dump
+   of HTML report content
+6. **tumor_sample.COAD.pcgr_acmg.grch37.cna_segments.tsv.gz** -
    Compressed tab-separated values file with annotations of gene
    transcripts that overlap with somatic copy number aberrations

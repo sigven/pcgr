@@ -1,13 +1,15 @@
 
 ## CHANGELOG
 
-#### dev/unreleased - Oct 27th 2018
+#### dev/unreleased - Oct 29th 2018
 
 ##### Fixed
+ * vcfanno fix for empty Description (upgrade to vcfanno v0.3.1 [Issue #49](https://github.com/sigven/pcgr/issues/49))
+ * Bug in message showing too few variants for MSI prediction, [Issue #55](https://github.com/sigven/pcgr/issues/55)
  * Bug in appending of custom VCF tags
 	 * Still unsolved: how to disambiguate identical FORMAT and INFO tags in vcf2tsv
- * Bug in SCNA value box display for multiple copy number hits (paste error)
- * Bug in vcf2tsv (handling INFO tags encoded with 'Type = String')
+ * Bug in SCNA value box display for multiple copy number hits ([Issue #47](https://github.com/sigven/pcgr/issues/47))
+ * Bug in vcf2tsv (handling INFO tags encoded with 'Type = String', [Issue #39](https://github.com/sigven/pcgr/issues/39))
  * Bug in search of UniProt functional features (BED feature regions spanning exons are now handled)
  * Stripped off HTML elements (TCGA_FREQUENCY, DBSNP) in TSV output
  * Some effect predictions from dbNSFP were not properly parsed (e.g. multiple prediction entries from multiple transcript isoforms), these should now be retrieved correctly
@@ -15,9 +17,9 @@
  * Bug in retrieval of splice site predictions from dbscSNV
 
 ##### Added
- * Possibility to run PCGR in a non-Docker environment (e.g. using the *--no-docker* option). Thanks to an excellent contribution by [Vlad Saveliev](https://github.com/vladsaveliev)
+ * Possibility to run PCGR in a non-Docker environment (e.g. using the *--no-docker* option). Thanks to an excellent contribution by [Vlad Saveliev](https://github.com/vladsaveliev), [Issue #35 ](https://github.com/sigven/pcgr/issues/35)
 	* Added possibility to add docker user-id
- * Possibility for MAF file output (converted with vcf2maf), must be configured by the user in the TOML file (i.e. *vcf2maf = true*)
+ * Possibility for MAF file output (converted with vcf2maf), must be configured by the user in the TOML file (i.e. *vcf2maf = true*, [Issue #17](https://github.com/sigven/pcgr/issues/17))
  * Possibility for adding custom VCF INFO tags to PCGR output files (JSON/TSV), must be configured by the user in the TOML file (i.e. *custom_tags*)
  * Addded MUTATION_HOTSPOT_CANCERTYPES in data tables (i.e. listing tumor types in which hotspot mutations have been found)
  * Included the 'rs' prefix for dbSNP identifiers (HTML and TSV output)
@@ -45,10 +47,10 @@
 #### 0.6.2 - May 9th 2018
 
 ##### Fixed
- * Bug in copy number segment display (missing variable initalization)
- * Typo in gnomAD filter statistic (fraction)
- * Bug in mutational signature analysis for grch38 (forgot to pass BSgenome object)
- * Missing proper ASCII-encoding in vcf2tsv conversion
+ * Bug in copy number segment display (missing variable initalization, [Issue #34](https://github.com/sigven/pcgr/issues/34)))
+ * Typo in gnomAD filter statistic (fraction, [Issue #31](https://github.com/sigven/pcgr/issues/31))
+ * Bug in mutational signature analysis for grch38 (forgot to pass BSgenome object, [Issue #27](https://github.com/sigven/pcgr/issues/27))
+ * Missing proper ASCII-encoding in vcf2tsv conversion, [Issue #](https://github.com/sigven/pcgr/issues/35)
  * Removed 'Noncoding mutations' section when no input VCF is present
  * Bug in annotation of copy number event type (focal/broad)
  * Bug in copy number annotation (missing protein-coding transcripts)
