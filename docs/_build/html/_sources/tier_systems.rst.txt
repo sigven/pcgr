@@ -61,7 +61,9 @@ outlined in `Li et al.,
 -  *Tier 4* - includes other coding variants
 
 For **copy number aberrations**, aberrations linked to Tier 1 & 2 are
-displayed, within following sections in the HTML report: \* *Copy number
-aberrations as biomarkers: Aberrations of strong clinical significance*
-(Tier 1) \* *Copy number aberrations as biomarkers: Aberrations of
-potential clinical significance* (Tier 2)
+displayed, within following sections in the HTML report:
+
+-  *Copy number aberrations as biomarkers: Aberrations of strong
+   clinical significance* (Tier 1)
+-  *Copy number aberrations as biomarkers: Aberrations of potential
+   clinical significance* (Tier 2)

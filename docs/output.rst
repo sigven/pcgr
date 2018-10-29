@@ -392,9 +392,10 @@ processing with the PCGR annotation pipeline:
    `MedGen <https://www.ncbi.nlm.nih.gov/medgen/>`__ concept IDs
    (*CUIs*)
 -  TUMOR_SUPPRESSOR - Gene is predicted as tumor suppressor candidate
-   according to (`TSGene v2.0 <https://bioinfo.uth.edu/TSGene/>`__)
--  ONCOGENE - Gene is curated as an oncogene according to (`TSGene
-   v2.0 <https://bioinfo.uth.edu/TSGene/>`__)
+   according to
+   (`CancerMine <https://zenodo.org/record/1336650#.W9do9WJKiL4>`__)
+-  ONCOGENE - Gene is predicted as an oncogene according to
+   (`CancerMine <https://zenodo.org/record/1336650#.W9do9WJKiL4>`__)
 -  ONCOSCORE - Literature-derived score for cancer gene relevance
    `Bioconductor/OncoScore <http://bioconductor.org/packages/release/bioc/html/OncoScore.html>`__,
    range from 0 (low oncogenic potential) to 1 (high oncogenic
@@ -603,8 +604,7 @@ The following variables are included in the tiered TSV file:
    12. REFSEQ_MRNA - RefSeq mRNA identifier
    13. ONCOSCORE - Literature-derived score for cancer gene relevance
    14. ONCOGENE - Gene is predicted as an oncogene according to literature mining (CancerMine)
-   15. TUMOR_SUPPRESSOR - Gene is predicted as tumor suppressor according to literature mining(CancerMine)
-       candidate according to TSGene
+   15. TUMOR_SUPPRESSOR - Gene is predicted as tumor suppressor according to literature mining (CancerMine)
    16. DISGENET_CUI - Associated tumor types from DisGeNET (MedGen concept IDs)
    17. DISGENET_TERMS - Associated tumor types from DisGeNET (MedGen concept terms)
    18. CONSEQUENCE - Variant consequence (as defined above for VCF output:
@@ -686,8 +686,8 @@ The format of the compressed TSV file is the following:
    15. biotype - type of gene
    16. disgenet_cui - tumor types associated with gene (from DisGeNET, tumor types
       are listed as MedGen concept IDs (CUI)
-   17. tsgene - tumor suppressor gene status (TSgene database)
-   18. tsgene_oncogene - oncogene status (TSgene database)
+   17. tsgene - tumor suppressor gene status (CancerMine literature database)
+   18. p_oncogene - oncogene status (CancerMine literature database)
    19. intogen_drivers - predicted driver gene status (IntoGen Cancer Drivers Database)
    20. chembl_compound_id - antineoplastic drugs targeting the encoded protein
       (from DGIdb, drugs are listed as ChEMBL compound identifiers)

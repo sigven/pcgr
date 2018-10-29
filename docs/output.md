@@ -212,8 +212,8 @@ Here, the __sample_id__ is provided as input by the user, and reflects a unique 
   - REFSEQ_MRNA - Corresponding RefSeq transcript(s) identifier for VEP's picked transcript (*NM_XXXXX*)
   - CORUM_ID - Associated protein complexes (identifiers) from [CORUM](http://mips.helmholtz-muenchen.de/corum/)
   - DISGENET_CUI - Tumor types associated with gene, as found in DisGeNET. Tumor types are listed as unique [MedGen](https://www.ncbi.nlm.nih.gov/medgen/) concept IDs (_CUIs_)
-  - TUMOR_SUPPRESSOR - Gene is predicted as tumor suppressor candidate according to ([TSGene v2.0](https://bioinfo.uth.edu/TSGene/))
-  - ONCOGENE - Gene is curated as an oncogene according to ([TSGene v2.0](https://bioinfo.uth.edu/TSGene/))
+  - TUMOR_SUPPRESSOR - Gene is predicted as tumor suppressor candidate according to ([CancerMine](https://zenodo.org/record/1336650#.W9do9WJKiL4))
+  - ONCOGENE - Gene is predicted as an oncogene according to ([CancerMine](https://zenodo.org/record/1336650#.W9do9WJKiL4))
   - ONCOSCORE - Literature-derived score for cancer gene relevance [Bioconductor/OncoScore](http://bioconductor.org/packages/release/bioc/html/OncoScore.html), range from 0 (low oncogenic potential) to 1 (high oncogenic potential)
   - INTOGEN_DRIVER - Gene is predicted as a cancer driver in the [IntoGen Cancer Drivers Database - 2014.12](https://www.intogen.org/downloads)
   - TCGA_DRIVER - Gene is predicted as a cancer driver in the [Pan-cancer analysis of cancer driver genes](https://www.ncbi.nlm.nih.gov/pubmed/29625053)
@@ -327,8 +327,7 @@ The following variables are included in the tiered TSV file:
     12. REFSEQ_MRNA - RefSeq mRNA identifier
     13. ONCOSCORE - Literature-derived score for cancer gene relevance
     14. ONCOGENE - Gene is predicted as an oncogene according to literature mining (CancerMine)
-    15. TUMOR_SUPPRESSOR - Gene is predicted as tumor suppressor according to literature mining(CancerMine)
-        candidate according to TSGene
+    15. TUMOR_SUPPRESSOR - Gene is predicted as tumor suppressor according to literature mining (CancerMine)
     16. DISGENET_CUI - Associated tumor types from DisGeNET (MedGen concept IDs)
     17. DISGENET_TERMS - Associated tumor types from DisGeNET (MedGen concept terms)
     18. CONSEQUENCE - Variant consequence (as defined above for VCF output:
@@ -398,8 +397,8 @@ The format of the compressed TSV file is the following:
     15. biotype - type of gene
     16. disgenet_cui - tumor types associated with gene (from DisGeNET, tumor types
 	   are listed as MedGen concept IDs (CUI)
-    17. tsgene - tumor suppressor gene status (TSgene database)
-    18. tsgene_oncogene - oncogene status (TSgene database)
+    17. tsgene - tumor suppressor gene status (CancerMine literature database)
+    18. p_oncogene - oncogene status (CancerMine literature database)
     19. intogen_drivers - predicted driver gene status (IntoGen Cancer Drivers Database)
     20. chembl_compound_id - antineoplastic drugs targeting the encoded protein
        (from DGIdb, drugs are listed as ChEMBL compound identifiers)
