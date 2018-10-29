@@ -61,9 +61,9 @@ Protein domains/functional features
 Cancer gene knowledge bases
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--  `CancerMine <https://bioinfo.uth.edu/TSGene/>`__ - Literature-mined
-   database of tumor suppressor genes/proto-oncogenes (release5, October
-   2018)
+-  `CancerMine <https://zenodo.org/record/1336650#.W9do9WJKiL4>`__ -
+   Literature-mined database of tumor suppressor genes/proto-oncogenes
+   (release5, October 2018)
 -  `DisGeNET v5.0 <http://www.disgenet.org>`__ - curated associations
    between human genes and different tumor types
 -  `TCGA driver genes <https://www.ncbi.nlm.nih.gov/pubmed/29625053>`__
