@@ -1,4 +1,4 @@
 ## MSI status
 
-The number of SNV/InDel calls (n = `r pcg_report[['snv_indel']][['variant_statistic']][['n']]`) is too limited (n < 30) for MSI prediction to be performed.
+The number of SNV/InDel calls (n = `r pcg_report[['snv_indel']][['variant_statistic']][['n_coding']]`) is too limited (n < 30) for MSI prediction to be performed.
 <br><br>
