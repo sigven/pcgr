@@ -123,7 +123,7 @@ generate_report_data_cna <- function(cna_file, pcgr_data, pcgr_version, sample_n
   local_df$segment_link <- paste0("<a href='",paste0(ucsc_browser_prefix,paste0(local_df$chrom,':',local_df$segment_start,'-',local_df$segment_end)),"' target=\"_blank\">",paste0(local_df$chrom,':',local_df$segment_start,'-',local_df$segment_end),"</a>")
 
   local_df_print <- local_df
-  local_df_print <- dplyr::select(local_df_print,chrom,segment_start,segment_end,segment_length_Mb,event_type,cytoband,LogR,ensembl_gene_id,symbol,ensembl_transcript_id,transcript_start,transcript_end,transcript_overlap_percent,name,biotype,disgenet_cui,tsgene,ts_oncogene,intogen_drivers,chembl_compound_id,gencode_gene_biotype,gencode_tag,gencode_release)
+  local_df_print <- dplyr::select(local_df_print,chrom,segment_start,segment_end,segment_length_Mb,event_type,cytoband,LogR,ensembl_gene_id,symbol,ensembl_transcript_id,transcript_start,transcript_end,transcript_overlap_percent,name,biotype,disgenet_cui,tsgene,p_oncogene,intogen_drivers,chembl_compound_id,gencode_gene_biotype,gencode_tag,gencode_release)
 
   chrOrder <- c(as.character(paste0('chr',c(1:22))),"chrX","chrY")
   local_df_print$chrom <- factor(local_df_print$chrom, levels=chrOrder)
@@ -147,7 +147,7 @@ generate_report_data_cna <- function(cna_file, pcgr_data, pcgr_version, sample_n
 
   local_df <- dplyr::rename(local_df, CHEMBL_COMPOUND_ID = chembl_compound_id, SYMBOL = symbol) %>% dplyr::mutate(VAR_ID = as.character(rep(1:nrow(local_df))))
   local_df <- pcgrr::annotate_variant_link(local_df, vardb = 'DGIDB', pcgr_data = pcgr_data)
-  local_df <- dplyr::rename(local_df, ONCOGENE = ts_oncogene, TUMOR_SUPPRESSOR = tsgene, ENTREZ_ID = entrezgene, CHROMOSOME = chrom, GENENAME = name, TARGETED_DRUGS = DGIDBLINK, SEGMENT_LENGTH_MB = segment_length_Mb, SEGMENT = segment_link, TRANSCRIPT_OVERLAP = transcript_overlap_percent)
+  local_df <- dplyr::rename(local_df, ONCOGENE = p_oncogene, TUMOR_SUPPRESSOR = tsgene, ENTREZ_ID = entrezgene, CHROMOSOME = chrom, GENENAME = name, TARGETED_DRUGS = DGIDBLINK, SEGMENT_LENGTH_MB = segment_length_Mb, SEGMENT = segment_link, TRANSCRIPT_OVERLAP = transcript_overlap_percent)
   local_df$ENTREZ_ID <- as.character(local_df$ENTREZ_ID)
   local_df <- dplyr::left_join(local_df,pcgr_data$kegg_gene_pathway_links, by=c("ENTREZ_ID" = "gene_id")) %>%
     dplyr::rename(KEGG_PATHWAY = kegg_pathway_urls)
@@ -279,7 +279,7 @@ annotate_facets_cna <- function(facets_cna_input_fname, facets_cna_output_fname,
   #local_df$segment_link <- paste0("<a href='",paste0(ucsc_browser_prefix,paste0(local_df$chrom,':',local_df$segment_start,'-',local_df$segment_end)),"' target=\"_blank\">",paste0(local_df$chrom,':',local_df$segment_start,'-',local_df$segment_end),"</a>")
 
   local_df_print <- local_df
-  local_df_print <- dplyr::select(local_df_print,chrom,segment_start,segment_end,segment_length_Mb,sample_id,event_type,cytoband,LogR,cellular_fraction,total_cn,minor_cn,ensembl_gene_id,symbol,ensembl_transcript_id,transcript_start,transcript_end,transcript_overlap_percent,name,biotype,tsgene,ts_oncogene,chembl_compound_id,gencode_gene_biotype,gencode_tag,gencode_release)
+  local_df_print <- dplyr::select(local_df_print,chrom,segment_start,segment_end,segment_length_Mb,sample_id,event_type,cytoband,LogR,cellular_fraction,total_cn,minor_cn,ensembl_gene_id,symbol,ensembl_transcript_id,transcript_start,transcript_end,transcript_overlap_percent,name,biotype,tsgene,p_oncogene,chembl_compound_id,gencode_gene_biotype,gencode_tag,gencode_release)
 
   chrOrder <- c(as.character(paste0('chr',c(1:22))),"chrX","chrY")
   local_df_print$chrom <- factor(local_df_print$chrom, levels=chrOrder)

@@ -2374,3 +2374,27 @@
 [2018-10-10 12:14:12][INFO] Writing JSON file with report contents
 [2018-10-10 12:14:12][INFO] ------
 [2018-10-10 12:14:12][INFO] Rendering HTML report with rmarkdown
+[2018-10-27 11:32:31][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-10-27 11:32:32][INFO] Number of PASS variants: 16782
+[2018-10-27 11:32:32][INFO] Number of SNVs: 13686
+[2018-10-27 11:32:32][INFO] Number of deletions: 1595
+[2018-10-27 11:32:32][INFO] Number of insertions: 1501
+[2018-10-27 11:32:32][INFO] Number of block substitutions: 0
+[2018-10-27 11:32:33][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-10-27 11:32:35][INFO] Adding citations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-10-27 11:32:35][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-10-27 11:32:36][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-10-27 11:32:36][INFO] Extending annotation descriptions related to ClinVar
+[2018-10-27 11:32:41][INFO] Filtering against cancer predisposition genes:
+[2018-10-27 11:32:41][INFO] 10211 variants remaining
+[2018-10-27 11:32:41][INFO] Found coding variants in the following cancer predisposition genes: MPL, ALK, EPCAM, MSH6, BARD1, FANCD2, XPC, SDHA, PMS2, MET, WRN, EXT1, RECQL4, ATM, POLE, BRCA2, ERCC5, FANCM, TSHR, BUB1B, FANCI, FANCA, TP53, BRIP1, ERCC2, POLD1
+[2018-10-27 11:32:41][INFO] Limiting variants to hereditary cancer-predisposing syndromes/cancer conditions
+[2018-10-27 11:33:09][INFO] Assignment of variants to tier 1/tier 2/tier 3
+[2018-10-27 11:33:09][INFO] TIER 1: Pathogenic variants - cancer_phenotype: n = 0
+[2018-10-27 11:33:09][INFO] TIER 1: Pathogenic variants - noncancer_phenotype: n = 0
+[2018-10-27 11:33:09][INFO] TIER 2: Likely pathogenic variants - cancer_phenotype: n = 0
+[2018-10-27 11:33:09][INFO] TIER 2: Likely pathogenic variants - noncancer_phenotype: n = 0
+[2018-10-27 11:33:09][INFO] TIER 3: Variants of uncertain significance - cancer_phenotype: n = 7
+[2018-10-27 11:33:10][INFO] TIER 3: Variants of uncertain significance - noncancer_phenotype: n = 2
+[2018-10-27 11:33:10][INFO] TIER 3: Other unclassified variants - noncancer_phenotype: n = 1
+[2018-10-27 11:33:45][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file

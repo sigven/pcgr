@@ -695,7 +695,7 @@ generate_tier_tsv_cpsr <- function(pcg_report, sample_name = "test"){
             for(t in tags){
               t <- stringr::str_trim(t)
               if(t %in% colnames(tierset)){
-                predispose_tags <- c(predispose_tsv_tags,t)
+                predispose_tags <- c(predispose_tags,t)
               }
             }
           }
@@ -712,11 +712,13 @@ generate_tier_tsv_cpsr <- function(pcg_report, sample_name = "test"){
           for(t in tags){
             t <- stringr::str_trim(t)
             if(t %in% colnames(tierset)){
-              predispose_tags <- c(predispose_tsv_tags,t)
+              predispose_tags <- c(predispose_tags,t)
             }
           }
         }
       }
+
+      cat(predispose_tags,'\n')
       if(nrow(pcg_report[['snv_indel']][['variant_display']][[tier]]) > 0){
         tierset <- pcg_report[['snv_indel']][['variant_display']][[tier]]
         tierset$VCF_SAMPLE_ID <- sample_name
@@ -733,7 +735,6 @@ generate_tier_tsv_cpsr <- function(pcg_report, sample_name = "test"){
         }
       }
     }
-
   }
   tsv_variants$DBSNP <- unlist(lapply(stringr::str_match_all(tsv_variants$DBSNP,">rs[0-9]{1,}<"),paste,collapse=","))
   tsv_variants$DBSNP <- stringr::str_replace_all(tsv_variants$DBSNP,">|<", "")
