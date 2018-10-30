@@ -1,10 +1,10 @@
 
-#' Function that generates cancer genome report - Tier model pcgr.0
+#' Function that generates predisposition_report - CPSR
 #'
 #' @param project_directory name of project directory
 #' @param query_vcf2tsv name of gzipped TSV file (vcf2tsv) with annotated query SNVs/InDels
 #' @param pcgr_data List of data frames with PCGR data annotations
-#' @param pcg_config Object with PCGR configuration parameters
+#' @param pcgr_config Object with CPSR configuration parameters
 #' @param sample_name sample identifier
 #' @param pcgr_version PCGR software version
 #' @param genome_assembly human genome assembly version
