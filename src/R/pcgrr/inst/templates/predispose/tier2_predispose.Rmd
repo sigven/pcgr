@@ -16,6 +16,7 @@ for(type in c('cancer_phenotype','noncancer_phenotype')){
   }
 }
 
+tot_variants_lp_clinvar <- NROW(pcg_report[['snv_indel']][['variant_display']][['tier2']][['cancer_phenotype']]) + NROW(pcg_report[['snv_indel']][['variant_display']][['tier2']][['noncancer_phenotype']])
 
 tag_tgp <- pcg_report[['pcgr_config']][['popgen']][['vcftag_tgp']]
 desc_tgp <- pcg_report[['pcgr_config']][['popgen']][['popdesc_tgp']]
@@ -26,6 +27,8 @@ formula_gnomad <- as.formula(paste0("~",rlang::sym(tag_gnomad)))
 
 ```
 
+A total of n = __`r tot_variants_lp_clinvar`__ variants are registered with a <i>likely pathogenic</i> clinical significance in ClinVar.
+<br><br>
 
 #### Cancer phenotypes
 
@@ -34,7 +37,7 @@ library(summarywidget)
 library(crosstalk)
 
 
-cat('A total of ',NROW(pcg_report[['snv_indel']][['variant_display']][['tier2']][['cancer_phenotype']]), ' unique, germline variant(s) are found as likely pathogenic and associated with cancer phenotypes in ClinVar for the selected predisposition genes:')
+cat('A total of <b>',NROW(pcg_report[['snv_indel']][['variant_display']][['tier2']][['cancer_phenotype']]), '</b> unique, germline variant(s) are found as likely pathogenic and associated with cancer phenotypes in ClinVar for the selected predisposition genes:')
 cat('\n')
 htmltools::br()
 htmltools::br()
@@ -80,7 +83,7 @@ library(summarywidget)
 library(crosstalk)
 
 
-cat('A total of ',NROW(pcg_report[['snv_indel']][['variant_display']][['tier2']][['noncancer_phenotype']]), ' unique, germline variant(s) are found as pathogenic and associated with undefined/non-cancer phenotypes in ClinVar for the selected predisposition genes:')
+cat('A total of <b>',NROW(pcg_report[['snv_indel']][['variant_display']][['tier2']][['noncancer_phenotype']]), '</b> unique, germline variant(s) are found as pathogenic and associated with undefined/non-cancer phenotypes in ClinVar for the selected predisposition genes:')
 cat('\n')
 htmltools::br()
 htmltools::br()

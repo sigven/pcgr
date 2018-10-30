@@ -58,6 +58,7 @@ for(type in c('cancer_phenotype','noncancer_phenotype','unclassified')){
   }
 }
 
+tot_variants_vus_clinvar <- NROW(pcg_report[['snv_indel']][['variant_display']][['tier3A']][['cancer_phenotype']]) + NROW(pcg_report[['snv_indel']][['variant_display']][['tier3A']][['noncancer_phenotype']])
 
 tag_tgp <- pcg_report[['pcgr_config']][['popgen']][['vcftag_tgp']]
 desc_tgp <- pcg_report[['pcgr_config']][['popgen']][['popdesc_tgp']]
@@ -69,6 +70,8 @@ formula_gnomad <- as.formula(paste0("~",rlang::sym(tag_gnomad)))
 
 ```
 
+A total of n = __`r tot_variants_vus_clinvar`__ variants are registered as <i>variants of uncertain significance</i> (VUS) in ClinVar.
+<br><br>
 
 ##### Cancer phenotypes
 
@@ -77,7 +80,7 @@ library(summarywidget)
 library(crosstalk)
 
 
-cat('A total of ',NROW(pcg_report[['snv_indel']][['variant_display']][['tier3A']][['cancer_phenotype']]), ' unique, germline variant(s) are registered as VUS in cancer phenotypes in ClinVar for the selected predisposition genes:')
+cat('A total of <b>',NROW(pcg_report[['snv_indel']][['variant_display']][['tier3A']][['cancer_phenotype']]), '</b> unique, germline variant(s) are registered as VUS in cancer phenotypes in ClinVar for the selected predisposition genes:')
 cat('\n')
 htmltools::br()
 htmltools::br()
@@ -127,7 +130,7 @@ library(summarywidget)
 library(crosstalk)
 
 
-cat('A total of ',NROW(pcg_report[['snv_indel']][['variant_display']][['tier3A']][['noncancer_phenotype']]), ' unique, germline variant(s) are registered as VUS in undefined/non-cancer phenotypes in ClinVar for the selected predisposition genes:')
+cat('A total of <b>',NROW(pcg_report[['snv_indel']][['variant_display']][['tier3A']][['noncancer_phenotype']]), '</b> unique, germline variant(s) are registered as VUS in undefined/non-cancer phenotypes in ClinVar for the selected predisposition genes:')
 cat('\n')
 htmltools::br()
 htmltools::br()
@@ -179,7 +182,7 @@ library(summarywidget)
 library(crosstalk)
 
 
-cat('A total of ',NROW(pcg_report[['snv_indel']][['variant_display']][['tier3B']]),' unique and protein-coding germline variant(s) are also found in the selected cancer predisposition genes. This subset is limited to variants that are **novel** (i.e. not found) or **rare**  (i.e. MAF < ',pcg_report[['pcgr_config']][['maf_limits']][['maf_gnomad']],'/',pcg_report[['pcgr_config']][['maf_limits']][['maf_tgp']],') in the ',desc_gnomad,' gnomAD population/',desc_tgp,' 1000 Genomes Project population:')
+cat('A total of n = <b>',NROW(pcg_report[['snv_indel']][['variant_display']][['tier3B']]),'</b> unique and protein-coding germline variant(s) are also found in the selected cancer predisposition genes. This subset is limited to variants that are **novel** (i.e. not found) or **rare**  (i.e. MAF < ',pcg_report[['pcgr_config']][['maf_limits']][['maf_gnomad']],'/',pcg_report[['pcgr_config']][['maf_limits']][['maf_tgp']],') in the ',desc_gnomad,' gnomAD population/',desc_tgp,' 1000 Genomes Project population:')
 cat('\n')
     
 htmltools::br()

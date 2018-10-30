@@ -448,26 +448,27 @@ assign_pathogenicity_score <- function(sample_calls, pcgr_config, pcgr_data){
 
   ## Assign a logical ACMG level
   # PM4 - Protein length changes due to inframe indels or nonstop variant of genes that harbor variants with a dominant mode of inheritance - PM4
-  # PCC1 - Protein length changes due to inframe indels or nonstop variant of genes that harbor variants with a recessive mode of inheritance - PPC1
+  # PCC1 - Protein length changes due to inframe indels or nonstop variant of genes that harbor variants with a recessive mode of inheritance (and unknown MOI) - PPC1
   if(nrow(sample_calls[!is.na(sample_calls$CONSEQUENCE) & stringr::str_detect(sample_calls$CONSEQUENCE,'stop_lost|inframe_deletion|inframe_insertion'),]) > 0){
     if(nrow(sample_calls[!is.na(sample_calls$CONSEQUENCE) & stringr::str_detect(sample_calls$CONSEQUENCE,'stop_lost|inframe_deletion|inframe_insertion') & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI) & stringr::str_detect(sample_calls$CANCER_PREDISPOSITION_MOI,"Dom|Dom&Rec"),]) > 0){
       sample_calls[!is.na(sample_calls$CONSEQUENCE) & stringr::str_detect(sample_calls$CONSEQUENCE,'stop_lost|inframe_deletion|inframe_insertion') & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI) & stringr::str_detect(sample_calls$CANCER_PREDISPOSITION_MOI,"Dom|Dom&Rec"),]$PM4 <- TRUE
     }
-    if(nrow(sample_calls[!is.na(sample_calls$CONSEQUENCE) & stringr::str_detect(sample_calls$CONSEQUENCE,'stop_lost|inframe_deletion|inframe_insertion') & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI) & stringr::str_detect(sample_calls$CANCER_PREDISPOSITION_MOI,"Rec"),]) > 0){
-      sample_calls[!is.na(sample_calls$CONSEQUENCE) & stringr::str_detect(sample_calls$CONSEQUENCE,'stop_lost|inframe_deletion|inframe_insertion') & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI) & stringr::str_detect(sample_calls$CANCER_PREDISPOSITION_MOI,"Rec"),]$PPC1 <- TRUE
+    if(nrow(sample_calls[!is.na(sample_calls$CONSEQUENCE) & stringr::str_detect(sample_calls$CONSEQUENCE,'stop_lost|inframe_deletion|inframe_insertion') & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI) & !stringr::str_detect(sample_calls$CANCER_PREDISPOSITION_MOI,"Dom"),]) > 0){
+      sample_calls[!is.na(sample_calls$CONSEQUENCE) & stringr::str_detect(sample_calls$CONSEQUENCE,'stop_lost|inframe_deletion|inframe_insertion') & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI) & !stringr::str_detect(sample_calls$CANCER_PREDISPOSITION_MOI,"Dom"),]$PPC1 <- TRUE
     }
   }
 
   ## Assign a logical ACMG level
   # PP2 - Missense variant in susceptibility gene
-  if(nrow(sample_calls[!is.na(sample_calls$CONSEQUENCE) & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI) & stringr::str_detect(sample_calls$CONSEQUENCE,'^missense_variant'),]) > 0){
-    sample_calls[!is.na(sample_calls$CONSEQUENCE) & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI) & stringr::str_detect(sample_calls$CONSEQUENCE,'^missense_variant'),]$PP2 <- TRUE
+  if(nrow(sample_calls[!is.na(sample_calls$CONSEQUENCE) & stringr::str_detect(sample_calls$CONSEQUENCE,'^missense_variant'),]) > 0){
+    sample_calls[!is.na(sample_calls$CONSEQUENCE) & stringr::str_detect(sample_calls$CONSEQUENCE,'^missense_variant'),]$PP2 <- TRUE
   }
+
 
   ## Assign a logical ACMG level
   # PMC1 - LoF in susceptibility gene, yet non tumor suppressor
-  if(nrow(sample_calls[!is.na(sample_calls$LOSS_OF_FUNCTION) & sample_calls$LOSS_OF_FUNCTION == TRUE & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI) & (is.na(sample_calls$TUMOR_SUPPRESSOR) | sample_calls$TUMOR_SUPPRESSOR == FALSE),]) > 0){
-    sample_calls[!is.na(sample_calls$LOSS_OF_FUNCTION) & sample_calls$LOSS_OF_FUNCTION == TRUE & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI) & (is.na(sample_calls$TUMOR_SUPPRESSOR) | sample_calls$TUMOR_SUPPRESSOR == FALSE),]$PMC1 <- TRUE
+  if(nrow(sample_calls[!is.na(sample_calls$LOSS_OF_FUNCTION) & sample_calls$LOSS_OF_FUNCTION == TRUE & (is.na(sample_calls$TUMOR_SUPPRESSOR) | sample_calls$TUMOR_SUPPRESSOR == FALSE),]) > 0){
+    sample_calls[!is.na(sample_calls$LOSS_OF_FUNCTION) & sample_calls$LOSS_OF_FUNCTION == TRUE & (is.na(sample_calls$TUMOR_SUPPRESSOR) | sample_calls$TUMOR_SUPPRESSOR == FALSE),]$PMC1 <- TRUE
   }
 
 
@@ -617,6 +618,7 @@ assign_pathogenicity_score <- function(sample_calls, pcgr_config, pcgr_data){
 
   sample_calls$PATHDOC <- stringr::str_replace(sample_calls$PATHDOC,"^<br>","")
   sample_calls$PATHDOC <- paste0("CPSR pathogenicity score: ",sample_calls$PATHSCORE, "<br>",sample_calls$PATHDOC)
+  sample_calls$PATHDOC <- stringr::str_replace(sample_calls$PATHDOC,"<br>$","")
 
   sample_calls$PATHRANK <- NA
   if(nrow(sample_calls[sample_calls$PATHSCORE > 8,]) > 0){
@@ -718,7 +720,7 @@ generate_tier_tsv_cpsr <- function(pcg_report, sample_name = "test"){
         }
       }
 
-      cat(predispose_tags,'\n')
+      #cat(predispose_tags,'\n')
       if(nrow(pcg_report[['snv_indel']][['variant_display']][[tier]]) > 0){
         tierset <- pcg_report[['snv_indel']][['variant_display']][[tier]]
         tierset$VCF_SAMPLE_ID <- sample_name
