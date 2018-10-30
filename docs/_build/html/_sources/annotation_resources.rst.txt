@@ -5,7 +5,7 @@ Basic variant consequence annotation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  `VEP v94 <http://www.ensembl.org/info/docs/tools/vep/index.html>`__ -
-   Variant Effect Predictor release 93 (`GENCODE
+   Variant Effect Predictor release 94 (`GENCODE
    v28 <https://www.gencodegenes.org/releases/28.html>`__ as gene
    reference database (v19 for grch37))
 

@@ -4,6 +4,7 @@
 #### dev/unreleased - Oct 29th 2018
 
 ##### Fixed
+ * Bug in new CancerMine oncogene/tumor suppressor annotation [Issue #53](https://github.com/sigven/pcgr/issues/53)
  * vcfanno fix for empty Description (upgrade to vcfanno v0.3.1 [Issue #49](https://github.com/sigven/pcgr/issues/49))
  * Bug in message showing too few variants for MSI prediction, [Issue #55](https://github.com/sigven/pcgr/issues/55)
  * Bug in appending of custom VCF tags

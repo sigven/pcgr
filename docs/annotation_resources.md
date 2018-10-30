@@ -1,7 +1,7 @@
 ## Annotation resources
 
 ### Basic variant consequence annotation
-  * [VEP v94](http://www.ensembl.org/info/docs/tools/vep/index.html) - Variant Effect Predictor release 93 ([GENCODE v28](https://www.gencodegenes.org/releases/28.html) as gene reference database (v19 for grch37))
+  * [VEP v94](http://www.ensembl.org/info/docs/tools/vep/index.html) - Variant Effect Predictor release 94 ([GENCODE v28](https://www.gencodegenes.org/releases/28.html) as gene reference database (v19 for grch37))
 
 ###  *Insilico* predictions of effect of coding variants
   * [dBNSFP v3.5](https://sites.google.com/site/jpopgen/dbNSFP) - database of non-synonymous functional predictions (August 2017)
