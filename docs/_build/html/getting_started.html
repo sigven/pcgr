@@ -13,8 +13,6 @@
 
   
   
-  
-  
 
   
 
@@ -24,22 +22,30 @@
 
   
 
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="author" title="About these documents" href="about.html" />
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Annotation resources" href="annotation_resources.html" />
-    <link rel="prev" title="About" href="about.html" /> 
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="author" title="About these documents"
+              href="about.html"/>
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Personal Cancer Genome Reporter dev documentation" href="index.html"/>
+        <link rel="next" title="Annotation resources" href="annotation_resources.html"/>
+        <link rel="prev" title="About" href="about.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav">
+<body class="wy-body-for-nav" role="document">
 
-   
   <div class="wy-grid-for-nav">
 
     
@@ -80,10 +86,7 @@
           
             
             
-              
-            
-            
-              <p class="caption"><span class="caption-text">Table of Contents</span></p>
+                <p class="caption"><span class="caption-text">Table of Contents</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Getting started</a><ul>
@@ -115,54 +118,34 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">Personal Cancer Genome Reporter</a>
-        
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Personal Cancer Genome Reporter</a>
       </nav>
 
 
+      
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
           
 
-
-
-
-
-
-
-
-
-
-
-
+ 
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
-
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html">Docs</a> &raquo;</li>
-        
-      <li>Getting started</li>
-    
-    
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Getting started</li>
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="_sources/getting_started.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -173,12 +156,12 @@
 <div class="section" id="step-0-python">
 <h2>STEP 0: Python<a class="headerlink" href="#step-0-python" title="Permalink to this headline">¶</a></h2>
 <p>An installation of Python (version <em>3.6</em>) is required to run PCGR. Check
-that Python is installed by typing <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">--version</span></code> in your terminal
+that Python is installed by typing <code class="docutils literal"><span class="pre">python</span> <span class="pre">--version</span></code> in your terminal
 window. In addition, a <a class="reference external" href="https://github.com/uiri/toml">Python library</a>
 for parsing configuration files encoded with
 <a class="reference external" href="https://github.com/toml-lang/toml">TOML</a> is needed. To install,
 simply run the following command:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">toml</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">toml</span>
 </pre></div>
 </div>
 </div>
@@ -199,8 +182,8 @@ versions of Docker/Windows do not work with PCGR (an example being
 volumes</a>)</li>
 </ul>
 </li>
-<li>Test that Docker is running, e.g.&nbsp;by typing <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">ps</span></code> or
-<code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">images</span></code> in the terminal window</li>
+<li>Test that Docker is running, e.g. by typing <code class="docutils literal"><span class="pre">docker</span> <span class="pre">ps</span></code> or
+<code class="docutils literal"><span class="pre">docker</span> <span class="pre">images</span></code> in the terminal window</li>
 <li>Adjust the computing resources dedicated to the Docker, i.e.:<ul>
 <li>Memory: minimum 5GB</li>
 <li>CPUs: minimum 4</li>
@@ -216,8 +199,10 @@ X</a></li>
 <h3>Development version<a class="headerlink" href="#development-version" title="Permalink to this headline">¶</a></h3>
 <ol class="loweralpha simple">
 <li>Clone the PCGR GitHub repository:
-<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/sigven/pcgr.git</span></code></li>
-<li>Download and unpack the latest data bundles in the PCGR directory<ul>
+<code class="docutils literal"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/sigven/pcgr.git</span></code></li>
+<li>Download and unpack the latest data bundles in the PCGR directory</li>
+</ol>
+<ul class="simple">
 <li><a class="reference external" href="https://drive.google.com/open?id=1MREECbygW47ttJySgfibBpX7romBrb_Q">grch37 data bundle -
 20181026</a>
 (approx 9.2Gb)</li>
@@ -225,46 +210,48 @@ X</a></li>
 20181026</a>
 (approx 13Gb)</li>
 <li><em>Unpacking</em>:
-<code class="docutils literal notranslate"><span class="pre">gzip</span> <span class="pre">-dc</span> <span class="pre">pcgr.databundle.grch37.YYYYMMDD.tgz</span> <span class="pre">|</span> <span class="pre">tar</span> <span class="pre">xvf</span> <span class="pre">-</span></code></li>
+<code class="docutils literal"><span class="pre">gzip</span> <span class="pre">-dc</span> <span class="pre">pcgr.databundle.grch37.YYYYMMDD.tgz</span> <span class="pre">|</span> <span class="pre">tar</span> <span class="pre">xvf</span> <span class="pre">-</span></code></li>
 </ul>
-</li>
+<ol class="loweralpha simple" start="3">
 <li>Pull the <a class="reference external" href="https://hub.docker.com/r/sigven/pcgr/">PCGR Docker image
-(dev)</a> from DockerHub
+(*dev*)</a> from DockerHub
 (approx 5.1Gb):<ul>
-<li><code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">pull</span> <span class="pre">sigven/pcgr:dev</span></code> (PCGR annotation engine)</li>
+<li><code class="docutils literal"><span class="pre">docker</span> <span class="pre">pull</span> <span class="pre">sigven/pcgr:dev</span></code> (PCGR annotation engine)</li>
 </ul>
 </li>
 </ol>
 </div>
 <div class="section" id="latest-release">
 <h3>Latest release<a class="headerlink" href="#latest-release" title="Permalink to this headline">¶</a></h3>
-<ol class="loweralpha">
-<li><p class="first">Download and unpack the <a class="reference external" href="https://github.com/sigven/pcgr/releases/tag/v6.2.1">latest software release
-(0.6.2.1)</a></p>
+<ol class="loweralpha simple">
+<li>Download and unpack the <a class="reference external" href="https://github.com/sigven/pcgr/releases/tag/v6.2.1">latest software release
+(0.6.2.1)</a></li>
+<li>Download and unpack the assembly-specific data bundle in the PCGR
+directory</li>
+</ol>
+<ul>
+<li><p class="first"><a class="reference external" href="https://drive.google.com/open?id=1cGBAmAh5t4miIeRrrd0zHsPCFToOr0Lf">grch37 data
+bundle</a>
+(approx 9.2Gb)</p>
 </li>
-<li><p class="first">Download and unpack the assembly-specific data bundle in the PCGR
-directory</p>
-<ul class="simple">
-<li><a class="reference external" href="https://drive.google.com/open?id=1cGBAmAh5t4miIeRrrd0zHsPCFToOr0Lf">grch37 data
+<li><p class="first"><a class="reference external" href="https://drive.google.com/open?id=12q3rr7xpdBfaefRi0ysFHbH34kehNZOV">grch38 data
 bundle</a>
-(approx 9.2Gb)</li>
-<li><a class="reference external" href="https://drive.google.com/open?id=12q3rr7xpdBfaefRi0ysFHbH34kehNZOV">grch38 data
-bundle</a>
-(approx 13Gb)</li>
-<li><em>Unpacking</em>:
-<code class="docutils literal notranslate"><span class="pre">gzip</span> <span class="pre">-dc</span> <span class="pre">pcgr.databundle.grch37.YYYYMMDD.tgz</span> <span class="pre">|</span> <span class="pre">tar</span> <span class="pre">xvf</span> <span class="pre">-</span></code></li>
-</ul>
+(approx 13Gb)</p>
+</li>
+<li><p class="first"><em>Unpacking</em>:
+<code class="docutils literal"><span class="pre">gzip</span> <span class="pre">-dc</span> <span class="pre">pcgr.databundle.grch37.YYYYMMDD.tgz</span> <span class="pre">|</span> <span class="pre">tar</span> <span class="pre">xvf</span> <span class="pre">-</span></code></p>
 <p>A <em>data/</em> folder within the <em>pcgr-X.X</em> software folder should now
 have been produced</p>
 </li>
-<li><p class="first">Pull the <a class="reference external" href="https://hub.docker.com/r/sigven/pcgr/">PCGR Docker image
-(0.6.2.1)</a> from DockerHub
-(approx 5.1Gb):</p>
-<ul class="simple">
-<li><code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">pull</span> <span class="pre">sigven/pcgr:0.6.2.1</span></code> (PCGR annotation engine)</li>
 </ul>
-</li>
+<ol class="loweralpha simple" start="3">
+<li>Pull the <a class="reference external" href="https://hub.docker.com/r/sigven/pcgr/">PCGR Docker image
+(0.6.2.1)</a> from DockerHub
+(approx 5.1Gb):</li>
 </ol>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">docker</span> <span class="pre">pull</span> <span class="pre">sigven/pcgr:0.6.2.1</span></code> (PCGR annotation engine)</li>
+</ul>
 </div>
 </div>
 <div class="section" id="step-3-input-preprocessing">
@@ -282,7 +269,7 @@ indexed using <a class="reference external" href="http://www.htslib.org/doc/tabi
 <a class="reference external" href="http://www.htslib.org/doc/tabix.html">tabix</a></li>
 <li>If the input VCF contains multi-allelic sites, these will be subject
 to <a class="reference external" href="http://genome.sph.umich.edu/wiki/Vt#Decompose">decomposition</a></li>
-<li>Variants used for reporting should be designated as ‘PASS’ in the VCF
+<li>Variants used for reporting should be designated as &#8216;PASS&#8217; in the VCF
 FILTER column</li>
 </ul>
 <p>The tab-separated values file with copy number aberrations <strong>MUST</strong>
@@ -296,10 +283,10 @@ contain the following four columns:</p>
 <p>Here, <em>Chromosome</em>, <em>Start</em>, and <em>End</em> denote the chromosomal segment,
 and <strong>Segment_Mean</strong> denotes the log(2) ratio for a particular segment,
 which is a common output of somatic copy number alteration callers. Note
-that coordinates must be <strong>one-based</strong> (i.e.&nbsp;chromosomes start at 1, not
+that coordinates must be <strong>one-based</strong> (i.e. chromosomes start at 1, not
 0). Below shows the initial part of a copy number segment file that is
-formatted correctly according to PCGR’s requirements:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Chromosome</span> <span class="n">Start</span>   <span class="n">End</span> <span class="n">Segment_Mean</span>
+formatted correctly according to PCGR&#8217;s requirements:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Chromosome</span> <span class="n">Start</span>   <span class="n">End</span> <span class="n">Segment_Mean</span>
 <span class="mi">1</span> <span class="mi">3218329</span> <span class="mi">3550598</span> <span class="mf">0.0024</span>
 <span class="mi">1</span> <span class="mi">3552451</span> <span class="mi">4593614</span> <span class="mf">0.1995</span>
 <span class="mi">1</span> <span class="mi">4593663</span> <span class="mi">6433129</span> <span class="o">-</span><span class="mf">1.0277</span>
@@ -318,9 +305,9 @@ workflow, related to the following:</p>
 <li>Sequencing depth/allelic support thresholds</li>
 <li>MSI prediction</li>
 <li>Mutational signatures analysis</li>
-<li>Mutational burden analysis (e.g.&nbsp;target size)</li>
+<li>Mutational burden analysis (e.g. target size)</li>
 <li>VCF to MAF conversion</li>
-<li>Tumor-only analysis options (i.e.&nbsp;exclusion of germline
+<li>Tumor-only analysis options (i.e. exclusion of germline
 variants/enrichment for somatic calls)</li>
 <li>VEP/<em>vcfanno</em> options</li>
 <li>Log-ratio thresholds for gains/losses in CNA analysis</li>
@@ -335,7 +322,7 @@ workflow.</p>
 <h2>STEP 5: Run example<a class="headerlink" href="#step-5-run-example" title="Permalink to this headline">¶</a></h2>
 <p>A tumor sample report is generated by calling the Python script
 <strong>pcgr.py</strong>, which takes the following arguments and options:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>usage: pcgr.py [-h] [--input_vcf INPUT_VCF] [--input_cna INPUT_CNA]
+<div class="highlight-default"><div class="highlight"><pre><span></span>usage: pcgr.py [-h] [--input_vcf INPUT_VCF] [--input_cna INPUT_CNA]
         [--force_overwrite] [--version] [--basic]
         [--docker-uid DOCKER_USER_ID] [--no-docker]
         pcgr_dir output_dir {grch37,grch38} configuration_file
@@ -383,24 +370,24 @@ sequenced within TCGA (<strong>GRCh37</strong> only). It also contains PCGR
 configuration files customized for these samples. A report for a
 colorectal tumor case can be generated by running the following command
 in your terminal window:</p>
-<p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">pcgr.py</span> <span class="pre">--input_vcf</span> <span class="pre">~/pcgr-0.6.2.1/examples/tumor_sample.COAD.vcf.gz</span></code>
-<code class="docutils literal notranslate"><span class="pre">--input_cna</span> <span class="pre">~/pcgr-0.6.2.1/examples/tumor_sample.COAD.cna.tsv</span></code>
-<code class="docutils literal notranslate"><span class="pre">~/pcgr-0.6.2.1</span> <span class="pre">~/pcgr-0.6.2.1/examples</span> <span class="pre">grch37</span> <span class="pre">~/pcgr-0.6.2.1/examples/pcgr_conf.COAD.toml</span> <span class="pre">tumor_sample.COAD</span></code></p>
+<p><code class="docutils literal"><span class="pre">python</span> <span class="pre">pcgr.py</span> <span class="pre">--input_vcf</span> <span class="pre">~/pcgr-0.6.2.1/examples/tumor_sample.COAD.vcf.gz</span></code>
+<code class="docutils literal"><span class="pre">--input_cna</span> <span class="pre">~/pcgr-0.6.2.1/examples/tumor_sample.COAD.cna.tsv</span></code>
+<code class="docutils literal"><span class="pre">~/pcgr-0.6.2.1</span> <span class="pre">~/pcgr-0.6.2.1/examples</span> <span class="pre">grch37</span> <span class="pre">~/pcgr-0.6.2.1/examples/pcgr_conf.COAD.toml</span> <span class="pre">tumor_sample.COAD</span></code></p>
 <p>This command will run the Docker-based PCGR workflow and produce the
 following output files in the <em>examples</em> folder:</p>
 <ol class="arabic simple">
 <li><strong>tumor_sample.COAD.pcgr_acmg.grch37.html</strong> - An interactive HTML
 report for clinical interpretation</li>
-<li><strong>tumor_sample.COAD.pcgr_acmg.grch37.pass.vcf.gz (.tbi)</strong> - Bgzipped
-VCF file with rich set of annotations for precision oncology</li>
+<li><strong>tumor_sample.COAD.pcgr_acmg.grch37.pass.vcf.gz (.tbi)</strong> -
+Bgzipped VCF file with rich set of annotations for precision oncology</li>
 <li><strong>tumor_sample.COAD.pcgr_acmg.grch37.pass.tsv.gz</strong> - Compressed
 vcf2tsv-converted file with rich set of annotations for precision
 oncology</li>
 <li><strong>tumor_sample.COAD.pcgr_acmg.grch37.snvs_indels.tiers.tsv</strong> -
 Tab-separated values file with variants organized according to tiers
 of functional relevance</li>
-<li><strong>tumor_sample.COAD.pcgr_acmg.grch37.json.gz</strong> - Compressed JSON dump
-of HTML report content</li>
+<li><strong>tumor_sample.COAD.pcgr_acmg.grch37.json.gz</strong> - Compressed JSON
+dump of HTML report content</li>
 <li><strong>tumor_sample.COAD.pcgr_acmg.grch37.cna_segments.tsv.gz</strong> -
 Compressed tab-separated values file with annotations of gene
 transcripts that overlap with somatic copy number aberrations</li>
@@ -410,16 +397,15 @@ transcripts that overlap with somatic copy number aberrations</li>
 
 
            </div>
-           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="annotation_resources.html" class="btn btn-neutral float-right" title="Annotation resources" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="annotation_resources.html" class="btn btn-neutral float-right" title="Annotation resources" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="about.html" class="btn btn-neutral" title="About" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="about.html" class="btn btn-neutral" title="About" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -432,7 +418,7 @@ transcripts that overlap with somatic copy number aberrations</li>
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -451,27 +437,30 @@ transcripts that overlap with somatic copy number aberrations</li>
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
             VERSION:'dev',
-            LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
+            HAS_SOURCE:  true
         };
     </script>
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 
-  <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
 
+  
+  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
+          SphinxRtdTheme.StickyNav.enable();
       });
-  </script> 
+  </script>
+   
 
 </body>
 </html>
