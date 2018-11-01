@@ -3,6 +3,7 @@ name: pcgr
 channels:
   - bioconda
   - conda-forge
+  - vladsaveliev
   - defaults
   - anaconda
 
@@ -29,14 +30,16 @@ dependencies:
   - nlopt
   #
   # Perl (for VEP)
-  - perl-dbi
-  - perl-dbd-mysql
+#  - perl-dbi
+#  - perl-dbd-mysql
   - perl-bioperl
-  - ensembl-vep>=92
+#  - perl-set-intervaltree
+  - ensembl-vep>=94
   #
   # PCGR: R packages
-  - pandoc<2  # r-rmarkdown 1.6 doesn't support pandoc 2, and a more recent r-rmarkdown is not available on conda
-  - r
+#  - pandoc<2  # r-rmarkdown 1.6 doesn't support pandoc 2, and a more recent r-rmarkdown is not available on conda
+  - pandoc==2.3.1
+  - r-base==3.4.1
   - bioconductor-biocinstaller
   - r-purrr>=0.2.4  # to force the one from conda-forge to address this issue https://github.com/jbkunst/highcharter/issues/285
   - r-dplyr
@@ -55,13 +58,23 @@ dependencies:
   - r-ggplot2
   - r-dt
   - r-stringi>=1.1.7  # for pcgrr
-  - r-htmlwidgets>=1.0  # dependency requirement for DT (by default, 0.9 is getting installed)
+  - r-htmlwidgets>=1.0  # requirement for DT (by default, 0.9 is getting installed)
   - r-crosstalk
   - r-deconstructsigs
   - r-knitr>=1.17
   - r-rmarkdown
+#  - r-collapsibletree  # for CELLector. To be added with R 3.5.1 https://github.com/conda-forge/staged-recipes/pull/6782
+  - r-data.tree  # for collapsibleTree
+  - r-igraph     # for collapsibleTree
+  - r-configr    # -c vladsaveliev
+  - r-sunburstr  # for CELLector, -c vladsaveliev
+  - r-arules     # for CELLector, -c vladsaveliev
   - bioconductor-variantannotation
   - bioconductor-bsgenome.hsapiens.ucsc.hg19
   - bioconductor-bsgenome.hsapiens.ucsc.hg38
   - bioconductor-genomeinfodb
   - bioconductor-genomicranges  # GenomicRangesS4Vectors
+  - bioconductor-regioner
+  - bioconductor-mutationalpatterns
+  - pip:
+    - gdown
