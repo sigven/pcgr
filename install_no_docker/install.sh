@@ -51,9 +51,11 @@ EOT
 ### Few more R packages that are not on yet conda
 
 # The "options(unzip = )" hack to address the install_github issue under conda https://github.com/r-lib/devtools/issues/1722
+export TAR=/bin/tar  # to avoid "/bin/gtar: not found"
+
 R -e "library(devtools); options(unzip = '$(which unzip)'); devtools::install_github('mjkallen/rlogging')"
 #R -e "library(devtools); options(unzip = '$(which unzip)'); devtools::install_github('kent37/summarywidget', dependencies=FALSE)"  # added to conda env
-R -e "install.packages('configr', dependencies = T, repos = 'http://cran.us.r-project.org')"
+R -e "options(unzip = '$(which unzip)'); install.packages('configr', dependencies = T, repos = 'http://cran.us.r-project.org')"
 #R -e "install.packages('data.tree', dependencies = T, repos = 'http://cran.us.r-project.org')"  # doesn't work
 R -e "library(devtools); options(unzip = '$(which unzip)'); devtools::install_github('AdeelK93/collapsibleTree', dependencies=FALSE)"  # to avoid re-installing conda's Rcpp and others
 R -e "library(devtools); options(unzip = '$(which unzip)'); devtools::install_github('Francescojm/CELLector', dependencies=FALSE)"
