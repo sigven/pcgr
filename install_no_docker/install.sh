@@ -60,8 +60,6 @@ R -e "options(unzip = '$(which unzip)'); install.packages('configr', dependencie
 R -e "library(devtools); options(unzip = '$(which unzip)'); devtools::install_github('AdeelK93/collapsibleTree', dependencies=FALSE)"  # to avoid re-installing conda's Rcpp and others
 R -e "library(devtools); options(unzip = '$(which unzip)'); devtools::install_github('Francescojm/CELLector', dependencies=FALSE)"
 
-# ggplot2 is available in package repositories, but dev version is recommended
-R -e "library(devtools); options(unzip = '$(which unzip)'); devtools::install_github('hadley/ggplot2', dependencies=FALSE)"
 # This one is local
 SRC_DIR=${THIS_DIR}/../src
 R -e "library(devtools); devtools::install('${SRC_DIR}/R/pcgrr', dependencies=FALSE)"
