@@ -12,3 +12,4 @@ docs/_build/
 .DS_Store
 
 data
+install_no_docker/conda_packages/

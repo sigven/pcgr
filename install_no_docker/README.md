@@ -8,8 +8,8 @@ bash -x install_no_docker/install.sh
 
 # Install reference data for your genome build
 pip install gdown
-gdown https://drive.google.com/uc?id=1cGBAmAh5t4miIeRrrd0zHsPCFToOr0Lf -O - | tar xvfz - # grch37
-gdown https://drive.google.com/uc?id=12q3rr7xpdBfaefRi0ysFHbH34kehNZOV -O - | tar xvfz - # grch38
+gdown https://drive.google.com/uc?id=1MREECbygW47ttJySgfibBpX7romBrb_Q -O - | tar xvzf - # grch37
+gdown https://drive.google.com/uc?id=1Xsw0WcKPnWgJDolQfrZATU5suEFJ5BKG -O - | tar xvzf - # grch38
 ```
 
 The first script will install all dependencies from package repositories like Conda and CRAN. If you don't have conda 
