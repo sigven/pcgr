@@ -441,7 +441,6 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       output_dir = '/workdir/output'
       vep_dir = '/usr/local/share/vep/data'
       r_scripts_dir = '/'
-      python_scripts_dir = ''
 
    else:
       if host_directories['input_vcf_basename_host'] != 'NA':
@@ -454,18 +453,14 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       data_dir = host_directories['base_dir_host']
       output_dir = host_directories['output_dir_host']
       vep_dir = vepdb_dir_host
-
-      src_dir = os.path.join(host_directories['base_dir_host'], 'src')
-      python_scripts_dir = os.path.join(src_dir, 'pcgr')
-      os.environ['PYTHONPATH'] = os.path.join(python_scripts_dir, 'lib') + ((':' + os.environ['PYTHONPATH']) if 'PYTHONPATH' in os.environ else '')
-      r_scripts_dir = src_dir
+      r_scripts_dir = ''
 
    check_subprocess(docker_command_run1.replace("-u " + str(uid), "") + 'mkdir -p ' + output_dir + docker_command_run_end)
 
    ## verify VCF and CNA segment file
    logger = getlogger('pcgr-validate-input')
    logger.info("STEP 0: Validate input data")
-   vcf_validate_command = docker_command_run1 + os.path.join(python_scripts_dir, "pcgr_validate_input.py") + " " + data_dir + " " + str(input_vcf_docker) + " " + str(input_cna_docker) + " " + str(input_conf_docker) + " " + str(genome_assembly)
+   vcf_validate_command = docker_command_run1 + "pcgr_validate_input.py " + data_dir + " " + str(input_vcf_docker) + " " + str(input_cna_docker) + " " + str(input_conf_docker) + " " + str(genome_assembly)
    if not docker_image_version:
       vcf_validate_command += ' --output_dir ' + output_dir + docker_command_run_end
    else:
@@ -520,7 +515,7 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       print()
       logger = getlogger('pcgr-vcfanno')
       logger.info("STEP 2: Annotation for precision oncology with pcgr-vcfanno (ClinVar, dbNSFP, UniProtKB, cancerhotspots.org, CiVIC, CBMDB, DoCM, TCGA, ICGC-PCAWG, IntoGen_drivers)")
-      pcgr_vcfanno_command = str(docker_command_run2) + os.path.join(python_scripts_dir, "pcgr_vcfanno.py") + " --num_processes " + str(config_options['other']['n_vcfanno_proc']) + " --dbnsfp --docm --clinvar --icgc --civic --cbmdb --intogen_driver_mut --tcga --uniprot --cancer_hotspots --pcgr_onco_xref " + str(vep_vcf) + ".gz " + str(vep_vcfanno_vcf) + " " + os.path.join(data_dir, "data", str(genome_assembly)) + docker_command_run_end
+      pcgr_vcfanno_command = str(docker_command_run2) + "pcgr_vcfanno.py --num_processes " + str(config_options['other']['n_vcfanno_proc']) + " --dbnsfp --docm --clinvar --icgc --civic --cbmdb --intogen_driver_mut --tcga --uniprot --cancer_hotspots --pcgr_onco_xref " + str(vep_vcf) + ".gz " + str(vep_vcfanno_vcf) + " " + os.path.join(data_dir, "data", str(genome_assembly)) + docker_command_run_end
       check_subprocess(pcgr_vcfanno_command)
       logger.info("Finished")
       #return
@@ -528,7 +523,7 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       ## summarise command
       print()
       logger = getlogger("pcgr-summarise")
-      pcgr_summarise_command = str(docker_command_run2) + os.path.join(python_scripts_dir, "pcgr_summarise.py") + " " + str(vep_vcfanno_vcf) + ".gz " + os.path.join(data_dir, "data", str(genome_assembly)) + docker_command_run_end
+      pcgr_summarise_command = str(docker_command_run2) + "pcgr_summarise.py " + str(vep_vcfanno_vcf) + ".gz " + os.path.join(data_dir, "data", str(genome_assembly)) + docker_command_run_end
       logger.info("STEP 3: Cancer gene annotations with pcgr-summarise")
       check_subprocess(pcgr_summarise_command)
 
@@ -543,7 +538,7 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       check_subprocess(create_output_vcf_command4)
 
       ## vcf2tsv command
-      pcgr_vcf2tsv_command = str(docker_command_run2) + os.path.join(python_scripts_dir, "vcf2tsv.py") + " " + str(output_pass_vcf) + " --compress " + str(output_pass_tsv) + docker_command_run_end
+      pcgr_vcf2tsv_command = str(docker_command_run2) + "vcf2tsv.py " + str(output_pass_vcf) + " --compress " + str(output_pass_tsv) + docker_command_run_end
       logger.info("Converting VCF to TSV with https://github.com/sigven/vcf2tsv")
       check_subprocess(pcgr_vcf2tsv_command)
       check_subprocess(clean_command)
@@ -557,7 +552,7 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
    if not basic:
       logger = getlogger('pcgr-writer')
       logger.info("STEP 4: Generation of output files - variant interpretation report for precision oncology")
-      pcgr_report_command = (docker_command_run1 + os.path.join(r_scripts_dir, "pcgr.R") + " " + output_dir + " " + str(output_pass_tsv) + ".gz" + " " + input_cna_docker + " " + str(sample_id) + " " + input_conf_docker + " " + str(pcgr_version) + " " + genome_assembly + " " + os.path.join(data_dir, docker_command_run_end))
+      pcgr_report_command = (docker_command_run1 + os.path.join(r_scripts_dir, "pcgr.R") + " " + output_dir + " " + str(output_pass_tsv) + ".gz" + " " + input_cna_docker + " " + str(sample_id) + " " + input_conf_docker + " " + str(pcgr_version) + " " + genome_assembly + " " + data_dir + docker_command_run_end)
       #print(pcgr_report_command)
       check_subprocess(pcgr_report_command)
       logger.info("Finished")

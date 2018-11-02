@@ -2,8 +2,7 @@ sudo: required
 
 language: python
 python:
-  # We don't actually use the Travis Python (since we are on conda), but this keeps it organized.
-  - "3.6"
+  - "3.6"  # required, otherwise conda will try to clash with py2 packages
 
 ## Download data bundles. (skipping this because of lack of disk space on Travis)
 #before_install:
@@ -12,13 +11,29 @@ python:
 #  - gdown.pl/gdown.pl https://drive.google.com/file/d/1cGBAmAh5t4miIeRrrd0zHsPCFToOr0Lf/view pcgr.databundle.grch37.tgz
 #  - gzip -dc pcgr.databundle.grch37.tgz | tar xvf -
 
+before_install:
+  # Get and install anaconda (https://conda.io/docs/travis.html)
+  - wget -nv https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH=$HOME/miniconda/bin:$PATH
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda info -a  # Useful for debugging any issues with conda
 
 install:
-  # Installing (the non-docker version)
-  - source install_no_docker/install.sh
+  - export PACKAGE_NAME=pcgr
+  # Setting up channels and install dependencies
+  - conda config --add channels defaults --add channels pcgr --add channels bioconda --add channels conda-forge
+  - conda install -q python=$TRAVIS_PYTHON_VERSION pip requests conda-build jinja2 anaconda-client
+  # Building package
+  - conda build install_no_docker/conda_pkg/${PACKAGE_NAME}
+  - conda build install_no_docker/conda_pkg/${PACKAGE_NAME}_dockerized
+  - conda install --use-local ${PACKAGE_NAME}
 
 script:
-  - source install_no_docker/load_pcgr.sh
+  - pcgr.py --version
+  - python -c "import pcgr"
   # (Skipping running an actual test because we don't have enough Travis disk space for full data bundles)
   # - python pcgr.py \
   #   --input_vcf examples/tumor_sample.COAD.vcf.gz \
@@ -29,3 +44,13 @@ script:
   #   examples/pcgr_conf.COAD.toml \
   #   tumor_sample.COAD
   #   --no-docker
+
+deploy:
+  # Deploy to Anaconda.org
+  - provider: script
+    script:
+      conda convert --platform osx-64 $HOME/miniconda/conda-bld/linux-64/${PACKAGE_NAME}_dockerized-*.tar.bz2 --output-dir $HOME/miniconda/conda-bld/ &&
+      anaconda -t ${ANACONDA_TOKEN} upload -u pcgr $HOME/miniconda/conda-bld/**/${PACKAGE_NAME}*.tar.bz2
+    on:
+      tags: true
+    skip_cleanup: true
