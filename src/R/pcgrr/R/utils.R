@@ -1042,7 +1042,7 @@ get_calls <- function(tsv_gz_file, pcgr_data, pcgr_version, sample_name, pcgr_co
 
   if ("LoF" %in% colnames(vcf_data_df)){
     vcf_data_df$LOSS_OF_FUNCTION <- FALSE
-    if(nrow(vcf_data_df[!is.na(vcf_data_df$LoF),]) > 0){
+    if(nrow(vcf_data_df[!is.na(vcf_data_df$LoF) & vcf_data_df$LoF == "HC", ]) > 0){
       vcf_data_df[!is.na(vcf_data_df$LoF) & vcf_data_df$LoF == "HC", ]$LOSS_OF_FUNCTION <- TRUE
     }
     ## Ignore LoF predictions for missense variants (bug in LofTee?)
