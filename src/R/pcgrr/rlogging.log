@@ -2398,3 +2398,312 @@
 [2018-10-27 11:33:10][INFO] TIER 3: Variants of uncertain significance - noncancer_phenotype: n = 2
 [2018-10-27 11:33:10][INFO] TIER 3: Other unclassified variants - noncancer_phenotype: n = 1
 [2018-10-27 11:33:45][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2018-11-01 13:56:35][INFO] Inferred weighted contribution of S1: 0.115
+[2018-11-01 13:56:35][INFO] Inferred weighted contribution of S3: 0.233
+[2018-11-01 13:56:35][INFO] Inferred weighted contribution of S5: 0.518
+[2018-11-01 13:56:35][INFO] Inferred weighted contribution of S11: 0.06
+[2018-11-01 13:56:35][INFO] ------
+[2018-11-01 14:00:47][INFO] Inferred weighted contribution of S1: 0.093
+[2018-11-01 14:00:47][INFO] Inferred weighted contribution of S3: 0.271
+[2018-11-01 14:00:47][INFO] Inferred weighted contribution of S5: 0.439
+[2018-11-01 14:00:47][INFO] Inferred weighted contribution of S15: 0.108
+[2018-11-01 14:00:47][INFO] ------
+[2018-11-01 14:01:28][INFO] Inferred weighted contribution of S1: 0.093
+[2018-11-01 14:01:28][INFO] Inferred weighted contribution of S3: 0.271
+[2018-11-01 14:01:28][INFO] Inferred weighted contribution of S5: 0.439
+[2018-11-01 14:01:28][INFO] Inferred weighted contribution of S15: 0.108
+[2018-11-01 14:01:29][INFO] ------
+[2018-11-01 14:01:30][INFO] Inferred weighted contribution of S4: 0.386
+[2018-11-01 14:01:30][INFO] Inferred weighted contribution of S6: 0.173
+[2018-11-01 14:01:30][INFO] Inferred weighted contribution of S11: 0.08
+[2018-11-01 14:01:30][INFO] Inferred weighted contribution of S12: 0.096
+[2018-11-01 14:01:30][INFO] Inferred weighted contribution of S18: 0.236
+[2018-11-01 14:01:30][INFO] ------
+[2018-11-01 14:01:31][INFO] Inferred weighted contribution of S3: 0.307
+[2018-11-01 14:01:31][INFO] Inferred weighted contribution of S5: 0.194
+[2018-11-01 14:01:31][INFO] Inferred weighted contribution of S6: 0.159
+[2018-11-01 14:01:31][INFO] Inferred weighted contribution of S19: 0.225
+[2018-11-01 14:01:31][INFO] Inferred weighted contribution of S29: 0.08
+[2018-11-01 14:01:31][INFO] ------
+[2018-11-01 14:01:33][INFO] Inferred weighted contribution of S1: 0.134
+[2018-11-01 14:01:33][INFO] Inferred weighted contribution of S5: 0.447
+[2018-11-01 14:01:33][INFO] Inferred weighted contribution of S9: 0.224
+[2018-11-01 14:01:33][INFO] Inferred weighted contribution of S15: 0.102
+[2018-11-01 14:01:33][INFO] ------
+[2018-11-01 14:01:34][INFO] Inferred weighted contribution of S1: 0.197
+[2018-11-01 14:01:34][INFO] Inferred weighted contribution of S3: 0.385
+[2018-11-01 14:01:34][INFO] Inferred weighted contribution of S5: 0.211
+[2018-11-01 14:01:34][INFO] Inferred weighted contribution of S23: 0.109
+[2018-11-01 14:01:34][INFO] ------
+[2018-11-01 14:01:36][INFO] Inferred weighted contribution of S3: 0.238
+[2018-11-01 14:01:36][INFO] Inferred weighted contribution of S5: 0.276
+[2018-11-01 14:01:36][INFO] Inferred weighted contribution of S6: 0.217
+[2018-11-01 14:01:36][INFO] Inferred weighted contribution of S15: 0.159
+[2018-11-01 14:01:36][INFO] Inferred weighted contribution of S29: 0.079
+[2018-11-01 14:01:36][INFO] ------
+[2018-11-01 14:01:37][INFO] Inferred weighted contribution of S3: 0.229
+[2018-11-01 14:01:37][INFO] Inferred weighted contribution of S5: 0.283
+[2018-11-01 14:01:37][INFO] Inferred weighted contribution of S6: 0.11
+[2018-11-01 14:01:37][INFO] Inferred weighted contribution of S15: 0.134
+[2018-11-01 14:01:37][INFO] Inferred weighted contribution of S19: 0.2
+[2018-11-01 14:01:37][INFO] ------
+[2018-11-01 14:01:39][INFO] Inferred weighted contribution of S1: 0.122
+[2018-11-01 14:01:39][INFO] Inferred weighted contribution of S3: 0.234
+[2018-11-01 14:01:39][INFO] Inferred weighted contribution of S5: 0.342
+[2018-11-01 14:01:39][INFO] Inferred weighted contribution of S6: 0.197
+[2018-11-01 14:01:39][INFO] Inferred weighted contribution of S11: 0.066
+[2018-11-01 14:01:39][INFO] ------
+[2018-11-01 14:01:40][INFO] Inferred weighted contribution of S1: 0.207
+[2018-11-01 14:01:40][INFO] Inferred weighted contribution of S3: 0.198
+[2018-11-01 14:01:40][INFO] Inferred weighted contribution of S5: 0.392
+[2018-11-01 14:01:40][INFO] Inferred weighted contribution of S15: 0.142
+[2018-11-01 14:01:40][INFO] ------
+[2018-11-01 14:01:42][INFO] Inferred weighted contribution of S3: 0.342
+[2018-11-01 14:01:42][INFO] Inferred weighted contribution of S5: 0.39
+[2018-11-01 14:01:42][INFO] Inferred weighted contribution of S6: 0.062
+[2018-11-01 14:01:42][INFO] Inferred weighted contribution of S23: 0.071
+[2018-11-01 14:01:42][INFO] Inferred weighted contribution of S29: 0.076
+[2018-11-01 14:01:42][INFO] ------
+[2018-11-01 14:01:43][INFO] Inferred weighted contribution of S2: 0.122
+[2018-11-01 14:01:43][INFO] Inferred weighted contribution of S3: 0.124
+[2018-11-01 14:01:43][INFO] Inferred weighted contribution of S5: 0.263
+[2018-11-01 14:01:43][INFO] Inferred weighted contribution of S11: 0.136
+[2018-11-01 14:01:43][INFO] Inferred weighted contribution of S29: 0.3
+[2018-11-01 14:01:43][INFO] ------
+[2018-11-01 14:01:45][INFO] Inferred weighted contribution of S1: 0.228
+[2018-11-01 14:01:45][INFO] Inferred weighted contribution of S3: 0.273
+[2018-11-01 14:01:45][INFO] Inferred weighted contribution of S5: 0.21
+[2018-11-01 14:01:45][INFO] Inferred weighted contribution of S9: 0.171
+[2018-11-01 14:01:45][INFO] Inferred weighted contribution of S15: 0.074
+[2018-11-01 14:01:45][INFO] ------
+[2018-11-01 14:01:46][INFO] Inferred weighted contribution of S4: 0.122
+[2018-11-01 14:01:46][INFO] Inferred weighted contribution of S5: 0.481
+[2018-11-01 14:01:46][INFO] Inferred weighted contribution of S6: 0.241
+[2018-11-01 14:01:46][INFO] ------
+[2018-11-01 14:01:48][INFO] Inferred weighted contribution of S1: 0.115
+[2018-11-01 14:01:48][INFO] Inferred weighted contribution of S5: 0.333
+[2018-11-01 14:01:48][INFO] Inferred weighted contribution of S9: 0.245
+[2018-11-01 14:01:48][INFO] Inferred weighted contribution of S21: 0.065
+[2018-11-01 14:01:48][INFO] Inferred weighted contribution of S24: 0.116
+[2018-11-01 14:01:48][INFO] Inferred weighted contribution of S30: 0.126
+[2018-11-01 14:01:48][INFO] ------
+[2018-11-01 14:01:49][INFO] Inferred weighted contribution of S1: 0.103
+[2018-11-01 14:01:49][INFO] Inferred weighted contribution of S3: 0.262
+[2018-11-01 14:01:49][INFO] Inferred weighted contribution of S5: 0.387
+[2018-11-01 14:01:49][INFO] Inferred weighted contribution of S11: 0.089
+[2018-11-01 14:01:49][INFO] Inferred weighted contribution of S15: 0.14
+[2018-11-01 14:01:49][INFO] ------
+[2018-11-01 14:01:51][INFO] Inferred weighted contribution of S5: 0.361
+[2018-11-01 14:01:51][INFO] Inferred weighted contribution of S6: 0.198
+[2018-11-01 14:01:51][INFO] Inferred weighted contribution of S9: 0.235
+[2018-11-01 14:01:51][INFO] Inferred weighted contribution of S11: 0.067
+[2018-11-01 14:01:51][INFO] Inferred weighted contribution of S19: 0.082
+[2018-11-01 14:01:51][INFO] ------
+[2018-11-01 14:01:52][INFO] Inferred weighted contribution of S1: 0.102
+[2018-11-01 14:01:52][INFO] Inferred weighted contribution of S5: 0.564
+[2018-11-01 14:01:52][INFO] Inferred weighted contribution of S6: 0.116
+[2018-11-01 14:01:52][INFO] Inferred weighted contribution of S17: 0.101
+[2018-11-01 14:01:52][INFO] Inferred weighted contribution of S28: 0.067
+[2018-11-01 14:01:52][INFO] ------
+[2018-11-01 14:01:54][INFO] Inferred weighted contribution of S1: 0.131
+[2018-11-01 14:01:54][INFO] Inferred weighted contribution of S3: 0.248
+[2018-11-01 14:01:54][INFO] Inferred weighted contribution of S5: 0.154
+[2018-11-01 14:01:54][INFO] Inferred weighted contribution of S15: 0.266
+[2018-11-01 14:01:54][INFO] Inferred weighted contribution of S19: 0.148
+[2018-11-01 14:01:54][INFO] ------
+[2018-11-01 14:01:55][INFO] Inferred weighted contribution of S1: 0.084
+[2018-11-01 14:01:55][INFO] Inferred weighted contribution of S5: 0.531
+[2018-11-01 14:01:55][INFO] Inferred weighted contribution of S15: 0.162
+[2018-11-01 14:01:55][INFO] Inferred weighted contribution of S24: 0.071
+[2018-11-01 14:01:55][INFO] Inferred weighted contribution of S30: 0.126
+[2018-11-01 14:01:55][INFO] ------
+[2018-11-01 14:01:57][INFO] Inferred weighted contribution of S1: 0.274
+[2018-11-01 14:01:57][INFO] Inferred weighted contribution of S5: 0.428
+[2018-11-01 14:01:57][INFO] Inferred weighted contribution of S9: 0.143
+[2018-11-01 14:01:57][INFO] Inferred weighted contribution of S11: 0.065
+[2018-11-01 14:01:57][INFO] Inferred weighted contribution of S15: 0.062
+[2018-11-01 14:01:57][INFO] ------
+[2018-11-01 14:01:58][INFO] Inferred weighted contribution of S1: 0.28
+[2018-11-01 14:01:58][INFO] Inferred weighted contribution of S3: 0.175
+[2018-11-01 14:01:58][INFO] Inferred weighted contribution of S5: 0.207
+[2018-11-01 14:01:58][INFO] Inferred weighted contribution of S9: 0.127
+[2018-11-01 14:01:58][INFO] Inferred weighted contribution of S15: 0.158
+[2018-11-01 14:01:58][INFO] ------
+[2018-11-01 14:01:59][INFO] Inferred weighted contribution of S5: 0.434
+[2018-11-01 14:01:59][INFO] Inferred weighted contribution of S6: 0.183
+[2018-11-01 14:01:59][INFO] Inferred weighted contribution of S9: 0.07
+[2018-11-01 14:01:59][INFO] Inferred weighted contribution of S19: 0.239
+[2018-11-01 14:01:59][INFO] ------
+[2018-11-01 14:02:01][INFO] Inferred weighted contribution of S1: 0.196
+[2018-11-01 14:02:01][INFO] Inferred weighted contribution of S5: 0.328
+[2018-11-01 14:02:01][INFO] Inferred weighted contribution of S6: 0.084
+[2018-11-01 14:02:01][INFO] Inferred weighted contribution of S9: 0.175
+[2018-11-01 14:02:01][INFO] Inferred weighted contribution of S24: 0.109
+[2018-11-01 14:02:01][INFO] Inferred weighted contribution of S30: 0.107
+[2018-11-01 14:02:01][INFO] ------
+[2018-11-01 14:02:03][INFO] Inferred weighted contribution of S3: 0.231
+[2018-11-01 14:02:03][INFO] Inferred weighted contribution of S5: 0.391
+[2018-11-01 14:02:03][INFO] Inferred weighted contribution of S6: 0.178
+[2018-11-01 14:02:03][INFO] Inferred weighted contribution of S29: 0.091
+[2018-11-01 14:02:03][INFO] ------
+[2018-11-01 14:02:04][INFO] Inferred weighted contribution of S1: 0.097
+[2018-11-01 14:02:04][INFO] Inferred weighted contribution of S5: 0.52
+[2018-11-01 14:02:04][INFO] Inferred weighted contribution of S9: 0.195
+[2018-11-01 14:02:04][INFO] Inferred weighted contribution of S25: 0.088
+[2018-11-01 14:02:04][INFO] ------
+[2018-11-01 14:02:06][INFO] Inferred weighted contribution of S3: 0.348
+[2018-11-01 14:02:06][INFO] Inferred weighted contribution of S5: 0.12
+[2018-11-01 14:02:06][INFO] Inferred weighted contribution of S6: 0.128
+[2018-11-01 14:02:06][INFO] Inferred weighted contribution of S9: 0.22
+[2018-11-01 14:02:06][INFO] Inferred weighted contribution of S30: 0.136
+[2018-11-01 14:02:06][INFO] ------
+[2018-11-01 14:02:07][INFO] Inferred weighted contribution of S1: 0.178
+[2018-11-01 14:02:07][INFO] Inferred weighted contribution of S5: 0.385
+[2018-11-01 14:02:07][INFO] Inferred weighted contribution of S6: 0.066
+[2018-11-01 14:02:07][INFO] Inferred weighted contribution of S19: 0.226
+[2018-11-01 14:02:07][INFO] Inferred weighted contribution of S30: 0.098
+[2018-11-01 14:02:07][INFO] ------
+[2018-11-01 14:02:08][INFO] Inferred weighted contribution of S5: 0.64
+[2018-11-01 14:02:08][INFO] Inferred weighted contribution of S6: 0.157
+[2018-11-01 14:02:08][INFO] Inferred weighted contribution of S11: 0.094
+[2018-11-01 14:02:08][INFO] ------
+[2018-11-01 14:02:10][INFO] Inferred weighted contribution of S1: 0.107
+[2018-11-01 14:02:10][INFO] Inferred weighted contribution of S5: 0.36
+[2018-11-01 14:02:10][INFO] Inferred weighted contribution of S6: 0.198
+[2018-11-01 14:02:10][INFO] Inferred weighted contribution of S9: 0.161
+[2018-11-01 14:02:10][INFO] Inferred weighted contribution of S25: 0.145
+[2018-11-01 14:02:10][INFO] ------
+[2018-11-01 14:02:11][INFO] Inferred weighted contribution of S1: 0.065
+[2018-11-01 14:02:11][INFO] Inferred weighted contribution of S4: 0.179
+[2018-11-01 14:02:11][INFO] Inferred weighted contribution of S5: 0.088
+[2018-11-01 14:02:11][INFO] Inferred weighted contribution of S6: 0.304
+[2018-11-01 14:02:11][INFO] Inferred weighted contribution of S11: 0.119
+[2018-11-01 14:02:11][INFO] Inferred weighted contribution of S18: 0.243
+[2018-11-01 14:02:12][INFO] ------
+[2018-11-01 14:02:13][INFO] Inferred weighted contribution of S3: 0.231
+[2018-11-01 14:02:13][INFO] Inferred weighted contribution of S5: 0.251
+[2018-11-01 14:02:13][INFO] Inferred weighted contribution of S6: 0.269
+[2018-11-01 14:02:13][INFO] Inferred weighted contribution of S8: 0.08
+[2018-11-01 14:02:13][INFO] Inferred weighted contribution of S15: 0.07
+[2018-11-01 14:02:13][INFO] Inferred weighted contribution of S24: 0.098
+[2018-11-01 14:02:13][INFO] ------
+[2018-11-01 14:02:14][INFO] Inferred weighted contribution of S1: 0.23
+[2018-11-01 14:02:14][INFO] Inferred weighted contribution of S3: 0.303
+[2018-11-01 14:02:14][INFO] Inferred weighted contribution of S5: 0.133
+[2018-11-01 14:02:14][INFO] Inferred weighted contribution of S12: 0.16
+[2018-11-01 14:02:14][INFO] Inferred weighted contribution of S15: 0.14
+[2018-11-01 14:02:14][INFO] ------
+[2018-11-01 14:02:16][INFO] Inferred weighted contribution of S1: 0.109
+[2018-11-01 14:02:16][INFO] Inferred weighted contribution of S5: 0.437
+[2018-11-01 14:02:16][INFO] Inferred weighted contribution of S9: 0.225
+[2018-11-01 14:02:16][INFO] Inferred weighted contribution of S15: 0.133
+[2018-11-01 14:02:16][INFO] ------
+[2018-11-01 14:02:17][INFO] Inferred weighted contribution of S1: 0.343
+[2018-11-01 14:02:17][INFO] Inferred weighted contribution of S5: 0.514
+[2018-11-01 14:02:17][INFO] ------
+[2018-11-01 14:02:19][INFO] Inferred weighted contribution of S1: 0.074
+[2018-11-01 14:02:19][INFO] Inferred weighted contribution of S5: 0.505
+[2018-11-01 14:02:19][INFO] Inferred weighted contribution of S6: 0.175
+[2018-11-01 14:02:19][INFO] Inferred weighted contribution of S19: 0.068
+[2018-11-01 14:02:19][INFO] Inferred weighted contribution of S24: 0.12
+[2018-11-01 14:02:19][INFO] ------
+[2018-11-01 14:02:20][INFO] Inferred weighted contribution of S5: 0.316
+[2018-11-01 14:02:20][INFO] Inferred weighted contribution of S6: 0.22
+[2018-11-01 14:02:20][INFO] Inferred weighted contribution of S8: 0.268
+[2018-11-01 14:02:20][INFO] Inferred weighted contribution of S9: 0.117
+[2018-11-01 14:02:20][INFO] ------
+[2018-11-01 14:02:22][INFO] Inferred weighted contribution of S5: 0.406
+[2018-11-01 14:02:22][INFO] Inferred weighted contribution of S6: 0.061
+[2018-11-01 14:02:22][INFO] Inferred weighted contribution of S15: 0.137
+[2018-11-01 14:02:22][INFO] Inferred weighted contribution of S19: 0.154
+[2018-11-01 14:02:22][INFO] Inferred weighted contribution of S25: 0.196
+[2018-11-01 14:02:22][INFO] ------
+[2018-11-01 14:02:23][INFO] Inferred weighted contribution of S1: 0.111
+[2018-11-01 14:02:23][INFO] Inferred weighted contribution of S2: 0.077
+[2018-11-01 14:02:23][INFO] Inferred weighted contribution of S5: 0.398
+[2018-11-01 14:02:23][INFO] Inferred weighted contribution of S11: 0.103
+[2018-11-01 14:02:23][INFO] Inferred weighted contribution of S29: 0.273
+[2018-11-01 14:02:23][INFO] ------
+[2018-11-01 14:02:24][INFO] Inferred weighted contribution of S1: 0.088
+[2018-11-01 14:02:24][INFO] Inferred weighted contribution of S3: 0.199
+[2018-11-01 14:02:24][INFO] Inferred weighted contribution of S5: 0.36
+[2018-11-01 14:02:25][INFO] Inferred weighted contribution of S6: 0.096
+[2018-11-01 14:02:25][INFO] Inferred weighted contribution of S19: 0.229
+[2018-11-01 14:02:25][INFO] ------
+[2018-11-01 14:02:26][INFO] Inferred weighted contribution of S1: 0.115
+[2018-11-01 14:02:26][INFO] Inferred weighted contribution of S3: 0.233
+[2018-11-01 14:02:26][INFO] Inferred weighted contribution of S5: 0.518
+[2018-11-01 14:02:26][INFO] Inferred weighted contribution of S11: 0.06
+[2018-11-01 14:02:26][INFO] ------
+[2018-11-01 18:09:26][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-11-01 18:09:26][INFO] Number of PASS variants: 1272
+[2018-11-01 18:09:26][INFO] Number of SNVs: 1222
+[2018-11-01 18:09:26][INFO] Number of deletions: 24
+[2018-11-01 18:09:26][INFO] Number of insertions: 0
+[2018-11-01 18:09:26][INFO] Number of block substitutions: 26
+[2018-11-01 18:09:26][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-11-01 18:09:28][INFO] Adding citations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-11-01 18:09:28][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-11-01 18:09:28][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-11-01 18:09:28][INFO] Extending annotation descriptions related to ClinVar
+[2018-11-01 18:09:30][INFO] Filtering against cancer predisposition genes:
+[2018-11-01 18:09:30][INFO] 704 variants remaining
+[2018-11-01 18:09:30][INFO] Limiting variants to hereditary cancer-predisposing syndromes/cancer conditions
+[2018-11-01 18:10:51][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-11-01 18:10:51][INFO] Number of PASS variants: 1272
+[2018-11-01 18:10:51][INFO] Number of SNVs: 1222
+[2018-11-01 18:10:51][INFO] Number of deletions: 24
+[2018-11-01 18:10:51][INFO] Number of insertions: 0
+[2018-11-01 18:10:51][INFO] Number of block substitutions: 26
+[2018-11-01 18:11:07][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-11-01 18:11:09][INFO] Adding citations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-11-01 18:11:31][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-11-01 18:11:31][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-11-01 18:14:14][INFO] Extending annotation descriptions related to ClinVar
+[2018-11-01 18:15:23][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-11-01 18:15:23][INFO] Number of PASS variants: 1272
+[2018-11-01 18:15:23][INFO] Number of SNVs: 1222
+[2018-11-01 18:15:23][INFO] Number of deletions: 24
+[2018-11-01 18:15:23][INFO] Number of insertions: 0
+[2018-11-01 18:15:23][INFO] Number of block substitutions: 26
+[2018-11-01 18:15:23][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-11-01 18:15:25][INFO] Adding citations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-11-01 18:15:25][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-11-01 18:15:25][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-11-01 18:15:25][INFO] Extending annotation descriptions related to ClinVar
+[2018-11-01 20:42:27][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-11-01 20:42:27][INFO] Number of PASS variants: 1272
+[2018-11-01 20:42:27][INFO] Number of SNVs: 1222
+[2018-11-01 20:42:27][INFO] Number of deletions: 24
+[2018-11-01 20:42:27][INFO] Number of insertions: 0
+[2018-11-01 20:42:27][INFO] Number of block substitutions: 26
+[2018-11-01 20:42:27][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-11-01 20:42:30][INFO] Adding citations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-11-01 20:42:30][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-11-01 20:42:30][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-11-01 20:42:30][INFO] Extending annotation descriptions related to ClinVar
+[2018-11-01 20:42:39][INFO] Filtering against cancer predisposition genes:
+[2018-11-01 20:42:39][INFO] 704 variants remaining
+[2018-11-01 20:42:39][INFO] Limiting variants to hereditary cancer-predisposing syndromes/cancer conditions
+[2018-11-01 20:43:31][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-11-01 20:43:34][INFO] Number of PASS variants: 1272
+[2018-11-01 20:43:34][INFO] Number of SNVs: 1222
+[2018-11-01 20:43:34][INFO] Number of deletions: 24
+[2018-11-01 20:43:34][INFO] Number of insertions: 0
+[2018-11-01 20:43:34][INFO] Number of block substitutions: 26
+[2018-11-01 20:43:34][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-11-01 20:43:36][INFO] Adding citations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-11-01 20:43:36][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-11-01 20:43:36][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-11-01 20:43:36][INFO] Extending annotation descriptions related to ClinVar
+[2018-11-01 20:43:38][INFO] Filtering against cancer predisposition genes:
+[2018-11-01 20:43:38][INFO] 856 variants remaining
+[2018-11-01 20:43:38][INFO] Found coding variants in the following cancer predisposition genes: MPL, NRAS, ALK, SOS1, ERBB4, VHL, RAF1, MLH1, CTNNB1, GATA2, PIK3CA, PDGFRA, KIT, KDR, APC, EGFR, MET, BRAF, EZH2, CDKN2A, RET, PTEN, HRAS, ATM, CBL, KRAS, CDK4, PTPN11, POLE, RB1, AKT1, MAP2K1, TSC2, TP53, SPOP, SETBP1, SMAD4, STK11, MAP2K2, ERCC2, RUNX1, CHEK2, AR
+[2018-11-01 20:43:38][INFO] Limiting variants to hereditary cancer-predisposing syndromes/cancer conditions
+[2018-11-01 20:44:06][INFO] Assignment of variants to tier 1/tier 2/tier 3
+[2018-11-01 20:44:07][INFO] TIER 1: Pathogenic variants - cancer_phenotype: n = 94
+[2018-11-01 20:44:07][INFO] TIER 1: Pathogenic variants - noncancer_phenotype: n = 24
+[2018-11-01 20:44:07][INFO] TIER 2: Likely pathogenic variants - cancer_phenotype: n = 79
+[2018-11-01 20:44:07][INFO] TIER 2: Likely pathogenic variants - noncancer_phenotype: n = 12
+[2018-11-01 20:44:07][INFO] TIER 3: Other unclassified variants - cancer_phenotype: n = 14
+[2018-11-01 20:44:07][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file

@@ -29,7 +29,11 @@ init_pcg_report <- function(pcgr_config = NULL, sample_name = 'SampleX', pcgr_ve
     pcg_report[[analysis_element]][['variant_statistic']] <- list()
     pcg_report[[analysis_element]][['zero']] <- FALSE
 
-    cancer_genes <- pcgrr::list_to_df(pcgr_config$cancer_predisposition_genes) %>% dplyr::filter(list.element == T) %>% dplyr::select(name) %>% dplyr::rename(symbol = name)
+    cancer_genes <- pcgrr::list_to_df(pcgr_config$cancer_predisposition_genes) %>%
+      dplyr::filter(list.element == T) %>%
+      dplyr::select(name) %>%
+      dplyr::rename(symbol = name)
+
     pcg_report[[analysis_element]][['predisposition_genes']] <- cancer_genes
 
     for(t in c('tier1','tier2','tier3A','tier3B','gwas')){
@@ -68,7 +72,6 @@ init_pcg_report <- function(pcgr_config = NULL, sample_name = 'SampleX', pcgr_ve
   }else{
 
     pcg_report[['tier_model']] <- pcgr_config$tier_model$tier_model
-
     pcg_report[['tumor_class']] <- 'Not defined'
     tumor_types_set <- pcgrr::list_to_df(pcgr_config$tumor_type) %>% dplyr::filter(list.element == T) %>% dplyr::select(name)
     if(nrow(tumor_types_set) > 0){

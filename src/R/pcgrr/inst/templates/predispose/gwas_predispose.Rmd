@@ -64,7 +64,7 @@ crosstalk::bscols(
 ```
 
 ```{r gwas_cancer_missing, echo=F, results = 'asis', eval = missing_gwas_items}
-cat('<i>No variants found.</i>',sep='\n')
+cat('<i>No variants with a p-value <',pcgr_config$gwas$p_value_min,' were found.</i>',sep='\n')
 cat('\n')
 ```
 <br><br>

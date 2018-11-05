@@ -890,18 +890,6 @@ add_gwas_citation_phenotype <- function(vcf_data_df, pcgr_data, p_value_threshol
 
 }
 
-
-mutate_cond <- function(.data, condition, ..., new_init = NA, envir = parent.frame()) {
-  # Initialize any new variables as new_init
-  new_vars <- substitute(list(...))[-1]
-  new_vars %<>% sapply(deparse) %>% names %>% dplyr::setdiff(names(.data))
-  .data[, new_vars] <- new_init
-
-  condition <- eval(substitute(condition), .data, envir)
-  .data[condition, ] <- .data %>% dplyr::filter(condition) %>% dplyr::mutate(...)
-  .data
-}
-
 #' Function that assigns genotype (het/hom) from VCF GT tag
 #'
 #' @param vcf_data_df
@@ -990,16 +978,12 @@ get_calls <- function(tsv_gz_file, pcgr_data, pcgr_version, sample_name, pcgr_co
     dplyr::rename(CONSEQUENCE = Consequence)
 
   if (nrow(vcf_data_df[!is.na(vcf_data_df$PROTEIN_CHANGE) & stringr::str_detect(vcf_data_df$PROTEIN_CHANGE, ":"), ]) > 0){
-    vcf_data_df[!is.na(vcf_data_df$PROTEIN_CHANGE) & stringr::str_detect(vcf_data_df$PROTEIN_CHANGE, ":"), ]$PROTEIN_CHANGE <- stringr::str_split_fixed(vcf_data_df[!is.na(vcf_data_df$PROTEIN_CHANGE) & stringr::str_detect(vcf_data_df$PROTEIN_CHANGE, ":"), ]$PROTEIN_CHANGE, pattern = ":", 2)[, 2]
+    vcf_data_df[!is.na(vcf_data_df$PROTEIN_CHANGE) & stringr::str_detect(vcf_data_df$PROTEIN_CHANGE, ":"), ]$PROTEIN_CHANGE <-
+      stringr::str_split_fixed(vcf_data_df[!is.na(vcf_data_df$PROTEIN_CHANGE) & stringr::str_detect(vcf_data_df$PROTEIN_CHANGE, ":"), ]$PROTEIN_CHANGE, pattern = ":", 2)[, 2]
   }
   if (nrow(vcf_data_df[!is.na(vcf_data_df$PROTEIN_CHANGE) & stringr::str_detect(vcf_data_df$PROTEIN_CHANGE, "^ENSP"), ]) > 0){
     vcf_data_df[!is.na(vcf_data_df$PROTEIN_CHANGE) & stringr::str_detect(vcf_data_df$PROTEIN_CHANGE, "^ENSP"), ]$PROTEIN_CHANGE <- NA
   }
-  # if (nrow(vcf_data_df[is.na(vcf_data_df$PROTEIN_CHANGE) & stringr::str_detect(vcf_data_df$CONSEQUENCE, "^synonymous_variant$"), ]) > 0){
-  #   vcf_data_df[is.na(vcf_data_df$PROTEIN_CHANGE) & stringr::str_detect(vcf_data_df$CONSEQUENCE, "^synonymous_variant$"), ]$PROTEIN_CHANGE <-
-  #     vcf_data_df[is.na(vcf_data_df$PROTEIN_CHANGE) & stringr::str_detect(vcf_data_df$CONSEQUENCE, "^synonymous_variant$"), ]$HGVSp_short
-  # }
-
 
   vcf_data_df$CODING_STATUS <- "noncoding"
   coding_consequence_pattern <- "^(stop_|start_lost|frameshift_|missense_variant|splice_donor|splice_acceptor|inframe_)"
@@ -1009,13 +993,20 @@ get_calls <- function(tsv_gz_file, pcgr_data, pcgr_version, sample_name, pcgr_co
   for (v in c("ONCOGENE", "TUMOR_SUPPRESSOR", "NETWORK_CG")){
     vcf_data_df[, v] <- as.logical(dplyr::recode(vcf_data_df[, v], True = TRUE, False = FALSE))
   }
-  vcf_data_df$ENTREZ_ID <- as.character(vcf_data_df$ENTREZ_ID)
-  if (nrow(vcf_data_df[!is.na(vcf_data_df$INTOGEN_DRIVER_MUT), ]) > 0){
-    vcf_data_df[!is.na(vcf_data_df$INTOGEN_DRIVER_MUT), ]$INTOGEN_DRIVER_MUT <- TRUE
+
+  if("ENTREZ_ID" %in% colnames(vcf_data_df$ENTREZ_ID)){
+    vcf_data_df$ENTREZ_ID <- as.character(vcf_data_df$ENTREZ_ID)
   }
-  if (nrow(vcf_data_df[is.na(vcf_data_df$INTOGEN_DRIVER_MUT), ]) > 0){
-    vcf_data_df[is.na(vcf_data_df$INTOGEN_DRIVER_MUT), ]$INTOGEN_DRIVER_MUT <- FALSE
+
+  if("INTOGEN_DRIVER_MUT" %in% colnames(vcf_data_df)){
+    if (nrow(vcf_data_df[!is.na(vcf_data_df$INTOGEN_DRIVER_MUT), ]) > 0){
+      vcf_data_df[!is.na(vcf_data_df$INTOGEN_DRIVER_MUT), ]$INTOGEN_DRIVER_MUT <- TRUE
+    }
+    if (nrow(vcf_data_df[is.na(vcf_data_df$INTOGEN_DRIVER_MUT), ]) > 0){
+      vcf_data_df[is.na(vcf_data_df$INTOGEN_DRIVER_MUT), ]$INTOGEN_DRIVER_MUT <- FALSE
+    }
   }
+
   if (!is.null(sample_name) & nrow(vcf_data_df) > 0){
     vcf_data_df$VCF_SAMPLE_ID <- sample_name
   }
@@ -1045,7 +1036,9 @@ get_calls <- function(tsv_gz_file, pcgr_data, pcgr_version, sample_name, pcgr_co
     vcf_data_df[, col] <- as.character(vcf_data_df[, col])
   }
 
-  vcf_data_df$CLINVAR_MSID <- as.integer(vcf_data_df$CLINVAR_MSID)
+  if("CLINVAR_MSID" %in% colnames(vcf_data_df)){
+    vcf_data_df$CLINVAR_MSID <- as.integer(vcf_data_df$CLINVAR_MSID)
+  }
 
   if ("LoF" %in% colnames(vcf_data_df)){
     vcf_data_df$LOSS_OF_FUNCTION <- FALSE
@@ -1090,7 +1083,7 @@ get_calls <- function(tsv_gz_file, pcgr_data, pcgr_version, sample_name, pcgr_co
   }
 
   vcf_data_df <- pcgrr::df_string_replace(vcf_data_df, strings = c("CONSEQUENCE"), pattern = "&", replacement = ", ", replace_all = T)
-  vcf_data_df <- pcgrr::df_string_replace(vcf_data_df, strings = c("VEP_ALL_CONSEQUENCE", "DOCM_DISEASE"), pattern = ",", replacement = ", ", replace_all = T)
+  vcf_data_df <- pcgrr::df_string_replace(vcf_data_df, strings = c("VEP_ALL_CONSEQUENCE", "DOCM_DISEASE","MUTATION_HOTSPOT_CANCERTYPE","ICGC_PCAWG_OCCURRENCE"), pattern = ",", replacement = ", ", replace_all = T)
 
   if ("EFFECT_PREDICTIONS" %in% colnames(vcf_data_df)){
     vcf_data_df$EFFECT_PREDICTIONS <- stringr::str_replace_all(vcf_data_df$EFFECT_PREDICTIONS, "\\.&|\\.$", "NA&")

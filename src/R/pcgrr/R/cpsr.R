@@ -349,7 +349,7 @@ assign_pathogenicity_score <- function(sample_calls, pcgr_config, pcgr_data){
   sample_calls$PS1 <- FALSE #Same amino acid change as a previously established pathogenic variant regardless of nucleotide change
   sample_calls$PMC1 <- FALSE #null variant in non-tumor suppressor
   sample_calls$PM2 <- FALSE #Absence or extremely low frequency (MAF < 0.0005) in 1000 Genomes Project, or gnomAD
-  sample_calls$PP2 <- FALSE #Missense variant in susceptibility gene
+  sample_calls$PP2 <- FALSE # Missense variant in a gene that has a relatively low rate of benign missense variation and where missense variants are a common mechanism of disease
   sample_calls$PM4 <- FALSE #Protein length changes due to inframe indels or nonstop variant of genes that harbor variants with a dominant mode of inheritance.
   sample_calls$PPC1 <- FALSE #Protein length changes due to inframe indels or nonstop variant of genes that harbor variants with a recessive mode of inheritance.
   sample_calls$PM5 <- FALSE #Novel missense change at an amino acid residue where a different missense change determined to be pathogenic has been seen before
@@ -358,7 +358,12 @@ assign_pathogenicity_score <- function(sample_calls, pcgr_config, pcgr_data){
   sample_calls$BMC1 <- FALSE #Peptide change is at the same location of a known benign change
   sample_calls$BSC1 <- FALSE #Peptide change is known to be benign
   sample_calls$BA1 <- FALSE #Common population frequency (MAF > 0.05) in 1000 Genomes Project, or gnomAD
+  sample_calls$BP1 <- FALSE #Missense variant in a gene for which primarily truncating variants are known to cause disease
 
+  predisposition_gene_info <- dplyr::select(pcgr_data$predisposition_genes, symbol, lof_known_moi, path_truncation_rate, benign_missense_rate) %>%
+    dplyr::rename(SYMBOL = symbol)
+
+  sample_calls <- dplyr::left_join(sample_calls, predisposition_gene_info, by=c("SYMBOL" = "SYMBOL"))
 
   ## Assign logical ACMG level
   # PP3 - Multiple lines of computational evidence support a deleterious effect on the gene or gene product (conservation, evolutionary, splicing impact, etc.)
@@ -410,6 +415,7 @@ assign_pathogenicity_score <- function(sample_calls, pcgr_config, pcgr_data){
     if(nrow(sample_calls[!is.na(sample_calls$GLOBAL_AF_GNOMAD) & sample_calls$GLOBAL_AF_GNOMAD < 0.0005,]) > 0){
       sample_calls[!is.na(sample_calls$GLOBAL_AF_GNOMAD) & sample_calls$GLOBAL_AF_GNOMAD < 0.0005,]$PM2 <- TRUE
     }
+
   }
 
   ## Assign logical ACMG level
@@ -421,28 +427,26 @@ assign_pathogenicity_score <- function(sample_calls, pcgr_config, pcgr_data){
     if(nrow(sample_calls[!is.na(sample_calls$GLOBAL_AF_1KG) & sample_calls$GLOBAL_AF_1KG > 0.05,]) > 0){
       sample_calls[!is.na(sample_calls$GLOBAL_AF_1KG) & sample_calls$GLOBAL_AF_1KG > 0.05,]$BA1 <- TRUE
     }
-  }
-
-  ## Assign logical ACMG level on loss-of-function variant in known predisposition gene (tumor suppressor genes only)
-  # PVS1 - Truncations in susceptibility genes where LOF is a known mechanism of the disease and harbor variants with a dominant mode of inheritance.
-  # PSC1 - Truncations in susceptibility genes where LOF is a known mechanism of the disease and harbor variants with a recessive mode of inheritance.
-  gain_of_function_genes <- c('ALK','SOS1','MET','EGFR','RET','HRAS','CDK4','KIT','PDGFRA','RHBDF2','PTPN11')
-
-  if(nrow(sample_calls[!is.na(sample_calls$LOSS_OF_FUNCTION) & sample_calls$LOSS_OF_FUNCTION == TRUE & sample_calls$TUMOR_SUPPRESSOR == TRUE & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI),]) > 0){
-    if(nrow(sample_calls[!is.na(sample_calls$LOSS_OF_FUNCTION) & sample_calls$LOSS_OF_FUNCTION == TRUE & sample_calls$TUMOR_SUPPRESSOR == TRUE & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI) & stringr::str_detect(sample_calls$CANCER_PREDISPOSITION_MOI,"Dom|Dom&Rec"),]) > 0){
-      sample_calls[!is.na(sample_calls$LOSS_OF_FUNCTION) & sample_calls$LOSS_OF_FUNCTION == TRUE & sample_calls$TUMOR_SUPPRESSOR == TRUE & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI) & stringr::str_detect(sample_calls$CANCER_PREDISPOSITION_MOI,"Dom|Dom&Rec"),]$PVS1 <- TRUE
-      ## skip genes that are associated with gain-of-function
-      if(nrow(sample_calls[sample_calls$PVS1 == TRUE & sample_calls$SYMBOL %in% gain_of_function_genes,]) > 0){
-        sample_calls[sample_calls$PVS1 == TRUE & sample_calls$SYMBOL %in% gain_of_function_genes,]$PVS1 <- FALSE
-      }
+    if(nrow(sample_calls[(sample_calls$SYMBOL == 'HFE' | sample_calls$SYMBOL == 'SERPINA1') & sample_calls$BA1 == TRUE & !is.na(sample_calls$GLOBAL_AF_1KG) & sample_calls$GLOBAL_AF_1KG < 0.25,]) > 0){
+      sample_calls[(sample_calls$SYMBOL == 'HFE' | sample_calls$SYMBOL == 'SERPINA1') & sample_calls$BA1 == TRUE & !is.na(sample_calls$GLOBAL_AF_1KG) & sample_calls$GLOBAL_AF_1KG < 0.25,]$BA1 <- FALSE
+    }
+    if(nrow(sample_calls[(sample_calls$SYMBOL == 'HFE' | sample_calls$SYMBOL == 'SERPINA1') & sample_calls$BA1 == TRUE & !is.na(sample_calls$GLOBAL_AF_GNOMAD) & sample_calls$GLOBAL_AF_GNOMAD < 0.25,]) > 0){
+      sample_calls[(sample_calls$SYMBOL == 'HFE' | sample_calls$SYMBOL == 'SERPINA1') & sample_calls$BA1 == TRUE & !is.na(sample_calls$GLOBAL_AF_GNOMAD) & sample_calls$GLOBAL_AF_GNOMAD < 0.25,]$BA1 <- FALSE
     }
 
-    if(nrow(sample_calls[!is.na(sample_calls$LOSS_OF_FUNCTION) & sample_calls$LOSS_OF_FUNCTION == TRUE & sample_calls$TUMOR_SUPPRESSOR == TRUE & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI) & stringr::str_detect(sample_calls$CANCER_PREDISPOSITION_MOI,"Rec"),]) > 0){
-      sample_calls[!is.na(sample_calls$LOSS_OF_FUNCTION) & sample_calls$LOSS_OF_FUNCTION == TRUE & sample_calls$TUMOR_SUPPRESSOR == TRUE & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI) & stringr::str_detect(sample_calls$CANCER_PREDISPOSITION_MOI,"Rec"),]$PSC1 <- TRUE
+  }
+
+  ## Assign logical ACMG level on loss-of-function variant in known predisposition gene
+  # PVS1 - Truncations in susceptibility genes where LOF is a known mechanism of the disease and harbor variants with a dominant mode of inheritance.
+  # PSC1 - Truncations in susceptibility genes where LOF is a known mechanism of the disease and harbor variants with a recessive mode of inheritance.
+  if(nrow(sample_calls[!is.na(sample_calls$LOSS_OF_FUNCTION) & sample_calls$LOSS_OF_FUNCTION == TRUE & !is.na(sample_calls$lof_known_moi) & sample_calls$lof_known_moi == "LoF" & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI),]) > 0){
+    if(nrow(sample_calls[!is.na(sample_calls$LOSS_OF_FUNCTION) & sample_calls$LOSS_OF_FUNCTION == TRUE & !is.na(sample_calls$lof_known_moi) & sample_calls$lof_known_moi == "LoF" & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI) & stringr::str_detect(sample_calls$CANCER_PREDISPOSITION_MOI,"AD|AD/AR"),]) > 0){
+      sample_calls[!is.na(sample_calls$LOSS_OF_FUNCTION) & sample_calls$LOSS_OF_FUNCTION == TRUE & !is.na(sample_calls$lof_known_moi) & sample_calls$lof_known_moi == "LoF" & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI) & stringr::str_detect(sample_calls$CANCER_PREDISPOSITION_MOI,"AD/AD/AR"),]$PVS1 <- TRUE
+    }
+
+    if(nrow(sample_calls[!is.na(sample_calls$LOSS_OF_FUNCTION) & sample_calls$LOSS_OF_FUNCTION == TRUE & !is.na(sample_calls$lof_known_moi) & sample_calls$lof_known_moi == "LoF" & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI) & stringr::str_detect(sample_calls$CANCER_PREDISPOSITION_MOI,"AR"),]) > 0){
+      sample_calls[!is.na(sample_calls$LOSS_OF_FUNCTION) & sample_calls$LOSS_OF_FUNCTION == TRUE & !is.na(sample_calls$lof_known_moi) & sample_calls$lof_known_moi == "LoF" & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI) & stringr::str_detect(sample_calls$CANCER_PREDISPOSITION_MOI,"AR"),]$PSC1 <- TRUE
       ## skip genes that are associated with gain-of-function
-      if(nrow(sample_calls[sample_calls$PSC1 == TRUE & sample_calls$SYMBOL %in% gain_of_function_genes,]) > 0){
-        sample_calls[sample_calls$PSC1 == TRUE & sample_calls$SYMBOL %in% gain_of_function_genes,]$PSC1 <- FALSE
-      }
     }
   }
 
@@ -450,25 +454,32 @@ assign_pathogenicity_score <- function(sample_calls, pcgr_config, pcgr_data){
   # PM4 - Protein length changes due to inframe indels or nonstop variant of genes that harbor variants with a dominant mode of inheritance - PM4
   # PCC1 - Protein length changes due to inframe indels or nonstop variant of genes that harbor variants with a recessive mode of inheritance (and unknown MOI) - PPC1
   if(nrow(sample_calls[!is.na(sample_calls$CONSEQUENCE) & stringr::str_detect(sample_calls$CONSEQUENCE,'stop_lost|inframe_deletion|inframe_insertion'),]) > 0){
-    if(nrow(sample_calls[!is.na(sample_calls$CONSEQUENCE) & stringr::str_detect(sample_calls$CONSEQUENCE,'stop_lost|inframe_deletion|inframe_insertion') & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI) & stringr::str_detect(sample_calls$CANCER_PREDISPOSITION_MOI,"Dom|Dom&Rec"),]) > 0){
-      sample_calls[!is.na(sample_calls$CONSEQUENCE) & stringr::str_detect(sample_calls$CONSEQUENCE,'stop_lost|inframe_deletion|inframe_insertion') & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI) & stringr::str_detect(sample_calls$CANCER_PREDISPOSITION_MOI,"Dom|Dom&Rec"),]$PM4 <- TRUE
+    if(nrow(sample_calls[!is.na(sample_calls$CONSEQUENCE) & stringr::str_detect(sample_calls$CONSEQUENCE,'stop_lost|inframe_deletion|inframe_insertion') & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI) & stringr::str_detect(sample_calls$CANCER_PREDISPOSITION_MOI,"AD/AR|AD"),]) > 0){
+      sample_calls[!is.na(sample_calls$CONSEQUENCE) & stringr::str_detect(sample_calls$CONSEQUENCE,'stop_lost|inframe_deletion|inframe_insertion') & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI) & stringr::str_detect(sample_calls$CANCER_PREDISPOSITION_MOI,"AD/AR|AD"),]$PM4 <- TRUE
     }
-    if(nrow(sample_calls[!is.na(sample_calls$CONSEQUENCE) & stringr::str_detect(sample_calls$CONSEQUENCE,'stop_lost|inframe_deletion|inframe_insertion') & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI) & !stringr::str_detect(sample_calls$CANCER_PREDISPOSITION_MOI,"Dom"),]) > 0){
-      sample_calls[!is.na(sample_calls$CONSEQUENCE) & stringr::str_detect(sample_calls$CONSEQUENCE,'stop_lost|inframe_deletion|inframe_insertion') & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI) & !stringr::str_detect(sample_calls$CANCER_PREDISPOSITION_MOI,"Dom"),]$PPC1 <- TRUE
+    if(nrow(sample_calls[!is.na(sample_calls$CONSEQUENCE) & stringr::str_detect(sample_calls$CONSEQUENCE,'stop_lost|inframe_deletion|inframe_insertion') & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI) & !stringr::str_detect(sample_calls$CANCER_PREDISPOSITION_MOI,"AD|Mosaic"),]) > 0){
+      sample_calls[!is.na(sample_calls$CONSEQUENCE) & stringr::str_detect(sample_calls$CONSEQUENCE,'stop_lost|inframe_deletion|inframe_insertion') & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI) & !stringr::str_detect(sample_calls$CANCER_PREDISPOSITION_MOI,"AD|Mosaic"),]$PPC1 <- TRUE
     }
   }
 
   ## Assign a logical ACMG level
-  # PP2 - Missense variant in susceptibility gene
-  if(nrow(sample_calls[!is.na(sample_calls$CONSEQUENCE) & stringr::str_detect(sample_calls$CONSEQUENCE,'^missense_variant'),]) > 0){
-    sample_calls[!is.na(sample_calls$CONSEQUENCE) & stringr::str_detect(sample_calls$CONSEQUENCE,'^missense_variant'),]$PP2 <- TRUE
+  # PP2 - Missense variant in a gene that has a relatively low rate of benign missense variation and where missense variants are a common mechanism of disease
+  if(nrow(sample_calls[!is.na(sample_calls$CONSEQUENCE) & !is.na(sample_calls$benign_missense_rate) & sample_calls$benign_missense_rate <= 0.2 & sample_calls$path_truncation_rate < 0.5 & stringr::str_detect(sample_calls$CONSEQUENCE,'^missense_variant'),]) > 0){
+    sample_calls[!is.na(sample_calls$CONSEQUENCE) & !is.na(sample_calls$benign_missense_rate) & sample_calls$benign_missense_rate <= 0.2 & sample_calls$path_truncation_rate < 0.5 & stringr::str_detect(sample_calls$CONSEQUENCE,'^missense_variant'),]$PP2 <- TRUE
   }
+
+  ## Assign a logical ACMG level
+  # BP1 - Missense variant in a gene for which primarily truncating variants are known to cause disease
+  if(nrow(sample_calls[!is.na(sample_calls$CONSEQUENCE) & sample_calls$path_truncation_rate > 0.75 & stringr::str_detect(sample_calls$CONSEQUENCE,'^missense_variant'),]) > 0){
+    sample_calls[!is.na(sample_calls$CONSEQUENCE) & sample_calls$path_truncation_rate > 0.75 & stringr::str_detect(sample_calls$CONSEQUENCE,'^missense_variant'),]$BP1 <- TRUE
+  }
+
 
 
   ## Assign a logical ACMG level
   # PMC1 - LoF in susceptibility gene, yet non tumor suppressor
-  if(nrow(sample_calls[!is.na(sample_calls$LOSS_OF_FUNCTION) & sample_calls$LOSS_OF_FUNCTION == TRUE & (is.na(sample_calls$TUMOR_SUPPRESSOR) | sample_calls$TUMOR_SUPPRESSOR == FALSE),]) > 0){
-    sample_calls[!is.na(sample_calls$LOSS_OF_FUNCTION) & sample_calls$LOSS_OF_FUNCTION == TRUE & (is.na(sample_calls$TUMOR_SUPPRESSOR) | sample_calls$TUMOR_SUPPRESSOR == FALSE),]$PMC1 <- TRUE
+  if(nrow(sample_calls[!is.na(sample_calls$LOSS_OF_FUNCTION) & sample_calls$LOSS_OF_FUNCTION == TRUE & (is.na(sample_calls$lof_known_moi) | sample_calls$lof_known_moi != "LoF"),]) > 0){
+    sample_calls[!is.na(sample_calls$LOSS_OF_FUNCTION) & sample_calls$LOSS_OF_FUNCTION == TRUE & (is.na(sample_calls$lof_known_moi) | sample_calls$lof_known_moi != "LoF"),]$PMC1 <- TRUE
   }
 
 
@@ -550,7 +561,7 @@ assign_pathogenicity_score <- function(sample_calls, pcgr_config, pcgr_data){
   sample_calls$PATHDOC <- ""
   if(nrow(sample_calls[sample_calls$PVS1 == TRUE,]) > 0){
     sample_calls[sample_calls$PVS1 == TRUE,]$PATHSCORE <- sample_calls[sample_calls$PVS1 == TRUE,]$PATHSCORE + 8
-    sample_calls[sample_calls$PVS1 == TRUE,]$PATHDOC <- paste(sample_calls[sample_calls$PVS1 == TRUE,]$PATHDOC,"- Loss-of-function variant in known susceptibility/syndrome gene (tumor suppressor only, dominant MOI) - PVS1",sep="<br>")
+    sample_calls[sample_calls$PVS1 == TRUE,]$PATHDOC <- paste(sample_calls[sample_calls$PVS1 == TRUE,]$PATHDOC,"- Loss-of-function variant in known susceptibility/syndrome gene (dominant MoI) - PVS1",sep="<br>")
   }
   if(nrow(sample_calls[sample_calls$PS1 == TRUE,]) > 0){
     sample_calls[sample_calls$PS1 == TRUE,]$PATHSCORE <- sample_calls[sample_calls$PS1 == TRUE,]$PATHSCORE + 7
@@ -558,16 +569,16 @@ assign_pathogenicity_score <- function(sample_calls, pcgr_config, pcgr_data){
   }
   if(nrow(sample_calls[sample_calls$PSC1 == TRUE,]) > 0){
     sample_calls[sample_calls$PSC1 == TRUE,]$PATHSCORE <- sample_calls[sample_calls$PSC1 == TRUE,]$PATHSCORE + 4
-    sample_calls[sample_calls$PSC1 == TRUE,]$PATHDOC <- paste(sample_calls[sample_calls$PSC1 == TRUE,]$PATHDOC,"- Loss-of-function variant in known susceptibility/syndrome gene (tumor suppressor only, recessive MOI) - PSC1",sep="<br>")
+    sample_calls[sample_calls$PSC1 == TRUE,]$PATHDOC <- paste(sample_calls[sample_calls$PSC1 == TRUE,]$PATHDOC,"- Loss-of-function variant in known susceptibility/syndrome gene (recessive MoI) - PSC1",sep="<br>")
   }
   if(nrow(sample_calls[sample_calls$PMC1 == TRUE,]) > 0){
     sample_calls[sample_calls$PMC1 == TRUE,]$PATHSCORE <- sample_calls[sample_calls$PMC1 == TRUE,]$PATHSCORE + 2
-    sample_calls[sample_calls$PMC1 == TRUE,]$PATHDOC <- paste(sample_calls[sample_calls$PMC1 == TRUE,]$PATHDOC,"- Loss-of-function variant in known susceptibility/syndrome gene (non tumor suppressor) - PMC1",sep="<br>")
+    sample_calls[sample_calls$PMC1 == TRUE,]$PATHDOC <- paste(sample_calls[sample_calls$PMC1 == TRUE,]$PATHDOC,"- Loss-of-function variant in known susceptibility/syndrome gene (LoF not a known mechanism of disease) - PMC1",sep="<br>")
   }
 
   if(nrow(sample_calls[sample_calls$PM4 == TRUE,]) > 0){
     sample_calls[sample_calls$PM4 == TRUE,]$PATHSCORE <- sample_calls[sample_calls$PM4 == TRUE,]$PATHSCORE + 2
-    sample_calls[sample_calls$PM4 == TRUE,]$PATHDOC <- paste(sample_calls[sample_calls$PM4 == TRUE,]$PATHDOC,"- Protein length changes due to inframe indels/stoploss variants in known susceptibility genes (dominant MOI) - PM4",sep="<br>")
+    sample_calls[sample_calls$PM4 == TRUE,]$PATHDOC <- paste(sample_calls[sample_calls$PM4 == TRUE,]$PATHDOC,"- Protein length changes due to inframe indels/stoploss variants in known susceptibility genes (dominant MoI) - PM4",sep="<br>")
   }
 
   if(nrow(sample_calls[sample_calls$PM1 == TRUE,]) > 0){
@@ -584,12 +595,12 @@ assign_pathogenicity_score <- function(sample_calls, pcgr_config, pcgr_data){
   }
   if(nrow(sample_calls[sample_calls$PP2 == TRUE,]) > 0){
     sample_calls[sample_calls$PP2 == TRUE,]$PATHSCORE <- sample_calls[sample_calls$PP2 == TRUE,]$PATHSCORE + 1
-    sample_calls[sample_calls$PP2 == TRUE,]$PATHDOC <- paste(sample_calls[sample_calls$PP2 == TRUE,]$PATHDOC,"- Missense variant in known susceptibility gene - PP2",sep="<br>")
+    sample_calls[sample_calls$PP2 == TRUE,]$PATHDOC <- paste(sample_calls[sample_calls$PP2 == TRUE,]$PATHDOC,"- Missense variant in susceptibility genes where pathogenic missense variants are relatively common - PP2",sep="<br>")
   }
 
   if(nrow(sample_calls[sample_calls$PPC1 == TRUE,]) > 0){
     sample_calls[sample_calls$PPC1 == TRUE,]$PATHSCORE <- sample_calls[sample_calls$PPC1 == TRUE,]$PATHSCORE + 1
-    sample_calls[sample_calls$PPC1 == TRUE,]$PATHDOC <- paste(sample_calls[sample_calls$PPC1 == TRUE,]$PATHDOC,"- Protein length changes due to inframe indels/stoploss variants in known susceptibility genes (recessive MOI) - PPC1",sep="<br>")
+    sample_calls[sample_calls$PPC1 == TRUE,]$PATHDOC <- paste(sample_calls[sample_calls$PPC1 == TRUE,]$PATHDOC,"- Protein length changes due to inframe indels/stoploss variants in known susceptibility genes (recessive MoI) - PPC1",sep="<br>")
   }
   if(nrow(sample_calls[sample_calls$PP3 == TRUE,]) > 0){
     sample_calls[sample_calls$PP3 == TRUE,]$PATHSCORE <- sample_calls[sample_calls$PP3 == TRUE,]$PATHSCORE + 1
@@ -613,7 +624,7 @@ assign_pathogenicity_score <- function(sample_calls, pcgr_config, pcgr_data){
 
   if(nrow(sample_calls[sample_calls$BA1 == TRUE,]) > 0){
     sample_calls[sample_calls$BA1 == TRUE,]$PATHSCORE <- sample_calls[sample_calls$BA1 == TRUE,]$PATHSCORE - 8
-    sample_calls[sample_calls$BA1 == TRUE,]$PATHDOC <- paste(sample_calls[sample_calls$BA1 == TRUE,]$PATHDOC,paste0("- High allele frequency in the general population (gnomAD/1KG global MAF > 0.05) - BA1"),sep="<br>")
+    sample_calls[sample_calls$BA1 == TRUE,]$PATHDOC <- paste(sample_calls[sample_calls$BA1 == TRUE,]$PATHDOC,paste0("- High allele frequency in the general population (gnomAD/1KG global MAF > 0.05 (exceptions for HFE/SERPINA1, MAF > 0.25)) - BA1"),sep="<br>")
   }
 
   sample_calls$PATHDOC <- stringr::str_replace(sample_calls$PATHDOC,"^<br>","")
