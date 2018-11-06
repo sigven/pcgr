@@ -111,13 +111,13 @@ filter_db_germline_variants <- function(var_df, pop='EUR',dbquery = '1KG', max_t
   if(dbquery == '1KG'){
     col <- paste0(pop,"_AF_1KG")
     if(any(grepl(paste0("^",col,"$"),names(var_df)))){
-      var_df <- var_df[is.na(var_df[,col]) | var_df[,col] < max_tolerated_af,]
+      var_df <- var_df[is.na(var_df[,col]) | var_df[,col] <= max_tolerated_af,]
     }
   }
   if(dbquery == 'gnomAD'){
     col <- paste0(pop,"_AF_GNOMAD")
     if(any(grepl(paste0("^",col,"$"),names(var_df)))){
-      var_df <- var_df[is.na(var_df[,col]) | var_df[,col] < max_tolerated_af,]
+      var_df <- var_df[is.na(var_df[,col]) | var_df[,col] <= max_tolerated_af,]
     }
   }
 

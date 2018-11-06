@@ -7,8 +7,9 @@ dev/unreleased - Nov 6th 2018
 Fixed
 '''''
 
--  Missing config option for *maf_gnomad_asj* in TOML file `Issue
-   #53 <https://github.com/sigven/pcgr/issues/53>`__
+-  Missing config option for *maf_gnomad_asj* in TOML file (also setting
+   operator to ``<=``) `Issue
+   #60 <https://github.com/sigven/pcgr/issues/60>`__
 -  Bug in new CancerMine oncogene/tumor suppressor annotation `Issue
    #53 <https://github.com/sigven/pcgr/issues/53>`__
 -  vcfanno fix for empty Description (upgrade to vcfanno v0.3.1 `Issue
