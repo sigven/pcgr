@@ -12,7 +12,7 @@ import platform
 import toml
 
 pcgr_version = 'dev'
-db_version = 'PCGR_DB_VERSION = 20181026'
+db_version = 'PCGR_DB_VERSION = 20181105'
 vep_version = '94'
 global vep_assembly
 
@@ -175,6 +175,7 @@ def read_config_options(configuration_file, pcgr_dir, genome_assembly, logger):
       if pcgr_config_options['mutational_signatures']['mutsignatures'] == 1:
          warn_msg = 'Estimation of mutational signatures is not perfomed in tumor-only mode (vcf_tumor_only = true)'
          pcgr_warn_message(warn_msg,logger)
+
    #print(str(pcgr_config_options))
    return pcgr_config_options
 

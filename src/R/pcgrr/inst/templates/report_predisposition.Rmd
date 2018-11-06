@@ -3,7 +3,7 @@ title: "Cancer Predisposition Sequencing Report - `r pcg_report$sample_name`"
 date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
 bibliography: bibliography.bib
 nocite: |
-  @Huang2018-ah, @Richards2015-kj, @Maxwell2016-mr
+  @Huang2018-ah, @Richards2015-kj, @Maxwell2016-mr, @Amendola2016-pu
 output: 
   html_document:
     toc: true

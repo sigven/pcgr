@@ -1,7 +1,7 @@
 
 ## CHANGELOG
 
-#### dev/unreleased - Oct 29th 2018
+#### dev/unreleased - Nov 5th 2018
 
 ##### Fixed
  * Bug in new CancerMine oncogene/tumor suppressor annotation [Issue #53](https://github.com/sigven/pcgr/issues/53)

@@ -470,8 +470,8 @@ assign_pathogenicity_score <- function(sample_calls, pcgr_config, pcgr_data){
 
   ## Assign a logical ACMG level
   # BP1 - Missense variant in a gene for which primarily truncating variants are known to cause disease
-  if(nrow(sample_calls[!is.na(sample_calls$CONSEQUENCE) & sample_calls$path_truncation_rate > 0.75 & stringr::str_detect(sample_calls$CONSEQUENCE,'^missense_variant'),]) > 0){
-    sample_calls[!is.na(sample_calls$CONSEQUENCE) & sample_calls$path_truncation_rate > 0.75 & stringr::str_detect(sample_calls$CONSEQUENCE,'^missense_variant'),]$BP1 <- TRUE
+  if(nrow(sample_calls[!is.na(sample_calls$CONSEQUENCE) & !is.na(sample_calls$path_truncation_rate) & sample_calls$path_truncation_rate > 0.90 & stringr::str_detect(sample_calls$CONSEQUENCE,'^missense_variant'),]) > 0){
+    sample_calls[!is.na(sample_calls$CONSEQUENCE) & !is.na(sample_calls$path_truncation_rate) & sample_calls$path_truncation_rate > 0.90 & stringr::str_detect(sample_calls$CONSEQUENCE,'^missense_variant'),]$BP1 <- TRUE
   }
 
 
@@ -534,7 +534,7 @@ assign_pathogenicity_score <- function(sample_calls, pcgr_config, pcgr_data){
 
 
   ##Assign logical ACMG level
-  # PM1 - in a somatic mutation hotspot as determined by cancerhotspots.org (v2)
+  # PM1 - missense variant in a somatic mutation hotspot as determined by cancerhotspots.org (v2)
   sample_calls <- sample_calls %>% tidyr::separate(MUTATION_HOTSPOT, c("hotspot_symbol","hotspot_codon","hotspot_pvalue"),sep="\\|",remove=F,extra="drop")
   if(nrow(sample_calls[!is.na(sample_calls$hotspot_codon),]) > 0){
     sample_calls[!is.na(sample_calls$hotspot_codon),]$hotspot_codon <- paste0('p.',sample_calls[!is.na(sample_calls$hotspot_codon),]$hotspot_codon)
@@ -605,6 +605,11 @@ assign_pathogenicity_score <- function(sample_calls, pcgr_config, pcgr_data){
   if(nrow(sample_calls[sample_calls$PP3 == TRUE,]) > 0){
     sample_calls[sample_calls$PP3 == TRUE,]$PATHSCORE <- sample_calls[sample_calls$PP3 == TRUE,]$PATHSCORE + 1
     sample_calls[sample_calls$PP3 == TRUE,]$PATHDOC <- paste(sample_calls[sample_calls$PP3 == TRUE,]$PATHDOC,paste0("- Multiple lines (>=",pcgr_config[['dbnsfp']][['min_majority']],") of in silico evidence of deleterious effect - PP3"),sep="<br>")
+  }
+
+  if(nrow(sample_calls[sample_calls$BP1 == TRUE,]) > 0){
+    sample_calls[sample_calls$BP1 == TRUE,]$PATHSCORE <- sample_calls[sample_calls$BP1 == TRUE,]$PATHSCORE - 1
+    sample_calls[sample_calls$BP1 == TRUE,]$PATHDOC <- paste(sample_calls[sample_calls$BP1 == TRUE,]$PATHDOC,paste0("- Missense variant in a gene for which primarily (>90%) truncating variants are known to cause disease - BP1"),sep="<br>")
   }
 
   if(nrow(sample_calls[sample_calls$BP4 == TRUE,]) > 0){

@@ -16,7 +16,7 @@
   * [ICGC-PCAWG](http://docs.icgc.org/pcawg/) - ICGC Pancancer Analysis of Whole Genomes - release 27, April 30th, 2018
 
 ### Variant databases of clinical utility
-  * [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - database of clinically related variants (October 2018)
+  * [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - database of clinically related variants (November 2018)
   * [DoCM](http://docm.genome.wustl.edu) - database of curated mutations (v3.2, April 2016)
   * [CIViC](http://civic.genome.wustl.edu) - clinical interpretations of variants in cancer (October 17th 2018)
   * [CBMDB](http://www.cancergenomeinterpreter.org/biomarkers) - Cancer BioMarkers database (January 17th 2018)

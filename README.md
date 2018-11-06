@@ -7,7 +7,7 @@ The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for
 ![PCGR overview](PCGR_workflow.png)
 
 ### News
-* _Oct 27th 2018_:
+* _Nov 6th 2018_:
    * Dev version is available for download (installation instructions below)
    * Reporting germline variants for cancer predisposition? Check out [github.com/sigven/cpsr](https://github.com/sigven/cpsr)
 * _May 14th 2018_: **0.6.2.1 release**
@@ -42,8 +42,8 @@ The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for
 
 
 ### Example reports
-* [Report for a breast tumor sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.BRCA.pcgr_acmg.grch37.0.6.3.html)
-* [Report for a colon adenocarcinoma sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.COAD.pcgr_acmg.grch37.0.6.3.html)
+* [Report for a breast tumor sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.BRCA.pcgr_acmg.grch37.dev.html)
+* [Report for a colon adenocarcinoma sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.COAD.pcgr_acmg.grch37.dev.html)
 
 
 ### PCGR documentation
@@ -58,7 +58,7 @@ Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, Ola Mykleb
 
 * [VEP v94](http://www.ensembl.org/info/docs/tools/vep/index.html) - Variant Effect Predictor (GENCODE v28/v19 as the gene reference dataset)
 * [CIViC](http://civic.genome.wustl.edu) - Clinical interpretations of variants in cancer (October 17th 2018)
-* [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - Database of variants with clinical significance (October 2018)
+* [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - Database of variants with clinical significance (November 2018)
 * [DoCM](http://docm.genome.wustl.edu) - Database of curated mutations (v3.2, April 2016)
 * [CBMDB](http://www.cancergenomeinterpreter.org/biomarkers) - Cancer Biomarkers database (January 17th 2018)
 * [IntOGen catalog of driver mutations](https://www.intogen.org/downloads) - (May 2016)
@@ -100,8 +100,8 @@ An installation of Python (version _3.6_) is required to run PCGR. Check that Py
 a. Clone the PCGR GitHub repository (includes run script and configuration file): `git clone https://github.com/sigven/pcgr.git`
 
 b. Download and unpack the latest data bundles in the PCGR directory
-   * [grch37 data bundle - 20181026](https://drive.google.com/open?id=1MREECbygW47ttJySgfibBpX7romBrb_Q) (approx 9.2Gb)
-   * [grch38 data bundle - 20181026](https://drive.google.com/open?id=1Xsw0WcKPnWgJDolQfrZATU5suEFJ5BKG) (approx 13Gb)
+   * [grch37 data bundle - 20181105](https://drive.google.com/open?id=1kI48PW1-6MTAC5H2zaDSOLtEsqaeL8Pr) (approx 9.2Gb)
+   * [grch38 data bundle - 20181105](https://drive.google.com/open?id=1GYLkKKDH8REg5AxCEZjsLJR0NI32rhUq) (approx 13Gb)
    * *Unpacking*: `gzip -dc pcgr.databundle.grch37.YYYYMMDD.tgz | tar xvf -`
 
 c. Pull the [PCGR Docker image (*dev*)](https://hub.docker.com/r/sigven/pcgr/) from DockerHub (approx 5.1Gb):
