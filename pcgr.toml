@@ -20,6 +20,7 @@ maf_onekg_global = 0.01
 ## exclude variants with minor allele frequency above the following population-specific thresholds
 ## gnomAD - WES data
 maf_gnomad_nfe = 0.01
+maf_gnomad_asj = 0.01
 maf_gnomad_amr = 0.01
 maf_gnomad_afr = 0.01
 maf_gnomad_sas = 0.01
