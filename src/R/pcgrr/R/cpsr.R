@@ -28,7 +28,7 @@ generate_predisposition_report <- function(project_directory, query_vcf2tsv, pcg
 
   ## define tags/variables to display in data tables (tier 1,2,3A,3B)
   predispose_tier1_2_display <- c("SYMBOL", "CONSEQUENCE", "PROTEIN_CHANGE", "CLINVAR_PHENOTYPE", "GENOTYPE", "GENE_NAME", "PROTEIN_DOMAIN",
-                          "HGVSp", "HGVSc", "CDS_CHANGE", "MUTATION_HOTSPOT","PROTEIN_FEATURE", "PREDICTED_EFFECT", "LOSS_OF_FUNCTION", "DBSNP", "CLINVAR",
+                          "HGVSp", "HGVSc", "CDS_CHANGE", "MUTATION_HOTSPOT", "RMSK_HIT","PROTEIN_FEATURE", "PREDICTED_EFFECT", "LOSS_OF_FUNCTION", "DBSNP", "CLINVAR",
                           "CLINVAR_CLINICAL_SIGNIFICANCE", "CLINVAR_VARIANT_ORIGIN", "GWAS_CITATION","ONCOGENE", "ONCOSCORE", "TUMOR_SUPPRESSOR",
                           "GLOBAL_AF_GNOMAD", pcg_report[["pcgr_config"]][["popgen"]][["vcftag_gnomad"]], "GLOBAL_AF_1KG",
                           pcg_report[["pcgr_config"]][["popgen"]][["vcftag_tgp"]], "GENOMIC_CHANGE", "GENOME_VERSION")
@@ -309,17 +309,17 @@ get_insilico_prediction_statistics <- function(sample_calls){
 
   insilico_pathogenicity_pred_algos <- c('SIFT_DBNSFP','PROVEAN_DBNSFP','META_LR_DBNSFP','FATHMM_DBNSFP','MUTATIONTASTER_DBNSFP',
                                          'MUTATIONASSESSOR_DBNSFP','FATHMM_MKL_DBNSF','M_CAP_DBNSFP','SPLICE_SITE_ADA_DBNSFP','SPLICE_SITE_RF_DBNSFP')
-  for(v in c('called','damaging','tolerated','splicing_neutral','splicing_affected')){
-    sample_calls[,paste0('n_insilico_',v)] <- 0
+  for(v in c('CALLED','DAMAGING','TOLERATED','SPLICING_NEUTRAL','SPLICING_AFFECTED')){
+    sample_calls[,paste0('N_INSILICO_',v)] <- 0
   }
 
   for(algo in insilico_pathogenicity_pred_algos){
     if(algo %in% colnames(sample_calls)){
-      sample_calls[!is.na(sample_calls[,algo]) & sample_calls[,algo] != '.','n_insilico_called'] <-  sample_calls[!is.na(sample_calls[,algo]) & sample_calls[,algo] != '.','n_insilico_called'] + 1
-      sample_calls[!is.na(sample_calls[,algo]) & (sample_calls[,algo] == 'damaging' | sample_calls[,algo] == 'possibly_damaging'),'n_insilico_damaging'] <-  sample_calls[!is.na(sample_calls[,algo]) & (sample_calls[,algo] == 'damaging' | sample_calls[,algo] == 'possibly_damaging'),'n_insilico_damaging'] + 1
-      sample_calls[!is.na(sample_calls[,algo]) & sample_calls[,algo] == 'tolerated','n_insilico_tolerated'] <-  sample_calls[!is.na(sample_calls[,algo]) & sample_calls[,algo] == 'tolerated','n_insilico_tolerated'] + 1
-      sample_calls[!is.na(sample_calls[,algo]) & sample_calls[,algo] == 'affect_splicing','n_insilico_splicing_affected'] <-  sample_calls[!is.na(sample_calls[,algo]) & sample_calls[,algo] == 'affect_splicing','n_insilico_splicing_affected'] + 1
-      sample_calls[!is.na(sample_calls[,algo]) & sample_calls[,algo] == 'splicing_neutral','n_insilico_splicing_neutral'] <-  sample_calls[!is.na(sample_calls[,algo]) & sample_calls[,algo] == 'splicing_neutral','n_insilico_splicing_neutral'] + 1
+      sample_calls[!is.na(sample_calls[,algo]) & sample_calls[,algo] != '.','N_INSILICO_CALLED'] <-  sample_calls[!is.na(sample_calls[,algo]) & sample_calls[,algo] != '.','N_INSILICO_CALLED'] + 1
+      sample_calls[!is.na(sample_calls[,algo]) & (sample_calls[,algo] == 'damaging' | sample_calls[,algo] == 'possibly_damaging'),'N_INSILICO_DAMAGING'] <-  sample_calls[!is.na(sample_calls[,algo]) & (sample_calls[,algo] == 'damaging' | sample_calls[,algo] == 'possibly_damaging'),'N_INSILICO_DAMAGING'] + 1
+      sample_calls[!is.na(sample_calls[,algo]) & sample_calls[,algo] == 'tolerated','N_INSILICO_TOLERATED'] <-  sample_calls[!is.na(sample_calls[,algo]) & sample_calls[,algo] == 'tolerated','N_INSILICO_TOLERATED'] + 1
+      sample_calls[!is.na(sample_calls[,algo]) & sample_calls[,algo] == 'affect_splicing','N_INSILICO_SPLICING_AFFECTED'] <-  sample_calls[!is.na(sample_calls[,algo]) & sample_calls[,algo] == 'affect_splicing','N_INSILICO_SPLICING_AFFECTED'] + 1
+      sample_calls[!is.na(sample_calls[,algo]) & sample_calls[,algo] == 'splicing_neutral','N_INSILICO_SPLICING_NEUTRAL'] <-  sample_calls[!is.na(sample_calls[,algo]) & sample_calls[,algo] == 'splicing_neutral','N_INSILICO_SPLICING_NEUTRAL'] + 1
     }
   }
   return(sample_calls)
@@ -335,10 +335,11 @@ get_insilico_prediction_statistics <- function(sample_calls){
 #'
 assign_pathogenicity_score <- function(sample_calls, pcgr_config, pcgr_data){
 
-  path_columns <- c("PVS1","PSC1","PS1","PM1", "PM2", "BA1","PP3","PM4","PPC1", "BP4", "PP2","BMC1","BSC1","n_insilico_called",
-                    "n_insilico_damaging", "n_insilico_tolerated", "n_insilico_splicing_neutral",
-                    "n_insilico_splicing_affected", "codon_prefix", "clinvar_pathogenic_codon",
+  path_columns <- c("PVS1","PSC1","PS1","PM1", "PM2", "BA1","PP3","PM4","PPC1", "BP4", "PP2","BMC1","BSC1","N_INSILICO_CALLED",
+                    "N_INSILICO_DAMAGING", "N_INSILICO_TOLERATED", "N_INSILICO_SPLICING_NEUTRAL",
+                    "N_INSILICO_SPLICING_AFFECTED", "codon_prefix", "clinvar_pathogenic_codon",
                     "clinvar_pathogenic", "clinvar_benign","clinvar_benign_codon","hotspot_symbol", "hotspot_codon","hotspot_pvalue",
+                    "LOF_KNOWN_MOI","PATH_TRUNCATION_RATE","BENIGN_MISSENSE_RATE",
                     "PATHSCORE","PATHDOC","PATHRANK")
   sample_calls <- sample_calls[, !(colnames(sample_calls) %in% path_columns)]
 
@@ -347,21 +348,21 @@ assign_pathogenicity_score <- function(sample_calls, pcgr_config, pcgr_data){
   sample_calls$PSC1 <- FALSE #null variant (nonsense, frameshift, canonical ±1 or 2 splice sites, initiation codon, single or multiexon deletion)
   #in a gene where LOF is a known mechanism of disease (Recessive mode of inheritance)
   sample_calls$PS1 <- FALSE #Same amino acid change as a previously established pathogenic variant regardless of nucleotide change
-  sample_calls$PMC1 <- FALSE #null variant in non-tumor suppressor
+  sample_calls$PMC1 <- FALSE #null variant in a gene where LoF is not a known mechanism of disease
   sample_calls$PM2 <- FALSE #Absence or extremely low frequency (MAF < 0.0005) in 1000 Genomes Project, or gnomAD
-  sample_calls$PP2 <- FALSE # Missense variant in a gene that has a relatively low rate of benign missense variation and where missense variants are a common mechanism of disease
+  sample_calls$PP2 <- FALSE # Missense variant in a gene that has a relatively low rate of benign missense variation (<20%) and where missense variants are a common mechanism of disease (>50% of pathogenic variants)
   sample_calls$PM4 <- FALSE #Protein length changes due to inframe indels or nonstop variant of genes that harbor variants with a dominant mode of inheritance.
   sample_calls$PPC1 <- FALSE #Protein length changes due to inframe indels or nonstop variant of genes that harbor variants with a recessive mode of inheritance.
   sample_calls$PM5 <- FALSE #Novel missense change at an amino acid residue where a different missense change determined to be pathogenic has been seen before
-  sample_calls$PP3 <- FALSE #Multiple lines of computational evidence support a deleterious effect on the gene or gene product (conservation, evolutionary, splicing impact, etc.)
-  sample_calls$BP4 <- FALSE #Multiple lines (>1) of in silico evidence of none deleterious effect.
+  sample_calls$PP3 <- FALSE #Multiple lines (>=5) of computational evidence support a deleterious effect on the gene or gene product (conservation, evolutionary, splicing impact, etc.)
+  sample_calls$BP4 <- FALSE #Multiple lines (>=5) of in silico evidence of none deleterious effect.
   sample_calls$BMC1 <- FALSE #Peptide change is at the same location of a known benign change
   sample_calls$BSC1 <- FALSE #Peptide change is known to be benign
   sample_calls$BA1 <- FALSE #Common population frequency (MAF > 0.05) in 1000 Genomes Project, or gnomAD
   sample_calls$BP1 <- FALSE #Missense variant in a gene for which primarily truncating variants are known to cause disease
 
   predisposition_gene_info <- dplyr::select(pcgr_data$predisposition_genes, symbol, lof_known_moi, path_truncation_rate, benign_missense_rate) %>%
-    dplyr::rename(SYMBOL = symbol)
+    dplyr::rename(SYMBOL = symbol, LOF_KNOWN_MOI = lof_known_moi, PATH_TRUNCATION_RATE = path_truncation_rate, BENIGN_MISSENSE_RATE = benign_missense_rate)
 
   sample_calls <- dplyr::left_join(sample_calls, predisposition_gene_info, by=c("SYMBOL" = "SYMBOL"))
 
@@ -372,38 +373,38 @@ assign_pathogenicity_score <- function(sample_calls, pcgr_config, pcgr_data){
   # Computational evidence for deleterious/benign effect is taken from invidual algorithm predictions in dbNSFP
   # SIFT,Provean,MutationTaster,MutationAssessor,M_CAP,MutPred,FATHMM,FATHMM-mkl,DBNSFP_LogReg,dbscSNV_RF,dbscSNV_AdaBoost
   # Default scheme (from default TOML file):
-  # 1) Damaging: Among 8 possible protein variant effect predictions, at least five algorithms must have made a call, with at least 4 predicted as damaging,
+  # 1) Damaging: Among 8 possible protein variant effect predictions, at least six algorithms must have made a call, with at least 5 predicted as damaging,
   #    and at most one predicted as tolerated (PP3)
   #    - at most 1 prediction for a splicing neutral effect
-  # 2) Tolerated: Among 8 possible protein variant effect predictions, at least five algorithms must have made a call, with at least 4 predicted as tolerated,
+  # 2) Tolerated: Among 8 possible protein variant effect predictions, at least six algorithms must have made a call, with at least 5 predicted as tolerated,
   #    and at most one predicted as damaging (BP4)
   #    - 0 predictions of splice site affected
 
   dbnsfp_min_majority <- pcgr_config[['dbnsfp']][['min_majority']]
   dbnsfp_max_minority <- pcgr_config[['dbnsfp']][['max_minority']]
-  dbnsfp_min_called <- dbnsfp_max_minority + dbnsfp_min_majority
+  dbnsfp_min_called <- dbnsfp_min_majority
 
   sample_calls <- pcgrr::get_insilico_prediction_statistics(sample_calls)
-  if(nrow(sample_calls[sample_calls$n_insilico_called >= dbnsfp_min_called &
-                       sample_calls$n_insilico_damaging >= dbnsfp_min_majority &
-                       sample_calls$n_insilico_tolerated <= dbnsfp_max_minority &
-                       sample_calls$n_insilico_splicing_neutral <= 1,]) > 0){
-    sample_calls[sample_calls$n_insilico_called >= dbnsfp_min_called &
-                   sample_calls$n_insilico_damaging >= dbnsfp_min_majority &
-                   sample_calls$n_insilico_tolerated <= dbnsfp_max_minority &
-                   sample_calls$n_insilico_splicing_neutral <= 1,]$PP3 <- TRUE
+  if(nrow(sample_calls[sample_calls$N_INSILICO_CALLED >= dbnsfp_min_called &
+                       sample_calls$N_INSILICO_DAMAGING >= dbnsfp_min_majority &
+                       sample_calls$N_INSILICO_TOLERATED <= dbnsfp_max_minority &
+                       sample_calls$N_INSILICO_SPLICING_NEUTRAL <= 1,]) > 0){
+    sample_calls[sample_calls$N_INSILICO_CALLED >= dbnsfp_min_called &
+                   sample_calls$N_INSILICO_DAMAGING >= dbnsfp_min_majority &
+                   sample_calls$N_INSILICO_TOLERATED <= dbnsfp_max_minority &
+                   sample_calls$N_INSILICO_SPLICING_NEUTRAL <= 1,]$PP3 <- TRUE
   }
-  if(nrow(sample_calls[sample_calls$n_insilico_called >= dbnsfp_min_called &
-                       sample_calls$n_insilico_tolerated >= dbnsfp_min_majority &
-                       sample_calls$n_insilico_damaging <= dbnsfp_max_minority &
-                       sample_calls$n_insilico_splicing_affected == 0,]) > 0){
-    sample_calls[sample_calls$n_insilico_called >= dbnsfp_min_called &
-                   sample_calls$n_insilico_tolerated >= dbnsfp_min_majority &
-                   sample_calls$n_insilico_damaging <= dbnsfp_max_minority &
-                   sample_calls$n_insilico_splicing_affected == 0,]$BP4 <- TRUE
+  if(nrow(sample_calls[sample_calls$N_INSILICO_CALLED >= dbnsfp_min_called &
+                       sample_calls$N_INSILICO_TOLERATED >= dbnsfp_min_majority &
+                       sample_calls$N_INSILICO_DAMAGING <= dbnsfp_max_minority &
+                       sample_calls$N_INSILICO_SPLICING_AFFECTED == 0,]) > 0){
+    sample_calls[sample_calls$N_INSILICO_CALLED >= dbnsfp_min_called &
+                   sample_calls$N_INSILICO_TOLERATED >= dbnsfp_min_majority &
+                   sample_calls$N_INSILICO_DAMAGING <= dbnsfp_max_minority &
+                   sample_calls$N_INSILICO_SPLICING_AFFECTED == 0,]$BP4 <- TRUE
   }
-  if(nrow(sample_calls[sample_calls$n_insilico_splicing_affected == 2,]) > 0){
-    sample_calls[sample_calls$n_insilico_splicing_affected == 2,]$PP3 <- TRUE
+  if(nrow(sample_calls[sample_calls$N_INSILICO_SPLICING_AFFECTED == 2,]) > 0){
+    sample_calls[sample_calls$N_INSILICO_SPLICING_AFFECTED == 2,]$PP3 <- TRUE
   }
 
   ## Assign logical ACMG level
@@ -439,13 +440,13 @@ assign_pathogenicity_score <- function(sample_calls, pcgr_config, pcgr_data){
   ## Assign logical ACMG level on loss-of-function variant in known predisposition gene
   # PVS1 - Truncations in susceptibility genes where LOF is a known mechanism of the disease and harbor variants with a dominant mode of inheritance.
   # PSC1 - Truncations in susceptibility genes where LOF is a known mechanism of the disease and harbor variants with a recessive mode of inheritance.
-  if(nrow(sample_calls[!is.na(sample_calls$LOSS_OF_FUNCTION) & sample_calls$LOSS_OF_FUNCTION == TRUE & !is.na(sample_calls$lof_known_moi) & sample_calls$lof_known_moi == "LoF" & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI),]) > 0){
-    if(nrow(sample_calls[!is.na(sample_calls$LOSS_OF_FUNCTION) & sample_calls$LOSS_OF_FUNCTION == TRUE & !is.na(sample_calls$lof_known_moi) & sample_calls$lof_known_moi == "LoF" & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI) & stringr::str_detect(sample_calls$CANCER_PREDISPOSITION_MOI,"AD|AD/AR"),]) > 0){
-      sample_calls[!is.na(sample_calls$LOSS_OF_FUNCTION) & sample_calls$LOSS_OF_FUNCTION == TRUE & !is.na(sample_calls$lof_known_moi) & sample_calls$lof_known_moi == "LoF" & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI) & stringr::str_detect(sample_calls$CANCER_PREDISPOSITION_MOI,"AD/AD/AR"),]$PVS1 <- TRUE
+  if(nrow(sample_calls[!is.na(sample_calls$LOSS_OF_FUNCTION) & sample_calls$LOSS_OF_FUNCTION == TRUE & !is.na(sample_calls$LOF_KNOWN_MOI) & sample_calls$LOF_KNOWN_MOI == "LoF" & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI),]) > 0){
+    if(nrow(sample_calls[!is.na(sample_calls$LOSS_OF_FUNCTION) & sample_calls$LOSS_OF_FUNCTION == TRUE & !is.na(sample_calls$LOF_KNOWN_MOI) & sample_calls$LOF_KNOWN_MOI == "LoF" & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI) & stringr::str_detect(sample_calls$CANCER_PREDISPOSITION_MOI,"AD|AD/AR"),]) > 0){
+      sample_calls[!is.na(sample_calls$LOSS_OF_FUNCTION) & sample_calls$LOSS_OF_FUNCTION == TRUE & !is.na(sample_calls$LOF_KNOWN_MOI) & sample_calls$LOF_KNOWN_MOI == "LoF" & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI) & stringr::str_detect(sample_calls$CANCER_PREDISPOSITION_MOI,"AD|AD/AR"),]$PVS1 <- TRUE
     }
 
-    if(nrow(sample_calls[!is.na(sample_calls$LOSS_OF_FUNCTION) & sample_calls$LOSS_OF_FUNCTION == TRUE & !is.na(sample_calls$lof_known_moi) & sample_calls$lof_known_moi == "LoF" & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI) & stringr::str_detect(sample_calls$CANCER_PREDISPOSITION_MOI,"AR"),]) > 0){
-      sample_calls[!is.na(sample_calls$LOSS_OF_FUNCTION) & sample_calls$LOSS_OF_FUNCTION == TRUE & !is.na(sample_calls$lof_known_moi) & sample_calls$lof_known_moi == "LoF" & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI) & stringr::str_detect(sample_calls$CANCER_PREDISPOSITION_MOI,"AR"),]$PSC1 <- TRUE
+    if(nrow(sample_calls[!is.na(sample_calls$LOSS_OF_FUNCTION) & sample_calls$LOSS_OF_FUNCTION == TRUE & !is.na(sample_calls$LOF_KNOWN_MOI) & sample_calls$LOF_KNOWN_MOI == "LoF" & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI) & stringr::str_detect(sample_calls$CANCER_PREDISPOSITION_MOI,"^AR$"),]) > 0){
+      sample_calls[!is.na(sample_calls$LOSS_OF_FUNCTION) & sample_calls$LOSS_OF_FUNCTION == TRUE & !is.na(sample_calls$LOF_KNOWN_MOI) & sample_calls$LOF_KNOWN_MOI == "LoF" & !is.na(sample_calls$CANCER_PREDISPOSITION_MOI) & stringr::str_detect(sample_calls$CANCER_PREDISPOSITION_MOI,"^AR$"),]$PSC1 <- TRUE
       ## skip genes that are associated with gain-of-function
     }
   }
@@ -464,24 +465,21 @@ assign_pathogenicity_score <- function(sample_calls, pcgr_config, pcgr_data){
 
   ## Assign a logical ACMG level
   # PP2 - Missense variant in a gene that has a relatively low rate of benign missense variation and where missense variants are a common mechanism of disease
-  if(nrow(sample_calls[!is.na(sample_calls$CONSEQUENCE) & !is.na(sample_calls$benign_missense_rate) & sample_calls$benign_missense_rate <= 0.2 & sample_calls$path_truncation_rate < 0.5 & stringr::str_detect(sample_calls$CONSEQUENCE,'^missense_variant'),]) > 0){
-    sample_calls[!is.na(sample_calls$CONSEQUENCE) & !is.na(sample_calls$benign_missense_rate) & sample_calls$benign_missense_rate <= 0.2 & sample_calls$path_truncation_rate < 0.5 & stringr::str_detect(sample_calls$CONSEQUENCE,'^missense_variant'),]$PP2 <- TRUE
+  if(nrow(sample_calls[!is.na(sample_calls$CONSEQUENCE) & !is.na(sample_calls$BENIGN_MISSENSE_RATE) & sample_calls$BENIGN_MISSENSE_RATE <= 0.2 & sample_calls$PATH_TRUNCATION_RATE < 0.5 & stringr::str_detect(sample_calls$CONSEQUENCE,'^missense_variant'),]) > 0){
+    sample_calls[!is.na(sample_calls$CONSEQUENCE) & !is.na(sample_calls$BENIGN_MISSENSE_RATE) & sample_calls$BENIGN_MISSENSE_RATE <= 0.2 & sample_calls$PATH_TRUNCATION_RATE < 0.5 & stringr::str_detect(sample_calls$CONSEQUENCE,'^missense_variant'),]$PP2 <- TRUE
   }
 
   ## Assign a logical ACMG level
   # BP1 - Missense variant in a gene for which primarily truncating variants are known to cause disease
-  if(nrow(sample_calls[!is.na(sample_calls$CONSEQUENCE) & !is.na(sample_calls$path_truncation_rate) & sample_calls$path_truncation_rate > 0.90 & stringr::str_detect(sample_calls$CONSEQUENCE,'^missense_variant'),]) > 0){
-    sample_calls[!is.na(sample_calls$CONSEQUENCE) & !is.na(sample_calls$path_truncation_rate) & sample_calls$path_truncation_rate > 0.90 & stringr::str_detect(sample_calls$CONSEQUENCE,'^missense_variant'),]$BP1 <- TRUE
+  if(nrow(sample_calls[!is.na(sample_calls$CONSEQUENCE) & !is.na(sample_calls$PATH_TRUNCATION_RATE) & sample_calls$PATH_TRUNCATION_RATE > 0.90 & stringr::str_detect(sample_calls$CONSEQUENCE,'^missense_variant'),]) > 0){
+    sample_calls[!is.na(sample_calls$CONSEQUENCE) & !is.na(sample_calls$PATH_TRUNCATION_RATE) & sample_calls$PATH_TRUNCATION_RATE > 0.90 & stringr::str_detect(sample_calls$CONSEQUENCE,'^missense_variant'),]$BP1 <- TRUE
   }
-
-
 
   ## Assign a logical ACMG level
-  # PMC1 - LoF in susceptibility gene, yet non tumor suppressor
-  if(nrow(sample_calls[!is.na(sample_calls$LOSS_OF_FUNCTION) & sample_calls$LOSS_OF_FUNCTION == TRUE & (is.na(sample_calls$lof_known_moi) | sample_calls$lof_known_moi != "LoF"),]) > 0){
-    sample_calls[!is.na(sample_calls$LOSS_OF_FUNCTION) & sample_calls$LOSS_OF_FUNCTION == TRUE & (is.na(sample_calls$lof_known_moi) | sample_calls$lof_known_moi != "LoF"),]$PMC1 <- TRUE
+  # PMC1 - LoF variant in susceptibility gene, yet unknown or not LoF mechanism of disease
+  if(nrow(sample_calls[!is.na(sample_calls$LOSS_OF_FUNCTION) & sample_calls$LOSS_OF_FUNCTION == TRUE & (is.na(sample_calls$LOF_KNOWN_MOI) | sample_calls$LOF_KNOWN_MOI != "LoF"),]) > 0){
+    sample_calls[!is.na(sample_calls$LOSS_OF_FUNCTION) & sample_calls$LOSS_OF_FUNCTION == TRUE & (is.na(sample_calls$LOF_KNOWN_MOI) | sample_calls$LOF_KNOWN_MOI != "LoF"),]$PMC1 <- TRUE
   }
-
 
   ## Assign logical ACMG level
   # PS1 - coinciding with known pathogenic missense variants (yet with different nucleotide change)
@@ -531,8 +529,6 @@ assign_pathogenicity_score <- function(sample_calls, pcgr_config, pcgr_data){
     sample_calls[is.na(sample_calls$BSC1) & is.na(sample_calls$BMC1) & sample_calls$BSC1 == T & sample_calls$BMC1 == T,]$BMC1 <- FALSE
   }
 
-
-
   ##Assign logical ACMG level
   # PM1 - missense variant in a somatic mutation hotspot as determined by cancerhotspots.org (v2)
   sample_calls <- sample_calls %>% tidyr::separate(MUTATION_HOTSPOT, c("hotspot_symbol","hotspot_codon","hotspot_pvalue"),sep="\\|",remove=F,extra="drop")
@@ -573,7 +569,7 @@ assign_pathogenicity_score <- function(sample_calls, pcgr_config, pcgr_data){
   }
   if(nrow(sample_calls[sample_calls$PMC1 == TRUE,]) > 0){
     sample_calls[sample_calls$PMC1 == TRUE,]$PATHSCORE <- sample_calls[sample_calls$PMC1 == TRUE,]$PATHSCORE + 2
-    sample_calls[sample_calls$PMC1 == TRUE,]$PATHDOC <- paste(sample_calls[sample_calls$PMC1 == TRUE,]$PATHDOC,"- Loss-of-function variant in known susceptibility/syndrome gene (LoF not a known mechanism of disease) - PMC1",sep="<br>")
+    sample_calls[sample_calls$PMC1 == TRUE,]$PATHDOC <- paste(sample_calls[sample_calls$PMC1 == TRUE,]$PATHDOC,"- Loss-of-function variant in known susceptibility/syndrome gene (unknown/LoF not a known mechanism of disease) - PMC1",sep="<br>")
   }
 
   if(nrow(sample_calls[sample_calls$PM4 == TRUE,]) > 0){
@@ -663,11 +659,14 @@ assign_pathogenicity_score <- function(sample_calls, pcgr_config, pcgr_data){
 #'
 generate_tier_tsv_cpsr <- function(pcg_report, sample_name = "test"){
 
-  predispose_tsv_tags <- c("VAR_ID","VCF_SAMPLE_ID","CODING_STATUS","SYMBOL","ENSEMBL_GENE_ID","ENSEMBL_TRANSCRIPT_ID","GENOTYPE","CONSEQUENCE","PROTEIN_CHANGE",
-                           "GENE_NAME","PROTEIN_DOMAIN", "HGVSp","HGVSc", "CDS_CHANGE","MUTATION_HOTSPOT","PROTEIN_FEATURE","EFFECT_PREDICTIONS",
+  predispose_tsv_tags <- c("VAR_ID","VCF_SAMPLE_ID","CODING_STATUS","SYMBOL","ENSEMBL_GENE_ID","ENSEMBL_TRANSCRIPT_ID","GENE_NAME",
+                           "LOF_KNOWN_MOI","PATH_TRUNCATION_RATE","BENIGN_MISSENSE_RATE","ONCOGENE", "ONCOSCORE","TUMOR_SUPPRESSOR",
+                           "GENOTYPE","CONSEQUENCE","PROTEIN_CHANGE","PROTEIN_DOMAIN", "HGVSp","HGVSc", "CDS_CHANGE","MUTATION_HOTSPOT","RMSK_HIT","PROTEIN_FEATURE","EFFECT_PREDICTIONS",
                            "LOSS_OF_FUNCTION", "DBSNP","CLINVAR_CLINICAL_SIGNIFICANCE", "CLINVAR_MSID","CLINVAR_VARIANT_ORIGIN",
-                           "CLINVAR_CONFLICTED", "CLINVAR_PHENOTYPE","VEP_ALL_CONSEQUENCE", "ONCOGENE", "ONCOSCORE","TUMOR_SUPPRESSOR",
-                           "PATHSCORE","PATHRANK", "PATHDOC","GLOBAL_AF_GNOMAD", pcg_report[['pcgr_config']][['popgen']][['vcftag_gnomad']],
+                           "CLINVAR_CONFLICTED", "CLINVAR_PHENOTYPE","VEP_ALL_CONSEQUENCE",
+                           "PATHSCORE","PATHRANK", "PATHDOC","PVS1","PSC1","PS1","PMC1","PM1","PM2","PM4","PM5","PP2","PPC1","PP3","BP3","BP4","BMC1","BSC1","BA1","BP1",
+                           "N_INSILICO_CALLED","N_INSILICO_DAMAGING","N_INSILICO_TOLERATED","N_INSILICO_SPLICING_NEUTRAL","N_INSILICO_SPLICING_AFFECTED",
+                           "GLOBAL_AF_GNOMAD", pcg_report[['pcgr_config']][['popgen']][['vcftag_gnomad']],
                            "GLOBAL_AF_1KG", pcg_report[['pcgr_config']][['popgen']][['vcftag_tgp']],"TIER","TIER_DESCRIPTION",
                            "GENOMIC_CHANGE", "GENOME_VERSION")
 

@@ -297,12 +297,12 @@ def read_config_options(configuration_file, base_dir, genome_assembly, logger, w
                   err_msg = "Log ratio for copy number amplifications (" + str(user_options[section][var]) + ") should be greater than zero"
                   error_message(err_msg,logger)
             if var == 'min_majority' and section == 'dbnsfp':
-               if user_options['dbnsfp'][var] > 8 or user_options['dbnsfp'][var] < 3:
-                  err_msg = "Minimum number of majority votes for consensus calls among dbNSFP predictions should not exceed 8 and should not be less than 3"
+               if user_options['dbnsfp'][var] > 8 or user_options['dbnsfp'][var] < 5:
+                  err_msg = "Minimum number of majority votes for consensus calls among dbNSFP predictions should not exceed 8 and should not be less than 5"
                   error_message(err_msg,logger)
             if var == 'max_minority' and section == 'dbnsfp':
-               if user_options['dbnsfp'][var] >= config_options['dbnsfp']['min_majority'] or user_options['dbnsfp'][var] > 3 or user_options['dbnsfp'][var] < 0 or (user_options['dbnsfp'][var] + config_options['dbnsfp']['min_majority'] > 8):
-                  err_msg = "Maximum number of minority votes for consensus calls among dbNSFP predictions should not exceed 3 (8 algorithms in total) and should be less than min_majority (" + str(user_options[section][var]) + ")"
+               if user_options['dbnsfp'][var] >= config_options['dbnsfp']['min_majority'] or user_options['dbnsfp'][var] > 2 or user_options['dbnsfp'][var] < 0 or (user_options['dbnsfp'][var] + config_options['dbnsfp']['min_majority'] > 8):
+                  err_msg = "Maximum number of minority votes for consensus calls among dbNSFP predictions should not exceed 2 (8 algorithms in total) and should be less than min_majority (" + str(config_options['dbnsfp']['min_majority']) + ")"
                   error_message(err_msg,logger)
             
             config_options[section][var] = user_options[section][var]

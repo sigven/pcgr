@@ -2729,3 +2729,13 @@
 [2018-11-05 22:55:29][INFO] TIER 3: Variants of uncertain significance - cancer_phenotype: n = 67
 [2018-11-05 22:55:29][INFO] TIER 3: Variants of uncertain significance - noncancer_phenotype: n = 3
 [2018-11-05 22:55:51][INFO] TIER 3: Other unclassified variants - noncancer_phenotype: n = 14
+[2018-11-09 13:11:35][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-11-09 13:11:35][INFO] Number of PASS variants: 19
+[2018-11-09 13:11:35][INFO] Number of SNVs: 18
+[2018-11-09 13:11:35][INFO] Number of deletions: 1
+[2018-11-09 13:11:35][INFO] Number of insertions: 0
+[2018-11-09 13:11:35][INFO] Number of block substitutions: 0
+[2018-11-09 13:11:35][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-11-09 13:11:37][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-11-09 13:11:37][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-11-09 13:11:37][INFO] Extending annotation descriptions related to ClinVar
