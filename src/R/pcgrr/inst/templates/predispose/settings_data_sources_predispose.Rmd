@@ -3,25 +3,29 @@
 The annotated variants are based on the following underlying tools and knowledge resources:
 
 ```{r list_resources, echo=F,results='asis'}
-for(n in names(pcg_report$pcgr_db_release)){
+for(n in names(cps_report$pcgr_db_release)){
   if(n == 'vep' | n == 'gencode' | n == 'clinvar' | n == 'dbnsfp' | n == 'pfam' | n == 'gnomad' | n == 'cancerhotspots' | n == 'dbsnp' | n == 'onekg' | n == 'uniprot' | n == 'do' | n == 'gwas'){
-    s <- paste0('* [',pcg_report$pcgr_db_release[[n]]$name,'](',pcg_report$pcgr_db_release[[n]]$url,') - ',pcg_report$pcgr_db_release[[n]]$description, ' (',pcg_report$pcgr_db_release[[n]]$version,')')
+    s <- paste0('* [',cps_report$pcgr_db_release[[n]]$name,'](',cps_report$pcgr_db_release[[n]]$url,') - ',cps_report$pcgr_db_release[[n]]$description, ' (',cps_report$pcgr_db_release[[n]]$version,')')
     cat(s,sep="\n")
   }
 }
 
 ```
 
-The report is generated with _[cpsr](https://github.com/sigven/cpsr)_ version `r pcg_report[['pcgr_version']]`, using the following key settings:
+The report is generated with _[cpsr](https://github.com/sigven/cpsr)_ version `r cps_report[['pcgr_version']]`, using the following key settings:
 
-* Genome assembly: __`r pcg_report[['genome_assembly']]`__
-* Report theme (Bootstrap): __`r pcg_report[['pcgr_config']][['visual']][['report_theme']]`__
+* Genome assembly: __`r cps_report[['genome_assembly']]`__
+* Report theme (Bootstrap): __`r cps_report[['cpsr_config']][['visual']][['report_theme']]`__
 * Control populations:
-    * 1000 Genomes Project (__`r pcg_report[['pcgr_config']][['popgen']][['popdesc_tgp']]`__)
-    * gnomAD (__`r pcg_report[['pcgr_config']][['popgen']][['popdesc_gnomad']]`__)
+    * 1000 Genomes Project (__`r cps_report[['cpsr_config']][['popgen']][['popdesc_tgp']]`__)
+    * gnomAD (__`r cps_report[['cpsr_config']][['popgen']][['popdesc_gnomad']]`__)
 * Minor allele frequency threshold (unclassified variants):
-    * 1000 Genomes Project (__`r pcg_report[['pcgr_config']][['popgen']][['popdesc_tgp']]`__): __`r pcg_report[['pcgr_config']][['maf_limits']][['maf_tgp']]`__
-    * gnomAD (__`r pcg_report[['pcgr_config']][['popgen']][['popdesc_gnomad']]`__): __`r pcg_report[['pcgr_config']][['maf_limits']][['maf_gnomad']]`__
-* Show GWAS hits in report: __`r pcg_report[['pcgr_config']][['gwas']][['gwas_hits']]`__
-    * Minimum p-value for association: __`r pcg_report[['pcgr_config']][['gwas']][['p_value_min']]`__
+    * 1000 Genomes Project (__`r cps_report[['cpsr_config']][['popgen']][['popdesc_tgp']]`__): __`r cps_report[['cpsr_config']][['maf_limits']][['maf_tgp']]`__
+    * gnomAD (__`r cps_report[['cpsr_config']][['popgen']][['popdesc_gnomad']]`__): __`r cps_report[['cpsr_config']][['maf_limits']][['maf_gnomad']]`__
+* Show GWAS hits in report: __`r cps_report[['cpsr_config']][['gwas']][['gwas_hits']]`__
+    * Minimum p-value for association: __`r cps_report[['cpsr_config']][['gwas']][['p_value_min']]`__
+* Pathogenicity prediction - voting scheme for consensus call among eight algorithms within [dbNSFP](https://sites.google.com/site/jpopgen/dbNSFP):
+    * Minimum number of majority votes:  __`r cps_report[['cpsr_config']][['dbnsfp']][['min_majority']]`__
+    * Maximum number of minority votes:  __`r cps_report[['cpsr_config']][['dbnsfp']][['max_minority']]`__
+        * Variants affecting splice sites require that each of the two algorithms agree
 

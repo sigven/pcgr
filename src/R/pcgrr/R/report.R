@@ -1,7 +1,7 @@
 
 #' Function that initates PCGR report object
 #'
-#' @param pcgr_config Object with PCGR configuration parameters
+#' @param config Object with configuration parameters
 #' @param cna_segments_tsv name of CNA segments file (tab-separated values)
 #' @param sample_name sample identifier
 #' @param pcgr_version PCGR software version
@@ -9,27 +9,28 @@
 #' @param class report analysis section (NULL defaults to full report)
 #' @param pcgr_data pcgr data object
 
-init_pcg_report <- function(pcgr_config = NULL, sample_name = 'SampleX', pcgr_version = '0.6.0', genome_assembly = 'grch37', class = NULL, pcgr_data = NULL, type = 'somatic'){
+init_pcg_report <- function(config = NULL, sample_name = 'SampleX', pcgr_version = '0.6.0', genome_assembly = 'grch37', class = NULL, pcgr_data = NULL, type = 'somatic'){
 
 
   pcg_report <- list()
-  pcg_report[['pcgr_config']] <- pcgr_config
+
   pcg_report[['sample_name']] <- sample_name
   pcg_report[['genome_assembly']] <- genome_assembly
   pcg_report[['pcgr_version']] <- pcgr_version
   pcg_report[['pcgr_db_release']] <- pcgr_data$pcgr_db_release
 
   if(type == 'predisposition'){
+    pcg_report[['cpsr_config']] <- config
     analysis_element <- 'snv_indel'
     pcg_report[[analysis_element]] <- list()
     pcg_report[[analysis_element]][['eval']] <- FALSE
-    pcg_report[[analysis_element]][['eval_gwas']] <- pcg_report[['pcgr_config']][['gwas']][['gwas_hits']]
+    pcg_report[[analysis_element]][['eval_gwas']] <- pcg_report[['cpsr_config']][['gwas']][['gwas_hits']]
     pcg_report[[analysis_element]][['variant_display']] <- list()
     pcg_report[[analysis_element]][['variant_set']] <- list()
     pcg_report[[analysis_element]][['variant_statistic']] <- list()
     pcg_report[[analysis_element]][['zero']] <- FALSE
 
-    cancer_genes <- pcgrr::list_to_df(pcgr_config$cancer_predisposition_genes) %>%
+    cancer_genes <- pcgrr::list_to_df(config$cancer_predisposition_genes) %>%
       dplyr::filter(list.element == T) %>%
       dplyr::select(name) %>%
       dplyr::rename(symbol = name)
@@ -52,16 +53,16 @@ init_pcg_report <- function(pcgr_config = NULL, sample_name = 'SampleX', pcgr_ve
       pcg_report[[analysis_element]][['variant_statistic']][[t]] <- 0
     }
 
-    if(!is.null(pcg_report[['pcgr_config']][['popgen']])){
-      if(pcg_report[['pcgr_config']][['popgen']][['pop_tgp']] != ""){
-        pop_tag_info <- pcgrr::get_population_tag(pcg_report[['pcgr_config']][['popgen']][['pop_tgp']], db = "1KG")
-        pcg_report[['pcgr_config']][['popgen']][['vcftag_tgp']] <- pop_tag_info$vcf_tag
-        pcg_report[['pcgr_config']][['popgen']][['popdesc_tgp']] <- pop_tag_info$pop_description
+    if(!is.null(pcg_report[['cpsr_config']][['popgen']])){
+      if(pcg_report[['cpsr_config']][['popgen']][['pop_tgp']] != ""){
+        pop_tag_info <- pcgrr::get_population_tag(pcg_report[['cpsr_config']][['popgen']][['pop_tgp']], db = "1KG")
+        pcg_report[['cpsr_config']][['popgen']][['vcftag_tgp']] <- pop_tag_info$vcf_tag
+        pcg_report[['cpsr_config']][['popgen']][['popdesc_tgp']] <- pop_tag_info$pop_description
       }
-      if(pcgr_config[['popgen']][['pop_gnomad']] != ""){
-        pop_tag_info <- pcgrr::get_population_tag(pcgr_config[['popgen']][['pop_gnomad']], db = "GNOMAD")
-        pcg_report[['pcgr_config']][['popgen']][['vcftag_gnomad']] <- pop_tag_info$vcf_tag
-        pcg_report[['pcgr_config']][['popgen']][['popdesc_gnomad']] <- pop_tag_info$pop_description
+      if(cpsr_config[['popgen']][['pop_gnomad']] != ""){
+        pop_tag_info <- pcgrr::get_population_tag(cpsr_config[['popgen']][['pop_gnomad']], db = "GNOMAD")
+        pcg_report[['cpsr_config']][['popgen']][['vcftag_gnomad']] <- pop_tag_info$vcf_tag
+        pcg_report[['cpsr_config']][['popgen']][['popdesc_gnomad']] <- pop_tag_info$pop_description
       }
     }
 
@@ -71,9 +72,10 @@ init_pcg_report <- function(pcgr_config = NULL, sample_name = 'SampleX', pcgr_ve
     }
   }else{
 
-    pcg_report[['tier_model']] <- pcgr_config$tier_model$tier_model
+    pcg_report[['pcgr_config']] <- config
+    pcg_report[['tier_model']] <- config$tier_model$tier_model
     pcg_report[['tumor_class']] <- 'Not defined'
-    tumor_types_set <- pcgrr::list_to_df(pcgr_config$tumor_type) %>% dplyr::filter(list.element == T) %>% dplyr::select(name)
+    tumor_types_set <- pcgrr::list_to_df(config$tumor_type) %>% dplyr::filter(list.element == T) %>% dplyr::select(name)
     if(nrow(tumor_types_set) > 0){
       pcg_report[['tumor_class']] <- paste0(tumor_types_set$name,collapse=", ")
     }
@@ -112,13 +114,13 @@ init_pcg_report <- function(pcgr_config = NULL, sample_name = 'SampleX', pcgr_ve
         if(analysis_element == 'snv_indel'){
           for(t in c('tier1','tier2','tier3','tier4','noncoding')){
             pcg_report[[analysis_element]][['variant_display']][[t]] <- data.frame()
-            if(t == 'tier2' & pcgr_config$tier_model$tier_model == 'pcgr'){
+            if(t == 'tier2' & config$tier_model$tier_model == 'pcgr'){
               pcg_report[[analysis_element]][['variant_display']][[t]] <- list()
               for(c in c('hotspot','curated_mutation','predicted_driver')){
                 pcg_report[[analysis_element]][['variant_display']][[t]][[c]] <- data.frame()
               }
             }
-            if(t == 'tier3' & pcgr_config$tier_model$tier_model == 'pcgr_acmg'){
+            if(t == 'tier3' & config$tier_model$tier_model == 'pcgr_acmg'){
               pcg_report[[analysis_element]][['variant_display']][[t]] <- list()
               for(c in c('proto_oncogene','tumor_suppressor')){
                 pcg_report[[analysis_element]][['variant_display']][[t]][[c]] <- data.frame()
@@ -141,7 +143,7 @@ init_pcg_report <- function(pcgr_config = NULL, sample_name = 'SampleX', pcgr_ve
           for(t in c('segment','oncogene_gain','tsgene_loss','biomarker')){
             pcg_report[[analysis_element]][['variant_display']][[t]] <- data.frame()
           }
-          if(pcgr_config$tier_model$tier_model == 'pcgr_acmg'){
+          if(config$tier_model$tier_model == 'pcgr_acmg'){
             pcg_report[[analysis_element]][['variant_display']][['biomarkers_tier1']] <- data.frame()
             pcg_report[[analysis_element]][['variant_display']][['biomarkers_tier2']] <- data.frame()
           }
@@ -157,7 +159,7 @@ init_pcg_report <- function(pcgr_config = NULL, sample_name = 'SampleX', pcgr_ve
         pcg_report[[analysis_element]][['variant_statistic']] <- list()
         pcg_report[[analysis_element]][['variant_statistic']][['n_tmb']] <- 0
         pcg_report[[analysis_element]][['variant_statistic']][['tmb_estimate']] <- 0
-        pcg_report[[analysis_element]][['variant_statistic']][['target_size_mb']] <- pcgr_config[['mutational_burden']][['target_size_mb']]
+        pcg_report[[analysis_element]][['variant_statistic']][['target_size_mb']] <- config[['mutational_burden']][['target_size_mb']]
         pcg_report[[analysis_element]][['variant_statistic']][['tmb_tertile']] <- 'TMB - not determined'
       }
       if(analysis_element == 'msi'){

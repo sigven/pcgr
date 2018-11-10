@@ -1,5 +1,5 @@
 ---
-title: "Cancer Predisposition Sequencing Report - `r pcg_report$sample_name`"
+title: "Cancer Predisposition Sequencing Report - `r cps_report$sample_name`"
 date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
 bibliography: bibliography.bib
 nocite: |
@@ -29,12 +29,12 @@ This report is intended for interpretation of inherited DNA variants implicated 
 
 1. Previously classified without conflicting interpretations in ClinVar (clinical significance - pathogenic/likely pathogenic), or
 2. Unclassified variants that are **novel** or associated with **rare** germline population frequency, i.e. 
-    * Minor allele frequency (MAF) < `r pcg_report[['pcgr_config']][['maf_limits']][['maf_gnomad']]`) in the user-defined population set in the gnomAD database, and
-    * Minor allele frequency (MAF) < `r pcg_report[['pcgr_config']][['maf_limits']][['maf_tgp']]`) in the user-defined population set in the 1000 Genomes Project
+    * Minor allele frequency (MAF) < `r cps_report[['cpsr_config']][['maf_limits']][['maf_gnomad']]`) in the user-defined population set in the gnomAD database, and
+    * Minor allele frequency (MAF) < `r cps_report[['cpsr_config']][['maf_limits']][['maf_tgp']]`) in the user-defined population set in the 1000 Genomes Project
 
 The following list of cancer predisposition genes are included in *Tier 1-3*:
 
-*`r paste(sort(pcg_report[['snv_indel']][['predisposition_genes']]$symbol),collapse=", ")`*
+*`r paste(sort(cps_report[['snv_indel']][['predisposition_genes']]$symbol),collapse=", ")`*
 
 
 For variants associated with cancer phenotypes through genome-wide association studies (*GWAS hits*), we do NOT make any restrictions on either
@@ -48,16 +48,16 @@ For variants associated with cancer phenotypes through genome-wide association s
 
 ## Germline SNVs/InDels
 
-```{r conditional_tier1, child='predispose/tier1_predispose.Rmd', eval = pcg_report[['snv_indel']][['eval']]}
+```{r conditional_tier1, child='predispose/tier1_predispose.Rmd', eval = cps_report[['snv_indel']][['eval']]}
 ```
 
-```{r conditional_tier2, child='predispose/tier2_predispose.Rmd', eval = pcg_report[['snv_indel']][['eval']]}
+```{r conditional_tier2, child='predispose/tier2_predispose.Rmd', eval = cps_report[['snv_indel']][['eval']]}
 ```
 
-```{r conditional_tier3, child='predispose/tier3_predispose.Rmd', eval = pcg_report[['snv_indel']][['eval']]}
+```{r conditional_tier3, child='predispose/tier3_predispose.Rmd', eval = cps_report[['snv_indel']][['eval']]}
 ```
 
-```{r conditional_gwas, child='predispose/gwas_predispose.Rmd', eval = pcg_report[['snv_indel']][['eval_gwas']]}
+```{r conditional_gwas, child='predispose/gwas_predispose.Rmd', eval = cps_report[['snv_indel']][['eval_gwas']]}
 ```
 
 ## References

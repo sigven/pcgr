@@ -10,11 +10,11 @@ The unclassified, coding variants have all been assigned a composite <i>pathogen
 * PMC1 (<b>2</b>) - null variant (nonsense, frameshift, canonical ±1 or 2 splice sites - indicated by [VEP's LofTee plugin](https://github.com/konradjk/loftee)) in a gene where LoF is NOT the known mechanism of disease
 * PM1 (<b>2</b>) - Located in a somatic mutational hotspot (cancerhotspots.org) 
 * PM2 (<b>2</b>) - Absence/extremely low frequency (MAF < 0.0005 in [1000 Genomes Project](http://www.internationalgenome.org/)/[gnomAD](http://gnomad.broadinstitute.org/) global population)
-* PM4 (<b>2</b>) - Protein length changes due to inframe indels or stoploss variants in known susceptibility gene (dominant MoI)
+* PM4 (<b>2</b>) - Protein length changes due to inframe indels or stoploss variants in non-repetitive regions (as identified by RepeatMasker) of known susceptibility gene (dominant MoI)
 * PM5 (<b>2</b>) - Novel missense change at an amino acid residue where a different missense change determined to be pathogenic has been seen before  ([ClinVar](https://www.ncbi.nlm.nih.gov/clinvar/))
 * PP2 (<b>1</b>) - Missense variant in a gene that has a relatively low rate of benign missense variation and where missense variants are a common mechanism of disease
 * PP3 (<b>1</b>) - Multiple lines of computational evidence support a deleterious effect on the gene or gene product (conservation, evolutionary, splicing impact, etc., from [dbNSFP](https://sites.google.com/site/jpopgen/dbNSFP))
-* PPC1 (<b>1</b>) - Protein length changes due to inframe indels or stoploss variants in known susceptibility gene (recessive MoI)
+* PPC1 (<b>1</b>) - Protein length changes due to inframe indels or stoploss variants in non-repetitive regions (as identified by RepeatMasker) of known susceptibility gene (recessive MoI)
 * BP4 (<b>-1</b>) - Multiple lines (>1) of in silico evidence of none deleterious effect.
 * BMC1 (<b>-2</b>) - Peptide change is at the same location of a known benign change ([ClinVar](https://www.ncbi.nlm.nih.gov/clinvar/))
 * BSC1 (<b>-6</b>) - Peptide change is known to be benign ([ClinVar](https://www.ncbi.nlm.nih.gov/clinvar/))
@@ -47,25 +47,25 @@ for(type in c('cancer_phenotype','noncancer_phenotype','unclassified')){
   show_tier3_filters[[type]] <- F
   missing_tier3_items[[type]] <- T
   if(type != 'unclassified'){
-    if(NROW(pcg_report[['snv_indel']][['variant_display']][['tier3A']][[type]]) > 0){
+    if(NROW(cps_report[['snv_indel']][['variant_display']][['tier3A']][[type]]) > 0){
       show_tier3_filters[[type]] <- T
       missing_tier3_items[[type]] <- F
     }
   }else{
-    if(NROW(pcg_report[['snv_indel']][['variant_display']][['tier3B']]) > 0){
+    if(NROW(cps_report[['snv_indel']][['variant_display']][['tier3B']]) > 0){
       show_tier3_filters[[type]] <- T
       missing_tier3_items[[type]] <- F
     }
   }
 }
 
-tot_variants_vus_clinvar <- NROW(pcg_report[['snv_indel']][['variant_display']][['tier3A']][['cancer_phenotype']]) + NROW(pcg_report[['snv_indel']][['variant_display']][['tier3A']][['noncancer_phenotype']])
+tot_variants_vus_clinvar <- NROW(cps_report[['snv_indel']][['variant_display']][['tier3A']][['cancer_phenotype']]) + NROW(cps_report[['snv_indel']][['variant_display']][['tier3A']][['noncancer_phenotype']])
 
-tag_tgp <- pcg_report[['pcgr_config']][['popgen']][['vcftag_tgp']]
-desc_tgp <- pcg_report[['pcgr_config']][['popgen']][['popdesc_tgp']]
+tag_tgp <- cps_report[['cpsr_config']][['popgen']][['vcftag_tgp']]
+desc_tgp <- cps_report[['cpsr_config']][['popgen']][['popdesc_tgp']]
 formula_tgp <- as.formula(paste0("~",rlang::sym(tag_tgp)))
-tag_gnomad <- pcg_report[['pcgr_config']][['popgen']][['vcftag_gnomad']]
-desc_gnomad <- pcg_report[['pcgr_config']][['popgen']][['popdesc_gnomad']]
+tag_gnomad <- cps_report[['cpsr_config']][['popgen']][['vcftag_gnomad']]
+desc_gnomad <- cps_report[['cpsr_config']][['popgen']][['popdesc_gnomad']]
 formula_gnomad <- as.formula(paste0("~",rlang::sym(tag_gnomad)))
 
 
@@ -81,14 +81,14 @@ library(summarywidget)
 library(crosstalk)
 
 
-cat('A total of <b>',NROW(pcg_report[['snv_indel']][['variant_display']][['tier3A']][['cancer_phenotype']]), '</b> unique, germline variant(s) are registered as VUS in cancer phenotypes in ClinVar for the selected predisposition genes:')
+cat('A total of <b>',NROW(cps_report[['snv_indel']][['variant_display']][['tier3A']][['cancer_phenotype']]), '</b> unique, germline variant(s) are registered as VUS in cancer phenotypes in ClinVar for the selected predisposition genes:')
 cat('\n')
 htmltools::br()
 htmltools::br()
 
-#col <- pcgr_config$custom_tags$custom_tags
+#col <- cpsr_config$custom_tags$custom_tags
 #as.formula(paste0("~",rlang::sym(col)))
-variants_tier3_cancer <- crosstalk::SharedData$new(pcg_report[['snv_indel']][['variant_display']][['tier3A']][['cancer_phenotype']])
+variants_tier3_cancer <- crosstalk::SharedData$new(cps_report[['snv_indel']][['variant_display']][['tier3A']][['cancer_phenotype']])
 crosstalk::bscols(
   list(
     crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_tier3_cancer, ~CONSEQUENCE),
@@ -131,12 +131,12 @@ library(summarywidget)
 library(crosstalk)
 
 
-cat('A total of <b>',NROW(pcg_report[['snv_indel']][['variant_display']][['tier3A']][['noncancer_phenotype']]), '</b> unique, germline variant(s) are registered as VUS in undefined/non-cancer phenotypes in ClinVar for the selected predisposition genes:')
+cat('A total of <b>',NROW(cps_report[['snv_indel']][['variant_display']][['tier3A']][['noncancer_phenotype']]), '</b> unique, germline variant(s) are registered as VUS in undefined/non-cancer phenotypes in ClinVar for the selected predisposition genes:')
 cat('\n')
 htmltools::br()
 htmltools::br()
 
-variants_tier3_noncancer <- crosstalk::SharedData$new(pcg_report[['snv_indel']][['variant_display']][['tier3A']][['noncancer_phenotype']])
+variants_tier3_noncancer <- crosstalk::SharedData$new(cps_report[['snv_indel']][['variant_display']][['tier3A']][['noncancer_phenotype']])
 crosstalk::bscols(
   list(
     crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_tier3_noncancer, ~CONSEQUENCE),
@@ -183,13 +183,13 @@ library(summarywidget)
 library(crosstalk)
 
 
-cat('A total of n = <b>',NROW(pcg_report[['snv_indel']][['variant_display']][['tier3B']]),'</b> unique and protein-coding germline variant(s) are also found in the selected cancer predisposition genes. This subset is limited to variants that are **novel** (i.e. not found) or **rare**  (i.e. MAF < ',pcg_report[['pcgr_config']][['maf_limits']][['maf_gnomad']],'/',pcg_report[['pcgr_config']][['maf_limits']][['maf_tgp']],') in the ',desc_gnomad,' gnomAD population/',desc_tgp,' 1000 Genomes Project population:')
+cat('A total of n = <b>',NROW(cps_report[['snv_indel']][['variant_display']][['tier3B']]),'</b> unique and protein-coding germline variant(s) are also found in the selected cancer predisposition genes. This subset is limited to variants that are **novel** (i.e. not found) or **rare**  (i.e. MAF < ',cps_report[['cpsr_config']][['maf_limits']][['maf_gnomad']],'/',cps_report[['cpsr_config']][['maf_limits']][['maf_tgp']],') in the ',desc_gnomad,' gnomAD population/',desc_tgp,' 1000 Genomes Project population:')
 cat('\n')
     
 htmltools::br()
 htmltools::br()
 
-variants_unclassified_shared <- crosstalk::SharedData$new(pcg_report[['snv_indel']][['variant_display']][['tier3B']])
+variants_unclassified_shared <- crosstalk::SharedData$new(cps_report[['snv_indel']][['variant_display']][['tier3B']])
 crosstalk::bscols(
   list(
     crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_unclassified_shared, ~CONSEQUENCE),

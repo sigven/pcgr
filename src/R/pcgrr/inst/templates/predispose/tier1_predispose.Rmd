@@ -11,20 +11,20 @@ missing_tier1_items <- list()
 for(type in c('cancer_phenotype','noncancer_phenotype')){
   show_tier1_filters[[type]] <- F
   missing_tier1_items[[type]] <- T
-  if(NROW(pcg_report[['snv_indel']][['variant_display']][['tier1']][[type]]) > 0){
+  if(NROW(cps_report[['snv_indel']][['variant_display']][['tier1']][[type]]) > 0){
     show_tier1_filters[[type]] <- T
     missing_tier1_items[[type]] <- F
   }
 }
 
-tot_variants_p_clinvar <- NROW(pcg_report[['snv_indel']][['variant_display']][['tier1']][['cancer_phenotype']]) + NROW(pcg_report[['snv_indel']][['variant_display']][['tier1']][['noncancer_phenotype']])
+tot_variants_p_clinvar <- NROW(cps_report[['snv_indel']][['variant_display']][['tier1']][['cancer_phenotype']]) + NROW(cps_report[['snv_indel']][['variant_display']][['tier1']][['noncancer_phenotype']])
 
 
-tag_tgp <- pcg_report[['pcgr_config']][['popgen']][['vcftag_tgp']]
-desc_tgp <- pcg_report[['pcgr_config']][['popgen']][['popdesc_tgp']]
+tag_tgp <- cps_report[['cpsr_config']][['popgen']][['vcftag_tgp']]
+desc_tgp <- cps_report[['cpsr_config']][['popgen']][['popdesc_tgp']]
 formula_tgp <- as.formula(paste0("~",rlang::sym(tag_tgp)))
-tag_gnomad <- pcg_report[['pcgr_config']][['popgen']][['vcftag_gnomad']]
-desc_gnomad <- pcg_report[['pcgr_config']][['popgen']][['popdesc_gnomad']]
+tag_gnomad <- cps_report[['cpsr_config']][['popgen']][['vcftag_gnomad']]
+desc_gnomad <- cps_report[['cpsr_config']][['popgen']][['popdesc_gnomad']]
 formula_gnomad <- as.formula(paste0("~",rlang::sym(tag_gnomad)))
 
 
@@ -41,12 +41,12 @@ library(summarywidget)
 library(crosstalk)
 
 
-cat('A total of <b>',NROW(pcg_report[['snv_indel']][['variant_display']][['tier1']][['cancer_phenotype']]), '</b> unique, germline variant(s) are found as pathogenic and associated with cancer phenotypes in ClinVar for the selected predisposition genes:')
+cat('A total of <b>',NROW(cps_report[['snv_indel']][['variant_display']][['tier1']][['cancer_phenotype']]), '</b> unique, germline variant(s) are found as pathogenic and associated with cancer phenotypes in ClinVar for the selected predisposition genes:')
 cat('\n')
 htmltools::br()
 htmltools::br()
 
-variants_tier1_cancer <- crosstalk::SharedData$new(pcg_report[['snv_indel']][['variant_display']][['tier1']][['cancer_phenotype']])
+variants_tier1_cancer <- crosstalk::SharedData$new(cps_report[['snv_indel']][['variant_display']][['tier1']][['cancer_phenotype']])
 crosstalk::bscols(
   list(
     crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_tier1_cancer, ~CONSEQUENCE),
@@ -87,12 +87,12 @@ library(summarywidget)
 library(crosstalk)
 
 
-cat('A total of <b>',NROW(pcg_report[['snv_indel']][['variant_display']][['tier1']][['noncancer_phenotype']]), '</b> unique, germline variant(s) are found as pathogenic and associated with undefined/non-cancer phenotypes in ClinVar for the selected predisposition genes:')
+cat('A total of <b>',NROW(cps_report[['snv_indel']][['variant_display']][['tier1']][['noncancer_phenotype']]), '</b> unique, germline variant(s) are found as pathogenic and associated with undefined/non-cancer phenotypes in ClinVar for the selected predisposition genes:')
 cat('\n')
 htmltools::br()
 htmltools::br()
 
-variants_tier1_noncancer <- crosstalk::SharedData$new(pcg_report[['snv_indel']][['variant_display']][['tier1']][['noncancer_phenotype']])
+variants_tier1_noncancer <- crosstalk::SharedData$new(cps_report[['snv_indel']][['variant_display']][['tier1']][['noncancer_phenotype']])
 
 crosstalk::bscols(
   list(

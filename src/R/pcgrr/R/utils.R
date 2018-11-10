@@ -1083,7 +1083,7 @@ get_calls <- function(tsv_gz_file, pcgr_data, pcgr_version, sample_name, pcgr_co
   }
 
   vcf_data_df <- pcgrr::df_string_replace(vcf_data_df, strings = c("CONSEQUENCE"), pattern = "&", replacement = ", ", replace_all = T)
-  vcf_data_df <- pcgrr::df_string_replace(vcf_data_df, strings = c("VEP_ALL_CONSEQUENCE", "DOCM_DISEASE","MUTATION_HOTSPOT_CANCERTYPE","ICGC_PCAWG_OCCURRENCE"), pattern = ",", replacement = ", ", replace_all = T)
+  vcf_data_df <- pcgrr::df_string_replace(vcf_data_df, strings = c("VEP_ALL_CONSEQUENCE", "REFSEQ_MRNA","DOCM_DISEASE","MUTATION_HOTSPOT_CANCERTYPE","ICGC_PCAWG_OCCURRENCE"), pattern = ",", replacement = ", ", replace_all = T)
 
   if ("EFFECT_PREDICTIONS" %in% colnames(vcf_data_df)){
     vcf_data_df$EFFECT_PREDICTIONS <- stringr::str_replace_all(vcf_data_df$EFFECT_PREDICTIONS, "\\.&|\\.$", "NA&")

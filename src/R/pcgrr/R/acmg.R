@@ -149,6 +149,9 @@ assign_tier1_tier2_acmg <- function(pcg_report_snv_indel){
     pcg_report_snv_indel[['variant_set']][['tier1']] <- dplyr::semi_join(pcg_report_snv_indel[['variant_set']][['tier1']], unique_variants_tier1, by=c("GENOMIC_CHANGE"))
     pcg_report_snv_indel[['variant_set']][['tier2']] <- dplyr::anti_join(pcg_report_snv_indel[['variant_set']][['tier2']], unique_variants_tier1, by=c("GENOMIC_CHANGE"))
   }
+  else{
+    pcg_report_snv_indel[['variant_set']][['tier1']] <- data.frame()
+  }
   if(nrow(unique_variants_tier2) == 0){
     pcg_report_snv_indel[['variant_set']][['tier2']] <- data.frame()
   }else{

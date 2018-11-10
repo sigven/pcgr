@@ -2739,3 +2739,35 @@
 [2018-11-09 13:11:37][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
 [2018-11-09 13:11:37][INFO] Extending annotation descriptions related to KEGG pathways
 [2018-11-09 13:11:37][INFO] Extending annotation descriptions related to ClinVar
+[2018-11-10 08:25:37][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-11-10 08:25:37][INFO] Number of PASS variants: 19
+[2018-11-10 08:25:37][INFO] Number of SNVs: 18
+[2018-11-10 08:25:37][INFO] Number of deletions: 1
+[2018-11-10 08:25:37][INFO] Number of insertions: 0
+[2018-11-10 08:25:37][INFO] Number of block substitutions: 0
+[2018-11-10 08:25:37][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-11-10 08:25:39][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-11-10 08:25:39][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-11-10 08:25:39][INFO] Extending annotation descriptions related to ClinVar
+[2018-11-10 08:29:45][INFO] Total sample calls (duplicate_entries): 19
+[2018-11-10 08:29:45][INFO] Excluding coinciding germline variants in 1000 Genomes Project populations
+[2018-11-10 08:29:45][INFO] Total sample calls remaining: 19
+[2018-11-10 08:29:45][INFO] Excluding coinciding germline variants in any population in the genome aggregation database (gnomAD)
+[2018-11-10 08:29:45][INFO] Total sample calls remaining: 19
+[2018-11-10 08:29:45][INFO] Excluding noncoding variants
+[2018-11-10 08:29:45][INFO] Total sample calls remaining: 2
+[2018-11-10 08:30:35][INFO] Number of protein-coding variants: 2
+[2018-11-10 08:30:53][INFO] Looking up SNV/InDel biomarkers for precision oncology - Breast_Cancer_NOS, Ovarian_Fallopian_Tube_Cancer_NOS
+[2018-11-10 08:30:53][INFO] Looking up SNV/InDel biomarkers for precision oncology - any tumortype
+[2018-11-10 08:31:06][INFO] Looking up SNV/InDel biomarkers for precision oncology - Breast_Cancer_NOS, Ovarian_Fallopian_Tube_Cancer_NOS
+[2018-11-10 08:31:07][INFO] 1 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
+[2018-11-10 08:31:07][INFO] Underlying variant(s):
+[2018-11-10 08:31:07][INFO] BRCA1 stop_gained stop_gained:ENST00000471181.7:c.4327C>T:exon12:p.R1443X 17:g.43082434G>A
+[2018-11-10 08:31:07][INFO] 0 clinical evidence item(s) found .. mapping = codon
+[2018-11-10 08:31:07][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2018-11-10 08:31:07][INFO] Looking up SNV/InDel biomarkers for precision oncology - any tumortype
+[2018-11-10 08:31:07][INFO] 1 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
+[2018-11-10 08:31:07][INFO] Underlying variant(s):
+[2018-11-10 08:31:07][INFO] BRCA1 stop_gained stop_gained:ENST00000471181.7:c.4327C>T:exon12:p.R1443X 17:g.43082434G>A
+[2018-11-10 08:31:07][INFO] 0 clinical evidence item(s) found .. mapping = codon
+[2018-11-10 08:31:07][INFO] 0 clinical evidence item(s) found .. mapping = exon
