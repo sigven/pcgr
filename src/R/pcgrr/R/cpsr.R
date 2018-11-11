@@ -241,7 +241,12 @@ generate_predisposition_report <- function(project_directory, query_vcf2tsv, pcg
 summary_findings_cpsr <- function(cps_report){
 
   if(nrow(cps_report[["snv_indel"]][["variant_display"]][["tier1"]][["cancer_phenotype"]]) > 0){
-    cps_report[["summary"]][["tier1"]] <- as.data.frame(dplyr::select(cps_report[["snv_indel"]][["variant_display"]][["tier1"]][["cancer_phenotype"]], CLINVAR_MSID, CLINVAR_PHENOTYPE, SYMBOL, HGVSp_short, CONSEQUENCE, ONCOSCORE) %>%
+    cps_report[["summary"]][["tier1"]] <- dplyr::select(cps_report[["snv_indel"]][["variant_display"]][["tier1"]][["cancer_phenotype"]], CLINVAR_MSID, CLINVAR_PHENOTYPE, SYMBOL, HGVSp_short, CONSEQUENCE, ONCOSCORE, HGVSc)
+    if(nrow(cps_report[["summary"]][["tier1"]][is.na(cps_report[["summary"]][["tier1"]]$HGVSp_short) & !is.na(cps_report[["summary"]][["tier1"]]$HGVSc),]) > 0){
+      cps_report[["summary"]][["tier1"]][is.na(cps_report[["summary"]][["tier1"]]$HGVSp_short) & !is.na(cps_report[["summary"]][["tier1"]]$HGVSc),]$HGVSp_short <-
+        cps_report[["summary"]][["tier1"]][is.na(cps_report[["summary"]][["tier1"]]$HGVSp_short) & !is.na(cps_report[["summary"]][["tier1"]]$HGVSc),]$HGVSc
+    }
+    cps_report[["summary"]][["tier1"]] <- as.data.frame(cps_report[["summary"]][["tier1"]] %>%
       dplyr::mutate(MUTATION = paste0("<a href=\"http://www.ncbi.nlm.nih.gov/clinvar/variation/",CLINVAR_MSID, "\" target=\"_blank\">", SYMBOL,":",CONSEQUENCE,":",HGVSp_short,"</a>")) %>%
       dplyr::mutate(MUTATION = stringr::str_replace(MUTATION,":NA$","")) %>%
       dplyr::select(-c(HGVSp_short,SYMBOL,CONSEQUENCE, CLINVAR_MSID)) %>%
@@ -254,7 +259,12 @@ summary_findings_cpsr <- function(cps_report){
   }
 
   if(nrow(cps_report[["snv_indel"]][["variant_display"]][["tier2"]][["cancer_phenotype"]]) > 0){
-    cps_report[["summary"]][["tier2"]] <- as.data.frame(dplyr::select(cps_report[["snv_indel"]][["variant_display"]][["tier2"]][["cancer_phenotype"]], CLINVAR_MSID, CLINVAR_PHENOTYPE, SYMBOL, HGVSp_short, CONSEQUENCE, ONCOSCORE) %>%
+    cps_report[["summary"]][["tier2"]] <- dplyr::select(cps_report[["snv_indel"]][["variant_display"]][["tier2"]][["cancer_phenotype"]], CLINVAR_MSID, CLINVAR_PHENOTYPE, SYMBOL, HGVSp_short, CONSEQUENCE, ONCOSCORE, HGVSc)
+    if(nrow(cps_report[["summary"]][["tier2"]][is.na(cps_report[["summary"]][["tier2"]]$HGVSp_short) & !is.na(cps_report[["summary"]][["tier2"]]$HGVSc),]) > 0){
+      cps_report[["summary"]][["tier2"]][is.na(cps_report[["summary"]][["tier2"]]$HGVSp_short) & !is.na(cps_report[["summary"]][["tier2"]]$HGVSc),]$HGVSp_short <-
+        cps_report[["summary"]][["tier2"]][is.na(cps_report[["summary"]][["tier2"]]$HGVSp_short) & !is.na(cps_report[["summary"]][["tier2"]]$HGVSc),]$HGVSc
+    }
+    cps_report[["summary"]][["tier2"]] <- as.data.frame(cps_report[["summary"]][["tier2"]] %>%
       dplyr::mutate(MUTATION = paste0("<a href=\"http://www.ncbi.nlm.nih.gov/clinvar/variation/",CLINVAR_MSID, "\" target=\"_blank\">", SYMBOL,":",CONSEQUENCE,":",HGVSp_short,"</a>")) %>%
       dplyr::mutate(MUTATION = stringr::str_replace(MUTATION,":NA$","")) %>%
       dplyr::select(-c(HGVSp_short,SYMBOL,CONSEQUENCE,CLINVAR_MSID)) %>%
@@ -267,7 +277,12 @@ summary_findings_cpsr <- function(cps_report){
   }
 
   if(nrow(cps_report[["snv_indel"]][["variant_display"]][["tier3A"]][["cancer_phenotype"]]) > 0){
-    cps_report[["summary"]][["tier3A"]] <- dplyr::select(cps_report[["snv_indel"]][["variant_display"]][["tier3A"]][["cancer_phenotype"]], CLINVAR_MSID, CLINVAR_PHENOTYPE, SYMBOL, PATHRANK, HGVSp_short, CONSEQUENCE, ONCOSCORE) %>%
+    cps_report[["summary"]][["tier3A"]] <- dplyr::select(cps_report[["snv_indel"]][["variant_display"]][["tier3A"]][["cancer_phenotype"]], CLINVAR_MSID, CLINVAR_PHENOTYPE, SYMBOL, PATHRANK, HGVSp_short, CONSEQUENCE, ONCOSCORE, HGVSc)
+    if(nrow(cps_report[["summary"]][["tier3A"]][is.na(cps_report[["summary"]][["tier3A"]]$HGVSp_short) & !is.na(cps_report[["summary"]][["tier3A"]]$HGVSc),]) > 0){
+      cps_report[["summary"]][["tier3A"]][is.na(cps_report[["summary"]][["tier3A"]]$HGVSp_short) & !is.na(cps_report[["summary"]][["tier3A"]]$HGVSc),]$HGVSp_short <-
+        cps_report[["summary"]][["tier3A"]][is.na(cps_report[["summary"]][["tier3A"]]$HGVSp_short) & !is.na(cps_report[["summary"]][["tier3A"]]$HGVSc),]$HGVSc
+    }
+    cps_report[["summary"]][["tier3A"]] <- cps_report[["summary"]][["tier3A"]] %>%
       dplyr::mutate(MUTATION = paste0("<a href=\"http://www.ncbi.nlm.nih.gov/clinvar/variation/",CLINVAR_MSID, "\" target=\"_blank\">", SYMBOL,":",CONSEQUENCE,":",HGVSp_short,"</a>")) %>%
       dplyr::mutate(MUTATION = stringr::str_replace(MUTATION,":NA$","")) %>%
       dplyr::filter(PATHRANK == 'HIGH')
@@ -288,7 +303,12 @@ summary_findings_cpsr <- function(cps_report){
   }
 
   if(nrow(cps_report[["snv_indel"]][["variant_display"]][["tier3B"]]) > 0){
-    cps_report[["summary"]][["tier3B"]] <- dplyr::select(cps_report[["snv_indel"]][["variant_display"]][["tier3B"]],  SYMBOL, PATHRANK, HGVSp_short, CONSEQUENCE, ONCOSCORE) %>%
+    cps_report[["summary"]][["tier3B"]] <- dplyr::select(cps_report[["snv_indel"]][["variant_display"]][["tier3B"]],  SYMBOL, PATHRANK, HGVSp_short, CONSEQUENCE, ONCOSCORE, HGVSc)
+    if(nrow(cps_report[["summary"]][["tier3B"]][is.na(cps_report[["summary"]][["tier3B"]]$HGVSp_short) & !is.na(cps_report[["summary"]][["tier3B"]]$HGVSc),]) > 0){
+      cps_report[["summary"]][["tier3B"]][is.na(cps_report[["summary"]][["tier3B"]]$HGVSp_short) & !is.na(cps_report[["summary"]][["tier3B"]]$HGVSc),]$HGVSp_short <-
+        cps_report[["summary"]][["tier3B"]][is.na(cps_report[["summary"]][["tier3B"]]$HGVSp_short) & !is.na(cps_report[["summary"]][["tier3B"]]$HGVSc),]$HGVSc
+    }
+    cps_report[["summary"]][["tier3B"]] <- cps_report[["summary"]][["tier3B"]] %>%
         dplyr::mutate(MUTATION =paste0(SYMBOL,":",CONSEQUENCE,":",HGVSp_short)) %>%
         dplyr::mutate(MUTATION = stringr::str_replace(MUTATION,":NA$","")) %>%
         dplyr::select(-c(HGVSp_short,SYMBOL,CONSEQUENCE)) %>%

@@ -25,7 +25,16 @@ for(type in c('tier1','tier2','tier3A','tier3B')){
 i <- 1
 cat('<ul>\n')
 while(i <= NROW(cps_report[['summary']][['tier1']])){
-  cat(paste0('<li><span style="color:#9E0142; font-size:13pt">',cps_report[['summary']][['tier1']][i,]$CLINVAR_PHENOTYPE,'</span> - ',cps_report[['summary']][['tier1']][i,]$VARIANTS),'</li>\n')
+  phenotype_variants <- tidyr::separate_rows(cps_report[['summary']][['tier1']][i,],"VARIANTS",sep=", ")
+  
+  cat(paste0('<li><span style="color:#9E0142; font-size:13pt">',cps_report[['summary']][['tier1']][i,]$CLINVAR_PHENOTYPE,'</span>'))
+  j <- 1
+  cat('<ul>\n')
+  while(j <= nrow(phenotype_variants)){
+    cat(paste0('<li><span style="color:#9E0142; font-size:13pt">',phenotype_variants[j,]$VARIANTS,'</span></li>\n'))
+    j <- j + 1
+  }
+  cat('</ul>\n</li>\n')
   i <- i + 1
 }
 cat('</ul>\n')
@@ -45,7 +54,15 @@ cat('\n')
 i <- 1
 cat('<ul>\n')
 while(i <= NROW(cps_report[['summary']][['tier2']])){
-  cat(paste0('<li><span style="color:#D53E4F; font-size:13pt">',cps_report[['summary']][['tier2']][i,]$CLINVAR_PHENOTYPE,'</span> - ',cps_report[['summary']][['tier2']][i,]$VARIANTS),'</li>\n')
+  phenotype_variants <- tidyr::separate_rows(cps_report[['summary']][['tier2']][i,],"VARIANTS",sep=", ")
+  cat(paste0('<li><span style="color:#D53E4F; font-size:13pt">',cps_report[['summary']][['tier2']][i,]$CLINVAR_PHENOTYPE,'</span>'))
+  j <- 1
+  cat('<ul>\n')
+  while(j <= nrow(phenotype_variants)){
+    cat(paste0('<li><span style="color:#D53E4F; font-size:13pt">',phenotype_variants[j,]$VARIANTS,'</span></li>\n'))
+    j <- j + 1
+  }
+  cat('</ul>\n</li>\n')
   i <- i + 1
 }
 cat('</ul>\n')
