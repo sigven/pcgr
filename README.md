@@ -7,7 +7,7 @@ The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for
 ![PCGR overview](PCGR_workflow.png)
 
 ### News
-* _Nov 6th 2018_:
+* _Nov 12th 2018_:
    * Dev version is available for download (installation instructions below)
    * Reporting germline variants for cancer predisposition? Check out [github.com/sigven/cpsr](https://github.com/sigven/cpsr)
 * _May 14th 2018_: **0.6.2.1 release**
