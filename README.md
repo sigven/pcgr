@@ -57,7 +57,7 @@ Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, Ola Mykleb
 ### Annotation resources included in PCGR
 
 * [VEP v94](http://www.ensembl.org/info/docs/tools/vep/index.html) - Variant Effect Predictor (GENCODE v28/v19 as the gene reference dataset)
-* [CIViC](http://civic.genome.wustl.edu) - Clinical interpretations of variants in cancer (October 17th 2018)
+* [CIViC](http://civic.genome.wustl.edu) - Clinical interpretations of variants in cancer (November 12th 2018)
 * [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - Database of variants with clinical significance (November 2018)
 * [DoCM](http://docm.genome.wustl.edu) - Database of curated mutations (v3.2, April 2016)
 * [CBMDB](http://www.cancergenomeinterpreter.org/biomarkers) - Cancer Biomarkers database (January 17th 2018)
@@ -70,7 +70,7 @@ Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, Ola Mykleb
 * [Pfam v32](http://pfam.xfam.org) - Database of protein families and domains (September 2018)
 * [DGIdb](http://dgidb.genome.wustl.edu) - Database of targeted cancer drugs  (v3.0.2, January 2018)
 * [ChEMBL](https://www.ebi.ac.uk/chembl/) - Manually curated database of bioactive molecules (v24.1, June 2018)
-* [CancerMine v5](https://zenodo.org/record/1336650#.W9QMdRMzaL4) - Literature-derived database of tumor suppressor genes/proto-oncogenes (October 2018)
+* [CancerMine v6](https://zenodo.org/record/1481254#.W-nN-3pKiL4) - Literature-derived database of tumor suppressor genes/proto-oncogenes (November 2018)
 
 
 ### Getting started
@@ -100,8 +100,8 @@ An installation of Python (version _3.6_) is required to run PCGR. Check that Py
 a. Clone the PCGR GitHub repository (includes run script and configuration file): `git clone https://github.com/sigven/pcgr.git`
 
 b. Download and unpack the latest data bundles in the PCGR directory
-   * [grch37 data bundle - 20181105](https://drive.google.com/open?id=1kI48PW1-6MTAC5H2zaDSOLtEsqaeL8Pr) (approx 9.2Gb)
-   * [grch38 data bundle - 20181105](https://drive.google.com/open?id=1GYLkKKDH8REg5AxCEZjsLJR0NI32rhUq) (approx 13Gb)
+   * [grch37 data bundle - 20181112](https://drive.google.com/open?id=1Ny0diC7MumyaOLutN8-1EoAJ7jOOK9Gn) (approx 9.2Gb)
+   * [grch38 data bundle - 20181112](https://drive.google.com/open?id=1VtYtURsPoELR_eYqZTBVguK3tZo3aBVm) (approx 13Gb)
    * *Unpacking*: `gzip -dc pcgr.databundle.grch37.YYYYMMDD.tgz | tar xvf -`
 
 c. Pull the [PCGR Docker image (*dev*)](https://hub.docker.com/r/sigven/pcgr/) from DockerHub (approx 5.1Gb):
