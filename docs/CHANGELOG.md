@@ -1,7 +1,7 @@
 
 ## CHANGELOG
 
-#### dev/unreleased - Nov 10th 2018
+#### dev/unreleased - Nov 12th 2018
 
 ##### Fixed
  * Bug in assignment of variants to tier1/tier2 [Issue #61](https://github.com/sigven/pcgr/issues/61)

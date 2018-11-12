@@ -18,7 +18,7 @@
 ### Variant databases of clinical utility
   * [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - database of clinically related variants (November 2018)
   * [DoCM](http://docm.genome.wustl.edu) - database of curated mutations (v3.2, April 2016)
-  * [CIViC](http://civic.genome.wustl.edu) - clinical interpretations of variants in cancer (October 17th 2018)
+  * [CIViC](http://civic.genome.wustl.edu) - clinical interpretations of variants in cancer (November 12th 2018)
   * [CBMDB](http://www.cancergenomeinterpreter.org/biomarkers) - Cancer BioMarkers database (January 17th 2018)
   * [DGIdb](http://dgidb.genome.wustl.edu) - database of targeted antineoplastic drugs (v3.0.2, January 2018)
 
@@ -27,12 +27,12 @@
   * [Pfam v32](http://pfam.xfam.org) - database of protein families and domains (September 2018)
 
 ### Cancer gene knowledge bases
-  * [CancerMine](https://zenodo.org/record/1336650#.W9do9WJKiL4) - Literature-mined database of tumor suppressor genes/proto-oncogenes (release5, October 2018)
+  * [CancerMine v6](https://zenodo.org/record/1481254#.W-nRznpKiL4) - Literature-mined database of tumor suppressor genes/proto-oncogenes (November 2018)
   * [DisGeNET v5.0](http://www.disgenet.org) - curated associations between human genes and different tumor types
   * [TCGA driver genes](https://www.ncbi.nlm.nih.gov/pubmed/29625053) - predicted cancer driver genes based on application of multiple driver gene prediction tools on TCGA pan-cancer cohort
 
 ### Pathway databases
-  * [KEGG PATHWAY Database](http://www.genome.jp/kegg/pathway.htm) - August 21st 2018
+  * [KEGG PATHWAY Database](http://www.genome.jp/kegg/pathway.htm) - October 24th 2018
 
 ### Notes on variant annotation datasets
 

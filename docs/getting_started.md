@@ -25,8 +25,8 @@ An installation of Python (version _3.6_) is required to run PCGR. Check that Py
 
 a. Clone the PCGR GitHub repository: `git clone https://github.com/sigven/pcgr.git`
 b. Download and unpack the latest data bundles in the PCGR directory
-   * [grch37 data bundle - 20181105](https://drive.google.com/open?id=1kI48PW1-6MTAC5H2zaDSOLtEsqaeL8Pr) (approx 9.2Gb)
-   * [grch38 data bundle - 20181105](https://drive.google.com/open?id=1GYLkKKDH8REg5AxCEZjsLJR0NI32rhUq) (approx 13Gb)
+   * [grch37 data bundle - 20181112](https://drive.google.com/open?id=1Ny0diC7MumyaOLutN8-1EoAJ7jOOK9Gn) (approx 9.2Gb)
+   * [grch38 data bundle - 20181112](https://drive.google.com/open?id=1VtYtURsPoELR_eYqZTBVguK3tZo3aBVm) (approx 13Gb)
    * *Unpacking*: `gzip -dc pcgr.databundle.grch37.YYYYMMDD.tgz | tar xvf -`
 c. Pull the [PCGR Docker image (*dev*)](https://hub.docker.com/r/sigven/pcgr/) from DockerHub (approx 5.1Gb):
       * `docker pull sigven/pcgr:dev` (PCGR annotation engine)
