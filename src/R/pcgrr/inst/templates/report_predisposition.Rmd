@@ -19,6 +19,7 @@ output:
 
 ```{r global_options, include=FALSE}
 knitr::opts_chunk$set(echo = F,warning=FALSE, dpi=72, error=F, eval=T)
+options(scipen=999)
 ```
 
 ```{r settings_data_sources, child='predispose/settings_data_sources_predispose.Rmd'}

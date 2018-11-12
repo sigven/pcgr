@@ -2771,3 +2771,171 @@
 [2018-11-10 08:31:07][INFO] BRCA1 stop_gained stop_gained:ENST00000471181.7:c.4327C>T:exon12:p.R1443X 17:g.43082434G>A
 [2018-11-10 08:31:07][INFO] 0 clinical evidence item(s) found .. mapping = codon
 [2018-11-10 08:31:07][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2018-11-12 12:34:00][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-11-12 12:34:00][INFO] Number of PASS variants: 3316
+[2018-11-12 12:34:00][INFO] Number of SNVs: 2669
+[2018-11-12 12:34:00][INFO] Number of deletions: 541
+[2018-11-12 12:34:00][INFO] Number of insertions: 103
+[2018-11-12 12:34:00][INFO] Number of block substitutions: 0
+[2018-11-12 12:34:00][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-11-12 12:34:03][INFO] Adding citations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-11-12 12:34:03][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-11-12 12:34:03][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-11-12 12:34:03][INFO] Extending annotation descriptions related to ClinVar
+[2018-11-12 12:34:06][INFO] Filtering against cancer predisposition genes:
+[2018-11-12 12:34:06][INFO] 49 variants remaining
+[2018-11-12 12:34:06][INFO] Found coding variants in the following cancer predisposition genes: EPCAM, CASR, KDR, PTPN13, FAT1, CDH10, APC, NSD1, PMS2, BRAF, EXT1, TSC1, ETV6, POLE, AXIN1, TSC2, FANCA, TP53, NF1, SMARCA4, ERCC2, POLD1, CHEK2, AR
+[2018-11-12 12:34:06][INFO] Limiting variants to hereditary cancer-predisposing syndromes/cancer conditions
+[2018-11-12 12:34:33][INFO] TIER 1: Pathogenic variants - cancer_phenotype: n = 3
+[2018-11-12 12:34:33][INFO] TIER 1: Pathogenic variants - noncancer_phenotype: n = 2
+[2018-11-12 12:34:33][INFO] TIER 2: Likely pathogenic variants - cancer_phenotype: n = 0
+[2018-11-12 12:34:33][INFO] TIER 2: Likely pathogenic variants - noncancer_phenotype: n = 0
+[2018-11-12 12:34:33][INFO] TIER 3: Variants of uncertain significance - cancer_phenotype: n = 1
+[2018-11-12 12:34:33][INFO] TIER 3: Variants of uncertain significance - noncancer_phenotype: n = 0
+[2018-11-12 12:34:34][INFO] TIER 3: Other unclassified variants - noncancer_phenotype: n = 18
+[2018-11-12 12:34:34][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2018-11-12 12:41:48][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-11-12 12:41:48][INFO] Number of PASS variants: 3316
+[2018-11-12 12:41:48][INFO] Number of SNVs: 2669
+[2018-11-12 12:41:48][INFO] Number of deletions: 541
+[2018-11-12 12:41:48][INFO] Number of insertions: 103
+[2018-11-12 12:41:48][INFO] Number of block substitutions: 0
+[2018-11-12 12:41:48][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-11-12 12:41:50][INFO] Adding citations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-11-12 12:41:50][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-11-12 12:41:50][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-11-12 12:41:51][INFO] Extending annotation descriptions related to ClinVar
+[2018-11-12 12:41:53][INFO] Filtering against cancer predisposition genes:
+[2018-11-12 12:41:53][INFO] 49 variants remaining
+[2018-11-12 12:41:53][INFO] Found coding variants in the following cancer predisposition genes: EPCAM, CASR, KDR, PTPN13, FAT1, CDH10, APC, NSD1, PMS2, BRAF, EXT1, TSC1, ETV6, POLE, AXIN1, TSC2, FANCA, TP53, NF1, SMARCA4, ERCC2, POLD1, CHEK2, AR
+[2018-11-12 12:41:53][INFO] Limiting variants to hereditary cancer-predisposing syndromes/cancer conditions
+[2018-11-12 12:42:01][INFO] Assignment of variants to tier 1/tier 2/tier 3
+[2018-11-12 12:42:01][INFO] TIER 1: Pathogenic variants - cancer_phenotype: n = 3
+[2018-11-12 12:42:01][INFO] TIER 1: Pathogenic variants - noncancer_phenotype: n = 2
+[2018-11-12 12:42:01][INFO] TIER 2: Likely pathogenic variants - cancer_phenotype: n = 0
+[2018-11-12 12:42:01][INFO] TIER 2: Likely pathogenic variants - noncancer_phenotype: n = 0
+[2018-11-12 12:42:02][INFO] TIER 3: Variants of uncertain significance - cancer_phenotype: n = 1
+[2018-11-12 12:42:02][INFO] TIER 3: Variants of uncertain significance - noncancer_phenotype: n = 0
+[2018-11-12 12:42:03][INFO] TIER 3: Other unclassified variants - noncancer_phenotype: n = 18
+[2018-11-12 12:42:03][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2018-11-12 13:10:47][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-11-12 13:10:47][INFO] Number of PASS variants: 3316
+[2018-11-12 13:10:47][INFO] Number of SNVs: 2669
+[2018-11-12 13:10:47][INFO] Number of deletions: 541
+[2018-11-12 13:10:47][INFO] Number of insertions: 103
+[2018-11-12 13:10:47][INFO] Number of block substitutions: 0
+[2018-11-12 13:10:47][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-11-12 13:10:48][INFO] Adding citations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-11-12 13:10:49][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-11-12 13:10:49][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-11-12 13:10:49][INFO] Extending annotation descriptions related to ClinVar
+[2018-11-12 13:10:51][INFO] Filtering against cancer predisposition genes:
+[2018-11-12 13:10:51][INFO] 49 variants remaining
+[2018-11-12 13:10:51][INFO] Found coding variants in the following cancer predisposition genes: EPCAM, CASR, KDR, PTPN13, FAT1, CDH10, APC, NSD1, PMS2, BRAF, EXT1, TSC1, ETV6, POLE, AXIN1, TSC2, FANCA, TP53, NF1, SMARCA4, ERCC2, POLD1, CHEK2, AR
+[2018-11-12 13:10:51][INFO] Limiting variants to hereditary cancer-predisposing syndromes/cancer conditions
+[2018-11-12 13:11:01][INFO] Assignment of variants to tier 1/tier 2/tier 3
+[2018-11-12 13:11:01][INFO] TIER 1: Pathogenic variants - cancer_phenotype: n = 3
+[2018-11-12 13:11:01][INFO] TIER 1: Pathogenic variants - noncancer_phenotype: n = 2
+[2018-11-12 13:11:01][INFO] TIER 2: Likely pathogenic variants - cancer_phenotype: n = 0
+[2018-11-12 13:11:01][INFO] TIER 2: Likely pathogenic variants - noncancer_phenotype: n = 0
+[2018-11-12 13:11:02][INFO] TIER 3: Variants of uncertain significance - cancer_phenotype: n = 1
+[2018-11-12 13:11:02][INFO] TIER 3: Variants of uncertain significance - noncancer_phenotype: n = 0
+[2018-11-12 13:11:02][INFO] TIER 3: Other unclassified variants - noncancer_phenotype: n = 18
+[2018-11-12 13:18:53][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2018-11-12 13:27:14][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-11-12 13:27:14][INFO] Number of PASS variants: 3316
+[2018-11-12 13:27:14][INFO] Number of SNVs: 2669
+[2018-11-12 13:27:14][INFO] Number of deletions: 541
+[2018-11-12 13:27:14][INFO] Number of insertions: 103
+[2018-11-12 13:27:14][INFO] Number of block substitutions: 0
+[2018-11-12 13:27:14][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-11-12 13:27:16][INFO] Adding citations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-11-12 13:27:16][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-11-12 13:27:16][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-11-12 13:27:17][INFO] Extending annotation descriptions related to ClinVar
+[2018-11-12 13:27:18][INFO] Filtering against cancer predisposition genes:
+[2018-11-12 13:27:18][INFO] 49 variants remaining
+[2018-11-12 13:27:18][INFO] Found coding variants in the following cancer predisposition genes: EPCAM, CASR, KDR, PTPN13, FAT1, CDH10, APC, NSD1, PMS2, BRAF, EXT1, TSC1, ETV6, POLE, AXIN1, TSC2, FANCA, TP53, NF1, SMARCA4, ERCC2, POLD1, CHEK2, AR
+[2018-11-12 13:27:18][INFO] Limiting variants to hereditary cancer-predisposing syndromes/cancer conditions
+[2018-11-12 13:27:27][INFO] Assignment of variants to tier 1/tier 2/tier 3
+[2018-11-12 13:27:28][INFO] TIER 1: Pathogenic variants - cancer_phenotype: n = 3
+[2018-11-12 13:27:28][INFO] TIER 1: Pathogenic variants - noncancer_phenotype: n = 2
+[2018-11-12 13:27:28][INFO] TIER 2: Likely pathogenic variants - cancer_phenotype: n = 0
+[2018-11-12 13:27:28][INFO] TIER 2: Likely pathogenic variants - noncancer_phenotype: n = 0
+[2018-11-12 13:27:28][INFO] TIER 3: Variants of uncertain significance - cancer_phenotype: n = 1
+[2018-11-12 13:27:28][INFO] TIER 3: Variants of uncertain significance - noncancer_phenotype: n = 0
+[2018-11-12 13:27:29][INFO] TIER 3: Other unclassified variants: n = 18
+[2018-11-12 13:27:45][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2018-11-12 13:57:30][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-11-12 13:57:30][INFO] Number of PASS variants: 3316
+[2018-11-12 13:57:30][INFO] Number of SNVs: 2669
+[2018-11-12 13:57:30][INFO] Number of deletions: 541
+[2018-11-12 13:57:30][INFO] Number of insertions: 103
+[2018-11-12 13:57:30][INFO] Number of block substitutions: 0
+[2018-11-12 13:57:30][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-11-12 13:57:32][INFO] Adding citations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-11-12 13:57:32][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-11-12 13:57:32][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-11-12 13:57:32][INFO] Extending annotation descriptions related to ClinVar
+[2018-11-12 13:57:35][INFO] Filtering against cancer predisposition genes:
+[2018-11-12 13:57:35][INFO] 49 variants remaining
+[2018-11-12 13:57:35][INFO] Found coding variants in the following cancer predisposition genes: EPCAM, CASR, KDR, PTPN13, FAT1, CDH10, APC, NSD1, PMS2, BRAF, EXT1, TSC1, ETV6, POLE, AXIN1, TSC2, FANCA, TP53, NF1, SMARCA4, ERCC2, POLD1, CHEK2, AR
+[2018-11-12 13:57:35][INFO] Limiting variants to hereditary cancer-predisposing syndromes/cancer conditions
+[2018-11-12 13:57:51][INFO] Assignment of variants to tier 1/tier 2/tier 3
+[2018-11-12 13:57:51][INFO] TIER 1: Pathogenic variants - cancer_phenotype: n = 3
+[2018-11-12 13:57:51][INFO] TIER 1: Pathogenic variants - noncancer_phenotype: n = 2
+[2018-11-12 13:57:51][INFO] TIER 2: Likely pathogenic variants - cancer_phenotype: n = 0
+[2018-11-12 13:57:51][INFO] TIER 2: Likely pathogenic variants - noncancer_phenotype: n = 0
+[2018-11-12 13:57:52][INFO] TIER 3: Variants of uncertain significance - cancer_phenotype: n = 1
+[2018-11-12 13:57:52][INFO] TIER 3: Variants of uncertain significance - noncancer_phenotype: n = 0
+[2018-11-12 13:57:52][INFO] TIER 3: Other unclassified variants: n = 18
+[2018-11-12 13:57:52][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2018-11-12 14:18:55][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-11-12 14:18:56][INFO] Number of PASS variants: 3316
+[2018-11-12 14:18:56][INFO] Number of SNVs: 2669
+[2018-11-12 14:18:56][INFO] Number of deletions: 541
+[2018-11-12 14:18:56][INFO] Number of insertions: 103
+[2018-11-12 14:18:56][INFO] Number of block substitutions: 0
+[2018-11-12 14:18:56][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-11-12 14:18:57][INFO] Adding citations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-11-12 14:18:57][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-11-12 14:18:57][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-11-12 14:18:58][INFO] Extending annotation descriptions related to ClinVar
+[2018-11-12 14:19:01][INFO] Filtering against cancer predisposition genes:
+[2018-11-12 14:19:01][INFO] 49 variants remaining
+[2018-11-12 14:19:01][INFO] Found coding variants in the following cancer predisposition genes: EPCAM, CASR, KDR, PTPN13, FAT1, CDH10, APC, NSD1, PMS2, BRAF, EXT1, TSC1, ETV6, POLE, AXIN1, TSC2, FANCA, TP53, NF1, SMARCA4, ERCC2, POLD1, CHEK2, AR
+[2018-11-12 14:19:01][INFO] Limiting variants to hereditary cancer-predisposing syndromes/cancer conditions
+[2018-11-12 14:19:14][INFO] Assignment of variants to tier 1/tier 2/tier 3
+[2018-11-12 14:19:14][INFO] TIER 1: Pathogenic variants - cancer_phenotype: n = 3
+[2018-11-12 14:19:14][INFO] TIER 1: Pathogenic variants - noncancer_phenotype: n = 2
+[2018-11-12 14:19:14][INFO] TIER 2: Likely pathogenic variants - cancer_phenotype: n = 0
+[2018-11-12 14:19:14][INFO] TIER 2: Likely pathogenic variants - noncancer_phenotype: n = 0
+[2018-11-12 14:19:14][INFO] TIER 3: Variants of uncertain significance - cancer_phenotype: n = 1
+[2018-11-12 14:19:14][INFO] TIER 3: Variants of uncertain significance - noncancer_phenotype: n = 0
+[2018-11-12 14:19:15][INFO] TIER 3: Other unclassified variants: n = 18
+[2018-11-12 14:19:15][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2018-11-12 14:23:56][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-11-12 14:23:56][INFO] Number of PASS variants: 3316
+[2018-11-12 14:23:56][INFO] Number of SNVs: 2669
+[2018-11-12 14:23:56][INFO] Number of deletions: 541
+[2018-11-12 14:23:56][INFO] Number of insertions: 103
+[2018-11-12 14:23:56][INFO] Number of block substitutions: 0
+[2018-11-12 14:23:56][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-11-12 14:23:57][INFO] Adding citations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-11-12 14:23:57][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-11-12 14:23:58][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-11-12 14:23:58][INFO] Extending annotation descriptions related to ClinVar
+[2018-11-12 14:24:00][INFO] Filtering against cancer predisposition genes:
+[2018-11-12 14:24:00][INFO] 49 variants remaining
+[2018-11-12 14:24:00][INFO] Found coding variants in the following cancer predisposition genes: EPCAM, CASR, KDR, PTPN13, FAT1, CDH10, APC, NSD1, PMS2, BRAF, EXT1, TSC1, ETV6, POLE, AXIN1, TSC2, FANCA, TP53, NF1, SMARCA4, ERCC2, POLD1, CHEK2, AR
+[2018-11-12 14:24:00][INFO] Limiting variants to hereditary cancer-predisposing syndromes/cancer conditions
+[2018-11-12 14:24:14][INFO] Assignment of variants to tier 1/tier 2/tier 3
+[2018-11-12 14:24:14][INFO] TIER 1: Pathogenic variants - cancer_phenotype: n = 3
+[2018-11-12 14:24:14][INFO] TIER 1: Pathogenic variants - noncancer_phenotype: n = 2
+[2018-11-12 14:24:14][INFO] TIER 2: Likely pathogenic variants - cancer_phenotype: n = 0
+[2018-11-12 14:24:14][INFO] TIER 2: Likely pathogenic variants - noncancer_phenotype: n = 0
+[2018-11-12 14:24:14][INFO] TIER 3: Variants of uncertain significance - cancer_phenotype: n = 1
+[2018-11-12 14:24:14][INFO] TIER 3: Variants of uncertain significance - noncancer_phenotype: n = 0
+[2018-11-12 14:24:15][INFO] TIER 3: Other unclassified variants: n = 18
+[2018-11-12 14:24:15][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2018-11-12 14:24:54][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file

@@ -22,6 +22,16 @@ for(type in c('tier1','tier2','tier3A','tier3B')){
 <ul><li><span style="color:#9E0142; font-size:13pt"><b>Pathogenic variants (ClinVar):</b></span></li>
 ```{r tier1_summary, echo = F, results='asis',eval = nonempty_tiers[['tier1']]}
 
+
+## remove duplicate variants (attributed to different phenotypes)
+if(nonempty_tiers[['tier1']] == T){
+  tmp <- tidyr::separate_rows(cps_report[['summary']][['tier1']],"VARIANTS",sep=", ") %>% 
+    dplyr::select(CLINVAR_PHENOTYPE, VARIANTS) %>%
+    dplyr::distinct(VARIANTS, .keep_all = T)
+  cps_report[['summary']][['tier1']] <- as.data.frame(tmp %>%
+    dplyr::group_by(CLINVAR_PHENOTYPE) %>%
+    dplyr::summarise(VARIANTS = paste(VARIANTS, collapse=", ")))
+}
 i <- 1
 cat('<ul>\n')
 while(i <= NROW(cps_report[['summary']][['tier1']])){
@@ -50,6 +60,16 @@ cat('\n')
 
 <ul><li><span style="color:#D53E4F; font-size:13pt"><b>Likely pathogenic variants (ClinVar):</b></span></li>
 ```{r tier2_summary, echo = F,results='asis',eval = nonempty_tiers[['tier2']]}
+
+## remove duplicate variants (attributed to different phenotypes)
+if(nonempty_tiers[['tier2']] == T){
+  tmp <- tidyr::separate_rows(cps_report[['summary']][['tier2']],"VARIANTS",sep=", ") %>% 
+    dplyr::select(CLINVAR_PHENOTYPE, VARIANTS) %>%
+    dplyr::distinct(VARIANTS, .keep_all = T)
+  cps_report[['summary']][['tier2']] <- as.data.frame(tmp %>%
+    dplyr::group_by(CLINVAR_PHENOTYPE) %>%
+    dplyr::summarise(VARIANTS = paste(VARIANTS, collapse=", ")))
+}
 
 i <- 1
 cat('<ul>\n')

@@ -24,7 +24,7 @@ The report is generated with _[cpsr](https://github.com/sigven/cpsr)_ version `r
     * gnomAD (__`r cps_report[['cpsr_config']][['popgen']][['popdesc_gnomad']]`__): __`r cps_report[['cpsr_config']][['maf_limits']][['maf_gnomad']]`__
 * Show GWAS hits in report: __`r cps_report[['cpsr_config']][['gwas']][['gwas_hits']]`__
     * Minimum p-value for association: __`r cps_report[['cpsr_config']][['gwas']][['p_value_min']]`__
-* Pathogenicity prediction - voting scheme for consensus call among eight algorithms within [dbNSFP](https://sites.google.com/site/jpopgen/dbNSFP):
+* <i>Insilico</i> pathogenicity prediction - voting scheme for consensus call among eight algorithms within [dbNSFP](https://sites.google.com/site/jpopgen/dbNSFP):
     * Minimum number of majority votes:  __`r cps_report[['cpsr_config']][['dbnsfp']][['min_majority']]`__
     * Maximum number of minority votes:  __`r cps_report[['cpsr_config']][['dbnsfp']][['max_minority']]`__
         * Variants affecting splice sites require that each of the two algorithms agree

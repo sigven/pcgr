@@ -113,7 +113,7 @@ generate_predisposition_report <- function(project_directory, query_vcf2tsv, pcg
               cps_report[["snv_indel"]][["variant_display"]][["tier1"]][[ph]] <-
                 cps_report[["snv_indel"]][["variant_display"]][["tier1"]][[ph]] %>%
                 dplyr::mutate(PATHRANK = NA, PATHSCORE = NA, PATHDOC = NA)
-              all_hits <- dplyr::bind_rows(all_hits, dplyr::select(cps_report[["snv_indel"]][["variant_display"]][["tier1"]][[ph]],GENOMIC_CHANGE))
+              all_hits <- dplyr::bind_rows(all_hits, dplyr::select(cps_report[["snv_indel"]][["variant_display"]][["tier1"]][[ph]],GENOMIC_CHANGE)) %>% dplyr::distinct()
             }
             rlogging::message(paste0("TIER 1: Pathogenic variants - ",ph,": n = ",nrow(cps_report[["snv_indel"]][["variant_display"]][["tier1"]][[ph]])))
 
@@ -126,7 +126,7 @@ generate_predisposition_report <- function(project_directory, query_vcf2tsv, pcg
               cps_report[["snv_indel"]][["variant_display"]][["tier2"]][[ph]] <-
                 cps_report[["snv_indel"]][["variant_display"]][["tier2"]][[ph]] %>%
                 dplyr::mutate(PATHRANK = NA, PATHSCORE = NA, PATHDOC = NA)
-              all_hits <- dplyr::bind_rows(all_hits, dplyr::select(cps_report[["snv_indel"]][["variant_display"]][["tier2"]][[ph]],GENOMIC_CHANGE))
+              all_hits <- dplyr::bind_rows(all_hits, dplyr::select(cps_report[["snv_indel"]][["variant_display"]][["tier2"]][[ph]],GENOMIC_CHANGE)) %>% dplyr::distinct()
             }
             rlogging::message(paste0("TIER 2: Likely pathogenic variants - ",ph,": n = ",nrow(cps_report[["snv_indel"]][["variant_display"]][["tier2"]][[ph]])))
           }
@@ -140,7 +140,7 @@ generate_predisposition_report <- function(project_directory, query_vcf2tsv, pcg
               cps_report[["snv_indel"]][["variant_display"]][["tier3A"]][[ph]] <-
                 cps_report[["snv_indel"]][["variant_display"]][["tier3A"]][[ph]] %>%
                 dplyr::arrange(desc(PATHSCORE), LOSS_OF_FUNCTION, CODING_STATUS, desc(ONCOSCORE))
-              all_hits <- dplyr::bind_rows(all_hits, dplyr::select(cps_report[["snv_indel"]][["variant_display"]][["tier3A"]][[ph]],GENOMIC_CHANGE))
+              all_hits <- dplyr::bind_rows(all_hits, dplyr::select(cps_report[["snv_indel"]][["variant_display"]][["tier3A"]][[ph]],GENOMIC_CHANGE)) %>% dplyr::distinct()
             }
             rlogging::message(paste0("TIER 3: Variants of uncertain significance - ",ph,": n = ",nrow(cps_report[["snv_indel"]][["variant_display"]][["tier3A"]][[ph]])))
           }
@@ -153,22 +153,26 @@ generate_predisposition_report <- function(project_directory, query_vcf2tsv, pcg
             cps_report[["snv_indel"]][["variant_display"]][["tier3B"]] <-
               cps_report[["snv_indel"]][["variant_display"]][["tier3B"]] %>%
               dplyr::arrange(desc(PATHSCORE), LOSS_OF_FUNCTION, CODING_STATUS, desc(ONCOSCORE))
-            all_hits <- dplyr::bind_rows(all_hits, dplyr::select(cps_report[["snv_indel"]][["variant_display"]][["tier3B"]],GENOMIC_CHANGE))
+            all_hits <- dplyr::bind_rows(all_hits, dplyr::select(cps_report[["snv_indel"]][["variant_display"]][["tier3B"]],GENOMIC_CHANGE)) %>% dplyr::distinct()
           }
-          rlogging::message(paste0("TIER 3: Other unclassified variants - ",ph,": n = ",nrow(cps_report[["snv_indel"]][["variant_display"]][["tier3B"]])))
+          rlogging::message(paste0("TIER 3: Other unclassified variants: n = ",nrow(cps_report[["snv_indel"]][["variant_display"]][["tier3B"]])))
 
           if(cpsr_config[['gwas']][['gwas_hits']] == TRUE){
             rlogging::message("Assignment of other variants to hits from genome-wide association studies")
           }
           ## Assign GWAS hits to cps_report object
           cps_report[["snv_indel"]][["variant_display"]][["gwas"]] <-  dplyr::filter(calls, !is.na(GWAS_HIT) & !is.na(GWAS_CITATION))
-          cps_report[["snv_indel"]][["variant_display"]][["gwas"]] <- dplyr::anti_join(cps_report[["snv_indel"]][["variant_display"]][["gwas"]], all_hits, by=c("GENOMIC_CHANGE"))
           if(nrow(cps_report[["snv_indel"]][["variant_display"]][["gwas"]]) > 0){
-            cps_report[["snv_indel"]][["variant_display"]][["gwas"]] <-
-              cps_report[["snv_indel"]][["variant_display"]][["gwas"]] %>%
-              dplyr::mutate(PATHRANK = NA, PATHSCORE = NA, PATHDOC = NA, CLINVAR_PHENOTYPE = NA) %>%
-              dplyr::rename(CLINVAR_CLINICAL_SIGNIFICANCE = CLINVAR_CLNSIG) %>%
-              dplyr::arrange(LOSS_OF_FUNCTION, CODING_STATUS, desc(ONCOSCORE))
+            if(nrow(all_hits) > 0){
+              cps_report[["snv_indel"]][["variant_display"]][["gwas"]] <- dplyr::anti_join(cps_report[["snv_indel"]][["variant_display"]][["gwas"]], all_hits, by=c("GENOMIC_CHANGE"))
+            }
+            if(nrow(cps_report[["snv_indel"]][["variant_display"]][["gwas"]]) > 0){
+              cps_report[["snv_indel"]][["variant_display"]][["gwas"]] <-
+                cps_report[["snv_indel"]][["variant_display"]][["gwas"]] %>%
+                dplyr::mutate(PATHRANK = NA, PATHSCORE = NA, PATHDOC = NA, CLINVAR_PHENOTYPE = NA) %>%
+                dplyr::rename(CLINVAR_CLINICAL_SIGNIFICANCE = CLINVAR_CLNSIG) %>%
+                dplyr::arrange(LOSS_OF_FUNCTION, CODING_STATUS, desc(ONCOSCORE))
+            }
           }
           if(cpsr_config[['gwas']][['gwas_hits']] == TRUE){
             rlogging::message(paste0("GWAS hits - cancer phenotypes: n = ",nrow(cps_report[["snv_indel"]][["variant_display"]][["gwas"]])))
@@ -371,11 +375,11 @@ assign_pathogenicity_score <- function(sample_calls, cpsr_config, pcgr_data){
   sample_calls$PMC1 <- FALSE #null variant in a gene where LoF is not a known mechanism of disease
   sample_calls$PM2 <- FALSE #Absence or extremely low frequency (MAF < 0.0005) in 1000 Genomes Project, or gnomAD
   sample_calls$PP2 <- FALSE # Missense variant in a gene that has a relatively low rate of benign missense variation (<20%) and where missense variants are a common mechanism of disease (>50% of pathogenic variants)
-  sample_calls$PM4 <- FALSE #Protein length changes due to inframe indels or nonstop variant of genes that harbor variants with a dominant mode of inheritance.
-  sample_calls$PPC1 <- FALSE #Protein length changes due to inframe indels or nonstop variant of genes that harbor variants with a recessive mode of inheritance.
+  sample_calls$PM4 <- FALSE #Protein length changes due to inframe indels or nonstop variant in non-repetitive regions of genes that harbor variants with a dominant mode of inheritance.
+  sample_calls$PPC1 <- FALSE #Protein length changes due to inframe indels or nonstop variant in non-repetitive regions of genes that harbor variants with a recessive mode of inheritance.
   sample_calls$PM5 <- FALSE #Novel missense change at an amino acid residue where a different missense change determined to be pathogenic has been seen before
-  sample_calls$PP3 <- FALSE #Multiple lines (>=5) of computational evidence support a deleterious effect on the gene or gene product (conservation, evolutionary, splicing impact, etc.)
-  sample_calls$BP4 <- FALSE #Multiple lines (>=5) of in silico evidence of none deleterious effect.
+  sample_calls$PP3 <- FALSE #Multiple lines of computational evidence support a deleterious effect on the gene or gene product (conservation, evolutionary, splicing impact, etc. - from dbNSFP)
+  sample_calls$BP4 <- FALSE #Multiple lines of computational evidence support a benign effect on the gene or gene product (conservation, evolutionary, splicing impact, etc. - from dbNSFP).
   sample_calls$BMC1 <- FALSE #Peptide change is at the same location of a known benign change
   sample_calls$BSC1 <- FALSE #Peptide change is known to be benign
   sample_calls$BA1 <- FALSE #Common population frequency (MAF > 0.05) in 1000 Genomes Project, or gnomAD
@@ -489,7 +493,7 @@ assign_pathogenicity_score <- function(sample_calls, cpsr_config, pcgr_data){
   }
 
   ## Assign a logical ACMG level
-  # BP1 - Missense variant in a gene for which primarily truncating variants are known to cause disease
+  # BP1 - Missense variant in a gene for which primarily truncating variants (> 90%, as given in Maxwell et al.) are known to cause disease
   if(nrow(sample_calls[!is.na(sample_calls$CONSEQUENCE) & !is.na(sample_calls$PATH_TRUNCATION_RATE) & sample_calls$PATH_TRUNCATION_RATE > 0.90 & stringr::str_detect(sample_calls$CONSEQUENCE,'^missense_variant'),]) > 0){
     sample_calls[!is.na(sample_calls$CONSEQUENCE) & !is.na(sample_calls$PATH_TRUNCATION_RATE) & sample_calls$PATH_TRUNCATION_RATE > 0.90 & stringr::str_detect(sample_calls$CONSEQUENCE,'^missense_variant'),]$BP1 <- TRUE
   }
@@ -531,11 +535,14 @@ assign_pathogenicity_score <- function(sample_calls, cpsr_config, pcgr_data){
     sample_calls[!is.na(sample_calls$clinvar_pathogenic_codon) & sample_calls$clinvar_pathogenic_codon == T,]$PM5 <- TRUE
   }
 
-  ## if previously found coinciding with pathogenic variant, set PM5 to false
+  ## if previously found coinciding with pathogenic variant (PS1), set PM5 to false
   if(nrow(sample_calls[is.na(sample_calls$PS1) & is.na(sample_calls$PM5) & sample_calls$PM5 == T & sample_calls$PS1 == T,]) > 0){
     sample_calls[is.na(sample_calls$PS1) & is.na(sample_calls$PM5) & sample_calls$PM5 == T & sample_calls$PS1 == T,]$PM5 <- FALSE
   }
 
+  ## Assign logical ACMG level
+  # BSC1 - coinciding with known benign missense variants
+  # BMC1 - occurs at the same codon as a known benign missense variant
   if(nrow(sample_calls[!is.na(sample_calls$clinvar_benign) & sample_calls$clinvar_benign == T,]) > 0){
     sample_calls[!is.na(sample_calls$clinvar_benign) & sample_calls$clinvar_benign == T,]$BSC1 <- TRUE
   }
@@ -543,7 +550,7 @@ assign_pathogenicity_score <- function(sample_calls, cpsr_config, pcgr_data){
     sample_calls[!is.na(sample_calls$clinvar_benign_codon) & sample_calls$clinvar_benign_codon == T,]$BMC1 <- TRUE
   }
 
-  ## if previously found coinciding with benign variant, set BMC1 to false
+  ## if previously found coinciding with benign variant (BSC1), set BMC1 to false
   if(nrow(sample_calls[is.na(sample_calls$BSC1) & is.na(sample_calls$BMC1) & sample_calls$BSC1 == T & sample_calls$BMC1 == T,]) > 0){
     sample_calls[is.na(sample_calls$BSC1) & is.na(sample_calls$BMC1) & sample_calls$BSC1 == T & sample_calls$BMC1 == T,]$BMC1 <- FALSE
   }
@@ -683,7 +690,7 @@ generate_tier_tsv_cpsr <- function(cps_report, sample_name = "test"){
                            "GENOTYPE","CONSEQUENCE","PROTEIN_CHANGE","PROTEIN_DOMAIN", "HGVSp","HGVSc", "CDS_CHANGE","MUTATION_HOTSPOT","RMSK_HIT","PROTEIN_FEATURE","EFFECT_PREDICTIONS",
                            "LOSS_OF_FUNCTION", "DBSNP","CLINVAR_CLINICAL_SIGNIFICANCE", "CLINVAR_MSID","CLINVAR_VARIANT_ORIGIN",
                            "CLINVAR_CONFLICTED", "CLINVAR_PHENOTYPE","VEP_ALL_CONSEQUENCE",
-                           "PATHSCORE","PATHRANK", "PATHDOC","PVS1","PSC1","PS1","PMC1","PM1","PM2","PM4","PM5","PP2","PPC1","PP3","BP3","BP4","BMC1","BSC1","BA1","BP1",
+                           "PATHSCORE","PATHRANK", "PATHDOC","PVS1","PSC1","PS1","PMC1","PM1","PM2","PM4","PM5","PP2","PPC1","PP3","BP4","BMC1","BSC1","BA1","BP1",
                            "N_INSILICO_CALLED","N_INSILICO_DAMAGING","N_INSILICO_TOLERATED","N_INSILICO_SPLICING_NEUTRAL","N_INSILICO_SPLICING_AFFECTED",
                            "GLOBAL_AF_GNOMAD", cps_report[['cpsr_config']][['popgen']][['vcftag_gnomad']],
                            "GLOBAL_AF_1KG", cps_report[['cpsr_config']][['popgen']][['vcftag_tgp']],"TIER","TIER_DESCRIPTION",
@@ -691,10 +698,20 @@ generate_tier_tsv_cpsr <- function(cps_report, sample_name = "test"){
 
   rlogging::message("Generating tiered set of result variants for output in tab-separated values (TSV) file")
 
+  predispose_tags <- predispose_tsv_tags
+  if(!is.null(cps_report[['cpsr_config']][['custom_tags']])){
+    if(cps_report[['cpsr_config']][['custom_tags']][['custom_tags']] != ""){
+      tags <- stringr::str_split(cps_report[['cpsr_config']][['custom_tags']][['custom_tags']],pattern = ",")[[1]]
+      for(t in tags){
+        t <- stringr::str_trim(t)
+        predispose_tags <- c(predispose_tags,t)
+      }
+    }
+  }
+
   tsv_variants <- data.frame()
   for(tier in c("tier1", "tier2", "tier3A", "tier3B","gwas")){
     if(tier != 'tier3B' & tier != "gwas"){
-      predispose_tags <- predispose_tsv_tags
       for(ph in c('cancer_phenotype','noncancer_phenotype')){
         tierset <- data.frame()
         if(nrow(cps_report[['snv_indel']][['variant_display']][[tier]][[ph]]) > 0){
@@ -736,25 +753,10 @@ generate_tier_tsv_cpsr <- function(cps_report, sample_name = "test"){
             }
           }
         }
-        if(nrow(tierset) > 0){
-          tsv_variants <- as.data.frame(dplyr::bind_rows(tsv_variants, dplyr::select(tierset, dplyr::one_of(predispose_tags))))
-        }
+        tsv_variants <- as.data.frame(dplyr::bind_rows(tsv_variants, tierset))
       }
     }else{
-      predispose_tags <- predispose_tsv_tags
-      if(!is.null(cps_report[['cpsr_config']][['custom_tags']])){
-        if(cps_report[['cpsr_config']][['custom_tags']][['custom_tags']] != ""){
-          tags <- stringr::str_split(cps_report[['cpsr_config']][['custom_tags']][['custom_tags']],pattern = ",")[[1]]
-          for(t in tags){
-            t <- stringr::str_trim(t)
-            if(t %in% colnames(tierset)){
-              predispose_tags <- c(predispose_tags,t)
-            }
-          }
-        }
-      }
-
-      #cat(predispose_tags,'\n')
+      tierset <- data.frame()
       if(nrow(cps_report[['snv_indel']][['variant_display']][[tier]]) > 0){
         tierset <- cps_report[['snv_indel']][['variant_display']][[tier]]
         tierset$VCF_SAMPLE_ID <- sample_name
@@ -766,12 +768,12 @@ generate_tier_tsv_cpsr <- function(cps_report, sample_name = "test"){
           tierset$TIER_DESCRIPTION <- 'GWAS hit'
           tierset$TIER <- 'GWAS'
         }
-        if(nrow(tierset) > 0){
-          tsv_variants <- as.data.frame(dplyr::bind_rows(tsv_variants, dplyr::select(tierset, dplyr::one_of(predispose_tags))))
-        }
+        tsv_variants <- as.data.frame(dplyr::bind_rows(tsv_variants, tierset))
       }
     }
   }
+  tsv_variants <- dplyr::select(tsv_variants, dplyr::one_of(predispose_tags))
+
   tsv_variants$DBSNP <- unlist(lapply(stringr::str_match_all(tsv_variants$DBSNP,">rs[0-9]{1,}<"),paste,collapse=","))
   tsv_variants$DBSNP <- stringr::str_replace_all(tsv_variants$DBSNP,">|<", "")
   tsv_variants$GENE_NAME <- unlist(lapply(stringr::str_match_all(tsv_variants$GENE_NAME,">.+<"),paste,collapse=","))
