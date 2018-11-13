@@ -2939,3 +2939,14 @@
 [2018-11-12 14:24:15][INFO] TIER 3: Other unclassified variants: n = 18
 [2018-11-12 14:24:15][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
 [2018-11-12 14:24:54][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2018-11-13 08:35:45][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2018-11-13 08:35:46][INFO] Number of PASS variants: 3316
+[2018-11-13 08:35:46][INFO] Number of SNVs: 2669
+[2018-11-13 08:35:46][INFO] Number of deletions: 541
+[2018-11-13 08:35:46][INFO] Number of insertions: 103
+[2018-11-13 08:35:46][INFO] Number of block substitutions: 0
+[2018-11-13 08:35:46][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2018-11-13 08:35:47][INFO] Adding citations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2018-11-13 08:35:47][INFO] Extending annotation descriptions related to Database of Curated Mutations (DoCM)
+[2018-11-13 08:35:47][INFO] Extending annotation descriptions related to KEGG pathways
+[2018-11-13 08:35:48][INFO] Extending annotation descriptions related to ClinVar

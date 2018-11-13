@@ -49,6 +49,16 @@ For variants associated with cancer phenotypes through genome-wide association s
 
 ## Germline SNVs/InDels
 
+### Variant statistics - selected cancer predisposition genes (n = `r cps_report[['snv_indel']][['n_predisposition_genes']]` )
+
+* Number of SNVs: __`r cps_report[['snv_indel']][['variant_statistic_cpg']][['n_snv']]`__
+* Number of InDels: __`r cps_report[['snv_indel']][['variant_statistic_cpg']][['n_indel']]`__
+* Number of protein-coding variants: __`r cps_report[['snv_indel']][['variant_statistic_cpg']][['n_coding']]`__
+* Number of noncoding variants: __`r pcg_report[['snv_indel']][['variant_statistic_cpg']][['n_noncoding']]`__
+
+<br><br>
+
+
 ```{r conditional_tier1, child='predispose/tier1_predispose.Rmd', eval = cps_report[['snv_indel']][['eval']]}
 ```
 

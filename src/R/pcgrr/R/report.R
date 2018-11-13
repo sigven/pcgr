@@ -28,6 +28,8 @@ init_pcg_report <- function(config = NULL, sample_name = 'SampleX', pcgr_version
     pcg_report[[analysis_element]][['variant_display']] <- list()
     pcg_report[[analysis_element]][['variant_set']] <- list()
     pcg_report[[analysis_element]][['variant_statistic']] <- list()
+    pcg_report[[analysis_element]][['variant_statistic_cpg']] <- list()
+
     pcg_report[[analysis_element]][['zero']] <- FALSE
 
     cancer_genes <- pcgrr::list_to_df(config$cancer_predisposition_genes) %>%
@@ -36,6 +38,7 @@ init_pcg_report <- function(config = NULL, sample_name = 'SampleX', pcgr_version
       dplyr::rename(symbol = name)
 
     pcg_report[[analysis_element]][['predisposition_genes']] <- cancer_genes
+    pcg_report[[analysis_element]][['n_predisposition_genes']] <- nrow(cancer_genes)
 
     for(t in c('tier1','tier2','tier3A','tier3B','gwas')){
       pcg_report[[analysis_element]][['variant_display']][[t]] <- data.frame()
@@ -49,8 +52,10 @@ init_pcg_report <- function(config = NULL, sample_name = 'SampleX', pcgr_version
     }
     pcg_report[[analysis_element]][['variant_set']][['tsv']] <- data.frame()
 
-    for(t in c('n','n_snv','n_indel','n_coding','n_noncoding')){
-      pcg_report[[analysis_element]][['variant_statistic']][[t]] <- 0
+    for(cl in c('variant_statistic','variant_statistic_cpg')){
+      for(t in c('n','n_snv','n_indel','n_coding','n_noncoding')){
+        pcg_report[[analysis_element]][[cl]][[t]] <- 0
+      }
     }
 
     if(!is.null(pcg_report[['cpsr_config']][['popgen']])){

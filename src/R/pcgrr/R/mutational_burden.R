@@ -16,7 +16,7 @@ generate_report_data_tmb <- function(sample_calls, pcgr_data, pcgr_version, samp
   rlogging::message('------')
   rlogging::message(paste0("Calculating tumor mutational burden"))
 
-  pcg_report_tmb <- pcgrr::init_pcg_report(pcgr_config = pcgr_config, sample_name = sample_name, pcgr_version = pcgr_version, genome_assembly = genome_assembly, class = 'tmb')
+  pcg_report_tmb <- pcgrr::init_pcg_report(pcgr_config, sample_name = sample_name, pcgr_version = pcgr_version, genome_assembly = genome_assembly, class = 'tmb')
 
   pcg_report_tmb[['eval']] <- TRUE
   pcg_report_tmb[['variant_statistic']][['n_tmb']] <- sample_calls %>% dplyr::filter(stringr::str_detect(CONSEQUENCE,tmb_consequence_pattern)) %>% nrow()

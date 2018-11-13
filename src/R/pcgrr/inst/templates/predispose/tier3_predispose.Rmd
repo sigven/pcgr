@@ -18,7 +18,7 @@ The unclassified, coding variants have all been assigned a composite <i>pathogen
 * PP3 (<b>1</b>) - Multiple lines of computational evidence support a deleterious effect on the gene or gene product (conservation, evolutionary, splicing impact, etc., from [dbNSFP](https://sites.google.com/site/jpopgen/dbNSFP))
 * PPC1 (<b>1</b>) - Protein length changes due to inframe indels or stoploss variants in non-repetitive regions (as identified by [RepeatMasker](http://www.repeatmasker.org/)) of known susceptibility gene (recessive MoI)
 * BP4 (<b>-1</b>) - Multiple lines of computational evidence support a benign effect on the gene or gene product (conservation, evolutionary, splicing impact, etc., from [dbNSFP](https://sites.google.com/site/jpopgen/dbNSFP))
-* BMC1 (<b>-2</b>) - Peptide change is at the same location of a known benign change ([ClinVar](https://www.ncbi.nlm.nih.gov/clinvar/))
+* BMC1 (<b>-2</b>) - Peptide change is at the same location (codon) of a known benign change ([ClinVar](https://www.ncbi.nlm.nih.gov/clinvar/))
 * BSC1 (<b>-6</b>) - Peptide change is known to be benign ([ClinVar](https://www.ncbi.nlm.nih.gov/clinvar/))
 * BA1 (<b>-8</b>) - High allele frequency in the general population (MAF > 0.05 in [1000 Genomes Project](http://www.internationalgenome.org/)/[gnomAD](http://gnomad.broadinstitute.org/) global population)
     * Exception for [homeostatic iron regulator (HFE)](https://www.ncbi.nlm.nih.gov/gene/3077) and [SERPINA1](https://www.ncbi.nlm.nih.gov/gene/5265), requiring MAF > 0.25
