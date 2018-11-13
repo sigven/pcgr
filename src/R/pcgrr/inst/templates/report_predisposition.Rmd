@@ -54,7 +54,7 @@ For variants associated with cancer phenotypes through genome-wide association s
 * Number of SNVs: __`r cps_report[['snv_indel']][['variant_statistic_cpg']][['n_snv']]`__
 * Number of InDels: __`r cps_report[['snv_indel']][['variant_statistic_cpg']][['n_indel']]`__
 * Number of protein-coding variants: __`r cps_report[['snv_indel']][['variant_statistic_cpg']][['n_coding']]`__
-* Number of noncoding variants: __`r pcg_report[['snv_indel']][['variant_statistic_cpg']][['n_noncoding']]`__
+* Number of noncoding variants: __`r cps_report[['snv_indel']][['variant_statistic_cpg']][['n_noncoding']]`__
 
 <br><br>
 
