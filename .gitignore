@@ -13,3 +13,4 @@ docs/_build/
 
 data
 install_no_docker/conda_packages/
+.Rproj.user
