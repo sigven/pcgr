@@ -64,8 +64,8 @@ init_pcg_report <- function(config = NULL, sample_name = 'SampleX', pcgr_version
         pcg_report[['cpsr_config']][['popgen']][['vcftag_tgp']] <- pop_tag_info$vcf_tag
         pcg_report[['cpsr_config']][['popgen']][['popdesc_tgp']] <- pop_tag_info$pop_description
       }
-      if(cpsr_config[['popgen']][['pop_gnomad']] != ""){
-        pop_tag_info <- pcgrr::get_population_tag(cpsr_config[['popgen']][['pop_gnomad']], db = "GNOMAD")
+      if(config[['popgen']][['pop_gnomad']] != ""){
+        pop_tag_info <- pcgrr::get_population_tag(config[['popgen']][['pop_gnomad']], db = "GNOMAD")
         pcg_report[['cpsr_config']][['popgen']][['vcftag_gnomad']] <- pop_tag_info$vcf_tag
         pcg_report[['cpsr_config']][['popgen']][['popdesc_gnomad']] <- pop_tag_info$pop_description
       }
