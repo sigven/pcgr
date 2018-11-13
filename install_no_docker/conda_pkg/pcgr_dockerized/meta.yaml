@@ -1,0 +1,30 @@
+{% set name = 'pcgr_dockerized' %}
+{% set version = os.environ.get('TRAVIS_TAG', '').replace('v.', '').replace('v', '') or 'dev' %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  path: ../../../
+
+build:
+  number: 0
+
+requirements:
+  build:
+    - python
+    - toml
+  run:
+    - python
+    - toml
+    - gdown
+
+test:
+  commands:
+    - pcgr.py --version
+
+about:
+  home: https://github.com/sigven/pcgr
+  license: MIT
+  summary: Personal Cancer Genome Reporter (PCGR)- variant interpretation report for precision oncology

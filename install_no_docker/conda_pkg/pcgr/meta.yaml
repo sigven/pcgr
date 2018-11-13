@@ -1,0 +1,145 @@
+{% set name = 'pcgr' %}
+{% set version = os.environ.get('TRAVIS_TAG', '').replace('v.', '').replace('v', '') or 'dev' %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  path: ../../../
+
+build:
+  number: 0
+  rpaths:
+    - lib/
+    - lib/R/library/
+
+requirements:
+  build:
+    - curl
+    - unzip
+    - r-base
+    - r-devtools
+    - tar
+    - python
+    - toml
+    #
+    # Need R packages build-time to correctly install pcgrr
+    - pandoc==2.3.1
+    - bioconductor-biocinstaller
+    - libgfortran-ng  # to fix -libgfortran error, thanks @pdiakumis
+    - r-purrr>=0.2.4  # to force the one from conda-forge to address this issue https://github.com/jbkunst/highcharter/issues/285
+    - r-dplyr
+    - r-stringr
+    - r-tidyr
+    - r-httr
+    - r-git2r
+    - r-data.table
+    - r-magrittr
+    - r-htmltools
+    - r-caret
+    - r-randomforest
+    - r-plotly
+    - r-rcpptoml
+    - r-ggplot2
+    - r-dt
+    - r-stringi>=1.1.7    # for pcgrr
+    - r-htmlwidgets>=1.0  # for DT (by default, 0.9 is getting installed)
+    - r-crosstalk
+    - r-deconstructsigs
+    - r-knitr>=1.17
+    - r-rmarkdown
+    - r-configr           # for pcgrr, -c vladsaveliev
+    - r-summarywidget     # for pcgrr, -c pdiakumis
+    - r-rlogging          # for pcgrr, -c pdiakumis
+    - r-collapsibletree   # for CELLector
+    - r-sunburstr         # for CELLector, -c vladsaveliev
+    - r-arules            # for CELLector, -c vladsaveliev
+    - bioconductor-variantannotation
+    - bioconductor-bsgenome.hsapiens.ucsc.hg19
+    - bioconductor-bsgenome.hsapiens.ucsc.hg38
+    - bioconductor-genomeinfodb
+    - bioconductor-genomicranges  # GenomicRangesS4Vectors
+    - bioconductor-regioner
+    - bioconductor-mutationalpatterns
+
+  run:
+    #
+    # PCGR: python
+    - python >=3.6
+    - pip
+    - numpy
+    - cython
+    - scipy
+    - pandas
+    - cyvcf2
+    - toml
+    - gdown  # google drive CLI to download test data
+    #
+    # PCGR: other tools
+    - tabix
+    - samtools
+    - bedtools
+    - vcfanno
+    - vt
+    - htslib
+    - vcf2maf
+    - nlopt
+    #
+    # Perl (for VEP)
+    - perl-bioperl
+    - ensembl-vep>=94
+    #
+    # PCGR: R packages
+    - r-base
+    - pandoc==2.3.1
+    - bioconductor-biocinstaller
+    - libgfortran-ng  # to fix -libgfortran error, thanks @pdiakumis
+    - r-purrr>=0.2.4  # to force the one from conda-forge to address this issue https://github.com/jbkunst/highcharter/issues/285
+    - r-dplyr
+    - r-devtools
+    - r-stringr
+    - r-tidyr
+    - r-httr
+    - r-git2r
+    - r-data.table
+    - r-magrittr
+    - r-htmltools
+    - r-caret
+    - r-randomforest
+    - r-plotly
+    - r-rcpptoml
+    - r-ggplot2
+    - r-dt
+    - r-stringi>=1.1.7    # for pcgrr
+    - r-htmlwidgets>=1.0  # for DT (by default, 0.9 is getting installed)
+    - r-crosstalk
+    - r-deconstructsigs
+    - r-knitr>=1.17
+    - r-rmarkdown
+    - r-configr           # for pcgrr, -c vladsaveliev
+    - r-summarywidget     # for pcgrr, -c pdiakumis
+    - r-rlogging          # for pcgrr, -c pdiakumis
+    - r-collapsibletree   # for CELLector
+    - r-sunburstr         # for CELLector, -c vladsaveliev
+    - r-arules            # for CELLector, -c vladsaveliev
+    - bioconductor-variantannotation
+    - bioconductor-bsgenome.hsapiens.ucsc.hg19
+    - bioconductor-bsgenome.hsapiens.ucsc.hg38
+    - bioconductor-genomeinfodb
+    - bioconductor-genomicranges  # GenomicRangesS4Vectors
+    - bioconductor-regioner
+    - bioconductor-mutationalpatterns
+
+test:
+  commands:
+    - pcgr.py --version
+    - '$R -e "library(pcgrr)"'
+  imports:
+    - annoutils
+
+about:
+  home: https://github.com/sigven/pcgr
+  license: MIT
+  summary: Personal Cancer Genome Reporter (PCGR)- variant interpretation report for precision oncology
+
