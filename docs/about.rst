@@ -14,8 +14,7 @@ oncology-relevant, up-to-date annotations retrieved flexibly through
 `vcfanno <https://github.com/brentp/vcfanno>`__, and produces
 interactive HTML reports intended for clinical interpretation.
 
-.. figure:: PCGR_workflow.png
-   :alt: 
+|image0|
 
 The Personal Cancer Genome Reporter has been developed by scientists
 affiliated with the `Norwegian Cancer Genomics
@@ -64,10 +63,13 @@ of. In addition to the bundled software, in the form of a Docker image,
 the workflow only needs to be attached with an `annotation data bundle
 for precision oncology <annotation_resources.html>`__.
 
-.. figure:: docker-logo50.png
-   :alt: 
+|image1|
 
 Contact
 ~~~~~~~
 
 sigven@ifi.uio.no
+
+.. |image0| image:: PCGR_workflow.png
+.. |image1| image:: docker-logo50.png
+

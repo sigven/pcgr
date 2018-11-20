@@ -1,4 +1,4 @@
-## Annotation resources
+## PCGR annotation resources
 
 ### Basic variant consequence annotation
   * [VEP v94](http://www.ensembl.org/info/docs/tools/vep/index.html) - Variant Effect Predictor release 94 ([GENCODE v28](https://www.gencodegenes.org/releases/28.html) as gene reference database (v19 for grch37))
@@ -23,7 +23,7 @@
   * [DGIdb](http://dgidb.genome.wustl.edu) - database of targeted antineoplastic drugs (v3.0.2, January 2018)
 
 ### Protein domains/functional features
-  * [UniProt/SwissProt KnowledgeBase 2018_09](http://www.uniprot.org) - resource on protein sequence and functional information (October 2018)
+  * [UniProt/SwissProt KnowledgeBase 2018_10](http://www.uniprot.org) - resource on protein sequence and functional information (November 2018)
   * [Pfam v32](http://pfam.xfam.org) - database of protein families and domains (September 2018)
 
 ### Cancer gene knowledge bases
@@ -64,6 +64,10 @@ __Antineoplastic drugs__
 __Gene-disease associations__
 
 - For gene-disease associations extracted from DisGeNET 5.0, we require a [score](http://www.disgenet.org/web/DisGeNET/menu/dbinfo#score) greater than 0.2 and that the association is suppported by at least one PMID (PubMed article). Associations involving non-cancer type of diseases are not included.
+
+__Tumor suppressor genes/proto-oncogenes__
+
+- For liteature-derived predictions of tumor suppressor genes/proto-oncogenes from *CancerMine*, we require a *minimum of three PubMed hits*.
 
 __TCGA somatic calls__
 

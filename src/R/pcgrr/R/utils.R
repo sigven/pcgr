@@ -202,17 +202,17 @@ tier_to_maf <- function(tier_df){
 #' @param project_directory name of project directory
 #' @param query_vcf2tsv name of gzipped TSV file (vcf2tsv) with annotated query SNVs/InDels
 #' @param pcgr_data List of data frames with PCGR data annotations
-#' @param pcg_config Object with PCGR configuration parameters
+#' @param config Object with PCGR configuration parameters
 #' @param cna_segments_tsv name of CNA segments file (tab-separated values)
 #' @param sample_name sample identifier
 #' @param pcgr_version PCGR software version
 #' @param genome_assembly human genome assembly version
 #'
 
-generate_report <- function(project_directory, query_vcf2tsv, pcgr_data, pcgr_config = NULL, sample_name = "SampleX",
+generate_report <- function(project_directory, query_vcf2tsv, pcgr_data, config = NULL, sample_name = "SampleX",
                             cna_segments_tsv = NULL, pcgr_version = "0.6.0", genome_assembly = "grch37"){
 
-  pcg_report <- pcgrr::init_pcg_report(pcgr_config, sample_name, pcgr_version, genome_assembly, class = NULL, pcgr_data = pcgr_data)
+  pcg_report <- pcgrr::init_pcg_report(config, sample_name, pcgr_version, genome_assembly, class = NULL, pcgr_data = pcgr_data)
 
   genome_seq <- BSgenome.Hsapiens.UCSC.hg38
   assembly <- "hg38"
@@ -233,39 +233,36 @@ generate_report <- function(project_directory, query_vcf2tsv, pcgr_data, pcgr_co
       rlogging::warning(paste0("File ", query_vcf2tsv, " does not exist or has zero size"))
     }
     else{
-      if (!is.null(pcgr_config) & query_vcf2tsv != "None.gz"){
-        sample_calls <- pcgrr::get_calls(query_vcf2tsv, pcgr_data, pcgr_version, sample_name, pcgr_config, genome_seq, assembly)
-        pcg_report_seqmode <- pcgrr::init_pcg_report(pcgr_config, sample_name, pcgr_version, genome_assembly, class = "sequencing_mode")
+      if (!is.null(config) & query_vcf2tsv != "None.gz"){
+        sample_calls <- pcgrr::get_calls(query_vcf2tsv, pcgr_data, pcgr_version, sample_name, config, genome_seq, assembly)
+        pcg_report_seqmode <- pcgrr::init_pcg_report(config, sample_name, pcgr_version, genome_assembly, class = "sequencing_mode")
         pcg_report_seqmode[["eval"]] <- TRUE
         if (nrow(sample_calls) > 0){
-          if (pcgr_config[["tumor_only"]][["vcf_tumor_only"]] == TRUE){
+          if (config[["tumor_only"]][["vcf_tumor_only"]] == TRUE){
             pcg_report_seqmode[["mode"]] <- "Tumor-only (no matching control)"
             pcg_report_seqmode[["tumor_only"]] <- TRUE
             pcg_report_tumor_only <- pcgrr::generate_report_data_tumor_only(sample_calls, pcgr_data, pcgr_version,
-                                                                            sample_name, pcgr_config, genome_seq, genome_assembly = assembly)
-            # pcg_report_snv_indel_unfiltered <- pcgrr::generate_report_data_snv_indel_pcgr(pcg_report_tumor_only[['variant_set']][['unfiltered']],
-            #                                                                               pcgr_data, pcgr_version, sample_name, pcgr_config, genome_seq,
-            #                                                                               assembly, callset = "unfiltered callset")
+                                                                            sample_name, config, genome_seq, genome_assembly = assembly)
             pcg_report_snv_indel_filtered <- pcgrr::generate_report_data_snv_indel_pcgr(pcg_report_tumor_only[["variant_set"]][["filtered"]],
-                                                                                        pcgr_data, pcgr_version, sample_name, pcgr_config, genome_seq,
+                                                                                        pcgr_data, pcgr_version, sample_name, config, genome_seq,
                                                                                         assembly, callset = "germline-filtered callset")
 
             pcg_report_tumor_only[["variant_set"]] <- NULL
             pcg_report <- pcgrr::update_pcg_report(pcg_report, pcg_report_snv_indel_filtered, analysis_element = "snv_indel")
             pcg_report <- pcgrr::update_pcg_report(pcg_report, pcg_report_tumor_only, analysis_element = "tumor_only")
           }else{
-            pcg_report_snv_indel <- pcgrr::generate_report_data_snv_indel_pcgr(sample_calls, pcgr_data, pcgr_version, sample_name, pcgr_config, genome_seq, assembly)
+            pcg_report_snv_indel <- pcgrr::generate_report_data_snv_indel_pcgr(sample_calls, pcgr_data, pcgr_version, sample_name, config, genome_seq, assembly)
             pcg_report <- pcgrr::update_pcg_report(pcg_report, pcg_report_snv_indel, analysis_element = "snv_indel")
-            if (pcgr_config[["mutational_signatures"]][["mutsignatures"]] == T){
-              pcg_report_signatures <- pcgrr::generate_report_data_signatures(sample_calls, pcgr_data, pcgr_version, sample_name, pcgr_config, genome_seq, assembly)
+            if (config[["mutational_signatures"]][["mutsignatures"]] == T){
+              pcg_report_signatures <- pcgrr::generate_report_data_signatures(sample_calls, pcgr_data, pcgr_version, sample_name, config, genome_seq, assembly)
               pcg_report <- pcgrr::update_pcg_report(pcg_report, pcg_report_signatures, analysis_element = "m_signature")
             }
-            if (pcgr_config[["msi"]][["msi"]] == T){
-              pcg_report_msi <- pcgrr::generate_report_data_msi(sample_calls, pcgr_data, pcgr_version, sample_name, pcgr_config, genome_seq, assembly)
+            if (config[["msi"]][["msi"]] == T){
+              pcg_report_msi <- pcgrr::generate_report_data_msi(sample_calls, pcgr_data, pcgr_version, sample_name, config, genome_seq, assembly)
               pcg_report <- pcgrr::update_pcg_report(pcg_report, pcg_report_msi, analysis_element = "msi")
             }
-            if (pcgr_config[["mutational_burden"]][["mutational_burden"]] == T){
-              pcg_report_tmb <- pcgrr::generate_report_data_tmb(sample_calls, pcgr_data, pcgr_version, sample_name, pcgr_config, genome_seq, assembly)
+            if (config[["mutational_burden"]][["mutational_burden"]] == T){
+              pcg_report_tmb <- pcgrr::generate_report_data_tmb(sample_calls, pcgr_data, pcgr_version, sample_name, config, genome_seq, assembly)
               pcg_report <- pcgrr::update_pcg_report(pcg_report, pcg_report_tmb, analysis_element = "tmb")
             }
           }
@@ -284,7 +281,7 @@ generate_report <- function(project_directory, query_vcf2tsv, pcgr_data, pcgr_co
 
   if (!is.null(cna_segments_tsv)){
     if (file.exists(cna_segments_tsv)){
-      pcg_report_cna <- pcgrr::generate_report_data_cna(cna_segments_tsv, pcgr_data, pcgr_version, sample_name, pcgr_config, genome_seq, genome_assembly, transcript_overlap_pct = pcgr_config[["cna"]][["cna_overlap_pct"]])
+      pcg_report_cna <- pcgrr::generate_report_data_cna(cna_segments_tsv, pcgr_data, pcgr_version, sample_name, config, genome_seq, genome_assembly, transcript_overlap_pct = config[["cna"]][["cna_overlap_pct"]])
       pcg_report <- pcgrr::update_pcg_report(pcg_report, pcg_report_cna, analysis_element = "cna")
     }
   }
@@ -307,7 +304,7 @@ generate_report <- function(project_directory, query_vcf2tsv, pcgr_data, pcgr_co
     }
   }
 
-  pcg_report_value_box <- pcgrr::generate_report_data_value_box(pcg_report, pcgr_data, pcgr_version, sample_name, pcgr_config, genome_seq, genome_assembly)
+  pcg_report_value_box <- pcgrr::generate_report_data_value_box(pcg_report, pcgr_data, pcgr_version, sample_name, config, genome_seq, genome_assembly)
   pcg_report <- pcgrr::update_pcg_report(pcg_report, pcg_report_value_box, analysis_element = "value_box")
 
   for (elem in c("tier1", "tier2", "tier3", "tier4")){
@@ -367,12 +364,12 @@ generate_biomarker_tsv <- function(clinical_evidence_items, sample_name = "test"
 #'
 #' @return tsv_variants data frame with tier-annotated list of variants for tab-separated output
 #'
-generate_tier_tsv <- function(variant_set, pcgr_data, pcgr_config, sample_name = "test"){
+generate_tier_tsv <- function(variant_set, pcgr_data, config, sample_name = "test"){
 
   tags <- NULL
-  if(!is.null(pcgr_config[['custom_tags']])){
-    if(pcgr_config[['custom_tags']][['custom_tags']] != ""){
-      tags <- stringr::str_split(pcgr_config[['custom_tags']][['custom_tags']],pattern = ",")[[1]]
+  if(!is.null(config[['custom_tags']])){
+    if(config[['custom_tags']][['custom_tags']] != ""){
+      tags <- stringr::str_split(config[['custom_tags']][['custom_tags']],pattern = ",")[[1]]
     }
   }
   rlogging::message("Generating tiered set of result variants for output in tab-separated values (TSV) file")
@@ -393,21 +390,21 @@ generate_tier_tsv <- function(variant_set, pcgr_data, pcgr_config, sample_name =
 
       if(tier == "tier1"){
         tierset$TIER_DESCRIPTION <- "Clinical biomarker - Predictive/prognostic/diagnostic"
-        if(pcgr_config[["tier_model"]][["tier_model"]] == "pcgr_acmg"){
+        if(config[["tier_model"]][["tier_model"]] == "pcgr_acmg"){
           tierset$TIER_DESCRIPTION <- "Variants of strong clinical significance"
         }
         tierset$TIER <- "TIER 1"
       }
       if(tier == "tier2"){
         tierset$TIER_DESCRIPTION <- "Other cancer mutation hotspot/predicted driver mutation/curated cancer-associated mutation"
-        if(pcgr_config[["tier_model"]][["tier_model"]] == "pcgr_acmg"){
+        if(config[["tier_model"]][["tier_model"]] == "pcgr_acmg"){
           tierset$TIER_DESCRIPTION <- "Variants of potential clinical significance"
         }
         tierset$TIER <- "TIER 2"
       }
       if(tier == "tier3"){
         tierset$TIER_DESCRIPTION <- "Other proto-oncogene/tumor suppressor mutation"
-        if(pcgr_config[["tier_model"]][["tier_model"]] == "pcgr_acmg"){
+        if(config[["tier_model"]][["tier_model"]] == "pcgr_acmg"){
           tierset$TIER_DESCRIPTION <- "Variants of uncertain significance"
         }
         tierset$TIER <- "TIER 3"
@@ -732,55 +729,55 @@ list_to_df <- function(listfordf){
 #' Function that adds read support (depth, allelic fraction) for tumor and normal and filters according to settings
 #'
 #' @param vcf_data_df data frame with variants
-#' @param pcgr_config list with configuration values
+#' @param config list with configuration values
 #'
 #' @return vcf_data_df
 #'
-add_filter_read_support <- function(vcf_data_df, pcgr_config){
+add_filter_read_support <- function(vcf_data_df, config){
   for (v in c("DP_TUMOR", "AF_TUMOR", "DP_NORMAL", "AF_NORMAL", "CALL_CONFIDENCE")){
     vcf_data_df[v] <- NA
   }
   found_tumor_tag <- 0
-  for (tag_name in names(pcgr_config$allelic_support)){
-    if (pcgr_config$allelic_support[[tag_name]] != "" & tag_name != "tumor_dp_min" & tag_name != "tumor_af_min" & tag_name != "normal_dp_min" & tag_name != "normal_af_max"){
-      pcgr_config$allelic_support[[tag_name]] <- stringr::str_replace_all(pcgr_config$allelic_support[[tag_name]], "-", ".")
-      if (pcgr_config$allelic_support[[tag_name]] %in% colnames(vcf_data_df)){
+  for (tag_name in names(config$allelic_support)){
+    if (config$allelic_support[[tag_name]] != "" & tag_name != "tumor_dp_min" & tag_name != "tumor_af_min" & tag_name != "normal_dp_min" & tag_name != "normal_af_max"){
+      config$allelic_support[[tag_name]] <- stringr::str_replace_all(config$allelic_support[[tag_name]], "-", ".")
+      if (config$allelic_support[[tag_name]] %in% colnames(vcf_data_df)){
         if (tag_name == "normal_af_tag"){
-          vcf_data_df[, "AF_NORMAL"] <- round(as.numeric(vcf_data_df[, pcgr_config$allelic_support[[tag_name]]]), digits = 3)
+          vcf_data_df[, "AF_NORMAL"] <- round(as.numeric(vcf_data_df[, config$allelic_support[[tag_name]]]), digits = 3)
         }
         if (tag_name == "normal_dp_tag"){
-          vcf_data_df[, "DP_NORMAL"] <- as.integer(vcf_data_df[, pcgr_config$allelic_support[[tag_name]]])
+          vcf_data_df[, "DP_NORMAL"] <- as.integer(vcf_data_df[, config$allelic_support[[tag_name]]])
         }
         if (tag_name == "tumor_af_tag"){
           found_tumor_tag <- 1
-          vcf_data_df[, "AF_TUMOR"] <- round(as.numeric(vcf_data_df[, pcgr_config$allelic_support[[tag_name]]]), digits = 3)
+          vcf_data_df[, "AF_TUMOR"] <- round(as.numeric(vcf_data_df[, config$allelic_support[[tag_name]]]), digits = 3)
         }
         if (tag_name == "tumor_dp_tag"){
           found_tumor_tag <- 1
-          vcf_data_df[, "DP_TUMOR"] <- as.integer(vcf_data_df[, pcgr_config$allelic_support[[tag_name]]])
+          vcf_data_df[, "DP_TUMOR"] <- as.integer(vcf_data_df[, config$allelic_support[[tag_name]]])
         }
         if (tag_name == "call_conf_tag"){
-          vcf_data_df[, "CALL_CONFIDENCE"] <- as.character(vcf_data_df[, pcgr_config$allelic_support[[tag_name]]])
+          vcf_data_df[, "CALL_CONFIDENCE"] <- as.character(vcf_data_df[, config$allelic_support[[tag_name]]])
         }
       }
     }
   }
 
   if (found_tumor_tag == 1){
-    rlogging::message("Filtering tumor variants based on allelic depth/fraction (min_dp_tumor=", pcgr_config$allelic_support$tumor_dp_min, ", min_af_tumor=", pcgr_config$allelic_support$tumor_af_min, ")")
-    rlogging::message("Filtering tumor variants based on allelic depth/fraction (min_dp_normal=", pcgr_config$allelic_support$normal_dp_min, ", max_af_normal=", pcgr_config$allelic_support$normal_af_max, ")")
+    rlogging::message("Filtering tumor variants based on allelic depth/fraction (min_dp_tumor=", config$allelic_support$tumor_dp_min, ", min_af_tumor=", config$allelic_support$tumor_af_min, ")")
+    rlogging::message("Filtering tumor variants based on allelic depth/fraction (min_dp_normal=", config$allelic_support$normal_dp_min, ", max_af_normal=", config$allelic_support$normal_af_max, ")")
     n_before_dp_af_filtering <- nrow(vcf_data_df)
     if (!any(is.na(vcf_data_df$DP_TUMOR))){
-      vcf_data_df <- dplyr::filter(vcf_data_df, DP_TUMOR >= pcgr_config$allelic_support$tumor_dp_min)
+      vcf_data_df <- dplyr::filter(vcf_data_df, DP_TUMOR >= config$allelic_support$tumor_dp_min)
     }
     if (!any(is.na(vcf_data_df$AF_TUMOR))){
-      vcf_data_df <- dplyr::filter(vcf_data_df, AF_TUMOR >= pcgr_config$allelic_support$tumor_af_min)
+      vcf_data_df <- dplyr::filter(vcf_data_df, AF_TUMOR >= config$allelic_support$tumor_af_min)
     }
     if (!any(is.na(vcf_data_df$AF_NORMAL))){
-      vcf_data_df <- dplyr::filter(vcf_data_df, AF_NORMAL <= pcgr_config$allelic_support$normal_af_max)
+      vcf_data_df <- dplyr::filter(vcf_data_df, AF_NORMAL <= config$allelic_support$normal_af_max)
     }
     if (!any(is.na(vcf_data_df$DP_NORMAL))){
-      vcf_data_df <- dplyr::filter(vcf_data_df, DP_NORMAL >= pcgr_config$allelic_support$normal_dp_min)
+      vcf_data_df <- dplyr::filter(vcf_data_df, DP_NORMAL >= config$allelic_support$normal_dp_min)
     }
     n_removed <- n_before_dp_af_filtering - nrow(vcf_data_df)
     percentage <- round(as.numeric((n_removed/n_before_dp_af_filtering) * 100), digits = 2)
@@ -923,8 +920,12 @@ determine_genotype <- function(vcf_data_df){
 
   if("GT" %in% colnames(vcf_data_df)){
     vcf_data_df$GENOTYPE <- "ND"
-    vcf_data_df[!is.na(vcf_data_df$GT) & vcf_data_df$GT %in% heterozygous_states,]$GENOTYPE <- 'heterozygous'
-    vcf_data_df[!is.na(vcf_data_df$GT) & vcf_data_df$GT %in% homozygous_states,]$GENOTYPE <- 'homozygous'
+    if(nrow(vcf_data_df[!is.na(vcf_data_df$GT) & vcf_data_df$GT %in% heterozygous_states,]) > 0){
+      vcf_data_df[!is.na(vcf_data_df$GT) & vcf_data_df$GT %in% heterozygous_states,]$GENOTYPE <- 'heterozygous'
+    }
+    if(nrow(vcf_data_df[!is.na(vcf_data_df$GT) & vcf_data_df$GT %in% homozygous_states,])){
+      vcf_data_df[!is.na(vcf_data_df$GT) & vcf_data_df$GT %in% homozygous_states,]$GENOTYPE <- 'homozygous'
+    }
   }
   else{
     vcf_data_df$GENOTYPE <- "NA"
@@ -937,13 +938,13 @@ determine_genotype <- function(vcf_data_df){
 #' @param pcgr_data object with PCGR annotation data
 #' @param pcgr_version PCGR software version
 #' @param sample_name sample identifier
-#' @param pcgr_config Object with PCGR configuration parameters
+#' @param config Object with PCGR configuration parameters
 #' @param genome_seq BSgenome object
 #' @param genome_assembly human genome assembly version
 #'
 #' @return vcf_data_df
 #'
-get_calls <- function(tsv_gz_file, pcgr_data, pcgr_version, sample_name, pcgr_config, genome_seq = BSgenome.Hsapiens.UCSC.hg19, genome_assembly = "hg19"){
+get_calls <- function(tsv_gz_file, pcgr_data, pcgr_version, sample_name, config, genome_seq = BSgenome.Hsapiens.UCSC.hg19, genome_assembly = "hg19"){
 
   vcf_data_df <- read.table(gzfile(tsv_gz_file), skip = 1, sep = "\t", header = T, stringsAsFactors = F, quote = "", comment.char = "", na.strings = c("."))
   if (nrow(vcf_data_df) == 0){
@@ -985,11 +986,12 @@ get_calls <- function(tsv_gz_file, pcgr_data, pcgr_version, sample_name, pcgr_co
     vcf_data_df[!is.na(vcf_data_df$PROTEIN_CHANGE) & stringr::str_detect(vcf_data_df$PROTEIN_CHANGE, "^ENSP"), ]$PROTEIN_CHANGE <- NA
   }
 
-  vcf_data_df$CODING_STATUS <- "noncoding"
-  coding_consequence_pattern <- "^(stop_|start_lost|frameshift_|missense_variant|splice_donor|splice_acceptor|inframe_)"
-  if (nrow(vcf_data_df[!is.na(vcf_data_df$CONSEQUENCE) & stringr::str_detect(vcf_data_df$CONSEQUENCE, coding_consequence_pattern), ]) > 0){
-    vcf_data_df[!is.na(vcf_data_df$CONSEQUENCE) & stringr::str_detect(vcf_data_df$CONSEQUENCE, coding_consequence_pattern), ]$CODING_STATUS <- "coding"
-  }
+  coding_csq_pattern <- "^(stop_|start_lost|frameshift_|missense_variant|splice_donor|splice_acceptor|inframe_)"
+  vcf_data_df <- vcf_data_df %>%
+    dplyr::mutate(CODING_STATUS = dplyr::if_else(stringr::str_detect(CONSEQUENCE,coding_csq_pattern),"coding","noncoding","noncoding")) %>%
+    dplyr::mutate(GENOMIC_CHANGE = paste0(CHROM,":g.",POS, REF, ">", ALT)) %>%
+    dplyr::mutate(VAR_ID = paste(CHROM, POS, REF, ALT, sep = "_"))
+
   for (v in c("ONCOGENE", "TUMOR_SUPPRESSOR", "NETWORK_CG")){
     vcf_data_df[, v] <- as.logical(dplyr::recode(vcf_data_df[, v], True = TRUE, False = FALSE))
   }
@@ -999,19 +1001,14 @@ get_calls <- function(tsv_gz_file, pcgr_data, pcgr_version, sample_name, pcgr_co
   }
 
   if("INTOGEN_DRIVER_MUT" %in% colnames(vcf_data_df)){
-    if (nrow(vcf_data_df[!is.na(vcf_data_df$INTOGEN_DRIVER_MUT), ]) > 0){
-      vcf_data_df[!is.na(vcf_data_df$INTOGEN_DRIVER_MUT), ]$INTOGEN_DRIVER_MUT <- TRUE
-    }
-    if (nrow(vcf_data_df[is.na(vcf_data_df$INTOGEN_DRIVER_MUT), ]) > 0){
-      vcf_data_df[is.na(vcf_data_df$INTOGEN_DRIVER_MUT), ]$INTOGEN_DRIVER_MUT <- FALSE
-    }
+    vcf_data_df <- vcf_data_df %>% dplyr::mutate(INTOGEN_DRIVER_MUT = dplyr::if_else(!is.na(INTOGEN_DRIVER_MUT),TRUE,FALSE,FALSE))
   }
 
   if (!is.null(sample_name) & nrow(vcf_data_df) > 0){
     vcf_data_df$VCF_SAMPLE_ID <- sample_name
   }
 
-  vcf_data_df <- pcgrr::add_filter_read_support(vcf_data_df, pcgr_config)
+  vcf_data_df <- pcgrr::add_filter_read_support(vcf_data_df, config)
   vcf_data_df <- pcgrr::determine_genotype(vcf_data_df)
 
   rlogging::message(paste0("Number of PASS variants: ", nrow(vcf_data_df)))
@@ -1030,8 +1027,6 @@ get_calls <- function(tsv_gz_file, pcgr_data, pcgr_version, sample_name, pcgr_co
     return(vcf_data_df)
   }
 
-  vcf_data_df$GENOMIC_CHANGE <- paste0(vcf_data_df$CHROM, ":g.", vcf_data_df$POS, vcf_data_df$REF, ">", vcf_data_df$ALT)
-  vcf_data_df$VAR_ID <- paste(vcf_data_df$CHROM, vcf_data_df$POS, vcf_data_df$REF, vcf_data_df$ALT, sep = "_")
   for (col in c("PFAM_DOMAIN", "ENTREZ_ID", "UNIPROT_FEATURE", "Gene")){
     vcf_data_df[, col] <- as.character(vcf_data_df[, col])
   }
@@ -1041,10 +1036,8 @@ get_calls <- function(tsv_gz_file, pcgr_data, pcgr_version, sample_name, pcgr_co
   }
 
   if ("LoF" %in% colnames(vcf_data_df)){
-    vcf_data_df$LOSS_OF_FUNCTION <- FALSE
-    if(nrow(vcf_data_df[!is.na(vcf_data_df$LoF) & vcf_data_df$LoF == "HC", ]) > 0){
-      vcf_data_df[!is.na(vcf_data_df$LoF) & vcf_data_df$LoF == "HC", ]$LOSS_OF_FUNCTION <- TRUE
-    }
+    vcf_data_df <- vcf_data_df %>% dplyr::mutate(LOSS_OF_FUNCTION = dplyr::if_else(!is.na(LoF) & LoF == "HC",TRUE,FALSE,FALSE))
+
     ## Ignore LoF predictions for missense variants (bug in LofTee?)
     if(nrow(vcf_data_df[!is.na(vcf_data_df$CONSEQUENCE) & vcf_data_df$CONSEQUENCE == 'missense_variant' & vcf_data_df$LOSS_OF_FUNCTION == T,]) > 0){
       vcf_data_df[!is.na(vcf_data_df$CONSEQUENCE) & vcf_data_df$CONSEQUENCE == 'missense_variant' & vcf_data_df$LOSS_OF_FUNCTION == T,]$LOSS_OF_FUNCTION <- FALSE
@@ -1056,7 +1049,7 @@ get_calls <- function(tsv_gz_file, pcgr_data, pcgr_version, sample_name, pcgr_co
   }
   vcf_data_df <- pcgrr::add_swissprot_feature_descriptions(vcf_data_df, pcgr_data = pcgr_data)
   if("GWAS_HIT" %in% colnames(vcf_data_df)){
-    vcf_data_df <- pcgrr::add_gwas_citation_phenotype(vcf_data_df, pcgr_data = pcgr_data, p_value_threshold = pcgr_config$gwas$p_value_min)
+    vcf_data_df <- pcgrr::add_gwas_citation_phenotype(vcf_data_df, pcgr_data = pcgr_data, p_value_threshold = config$gwas$p_value_min)
   }
   vcf_data_df <- dplyr::left_join(vcf_data_df, dplyr::select(pcgr_data$pfam_domains, pfam_id, pfam_name), by = c("PFAM_DOMAIN" = "pfam_id")) %>%
     dplyr::rename(PFAM_DOMAIN_NAME = pfam_name)

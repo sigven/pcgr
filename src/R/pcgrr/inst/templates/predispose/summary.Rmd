@@ -1,8 +1,6 @@
 
 ## Summary of findings
 
-
-
 ```{r summary_data_status, echo=F}
 
 empty_tiers <- list()
@@ -19,7 +17,7 @@ for(type in c('tier1','tier2','tier3A','tier3B')){
 
 ```
 
-<ul><li><span style="color:#9E0142; font-size:13pt"><b>Pathogenic variants (ClinVar):</b></span></li>
+<ul><li><span style="color:#9E0142; font-size:13pt"><b>Tier 1 - pathogenic variants (ClinVar):</b></span></li>
 ```{r tier1_summary, echo = F, results='asis',eval = nonempty_tiers[['tier1']]}
 
 
@@ -56,9 +54,7 @@ cat('\n')
 ```
 </ul>
 
-<br>
-
-<ul><li><span style="color:#D53E4F; font-size:13pt"><b>Likely pathogenic variants (ClinVar):</b></span></li>
+<ul><li><span style="color:#D53E4F; font-size:13pt"><b>Tier 2 - likely pathogenic variants (ClinVar):</b></span></li>
 ```{r tier2_summary, echo = F,results='asis',eval = nonempty_tiers[['tier2']]}
 
 ## remove duplicate variants (attributed to different phenotypes)
@@ -95,9 +91,8 @@ cat('\n')
 ```
 </ul>
 
-<br>
-
-<ul><li><span style="color:#F46D43; font-size:13pt"><b>Unclassified variants (ClinVar) - HIGH predicted pathogenicity:</b></span></li> 
+<ul><li><span style="color:#F46D43; font-size:13pt"><b>Tier 3 - unclassified variants - HIGH predicted pathogenicity:</b></span></li>
+<ul><li><span style="color:#F46D43; font-size:13pt"><b>ClinVar</b></span></li>
 ```{r tier3A_summary, echo = F,results='asis',eval = nonempty_tiers[['tier3A']]}
 
 i <- 1
@@ -116,9 +111,7 @@ cat('\n')
 ```
 </ul>
 
-<br>
-
-<ul><li><span style="color:#F46D43; font-size:13pt"><b>Unclassified variants (not found in ClinVar) - HIGH predicted pathogenicity:</b></span></li> 
+<ul><li><span style="color:#F46D43; font-size:13pt"><b>Non-ClinVar</b></span></li> 
 ```{r tier3B_summary, echo = F,results='asis',eval = nonempty_tiers[['tier3B']]}
 
 i <- 1
@@ -135,5 +128,4 @@ cat('</ul>\n')
 cat('<ul><li><i>No variants found.</i></li></ul>',sep='\n')
 cat('\n')
 ```
-</ul>
-<br>
+</ul></ul>

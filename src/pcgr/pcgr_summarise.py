@@ -47,7 +47,7 @@ def extend_vcf_annotations(query_vcf, pcgr_db_directory, logger, cpsr):
    dbnsfp_prediction_algorithms = meta_vep_dbnsfp_info['dbnsfp_prediction_algorithms']
 
    vcf = VCF(query_vcf)
-   for tag in vcf_infotags_meta:
+   for tag in sorted(vcf_infotags_meta):
       vcf.add_info_to_header({'ID': tag, 'Description': str(vcf_infotags_meta[tag]['description']),'Type':str(vcf_infotags_meta[tag]['type']), 'Number': str(vcf_infotags_meta[tag]['number'])})
 
    w = Writer(out_vcf, vcf)
@@ -55,7 +55,7 @@ def extend_vcf_annotations(query_vcf, pcgr_db_directory, logger, cpsr):
    num_chromosome_records_processed = 0
    pcgr_onco_xref_map = {'ENSEMBL_TRANSCRIPT_ID': 0, 'ENSEMBL_GENE_ID':1, 'SYMBOL':2, 'ENTREZ_ID':3, 'UNIPROT_ID':4, 'APPRIS':5,'UNIPROT_ACC':6,'REFSEQ_MRNA':7,'CORUM_ID':8,'TUMOR_SUPPRESSOR':9,
                         'ONCOGENE':10,'NETWORK_CG':11,'DISGENET_CUI':12,'CHEMBL_COMPOUND_ID':13,'INTOGEN_DRIVER':14,'TCGA_DRIVER':15,'ONCOSCORE':16, 'CANCER_PREDISPOSITION_SOURCE':18, 
-                        'CANCER_SUSCEPTIBILITY_CUI':19, 'CANCER_SYNDROME_CUI':20, 'CANCER_PREDISPOSITION_MOI': 21}
+                        'CANCER_SUSCEPTIBILITY_CUI':19, 'CANCER_SYNDROME_CUI':20, 'CANCER_PREDISPOSITION_MOI':21, 'CANCER_PREDISPOSITION_MOD':22}
    for rec in vcf:
       all_transcript_consequences = []
       if current_chrom is None:

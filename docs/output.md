@@ -320,52 +320,53 @@ The following variables are included in the tiered TSV file:
     5. SYMBOL - Gene symbol
     6. GENE_NAME - Gene description
     7. CCDS - CCDS identifier
-    8. ENTREZ_ID - Entrez gene identifier
-    9. UNIPROT_ID - UniProt protein identifier
-    10. ENSEMBL_TRANSCRIPT_ID - Ensembl transcript identifier
-    11. ENSEMBL_GENE_ID - Ensembl gene identifier
-    12. REFSEQ_MRNA - RefSeq mRNA identifier
-    13. ONCOSCORE - Literature-derived score for cancer gene relevance
-    14. ONCOGENE - Gene is predicted as an oncogene according to literature mining (CancerMine)
-    15. TUMOR_SUPPRESSOR - Gene is predicted as tumor suppressor according to literature mining (CancerMine)
-    16. DISGENET_CUI - Associated tumor types from DisGeNET (MedGen concept IDs)
-    17. DISGENET_TERMS - Associated tumor types from DisGeNET (MedGen concept terms)
-    18. CONSEQUENCE - Variant consequence (as defined above for VCF output:
+    8. CANONICAL - indication of canonical transcript
+    9. ENTREZ_ID - Entrez gene identifier
+    10. UNIPROT_ID - UniProt protein identifier
+    11. ENSEMBL_TRANSCRIPT_ID - Ensembl transcript identifier
+    12. ENSEMBL_GENE_ID - Ensembl gene identifier
+    13. REFSEQ_MRNA - RefSeq mRNA identifier
+    14. ONCOSCORE - Literature-derived score for cancer gene relevance
+    15. ONCOGENE - Gene is predicted as an oncogene according to literature mining (CancerMine)
+    16. TUMOR_SUPPRESSOR - Gene is predicted as tumor suppressor according to literature mining (CancerMine)
+    17. DISGENET_CUI - Associated tumor types from DisGeNET (MedGen concept IDs)
+    18. DISGENET_TERMS - Associated tumor types from DisGeNET (MedGen concept terms)
+    19. CONSEQUENCE - Variant consequence (as defined above for VCF output:
         Consequence)
-    19. PROTEIN_CHANGE - Protein change (HGVSp without reference accession)
-    20. PROTEIN_DOMAIN - Protein domain
-    21. CDS_CHANGE - composite VEP-based variable for coding change, format:
+    20. PROTEIN_CHANGE - Protein change (HGVSp without reference accession)
+    21. PROTEIN_DOMAIN - Protein domain
+    22. CDS_CHANGE - composite VEP-based variable for coding change, format:
         Consequence:Feature:cDNA_position:EXON:HGVSp_short
-    22. HGVSp
-    23. HGVSc
-    24. EFFECT_PREDICTIONS - as defined above for VCF
-    25. MUTATION_HOTSPOT - mutation hotspot codon in
+    23. HGVSp
+    24. HGVSc
+    25. EFFECT_PREDICTIONS - as defined above for VCF
+    26. MUTATION_HOTSPOT - mutation hotspot codon in
         cancerhotspots.org. Format: gene_symbol | codon | q-value
-    26. MUTATION_HOTSPOT_TRANSCRIPT - hotspot-associated transcripts (Ensembl transcript ID)
-    27. MUTATION_HOTSPOT_CANCERTYPE - hotspot-associated cancer types (from cancerhotspots.org)
-    28. INTOGEN_DRIVER_MUT - Indicates if existing variant is predicted as
+    27. MUTATION_HOTSPOT_TRANSCRIPT - hotspot-associated transcripts (Ensembl transcript ID)
+    28. MUTATION_HOTSPOT_CANCERTYPE - hotspot-associated cancer types (from cancerhotspots.org)
+    29. INTOGEN_DRIVER_MUT - Indicates if existing variant is predicted as
         driver mutation from IntoGen Catalog of Driver Mutations
-    29. VEP_ALL_CONSEQUENCE - all VEP consequences
-    30. DBSNPRSID - dbSNP reference cluster ID
-    31. COSMIC_MUTATION_ID - COSMIC mutation ID
-    32. TCGA_PANCANCER_COUNT - Raw variant count across all TCGA tumor types
-    33. TCGA_FREQUENCY - Frequency of variant across TCGA tumor types. Format: tumortype|
+    30. VEP_ALL_CONSEQUENCE - all VEP consequences
+    31. DBSNPRSID - dbSNP reference cluster ID
+    32. COSMIC_MUTATION_ID - COSMIC mutation ID
+    33. TCGA_PANCANCER_COUNT - Raw variant count across all TCGA tumor types
+    34. TCGA_FREQUENCY - Frequency of variant across TCGA tumor types. Format: tumortype|
     percent affected|affected cases|total cases
-    34. ICGC_PCAWG_OCCURRENCE - Mutation occurrence in ICGC-PCAWG by project:
+    35. ICGC_PCAWG_OCCURRENCE - Mutation occurrence in ICGC-PCAWG by project:
     project_code|affected_donors|tested_donors|frequency
-    35. CHEMBL_COMPOUND_ID - Compounds (as ChEMBL IDs) that target the encoded protein (from DGIdb)
-    36. CHEMBL_COMPOUND_TERMS - Compounds (as drug names) that target the encoded protein (from DGIdb)
-    37. CLINVAR - ClinVar association: variant origin and associated traits
-    38. CLINVAR_CLNSIG - clinical significance of ClinVar variant
-    39. GLOBAL_AF_GNOMAD - global germline allele frequency in gnomAD
-    40. GLOBAL_AF_1KG - 1000G Project - phase 3, germline allele frequency
-    41. CALL_CONFIDENCE - confidence indicator for somatic variant
-    42. DP_TUMOR - sequencing depth at variant site (tumor)
-    43. AF_TUMOR - allelic fraction of alternate allele (tumor)
-    44. DP_NORMAL - sequencing depth at variant site (normal)
-    45. AF_NORMAL - allelic fraction of alternate allele (normal)
-    46. TIER
-    47. TIER_DESCRIPTION
+    36. CHEMBL_COMPOUND_ID - Compounds (as ChEMBL IDs) that target the encoded protein (from DGIdb)
+    37. CHEMBL_COMPOUND_TERMS - Compounds (as drug names) that target the encoded protein (from DGIdb)
+    38. CLINVAR - ClinVar association: variant origin and associated traits
+    39. CLINVAR_CLNSIG - clinical significance of ClinVar variant
+    40. GLOBAL_AF_GNOMAD - global germline allele frequency in gnomAD
+    41. GLOBAL_AF_1KG - 1000G Project - phase 3, germline allele frequency
+    42. CALL_CONFIDENCE - confidence indicator for somatic variant
+    43. DP_TUMOR - sequencing depth at variant site (tumor)
+    44. AF_TUMOR - allelic fraction of alternate allele (tumor)
+    45. DP_NORMAL - sequencing depth at variant site (normal)
+    46. AF_NORMAL - allelic fraction of alternate allele (normal)
+    47. TIER
+    48. TIER_DESCRIPTION
 
 
 **NOTE**: The user has the possibility to append the TSV file with data from other tags in the input VCF of interest (i.e. using the *custom_tags* option in the TOML configuration file)

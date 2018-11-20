@@ -92,7 +92,7 @@ def check_existing_vcf_info_tags(input_vcf, pcgr_directory, genome_assembly, log
    logger.info('No query VCF INFO tags coincide with CPSR INFO tags')
    return ret
 
-def simplify_vcf(input_vcf, vcf, output_dir, logger):
+def simplify_vcf(input_vcf, vcf, pcgr_directory, genome_assembly, output_dir, logger):
 
    """
    Function that performs tre things on the validated input VCF:
@@ -103,6 +103,7 @@ def simplify_vcf(input_vcf, vcf, output_dir, logger):
 
    input_vcf_cpsr_ready = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)','.cpsr_ready.tmp.vcf', os.path.basename(input_vcf)))
    input_vcf_cpsr_ready_decomposed = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)','.cpsr_ready.vcf', os.path.basename(input_vcf)))
+   input_vcf_cpsr_ready_decomposed_target = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)','.cpsr_ready_target.vcf', os.path.basename(input_vcf)))
 
    multiallelic_alt = 0
    for rec in vcf:
@@ -136,9 +137,19 @@ def simplify_vcf(input_vcf, vcf, output_dir, logger):
    else:
       command_copy = 'cp ' + str(input_vcf_cpsr_ready) + ' ' + str(input_vcf_cpsr_ready_decomposed)
       os.system(command_copy)
-   os.system('bgzip -cf ' + str(input_vcf_cpsr_ready_decomposed) + ' > ' + str(input_vcf_cpsr_ready_decomposed) + '.gz')
-   os.system('tabix -p vcf ' + str(input_vcf_cpsr_ready_decomposed) + '.gz')
-   os.system('rm -f ' + str(input_vcf_cpsr_ready) + ' ' + os.path.join(output_dir, 'decompose.log'))
+
+   logger.info('Limiting variant set to cancer predisposition loci')
+   target_bed = os.path.join(pcgr_directory,'data',genome_assembly, 'cpsr_target.bed.gz')
+   target_variants_intersect_cmd = 'bedtools intersect -wa -u -header -a ' + str(input_vcf_cpsr_ready_decomposed) + ' -b ' + str(target_bed) + ' > ' + str(input_vcf_cpsr_ready_decomposed_target)
+   os.system(target_variants_intersect_cmd)
+
+   os.system('bgzip -cf ' + str(input_vcf_cpsr_ready_decomposed_target) + ' > ' + str(input_vcf_cpsr_ready_decomposed_target) + '.gz')
+   os.system('tabix -p vcf ' + str(input_vcf_cpsr_ready_decomposed_target) + '.gz')
+   os.system('rm -f ' + str(input_vcf_cpsr_ready) + ' ' + str(input_vcf_cpsr_ready_decomposed) + ' ' + os.path.join(output_dir, 'decompose.log'))
+
+   #os.system('bgzip -cf ' + str(input_vcf_cpsr_ready_decomposed) + ' > ' + str(input_vcf_cpsr_ready_decomposed) + '.gz')
+   #os.system('tabix -p vcf ' + str(input_vcf_cpsr_ready_decomposed) + '.gz')
+   #os.system('rm -f ' + str(input_vcf_cpsr_ready) + ' ' + os.path.join(output_dir, 'decompose.log'))
 
 def validate_cpsr_input(pcgr_directory, input_vcf, configuration_file, genome_assembly, output_dir):
    """
@@ -163,7 +174,7 @@ def validate_cpsr_input(pcgr_directory, input_vcf, configuration_file, genome_as
          return -1
 
       vcf = VCF(input_vcf)
-      simplify_vcf(input_vcf, vcf, output_dir, logger)
+      simplify_vcf(input_vcf, vcf, pcgr_directory, genome_assembly, output_dir, logger)
 
    return 0
 

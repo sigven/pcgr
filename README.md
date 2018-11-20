@@ -7,7 +7,7 @@ The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for
 ![PCGR overview](PCGR_workflow.png)
 
 ### News
-* _Nov 12th 2018_:
+* _Nov 19th 2018_:
    * Dev version is available for download (installation instructions below)
    * Reporting germline variants for cancer predisposition? Check out [github.com/sigven/cpsr](https://github.com/sigven/cpsr)
 * _May 14th 2018_: **0.6.2.1 release**
@@ -66,7 +66,7 @@ Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, Ola Mykleb
 * [Cancer Hotspots](http://cancerhotspots.org) - Resource for statistically significant mutations in cancer (v2 - 2017)
 * [dBNSFP v3.5](https://sites.google.com/site/jpopgen/dbNSFP) - Database of non-synonymous functional predictions (August 2017)
 * [TCGA release 13](https://portal.gdc.cancer.gov/) - somatic mutations discovered across 33 tumor type cohorts (The Cancer Genome Atlas)
-* [UniProt/SwissProt KnowledgeBase 2018_09](http://www.uniprot.org) - Resource on protein sequence and functional information (October 2018)
+* [UniProt/SwissProt KnowledgeBase 2018_10](http://www.uniprot.org) - Resource on protein sequence and functional information (November 2018)
 * [Pfam v32](http://pfam.xfam.org) - Database of protein families and domains (September 2018)
 * [DGIdb](http://dgidb.genome.wustl.edu) - Database of targeted cancer drugs  (v3.0.2, January 2018)
 * [ChEMBL](https://www.ebi.ac.uk/chembl/) - Manually curated database of bioactive molecules (v24.1, June 2018)
@@ -100,8 +100,8 @@ An installation of Python (version _3.6_) is required to run PCGR. Check that Py
 a. Clone the PCGR GitHub repository (includes run script and configuration file): `git clone https://github.com/sigven/pcgr.git`
 
 b. Download and unpack the latest data bundles in the PCGR directory
-   * [grch37 data bundle - 20181112](https://drive.google.com/open?id=1Ny0diC7MumyaOLutN8-1EoAJ7jOOK9Gn) (approx 9.2Gb)
-   * [grch38 data bundle - 20181112](https://drive.google.com/open?id=1VtYtURsPoELR_eYqZTBVguK3tZo3aBVm) (approx 13Gb)
+   * [grch37 data bundle - 20181119](https://drive.google.com/open?id=1OL5C994HDaeadASz7KzMhPoXfdSiyhNy) (approx 9Gb)
+   * [grch38 data bundle - 20181119](https://drive.google.com/open?id=1VtYtURsPoELR_eYqZTBVguK3tZo3aBVm) (approx 14Gb)
    * *Unpacking*: `gzip -dc pcgr.databundle.grch37.YYYYMMDD.tgz | tar xvf -`
 
 c. Pull the [PCGR Docker image (*dev*)](https://hub.docker.com/r/sigven/pcgr/) from DockerHub (approx 5.1Gb):
