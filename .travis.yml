@@ -24,7 +24,7 @@ before_install:
 install:
   - export PACKAGE_NAME=pcgr
   # Setting up channels and install dependencies
-  - conda config --add channels defaults --add channels pcgr --add channels bioconda --add channels conda-forge
+  - conda config --add channels pcgr --add channels bioconda --add channels conda-forge
   - conda install -q python=$TRAVIS_PYTHON_VERSION pip requests conda-build jinja2 anaconda-client
   # Building package
   - conda build install_no_docker/conda_pkg/${PACKAGE_NAME}

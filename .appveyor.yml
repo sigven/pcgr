@@ -1,10 +1,24 @@
 image: ubuntu
 
 install:
-  # Installing (the non-docker version)
-  - bash -x install_no_docker/install.sh
+  - wget -nv https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH=$HOME/miniconda/bin:$PATH
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda info -a  # Useful for debugging any issues with conda
+  - export PACKAGE_NAME=pcgr
+  # Setting up channels and install dependencies
+  - conda config --add channels pcgr --add channels bioconda --add channels conda-forge
+  - conda install -q python=$TRAVIS_PYTHON_VERSION pip requests conda-build jinja2 anaconda-client
+  # Building package
+  - conda build install_no_docker/conda_pkg/${PACKAGE_NAME}
+  - conda build install_no_docker/conda_pkg/${PACKAGE_NAME}_dockerized
+  - conda install --use-local ${PACKAGE_NAME}
 
 test_script:
-  - source install_no_docker/load_pcgr.sh
+  - pcgr.py --version
+  - python -c "import pcgr"
 
 build: off
