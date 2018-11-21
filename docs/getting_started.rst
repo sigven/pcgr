@@ -55,7 +55,7 @@ b. Download and unpack the latest data bundles in the PCGR directory
       20181119 <https://drive.google.com/open?id=1OL5C994HDaeadASz7KzMhPoXfdSiyhNy>`__
       (approx 9Gb)
    -  `grch38 data bundle -
-      20181119 <https://drive.google.com/open?id=1VtYtURsPoELR_eYqZTBVguK3tZo3aBVm>`__
+      20181119 <https://drive.google.com/open?id=1CZNc87E0K5AK2RDSNU57FqLp0H1skpUh>`__
       (approx 14Gb)
    -  *Unpacking*:
       ``gzip -dc pcgr.databundle.grch37.YYYYMMDD.tgz | tar xvf -``
@@ -78,7 +78,7 @@ b. Download and unpack the assembly-specific data bundle in the PCGR
       bundle <https://drive.google.com/open?id=1cGBAmAh5t4miIeRrrd0zHsPCFToOr0Lf>`__
       (approx 9.2Gb)
    -  `grch38 data
-      bundle <https://drive.google.com/open?id=12q3rr7xpdBfaefRi0ysFHbH34kehNZOV>`__
+      bundle <https://drive.google.com/open?id=1CZNc87E0K5AK2RDSNU57FqLp0H1skpUh>`__
       (approx 13Gb)
    -  *Unpacking*:
       ``gzip -dc pcgr.databundle.grch37.YYYYMMDD.tgz | tar xvf -``

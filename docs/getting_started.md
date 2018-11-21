@@ -26,7 +26,7 @@ An installation of Python (version _3.6_) is required to run PCGR. Check that Py
 a. Clone the PCGR GitHub repository: `git clone https://github.com/sigven/pcgr.git`
 b. Download and unpack the latest data bundles in the PCGR directory
    * [grch37 data bundle - 20181119](https://drive.google.com/open?id=1OL5C994HDaeadASz7KzMhPoXfdSiyhNy) (approx 9Gb)
-   * [grch38 data bundle - 20181119](https://drive.google.com/open?id=1VtYtURsPoELR_eYqZTBVguK3tZo3aBVm) (approx 14Gb)
+   * [grch38 data bundle - 20181119](https://drive.google.com/open?id=1CZNc87E0K5AK2RDSNU57FqLp0H1skpUh) (approx 14Gb)
    * *Unpacking*: `gzip -dc pcgr.databundle.grch37.YYYYMMDD.tgz | tar xvf -`
 c. Pull the [PCGR Docker image (*dev*)](https://hub.docker.com/r/sigven/pcgr/) from DockerHub (approx 5.1Gb):
       * `docker pull sigven/pcgr:dev` (PCGR annotation engine)
@@ -36,7 +36,7 @@ c. Pull the [PCGR Docker image (*dev*)](https://hub.docker.com/r/sigven/pcgr/) f
 a. Download and unpack the [latest software release (0.6.2.1)](https://github.com/sigven/pcgr/releases/tag/v6.2.1)
 b. Download and unpack the assembly-specific data bundle in the PCGR directory
    * [grch37 data bundle](https://drive.google.com/open?id=1cGBAmAh5t4miIeRrrd0zHsPCFToOr0Lf) (approx 9.2Gb)
-   * [grch38 data bundle](https://drive.google.com/open?id=12q3rr7xpdBfaefRi0ysFHbH34kehNZOV) (approx 13Gb)
+   * [grch38 data bundle](https://drive.google.com/open?id=1CZNc87E0K5AK2RDSNU57FqLp0H1skpUh) (approx 13Gb)
    * *Unpacking*: `gzip -dc pcgr.databundle.grch37.YYYYMMDD.tgz | tar xvf -`
 
     A _data/_ folder within the _pcgr-X.X_ software folder should now have been produced
