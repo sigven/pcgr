@@ -4,12 +4,8 @@ language: python
 python:
   - "3.6"  # required, otherwise conda will try to clash with py2 packages
 
-## Download data bundles. (skipping this because of lack of disk space on Travis)
-#before_install:
-#  - cd ..
-#  - git clone https://github.com/circulosmeos/gdown.pl
-#  - gdown.pl/gdown.pl https://drive.google.com/file/d/1cGBAmAh5t4miIeRrrd0zHsPCFToOr0Lf/view pcgr.databundle.grch37.tgz
-#  - gzip -dc pcgr.databundle.grch37.tgz | tar xvf -
+services:
+  - docker
 
 before_install:
   # Get and install anaconda (https://conda.io/docs/travis.html)
@@ -22,28 +18,38 @@ before_install:
   - conda info -a  # Useful for debugging any issues with conda
 
 install:
+  # Set up conda
   - export PACKAGE_NAME=pcgr
   # Setting up channels and install dependencies
   - conda config --add channels pcgr --add channels bioconda --add channels conda-forge
   - conda install -q python=$TRAVIS_PYTHON_VERSION pip requests conda-build jinja2 anaconda-client
-  # Building package
+  # Building packages
   - conda build install_no_docker/conda_pkg/${PACKAGE_NAME}
   - conda build install_no_docker/conda_pkg/${PACKAGE_NAME}_dockerized
-  - conda install --use-local ${PACKAGE_NAME}
+  #
+  # Dockerized installation:
+  - docker pull sigven/pcgr:dev
+  - conda install --use-local ${PACKAGE_NAME}_dockerized
+  # Download the data bundle (usable for both version)
+  - gdown https://drive.google.com/uc?id=1OL5C994HDaeadASz7KzMhPoXfdSiyhNy -O - | tar xzf - # grch37
 
 script:
+  # Dockerized installation:
   - pcgr.py --version
   - python -c "import pcgr"
-  # (Skipping running an actual test because we don't have enough Travis disk space for full data bundles)
-  # - python pcgr.py \
-  #   --input_vcf examples/tumor_sample.COAD.vcf.gz \
-  #   --input_cna examples/tumor_sample.COAD.cna.tsv \
-  #   . \
-  #   examples \
-  #   grch37 \
-  #   examples/pcgr_conf.COAD.toml \
-  #   tumor_sample.COAD
-  #   --no-docker
+  - pcgr.py
+    --input_vcf examples/tumor_sample.COAD.vcf.gz
+    --input_cna examples/tumor_sample.COAD.cna.tsv
+    . ./examples grch37 examples/pcgr_conf.COAD.toml tumor_sample.COAD
+  #
+  # Condarized installation:
+  - conda install --use-local ${PACKAGE_NAME}
+  - pcgr.py --version
+  - python -c "import pcgr"
+  - pcgr.py
+    --input_vcf examples/tumor_sample.BRCA.vcf.gz
+    --input_cna examples/tumor_sample.BRCA.cna.tsv
+    . ./examples grch37 examples/pcgr_conf.BRCA.toml tumor_sample.BRCA --no-docker
 
 deploy:
   # Deploy to Anaconda.org
