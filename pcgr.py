@@ -11,7 +11,7 @@ import getpass
 import platform
 import toml
 
-pcgr_version = 'dev'
+pcgr_version = '0.7.0'
 db_version = 'PCGR_DB_VERSION = 20181119'
 vep_version = '94'
 global vep_assembly
