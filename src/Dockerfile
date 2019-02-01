@@ -112,7 +112,7 @@ RUN apt-get update && apt-get -y install \
 RUN cpanm DBI DBD::mysql
 
 # create vep user
-RUN useradd -r -m -U -d /opt/vep -s /bin/bash -c "VEP User" -p '' vep
+RUN useradd -u 9999 -r -m -U -d /opt/vep -s /bin/bash -c "VEP User" -p '' vep
 RUN usermod -a -G sudo vep
 USER vep
 ENV OPT /opt/vep
