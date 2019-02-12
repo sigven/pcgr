@@ -65,34 +65,34 @@ def vcf2tsv(query_vcf, out_tsv, skip_info_data, skip_genotype_data, keep_rejecte
                else:
                   gt_present_header = 1
 
-   header_line = '\t'.join(fixed_columns_header)
+   header_tags = fixed_columns_header
    if skip_info_data is False:
-      header_line = '\t'.join(fixed_columns_header) + '\t' + '\t'.join(sorted(info_columns_header))
+      header_tags = fixed_columns_header + sorted(info_columns_header)
       if len(sample_columns_header) > 0:
          if skip_genotype_data is False:
-            header_line = '\t'.join(fixed_columns_header) + '\t' + '\t'.join(sorted(info_columns_header)) + '\t' + '\t'.join(sample_columns_header) + '\t' + '\t'.join(sorted(format_columns_header)) + '\tGT'
+            header_tags = fixed_columns_header + sorted(info_columns_header) + sample_columns_header + sorted(format_columns_header) + ['GT']
          else:
-            header_line = '\t'.join(fixed_columns_header) + '\t' + '\t'.join(sorted(info_columns_header))
+            header_tags = fixed_columns_header + sorted(info_columns_header)
    else:
       if len(sample_columns_header) > 0:
          if skip_genotype_data is False:
-            header_line = '\t'.join(fixed_columns_header) + '\t' + '\t'.join(sample_columns_header) + '\t' + '\t'.join(sorted(format_columns_header)) + '\tGT'
+            header_tags = fixed_columns_header + sample_columns_header + sorted(format_columns_header) + ['GT']
          else:
-            header_line = '\t'.join(fixed_columns_header)
-            
+            header_tags = fixed_columns_header
+   header_line = '\t'.join(header_tags)
+
    out.write('#https://github.com/sigven/vcf2tsv version=' + str(version) + '\n')
    if print_data_type_header is True:
-      header_tags = header_line.rstrip().split('\t')
       header_types = []
       for h in header_tags:
          if h in column_types:
             header_types.append(str(column_types[h]))
-      header_line_type = '\t'.join(fixed_columns_header_type) + '\t' + '\t'.join(header_types)
+      header_line_type = '\t'.join(fixed_columns_header_type + header_types)
       out.write('#' + str(header_line_type) + '\n')
       out.write(str(header_line) + '\n')
    else:
       out.write(str(header_line) + '\n')
-   
+
    for rec in vcf:
       rec_id = '.'
       rec_qual = '.'
@@ -105,7 +105,7 @@ def vcf2tsv(query_vcf, out_tsv, skip_info_data, skip_genotype_data, keep_rejecte
       rec_filter = str(rec.FILTER)
       if rec.FILTER is None:
          rec_filter = 'PASS'
-     
+
       pos = int(rec.start) + 1
       fixed_fields_string = str(rec.CHROM) + '\t' + str(pos) + '\t' + str(rec_id) + '\t' + str(rec.REF) + '\t' + str(alt) + '\t' + str(rec_qual) + '\t' + str(rec_filter)
       
