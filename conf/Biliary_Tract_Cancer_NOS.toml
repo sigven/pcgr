@@ -1,0 +1,136 @@
+# Basic PCGR configuration options (TOML).
+
+[tier_model]
+## tier model for prioritization of SNVs/InDels ("pcgr_acmg" or "pcgr")
+tier_model = "pcgr_acmg"
+
+[tumor_only]
+## If input VCF contains mix of germline/somatic (variants called with no matching control, i.e. tumor-only) set vcf_tumor_only to true
+vcf_tumor_only = false
+
+## If vcf_tumor_only = true, several filters can be configured, all as a means to minimize the proportion of germline calls in the raw set derived from tumor-only calling
+
+## Exclude variants (SNVs/InDels) with minor allele frequency above the following population-specific thresholds
+## 1000 Genomes Project - WGS data
+maf_onekg_eur = 0.002
+maf_onekg_amr = 0.002
+maf_onekg_afr = 0.002
+maf_onekg_sas = 0.002
+maf_onekg_eas = 0.002
+maf_onekg_global = 0.002
+
+## exclude variants with minor allele frequency above the following population-specific thresholds
+## gnomAD - WES data
+maf_gnomad_nfe = 0.002
+maf_gnomad_amr = 0.002
+maf_gnomad_afr = 0.002
+maf_gnomad_asj = 0.002
+maf_gnomad_sas = 0.002
+maf_gnomad_eas = 0.002
+maf_gnomad_fin = 0.002
+maf_gnomad_oth = 0.002
+maf_gnomad_global = 0.002
+
+## Exclude variants occurring in PoN (panel of normals, if provided as VCF)
+exclude_pon = true
+
+## Exclude likely homozygous germline variants (100% allelic fraction for alternate allele in tumor, very unlikely somatic event)
+exclude_likely_hom_germline = false
+
+## Exclude likely heterozygous germline variants
+## Must satisfy i) 40-60 % allelic fraction for alternate allele in tumor sample, ii) present in dbSNP + gnomAD, ii) not existing as somatic event in COSMIC/TCGA
+## Note that the application of this filter may be suboptimal for very impure tumors or variants affected by CNAs etc (under these circumstances, the allelic fraction
+## will be skewed
+exclude_likely_het_germline = false
+
+## Exclude variants found in dbSNP (only those that are NOT found in ClinVar(somatic origin)/DoCM/TCGA/COSMIC)
+exclude_dbsnp_nonsomatic = false
+
+## exclude all non-exonic variants
+exclude_nonexonic = true
+
+[allelic_support]
+## Specify INFO tags in input VCF that denotes depth/allelic fraction in tumor and normal sample
+## An additional tag that denotes call confidence (call_conf_tag) can also be specified, which will
+## be used for exploration in the global variant browser. Note that 'tumor_dp_tag' must be of
+## Type=Integer, and 'tumor_af_tag' must be of Type=Float (similarly for normal sample)
+tumor_dp_tag = ""
+tumor_af_tag = ""
+control_dp_tag = ""
+control_af_tag = ""
+call_conf_tag = ""
+
+## set thresholds for tumor depth/allelic fraction, will be applied before report generation
+## will only apply if 'tumor_dp_tag' and 'tumor_af_tag' are specified above
+tumor_dp_min = 0
+tumor_af_min = 0.0
+control_dp_min = 0
+control_af_max = 1.0
+
+[mutational_burden]
+## Calculate mutational burden (similar to Chalmers et al., Genome Med, 2017)
+mutational_burden = true
+## Size of coding target region in megabases (defaults to exome ~ 36 Mb)
+## Note: this should ideally denote the callable target size (i.e. reflecting variable
+## sequencing depth)
+target_size_mb = 34.0
+## set upper limits to tumor mutational burden tertiles (mutations/Mb)
+tmb_low_limit = 5
+tmb_intermediate_limit = 20
+## tmb_high = tmb > tmb_intermediate_limit
+
+[cna]
+## log ratio thresholds for determination of copy number gains and homozygous deletions
+logR_gain = 0.8
+logR_homdel = -0.8
+
+## mean percent overlap between copy number segment and gene transcripts for reporting of gains/losses in tumor suppressor genes/oncogenes
+cna_overlap_pct = 50
+
+[msi]
+## Predict microsatellite instability
+msi = true
+
+[mutational_signatures]
+## Identify relative contribution of 30 known mutational signatures (COSMIC) through the deconstructSigs framework
+mutsignatures = true
+## deconstructSigs option: number of mutational signatures to limit the search to ('signatures.limit' in whichSignatures)
+mutsignatures_signature_limit = 6
+## deconstructSigs option: type of trimer count normalization for inference of known mutational signatures, see explanation at https://github.com/raerose01/deconstructSigs"
+## options = 'default', 'exome', 'genome', 'exome2genome'
+## NOTE: If your data (VCF) is from exome sequencing, 'default' or 'exome2genome' should be used. See https://github.com/raerose01/deconstructSigs/issues/2
+mutsignatures_normalization = "default"
+## Require a minimum number of mutations for signature estimation
+mutsignatures_mutation_limit = 100
+## deconstructSigs option: discard any signature contributions with a weight less than this amount
+mutsignatures_cutoff = 0.06
+
+[visual]
+## Choose visual theme of report, any of: "default", "cerulean", "journal", "flatly", "readable", "spacelab", "united", "cosmo", "lumen", "paper", "sandstone", "simplex", or "yeti" (https://bootswatch.com/)
+report_theme = "default"
+
+[custom_tags]
+## list VCF info tags that should be present in JSON and TSV output
+## tags should be comma separated, i.e. custom_tags = "MUTECT2_FILTER,STRELKA_FILTER"
+custom_tags = ""
+
+[other]
+## Keep/skip VCF validation by https://github.com/EBIvariation/vcf-validator. The vcf-validator checks
+## that the input VCF is properly encoded. Since the vcf-validator is strict, and with error messages
+## that is not always self-explanatory, the users can skip validation if they are confident that the
+## most critical parts of the VCF are properly encoded
+vcf_validation = true
+## list/do not list noncoding variants
+list_noncoding = true
+## VEP/vcfanno processing options
+n_vcfanno_proc = 4
+n_vep_forks = 4
+## Customise the order of criteria used to pick the primary transcript in VEP (see https://www.ensembl.org/info/docs/tools/vep/script/vep_options.html#opt_pick_order)
+vep_pick_order = "canonical,appris,biotype,ccds,rank,tsl,length"
+## omit intergenic variants during VEP processing
+vep_skip_intergenic = false
+## generate a MAF for input VCF using https://github.com/mskcc/vcf2maf
+vcf2maf = true
+
+[tumor_type]
+type = "Biliary_Tract_Cancer_NOS" 
