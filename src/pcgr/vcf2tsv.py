@@ -6,7 +6,7 @@ import numpy as np
 import re
 import subprocess
 
-version = '0.3.3'
+version = '0.3.4'
 
 
 def __main__():
@@ -65,29 +65,37 @@ def vcf2tsv(query_vcf, out_tsv, skip_info_data, skip_genotype_data, keep_rejecte
                else:
                   gt_present_header = 1
 
-   header_line = '\t'.join(fixed_columns_header)
+   #header_line = '\t'.join(fixed_columns_header)
+   header_tags = fixed_columns_header
    if skip_info_data is False:
-      header_line = '\t'.join(fixed_columns_header) + '\t' + '\t'.join(sorted(info_columns_header))
+      #header_line = '\t'.join(fixed_columns_header) + '\t' + '\t'.join(sorted(info_columns_header))
+      header_tags = fixed_columns_header + sorted(info_columns_header)
       if len(sample_columns_header) > 0:
          if skip_genotype_data is False:
-            header_line = '\t'.join(fixed_columns_header) + '\t' + '\t'.join(sorted(info_columns_header)) + '\t' + '\t'.join(sample_columns_header) + '\t' + '\t'.join(sorted(format_columns_header)) + '\tGT'
+            #header_line = '\t'.join(fixed_columns_header) + '\t' + '\t'.join(sorted(info_columns_header)) + '\t' + '\t'.join(sample_columns_header) + '\t' + '\t'.join(sorted(format_columns_header)) + '\tGT'
+            header_tags = fixed_columns_header + sorted(info_columns_header) + sample_columns_header + sorted(format_columns_header) + ['GT']
          else:
-            header_line = '\t'.join(fixed_columns_header) + '\t' + '\t'.join(sorted(info_columns_header))
+            #header_line = '\t'.join(fixed_columns_header) + '\t' + '\t'.join(sorted(info_columns_header))
+            header_tags = fixed_columns_header + sorted(info_columns_header)
    else:
       if len(sample_columns_header) > 0:
          if skip_genotype_data is False:
-            header_line = '\t'.join(fixed_columns_header) + '\t' + '\t'.join(sample_columns_header) + '\t' + '\t'.join(sorted(format_columns_header)) + '\tGT'
+            #header_line = '\t'.join(fixed_columns_header) + '\t' + '\t'.join(sample_columns_header) + '\t' + '\t'.join(sorted(format_columns_header)) + '\tGT'
+            header_tags = fixed_columns_header + sample_columns_header + sorted(format_columns_header) + ['GT']
          else:
-            header_line = '\t'.join(fixed_columns_header)
-            
+            #header_line = '\t'.join(fixed_columns_header)
+            header_tags = fixed_columns_header
+   header_line = '\t'.join(header_tags)
+   
    out.write('#https://github.com/sigven/vcf2tsv version=' + str(version) + '\n')
    if print_data_type_header is True:
-      header_tags = header_line.rstrip().split('\t')
+      #header_tags = header_line.rstrip().split('\t')
       header_types = []
       for h in header_tags:
          if h in column_types:
             header_types.append(str(column_types[h]))
-      header_line_type = '\t'.join(fixed_columns_header_type) + '\t' + '\t'.join(header_types)
+      #header_line_type = '\t'.join(fixed_columns_header_type) + '\t' + '\t'.join(header_types)
+      header_line_type = '\t'.join(fixed_columns_header_type + header_types)
       out.write('#' + str(header_line_type) + '\n')
       out.write(str(header_line) + '\n')
    else:
@@ -154,7 +162,7 @@ def vcf2tsv(query_vcf, out_tsv, skip_info_data, skip_genotype_data, keep_rejecte
                               vcf_info_data.append(str(variant_info.get(info_field)))
                            else:
                               print('vcf2tsv.py WARNING:\tINFO tag ' + str(info_field) + ' is defined in the VCF header as type \'Integer\', yet parsed as other type:' + str(type(variant_info.get(info_field))))
-                              vcf_info_data.append(re.sub('\(|\)', '', variant_info.get(info_field).encode('ascii','ignore').decode('ascii')))
+                              vcf_info_data.append(re.sub(r'\(|\)', '', variant_info.get(info_field).encode('ascii','ignore').decode('ascii')))
 
       #print(str(vcf_info_data))
       #dictionary, with sample names as keys, values being genotype data (dictionary with format tags as keys)
