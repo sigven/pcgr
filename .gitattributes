@@ -1,2 +1,2 @@
-docs/_build/html/* linguist-documentation=true
+*.html linguist-documentation
 src/R/pcgrr/inst/templates/*.bib linguist-vendored=true
