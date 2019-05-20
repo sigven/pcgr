@@ -186,7 +186,7 @@ RUN apt-get update && apt-get install apt-transport-https
 RUN sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
 RUN sudo apt-get update \
    && sudo apt-get -y install software-properties-common
-  
+
 ENV TZ=Europe/Minsk
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
@@ -223,7 +223,7 @@ RUN cd samtools-1.9 && ./configure --prefix=/usr/local/bin && make && make insta
 
 WORKDIR /
 
-RUN R -e "install.packages(c('BiocManager','devtools'))" 
+RUN R -e "install.packages(c('BiocManager','devtools'))"
 RUN R -e "BiocManager::install(\"ComplexHeatmap\")"
 RUN R -e "BiocManager::install(\"VariantAnnotation\")"
 RUN R -e "BiocManager::install(\"Biostrings\")"
@@ -275,7 +275,6 @@ RUN wget https://github.com/stevengj/nlopt/archive/v2.5.0.tar.gz \
     && cmake . \
 		&& make \
 		&& make install
-
 
 USER root
 WORKDIR /
@@ -334,7 +333,6 @@ ADD pcgr.R /
 ADD cpsr.R /
 
 USER root
-WORKDIR /
 WORKDIR /
 
 RUN rm -f nlopt-2.5.0.tar.gz
