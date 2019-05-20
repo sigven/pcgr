@@ -1,5 +1,0 @@
-<br><br>
-![FACETS CNA profile](`r cna_plot_png`)
-<br>
-
-The top panel of the figure displays __logR__ with chromosomes alternating in blue and gray. The green line indicates the median logR in the sample. The purple line indicates the logR of the diploid state. The second panel displays __logOR__. Segment means are plotted in red lines. The third panel plots the total (black, __cnTotal__) and minor (red, __cnMinor__) copy number for each segment. The bottom bar shows the associated cellular fraction (__cf__), revealing clonal and subclonal copy number events. Dark blue indicates high cellular fraction, light blue indicates low cellular fraction. Beige indicates a normal segment (total=2,minor=1).

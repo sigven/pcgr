@@ -1,18 +1,18 @@
 ## MSI status
 
-Microsatellite instability (MSI) is the result of impaired DNA mismatch repair and constitutes a cellular phenotype of clinical significance in many cancer types, most prominently colorectal cancers, stomach cancers, endometrial cancers, and ovarian cancers ([Cortes-Ciriano et al., 2017](https://www.ncbi.nlm.nih.gov/pubmed/28585546)). We have built a statistical MSI classifier from somatic mutation profiles that separates _MSI.H_ (MSI-high) from _MSS_ (MS stable) tumors. The MSI classifier was trained using 999 exome-sequenced TCGA tumor samples with known MSI status (i.e. assayed from mononucleotide markers), and obtained a [positive predictive value](https://en.wikipedia.org/wiki/Positive_and_negative_predictive_values#Positive_predictive_value) of 100.0% and a [negative predictive value](https://en.wikipedia.org/wiki/Positive_and_negative_predictive_values#Negative_predictive_value) of 98.8% on an independent test set of 427 samples. Details of the MSI classification approach can be found <a href="http://rpubs.com/sigven/msi2018" target="_blank">here</a>.
+Microsatellite instability (MSI) is the result of impaired DNA mismatch repair and constitutes a cellular phenotype of clinical significance in many cancer types, most prominently colorectal cancers, stomach cancers, endometrial cancers, and ovarian cancers ([Cortes-Ciriano et al., 2017](https://www.ncbi.nlm.nih.gov/pubmed/28585546)). We have built a statistical MSI classifier from somatic mutation profiles that separates _MSI.H_ (MSI-high) from _MSS_ (MS stable) tumors. The MSI classifier was trained using 999 exome-sequenced TCGA tumor samples with known MSI status (i.e. assayed from mononucleotide markers), and obtained a [positive predictive value](https://en.wikipedia.org/wiki/Positive_and_negative_predictive_values#Positive_predictive_value) of 98.9% and a [negative predictive value](https://en.wikipedia.org/wiki/Positive_and_negative_predictive_values#Negative_predictive_value) of 98.8% on an independent test set of 427 samples. Details of the MSI classification approach can be found <a href="http://rpubs.com/sigven/msi_classification_v3" target="_blank">here</a>.
 
 <br>
 
-* _Predicted MSI status for `r pcg_report$sample_name`_: __`r pcg_report[['msi']][['prediction']][['msi_stats']][['predicted_class']]`__
+* _Predicted MSI status for `r pcg_report$metadata$sample_name`_: __`r pcg_report[['content']][['msi']][['prediction']][['msi_stats']][['predicted_class']]`__
 
 ### Supporting evidence: indel fraction among somatic calls
 
-The plot below illustrates the fraction of indels among all calls in _`r pcg_report$sample_name`_ (black dashed line) along with the distribution of indel fractions for TCGA samples (colorectal, endometrial, ovarian, stomach) with known MSI status assayed from mononucleotide markers ( _MSI.H_ = high microsatellite instability, _MSS_ = microsatellite stable):
+The plot below illustrates the fraction of indels among all calls in _`r pcg_report$metadata$sample_name`_ (black dashed line) along with the distribution of indel fractions for TCGA samples (colorectal, endometrial, ovarian, stomach) with known MSI status assayed from mononucleotide markers ( _MSI.H_ = high microsatellite instability, _MSS_ = microsatellite stable):
 
 ```{r msi_indelfrac_plot, echo = F, fig.width=12, fig.height=6}
 htmltools::br()
-p <- pcgrr::msi_indel_fraction_plot(pcg_report[['msi']][['prediction']][['tcga_dataset']], pcg_report[['msi']][['prediction']][['msi_stats']][['fracIndels']])
+p <- pcgrr::msi_indel_fraction_plot(pcg_report[['content']][['msi']][['prediction']][['tcga_dataset']], pcg_report[['content']][['msi']][['prediction']][['msi_stats']][['fracIndels']])
 p
 
 htmltools::br()
@@ -23,8 +23,8 @@ htmltools::br()
 
 <br>
 ```{r msi_gene_variants, echo=F, results='asis'}
-if(NROW(pcg_report[['msi']][['prediction']][['mmr_pol_variants']]) > 0){
-  DT::datatable(pcg_report[['msi']][['prediction']][['mmr_pol_variants']], escape=F,extensions=c("Buttons","Responsive"), width = "100%",options=list(buttons = c('csv','excel'),dom = 'Bfrtip'))
+if(NROW(pcg_report[['content']][['msi']][['prediction']][['mmr_pol_variants']]) > 0){
+  DT::datatable(pcg_report[['content']][['msi']][['prediction']][['mmr_pol_variants']], escape=F,extensions=c("Buttons","Responsive"), width = "100%",options=list(buttons = c('csv','excel'),dom = 'Bfrtip'))
 }else{
   cat('<i>No variants found.</i>',sep='\n')
   cat('\n')

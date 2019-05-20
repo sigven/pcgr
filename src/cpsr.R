@@ -18,12 +18,22 @@ sample_name <- as.character(args[3])
 configuration_file <- as.character(args[4])
 version <- as.character(args[5])
 genome_assembly <- as.character(args[6])
-data_dir <- as.character(args[7])
+virtual_panel_id <- as.integer(args[7])
+data_dir <- as.character(args[8])
 
 rlogging::SetTimeStampFormat(ts.format="%Y-%m-%d %H:%M:%S ")
 rlogging::SetLogFile(NULL)
 
-load(paste0(data_dir,'/data/',genome_assembly,'/rda/pcgr_data.rda'))
+pcgr_data <- readRDS(paste0(data_dir,'/data/',genome_assembly,'/rds/pcgr_data.rds'))
+
+pcgr_data[['assembly']][['seqinfo']] <- 
+   GenomeInfoDb::Seqinfo(seqnames = GenomeInfoDb::seqlevels(GenomeInfoDb::seqinfo(BSgenome.Hsapiens.UCSC.hg38)), seqlengths = GenomeInfoDb::seqlengths(GenomeInfoDb::seqinfo(BSgenome.Hsapiens.UCSC.hg38)), genome = 'hg38')
+pcgr_data[['assembly']][['bsg']] <- BSgenome.Hsapiens.UCSC.hg38
+if(genome_assembly == 'grch37'){
+  pcgr_data[['assembly']][['bsg']] <- BSgenome.Hsapiens.UCSC.hg19
+  pcgr_data[['assembly']][['seqinfo']] <- 
+     GenomeInfoDb::Seqinfo(seqnames = GenomeInfoDb::seqlevels(GenomeInfoDb::seqinfo(BSgenome.Hsapiens.UCSC.hg19)), seqlengths = GenomeInfoDb::seqlengths(GenomeInfoDb::seqinfo(BSgenome.Hsapiens.UCSC.hg19)), genome = 'hg19')
+}
 
 cpsr_config <- NULL
 default_configuration_file <- paste0(data_dir,'/data/',genome_assembly,'/cpsr_configuration_default.toml')
@@ -43,4 +53,7 @@ for(section in names(cpsr_config)){
   }
 }
 
-pcgrr::generate_predisposition_report(dir, query_vcf2tsv, pcgr_data, cpsr_config, sample_name, version, genome_assembly = genome_assembly)
+cps_report <- pcgrr::generate_predisposition_report(dir, query_vcf2tsv, pcgr_data, cpsr_config, virtual_panel_id, sample_name)
+pcgrr::write_report(dir, cps_report, sample_name, genome_assembly, tier_model = "cpsr", format = 'html')
+pcgrr::write_report(dir, cps_report, sample_name, genome_assembly, tier_model = "cpsr", format = 'json')
+

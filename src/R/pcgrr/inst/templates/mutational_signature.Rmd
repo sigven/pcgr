@@ -5,16 +5,16 @@ The set of somatic mutations observed in a tumor reflects the varied mutational 
 
 Here, we apply the [deconstructSigs package](https://github.com/raerose01/deconstructSigs) ([Rosenthal et al., 2013](https://www.ncbi.nlm.nih.gov/pubmed/26899170)) to delineate the known mutational signatures in a single tumor. This package compares the patterns of mutations observed in a single tumor with a large set of estimated signatures found across tumor types ([Alexandrov et al., 2013](https://www.ncbi.nlm.nih.gov/pubmed/27496093), [Alexandrov et al., 2013](https://www.ncbi.nlm.nih.gov/pubmed/23945592)). 
 
-A total of __n = `r nrow(pcg_report[['m_signature']][['variant_set']]$all)`__ SNVs were used for the mutational signature analysis of this tumor.
+A total of __n = `r nrow(pcg_report[['content']][['m_signature']][['variant_set']]$all)`__ SNVs were used for the mutational signature analysis of this tumor.
 
 Given an input tumor profile and reference input signatures (i.e. [30 mutational signatures detected by Sanger/COSMIC](http://cancer.sanger.ac.uk/cosmic/signatures)), deconstructSigs iteratively infers the weighted contributions of each reference signature until an empirically chosen error threshold is reached. In the plots below, the _top panel_ is the tumor mutational profile displaying the fraction of mutations found in each trinucleotide context, the _middle panel_ is the reconstructed mutational profile created by multiplying the calculated weights by the signatures, and the _bottom panel_ is the error between the tumor mutational profile and reconstructed mutational profile. The piechart shows the relative contribution of each signature in the sample.
 
 ```{r sigplot, echo=F, fig.width=12,fig.height = 12, dpi=200}
-deconstructSigs::plotSignatures(pcg_report[['m_signature']][['result']]$deconstructsigs_which_signatures)
+deconstructSigs::plotSignatures(pcg_report[['content']][['m_signature']][['result']]$deconstructsigs_which_signatures)
 ```
 
 ```{r sigpie, echo=F, fig.width=12,fig.height = 6, dpi=200}
-deconstructSigs::makePie(pcg_report[['m_signature']][['result']]$deconstructsigs_which_signatures)
+deconstructSigs::makePie(pcg_report[['content']][['m_signature']][['result']]$deconstructsigs_which_signatures)
 ```
 
 
@@ -25,6 +25,6 @@ deconstructSigs::makePie(pcg_report[['m_signature']][['result']]$deconstructsigs
 <br>
 ```{r aetiologies, echo=F}
 myOptions <- list(paging = F,pageLength=10, searching=F,caching=F,buttons = c('csv','excel'),dom = 'Bfrtip')
-DT::datatable(pcg_report[['m_signature']][['result']]$cancertypes_aetiologies,options = myOptions,extensions=c("Buttons","Responsive"))
+DT::datatable(pcg_report[['content']][['m_signature']][['result']]$cancertypes_aetiologies,options = myOptions,extensions=c("Buttons","Responsive"))
 ```
 <br>

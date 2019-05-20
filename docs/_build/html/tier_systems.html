@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Tier models &mdash; Personal Cancer Genome Reporter dev documentation</title>
+  <title>Tier models &mdash; Personal Cancer Genome Reporter 0.8.0 documentation</title>
   
 
   
@@ -59,7 +59,7 @@
             
             
               <div class="version">
-                dev
+                0.8.0
               </div>
             
           
@@ -91,8 +91,7 @@
 <li class="toctree-l1"><a class="reference internal" href="input.html">Input</a></li>
 <li class="toctree-l1"><a class="reference internal" href="output.html">Output</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Tier models</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#tier-model-1-pcgr">Tier model 1 - <em>pcgr</em></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#tier-model-2-pcgr-acmg">Tier model 2 - <em>pcgr_acmg</em></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tier-model-1-pcgr-acmg">Tier model 1 - <em>pcgr_acmg</em></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="CHANGELOG.html">CHANGELOG</a></li>
@@ -162,31 +161,19 @@
             
   <div class="section" id="tier-models">
 <h1>Tier models<a class="headerlink" href="#tier-models" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="tier-model-1-pcgr">
-<h2>Tier model 1 - <em>pcgr</em><a class="headerlink" href="#tier-model-1-pcgr" title="Permalink to this headline">¶</a></h2>
-<p>This tier model is inspired by recommended variant prioritization by
-<a class="reference external" href="https://www.ncbi.nlm.nih.gov/pubmed/24768039">Dienstmann et al.,
-2014</a>:</p>
-<ul class="simple">
-<li><em>Tier 1</em> - constitutes variants linked to <em>any</em> predictive,
-prognostic, or diagnostic biomarkers in the <a class="reference external" href="http://civic.genome.wustl.edu">CIViC
-database</a> and the <a class="reference external" href="https://www.cancergenomeinterpreter.org/biomarkers">Cancer
-Biomarkers
-Database</a></li>
-<li><em>Tier 2</em> - includes other coding variants that are found in known
-cancer mutation hotspots, predicted as cancer driver mutations, or
-curated as disease-causing</li>
-<li><em>Tier 3</em> - includes other coding variants found in oncogenes or tumor
-suppressor genes</li>
-<li><em>Tier 4</em> - includes other coding variants</li>
-</ul>
-<p>For <strong>copy number aberrations</strong>, aberrations linked to Tier 1 are
-displayed (within the section entitled <em>Copy number aberrations as
-biomarkers for prognosis, diagnosis, and drug response</em> in the HTML
-report)</p>
-</div>
-<div class="section" id="tier-model-2-pcgr-acmg">
-<h2>Tier model 2 - <em>pcgr_acmg</em><a class="headerlink" href="#tier-model-2-pcgr-acmg" title="Permalink to this headline">¶</a></h2>
+<!--
+### Tier model 1 - *pcgr*
+
+This tier model is inspired by recommended variant prioritization by [Dienstmann et al., 2014](https://www.ncbi.nlm.nih.gov/pubmed/24768039):
+
+- _Tier 1_ - constitutes variants linked to *any* predictive, prognostic, or diagnostic biomarkers in the [CIViC database](http://civic.genome.wustl.edu) and the [Cancer Biomarkers Database](https://www.cancergenomeinterpreter.org/biomarkers)
+- _Tier 2_ - includes other coding variants that are found in known cancer mutation hotspots, predicted as cancer driver mutations, or curated as disease-causing
+- _Tier 3_ - includes other coding variants found in oncogenes or tumor suppressor genes
+- _Tier 4_ - includes other coding variants
+
+For **copy number aberrations**, aberrations linked to Tier 1 are displayed (within the section entitled *Copy number aberrations as biomarkers for prognosis, diagnosis, and drug response* in the HTML report)
+--><div class="section" id="tier-model-1-pcgr-acmg">
+<h2>Tier model 1 - <em>pcgr_acmg</em><a class="headerlink" href="#tier-model-1-pcgr-acmg" title="Permalink to this headline">¶</a></h2>
 <p>This tier model attempts to adopt concensus recommendations by ACMG, as
 outlined in <a class="reference external" href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5707196/">Li et al.,
 2017</a>:</p>
@@ -250,7 +237,7 @@ clinical significance</em> (Tier 2)</li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017/2018, Sigve Nakken.
+        &copy; Copyright 2017-2019, Sigve Nakken.
 
     </p>
   </div>
@@ -272,7 +259,7 @@ clinical significance</em> (Tier 2)</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'dev',
+            VERSION:'0.8.0',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',

@@ -1,24 +1,24 @@
 ### Tier & variant statistics
 
-* Number of SNVs: __`r pcg_report[['snv_indel']][['variant_statistic']][['n_snv']]`__
-* Number of InDels: __`r pcg_report[['snv_indel']][['variant_statistic']][['n_indel']]`__
-* Number of protein-coding variants: __`r pcg_report[['snv_indel']][['variant_statistic']][['n_coding']]`__
+* Number of SNVs: __`r pcg_report[['content']][['snv_indel']][['variant_statistic']][['n_snv']]`__
+* Number of InDels: __`r pcg_report[['content']][['snv_indel']][['variant_statistic']][['n_indel']]`__
+* Number of protein-coding variants: __`r pcg_report[['content']][['snv_indel']][['variant_statistic']][['n_coding']]`__
 
-The prioritization of SNV/InDels is here done according to a four-tiered structure, adopting the joint consensus recommendation by the ACMG [[@Li2017-ew]](https://www.ncbi.nlm.nih.gov/pubmed/27993330).
+The prioritization of SNV/InDels is here done according to a four-tiered structure, adopting the joint consensus recommendation by AMP/ACMG [[@Li2017-ew]](https://www.ncbi.nlm.nih.gov/pubmed/27993330).
 
-* Tier 1 - variants of strong clinical significance: __`r pcg_report[['snv_indel']][['variant_statistic']][['n_tier1']]`__
-* Tier 2 - variants of potential clinical significance: __`r pcg_report[['snv_indel']][['variant_statistic']][['n_tier2']]`__
-* Tier 3 - variants of unknown clinical significance: __`r pcg_report[['snv_indel']][['variant_statistic']][['n_tier3']]`__
-* Tier 4 - other coding variants: __`r pcg_report[['snv_indel']][['variant_statistic']][['n_tier4']]`__
-* Noncoding variants: __`r pcg_report[['snv_indel']][['variant_statistic']][['n_noncoding']]`__
+* Tier 1 - variants of strong clinical significance: __`r pcg_report[['content']][['snv_indel']][['variant_statistic']][['n_tier1']]`__
+* Tier 2 - variants of potential clinical significance: __`r pcg_report[['content']][['snv_indel']][['variant_statistic']][['n_tier2']]`__
+* Tier 3 - variants of unknown clinical significance: __`r pcg_report[['content']][['snv_indel']][['variant_statistic']][['n_tier3']]`__
+* Tier 4 - other coding variants: __`r pcg_report[['content']][['snv_indel']][['variant_statistic']][['n_tier4']]`__
+* Noncoding variants: __`r pcg_report[['content']][['snv_indel']][['variant_statistic']][['n_noncoding']]`__
 
 <br><br>
 
 
 ```{r vaf_plot_prep, echo=F}
 tumor_af_plot <- F
-if(NROW(pcg_report[['snv_indel']][['variant_set']][['tsv']]) > 0){
-  if(NROW(dplyr::filter(pcg_report[['snv_indel']][['variant_set']][['tsv']], !is.na(DP_TUMOR))) > 0 & NROW(dplyr::filter(pcg_report[['snv_indel']][['variant_set']][['tsv']], !is.na(AF_TUMOR))) > 0){
+if(NROW(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']]) > 0){
+  if(NROW(dplyr::filter(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']], !is.na(DP_TUMOR))) > 0 & NROW(dplyr::filter(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']], !is.na(AF_TUMOR))) > 0){
     tumor_af_plot <- T
   }
 }
@@ -32,7 +32,7 @@ cat('<h3>Global distribution - allelic support</h3>',sep="\n")
 
 
 ```{r tumor_allelic_support, echo = F, fig.width=10, fig.height=7, eval=tumor_af_plot}
-histplot <- pcgrr::tier_af_distribution(pcg_report[['snv_indel']][['variant_set']][['tsv']])
+histplot <- pcgrr::tier_af_distribution(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']])
 plotly::ggplotly(histplot)
 htmltools::br()
 ```
@@ -58,19 +58,15 @@ table_browse_tumor_dp_af_normal_dp_af <- F
 table_browse_tumor_dp_af_normal_dp_af_CC <- F
 reduced_table_set <- F
 
-if(NROW(pcg_report[['snv_indel']][['variant_set']][['tsv']]) > 0){
+if(NROW(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']]) > 0){
   table_browse_basic <- T
-  #if(NROW(pcg_report[['snv_indel']][['variant_set']][['tsv']]) > 5000){
-    #pcg_report[['snv_indel']][['variant_set']][['tsv']] <- head(pcg_report[['snv_indel']][['variant_set']][['tsv']],5000)
-  #}
-  #reduced_table_set 
 
-  if(NROW(dplyr::filter(pcg_report[['snv_indel']][['variant_set']][['tsv']], !is.na(CALL_CONFIDENCE))) > 0){
+  if(NROW(dplyr::filter(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']], !is.na(CALL_CONFIDENCE))) > 0){
     table_browse_basic_CC <- T
     table_browse_basic <- F
   }
   
-  if(NROW(dplyr::filter(pcg_report[['snv_indel']][['variant_set']][['tsv']], !is.na(DP_TUMOR))) > 0 & NROW(dplyr::filter(pcg_report[['snv_indel']][['variant_set']][['tsv']], !is.na(AF_TUMOR))) > 0){
+  if(NROW(dplyr::filter(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']], !is.na(DP_TUMOR))) > 0 & NROW(dplyr::filter(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']], !is.na(AF_TUMOR))) > 0){
     table_browse_tumor_dp_af <- T
     if(table_browse_basic_CC == T){
       table_browse_tumor_dp_af_CC <- T
@@ -80,7 +76,7 @@ if(NROW(pcg_report[['snv_indel']][['variant_set']][['tsv']]) > 0){
     table_browse_basic <- F
   }
   
-  if((table_browse_tumor_dp_af == T | table_browse_tumor_dp_af_CC == T) & NROW(dplyr::filter(pcg_report[['snv_indel']][['variant_set']][['tsv']], !is.na(DP_NORMAL))) > 0 & NROW(dplyr::filter(pcg_report[['snv_indel']][['variant_set']][['tsv']], !is.na(AF_NORMAL))) > 0){
+  if((table_browse_tumor_dp_af == T | table_browse_tumor_dp_af_CC == T) & NROW(dplyr::filter(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']], !is.na(DP_CONTROL))) > 0 & NROW(dplyr::filter(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']], !is.na(AF_CONTROL))) > 0){
     table_browse_tumor_dp_af <- F
     table_browse_basic <- F
     table_browse_tumor_dp_af_normal_dp_af <- T
@@ -101,7 +97,7 @@ if(NROW(pcg_report[['snv_indel']][['variant_set']][['tsv']]) > 0){
 library(crosstalk)
 library(summarywidget)
 
-vars <- pcg_report[['snv_indel']][['variant_set']][['tsv']] %>% dplyr::select(SYMBOL, CONSEQUENCE, PROTEIN_CHANGE, VARIANT_CLASS, TIER, GENOMIC_CHANGE, GENOME_VERSION, CALL_CONFIDENCE, DP_TUMOR, AF_TUMOR, DP_NORMAL, AF_NORMAL)
+vars <- pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']] %>% dplyr::select(SYMBOL, CONSEQUENCE, PROTEIN_CHANGE, VARIANT_CLASS, TIER, GENOMIC_CHANGE, GENOME_VERSION, CALL_CONFIDENCE, DP_TUMOR, AF_TUMOR, DP_CONTROL, AF_CONTROL)
 vars$CONSEQUENCE <- stringr::str_replace_all(vars$CONSEQUENCE,"&",",")
 variants_shared <- crosstalk::SharedData$new(vars)
   
@@ -128,7 +124,7 @@ crosstalk::bscols(
 library(crosstalk)
 library(summarywidget)
 
-vars <- pcg_report[['snv_indel']][['variant_set']][['tsv']] %>% dplyr::select(SYMBOL, CONSEQUENCE, PROTEIN_CHANGE, VARIANT_CLASS, TIER, GENOMIC_CHANGE, GENOME_VERSION, CALL_CONFIDENCE, DP_TUMOR, AF_TUMOR, DP_NORMAL, AF_NORMAL)
+vars <- pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']] %>% dplyr::select(SYMBOL, CONSEQUENCE, PROTEIN_CHANGE, VARIANT_CLASS, TIER, GENOMIC_CHANGE, GENOME_VERSION, CALL_CONFIDENCE, DP_TUMOR, AF_TUMOR, DP_CONTROL, AF_CONTROL)
 vars$CONSEQUENCE <- stringr::str_replace_all(vars$CONSEQUENCE,"&",",")
 variants_shared <- crosstalk::SharedData$new(vars)
   
@@ -157,7 +153,7 @@ crosstalk::bscols(
 library(crosstalk)
 library(summarywidget)
 
-vars <- pcg_report[['snv_indel']][['variant_set']][['tsv']] %>% dplyr::select(SYMBOL, CONSEQUENCE, PROTEIN_CHANGE, VARIANT_CLASS, TIER, GENOMIC_CHANGE, GENOME_VERSION, CALL_CONFIDENCE, DP_TUMOR, AF_TUMOR, DP_NORMAL, AF_NORMAL) %>% dplyr::filter(!is.na(DP_TUMOR) & !is.na(AF_TUMOR))
+vars <- pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']] %>% dplyr::select(SYMBOL, CONSEQUENCE, PROTEIN_CHANGE, VARIANT_CLASS, TIER, GENOMIC_CHANGE, GENOME_VERSION, CALL_CONFIDENCE, DP_TUMOR, AF_TUMOR, DP_CONTROL, AF_CONTROL) %>% dplyr::filter(!is.na(DP_TUMOR) & !is.na(AF_TUMOR))
 vars$CONSEQUENCE <- stringr::str_replace_all(vars$CONSEQUENCE,"&",",")
 variants_shared <- crosstalk::SharedData$new(vars)
   
@@ -187,7 +183,9 @@ crosstalk::bscols(
 library(crosstalk)
 library(summarywidget)
 
-vars <- pcg_report[['snv_indel']][['variant_set']][['tsv']] %>% dplyr::select(SYMBOL, CONSEQUENCE, PROTEIN_CHANGE, VARIANT_CLASS, TIER, GENOMIC_CHANGE, GENOME_VERSION, CALL_CONFIDENCE, DP_TUMOR, AF_TUMOR, DP_NORMAL, AF_NORMAL) %>% dplyr::filter(!is.na(DP_TUMOR) & !is.na(AF_TUMOR))
+vars <- pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']] %>% 
+  dplyr::select(SYMBOL, CONSEQUENCE, PROTEIN_CHANGE, VARIANT_CLASS, TIER, GENOMIC_CHANGE, GENOME_VERSION, CALL_CONFIDENCE, DP_TUMOR, AF_TUMOR, DP_CONTROL, AF_CONTROL) %>% 
+  dplyr::filter(!is.na(DP_TUMOR) & !is.na(AF_TUMOR))
 vars$CONSEQUENCE <- stringr::str_replace_all(vars$CONSEQUENCE,"&",",")
 variants_shared <- crosstalk::SharedData$new(vars)
   
@@ -218,7 +216,7 @@ crosstalk::bscols(
 library(crosstalk)
 library(summarywidget)
 
-vars <- pcg_report[['snv_indel']][['variant_set']][['tsv']] %>% dplyr::select(SYMBOL, CONSEQUENCE, PROTEIN_CHANGE, VARIANT_CLASS, TIER, GENOMIC_CHANGE, GENOME_VERSION, CALL_CONFIDENCE, DP_TUMOR, AF_TUMOR, DP_NORMAL, AF_NORMAL) %>% dplyr::filter(!is.na(DP_TUMOR) & !is.na(AF_TUMOR) & !is.na(AF_NORMAL) & !is.na(DP_NORMAL))
+vars <- pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']] %>% dplyr::select(SYMBOL, CONSEQUENCE, PROTEIN_CHANGE, VARIANT_CLASS, TIER, GENOMIC_CHANGE, GENOME_VERSION, CALL_CONFIDENCE, DP_TUMOR, AF_TUMOR, DP_CONTROL, AF_CONTROL) %>% dplyr::filter(!is.na(DP_TUMOR) & !is.na(AF_TUMOR) & !is.na(AF_CONTROL) & !is.na(DP_CONTROL))
 vars$CONSEQUENCE <- stringr::str_replace_all(vars$CONSEQUENCE,"&",",")
 variants_shared <- crosstalk::SharedData$new(vars)
   
@@ -230,8 +228,8 @@ crosstalk::bscols(
   ),
   list(
     crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_shared, ~CONSEQUENCE),
-    crosstalk::filter_slider("DP_NORMAL", "Sequencing depth control", variants_shared, ~DP_NORMAL, sep=F, ticks = F),
-    pcgrr::filter_slider_allelic_fraction("AF_NORMAL", "Allelic fraction control", variants_shared, ~AF_NORMAL, step=0.05, sep=F, ticks = T)
+    crosstalk::filter_slider("DP_CONTROL", "Sequencing depth control", variants_shared, ~DP_CONTROL, sep=F, ticks = F),
+    pcgrr::filter_slider_allelic_fraction("AF_CONTROL", "Allelic fraction control", variants_shared, ~AF_CONTROL, step=0.05, sep=F, ticks = T)
   )
 )
   
@@ -249,7 +247,7 @@ crosstalk::bscols(
 library(crosstalk)
 library(summarywidget)
 
-vars <- pcg_report[['snv_indel']][['variant_set']][['tsv']] %>% dplyr::select(SYMBOL, CONSEQUENCE, PROTEIN_CHANGE, VARIANT_CLASS, TIER, GENOMIC_CHANGE, GENOME_VERSION, CALL_CONFIDENCE, DP_TUMOR, AF_TUMOR, DP_NORMAL, AF_NORMAL) %>% dplyr::filter(!is.na(DP_TUMOR) & !is.na(AF_TUMOR) & !is.na(AF_NORMAL) & !is.na(DP_NORMAL))
+vars <- pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']] %>% dplyr::select(SYMBOL, CONSEQUENCE, PROTEIN_CHANGE, VARIANT_CLASS, TIER, GENOMIC_CHANGE, GENOME_VERSION, CALL_CONFIDENCE, DP_TUMOR, AF_TUMOR, DP_CONTROL, AF_CONTROL) %>% dplyr::filter(!is.na(DP_TUMOR) & !is.na(AF_TUMOR) & !is.na(AF_CONTROL) & !is.na(DP_CONTROL))
 vars$CONSEQUENCE <- stringr::str_replace_all(vars$CONSEQUENCE,"&",",")
 variants_shared <- crosstalk::SharedData$new(vars)
   
@@ -262,8 +260,8 @@ crosstalk::bscols(
   list(
     crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_shared, ~CONSEQUENCE),
     crosstalk::filter_select("CALL_CONFIDENCE", "Call confidence", variants_shared, ~CALL_CONFIDENCE),
-    crosstalk::filter_slider("DP_NORMAL", "Sequencing depth control", variants_shared, ~DP_NORMAL, sep=F, ticks = F),
-    pcgrr::filter_slider_allelic_fraction("AF_NORMAL", "Allelic fraction control", variants_shared, ~AF_NORMAL, step=0.05, sep=F, ticks = T)
+    crosstalk::filter_slider("DP_CONTROL", "Sequencing depth control", variants_shared, ~DP_CONTROL, sep=F, ticks = F),
+    pcgrr::filter_slider_allelic_fraction("AF_CONTROL", "Allelic fraction control", variants_shared, ~AF_CONTROL, step=0.05, sep=F, ticks = T)
   )
 )
   

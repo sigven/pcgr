@@ -1,31 +1,14 @@
-## Settings & annotation sources
+## Settings
 
-The annotated variants are based on the following underlying tools and knowledge resources:
+The report is generated with _[cpsr](https://github.com/sigven/cpsr)_ version `r cps_report[['metadata']][['cpsr_version']]`, ( _[pcgr](https://github.com/sigven/pcgr)_ version `r cps_report[['metadata']][['pcgr_version']]`), using the following key settings:
 
-```{r list_resources, echo=F,results='asis'}
-for(n in names(cps_report$pcgr_db_release)){
-  if(n == 'vep' | n == 'gencode' | n == 'clinvar' | n == 'dbnsfp' | n == 'pfam' | n == 'gnomad' | n == 'cancerhotspots' | n == 'dbsnp' | n == 'onekg' | n == 'uniprot' | n == 'do' | n == 'gwas'){
-    s <- paste0('* [',cps_report$pcgr_db_release[[n]]$name,'](',cps_report$pcgr_db_release[[n]]$url,') - ',cps_report$pcgr_db_release[[n]]$description, ' (',cps_report$pcgr_db_release[[n]]$version,')')
-    cat(s,sep="\n")
-  }
-}
+* Genome assembly: __`r cps_report[['metadata']][['genome_assembly']]`__
+* Report theme (Bootstrap): __`r cps_report[['metadata']][['config']][['visual']][['report_theme']]`__
+* Control population gnomAD: __`r cps_report[['metadata']][['config']][['popgen']][['popdesc_gnomad']]`__
+* Upper MAF threshold in gnomAD for variants included in report:  __`r cps_report[['metadata']][['config']][['maf_limits']][['maf_gnomad']]`__
+* Show GWAS hits in report: __`r cps_report[['metadata']][['config']][['gwas']][['gwas_hits']]`__
+    * Minimum p-value for association: __`r cps_report[['metadata']][['config']][['gwas']][['p_value_min']]`__
+* Cancer predisposition geneset:
+   *  __[`r cps_report[['metadata']][['gene_panel']][['name']]`](`r cps_report[['metadata']][['gene_panel']][['url']]`)__ 
 
-```
-
-The report is generated with _[cpsr](https://github.com/sigven/cpsr)_ version `r cps_report[['pcgr_version']]`, using the following key settings:
-
-* Genome assembly: __`r cps_report[['genome_assembly']]`__
-* Report theme (Bootstrap): __`r cps_report[['cpsr_config']][['visual']][['report_theme']]`__
-* Control populations:
-    * 1000 Genomes Project (__`r cps_report[['cpsr_config']][['popgen']][['popdesc_tgp']]`__)
-    * gnomAD (__`r cps_report[['cpsr_config']][['popgen']][['popdesc_gnomad']]`__)
-* Minor allele frequency threshold (unclassified variants):
-    * 1000 Genomes Project (__`r cps_report[['cpsr_config']][['popgen']][['popdesc_tgp']]`__): __`r cps_report[['cpsr_config']][['maf_limits']][['maf_tgp']]`__
-    * gnomAD (__`r cps_report[['cpsr_config']][['popgen']][['popdesc_gnomad']]`__): __`r cps_report[['cpsr_config']][['maf_limits']][['maf_gnomad']]`__
-* Show GWAS hits in report: __`r cps_report[['cpsr_config']][['gwas']][['gwas_hits']]`__
-    * Minimum p-value for association: __`r cps_report[['cpsr_config']][['gwas']][['p_value_min']]`__
-* <i>Insilico</i> pathogenicity prediction - voting scheme for consensus call among eight algorithms within [dbNSFP](https://sites.google.com/site/jpopgen/dbNSFP):
-    * Minimum number of majority votes:  __`r cps_report[['cpsr_config']][['dbnsfp']][['min_majority']]`__
-    * Maximum number of minority votes:  __`r cps_report[['cpsr_config']][['dbnsfp']][['max_minority']]`__
-        * Variants affecting splice sites require that each of the two algorithms agree
 

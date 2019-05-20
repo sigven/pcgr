@@ -1,138 +1,110 @@
 #' Function that predicts MSI status based on fraction of indels among calls
 #'
 #' @param vcf_data_df data frame with somatic mutations/indels
-#' @param simpleRepeats_gr Genomic Ranges object with sequence repeats
-#' @param windowMasker_gr Genomic Ranges object with
+#' @param pcgr_data object with PCGR datasets
 #' @param msi_prediction_model statistical model for MSI prediction/classification
 #' @param msi_prediction_dataset underlying dataset from TCGA used for development of statistical classifier
 #' @param target_size_mb size of targeted genomic region (coding)
-#' @param bsg BSgenome data object in Biostrings objects (e.g. BSgenome.Hsapiens.UCSC.hg19)
-#' @param genome_assembly hg19/hg38
 #' @param sample_name name of sample
 #' @return msi_data
 #'
 #'
-predict_msi_status <- function(vcf_data_df, simpleRepeats_gr, windowMasker_gr, msi_prediction_model, msi_prediction_dataset, target_size_mb, bsg = BSgenome.Hsapiens.UCSC.hg19, genome_assembly = 'hg19',sample_name = 'Test'){
+predict_msi_status <- function(vcf_data_df, pcgr_data, msi_prediction_model, msi_prediction_dataset, target_size_mb, sample_name = 'Test'){
 
-  mutations_valid <- pcgrr::get_valid_chromosomes(vcf_data_df, chromosome_column = 'CHROM', bsg = bsg)
-  mutations_valid <- dplyr::select(mutations_valid, CHROM,POS,REF,ALT,CONSEQUENCE,SYMBOL,GENOMIC_CHANGE,VARIANT_CLASS,PROTEIN_DOMAIN,GENE_NAME,PROTEIN_CHANGE,PROTEIN_FEATURE,MUTATION_HOTSPOT,DOCM_DISEASE,DOCM_LITERATURE,CLINVAR,TCGA_FREQUENCY,CANCER_ASSOCIATIONS,AF_TUMOR, DP_TUMOR,AF_NORMAL,DP_NORMAL,CALL_CONFIDENCE)
-  seqinfo <- GenomeInfoDb::Seqinfo(seqnames = GenomeInfoDb::seqlevels(GenomeInfoDb::seqinfo(bsg)), seqlengths = GenomeInfoDb::seqlengths(GenomeInfoDb::seqinfo(bsg)), genome = genome_assembly)
-  vcf_df_gr <- GenomicRanges::makeGRangesFromDataFrame(mutations_valid, keep.extra.columns = T, seqinfo = seqinfo, seqnames.field = 'CHROM',start.field = 'POS', end.field = 'POS', ignore.strand = T, starts.in.df.are.0based = F)
+  mutations_valid <- pcgrr::get_valid_chromosomes(vcf_data_df, chromosome_column = 'CHROM', bsg = pcgr_data[['assembly']][['bsg']])
+  mutations_valid <- mutations_valid %>%
+    dplyr::select(CHROM,POS,REF,ALT,CONSEQUENCE,SYMBOL,GENOMIC_CHANGE,VARIANT_CLASS,PROTEIN_DOMAIN,
+                  GENE_NAME,PROTEIN_CHANGE,MUTATION_HOTSPOT,CLINVAR,TCGA_FREQUENCY,AF_TUMOR, DP_TUMOR,
+                  AF_CONTROL,DP_CONTROL,CALL_CONFIDENCE, SIMPLEREPEATS_HIT, WINMASKER_HIT)
 
-  variant_repeat_hits <- GenomicRanges::findOverlaps(vcf_df_gr, simpleRepeats_gr, type="any", select="all", ignore.strand = T)
-  ranges <- simpleRepeats_gr[subjectHits(variant_repeat_hits)]
-  mcols(ranges) <- c(mcols(ranges),mcols(vcf_df_gr[queryHits(variant_repeat_hits)]))
-  variants_in_repeats <- as.data.frame(mcols(ranges))
-
-  vcf_df_repeatAnnotated <- mutations_valid
-  vcf_df_repeatAnnotated$repeatStatus <- NA
-
-  ## a single variant may intersect overlapping repeats; make unique repeat variants
-  variants_in_repeats_unique <- dplyr::select(variants_in_repeats, GENOMIC_CHANGE) %>% dplyr::distinct()
-  if(nrow(variants_in_repeats_unique) > 0){
-    variants_in_repeats_unique$repeatStatus <- 'simpleRepeat'
-    vcf_df_repeatAnnotated <- dplyr::left_join(mutations_valid, variants_in_repeats_unique,by="GENOMIC_CHANGE")
-  }
-
-  variant_winmask_hits <- GenomicRanges::findOverlaps(vcf_df_gr, windowMasker_gr, type="any", select="all", ignore.strand = T)
-  ranges <- windowMasker_gr[subjectHits(variant_winmask_hits)]
-  mcols(ranges) <- c(mcols(ranges),mcols(vcf_df_gr[queryHits(variant_winmask_hits)]))
-  variants_in_winmask <- as.data.frame(mcols(ranges))
-
-  ## a single variant may intersect overlapping repeats; make unique repeat variants per patient tumor
-  variants_in_winmask_unique <- dplyr::select(variants_in_winmask, GENOMIC_CHANGE) %>% dplyr::distinct()
-  if(nrow(variants_in_winmask_unique) > 0){
-    variants_in_winmask_unique$winMaskStatus <- 'winMaskDust'
-    vcf_df_repeatAnnotated <- dplyr::left_join(vcf_df_repeatAnnotated, variants_in_winmask_unique,by="GENOMIC_CHANGE")
-  }
-  else{
-    vcf_df_repeatAnnotated$winMaskStatus <- NA
-  }
+  vcf_df_repeatAnnotated <- mutations_valid %>%
+    dplyr::mutate(repeatStatus = dplyr::if_else(SIMPLEREPEATS_HIT == T,"simpleRepeat",as.character(NA))) %>%
+    dplyr::mutate(winMaskStatus = dplyr::if_else(WINMASKER_HIT == T,"winMaskDust",as.character(NA)))
 
   msi_stats <- data.frame('sample_name' = sample_name, stringsAsFactors = F)
 
   msi_stats1 <- vcf_df_repeatAnnotated %>%
     dplyr::filter(!is.na(repeatStatus) & (VARIANT_CLASS == 'insertion' | VARIANT_CLASS == 'deletion')) %>%
-    dplyr::summarise(repeat_indels = n())
+    dplyr::summarise(repeat_indels = dplyr::n())
 
   msi_stats2 <- vcf_df_repeatAnnotated %>%
     dplyr::filter(!is.na(repeatStatus) & VARIANT_CLASS == 'SNV') %>%
-    dplyr::summarise(repeat_SNVs = n())
+    dplyr::summarise(repeat_SNVs = dplyr::n())
 
   msi_stats3 <- vcf_df_repeatAnnotated %>%
     dplyr::filter(!is.na(repeatStatus)) %>%
-    dplyr::summarise(repeat_indelSNVs = n())
+    dplyr::summarise(repeat_indelSNVs = dplyr::n())
 
   winmask_indels <- vcf_df_repeatAnnotated %>%
     dplyr::filter(!is.na(winMaskStatus) & (VARIANT_CLASS == 'insertion' | VARIANT_CLASS == 'deletion')) %>%
-    dplyr::summarise(winmask_indels = n())
+    dplyr::summarise(winmask_indels = dplyr::n())
 
   winmask_snvs <- vcf_df_repeatAnnotated %>%
     dplyr::filter(!is.na(winMaskStatus) & VARIANT_CLASS == 'SNV') %>%
-    dplyr::summarise(winmask_SNVs = n())
+    dplyr::summarise(winmask_SNVs = dplyr::n())
 
   winmask_tot <- vcf_df_repeatAnnotated %>%
     dplyr::filter(!is.na(winMaskStatus)) %>%
-    dplyr::summarise(winmask_indelSNVs = n())
+    dplyr::summarise(winmask_indelSNVs = dplyr::n())
 
   msi_stats4 <- vcf_df_repeatAnnotated %>%
     dplyr::filter(is.na(repeatStatus) & (VARIANT_CLASS == 'insertion' | VARIANT_CLASS == 'deletion')) %>%
-    dplyr::summarise(nonRepeat_indels = n())
+    dplyr::summarise(nonRepeat_indels = dplyr::n())
 
   msi_stats5 <- vcf_df_repeatAnnotated %>%
     dplyr::filter(is.na(repeatStatus) & VARIANT_CLASS == 'SNV') %>%
-    dplyr::summarise(nonRepeat_SNVs = n())
+    dplyr::summarise(nonRepeat_SNVs = dplyr::n())
 
   msi_stats6 <- vcf_df_repeatAnnotated %>%
     dplyr::filter(is.na(repeatStatus)) %>%
-    dplyr::summarise(nonRepeat_indelSNVs = n())
+    dplyr::summarise(nonRepeat_indelSNVs = dplyr::n())
 
   msi_stats7 <- vcf_df_repeatAnnotated %>%
     dplyr::filter(VARIANT_CLASS == 'insertion' | VARIANT_CLASS == 'deletion') %>%
-    dplyr::summarise(indels = n())
+    dplyr::summarise(indels = dplyr::n())
 
   msi_stats8 <- vcf_df_repeatAnnotated %>%
     dplyr::filter(VARIANT_CLASS == 'SNV') %>%
-    dplyr::summarise(SNVs = n())
+    dplyr::summarise(SNVs = dplyr::n())
 
   msi_stats9<- vcf_df_repeatAnnotated %>%
-    dplyr::summarise(indelSNVs = n())
+    dplyr::summarise(indelSNVs = dplyr::n())
 
   msi_stats10 <- vcf_df_repeatAnnotated %>%
-    dplyr::filter(SYMBOL == 'MLH1' & stringr::str_detect(CONSEQUENCE,"frameshift_|missense_|splice_|stop_|inframe_")) %>%
-    dplyr::summarise(MLH1 = n())
+    dplyr::filter(SYMBOL == 'MLH1' & stringr::str_detect(CONSEQUENCE,"frameshift_|missense_|splice_|stop_|start_|inframe_")) %>%
+    dplyr::summarise(MLH1 = dplyr::n())
 
   msi_stats11 <- vcf_df_repeatAnnotated %>%
-    dplyr::filter(SYMBOL == 'MLH3' & stringr::str_detect(CONSEQUENCE,"frameshift_|missense_|splice_|stop_|inframe_")) %>%
-    dplyr::summarise(MLH3 = n())
+    dplyr::filter(SYMBOL == 'MLH3' & stringr::str_detect(CONSEQUENCE,"frameshift_|missense_|splice_|stop_|start_|inframe_")) %>%
+    dplyr::summarise(MLH3 = dplyr::n())
 
   msi_stats12 <- vcf_df_repeatAnnotated %>%
-    dplyr::filter(SYMBOL == 'MSH2' & stringr::str_detect(CONSEQUENCE,"frameshift_|missense_|splice_|stop_|inframe_")) %>%
-    dplyr::summarise(MSH2 = n())
+    dplyr::filter(SYMBOL == 'MSH2' & stringr::str_detect(CONSEQUENCE,"frameshift_|missense_|splice_|stop_|start_|inframe_")) %>%
+    dplyr::summarise(MSH2 = dplyr::n())
 
   msi_stats13 <- vcf_df_repeatAnnotated %>%
-    dplyr::filter(SYMBOL == 'MSH3' & stringr::str_detect(CONSEQUENCE,"frameshift_|missense_|splice_|stop_|inframe_")) %>%
-    dplyr::summarise(MSH3 = n())
+    dplyr::filter(SYMBOL == 'MSH3' & stringr::str_detect(CONSEQUENCE,"frameshift_|missense_|splice_|stop_|start_|inframe_")) %>%
+    dplyr::summarise(MSH3 = dplyr::n())
 
   msi_stats14 <- vcf_df_repeatAnnotated %>%
-    dplyr::filter(SYMBOL == 'MSH6' & stringr::str_detect(CONSEQUENCE,"frameshift_|missense_|splice_|stop_|inframe_")) %>%
-    dplyr::summarise(MSH6 = n())
+    dplyr::filter(SYMBOL == 'MSH6' & stringr::str_detect(CONSEQUENCE,"frameshift_|missense_|splice_|stop_|start_|inframe_")) %>%
+    dplyr::summarise(MSH6 = dplyr::n())
 
   msi_stats15 <- vcf_df_repeatAnnotated %>%
-    dplyr::filter(SYMBOL == 'PMS1' & stringr::str_detect(CONSEQUENCE,"frameshift_|missense_|splice_|stop_|inframe_")) %>%
-    dplyr::summarise(PMS1 = n())
+    dplyr::filter(SYMBOL == 'PMS1' & stringr::str_detect(CONSEQUENCE,"frameshift_|missense_|splice_|stop_|start_|inframe_")) %>%
+    dplyr::summarise(PMS1 = dplyr::n())
 
   msi_stats16 <- vcf_df_repeatAnnotated %>%
-    dplyr::filter(SYMBOL == 'PMS2' & stringr::str_detect(CONSEQUENCE,"frameshift_|missense_|splice_|stop_|inframe_")) %>%
-    dplyr::summarise(PMS2 = n())
+    dplyr::filter(SYMBOL == 'PMS2' & stringr::str_detect(CONSEQUENCE,"frameshift_|missense_|splice_|stop_|start_|inframe_")) %>%
+    dplyr::summarise(PMS2 = dplyr::n())
 
   msi_stats17 <- vcf_df_repeatAnnotated %>%
-    dplyr::filter(SYMBOL == 'POLE' & stringr::str_detect(CONSEQUENCE,"frameshift_|missense_|splice_|stop_|inframe_")) %>%
-    dplyr::summarise(POLE = n())
+    dplyr::filter(SYMBOL == 'POLE' & stringr::str_detect(CONSEQUENCE,"frameshift_|missense_|splice_|stop_|start_|inframe_")) %>%
+    dplyr::summarise(POLE = dplyr::n())
 
   msi_stats18 <- vcf_df_repeatAnnotated %>%
-    dplyr::filter(SYMBOL == 'POLD1' & stringr::str_detect(CONSEQUENCE,"frameshift_|missense_|splice_|stop_|inframe_")) %>%
-    dplyr::summarise(POLD1 = n())
+    dplyr::filter(SYMBOL == 'POLD1' & stringr::str_detect(CONSEQUENCE,"frameshift_|missense_|splice_|stop_|start_|inframe_")) %>%
+    dplyr::summarise(POLD1 = dplyr::n())
 
 
   msi_stats1$sample_name <- sample_name
@@ -197,17 +169,17 @@ predict_msi_status <- function(vcf_data_df, simpleRepeats_gr, windowMasker_gr, m
   #mmr_pol_df <- dplyr::select(mmr_pol_df, -c(CHROM,POS,REF,ALT,start_field,end_field))
   mmr_pol_df <- dplyr::select(mmr_pol_df, -c(CHROM,POS,REF,ALT))
   mmr_pol_df <- dplyr::rename(mmr_pol_df, GENE = SYMBOL)
-  mmr_pol_df <- mmr_pol_df %>% dplyr::select(GENE, CONSEQUENCE, PROTEIN_CHANGE, GENE_NAME, VARIANT_CLASS, PROTEIN_DOMAIN, PROTEIN_FEATURE, dplyr::everything())
+  mmr_pol_df <- mmr_pol_df %>% dplyr::select(GENE, CONSEQUENCE, PROTEIN_CHANGE, GENE_NAME, VARIANT_CLASS, PROTEIN_DOMAIN, dplyr::everything())
 
   msi_predictors <- c('fracWinMaskIndels','fracWinMaskSNVs','fracRepeatIndels','fracNonRepeatIndels','fracIndels','MLH1','MLH3','MSH2','MSH3','MSH6','PMS1','PMS2','POLD1','POLE','tmb','tmb_indel','tmb_snv')
   msi_class <- predict(msi_prediction_model, dplyr::select(msi_stats,msi_predictors))
   if(msi_class == 'MSS'){
     msi_stats$predicted_class <- 'MSS (Microsatellite stable)'
-    msi_stats$vb <- 'MSS'
+    msi_stats$vb <- 'MSI status:\nMSS'
   }
   else{
     msi_stats$predicted_class <- 'MSI.H (Microsatellite instability - high)'
-    msi_stats$vb <- 'MSI - High'
+    msi_stats$vb <- 'MSI status:\nMSI - High'
   }
   rlogging::message(paste0("Predicted MSI status: ", msi_stats$predicted_class))
   rlogging::message(paste0("MSI - Indel fraction: ", round(msi_stats$fracNonRepeatIndels, digits = 3)))
@@ -222,27 +194,27 @@ predict_msi_status <- function(vcf_data_df, simpleRepeats_gr, windowMasker_gr, m
 #'
 #' @param sample_calls variant calls subject to mutational signature analysis
 #' @param pcgr_data object with PCGR annotation data
-#' @param pcgr_version PCGR software version
 #' @param sample_name sample identifier
 #' @param pcgr_config Object with PCGR configuration parameters
-#' @param genome_seq BSgenome object
-#' @param genome_assembly human genome assembly version
 #'
-generate_report_data_msi <- function(sample_calls, pcgr_data, pcgr_version, sample_name, pcgr_config, genome_seq, genome_assembly){
+generate_report_data_msi <- function(sample_calls, pcgr_data, sample_name, pcgr_config){
 
-  pcg_report_msi <- pcgrr::init_pcg_report(pcgr_config, sample_name, pcgr_version, genome_assembly, class = 'msi')
+  pcg_report_msi <- pcgrr::init_pcg_report(pcgr_config, sample_name, class = 'msi')
   rlogging::message('------')
   rlogging::message("Predicting microsatellite instability status")
 
-  #msi_sample_calls <- sample_calls %>% dplyr::filter(stringr::str_detect(CONSEQUENCE,"^(frameshift_|missense_|splice_|synonymous_|stop_|start_lost|inframe_)"))
   msi_sample_calls <- sample_calls %>% dplyr::filter(CODING_STATUS == "coding")
   rlogging::message(paste0("n = ",nrow(msi_sample_calls)," coding variants used for MSI prediction"))
   if(nrow(msi_sample_calls) >= 30){
-    pcg_report_msi[['prediction']] <- pcgrr::predict_msi_status(msi_sample_calls, simpleRepeats_gr = pcgr_data$simpleRepeats_gr, windowMasker_gr = pcgr_data$windowMasker_gr, msi_prediction_model = pcgr_data$msi_model$model, msi_prediction_dataset = pcgr_data$msi_model$tcga_dataset, target_size_mb = pcgr_config$mutational_burden$target_size_mb, bsg = genome_seq, genome_assembly = genome_assembly, sample_name = sample_name)
+    pcg_report_msi[['prediction']] <- pcgrr::predict_msi_status(msi_sample_calls, pcgr_data,
+                                                                msi_prediction_model = pcgr_data[['msi']][['model']][['model']],
+                                                                msi_prediction_dataset = pcgr_data[['msi']][['model']][['tcga_dataset']],
+                                                                target_size_mb = pcgr_config$mutational_burden$target_size_mb,
+                                                                sample_name = sample_name)
     pcg_report_msi[['eval']] <- TRUE
   }
   else{
-    rlogging::message(paste0("Too few variants (n < 30) for robust MSI prediction:"))
+    rlogging::message(paste0("Too few coding variants (n < 30) for robust MSI prediction:"))
     pcg_report_msi[['missing_data']] <- TRUE
   }
 

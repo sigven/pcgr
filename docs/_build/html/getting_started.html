@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Getting started &mdash; Personal Cancer Genome Reporter dev documentation</title>
+  <title>Getting started &mdash; Personal Cancer Genome Reporter 0.8.0 documentation</title>
   
 
   
@@ -59,7 +59,7 @@
             
             
               <div class="version">
-                dev
+                0.8.0
               </div>
             
           
@@ -218,19 +218,19 @@ X</a></li>
 <li>Clone the PCGR GitHub repository:
 <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/sigven/pcgr.git</span></code></li>
 <li>Download and unpack the latest data bundles in the PCGR directory<ul>
-<li><a class="reference external" href="https://drive.google.com/open?id=1OL5C994HDaeadASz7KzMhPoXfdSiyhNy">grch37 data bundle -
-20181119</a>
-(approx 9Gb)</li>
-<li><a class="reference external" href="https://drive.google.com/open?id=1CZNc87E0K5AK2RDSNU57FqLp0H1skpUh">grch38 data bundle -
-20181119</a>
-(approx 14Gb)</li>
+<li><a class="reference external" href="https://drive.google.com/open?id=1vIESS8NxiITUnrqZoWOdNk1YsklH8f1C">grch37 data bundle -
+20190519</a>
+(approx 15Gb)</li>
+<li><a class="reference external" href="https://drive.google.com/open?id=1eoMgc2AzK1w1jrX2LSLEas4YJPiQJx1B">grch38 data bundle -
+20190519</a>
+(approx 16Gb)</li>
 <li><em>Unpacking</em>:
 <code class="docutils literal notranslate"><span class="pre">gzip</span> <span class="pre">-dc</span> <span class="pre">pcgr.databundle.grch37.YYYYMMDD.tgz</span> <span class="pre">|</span> <span class="pre">tar</span> <span class="pre">xvf</span> <span class="pre">-</span></code></li>
 </ul>
 </li>
 <li>Pull the <a class="reference external" href="https://hub.docker.com/r/sigven/pcgr/">PCGR Docker image
 (dev)</a> from DockerHub
-(approx 5.1Gb):<ul>
+(approx 5.2Gb):<ul>
 <li><code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">pull</span> <span class="pre">sigven/pcgr:dev</span></code> (PCGR annotation engine)</li>
 </ul>
 </li>
@@ -238,30 +238,33 @@ X</a></li>
 </div>
 <div class="section" id="latest-release">
 <h3>Latest release<a class="headerlink" href="#latest-release" title="Permalink to this headline">¶</a></h3>
-<ol class="loweralpha">
-<li><p class="first">Download and unpack the <a class="reference external" href="https://github.com/sigven/pcgr/releases/tag/v0.7.0">latest software release
-(0.7.0)</a></p>
+<ol class="loweralpha simple">
+<li>Download and unpack the <a class="reference external" href="https://github.com/sigven/pcgr/releases/tag/v0.8.0">latest software release
+(0.8.0)</a></li>
+<li>Download and unpack the assembly-specific data bundle in the PCGR
+directory</li>
+</ol>
+<ul>
+<li><p class="first"><a class="reference external" href="https://drive.google.com/open?id=1vIESS8NxiITUnrqZoWOdNk1YsklH8f1C">grch37 data bundle -
+20190519</a>
+(approx 15Gb)</p>
 </li>
-<li><p class="first">Download and unpack the assembly-specific data bundle in the PCGR
-directory</p>
+<li><p class="first"><a class="reference external" href="https://drive.google.com/open?id=1eoMgc2AzK1w1jrX2LSLEas4YJPiQJx1B">grch38 data bundle -
+20190519</a>
+(approx 16Gb)</p>
 <ul class="simple">
-<li><a class="reference external" href="https://drive.google.com/open?id=1OL5C994HDaeadASz7KzMhPoXfdSiyhNy">grch37 data bundle -
-20181119</a>
-(approx 9Gb)</li>
-<li><a class="reference external" href="https://drive.google.com/open?id=1CZNc87E0K5AK2RDSNU57FqLp0H1skpUh">grch38 data bundle -
-20181119</a>
-(approx 14Gb)</li>
 <li><em>Unpacking</em>:
 <code class="docutils literal notranslate"><span class="pre">gzip</span> <span class="pre">-dc</span> <span class="pre">pcgr.databundle.grch37.YYYYMMDD.tgz</span> <span class="pre">|</span> <span class="pre">tar</span> <span class="pre">xvf</span> <span class="pre">-</span></code></li>
 </ul>
 <p>A <em>data/</em> folder within the <em>pcgr-X.X</em> software folder should now
 have been produced</p>
 </li>
-<li><p class="first">Pull the <a class="reference external" href="https://hub.docker.com/r/sigven/pcgr/">PCGR Docker image
-(0.7.0)</a> from DockerHub
-(approx 5.1Gb):</p>
-<ul class="simple">
-<li><code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">pull</span> <span class="pre">sigven/pcgr:0.7.0</span></code> (PCGR annotation engine)</li>
+</ul>
+<ol class="loweralpha simple" start="3">
+<li>Pull the <a class="reference external" href="https://hub.docker.com/r/sigven/pcgr/">PCGR Docker image
+(0.8.0)</a> from DockerHub
+(approx 5.2Gb):<ul>
+<li><code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">pull</span> <span class="pre">sigven/pcgr:0.8.0</span></code> (PCGR annotation engine)</li>
 </ul>
 </li>
 </ol>
@@ -308,14 +311,13 @@ formatted correctly according to PCGR’s requirements:</p>
 </div>
 <div class="section" id="step-4-configure-pcgr">
 <h2>STEP 4: Configure PCGR<a class="headerlink" href="#step-4-configure-pcgr" title="Permalink to this headline">¶</a></h2>
-<p>The PCGR configuration file, formatted using
-<a class="reference external" href="https://github.com/toml-lang/toml">TOML</a> (an easy to read file
-format) enables the user to configure a number of options in the PCGR
-workflow, related to the following:</p>
+<p>The PCGR software bundle comes with default configuration files per
+tumor type ( in the <em>conf/</em> folder), to be used as a starting point for
+runnning the PCGR workflow. The configuration file, formatted using
+<a class="reference external" href="https://github.com/toml-lang/toml">TOML</a>, enables the user to
+configure a number of options related to the following:</p>
 <ul class="simple">
-<li>Tumor type of input sample</li>
-<li>Tier model</li>
-<li>Sequencing depth/allelic support thresholds</li>
+<li>Sequencing depth/allelic support (definition of tags + thresholds)</li>
 <li>MSI prediction</li>
 <li>Mutational signatures analysis</li>
 <li>Mutational burden analysis (e.g.&nbsp;target size)</li>
@@ -327,29 +329,22 @@ variants/enrichment for somatic calls)</li>
 </ul>
 <p>More details about the exact <a class="reference external" href="http://pcgr.readthedocs.io/en/latest/input.html#pcgr-configuration-file">usage of the configuration
 options</a>.</p>
-<p>The PCGR software bundle comes with a default configuration file
-(<em>pcgr.toml</em>), to be used as a starting point for runnning the PCGR
-workflow.</p>
 </div>
 <div class="section" id="step-5-run-example">
 <h2>STEP 5: Run example<a class="headerlink" href="#step-5-run-example" title="Permalink to this headline">¶</a></h2>
 <p>A tumor sample report is generated by calling the Python script
 <strong>pcgr.py</strong>, which takes the following arguments and options:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>usage: pcgr.py [-h] [--input_vcf INPUT_VCF] [--input_cna INPUT_CNA]
-        [--force_overwrite] [--version] [--basic]
-        [--docker-uid DOCKER_USER_ID] [--no-docker]
-        pcgr_dir output_dir {grch37,grch38} configuration_file
-        sample_id
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>usage: pcgr.py [options] &lt;PCGR_DIR&gt; &lt;OUTPUT_DIR&gt; &lt;GENOME_ASSEMBLY&gt; &lt;CONFIG_FILE&gt; &lt;SAMPLE_ID&gt;
 
 Personal Cancer Genome Reporter (PCGR) workflow for clinical interpretation of
 somatic nucleotide variants and copy number aberration segments
 
 positional arguments:
 pcgr_dir              PCGR base directory with accompanying data directory,
-                e.g. ~/pcgr-0.7.0
+                e.g. ~/pcgr-0.8.0
 output_dir            Output directory
 {grch37,grch38}       Genome assembly build: grch37 or grch38
-configuration_file    PCGR configuration file (TOML format)
+configuration_file    PCGR configuration file (TOML format, in conf/ folder)
 sample_id             Tumor sample/cancer genome identifier - prefix for
                 output files
 
@@ -361,6 +356,15 @@ optional arguments:
 --input_cna INPUT_CNA
                 Somatic copy number alteration segments (tab-separated
                 values) (default: None)
+--input_cna_plot INPUT_CNA_PLOT
+                Somatic copy number alteration plot (default: None)
+--pon_vcf PON_VCF     VCF file with germline calls from Panel of Normals
+                (PON) - i.e. blacklist variants (default: None)
+--tumor_purity TUMOR_PURITY
+                Estimated tumor purity (between 0 and 1) (default:
+                None)
+--tumor_ploidy TUMOR_PLOIDY
+                Estimated tumor ploidy (default: None)
 --force_overwrite     By default, the script will fail with an error if any
                 output file already exists. You can force the
                 overwrite of existing result files by using this flag
@@ -369,6 +373,8 @@ optional arguments:
 --basic               Run functional variant annotation on VCF through
                 VEP/vcfanno, omit other analyses (i.e. CNA, MSI,
                 report generation etc. (STEP 4) (default: False)
+--no_vcf_validate    Skip validation of input VCF with Ensembl&#39;s vcf-
+               validator (default: False)
 --docker-uid DOCKER_USER_ID
                 Docker user ID. Default is the host system user ID. If
                 you are experiencing permission errors, try setting
@@ -383,9 +389,9 @@ sequenced within TCGA (<strong>GRCh37</strong> only). It also contains PCGR
 configuration files customized for these samples. A report for a
 colorectal tumor case can be generated by running the following command
 in your terminal window:</p>
-<p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">pcgr.py</span> <span class="pre">--input_vcf</span> <span class="pre">~/pcgr-0.7.0/examples/tumor_sample.COAD.vcf.gz</span></code>
-<code class="docutils literal notranslate"><span class="pre">--input_cna</span> <span class="pre">~/pcgr-0.7.0/examples/tumor_sample.COAD.cna.tsv</span></code>
-<code class="docutils literal notranslate"><span class="pre">~/pcgr-0.7.0</span> <span class="pre">~/pcgr-0.7.0/examples</span> <span class="pre">grch37</span> <span class="pre">~/pcgr-0.7.0/examples/pcgr_conf.COAD.toml</span> <span class="pre">tumor_sample.COAD</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">pcgr.py</span> <span class="pre">--input_vcf</span> <span class="pre">~/pcgr-0.8.0/examples/tumor_sample.COAD.vcf.gz</span></code>
+<code class="docutils literal notranslate"><span class="pre">--input_cna</span> <span class="pre">~/pcgr-0.8.0/examples/tumor_sample.COAD.cna.tsv</span></code>
+<code class="docutils literal notranslate"><span class="pre">~/pcgr-0.8.0</span> <span class="pre">~/pcgr-0.8.0/examples</span> <span class="pre">grch37</span> <span class="pre">~/pcgr-0.8.0/conf/Colorectal_Cancer_NOS.toml</span> <span class="pre">tumor_sample.COAD</span></code></p>
 <p>This command will run the Docker-based PCGR workflow and produce the
 following output files in the <em>examples</em> folder:</p>
 <ol class="arabic simple">
@@ -428,7 +434,7 @@ transcripts that overlap with somatic copy number aberrations</li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017/2018, Sigve Nakken.
+        &copy; Copyright 2017-2019, Sigve Nakken.
 
     </p>
   </div>
@@ -450,7 +456,7 @@ transcripts that overlap with somatic copy number aberrations</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'dev',
+            VERSION:'0.8.0',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',

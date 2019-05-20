@@ -1,7 +1,7 @@
 
 ### Tier 3 - Variants of unknown clinical significance {.tabset}
 
-- A total of __`r NROW(pcg_report[['snv_indel']][['variant_display']][['tier3']][['proto_oncogene']]) + NROW(pcg_report[['snv_indel']][['variant_display']][['tier3']][['tumor_suppressor']])`__ unique, somatic variant(s) in the tumor sample are of unknown clinical significance, as found within known proto-oncogenes or tumor suppressor genes.
+- A total of __`r NROW(pcg_report[['content']][['snv_indel']][['variant_display']][['tier3']][['proto_oncogene']]) + NROW(pcg_report[['content']][['snv_indel']][['variant_display']][['tier3']][['tumor_suppressor']])`__ unique, somatic variant(s) in the tumor sample are of unknown clinical significance, as found within known proto-oncogenes or tumor suppressor genes.
 <br><br>
 
 
@@ -12,7 +12,7 @@ missing_tier3_items <- list()
 for(type in c('proto_oncogene','tumor_suppressor')){
   show_tier3_filters[[type]] <- F
   missing_tier3_items[[type]] <- T
-  if(NROW(pcg_report[['snv_indel']][['variant_display']][['tier3']][[type]]) > 0){
+  if(NROW(pcg_report[['content']][['snv_indel']][['variant_display']][['tier3']][[type]]) > 0){
     show_tier3_filters[[type]] <- T
     missing_tier3_items[[type]] <- F
   }
@@ -29,14 +29,14 @@ for(type in c('proto_oncogene','tumor_suppressor')){
 library(summarywidget)
 library(crosstalk)
 
-variants_tsgene_shared <- crosstalk::SharedData$new(pcg_report[['snv_indel']][['variant_display']][['tier3']][['tumor_suppressor']])
+variants_tsgene_shared <- crosstalk::SharedData$new(pcg_report[['content']][['snv_indel']][['variant_display']][['tier3']][['tumor_suppressor']])
 crosstalk::bscols(
   list(
     crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_tsgene_shared, ~CONSEQUENCE),
     crosstalk::filter_select("MUTATION_HOTSPOT", "Mutation hotspot", variants_tsgene_shared, ~MUTATION_HOTSPOT)
   ),
   list(
-    crosstalk::filter_select("INTOGEN_DRIVER_MUT", "Predicted driver mutation", variants_tsgene_shared, ~INTOGEN_DRIVER_MUT)
+    crosstalk::filter_select("PUTATIVE_DRIVER_MUTATION", "Predicted driver mutation", variants_tsgene_shared, ~PUTATIVE_DRIVER_MUTATION)
     
   )
 )
@@ -46,7 +46,8 @@ htmltools::br()
 htmltools::br()
 
 crosstalk::bscols(
-  DT::datatable(variants_tsgene_shared, escape=F,extensions=c("Buttons","Responsive"), width = "100%",options=list(buttons = c('csv','excel'),dom = 'Bfrtip'))
+  DT::datatable(variants_tsgene_shared, escape=F,extensions=c("Buttons","Responsive"), width = "100%",options=list(buttons = c('csv','excel'),dom = 'Bfrtip')) %>%
+  DT::formatStyle("SYMBOL","OPENTARGETS_RANK", color = "white", backgroundColor = DT::styleInterval(pcg_report[['content']][['report_display_config']][['opentargets_rank']][['breaks']], pcg_report[['content']][['report_display_config']][['opentargets_rank']][['colors']]))
 )
 
 #htmltools::br()
@@ -68,14 +69,14 @@ cat('\n')
 library(summarywidget)
 library(crosstalk)
 
-variants_oncogene_shared <- crosstalk::SharedData$new(pcg_report[['snv_indel']][['variant_display']][['tier3']][['proto_oncogene']])
+variants_oncogene_shared <- crosstalk::SharedData$new(pcg_report[['content']][['snv_indel']][['variant_display']][['tier3']][['proto_oncogene']])
 crosstalk::bscols(
   list(
     crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_oncogene_shared, ~CONSEQUENCE),
     crosstalk::filter_select("MUTATION_HOTSPOT", "Mutation hotspot", variants_oncogene_shared, ~MUTATION_HOTSPOT)
   ),
   list(
-    crosstalk::filter_select("INTOGEN_DRIVER_MUT", "Predicted driver mutation", variants_oncogene_shared, ~INTOGEN_DRIVER_MUT)
+    crosstalk::filter_select("PUTATIVE_DRIVER_MUTATION", "Predicted driver mutation", variants_oncogene_shared, ~PUTATIVE_DRIVER_MUTATION)
     
   )
 )
@@ -85,7 +86,8 @@ htmltools::br()
 htmltools::br()
 
 crosstalk::bscols(
-  DT::datatable(variants_oncogene_shared, escape=F,extensions=c("Buttons","Responsive"), width = "100%",options=list(buttons = c('csv','excel'),dom = 'Bfrtip'))
+  DT::datatable(variants_oncogene_shared, escape=F,extensions=c("Buttons","Responsive"), width = "100%",options=list(buttons = c('csv','excel'),dom = 'Bfrtip')) %>%
+  DT::formatStyle("SYMBOL","OPENTARGETS_RANK", color = "white", backgroundColor = DT::styleInterval(pcg_report[['content']][['report_display_config']][['opentargets_rank']][['breaks']], pcg_report[['content']][['report_display_config']][['opentargets_rank']][['colors']]))
 )
 
 #htmltools::br()

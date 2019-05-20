@@ -7,17 +7,13 @@
 
 show_gwas_filters <- F
 missing_gwas_items <- T
-if(NROW(cps_report[['snv_indel']][['variant_display']][['gwas']]) > 0){
+if(NROW(cps_report[['content']][['snv_indel']][['variant_display']][['gwas']]) > 0){
   show_gwas_filters <- T
   missing_gwas_items <- F
 }
  
-
-tag_tgp <- cps_report[['cpsr_config']][['popgen']][['vcftag_tgp']]
-desc_tgp <- cps_report[['cpsr_config']][['popgen']][['popdesc_tgp']]
-formula_tgp <- as.formula(paste0("~",rlang::sym(tag_tgp)))
-tag_gnomad <- cps_report[['cpsr_config']][['popgen']][['vcftag_gnomad']]
-desc_gnomad <- cps_report[['cpsr_config']][['popgen']][['popdesc_gnomad']]
+tag_gnomad <- cps_report[['metadata']][['config']][['popgen']][['vcftag_gnomad']]
+desc_gnomad <- cps_report[['metadata']][['config']][['popgen']][['popdesc_gnomad']]
 formula_gnomad <- as.formula(paste0("~",rlang::sym(tag_gnomad)))
 
 
@@ -28,25 +24,21 @@ library(summarywidget)
 library(crosstalk)
 
 
-cat('A total of ',NROW(cps_report[['snv_indel']][['variant_display']][['gwas']]), ' other germline variant(s) are associated with cancer phenotypes through genome-wide association studies (p-value < ',cps_report[['cpsr_config']][['gwas']][['p_value_min']],'):')
+cat('A total of ',NROW(cps_report[['content']][['snv_indel']][['variant_display']][['gwas']]), ' other germline variant(s) are associated with cancer phenotypes through genome-wide association studies (p-value < ',cps_report[['metadata']][['config']][['gwas']][['p_value_min']],'):')
 cat('\n')
 htmltools::br()
 htmltools::br()
 
-#col <- cpsr_config$custom_tags$custom_tags
-#as.formula(paste0("~",rlang::sym(col)))
-variants_gwas_cancer <- crosstalk::SharedData$new(cps_report[['snv_indel']][['variant_display']][['gwas']])
+variants_gwas_cancer <- crosstalk::SharedData$new(cps_report[['content']][['snv_indel']][['variant_display']][['gwas']])
 crosstalk::bscols(
   list(
     crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_gwas_cancer, ~CONSEQUENCE),
     crosstalk::filter_checkbox("GENOTYPE", "Genotype", variants_gwas_cancer, ~GENOTYPE),
-    crosstalk::filter_select("SYMBOL", "Gene", variants_gwas_cancer, ~SYMBOL),
-    crosstalk::filter_select("GWAS_PHENOTYPE", "GWAS phenotype", variants_gwas_cancer, ~GWAS_PHENOTYPE)
+    crosstalk::filter_select("SYMBOL", "Gene", variants_gwas_cancer, ~SYMBOL)
   ),
   list(
-    crosstalk::filter_checkbox("LOSS_OF_FUNCTION", "Predicted loss-of-function variant", variants_gwas_cancer, ~LOSS_OF_FUNCTION),
     crosstalk::filter_slider(tag_gnomad, paste0("MAF gnomAD (",desc_gnomad,")"), variants_gwas_cancer, formula_gnomad, sep="",ticks = F),
-    crosstalk::filter_slider(tag_tgp, paste0("MAF 1000 Genomes Project (",desc_tgp,")"), variants_gwas_cancer, formula_tgp, sep="",ticks = F)
+    crosstalk::filter_select("GWAS_PHENOTYPE", "GWAS phenotype", variants_gwas_cancer, ~GWAS_PHENOTYPE)
   )
 )
 
@@ -64,7 +56,7 @@ crosstalk::bscols(
 ```
 
 ```{r gwas_cancer_missing, echo=F, results = 'asis', eval = missing_gwas_items}
-cat('<i>No variants with a p-value <',cpsr_config$gwas$p_value_min,' were found.</i>',sep='\n')
+cat('<i>No GWAS variants with a p-value <',cps_report[['metadata']][['config']][['gwas']][['p_value_min']],' were found.</i>',sep='\n')
 cat('\n')
 ```
 <br><br>

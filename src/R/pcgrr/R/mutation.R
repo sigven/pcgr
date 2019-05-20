@@ -69,49 +69,18 @@ assign_mutation_type <- function(var_df){
 
   var_df$MUTATION_TYPE <- NA
   if('VARIANT_CLASS' %in% colnames(var_df) & 'REF' %in% colnames(var_df) & 'ALT' %in% colnames(var_df)){
-    if(nrow(var_df[var_df$VARIANT_CLASS == 'SNV' & var_df$REF == 'G' & var_df$ALT == 'A',]) > 0){
-      var_df[var_df$VARIANT_CLASS == 'SNV' & var_df$REF == 'G' & var_df$ALT == 'A',]$MUTATION_TYPE <- 'C>T:G>A'
-    }
-    if(nrow(var_df[var_df$VARIANT_CLASS == 'SNV' & var_df$REF == 'C' & var_df$ALT == 'T',]) > 0){
-      var_df[var_df$VARIANT_CLASS == 'SNV' & var_df$REF == 'C' & var_df$ALT == 'T',]$MUTATION_TYPE <- 'C>T:G>A'
-    }
-
-    if(nrow(var_df[var_df$VARIANT_CLASS == 'SNV' & var_df$REF == 'G' & var_df$ALT == 'C',]) > 0){
-      var_df[var_df$VARIANT_CLASS == 'SNV' & var_df$REF == 'G' & var_df$ALT == 'C',]$MUTATION_TYPE <- 'C>G:G>C'
-    }
-    if(nrow(var_df[var_df$VARIANT_CLASS == 'SNV' & var_df$REF == 'C' & var_df$ALT == 'G',]) > 0){
-      var_df[var_df$VARIANT_CLASS == 'SNV' & var_df$REF == 'C' & var_df$ALT == 'G',]$MUTATION_TYPE <- 'C>G:G>C'
-    }
-
-    if(nrow(var_df[var_df$VARIANT_CLASS == 'SNV' & var_df$REF == 'C' & var_df$ALT == 'A',]) > 0){
-      var_df[var_df$VARIANT_CLASS == 'SNV' & var_df$REF == 'C' & var_df$ALT == 'A',]$MUTATION_TYPE <- 'C>A:G>T'
-    }
-    if(nrow(var_df[var_df$VARIANT_CLASS == 'SNV' & var_df$REF == 'G' & var_df$ALT == 'T',]) > 0){
-      var_df[var_df$VARIANT_CLASS == 'SNV' & var_df$REF == 'G' & var_df$ALT == 'T',]$MUTATION_TYPE <- 'C>A:G>T'
-    }
-
-    if(nrow(var_df[var_df$VARIANT_CLASS == 'SNV' & var_df$REF == 'A' & var_df$ALT == 'G',]) > 0){
-      var_df[var_df$VARIANT_CLASS == 'SNV' & var_df$REF == 'A' & var_df$ALT == 'G',]$MUTATION_TYPE <- 'A>G:T>C'
-    }
-    if(nrow(var_df[var_df$VARIANT_CLASS == 'SNV' & var_df$REF == 'T' & var_df$ALT == 'C',]) > 0){
-      var_df[var_df$VARIANT_CLASS == 'SNV' & var_df$REF == 'T' & var_df$ALT == 'C',]$MUTATION_TYPE <- 'A>G:T>C'
-    }
-
-    if(nrow(var_df[var_df$VARIANT_CLASS == 'SNV' & var_df$REF == 'A' & var_df$ALT == 'T',]) > 0){
-      var_df[var_df$VARIANT_CLASS == 'SNV' & var_df$REF == 'A' & var_df$ALT == 'T',]$MUTATION_TYPE <- 'A>T:T>A'
-    }
-    if(nrow(var_df[var_df$VARIANT_CLASS == 'SNV' & var_df$REF == 'T' & var_df$ALT == 'A',]) > 0){
-      var_df[var_df$VARIANT_CLASS == 'SNV' & var_df$REF == 'T' & var_df$ALT == 'A',]$MUTATION_TYPE <- 'A>T:T>A'
-    }
-
-    if(nrow(var_df[var_df$VARIANT_CLASS == 'SNV' & var_df$REF == 'T' & var_df$ALT == 'G',]) > 0){
-      var_df[var_df$VARIANT_CLASS == 'SNV' & var_df$REF == 'T' & var_df$ALT == 'G',]$MUTATION_TYPE <- 'A>C:T>G'
-    }
-    if(nrow(var_df[var_df$VARIANT_CLASS == 'SNV' & var_df$REF == 'A' & var_df$ALT == 'C',]) > 0){
-      var_df[var_df$VARIANT_CLASS == 'SNV' & var_df$REF == 'A' & var_df$ALT == 'C',]$MUTATION_TYPE <- 'A>C:T>G'
-    }
+    var_df <- var_df %>%
+      dplyr::mutate(MUTATION_TYPE = dplyr::if_else(VARIANT_CLASS == "SNV" & REF == "G" & ALT == "A","C>T:G>A",MUTATION_TYPE)) %>%
+      dplyr::mutate(MUTATION_TYPE = dplyr::if_else(VARIANT_CLASS == "SNV" & REF == "C" & ALT == "T","C>T:G>A",MUTATION_TYPE)) %>%
+      dplyr::mutate(MUTATION_TYPE = dplyr::if_else(VARIANT_CLASS == "SNV" & REF == "G" & ALT == "C","C>G:G>C",MUTATION_TYPE)) %>%
+      dplyr::mutate(MUTATION_TYPE = dplyr::if_else(VARIANT_CLASS == "SNV" & REF == "C" & ALT == "G","C>G:G>C",MUTATION_TYPE)) %>%
+      dplyr::mutate(MUTATION_TYPE = dplyr::if_else(VARIANT_CLASS == "SNV" & REF == "C" & ALT == "A","C>A:G>T",MUTATION_TYPE)) %>%
+      dplyr::mutate(MUTATION_TYPE = dplyr::if_else(VARIANT_CLASS == "SNV" & REF == "G" & ALT == "T","C>A:G>T",MUTATION_TYPE)) %>%
+      dplyr::mutate(MUTATION_TYPE = dplyr::if_else(VARIANT_CLASS == "SNV" & REF == "A" & ALT == "G","A>G:T>C",MUTATION_TYPE)) %>%
+      dplyr::mutate(MUTATION_TYPE = dplyr::if_else(VARIANT_CLASS == "SNV" & REF == "T" & ALT == "C","A>G:T>C",MUTATION_TYPE)) %>%
+      dplyr::mutate(MUTATION_TYPE = dplyr::if_else(VARIANT_CLASS == "SNV" & REF == "A" & ALT == "T","A>T:T>A",MUTATION_TYPE)) %>%
+      dplyr::mutate(MUTATION_TYPE = dplyr::if_else(VARIANT_CLASS == "SNV" & REF == "T" & ALT == "A","A>T:T>A",MUTATION_TYPE))
   }
-
   return(var_df)
 }
 

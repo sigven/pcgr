@@ -1,6 +1,7 @@
 
 ## Tier models
 
+<!--
 ### Tier model 1 - *pcgr*
 
 This tier model is inspired by recommended variant prioritization by [Dienstmann et al., 2014](https://www.ncbi.nlm.nih.gov/pubmed/24768039):
@@ -11,9 +12,9 @@ This tier model is inspired by recommended variant prioritization by [Dienstmann
 - _Tier 4_ - includes other coding variants
 
 For **copy number aberrations**, aberrations linked to Tier 1 are displayed (within the section entitled *Copy number aberrations as biomarkers for prognosis, diagnosis, and drug response* in the HTML report)
+-->
 
-
-### Tier model 2 - *pcgr_acmg*
+### Tier model 1 - *pcgr_acmg*
 
 This tier model attempts to adopt concensus recommendations by ACMG, as outlined in [Li et al., 2017](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5707196/):
 
@@ -27,6 +28,6 @@ This tier model attempts to adopt concensus recommendations by ACMG, as outlined
  - *Tier 4* - includes other coding variants
 
  For **copy number aberrations**, aberrations linked to Tier 1 & 2 are displayed, within following sections in the HTML report:
- 
+
   * *Copy number aberrations as biomarkers: Aberrations of strong clinical significance* (Tier 1)
   * *Copy number aberrations as biomarkers: Aberrations of potential clinical significance* (Tier 2)

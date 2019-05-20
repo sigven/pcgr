@@ -1,21 +1,22 @@
 ### Noncoding mutations
 
-- A total of __`r NROW(pcg_report[['snv_indel']][['variant_display']][['noncoding']])`__ unique, somatic variant(s) are also found in the tumor sample.
+- A total of __`r NROW(pcg_report[['content']][['snv_indel']][['variant_display']][['noncoding']])`__ unique, somatic variant(s) that do not alter any encoded protein sequence(s) are also found in the tumor sample.
 <br><br>
 
 ```{r noncoding, results='asis',echo=F}
 
 myOptions <- list(paging = F,pageLength=10, searching=T,caching=F,buttons = c('csv','excel'),dom = 'Bfrtip')
-if(NROW(pcg_report[['snv_indel']][['variant_display']][['noncoding']]) > 10){
+if(NROW(pcg_report[['content']][['snv_indel']][['variant_display']][['noncoding']]) > 10){
   myOptions <- list(paging = T,pageLength=10, searching=T,caching=F,buttons = c('csv','excel'),dom = 'Bfrtip')
 }
-if(NROW(pcg_report[['snv_indel']][['variant_display']][['noncoding']]) > 0){
-  if(NROW(pcg_report[['snv_indel']][['variant_display']][['noncoding']]) > 2000){
-    cat('<b>NOTE - listing top 2000 variants according to ONCOSCORE</b><br>',sep="\n")
+if(NROW(pcg_report[['content']][['snv_indel']][['variant_display']][['noncoding']]) > 0){
+  if(NROW(pcg_report[['content']][['snv_indel']][['variant_display']][['noncoding']]) > 2000){
+    cat('<b>NOTE - listing top 2000 variants (ranked according to Open Targets phenotype association score) </b><br>',sep="\n")
     cat('<br>')
-    pcg_report[['snv_indel']][['variant_display']][['noncoding']] <- head(pcg_report[['snv_indel']][['variant_display']][['noncoding']], 2000)
+    pcg_report[['content']][['snv_indel']][['variant_display']][['noncoding']] <- head(pcg_report[['content']][['snv_indel']][['variant_display']][['noncoding']], 2000)
   }
-  DT::datatable(pcg_report[['snv_indel']][['variant_display']][['noncoding']], options = myOptions, escape=F, extensions = c("Buttons","Responsive"))
+  DT::datatable(pcg_report[['content']][['snv_indel']][['variant_display']][['noncoding']], options = myOptions, escape=F, extensions = c("Buttons","Responsive")) %>%
+  DT::formatStyle("SYMBOL","OPENTARGETS_RANK", color = "white", backgroundColor = DT::styleInterval(pcg_report[['content']][['report_display_config']][['opentargets_rank']][['breaks']], pcg_report[['content']][['report_display_config']][['opentargets_rank']][['colors']]))
 }
 
 ```

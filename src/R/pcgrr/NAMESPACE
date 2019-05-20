@@ -2,33 +2,57 @@ exportPattern("^[[:alpha:]]+")
 
 export(list_to_df)
 
-export(plot_value_boxes)
-export(tier_to_maf)
+## FUNCTIONS - READ CALLS (VCF/CNA)
 export(add_filter_read_support)
 export(add_swissprot_feature_descriptions)
 export(add_gwas_citation_phenotype)
 export(determine_genotype)
-export(get_population_tag)
-export(get_insilico_prediction_statistics)
-export(assign_pathogenicity_score)
-export(generate_tier_tsv_cpsr)
-export(summary_findings_cpsr)
-
+export(get_cna_cytoband)
+export(df_string_replace)
+export(get_valid_chromosomes)
+export(get_ordinary_chromosomes)
+export(assign_mutation_type)
 export(annotate_variant_link)
 export(generate_annotation_link)
-export(generate_report_acmg)
+export(detect_vcf_sample_name)
 
+## CPSR FUNCTIONS
+export(get_insilico_prediction_statistics)
+export(assign_pathogenicity_evidence)
+export(determine_pathogenicity_classification)
+export(detect_cancer_traits_clinvar)
+export(summary_donut_chart)
+export(assign_cpsr_tier)
+export(retrieve_sf_calls)
+export(generate_predisposition_report)
+export(gene_selection_tiles)
+export(get_x_coords)
+
+
+## GENERAL UTILITIES: PCGR/CPSR
+export(write_report)
+export(variant_stats_report)
 export(get_calls)
 export(order_variants)
+export(sort_chromosomal_segments)
+
+
+## GERMLINE ANNOTATION/FILTERING FUNCTIONS
+export(assign_somatic_germline_evidence)
+export(assign_germline_popfreq_status)
+export(assign_somatic_classification)
+export(assign_poplevel_frequency)
+export(get_population_tag)
+export(make_upset_plot_data)
+export(upset_plot_tumor_only)
+
 
 export(filter_slider_allelic_fraction)
-
 export(get_clinical_associations_snv_indel)
 export(get_clinical_associations_cna)
+export(plot_value_boxes)
 
-export(generate_report_data_snv_indel_pcgr)
-export(generate_report_data_snv_indel_acmg)
-
+export(generate_report_data_snv_indel)
 export(generate_report_data_tmb)
 export(generate_report_data_signatures)
 export(generate_report_data_msi)
@@ -38,21 +62,20 @@ export(generate_report_data_value_box)
 export(generate_report)
 export(annotate_facets_cna)
 
-export(generate_predisposition_report)
 
-export(filter_db_germline_variants)
-export(assign_poplevel_frequency)
+#export(filter_db_germline_variants)
 export(generate_biomarker_tsv)
 export(signature_contributions_single_sample)
 export(generate_tier_tsv)
 export(predict_msi_status)
 export(msi_indel_fraction_plot)
-export(get_cna_cytoband)
-export(df_string_replace)
-export(get_valid_chromosomes)
-export(assign_mutation_type)
+export(plot_tmb_primay_site_tcga)
+
 export(get_proper_maf_alleles)
 export(parse_transvar_file)
+export(read_vcf_vranges)
+export(dna_kmer_distribution)
+export(mutation_context)
 
 export(init_pcg_report)
 export(update_pcg_report)

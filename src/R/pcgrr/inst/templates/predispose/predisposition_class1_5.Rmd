@@ -1,0 +1,301 @@
+
+
+```{r prepare_classified_variant_data, echo=F, results='asis'}
+
+
+show_class_filters <- list()
+missing_class_items <- list()
+tot_variants_p_clinvar <- list()
+tot_variants_p_other <- list()
+for(c in c('class1','class2','class3','class4','class5')){
+  show_class_filters[[c]] <- F
+  missing_class_items[[c]] <- T
+  tot_variants_p_clinvar[[c]] <- 0
+  tot_variants_p_other[[c]] <- 0
+  if(NROW(cps_report[['content']][['snv_indel']][['variant_display']][[c]]) > 0){
+    show_class_filters[[c]] <- T
+    missing_class_items[[c]] <- T
+    tot_variants_p_clinvar[[c]] <- NROW(cps_report[['content']][['snv_indel']][['variant_display']][[c]] %>% dplyr::filter(SOURCE == "ClinVar"))
+    tot_variants_p_other[[c]] <- NROW(cps_report[['content']][['snv_indel']][['variant_display']][[c]] %>% dplyr::filter(SOURCE == "Other"))
+  }
+}
+
+tag_gnomad <- cps_report[['metadata']][['config']][['popgen']][['vcftag_gnomad']]
+desc_gnomad <- cps_report[['metadata']][['config']][['popgen']][['popdesc_gnomad']]
+formula_gnomad <- as.formula(paste0("~",rlang::sym(tag_gnomad)))
+
+
+
+```
+
+### <span style="color:#9E0142">Class 5 - <b>Pathogenic</b> variants</span>
+
+<br>
+
+*  A total of n = __`r tot_variants_p_clinvar[['class5']]`__ variants are registered with a <i>Pathogenic</i> clinical significance in ClinVar.
+*  A total of n = __`r tot_variants_p_other[['class5']]`__ <i><b>Other</b></i> variants (i.e. not registered in ClinVar) are classified with a <i>Pathogenic</i> significance by CPSR (ACMG criteria - based on population frequency and variant effect).
+
+<br>
+
+
+```{r class5_cpsr, echo=F, results = 'asis', eval = show_class_filters[['class5']]}
+library(summarywidget)
+library(crosstalk)
+
+cat('\n')
+htmltools::br()
+
+variants_class5 <- crosstalk::SharedData$new(cps_report[['content']][['snv_indel']][['variant_display']][['class5']])
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_class5, ~CONSEQUENCE),
+    crosstalk::filter_checkbox("GENOTYPE", "Genotype", variants_class5, ~GENOTYPE),
+    crosstalk::filter_select("SYMBOL", "Gene", variants_class5, ~SYMBOL)
+  ),
+  list(
+    crosstalk::filter_select("CLINVAR_PHENOTYPE", "ClinVar phenotype(s)", variants_class5, ~CLINVAR_PHENOTYPE),
+    crosstalk::filter_slider(tag_gnomad, paste0("MAF gnomAD (",desc_gnomad,")"), variants_class5, formula_gnomad, sep="",ticks = F)
+  )
+)
+
+    
+
+htmltools::br()
+htmltools::br()
+
+crosstalk::bscols(
+  DT::datatable(variants_class5, escape=F,extensions=c("Buttons","Responsive"), width = "100%",
+                options = list(
+                  buttons = c('csv','excel'),
+                  dom = 'Bfrtip',
+                  initComplete = DT::JS(
+                      "function(settings, json) {",
+                      "$(this.api().table().header()).css({'background-color': '#9E0142', 'color': '#fff'});",
+                      "}")
+                )
+        )
+)
+
+#htmltools::br()
+
+```
+
+<br><br>
+
+### <span style="color:#D53E4F">Class 4 - <b>Likely Pathogenic</b> variants</span>
+
+<br>
+
+*  A total of n = __`r tot_variants_p_clinvar[['class4']]`__ variants are recorded with a <i>Likely Pathogenic</i> clinical significance in ClinVar.
+*  A total of n = __`r tot_variants_p_other[['class4']]`__ <i><b>Other</b></i> variants (i.e. not registered in ClinVar) are classified with a <i>Likely Pathogenic</i> significance by CPSR (ACMG criteria - based on population frequency and variant effect).
+
+<br><br>
+
+
+```{r class4_cpsr, echo=F, results = 'asis', eval = show_class_filters[['class4']]}
+library(summarywidget)
+library(crosstalk)
+
+cat('\n')
+htmltools::br()
+
+variants_class4 <- crosstalk::SharedData$new(cps_report[['content']][['snv_indel']][['variant_display']][['class4']])
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_class4, ~CONSEQUENCE),
+    crosstalk::filter_checkbox("GENOTYPE", "Genotype", variants_class4, ~GENOTYPE),
+    crosstalk::filter_select("SYMBOL", "Gene", variants_class4, ~SYMBOL)
+  ),
+  list(
+    crosstalk::filter_select("CLINVAR_PHENOTYPE", "ClinVar phenotype(s)", variants_class4, ~CLINVAR_PHENOTYPE),
+    crosstalk::filter_slider(tag_gnomad, paste0("MAF gnomAD (",desc_gnomad,")"), variants_class4, formula_gnomad, sep="",ticks = F)
+
+  )
+)
+
+    
+
+htmltools::br()
+htmltools::br()
+
+crosstalk::bscols(
+  DT::datatable(variants_class4, escape=F,extensions=c("Buttons","Responsive"), width = "100%",
+                options = list(
+                  buttons = c('csv','excel'),
+                  dom = 'Bfrtip',
+                  initComplete = DT::JS(
+                      "function(settings, json) {",
+                      "$(this.api().table().header()).css({'background-color': '#D53E4F', 'color': '#fff'});",
+                      "}")
+                )
+        )
+)
+
+#htmltools::br()
+
+```
+<br><br>
+
+### <span style="color:#000000">Class 3 - <b>Variants of Uncertain Significance (VUS)</b></span>
+
+<br>
+
+*  A total of n = __`r tot_variants_p_clinvar[['class3']]`__ variants are recorded with a <i>VUS</i> clinical significance in ClinVar.
+*  A total of n = __`r tot_variants_p_other[['class3']]`__ <i><b>Other</b></i> variants (i.e. not registered in ClinVar) are classified with a <i>VUS</i> significance by CPSR (ACMG criteria - based on population frequency and variant effect).
+
+<br><br>
+
+
+```{r class3_cpsr, echo=F, results = 'asis', eval = show_class_filters[['class3']]}
+library(summarywidget)
+library(crosstalk)
+
+cat('\n')
+htmltools::br()
+
+variants_class3 <- crosstalk::SharedData$new(cps_report[['content']][['snv_indel']][['variant_display']][['class3']])
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_class3, ~CONSEQUENCE),
+    crosstalk::filter_checkbox("GENOTYPE", "Genotype", variants_class3, ~GENOTYPE),
+    crosstalk::filter_select("SYMBOL", "Gene", variants_class3, ~SYMBOL)
+  ),
+  list(
+    crosstalk::filter_select("CLINVAR_PHENOTYPE", "ClinVar phenotype(s)", variants_class3, ~CLINVAR_PHENOTYPE),
+    crosstalk::filter_select("CLINVAR_CONFLICTED", "ClinVar conflicting interpretations", variants_class3, ~CLINVAR_CONFLICTED),
+    crosstalk::filter_slider(tag_gnomad, paste0("MAF gnomAD (",desc_gnomad,")"), variants_class3, formula_gnomad, sep="",ticks = F)
+
+  )
+)
+
+    
+
+htmltools::br()
+htmltools::br()
+
+crosstalk::bscols(
+  DT::datatable(variants_class3, escape=F,extensions=c("Buttons","Responsive"), width = "100%",
+                options = list(
+                  buttons = c('csv','excel'),
+                  dom = 'Bfrtip',
+                  initComplete = DT::JS(
+                      "function(settings, json) {",
+                      "$(this.api().table().header()).css({'background-color': 'black', 'color': '#fff'});",
+                      "}")
+                )
+        )
+)
+
+#htmltools::br()
+
+```
+<br><br>
+
+### <span style="color:#78C679">Class 2 - <b>Likely Benign</b> variants</span>
+
+<br>
+
+*  A total of n = __`r tot_variants_p_clinvar[['class2']]`__ variants are recorded with a <i>Likely Benign</i> clinical significance in ClinVar.
+*  A total of n = __`r tot_variants_p_other[['class2']]`__ <i><b>Other</b></i> variants (i.e. not registered in ClinVar) are classified with a <i>Likely Benign</i> significance by CPSR (ACMG criteria - based on population frequency and variant effect).
+
+<br>
+
+
+```{r class2_cpsr, echo=F, results = 'asis', eval = show_class_filters[['class2']]}
+library(summarywidget)
+library(crosstalk)
+
+cat('\n')
+htmltools::br()
+
+variants_class2 <- crosstalk::SharedData$new(cps_report[['content']][['snv_indel']][['variant_display']][['class2']])
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_class2, ~CONSEQUENCE),
+    crosstalk::filter_checkbox("GENOTYPE", "Genotype", variants_class2, ~GENOTYPE),
+    crosstalk::filter_select("SYMBOL", "Gene", variants_class2, ~SYMBOL)
+  ),
+  list(
+    crosstalk::filter_select("CLINVAR_PHENOTYPE", "ClinVar phenotype(s)", variants_class2, ~CLINVAR_PHENOTYPE),
+    crosstalk::filter_slider(tag_gnomad, paste0("MAF gnomAD (",desc_gnomad,")"), variants_class2, formula_gnomad, sep="",ticks = F)
+
+  )
+)
+
+    
+
+htmltools::br()
+htmltools::br()
+
+crosstalk::bscols(
+  DT::datatable(variants_class2, escape=F,extensions=c("Buttons","Responsive"), width = "100%",
+                options = list(
+                  buttons = c('csv','excel'),
+                  dom = 'Bfrtip',
+                  initComplete = DT::JS(
+                      "function(settings, json) {",
+                      "$(this.api().table().header()).css({'background-color': '#78C679', 'color': '#fff'});",
+                      "}")
+                )
+        )
+)
+
+#htmltools::br()
+
+```
+<br><br>
+
+### <span style="color:#077009">Class 1 - <b>Benign</b> variants</span>
+
+<br>
+
+*  A total of n = __`r tot_variants_p_clinvar[['class1']]`__ variants are recorded with a <i>Benign</i> clinical significance in ClinVar.
+*  A total of n = __`r tot_variants_p_other[['class1']]`__ <i><b>Other</b></i> variants (i.e. not registered in ClinVar) are classified with a <i>Benign</i> significance by CPSR (ACMG criteria - based on population frequency and variant effect).
+
+<br><br>
+
+
+```{r class1_cpsr, echo=F, results = 'asis', eval = show_class_filters[['class1']]}
+library(summarywidget)
+library(crosstalk)
+
+cat('\n')
+htmltools::br()
+
+variants_class1 <- crosstalk::SharedData$new(cps_report[['content']][['snv_indel']][['variant_display']][['class1']])
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_class1, ~CONSEQUENCE),
+    crosstalk::filter_checkbox("GENOTYPE", "Genotype", variants_class1, ~GENOTYPE),
+    crosstalk::filter_select("SYMBOL", "Gene", variants_class1, ~SYMBOL)
+  ),
+  list(
+    crosstalk::filter_select("CLINVAR_PHENOTYPE", "ClinVar phenotype(s)", variants_class1, ~CLINVAR_PHENOTYPE),
+    crosstalk::filter_slider(tag_gnomad, paste0("MAF gnomAD (",desc_gnomad,")"), variants_class1, formula_gnomad, sep="",ticks = F)
+
+  )
+)
+
+    
+
+htmltools::br()
+htmltools::br()
+
+crosstalk::bscols(
+  DT::datatable(variants_class1, escape=F,extensions=c("Buttons","Responsive"), width = "100%",
+                options = list(
+                  buttons = c('csv','excel'),
+                  dom = 'Bfrtip',
+                  initComplete = DT::JS(
+                      "function(settings, json) {",
+                      "$(this.api().table().header()).css({'background-color': '#077009', 'color': '#fff'});",
+                      "}")
+                )
+        )
+)
+
+#htmltools::br()
+
+```
+
+

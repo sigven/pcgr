@@ -1,8 +1,5 @@
 # Basic PCGR configuration options (TOML).
 
-[tier_model]
-## tier model for prioritization of SNVs/InDels ("pcgr_acmg" or "pcgr")
-tier_model = "pcgr_acmg"
 
 [tumor_only]
 ## If input VCF contains mix of germline/somatic (variants called with no matching control, i.e. tumor-only) set vcf_tumor_only to true
@@ -40,7 +37,7 @@ exclude_likely_hom_germline = false
 ## Exclude likely heterozygous germline variants
 ## Must satisfy i) 40-60 % allelic fraction for alternate allele in tumor sample, ii) present in dbSNP + gnomAD, ii) not existing as somatic event in COSMIC/TCGA
 ## Note that the application of this filter may be suboptimal for very impure tumors or variants affected by CNAs etc (under these circumstances, the allelic fraction
-## will be skewed
+## will be skewed (see e.g. discussion in PMID:29249243)
 exclude_likely_het_germline = false
 
 ## Exclude variants found in dbSNP (only those that are NOT found in ClinVar(somatic origin)/DoCM/TCGA/COSMIC)
@@ -61,7 +58,8 @@ control_af_tag = ""
 call_conf_tag = ""
 
 ## set thresholds for tumor depth/allelic fraction, will be applied before report generation
-## will only apply if 'tumor_dp_tag' and 'tumor_af_tag' are specified above
+## will only apply if 'tumor_dp_tag' and 'tumor_af_tag' are specified above (similarly
+## for 'control_dp_tag' and 'control_af_tag'
 tumor_dp_min = 0
 tumor_af_min = 0.0
 control_dp_min = 0
@@ -70,9 +68,8 @@ control_af_max = 1.0
 [mutational_burden]
 ## Calculate mutational burden (similar to Chalmers et al., Genome Med, 2017)
 mutational_burden = true
-## Size of coding target region in megabases (defaults to exome ~ 36 Mb)
-## Note: this should ideally denote the callable target size (i.e. reflecting variable
-## sequencing depth)
+## Size of coding target region in megabases (defaults to size of protein-coding regions of GENCODE ~ 34 Mb)
+## Note: this should ideally denote the callable target size (i.e. reflecting variable sequencing depth)
 target_size_mb = 34.0
 ## set upper limits to tumor mutational burden tertiles (mutations/Mb)
 tmb_low_limit = 5
@@ -99,7 +96,7 @@ mutsignatures_signature_limit = 6
 ## deconstructSigs option: type of trimer count normalization for inference of known mutational signatures, see explanation at https://github.com/raerose01/deconstructSigs"
 ## options = 'default', 'exome', 'genome', 'exome2genome'
 ## NOTE: If your data (VCF) is from exome sequencing, 'default' or 'exome2genome' should be used. See https://github.com/raerose01/deconstructSigs/issues/2
-mutsignatures_normalization = "default"
+mutsignatures_normalization = "exome2genome"
 ## Require a minimum number of mutations for signature estimation
 mutsignatures_mutation_limit = 100
 ## deconstructSigs option: discard any signature contributions with a weight less than this amount
@@ -115,11 +112,6 @@ report_theme = "default"
 custom_tags = ""
 
 [other]
-## Keep/skip VCF validation by https://github.com/EBIvariation/vcf-validator. The vcf-validator checks
-## that the input VCF is properly encoded. Since the vcf-validator is strict, and with error messages
-## that is not always self-explanatory, the users can skip validation if they are confident that the
-## most critical parts of the VCF are properly encoded
-vcf_validation = true
 ## list/do not list noncoding variants
 list_noncoding = true
 ## VEP/vcfanno processing options
@@ -132,5 +124,6 @@ vep_skip_intergenic = false
 ## generate a MAF for input VCF using https://github.com/mskcc/vcf2maf
 vcf2maf = true
 
+## Not for edit
 [tumor_type]
 type = "Pleural_Cancer_NOS" 

@@ -9,26 +9,26 @@ The table below permits filtering of the total SNV/InDel set by various criteria
 library(crosstalk)
 library(summarywidget)
 
-if(NROW(pcg_report[['snv_indel']][['variant_set']][['tsv']]) > 2000){
+if(NROW(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']]) > 2000){
     cat('<b>NOTE - listing top 5000 variants</b><br>',sep="\n")
     cat('<br>')
-    pcg_report[['snv_indel']][['variant_set']][['tsv']] <- head(pcg_report[['snv_indel']][['variant_set']][['tsv']], 5000)
+    pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']] <- head(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']], 5000)
   }
 
 
-vars <- pcg_report[['snv_indel']][['variant_set']][['tsv']] %>% dplyr::select(SYMBOL, CONSEQUENCE, PROTEIN_CHANGE, VARIANT_CLASS, TIER, TIER_DESCRIPTION, GENE_NAME, dplyr::everything())
+vars <- pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']] %>% dplyr::select(SYMBOL, CONSEQUENCE, PROTEIN_CHANGE, VARIANT_CLASS, TIER, TIER_DESCRIPTION, GENE_NAME, dplyr::everything())
 vars$CONSEQUENCE <- stringr::str_replace_all(vars$CONSEQUENCE,"&",",")
 variants_shared <- crosstalk::SharedData$new(vars)
   
 crosstalk::bscols(
   list(
-    crosstalk::filter_slider("DP_TUMOR", "Tumor sequencing depth", variants_shared, ~DP_TUMOR, ticks = F),
-    crosstalk::filter_slider("DP_NORMAL", "Normal sequencing depth", variants_shared, ~DP_NORMAL, ticks = F),
+    crosstalk::filter_slider("DP_TUMOR", "Sequencing depth tumor", variants_shared, ~DP_TUMOR, ticks = F),
+    crosstalk::filter_slider("DP_CONTROL", "Sequencing depth control", variants_shared, ~DP_CONTROL, ticks = F),
     crosstalk::filter_checkbox("CALL_CONFIDENCE", "Call confidence", variants_shared, ~CALL_CONFIDENCE)
   ),
   list(
     crosstalk::filter_slider("AF_TUMOR", "Allelic fraction tumor", variants_shared, ~AF_TUMOR, sep=F, ticks = F),
-    crosstalk::filter_slider("AF_NORMAL", "Allelic fraction normal", variants_shared, ~AF_NORMAL, sep = F, ticks = F),
+    crosstalk::filter_slider("AF_CONTROL", "Allelic fraction control", variants_shared, ~AF_CONTROL, sep = F, ticks = F),
     crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_shared, ~CONSEQUENCE)
   )
 )

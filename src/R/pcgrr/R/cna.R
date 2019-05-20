@@ -34,20 +34,21 @@ get_cna_cytoband <- function(cna_gr, cytoband_gr){
   cyto_df$segment_end <- end(ranges(cna_gr[queryHits(cyto_hits)]))
   cyto_df$segment_length <- width(ranges(cna_gr[queryHits(cyto_hits)]))
 
-  cyto_stats <- as.data.frame(dplyr::group_by(cyto_df,segmentID,segment_length) %>% dplyr::summarise(cytoband = paste(name, collapse=", "), chromosome_arm = paste(unique(arm), collapse=","), focalCNAthresholds = paste(unique(focalCNAthreshold), collapse=",")))
-  if(nrow(cyto_stats[!is.na(cyto_stats$focalCNAthresholds) & stringr::str_detect(cyto_stats$focalCNAthresholds,","),]) > 0){
-    cyto_stats[!is.na(cyto_stats$focalCNAthresholds) & stringr::str_detect(cyto_stats$focalCNAthresholds,","),]$focalCNAthresholds <- NA
-  }
-  cyto_stats$focalCNAthresholds <- as.numeric(cyto_stats$focalCNAthresholds)
+  cyto_stats <- as.data.frame(
+      dplyr::group_by(cyto_df,segmentID,segment_length) %>%
+      dplyr::summarise(cytoband = paste(name, collapse=", "), chromosome_arm = paste(unique(arm), collapse=","), focalCNAthresholds = paste(unique(focalCNAthreshold), collapse=","))
+  )
+
+  cyto_stats <- cyto_stats %>%
+    dplyr::mutate(focalCNAthresholds = dplyr::if_else(!is.na(focalCNAthresholds) & stringr::str_detect(focalCNAthresholds,","),as.character(NA),as.character(focalCNAthresholds))) %>%
+    dplyr::mutate(focalCNAthresholds = as.numeric(focalCNAthresholds))
+
   cyto_stats <- as.data.frame(cyto_stats %>% dplyr::rowwise() %>% dplyr::mutate(broad_cnv_event = segment_length > focalCNAthresholds))
 
   cyto_stats$event_type <- 'broad'
-  if(nrow(cyto_stats[!is.na(cyto_stats$broad_cnv_event) & cyto_stats$broad_cnv_event == F,]) > 0){
-    cyto_stats[!is.na(cyto_stats$broad_cnv_event) & cyto_stats$broad_cnv_event == F,]$event_type <- 'focal'
-  }
-  if(nrow(cyto_stats[is.na(cyto_stats$broad_cnv_event),]) > 0){
-    cyto_stats[is.na(cyto_stats$broad_cnv_event),]$event_type <- NA
-  }
+  cyto_stats <- cyto_stats %>%
+    dplyr::mutate(event_type = dplyr::if_else(!is.na(broad_cnv_event) & broad_cnv_event == F,'focal',event_type)) %>%
+    dplyr::mutate(event_type = dplyr::if_else(is.na(broad_cnv_event),as.character(NA),event_type))
 
   cyto_stats <- pcgrr::df_string_replace(cyto_stats, c("cytoband"), pattern = ", (\\S+, ){0,}", replacement = " - ")
   cyto_stats <- tidyr::separate(cyto_stats,segmentID,sep=":",into = c('chrom','start','stop'),remove=F)
@@ -61,25 +62,16 @@ get_cna_cytoband <- function(cna_gr, cytoband_gr){
 #'
 #' @param cna_file CNV file name with chromosomal log(2)-ratio segments
 #' @param pcgr_data object with PCGR annotation data
-#' @param pcgr_version PCGR software version
 #' @param sample_name sample identifier
 #' @param pcgr_config Object with PCGR configuration parameters
-#' @param genome_seq BSgenome object
-#' @param genome_assembly human genome assembly version
 #' @param transcript_overlap_pct required aberration overlap fraction (percent) for reported transcripts (default 100 percent)
 #'
-generate_report_data_cna <- function(cna_file, pcgr_data, pcgr_version, sample_name, pcgr_config, genome_seq, genome_assembly, transcript_overlap_pct = 100){
+generate_report_data_cna <- function(cna_file, pcgr_data, sample_name, pcgr_config, transcript_overlap_pct = 100){
 
-  pcg_report_cna <- pcgrr::init_pcg_report(pcgr_config, sample_name, pcgr_version, genome_assembly, class = 'cna')
+  pcg_report_cna <- pcgrr::init_pcg_report(pcgr_config, sample_name, class = 'cna')
   logR_homdel <- pcgr_config[['cna']][['logR_homdel']]
   logR_gain <- pcgr_config[['cna']][['logR_gain']]
-
-  assembly <- 'hg38'
-  ucsc_browser_prefix <- 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&position='
-  if(genome_assembly == 'grch37'){
-    assembly <- 'hg19'
-    ucsc_browser_prefix <- 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position='
-  }
+  ucsc_browser_prefix <- paste0('http://genome.ucsc.edu/cgi-bin/hgTracks?db=',pcgr_data[['assembly']][['hg_name']],'&position=')
 
   rlogging::message('------')
   rlogging::message(paste0("Generating report data for copy number segment file ",cna_file))
@@ -88,15 +80,15 @@ generate_report_data_cna <- function(cna_file, pcgr_data, pcgr_version, sample_n
   cna_df_raw$chromosome <- stringr::str_replace(cna_df_raw$chromosome,"^chr","")
 
   ## VALIDATE INPUT CHROMOSOMES
-  cna_df <- pcgrr::get_valid_chromosomes(cna_df_raw, chromosome_column = 'chromosome', bsg = genome_seq)
-  cna_df <- pcgrr::get_valid_chromosome_segments(cna_df, genome_assembly, bsg = genome_seq)
+  cna_df <- pcgrr::get_valid_chromosomes(cna_df_raw, chromosome_column = 'chromosome', bsg = pcgr_data[['assembly']][['bsg']])
+  cna_df <- pcgrr::get_valid_chromosome_segments(cna_df, genome_assembly = pcgr_data[['assembly']][['grch_name']], bsg = pcgr_data[['assembly']][['bsg']])
   cna_df <- cna_df %>% dplyr::filter(!is.na(LogR))
   cna_df$LogR <- round(as.numeric(cna_df$LogR),digits=3)
   cna_df$segmentID <- paste0(cna_df$chromosome,":",cna_df$segment_start,":",cna_df$segment_end)
 
   ## MAKE GRANGES OBJECT OF INPUT
-  cna_gr <- GenomicRanges::makeGRangesFromDataFrame(cna_df, keep.extra.columns = T, seqinfo = pcgr_data$seqinfo, seqnames.field = 'chromosome',start.field = 'segment_start', end.field = 'segment_end', ignore.strand = T, starts.in.df.are.0based = T)
-  cytoband_df <- pcgrr::get_cna_cytoband(cna_gr, pcgr_data$cytoband_gr)
+  cna_gr <- GenomicRanges::makeGRangesFromDataFrame(cna_df, keep.extra.columns = T, seqinfo = pcgr_data[['assembly']][['seqinfo']], seqnames.field = 'chromosome',start.field = 'segment_start', end.field = 'segment_end', ignore.strand = T, starts.in.df.are.0based = T)
+  cytoband_df <- pcgrr::get_cna_cytoband(cna_gr, pcgr_data[['genomic_ranges']][['cytoband']])
   cna_df <- dplyr::left_join(cna_df, cytoband_df,by="segmentID")
 
   cna_segments <- cna_df
@@ -105,10 +97,10 @@ generate_report_data_cna <- function(cna_file, pcgr_data, pcgr_version, sample_n
   cna_segments <- dplyr::rename(cna_segments, SEGMENT_LENGTH_MB = segment_length_Mb, SEGMENT = segment_link)
   cna_segments <- dplyr::select(cna_segments, SEGMENT, SEGMENT_LENGTH_MB, cytoband, LogR, event_type) %>% dplyr::distinct()
 
-  cna_gr <- GenomicRanges::makeGRangesFromDataFrame(cna_df, keep.extra.columns = T, seqinfo = pcgr_data$seqinfo, seqnames.field = 'chromosome',start.field = 'segment_start', end.field = 'segment_end', ignore.strand = T, starts.in.df.are.0based = T)
+  cna_gr <- GenomicRanges::makeGRangesFromDataFrame(cna_df, keep.extra.columns = T, seqinfo = pcgr_data[['assembly']][['seqinfo']], seqnames.field = 'chromosome',start.field = 'segment_start', end.field = 'segment_end', ignore.strand = T, starts.in.df.are.0based = T)
 
-  hits <- GenomicRanges::findOverlaps(cna_gr, pcgr_data$gencode_genes_gr, type="any", select="all")
-  ranges <- pcgr_data$gencode_genes_gr[subjectHits(hits)]
+  hits <- GenomicRanges::findOverlaps(cna_gr, pcgr_data[['genomic_ranges']][['gencode_genes']], type="any", select="all")
+  ranges <- pcgr_data[['genomic_ranges']][['gencode_genes']][subjectHits(hits)]
   mcols(ranges) <- c(mcols(ranges),mcols(cna_gr[queryHits(hits)]))
 
   local_df <- as.data.frame(mcols(ranges))
@@ -140,7 +132,14 @@ generate_report_data_cna <- function(cna_file, pcgr_data, pcgr_version, sample_n
     }
   }
 
-  avg_transcript_overlap <- as.data.frame(dplyr::filter(local_df, biotype == 'protein_coding') %>% dplyr::group_by(segmentID, symbol) %>% dplyr::summarise(MEAN_TRANSCRIPT_CNA_OVERLAP = mean(transcript_overlap_percent), TRANSCRIPTS = paste0(ensembl_transcript_id, collapse=", "))) %>% dplyr::rename(SYMBOL = symbol)
+  avg_transcript_overlap <- as.data.frame(
+    local_df %>%
+      dplyr::filter(biotype == 'protein_coding') %>%
+      dplyr::group_by(segmentID, symbol) %>%
+      dplyr::summarise(MEAN_TRANSCRIPT_CNA_OVERLAP = mean(transcript_overlap_percent), TRANSCRIPTS = paste0(ensembl_transcript_id, collapse=", "))
+  )
+
+  avg_transcript_overlap <- avg_transcript_overlap %>%dplyr::rename(SYMBOL = symbol)
   avg_transcript_overlap$MEAN_TRANSCRIPT_CNA_OVERLAP <- round(avg_transcript_overlap$MEAN_TRANSCRIPT_CNA_OVERLAP, digits=2)
 
   local_df <- dplyr::select(local_df, -ensembl_transcript_id) %>% dplyr::filter(biotype == 'protein_coding') %>% dplyr::distinct()
@@ -149,7 +148,7 @@ generate_report_data_cna <- function(cna_file, pcgr_data, pcgr_version, sample_n
   local_df <- pcgrr::annotate_variant_link(local_df, vardb = 'DGIDB', pcgr_data = pcgr_data)
   local_df <- dplyr::rename(local_df, ONCOGENE = p_oncogene, TUMOR_SUPPRESSOR = tsgene, ENTREZ_ID = entrezgene, CHROMOSOME = chrom, GENENAME = name, TARGETED_DRUGS = DGIDBLINK, SEGMENT_LENGTH_MB = segment_length_Mb, SEGMENT = segment_link, TRANSCRIPT_OVERLAP = transcript_overlap_percent)
   local_df$ENTREZ_ID <- as.character(local_df$ENTREZ_ID)
-  local_df <- dplyr::left_join(local_df,pcgr_data$kegg_gene_pathway_links, by=c("ENTREZ_ID" = "gene_id")) %>%
+  local_df <- dplyr::left_join(local_df,pcgr_data[['kegg']][['pathway_links']], by=c("ENTREZ_ID" = "gene_id")) %>%
     dplyr::rename(KEGG_PATHWAY = kegg_pathway_urls)
   entrezgene_annotation_links <- pcgrr::generate_annotation_link(local_df,
                                                                  group_by_var = "VAR_ID",
@@ -221,7 +220,7 @@ generate_report_data_cna <- function(cna_file, pcgr_data, pcgr_version, sample_n
 
 
 
-annotate_facets_cna <- function(facets_cna_input_fname, facets_cna_output_fname, pcgr_data, sample_name, genome_seq, genome_assembly, transcript_overlap_pct = 50){
+annotate_facets_cna <- function(facets_cna_input_fname, facets_cna_output_fname, pcgr_data, sample_name, transcript_overlap_pct = 50){
 
   assembly <- 'hg38'
   ucsc_browser_prefix <- 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&position='
@@ -243,16 +242,16 @@ annotate_facets_cna <- function(facets_cna_input_fname, facets_cna_output_fname,
   cna_df_raw$chromosome <- stringr::str_replace(cna_df_raw$chromosome,"^chr","")
 
   ## VALIDATE INPUT CHROMOSOMES
-  cna_df <- pcgrr::get_valid_chromosomes(cna_df_raw, chromosome_column = 'chromosome', bsg = genome_seq)
-  cna_df <- pcgrr::get_valid_chromosome_segments(cna_df, genome_assembly, bsg = genome_seq)
+  cna_df <- pcgrr::get_valid_chromosomes(cna_df_raw, chromosome_column = 'chromosome', bsg = pcgr_data[['assembly']][['seq']])
+  cna_df <- pcgrr::get_valid_chromosome_segments(cna_df, pcgr_data[['assembly']][['grch_name']], bsg = pcgr_data[['assembly']][['seq']])
   cna_df <- cna_df %>% dplyr::filter(!is.na(LogR))
   cna_df$LogR <- round(as.numeric(cna_df$LogR),digits=3)
   cna_df$segmentID <- paste0(cna_df$chromosome,":",cna_df$segment_start,":",cna_df$segment_end)
   cna_df$sample_id <- sample_name
 
   ## MAKE GRANGES OBJECT OF INPUT
-  cna_gr <- GenomicRanges::makeGRangesFromDataFrame(cna_df, keep.extra.columns = T, seqinfo = pcgr_data$seqinfo, seqnames.field = 'chromosome',start.field = 'segment_start', end.field = 'segment_end', ignore.strand = T, starts.in.df.are.0based = T)
-  cytoband_df <- pcgrr::get_cna_cytoband(cna_gr, pcgr_data$cytoband_gr)
+  cna_gr <- GenomicRanges::makeGRangesFromDataFrame(cna_df, keep.extra.columns = T, seqinfo = pcgr_data[['assembly']][['seqinfo']], seqnames.field = 'chromosome',start.field = 'segment_start', end.field = 'segment_end', ignore.strand = T, starts.in.df.are.0based = T)
+  cytoband_df <- pcgrr::get_cna_cytoband(cna_gr, pcgr_data[['genomic_ranges']][['cytoband']])
   cna_df <- dplyr::left_join(cna_df, cytoband_df,by="segmentID")
 
   cna_segments <- cna_df
@@ -261,10 +260,10 @@ annotate_facets_cna <- function(facets_cna_input_fname, facets_cna_output_fname,
   #cna_segments <- dplyr::rename(cna_segments, SEGMENT_LENGTH_MB = segment_length_Mb, SEGMENT = segment_link)
   #cna_segments <- dplyr::select(cna_segments, SEGMENT, SEGMENT_LENGTH_MB, cytoband, LogR, event_type) %>% dplyr::distinct()
 
-  cna_gr <- GenomicRanges::makeGRangesFromDataFrame(cna_df, keep.extra.columns = T, seqinfo = pcgr_data$seqinfo, seqnames.field = 'chromosome',start.field = 'segment_start', end.field = 'segment_end', ignore.strand = T, starts.in.df.are.0based = T)
+  cna_gr <- GenomicRanges::makeGRangesFromDataFrame(cna_df, keep.extra.columns = T, seqinfo = pcgr_data[['assembly']][['seqinfo']], seqnames.field = 'chromosome',start.field = 'segment_start', end.field = 'segment_end', ignore.strand = T, starts.in.df.are.0based = T)
 
-  hits <- GenomicRanges::findOverlaps(cna_gr, pcgr_data$gencode_genes_gr, type="any", select="all")
-  ranges <- pcgr_data$gencode_genes_gr[subjectHits(hits)]
+  hits <- GenomicRanges::findOverlaps(cna_gr, pcgr_data[['genomic_ranges']][['gencode_genes']], type="any", select="all")
+  ranges <- pcgr_data[['genomic_ranges']][['gencode_genes']][subjectHits(hits)]
   mcols(ranges) <- c(mcols(ranges),mcols(cna_gr[queryHits(hits)]))
 
   local_df <- as.data.frame(mcols(ranges))

@@ -1,12 +1,12 @@
 
 ### Copy number aberrations as biomarkers
 
-A total of __`r NROW(pcg_report[['cna']][['variant_display']][['biomarkers_tier1']]) + NROW(pcg_report[['cna']][['variant_display']][['biomarkers_tier2']])`__ aberrations are associated with clinical evidence items in the [database for clinical interpretations of variants in cancer, CIViC](https://civic.genome.wustl.edu/#/home), with the following number of evidence items:
+A total of __`r NROW(pcg_report[['content']][['cna']][['variant_display']][['biomarkers_tier1']]) + NROW(pcg_report[['content']][['cna']][['variant_display']][['biomarkers_tier2']])`__ aberrations are associated with clinical evidence items in the [database for clinical interpretations of variants in cancer, CIViC](https://civic.genome.wustl.edu/#/home), with the following number of evidence items:
 
- *  Predictive: __`r NROW(pcg_report[['cna']][['clinical_evidence_item']][['specific_tumortype']][['predictive']][['A_B']]) + NROW(pcg_report[['cna']][['clinical_evidence_item']][['other_tumortype']][['predictive']][['A_B']]) + NROW(pcg_report[['cna']][['clinical_evidence_item']][['specific_tumortype']][['predictive']][['C_D_E']])`__ evidence items
- *  Prognostic: __`r NROW(pcg_report[['cna']][['clinical_evidence_item']][['specific_tumortype']][['prognostic']][['A_B']]) + NROW(pcg_report[['cna']][['clinical_evidence_item']][['other_tumortype']][['prognostic']][['A_B']]) + NROW(pcg_report[['cna']][['clinical_evidence_item']][['specific_tumortype']][['prognostic']][['C_D_E']])`__ evidence items
- *  Diagnostic: __`r NROW(pcg_report[['cna']][['clinical_evidence_item']][['specific_tumortype']][['diagnostic']][['A_B']]) + NROW(pcg_report[['cna']][['clinical_evidence_item']][['other_tumortype']][['diagnostic']][['A_B']]) +
-NROW(pcg_report[['cna']][['clinical_evidence_item']][['specific_tumortype']][['diagnostic']][['C_D_E']])`__ evidence items
+ *  Predictive: __`r NROW(pcg_report[['content']][['cna']][['clinical_evidence_item']][['specific_tumortype']][['predictive']][['A_B']]) + NROW(pcg_report[['content']][['cna']][['clinical_evidence_item']][['other_tumortype']][['predictive']][['A_B']]) + NROW(pcg_report[['content']][['cna']][['clinical_evidence_item']][['specific_tumortype']][['predictive']][['C_D_E']])`__ evidence items
+ *  Prognostic: __`r NROW(pcg_report[['content']][['cna']][['clinical_evidence_item']][['specific_tumortype']][['prognostic']][['A_B']]) + NROW(pcg_report[['content']][['cna']][['clinical_evidence_item']][['other_tumortype']][['prognostic']][['A_B']]) + NROW(pcg_report[['content']][['cna']][['clinical_evidence_item']][['specific_tumortype']][['prognostic']][['C_D_E']])`__ evidence items
+ *  Diagnostic: __`r NROW(pcg_report[['content']][['cna']][['clinical_evidence_item']][['specific_tumortype']][['diagnostic']][['A_B']]) + NROW(pcg_report[['content']][['cna']][['clinical_evidence_item']][['other_tumortype']][['diagnostic']][['A_B']]) +
+NROW(pcg_report[['content']][['cna']][['clinical_evidence_item']][['specific_tumortype']][['diagnostic']][['C_D_E']])`__ evidence items
 
 <br><br>
 
@@ -23,16 +23,16 @@ for(sig in c('strong_significance','potential_significance')){
     show_cna_filters[[sig]][[type]] <- F
     missing_cna_variants[[sig]][[type]] <- T
     cna_evidence_items[[sig]][[type]] <- data.frame()
-    if(sig == 'strong_significance' & NROW(pcg_report[['cna']][['clinical_evidence_item']][['specific_tumortype']][[type]][['A_B']]) > 0){
+    if(sig == 'strong_significance' & NROW(pcg_report[['content']][['cna']][['clinical_evidence_item']][['specific_tumortype']][[type]][['A_B']]) > 0){
       show_cna_filters[[sig]][[type]] <- T
       missing_cna_variants[[sig]][[type]] <- F
-      cna_evidence_items[[sig]][[type]] <- pcg_report[['cna']][['clinical_evidence_item']][['specific_tumortype']][[type]][['A_B']]
+      cna_evidence_items[[sig]][[type]] <- pcg_report[['content']][['cna']][['clinical_evidence_item']][['specific_tumortype']][[type]][['A_B']]
     }
     
-    if(sig == 'potential_significance' & (NROW(pcg_report[['cna']][['clinical_evidence_item']][['specific_tumortype']][[type]][['C_D_E']]) > 0 | NROW(pcg_report[['cna']][['clinical_evidence_item']][['other_tumortype']][[type]][['A_B']]) > 0)){
+    if(sig == 'potential_significance' & (NROW(pcg_report[['content']][['cna']][['clinical_evidence_item']][['specific_tumortype']][[type]][['C_D_E']]) > 0 | NROW(pcg_report[['content']][['cna']][['clinical_evidence_item']][['other_tumortype']][[type]][['A_B']]) > 0)){
       show_cna_filters[[sig]][[type]] <- T
       missing_cna_variants[[sig]][[type]] <- F
-      cna_evidence_items[[sig]][[type]] <- rbind(pcg_report[['cna']][['clinical_evidence_item']][['other_tumortype']][[type]][['A_B']], pcg_report[['cna']][['clinical_evidence_item']][['specific_tumortype']][[type]][['C_D_E']])
+      cna_evidence_items[[sig]][[type]] <- rbind(pcg_report[['content']][['cna']][['clinical_evidence_item']][['other_tumortype']][[type]][['A_B']], pcg_report[['content']][['cna']][['clinical_evidence_item']][['specific_tumortype']][[type]][['C_D_E']])
     }
   }
 }

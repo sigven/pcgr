@@ -1,10 +1,10 @@
 
 ### Tier 1 - Variants of strong clinical significance {.tabset}
 
-- Considering evidence items with strongest evidence levels (A & B) for the query tumor type (_`r pcg_report[['tumor_class']]`_)  in the [database for clinical interpretations of variants in cancer, CIViC](https://civic.genome.wustl.edu/#/home) or [Cancer Biomarkers database](https://www.cancergenomeinterpreter.org/biomarkers), a total of __`r NROW(pcg_report[['snv_indel']][['variant_display']][['tier1']])`__ unique, somatic variants were found, with the following number of evidence items:
-    * Tier 1 - Predictive/Therapeutic: __`r NROW(pcg_report[['snv_indel']][['clinical_evidence_item']][['specific_tumortype']][['predictive']][['A_B']])`__ evidence items
-    * Tier 1 - Prognostic: __`r NROW(pcg_report[['snv_indel']][['clinical_evidence_item']][['specific_tumortype']][['prognostic']][['A_B']])`__ evidence items
-    * Tier 1 - Diagnostic: __`r NROW(pcg_report[['snv_indel']][['clinical_evidence_item']][['specific_tumortype']][['diagnostic']][['A_B']])`__ evidence items
+- Considering evidence items with strongest evidence levels (A & B) for the query tumor type (_`r pcg_report[['metadata']][['tumor_class']]`_)  in the [database for clinical interpretations of variants in cancer, CIViC](https://civic.genome.wustl.edu/#/home) or [Cancer Biomarkers database](https://www.cancergenomeinterpreter.org/biomarkers), a total of __`r NROW(pcg_report[['content']][['snv_indel']][['variant_display']][['tier1']])`__ unique, somatic variants were found, with the following number of evidence items:
+    * Tier 1 - Predictive/Therapeutic: __`r NROW(pcg_report[['content']][['snv_indel']][['clinical_evidence_item']][['specific_tumortype']][['predictive']][['A_B']])`__ evidence items
+    * Tier 1 - Prognostic: __`r NROW(pcg_report[['content']][['snv_indel']][['clinical_evidence_item']][['specific_tumortype']][['prognostic']][['A_B']])`__ evidence items
+    * Tier 1 - Diagnostic: __`r NROW(pcg_report[['content']][['snv_indel']][['clinical_evidence_item']][['specific_tumortype']][['diagnostic']][['A_B']])`__ evidence items
 
 <br><br>
 
@@ -16,7 +16,7 @@ missing_tier1_items <- list()
 for(type in c('diagnostic','prognostic','predictive')){
   show_tier1_filters[[type]] <- F
   missing_tier1_items[[type]] <- T
-  if(NROW(pcg_report[['snv_indel']][['clinical_evidence_item']][['specific_tumortype']][[type]][['A_B']]) > 0){
+  if(NROW(pcg_report[['content']][['snv_indel']][['clinical_evidence_item']][['specific_tumortype']][[type]][['A_B']]) > 0){
     show_tier1_filters[[type]] <- T
     missing_tier1_items[[type]] <- F
   }
@@ -33,7 +33,7 @@ for(type in c('diagnostic','prognostic','predictive')){
 library(summarywidget)
 library(crosstalk)
 
-variants_tier1_predictive_shared <- crosstalk::SharedData$new(pcg_report[['snv_indel']][['clinical_evidence_item']][['specific_tumortype']][['predictive']][['A_B']])
+variants_tier1_predictive_shared <- crosstalk::SharedData$new(pcg_report[['content']][['snv_indel']][['clinical_evidence_item']][['specific_tumortype']][['predictive']][['A_B']])
 crosstalk::bscols(
   list(
     crosstalk::filter_select("CANCER_TYPE", "Cancer type", variants_tier1_predictive_shared, ~CANCER_TYPE),
@@ -56,7 +56,6 @@ crosstalk::bscols(
  DT::formatStyle('EVIDENCE_LEVEL', backgroundColor = DT::styleEqual(c('A: Validated','A: FDA/NCCN/ELN guidelines','B: Clinical evidence','B1: Clinical evidence: late trials','B2: Clinical evidence: early trials','C: Case study','D: Preclinical evidence','E: Indirect evidence'), c("#009E73","#009E73","#56B4E9", "#56B4E9","#56B4E9","#0072B2","#E69F00", "#F0E442")))
 )
 
-#htmltools::br()
 
 ```
 
@@ -76,7 +75,7 @@ cat('\n')
 library(summarywidget)
 library(crosstalk)
 
-variants_tier1_prognostic_shared <- crosstalk::SharedData$new(pcg_report[['snv_indel']][['clinical_evidence_item']][['specific_tumortype']][['prognostic']][['A_B']])
+variants_tier1_prognostic_shared <- crosstalk::SharedData$new(pcg_report[['content']][['snv_indel']][['clinical_evidence_item']][['specific_tumortype']][['prognostic']][['A_B']])
 crosstalk::bscols(
   list(
     crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_tier1_prognostic_shared, ~CONSEQUENCE),
@@ -96,7 +95,6 @@ crosstalk::bscols(
   DT::datatable(variants_tier1_prognostic_shared, escape=F,extensions=c("Buttons","Responsive"), width = "100%",options=list(buttons = c('csv','excel'),dom = 'Bfrtip')) %>%
   DT::formatStyle('EVIDENCE_LEVEL', backgroundColor = DT::styleEqual(c('A: Validated','A: FDA/NCCN/ELN guidelines','B: Clinical evidence','B1: Clinical evidence: late trials','B2: Clinical evidence: early trials','C: Case study','D: Preclinical evidence','E: Indirect evidence'), c("#009E73","#009E73","#56B4E9", "#56B4E9","#56B4E9","#0072B2","#E69F00", "#F0E442")))
 )
-#htmltools::br()
 
 ```
 
@@ -116,7 +114,7 @@ cat('\n')
 library(summarywidget)
 library(crosstalk)
 
-variants_tier1_diagnostic_shared <- crosstalk::SharedData$new(pcg_report[['snv_indel']][['clinical_evidence_item']][['specific_tumortype']][['diagnostic']][['A_B']])
+variants_tier1_diagnostic_shared <- crosstalk::SharedData$new(pcg_report[['content']][['snv_indel']][['clinical_evidence_item']][['specific_tumortype']][['diagnostic']][['A_B']])
 crosstalk::bscols(
   list(
     crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_tier1_diagnostic_shared, ~CONSEQUENCE),
@@ -137,7 +135,6 @@ crosstalk::bscols(
   DT::datatable(variants_tier1_diagnostic_shared, escape=F,extensions=c("Buttons","Responsive"), width = "100%",options=list(buttons = c('csv','excel'),dom = 'Bfrtip')) %>%
   DT::formatStyle('EVIDENCE_LEVEL', backgroundColor = DT::styleEqual(c('A: Validated','A: FDA/NCCN/ELN guidelines','B: Clinical evidence','B1: Clinical evidence: late trials','B2: Clinical evidence: early trials','C: Case study','D: Preclinical evidence','E: Indirect evidence'), c("#009E73","#009E73","#56B4E9", "#56B4E9","#56B4E9","#0072B2","#E69F00", "#F0E442")))
 )
-#htmltools::br()
 
 ```
 

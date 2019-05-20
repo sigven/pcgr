@@ -4,68 +4,68 @@ PCGR annotation resources
 Basic variant consequence annotation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--  `VEP v94 <http://www.ensembl.org/info/docs/tools/vep/index.html>`__ -
-   Variant Effect Predictor release 94 (`GENCODE
-   v28 <https://www.gencodegenes.org/releases/28.html>`__ as gene
-   reference database (v19 for grch37))
+-  `VEP <http://www.ensembl.org/info/docs/tools/vep/index.html>`__ -
+   Variant Effect Predictor release 96 (`GENCODE
+   v30 <https://www.gencodegenes.org/human/>`__ as gene reference
+   database (v19 for grch37))
 
 *Insilico* predictions of effect of coding variants
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--  `dBNSFP v3.5 <https://sites.google.com/site/jpopgen/dbNSFP>`__ -
-   database of non-synonymous functional predictions (August 2017)
--  `IntOGen catalogs of driver
-   mutations/genes <https://www.intogen.org/downloads>`__ - (May 2016)
+-  `dBNSFP <https://sites.google.com/site/jpopgen/dbNSFP>`__ - database
+   of non-synonymous functional predictions (v4.0, May 2019)
 
 Variant frequency databases
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--  `gnomAD r2 <http://exac.broadinstitute.org/>`__ - germline variant
-   frequencies exome-wide (October 2017)
--  `dbSNP b151 <http://www.ncbi.nlm.nih.gov/SNP/>`__ - database of short
-   genetic variants (build 150 for grch37)
--  `1000Genomes
-   phase3 <ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/>`__
-   - germline variant frequencies genome-wide (May 2013)
+-  `gnomAD <http://exac.broadinstitute.org/>`__ - germline variant
+   frequencies exome-wide (r2.1, October 2018)
+-  `dbSNP <http://www.ncbi.nlm.nih.gov/SNP/>`__ - database of short
+   genetic variants (b151)
 -  `Cancer Hotspots <http://cancerhotspots.org>`__ - a resource for
    statistically significant mutations in cancer (v2, 2017)
--  `TCGA release 13.0 <https://portal.gdc.cancer.gov/>`__ - somatic
-   mutations discovered across 33 tumor type cohorts (The Cancer Genome
-   Atlas)
+-  `TCGA <https://portal.gdc.cancer.gov/>`__ - somatic mutations
+   discovered across 33 tumor type cohorts (release 16.0, March 2019)
 -  `ICGC-PCAWG <http://docs.icgc.org/pcawg/>`__ - ICGC Pancancer
-   Analysis of Whole Genomes - release 27, April 30th, 2018
+   Analysis of Whole Genomes - (release 28, March 17th, 2019)
 
 Variant databases of clinical utility
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  `ClinVar <http://www.ncbi.nlm.nih.gov/clinvar/>`__ - database of
-   clinically related variants (November 2018)
+   clinically related variants (May 2019)
 -  `DoCM <http://docm.genome.wustl.edu>`__ - database of curated
    mutations (v3.2, April 2016)
 -  `CIViC <http://civic.genome.wustl.edu>`__ - clinical interpretations
-   of variants in cancer (November 12th 2018)
+   of variants in cancer (May 18th 2019)
 -  `CBMDB <http://www.cancergenomeinterpreter.org/biomarkers>`__ -
    Cancer BioMarkers database (January 17th 2018)
 -  `DGIdb <http://dgidb.genome.wustl.edu>`__ - database of targeted
    antineoplastic drugs (v3.0.2, January 2018)
+-  `ChEMBL <https://www.ebi.ac.uk/chembl/>`__ - database of drugs,
+   drug-like small molecules and their targets (ChEMBL_25, March 2019)
 
 Protein domains/functional features
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--  `UniProt/SwissProt KnowledgeBase 2018_10 <http://www.uniprot.org>`__
-   - resource on protein sequence and functional information (November
-   2018)
--  `Pfam v32 <http://pfam.xfam.org>`__ - database of protein families
-   and domains (September 2018)
+-  `UniProt/SwissProt KnowledgeBase <http://www.uniprot.org>`__ -
+   resource on protein sequence and functional information (2019_04, May
+   2019)
+-  `Pfam <http://pfam.xfam.org>`__ - database of protein families and
+   domains (v32, September 2018)
 
-Cancer gene knowledge bases
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Knowledge resources on gene and protein targets
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--  `CancerMine v6 <https://zenodo.org/record/1481254#.W-nRznpKiL4>`__ -
+-  `CancerMine <https://zenodo.org/record/2587719#.XJNfS0RKiL4>`__ -
    Literature-mined database of tumor suppressor genes/proto-oncogenes
-   (November 2018)
--  `DisGeNET v5.0 <http://www.disgenet.org>`__ - curated associations
-   between human genes and different tumor types
+   (v12, May 2019)
+-  `Open Targets Platform <https://www.targetvalidation.org/>`__ -
+   Database on disease-target associations and target tractability
+   aggregated from multiple sources (literature, pathways, mutations)
+   (2019_04)
+-  `DisGeNET <http://www.disgenet.org>`__ - curated associations between
+   human genes and different tumor types (v6.0, January 2019)
 -  `TCGA driver genes <https://www.ncbi.nlm.nih.gov/pubmed/29625053>`__
    - predicted cancer driver genes based on application of multiple
    driver gene prediction tools on TCGA pan-cancer cohort
@@ -74,7 +74,10 @@ Pathway databases
 ~~~~~~~~~~~~~~~~~
 
 -  `KEGG PATHWAY Database <http://www.genome.jp/kegg/pathway.htm>`__ -
-   October 24th 2018
+   March 1st 2019
+-  `Oncogenic Signaling Pathways -
+   TCGA <https://www.ncbi.nlm.nih.gov/pubmed/29625050>`__ - Sanchez-Vega
+   et al., *Cell*, 2018
 
 Notes on variant annotation datasets
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -104,8 +107,8 @@ Data quality
 
 Clinical biomarkers included in PCGR are limited to the following:
 
--  Markers in CIViC must be *accepted* (*submitted* evidence items are
-   not considered)
+-  Evidence items for specific markers in CIViC must be *accepted*
+   (*submitted* evidence items are not considered)
 -  Markers reported at the variant level (e.g. **BRAF p.V600E**)
 -  Markers reported at the codon level (e.g. **KRAS p.G12**)
 -  Markers reported at the exon level (e.g. **KIT exon 11 mutation**)
@@ -127,17 +130,37 @@ issue <https://github.com/sigven/pcgr/issues/37#issuecomment-391966286>`__
 
 **Gene-disease associations**
 
--  For gene-disease associations extracted from DisGeNET 5.0, we require
-   a `score <http://www.disgenet.org/web/DisGeNET/menu/dbinfo#score>`__
+-  For gene-disease associations extracted from DisGeNET, we require a
+   `score <http://www.disgenet.org/web/DisGeNET/menu/dbinfo#score>`__
    greater than 0.2 and that the association is suppported by at least
    one PMID (PubMed article). Associations involving non-cancer type of
    diseases are not included.
+-  Cancer phenotype associations retrieved from the `Open Targets
+   platform <https://www.targetvalidation.org/>`__ are largely based on
+   the `association
+   score <https://docs.targetvalidation.org/getting-started/scoring>`__
+   developed by the Open Targets platform, with a couple of extra
+   post-processing steps:
+
+   -  Phenotype associations in OpenTargets are assembled from `20
+      different data
+      sources <https://docs.targetvalidation.org/data-sources/data-sources>`__.
+      Target-disease associations included in PCGR must be supported by
+      **at least two distinct sources**
+   -  The weakest associations, here defined as those with an
+      association score < 0.4 (scale from 0 to 1), are ommitted
+   -  As is done within the Open Targets Platform, association scores
+      (for genes) are represented with varying shades of blue: the
+      darker the blue, the stronger the association. Variant hits in
+      tier 3/4 and the noncoding section are arranged according to this
+      association score. If several disease subtypes are associated with
+      a gene, the maximum association score is chosen.
 
 **Tumor suppressor genes/proto-oncogenes**
 
 -  For liteature-derived predictions of tumor suppressor
    genes/proto-oncogenes from *CancerMine*, we require a *minimum of
-   three PubMed hits*.
+   four PubMed hits*.
 
 **TCGA somatic calls**
 

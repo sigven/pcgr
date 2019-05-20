@@ -20,11 +20,23 @@ configuration_file <- as.character(args[5])
 version <- as.character(args[6])
 genome_assembly <- as.character(args[7])
 data_dir <- as.character(args[8])
+query_cna_plot <- as.character(args[9])
+purity_estimate <- as.character(args[10])
+ploidy_estimate <- as.character(args[11])
 
 rlogging::SetTimeStampFormat(ts.format="%Y-%m-%d %H:%M:%S ")
 rlogging::SetLogFile(NULL)
 
-load(paste0(data_dir,'/data/',genome_assembly,'/rda/pcgr_data.rda'))
+pcgr_data <- readRDS(paste0(data_dir,'/data/',genome_assembly,'/rds/pcgr_data.rds'))
+
+pcgr_data[['assembly']][['seqinfo']] <- 
+   GenomeInfoDb::Seqinfo(seqnames = GenomeInfoDb::seqlevels(GenomeInfoDb::seqinfo(BSgenome.Hsapiens.UCSC.hg38)), seqlengths = GenomeInfoDb::seqlengths(GenomeInfoDb::seqinfo(BSgenome.Hsapiens.UCSC.hg38)), genome = 'hg38')
+pcgr_data[['assembly']][['bsg']] <- BSgenome.Hsapiens.UCSC.hg38
+if(genome_assembly == 'grch37'){
+  pcgr_data[['assembly']][['bsg']] <- BSgenome.Hsapiens.UCSC.hg19
+  pcgr_data[['assembly']][['seqinfo']] <- 
+     GenomeInfoDb::Seqinfo(seqnames = GenomeInfoDb::seqlevels(GenomeInfoDb::seqinfo(BSgenome.Hsapiens.UCSC.hg19)), seqlengths = GenomeInfoDb::seqlengths(GenomeInfoDb::seqinfo(BSgenome.Hsapiens.UCSC.hg19)), genome = 'hg19')
+}
 
 pcgr_config <- NULL
 default_configuration_file <- paste0(data_dir,'/data/',genome_assembly,'/pcgr_configuration_default.toml')
@@ -44,8 +56,13 @@ for(section in names(pcgr_config)){
   }
 }
 
-if(pcgr_config$tier_model$tier_model == 'pcgr'){
-  pcgrr::generate_report(dir, query_vcf2tsv, pcgr_data, pcgr_config, sample_name, query_cnv, version, genome_assembly = genome_assembly)
-}else{
-  pcgrr::generate_report_acmg(dir, query_vcf2tsv, pcgr_data, pcgr_config, sample_name, query_cnv, version, genome_assembly = genome_assembly)
-}
+## append optional estimates of tumor purity and ploidy provided by user
+pcgr_config[['tumor_properties']] <- list()
+pcgr_config[['tumor_properties']][['tumor_purity']] <- purity_estimate
+pcgr_config[['tumor_properties']][['tumor_ploidy']] <- ploidy_estimate
+
+pcg_report <- pcgrr::generate_report(dir, query_vcf2tsv, pcgr_data, pcgr_config, sample_name = sample_name, cna_segments_tsv = query_cnv, 
+				     cna_plot = query_cna_plot, tier_model = pcgr_config$tier_model$tier_model)
+pcgrr::write_report(dir, pcg_report, sample_name, genome_assembly, tier_model = pcgr_config$tier_model$tier_model, format = 'html')
+pcgrr::write_report(dir, pcg_report, sample_name, genome_assembly, tier_model = pcgr_config$tier_model$tier_model, format = 'json')
+

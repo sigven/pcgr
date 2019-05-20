@@ -1,6 +1,63 @@
 
 ## CHANGELOG
 
+#### 0.8.0 - May 20th 2019
+
+##### Fixed
+ * Bug in value box for Tier 2 variants (new line carriage) [Issue #73](https://github.com/sigven/pcgr/issues/73)
+
+##### Added
+ * Upgraded VEP to v96
+	 * Skipping the *--regulatory* VEP option to avoid forking issues and to improve speed (See [this issue](https://github.com/Ensembl/ensembl-vep/issues/384))
+	 * Added option to configure *pick-order* for choice of primary transcript in configuration file
+ * Pre-made configuration files for each tumor type in _conf_ folder
+ * Possibility to append a CNA plot file (.png format) to the section of the report with _Somatic CNAs_ [ previous feature request](https://github.com/sigven/pcgr/issues/58)
+ * Added possibility to input estimates of **tumor purity** and **ploidy**
+     * shown as value boxes in _Main results_
+ * Tumor mutational burden is now compared with the distribution of TMB observed for TCGA's cohorts (organized by primary site)
+	* Default target size is now 34Mb (approx. estimate from exome-wide calculation of protein-coding parts of GENCODE)
+ * Added flexibility for variant filtering in tumor-only input callsets
+   * Added additional options to exclude likely germline variants (both requires the tumor VAF tag to be correctly specified in the input VCF)
+     * __exclude\_likely\_hom\_germline__ - removes any variant with an allelic fraction of 1 (100%) - very unlikely somatic event
+	* __exclude\_likely\_het_germline__ - removes any variant with
+		* an allelic fraction between 0.4 and 0.6, and
+		* presence in dbSNP + gnomAD, and
+		* no presence as somatic event in COSMIC/TCGA
+   * Added possibility to input *PANEL-OF-NORMALS* VCF - this to support the many labs that have sequenced a database/pool of healthy controls. This set of variants are utilized in PCGR to improve the variant filtering when running in tumor-only mode. The *PANEL-OF-NORMALS* annotation work as follows:
+     * all variants in the tumor that coincide with any variant listed in the *PANEL-OF-NORMALS* VCF is appended with a **PANEL_OF_NORMALS** flag in the query VCF with tumor variants.
+	* If configuration parameter __exclude_pon__ is set to True in __tumor_only__ runs, all variants with a **PANEL_OF_NORMALS** flag are filtered/excluded
+ * For tumor-only runs, added an [UpSet plot](https://github.com/hms-dbmi/UpSetR#Demo) showing how different filtering sources (gnomAD, 1KG Project, panel-of-normals etc) contribute in the germline filtering procedure
+ * Variants in _Tier 3 / Tier 4 / Noncoding_ are now sorted (and color-coded) according to the target (gene) association score to the cancer phenotype, as provided by the [OpenTargets Platform](https://docs.targetvalidation.org/getting-started/scoring)
+ * Added annotation of TCGA's ten oncogenic signaling pathways
+ * Added *EXONIC_STATUS* annotation tag (VCF and TSV)
+	 * *exonic* denotes all protein-altering AND cannonical splicesite altering AND synonymous variants, *nonexonic* denotes the complement
+ * Added *CODING_STATUS* annotation tag (VCF and TSV)
+	 * *coding* denotes all protein-altering AND cannonical splicesite altering, *noncoding* denotes the complement
+ * Added *SYMBOL_ENTREZ* annotation tag (VCF)
+	* Official gene symbol from NCBI EntreZ (SYMBOL provided by VEP can sometimes be non-official/alias (i.e. for GENCODE v19/grch37))
+ * Added *SIMPLEREPEATS_HIT* annotation tag (VCF and TSV)
+    * Variant overlaps UCSC _simpleRepeat_ sequence repeat track - used for MSI prediction
+ * Added *WINMASKER_HIT* annotation tag (VCF and TSV)
+    * Variant overlaps UCSC _windowmaskerSdust_ sequence repeat track - used for MSI prediction
+ * Added *PUTATIVE_DRIVER_MUTATION* annotation tag (VCF and TSV)
+    * Putative cancer driver mutation discovered by multiple approaches from 9,423 tumor exomes in TCGA. Format: symbol:hgvsp:ensembl_transcript_id:discovery_approaches
+ * Added *OPENTARGETS_DISEASE_ASSOCS* annotation tag (VCF and TSV)
+   * Associations between protein targets and disease based on multiple lines of evidence (mutations,affected pathways,GWAS, literature etc). Format: CUI:EFO_ID:IS_DIRECT:OVERALL_SCORE
+ * Added *OPENTARGETS_TRACTABILITY_COMPOUND* annotation tag (VCF and TSV)
+   * Confidence for the existence of a modulator (small molecule) that interacts with the target (protein) to elicit a desired biological effect
+ * Added *OPENTARGTES_TRACTABILITY_ANTIBODY* annotation tag (VCF and TSV)
+   * Confidence for the existence of a modulator (antibody) that interacts with the target (protein) to elicit a desired biological effect
+ * Added *CLINVAR_REVIEW_STATUS_STARS* annotation tag
+   * Rating of the ClinVar variant (0-4 stars) with respect to level of review
+
+##### Changed
+ * Moved from [IntoGen's driver mutation resource](https://www.intogen.org/) to [TCGA's putative driver mutation list](https://doi.org/10.1016/j.cell.2018.02.060) in display of driver mutation status
+ * Moved option for vcf_validation from configuration file to run script (`--no_vcf_validate`)
+
+##### Removed
+ * Original tier model 'pcgr'
+
+
 #### 0.7.0 - Nov 27th 2018
 
 ##### Fixed
@@ -24,7 +81,7 @@
 	* Added possibility to add docker user-id
  * Possibility for MAF file output (converted with vcf2maf), must be configured by the user in the TOML file (i.e. *vcf2maf = true*, [Issue #17](https://github.com/sigven/pcgr/issues/17))
  * Possibility for adding custom VCF INFO tags to PCGR output files (JSON/TSV), must be configured by the user in the TOML file (i.e. *custom_tags*)
- * Addded MUTATION_HOTSPOT_CANCERTYPES in data tables (i.e. listing tumor types in which hotspot mutations have been found)
+ * Added MUTATION_HOTSPOT_CANCERTYPE in data tables (i.e. listing tumor types in which hotspot mutations have been found)
  * Included the 'rs' prefix for dbSNP identifiers (HTML and TSV output)
  * Individual entries/columns for variant effect predictions:
 	 * Individual algorithms: SIFT_DBNSFP, M_CAP_DBNSFP, MUTPRED_DBNSFP, MUTATIONTASTER_DBNSFP, MUTATIONASSESSOR_DBNSFP, FATHMM_DBNSFP, FATHMM_MKL_DBNSFP, PROVEAN_DBNSFP

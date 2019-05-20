@@ -40,104 +40,6 @@ def error_message(message, logger):
    logger.error('')
    exit(1)
 
-# def verify_config_file(configuration_file, logger):
-#    if not os.path.exists(os.path.abspath(configuration_file)):
-#       err_msg = "Input file (" + str(configuration_file) + ") does not exist"
-#       error_message(err_msg,logger)
-
-#    if not os.path.abspath(configuration_file).endswith('.toml'):
-#       err_msg = "Configuration file (" + os.path.abspath(configuration_file) + ") does not have the correct file extension (.toml)"
-#       error_message(err_msg,logger)
-
-#    config_host_info = {'basename':os.path.basename(str(configuration_file)), 'dir':os.path.dirname(os.path.abspath(configuration_file))}
-#    return config_host_info
-
-# def verify_input_vcf(input_vcf, logger):
-#    if not os.path.exists(os.path.abspath(input_vcf)):
-#       err_msg = "Input file (" + str(input_vcf) + ") does not exist"
-#       error_message(err_msg,logger)
-
-#    if not (os.path.abspath(input_vcf).endswith('.vcf') or os.path.abspath(input_vcf).endswith('.vcf.gz')):
-#       err_msg = "VCF input file (" + os.path.abspath(input_vcf) + ") does not have the correct file extension (.vcf or .vcf.gz)"
-#       error_message(err_msg,logger)
-
-#    ## check that tabix file exist if bgzipped files is given
-#    if os.path.abspath(input_vcf).endswith('.vcf.gz'):
-#       tabix_file = input_vcf + '.tbi'
-#       if not os.path.exists(os.path.abspath(tabix_file)):
-#          err_msg = "Tabix file (i.e. '.gz.tbi') is not present for the bgzipped VCF input file (" + os.path.abspath(input_vcf) + "). Please make sure your input VCF is properly compressed and indexed (bgzip + tabix)"
-#          error_message(err_msg,logger)
-
-#    vcf_host_info = {'basename':os.path.basename(str(input_vcf)), 'dir':os.path.dirname(os.path.abspath(input_vcf))}
-#    return vcf_host_info
-
-# def verify_somatic_cna(input_cna, logger):
-#    if not os.path.exists(os.path.abspath(input_cna)):
-#       err_msg = "Input file (" + str(input_cna) + ") does not exist"
-#       error_message(err_msg,logger)
-#    if not (os.path.abspath(input_cna).endswith('.tsv') or os.path.abspath(input_cna).endswith('.txt')):
-#       err_msg = "CNA segment input file (" + os.path.abspath(input_cna) + ") does not have the correct file extension (.tsv or .txt)"
-#       error_message(err_msg,logger)
-   
-#    input_cna_basename = os.path.basename(str(input_cna))
-#    input_cna_dir = os.path.dirname(os.path.abspath(input_cna))
-
-#    cna_host_info = {'basename':os.path.basename(str(input_cna_basename)), 'dir':os.path.dirname(os.path.abspath(input_cna_dir))}
-#    return cna_host_info
-
-# def verify_output_folder(output_dir, logger):
-#    ## check the existence of given output folder
-#    output_dir_full = os.path.abspath(output_dir)
-#    if not os.path.isdir(output_dir_full):
-#       err_msg = "Output directory (" + str(output_dir_full) + ") does not exist"
-#       error_message(err_msg,logger)
-
-# def verify_databundle(directory, db_version, genome_assembly, logger, workflow = 'pcgr'):
-#    ## check the existence of base folder
-#    base_dir = os.path.abspath(directory)
-#    if not os.path.isdir(base_dir):
-#       err_msg = "Base directory (" + str(base_dir) + ") does not exist"
-#       error_message(err_msg,logger)
-   
-#    ## check the existence of data folder within the base folder
-#    db_dir = os.path.join(os.path.abspath(directory), 'data')
-#    if not os.path.isdir(db_dir):
-#       err_msg = "Data directory (" + str(db_dir) + ") does not exist"
-#       error_message(err_msg,logger)
-   
-#    ## check the existence of specified assembly data folder within the base folder
-#    db_assembly_dir = os.path.join(os.path.abspath(db_dir), genome_assembly)
-#    if not os.path.isdir(db_assembly_dir):
-#       err_msg = "Data directory for the specified genome assembly (" + str(db_assembly_dir) + ") does not exist"
-#       error_message(err_msg,logger)
-   
-#    ## check the existence of RELEASE_NOTES (starting from 0.4.0)
-#    rel_notes_file = os.path.join(os.path.abspath(db_assembly_dir), 'RELEASE_NOTES')
-#    if not os.path.exists(rel_notes_file):
-#       err_msg = 'The PCGR data bundle is outdated - please download the latest data bundle (see github.com/sigven/pcgr for instructions)'
-#       if workflow == 'gvanno':
-#          err_msg = 'The gvanno data bundle is outdated - please download the latest data bundle (see github.com/sigven/gvanno for instructions)'
-#       if workflow == 'cpsr':
-#          err_msg = 'The cpsr data bundle is outdated - please download the latest data bundle (see github.com/sigven/cpsr for instructions)'
-#       error_message(err_msg,logger)
-      
-#    release_notes = open(rel_notes_file,'r')
-#    compliant_data_bundle = 0
-#    for line in release_notes:
-#       if db_version in line:
-#          compliant_data_bundle = 1
-   
-#    release_notes.close()
-
-#    if compliant_data_bundle == 0:
-#       err_msg = 'The PCGR data bundle is not compliant with the software version - please download the latest software and data bundle (see https://github.com/sigven/pcgr for instructions)'
-#       if workflow == 'gvanno':
-#           err_msg = 'The gvanno data bundle is not compliant with the software version - please download the latest software and data bundle (see https://github.com/sigven/gvanno for instructions)'
-#       if workflow == 'cpsr':
-#           err_msg = 'The cpsr data bundle is not compliant with the software version - please download the latest software and data bundle (see https://github.com/sigven/cpsr for instructions)'
-#       error_message(err_msg,logger)
-#    return
-
 def write_pass_vcf(annotated_vcf, logger):
    
    out_vcf = re.sub(r'\.annotated\.vcf\.gz$','.annotated.pass.vcf',annotated_vcf)
@@ -215,13 +117,20 @@ def read_config_options(configuration_file, base_dir, genome_assembly, logger, w
       err_msg = 'Configuration file ' + str(configuration_file) + ' is not formatted correctly'
       error_message(err_msg, logger)
    
-   tumor_types = []
+   valid_tumor_types = ['Adrenal_Gland_Cancer_NOS','Ampullary_Carcinoma_NOS','Biliary_Tract_Cancer_NOS','Bladder_Urinary_Tract_Cancer_NOS',
+                        'Bone_Cancer_NOS','Breast_Cancer_NOS','Cancer_Unknown_Primary_NOS','Cervical_Cancer_NOS','CNS_Brain_Cancer_NOS',
+                        'Colorectal_Cancer_NOS','Esophageal_Cancer_NOS','Head_And_Neck_Cancer_NOS','Kidney_Cancer','Leukemia_NOS',
+                        'Liver_Cancer_NOS','Lung_Cancer_NOS','Lymphoma_Hodgkin_NOS','Lymphoma_Non_Hodgkin_NOS','Multiple_Myeloma_NOS',
+                        'Ovarian_Fallopian_Tube_Cancer_NOS','Pancreatic_Cancer_NOS','Penile_Cancer_NOS','Peripheral_Nervous_System_Cancer_NOS',
+                        'Peritoneal_Cancer_NOS','Pleural_Cancer_NOS','Prostate_Cancer_NOS','Skin_Cancer_NOS','Soft_Tissue_Cancer_NOS',
+                        'Stomach_Cancer_NOS','Testicular_Cancer_NOS','Thymic_Cancer_NOS','Thyroid_Cancer_NOS','Uterine_Cancer_NOS',
+                        'Vulvar_Vaginal_Cancer_NOS','']
+
    for section in config_options:
       if section in user_options:
          for var in config_options[section]:
             if not var in user_options[section]:
                continue
-            #print(str(section) + '\t' + str(var))
             if isinstance(config_options[section][var],bool) and not isinstance(user_options[section][var],bool):
                err_msg = 'Configuration value ' + str(user_options[section][var]) + ' for ' + str(var) + ' cannot be parsed properly (expecting boolean)'
                error_message(err_msg, logger)
@@ -234,10 +143,11 @@ def read_config_options(configuration_file, base_dir, genome_assembly, logger, w
             if isinstance(config_options[section][var],str) and not isinstance(user_options[section][var],str):
                err_msg = 'Configuration value ' + str(user_options[section][var]) + ' for ' + str(var) + ' cannot be parsed properly (expecting string)'
                error_message(err_msg, logger)
-            if section == 'tumor_type':
-               if user_options[section][var]:
-                  tumor_types.append(str(var))
-            tier_options = ['pcgr','pcgr_acmg']
+            if section == 'tumor_type' and var == 'type':
+               if not str(user_options[section][var]) in valid_tumor_types:
+                  err_msg('Configuration value for tumor type (' + str(user_options[section][var]) + ') is not a valid type')
+                  error_message(err_msg, logger)
+            #tier_options = ['pcgr','pcgr_acmg']
             normalization_options = ['default','exome','genome','exome2genome']
             populations_tgp = ['afr','amr','eas','sas','eur','global']
             populations_gnomad = ['afr','amr','eas','sas','nfe','oth','fin','asj','global']
@@ -252,17 +162,21 @@ def read_config_options(configuration_file, base_dir, genome_assembly, logger, w
                if int(user_options[section][var]) < 1 or int(user_options[section][var]) > 30:
                   err_msg = "Number of mutational signatures in search space ('mutsignatures_signature_limit') must be positive and not more than 30 (retrieved value: " + str(user_options[section][var]) + ")"
                   error_message(err_msg,logger)
-            if var == 'tier_model' and not str(user_options[section][var]) in tier_options:
-               err_msg = 'Configuration value \'' + str(user_options[section][var]) + '\' for ' + str(var) + ' cannot be parsed properly (expecting \'pcgr\', or \'pcgr_acmg\')'
-               error_message(err_msg, logger)
+            # if var == 'tier_model' and not str(user_options[section][var]) in tier_options:
+            #    err_msg = 'Configuration value \'' + str(user_options[section][var]) + '\' for ' + str(var) + \
+            #       ' cannot be parsed properly (expecting \'pcgr\', or \'pcgr_acmg\')'
+            #    error_message(err_msg, logger)
             if var == 'pop_gnomad' and not str(user_options[section][var]) in populations_gnomad:
-               err_msg = 'Configuration value \'' + str(user_options[section][var]) + '\' for ' + str(var) + ' cannot be parsed properly (expecting \'afr\', \'amr\', \'asj\', \'eas\', \'fin\', \'global\', \'nfe\', \'oth\', or \'sas\')'
+               err_msg = 'Configuration value \'' + str(user_options[section][var]) + '\' for ' + str(var) + \
+                  ' cannot be parsed properly (expecting \'afr\', \'amr\', \'asj\', \'eas\', \'fin\', \'global\', \'nfe\', \'oth\', or \'sas\')'
                error_message(err_msg, logger)
             if var == 'pop_tgp' and not str(user_options[section][var]) in populations_tgp:
-               err_msg = 'Configuration value \'' + str(user_options[section][var]) + '\' for ' + str(var) + ' cannot be parsed properly (expecting \'afr\', \'amr\', \'eas\', \'eur\', \'global\', or \'sas\')'
+               err_msg = 'Configuration value \'' + str(user_options[section][var]) + '\' for ' + str(var) + \
+                  ' cannot be parsed properly (expecting \'afr\', \'amr\', \'eas\', \'eur\', \'global\', or \'sas\')'
                error_message(err_msg, logger)
             if var == 'report_theme' and not str(user_options[section][var]) in theme_options:
-               err_msg = 'Configuration value \'' + str(user_options[section][var]) + '\' for ' + str(var) + ' cannot be parsed properly (expecting \'default\', \'cerulean\', \'journal\', \'flatly\', \'readable\', \'spacelab\', \'united\', \'cosmo\', \'lumen\', \'paper\', \'sandstone\', \'simplex\', or \'yeti\')'
+               err_msg = 'Configuration value \'' + str(user_options[section][var]) + '\' for ' + str(var) + \
+                  ' cannot be parsed properly (expecting \'default\', \'cerulean\', \'journal\', \'flatly\', \'readable\', \'spacelab\', \'united\', \'cosmo\', \'lumen\', \'paper\', \'sandstone\', \'simplex\', or \'yeti\')'
                error_message(err_msg, logger)
             if var.startswith('maf_'):
                if user_options[section][var] < 0 or user_options[section][var] > 1:
@@ -277,8 +191,8 @@ def read_config_options(configuration_file, base_dir, genome_assembly, logger, w
                   err_msg = "Maximum AF normal: " + str(var) + " must be within the [0,1] range, current value is " + str(user_options[section][var]) + ")"
                   error_message(err_msg,logger)
             if var == 'target_size_mb':
-               if user_options[section][var] < 0 or user_options[section][var] > 50:
-                  err_msg = "Target size region in Mb (" + str(user_options[section][var]) + ") is not positive or larger than the likely maximum size of the coding human genome (50 Mb))"
+               if user_options[section][var] < 0 or user_options[section][var] > 34:
+                  err_msg = "Target size region in Mb (" + str(user_options[section][var]) + ") is not positive or larger than the likely maximum size of the coding human genome (34 Mb))"
                   error_message(err_msg,logger)
                if user_options[section][var] < 1:
                   warn_msg = "Target size region in Mb (" + str(user_options[section][var]) + ") must be greater than 1 for mutational burden estimate to be robust (ignoring TMB calculation)"
@@ -296,21 +210,24 @@ def read_config_options(configuration_file, base_dir, genome_assembly, logger, w
                if user_options['cna'][var] < 0:
                   err_msg = "Log ratio for copy number amplifications (" + str(user_options[section][var]) + ") should be greater than zero"
                   error_message(err_msg,logger)
-            if var == 'min_majority' and section == 'dbnsfp':
-               if user_options['dbnsfp'][var] > 8 or user_options['dbnsfp'][var] < 5:
-                  err_msg = "Minimum number of majority votes for consensus calls among dbNSFP predictions should not exceed 8 and should not be less than 5"
-                  error_message(err_msg,logger)
-            if var == 'max_minority' and section == 'dbnsfp':
-               if user_options['dbnsfp'][var] >= config_options['dbnsfp']['min_majority'] or user_options['dbnsfp'][var] > 2 or user_options['dbnsfp'][var] < 0 or (user_options['dbnsfp'][var] + config_options['dbnsfp']['min_majority'] > 8):
-                  err_msg = "Maximum number of minority votes for consensus calls among dbNSFP predictions should not exceed 2 (8 algorithms in total) and should be less than min_majority (" + str(config_options['dbnsfp']['min_majority']) + ")"
-                  error_message(err_msg,logger)
-            
+            if var == 'vep_pick_order':
+               values = str(user_options['other'][var]).split(',')
+               permitted_sources = ['canonical','appris','tsl','biotype','ccds','rank','length']
+               num_permitted_sources = 0
+               for v in values:
+                  if v in permitted_sources:
+                     num_permitted_sources += 1
+               
+               if num_permitted_sources < 7:
+                  err_msg = "Configuration value vep_pick_order = " + str(user_options['other']['vep_pick_order']) + " is formatted incorrectly should be a comma-separated string of the following values: canonical,appris,tsl,biotype,ccds,rank,length"
+                  error_message(err_msg, logger)
             config_options[section][var] = user_options[section][var]
 
-   if len(tumor_types) > 2:
-      err_msg = "Two many tumor types (", str(",".join(tumor_types)) + ")  set to True - limit is set to two"
-      error_message(err_msg,logger)
+   
    if wflow == 'pcgr':
+      if config_options['tumor_type']['type'] == '':
+         err_msg = "Tumor type not defined - please specify a tumor type in the configuration file ([tumor_type] section)"
+         error_message(err_msg,logger)
       if 'msi' in config_options.keys() and 'mutational_burden' in config_options.keys():
          if config_options['msi']['msi'] == 1 and config_options['mutational_burden']['mutational_burden'] == 0:
             err_msg = "Prediction of MSI status (msi = true) requires mutational burden/target_size input (mutational_burden = true) - this is currently set as false"
@@ -353,6 +270,8 @@ def map_variant_effect_predictors(rec, algorithms):
          for algo_pred in rec.INFO['EFFECT_PREDICTIONS'].split('&'):
             if algo_pred.startswith('sift:'):
                rec.INFO['SIFT_DBNSFP'] = str(algo_pred.split(':')[1])
+            if algo_pred.startswith('sift4g:'):
+               rec.INFO['SIFT4G_DBNSFP'] = str(algo_pred.split(':')[1])
             if algo_pred.startswith('provean:'):
                rec.INFO['PROVEAN_DBNSFP'] = str(algo_pred.split(':')[1])
             if algo_pred.startswith('m-cap:'):
@@ -369,6 +288,10 @@ def map_variant_effect_predictors(rec, algorithms):
                rec.INFO['MUTATIONTASTER_DBNSFP'] = str(algo_pred.split(':')[1])
             if algo_pred.startswith('mutationassessor:'):
                rec.INFO['MUTATIONASSESSOR_DBNSFP'] = str(algo_pred.split(':')[1])
+            if algo_pred.startswith('deogen2:'):
+               rec.INFO['DEOGEN2_DBNSFP'] = str(algo_pred.split(':')[1])
+            if algo_pred.startswith('primateai:'):
+               rec.INFO['PRIMATEAI_DBNSFP'] = str(algo_pred.split(':')[1])
             if algo_pred.startswith('splice_site_rf:'):
                rec.INFO['SPLICE_SITE_RF_DBNSFP'] = str(algo_pred.split(':')[1])
             if algo_pred.startswith('splice_site_ada:'):
@@ -386,59 +309,90 @@ def detect_reserved_info_tag(tag, tag_name, logger):
       err_msg = 'Custom INFO tag (' + str(tag_name) + ') needs another name - ' + str(tag) + ' is a reserved field in the VCF specification (FORMAT)'
       return error_message(err_msg, logger)
 
-def set_coding_change(rec):
+
+def assign_cds_exon_intron_annotations(csq_record):
+   csq_record['CODING_STATUS'] = 'noncoding'
+   csq_record['EXONIC_STATUS'] = 'nonexonic'
+   csq_record['SPLICE_DONOR_RELEVANT'] = False
+   csq_record['NULL_VARIANT'] = False
    
+   coding_csq_pattern = r"^(stop_|start_lost|frameshift_|missense_|splice_donor|splice_acceptor|protein_altering|inframe_)"
+   wes_csq_pattern = r"^(stop_|start_lost|frameshift_|missense_|splice_donor|splice_acceptor|inframe_|protein_altering|synonymous)"
+   null_pattern = r"^(stop_|frameshift_)"
+   if re.match(coding_csq_pattern, str(csq_record['Consequence'])):
+      csq_record['CODING_STATUS'] = 'coding'
+   
+   if re.match(wes_csq_pattern, str(csq_record['Consequence'])):
+      csq_record['EXONIC_STATUS'] = 'exonic'
+   
+   if re.match(null_pattern, str(csq_record['Consequence'])):
+      csq_record['NULL_VARIANT'] = True
+
+   if re.match(r"^splice_region_variant", str(csq_record['Consequence'])) and re.search(r'(\+3(A|G)>|\+4G>|\+5G>)', str(csq_record['HGVSc'])):
+      csq_record['SPLICE_DONOR_RELEVANT'] = True
+
    for m in ['HGVSp_short','CDS_CHANGE']:
-      rec.INFO[m] = '.'
-   if not rec.INFO.get('HGVSc') is None:
-      if rec.INFO.get('HGVSc') != '.':
-         if 'splice_acceptor_variant' in rec.INFO.get('Consequence') or 'splice_donor_variant' in rec.INFO.get('Consequence'):
-            key = str(rec.INFO.get('Consequence')) + ':' + str(rec.INFO.get('HGVSc'))
-            rec.INFO['CDS_CHANGE'] = key
-   if rec.INFO.get('Amino_acids') is None or rec.INFO.get('Protein_position') is None or rec.INFO.get('Consequence') is None:
+      csq_record[m] = '.'
+   if not csq_record['HGVSc'] is None:
+      if csq_record['HGVSc'] != '.':
+         if 'splice_acceptor_variant' in csq_record['Consequence'] or 'splice_donor_variant' in csq_record['Consequence']:
+            key = str(csq_record['Consequence']) + ':' + str(csq_record['HGVSc'])
+            csq_record['CDS_CHANGE'] = key
+   if csq_record['Amino_acids'] is None or csq_record['Protein_position'] is None or csq_record['Consequence'] is None:
       return
-   if not rec.INFO.get('Protein_position') is None:
-      if rec.INFO.get('Protein_position').startswith('-'):
+   if not csq_record['Protein_position'] is None:
+      if csq_record['Protein_position'].startswith('-'):
          return
 
    protein_change = '.'
-   if '/' in rec.INFO.get('Protein_position'):
-      protein_position = str(rec.INFO.get('Protein_position').split('/')[0])
+   if '/' in csq_record['Protein_position']:
+      protein_position = str(csq_record['Protein_position'].split('/')[0])
       if '-' in protein_position:
          if protein_position.split('-')[0].isdigit():
-            rec.INFO['AMINO_ACID_START'] = protein_position.split('-')[0]
+            csq_record['AMINO_ACID_START'] = protein_position.split('-')[0]
          if protein_position.split('-')[1].isdigit():
-            rec.INFO['AMINO_ACID_END'] = protein_position.split('-')[1]
+            csq_record['AMINO_ACID_END'] = protein_position.split('-')[1]
       else:
          if protein_position.isdigit():
-            rec.INFO['AMINO_ACID_START'] = protein_position
-            rec.INFO['AMINO_ACID_END'] = protein_position
+            csq_record['AMINO_ACID_START'] = protein_position
+            csq_record['AMINO_ACID_END'] = protein_position
    
-   if not rec.INFO.get('HGVSp') is None:
-      if rec.INFO.get('HGVSp') != '.':
-         if ':' in rec.INFO.get('HGVSp'):
-            protein_identifier = str(rec.INFO.get('HGVSp').split(':')[0])
+   if not csq_record['HGVSp'] is None:
+      if csq_record['HGVSp'] != '.':
+         if ':' in csq_record['HGVSp']:
+            protein_identifier = str(csq_record['HGVSp'].split(':')[0])
             if protein_identifier.startswith('ENSP'):
-               protein_change_VEP = str(rec.INFO.get('HGVSp').split(':')[1])
+               protein_change_VEP = str(csq_record['HGVSp'].split(':')[1])
                protein_change = threeToOneAA(protein_change_VEP)
   
-   if 'synonymous_variant' in rec.INFO.get('Consequence'):
-      protein_change = 'p.' + str(rec.INFO.get('Amino_acids')) + str(protein_position) + str(rec.INFO.get('Amino_acids'))
-      if 'stop_lost' in str(rec.INFO.get('Consequence')) and '/' in str(rec.INFO.get('Amino_acids')):
-         protein_change = 'p.X' + str(protein_position) + str(rec.INFO.get('Amino_acids')).split('/')[1]
+   if 'synonymous_variant' in csq_record['Consequence']:
+      protein_change = 'p.' + str(csq_record['Amino_acids']) + str(protein_position) + str(csq_record['Amino_acids'])
+      if 'stop_lost' in str(csq_record['Consequence']) and '/' in str(csq_record['Amino_acids']):
+         protein_change = 'p.X' + str(protein_position) + str(csq_record['Amino_acids']).split('/')[1]
     
-   rec.INFO['HGVSp_short'] = protein_change
+   csq_record['HGVSp_short'] = protein_change
    exon_number = 'NA'
-   if not rec.INFO.get('EXON') is None:
-      if rec.INFO.get('EXON') != '.':
-         if '/' in rec.INFO.get('EXON'):
-            exon_number = str(rec.INFO.get('EXON')).split('/')[0]
-  
-   if not rec.INFO.get('HGVSc') is None:
-      if rec.INFO.get('HGVSc') != '.':
+   if not csq_record['EXON'] is None:
+      if csq_record['EXON'] != '.':
+         if '/' in csq_record['EXON']:
+            exon_number = str(csq_record['EXON']).split('/')[0]
+            num_exons = str(csq_record['EXON']).split('/')[1]
+            if exon_number == num_exons:
+               csq_record['LAST_EXON'] = True
+
+   if not csq_record['INTRON'] is None:
+      if csq_record['INTRON'] != '.':
+         if '/' in csq_record['INTRON']:
+            intron_number = str(csq_record['INTRON']).split('/')[0]
+            num_introns = str(csq_record['INTRON']).split('/')[1]
+            if intron_number == num_introns:
+               csq_record['LAST_INTRON'] = True
+
+   if not csq_record['HGVSc'] is None:
+      if csq_record['HGVSc'] != '.':
          if protein_change != '.':
-            key = str(rec.INFO.get('Consequence')) + ':' + str(rec.INFO.get('HGVSc')) + ':exon' + str(exon_number) + ':' + str(protein_change)
-            rec.INFO['CDS_CHANGE'] = key
+            key = str(csq_record['Consequence']) + ':' + str(csq_record['HGVSc']) + ':exon' + str(exon_number) + ':' + str(protein_change)
+            csq_record['CDS_CHANGE'] = key
 
    return
 
@@ -475,6 +429,7 @@ def map_dbnsfp_predictions(dbnsfp_tag, algorithms):
       i = 7
       v = 0
       
+      #print(str(algorithms))
       if len(algorithms) != len(dbnsfp_info[7:]):
          return effect_predictions
       
@@ -505,6 +460,22 @@ def map_dbnsfp_predictions(dbnsfp_tag, algorithms):
    return effect_predictions
 
 
+def make_transcript_xref_map(rec, fieldmap, xref_tag = 'PCGR_ONCO_XREF'):
+   transcript_xref_map = {}
+   if not rec.INFO.get(xref_tag) is None:
+      for tref in rec.INFO.get(xref_tag).split(','):
+         xrefs = tref.split('|')
+         ensembl_transcript_id = str(xrefs[0])
+         transcript_xref_map[ensembl_transcript_id] = {}
+         for annotation in fieldmap.keys():
+            annotation_index = fieldmap[annotation]
+            if annotation_index > (len(xrefs) - 1):
+               continue
+            if xrefs[annotation_index] != '':
+               transcript_xref_map[ensembl_transcript_id][annotation] = xrefs[annotation_index]
+   
+   return(transcript_xref_map)
+
 def vep_dbnsfp_meta_vcf(query_vcf, info_tags_wanted):
    vep_to_pcgr_af = {'gnomAD_AMR_AF':'AMR_AF_GNOMAD','gnomAD_AFR_AF':'AFR_AF_GNOMAD','gnomAD_EAS_AF':'EAS_AF_GNOMAD','gnomAD_NFE_AF':'NFE_AF_GNOMAD','gnomAD_AF':'GLOBAL_AF_GNOMAD',
                      'gnomAD_SAS_AF':'SAS_AF_GNOMAD','gnomAD_OTH_AF':'OTH_AF_GNOMAD','gnomAD_ASJ_AF':'ASJ_AF_GNOMAD','gnomAD_FIN_AF':'FIN_AF_GNOMAD','AFR_AF':'AFR_AF_1KG',
@@ -533,16 +504,88 @@ def vep_dbnsfp_meta_vcf(query_vcf, info_tags_wanted):
                         vep_csq_fields2index[v] = i
                      i = i + 1
                if identifier == 'DBNSFP':
-                  #if len(subtags) > 7:
-                     #effect_predictions_description = "Format: " + '|'.join(subtags[7:])
                   i = 7
                   while(i < len(subtags)):
                      dbnsfp_prediction_algorithms.append(str(re.sub(r'((_score)|(_pred))"*$','',subtags[i])))
                      i = i + 1
 
    vep_dbnsfp_meta_info = {}
-   vep_dbnsfp_meta_info['vep_csq_index2fields'] = vep_csq_index2fields
-   vep_dbnsfp_meta_info['vep_csq_fields2index'] = vep_csq_fields2index
+   vep_dbnsfp_meta_info['vep_csq_fieldmap'] = {}
+   vep_dbnsfp_meta_info['vep_csq_fieldmap']['field2index'] = vep_csq_fields2index
+   vep_dbnsfp_meta_info['vep_csq_fieldmap']['index2field'] = vep_csq_index2fields
    vep_dbnsfp_meta_info['dbnsfp_prediction_algorithms'] = dbnsfp_prediction_algorithms
 
    return vep_dbnsfp_meta_info
+
+def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, logger, pick_only = True, csq_identifier = 'CSQ'):
+
+   all_csq_pick = []
+   all_transcript_consequences = []
+
+   for csq in rec.INFO.get(csq_identifier).split(','):
+      csq_fields =  csq.split('|')
+      ## loop over VEP consequence blocks PICK'ed according to VEP's ranking scheme
+      if csq_fields[vep_csq_fields_map['field2index']['PICK']] == "1": ## only consider the primary/picked consequence when expanding with annotation tags
+         j = 0
+         csq_record = {}
+
+         ## loop over block annotation elements (separated with '|'), and assign their values to the csq_record dictionary object
+         while(j < len(csq_fields)):
+            if j in vep_csq_fields_map['index2field']:
+               if csq_fields[j] != '':
+                  csq_record[vep_csq_fields_map['index2field'][j]] = str(csq_fields[j])
+                  if vep_csq_fields_map['index2field'][j] == 'Feature':
+                     ensembl_transcript_id = str(csq_fields[j])
+                     if ensembl_transcript_id in transcript_xref_map:
+                        for annotation in transcript_xref_map[ensembl_transcript_id].keys():
+                           if annotation != 'SYMBOL':
+                              ## assign additional gene/transcript annotations from the custom transcript xref map (PCGR/CPSR) as key,value pairs in the csq_record object
+                              csq_record[annotation] = transcript_xref_map[ensembl_transcript_id][annotation]
+                     else:
+                        logger.warning('Could not find transcript xrefs for ' + str(ensembl_transcript_id))
+
+                  ## Specifically assign PFAM protein domain as a csq_record key
+                  if vep_csq_fields_map['index2field'][j] == 'DOMAINS':
+                     domain_identifiers = str(csq_fields[j]).split('&')
+                     for v in domain_identifiers:
+                        if v.startswith('Pfam_domain'):
+                           csq_record['PFAM_DOMAIN'] = str(re.sub(r'\.[0-9]{1,}$','',re.sub(r'Pfam_domain:','',v)))
+                     
+                     csq_record['DOMAINS'] = None
+                  ## Assign COSMIC/DBSNP mutation ID's as individual key,value pairs in the csq_record object
+                  if vep_csq_fields_map['index2field'][j] == 'Existing_variation':
+                     var_identifiers = str(csq_fields[j]).split('&')
+                     cosmic_identifiers = []
+                     dbsnp_identifiers = []
+                     for v in var_identifiers:
+                        if v.startswith('COSM'):
+                           cosmic_identifiers.append(v)
+                        if v.startswith('rs'):
+                           dbsnp_identifiers.append(v)
+                     if len(cosmic_identifiers) > 0:
+                        csq_record['COSMIC_MUTATION_ID'] = '&'.join(cosmic_identifiers)
+                     if len(dbsnp_identifiers) > 0:
+                        csq_record['DBSNPRSID'] = '&'.join(dbsnp_identifiers)
+               else:
+                  csq_record[vep_csq_fields_map['index2field'][j]] = None
+            j = j + 1
+         
+         ## Assign coding status, protein change, coding sequence change, last exon/intron status etc
+         assign_cds_exon_intron_annotations(csq_record)
+         all_csq_pick.append(csq_record)
+      symbol = '.'
+      if csq_fields[vep_csq_fields_map['field2index']['SYMBOL']] != "":
+         symbol = str(csq_fields[vep_csq_fields_map['field2index']['SYMBOL']])
+      consequence_entry = (str(csq_fields[vep_csq_fields_map['field2index']['Consequence']]) + ':' +  
+         str(symbol) + ':' + 
+         str(csq_fields[vep_csq_fields_map['field2index']['Feature_type']]) + ':' + 
+         str(csq_fields[vep_csq_fields_map['field2index']['Feature']]) + ':' + 
+         str(csq_fields[vep_csq_fields_map['field2index']['BIOTYPE']]))
+      all_transcript_consequences.append(consequence_entry)
+         
+   vep_csq_results = {}
+   vep_csq_results['vep_block'] = all_csq_pick
+   vep_csq_results['vep_all_csq'] = all_transcript_consequences
+
+   return(vep_csq_results)
+      

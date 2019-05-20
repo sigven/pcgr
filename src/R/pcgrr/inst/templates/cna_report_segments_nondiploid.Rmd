@@ -1,25 +1,26 @@
 ## Somatic CNAs
 
-```{r cna_plot_custom, child='cna_plot.Rmd', eval = FALSE}
-```
+```{r cna_plot, eval = pcg_report[['content']][['cna_plot']][['eval']]}
 
-<br>
+knitr::include_graphics(pcg_report[['content']][['cna_plot']][['png']])
+
+```
 
 ### Segments - amplifications and homozygous deletions
 
 The following user-defined thresholds determine copy number aberrations shown here: 
 
-* <span style="color:#009E73"><b>Copy number amplifications</b></span>: Log(2) ratio >= `r pcg_report[['pcgr_config']][['cna']][['logR_gain']]`
-* <span style="color:red"><b>Homozygous deletions</b></span>: Log(2) ratio <= `r pcg_report[['pcgr_config']][['cna']][['logR_homdel']]`
+* <span style="color:#009E73"><b>Copy number amplifications</b></span>: Log(2) ratio >= `r pcg_report[['metadata']][['config']][['cna']][['logR_gain']]`
+* <span style="color:red"><b>Homozygous deletions</b></span>: Log(2) ratio <= `r pcg_report[['metadata']][['config']][['cna']][['logR_homdel']]`
 
-A total of __`r NROW(pcg_report[['cna']][['variant_display']][['segment']])`__ unfiltered aberration segments satisfied the above criteria.
+A total of __`r NROW(pcg_report[['content']][['cna']][['variant_display']][['segment']])`__ unfiltered aberration segments satisfied the above criteria.
 
 <br>
 
 
 ```{r cna_segments_setup, echo=F}
 show_segment_filter_table <- F
-if(NROW(pcg_report[['cna']][['variant_display']][['segment']]) > 0){
+if(NROW(pcg_report[['content']][['cna']][['variant_display']][['segment']]) > 0){
   show_segment_filter_table <- T
 }
 
@@ -31,8 +32,8 @@ if(NROW(pcg_report[['cna']][['variant_display']][['segment']]) > 0){
 cna_segments_sd <- NULL
 cna_segments <- data.frame()
 
-if(NROW(pcg_report[['cna']][['variant_display']][['segment']]) > 0){
-  cna_segments <- dplyr::rename(pcg_report[['cna']][['variant_display']][['segment']], Segment = SEGMENT, Length_Mb = SEGMENT_LENGTH_MB, Cytoband = cytoband, Event_type = event_type)
+if(NROW(pcg_report[['content']][['cna']][['variant_display']][['segment']]) > 0){
+  cna_segments <- dplyr::rename(pcg_report[['content']][['cna']][['variant_display']][['segment']], Segment = SEGMENT, Length_Mb = SEGMENT_LENGTH_MB, Cytoband = cytoband, Event_type = event_type)
   cna_segments_sd <- crosstalk::SharedData$new(cna_segments)
 }else{
   cna_segments_sd <- crosstalk::SharedData$new(cna_segments)
@@ -64,7 +65,7 @@ crosstalk::bscols(
 htmltools::br()
 crosstalk::bscols(
   DT::datatable(cna_segments_sd, extensions=c("Buttons","Responsive"),escape = F, width = "100%",options=list(buttons = c('csv','excel'),dom = 'Bfrtip')) %>%
-  DT::formatStyle('LogR',color='white', backgroundColor = DT::styleInterval(pcg_report[['pcgr_config']][['cna']][['logR_homdel']], c('red', '#009E73')))
+  DT::formatStyle('LogR',color='white', backgroundColor = DT::styleInterval(pcg_report[['metadata']][['config']][['cna']][['logR_homdel']], c('red', '#009E73')))
 )
 
   

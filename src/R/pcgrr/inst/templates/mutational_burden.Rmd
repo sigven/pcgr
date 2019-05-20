@@ -1,5 +1,27 @@
 ### Tumor mutational burden (TMB)
 
-The size of the targeted (coding) genomic region has been defined as: __`r pcg_report[['pcgr_config']][['mutational_burden']][['target_size_mb']]` Mb__. For estimation of TMB, we used same approach as was outlined in a recent study [[@Chalmers2017-cz]](https://www.ncbi.nlm.nih.gov/pubmed/28420421), i.e. counting all coding, somatic base substitutions and indels in the targeted regions, including synonymous alterations. 
+The size of the targeted (coding) genomic region has been defined as: __`r pcg_report[['metadata']][['config']][['mutational_burden']][['target_size_mb']]` Mb__. For estimation of TMB, PCGR employs the same approach as was outlined in a recently published large-scale study of TMB [[@Chalmers2017-cz]](https://www.ncbi.nlm.nih.gov/pubmed/28420421), i.e. counting all coding, somatic base substitutions and indels in the targeted regions, including synonymous alterations. 
 
-Estimated mutational burden: __`r pcg_report[['tmb']][['variant_statistic']][['tmb_estimate']]`__ __mutations/Mb__ __(`r pcg_report[['tmb']][['variant_statistic']][['tmb_tertile']]`)__
+Estimated mutational burden: __`r pcg_report[['content']][['tmb']][['variant_statistic']][['tmb_estimate']]`__ __mutations/Mb__ __(`r pcg_report[['content']][['tmb']][['variant_statistic']][['tmb_tertile']]`)__
+
+<br><br>
+
+```{r tumor_tmb_tcga_header, echo = F, results='asis', eval=T}
+cat('<h4>TMB reference distributions - TCGA</h4>',sep="\n")
+```
+<br>
+The plot below indicates how the mutational burden estimated for the query tumor sample (red dotted line) compares with the distributions observed for tumor samples in The Cancer Genome Atlas (TCGA). The grey area indicates the upper TMB tertile as defined by the user. Please note the following characteristics of the TCGA dataset presented here, which must be taken into account during TMB interpretation of the query sample:
+
+* The TCGA tumor samples are sequenced with a mean coverage of approximately 100X
+* The TCGA somatic mutation calls are based on a consensus among variant callers (each variant is supported by a minimum of two variant calling algorithms)
+* The TCGA somatic mutation calls are based on paired tumor-control sequencing (tumor-only sequencing may produce higher numbers due to more noise)
+
+<br><br>
+```{r tumor_tmb_tcga_plot, echo = F, fig.width=12, fig.height=9, eval=T}
+tmb_plot <- pcgrr::plot_tmb_primay_site_tcga(pcg_report[['content']][['tmb']][['tcga_tmb']], p_site = pcg_report[['metadata']][['tumor_primary_site']], tmb_estimate = pcg_report[['content']][['tmb']][['variant_statistic']][['tmb_estimate']], tmb_high = pcg_report[['metadata']][['config']][['mutational_burden']][['tmb_intermediate_limit']])
+tmb_plot
+htmltools::br()
+```
+
+<br>
+

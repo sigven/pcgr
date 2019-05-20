@@ -19,11 +19,13 @@ def __main__():
    parser.add_argument('input_vcf', help='VCF input file with query variants (SNVs/InDels)')
    parser.add_argument('input_cna', help='Somatic copy number query segments (tab-separated values)')
    parser.add_argument('configuration_file', help='Configuration file (TOML-formatted, e.g. pcgr_conf.toml)')
+   parser.add_argument('panel_normal_vcf',help="VCF file with germline calls from panel of normals")
+   parser.add_argument('vcf_validation',type=int, help="Perform VCF validation with Ensembl's vcf-validator")
    parser.add_argument('genome_assembly',help='grch37 or grch38')
    parser.add_argument('--output_dir', dest='output_dir', help='Output directory', default='/workdir/output')
    args = parser.parse_args()
 
-   ret = validate_pcgr_input(args.pcgr_dir, args.input_vcf, args.input_cna, args.configuration_file, args.genome_assembly, args.output_dir)
+   ret = validate_pcgr_input(args.pcgr_dir, args.input_vcf, args.input_cna, args.configuration_file, args.panel_normal_vcf, args.vcf_validation, args.genome_assembly, args.output_dir)
    if ret != 0:
       sys.exit(1)
 
@@ -133,6 +135,31 @@ def check_existing_vcf_info_tags(input_vcf, pcgr_directory, genome_assembly, log
    logger.info('No query VCF INFO tags coincide with PCGR INFO tags')
    return ret
 
+def validate_panel_normal_vcf(vcf, logger):
+   
+   """
+   Function that checks the INFO tags in the panel of normal VCF for the presense of 'PANEL_OF_NORMAL' (logical tag)
+   If any coinciding tags, an error will be returned
+   """
+            
+   vcf = VCF(vcf)
+   ret = -1
+   for e in vcf.header_iter():
+      header_element = e.info()
+      if 'ID' in header_element.keys() and 'HeaderType' in header_element.keys():
+         if header_element['HeaderType'] == 'INFO' and header_element['Type'] == 'Flag':
+            if header_element['ID'] == 'PANEL_OF_NORMALS':
+               logger.info('Found \'PANEL_OF_NORMALS\' INFO flag in the VCF header section of the of panel of normals VCF file')
+               ret = 1
+
+
+   if ret == -1:
+      err_msg = 'INFO flag \'PANEL_OF_NORMALS\' is missing from the panel of normal VCF header'
+      return pcgr_error_message(err_msg, logger)
+
+   return ret
+
+
 def check_format_ad_dp_tags(vcf, pcgr_directory, config_options, logger):
    
    found_taf_tag = 0
@@ -143,14 +170,14 @@ def check_format_ad_dp_tags(vcf, pcgr_directory, config_options, logger):
    
    tumor_dp_tag = config_options['allelic_support']['tumor_dp_tag']
    tumor_af_tag = config_options['allelic_support']['tumor_af_tag']
-   normal_dp_tag = config_options['allelic_support']['normal_dp_tag']
-   normal_af_tag = config_options['allelic_support']['normal_af_tag']
+   control_dp_tag = config_options['allelic_support']['control_dp_tag']
+   control_af_tag = config_options['allelic_support']['control_af_tag']
    call_conf_tag = config_options['allelic_support']['call_conf_tag']
    
    annoutils.detect_reserved_info_tag(tumor_dp_tag,'tumor_dp_tag', logger)
-   annoutils.detect_reserved_info_tag(normal_dp_tag,'normal_dp_tag', logger)
+   annoutils.detect_reserved_info_tag(control_dp_tag,'control_dp_tag', logger)
    annoutils.detect_reserved_info_tag(tumor_af_tag,'tumor_af_tag', logger)
-   annoutils.detect_reserved_info_tag(normal_af_tag,'normal_af_tag', logger)
+   annoutils.detect_reserved_info_tag(control_af_tag,'control_af_tag', logger)
    annoutils.detect_reserved_info_tag(call_conf_tag,'call_conf_tag', logger)
    
    for e in vcf.header_iter():
@@ -171,19 +198,19 @@ def check_format_ad_dp_tags(vcf, pcgr_directory, config_options, logger):
                else:
                   err_msg = 'INFO tag for tumor variant allelic fraction (tumor_af_tag ' + str(tumor_af_tag) + ') is not correctly specified in input VCF (Type=' + str(header_element['Type']) + '), should be Type=Float'
                   return pcgr_error_message(err_msg, logger)
-            if header_element['ID'] == normal_dp_tag:
+            if header_element['ID'] == control_dp_tag:
                if header_element['Type'] == 'Integer':
-                  logger.info('Found INFO tag for normal/control variant sequencing depth (normal_dp_tag ' + str(normal_dp_tag) + ') in input VCF')
+                  logger.info('Found INFO tag for normal/control variant sequencing depth (control_dp_tag ' + str(control_dp_tag) + ') in input VCF')
                   found_ndp_tag = 1
                else:
-                  err_msg = 'INFO tag for normal/control variant sequencing depth (normal_dp_tag ' + str(normal_dp_tag) + ') is not correctly specified in input VCF (Type=' + str(header_element['Type']) + '), should be Type=Integer'
+                  err_msg = 'INFO tag for normal/control variant sequencing depth (control_dp_tag ' + str(control_dp_tag) + ') is not correctly specified in input VCF (Type=' + str(header_element['Type']) + '), should be Type=Integer'
                   return pcgr_error_message(err_msg, logger)
-            if header_element['ID'] == normal_af_tag:
+            if header_element['ID'] == control_af_tag:
                if header_element['Type'] == 'Float':
-                  logger.info('Found INFO tag for normal/control allelic fraction (normal_af_tag ' + str(normal_af_tag) + ') in input VCF')
+                  logger.info('Found INFO tag for normal/control allelic fraction (control_af_tag ' + str(control_af_tag) + ') in input VCF')
                   found_naf_tag = 1
                else:
-                  err_msg = 'INFO tag for for normal/control allelic fraction (normal_af_tag ' + str(normal_af_tag) + ') is not correctly specified in input VCF (Type=' + str(header_element['Type']) + ') should be Type=Float'
+                  err_msg = 'INFO tag for for normal/control allelic fraction (control_af_tag ' + str(control_af_tag) + ') is not correctly specified in input VCF (Type=' + str(header_element['Type']) + ') should be Type=Float'
                   return pcgr_error_message(err_msg, logger)
             if header_element['ID'] == call_conf_tag:
                if header_element['Type'] == 'String':
@@ -200,11 +227,18 @@ def check_format_ad_dp_tags(vcf, pcgr_directory, config_options, logger):
       logger.warn('Could not find the specified tumor_dp_tag (' + str(tumor_dp_tag) + ') in INFO column of input VCF')
    if tumor_af_tag != '' and found_taf_tag == 0:
       logger.warn('Could not find the specified tumor_af_tag (' + str(tumor_af_tag) + ') in INFO column of input VCF')
-   if normal_dp_tag != '' and found_ndp_tag == 0:
-      logger.warn('Could not find the specified normal_dp_tag (' + str(normal_dp_tag) + ') in INFO column of input VCF')
-   if normal_af_tag != '' and found_naf_tag == 0:
-      logger.warn('Could not find the specified normal_af_tag (' + str(normal_af_tag) + ') in INFO column of input VCF')
+   if control_dp_tag != '' and found_ndp_tag == 0:
+      logger.warn('Could not find the specified control_dp_tag (' + str(control_dp_tag) + ') in INFO column of input VCF')
+   if control_af_tag != '' and found_naf_tag == 0:
+      logger.warn('Could not find the specified control_af_tag (' + str(control_af_tag) + ') in INFO column of input VCF')
    
+   if config_options['tumor_only']['exclude_likely_hom_germline'] is True and config_options['tumor_only']['vcf_tumor_only'] is True and found_taf_tag == 0:
+      logger.warn('Could not find the specified tumor_af_tag (' + str(tumor_af_tag) + ') in INFO column of input VCF - filtering of homozygous germline variants in tumor-only mode will be ignored')
+
+   if config_options['tumor_only']['exclude_likely_het_germline'] is True and config_options['tumor_only']['vcf_tumor_only'] is True and found_taf_tag == 0:
+      logger.warn('Could not find the specified tumor_af_tag (' + str(tumor_af_tag) + ') in INFO column of input VCF - filtering of heterozygous germline variants in tumor-only mode will be ignored')
+
+
    if found_tdp_tag == 1 and found_taf_tag == 0:
       logger.warn('BOTH \' tumor_dp_tag\' AND \' tumor_af_tag\' need to be specified for use in tumor report (\'tumor_af_tag\' is missing)')
    
@@ -212,11 +246,13 @@ def check_format_ad_dp_tags(vcf, pcgr_directory, config_options, logger):
       logger.warn('BOTH \'tumor_dp_tag\' AND \'tumor_af_tag\' need to be specified for use in tumor report (\'tumor_dp_tag\' is missing)')
    
    if found_ndp_tag == 1 and found_naf_tag == 0:
-      logger.warn('BOTH \'normal_dp_tag\' AND \'normal_af_tag\' need to be specified for use in tumor report (\'normal_af_tag\' is missing)')
+      logger.warn('BOTH \'control_dp_tag\' AND \'control_af_tag\' need to be specified for use in tumor report (\'control_af_tag\' is missing)')
    
    if found_ndp_tag == 0 and found_naf_tag == 1:
-      logger.warn('BOTH \'normal_dp_tag\' AND \'normal_af_tag\' need to be specified for use in tumor report (\'normal_dp_tag\' is missing)')
-         
+      logger.warn('BOTH \'control_dp_tag\' AND \'control_af_tag\' need to be specified for use in tumor report (\'control_dp_tag\' is missing)')
+   
+   ## if filtering turned on for AF-based tumor-only filtering, return error if TVAF not defined
+
    return 0
 
 
@@ -264,30 +300,49 @@ def simplify_vcf(input_vcf, vcf, output_dir, logger):
    else:
       command_copy = 'cp ' + str(input_vcf_pcgr_ready) + ' ' + str(input_vcf_pcgr_ready_decomposed)
       os.system(command_copy)
+   
+   
+
    os.system('bgzip -cf ' + str(input_vcf_pcgr_ready_decomposed) + ' > ' + str(input_vcf_pcgr_ready_decomposed) + '.gz')
    os.system('tabix -p vcf ' + str(input_vcf_pcgr_ready_decomposed) + '.gz')
+
+   if os.path.exists(input_vcf_pcgr_ready_decomposed + '.gz') and os.path.getsize(input_vcf_pcgr_ready_decomposed + '.gz') > 0:
+      vcf = VCF(input_vcf_pcgr_ready_decomposed + '.gz')
+      i = 0
+      for rec in vcf:
+         i = i + 1
+      if len(vcf.seqnames) == 0 or i == 0:
+         logger.info('')
+         logger.info("Input VCF contains NO valid variants after VCF cleaning - quitting workflow")
+         logger.info('')
+         exit(1)
+
    os.system('rm -f ' + str(input_vcf_pcgr_ready) + ' ' + os.path.join(output_dir, 'decompose.log'))
 
-def validate_pcgr_input(pcgr_directory, input_vcf, input_cna, configuration_file, genome_assembly, output_dir):
+def validate_pcgr_input(pcgr_directory, input_vcf, input_cna, configuration_file, panel_normal_vcf, vcf_validation, genome_assembly, output_dir):
    """
    Function that reads the input files to PCGR (VCF file and Tab-separated values file with copy number segments) and performs the following checks:
    1. Check that VCF file is properly formatted (according to EBIvariation/vcf-validator - VCF v4.2) - optional (vcf_validation in config file)
    2. Check that no INFO annotation tags in the query VCF coincides with those generated by PCGR
    3. Check that provided columns for tumor/normal coverage and allelic depths are found in VCF
    4. Check that if VCF have variants with multiple alternative alleles (e.g. 'A,T') run vt decompose
-   5. Check that copy number segment file has required columns and correct data types (and range)
-   6. Any genotype data from VCF input file is stripped, and the resulting VCF file is sorted and indexed (bgzip + tabix) 
+   5. Check that panel-of-normals VCF adheres to the required format (PANEL_OF_NORMALS INFO tag in header)
+   6. Check that copy number segment file has required columns and correct data types (and range)
+   7. Any genotype data from VCF input file is stripped, and the resulting VCF file is sorted and indexed (bgzip + tabix) 
    """
    logger = annoutils.getlogger('pcgr-validate-input')
    config_options = annoutils.read_config_options(configuration_file, pcgr_directory, genome_assembly, logger, wflow = 'pcgr')
-   #print str(config_options)
+
+   if panel_normal_vcf == "None" and config_options['tumor_only']['vcf_tumor_only'] is True and config_options['tumor_only']['exclude_pon'] is True:
+      logger.warn('Panel-of-normals VCF is not present - exclusion of calls found in panel-of-normals will be ignored')
+
    if not input_vcf == 'None':
-      if config_options['other']['vcf_validation']:
+      if vcf_validation == 1:
          valid_vcf = is_valid_vcf(input_vcf, output_dir, logger)
          if valid_vcf == -1:
             return -1
       else:
-         logger.info('Skipping validation of VCF file - as defined in configuration file (vcf_validation = false)')
+         logger.info('Skipping validation of VCF file - as provided by option --no_vcf_validate')
       tag_check = check_existing_vcf_info_tags(input_vcf, pcgr_directory, genome_assembly, logger)
       if tag_check == -1:
          return -1
@@ -298,10 +353,16 @@ def validate_pcgr_input(pcgr_directory, input_vcf, input_cna, configuration_file
          return -1
       
       simplify_vcf(input_vcf, vcf, output_dir, logger)
+   
+   if not panel_normal_vcf == "None":
+      valid_panel_normals = validate_panel_normal_vcf(panel_normal_vcf, logger)
+      if valid_panel_normals == -1:
+         return -1
       
    if not input_cna == 'None':
-      ret = is_valid_cna(input_cna, logger)
-      return ret
+      valid_cna = is_valid_cna(input_cna, logger)
+      if valid_cna == -1:
+         return -1
    
    return 0
    
