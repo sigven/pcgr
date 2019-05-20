@@ -16,8 +16,8 @@ Tier models
    For **copy number aberrations**, aberrations linked to Tier 1 are displayed (within the section entitled *Copy number aberrations as biomarkers for prognosis, diagnosis, and drug response* in the HTML report)
    -->
 
-Tier model 1 - *pcgr_acmg*
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+*pcgr_acmg*
+~~~~~~~~~~~
 
 This tier model attempts to adopt concensus recommendations by ACMG, as
 outlined in `Li et al.,
