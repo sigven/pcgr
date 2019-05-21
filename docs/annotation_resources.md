@@ -65,8 +65,8 @@ __Antineoplastic drugs__
 __Gene-disease associations__
 
 - For gene-disease associations extracted from DisGeNET, we require a [score](http://www.disgenet.org/web/DisGeNET/menu/dbinfo#score) greater than 0.2 and that the association is suppported by at least one PMID (PubMed article). Associations involving non-cancer type of diseases are not included.
-- Cancer phenotype associations retrieved from the [Open Targets platform](https://www.targetvalidation.org/) are largely based on the [association score](https://docs.targetvalidation.org/getting-started/scoring) developed by the Open Targets platform, with a couple of extra post-processing steps:
-	- Phenotype associations in OpenTargets are assembled from [20 different data sources](https://docs.targetvalidation.org/data-sources/data-sources). Target-disease associations included in PCGR must be supported by **at least two distinct sources**
+- Cancer phenotype associations retrieved from the [Open Targets Platform](https://www.targetvalidation.org/) are largely based on the [association score](https://docs.targetvalidation.org/getting-started/scoring) developed by the Open Targets Platform, with a couple of extra post-processing steps:
+	- Phenotype associations in Open Targets Platform are assembled from [20 different data sources](https://docs.targetvalidation.org/data-sources/data-sources). Target-disease associations included in PCGR must be supported by **at least two distinct sources**
 	- The weakest associations, here defined as those with an association score < 0.4 (scale from 0 to 1), are ommitted
 	- As is done within the Open Targets Platform, association scores (for genes) are represented with varying shades of blue: the darker the blue, the stronger the association. Variant hits in tier 3/4 and the noncoding section are arranged according to this association score. If several disease subtypes are associated with a gene, the maximum association score is chosen.
 

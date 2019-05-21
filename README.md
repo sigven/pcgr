@@ -10,7 +10,7 @@ The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for
 * _May 20th 2019_: **0.8.0 release**
    * Bundle update (VEP, CIViC, UniProt, CancerMine, dbNSFP, OpenTargets, DisGeNET, TCGA, ICGC-PCAWG)
    * New functionality
-	   * Ranking of variants in tiers 3-4/noncoding according to [OpenTargets](https://targetvalidation.org)-derived association score of gene to tumor type
+	   * Ranking of variants in tiers 3-4/noncoding according to association scores form [Open Targets Platform](https://targetvalidation.org),([Carvalho-Silva et. al, NAR, 2019](https://www.ncbi.nlm.nih.gov/pubmed/30462303))
 	   * Mutational burden in the context of TCGA distributions
 	   * More extensive variant filtering options for tumor-only runs
 	   * Possibility to feed a panel-of-normals VCF to PCGR for filtering purposes

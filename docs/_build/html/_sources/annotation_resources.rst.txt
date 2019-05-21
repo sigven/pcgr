@@ -136,14 +136,14 @@ issue <https://github.com/sigven/pcgr/issues/37#issuecomment-391966286>`__
    one PMID (PubMed article). Associations involving non-cancer type of
    diseases are not included.
 -  Cancer phenotype associations retrieved from the `Open Targets
-   platform <https://www.targetvalidation.org/>`__ are largely based on
+   Platform <https://www.targetvalidation.org/>`__ are largely based on
    the `association
    score <https://docs.targetvalidation.org/getting-started/scoring>`__
-   developed by the Open Targets platform, with a couple of extra
+   developed by the Open Targets Platform, with a couple of extra
    post-processing steps:
 
-   -  Phenotype associations in OpenTargets are assembled from `20
-      different data
+   -  Phenotype associations in Open Targets Platform are assembled from
+      `20 different data
       sources <https://docs.targetvalidation.org/data-sources/data-sources>`__.
       Target-disease associations included in PCGR must be supported by
       **at least two distinct sources**
