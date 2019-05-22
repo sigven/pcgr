@@ -80,4 +80,6 @@ export(mutation_context)
 export(init_pcg_report)
 export(update_pcg_report)
 
+export(acmg_evidence_codes)
+
 importFrom(magrittr,"%>%")
