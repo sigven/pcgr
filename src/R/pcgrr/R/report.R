@@ -84,6 +84,9 @@ init_pcg_report <- function(config = NULL, sample_name = 'SampleX', class = NULL
           report[['metadata']][['tumor_tcga_cohort']] <- tumor_group_entry$tcga_cohort
           report[['metadata']][['medgen_ontology']][['query']] <- dplyr::filter(pcgr_data[['phenotype_ontology']][['medgen_cancer']], group == config$tumor_type$type)
         }
+      }else{
+        report[['metadata']][['tumor_class']] <- 'Cancer_NOS'
+        report[['metadata']][['medgen_ontology']][['query']] <- pcgr_data[['phenotype_ontology']][['medgen_cancer']]
       }
     }
     for(analysis_element in c('snv_indel','tmb','msi','cna','cna_plot','m_signature',

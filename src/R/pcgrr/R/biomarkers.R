@@ -24,7 +24,8 @@ get_clinical_associations_snv_indel <- function(sample_calls, pcgr_data, pcgr_co
   }else{
     #tumor_type_query <- pcgrr::list_to_df(pcgr_config$tumor_type) %>% dplyr::filter(list.element == T) %>% dplyr::select(name)
     tumor_type_query <- data.frame('name' = pcgr_config$tumor_type$type, stringsAsFactors = F)
-    if(nrow(tumor_type_query) == 0){
+
+    if(pcgr_config$tumor_type$type == ""){
       return(list('clinical_evidence_item' = clin_eitems_list, 'variant_set' = variant_set))
     }
     rlogging::message(paste0("Looking up SNV/InDel biomarkers for precision oncology - ",paste(tumor_type_query$name,collapse=", ")))

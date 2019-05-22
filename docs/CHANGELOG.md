@@ -1,6 +1,11 @@
 
 ## CHANGELOG
 
+#### 0.8.1 - May 22nd 2019
+
+##### Added
+  * *Cancer_NOS.toml* as configuration file for unspecified tumor types
+
 #### 0.8.0 - May 20th 2019
 
 ##### Fixed

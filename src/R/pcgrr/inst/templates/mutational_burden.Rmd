@@ -18,7 +18,7 @@ The plot below indicates how the mutational burden estimated for the query tumor
 
 <br><br>
 ```{r tumor_tmb_tcga_plot, echo = F, fig.width=12, fig.height=9, eval=T}
-tmb_plot <- pcgrr::plot_tmb_primay_site_tcga(pcg_report[['content']][['tmb']][['tcga_tmb']], p_site = pcg_report[['metadata']][['tumor_primary_site']], tmb_estimate = pcg_report[['content']][['tmb']][['variant_statistic']][['tmb_estimate']], tmb_high = pcg_report[['metadata']][['config']][['mutational_burden']][['tmb_intermediate_limit']])
+tmb_plot <- pcgrr::plot_tmb_primary_site_tcga(pcg_report[['content']][['tmb']][['tcga_tmb']], p_site = pcg_report[['metadata']][['tumor_primary_site']], tmb_estimate = pcg_report[['content']][['tmb']][['variant_statistic']][['tmb_estimate']], tmb_high = pcg_report[['metadata']][['config']][['mutational_burden']][['tmb_intermediate_limit']])
 tmb_plot
 htmltools::br()
 ```

@@ -1,6 +1,14 @@
 CHANGELOG
 ---------
 
+0.8.1 - May 22nd 2019
+^^^^^^^^^^^^^^^^^^^^^
+
+Added
+'''''
+
+-  *Cancer_NOS.toml* as configuration file for unspecified tumor types
+
 0.8.0 - May 20th 2019
 ^^^^^^^^^^^^^^^^^^^^^
 
@@ -9,6 +17,8 @@ Fixed
 
 -  Bug in value box for Tier 2 variants (new line carriage) `Issue
    #73 <https://github.com/sigven/pcgr/issues/73>`__
+
+.. _added-1:
 
 Added
 '''''
@@ -183,7 +193,7 @@ Fixed
 -  Removed ‘COSM’ prefix in COSMIC mutation links
 -  Bug in retrieval of splice site predictions from dbscSNV
 
-.. _added-1:
+.. _added-2:
 
 Added
 '''''
@@ -268,7 +278,7 @@ Fixed
 -  Bug in copy number annotation (missing protein-coding transcripts)
 -  Updated MSI prediction (variable importance, performance measures)
 
-.. _added-2:
+.. _added-3:
 
 Added
 '''''
@@ -300,7 +310,7 @@ Fixed
 0.6.0 - April 25th 2018
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-.. _added-3:
+.. _added-4:
 
 Added
 '''''

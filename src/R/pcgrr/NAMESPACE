@@ -69,7 +69,7 @@ export(signature_contributions_single_sample)
 export(generate_tier_tsv)
 export(predict_msi_status)
 export(msi_indel_fraction_plot)
-export(plot_tmb_primay_site_tcga)
+export(plot_tmb_primary_site_tcga)
 
 export(get_proper_maf_alleles)
 export(parse_transvar_file)

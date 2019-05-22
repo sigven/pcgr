@@ -38,7 +38,7 @@ generate_report_data_tmb <- function(sample_calls, pcgr_data, sample_name, pcgr_
   return(pcg_report_tmb)
 }
 
-plot_tmb_primay_site_tcga <- function(tcga_tmb, p_site = "Liver", tmb_estimate = 5, tmb_high = 20){
+plot_tmb_primary_site_tcga <- function(tcga_tmb, p_site = "Liver", tmb_estimate = 5, tmb_high = 20){
 
 
   tmb_site_colors <- data.frame('primary_site' = unique(tcga_tmb$sample_stats$primary_site$primary_site), stringsAsFactors = F)

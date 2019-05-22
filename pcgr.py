@@ -11,7 +11,7 @@ import getpass
 import platform
 import toml
 
-pcgr_version = 'dev'
+pcgr_version = '0.8.1'
 db_version = 'PCGR_DB_VERSION = 20190519'
 vep_version = '96'
 global vep_assembly
@@ -223,9 +223,9 @@ def read_config_options(configuration_file, pcgr_dir, genome_assembly, logger):
 
             pcgr_config_options[section][var] = user_options[section][var]
 
-   if pcgr_config_options['tumor_type']['type'] == '':
-      err_msg = "Tumor type not defined - please specify a tumor type in the configuration file ([tumor_type] section)"
-      pcgr_error_message(err_msg,logger)
+   #if pcgr_config_options['tumor_type']['type'] == '':
+      #err_msg = "Tumor type not defined - please specify a tumor type in the configuration file ([tumor_type] section)"
+      #pcgr_error_message(err_msg,logger)
    if pcgr_config_options['msi']['msi'] == 1 and pcgr_config_options['mutational_burden']['mutational_burden'] == 0:
       err_msg = "Prediction of MSI status (msi = true) requires mutational burden/target_size input (mutational_burden = true) - this is currently set as false"
       pcgr_error_message(err_msg,logger)

@@ -19,9 +19,9 @@ def __main__():
    parser.add_argument("--print_data_type_header", action="store_true", help="Print a header line with data types of VCF annotations")
    parser.add_argument("--compress", action="store_true", help="Compress TSV file with gzip")
    args = parser.parse_args()
-
+   
    vcf2tsv(args.query_vcf, args.out_tsv, args.skip_info_data, args.skip_genotype_data, args.keep_rejected_calls, args.compress, args.print_data_type_header)
-
+         
 
 def check_subprocess(command):
    try:
@@ -34,10 +34,10 @@ def check_subprocess(command):
 
 
 def vcf2tsv(query_vcf, out_tsv, skip_info_data, skip_genotype_data, keep_rejected_calls, compress, print_data_type_header):
-
+   
    vcf = VCF(query_vcf, gts012 = True)
    out = open(out_tsv,'w')
-
+   
    fixed_columns_header = ['CHROM','POS','ID','REF','ALT','QUAL','FILTER']
    fixed_columns_header_type = ['String','Integer','String','String','String','Float','String']
    samples = vcf.samples
@@ -46,10 +46,10 @@ def vcf2tsv(query_vcf, out_tsv, skip_info_data, skip_genotype_data, keep_rejecte
    sample_columns_header = []
    column_types = {}
    gt_present_header = 0
-
+   
    if len(samples) > 0:
       sample_columns_header.append('VCF_SAMPLE_ID')
-
+   
    for e in vcf.header_iter():
       header_element = e.info()
       if 'ID' in header_element.keys() and 'HeaderType' in header_element.keys():
@@ -86,7 +86,7 @@ def vcf2tsv(query_vcf, out_tsv, skip_info_data, skip_genotype_data, keep_rejecte
             #header_line = '\t'.join(fixed_columns_header)
             header_tags = fixed_columns_header
    header_line = '\t'.join(header_tags)
-
+   
    out.write('#https://github.com/sigven/vcf2tsv version=' + str(version) + '\n')
    if print_data_type_header is True:
       #header_tags = header_line.rstrip().split('\t')
@@ -100,7 +100,7 @@ def vcf2tsv(query_vcf, out_tsv, skip_info_data, skip_genotype_data, keep_rejecte
       out.write(str(header_line) + '\n')
    else:
       out.write(str(header_line) + '\n')
-
+   
    for rec in vcf:
       rec_id = '.'
       rec_qual = '.'
@@ -113,14 +113,14 @@ def vcf2tsv(query_vcf, out_tsv, skip_info_data, skip_genotype_data, keep_rejecte
       rec_filter = str(rec.FILTER)
       if rec.FILTER is None:
          rec_filter = 'PASS'
-
+     
       pos = int(rec.start) + 1
       fixed_fields_string = str(rec.CHROM) + '\t' + str(pos) + '\t' + str(rec_id) + '\t' + str(rec.REF) + '\t' + str(alt) + '\t' + str(rec_qual) + '\t' + str(rec_filter)
-
-
+      
+      
       if not 'PASS' in rec_filter and not keep_rejected_calls:
          continue
-
+      
       variant_info = rec.INFO
       vcf_info_data = []
       if skip_info_data is False:
@@ -182,7 +182,7 @@ def vcf2tsv(query_vcf, out_tsv, skip_info_data, skip_genotype_data, keep_rejecte
                   gt = '1/1'
             vcf_sample_genotype_data[samples[i]]['GT'] = gt
             i = i + 1
-
+               
       for format_tag in sorted(format_columns_header):
          if len(samples) > 0 and skip_genotype_data is False:
             sample_dat = rec.format(format_tag)
@@ -191,7 +191,7 @@ def vcf2tsv(query_vcf, out_tsv, skip_info_data, skip_genotype_data, keep_rejecte
                while k < len(samples):
                   if samples[k] in vcf_sample_genotype_data:
                      vcf_sample_genotype_data[samples[k]][format_tag] = '.'
-                  k = k + 1
+                  k = k + 1               
                continue
             dim = sample_dat.shape
             j = 0
@@ -210,7 +210,7 @@ def vcf2tsv(query_vcf, out_tsv, skip_info_data, skip_genotype_data, keep_rejecte
                   if samples[j] in vcf_sample_genotype_data:
                      vcf_sample_genotype_data[samples[j]][format_tag] = d
                j = j + 1
-
+      
       #print(str(vcf_sample_genotype_data))
       tsv_elements = []
       tsv_elements.append(fixed_fields_string)
@@ -236,7 +236,7 @@ def vcf2tsv(query_vcf, out_tsv, skip_info_data, skip_genotype_data, keep_rejecte
                         out.write('\t'.join(line_elements) + '\n')
                   else:
                      out.write("\t".join(str(n) for n in line_elements) + '\n')
-
+                    
             else:
                tsv_elements.append("\t".join(str(n) for n in vcf_info_data))
                line_elements = []
@@ -273,11 +273,14 @@ def vcf2tsv(query_vcf, out_tsv, skip_info_data, skip_genotype_data, keep_rejecte
             line_elements.extend(tsv_elements)
             line_elements = tsv_elements
             out.write('\t'.join(line_elements) + '\n')
-
+       
    out.close()
-
+   
    if compress is True:
       command = 'gzip -f ' + str(out_tsv)
       check_subprocess(command)
 
 if __name__=="__main__": __main__()
+
+
+   
