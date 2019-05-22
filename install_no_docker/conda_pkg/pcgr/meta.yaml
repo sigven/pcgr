@@ -135,6 +135,7 @@ test:
   commands:
     - pcgr.py --version
     - '$R -e "library(pcgrr)"'
+    - '$R -e "library(pcgrr) ; pcgrr::acmg_evidence_codes"'
   imports:
     - annoutils
 
