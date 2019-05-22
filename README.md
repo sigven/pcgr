@@ -71,7 +71,7 @@ The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for
 
 Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, Ola Myklebost, and Eivind Hovig. __Personal Cancer Genome Reporter: variant interpretation report for precision oncology__ (2017). _Bioinformatics_. 34(10):1778–1780. doi:[10.1093/bioinformatics/btx817](https://doi.org/10.1093/bioinformatics/btx817)
 
-### Annotation resources included in PCGR (0.8.0)
+### Annotation resources included in PCGR (0.8.1)
 
 * [VEP](http://www.ensembl.org/info/docs/tools/vep/index.html) - Variant Effect Predictor v96 (GENCODE v30/v19 as the gene reference dataset)
 * [CIViC](http://civic.genome.wustl.edu) - Clinical interpretations of variants in cancer (May 18th 2019)
