@@ -40,7 +40,7 @@ script:
   - pcgr.py
     --input_vcf examples/tumor_sample.COAD.vcf.gz
     --input_cna examples/tumor_sample.COAD.cna.tsv
-    . ./examples grch37 examples/pcgr_conf.COAD.toml tumor_sample.COAD
+    . ./examples grch37 examples/examples_BRCA.toml tumor_sample.COAD
   #
   # Condarized installation:
   - conda install --use-local ${PACKAGE_NAME}
@@ -49,7 +49,7 @@ script:
   - pcgr.py
     --input_vcf examples/tumor_sample.BRCA.vcf.gz
     --input_cna examples/tumor_sample.BRCA.cna.tsv
-    . ./examples grch37 examples/pcgr_conf.BRCA.toml tumor_sample.BRCA --no-docker
+    . ./examples grch37 examples/examples_BRCA.toml tumor_sample.BRCA --no-docker
 
 deploy:
   # Deploy to Anaconda.org
