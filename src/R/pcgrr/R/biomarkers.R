@@ -7,7 +7,7 @@
 #' @param biomarker_mapping_stringency - one of 'exact' (allele-specific) or 'approximate' (codon or exon-level biomarkers)
 #'
 #' @return list
-#'
+
 get_clinical_associations_snv_indel <- function(sample_calls, pcgr_data, pcgr_config, tumor_type_specificity = 'any_tumortype', biomarker_mapping_stringency = 1){
 
   all_eitems <- data.frame()
@@ -162,7 +162,7 @@ get_clinical_associations_snv_indel <- function(sample_calls, pcgr_data, pcgr_co
       for(i in 1:nrow(unique_variants)){
         rlogging::message(paste(unique_variants[i,],collapse=" "))
       }
-      all_eitems <- rbind(all_eitems, clinical_evidence_items)
+      all_eitems <- rbind.fill(all_eitems, clinical_evidence_items)
     }
     else{
       rlogging::message(paste0(nrow(clinical_evidence_items),' clinical evidence item(s) found .. mapping = ',mapping))
