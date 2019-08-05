@@ -21,7 +21,7 @@ requirements:
     - r-base
     - r-devtools
     - tar
-    - python
+    - python >=3.7.3
     - toml
     #
     # Need R packages build-time to correctly install pcgrr
@@ -66,7 +66,7 @@ requirements:
   run:
     #
     # PCGR: python
-    - python >=3.6
+    - python >=3.7.3
     - pip
     - numpy
     - cython
@@ -88,7 +88,7 @@ requirements:
     #
     # Perl (for VEP)
     - perl-bioperl
-    - ensembl-vep>=94
+    - ensembl-vep==96.3
     #
     # PCGR: R packages
     - r-base
