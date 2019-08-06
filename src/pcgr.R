@@ -3,6 +3,7 @@
 options(warn=-1)
 args = commandArgs(trailingOnly=TRUE)
 
+suppressWarnings(suppressPackageStartupMessages(library(plyr)))
 suppressWarnings(suppressPackageStartupMessages(library(pcgrr)))
 suppressWarnings(suppressPackageStartupMessages(library(magrittr)))
 suppressWarnings(suppressPackageStartupMessages(library(BSgenome.Hsapiens.UCSC.hg19)))
