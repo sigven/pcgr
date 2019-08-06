@@ -62,7 +62,7 @@ pcgr_config[['tumor_properties']][['tumor_purity']] <- purity_estimate
 pcgr_config[['tumor_properties']][['tumor_ploidy']] <- ploidy_estimate
 
 pcg_report <- pcgrr::generate_report(dir, query_vcf2tsv, pcgr_data, pcgr_config, sample_name = sample_name, cna_segments_tsv = query_cnv, 
-				     cna_plot = query_cna_plot, tier_model = pcgr_config$tier_model$tier_model)
-pcgrr::write_report(dir, pcg_report, sample_name, genome_assembly, tier_model = pcgr_config$tier_model$tier_model, format = 'html')
-pcgrr::write_report(dir, pcg_report, sample_name, genome_assembly, tier_model = pcgr_config$tier_model$tier_model, format = 'json')
+				     cna_plot = query_cna_plot, tier_model = 'pcgr_acmg')
+pcgrr::write_report(dir, pcg_report, sample_name, genome_assembly, tier_model = 'pcgr_acmg', format = 'html')
+pcgrr::write_report(dir, pcg_report, sample_name, genome_assembly, tier_model = 'pcgr_acmg', format = 'json')
 
