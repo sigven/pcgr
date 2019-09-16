@@ -71,7 +71,7 @@ get_clinical_associations_snv_indel <- function(sample_calls, pcgr_data, pcgr_co
         eitems <- dplyr::inner_join(civic_calls,civic_biomarkers,by=c("CIVIC_ID" = "evidence_id")) %>% dplyr::distinct()
         names(eitems) <- toupper(names(eitems))
         eitems <- eitems %>% dplyr::select(-c(EITEM_CONSEQUENCE,MAPPING_CATEGORY,EITEM_CODON,EITEM_EXON))
-        clinical_evidence_items <- rbind(clinical_evidence_items, eitems)
+        clinical_evidence_items <- rbind.fill(clinical_evidence_items, eitems)
       }
       sample_calls_cbmdb <- sample_calls %>% dplyr::filter(is.na(CIVIC_ID) & !is.na(CBMDB_ID))
       if(nrow(sample_calls_cbmdb) > 0){
@@ -82,7 +82,7 @@ get_clinical_associations_snv_indel <- function(sample_calls, pcgr_data, pcgr_co
         eitems <- dplyr::inner_join(cbmdb_calls,cbmdb_biomarkers,by=c("CBMDB_ID" = "evidence_id")) %>% dplyr::distinct()
         names(eitems) <- toupper(names(eitems))
         eitems <- eitems %>% dplyr::select(-c(EITEM_CONSEQUENCE,MAPPING_CATEGORY,EITEM_CODON,EITEM_EXON))
-        clinical_evidence_items <- rbind(clinical_evidence_items, eitems)
+        clinical_evidence_items <- rbind.fill(clinical_evidence_items, eitems)
       }
     }
     else{
@@ -257,7 +257,7 @@ names(civic_cna_biomarkers) <- toupper(names(civic_cna_biomarkers))
           biomarker_hits <- biomarker_hits_civic
         }
         if(nrow(biomarker_hits) > 0){
-          cna_biomarkers <- rbind(cna_biomarkers,biomarker_hits)
+          cna_biomarkers <- rbind.fill(cna_biomarkers,biomarker_hits)
         }
       }
     }
