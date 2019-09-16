@@ -30,7 +30,7 @@ get_clinical_associations_snv_indel <- function(sample_calls, pcgr_data, pcgr_co
     }
     rlogging::message(paste0("Looking up SNV/InDel biomarkers for precision oncology - ",paste(tumor_type_query$name,collapse=", ")))
   }
-  civic_biomarkers <- pcgr_data[['biomarkers']][['civic']] %>% dplyr::filter(alteration_type == 'MUT')
+  civic_biomarkers <- pcgr_data[['biomarkers']][['civic']] %>% dplyr::filter(alteration_type == 'MUT') %>% dplyr::filter(variant_origin == 'Somatic Mutation')
   cbmdb_biomarkers <- pcgr_data[['biomarkers']][['cbmdb']] %>% dplyr::filter(alteration_type == 'MUT')
   if("pubmed_html_link" %in% colnames(civic_biomarkers)){
     civic_biomarkers <- dplyr::rename(civic_biomarkers, citation = pubmed_html_link)
@@ -49,7 +49,10 @@ get_clinical_associations_snv_indel <- function(sample_calls, pcgr_data, pcgr_co
   if(tumor_type_specificity == 'specific_tumortype'){
     tumor_type_query <- data.frame('name' = pcgr_config$tumor_type$type, stringsAsFactors = F)
     #tumor_type_query <- pcgrr::list_to_df(pcgr_config$tumor_type) %>% dplyr::filter(list.element == T) %>% dplyr::select(name)
-    tumor_tree_query <- dplyr::semi_join(dplyr::select(pcgr_data[['phenotype_ontology']][['medgen_cancer']],group,do_id,cui,cui_name), tumor_type_query, by=c("group" = "name")) %>% dplyr::filter(!is.na(do_id)) %>% dplyr::distinct()
+    tumor_tree_query <- dplyr::semi_join(dplyr::select(pcgr_data[['phenotype_ontology']][['medgen_cancer']],group,do_id,cui,cui_name),
+                                         tumor_type_query, by=c("group" = "name")) %>%
+      dplyr::filter(!is.na(do_id)) %>%
+      dplyr::distinct()
     civic_biomarkers <- dplyr::semi_join(civic_biomarkers,tumor_tree_query,by=c("disease_ontology_id" = "do_id"))
     cbmdb_biomarkers <- dplyr::semi_join(cbmdb_biomarkers,tumor_tree_query,by=c("disease_ontology_id" = "do_id"))
   }
@@ -71,7 +74,10 @@ get_clinical_associations_snv_indel <- function(sample_calls, pcgr_data, pcgr_co
         eitems <- dplyr::inner_join(civic_calls,civic_biomarkers,by=c("CIVIC_ID" = "evidence_id")) %>% dplyr::distinct()
         names(eitems) <- toupper(names(eitems))
         eitems <- eitems %>% dplyr::select(-c(EITEM_CONSEQUENCE,MAPPING_CATEGORY,EITEM_CODON,EITEM_EXON))
-        clinical_evidence_items <- rbind(clinical_evidence_items, eitems)
+        if("CBMDB_ID" %in% colnames(eitems)){
+          eitems$CBMDB_ID <- as.integer(eitems$CBMDB_ID)
+        }
+        clinical_evidence_items <- dplyr::bind_rows(clinical_evidence_items, eitems)
       }
       sample_calls_cbmdb <- sample_calls %>% dplyr::filter(is.na(CIVIC_ID) & !is.na(CBMDB_ID))
       if(nrow(sample_calls_cbmdb) > 0){
@@ -82,12 +88,15 @@ get_clinical_associations_snv_indel <- function(sample_calls, pcgr_data, pcgr_co
         eitems <- dplyr::inner_join(cbmdb_calls,cbmdb_biomarkers,by=c("CBMDB_ID" = "evidence_id")) %>% dplyr::distinct()
         names(eitems) <- toupper(names(eitems))
         eitems <- eitems %>% dplyr::select(-c(EITEM_CONSEQUENCE,MAPPING_CATEGORY,EITEM_CODON,EITEM_EXON))
-        clinical_evidence_items <- rbind(clinical_evidence_items, eitems)
+        clinical_evidence_items <- dplyr::bind_rows(clinical_evidence_items, eitems)
       }
     }
     else{
       sample_calls_civic <- sample_calls %>% dplyr::filter(!is.na(CIVIC_ID_2))
       if(nrow(sample_calls_civic) > 0){
+        if("CBMDB_ID" %in% colnames(sample_calls_civic)){
+          sample_calls_civic$CBMDB_ID <- as.integer(sample_calls_civic$CBMDB_ID)
+        }
         tmp <- dplyr::select(sample_calls_civic,CIVIC_ID_2,VAR_ID) %>% tidyr::separate_rows(CIVIC_ID_2,sep=",")
         sample_calls_civic <- merge(tmp,dplyr::select(sample_calls_civic,-c(CIVIC_ID_2)),by.x = "VAR_ID",by.y = "VAR_ID")
         civic_calls <- dplyr::select(sample_calls_civic,dplyr::one_of(pcgr_data[['annotation_tags']][['all']]))
@@ -99,7 +108,7 @@ get_clinical_associations_snv_indel <- function(sample_calls, pcgr_data, pcgr_co
               clinical_evidence_items <- dplyr::filter(clinical_evidence_items_all, !is.na(EITEM_CODON))
               clinical_evidence_items <- dplyr::filter(clinical_evidence_items, EITEM_CODON <= AMINO_ACID_END & EITEM_CODON >= AMINO_ACID_START)
               if(nrow(clinical_evidence_items) > 0){
-                clinical_evidence_items <- clinical_evidence_items %>% dplyr::filter(!is.na(EITEM_CONSEQUENCE) & startsWith(CONSEQUENCE,EITEM_CONSEQUENCE) | is.na(EITEM_CONSEQUENCE))
+                clinical_evidence_items <- clinical_evidence_items %>% dplyr::filter((!is.na(EITEM_CONSEQUENCE) & startsWith(CONSEQUENCE,EITEM_CONSEQUENCE) | is.na(EITEM_CONSEQUENCE)) & CODING_STATUS == "coding")
                 if(nrow(clinical_evidence_items) > 0){
                   clinical_evidence_items <- clinical_evidence_items %>% dplyr::select(-c(EITEM_CONSEQUENCE,MAPPING_CATEGORY,EITEM_CODON,EITEM_EXON))
                 }else{
@@ -162,7 +171,7 @@ get_clinical_associations_snv_indel <- function(sample_calls, pcgr_data, pcgr_co
       for(i in 1:nrow(unique_variants)){
         rlogging::message(paste(unique_variants[i,],collapse=" "))
       }
-      all_eitems <- rbind.fill(all_eitems, clinical_evidence_items)
+      all_eitems <- plyr::rbind.fill(all_eitems, clinical_evidence_items)
     }
     else{
       rlogging::message(paste0(nrow(clinical_evidence_items),' clinical evidence item(s) found .. mapping = ',mapping))
@@ -257,7 +266,7 @@ names(civic_cna_biomarkers) <- toupper(names(civic_cna_biomarkers))
           biomarker_hits <- biomarker_hits_civic
         }
         if(nrow(biomarker_hits) > 0){
-          cna_biomarkers <- rbind(cna_biomarkers,biomarker_hits)
+          cna_biomarkers <- dplyr::bind_rows(cna_biomarkers,biomarker_hits)
         }
       }
     }

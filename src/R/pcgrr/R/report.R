@@ -8,7 +8,7 @@
 #' @param type somatic or predisposition
 #' @param virtual_panel_id identifier for virtual panel id
 
-init_pcg_report <- function(config = NULL, sample_name = 'SampleX', class = NULL, pcgr_data = NULL, type = 'somatic', virtual_panel_id = -1){
+init_pcg_report <- function(config = NULL, sample_name = 'SampleX', class = NULL, pcgr_data = NULL, type = 'somatic', virtual_panel_id = -1, diagnostic_grade_only = 0){
 
   report <- list()
   for(elem in c('metadata','content')){
@@ -33,9 +33,21 @@ init_pcg_report <- function(config = NULL, sample_name = 'SampleX', class = NULL
       report[['metadata']][['gene_panel']] <- list()
       report[['metadata']][['gene_panel']][['genes']] <- pcgr_data[['virtual_gene_panels']] %>%
         dplyr::filter(id == virtual_panel_id) %>%
-        dplyr::select(symbol, confidence_level, panel_name, panel_id, panel_url)
-      report[['metadata']][['gene_panel']][['name']] <- unique(report[['metadata']][['gene_panel']][['genes']]$panel_name)
+        dplyr::select(symbol, confidence_level, panel_name, panel_id, panel_version, panel_url)
+      if(diagnostic_grade_only == 1){
+        report[['metadata']][['gene_panel']][['genes']] <- report[['metadata']][['gene_panel']][['genes']] %>%
+          dplyr::filter(confidence_level == 3 | confidence_level == 4)
+      }
+      report[['metadata']][['gene_panel']][['name']] <-
+        paste0(unique(report[['metadata']][['gene_panel']][['genes']]$panel_name)," - v",unique(report[['metadata']][['gene_panel']][['genes']]$panel_version))
       report[['metadata']][['gene_panel']][['url']] <- unique(report[['metadata']][['gene_panel']][['genes']]$panel_url)
+      report[['metadata']][['gene_panel']][['confidence']] <- 'Diagnostic-grade/Borderline/Low evidence (GREEN/AMBER/RED)'
+      if(diagnostic_grade_only == 1 & virtual_panel_id != 0){
+        report[['metadata']][['gene_panel']][['confidence']] <- 'Diagnostic-grade only (GREEN)'
+      }
+      if(virtual_panel_id == 0){
+        report[['metadata']][['gene_panel']][['confidence']] <- 'Exploratory geneset (research)'
+      }
     }
 
   }
@@ -52,7 +64,7 @@ init_pcg_report <- function(config = NULL, sample_name = 'SampleX', class = NULL
     report[['content']][[analysis_element]][['variant_display']] <- list()
     report[['content']][[analysis_element]][['variant_set']] <- list()
     report[['content']][[analysis_element]][['zero']] <- FALSE
-    for(t in c('class1','class2','class3','class4','class5','gwas','sf')){
+    for(t in c('class1','class2','class3','class4','class5','clinical_evidence_items','gwas','sf')){
       report[['content']][[analysis_element]][['variant_display']][[t]] <- data.frame()
       report[['content']][[analysis_element]][['variant_set']][[t]] <- data.frame()
     }
@@ -82,7 +94,8 @@ init_pcg_report <- function(config = NULL, sample_name = 'SampleX', class = NULL
         if(nrow(tumor_group_entry) == 1){
           report[['metadata']][['tumor_primary_site']] <- tumor_group_entry$primary_site
           report[['metadata']][['tumor_tcga_cohort']] <- tumor_group_entry$tcga_cohort
-          report[['metadata']][['medgen_ontology']][['query']] <- dplyr::filter(pcgr_data[['phenotype_ontology']][['medgen_cancer']], group == config$tumor_type$type)
+          report[['metadata']][['medgen_ontology']][['query']] <-
+            dplyr::filter(pcgr_data[['phenotype_ontology']][['medgen_cancer']], group == config$tumor_type$type)
         }
       }else{
         report[['metadata']][['tumor_class']] <- 'Cancer_NOS'
@@ -90,7 +103,7 @@ init_pcg_report <- function(config = NULL, sample_name = 'SampleX', class = NULL
       }
     }
     for(analysis_element in c('snv_indel','tmb','msi','cna','cna_plot','m_signature',
-                              'sequencing_mode','tumor_only','value_box','cna_plot',
+                              'sequencing_mode','tumor_only','value_box','cna_plot','rainfall',
                               'tumor_purity','tumor_ploidy','report_display_config')){
       report[['content']][[analysis_element]] <- list()
       report[['content']][[analysis_element]][['eval']] <- FALSE
@@ -98,6 +111,12 @@ init_pcg_report <- function(config = NULL, sample_name = 'SampleX', class = NULL
       if(analysis_element == 'cna_plot'){
         report[['content']][[analysis_element]][['png']] <- NULL
       }
+      if(analysis_element == 'rainfall'){
+        report[['content']][[analysis_element]][['gr']] <- NA
+        report[['content']][[analysis_element]][['pp']] <- NA
+      }
+
+
       if(analysis_element == 'report_display_config'){
         report[['content']][[analysis_element]][['opentargets_rank']] <- list()
         report[['content']][[analysis_element]][['opentargets_rank']][['breaks']] <- c(0.40, 0.55, 0.70, 0.85)
@@ -147,13 +166,7 @@ init_pcg_report <- function(config = NULL, sample_name = 'SampleX', class = NULL
         if(analysis_element == 'snv_indel'){
           for(t in c('tier1','tier2','tier3','tier4','noncoding')){
             report[['content']][[analysis_element]][['variant_display']][[t]] <- data.frame()
-            # if(t == 'tier2' & config$tier_model$tier_model == 'pcgr'){
-            #   report[['content']][[analysis_element]][['variant_display']][[t]] <- list()
-            #   for(c in c('hotspot','curated_mutation','predicted_driver')){
-            #     report[['content']][[analysis_element]][['variant_display']][[t]][[c]] <- data.frame()
-            #   }
-            # }
-            if(t == 'tier3' & config$tier_model$tier_model == 'pcgr_acmg'){
+            if(t == 'tier3'){
               report[['content']][[analysis_element]][['variant_display']][[t]] <- list()
               for(c in c('proto_oncogene','tumor_suppressor')){
                 report[['content']][[analysis_element]][['variant_display']][[t]][[c]] <- data.frame()
@@ -176,10 +189,8 @@ init_pcg_report <- function(config = NULL, sample_name = 'SampleX', class = NULL
           for(t in c('segment','oncogene_gain','tsgene_loss','biomarker')){
             report[['content']][[analysis_element]][['variant_display']][[t]] <- data.frame()
           }
-          if(config$tier_model$tier_model == 'pcgr_acmg'){
-            report[['content']][[analysis_element]][['variant_display']][['biomarkers_tier1']] <- data.frame()
-            report[['content']][[analysis_element]][['variant_display']][['biomarkers_tier2']] <- data.frame()
-          }
+          report[['content']][[analysis_element]][['variant_display']][['biomarkers_tier1']] <- data.frame()
+          report[['content']][[analysis_element]][['variant_display']][['biomarkers_tier2']] <- data.frame()
         }
       }
       if(analysis_element == 'm_signature'){

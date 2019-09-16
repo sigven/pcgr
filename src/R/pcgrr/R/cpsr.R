@@ -9,9 +9,9 @@
 #' @param sample_name sample identifier
 #'
 
-generate_predisposition_report <- function(project_directory, query_vcf2tsv, pcgr_data, cpsr_config = NULL, virtual_panel_id = -1, sample_name = "SampleX"){
+generate_predisposition_report <- function(project_directory, query_vcf2tsv, pcgr_data, cpsr_config = NULL, virtual_panel_id = -1, diagnostic_grade_only = 0, sample_name = "SampleX"){
 
-  cps_report <- pcgrr::init_pcg_report(cpsr_config, sample_name, class = NULL, pcgr_data = pcgr_data, type = "predisposition", virtual_panel_id = virtual_panel_id)
+  cps_report <- pcgrr::init_pcg_report(cpsr_config, sample_name, class = NULL, pcgr_data = pcgr_data, type = "predisposition", virtual_panel_id = virtual_panel_id, diagnostic_grade_only = diagnostic_grade_only)
 
   fnames <- list()
   fnames[["tsv"]] <- paste0(project_directory, "/", sample_name, ".cpsr.snvs_indels.tiers.",pcgr_data[['assembly']][['grch_name']],".tsv")
@@ -20,7 +20,7 @@ generate_predisposition_report <- function(project_directory, query_vcf2tsv, pcg
   class_1_5_display <- c("SYMBOL", "SOURCE", "CLINVAR_PHENOTYPE", "CONSEQUENCE", "PROTEIN_CHANGE", "GENOTYPE", "GENE_NAME", "PROTEIN_DOMAIN",
                           "HGVSp", "HGVSc", "CDS_CHANGE", "REFSEQ_MRNA","MUTATION_HOTSPOT", "RMSK_HIT","PROTEIN_FEATURE", "PREDICTED_EFFECT",
                           "LOSS_OF_FUNCTION", "DBSNP", "CLINVAR","CLINVAR_CLASSIFICATION","CLINVAR_REVIEW_STATUS_STARS","CLINVAR_CONFLICTED",
-                          "CLINVAR_VARIANT_ORIGIN", "CPSR_CLASSIFICATION","CPSR_CLASSIFICATION_DOC",
+                          "CLINVAR_VARIANT_ORIGIN", "CPSR_CLASSIFICATION","CPSR_CLASSIFICATION_SCORE","CPSR_CLASSIFICATION_DOC",
                           "CPSR_CLASSIFICATION_CODE","ONCOGENE", "TUMOR_SUPPRESSOR",
                           "GLOBAL_AF_GNOMAD", cps_report[["metadata"]][["config"]][["popgen"]][["vcftag_gnomad"]],
                           "GENOMIC_CHANGE", "GENOME_VERSION")
@@ -65,7 +65,10 @@ generate_predisposition_report <- function(project_directory, query_vcf2tsv, pcg
         call_stats <- pcgrr::variant_stats_report(calls, name = "variant_statistic")
 
         cpg_calls <- dplyr::inner_join(calls, cps_report[['metadata']][['gene_panel']][['genes']], by = c("SYMBOL" = "symbol"))
-        cpg_calls <- cpg_calls %>% dplyr::filter(is.na(GLOBAL_AF_GNOMAD) | GLOBAL_AF_GNOMAD < cps_report[['metadata']][['config']][['maf_limits']][['maf_gnomad']])
+        cpg_calls <- cpg_calls %>%
+          dplyr::filter(is.na(GLOBAL_AF_GNOMAD) | GLOBAL_AF_GNOMAD < cps_report[['metadata']][['config']][['maf_limits']][['maf_gnomad']])
+        rlogging::message(paste0("Number of coding variants with MAF frequency under threshold (",cps_report[['metadata']][['config']][['maf_limits']][['maf_gnomad']],"): ",nrow(cpg_calls)))
+
         cpg_call_stats <- pcgrr::variant_stats_report(cpg_calls, name = "variant_statistic_cpg")
 
         rlogging::message(paste0("Number of coding variants in cancer predisposition genes: ",cpg_call_stats[['variant_statistic_cpg']][['n_coding']]))
@@ -249,7 +252,7 @@ assign_pathogenicity_evidence <- function(cpg_calls, cpsr_config, pcgr_data){
   #    - 0 predictions of splice site affected
 
   dbnsfp_min_majority <- 6
-  dbnsfp_max_minority <- 1
+  dbnsfp_max_minority <- 2
   dbnsfp_min_called <- dbnsfp_min_majority + 1
 
   cpg_calls <- pcgrr::get_insilico_prediction_statistics(cpg_calls)
@@ -309,15 +312,15 @@ assign_pathogenicity_evidence <- function(cpg_calls, cpsr_config, pcgr_data){
   cpg_calls <- cpg_calls %>%
     dplyr::mutate(ACMG_PVS1_1 = dplyr::if_else(NULL_VARIANT == T & LOSS_OF_FUNCTION == T & MOD == "LoF" & (ACMG_PM2_1 == TRUE | ACMG_PM2_2 == TRUE),TRUE,FALSE,FALSE))
   cpg_calls <- cpg_calls %>%
-    dplyr::mutate(ACMG_PVS1_3 = dplyr::if_else(NULL_VARIANT == T & LOSS_OF_FUNCTION == T & MOD != "LoF" & (ACMG_PM2_1 == TRUE | ACMG_PM2_2 == TRUE),TRUE,FALSE,FALSE))
+    dplyr::mutate(ACMG_PVS1_3 = dplyr::if_else(NULL_VARIANT == T & LOSS_OF_FUNCTION == T & (is.na(MOD) | MOD != "LoF") & (ACMG_PM2_1 == TRUE | ACMG_PM2_2 == TRUE),TRUE,FALSE,FALSE))
   cpg_calls <- cpg_calls %>%
     dplyr::mutate(ACMG_PVS1_2 = dplyr::if_else(NULL_VARIANT == T & LOSS_OF_FUNCTION == F & MOD == "LoF" & (ACMG_PM2_1 == TRUE | ACMG_PM2_2 == TRUE),TRUE,FALSE,FALSE))
   cpg_calls <- cpg_calls %>%
-    dplyr::mutate(ACMG_PVS1_4 = dplyr::if_else(NULL_VARIANT == T & LOSS_OF_FUNCTION == F & MOD != "LoF" & (ACMG_PM2_1 == TRUE | ACMG_PM2_2 == TRUE),TRUE,FALSE,FALSE))
+    dplyr::mutate(ACMG_PVS1_4 = dplyr::if_else(NULL_VARIANT == T & LOSS_OF_FUNCTION == F & (is.na(MOD) | MOD != "LoF") & (ACMG_PM2_1 == TRUE | ACMG_PM2_2 == TRUE),TRUE,FALSE,FALSE))
   cpg_calls <- cpg_calls %>%
     dplyr::mutate(ACMG_PVS1_5 = dplyr::if_else(CONSEQUENCE == "start_lost" & MOD == "LoF" & (ACMG_PM2_1 == TRUE | ACMG_PM2_2 == TRUE),TRUE,FALSE,FALSE))
   cpg_calls <- cpg_calls %>%
-    dplyr::mutate(ACMG_PVS1_6 = dplyr::if_else(CONSEQUENCE == "start_lost" & MOD != "LoF" & (ACMG_PM2_1 == TRUE | ACMG_PM2_2 == TRUE),TRUE,FALSE,FALSE))
+    dplyr::mutate(ACMG_PVS1_6 = dplyr::if_else(CONSEQUENCE == "start_lost" & (is.na(MOD) | MOD != "LoF") & (ACMG_PM2_1 == TRUE | ACMG_PM2_2 == TRUE),TRUE,FALSE,FALSE))
   cpg_calls <- cpg_calls %>%
     dplyr::mutate(ACMG_PVS1_7 = dplyr::if_else(LOSS_OF_FUNCTION == T & stringr::str_detect(CONSEQUENCE,"_donor|_acceptor") &
                                                     LAST_INTRON == F & MOD == "LoF" & (ACMG_PM2_1 == TRUE | ACMG_PM2_2 == TRUE),TRUE,FALSE,FALSE))
@@ -326,7 +329,7 @@ assign_pathogenicity_evidence <- function(cpg_calls, cpsr_config, pcgr_data){
                                                    LAST_INTRON == T & MOD == "LoF" & (ACMG_PM2_1 == TRUE | ACMG_PM2_2 == TRUE),TRUE,FALSE,FALSE))
   cpg_calls <- cpg_calls %>%
     dplyr::mutate(ACMG_PVS1_9 = dplyr::if_else(LOSS_OF_FUNCTION == T & stringr::str_detect(CONSEQUENCE,"_donor|_acceptor") &
-                                                   LAST_INTRON == F & MOD != "LoF" & (ACMG_PM2_1 == TRUE | ACMG_PM2_2 == TRUE),TRUE,FALSE,FALSE))
+                                                   LAST_INTRON == F & (is.na(MOD) | MOD != "LoF") & (ACMG_PM2_1 == TRUE | ACMG_PM2_2 == TRUE),TRUE,FALSE,FALSE))
   cpg_calls <- cpg_calls %>%
     dplyr::mutate(ACMG_PVS1_10 = dplyr::if_else(SPLICE_DONOR_RELEVANT == T & ACMG_PP3 == TRUE & (ACMG_PM2_1 == TRUE | ACMG_PM2_2 == TRUE),TRUE,FALSE,FALSE))
 
@@ -370,6 +373,7 @@ assign_pathogenicity_evidence <- function(cpg_calls, cpsr_config, pcgr_data){
   # ACMG_BSC1 - coinciding with known benign missense variants
   # ACMG_BMC1 - occurs at the same codon as a known benign missense variant
 
+  cpg_calls
   cpg_calls$codon_prefix <- NA
   if(nrow(cpg_calls[!is.na(cpg_calls$CONSEQUENCE) & cpg_calls$CONSEQUENCE == 'missense_variant',]) > 0){
     cpg_calls[cpg_calls$CONSEQUENCE == 'missense_variant',]$codon_prefix <-
@@ -445,14 +449,13 @@ determine_pathogenicity_classification <- function(cpg_calls){
   evidence_codes <- pcgrr::acmg_evidence_codes
 
   path_cols <- c('CPSR_CLASSIFICATION','CPSR_CLASSIFICATION_DOC','CPSR_CLASSIFICATION_CODE',
-                'cpsr_score_pathogenic','cpsr_score_pathogenic_2','cpsr_score_benign')
+                'cpsr_score_pathogenic','cpsr_score_benign')
   cpg_calls <- cpg_calls[, !(colnames(cpg_calls) %in% path_cols)]
 
   cpg_calls$CPSR_CLASSIFICATION <- 'VUS'
   cpg_calls$CPSR_CLASSIFICATION_DOC <- ''
   cpg_calls$CPSR_CLASSIFICATION_CODE <- ''
   cpg_calls$cpsr_score_pathogenic <- 0
-  cpg_calls$cpsr_score_pathogenic_2 <- 0
   cpg_calls$cpsr_score_benign <- 0
 
   i <- 1
@@ -460,74 +463,30 @@ determine_pathogenicity_classification <- function(cpg_calls){
     category <- evidence_codes[i,]$category
     pole <- evidence_codes[i,]$pathogenicity_pole
     description <- evidence_codes[i,]$description
-    cpsr_evidence_code <- evidence_codes[i,"cpsr_evidence_code"]
-    if(cpsr_evidence_code %in% colnames(cpg_calls) & pole == 'B'){
-
-      if(nrow(cpg_calls[cpg_calls[,cpsr_evidence_code] == T,]) > 0){
-        #cat(i,cpsr_evidence_code,'\n',sep=" - ")
-        cpg_calls[cpg_calls[,cpsr_evidence_code] == T,"cpsr_score_benign"] <-
-          cpg_calls[cpg_calls[,cpsr_evidence_code] == T,"cpsr_score_benign"] +
-          evidence_codes[i,"path_score"]
-        cpg_calls[cpg_calls[,cpsr_evidence_code] == TRUE,]$CPSR_CLASSIFICATION_DOC <-
-          paste(cpg_calls[cpg_calls[,cpsr_evidence_code] == TRUE,]$CPSR_CLASSIFICATION_DOC, paste0("- ",description),sep="<br>")
-        cpg_calls[cpg_calls[,cpsr_evidence_code] == TRUE,]$CPSR_CLASSIFICATION_CODE <-
-          paste(cpg_calls[cpg_calls[,cpsr_evidence_code] == TRUE,]$CPSR_CLASSIFICATION_CODE, paste0(cpsr_evidence_code),sep="|")
-      }
-    }
-    i <- i + 1
-  }
-  i <- 1
-  while(i <= nrow(evidence_codes)){
-    category <- evidence_codes[i,]$category
-    pole <- evidence_codes[i,]$pathogenicity_pole
-    description <- evidence_codes[i,]$description
-    cpsr_evidence_code <- evidence_codes[i,"cpsr_evidence_code"]
-    if(cpsr_evidence_code %in% colnames(cpg_calls) & pole == 'P' & category == 'funcvarpop'){
-      if(nrow(cpg_calls[cpg_calls[,cpsr_evidence_code] == T,]) > 0){
-        #cat(i,cpsr_evidence_code,'\n',sep=" - ")
-        cpg_calls[cpg_calls[,cpsr_evidence_code] == T,"cpsr_score_pathogenic"] <-
-          cpg_calls[cpg_calls[,cpsr_evidence_code] == T,"cpsr_score_pathogenic"] +
-          evidence_codes[i,"path_score"]
-        cpg_calls[cpg_calls[,cpsr_evidence_code] == TRUE,]$CPSR_CLASSIFICATION_DOC <-
-          paste(cpg_calls[cpg_calls[,cpsr_evidence_code] == TRUE,]$CPSR_CLASSIFICATION_DOC, paste0("- ",description),sep="<br>")
-        cpg_calls[cpg_calls[,cpsr_evidence_code] == TRUE,]$CPSR_CLASSIFICATION_CODE <-
-          paste(cpg_calls[cpg_calls[,cpsr_evidence_code] == TRUE,]$CPSR_CLASSIFICATION_CODE, paste0(cpsr_evidence_code),sep="|")
-      }
-    }
-    i <- i + 1
-  }
-  i <- 1
-  while(i <= nrow(evidence_codes)){
-    category <- evidence_codes[i,]$category
-    pole <- evidence_codes[i,]$pathogenicity_pole
-    description <- evidence_codes[i,]$description
-    cpsr_evidence_code <- evidence_codes[i,"cpsr_evidence_code"]
-    if(cpsr_evidence_code %in% colnames(cpg_calls) & pole == 'P' & category != 'funcvarpop'){
-      #cat(i,cpsr_evidence_code,'\n',sep=" - ")
-      if(nrow(cpg_calls[cpg_calls[,cpsr_evidence_code] == T,]) > 0){
-        cpg_calls[cpg_calls[,cpsr_evidence_code] == T,"cpsr_score_pathogenic_2"] <-
-          cpg_calls[cpg_calls[,cpsr_evidence_code] == T,"cpsr_score_pathogenic_2"] +
-          evidence_codes[i,"path_score"]
-        cpg_calls[cpg_calls[,cpsr_evidence_code] == TRUE,]$CPSR_CLASSIFICATION_DOC <-
-          paste(cpg_calls[cpg_calls[,cpsr_evidence_code] == TRUE,]$CPSR_CLASSIFICATION_DOC, paste0("- ",description),sep="<br>")
-        cpg_calls[cpg_calls[,cpsr_evidence_code] == TRUE,]$CPSR_CLASSIFICATION_CODE <-
-          paste(cpg_calls[cpg_calls[,cpsr_evidence_code] == TRUE,]$CPSR_CLASSIFICATION_CODE, paste0(cpsr_evidence_code),sep="|")
-
-      }
+    cpsr_evidence_code <- evidence_codes[i,]$cpsr_evidence_code
+    score <- evidence_codes[i,]$path_score
+    if(cpsr_evidence_code %in% colnames(cpg_calls)){
+      cpg_calls <- cpg_calls %>%
+        dplyr::mutate(cpsr_score_benign = cpsr_score_benign + dplyr::if_else(pole == 'B' & !!rlang::sym(cpsr_evidence_code) == T,score,0)) %>%
+        dplyr::mutate(cpsr_score_pathogenic = cpsr_score_pathogenic + dplyr::if_else(pole == 'P' & !!rlang::sym(cpsr_evidence_code) == T,score,0)) %>%
+        dplyr::mutate(CPSR_CLASSIFICATION_DOC = paste0(CPSR_CLASSIFICATION_DOC,dplyr::if_else(!!rlang::sym(cpsr_evidence_code) == T,paste0("- ",description),""),sep="<br>")) %>%
+        dplyr::mutate(CPSR_CLASSIFICATION_CODE = paste0(CPSR_CLASSIFICATION_CODE,dplyr::if_else(!!rlang::sym(cpsr_evidence_code) == T,cpsr_evidence_code,""),sep="|"))
     }
     i <- i + 1
   }
 
   cpg_calls <- cpg_calls %>%
-    dplyr::mutate(CPSR_CLASSIFICATION_CODE = stringr::str_replace(CPSR_CLASSIFICATION_CODE,"^\\|","")) %>%
-    dplyr::mutate(cpsr_score_pathogenic = dplyr::if_else(cpsr_score_pathogenic == 0,cpsr_score_pathogenic_2,cpsr_score_pathogenic)) %>%
-    dplyr::mutate(CPSR_CLASSIFICATION = dplyr::if_else(cpsr_score_pathogenic >= 4 & cpsr_score_pathogenic < 5,"Likely_Pathogenic", CPSR_CLASSIFICATION)) %>%
+    dplyr::mutate(CPSR_CLASSIFICATION_CODE = stringr::str_replace_all(stringr::str_replace_all(CPSR_CLASSIFICATION_CODE,"(\\|{2,})","|"),"(^\\|)|(\\|$)","")) %>%
+    dplyr::mutate(CPSR_CLASSIFICATION_DOC = stringr::str_replace_all(stringr::str_replace_all(CPSR_CLASSIFICATION_DOC,"(<br>){2,}","<br>"),"(^(<br>))|((<br>)$)","")) %>%
+    dplyr::mutate(cpsr_score_pathogenic = dplyr::if_else(stringr::str_detect(CPSR_CLASSIFICATION_CODE,"ACMG_PVS") & stringr::str_detect(CPSR_CLASSIFICATION_CODE,"ACMG_PM2_2"),cpsr_score_pathogenic - 1,cpsr_score_pathogenic)) %>%
+    dplyr::mutate(cpsr_score_pathogenic = dplyr::if_else(stringr::str_detect(CPSR_CLASSIFICATION_CODE,"ACMG_PVS") & stringr::str_detect(CPSR_CLASSIFICATION_CODE,"ACMG_PM2_1"),cpsr_score_pathogenic - 0.5,cpsr_score_pathogenic)) %>%
+    dplyr::mutate(CPSR_CLASSIFICATION = dplyr::if_else(cpsr_score_pathogenic >= 3.5 & cpsr_score_pathogenic < 5,"Likely_Pathogenic", CPSR_CLASSIFICATION)) %>%
     dplyr::mutate(CPSR_CLASSIFICATION = dplyr::if_else(cpsr_score_pathogenic >= 5,"Pathogenic", CPSR_CLASSIFICATION)) %>%
     dplyr::mutate(CPSR_CLASSIFICATION = dplyr::if_else(cpsr_score_benign <= -3 & cpsr_score_pathogenic <= 0.5,"Likely_Benign", CPSR_CLASSIFICATION)) %>%
     dplyr::mutate(CPSR_CLASSIFICATION = dplyr::if_else(cpsr_score_benign <= -5,"Benign", CPSR_CLASSIFICATION)) %>%
     dplyr::mutate(CPSR_CLASSIFICATION_SCORE = dplyr::if_else(cpsr_score_benign == 0, cpsr_score_pathogenic, cpsr_score_benign)) %>%
     dplyr::mutate(CPSR_CLASSIFICATION_SCORE = dplyr::if_else(cpsr_score_benign < 0 & cpsr_score_pathogenic > 0,cpsr_score_benign + cpsr_score_pathogenic,CPSR_CLASSIFICATION_SCORE)) %>%
-    dplyr::select(-c(cpsr_score_benign,cpsr_score_pathogenic,cpsr_score_pathogenic_2))
+    dplyr::select(-c(cpsr_score_benign,cpsr_score_pathogenic))
 
   return(cpg_calls)
 
@@ -551,7 +510,7 @@ assign_cpsr_tier <- function(cpg_calls, cpsr_config, display_tags){
                            cpsr_config[['popgen']][['vcftag_gnomad']])
 
   evidence_codes <- dplyr::filter(pcgrr::acmg_evidence_codes, cpsr_evidence_code != 'ACMG_BS2_1' & cpsr_evidence_code != 'ACMG_BS2_2' & cpsr_evidence_code != 'ACMG_BS2_3')
-  predispose_tsv_tags <- c(predispose_tsv_tags, evidence_codes$cpsr_evidence_code, c("CPSR_CLASSIFICATION","CPSR_CLASSIFICATION_CODE","CPSR_CLASSIFICATION_DOC","SOURCE"))
+  predispose_tsv_tags <- c(predispose_tsv_tags, evidence_codes$cpsr_evidence_code, c("CPSR_CLASSIFICATION","CPSR_CLASSIFICATION_SCORE","CPSR_CLASSIFICATION_CODE","CPSR_CLASSIFICATION_DOC","SOURCE"))
 
   rlogging::message("Generating tiered set of result variants for output in tab-separated values (TSV) file")
 
@@ -622,7 +581,8 @@ assign_cpsr_tier <- function(cpg_calls, cpsr_config, display_tags){
       dplyr::mutate(CPSR_CLASSIFICATION = dplyr::if_else(!is.na(CLINVAR_CLASSIFICATION),"",as.character(CPSR_CLASSIFICATION))) %>%
       dplyr::mutate(CPSR_CLASSIFICATION_DOC = dplyr::if_else(!is.na(CLINVAR_CLASSIFICATION),"",as.character(CPSR_CLASSIFICATION_DOC))) %>%
       dplyr::mutate(CPSR_CLASSIFICATION_CODE = dplyr::if_else(!is.na(CLINVAR_CLASSIFICATION),"",as.character(CPSR_CLASSIFICATION_CODE))) %>%
-      dplyr::arrange(SOURCE, CANCER_PHENOTYPE) %>%
+      dplyr::mutate(CPSR_CLASSIFICATION_SCORE = dplyr::if_else(!is.na(CLINVAR_CLASSIFICATION),as.numeric(NA),as.numeric(CPSR_CLASSIFICATION_SCORE))) %>%
+      dplyr::arrange(SOURCE, CANCER_PHENOTYPE, desc(CPSR_CLASSIFICATION_SCORE)) %>%
       dplyr::select(-CANCER_PHENOTYPE)
 
     snv_indel_report[['variant_display']][[c]] <- dplyr::select(snv_indel_report[['variant_set']][[c]], dplyr::one_of(display_tags))
@@ -824,7 +784,8 @@ summary_donut_chart <- function(variants_tsv, plot_type = 'ClinVar'){
         ggplot2::ggtitle(title) +
         ggplot2::theme(plot.title = ggplot2::element_text(family = "Helvetica", size = 16, vjust = -1, hjust = 0.5),
                        legend.title = ggplot2::element_blank(),
-                       plot.margin = grid::unit(c(0.0,0.0,0.0,0.0), "mm"),
+                       plot.margin = ggplot2::margin(0, 0, 0, 0, "cm"),
+                       #plot.margin = grid::unit(c(0.0,0.0,0.0,0.0), "mm"),
                        legend.text = ggplot2::element_text(family = "Helvetica", size = 14))
     }
 
@@ -865,7 +826,7 @@ gene_selection_tiles <- function(genes = NULL, confidence = NULL, box_w = 2, box
   tile_numbers[['custom']][['n_col']] <- length(genes)
   tile_numbers[['custom']][['n_row']] <- 1
 
-  color_df <- data.frame('color' = c("#b8b8ba","#BDD7E7","#6BAED6","#3182BD","#08519C"), stringsAsFactors = F)
+  color_df <- data.frame('color' = c("#b8b8ba","#d9534f","#f0ad4e","#3fad46","#000000"), stringsAsFactors = F)
   color_df$confidence <- seq(0,4,1)
 
   confidence_df <- data.frame('color' = rep('black',length(genes)), stringsAsFactors = F)

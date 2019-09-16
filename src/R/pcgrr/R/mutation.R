@@ -67,19 +67,21 @@ get_deletion_mechanism <- function(vcf_data_df, genome_assembly = 'hg19'){
 #'
 assign_mutation_type <- function(var_df){
 
-  var_df$MUTATION_TYPE <- NA
   if('VARIANT_CLASS' %in% colnames(var_df) & 'REF' %in% colnames(var_df) & 'ALT' %in% colnames(var_df)){
     var_df <- var_df %>%
-      dplyr::mutate(MUTATION_TYPE = dplyr::if_else(VARIANT_CLASS == "SNV" & REF == "G" & ALT == "A","C>T:G>A",MUTATION_TYPE)) %>%
-      dplyr::mutate(MUTATION_TYPE = dplyr::if_else(VARIANT_CLASS == "SNV" & REF == "C" & ALT == "T","C>T:G>A",MUTATION_TYPE)) %>%
-      dplyr::mutate(MUTATION_TYPE = dplyr::if_else(VARIANT_CLASS == "SNV" & REF == "G" & ALT == "C","C>G:G>C",MUTATION_TYPE)) %>%
-      dplyr::mutate(MUTATION_TYPE = dplyr::if_else(VARIANT_CLASS == "SNV" & REF == "C" & ALT == "G","C>G:G>C",MUTATION_TYPE)) %>%
-      dplyr::mutate(MUTATION_TYPE = dplyr::if_else(VARIANT_CLASS == "SNV" & REF == "C" & ALT == "A","C>A:G>T",MUTATION_TYPE)) %>%
-      dplyr::mutate(MUTATION_TYPE = dplyr::if_else(VARIANT_CLASS == "SNV" & REF == "G" & ALT == "T","C>A:G>T",MUTATION_TYPE)) %>%
-      dplyr::mutate(MUTATION_TYPE = dplyr::if_else(VARIANT_CLASS == "SNV" & REF == "A" & ALT == "G","A>G:T>C",MUTATION_TYPE)) %>%
-      dplyr::mutate(MUTATION_TYPE = dplyr::if_else(VARIANT_CLASS == "SNV" & REF == "T" & ALT == "C","A>G:T>C",MUTATION_TYPE)) %>%
-      dplyr::mutate(MUTATION_TYPE = dplyr::if_else(VARIANT_CLASS == "SNV" & REF == "A" & ALT == "T","A>T:T>A",MUTATION_TYPE)) %>%
-      dplyr::mutate(MUTATION_TYPE = dplyr::if_else(VARIANT_CLASS == "SNV" & REF == "T" & ALT == "A","A>T:T>A",MUTATION_TYPE))
+      dplyr::mutate(MUTATION_TYPE = dplyr::case_when(VARIANT_CLASS == "SNV" & REF == "G" & ALT == "A" ~ "C>T:G>A",
+                                                     VARIANT_CLASS == "SNV" & REF == "C" & ALT == "T" ~ "C>T:G>A",
+                                                     VARIANT_CLASS == "SNV" & REF == "G" & ALT == "C" ~ "C>G:G>C",
+                                                     VARIANT_CLASS == "SNV" & REF == "C" & ALT == "G" ~ "C>G:G>C",
+                                                     VARIANT_CLASS == "SNV" & REF == "C" & ALT == "A" ~ "C>A:G>T",
+                                                     VARIANT_CLASS == "SNV" & REF == "G" & ALT == "T" ~ "C>A:G>T",
+                                                     VARIANT_CLASS == "SNV" & REF == "A" & ALT == "G" ~ "A>G:T>C",
+                                                     VARIANT_CLASS == "SNV" & REF == "T" & ALT == "C" ~ "A>G:T>C",
+                                                     VARIANT_CLASS == "SNV" & REF == "A" & ALT == "T" ~ "A>T:T>A",
+                                                     VARIANT_CLASS == "SNV" & REF == "T" & ALT == "A" ~ "A>T:T>A",
+                                                     VARIANT_CLASS == "SNV" & REF == "A" & ALT == "C" ~ "A>C:T>G",
+                                                     VARIANT_CLASS == "SNV" & REF == "T" & ALT == "G" ~ "A>C:T>G",
+                                                     FALSE ~ as.character(NA)))
   }
   return(var_df)
 }
