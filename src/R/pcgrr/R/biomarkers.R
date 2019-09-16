@@ -266,7 +266,11 @@ names(civic_cna_biomarkers) <- toupper(names(civic_cna_biomarkers))
           biomarker_hits <- biomarker_hits_civic
         }
         if(nrow(biomarker_hits) > 0){
+<<<<<<< HEAD
           cna_biomarkers <- dplyr::bind_rows(cna_biomarkers,biomarker_hits)
+=======
+          cna_biomarkers <- rbind.fill(cna_biomarkers,biomarker_hits)
+>>>>>>> e28aca593808800e5dbb5e80c20dee07e7b6293e
         }
       }
     }
