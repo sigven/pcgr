@@ -9,6 +9,7 @@ The report is generated with _[cpsr](https://github.com/sigven/cpsr)_ version `r
 * Show GWAS hits in report: __`r cps_report[['metadata']][['config']][['gwas']][['gwas_hits']]`__
     * Minimum p-value for association: __`r cps_report[['metadata']][['config']][['gwas']][['p_value_min']]`__
 * Cancer predisposition geneset:
-   *  __[`r cps_report[['metadata']][['gene_panel']][['name']]`](`r cps_report[['metadata']][['gene_panel']][['url']]`)__ 
+   *  __[`r cps_report[['metadata']][['gene_panel']][['name']]`](`r cps_report[['metadata']][['gene_panel']][['url']]`)__
+   *  `r cps_report[['metadata']][['gene_panel']][['confidence']]`
 
 

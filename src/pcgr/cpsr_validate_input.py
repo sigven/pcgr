@@ -20,11 +20,12 @@ def __main__():
    parser.add_argument('configuration_file', help='Configuration file (TOML-formatted, e.g. pcgr_conf.toml)')
    parser.add_argument('vcf_validation',type=int, help="Perform VCF validation with Ensembl's vcf-validator")
    parser.add_argument('genome_assembly',help='grch37 or grch38')
-   parser.add_argument('virtual_panel_id',help='virtual panel identifier')
+   parser.add_argument('virtual_panel_id',type=int,help='virtual panel identifier')
+   parser.add_argument('diagnostic_grade_only',type=int,help="green panels only")
    parser.add_argument('--output_dir', dest='output_dir', help='Output directory', default='/workdir/output')
    args = parser.parse_args()
 
-   ret = validate_cpsr_input(args.pcgr_dir, args.input_vcf, args.configuration_file, args.vcf_validation, args.genome_assembly, args.virtual_panel_id, args.output_dir)
+   ret = validate_cpsr_input(args.pcgr_dir, args.input_vcf, args.configuration_file, args.vcf_validation, args.genome_assembly, args.virtual_panel_id, args.diagnostic_grade_only, args.output_dir)
    if ret != 0:
       sys.exit(1)
 
@@ -94,7 +95,7 @@ def check_existing_vcf_info_tags(input_vcf, pcgr_directory, genome_assembly, log
    logger.info('No query VCF INFO tags coincide with CPSR INFO tags')
    return ret
 
-def simplify_vcf(input_vcf, vcf, pcgr_directory, genome_assembly, virtual_panel_id, output_dir, logger):
+def simplify_vcf(input_vcf, vcf, pcgr_directory, genome_assembly, virtual_panel_id, diagnostic_grade_only, output_dir, logger):
 
    """
    Function that performs tre things on the validated input VCF:
@@ -116,15 +117,15 @@ def simplify_vcf(input_vcf, vcf, pcgr_directory, genome_assembly, virtual_panel_
          multiallelic_alt = 1
    command_vcf_sample_free1 = 'egrep \'^##\' ' + str(input_vcf) + ' > ' + str(input_vcf_cpsr_ready)
    command_vcf_sample_free2 = 'egrep \'^#CHROM\' ' + str(input_vcf) + ' >> ' + str(input_vcf_cpsr_ready)
-   command_vcf_sample_free3 = 'egrep -v \'^#\' ' + str(input_vcf) + ' | sed \'s/^chr//\' | egrep \'^[0-9]\' | sort -k1,1n -k2,2n -k3,3 -k4,4 >> ' + str(input_vcf_cpsr_ready)
-   command_vcf_sample_free4 = 'egrep -v \'^#\' ' + str(input_vcf) + ' | sed \'s/^chr//\' | egrep -v \'^[0-9]\' | egrep \'^[XYM]\' | sort -k1,1 -k2,2n -k3,3 -k4,4 >> ' + str(input_vcf_cpsr_ready)
-   command_vcf_sample_free5 = 'egrep -v \'^#\' ' + str(input_vcf) + ' | sed \'s/^chr//\' | egrep -v \'^[0-9]\' | egrep -v \'^[XYM]\' | sort -k1,1 -k2,2n -k3,3 -k4,4 >> ' + str(input_vcf_cpsr_ready)
+   command_vcf_sample_free3 = 'egrep -v \'^#\' ' + str(input_vcf) + ' | sed \'s/^chr//\' | egrep \'^[0-9]\' | sort -k1,1n -k2,2n -k4,4 -k5,5 >> ' + str(input_vcf_cpsr_ready)
+   command_vcf_sample_free4 = 'egrep -v \'^#\' ' + str(input_vcf) + ' | sed \'s/^chr//\' | egrep -v \'^[0-9]\' | egrep \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> ' + str(input_vcf_cpsr_ready)
+   command_vcf_sample_free5 = 'egrep -v \'^#\' ' + str(input_vcf) + ' | sed \'s/^chr//\' | egrep -v \'^[0-9]\' | egrep -v \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> ' + str(input_vcf_cpsr_ready)
    if input_vcf.endswith('.gz'):
       command_vcf_sample_free1 = 'bgzip -dc ' + str(input_vcf) + ' | egrep \'^##\' > ' + str(input_vcf_cpsr_ready)
       command_vcf_sample_free2 = 'bgzip -dc ' + str(input_vcf) + ' | egrep \'^#CHROM\'  >> ' + str(input_vcf_cpsr_ready)
-      command_vcf_sample_free3 = 'bgzip -dc ' + str(input_vcf) + ' | egrep -v \'^#\' | sed \'s/^chr//\' | egrep \'^[0-9]\' | sort -k1,1n -k2,2n -k3,3 -k4,4 >> ' + str(input_vcf_cpsr_ready)
-      command_vcf_sample_free4 = 'bgzip -dc ' + str(input_vcf) + ' | egrep -v \'^#\' | sed \'s/^chr//\' | egrep -v \'^[0-9]\' | egrep \'^[XYM]\' | sort -k1,1 -k2,2n -k3,3 -k4,4 >> ' + str(input_vcf_cpsr_ready)
-      command_vcf_sample_free5 = 'bgzip -dc ' + str(input_vcf) + ' | egrep -v \'^#\' | sed \'s/^chr//\' | egrep -v \'^[0-9]\' | egrep -v \'^[XYM]\' | sort -k1,1 -k2,2n -k3,3 -k4,4 >> ' + str(input_vcf_cpsr_ready)
+      command_vcf_sample_free3 = 'bgzip -dc ' + str(input_vcf) + ' | egrep -v \'^#\' | sed \'s/^chr//\' | egrep \'^[0-9]\' | sort -k1,1n -k2,2n -k4,4 -k5,5 >> ' + str(input_vcf_cpsr_ready)
+      command_vcf_sample_free4 = 'bgzip -dc ' + str(input_vcf) + ' | egrep -v \'^#\' | sed \'s/^chr//\' | egrep -v \'^[0-9]\' | egrep \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> ' + str(input_vcf_cpsr_ready)
+      command_vcf_sample_free5 = 'bgzip -dc ' + str(input_vcf) + ' | egrep -v \'^#\' | sed \'s/^chr//\' | egrep -v \'^[0-9]\' | egrep -v \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> ' + str(input_vcf_cpsr_ready)
 
    os.system(command_vcf_sample_free1)
    os.system(command_vcf_sample_free2)
@@ -143,6 +144,8 @@ def simplify_vcf(input_vcf, vcf, pcgr_directory, genome_assembly, virtual_panel_
    logger.info('Limiting variant set to cancer predisposition loci')
    #target_bed = os.path.join(pcgr_directory,'data',genome_assembly, 'cpsr_target.bed.gz')
    target_bed = os.path.join(pcgr_directory,'data',genome_assembly, 'virtual_panels', str(virtual_panel_id) + "." + genome_assembly + ".bed.gz")
+   if diagnostic_grade_only == 1 and virtual_panel_id != 0:
+      target_bed = os.path.join(pcgr_directory, 'data', genome_assembly, 'virtual_panels', str(virtual_panel_id) + "." + genome_assembly + ".GREEN.bed.gz")
    if os.path.exists(target_bed):
       target_variants_intersect_cmd = 'bedtools intersect -wa -u -header -a ' + str(input_vcf_cpsr_ready_decomposed) + ' -b ' + str(target_bed) + ' > ' + str(input_vcf_cpsr_ready_decomposed_target)
       os.system(target_variants_intersect_cmd)
@@ -169,7 +172,7 @@ def simplify_vcf(input_vcf, vcf, pcgr_directory, genome_assembly, virtual_panel_
          logger.info('')
          exit(1)
 
-def validate_cpsr_input(pcgr_directory, input_vcf, configuration_file, vcf_validation, genome_assembly, virtual_panel_id, output_dir):
+def validate_cpsr_input(pcgr_directory, input_vcf, configuration_file, vcf_validation, genome_assembly, virtual_panel_id, diagnostic_grade_only, output_dir):
    """
    Function that reads the input files to CPSR (VCF file) and performs the following checks:
    1. Check that VCF file is properly formatted (according to EBIvariation/vcf-validator - VCF v4.2) - optional (vcf_validation in config file)
@@ -197,7 +200,7 @@ def validate_cpsr_input(pcgr_directory, input_vcf, configuration_file, vcf_valid
       if len(samples) > 1:
          err_msg = "Query VCF contains more than one sample column (" + ', '.join(samples) + ") - CPSR expects a germline VCF with a single sample column - exiting"
          return annoutils.error_message(err_msg, logger)
-      simplify_vcf(input_vcf, vcf, pcgr_directory, genome_assembly, virtual_panel_id, output_dir, logger)
+      simplify_vcf(input_vcf, vcf, pcgr_directory, genome_assembly, virtual_panel_id, diagnostic_grade_only, output_dir, logger)
 
    return 0
 

@@ -23,6 +23,7 @@ def __main__():
    parser.add_argument("--dbnsfp",action = "store_true", help="Annotate VCF with annotations from database of non-synonymous functional predictions")
    parser.add_argument("--tcga",action = "store_true", help="Annotate VCF with variant frequencies from the The Cancer Genome Atlas")
    parser.add_argument("--tcga_pcdm",action = "store_true", help="Annotate VCF with putative cancer driver mutations from The Cancer Genome Atlas")
+   parser.add_argument("--chasmplus", action="store_true",help="Annotate VCF with putative cancer driver mutations from CHASMplus algorithm")
    parser.add_argument("--civic",action = "store_true", help="Annotate VCF with annotations from the Clinical Interpretation of Variants in Cancer database")
    parser.add_argument("--cbmdb",action = "store_true", help="Annotate VCF with annotations from the Cancer bioMarkers database")
    parser.add_argument("--icgc",action = "store_true", help="Annotate VCF with known variants found in the ICGC-PCAWG sequencing project")
@@ -41,7 +42,7 @@ def __main__():
    vcfheader_file = args.out_vcf + '.tmp.' + str(random.randrange(0,10000000)) + '.header.txt'
    conf_fname = args.out_vcf + '.tmp.conf.toml'
    print_vcf_header(args.query_vcf, vcfheader_file, chromline_only = False)
-   run_vcfanno(args.num_processes, args.query_vcf, args.panel_normal_vcf, query_info_tags, vcfheader_file, args.pcgr_db_dir, conf_fname, args.out_vcf, args.docm, args.intogen_driver_mut, args.clinvar, args.tcga, args.tcga_pcdm, args.dbnsfp, args.civic, args.cbmdb, args.icgc, args.uniprot, args.cancer_hotspots, args.pcgr_onco_xref, args.gwas, args.rmsk, args.simplerepeats, args.winmsk, args.gnomad_cpsr)
+   run_vcfanno(args.num_processes, args.query_vcf, args.panel_normal_vcf, query_info_tags, vcfheader_file, args.pcgr_db_dir, conf_fname, args.out_vcf, args.docm, args.intogen_driver_mut, args.clinvar, args.tcga, args.tcga_pcdm, args.chasmplus, args.dbnsfp, args.civic, args.cbmdb, args.icgc, args.uniprot, args.cancer_hotspots, args.pcgr_onco_xref, args.gwas, args.rmsk, args.simplerepeats, args.winmsk, args.gnomad_cpsr)
 
 
 def prepare_vcfanno_configuration(vcfanno_data_directory, conf_fname, vcfheader_file, logger, datasource_info_tags, query_info_tags, datasource):
@@ -51,7 +52,7 @@ def prepare_vcfanno_configuration(vcfanno_data_directory, conf_fname, vcfheader_
    append_to_conf_file(datasource, datasource_info_tags, vcfanno_data_directory, conf_fname)
    append_to_vcf_header(vcfanno_data_directory, datasource, vcfheader_file)
 
-def run_vcfanno(num_processes, query_vcf, panel_normal_vcf, query_info_tags, vcfheader_file, pcgr_db_directory, conf_fname, output_vcf, docm, intogen_driver_mut, clinvar, tcga, tcga_pcdm, dbnsfp, civic, cbmdb, icgc, uniprot, cancer_hotspots, pcgr_onco_xref, gwas, rmsk, simplerepeats, winmsk, gnomad_cpsr):
+def run_vcfanno(num_processes, query_vcf, panel_normal_vcf, query_info_tags, vcfheader_file, pcgr_db_directory, conf_fname, output_vcf, docm, intogen_driver_mut, clinvar, tcga, tcga_pcdm, chasmplus, dbnsfp, civic, cbmdb, icgc, uniprot, cancer_hotspots, pcgr_onco_xref, gwas, rmsk, simplerepeats, winmsk, gnomad_cpsr):
    """
    Function that annotates a VCF file with vcfanno against a user-defined set of germline and somatic VCF files
    """
@@ -62,10 +63,11 @@ def run_vcfanno(num_processes, query_vcf, panel_normal_vcf, query_info_tags, vcf
    docm_info_tags = ["DOCM_PMID"]
    tcga_info_tags = ["TCGA_FREQUENCY","TCGA_PANCANCER_COUNT"]
    tcga_pcdm_info_tags = ["PUTATIVE_DRIVER_MUTATION"]
+   chasmplus_info_tags = ["CHASMPLUS_DRIVER","CHASMPLUS_TTYPE","CHASMPLUS_PANCAN"]
    intogen_driver_mut_info_tags = ["INTOGEN_DRIVER_MUT"]
    clinvar_info_tags = ["CLINVAR_MSID","CLINVAR_PMID","CLINVAR_CLNSIG","CLINVAR_VARIANT_ORIGIN","CLINVAR_CONFLICTED","CLINVAR_MEDGEN_CUI",
                         "CLINVAR_MEDGEN_CUI_SOMATIC","CLINVAR_CLNSIG_SOMATIC","CLINVAR_PMID_SOMATIC","CLINVAR_ALLELE_ID","CLINVAR_HGVSP",
-                        "CLINVAR_REVIEW_STATUS_STARS","CLINVAR_CLASSIFICATION"]
+                        "CLINVAR_REVIEW_STATUS_STARS","CLINVAR_CLASSIFICATION","CLINVAR_ENTREZGENE"]
    cancer_hotspots_info_tags = ["MUTATION_HOTSPOT","MUTATION_HOTSPOT_TRANSCRIPT","MUTATION_HOTSPOT_CANCERTYPE"]
    dbnsfp_info_tags = ["DBNSFP"]
    uniprot_info_tags = ["UNIPROT_FEATURE"]
@@ -81,7 +83,7 @@ def run_vcfanno(num_processes, query_vcf, panel_normal_vcf, query_info_tags, vcf
    gnomad_cpsr_tags.append('NON_CANCER_NHOMALT_GLOBAL')
    gnomad_cpsr_tags.append('NON_CANCER_AN_GLOBAL')
    gnomad_cpsr_tags.append('NON_CANCER_AF_GLOBAL')
-   for pop in ['NFE','SAS','FIN','EAS','AMR','AFR']:
+   for pop in ['ASJ','NFE','SAS','FIN','EAS','AMR','AFR','OTH']:
       gnomad_cpsr_tags.append('NON_CANCER_AC_' + str(pop))
       gnomad_cpsr_tags.append('NON_CANCER_AN_' + str(pop))
       gnomad_cpsr_tags.append('NON_CANCER_AF_' + str(pop))
@@ -99,6 +101,8 @@ def run_vcfanno(num_processes, query_vcf, panel_normal_vcf, query_info_tags, vcf
       prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file, logger, tcga_info_tags, query_info_tags, "tcga")
    if tcga_pcdm is True:
       prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file, logger, tcga_pcdm_info_tags, query_info_tags, "tcga_pcdm")
+   if chasmplus is True:
+      prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file, logger, chasmplus_info_tags, query_info_tags, "chasmplus")
    if civic is True:
       prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file, logger, civic_info_tags, query_info_tags, "civic")
    if cancer_hotspots is True:

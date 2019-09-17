@@ -15,6 +15,12 @@ export(assign_mutation_type)
 export(annotate_variant_link)
 export(generate_annotation_link)
 export(detect_vcf_sample_name)
+export(data_integrity_check)
+export(add_ucsc_segment_link)
+
+## KATAEGIS FUNCTIONS (maftools)
+#export(detect_kataegis_pcgrr)
+#export(detect_kataegis_pcgrr_chr)
 
 ## CPSR FUNCTIONS
 export(get_insilico_prediction_statistics)
@@ -60,8 +66,8 @@ export(generate_report_data_cna)
 export(generate_report_data_tumor_only)
 export(generate_report_data_value_box)
 export(generate_report)
-export(annotate_facets_cna)
-
+#export(annotate_facets_cna)
+export(update_maf_allelic_support)
 
 #export(filter_db_germline_variants)
 export(generate_biomarker_tsv)

@@ -92,6 +92,33 @@ def getlogger(logger_name):
 	return logger
 
 
+def get_correct_cpg_transcript(vep_csq_records):
+
+   ## some variants are assigned multiple transcript consequences
+   index = 0
+   if len(vep_csq_records) == 1:
+      return index
+   j = 0
+   block_idx = 0
+   block_idx_pten = -1
+   block_idx_klln = -1
+   num_cpg_blocks = 0
+   while j < len(vep_csq_records):
+      if 'CANCER_PREDISPOSITION_SOURCE' in vep_csq_records[j] or 'GE_PANEL_ID' in vep_csq_records[j]:
+         block_idx = j
+         num_cpg_blocks += 1
+         if 'SYMBOL' in vep_csq_records[j]:
+            if vep_csq_records[j]['SYMBOL'] == 'KLLN':
+               block_idx_klln = j
+            if vep_csq_records[j]['SYMBOL'] == 'PTEN':
+               block_idx_pten = j
+      j = j + 1
+   
+   if block_idx_klln != -1 and block_idx_pten != -1:
+      block_idx = block_idx_pten
+   return block_idx
+
+
 def read_config_options(configuration_file, base_dir, genome_assembly, logger, wflow = 'pcgr'):
    
    ## read default options
@@ -122,7 +149,7 @@ def read_config_options(configuration_file, base_dir, genome_assembly, logger, w
                         'Colorectal_Cancer_NOS','Esophageal_Cancer_NOS','Head_And_Neck_Cancer_NOS','Kidney_Cancer','Leukemia_NOS',
                         'Liver_Cancer_NOS','Lung_Cancer_NOS','Lymphoma_Hodgkin_NOS','Lymphoma_Non_Hodgkin_NOS','Multiple_Myeloma_NOS',
                         'Ovarian_Fallopian_Tube_Cancer_NOS','Pancreatic_Cancer_NOS','Penile_Cancer_NOS','Peripheral_Nervous_System_Cancer_NOS',
-                        'Peritoneal_Cancer_NOS','Pleural_Cancer_NOS','Prostate_Cancer_NOS','Skin_Cancer_NOS','Soft_Tissue_Cancer_NOS',
+                        'Peritoneal_Cancer_NOS','Pleural_Cancer_NOS','Prostate_Cancer_NOS','Skin_Cancer_NOS','Soft_Tissue_Cancer_Sarcoma_NOS',
                         'Stomach_Cancer_NOS','Testicular_Cancer_NOS','Thymic_Cancer_NOS','Thyroid_Cancer_NOS','Uterine_Cancer_NOS',
                         'Vulvar_Vaginal_Cancer_NOS','']
 
@@ -496,7 +523,7 @@ def vep_dbnsfp_meta_vcf(query_vcf, info_tags_wanted):
                if identifier == 'CSQ':
                   i = 0
                   for t in subtags:
-                     v = t
+                     v = t.replace('"','')
                      if t in vep_to_pcgr_af:
                         v = str(vep_to_pcgr_af[t])
                      if v in info_tags_wanted:
@@ -572,6 +599,7 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, logger, pick_onl
          
          ## Assign coding status, protein change, coding sequence change, last exon/intron status etc
          assign_cds_exon_intron_annotations(csq_record)
+         ## Append transcript consequence to all_csq_pick
          all_csq_pick.append(csq_record)
       symbol = '.'
       if csq_fields[vep_csq_fields_map['field2index']['SYMBOL']] != "":

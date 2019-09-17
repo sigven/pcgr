@@ -58,9 +58,9 @@ def extend_vcf_annotations(query_vcf, pcgr_db_directory, logger, pon_annotation,
    current_chrom = None
    num_chromosome_records_processed = 0
    pcgr_onco_xref_map = {'ENSEMBL_TRANSCRIPT_ID': 0, 'ENSEMBL_GENE_ID':1, 'ENSEMBL_PROTEIN_ID':2, 'SYMBOL':3, 'SYMBOL_ENTREZ':4, 'ENTREZ_ID':5, 'UNIPROT_ID':6, 'APPRIS':7,'UNIPROT_ACC':8,'REFSEQ_MRNA':9,'CORUM_ID':10,'TUMOR_SUPPRESSOR':11,
-                        'ONCOGENE':12,'NETWORK_CG':13,'DISGENET_CUI':14,'CHEMBL_COMPOUND_ID':15,'INTOGEN_DRIVER':16,'TCGA_DRIVER':17,'ONCOSCORE':18, 'MIM_PHENOTYPE_ID':19, 'CANCER_PREDISPOSITION_SOURCE':20, 
-                        'CANCER_SUSCEPTIBILITY_CUI':21, 'CANCER_SYNDROME_CUI':22, 'CANCER_PREDISPOSITION_MOI':23, 'CANCER_PREDISPOSITION_MOD':24, 'SIGNALING_PATHWAY':25, 'OPENTARGETS_DISEASE_ASSOCS':26,
-                        'OPENTARGETS_TRACTABILITY_COMPOUND:':27, 'OPENTARGETS_TRACTABILITY_ANTIBODY':28, 'GE_PANEL_ID':29}
+                        'ONCOGENE':12,'DRIVER':13, 'NETWORK_CG':14,'DISGENET_CUI':15,'CHEMBL_COMPOUND_ID':16,'INTOGEN_DRIVER':17,'TCGA_DRIVER':18,'ONCOSCORE':19, 'MIM_PHENOTYPE_ID':20, 'CANCER_PREDISPOSITION_SOURCE':21, 
+                        'CANCER_SUSCEPTIBILITY_CUI':22, 'CANCER_SYNDROME_CUI':23, 'CANCER_PREDISPOSITION_MOI':24, 'CANCER_PREDISPOSITION_MOD':25, 'SIGNALING_PATHWAY':26, 'OPENTARGETS_DISEASE_ASSOCS':27,
+                        'OPENTARGETS_TRACTABILITY_COMPOUND:':28, 'OPENTARGETS_TRACTABILITY_ANTIBODY':29, 'GE_PANEL_ID':30, 'ACTIONABLE_TARGET':31}
    
    vcf_info_element_types = {}
    for e in vcf.header_iter():
@@ -97,14 +97,8 @@ def extend_vcf_annotations(query_vcf, pcgr_db_directory, logger, pon_annotation,
          vep_csq_records = csq_record_results['vep_block']
 
          block_idx = 0
-         if len(vep_csq_records) > 1 and cpsr is True:
-            j = 0
-            num_cpg_blocks = 0
-            while j < len(vep_csq_records):
-               if 'CANCER_PREDISPOSITION_SOURCE' in vep_csq_records[j] or 'GE_PANEL_ID' in vep_csq_records[j]:
-                  block_idx = j
-                  num_cpg_blocks += 1
-               j = j + 1
+         if cpsr is True:
+            block_idx = annoutils.get_correct_cpg_transcript(vep_csq_records)
          record = vep_csq_records[block_idx]
          for k in record:
             if k in vcf_info_element_types:

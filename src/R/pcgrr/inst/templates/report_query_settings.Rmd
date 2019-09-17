@@ -25,7 +25,7 @@ The report is generated with _[PCGR](https://github.com/sigven/pcgr)_ version `r
 * Minimum allelic fraction (AF) tumor (SNV + InDels): __`r pcg_report[['metadata']][['config']][['allelic_support']][['tumor_af_min']]`__
 * Minimum sequencing depth (DP) control (SNV + InDels): __`r pcg_report[['metadata']][['config']][['allelic_support']][['control_dp_min']]`__
 * Maximum allelic fraction (AF) control (SNV + InDels): __`r pcg_report[['metadata']][['config']][['allelic_support']][['control_af_max']]`__
-* Tier system (VCF): __`r pcg_report[['metadata']][['config']][['tier_model']][['tier_model']]`__
+* Tier system (VCF): __pcgr_acmg__
 * MSI prediction: __`r msi_prediction`__
 * Mutational burden estimation: __`r mutational_burden`__
 * Mutational signatures estimation: __`r signatures_estimation`__

@@ -46,6 +46,7 @@ p1 <- pcgrr::gene_selection_tiles(genes = cps_report[['metadata']][['gene_panel'
 p1
 
 ```
+<br>
 
 ## Summary of findings
 
@@ -86,6 +87,11 @@ Variant numbers in the selected cancer predisposition genes (n = `r NROW(cps_rep
 
 ```{r conditional_sf, child='predispose/sf.Rmd', eval = cps_report[['metadata']][['config']][['secondary_findings']][['show_sf']]}
 ```
+
+```{r global_options2, include=FALSE}
+options(scipen=0)
+```
+
 
 ```{r conditional_gwas, child='predispose/gwas_predispose.Rmd', eval = cps_report[['metadata']][['config']][['gwas']][['gwas_hits']]}
 ```

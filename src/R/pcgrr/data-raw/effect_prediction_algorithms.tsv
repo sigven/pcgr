@@ -1,0 +1,18 @@
+algorithm	url	display_name
+primateai	https://github.com/Illumina/PrimateAI	PrimateAI
+metalr	https://www.ncbi.nlm.nih.gov/pubmed/2555246	Ensembl-LogisticRegression
+sift4g	https://sift.bii.a-star.edu.sg/sift4g/AboutSIFT4G.html	SIFT4G
+metasvm	https://www.ncbi.nlm.nih.gov/pubmed/25552646	Ensembl-SVM
+deogen2	https://www.ncbi.nlm.nih.gov/pubmed/28498993	DEOGEN2
+mutationassessor	http://mutationassessor.org	MutationAssessor
+mutationtaster	http://www.mutationtaster.org	MutationTaster
+fathmm	http://fathmm.biocompute.org.uk	FATHMM
+fathmm_mkl_coding	http://fathmm.biocompute.org.uk/fathmmMKL.htm	FATHMM-mkl
+sift	http://provean.jcvi.org/index.php	SIFT
+lrt	http://www.genetics.wustl.edu/jflab/lrt_query.html	LRT
+provean	http://provean.jcvi.org/index.php	PROVEAN
+mutpred	http://mutpred.mutdb.org	MutPred
+m-cap	http://bejerano.stanford.edu/MCAP/	M-CAP
+splice_site_rf	http://nar.oxfordjournals.org/content/42/22/13534	Splice site effect (Random forest)
+splice_site_ada	http://nar.oxfordjournals.org/content/42/22/13534	Splice site effect (Adaptive boosting)
+gerp_rs	http://mendel.stanford.edu/SidowLab/downloads/gerp/	GERP++ RS score
