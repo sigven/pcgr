@@ -2,10 +2,8 @@
 
 
 [tumor_only]
-## If input VCF contains mix of germline/somatic (variants called with no matching control, i.e. tumor-only) set vcf_tumor_only to true
-vcf_tumor_only = false
-
-## If vcf_tumor_only = true, several filters can be configured, all as a means to minimize the proportion of germline calls in the raw set derived from tumor-only calling
+## Variant filtering applied for option --tumor_only = true in pcgr.py
+## Several filters can be configured, all as a means to minimize the proportion of germline calls in the raw set derived from tumor-only calling
 
 ## Exclude variants (SNVs/InDels) with minor allele frequency above the following population-specific thresholds
 ## 1000 Genomes Project - WGS data
@@ -32,7 +30,7 @@ maf_gnomad_global = 0.002
 exclude_pon = true
 
 ## Exclude likely homozygous germline variants (100% allelic fraction for alternate allele in tumor, very unlikely somatic event)
-exclude_likely_hom_germline = false
+exclude_likely_hom_germline = true
 
 ## Exclude likely heterozygous germline variants
 ## Must satisfy i) 40-60 % allelic fraction for alternate allele in tumor sample, ii) present in dbSNP + gnomAD, ii) not existing as somatic event in COSMIC/TCGA
@@ -118,7 +116,7 @@ list_noncoding = true
 n_vcfanno_proc = 4
 n_vep_forks = 4
 ## Customise the order of criteria used to pick the primary transcript in VEP (see https://www.ensembl.org/info/docs/tools/vep/script/vep_options.html#opt_pick_order)
-vep_pick_order = "canonical,appris,biotype,ccds,rank,tsl,length"
+vep_pick_order = "canonical,appris,biotype,ccds,rank,tsl,length,mane"
 ## omit intergenic variants during VEP processing
 vep_skip_intergenic = false
 ## generate a MAF for input VCF using https://github.com/mskcc/vcf2maf
