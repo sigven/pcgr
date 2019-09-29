@@ -20,12 +20,13 @@ def __main__():
    parser.add_argument('input_cna', help='Somatic copy number query segments (tab-separated values)')
    parser.add_argument('configuration_file', help='Configuration file (TOML-formatted, e.g. pcgr_conf.toml)')
    parser.add_argument('panel_normal_vcf',help="VCF file with germline calls from panel of normals")
-   parser.add_argument('vcf_validation',type=int, help="Perform VCF validation with Ensembl's vcf-validator")
+   parser.add_argument('vcf_validation',type=int, default=0,choices=[0,1],help="Perform VCF validation with Ensembl's vcf-validator")
+   parser.add_argument('tumor_only',type=int, default=0,choices=[0,1],help="Tumor only sequencing")
    parser.add_argument('genome_assembly',help='grch37 or grch38')
    parser.add_argument('--output_dir', dest='output_dir', help='Output directory', default='/workdir/output')
    args = parser.parse_args()
 
-   ret = validate_pcgr_input(args.pcgr_dir, args.input_vcf, args.input_cna, args.configuration_file, args.panel_normal_vcf, args.vcf_validation, args.genome_assembly, args.output_dir)
+   ret = validate_pcgr_input(args.pcgr_dir, args.input_vcf, args.input_cna, args.configuration_file, args.panel_normal_vcf, args.vcf_validation, args.tumor_only,args.genome_assembly, args.output_dir)
    if ret != 0:
       sys.exit(1)
 
@@ -160,7 +161,7 @@ def validate_panel_normal_vcf(vcf, logger):
    return ret
 
 
-def check_format_ad_dp_tags(vcf, pcgr_directory, config_options, logger):
+def check_format_ad_dp_tags(vcf, pcgr_directory, config_options, tumor_only, logger):
    
    found_taf_tag = 0
    found_tdp_tag = 0
@@ -232,10 +233,12 @@ def check_format_ad_dp_tags(vcf, pcgr_directory, config_options, logger):
    if control_af_tag != '' and found_naf_tag == 0:
       logger.warn('Could not find the specified control_af_tag (' + str(control_af_tag) + ') in INFO column of input VCF')
    
-   if config_options['tumor_only']['exclude_likely_hom_germline'] is True and config_options['tumor_only']['vcf_tumor_only'] is True and found_taf_tag == 0:
+   #if config_options['tumor_only']['exclude_likely_hom_germline'] is True and config_options['tumor_only']['vcf_tumor_only'] is True and found_taf_tag == 0:
+   if config_options['tumor_only']['exclude_likely_hom_germline'] is True and tumor_only == 1 and found_taf_tag == 0:
       logger.warn('Could not find the specified tumor_af_tag (' + str(tumor_af_tag) + ') in INFO column of input VCF - filtering of homozygous germline variants in tumor-only mode will be ignored')
 
-   if config_options['tumor_only']['exclude_likely_het_germline'] is True and config_options['tumor_only']['vcf_tumor_only'] is True and found_taf_tag == 0:
+   #if config_options['tumor_only']['exclude_likely_het_germline'] is True and config_options['tumor_only']['vcf_tumor_only'] is True and found_taf_tag == 0:
+   if config_options['tumor_only']['exclude_likely_het_germline'] is True and tumor_only == 1 and found_taf_tag == 0:
       logger.warn('Could not find the specified tumor_af_tag (' + str(tumor_af_tag) + ') in INFO column of input VCF - filtering of heterozygous germline variants in tumor-only mode will be ignored')
 
 
@@ -319,7 +322,7 @@ def simplify_vcf(input_vcf, vcf, output_dir, logger):
 
    os.system('rm -f ' + str(input_vcf_pcgr_ready) + ' ' + os.path.join(output_dir, 'decompose.log'))
 
-def validate_pcgr_input(pcgr_directory, input_vcf, input_cna, configuration_file, panel_normal_vcf, vcf_validation, genome_assembly, output_dir):
+def validate_pcgr_input(pcgr_directory, input_vcf, input_cna, configuration_file, panel_normal_vcf, vcf_validation, tumor_only, genome_assembly, output_dir):
    """
    Function that reads the input files to PCGR (VCF file and Tab-separated values file with copy number segments) and performs the following checks:
    1. Check that VCF file is properly formatted (according to EBIvariation/vcf-validator - VCF v4.2) - optional (vcf_validation in config file)
@@ -333,7 +336,7 @@ def validate_pcgr_input(pcgr_directory, input_vcf, input_cna, configuration_file
    logger = annoutils.getlogger('pcgr-validate-input')
    config_options = annoutils.read_config_options(configuration_file, pcgr_directory, genome_assembly, logger, wflow = 'pcgr')
 
-   if panel_normal_vcf == "None" and config_options['tumor_only']['vcf_tumor_only'] is True and config_options['tumor_only']['exclude_pon'] is True:
+   if panel_normal_vcf == "None" and tumor_only == 1 and config_options['tumor_only']['exclude_pon'] is True:
       logger.warn('Panel-of-normals VCF is not present - exclusion of calls found in panel-of-normals will be ignored')
 
    if not input_vcf == 'None':
@@ -348,7 +351,7 @@ def validate_pcgr_input(pcgr_directory, input_vcf, input_cna, configuration_file
          return -1
       
       vcf = VCF(input_vcf)
-      allelic_support_check = check_format_ad_dp_tags(vcf, pcgr_directory, config_options, logger)
+      allelic_support_check = check_format_ad_dp_tags(vcf, pcgr_directory, config_options, tumor_only, logger)
       if allelic_support_check == -1:
          return -1
       

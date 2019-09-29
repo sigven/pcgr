@@ -206,9 +206,16 @@ df_string_replace <- function(df, strings, pattern, replacement, replace_all = F
 #'
 
 generate_report <- function(project_directory, query_vcf2tsv, pcgr_data, config = NULL, sample_name = "SampleX",
-                            cna_segments_tsv = NULL, cna_plot = NULL, tier_model = "pcgr_acmg"){
+                            cna_segments_tsv = NULL, cna_plot = NULL, tier_model = "pcgr_acmg", tumor_only = 0){
 
   rlogging::message(paste0('Initializing PCGR report - sample ', sample_name))
+
+  if(!is.null(config[['tumor_only']])){
+    config[['tumor_only']][['vcf_tumor_only']] <- FALSE
+    if(tumor_only == 1){
+      config[['tumor_only']][['vcf_tumor_only']] <- TRUE
+    }
+  }
   pcg_report <- pcgrr::init_pcg_report(config, sample_name, class = NULL, pcgr_data = pcgr_data)
 
   fnames <- list()
@@ -239,6 +246,17 @@ generate_report <- function(project_directory, query_vcf2tsv, pcgr_data, config 
                                                     config, callset = "germline-filtered callset", tier_model = tier_model)
 
             pcg_report_tumor_only[['upset_data']] <- pcgrr::make_upset_plot_data(pcg_report_tumor_only$variant_set$unfiltered, config)
+            num_upset_sources <- 0
+            for(c in colnames(pcg_report_tumor_only[['upset_data']])){
+              if(c != 'VAR_ID'){
+                if(sum(pcg_report_tumor_only[['upset_data']][,c]) > 0){
+                  num_upset_sources <- num_upset_sources + 1
+                }
+              }
+            }
+            if(num_upset_sources >= 2){
+              pcg_report_tumor_only[['upset_plot_valid']] <- TRUE
+            }
             #pcg_report_tumor_only[["variant_set"]] <- NULL
             pcg_report <- pcgrr::update_pcg_report(pcg_report, pcg_report_snv_indel_filtered, analysis_element = "snv_indel")
             pcg_report <- pcgrr::update_pcg_report(pcg_report, pcg_report_tumor_only, analysis_element = "tumor_only")
@@ -640,12 +658,14 @@ annotate_variant_link <- function(var_df, vardb = "DBSNP", linktype = "dbsource"
 
   if(vardb == "ANTINEOPHARMA"){
     if(any(grepl(paste0("^CHEMBL_COMPOUND_ID$"),names(var_df))) & any(grepl(paste0("^SYMBOL$"),names(var_df))) & any(grepl(paste0("^VAR_ID$"),names(var_df))) & !is.null(pcgr_data)){
-      var_df_unique_slim <- dplyr::select(var_df, VAR_ID, SYMBOL, CHEMBL_COMPOUND_ID) %>% dplyr::filter(!is.na(CHEMBL_COMPOUND_ID)) %>% dplyr::distinct()
+      var_df_unique_slim <- dplyr::select(var_df, VAR_ID, SYMBOL, CHEMBL_COMPOUND_ID) %>%
+        dplyr::filter(!is.na(CHEMBL_COMPOUND_ID)) %>%
+        dplyr::distinct()
       if(nrow(var_df_unique_slim) > 0){
         var_df_unique_slim_melted <- var_df_unique_slim %>% tidyr::separate_rows(CHEMBL_COMPOUND_ID,sep="&")
         chembl_drugs <-
-          dplyr::select(pcgr_data[['antineopharma']][['antineopharma']],molecule_chembl_id,symbol,nci_concept_display_name,chembl_max_phase) %>%
-          dplyr::arrange(symbol,desc(chembl_max_phase)) %>%
+          dplyr::select(pcgr_data[['antineopharma']][['antineopharma']],molecule_chembl_id,symbol,nci_concept_display_name) %>%
+          dplyr::arrange(symbol) %>%
           dplyr::distinct()
         var_df_unique_slim_melted <- var_df_unique_slim_melted %>%
           dplyr::left_join(chembl_drugs, by=c("CHEMBL_COMPOUND_ID" = "molecule_chembl_id", "SYMBOL" = "symbol")) %>%

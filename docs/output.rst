@@ -8,12 +8,10 @@ An interactive and tier-structured HTML report that shows the most
 relevant findings in the query cancer genome is provided with the
 following naming convention:
 
-**sample_id**.__tier_model__.__genome_assembly__.html
+**sample_id**.pcgr_acmg.__genome_assembly__.html
 
 -  The **sample_id** is provided as input by the user, and reflects a
    unique identifier of the tumor-normal sample pair to be analyzed.
--  The **tier_model** is provided by the user and will be either
-   *‘pcgr’* or *‘pcgr_acmg’*
 
 The report is structured in seven main sections, described in more
 detail below:
@@ -44,8 +42,8 @@ detail below:
       -  given a coding target region size specified by the user
          (ideally the **callable target size**), an estimate of the
          mutational burden is provided
-      -  is presently only computed for tumor-normal input (e.g.
-         *vcf_tumor_only = false*)
+      -  is presently only computed for tumor-normal input
+         (e.g. *vcf_tumor_only = false*)
       -  The estimated mutational burden is assigned a descriptive
          *tertile* based on thresholds defined by the user (these should
          reflect thresholds of clinical significance, and may vary for
@@ -114,8 +112,8 @@ detail below:
       `here <http://rpubs.com/sigven/msi_classification_v3>`__)
    -  The MSI classifier was trained on TCGA exome samples.
    -  Will only be present in the report if specified by the user in the
-      configuration file (i.e. *msi = true*) and if the input is
-      tumor-normal (i.e. *vcf_tumor_only = false*)
+      configuration file (i.e. *msi = true*) and if the input is
+      tumor-normal (i.e. *vcf_tumor_only = false*)
 
 6. **Mutational signatures**
 
@@ -126,8 +124,8 @@ detail below:
       as the underlying framework)
    -  Datatable with signatures and proposed underlying etiologies
    -  Will only be present in the report if specified by the user in the
-      configuration file (i.e. *mutsignatures = true*) and if the input
-      is tumor-normal (i.e. *vcf_tumor_only = false*)
+      configuration file (i.e. *mutsignatures = true*) and if the input
+      is tumor-normal (i.e. *vcf_tumor_only = false*)
    -  `Trimer (i.e. DNA 3-mer)
       normalization <https://github.com/raerose01/deconstructSigs>`__
       can be configured according to sequencing approach used (WES, WXS
@@ -202,7 +200,7 @@ following:
 -  COSMIC - Cosmic mutation IDs
 -  CLINVAR - ClinVar variant origin and associated phenotypes
 -  CANCER_ASSOCIATIONS - Gene-associated cancer types from DisGenet
--  TARGETED_DRUGS - Targeted drugs from DGIdb-ChEMBL
+-  TARGETED_DRUGS - Targeted drugs from Open Targets Platform /ChEMBL
 -  KEGG_PATHWAY - Gene-associated pathways from KEGG
 -  CALL_CONFIDENCE - Variant confidence (as set by user in input VCF)
 -  DP_TUMOR - Variant sequencing depth in tumor (as set by user in input
@@ -219,9 +217,9 @@ following:
 Example reports:
 
 -  `View an example report for a breast tumor sample
-   (TCGA) <http://folk.uio.no/sigven/tumor_sample.BRCA.pcgr_acmg.grch37.0.8.0.html>`__
+   (TCGA) <http://folk.uio.no/sigven/tumor_sample.BRCA.pcgr_acmg.grch37.0.8.2.html>`__
 -  `View an example report for a colon adenocarcinoma sample
-   (TCGA) <http://folk.uio.no/sigven/tumor_sample.COAD.pcgr_acmg.grch37.0.8.0.html>`__
+   (TCGA) <http://folk.uio.no/sigven/tumor_sample.COAD.pcgr_acmg.grch37.0.8.2.html>`__
 
 The HTML reports have been tested using the following browsers:
 
@@ -237,8 +235,7 @@ will easen the process of extracting particular parts of the report for
 further analysis. The JSON contains two main objects, *metadata* and
 *content*, where the former contains information about the settings,
 data versions, and the latter contains the various sections of the
-report. Examples (using R) on how to extract information from the JSON
-file will soon be posted here.
+report.
 
 Output files - somatic SNVs/InDels
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -250,7 +247,7 @@ A VCF file containing annotated, somatic calls (single nucleotide
 variants and insertion/deletions) is generated with the following naming
 convention:
 
-**sample_id**.__tier_model__.__genome_assembly__.vcf.gz
+**sample_id**.pcgr_acmg.__genome_assembly__.vcf.gz
 
 Here, the **sample_id** is provided as input by the user, and reflects a
 unique identifier of the tumor-normal sample pair to be analyzed.
@@ -606,8 +603,8 @@ processing with the PCGR annotation pipeline:
 '''''''
 
 -  CHEMBL_COMPOUND_ID - antineoplastic drugs targeting the encoded
-   protein (from `Drug-Gene Interaction
-   Database <http://dgidb.genome.wustl.edu/>`__, drugs are listed as
+   protein (from `Open Targets
+   Platform <https://www.targetvalidation.org/>`__, drugs are listed as
    `ChEMBL <https://www.ebi.ac.uk/chembl/>`__ compound identifiers)
 -  CIVIC_ID, CIVIC_ID_2 - Variant identifiers in the `CIViC
    database <http://civic.genome.wustl.edu>`__, CIVIC_ID refers to
@@ -625,7 +622,7 @@ Annotated List of all SNVs/InDels
 We provide a tab-separated values file with most important annotations
 for SNVs/InDels. The file has the following naming convention:
 
-**sample_id**.__tier_model__.__genome_assembly__.snvs_indels.tiers.tsv
+**sample_id**.pcgr_acmg.__genome_assembly__.snvs_indels.tiers.tsv
 
 The SNVs/InDels are organized into different **tiers** (as defined above
 for the HTML report)
@@ -674,30 +671,32 @@ The following variables are included in the tiered TSV file:
    34. MUTATION_HOTSPOT_CANCERTYPE - hotspot-associated cancer types (from cancerhotspots.org)
    35. PUTATIVE_DRIVER_MUTATION - Indicates if variant is predicted as
        driver mutation from TCGA's PanCancer study of cancer driver mutation
-   36. VEP_ALL_CSQ - all VEP transcript block consequences
-   37. DBSNPRSID - dbSNP reference cluster ID
-   38. COSMIC_MUTATION_ID - COSMIC mutation ID
-   39. TCGA_PANCANCER_COUNT - Raw variant count across all TCGA tumor types
-   40. TCGA_FREQUENCY - Frequency of variant across TCGA tumor types. Format: tumortype|
+   36. CHASMPLUS_DRIVER - Driver mutation predicted by CHASMplus algorithm
+   37. CHASMPLUS_TTYPE - Tumor type for which mutation is predicted as driver by CHASMplus
+   38. VEP_ALL_CSQ - all VEP transcript block consequences
+   39. DBSNPRSID - dbSNP reference cluster ID
+   40. COSMIC_MUTATION_ID - COSMIC mutation ID
+   41. TCGA_PANCANCER_COUNT - Raw variant count across all TCGA tumor types
+   42. TCGA_FREQUENCY - Frequency of variant across TCGA tumor types. Format: tumortype|
    percent affected|affected cases|total cases
-   41. ICGC_PCAWG_OCCURRENCE - Mutation occurrence in ICGC-PCAWG by project:
+   43. ICGC_PCAWG_OCCURRENCE - Mutation occurrence in ICGC-PCAWG by project:
    project_code|affected_donors|tested_donors|frequency
-   42. CHEMBL_COMPOUND_ID - Compounds (as ChEMBL IDs) that target the encoded protein (from DGIdb)
-   43. CHEMBL_COMPOUND_TERMS - Compounds (as drug names) that target the encoded protein (from DGIdb)
-   44. SIMPLEREPEATS_HIT - Variant overlaps UCSC _simpleRepeat_ sequence repeat track
-   45. WINMASKER_HIT - Variant overlaps UCSC _windowmaskerSdust_ sequence repeat track
-   46. OPENTARGETS_RANK - OpenTargets association score (between 0 and 1) for gene (maximum across cancer phenotypes)
-   47. CLINVAR - ClinVar association: variant origin and associated traits
-   48. CLINVAR_CLNSIG - clinical significance of ClinVar variant
-   49. GLOBAL_AF_GNOMAD - global germline allele frequency in gnomAD
-   50. GLOBAL_AF_1KG - 1000G Project - phase 3, germline allele frequency
-   51. CALL_CONFIDENCE - confidence indicator for somatic variant
-   52. DP_TUMOR - sequencing depth at variant site (tumor sample)
-   53. AF_TUMOR - allelic fraction of alternate allele (tumor sample)
-   54. DP_CONTROL - sequencing depth at variant site (control sample)
-   55. AF_CONTROL - allelic fraction of alternate allele (control sample)
-   56. TIER
-   57. TIER_DESCRIPTION
+   44. CHEMBL_COMPOUND_ID - Compounds (as ChEMBL IDs) that target the encoded protein (from Open Targets Platform)
+   45. CHEMBL_COMPOUND_TERMS - Compounds (as drug names) that target the encoded protein (from Open Targets Platform)
+   46. SIMPLEREPEATS_HIT - Variant overlaps UCSC _simpleRepeat_ sequence repeat track
+   47. WINMASKER_HIT - Variant overlaps UCSC _windowmaskerSdust_ sequence repeat track
+   48. OPENTARGETS_RANK - OpenTargets association score (between 0 and 1) for gene (maximum across cancer phenotypes)
+   49. CLINVAR - ClinVar association: variant origin and associated traits
+   50. CLINVAR_CLNSIG - clinical significance of ClinVar variant
+   51. GLOBAL_AF_GNOMAD - global germline allele frequency in gnomAD
+   52. GLOBAL_AF_1KG - 1000G Project - phase 3, germline allele frequency
+   53. CALL_CONFIDENCE - confidence indicator for somatic variant
+   54. DP_TUMOR - sequencing depth at variant site (tumor sample)
+   55. AF_TUMOR - allelic fraction of alternate allele (tumor sample)
+   56. DP_CONTROL - sequencing depth at variant site (control sample)
+   57. AF_CONTROL - allelic fraction of alternate allele (control sample)
+   58. TIER
+   59. TIER_DESCRIPTION
 
 **NOTE**: The user has the possibility to append the TSV file with data
 from other tags in the input VCF of interest (i.e. using the
@@ -718,7 +717,7 @@ addition, PCGR attaches cancer-relevant annotations for the affected
 transcripts. The naming convention of the compressed TSV file is as
 follows:
 
-**sample_id**.__tier_model__.__genome_assembly__.cna_segments.tsv.gz
+**sample_id**.pcgr_acmg.__genome_assembly__.cna_segments.tsv.gz
 
 The format of the compressed TSV file is the following:
 
@@ -731,21 +730,22 @@ The format of the compressed TSV file is the following:
    5. event_type - focal or broad (covering more than 25% of chromosome arm)
    6. cytoband
    7. LogR - Copy log-ratio
-   8. ensembl_gene_id
-   9. symbol - gene symbol
-   10. ensembl_transcript_id
-   11. transcript_start
-   12. transcript_end
-   13. transcript_overlap_percent - percent of transcript length covered by CN segment
-   14. name - gene name description
-   15. biotype - type of gene
-   16. disgenet_cui - tumor types associated with gene (from DisGeNET, tumor types
+   8. sample_id - Sample identifier
+   9. ensembl_gene_id
+   10. symbol - gene symbol
+   11. ensembl_transcript_id
+   12. transcript_start
+   13. transcript_end
+   14. transcript_overlap_percent - percent of transcript length covered by CN segment
+   15. name - gene name description
+   16. biotype - type of gene
+   17. disgenet_cui - tumor types associated with gene (from DisGeNET, tumor types
       are listed as MedGen concept IDs (CUI)
-   17. tsgene - tumor suppressor gene status (CancerMine literature database)
-   18. p_oncogene - oncogene status (CancerMine literature database)
-   19. intogen_drivers - predicted driver gene status (IntoGen Cancer Drivers Database)
-   20. chembl_compound_id - antineoplastic drugs targeting the encoded protein
-      (from DGIdb, drugs are listed as ChEMBL compound identifiers)
-   21. gencode_gene_biotype
-   22. gencode_tag
-   23. gencode_release
+   18. tsgene - tumor suppressor gene status (CancerMine literature database)
+   19. p_oncogene - oncogene status (CancerMine literature database)
+   20. intogen_drivers - predicted driver gene status (IntoGen Cancer Drivers Database)
+   21. chembl_compound_id - antineoplastic drugs targeting the encoded protein
+      (from Open Targets Platform, drugs are listed as ChEMBL compound identifiers)
+   22. gencode_gene_biotype
+   23. gencode_tag
+   24. gencode_release

@@ -124,4 +124,4 @@ vcf2maf = true
 
 ## Not for edit
 [tumor_type]
-type = "Adrenal_Gland_Cancer_NOS" 
+type = "Soft_Tissue_Cancer_Sarcoma_NOS" 

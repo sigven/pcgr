@@ -73,8 +73,8 @@ with descriptive comments wrt. usage are shown below:
    # PCGR configuration options (TOML).
 
    [tumor_only]
-   ## If input VCF contains mix of germline/somatic (variants called with no matching control, i.e. tumor-only) set vcf_tumor_only to true
-   vcf_tumor_only = false
+   ## Variant filtering applied for option --tumor_only = true in pcgr.py
+   ## Several filters can be configured, all as a means to minimize the proportion of germline calls in the raw set derived from tumor-only calling
 
    ## if vcf_tumor_only = true, exclude variants (SNVs/InDels) with minor allele frequency above the following population-specific thresholds
    ## 1000 Genomes Project - WGS data

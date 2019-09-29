@@ -8,11 +8,9 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Input &mdash; Personal Cancer Genome Reporter 0.8.1 documentation</title>
+  <title>Input &mdash; Personal Cancer Genome Reporter 0.8.2 documentation</title>
   
 
-  
-  
   
   
 
@@ -24,22 +22,30 @@
 
   
 
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="author" title="About these documents" href="about.html" />
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Output" href="output.html" />
-    <link rel="prev" title="PCGR annotation resources" href="annotation_resources.html" /> 
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="author" title="About these documents"
+              href="about.html"/>
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Personal Cancer Genome Reporter 0.8.2 documentation" href="index.html"/>
+        <link rel="next" title="Output" href="output.html"/>
+        <link rel="prev" title="PCGR annotation resources" href="annotation_resources.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav">
+<body class="wy-body-for-nav" role="document">
 
-   
   <div class="wy-grid-for-nav">
 
     
@@ -59,7 +65,7 @@
             
             
               <div class="version">
-                0.8.1
+                0.8.2
               </div>
             
           
@@ -80,10 +86,7 @@
           
             
             
-              
-            
-            
-              <p class="caption"><span class="caption-text">Table of Contents</span></p>
+                <p class="caption"><span class="caption-text">Table of Contents</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a></li>
@@ -108,54 +111,34 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">Personal Cancer Genome Reporter</a>
-        
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Personal Cancer Genome Reporter</a>
       </nav>
 
 
+      
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
           
 
-
-
-
-
-
-
-
-
-
-
-
+ 
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
-
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html">Docs</a> &raquo;</li>
-        
-      <li>Input</li>
-    
-    
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Input</li>
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="_sources/input.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -212,7 +195,7 @@ which is a common output of somatic copy number alteration callers. Note
 that coordinates must be <strong>one-based</strong> (i.e.&nbsp;chromosomes start at 1, not
 0). Below shows the initial part of a copy number segment file that is
 formatted correctly according to PCGR’s requirements:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Chromosome</span>    <span class="n">Start</span>   <span class="n">End</span> <span class="n">Segment_Mean</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Chromosome</span>    <span class="n">Start</span>   <span class="n">End</span> <span class="n">Segment_Mean</span>
 <span class="mi">1</span> <span class="mi">3218329</span> <span class="mi">3550598</span> <span class="mf">0.0024</span>
 <span class="mi">1</span> <span class="mi">3552451</span> <span class="mi">4593614</span> <span class="mf">0.1995</span>
 <span class="mi">1</span> <span class="mi">4593663</span> <span class="mi">6433129</span> <span class="o">-</span><span class="mf">1.0277</span>
@@ -224,11 +207,11 @@ formatted correctly according to PCGR’s requirements:</p>
 <p>The cancer genome sequencing report can be flexibly configured in a
 TOML-formatted configuration file. The default TOML configuration file,
 with descriptive comments wrt. usage are shown below:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># PCGR configuration options (TOML).</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># PCGR configuration options (TOML).</span>
 
 <span class="p">[</span><span class="n">tumor_only</span><span class="p">]</span>
-<span class="c1">## If input VCF contains mix of germline/somatic (variants called with no matching control, i.e. tumor-only) set vcf_tumor_only to true</span>
-<span class="n">vcf_tumor_only</span> <span class="o">=</span> <span class="n">false</span>
+<span class="c1">## Variant filtering applied for option --tumor_only = true in pcgr.py</span>
+<span class="c1">## Several filters can be configured, all as a means to minimize the proportion of germline calls in the raw set derived from tumor-only calling</span>
 
 <span class="c1">## if vcf_tumor_only = true, exclude variants (SNVs/InDels) with minor allele frequency above the following population-specific thresholds</span>
 <span class="c1">## 1000 Genomes Project - WGS data</span>
@@ -353,16 +336,15 @@ with descriptive comments wrt. usage are shown below:</p>
 
 
            </div>
-           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="output.html" class="btn btn-neutral float-right" title="Output" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="output.html" class="btn btn-neutral float-right" title="Output" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="annotation_resources.html" class="btn btn-neutral" title="PCGR annotation resources" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="annotation_resources.html" class="btn btn-neutral" title="PCGR annotation resources" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -375,7 +357,7 @@ with descriptive comments wrt. usage are shown below:</p>
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -393,12 +375,10 @@ with descriptive comments wrt. usage are shown below:</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.8.1',
-            LANGUAGE:'None',
+            VERSION:'0.8.2',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
+            HAS_SOURCE:  true
         };
     </script>
       <script type="text/javascript" src="_static/jquery.js"></script>
@@ -407,13 +387,19 @@ with descriptive comments wrt. usage are shown below:</p>
 
   
 
-  <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
 
+  
+  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
+          SphinxRtdTheme.StickyNav.enable();
       });
-  </script> 
+  </script>
+   
 
 </body>
 </html>

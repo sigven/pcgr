@@ -258,7 +258,7 @@ RUN rm -rf /tmp/R*
 
 
 ## Install vcfanno version 0.3.1
-RUN wget https://github.com/brentp/vcfanno/releases/download/v0.3.1/vcfanno_linux64 && \
+RUN wget https://github.com/brentp/vcfanno/releases/download/v0.3.2/vcfanno_linux64 && \
     mv vcfanno_linux64 vcfanno && \
     mv vcfanno /usr/local/bin && \
     chmod 755 /usr/local/bin/vcfanno
@@ -312,7 +312,8 @@ WORKDIR /
 RUN curl -L -o mskcc-vcf2maf.tar.gz https://api.github.com/repos/mskcc/vcf2maf/tarball/v1.6.17
 RUN tar -zxf mskcc-vcf2maf.tar.gz
 RUN chmod 755 /mskcc-vcf2maf-*/*.pl
-RUN ln -s /mskcc-vcf2maf-*/vcf2maf.pl /usr/local/bin/vcf2maf.pl
+RUN cp /mskcc-vcf2maf-*/*.pl /usr/local/bin
+#RUN ln -s /mskcc-vcf2maf-*/vcf2maf.pl /usr/local/bin/vcf2maf.pl
 
 WORKDIR /
 
@@ -336,12 +337,13 @@ WORKDIR /
 
 RUN R -e "devtools::install_github('hms-dbmi/UpSetR')"
 
-RUN rm -f nlopt-2.6.1.tar.gz
+RUN rm -f v2.6.1.tar.gz
+#RUN rm -rf mskcc-vcf2maf-*
 RUN rm -rf $HOME/src/ensembl-vep/t/
 RUN rm -f $HOME/src/v335_base.tar.gz
 RUN rm -f $HOME/src/release-1-6-924.zip
 RUN rm -rf /vt
-RUN rm -rf /samtools-1.9.tar.bz2
+RUN rm -rf /samtools-1.9*
 RUN rm -rf /mskcc-vcf2maf.tar.gz
 
 ENV PATH=/usr/local/bin/bin:$PATH

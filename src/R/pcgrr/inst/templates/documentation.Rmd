@@ -22,7 +22,7 @@ for(n in names(pcg_report$metadata$pcgr_db_release)){
 * __Databases/datasets__ 
 ```{r list_db, echo=F,results='asis'}
 for(n in names(pcg_report$metadata$pcgr_db_release)){
-  if(pcg_report$metadata$pcgr_db_release[[n]]$resource_type == 'db' & n != 'gwas'){
+  if(pcg_report$metadata$pcgr_db_release[[n]]$resource_type == 'db' & n != 'gwas' & n != 'ct'){
     s <- paste0('    * [',pcg_report$metadata$pcgr_db_release[[n]]$name,'](',pcg_report$metadata$pcgr_db_release[[n]]$url,') - ',pcg_report$metadata$pcgr_db_release[[n]]$description, ' (',pcg_report$metadata$pcgr_db_release[[n]]$version,')')
     cat(s,sep="\n")
   }

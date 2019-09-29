@@ -24,6 +24,7 @@ data_dir <- as.character(args[8])
 query_cna_plot <- as.character(args[9])
 purity_estimate <- as.character(args[10])
 ploidy_estimate <- as.character(args[11])
+t_only <- as.integer(args[12])
 
 rlogging::SetTimeStampFormat(ts.format="%Y-%m-%d %H:%M:%S ")
 rlogging::SetLogFile(NULL)
@@ -63,7 +64,7 @@ pcgr_config[['tumor_properties']][['tumor_purity']] <- purity_estimate
 pcgr_config[['tumor_properties']][['tumor_ploidy']] <- ploidy_estimate
 
 pcg_report <- pcgrr::generate_report(dir, query_vcf2tsv, pcgr_data, pcgr_config, sample_name = sample_name, cna_segments_tsv = query_cnv, 
-				     cna_plot = query_cna_plot, tier_model = 'pcgr_acmg')
+				     cna_plot = query_cna_plot, tier_model = 'pcgr_acmg', tumor_only = t_only)
 pcgrr::write_report(dir, pcg_report, sample_name, genome_assembly, tier_model = 'pcgr_acmg', format = 'html')
 pcgrr::write_report(dir, pcg_report, sample_name, genome_assembly, tier_model = 'pcgr_acmg', format = 'json')
 

@@ -5,8 +5,8 @@ Basic variant consequence annotation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  `VEP <http://www.ensembl.org/info/docs/tools/vep/index.html>`__ -
-   Variant Effect Predictor release 96 (`GENCODE
-   v30 <https://www.gencodegenes.org/human/>`__ as gene reference
+   Variant Effect Predictor release 97.3 (`GENCODE
+   v31 <https://www.gencodegenes.org/human/>`__ as gene reference
    database (v19 for grch37))
 
 *Insilico* predictions of effect of coding variants
@@ -25,7 +25,7 @@ Variant frequency databases
 -  `Cancer Hotspots <http://cancerhotspots.org>`__ - a resource for
    statistically significant mutations in cancer (v2, 2017)
 -  `TCGA <https://portal.gdc.cancer.gov/>`__ - somatic mutations
-   discovered across 33 tumor type cohorts (release 16.0, March 2019)
+   discovered across 33 tumor type cohorts (release 18.0, July 2019)
 -  `ICGC-PCAWG <http://docs.icgc.org/pcawg/>`__ - ICGC Pancancer
    Analysis of Whole Genomes - (release 28, March 17th, 2019)
 
@@ -33,15 +33,13 @@ Variant databases of clinical utility
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  `ClinVar <http://www.ncbi.nlm.nih.gov/clinvar/>`__ - database of
-   clinically related variants (May 2019)
+   clinically related variants (September 2019)
 -  `DoCM <http://docm.genome.wustl.edu>`__ - database of curated
    mutations (v3.2, April 2016)
 -  `CIViC <http://civic.genome.wustl.edu>`__ - clinical interpretations
-   of variants in cancer (May 18th 2019)
+   of variants in cancer (September 27th 2019)
 -  `CBMDB <http://www.cancergenomeinterpreter.org/biomarkers>`__ -
    Cancer BioMarkers database (January 17th 2018)
--  `DGIdb <http://dgidb.genome.wustl.edu>`__ - database of targeted
-   antineoplastic drugs (v3.0.2, January 2018)
 -  `ChEMBL <https://www.ebi.ac.uk/chembl/>`__ - database of drugs,
    drug-like small molecules and their targets (ChEMBL_25, March 2019)
 
@@ -49,21 +47,21 @@ Protein domains/functional features
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  `UniProt/SwissProt KnowledgeBase <http://www.uniprot.org>`__ -
-   resource on protein sequence and functional information (2019_04, May
-   2019)
+   resource on protein sequence and functional information (2019_08,
+   September 2019)
 -  `Pfam <http://pfam.xfam.org>`__ - database of protein families and
    domains (v32, September 2018)
 
 Knowledge resources on gene and protein targets
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--  `CancerMine <https://zenodo.org/record/2587719#.XJNfS0RKiL4>`__ -
+-  `CancerMine <https://zenodo.org/record/3386384#.XXAE5ZMzaL4>`__ -
    Literature-mined database of tumor suppressor genes/proto-oncogenes
-   (v12, May 2019)
+   (v16, September 2019)
 -  `Open Targets Platform <https://www.targetvalidation.org/>`__ -
-   Database on disease-target associations and target tractability
-   aggregated from multiple sources (literature, pathways, mutations)
-   (2019_04)
+   Database on disease-target associations, targeted drugs and
+   tractability aggregated from multiple sources (literature, pathways,
+   mutations) (2019_09)
 -  `DisGeNET <http://www.disgenet.org>`__ - curated associations between
    human genes and different tumor types (v6.0, January 2019)
 -  `TCGA driver genes <https://www.ncbi.nlm.nih.gov/pubmed/29625053>`__
@@ -74,7 +72,7 @@ Pathway databases
 ~~~~~~~~~~~~~~~~~
 
 -  `KEGG PATHWAY Database <http://www.genome.jp/kegg/pathway.htm>`__ -
-   March 1st 2019
+   July 29th 2019
 -  `Oncogenic Signaling Pathways -
    TCGA <https://www.ncbi.nlm.nih.gov/pubmed/29625050>`__ - Sanchez-Vega
    et al., *Cell*, 2018
@@ -92,9 +90,9 @@ fraction of variants in the annotation datasets related to clinical
 interpretation, CIViC and CBMDB, has however not been mapped to the
 genome. Whenever possible, we have utilized
 `TransVar <http://bioinformatics.mdanderson.org/transvarweb/>`__ to
-identify the actual genomic variants (e.g. *g.chr7:140453136A>T*) that
+identify the actual genomic variants (e.g. *g.chr7:140453136A>T*) that
 correspond to variants reported at the amino acid level or with other
-HGVS nomenclature (e.g. *p.V600E*).
+HGVS nomenclature (e.g. *p.V600E*).
 
 For variants that have been mapped to a specific build (GRCh37/GRCh38),
 we have utilized the `crossmap <http://crossmap.sourceforge.net/>`__
@@ -109,9 +107,9 @@ Clinical biomarkers included in PCGR are limited to the following:
 
 -  Evidence items for specific markers in CIViC must be *accepted*
    (*submitted* evidence items are not considered)
--  Markers reported at the variant level (e.g. **BRAF p.V600E**)
--  Markers reported at the codon level (e.g. **KRAS p.G12**)
--  Markers reported at the exon level (e.g. **KIT exon 11 mutation**)
+-  Markers reported at the variant level (e.g. **BRAF p.V600E**)
+-  Markers reported at the codon level (e.g. **KRAS p.G12**)
+-  Markers reported at the exon level (e.g. **KIT exon 11 mutation**)
 -  Within the `Cancer bioMarkers database
    (CBMDB) <https://www.cancergenomeinterpreter.org/biomarkers>`__, only
    markers collected from FDA/NCCN guidelines, scientific literature,
@@ -122,11 +120,19 @@ Clinical biomarkers included in PCGR are limited to the following:
 See also comment on a `closed GitHib
 issue <https://github.com/sigven/pcgr/issues/37#issuecomment-391966286>`__
 
+**IMPORTANT NOTE**: The variant consequence reported by CIViC may
+deviate from what is reported by PCGR. PCGR picks the variant
+consequence according to VEP’s *pick* option (depending on a ranked list
+of criteria that can be configured by the user), and this particular
+transcript consequence may differ from what has been reported in the
+literature.
+
 **Antineoplastic drugs**
 
--  For drugs extracted from `DGIdb <http://dgidb.genome.wustl.edu>`__,
-   we only include antineoplastic drugs subject to direct interaction
-   with a target (i.e. as recorded in ChEMBL)
+-  For cancer drugs extracted from `Open Targets
+   Platform <https://www.targetvalidation.org>`__, we only include
+   antineoplastic drugs that have reached phase 3 or higher (i.e. as
+   recorded in ChEMBL)
 
 **Gene-disease associations**
 

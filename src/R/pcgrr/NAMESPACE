@@ -33,6 +33,7 @@ export(retrieve_sf_calls)
 export(generate_predisposition_report)
 export(gene_selection_tiles)
 export(get_x_coords)
+export(get_germline_biomarkers)
 
 
 ## GENERAL UTILITIES: PCGR/CPSR

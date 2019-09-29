@@ -59,40 +59,43 @@ generate_predisposition_report <- function(project_directory, query_vcf2tsv, pcg
     }else{
       if (!is.null(cpsr_config) & query_vcf2tsv != "None.gz"){
 
-        ##read calls
+        ## read calls
         calls <- pcgrr::get_calls(query_vcf2tsv, pcgr_data, sample_name, cpsr_config, medgen_ont = cps_report[['metadata']][['medgen_ontology']][['all']], cpsr = TRUE)
         calls <- dplyr::rename(calls, CLINVAR_CLINICAL_SIGNIFICANCE = CLINVAR_CLNSIG)
         call_stats <- pcgrr::variant_stats_report(calls, name = "variant_statistic")
 
         cpg_calls <- dplyr::inner_join(calls, cps_report[['metadata']][['gene_panel']][['genes']], by = c("SYMBOL" = "symbol"))
-        cpg_calls <- cpg_calls %>%
-          dplyr::filter(is.na(GLOBAL_AF_GNOMAD) | GLOBAL_AF_GNOMAD < cps_report[['metadata']][['config']][['maf_limits']][['maf_gnomad']])
-        rlogging::message(paste0("Number of coding variants with MAF frequency under threshold (",cps_report[['metadata']][['config']][['maf_limits']][['maf_gnomad']],"): ",nrow(cpg_calls)))
-
         cpg_call_stats <- pcgrr::variant_stats_report(cpg_calls, name = "variant_statistic_cpg")
 
         rlogging::message(paste0("Number of coding variants in cancer predisposition genes: ",cpg_call_stats[['variant_statistic_cpg']][['n_coding']]))
+        rlogging::message(paste0("Number of non-coding variants in cancer predisposition genes: ",cpg_call_stats[['variant_statistic_cpg']][['n_noncoding']]))
         sf_calls <- pcgrr::retrieve_sf_calls(calls, medgen)
         sf_call_stats <- pcgrr::variant_stats_report(sf_calls, name = "variant_statistic_sf")
 
-        cpg_calls_coding <- cpg_calls %>% dplyr::filter(CODING_STATUS == "coding")
-        gene_hits_coding <- paste(unique(cpg_calls_coding$SYMBOL), collapse = ", ")
-        if(nrow(cpg_calls_coding) > 0){
-          rlogging::message("Coding variants were found in the following cancer predisposition genes: ", gene_hits_coding)
-        }else{
+        #gene_hits <- paste(unique(cpg_calls$SYMBOL), collapse = ", ")
+        #if(nrow(cpg_calls) > 0){
+          #rlogging::message("Variants were found in the following cancer predisposition genes: ", gene_hits)
+        if(nrow(cpg_calls) == 0){
           cps_report$variant_statistic_cpg <- cpg_call_stats$variant_statistic_cpg
           return(cps_report)
         }
 
-        cpg_calls_coding <- pcgrr::assign_pathogenicity_evidence(cpg_calls_coding, cpsr_config, pcgr_data)
-        cpg_calls_coding <- pcgrr::determine_pathogenicity_classification(cpg_calls_coding)
-        cpg_calls_coding <- pcgrr::detect_cancer_traits_clinvar(cpg_calls_coding, medgen)
-        snv_indel_report <- pcgrr::assign_cpsr_tier(cpg_calls_coding, cps_report[['metadata']][['config']], class_1_5_display)
+        cpg_calls <- pcgrr::assign_pathogenicity_evidence(cpg_calls, cpsr_config, pcgr_data) %>%
+          pcgrr::determine_pathogenicity_classification() %>%
+          pcgrr::detect_cancer_traits_clinvar(medgen)
+        snv_indel_report <- pcgrr::assign_cpsr_tier(cpg_calls, cps_report[['metadata']][['config']], class_1_5_display)
         snv_indel_report$variant_statistic <- call_stats$variant_statistic
         snv_indel_report$variant_statistic_cpg <- cpg_call_stats$variant_statistic_cpg
         snv_indel_report$variant_statistic_sf <- sf_call_stats$variant_statistic_sf
+        snv_indel_report <- pcgrr::get_germline_biomarkers(snv_indel_report, pcgr_data)
+
+
 
         cps_report <- pcgrr::update_pcg_report(cps_report, report_data = snv_indel_report)
+
+
+        gene_hits <- paste(unique(cps_report[["content"]][["snv_indel"]][["variant_set"]][['tsv']]$SYMBOL),collapse=", ")
+        rlogging::message("Variants were found in the following cancer predisposition genes: ", gene_hits)
 
         if(cpsr_config[['secondary_findings']][['show_sf']] == TRUE){
           rlogging::message("Assignment of other variants in genes recommended for reporting as incidental findings (ACMG SF v2.0)")
@@ -108,11 +111,13 @@ generate_predisposition_report <- function(project_directory, query_vcf2tsv, pcg
           rlogging::message("Assignment of other variants to hits from genome-wide association studies")
         }
         ## Assign GWAS hits to cps_report object
-        cps_report[['content']][["snv_indel"]][["variant_display"]][["gwas"]] <-  dplyr::filter(calls, !is.na(GWAS_HIT) & !is.na(GWAS_CITATION))
+        cps_report[['content']][["snv_indel"]][["variant_display"]][["gwas"]] <-
+          dplyr::filter(calls, !is.na(GWAS_HIT) & !is.na(GWAS_CITATION))
         if(nrow(cps_report[['content']][["snv_indel"]][["variant_display"]][["gwas"]]) > 0){
           if(nrow(cps_report[['content']][['snv_indel']][['variant_set']][['tsv']]) > 0){
             cps_report[['content']][["snv_indel"]][["variant_display"]][["gwas"]] <-
-              dplyr::anti_join(cps_report[['content']][["snv_indel"]][["variant_display"]][["gwas"]], cps_report[['content']][['snv_indel']][['variant_set']][['tsv']], by=c("GENOMIC_CHANGE"))
+              dplyr::anti_join(cps_report[['content']][["snv_indel"]][["variant_display"]][["gwas"]],
+                               cps_report[['content']][['snv_indel']][['variant_set']][['tsv']], by=c("GENOMIC_CHANGE"))
           }
           if(nrow(cps_report[['content']][["snv_indel"]][["variant_display"]][["gwas"]]) > 0){
             cps_report[['content']][["snv_indel"]][["variant_display"]][["gwas"]] <-
@@ -501,7 +506,7 @@ assign_cpsr_tier <- function(cpg_calls, cpsr_config, display_tags){
   predispose_tsv_tags <- c("GENOMIC_CHANGE","VAR_ID","GENOTYPE",
                            "GENOME_VERSION","VCF_SAMPLE_ID","VARIANT_CLASS","CODING_STATUS",
                            "SYMBOL","GENE_NAME","CCDS","ENTREZ_ID","UNIPROT_ID","ENSEMBL_GENE_ID","ENSEMBL_TRANSCRIPT_ID","REFSEQ_MRNA",
-                           "ONCOGENE", "TUMOR_SUPPRESSOR","MOD","CONSEQUENCE","VEP_ALL_CSQ",
+                           "ONCOGENE", "TUMOR_SUPPRESSOR","MOD","CONSEQUENCE","VEP_ALL_CSQ","CIVIC_ID","CIVIC_ID_2",
                            "PROTEIN_CHANGE","PROTEIN_DOMAIN", "HGVSp","HGVSc","LAST_EXON","CDS_CHANGE","MUTATION_HOTSPOT","RMSK_HIT",
                            "PROTEIN_FEATURE","EFFECT_PREDICTIONS", "LOSS_OF_FUNCTION", "DBSNP","CLINVAR_CLASSIFICATION",
                            "CLINVAR_MSID","CLINVAR_VARIANT_ORIGIN","CLINVAR_CONFLICTED", "CLINVAR_PHENOTYPE","CLINVAR_REVIEW_STATUS_STARS",
@@ -509,8 +514,10 @@ assign_cpsr_tier <- function(cpg_calls, cpsr_config, display_tags){
                            "N_INSILICO_SPLICING_NEUTRAL","N_INSILICO_SPLICING_AFFECTED","GLOBAL_AF_GNOMAD",
                            cpsr_config[['popgen']][['vcftag_gnomad']])
 
-  evidence_codes <- dplyr::filter(pcgrr::acmg_evidence_codes, cpsr_evidence_code != 'ACMG_BS2_1' & cpsr_evidence_code != 'ACMG_BS2_2' & cpsr_evidence_code != 'ACMG_BS2_3')
-  predispose_tsv_tags <- c(predispose_tsv_tags, evidence_codes$cpsr_evidence_code, c("CPSR_CLASSIFICATION","CPSR_CLASSIFICATION_SCORE","CPSR_CLASSIFICATION_CODE","CPSR_CLASSIFICATION_DOC","SOURCE"))
+  evidence_codes <- pcgrr::acmg_evidence_codes %>%
+    dplyr::filter(cpsr_evidence_code != 'ACMG_BS2_1' & cpsr_evidence_code != 'ACMG_BS2_2' & cpsr_evidence_code != 'ACMG_BS2_3')
+  predispose_tsv_tags <- c(predispose_tsv_tags, evidence_codes$cpsr_evidence_code,
+                           c("CPSR_CLASSIFICATION","CPSR_CLASSIFICATION_SCORE","CPSR_CLASSIFICATION_CODE","CPSR_CLASSIFICATION_DOC","SOURCE"))
 
   rlogging::message("Generating tiered set of result variants for output in tab-separated values (TSV) file")
 
@@ -555,6 +562,21 @@ assign_cpsr_tier <- function(cpg_calls, cpsr_config, display_tags){
   }
   cpg_calls <- cpg_calls %>% dplyr::anti_join(all_clinvar_calls, by=c("VAR_ID"))
 
+  n_nonclinvar = nrow(cpg_calls)
+
+  cpg_calls <- cpg_calls %>%
+    dplyr::filter(is.na(GLOBAL_AF_GNOMAD) | GLOBAL_AF_GNOMAD < cpsr_config[['maf_limits']][['maf_gnomad']])
+  n_maf_filtered <- n_nonclinvar - nrow(cpg_calls)
+  rlogging::message(paste0("Ignoring n = ",n_maf_filtered," unclassified variants with a global MAF frequency above ",cpsr_config[['maf_limits']][['maf_gnomad']]))
+
+  n_after_maf_filtering <- nrow(cpg_calls)
+
+  cpg_calls <- cpg_calls %>%
+    dplyr::filter(CODING_STATUS == "coding")
+
+  n_noncoding_filtered <- n_after_maf_filtering - nrow(cpg_calls)
+  rlogging::message(paste0("Ignoring n = ",n_noncoding_filtered," unclassified variants with a noncoding variant consequence"))
+
   non_clinvar_calls <- list()
   non_clinvar_calls[['class5']] <- cpg_calls %>%
     dplyr::filter(CPSR_CLASSIFICATION == "Pathogenic") %>%
@@ -577,11 +599,16 @@ assign_cpsr_tier <- function(cpg_calls, cpsr_config, display_tags){
     dplyr::mutate(SOURCE = "Other")
 
   for(c in c('class1','class2','class3','class4','class5')){
-    snv_indel_report[['variant_set']][[c]] <- dplyr::bind_rows(non_clinvar_calls[[c]],snv_indel_report[['variant_set']][[c]]) %>%
-      dplyr::mutate(CPSR_CLASSIFICATION = dplyr::if_else(!is.na(CLINVAR_CLASSIFICATION),"",as.character(CPSR_CLASSIFICATION))) %>%
-      dplyr::mutate(CPSR_CLASSIFICATION_DOC = dplyr::if_else(!is.na(CLINVAR_CLASSIFICATION),"",as.character(CPSR_CLASSIFICATION_DOC))) %>%
-      dplyr::mutate(CPSR_CLASSIFICATION_CODE = dplyr::if_else(!is.na(CLINVAR_CLASSIFICATION),"",as.character(CPSR_CLASSIFICATION_CODE))) %>%
-      dplyr::mutate(CPSR_CLASSIFICATION_SCORE = dplyr::if_else(!is.na(CLINVAR_CLASSIFICATION),as.numeric(NA),as.numeric(CPSR_CLASSIFICATION_SCORE))) %>%
+    snv_indel_report[['variant_set']][[c]] <- dplyr::bind_rows(non_clinvar_calls[[c]],snv_indel_report[['variant_set']][[c]])
+
+    if(cpsr_config[['classification']][['clinvar_cpsr']] == F){
+      snv_indel_report[['variant_set']][[c]] <- snv_indel_report[['variant_set']][[c]] %>%
+        dplyr::mutate(CPSR_CLASSIFICATION = dplyr::if_else(!is.na(CLINVAR_CLASSIFICATION),"",as.character(CPSR_CLASSIFICATION))) %>%
+        dplyr::mutate(CPSR_CLASSIFICATION_DOC = dplyr::if_else(!is.na(CLINVAR_CLASSIFICATION),"",as.character(CPSR_CLASSIFICATION_DOC))) %>%
+        dplyr::mutate(CPSR_CLASSIFICATION_CODE = dplyr::if_else(!is.na(CLINVAR_CLASSIFICATION),"",as.character(CPSR_CLASSIFICATION_CODE))) %>%
+        dplyr::mutate(CPSR_CLASSIFICATION_SCORE = dplyr::if_else(!is.na(CLINVAR_CLASSIFICATION),as.numeric(NA),as.numeric(CPSR_CLASSIFICATION_SCORE)))
+    }
+    snv_indel_report[['variant_set']][[c]] <- snv_indel_report[['variant_set']][[c]] %>%
       dplyr::arrange(SOURCE, CANCER_PHENOTYPE, desc(CPSR_CLASSIFICATION_SCORE)) %>%
       dplyr::select(-CANCER_PHENOTYPE)
 
@@ -605,7 +632,6 @@ assign_cpsr_tier <- function(cpg_calls, cpsr_config, display_tags){
                       "PROTEIN_FEATURE","EFFECT_PREDICTIONS", "LOSS_OF_FUNCTION", "DBSNP","CLINVAR_CLASSIFICATION",
                       "CLINVAR_MSID","CLINVAR_VARIANT_ORIGIN","CLINVAR_CONFLICTED", "CLINVAR_PHENOTYPE","CLINVAR_REVIEW_STATUS_STARS"),
                     dplyr::everything())
-    #snv_indel_report[['variant_set']][[c]]$CLINVAR_CLINICAL_SIGNIFICANCE <- NULL
 
     for(col in colnames(snv_indel_report[['variant_set']][[c]])){
       if(nrow(snv_indel_report[['variant_set']][[c]][!is.na(snv_indel_report[['variant_set']][[c]][,col]) & snv_indel_report[['variant_set']][[c]][,col] == "",]) > 0){
@@ -735,7 +761,7 @@ summary_donut_chart <- function(variants_tsv, plot_type = 'ClinVar'){
   if(nrow(variants_tsv) > 0){
 
     set_clinvar <- variants_tsv %>% dplyr::filter(!is.na(CLINVAR_CLASSIFICATION))
-    set_other <- variants_tsv %>% dplyr::filter(nchar(CPSR_CLASSIFICATION) > 0)
+    set_other <- variants_tsv %>% dplyr::filter(nchar(CPSR_CLASSIFICATION) > 0 & is.na(CLINVAR_CLASSIFICATION))
 
     if((plot_type == 'ClinVar' & nrow(set_clinvar) > 0) | (plot_type != "ClinVar" & nrow(set_other) > 0)){
 
@@ -896,5 +922,125 @@ gene_selection_tiles <- function(genes = NULL, confidence = NULL, box_w = 2, box
     )
 
   return(p)
+}
+
+#' Function that retrieves clinical evidence items (CIVIC, CBMDB) for somatic cancer variants
+#'
+#' @param snv_indel_report report structure
+#' @param pcgr_data object with PCGR annotation data
+#'
+#' @return list
+
+get_germline_biomarkers <- function(snv_indel_report, pcgr_data){
+
+  rlogging::message('Matching variant set with existing genomic biomarkers from CIViC (germline)')
+
+  clin_eitems_list <- list()
+  for(type in c('diagnostic','prognostic','predictive','predisposing')){
+    clin_eitems_list[[type]] <- data.frame()
+  }
+
+  germline_biomarkers <- pcgr_data[['biomarkers']][['civic']] %>%
+    dplyr::filter((alteration_type == 'MUT' | alteration_type == 'MUT_LOF') & (variant_origin == "Germline Mutation" | variant_origin == 'Germline Polymorphism')) %>%
+    dplyr::filter(mapping_category == 'exact' | mapping_category == 'codon' | mapping_category == 'gene') %>%
+    dplyr::select(genesymbol, alteration_type, clinical_significance, evidence_id, evidence_direction, pubmed_html_link, rating,
+                  therapeutic_context, cancer_type, evidence_description, evidence_level, evidence_type, mapping_category,
+                  eitem_consequence, eitem_exon, eitem_codon) %>%
+      dplyr::rename(citation = pubmed_html_link, description = evidence_description)
+
+
+  clinical_evidence_items <- data.frame()
+  bmarker_mapping_levels <- c('exact','gene')
+
+  for(mapping in bmarker_mapping_levels){
+    bmarkers <- germline_biomarkers %>% dplyr::filter(mapping_category == mapping)
+
+    if(mapping == 'exact'){
+      sample_calls_civic <- snv_indel_report[['variant_set']][['tsv']] %>% dplyr::filter(!is.na(CIVIC_ID))
+      if(nrow(sample_calls_civic) > 0){
+        eitems <- dplyr::select(sample_calls_civic,CIVIC_ID,VAR_ID, SYMBOL) %>%
+          dplyr::rename(evidence_id = CIVIC_ID) %>%
+          tidyr::separate_rows(evidence_id,sep=",") %>%
+          dplyr::inner_join(bmarkers, by=c("evidence_id" = "evidence_id", "SYMBOL" = "genesymbol")) %>%
+          dplyr::distinct() %>%
+          dplyr::rename_all(toupper) %>%
+          dplyr::select(-c(EITEM_CONSEQUENCE,MAPPING_CATEGORY,EITEM_CODON,EITEM_EXON))
+
+        if(nrow(eitems) > 0){
+          clinical_evidence_items <- dplyr::bind_rows(clinical_evidence_items, eitems) %>%
+            dplyr::mutate(BIOMARKER_MAPPING = mapping)
+        }
+      }
+    }
+    else{
+      sample_calls_civic <- snv_indel_report[['variant_set']][['tsv']] %>%
+        dplyr::filter(!is.na(CIVIC_ID_2)) %>%
+        dplyr::filter(!is.na(CPSR_CLASSIFICATION) | !is.na(CLINVAR_CLASSIFICATION)) %>%
+        dplyr::filter(stringr::str_detect(CPSR_CLASSIFICATION,"Pathogenic") | stringr::str_detect(CLINVAR_CLASSIFICATION,"Pathogenic"))
+
+      if(nrow(sample_calls_civic) > 0){
+        eitems <- dplyr::select(sample_calls_civic,CIVIC_ID_2,VAR_ID, SYMBOL, LOSS_OF_FUNCTION) %>%
+          dplyr::mutate(BIOMARKER_MAPPING = mapping) %>%
+          tidyr::separate_rows(CIVIC_ID_2,sep=",") %>%
+          dplyr::rename(evidence_id = CIVIC_ID_2) %>%
+          dplyr::inner_join(bmarkers, by=c("evidence_id" = "evidence_id", "SYMBOL" = "genesymbol")) %>%
+          dplyr::filter((alteration_type == 'MUT_LOF' & LOSS_OF_FUNCTION == T) | alteration_type == 'MUT') %>%
+          dplyr::rename_all(toupper) %>%
+          dplyr::select(-c(EITEM_CONSEQUENCE,MAPPING_CATEGORY,EITEM_CODON,EITEM_EXON,LOSS_OF_FUNCTION)) %>%
+          dplyr::distinct()
+
+        if(nrow(eitems) > 0){
+          clinical_evidence_items <- dplyr::bind_rows(clinical_evidence_items, eitems)
+        }
+      }
+    }
+  }
+
+  snv_indel_report[['variant_set']][['tsv']] <- snv_indel_report[['variant_set']][['tsv']] %>%
+    dplyr::select(-c(CIVIC_ID, CIVIC_ID_2))
+
+  if(nrow(clinical_evidence_items) > 0){
+    clinical_evidence_items <- clinical_evidence_items %>%
+      dplyr::mutate(BIOMARKER_MAPPING = dplyr::if_else(is.na(BIOMARKER_MAPPING),"gene",as.character(BIOMARKER_MAPPING)))
+
+
+    supporting_variants <- as.data.frame(
+      clinical_evidence_items %>%
+        dplyr::select(VAR_ID, EVIDENCE_ID) %>%
+        dplyr::left_join(dplyr::select(snv_indel_report[['variant_set']][['tsv']], VAR_ID, CDS_CHANGE, GENE_NAME, GENOMIC_CHANGE, SYMBOL), by = c("VAR_ID")) %>%
+        dplyr::group_by(EVIDENCE_ID) %>%
+        dplyr::summarise(SYMBOL = paste(unique(SYMBOL),collapse=", "),
+                         GENE_NAME = paste(unique(GENE_NAME), collapse=", "),
+                         CDS_CHANGE = paste(unique(CDS_CHANGE), collapse = ", "),
+                         GENOMIC_CHANGE = paste(unique(GENOMIC_CHANGE), collapse=", ")
+                         )
+    )
+
+
+    clinical_evidence_items <- clinical_evidence_items %>%
+      dplyr::select(-VAR_ID) %>%
+      dplyr::distinct() %>%
+      dplyr::left_join(supporting_variants, by=c("EVIDENCE_ID","SYMBOL"))
+
+    rlogging::message(paste0(nrow(clinical_evidence_items),' clinical evidence item(s) found .. mapping = ',mapping))
+
+  }else{
+    rlogging::message(paste0(nrow(clinical_evidence_items),' clinical evidence item(s) found .. mapping = ',mapping))
+  }
+
+
+  if(nrow(clinical_evidence_items) > 0){
+    for(type in c('prognostic','diagnostic','predictive','predisposing')){
+      clin_eitems_list[[type]] <- clinical_evidence_items %>%
+        dplyr::filter(EVIDENCE_TYPE == stringr::str_to_title(type)) %>%
+        dplyr::arrange(EVIDENCE_LEVEL) %>%
+        dplyr::select(SYMBOL, GENE_NAME, CANCER_TYPE, CLINICAL_SIGNIFICANCE, EVIDENCE_LEVEL, RATING, dplyr::everything()) %>%
+        dplyr::select(-c(ALTERATION_TYPE,EVIDENCE_ID, EVIDENCE_TYPE))
+    }
+  }
+
+  snv_indel_report$clinical_evidence_item <- clin_eitems_list
+  return(snv_indel_report)
+
 }
 

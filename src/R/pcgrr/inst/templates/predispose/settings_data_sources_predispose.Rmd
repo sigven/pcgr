@@ -5,10 +5,10 @@ The report is generated with _[cpsr](https://github.com/sigven/cpsr)_ version `r
 * Genome assembly: __`r cps_report[['metadata']][['genome_assembly']]`__
 * Report theme (Bootstrap): __`r cps_report[['metadata']][['config']][['visual']][['report_theme']]`__
 * Control population gnomAD: __`r cps_report[['metadata']][['config']][['popgen']][['popdesc_gnomad']]`__
-* Upper MAF threshold in gnomAD for variants included in report:  __`r cps_report[['metadata']][['config']][['maf_limits']][['maf_gnomad']]`__
+* Upper MAF threshold (gnomAD) for unclassified variants included in report:  __`r cps_report[['metadata']][['config']][['maf_limits']][['maf_gnomad']]`__
 * Show GWAS hits in report: __`r cps_report[['metadata']][['config']][['gwas']][['gwas_hits']]`__
     * Minimum p-value for association: __`r cps_report[['metadata']][['config']][['gwas']][['p_value_min']]`__
-* Cancer predisposition geneset:
+* Cancer predisposition geneset (virtual gene panel):
    *  __[`r cps_report[['metadata']][['gene_panel']][['name']]`](`r cps_report[['metadata']][['gene_panel']][['url']]`)__
    *  `r cps_report[['metadata']][['gene_panel']][['confidence']]`
 

@@ -1,6 +1,24 @@
 
 ## CHANGELOG
 
+#### 0.8.2 - Sep 29th 2019
+
+- Data updates: ClinVar, GWAS catalog, GENCODE, DiseaseOntology, CIViC, CancerMine, UniProt KB
+- Software updates: VEP 97.3, vcfanno [0.3.2](https://github.com/brentp/vcfanno/releases/tag/v0.3.2), LOFTEE (VEP plugin) [1.0.3](https://github.com/konradjk/loftee/releases)
+
+##### Fixed
+ * Bug in concatenation of clinical evidence items from different sources (CIVIC + CBMDB) (issues [#83](https://github.com/sigven/pcgr/issues/83),[#87](https://github.com/sigven/pcgr/issues/87))
+ * Silent variants that coincide with biomarkers reported at codon level are ignored
+ * Distinction between clinical evidence items of different origins (somatic + germline)
+ * Improved mapping between Ensembl transcripts and UniProt accessions (using also RefSeq accessions where available)
+ * Bug in UpSetPlot for cases where filtering produce less than two intersecting sets
+
+##### Added
+ * New field ['mane'](https://www.ensembl.org/info/genome/genebuild/mane.html) as criteria for pick order in configuration file (VEP)
+ * Sample identifier to copy number annotation output (convenient for concatenation of output from multiple samples)
+ * Capturing allelic depth (t_depth, t_ref_count etc.) in vcf2maf output (enhancement [#52](https://github.com/sigven/pcgr/issues/52))
+ * Option _tumor_only_ in pcgr.py, replaces _vcf_tumor_only_ in configuration file, more convenient in terms of configuration
+
 #### 0.8.1 - May 22nd 2019
 
 ##### Added

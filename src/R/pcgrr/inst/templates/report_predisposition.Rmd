@@ -85,6 +85,12 @@ Variant numbers in the selected cancer predisposition genes (n = `r NROW(cps_rep
 
 <br><br>
 
+```{r conditional_biomarkers, child='predispose/biomarkers_germline.Rmd', eval = cps_report[['content']][['snv_indel']][['eval']]}
+```
+
+<br><br>
+
+
 ```{r conditional_sf, child='predispose/sf.Rmd', eval = cps_report[['metadata']][['config']][['secondary_findings']][['show_sf']]}
 ```
 

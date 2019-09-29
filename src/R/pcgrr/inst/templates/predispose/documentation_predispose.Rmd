@@ -32,7 +32,7 @@ for(n in names(cps_report$metadata$pcgr_db_release)){
 ```{r list_db, echo=F,results='asis'}
 for(n in names(cps_report$metadata$pcgr_db_release)){
   if(cps_report$metadata$pcgr_db_release[[n]]$resource_type != 'software'){
-    if(n != 'gwas' & n != 'civic' & n != 'cbmdb' & n != 'chembl' & n != 'corum' & n != 'icgc' & n != 'tcga' & n != 'cosmic' & n != 'dgidb' & n != 'ct' & 
+    if(n != 'cbmdb' & n != 'chembl' & n != 'corum' & n != 'icgc' & n != 'tcga' & n != 'cosmic' & n != 'dgidb' & n != 'ct' & 
        n != 'kegg' & n != 'disgenet' & n != 'onekg' & n != 'oncoscore' & n != 'tcga-pcdm' & n != 'opentargets'){
       s <- paste0('    * [',cps_report$metadata$pcgr_db_release[[n]]$name,'](',cps_report$metadata$pcgr_db_release[[n]]$url,') - ',cps_report$metadata$pcgr_db_release[[n]]$description, ' (',cps_report$metadata$pcgr_db_release[[n]]$version,')')
       cat(s,sep="\n")

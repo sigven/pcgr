@@ -7,6 +7,7 @@
 #' @param pcgr_data PCGR software version
 #' @param type somatic or predisposition
 #' @param virtual_panel_id identifier for virtual panel id
+#' @param diagnostic_grade_only choose only clinical grade genes from genomics england panels
 
 init_pcg_report <- function(config = NULL, sample_name = 'SampleX', class = NULL, pcgr_data = NULL, type = 'somatic', virtual_panel_id = -1, diagnostic_grade_only = 0){
 
@@ -14,6 +15,7 @@ init_pcg_report <- function(config = NULL, sample_name = 'SampleX', class = NULL
   for(elem in c('metadata','content')){
     report[[elem]] <- list()
   }
+
   if(!is.null(pcgr_data)){
     report[['metadata']][['pcgr_db_release']] <- pcgr_data[['release_notes']]
     report[['metadata']][['pcgr_version']] <- pcgr_data[['software_version']][['pcgr']]
@@ -64,11 +66,15 @@ init_pcg_report <- function(config = NULL, sample_name = 'SampleX', class = NULL
     report[['content']][[analysis_element]][['variant_display']] <- list()
     report[['content']][[analysis_element]][['variant_set']] <- list()
     report[['content']][[analysis_element]][['zero']] <- FALSE
-    for(t in c('class1','class2','class3','class4','class5','clinical_evidence_items','gwas','sf')){
+    for(t in c('class1','class2','class3','class4','class5','gwas','sf')){
       report[['content']][[analysis_element]][['variant_display']][[t]] <- data.frame()
       report[['content']][[analysis_element]][['variant_set']][[t]] <- data.frame()
     }
     report[['content']][[analysis_element]][['variant_set']][['tsv']] <- data.frame()
+    report[['content']][[analysis_element]][['clinical_evidence_item']] <- list()
+    for(evidence_type in c('prognostic','diagnostic','predictive','predisposing')){
+      report[['content']][[analysis_element]][['clinical_evidence_item']][[evidence_type]] <- data.frame()
+    }
 
     for(cl in c('variant_statistic','variant_statistic_cpg','variant_statistic_sf')){
       report[['content']][[analysis_element]][[cl]] <- list()
@@ -218,6 +224,7 @@ init_pcg_report <- function(config = NULL, sample_name = 'SampleX', class = NULL
         report[['content']][[analysis_element]][['variant_set']][['unfiltered']] <- data.frame()
         report[['content']][[analysis_element]][['variant_set']][['filtered']] <- data.frame()
         report[['content']][[analysis_element]][['upset_data']] <- data.frame()
+        report[['content']][[analysis_element]][['upset_plot_valid']] <- FALSE
         report[['content']][[analysis_element]][['variant_statistic']] <- list()
 
         for(successive_filter in c('unfiltered_n','onekg_n_remain','gnomad_n_remain','clinvar_n_remain',

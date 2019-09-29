@@ -117,7 +117,7 @@ list_noncoding = true
 n_vcfanno_proc = 4
 n_vep_forks = 4
 ## Customise the order of criteria used to pick the primary transcript in VEP (see https://www.ensembl.org/info/docs/tools/vep/script/vep_options.html#opt_pick_order)
-vep_pick_order = "canonical,appris,biotype,ccds,rank,tsl,length"
+vep_pick_order = "canonical,appris,biotype,ccds,rank,tsl,length,mane"
 ## omit intergenic variants during VEP processing
 vep_skip_intergenic = false
 ## generate a MAF for input VCF using https://github.com/mskcc/vcf2maf

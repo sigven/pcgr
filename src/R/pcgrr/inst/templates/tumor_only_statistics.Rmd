@@ -80,15 +80,14 @@ cat('</ol>')
 ```
 <br>
 
-```{r tumor_only_upset_title, echo = F, results='asis', eval=T}
-cat('<h4>Intersection of query with germline indicators - UpSet plot</h4>',sep="\n")
+```{r tumor_only_upset_title, echo = F, results='asis', eval=pcg_report[['content']][['tumor_only']][['upset_plot_valid']]}
+cat('<h4>Intersection of query with germline indicators - UpSet plot</h4>',sep="\n\n")
+cat('The plot below indicates, through an <a href=\'http://gehlenborglab.org/research/projects/upsetr\' target=\'_blank\'>UpSet plot</a>, the prevalence of the most prominent intersections for different sources of germline indicators in the query sample:')
 ```
-<br>
-The plot below indicates, through an [UpSet plot](http://gehlenborglab.org/research/projects/upsetr/), the prevalence of the most prominent intersections for different sources of germline indicators in the query sample:
 
 
 <br><br>
-```{r tumor_only_upset, echo = F, fig.width=10, fig.height=8, eval=T}
+```{r tumor_only_upset, echo = F, fig.width=10, fig.height=8, eval=pcg_report[['content']][['tumor_only']][['upset_plot_valid']]}
 upset_plot <- pcgrr::upset_plot_tumor_only(pcg_report[['content']][['tumor_only']][['upset_data']])
 upset_plot
 htmltools::br()

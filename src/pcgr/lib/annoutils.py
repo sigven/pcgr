@@ -94,29 +94,50 @@ def getlogger(logger_name):
 
 def get_correct_cpg_transcript(vep_csq_records):
 
-   ## some variants are assigned multiple transcript consequences
+  
    index = 0
    if len(vep_csq_records) == 1:
       return index
    j = 0
-   block_idx = 0
-   block_idx_pten = -1
-   block_idx_klln = -1
+   csq_idx = 0
+
+   ## some variants iare assigned multiple transcript consequences
+   ## if cancer predisposition genes are in the vicinity of other genes, choose the cancer predisposition gene
+   ## if there are neighbouring cancer-predispositon genes, choose custom gene, preferring coding change (see below, KLLN/PTEN, XPC/TMEM43, NTHL1/TSC2)
+   csq_idx_dict = {}
+   for g in ['KLLN','PTEN','XPC','TMEM43','NTHL1','TSC2']:
+      csq_idx_dict[g] = {}
+      csq_idx_dict[g]['idx'] = -1
+      csq_idx_dict[g]['coding'] = False
+
    num_cpg_blocks = 0
    while j < len(vep_csq_records):
       if 'CANCER_PREDISPOSITION_SOURCE' in vep_csq_records[j] or 'GE_PANEL_ID' in vep_csq_records[j]:
-         block_idx = j
+         csq_idx = j
          num_cpg_blocks += 1
          if 'SYMBOL' in vep_csq_records[j]:
-            if vep_csq_records[j]['SYMBOL'] == 'KLLN':
-               block_idx_klln = j
-            if vep_csq_records[j]['SYMBOL'] == 'PTEN':
-               block_idx_pten = j
+            if vep_csq_records[j]['SYMBOL'] in csq_idx_dict.keys():
+               csq_idx_dict[str(vep_csq_records[j]['SYMBOL'])]['idx'] = j
+               if vep_csq_records[j]['CODING_STATUS'] == 'coding':
+                  csq_idx_dict[str(vep_csq_records[j]['SYMBOL'])]['coding'] = True
       j = j + 1
    
-   if block_idx_klln != -1 and block_idx_pten != -1:
-      block_idx = block_idx_pten
-   return block_idx
+   if csq_idx_dict['KLLN']['idx'] != -1 and csq_idx_dict['PTEN']['idx'] != -1:
+      csq_idx = csq_idx_dict['PTEN']['idx']
+      if csq_idx_dict['KLLN']['coding'] is True:
+         csq_idx = csq_idx_dict['KLLN']['idx']
+   
+   if csq_idx_dict['XPC']['idx'] != -1 and csq_idx_dict['TMEM43']['idx'] != -1:
+      csq_idx = csq_idx_dict['XPC']['idx']
+      if csq_idx_dict['TMEM43']['coding'] is True:
+         csq_idx = csq_idx_dict['TMEM43']['idx']
+   
+   if csq_idx_dict['TSC2']['idx'] != -1 and csq_idx_dict['NTHL1']['idx'] != -1:
+      csq_idx = csq_idx_dict['TSC2']['idx']
+      if csq_idx_dict['NTHL1']['coding'] is True:
+         csq_idx = csq_idx_dict['NTHL1']['idx']
+
+   return csq_idx
 
 
 def read_config_options(configuration_file, base_dir, genome_assembly, logger, wflow = 'pcgr'):
@@ -144,14 +165,14 @@ def read_config_options(configuration_file, base_dir, genome_assembly, logger, w
       err_msg = 'Configuration file ' + str(configuration_file) + ' is not formatted correctly'
       error_message(err_msg, logger)
    
-   valid_tumor_types = ['Adrenal_Gland_Cancer_NOS','Ampullary_Carcinoma_NOS','Biliary_Tract_Cancer_NOS','Bladder_Urinary_Tract_Cancer_NOS',
-                        'Bone_Cancer_NOS','Breast_Cancer_NOS','Cancer_Unknown_Primary_NOS','Cervical_Cancer_NOS','CNS_Brain_Cancer_NOS',
-                        'Colorectal_Cancer_NOS','Esophageal_Cancer_NOS','Head_And_Neck_Cancer_NOS','Kidney_Cancer','Leukemia_NOS',
-                        'Liver_Cancer_NOS','Lung_Cancer_NOS','Lymphoma_Hodgkin_NOS','Lymphoma_Non_Hodgkin_NOS','Multiple_Myeloma_NOS',
-                        'Ovarian_Fallopian_Tube_Cancer_NOS','Pancreatic_Cancer_NOS','Penile_Cancer_NOS','Peripheral_Nervous_System_Cancer_NOS',
-                        'Peritoneal_Cancer_NOS','Pleural_Cancer_NOS','Prostate_Cancer_NOS','Skin_Cancer_NOS','Soft_Tissue_Cancer_Sarcoma_NOS',
-                        'Stomach_Cancer_NOS','Testicular_Cancer_NOS','Thymic_Cancer_NOS','Thyroid_Cancer_NOS','Uterine_Cancer_NOS',
-                        'Vulvar_Vaginal_Cancer_NOS','']
+   valid_tumor_types = ['Adrenal_Gland_Cancer_NOS', 'Ampullary_Carcinoma_NOS', 'Biliary_Tract_Cancer_NOS', 'Bladder_Urinary_Tract_Cancer_NOS',
+                        'Bone_Cancer_NOS', 'Breast_Cancer_NOS', 'Cancer_Unknown_Primary_NOS', 'Cervical_Cancer_NOS', 'CNS_Brain_Cancer_NOS',
+                        'Colorectal_Cancer_NOS', 'Esophageal_Cancer_NOS', 'Head_And_Neck_Cancer_NOS', 'Kidney_Cancer_NOS', 'Leukemia_NOS',
+                        'Liver_Cancer_NOS', 'Lung_Cancer_NOS', 'Lymphoma_Hodgkin_NOS', 'Lymphoma_Non_Hodgkin_NOS', 'Multiple_Myeloma_NOS', 'Ocular_Cancer_NOS',
+                        'Ovarian_Fallopian_Tube_Cancer_NOS', 'Pancreatic_Cancer_NOS', 'Penile_Cancer_NOS', 'Peripheral_Nervous_System_Cancer_NOS',
+                        'Peritoneal_Cancer_NOS', 'Pleural_Cancer_NOS', 'Prostate_Cancer_NOS', 'Skin_Cancer_NOS', 'Soft_Tissue_Cancer_Sarcoma_NOS',
+                        'Stomach_Cancer_NOS', 'Testicular_Cancer_NOS', 'Thymic_Cancer_NOS', 'Thyroid_Cancer_NOS', 'Uterine_Cancer_NOS',
+                        'Vulvar_Vaginal_Cancer_NOS', '']
 
    for section in config_options:
       if section in user_options:
@@ -189,10 +210,6 @@ def read_config_options(configuration_file, base_dir, genome_assembly, logger, w
                if int(user_options[section][var]) < 1 or int(user_options[section][var]) > 30:
                   err_msg = "Number of mutational signatures in search space ('mutsignatures_signature_limit') must be positive and not more than 30 (retrieved value: " + str(user_options[section][var]) + ")"
                   error_message(err_msg,logger)
-            # if var == 'tier_model' and not str(user_options[section][var]) in tier_options:
-            #    err_msg = 'Configuration value \'' + str(user_options[section][var]) + '\' for ' + str(var) + \
-            #       ' cannot be parsed properly (expecting \'pcgr\', or \'pcgr_acmg\')'
-            #    error_message(err_msg, logger)
             if var == 'pop_gnomad' and not str(user_options[section][var]) in populations_gnomad:
                err_msg = 'Configuration value \'' + str(user_options[section][var]) + '\' for ' + str(var) + \
                   ' cannot be parsed properly (expecting \'afr\', \'amr\', \'asj\', \'eas\', \'fin\', \'global\', \'nfe\', \'oth\', or \'sas\')'
@@ -239,22 +256,19 @@ def read_config_options(configuration_file, base_dir, genome_assembly, logger, w
                   error_message(err_msg,logger)
             if var == 'vep_pick_order':
                values = str(user_options['other'][var]).split(',')
-               permitted_sources = ['canonical','appris','tsl','biotype','ccds','rank','length']
+               permitted_sources = ['canonical','appris','tsl','biotype','ccds','rank','length','mane']
                num_permitted_sources = 0
                for v in values:
                   if v in permitted_sources:
                      num_permitted_sources += 1
                
-               if num_permitted_sources < 7:
-                  err_msg = "Configuration value vep_pick_order = " + str(user_options['other']['vep_pick_order']) + " is formatted incorrectly should be a comma-separated string of the following values: canonical,appris,tsl,biotype,ccds,rank,length"
+               if num_permitted_sources != 8:
+                  err_msg = "Configuration value vep_pick_order = " + str(user_options['other']['vep_pick_order']) + " is formatted incorrectly should be a comma-separated string of the following values: canonical,appris,tsl,biotype,ccds,rank,length,mane"
                   error_message(err_msg, logger)
             config_options[section][var] = user_options[section][var]
 
    
    if wflow == 'pcgr':
-      #if config_options['tumor_type']['type'] == '':
-         #err_msg = "Tumor type not defined - please specify a tumor type in the configuration file ([tumor_type] section)"
-         #error_message(err_msg,logger)
       if 'msi' in config_options.keys() and 'mutational_burden' in config_options.keys():
          if config_options['msi']['msi'] == 1 and config_options['mutational_burden']['mutational_burden'] == 0:
             err_msg = "Prediction of MSI status (msi = true) requires mutational burden/target_size input (mutational_burden = true) - this is currently set as false"
@@ -456,7 +470,6 @@ def map_dbnsfp_predictions(dbnsfp_tag, algorithms):
       i = 7
       v = 0
       
-      #print(str(algorithms))
       if len(algorithms) != len(dbnsfp_info[7:]):
          return effect_predictions
       

@@ -12,42 +12,28 @@ import platform
 import toml
 
 pcgr_version = '0.8.2'
-db_version = 'PCGR_DB_VERSION = 20190905'
+db_version = 'PCGR_DB_VERSION = 20190927'
 vep_version = '97'
 global vep_assembly
 
 def __main__():
    
-   parser = argparse.ArgumentParser(description='Personal Cancer Genome Reporter (PCGR) workflow for clinical interpretation of somatic nucleotide variants and copy number aberration segments',formatter_class=argparse.ArgumentDefaultsHelpFormatter, usage="%(prog)s [options] <PCGR_DIR> <OUTPUT_DIR> <GENOME_ASSEMBLY> <CONFIG_FILE> <SAMPLE_ID>" )
+   parser = argparse.ArgumentParser(description='Personal Cancer Genome Reporter (PCGR) workflow for clinical interpretation of somatic nucleotide variants and copy number aberration segments',
+                                    formatter_class=argparse.ArgumentDefaultsHelpFormatter, usage="%(prog)s [options] <PCGR_DIR> <OUTPUT_DIR> <GENOME_ASSEMBLY> <CONFIG_FILE> <SAMPLE_ID>" )
    parser.add_argument('--input_vcf', dest = "input_vcf", help='VCF input file with somatic query variants (SNVs/InDels).')
    parser.add_argument('--input_cna', dest = "input_cna",help='Somatic copy number alteration segments (tab-separated values)')
    parser.add_argument('--input_cna_plot', dest = "input_cna_plot",help='Somatic copy number alteration plot')
    parser.add_argument('--pon_vcf',dest = "pon_vcf", help="VCF file with germline calls from Panel of Normals (PON) - i.e. blacklist variants")
    parser.add_argument('--tumor_purity',type = float, dest="tumor_purity", help="Estimated tumor purity (between 0 and 1)")
    parser.add_argument('--tumor_ploidy',type = float, dest="tumor_ploidy", help="Estimated tumor ploidy")
-   #parser.add_argument('--tumor_only',action = "store_true",help="Input VCF comes from tumor-only sequencing, calls will be filtered for variants of germline origin")
-   #parser.add_argument('--tumor_dp_tag',dest="tumor_dp_tag",help="VCF INFO tag that denotes total sequencing depth at variant site in tumor sample")
-   #parser.add_argument('--tumor_af_tag',dest="tumor_af_tag",help="VCF INFO tag that denotes allelic fraction of alternate allele in tumor sample")
-   #parser.add_argument('--normal_dp_tag',dest="normal_dp_tag",help="VCF INFO tag that denotes total sequencing depth at variant site in normal (control) sample")
-   #parser.add_argument('--normal_af_tag',dest="normal_af_tag",help="VCF INFO tag that denotes allelic fraction of alternate allele in normal (control) sample")
-   #parser.add_argument('--tumor_dp_min',dest="tumor_dp_min",default=0,type=int,help="Minimum sequencing depth at variant site in tumor sample (variant filtering criteria, applied to callset before report generation)")
-   #parser.add_argument('--tumor_af_min',dest="tumor_af_min",default=0,type=float,help="Minimum allelic fraction of alternate allele in tumor sample (variant filtering criteria, applied to callset before report generation")
-   #parser.add_argument('--normal_dp_min',dest="normal_dp_min",default=0,type=int,help="Minimum sequencing depth at variant site in normal (control) sample (variant filtering criteria, applied to callset before report generation)")
-   #parser.add_argument('--normal_af_max',dest="normal_af_max",default=1,type=float,help="Maximum value of allelic fraction of alternate allele i normal (control) sample, defaults to 1 (no filtering)")
-   #parser.add_argument('--call_conf_tag',dest="call_conf_tag",help="VCF INFO tag that denotes variant call confidence (e.g. categorical variable)")
-   #parser.add_argument('--skip_msi',action = "store_true",help="Skip variant-based prediction of MSI status")
-   #parser.add_argument('--skip_tmb',action = "store_true",help="Skip estimation of mutational burden")
-   #parser.add_argument('--skip_msig',action = "store_true",help="Skip mutational signature analysis")
-   #parser.add_argument('--vcf2maf',action = "store_true",help="Generate MAF file of input VCF using vcf2maf")
-   #parser.add_argument('--tumor_type',dest="tumor_type",help="Tumor type of query cancer genome, as integer code (make comma-separated if > 1)\nBALLE\nBALLE\n")
-   #parser.add_argument('--skip_vcf_validation', action = "store_true",help="Skip validation of input VCF with Ensembl's vcf-validator")
-   #parser.add_argument('--target_size_mb',dest="target_size_mb",default=36,type=int,help="Size of coding target region in in megabases (defaults to exome ~ 36Mb")
+   parser.add_argument('--tumor_only',action = "store_true",help="Input VCF comes from tumor-only sequencing, calls will be filtered for variants of germline origin (set configurations for filtering in .toml file)")
    parser.add_argument('--force_overwrite', action = "store_true", help='By default, the script will fail with an error if any output file already exists. You can force the overwrite of existing result files by using this flag')
    parser.add_argument('--version', action='version', version='%(prog)s ' + str(pcgr_version))
    parser.add_argument('--basic',action="store_true",help="Run functional variant annotation on VCF through VEP/vcfanno, omit other analyses (i.e. CNA, MSI, report generation etc. (STEP 4)")
    parser.add_argument('--no_vcf_validate', action = "store_true",help="Skip validation of input VCF with Ensembl's vcf-validator")
    parser.add_argument('--docker-uid', dest='docker_user_id', help='Docker user ID. Default is the host system user ID. If you are experiencing permission errors, try setting this up to root (`--docker-uid root`)')
-   parser.add_argument('--no-docker', action='store_true', dest='no_docker', default=False, help='Run the PCGR workflow in a non-Docker mode (see install_no_docker/ folder for instructions')
+   parser.add_argument('--no-docker', action='store_true', dest='no_docker', default=False, help='Run the PCGR workflow in a non-Docker mode (see install_no_docker/ folder for instructions')   
+   parser.add_argument('--debug',action='store_true',default=False, help='Print full docker commands to log')
    parser.add_argument('pcgr_dir',help='PCGR base directory with accompanying data directory, e.g. ~/pcgr-0.8.2')
    parser.add_argument('output_dir',help='Output directory')
    parser.add_argument('genome_assembly',choices = ['grch37','grch38'], help='Genome assembly build: grch37 or grch38')
@@ -60,6 +46,10 @@ def __main__():
    overwrite = 0
    if args.force_overwrite is True:
       overwrite = 1
+   tumor_only = 0
+   if args.tumor_only is True:
+      tumor_only = 1
+   
 
    logger = getlogger('pcgr-validate-config')
 
@@ -75,7 +65,7 @@ def __main__():
 
    config_options = {}
    if os.path.exists(args.configuration_file):
-      config_options = read_config_options(args.configuration_file, args.pcgr_dir, args.genome_assembly, logger)
+      config_options = read_config_options(args.configuration_file, args.pcgr_dir, args.genome_assembly, tumor_only, logger)
    else:
       err_msg = "PCGR configuration file " + str(args.configuration_file) + " does not exist - exiting"
       pcgr_error_message(err_msg,logger)
@@ -99,12 +89,12 @@ def __main__():
    
 
    logger = getlogger('pcgr-check-files')
-   host_directories = verify_input_files(args.input_vcf, args.input_cna, args.input_cna_plot, args.pon_vcf, args.configuration_file, config_options, args.pcgr_dir, args.output_dir, args.sample_id, args.genome_assembly, overwrite, logger)
+   host_directories = verify_input_files(args.input_vcf, args.input_cna, args.input_cna_plot, args.pon_vcf, args.configuration_file, config_options, args.pcgr_dir, args.output_dir, args.sample_id, args.genome_assembly, tumor_only, overwrite, logger)
 
-   run_pcgr(host_directories, docker_image_version, config_options, args.sample_id, args.genome_assembly, tumor_properties, pcgr_version, args.basic, args.no_vcf_validate, docker_user_id=args.docker_user_id)
+   run_pcgr(host_directories, docker_image_version, config_options, args.sample_id, args.genome_assembly, tumor_only, tumor_properties, pcgr_version, args.basic, args.no_vcf_validate, debug = args.debug, docker_user_id=args.docker_user_id)
 
 
-def read_config_options(configuration_file, pcgr_dir, genome_assembly, logger):
+def read_config_options(configuration_file, pcgr_dir, genome_assembly, tumor_only, logger):
    
    ## read default options
    pcgr_config_options = {}
@@ -127,8 +117,8 @@ def read_config_options(configuration_file, pcgr_dir, genome_assembly, logger):
    
    valid_tumor_types = ['Adrenal_Gland_Cancer_NOS','Ampullary_Carcinoma_NOS','Biliary_Tract_Cancer_NOS','Bladder_Urinary_Tract_Cancer_NOS',
                         'Bone_Cancer_NOS','Breast_Cancer_NOS','Cancer_Unknown_Primary_NOS','Cervical_Cancer_NOS','CNS_Brain_Cancer_NOS',
-                        'Colorectal_Cancer_NOS','Esophageal_Cancer_NOS','Head_And_Neck_Cancer_NOS','Kidney_Cancer','Leukemia_NOS',
-                        'Liver_Cancer_NOS','Lung_Cancer_NOS','Lymphoma_Hodgkin_NOS','Lymphoma_Non_Hodgkin_NOS','Multiple_Myeloma_NOS',
+                        'Colorectal_Cancer_NOS','Esophageal_Cancer_NOS','Head_And_Neck_Cancer_NOS','Kidney_Cancer_NOS','Leukemia_NOS',
+                        'Liver_Cancer_NOS','Lung_Cancer_NOS','Lymphoma_Hodgkin_NOS','Lymphoma_Non_Hodgkin_NOS','Multiple_Myeloma_NOS','Ocular_Cancer_NOS',
                         'Ovarian_Fallopian_Tube_Cancer_NOS','Pancreatic_Cancer_NOS','Penile_Cancer_NOS','Peripheral_Nervous_System_Cancer_NOS',
                         'Peritoneal_Cancer_NOS','Pleural_Cancer_NOS','Prostate_Cancer_NOS','Skin_Cancer_NOS','Soft_Tissue_Cancer_Sarcoma_NOS',
                         'Stomach_Cancer_NOS','Testicular_Cancer_NOS','Thymic_Cancer_NOS','Thyroid_Cancer_NOS','Uterine_Cancer_NOS',
@@ -169,10 +159,6 @@ def read_config_options(configuration_file, pcgr_dir, genome_assembly, logger):
                if int(user_options[section][var]) < 1 or int(user_options[section][var]) > 30:
                   err_msg = "Number of mutational signatures in search space ('mutsignatures_signature_limit') must be positive and not more than 30 (retrieved value: " + str(user_options[section][var]) + ")"
                   pcgr_error_message(err_msg,logger)
-            # if var == 'tier_model' and not str(user_options[section][var]) in tier_options:
-            #    err_msg = 'Configuration value ' + str(user_options[section][var]) + ' for ' + str(var) + \
-            #       ' cannot be parsed properly (expecting \'pcgr\', or \'pcgr_acmg\')'
-            #   pcgr_error_message(err_msg, logger)
             if var == 'report_theme' and not str(user_options[section][var]) in theme_options:
                err_msg = 'Configuration value ' + str(user_options[section][var]) + ' for ' + str(var) + \
                   ' cannot be parsed properly (expecting \'default\', \'cerulean\', \'journal\', \'flatly\', \'readable\', \'spacelab\', \'united\', \'cosmo\', \'lumen\', \'paper\', \'sandstone\', \'simplex\',or \'yeti\')'
@@ -223,13 +209,12 @@ def read_config_options(configuration_file, pcgr_dir, genome_assembly, logger):
 
             pcgr_config_options[section][var] = user_options[section][var]
 
-   #if pcgr_config_options['tumor_type']['type'] == '':
-      #err_msg = "Tumor type not defined - please specify a tumor type in the configuration file ([tumor_type] section)"
-      #pcgr_error_message(err_msg,logger)
+  
    if pcgr_config_options['msi']['msi'] == 1 and pcgr_config_options['mutational_burden']['mutational_burden'] == 0:
       err_msg = "Prediction of MSI status (msi = true) requires mutational burden/target_size input (mutational_burden = true) - this is currently set as false"
       pcgr_error_message(err_msg,logger)
-   if pcgr_config_options['tumor_only']['vcf_tumor_only'] == 1:
+   if tumor_only == 1:
+   #if pcgr_config_options['tumor_only']['vcf_tumor_only'] == 1:
       if pcgr_config_options['msi']['msi'] == 1:
          warn_msg = 'Prediction of MSI status in tumor-only mode is not performed - valid for tumor-control data only'
          pcgr_warn_message(warn_msg,logger)
@@ -256,7 +241,7 @@ def pcgr_error_message(message, logger):
 def pcgr_warn_message(message, logger):
    logger.warning(message)
 
-def verify_input_files(input_vcf, input_cna, input_cna_plot, panel_normal_vcf, configuration_file, pcgr_config_options, base_pcgr_dir, output_dir, sample_id, genome_assembly, overwrite, logger):
+def verify_input_files(input_vcf, input_cna, input_cna_plot, panel_normal_vcf, configuration_file, pcgr_config_options, base_pcgr_dir, output_dir, sample_id, genome_assembly, tumor_only, overwrite, logger):
    """
    Function that checks the input files and directories provided by the user and checks for their existence
    """
@@ -282,8 +267,9 @@ def verify_input_files(input_vcf, input_cna, input_cna_plot, panel_normal_vcf, c
    
    ## if msi or mutsignatures is set to True, input VCF is needed
    if input_vcf is None:
-      if pcgr_config_options['tumor_only']['vcf_tumor_only'] == 1:
-         err_msg = "Tumor-only mode ('vcf_tumor_only = true') requires a VCF input file (--input_vcf) - this is currently missing"
+      #if pcgr_config_options['tumor_only']['vcf_tumor_only'] == 1:
+      if tumor_only == 1:
+         err_msg = "Tumor-only mode ('--tumor_only') requires a VCF input file (--input_vcf) - this is currently missing"
          pcgr_error_message(err_msg,logger)
       if pcgr_config_options['msi']['msi'] == 1:
          err_msg = "Prediction of MSI status (msi = true) requires a VCF input file (--input_vcf) - this is currently missing"
@@ -482,7 +468,7 @@ def getlogger(logger_name):
 
    return logger
 
-def run_pcgr(host_directories, docker_image_version, config_options, sample_id, genome_assembly, tumor_properties, pcgr_version, basic, no_vcf_validate, docker_user_id=None):
+def run_pcgr(host_directories, docker_image_version, config_options, sample_id, genome_assembly, tumor_only, tumor_properties, pcgr_version, basic, no_vcf_validate, debug = True, docker_user_id=None):
    """
    Main function to run the PCGR workflow using Docker
    """
@@ -615,7 +601,7 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       logger.info("Tumor type: Cancer_NOS (Any tumortype)")
    else:
       logger.info("Tumor type: " + str(config_options['tumor_type']['type']))
-   logger.info("Tumor-only: " + str(config_options['tumor_only']['vcf_tumor_only']))
+   logger.info("Tumor-only: " + str(tumor_only))
    print()
 
    #logger.info("Finished")
@@ -623,12 +609,13 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
    ## verify VCF and CNA segment file
    logger = getlogger('pcgr-validate-input')
    logger.info("STEP 0: Validate input data")
-   vcf_validate_command = docker_cmd_run1 + "pcgr_validate_input.py " + data_dir + " " + str(input_vcf_docker) + " " + str(input_cna_docker) + " " + str(input_conf_docker) + " " + str(panel_normal_docker) + " " + str(vcf_validation) + " " + str(genome_assembly)
+   vcf_validate_command = docker_cmd_run1 + "pcgr_validate_input.py " + data_dir + " " + str(input_vcf_docker) + " " + str(input_cna_docker) + " " + str(input_conf_docker) + " " + str(panel_normal_docker) + " " + str(vcf_validation) + " " + str(tumor_only) + " " + str(genome_assembly)
    if not docker_image_version:
       vcf_validate_command += ' --output_dir ' + output_dir + docker_cmd_run_end
    else:
       vcf_validate_command += docker_cmd_run_end
-   #print(str(vcf_validate_command))
+   if debug is True:
+      logger.info(vcf_validate_command)
    check_subprocess(vcf_validate_command)
    logger.info('Finished')
 
@@ -649,15 +636,10 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       vep_vcfanno_annotated_vcf = re.sub(r'\.vcfanno', '.vcfanno.annotated', vep_vcfanno_vcf) + '.gz'
       vep_vcfanno_annotated_pass_vcf = re.sub(r'\.vcfanno', '.vcfanno.annotated.pass', vep_vcfanno_vcf) + '.gz'
 
-      #pick_order = "canonical,appris,tsl,biotype,ccds,rank,length" 
-      #pick_order = "biotype,canonical,appris,tsl,ccds,rank,length"
       fasta_assembly = os.path.join(vep_dir, "homo_sapiens", str(vep_version) + "_" + str(vep_assembly), "Homo_sapiens." + str(vep_assembly) + ".dna.primary_assembly.fa.gz")
-      #vep_flags = "--vcf --quiet --check_ref --flag_pick_allele_gene --hgvs --dont_skip --af --af_1kg --af_gnomad " + \
-      #    "--variant_class --domains --symbol --protein --ccds --uniprot --appris --biotype --canonical --gencode_basic --cache " + \
-      #    "--numbers --total_length --no_stats --allele_number --no_escape --xref_refseq"
       vep_flags = "--hgvs --af --af_1kg --af_gnomad --variant_class --domains --symbol --protein --ccds " + \
          "--uniprot --appris --biotype --canonical --gencode_basic --cache --numbers --total_length --allele_number " + \
-         "--no_stats --no_escape --xref_refseq --vcf --quiet --check_ref --dont_skip --flag_pick_allele"
+         "--no_stats --no_escape --xref_refseq --vcf --quiet --check_ref --dont_skip --flag_pick_allele_gene"
       vep_options = "--pick_order " + str(config_options['other']['vep_pick_order']) + " --force_overwrite --species homo_sapiens --assembly " \
          + str(vep_assembly) + " --offline --fork " + str(config_options['other']['n_vep_forks']) + " " + str(vep_flags)  + " --dir " + vep_dir
       vep_options += " --cache_version " + str(vep_version)
@@ -667,11 +649,12 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       vep_bgzip_command = docker_cmd_run1 + "bgzip -f -c " + str(vep_vcf) + " > " + str(vep_vcf) + '.gz' + docker_cmd_run_end
       vep_tabix_command = docker_cmd_run1 + "tabix -f -p vcf " + str(vep_vcf) + ".gz" + docker_cmd_run_end
 
-      #print(str(vep_main_command))
       ## vep commands
       print()
       logger = getlogger('pcgr-vep')
       logger.info("STEP 1: Basic variant annotation with Variant Effect Predictor (" + str(vep_version) + ", GENCODE " + str(gencode_version) + ", " + str(genome_assembly) + ")")
+      if debug is True:
+         logger.info(vep_main_command)
       check_subprocess(vep_main_command)
       check_subprocess(vep_bgzip_command)
       check_subprocess(vep_tabix_command)
@@ -681,6 +664,8 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
          logger.info('Converting VEP-annotated VCF to MAF with https://github.com/mskcc/vcf2maf')
          vcf2maf_command = str(docker_cmd_run1) + "vcf2maf.pl --input-vcf " + str(input_vcf_pcgr_ready_uncompressed) + " --tumor-id " + str(sample_id) + " --output-maf " + str(output_maf) + " --ref-fasta " + str(fasta_assembly) + " --filter-vcf 0 --ncbi-build " + str(ncbi_build_maf) + " > " + str(output_vcf2maf_log) + " 2>&1" + docker_cmd_run_end
          clean_vcf2maf_command = str(docker_cmd_run1) + "rm -f " + str(output_vcf2maf_log) + " " + re.sub(r'(\.vcf$)', '.vep.vcf', input_vcf_pcgr_ready_uncompressed) + " " + docker_cmd_run_end
+         if debug is True:
+            logger.info(vcf2maf_command)
          check_subprocess(vcf2maf_command)
          check_subprocess(clean_vcf2maf_command)
 
@@ -697,15 +682,18 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       else:
          logger.info("STEP 2: Annotation for precision oncology with pcgr-vcfanno (ClinVar, dbNSFP, UniProtKB, cancerhotspots.org, CiVIC, CBMDB, DoCM, CHASMplus driver mutations, TCGA - putative driver mutations/recurrence, ICGC-PCAWG)")
       pcgr_vcfanno_command = pcgr_vcfanno_command + docker_cmd_run_end
+      if debug is True:
+         logger.info(pcgr_vcfanno_command)
       check_subprocess(pcgr_vcfanno_command)
       logger.info("Finished")
-      #return
 
       ## summarise command
       print()
       logger = getlogger("pcgr-summarise")
       pcgr_summarise_command = str(docker_cmd_run2) + "pcgr_summarise.py " + str(vep_vcfanno_vcf) + ".gz " + str(pon_annotation) + " " + str(os.path.join(data_dir, "data", str(genome_assembly))) + docker_cmd_run_end
       logger.info("STEP 3: Cancer gene annotations with pcgr-summarise")
+      if debug is True:
+         logger.info(pcgr_summarise_command)
       check_subprocess(pcgr_summarise_command)
 
       create_output_vcf_command1 = str(docker_cmd_run2) + 'mv ' + str(vep_vcfanno_annotated_vcf) + ' ' + str(output_vcf) + docker_cmd_run_end
@@ -721,11 +709,11 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       ## vcf2tsv command
       pcgr_vcf2tsv_command = str(docker_cmd_run2) + "vcf2tsv.py " + str(output_pass_vcf) + " --compress " + str(output_pass_tsv) + docker_cmd_run_end
       logger.info("Converting VCF to TSV with https://github.com/sigven/vcf2tsv")
+      if debug is True:
+         logger.info(pcgr_vcf2tsv_command)
       check_subprocess(pcgr_vcf2tsv_command)
       check_subprocess(clean_command)
       logger.info("Finished")
-
-      #return
 
    print()
 
@@ -733,8 +721,11 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
    if not basic:
       logger = getlogger('pcgr-writer')
       logger.info("STEP 4: Generation of output files - variant interpretation report for precision oncology")
-      pcgr_report_command = (docker_cmd_run1 + os.path.join(r_scripts_dir, "pcgr.R") + " " + output_dir + " " + str(output_pass_tsv) + ".gz" + " " + input_cna_docker + " " + str(sample_id) + " " + input_conf_docker + " " + str(pcgr_version) + " " + genome_assembly + " " + data_dir + " " + str(input_cna_plot_docker) + " " + str(tumor_properties['tumor_purity']) + " " + str(tumor_properties['tumor_ploidy']) + docker_cmd_run_end)
-      #print(pcgr_report_command)
+      pcgr_report_command = (docker_cmd_run1 + os.path.join(r_scripts_dir, "pcgr.R") + " " + output_dir + " " + str(output_pass_tsv) + ".gz" + " " + \
+                           input_cna_docker + " " + str(sample_id) + " " + input_conf_docker + " " + str(pcgr_version) + " " + genome_assembly + " " + data_dir + " " + \
+                           str(input_cna_plot_docker) + " " + str(tumor_properties['tumor_purity']) + " " + str(tumor_properties['tumor_ploidy']) + " " + str(tumor_only) +  docker_cmd_run_end)
+      if debug is True:
+         logger.info(pcgr_report_command)
       check_subprocess(pcgr_report_command)
       logger.info("Finished")
 

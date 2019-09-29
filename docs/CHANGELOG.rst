@@ -1,8 +1,48 @@
 CHANGELOG
 ---------
 
+0.8.2 - Sep 29th 2019
+^^^^^^^^^^^^^^^^^^^^^
+
+-  Data updates: ClinVar, GWAS catalog, GENCODE, DiseaseOntology, CIViC,
+   CancerMine, UniProt KB
+-  Software updates: VEP 97.3, vcfanno
+   `0.3.2 <https://github.com/brentp/vcfanno/releases/tag/v0.3.2>`__,
+   LOFTEE (VEP plugin)
+   `1.0.3 <https://github.com/konradjk/loftee/releases>`__
+
+Fixed
+'''''
+
+-  Bug in concatenation of clinical evidence items from different
+   sources (CIVIC + CBMDB) (issues
+   `#83 <https://github.com/sigven/pcgr/issues/83>`__,\ `#87 <https://github.com/sigven/pcgr/issues/87>`__)
+-  Silent variants that coincide with biomarkers reported at codon level
+   are ignored
+-  Distinction between clinical evidence items of different origins
+   (somatic + germline)
+-  Improved mapping between Ensembl transcripts and UniProt accessions
+   (using also RefSeq accessions where available)
+-  Bug in UpSetPlot for cases where filtering produce less than two
+   intersecting sets
+
+Added
+'''''
+
+-  New field
+   `‘mane’ <https://www.ensembl.org/info/genome/genebuild/mane.html>`__
+   as criteria for pick order in configuration file (VEP)
+-  Sample identifier to copy number annotation output (convenient for
+   concatenation of output from multiple samples)
+-  Capturing allelic depth (t_depth, t_ref_count etc.) in vcf2maf output
+   (enhancement `#52 <https://github.com/sigven/pcgr/issues/52>`__)
+-  Option *tumor_only* in pcgr.py, replaces *vcf_tumor_only* in
+   configuration file, more convenient in terms of configuration
+
 0.8.1 - May 22nd 2019
 ^^^^^^^^^^^^^^^^^^^^^
+
+.. _added-1:
 
 Added
 '''''
@@ -12,13 +52,15 @@ Added
 0.8.0 - May 20th 2019
 ^^^^^^^^^^^^^^^^^^^^^
 
+.. _fixed-1:
+
 Fixed
 '''''
 
 -  Bug in value box for Tier 2 variants (new line carriage) `Issue
    #73 <https://github.com/sigven/pcgr/issues/73>`__
 
-.. _added-1:
+.. _added-2:
 
 Added
 '''''
@@ -159,7 +201,7 @@ Removed
 0.7.0 - Nov 27th 2018
 ^^^^^^^^^^^^^^^^^^^^^
 
-.. _fixed-1:
+.. _fixed-2:
 
 Fixed
 '''''
@@ -193,7 +235,7 @@ Fixed
 -  Removed ‘COSM’ prefix in COSMIC mutation links
 -  Bug in retrieval of splice site predictions from dbscSNV
 
-.. _added-2:
+.. _added-3:
 
 Added
 '''''
@@ -206,11 +248,11 @@ Added
    -  Added possibility to add docker user-id
 
 -  Possibility for MAF file output (converted with vcf2maf), must be
-   configured by the user in the TOML file (i.e. *vcf2maf = true*,
+   configured by the user in the TOML file (i.e. *vcf2maf = true*,
    `Issue #17 <https://github.com/sigven/pcgr/issues/17>`__)
 -  Possibility for adding custom VCF INFO tags to PCGR output files
-   (JSON/TSV), must be configured by the user in the TOML file (i.e.
-   *custom_tags*)
+   (JSON/TSV), must be configured by the user in the TOML file
+   (i.e. *custom_tags*)
 -  Added MUTATION_HOTSPOT_CANCERTYPE in data tables (i.e. listing tumor
    types in which hotspot mutations have been found)
 -  Included the ‘rs’ prefix for dbSNP identifiers (HTML and TSV output)
@@ -249,7 +291,7 @@ Changed
 0.6.2.1 - May 14th 2018
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-.. _fixed-2:
+.. _fixed-3:
 
 Fixed
 '''''
@@ -259,7 +301,7 @@ Fixed
 0.6.2 - May 9th 2018
 ^^^^^^^^^^^^^^^^^^^^
 
-.. _fixed-3:
+.. _fixed-4:
 
 Fixed
 '''''
@@ -278,7 +320,7 @@ Fixed
 -  Bug in copy number annotation (missing protein-coding transcripts)
 -  Updated MSI prediction (variable importance, performance measures)
 
-.. _added-3:
+.. _added-4:
 
 Added
 '''''
@@ -292,7 +334,7 @@ Added
 0.6.1 - May 2nd 2018
 ^^^^^^^^^^^^^^^^^^^^
 
-.. _fixed-4:
+.. _fixed-5:
 
 Fixed
 '''''
@@ -310,7 +352,7 @@ Fixed
 0.6.0 - April 25th 2018
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-.. _added-4:
+.. _added-5:
 
 Added
 '''''
@@ -458,8 +500,8 @@ Removed
 
 -  Output files
 
-   -  TSV files with mutational signature results and biomarkers (i.e.
-      *sample_id.pcgr.snvs_indels.biomarkers.tsv* and
+   -  TSV files with mutational signature results and biomarkers
+      (i.e. *sample_id.pcgr.snvs_indels.biomarkers.tsv* and
       *sample_id.pcgr.mutational_signatures.tsv*)
 
       -  Data can still be retrieved - now from the JSON dump

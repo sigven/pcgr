@@ -84,3 +84,260 @@
 [2019-09-07 11:48:41][INFO] 0 clinical evidence item(s) found .. mapping = exon
 [2019-09-07 11:48:42][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
 [2019-09-07 11:48:42][INFO] ------
+[2019-09-17 13:21:41][INFO] Verifying data integrity of input callset
+[2019-09-17 13:21:41][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2019-09-17 13:21:41][INFO] Adding citations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2019-09-17 13:21:41][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2019-09-17 13:21:42][INFO] Number of PASS variants: 980
+[2019-09-17 13:21:42][INFO] Number of SNVs: 624
+[2019-09-17 13:21:42][INFO] Number of deletions: 248
+[2019-09-17 13:21:42][INFO] Number of insertions: 108
+[2019-09-17 13:21:42][INFO] Number of block substitutions: 0
+[2019-09-17 13:21:42][INFO] Extending annotation descriptions related to KEGG pathways
+[2019-09-17 13:21:43][INFO] Extending annotation descriptions related to ClinVar
+[2019-09-17 13:26:06][INFO] Verifying data integrity of input callset
+[2019-09-17 13:26:06][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2019-09-17 13:26:06][INFO] Adding citations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2019-09-17 13:26:06][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2019-09-17 13:26:07][INFO] Number of PASS variants: 980
+[2019-09-17 13:26:07][INFO] Number of SNVs: 624
+[2019-09-17 13:26:07][INFO] Number of deletions: 248
+[2019-09-17 13:26:07][INFO] Number of insertions: 108
+[2019-09-17 13:26:07][INFO] Number of block substitutions: 0
+[2019-09-17 13:26:07][INFO] Extending annotation descriptions related to KEGG pathways
+[2019-09-17 13:26:07][INFO] Extending annotation descriptions related to ClinVar
+[2019-09-17 14:49:56][INFO] Verifying data integrity of input callset
+[2019-09-17 14:49:57][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2019-09-17 14:50:05][INFO] Adding citations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2019-09-17 14:50:05][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2019-09-17 14:50:05][INFO] Number of PASS variants: 980
+[2019-09-17 14:50:05][INFO] Number of SNVs: 624
+[2019-09-17 14:50:05][INFO] Number of deletions: 248
+[2019-09-17 14:50:05][INFO] Number of insertions: 108
+[2019-09-17 14:50:05][INFO] Number of block substitutions: 0
+[2019-09-17 14:50:05][INFO] Extending annotation descriptions related to KEGG pathways
+[2019-09-17 14:50:06][INFO] Extending annotation descriptions related to ClinVar
+[2019-09-17 14:53:46][INFO] Verifying data integrity of input callset
+[2019-09-17 14:53:46][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2019-09-17 14:53:46][INFO] Adding citations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2019-09-17 14:53:46][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2019-09-17 14:53:46][INFO] Number of PASS variants: 980
+[2019-09-17 14:53:46][INFO] Number of SNVs: 624
+[2019-09-17 14:53:46][INFO] Number of deletions: 248
+[2019-09-17 14:53:46][INFO] Number of insertions: 108
+[2019-09-17 14:53:46][INFO] Number of block substitutions: 0
+[2019-09-17 14:53:46][INFO] Extending annotation descriptions related to KEGG pathways
+[2019-09-17 14:53:48][INFO] Extending annotation descriptions related to ClinVar
+[2019-09-17 15:13:41][INFO] Verifying data integrity of input callset
+[2019-09-17 15:13:41][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2019-09-17 15:13:41][INFO] Adding citations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2019-09-17 15:13:41][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2019-09-17 15:13:44][INFO] Number of PASS variants: 980
+[2019-09-17 15:13:44][INFO] Number of SNVs: 624
+[2019-09-17 15:13:44][INFO] Number of deletions: 248
+[2019-09-17 15:13:44][INFO] Number of insertions: 108
+[2019-09-17 15:13:44][INFO] Number of block substitutions: 0
+[2019-09-17 15:13:44][INFO] Extending annotation descriptions related to KEGG pathways
+[2019-09-17 15:13:44][INFO] Extending annotation descriptions related to ClinVar
+[2019-09-18 09:25:44][INFO] Verifying data integrity of input callset
+[2019-09-18 09:25:44][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2019-09-18 09:25:45][INFO] Adding citations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2019-09-18 09:25:45][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2019-09-18 09:25:47][INFO] Number of PASS variants: 980
+[2019-09-18 09:25:47][INFO] Number of SNVs: 624
+[2019-09-18 09:25:47][INFO] Number of deletions: 248
+[2019-09-18 09:25:47][INFO] Number of insertions: 108
+[2019-09-18 09:25:47][INFO] Number of block substitutions: 0
+[2019-09-18 09:25:47][INFO] Extending annotation descriptions related to KEGG pathways
+[2019-09-18 09:25:47][INFO] Extending annotation descriptions related to ClinVar
+[2019-09-18 09:28:03][INFO] Number of coding variants in cancer predisposition genes: 920
+[2019-09-18 09:35:49][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2019-09-18 09:52:07][INFO] Verifying data integrity of input callset
+[2019-09-18 09:52:07][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2019-09-18 09:52:07][INFO] Adding citations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2019-09-18 09:52:07][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2019-09-18 09:52:08][INFO] Number of PASS variants: 980
+[2019-09-18 09:52:08][INFO] Number of SNVs: 624
+[2019-09-18 09:52:08][INFO] Number of deletions: 248
+[2019-09-18 09:52:08][INFO] Number of insertions: 108
+[2019-09-18 09:52:08][INFO] Number of block substitutions: 0
+[2019-09-18 09:52:08][INFO] Extending annotation descriptions related to KEGG pathways
+[2019-09-18 09:52:09][INFO] Extending annotation descriptions related to ClinVar
+[2019-09-18 09:52:12][INFO] Number of coding variants in cancer predisposition genes: 920
+[2019-09-18 09:52:12][INFO] Coding variants were found in the following cancer predisposition genes: SDHB, MPL, UROD, MUTYH, GBA, SDHC, FH, ALK, SOS1, EPCAM, MSH2, MSH6, FANCL, TMEM127, ERCC3, ABCB11, PMS1, BARD1, DIS3L2, FANCD2, VHL, RAF1, XPC, MLH1, COL7A1, BAP1, MITF, ATR, PHOX2B, PDGFRA, KIT, SDHA, TERT, PRDM9, DROSHA, APC, RAD50, ITK, NHP2, HFE, FANCE, POLH, PMS2, EGFR, SBDS, SLC25A13, MET, POT1, PRSS1, WRN, NBN, EXT1, RECQL4, DOCK8, MTAP, CDKN2A, FANCG, PAX5, FANCC, PTCH1, XPA, TSC1, RET, JMJD1C, PRF1, PTEN, HRAS, CTR9, FANCF, EXT2, DDB2, MEN1, ATM, SDHD, CBL, CDKN1B, RECQL, KRAS, CDK4, SH2B3, PTPN11, HNF1A, POLE, GJB2, BRCA2, RB1, ERCC5, FANCM, MAX, TSHR, SERPINA1, DICER1, NOP10, BUB1B, FAH, FANCI, BLM, NTHL1, TSC2, ERCC4, PALB2, CYLD, CDH1, FANCA, TP53, NF1, RAD51D, SMARCE1, STAT3, BRCA1, RAD51C, BRIP1, AXIN2, PRKAR1A, RHBDF2, SETBP1, SMAD4, ELANE, STK11, MAP2K2, SMARCA4, ERCC2, ERCC1, POLD1, SMARCB1, CHEK2, NF2, AR, SH2D1A, DKC1
+[2019-09-18 09:52:14][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2019-09-18 09:52:14][INFO] Ignoring n = 0 unclassified variants with a global MAF frequency above 0.9
+[2019-09-18 09:52:16][INFO] Assignment of other variants in genes recommended for reporting as incidental findings (ACMG SF v2.0)
+[2019-09-18 09:52:16][INFO] Number of pathogenic variants in the incidentalome - other genes of clinical significance: 0
+[2019-09-18 09:52:16][INFO] Assignment of other variants to hits from genome-wide association studies
+[2019-09-18 09:54:46][INFO] ------
+[2019-09-18 09:54:46][INFO] Writing HTML file with report contents
+[2019-09-18 09:55:05][INFO] ------
+[2019-09-18 09:55:05][INFO] Writing HTML file with report contents
+[2019-09-18 09:55:34][INFO] ------
+[2019-09-18 09:55:34][INFO] Writing HTML file with report contents
+[2019-09-18 12:27:51][INFO] Verifying data integrity of input callset
+[2019-09-18 12:27:52][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2019-09-18 12:27:52][INFO] Adding citations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2019-09-18 12:27:52][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2019-09-18 12:27:54][INFO] Number of PASS variants: 980
+[2019-09-18 12:27:54][INFO] Number of SNVs: 624
+[2019-09-18 12:27:54][INFO] Number of deletions: 248
+[2019-09-18 12:27:54][INFO] Number of insertions: 108
+[2019-09-18 12:27:54][INFO] Number of block substitutions: 0
+[2019-09-18 12:27:54][INFO] Extending annotation descriptions related to KEGG pathways
+[2019-09-18 12:27:55][INFO] Extending annotation descriptions related to ClinVar
+[2019-09-18 12:27:59][INFO] Number of coding variants in cancer predisposition genes: 920
+[2019-09-18 12:27:59][INFO] Number of non-coding variants in cancer predisposition genes: 60
+[2019-09-18 12:31:22][INFO] Verifying data integrity of input callset
+[2019-09-18 12:31:22][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2019-09-18 12:31:22][INFO] Adding citations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2019-09-18 12:31:22][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2019-09-18 12:31:22][INFO] Number of PASS variants: 980
+[2019-09-18 12:31:22][INFO] Number of SNVs: 624
+[2019-09-18 12:31:22][INFO] Number of deletions: 248
+[2019-09-18 12:31:22][INFO] Number of insertions: 108
+[2019-09-18 12:31:22][INFO] Number of block substitutions: 0
+[2019-09-18 12:31:22][INFO] Extending annotation descriptions related to KEGG pathways
+[2019-09-18 12:31:23][INFO] Extending annotation descriptions related to ClinVar
+[2019-09-18 12:31:36][INFO] Number of coding variants in cancer predisposition genes: 920
+[2019-09-18 12:31:36][INFO] Number of non-coding variants in cancer predisposition genes: 60
+[2019-09-18 12:31:47][INFO] Variants were found in the following cancer predisposition genes: SDHB, MPL, UROD, MUTYH, GBA, SDHC, FH, ALK, SOS1, EPCAM, MSH2, MSH6, FANCL, TMEM127, ERCC3, ABCB11, PMS1, BARD1, DIS3L2, FANCD2, VHL, RAF1, XPC, MLH1, COL7A1, BAP1, MITF, ATR, PHOX2B, PDGFRA, KIT, SDHA, TERT, PRDM9, DROSHA, APC, RAD50, ITK, NHP2, HFE, FANCE, POLH, PMS2, EGFR, SBDS, SLC25A13, MET, POT1, PRSS1, WRN, NBN, EXT1, RECQL4, DOCK8, MTAP, CDKN2A, FANCG, PAX5, FANCC, PTCH1, XPA, TSC1, RET, JMJD1C, PRF1, PTEN, HRAS, CTR9, FANCF, EXT2, DDB2, MEN1, ATM, SDHD, CBL, CDKN1B, RECQL, KRAS, CDK4, SH2B3, PTPN11, HNF1A, POLE, GJB2, BRCA2, RB1, ERCC5, FANCM, MAX, TSHR, SERPINA1, DICER1, NOP10, BUB1B, FAH, FANCI, BLM, NTHL1, TSC2, ERCC4, PALB2, CYLD, CDH1, FANCA, TP53, NF1, RAD51D, SMARCE1, STAT3, BRCA1, RAD51C, BRIP1, AXIN2, PRKAR1A, RHBDF2, SETBP1, SMAD4, ELANE, STK11, MAP2K2, SMARCA4, ERCC2, ERCC1, POLD1, SMARCB1, CHEK2, NF2, AR, SH2D1A, DKC1
+[2019-09-18 13:29:10][INFO] Verifying data integrity of input callset
+[2019-09-18 13:29:10][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2019-09-18 13:29:11][INFO] Adding citations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2019-09-18 13:29:11][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2019-09-18 13:29:11][INFO] Number of PASS variants: 980
+[2019-09-18 13:29:11][INFO] Number of SNVs: 624
+[2019-09-18 13:29:11][INFO] Number of deletions: 248
+[2019-09-18 13:29:11][INFO] Number of insertions: 108
+[2019-09-18 13:29:11][INFO] Number of block substitutions: 0
+[2019-09-18 13:29:11][INFO] Extending annotation descriptions related to KEGG pathways
+[2019-09-18 13:29:12][INFO] Extending annotation descriptions related to ClinVar
+[2019-09-18 13:29:15][INFO] Number of coding variants in cancer predisposition genes: 920
+[2019-09-18 13:29:15][INFO] Number of non-coding variants in cancer predisposition genes: 60
+[2019-09-18 13:29:15][INFO] Variants were found in the following cancer predisposition genes: SDHB, MPL, UROD, MUTYH, GBA, SDHC, FH, ALK, SOS1, EPCAM, MSH2, MSH6, FANCL, TMEM127, ERCC3, ABCB11, PMS1, BARD1, DIS3L2, FANCD2, VHL, RAF1, XPC, MLH1, COL7A1, BAP1, MITF, ATR, PHOX2B, PDGFRA, KIT, SDHA, TERT, PRDM9, DROSHA, APC, RAD50, ITK, NHP2, HFE, FANCE, POLH, PMS2, EGFR, SBDS, SLC25A13, MET, POT1, PRSS1, WRN, NBN, EXT1, RECQL4, DOCK8, MTAP, CDKN2A, FANCG, PAX5, FANCC, PTCH1, XPA, TSC1, RET, JMJD1C, PRF1, PTEN, HRAS, CTR9, FANCF, EXT2, DDB2, MEN1, ATM, SDHD, CBL, CDKN1B, RECQL, KRAS, CDK4, SH2B3, PTPN11, HNF1A, POLE, GJB2, BRCA2, RB1, ERCC5, FANCM, MAX, TSHR, SERPINA1, DICER1, NOP10, BUB1B, FAH, FANCI, BLM, NTHL1, TSC2, ERCC4, PALB2, CYLD, CDH1, FANCA, TP53, NF1, RAD51D, SMARCE1, STAT3, BRCA1, RAD51C, BRIP1, AXIN2, PRKAR1A, RHBDF2, SETBP1, SMAD4, ELANE, STK11, MAP2K2, SMARCA4, ERCC2, ERCC1, POLD1, SMARCB1, CHEK2, NF2, AR, SH2D1A, DKC1
+[2019-09-18 13:29:18][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2019-09-18 13:29:18][INFO] Ignoring n = 0 unclassified variants with a global MAF frequency above 0.9
+[2019-09-18 13:33:27][INFO] Verifying data integrity of input callset
+[2019-09-18 13:33:27][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2019-09-18 13:33:27][INFO] Adding citations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2019-09-18 13:33:27][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2019-09-18 13:33:28][INFO] Number of PASS variants: 980
+[2019-09-18 13:33:28][INFO] Number of SNVs: 624
+[2019-09-18 13:33:28][INFO] Number of deletions: 248
+[2019-09-18 13:33:28][INFO] Number of insertions: 108
+[2019-09-18 13:33:28][INFO] Number of block substitutions: 0
+[2019-09-18 13:33:28][INFO] Extending annotation descriptions related to KEGG pathways
+[2019-09-18 13:33:28][INFO] Extending annotation descriptions related to ClinVar
+[2019-09-18 13:33:32][INFO] Number of coding variants in cancer predisposition genes: 920
+[2019-09-18 13:33:32][INFO] Number of non-coding variants in cancer predisposition genes: 60
+[2019-09-18 13:33:32][INFO] Variants were found in the following cancer predisposition genes: SDHB, MPL, UROD, MUTYH, GBA, SDHC, FH, ALK, SOS1, EPCAM, MSH2, MSH6, FANCL, TMEM127, ERCC3, ABCB11, PMS1, BARD1, DIS3L2, FANCD2, VHL, RAF1, XPC, MLH1, COL7A1, BAP1, MITF, ATR, PHOX2B, PDGFRA, KIT, SDHA, TERT, PRDM9, DROSHA, APC, RAD50, ITK, NHP2, HFE, FANCE, POLH, PMS2, EGFR, SBDS, SLC25A13, MET, POT1, PRSS1, WRN, NBN, EXT1, RECQL4, DOCK8, MTAP, CDKN2A, FANCG, PAX5, FANCC, PTCH1, XPA, TSC1, RET, JMJD1C, PRF1, PTEN, HRAS, CTR9, FANCF, EXT2, DDB2, MEN1, ATM, SDHD, CBL, CDKN1B, RECQL, KRAS, CDK4, SH2B3, PTPN11, HNF1A, POLE, GJB2, BRCA2, RB1, ERCC5, FANCM, MAX, TSHR, SERPINA1, DICER1, NOP10, BUB1B, FAH, FANCI, BLM, NTHL1, TSC2, ERCC4, PALB2, CYLD, CDH1, FANCA, TP53, NF1, RAD51D, SMARCE1, STAT3, BRCA1, RAD51C, BRIP1, AXIN2, PRKAR1A, RHBDF2, SETBP1, SMAD4, ELANE, STK11, MAP2K2, SMARCA4, ERCC2, ERCC1, POLD1, SMARCB1, CHEK2, NF2, AR, SH2D1A, DKC1
+[2019-09-18 13:33:34][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2019-09-18 13:33:34][INFO] Ignoring n = 0 unclassified variants with a global MAF frequency above 0.9
+[2019-09-18 13:34:00][INFO] Assignment of other variants in genes recommended for reporting as incidental findings (ACMG SF v2.0)
+[2019-09-18 13:34:00][INFO] Number of pathogenic variants in the incidentalome - other genes of clinical significance: 0
+[2019-09-18 13:34:00][INFO] Assignment of other variants to hits from genome-wide association studies
+[2019-09-18 13:48:12][INFO] Verifying data integrity of input callset
+[2019-09-18 13:48:12][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2019-09-18 13:48:12][INFO] Adding citations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2019-09-18 13:48:12][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2019-09-18 13:48:12][INFO] Number of PASS variants: 980
+[2019-09-18 13:48:12][INFO] Number of SNVs: 624
+[2019-09-18 13:48:12][INFO] Number of deletions: 248
+[2019-09-18 13:48:12][INFO] Number of insertions: 108
+[2019-09-18 13:48:12][INFO] Number of block substitutions: 0
+[2019-09-18 13:48:12][INFO] Extending annotation descriptions related to KEGG pathways
+[2019-09-18 13:48:13][INFO] Extending annotation descriptions related to ClinVar
+[2019-09-18 13:48:16][INFO] Number of coding variants in cancer predisposition genes: 920
+[2019-09-18 13:48:16][INFO] Number of non-coding variants in cancer predisposition genes: 60
+[2019-09-18 13:48:16][INFO] Variants were found in the following cancer predisposition genes: SDHB, MPL, UROD, MUTYH, GBA, SDHC, FH, ALK, SOS1, EPCAM, MSH2, MSH6, FANCL, TMEM127, ERCC3, ABCB11, PMS1, BARD1, DIS3L2, FANCD2, VHL, RAF1, XPC, MLH1, COL7A1, BAP1, MITF, ATR, PHOX2B, PDGFRA, KIT, SDHA, TERT, PRDM9, DROSHA, APC, RAD50, ITK, NHP2, HFE, FANCE, POLH, PMS2, EGFR, SBDS, SLC25A13, MET, POT1, PRSS1, WRN, NBN, EXT1, RECQL4, DOCK8, MTAP, CDKN2A, FANCG, PAX5, FANCC, PTCH1, XPA, TSC1, RET, JMJD1C, PRF1, PTEN, HRAS, CTR9, FANCF, EXT2, DDB2, MEN1, ATM, SDHD, CBL, CDKN1B, RECQL, KRAS, CDK4, SH2B3, PTPN11, HNF1A, POLE, GJB2, BRCA2, RB1, ERCC5, FANCM, MAX, TSHR, SERPINA1, DICER1, NOP10, BUB1B, FAH, FANCI, BLM, NTHL1, TSC2, ERCC4, PALB2, CYLD, CDH1, FANCA, TP53, NF1, RAD51D, SMARCE1, STAT3, BRCA1, RAD51C, BRIP1, AXIN2, PRKAR1A, RHBDF2, SETBP1, SMAD4, ELANE, STK11, MAP2K2, SMARCA4, ERCC2, ERCC1, POLD1, SMARCB1, CHEK2, NF2, AR, SH2D1A, DKC1
+[2019-09-18 13:48:18][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2019-09-18 13:48:18][INFO] Ignoring n = 0 unclassified variants with a global MAF frequency above 0.9
+[2019-09-18 15:41:09][INFO] 2109 clinical evidence item(s) found .. mapping = gene
+[2019-09-18 20:25:02][INFO] Verifying data integrity of input callset
+[2019-09-18 20:25:02][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2019-09-18 20:25:02][INFO] Adding citations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2019-09-18 20:25:02][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2019-09-18 20:25:03][INFO] Number of PASS variants: 980
+[2019-09-18 20:25:03][INFO] Number of SNVs: 624
+[2019-09-18 20:25:03][INFO] Number of deletions: 248
+[2019-09-18 20:25:03][INFO] Number of insertions: 108
+[2019-09-18 20:25:03][INFO] Number of block substitutions: 0
+[2019-09-18 20:25:03][INFO] Extending annotation descriptions related to KEGG pathways
+[2019-09-18 20:25:04][INFO] Extending annotation descriptions related to ClinVar
+[2019-09-18 20:25:08][INFO] Number of coding variants in cancer predisposition genes: 920
+[2019-09-18 20:25:08][INFO] Number of non-coding variants in cancer predisposition genes: 60
+[2019-09-18 20:25:08][INFO] Variants were found in the following cancer predisposition genes: SDHB, MPL, UROD, MUTYH, GBA, SDHC, FH, ALK, SOS1, EPCAM, MSH2, MSH6, FANCL, TMEM127, ERCC3, ABCB11, PMS1, BARD1, DIS3L2, FANCD2, VHL, RAF1, XPC, MLH1, COL7A1, BAP1, MITF, ATR, PHOX2B, PDGFRA, KIT, SDHA, TERT, PRDM9, DROSHA, APC, RAD50, ITK, NHP2, HFE, FANCE, POLH, PMS2, EGFR, SBDS, SLC25A13, MET, POT1, PRSS1, WRN, NBN, EXT1, RECQL4, DOCK8, MTAP, CDKN2A, FANCG, PAX5, FANCC, PTCH1, XPA, TSC1, RET, JMJD1C, PRF1, PTEN, HRAS, CTR9, FANCF, EXT2, DDB2, MEN1, ATM, SDHD, CBL, CDKN1B, RECQL, KRAS, CDK4, SH2B3, PTPN11, HNF1A, POLE, GJB2, BRCA2, RB1, ERCC5, FANCM, MAX, TSHR, SERPINA1, DICER1, NOP10, BUB1B, FAH, FANCI, BLM, NTHL1, TSC2, ERCC4, PALB2, CYLD, CDH1, FANCA, TP53, NF1, RAD51D, SMARCE1, STAT3, BRCA1, RAD51C, BRIP1, AXIN2, PRKAR1A, RHBDF2, SETBP1, SMAD4, ELANE, STK11, MAP2K2, SMARCA4, ERCC2, ERCC1, POLD1, SMARCB1, CHEK2, NF2, AR, SH2D1A, DKC1
+[2019-09-18 20:25:10][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2019-09-18 20:25:10][INFO] Ignoring n = 0 unclassified variants with a global MAF frequency above 0.9
+[2019-09-18 20:25:11][INFO] Assignment of other variants in genes recommended for reporting as incidental findings (ACMG SF v2.0)
+[2019-09-18 20:25:11][INFO] Number of pathogenic variants in the incidentalome - other genes of clinical significance: 0
+[2019-09-18 20:25:11][INFO] Assignment of other variants to hits from genome-wide association studies
+[2019-09-18 20:27:40][INFO] ------
+[2019-09-18 20:27:40][INFO] Writing HTML file with report contents
+[2019-09-18 20:29:49][INFO] ------
+[2019-09-18 20:29:49][INFO] Writing HTML file with report contents
+[2019-09-18 20:32:00][INFO] ------
+[2019-09-18 20:32:00][INFO] Writing HTML file with report contents
+[2019-09-18 20:36:17][INFO] ------
+[2019-09-18 20:36:17][INFO] Writing HTML file with report contents
+[2019-09-27 13:06:03][INFO] Initializing PCGR report - sample CosmicCodingMuts
+[2019-09-27 13:06:10][INFO] Verifying data integrity of input callset
+[2019-09-27 13:06:10][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2019-09-27 13:06:10][INFO] Filtering tumor variants based on allelic depth/fraction (min_dp_tumor=0, min_af_tumor=0)
+[2019-09-27 13:06:10][INFO] Filtering tumor variants based on allelic depth/fraction (min_dp_control=0, max_af_control=1)
+[2019-09-27 13:06:10][INFO] Removed 0 tumor variants (0%) based on thresholds for allelic depth/fraction
+[2019-09-27 13:06:10][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2019-09-27 13:06:11][INFO] Number of PASS variants: 195
+[2019-09-27 13:06:11][INFO] Number of SNVs: 195
+[2019-09-27 13:06:11][INFO] Number of deletions: 0
+[2019-09-27 13:06:11][INFO] Number of insertions: 0
+[2019-09-27 13:06:11][INFO] Number of block substitutions: 0
+[2019-09-27 13:06:11][INFO] Extending annotation descriptions related to KEGG pathways
+[2019-09-27 13:06:12][INFO] Extending annotation descriptions related to ClinVar
+[2019-09-27 13:06:13][INFO] Updating MAF file with information regarding variant sequencing depths and allelic support
+[2019-09-27 13:06:40][INFO] Excluding coinciding germline variants in 1000 Genomes Project populations
+[2019-09-27 13:06:40][INFO] Total sample calls remaining: 195
+[2019-09-27 13:06:40][INFO] Excluding coinciding germline variants in any population in the genome aggregation database (gnomAD)
+[2019-09-27 13:06:40][INFO] Total sample calls remaining: 195
+[2019-09-27 13:06:40][INFO] Excluding coinciding germline variants in ClinVar
+[2019-09-27 13:06:40][INFO] Total sample calls remaining: 194
+[2019-09-27 13:06:40][INFO] Excluding putative germline variants found in calls from panel-of-normals (PON)
+[2019-09-27 13:06:40][INFO] Total sample calls remaining: 194
+[2019-09-27 13:06:40][INFO] Excluding likely homozygous germline variants found as variants with 100% allelic fraction
+[2019-09-27 13:06:40][INFO] Total sample calls remaining: 194
+[2019-09-27 13:06:40][INFO] Excluding non-exonic variants
+[2019-09-27 13:06:40][INFO] Total sample calls remaining: 154
+[2019-09-27 13:06:40][INFO] ------
+[2019-09-27 13:06:40][INFO] Generating data for tiered cancer genome report - germline-filtered callset tier model ''
+[2019-09-27 13:06:40][INFO] Number of protein-coding variants: 116
+[2019-09-27 13:06:40][INFO] Looking up SNV/InDel biomarkers for precision oncology - any tumortype
+[2019-09-27 13:06:40][INFO] 19 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
+[2019-09-27 13:06:40][INFO] Underlying variant(s):
+[2019-09-27 13:06:40][INFO] PIK3CA missense_variant missense_variant:ENST00000263967.3:c.3140A>G:exon21:p.H1047R 3:g.178952085A>G
+[2019-09-27 13:06:40][INFO] 0 clinical evidence item(s) found .. mapping = codon
+[2019-09-27 13:06:40][INFO] 1 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exon
+[2019-09-27 13:06:40][INFO] Underlying variant(s):
+[2019-09-27 13:06:40][INFO] PIK3CA missense_variant missense_variant:ENST00000263967.3:c.3140A>G:exon21:p.H1047R 3:g.178952085A>G
+[2019-09-27 13:06:40][INFO] Looking up SNV/InDel biomarkers for precision oncology - Breast_Cancer_NOS
+[2019-09-27 13:06:40][INFO] 7 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
+[2019-09-27 13:06:40][INFO] Underlying variant(s):
+[2019-09-27 13:06:40][INFO] PIK3CA missense_variant missense_variant:ENST00000263967.3:c.3140A>G:exon21:p.H1047R 3:g.178952085A>G
+[2019-09-27 13:06:40][INFO] 0 clinical evidence item(s) found .. mapping = codon
+[2019-09-27 13:06:40][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2019-09-27 13:06:43][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2019-09-27 13:06:43][INFO] ------
+[2019-09-29 18:24:55][INFO] Verifying data integrity of input callset
+[2019-09-29 18:24:55][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2019-09-29 18:24:55][INFO] Adding citations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2019-09-29 18:24:55][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2019-09-29 18:24:56][INFO] Number of PASS variants: 653
+[2019-09-29 18:24:56][INFO] Number of SNVs: 413
+[2019-09-29 18:24:56][INFO] Number of deletions: 167
+[2019-09-29 18:24:56][INFO] Number of insertions: 73
+[2019-09-29 18:24:56][INFO] Number of block substitutions: 0
+[2019-09-29 18:24:56][INFO] Extending annotation descriptions related to KEGG pathways
+[2019-09-29 18:24:56][INFO] Extending annotation descriptions related to ClinVar
+[2019-09-29 18:25:00][INFO] Number of coding variants in cancer predisposition genes: 610
+[2019-09-29 18:25:00][INFO] Number of non-coding variants in cancer predisposition genes: 43
