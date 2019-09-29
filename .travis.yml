@@ -31,7 +31,7 @@ install:
   - docker pull sigven/pcgr:dev
   - conda install --use-local ${PACKAGE_NAME}_dockerized
   # Download the data bundle (usable for both version)
-  - gdown https://drive.google.com/uc?id=1vIESS8NxiITUnrqZoWOdNk1YsklH8f1C -O - | tar xzf - # grch37
+  - gdown https://drive.google.com/uc?id=1cBwhrE1XtzSRFXVz-7HBeswFSTlbYONu -O - | tar xzf - # grch37
 
 script:
   # Dockerized installation:
