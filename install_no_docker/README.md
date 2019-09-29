@@ -26,7 +26,7 @@ Or alternatively build the package from source, which is useful if you need to u
 
 ```
 conda install conda-build
-conda build -c conda-forge -c bioconda -c pcgr -c defaults install_no_docker/conda_package/pcgr
+conda build -c conda-forge -c bioconda -c pcgr -c defaults install_no_docker/conda_pkg/pcgr
 conda install --use-local $CHANNELS pcgr
 ```
 
