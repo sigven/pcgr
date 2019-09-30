@@ -33,8 +33,8 @@ conda install --use-local $CHANNELS pcgr
 Finally you can download reference data bundle for your genome build and you are all set:
 
 ```
-gdown https://drive.google.com/uc?id=1OL5C994HDaeadASz7KzMhPoXfdSiyhNy -O - | tar xvzf - # grch37
-gdown https://drive.google.com/uc?id=1CZNc87E0K5AK2RDSNU57FqLp0H1skpUh -O - | tar xvzf - # grch38
+gdown https://drive.google.com/uc?id=1cBwhrE1XtzSRFXVz-7HBeswFSTlbYONu -O - | tar xvzf - # grch37
+gdown https://drive.google.com/uc?id=1dUFBjWv5Uohov4ELC-FBLdtmHsiDeT1Z -O - | tar xvzf - # grch38
 ```
 
 There is a chance you'll encounter errors during the installation. Due to ongoing updates of the packages in public repositories, some packages might end up conflicting with each other or missing for your system. So try to stick to the dockerized version of PCGR whenever possible.
