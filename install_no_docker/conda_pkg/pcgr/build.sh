@@ -21,6 +21,10 @@ mv ${SRC_DIR}/src/pcgr/*.py ${SRC_DIR}/*.py ${PREFIX}/bin/  # python scripts
 mv ${SRC_DIR}/src/*.R ${PREFIX}/bin/  # R scripts
 # R modules:
 R -e "library(devtools); devtools::install('${SRC_DIR}/src/R/pcgrr', dependencies=FALSE, args=c('--library=${PREFIX}/lib/R/library'))"
+R -e "library(devtools); devtools::install_github('rstudio/crosstalk', dependencies=FALSE, args=c('--library=${PREFIX}/lib/R/library'))"
+R -e "library(devtools); install.packages('BiocManager', repos = 'http://cran.us.r-project.org'), dependencies=FALSE, args=c('--library=${PREFIX}/lib/R/library'))"
+R -e "BiocManager::install('TxDb.Hsapiens.UCSC.hg19.knownGene')"
+R -e "BiocManager::install('TxDb.Hsapiens.UCSC.hg38.knownGene')"
 
 # VCF validator
 wget https://github.com/EBIvariation/vcf-validator/releases/download/v0.6/vcf_validator -O ${PREFIX}/bin/vcf_validator
@@ -31,3 +35,6 @@ chmod +x ${PREFIX}/bin/vcf_validator
 #   recent perl 5.26 (see https://github.com/sigven/cpsr/issues/2)
 mkdir ${PREFIX}/share/loftee
 tar -xzf ${SRC_DIR}/src/loftee.tgz -C ${PREFIX}/share/loftee
+
+# Try getting the github version instead:
+#git clone https://github.com/konradjk/loftee
