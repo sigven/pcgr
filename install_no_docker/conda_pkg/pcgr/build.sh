@@ -21,7 +21,7 @@ mv ${SRC_DIR}/src/pcgr/*.py ${SRC_DIR}/*.py ${PREFIX}/bin/  # python scripts
 mv ${SRC_DIR}/src/*.R ${PREFIX}/bin/  # R scripts
 # R modules:
 R -e "library(devtools); devtools::install('${SRC_DIR}/src/R/pcgrr', dependencies=FALSE, args=c('--library=${PREFIX}/lib/R/library'))"
-R -e "library(devtools); options(unzip = '$(which unzip)'); devtools::install_github('rstudio/crosstalk', dependencies=FALSE, args=c('--library=${PREFIX}/lib/R/library'))"
+R -e "library(devtools); options(unzip = '$(which unzip)', gtar = '$(which gtar)', gzip = '$(which gzip)'); devtools::install_github('rstudio/crosstalk', dependencies=FALSE, args=c('--library=${PREFIX}/lib/R/library'))"
 R -e "install.packages('BiocManager', repos = 'http://cran.us.r-project.org', dependencies=FALSE, args=c('--library=${PREFIX}/lib/R/library'))"
 R -e "library(BiocManager); BiocManager::install('TxDb.Hsapiens.UCSC.hg19.knownGene')"
 R -e "library(BiocManager); BiocManager::install('TxDb.Hsapiens.UCSC.hg38.knownGene')"
