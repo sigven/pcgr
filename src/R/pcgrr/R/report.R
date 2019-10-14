@@ -9,7 +9,8 @@
 #' @param virtual_panel_id identifier for virtual panel id
 #' @param diagnostic_grade_only choose only clinical grade genes from genomics england panels
 
-init_pcg_report <- function(config = NULL, sample_name = 'SampleX', class = NULL, pcgr_data = NULL, type = 'somatic', virtual_panel_id = -1, diagnostic_grade_only = 0){
+init_pcg_report <- function(config = NULL, sample_name = 'SampleX', class = NULL, pcgr_data = NULL,
+                            type = 'somatic', virtual_panel_id = -1, diagnostic_grade_only = 0){
 
   report <- list()
   for(elem in c('metadata','content')){

@@ -5,7 +5,7 @@ Basic variant consequence annotation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  `VEP <http://www.ensembl.org/info/docs/tools/vep/index.html>`__ -
-   Variant Effect Predictor release 97.3 (`GENCODE
+   Variant Effect Predictor release 98.2 (`GENCODE
    v31 <https://www.gencodegenes.org/human/>`__ as gene reference
    database (v19 for grch37))
 
@@ -25,7 +25,8 @@ Variant frequency databases
 -  `Cancer Hotspots <http://cancerhotspots.org>`__ - a resource for
    statistically significant mutations in cancer (v2, 2017)
 -  `TCGA <https://portal.gdc.cancer.gov/>`__ - somatic mutations
-   discovered across 33 tumor type cohorts (release 18.0, July 2019)
+   discovered across 33 tumor type cohorts (release 19.0, September
+   2019)
 -  `ICGC-PCAWG <http://docs.icgc.org/pcawg/>`__ - ICGC Pancancer
    Analysis of Whole Genomes - (release 28, March 17th, 2019)
 
@@ -33,11 +34,11 @@ Variant databases of clinical utility
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  `ClinVar <http://www.ncbi.nlm.nih.gov/clinvar/>`__ - database of
-   clinically related variants (September 2019)
+   clinically related variants (October 2019)
 -  `DoCM <http://docm.genome.wustl.edu>`__ - database of curated
    mutations (v3.2, April 2016)
 -  `CIViC <http://civic.genome.wustl.edu>`__ - clinical interpretations
-   of variants in cancer (September 27th 2019)
+   of variants in cancer (October 13th 2019)
 -  `CBMDB <http://www.cancergenomeinterpreter.org/biomarkers>`__ -
    Cancer BioMarkers database (January 17th 2018)
 -  `ChEMBL <https://www.ebi.ac.uk/chembl/>`__ - database of drugs,
@@ -55,9 +56,9 @@ Protein domains/functional features
 Knowledge resources on gene and protein targets
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--  `CancerMine <https://zenodo.org/record/3386384#.XXAE5ZMzaL4>`__ -
+-  `CancerMine <https://zenodo.org/record/3472758#.XZjCqeczaL4>`__ -
    Literature-mined database of tumor suppressor genes/proto-oncogenes
-   (v16, September 2019)
+   (v17, October 2019)
 -  `Open Targets Platform <https://www.targetvalidation.org/>`__ -
    Database on disease-target associations, targeted drugs and
    tractability aggregated from multiple sources (literature, pathways,
@@ -72,7 +73,7 @@ Pathway databases
 ~~~~~~~~~~~~~~~~~
 
 -  `KEGG PATHWAY Database <http://www.genome.jp/kegg/pathway.htm>`__ -
-   July 29th 2019
+   October 2nd 2019
 -  `Oncogenic Signaling Pathways -
    TCGA <https://www.ncbi.nlm.nih.gov/pubmed/29625050>`__ - Sanchez-Vega
    et al., *Cell*, 2018

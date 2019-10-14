@@ -19,7 +19,8 @@ for(type in c('diagnostic','prognostic','predictive')){
   missing_tier2_items[[type]] <- T
   eitems[[type]] <- data.frame()
   if(NROW(pcg_report[['content']][['snv_indel']][['clinical_evidence_item']][['other_tumortype']][[type]][['A_B']]) > 0 | NROW(pcg_report[['content']][['snv_indel']][['clinical_evidence_item']][['specific_tumortype']][[type]][['C_D_E']]) > 0){
-    eitems[[type]] <- rbind(pcg_report[['content']][['snv_indel']][['clinical_evidence_item']][['other_tumortype']][[type]][['A_B']], pcg_report[['content']][['snv_indel']][['clinical_evidence_item']][['specific_tumortype']][[type]][['C_D_E']])
+    eitems[[type]] <- rbind(pcg_report[['content']][['snv_indel']][['clinical_evidence_item']][['other_tumortype']][[type]][['A_B']], pcg_report[['content']][['snv_indel']][['clinical_evidence_item']][['specific_tumortype']][[type]][['C_D_E']]) %>%
+      dplyr::arrange(desc(RATING))
     show_tier2_filters[[type]] <- T
     missing_tier2_items[[type]] <- F
   }
@@ -41,7 +42,8 @@ crosstalk::bscols(
   list(
     crosstalk::filter_select("CANCER_TYPE", "Cancer type", variants_tier2_predictive_shared, ~CANCER_TYPE),
     crosstalk::filter_select("CLINICAL_SIGNIFICANCE", "Clinical significance", variants_tier2_predictive_shared, ~CLINICAL_SIGNIFICANCE),
-    crosstalk::filter_select("EVIDENCE_LEVEL", "Evidence level", variants_tier2_predictive_shared, ~EVIDENCE_LEVEL)
+    crosstalk::filter_select("EVIDENCE_LEVEL", "Evidence level", variants_tier2_predictive_shared, ~EVIDENCE_LEVEL),
+    crosstalk::filter_slider("RATING", "Rating", variants_tier2_predictive_shared, ~RATING, min = 0, max = 5, step = 1, ticks = T)
   ),
   list(
     crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_tier2_predictive_shared, ~CONSEQUENCE),
@@ -88,7 +90,8 @@ crosstalk::bscols(
   ),
   list(
     crosstalk::filter_select("EVIDENCE_LEVEL", "Evidence level", variants_tier2_prognostic_shared, ~EVIDENCE_LEVEL),
-    crosstalk::filter_select("BIOMARKER_MAPPING", "Biomarker mapping", variants_tier2_prognostic_shared, ~BIOMARKER_MAPPING)
+    crosstalk::filter_select("BIOMARKER_MAPPING", "Biomarker mapping", variants_tier2_prognostic_shared, ~BIOMARKER_MAPPING),
+    crosstalk::filter_slider("RATING", "Rating", variants_tier2_prognostic_shared, ~RATING, min = 0, max = 5, step = 1, ticks = T)
   )
 )
 cat('The table below lists all variant-evidence item associations:',sep='\n')
@@ -129,7 +132,8 @@ crosstalk::bscols(
   ),
   list(
     crosstalk::filter_select("EVIDENCE_LEVEL", "Evidence level", variants_tier2_diagnostic_shared, ~EVIDENCE_LEVEL),
-    crosstalk::filter_select("BIOMARKER_MAPPING", "Biomarker mapping", variants_tier2_diagnostic_shared, ~BIOMARKER_MAPPING)
+    crosstalk::filter_select("BIOMARKER_MAPPING", "Biomarker mapping", variants_tier2_diagnostic_shared, ~BIOMARKER_MAPPING),
+    crosstalk::filter_slider("RATING", "Rating", variants_tier2_diagnostic_shared, ~RATING, min = 0, max = 5, step = 1, ticks = T),
   )
 )
 cat('The table below lists all variant-evidence item associations:',sep='\n')

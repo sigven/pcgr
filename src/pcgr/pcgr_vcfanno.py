@@ -36,13 +36,14 @@ def __main__():
    parser.add_argument("--winmsk",action = "store_true", help="Annotate VCF against known sequence repeats, as identified by Windowmasker (winmsk)")
    parser.add_argument("--gnomad_cpsr",action = "store_true",help="Annotate VCF with population-specific allelic counts and frequencies in cancer predisposition genes (gnomAD non-cancer subset)")
    parser.add_argument("--panel_normal_vcf",dest="panel_normal_vcf",help="Annotate VCF with germline calls from panel of normals")
+   parser.add_argument("--keep_logs",action = "store_true")
 
    args = parser.parse_args()
    query_info_tags = get_vcf_info_tags(args.query_vcf)
    vcfheader_file = args.out_vcf + '.tmp.' + str(random.randrange(0,10000000)) + '.header.txt'
    conf_fname = args.out_vcf + '.tmp.conf.toml'
    print_vcf_header(args.query_vcf, vcfheader_file, chromline_only = False)
-   run_vcfanno(args.num_processes, args.query_vcf, args.panel_normal_vcf, query_info_tags, vcfheader_file, args.pcgr_db_dir, conf_fname, args.out_vcf, args.docm, args.intogen_driver_mut, args.clinvar, args.tcga, args.tcga_pcdm, args.chasmplus, args.dbnsfp, args.civic, args.cbmdb, args.icgc, args.uniprot, args.cancer_hotspots, args.pcgr_onco_xref, args.gwas, args.rmsk, args.simplerepeats, args.winmsk, args.gnomad_cpsr)
+   run_vcfanno(args.num_processes, args.query_vcf, args.panel_normal_vcf, query_info_tags, vcfheader_file, args.pcgr_db_dir, conf_fname, args.out_vcf, args.docm, args.intogen_driver_mut, args.clinvar, args.tcga, args.tcga_pcdm, args.chasmplus, args.dbnsfp, args.civic, args.cbmdb, args.icgc, args.uniprot, args.cancer_hotspots, args.pcgr_onco_xref, args.gwas, args.rmsk, args.simplerepeats, args.winmsk, args.gnomad_cpsr, args.keep_logs)
 
 
 def prepare_vcfanno_configuration(vcfanno_data_directory, conf_fname, vcfheader_file, logger, datasource_info_tags, query_info_tags, datasource):
@@ -52,7 +53,7 @@ def prepare_vcfanno_configuration(vcfanno_data_directory, conf_fname, vcfheader_
    append_to_conf_file(datasource, datasource_info_tags, vcfanno_data_directory, conf_fname)
    append_to_vcf_header(vcfanno_data_directory, datasource, vcfheader_file)
 
-def run_vcfanno(num_processes, query_vcf, panel_normal_vcf, query_info_tags, vcfheader_file, pcgr_db_directory, conf_fname, output_vcf, docm, intogen_driver_mut, clinvar, tcga, tcga_pcdm, chasmplus, dbnsfp, civic, cbmdb, icgc, uniprot, cancer_hotspots, pcgr_onco_xref, gwas, rmsk, simplerepeats, winmsk, gnomad_cpsr):
+def run_vcfanno(num_processes, query_vcf, panel_normal_vcf, query_info_tags, vcfheader_file, pcgr_db_directory, conf_fname, output_vcf, docm, intogen_driver_mut, clinvar, tcga, tcga_pcdm, chasmplus, dbnsfp, civic, cbmdb, icgc, uniprot, cancer_hotspots, pcgr_onco_xref, gwas, rmsk, simplerepeats, winmsk, gnomad_cpsr, keep_logs):
    """
    Function that annotates a VCF file with vcfanno against a user-defined set of germline and somatic VCF files
    """
@@ -149,7 +150,8 @@ def run_vcfanno(num_processes, query_vcf, panel_normal_vcf, query_info_tags, vcf
    
    os.system('cat ' + str(vcfheader_file) + ' > ' + str(output_vcf))
    os.system('cat ' + str(out_vcf_vcfanno_unsorted1) + ' | grep -v \'^#\' >> ' + str(output_vcf))
-   os.system('rm -f ' + str(output_vcf) + '.tmp*')
+   if not keep_logs is True:
+      os.system('rm -f ' + str(output_vcf) + '.tmp*')
    os.system('bgzip -f ' + str(output_vcf))
    os.system('tabix -f -p vcf ' + str(output_vcf) + '.gz')
    return 0

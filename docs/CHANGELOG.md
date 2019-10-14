@@ -1,6 +1,21 @@
 
 ## CHANGELOG
 
+#### 0.8.3 - October 14th 2019
+
+- Data updates: ClinVar, GWAS catalog, GENCODE, CIViC, CancerMine
+- Software updates: VEP 98.2, vcf2tsv
+
+##### Fixed
+ * More improved mapping between Ensembl transcripts and UniProt accessions (using also RefSeq accessions where available)
+
+##### Added
+ * Possibility to filter evidence items by RATING in interactive data tables
+
+##### Changed
+ * Option _target_size_mb_ in pcgr.py replaces _target_size_mb_ in configuration file, more convenient in terms of configuring runs
+ * Option _tumor_type_ in pcgr.py replaces _tumor_type_ in configuration file
+
 #### 0.8.2 - Sep 29th 2019
 
 - Data updates: ClinVar, GWAS catalog, GENCODE, DiseaseOntology, CIViC, CancerMine, UniProt KB

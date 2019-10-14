@@ -10,23 +10,103 @@ import sys
 import getpass
 import platform
 import toml
+from argparse import RawTextHelpFormatter
 
-pcgr_version = 'dev'
-db_version = 'PCGR_DB_VERSION = 20190927'
-vep_version = '97'
+
+pcgr_version = '0.8.3'
+db_version = 'PCGR_DB_VERSION = 20191013'
+vep_version = '98'
 global vep_assembly
 
+
+ttypes = {
+		0: "Cancer_NOS",
+      1: "Adrenal_Gland_Cancer_NOS",
+      2: "Ampullary_Carcinoma_NOS",
+      3: "Biliary_Tract_Cancer_NOS",
+      4: "Bladder_Urinary_Tract_Cancer_NOS",
+      5: "Bone_Cancer_NOS",
+      6: "Breast_Cancer_NOS",
+      7: "CNS_Brain_Cancer_NOS",
+      8: "Cancer_Unknown_Primary_NOS",
+      9: "Cervical_Cancer_NOS",
+      10: "Colorectal_Cancer_NOS",
+      11: "Esophageal_Cancer_NOS",
+      12: "Head_And_Neck_Cancer_NOS",
+      13: "Kidney_Cancer_NOS",
+      14: "Leukemia_NOS",
+      15: "Liver_Cancer_NOS",
+      16: "Lung_Cancer_NOS",
+      17: "Lymphoma_Hodgkin_NOS",
+      18: "Lymphoma_Non_Hodgkin_NOS",
+      19: "Multiple_Myeloma",
+      20: "Ocular_Cancer_NOS",
+      21: "Ovarian_Fallopian_Tube_Cancer_NOS",
+      22: "Pancreatic_Cancer_NOS",
+      23: "Penile_Cancer_NOS",
+      24: "Peripheral_Nervous_System_Cancer_NOS",
+      25: "Peritoneal_Cancer_NOS",
+      26: "Pleural_Cancer_NOS",
+      27: "Prostate_Cancer_NOS",
+      28: "Skin_Cancer_NOS",
+      29: "Soft_Tissue_Cancer_Sarcoma_NOS",
+      30: "Stomach_Cancer_NOS",
+      31: "Testicular_Cancer_NOS",
+      32: "Thymic_Cancer_NOS",
+      33: "Thyroid_Cancer_NOS",
+      34: "Uterine_Cancer_NOS",
+      35: "Vulvar_Vaginal_Cancer_NOS"
+	}
+
 def __main__():
-   
+
+   tumor_types = "1 = Adrenal_Gland_Cancer_NOS\n"
+   tumor_types = tumor_types + "2 = Ampullary_Carcinoma_NOS\n"
+   tumor_types = tumor_types + "3 = Biliary_Tract_Cancer_NOS\n"
+   tumor_types = tumor_types + "4 = Bladder_Urinary_Tract_Cancer_NOS\n"
+   tumor_types = tumor_types + "5 = Bone_Cancer_NOS\n"
+   tumor_types = tumor_types + "6 = Breast_Cancer_NOS\n"
+   tumor_types = tumor_types + "7 = CNS_Brain_Cancer_NOS\n"
+   tumor_types = tumor_types + "8 = Cancer_Unknown_Primary_NOS\n"
+   tumor_types = tumor_types + "9 = Cervical_Cancer_NOS\n"
+   tumor_types = tumor_types + "10 = Colorectal_Cancer_NOS\n"
+   tumor_types = tumor_types + "11 = Esophageal_Cancer_NOS\n"
+   tumor_types = tumor_types + "12 = Head_And_Neck_Cancer_NOS\n"
+   tumor_types = tumor_types + "13 = Kidney_Cancer_NOS\n"
+   tumor_types = tumor_types + "14 = Leukemia_NOS\n"
+   tumor_types = tumor_types + "15 = Liver_Cancer_NOS\n"
+   tumor_types = tumor_types + "16 = Lung_Cancer_NOS\n"
+   tumor_types = tumor_types + "17 = Lymphoma_Hodgkin_NOS\n"
+   tumor_types = tumor_types + "18 = Lymphoma_Non_Hodgkin_NOS\n"
+   tumor_types = tumor_types + "19 = Multiple_Myeloma\n"
+   tumor_types = tumor_types + "20 = Ocular_Cancer_NOS\n"
+   tumor_types = tumor_types + "21 = Ovarian_Fallopian_Tube_Cancer_NOS\n"
+   tumor_types = tumor_types + "22 = Pancreatic_Cancer_NOS\n"
+   tumor_types = tumor_types + "23 = Penile_Cancer_NOS\n"
+   tumor_types = tumor_types + "24 = Peripheral_Nervous_System_Cancer_NOS\n"
+   tumor_types = tumor_types + "25 = Peritoneal_Cancer_NOS\n"
+   tumor_types = tumor_types + "26 = Pleural_Cancer_NOS\n"
+   tumor_types = tumor_types + "27 = Prostate_Cancer_NOS\n"
+   tumor_types = tumor_types + "28 = Skin_Cancer_NOS\n"
+   tumor_types = tumor_types + "29 = Soft_Tissue_Cancer_Sarcoma_NOS\n"
+   tumor_types = tumor_types + "30 = Stomach_Cancer_NOS\n"
+   tumor_types = tumor_types + "31 = Testicular_Cancer_NOS\n"
+   tumor_types = tumor_types + "32 = Thymic_Cancer_NOS\n"
+   tumor_types = tumor_types + "33 = Thyroid_Cancer_NOS\n"
+   tumor_types = tumor_types + "34 = Uterine_Cancer_NOS\n"
+   tumor_types = tumor_types + "35 = Vulvar_Vaginal_Cancer_NOS\n"
+      
    parser = argparse.ArgumentParser(description='Personal Cancer Genome Reporter (PCGR) workflow for clinical interpretation of somatic nucleotide variants and copy number aberration segments',
-                                    formatter_class=argparse.ArgumentDefaultsHelpFormatter, usage="%(prog)s [options] <PCGR_DIR> <OUTPUT_DIR> <GENOME_ASSEMBLY> <CONFIG_FILE> <SAMPLE_ID>" )
+                                    formatter_class=RawTextHelpFormatter, usage="%(prog)s -h [options] <PCGR_DIR> <OUTPUT_DIR> <GENOME_ASSEMBLY> <CONFIG_FILE> <SAMPLE_ID>" )
    parser.add_argument('--input_vcf', dest = "input_vcf", help='VCF input file with somatic query variants (SNVs/InDels).')
    parser.add_argument('--input_cna', dest = "input_cna",help='Somatic copy number alteration segments (tab-separated values)')
    parser.add_argument('--input_cna_plot', dest = "input_cna_plot",help='Somatic copy number alteration plot')
-   parser.add_argument('--pon_vcf',dest = "pon_vcf", help="VCF file with germline calls from Panel of Normals (PON) - i.e. blacklist variants")
-   parser.add_argument('--tumor_purity',type = float, dest="tumor_purity", help="Estimated tumor purity (between 0 and 1)")
-   parser.add_argument('--tumor_ploidy',type = float, dest="tumor_ploidy", help="Estimated tumor ploidy")
-   parser.add_argument('--tumor_only',action = "store_true",help="Input VCF comes from tumor-only sequencing, calls will be filtered for variants of germline origin (set configurations for filtering in .toml file)")
+   parser.add_argument('--pon_vcf',dest = "pon_vcf", help="VCF file with germline calls from Panel of Normals (PON) - i.e. blacklisted variants, (default: %(default)s)")
+   parser.add_argument('--tumor_type',dest = "ttype", type = int, default=0, help="Optional integer code to specify tumor type of query,\n choose any of the following identifiers:\n" + str(tumor_types) + "(default: %(default)s - any tumor type)")
+   parser.add_argument('--tumor_purity',type = float, dest="tumor_purity", help="Estimated tumor purity (between 0 and 1, (default: %(default)s)")
+   parser.add_argument('--tumor_ploidy',type = float, dest="tumor_ploidy", help="Estimated tumor ploidy (default: %(default)s)")
+   parser.add_argument('--target_size_mb',type = float, default=34, dest="target_size_mb",help="For mutational burden analysis - approximate protein-coding target size of sequencing assay (default: %(default)s Mb (WES))")
+   parser.add_argument('--tumor_only',action = "store_true",help="Input VCF comes from tumor-only sequencing, calls will be filtered for variants of germline origin (set configurations for filtering in .toml file), (default: %(default)s)")
    parser.add_argument('--force_overwrite', action = "store_true", help='By default, the script will fail with an error if any output file already exists. You can force the overwrite of existing result files by using this flag')
    parser.add_argument('--version', action='version', version='%(prog)s ' + str(pcgr_version))
    parser.add_argument('--basic',action="store_true",help="Run functional variant annotation on VCF through VEP/vcfanno, omit other analyses (i.e. CNA, MSI, report generation etc. (STEP 4)")
@@ -34,10 +114,10 @@ def __main__():
    parser.add_argument('--docker-uid', dest='docker_user_id', help='Docker user ID. Default is the host system user ID. If you are experiencing permission errors, try setting this up to root (`--docker-uid root`)')
    parser.add_argument('--no-docker', action='store_true', dest='no_docker', default=False, help='Run the PCGR workflow in a non-Docker mode (see install_no_docker/ folder for instructions')   
    parser.add_argument('--debug',action='store_true',default=False, help='Print full docker commands to log')
-   parser.add_argument('pcgr_dir',help='PCGR base directory with accompanying data directory, e.g. ~/pcgr-0.8.2')
+   parser.add_argument('pcgr_dir',help='PCGR base directory with accompanying data directory, e.g. ~/pcgr-0.8.3')
    parser.add_argument('output_dir',help='Output directory')
    parser.add_argument('genome_assembly',choices = ['grch37','grch38'], help='Genome assembly build: grch37 or grch38')
-   parser.add_argument('configuration_file',help='PCGR configuration file (TOML format), in conf/ folder')
+   parser.add_argument('configuration_file',help='PCGR configuration file (TOML format)')
    parser.add_argument('sample_id',help="Tumor sample/cancer genome identifier - prefix for output files")
 
    docker_image_version = 'sigven/pcgr:' + str(pcgr_version)
@@ -63,9 +143,13 @@ def __main__():
          err_msg = 'Docker image ' + str(docker_image_version) + ' does not exist, pull image from Dockerhub (docker pull ' + str(docker_image_version) + ')'
          pcgr_error_message(err_msg,logger)
 
+   if args.ttype > 34 or args.ttype < 0:
+      err_msg = "Tumor type code (" + str(args.ttype) + ") needs to be between " + str(min(ttypes.keys())) + " and " + str(max(ttypes.keys()))
+      pcgr_error_message(err_msg,logger)
+   
    config_options = {}
    if os.path.exists(args.configuration_file):
-      config_options = read_config_options(args.configuration_file, args.pcgr_dir, args.genome_assembly, tumor_only, logger)
+      config_options = read_config_options(args.configuration_file, args.pcgr_dir, args.genome_assembly, tumor_only, args.ttype, logger)
    else:
       err_msg = "PCGR configuration file " + str(args.configuration_file) + " does not exist - exiting"
       pcgr_error_message(err_msg,logger)
@@ -87,6 +171,14 @@ def __main__():
          err_msg = "Tumor ploidy value " + str(args.tumor_ploidy) + " is negative"
          pcgr_error_message(err_msg,logger)
    
+   if args.target_size_mb < 0 or args.target_size_mb > 34:
+      err_msg = "Target size region in Mb (" + str(args.target_size_mb) + ") is not positive or larger than the likely maximum size of the coding human genome (34 Mb))"
+      pcgr_error_message(err_msg,logger)
+   if args.target_size_mb < 1:
+      warn_msg = "Target size region in Mb (" + str(args.target_size_mb) + ") must be greater than 1 Mb for mutational burden estimate to be robust (ignoring TMB calculation)"
+      pcgr_warn_message(warn_msg,logger)
+      config_options['mutational_burden']['mutational_burden'] = False
+   config_options['mutational_burden']['target_size_mb'] = args.target_size_mb
 
    logger = getlogger('pcgr-check-files')
    host_directories = verify_input_files(args.input_vcf, args.input_cna, args.input_cna_plot, args.pon_vcf, args.configuration_file, config_options, args.pcgr_dir, args.output_dir, args.sample_id, args.genome_assembly, tumor_only, overwrite, logger)
@@ -94,7 +186,7 @@ def __main__():
    run_pcgr(host_directories, docker_image_version, config_options, args.sample_id, args.genome_assembly, tumor_only, tumor_properties, pcgr_version, args.basic, args.no_vcf_validate, debug = args.debug, docker_user_id=args.docker_user_id)
 
 
-def read_config_options(configuration_file, pcgr_dir, genome_assembly, tumor_only, logger):
+def read_config_options(configuration_file, pcgr_dir, genome_assembly, tumor_only, ttype, logger):
    
    ## read default options
    pcgr_config_options = {}
@@ -114,15 +206,6 @@ def read_config_options(configuration_file, pcgr_dir, genome_assembly, tumor_onl
    except (IndexError,TypeError):
       err_msg = 'Configuration file ' + str(configuration_file) + ' is not formatted correctly'
       pcgr_error_message(err_msg, logger)
-   
-   valid_tumor_types = ['Adrenal_Gland_Cancer_NOS','Ampullary_Carcinoma_NOS','Biliary_Tract_Cancer_NOS','Bladder_Urinary_Tract_Cancer_NOS',
-                        'Bone_Cancer_NOS','Breast_Cancer_NOS','Cancer_Unknown_Primary_NOS','Cervical_Cancer_NOS','CNS_Brain_Cancer_NOS',
-                        'Colorectal_Cancer_NOS','Esophageal_Cancer_NOS','Head_And_Neck_Cancer_NOS','Kidney_Cancer_NOS','Leukemia_NOS',
-                        'Liver_Cancer_NOS','Lung_Cancer_NOS','Lymphoma_Hodgkin_NOS','Lymphoma_Non_Hodgkin_NOS','Multiple_Myeloma_NOS','Ocular_Cancer_NOS',
-                        'Ovarian_Fallopian_Tube_Cancer_NOS','Pancreatic_Cancer_NOS','Penile_Cancer_NOS','Peripheral_Nervous_System_Cancer_NOS',
-                        'Peritoneal_Cancer_NOS','Pleural_Cancer_NOS','Prostate_Cancer_NOS','Skin_Cancer_NOS','Soft_Tissue_Cancer_Sarcoma_NOS',
-                        'Stomach_Cancer_NOS','Testicular_Cancer_NOS','Thymic_Cancer_NOS','Thyroid_Cancer_NOS','Uterine_Cancer_NOS',
-                        'Vulvar_Vaginal_Cancer_NOS','']
 
    for section in pcgr_config_options:
       if section in user_options:
@@ -141,11 +224,6 @@ def read_config_options(configuration_file, pcgr_dir, genome_assembly, tumor_onl
             if isinstance(pcgr_config_options[section][var],str) and not isinstance(user_options[section][var],str):
                err_msg = 'Configuration value ' + str(user_options[section][var]) + ' for ' + str(var) + ' cannot be parsed properly (expecting string)'
                pcgr_error_message(err_msg, logger)
-            if section == 'tumor_type' and var == 'type':
-               if not str(user_options[section][var]) in valid_tumor_types:
-                  err_msg = 'Configuration value for tumor type (' + str(user_options[section][var]) + ') is not a valid type'
-                  pcgr_error_message(err_msg, logger)
-            #tier_options = ['pcgr','pcgr_acmg']
             normalization_options = ['default','exome','genome','exome2genome']
             theme_options = ['default', 'cerulean', 'journal', 'flatly', 'readable', 'spacelab', 'united', 'cosmo', 'lumen', 'paper', 'sandstone', 'simplex','yeti']
             if var == 'mutsignatures_normalization' and not str(user_options[section][var]) in normalization_options:
@@ -175,14 +253,6 @@ def read_config_options(configuration_file, pcgr_dir, genome_assembly, tumor_onl
                if user_options['allelic_support'][var] < 0 or user_options[section][var] > 1:
                   err_msg = "Maximum AF normal: " + str(var) + " must be within the [0,1] range, current value is " + str(user_options[section][var]) + ")"
                   pcgr_error_message(err_msg,logger)
-            if var == 'target_size_mb':
-               if user_options[section][var] < 0 or user_options['mutational_burden'][var] > 50:
-                  err_msg = "Target size region in Mb (" + str(user_options[section][var]) + ") is not positive or larger than the likely maximum size of the coding human genome (50 Mb))"
-                  pcgr_error_message(err_msg,logger)
-               if user_options[section][var] < 1:
-                  warn_msg = "Target size region in Mb (" + str(user_options[section][var]) + ") must be greater than 1 for mutational burden estimate to be robust (ignoring TMB calculation)"
-                  pcgr_warn_message(warn_msg,logger)
-                  pcgr_config_options[section]['mutational_burden'] = False
             if var == 'logR_homdel':
                if user_options['cna'][var] > 0:
                   err_msg = "Log ratio for homozygous deletions (" + str(user_options[section][var]) + ") should be less than zero"
@@ -214,7 +284,6 @@ def read_config_options(configuration_file, pcgr_dir, genome_assembly, tumor_onl
       err_msg = "Prediction of MSI status (msi = true) requires mutational burden/target_size input (mutational_burden = true) - this is currently set as false"
       pcgr_error_message(err_msg,logger)
    if tumor_only == 1:
-   #if pcgr_config_options['tumor_only']['vcf_tumor_only'] == 1:
       if pcgr_config_options['msi']['msi'] == 1:
          warn_msg = 'Prediction of MSI status in tumor-only mode is not performed - valid for tumor-control data only'
          pcgr_warn_message(warn_msg,logger)
@@ -224,11 +293,10 @@ def read_config_options(configuration_file, pcgr_dir, genome_assembly, tumor_onl
       if pcgr_config_options['mutational_signatures']['mutsignatures'] == 1:
          warn_msg = 'Estimation of mutational signatures in tumor-only mode is not performed - valid for tumor-control data only'
          pcgr_warn_message(warn_msg,logger)
-         #err_msg = 'Estimation of mutational signatures in tumor-only mode is suboptimal - results must be interpreted with caution (vcf_tumor_only = true)'
-         #pcgr_error_message(warn_msg,logger)
+   
+   pcgr_config_options['tumor_type'] = {}
+   pcgr_config_options['tumor_type']['type'] = str(ttypes[ttype])
 
-
-   #print(str(pcgr_config_options))
    return pcgr_config_options
 
 
@@ -597,11 +665,12 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
    logger = getlogger("pcgr-start")
    logger.info("--- Personal Cancer Genome Reporter workflow ----")
    logger.info("Sample name: " + str(sample_id))
-   if config_options['tumor_type']['type'] == "":
+   if config_options['tumor_type']['type'] == "Cancer_NOS":
       logger.info("Tumor type: Cancer_NOS (Any tumortype)")
    else:
       logger.info("Tumor type: " + str(config_options['tumor_type']['type']))
    logger.info("Tumor-only: " + str(tumor_only))
+   logger.info("Coding target size - sequencing assay: " + str(config_options['mutational_burden']['target_size_mb']) + "Mb")
    print()
 
    #logger.info("Finished")
@@ -624,9 +693,9 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
    if not input_vcf_docker == 'None':
 
       ## Define input, output and temporary file names
-      output_vcf = os.path.join(output_dir, str(sample_id) + '.' + str(config_options['tier_model']['tier_model']) + '.' + str(genome_assembly) + '.vcf.gz')
-      output_pass_vcf = os.path.join(output_dir, str(sample_id) + '.' + str(config_options['tier_model']['tier_model']) + '.' + str(genome_assembly) + '.pass.vcf.gz')
-      output_pass_tsv = os.path.join(output_dir, str(sample_id) + '.' + str(config_options['tier_model']['tier_model']) + '.' + str(genome_assembly) + '.pass.tsv')
+      output_vcf = os.path.join(output_dir, str(sample_id) + '.pcgr_acmg.'  + str(genome_assembly) + '.vcf.gz')
+      output_pass_vcf = os.path.join(output_dir, str(sample_id) + '.pcgr_acmg.'  + str(genome_assembly) + '.pass.vcf.gz')
+      output_pass_tsv = os.path.join(output_dir, str(sample_id) + '.pcgr_acmg.'  + str(genome_assembly) + '.pass.tsv')
       output_maf = os.path.join(output_dir, str(sample_id) + '.' + str(genome_assembly) + '.tmp.maf')
       output_vcf2maf_log = os.path.join(output_dir, str(sample_id) + '.' + str(genome_assembly) + '.maf.log')
       input_vcf_pcgr_ready = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)', '.pcgr_ready.vcf.gz', host_directories['input_vcf_basename_host']))
@@ -670,6 +739,7 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
          check_subprocess(clean_vcf2maf_command)
 
       logger.info("Finished")
+      #return()
 
       ## vcfanno command
       print()
@@ -686,6 +756,7 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
          logger.info(pcgr_vcfanno_command)
       check_subprocess(pcgr_vcfanno_command)
       logger.info("Finished")
+      #return
 
       ## summarise command
       print()
@@ -723,7 +794,8 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       logger.info("STEP 4: Generation of output files - variant interpretation report for precision oncology")
       pcgr_report_command = (docker_cmd_run1 + os.path.join(r_scripts_dir, "pcgr.R") + " " + output_dir + " " + str(output_pass_tsv) + ".gz" + " " + \
                            input_cna_docker + " " + str(sample_id) + " " + input_conf_docker + " " + str(pcgr_version) + " " + genome_assembly + " " + data_dir + " " + \
-                           str(input_cna_plot_docker) + " " + str(tumor_properties['tumor_purity']) + " " + str(tumor_properties['tumor_ploidy']) + " " + str(tumor_only) +  docker_cmd_run_end)
+                           str(input_cna_plot_docker) + " " + str(tumor_properties['tumor_purity']) + " " + str(tumor_properties['tumor_ploidy']) + " " + str(tumor_only) +  " " + \
+                           str(config_options['mutational_burden']['target_size_mb']) + " " + str(config_options['tumor_type']['type']) + docker_cmd_run_end)
       if debug is True:
          logger.info(pcgr_report_command)
       check_subprocess(pcgr_report_command)

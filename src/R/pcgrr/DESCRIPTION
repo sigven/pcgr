@@ -1,7 +1,7 @@
 Package: pcgrr
 Type: Package
 Title: Personal Cancer Genome ReporteR
-Version: 0.8.2
+Version: 0.8.3
 Author: Sigve Nakken
 Maintainer: Sigve Nakken <sigven@ifi.uio.no>
 Description: Functions, tools and utilities for the generation of clinical cancer genome reports with PCGR.

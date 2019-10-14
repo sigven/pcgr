@@ -38,7 +38,9 @@ crosstalk::bscols(
   list(
     crosstalk::filter_select("CANCER_TYPE", "Cancer type", variants_tier1_predictive_shared, ~CANCER_TYPE),
     crosstalk::filter_select("CLINICAL_SIGNIFICANCE", "Clinical significance", variants_tier1_predictive_shared, ~CLINICAL_SIGNIFICANCE),
-    crosstalk::filter_select("EVIDENCE_LEVEL", "Evidence level", variants_tier1_predictive_shared, ~EVIDENCE_LEVEL)
+    crosstalk::filter_select("EVIDENCE_LEVEL", "Evidence level", variants_tier1_predictive_shared, ~EVIDENCE_LEVEL),
+    crosstalk::filter_slider("RATING", "Rating", variants_tier1_predictive_shared, ~RATING, min = 0, max = 5, step = 1, ticks = T)
+
   ),
   list(
     crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_tier1_predictive_shared, ~CONSEQUENCE),
@@ -84,7 +86,9 @@ crosstalk::bscols(
   ),
   list(
     crosstalk::filter_select("EVIDENCE_LEVEL", "Evidence level", variants_tier1_prognostic_shared, ~EVIDENCE_LEVEL),
-    crosstalk::filter_select("BIOMARKER_MAPPING", "Biomarker mapping", variants_tier1_prognostic_shared, ~BIOMARKER_MAPPING)
+    crosstalk::filter_select("BIOMARKER_MAPPING", "Biomarker mapping", variants_tier1_prognostic_shared, ~BIOMARKER_MAPPING),
+    crosstalk::filter_slider("RATING", "Rating", variants_tier1_prognostic_shared, ~RATING, min = 0, max = 5, step = 1, ticks = T)
+
   )
 )
 cat('The table below lists all variant-evidence item associations:',sep='\n')
@@ -124,7 +128,9 @@ crosstalk::bscols(
   ),
   list(
     crosstalk::filter_select("EVIDENCE_LEVEL", "Evidence level", variants_tier1_diagnostic_shared, ~EVIDENCE_LEVEL),
-    crosstalk::filter_select("BIOMARKER_MAPPING", "Biomarker mapping", variants_tier1_diagnostic_shared, ~BIOMARKER_MAPPING)
+    crosstalk::filter_select("BIOMARKER_MAPPING", "Biomarker mapping", variants_tier1_diagnostic_shared, ~BIOMARKER_MAPPING),
+    crosstalk::filter_slider("RATING", "Rating", variants_tier1_diagnostic_shared, ~RATING, min = 0, max = 5, step = 1, ticks = T)
+
   )
 )
 cat('The table below lists all variant-evidence item associations:',sep='\n')

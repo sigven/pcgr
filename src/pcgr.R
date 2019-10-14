@@ -25,6 +25,8 @@ query_cna_plot <- as.character(args[9])
 purity_estimate <- as.character(args[10])
 ploidy_estimate <- as.character(args[11])
 t_only <- as.integer(args[12])
+target_size_mb <- as.numeric(args[13])
+tumor_type <- as.character(args[14])
 
 rlogging::SetTimeStampFormat(ts.format="%Y-%m-%d %H:%M:%S ")
 rlogging::SetLogFile(NULL)
@@ -62,7 +64,12 @@ for(section in names(pcgr_config)){
 pcgr_config[['tumor_properties']] <- list()
 pcgr_config[['tumor_properties']][['tumor_purity']] <- purity_estimate
 pcgr_config[['tumor_properties']][['tumor_ploidy']] <- ploidy_estimate
-
+pcgr_config[['mutational_burden']][['target_size_mb']] <- target_size_mb
+pcgr_config[['tumor_type']] <- list()
+pcgr_config[['tumor_type']][['type']] <- tumor_type
+if(tumor_type == "Cancer_NOS"){
+  pcgr_config[['tumor_type']][['type']] <- ""
+}
 pcg_report <- pcgrr::generate_report(dir, query_vcf2tsv, pcgr_data, pcgr_config, sample_name = sample_name, cna_segments_tsv = query_cnv, 
 				     cna_plot = query_cna_plot, tier_model = 'pcgr_acmg', tumor_only = t_only)
 pcgrr::write_report(dir, pcg_report, sample_name, genome_assembly, tier_model = 'pcgr_acmg', format = 'html')

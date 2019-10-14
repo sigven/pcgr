@@ -341,3 +341,50 @@
 [2019-09-29 18:24:56][INFO] Extending annotation descriptions related to ClinVar
 [2019-09-29 18:25:00][INFO] Number of coding variants in cancer predisposition genes: 610
 [2019-09-29 18:25:00][INFO] Number of non-coding variants in cancer predisposition genes: 43
+[2019-10-08 08:27:39][INFO] Verifying data integrity of input callset
+[2019-10-08 08:27:39][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2019-10-08 08:27:39][INFO] Filtering tumor variants based on allelic depth/fraction (min_dp_tumor=0, min_af_tumor=0)
+[2019-10-08 08:27:39][INFO] Filtering tumor variants based on allelic depth/fraction (min_dp_control=0, max_af_control=1)
+[2019-10-08 08:27:39][INFO] Removed 0 tumor variants (0%) based on thresholds for allelic depth/fraction
+[2019-10-08 08:27:39][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2019-10-08 08:27:49][INFO] Number of PASS variants: 195
+[2019-10-08 08:27:49][INFO] Number of SNVs: 195
+[2019-10-08 08:27:49][INFO] Number of deletions: 0
+[2019-10-08 08:27:49][INFO] Number of insertions: 0
+[2019-10-08 08:27:49][INFO] Number of block substitutions: 0
+[2019-10-08 08:27:49][INFO] Extending annotation descriptions related to KEGG pathways
+[2019-10-08 08:27:50][INFO] Extending annotation descriptions related to ClinVar
+[2019-10-14 08:31:38][INFO] Initializing PCGR report - sample CosmicCodingMuts
+[2019-10-14 08:31:48][INFO] Verifying data integrity of input callset
+[2019-10-14 08:31:48][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2019-10-14 08:31:48][INFO] Filtering tumor variants based on allelic depth/fraction (min_dp_tumor=0, min_af_tumor=0)
+[2019-10-14 08:31:48][INFO] Filtering tumor variants based on allelic depth/fraction (min_dp_control=0, max_af_control=1)
+[2019-10-14 08:31:48][INFO] Removed 0 tumor variants (0%) based on thresholds for allelic depth/fraction
+[2019-10-14 08:31:48][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2019-10-14 08:31:49][INFO] Number of PASS variants: 3316
+[2019-10-14 08:31:49][INFO] Number of SNVs: 2669
+[2019-10-14 08:31:49][INFO] Number of deletions: 541
+[2019-10-14 08:31:49][INFO] Number of insertions: 103
+[2019-10-14 08:31:49][INFO] Number of block substitutions: 0
+[2019-10-14 08:31:49][INFO] Extending annotation descriptions related to KEGG pathways
+[2019-10-14 08:31:50][INFO] Extending annotation descriptions related to ClinVar
+[2019-10-14 08:31:54][INFO] Updating MAF file with information regarding variant sequencing depths and allelic support
+[2019-10-14 08:32:13][INFO] ------
+[2019-10-14 08:32:13][INFO] Generating data for tiered cancer genome report - somatic calls tier model ''
+[2019-10-14 08:32:13][INFO] Number of protein-coding variants: 1870
+[2019-10-14 08:32:13][INFO] Looking up SNV/InDel biomarkers for precision oncology - any tumortype
+[2019-10-14 08:32:13][INFO] 0 clinical evidence item(s) found .. mapping = exact
+[2019-10-14 08:32:14][INFO] 0 clinical evidence item(s) found .. mapping = codon
+[2019-10-14 08:32:14][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2019-10-14 08:32:14][INFO] Looking up SNV/InDel biomarkers for precision oncology - Colorectal_Cancer_NOS
+[2019-10-14 08:32:14][INFO] 0 clinical evidence item(s) found .. mapping = exact
+[2019-10-14 08:32:14][INFO] 0 clinical evidence item(s) found .. mapping = codon
+[2019-10-14 08:32:14][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2019-10-14 08:32:14][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2019-10-14 08:32:14][INFO] ------
+[2019-10-14 08:34:26][INFO] Number of protein-coding variants: 1870
+[2019-10-14 08:34:41][INFO] Looking up SNV/InDel biomarkers for precision oncology - any tumortype
+[2019-10-14 08:34:41][INFO] 0 clinical evidence item(s) found .. mapping = exact
+[2019-10-14 08:34:41][INFO] 0 clinical evidence item(s) found .. mapping = codon
+[2019-10-14 08:34:41][INFO] 0 clinical evidence item(s) found .. mapping = exon
+[2019-10-14 08:36:35][INFO] Looking up SNV/InDel biomarkers for precision oncology - any tumortype

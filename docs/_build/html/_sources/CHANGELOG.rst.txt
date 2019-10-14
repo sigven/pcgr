@@ -1,6 +1,32 @@
 CHANGELOG
 ---------
 
+0.8.3 - October 14th 2019
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+-  Data updates: ClinVar, GWAS catalog, GENCODE, CIViC, CancerMine
+-  Software updates: VEP 98.2, vcf2tsv
+
+Fixed
+'''''
+
+-  More improved mapping between Ensembl transcripts and UniProt
+   accessions (using also RefSeq accessions where available)
+
+Added
+'''''
+
+-  Possibility to filter evidence items by RATING in interactive data
+   tables
+
+Changed
+'''''''
+
+-  Option *target_size_mb* in pcgr.py replaces *target_size_mb* in
+   configuration file, more convenient in terms of configuring runs
+-  Option *tumor_type* in pcgr.py replaces *tumor_type* in configuration
+   file
+
 0.8.2 - Sep 29th 2019
 ^^^^^^^^^^^^^^^^^^^^^
 
@@ -10,6 +36,8 @@ CHANGELOG
    `0.3.2 <https://github.com/brentp/vcfanno/releases/tag/v0.3.2>`__,
    LOFTEE (VEP plugin)
    `1.0.3 <https://github.com/konradjk/loftee/releases>`__
+
+.. _fixed-1:
 
 Fixed
 '''''
@@ -25,6 +53,8 @@ Fixed
    (using also RefSeq accessions where available)
 -  Bug in UpSetPlot for cases where filtering produce less than two
    intersecting sets
+
+.. _added-1:
 
 Added
 '''''
@@ -42,7 +72,7 @@ Added
 0.8.1 - May 22nd 2019
 ^^^^^^^^^^^^^^^^^^^^^
 
-.. _added-1:
+.. _added-2:
 
 Added
 '''''
@@ -52,7 +82,7 @@ Added
 0.8.0 - May 20th 2019
 ^^^^^^^^^^^^^^^^^^^^^
 
-.. _fixed-1:
+.. _fixed-2:
 
 Fixed
 '''''
@@ -60,7 +90,7 @@ Fixed
 -  Bug in value box for Tier 2 variants (new line carriage) `Issue
    #73 <https://github.com/sigven/pcgr/issues/73>`__
 
-.. _added-2:
+.. _added-3:
 
 Added
 '''''
@@ -183,6 +213,8 @@ Added
    -  Rating of the ClinVar variant (0-4 stars) with respect to level of
       review
 
+.. _changed-1:
+
 Changed
 '''''''
 
@@ -201,7 +233,7 @@ Removed
 0.7.0 - Nov 27th 2018
 ^^^^^^^^^^^^^^^^^^^^^
 
-.. _fixed-2:
+.. _fixed-3:
 
 Fixed
 '''''
@@ -235,7 +267,7 @@ Fixed
 -  Removed ‘COSM’ prefix in COSMIC mutation links
 -  Bug in retrieval of splice site predictions from dbscSNV
 
-.. _added-3:
+.. _added-4:
 
 Added
 '''''
@@ -274,7 +306,7 @@ Added
 
 -  Upgraded VEP to v94
 
-.. _changed-1:
+.. _changed-2:
 
 Changed
 '''''''
@@ -291,7 +323,7 @@ Changed
 0.6.2.1 - May 14th 2018
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-.. _fixed-3:
+.. _fixed-4:
 
 Fixed
 '''''
@@ -301,7 +333,7 @@ Fixed
 0.6.2 - May 9th 2018
 ^^^^^^^^^^^^^^^^^^^^
 
-.. _fixed-4:
+.. _fixed-5:
 
 Fixed
 '''''
@@ -320,7 +352,7 @@ Fixed
 -  Bug in copy number annotation (missing protein-coding transcripts)
 -  Updated MSI prediction (variable importance, performance measures)
 
-.. _added-4:
+.. _added-5:
 
 Added
 '''''
@@ -334,7 +366,7 @@ Added
 0.6.1 - May 2nd 2018
 ^^^^^^^^^^^^^^^^^^^^
 
-.. _fixed-5:
+.. _fixed-6:
 
 Fixed
 '''''
@@ -352,7 +384,7 @@ Fixed
 0.6.0 - April 25th 2018
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-.. _added-5:
+.. _added-6:
 
 Added
 '''''
@@ -513,7 +545,7 @@ Removed
          https://github.com/mskcc/vcf2maf will be incorporated in the
          next release
 
-.. _changed-2:
+.. _changed-3:
 
 Changed
 '''''''

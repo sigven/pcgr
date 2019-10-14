@@ -511,7 +511,7 @@ generate_report_data_snv_indel <- function(sample_calls, pcgr_data, sample_name,
                                            biomarker_mapping_stringency = 1, tier_model = "pcgr_acmg"){
 
   rlogging::message("------")
-  rlogging::message(paste0("Generating data for tiered cancer genome report - ", callset, " tier model '", config[["tier_model"]][["tier_model"]],"'"))
+  rlogging::message(paste0("Generating data for tiered cancer genome report - ", callset, " tier model '", tier_model,"'"))
 
   pcg_report_snv_indel <- pcgrr::init_pcg_report(config, sample_name, class = "snv_indel")
   pcg_report_snv_indel[["eval"]] <- TRUE
@@ -1139,7 +1139,7 @@ get_calls <- function(tsv_gz_file, pcgr_data, sample_name, config, medgen_ont = 
                     "OPENTARGETS_RANK","TARGETED_DRUGS",
                     "CANCER_ASSOCIATIONS", "DBSNP",
                     "COSMIC", "PROTEIN_DOMAIN",
-                    "CLINVAR_PHENOTYPE",
+                    "CLINVAR_PHENOTYPE","NCBI_REFSEQ",
                     "AF_TUMOR","DP_TUMOR",
                     "AF_CONTROL","DP_CONTROL",
                     "CALL_CONFIDENCE","PFAM_DOMAIN_NAME",

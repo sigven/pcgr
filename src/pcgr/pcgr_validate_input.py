@@ -233,11 +233,9 @@ def check_format_ad_dp_tags(vcf, pcgr_directory, config_options, tumor_only, log
    if control_af_tag != '' and found_naf_tag == 0:
       logger.warn('Could not find the specified control_af_tag (' + str(control_af_tag) + ') in INFO column of input VCF')
    
-   #if config_options['tumor_only']['exclude_likely_hom_germline'] is True and config_options['tumor_only']['vcf_tumor_only'] is True and found_taf_tag == 0:
    if config_options['tumor_only']['exclude_likely_hom_germline'] is True and tumor_only == 1 and found_taf_tag == 0:
       logger.warn('Could not find the specified tumor_af_tag (' + str(tumor_af_tag) + ') in INFO column of input VCF - filtering of homozygous germline variants in tumor-only mode will be ignored')
 
-   #if config_options['tumor_only']['exclude_likely_het_germline'] is True and config_options['tumor_only']['vcf_tumor_only'] is True and found_taf_tag == 0:
    if config_options['tumor_only']['exclude_likely_het_germline'] is True and tumor_only == 1 and found_taf_tag == 0:
       logger.warn('Could not find the specified tumor_af_tag (' + str(tumor_af_tag) + ') in INFO column of input VCF - filtering of heterozygous germline variants in tumor-only mode will be ignored')
 

@@ -8,7 +8,9 @@
 #'
 #' @return list
 
-get_clinical_associations_snv_indel <- function(sample_calls, pcgr_data, pcgr_config, tumor_type_specificity = 'any_tumortype', biomarker_mapping_stringency = 1){
+get_clinical_associations_snv_indel <- function(sample_calls, pcgr_data, pcgr_config,
+                                                tumor_type_specificity = 'any_tumortype',
+                                                biomarker_mapping_stringency = 1){
 
   all_eitems <- data.frame()
   variant_set <- data.frame()
@@ -30,7 +32,7 @@ get_clinical_associations_snv_indel <- function(sample_calls, pcgr_data, pcgr_co
     }
     rlogging::message(paste0("Looking up SNV/InDel biomarkers for precision oncology - ",paste(tumor_type_query$name,collapse=", ")))
   }
-  civic_biomarkers <- pcgr_data[['biomarkers']][['civic']] %>% dplyr::filter(alteration_type == 'MUT') %>% dplyr::filter(variant_origin == 'Somatic Mutation')
+  civic_biomarkers <- pcgr_data[['biomarkers']][['civic']] %>% dplyr::filter(alteration_type == 'MUT' & variant_origin == "Somatic")
   cbmdb_biomarkers <- pcgr_data[['biomarkers']][['cbmdb']] %>% dplyr::filter(alteration_type == 'MUT')
   if("pubmed_html_link" %in% colnames(civic_biomarkers)){
     civic_biomarkers <- dplyr::rename(civic_biomarkers, citation = pubmed_html_link)
@@ -100,7 +102,8 @@ get_clinical_associations_snv_indel <- function(sample_calls, pcgr_data, pcgr_co
         tmp <- dplyr::select(sample_calls_civic,CIVIC_ID_2,VAR_ID) %>% tidyr::separate_rows(CIVIC_ID_2,sep=",")
         sample_calls_civic <- merge(tmp,dplyr::select(sample_calls_civic,-c(CIVIC_ID_2)),by.x = "VAR_ID",by.y = "VAR_ID")
         civic_calls <- dplyr::select(sample_calls_civic,dplyr::one_of(pcgr_data[['annotation_tags']][['all']]))
-        clinical_evidence_items_all <- dplyr::inner_join(civic_calls,civic_biomarkers,by=c("CIVIC_ID_2" = "evidence_id")) %>% dplyr::distinct()
+        clinical_evidence_items_all <- dplyr::inner_join(civic_calls,civic_biomarkers,by=c("CIVIC_ID_2" = "evidence_id")) %>%
+          dplyr::distinct()
         names(clinical_evidence_items_all) <- toupper(names(clinical_evidence_items_all))
         if(nrow(clinical_evidence_items_all) > 0){
           if(mapping == 'codon' & 'EITEM_CODON' %in% colnames(clinical_evidence_items_all)){
@@ -108,9 +111,11 @@ get_clinical_associations_snv_indel <- function(sample_calls, pcgr_data, pcgr_co
               clinical_evidence_items <- dplyr::filter(clinical_evidence_items_all, !is.na(EITEM_CODON))
               clinical_evidence_items <- dplyr::filter(clinical_evidence_items, EITEM_CODON <= AMINO_ACID_END & EITEM_CODON >= AMINO_ACID_START)
               if(nrow(clinical_evidence_items) > 0){
-                clinical_evidence_items <- clinical_evidence_items %>% dplyr::filter((!is.na(EITEM_CONSEQUENCE) & startsWith(CONSEQUENCE,EITEM_CONSEQUENCE) | is.na(EITEM_CONSEQUENCE)) & CODING_STATUS == "coding")
+                clinical_evidence_items <- clinical_evidence_items %>%
+                  dplyr::filter((!is.na(EITEM_CONSEQUENCE) & startsWith(CONSEQUENCE,EITEM_CONSEQUENCE) | is.na(EITEM_CONSEQUENCE)) & CODING_STATUS == "coding")
                 if(nrow(clinical_evidence_items) > 0){
-                  clinical_evidence_items <- clinical_evidence_items %>% dplyr::select(-c(EITEM_CONSEQUENCE,MAPPING_CATEGORY,EITEM_CODON,EITEM_EXON))
+                  clinical_evidence_items <- clinical_evidence_items %>%
+                    dplyr::select(-c(EITEM_CONSEQUENCE,MAPPING_CATEGORY,EITEM_CODON,EITEM_EXON))
                 }else{
                   clinical_evidence_items <- data.frame()
                 }
@@ -126,10 +131,12 @@ get_clinical_associations_snv_indel <- function(sample_calls, pcgr_data, pcgr_co
               clinical_evidence_items <- dplyr::filter(clinical_evidence_items_all, !is.na(EITEM_EXON))
               clinical_evidence_items <- clinical_evidence_items %>% dplyr::filter(EXON == EITEM_EXON)
               if(nrow(clinical_evidence_items) > 0){
-                clinical_evidence_items <- clinical_evidence_items %>% dplyr::filter(!is.na(EITEM_CONSEQUENCE) & startsWith(CONSEQUENCE,EITEM_CONSEQUENCE) | is.na(EITEM_CONSEQUENCE))
+                clinical_evidence_items <- clinical_evidence_items %>%
+                  dplyr::filter(!is.na(EITEM_CONSEQUENCE) & startsWith(CONSEQUENCE,EITEM_CONSEQUENCE) | is.na(EITEM_CONSEQUENCE))
                 clinical_evidence_items <- dplyr::filter(clinical_evidence_items, CODING_STATUS == 'coding')
                 if(nrow(clinical_evidence_items) > 0){
-                  clinical_evidence_items <- clinical_evidence_items %>% dplyr::select(-c(EITEM_CONSEQUENCE,MAPPING_CATEGORY,EITEM_CODON,EITEM_EXON))
+                  clinical_evidence_items <- clinical_evidence_items %>%
+                    dplyr::select(-c(EITEM_CONSEQUENCE,MAPPING_CATEGORY,EITEM_CODON,EITEM_EXON))
                 }else{
                   clinical_evidence_items <- data.frame()
                 }
@@ -147,7 +154,8 @@ get_clinical_associations_snv_indel <- function(sample_calls, pcgr_data, pcgr_co
                 clinical_evidence_items <- clinical_evidence_items %>% dplyr::filter(GENESYMBOL == SYMBOL)
                 if(nrow(clinical_evidence_items) > 0){
                   clinical_evidence_items <- dplyr::filter(clinical_evidence_items, CODING_STATUS == 'coding')
-                  clinical_evidence_items <- clinical_evidence_items %>% dplyr::select(-c(EITEM_CONSEQUENCE,MAPPING_CATEGORY,EITEM_CODON,EITEM_EXON))
+                  clinical_evidence_items <- clinical_evidence_items %>%
+                    dplyr::select(-c(EITEM_CONSEQUENCE,MAPPING_CATEGORY,EITEM_CODON,EITEM_EXON))
                 }else{
                   clinical_evidence_items <- data.frame()
                 }
@@ -163,9 +171,13 @@ get_clinical_associations_snv_indel <- function(sample_calls, pcgr_data, pcgr_co
     }
 
     if(nrow(clinical_evidence_items) > 0){
-      clinical_evidence_items <- clinical_evidence_items %>% dplyr::mutate(EVIDENCE_ID = CIVIC_ID, BIOMARKER_MAPPING = mapping)
-      clinical_evidence_items <- dplyr::rename(clinical_evidence_items, HGVSp = HGVSP, HGVSc = HGVSC) %>% dplyr::arrange(EVIDENCE_LEVEL,RATING)
-      unique_variants <- clinical_evidence_items %>% dplyr::select(SYMBOL, CONSEQUENCE, CDS_CHANGE, GENOMIC_CHANGE) %>% dplyr::distinct()
+      clinical_evidence_items <- clinical_evidence_items %>%
+        dplyr::mutate(EVIDENCE_ID = CIVIC_ID, BIOMARKER_MAPPING = mapping) %>%
+        dplyr::rename(HGVSp = HGVSP, HGVSc = HGVSC) %>%
+        dplyr::arrange(EVIDENCE_LEVEL,desc(RATING))
+      unique_variants <- clinical_evidence_items %>%
+        dplyr::select(SYMBOL, CONSEQUENCE, CDS_CHANGE, GENOMIC_CHANGE) %>%
+        dplyr::distinct()
       rlogging::message(paste0(nrow(clinical_evidence_items),' clinical evidence item(s) found .. (',nrow(unique_variants),' unique variant(s)), mapping = ',mapping))
       rlogging::message('Underlying variant(s):')
       for(i in 1:nrow(unique_variants)){
@@ -181,19 +193,26 @@ get_clinical_associations_snv_indel <- function(sample_calls, pcgr_data, pcgr_co
 
   if(nrow(all_eitems) > 0){
     variant_set <- dplyr::select(all_eitems, dplyr::one_of(pcgr_data[['annotation_tags']][['all']])) %>%
-      dplyr::select(-c(CBMDB_ID,CIVIC_ID,CIVIC_ID_2)) %>% dplyr::distinct()
+      dplyr::select(-c(CBMDB_ID,CIVIC_ID,CIVIC_ID_2)) %>%
+      dplyr::distinct()
     clin_eitems_list <- list()
     for(type in c('prognostic','diagnostic','predictive')){
       clin_eitems_list[[type]] <- list()
-      clin_eitems_list[[type]][['any']] <- dplyr::select(all_eitems, dplyr::one_of(pcgr_data[['annotation_tags']][['tier1_display']])) %>% dplyr::filter(EVIDENCE_TYPE == stringr::str_to_title(type)) %>% dplyr::arrange(EVIDENCE_LEVEL)
+      clin_eitems_list[[type]][['any']] <- dplyr::select(all_eitems, dplyr::one_of(pcgr_data[['annotation_tags']][['tier1_display']])) %>%
+        dplyr::filter(EVIDENCE_TYPE == stringr::str_to_title(type)) %>%
+        dplyr::arrange(EVIDENCE_LEVEL, desc(RATING))
       if(nrow(clin_eitems_list[[type]][['any']]) > 0){
         if(nrow(clin_eitems_list[[type]][['any']] %>% dplyr::filter(stringr::str_detect(EVIDENCE_LEVEL,"^(A|B|B1|B2):"))) > 0){
-          clin_eitems_list[[type]][['A_B']] <- clin_eitems_list[[type]][['any']] %>% dplyr::filter(stringr::str_detect(EVIDENCE_LEVEL,"^(A|B|B1|B2):")) %>% dplyr::arrange(EVIDENCE_LEVEL)
+          clin_eitems_list[[type]][['A_B']] <- clin_eitems_list[[type]][['any']] %>%
+            dplyr::filter(stringr::str_detect(EVIDENCE_LEVEL,"^(A|B|B1|B2):")) %>%
+            dplyr::arrange(EVIDENCE_LEVEL, desc(RATING))
         }else{
           clin_eitems_list[[type]][['A_B']] <- data.frame()
         }
         if(nrow(clin_eitems_list[[type]][['any']] %>% dplyr::filter(stringr::str_detect(EVIDENCE_LEVEL,"^(C|D|E):"))) > 0){
-          clin_eitems_list[[type]][['C_D_E']] <- clin_eitems_list[[type]][['any']] %>% dplyr::filter(stringr::str_detect(EVIDENCE_LEVEL,"^(C|D|E):")) %>% dplyr::arrange(EVIDENCE_LEVEL)
+          clin_eitems_list[[type]][['C_D_E']] <- clin_eitems_list[[type]][['any']] %>%
+            dplyr::filter(stringr::str_detect(EVIDENCE_LEVEL,"^(C|D|E):")) %>%
+            dplyr::arrange(EVIDENCE_LEVEL, desc(RATING))
         }else{
           clin_eitems_list[[type]][['C_D_E']] <- data.frame()
         }
@@ -274,18 +293,23 @@ names(civic_cna_biomarkers) <- toupper(names(civic_cna_biomarkers))
 
   if(nrow(cna_biomarkers) > 0){
     cna_biomarkers <- cna_biomarkers[c("SYMBOL","CANCER_TYPE","CNA_TYPE","EVIDENCE_LEVEL","CLINICAL_SIGNIFICANCE","EVIDENCE_TYPE","DESCRIPTION","EVIDENCE_DIRECTION","THERAPEUTIC_CONTEXT","CITATION","RATING","GENE_NAME","KEGG_PATHWAY","TARGETED_DRUGS","SEGMENT_LENGTH_MB", "SEGMENT","LogR")]
-    cna_biomarkers <- cna_biomarkers %>% dplyr::arrange(EVIDENCE_LEVEL,RATING)
+    cna_biomarkers <- cna_biomarkers %>%
+      dplyr::arrange(EVIDENCE_LEVEL,desc(RATING))
     for(type in c('diagnostic','prognostic','predictive')){
       clinical_evidence_items[[type]] <- list()
       if(nrow(dplyr::filter(cna_biomarkers, EVIDENCE_TYPE == stringr::str_to_title(type))) > 0){
         clinical_evidence_items[[type]][['any']] <- dplyr::filter(cna_biomarkers, EVIDENCE_TYPE == stringr::str_to_title(type))
         if(nrow(clinical_evidence_items[[type]][['any']] %>% dplyr::filter(stringr::str_detect(EVIDENCE_LEVEL,"^(A|B|B1|B2):"))) > 0){
-          clinical_evidence_items[[type]][['A_B']] <- clinical_evidence_items[[type]][['any']] %>% dplyr::filter(stringr::str_detect(EVIDENCE_LEVEL,"^(A|B|B1|B2):"))
+          clinical_evidence_items[[type]][['A_B']] <- clinical_evidence_items[[type]][['any']] %>%
+            dplyr::filter(stringr::str_detect(EVIDENCE_LEVEL,"^(A|B|B1|B2):")) %>%
+            dplyr::arrange(desc(RATING))
         }else{
           clinical_evidence_items[[type]][['A_B']] <- data.frame()
         }
         if(nrow(clinical_evidence_items[[type]][['any']] %>% dplyr::filter(stringr::str_detect(EVIDENCE_LEVEL,"^(C|D|E):"))) > 0){
-          clinical_evidence_items[[type]][['C_D_E']] <- clinical_evidence_items[[type]][['any']] %>% dplyr::filter(stringr::str_detect(EVIDENCE_LEVEL,"^(C|D|E):"))
+          clinical_evidence_items[[type]][['C_D_E']] <- clinical_evidence_items[[type]][['any']] %>%
+            dplyr::filter(stringr::str_detect(EVIDENCE_LEVEL,"^(C|D|E):")) %>%
+            dplyr::arrange(desc(RATING))
         }else{
           clinical_evidence_items[[type]][['C_D_E']] <- data.frame()
         }

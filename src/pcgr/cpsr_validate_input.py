@@ -21,7 +21,7 @@ def __main__():
    parser.add_argument('vcf_validation',type=int, default=0,choices=[0,1], help="Perform VCF validation with Ensembl's vcf-validator")
    parser.add_argument('genome_assembly',help='grch37 or grch38')
    parser.add_argument('virtual_panel_id',type=int,help='virtual panel identifier')
-   parser.add_argument('diagnostic_grade_only',type=int, default=0,choices=[0,1],,help="Green virtual panels only (Genomics England PanelApp)")
+   parser.add_argument('diagnostic_grade_only',type=int, default=0,choices=[0,1],help="Green virtual panels only (Genomics England PanelApp)")
    parser.add_argument('--output_dir', dest='output_dir', help='Output directory', default='/workdir/output')
    args = parser.parse_args()
 

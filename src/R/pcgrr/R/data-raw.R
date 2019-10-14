@@ -44,7 +44,9 @@ variant_db_url <- dplyr::bind_rows(variant_db_url,
                              data.frame('name' = 'PROTEIN_DOMAIN',group_by_var = 'VAR_ID',url_prefix = 'http://pfam.xfam.org/family/',
                                         link_key_var = "PFAM_DOMAIN",link_display_var = "PFAM_DOMAIN_NAME", stringsAsFactors = F),
                              data.frame('name' = 'COSMIC',group_by_var = 'VAR_ID',url_prefix = 'http://cancer.sanger.ac.uk/cosmic/mutation/overview?id=',
-                                        link_key_var = "COSMIC_MUTATION_ID",link_display_var = "COSMIC_MUTATION_ID", stringsAsFactors = F)
+                                        link_key_var = "COSMIC_MUTATION_ID",link_display_var = "COSMIC_MUTATION_ID", stringsAsFactors = F),
+                             data.frame('name' = 'NCBI_REFSEQ', group_by_var = 'VAR_ID', url_prefix = 'https://www.ncbi.nlm.nih.gov/nuccore/',
+                                        link_key_var = "REFSEQ_MRNA", link_display_var = "REFSEQ_MRNA", stringsAsFactors = F)
 )
 
 usethis::use_data(variant_db_url,overwrite = T)

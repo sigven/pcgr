@@ -76,7 +76,8 @@ def extend_vcf_annotations(query_vcf, pcgr_db_directory, logger, pon_annotation,
          num_chromosome_records_processed = 0
       else:
          if str(rec.CHROM) != current_chrom:
-            logger.info('Completed summary of functional annotations for ' + str(num_chromosome_records_processed) + ' variants on chromosome ' + str(current_chrom))
+            if not current_chrom is None:
+               logger.info('Completed summary of functional annotations for ' + str(num_chromosome_records_processed) + ' variants on chromosome ' + str(current_chrom))
             current_chrom = str(rec.CHROM)
             num_chromosome_records_processed = 0
       if rec.INFO.get('CSQ') is None:
@@ -114,7 +115,8 @@ def extend_vcf_annotations(query_vcf, pcgr_db_directory, logger, pon_annotation,
 
       w.write_record(rec)
    w.close()
-   logger.info('Completed summary of functional annotations for ' + str(num_chromosome_records_processed) + ' variants on chromosome ' + str(current_chrom))
+   if not current_chrom is None:
+      logger.info('Completed summary of functional annotations for ' + str(num_chromosome_records_processed) + ' variants on chromosome ' + str(current_chrom))
    vcf.close()
 
    if os.path.exists(out_vcf):

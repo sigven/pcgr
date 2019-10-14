@@ -101,6 +101,7 @@ The interactive datatables contain a number of hyperlinked annotations similar t
 * CONSEQUENCE - VEP consequence (primary transcript)
 * HGVSc - from VEP
 * HGVSp - from VEP
+* NCBI_REFSEQ - Transcript accession ID(s) (NCBI RefSeq)
 * ONCOGENE - Predicted as proto-oncogene from literature mining
 * TUMOR_SUPPRESSOR - Predicted as tumor suppressor gene from literature mining
 * ONCOSCORE - Literature-derived score for oncogenic potential (gene level)

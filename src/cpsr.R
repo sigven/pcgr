@@ -55,6 +55,8 @@ for(section in names(cpsr_config)){
 }
 
 cps_report <- pcgrr::generate_predisposition_report(dir, query_vcf2tsv, pcgr_data, cpsr_config, virtual_panel_id, diagnostic_grade_only, sample_name)
-pcgrr::write_report(dir, cps_report, sample_name, genome_assembly, tier_model = "cpsr", format = 'html')
-pcgrr::write_report(dir, cps_report, sample_name, genome_assembly, tier_model = "cpsr", format = 'json')
+if(!is.null(cps_report)){
+   pcgrr::write_report(dir, cps_report, sample_name, genome_assembly, tier_model = "cpsr", format = 'html')
+   pcgrr::write_report(dir, cps_report, sample_name, genome_assembly, tier_model = "cpsr", format = 'json')
+}
 

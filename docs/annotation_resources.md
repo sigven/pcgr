@@ -1,7 +1,7 @@
 ## PCGR annotation resources
 
 ### Basic variant consequence annotation
-  * [VEP](http://www.ensembl.org/info/docs/tools/vep/index.html) - Variant Effect Predictor release 97.3 ([GENCODE v31](https://www.gencodegenes.org/human/) as gene reference database (v19 for grch37))
+  * [VEP](http://www.ensembl.org/info/docs/tools/vep/index.html) - Variant Effect Predictor release 98.2 ([GENCODE v31](https://www.gencodegenes.org/human/) as gene reference database (v19 for grch37))
 
 ###  *Insilico* predictions of effect of coding variants
   * [dBNSFP](https://sites.google.com/site/jpopgen/dbNSFP) - database of non-synonymous functional predictions (v4.0, May 2019)
@@ -10,13 +10,13 @@
   * [gnomAD](http://exac.broadinstitute.org/) - germline variant frequencies exome-wide (r2.1, October 2018)
   * [dbSNP](http://www.ncbi.nlm.nih.gov/SNP/) - database of short genetic variants (b151)
   * [Cancer Hotspots](http://cancerhotspots.org) - a resource for statistically significant mutations in cancer (v2, 2017)
-  * [TCGA](https://portal.gdc.cancer.gov/) - somatic mutations discovered across 33 tumor type cohorts (release 18.0, July 2019)
+  * [TCGA](https://portal.gdc.cancer.gov/) - somatic mutations discovered across 33 tumor type cohorts (release 19.0, September 2019)
   * [ICGC-PCAWG](http://docs.icgc.org/pcawg/) - ICGC Pancancer Analysis of Whole Genomes - (release 28, March 17th, 2019)
 
 ### Variant databases of clinical utility
-  * [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - database of clinically related variants (September 2019)
+  * [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - database of clinically related variants (October 2019)
   * [DoCM](http://docm.genome.wustl.edu) - database of curated mutations (v3.2, April 2016)
-  * [CIViC](http://civic.genome.wustl.edu) - clinical interpretations of variants in cancer (September 27th 2019)
+  * [CIViC](http://civic.genome.wustl.edu) - clinical interpretations of variants in cancer (October 13th 2019)
   * [CBMDB](http://www.cancergenomeinterpreter.org/biomarkers) - Cancer BioMarkers database (January 17th 2018)
   * [ChEMBL](https://www.ebi.ac.uk/chembl/) - database of drugs, drug-like small molecules and their targets (ChEMBL_25, March 2019)
 
@@ -25,13 +25,13 @@
   * [Pfam](http://pfam.xfam.org) - database of protein families and domains (v32, September 2018)
 
 ### Knowledge resources on gene and protein targets
-  * [CancerMine](https://zenodo.org/record/3386384#.XXAE5ZMzaL4) - Literature-mined database of tumor suppressor genes/proto-oncogenes (v16, September 2019)
+  * [CancerMine](https://zenodo.org/record/3472758#.XZjCqeczaL4) - Literature-mined database of tumor suppressor genes/proto-oncogenes (v17, October 2019)
   * [Open Targets Platform](https://www.targetvalidation.org/) - Database on disease-target associations, targeted drugs and tractability aggregated from multiple sources (literature, pathways, mutations) (2019_09)
   * [DisGeNET](http://www.disgenet.org) - curated associations between human genes and different tumor types (v6.0, January 2019)
   * [TCGA driver genes](https://www.ncbi.nlm.nih.gov/pubmed/29625053) - predicted cancer driver genes based on application of multiple driver gene prediction tools on TCGA pan-cancer cohort
 
 ### Pathway databases
-  * [KEGG PATHWAY Database](http://www.genome.jp/kegg/pathway.htm) - July 29th 2019
+  * [KEGG PATHWAY Database](http://www.genome.jp/kegg/pathway.htm) - October 2nd 2019
   * [Oncogenic Signaling Pathways - TCGA](https://www.ncbi.nlm.nih.gov/pubmed/29625050) - Sanchez-Vega et al., *Cell*, 2018
 
 ### Notes on variant annotation datasets
@@ -57,7 +57,7 @@ Clinical biomarkers included in PCGR are limited to the following:
 
 See also comment on a [closed GitHib issue](https://github.com/sigven/pcgr/issues/37#issuecomment-391966286)
 
-__IMPORTANT NOTE__: The variant consequence reported by CIViC may deviate from what is reported by PCGR. PCGR picks the variant consequence according to VEP's _pick_ option (depending on a ranked list of criteria that can be configured by the user), and this particular transcript consequence may differ from what has been reported in the literature. 
+__IMPORTANT NOTE__: The variant consequence reported by CIViC may deviate from what is reported by PCGR. PCGR picks the variant consequence according to VEP's _pick_ option (depending on a ranked list of criteria that can be configured by the user), and this particular transcript consequence may differ from what has been reported in the literature.
 
 __Antineoplastic drugs__
 

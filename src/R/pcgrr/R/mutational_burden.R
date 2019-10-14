@@ -18,8 +18,8 @@ generate_report_data_tmb <- function(sample_calls, pcgr_data, sample_name, pcgr_
   pcg_report_tmb[['eval']] <- TRUE
   pcg_report_tmb[['variant_statistic']][['n_tmb']] <- sample_calls %>% dplyr::filter(stringr::str_detect(CONSEQUENCE,tmb_consequence_pattern)) %>% nrow()
   if(pcg_report_tmb[['variant_statistic']][['n_tmb']] > 0 & pcgr_config$mutational_burden$target_size_mb > 0){
-    pcg_report_tmb[['variant_statistic']][['tmb_estimate']] <- round(as.numeric(pcg_report_tmb[['variant_statistic']][['n_tmb']] / pcgr_config$mutational_burden$target_size_mb),digits = 2)
-    pcg_report_tmb[['variant_statistic']][['target_size_mb']] <- pcgr_config$mutational_burden$target_size_mb
+    pcg_report_tmb[['variant_statistic']][['tmb_estimate']] <- round(as.numeric(pcg_report_tmb[['variant_statistic']][['n_tmb']] /
+                                                                                  pcg_report_tmb[['variant_statistic']][['target_size_mb']]),digits = 2)
     if(pcg_report_tmb[['variant_statistic']][['tmb_estimate']] <= pcgr_config$mutational_burden$tmb_low_limit){
       pcg_report_tmb[['variant_statistic']][['tmb_tertile']] <- paste0('TMB - Low\n(0 - ',pcgr_config$mutational_burden$tmb_low_limit,' mutations/Mb)')
     }
@@ -31,6 +31,7 @@ generate_report_data_tmb <- function(sample_calls, pcgr_data, sample_name, pcgr_
     }
   }
   rlogging::message(paste0("Number of variants for mutational burden analysis: ",pcg_report_tmb[['variant_statistic']][['n_tmb']]))
+  rlogging::message(paste0("Coding target size sequencing assay (Mb): ",pcg_report_tmb[['variant_statistic']][['target_size_mb']]))
   rlogging::message(paste0("Estimated mutational burden: ", pcg_report_tmb[['variant_statistic']][['tmb_estimate']]," mutations/Mb"))
   rlogging::message(paste0("Mutational burden tertile: ",stringr::str_replace(pcg_report_tmb[['variant_statistic']][['tmb_tertile']],"\n"," ")))
   rlogging::message('------')

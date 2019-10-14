@@ -195,7 +195,6 @@ def read_config_options(configuration_file, base_dir, genome_assembly, logger, w
                if not str(user_options[section][var]) in valid_tumor_types:
                   err_msg('Configuration value for tumor type (' + str(user_options[section][var]) + ') is not a valid type')
                   error_message(err_msg, logger)
-            #tier_options = ['pcgr','pcgr_acmg']
             normalization_options = ['default','exome','genome','exome2genome']
             populations_tgp = ['afr','amr','eas','sas','eur','global']
             populations_gnomad = ['afr','amr','eas','sas','nfe','oth','fin','asj','global']
@@ -234,14 +233,6 @@ def read_config_options(configuration_file, base_dir, genome_assembly, logger, w
                if user_options[section][var] < 0 or user_options[section][var] > 1:
                   err_msg = "Maximum AF normal: " + str(var) + " must be within the [0,1] range, current value is " + str(user_options[section][var]) + ")"
                   error_message(err_msg,logger)
-            if var == 'target_size_mb':
-               if user_options[section][var] < 0 or user_options[section][var] > 34:
-                  err_msg = "Target size region in Mb (" + str(user_options[section][var]) + ") is not positive or larger than the likely maximum size of the coding human genome (34 Mb))"
-                  error_message(err_msg,logger)
-               if user_options[section][var] < 1:
-                  warn_msg = "Target size region in Mb (" + str(user_options[section][var]) + ") must be greater than 1 for mutational burden estimate to be robust (ignoring TMB calculation)"
-                  warn_message(warn_msg,logger)
-                  config_options[section]['mutational_burden'] = False
             if var == 'cna_overlap_pct':
                if user_options['cna'][var] > 100 or user_options['cna'][var] <= 0:
                   err_msg = "Minimum percent overlap between copy number segment and gene transcript (" + str(user_options[section][var]) + ") should be greater than zero and less than 100"

@@ -4,9 +4,10 @@ import argparse
 from cyvcf2 import VCF, Writer
 import numpy as np
 import re
+import math
 import subprocess
 
-version = '0.3.4'
+version = '0.3.5'
 
 
 def __main__():
@@ -18,6 +19,7 @@ def __main__():
    parser.add_argument("--keep_rejected_calls", action="store_true", help="Print data for rejected calls")
    parser.add_argument("--print_data_type_header", action="store_true", help="Print a header line with data types of VCF annotations")
    parser.add_argument("--compress", action="store_true", help="Compress TSV file with gzip")
+   parser.add_argument('--version', action='version', version='%(prog)s ' + str(version))
    args = parser.parse_args()
    
    vcf2tsv(args.query_vcf, args.out_tsv, args.skip_info_data, args.skip_genotype_data, args.keep_rejected_calls, args.compress, args.print_data_type_header)
@@ -203,6 +205,9 @@ def vcf2tsv(query_vcf, out_tsv, skip_info_data, skip_genotype_data, keep_rejecte
                      vcf_sample_genotype_data[samples[j]][format_tag] = d
                else:
                   d = '.'
+                  if column_types[format_tag] == 'Float':
+                     if not math.isnan(sample_dat[j]):
+                        d = str(sample_dat[j][0])
                   if column_types[format_tag] == 'String':
                      d = str(sample_dat[j])
                   if column_types[format_tag] == 'Integer':

@@ -18,7 +18,7 @@ generate_predisposition_report <- function(project_directory, query_vcf2tsv, pcg
 
   ## define tags/variables to display in data tables (class 1 - 5)
   class_1_5_display <- c("SYMBOL", "SOURCE", "CLINVAR_PHENOTYPE", "CONSEQUENCE", "PROTEIN_CHANGE", "GENOTYPE", "GENE_NAME", "PROTEIN_DOMAIN",
-                          "HGVSp", "HGVSc", "CDS_CHANGE", "REFSEQ_MRNA","MUTATION_HOTSPOT", "RMSK_HIT","PROTEIN_FEATURE", "PREDICTED_EFFECT",
+                          "HGVSp", "HGVSc", "NCBI_REFSEQ","CDS_CHANGE", "REFSEQ_MRNA","MUTATION_HOTSPOT", "RMSK_HIT","PROTEIN_FEATURE", "PREDICTED_EFFECT",
                           "LOSS_OF_FUNCTION", "DBSNP", "CLINVAR","CLINVAR_CLASSIFICATION","CLINVAR_REVIEW_STATUS_STARS","CLINVAR_CONFLICTED",
                           "CLINVAR_VARIANT_ORIGIN", "CPSR_CLASSIFICATION","CPSR_CLASSIFICATION_SCORE","CPSR_CLASSIFICATION_DOC",
                           "CPSR_CLASSIFICATION_CODE","ONCOGENE", "TUMOR_SUPPRESSOR",
@@ -27,7 +27,7 @@ generate_predisposition_report <- function(project_directory, query_vcf2tsv, pcg
 
   ## define tags/variables to display in data tables (secondary findings)
   secondary_findings_display <- c("SYMBOL", "CLIN_SIGNIFICANCE", "CLINVAR_PHENOTYPE", "CONSEQUENCE", "PROTEIN_CHANGE", "GENOTYPE", "GENE_NAME", "PROTEIN_DOMAIN",
-                               "HGVSp", "HGVSc", "CDS_CHANGE", "REFSEQ_MRNA","MUTATION_HOTSPOT","RMSK_HIT","PROTEIN_FEATURE", "PREDICTED_EFFECT",
+                               "HGVSp", "HGVSc",  "NCBI_REFSEQ","CDS_CHANGE", "REFSEQ_MRNA","MUTATION_HOTSPOT","RMSK_HIT","PROTEIN_FEATURE", "PREDICTED_EFFECT",
                                "LOSS_OF_FUNCTION", "DBSNP", "CLINVAR", "CLINVAR_REVIEW_STATUS_STARS","CLINVAR_CONFLICTED",
                                "CLINVAR_CLINICAL_SIGNIFICANCE", "CLINVAR_VARIANT_ORIGIN",
                                "GWAS_CITATION","ONCOGENE", "TUMOR_SUPPRESSOR",
@@ -35,7 +35,7 @@ generate_predisposition_report <- function(project_directory, query_vcf2tsv, pcg
                                "GENOMIC_CHANGE", "GENOME_VERSION")
 
   predispose_gwas_display <- c("SYMBOL","CONSEQUENCE", "GWAS_CITATION","PROTEIN_CHANGE","GENOTYPE","LOSS_OF_FUNCTION",
-                                 "PROTEIN_CHANGE","GENE_NAME", "GWAS_PHENOTYPE","PROTEIN_DOMAIN","HGVSp", "HGVSc", "CDS_CHANGE","CODING_STATUS", "REFSEQ_MRNA",
+                                 "PROTEIN_CHANGE","GENE_NAME", "GWAS_PHENOTYPE","PROTEIN_DOMAIN","HGVSp", "HGVSc", "NCBI_REFSEQ","CDS_CHANGE","CODING_STATUS", "REFSEQ_MRNA",
                                "PROTEIN_FEATURE", "PREDICTED_EFFECT",
                                  "DBSNP","GLOBAL_AF_GNOMAD",
                                cps_report[["metadata"]][["config"]][["popgen"]][["vcftag_gnomad"]],
@@ -61,6 +61,10 @@ generate_predisposition_report <- function(project_directory, query_vcf2tsv, pcg
 
         ## read calls
         calls <- pcgrr::get_calls(query_vcf2tsv, pcgr_data, sample_name, cpsr_config, medgen_ont = cps_report[['metadata']][['medgen_ontology']][['all']], cpsr = TRUE)
+        if(nrow(calls) == 0){
+          rlogging::warning("There are zero calls in input file - no report will be produced")
+          return(NULL)
+        }
         calls <- dplyr::rename(calls, CLINVAR_CLINICAL_SIGNIFICANCE = CLINVAR_CLNSIG)
         call_stats <- pcgrr::variant_stats_report(calls, name = "variant_statistic")
 
@@ -72,9 +76,6 @@ generate_predisposition_report <- function(project_directory, query_vcf2tsv, pcg
         sf_calls <- pcgrr::retrieve_sf_calls(calls, medgen)
         sf_call_stats <- pcgrr::variant_stats_report(sf_calls, name = "variant_statistic_sf")
 
-        #gene_hits <- paste(unique(cpg_calls$SYMBOL), collapse = ", ")
-        #if(nrow(cpg_calls) > 0){
-          #rlogging::message("Variants were found in the following cancer predisposition genes: ", gene_hits)
         if(nrow(cpg_calls) == 0){
           cps_report$variant_statistic_cpg <- cpg_call_stats$variant_statistic_cpg
           return(cps_report)

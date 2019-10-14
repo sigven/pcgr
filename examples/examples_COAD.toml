@@ -1,6 +1,5 @@
 # Basic PCGR configuration options (TOML).
 
-
 [tumor_only]
 ## Variant filtering applied for option --tumor_only = true in pcgr.py
 ## Several filters can be configured, all as a means to minimize the proportion of germline calls in the raw set derived from tumor-only calling
@@ -66,9 +65,6 @@ control_af_max = 1.0
 [mutational_burden]
 ## Calculate mutational burden (similar to Chalmers et al., Genome Med, 2017)
 mutational_burden = true
-## Size of coding target region in megabases (defaults to size of protein-coding regions of GENCODE ~ 34 Mb)
-## Note: this should ideally denote the callable target size (i.e. reflecting variable sequencing depth)
-target_size_mb = 34.0
 ## set upper limits to tumor mutational burden tertiles (mutations/Mb)
 tmb_low_limit = 5
 tmb_intermediate_limit = 20
@@ -121,7 +117,3 @@ vep_pick_order = "canonical,appris,biotype,ccds,rank,tsl,length,mane"
 vep_skip_intergenic = false
 ## generate a MAF for input VCF using https://github.com/mskcc/vcf2maf
 vcf2maf = true
-
-## Not for edit
-[tumor_type]
-type = "Colorectal_Cancer_NOS" 
