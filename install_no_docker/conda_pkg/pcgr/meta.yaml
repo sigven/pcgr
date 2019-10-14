@@ -88,7 +88,7 @@ requirements:
     #
     # Perl (for VEP)
     - perl-bioperl
-    - ensembl-vep==96.3
+    - ensembl-vep==98.2
     #
     # PCGR: R packages
     - r-base
