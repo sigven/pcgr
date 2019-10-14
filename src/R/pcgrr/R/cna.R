@@ -157,6 +157,7 @@ generate_report_data_cna <- function(cna_file, pcgr_data, sample_name, pcgr_conf
   local_df <- dplyr::select(local_df, -ensembl_transcript_id) %>%
     dplyr::filter(biotype == 'protein_coding') %>%
     dplyr::distinct() %>%
+    dplyr::mutate(symbol = as.character(symbol)) %>%
     dplyr::rename(CHEMBL_COMPOUND_ID = chembl_compound_id, SYMBOL = symbol) %>%
     dplyr::mutate(VAR_ID = as.character(rep(1:nrow(.)))) %>%
     pcgrr::annotate_variant_link(vardb = 'ANTINEOPHARMA', pcgr_data = pcgr_data) %>%
