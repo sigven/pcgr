@@ -40,6 +40,8 @@ The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for
 * [Report for a colon adenocarcinoma sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.COAD.pcgr_acmg.grch37.html)
 
 
+[![Build Status](https://travis-ci.org/sigven/pcgr.svg?branch=master)](https://travis-ci.org/sigven/pcgr)
+
 ### PCGR documentation
 
 [![Documentation Status](https://readthedocs.org/projects/pcgr/badge/?version=latest)](http://pcgr.readthedocs.io/en/latest/?badge=latest)
