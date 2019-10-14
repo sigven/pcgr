@@ -31,7 +31,7 @@ install:
   - docker pull sigven/pcgr:dev
   - conda install --use-local ${PACKAGE_NAME}_dockerized
   # Download the data bundle (usable for both version)
-  - gdown https://drive.google.com/uc?id=1cBwhrE1XtzSRFXVz-7HBeswFSTlbYONu -O - | tar xzf - # grch37
+  - gdown https://drive.google.com/open?id=17DUuy4Z_zid6YIvT8SSYqVzrpzZcoS1i -O - | tar xzf - # grch37
 
 script:
   # Dockerized installation:
@@ -49,7 +49,7 @@ script:
   - pcgr.py
     --input_vcf examples/tumor_sample.BRCA.vcf.gz
     --input_cna examples/tumor_sample.BRCA.cna.tsv
-    . ./examples grch37 examples/examples_BRCA.toml tumor_sample.BRCA --no-docker
+    . ./examples grch37 examples/examples_BRCA.toml tumor_sample.BRCA --tumor_type 6 --no-docker
 
 deploy:
   # Deploy to Anaconda.org
