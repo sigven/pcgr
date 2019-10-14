@@ -13,7 +13,7 @@ import toml
 from argparse import RawTextHelpFormatter
 
 
-pcgr_version = '0.8.3'
+pcgr_version = 'dev'
 db_version = 'PCGR_DB_VERSION = 20191013'
 vep_version = '98'
 global vep_assembly
