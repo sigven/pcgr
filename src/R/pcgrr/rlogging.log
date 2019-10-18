@@ -388,3 +388,39 @@
 [2019-10-14 08:34:41][INFO] 0 clinical evidence item(s) found .. mapping = codon
 [2019-10-14 08:34:41][INFO] 0 clinical evidence item(s) found .. mapping = exon
 [2019-10-14 08:36:35][INFO] Looking up SNV/InDel biomarkers for precision oncology - any tumortype
+[2019-10-16 10:40:11][INFO] Verifying data integrity of input callset
+[2019-10-16 10:40:11][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2019-10-16 10:40:11][INFO] Adding citations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2019-10-16 10:40:11][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2019-10-16 10:40:12][INFO] Number of PASS variants: 653
+[2019-10-16 10:40:12][INFO] Number of SNVs: 413
+[2019-10-16 10:40:12][INFO] Number of deletions: 167
+[2019-10-16 10:40:12][INFO] Number of insertions: 73
+[2019-10-16 10:40:12][INFO] Number of block substitutions: 0
+[2019-10-16 10:40:12][INFO] Extending annotation descriptions related to KEGG pathways
+[2019-10-16 10:40:12][INFO] Extending annotation descriptions related to ClinVar
+[2019-10-16 10:40:15][INFO] Number of coding variants in cancer predisposition genes: 568
+[2019-10-16 10:40:15][INFO] Number of non-coding variants in cancer predisposition genes: 36
+[2019-10-16 10:40:18][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2019-10-16 10:40:18][INFO] Ignoring n = 0 unclassified variants with a global MAF frequency above 0.9
+[2019-10-16 10:40:18][INFO] Ignoring n = 20 unclassified variants with a noncoding variant consequence
+[2019-10-16 10:40:43][INFO] Matching variant set with existing genomic biomarkers from CIViC (germline)
+[2019-10-16 10:49:35][INFO] Matching variant set with existing genomic biomarkers from CIViC (germline)
+[2019-10-16 10:50:07][INFO] Verifying data integrity of input callset
+[2019-10-16 10:50:07][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2019-10-16 10:50:07][INFO] Adding citations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2019-10-16 10:50:08][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2019-10-16 10:50:08][INFO] Number of PASS variants: 653
+[2019-10-16 10:50:08][INFO] Number of SNVs: 413
+[2019-10-16 10:50:08][INFO] Number of deletions: 167
+[2019-10-16 10:50:08][INFO] Number of insertions: 73
+[2019-10-16 10:50:08][INFO] Number of block substitutions: 0
+[2019-10-16 10:50:08][INFO] Extending annotation descriptions related to KEGG pathways
+[2019-10-16 10:50:09][INFO] Extending annotation descriptions related to ClinVar
+[2019-10-16 10:50:12][INFO] Number of coding variants in cancer predisposition genes: 568
+[2019-10-16 10:50:12][INFO] Number of non-coding variants in cancer predisposition genes: 36
+[2019-10-16 10:50:14][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2019-10-16 10:50:14][INFO] Ignoring n = 0 unclassified variants with a global MAF frequency above 0.9
+[2019-10-16 10:50:14][INFO] Ignoring n = 20 unclassified variants with a noncoding variant consequence
+[2019-10-16 10:50:15][INFO] Matching variant set with existing genomic biomarkers from CIViC (germline)
+[2019-10-16 10:50:15][INFO] 71 clinical evidence item(s) found .. mapping = gene

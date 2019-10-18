@@ -942,7 +942,7 @@ get_germline_biomarkers <- function(snv_indel_report, pcgr_data){
   }
 
   germline_biomarkers <- pcgr_data[['biomarkers']][['civic']] %>%
-    dplyr::filter((alteration_type == 'MUT' | alteration_type == 'MUT_LOF') & (variant_origin == "Germline Mutation" | variant_origin == 'Germline Polymorphism')) %>%
+    dplyr::filter((alteration_type == 'MUT' | alteration_type == 'MUT_LOF') & (stringr::str_detect(tolower(variant_origin),"germline"))) %>%
     dplyr::filter(mapping_category == 'exact' | mapping_category == 'codon' | mapping_category == 'gene') %>%
     dplyr::select(genesymbol, alteration_type, clinical_significance, evidence_id, evidence_direction, pubmed_html_link, rating,
                   therapeutic_context, cancer_type, evidence_description, evidence_level, evidence_type, mapping_category,
