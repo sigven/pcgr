@@ -35,7 +35,8 @@ chmod +x ${PREFIX}/bin/vcf_validator
 # ensembl-vep conda package installs most recent version of LoF automatically, however it doesn't work with the most
 #   recent perl 5.26 (see https://github.com/sigven/cpsr/issues/2)
 mkdir ${PREFIX}/share/loftee
-tar -xzf ${SRC_DIR}/src/loftee_1.0.3.tgz -C ${PREFIX}/share/loftee
+#tar -xzf ${SRC_DIR}/src/loftee_1.0.3.tgz -C ${PREFIX}/share/loftee
+cp ${SRC_DIR}/src/loftee_1.0.3.tgz ${PREFIX}/share/loftee
 
 # Try getting the github version instead:
 #git clone https://github.com/konradjk/loftee
