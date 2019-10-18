@@ -26,6 +26,8 @@ export TAR=$(which tar); R -e "library(devtools); options(unzip = 'internal'); d
 R -e "install.packages('BiocManager', repos = 'http://cran.us.r-project.org', dependencies=FALSE, args=c('--library=${PREFIX}/lib/R/library'))"
 R -e "library(BiocManager); BiocManager::install('TxDb.Hsapiens.UCSC.hg19.knownGene')"
 R -e "library(BiocManager); BiocManager::install('TxDb.Hsapiens.UCSC.hg38.knownGene')"
+R -e "library(BiocManager); BiocManager::install('BSgenome.Hsapiens.UCSC.hg19')"
+R -e "library(BiocManager); BiocManager::install('BSgenome.Hsapiens.UCSC.hg38')"
 
 # VCF validator
 wget https://github.com/EBIvariation/vcf-validator/releases/download/v0.6/vcf_validator -O ${PREFIX}/bin/vcf_validator
