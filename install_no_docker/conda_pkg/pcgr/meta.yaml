@@ -18,17 +18,17 @@ requirements:
   build:
     - curl
     - unzip
-    - r-base
+    - r-base >=3.6.1
     - r-devtools
     - tar
     - python >=3.7.3
     - toml
     #
     # Need R packages build-time to correctly install pcgrr
-    - pandoc>=2.3.1
+    - pandoc >=2.3.1
     - bioconductor-biocinstaller
     - libgfortran-ng  # to fix -libgfortran error, thanks @pdiakumis
-    - r-purrr>=0.2.4  # to force the one from conda-forge to address this issue https://github.com/jbkunst/highcharter/issues/285
+    - r-purrr >=0.2.4  # to force the one from conda-forge to address this issue https://github.com/jbkunst/highcharter/issues/285
     - r-dplyr
     - r-stringr
     - r-tidyr
@@ -43,11 +43,11 @@ requirements:
     - r-rcpptoml
     - r-ggplot2
     - r-dt
-    - r-stringi>=1.1.7    # for pcgrr
-    - r-htmlwidgets>=1.0  # for DT (by default, 0.9 is getting installed)
+    - r-stringi >=1.1.7    # for pcgrr
+    - r-htmlwidgets >=1.0  # for DT (by default, 0.9 is getting installed)
     - r-crosstalk
     - r-deconstructsigs
-    - r-knitr>=1.17
+    - r-knitr >=1.17
     - r-rmarkdown
     - r-configr           # for pcgrr, -c vladsaveliev
     - r-summarywidget     # for pcgrr, -c pdiakumis
@@ -57,8 +57,8 @@ requirements:
     - r-arules            # for CELLector, -c vladsaveliev
     - bioconductor-variantannotation
     - r-biocmanager
-#    - bioconductor-bsgenome.hsapiens.ucsc.hg19
-#    - bioconductor-bsgenome.hsapiens.ucsc.hg38
+    - bioconductor-bsgenome.hsapiens.ucsc.hg19
+    - bioconductor-bsgenome.hsapiens.ucsc.hg38
     - bioconductor-genomeinfodb
     - bioconductor-genomicranges  # GenomicRangesS4Vectors
     - bioconductor-regioner
