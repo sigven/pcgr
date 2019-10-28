@@ -27,7 +27,7 @@ mv ${SRC_DIR}/src/*.R ${PREFIX}/bin/  # R scripts
 #R -e "library(BiocManager); BiocManager::install('BSgenome.Hsapiens.UCSC.hg19')"
 #R -e "library(BiocManager); BiocManager::install('BSgenome.Hsapiens.UCSC.hg38')"
 
-R -e "library(devtools); devtools::install('${SRC_DIR}/src/R/pcgrr', dependencies=FALSE, args=c('--library=${PREFIX}/lib/R/library'))"
+R -e "remove.packages('crosstalk'); library(devtools); devtools::install('${SRC_DIR}/src/R/pcgrr', dependencies=FALSE, args=c('--library=${PREFIX}/lib/R/library'))"
 echo "tar=$(which tar)"
 export TAR=$(which tar); R -e "library(devtools); options(unzip = 'internal'); devtools::install_github('rstudio/crosstalk', dependencies=FALSE)"
 
