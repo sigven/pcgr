@@ -49,14 +49,14 @@ requirements:
     - r-deconstructsigs
     - r-knitr >=1.17
     - r-rmarkdown
-    - r-configr           # for pcgrr, -c vladsaveliev
-    - r-summarywidget     # for pcgrr, -c pdiakumis
-    - r-rlogging          # for pcgrr, -c pdiakumis
+    - r-configr           # for pcgrr, -c pcgr
+    - r-summarywidget     # for pcgrr, -c pcgr
+    - r-rlogging          # for pcgrr, -c pcgr
     - r-collapsibletree   # for CELLector
-    - r-sunburstr         # for CELLector, -c vladsaveliev
-    - r-arules            # for CELLector, -c vladsaveliev
-    - bioconductor-variantannotation
+    - r-sunburstr         # for CELLector, -c pcgr
+    - r-arules            # for CELLector, -c pcgr
     - r-biocmanager
+    - bioconductor-variantannotation
     - bioconductor-bsgenome.hsapiens.ucsc.hg19
     - bioconductor-bsgenome.hsapiens.ucsc.hg38
     - bioconductor-genomeinfodb
@@ -64,6 +64,9 @@ requirements:
     - bioconductor-regioner
     - bioconductor-mutationalpatterns
 
+  host:
+    - r-devtools
+  
   run:
     #
     # PCGR: python
@@ -118,12 +121,13 @@ requirements:
     - r-deconstructsigs
     - r-knitr>=1.17
     - r-rmarkdown
-    - r-configr           # for pcgrr, -c vladsaveliev
-    - r-summarywidget     # for pcgrr, -c pdiakumis
-    - r-rlogging          # for pcgrr, -c pdiakumis
+    - r-configr           # for pcgrr, -c pcgr
+    - r-summarywidget     # for pcgrr, -c pcgr
+    - r-rlogging          # for pcgrr, -c pcgr
     - r-collapsibletree   # for CELLector
-    - r-sunburstr         # for CELLector, -c vladsaveliev
-    - r-arules            # for CELLector, -c vladsaveliev
+    - r-sunburstr         # for CELLector, -c pcgr
+    - r-arules            # for CELLector, -c pcgr
+    - r-biocmanager
     - bioconductor-variantannotation
     - bioconductor-bsgenome.hsapiens.ucsc.hg19
     - bioconductor-bsgenome.hsapiens.ucsc.hg38
@@ -137,6 +141,7 @@ test:
     - pcgr.py --version
     - '$R -e "library(pcgrr)"'
     - '$R -e "library(pcgrr) ; pcgrr::acmg_evidence_codes"'
+    - '$R -e "library(crosstalk); sessionInfo();"'
   imports:
     - annoutils
 

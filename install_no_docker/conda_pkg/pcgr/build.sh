@@ -27,9 +27,7 @@ mv ${SRC_DIR}/src/*.R ${PREFIX}/bin/  # R scripts
 #R -e "library(BiocManager); BiocManager::install('BSgenome.Hsapiens.UCSC.hg19')"
 #R -e "library(BiocManager); BiocManager::install('BSgenome.Hsapiens.UCSC.hg38')"
 
-R -e "remove.packages('crosstalk'); library(devtools); devtools::install('${SRC_DIR}/src/R/pcgrr', dependencies=FALSE, args=c('--library=${PREFIX}/lib/R/library'))"
-echo "tar=$(which tar)"
-export TAR=$(which tar); R -e "library(devtools); options(unzip = 'internal'); devtools::install_github('rstudio/crosstalk', dependencies=FALSE)"
+R -e "library(devtools); devtools::install('${SRC_DIR}/src/R/pcgrr', dependencies=FALSE, args=c('--library=${PREFIX}/lib/R/library'))"
 
 # VCF validator
 wget https://github.com/EBIvariation/vcf-validator/releases/download/v0.6/vcf_validator -O ${PREFIX}/bin/vcf_validator
@@ -41,6 +39,6 @@ chmod +x ${PREFIX}/bin/vcf_validator
 mkdir ${PREFIX}/share/loftee
 #tar -xzf ${SRC_DIR}/src/loftee_1.0.3.tgz -C ${PREFIX}/share/loftee
 cp ${SRC_DIR}/src/loftee_1.0.3.tgz ${PREFIX}/share/loftee
-
 # Try getting the github version instead:
 #git clone https://github.com/konradjk/loftee
+
