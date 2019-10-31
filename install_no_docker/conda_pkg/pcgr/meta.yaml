@@ -64,9 +64,6 @@ requirements:
     - bioconductor-regioner
     - bioconductor-mutationalpatterns
 
-  host:
-    - r-devtools
-  
   run:
     #
     # PCGR: python
