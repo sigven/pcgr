@@ -26,9 +26,9 @@ install:
   # Building packages
   - git clone https://github.com/tlatsas/bash-spinner
   - source bash-spinner/spinner.sh; \
-    start_spinner; \
+    start_spinner "Installing PCGR"; \
     conda build install_no_docker/conda_pkg/${PACKAGE_NAME}; \
-    stop_spinner
+    stop_spinner $?
   - conda build install_no_docker/conda_pkg/${PACKAGE_NAME}_dockerized
   #
   # Dockerized installation:
