@@ -157,11 +157,16 @@ get_insilico_prediction_statistics <- function(cpg_calls){
 
   for(algo in insilico_pathogenicity_pred_algos){
     if(algo %in% colnames(cpg_calls)){
-      cpg_calls[!is.na(cpg_calls[,algo]) & cpg_calls[,algo] != '.','N_INSILICO_CALLED'] <-  cpg_calls[!is.na(cpg_calls[,algo]) & cpg_calls[,algo] != '.','N_INSILICO_CALLED'] + 1
-      cpg_calls[!is.na(cpg_calls[,algo]) & (cpg_calls[,algo] == 'damaging' | cpg_calls[,algo] == 'possibly_damaging'),'N_INSILICO_DAMAGING'] <-  cpg_calls[!is.na(cpg_calls[,algo]) & (cpg_calls[,algo] == 'damaging' | cpg_calls[,algo] == 'possibly_damaging'),'N_INSILICO_DAMAGING'] + 1
-      cpg_calls[!is.na(cpg_calls[,algo]) & cpg_calls[,algo] == 'tolerated','N_INSILICO_TOLERATED'] <-  cpg_calls[!is.na(cpg_calls[,algo]) & cpg_calls[,algo] == 'tolerated','N_INSILICO_TOLERATED'] + 1
-      cpg_calls[!is.na(cpg_calls[,algo]) & cpg_calls[,algo] == 'affect_splicing','N_INSILICO_SPLICING_AFFECTED'] <-  cpg_calls[!is.na(cpg_calls[,algo]) & cpg_calls[,algo] == 'affect_splicing','N_INSILICO_SPLICING_AFFECTED'] + 1
-      cpg_calls[!is.na(cpg_calls[,algo]) & cpg_calls[,algo] == 'splicing_neutral','N_INSILICO_SPLICING_NEUTRAL'] <-  cpg_calls[!is.na(cpg_calls[,algo]) & cpg_calls[,algo] == 'splicing_neutral','N_INSILICO_SPLICING_NEUTRAL'] + 1
+      cpg_calls[!is.na(cpg_calls[,algo]) & cpg_calls[,algo] != '.','N_INSILICO_CALLED'] <-
+        cpg_calls[!is.na(cpg_calls[,algo]) & cpg_calls[,algo] != '.','N_INSILICO_CALLED'] + 1
+      cpg_calls[!is.na(cpg_calls[,algo]) & (cpg_calls[,algo] == 'damaging' | cpg_calls[,algo] == 'possibly_damaging'),'N_INSILICO_DAMAGING'] <-
+        cpg_calls[!is.na(cpg_calls[,algo]) & (cpg_calls[,algo] == 'damaging' | cpg_calls[,algo] == 'possibly_damaging'),'N_INSILICO_DAMAGING'] + 1
+      cpg_calls[!is.na(cpg_calls[,algo]) & cpg_calls[,algo] == 'tolerated','N_INSILICO_TOLERATED'] <-
+        cpg_calls[!is.na(cpg_calls[,algo]) & cpg_calls[,algo] == 'tolerated','N_INSILICO_TOLERATED'] + 1
+      cpg_calls[!is.na(cpg_calls[,algo]) & cpg_calls[,algo] == 'affect_splicing','N_INSILICO_SPLICING_AFFECTED'] <-
+        cpg_calls[!is.na(cpg_calls[,algo]) & cpg_calls[,algo] == 'affect_splicing','N_INSILICO_SPLICING_AFFECTED'] + 1
+      cpg_calls[!is.na(cpg_calls[,algo]) & cpg_calls[,algo] == 'splicing_neutral','N_INSILICO_SPLICING_NEUTRAL'] <-
+        cpg_calls[!is.na(cpg_calls[,algo]) & cpg_calls[,algo] == 'splicing_neutral','N_INSILICO_SPLICING_NEUTRAL'] + 1
     }
   }
   return(cpg_calls)
@@ -182,6 +187,9 @@ assign_pathogenicity_evidence <- function(cpg_calls, cpsr_config, pcgr_data){
   gad_AF_tag <- paste0('NON_CANCER_AF_',gad_population)
   gad_NHOMALT_tag <- paste0('NON_CANCER_NHOMALT_',gad_population)
   gad_AC_tag <- paste0('NON_CANCER_AC_',gad_population)
+
+  pathogenic_range_ac <- 20
+  min_an <- 12000
 
   acmg_ev_codes <- c('ACMG_BA1_AD',   ## Very high MAF (> 0.5% in gnomAD non-cancer pop subset) - min AN = 12,000, min AC = 12 - Dominant mechanism of disease
                      'ACMG_BS1_1_AD', ## High MAF (> 0.1% in gnomAD non-cancer pop subset) - min AN = 12,000, min AC = 12 - Dominant mechanism of disease
@@ -244,22 +252,25 @@ assign_pathogenicity_evidence <- function(cpg_calls, cpsr_config, pcgr_data){
   cpg_calls <- dplyr::left_join(cpg_calls, predisposition_gene_info, by=c("SYMBOL" = "SYMBOL"))
 
   ## Assign logical ACMG evidence indicators
-  # ACMG_PP3 - Multiple lines of computational evidence support a deleterious effect on the gene or gene product (conservation, evolutionary, splicing impact, etc.)
-  # ACMG_BP4 - Multiple lines (>1) of in silico evidence of none deleterious effect.
+  #
+  #
+  # ACMG_PP3 - Multiple lines (>=6) of insilico evidence support a deleterious effect on the gene or gene product (conservation, evolutionary, splicing impact, etc.)
+  # ACMG_BP4 - Multiple lines (>=6) of insilico evidence support a benign effect.
   #
   # Computational evidence for deleterious/benign effect is taken from invidual algorithm predictions in dbNSFP
   # SIFT,Provean,MutationTaster,MutationAssessor,M_CAP,MutPred,FATHMM,FATHMM-mkl,DBNSFP_LogReg,dbscSNV_RF,dbscSNV_AdaBoost
   # Default scheme (from default TOML file):
-  # 1) Damaging: Among 8 possible protein variant effect predictions, at least seven algorithms must have made a call, with at least 6 predicted as damaging,
-  #    and at most one predicted as tolerated (PP3)
+  # 1) Damaging: Among all possible protein variant effect predictions, at least six algorithms must have made a call, with at least 5 predicted as damaging,
+  #    and at most two predicted as tolerated (PP3)
   #    - at most 1 prediction for a splicing neutral effect
-  # 2) Tolerated: Among 8 possible protein variant effect predictions, at least seven algorithms must have made a call, with at least 6 predicted as tolerated,
+  #    Exception: if both splice site predictions indicate damaging effects; ignore other criteria
+  # 2) Tolerated: Among all possible protein variant effect predictions, at least six algorithms must have made a call, with at least 5 predicted as tolerated,
   #    and at most one predicted as damaging (BP4)
   #    - 0 predictions of splice site affected
 
-  dbnsfp_min_majority <- 6
+  dbnsfp_min_majority <- 5
   dbnsfp_max_minority <- 2
-  dbnsfp_min_called <- dbnsfp_min_majority + 1
+  dbnsfp_min_called <- dbnsfp_min_majority
 
   cpg_calls <- pcgrr::get_insilico_prediction_statistics(cpg_calls)
 
@@ -275,22 +286,22 @@ assign_pathogenicity_evidence <- function(cpg_calls, cpsr_config, pcgr_data){
   cpg_calls <- cpg_calls %>% dplyr::mutate(ACMG_PP3 = dplyr::case_when(N_INSILICO_SPLICING_AFFECTED == 2 ~ TRUE, TRUE ~ as.logical(ACMG_PP3)))
 
   ## Assign logical ACMG evidence indicators based on population frequency data in non-cancer samples from gnomAD (Dominant vs. recessive modes of inheritance)
-  # 'ACMG_BA1_AD'   - Very high MAF (> 0.5% in gnomAD non-cancer pop subset) - min AN = 12,000, min AC = 12 - Dominant mechanism of disease
-  # 'ACMG_BS1_1_AD' - High MAF (> 0.1% in gnomAD non-cancer pop subset) - min AN = 12,000, min AC = 12 - Dominant mechanism of disease
+  # 'ACMG_BA1_AD'   - Very high MAF (> 0.5% in gnomAD non-cancer pop subset) - min AN = 12,000, min AC = 20 - Dominant mechanism of disease
+  # 'ACMG_BS1_1_AD' - High MAF (> 0.1% in gnomAD non-cancer pop subset) - min AN = 12,000, min AC = 20 - Dominant mechanism of disease
   # 'ACMG_BS1_2_AD' - Somewhat high AF (> 8 alleles in gnomAD non-cancer pop subset) - Dominant mechanism of disease
-  # 'ACMG_BA1_AR'   - Very high MAF (> 1% in gnomAD non-cancer pop subset) - min AN = 12,000, min AC = 12 - Recessive mechanism of disease
-  # 'ACMG_BS1_1_AR' - High MAF (> 0.3% in gnomAD non-cancer pop subset) - min AN = 12,000, min AC = 12 - Recessive mechanism of disease
+  # 'ACMG_BA1_AR'   - Very high MAF (> 1% in gnomAD non-cancer pop subset) - min AN = 12,000, min AC = 20 - Recessive mechanism of disease
+  # 'ACMG_BS1_1_AR' - High MAF (> 0.3% in gnomAD non-cancer pop subset) - min AN = 12,000, min AC = 20 - Recessive mechanism of disease
   # 'ACMG_BS1_2_AR' - Somewhat high AF (> 8 alleles in gnomAD non-cancer pop subset) - Recessive mechanism of disease
-  # 'ACMG_PM2_1'    - Allele count within pathogenic range (8 or fewer alleles in the population-specific non-cancer gnomAD subset)
+  # 'ACMG_PM2_1'    - Allele count within pathogenic range (20 or fewer alleles in the population-specific non-cancer gnomAD subset, min AN = 12,000)
   # 'ACMG_PM2_2'    - Alternate allele absent in the population-specific non-cancer gnomAD subset
   if(gad_AN_tag %in% colnames(cpg_calls) & gad_AC_tag %in% colnames(cpg_calls) & gad_NHOMALT_tag %in% colnames(cpg_calls)){
     cpg_calls <- cpg_calls %>%
-      dplyr::mutate(ACMG_PM2_1 = dplyr::if_else(!is.na(!!rlang::sym(gad_AC_tag)) & !!rlang::sym(gad_AC_tag) <= 8,TRUE,FALSE,FALSE))
+      dplyr::mutate(ACMG_PM2_1 = dplyr::if_else(!!rlang::sym(gad_AN_tag) >= min_an & !is.na(!!rlang::sym(gad_AC_tag)) & !!rlang::sym(gad_AC_tag) <= pathogenic_range_ac,TRUE,FALSE,FALSE))
     cpg_calls <- cpg_calls %>%
       dplyr::mutate(ACMG_PM2_2 = dplyr::if_else(is.na(!!rlang::sym(gad_AC_tag)),TRUE,FALSE,FALSE))
 
     cpg_calls <- cpg_calls %>%
-      dplyr::mutate(gad_an_ac_sufficient = dplyr::if_else(!!rlang::sym(gad_AN_tag) >= 12000 & !!rlang::sym(gad_AC_tag) >= 12,TRUE,FALSE,FALSE))
+      dplyr::mutate(gad_an_ac_sufficient = dplyr::if_else(!!rlang::sym(gad_AN_tag) >= min_an & !!rlang::sym(gad_AC_tag) >= pathogenic_range_ac,TRUE,FALSE,FALSE))
     cpg_calls <- cpg_calls %>%
       dplyr::mutate(gad_af = dplyr::if_else(gad_an_ac_sufficient == TRUE, as.numeric(!!rlang::sym(gad_AC_tag)/!!rlang::sym(gad_AN_tag)),as.double(NA),as.double(NA)))
 
@@ -299,13 +310,13 @@ assign_pathogenicity_evidence <- function(cpg_calls, cpsr_config, pcgr_data){
     cpg_calls <- cpg_calls %>%
       dplyr::mutate(ACMG_BS1_1_AD = dplyr::if_else(ACMG_BA1_AD == FALSE & ACMG_PM2_2 == FALSE & gad_af >= 0.001 & cpsr_gene_moi == "AD",TRUE,FALSE,FALSE))
     cpg_calls <- cpg_calls %>%
-      dplyr::mutate(ACMG_BS1_2_AD = dplyr::if_else(ACMG_BS1_1_AD == FALSE & ACMG_BA1_AD == FALSE & ACMG_PM2_2 == FALSE & !!rlang::sym(gad_AC_tag) > 8 & cpsr_gene_moi == "AD",TRUE,FALSE,FALSE))
+      dplyr::mutate(ACMG_BS1_2_AD = dplyr::if_else(ACMG_BS1_1_AD == FALSE & ACMG_BA1_AD == FALSE & ACMG_PM2_2 == FALSE & !!rlang::sym(gad_AC_tag) > pathogenic_range_ac & cpsr_gene_moi == "AD",TRUE,FALSE,FALSE))
     cpg_calls <- cpg_calls %>%
       dplyr::mutate(ACMG_BA1_AR = dplyr::if_else(ACMG_PM2_2 == FALSE & gad_af >= 0.01 & (cpsr_gene_moi == "AR" | is.na(cpsr_gene_moi)),TRUE,FALSE,FALSE))
     cpg_calls <- cpg_calls %>%
       dplyr::mutate(ACMG_BS1_1_AR = dplyr::if_else(ACMG_BA1_AR == FALSE & ACMG_PM2_2 == FALSE & gad_af >= 0.003 & (cpsr_gene_moi == "AR" | is.na(cpsr_gene_moi)),TRUE,FALSE,FALSE))
     cpg_calls <- cpg_calls %>%
-      dplyr::mutate(ACMG_BS1_2_AR = dplyr::if_else(ACMG_BA1_AR == FALSE & ACMG_BS1_1_AR == FALSE & ACMG_PM2_2 == FALSE & !!rlang::sym(gad_AC_tag) > 8 & (cpsr_gene_moi == "AR" | is.na(cpsr_gene_moi)),TRUE,FALSE,FALSE))
+      dplyr::mutate(ACMG_BS1_2_AR = dplyr::if_else(ACMG_BA1_AR == FALSE & ACMG_BS1_1_AR == FALSE & ACMG_PM2_2 == FALSE & !!rlang::sym(gad_AC_tag) > pathogenic_range_ac & (cpsr_gene_moi == "AR" | is.na(cpsr_gene_moi)),TRUE,FALSE,FALSE))
   }
 
   ## Assign logical ACMG evidence indicators on NULL variants in known predisposition genes (LoF established as mechanism of disease or not, presumed loss of mRNA/protein (LOFTEE) or not)
@@ -365,7 +376,7 @@ assign_pathogenicity_evidence <- function(cpg_calls, cpsr_config, pcgr_data){
   ## Assign logical ACMG evidence indicator
   # ACMG_PP2 - Missense variant in a gene that has a relatively low rate of benign missense variation and where missense variants are a common mechanism of disease
   cpg_calls <- cpg_calls %>%
-    dplyr::mutate(ACMG_PP2 = dplyr::if_else(BENIGN_MISSENSE_RATE <= 0.2 & PATH_TRUNCATION_RATE < 0.5 & stringr::str_detect(CONSEQUENCE,"^missense_variant"),TRUE,FALSE,FALSE))
+    dplyr::mutate(ACMG_PP2 = dplyr::if_else((is.na(BENIGN_MISSENSE_RATE) | BENIGN_MISSENSE_RATE <= 0.3) & (is.na(PATH_TRUNCATION_RATE) | PATH_TRUNCATION_RATE < 0.5) & stringr::str_detect(CONSEQUENCE,"^missense_variant"),TRUE,FALSE,FALSE))
 
   ## Assign a logical ACMG evidence indicator
   # ACMG_BP1 - Missense variant in a gene for which primarily truncating variants (> 90%, as given in Maxwell et al.) are known to cause disease
@@ -758,6 +769,7 @@ summary_donut_chart <- function(variants_tsv, plot_type = 'ClinVar'){
 
   title = 'ClinVar variants'
   p <- NULL
+
 
   if(nrow(variants_tsv) > 0){
 

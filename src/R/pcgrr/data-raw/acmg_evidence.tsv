@@ -1,14 +1,14 @@
 cpsr_evidence_code	category	pathogenicity_pole	category_long	description	sherloc_code	path_score
-ACMG_BA1_AD	clinpop	B	Clinical - population frequency	Very high MAF (> 0.5% in gnomAD non-cancer pop subset, min AN = 12,000, min AC = 12) - dominant mode of inheritance	EV0096	-5
-ACMG_BS1_1_AD	clinpop	B	Clinical - population frequency	High MAF (> 0.1% in gnomAD non-cancer pop subset, min AN = 12,000, min AC = 12) - dominant mode of inheritance	EV0097	-3
-ACMG_BS1_2_AD	clinpop	B	Clinical - population frequency	Somewhat high AF (> 8 alleles in gnomAD non-cancer pop subset) - dominant mode of inheritance	EV0161	-1
-ACMG_BA1_AR	clinpop	B	Clinical - population frequency	Very high MAF (> 1% in gnomAD non-cancer pop subset, min AN = 12,000, min AC = 12) - recessive mode of inheritance	EV0093	-5
-ACMG_BS1_1_AR	clinpop	B	Clinical - population frequency	High MAF (> 0.3% in gnomAD non-cancer pop subset, min AN = 12,000, min AC = 12) - recessive mode of inheritance	EV0094	-3
-ACMG_BS1_2_AR	clinpop	B	Clinical - population frequency	Somewhat high AF (> 8 alleles in gnomAD non-cancer pop subset) - recessive mode of inheritance	EV0160	-1
+ACMG_BA1_AD	clinpop	B	Clinical - population frequency	Very high MAF (> 0.5% in gnomAD non-cancer pop subset, min AN = 12,000, min AC = 20) - dominant mode of inheritance	EV0096	-5
+ACMG_BS1_1_AD	clinpop	B	Clinical - population frequency	High MAF (> 0.1% in gnomAD non-cancer pop subset, min AN = 12,000, min AC = 20) - dominant mode of inheritance	EV0097	-3
+ACMG_BS1_2_AD	clinpop	B	Clinical - population frequency	Somewhat high AF (> 20 alleles in gnomAD non-cancer pop subset) - dominant mode of inheritance	EV0161	-1
+ACMG_BA1_AR	clinpop	B	Clinical - population frequency	Very high MAF (> 1% in gnomAD non-cancer pop subset, min AN = 12,000, min AC = 20) - recessive mode of inheritance	EV0093	-5
+ACMG_BS1_1_AR	clinpop	B	Clinical - population frequency	High MAF (> 0.3% in gnomAD non-cancer pop subset, min AN = 12,000, min AC = 20) - recessive mode of inheritance	EV0094	-3
+ACMG_BS1_2_AR	clinpop	B	Clinical - population frequency	Somewhat high AF (> 20 alleles in gnomAD non-cancer pop subset) - recessive mode of inheritance	EV0160	-1
 ACMG_BS2_1	clinpop	B	Clinical - population frequency	1 homozygote in gnomAD non-cancer pop subset - severe, early onset, highly penetrant	EV0113	-1
 ACMG_BS2_2	clinpop	B	Clinical - population frequency	2 homozygotes in gnomAD non-cancer pop subset - severe, early onset, highly penetrant	EV0116	-4
 ACMG_BS2_3	clinpop	B	Clinical - population frequency	2 homozygotes in gnomAD non-cancer pop subset - moderate, early onset, variably penetrant	EV0117	-2
-ACMG_PM2_1	clinpop	P	Clinical - population frequency	Allele count within pathogenic range (8 or fewer alleles in the population-specific non-cancer gnomAD subset)	EV0101	0.5
+ACMG_PM2_1	clinpop	P	Clinical - population frequency	Allele count within pathogenic range (20 or fewer alleles in the population-specific non-cancer gnomAD subset, min AN = 12,000)	EV0101	0.5
 ACMG_PM2_2	clinpop	P	Clinical - population frequency	Alternate allele absent in the population-specific non-cancer gnomAD subset	EV0135	1
 ACMG_PVS1_1	funcvarpop	P	Functional - variant effect	Null variant - predicted as LoF by LOFTEE - within pathogenic range (ACMG_PM2_1/2) - LoF established for gene	EV0016	5
 ACMG_PVS1_2	funcvarpop	P	Functional - variant effect	Null variant - not predicted as LoF by LOFTEE - within pathogenic range (ACMG_PM2_1/2) - LoF established mechanism for gene	EV0019	2.5
@@ -21,13 +21,13 @@ ACMG_PVS1_8	funcvarpop	P	Functional - variant effect	Donor/acceptor variant - la
 ACMG_PVS1_9	funcvarpop	P	Functional - variant effect	Donor/acceptor variant - not last intron - within pathogenic range (ACMG_PM2_1/2) - LoF not established mechanism for gene	EV0181	2
 ACMG_PVS1_10	funcvarpop	P	Functional - variant effect	Donor variant at located at the +3, +4 or +5 position of the intron -  within pathogenic range (ACMG_PM2_1/2) - ACMG_PP3 support	EV0184	2
 ACMG_PS1	funcvar	P	Functional - variant effect	Same amino acid change as a previously established pathogenic variant (ClinVar - minimum two review stars) regardless of nucleotide change	EV0018	4
-ACMG_PP2	funcvar	P	Functional - variant effect	Missense variant in a gene that has a relatively low rate of benign missense variation (<20%) and where missense variants are a common mechanism of disease (>50% of high-confidence pathogenic variants (ClinVar))	NA	0.5
+ACMG_PP2	funcvar	P	Functional - variant effect	Missense variant in a gene that has a relatively low rate of benign missense variation (<30%) and where missense variants are a common mechanism of disease (>50% of high-confidence pathogenic variants (ClinVar))	NA	0.5
 ACMG_PM1	funcvar	P	Functional - variant effect	Missense variant at critical AA residue (as identified in mutationhotspots.org)	EV0212	2
 ACMG_PM4	funcvar	P	Functional - variant effect	Protein length changes due to inframe indels or nonstop variant in non-repetitive regions (as identified by RepeatMasker) of genes that harbor variants with a dominant mode of inheritance.	NA	0
 ACMG_PPC1	funcvar	P	Functional - variant effect	Protein length changes due to inframe indels or nonstop variant in non-repetitive regions (as identified by RepeatMasker) of genes that harbor variants with a recessive mode of inheritance.	NA	0
 ACMG_PM5	funcvar	P	Functional - variant effect	Novel missense change at an amino acid residue where a different missense change determined to be pathogenic has been seen before (ClinVar - minimum two review stars)	EV0044	1.5
-ACMG_PP3	funccomp	P	Functional - computational & predictive	Multiple lines of computational evidence support a deleterious effect on the gene or gene product (conservation, evolutionary, splicing impact, etc. - from dbNSFP)	EV0122	0.5
-ACMG_BP4	funccomp	B	Functional - computational & predictive	Multiple lines of computational evidence support a benign effect on the gene or gene product (conservation, evolutionary, splicing impact, etc. - from dbNSFP)	EV0126	-1
-ACMG_BMC1	funcvar	B	Functional - variant effect	Peptide change is at the same location of a known benign change (ClinVar - minimum two review stars)	NA	0	
+ACMG_PP3	funccomp	P	Functional - computational & predictive	Multiple lines (>=5) of computational evidence support a deleterious effect on the gene or gene product (conservation, evolutionary, splicing impact, etc. - from dbNSFP)	EV0122	0.5
+ACMG_BP4	funccomp	B	Functional - computational & predictive	Multiple lines (>=5) of computational evidence support a benign effect on the gene or gene product (conservation, evolutionary, splicing impact, etc. - from dbNSFP)	EV0126	-1
+ACMG_BMC1	funcvar	B	Functional - variant effect	Peptide change is at the same location of a known benign change (ClinVar - minimum two review stars)	NA	0
 ACMG_BSC1	funcvar	B	Functional - variant effect	Peptide change is reported as benign (ClinVar - minimum two review stars)	EV0112	-3
-ACMG_BP1	funcvar	B	Functional - variant effect	Missense variant in a gene for which primarily truncating variants are known to cause disease (ClinVar)	NA	-0.5
+ACMG_BP1	funcvar	B	Functional - variant effect	Missense variant in a gene for which primarily truncating variants (>= 90% of pathogenic variants) are known to cause disease (ClinVar)	NA	-0.5
