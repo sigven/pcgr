@@ -24,7 +24,7 @@ install:
   - conda config --add channels pcgr --add channels bioconda --add channels conda-forge
   - conda install -q python=$TRAVIS_PYTHON_VERSION pip requests conda-build jinja2 anaconda-client
   # Building packages
-  - travis_wait conda build install_no_docker/conda_pkg/${PACKAGE_NAME}
+  - travis_wait 40 conda build install_no_docker/conda_pkg/${PACKAGE_NAME}
   - conda build install_no_docker/conda_pkg/${PACKAGE_NAME}_dockerized
   #
   # Dockerized installation:
