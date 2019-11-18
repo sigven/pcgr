@@ -36,6 +36,7 @@ def pcgr_error_message(message, logger):
    logger.error('')
    return -1
 
+
 def is_valid_cna(cna_segment_file, logger):
    """
    Function that checks whether the CNA segment file adheres to the correct format

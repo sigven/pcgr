@@ -1,14 +1,14 @@
 cpsr_evidence_code	category	pathogenicity_pole	category_long	description	sherloc_code	path_score
-ACMG_BA1_AD	clinpop	B	Clinical - population frequency	Very high MAF (> 0.5% in gnomAD non-cancer pop subset, min AN = 12,000, min AC = 20) - dominant mode of inheritance	EV0096	-5
-ACMG_BS1_1_AD	clinpop	B	Clinical - population frequency	High MAF (> 0.1% in gnomAD non-cancer pop subset, min AN = 12,000, min AC = 20) - dominant mode of inheritance	EV0097	-3
-ACMG_BS1_2_AD	clinpop	B	Clinical - population frequency	Somewhat high AF (> 20 alleles in gnomAD non-cancer pop subset) - dominant mode of inheritance	EV0161	-1
-ACMG_BA1_AR	clinpop	B	Clinical - population frequency	Very high MAF (> 1% in gnomAD non-cancer pop subset, min AN = 12,000, min AC = 20) - recessive mode of inheritance	EV0093	-5
-ACMG_BS1_1_AR	clinpop	B	Clinical - population frequency	High MAF (> 0.3% in gnomAD non-cancer pop subset, min AN = 12,000, min AC = 20) - recessive mode of inheritance	EV0094	-3
-ACMG_BS1_2_AR	clinpop	B	Clinical - population frequency	Somewhat high AF (> 20 alleles in gnomAD non-cancer pop subset) - recessive mode of inheritance	EV0160	-1
-ACMG_BS2_1	clinpop	B	Clinical - population frequency	1 homozygote in gnomAD non-cancer pop subset - severe, early onset, highly penetrant	EV0113	-1
-ACMG_BS2_2	clinpop	B	Clinical - population frequency	2 homozygotes in gnomAD non-cancer pop subset - severe, early onset, highly penetrant	EV0116	-4
-ACMG_BS2_3	clinpop	B	Clinical - population frequency	2 homozygotes in gnomAD non-cancer pop subset - moderate, early onset, variably penetrant	EV0117	-2
-ACMG_PM2_1	clinpop	P	Clinical - population frequency	Allele count within pathogenic range (20 or fewer alleles in the population-specific non-cancer gnomAD subset, min AN = 12,000)	EV0101	0.5
+ACMG_BA1_AD	clinpop	B	Clinical - population frequency	Very high MAF (> 0.5% in gnomAD non-cancer pop subset, min AN = 12,000) - dominant mode of inheritance	EV0096	-5
+ACMG_BS1_1_AD	clinpop	B	Clinical - population frequency	High MAF (> 0.1% in gnomAD non-cancer pop subset, min AN = 12,000) - dominant mode of inheritance	EV0097	-3
+ACMG_BS1_2_AD	clinpop	B	Clinical - population frequency	Somewhat high MAF (> 0.005% in gnomAD non-cancer pop subset, min AN = 12,000) - dominant mode of inheritance	EV0161	-1
+ACMG_BA1_AR	clinpop	B	Clinical - population frequency	Very high MAF (> 1% in gnomAD non-cancer pop subset, min AN = 12,000) - recessive mode of inheritance	EV0093	-5
+ACMG_BS1_1_AR	clinpop	B	Clinical - population frequency	High MAF (> 0.3% in gnomAD non-cancer pop subset, min AN = 12,000) - recessive mode of inheritance	EV0094	-3
+ACMG_BS1_2_AR	clinpop	B	Clinical - population frequency	Somewhat high MAF (> 0.005% in gnomAD non-cancer pop subset, min AN = 12,000) - recessive mode of inheritance	EV0160	-1
+ACMG_BS2_1	clinpop	B	Clinical - population frequency	One homozygote in gnomAD non-cancer pop subset - severe, early onset, highly penetrant	EV0113	-1
+ACMG_BS2_2	clinpop	B	Clinical - population frequency	Two homozygotes in gnomAD non-cancer pop subset - severe, early onset, highly penetrant	EV0116	-4
+ACMG_BS2_3	clinpop	B	Clinical - population frequency	Two homozygotes in gnomAD non-cancer pop subset - moderate, early onset, variably penetrant	EV0117	-2
+ACMG_PM2_1	clinpop	P	Clinical - population frequency	Allele count within pathogenic range (MAF <= 0.005% in the population-specific non-cancer gnomAD subset, min AN = 12,000)	EV0101	0.5
 ACMG_PM2_2	clinpop	P	Clinical - population frequency	Alternate allele absent in the population-specific non-cancer gnomAD subset	EV0135	1
 ACMG_PVS1_1	funcvarpop	P	Functional - variant effect	Null variant - predicted as LoF by LOFTEE - within pathogenic range (ACMG_PM2_1/2) - LoF established for gene	EV0016	5
 ACMG_PVS1_2	funcvarpop	P	Functional - variant effect	Null variant - not predicted as LoF by LOFTEE - within pathogenic range (ACMG_PM2_1/2) - LoF established mechanism for gene	EV0019	2.5

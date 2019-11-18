@@ -196,6 +196,7 @@ df_string_replace <- function(df, strings, pattern, replacement, replace_all = F
 #' @param project_directory name of project directory
 #' @param query_vcf2tsv name of gzipped TSV file (vcf2tsv) with annotated query SNVs/InDels
 #' @param pcgr_data List of data frames with PCGR data annotations
+#' @param pcgr_version PCGR software version
 #' @param config Object with PCGR configuration parameters
 #' @param cna_segments_tsv name of CNA segments file (tab-separated values)
 #' @param cna_plot Path to PNG image with CNA plot
@@ -205,7 +206,7 @@ df_string_replace <- function(df, strings, pattern, replacement, replace_all = F
 #' @param tier_model One of 'pcgr' or 'pcgr_acmg'
 #'
 
-generate_report <- function(project_directory, query_vcf2tsv, pcgr_data, config = NULL, sample_name = "SampleX",
+generate_report <- function(project_directory, query_vcf2tsv, pcgr_data, pcgr_version = 'dev', config = NULL, sample_name = "SampleX",
                             cna_segments_tsv = NULL, cna_plot = NULL, tier_model = "pcgr_acmg", tumor_only = 0){
 
   rlogging::message(paste0('Initializing PCGR report - sample ', sample_name))
@@ -216,7 +217,7 @@ generate_report <- function(project_directory, query_vcf2tsv, pcgr_data, config 
       config[['tumor_only']][['vcf_tumor_only']] <- TRUE
     }
   }
-  pcg_report <- pcgrr::init_pcg_report(config, sample_name, class = NULL, pcgr_data = pcgr_data)
+  pcg_report <- pcgrr::init_pcg_report(config, sample_name, class = NULL, pcgr_data = pcgr_data, pcgr_version = pcgr_version)
 
   fnames <- list()
   fnames[["tsv_unfiltered"]] <- paste0(project_directory, "/",sample_name,".",tier_model,".",pcgr_data[['assembly']][['grch_name']],".snvs_indels.tiers.unfiltered.tsv")

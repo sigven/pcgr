@@ -4,13 +4,16 @@
 #' @param config Object with configuration parameters
 #' @param sample_name sample identifier
 #' @param class report analysis section (NULL defaults to full report)
-#' @param pcgr_data PCGR software version
+#' @param pcgr_data PCGR data bundle
+#' @param pcgr_version PCGR software version
+#' @param cpsr_version CPSR software version
 #' @param type somatic or predisposition
 #' @param virtual_panel_id identifier for virtual panel id
+#' @param custom_bed custom BED file with target loci for screening
 #' @param diagnostic_grade_only choose only clinical grade genes from genomics england panels
 
-init_pcg_report <- function(config = NULL, sample_name = 'SampleX', class = NULL, pcgr_data = NULL,
-                            type = 'somatic', virtual_panel_id = -1, diagnostic_grade_only = 0){
+init_pcg_report <- function(config = NULL, sample_name = 'SampleX', class = NULL, pcgr_data = NULL, pcgr_version = 'dev',
+                            cpsr_version = 'dev', type = 'somatic', virtual_panel_id = -1, custom_bed = NULL, diagnostic_grade_only = 0){
 
   report <- list()
   for(elem in c('metadata','content')){
@@ -19,8 +22,8 @@ init_pcg_report <- function(config = NULL, sample_name = 'SampleX', class = NULL
 
   if(!is.null(pcgr_data)){
     report[['metadata']][['pcgr_db_release']] <- pcgr_data[['release_notes']]
-    report[['metadata']][['pcgr_version']] <- pcgr_data[['software_version']][['pcgr']]
-    report[['metadata']][['cpsr_version']] <- pcgr_data[['software_version']][['cpsr']]
+    report[['metadata']][['pcgr_version']] <- pcgr_version
+    report[['metadata']][['cpsr_version']] <- cpsr_version
     report[['metadata']][['genome_assembly']] <- pcgr_data[['assembly']][['grch_name']]
     report[['metadata']][['sample_name']] <- sample_name
     report[['metadata']][['report_type']] <- type
@@ -51,8 +54,25 @@ init_pcg_report <- function(config = NULL, sample_name = 'SampleX', class = NULL
       if(virtual_panel_id == 0){
         report[['metadata']][['gene_panel']][['confidence']] <- 'Exploratory geneset (research)'
       }
-    }
+    }else{
+      if(!is.null(custom_bed)){
+        target_genes <- pcgrr::custom_bed_geneset(custom_bed, pcgr_data = pcgr_data)
+        if(nrow(target_genes) > 0){
 
+          target_genes <- target_genes %>%
+            dplyr::mutate(confidence_level = -1, panel_name = report[['metadata']][['config']][['custom_panel']][['name']],
+                          panel_id = -1, panel_version = NA, panel_url = report[['metadata']][['config']][['custom_panel']][['url']])
+
+          report[['metadata']][['gene_panel']] <- list()
+          report[['metadata']][['gene_panel']][['genes']] <- target_genes
+          report[['metadata']][['gene_panel']][['name']] <- report[['metadata']][['config']][['custom_panel']][['name']]
+          report[['metadata']][['gene_panel']][['confidence']] <- 'User-defined panel (BED)'
+        }else{
+          rlogging::warning(paste0("Custom BED file (", custom_bed, ") does not contain regions that overlap protein-coding transcripts (regulatory/exonic)"))
+          rlogging::message("Quitting report generation")
+        }
+      }
+    }
   }
 
   if(type == 'predisposition'){

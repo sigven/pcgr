@@ -16,11 +16,13 @@ dir <- as.character(args[1])
 query_vcf2tsv <- as.character(args[2])
 sample_name <- as.character(args[3])
 configuration_file <- as.character(args[4])
-version <- as.character(args[5])
-genome_assembly <- as.character(args[6])
-virtual_panel_id <- as.integer(args[7])
-diagnostic_grade_only <- as.integer(args[8])
-data_dir <- as.character(args[9])
+pcgr_version <- as.character(args[5])
+cpsr_version <- as.character(args[6])
+genome_assembly <- as.character(args[7])
+virtual_panel_id <- as.integer(args[8])
+custom_bed <- as.character(args[9])
+diagnostic_grade_only <- as.integer(args[10])
+data_dir <- as.character(args[11])
 
 rlogging::SetTimeStampFormat(ts.format="%Y-%m-%d %H:%M:%S ")
 rlogging::SetLogFile(NULL)
@@ -54,7 +56,7 @@ for(section in names(cpsr_config)){
   }
 }
 
-cps_report <- pcgrr::generate_predisposition_report(dir, query_vcf2tsv, pcgr_data, cpsr_config, virtual_panel_id, diagnostic_grade_only, sample_name)
+cps_report <- pcgrr::generate_predisposition_report(dir, query_vcf2tsv, custom_bed, pcgr_data, pcgr_version, cpsr_version, cpsr_config, virtual_panel_id, diagnostic_grade_only, sample_name)
 if(!is.null(cps_report)){
    pcgrr::write_report(dir, cps_report, sample_name, genome_assembly, tier_model = "cpsr", format = 'html')
    pcgrr::write_report(dir, cps_report, sample_name, genome_assembly, tier_model = "cpsr", format = 'json')

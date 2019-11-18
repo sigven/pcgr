@@ -59,7 +59,8 @@ crosstalk::bscols(
   ),
   list(
     crosstalk::filter_select("THERAPEUTIC_CONTEXT", "Therapeutic context", cna_predictive_shared_strong, ~THERAPEUTIC_CONTEXT),
-    crosstalk::filter_slider("LogR", "Log-ratio", cna_predictive_shared_strong, ~LogR, ticks = F)
+    crosstalk::filter_slider("LogR", "Log-ratio", cna_predictive_shared_strong, ~LogR, ticks = F),
+    crosstalk::filter_slider("RATING", "Rating", cna_predictive_shared_strong, ~RATING, min = 0, max = 5, step = 1, ticks = T)
   )
 )
 
@@ -96,7 +97,8 @@ cna_prognostic_shared_strong <- crosstalk::SharedData$new(cna_evidence_items[['s
 crosstalk::bscols(
   list(
     crosstalk::filter_select("CANCER_TYPE", "Cancer type", cna_prognostic_shared_strong, ~CANCER_TYPE),
-    crosstalk::filter_select("CLINICAL_SIGNIFICANCE", "Clinical significance", cna_prognostic_shared_strong, ~CLINICAL_SIGNIFICANCE)
+    crosstalk::filter_select("CLINICAL_SIGNIFICANCE", "Clinical significance", cna_prognostic_shared_strong, ~CLINICAL_SIGNIFICANCE),
+    crosstalk::filter_slider("RATING", "Rating", cna_prognostic_shared_strong, ~RATING, min = 0, max = 5, step = 1, ticks = T)
   ),
   list(
     crosstalk::filter_select("EVIDENCE_LEVEL", "Evidence level", cna_prognostic_shared_strong, ~EVIDENCE_LEVEL),
@@ -135,7 +137,8 @@ cna_diagnostic_shared_strong <- crosstalk::SharedData$new(cna_evidence_items[['s
 crosstalk::bscols(
   list(
     crosstalk::filter_select("CANCER_TYPE", "Cancer type", cna_diagnostic_shared_strong, ~CANCER_TYPE),
-    crosstalk::filter_select("CLINICAL_SIGNIFICANCE", "Clinical association", cna_diagnostic_shared_strong, ~CLINICAL_SIGNIFICANCE)
+    crosstalk::filter_select("CLINICAL_SIGNIFICANCE", "Clinical association", cna_diagnostic_shared_strong, ~CLINICAL_SIGNIFICANCE),
+    crosstalk::filter_slider("RATING", "Rating", cna_diagnostic_shared_strong, ~RATING, min = 0, max = 5, step = 1, ticks = T)
   ),
   list(
     crosstalk::filter_select("EVIDENCE_LEVEL", "Evidence level", cna_diagnostic_shared_strong, ~EVIDENCE_LEVEL),
@@ -180,7 +183,8 @@ crosstalk::bscols(
   ),
   list(
     crosstalk::filter_select("THERAPEUTIC_CONTEXT", "Therapeutic context", cna_predictive_shared, ~THERAPEUTIC_CONTEXT),
-    crosstalk::filter_slider("LogR", "Log-ratio", cna_predictive_shared, ~LogR, ticks = F)
+    crosstalk::filter_slider("LogR", "Log-ratio", cna_predictive_shared, ~LogR, ticks = F),
+    crosstalk::filter_slider("RATING", "Rating", cna_predictive_shared, ~RATING, min = 0, max = 5, step = 1, ticks = T)
   )
 )
 
@@ -217,7 +221,8 @@ cna_prognostic_shared <- crosstalk::SharedData$new(cna_evidence_items[['potentia
 crosstalk::bscols(
   list(
     crosstalk::filter_select("CANCER_TYPE", "Cancer type", cna_prognostic_shared, ~CANCER_TYPE),
-    crosstalk::filter_select("CLINICAL_SIGNIFICANCE", "Clinical significance", cna_prognostic_shared, ~CLINICAL_SIGNIFICANCE)
+    crosstalk::filter_select("CLINICAL_SIGNIFICANCE", "Clinical significance", cna_prognostic_shared, ~CLINICAL_SIGNIFICANCE),
+    crosstalk::filter_slider("RATING", "Rating", cna_prognostic_shared, ~RATING, min = 0, max = 5, step = 1, ticks = T)
   ),
   list(
     crosstalk::filter_select("EVIDENCE_LEVEL", "Evidence level", cna_prognostic_shared, ~EVIDENCE_LEVEL),
@@ -256,7 +261,8 @@ cna_diagnostic_shared <- crosstalk::SharedData$new(cna_evidence_items[['potentia
 crosstalk::bscols(
   list(
     crosstalk::filter_select("CANCER_TYPE", "Cancer type", cna_diagnostic_shared, ~CANCER_TYPE),
-    crosstalk::filter_select("CLINICAL_SIGNIFICANCE", "Clinical association", cna_diagnostic_shared, ~CLINICAL_SIGNIFICANCE)
+    crosstalk::filter_select("CLINICAL_SIGNIFICANCE", "Clinical association", cna_diagnostic_shared, ~CLINICAL_SIGNIFICANCE),
+    crosstalk::filter_slider("RATING", "Rating", cna_diagnostic_shared, ~RATING, min = 0, max = 5, step = 1, ticks = T)
   ),
   list(
     crosstalk::filter_select("EVIDENCE_LEVEL", "Evidence level", cna_diagnostic_shared, ~EVIDENCE_LEVEL),

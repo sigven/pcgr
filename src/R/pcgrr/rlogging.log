@@ -424,3 +424,14 @@
 [2019-10-16 10:50:14][INFO] Ignoring n = 20 unclassified variants with a noncoding variant consequence
 [2019-10-16 10:50:15][INFO] Matching variant set with existing genomic biomarkers from CIViC (germline)
 [2019-10-16 10:50:15][INFO] 71 clinical evidence item(s) found .. mapping = gene
+[2019-11-05 14:50:55][INFO] Verifying data integrity of input callset
+[2019-11-05 14:50:55][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2019-11-05 14:50:55][INFO] Adding citations/phenotypes underlying GWAS hits (NHGRI-EBI GWAS Catalog)
+[2019-11-05 14:50:55][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2019-11-05 14:50:56][INFO] Number of PASS variants: 85
+[2019-11-05 14:50:56][INFO] Number of SNVs: 45
+[2019-11-05 14:50:56][INFO] Number of deletions: 32
+[2019-11-05 14:50:56][INFO] Number of insertions: 8
+[2019-11-05 14:50:56][INFO] Number of block substitutions: 0
+[2019-11-05 14:50:56][INFO] Extending annotation descriptions related to KEGG pathways
+[2019-11-05 14:50:56][INFO] Extending annotation descriptions related to ClinVar

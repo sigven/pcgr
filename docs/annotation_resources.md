@@ -1,7 +1,7 @@
 ## PCGR annotation resources
 
 ### Basic variant consequence annotation
-  * [VEP](http://www.ensembl.org/info/docs/tools/vep/index.html) - Variant Effect Predictor release 98.2 ([GENCODE v31](https://www.gencodegenes.org/human/) as gene reference database (v19 for grch37))
+  * [VEP](http://www.ensembl.org/info/docs/tools/vep/index.html) - Variant Effect Predictor release 98.3 ([GENCODE v31](https://www.gencodegenes.org/human/) as gene reference database (v19 for grch37))
 
 ###  *Insilico* predictions of effect of coding variants
   * [dBNSFP](https://sites.google.com/site/jpopgen/dbNSFP) - database of non-synonymous functional predictions (v4.0, May 2019)
@@ -16,16 +16,16 @@
 ### Variant databases of clinical utility
   * [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - database of clinically related variants (October 2019)
   * [DoCM](http://docm.genome.wustl.edu) - database of curated mutations (v3.2, April 2016)
-  * [CIViC](http://civic.genome.wustl.edu) - clinical interpretations of variants in cancer (October 13th 2019)
+  * [CIViC](http://civic.genome.wustl.edu) - clinical interpretations of variants in cancer (November 5th 2019)
   * [CBMDB](http://www.cancergenomeinterpreter.org/biomarkers) - Cancer BioMarkers database (January 17th 2018)
   * [ChEMBL](https://www.ebi.ac.uk/chembl/) - database of drugs, drug-like small molecules and their targets (ChEMBL_25, March 2019)
 
 ### Protein domains/functional features
-  * [UniProt/SwissProt KnowledgeBase](http://www.uniprot.org) - resource on protein sequence and functional information (2019_08, September 2019)
+  * [UniProt/SwissProt KnowledgeBase](http://www.uniprot.org) - resource on protein sequence and functional information (2019_10, November 2019)
   * [Pfam](http://pfam.xfam.org) - database of protein families and domains (v32, September 2018)
 
 ### Knowledge resources on gene and protein targets
-  * [CancerMine](https://zenodo.org/record/3472758#.XZjCqeczaL4) - Literature-mined database of tumor suppressor genes/proto-oncogenes (v17, October 2019)
+  * [CancerMine](https://zenodo.org/record/3525385#.XcHblUVKiL4) - Literature-mined database of tumor suppressor genes/proto-oncogenes (v18, November 2019)
   * [Open Targets Platform](https://www.targetvalidation.org/) - Database on disease-target associations, targeted drugs and tractability aggregated from multiple sources (literature, pathways, mutations) (2019_09)
   * [DisGeNET](http://www.disgenet.org) - curated associations between human genes and different tumor types (v6.0, January 2019)
   * [TCGA driver genes](https://www.ncbi.nlm.nih.gov/pubmed/29625053) - predicted cancer driver genes based on application of multiple driver gene prediction tools on TCGA pan-cancer cohort

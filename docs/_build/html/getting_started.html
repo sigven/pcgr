@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Getting started &mdash; Personal Cancer Genome Reporter 0.8.3 documentation</title>
+  <title>Getting started &mdash; Personal Cancer Genome Reporter 0.8.4 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Personal Cancer Genome Reporter 0.8.3 documentation" href="index.html"/>
+    <link rel="top" title="Personal Cancer Genome Reporter 0.8.4 documentation" href="index.html"/>
         <link rel="next" title="PCGR annotation resources" href="annotation_resources.html"/>
         <link rel="prev" title="About" href="about.html"/> 
 
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.8.3
+                0.8.4
               </div>
             
           
@@ -203,11 +203,11 @@ determined) one may need to adjust these settings</li>
 <li>Clone the PCGR GitHub repository:
 <code class="docutils literal"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/sigven/pcgr.git</span></code></li>
 <li>Download and unpack the latest data bundles in the PCGR directory<ul>
-<li><a class="reference external" href="https://drive.google.com/open?id=17DUuy4Z_zid6YIvT8SSYqVzrpzZcoS1i">grch37 data bundle -
-20191013</a>
+<li><a class="reference external" href="https://drive.google.com/file/d/1TdYagetk-l__aYBsaZJHJvYFStDnIEcq">grch37 data bundle -
+20191116</a>
 (approx 16Gb)</li>
-<li><a class="reference external" href="https://drive.google.com/open?id=1tuKOmExGRCwte4rrP7yKogCxnq6I4fiH">grch38 data bundle -
-20191013</a>
+<li><a class="reference external" href="https://drive.google.com/file/d/1wpVqlgY5jBKkQaTAxzgf0rgxKxOEJgj-">grch38 data bundle -
+20191116</a>
 (approx 17Gb)</li>
 <li><em>Unpacking</em>:
 <code class="docutils literal"><span class="pre">gzip</span> <span class="pre">-dc</span> <span class="pre">pcgr.databundle.grch37.YYYYMMDD.tgz</span> <span class="pre">|</span> <span class="pre">tar</span> <span class="pre">xvf</span> <span class="pre">-</span></code></li>
@@ -224,18 +224,18 @@ determined) one may need to adjust these settings</li>
 <div class="section" id="latest-release">
 <h3>Latest release<a class="headerlink" href="#latest-release" title="Permalink to this headline">¶</a></h3>
 <ol class="loweralpha simple">
-<li>Download and unpack the <a class="reference external" href="https://github.com/sigven/pcgr/releases/tag/v0.8.3">latest software release
-(0.8.3)</a></li>
+<li>Download and unpack the <a class="reference external" href="https://github.com/sigven/pcgr/releases/tag/v0.8.4">latest software release
+(0.8.4)</a></li>
 <li>Download and unpack the assembly-specific data bundle in the PCGR
 directory</li>
 </ol>
 <ul>
-<li><p class="first"><a class="reference external" href="https://drive.google.com/open?id=17DUuy4Z_zid6YIvT8SSYqVzrpzZcoS1i">grch37 data bundle -
-20191013</a>
+<li><p class="first"><a class="reference external" href="https://drive.google.com/file/d/1TdYagetk-l__aYBsaZJHJvYFStDnIEcq">grch37 data bundle -
+20191116</a>
 (approx 16Gb)</p>
 </li>
-<li><p class="first"><a class="reference external" href="https://drive.google.com/open?id=1tuKOmExGRCwte4rrP7yKogCxnq6I4fiH">grch38 data bundle -
-20191013</a>
+<li><p class="first"><a class="reference external" href="https://drive.google.com/file/d/1wpVqlgY5jBKkQaTAxzgf0rgxKxOEJgj-">grch38 data bundle -
+20191116</a>
 (approx 17Gb)</p>
 <ul class="simple">
 <li><em>Unpacking</em>:
@@ -247,9 +247,9 @@ have been produced</p>
 </ul>
 <ol class="loweralpha simple" start="3">
 <li>Pull the <a class="reference external" href="https://hub.docker.com/r/sigven/pcgr/">PCGR Docker image
-(0.8.3)</a> from DockerHub
+(0.8.4)</a> from DockerHub
 (approx 5.2Gb):<ul>
-<li><code class="docutils literal"><span class="pre">docker</span> <span class="pre">pull</span> <span class="pre">sigven/pcgr:0.8.3</span></code> (PCGR annotation engine)</li>
+<li><code class="docutils literal"><span class="pre">docker</span> <span class="pre">pull</span> <span class="pre">sigven/pcgr:0.8.4</span></code> (PCGR annotation engine)</li>
 </ul>
 </li>
 </ol>
@@ -305,7 +305,7 @@ configure a number of options related to the following:</p>
 <li>Sequencing depth/allelic support (definition of tags + thresholds)</li>
 <li>MSI prediction</li>
 <li>Mutational signatures analysis</li>
-<li>Mutational burden analysis (e.g.&nbsp;target size)</li>
+<li>Mutational burden analysis</li>
 <li>VCF to MAF conversion</li>
 <li>Tumor-only analysis options (i.e.&nbsp;exclusion of germline
 variants/enrichment for somatic calls)</li>
@@ -324,7 +324,7 @@ options</a>.</p>
 Personal Cancer Genome Reporter (PCGR) workflow for clinical interpretation of somatic nucleotide variants and copy number aberration segments
 
 positional arguments:
-  pcgr_dir              PCGR base directory with accompanying data directory, e.g. ~/pcgr-0.8.3
+  pcgr_dir              PCGR base directory with accompanying data directory, e.g. ~/pcgr-0.8.4
   output_dir            Output directory
   {grch37,grch38}       Genome assembly build: grch37 or grch38
   configuration_file    PCGR configuration file (TOML format)
@@ -390,7 +390,7 @@ optional arguments:
   --no_vcf_validate     Skip validation of input VCF with Ensembl&#39;s vcf-validator
   --docker-uid DOCKER_USER_ID
                         Docker user ID. Default is the host system user ID. If you are experiencing permission errors, try setting this up to root (`--docker-uid root`)
-  --no-docker           Run the PCGR workflow in a non-Docker mode (see install_no_docker/ folder for instructions
+  --no-docker           Run the PCGR workflow in a non-Docker mode (see install_no_docker/ folder for instructions)
   --debug               Print full docker commands to log
 </pre></div>
 </div>
@@ -399,9 +399,9 @@ sequenced within TCGA (<strong>GRCh37</strong> only). It also contains PCGR
 configuration files customized for these samples. A report for a
 colorectal tumor case can be generated by running the following command
 in your terminal window:</p>
-<p><code class="docutils literal"><span class="pre">python</span> <span class="pre">pcgr.py</span> <span class="pre">--input_vcf</span> <span class="pre">~/pcgr-0.8.3/examples/tumor_sample.COAD.vcf.gz</span> <span class="pre">--tumor_type</span> <span class="pre">10</span></code>
-<code class="docutils literal"><span class="pre">--input_cna</span> <span class="pre">~/pcgr-0.8.3/examples/tumor_sample.COAD.cna.tsv</span> <span class="pre">--tumor_purity</span> <span class="pre">0.9</span> <span class="pre">--tumor_ploidy</span> <span class="pre">2.0</span></code>
-<code class="docutils literal"><span class="pre">~/pcgr-0.8.3</span> <span class="pre">~/pcgr-0.8.3/examples</span> <span class="pre">grch37</span> <span class="pre">~/pcgr-0.8.3/examples/examples_COAD.toml</span> <span class="pre">tumor_sample.COAD</span></code></p>
+<p><code class="docutils literal"><span class="pre">python</span> <span class="pre">pcgr.py</span> <span class="pre">--input_vcf</span> <span class="pre">~/pcgr-0.8.4/examples/tumor_sample.COAD.vcf.gz</span> <span class="pre">--tumor_type</span> <span class="pre">10</span></code>
+<code class="docutils literal"><span class="pre">--input_cna</span> <span class="pre">~/pcgr-0.8.4/examples/tumor_sample.COAD.cna.tsv</span> <span class="pre">--tumor_purity</span> <span class="pre">0.9</span> <span class="pre">--tumor_ploidy</span> <span class="pre">2.0</span></code>
+<code class="docutils literal"><span class="pre">~/pcgr-0.8.4</span> <span class="pre">~/pcgr-0.8.4/examples</span> <span class="pre">grch37</span> <span class="pre">~/pcgr-0.8.4/examples/examples_COAD.toml</span> <span class="pre">tumor_sample.COAD</span></code></p>
 <p>This command will run the Docker-based PCGR workflow and produce the
 following output files in the <em>examples</em> folder:</p>
 <ol class="arabic simple">
@@ -465,7 +465,7 @@ transcripts that overlap with somatic copy number aberrations</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.8.3',
+            VERSION:'0.8.4',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

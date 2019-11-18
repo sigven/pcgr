@@ -70,7 +70,7 @@ pcgr_config[['tumor_type']][['type']] <- tumor_type
 if(tumor_type == "Cancer_NOS"){
   pcgr_config[['tumor_type']][['type']] <- ""
 }
-pcg_report <- pcgrr::generate_report(dir, query_vcf2tsv, pcgr_data, pcgr_config, sample_name = sample_name, cna_segments_tsv = query_cnv, 
+pcg_report <- pcgrr::generate_report(dir, query_vcf2tsv, pcgr_data, pcgr_version = version, pcgr_config, sample_name = sample_name, cna_segments_tsv = query_cnv, 
 				     cna_plot = query_cna_plot, tier_model = 'pcgr_acmg', tumor_only = t_only)
 pcgrr::write_report(dir, pcg_report, sample_name, genome_assembly, tier_model = 'pcgr_acmg', format = 'html')
 pcgrr::write_report(dir, pcg_report, sample_name, genome_assembly, tier_model = 'pcgr_acmg', format = 'json')

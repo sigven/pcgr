@@ -257,13 +257,17 @@ get_clinical_associations_cna <- function(onco_ts_sets, pcgr_data, pcgr_config, 
     }
     rlogging::message(paste0("Looking up SCNA biomarkers for precision oncology - ",paste(tumor_type_query$name,collapse=", ")))
   }
-  civic_cna_biomarkers <- dplyr::filter(pcgr_data[['biomarkers']][['civic']], alteration_type == 'CNA' & !is.na(eitem_consequence)) %>% dplyr::select(genesymbol,evidence_type,evidence_level,evidence_description,cancer_type,evidence_direction,pubmed_html_link,disease_ontology_id,therapeutic_context,rating,clinical_significance,eitem_consequence)
+  civic_cna_biomarkers <- dplyr::filter(pcgr_data[['biomarkers']][['civic']], alteration_type == 'CNA' & !is.na(eitem_consequence)) %>%
+    dplyr::select(genesymbol,evidence_type,evidence_level,evidence_description,cancer_type,evidence_direction,pubmed_html_link,disease_ontology_id,therapeutic_context,rating,clinical_significance,eitem_consequence)
 names(civic_cna_biomarkers) <- toupper(names(civic_cna_biomarkers))
-  civic_cna_biomarkers <- dplyr::rename(civic_cna_biomarkers, SYMBOL = GENESYMBOL, CNA_TYPE = EITEM_CONSEQUENCE, DESCRIPTION = EVIDENCE_DESCRIPTION, CITATION = PUBMED_HTML_LINK)
+  civic_cna_biomarkers <- dplyr::rename(civic_cna_biomarkers, SYMBOL = GENESYMBOL, CNA_TYPE = EITEM_CONSEQUENCE,
+                                        DESCRIPTION = EVIDENCE_DESCRIPTION, CITATION = PUBMED_HTML_LINK)
 
-  cbmdb_cna_biomarkers <- dplyr::filter(pcgr_data[['biomarkers']][['cbmdb']], alteration_type == 'CNA' & !is.na(eitem_consequence)) %>% dplyr::select(genesymbol,evidence_type,evidence_level,evidence_description,cancer_type,evidence_direction,pubmed_html_link,disease_ontology_id, therapeutic_context,rating,clinical_significance,eitem_consequence)
+  cbmdb_cna_biomarkers <- dplyr::filter(pcgr_data[['biomarkers']][['cbmdb']], alteration_type == 'CNA' & !is.na(eitem_consequence)) %>%
+    dplyr::select(genesymbol,evidence_type,evidence_level,evidence_description,cancer_type,evidence_direction,pubmed_html_link,disease_ontology_id, therapeutic_context,rating,clinical_significance,eitem_consequence)
   names(cbmdb_cna_biomarkers) <- toupper(names(cbmdb_cna_biomarkers))
-  cbmdb_cna_biomarkers <- dplyr::rename(cbmdb_cna_biomarkers, SYMBOL = GENESYMBOL, CNA_TYPE = EITEM_CONSEQUENCE, DESCRIPTION = EVIDENCE_DESCRIPTION, CITATION = PUBMED_HTML_LINK)
+  cbmdb_cna_biomarkers <- dplyr::rename(cbmdb_cna_biomarkers, SYMBOL = GENESYMBOL, CNA_TYPE = EITEM_CONSEQUENCE,
+                                        DESCRIPTION = EVIDENCE_DESCRIPTION, CITATION = PUBMED_HTML_LINK)
 
   if(tumor_type_specificity == 'specific_tumortype'){
     tumor_type_query <- data.frame('name' = pcgr_config$tumor_type$type, stringsAsFactors = F)
@@ -292,7 +296,9 @@ names(civic_cna_biomarkers) <- toupper(names(civic_cna_biomarkers))
   }
 
   if(nrow(cna_biomarkers) > 0){
-    cna_biomarkers <- cna_biomarkers[c("SYMBOL","CANCER_TYPE","CNA_TYPE","EVIDENCE_LEVEL","CLINICAL_SIGNIFICANCE","EVIDENCE_TYPE","DESCRIPTION","EVIDENCE_DIRECTION","THERAPEUTIC_CONTEXT","CITATION","RATING","GENE_NAME","KEGG_PATHWAY","TARGETED_DRUGS","SEGMENT_LENGTH_MB", "SEGMENT","LogR")]
+    cna_biomarkers <- cna_biomarkers[c("SYMBOL","CANCER_TYPE","CNA_TYPE","EVIDENCE_LEVEL","CLINICAL_SIGNIFICANCE",
+                                       "EVIDENCE_TYPE","DESCRIPTION","EVIDENCE_DIRECTION","THERAPEUTIC_CONTEXT","CITATION",
+                                       "RATING","GENE_NAME","KEGG_PATHWAY","TARGETED_DRUGS","SEGMENT_LENGTH_MB", "SEGMENT","LogR")]
     cna_biomarkers <- cna_biomarkers %>%
       dplyr::arrange(EVIDENCE_LEVEL,desc(RATING))
     for(type in c('diagnostic','prognostic','predictive')){
@@ -302,14 +308,14 @@ names(civic_cna_biomarkers) <- toupper(names(civic_cna_biomarkers))
         if(nrow(clinical_evidence_items[[type]][['any']] %>% dplyr::filter(stringr::str_detect(EVIDENCE_LEVEL,"^(A|B|B1|B2):"))) > 0){
           clinical_evidence_items[[type]][['A_B']] <- clinical_evidence_items[[type]][['any']] %>%
             dplyr::filter(stringr::str_detect(EVIDENCE_LEVEL,"^(A|B|B1|B2):")) %>%
-            dplyr::arrange(desc(RATING))
+            dplyr::arrange(EVIDENCE_LEVEL, desc(RATING))
         }else{
           clinical_evidence_items[[type]][['A_B']] <- data.frame()
         }
         if(nrow(clinical_evidence_items[[type]][['any']] %>% dplyr::filter(stringr::str_detect(EVIDENCE_LEVEL,"^(C|D|E):"))) > 0){
           clinical_evidence_items[[type]][['C_D_E']] <- clinical_evidence_items[[type]][['any']] %>%
             dplyr::filter(stringr::str_detect(EVIDENCE_LEVEL,"^(C|D|E):")) %>%
-            dplyr::arrange(desc(RATING))
+            dplyr::arrange(EVIDENCE_LEVEL, desc(RATING))
         }else{
           clinical_evidence_items[[type]][['C_D_E']] <- data.frame()
         }

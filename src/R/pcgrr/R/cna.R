@@ -74,7 +74,7 @@ generate_report_data_cna <- function(cna_file, pcgr_data, sample_name, pcgr_conf
 
   rlogging::message('------')
   rlogging::message(paste0("Generating report data for copy number segment file ",cna_file))
-  cna_df_raw <- read.table(file=cna_file,header = T,stringsAsFactors = F,comment.char="", quote="") %>%
+  cna_df_raw <- read.table(file=cna_file,header = T,stringsAsFactors = F,sep="\t",comment.char="", quote="") %>%
     dplyr::rename(chromosome = Chromosome, LogR = Segment_Mean, segment_start = Start, segment_end = End) %>%
     dplyr::distinct() %>%
     dplyr::mutate(chromosome = stringr::str_replace(chromosome,"^chr",""))
@@ -88,7 +88,9 @@ generate_report_data_cna <- function(cna_file, pcgr_data, sample_name, pcgr_conf
     dplyr::mutate(segmentID = paste0(chromosome,":",segment_start,":",segment_end))
 
   ## MAKE GRANGES OBJECT OF INPUT
-  cna_gr <- GenomicRanges::makeGRangesFromDataFrame(cna_df, keep.extra.columns = T, seqinfo = pcgr_data[['assembly']][['seqinfo']], seqnames.field = 'chromosome',start.field = 'segment_start', end.field = 'segment_end', ignore.strand = T, starts.in.df.are.0based = T)
+  cna_gr <- GenomicRanges::makeGRangesFromDataFrame(cna_df, keep.extra.columns = T, seqinfo = pcgr_data[['assembly']][['seqinfo']],
+                                                    seqnames.field = 'chromosome',start.field = 'segment_start', end.field = 'segment_end',
+                                                    ignore.strand = T, starts.in.df.are.0based = T)
   cytoband_df <- pcgrr::get_cna_cytoband(cna_gr, pcgr_data[['genomic_ranges']][['cytoband']])
   cna_df <- dplyr::left_join(cna_df, cytoband_df,by="segmentID")
 
@@ -100,7 +102,9 @@ generate_report_data_cna <- function(cna_file, pcgr_data, sample_name, pcgr_conf
     dplyr::select(SEGMENT, SEGMENT_LENGTH_MB, cytoband, LogR, event_type) %>%
     dplyr::distinct()
 
-  cna_gr <- GenomicRanges::makeGRangesFromDataFrame(cna_df, keep.extra.columns = T, seqinfo = pcgr_data[['assembly']][['seqinfo']], seqnames.field = 'chromosome',start.field = 'segment_start', end.field = 'segment_end', ignore.strand = T, starts.in.df.are.0based = T)
+  cna_gr <- GenomicRanges::makeGRangesFromDataFrame(cna_df, keep.extra.columns = T, seqinfo = pcgr_data[['assembly']][['seqinfo']],
+                                                    seqnames.field = 'chromosome',start.field = 'segment_start', end.field = 'segment_end',
+                                                    ignore.strand = T, starts.in.df.are.0based = T)
 
   hits <- GenomicRanges::findOverlaps(cna_gr, pcgr_data[['genomic_ranges']][['gencode_genes']], type="any", select="all")
   ranges <- pcgr_data[['genomic_ranges']][['gencode_genes']][subjectHits(hits)]

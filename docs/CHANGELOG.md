@@ -1,6 +1,11 @@
 
 ## CHANGELOG
 
+#### 0.8.4 - November 18th 2019
+
+- Data updates: ClinVar, CIViC, CancerMine, UniProt KB
+- Software updates: VEP 98.3
+
 #### 0.8.3 - October 14th 2019
 
 - Data updates: ClinVar, GWAS catalog, GENCODE, CIViC, CancerMine

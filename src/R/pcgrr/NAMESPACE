@@ -34,6 +34,7 @@ export(generate_predisposition_report)
 export(gene_selection_tiles)
 export(get_x_coords)
 export(get_germline_biomarkers)
+export(custom_bed_geneset)
 
 
 ## GENERAL UTILITIES: PCGR/CPSR

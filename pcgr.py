@@ -13,8 +13,8 @@ import toml
 from argparse import RawTextHelpFormatter
 
 
-pcgr_version = 'dev'
-db_version = 'PCGR_DB_VERSION = 20191013'
+pcgr_version = '0.8.4'
+db_version = 'PCGR_DB_VERSION = 20191116'
 vep_version = '98'
 global vep_assembly
 
@@ -112,7 +112,7 @@ def __main__():
    parser.add_argument('--basic',action="store_true",help="Run functional variant annotation on VCF through VEP/vcfanno, omit other analyses (i.e. CNA, MSI, report generation etc. (STEP 4)")
    parser.add_argument('--no_vcf_validate', action = "store_true",help="Skip validation of input VCF with Ensembl's vcf-validator")
    parser.add_argument('--docker-uid', dest='docker_user_id', help='Docker user ID. Default is the host system user ID. If you are experiencing permission errors, try setting this up to root (`--docker-uid root`)')
-   parser.add_argument('--no-docker', action='store_true', dest='no_docker', default=False, help='Run the PCGR workflow in a non-Docker mode (see install_no_docker/ folder for instructions')   
+   parser.add_argument('--no-docker', action='store_true', dest='no_docker', default=False, help='Run the PCGR workflow in a non-Docker mode (see install_no_docker/ folder for instructions)')   
    parser.add_argument('--debug',action='store_true',default=False, help='Print full docker commands to log')
    parser.add_argument('pcgr_dir',help='PCGR base directory with accompanying data directory, e.g. ~/pcgr-0.8.3')
    parser.add_argument('output_dir',help='Output directory')
