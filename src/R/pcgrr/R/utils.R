@@ -266,16 +266,18 @@ generate_report <- function(project_directory, query_vcf2tsv, pcgr_data, pcgr_ve
             pcg_report <- pcgrr::update_pcg_report(pcg_report, pcg_report_snv_indel, analysis_element = "snv_indel")
           }
           if (config[["mutational_signatures"]][["mutsignatures"]] == T & config[["tumor_only"]][["vcf_tumor_only"]] == FALSE){
-            pcg_report_signatures <- pcgrr::generate_report_data_signatures(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']], pcgr_data, sample_name, config)
+            pcg_report_signatures <- pcgrr::generate_report_data_signatures(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']],
+                                                                            pcgr_data, sample_name, config)
             pcg_report <- pcgrr::update_pcg_report(pcg_report, pcg_report_signatures, analysis_element = "m_signature")
           }
           if (config[["msi"]][["msi"]] == T & config[["tumor_only"]][["vcf_tumor_only"]] == FALSE){
-            pcg_report_msi <- pcgrr::generate_report_data_msi(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']], pcgr_data, sample_name, config)
+            pcg_report_msi <- pcgrr::generate_report_data_msi(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']],
+                                                              pcgr_data, sample_name, config)
             pcg_report <- pcgrr::update_pcg_report(pcg_report, pcg_report_msi, analysis_element = "msi")
           }
           if (config[["mutational_burden"]][["mutational_burden"]] == T){
-            pcg_report_tmb <- pcgrr::generate_report_data_tmb(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']], pcgr_data,
-                                                              sample_name, config)
+            pcg_report_tmb <- pcgrr::generate_report_data_tmb(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']],
+                                                              pcgr_data,sample_name, config)
             pcg_report <- pcgrr::update_pcg_report(pcg_report, pcg_report_tmb, analysis_element = "tmb")
           }
           pcg_report <- pcgrr::update_pcg_report(pcg_report, pcg_report_seqmode, analysis_element = "sequencing_mode")
@@ -292,7 +294,8 @@ generate_report <- function(project_directory, query_vcf2tsv, pcgr_data, pcgr_ve
 
   if (!is.null(cna_segments_tsv)){
     if (file.exists(cna_segments_tsv)){
-      pcg_report_cna <- pcgrr::generate_report_data_cna(cna_segments_tsv, pcgr_data, sample_name, config, transcript_overlap_pct = config[["cna"]][["cna_overlap_pct"]])
+      pcg_report_cna <- pcgrr::generate_report_data_cna(cna_segments_tsv, pcgr_data, sample_name,
+                                                        config, transcript_overlap_pct = config[["cna"]][["cna_overlap_pct"]])
       pcg_report <- pcgrr::update_pcg_report(pcg_report, pcg_report_cna, analysis_element = "cna")
     }
   }

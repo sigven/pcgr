@@ -435,3 +435,175 @@
 [2019-11-05 14:50:56][INFO] Number of block substitutions: 0
 [2019-11-05 14:50:56][INFO] Extending annotation descriptions related to KEGG pathways
 [2019-11-05 14:50:56][INFO] Extending annotation descriptions related to ClinVar
+[2019-11-21 11:30:02][INFO] Initializing PCGR report - sample single_filtered
+[2019-11-21 11:30:33][INFO] Verifying data integrity of input callset
+[2019-11-21 11:30:34][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2019-11-21 11:30:34][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2019-11-21 11:30:34][INFO] Number of PASS variants: 19
+[2019-11-21 11:30:34][INFO] Number of SNVs: 1
+[2019-11-21 11:30:34][INFO] Number of deletions: 4
+[2019-11-21 11:30:34][INFO] Number of insertions: 14
+[2019-11-21 11:30:34][INFO] Number of block substitutions: 0
+[2019-11-21 11:30:34][INFO] Extending annotation descriptions related to KEGG pathways
+[2019-11-21 11:30:35][INFO] Extending annotation descriptions related to ClinVar
+[2019-11-21 11:30:36][INFO] Updating MAF file with information regarding variant sequencing depths and allelic support
+[2019-11-21 11:30:37][INFO] Excluding coinciding germline variants in 1000 Genomes Project populations
+[2019-11-21 11:30:37][INFO] Total sample calls remaining: 19
+[2019-11-21 11:30:37][INFO] Excluding coinciding germline variants in any population in the genome aggregation database (gnomAD)
+[2019-11-21 11:30:37][INFO] Total sample calls remaining: 19
+[2019-11-21 11:30:37][INFO] Excluding coinciding germline variants in ClinVar
+[2019-11-21 11:30:37][INFO] Total sample calls remaining: 19
+[2019-11-21 11:30:37][INFO] Excluding putative germline variants found in calls from panel-of-normals (PON)
+[2019-11-21 11:30:37][INFO] Total sample calls remaining: 19
+[2019-11-21 11:30:37][INFO] Excluding non-exonic variants
+[2019-11-21 11:30:37][INFO] Total sample calls remaining: 14
+[2019-11-21 11:30:37][INFO] ------
+[2019-11-21 11:30:37][INFO] Generating data for tiered cancer genome report - germline-filtered callset tier model 'pcgr_acmg'
+[2019-11-21 11:30:37][INFO] Number of protein-coding variants: 14
+[2019-11-21 11:30:37][INFO] Looking up SNV/InDel biomarkers for precision oncology - any tumortype
+[2019-11-21 11:30:37][INFO] 9 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
+[2019-11-21 11:30:37][INFO] Underlying variant(s):
+[2019-11-21 11:30:37][INFO] KRAS missense_variant missense_variant:ENST00000256078.4:c.35G>C:exon2:p.G12A 12:g.25398284C>G
+[2019-11-21 11:30:37][INFO] 19 clinical evidence item(s) found .. (1 unique variant(s)), mapping = codon
+[2019-11-21 11:30:37][INFO] Underlying variant(s):
+[2019-11-21 11:30:37][INFO] KRAS missense_variant missense_variant:ENST00000256078.4:c.35G>C:exon2:p.G12A 12:g.25398284C>G
+[2019-11-21 11:30:37][INFO] 8 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exon
+[2019-11-21 11:30:37][INFO] Underlying variant(s):
+[2019-11-21 11:30:37][INFO] KRAS missense_variant missense_variant:ENST00000256078.4:c.35G>C:exon2:p.G12A 12:g.25398284C>G
+[2019-11-21 11:30:37][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2019-11-21 11:30:37][INFO] ------
+[2019-11-21 11:30:37][INFO] ------
+[2019-11-21 11:30:37][INFO] Calculating tumor mutational burden
+[2019-11-21 11:31:46][INFO] Verifying data integrity of input callset
+[2019-11-21 11:31:46][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2019-11-21 11:31:46][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2019-11-21 11:31:46][INFO] Number of PASS variants: 19
+[2019-11-21 11:31:46][INFO] Number of SNVs: 1
+[2019-11-21 11:31:46][INFO] Number of deletions: 4
+[2019-11-21 11:31:46][INFO] Number of insertions: 14
+[2019-11-21 11:31:46][INFO] Number of block substitutions: 0
+[2019-11-21 11:31:46][INFO] Extending annotation descriptions related to KEGG pathways
+[2019-11-21 11:31:47][INFO] Extending annotation descriptions related to ClinVar
+[2019-11-21 11:31:48][INFO] Updating MAF file with information regarding variant sequencing depths and allelic support
+[2019-11-21 11:32:25][INFO] Excluding coinciding germline variants in 1000 Genomes Project populations
+[2019-11-21 11:32:25][INFO] Total sample calls remaining: 19
+[2019-11-21 11:32:25][INFO] Excluding coinciding germline variants in any population in the genome aggregation database (gnomAD)
+[2019-11-21 11:32:25][INFO] Total sample calls remaining: 19
+[2019-11-21 11:32:25][INFO] Excluding coinciding germline variants in ClinVar
+[2019-11-21 11:32:25][INFO] Total sample calls remaining: 19
+[2019-11-21 11:32:25][INFO] Excluding putative germline variants found in calls from panel-of-normals (PON)
+[2019-11-21 11:32:25][INFO] Total sample calls remaining: 19
+[2019-11-21 11:32:25][INFO] Excluding non-exonic variants
+[2019-11-21 11:32:25][INFO] Total sample calls remaining: 14
+[2019-11-21 11:32:25][INFO] ------
+[2019-11-21 11:32:25][INFO] Generating data for tiered cancer genome report - germline-filtered callset tier model 'pcgr_acmg'
+[2019-11-21 11:32:25][INFO] Number of protein-coding variants: 14
+[2019-11-21 11:32:25][INFO] Looking up SNV/InDel biomarkers for precision oncology - any tumortype
+[2019-11-21 11:32:25][INFO] 9 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
+[2019-11-21 11:32:25][INFO] Underlying variant(s):
+[2019-11-21 11:32:25][INFO] KRAS missense_variant missense_variant:ENST00000256078.4:c.35G>C:exon2:p.G12A 12:g.25398284C>G
+[2019-11-21 11:32:25][INFO] 19 clinical evidence item(s) found .. (1 unique variant(s)), mapping = codon
+[2019-11-21 11:32:25][INFO] Underlying variant(s):
+[2019-11-21 11:32:25][INFO] KRAS missense_variant missense_variant:ENST00000256078.4:c.35G>C:exon2:p.G12A 12:g.25398284C>G
+[2019-11-21 11:32:25][INFO] 8 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exon
+[2019-11-21 11:32:25][INFO] Underlying variant(s):
+[2019-11-21 11:32:25][INFO] KRAS missense_variant missense_variant:ENST00000256078.4:c.35G>C:exon2:p.G12A 12:g.25398284C>G
+[2019-11-21 11:32:26][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2019-11-21 11:32:26][INFO] ------
+[2019-11-21 11:32:35][INFO] ------
+[2019-11-21 11:32:35][INFO] Identifying weighted contributions of known mutational signatures using deconstructSigs
+[2019-11-21 11:32:35][INFO] deconstructSigs normalization method ('tri.counts.method'): exome2genome
+[2019-11-21 11:32:35][INFO] Number of SNVs for signature analysis: 1
+[2019-11-21 11:32:35][INFO] Too few SNVs (n = 1) for reconstruction of mutational signatures by deconstructSigs, limit set to 100
+[2019-11-21 11:33:02][INFO] Initializing PCGR report - sample single_filtered
+[2019-11-21 11:33:08][INFO] Verifying data integrity of input callset
+[2019-11-21 11:33:08][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2019-11-21 11:33:08][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2019-11-21 11:33:09][INFO] Number of PASS variants: 19
+[2019-11-21 11:33:09][INFO] Number of SNVs: 1
+[2019-11-21 11:33:09][INFO] Number of deletions: 4
+[2019-11-21 11:33:09][INFO] Number of insertions: 14
+[2019-11-21 11:33:09][INFO] Number of block substitutions: 0
+[2019-11-21 11:33:09][INFO] Extending annotation descriptions related to KEGG pathways
+[2019-11-21 11:33:09][INFO] Extending annotation descriptions related to ClinVar
+[2019-11-21 11:33:11][INFO] Updating MAF file with information regarding variant sequencing depths and allelic support
+[2019-11-21 11:33:38][INFO] Excluding coinciding germline variants in 1000 Genomes Project populations
+[2019-11-21 11:33:38][INFO] Total sample calls remaining: 19
+[2019-11-21 11:33:38][INFO] Excluding coinciding germline variants in any population in the genome aggregation database (gnomAD)
+[2019-11-21 11:33:38][INFO] Total sample calls remaining: 19
+[2019-11-21 11:33:38][INFO] Excluding coinciding germline variants in ClinVar
+[2019-11-21 11:33:38][INFO] Total sample calls remaining: 19
+[2019-11-21 11:33:38][INFO] Excluding putative germline variants found in calls from panel-of-normals (PON)
+[2019-11-21 11:33:38][INFO] Total sample calls remaining: 19
+[2019-11-21 11:33:38][INFO] Excluding non-exonic variants
+[2019-11-21 11:33:38][INFO] Total sample calls remaining: 14
+[2019-11-21 11:33:38][INFO] ------
+[2019-11-21 11:33:38][INFO] Generating data for tiered cancer genome report - germline-filtered callset tier model 'pcgr_acmg'
+[2019-11-21 11:33:38][INFO] Number of protein-coding variants: 14
+[2019-11-21 11:33:38][INFO] Looking up SNV/InDel biomarkers for precision oncology - any tumortype
+[2019-11-21 11:33:38][INFO] 9 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
+[2019-11-21 11:33:38][INFO] Underlying variant(s):
+[2019-11-21 11:33:38][INFO] KRAS missense_variant missense_variant:ENST00000256078.4:c.35G>C:exon2:p.G12A 12:g.25398284C>G
+[2019-11-21 11:33:38][INFO] 19 clinical evidence item(s) found .. (1 unique variant(s)), mapping = codon
+[2019-11-21 11:33:38][INFO] Underlying variant(s):
+[2019-11-21 11:33:38][INFO] KRAS missense_variant missense_variant:ENST00000256078.4:c.35G>C:exon2:p.G12A 12:g.25398284C>G
+[2019-11-21 11:33:38][INFO] 8 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exon
+[2019-11-21 11:33:38][INFO] Underlying variant(s):
+[2019-11-21 11:33:38][INFO] KRAS missense_variant missense_variant:ENST00000256078.4:c.35G>C:exon2:p.G12A 12:g.25398284C>G
+[2019-11-21 11:33:38][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2019-11-21 11:33:38][INFO] ------
+[2019-11-21 11:33:38][INFO] ------
+[2019-11-21 11:33:38][INFO] Calculating tumor mutational burden
+[2019-11-21 11:34:33][INFO] ------
+[2019-11-21 11:34:33][INFO] Calculating tumor mutational burden
+[2019-11-21 11:37:51][INFO] ------
+[2019-11-21 11:37:51][INFO] Calculating tumor mutational burden
+[2019-11-21 11:37:51][INFO] Number of variants for mutational burden analysis: 11
+[2019-11-21 11:37:51][INFO] Coding target size sequencing assay (Mb): 34
+[2019-11-21 11:37:51][INFO] Estimated mutational burden: 0.32 mutations/Mb
+[2019-11-21 11:37:51][INFO] Mutational burden tertile: TMB - Low (0 - 5 mutations/Mb)
+[2019-11-21 11:37:51][INFO] ------
+[2019-11-21 11:43:10][INFO] Initializing PCGR report - sample single_filtered
+[2019-11-21 11:43:33][INFO] Verifying data integrity of input callset
+[2019-11-21 11:43:33][INFO] Excluding 0 variants from non-nuclear chromosomes/scaffolds
+[2019-11-21 11:43:33][INFO] Extending annotation descriptions related to UniprotKB/SwissProt protein features
+[2019-11-21 11:43:33][INFO] Number of PASS variants: 19
+[2019-11-21 11:43:33][INFO] Number of SNVs: 1
+[2019-11-21 11:43:33][INFO] Number of deletions: 4
+[2019-11-21 11:43:33][INFO] Number of insertions: 14
+[2019-11-21 11:43:33][INFO] Number of block substitutions: 0
+[2019-11-21 11:43:33][INFO] Extending annotation descriptions related to KEGG pathways
+[2019-11-21 11:43:34][INFO] Extending annotation descriptions related to ClinVar
+[2019-11-21 11:43:35][INFO] Updating MAF file with information regarding variant sequencing depths and allelic support
+[2019-11-21 11:43:35][INFO] Excluding coinciding germline variants in 1000 Genomes Project populations
+[2019-11-21 11:43:35][INFO] Total sample calls remaining: 19
+[2019-11-21 11:43:35][INFO] Excluding coinciding germline variants in any population in the genome aggregation database (gnomAD)
+[2019-11-21 11:43:35][INFO] Total sample calls remaining: 19
+[2019-11-21 11:43:35][INFO] Excluding coinciding germline variants in ClinVar
+[2019-11-21 11:43:35][INFO] Total sample calls remaining: 19
+[2019-11-21 11:43:35][INFO] Excluding putative germline variants found in calls from panel-of-normals (PON)
+[2019-11-21 11:43:35][INFO] Total sample calls remaining: 19
+[2019-11-21 11:43:35][INFO] Excluding non-exonic variants
+[2019-11-21 11:43:35][INFO] Total sample calls remaining: 14
+[2019-11-21 11:43:35][INFO] ------
+[2019-11-21 11:43:35][INFO] Generating data for tiered cancer genome report - germline-filtered callset tier model 'pcgr_acmg'
+[2019-11-21 11:43:35][INFO] Number of protein-coding variants: 14
+[2019-11-21 11:43:35][INFO] Looking up SNV/InDel biomarkers for precision oncology - any tumortype
+[2019-11-21 11:43:35][INFO] 9 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exact
+[2019-11-21 11:43:35][INFO] Underlying variant(s):
+[2019-11-21 11:43:35][INFO] KRAS missense_variant missense_variant:ENST00000256078.4:c.35G>C:exon2:p.G12A 12:g.25398284C>G
+[2019-11-21 11:43:36][INFO] 19 clinical evidence item(s) found .. (1 unique variant(s)), mapping = codon
+[2019-11-21 11:43:36][INFO] Underlying variant(s):
+[2019-11-21 11:43:36][INFO] KRAS missense_variant missense_variant:ENST00000256078.4:c.35G>C:exon2:p.G12A 12:g.25398284C>G
+[2019-11-21 11:43:36][INFO] 8 clinical evidence item(s) found .. (1 unique variant(s)), mapping = exon
+[2019-11-21 11:43:36][INFO] Underlying variant(s):
+[2019-11-21 11:43:36][INFO] KRAS missense_variant missense_variant:ENST00000256078.4:c.35G>C:exon2:p.G12A 12:g.25398284C>G
+[2019-11-21 11:43:36][INFO] Generating tiered set of result variants for output in tab-separated values (TSV) file
+[2019-11-21 11:43:36][INFO] ------
+[2019-11-21 11:43:36][INFO] ------
+[2019-11-21 11:43:36][INFO] Calculating tumor mutational burden
+[2019-11-21 11:43:36][INFO] Number of variants for mutational burden analysis: 11
+[2019-11-21 11:43:36][INFO] Coding target size sequencing assay (Mb): 34
+[2019-11-21 11:43:36][INFO] Estimated mutational burden: 0.32 mutations/Mb
+[2019-11-21 11:43:36][INFO] Mutational burden tertile: TMB - Low (0 - 5 mutations/Mb)
+[2019-11-21 11:43:36][INFO] ------

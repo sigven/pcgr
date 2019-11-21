@@ -19,7 +19,7 @@ for(type in c('diagnostic','prognostic','predictive')){
   missing_tier2_items[[type]] <- T
   eitems[[type]] <- data.frame()
   if(NROW(pcg_report[['content']][['snv_indel']][['clinical_evidence_item']][['other_tumortype']][[type]][['A_B']]) > 0 | NROW(pcg_report[['content']][['snv_indel']][['clinical_evidence_item']][['specific_tumortype']][[type]][['C_D_E']]) > 0){
-    eitems[[type]] <- rbind(pcg_report[['content']][['snv_indel']][['clinical_evidence_item']][['other_tumortype']][[type]][['A_B']], pcg_report[['content']][['snv_indel']][['clinical_evidence_item']][['specific_tumortype']][[type]][['C_D_E']]) %>%
+    eitems[[type]] <- dplyr::bind_rows(pcg_report[['content']][['snv_indel']][['clinical_evidence_item']][['other_tumortype']][[type]][['A_B']], pcg_report[['content']][['snv_indel']][['clinical_evidence_item']][['specific_tumortype']][[type]][['C_D_E']]) %>%
       dplyr::arrange(desc(RATING))
     show_tier2_filters[[type]] <- T
     missing_tier2_items[[type]] <- F
@@ -133,7 +133,7 @@ crosstalk::bscols(
   list(
     crosstalk::filter_select("EVIDENCE_LEVEL", "Evidence level", variants_tier2_diagnostic_shared, ~EVIDENCE_LEVEL),
     crosstalk::filter_select("BIOMARKER_MAPPING", "Biomarker mapping", variants_tier2_diagnostic_shared, ~BIOMARKER_MAPPING),
-    crosstalk::filter_slider("RATING", "Rating", variants_tier2_diagnostic_shared, ~RATING, min = 0, max = 5, step = 1, ticks = T),
+    crosstalk::filter_slider("RATING", "Rating", variants_tier2_diagnostic_shared, ~RATING, min = 0, max = 5, step = 1, ticks = T)
   )
 )
 cat('The table below lists all variant-evidence item associations:',sep='\n')
@@ -141,8 +141,21 @@ htmltools::br()
 htmltools::br()
 
 crosstalk::bscols(
-  DT::datatable(variants_tier2_diagnostic_shared, escape=F,extensions=c("Buttons","Responsive"), width = "100%",options=list(buttons = c('csv','excel'),dom = 'Bfrtip')) %>%
-  DT::formatStyle('EVIDENCE_LEVEL', backgroundColor = DT::styleEqual(c('A: Validated','A: FDA/NCCN/ELN guidelines','B: Clinical evidence','B1: Clinical evidence: late trials','B2: Clinical evidence: early trials','C: Case study','D: Preclinical evidence','E: Indirect evidence'), c("#009E73","#009E73","#56B4E9", "#56B4E9","#56B4E9","#0072B2","#E69F00", "#F0E442")))
+  DT::datatable(variants_tier2_diagnostic_shared, 
+                escape=F,extensions=c("Buttons","Responsive"), 
+                width = "100%",
+                options=list(buttons = c('csv','excel'),dom = 'Bfrtip')) %>%
+  DT::formatStyle('EVIDENCE_LEVEL', 
+                  backgroundColor = DT::styleEqual(c('A: Validated',
+                                                     'A: FDA/NCCN/ELN guidelines',
+                                                     'B: Clinical evidence',
+                                                     'B1: Clinical evidence: late trials',
+                                                     'B2: Clinical evidence: early trials',
+                                                     'C: Case study',
+                                                     'D: Preclinical evidence',
+                                                     'E: Indirect evidence'), 
+                                                   c("#009E73","#009E73","#56B4E9", "#56B4E9","#56B4E9","#0072B2","#E69F00", "#F0E442"))
+                  )
 )
 #htmltools::br()
 
