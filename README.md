@@ -79,7 +79,7 @@ An installation of Python (version _3.6_) is required to run PCGR. Check that Py
 
 ##### Development version
 
-a. Clone the PCGR GitHub repository (includes run script and folder with configuration files pr tumor type): `git clone https://github.com/sigven/pcgr.git`
+a. Clone the PCGR GitHub repository (includes run script and default configuration file): `git clone https://github.com/sigven/pcgr.git`
 
 b. Download and unpack the latest data bundles in the PCGR directory
    * [grch37 data bundle - 20191116](https://drive.google.com/file/d/1TdYagetk-l__aYBsaZJHJvYFStDnIEcq) (approx 16Gb)
