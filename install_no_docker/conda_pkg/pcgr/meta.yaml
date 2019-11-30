@@ -21,11 +21,10 @@ requirements:
     - r-base
     - r-devtools
     - tar
-    - python >=3.7.3
+    - python
     - toml
     #
     # Need R packages build-time to correctly install pcgrr
-    - pandoc >=2.3.1
     - bioconductor-biocinstaller
     - libgfortran-ng  # to fix -libgfortran error, thanks @pdiakumis
     - r-purrr >=0.2.4  # to force the one from conda-forge to address this issue https://github.com/jbkunst/highcharter/issues/285
@@ -60,7 +59,7 @@ requirements:
   run:
     #
     # PCGR: python
-    - python >=3.7.3
+    - python
     - pip
     - numpy
     - cython
