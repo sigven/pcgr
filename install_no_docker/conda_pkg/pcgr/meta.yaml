@@ -55,6 +55,13 @@ requirements:
     - r-sunburstr         # for CELLector, -c pcgr
     - r-arules            # for CELLector, -c pcgr
     - r-biocmanager
+    - bioconductor-variantannotation
+    - bioconductor-bsgenome.hsapiens.ucsc.hg19
+    - bioconductor-bsgenome.hsapiens.ucsc.hg38
+    - bioconductor-genomeinfodb
+    - bioconductor-genomicranges  # GenomicRangesS4Vectors
+    - bioconductor-regioner
+    - bioconductor-mutationalpatterns
 
   run:
     #
