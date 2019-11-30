@@ -82,14 +82,13 @@ requirements:
     #
     # Perl (for VEP)
     - perl-bioperl
-    - ensembl-vep==98.3
+    - ensembl-vep ==98.3
     #
     # PCGR: R packages
     - r-base
-    - pandoc==2.3.1
     - bioconductor-biocinstaller
     - libgfortran-ng  # to fix -libgfortran error, thanks @pdiakumis
-    - r-purrr>=0.2.4  # to force the one from conda-forge to address this issue https://github.com/jbkunst/highcharter/issues/285
+    - r-purrr >=0.2.4  # to force the one from conda-forge to address this issue https://github.com/jbkunst/highcharter/issues/285
     - r-dplyr
     - r-devtools
     - r-stringr
@@ -105,11 +104,11 @@ requirements:
     - r-rcpptoml
     - r-ggplot2
     - r-dt
-    - r-stringi>=1.1.7    # for pcgrr
-    - r-htmlwidgets>=1.0  # for DT (by default, 0.9 is getting installed)
+    - r-stringi >=1.1.7    # for pcgrr
+    - r-htmlwidgets >=1.0  # for DT (by default, 0.9 is getting installed)
     - r-crosstalk
     - r-deconstructsigs
-    - r-knitr>=1.17
+    - r-knitr >=1.17
     - r-rmarkdown
     - r-configr           # for pcgrr, -c pcgr
     - r-summarywidget     # for pcgrr, -c pcgr
