@@ -29,7 +29,10 @@ install:
   # Installing
   - conda install --use-local ${PACKAGE_NAME}
   # Pulling reference data
-  - gdown https://drive.google.com/uc?id=1TdYagetk-l__aYBsaZJHJvYFStDnIEcq -O - | tar xzf - # grch37
+  - wget https://raw.githubusercontent.com/circulosmeos/gdown.pl/master/gdown.pl
+  - perl gdown.pl "https://drive.google.com/uc?id=1TdYagetk-l__aYBsaZJHJvYFStDnIEcq" grch37.tar.gz
+  - tar -xzf grch37.tar.gz  # will extract into ./data/grch37/
+  # - gdown https://drive.google.com/uc?id=1TdYagetk-l__aYBsaZJHJvYFStDnIEcq -O - | tar xzf - # grch37
 
 script:
   # Condarized installation:
