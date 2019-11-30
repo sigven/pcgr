@@ -24,30 +24,14 @@ install:
   - conda config --add channels pcgr --add channels bioconda --add channels conda-forge
   - conda install -q python=$TRAVIS_PYTHON_VERSION pip requests conda-build jinja2 anaconda-client
   # Building packages
-#  - git clone https://github.com/tlatsas/bash-spinner
-#  - source bash-spinner/spinner.sh
-#  - start_spinner "Installing PCGR"
   - conda build install_no_docker/conda_pkg/${PACKAGE_NAME}
-#  - stop_spinner $?
   - conda build install_no_docker/conda_pkg/${PACKAGE_NAME}_dockerized
-  #
+  # Installing
   - conda install --use-local ${PACKAGE_NAME}
+  # Pulling reference data
   - gdown https://drive.google.com/uc?id=1TdYagetk-l__aYBsaZJHJvYFStDnIEcq -O - | tar xzf - # grch37
-  # Dockerized installation:
-  #- docker pull sigven/pcgr:latest
-  # Download the data bundle (usable for both version)
-#  - wget https://raw.githubusercontent.com/circulosmeos/gdown.pl/master/gdown.pl
-#  - perl gdown.pl "https://drive.google.com/uc?id=17DUuy4Z_zid6YIvT8SSYqVzrpzZcoS1i" grch37.tar.gz && tar -xzf grch37.tar.gz  # will extract into ./data/grch37/
 
 script:
-#  # Dockerized installation:
-#  - pcgr.py --version
-#  - python -c "import pcgr"
-#  - pcgr.py
-#    --input_vcf examples/tumor_sample.COAD.vcf.gz
-#    --input_cna examples/tumor_sample.COAD.cna.tsv
-#    . ./examples grch37 examples/examples_BRCA.toml tumor_sample.COAD --tumor_type 10
-  #
   # Condarized installation:
   - pcgr.py --version
   - python -c "import pcgr"
