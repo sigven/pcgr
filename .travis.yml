@@ -32,21 +32,21 @@ install:
   - conda build install_no_docker/conda_pkg/${PACKAGE_NAME}_dockerized
   #
   # Dockerized installation:
-  - docker pull sigven/pcgr:latest
-  - conda install --use-local ${PACKAGE_NAME}_dockerized
+  #- docker pull sigven/pcgr:latest
+  #- conda install --use-local ${PACKAGE_NAME}_dockerized
   # Download the data bundle (usable for both version)
   - gdown https://drive.google.com/uc?id=1TdYagetk-l__aYBsaZJHJvYFStDnIEcq -O - | tar xzf - # grch37
 #  - wget https://raw.githubusercontent.com/circulosmeos/gdown.pl/master/gdown.pl
 #  - perl gdown.pl "https://drive.google.com/uc?id=17DUuy4Z_zid6YIvT8SSYqVzrpzZcoS1i" grch37.tar.gz && tar -xzf grch37.tar.gz  # will extract into ./data/grch37/
 
 script:
-  # Dockerized installation:
-  - pcgr.py --version
-  - python -c "import pcgr"
-  - pcgr.py
-    --input_vcf examples/tumor_sample.COAD.vcf.gz
-    --input_cna examples/tumor_sample.COAD.cna.tsv
-    . ./examples grch37 examples/examples_BRCA.toml tumor_sample.COAD --tumor_type 10
+#  # Dockerized installation:
+#  - pcgr.py --version
+#  - python -c "import pcgr"
+#  - pcgr.py
+#    --input_vcf examples/tumor_sample.COAD.vcf.gz
+#    --input_cna examples/tumor_sample.COAD.cna.tsv
+#    . ./examples grch37 examples/examples_BRCA.toml tumor_sample.COAD --tumor_type 10
   #
   # Condarized installation:
   - conda install --use-local ${PACKAGE_NAME}
