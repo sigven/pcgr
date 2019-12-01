@@ -1,5 +1,5 @@
 {% set name = 'pcgr' %}
-{% set version = os.environ.get('TRAVIS_TAG', '').replace('v.', '').replace('v', '') or 'dev' %}
+{% set version = os.environ.get('VERSION', '').replace('v.', '').replace('v', '') or 'dev' %}
 
 package:
   name: {{ name }}

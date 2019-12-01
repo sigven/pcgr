@@ -27,7 +27,7 @@ install:
   - conda build install_no_docker/conda_pkg/${PACKAGE_NAME}
   - conda build install_no_docker/conda_pkg/${PACKAGE_NAME}_dockerized
   # Installing
-  - conda install --use-local ${PACKAGE_NAME}
+  - conda install "${PACKAGE_NAME}==${VERSION}"
   # Pulling reference data
   - wget https://raw.githubusercontent.com/circulosmeos/gdown.pl/master/gdown.pl
   - perl gdown.pl "https://drive.google.com/uc?id=1TdYagetk-l__aYBsaZJHJvYFStDnIEcq" grch37.tar.gz
