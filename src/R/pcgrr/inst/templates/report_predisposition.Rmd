@@ -41,6 +41,13 @@ if(set_other == 0 | set_clinvar == 0){
 ```
 
 
+```{r gene_selection, echo = F, fig.width = width_panel, fig.height = height_panel, eval = T}
+p1 <- pcgrr::gene_selection_tiles(genes = cps_report[['metadata']][['gene_panel']][['genes']]$symbol, confidence = cps_report[['metadata']][['gene_panel']][['genes']]$confidence_level, box_w = 3.4, space = 0.4, box_h = 0.8)
+p1
+
+```
+<br>
+
 ## Summary of findings
 
 ```{r donut_chart, echo = F, fig.width = width_donut, fig.height = height_donut, eval = cps_report[['content']][['snv_indel']][['eval']]}
