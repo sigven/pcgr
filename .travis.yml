@@ -19,7 +19,7 @@ before_install:
 
 install:
   - export PACKAGE_NAME=pcgr
-  - if test -z "$TRAVIS_TAG" ; then export VERSION="dev" ; else export VERSION="$TRAVIS_TAG" ; fi
+  - if test -z "$TRAVIS_TAG" ; then export VERSION="0.0.1" ; else export VERSION="$TRAVIS_TAG" ; fi
   # Setting up channels and install dependencies
   - conda config --add channels bioconda --add channels conda-forge --add channels pcgr --add channels local
   - conda install -q python=$TRAVIS_PYTHON_VERSION pip requests conda-build jinja2 anaconda-client

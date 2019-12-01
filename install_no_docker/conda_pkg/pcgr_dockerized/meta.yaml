@@ -1,5 +1,5 @@
 {% set name = 'pcgr_dockerized' %}
-{% set version = os.environ.get('VERSION', '').replace('v.', '').replace('v', '') or 'dev' %}
+{% set version = os.environ.get('VERSION', '').replace('v.', '').replace('v', '') or '0.0.1' %}
 
 package:
   name: {{ name }}
