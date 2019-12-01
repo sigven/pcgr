@@ -18,8 +18,8 @@ before_install:
   - conda info -a  # Useful for debugging any issues with conda
 
 install:
-  # Set up conda
   - export PACKAGE_NAME=pcgr
+  - [[ ! -z $TRAVIS_TAG ]] && export VERSION=$TRAVIS_TAG || export VERSION=dev-0
   # Setting up channels and install dependencies
   - conda config --add channels bioconda --add channels conda-forge --add channels pcgr --add channels local
   - conda install -q python=$TRAVIS_PYTHON_VERSION pip requests conda-build jinja2 anaconda-client
