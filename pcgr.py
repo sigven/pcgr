@@ -710,12 +710,14 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       fasta_assembly = os.path.join(vep_dir, "homo_sapiens", str(vep_version) + "_" + str(vep_assembly), "Homo_sapiens." + str(vep_assembly) + ".dna.primary_assembly.fa.gz")
       vep_flags = "--hgvs --af --af_1kg --af_gnomad --variant_class --domains --symbol --protein --ccds " + \
          "--uniprot --appris --biotype --canonical --gencode_basic --cache --numbers --total_length --allele_number " + \
-         "--no_stats --no_escape --xref_refseq --vcf --quiet --check_ref --dont_skip --flag_pick_allele_gene"
+         "--no_stats --no_escape --xref_refseq --vcf --check_ref --dont_skip --flag_pick_allele_gene"
       vep_options = "--pick_order " + str(config_options['other']['vep_pick_order']) + " --force_overwrite --species homo_sapiens --assembly " \
          + str(vep_assembly) + " --offline --fork " + str(config_options['other']['n_vep_forks']) + " " + str(vep_flags)  + " --dir " + vep_dir
       vep_options += " --cache_version " + str(vep_version)
       if config_options['other']['vep_skip_intergenic'] == 1:
          vep_options = vep_options + " --no_intergenic"
+      if not debug:
+         vep_options += " --quiet"
       vep_main_command = docker_cmd_run1 + "vep --input_file " + str(input_vcf_pcgr_ready) + " --output_file " + str(vep_vcf) + " " + str(vep_options) + " --fasta " + str(fasta_assembly) + docker_cmd_run_end
       vep_bgzip_command = docker_cmd_run1 + "bgzip -f -c " + str(vep_vcf) + " > " + str(vep_vcf) + '.gz' + docker_cmd_run_end
       vep_tabix_command = docker_cmd_run1 + "tabix -f -p vcf " + str(vep_vcf) + ".gz" + docker_cmd_run_end
