@@ -12,7 +12,9 @@
 #' @param sample_name sample identifier
 #'
 
-generate_predisposition_report <- function(project_directory, query_vcf2tsv, custom_bed, pcgr_data, pcgr_version, cpsr_version,
+options(error = traceback)
+
+generate_predisposition_report <- function(project_directory, query_vcf2tsv, custom_bed, pcgr_data, pcgr_version, cpsr_version, 
                                            cpsr_config = NULL, virtual_panel_id = -1, diagnostic_grade_only = 0, sample_name = "SampleX"){
 
   cps_report <- pcgrr::init_pcg_report(cpsr_config, sample_name, class = NULL, pcgr_data = pcgr_data, pcgr_version = pcgr_version,
@@ -77,6 +79,7 @@ generate_predisposition_report <- function(project_directory, query_vcf2tsv, cus
         calls <- dplyr::rename(calls, CLINVAR_CLINICAL_SIGNIFICANCE = CLINVAR_CLNSIG)
         call_stats <- pcgrr::variant_stats_report(calls, name = "variant_statistic")
 
+        calls <- dplyr::mutate(calls, SYMBOL = as.character(SYMBOL))
         cpg_calls <- dplyr::inner_join(calls, cps_report[['metadata']][['gene_panel']][['genes']], by = c("SYMBOL" = "symbol"))
         cpg_call_stats <- pcgrr::variant_stats_report(cpg_calls, name = "variant_statistic_cpg")
 
@@ -717,7 +720,7 @@ variant_stats_report <- function(calls, name = "variant_statistic"){
 #'
 retrieve_sf_calls <- function(calls, medgen){
 
-  calls$CLINVAR_PHENOTYPE <- NA
+  calls = calls %>% dplyr::mutate(CLINVAR_PHENOTYPE = NA)
   sf_calls <- calls %>%
       dplyr::filter(!is.na(CANCER_PREDISPOSITION_SOURCE) & CANCER_PREDISPOSITION_SOURCE == 'ACMG_SF20' & !is.na(CLINVAR_CLINICAL_SIGNIFICANCE)) %>%
       dplyr::rename(CLIN_SIGNIFICANCE = CLINVAR_CLASSIFICATION) %>%

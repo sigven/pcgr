@@ -12,6 +12,9 @@ import pandas as np
 import toml
 from cyvcf2 import VCF
 
+logger = logging.getLogger('cpsr-validate-input')
+global debug
+
 def __main__():
 
    parser = argparse.ArgumentParser(description='Verify input data for CPSR')
@@ -22,13 +25,28 @@ def __main__():
    parser.add_argument('vcf_validation',type=int, default=0,choices=[0,1], help="Perform VCF validation with Ensembl's vcf-validator")
    parser.add_argument('genome_assembly',help='grch37 or grch38')
    parser.add_argument('virtual_panel_id',type=int,help='virtual panel identifier')
-   parser.add_argument('diagnostic_grade_only',type=int, default=0,choices=[0,1],help="Green virtual panels only (Genomics England PanelApp)")
+   parser.add_argument('diagnostic_grade_only', type=int, default=0, choices=[0,1], help="Green virtual panels only (Genomics England PanelApp)")
    parser.add_argument('--output_dir', dest='output_dir', help='Output directory', default='/workdir/output')
+   parser.add_argument('--debug',action='store_true',default=False, help='Print full docker commands to log')
    args = parser.parse_args()
+
+   global debug
+   debug = args.debug
 
    ret = validate_cpsr_input(args.pcgr_dir, args.input_vcf, args.custom_bed, args.configuration_file, args.vcf_validation, args.genome_assembly, args.virtual_panel_id, args.diagnostic_grade_only, args.output_dir)
    if ret != 0:
       sys.exit(1)
+
+def check_subprocess(command):
+   if debug:
+      logger.info(command)
+   try:
+      output = subprocess.check_output(str(command), stderr=subprocess.STDOUT, shell=True)
+      if len(output) > 0:
+         print (str(output.decode()).rstrip())
+   except subprocess.CalledProcessError as e:
+      print (e.output.decode())
+      exit(0)
 
 def is_valid_vcf(input_vcf, output_dir, logger):
    """
@@ -40,7 +58,7 @@ def is_valid_vcf(input_vcf, output_dir, logger):
    command_v42 = 'vcf_validator --input ' + str(input_vcf) + ' > ' + str(vcf_validation_output_file)
    if input_vcf.endswith('.gz'):
       command_v42 = 'bgzip -dc ' + str(input_vcf) + ' | vcf_validator  > ' + str(vcf_validation_output_file)
-   os.system(command_v42)
+   check_subprocess(command_v42)
 
 
    #is_valid_vcf = -1
@@ -58,7 +76,8 @@ def is_valid_vcf(input_vcf, output_dir, logger):
             if 'the input file is not valid' in line.rstrip():  ## non-valid VCF
                validation_results['validation_status'] = 0
       f.close()
-      os.system('rm -f ' + str(vcf_validation_output_file))
+      if not debug:
+         check_subprocess('rm -f ' + str(vcf_validation_output_file))
    else:
       err_msg = str(vcf_validation_output_file) + ' does not exist'
       return annoutils.error_message(err_msg, logger)
@@ -169,29 +188,29 @@ def simplify_vcf(input_vcf, vcf, custom_bed, pcgr_directory, genome_assembly, vi
       command_vcf_sample_free4 = 'bgzip -dc ' + str(input_vcf) + ' | egrep -v \'^#\' | sed \'s/^chr//\' | egrep -v \'^[0-9]\' | egrep \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> ' + str(input_vcf_cpsr_ready)
       command_vcf_sample_free5 = 'bgzip -dc ' + str(input_vcf) + ' | egrep -v \'^#\' | sed \'s/^chr//\' | egrep -v \'^[0-9]\' | egrep -v \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> ' + str(input_vcf_cpsr_ready)
 
-   os.system(command_vcf_sample_free1)
-   os.system(command_vcf_sample_free2)
-   os.system(command_vcf_sample_free3)
-   os.system(command_vcf_sample_free4)
-   os.system(command_vcf_sample_free5)
-   
+   check_subprocess(command_vcf_sample_free1)
+   check_subprocess(command_vcf_sample_free2)
+   check_subprocess(command_vcf_sample_free3)
+   check_subprocess(command_vcf_sample_free4)
+   check_subprocess(command_vcf_sample_free5)
    if not custom_bed == 'None':
-      os.system(command_custom_bed1)
-      os.system(command_custom_bed2)
+      check_subprocessm(command_custom_bed1)
+      check_subprocess(command_custom_bed2)
 
    if multiallelic_alt == 1:
       logger.info('Decomposing multi-allelic sites in input VCF file using \'vt decompose\'')
       command_decompose = 'vt decompose -s ' + str(input_vcf_cpsr_ready) + ' > ' + str(input_vcf_cpsr_ready_decomposed) + ' 2> ' + os.path.join(output_dir, 'decompose.log')
-      os.system(command_decompose)
+      check_subprocess(command_decompose)
    else:
       command_copy = 'cp ' + str(input_vcf_cpsr_ready) + ' ' + str(input_vcf_cpsr_ready_decomposed)
-      os.system(command_copy)
+      check_subprocess(command_copy)
+
 
    if not custom_bed == 'None':
       logger.info('Limiting variant set to user-defined screening loci (custom BED)')
       if os.path.exists(custom_bed_cpsr_ready) and os.stat(custom_bed_cpsr_ready).st_size != 0:
          target_variants_intersect_cmd = "bedtools intersect -wa -u -header -a " + str(input_vcf_cpsr_ready_decomposed) + " -b " + str(custom_bed_cpsr_ready) + " > " + str(input_vcf_cpsr_ready_decomposed_target)
-         os.system(target_variants_intersect_cmd)
+         check_subprocess(target_variants_intersect_cmd)
       else:
          logger.info('Custom BED file has a filesize of zero or does not exist')
    else:
@@ -201,17 +220,17 @@ def simplify_vcf(input_vcf, vcf, custom_bed, pcgr_directory, genome_assembly, vi
          target_bed = os.path.join(pcgr_directory, 'data', genome_assembly, 'virtual_panels', str(virtual_panel_id) + "." + genome_assembly + ".GREEN.bed.gz")
       if os.path.exists(target_bed):
          target_variants_intersect_cmd = 'bedtools intersect -wa -u -header -a ' + str(input_vcf_cpsr_ready_decomposed) + ' -b ' + str(target_bed) + ' > ' + str(input_vcf_cpsr_ready_decomposed_target)
-         os.system(target_variants_intersect_cmd)
+         check_subprocess(target_variants_intersect_cmd)
       else:
          logger.info('')
          logger.info("Virtual gene panel - BED file (" + str(target_bed) + ")  not found - exiting")
          logger.info('')
          exit(1)
-
    
-   os.system('bgzip -cf ' + str(input_vcf_cpsr_ready_decomposed_target) + ' > ' + str(input_vcf_cpsr_ready_decomposed_target) + '.gz')
-   os.system('tabix -p vcf ' + str(input_vcf_cpsr_ready_decomposed_target) + '.gz')
-   os.system('rm -f ' + str(input_vcf_cpsr_ready) + ' ' + str(input_vcf_cpsr_ready_decomposed) + ' ' + os.path.join(output_dir, 'decompose.log'))
+   check_subprocess('bgzip -cf ' + str(input_vcf_cpsr_ready_decomposed_target) + ' > ' + str(input_vcf_cpsr_ready_decomposed_target) + '.gz')
+   check_subprocess('tabix -p vcf ' + str(input_vcf_cpsr_ready_decomposed_target) + '.gz')
+   if not debug:
+      check_subprocess('rm -f ' + str(input_vcf_cpsr_ready) + ' ' + str(input_vcf_cpsr_ready_decomposed) + ' ' + os.path.join(output_dir, 'decompose.log'))
 
    if os.path.exists(input_vcf_cpsr_ready_decomposed_target + '.gz') and os.path.getsize(input_vcf_cpsr_ready_decomposed_target + '.gz') > 0:
       vcf = VCF(input_vcf_cpsr_ready_decomposed_target + '.gz')

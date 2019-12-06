@@ -17,6 +17,7 @@ pcgr_version = 'dev'
 db_version = 'PCGR_DB_VERSION = 20191116'
 vep_version = '98'
 global vep_assembly
+global debug
 
 
 ttypes = {
@@ -130,6 +131,8 @@ def __main__():
    if args.tumor_only is True:
       tumor_only = 1
    
+   global debug
+   debug = args.debug
 
    logger = getlogger('pcgr-validate-config')
 
@@ -183,7 +186,7 @@ def __main__():
    logger = getlogger('pcgr-check-files')
    host_directories = verify_input_files(args.input_vcf, args.input_cna, args.input_cna_plot, args.pon_vcf, args.configuration_file, config_options, args.pcgr_dir, args.output_dir, args.sample_id, args.genome_assembly, tumor_only, overwrite, logger)
 
-   run_pcgr(host_directories, docker_image_version, config_options, args.sample_id, args.genome_assembly, tumor_only, tumor_properties, pcgr_version, args.basic, args.no_vcf_validate, debug = args.debug, docker_user_id=args.docker_user_id)
+   run_pcgr(host_directories, docker_image_version, config_options, args.sample_id, args.genome_assembly, tumor_only, tumor_properties, pcgr_version, args.basic, args.no_vcf_validate, docker_user_id=args.docker_user_id)
 
 
 def read_config_options(configuration_file, pcgr_dir, genome_assembly, tumor_only, ttype, logger):
@@ -507,8 +510,9 @@ def verify_input_files(input_vcf, input_cna, input_cna_plot, panel_normal_vcf, c
    return host_directories
    
 
-def check_subprocess(command):
-   #print(command)
+def check_subprocess(logger, command):
+   if debug:
+      logger.info(command)
    try:
       output = subprocess.check_output(str(command), stderr=subprocess.STDOUT, shell=True)
       if len(output) > 0:
@@ -536,7 +540,7 @@ def getlogger(logger_name):
 
    return logger
 
-def run_pcgr(host_directories, docker_image_version, config_options, sample_id, genome_assembly, tumor_only, tumor_properties, pcgr_version, basic, no_vcf_validate, debug = True, docker_user_id=None):
+def run_pcgr(host_directories, docker_image_version, config_options, sample_id, genome_assembly, tumor_only, tumor_properties, pcgr_version, basic, no_vcf_validate, docker_user_id=None):
    """
    Main function to run the PCGR workflow using Docker
    """
@@ -660,7 +664,7 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       vep_dir = vepdb_dir_host
       r_scripts_dir = ''
 
-   check_subprocess(docker_cmd_run1.replace("-u " + str(uid), "") + 'mkdir -p ' + output_dir + docker_cmd_run_end)
+   check_subprocess(logger, docker_cmd_run1.replace("-u " + str(uid), "") + 'mkdir -p ' + output_dir + docker_cmd_run_end)
 
    logger = getlogger("pcgr-start")
    logger.info("--- Personal Cancer Genome Reporter workflow ----")
@@ -683,9 +687,7 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       vcf_validate_command += ' --output_dir ' + output_dir + docker_cmd_run_end
    else:
       vcf_validate_command += docker_cmd_run_end
-   if debug is True:
-      logger.info(vcf_validate_command)
-   check_subprocess(vcf_validate_command)
+   check_subprocess(logger, vcf_validate_command)
    logger.info('Finished')
 
    #Valid criteria are: [ canonical appris tsl biotype ccds rank length ]. e.g.:
@@ -708,12 +710,14 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       fasta_assembly = os.path.join(vep_dir, "homo_sapiens", str(vep_version) + "_" + str(vep_assembly), "Homo_sapiens." + str(vep_assembly) + ".dna.primary_assembly.fa.gz")
       vep_flags = "--hgvs --af --af_1kg --af_gnomad --variant_class --domains --symbol --protein --ccds " + \
          "--uniprot --appris --biotype --canonical --gencode_basic --cache --numbers --total_length --allele_number " + \
-         "--no_stats --no_escape --xref_refseq --vcf --quiet --check_ref --dont_skip --flag_pick_allele_gene"
+         "--no_stats --no_escape --xref_refseq --vcf --check_ref --dont_skip --flag_pick_allele_gene"
       vep_options = "--pick_order " + str(config_options['other']['vep_pick_order']) + " --force_overwrite --species homo_sapiens --assembly " \
          + str(vep_assembly) + " --offline --fork " + str(config_options['other']['n_vep_forks']) + " " + str(vep_flags)  + " --dir " + vep_dir
       vep_options += " --cache_version " + str(vep_version)
       if config_options['other']['vep_skip_intergenic'] == 1:
          vep_options = vep_options + " --no_intergenic"
+      if not debug:
+         vep_options += " --quiet"
       vep_main_command = docker_cmd_run1 + "vep --input_file " + str(input_vcf_pcgr_ready) + " --output_file " + str(vep_vcf) + " " + str(vep_options) + " --fasta " + str(fasta_assembly) + docker_cmd_run_end
       vep_bgzip_command = docker_cmd_run1 + "bgzip -f -c " + str(vep_vcf) + " > " + str(vep_vcf) + '.gz' + docker_cmd_run_end
       vep_tabix_command = docker_cmd_run1 + "tabix -f -p vcf " + str(vep_vcf) + ".gz" + docker_cmd_run_end
@@ -722,21 +726,17 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       print()
       logger = getlogger('pcgr-vep')
       logger.info("STEP 1: Basic variant annotation with Variant Effect Predictor (" + str(vep_version) + ", GENCODE " + str(gencode_version) + ", " + str(genome_assembly) + ")")
-      if debug is True:
-         logger.info(vep_main_command)
-      check_subprocess(vep_main_command)
-      check_subprocess(vep_bgzip_command)
-      check_subprocess(vep_tabix_command)
+      check_subprocess(logger, vep_main_command)
+      check_subprocess(logger, vep_bgzip_command)
+      check_subprocess(logger, vep_tabix_command)
       #exit(1)
 
       if config_options['other']['vcf2maf'] == 1:
          logger.info('Converting VEP-annotated VCF to MAF with https://github.com/mskcc/vcf2maf')
          vcf2maf_command = str(docker_cmd_run1) + "vcf2maf.pl --input-vcf " + str(input_vcf_pcgr_ready_uncompressed) + " --tumor-id " + str(sample_id) + " --output-maf " + str(output_maf) + " --ref-fasta " + str(fasta_assembly) + " --filter-vcf 0 --ncbi-build " + str(ncbi_build_maf) + " > " + str(output_vcf2maf_log) + " 2>&1" + docker_cmd_run_end
          clean_vcf2maf_command = str(docker_cmd_run1) + "rm -f " + str(output_vcf2maf_log) + " " + re.sub(r'(\.vcf$)', '.vep.vcf', input_vcf_pcgr_ready_uncompressed) + " " + docker_cmd_run_end
-         if debug is True:
-            logger.info(vcf2maf_command)
-         check_subprocess(vcf2maf_command)
-         check_subprocess(clean_vcf2maf_command)
+         check_subprocess(logger, vcf2maf_command)
+         check_subprocess(logger, clean_vcf2maf_command)
 
       logger.info("Finished")
       #return()
@@ -745,6 +745,8 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       print()
       logger = getlogger('pcgr-vcfanno')
       pcgr_vcfanno_command = str(docker_cmd_run2) + "pcgr_vcfanno.py --num_processes " + str(config_options['other']['n_vcfanno_proc']) + " --chasmplus --dbnsfp --docm --clinvar --icgc --civic --cbmdb --tcga_pcdm --winmsk --simplerepeats --tcga --uniprot --cancer_hotspots --pcgr_onco_xref " + str(vep_vcf) + ".gz " + str(vep_vcfanno_vcf) + " " + os.path.join(data_dir, "data", str(genome_assembly))
+      if debug:
+         pcgr_vcfanno_command += " --debug"
       if panel_normal_docker != 'None':
          pon_annotation = 1
          pcgr_vcfanno_command = pcgr_vcfanno_command + " --panel_normal_vcf " + str(panel_normal_docker)
@@ -752,9 +754,7 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       else:
          logger.info("STEP 2: Annotation for precision oncology with pcgr-vcfanno (ClinVar, dbNSFP, UniProtKB, cancerhotspots.org, CiVIC, CBMDB, DoCM, CHASMplus driver mutations, TCGA - putative driver mutations/recurrence, ICGC-PCAWG)")
       pcgr_vcfanno_command = pcgr_vcfanno_command + docker_cmd_run_end
-      if debug is True:
-         logger.info(pcgr_vcfanno_command)
-      check_subprocess(pcgr_vcfanno_command)
+      check_subprocess(logger, pcgr_vcfanno_command)
       logger.info("Finished")
       #return
 
@@ -762,28 +762,27 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       print()
       logger = getlogger("pcgr-summarise")
       pcgr_summarise_command = str(docker_cmd_run2) + "pcgr_summarise.py " + str(vep_vcfanno_vcf) + ".gz " + str(pon_annotation) + " " + str(os.path.join(data_dir, "data", str(genome_assembly))) + docker_cmd_run_end
+      if debug:
+         pcgr_summarise_command  += ' --debug'
       logger.info("STEP 3: Cancer gene annotations with pcgr-summarise")
-      if debug is True:
-         logger.info(pcgr_summarise_command)
-      check_subprocess(pcgr_summarise_command)
+      check_subprocess(logger, pcgr_summarise_command)
 
       create_output_vcf_command1 = str(docker_cmd_run2) + 'mv ' + str(vep_vcfanno_annotated_vcf) + ' ' + str(output_vcf) + docker_cmd_run_end
       create_output_vcf_command2 = str(docker_cmd_run2) + 'mv ' + str(vep_vcfanno_annotated_vcf) + '.tbi ' + str(output_vcf) + '.tbi' + docker_cmd_run_end
       create_output_vcf_command3 = str(docker_cmd_run2) + 'mv ' + str(vep_vcfanno_annotated_pass_vcf) + ' ' + str(output_pass_vcf) + docker_cmd_run_end
       create_output_vcf_command4 = str(docker_cmd_run2) + 'mv ' + str(vep_vcfanno_annotated_pass_vcf) + '.tbi ' + str(output_pass_vcf) + '.tbi' + docker_cmd_run_end
       clean_command = str(docker_cmd_run2) + 'rm -f ' + str(vep_vcf) + '* ' + str(vep_vcfanno_annotated_vcf) + ' ' + str(vep_vcfanno_annotated_pass_vcf) + '* ' + str(vep_vcfanno_vcf) + '* ' +  str(input_vcf_pcgr_ready_uncompressed) + "* "  + docker_cmd_run_end
-      check_subprocess(create_output_vcf_command1)
-      check_subprocess(create_output_vcf_command2)
-      check_subprocess(create_output_vcf_command3)
-      check_subprocess(create_output_vcf_command4)
+      check_subprocess(logger, create_output_vcf_command1)
+      check_subprocess(logger, create_output_vcf_command2)
+      check_subprocess(logger, create_output_vcf_command3)
+      check_subprocess(logger, create_output_vcf_command4)
 
       ## vcf2tsv command
       pcgr_vcf2tsv_command = str(docker_cmd_run2) + "vcf2tsv.py " + str(output_pass_vcf) + " --compress " + str(output_pass_tsv) + docker_cmd_run_end
       logger.info("Converting VCF to TSV with https://github.com/sigven/vcf2tsv")
-      if debug is True:
-         logger.info(pcgr_vcf2tsv_command)
-      check_subprocess(pcgr_vcf2tsv_command)
-      check_subprocess(clean_command)
+      check_subprocess(logger, pcgr_vcf2tsv_command)
+      if not debug:
+         check_subprocess(logger, clean_command)
       logger.info("Finished")
 
    print()
@@ -796,9 +795,7 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
                            input_cna_docker + " " + str(sample_id) + " " + input_conf_docker + " " + str(pcgr_version) + " " + genome_assembly + " " + data_dir + " " + \
                            str(input_cna_plot_docker) + " " + str(tumor_properties['tumor_purity']) + " " + str(tumor_properties['tumor_ploidy']) + " " + str(tumor_only) +  " " + \
                            str(config_options['mutational_burden']['target_size_mb']) + " " + str(config_options['tumor_type']['type']) + docker_cmd_run_end)
-      if debug is True:
-         logger.info(pcgr_report_command)
-      check_subprocess(pcgr_report_command)
+      check_subprocess(logger, pcgr_report_command)
       logger.info("Finished")
 
    print()

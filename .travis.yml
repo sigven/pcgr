@@ -2,7 +2,7 @@ sudo: required
 
 language: python
 python:
-  - "3.6"  # required, otherwise conda will try to clash with py2 packages
+  - "3.7"  # required, otherwise conda will try to clash with py2 packages
 
 services:
   - docker
@@ -18,32 +18,24 @@ before_install:
   - conda info -a  # Useful for debugging any issues with conda
 
 install:
-  # Set up conda
   - export PACKAGE_NAME=pcgr
+  - if test -z "$TRAVIS_TAG" ; then export VERSION="0.0.1" ; else export VERSION="$TRAVIS_TAG" ; fi
   # Setting up channels and install dependencies
-  - conda config --add channels pcgr --add channels bioconda --add channels conda-forge
+  - conda config --add channels bioconda --add channels conda-forge --add channels pcgr --add channels local
   - conda install -q python=$TRAVIS_PYTHON_VERSION pip requests conda-build jinja2 anaconda-client
   # Building packages
   - conda build install_no_docker/conda_pkg/${PACKAGE_NAME}
   - conda build install_no_docker/conda_pkg/${PACKAGE_NAME}_dockerized
-  #
-  # Dockerized installation:
-  - docker pull sigven/pcgr:dev
-  - conda install --use-local ${PACKAGE_NAME}_dockerized
-  # Download the data bundle (usable for both version)
-  - gdown https://drive.google.com/uc?id=1TdYagetk-l__aYBsaZJHJvYFStDnIEcq -O - | tar xzf - # grch37
+  # Installing
+  - conda install "${PACKAGE_NAME}==${VERSION}"
+  # Pulling reference data
+  - wget https://raw.githubusercontent.com/circulosmeos/gdown.pl/master/gdown.pl
+  - perl gdown.pl "https://drive.google.com/uc?id=1TdYagetk-l__aYBsaZJHJvYFStDnIEcq" grch37.tar.gz
+  - tar -xzf grch37.tar.gz  # will extract into ./data/grch37/
+  # - gdown https://drive.google.com/uc?id=1TdYagetk-l__aYBsaZJHJvYFStDnIEcq -O - | tar xzf - # grch37
 
 script:
-  # Dockerized installation:
-  - pcgr.py --version
-  - python -c "import pcgr"
-  - pcgr.py
-    --input_vcf examples/tumor_sample.COAD.vcf.gz
-    --input_cna examples/tumor_sample.COAD.cna.tsv
-    . ./examples grch37 examples/examples_BRCA.toml tumor_sample.COAD --tumor_type 10
-  #
   # Condarized installation:
-  - conda install --use-local ${PACKAGE_NAME}
   - pcgr.py --version
   - python -c "import pcgr"
   - pcgr.py

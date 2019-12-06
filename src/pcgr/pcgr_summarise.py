@@ -6,7 +6,10 @@ import argparse
 from cyvcf2 import VCF, Writer
 import gzip
 import os
+import subprocess
 import annoutils
+
+global debug
 
 csv.field_size_limit(500 * 1024 * 1024)
 
@@ -17,7 +20,11 @@ def __main__():
    parser.add_argument('pon_annotation',default=0,type=int,help='Include Panel of Normals annotation')
    parser.add_argument('pcgr_db_dir',help='PCGR data directory')
    parser.add_argument('--cpsr',action="store_true",help="Aggregate cancer gene annotations for Cancer Predisposition Sequencing Reporter (CPSR)")
+   parser.add_argument('--debug',action='store_true',default=False, help='Print full docker commands to log')
    args = parser.parse_args()
+
+   global debug
+   debug = args.debug
 
    logger = annoutils.getlogger('pcgr-gene-annotate')
    if args.cpsr is True:
@@ -25,6 +32,16 @@ def __main__():
 
    extend_vcf_annotations(args.vcf_file, args.pcgr_db_dir, logger, args.pon_annotation, args.cpsr)
 
+def check_subprocess(logger, command):
+   if debug:
+      logger.info(command)
+   try:
+      output = subprocess.check_output(str(command), stderr=subprocess.STDOUT, shell=True)
+      if len(output) > 0:
+         print (str(output.decode()).rstrip())
+   except subprocess.CalledProcessError as e:
+      print (e.output.decode())
+      exit(0)
 
 def extend_vcf_annotations(query_vcf, pcgr_db_directory, logger, pon_annotation, cpsr):
    """
@@ -115,14 +132,14 @@ def extend_vcf_annotations(query_vcf, pcgr_db_directory, logger, pon_annotation,
 
       w.write_record(rec)
    w.close()
-   if not current_chrom is None:
+   if current_chrom is not None:
       logger.info('Completed summary of functional annotations for ' + str(num_chromosome_records_processed) + ' variants on chromosome ' + str(current_chrom))
    vcf.close()
 
    if os.path.exists(out_vcf):
       if os.path.getsize(out_vcf) > 0:
-         os.system('bgzip -f ' + str(out_vcf))
-         os.system('tabix -f -p vcf ' + str(out_vcf) + '.gz')
+         check_subprocess(logger, 'bgzip -f ' + str(out_vcf))
+         check_subprocess(logger, 'tabix -f -p vcf ' + str(out_vcf) + '.gz')
          annotated_vcf = out_vcf + '.gz'
          annoutils.write_pass_vcf(annotated_vcf, logger)
       else:

@@ -1,5 +1,5 @@
 {% set name = 'pcgr' %}
-{% set version = os.environ.get('TRAVIS_TAG', '').replace('v.', '').replace('v', '') or 'dev' %}
+{% set version = os.environ.get('VERSION', '').replace('v.', '').replace('v', '') or '0.0.1' %}
 
 package:
   name: {{ name }}
@@ -21,14 +21,13 @@ requirements:
     - r-base
     - r-devtools
     - tar
-    - python >=3.7.3
+    - python
     - toml
     #
     # Need R packages build-time to correctly install pcgrr
-    - pandoc==2.3.1
     - bioconductor-biocinstaller
     - libgfortran-ng  # to fix -libgfortran error, thanks @pdiakumis
-    - r-purrr>=0.2.4  # to force the one from conda-forge to address this issue https://github.com/jbkunst/highcharter/issues/285
+    - r-purrr >=0.2.4  # to force the one from conda-forge to address this issue https://github.com/jbkunst/highcharter/issues/285
     - r-dplyr
     - r-stringr
     - r-tidyr
@@ -43,18 +42,19 @@ requirements:
     - r-rcpptoml
     - r-ggplot2
     - r-dt
-    - r-stringi>=1.1.7    # for pcgrr
-    - r-htmlwidgets>=1.0  # for DT (by default, 0.9 is getting installed)
+    - r-stringi >=1.1.7    # for pcgrr
+    - r-htmlwidgets >=1.0  # for DT (by default, 0.9 is getting installed)
     - r-crosstalk
     - r-deconstructsigs
-    - r-knitr>=1.17
+    - r-knitr >=1.17
     - r-rmarkdown
-    - r-configr           # for pcgrr, -c vladsaveliev
-    - r-summarywidget     # for pcgrr, -c pdiakumis
-    - r-rlogging          # for pcgrr, -c pdiakumis
+    - r-configr           # for pcgrr, -c pcgr
+    - r-summarywidget     # for pcgrr, -c pcgr
+    - r-rlogging          # for pcgrr, -c pcgr
     - r-collapsibletree   # for CELLector
-    - r-sunburstr         # for CELLector, -c vladsaveliev
-    - r-arules            # for CELLector, -c vladsaveliev
+    - r-sunburstr         # for CELLector, -c pcgr
+    - r-arules            # for CELLector, -c pcgr
+    - r-biocmanager
     - bioconductor-variantannotation
     - bioconductor-bsgenome.hsapiens.ucsc.hg19
     - bioconductor-bsgenome.hsapiens.ucsc.hg38
@@ -66,7 +66,7 @@ requirements:
   run:
     #
     # PCGR: python
-    - python >=3.7.3
+    - python
     - pip
     - numpy
     - cython
@@ -88,14 +88,14 @@ requirements:
     #
     # Perl (for VEP)
     - perl-bioperl
-    - ensembl-vep==98.3
+    - ensembl-vep ==98.3
+    - perl-bio-bigfile  # for Loftee (doesn't come with ensemble-vep, but will come with https://github.com/bioconda/bioconda-recipes/pull/18808 once merged)
     #
     # PCGR: R packages
     - r-base
-    - pandoc==2.3.1
     - bioconductor-biocinstaller
     - libgfortran-ng  # to fix -libgfortran error, thanks @pdiakumis
-    - r-purrr>=0.2.4  # to force the one from conda-forge to address this issue https://github.com/jbkunst/highcharter/issues/285
+    - r-purrr >=0.2.4  # to force the one from conda-forge to address this issue https://github.com/jbkunst/highcharter/issues/285
     - r-dplyr
     - r-devtools
     - r-stringr
@@ -111,18 +111,19 @@ requirements:
     - r-rcpptoml
     - r-ggplot2
     - r-dt
-    - r-stringi>=1.1.7    # for pcgrr
-    - r-htmlwidgets>=1.0  # for DT (by default, 0.9 is getting installed)
+    - r-stringi >=1.1.7    # for pcgrr
+    - r-htmlwidgets >=1.0  # for DT (by default, 0.9 is getting installed)
     - r-crosstalk
     - r-deconstructsigs
-    - r-knitr>=1.17
+    - r-knitr >=1.17
     - r-rmarkdown
-    - r-configr           # for pcgrr, -c vladsaveliev
-    - r-summarywidget     # for pcgrr, -c pdiakumis
-    - r-rlogging          # for pcgrr, -c pdiakumis
+    - r-configr           # for pcgrr, -c pcgr
+    - r-summarywidget     # for pcgrr, -c pcgr
+    - r-rlogging          # for pcgrr, -c pcgr
     - r-collapsibletree   # for CELLector
-    - r-sunburstr         # for CELLector, -c vladsaveliev
-    - r-arules            # for CELLector, -c vladsaveliev
+    - r-sunburstr         # for CELLector, -c pcgr
+    - r-arules            # for CELLector, -c pcgr
+    - r-biocmanager
     - bioconductor-variantannotation
     - bioconductor-bsgenome.hsapiens.ucsc.hg19
     - bioconductor-bsgenome.hsapiens.ucsc.hg38
@@ -136,6 +137,7 @@ test:
     - pcgr.py --version
     - '$R -e "library(pcgrr)"'
     - '$R -e "library(pcgrr) ; pcgrr::acmg_evidence_codes"'
+    - '$R -e "library(crosstalk); sessionInfo();"'
   imports:
     - annoutils
 

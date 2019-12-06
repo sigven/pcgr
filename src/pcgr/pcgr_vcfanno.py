@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
+import subprocess
 from cyvcf2 import VCF
 import random
 import annoutils
@@ -9,6 +10,8 @@ import re
 import sys
 
 logger = annoutils.getlogger('pcgr-vcfanno')
+
+global debug
 
 
 def __main__():
@@ -37,8 +40,13 @@ def __main__():
    parser.add_argument("--gnomad_cpsr",action = "store_true",help="Annotate VCF with population-specific allelic counts and frequencies in cancer predisposition genes (gnomAD non-cancer subset)")
    parser.add_argument("--panel_normal_vcf",dest="panel_normal_vcf",help="Annotate VCF with germline calls from panel of normals")
    parser.add_argument("--keep_logs",action = "store_true")
+   parser.add_argument('--debug',action='store_true',default=False, help='Print full docker commands to log')
 
    args = parser.parse_args()
+
+   global debug
+   debug = args.debug
+
    query_info_tags = get_vcf_info_tags(args.query_vcf)
    vcfheader_file = args.out_vcf + '.tmp.' + str(random.randrange(0,10000000)) + '.header.txt'
    conf_fname = args.out_vcf + '.tmp.conf.toml'
@@ -146,22 +154,21 @@ def run_vcfanno(num_processes, query_vcf, panel_normal_vcf, query_info_tags, vcf
    query_prefix = re.sub(r'\.vcf.gz$','',query_vcf)
    print_vcf_header(query_vcf, vcfheader_file, chromline_only = True)
    command1 = "vcfanno -p=" + str(num_processes) + " " + str(conf_fname) + " " + str(query_vcf) + " > " + str(out_vcf_vcfanno_unsorted1) + " 2> " + str(query_prefix) + '.vcfanno.log'
-   os.system(command1)
+   check_subprocess(command1)
    
-   os.system('cat ' + str(vcfheader_file) + ' > ' + str(output_vcf))
-   os.system('cat ' + str(out_vcf_vcfanno_unsorted1) + ' | grep -v \'^#\' >> ' + str(output_vcf))
+   check_subprocess('cat ' + str(vcfheader_file) + ' > ' + str(output_vcf))
+   check_subprocess('cat ' + str(out_vcf_vcfanno_unsorted1) + ' | grep -v \'^#\' >> ' + str(output_vcf))
    if not keep_logs is True:
-      os.system('rm -f ' + str(output_vcf) + '.tmp*')
-   os.system('bgzip -f ' + str(output_vcf))
-   os.system('tabix -f -p vcf ' + str(output_vcf) + '.gz')
-   return 0
+      check_subprocess('rm -f ' + str(output_vcf) + '.tmp*')
+   check_subprocess('bgzip -f ' + str(output_vcf))
+   check_subprocess('tabix -f -p vcf ' + str(output_vcf) + '.gz')
    
 def append_to_vcf_header(pcgr_db_directory, datasource, vcfheader_file):
    """
    Function that appends the VCF header information for a given 'datasource' (containing INFO tag formats/descriptions, and datasource version)
    """
    vcf_info_tags_file = str(pcgr_db_directory) + '/' + str(datasource) + '/' + str(datasource) + '.vcfanno.vcf_info_tags.txt'
-   os.system('cat ' + str(vcf_info_tags_file) + ' >> ' + str(vcfheader_file))
+   check_subprocess('cat ' + str(vcf_info_tags_file) + ' >> ' + str(vcfheader_file))
 
 
 def append_to_conf_file(datasource, datasource_info_tags, pcgr_db_directory, conf_fname):
@@ -220,8 +227,21 @@ def get_vcf_info_tags(vcffile):
 
 def print_vcf_header(query_vcf, vcfheader_file, chromline_only = False):
    if chromline_only == True:
-      os.system('bgzip -dc ' + str(query_vcf) + ' | egrep \'^#\' | egrep \'^#CHROM\' >> ' + str(vcfheader_file))
+      check_subprocess('bgzip -dc ' + str(query_vcf) + ' | egrep \'^#\' | egrep \'^#CHROM\' >> ' + str(vcfheader_file))
    else:
-      os.system('bgzip -dc ' + str(query_vcf) + ' | egrep \'^#\' | egrep -v \'^#CHROM\' > ' + str(vcfheader_file))
+      check_subprocess('bgzip -dc ' + str(query_vcf) + ' | egrep \'^#\' | egrep -v \'^#CHROM\' > ' + str(vcfheader_file))
+
+
+def check_subprocess(command):
+   if debug:
+      logger.info(command)
+   try:
+      output = subprocess.check_output(str(command), stderr=subprocess.STDOUT, shell=True)
+      if len(output) > 0:
+         print (str(output.decode()).rstrip())
+   except subprocess.CalledProcessError as e:
+      print (e.output.decode())
+      exit(0)
+
 
 if __name__=="__main__": __main__()
