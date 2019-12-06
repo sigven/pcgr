@@ -27,13 +27,10 @@ chmod +x ${PREFIX}/bin/vcf_validator
 
 R -e "library(devtools); devtools::install('${SRC_DIR}/src/R/pcgrr', dependencies=FALSE, args=c('--library=${PREFIX}/lib/R/library'))"
 
-### Loftee. To make sure same LoF version is used in dockerized and non-dockerized installation. Ensembl-vep conda
-#   package installs most recent version of LoF automatically, however it doesn't work with the most
+### Loftee. To make sure same LoF version is used in dockerized and non-dockerized installation.
+#   ensembl-vep conda package installs most recent version of LoF automatically, however it doesn't work with the most
 #   recent perl 5.26 (see https://github.com/sigven/cpsr/issues/2)
-#disabled for now - BigFile needs to be build for conda https://github.com/bioconda/bioconda-recipes/pull/18392
-#mkdir ${PREFIX}/share/loftee
-#tar -xzf ${SRC_DIR}/src/loftee_1.0.3.tgz -C ${PREFIX}/share/loftee
-
-# Try getting the github version instead:
-#git clone https://github.com/konradjk/loftee
-# LofTee needs perl BigWig module, having problems with it
+#   Also Loftee for hg38 needs Perl-Bio-BigFile (doesn't come with ensemble-vep, but will come
+#   with https://github.com/bioconda/bioconda-recipes/pull/18808 once merged)
+mkdir ${PREFIX}/share/loftee
+tar -xzf ${SRC_DIR}/src/loftee_1.0.3.tgz -C ${PREFIX}/share/loftee

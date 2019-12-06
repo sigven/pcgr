@@ -2,7 +2,7 @@ sudo: required
 
 language: python
 python:
-  - "3.6"  # required, otherwise conda will try to clash with py2 packages
+  - "3.7"  # required, otherwise conda will try to clash with py2 packages
 
 services:
   - docker
