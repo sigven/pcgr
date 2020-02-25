@@ -710,7 +710,7 @@ def run_pcgr(host_directories, docker_image_version, config_options, sample_id, 
       fasta_assembly = os.path.join(vep_dir, "homo_sapiens", str(vep_version) + "_" + str(vep_assembly), "Homo_sapiens." + str(vep_assembly) + ".dna.primary_assembly.fa.gz")
       vep_flags = "--hgvs --af --af_1kg --af_gnomad --variant_class --domains --symbol --protein --ccds " + \
          "--uniprot --appris --biotype --canonical --gencode_basic --cache --numbers --total_length --allele_number " + \
-         "--no_stats --no_escape --xref_refseq --vcf --check_ref --dont_skip --flag_pick_allele_gene"
+         "--no_stats --no_escape --xref_refseq --vcf --check_ref --dont_skip --flag_pick_allele"
       vep_options = "--pick_order " + str(config_options['other']['vep_pick_order']) + " --force_overwrite --species homo_sapiens --assembly " \
          + str(vep_assembly) + " --offline --fork " + str(config_options['other']['n_vep_forks']) + " " + str(vep_flags)  + " --dir " + vep_dir
       vep_options += " --cache_version " + str(vep_version)
