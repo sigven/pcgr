@@ -62,6 +62,7 @@ requirements:
     - bioconductor-genomicranges  # GenomicRangesS4Vectors
     - bioconductor-regioner
     - bioconductor-mutationalpatterns
+    - r-shiny
 
   run:
     #
@@ -131,6 +132,7 @@ requirements:
     - bioconductor-genomicranges  # GenomicRangesS4Vectors
     - bioconductor-regioner
     - bioconductor-mutationalpatterns
+    - r-shiny
 
 test:
   commands:
