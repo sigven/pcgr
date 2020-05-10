@@ -853,7 +853,8 @@ def run_pcgr(arg_dict, host_directories, config_options):
       ## PCGR|vcf2maf - if option set, convert VCF to MAF with https://github.com/mskcc/vcf2maf
       if config_options['other']['vcf2maf'] == 1:
          logger.info('Converting VEP-annotated VCF to MAF with https://github.com/mskcc/vcf2maf')
-         vcf2maf_command = str(docker_cmd_run1) + "vcf2maf.pl --input-vcf " + str(input_vcf_pcgr_ready_uncompressed) + " --tumor-id " + \
+         vcf2maf_command = str(docker_cmd_run1) + "vcf2maf.pl --inhibit-vep " + \
+            "--input-vcf " + str(input_vcf_pcgr_ready_uncompressed) + " --tumor-id " + \
             str(arg_dict['sample_id']) + " --output-maf " + str(output_maf) + " --ref-fasta " + str(fasta_assembly) + " --filter-vcf 0 --ncbi-build " + \
                str(NCBI_BUILD_MAF) + " > " + str(output_vcf2maf_log) + " 2>&1" + docker_cmd_run_end
          clean_vcf2maf_command = str(docker_cmd_run1) + "rm -f " + str(output_vcf2maf_log) + " " + re.sub(r'(\.vcf$)', '.vep.vcf', input_vcf_pcgr_ready_uncompressed) + " " + docker_cmd_run_end
