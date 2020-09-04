@@ -90,7 +90,7 @@ requirements:
     # Perl (for VEP)
     - perl-bioperl
     - ensembl-vep ==98.3
-    #- perl-bio-bigfile  # for Loftee (doesn't come with ensemble-vep, but will come with https://github.com/bioconda/bioconda-recipes/pull/18808 once merged)
+    - perl-bio-bigfile  # for Loftee (doesn't come with ensemble-vep, but will come with https://github.com/bioconda/bioconda-recipes/pull/18808 once merged)
     #
     # PCGR: R packages
     - bioconductor-biocinstaller
