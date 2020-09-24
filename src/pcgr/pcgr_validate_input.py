@@ -26,7 +26,8 @@ def __main__():
    parser.add_argument('--output_dir', dest='output_dir', help='Output directory', default='/workdir/output')
    args = parser.parse_args()
 
-   ret = validate_pcgr_input(args.pcgr_dir, args.input_vcf, args.input_cna, args.configuration_file, args.panel_normal_vcf, args.vcf_validation, args.tumor_only,args.genome_assembly, args.output_dir)
+   ret = validate_pcgr_input(args.pcgr_dir, args.input_vcf, args.input_cna, args.configuration_file, 
+                              args.panel_normal_vcf, args.vcf_validation, args.tumor_only,args.genome_assembly, args.output_dir)
    if ret != 0:
       sys.exit(1)
 
@@ -36,6 +37,15 @@ def pcgr_error_message(message, logger):
    logger.error('')
    return -1
 
+
+def check_subprocess(command):
+   try:
+      output = subprocess.check_output(str(command), stderr=subprocess.STDOUT, shell=True)
+      if len(output) > 0:
+         print (str(output.decode()).rstrip())
+   except subprocess.CalledProcessError as e:
+      print (e.output.decode())
+      exit(0)
 
 def is_valid_cna(cna_segment_file, logger):
    """
@@ -48,6 +58,9 @@ def is_valid_cna(cna_segment_file, logger):
       return pcgr_error_message(err_msg, logger)
    
    cna_dataframe = np.read_csv(cna_segment_file, sep="\t")
+   if cna_dataframe.empty is True:
+      err_msg = 'Copy number segment file is empty - contains NO segments'
+      return pcgr_error_message(err_msg, logger)
    if not cna_dataframe['Start'].dtype.kind in 'i': ## check that 'Start' is of type integer
       err_msg = '\'Start\' column of copy number segment file contains non-integer values'
       return pcgr_error_message(err_msg, logger)
@@ -67,48 +80,6 @@ def is_valid_cna(cna_segment_file, logger):
          err_msg = 'Detected wrongly formatted chromosomal segment - \'Start\' or \'End\' is less than or equal to zero (' + str(rec['Chromosome']) + ':' + str(rec['Start']) + '-' + str(rec['End']) + ')'
          return pcgr_error_message(err_msg, logger)
    logger.info('Copy number segment file (' + str(cna_segment_file) + ') adheres to the correct format')
-   return 0
-
-def is_valid_vcf(input_vcf, output_dir, logger):
-   """
-   Function that reads the output file of EBIvariation/vcf-validator and reports potential errors and validation status 
-   """
-   
-   logger.info('Validating VCF file with EBIvariation/vcf-validator (version 0.6)')
-   vcf_validation_output_file = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)','.vcf_validator_output',os.path.basename(input_vcf)))
-   command_v42 = 'vcf_validator --input ' + str(input_vcf) + ' > ' + str(vcf_validation_output_file) + ' 2>&1'
-   if input_vcf.endswith('.gz'):
-      command_v42 = 'bgzip -dc ' + str(input_vcf) + ' | vcf_validator  > ' + str(vcf_validation_output_file) + ' 2>&1'
-   os.system(command_v42)
-   
-   #is_valid_vcf = -1
-   validation_results = {}
-   validation_results['validation_status'] = 0
-   validation_results['error_messages'] = []
-   if os.path.exists(vcf_validation_output_file):
-      f = open(vcf_validation_output_file,'r')
-      for line in f:
-         if not re.search(r' \(warning\)$|Reading from ',line.rstrip()): ## ignore warnings
-            if line.startswith('Line '):
-               validation_results['error_messages'].append('ERROR: ' + line.rstrip())
-            if 'the input file is valid' in line.rstrip(): ## valid VCF
-               validation_results['validation_status'] = 1
-            if 'the input file is not valid' in line.rstrip():  ## non-valid VCF
-               validation_results['validation_status'] = 0
-      f.close()
-      os.system('rm -f ' + str(vcf_validation_output_file))
-   else:
-      err_msg = str(vcf_validation_output_file) + ' does not exist'
-      return pcgr_error_message(err_msg, logger)
-   
-   if validation_results['validation_status'] == 0:
-      error_string_42 = '\n'.join(validation_results['error_messages'])
-      validation_status = 'According to the VCF specification, the VCF file (' + str(input_vcf) + ') is NOT valid'
-      err_msg = validation_status + ':\n' + str(error_string_42)
-      return pcgr_error_message(err_msg, logger)
-   else:
-      validation_status = 'According to the VCF specification, the VCF file ' + str(input_vcf) + ' is valid'
-      logger.info(validation_status)
    return 0
 
 def check_existing_vcf_info_tags(input_vcf, pcgr_directory, genome_assembly, logger):
@@ -163,6 +134,10 @@ def validate_panel_normal_vcf(vcf, logger):
 
 
 def check_format_ad_dp_tags(vcf, pcgr_directory, config_options, tumor_only, logger):
+
+   """
+   Function that checks whether the INFO tags specified for depth/allelic fraction are correctly formatted in the VCF header (i.e. Type)
+   """
    
    found_taf_tag = 0
    found_tdp_tag = 0
@@ -289,24 +264,22 @@ def simplify_vcf(input_vcf, vcf, output_dir, logger):
       command_vcf_sample_free4 = 'bgzip -dc ' + str(input_vcf) + ' | egrep -v \'^#\' | sed \'s/^chr//\' | cut -f1-8 | egrep -v \'^[0-9]\' | egrep \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> ' + str(input_vcf_pcgr_ready)
       command_vcf_sample_free5 = 'bgzip -dc ' + str(input_vcf) + ' | egrep -v \'^#\' | sed \'s/^chr//\' | cut -f1-8 | egrep -v \'^[0-9]\' | egrep -v \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> ' + str(input_vcf_pcgr_ready)
    
-   os.system(command_vcf_sample_free1)
-   os.system(command_vcf_sample_free2)
-   os.system(command_vcf_sample_free3)
-   os.system(command_vcf_sample_free4)
-   os.system(command_vcf_sample_free5)
+   check_subprocess(command_vcf_sample_free1)
+   check_subprocess(command_vcf_sample_free2)
+   check_subprocess(command_vcf_sample_free3)
+   check_subprocess(command_vcf_sample_free4)
+   check_subprocess(command_vcf_sample_free5)
 
    if multiallelic_alt == 1:
       logger.info('Decomposing multi-allelic sites in input VCF file using \'vt decompose\'')
       command_decompose = 'vt decompose -s ' + str(input_vcf_pcgr_ready) + ' > ' + str(input_vcf_pcgr_ready_decomposed) + ' 2> ' + os.path.join(output_dir, 'decompose.log')
-      os.system(command_decompose)
+      check_subprocess(command_decompose)
    else:
       command_copy = 'cp ' + str(input_vcf_pcgr_ready) + ' ' + str(input_vcf_pcgr_ready_decomposed)
-      os.system(command_copy)
+      check_subprocess(command_copy)
    
-   
-
-   os.system('bgzip -cf ' + str(input_vcf_pcgr_ready_decomposed) + ' > ' + str(input_vcf_pcgr_ready_decomposed) + '.gz')
-   os.system('tabix -p vcf ' + str(input_vcf_pcgr_ready_decomposed) + '.gz')
+   check_subprocess('bgzip -cf ' + str(input_vcf_pcgr_ready_decomposed) + ' > ' + str(input_vcf_pcgr_ready_decomposed) + '.gz')
+   check_subprocess('tabix -p vcf ' + str(input_vcf_pcgr_ready_decomposed) + '.gz')
 
    if os.path.exists(input_vcf_pcgr_ready_decomposed + '.gz') and os.path.getsize(input_vcf_pcgr_ready_decomposed + '.gz') > 0:
       vcf = VCF(input_vcf_pcgr_ready_decomposed + '.gz')
@@ -319,7 +292,7 @@ def simplify_vcf(input_vcf, vcf, output_dir, logger):
          logger.info('')
          exit(1)
 
-   os.system('rm -f ' + str(input_vcf_pcgr_ready) + ' ' + os.path.join(output_dir, 'decompose.log'))
+   check_subprocess('rm -f ' + str(input_vcf_pcgr_ready) + ' ' + os.path.join(output_dir, 'decompose.log'))
 
 def validate_pcgr_input(pcgr_directory, input_vcf, input_cna, configuration_file, panel_normal_vcf, vcf_validation, tumor_only, genome_assembly, output_dir):
    """
@@ -332,35 +305,44 @@ def validate_pcgr_input(pcgr_directory, input_vcf, input_cna, configuration_file
    6. Check that copy number segment file has required columns and correct data types (and range)
    7. Any genotype data from VCF input file is stripped, and the resulting VCF file is sorted and indexed (bgzip + tabix) 
    """
-   logger = annoutils.getlogger('pcgr-validate-input')
+   logger = annoutils.getlogger('pcgr-validate-arguments-input')
    config_options = annoutils.read_config_options(configuration_file, pcgr_directory, genome_assembly, logger, wflow = 'pcgr')
 
    if panel_normal_vcf == "None" and tumor_only == 1 and config_options['tumor_only']['exclude_pon'] is True:
       logger.warn('Panel-of-normals VCF is not present - exclusion of calls found in panel-of-normals will be ignored')
 
    if not input_vcf == 'None':
+
+      ## Perform VCF validation if this option is set
       if vcf_validation == 1:
-         valid_vcf = is_valid_vcf(input_vcf, output_dir, logger)
+         valid_vcf = annoutils.is_valid_vcf(input_vcf, output_dir, logger, False)
          if valid_vcf == -1:
             return -1
       else:
          logger.info('Skipping validation of VCF file - as provided by option --no_vcf_validate')
+
+      ## Check that VCF does not contain INFO tags that will be appended with PCGR annotation
       tag_check = check_existing_vcf_info_tags(input_vcf, pcgr_directory, genome_assembly, logger)
       if tag_check == -1:
          return -1
       
+      ## Check whether specified tags for depth/allelic fraction is properly defined in VCF
       vcf = VCF(input_vcf)
       allelic_support_check = check_format_ad_dp_tags(vcf, pcgr_directory, config_options, tumor_only, logger)
       if allelic_support_check == -1:
          return -1
       
+      ## Simplify VCF - remove multiallelic variants
       simplify_vcf(input_vcf, vcf, output_dir, logger)
    
+
+   ## Validate panel-of-normals VCF is this is provided
    if not panel_normal_vcf == "None":
       valid_panel_normals = validate_panel_normal_vcf(panel_normal_vcf, logger)
       if valid_panel_normals == -1:
          return -1
-      
+   
+   ## Check whether file with copy number aberration segments is properly formatted
    if not input_cna == 'None':
       valid_cna = is_valid_cna(input_cna, logger)
       if valid_cna == -1:

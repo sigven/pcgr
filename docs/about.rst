@@ -6,15 +6,19 @@ What is the Personal Cancer Genome Reporter (PCGR)?
 
 The Personal Cancer Genome Reporter (PCGR) is a stand-alone software
 package for functional annotation and translation of individual cancer
-genomes for precision oncology. It interprets both somatic SNVs/InDels
-and copy number aberrations. The software extends basic gene and variant
-annotations from the `Ensembl’s Variant Effect Predictor
+genomes for precision cancer medicine. It interprets both somatic
+SNVs/InDels and copy number aberrations. The software extends basic gene
+and variant annotations from the `Ensembl’s Variant Effect Predictor
 (VEP) <http://www.ensembl.org/info/docs/tools/vep/index.html>`__ with
 oncology-relevant, up-to-date annotations retrieved flexibly through
-`vcfanno <https://github.com/brentp/vcfanno>`__, and produces
-interactive HTML reports intended for clinical interpretation.
+`vcfanno <https://github.com/brentp/vcfanno>`__. Variants are classified
+into `tiers of clinical significance <tier_systems.md>`__, and
+interactive HTML output reports permits exploration of the final
+results.
 
-|image0|
+Example views from the dashboard HTML output:
+
+|image1|
 
 The Personal Cancer Genome Reporter has been developed by scientists
 affiliated with the `Norwegian Cancer Genomics
@@ -24,10 +28,17 @@ Research/Oslo University Hospital <http://radium.no>`__.
 Example reports
 ~~~~~~~~~~~~~~~
 
--  `Report for a breast tumor sample
-   (TCGA) <http://folk.uio.no/sigven/tumor_sample.BRCA.pcgr_acmg.grch37.v0.8.2.html>`__
--  `Report for a colon adenocarcinoma sample
-   (TCGA) <http://folk.uio.no/sigven/tumor_sample.COAD.pcgr_acmg.grch37.v0.8.2.html>`__
+-  `Cervical cancer sample
+   (tumor-only) <http://insilico.hpc.uio.no/pcgr/example_reports/0.9.0rc/TCGA-FU-A3HZ-01A_TO.pcgr_acmg.grch37.flexdb.html>`__
+-  `Lung cancer sample
+   (tumor-control) <http://insilico.hpc.uio.no/pcgr/example_reports/0.9.0rc/TCGA-95-7039-01A.pcgr_acmg.grch37.flexdb.html>`__
+-  `Breast cancer sample
+   (tumor-control) <http://insilico.hpc.uio.no/pcgr/example_reports/0.9.0rc/TCGA-EW-A1J5-01A.pcgr_acmg.grch37.flexdb.html>`__
+-  `Brain cancer sample
+   (tumor-control) <http://insilico.hpc.uio.no/pcgr/example_reports/0.9.0rc/TCGA-14-0866-01B.pcgr_acmg.grch37.flexdb.html>`__
+
+(to view the rmarkdown-based reports, simply remove *.flexdb.* in the
+file names for the flexdashboard reports)
 
 Why use PCGR?
 ~~~~~~~~~~~~~
@@ -50,7 +61,7 @@ Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, Ola
 Myklebost, and Eivind Hovig. **Personal Cancer Genome Reporter: variant
 interpretation report for precision oncology** (2017). *Bioinformatics*.
 34(10):1778–1780.
-doi:\ `10.1093/bioinformatics/btx817 <https://doi.org/10.1093/bioinformatics/btx817>`__
+doi:`10.1093/bioinformatics/btx817 <https://doi.org/10.1093/bioinformatics/btx817>`__
 
 Docker-based technology
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -63,13 +74,12 @@ of. In addition to the bundled software, in the form of a Docker image,
 the workflow only needs to be attached with an `annotation data bundle
 for precision oncology <annotation_resources.html>`__.
 
-|image1|
+|image2|
 
 Contact
 ~~~~~~~
 
 sigven@ifi.uio.no
 
-.. |image0| image:: PCGR_workflow.png
-.. |image1| image:: docker-logo50.png
-
+.. |image1| image:: pcgr_dashboard_views.png
+.. |image2| image:: docker-logo50.png

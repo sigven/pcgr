@@ -1,0 +1,21 @@
+
+
+## Summary of findings
+
+```{r donut_chart, echo = F, fig.width = width_donut, fig.height = height_donut, eval = cps_report[['content']][['snv_indel']][['eval']]}
+p1 <- pcgrr::summary_donut_chart(cps_report$content$snv_indel$variant_set$tsv, plot_type = "ClinVar")
+p2 <- pcgrr::summary_donut_chart(cps_report$content$snv_indel$variant_set$tsv, plot_type = "Other")
+
+p <- NULL
+if(!is.null(p1) & !is.null(p2)){
+  p <- ggpubr::ggarrange(p1, p2, labels = c("",""), ncol = 2, nrow = 1)
+}
+if(!is.null(p1) & is.null(p2)){
+  p  = p1
+}
+if(is.null(p1) & !is.null(p2)){
+  p <- p2
+}
+p
+
+```

@@ -1,0 +1,108 @@
+Noncoding {data-navmenu="SNVs and InDels"}
+================================================================== 
+
+Row
+-------------------------------------
+
+### SNVs and InDels
+
+```{r}
+flexdashboard::valueBox("Noncoding", caption = NULL, color = '#000000', icon = NULL)
+```
+
+
+### Total variants
+
+```{r}
+flexdashboard::valueBox(pcg_report$content$snv_indel$variant_statistic$n_noncoding, color = pcg_report$metadata$color_value_box, icon = "fa-dna")
+```
+
+### SNVs
+
+```{r}
+n_snv <- dplyr::filter(pcg_report$content$snv_indel$variant_set$tsv, VARIANT_CLASS == "SNV" & TIER == "NONCODING") %>% 
+  nrow()
+flexdashboard::valueBox(as.character(n_snv), color = pcg_report$metadata$color_value_box, icon = "fa-dna")
+```
+
+### InDels
+
+```{r}
+n_indel <- dplyr::filter(pcg_report$content$snv_indel$variant_set$tsv, 
+                       (VARIANT_CLASS == "insertion" | VARIANT_CLASS == "deletion" | VARIANT_CLASS == "indel") & TIER == "NONCODING") %>%
+  nrow()
+
+flexdashboard::valueBox(as.character(n_indel), color = pcg_report$metadata$color_value_box, icon = "fa-dna")
+```
+
+### Block substitutions
+
+```{r}
+n_block <- dplyr::filter(pcg_report$content$snv_indel$variant_set$tsv, VARIANT_CLASS == "substitution" & TIER == "NONCODING") %>%
+  nrow()
+
+flexdashboard::valueBox(as.character(n_block), color = pcg_report$metadata$color_value_box, icon = "fa-dna")
+```
+
+Row
+-----------------------------------------------------
+
+### Noncoding - variant filters {data-padding=15 data-width=250}
+
+<br>
+
+```{r table_browse_noncoding, echo=F, results = "asis", eval = pcg_report$content$snv_indel$variant_statistic$n_noncoding > 0}
+
+if(NROW(pcg_report[['content']][['snv_indel']][['variant_display']][['noncoding']]) > 5000){
+  cat('<b>NOTE - only considering top 5000 variants (ranked according to Open Targets phenotype association score) </b><br>',sep="\n")
+  cat('<br>')
+  pcg_report[['content']][['snv_indel']][['variant_display']][['noncoding']] <- 
+    head(pcg_report[['content']][['snv_indel']][['variant_display']][['noncoding']], 5000)
+}
+htmltools::br()
+
+
+cat('Noncoding variants (right panel) can be interactively explored according to various criteria\n:')
+
+variants_noncoding_shared <- 
+  crosstalk::SharedData$new(pcg_report[['content']][['snv_indel']][['variant_display']][['noncoding']])
+
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_noncoding_shared, ~CONSEQUENCE),
+    crosstalk::filter_select("SYMBOL", "Gene", variants_noncoding_shared, ~SYMBOL)
+  )
+)
+
+```
+
+
+```{r noncoding_missing_filters, echo=F, results = 'asis', eval = pcg_report$content$snv_indel$variant_statistic$n_noncoding == 0}
+cat('\n*  <i> <font style="font-size: 110%"><b>No</b> noncoding variants found.</font></i>', sep = '\n')
+cat('\n')
+```
+
+
+### Noncoding  - variant datatable {data-padding=15}
+
+
+```{r table_noncoding, eval = pcg_report$content$snv_indel$variant_statistic$n_noncoding > 0}
+
+DT::datatable(variants_noncoding_shared, escape=F,extensions=c("Buttons","Responsive"), 
+options=list(buttons = c('csv','excel'), 
+             scrollCollapse = T,
+             scrollY = scrollY_flexdb_container,
+             autoWidth = T, 
+                 fixedColumns = T,
+                 fixedHeader = T,
+                 #scrollX = F,
+                  columnDefs = list(list(width = '90px', targets = c(1,2,3,4,5,6))),
+             dom = 'Bfrtip')) %>%
+  DT::formatStyle("SYMBOL","OPENTARGETS_RANK", color = "white", backgroundColor = DT::styleInterval(pcg_report[['content']][['report_display_config']][['opentargets_rank']][['breaks']], pcg_report[['content']][['report_display_config']][['opentargets_rank']][['colors']]))
+  
+```
+
+```{r noncoding_missing_data, echo=F, results = 'asis', eval = pcg_report$content$snv_indel$variant_statistic$n_noncoding == 0}
+cat('\n*  <i> <font style="font-size: 110%"><b>No</b> noncoding variants found.</font></i>', sep = '\n')
+cat('\n')
+```

@@ -47,10 +47,12 @@ def extend_vcf_annotations(query_vcf, pcgr_db_directory, logger, pon_annotation,
    """
    Function that reads VEP/vcfanno-annotated VCF and extends the VCF INFO column with tags from
    1. CSQ elements within the primary transcript consequence picked by VEP, e.g. SYMBOL, Feature, Gene, Consequence etc.
-   2. Cancer-relevant gene annotations, e.g. known oncogenes/tumor suppressors, known antineoplastic drugs interacting with a given protein etc.
+   2. Cancer-relevant gene annotations (PCGR_ONCO_XREF), e.g. known oncogenes/tumor suppressors, known antineoplastic drugs interacting with a given protein etc.
    3. Protein-relevant annotations, e.g. cancer hotspot mutations, functional protein features etc.
    4. Variant effect predictions
    5. Panel-of-normal (blacklisted variants) annotation
+
+   List of INFO tags to be produced is provided by the 'infotags' files in the pcgr_db_directory
    """
 
    ## read VEP and PCGR tags to be appended to VCF file
@@ -74,10 +76,20 @@ def extend_vcf_annotations(query_vcf, pcgr_db_directory, logger, pon_annotation,
    w = Writer(out_vcf, vcf)
    current_chrom = None
    num_chromosome_records_processed = 0
-   pcgr_onco_xref_map = {'ENSEMBL_TRANSCRIPT_ID': 0, 'ENSEMBL_GENE_ID':1, 'ENSEMBL_PROTEIN_ID':2, 'SYMBOL':3, 'SYMBOL_ENTREZ':4, 'ENTREZ_ID':5, 'UNIPROT_ID':6, 'APPRIS':7,'UNIPROT_ACC':8,'REFSEQ_MRNA':9,'CORUM_ID':10,'TUMOR_SUPPRESSOR':11,
-                        'ONCOGENE':12,'DRIVER':13, 'NETWORK_CG':14,'DISGENET_CUI':15,'CHEMBL_COMPOUND_ID':16,'INTOGEN_DRIVER':17,'TCGA_DRIVER':18,'ONCOSCORE':19, 'MIM_PHENOTYPE_ID':20, 'CANCER_PREDISPOSITION_SOURCE':21, 
-                        'CANCER_SUSCEPTIBILITY_CUI':22, 'CANCER_SYNDROME_CUI':23, 'CANCER_PREDISPOSITION_MOI':24, 'CANCER_PREDISPOSITION_MOD':25, 'SIGNALING_PATHWAY':26, 'OPENTARGETS_DISEASE_ASSOCS':27,
-                        'OPENTARGETS_TRACTABILITY_COMPOUND:':28, 'OPENTARGETS_TRACTABILITY_ANTIBODY':29, 'GE_PANEL_ID':30, 'ACTIONABLE_TARGET':31}
+   pcgr_onco_xref_map = {'ENSEMBL_TRANSCRIPT_ID': 0, 'ENSEMBL_GENE_ID':1, 'ENSEMBL_PROTEIN_ID':2, 'SYMBOL':3, 'SYMBOL_ENTREZ':4, 
+                        'ENTREZ_ID':5, 'UNIPROT_ID':6, 'APPRIS':7,'UNIPROT_ACC':8,'REFSEQ_MRNA':9,'CORUM_ID':10,'TUMOR_SUPPRESSOR':11,
+                        'TUMOR_SUPPRESSOR_EVIDENCE':12, 'ONCOGENE':13, 'ONCOGENE_EVIDENCE':14,
+                        'NETWORK_CG':15,'DISGENET_CUI':16,'CHEMBL_COMPOUND_ID':17,'CHEMBL_COMPOUND_ID_EARLY_PHASE':18, 'INTOGEN_DRIVER':19,
+                        'TCGA_DRIVER':20,'ONCOSCORE':21, 'MIM_PHENOTYPE_ID':22, 'CANCER_PREDISPOSITION_SOURCE':23, 
+                        'CANCER_SUSCEPTIBILITY_CUI':24, 'CANCER_SYNDROME_CUI':25, 'CANCER_PREDISPOSITION_MOI':26, 
+                        'CANCER_PREDISPOSITION_MOD':27, 'SIGNALING_PATHWAY':28, 'OPENTARGETS_DISEASE_ASSOCS':29,
+                        'OPENTARGETS_TRACTABILITY_COMPOUND':30, 'OPENTARGETS_TRACTABILITY_ANTIBODY':31, 'GE_PANEL_ID':32, 
+                        'ACTIONABLE_TARGET':33,'GENCODE_GENE_STATUS':34,
+                        'PROB_HAPLOINSUFFICIENCY':35,'PROB_EXAC_LOF_INTOLERANT':36,'PROB_EXAC_LOF_INTOLERANT_HOM':37,
+                        'PROB_EXAC_LOF_TOLERANT_NULL':38,'PROB_EXAC_NONTCGA_LOF_INTOLERANT':39,
+                        'PROB_EXAC_NONTCGA_LOF_INTOLERANT_HOM':40, 'PROB_EXAC_NONTCGA_LOF_TOLERANT_NULL':41,
+                        'PROB_GNOMAD_LOF_INTOLERANT':42, 'PROB_GNOMAD_LOF_INTOLERANT_HOM':43, 'PROB_GNOMAD_LOF_TOLERANT_NULL':44,
+                        'ESSENTIAL_GENE_CRISPR':45, 'ESSENTIAL_GENE_CRISPR2':46}
    
    vcf_info_element_types = {}
    for e in vcf.header_iter():
@@ -150,4 +162,4 @@ def extend_vcf_annotations(query_vcf, pcgr_db_directory, logger, pon_annotation,
 if __name__=="__main__": __main__()
 
 
-      
+

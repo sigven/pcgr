@@ -31,3 +31,5 @@ ACMG_BP4	funccomp	B	Functional - computational & predictive	Multiple lines (>=5)
 ACMG_BMC1	funcvar	B	Functional - variant effect	Peptide change is at the same location of a known benign change (ClinVar - minimum two review stars)	NA	0
 ACMG_BSC1	funcvar	B	Functional - variant effect	Peptide change is reported as benign (ClinVar - minimum two review stars)	EV0112	-3
 ACMG_BP1	funcvar	B	Functional - variant effect	Missense variant in a gene for which primarily truncating variants (>= 90% of pathogenic variants) are known to cause disease (ClinVar)	NA	-0.5
+ACMG_BP3	funcvar	B	Functional - variant effect	Non-coding variant in the UTR or promoter region	EV0168	-2.5
+ACMG_BP7	funcvar	B	Functional - variant effect	Silent and intronic changes outside of the consensus splice site	EV0103	-2.5

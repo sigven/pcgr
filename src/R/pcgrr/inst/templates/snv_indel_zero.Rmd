@@ -1,4 +1,0 @@
-<br>
-There are __0__ _PASS_ variants (potentially after filtering) in the input VCF file
-<br>
-

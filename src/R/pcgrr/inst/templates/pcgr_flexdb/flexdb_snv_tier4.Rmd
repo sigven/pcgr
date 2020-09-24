@@ -1,0 +1,117 @@
+Tier 4 {data-navmenu="SNVs and InDels"}
+================================================================== 
+
+Row
+-------------------------------------
+
+### SNVs and InDels
+
+```{r}
+flexdashboard::valueBox("TIER 4", caption = NULL, color = '#000000', icon = NULL)
+```
+
+
+### Total variants
+
+```{r}
+flexdashboard::valueBox(pcg_report$content$snv_indel$variant_statistic$n_tier4, color = pcg_report$metadata$color_value_box, icon = "fa-dna")
+```
+
+### SNVs
+
+```{r}
+n_snv <- dplyr::filter(pcg_report$content$snv_indel$variant_set$tsv, VARIANT_CLASS == "SNV" & TIER == "TIER 4") %>% nrow()
+flexdashboard::valueBox(as.character(n_snv), color = pcg_report$metadata$color_value_box, icon = "fa-dna")
+```
+
+### InDels
+
+```{r}
+n_indel <- dplyr::filter(pcg_report$content$snv_indel$variant_set$tsv, 
+                       (VARIANT_CLASS == "insertion" | VARIANT_CLASS == "deletion" | VARIANT_CLASS == "indel") & TIER == "TIER 4") %>%
+  nrow()
+
+flexdashboard::valueBox(as.character(n_indel), color = pcg_report$metadata$color_value_box, icon = "fa-dna")
+```
+
+### Block substitutions
+
+```{r}
+n_block <- dplyr::filter(pcg_report$content$snv_indel$variant_set$tsv, 
+                         VARIANT_CLASS == "substitution" & TIER == "TIER 4") %>% 
+  nrow()
+
+flexdashboard::valueBox(as.character(n_block), color = pcg_report$metadata$color_value_box, icon = "fa-dna")
+```
+
+
+
+Row
+-----------------------------------------------------
+
+### Tier 4 - variant filters {data-padding=15 data-width=250}
+
+<br>
+
+```{r table_browse_tier4, echo=F, results = "asis", eval = pcg_report$content$snv_indel$variant_statistic$n_tier4 > 0}
+
+if(NROW(pcg_report[['content']][['snv_indel']][['variant_display']][['tier4']]) > 5000){
+  cat('<b>NOTE - only considering top 5000 variants (ranked according to Open Targets phenotype association score) </b><br>',sep="\n")
+  cat('<br>')
+  pcg_report[['content']][['snv_indel']][['variant_display']][['tier4']] <- 
+    head(pcg_report[['content']][['snv_indel']][['variant_display']][['tier4']], 5000)
+}
+htmltools::br()
+
+cat('Variants in TIER 4 (right panel) can be interactively explored according to various criteria\n:')
+
+
+
+tier4_vars <- pcg_report[['content']][['snv_indel']][['variant_display']][['tier4']]
+
+variants_tier4_shared <- crosstalk::SharedData$new(tier4_vars)
+
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_tier4_shared, ~CONSEQUENCE),
+    crosstalk::filter_select("SYMBOL", "Gene", variants_tier4_shared, ~SYMBOL),
+    crosstalk::filter_select("CHEMBL_COMPOUND_TERMS", "Targeted drugs", variants_tier4_shared, ~TARGETED_DRUGS)
+  )
+)
+
+
+```
+
+
+```{r tier4_missing_filters, echo=F, results = 'asis', eval = pcg_report$content$snv_indel$variant_statistic$n_tier4 == 0}
+cat('\n*  <i> <font style="font-size: 110%"><b>No</b> other protein-coding variants found.</font></i>', sep = '\n')
+cat('\n')
+```
+
+
+### Tier 4 - variant datatable {data-padding=15}
+
+<br>
+
+```{r table_tier4, eval = pcg_report$content$snv_indel$variant_statistic$n_tier4 > 0}
+
+DT::datatable(variants_tier4_shared, escape=F,extensions=c("Buttons","Responsive"), 
+options=list(buttons = c('csv','excel'), 
+             scrollCollapse=T, 
+             scrollY = scrollY_flexdb_container,
+             autoWidth = T, 
+                 fixedColumns = T,
+                 fixedHeader = T,
+             width = "100%",
+                 #scrollX = F,
+                  columnDefs = list(list(width = '90px', targets = c(1,2,3,4,5,6))),
+             dom = 'Bfrtip')) %>%
+  DT::formatStyle("SYMBOL","OPENTARGETS_RANK", color = "white", backgroundColor = DT::styleInterval(pcg_report[['content']][['report_display_config']][['opentargets_rank']][['breaks']], pcg_report[['content']][['report_display_config']][['opentargets_rank']][['colors']]))
+  
+```
+
+```{r tier4_missing_data, echo=F, results = 'asis', eval = pcg_report$content$snv_indel$variant_statistic$n_tier4 == 0}
+cat('\n*  <i> <font style="font-size: 110%"><b>No</b> other protein-coding variants found.</font></i>', sep = '\n')
+cat('\n')
+```
+

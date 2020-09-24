@@ -12,6 +12,7 @@ Welcome to PCGR's documentation!
 
    about
    getting_started
+   FAQ
    annotation_resources
    input
    output

@@ -1,0 +1,16 @@
+<br><br>
+
+### Virtual gene panel
+
+Cancer predisposition geneset subject to analysis/screening in this report:
+
+   *  __[`r cps_report[['metadata']][['gene_panel']][['name']]`](`r cps_report[['metadata']][['gene_panel']][['url']]`)__
+   *  `r cps_report[['metadata']][['gene_panel']][['confidence']]`
+   
+```{r gene_selection, echo = F, eval = T}
+tiles_html <- pcgrr::virtual_panel_display_html(gene_df = cps_report[['metadata']][['gene_panel']][['genes']])
+```
+
+`r tiles_html`
+
+<br><br>

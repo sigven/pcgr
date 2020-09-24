@@ -8,6 +8,7 @@ Welcome to Personal Cancer Genome Reporter's documentation!
 
    about
    getting_started
+   FAQ
    annotation_resources
    input
    output

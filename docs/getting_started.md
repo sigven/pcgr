@@ -1,55 +1,57 @@
 ## Getting started
 
-
 ### STEP 0: Python
 
 An installation of Python (version _3.6_) is required to run PCGR. Check that Python is installed by typing `python --version` in your terminal window. In addition, a [Python library](https://github.com/uiri/toml) for parsing configuration files encoded with [TOML](https://github.com/toml-lang/toml) is needed. To install, simply run the following command:
 
-	pip install toml
+   	pip install toml
 
 ### STEP 1: Installation of Docker
 
 1. [Install the Docker engine](https://docs.docker.com/engine/installation/) on your preferred platform
-	- installing [Docker on Linux](https://docs.docker.com/engine/installation/linux/)
-	- installing [Docker on Mac OS](https://docs.docker.com/engine/installation/mac/)
-	- NOTE: We have not yet been able to perform enough testing on the Windows platform, and we have received feedback that particular versions of Docker/Windows do not work with PCGR (an example being [mounting of data volumes](https://github.com/docker/toolbox/issues/607))
+   - installing [Docker on Linux](https://docs.docker.com/engine/installation/linux/)
+   - installing [Docker on Mac OS](https://docs.docker.com/engine/installation/mac/)
+   - NOTE: We have not yet been able to perform enough testing on the Windows platform, and we have received feedback that particular versions of Docker/Windows do not work with PCGR (an example being [mounting of data volumes](https://github.com/docker/toolbox/issues/607))
 2. Test that Docker is running, e.g. by typing `docker ps` or `docker images` in the terminal window
 3. Adjust the computing resources dedicated to the Docker, i.e.:
-	- Memory: minimum 5GB
-	- CPUs: minimum 4
-	- [How to - Mac OS X](https://docs.docker.com/docker-for-mac/#advanced)
-	- __NOTE__: For query VCF's that are very large (size to be determined) one may need to adjust these settings
+   - Memory: minimum 5GB
+   - CPUs: minimum 4
+   - [How to - Mac OS X](https://docs.docker.com/docker-for-mac/#advanced)
 
 ### STEP 2: Download PCGR and data bundle
 
 #### Development version
 
-a. Clone the PCGR GitHub repository: `git clone https://github.com/sigven/pcgr.git`
+a. Clone the PCGR GitHub repository (includes run script and default configuration file): `git clone https://github.com/sigven/pcgr.git`
+
 b. Download and unpack the latest data bundles in the PCGR directory
-   * [grch37 data bundle - 20191116](https://drive.google.com/file/d/1TdYagetk-l__aYBsaZJHJvYFStDnIEcq) (approx 16Gb)
-   * [grch38 data bundle - 20191116](https://drive.google.com/file/d/1wpVqlgY5jBKkQaTAxzgf0rgxKxOEJgj-) (approx 17Gb)
+   * [grch37 data bundle - 20200920](http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch37.20200920.tgz) (approx 17Gb)
+   * [grch38 data bundle - 20200920](http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch38.20200920.tgz) (approx 18Gb)
    * *Unpacking*: `gzip -dc pcgr.databundle.grch37.YYYYMMDD.tgz | tar xvf -`
-c. Pull the [PCGR Docker image (*dev*)](https://hub.docker.com/r/sigven/pcgr/) from DockerHub (approx 5.2Gb):
-      * `docker pull sigven/pcgr:dev` (PCGR annotation engine)
+
+c. Pull the [PCGR Docker image (*dev*)](https://hub.docker.com/r/sigven/pcgr/) from DockerHub (approx 6.8Gb):
+* `docker pull sigven/pcgr:dev` (PCGR annotation engine)
 
 #### Latest release
 
-a. Download and unpack the [latest software release (0.8.4)](https://github.com/sigven/pcgr/releases/tag/v0.8.4)
+a. Download and unpack the [latest software release (0.9.0rc)](https://github.com/sigven/pcgr/releases/tag/v0.9.0rc)
+
 b. Download and unpack the assembly-specific data bundle in the PCGR directory
-* [grch37 data bundle - 20191116](https://drive.google.com/file/d/1TdYagetk-l__aYBsaZJHJvYFStDnIEcq) (approx 16Gb)
-* [grch38 data bundle - 20191116](https://drive.google.com/file/d/1wpVqlgY5jBKkQaTAxzgf0rgxKxOEJgj-) (approx 17Gb)
-   * *Unpacking*: `gzip -dc pcgr.databundle.grch37.YYYYMMDD.tgz | tar xvf -`
+  * [grch37 data bundle - 20200920](http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch37.20200920.tgz) (approx 17Gb)
+  * [grch38 data bundle - 20200920](http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch38.20200920.tgz) (approx 18Gb)
+     * *Unpacking*: `gzip -dc pcgr.databundle.grch37.YYYYMMDD.tgz | tar xvf -`
 
     A _data/_ folder within the _pcgr-X.X_ software folder should now have been produced
-c. Pull the [PCGR Docker image (0.8.4)](https://hub.docker.com/r/sigven/pcgr/) from DockerHub (approx 5.2Gb):
-   * `docker pull sigven/pcgr:0.8.4` (PCGR annotation engine)
+
+c. Pull the [PCGR Docker image (0.9.0rc)](https://hub.docker.com/r/sigven/pcgr/) from DockerHub (approx 6.8Gb):
+   * `docker pull sigven/pcgr:0.9.0rc` (PCGR annotation engine)
 
 ### STEP 3: Input preprocessing
 
 The PCGR workflow accepts two types of input files:
 
-* An unannotated, single-sample VCF file (>= v4.2) with called somatic variants (SNVs/InDels)
-* A copy number segment file
+  * An unannotated, single-sample VCF file (>= v4.2) with called somatic variants (SNVs/InDels)
+  * A copy number segment file
 
 PCGR can be run with either or both of the two input files present.
 
@@ -66,118 +68,150 @@ The tab-separated values file with copy number aberrations __MUST__ contain the 
 
 Here, _Chromosome_, _Start_, and _End_ denote the chromosomal segment, and __Segment_Mean__ denotes the log(2) ratio for a particular segment, which is a common output of somatic copy number alteration callers. Note that coordinates must be **one-based** (i.e. chromosomes start at 1, not 0). Below shows the initial part of a copy number segment file that is formatted correctly according to PCGR's requirements:
 
-	 Chromosome	Start	End	Segment_Mean
-	 1 3218329 3550598 0.0024
-	 1 3552451 4593614 0.1995
-	 1 4593663 6433129 -1.0277
+    Chromosome	Start	End	Segment_Mean
+    1 3218329 3550598 0.0024
+    1 3552451 4593614 0.1995
+    1 4593663 6433129 -1.0277
 
 
-### STEP 4: Configure PCGR
+### STEP 4: Configure your PCGR workflow
 
 The PCGR software bundle comes with a default configuration file in the *conf/* folder, to be used as a starting point for runnning the PCGR workflow. The configuration file, formatted using [TOML](https://github.com/toml-lang/toml), enables the user to configure a number of options related to the following:
 
-* Sequencing depth/allelic support (definition of tags + thresholds)
-* MSI prediction
-* Mutational signatures analysis
-* Mutational burden analysis
-* VCF to MAF conversion
-* Tumor-only analysis options (i.e. exclusion of germline variants/enrichment for somatic calls)
+* __IMPORTANT__: Designation of VCF INFO tags that denote variant depth/allelic fraction
+    * If this is not available/properly set, the report contents will be less informative __AND__ it will not be possible to preset thresholds for depth/allelic fraction
+* Tumor-only analysis options
+	* tick on/off various filtering schemes for exclusion of germline variants (for input VCFs coming from tumor-only sequencing assays)
 * VEP/_vcfanno_ options
-* Log-ratio thresholds for gains/losses in CNA analysis
 
-More details about the exact [usage of the configuration options](http://pcgr.readthedocs.io/en/latest/input.html#pcgr-configuration-file).
+More details about the exact nature of the [configuration options](http://pcgr.readthedocs.io/en/latest/input.html#pcgr-configuration-file).
 
 
 ### STEP 5: Run example
 
-A tumor sample report is generated by calling the Python script __pcgr.py__, which takes the following arguments and options:
-
-	usage: pcgr.py -h [options] <PCGR_DIR> <OUTPUT_DIR> <GENOME_ASSEMBLY> <CONFIG_FILE> <SAMPLE_ID>
+	usage: pcgr.py -h [options] --input_vcf INPUT_VCF --pcgr_dir PCGR_DIR --output_dir OUTPUT_DIR --genome_assembly  GENOME_ASSEMBLY --conf CONFIG_FILE --sample_id SAMPLE_ID
 
 	Personal Cancer Genome Reporter (PCGR) workflow for clinical interpretation of somatic nucleotide variants and copy number aberration segments
 
-	positional arguments:
-	  pcgr_dir              PCGR base directory with accompanying data directory, e.g. ~/pcgr-0.8.4
-	  output_dir            Output directory
-	  {grch37,grch38}       Genome assembly build: grch37 or grch38
-	  configuration_file    PCGR configuration file (TOML format)
-	  sample_id             Tumor sample/cancer genome identifier - prefix for output files
+	Required arguments:
+	--input_vcf INPUT_VCF
+				    VCF input file with somatic variants in tumor sample, SNVs/InDels
+	--pcgr_dir PCGR_DIR   PCGR base directory with accompanying data directory, e.g. ~/pcgr-0.9.0
+	--output_dir OUTPUT_DIR
+				    Output directory
+	--genome_assembly {grch37,grch38}
+				    Human genome assembly build: grch37 or grch38
+	--conf CONFIGURATION_FILE
+				    PCGR configuration file in TOML format
+	--sample_id SAMPLE_ID
+				    Tumor sample/cancer genome identifier - prefix for output files
 
-	optional arguments:
-	  -h, --help            show this help message and exit
-	  --input_vcf INPUT_VCF
-	                        VCF input file with somatic query variants (SNVs/InDels).
-	  --input_cna INPUT_CNA
-	                        Somatic copy number alteration segments (tab-separated values)
-	  --input_cna_plot INPUT_CNA_PLOT
-	                        Somatic copy number alteration plot
-	  --pon_vcf PON_VCF     VCF file with germline calls from Panel of Normals (PON) - i.e. blacklisted variants, (default: None)
-	  --tumor_type TTYPE    Optional integer code to specify tumor type of query,
-	                         choose any of the following identifiers:
-	                        1 = Adrenal_Gland_Cancer_NOS
-	                        2 = Ampullary_Carcinoma_NOS
-	                        3 = Biliary_Tract_Cancer_NOS
-	                        4 = Bladder_Urinary_Tract_Cancer_NOS
-	                        5 = Bone_Cancer_NOS
-	                        6 = Breast_Cancer_NOS
-	                        7 = CNS_Brain_Cancer_NOS
-	                        8 = Cancer_Unknown_Primary_NOS
-	                        9 = Cervical_Cancer_NOS
-	                        10 = Colorectal_Cancer_NOS
-	                        11 = Esophageal_Cancer_NOS
-	                        12 = Head_And_Neck_Cancer_NOS
-	                        13 = Kidney_Cancer_NOS
-	                        14 = Leukemia_NOS
-	                        15 = Liver_Cancer_NOS
-	                        16 = Lung_Cancer_NOS
-	                        17 = Lymphoma_Hodgkin_NOS
-	                        18 = Lymphoma_Non_Hodgkin_NOS
-	                        19 = Multiple_Myeloma
-	                        20 = Ocular_Cancer_NOS
-	                        21 = Ovarian_Fallopian_Tube_Cancer_NOS
-	                        22 = Pancreatic_Cancer_NOS
-	                        23 = Penile_Cancer_NOS
-	                        24 = Peripheral_Nervous_System_Cancer_NOS
-	                        25 = Peritoneal_Cancer_NOS
-	                        26 = Pleural_Cancer_NOS
-	                        27 = Prostate_Cancer_NOS
-	                        28 = Skin_Cancer_NOS
-	                        29 = Soft_Tissue_Cancer_Sarcoma_NOS
-	                        30 = Stomach_Cancer_NOS
-	                        31 = Testicular_Cancer_NOS
-	                        32 = Thymic_Cancer_NOS
-	                        33 = Thyroid_Cancer_NOS
-	                        34 = Uterine_Cancer_NOS
-	                        35 = Vulvar_Vaginal_Cancer_NOS
-	                        (default: 0 - any tumor type)
-	  --tumor_purity TUMOR_PURITY
-	                        Estimated tumor purity (between 0 and 1, (default: None)
-	  --tumor_ploidy TUMOR_PLOIDY
-	                        Estimated tumor ploidy (default: None)
-	  --target_size_mb TARGET_SIZE_MB
-	                        For mutational burden analysis - approximate protein-coding target size of sequencing assay (default: 34 Mb (WES))
-	  --tumor_only          Input VCF comes from tumor-only sequencing, calls will be filtered for variants of germline origin (set configurations for filtering in .toml file), (default: False)
-	  --force_overwrite     By default, the script will fail with an error if any output file already exists. You can force the overwrite of existing result files by using this flag
-	  --version             show program's version number and exit
-	  --basic               Run functional variant annotation on VCF through VEP/vcfanno, omit other analyses (i.e. CNA, MSI, report generation etc. (STEP 4)
-	  --no_vcf_validate     Skip validation of input VCF with Ensembl's vcf-validator
-	  --docker-uid DOCKER_USER_ID
-	                        Docker user ID. Default is the host system user ID. If you are experiencing permission errors, try setting this up to root (`--docker-uid root`)
-	  --no-docker           Run the PCGR workflow in a non-Docker mode (see install_no_docker/ folder for instructions)
-	  --debug               Print full docker commands to log
+	Optional arguments:
+	--input_cna INPUT_CNA
+				    Somatic copy number alteration segments (tab-separated values)
+	--logr_gain LOGR_GAIN
+				    Log ratio-threshold for regions containing copy number gains/amplifications (default: 0.8)
+	--logr_homdel LOGR_HOMDEL
+				    Log ratio-threshold for regions containing homozygous deletions (default: -0.8)
+	--cna_overlap_pct CNA_OVERLAP_PCT
+				    Mean percent overlap between copy number segment and gene transcripts for reporting of gains/losses in tumor suppressor genes/oncogenes, (default: 50)
+	--pon_vcf PON_VCF     VCF file with germline calls from Panel of Normals (PON) - i.e. blacklisted variants, (default: None)
+	--tumor_site TSITE    Optional integer code to specify primary tumor type/site of query sample,
+					choose any of the following identifiers:
+				    1 = Adrenal Gland
+				    2 = Ampulla of Vater
+				    3 = Biliary Tract
+				    4 = Bladder/Urinary Tract
+				    5 = Bone
+				    6 = Breast
+				    7 = Cervix
+				    8 = CNS/Brain
+				    9 = Colon/Rectum
+				    10 = Esophagus/Stomach
+				    11 = Eye
+				    12 = Head and Neck
+				    13 = Kidney
+				    14 = Liver
+				    15 = Lung
+				    16 = Lymphoid
+				    17 = Myeloid
+				    18 = Ovary/Fallopian Tube
+				    19 = Pancreas
+				    20 = Peripheral Nervous System
+				    21 = Peritoneum
+				    22 = Pleura
+				    23 = Prostate
+				    24 = Skin
+				    25 = Soft Tissue
+				    26 = Testis
+				    27 = Thymus
+				    28 = Thyroid
+				    29 = Uterus
+				    30 = Vulva/Vagina
+				    (default: 0 - any tumor type)
+	--tumor_purity TUMOR_PURITY
+				    Estimated tumor purity (between 0 and 1, (default: None)
+	--tumor_ploidy TUMOR_PLOIDY
+				    Estimated tumor ploidy (default: None)
+	--tumor_dp_min TUMOR_DP_MIN
+				    If VCF INFO tag for sequencing depth (tumor) is provided and found, set minimum required depth for inclusion in report (default: 0)
+	--tumor_af_min TUMOR_AF_MIN
+				    If VCF INFO tag for variant allelic fraction (tumor) is provided and found, set minimum required AF for inclusion in report (default: 0)
+	--control_dp_min CONTROL_DP_MIN
+				    If VCF INFO tag for sequencing depth (control) is provided and found, set minimum required depth for inclusion in report (default: 0)
+	--control_af_max CONTROL_AF_MAX
+				    If VCF INFO tag for variant allelic fraction (control) is provided and found, set maximum tolerated AF for inclusion in report (default: 1)
+	--target_size_mb TARGET_SIZE_MB
+				    For mutational burden analysis - approximate protein-coding target size of sequencing assay (default: 34 Mb (WES/WGS))
+	--tumor_only          Input VCF comes from tumor-only sequencing, calls will be filtered for variants of germline origin (set configurations for filtering in .toml file), (default: False)
+	--cell_line           Input VCF comes from tumor cell line sequencing (requires --tumor_only), calls will be filtered for variants of germline origin (set configurations for filtering in .toml file), (default: False)
+	--assay {WES,WGS,TARGETED}
+				    Type of DNA sequencing assay performed for input data (VCF) default: WES
+	--include_trials      (Beta) Include relevant ongoing or future clinical trials, focusing on studies with molecularly targeted interventions
+	--estimate_tmb        Estimate tumor mutational burden from the total number of somatic mutations and target region size, default: False
+	--estimate_msi_status
+				    Predict microsatellite instability status from patterns of somatic mutations/indels, default: False
+	--estimate_signatures
+				    Estimate relative contributions of reference mutational signatures in query sample and detect potential kataegis events), default: False
+	--min_mutations_signatures MIN_MUTATIONS_SIGNATURES
+				    Minimum number of SNVs required for reconstruction of mutational signatures (SBS) by MutationalPatterns (default: 200, minimum n = 100)
+	--all_reference_signatures
+				    Use all reference mutational signatures (SBS, n = 67) in signature reconstruction rather than only those already attributed to the tumor type (default: False)
+	--force_overwrite     By default, the script will fail with an error if any output file already exists. You can force the overwrite of existing result files by using this flag
+	--version             show program's version number and exit
+	--basic               Run functional variant annotation on VCF through VEP/vcfanno, omit other analyses (i.e. Tier assignment/MSI/TMB/Signatures etc. and report generation (STEP 4), default: False
+	--no_vcf_validate     Skip validation of input VCF with Ensembl's vcf-validator
+	--docker-uid DOCKER_USER_ID
+				    Docker user ID. default is the host system user ID. If you are experiencing permission errors, try setting this up to root (`--docker-uid root`)
+	--no-docker           Run the PCGR workflow in a non-Docker mode (see install_no_docker/ folder for instructions)
+	--debug               Print full Docker commands to log, default: False
 
+The _examples_ folder contain input VCF files from two tumor samples sequenced within TCGA (**GRCh37** only). It also contains a PCGR configuration file customized for these VCFs. A report for a colorectal tumor case can be generated by running the following command in your terminal window:
 
-The _examples_ folder contain input files from two tumor samples sequenced within TCGA (**GRCh37** only). It also contains PCGR configuration files customized for these samples. A report for a colorectal tumor case can be generated by running the following command in your terminal window:
-
-`python pcgr.py --input_vcf ~/pcgr-0.8.4/examples/tumor_sample.COAD.vcf.gz --tumor_type 10`
-`--input_cna ~/pcgr-0.8.4/examples/tumor_sample.COAD.cna.tsv --tumor_purity 0.9 --tumor_ploidy 2.0`
-` ~/pcgr-0.8.4 ~/pcgr-0.8.4/examples grch37 ~/pcgr-0.8.4/examples/examples_COAD.toml tumor_sample.COAD`
+	python ~/pcgr-0.9.0rc/pcgr.py
+	--pcgr_dir ~/pcgr-0.9.0rc
+	--output_dir ~/pcgr-0.9.0rc
+	--sample_id tumor_sample.COAD
+	--genome_assembly grch37
+	--conf ~/pcgr-0.9.0rc/examples/example_COAD.toml
+	--input_vcf ~/pcgr-0.9.0rc/examples/tumor_sample.COAD.vcf.gz
+	--tumor_site 9
+	--input_cna ~/pcgr-0.9.0rc/examples/tumor_sample.COAD.cna.tsv
+	--tumor_purity 0.9
+	--tumor_ploidy 2.0
+	--include_trials
+	--assay WES
+	--estimate_signatures
+	--estimate_msi_status
+	--estimate_tmb
+	--no_vcf_validate
 
 This command will run the Docker-based PCGR workflow and produce the following output files in the _examples_ folder:
 
-  1. __tumor_sample.COAD.pcgr_acmg.grch37.html__ - An interactive HTML report for clinical interpretation
-  2. __tumor_sample.COAD.pcgr_acmg.grch37.pass.vcf.gz (.tbi)__ - Bgzipped VCF file with rich set of annotations for precision oncology
-  3. __tumor_sample.COAD.pcgr_acmg.grch37.pass.tsv.gz__ - Compressed vcf2tsv-converted file with rich set of annotations for precision oncology
-  4. __tumor_sample.COAD.pcgr_acmg.grch37.snvs_indels.tiers.tsv__ - Tab-separated values file with variants organized according to tiers of functional relevance
-  5. __tumor_sample.COAD.pcgr_acmg.grch37.json.gz__ - Compressed JSON dump of HTML report content
-  6. __tumor_sample.COAD.pcgr_acmg.grch37.cna_segments.tsv.gz__ - Compressed tab-separated values file with annotations of gene transcripts that overlap with somatic copy number aberrations
+1. __tumor_sample.COAD.pcgr_acmg.grch37.html__ - An interactive HTML report for clinical interpretation
+2. __tumor_sample.COAD.pcgr_acmg.grch37.pass.vcf.gz__ - Bgzipped VCF file with rich set of annotations for precision oncology
+3. __tumor_sample.COAD.pcgr_acmg.grch37.pass.tsv.gz__ - Compressed vcf2tsv-converted file with rich set of annotations for precision oncology
+4. __tumor_sample.COAD.pcgr_acmg.grch37.snvs_indels.tiers.tsv__ - Tab-separated values file with variants organized according to tiers of functional relevance
+5. __tumor_sample.COAD.pcgr_acmg.grch37.mutational_signatures.tsv__ - Tab-separated values file with information on contribution of mutational signatures
+5. __tumor_sample.COAD.pcgr_acmg.grch37.json.gz__ - Compressed JSON dump of HTML report content
+6. __tumor_sample.COAD.pcgr_acmg.grch37.cna_segments.tsv.gz__ - Compressed tab-separated values file with annotations of gene transcripts that overlap with somatic copy number aberrations

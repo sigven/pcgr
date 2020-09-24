@@ -36,7 +36,7 @@ Here, _Chromosome_, _Start_, and _End_ denote the chromosomal segment, and __Seg
 
 ### PCGR configuration file
 
-The cancer genome sequencing report can be flexibly configured in a TOML-formatted configuration file. The default TOML configuration file, with descriptive comments wrt. usage are shown below:
+Some features and analysis performed in PCGR must be configured in a TOML-formatted configuration file. The default TOML configuration file, with descriptive comments wrt. usage are shown below:
 
 	# PCGR configuration options (TOML).
 
@@ -84,60 +84,15 @@ The cancer genome sequencing report can be flexibly configured in a TOML-formatt
 
 
 	[allelic_support]
-	## Specify INFO tags in input VCF that denotes depth/allelic fraction in tumor and normal sample
+	## Specify INFO tags in input VCF that denotes depth/allelic fraction in tumor and control sample
 	## An additional tag that denotes call confidence (call_conf_tag) can also be specified, which will
 	## be used for exploration in the global variant browser. Note that 'tumor_dp_tag' must be of
-	## Type=Integer, and 'tumor_af_tag' must be of Type=Float (similarly for normal sample)
+	## Type=Integer, and 'tumor_af_tag' must be of Type=Float (similarly for control sample)
 	tumor_dp_tag = ""
 	tumor_af_tag = ""
-	normal_dp_tag = ""
-	normal_af_tag = ""
+	control_dp_tag = ""
+	control_af_tag = ""
 	call_conf_tag = ""
-
-	## set thresholds for tumor/normal depth/allelic fraction, will be applied before report generation
-	## requires that 'tumor/normal_dp_tag' and 'tumor/normal_af_tag' are specified above
-	tumor_dp_min = 0
-	tumor_af_min = 0.0
-	normal_dp_min = 0
-	normal_af_max = 1.0
-
-	[mutational_burden]
-	## Calculate mutational burden (similar to Chalmers et al., Genome Med, 2017)
-	mutational_burden = true
-	## Size of coding target region in megabases (defaults to exome ~ 36 Mb)
-	## Note: this should ideally denote the callable target size (i.e. reflecting variable
-	## sequencing depth)
-	target_size_mb = 34.0
-	## set upper limits to tumor mutational burden tertiles (mutations/Mb)
-	tmb_low_limit = 5
-	tmb_intermediate_limit = 20
-	## tmb_high = tmb > tmb_intermediate_limit
-
-	[cna]
-	## log ratio thresholds for determination of copy number gains and homozygous deletions
-	logR_gain = 0.8
-	logR_homdel = -0.8
-
-	## percent overlap between copy number segment and gene transcripts (average) for reporting of gains/losses in tumor suppressor genes/oncogenes
-	cna_overlap_pct = 100
-
-	[msi]
-	## Predict microsatellite instability
-	msi = true
-
-	[mutational_signatures]
-	## Identify relative contribution of 30 known mutational signatures (COSMIC) through the deconstructSigs framework
-	mutsignatures = true
-	## deconstructSigs option: number of mutational signatures to limit the search to ('signatures.limit' in whichSignatures)
-	mutsignatures_signature_limit = 6
-	## deconstructSigs option: type of trimer count normalization for inference of known mutational signatures, see explanation at https://github.com/raerose01/deconstructSigs"
-	## options = 'default', 'exome', 'genome', 'exome2genome'
-	## NOTE: If your data (VCF) is from exome sequencing, 'default' or 'exome2genome' should be used. See https://github.com/raerose01/deconstructSigs/issues/2
-	mutsignatures_normalization = "exome2genome"
-	## Require a minimum number of mutations for signature estimation
-	mutsignatures_mutation_limit = 100
-	## deconstructSigs option: discard any signature contributions with a weight less than this amount
-	mutsignatures_cutoff = 0.06
 
 	[visual]
 	## Choose visual theme of report, any of: "default", "cerulean", "journal", "flatly", "readable", "spacelab", "united", "cosmo", "lumen", "paper", "sandstone", "simplex", or "yeti" (https://bootswatch.com/)

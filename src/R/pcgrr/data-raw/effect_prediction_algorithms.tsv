@@ -16,3 +16,6 @@ m-cap	http://bejerano.stanford.edu/MCAP/	M-CAP
 splice_site_rf	http://nar.oxfordjournals.org/content/42/22/13534	Splice site effect (Random forest)
 splice_site_ada	http://nar.oxfordjournals.org/content/42/22/13534	Splice site effect (Adaptive boosting)
 gerp_rs	http://mendel.stanford.edu/SidowLab/downloads/gerp/	GERP++ RS score
+clinpred	https://doi.org/10.1016/j.ajhg.2018.08.005	ClinPred
+list_s2	https://doi.org/10.1093/nar/gkaa288	LIST-S2
+bayesdel_addaf	https://doi.org/10.1002/humu.23158	BayesDel

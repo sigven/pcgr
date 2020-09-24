@@ -100,7 +100,8 @@ RUN apt-get update && apt-get -y install \
   perl \
   perl-base \
   unzip \
-  vim && \
+  vim \
+  wget && \
   apt-get -y purge manpages-dev && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
@@ -161,6 +162,9 @@ ENV PERL5LIB $PERL5LIB_TMP
 
 WORKDIR /
 ADD loftee_1.0.3.tgz $OPT/src/ensembl-vep/modules
+ADD UTRannotator.tgz $OPT/src/ensembl-vep/modules
+RUN wget -q "https://raw.githubusercontent.com/Ensembl/VEP_plugins/release/100/NearestExonJB.pm" -O $OPT/src/ensembl-vep/modules/NearestExonJB.pm
+
 
 # Final steps
 WORKDIR $OPT_SRC/ensembl-vep
@@ -170,7 +174,7 @@ RUN echo >> $OPT/.profile && \
   echo PATH=$PATH:\$PATH >> $OPT/.profile && \
   echo export PATH >> $OPT/.profile && \
   # Run INSTALL.pl and remove the ensemb-vep tests and travis
-  ./INSTALL.pl -a ap -g miRNA,LoF -l && rm -rf t travisci .travis.yml
+  ./INSTALL.pl -a ap -g miRNA,UTRannotator,NearestExonJB,LoF -l && rm -rf t travisci .travis.yml
 
 WORKDIR /
 
@@ -197,7 +201,7 @@ RUN sudo apt-get update \
 ENV TZ=Europe/Minsk
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-RUN sudo add-apt-repository 'deb [arch=amd64,i386] https://cloud.r-project.org/bin/linux/ubuntu bionic-cran35/'
+RUN sudo add-apt-repository 'deb [arch=amd64,i386] https://cloud.r-project.org/bin/linux/ubuntu bionic-cran40/'
 RUN apt-get update && apt-get -y install r-base
 
 USER root
@@ -222,50 +226,47 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # #RUN apt-get autoremove
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    r-base-core \
-    r-recommended \
- 		r-base
-
-RUN wget https://github.com/samtools/samtools/releases/download/1.9/samtools-1.9.tar.bz2
-RUN bunzip2 -dc samtools-1.9.tar.bz2 | tar xvf -
-RUN cd samtools-1.9 && ./configure --prefix=/usr/local/bin && make && make install
-
-ENV PATH /usr/local/bin:/usr/local/bin/bin:$PATH
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#     r-base-core \
+#     r-recommended \
+#  		r-base
 
 
-WORKDIR /
-
-RUN apt-get update && apt-get install -y --no-install-recommends libmagick++-dev libgdal-dev libgit2-dev libgeos-dev
-
-RUN R -e "install.packages(c('usethis','httr', 'jsonlite','devtools'), dependencies = T)"
-RUN R -e "install.packages(c('BiocManager','devtools'), dependencies = T)"
-
-# ## Install maftools, rlogging, ggpubr from github repository.
-RUN R -e "library(\"devtools\")"
-RUN R -e "devtools::install_github(repo = \"PoisonAlien/maftools\")"
-RUN R -e "devtools::install_github('mjkallen/rlogging')"
-RUN R -e "devtools::install_github('kassambara/ggpubr')"
-
-# ## Install other bioconductor/cran packages
-RUN R -e "BiocManager::install(c('regioneR','VariantAnnotation','MutationalPatterns','deconstructSigs', 'BSgenome.Hsapiens.UCSC.hg19','BSgenome.Hsapiens.UCSC.hg38','GenomeInfoDb','GenomicRanges','S4Vectors','karyoploteR','Biostrings','ComplexHeatmap'))"
 
 
-RUN R -e "install.packages(c('configr','rmarkdown','git2r','data.table','tidyverse','htmltools','caret','randomForest','plotly','RcppTOML'), dependencies = T, repos = 'http://cran.us.r-project.org')"
-RUN R -e "library(devtools); devtools::install_github('rstudio/DT'); devtools::install_github('mjkallen/rlogging'); devtools::install_github('kent37/summarywidget')"
-RUN R -e "library(devtools); devtools::install_github('rstudio/crosstalk')"
-RUN rm -rf /tmp/R*
+
+# WORKDIR /
+
+RUN apt-get update && apt-get install -y --no-install-recommends libmagick++-dev libgdal-dev libgit2-dev libgeos-dev gcc
+
+RUN R -e "install.packages(c('usethis','httr', 'jsonlite','devtools','remotes','BiocManager','DT','tidyverse'), dependencies = T)"
+RUN R -e "devtools::install_github('hms-dbmi/UpSetR')"
+RUN R -e "install.packages(c('flexdashboard','treemap'),dependencies = T, repos = 'http://cran.us.r-project.org')"
+RUN R -e "devtools::install_github('PoisonAlien/maftools', build_manual = F, build_vignettes = F)"
+RUN R -e "devtools::install_github('mjkallen/rlogging', build_manual = F, build_vignettes = F)"
+RUN R -e "remotes::install_github('kassambara/ggpubr')"
 
 
-## Install vcfanno version 0.3.1
+# # ## Install other bioconductor/cran packages
+RUN R -e "BiocManager::install(c('VariantAnnotation','MutationalPatterns','BSgenome.Hsapiens.UCSC.hg19','BSgenome.Hsapiens.UCSC.hg38'), dependencies = T)"
+RUN R -e "remotes::install_github('raerose01/deconstructSigs')"
+
+RUN R -e "install.packages(c('configr','assertable','data.table','caret','randomForest','plotly','RcppTOML','nat.utils'), dependencies = T, repos = 'http://cran.us.r-project.org')"
+# RUN R -e "remotes::install_github('rstudio/DT')"
+# RUN R -e "remotes::install_github('rstudio/crosstalk', upgrade = 'ask')"
+# RUN R -e "remotes::install_github('raerose01/deconstructSigs', upgrade = 'ask')"
+# RUN rm -rf /tmp/R*
+
+
+## Install vcfanno version 0.3.2
 RUN wget https://github.com/brentp/vcfanno/releases/download/v0.3.2/vcfanno_linux64 && \
     mv vcfanno_linux64 vcfanno && \
     mv vcfanno /usr/local/bin && \
     chmod 755 /usr/local/bin/vcfanno
 
 ## Install Ensembl's Vcf-validator
-RUN wget https://github.com/EBIvariation/vcf-validator/releases/download/v0.6/vcf_validator && \
-mv vcf_validator /usr/local/bin/ && \
+RUN wget https://github.com/EBIvariation/vcf-validator/releases/download/v0.9.3/vcf_validator_linux && \
+mv vcf_validator_linux /usr/local/bin/vcf_validator && \
 chmod 755 /usr/local/bin/vcf_validator
 
 ## Install pandoc (for HTML report generation)
@@ -278,16 +279,15 @@ USER root
 WORKDIR /
 
 
-RUN wget https://github.com/stevengj/nlopt/archive/v2.6.1.tar.gz \
-		&& gzip -dc v2.6.1.tar.gz | tar xvf - \
-		&& cd nlopt-2.6.1 \
+RUN wget https://github.com/stevengj/nlopt/archive/v2.6.2.tar.gz \
+		&& gzip -dc v2.6.2.tar.gz | tar xvf - \
+		&& cd nlopt-2.6.2 \
     && cmake . \
 		&& make \
 		&& make install
 
 USER root
 WORKDIR /
-
 
 RUN git clone https://github.com/atks/vt.git
 WORKDIR vt
@@ -296,24 +296,28 @@ RUN make test
 RUN cp vt /usr/local/bin
 RUN export PATH=/usr/local/bin:$PATH
 
-## Add local PCGR R package
+RUN R -e "remotes::install_github('kent37/summarywidget')"
+RUN R -e "install.packages('treemap',dependencies = T, repos = 'http://cran.us.r-project.org')"
+RUN R -e "devtools::install_github('glin/reactable')"
+
+RUN wget https://github.com/samtools/samtools/releases/download/1.10/samtools-1.10.tar.bz2
+RUN bunzip2 -dc samtools-1.10.tar.bz2 | tar xvf -
+RUN cd samtools-1.10 && ./configure --prefix=/usr/local/bin && make && make install
+
 WORKDIR /
 ADD R/ /
-RUN R -e "devtools::install('pcgrr')"
 
-
-# Add local PCGR Python scripts/libraries
+## Add local PCGR Python scripts/libraries
 ADD pcgr.tgz /
 ENV PATH=$PATH:/pcgr
 ENV PYTHONPATH=:/pcgr/lib:${PYTHONPATH}
-#ENV VCFANNO_DATA_DOCKER="/data"
+RUN R -e "devtools::install('pcgrr', upgrade = 'ask')"
 
 WORKDIR /
 RUN curl -L -o mskcc-vcf2maf.tar.gz https://api.github.com/repos/mskcc/vcf2maf/tarball/v1.6.17
 RUN tar -zxf mskcc-vcf2maf.tar.gz
 RUN chmod 755 /mskcc-vcf2maf-*/*.pl
 RUN cp /mskcc-vcf2maf-*/*.pl /usr/local/bin
-#RUN ln -s /mskcc-vcf2maf-*/vcf2maf.pl /usr/local/bin/vcf2maf.pl
 
 WORKDIR /
 
@@ -335,16 +339,28 @@ ADD cpsr.R /
 USER root
 WORKDIR /
 
-RUN R -e "devtools::install_github('hms-dbmi/UpSetR')"
+ENV PATH /usr/local/bin:/usr/local/bin/bin:$PATH
 
-RUN rm -f v2.6.1.tar.gz
-#RUN rm -rf mskcc-vcf2maf-*
+RUN rm -f v2.6.2.tar.gz
 RUN rm -rf $HOME/src/ensembl-vep/t/
 RUN rm -f $HOME/src/v335_base.tar.gz
 RUN rm -f $HOME/src/release-1-6-924.zip
 RUN rm -rf /vt
-RUN rm -rf /samtools-1.9*
+RUN rm -rf /samtools-1.10*
 RUN rm -rf /mskcc-vcf2maf.tar.gz
+RUN rm -rf /tmp/*
+RUN rm -rf /usr/local/lib/R/site-library/SNPlocs.Hsapiens.dbSNP.20101109
+RUN rm -rf /usr/local/lib/R/site-library/TxDb.Dmelanogaster.UCSC.dm3.ensGene
+RUN rm -rf /usr/local/lib/R/site-library/TxDb.Hsapiens.UCSC.hg19.knownGene
+RUN rm -rf /usr/local/lib/R/site-library/SIFT.Hsapiens.dbSNP137
+RUN rm -rf /usr/local/lib/R/site-library/SIFT.Hsapiens.dbSNP132
+RUN rm -rf /usr/local/lib/R/site-library/PolyPhen.Hsapiens.dbSNP131
+RUN rm -rf /usr/local/lib/R/site-library/BSgenome.Celegans.UCSC.ce2
+RUN rm -rf /usr/local/lib/R/site-library/BSgenome.Hsapiens.1000genomes.hs37d5
+RUN rm -rf /usr/local/lib/R/site-library/BSgenome.Hsapiens.NCBI.GRCh38
+RUN rm -rf /usr/local/lib/R/site-library/BSgenome.Scerevisiae.UCSC.sacCer2
+
+
 
 ENV PATH=/usr/local/bin/bin:$PATH
 

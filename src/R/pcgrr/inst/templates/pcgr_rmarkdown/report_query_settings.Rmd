@@ -1,0 +1,40 @@
+## Settings
+
+```{r on_off_settings, echo=F}
+signatures_estimation <- 'ON'
+msi_prediction <- 'ON'
+mutational_burden <- 'ON'
+if(pcg_report$content$msi$eval == F){
+  msi_prediction <- 'OFF'
+}
+if(pcg_report$content$m_signature_mp$eval == F){
+  signatures_estimation <- 'OFF'
+}
+if(pcg_report$content$tmb$eval == F){
+  mutational_burden <- 'OFF'
+}
+```
+
+### Metadata - sample and sequencing assay
+
+* Sample name: __`r pcg_report[['metadata']][['sample_name']]`__
+* Tumor primary site:  __`r pcg_report[['metadata']][['config']][['tumor_properties']][['tumor_type']]`__
+* Sequencing mode input (VCF): __`r pcg_report[['metadata']][['config']][['assay_properties']][['mode']]`__
+* Sequencing type input (VCF): __`r pcg_report[['metadata']][['config']][['assay_properties']][['type']]`__
+* Coding target size (VCF): __`r pcg_report[['metadata']][['config']][['assay_properties']][['target_size_mb']]` Mb__
+
+### Report configuration
+
+The report is generated with _[PCGR](https://github.com/sigven/pcgr)_ version `r pcg_report[['metadata']][['pcgr_version']]`, using the following key settings:
+
+* Minimum sequencing depth (DP) tumor (SNV + InDels): __`r pcg_report[['metadata']][['config']][['allelic_support']][['tumor_dp_min']]`__
+* Minimum allelic fraction (AF) tumor (SNV + InDels): __`r pcg_report[['metadata']][['config']][['allelic_support']][['tumor_af_min']]`__
+* Minimum sequencing depth (DP) control (SNV + InDels): __`r pcg_report[['metadata']][['config']][['allelic_support']][['control_dp_min']]`__
+* Maximum allelic fraction (AF) control (SNV + InDels): __`r pcg_report[['metadata']][['config']][['allelic_support']][['control_af_max']]`__
+* Tier system (VCF): __pcgr_acmg__
+* MSI prediction: __`r msi_prediction`__
+* Mutational burden estimation: __`r mutational_burden`__
+* Mutational signatures estimation: __`r signatures_estimation`__
+* Report theme (Bootstrap): __`r pcg_report[['metadata']][['config']][['visual']][['report_theme']]`__
+
+

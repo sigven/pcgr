@@ -1,0 +1,72 @@
+
+## Clinical trials (Beta)
+
+* Ongoing or planned clinical trials in the relevant tumor type have been retrieved from [clinicaltrials.gov](https://clinicaltrials.gov), focusing on the subset with molecularly targeted therapies
+* Key information entities (interventions/drugs, conditions) in trial records have been mapped to established thesauri ([ChEMBL](https://www.ebi.ac.uk/chembl/), [NCI Thesaurus](https://ncithesaurus.nci.nih.gov/ncitbrowser/), [UMLS/MedGen](https://www.ncbi.nlm.nih.gov/medgen/))
+* Results from a text-mining procedure on unstructured trial text (e.g. <i>inclusion/exclusion criteria</i>) attempts to highlight the presence of established molecular biomarkers in cancer and relevant therapeutic contexts. 
+
+<br>
+
+```{r table_browse_trials, echo=F, results = "asis", eval = !pcg_report[['content']][['clinicaltrials']][['missing_data']]}
+
+trials_ttype <- crosstalk::SharedData$new(pcg_report[['content']][['clinicaltrials']][['trials']])
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("CONDITION_RAW", "Condition (cancer subtype)", trials_ttype, ~CONDITION_RAW),
+    crosstalk::filter_select("OVERALL_STATUS", "Status", trials_ttype, ~OVERALL_STATUS),
+    crosstalk::filter_select("INTERVENTION_RAW", "Drug(s)", trials_ttype, ~INTERVENTION_RAW),
+    crosstalk::filter_select("INTERVENTION_TARGET", "Drug target(s)", trials_ttype, ~INTERVENTION_TARGET),
+    crosstalk::filter_select("KEYWORD", "Therapeutic context mentions (text-mined)", trials_ttype, ~KEYWORD),
+    crosstalk::filter_select("BIOMARKER_INDEX", "Biomarker mentions (text-mined)", trials_ttype, ~BIOMARKER_INDEX)
+
+  ),
+  list(
+    crosstalk::filter_select("PHASE","Phase",trials_ttype,~PHASE),
+    crosstalk::filter_checkbox("GENDER", "Gender", trials_ttype, ~GENDER),
+    crosstalk::filter_slider("MINIMUM_AGE", "Minimum age", trials_ttype, ~MINIMUM_AGE),
+    crosstalk::filter_slider("MAXIMUM_AGE", "Maximum age", trials_ttype, ~MAXIMUM_AGE),
+    crosstalk::filter_select("METASTASES_INDEX", "Metastases mentions (text-mined)", trials_ttype, ~METASTASES_INDEX)
+  )
+)
+
+
+```
+
+
+```{r trials_missing_filters, echo=F, results = 'asis', eval = pcg_report[['content']][['clinicaltrials']][['missing_data']]}
+cat('\n*  <i> <font style="font-size: 110%"><b>No</b> molecularly targeted trials retrieved for the tumor type in question.</i></font>', sep='\n')
+cat('\n')
+```
+
+
+<br>
+
+```{r trials_table_all, eval = !pcg_report[['content']][['clinicaltrials']][['missing_data']]}
+
+trials_ttype %>%
+  DT::datatable(escape = F, 
+                extensions = c("Buttons","Responsive"), 
+                options = list(pageLength = 10, 
+                               buttons = c('csv','excel'), 
+                               dom = 'Bfrtip')) %>%
+  DT::formatStyle("OVERALL_STATUS",color="white", 
+                  backgroundColor = DT::styleEqual(c('Recruiting',
+                                                     'Not yet recruiting',
+                                                     'Active, not recruiting',
+                                                     'Enrolling by invitation',
+                                                     'Completed',
+                                                     'Suspended',
+                                                     'Withdrawn',
+                                                     'Unknown status'), c("#00a65a","#00a65a","#CD534C","#CD534C","#CD534C","#CD534C","#CD534C", "#8F7700")))
+
+  # DT::formatStyle(color="white", "SYMBOL", "BIOMARKER_MAPPING", fontWeight = 'bold', `text-align` = 'center',
+  #                 backgroundColor = DT::styleEqual(c('exact','codon','exon','gene'), 
+  #                                                  c('#000','#000',pcg_report[['metadata']][['color_palette']][['warning']][['values']][1], pcg_report[['metadata']][['color_palette']][['warning']][['values']][1])))
+
+```
+
+
+```{r trials_missing_data, echo=F, results = 'asis', eval = pcg_report[['content']][['clinicaltrials']][['missing_data']]}
+cat('\n*  <i> <font style="font-size: 110%"><b>No</b> molecularly targeted trials retrieved for the tumor type in question .</i></font>',sep='\n')
+cat('\n')
+```

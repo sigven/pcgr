@@ -1,4 +1,0 @@
-## Mutational signatures
-
-The number of SNV calls (n = `r nrow(pcg_report[['content']][['m_signature']][['variant_set']][['all']])`) is too limited. A minimum of `r pcg_report[['metadata']][['config']][['mutational_signatures']][['mutsignatures_mutation_limit']]` SNVs is currently required for a mutational signature analysis to be performed (this number can be configured in the PCGR configuration file).
-<br><br>

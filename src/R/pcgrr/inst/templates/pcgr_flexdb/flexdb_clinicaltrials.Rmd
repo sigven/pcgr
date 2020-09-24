@@ -1,0 +1,179 @@
+Clinical trials
+==================================================================
+
+Row
+-------------------------------------
+
+### Molecularly targeted trials
+
+```{r}
+flexdashboard::valueBox("Clinical trials (Beta)", caption = NULL, color = '#000000', icon = NULL)
+n_not_recruiting <- pcg_report[['content']][['clinicaltrials']][['trials']] %>% 
+  dplyr::filter(OVERALL_STATUS == "Not yet recruiting") %>% NROW()
+
+n_recruiting <- pcg_report[['content']][['clinicaltrials']][['trials']] %>% 
+  dplyr::filter(OVERALL_STATUS == "Recruiting") %>% NROW()
+
+n_enrolling <- pcg_report[['content']][['clinicaltrials']][['trials']] %>% 
+  dplyr::filter(OVERALL_STATUS == "Enrolling by invitation") %>% NROW()
+
+n_active <- pcg_report[['content']][['clinicaltrials']][['trials']] %>% 
+  dplyr::filter(OVERALL_STATUS == "Active, not recruiting") %>% NROW()
+
+n_unknown <- pcg_report[['content']][['clinicaltrials']][['trials']] %>% 
+  dplyr::filter(OVERALL_STATUS == "Unknown status") %>% NROW()
+``` 
+
+### Not yet recruiting
+
+```{r}
+
+
+flexdashboard::valueBox(n_not_recruiting, color = dplyr::if_else(
+  n_not_recruiting > 0,
+  pcg_report[['metadata']][['color_value_box']],
+  pcg_report[['metadata']][['color_none']]))
+
+
+```
+
+### Recruiting
+
+```{r}
+
+flexdashboard::valueBox(n_recruiting, color = dplyr::if_else(
+  n_recruiting > 0,
+  pcg_report[['metadata']][['color_value_box']],
+  pcg_report[['metadata']][['color_none']]))
+
+```
+
+
+### Enrolling by invitation
+
+```{r}
+
+flexdashboard::valueBox(n_enrolling, color = dplyr::if_else(
+  n_enrolling > 0,
+  pcg_report[['metadata']][['color_value_box']],
+  pcg_report[['metadata']][['color_none']]))
+```
+
+### Active, not recruiting
+
+```{r}
+flexdashboard::valueBox(n_active, color = dplyr::if_else(
+  n_active > 0,
+  pcg_report[['metadata']][['color_value_box']],
+  pcg_report[['metadata']][['color_none']]))
+
+```
+
+### Unknown status
+
+```{r}
+flexdashboard::valueBox(n_unknown, color = dplyr::if_else(
+  n_unknown > 0,
+  pcg_report[['metadata']][['color_value_box']],
+  pcg_report[['metadata']][['color_none']]))
+```
+
+
+Row
+-----------------------------------------------------
+
+### Molecularly targeted trials - filters {data-padding=15 data-width=300}
+
+* Ongoing or planned clinical trials in the relevant tumor type have been retrieved from [clinicaltrials.gov](https://clinicaltrials.gov), focusing on the subset with molecularly targeted therapies
+* Key information entities (interventions/drugs, conditions) in trial records have been mapped to established thesauri ([ChEMBL](https://www.ebi.ac.uk/chembl/), [NCI Thesaurus](https://ncithesaurus.nci.nih.gov/ncitbrowser/), [UMLS/MedGen](https://www.ncbi.nlm.nih.gov/medgen/))
+* Results from a text-mining procedure on unstructured trial text (e.g. <i>inclusion/exclusion criteria</i>) attempts to highlight the presence of established molecular biomarkers in cancer and relevant therapeutic contexts. 
+
+<br>
+
+```{r table_browse_trials, echo=F, results = "asis", eval = !pcg_report[['content']][['clinicaltrials']][['missing_data']]}
+
+
+if(NROW(pcg_report[['content']][['clinicaltrials']][['trials']]) > 2000){
+  cat('<b>NOTE - only considering top 2000 trials (ranked according to status and start date) </b><br>',sep="\n")
+  cat('<br>')
+  pcg_report[['content']][['clinicaltrials']][['trials']] <- 
+    head(pcg_report[['content']][['clinicaltrials']][['trials']], 2000)
+}
+
+trials_ttype <- crosstalk::SharedData$new(pcg_report[['content']][['clinicaltrials']][['trials']])
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("CONDITION_RAW", "Condition (cancer subtype)", trials_ttype, ~CONDITION_RAW),
+    crosstalk::filter_select("OVERALL_STATUS", "Status", trials_ttype, ~OVERALL_STATUS),
+    crosstalk::filter_select("INTERVENTION_RAW", "Drug(s)", trials_ttype, ~INTERVENTION_RAW),
+    crosstalk::filter_select("INTERVENTION_TARGET", "Drug target(s)", trials_ttype, ~INTERVENTION_TARGET),
+    crosstalk::filter_select("KEYWORD", "Therapeutic context mentions (text-mined)", trials_ttype, ~KEYWORD),
+    crosstalk::filter_select("BIOMARKER_INDEX", "Biomarker mentions (text-mined)", trials_ttype, ~BIOMARKER_INDEX)
+
+  ),
+  list(
+    crosstalk::filter_select("PHASE","Phase",trials_ttype,~PHASE),
+    crosstalk::filter_checkbox("GENDER", "Gender", trials_ttype, ~GENDER),
+    crosstalk::filter_slider("MINIMUM_AGE", "Minimum age", trials_ttype, ~MINIMUM_AGE),
+    crosstalk::filter_slider("MAXIMUM_AGE", "Maximum age", trials_ttype, ~MAXIMUM_AGE),
+    crosstalk::filter_select("METASTASES_INDEX", "Metastases mentions (text-mined)", trials_ttype, ~METASTASES_INDEX)
+  )
+)
+
+
+```
+
+
+```{r trials_missing_filters, echo=F, results = 'asis', eval = pcg_report[['content']][['clinicaltrials']][['missing_data']]}
+cat('\n*  <i> <font style="font-size: 110%"><b>No</b> molecularly targeted trials retrieved for the tumor type in question.</i></font>', sep='\n')
+cat('\n')
+```
+
+
+### Molecularly targeted trials {data-padding=15}
+
+<br>
+
+```{r trials_table_all, eval = !pcg_report[['content']][['clinicaltrials']][['missing_data']]}
+
+if(NROW(trials_ttype) > 2000){
+  cat('<b>NOTE - only considering top 2000 trials (ranked according to status and start date) </b><br>',sep="\n")
+  cat('<br>')
+}
+
+
+trials_ttype %>%
+  DT::datatable(escape = F, 
+                width = "100%",
+                extensions = c("Buttons","Responsive"), 
+                options = list(pageLength = 8, 
+                               scrollY = scrollY_flexdb_container,
+                               buttons = c('csv','excel'), 
+                                fixedColumns = T,
+                 fixedHeader = T,
+                 #scrollX = F,
+                  columnDefs = list(list(width = '110px', targets = c(1,3,5)),
+                                    list(width = '200px', targets = c(2,4))),
+                               dom = 'Bfrtip')) %>%
+  DT::formatStyle("OVERALL_STATUS",color="white", `text-align` = 'center', fontWeight = "bold",
+                  backgroundColor = DT::styleEqual(c('Recruiting',
+                                                     'Not yet recruiting',
+                                                     'Active, not recruiting',
+                                                     'Enrolling by invitation',
+                                                     'Completed',
+                                                     'Suspended',
+                                                     'Withdrawn',
+                                                     'Unknown status'), c("#00a65a","#00a65a","#CD534C","#CD534C","#CD534C","#CD534C","#CD534C", "#8F7700")))
+
+  # DT::formatStyle(color="white", "SYMBOL", "BIOMARKER_MAPPING", fontWeight = 'bold', `text-align` = 'center',
+  #                 backgroundColor = DT::styleEqual(c('exact','codon','exon','gene'), 
+  #                                                  c('#000','#000',pcg_report[['metadata']][['color_palette']][['warning']][['values']][1], pcg_report[['metadata']][['color_palette']][['warning']][['values']][1])))
+
+```
+
+
+```{r trials_missing_data, echo=F, results = 'asis', eval = pcg_report[['content']][['clinicaltrials']][['missing_data']]}
+cat('\n*  <i> <font style="font-size: 110%"><b>No</b> molecularly targeted trials retrieved for the tumor type in question .</i></font>',sep='\n')
+cat('\n')
+```
+

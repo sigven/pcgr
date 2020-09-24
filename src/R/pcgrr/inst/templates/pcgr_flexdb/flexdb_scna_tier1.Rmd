@@ -1,0 +1,130 @@
+Tier 1 {data-navmenu="sCNA"}
+==================================================================
+
+Row
+-------------------------------------
+
+### sCNA
+
+```{r fig.width = 5}
+flexdashboard::valueBox("TIER 1", caption = NULL, color = '#000000', icon = NULL)
+```
+
+### Biomarker genes
+
+```{r}
+num_genes <- 0
+if(NROW(pcg_report$content$cna$variant_display$tier1) > 0){
+  num_genes <- length(unique(pcg_report$content$cna$variant_display$tier1$SYMBOL))
+}
+flexdashboard::valueBox(num_genes, color = pcg_report$metadata$color_value_box, icon = "fa-dna")
+
+```
+
+### Biomarker aberrations
+
+```{r}
+flexdashboard::valueBox(length(unique(pcg_report$content$cna$variant_display$tier1$SEGMENT)), color = pcg_report$metadata$color_value_box, icon = "fa-dna")
+```
+
+
+### Diagnostic evidence items
+
+```{r}
+entries_diagnostic <- NROW(pcg_report$content$cna$clin_eitem$specific_ttype$diagnostic$A_B)
+flexdashboard::valueBox(entries_diagnostic, color = ifelse(entries_diagnostic > 0,
+                        "#00a65a",
+                        pcg_report$metadata$color_none), icon = "fa-file-prescription")
+```
+
+### Prognostic evidence items
+
+```{r}
+entries_prognostic <- NROW(pcg_report$content$cna$clin_eitem$specific_ttype$prognostic$A_B)
+flexdashboard::valueBox(entries_prognostic, color = ifelse(entries_prognostic > 0,
+                        "#00a65a",
+                        pcg_report$metadata$color_none), icon = "fa-file-prescription")
+```
+
+### Predictive evidence items
+
+```{r}
+entries_predictive <- NROW(pcg_report$content$cna$clin_eitem$specific_ttype$predictive$A_B)
+flexdashboard::valueBox(entries_predictive, color = ifelse(entries_predictive > 0,
+                        "#00a65a",
+                        pcg_report$metadata$color_none), icon = "fa-file-prescription")
+```
+
+
+Row
+-----------------------------------------------------
+
+### Tier 1 variant evidence items - filters {data-padding=15 data-width=300}
+
+
+<br><br>
+
+```{r table_browse_scna_tier1, echo=F, results = "asis", eval = NROW(pcg_report$content$cna$variant_display$tier1) > 0}
+
+cat('\nEvidence items associated with variants in tier 1 (right panel) can be filtered according to various criteria:\n')
+
+variants_tier1 <- dplyr::bind_rows(
+  pcg_report[['content']][['cna']][['clin_eitem']][['specific_ttype']][['diagnostic']][['A_B']],
+  pcg_report[['content']][['cna']][['clin_eitem']][['specific_ttype']][['predictive']][['A_B']],
+  pcg_report[['content']][['cna']][['clin_eitem']][['specific_ttype']][['prognostic']][['A_B']])
+
+variants_tier1_shared <- crosstalk::SharedData$new(variants_tier1)
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("CANCER_TYPE", "Cancer type", variants_tier1_shared, ~CANCER_TYPE),
+    crosstalk::filter_select("CLINICAL_SIGNIFICANCE", "Clinical significance", variants_tier1_shared, ~CLINICAL_SIGNIFICANCE),
+    crosstalk::filter_slider("RATING", "Rating", variants_tier1_shared, ~RATING, min = 0, max = 5, step = 1, ticks = T)
+
+  ),
+  list(
+    crosstalk::filter_select("EVIDENCE_TYPE", "Evidence type", variants_tier1_shared, ~EVIDENCE_TYPE),
+    crosstalk::filter_select("EVIDENCE_LEVEL", "Evidence level", variants_tier1_shared, ~EVIDENCE_LEVEL),
+    crosstalk::filter_select("THERAPEUTIC_CONTEXT", "Therapeutic context", variants_tier1_shared, ~THERAPEUTIC_CONTEXT)
+  )
+)
+
+
+```
+
+
+```{r tier1_scna_missing_filters, echo=F, results = 'asis', eval = NROW(pcg_report$content$cna$variant_display$tier1) == 0}
+cat('\n*  <i> <font style="font-size: 110%"><b>No</b> somatic copy-number aberrations of strong clinical significance found.</font></i>', sep = '\n')
+cat('\n')
+```
+
+
+### Tier 1  - variant evidence items {data-padding=15}
+
+<br><br>
+
+
+```{r table_scna_tier1, eval = NROW(pcg_report$content$cna$variant_display$tier1) > 0}
+
+variants_tier1_shared %>%
+  DT::datatable(escape=F, 
+                extensions=c("Buttons","Responsive"), 
+                options=list(buttons = c('csv','excel'), 
+                             scrollCollapse=T, 
+                             scrollY = scrollY_flexdb_container,
+                             autoWidth = T, 
+                 fixedColumns = T,
+                 fixedHeader = T,
+                 #scrollX = F,
+                  columnDefs = list(list(width = '90px', targets = c(1,2,3,4,5,6))),
+                             dom = 'Bfrtip')) %>%
+  DT::formatStyle('EVIDENCE_LEVEL', 
+                 backgroundColor = DT::styleEqual(c('A: Validated','A: FDA/NCCN/ELN guidelines','B: Clinical evidence','B1: Clinical evidence: late trials','B2: Clinical evidence: early trials','C: Case study','D: Preclinical evidence','E: Indirect evidence'), c("#009E73","#009E73","#56B4E9", "#56B4E9","#56B4E9","#0072B2","#E69F00", "#F0E442")))
+
+```
+
+
+```{r tier1_scna_missing_data, echo=F, results = 'asis', eval = NROW(pcg_report$content$cna$variant_display$tier1) == 0}
+cat('\n*  <i> <font style="font-size: 110%"><b>No</b> somatic copy-number aberrations of strong clinical significance found.</font></i>',sep='\n')
+cat('\n')
+```
+

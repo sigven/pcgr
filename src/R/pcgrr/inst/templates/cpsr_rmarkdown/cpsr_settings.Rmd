@@ -1,0 +1,19 @@
+## Settings
+
+### Sample metadata
+
+* Sample name &nbsp;:&nbsp; <span style="background-color:#000000; color:white"><b>&nbsp;`r cps_report[['metadata']][['sample_name']]`&nbsp;</b></span>
+<br>
+
+### Report configuration 
+
+The report is generated with _[cpsr](https://github.com/sigven/cpsr)_ version `r cps_report[['metadata']][['cpsr_version']]`, ( _[pcgr](https://github.com/sigven/pcgr)_ version `r cps_report[['metadata']][['pcgr_version']]`), using the following key settings:
+
+* Genome assembly: __`r cps_report[['metadata']][['genome_assembly']]`__
+* Report theme (Bootstrap): __`r cps_report[['metadata']][['config']][['visual']][['report_theme']]`__
+* Control population gnomAD: __`r cps_report[['metadata']][['config']][['popgen']][['popdesc_gnomad']]`__
+* Upper MAF threshold (gnomAD) for unclassified variants included in report:  __`r cps_report[['metadata']][['config']][['maf_upper_threshold']]`__
+* Ignore non-proteincoding variants in report: __`r cps_report[['metadata']][['config']][['ignore_noncoding']]`__
+* Include [incidental findings](https://www.ncbi.nlm.nih.gov/clinvar/docs/acmg/) in report: __`r cps_report[['metadata']][['config']][['incidental_findings']]`__
+* Show GWAS hits in report: __`r cps_report[['metadata']][['config']][['gwas_findings']]`__
+    * Minimum p-value for association: __`r cps_report[['metadata']][['config']][['gwas']][['p_value_min']]`__

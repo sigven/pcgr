@@ -1,61 +1,58 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Input &mdash; Personal Cancer Genome Reporter 0.8.4 documentation</title>
+  <title>Input &mdash; Personal Cancer Genome Reporter 0.9.0rc documentation</title>
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="author" title="About these documents"
-              href="about.html"/>
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Personal Cancer Genome Reporter 0.8.4 documentation" href="index.html"/>
-        <link rel="next" title="Output" href="output.html"/>
-        <link rel="prev" title="PCGR annotation resources" href="annotation_resources.html"/> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Output" href="output.html" />
+    <link rel="prev" title="PCGR annotation resources" href="annotation_resources.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="index.html" class="icon icon-home"> Personal Cancer Genome Reporter
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Personal Cancer Genome Reporter
           
 
           
@@ -65,7 +62,7 @@
             
             
               <div class="version">
-                0.8.4
+                0.9.0rc
               </div>
             
           
@@ -82,14 +79,19 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <p class="caption"><span class="caption-text">Table of Contents</span></p>
+              
+            
+            
+              <p class="caption"><span class="caption-text">Table of Contents</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="annotation_resources.html">PCGR annotation resources</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Input</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#vcf">VCF</a></li>
@@ -105,40 +107,61 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">Personal Cancer Genome Reporter</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Personal Cancer Genome Reporter</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
-    <li>Input</li>
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Input</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
+            
             <a href="_sources/input.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -148,27 +171,27 @@
 <h1>Input<a class="headerlink" href="#input" title="Permalink to this headline">¶</a></h1>
 <p>The PCGR workflow accepts two types of input files:</p>
 <ul class="simple">
-<li>An unannotated, single-sample VCF file (&gt;= v4.2) with called somatic
-variants (SNVs/InDels)</li>
-<li>A copy number segment file</li>
+<li><p>An unannotated, single-sample VCF file (&gt;= v4.2) with called somatic
+variants (SNVs/InDels)</p></li>
+<li><p>A copy number segment file</p></li>
 </ul>
 <p>PCGR can be run with either or both of the two input files present.</p>
 <div class="section" id="vcf">
 <h2>VCF<a class="headerlink" href="#vcf" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>We <strong>strongly</strong> recommend that the input VCF is compressed and
+<li><p>We <strong>strongly</strong> recommend that the input VCF is compressed and
 indexed using <a class="reference external" href="http://www.htslib.org/doc/tabix.html">bgzip</a> and
-<a class="reference external" href="http://www.htslib.org/doc/tabix.html">tabix</a></li>
-<li>If the input VCF contains multi-allelic sites, these will be subject
-to <a class="reference external" href="http://genome.sph.umich.edu/wiki/Vt#Decompose">decomposition</a></li>
-<li>Variants used for reporting should be designated as ‘PASS’ in the VCF
-FILTER column</li>
+<a class="reference external" href="http://www.htslib.org/doc/tabix.html">tabix</a></p></li>
+<li><p>If the input VCF contains multi-allelic sites, these will be subject
+to <a class="reference external" href="http://genome.sph.umich.edu/wiki/Vt#Decompose">decomposition</a></p></li>
+<li><p>Variants used for reporting should be designated as ‘PASS’ in the VCF
+FILTER column</p></li>
 </ul>
 <p><strong>IMPORTANT NOTE 1</strong>: Considering the VCF output for the <a class="reference external" href="https://www.biostars.org/p/19104/">numerous
 somatic SNV/InDel callers</a> that
 have been developed, we have a experienced a general lack of uniformity
 and robustness for the representation of somatic variant genotype data
-(e.g.&nbsp;variant allelic depths (tumor/normal), genotype quality etc.).
+(e.g. variant allelic depths (tumor/normal), genotype quality etc.).
 Variant genotype data found as INFO tags in the input VCF can be
 specified as optional arguments to the PCGR workflow, which in turn can
 be used for interactive exploration in the tumor report.</p>
@@ -184,18 +207,18 @@ query VCF file that coincide with those produced by PCGR.</p>
 <p>The tab-separated values file with copy number aberrations <strong>MUST</strong>
 contain the following four columns:</p>
 <ul class="simple">
-<li>Chromosome</li>
-<li>Start</li>
-<li>End</li>
-<li>Segment_Mean</li>
+<li><p>Chromosome</p></li>
+<li><p>Start</p></li>
+<li><p>End</p></li>
+<li><p>Segment_Mean</p></li>
 </ul>
 <p>Here, <em>Chromosome</em>, <em>Start</em>, and <em>End</em> denote the chromosomal segment,
 and <strong>Segment_Mean</strong> denotes the log(2) ratio for a particular segment,
 which is a common output of somatic copy number alteration callers. Note
-that coordinates must be <strong>one-based</strong> (i.e.&nbsp;chromosomes start at 1, not
+that coordinates must be <strong>one-based</strong> (i.e. chromosomes start at 1, not
 0). Below shows the initial part of a copy number segment file that is
 formatted correctly according to PCGR’s requirements:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Chromosome</span>    <span class="n">Start</span>   <span class="n">End</span> <span class="n">Segment_Mean</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Chromosome</span>    <span class="n">Start</span>   <span class="n">End</span> <span class="n">Segment_Mean</span>
 <span class="mi">1</span> <span class="mi">3218329</span> <span class="mi">3550598</span> <span class="mf">0.0024</span>
 <span class="mi">1</span> <span class="mi">3552451</span> <span class="mi">4593614</span> <span class="mf">0.1995</span>
 <span class="mi">1</span> <span class="mi">4593663</span> <span class="mi">6433129</span> <span class="o">-</span><span class="mf">1.0277</span>
@@ -204,10 +227,10 @@ formatted correctly according to PCGR’s requirements:</p>
 </div>
 <div class="section" id="pcgr-configuration-file">
 <h2>PCGR configuration file<a class="headerlink" href="#pcgr-configuration-file" title="Permalink to this headline">¶</a></h2>
-<p>The cancer genome sequencing report can be flexibly configured in a
+<p>Some features and analysis performed in PCGR must be configured in a
 TOML-formatted configuration file. The default TOML configuration file,
 with descriptive comments wrt. usage are shown below:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># PCGR configuration options (TOML).</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># PCGR configuration options (TOML).</span>
 
 <span class="p">[</span><span class="n">tumor_only</span><span class="p">]</span>
 <span class="c1">## Variant filtering applied for option --tumor_only = true in pcgr.py</span>
@@ -253,60 +276,15 @@ with descriptive comments wrt. usage are shown below:</p>
 
 
 <span class="p">[</span><span class="n">allelic_support</span><span class="p">]</span>
-<span class="c1">## Specify INFO tags in input VCF that denotes depth/allelic fraction in tumor and normal sample</span>
+<span class="c1">## Specify INFO tags in input VCF that denotes depth/allelic fraction in tumor and control sample</span>
 <span class="c1">## An additional tag that denotes call confidence (call_conf_tag) can also be specified, which will</span>
 <span class="c1">## be used for exploration in the global variant browser. Note that &#39;tumor_dp_tag&#39; must be of</span>
-<span class="c1">## Type=Integer, and &#39;tumor_af_tag&#39; must be of Type=Float (similarly for normal sample)</span>
+<span class="c1">## Type=Integer, and &#39;tumor_af_tag&#39; must be of Type=Float (similarly for control sample)</span>
 <span class="n">tumor_dp_tag</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 <span class="n">tumor_af_tag</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-<span class="n">normal_dp_tag</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-<span class="n">normal_af_tag</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+<span class="n">control_dp_tag</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+<span class="n">control_af_tag</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 <span class="n">call_conf_tag</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-
-<span class="c1">## set thresholds for tumor/normal depth/allelic fraction, will be applied before report generation</span>
-<span class="c1">## requires that &#39;tumor/normal_dp_tag&#39; and &#39;tumor/normal_af_tag&#39; are specified above</span>
-<span class="n">tumor_dp_min</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="n">tumor_af_min</span> <span class="o">=</span> <span class="mf">0.0</span>
-<span class="n">normal_dp_min</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="n">normal_af_max</span> <span class="o">=</span> <span class="mf">1.0</span>
-
-<span class="p">[</span><span class="n">mutational_burden</span><span class="p">]</span>
-<span class="c1">## Calculate mutational burden (similar to Chalmers et al., Genome Med, 2017)</span>
-<span class="n">mutational_burden</span> <span class="o">=</span> <span class="n">true</span>
-<span class="c1">## Size of coding target region in megabases (defaults to exome ~ 36 Mb)</span>
-<span class="c1">## Note: this should ideally denote the callable target size (i.e. reflecting variable</span>
-<span class="c1">## sequencing depth)</span>
-<span class="n">target_size_mb</span> <span class="o">=</span> <span class="mf">34.0</span>
-<span class="c1">## set upper limits to tumor mutational burden tertiles (mutations/Mb)</span>
-<span class="n">tmb_low_limit</span> <span class="o">=</span> <span class="mi">5</span>
-<span class="n">tmb_intermediate_limit</span> <span class="o">=</span> <span class="mi">20</span>
-<span class="c1">## tmb_high = tmb &gt; tmb_intermediate_limit</span>
-
-<span class="p">[</span><span class="n">cna</span><span class="p">]</span>
-<span class="c1">## log ratio thresholds for determination of copy number gains and homozygous deletions</span>
-<span class="n">logR_gain</span> <span class="o">=</span> <span class="mf">0.8</span>
-<span class="n">logR_homdel</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.8</span>
-
-<span class="c1">## percent overlap between copy number segment and gene transcripts (average) for reporting of gains/losses in tumor suppressor genes/oncogenes</span>
-<span class="n">cna_overlap_pct</span> <span class="o">=</span> <span class="mi">100</span>
-
-<span class="p">[</span><span class="n">msi</span><span class="p">]</span>
-<span class="c1">## Predict microsatellite instability</span>
-<span class="n">msi</span> <span class="o">=</span> <span class="n">true</span>
-
-<span class="p">[</span><span class="n">mutational_signatures</span><span class="p">]</span>
-<span class="c1">## Identify relative contribution of 30 known mutational signatures (COSMIC) through the deconstructSigs framework</span>
-<span class="n">mutsignatures</span> <span class="o">=</span> <span class="n">true</span>
-<span class="c1">## deconstructSigs option: number of mutational signatures to limit the search to (&#39;signatures.limit&#39; in whichSignatures)</span>
-<span class="n">mutsignatures_signature_limit</span> <span class="o">=</span> <span class="mi">6</span>
-<span class="c1">## deconstructSigs option: type of trimer count normalization for inference of known mutational signatures, see explanation at https://github.com/raerose01/deconstructSigs&quot;</span>
-<span class="c1">## options = &#39;default&#39;, &#39;exome&#39;, &#39;genome&#39;, &#39;exome2genome&#39;</span>
-<span class="c1">## NOTE: If your data (VCF) is from exome sequencing, &#39;default&#39; or &#39;exome2genome&#39; should be used. See https://github.com/raerose01/deconstructSigs/issues/2</span>
-<span class="n">mutsignatures_normalization</span> <span class="o">=</span> <span class="s2">&quot;exome2genome&quot;</span>
-<span class="c1">## Require a minimum number of mutations for signature estimation</span>
-<span class="n">mutsignatures_mutation_limit</span> <span class="o">=</span> <span class="mi">100</span>
-<span class="c1">## deconstructSigs option: discard any signature contributions with a weight less than this amount</span>
-<span class="n">mutsignatures_cutoff</span> <span class="o">=</span> <span class="mf">0.06</span>
 
 <span class="p">[</span><span class="n">visual</span><span class="p">]</span>
 <span class="c1">## Choose visual theme of report, any of: &quot;default&quot;, &quot;cerulean&quot;, &quot;journal&quot;, &quot;flatly&quot;, &quot;readable&quot;, &quot;spacelab&quot;, &quot;united&quot;, &quot;cosmo&quot;, &quot;lumen&quot;, &quot;paper&quot;, &quot;sandstone&quot;, &quot;simplex&quot;, or &quot;yeti&quot; (https://bootswatch.com/)</span>
@@ -336,15 +314,16 @@ with descriptive comments wrt. usage are shown below:</p>
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="output.html" class="btn btn-neutral float-right" title="Output" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="output.html" class="btn btn-neutral float-right" title="Output" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="annotation_resources.html" class="btn btn-neutral" title="PCGR annotation resources" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="annotation_resources.html" class="btn btn-neutral float-left" title="PCGR annotation resources" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -353,11 +332,19 @@ with descriptive comments wrt. usage are shown below:</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017-2019, Sigve Nakken.
+        
+        &copy; Copyright 2017-2020, Sigve Nakken
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -369,36 +356,15 @@ with descriptive comments wrt. usage are shown below:</p>
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'0.8.4',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

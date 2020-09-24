@@ -1,0 +1,66 @@
+
+h1.title {
+  font-size: 34px;
+  color: black;
+}
+
+a.tierlink, a.tierlink:visited{
+  color: white;
+  font-weight: bold;
+}
+
+.chart-title {
+  border-bottom: 1px solid #f2f2f2;
+  /*border-bottom: 1px solid #d7d7d7;*/
+  /*color: #666;*/
+  color: #fff;
+  background: #000;
+  /*font-size: 14px;
+  font-weight: 300;*/
+  font-weight: bold;
+  font-size: 15px;
+  padding: 7px 10px 4px;
+}
+
+
+.chart-wrapper {
+  margin-bottom: 18px;
+  /*overflow: auto;*/
+}
+
+
+.tabset .tabset-fade {
+  background: #000;
+  color: #fff;
+  font-weight: bold;
+}
+
+.nav-tabs{
+  background: #000;
+  color: #fff;
+  font-weight: bold;
+}
+.nav-tabs-custom > .nav-tabs {
+  background: #000;
+  color: #fff;
+  font-weight: bold;
+}
+
+
+.nav-tabs-custom > .nav-tabs > li,
+.nav-tabs-custom > .nav-tabs > li > a
+{
+  background: #000;
+  color: #fff;
+  font-weight: bold;
+}
+
+.nav-tabs-custom > .nav-tabs > li.active,
+.nav-tabs-custom > .nav-tabs > li.active > a
+{
+  background: #fff;
+  color: #000;
+  font-weight: bold;
+  border-top-color: #0073C2;
+}
+

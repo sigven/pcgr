@@ -1,0 +1,139 @@
+### Tier & variant statistics
+
+* Number of SNVs: __`r pcg_report[['content']][['snv_indel']][['variant_statistic']][['n_snv']]`__
+* Number of InDels: __`r pcg_report[['content']][['snv_indel']][['variant_statistic']][['n_indel']]`__
+* Number of protein-coding variants: __`r pcg_report[['content']][['snv_indel']][['variant_statistic']][['n_coding']]`__
+
+The prioritization of SNV/InDels is here done according to a four-tiered structure, adopting the joint consensus recommendation by AMP/ACMG [[@Li2017-ew]](https://www.ncbi.nlm.nih.gov/pubmed/27993330).
+
+* Tier 1 - variants of strong clinical significance: __`r pcg_report[['content']][['snv_indel']][['variant_statistic']][['n_tier1']]`__
+* Tier 2 - variants of potential clinical significance: __`r pcg_report[['content']][['snv_indel']][['variant_statistic']][['n_tier2']]`__
+* Tier 3 - variants of unknown clinical significance: __`r pcg_report[['content']][['snv_indel']][['variant_statistic']][['n_tier3']]`__
+* Tier 4 - other coding variants: __`r pcg_report[['content']][['snv_indel']][['variant_statistic']][['n_tier4']]`__
+* Noncoding variants: __`r pcg_report[['content']][['snv_indel']][['variant_statistic']][['n_noncoding']]`__
+
+<br><br>
+
+
+```{r vaf_plot_prep2, echo=F}
+tumor_af_plot <- F
+if(NROW(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']]) > 0){
+  if(NROW(dplyr::filter(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']], !is.na(DP_TUMOR))) > 0 & NROW(dplyr::filter(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']], !is.na(AF_TUMOR))) > 0){
+    tumor_af_plot <- T
+  }
+}
+```
+
+
+```{r tumor_allelic_support_header, echo=F, results='asis', eval=tumor_af_plot}
+cat('<h3>Global distribution - allelic support</h3>',sep="\n")
+```
+
+
+```{r tumor_allelic_support, echo = F, fig.width=10, fig.height=7, eval=tumor_af_plot}
+
+af_bin_df <- pcgrr::tier_af_distribution(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']])
+af_bin_df$TIER <- factor(af_bin_df$TIER, levels = c("TIER 1","TIER 2","TIER 3","TIER 4","NONCODING"))
+
+#af_bin_df <- pcgrr::tier_af_distribution(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']])
+p <- ggplot2::ggplot(data = af_bin_df) + 
+    ggplot2::geom_bar(mapping = ggplot2::aes(x = bin_name, y = Count, fill = TIER), stat = "identity") +
+    ggplot2::scale_color_manual(values = pcg_report[['metadata']][['color_palette']][['tier']][['values']]) +
+    ggplot2::scale_fill_manual(values = pcg_report[['metadata']][['color_palette']][['tier']][['values']]) +
+    ggplot2::theme_classic() +
+    ggplot2::ylab("Number of variants") +
+    ggplot2::xlab("Variant allelic fraction - tumor") +
+    ggplot2::theme(legend.title = ggplot2::element_blank(),
+                   #axis.text.x = element_blank(),
+                   axis.text.x = ggplot2::element_text(angle = 45, family = "Helvetica", size = 12, vjust = -0.1),
+                   axis.title.x = ggplot2::element_text(family = "Helvetica", size = 12, vjust = -2),
+                   axis.text.y = ggplot2::element_text(family = "Helvetica", size = 12),
+                   axis.title.y = ggplot2::element_text(family = "Helvetica", size = 12, vjust = 1.5),
+                   plot.margin = (grid::unit(c(0.5, 2, 2, 0.5), "cm")),
+                   legend.text = ggplot2::element_text(family = "Helvetica", size = 12))
+plotly::ggplotly(p)
+htmltools::br()
+```
+
+
+```{r eval = !tumor_af_plot, results = "asis"}
+cat('*   <i>Tumor sequencing depth and allelic fraction of variants not provided - omitting plot.</i>',sep='\n')
+cat('\n')
+
+```
+
+
+### Global variant browser
+
+The table below permits filtering of the total SNV/InDel set by various criteria.
+
+__NOTE 1__: The filtering applies to this table only, and not to the tier-specific tables below. 
+
+__NOTE 2__: Filtering on sequencing depth/allelic fraction depends on input specified by user (VCF INFO tags). 
+
+<br>
+
+
+```{r global_table_browse, echo=F, results = "asis", eval = T}
+
+if(NROW(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']]) > 5000){
+    cat('<b>NOTE - listing top 5000 variants</b><br>',sep="\n")
+    cat('<br>')
+    pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']] <- head(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']], 5000)
+}
+
+tiers <- c('TIER 1','TIER 2','TIER 3','TIER 4','NONCODING')
+
+vars <- pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']] %>% 
+  dplyr::select(SYMBOL, CONSEQUENCE, PROTEIN_CHANGE, VARIANT_CLASS, TIER, 
+                GENOMIC_CHANGE, GENOME_VERSION, CALL_CONFIDENCE, DP_TUMOR, 
+                AF_TUMOR, DP_CONTROL, AF_CONTROL) %>%
+  dplyr::mutate(CONSEQUENCE = stringr::str_replace_all(CONSEQUENCE,"&",","))
+
+variants_shared <- crosstalk::SharedData$new(vars)
+
+
+filter_set1 <- list()
+filter_set2 <- list()
+
+filter_set1[[1]] <- crosstalk::filter_select("TIER", "Tier", variants_shared, ~TIER)
+filter_set2[[1]] <- crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_shared, ~CONSEQUENCE)
+
+i_set1 <- 2
+i_set2 <- 2
+if(any(!is.na(vars$CALL_CONFIDENCE))){
+  filter_set1[[i_set1]] <- crosstalk::filter_select("CALL_CONFIDENCE", "Call confidence", variants_shared, ~CALL_CONFIDENCE)
+  i_set1 <- i_set1 + 1
+}
+if(any(!is.na(vars$DP_TUMOR)) & any(!is.na(vars$AF_TUMOR))){
+  filter_set1[[i_set1]] <- crosstalk::filter_slider("DP_TUMOR", "Sequencing depth tumor", variants_shared, ~DP_TUMOR, ticks = F, sep = F)
+  filter_set2[[i_set2]] <- crosstalk::filter_slider("AF_TUMOR", "Allelic fraction tumor", variants_shared, ~AF_TUMOR, 
+                                                    sep = F, min = 0, max = 1, step = 0.05, ticks = T)
+  i_set1 <- i_set1 + 1
+  i_set2 <- i_set2 + 1
+}
+if(any(!is.na(vars$DP_CONTROL)) & any(!is.na(vars$AF_CONTROL))){
+  filter_set1[[i_set1]] <- crosstalk::filter_slider("DP_CONTROL", "Sequencing depth control", variants_shared, ~DP_CONTROL, ticks = F, sep = F)
+  filter_set2[[i_set2]] <- crosstalk::filter_slider("AF_CONTROL", "Allelic fraction control", variants_shared, ~AF_CONTROL, 
+                                                    sep = F, min = 0, max = 1, step = 0.05, ticks = T)
+}
+
+crosstalk::bscols(
+  filter_set1,
+  filter_set2
+)
+
+
+htmltools::br()
+DT::datatable(variants_shared, extensions=c("Buttons","Responsive"), 
+              options=list(buttons = c('csv','excel'), scrollCollapse=T, dom = 'Bfrtip')
+) %>%
+   DT::formatStyle('TIER',color = 'white', 
+                   backgroundColor = DT::styleEqual(tiers, head(pcg_report[['metadata']][['color_palette']][['tier']][['values']],5)), 
+                   fontWeight = 'bold', `text-align` = 'center')
+
+
+```
+
+
+<br><br>

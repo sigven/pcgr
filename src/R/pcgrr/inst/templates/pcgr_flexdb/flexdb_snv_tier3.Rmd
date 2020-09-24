@@ -1,0 +1,135 @@
+Tier 3 {data-navmenu="SNVs and InDels"}
+================================================================== 
+
+Row
+-------------------------------------
+
+### SNVs and InDels
+
+```{r}
+flexdashboard::valueBox("TIER 3", caption = NULL, color = '#000000', icon = NULL)
+```
+
+### Total variants
+
+```{r}
+flexdashboard::valueBox(pcg_report$content$snv_indel$variant_statistic$n_tier3, 
+                        color = pcg_report$metadata$color_value_box, icon = "fa-dna")
+```
+
+### Variants in proto-oncogenes
+
+```{r oncogene_variants, echo = F}
+flexdashboard::valueBox(NROW(pcg_report$content$snv_indel$variant_display$tier3$proto_oncogene), 
+                        color = pcg_report$metadata$color_value_box, icon = "fa-dna")
+```
+
+
+### Variants in tumor suppressor genes
+
+```{r tsgene_variants, echo = F}
+
+n_tsgene <- 
+  pcg_report$content$snv_indel$variant_set$tsv %>% 
+  dplyr::filter(TIER == "TIER 3" & TUMOR_SUPPRESSOR == T & ONCOGENE == F) %>%
+  nrow()
+flexdashboard::valueBox(n_tsgene, color = pcg_report$metadata$color_value_box, icon = "fa-dna")
+```
+
+### Variants in genes with dual roles
+
+```{r dual_role_variants, echo = F}
+
+n_dual_role <- 
+  pcg_report$content$snv_indel$variant_set$tsv %>% 
+  dplyr::filter(TIER == "TIER 3" & TUMOR_SUPPRESSOR == T & ONCOGENE == T) %>%
+  nrow() 
+flexdashboard::valueBox(n_dual_role, color = pcg_report$metadata$color_value_box, icon = "fa-dna")
+```
+
+
+Row
+-----------------------------------------------------
+
+### Tier 3 - variant filters {data-padding=15 data-width=250}
+
+<br>
+
+```{r table_browse_tier3, echo=F, results = "asis", eval = pcg_report$content$snv_indel$variant_statistic$n_tier3 > 0}
+
+tier3_vars <- dplyr::bind_rows(pcg_report[['content']][['snv_indel']][['variant_display']][['tier3']][['tumor_suppressor']],
+                              pcg_report[['content']][['snv_indel']][['variant_display']][['tier3']][['proto_oncogene']])
+
+mutation_hotspot_levels <- levels(as.factor(tier3_vars$MUTATION_HOTSPOT))
+if(length(mutation_hotspot_levels) > 0){
+  tier3_vars <- tier3_vars %>%
+    dplyr::arrange(MUTATION_HOTSPOT, desc(OPENTARGETS_RANK))
+}
+
+
+
+cat('Variants in TIER 3 (right panel) can be interactively explored according to various criteria\n:')
+
+variants_tier3_shared <- crosstalk::SharedData$new(tier3_vars)
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_tier3_shared, ~CONSEQUENCE),
+    crosstalk::filter_select("TUMOR_SUPPRESSOR", "Tumor suppressor", variants_tier3_shared, ~TUMOR_SUPPRESSOR),
+    crosstalk::filter_select("ONCOGENE", "Proto-oncogene", variants_tier3_shared, ~ONCOGENE)
+  ),
+  list(
+    crosstalk::filter_select("SYMBOL", "Gene", variants_tier3_shared, ~SYMBOL),
+    crosstalk::filter_select("PUTATIVE_DRIVER_MUTATION", "Predicted driver mutation", variants_tier3_shared, ~PUTATIVE_DRIVER_MUTATION),
+    crosstalk::filter_select("MUTATION_HOTSPOT", "Mutation hotspot", variants_tier3_shared, ~MUTATION_HOTSPOT),
+    crosstalk::filter_select("CHEMBL_COMPOUND_TERMS", "Targeted drugs", variants_tier3_shared, ~CHEMBL_COMPOUND_TERMS)
+
+    
+  )
+)
+
+```
+
+
+```{r tier3_missing_filters, echo=F, results = 'asis', eval = pcg_report$content$snv_indel$variant_statistic$n_tier3 == 0}
+cat('\n*  <i> <font style="font-size: 110%"><b>No</b> other variants found in proto-oncogenes or tumor suppressor genes.</font></i>', sep = '\n')
+cat('\n')
+```
+
+
+### Tier 3  - variant datatable {data-padding=15}
+
+<br>
+
+
+```{r table_tier3, eval = pcg_report$content$snv_indel$variant_statistic$n_tier3 > 0}
+
+
+dt <- DT::datatable(variants_tier3_shared, escape=F,extensions=c("Buttons","Responsive"), 
+                    options = list(pageLength = 8, 
+                                   scrollY = scrollY_flexdb_container, 
+                                   buttons = c('csv','excel'), 
+                                   autoWidth = T, 
+                 fixedColumns = T,
+                 fixedHeader = T,
+                 width = "100%",
+                 #scrollX = F,
+                  columnDefs = list(list(width = '90px', targets = c(1,2,3,4,5,6))),
+                                   dom = 'Bfrtip')) %>%
+  DT::formatStyle("SYMBOL","OPENTARGETS_RANK", color = "white", backgroundColor = DT::styleInterval(pcg_report[['content']][['report_display_config']][['opentargets_rank']][['breaks']], pcg_report[['content']][['report_display_config']][['opentargets_rank']][['colors']]))
+
+if(length(mutation_hotspot_levels) > 0){
+  dt <- dt %>%
+    DT::formatStyle("MUTATION_HOTSPOT","MUTATION_HOTSPOT",
+                    color = "white", fontWeight = "bold",
+                    backgroundColor = DT::styleEqual(mutation_hotspot_levels, rep("black", length(mutation_hotspot_levels)))
+    )
+}
+dt
+
+```
+
+```{r tier3_missing_data, echo=F, results = 'asis', eval = pcg_report$content$snv_indel$variant_statistic$n_tier3 == 0}
+cat('\n*  <i> <font style="font-size: 110%"><b>No</b> other variants found in proto-oncogenes or tumor suppressor genes.</font></i>', sep = '\n')
+cat('\n')
+```
+

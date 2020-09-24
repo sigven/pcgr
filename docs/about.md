@@ -2,17 +2,22 @@
 
 ###  What is the Personal Cancer Genome Reporter (PCGR)?
 
-The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for functional annotation and translation of individual cancer genomes for precision oncology. It interprets both somatic SNVs/InDels and copy number aberrations. The software extends basic gene and variant annotations from the [Ensembl’s Variant Effect Predictor (VEP)](http://www.ensembl.org/info/docs/tools/vep/index.html) with oncology-relevant, up-to-date annotations retrieved flexibly through [vcfanno](https://github.com/brentp/vcfanno), and produces interactive HTML reports intended for clinical interpretation.
+The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for functional annotation and translation of individual cancer genomes for precision cancer medicine. It interprets both somatic SNVs/InDels and copy number aberrations. The software extends basic gene and variant annotations from the [Ensembl’s Variant Effect Predictor (VEP)](http://www.ensembl.org/info/docs/tools/vep/index.html) with oncology-relevant, up-to-date annotations retrieved flexibly through [vcfanno](https://github.com/brentp/vcfanno). Variants are classified into [tiers of clinical significance](tier_systems.md), and interactive HTML output reports permits exploration of the final results.
 
+Example views from the dashboard HTML output:
 
-![](PCGR_workflow.png)
+![](pcgr_dashboard_views.png)
 
 The Personal Cancer Genome Reporter has been developed by scientists affiliated with the [Norwegian Cancer Genomics Consortium](http://cancergenomics.no), at the [Institute for Cancer Research/Oslo University Hospital](http://radium.no).
 
 ### Example reports
-* [Report for a breast tumor sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.BRCA.pcgr_acmg.grch37.v0.8.2.html)
-* [Report for a colon adenocarcinoma sample (TCGA)](http://folk.uio.no/sigven/tumor_sample.COAD.pcgr_acmg.grch37.v0.8.2.html)
 
+* [Cervical cancer sample (tumor-only)](http://insilico.hpc.uio.no/pcgr/example_reports/0.9.0rc/TCGA-FU-A3HZ-01A_TO.pcgr_acmg.grch37.flexdb.html)
+* [Lung cancer sample (tumor-control)](http://insilico.hpc.uio.no/pcgr/example_reports/0.9.0rc/TCGA-95-7039-01A.pcgr_acmg.grch37.flexdb.html)
+* [Breast cancer sample (tumor-control)](http://insilico.hpc.uio.no/pcgr/example_reports/0.9.0rc/TCGA-EW-A1J5-01A.pcgr_acmg.grch37.flexdb.html)
+* [Brain cancer sample (tumor-control)](http://insilico.hpc.uio.no/pcgr/example_reports/0.9.0rc/TCGA-14-0866-01B.pcgr_acmg.grch37.flexdb.html)
+
+(to view the rmarkdown-based reports, simply remove _.flexdb._ in the file names for the flexdashboard reports)
 
 ### Why use PCGR?
 

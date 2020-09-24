@@ -1,6 +1,47 @@
 
 ## CHANGELOG
 
+
+#### 0.9.0rc - September 24th 2020
+
+- Data updates: ClinVar, GWAS catalog, GENCODE, CIViC, CancerMine, UniProt KB, dbNSFP, Pfam, KEGG, Open Targets Platform
+- Software updates: VEP 101
+
+##### Fixed
+ * An extra comma was mistakenly present in the template for tier 2 variants, issue [#96](https://github.com/sigven/pcgr/issues/96)
+ * Missing protein domain annotations for grch38, issue [#116](https://github.com/sigven/pcgr/issues/96)
+ 
+##### Changed
+  * All arguments to `pcgr.py` is now non-positional
+  * Arguments to `pcgr.py` are divided into two groups: _required_ and _optional_
+  * Options ___allelic_support:tumor_dp_min___,  ___allelic_support:tumor_af_min___, ___allelic_support:control_dp_min___, ___allelic_support:control_af_max___ in PCGR configuration file are now optional arguments `--tumor_dp_min`, `--tumor_af_min`, `--control_dp_min`, --control_af_max` in `cpsr.py`
+  * Option ___mutational_burden:mutational_burden___ in PCGR configuration file is now optional argument `--estimate_tmb` in `pcgr.py`
+  * Option ___msi:msi___ in PCGR configuration file is now optional argument `--estimate_msi_status` in `pcgr.py`
+  * Option __mutational_signatures:mutational_signatures__ in PCGR configuration file is now optional argument `--estimate_signatures` in `pcgr.py`
+  * Options __mutational_signatures:mutsignatures_signature_limit__, __mutational_signatures:mutsignatures_normalization__, __mutational_signatures:mutsignatures_mutation_limit__, __mutational_signatures:mutsignatures_cutoff__ are removed (used for deconstructSigs analysis, which is no longer in use)
+  * Optional argument `--cna_overlap_pct` in `pcgr.py` replaces __cna:cna_overlap_pct__ in PCGR configuration file
+  * Optional argument `--logr_gain` in `pcgr.py` replaces __cna:logr_gain__ in PCGR configuration file
+  * Optional argument `--logr_homdel` in `pcgr.py` replaces __cna:logr_homdel__ in PCGR configuration file
+  * Removed  __mutational_burden:tmb_low_limit__ and __mutational_burden:tmb_intermediate_limit__  - TMB is no longer interpreted in the context of thresholds
+  * Classifications of genes as tumor suppressors/oncogenes are now based on a combination of CancerMine citation count and presence in Network of Cancer Genes
+  * __Settings__ section of report is now divived into three:
+	 * Metadata - sample and sequencing assay
+	 * Report configuration
+
+
+##### Added
+ * Optional argument `--include_trials` in `pcgr.py` - includes a section with annotated clinical trials for the tumor type in question
+ * Optional argument `--assay` in `pcgr.py` - designates type of sequencing assay
+ * Optional argument `--cell_line` in `pcgr.py` - designates runs of tumor cell lines (only for display, not used to configure any analysis)
+ * Optional argument `--min_mutations_signatures` in `pcgr.py` - minimum number of required mutations for mutational signature analysis with MutationalPatterns
+ * Optional argument `--all_reference_signatures` in `pcgr.py` - considers all reference signatures during fitting of mutational profile to known signatures
+ * Optional argument `--estimate_signatures` now also includes detection of potential kataegis events (WGS/WES assays only), and rainfall plot in the flexdashboard output
+ * The user can now distinguish (through color codes) whether a biomarker has been mapped exactly (nucleotide change) or at a regional level (codon/exon)
+ * All variant-associated biomarkers (regardless of assignment to TIER 1/2) are now found in a new section (SNVs/InDels)
+ * For copy number amplifications, other putative drug targets in cancer are listed in a new section
+ * Detailed documentation of report contents are added to the Documentation section
+ * References are updated and all provided with DOI
+
 #### 0.8.4 - November 18th 2019
 
 - Data updates: ClinVar, CIViC, CancerMine, UniProt KB

@@ -1,60 +1,57 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>CHANGELOG &mdash; Personal Cancer Genome Reporter 0.8.4 documentation</title>
+  <title>CHANGELOG &mdash; Personal Cancer Genome Reporter 0.9.0rc documentation</title>
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="author" title="About these documents"
-              href="about.html"/>
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Personal Cancer Genome Reporter 0.8.4 documentation" href="index.html"/>
-        <link rel="prev" title="Tier models" href="tier_systems.html"/> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Tier models" href="tier_systems.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="index.html" class="icon icon-home"> Personal Cancer Genome Reporter
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Personal Cancer Genome Reporter
           
 
           
@@ -64,7 +61,7 @@
             
             
               <div class="version">
-                0.8.4
+                0.9.0rc
               </div>
             
           
@@ -81,65 +78,76 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <p class="caption"><span class="caption-text">Table of Contents</span></p>
+              
+            
+            
+              <p class="caption"><span class="caption-text">Table of Contents</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="annotation_resources.html">PCGR annotation resources</a></li>
 <li class="toctree-l1"><a class="reference internal" href="input.html">Input</a></li>
 <li class="toctree-l1"><a class="reference internal" href="output.html">Output</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tier_systems.html">Tier models</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">CHANGELOG</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#rc-september-24th-2020">0.9.0rc - September 24th 2020</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#fixed">Fixed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#changed">Changed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#added">Added</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#november-18th-2019">0.8.4 - November 18th 2019</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#october-14th-2019">0.8.3 - October 14th 2019</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#fixed">Fixed</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#added">Added</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#changed">Changed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fixed-1">Fixed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#added-1">Added</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#changed-1">Changed</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#sep-29th-2019">0.8.2 - Sep 29th 2019</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#fixed-1">Fixed</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#added-1">Added</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#may-22nd-2019">0.8.1 - May 22nd 2019</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#fixed-2">Fixed</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#added-2">Added</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#may-20th-2019">0.8.0 - May 20th 2019</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#fixed-2">Fixed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#may-22nd-2019">0.8.1 - May 22nd 2019</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#added-3">Added</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#changed-1">Changed</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#may-20th-2019">0.8.0 - May 20th 2019</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#fixed-3">Fixed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#added-4">Added</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#changed-2">Changed</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#removed">Removed</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#nov-27th-2018">0.7.0 - Nov 27th 2018</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#fixed-3">Fixed</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#added-4">Added</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#changed-2">Changed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fixed-4">Fixed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#added-5">Added</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#changed-3">Changed</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#may-14th-2018">0.6.2.1 - May 14th 2018</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#fixed-4">Fixed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fixed-5">Fixed</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#may-9th-2018">0.6.2 - May 9th 2018</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#fixed-5">Fixed</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#added-5">Added</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fixed-6">Fixed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#added-6">Added</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#may-2nd-2018">0.6.1 - May 2nd 2018</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#fixed-6">Fixed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fixed-7">Fixed</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#april-25th-2018">0.6.0 - April 25th 2018</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#added-6">Added</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#added-7">Added</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#removed-1">Removed</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#changed-3">Changed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#changed-4">Changed</a></li>
 </ul>
 </li>
 </ul>
@@ -149,40 +157,61 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">Personal Cancer Genome Reporter</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Personal Cancer Genome Reporter</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
-    <li>CHANGELOG</li>
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>CHANGELOG</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
+            
             <a href="_sources/CHANGELOG.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -190,326 +219,439 @@
             
   <div class="section" id="changelog">
 <h1>CHANGELOG<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="november-18th-2019">
-<h2>0.8.4 - November 18th 2019<a class="headerlink" href="#november-18th-2019" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="rc-september-24th-2020">
+<h2>0.9.0rc - September 24th 2020<a class="headerlink" href="#rc-september-24th-2020" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>Data updates: ClinVar, CIViC, CancerMine, UniProt KB</li>
-<li>Software updates: VEP 98.3</li>
-</ul>
-</div>
-<div class="section" id="october-14th-2019">
-<h2>0.8.3 - October 14th 2019<a class="headerlink" href="#october-14th-2019" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li>Data updates: ClinVar, GWAS catalog, GENCODE, CIViC, CancerMine</li>
-<li>Software updates: VEP 98.2, vcf2tsv</li>
+<li><p>Data updates: ClinVar, GWAS catalog, GENCODE, CIViC, CancerMine,
+UniProt KB, dbNSFP, Pfam, KEGG, Open Targets Platform</p></li>
+<li><p>Software updates: VEP 101</p></li>
 </ul>
 <div class="section" id="fixed">
 <h3>Fixed<a class="headerlink" href="#fixed" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>More improved mapping between Ensembl transcripts and UniProt
-accessions (using also RefSeq accessions where available)</li>
-</ul>
-</div>
-<div class="section" id="added">
-<h3>Added<a class="headerlink" href="#added" title="Permalink to this headline">¶</a></h3>
-<ul class="simple">
-<li>Possibility to filter evidence items by RATING in interactive data
-tables</li>
+<li><p>An extra comma was mistakenly present in the template for tier 2
+variants, issue <a class="reference external" href="https://github.com/sigven/pcgr/issues/96">#96</a></p></li>
+<li><p>Missing protein domain annotations for grch38, issue
+<a class="reference external" href="https://github.com/sigven/pcgr/issues/96">#116</a></p></li>
 </ul>
 </div>
 <div class="section" id="changed">
 <h3>Changed<a class="headerlink" href="#changed" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>Option <em>target_size_mb</em> in pcgr.py replaces <em>target_size_mb</em> in
-configuration file, more convenient in terms of configuring runs</li>
-<li>Option <em>tumor_type</em> in pcgr.py replaces <em>tumor_type</em> in configuration
-file</li>
+<li><p>All arguments to <code class="docutils literal notranslate"><span class="pre">pcgr.py</span></code> is now non-positional</p></li>
+<li><p>Arguments to <code class="docutils literal notranslate"><span class="pre">pcgr.py</span></code> are divided into two groups: <em>required</em> and
+<em>optional</em></p></li>
+<li><p>Options <strong>allelic_support:tumor_dp_min</strong>,
+<strong>allelic_support:tumor_af_min</strong>, <strong>allelic_support:control_dp_min</strong>,
+<strong>allelic_support:control_af_max</strong> in PCGR configuration file are now
+optional arguments <code class="docutils literal notranslate"><span class="pre">--tumor_dp_min</span></code>, <code class="docutils literal notranslate"><span class="pre">--tumor_af_min</span></code>,
+<code class="docutils literal notranslate"><span class="pre">--control_dp_min</span></code>, –control_af_max<code class="docutils literal notranslate"><span class="pre">in</span></code>cpsr.py`</p></li>
+<li><p>Option <strong>mutational_burden:mutational_burden</strong> in PCGR configuration
+file is now optional argument <code class="docutils literal notranslate"><span class="pre">--estimate_tmb</span></code> in <code class="docutils literal notranslate"><span class="pre">pcgr.py</span></code></p></li>
+<li><p>Option <strong>msi:msi</strong> in PCGR configuration file is now optional
+argument <code class="docutils literal notranslate"><span class="pre">--estimate_msi_status</span></code> in <code class="docutils literal notranslate"><span class="pre">pcgr.py</span></code></p></li>
+<li><p>Option <strong>mutational_signatures:mutational_signatures</strong> in PCGR
+configuration file is now optional argument <code class="docutils literal notranslate"><span class="pre">--estimate_signatures</span></code>
+in <code class="docutils literal notranslate"><span class="pre">pcgr.py</span></code></p></li>
+<li><p>Options <strong>mutational_signatures:mutsignatures_signature_limit</strong>,
+<strong>mutational_signatures:mutsignatures_normalization</strong>,
+<strong>mutational_signatures:mutsignatures_mutation_limit</strong>,
+<strong>mutational_signatures:mutsignatures_cutoff</strong> are removed (used for
+deconstructSigs analysis, which is no longer in use)</p></li>
+<li><p>Optional argument <code class="docutils literal notranslate"><span class="pre">--cna_overlap_pct</span></code> in <code class="docutils literal notranslate"><span class="pre">pcgr.py</span></code> replaces
+<strong>cna:cna_overlap_pct</strong> in PCGR configuration file</p></li>
+<li><p>Optional argument <code class="docutils literal notranslate"><span class="pre">--logr_gain</span></code> in <code class="docutils literal notranslate"><span class="pre">pcgr.py</span></code> replaces
+<strong>cna:logr_gain</strong> in PCGR configuration file</p></li>
+<li><p>Optional argument <code class="docutils literal notranslate"><span class="pre">--logr_homdel</span></code> in <code class="docutils literal notranslate"><span class="pre">pcgr.py</span></code> replaces
+<strong>cna:logr_homdel</strong> in PCGR configuration file</p></li>
+<li><p>Removed <strong>mutational_burden:tmb_low_limit</strong> and
+<strong>mutational_burden:tmb_intermediate_limit</strong> - TMB is no longer
+interpreted in the context of thresholds</p></li>
+<li><p>Classifications of genes as tumor suppressors/oncogenes are now based
+on a combination of CancerMine citation count and presence in Network
+of Cancer Genes</p></li>
+<li><p><strong>Settings</strong> section of report is now divived into three:</p>
+<ul>
+<li><p>Metadata - sample and sequencing assay</p></li>
+<li><p>Report configuration</p></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="added">
+<h3>Added<a class="headerlink" href="#added" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Optional argument <code class="docutils literal notranslate"><span class="pre">--include_trials</span></code> in <code class="docutils literal notranslate"><span class="pre">pcgr.py</span></code> - includes a
+section with annotated clinical trials for the tumor type in question</p></li>
+<li><p>Optional argument <code class="docutils literal notranslate"><span class="pre">--assay</span></code> in <code class="docutils literal notranslate"><span class="pre">pcgr.py</span></code> - designates type of
+sequencing assay</p></li>
+<li><p>Optional argument <code class="docutils literal notranslate"><span class="pre">--cell_line</span></code> in <code class="docutils literal notranslate"><span class="pre">pcgr.py</span></code> - designates runs of
+tumor cell lines (only for display, not used to configure any
+analysis)</p></li>
+<li><p>Optional argument <code class="docutils literal notranslate"><span class="pre">--min_mutations_signatures</span></code> in <code class="docutils literal notranslate"><span class="pre">pcgr.py</span></code> -
+minimum number of required mutations for mutational signature
+analysis with MutationalPatterns</p></li>
+<li><p>Optional argument <code class="docutils literal notranslate"><span class="pre">--all_reference_signatures</span></code> in <code class="docutils literal notranslate"><span class="pre">pcgr.py</span></code> -
+considers all reference signatures during fitting of mutational
+profile to known signatures</p></li>
+<li><p>Optional argument <code class="docutils literal notranslate"><span class="pre">--estimate_signatures</span></code> now also includes
+detection of potential kataegis events (WGS/WES assays only), and
+rainfall plot in the flexdashboard output</p></li>
+<li><p>The user can now distinguish (through color codes) whether a
+biomarker has been mapped exactly (nucleotide change) or at a
+regional level (codon/exon)</p></li>
+<li><p>All variant-associated biomarkers (regardless of assignment to TIER
+1/2) are now found in a new section (SNVs/InDels)</p></li>
+<li><p>For copy number amplifications, other putative drug targets in cancer
+are listed in a new section</p></li>
+<li><p>Detailed documentation of report contents are added to the
+Documentation section</p></li>
+<li><p>References are updated and all provided with DOI</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="november-18th-2019">
+<h2>0.8.4 - November 18th 2019<a class="headerlink" href="#november-18th-2019" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Data updates: ClinVar, CIViC, CancerMine, UniProt KB</p></li>
+<li><p>Software updates: VEP 98.3</p></li>
+</ul>
+</div>
+<div class="section" id="october-14th-2019">
+<h2>0.8.3 - October 14th 2019<a class="headerlink" href="#october-14th-2019" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Data updates: ClinVar, GWAS catalog, GENCODE, CIViC, CancerMine</p></li>
+<li><p>Software updates: VEP 98.2, vcf2tsv</p></li>
+</ul>
+<div class="section" id="fixed-1">
+<span id="id1"></span><h3>Fixed<a class="headerlink" href="#fixed-1" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>More improved mapping between Ensembl transcripts and UniProt
+accessions (using also RefSeq accessions where available)</p></li>
+</ul>
+</div>
+<div class="section" id="added-1">
+<span id="id2"></span><h3>Added<a class="headerlink" href="#added-1" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Possibility to filter evidence items by RATING in interactive data
+tables</p></li>
+</ul>
+</div>
+<div class="section" id="changed-1">
+<span id="id3"></span><h3>Changed<a class="headerlink" href="#changed-1" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Option <em>target_size_mb</em> in pcgr.py replaces <em>target_size_mb</em> in
+configuration file, more convenient in terms of configuring runs</p></li>
+<li><p>Option <em>tumor_type</em> in pcgr.py replaces <em>tumor_type</em> in configuration
+file</p></li>
 </ul>
 </div>
 </div>
 <div class="section" id="sep-29th-2019">
 <h2>0.8.2 - Sep 29th 2019<a class="headerlink" href="#sep-29th-2019" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>Data updates: ClinVar, GWAS catalog, GENCODE, DiseaseOntology, CIViC,
-CancerMine, UniProt KB</li>
-<li>Software updates: VEP 97.3, vcfanno
+<li><p>Data updates: ClinVar, GWAS catalog, GENCODE, DiseaseOntology, CIViC,
+CancerMine, UniProt KB</p></li>
+<li><p>Software updates: VEP 97.3, vcfanno
 <a class="reference external" href="https://github.com/brentp/vcfanno/releases/tag/v0.3.2">0.3.2</a>,
 LOFTEE (VEP plugin)
-<a class="reference external" href="https://github.com/konradjk/loftee/releases">1.0.3</a></li>
+<a class="reference external" href="https://github.com/konradjk/loftee/releases">1.0.3</a></p></li>
 </ul>
-<div class="section" id="fixed-1">
-<span id="id1"></span><h3>Fixed<a class="headerlink" href="#fixed-1" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="fixed-2">
+<span id="id4"></span><h3>Fixed<a class="headerlink" href="#fixed-2" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>Bug in concatenation of clinical evidence items from different
+<li><p>Bug in concatenation of clinical evidence items from different
 sources (CIVIC + CBMDB) (issues
-<a class="reference external" href="https://github.com/sigven/pcgr/issues/83">#83</a>,<a class="reference external" href="https://github.com/sigven/pcgr/issues/87">#87</a>)</li>
-<li>Silent variants that coincide with biomarkers reported at codon level
-are ignored</li>
-<li>Distinction between clinical evidence items of different origins
-(somatic + germline)</li>
-<li>Improved mapping between Ensembl transcripts and UniProt accessions
-(using also RefSeq accessions where available)</li>
-<li>Bug in UpSetPlot for cases where filtering produce less than two
-intersecting sets</li>
+<a class="reference external" href="https://github.com/sigven/pcgr/issues/83">#83</a>,<a class="reference external" href="https://github.com/sigven/pcgr/issues/87">#87</a>)</p></li>
+<li><p>Silent variants that coincide with biomarkers reported at codon level
+are ignored</p></li>
+<li><p>Distinction between clinical evidence items of different origins
+(somatic + germline)</p></li>
+<li><p>Improved mapping between Ensembl transcripts and UniProt accessions
+(using also RefSeq accessions where available)</p></li>
+<li><p>Bug in UpSetPlot for cases where filtering produce less than two
+intersecting sets</p></li>
 </ul>
 </div>
-<div class="section" id="added-1">
-<span id="id2"></span><h3>Added<a class="headerlink" href="#added-1" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="added-2">
+<span id="id5"></span><h3>Added<a class="headerlink" href="#added-2" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>New field
+<li><p>New field
 <a class="reference external" href="https://www.ensembl.org/info/genome/genebuild/mane.html">‘mane’</a>
-as criteria for pick order in configuration file (VEP)</li>
-<li>Sample identifier to copy number annotation output (convenient for
-concatenation of output from multiple samples)</li>
-<li>Capturing allelic depth (t_depth, t_ref_count etc.) in vcf2maf output
-(enhancement <a class="reference external" href="https://github.com/sigven/pcgr/issues/52">#52</a>)</li>
-<li>Option <em>tumor_only</em> in pcgr.py, replaces <em>vcf_tumor_only</em> in
-configuration file, more convenient in terms of configuration</li>
+as criteria for pick order in configuration file (VEP)</p></li>
+<li><p>Sample identifier to copy number annotation output (convenient for
+concatenation of output from multiple samples)</p></li>
+<li><p>Capturing allelic depth (t_depth, t_ref_count etc.) in vcf2maf output
+(enhancement <a class="reference external" href="https://github.com/sigven/pcgr/issues/52">#52</a>)</p></li>
+<li><p>Option <em>tumor_only</em> in pcgr.py, replaces <em>vcf_tumor_only</em> in
+configuration file, more convenient in terms of configuration</p></li>
 </ul>
 </div>
 </div>
 <div class="section" id="may-22nd-2019">
 <h2>0.8.1 - May 22nd 2019<a class="headerlink" href="#may-22nd-2019" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="added-2">
-<span id="id3"></span><h3>Added<a class="headerlink" href="#added-2" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="added-3">
+<span id="id6"></span><h3>Added<a class="headerlink" href="#added-3" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li><em>Cancer_NOS.toml</em> as configuration file for unspecified tumor types</li>
+<li><p><em>Cancer_NOS.toml</em> as configuration file for unspecified tumor types</p></li>
 </ul>
 </div>
 </div>
 <div class="section" id="may-20th-2019">
 <h2>0.8.0 - May 20th 2019<a class="headerlink" href="#may-20th-2019" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="fixed-2">
-<span id="id4"></span><h3>Fixed<a class="headerlink" href="#fixed-2" title="Permalink to this headline">¶</a></h3>
-<ul class="simple">
-<li>Bug in value box for Tier 2 variants (new line carriage) <a class="reference external" href="https://github.com/sigven/pcgr/issues/73">Issue
-#73</a></li>
-</ul>
-</div>
-<div class="section" id="added-3">
-<span id="id5"></span><h3>Added<a class="headerlink" href="#added-3" title="Permalink to this headline">¶</a></h3>
-<ul class="simple">
-<li>Upgraded VEP to v96<ul>
-<li>Skipping the <em>–regulatory</em> VEP option to avoid forking issues and
-to improve speed (See <a class="reference external" href="https://github.com/Ensembl/ensembl-vep/issues/384">this
-issue</a>)</li>
-<li>Added option to configure <em>pick-order</em> for choice of primary
-transcript in configuration file</li>
-</ul>
-</li>
-<li>Pre-made configuration files for each tumor type in <em>conf</em> folder</li>
-<li>Possibility to append a CNA plot file (.png format) to the section of
-the report with <em>Somatic CNAs</em> <a class="reference external" href="https://github.com/sigven/pcgr/issues/58">previous feature
-request</a></li>
-<li>Added possibility to input estimates of <strong>tumor purity</strong> and
-<strong>ploidy</strong><ul>
-<li>shown as value boxes in <em>Main results</em></li>
-</ul>
-</li>
-<li>Tumor mutational burden is now compared with the distribution of TMB
-observed for TCGA’s cohorts (organized by primary site)<ul>
-<li>Default target size is now 34Mb (approx. estimate from exome-wide
-calculation of protein-coding parts of GENCODE)</li>
-</ul>
-</li>
-<li>Added flexibility for variant filtering in tumor-only input callsets<ul>
-<li>Added additional options to exclude likely germline variants (both
-requires the tumor VAF tag to be correctly specified in the input
-VCF)<ul>
-<li><strong>exclude_likely_hom_germline</strong> - removes any variant with an
-allelic fraction of 1 (100%) - very unlikely somatic event</li>
-</ul>
-</li>
-<li><strong>exclude_likely_het_germline</strong> - removes any variant with<ul>
-<li>an allelic fraction between 0.4 and 0.6, and</li>
-<li>presence in dbSNP + gnomAD, and</li>
-<li>no presence as somatic event in COSMIC/TCGA</li>
-</ul>
-</li>
-<li>Added possibility to input <em>PANEL-OF-NORMALS</em> VCF - this to
-support the many labs that have sequenced a database/pool of
-healthy controls. This set of variants are utilized in PCGR to
-improve the variant filtering when running in tumor-only mode. The
-<em>PANEL-OF-NORMALS</em> annotation work as follows:<ul>
-<li>all variants in the tumor that coincide with any variant listed
-in the <em>PANEL-OF-NORMALS</em> VCF is appended with a
-<strong>PANEL_OF_NORMALS</strong> flag in the query VCF with tumor variants.</li>
-</ul>
-</li>
-<li>If configuration parameter <strong>exclude_pon</strong> is set to True in
-<strong>tumor_only</strong> runs, all variants with a <strong>PANEL_OF_NORMALS</strong> flag
-are filtered/excluded</li>
-</ul>
-</li>
-<li>For tumor-only runs, added an <a class="reference external" href="https://github.com/hms-dbmi/UpSetR#Demo">UpSet
-plot</a> showing how
-different filtering sources (gnomAD, 1KG Project, panel-of-normals
-etc) contribute in the germline filtering procedure</li>
-<li>Variants in <em>Tier 3 / Tier 4 / Noncoding</em> are now sorted (and
-color-coded) according to the target (gene) association score to the
-cancer phenotype, as provided by the <a class="reference external" href="https://docs.targetvalidation.org/getting-started/scoring">OpenTargets
-Platform</a></li>
-<li>Added annotation of TCGA’s ten oncogenic signaling pathways</li>
-<li>Added <em>EXONIC_STATUS</em> annotation tag (VCF and TSV)<ul>
-<li><em>exonic</em> denotes all protein-altering AND cannonical splicesite
-altering AND synonymous variants, <em>nonexonic</em> denotes the
-complement</li>
-</ul>
-</li>
-<li>Added <em>CODING_STATUS</em> annotation tag (VCF and TSV)<ul>
-<li><em>coding</em> denotes all protein-altering AND cannonical splicesite
-altering, <em>noncoding</em> denotes the complement</li>
-</ul>
-</li>
-<li>Added <em>SYMBOL_ENTREZ</em> annotation tag (VCF)<ul>
-<li>Official gene symbol from NCBI EntreZ (SYMBOL provided by VEP can
-sometimes be non-official/alias (i.e.&nbsp;for GENCODE v19/grch37))</li>
-</ul>
-</li>
-<li>Added <em>SIMPLEREPEATS_HIT</em> annotation tag (VCF and TSV)<ul>
-<li>Variant overlaps UCSC <em>simpleRepeat</em> sequence repeat track - used
-for MSI prediction</li>
-</ul>
-</li>
-<li>Added <em>WINMASKER_HIT</em> annotation tag (VCF and TSV)<ul>
-<li>Variant overlaps UCSC <em>windowmaskerSdust</em> sequence repeat track -
-used for MSI prediction</li>
-</ul>
-</li>
-<li>Added <em>PUTATIVE_DRIVER_MUTATION</em> annotation tag (VCF and TSV)<ul>
-<li>Putative cancer driver mutation discovered by multiple approaches
-from 9,423 tumor exomes in TCGA. Format:
-symbol:hgvsp:ensembl_transcript_id:discovery_approaches</li>
-</ul>
-</li>
-<li>Added <em>OPENTARGETS_DISEASE_ASSOCS</em> annotation tag (VCF and TSV)<ul>
-<li>Associations between protein targets and disease based on multiple
-lines of evidence (mutations,affected pathways,GWAS, literature
-etc). Format: CUI:EFO_ID:IS_DIRECT:OVERALL_SCORE</li>
-</ul>
-</li>
-<li>Added <em>OPENTARGETS_TRACTABILITY_COMPOUND</em> annotation tag (VCF and
-TSV)<ul>
-<li>Confidence for the existence of a modulator (small molecule) that
-interacts with the target (protein) to elicit a desired biological
-effect</li>
-</ul>
-</li>
-<li>Added <em>OPENTARGTES_TRACTABILITY_ANTIBODY</em> annotation tag (VCF and
-TSV)<ul>
-<li>Confidence for the existence of a modulator (antibody) that
-interacts with the target (protein) to elicit a desired biological
-effect</li>
-</ul>
-</li>
-<li>Added <em>CLINVAR_REVIEW_STATUS_STARS</em> annotation tag<ul>
-<li>Rating of the ClinVar variant (0-4 stars) with respect to level of
-review</li>
-</ul>
-</li>
-</ul>
-</div>
-<div class="section" id="changed-1">
-<span id="id6"></span><h3>Changed<a class="headerlink" href="#changed-1" title="Permalink to this headline">¶</a></h3>
-<ul class="simple">
-<li>Moved from <a class="reference external" href="https://www.intogen.org/">IntoGen’s driver mutation
-resource</a> to <a class="reference external" href="https://doi.org/10.1016/j.cell.2018.02.060">TCGA’s putative driver
-mutation list</a> in
-display of driver mutation status</li>
-<li>Moved option for vcf_validation from configuration file to run script
-(<code class="docutils literal"><span class="pre">--no_vcf_validate</span></code>)</li>
-</ul>
-</div>
-<div class="section" id="removed">
-<h3>Removed<a class="headerlink" href="#removed" title="Permalink to this headline">¶</a></h3>
-<ul class="simple">
-<li>Original tier model ‘pcgr’</li>
-</ul>
-</div>
-</div>
-<div class="section" id="nov-27th-2018">
-<h2>0.7.0 - Nov 27th 2018<a class="headerlink" href="#nov-27th-2018" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="fixed-3">
 <span id="id7"></span><h3>Fixed<a class="headerlink" href="#fixed-3" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>Bug in assignment of variants to tier1/tier2 <a class="reference external" href="https://github.com/sigven/pcgr/issues/61">Issue
-#61</a></li>
-<li>Missing config option for <em>maf_gnomad_asj</em> in TOML file (also setting
-operator to <code class="docutils literal"><span class="pre">&lt;=</span></code>) <a class="reference external" href="https://github.com/sigven/pcgr/issues/60">Issue
-#60</a></li>
-<li>Bug in new CancerMine oncogene/tumor suppressor annotation <a class="reference external" href="https://github.com/sigven/pcgr/issues/53">Issue
-#53</a></li>
-<li>vcfanno fix for empty Description (upgrade to vcfanno v0.3.1 <a class="reference external" href="https://github.com/sigven/pcgr/issues/49">Issue
-#49</a>)</li>
-<li>Bug in message showing too few variants for MSI prediction, <a class="reference external" href="https://github.com/sigven/pcgr/issues/55">Issue
-#55</a></li>
-<li>Bug in appending of custom VCF tags<ul>
-<li>Still unsolved: how to disambiguate identical FORMAT and INFO tags
-in vcf2tsv</li>
-</ul>
-</li>
-<li>Bug in SCNA value box display for multiple copy number hits (<a class="reference external" href="https://github.com/sigven/pcgr/issues/47">Issue
-#47</a>)</li>
-<li>Bug in vcf2tsv (handling INFO tags encoded with ‘Type = String’,
-<a class="reference external" href="https://github.com/sigven/pcgr/issues/39">Issue #39</a>)</li>
-<li>Bug in search of UniProt functional features (BED feature regions
-spanning exons are now handled)</li>
-<li>Stripped off HTML elements (TCGA_FREQUENCY, DBSNP) in TSV output</li>
-<li>Some effect predictions from dbNSFP were not properly parsed
-(e.g.&nbsp;multiple prediction entries from multiple transcript isoforms),
-these should now be retrieved correctly</li>
-<li>Removed ‘COSM’ prefix in COSMIC mutation links</li>
-<li>Bug in retrieval of splice site predictions from dbscSNV</li>
+<li><p>Bug in value box for Tier 2 variants (new line carriage) <a class="reference external" href="https://github.com/sigven/pcgr/issues/73">Issue
+#73</a></p></li>
 </ul>
 </div>
 <div class="section" id="added-4">
 <span id="id8"></span><h3>Added<a class="headerlink" href="#added-4" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>Possibility to run PCGR in a non-Docker environment (e.g.&nbsp;using the
-<em>–no-docker</em> option). Thanks to an excellent contribution by <a class="reference external" href="https://github.com/vladsaveliev">Vlad
-Saveliev</a>, <a class="reference external" href="https://github.com/sigven/pcgr/issues/35">Issue
-#35</a><ul>
-<li>Added possibility to add docker user-id</li>
+<li><p>Upgraded VEP to v96</p>
+<ul>
+<li><p>Skipping the <em>–regulatory</em> VEP option to avoid forking issues and
+to improve speed (See <a class="reference external" href="https://github.com/Ensembl/ensembl-vep/issues/384">this
+issue</a>)</p></li>
+<li><p>Added option to configure <em>pick-order</em> for choice of primary
+transcript in configuration file</p></li>
 </ul>
 </li>
-<li>Possibility for MAF file output (converted with vcf2maf), must be
-configured by the user in the TOML file (i.e.&nbsp;<em>vcf2maf = true</em>,
-<a class="reference external" href="https://github.com/sigven/pcgr/issues/17">Issue #17</a>)</li>
-<li>Possibility for adding custom VCF INFO tags to PCGR output files
-(JSON/TSV), must be configured by the user in the TOML file
-(i.e.&nbsp;<em>custom_tags</em>)</li>
-<li>Added MUTATION_HOTSPOT_CANCERTYPE in data tables (i.e.&nbsp;listing tumor
-types in which hotspot mutations have been found)</li>
-<li>Included the ‘rs’ prefix for dbSNP identifiers (HTML and TSV output)</li>
-<li>Individual entries/columns for variant effect predictions:<ul>
-<li>Individual algorithms: SIFT_DBNSFP, M_CAP_DBNSFP, MUTPRED_DBNSFP,
-MUTATIONTASTER_DBNSFP, MUTATIONASSESSOR_DBNSFP, FATHMM_DBNSFP,
-FATHMM_MKL_DBNSFP, PROVEAN_DBNSFP</li>
-<li>Ensemble predictions (META_LR_DBNSFP), dbscSNV splice site
-predictions (SPLICE_SITE_RF_DBNSFP, SPLICE_SITE_ADA_DBNSFP)</li>
+<li><p>Pre-made configuration files for each tumor type in <em>conf</em> folder</p></li>
+<li><p>Possibility to append a CNA plot file (.png format) to the section of
+the report with <em>Somatic CNAs</em> <a class="reference external" href="https://github.com/sigven/pcgr/issues/58">previous feature
+request</a></p></li>
+<li><p>Added possibility to input estimates of <strong>tumor purity</strong> and
+<strong>ploidy</strong></p>
+<ul>
+<li><p>shown as value boxes in <em>Main results</em></p></li>
 </ul>
 </li>
-<li>Upgraded samtools to v1.9 (makes vcf2maf work properly)</li>
-<li>Added Ensembl gene/transcript id and corresponding RefSeq mRNA id to
-TSV/JSON</li>
-<li>Added for future implementation:<ul>
-<li>SeqKat + karyoploteR for exploration of <em>kataegis/hypermutation</em></li>
-<li>CELLector - genomics-guided selection of cancer cell lines</li>
+<li><p>Tumor mutational burden is now compared with the distribution of TMB
+observed for TCGA’s cohorts (organized by primary site)</p>
+<ul>
+<li><p>Default target size is now 34Mb (approx. estimate from exome-wide
+calculation of protein-coding parts of GENCODE)</p></li>
 </ul>
 </li>
-<li>Upgraded VEP to v94</li>
+<li><p>Added flexibility for variant filtering in tumor-only input callsets</p>
+<ul>
+<li><p>Added additional options to exclude likely germline variants (both
+requires the tumor VAF tag to be correctly specified in the input
+VCF)</p>
+<ul>
+<li><p><strong>exclude_likely_hom_germline</strong> - removes any variant with an
+allelic fraction of 1 (100%) - very unlikely somatic event</p></li>
+</ul>
+</li>
+<li><p><strong>exclude_likely_het_germline</strong> - removes any variant with</p>
+<ul>
+<li><p>an allelic fraction between 0.4 and 0.6, and</p></li>
+<li><p>presence in dbSNP + gnomAD, and</p></li>
+<li><p>no presence as somatic event in COSMIC/TCGA</p></li>
+</ul>
+</li>
+<li><p>Added possibility to input <em>PANEL-OF-NORMALS</em> VCF - this to
+support the many labs that have sequenced a database/pool of
+healthy controls. This set of variants are utilized in PCGR to
+improve the variant filtering when running in tumor-only mode. The
+<em>PANEL-OF-NORMALS</em> annotation work as follows:</p>
+<ul>
+<li><p>all variants in the tumor that coincide with any variant listed
+in the <em>PANEL-OF-NORMALS</em> VCF is appended with a
+<strong>PANEL_OF_NORMALS</strong> flag in the query VCF with tumor variants.</p></li>
+</ul>
+</li>
+<li><p>If configuration parameter <strong>exclude_pon</strong> is set to True in
+<strong>tumor_only</strong> runs, all variants with a <strong>PANEL_OF_NORMALS</strong> flag
+are filtered/excluded</p></li>
+</ul>
+</li>
+<li><p>For tumor-only runs, added an <a class="reference external" href="https://github.com/hms-dbmi/UpSetR#Demo">UpSet
+plot</a> showing how
+different filtering sources (gnomAD, 1KG Project, panel-of-normals
+etc) contribute in the germline filtering procedure</p></li>
+<li><p>Variants in <em>Tier 3 / Tier 4 / Noncoding</em> are now sorted (and
+color-coded) according to the target (gene) association score to the
+cancer phenotype, as provided by the <a class="reference external" href="https://docs.targetvalidation.org/getting-started/scoring">OpenTargets
+Platform</a></p></li>
+<li><p>Added annotation of TCGA’s ten oncogenic signaling pathways</p></li>
+<li><p>Added <em>EXONIC_STATUS</em> annotation tag (VCF and TSV)</p>
+<ul>
+<li><p><em>exonic</em> denotes all protein-altering AND cannonical splicesite
+altering AND synonymous variants, <em>nonexonic</em> denotes the
+complement</p></li>
+</ul>
+</li>
+<li><p>Added <em>CODING_STATUS</em> annotation tag (VCF and TSV)</p>
+<ul>
+<li><p><em>coding</em> denotes all protein-altering AND cannonical splicesite
+altering, <em>noncoding</em> denotes the complement</p></li>
+</ul>
+</li>
+<li><p>Added <em>SYMBOL_ENTREZ</em> annotation tag (VCF)</p>
+<ul>
+<li><p>Official gene symbol from NCBI EntreZ (SYMBOL provided by VEP can
+sometimes be non-official/alias (i.e. for GENCODE v19/grch37))</p></li>
+</ul>
+</li>
+<li><p>Added <em>SIMPLEREPEATS_HIT</em> annotation tag (VCF and TSV)</p>
+<ul>
+<li><p>Variant overlaps UCSC <em>simpleRepeat</em> sequence repeat track - used
+for MSI prediction</p></li>
+</ul>
+</li>
+<li><p>Added <em>WINMASKER_HIT</em> annotation tag (VCF and TSV)</p>
+<ul>
+<li><p>Variant overlaps UCSC <em>windowmaskerSdust</em> sequence repeat track -
+used for MSI prediction</p></li>
+</ul>
+</li>
+<li><p>Added <em>PUTATIVE_DRIVER_MUTATION</em> annotation tag (VCF and TSV)</p>
+<ul>
+<li><p>Putative cancer driver mutation discovered by multiple approaches
+from 9,423 tumor exomes in TCGA. Format:
+symbol:hgvsp:ensembl_transcript_id:discovery_approaches</p></li>
+</ul>
+</li>
+<li><p>Added <em>OPENTARGETS_DISEASE_ASSOCS</em> annotation tag (VCF and TSV)</p>
+<ul>
+<li><p>Associations between protein targets and disease based on multiple
+lines of evidence (mutations,affected pathways,GWAS, literature
+etc). Format: CUI:EFO_ID:IS_DIRECT:OVERALL_SCORE</p></li>
+</ul>
+</li>
+<li><p>Added <em>OPENTARGETS_TRACTABILITY_COMPOUND</em> annotation tag (VCF and
+TSV)</p>
+<ul>
+<li><p>Confidence for the existence of a modulator (small molecule) that
+interacts with the target (protein) to elicit a desired biological
+effect</p></li>
+</ul>
+</li>
+<li><p>Added <em>OPENTARGTES_TRACTABILITY_ANTIBODY</em> annotation tag (VCF and
+TSV)</p>
+<ul>
+<li><p>Confidence for the existence of a modulator (antibody) that
+interacts with the target (protein) to elicit a desired biological
+effect</p></li>
+</ul>
+</li>
+<li><p>Added <em>CLINVAR_REVIEW_STATUS_STARS</em> annotation tag</p>
+<ul>
+<li><p>Rating of the ClinVar variant (0-4 stars) with respect to level of
+review</p></li>
+</ul>
+</li>
 </ul>
 </div>
 <div class="section" id="changed-2">
 <span id="id9"></span><h3>Changed<a class="headerlink" href="#changed-2" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>Changed CANCER_MUTATION_HOTSPOT to MUTATION_HOTSPOT</li>
-<li>Moved from <a class="reference external" href="https://bioinfo.uth.edu/TSGene/">TSGene 2.0</a> to
+<li><p>Moved from <a class="reference external" href="https://www.intogen.org/">IntoGen’s driver mutation
+resource</a> to <a class="reference external" href="https://doi.org/10.1016/j.cell.2018.02.060">TCGA’s putative driver
+mutation list</a> in
+display of driver mutation status</p></li>
+<li><p>Moved option for vcf_validation from configuration file to run script
+(<code class="docutils literal notranslate"><span class="pre">--no_vcf_validate</span></code>)</p></li>
+</ul>
+</div>
+<div class="section" id="removed">
+<h3>Removed<a class="headerlink" href="#removed" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Original tier model ‘pcgr’</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="nov-27th-2018">
+<h2>0.7.0 - Nov 27th 2018<a class="headerlink" href="#nov-27th-2018" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="fixed-4">
+<span id="id10"></span><h3>Fixed<a class="headerlink" href="#fixed-4" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Bug in assignment of variants to tier1/tier2 <a class="reference external" href="https://github.com/sigven/pcgr/issues/61">Issue
+#61</a></p></li>
+<li><p>Missing config option for <em>maf_gnomad_asj</em> in TOML file (also setting
+operator to <code class="docutils literal notranslate"><span class="pre">&lt;=</span></code>) <a class="reference external" href="https://github.com/sigven/pcgr/issues/60">Issue
+#60</a></p></li>
+<li><p>Bug in new CancerMine oncogene/tumor suppressor annotation <a class="reference external" href="https://github.com/sigven/pcgr/issues/53">Issue
+#53</a></p></li>
+<li><p>vcfanno fix for empty Description (upgrade to vcfanno v0.3.1 <a class="reference external" href="https://github.com/sigven/pcgr/issues/49">Issue
+#49</a>)</p></li>
+<li><p>Bug in message showing too few variants for MSI prediction, <a class="reference external" href="https://github.com/sigven/pcgr/issues/55">Issue
+#55</a></p></li>
+<li><p>Bug in appending of custom VCF tags</p>
+<ul>
+<li><p>Still unsolved: how to disambiguate identical FORMAT and INFO tags
+in vcf2tsv</p></li>
+</ul>
+</li>
+<li><p>Bug in SCNA value box display for multiple copy number hits (<a class="reference external" href="https://github.com/sigven/pcgr/issues/47">Issue
+#47</a>)</p></li>
+<li><p>Bug in vcf2tsv (handling INFO tags encoded with ‘Type = String’,
+<a class="reference external" href="https://github.com/sigven/pcgr/issues/39">Issue #39</a>)</p></li>
+<li><p>Bug in search of UniProt functional features (BED feature regions
+spanning exons are now handled)</p></li>
+<li><p>Stripped off HTML elements (TCGA_FREQUENCY, DBSNP) in TSV output</p></li>
+<li><p>Some effect predictions from dbNSFP were not properly parsed
+(e.g. multiple prediction entries from multiple transcript isoforms),
+these should now be retrieved correctly</p></li>
+<li><p>Removed ‘COSM’ prefix in COSMIC mutation links</p></li>
+<li><p>Bug in retrieval of splice site predictions from dbscSNV</p></li>
+</ul>
+</div>
+<div class="section" id="added-5">
+<span id="id11"></span><h3>Added<a class="headerlink" href="#added-5" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Possibility to run PCGR in a non-Docker environment (e.g. using the
+<em>–no-docker</em> option). Thanks to an excellent contribution by <a class="reference external" href="https://github.com/vladsaveliev">Vlad
+Saveliev</a>, <a class="reference external" href="https://github.com/sigven/pcgr/issues/35">Issue
+#35</a></p>
+<ul>
+<li><p>Added possibility to add docker user-id</p></li>
+</ul>
+</li>
+<li><p>Possibility for MAF file output (converted with vcf2maf), must be
+configured by the user in the TOML file (i.e. <em>vcf2maf = true</em>,
+<a class="reference external" href="https://github.com/sigven/pcgr/issues/17">Issue #17</a>)</p></li>
+<li><p>Possibility for adding custom VCF INFO tags to PCGR output files
+(JSON/TSV), must be configured by the user in the TOML file
+(i.e. <em>custom_tags</em>)</p></li>
+<li><p>Added MUTATION_HOTSPOT_CANCERTYPE in data tables (i.e. listing tumor
+types in which hotspot mutations have been found)</p></li>
+<li><p>Included the ‘rs’ prefix for dbSNP identifiers (HTML and TSV output)</p></li>
+<li><p>Individual entries/columns for variant effect predictions:</p>
+<ul>
+<li><p>Individual algorithms: SIFT_DBNSFP, M_CAP_DBNSFP, MUTPRED_DBNSFP,
+MUTATIONTASTER_DBNSFP, MUTATIONASSESSOR_DBNSFP, FATHMM_DBNSFP,
+FATHMM_MKL_DBNSFP, PROVEAN_DBNSFP</p></li>
+<li><p>Ensemble predictions (META_LR_DBNSFP), dbscSNV splice site
+predictions (SPLICE_SITE_RF_DBNSFP, SPLICE_SITE_ADA_DBNSFP)</p></li>
+</ul>
+</li>
+<li><p>Upgraded samtools to v1.9 (makes vcf2maf work properly)</p></li>
+<li><p>Added Ensembl gene/transcript id and corresponding RefSeq mRNA id to
+TSV/JSON</p></li>
+<li><p>Added for future implementation:</p>
+<ul>
+<li><p>SeqKat + karyoploteR for exploration of <em>kataegis/hypermutation</em></p></li>
+<li><p>CELLector - genomics-guided selection of cancer cell lines</p></li>
+</ul>
+</li>
+<li><p>Upgraded VEP to v94</p></li>
+</ul>
+</div>
+<div class="section" id="changed-3">
+<span id="id12"></span><h3>Changed<a class="headerlink" href="#changed-3" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Changed CANCER_MUTATION_HOTSPOT to MUTATION_HOTSPOT</p></li>
+<li><p>Moved from <a class="reference external" href="https://bioinfo.uth.edu/TSGene/">TSGene 2.0</a> to
 <a class="reference external" href="https://zenodo.org/record/1336650#.W9QMdRMzaL4">CancerMine</a> for
-annotation of tumor suppressor genes and proto-oncogenes<ul>
-<li>A minimum of n=3 citations were required to include
+annotation of tumor suppressor genes and proto-oncogenes</p>
+<ul>
+<li><p>A minimum of n=3 citations were required to include
 literatured-mined tumor suppressor genes and proto-oncogenes from
-CancerMine</li>
+CancerMine</p></li>
 </ul>
 </li>
 </ul>
@@ -517,237 +659,258 @@ CancerMine</li>
 </div>
 <div class="section" id="may-14th-2018">
 <h2>0.6.2.1 - May 14th 2018<a class="headerlink" href="#may-14th-2018" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="fixed-4">
-<span id="id10"></span><h3>Fixed<a class="headerlink" href="#fixed-4" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="fixed-5">
+<span id="id13"></span><h3>Fixed<a class="headerlink" href="#fixed-5" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>Bug in copy number annotation (broad/focal)</li>
+<li><p>Bug in copy number annotation (broad/focal)</p></li>
 </ul>
 </div>
 </div>
 <div class="section" id="may-9th-2018">
 <h2>0.6.2 - May 9th 2018<a class="headerlink" href="#may-9th-2018" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="fixed-5">
-<span id="id11"></span><h3>Fixed<a class="headerlink" href="#fixed-5" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="fixed-6">
+<span id="id14"></span><h3>Fixed<a class="headerlink" href="#fixed-6" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>Bug in copy number segment display (missing variable initalization,
-<a class="reference external" href="https://github.com/sigven/pcgr/issues/34">Issue #34</a>))</li>
-<li>Typo in gnomAD filter statistic (fraction, <a class="reference external" href="https://github.com/sigven/pcgr/issues/31">Issue
-#31</a>)</li>
-<li>Bug in mutational signature analysis for grch38 (forgot to pass
+<li><p>Bug in copy number segment display (missing variable initalization,
+<a class="reference external" href="https://github.com/sigven/pcgr/issues/34">Issue #34</a>))</p></li>
+<li><p>Typo in gnomAD filter statistic (fraction, <a class="reference external" href="https://github.com/sigven/pcgr/issues/31">Issue
+#31</a>)</p></li>
+<li><p>Bug in mutational signature analysis for grch38 (forgot to pass
 BSgenome object, <a class="reference external" href="https://github.com/sigven/pcgr/issues/27">Issue
-#27</a>)</li>
-<li>Missing proper ASCII-encoding in vcf2tsv conversion, <a class="reference external" href="https://github.com/sigven/pcgr/issues/35">Issue
-#</a></li>
-<li>Removed ‘Noncoding mutations’ section when no input VCF is present</li>
-<li>Bug in annotation of copy number event type (focal/broad)</li>
-<li>Bug in copy number annotation (missing protein-coding transcripts)</li>
-<li>Updated MSI prediction (variable importance, performance measures)</li>
+#27</a>)</p></li>
+<li><p>Missing proper ASCII-encoding in vcf2tsv conversion, <a class="reference external" href="https://github.com/sigven/pcgr/issues/35">Issue
+#</a></p></li>
+<li><p>Removed ‘Noncoding mutations’ section when no input VCF is present</p></li>
+<li><p>Bug in annotation of copy number event type (focal/broad)</p></li>
+<li><p>Bug in copy number annotation (missing protein-coding transcripts)</p></li>
+<li><p>Updated MSI prediction (variable importance, performance measures)</p></li>
 </ul>
 </div>
-<div class="section" id="added-5">
-<span id="id12"></span><h3>Added<a class="headerlink" href="#added-5" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="added-6">
+<span id="id15"></span><h3>Added<a class="headerlink" href="#added-6" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>Genome assembly is appended to every output file</li>
-<li>Issue warning for copy number segment that goes beyond chromosomal
-lengths of specified assembly (segments will be skipped)</li>
-<li>Added missing subtypes for ‘Skin_Cancer_NOS’ in the cancer phenotype
-dataset</li>
+<li><p>Genome assembly is appended to every output file</p></li>
+<li><p>Issue warning for copy number segment that goes beyond chromosomal
+lengths of specified assembly (segments will be skipped)</p></li>
+<li><p>Added missing subtypes for ‘Skin_Cancer_NOS’ in the cancer phenotype
+dataset</p></li>
 </ul>
 </div>
 </div>
 <div class="section" id="may-2nd-2018">
 <h2>0.6.1 - May 2nd 2018<a class="headerlink" href="#may-2nd-2018" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="fixed-6">
-<span id="id13"></span><h3>Fixed<a class="headerlink" href="#fixed-6" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="fixed-7">
+<span id="id16"></span><h3>Fixed<a class="headerlink" href="#fixed-7" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>Bug in tier assignment ‘pcgr_acmg’ (case for no variants in
-tier1,2,3)</li>
-<li>Bug in tier assignment ‘pcgr_acmg’ (no tumor type specified, evidence
-items with weak support detected)</li>
-<li>Bug: duplicated variants in ‘Tier 3’ resulting from genes encoded
-with dual roles as tumor suppressor genes/oncogenes</li>
-<li>Bug: duplicated variants in ‘Tier 1/Noncoding variants’ resulting
+<li><p>Bug in tier assignment ‘pcgr_acmg’ (case for no variants in
+tier1,2,3)</p></li>
+<li><p>Bug in tier assignment ‘pcgr_acmg’ (no tumor type specified, evidence
+items with weak support detected)</p></li>
+<li><p>Bug: duplicated variants in ‘Tier 3’ resulting from genes encoded
+with dual roles as tumor suppressor genes/oncogenes</p></li>
+<li><p>Bug: duplicated variants in ‘Tier 1/Noncoding variants’ resulting
 from rare cases of noncoding variants occurring in Tier 1 (synonymous
-variants with biomarker role)</li>
+variants with biomarker role)</p></li>
 </ul>
 </div>
 </div>
 <div class="section" id="april-25th-2018">
 <h2>0.6.0 - April 25th 2018<a class="headerlink" href="#april-25th-2018" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="added-6">
-<span id="id14"></span><h3>Added<a class="headerlink" href="#added-6" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="added-7">
+<span id="id17"></span><h3>Added<a class="headerlink" href="#added-7" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>New argument in pcgr.py<ul>
-<li><em>assembly</em> (grch37/grch38)</li>
+<li><p>New argument in pcgr.py</p>
+<ul>
+<li><p><em>assembly</em> (grch37/grch38)</p></li>
 </ul>
 </li>
-<li>New option in pcgr.py<ul>
-<li><em>–basic</em> - run comprehensive VCF annotation only, skip report
-generation and additional analyses</li>
+<li><p>New option in pcgr.py</p>
+<ul>
+<li><p><em>–basic</em> - run comprehensive VCF annotation only, skip report
+generation and additional analyses</p></li>
 </ul>
 </li>
-<li>New sections in HTML report<ul>
-<li><em>Settings and annotation sources</em> - now also listing key PCGR
-configuration settings</li>
-<li><em>Main findings</em> - Six value boxes indicating the main findings of
-clinical relevance</li>
+<li><p>New sections in HTML report</p>
+<ul>
+<li><p><em>Settings and annotation sources</em> - now also listing key PCGR
+configuration settings</p></li>
+<li><p><em>Main findings</em> - Six value boxes indicating the main findings of
+clinical relevance</p></li>
 </ul>
 </li>
-<li>New configuration options<ul>
-<li>[tier_model](string) - choice between <em>pcgr_acmg</em> and <em>pcgr</em></li>
-<li>[mutational_burden] - set TMB tertile limits<ul>
-<li><em>tmb_low_limit (float)</em></li>
-<li><em>tmb_intermediate_limit (float)</em></li>
+<li><p>New configuration options</p>
+<ul>
+<li><p>[tier_model](string) - choice between <em>pcgr_acmg</em> and <em>pcgr</em></p></li>
+<li><p>[mutational_burden] - set TMB tertile limits</p>
+<ul>
+<li><p><em>tmb_low_limit (float)</em></p></li>
+<li><p><em>tmb_intermediate_limit (float)</em></p></li>
 </ul>
 </li>
-<li>[tumor_type] - choose between 34 tumor types/classes:<ul>
-<li><em>Adrenal_Gland_Cancer_NOS (logical)</em></li>
-<li><em>Ampullary_Carcinoma_NOS (logical)</em></li>
-<li><em>Biliary_Tract_Cancer_NOS (logical)</em></li>
-<li><em>Bladder_Urinary_Tract_Cancer_NOS (logical)</em></li>
-<li><em>Blood_Cancer_NOS (logical)</em></li>
-<li><em>Bone_Cancer_NOS (logical)</em></li>
-<li><em>Breast_Cancer_NOS (logical)</em></li>
-<li><em>CNS_Brain_Cancer_NOS (logical)</em></li>
-<li><em>Colorectal_Cancer_NOS (logical)</em></li>
-<li><em>Cervical_Cancer_NOS (logical)</em></li>
-<li><em>Esophageal_Stomach_Cancer_NOS (logical)</em></li>
-<li><em>Head_And_Neck_Cancer_NOS (logical)</em></li>
-<li><em>Hereditary_Cancer_NOS (logical)</em></li>
-<li><em>Kidney_Cancer_NOS (logical)</em></li>
-<li><em>Leukemia_NOS (logical)</em></li>
-<li><em>Liver_Cancer_NOS (logical)</em></li>
-<li><em>Lung_Cancer_NOS (logical)</em></li>
-<li><em>Lymphoma_Hodgkin_NOS (logical)</em></li>
-<li><em>Lymphoma_Non_Hodgkin_NOS (logical)</em></li>
-<li><em>Ovarian_Fallopian_Tube_Cancer_NOS (logical)</em></li>
-<li><em>Pancreatic_Cancer_NOS (logical)</em></li>
-<li><em>Penile_Cancer_NOS (logical)</em></li>
-<li><em>Peripheral_Nervous_System_Cancer_NOS (logical)</em></li>
-<li><em>Peritoneal_Cancer_NOS (logical)</em></li>
-<li><em>Pleural_Cancer_NOS (logical)</em></li>
-<li><em>Prostate_Cancer_NOS (logical)</em></li>
-<li><em>Skin_Cancer_NOS (logical)</em></li>
-<li><em>Soft_Tissue_Cancer_NOS (logical)</em></li>
-<li><em>Stomach_Cancer_NOS (logical)</em></li>
-<li><em>Testicular_Cancer_NOS (logical)</em></li>
-<li><em>Thymic_Cancer_NOS (logical)</em></li>
-<li><em>Thyroid_Cancer_NOS (logical)</em></li>
-<li><em>Uterine_Cancer_NOS (logical)</em></li>
-<li><em>Vulvar_Vaginal_Cancer_NOS (logical)</em></li>
+<li><p>[tumor_type] - choose between 34 tumor types/classes:</p>
+<ul>
+<li><p><em>Adrenal_Gland_Cancer_NOS (logical)</em></p></li>
+<li><p><em>Ampullary_Carcinoma_NOS (logical)</em></p></li>
+<li><p><em>Biliary_Tract_Cancer_NOS (logical)</em></p></li>
+<li><p><em>Bladder_Urinary_Tract_Cancer_NOS (logical)</em></p></li>
+<li><p><em>Blood_Cancer_NOS (logical)</em></p></li>
+<li><p><em>Bone_Cancer_NOS (logical)</em></p></li>
+<li><p><em>Breast_Cancer_NOS (logical)</em></p></li>
+<li><p><em>CNS_Brain_Cancer_NOS (logical)</em></p></li>
+<li><p><em>Colorectal_Cancer_NOS (logical)</em></p></li>
+<li><p><em>Cervical_Cancer_NOS (logical)</em></p></li>
+<li><p><em>Esophageal_Stomach_Cancer_NOS (logical)</em></p></li>
+<li><p><em>Head_And_Neck_Cancer_NOS (logical)</em></p></li>
+<li><p><em>Hereditary_Cancer_NOS (logical)</em></p></li>
+<li><p><em>Kidney_Cancer_NOS (logical)</em></p></li>
+<li><p><em>Leukemia_NOS (logical)</em></p></li>
+<li><p><em>Liver_Cancer_NOS (logical)</em></p></li>
+<li><p><em>Lung_Cancer_NOS (logical)</em></p></li>
+<li><p><em>Lymphoma_Hodgkin_NOS (logical)</em></p></li>
+<li><p><em>Lymphoma_Non_Hodgkin_NOS (logical)</em></p></li>
+<li><p><em>Ovarian_Fallopian_Tube_Cancer_NOS (logical)</em></p></li>
+<li><p><em>Pancreatic_Cancer_NOS (logical)</em></p></li>
+<li><p><em>Penile_Cancer_NOS (logical)</em></p></li>
+<li><p><em>Peripheral_Nervous_System_Cancer_NOS (logical)</em></p></li>
+<li><p><em>Peritoneal_Cancer_NOS (logical)</em></p></li>
+<li><p><em>Pleural_Cancer_NOS (logical)</em></p></li>
+<li><p><em>Prostate_Cancer_NOS (logical)</em></p></li>
+<li><p><em>Skin_Cancer_NOS (logical)</em></p></li>
+<li><p><em>Soft_Tissue_Cancer_NOS (logical)</em></p></li>
+<li><p><em>Stomach_Cancer_NOS (logical)</em></p></li>
+<li><p><em>Testicular_Cancer_NOS (logical)</em></p></li>
+<li><p><em>Thymic_Cancer_NOS (logical)</em></p></li>
+<li><p><em>Thyroid_Cancer_NOS (logical)</em></p></li>
+<li><p><em>Uterine_Cancer_NOS (logical)</em></p></li>
+<li><p><em>Vulvar_Vaginal_Cancer_NOS (logical)</em></p></li>
 </ul>
 </li>
-<li>[mutational_signatures]<ul>
-<li><em>mutsignatures_cutoff (float)</em> - discard any signature
-contributions with a weight less than the cutoff</li>
+<li><p>[mutational_signatures]</p>
+<ul>
+<li><p><em>mutsignatures_cutoff (float)</em> - discard any signature
+contributions with a weight less than the cutoff</p></li>
 </ul>
 </li>
-<li>[cna]<ul>
-<li><em>transcript_cna_overlap (float)</em> - minimum percent overlap
+<li><p>[cna]</p>
+<ul>
+<li><p><em>transcript_cna_overlap (float)</em> - minimum percent overlap
 between copy number segment and transcripts (average) for tumor
-suppressor gene/proto-oncogene to be reported</li>
+suppressor gene/proto-oncogene to be reported</p></li>
 </ul>
 </li>
-<li>[allelic_support]<ul>
-<li>If input VCF has correctly formatted depth/allelic fraction as
+<li><p>[allelic_support]</p>
+<ul>
+<li><p>If input VCF has correctly formatted depth/allelic fraction as
 INFO tags, users can add thresholds on depth/support that are
-applied prior to report generation<ul>
-<li><em>tumor_dp_min (integer)</em> - minimum sequencing depth for
-variant in tumor sample</li>
-<li><em>tumor_af_min (float)</em> - minimum allelic fraction for
-variant in tumor sample</li>
-<li><em>normal_dp_min (integer)</em> - minimum sequencing depth for
-variant in normal sample</li>
-<li><em>normal_af_max (float)</em> - maximum allelic fraction for
-variant in normal sample</li>
+applied prior to report generation</p>
+<ul>
+<li><p><em>tumor_dp_min (integer)</em> - minimum sequencing depth for
+variant in tumor sample</p></li>
+<li><p><em>tumor_af_min (float)</em> - minimum allelic fraction for
+variant in tumor sample</p></li>
+<li><p><em>normal_dp_min (integer)</em> - minimum sequencing depth for
+variant in normal sample</p></li>
+<li><p><em>normal_af_max (float)</em> - maximum allelic fraction for
+variant in normal sample</p></li>
 </ul>
 </li>
 </ul>
 </li>
-<li>[visual]<ul>
-<li><em>report_theme (string)</em> - visual theme of report (Bootstrap)</li>
+<li><p>[visual]</p>
+<ul>
+<li><p><em>report_theme (string)</em> - visual theme of report (Bootstrap)</p></li>
 </ul>
 </li>
-<li>[other]<ul>
-<li><em>vcf_validation (logical)</em> - keep/skip VCF validation by
-<a class="reference external" href="https://github.com/EBIvariation/vcf-validator">vcf-validator</a></li>
+<li><p>[other]</p>
+<ul>
+<li><p><em>vcf_validation (logical)</em> - keep/skip VCF validation by
+<a class="reference external" href="https://github.com/EBIvariation/vcf-validator">vcf-validator</a></p></li>
 </ul>
 </li>
 </ul>
 </li>
-<li>New output file - JSON output of HTML report content</li>
-<li>New INFO tags of PCGR-annotated VCF<ul>
-<li><em>CANCER_PREDISPOSITION</em></li>
-<li><em>PFAM_DOMAIN</em></li>
-<li><em>TCGA_FREQUENCY</em></li>
-<li><em>TCGA_PANCANCER_COUNT</em></li>
-<li><em>ICGC_PCAWG_OCCURRENCE</em></li>
-<li><em>ICGC_PCAWG_AFFECTED_DONORS</em></li>
-<li><em>CLINVAR_MEDGEN_CUI</em></li>
+<li><p>New output file - JSON output of HTML report content</p></li>
+<li><p>New INFO tags of PCGR-annotated VCF</p>
+<ul>
+<li><p><em>CANCER_PREDISPOSITION</em></p></li>
+<li><p><em>PFAM_DOMAIN</em></p></li>
+<li><p><em>TCGA_FREQUENCY</em></p></li>
+<li><p><em>TCGA_PANCANCER_COUNT</em></p></li>
+<li><p><em>ICGC_PCAWG_OCCURRENCE</em></p></li>
+<li><p><em>ICGC_PCAWG_AFFECTED_DONORS</em></p></li>
+<li><p><em>CLINVAR_MEDGEN_CUI</em></p></li>
 </ul>
 </li>
-<li>New column entries in annotated SNV/InDel TSV file:<ul>
-<li><em>CANCER_PREDISPOSITION</em></li>
-<li><em>ICGC_PCAWG_OCCURRENCE</em></li>
-<li><em>TCGA_FREQUENCY</em></li>
+<li><p>New column entries in annotated SNV/InDel TSV file:</p>
+<ul>
+<li><p><em>CANCER_PREDISPOSITION</em></p></li>
+<li><p><em>ICGC_PCAWG_OCCURRENCE</em></p></li>
+<li><p><em>TCGA_FREQUENCY</em></p></li>
 </ul>
 </li>
-<li>New column in CNA output<ul>
-<li><em>TRANSCRIPTS</em> - aberration-overlapping transcripts (Ensembl
-transcript IDs)</li>
-<li><em>MEAN_TRANSCRIPT_CNA_OVERLAP</em> - Mean overlap (%) betweeen gene
-transcripts and aberration segment</li>
+<li><p>New column in CNA output</p>
+<ul>
+<li><p><em>TRANSCRIPTS</em> - aberration-overlapping transcripts (Ensembl
+transcript IDs)</p></li>
+<li><p><em>MEAN_TRANSCRIPT_CNA_OVERLAP</em> - Mean overlap (%) betweeen gene
+transcripts and aberration segment</p></li>
 </ul>
 </li>
 </ul>
 </div>
 <div class="section" id="removed-1">
-<span id="id15"></span><h3>Removed<a class="headerlink" href="#removed-1" title="Permalink to this headline">¶</a></h3>
+<span id="id18"></span><h3>Removed<a class="headerlink" href="#removed-1" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>Elements of databundle (now annotated directly through VEP):<ul>
-<li>dbsnp</li>
-<li>gnomad/exac</li>
-<li>1000G project</li>
+<li><p>Elements of databundle (now annotated directly through VEP):</p>
+<ul>
+<li><p>dbsnp</p></li>
+<li><p>gnomad/exac</p></li>
+<li><p>1000G project</p></li>
 </ul>
 </li>
-<li>INFO tags of PCGR-annotated VCF<ul>
-<li><em>DBSNPBUILDID</em></li>
-<li><em>DBSNP_VALIDATION</em></li>
-<li><em>DBSNP_SUBMISSIONS</em></li>
-<li><em>DBSNP_MAPPINGSTATUS</em></li>
-<li><em>GWAS_CATALOG_PMID</em></li>
-<li><em>GWAS_CATALOG_TRAIT_URI</em></li>
-<li><em>DOCM_DISEASE</em></li>
+<li><p>INFO tags of PCGR-annotated VCF</p>
+<ul>
+<li><p><em>DBSNPBUILDID</em></p></li>
+<li><p><em>DBSNP_VALIDATION</em></p></li>
+<li><p><em>DBSNP_SUBMISSIONS</em></p></li>
+<li><p><em>DBSNP_MAPPINGSTATUS</em></p></li>
+<li><p><em>GWAS_CATALOG_PMID</em></p></li>
+<li><p><em>GWAS_CATALOG_TRAIT_URI</em></p></li>
+<li><p><em>DOCM_DISEASE</em></p></li>
 </ul>
 </li>
-<li>Output files<ul>
-<li>TSV files with mutational signature results and biomarkers
-(i.e.&nbsp;<em>sample_id.pcgr.snvs_indels.biomarkers.tsv</em> and
-<em>sample_id.pcgr.mutational_signatures.tsv</em>)<ul>
-<li>Data can still be retrieved - now from the JSON dump</li>
+<li><p>Output files</p>
+<ul>
+<li><p>TSV files with mutational signature results and biomarkers
+(i.e. <em>sample_id.pcgr.snvs_indels.biomarkers.tsv</em> and
+<em>sample_id.pcgr.mutational_signatures.tsv</em>)</p>
+<ul>
+<li><p>Data can still be retrieved - now from the JSON dump</p></li>
 </ul>
 </li>
-<li>MAF file<ul>
-<li>The previous MAF output was generated in a custom fashion, a
+<li><p>MAF file</p>
+<ul>
+<li><p>The previous MAF output was generated in a custom fashion, a
 more accurate MAF output based on
 <a class="reference external" href="https://github.com/mskcc/vcf2maf">https://github.com/mskcc/vcf2maf</a> will be incorporated in the
-next release</li>
+next release</p></li>
 </ul>
 </li>
 </ul>
 </li>
 </ul>
 </div>
-<div class="section" id="changed-3">
-<span id="id16"></span><h3>Changed<a class="headerlink" href="#changed-3" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="changed-4">
+<span id="id19"></span><h3>Changed<a class="headerlink" href="#changed-4" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>HTML report sections<ul>
-<li><em>Tier statistics</em> and <em>Variant statistics</em> are now grouped into
-the section <em>Tier and variant statistics</em></li>
-<li><em>Tier 5</em> is now <em>Noncoding mutations</em> (i.e.&nbsp;not considered a tier
-per se)</li>
-<li>Sliders for allelic fraction in the <em>Global variant browser</em> are
-now fixed from 0 to 1 (0.05 intervals)</li>
+<li><p>HTML report sections</p>
+<ul>
+<li><p><em>Tier statistics</em> and <em>Variant statistics</em> are now grouped into
+the section <em>Tier and variant statistics</em></p></li>
+<li><p><em>Tier 5</em> is now <em>Noncoding mutations</em> (i.e. not considered a tier
+per se)</p></li>
+<li><p>Sliders for allelic fraction in the <em>Global variant browser</em> are
+now fixed from 0 to 1 (0.05 intervals)</p></li>
 </ul>
 </li>
 </ul>
@@ -757,13 +920,14 @@ now fixed from 0 to 1 (0.05 intervals)</li>
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
       
-        <a href="tier_systems.html" class="btn btn-neutral" title="Tier models" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="tier_systems.html" class="btn btn-neutral float-left" title="Tier models" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -772,11 +936,19 @@ now fixed from 0 to 1 (0.05 intervals)</li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017-2019, Sigve Nakken.
+        
+        &copy; Copyright 2017-2020, Sigve Nakken
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -788,36 +960,15 @@ now fixed from 0 to 1 (0.05 intervals)</li>
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'0.8.4',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

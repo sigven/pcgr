@@ -5,15 +5,15 @@ Basic variant consequence annotation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  `VEP <http://www.ensembl.org/info/docs/tools/vep/index.html>`__ -
-   Variant Effect Predictor release 98.3 (`GENCODE
-   v31 <https://www.gencodegenes.org/human/>`__ as gene reference
+   Variant Effect Predictor release 101 (`GENCODE
+   v35 <https://www.gencodegenes.org/human/>`__ as gene reference
    database (v19 for grch37))
 
 *Insilico* predictions of effect of coding variants
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  `dBNSFP <https://sites.google.com/site/jpopgen/dbNSFP>`__ - database
-   of non-synonymous functional predictions (v4.0, May 2019)
+   of non-synonymous functional predictions (v4.1, June 2020)
 
 Variant frequency databases
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -21,12 +21,11 @@ Variant frequency databases
 -  `gnomAD <http://exac.broadinstitute.org/>`__ - germline variant
    frequencies exome-wide (r2.1, October 2018)
 -  `dbSNP <http://www.ncbi.nlm.nih.gov/SNP/>`__ - database of short
-   genetic variants (b151)
+   genetic variants (build 153)
 -  `Cancer Hotspots <http://cancerhotspots.org>`__ - a resource for
    statistically significant mutations in cancer (v2, 2017)
 -  `TCGA <https://portal.gdc.cancer.gov/>`__ - somatic mutations
-   discovered across 33 tumor type cohorts (release 19.0, September
-   2019)
+   discovered across 33 tumor type cohorts (release 25.0, July 2020)
 -  `ICGC-PCAWG <http://docs.icgc.org/pcawg/>`__ - ICGC Pancancer
    Analysis of Whole Genomes - (release 28, March 17th, 2019)
 
@@ -34,37 +33,38 @@ Variant databases of clinical utility
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  `ClinVar <http://www.ncbi.nlm.nih.gov/clinvar/>`__ - database of
-   clinically related variants (October 2019)
+   clinically related variants (August 2020)
 -  `DoCM <http://docm.genome.wustl.edu>`__ - database of curated
    mutations (v3.2, April 2016)
 -  `CIViC <http://civic.genome.wustl.edu>`__ - clinical interpretations
-   of variants in cancer (November 5th 2019)
--  `CBMDB <http://www.cancergenomeinterpreter.org/biomarkers>`__ -
-   Cancer BioMarkers database (January 17th 2018)
+   of variants in cancer (September 20th 2020)
+-  `CGI <http://www.cancergenomeinterpreter.org/biomarkers>`__ - Cancer
+   Genome Interpreter Cancer Biomarkers Database (CGI) (January 17th
+   2018)
 -  `ChEMBL <https://www.ebi.ac.uk/chembl/>`__ - database of drugs,
-   drug-like small molecules and their targets (ChEMBL_25, March 2019)
+   drug-like small molecules and their targets (ChEMBL_27, May 2020)
 
 Protein domains/functional features
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  `UniProt/SwissProt KnowledgeBase <http://www.uniprot.org>`__ -
-   resource on protein sequence and functional information (2019_10,
-   November 2019)
+   resource on protein sequence and functional information (2020_04,
+   August 2020)
 -  `Pfam <http://pfam.xfam.org>`__ - database of protein families and
-   domains (v32, September 2018)
+   domains (v33, May 2020)
 
 Knowledge resources on gene and protein targets
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  `CancerMine <https://zenodo.org/record/3525385#.XcHblUVKiL4>`__ -
    Literature-mined database of tumor suppressor genes/proto-oncogenes
-   (v18, November 2019)
+   (v28, September 2020)
 -  `Open Targets Platform <https://www.targetvalidation.org/>`__ -
    Database on disease-target associations, targeted drugs and
    tractability aggregated from multiple sources (literature, pathways,
-   mutations) (2019_09)
+   mutations) (2020_06)
 -  `DisGeNET <http://www.disgenet.org>`__ - curated associations between
-   human genes and different tumor types (v6.0, January 2019)
+   human genes and different tumor types (v7.0, May 2020)
 -  `TCGA driver genes <https://www.ncbi.nlm.nih.gov/pubmed/29625053>`__
    - predicted cancer driver genes based on application of multiple
    driver gene prediction tools on TCGA pan-cancer cohort
@@ -73,7 +73,7 @@ Pathway databases
 ~~~~~~~~~~~~~~~~~
 
 -  `KEGG PATHWAY Database <http://www.genome.jp/kegg/pathway.htm>`__ -
-   October 2nd 2019
+   September 1st 2020
 -  `Oncogenic Signaling Pathways -
    TCGA <https://www.ncbi.nlm.nih.gov/pubmed/29625050>`__ - Sanchez-Vega
    et al., *Cell*, 2018
@@ -112,7 +112,7 @@ Clinical biomarkers included in PCGR are limited to the following:
 -  Markers reported at the codon level (e.g. **KRAS p.G12**)
 -  Markers reported at the exon level (e.g. **KIT exon 11 mutation**)
 -  Within the `Cancer bioMarkers database
-   (CBMDB) <https://www.cancergenomeinterpreter.org/biomarkers>`__, only
+   (CGI) <https://www.cancergenomeinterpreter.org/biomarkers>`__, only
    markers collected from FDA/NCCN guidelines, scientific literature,
    and clinical trials are included (markers collected from conference
    abstracts etc. are not included)
@@ -150,7 +150,7 @@ literature.
    post-processing steps:
 
    -  Phenotype associations in Open Targets Platform are assembled from
-      `20 different data
+      `a variety of different data
       sources <https://docs.targetvalidation.org/data-sources/data-sources>`__.
       Target-disease associations included in PCGR must be supported by
       **at least two distinct sources**
@@ -165,9 +165,25 @@ literature.
 
 **Tumor suppressor genes/proto-oncogenes**
 
--  For liteature-derived predictions of tumor suppressor
-   genes/proto-oncogenes from *CancerMine*, we require a *minimum of
-   four PubMed hits*.
+-  Status as oncogenes and/or tumor suppressors genes are done according
+   to the following scheme in PCGR:
+
+   -  Five or more publications in the biomedical literature that
+      suggests an oncogenic/tumor suppressor role for a given gene (as
+      collected from the `CancerMine text-mining
+      resource <http://bionlp.bcgsc.ca/cancermine/>`__), **OR**
+   -  At least two publications from CancerMine that suggests an
+      oncogenic/tumor suppressor role for a given gene **AND** an
+      existing record for the same gene as a tumor suppressor/oncogene
+      in the `Network of Cancer Genes (NCG) <http://ncg.kcl.ac.uk/>`__
+   -  Status as oncogene is ignored if a given gene has three times as
+      much (literature evidence) support for a role as a tumor
+      suppressor gene (and vice versa)
+   -  Oncogenes/tumor suppressor candidates from CancerMine/NCG that are
+      found in the `curated list of false positive cancer drivers
+      compiled by Bailey et al. (Cell,
+      2018) <https://www.ncbi.nlm.nih.gov/pubmed/30096302>`__ have been
+      excluded
 
 **TCGA somatic calls**
 
