@@ -210,6 +210,7 @@ def get_correct_cpg_transcript(vep_csq_records):
             if vep_csq_records[j]['SYMBOL'] in csq_idx_dict.keys():
                csq_idx_dict[str(vep_csq_records[j]['SYMBOL'])]['idx'] = j
                if vep_csq_records[j]['CODING_STATUS'] == 'coding':
+                  csq_idx = j  # prefer coding on over anything else
                   csq_idx_dict[str(vep_csq_records[j]['SYMBOL'])]['coding'] = True
       j = j + 1
    
@@ -228,6 +229,8 @@ def get_correct_cpg_transcript(vep_csq_records):
       if csq_idx_dict['NTHL1']['coding'] is True:
          csq_idx = csq_idx_dict['NTHL1']['idx']
 
+   if csq_idx is None:
+      csq_idx = 0
    return csq_idx
 
 
