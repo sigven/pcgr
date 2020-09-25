@@ -71,7 +71,8 @@ Row {data-height=500}
 tcga_tmb <- pcg_report[['content']][['tmb']][['tcga_tmb']]
 p_site <- pcg_report[['metadata']][['config']][['tumor_properties']][['tumor_type']]
 tmb_estimate = pcg_report[['content']][['tmb']][['variant_statistic']][['tmb_estimate']]
-tmb_high = pcg_report[['metadata']][['config']][['tmb']][['tmb_intermediate_limit']]
+algorithm <- pcg_report[['content']][['tmb']][['algorithm']]
+#tmb_high = pcg_report[['metadata']][['config']][['tmb']][['tmb_intermediate_limit']]
 
 tmb_site_colors <- 
   data.frame(primary_site = unique(tcga_tmb$primary_site), stringsAsFactors = F) %>%
@@ -80,10 +81,17 @@ tmb_site_colors <-
   dplyr::mutate(color = dplyr::if_else(primary_site == p_site,
                                        pcg_report[['metadata']][['color_palette']][['tier']][['values']][1], color))
   
-  tmb_site_color_vec <- tmb_site_colors$color
-  names(tmb_site_color_vec) <- tmb_site_colors$primary_site
+tmb_site_color_vec <- tmb_site_colors$color
+names(tmb_site_color_vec) <- tmb_site_colors$primary_site
 
-  tcga_tmb <- tcga_tmb %>% dplyr::filter(!is.na(primary_site))
+tcga_tmb <- tcga_tmb %>% dplyr::filter(!is.na(primary_site))
+
+if(algorithm == "nonsyn"){
+  tcga_tmb <- tcga_tmb %>% dplyr::filter(!is.na(primary_site)) %>%
+    dplyr::select(primary_site, tmb_ns_log10, tmb_ns) %>%
+    dplyr::rename(tmb = tmb_ns, tmb_log10 = tmb_ns_log10)
+}
+
 
 tmb_plot_site <-
   #ggplot2::ggplot(data = tcga_tmb[['tmb_site']]) +

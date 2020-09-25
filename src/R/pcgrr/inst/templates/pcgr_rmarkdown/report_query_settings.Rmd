@@ -34,7 +34,9 @@ The report is generated with _[PCGR](https://github.com/sigven/pcgr)_ version `r
 * Tier system (VCF): __pcgr_acmg__
 * MSI prediction: __`r msi_prediction`__
 * Mutational burden estimation: __`r mutational_burden`__
+  * TMB algorithm: <b> __`r pcg_report[['metadata']][['config']][['tmb']][['algorithm']]`__ </b>
 * Mutational signatures estimation: __`r signatures_estimation`__
+  * All reference signatures: <b> __`r pcg_report[['metadata']][['config']][['msigs']][['all_reference_signatures']]`__ </b>
 * Report theme (Bootstrap): __`r pcg_report[['metadata']][['config']][['visual']][['report_theme']]`__
 
 

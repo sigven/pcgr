@@ -229,6 +229,7 @@ init_report <- function(config = NULL, sample_name = "SampleX",
         report[["content"]][[analysis_element]][["result"]][["goodness_of_fit"]] <- NA
       }
       if (analysis_element == "tmb") {
+        report[["content"]][[analysis_element]][["algorithm"]] <- "all_coding"
         report[["content"]][[analysis_element]][["variant_statistic"]] <- list()
         report[["content"]][[analysis_element]][["variant_statistic"]][["n_tmb"]] <- 0
         report[["content"]][[analysis_element]][["variant_statistic"]][["tmb_estimate"]] <- 0

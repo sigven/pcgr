@@ -126,6 +126,7 @@ def __main__():
    optional.add_argument('--estimate_tmb', action = "store_true", help = "Estimate tumor mutational burden from the total number of somatic mutations and target region size, default: %(default)s")
    optional.add_argument('--estimate_msi_status', action = "store_true", help = "Predict microsatellite instability status from patterns of somatic mutations/indels, default: %(default)s")
    optional.add_argument('--estimate_signatures', action = "store_true", help = "Estimate relative contributions of reference mutational signatures in query sample and detect potential kataegis events), default: %(default)s")
+   optional.add_argument('--tmb_algorithm', dest = "tmb_algorithm", default = "all_coding", choices = ['all_coding','nonsyn'], help = "Method for calculation of TMB, all coding variants (Chalmers et al., Genome Medicine, 2017), or non-synonymous variants only, default: %(default)s")
    optional.add_argument('--min_mutations_signatures', type = int, default = 200, dest = "min_mutations_signatures", help = "Minimum number of SNVs required for reconstruction of mutational signatures (SBS) by MutationalPatterns (default: %(default)s, minimum n = 100)")
    optional.add_argument('--all_reference_signatures', action = "store_true", help = "Use all reference mutational signatures (SBS, n = 67) in signature reconstruction rather than only those already attributed to the tumor type (default: %(default)s)")
    optional.add_argument('--force_overwrite', action = "store_true", help = 'By default, the script will fail with an error if any output file already exists. You can force the overwrite of existing result files by using this flag')
@@ -313,6 +314,7 @@ def __main__():
    config_options['tmb'] = {}
    config_options['tmb']['run'] = int(arg_dict['estimate_tmb'])
    config_options['tmb']['target_size_mb'] = arg_dict['target_size_mb']
+   config_options['tmb']['algorithm'] = arg_dict['tmb_algorithm']
    config_options['cna'] = {}
    config_options['cna']['logR_homdel'] = float(arg_dict['logr_homdel'])
    config_options['cna']['logR_gain'] = float(arg_dict['logr_gain'])
@@ -920,7 +922,8 @@ def run_pcgr(arg_dict, host_directories, config_options):
                            str(arg_dict['genome_assembly']) + " " + data_dir + " " + \
                            str(input_cna_plot_docker) + " " + str(config_options['tumor_purity']) + " " + \
                            str(config_options['tumor_ploidy']) + " " + str(config_options['assay']) + " " + str(tumor_only) +  " " + \
-                           str(config_options['tmb']['run']) + " " + str(config_options['msi']['run']) + " " + str(config_options['msigs']['run']) + " " + \
+                           str(config_options['tmb']['run']) + " " + str(config_options['tmb']['algorithm']) + " " + \
+                           str(config_options['msi']['run']) + " " + str(config_options['msigs']['run']) + " " + \
                            str(config_options['tmb']['target_size_mb']) + " " + str(config_options['cna']['logR_homdel']) + " " + \
                            str(config_options['cna']['logR_gain']) + " " + str(config_options['cna']['cna_overlap_pct']) + " "  + \
                            str(config_options['msigs']['mutation_limit']) + " " + str(config_options['msigs']['all_reference_signatures']) + " " + \

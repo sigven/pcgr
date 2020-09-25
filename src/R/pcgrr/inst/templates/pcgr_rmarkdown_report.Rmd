@@ -4,7 +4,7 @@ date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
 bibliography: bibliography.bib
 nocite: |
   @Tamborero2018-aj, @Poti2019-qr, @Alexandrov2020-gj, @Alexandrov2013-gs, @Griffith2017-do, @Ma2018-to, @Cortes-Ciriano2017-vl, @Li2017-ew,
-  @Blokzijl2018-nc, @Lever2019-xp, @Repana2019-dd, @Chalmers2017-cz, @Yin2020-or, @Bailey2018-os
+  @Blokzijl2018-nc, @Lever2019-xp, @Repana2019-dd, @Chalmers2017-cz, @Yin2020-or, @Bailey2018-os, @Fernandez2019-mk
 output: 
   html_document:
     toc: true

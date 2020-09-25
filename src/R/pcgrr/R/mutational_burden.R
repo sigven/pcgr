@@ -10,11 +10,17 @@
 generate_report_data_tmb <- function(sample_calls, pcgr_data, sample_name, pcgr_config) {
 
   tmb_consequence_pattern <- "^(stop_|start_lost|frameshift_|missense_|synonymous_|inframe_)"
+
   rlogging::message("------")
   rlogging::message(paste0("Calculating tumor mutational burden"))
 
   pcg_report_tmb <- pcgrr::init_report(pcgr_config, sample_name = sample_name,
                                            class = "tmb", pcgr_data = pcgr_data)
+
+  if(pcgr_config[['tmb']][['algorithm']] == 'nonsyn'){
+    tmb_consequence_pattern <- "^(missense_)"
+    pcg_report_tmb[['tmb']][['algorithm']] <- pcgr_config[['tmb']][['algorithm']]
+  }
 
   pcg_report_tmb[["eval"]] <- TRUE
   pcg_report_tmb[["variant_statistic"]][["n_tmb"]] <- sample_calls %>%
@@ -46,7 +52,8 @@ generate_report_data_tmb <- function(sample_calls, pcgr_data, sample_name, pcgr_
   return(pcg_report_tmb)
 }
 
-plot_tmb_primary_site_tcga <- function(tcga_tmb, p_site = "Liver", tmb_estimate = 5, tmb_high = 20) {
+plot_tmb_primary_site_tcga <- function(tcga_tmb, p_site = "Liver", tmb_estimate = 5,
+                                       algorithm = "all_coding") {
 
 
   tmb_site_colors <- data.frame(primary_site = unique(tcga_tmb$primary_site), stringsAsFactors = F) %>%
@@ -59,7 +66,14 @@ plot_tmb_primary_site_tcga <- function(tcga_tmb, p_site = "Liver", tmb_estimate 
   tmb_site_color_vec <- tmb_site_colors$color
   names(tmb_site_color_vec) <- tmb_site_colors$primary_site
 
-  tcga_tmb <- tcga_tmb %>% dplyr::filter(!is.na(primary_site))
+  tcga_tmb <- tcga_tmb %>% dplyr::filter(!is.na(primary_site)) %>%
+    dplyr::select(primary_site, tmb_log10, tmb)
+
+  if(algorithm == "nonsyn"){
+    tcga_tmb <- tcga_tmb %>% dplyr::filter(!is.na(primary_site)) %>%
+      dplyr::select(primary_site, tmb_ns_log10, tmb_ns) %>%
+      dplyr::rename(tmb = tmb_ns, tmb_log10 = tmb_ns_log10)
+  }
 
   tmb_plot_site <-
     ggplot2::ggplot(data = tcga_tmb) +

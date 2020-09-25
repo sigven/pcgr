@@ -18,7 +18,9 @@ Key report configuration settings:
 * Maximum allelic fraction <b>control</b> (VAF, SNV/InDel): <b> __`r pcg_report[['metadata']][['config']][['allelic_support']][['control_af_max']]`__ </b>
 * MSI prediction: <b> __`r msi_prediction`__ </b>
 * Mutational burden estimation: <b> __`r mutational_burden`__ </b>
+  * TMB algorithm: <b> __`r pcg_report[['metadata']][['config']][['tmb']][['algorithm']]`__ </b>
 * Mutational signatures estimation: <b> __`r signatures_estimation`__ </b>
+  * All reference signatures: <b> __`r pcg_report[['metadata']][['config']][['msigs']][['all_reference_signatures']]`__ </b>
 * Clinical trial inclusion: <b> __`r trial_inclusion`__ </b>
 
 <br>
@@ -176,7 +178,13 @@ cat("The accuracy of signature fitting (highlighted in value box) reflects how w
 
 #### Tumor mutational burden (TMB)
 
-Tumor mutational load or mutational burden is a measure of the number of mutations within a tumor genome, defined as the total number of mutations per coding area of a tumour genome. TMB may serve as a proxy for determining the number of neoantigens per tumor, which in turn has implications for response to immunotherapy. For estimation of TMB, PCGR employs the same approach as was outlined in a recently published large-scale study of TMB ([Chalmers et al., 2017](https://www.ncbi.nlm.nih.gov/pubmed/28420421)), i.e. counting all somatic base substitutions and indels in the protein-coding regions of the sequencing assay, including synonymous alterations. 
+Tumor mutational load or mutational burden is a measure of the number of mutations within a tumor genome, defined as the total number of mutations per coding area of a tumour genome. TMB may serve as a proxy for determining the number of neoantigens per tumor, which in turn may have implications for response to immunotherapy. For estimation of TMB, PCGR employs two different algorithms (one to be chosen by the user):
+
+  1) __all_coding__: the same approach as was outlined in a recently published large-scale study of TMB ([Chalmers et al., 2017](https://www.ncbi.nlm.nih.gov/pubmed/28420421)), i.e. counting all somatic base substitutions and indels in the protein-coding regions of the sequencing assay, including synonymous alterations. 
+  2) __nonsyn__: non-synonymous variants only, i.e. as employed by [Fernandez et al., 2019](https://www.ncbi.nlm.nih.gov/pubmed/31475242)
+
+Numbers obtained with 1) or 2) is next divided by the coding target size of the sequencing assay.
+
 
 #### MSI classification
 
