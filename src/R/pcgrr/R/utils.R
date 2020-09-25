@@ -2061,13 +2061,9 @@ update_maf_allelic_support <- function(calls, maf_fname_tmp,
     dplyr::select(CHROM, POS, DP_TUMOR, AF_TUMOR, DP_CONTROL, AF_CONTROL, VARIANT_CLASS) %>%
     dplyr::rename(Chromosome = CHROM, Start_Position = POS) %>%
     dplyr::mutate(Chromosome = as.character(Chromosome)) %>%
-<<<<<<< HEAD
     dplyr::mutate(Start_Position = dplyr::if_else(VARIANT_CLASS == "deletion",
                                                   Start_Position + 1,
                                                   as.double(Start_Position)))
-=======
-    dplyr::mutate(Start_Position = dplyr::if_else(VARIANT_CLASS == "deletion",Start_Position + 1,as.double(Start_Position)))
->>>>>>> bfb11e65297b83a50c0b0c47ad7c826158ef3b85
 
     if (!is.null(maf_data)) {
       if (!any(is.na(calls_maf$DP_TUMOR)) & !any(is.na(calls_maf$AF_TUMOR))) {
@@ -2078,16 +2074,11 @@ update_maf_allelic_support <- function(calls, maf_fname_tmp,
           dplyr::mutate(Chromosome = as.character(Chromosome))
 
         maf_data <- maf_data %>%
-<<<<<<< HEAD
-          dplyr::left_join(dplyr::select(calls_maf, -c(DP_CONTROL, AF_CONTROL)),
-                           by = c("Chromosome", "Start_Position", "VARIANT_CLASS")) %>%
+          dplyr::mutate(Chromosome = as.character(Chromosome)) %>%
+          dplyr::left_join(dplyr::select(calls_maf,-c(DP_CONTROL,AF_CONTROL)),
+                           by=c("Chromosome","Start_Position","VARIANT_CLASS")) %>%
           dplyr::mutate(t_depth = t_depth_estimate, t_ref_count = t_ref_count_estimate,
                         t_alt_count = t_alt_count_estimate) %>%
-=======
-          dplyr::mutate(Chromosome = as.character(Chromosome)) %>%
-          dplyr::left_join(dplyr::select(calls_maf,-c(DP_CONTROL,AF_CONTROL)),by=c("Chromosome","Start_Position","VARIANT_CLASS")) %>%
-          dplyr::mutate(t_depth = t_depth_estimate, t_ref_count = t_ref_count_estimate, t_alt_count = t_alt_count_estimate) %>%
->>>>>>> bfb11e65297b83a50c0b0c47ad7c826158ef3b85
           dplyr::mutate(t_depth_estimate = NULL, t_ref_count_estimate = NULL, t_alt_count_estimate = NULL)
 
       }
