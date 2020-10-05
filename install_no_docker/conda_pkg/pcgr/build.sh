@@ -19,13 +19,9 @@ mv ${SRC_DIR}/src/*.R ${PREFIX}/bin/  # R scripts
 wget https://github.com/EBIvariation/vcf-validator/releases/download/v0.6/vcf_validator -O ${PREFIX}/bin/vcf_validator
 chmod +x ${PREFIX}/bin/vcf_validator
 
-#R -e "install.packages('BiocManager', repos = 'http://cran.us.r-project.org', dependencies=FALSE, args=c('--library=${PREFIX}/lib/R/library'))"
-#R -e "library(BiocManager); BiocManager::install('TxDb.Hsapiens.UCSC.hg19.knownGene')"
-#R -e "library(BiocManager); BiocManager::install('TxDb.Hsapiens.UCSC.hg38.knownGene')"
-#R -e "library(BiocManager); BiocManager::install('BSgenome.Hsapiens.UCSC.hg19')"
-#R -e "library(BiocManager); BiocManager::install('BSgenome.Hsapiens.UCSC.hg38')"
-
 R -e "library(devtools); devtools::install('${SRC_DIR}/src/R/pcgrr', dependencies=FALSE, args=c('--library=${PREFIX}/lib/R/library'))"
+R -e "install.packages('nat.utils', dependencies = F, repos = 'http://cran.rstudio.com')"
+R -e "install.packages('assertable', dependencies = F, repos = 'http://cran.rstudio.com')"
 
 ### Loftee. To make sure same LoF version is used in dockerized and non-dockerized installation.
 #   ensembl-vep conda package installs most recent version of LoF automatically, however it doesn't work with the most

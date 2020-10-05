@@ -13,3 +13,6 @@ docs/_build/
 
 #data
 .Rproj.user
+
+.Rhistory
+*.Rproj

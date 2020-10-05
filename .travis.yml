@@ -29,19 +29,19 @@ install:
   # Installing
   - conda install "${PACKAGE_NAME}==${VERSION}"
   # Pulling reference data
-  - wget https://raw.githubusercontent.com/circulosmeos/gdown.pl/master/gdown.pl
-  - perl gdown.pl "https://drive.google.com/uc?id=1TdYagetk-l__aYBsaZJHJvYFStDnIEcq" grch37.tar.gz
-  - tar -xzf grch37.tar.gz  # will extract into ./data/grch37/
+#  - wget https://raw.githubusercontent.com/circulosmeos/gdown.pl/master/gdown.pl
+#  - perl gdown.pl "https://drive.google.com/uc?id=1TdYagetk-l__aYBsaZJHJvYFStDnIEcq" grch37.tar.gz
+#  - tar -xzf grch37.tar.gz  # will extract into ./data/grch37/
   # - gdown https://drive.google.com/uc?id=1TdYagetk-l__aYBsaZJHJvYFStDnIEcq -O - | tar xzf - # grch37
 
 script:
   # Condarized installation:
   - pcgr.py --version
   - python -c "import pcgr"
-  - pcgr.py
-    --input_vcf examples/tumor_sample.BRCA.vcf.gz
-    --input_cna examples/tumor_sample.BRCA.cna.tsv
-    . ./examples grch37 examples/examples_BRCA.toml tumor_sample.BRCA --tumor_type 6 --no-docker
+#  - pcgr.py
+#    --input_vcf examples/tumor_sample.BRCA.vcf.gz
+#    --input_cna examples/tumor_sample.BRCA.cna.tsv
+#    . ./examples grch37 examples/examples_BRCA.toml tumor_sample.BRCA --tumor_type 6 --no-docker
 
 deploy:
   # Deploy to Anaconda.org
