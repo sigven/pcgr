@@ -11,5 +11,5 @@ docs/_build/
 # macOS files
 .DS_Store
 
-data
+#data
 .Rproj.user

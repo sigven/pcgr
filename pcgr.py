@@ -136,7 +136,7 @@ def __main__():
    optional.add_argument('--docker-uid', dest = 'docker_user_id', help = 'Docker user ID. default is the host system user ID. If you are experiencing permission errors, try setting this up to root (`--docker-uid root`)')
    optional.add_argument('--no-docker', action ='store_true', dest = 'no_docker', default=False, help = 'Run the PCGR workflow in a non-Docker mode (see install_no_docker/ folder for instructions)')   
    optional.add_argument('--debug', action ='store_true', default=False, help = 'Print full Docker commands to log, default: %(default)s')
-   required.add_argument('--pcgr_dir', dest = 'pcgr_dir', help = 'PCGR base directory with accompanying data directory, e.g. ~/pcgr-0.9.0', required = True)
+   required.add_argument('--pcgr_dir', dest = 'pcgr_dir', help = 'PCGR base directory with accompanying data directory, e.g. ~/pcgr-' + str(PCGR_VERSION), required = True)
    required.add_argument('--output_dir', dest = 'output_dir', help = 'Output directory', required = True)
    required.add_argument('--genome_assembly', dest = 'genome_assembly', choices = ['grch37','grch38'], help = 'Human genome assembly build: grch37 or grch38', required = True)
    required.add_argument('--conf', dest = 'configuration_file', help = 'PCGR configuration file in TOML format', required = True)
