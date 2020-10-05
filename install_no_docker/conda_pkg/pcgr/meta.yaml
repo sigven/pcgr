@@ -18,16 +18,15 @@ requirements:
   build:
     - curl
     - unzip
-    - r-base
-    - r-devtools
     - tar
-    - python
+    - python =3.7
+    - r-base =4.0.2
     - toml
     #
     # Need R packages build-time to correctly install pcgrr
     - bioconductor-biocinstaller
-    - libgfortran-ng  # to fix -libgfortran error, thanks @pdiakumis
-    - r-purrr >=0.2.4  # to force the one from conda-forge to address this issue https://github.com/jbkunst/highcharter/issues/285
+    - r-devtools
+    - r-purrr
     - r-dplyr
     - r-stringr
     - r-tidyr
@@ -42,31 +41,34 @@ requirements:
     - r-rcpptoml
     - r-ggplot2
     - r-dt
-    - r-stringi >=1.1.7    # for pcgrr
-    - r-htmlwidgets >=1.0  # for DT (by default, 0.9 is getting installed)
+    - r-stringi
+    - r-htmlwidgets
     - r-crosstalk
     - r-deconstructsigs
-    - r-knitr >=1.17
+    - r-knitr
     - r-rmarkdown
     - r-configr           # for pcgrr, -c pcgr
     - r-summarywidget     # for pcgrr, -c pcgr
     - r-rlogging          # for pcgrr, -c pcgr
     - r-collapsibletree   # for CELLector
     - r-sunburstr         # for CELLector, -c pcgr
-    - r-arules            # for CELLector, -c pcgr
+    - r-arules            # for CELLector, on conda-forge now
     - r-biocmanager
     - bioconductor-variantannotation
     - bioconductor-bsgenome.hsapiens.ucsc.hg19
     - bioconductor-bsgenome.hsapiens.ucsc.hg38
     - bioconductor-genomeinfodb
-    - bioconductor-genomicranges  # GenomicRangesS4Vectors
+    - bioconductor-genomicranges
     - bioconductor-regioner
     - bioconductor-mutationalpatterns
+    - r-shiny
+    - r-flexdashboard
 
   run:
     #
     # PCGR: python
-    - python
+    - python =3.7
+    - r-base =4.0.2
     - pip
     - numpy
     - cython
@@ -92,12 +94,10 @@ requirements:
     - perl-bio-bigfile  # for Loftee (doesn't come with ensemble-vep, but will come with https://github.com/bioconda/bioconda-recipes/pull/18808 once merged)
     #
     # PCGR: R packages
-    - r-base
     - bioconductor-biocinstaller
-    - libgfortran-ng  # to fix -libgfortran error, thanks @pdiakumis
-    - r-purrr >=0.2.4  # to force the one from conda-forge to address this issue https://github.com/jbkunst/highcharter/issues/285
-    - r-dplyr
     - r-devtools
+    - r-purrr
+    - r-dplyr
     - r-stringr
     - r-tidyr
     - r-httr
@@ -111,18 +111,18 @@ requirements:
     - r-rcpptoml
     - r-ggplot2
     - r-dt
-    - r-stringi >=1.1.7    # for pcgrr
-    - r-htmlwidgets >=1.0  # for DT (by default, 0.9 is getting installed)
+    - r-stringi
+    - r-htmlwidgets
     - r-crosstalk
     - r-deconstructsigs
-    - r-knitr >=1.17
+    - r-knitr
     - r-rmarkdown
     - r-configr           # for pcgrr, -c pcgr
     - r-summarywidget     # for pcgrr, -c pcgr
     - r-rlogging          # for pcgrr, -c pcgr
     - r-collapsibletree   # for CELLector
     - r-sunburstr         # for CELLector, -c pcgr
-    - r-arules            # for CELLector, -c pcgr
+    - r-arules            # for CELLector
     - r-biocmanager
     - bioconductor-variantannotation
     - bioconductor-bsgenome.hsapiens.ucsc.hg19
@@ -131,6 +131,7 @@ requirements:
     - bioconductor-genomicranges  # GenomicRangesS4Vectors
     - bioconductor-regioner
     - bioconductor-mutationalpatterns
+    - r-shiny
 
 test:
   commands:

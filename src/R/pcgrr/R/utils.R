@@ -2074,6 +2074,7 @@ update_maf_allelic_support <- function(calls, maf_fname_tmp,
   calls_maf <- calls %>%
     dplyr::select(CHROM, POS, DP_TUMOR, AF_TUMOR, DP_CONTROL, AF_CONTROL, VARIANT_CLASS) %>%
     dplyr::rename(Chromosome = CHROM, Start_Position = POS) %>%
+    dplyr::mutate(VARIANT_CLASS = as.character(VARIANT_CLASS)) %>%
     dplyr::mutate(Chromosome = as.character(Chromosome)) %>%
     dplyr::mutate(Start_Position = dplyr::if_else(VARIANT_CLASS == "deletion",
                                                   Start_Position + 1,
@@ -2089,6 +2090,7 @@ update_maf_allelic_support <- function(calls, maf_fname_tmp,
 
         maf_data <- maf_data %>%
           dplyr::mutate(Chromosome = as.character(Chromosome)) %>%
+          dplyr::mutate(VARIANT_CLASS = as.character(VARIANT_CLASS)) %>%
           dplyr::left_join(dplyr::select(calls_maf,-c(DP_CONTROL,AF_CONTROL)),
                            by=c("Chromosome","Start_Position","VARIANT_CLASS")) %>%
           dplyr::mutate(t_depth = t_depth_estimate, t_ref_count = t_ref_count_estimate,
