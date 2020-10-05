@@ -47,7 +47,7 @@ Variant numbers in the selected cancer predisposition genes (n = `r NROW(cps_rep
 
 <br><br>
 
-### <span style="color:`r pcgrr::significance_colors[1]`">Class 5 - <b>Pathogenic</b> variants</span> {.tabset .tabset-pills .nav-justified}
+### <span style="color:`r pcgrr::color_palette$pathogenicity$values[1]`">Class 5 - <b>Pathogenic</b> variants</span> {.tabset .tabset-pills .nav-justified}
 
 <br>
 
@@ -203,7 +203,7 @@ htmltools::br()
 
 
 
-### <span style="color:`r pcgrr::significance_colors[2]`">Class 4 - <b>Likely Pathogenic</b> variants</span> {.tabset .tabset-pills .nav-justified}
+### <span style="color:`r pcgrr::color_palette$pathogenicity$values[2]`">Class 4 - <b>Likely Pathogenic</b> variants</span> {.tabset .tabset-pills .nav-justified}
 
 <br>
 
@@ -355,7 +355,7 @@ htmltools::br()
 ```
 
 
-### <span style="color:`r pcgrr::significance_colors[3]`">Class 3 - <b>Variants of Uncertain Significance (VUS)</b></span> {.tabset .tabset-pills .nav-justified}
+### <span style="color:`r pcgrr::color_palette$pathogenicity$values[3]`">Class 3 - <b>Variants of Uncertain Significance (VUS)</b></span> {.tabset .tabset-pills .nav-justified}
 
 <br>
 
@@ -506,7 +506,7 @@ htmltools::br()
 
 ```
 
-### <span style="color:`r pcgrr::significance_colors[4]`">Class 2 - <b>Likely Benign</b> variants</span> {.tabset .tabset-pills .nav-justified}
+### <span style="color:`r pcgrr::color_palette$pathogenicity$values[4]`">Class 2 - <b>Likely Benign</b> variants</span> {.tabset .tabset-pills .nav-justified}
 
 <br>
 
@@ -658,7 +658,7 @@ htmltools::br()
 ```
 
 
-### <span style="color:`r pcgrr::significance_colors[5]`">Class 1 - <b>Benign</b> variants</span> {.tabset .tabset-pills .nav-justified}
+### <span style="color:`r pcgrr::color_palette$pathogenicity$values[5]`">Class 1 - <b>Benign</b> variants</span> {.tabset .tabset-pills .nav-justified}
 
 <br>
 

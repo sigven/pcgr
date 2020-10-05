@@ -4,7 +4,7 @@
 
 ```{r prepare_sf_data, echo=F, results='asis'}
 
-tot_variants_p_clinvar <- NROW(cps_report[['content']][['snv_indel']][['variant_display']][['sf']])
+tot_variants_p_clinvar <- NROW(cps_report[['content']][['snv_indel']][['variant_display']][['incidental']])
 
 ```
 
@@ -18,7 +18,7 @@ are registered with a <i>Pathogenic/Likely pathogenic</i> clinical significance 
 htmltools::br()
 htmltools::br()
 
-DT::datatable(cps_report[['content']][['snv_indel']][['variant_display']][['sf']], escape=F,extensions=c("Buttons","Responsive"), 
+DT::datatable(cps_report[['content']][['snv_indel']][['variant_display']][['incidental']], escape=F,extensions=c("Buttons","Responsive"), 
               options = list(
                 pageLength = 6,
                 buttons = c('csv','excel'),

@@ -149,7 +149,8 @@ variants_tier2_shared %>%
                  backgroundColor = DT::styleEqual(c('A: Validated','A: FDA/NCCN/ELN guidelines','B: Clinical evidence','B1: Clinical evidence: late trials','B2: Clinical evidence: early trials','C: Case study','D: Preclinical evidence','E: Indirect evidence'), c("#009E73","#009E73","#56B4E9", "#56B4E9","#56B4E9","#0072B2","#E69F00", "#F0E442"))) %>%
   DT::formatStyle(color="white", "SYMBOL", "BIOMARKER_MAPPING", fontWeight = 'bold', `text-align` = 'center',
                   backgroundColor = DT::styleEqual(c('exact','codon','exon','gene'), 
-                                                   c('#000','#000',pcgrr::color_warning, pcgrr::color_warning)))
+                                                   c('#000','#000',pcg_report[['metadata']][['color_palette']][['warning']][['values']][1],
+                                                     pcg_report[['metadata']][['color_palette']][['warning']][['values']][1])))
 
 ```
 
