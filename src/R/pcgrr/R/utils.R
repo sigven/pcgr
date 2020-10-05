@@ -1328,19 +1328,32 @@ append_gwas_citation_phenotype <- function(vcf_data_df, gwas_citations_phenotype
     }
     feature_df <- as.data.frame(feature_df %>%
                                   tidyr::separate_rows(GWAS_HIT, sep = ",") %>%
-                                  tidyr::separate(GWAS_HIT, into = c("rsid", "risk_allele", "pmid", "tagsnp", "p_value", "efo_id", "do_id"), sep = "\\|", remove = F) %>%
+                                  tidyr::separate(GWAS_HIT,
+                                                  into = c("rsid", "risk_allele", "pmid",
+                                                           "tagsnp", "p_value", "efo_id", "do_id"),
+                                                  sep = "\\|", remove = F) %>%
                                   dplyr::mutate(gwas_key = paste(rsid, efo_id, pmid, sep = "_")) %>%
-                                  dplyr::left_join(dplyr::select(gwas_citations_phenotypes, gwas_key, GWAS_PH, GWAS_CIT), by = c("gwas_key")) %>%
+                                  dplyr::left_join(dplyr::select(gwas_citations_phenotypes,
+                                                                 gwas_key, GWAS_PH, GWAS_CIT),
+                                                   by = c("gwas_key")) %>%
                                   dplyr::filter(!is.na(GWAS_CIT)) %>%
                                   dplyr::group_by(VAR_ID) %>%
-                                  dplyr::summarise(GWAS_PHENOTYPE = paste(unique(GWAS_PH), collapse = "; "), GWAS_CITATION = paste(unique(GWAS_CIT), collapse = "; ")) %>%
-                                  dplyr::mutate(GWAS_CITATION = dplyr::if_else(GWAS_CITATION == "NA", as.character(NA), as.character(GWAS_CITATION))) %>%
-                                  dplyr::mutate(GWAS_PHENOTYPE = dplyr::if_else(GWAS_PHENOTYPE == "NA", as.character(NA), as.character(GWAS_PHENOTYPE))) %>%
+                                  dplyr::summarise(GWAS_PHENOTYPE = paste(unique(GWAS_PH), collapse = "; "),
+                                                   GWAS_CITATION = paste(unique(GWAS_CIT), collapse = "; ")) %>%
+                                  dplyr::mutate(GWAS_CITATION = dplyr::if_else(GWAS_CITATION == "NA",
+                                                                               as.character(NA),
+                                                                               as.character(GWAS_CITATION))) %>%
+                                  dplyr::mutate(GWAS_PHENOTYPE = dplyr::if_else(GWAS_PHENOTYPE == "NA",
+                                                                                as.character(NA),
+                                                                                as.character(GWAS_PHENOTYPE))) %>%
                                   dplyr::filter(!is.na(GWAS_CITATION) & !is.na(GWAS_PHENOTYPE))
     )
     if (nrow(feature_df) > 0) {
       vcf_data_df <- vcf_data_df %>%
         dplyr::left_join(feature_df, by = c("VAR_ID" = "VAR_ID"))
+    }else{
+      vcf_data_df$GWAS_CITATION <- NA
+      vcf_data_df$GWAS_PHENOTYPE <- NA
     }
   }else{
     vcf_data_df$GWAS_CITATION <- NA
@@ -1700,6 +1713,7 @@ get_calls <- function(tsv_gz_file, pcgr_data, sample_name,
     pcgrr::order_variants() %>%
     dplyr::rename(CONSEQUENCE = Consequence)
 
+  ##
   if (cpsr == T) {
     if ("LoF" %in% colnames(vcf_data_df)) {
       vcf_data_df <- vcf_data_df %>%

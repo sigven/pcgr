@@ -97,26 +97,30 @@ generate_cpsr_report <- function(project_directory, query_vcf2tsv,
                                  cpg_call_stats[["variant_statistic_cpg"]][["n_coding"]]))
         rlogging::message(paste0("Number of non-coding variants in cancer predisposition genes: ",
                                  cpg_call_stats[["variant_statistic_cpg"]][["n_noncoding"]]))
-        sf_calls <- pcgrr::retrieve_sf_calls(calls,
+        incidental_calls <- pcgrr::retrieve_incidental_calls(calls,
                                              umls_map = pcgr_data$phenotype_ontology$umls)
-        sf_call_stats <- pcgrr::variant_stats_report(sf_calls, name = "variant_statistic_sf")
+        incidental_call_stats <- pcgrr::variant_stats_report(incidental_calls, name = "variant_statistic_incidental")
 
         if (nrow(cpg_calls) == 0) {
           cps_report$content$snv_indel$variant_statistic_cpg <- cpg_call_stats$variant_statistic_cpg
           return(cps_report)
         }
 
+        ## Assign ACMG evidence codes (>30 criteria) to variants
         cpg_calls <- pcgrr::assign_pathogenicity_evidence(cpg_calls, cpsr_config, pcgr_data) %>%
           pcgrr::determine_pathogenicity_classification() %>%
           pcgrr::detect_cancer_traits_clinvar(oncotree = cps_report[["metadata"]][["phenotype_ontology"]][["oncotree"]],
                                               umls_map = pcgr_data[["phenotype_ontology"]][["umls"]])
 
+        ## Assign calls to tiers (ClinVar calls + CPSR classification for novel, non-ClinVar variants)
         snv_indel_report <- pcgrr::assign_cpsr_tier(cpg_calls,
                                                     cps_report[["metadata"]][["config"]],
                                                     class_1_5_display)
         snv_indel_report$variant_statistic <- call_stats$variant_statistic
         snv_indel_report$variant_statistic_cpg <- cpg_call_stats$variant_statistic_cpg
-        snv_indel_report$variant_statistic_sf <- sf_call_stats$variant_statistic_sf
+        snv_indel_report$variant_statistic_incidental <- incidental_call_stats$variant_statistic_incidental
+
+        ## Retrieve and assign potential biomarkers to report
         snv_indel_report <- pcgrr::get_germline_biomarkers(snv_indel_report, pcgr_data)
 
         cps_report <- pcgrr::update_report(cps_report, report_data = snv_indel_report)
@@ -129,14 +133,15 @@ generate_cpsr_report <- function(project_directory, query_vcf2tsv,
                            collapse = ", ")
         rlogging::message("Variants were found in the following cancer predisposition genes: ", gene_hits)
 
+        ## Incidental findings
         if (cpsr_config[["incidental_findings"]] == TRUE) {
-          if(nrow(sf_calls) > 0){
+          if(nrow(incidental_calls) > 0){
             rlogging::message("Assignment of other variants in genes recommended for reporting as incidental findings (ACMG SF v2.0)")
-            cps_report[["content"]][["snv_indel"]][["variant_display"]][["sf"]] <- sf_calls %>%
+            cps_report[["content"]][["snv_indel"]][["variant_display"]][["sf"]] <- incidental_calls %>%
               dplyr::arrange(LOSS_OF_FUNCTION, CODING_STATUS) %>%
               dplyr::select(dplyr::one_of(incidental_findings_display))
             rlogging::message(paste0("Number of pathogenic variants in the incidentalome - other genes of clinical significance: ",
-                                     cps_report[["content"]][["snv_indel"]][["variant_statistic_sf"]][["n_coding"]]))
+                                     cps_report[["content"]][["snv_indel"]][["variant_statistic_incidental"]][["n_coding"]]))
           }
         }
 
@@ -144,22 +149,26 @@ generate_cpsr_report <- function(project_directory, query_vcf2tsv,
 
         if (cpsr_config[["gwas_findings"]] == TRUE) {
           rlogging::message("Assignment of other variants to hits from genome-wide association studies")
-        }
-        ## Assign GWAS hits to cps_report object
-        cps_report[["content"]][["snv_indel"]][["variant_display"]][["gwas"]] <-
-          dplyr::filter(calls, !is.na(GWAS_HIT) & !is.na(GWAS_CITATION))
-        if (nrow(cps_report[["content"]][["snv_indel"]][["variant_display"]][["gwas"]]) > 0) {
-          if (nrow(cps_report[["content"]][["snv_indel"]][["variant_set"]][["tsv"]]) > 0) {
-            cps_report[["content"]][["snv_indel"]][["variant_display"]][["gwas"]] <-
-              dplyr::anti_join(cps_report[["content"]][["snv_indel"]][["variant_display"]][["gwas"]],
-                               cps_report[["content"]][["snv_indel"]][["variant_set"]][["tsv"]],
-                               by = c("GENOMIC_CHANGE"))
-          }
+
+          ## Assign GWAS hits to cps_report object
+          cps_report[["content"]][["snv_indel"]][["variant_display"]][["gwas"]] <-
+            dplyr::filter(calls, !is.na(GWAS_HIT) & !is.na(GWAS_CITATION))
           if (nrow(cps_report[["content"]][["snv_indel"]][["variant_display"]][["gwas"]]) > 0) {
-            cps_report[["content"]][["snv_indel"]][["variant_display"]][["gwas"]] <-
-              cps_report[["content"]][["snv_indel"]][["variant_display"]][["gwas"]] %>%
-              dplyr::select(dplyr::one_of(predispose_gwas_display)) %>%
-              dplyr::arrange(LOSS_OF_FUNCTION, CODING_STATUS)
+            if (nrow(cps_report[["content"]][["snv_indel"]][["variant_set"]][["tsv"]]) > 0) {
+
+              ## Omit variants that is already present in TIER 1-5
+              cps_report[["content"]][["snv_indel"]][["variant_display"]][["gwas"]] <-
+                dplyr::anti_join(cps_report[["content"]][["snv_indel"]][["variant_display"]][["gwas"]],
+                                 cps_report[["content"]][["snv_indel"]][["variant_set"]][["tsv"]],
+                                 by = c("GENOMIC_CHANGE"))
+            }
+            ## Select variables to include for GWAS hits and arrange results
+            if (nrow(cps_report[["content"]][["snv_indel"]][["variant_display"]][["gwas"]]) > 0) {
+              cps_report[["content"]][["snv_indel"]][["variant_display"]][["gwas"]] <-
+                cps_report[["content"]][["snv_indel"]][["variant_display"]][["gwas"]] %>%
+                dplyr::select(dplyr::one_of(predispose_gwas_display)) %>%
+                dplyr::arrange(LOSS_OF_FUNCTION, CODING_STATUS)
+            }
           }
         }
       }
@@ -877,17 +886,17 @@ assign_cpsr_tier <- function(cpg_calls, cpsr_config, display_tags) {
 #' @param calls data frame with variants in genes recommended for incidental findings reporting
 #' @param umls_map data frame with UMLS phenotype terms
 #'
-retrieve_sf_calls <- function(calls, umls_map) {
+retrieve_incidental_calls <- function(calls, umls_map) {
 
-  sf_calls <- calls %>%
+  incidental_calls <- calls %>%
       dplyr::filter(!is.na(CANCER_PREDISPOSITION_SOURCE) &
                       CANCER_PREDISPOSITION_SOURCE == "ACMG_SF20" &
                       !is.na(CLINVAR_CLASSIFICATION)) %>%
       dplyr::filter(CLINVAR_CLASSIFICATION == "Pathogenic" |
                       CLINVAR_CLASSIFICATION == "Likely_Pathogenic")
 
-  if (nrow(sf_calls) > 0) {
-    sf_calls_per_trait <- tidyr::separate_rows(sf_calls, CLINVAR_UMLS_CUI, sep = ",") %>%
+  if (nrow(incidental_calls) > 0) {
+    incidental_calls_per_trait <- tidyr::separate_rows(incidental_calls, CLINVAR_UMLS_CUI, sep = ",") %>%
       dplyr::select(VAR_ID, CLINVAR_UMLS_CUI) %>%
       dplyr::left_join(umls_map, by = c("CLINVAR_UMLS_CUI" = "cui")) %>%
       dplyr::rename(CLINVAR_PHENOTYPE = cui_name) %>%
@@ -895,12 +904,12 @@ retrieve_sf_calls <- function(calls, umls_map) {
       dplyr::summarise(CLINVAR_PHENOTYPE = paste(unique(CLINVAR_PHENOTYPE), collapse="; ")) %>%
       dplyr::distinct()
 
-    sf_calls <- dplyr::inner_join(sf_calls,
-                                  dplyr::select(sf_calls_per_trait, VAR_ID, CLINVAR_PHENOTYPE),
+    incidental_calls <- dplyr::inner_join(incidental_calls,
+                                  dplyr::select(incidental_calls_per_trait, VAR_ID, CLINVAR_PHENOTYPE),
                                   by = c("VAR_ID" = "VAR_ID"))
   }
 
-  return(sf_calls)
+  return(incidental_calls)
 
 }
 

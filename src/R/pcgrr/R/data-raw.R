@@ -61,12 +61,8 @@ for(c in c('pathogenicity','clinical_evidence','tier','report_color','warning','
 
 }
 
-#usethis::use_data(color_warning, overwrite = T)
-#usethis::use_data(value_box_color, overwrite = T)
-usethis::use_data(acmg_evidence_codes, overwrite = T)
-#usethis::use_data(significance_colors, overwrite = T)
-#usethis::use_data(significance_levels, overwrite = T)
 usethis::use_data(color_palette, overwrite = T)
+usethis::use_data(acmg_evidence_codes, overwrite = T)
 
 heterozygous_states <- c()
 ref_allele_index <- 0

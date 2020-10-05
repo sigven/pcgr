@@ -47,7 +47,7 @@ init_report <- function(config = NULL, sample_name = "SampleX",
     report[["content"]][[analysis_element]][["variant_display"]] <- list()
     report[["content"]][[analysis_element]][["variant_set"]] <- list()
     report[["content"]][[analysis_element]][["zero"]] <- FALSE
-    for (t in c("class1", "class2", "class3", "class4", "class5", "gwas", "sf")) {
+    for (t in c("class1", "class2", "class3", "class4", "class5", "gwas", "incidental")) {
       report[["content"]][[analysis_element]][["variant_display"]][[t]] <- data.frame()
       report[["content"]][[analysis_element]][["variant_set"]][[t]] <- data.frame()
     }
@@ -57,7 +57,7 @@ init_report <- function(config = NULL, sample_name = "SampleX",
       report[["content"]][[analysis_element]][["clin_eitem"]][[evidence_type]] <- data.frame()
     }
 
-    for (cl in c("variant_statistic", "variant_statistic_cpg", "variant_statistic_sf")) {
+    for (cl in c("variant_statistic", "variant_statistic_cpg", "variant_statistic_incidental")) {
       report[["content"]][[analysis_element]][[cl]] <- list()
       for (t in c("n", "n_snv", "n_indel", "n_coding", "n_noncoding")) {
         report[["content"]][[analysis_element]][[cl]][[t]] <- 0
