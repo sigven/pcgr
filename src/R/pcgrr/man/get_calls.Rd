@@ -4,23 +4,33 @@
 \alias{get_calls}
 \title{Function that reads a fully annotated VCF from PCGR VEP/vcfanno pipeline}
 \usage{
-get_calls(tsv_gz_file, pcgr_data, pcgr_version, sample_name, pcgr_config,
-  genome_seq = BSgenome.Hsapiens.UCSC.hg19, genome_assembly = "hg19")
+get_calls(
+  tsv_gz_file,
+  pcgr_data,
+  sample_name,
+  config,
+  oncotree = NULL,
+  cpsr = F,
+  n_lines_skip = 1,
+  maf_filenames = NULL
+)
 }
 \arguments{
 \item{tsv_gz_file}{Bgzipped VCF file}
 
 \item{pcgr_data}{object with PCGR annotation data}
 
-\item{pcgr_version}{PCGR software version}
-
 \item{sample_name}{sample identifier}
 
-\item{pcgr_config}{Object with PCGR configuration parameters}
+\item{config}{Object with PCGR configuration parameters}
 
-\item{genome_seq}{BSgenome object}
+\item{oncotree}{data frame with sample-dependent phenotype terms from UMLS}
 
-\item{genome_assembly}{human genome assembly version}
+\item{cpsr}{logical indicating call retrieval from CPSR workflow}
+
+\item{n_lines_skip}{number of lines to skip from vcf2tsv file}
+
+\item{maf_filenames}{list with filenames for sample MAFs (temp and final)}
 }
 \value{
 vcf_data_df

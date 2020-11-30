@@ -163,7 +163,7 @@ ENV PERL5LIB $PERL5LIB_TMP
 WORKDIR /
 ADD loftee_1.0.3.tgz $OPT/src/ensembl-vep/modules
 ADD UTRannotator.tgz $OPT/src/ensembl-vep/modules
-RUN wget -q "https://raw.githubusercontent.com/Ensembl/VEP_plugins/release/100/NearestExonJB.pm" -O $OPT/src/ensembl-vep/modules/NearestExonJB.pm
+RUN wget -q "https://raw.githubusercontent.com/Ensembl/VEP_plugins/release/101/NearestExonJB.pm" -O $OPT/src/ensembl-vep/modules/NearestExonJB.pm
 
 
 # Final steps
@@ -207,9 +207,10 @@ RUN apt-get update && apt-get -y install r-base
 USER root
 WORKDIR /
 
+## PINNED VERSIONS: numpy cython scipy pandas cyvcf2 toml
 ENV PACKAGE_BIO="libhts2 bedtools"
-ENV PACKAGE_DEV="gfortran gcc-multilib autoconf libncurses5-dev libblas-dev liblapack-dev libssh2-1-dev libxml2-dev vim libcrypto++-dev libpq-dev libxt-dev libudunits2-dev libcairo2-dev libbz2-dev libcurl4-openssl-dev"
-ENV PYTHON_MODULES="numpy cython scipy pandas cyvcf2 toml"
+ENV PACKAGE_DEV="gfortran gcc-multilib autoconf libncurses5-dev libnlopt-dev libblas-dev liblapack-dev libssh2-1-dev libxml2-dev vim libcrypto++-dev libpq-dev libxt-dev libudunits2-dev libcairo2-dev libbz2-dev libcurl4-openssl-dev"
+ENV PYTHON_MODULES="numpy==1.19.2 cython==0.29.21 scipy==1.5.3 pandas==1.1.3 cyvcf2==0.20.9 toml==0.10.1"
 RUN apt-get update \
 	&& apt-get install -y --no-install-recommends \
 		nano ed locales vim-tiny fonts-texgyre \
@@ -221,56 +222,21 @@ RUN sudo -H pip install --upgrade pip
 RUN sudo -H pip install -U setuptools
 RUN sudo -H pip install $PYTHON_MODULES
 #
-RUN apt-get update && apt-get install -y --no-install-recommends \
-  cmake
 
-# #RUN apt-get autoremove
-
-# RUN apt-get update && apt-get install -y --no-install-recommends \
-#     r-base-core \
-#     r-recommended \
-#  		r-base
-
-
-
-
-
-# WORKDIR /
-
-RUN apt-get update && apt-get install -y --no-install-recommends libmagick++-dev libgdal-dev libgit2-dev libgeos-dev gcc
-
-RUN R -e "install.packages(c('usethis','httr', 'jsonlite','devtools','remotes','BiocManager','DT','tidyverse'), dependencies = T)"
-RUN R -e "devtools::install_github('hms-dbmi/UpSetR')"
-RUN R -e "install.packages(c('flexdashboard','treemap'),dependencies = T, repos = 'http://cran.us.r-project.org')"
-RUN R -e "devtools::install_github('PoisonAlien/maftools', build_manual = F, build_vignettes = F)"
-RUN R -e "devtools::install_github('mjkallen/rlogging', build_manual = F, build_vignettes = F)"
-RUN R -e "remotes::install_github('kassambara/ggpubr')"
-
-
-# # ## Install other bioconductor/cran packages
-RUN R -e "BiocManager::install(c('VariantAnnotation','MutationalPatterns','BSgenome.Hsapiens.UCSC.hg19','BSgenome.Hsapiens.UCSC.hg38'), dependencies = T)"
-RUN R -e "remotes::install_github('raerose01/deconstructSigs')"
-
-RUN R -e "install.packages(c('configr','assertable','data.table','caret','randomForest','plotly','RcppTOML','nat.utils'), dependencies = T, repos = 'http://cran.us.r-project.org')"
-# RUN R -e "remotes::install_github('rstudio/DT')"
-# RUN R -e "remotes::install_github('rstudio/crosstalk', upgrade = 'ask')"
-# RUN R -e "remotes::install_github('raerose01/deconstructSigs', upgrade = 'ask')"
-# RUN rm -rf /tmp/R*
-
-
-## Install vcfanno version 0.3.2
+WORKDIR /
+# PINNED VERSION: vcfanno - annotation of VCF against VCFs/BED files
 RUN wget https://github.com/brentp/vcfanno/releases/download/v0.3.2/vcfanno_linux64 && \
     mv vcfanno_linux64 vcfanno && \
     mv vcfanno /usr/local/bin && \
     chmod 755 /usr/local/bin/vcfanno
 
-## Install Ensembl's Vcf-validator
+## PINNED VERSION: Ensembl's vcf-validator - validation of VCF format
 RUN wget https://github.com/EBIvariation/vcf-validator/releases/download/v0.9.3/vcf_validator_linux && \
 mv vcf_validator_linux /usr/local/bin/vcf_validator && \
 chmod 755 /usr/local/bin/vcf_validator
 
-## Install pandoc (for HTML report generation)
-RUN wget https://github.com/jgm/pandoc/releases/download/2.7.3/pandoc-2.7.3-1-amd64.deb && \
+## PINNED VERSION: pandoc (for HTML report generation)
+RUN wget https://github.com/jgm/pandoc/releases/download/2.11.2/pandoc-2.11.2-1-amd64.deb && \
   dpkg -i pandoc* && \
   rm pandoc* && \
   apt-get clean
@@ -278,7 +244,10 @@ RUN wget https://github.com/jgm/pandoc/releases/download/2.7.3/pandoc-2.7.3-1-am
 USER root
 WORKDIR /
 
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends cmake
 
+## PINNED VERSION: nlopt
 RUN wget https://github.com/stevengj/nlopt/archive/v2.6.2.tar.gz \
 		&& gzip -dc v2.6.2.tar.gz | tar xvf - \
 		&& cd nlopt-2.6.2 \
@@ -289,43 +258,51 @@ RUN wget https://github.com/stevengj/nlopt/archive/v2.6.2.tar.gz \
 USER root
 WORKDIR /
 
-RUN git clone https://github.com/atks/vt.git
-WORKDIR vt
-RUN make
-RUN make test
-RUN cp vt /usr/local/bin
-RUN export PATH=/usr/local/bin:$PATH
+## vt - variant tool set - use conda version
+## primary use in PCGR/CPSR: decomposition of multiallelic variants in a VCF file
+RUN wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh \
+    && chmod 0755 miniconda.sh
+RUN ["/bin/bash", "-c", "/miniconda.sh -b -p /conda"]
+ENV PATH /conda/bin:$PATH
+RUN rm miniconda.sh
 
-RUN R -e "remotes::install_github('kent37/summarywidget')"
-RUN R -e "install.packages('treemap',dependencies = T, repos = 'http://cran.us.r-project.org')"
-RUN R -e "devtools::install_github('glin/reactable')"
+# update conda & install vt
+RUN conda update conda
+RUN conda install -c bioconda vt
 
+## PINNED VERSION: samtools (used e.g. by LOFTEE)
 RUN wget https://github.com/samtools/samtools/releases/download/1.10/samtools-1.10.tar.bz2
 RUN bunzip2 -dc samtools-1.10.tar.bz2 | tar xvf -
 RUN cd samtools-1.10 && ./configure --prefix=/usr/local/bin && make && make install
 
+## ADD pcgrr source package
 WORKDIR /
 ADD R/ /
 
 ## Add local PCGR Python scripts/libraries
 ADD pcgr.tgz /
+
+## pcgrr dependencies: restore all R package versions and dependencies with renv package
+## PINNED versions of all packages can be found in /renv.lock (JSON format)
+RUN R -e "install.packages(repos = NULL, 'https://cloud.r-project.org/src/contrib/renv_0.12.2.tar.gz', lib = '/usr/lib/R/library/')"
+RUN cp /pcgrr/renv.lock /
+RUN R -e "library(renv); renv::restore(prompt = F, library = '/usr/lib/R/library/')"
+
 ENV PATH=$PATH:/pcgr
 ENV PYTHONPATH=:/pcgr/lib:${PYTHONPATH}
-RUN R -e "devtools::install('pcgrr', upgrade = 'ask')"
+WORKDIR /
+
+## PINNED version - pcgrr
+RUN R -e "install.packages(repos = NULL, 'pcgrr_0.9.1.tar.gz', lib = '/usr/lib/R/library/')"
 
 WORKDIR /
-RUN curl -L -o mskcc-vcf2maf.tar.gz https://api.github.com/repos/mskcc/vcf2maf/tarball/v1.6.17
+## PINNED VERSION: vcf2maf
+RUN curl -L -o mskcc-vcf2maf.tar.gz https://api.github.com/repos/mskcc/vcf2maf/tarball/v1.6.18
 RUN tar -zxf mskcc-vcf2maf.tar.gz
 RUN chmod 755 /mskcc-vcf2maf-*/*.pl
 RUN cp /mskcc-vcf2maf-*/*.pl /usr/local/bin
 
-WORKDIR /
-
-## Clean Up
-RUN apt-get clean autoclean
-RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-RUN rm -rf /var/lib/{dpkg,cache,log}
-
+## Add working directory, data directory and R run scripts (PCGR + CPSR)
 VOLUME /workdir
 WORKDIR /workdir/
 USER root
@@ -341,7 +318,15 @@ WORKDIR /
 
 ENV PATH /usr/local/bin:/usr/local/bin/bin:$PATH
 
+## Clean Up
+
+RUN apt-get clean autoclean
+RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN rm -rf /var/lib/{dpkg,cache,log}
+
 RUN rm -f v2.6.2.tar.gz
+RUN rm -rf nlopt-2.6.2*
+RUN rm -rf pcgrr_0.9.1.tar.gz
 RUN rm -rf $HOME/src/ensembl-vep/t/
 RUN rm -f $HOME/src/v335_base.tar.gz
 RUN rm -f $HOME/src/release-1-6-924.zip
@@ -349,18 +334,3 @@ RUN rm -rf /vt
 RUN rm -rf /samtools-1.10*
 RUN rm -rf /mskcc-vcf2maf.tar.gz
 RUN rm -rf /tmp/*
-RUN rm -rf /usr/local/lib/R/site-library/SNPlocs.Hsapiens.dbSNP.20101109
-RUN rm -rf /usr/local/lib/R/site-library/TxDb.Dmelanogaster.UCSC.dm3.ensGene
-RUN rm -rf /usr/local/lib/R/site-library/TxDb.Hsapiens.UCSC.hg19.knownGene
-RUN rm -rf /usr/local/lib/R/site-library/SIFT.Hsapiens.dbSNP137
-RUN rm -rf /usr/local/lib/R/site-library/SIFT.Hsapiens.dbSNP132
-RUN rm -rf /usr/local/lib/R/site-library/PolyPhen.Hsapiens.dbSNP131
-RUN rm -rf /usr/local/lib/R/site-library/BSgenome.Celegans.UCSC.ce2
-RUN rm -rf /usr/local/lib/R/site-library/BSgenome.Hsapiens.1000genomes.hs37d5
-RUN rm -rf /usr/local/lib/R/site-library/BSgenome.Hsapiens.NCBI.GRCh38
-RUN rm -rf /usr/local/lib/R/site-library/BSgenome.Scerevisiae.UCSC.sacCer2
-
-
-
-ENV PATH=/usr/local/bin/bin:$PATH
-

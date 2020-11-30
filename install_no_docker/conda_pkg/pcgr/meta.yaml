@@ -1,5 +1,5 @@
 {% set name = 'pcgr' %}
-{% set version = os.environ.get('VERSION', '').replace('v.', '').replace('v', '') or '0.0.1' %}
+{% set version = os.environ.get('PCGR_VERSION', '').replace('v.', '').replace('v', '') or '0.0.1' %}
 
 package:
   name: {{ name }}
@@ -20,130 +20,128 @@ requirements:
     - unzip
     - tar
     - python =3.7
-    - r-base =4.0.2
-    - toml
-    #
-    # Need R packages build-time to correctly install pcgrr
-    - bioconductor-biocinstaller
-    - r-devtools
-    - r-purrr
-    - r-dplyr
-    - r-stringr
-    - r-tidyr
-    - r-httr
-    - r-git2r
-    - r-data.table
-    - r-magrittr
-    - r-htmltools
-    - r-caret
-    - r-randomforest
-    - r-plotly
-    - r-rcpptoml
-    - r-ggplot2
-    - r-dt
-    - r-stringi
-    - r-htmlwidgets
-    - r-crosstalk
-    - r-deconstructsigs
-    - r-knitr
-    - r-rmarkdown
-    - r-configr           # for pcgrr, -c pcgr
+    - r-base =4.0.3
+    - toml >=0.10.1
+    - r-devtools >=2.3.2
+    - r-usethis >=1.6.3
+    - r-purrr >=0.3.4
+    - r-dplyr >=1.0.2
+    - r-stringr >=1.4.0
+    - r-tidyr >=1.1.2
+    - r-httr >=1.4.2
+    - r-git2r >=0.27.1
+    - r-data.table >=1.13.2
+    - r-magrittr >=1.5
+    - r-htmltools >=0.5.0
+    - r-caret <=6.0_86
+    - r-randomforest >=4.6_14
+    - r-plotly >=4.9.2.1
+    - r-rcpptoml >=0.1.6
+    - r-ggplot2 >=3.3.2
+    - r-dt >=0.16
+    - r-stringi >=1.5.3
+    - r-htmlwidgets >=1.5.2
+    - r-crosstalk >=1.1.0.1
+    - r-deconstructsigs >=1.8.0.1
+    - r-knitr >=1.30
+    - r-rmarkdown >=2.5
+    - r-configr >=0.3.5    # for pcgrr, -c pcgr
     - r-summarywidget     # for pcgrr, -c pcgr
     - r-rlogging          # for pcgrr, -c pcgr
-    - r-collapsibletree   # for CELLector
-    - r-sunburstr         # for CELLector, -c pcgr
-    - r-arules            # for CELLector, on conda-forge now
-    - r-biocmanager
-    - bioconductor-variantannotation
-    - bioconductor-bsgenome.hsapiens.ucsc.hg19
-    - bioconductor-bsgenome.hsapiens.ucsc.hg38
-    - bioconductor-genomeinfodb
-    - bioconductor-genomicranges
-    - bioconductor-regioner
-    - bioconductor-mutationalpatterns
-    - r-shiny
-    - r-flexdashboard
-
+    - r-biocmanager >=1.30.10
+    - bioconductor-variantannotation >=1.36.0
+    - bioconductor-bsgenome.hsapiens.ucsc.hg19 >=1.4.3
+    - bioconductor-bsgenome.hsapiens.ucsc.hg38 >=1.4.3
+    - bioconductor-genomeinfodb >=1.26.0
+    - bioconductor-genomicranges >=1.42.0
+    - bioconductor-mutationalpatterns >=3.0.0
+    - r-shiny >=1.5.0
+    - r-flexdashboard >=0.5.2
+    - r-tidyverse >=1.3.0
+    - r-reactable >=0.2.3
+    - r-ggpubr >=0.4.0
+    - r-upsetr >=1.4.0
   run:
-    #
     # PCGR: python
     - python =3.7
-    - r-base =4.0.2
+    - r-base =4.0.3
     - pip
-    - numpy
-    - cython
-    - scipy
-    - pandas
-    - cyvcf2
-    - toml
+    - numpy =1.19.2
+    - cython =0.29.21
+    - scipy =1.5.3
+    - pandas =1.1.3
+    - cyvcf2 =0.20.9
+    - toml =0.10.1
     - gdown  # google drive CLI to download test data
-    #
+    - samtools =1.10
+    - bedtools =2.26
+    - vcfanno =0.3.2
+    - perl-bioperl
+    - ensembl-vep ==101
+    - htslib
+    - vcf2maf =1.6.18
+   
+                                                #
     # PCGR: other tools
     - tabix
-    - samtools
-    - bedtools
-    - vcfanno
+    - samtools =1.10
+    - bedtools =2.26.0
+    - vcfanno =0.3.2
     - vt
     - htslib
-    - vcf2maf
-    - nlopt
-    #
-    # Perl (for VEP)
+    - vcf2maf =1.6.18
+    - nlopt =2.6.2
     - perl-bioperl
-    - ensembl-vep ==98.3
+    - ensembl-vep ==101
     - perl-bio-bigfile  # for Loftee (doesn't come with ensemble-vep, but will come with https://github.com/bioconda/bioconda-recipes/pull/18808 once merged)
-    #
-    # PCGR: R packages
-    - bioconductor-biocinstaller
-    - r-devtools
-    - r-purrr
-    - r-dplyr
-    - r-stringr
-    - r-tidyr
-    - r-httr
-    - r-git2r
-    - r-data.table
-    - r-magrittr
-    - r-htmltools
-    - r-caret
-    - r-randomforest
-    - r-plotly
-    - r-rcpptoml
-    - r-ggplot2
-    - r-dt
-    - r-stringi
-    - r-htmlwidgets
-    - r-crosstalk
-    - r-deconstructsigs
-    - r-knitr
-    - r-rmarkdown
-    - r-configr           # for pcgrr, -c pcgr
+    - r-devtools >=2.3.2
+    - r-usethis >=1.6.3
+    - r-purrr >=0.3.4
+    - r-dplyr >=1.0.2
+    - r-stringr >=1.4.0
+    - r-tidyr >=1.1.2
+    - r-httr >=1.4.2
+    - r-git2r >=0.27.1
+    - r-data.table >=1.13.2
+    - r-magrittr >=1.5
+    - r-htmltools >=0.5.0
+    - r-caret <=6.0_86
+    - r-randomforest >=4.6_14
+    - r-plotly >=4.9.2.1
+    - r-rcpptoml >=0.1.6
+    - r-ggplot2 >=3.3.2
+    - r-dt >=0.16
+    - r-stringi >=1.5.3
+    - r-htmlwidgets >=1.5.2
+    - r-crosstalk >=1.1.0.1
+    - r-deconstructsigs >=1.8.0.1
+    - r-knitr >=1.30
+    - r-rmarkdown >=2.5
+    - r-configr >=0.3.5    # for pcgrr, -c pcgr
     - r-summarywidget     # for pcgrr, -c pcgr
     - r-rlogging          # for pcgrr, -c pcgr
-    - r-collapsibletree   # for CELLector
-    - r-sunburstr         # for CELLector, -c pcgr
-    - r-arules            # for CELLector
-    - r-biocmanager
-    - bioconductor-variantannotation
-    - bioconductor-bsgenome.hsapiens.ucsc.hg19
-    - bioconductor-bsgenome.hsapiens.ucsc.hg38
-    - bioconductor-genomeinfodb
-    - bioconductor-genomicranges  # GenomicRangesS4Vectors
-    - bioconductor-regioner
-    - bioconductor-mutationalpatterns
-    - r-shiny
+    - r-biocmanager >=1.30.10
+    - bioconductor-variantannotation >=1.36.0
+    - bioconductor-bsgenome.hsapiens.ucsc.hg19 >=1.4.3
+    - bioconductor-bsgenome.hsapiens.ucsc.hg38 >=1.4.3
+    - bioconductor-genomeinfodb >=1.26.0
+    - bioconductor-genomicranges >=1.42.0
+    - bioconductor-mutationalpatterns >=3.0.0
+    - r-shiny >=1.5.0
+    - r-flexdashboard >=0.5.2
+    - r-tidyverse >=1.3.0
+    - r-reactable >=0.2.3
+    - r-ggpubr >=0.4.0
+    - r-upsetr >=1.4.0
 
 test:
   commands:
     - pcgr.py --version
-    - '$R -e "library(pcgrr)"'
-    - '$R -e "library(pcgrr) ; pcgrr::acmg_evidence_codes"'
-    - '$R -e "library(crosstalk); sessionInfo();"'
+    - '$R -e ".libPaths(R.home(\"library\")); library(pcgrr)"'
   imports:
     - annoutils
 
 about:
   home: https://github.com/sigven/pcgr
   license: MIT
-  summary: Personal Cancer Genome Reporter (PCGR)- variant interpretation report for precision oncology
-
+  summary: Personal Cancer Genome Reporter (PCGR) - variant interpretation report for precision cancer medicine

@@ -15,8 +15,8 @@ flexdashboard::valueBox("sCNA", caption = NULL, color = "#000000", icon = NULL)
 ### Proto-oncogenes subject to amplification
 
 ```{r cna_gains_oncogenes, echo = F}
-flexdashboard::valueBox(NROW(pcg_report$content$cna$variant_display$oncogene_gain),
-                        color = ifelse(NROW(pcg_report$content$cna$variant_display$oncogene_gain) > 0,
+flexdashboard::valueBox(NROW(pcg_report$content$cna$disp$oncogene_gain),
+                        color = ifelse(NROW(pcg_report$content$cna$disp$oncogene_gain) > 0,
                                        pcg_report$metadata$color_value_box,
                                        pcg_report$metadata$color_none),
                         icon = "fa-dna", href="#scna-oncogene")
@@ -25,8 +25,8 @@ flexdashboard::valueBox(NROW(pcg_report$content$cna$variant_display$oncogene_gai
 ### Loss of tumor suppressor genes
 
 ```{r cna_loss_tsgene, echo = F}
-flexdashboard::valueBox(NROW(pcg_report$content$cna$variant_display$tsgene_loss),
-                        color = ifelse(NROW(pcg_report$content$cna$variant_display$tsgene_loss) > 0,
+flexdashboard::valueBox(NROW(pcg_report$content$cna$disp$tsgene_loss),
+                        color = ifelse(NROW(pcg_report$content$cna$disp$tsgene_loss) > 0,
                                        pcg_report$metadata$color_value_box,
                                        pcg_report$metadata$color_none),
                         icon = "fa-dna", href="#scna-tsgene")
@@ -35,8 +35,8 @@ flexdashboard::valueBox(NROW(pcg_report$content$cna$variant_display$tsgene_loss)
 ### Other drug targets subject to amplification
 
 ```{r cna_gain_target, echo = F}
-flexdashboard::valueBox(NROW(pcg_report$content$cna$variant_display$other_target),
-                        color = ifelse(NROW(pcg_report$content$cna$variant_display$other_target) > 0,
+flexdashboard::valueBox(NROW(pcg_report$content$cna$disp$other_target),
+                        color = ifelse(NROW(pcg_report$content$cna$disp$other_target) > 0,
                                        pcg_report$metadata$color_value_box,
                                        pcg_report$metadata$color_none),
                         icon = "fa-dna", href="#scna-other")
@@ -50,17 +50,17 @@ Row
 
 <br><br>
 
-```{r table_browse_scna_oncogene, echo=F, results = "asis", eval = NROW(pcg_report$content$cna$variant_display$oncogene_gain) > 0}
+```{r table_browse_scna_oncogene, echo=F, results = "asis", eval = NROW(pcg_report$content$cna$disp$oncogene_gain) > 0}
 
 cat('\nProto-oncogenes subject to amplifications (right panel) can be filtered according to various criteria:\n')
 
-drug_levels <- levels(as.factor(pcg_report[["content"]][["cna"]][["variant_display"]][["oncogene_gain"]]$DRUGS_ON_LABEL))
+drug_levels <- levels(as.factor(pcg_report[["content"]][["cna"]][["disp"]][["oncogene_gain"]]$DRUGS_ON_LABEL))
 # if(length(drug_levels) > 0){
 #   tier3_vars <- tier3_vars %>%
 #     dplyr::arrange(MUTATION_HOTSPOT, desc(OPENTARGETS_RANK))
 # }
 
-oncogene_gain_variants <- crosstalk::SharedData$new(pcg_report[["content"]][["cna"]][["variant_display"]][["oncogene_gain"]])
+oncogene_gain_variants <- crosstalk::SharedData$new(pcg_report[["content"]][["cna"]][["disp"]][["oncogene_gain"]])
 crosstalk::bscols(
   list(
     crosstalk::filter_select("SYMBOL", "Gene", oncogene_gain_variants, ~SYMBOL),
@@ -75,7 +75,7 @@ crosstalk::bscols(
 ```
 
 
-```{r oncogene_missing_filters, echo=F, results = 'asis', eval = NROW(pcg_report$content$cna$variant_display$oncogene_gain) == 0}
+```{r oncogene_missing_filters, echo=F, results = 'asis', eval = NROW(pcg_report$content$cna$disp$oncogene_gain) == 0}
 cat('\n*  <i> <b>No</b> proto-oncogenes subject to copy number amplifications.</i>',sep='\n')
 cat('\n')
 ```
@@ -85,7 +85,7 @@ cat('\n')
 
 <br><br>
 
-```{r table_scna_oncogene, eval = NROW(pcg_report$content$cna$variant_display$oncogene_gain) > 0}
+```{r table_scna_oncogene, eval = NROW(pcg_report$content$cna$disp$oncogene_gain) > 0}
 
 dt <- oncogene_gain_variants %>%
   DT::datatable(escape = F, 
@@ -112,7 +112,7 @@ dt
 ```
 
 
-```{r oncogene_missing_data, echo=F, results = 'asis', eval = NROW(pcg_report$content$cna$variant_display$oncogene_gain) == 0}
+```{r oncogene_missing_data, echo=F, results = 'asis', eval = NROW(pcg_report$content$cna$disp$oncogene_gain) == 0}
 cat('\n*  <i> <b>No</b> proto-oncogenes subject to copy number amplifications.</i>',sep='\n')
 cat('\n')
 ```

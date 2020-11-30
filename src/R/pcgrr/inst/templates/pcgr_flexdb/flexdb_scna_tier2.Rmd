@@ -13,17 +13,17 @@ flexdashboard::valueBox("TIER 2", caption = NULL, color = '#000000', icon = NULL
 ### Biomarker genes
 
 ```{r}
-#markers <- paste(unique(pcg_report$content$cna$variant_display$tier2$SYMBOL),collapse="|")
+#markers <- paste(unique(pcg_report$content$cna$disp$tier2$SYMBOL),collapse="|")
 #if(stringr::str_count(markers, pattern="\\|") > 1){
-  #markers <- paste0(paste(head(unique(pcg_report$content$cna$variant_display$tier2$SYMBOL), 2), collapse = "|"), "++")
+  #markers <- paste0(paste(head(unique(pcg_report$content$cna$disp$tier2$SYMBOL), 2), collapse = "|"), "++")
 #}
-flexdashboard::valueBox(length(unique(pcg_report$content$cna$variant_display$tier2$SYMBOL)), color = pcg_report$metadata$color_value_box)
+flexdashboard::valueBox(length(unique(pcg_report$content$cna$disp$tier2$SYMBOL)), color = pcg_report$metadata$color_value_box)
 ```
 
 ### Biomarker aberrations
 
 ```{r}
-flexdashboard::valueBox(length(unique(pcg_report$content$cna$variant_display$tier2$SEGMENT)), color = pcg_report$metadata$color_value_box, icon = "fa-dna")
+flexdashboard::valueBox(length(unique(pcg_report$content$cna$disp$tier2$SEGMENT)), color = pcg_report$metadata$color_value_box, icon = "fa-dna")
 ```
 
 
@@ -66,7 +66,7 @@ Row
 
 <br><br>
 
-```{r table_browse_scna_tier2, echo=F, results = "asis", eval = NROW(pcg_report$content$cna$variant_display$tier2) > 0}
+```{r table_browse_scna_tier2, echo=F, results = "asis", eval = NROW(pcg_report$content$cna$disp$tier2) > 0}
 
 cat('\nEvidence items associated with variants in tier 1 (right panel) can be filtered according to various criteria:\n')
 
@@ -101,7 +101,7 @@ crosstalk::bscols(
 ```
 
 
-```{r tier2_scna_missing_filters, echo=F, results = 'asis', eval = NROW(pcg_report$content$cna$variant_display$tier2) == 0}
+```{r tier2_scna_missing_filters, echo=F, results = 'asis', eval = NROW(pcg_report$content$cna$disp$tier2) == 0}
 cat('\n*  <i> <font style="font-size: 110%"><b>No</b> somatic copy-number aberrations of potential clinical significance found.</font></i>',sep='\n')
 cat('\n')
 ```
@@ -112,7 +112,7 @@ cat('\n')
 <br><br>
 
 
-```{r table_scna_tier2, eval = NROW(pcg_report$content$cna$variant_display$tier2) > 0}
+```{r table_scna_tier2, eval = NROW(pcg_report$content$cna$disp$tier2) > 0}
 
 variants_tier2_shared %>%
   DT::datatable(escape=F, 
@@ -132,7 +132,7 @@ variants_tier2_shared %>%
 ```
 
 
-```{r tier2_scna_missing_data, echo=F, results = 'asis', eval = NROW(pcg_report$content$cna$variant_display$tier2) == 0}
+```{r tier2_scna_missing_data, echo=F, results = 'asis', eval = NROW(pcg_report$content$cna$disp$tier2) == 0}
 cat('\n*  <i> <font style="font-size: 110%"><b>No</b> somatic copy-number aberrations of potential clinical significance found.</font></i>',sep='\n')
 cat('\n')
 ```

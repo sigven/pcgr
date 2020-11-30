@@ -15,26 +15,26 @@ flexdashboard::valueBox("SNVs/InDels", caption = NULL, color = '#000000', icon =
 ### Total variants
 
 ```{r}
-flexdashboard::valueBox(pcg_report$content$snv_indel$variant_statistic$n, color = pcg_report$metadata$color_value_box, icon = "fa-dna")
+flexdashboard::valueBox(pcg_report$content$snv_indel$v_stat$n, color = pcg_report$metadata$color_value_box, icon = "fa-dna")
 ```
 
 
 ### SNVs
 
 ```{r}
-flexdashboard::valueBox(pcg_report$content$snv_indel$variant_statistic$n_snv, color = pcg_report$metadata$color_value_box, icon = "fa-dna")
+flexdashboard::valueBox(pcg_report$content$snv_indel$v_stat$n_snv, color = pcg_report$metadata$color_value_box, icon = "fa-dna")
 ```
 
 ### InDels
 
 ```{r}
-flexdashboard::valueBox(pcg_report$content$snv_indel$variant_statistic$n_indel, color = pcg_report$metadata$color_value_box, icon = "fa-dna")
+flexdashboard::valueBox(pcg_report$content$snv_indel$v_stat$n_indel, color = pcg_report$metadata$color_value_box, icon = "fa-dna")
 ```
 
 ### TIER 1 variants
 
 ```{r}
-tier1 <- pcg_report$content$snv_indel$variant_statistic$n_tier1
+tier1 <- pcg_report$content$snv_indel$v_stat$n_tier1
 flexdashboard::valueBox(tier1, color = ifelse(tier1 > 0,
                         "#00a65a",
                         pcg_report$metadata$color_none), icon = "fa-file-prescription", href="#tier-1")
@@ -43,7 +43,7 @@ flexdashboard::valueBox(tier1, color = ifelse(tier1 > 0,
 ### TIER 2 variants
 
 ```{r}
-tier2 <- pcg_report$content$snv_indel$variant_statistic$n_tier2
+tier2 <- pcg_report$content$snv_indel$v_stat$n_tier2
 flexdashboard::valueBox(tier2, color = ifelse(tier2 > 0,
                         "#00a65a",
                         pcg_report$metadata$color_none), icon = "fa-file-prescription", href="#tier-2")
@@ -58,15 +58,15 @@ Row {data-height=300}
 
 <br>
 
-* <font style="color:white; font-size: 125%; font-weight: bold; background-color:`r pcg_report[['metadata']][['color_palette']][['tier']][['values']][1]`"><a class="tierlink"  href="#tier-1">&nbsp;TIER 1&nbsp;&nbsp;</font></a> <b><font style="font-size: 125%">:&nbsp;`r pcg_report$content$snv_indel$variant_statistic$n_tier1`</font></b><br>
+* <font style="color:white; font-size: 125%; font-weight: bold; background-color:`r pcg_report[['metadata']][['color_palette']][['tier']][['values']][1]`"><a class="tierlink"  href="#tier-1">&nbsp;TIER 1&nbsp;&nbsp;</font></a> <b><font style="font-size: 125%">:&nbsp;`r pcg_report$content$snv_indel$v_stat$n_tier1`</font></b><br>
 
-* <font style="color:white; font-size: 125%; font-weight: bold; background-color:`r pcg_report[['metadata']][['color_palette']][['tier']][['values']][2]`"><a class="tierlink"  href="#tier-2">&nbsp;TIER 2&nbsp;&nbsp;</font></a> <b><font style="font-size: 125%">:&nbsp;`r pcg_report$content$snv_indel$variant_statistic$n_tier2`</font></b><br>
+* <font style="color:white; font-size: 125%; font-weight: bold; background-color:`r pcg_report[['metadata']][['color_palette']][['tier']][['values']][2]`"><a class="tierlink"  href="#tier-2">&nbsp;TIER 2&nbsp;&nbsp;</font></a> <b><font style="font-size: 125%">:&nbsp;`r pcg_report$content$snv_indel$v_stat$n_tier2`</font></b><br>
 
-* <font style="color:white; font-size: 125%; font-weight: bold; background-color:`r pcg_report[['metadata']][['color_palette']][['tier']][['values']][3]`"><a class="tierlink"  href="#tier-3">&nbsp;TIER 3&nbsp;&nbsp;</font></a> <b><font style="font-size: 125%">:&nbsp;`r pcg_report$content$snv_indel$variant_statistic$n_tier3`</font></b><br>
+* <font style="color:white; font-size: 125%; font-weight: bold; background-color:`r pcg_report[['metadata']][['color_palette']][['tier']][['values']][3]`"><a class="tierlink"  href="#tier-3">&nbsp;TIER 3&nbsp;&nbsp;</font></a> <b><font style="font-size: 125%">:&nbsp;`r pcg_report$content$snv_indel$v_stat$n_tier3`</font></b><br>
 
-* <font style="color:white; font-size: 125%; font-weight: bold; background-color:`r pcg_report[['metadata']][['color_palette']][['tier']][['values']][4]`"><a class="tierlink"  href="#tier-4">&nbsp;TIER 4&nbsp;&nbsp;</font></a> <b><font style="font-size: 125%">:&nbsp;`r pcg_report$content$snv_indel$variant_statistic$n_tier4`</font></b><br>
+* <font style="color:white; font-size: 125%; font-weight: bold; background-color:`r pcg_report[['metadata']][['color_palette']][['tier']][['values']][4]`"><a class="tierlink"  href="#tier-4">&nbsp;TIER 4&nbsp;&nbsp;</font></a> <b><font style="font-size: 125%">:&nbsp;`r pcg_report$content$snv_indel$v_stat$n_tier4`</font></b><br>
 
-* <font style="color:white; font-size: 125%;font-weight: bold; background-color:`r pcg_report[['metadata']][['color_palette']][['tier']][['values']][5]`"><a class="tierlink"  href="#noncoding">&nbsp;NONCODING&nbsp;&nbsp;</font></a> <b><font style="font-size: 125%">:&nbsp;`r pcg_report$content$snv_indel$variant_statistic$n_noncoding`</font></b>
+* <font style="color:white; font-size: 125%;font-weight: bold; background-color:`r pcg_report[['metadata']][['color_palette']][['tier']][['values']][5]`"><a class="tierlink"  href="#noncoding">&nbsp;NONCODING&nbsp;&nbsp;</font></a> <b><font style="font-size: 125%">:&nbsp;`r pcg_report$content$snv_indel$v_stat$n_noncoding`</font></b>
 
 
 ### Allelic support plot {data-padding=10}

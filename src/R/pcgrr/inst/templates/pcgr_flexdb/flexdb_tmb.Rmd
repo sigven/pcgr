@@ -21,11 +21,11 @@ flexdashboard::valueBox("TMB/MSI status", caption = NULL, color = '#000000', ico
 
 ```{r tmb_vbox_size, width = 4, echo = F}
 col <- pcg_report$metadata$color_value_box
-if(pcg_report$metadata$config$assay_properties$target_size_mb < 1){
+if(pcg_report$metadata$config$assay_props$target_size_mb < 1){
   col <- pcg_report[['metadata']][['color_palette']][['warning']][['values']][1]
 }
 
-flexdashboard::valueBox(paste0(pcg_report$metadata$config$assay_properties$target_size_mb," Mb"),
+flexdashboard::valueBox(paste0(pcg_report$metadata$config$assay_props$target_size_mb," Mb"),
                         color = col,
                         icon = "fa-dna")
 ```
@@ -33,7 +33,7 @@ flexdashboard::valueBox(paste0(pcg_report$metadata$config$assay_properties$targe
 ### Coding mutations
 
 ```{r tmb_n_muts, width = 4, echo = F}
-flexdashboard::valueBox(pcg_report$content$snv_indel$variant_statistic$n_coding,
+flexdashboard::valueBox(pcg_report$content$snv_indel$v_stat$n_coding,
                         color = pcg_report$metadata$color_value_box,
                         icon = "fa-dna")
 ```
@@ -42,7 +42,7 @@ flexdashboard::valueBox(pcg_report$content$snv_indel$variant_statistic$n_coding,
 ### TMB estimate
 
 ```{r tmb_vbox_estimate, echo = F}
-flexdashboard::valueBox(paste0(pcg_report$content$tmb$variant_statistic$tmb_estimate," mut/Mb"), 
+flexdashboard::valueBox(paste0(pcg_report$content$tmb$v_stat$tmb_estimate," mut/Mb"), 
                         color = pcg_report$metadata$color_value_box,
                         icon = "fa-dna")
 ```
@@ -69,8 +69,8 @@ Row {data-height=500}
 
 ```{r tmb_plot, echo = F}
 tcga_tmb <- pcg_report[['content']][['tmb']][['tcga_tmb']]
-p_site <- pcg_report[['metadata']][['config']][['tumor_properties']][['tumor_type']]
-tmb_estimate = pcg_report[['content']][['tmb']][['variant_statistic']][['tmb_estimate']]
+p_site <- pcg_report[['metadata']][['config']][["t_props"]][['tumor_type']]
+tmb_estimate = pcg_report[['content']][['tmb']][['v_stat']][['tmb_estimate']]
 algorithm <- pcg_report[['content']][['tmb']][['algorithm']]
 #tmb_high = pcg_report[['metadata']][['config']][['tmb']][['tmb_intermediate_limit']]
 

@@ -29,13 +29,13 @@ Example reports
 ~~~~~~~~~~~~~~~
 
 -  `Cervical cancer sample
-   (tumor-only) <http://insilico.hpc.uio.no/pcgr/example_reports/0.9.0rc/TCGA-FU-A3HZ-01A_TO.pcgr_acmg.grch37.flexdb.html>`__
+   (tumor-only) <http://insilico.hpc.uio.no/pcgr/example_reports/0.9.1/TCGA-FU-A3HZ-01A_TO.pcgr_acmg.grch37.flexdb.html>`__
 -  `Lung cancer sample
-   (tumor-control) <http://insilico.hpc.uio.no/pcgr/example_reports/0.9.0rc/TCGA-95-7039-01A.pcgr_acmg.grch37.flexdb.html>`__
+   (tumor-control) <http://insilico.hpc.uio.no/pcgr/example_reports/0.9.1/TCGA-95-7039-01A.pcgr_acmg.grch37.flexdb.html>`__
 -  `Breast cancer sample
-   (tumor-control) <http://insilico.hpc.uio.no/pcgr/example_reports/0.9.0rc/TCGA-EW-A1J5-01A.pcgr_acmg.grch37.flexdb.html>`__
+   (tumor-control) <http://insilico.hpc.uio.no/pcgr/example_reports/0.9.1/TCGA-EW-A1J5-01A.pcgr_acmg.grch37.flexdb.html>`__
 -  `Brain cancer sample
-   (tumor-control) <http://insilico.hpc.uio.no/pcgr/example_reports/0.9.0rc/TCGA-14-0866-01B.pcgr_acmg.grch37.flexdb.html>`__
+   (tumor-control) <http://insilico.hpc.uio.no/pcgr/example_reports/0.9.1/TCGA-14-0866-01B.pcgr_acmg.grch37.flexdb.html>`__
 
 (to view the rmarkdown-based reports, simply remove *.flexdb.* in the
 file names for the flexdashboard reports)

@@ -23,10 +23,10 @@ flexdashboard::valueBox("SIGNATURES", caption = NULL, color = '#000000', icon = 
 
 ```{r mutsig_snv_box}
 col <- pcg_report$metadata$color_value_box
-if(pcg_report$content$snv_indel$variant_statistic$n_snv < 100){
+if(pcg_report$content$snv_indel$v_stat$n_snv < 100){
   col <- pcg_report[['metadata']][['color_palette']][['warning']][['values']][1]
 }
-flexdashboard::valueBox(pcg_report$content$snv_indel$variant_statistic$n_snv, color = col, icon = "fa-dna")
+flexdashboard::valueBox(pcg_report$content$snv_indel$v_stat$n_snv, color = col, icon = "fa-dna")
 ```
 
 

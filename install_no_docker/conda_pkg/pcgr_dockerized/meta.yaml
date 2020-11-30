@@ -26,4 +26,4 @@ test:
 about:
   home: https://github.com/sigven/pcgr
   license: MIT
-  summary: Personal Cancer Genome Reporter (PCGR)- variant interpretation report for precision oncology
+  summary: Personal Cancer Genome Reporter (PCGR) - variant interpretation report for precision cancer medicine

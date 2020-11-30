@@ -4,13 +4,13 @@
 \alias{determine_genotype}
 \title{Function that assigns genotype (het/hom) from VCF GT tag}
 \usage{
-determine_genotype(vcf_data_df)
+determine_genotype(vcf_df)
 }
 \arguments{
-\item{vcf_data_df}{}
+\item{vcf_df}{}
 }
 \value{
-vcf_data_df
+vcf_df
 }
 \description{
 Function that assigns genotype (het/hom) from VCF GT tag

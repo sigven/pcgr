@@ -13,14 +13,14 @@ flexdashboard::valueBox("TIER 3", caption = NULL, color = '#000000', icon = NULL
 ### Total variants
 
 ```{r}
-flexdashboard::valueBox(pcg_report$content$snv_indel$variant_statistic$n_tier3, 
+flexdashboard::valueBox(pcg_report$content$snv_indel$v_stat$n_tier3, 
                         color = pcg_report$metadata$color_value_box, icon = "fa-dna")
 ```
 
 ### Variants in proto-oncogenes
 
 ```{r oncogene_variants, echo = F}
-flexdashboard::valueBox(NROW(pcg_report$content$snv_indel$variant_display$tier3$proto_oncogene), 
+flexdashboard::valueBox(NROW(pcg_report$content$snv_indel$disp$tier3$proto_oncogene), 
                         color = pcg_report$metadata$color_value_box, icon = "fa-dna")
 ```
 
@@ -55,10 +55,10 @@ Row
 
 <br>
 
-```{r table_browse_tier3, echo=F, results = "asis", eval = pcg_report$content$snv_indel$variant_statistic$n_tier3 > 0}
+```{r table_browse_tier3, echo=F, results = "asis", eval = pcg_report$content$snv_indel$v_stat$n_tier3 > 0}
 
-tier3_vars <- dplyr::bind_rows(pcg_report[['content']][['snv_indel']][['variant_display']][['tier3']][['tumor_suppressor']],
-                              pcg_report[['content']][['snv_indel']][['variant_display']][['tier3']][['proto_oncogene']])
+tier3_vars <- dplyr::bind_rows(pcg_report[['content']][['snv_indel']][["disp"]][['tier3']][['tumor_suppressor']],
+                              pcg_report[['content']][['snv_indel']][["disp"]][['tier3']][['proto_oncogene']])
 
 mutation_hotspot_levels <- levels(as.factor(tier3_vars$MUTATION_HOTSPOT))
 if(length(mutation_hotspot_levels) > 0){
@@ -90,7 +90,7 @@ crosstalk::bscols(
 ```
 
 
-```{r tier3_missing_filters, echo=F, results = 'asis', eval = pcg_report$content$snv_indel$variant_statistic$n_tier3 == 0}
+```{r tier3_missing_filters, echo=F, results = 'asis', eval = pcg_report$content$snv_indel$v_stat$n_tier3 == 0}
 cat('\n*  <i> <font style="font-size: 110%"><b>No</b> other variants found in proto-oncogenes or tumor suppressor genes.</font></i>', sep = '\n')
 cat('\n')
 ```
@@ -101,7 +101,7 @@ cat('\n')
 <br>
 
 
-```{r table_tier3, eval = pcg_report$content$snv_indel$variant_statistic$n_tier3 > 0}
+```{r table_tier3, eval = pcg_report$content$snv_indel$v_stat$n_tier3 > 0}
 
 
 dt <- DT::datatable(variants_tier3_shared, escape=F,extensions=c("Buttons","Responsive"), 
@@ -128,7 +128,7 @@ dt
 
 ```
 
-```{r tier3_missing_data, echo=F, results = 'asis', eval = pcg_report$content$snv_indel$variant_statistic$n_tier3 == 0}
+```{r tier3_missing_data, echo=F, results = 'asis', eval = pcg_report$content$snv_indel$v_stat$n_tier3 == 0}
 cat('\n*  <i> <font style="font-size: 110%"><b>No</b> other variants found in proto-oncogenes or tumor suppressor genes.</font></i>', sep = '\n')
 cat('\n')
 ```

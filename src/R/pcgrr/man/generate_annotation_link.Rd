@@ -2,11 +2,18 @@
 % Please edit documentation in R/utils.R
 \name{generate_annotation_link}
 \alias{generate_annotation_link}
-\title{A function that generates a HTML link for selected identifiers (DBSNP, COSMIC, CLINVAR, ENTREZ)}
+\title{A function that generates a HTML link for selected
+identifiers (DBSNP, COSMIC, CLINVAR, ENTREZ)}
 \usage{
-generate_annotation_link(df, vardb = "DBSNP", group_by_var = "VAR_ID",
+generate_annotation_link(
+  df,
+  vardb = "DBSNP",
+  group_by_var = "VAR_ID",
   url_prefix = "http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=",
-  link_key_var = "DBSNPRSID", link_display_var = "DBSNPRSID")
+  link_key_var = "DBSNPRSID",
+  link_display_var = "DBSNPRSID",
+  genome_assembly = "grch37"
+)
 }
 \arguments{
 \item{df}{data frame}
@@ -25,5 +32,6 @@ generate_annotation_link(df, vardb = "DBSNP", group_by_var = "VAR_ID",
 df_annotation_links
 }
 \description{
-A function that generates a HTML link for selected identifiers (DBSNP, COSMIC, CLINVAR, ENTREZ)
+A function that generates a HTML link for selected
+identifiers (DBSNP, COSMIC, CLINVAR, ENTREZ)
 }

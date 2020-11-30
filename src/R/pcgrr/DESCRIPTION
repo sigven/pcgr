@@ -1,16 +1,22 @@
 Package: pcgrr
 Type: Package
 Title: Personal Cancer Genome ReporteR
-Version: 0.9.0
+Version: 0.9.1
 Author: Sigve Nakken
 Maintainer: Sigve Nakken <sigven@ifi.uio.no>
 Description: Functions, tools and utilities for the generation of clinical cancer genome reports with PCGR.
     This R package is an integrated part of the Docker/Conda-based PCGR workflow (https://github.com/sigven/pcgr), it should thus not be used as a stand-alone package.
 License: MIT
-Imports: BSgenome.Hsapiens.UCSC.hg19, BSgenome.Hsapiens.UCSC.hg38, magrittr, deconstructSigs, data.table, ggplot2, plotly, rlogging, configr, RcppTOML, tidyr, stringr,
-         httr, GenomicRanges, GenomeInfoDb, S4Vectors, htmltools, caret, randomForest, Biostrings, RColorBrewer
+biocViews:
+Imports: BSgenome.Hsapiens.UCSC.hg19, BSgenome.Hsapiens.UCSC.hg38, magrittr, deconstructSigs, 
+         data.table, ggplot2, BiocManager, plotly, rlogging, configr, RcppTOML, usethis, 
+         GenomicRanges, GenomeInfoDb, S4Vectors, htmltools, caret, randomForest, UpSetR,
+         Biostrings, RColorBrewer, VariantAnnotation, MutationalPatterns, flexdashboard,
+         jsonlite, DT, tidyverse, assertable, ggpubr, devtools
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.1
 Depends: 
-    R (>= 2.10)
+    R (>= 4.0)
+Suggests: 
+    testthat

@@ -372,10 +372,12 @@ def map_variant_effect_predictors(rec, algorithms):
                rec.INFO['PRIMATEAI_DBNSFP'] = str(algo_pred.split(':')[1])
             if algo_pred.startswith('list_s2:'):
                rec.INFO['LIST_S2_DBNSFP'] = str(algo_pred.split(':')[1])
+            if algo_pred.startswith('gerp_rs:'):
+               rec.INFO['GERP_DBNSFP'] = str(algo_pred.split(':')[1])
             if algo_pred.startswith('bayesdel_addaf:'):
                rec.INFO['BAYESDEL_ADDAF_DBNSFP'] = str(algo_pred.split(':')[1])
-            if algo_pred.startswith('clinpred:'):
-               rec.INFO['CLINPRED_DBNSFP'] = str(algo_pred.split(':')[1])
+            if algo_pred.startswith('aloft:'):
+               rec.INFO['ALOFTPRED_DBNSFP'] = str(algo_pred.split(':')[1])
             if algo_pred.startswith('splice_site_rf:'):
                rec.INFO['SPLICE_SITE_RF_DBNSFP'] = str(algo_pred.split(':')[1])
             if algo_pred.startswith('splice_site_ada:'):

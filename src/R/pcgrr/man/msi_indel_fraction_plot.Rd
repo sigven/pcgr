@@ -2,12 +2,14 @@
 % Please edit documentation in R/msi.R
 \name{msi_indel_fraction_plot}
 \alias{msi_indel_fraction_plot}
-\title{Function that plots the indel fraction for a given sample and contrasts this with the distribution for MSI-H/MSS samples from TCGA}
+\title{Function that plots the indel fraction for a given sample and
+contrasts this with the distribution for MSI-H/MSS samples from TCGA}
 \usage{
 msi_indel_fraction_plot(tcga_msi_dataset, indel_fraction)
 }
 \arguments{
-\item{tcga_msi_dataset}{underlying dataset from TCGA used for development of statistical classifier}
+\item{tcga_msi_dataset}{underlying dataset from TCGA used for development
+of statistical classifier}
 
 \item{indel_fraction}{fraction of indels of all mutations (SNVs + indels)}
 }
@@ -15,5 +17,6 @@ msi_indel_fraction_plot(tcga_msi_dataset, indel_fraction)
 p
 }
 \description{
-Function that plots the indel fraction for a given sample and contrasts this with the distribution for MSI-H/MSS samples from TCGA
+Function that plots the indel fraction for a given sample and
+contrasts this with the distribution for MSI-H/MSS samples from TCGA
 }

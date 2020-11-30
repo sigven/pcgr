@@ -2,18 +2,22 @@
 % Please edit documentation in R/germline.R
 \name{get_population_tag}
 \alias{get_population_tag}
-\title{Function that retrieves name of VCF INFO tag and population description for gnomad/1000G population}
+\title{Function that retrieves name of VCF INFO tag and
+population description for gnomad/1000G population}
 \usage{
-get_population_tag(population_code, db = "1KG")
+get_population_tag(population_code, db = "1KG", subset = NA)
 }
 \arguments{
 \item{population_code}{three-letter code}
 
 \item{db}{1KG or GNOMAD}
+
+\item{subset}{NA or "non_cancer" (for GNOMAD)}
 }
 \value{
 pop_tag_info
 }
 \description{
-Function that retrieves name of VCF INFO tag and population description for gnomad/1000G population
+Function that retrieves name of VCF INFO tag and
+population description for gnomad/1000G population
 }

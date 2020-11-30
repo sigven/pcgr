@@ -14,8 +14,8 @@ flexdashboard::valueBox("TIER 1", caption = NULL, color = '#000000', icon = NULL
 
 ```{r}
 num_genes <- 0
-if(NROW(pcg_report$content$cna$variant_display$tier1) > 0){
-  num_genes <- length(unique(pcg_report$content$cna$variant_display$tier1$SYMBOL))
+if(NROW(pcg_report$content$cna$disp$tier1) > 0){
+  num_genes <- length(unique(pcg_report$content$cna$disp$tier1$SYMBOL))
 }
 flexdashboard::valueBox(num_genes, color = pcg_report$metadata$color_value_box, icon = "fa-dna")
 
@@ -24,7 +24,7 @@ flexdashboard::valueBox(num_genes, color = pcg_report$metadata$color_value_box, 
 ### Biomarker aberrations
 
 ```{r}
-flexdashboard::valueBox(length(unique(pcg_report$content$cna$variant_display$tier1$SEGMENT)), color = pcg_report$metadata$color_value_box, icon = "fa-dna")
+flexdashboard::valueBox(length(unique(pcg_report$content$cna$disp$tier1$SEGMENT)), color = pcg_report$metadata$color_value_box, icon = "fa-dna")
 ```
 
 
@@ -64,7 +64,7 @@ Row
 
 <br><br>
 
-```{r table_browse_scna_tier1, echo=F, results = "asis", eval = NROW(pcg_report$content$cna$variant_display$tier1) > 0}
+```{r table_browse_scna_tier1, echo=F, results = "asis", eval = NROW(pcg_report$content$cna$disp$tier1) > 0}
 
 cat('\nEvidence items associated with variants in tier 1 (right panel) can be filtered according to various criteria:\n')
 
@@ -92,7 +92,7 @@ crosstalk::bscols(
 ```
 
 
-```{r tier1_scna_missing_filters, echo=F, results = 'asis', eval = NROW(pcg_report$content$cna$variant_display$tier1) == 0}
+```{r tier1_scna_missing_filters, echo=F, results = 'asis', eval = NROW(pcg_report$content$cna$disp$tier1) == 0}
 cat('\n*  <i> <font style="font-size: 110%"><b>No</b> somatic copy-number aberrations of strong clinical significance found.</font></i>', sep = '\n')
 cat('\n')
 ```
@@ -103,7 +103,7 @@ cat('\n')
 <br><br>
 
 
-```{r table_scna_tier1, eval = NROW(pcg_report$content$cna$variant_display$tier1) > 0}
+```{r table_scna_tier1, eval = NROW(pcg_report$content$cna$disp$tier1) > 0}
 
 variants_tier1_shared %>%
   DT::datatable(escape=F, 
@@ -123,7 +123,7 @@ variants_tier1_shared %>%
 ```
 
 
-```{r tier1_scna_missing_data, echo=F, results = 'asis', eval = NROW(pcg_report$content$cna$variant_display$tier1) == 0}
+```{r tier1_scna_missing_data, echo=F, results = 'asis', eval = NROW(pcg_report$content$cna$disp$tier1) == 0}
 cat('\n*  <i> <font style="font-size: 110%"><b>No</b> somatic copy-number aberrations of strong clinical significance found.</font></i>',sep='\n')
 cat('\n')
 ```

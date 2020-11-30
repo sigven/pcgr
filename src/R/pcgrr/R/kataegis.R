@@ -1,4 +1,5 @@
-#' Function that detects kataegis events from a data frame with genomic cooordinates of mutations
+#' Function that detects kataegis events from a data frame
+#' with genomic cooordinates of mutations
 #'
 #' @param data data frame with somatic mutations, as produced by kataegis_input
 #' @param sample_id sample identifier
@@ -10,13 +11,22 @@
 #' @return kataegis_df data frame with potential kataegis events
 #'
 #'
-kataegis_detect <- function(data, sample_id = "sample_id", build = "grch37", min.mut = 6,
-                            max.dis = 1000, chr = "chr", pos = "pos",
+kataegis_detect <- function(data, sample_id = "sample_id",
+                            build = "grch37", min.mut = 6,
+                            max.dis = 1000,
+                            chr = "chr", pos = "pos",
                             txdb = NULL) {
-  rlogging::message("Detecting possible kataegis events (clusters of C>T (APOBEC enzyme family) and C>T/G (TLS DNA polymerase) mutations")
-  assertable::assert_colnames(data, c(chr, pos), only_colnames = F, quiet = T)
-  invisible(assertthat::assert_that(build == "grch37" | build == "grch38",
-                                    msg = paste0("Value for argument build ('", build, "') not allowed, allowed reference builds are: 'grch37' or 'grch38'")))
+  rlogging::message("Detecting possible kataegis events (clusters of C>T ",
+                    "(APOBEC enzyme family) and C>T/G ",
+                    "(TLS DNA polymerase) mutations")
+  assertable::assert_colnames(
+    data, c(chr, pos), only_colnames = F, quiet = T)
+  invisible(
+    assertthat::assert_that(
+      build == "grch37" | build == "grch38",
+      msg = paste0("Value for argument build ('",
+                   build,
+                   "') not allowed")))
 
   chr.arm <- c(1.25e+08, 93300000, 9.1e+07, 50400000, 48400000,
               6.1e+07, 59900000, 45600000, 4.9e+07, 40200000, 53700000,
@@ -58,23 +68,31 @@ kataegis_detect <- function(data, sample_id = "sample_id", build = "grch37", min
         } else {
           arm <- paste(chr.n, "p, ", chr.n, "q", sep = "")
         }
-        katPoint[i, 1:8] <- c(sample_id, data$chr[i], data$pos[i - mutnum + 1],
-                             data$pos[i], arm, len, mutnum, round(Cmutnum / mutnum, 3))
+        katPoint[i, 1:8] <-
+          c(sample_id, data$chr[i], data$pos[i - mutnum + 1],
+            data$pos[i], arm, len, mutnum, round(Cmutnum / mutnum, 3))
       }
       mutnum <- 1
       Cmutnum <- 0
     }
   }
   kataegis_df <- data.frame(na.omit(katPoint))
-  names(kataegis_df) <- c("sample_id", "chrom", "start", "end", "chrom.arm", "length", "number.mut",
+  names(kataegis_df) <- c("sample_id", "chrom", "start",
+                          "end", "chrom.arm", "length", "number.mut",
                           "weight.C>X")
   if (NROW(kataegis_df) > 0) {
     for (i in 1:dim(kataegis_df)[1]) {
       if (as.numeric(as.character(kataegis_df$"weight.C>X"[i])) < 0.8) {
         kataegis_df$confidence[i] <- 0
       } else {
-        kataegis_df$confidence[i] <- length(which(subset(kataegis_df,
-                                                          as.numeric(as.character(kataegis_df$"weight.C>X")) >= 0.8)$chrom == kataegis_df$chrom[i]))
+        chrom_i <- kataegis_df$chrom[i]
+        kataegis_df$confidence[i] <-
+          length(which(
+            subset(
+              kataegis_df,
+              as.numeric(
+                as.character(kataegis_df$"weight.C>X")) >= 0.8)$chrom == chrom_i
+            ))
         if (kataegis_df$confidence[i] > 3) {
           kataegis_df$confidence[i] <- 3
         }
@@ -83,21 +101,27 @@ kataegis_detect <- function(data, sample_id = "sample_id", build = "grch37", min
     kataegis_df <- kataegis_df %>% dplyr::arrange(desc(confidence))
 
     if (!is.null(txdb)) {
-      gr <- GenomicRanges::GRanges(seqnames = Rle(kataegis_df$chrom),
-                                   ranges = IRanges(start = as.numeric(as.character(kataegis_df$start)), end = as.numeric(as.character(kataegis_df$end))))
-      peakAnno <- annotatePeak(gr, tssRegion = c(-3000, 3000), TxDb = txdb, annoDb = "org.Hs.eg.db")
+      gr <-
+        GenomicRanges::GRanges(
+          seqnames = Rle(kataegis_df$chrom),
+          ranges = IRanges(start = as.numeric(as.character(kataegis_df$start)),
+                           end = as.numeric(as.character(kataegis_df$end))))
+      peakAnno <- annotatePeak(gr, tssRegion = c(-3000, 3000),
+                               TxDb = txdb, annoDb = "org.Hs.eg.db")
       kataegis_df$annotation <- peakAnno@anno$annotation
       kataegis_df$distanceToTSS <- peakAnno@anno$distanceToTSS
       kataegis_df$geneName <- peakAnno@anno$SYMBOL
       kataegis_df$geneID <- peakAnno@anno$geneId
     }
   }
-  rlogging::message(paste(dim(kataegis_df)[1], "potential kataegis events identified",
+  rlogging::message(paste(dim(kataegis_df)[1],
+                          "potential kataegis events identified",
                 sep = " "))
   return(kataegis_df)
 }
 
-#' Function that detects kataegis events from a data frame with genomic cooordinates of mutations
+#' Function that detects kataegis events from a data frame
+#' with genomic cooordinates of mutations
 #'
 #' @param variant_set data frame with raw set of somatic mutations
 #' @param chr column name in data that denotes chromosome
@@ -109,80 +133,100 @@ kataegis_detect <- function(data, sample_id = "sample_id", build = "grch37", min
 #'
 #'
 
-kataegis_input <- function(variant_set, chr = "chr", pos = "pos", ref = "ref",
+kataegis_input <- function(variant_set, chr = "chr",
+                           pos = "pos", ref = "ref",
                          alt = "alt", build = NULL) {
 
-  invisible(assertthat::assert_that(!is.null(build), msg = "Argument 'build' cannot be NULL, any of 'grch37' or 'grch38'"))
-  invisible(assertthat::assert_that(is.data.frame(variant_set), msg = paste0("Argument 'variant_set' needs be of type data.frame")))
-  invisible(assertthat::assert_that(build == "grch37" | build == "grch38",
-                                  msg = paste0("Value for argument build ('", build,
-                                               "') not allowed, allowed reference builds are: 'grch37' or 'grch38'")))
-  assertable::assert_colnames(variant_set, c(chr, pos, ref, alt), only_colnames = F, quiet = T)
+  invisible(assertthat::assert_that(
+    !is.null(build),
+    msg = "Argument 'build' cannot be NULL, any of 'grch37' or 'grch38'"))
+  invisible(assertthat::assert_that(
+    is.data.frame(variant_set),
+    msg = paste0("Argument 'variant_set' needs be of type data.frame")))
+  invisible(assertthat::assert_that(
+    build == "grch37" | build == "grch38",
+    msg = paste0("Value for argument build ('", build,
+                 "') not allowed, allowed reference builds are: 'grch37' or 'grch38'")))
+  assertable::assert_colnames(variant_set,
+                              c(chr, pos, ref, alt),
+                              only_colnames = F, quiet = T)
 
-  mut.data <- variant_set[, c(chr, pos, ref, alt)]
-  names(mut.data) <- c("chr", "pos", "ref", "alt")
-  mut.data <- mut.data %>%
+  mut_data <- variant_set[, c(chr, pos, ref, alt)]
+  names(mut_data) <- c("chr", "pos", "ref", "alt")
+  mut_data <- mut_data %>%
     dplyr::filter(nchar(ref) == 1 & nchar(alt) == 1 &
-                    stringr::str_detect(ref, "^(A|C|T|G)$") & stringr::str_detect(alt, "^(A|C|G|T)$"))
+                    stringr::str_detect(ref, "^(A|C|T|G)$") &
+                    stringr::str_detect(alt, "^(A|C|G|T)$"))
 
   context_size <- 10
-  if (nrow(mut.data) > 100) {
+  if (nrow(mut_data) > 100) {
     bsg <- BSgenome.Hsapiens.UCSC.hg19
     chr.lens <- as.integer(head(GenomeInfoDb::seqlengths(bsg), 24))
     if (build == "grch38") {
       bsg <- BSgenome.Hsapiens.UCSC.hg38
       chr.lens <- as.integer(head(GenomeInfoDb::seqlengths(bsg), 24))
     }
-    mut.data$build <- build
-    ref_base <-  Biostrings::DNAStringSet(mut.data$ref)
-    alt_base <-  Biostrings::DNAStringSet(mut.data$alt)
-    conv.start <-  mut.data$pos - context_size
-    conv.end <-  mut.data$pos + context_size
-    context <-  Biostrings::getSeq(bsg, mut.data$chr, start = conv.start, end = conv.end)
+    mut_data$build <- build
+    ref_base <-  Biostrings::DNAStringSet(mut_data$ref)
+    alt_base <-  Biostrings::DNAStringSet(mut_data$alt)
+    conv.start <-  mut_data$pos - context_size
+    conv.end <-  mut_data$pos + context_size
+    context <-  Biostrings::getSeq(bsg, mut_data$chr,
+                                   start = conv.start, end = conv.end)
     if (TRUE) {
-      idx <-  mut.data$ref %in% c("A", "G")
+      idx <-  mut_data$ref %in% c("A", "G")
       context[idx] <-  Biostrings::reverseComplement(context[idx])
       ref_base[idx] <-  Biostrings::reverseComplement(ref_base[idx])
       alt_base[idx] <-  Biostrings::reverseComplement(alt_base[idx])
     }
-    mut.data$alteration <-  paste(ref_base, alt_base, sep = ">")
-    mut.data$context <- context
+    mut_data$alteration <-  paste(ref_base, alt_base, sep = ">")
+    mut_data$context <- context
     # Replace chr x and y with numeric value (23 and 24) for better
     # ordering
-    seq <-  gsub(pattern = "chr", replacement = "", x = mut.data$chr,
+    seq <-  gsub(pattern = "chr", replacement = "", x = mut_data$chr,
                fixed = TRUE)
     seq <-  gsub(pattern = "X", replacement = "23", x = seq, fixed = TRUE)
     seq <-  gsub(pattern = "Y", replacement = "24", x = seq, fixed = TRUE)
-    mut.data$seq <-  as.numeric(seq)
-    mut.data <-  mut.data[order(mut.data$seq, mut.data$pos), ]
+    mut_data$seq <-  as.numeric(seq)
+    mut_data <-  mut_data[order(mut_data$seq, mut_data$pos), ]
     chr.lens.sum <-  cumsum(as.numeric(chr.lens))
     chr.lens.sum <-  c(0, chr.lens.sum)
-    mut.data$dis <-  c(mut.data$pos[1], diff(mut.data$pos + chr.lens.sum[mut.data$seq]))
+    mut_data$dis <-  c(mut_data$pos[1],
+                       diff(mut_data$pos + chr.lens.sum[mut_data$seq]))
   }else{
-    mut.data <- NULL
+    mut_data <- NULL
   }
-  return(mut.data)
+  return(mut_data)
 }
 
 #' Function that generates data frame with potential kataegis events
 #'
-#' @param variant_set data frame with SNVs/InDels (must contain 'CHROM','POS','REF','ALT')
+#' @param variant_set data frame with SNVs/InDels (must contain 'CHROM',
+#' 'POS','REF','ALT')
 #' @param sample_name name of tumor sample
 #' @param build genome assembly (grch37/grch38)
 #'
-generate_report_data_kataegis <- function(variant_set, sample_name = "SampleX", build = "grch37") {
+generate_report_data_kataegis <- function(variant_set,
+                                          sample_name = "SampleX",
+                                          build = "grch37") {
 
   pcg_report_kataegis <- pcgrr::init_report(class = "kataegis")
 
   rlogging::message("------")
-  rlogging::message(paste0("Kataegis detection from genomic distribution of SNVs"))
+  rlogging::message(
+    paste0("Kataegis detection from genomic distribution of SNVs"))
 
 
-  invisible(assertthat::assert_that(is.data.frame(variant_set), msg = paste0("Argument 'variant_set' needs be of type data.frame")))
-  assertable::assert_colnames(variant_set, c("CHROM", "REF", "ALT", "POS"), only_colnames = F, quiet = T)
-  invisible(assertthat::assert_that(build == "grch37" | build == "grch38",
-                                  msg = paste0("Value for argument build ('", build,
-                                               "') not allowed, allowed reference builds are: 'grch37' or 'grch38'")))
+  invisible(assertthat::assert_that(
+    is.data.frame(variant_set),
+    msg = paste0("Argument 'variant_set' needs be of type data.frame")))
+  assertable::assert_colnames(
+    variant_set, c("CHROM", "REF", "ALT", "POS"), only_colnames = F, quiet = T)
+  invisible(assertthat::assert_that(
+    build == "grch37" | build == "grch38",
+    msg =
+      paste0("Value for argument build ('", build,
+             "') not allowed, allowed reference builds are: 'grch37' or 'grch38'")))
 
   chr_prefix <- FALSE
   chromosome_names <- unique(variant_set[, "CHROM"])
@@ -200,17 +244,20 @@ generate_report_data_kataegis <- function(variant_set, sample_name = "SampleX", 
                                          pos = "POS", ref = "REF",
                                          alt = "ALT",
                                          build = build)
-  if(!is.null(kataegis_data)){
+  if (!is.null(kataegis_data)) {
 
     if (nrow(kataegis_data) > 100) {
       pcg_report_kataegis[["eval"]] <- TRUE
 
-      pcg_report_kataegis[["events"]] <- pcgrr::kataegis_detect(kataegis_data,
-                                                                sample_id = sample_name,
-                                                                build = build)
+      pcg_report_kataegis[["events"]] <-
+        pcgrr::kataegis_detect(kataegis_data,
+                               sample_id = sample_name,
+                               build = build)
     }
   }else{
-    rlogging::message(paste0("No or too few SNVs (< 100) found in input - skipping kataegis detection"))
+    rlogging::message(
+      paste0(
+        "No or too few SNVs (< 100) found in input - skipping kataegis detection"))
     #pcg_report_kataegis[["eval"]] <- FALSE
   }
   return(pcg_report_kataegis)

@@ -1,16 +1,16 @@
 ### Tier & variant statistics
 
-* Number of SNVs: __`r pcg_report[['content']][['snv_indel']][['variant_statistic']][['n_snv']]`__
-* Number of InDels: __`r pcg_report[['content']][['snv_indel']][['variant_statistic']][['n_indel']]`__
-* Number of protein-coding variants: __`r pcg_report[['content']][['snv_indel']][['variant_statistic']][['n_coding']]`__
+* Number of SNVs: __`r pcg_report[['content']][['snv_indel']][['v_stat']][['n_snv']]`__
+* Number of InDels: __`r pcg_report[['content']][['snv_indel']][['v_stat']][['n_indel']]`__
+* Number of protein-coding variants: __`r pcg_report[['content']][['snv_indel']][['v_stat']][['n_coding']]`__
 
 The prioritization of SNV/InDels is here done according to a four-tiered structure, adopting the joint consensus recommendation by AMP/ACMG [[@Li2017-ew]](https://www.ncbi.nlm.nih.gov/pubmed/27993330).
 
-* Tier 1 - variants of strong clinical significance: __`r pcg_report[['content']][['snv_indel']][['variant_statistic']][['n_tier1']]`__
-* Tier 2 - variants of potential clinical significance: __`r pcg_report[['content']][['snv_indel']][['variant_statistic']][['n_tier2']]`__
-* Tier 3 - variants of unknown clinical significance: __`r pcg_report[['content']][['snv_indel']][['variant_statistic']][['n_tier3']]`__
-* Tier 4 - other coding variants: __`r pcg_report[['content']][['snv_indel']][['variant_statistic']][['n_tier4']]`__
-* Noncoding variants: __`r pcg_report[['content']][['snv_indel']][['variant_statistic']][['n_noncoding']]`__
+* Tier 1 - variants of strong clinical significance: __`r pcg_report[['content']][['snv_indel']][['v_stat']][['n_tier1']]`__
+* Tier 2 - variants of potential clinical significance: __`r pcg_report[['content']][['snv_indel']][['v_stat']][['n_tier2']]`__
+* Tier 3 - variants of unknown clinical significance: __`r pcg_report[['content']][['snv_indel']][['v_stat']][['n_tier3']]`__
+* Tier 4 - other coding variants: __`r pcg_report[['content']][['snv_indel']][['v_stat']][['n_tier4']]`__
+* Noncoding variants: __`r pcg_report[['content']][['snv_indel']][['v_stat']][['n_noncoding']]`__
 
 <br><br>
 

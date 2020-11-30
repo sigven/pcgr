@@ -18,10 +18,10 @@ if(pcg_report$content$tmb$eval == F){
 ### Metadata - sample and sequencing assay
 
 * Sample name: __`r pcg_report[['metadata']][['sample_name']]`__
-* Tumor primary site:  __`r pcg_report[['metadata']][['config']][['tumor_properties']][['tumor_type']]`__
-* Sequencing mode input (VCF): __`r pcg_report[['metadata']][['config']][['assay_properties']][['mode']]`__
-* Sequencing type input (VCF): __`r pcg_report[['metadata']][['config']][['assay_properties']][['type']]`__
-* Coding target size (VCF): __`r pcg_report[['metadata']][['config']][['assay_properties']][['target_size_mb']]` Mb__
+* Tumor primary site:  __`r pcg_report[['metadata']][['config']][["t_props"]][['tumor_type']]`__
+* Sequencing mode input (VCF): __`r pcg_report[['metadata']][['config']][["assay_props"]][['mode']]`__
+* Sequencing type input (VCF): __`r pcg_report[['metadata']][['config']][["assay_props"]][['type']]`__
+* Coding target size (VCF): __`r pcg_report[['metadata']][['config']][["assay_props"]][['target_size_mb']]` Mb__
 
 ### Report configuration
 

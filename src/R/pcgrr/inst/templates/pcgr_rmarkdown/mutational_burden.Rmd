@@ -3,9 +3,9 @@
 For estimation of TMB, PCGR employs two different approaches/algorithms ( __all_coding__, and __nonsyn__, see details outlined in the [Documentation](#Documentation) below).
 
 TMB algorithm chosen by user: __`r pcg_report[['metadata']][['config']][['tmb']][['algorithm']]`__
-Size of targeted coding region: __`r pcg_report[['metadata']][['config']][['assay_properties']][['target_size_mb']]` Mb__
+Size of targeted coding region: __`r pcg_report[['metadata']][['config']][["assay_props"]][['target_size_mb']]` Mb__
 
-Estimated mutational burden: __`r pcg_report[['content']][['tmb']][['variant_statistic']][['tmb_estimate']]`__ __mutations/Mb__ 
+Estimated mutational burden: __`r pcg_report[['content']][['tmb']][['v_stat']][['tmb_estimate']]`__ __mutations/Mb__ 
 
 <br><br>
 
@@ -22,8 +22,8 @@ The plot below indicates how the mutational burden estimated for the query tumor
 <br><br>
 ```{r tumor_tmb_tcga_plot, echo = F, fig.width=12, fig.height=9, eval=T}
 tmb_plot <- pcgrr::plot_tmb_primary_site_tcga(pcg_report[['content']][['tmb']][['tcga_tmb']], 
-                                              p_site = pcg_report[['metadata']][['config']][['tumor_properties']][['tumor_type']], 
-                                              tmb_estimate = pcg_report[['content']][['tmb']][['variant_statistic']][['tmb_estimate']],
+                                              p_site = pcg_report[['metadata']][['config']][["t_props"]][['tumor_type']], 
+                                              tmb_estimate = pcg_report[['content']][['tmb']][['v_stat']][['tmb_estimate']],
                                               algorithm = pcg_report[['content']][['tmb']][['algorithm']])
 tmb_plot
 htmltools::br()

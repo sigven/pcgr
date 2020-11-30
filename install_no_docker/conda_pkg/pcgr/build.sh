@@ -7,21 +7,23 @@ set -x
 chmod +x ${SRC_DIR}/src/pcgr/*.py
 chmod +x ${SRC_DIR}/*.py
 chmod +x ${SRC_DIR}/src/*.R
+chmod +x ${SRC_DIR}/src/R/*.tar.gz
 # Moving libraries and scripts
-mkdir -p ${PREFIX}/lib/R/library/pcgrr
+mkdir -p ${PREFIX}/lib/R/library
 mkdir -p ${PREFIX}/bin
 mkdir -p ${SP_DIR}
+#mv ${SRC_DIR}/src/R/ $PREFIX/lib/R/library/
 mv ${SRC_DIR}/src/pcgr/lib/* ${SP_DIR}/  # python modules
 mv ${SRC_DIR}/src/pcgr/*.py ${SRC_DIR}/*.py ${PREFIX}/bin/  # python scripts
 mv ${SRC_DIR}/src/*.R ${PREFIX}/bin/  # R scripts
 
 # VCF validator
-wget https://github.com/EBIvariation/vcf-validator/releases/download/v0.6/vcf_validator -O ${PREFIX}/bin/vcf_validator
+wget https://github.com/EBIvariation/vcf-validator/releases/download/v0.9.3/vcf_validator_linux -O ${PREFIX}/bin/vcf_validator
 chmod +x ${PREFIX}/bin/vcf_validator
 
-R -e "library(devtools); devtools::install('${SRC_DIR}/src/R/pcgrr', dependencies=FALSE, args=c('--library=${PREFIX}/lib/R/library'))"
-R -e "install.packages('nat.utils', dependencies = F, repos = 'http://cran.rstudio.com')"
-R -e "install.packages('assertable', dependencies = F, repos = 'http://cran.rstudio.com')"
+## Install assertable package (not found through Conda channels), and pcgrr
+R -e "install.packages('${SRC_DIR}/src/R/assertable_0.2.7.tar.gz', lib='${PREFIX}/lib/R/library', repos = NULL)"
+R -e "install.packages('${SRC_DIR}/src/R/pcgrr_0.9.1.tar.gz', lib='${PREFIX}/lib/R/library', repos = NULL)"
 
 ### Loftee. To make sure same LoF version is used in dockerized and non-dockerized installation.
 #   ensembl-vep conda package installs most recent version of LoF automatically, however it doesn't work with the most

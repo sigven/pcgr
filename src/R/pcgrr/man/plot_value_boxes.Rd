@@ -2,7 +2,8 @@
 % Please edit documentation in R/value_boxes.R
 \name{plot_value_boxes}
 \alias{plot_value_boxes}
-\title{Function that plots four value boxes with the most important findings in the cancer genome}
+\title{Function that plots four value boxes with the most
+important findings in the cancer genome}
 \usage{
 plot_value_boxes(pcg_report)
 }
@@ -13,5 +14,6 @@ plot_value_boxes(pcg_report)
 p
 }
 \description{
-Function that plots four value boxes with the most important findings in the cancer genome
+Function that plots four value boxes with the most
+important findings in the cancer genome
 }

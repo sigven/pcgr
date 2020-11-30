@@ -13,10 +13,10 @@ The report is generated with _[PCGR](https://github.com/sigven/pcgr)_ version `r
 Key configuration settings:
 
 * Genome assembly: <b> __`r pcg_report[['metadata']][['genome_assembly']]`__ </b>
-* Tumor type: <b> __`r pcg_report[['metadata']][['config']][['tumor_properties']][['tumor_type']]`__ </b>
-* Sequencing mode input (VCF): <b> __`r pcg_report[['metadata']][['config']][['assay_properties']][['mode']]`__ </b>
-* Sequencing type input (VCF): <b> __`r pcg_report[['metadata']][['config']][['assay_properties']][['type']]`__ </b>
-* Coding target size (VCF): <b> __`r pcg_report[['metadata']][['config']][['assay_properties']][['target_size_mb']]` Mb__ </b>
+* Tumor type: <b> __`r pcg_report[['metadata']][['config']][["t_props"]][['tumor_type']]`__ </b>
+* Sequencing mode input (VCF): <b> __`r pcg_report[['metadata']][['config']][["assay_props"]][['mode']]`__ </b>
+* Sequencing type input (VCF): <b> __`r pcg_report[['metadata']][['config']][["assay_props"]][['type']]`__ </b>
+* Coding target size (VCF): <b> __`r pcg_report[['metadata']][['config']][["assay_props"]][['target_size_mb']]` Mb__ </b>
 * Minimum sequencing depth <b>tumor</b> (DP, SNV/InDel): <b> __`r pcg_report[['metadata']][['config']][['allelic_support']][['tumor_dp_min']]`__ </b>
 * Minimum allelic fraction <b>tumor</b> (VAF, SNV/InDel): <b> __`r pcg_report[['metadata']][['config']][['allelic_support']][['tumor_af_min']]`__ </b>
 * Minimum sequencing depth <b>control</b> (DP, SNV/InDel): <b> __`r pcg_report[['metadata']][['config']][['allelic_support']][['control_dp_min']]`__ </b>
@@ -41,8 +41,8 @@ flexdashboard::valueBox("SNVs/Indels", caption = NULL, color = '#000000',
 ### Total variants (SNVs / InDels)
 
 ```{r fig.width = 3.5}
-flexdashboard::valueBox(paste(pcg_report$content$snv_indel$variant_statistic$n_snv, 
-                               pcg_report$content$snv_indel$variant_statistic$n_indel,
+flexdashboard::valueBox(paste(pcg_report$content$snv_indel$v_stat$n_snv, 
+                               pcg_report$content$snv_indel$v_stat$n_indel,
                                sep = " / "),
                                color = pcg_report[['metadata']][['color_palette']][['tier']][['values']][1], icon = "fa-dna")
 ```
@@ -67,8 +67,8 @@ flexdashboard::valueBox("sCNA", caption = NULL, color = '#000000',
 ### Total aberrations (loss / gains)
 
 ```{r fig.width = 3.5}
-flexdashboard::valueBox(paste(pcg_report$content$cna$variant_statistic$n_cna_loss, 
-                               pcg_report$content$cna$variant_statistic$n_cna_gain,sep=" / "), 
+flexdashboard::valueBox(paste(pcg_report$content$cna$v_stat$n_cna_loss, 
+                               pcg_report$content$cna$v_stat$n_cna_gain,sep=" / "), 
                                color = pcg_report[['metadata']][['color_palette']][['tier']][['values']][1], icon = "fa-dna",
                         href = "#overview-2")
 ```
@@ -116,7 +116,7 @@ flexdashboard::valueBox("TMB/MSI status", caption = NULL, color = '#000000', ico
 ### TMB estimate
 
 ```{r fig.width = 3.5}
-flexdashboard::valueBox(paste0(pcg_report$content$tmb$variant_statistic$tmb_estimate," mut/Mb"), 
+flexdashboard::valueBox(paste0(pcg_report$content$tmb$v_stat$tmb_estimate," mut/Mb"), 
                         color = pcg_report[['metadata']][['color_palette']][['tier']][['values']][1],
                         icon = "fa-dna")
 ```

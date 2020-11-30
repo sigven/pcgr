@@ -1,6 +1,38 @@
 CHANGELOG
 ---------
 
+0.9.1 - November 30th 2020
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+-  Data updates: ClinVar, GWAS catalog, CIViC, CancerMine, dbNSFP, KEGG,
+   ChEMBL/DGIdb, Disease Ontology, Experimental Factor Ontology
+
+Added
+'''''
+
+-  added possibility to configure algorithm for TMB calculation,
+   optional argument ``tmb_algorithm`` - all coding variants
+   (**all_coding**) or non-synonymous variants only (**nonsyn**)
+-  R code subject to static analysis with
+   `lintr <https://github.com/jimhester/lintr>`__
+-  Improved Conda recipe (i.e. ``meta.yaml``) with version pinning of
+   all package dependencies
+
+Changed
+'''''''
+
+-  Removed DisGeNET annotations from output (associations from Open
+   Targets Platform serve same purpose)
+-  Version pinning of software dependencies in Dockerfile:
+
+   -  All R packages necessary for PCGR is installed using the `renv
+      framework <https://rstudio.github.io/renv/index.html>`__, ensuring
+      improved versioning and reproducibility
+   -  Other tools/utilities and Python libraries that have been version
+      pinned:
+
+      -  bedtools, samtools, numpy, cython, scipy, cyvcf2, toml, pandas
+
 0.9.0rc - September 24th 2020
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -15,6 +47,8 @@ Fixed
    variants, issue `#96 <https://github.com/sigven/pcgr/issues/96>`__
 -  Missing protein domain annotations for grch38, issue
    `#116 <https://github.com/sigven/pcgr/issues/96>`__
+
+.. _changed-1:
 
 Changed
 '''''''
@@ -55,6 +89,8 @@ Changed
 
    -  Metadata - sample and sequencing assay
    -  Report configuration
+
+.. _added-1:
 
 Added
 '''''
@@ -106,7 +142,7 @@ Fixed
 -  More improved mapping between Ensembl transcripts and UniProt
    accessions (using also RefSeq accessions where available)
 
-.. _added-1:
+.. _added-2:
 
 Added
 '''''
@@ -114,7 +150,7 @@ Added
 -  Possibility to filter evidence items by RATING in interactive data
    tables
 
-.. _changed-1:
+.. _changed-2:
 
 Changed
 '''''''
@@ -151,7 +187,7 @@ Fixed
 -  Bug in UpSetPlot for cases where filtering produce less than two
    intersecting sets
 
-.. _added-2:
+.. _added-3:
 
 Added
 '''''
@@ -169,7 +205,7 @@ Added
 0.8.1 - May 22nd 2019
 ^^^^^^^^^^^^^^^^^^^^^
 
-.. _added-3:
+.. _added-4:
 
 Added
 '''''
@@ -187,7 +223,7 @@ Fixed
 -  Bug in value box for Tier 2 variants (new line carriage) `Issue
    #73 <https://github.com/sigven/pcgr/issues/73>`__
 
-.. _added-4:
+.. _added-5:
 
 Added
 '''''
@@ -310,7 +346,7 @@ Added
    -  Rating of the ClinVar variant (0-4 stars) with respect to level of
       review
 
-.. _changed-2:
+.. _changed-3:
 
 Changed
 '''''''
@@ -364,7 +400,7 @@ Fixed
 -  Removed ‘COSM’ prefix in COSMIC mutation links
 -  Bug in retrieval of splice site predictions from dbscSNV
 
-.. _added-5:
+.. _added-6:
 
 Added
 '''''
@@ -403,7 +439,7 @@ Added
 
 -  Upgraded VEP to v94
 
-.. _changed-3:
+.. _changed-4:
 
 Changed
 '''''''
@@ -449,7 +485,7 @@ Fixed
 -  Bug in copy number annotation (missing protein-coding transcripts)
 -  Updated MSI prediction (variable importance, performance measures)
 
-.. _added-6:
+.. _added-7:
 
 Added
 '''''
@@ -481,7 +517,7 @@ Fixed
 0.6.0 - April 25th 2018
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-.. _added-7:
+.. _added-8:
 
 Added
 '''''
@@ -642,7 +678,7 @@ Removed
          https://github.com/mskcc/vcf2maf will be incorporated in the
          next release
 
-.. _changed-4:
+.. _changed-5:
 
 Changed
 '''''''

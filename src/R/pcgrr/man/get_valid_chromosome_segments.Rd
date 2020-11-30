@@ -2,10 +2,14 @@
 % Please edit documentation in R/cna.R
 \name{get_valid_chromosome_segments}
 \alias{get_valid_chromosome_segments}
-\title{Function that removes copy number segments that go beyond chrosomal lengths for the given assembly}
+\title{Function that removes copy number segments that go
+beyond chrosomal lengths for the given assembly}
 \usage{
-get_valid_chromosome_segments(cna_segments_df,
-  genome_assembly = "grch37", bsg = BSgenome.Hsapiens.UCSC.hg19)
+get_valid_chromosome_segments(
+  cna_segments_df,
+  genome_assembly = "grch37",
+  bsg = BSgenome.Hsapiens.UCSC.hg19
+)
 }
 \arguments{
 \item{cna_segments_df}{genomic segments with CNA}
@@ -15,5 +19,6 @@ get_valid_chromosome_segments(cna_segments_df,
 \item{bsg}{BSgenome object}
 }
 \description{
-Function that removes copy number segments that go beyond chrosomal lengths for the given assembly
+Function that removes copy number segments that go
+beyond chrosomal lengths for the given assembly
 }

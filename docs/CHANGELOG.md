@@ -1,6 +1,21 @@
 
 ## CHANGELOG
 
+#### 0.9.1 - November 30th 2020
+ * Data updates: ClinVar, GWAS catalog, CIViC, CancerMine, dbNSFP, KEGG, ChEMBL/DGIdb, Disease Ontology, Experimental Factor Ontology
+
+##### Added
+ * added possibility to configure algorithm for TMB calculation, optional argument `tmb_algorithm` - all coding variants (__all_coding__) or non-synonymous variants only (__nonsyn__)
+ * R code subject to static analysis with [lintr](https://github.com/jimhester/lintr)
+ * Improved Conda recipe (i.e. `meta.yaml`) with version pinning of all package dependencies
+
+##### Changed
+ * Removed DisGeNET annotations from output (associations from Open Targets Platform serve same purpose)
+ * Version pinning of software dependencies in Dockerfile:
+	 * All R packages necessary for PCGR is installed using the [renv framework](https://rstudio.github.io/renv/index.html), ensuring improved versioning and reproducibility
+	 * Other tools/utilities and Python libraries that have been version pinned:
+		 * bedtools, samtools, numpy, cython, scipy, cyvcf2, toml, pandas
+
 
 #### 0.9.0rc - September 24th 2020
 
@@ -10,7 +25,7 @@
 ##### Fixed
  * An extra comma was mistakenly present in the template for tier 2 variants, issue [#96](https://github.com/sigven/pcgr/issues/96)
  * Missing protein domain annotations for grch38, issue [#116](https://github.com/sigven/pcgr/issues/96)
- 
+
 ##### Changed
   * All arguments to `pcgr.py` is now non-positional
   * Arguments to `pcgr.py` are divided into two groups: _required_ and _optional_

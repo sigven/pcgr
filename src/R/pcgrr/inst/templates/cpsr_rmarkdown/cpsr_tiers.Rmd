@@ -15,8 +15,8 @@ for(c in c('class1','class2','class3','class4','class5')){
     tot_variants[[c]][[m]] <- 0
     show_class_filters[[c]][[m]] <- F
     missing_class_items[[c]][[m]] <- T
-    if(NROW(cps_report[['content']][['snv_indel']][['variant_display']][[c]]) > 0){
-      tot_variants[[c]][[m]] <- NROW(cps_report[['content']][['snv_indel']][['variant_display']][[c]] %>% 
+    if(NROW(cps_report[['content']][['snv_indel']][["disp"]][[c]]) > 0){
+      tot_variants[[c]][[m]] <- NROW(cps_report[['content']][['snv_indel']][["disp"]][[c]] %>% 
                                      dplyr::filter(SOURCE == m))
     }
     if(tot_variants[[c]][[m]] > 0){
@@ -41,9 +41,9 @@ formula_gnomad <- as.formula(paste0("~",rlang::sym(tag_gnomad)))
 
 Variant numbers in the selected cancer predisposition genes (n = `r NROW(cps_report[['metadata']][['gene_panel']][['genes']])`)
 
-* Number of SNVs: __`r cps_report[['content']][['snv_indel']][['variant_statistic_cpg']][['n_snv']]`__
-* Number of InDels: __`r cps_report[['content']][['snv_indel']][['variant_statistic_cpg']][['n_indel']]`__
-* Number of protein-coding variants: __`r cps_report[['content']][['snv_indel']][['variant_statistic_cpg']][['n_coding']]`__
+* Number of SNVs: __`r cps_report[['content']][['snv_indel']][['v_stat_cpg']][['n_snv']]`__
+* Number of InDels: __`r cps_report[['content']][['snv_indel']][['v_stat_cpg']][['n_indel']]`__
+* Number of protein-coding variants: __`r cps_report[['content']][['snv_indel']][['v_stat_cpg']][['n_coding']]`__
 
 <br><br>
 
@@ -77,7 +77,7 @@ htmltools::br()
 
 
 variants_class5_clinvar <- 
-  dplyr::filter(cps_report[['content']][['snv_indel']][['variant_display']][['class5']], SOURCE == 'ClinVar')
+  dplyr::filter(cps_report[['content']][['snv_indel']][["disp"]][['class5']], SOURCE == 'ClinVar')
 
 if(NROW(variants_class5_clinvar) > 5000){
   cat('<b>NOTE - only considering top 5000 variants (due to limitations with client-side tables) </b><br>',sep="\n")
@@ -87,7 +87,7 @@ if(NROW(variants_class5_clinvar) > 5000){
 }
 
 variants_class5_clinvar <- variants_class5_clinvar %>% 
-  dplyr::select(-c(CPSR_CLASSIFICATION,CPSR_CLASSIFICATION_SCORE,
+  dplyr::select(-c(CPSR_CLASSIFICATION,CPSR_PATHOGENICITY_SCORE,
                    CPSR_CLASSIFICATION_DOC,CPSR_CLASSIFICATION_CODE))
 
 variants_class5_1 <- crosstalk::SharedData$new(variants_class5_clinvar)
@@ -148,7 +148,7 @@ if(missing_class_items[['class5']][['ClinVar']] == T & missing_class_items[['cla
 ```{r class5_cpsr_other, echo=F, results = 'asis', eval = show_class_filters[['class5']][['Other']]}
 
 variants_class5_other <- 
-  dplyr::filter(cps_report[['content']][['snv_indel']][['variant_display']][['class5']], SOURCE == 'Other')
+  dplyr::filter(cps_report[['content']][['snv_indel']][["disp"]][['class5']], SOURCE == 'Other')
 
 if(NROW(variants_class5_other) > 5000){
   cat('<b>NOTE - only considering top 5000 variants (ranked according to CPSR classification score) </b><br>',sep="\n")
@@ -171,7 +171,7 @@ crosstalk::bscols(
   ),
   list(
     crosstalk::filter_select("CPSR_CLASSIFICATION_CODE", "CPSR classification (ACMG criteria codes)", variants_class5_2, ~CPSR_CLASSIFICATION_CODE),
-    crosstalk::filter_slider("CPSR_CLASSIFICATION_SCORE", "CPSR pathogenicity score", variants_class5_2, ~CPSR_CLASSIFICATION_SCORE, step = 0.5, ticks = T),
+    crosstalk::filter_slider("CPSR_PATHOGENICITY_SCORE", "CPSR pathogenicity score", variants_class5_2, ~CPSR_PATHOGENICITY_SCORE, step = 0.5, ticks = T),
     crosstalk::filter_slider(tag_gnomad, paste0("MAF gnomAD (",desc_gnomad,")"), variants_class5_2, formula_gnomad, sep="",ticks = F)
   )
 )
@@ -231,7 +231,7 @@ cat('\n')
 htmltools::br()
 
 variants_class4_clinvar <- 
-  dplyr::filter(cps_report[['content']][['snv_indel']][['variant_display']][['class4']], SOURCE == 'ClinVar')
+  dplyr::filter(cps_report[['content']][['snv_indel']][["disp"]][['class4']], SOURCE == 'ClinVar')
 
 if(NROW(variants_class4_clinvar) > 5000){
   cat('<b>NOTE - only considering top 5000 variants (due to limitations with client-side tables) </b><br>',sep="\n")
@@ -241,7 +241,7 @@ if(NROW(variants_class4_clinvar) > 5000){
 }
 
 variants_class4_clinvar <- variants_class4_clinvar %>% 
-  dplyr::select(-c(CPSR_CLASSIFICATION,CPSR_CLASSIFICATION_SCORE,
+  dplyr::select(-c(CPSR_CLASSIFICATION,CPSR_PATHOGENICITY_SCORE,
                    CPSR_CLASSIFICATION_DOC,CPSR_CLASSIFICATION_CODE))
 
 variants_class4_1 <- crosstalk::SharedData$new(variants_class4_clinvar)
@@ -302,7 +302,7 @@ cat('\n')
 htmltools::br()
 
 variants_class4_other <- 
-  dplyr::filter(cps_report[['content']][['snv_indel']][['variant_display']][['class4']], SOURCE == 'Other')
+  dplyr::filter(cps_report[['content']][['snv_indel']][["disp"]][['class4']], SOURCE == 'Other')
 
 if(NROW(variants_class4_other) > 5000){
   cat('<b>NOTE - only considering top 5000 variants (ranked according to CPSR classification score) </b><br>',sep="\n")
@@ -324,7 +324,7 @@ crosstalk::bscols(
   ),
   list(
     crosstalk::filter_select("CPSR_CLASSIFICATION_CODE", "CPSR classification (ACMG criteria codes)", variants_class4_2, ~CPSR_CLASSIFICATION_CODE),
-    crosstalk::filter_slider("CPSR_CLASSIFICATION_SCORE", "CPSR pathogenicity score", variants_class4_2, ~CPSR_CLASSIFICATION_SCORE, step = 0.5, ticks = T),
+    crosstalk::filter_slider("CPSR_PATHOGENICITY_SCORE", "CPSR pathogenicity score", variants_class4_2, ~CPSR_PATHOGENICITY_SCORE, step = 0.5, ticks = T),
     crosstalk::filter_slider(tag_gnomad, paste0("MAF gnomAD (",desc_gnomad,")"), variants_class4_2, formula_gnomad, sep="",ticks = F)
   )
 )
@@ -383,7 +383,7 @@ cat('\n')
 htmltools::br()
 
 variants_class3_clinvar <- 
-  dplyr::filter(cps_report[['content']][['snv_indel']][['variant_display']][['class3']], SOURCE == 'ClinVar')
+  dplyr::filter(cps_report[['content']][['snv_indel']][["disp"]][['class3']], SOURCE == 'ClinVar')
 
 if(NROW(variants_class3_clinvar) > 5000){
   cat('<b>NOTE - only considering top 5000 variants (due to limitations with client-side tables) </b><br>',sep="\n")
@@ -393,7 +393,7 @@ if(NROW(variants_class3_clinvar) > 5000){
 }
 
 variants_class3_clinvar <- variants_class3_clinvar %>% 
-  dplyr::select(-c(CPSR_CLASSIFICATION,CPSR_CLASSIFICATION_SCORE,
+  dplyr::select(-c(CPSR_CLASSIFICATION,CPSR_PATHOGENICITY_SCORE,
                    CPSR_CLASSIFICATION_DOC,CPSR_CLASSIFICATION_CODE))
 
 variants_class3_1 <- crosstalk::SharedData$new(variants_class3_clinvar)
@@ -454,7 +454,7 @@ cat('\n')
 htmltools::br()
 
 variants_class3_other <- 
-  dplyr::filter(cps_report[['content']][['snv_indel']][['variant_display']][['class3']], SOURCE == 'Other')
+  dplyr::filter(cps_report[['content']][['snv_indel']][["disp"]][['class3']], SOURCE == 'Other')
 
 if(NROW(variants_class3_other) > 5000){
   cat('<b>NOTE - only considering top 5000 variants (ranked according to CPSR classification score) </b><br>',sep="\n")
@@ -476,7 +476,7 @@ crosstalk::bscols(
   ),
   list(
     crosstalk::filter_select("CPSR_CLASSIFICATION_CODE", "CPSR classification (ACMG criteria codes)", variants_class3_2, ~CPSR_CLASSIFICATION_CODE),
-    crosstalk::filter_slider("CPSR_CLASSIFICATION_SCORE", "CPSR pathogenicity score", variants_class3_2, ~CPSR_CLASSIFICATION_SCORE, step = 0.5, ticks = T),
+    crosstalk::filter_slider("CPSR_PATHOGENICITY_SCORE", "CPSR pathogenicity score", variants_class3_2, ~CPSR_PATHOGENICITY_SCORE, step = 0.5, ticks = T),
     crosstalk::filter_slider(tag_gnomad, paste0("MAF gnomAD (",desc_gnomad,")"), variants_class3_2, formula_gnomad, sep="",ticks = F)
   )
 )
@@ -534,7 +534,7 @@ cat('\n')
 htmltools::br()
 
 variants_class2_clinvar <- 
-  dplyr::filter(cps_report[['content']][['snv_indel']][['variant_display']][['class2']], SOURCE == 'ClinVar')
+  dplyr::filter(cps_report[['content']][['snv_indel']][["disp"]][['class2']], SOURCE == 'ClinVar')
 
 if(NROW(variants_class2_clinvar) > 5000){
   cat('<b>NOTE - only considering top 5000 variants (due to limitations with client-side tables) </b><br>',sep="\n")
@@ -544,7 +544,7 @@ if(NROW(variants_class2_clinvar) > 5000){
 }
 
 variants_class2_clinvar <- variants_class2_clinvar %>% 
-  dplyr::select(-c(CPSR_CLASSIFICATION,CPSR_CLASSIFICATION_SCORE,
+  dplyr::select(-c(CPSR_CLASSIFICATION,CPSR_PATHOGENICITY_SCORE,
                    CPSR_CLASSIFICATION_DOC,CPSR_CLASSIFICATION_CODE))
 
 variants_class2_1 <- crosstalk::SharedData$new(variants_class2_clinvar)
@@ -605,7 +605,7 @@ cat('\n')
 htmltools::br()
 
 variants_class2_other <- 
-  dplyr::filter(cps_report[['content']][['snv_indel']][['variant_display']][['class2']], SOURCE == 'Other')
+  dplyr::filter(cps_report[['content']][['snv_indel']][["disp"]][['class2']], SOURCE == 'Other')
 
 if(NROW(variants_class2_other) > 5000){
   cat('<b>NOTE - only considering top 5000 variants (ranked according to CPSR classification score) </b><br>',sep="\n")
@@ -627,7 +627,7 @@ crosstalk::bscols(
   ),
   list(
     crosstalk::filter_select("CPSR_CLASSIFICATION_CODE", "CPSR classification (ACMG criteria codes)", variants_class2_2, ~CPSR_CLASSIFICATION_CODE),
-    crosstalk::filter_slider("CPSR_CLASSIFICATION_SCORE", "CPSR pathogenicity score", variants_class2_2, ~CPSR_CLASSIFICATION_SCORE, step = 0.5, ticks = T),
+    crosstalk::filter_slider("CPSR_PATHOGENICITY_SCORE", "CPSR pathogenicity score", variants_class2_2, ~CPSR_PATHOGENICITY_SCORE, step = 0.5, ticks = T),
     crosstalk::filter_slider(tag_gnomad, paste0("MAF gnomAD (",desc_gnomad,")"), variants_class2_2, formula_gnomad, sep="",ticks = F)
   )
 )
@@ -686,7 +686,7 @@ cat('\n')
 htmltools::br()
 
 variants_class1_clinvar <- 
-  dplyr::filter(cps_report[['content']][['snv_indel']][['variant_display']][['class1']], SOURCE == 'ClinVar')
+  dplyr::filter(cps_report[['content']][['snv_indel']][["disp"]][['class1']], SOURCE == 'ClinVar')
 
 if(NROW(variants_class1_clinvar) > 5000){
   cat('<b>NOTE - only considering top 5000 variants (due to limitations with client-side tables) </b><br>',sep="\n")
@@ -696,7 +696,7 @@ if(NROW(variants_class1_clinvar) > 5000){
 }
 
 variants_class1_clinvar <- variants_class1_clinvar %>% 
-  dplyr::select(-c(CPSR_CLASSIFICATION,CPSR_CLASSIFICATION_SCORE,
+  dplyr::select(-c(CPSR_CLASSIFICATION,CPSR_PATHOGENICITY_SCORE,
                    CPSR_CLASSIFICATION_DOC,CPSR_CLASSIFICATION_CODE))
 
 variants_class1_1 <- crosstalk::SharedData$new(variants_class1_clinvar)
@@ -759,7 +759,7 @@ cat('\n')
 htmltools::br()
 
 variants_class1_other <- 
-  dplyr::filter(cps_report[['content']][['snv_indel']][['variant_display']][['class1']], SOURCE == 'Other')
+  dplyr::filter(cps_report[['content']][['snv_indel']][["disp"]][['class1']], SOURCE == 'Other')
 
 if(NROW(variants_class1_other) > 5000){
   cat('<b>NOTE - only considering top 5000 variants (ranked according to CPSR classification score) </b><br>',sep="\n")
@@ -781,7 +781,7 @@ crosstalk::bscols(
   ),
   list(
     crosstalk::filter_select("CPSR_CLASSIFICATION_CODE", "CPSR classification (ACMG criteria codes)", variants_class1_2, ~CPSR_CLASSIFICATION_CODE),
-    crosstalk::filter_slider("CPSR_CLASSIFICATION_SCORE", "CPSR pathogenicity score", variants_class1_2, ~CPSR_CLASSIFICATION_SCORE, step = 0.5, ticks = T),
+    crosstalk::filter_slider("CPSR_PATHOGENICITY_SCORE", "CPSR pathogenicity score", variants_class1_2, ~CPSR_PATHOGENICITY_SCORE, step = 0.5, ticks = T),
     crosstalk::filter_slider(tag_gnomad, paste0("MAF gnomAD (",desc_gnomad,")"), variants_class1_2, formula_gnomad, sep="",ticks = F)
   )
 )

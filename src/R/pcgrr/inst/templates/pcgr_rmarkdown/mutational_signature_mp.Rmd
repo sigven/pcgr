@@ -18,7 +18,7 @@ Here, we apply the **MutationalPatterns** package ([Blokzijl et al., 2018](https
 
 ```{r results = "asis", include = !missing_data_norun & !pcg_report$metadata$config$msigs$all_reference_signatures}
 
-cat('Specifically, for tumors of type <b>', pcg_report$metadata$config$tumor_properties$tumor_type,'</b>, mutational signature reconstruction is here limited to the following reference collection:<br>',sep="")
+cat('Specifically, for tumors of type <b>', pcg_report$metadata$config$t_props$tumor_type,'</b>, mutational signature reconstruction is here limited to the following reference collection:<br>',sep="")
 
 dat <- pcg_report$content$m_signature_mp$result$reference_data$aetiology
 if("signature_id" %in% colnames(dat) & "aetiology_keyword" %in% colnames(dat)){

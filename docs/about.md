@@ -12,10 +12,10 @@ The Personal Cancer Genome Reporter has been developed by scientists affiliated 
 
 ### Example reports
 
-* [Cervical cancer sample (tumor-only)](http://insilico.hpc.uio.no/pcgr/example_reports/0.9.0rc/TCGA-FU-A3HZ-01A_TO.pcgr_acmg.grch37.flexdb.html)
-* [Lung cancer sample (tumor-control)](http://insilico.hpc.uio.no/pcgr/example_reports/0.9.0rc/TCGA-95-7039-01A.pcgr_acmg.grch37.flexdb.html)
-* [Breast cancer sample (tumor-control)](http://insilico.hpc.uio.no/pcgr/example_reports/0.9.0rc/TCGA-EW-A1J5-01A.pcgr_acmg.grch37.flexdb.html)
-* [Brain cancer sample (tumor-control)](http://insilico.hpc.uio.no/pcgr/example_reports/0.9.0rc/TCGA-14-0866-01B.pcgr_acmg.grch37.flexdb.html)
+* [Cervical cancer sample (tumor-only)](http://insilico.hpc.uio.no/pcgr/example_reports/0.9.1/TCGA-FU-A3HZ-01A_TO.pcgr_acmg.grch37.flexdb.html)
+* [Lung cancer sample (tumor-control)](http://insilico.hpc.uio.no/pcgr/example_reports/0.9.1/TCGA-95-7039-01A.pcgr_acmg.grch37.flexdb.html)
+* [Breast cancer sample (tumor-control)](http://insilico.hpc.uio.no/pcgr/example_reports/0.9.1/TCGA-EW-A1J5-01A.pcgr_acmg.grch37.flexdb.html)
+* [Brain cancer sample (tumor-control)](http://insilico.hpc.uio.no/pcgr/example_reports/0.9.1/TCGA-14-0866-01B.pcgr_acmg.grch37.flexdb.html)
 
 (to view the rmarkdown-based reports, simply remove _.flexdb._ in the file names for the flexdashboard reports)
 

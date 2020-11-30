@@ -4,16 +4,12 @@
 \alias{get_cna_cytoband}
 \title{Function that gets the chromosome bands of copy number segments}
 \usage{
-get_cna_cytoband(cna_gr, cytoband_gr)
+get_cna_cytoband(cna_df, pcgr_data = NULL)
 }
 \arguments{
-\item{cna_gr}{genomic ranges object with copy number aberrations}
+\item{cna_df}{genomic ranges object with copy number aberrations}
 
-\item{cytoband_gr}{genomic ranges object with chromosomal cytobands}
-
-\item{normalization_method}{metod for normalization of context counts (deconstructSigs)}
-
-\item{signatures_limit}{max number of contributing signatures}
+\item{pcgr_data}{pcgr data bundle object}
 }
 \description{
 Function that gets the chromosome bands of copy number segments

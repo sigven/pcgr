@@ -4,27 +4,26 @@
 \alias{predict_msi_status}
 \title{Function that predicts MSI status based on fraction of indels among calls}
 \usage{
-predict_msi_status(vcf_data_df, simpleRepeats_gr, windowMasker_gr,
-  msi_prediction_model, msi_prediction_dataset, target_size_mb,
-  bsg = BSgenome.Hsapiens.UCSC.hg19, genome_assembly = "hg19",
-  sample_name = "Test")
+predict_msi_status(
+  vcf_data_df,
+  pcgr_data,
+  msi_prediction_model,
+  msi_prediction_dataset,
+  target_size_mb,
+  sample_name = "Test"
+)
 }
 \arguments{
 \item{vcf_data_df}{data frame with somatic mutations/indels}
 
-\item{simpleRepeats_gr}{Genomic Ranges object with sequence repeats}
+\item{pcgr_data}{object with PCGR datasets}
 
-\item{windowMasker_gr}{Genomic Ranges object with}
+\item{msi_prediction_model}{statistical model for MSI prediction}
 
-\item{msi_prediction_model}{statistical model for MSI prediction/classification}
-
-\item{msi_prediction_dataset}{underlying dataset from TCGA used for development of statistical classifier}
+\item{msi_prediction_dataset}{underlying dataset from TCGA used for
+development of statistical classifier}
 
 \item{target_size_mb}{size of targeted genomic region (coding)}
-
-\item{bsg}{BSgenome data object in Biostrings objects (e.g. BSgenome.Hsapiens.UCSC.hg19)}
-
-\item{genome_assembly}{hg19/hg38}
 
 \item{sample_name}{name of sample}
 }

@@ -2,7 +2,8 @@
 % Please edit documentation in R/utils.R
 \name{df_string_replace}
 \alias{df_string_replace}
-\title{Function that performs stringr::str_replace on strings of multiple string columns of a dataframe}
+\title{Function that performs stringr::str_replace on strings of multiple
+string columns of a dataframe}
 \usage{
 df_string_replace(df, strings, pattern, replacement, replace_all = F)
 }
@@ -21,5 +22,6 @@ df_string_replace(df, strings, pattern, replacement, replace_all = F)
 df
 }
 \description{
-Function that performs stringr::str_replace on strings of multiple string columns of a dataframe
+Function that performs stringr::str_replace on strings of multiple
+string columns of a dataframe
 }

@@ -2,31 +2,46 @@
 % Please edit documentation in R/mutational_signatures.R
 \name{signature_contributions_single_sample}
 \alias{signature_contributions_single_sample}
-\title{Function that retrieves relative estimates of known somatic signatures from a single tumor}
+\title{Function that retrieves relative estimates of known somatic signatures
+from a single tumor}
 \usage{
-signature_contributions_single_sample(sample_calls, sample_name,
+signature_contributions_single_sample(
+  sample_calls,
+  sample_name,
   normalization_method = "default",
-  cosmic_signatures_aetiologies = NULL, signature_limit = 6,
-  skip_signatures = NULL, signature_cutoff = 0.06,
-  bsg = BSgenome.Hsapiens.UCSC.hg19)
+  cosmic_signatures_aetiologies = NULL,
+  signature_limit = 6,
+  associated_signatures = NULL,
+  signature_cutoff = 0.06,
+  bsgenome = NULL,
+  weight_precision = 3
+)
 }
 \arguments{
 \item{sample_name}{sample name}
 
-\item{normalization_method}{metod for normalization of context counts (deconstructSigs)}
+\item{normalization_method}{metod for normalization of context
+counts (deconstructSigs)}
 
 \item{signature_limit}{max number of contributing signatures}
 
-\item{skip_signatures}{vector of signatures that are skipped in search space, e.g. c('Signature.29','Signature.23')}
+\item{associated_signatures}{limit search spaced vector of signatures
+that are  c("Signature.29","Signature.23")}
 
-\item{signature_cutoff}{discard any signature contributions with weight less than this amount}
+\item{signature_cutoff}{discard any signature contributions with weight
+less than this amount}
+
+\item{weight_precision}{number of significant digits in signature weight}
+
+\item{mut_data}{data frame with somatic mutations (VCF_SAMPLE_ID, CHROM,
+POS, REF, ALT)}
+
+\item{cosmic_cancertypes_aetiologies}{list of known signaturea and
+associated etiologies/cancertypes}
 
 \item{bsg}{genome sequence object (BSgenome.Hsapiens.UCSC)}
-
-\item{mut_data}{data frame with somatic mutations (VCF_SAMPLE_ID, CHROM, POS, REF, ALT)}
-
-\item{cosmic_cancertypes_aetiologies}{list of known signaturea and associated etiologies/cancertypes}
 }
 \description{
-Function that retrieves relative estimates of known somatic signatures from a single tumor
+Function that retrieves relative estimates of known somatic signatures
+from a single tumor
 }

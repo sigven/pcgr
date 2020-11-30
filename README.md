@@ -6,7 +6,7 @@
 - [News](#news)
 - [Example reports](#example-reports)
 - [PCGR Documentation](#documentation)
-- [Annotation resources](#annotation-resources-included-in-pcgr---0.9.0)
+- [Annotation resources](#annotation-resources-included-in-pcgr---0.9.1)
 - [Getting started](#getting-started)
 - [FAQ](#faq)
 - [Contact](#contact)
@@ -21,6 +21,9 @@ A few screenshots of the dashboard-type HTML output (new in 0.9.0) is shown belo
 ![PCGR overview](pcgr_dashboard_views.png)
 
 ### News
+* _November 30th 2020_: **0.9.1 release**
+   * Data bundle updates (CIViC, ClinVar, CancerMine, UniProt KB)
+   * [CHANGELOG](http://pcgr.readthedocs.io/en/latest/CHANGELOG.html)
 * _Sep 24th 2020_: **0.9.0rc release**
    * Major data bundle updates (CIViC, ClinVar, CancerMine, UniProt KB, Open Targets Platform, Pfam, DisGeNET, GENCODE)
    * VEP v101
@@ -49,10 +52,10 @@ A few screenshots of the dashboard-type HTML output (new in 0.9.0) is shown belo
 
 ### Example reports
 
-* [Cervical cancer sample (tumor-only)](http://insilico.hpc.uio.no/pcgr/example_reports/0.9.0rc/TCGA-FU-A3HZ-01A_TO.pcgr_acmg.grch37.flexdb.html)
-* [Lung cancer sample (tumor-control)](http://insilico.hpc.uio.no/pcgr/example_reports/0.9.0rc/TCGA-95-7039-01A.pcgr_acmg.grch37.flexdb.html)
-* [Breast cancer sample (tumor-control)](http://insilico.hpc.uio.no/pcgr/example_reports/0.9.0rc/TCGA-EW-A1J5-01A.pcgr_acmg.grch37.flexdb.html)
-* [Brain cancer sample (tumor-control)](http://insilico.hpc.uio.no/pcgr/example_reports/0.9.0rc/TCGA-14-0866-01B.pcgr_acmg.grch37.flexdb.html)
+* [Cervical cancer sample (tumor-only)](http://insilico.hpc.uio.no/pcgr/example_reports/0.9.1/TCGA-EA-A410-01A_TO.pcgr_acmg.grch37.flexdb.html)
+* [Lung cancer sample (tumor-control)](http://insilico.hpc.uio.no/pcgr/example_reports/0.9.1/TCGA-05-4427-01A.pcgr_acmg.grch37.flexdb.html)
+* [Colorectal cancer sample (tumor-control)](http://insilico.hpc.uio.no/pcgr/example_reports/0.9.1/TCGA-AD-5900-01A.pcgr_acmg.grch37.flexdb.html)
+* [Brain cancer sample (tumor-control)](http://insilico.hpc.uio.no/pcgr/example_reports/0.9.1/TCGA-QH-A6CU-01A.pcgr_acmg.grch37.flexdb.html)
 
 (to view the rmarkdown-based reports, simply remove _.flexdb._ in the file names for the flexdashboard reports)
 
@@ -68,23 +71,22 @@ A few screenshots of the dashboard-type HTML output (new in 0.9.0) is shown belo
 
 Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, Ola Myklebost, and Eivind Hovig. __Personal Cancer Genome Reporter: variant interpretation report for precision oncology__ (2017). _Bioinformatics_. 34(10):1778–1780. doi:[10.1093/bioinformatics/btx817](https://doi.org/10.1093/bioinformatics/btx817)
 
-### Annotation resources included in PCGR - 0.9.0
+### Annotation resources included in PCGR - 0.9.1
 
 * [VEP](http://www.ensembl.org/info/docs/tools/vep/index.html) - Variant Effect Predictor v101 (GENCODE v35/v19 as the gene reference dataset)
-* [CIViC](http://civic.genome.wustl.edu) - Clinical interpretations of variants in cancer (September 20th 2020)
-* [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - Database of variants with clinical significance (August 2020)
+* [CIViC](http://civic.genome.wustl.edu) - Clinical interpretations of variants in cancer (November 18th 2020)
+* [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - Database of variants with clinical significance (November 2020)
 * [DoCM](http://docm.genome.wustl.edu) - Database of curated mutations (v3.2, Apr 2016)
 * [CGI](http://www.cancergenomeinterpreter.org/biomarkers) - Cancer Biomarkers database (Jan 17th 2018)
-* [DisGeNET](http://www.disgenet.org) - Database of gene-tumor type associations (v7.0, May 2020)
 * [Cancer Hotspots](http://cancerhotspots.org) - Resource for statistically significant mutations in cancer (v2 - 2017)
 * [dBNSFP](https://sites.google.com/site/jpopgen/dbNSFP) - Database of non-synonymous functional predictions (v4.1, June 2020)
 * [TCGA](https://portal.gdc.cancer.gov/) - somatic mutations discovered across 33 tumor type cohorts (The Cancer Genome Atlas (TCGA), release 25, July 2020)
 * [CHASMplus](https://karchinlab.github.io/CHASMplus/) - predicted driver mutations across 33 tumor type cohorts in TCGA
-* [UniProt/SwissProt KnowledgeBase](http://www.uniprot.org) - Resource on protein sequence and functional information (2020_04, August 2020)
+* [UniProt/SwissProt KnowledgeBase](http://www.uniprot.org) - Resource on protein sequence and functional information (2020_05, October 2020)
 * [Pfam](http://pfam.xfam.org) - Database of protein families and domains (v33, May 2020)
-* [Open Targets Platform](https://targetvalidation.org) - Target-disease and target-drug associations  (2020_04, June 2020)
+* [Open Targets Platform](https://targetvalidation.org) - Target-disease and target-drug associations  (2020_09, September 2020)
 * [ChEMBL](https://www.ebi.ac.uk/chembl/) - Manually curated database of bioactive molecules (v27, May 2020)
-* [CancerMine](https://zenodo.org/record/3472758#.XZjCqeczaL4) - Literature-mined database of tumor suppressor genes/proto-oncogenes (v28, September 2020)
+* [CancerMine](https://zenodo.org/record/4270451#.X7t43qpKiHE) - Literature-mined database of tumor suppressor genes/proto-oncogenes (v30, November 2020)
 
 
 ### Getting started
@@ -94,6 +96,10 @@ Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, Ola Mykleb
 An installation of Python (version _3.6_) is required to run PCGR. Check that Python is installed by typing `python --version` in your terminal window. In addition, a [Python library](https://github.com/uiri/toml) for parsing configuration files encoded with [TOML](https://github.com/toml-lang/toml) is needed. To install, simply run the following command:
 
    	pip install toml
+
+
+**IMPORTANT NOTE**: STEP 1 & 2 below outline installation guidelines for running PCGR with Docker. If you want to install and run PCGR without the use of Docker (i.e. through Conda), follow [these instructions](install_no_docker/README.md)
+
 
 #### STEP 1: Installation of Docker
 
@@ -107,6 +113,7 @@ An installation of Python (version _3.6_) is required to run PCGR. Check that Py
    - CPUs: minimum 4
    - [How to - Mac OS X](https://docs.docker.com/docker-for-mac/#advanced)
 
+
 #### STEP 2: Download PCGR and data bundle
 
 ##### Development version
@@ -114,26 +121,27 @@ An installation of Python (version _3.6_) is required to run PCGR. Check that Py
 a. Clone the PCGR GitHub repository (includes run script and default configuration file): `git clone https://github.com/sigven/pcgr.git`
 
 b. Download and unpack the latest data bundles in the PCGR directory
-   * [grch37 data bundle - 20200920](http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch37.20200920.tgz) (approx 17Gb)
-   * [grch38 data bundle - 20200920](http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch38.20200920.tgz) (approx 18Gb)
+   * [grch37 data bundle - 20201123](http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch37.20201123.tgz) (approx 17Gb)
+   * [grch38 data bundle - 20201123](http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch38.20201123.tgz) (approx 18Gb)
    * *Unpacking*: `gzip -dc pcgr.databundle.grch37.YYYYMMDD.tgz | tar xvf -`
 
-c. Pull the [PCGR Docker image (*dev*)](https://hub.docker.com/r/sigven/pcgr/) from DockerHub (approx 6.8Gb):
+c. Pull the [PCGR Docker image (*dev*)](https://hub.docker.com/r/sigven/pcgr/) from DockerHub (approx 5.1Gb):
 * `docker pull sigven/pcgr:dev` (PCGR annotation engine)
 
 ##### Latest release
 
-a. Download and unpack the [latest software release (0.9.0rc)](https://github.com/sigven/pcgr/releases/tag/v0.9.0rc)
+a. Download and unpack the [latest software release (0.9.1)](https://github.com/sigven/pcgr/releases/tag/v0.9.1)
 
 b. Download and unpack the assembly-specific data bundle in the PCGR directory
-  * [grch37 data bundle - 20200920](http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch37.20200920.tgz) (approx 17Gb)
-  * [grch38 data bundle - 20200920](http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch38.20200920.tgz) (approx 18Gb)
+  * [grch37 data bundle - 20201123](http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch37.20201123.tgz) (approx 17Gb)
+  * [grch38 data bundle - 20201123](http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch38.20201123.tgz) (approx 18Gb)
      * *Unpacking*: `gzip -dc pcgr.databundle.grch37.YYYYMMDD.tgz | tar xvf -`
 
     A _data/_ folder within the _pcgr-X.X_ software folder should now have been produced
 
-c. Pull the [PCGR Docker image (0.9.0rc)](https://hub.docker.com/r/sigven/pcgr/) from DockerHub (approx 6.8Gb):
-   * `docker pull sigven/pcgr:0.9.0rc` (PCGR annotation engine)
+c. Pull the [PCGR Docker image (0.9.1)](https://hub.docker.com/r/sigven/pcgr/) from DockerHub (approx 5.1Gb):
+   * `docker pull sigven/pcgr:0.9.1` (PCGR annotation engine)
+
 
 #### STEP 3: Input preprocessing
 
@@ -270,6 +278,8 @@ A tumor sample report is generated by calling the Python script __pcgr.py__, whi
 				    Predict microsatellite instability status from patterns of somatic mutations/indels, default: False
 	--estimate_signatures
 				    Estimate relative contributions of reference mutational signatures in query sample and detect potential kataegis events), default: False
+	--tmb_algorithm {all_coding,nonsyn}
+			         Method for calculation of TMB, all coding variants (Chalmers et al., Genome Medicine, 2017), or non-synonymous variants only, default: all_coding
 	--min_mutations_signatures MIN_MUTATIONS_SIGNATURES
 				    Minimum number of SNVs required for reconstruction of mutational signatures (SBS) by MutationalPatterns (default: 200, minimum n = 100)
 	--all_reference_signatures
@@ -285,15 +295,15 @@ A tumor sample report is generated by calling the Python script __pcgr.py__, whi
 
 The _examples_ folder contain input VCF files from two tumor samples sequenced within TCGA (**GRCh37** only). It also contains a PCGR configuration file customized for these VCFs. A report for a colorectal tumor case can be generated by running the following command in your terminal window:
 
-	python ~/pcgr-0.9.0rc/pcgr.py
-	--pcgr_dir ~/pcgr-0.9.0rc
-	--output_dir ~/pcgr-0.9.0rc
+	python ~/pcgr-0.9.1/pcgr.py
+	--pcgr_dir ~/pcgr-0.9.1
+	--output_dir ~/pcgr-0.9.1
 	--sample_id tumor_sample.COAD
 	--genome_assembly grch37
-	--conf ~/pcgr-0.9.0rc/examples/example_COAD.toml
-	--input_vcf ~/pcgr-0.9.0rc/examples/tumor_sample.COAD.vcf.gz
+	--conf ~/pcgr-0.9.1/examples/example_COAD.toml
+	--input_vcf ~/pcgr-0.9.1/examples/tumor_sample.COAD.vcf.gz
 	--tumor_site 9
-	--input_cna ~/pcgr-0.9.0rc/examples/tumor_sample.COAD.cna.tsv
+	--input_cna ~/pcgr-0.9.1/examples/tumor_sample.COAD.cna.tsv
 	--tumor_purity 0.9
 	--tumor_ploidy 2.0
 	--include_trials

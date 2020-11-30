@@ -14,7 +14,7 @@ flexdashboard::valueBox("TIER 4", caption = NULL, color = '#000000', icon = NULL
 ### Total variants
 
 ```{r}
-flexdashboard::valueBox(pcg_report$content$snv_indel$variant_statistic$n_tier4, color = pcg_report$metadata$color_value_box, icon = "fa-dna")
+flexdashboard::valueBox(pcg_report$content$snv_indel$v_stat$n_tier4, color = pcg_report$metadata$color_value_box, icon = "fa-dna")
 ```
 
 ### SNVs
@@ -53,13 +53,13 @@ Row
 
 <br>
 
-```{r table_browse_tier4, echo=F, results = "asis", eval = pcg_report$content$snv_indel$variant_statistic$n_tier4 > 0}
+```{r table_browse_tier4, echo=F, results = "asis", eval = pcg_report$content$snv_indel$v_stat$n_tier4 > 0}
 
-if(NROW(pcg_report[['content']][['snv_indel']][['variant_display']][['tier4']]) > 5000){
+if(NROW(pcg_report[['content']][['snv_indel']][["disp"]][['tier4']]) > 5000){
   cat('<b>NOTE - only considering top 5000 variants (ranked according to Open Targets phenotype association score) </b><br>',sep="\n")
   cat('<br>')
-  pcg_report[['content']][['snv_indel']][['variant_display']][['tier4']] <- 
-    head(pcg_report[['content']][['snv_indel']][['variant_display']][['tier4']], 5000)
+  pcg_report[['content']][['snv_indel']][["disp"]][['tier4']] <- 
+    head(pcg_report[['content']][['snv_indel']][["disp"]][['tier4']], 5000)
 }
 htmltools::br()
 
@@ -67,7 +67,7 @@ cat('Variants in TIER 4 (right panel) can be interactively explored according to
 
 
 
-tier4_vars <- pcg_report[['content']][['snv_indel']][['variant_display']][['tier4']]
+tier4_vars <- pcg_report[['content']][['snv_indel']][["disp"]][['tier4']]
 
 variants_tier4_shared <- crosstalk::SharedData$new(tier4_vars)
 
@@ -83,7 +83,7 @@ crosstalk::bscols(
 ```
 
 
-```{r tier4_missing_filters, echo=F, results = 'asis', eval = pcg_report$content$snv_indel$variant_statistic$n_tier4 == 0}
+```{r tier4_missing_filters, echo=F, results = 'asis', eval = pcg_report$content$snv_indel$v_stat$n_tier4 == 0}
 cat('\n*  <i> <font style="font-size: 110%"><b>No</b> other protein-coding variants found.</font></i>', sep = '\n')
 cat('\n')
 ```
@@ -93,7 +93,7 @@ cat('\n')
 
 <br>
 
-```{r table_tier4, eval = pcg_report$content$snv_indel$variant_statistic$n_tier4 > 0}
+```{r table_tier4, eval = pcg_report$content$snv_indel$v_stat$n_tier4 > 0}
 
 DT::datatable(variants_tier4_shared, escape=F,extensions=c("Buttons","Responsive"), 
 options=list(buttons = c('csv','excel'), 
@@ -110,7 +110,7 @@ options=list(buttons = c('csv','excel'),
   
 ```
 
-```{r tier4_missing_data, echo=F, results = 'asis', eval = pcg_report$content$snv_indel$variant_statistic$n_tier4 == 0}
+```{r tier4_missing_data, echo=F, results = 'asis', eval = pcg_report$content$snv_indel$v_stat$n_tier4 == 0}
 cat('\n*  <i> <font style="font-size: 110%"><b>No</b> other protein-coding variants found.</font></i>', sep = '\n')
 cat('\n')
 ```

@@ -1,7 +1,7 @@
 
 ### Copy number aberrations as biomarkers
 
-A total of __`r NROW(pcg_report[['content']][['cna']][['variant_display']][['tier1']]) + NROW(pcg_report[['content']][['cna']][['variant_display']][['tier2']])`__ aberrations are associated with clinical evidence items in the [database for clinical interpretations of variants in cancer, CIViC](https://civic.genome.wustl.edu/#/home), with the following number of evidence items:
+A total of __`r NROW(pcg_report[['content']][['cna']][["disp"]][['tier1']]) + NROW(pcg_report[['content']][['cna']][["disp"]][['tier2']])`__ aberrations are associated with clinical evidence items in the [database for clinical interpretations of variants in cancer, CIViC](https://civic.genome.wustl.edu/#/home), with the following number of evidence items:
 
  *  Predictive: __`r NROW(pcg_report[['content']][['cna']][['clin_eitem']][['specific_ttype']][['predictive']][['A_B']]) + NROW(pcg_report[['content']][['cna']][['clin_eitem']][['other_ttype']][['predictive']][['A_B']]) + NROW(pcg_report[['content']][['cna']][['clin_eitem']][['specific_ttype']][['predictive']][['C_D_E']])`__ evidence items
  *  Prognostic: __`r NROW(pcg_report[['content']][['cna']][['clin_eitem']][['specific_ttype']][['prognostic']][['A_B']]) + NROW(pcg_report[['content']][['cna']][['clin_eitem']][['other_ttype']][['prognostic']][['A_B']]) + NROW(pcg_report[['content']][['cna']][['clin_eitem']][['specific_ttype']][['prognostic']][['C_D_E']])`__ evidence items

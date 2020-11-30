@@ -15,6 +15,11 @@ simply run the following command:
 
    pip install toml
 
+**IMPORTANT NOTE**: STEP 1 & 2 outline installation guidelines for
+running PCGR with Docker. If you want to install and run PCGR without
+the use of Docker (i.e. through Conda), follow `these
+instructions <https://github.com/sigven/pcgr/install_no_docker/README.md>`__
+
 STEP 1: Installation of Docker
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -36,7 +41,8 @@ STEP 1: Installation of Docker
    ``docker images`` in the terminal window
 3. Adjust the computing resources dedicated to the Docker, i.e.:
 
-   -  Memory: minimum 5GB
+   -  Memory: minimum 6GB (this may need an increase for large input
+      files)
    -  CPUs: minimum 4
    -  `How to - Mac OS
       X <https://docs.docker.com/docker-for-mac/#advanced>`__
@@ -53,17 +59,17 @@ a. Clone the PCGR GitHub repository (includes run script and default
 b. Download and unpack the latest data bundles in the PCGR directory
 
    -  `grch37 data bundle -
-      20200920 <http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch37.20200920.tgz>`__
+      20201123 <http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch37.20201123.tgz>`__
       (approx 17Gb)
    -  `grch38 data bundle -
-      20200920 <http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch38.20200920.tgz>`__
+      20201123 <http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch38.20201123.tgz>`__
       (approx 18Gb)
    -  *Unpacking*:
       ``gzip -dc pcgr.databundle.grch37.YYYYMMDD.tgz | tar xvf -``
 
 c. Pull the `PCGR Docker image
    (dev) <https://hub.docker.com/r/sigven/pcgr/>`__ from DockerHub
-   (approx 6.8Gb):
+   (approx 5.1Gb):
 
 -  ``docker pull sigven/pcgr:dev`` (PCGR annotation engine)
 
@@ -71,16 +77,16 @@ Latest release
 ^^^^^^^^^^^^^^
 
 a. Download and unpack the `latest software release
-   (0.9.0rc) <https://github.com/sigven/pcgr/releases/tag/v0.9.0rc>`__
+   (0.9.1) <https://github.com/sigven/pcgr/releases/tag/v0.9.1>`__
 
 b. Download and unpack the assembly-specific data bundle in the PCGR
    directory
 
 -  `grch37 data bundle -
-   20200920 <http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch37.20200920.tgz>`__
+   20201123 <http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch37.20201123.tgz>`__
    (approx 17Gb)
 -  `grch38 data bundle -
-   20200920 <http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch38.20200920.tgz>`__
+   20201123 <http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch38.20201123.tgz>`__
    (approx 18Gb)
 
    -  *Unpacking*:
@@ -90,10 +96,10 @@ b. Download and unpack the assembly-specific data bundle in the PCGR
    have been produced
 
 c. Pull the `PCGR Docker image
-   (0.9.0rc) <https://hub.docker.com/r/sigven/pcgr/>`__ from DockerHub
-   (approx 6.8Gb):
+   (0.9.1) <https://hub.docker.com/r/sigven/pcgr/>`__ from DockerHub
+   (approx 5.1Gb):
 
-   -  ``docker pull sigven/pcgr:0.9.0rc`` (PCGR annotation engine)
+   -  ``docker pull sigven/pcgr:0.9.1`` (PCGR annotation engine)
 
 STEP 3: Input preprocessing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -174,7 +180,7 @@ STEP 5: Run example
    Required arguments:
    --input_vcf INPUT_VCF
                    VCF input file with somatic variants in tumor sample, SNVs/InDels
-   --pcgr_dir PCGR_DIR   PCGR base directory with accompanying data directory, e.g. ~/pcgr-0.9.0
+   --pcgr_dir PCGR_DIR   PCGR base directory with accompanying data directory, e.g. ~/pcgr-0.9.1
    --output_dir OUTPUT_DIR
                    Output directory
    --genome_assembly {grch37,grch38}
@@ -251,6 +257,8 @@ STEP 5: Run example
                    Predict microsatellite instability status from patterns of somatic mutations/indels, default: False
    --estimate_signatures
                    Estimate relative contributions of reference mutational signatures in query sample and detect potential kataegis events), default: False
+   --tmb_algorithm {all_coding,nonsyn}
+                    Method for calculation of TMB, all coding variants (Chalmers et al., Genome Medicine, 2017), or non-synonymous variants only, default: all_coding
    --min_mutations_signatures MIN_MUTATIONS_SIGNATURES
                    Minimum number of SNVs required for reconstruction of mutational signatures (SBS) by MutationalPatterns (default: 200, minimum n = 100)
    --all_reference_signatures
@@ -272,15 +280,15 @@ terminal window:
 
 ::
 
-   python ~/pcgr-0.9.0rc/pcgr.py
-   --pcgr_dir ~/pcgr-0.9.0rc
-   --output_dir ~/pcgr-0.9.0rc
+   python ~/pcgr-0.9.1/pcgr.py
+   --pcgr_dir ~/pcgr-0.9.1
+   --output_dir ~/pcgr-0.9.1
    --sample_id tumor_sample.COAD
    --genome_assembly grch37
-   --conf ~/pcgr-0.9.0rc/examples/example_COAD.toml
-   --input_vcf ~/pcgr-0.9.0rc/examples/tumor_sample.COAD.vcf.gz
+   --conf ~/pcgr-0.9.1/examples/example_COAD.toml
+   --input_vcf ~/pcgr-0.9.1/examples/tumor_sample.COAD.vcf.gz
    --tumor_site 9
-   --input_cna ~/pcgr-0.9.0rc/examples/tumor_sample.COAD.cna.tsv
+   --input_cna ~/pcgr-0.9.1/examples/tumor_sample.COAD.cna.tsv
    --tumor_purity 0.9
    --tumor_ploidy 2.0
    --include_trials

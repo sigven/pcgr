@@ -25,7 +25,7 @@ Variant frequency databases
 -  `Cancer Hotspots <http://cancerhotspots.org>`__ - a resource for
    statistically significant mutations in cancer (v2, 2017)
 -  `TCGA <https://portal.gdc.cancer.gov/>`__ - somatic mutations
-   discovered across 33 tumor type cohorts (release 25.0, July 2020)
+   discovered across 33 tumor type cohorts (release 27.0, October 2020)
 -  `ICGC-PCAWG <http://docs.icgc.org/pcawg/>`__ - ICGC Pancancer
    Analysis of Whole Genomes - (release 28, March 17th, 2019)
 
@@ -33,11 +33,11 @@ Variant databases of clinical utility
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  `ClinVar <http://www.ncbi.nlm.nih.gov/clinvar/>`__ - database of
-   clinically related variants (August 2020)
+   clinically related variants (November 2020)
 -  `DoCM <http://docm.genome.wustl.edu>`__ - database of curated
    mutations (v3.2, April 2016)
 -  `CIViC <http://civic.genome.wustl.edu>`__ - clinical interpretations
-   of variants in cancer (September 20th 2020)
+   of variants in cancer (November 18th 2020)
 -  `CGI <http://www.cancergenomeinterpreter.org/biomarkers>`__ - Cancer
    Genome Interpreter Cancer Biomarkers Database (CGI) (January 17th
    2018)
@@ -48,8 +48,8 @@ Protein domains/functional features
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  `UniProt/SwissProt KnowledgeBase <http://www.uniprot.org>`__ -
-   resource on protein sequence and functional information (2020_04,
-   August 2020)
+   resource on protein sequence and functional information (2020_05,
+   October 2020)
 -  `Pfam <http://pfam.xfam.org>`__ - database of protein families and
    domains (v33, May 2020)
 
@@ -58,13 +58,11 @@ Knowledge resources on gene and protein targets
 
 -  `CancerMine <https://zenodo.org/record/3525385#.XcHblUVKiL4>`__ -
    Literature-mined database of tumor suppressor genes/proto-oncogenes
-   (v28, September 2020)
+   (v30, November 2020)
 -  `Open Targets Platform <https://www.targetvalidation.org/>`__ -
-   Database on disease-target associations, targeted drugs and
-   tractability aggregated from multiple sources (literature, pathways,
-   mutations) (2020_06)
--  `DisGeNET <http://www.disgenet.org>`__ - curated associations between
-   human genes and different tumor types (v7.0, May 2020)
+   Database on disease-target associations, molecularly targeted drugs
+   and tractability aggregated from multiple sources (literature,
+   pathways, mutations) (2020_09)
 -  `TCGA driver genes <https://www.ncbi.nlm.nih.gov/pubmed/29625053>`__
    - predicted cancer driver genes based on application of multiple
    driver gene prediction tools on TCGA pan-cancer cohort
@@ -73,7 +71,7 @@ Pathway databases
 ~~~~~~~~~~~~~~~~~
 
 -  `KEGG PATHWAY Database <http://www.genome.jp/kegg/pathway.htm>`__ -
-   September 1st 2020
+   November 20th 2020
 -  `Oncogenic Signaling Pathways -
    TCGA <https://www.ncbi.nlm.nih.gov/pubmed/29625050>`__ - Sanchez-Vega
    et al., *Cell*, 2018
@@ -128,20 +126,15 @@ of criteria that can be configured by the user), and this particular
 transcript consequence may differ from what has been reported in the
 literature.
 
-**Antineoplastic drugs**
+**Molecularly targeted drugs**
 
--  For cancer drugs extracted from `Open Targets
-   Platform <https://www.targetvalidation.org>`__, we only include
-   antineoplastic drugs that have reached phase 3 or higher (i.e. as
-   recorded in ChEMBL)
+-  For targeted drugs extracted from `Open Targets
+   Platform <https://www.targetvalidation.org>`__, we distinguish
+   between drugs in late clinical development (phase 3-4), versus those
+   in early clinical development (phase 1-2).
 
 **Gene-disease associations**
 
--  For gene-disease associations extracted from DisGeNET, we require a
-   `score <http://www.disgenet.org/web/DisGeNET/menu/dbinfo#score>`__
-   greater than 0.2 and that the association is suppported by at least
-   one PMID (PubMed article). Associations involving non-cancer type of
-   diseases are not included.
 -  Cancer phenotype associations retrieved from the `Open Targets
    Platform <https://www.targetvalidation.org/>`__ are largely based on
    the `association

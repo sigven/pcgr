@@ -1,6 +1,8 @@
 #!/usr/bin/env Rscript
 
 options(warn=-1)
+.libPaths(R.home("library"))
+
 args = commandArgs(trailingOnly=TRUE)
 
 suppressWarnings(suppressPackageStartupMessages(library(pcgrr)))
@@ -25,9 +27,10 @@ maf_upper_threshold <- as.numeric(args[10])
 diagnostic_grade_only <- as.integer(args[11])
 data_dir <- as.character(args[12])
 ignore_noncoding <- as.integer(args[13])
-incidental_findings <- as.integer(args[14])
-gwas_findings <- as.integer(args[15])
-classify_all <- as.integer(args[16])
+clinvar_ignore_noncancer <- as.integer(args[14])
+secondary_findings <- as.integer(args[15])
+gwas_findings <- as.integer(args[16])
+classify_all <- as.integer(args[17])
 
 rlogging::SetTimeStampFormat(ts.format="%Y-%m-%d %H:%M:%S ")
 rlogging::SetLogFile(NULL)
@@ -65,11 +68,12 @@ for(section in names(cpsr_config)){
 }
 
 cpsr_config[['ignore_noncoding']] <- as.logical(ignore_noncoding)
-cpsr_config[['incidental_findings']] <- as.logical(incidental_findings)
+cpsr_config[['secondary_findings']] <- as.logical(secondary_findings)
 cpsr_config[['gwas_findings']] <- as.logical(gwas_findings)
 cpsr_config[['classify_all']] <- as.logical(classify_all)
 cpsr_config[['maf_upper_threshold']] <- maf_upper_threshold
 cpsr_config[['diagnostic_grade_only']] <- as.logical(diagnostic_grade_only)
+cpsr_config[['clinvar_ignore_noncancer']] <- as.logical(clinvar_ignore_noncancer)
 
 ## Generate report content
 cps_report <- pcgrr::generate_cpsr_report(dir, query_vcf2tsv, custom_bed, pcgr_data, pcgr_version, 

@@ -42,7 +42,7 @@ scrollY_flexdb_container <- "510px"
 ```{r conditional_overview, child='pcgr_flexdb/flexdb_snv_overview.Rmd', eval = pcg_report$content$snv_indel$eval}
 ```
 
-```{r conditional_overview, child='pcgr_flexdb/flexdb_variant_filter_stats.Rmd', eval = pcg_report$metadata$config$assay_properties$vcf_tumor_only}
+```{r conditional_overview, child='pcgr_flexdb/flexdb_variant_filter_stats.Rmd', eval = pcg_report$metadata$config$assay_props$vcf_tumor_only}
 ```
 
 ```{r conditional_tier1, child='pcgr_flexdb/flexdb_snv_tier1.Rmd', eval = pcg_report$content$snv_indel$eval}

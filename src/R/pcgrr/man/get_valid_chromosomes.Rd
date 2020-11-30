@@ -4,13 +4,17 @@
 \alias{get_valid_chromosomes}
 \title{Function that check for valid mutations/chromosomes in input}
 \usage{
-get_valid_chromosomes(vcf_data_df, chromosome_column = "CHROM",
-  bsg = BSgenome.Hsapiens.UCSC.hg19)
+get_valid_chromosomes(
+  vcf_data_df,
+  chromosome_column = "CHROM",
+  bsg = BSgenome.Hsapiens.UCSC.hg19
+)
 }
 \arguments{
 \item{vcf_data_df}{data frame}
 
-\item{chromosome_column}{name of columns for which string replace is to be performed}
+\item{chromosome_column}{name of columns for which string replace
+is to be performed}
 
 \item{pattern}{pattern to replace}
 }

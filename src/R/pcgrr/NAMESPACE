@@ -1,8 +1,14 @@
 exportPattern("^[[:alpha:]]+")
 
-export(list_to_df)
-
-## FUNCTIONS - READ CALLS (VCF/CNA)
+## UTILITY FUNCTIONS -
+## 1) CALL PREPARATION (VCF/CNA)
+##    0. DATA INTEGRITY / TYPE QC
+##    1. QC CHROMOSOME NAMES
+##    2. QC CHROMOSOME AND VARIANT ORDER
+##    3. VARIANT FILTERING (DP/AF)
+##    4. GENOTYPE CHECK
+## 2) ADDITION OF GENE/VARIANT LINKS
+## 3
 export(append_read_support)
 export(append_pfeature_descriptions)
 export(append_gwas_citation_phenotype)
@@ -11,7 +17,6 @@ export(append_tcga_var_link)
 export(append_otargets_pheno_link)
 export(append_drug_var_link)
 export(append_ucsc_segment_link)
-export(append_disgenet_var_link)
 export(append_annotation_links)
 export(filter_read_support)
 export(determine_genotype)
@@ -20,33 +25,10 @@ export(df_string_replace)
 export(get_valid_chromosomes)
 export(get_ordinary_chromosomes)
 export(assign_mutation_type)
-#export(annotate_variant_link)
 export(generate_annotation_link)
 export(detect_vcf_sample_name)
 export(data_integrity_check)
 export(recode_logical_vars)
-
-## KATAEGIS FUNCTIONS
-export(kataegis_input)
-export(kataegis_detect)
-export(generate_report_data_rainfall)
-export(generate_report_data_kataegis)
-
-## CPSR FUNCTIONS
-export(get_insilico_prediction_statistics)
-export(assign_pathogenicity_evidence)
-export(determine_pathogenicity_classification)
-export(detect_cancer_traits_clinvar)
-export(summary_donut_chart)
-export(assign_cpsr_tier)
-export(retrieve_incidental_calls)
-export(generate_cpsr_report)
-export(virtual_panel_display_html)
-export(get_germline_biomarkers)
-export(custom_bed_genes)
-
-
-## GENERAL UTILITIES: PCGR/CPSR
 export(write_report_output)
 export(variant_stats_report)
 export(get_calls)
@@ -55,30 +37,52 @@ export(sort_chromosomal_segments)
 export(remove_cols_from_df)
 export(check_common_colnames)
 export(write_processed_vcf)
+export(plot_value_boxes)
 
+## KATAEGIS FUNCTIONS
+export(kataegis_input)
+export(kataegis_detect)
+
+## CPSR FUNCTIONS
+export(get_insilico_prediction_statistics)
+export(assign_pathogenicity_evidence)
+export(determine_pathogenicity_classification)
+export(detect_cancer_traits_clinvar)
+export(summary_donut_chart)
+export(assign_cpsr_tier)
+export(retrieve_secondary_calls)
+export(generate_cpsr_report)
+export(virtual_panel_display_html)
+export(get_germline_biomarkers)
+export(custom_bed_genes)
 
 ## GERMLINE ANNOTATION/FILTERING FUNCTIONS
 export(assign_somatic_germline_evidence)
 export(assign_germline_popfreq_status)
 export(assign_somatic_classification)
-export(assign_poplevel_frequency)
 export(get_population_tag)
 export(make_upset_plot_data)
 export(upset_plot_tumor_only)
 
-
+## BIOMARKERS / CLINICAL EVIDENCE ITEMS
 export(get_clin_assocs_snv_indel)
 export(get_clin_assocs_cna)
 export(load_all_eitems)
-export(get_eitems_per_var)
-export(filter_eitems_per_var)
+export(load_eitems)
+export(match_eitems_to_var)
+export(deduplicate_eitems)
+export(qc_var_eitems)
 export(filter_eitems_by_site)
-export(get_eitems_per_var_by_significance)
+export(structure_var_eitems)
 export(get_oncogene_tsgene_target_sets)
 export(targeted_drugs_pr_ttype)
+export(log_var_eitem_stats)
 
-export(plot_value_boxes)
 
+## GENERATION OF CONTENTS FOR REPORT ELEMENTS
+export(init_report)
+export(update_report)
+export(set_report_metadata)
 export(generate_report_data_snv_indel)
 export(generate_report_data_tmb)
 export(generate_report_data_signatures_mp)
@@ -88,11 +92,12 @@ export(generate_report_data_tumor_only)
 export(generate_report_data_value_box)
 export(generate_report_data_trials)
 export(generate_pcgr_report)
-#export(annotate_facets_cna)
+export(generate_report_data_rainfall)
+export(generate_report_data_kataegis)
+
 export(update_maf_allelic_support)
 
-#export(filter_db_germline_variants)
-export(generate_biomarker_tsv)
+
 export(signature_contributions_single_sample)
 export(get_reference_signature_data)
 export(generate_tier_tsv)
@@ -101,15 +106,6 @@ export(msi_indel_fraction_plot)
 export(plot_tmb_primary_site_tcga)
 
 export(get_proper_maf_alleles)
-export(parse_transvar_file)
-#export(read_vcf_vranges)
-export(dna_kmer_distribution)
-export(mutation_context)
-
-export(init_report)
-export(update_report)
-export(set_report_metadata)
-
-export(acmg_evidence_codes)
+#export(parse_transvar_file)
 
 importFrom(magrittr,"%>%")

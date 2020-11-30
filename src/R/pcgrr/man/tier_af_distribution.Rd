@@ -2,7 +2,8 @@
 % Please edit documentation in R/utils.R
 \name{tier_af_distribution}
 \alias{tier_af_distribution}
-\title{Function that plots a histogram of the the variant allelic support (tumor) - grouped by tiers}
+\title{Function that plots a histogram of the the variant allelic
+support (tumor) - grouped by tiers}
 \usage{
 tier_af_distribution(tier_df, bin_size = 0.1)
 }
@@ -15,5 +16,6 @@ tier_af_distribution(tier_df, bin_size = 0.1)
 p geom_histogram plot from ggplot2
 }
 \description{
-Function that plots a histogram of the the variant allelic support (tumor) - grouped by tiers
+Function that plots a histogram of the the variant allelic
+support (tumor) - grouped by tiers
 }

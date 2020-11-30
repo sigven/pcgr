@@ -6,7 +6,7 @@
 
 show_gwas_filters <- F
 missing_gwas_items <- T
-if(NROW(cps_report[['content']][['snv_indel']][['variant_display']][['gwas']]) > 0){
+if(NROW(cps_report[['content']][['snv_indel']][["disp"]][['gwas']]) > 0){
   show_gwas_filters <- T
   missing_gwas_items <- F
 }
@@ -19,12 +19,12 @@ formula_gnomad <- as.formula(paste0("~",rlang::sym(tag_gnomad)))
 
 ```{r gwas_cancer, echo=F, results = 'asis', eval = show_gwas_filters}
 
-cat('A total of ',NROW(cps_report[['content']][['snv_indel']][['variant_display']][['gwas']]), ' other germline variant(s) are associated with cancer phenotypes through genome-wide association studies (p-value < ',cps_report[['metadata']][['config']][['gwas']][['p_value_min']],'):')
+cat('A total of ',NROW(cps_report[['content']][['snv_indel']][["disp"]][['gwas']]), ' other germline variant(s) are associated with cancer phenotypes through genome-wide association studies (p-value < ',cps_report[['metadata']][['config']][['gwas']][['p_value_min']],'):')
 cat('\n')
 htmltools::br()
 htmltools::br()
 
-variants_gwas_cancer <- crosstalk::SharedData$new(cps_report[['content']][['snv_indel']][['variant_display']][['gwas']])
+variants_gwas_cancer <- crosstalk::SharedData$new(cps_report[['content']][['snv_indel']][["disp"]][['gwas']])
 crosstalk::bscols(
   list(
     crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_gwas_cancer, ~CONSEQUENCE),

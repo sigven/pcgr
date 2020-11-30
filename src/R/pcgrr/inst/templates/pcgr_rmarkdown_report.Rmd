@@ -92,7 +92,7 @@ cat("\n")
 
 cat("## MSI status")
 
-cat("\nThe number of SNV/InDel calls (n = ",pcg_report[['content']][['snv_indel']][['variant_statistic']][['n_coding']], 
+cat("\nThe number of SNV/InDel calls (n = ",pcg_report[['content']][['snv_indel']][['v_stat']][['n_coding']], 
 "is too limited for MSI prediction to be performed.",sep="\n")
 
 htmltools::br()

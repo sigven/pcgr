@@ -1,6 +1,8 @@
 #!/usr/bin/env Rscript
 
 options(warn=-1)
+.libPaths(R.home("library"))
+
 args = commandArgs(trailingOnly=TRUE)
 
 suppressWarnings(suppressPackageStartupMessages(library(plyr)))
@@ -91,28 +93,28 @@ if(query_cnv == "None"){
 
 ## Append settings to PCGR configuration object (fed as arguments to main Python script (pcgr.py))
 
-## Tumor properties: purity, ploidy, tumor type
-pcgr_config[['tumor_properties']] <- list()
-pcgr_config[['tumor_properties']][['tumor_purity']] <- purity_estimate
-pcgr_config[['tumor_properties']][['tumor_ploidy']] <- ploidy_estimate
-pcgr_config[['tumor_properties']][['tumor_type']] <- tumor_site
+## Tumor properties (t_props): purity, ploidy, tumor type
+pcgr_config[['t_props']] <- list()
+pcgr_config[['t_props']][['tumor_purity']] <- purity_estimate
+pcgr_config[['t_props']][['tumor_ploidy']] <- ploidy_estimate
+pcgr_config[['t_props']][['tumor_type']] <- tumor_site
 if(tumor_site == "Any"){
-  pcgr_config[['tumor_properties']][['tumor_type']] <- "Cancer, NOS"
+  pcgr_config[['t_props']][['tumor_type']] <- "Cancer, NOS"
 }
 
 ## Sequencing assay properties (VCF)
 ## Target (WES/WGS/TARGETED), mode (tumor-control/tumor-only), coding target size
-pcgr_config[['assay_properties']] <- list()
-pcgr_config[['assay_properties']][['mode']] <- 'Tumor-Control'
-pcgr_config[['assay_properties']][['vcf_tumor_only']] <- FALSE
-pcgr_config[['assay_properties']][['target_size_mb']] <- target_size_mb
-pcgr_config[['assay_properties']][['type']] <- assay
+pcgr_config[['assay_props']] <- list()
+pcgr_config[['assay_props']][['mode']] <- 'Tumor-Control'
+pcgr_config[['assay_props']][['vcf_tumor_only']] <- FALSE
+pcgr_config[['assay_props']][['target_size_mb']] <- target_size_mb
+pcgr_config[['assay_props']][['type']] <- assay
 
 if(t_only == 1){
-  pcgr_config[['assay_properties']][['vcf_tumor_only']] <- TRUE
-  pcgr_config[['assay_properties']][['mode']] <- 'Tumor-Only'
+  pcgr_config[['assay_props']][['vcf_tumor_only']] <- TRUE
+  pcgr_config[['assay_props']][['mode']] <- 'Tumor-Only'
   if(cell_line == 1){
-      pcgr_config[['assay_properties']][['mode']] <- 'Cell line (Tumor-Only)'
+      pcgr_config[['assay_props']][['mode']] <- 'Cell line (Tumor-Only)'
   }
 }
 
@@ -120,7 +122,7 @@ if(t_only == 1){
 pcgr_config[['clinicaltrials']] <- list()
 pcgr_config[['clinicaltrials']][['run']] <- as.logical(include_trials)
 
-if(pcgr_config[['tumor_properties']][['tumor_type']] == "Cancer, NOS"){
+if(pcgr_config[['t_props']][['tumor_type']] == "Cancer, NOS"){
   rlogging::message(paste0("Clinical trials will not be included in the report when primary site is not specified - skipping"))
   pcgr_config[['clinicaltrials']][['run']] <- F
 
@@ -139,8 +141,8 @@ pcgr_config[['msigs']][['mutation_limit']] <- min_snv_signatures
 
 ## Copy number aberration (CNA) settings
 pcgr_config[['cna']] <- list()
-pcgr_config[['cna']][['logR_homdel']] <- logr_homdel
-pcgr_config[['cna']][['logR_gain']] <- logr_gain
+pcgr_config[['cna']][['log_r_homdel']] <- logr_homdel
+pcgr_config[['cna']][['log_r_gain']] <- logr_gain
 pcgr_config[['cna']][['cna_overlap_pct']] <- cna_overlap_pct
 
 ## Allelic support settings (VCF)
@@ -160,7 +162,7 @@ if(!is.null(pcg_report)){
   pcgrr::write_report_output(dir, pcg_report, sample_name, genome_assembly, output_format = 'json')
   pcgrr::write_report_output(dir, pcg_report, sample_name, genome_assembly, output_format = 'snv_tsv')
   pcgrr::write_report_output(dir, pcg_report, sample_name, genome_assembly, output_format = 'msigs_tsv')
-  if(pcgr_config[['assay_properties']][['vcf_tumor_only']] == T){
+  if(pcgr_config[['assay_props']][['vcf_tumor_only']] == T){
     pcgrr::write_report_output(dir, pcg_report, sample_name, genome_assembly, output_format = 'snv_tsv_unfiltered')
   }
   pcgrr::write_report_output(dir, pcg_report, sample_name, genome_assembly, output_format = 'cna_tsv')

@@ -1,18 +1,15 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Getting started &mdash; Personal Cancer Genome Reporter 0.9.0rc documentation</title>
+  <title>Getting started &mdash; Personal Cancer Genome Reporter 0.9.1 documentation</title>
   
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
 
   
   
@@ -20,9 +17,7 @@
   
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -34,6 +29,10 @@
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="author" title="About these documents" href="about.html" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -52,7 +51,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Personal Cancer Genome Reporter
+            <a href="index.html" class="icon icon-home"> Personal Cancer Genome Reporter
           
 
           
@@ -62,7 +61,7 @@
             
             
               <div class="version">
-                0.9.0rc
+                0.9.1
               </div>
             
           
@@ -79,7 +78,6 @@
           
         </div>
 
-        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -114,7 +112,6 @@
             
           
         </div>
-        
       </div>
     </nav>
 
@@ -153,7 +150,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="index.html">Docs</a> &raquo;</li>
         
       <li>Getting started</li>
     
@@ -187,6 +184,10 @@ simply run the following command:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">toml</span>
 </pre></div>
 </div>
+<p><strong>IMPORTANT NOTE</strong>: STEP 1 &amp; 2 outline installation guidelines for
+running PCGR with Docker. If you want to install and run PCGR without
+the use of Docker (i.e. through Conda), follow <a class="reference external" href="https://github.com/sigven/pcgr/install_no_docker/README.md">these
+instructions</a></p>
 </div>
 <div class="section" id="step-1-installation-of-docker">
 <h2>STEP 1: Installation of Docker<a class="headerlink" href="#step-1-installation-of-docker" title="Permalink to this headline">¶</a></h2>
@@ -210,7 +211,8 @@ volumes</a>)</p></li>
 <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">images</span></code> in the terminal window</p></li>
 <li><p>Adjust the computing resources dedicated to the Docker, i.e.:</p>
 <ul class="simple">
-<li><p>Memory: minimum 5GB</p></li>
+<li><p>Memory: minimum 6GB (this may need an increase for large input
+files)</p></li>
 <li><p>CPUs: minimum 4</p></li>
 <li><p><a class="reference external" href="https://docs.docker.com/docker-for-mac/#advanced">How to - Mac OS
 X</a></p></li>
@@ -227,11 +229,11 @@ X</a></p></li>
 configuration file): <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/sigven/pcgr.git</span></code></p></li>
 <li><p>Download and unpack the latest data bundles in the PCGR directory</p>
 <ul class="simple">
-<li><p><a class="reference external" href="http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch37.20200920.tgz">grch37 data bundle -
-20200920</a>
+<li><p><a class="reference external" href="http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch37.20201123.tgz">grch37 data bundle -
+20201123</a>
 (approx 17Gb)</p></li>
-<li><p><a class="reference external" href="http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch38.20200920.tgz">grch38 data bundle -
-20200920</a>
+<li><p><a class="reference external" href="http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch38.20201123.tgz">grch38 data bundle -
+20201123</a>
 (approx 18Gb)</p></li>
 <li><p><em>Unpacking</em>:
 <code class="docutils literal notranslate"><span class="pre">gzip</span> <span class="pre">-dc</span> <span class="pre">pcgr.databundle.grch37.YYYYMMDD.tgz</span> <span class="pre">|</span> <span class="pre">tar</span> <span class="pre">xvf</span> <span class="pre">-</span></code></p></li>
@@ -239,7 +241,7 @@ configuration file): <code class="docutils literal notranslate"><span class="pre
 </li>
 <li><p>Pull the <a class="reference external" href="https://hub.docker.com/r/sigven/pcgr/">PCGR Docker image
 (dev)</a> from DockerHub
-(approx 6.8Gb):</p></li>
+(approx 5.1Gb):</p></li>
 </ol>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">pull</span> <span class="pre">sigven/pcgr:dev</span></code> (PCGR annotation engine)</p></li>
@@ -248,17 +250,17 @@ configuration file): <code class="docutils literal notranslate"><span class="pre
 <div class="section" id="latest-release">
 <h3>Latest release<a class="headerlink" href="#latest-release" title="Permalink to this headline">¶</a></h3>
 <ol class="loweralpha simple">
-<li><p>Download and unpack the <a class="reference external" href="https://github.com/sigven/pcgr/releases/tag/v0.9.0rc">latest software release
-(0.9.0rc)</a></p></li>
+<li><p>Download and unpack the <a class="reference external" href="https://github.com/sigven/pcgr/releases/tag/v0.9.1">latest software release
+(0.9.1)</a></p></li>
 <li><p>Download and unpack the assembly-specific data bundle in the PCGR
 directory</p></li>
 </ol>
 <ul>
-<li><p><a class="reference external" href="http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch37.20200920.tgz">grch37 data bundle -
-20200920</a>
+<li><p><a class="reference external" href="http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch37.20201123.tgz">grch37 data bundle -
+20201123</a>
 (approx 17Gb)</p></li>
-<li><p><a class="reference external" href="http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch38.20200920.tgz">grch38 data bundle -
-20200920</a>
+<li><p><a class="reference external" href="http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch38.20201123.tgz">grch38 data bundle -
+20201123</a>
 (approx 18Gb)</p>
 <ul class="simple">
 <li><p><em>Unpacking</em>:
@@ -270,10 +272,10 @@ have been produced</p>
 </ul>
 <ol class="loweralpha simple" start="3">
 <li><p>Pull the <a class="reference external" href="https://hub.docker.com/r/sigven/pcgr/">PCGR Docker image
-(0.9.0rc)</a> from DockerHub
-(approx 6.8Gb):</p>
+(0.9.1)</a> from DockerHub
+(approx 5.1Gb):</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">pull</span> <span class="pre">sigven/pcgr:0.9.0rc</span></code> (PCGR annotation engine)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">pull</span> <span class="pre">sigven/pcgr:0.9.1</span></code> (PCGR annotation engine)</p></li>
 </ul>
 </li>
 </ol>
@@ -354,7 +356,7 @@ Personal Cancer Genome Reporter (PCGR) workflow for clinical interpretation of s
 Required arguments:
 --input_vcf INPUT_VCF
                 VCF input file with somatic variants in tumor sample, SNVs/InDels
---pcgr_dir PCGR_DIR   PCGR base directory with accompanying data directory, e.g. ~/pcgr-0.9.0
+--pcgr_dir PCGR_DIR   PCGR base directory with accompanying data directory, e.g. ~/pcgr-0.9.1
 --output_dir OUTPUT_DIR
                 Output directory
 --genome_assembly {grch37,grch38}
@@ -431,6 +433,8 @@ Optional arguments:
                 Predict microsatellite instability status from patterns of somatic mutations/indels, default: False
 --estimate_signatures
                 Estimate relative contributions of reference mutational signatures in query sample and detect potential kataegis events), default: False
+--tmb_algorithm {all_coding,nonsyn}
+                 Method for calculation of TMB, all coding variants (Chalmers et al., Genome Medicine, 2017), or non-synonymous variants only, default: all_coding
 --min_mutations_signatures MIN_MUTATIONS_SIGNATURES
                 Minimum number of SNVs required for reconstruction of mutational signatures (SBS) by MutationalPatterns (default: 200, minimum n = 100)
 --all_reference_signatures
@@ -450,15 +454,15 @@ sequenced within TCGA (<strong>GRCh37</strong> only). It also contains a PCGR
 configuration file customized for these VCFs. A report for a colorectal
 tumor case can be generated by running the following command in your
 terminal window:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">~/</span><span class="n">pcgr</span><span class="o">-</span><span class="mf">0.9</span><span class="o">.</span><span class="mi">0</span><span class="n">rc</span><span class="o">/</span><span class="n">pcgr</span><span class="o">.</span><span class="n">py</span>
-<span class="o">--</span><span class="n">pcgr_dir</span> <span class="o">~/</span><span class="n">pcgr</span><span class="o">-</span><span class="mf">0.9</span><span class="o">.</span><span class="mi">0</span><span class="n">rc</span>
-<span class="o">--</span><span class="n">output_dir</span> <span class="o">~/</span><span class="n">pcgr</span><span class="o">-</span><span class="mf">0.9</span><span class="o">.</span><span class="mi">0</span><span class="n">rc</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">~/</span><span class="n">pcgr</span><span class="o">-</span><span class="mf">0.9</span><span class="o">.</span><span class="mi">1</span><span class="o">/</span><span class="n">pcgr</span><span class="o">.</span><span class="n">py</span>
+<span class="o">--</span><span class="n">pcgr_dir</span> <span class="o">~/</span><span class="n">pcgr</span><span class="o">-</span><span class="mf">0.9</span><span class="o">.</span><span class="mi">1</span>
+<span class="o">--</span><span class="n">output_dir</span> <span class="o">~/</span><span class="n">pcgr</span><span class="o">-</span><span class="mf">0.9</span><span class="o">.</span><span class="mi">1</span>
 <span class="o">--</span><span class="n">sample_id</span> <span class="n">tumor_sample</span><span class="o">.</span><span class="n">COAD</span>
 <span class="o">--</span><span class="n">genome_assembly</span> <span class="n">grch37</span>
-<span class="o">--</span><span class="n">conf</span> <span class="o">~/</span><span class="n">pcgr</span><span class="o">-</span><span class="mf">0.9</span><span class="o">.</span><span class="mi">0</span><span class="n">rc</span><span class="o">/</span><span class="n">examples</span><span class="o">/</span><span class="n">example_COAD</span><span class="o">.</span><span class="n">toml</span>
-<span class="o">--</span><span class="n">input_vcf</span> <span class="o">~/</span><span class="n">pcgr</span><span class="o">-</span><span class="mf">0.9</span><span class="o">.</span><span class="mi">0</span><span class="n">rc</span><span class="o">/</span><span class="n">examples</span><span class="o">/</span><span class="n">tumor_sample</span><span class="o">.</span><span class="n">COAD</span><span class="o">.</span><span class="n">vcf</span><span class="o">.</span><span class="n">gz</span>
+<span class="o">--</span><span class="n">conf</span> <span class="o">~/</span><span class="n">pcgr</span><span class="o">-</span><span class="mf">0.9</span><span class="o">.</span><span class="mi">1</span><span class="o">/</span><span class="n">examples</span><span class="o">/</span><span class="n">example_COAD</span><span class="o">.</span><span class="n">toml</span>
+<span class="o">--</span><span class="n">input_vcf</span> <span class="o">~/</span><span class="n">pcgr</span><span class="o">-</span><span class="mf">0.9</span><span class="o">.</span><span class="mi">1</span><span class="o">/</span><span class="n">examples</span><span class="o">/</span><span class="n">tumor_sample</span><span class="o">.</span><span class="n">COAD</span><span class="o">.</span><span class="n">vcf</span><span class="o">.</span><span class="n">gz</span>
 <span class="o">--</span><span class="n">tumor_site</span> <span class="mi">9</span>
-<span class="o">--</span><span class="n">input_cna</span> <span class="o">~/</span><span class="n">pcgr</span><span class="o">-</span><span class="mf">0.9</span><span class="o">.</span><span class="mi">0</span><span class="n">rc</span><span class="o">/</span><span class="n">examples</span><span class="o">/</span><span class="n">tumor_sample</span><span class="o">.</span><span class="n">COAD</span><span class="o">.</span><span class="n">cna</span><span class="o">.</span><span class="n">tsv</span>
+<span class="o">--</span><span class="n">input_cna</span> <span class="o">~/</span><span class="n">pcgr</span><span class="o">-</span><span class="mf">0.9</span><span class="o">.</span><span class="mi">1</span><span class="o">/</span><span class="n">examples</span><span class="o">/</span><span class="n">tumor_sample</span><span class="o">.</span><span class="n">COAD</span><span class="o">.</span><span class="n">cna</span><span class="o">.</span><span class="n">tsv</span>
 <span class="o">--</span><span class="n">tumor_purity</span> <span class="mf">0.9</span>
 <span class="o">--</span><span class="n">tumor_ploidy</span> <span class="mf">2.0</span>
 <span class="o">--</span><span class="n">include_trials</span>
@@ -514,19 +518,11 @@ transcripts that overlap with somatic copy number aberrations</p></li>
 
   <div role="contentinfo">
     <p>
-        
         &copy; Copyright 2017-2020, Sigve Nakken
 
     </p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -537,6 +533,7 @@ transcripts that overlap with somatic copy number aberrations</p></li>
 
   </div>
   
+
 
   <script type="text/javascript">
       jQuery(function () {

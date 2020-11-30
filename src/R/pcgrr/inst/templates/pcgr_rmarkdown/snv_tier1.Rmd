@@ -1,7 +1,7 @@
 
 ### Tier 1 - Variants of strong clinical significance {.tabset}
 
-- Considering evidence items with strongest evidence levels (A & B) for the query tumor type (_`r pcg_report[['metadata']][['config']][['tumor_properties']][['tumor_type']]`_)  in the [database for clinical interpretations of variants in cancer, CIViC](https://civic.genome.wustl.edu/#/home) or [Cancer Biomarkers database](https://www.cancergenomeinterpreter.org/biomarkers), a total of __`r NROW(pcg_report[['content']][['snv_indel']][['variant_display']][['tier1']])`__ unique, somatic variants were found, with the following number of evidence items:
+- Considering evidence items with strongest evidence levels (A & B) for the query tumor type (_`r pcg_report[['metadata']][['config']][["t_props"]][['tumor_type']]`_)  in the [database for clinical interpretations of variants in cancer, CIViC](https://civic.genome.wustl.edu/#/home) or [Cancer Biomarkers database](https://www.cancergenomeinterpreter.org/biomarkers), a total of __`r NROW(pcg_report[['content']][['snv_indel']][["disp"]][['tier1']])`__ unique, somatic variants were found, with the following number of evidence items:
     * Tier 1 - Predictive/Therapeutic: __`r NROW(pcg_report[['content']][['snv_indel']][['clin_eitem']][['specific_ttype']][['predictive']][['A_B']])`__ evidence items
     * Tier 1 - Prognostic: __`r NROW(pcg_report[['content']][['snv_indel']][['clin_eitem']][['specific_ttype']][['prognostic']][['A_B']])`__ evidence items
     * Tier 1 - Diagnostic: __`r NROW(pcg_report[['content']][['snv_indel']][['clin_eitem']][['specific_ttype']][['diagnostic']][['A_B']])`__ evidence items
@@ -9,7 +9,7 @@
 <br><br>
 
 
-```{r biomarker_note1, echo=F, results = "asis", include = pcg_report$content$snv_indel$variant_statistic$n_tier1 > 0}
+```{r biomarker_note1, echo=F, results = "asis", include = pcg_report$content$snv_indel$v_stat$n_tier1 > 0}
 
 cat('<b>NOTE:</b> Reported biomarkers in CIViC/CGI are mapped at different resolutions (i.e. filter <b>Biomarker mapping</b>). The accuracy of a match between variants in the tumor sample and the reported biomarkers will vary accordingly (highlighted by gene symbols with different color backgrounds):\n\n')
 

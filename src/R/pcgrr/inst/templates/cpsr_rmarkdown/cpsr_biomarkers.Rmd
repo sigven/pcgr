@@ -1,5 +1,5 @@
 
-### Genomic biomarkers {.tabset}
+### Variant biomarkers {.tabset}
 
 - Variants (__class 4/5__) in the query sample that overlap with reported clinical biomarkers from the [database for clinical interpretations of variants in cancer, CIViC](https://civic.genome.wustl.edu/#/home) are considered. Note that several variants in the query can overlap the same existing biomarker, given that biomarkers are reported at different resolutions (variant/gene level). Total number of clinical evidence items that coincide with query variants:
     * Predisposing: __`r NROW(cps_report[['content']][['snv_indel']][['clin_eitem']][['predisposing']])`__ evidence items
@@ -14,16 +14,31 @@
 
 show_germline_filters <- list()
 missing_germline_items <- list()
+biomarker_present <- F
 for(type in c('diagnostic','prognostic','predictive','predisposing')){
   show_germline_filters[[type]] <- F
   missing_germline_items[[type]] <- T
   if(NROW(cps_report[['content']][['snv_indel']][['clin_eitem']][[type]]) > 0){
     show_germline_filters[[type]] <- T
     missing_germline_items[[type]] <- F
+    biomarker_present <- T
   }
 }
 
 ```
+
+
+```{r biomarker_note, echo=F, results = "asis", include = biomarker_present}
+
+cat('<b>NOTE:</b> Reported biomarkers in CIViC are mapped at different resolutions (i.e. filter <b>Biomarker mapping</b>). The accuracy of a match between variants in the tumor sample and the reported biomarkers will vary accordingly (highlighted by gene symbols with different color backgrounds):\n\n')
+
+cat('<ul><li>Biomarker match at the <mark style="background-color:black; font-weight:bold; color:white">exact variant/codon level</mark></li>')
+cat(paste0('<br><li>Biomarker match at the <mark style="background-color:', cps_report[['metadata']][['color_palette']][['warning']][['values']][1],'; color:white; font-weight:bold">exon/gene level</mark></li></ul>\n'))
+
+htmltools::br()
+```
+
+
 
 
 ```{r active_tab_cpsr_predisposing, echo = F, results = "asis"}
@@ -68,7 +83,21 @@ DT::datatable(variants_germline_predisposing_shared, escape=F,extensions=c("Butt
                 list(buttons = c('csv','excel'),
                      pageLength = 6,
                      dom = 'Bfrtip')) %>%
-  DT::formatStyle('EVIDENCE_LEVEL', backgroundColor = DT::styleEqual(c('A: Validated','A: FDA/NCCN/ELN guidelines','B: Clinical evidence','B1: Clinical evidence: late trials','B2: Clinical evidence: early trials','C: Case study','D: Preclinical evidence','E: Indirect evidence'), c("#009E73","#009E73","#56B4E9", "#56B4E9","#56B4E9","#0072B2","#E69F00", "#F0E442")))
+  DT::formatStyle('EVIDENCE_LEVEL', 
+                  backgroundColor = DT::styleEqual(c('A: Validated', 
+                                                     'A: FDA/NCCN/ELN guidelines', 
+                                                     'B: Clinical evidence', 
+                                                     'B1: Clinical evidence: late trials', 
+                                                     'B2: Clinical evidence: early trials', 
+                                                     'C: Case study', 
+                                                     'D: Preclinical evidence', 
+                                                     'E: Indirect evidence'), 
+                                                   c("#009E73","#009E73","#56B4E9", 
+                                                     "#56B4E9","#56B4E9","#0072B2",
+                                                     "#E69F00", "#F0E442"))) %>%
+  DT::formatStyle(color="white", "SYMBOL", "BIOMARKER_MAPPING", fontWeight = 'bold', `text-align` = 'center',
+                  backgroundColor = DT::styleEqual(c('exact','codon','exon','gene'), 
+                                                   c('#000','#000',cps_report[['metadata']][['color_palette']][['warning']][['values']][1], cps_report[['metadata']][['color_palette']][['warning']][['values']][1])))
 
 
 
@@ -120,7 +149,22 @@ htmltools::br()
 
 DT::datatable(variants_germline_predictive_shared, escape=F,extensions=c("Buttons","Responsive"), options=list(buttons = c('csv','excel'),
                                                                                                                pageLength = 6, dom = 'Bfrtip')) %>%
-  DT::formatStyle('EVIDENCE_LEVEL', backgroundColor = DT::styleEqual(c('A: Validated','A: FDA/NCCN/ELN guidelines','B: Clinical evidence','B1: Clinical evidence: late trials','B2: Clinical evidence: early trials','C: Case study','D: Preclinical evidence','E: Indirect evidence'), c("#009E73","#009E73","#56B4E9", "#56B4E9","#56B4E9","#0072B2","#E69F00", "#F0E442")))
+  DT::formatStyle('EVIDENCE_LEVEL', 
+                  backgroundColor = DT::styleEqual(c('A: Validated',
+                                                     'A: FDA/NCCN/ELN guidelines',
+                                                     'B: Clinical evidence',
+                                                     'B1: Clinical evidence: late trials',
+                                                     'B2: Clinical evidence: early trials',
+                                                     'C: Case study',
+                                                     'D: Preclinical evidence',
+                                                     'E: Indirect evidence'), 
+                                                   c("#009E73","#009E73","#56B4E9", 
+                                                     "#56B4E9","#56B4E9","#0072B2",
+                                                     "#E69F00", "#F0E442"))) %>%
+  DT::formatStyle(color="white", "SYMBOL", "BIOMARKER_MAPPING", 
+                  fontWeight = 'bold', `text-align` = 'center',
+                  backgroundColor = DT::styleEqual(c('exact','codon','exon','gene'), 
+                                                   c('#000','#000',cps_report[['metadata']][['color_palette']][['warning']][['values']][1], cps_report[['metadata']][['color_palette']][['warning']][['values']][1])))
 
 
 
@@ -171,7 +215,22 @@ htmltools::br()
 
 DT::datatable(variants_germline_prognostic_shared, escape=F,extensions=c("Buttons","Responsive"), options=list(buttons = c('csv','excel'), 
                                                                                                                pageLength = 6, dom = 'Bfrtip')) %>%
-  DT::formatStyle('EVIDENCE_LEVEL', backgroundColor = DT::styleEqual(c('A: Validated','A: FDA/NCCN/ELN guidelines','B: Clinical evidence','B1: Clinical evidence: late trials','B2: Clinical evidence: early trials','C: Case study','D: Preclinical evidence','E: Indirect evidence'), c("#009E73","#009E73","#56B4E9", "#56B4E9","#56B4E9","#0072B2","#E69F00", "#F0E442")))
+  DT::formatStyle('EVIDENCE_LEVEL', 
+                  backgroundColor = DT::styleEqual(c('A: Validated',
+                                                     'A: FDA/NCCN/ELN guidelines',
+                                                     'B: Clinical evidence',
+                                                     'B1: Clinical evidence: late trials',
+                                                     'B2: Clinical evidence: early trials',
+                                                     'C: Case study',
+                                                     'D: Preclinical evidence',
+                                                     'E: Indirect evidence'), 
+                                                   c("#009E73","#009E73","#56B4E9", 
+                                                     "#56B4E9","#56B4E9","#0072B2",
+                                                     "#E69F00", "#F0E442"))) %>%
+  DT::formatStyle(color="white", "SYMBOL", "BIOMARKER_MAPPING", 
+                  fontWeight = 'bold', `text-align` = 'center',
+                  backgroundColor = DT::styleEqual(c('exact','codon','exon','gene'),
+                                         c('#000','#000',cps_report[['metadata']][['color_palette']][['warning']][['values']][1], cps_report[['metadata']][['color_palette']][['warning']][['values']][1])))
 
 
 ```
@@ -223,7 +282,22 @@ htmltools::br()
 DT::datatable(variants_germline_diagnostic_shared, escape=F,extensions=c("Buttons","Responsive"), 
               options=list(buttons = c('csv','excel'), 
                            pageLength = 6, dom = 'Bfrtip')) %>%
-  DT::formatStyle('EVIDENCE_LEVEL', backgroundColor = DT::styleEqual(c('A: Validated','A: FDA/NCCN/ELN guidelines','B: Clinical evidence','B1: Clinical evidence: late trials','B2: Clinical evidence: early trials','C: Case study','D: Preclinical evidence','E: Indirect evidence'), c("#009E73","#009E73","#56B4E9", "#56B4E9","#56B4E9","#0072B2","#E69F00", "#F0E442")))
+  DT::formatStyle('EVIDENCE_LEVEL', 
+                  backgroundColor = DT::styleEqual(c('A: Validated',
+                                                     'A: FDA/NCCN/ELN guidelines',
+                                                     'B: Clinical evidence',
+                                                     'B1: Clinical evidence: late trials',
+                                                     'B2: Clinical evidence: early trials',
+                                                     'C: Case study',
+                                                     'D: Preclinical evidence',
+                                                     'E: Indirect evidence'), 
+                                                   c("#009E73","#009E73","#56B4E9", 
+                                                     "#56B4E9","#56B4E9","#0072B2",
+                                                     "#E69F00", "#F0E442"))) %>%
+  DT::formatStyle(color="white", "SYMBOL", "BIOMARKER_MAPPING", 
+                  fontWeight = 'bold', `text-align` = 'center',
+                  backgroundColor = DT::styleEqual(c('exact','codon','exon','gene'),
+                                         c('#000','#000',cps_report[['metadata']][['color_palette']][['warning']][['values']][1], cps_report[['metadata']][['color_palette']][['warning']][['values']][1])))
 
 
 ```
