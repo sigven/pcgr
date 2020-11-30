@@ -1,5 +1,5 @@
 {% set name = 'pcgr' %}
-{% set version = os.environ.get('PCGR_VERSION', '').replace('v.', '').replace('v', '') or '0.0.1' %}
+{% set version = os.environ.get('VERSION', '').replace('v.', '').replace('v', '') or '0.0.1' %}
 
 package:
   name: {{ name }}
