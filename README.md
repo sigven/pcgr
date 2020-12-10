@@ -6,7 +6,7 @@
 - [News](#news)
 - [Example reports](#example-reports)
 - [PCGR Documentation](#documentation)
-- [Annotation resources](#annotation-resources-included-in-pcgr---0.9.1)
+- [Annotation resources](#annotation-resources-included-in-pcgr---091)
 - [Getting started](#getting-started)
 - [FAQ](#faq)
 - [Contact](#contact)
@@ -98,7 +98,7 @@ An installation of Python (version _3.6_) is required to run PCGR. Check that Py
    	pip install toml
 
 
-**IMPORTANT NOTE**: STEP 1 & 2 below outline installation guidelines for running PCGR with Docker. If you want to install and run PCGR without the use of Docker (i.e. through Conda), follow [these instructions](install_no_docker/README.md)
+**IMPORTANT NOTE**: STEP 1 & 2 below outline installation guidelines for running PCGR with Docker. If you want to install and run PCGR without the use of Docker (i.e. through Conda), follow [these instructions](https://github.com/sigven/pcgr/blob/master/install_no_docker/README.md)
 
 
 #### STEP 1: Installation of Docker
@@ -147,10 +147,8 @@ c. Pull the [PCGR Docker image (0.9.1)](https://hub.docker.com/r/sigven/pcgr/) f
 
 The PCGR workflow accepts two types of input files:
 
-  * An unannotated, single-sample VCF file (>= v4.2) with called somatic variants (SNVs/InDels)
-  * A copy number segment file
-
-PCGR can be run with either or both of the two input files present.
+  * An unannotated, single-sample VCF file (>= v4.2) with called somatic variants (SNVs/InDels) - __required__
+  * A copy number segment file - __optional__
 
 * We __strongly__ recommend that the input VCF is compressed and indexed using [bgzip](http://www.htslib.org/doc/tabix.html) and [tabix](http://www.htslib.org/doc/tabix.html)
 * If the input VCF contains multi-allelic sites, these will be subject to [decomposition](http://genome.sph.umich.edu/wiki/Vt#Decompose)
