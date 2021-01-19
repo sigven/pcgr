@@ -90,6 +90,13 @@ generate_report_data_value_box <- function(pcg_report,
   }
 
   pcg_report_value_box[["kataegis"]] <- "Kataegis events:\nNA"
+  num_events <- NROW(rep_cont$kataegis$events)
+  if(num_events > 0){
+    num_events <- NROW(rep_cont$kataegis$events %>%
+                         dplyr::filter(confidence == 3))
+    pcg_report_value_box[["kataegis"]] <-
+      paste0("Kataegis events:\n", num_events)
+  }
 
   if (rep_cont[["tumor_purity"]][["eval"]]) {
     if (!is.null(rep_cont[["tumor_purity"]][["estimate"]])) {

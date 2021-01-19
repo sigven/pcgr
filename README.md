@@ -123,6 +123,7 @@ a. Clone the PCGR GitHub repository (includes run script and default configurati
 b. Download and unpack the latest data bundles in the PCGR directory
    * [grch37 data bundle - 20201123](http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch37.20201123.tgz) (approx 17Gb)
    * [grch38 data bundle - 20201123](http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch38.20201123.tgz) (approx 18Gb)
+	   * If our local server cannot be reached or is non-responding, try [grch37 - Google Drive](https://drive.google.com/file/d/1Fp4pYp4rU8Q0IFsKIRPV5pbhpT17rs0l/view?usp=sharing) / [grch38 - Google Drive](https://drive.google.com/file/d/1iLe_ux4Y7sbkdBDTZKnOlsMmouMtDNrw/view?usp=sharing)
    * *Unpacking*: `gzip -dc pcgr.databundle.grch37.YYYYMMDD.tgz | tar xvf -`
 
 c. Pull the [PCGR Docker image (*dev*)](https://hub.docker.com/r/sigven/pcgr/) from DockerHub (approx 5.1Gb):

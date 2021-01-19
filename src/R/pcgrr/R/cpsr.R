@@ -128,11 +128,14 @@ generate_cpsr_report <- function(project_directory, query_vcf2tsv,
             cpg_calls, name = "v_stat_cpg")
 
         rlogging::message(
-          paste0("Number of coding variants in cancer predisposition genes: ",
+          paste0("Total number of variants in cancer predisposition genes (for TIER output): ",
+                 cpg_call_stats[["v_stat_cpg"]][["n"]]))
+        rlogging::message(
+          paste0("Number of coding variants in cancer predisposition genes (for TIER output): ",
                  cpg_call_stats[["v_stat_cpg"]][["n_coding"]]))
         rlogging::message(
           paste0(
-            "Number of non-coding variants in cancer predisposition genes: ",
+            "Number of non-coding variants in cancer predisposition genes (for TIER output): ",
             cpg_call_stats[["v_stat_cpg"]][["n_noncoding"]]))
         secondary_calls <-
           pcgrr::retrieve_secondary_calls(
@@ -1203,7 +1206,7 @@ assign_cpsr_tier <- function(cpg_calls, cpsr_config, display_tags) {
 
   cpg_calls <- cpg_calls %>%
     dplyr::filter(is.na(GLOBAL_AF_GNOMAD) |
-                    GLOBAL_AF_GNOMAD < cpsr_config[["maf_upper_threshold"]])
+                    GLOBAL_AF_GNOMAD <= cpsr_config[["maf_upper_threshold"]])
   n_maf_filtered <- n_nonclinvar - nrow(cpg_calls)
   rlogging::message(
     paste0("Ignoring n = ", n_maf_filtered,
