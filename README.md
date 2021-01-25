@@ -52,20 +52,19 @@ A few screenshots of the dashboard-type HTML output (new in 0.9.0) is shown belo
 
 ### Example reports
 
-* [Cervical cancer sample (tumor-only)](http://insilico.hpc.uio.no/pcgr/example_reports/0.9.1/TCGA-EA-A410-01A_TO.pcgr_acmg.grch37.flexdb.html)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4050895.svg)](https://doi.org/10.5281/zenodo.4050895)
+
+<!--* [Cervical cancer sample (tumor-only)](http://insilico.hpc.uio.no/pcgr/example_reports/0.9.1/TCGA-EA-A410-01A_TO.pcgr_acmg.grch37.flexdb.html)
 * [Lung cancer sample (tumor-control)](http://insilico.hpc.uio.no/pcgr/example_reports/0.9.1/TCGA-05-4427-01A.pcgr_acmg.grch37.flexdb.html)
 * [Colorectal cancer sample (tumor-control)](http://insilico.hpc.uio.no/pcgr/example_reports/0.9.1/TCGA-AD-5900-01A.pcgr_acmg.grch37.flexdb.html)
 * [Brain cancer sample (tumor-control)](http://insilico.hpc.uio.no/pcgr/example_reports/0.9.1/TCGA-QH-A6CU-01A.pcgr_acmg.grch37.flexdb.html)
 
-(to view the rmarkdown-based reports, simply remove _.flexdb._ in the file names for the flexdashboard reports)
+(to view the rmarkdown-based reports, simply remove _.flexdb._ in the file names for the flexdashboard reports)-->
 
-
-
-[![Build Status](https://travis-ci.org/sigven/pcgr.svg?branch=master)](https://travis-ci.org/sigven/pcgr)
 
 ### PCGR documentation
 
-[![Documentation Status](https://readthedocs.org/projects/pcgr/badge/?version=latest)](http://pcgr.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/pcgr/badge/?version=latest)](http://pcgr.readthedocs.io/en/latest/?badge=latest)  &nbsp; [![Build Status](https://travis-ci.org/sigven/pcgr.svg?branch=master)](https://travis-ci.org/sigven/pcgr)
 
 **IMPORTANT**: If you use PCGR, please cite the publication:
 
