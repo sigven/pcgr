@@ -19,3 +19,14 @@ if(is.null(p1) & !is.null(p2)){
 p
 
 ```
+
+
+### Variant statistics 
+
+Variant numbers in the selected cancer predisposition genes (n = `r NROW(cps_report[['metadata']][['gene_panel']][['genes']])`)
+
+* Number of SNVs: __`r cps_report[['content']][['snv_indel']][['v_stat_cpg']][['n_snv']]`__
+* Number of InDels: __`r cps_report[['content']][['snv_indel']][['v_stat_cpg']][['n_indel']]`__
+* Number of protein-coding variants: __`r cps_report[['content']][['snv_indel']][['v_stat_cpg']][['n_coding']]`__
+
+<br><br>

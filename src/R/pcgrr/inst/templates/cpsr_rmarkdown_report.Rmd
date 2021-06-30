@@ -4,25 +4,15 @@ date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
 bibliography: bibliography.bib
 nocite: |
   @Huang2018-ah, @Richards2015-kj, @Maxwell2016-mr, @Amendola2016-pu, @Griffith2017-do, @Martin2019-nq, @Nykamp2017-rj
-output: 
-  html_document:
-    toc: true
-    theme: default
-    number_sections: false
-    toc_float: true
-    toc_depth: 3
-    fig_width: 5
-    fig_height: 4
-    includes:
-      after_body: disclaimer_predisposition.md
+output: html_document
 ---
 
 ```{r global_options, include=FALSE}
 knitr::opts_chunk$set(echo = F,warning=FALSE, dpi=72, error=F, eval=T)
 options(scipen=999)
 
-width_panel <- 14
-height_panel <- 3 + as.integer((max(0,(NROW(cps_report[['metadata']][['gene_panel']][['genes']]) - 24)) / 16))
+# width_panel <- 14
+# height_panel <- 3 + as.integer((max(0,(NROW(cps_report[['metadata']][['gene_panel']][['genes']]) - 24)) / 16))
 
 width_donut <- 10
 height_donut <- 7
@@ -80,7 +70,7 @@ cat('</ul><br>')
 options(scipen=0)
 ```
 
-```{r conditional_gwas, child='cpsr_rmarkdown/cpsr_gwas.Rmd', eval = cps_report[['metadata']][['config']][['gwas_findings']]}
+```{r conditional_gwas, child='cpsr_rmarkdown/cpsr_gwas.Rmd', eval = cps_report[['metadata']][['config']][['gwas']][['run']]}
 ```
 
 ```{r conditional_documentation, child='cpsr_rmarkdown/cpsr_documentation.Rmd', eval = TRUE}
@@ -88,5 +78,6 @@ options(scipen=0)
 
 <br><br>
 
-### References
+
+## References
 

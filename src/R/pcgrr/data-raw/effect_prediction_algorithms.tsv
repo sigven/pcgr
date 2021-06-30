@@ -18,3 +18,5 @@ splice_site_ada	http://nar.oxfordjournals.org/content/42/22/13534	Splice site ef
 gerp_rs	http://mendel.stanford.edu/SidowLab/downloads/gerp/	GERP++ RS score
 list_s2	https://doi.org/10.1093/nar/gkaa288	LIST-S2
 bayesdel_addaf	https://doi.org/10.1002/humu.23158	BayesDel
+aloft	http://aloft.gersteinlab.org/	ALoFT
+metarnn	http://www.liulab.science/metarnn.html	MetaRNN

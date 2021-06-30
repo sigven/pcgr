@@ -9,86 +9,103 @@ suppressWarnings(suppressPackageStartupMessages(library(pcgrr)))
 suppressWarnings(suppressPackageStartupMessages(library(magrittr)))
 suppressWarnings(suppressPackageStartupMessages(library(BSgenome.Hsapiens.UCSC.hg19)))
 suppressWarnings(suppressPackageStartupMessages(library(BSgenome.Hsapiens.UCSC.hg38)))
-suppressWarnings(suppressPackageStartupMessages(library(deconstructSigs)))
-suppressWarnings(suppressPackageStartupMessages(library(randomForest)))
-suppressWarnings(suppressPackageStartupMessages(library(caret)))
-suppressWarnings(suppressPackageStartupMessages(library(RcppTOML)))
 
 dir <- as.character(args[1])
-query_vcf2tsv <- as.character(args[2])
-sample_name <- as.character(args[3])
-configuration_file <- as.character(args[4])
-pcgr_version <- as.character(args[5])
-cpsr_version <- as.character(args[6])
-genome_assembly <- as.character(args[7])
-virtual_panel_id <- as.integer(args[8])
-custom_bed <- as.character(args[9])
-maf_upper_threshold <- as.numeric(args[10])
-diagnostic_grade_only <- as.integer(args[11])
-data_dir <- as.character(args[12])
-ignore_noncoding <- as.integer(args[13])
-clinvar_ignore_noncancer <- as.integer(args[14])
-secondary_findings <- as.integer(args[15])
-gwas_findings <- as.integer(args[16])
-classify_all <- as.integer(args[17])
 
-rlogging::SetTimeStampFormat(ts.format="%Y-%m-%d %H:%M:%S ")
-rlogging::SetLogFile(NULL)
+cpsr_config <- list()
+cpsr_config[['required_args']] <- list()
+cpsr_config[['required_args']][['query_vcf2tsv']] <- as.character(args[2])
+cpsr_config[['required_args']][['sample_name']] <- as.character(args[3])
+cpsr_config[['required_args']][['pcgr_version']] <- as.character(args[4])
+cpsr_config[['required_args']][['cpsr_version']] <- as.character(args[5])
+cpsr_config[['required_args']][['genome_assembly']] <- as.character(args[6])
+cpsr_config[['required_args']][['data_dir']] <- as.character(args[7])
+cpsr_config[['required_args']][['output_dir']] <- as.character(dir)
+cpsr_config[['required_args']][['virtual_panel_id']] <- as.character(args[8])
+cpsr_config[['preserved_info_tags']] <- as.character(args[9])
 
-pcgr_data <- readRDS(paste0(data_dir,'/data/',genome_assembly,'/rds/pcgr_data.rds'))
+cpsr_config[['custom_panel']] <- list()
+cpsr_config[['custom_panel']][['bed_fname']] <- as.character(args[10])
+cpsr_config[['custom_panel']][['name']] <- as.character(args[11])
+cpsr_config[['custom_panel']][['version']] <- '1.0'
+cpsr_config[['custom_panel']][['url']] <- ''
+
+cpsr_config[['assay_props']] <- list()
+cpsr_config[['assay_props']][['type']] <- "Germline"
+
+cpsr_config[['visual']] <- list()
+cpsr_config[['visual']][['report_theme']] <- as.character(args[12])
+cpsr_config[['visual']][['table_display']] <- as.character(args[13])
+cpsr_config[['visual']][['nonfloating_toc']] <- as.logical(as.integer(args[14]))
+cpsr_config[['gwas']] <- list()
+cpsr_config[['gwas']][['run']] <- as.logical(as.integer(args[15]))
+cpsr_config[['gwas']][['p_value_min']] <- as.numeric(args[16])
+cpsr_config[['popgen']] <- list()
+cpsr_config[['popgen']][['pop_gnomad']] <- as.character(args[17])
+cpsr_config[['popgen']][['maf_upper_threshold']] <- as.numeric(args[18])
+
+cpsr_config[['other']] <- list()
+cpsr_config[['other']][['vep_pick_order']] <- as.character(args[19])
+cpsr_config[['other']][['vep_n_forks']] <- as.integer(args[20])
+cpsr_config[['other']][['vep_buffer_size']] <- as.integer(args[21])
+cpsr_config[['other']][['vep_skip_intergenic']] <- as.logical(as.integer(args[22]))
+cpsr_config[['other']][['vep_regulatory']] <- as.logical(as.integer(args[23]))
+
+arg_counter <- 24
+for (opt in c('secondary_findings','classify_all','ignore_noncoding',
+              'clinvar_ignore_noncancer','diagnostic_grade_only')){
+  cpsr_config[opt] <- as.logical(as.integer(args[arg_counter]))
+  arg_counter <- arg_counter + 1
+}
+
+saveRDS(cpsr_config, file=paste0(dir,"/", cpsr_config[['required_args']][['sample_name']],".cpsr_config.rds"))
+
+pcgr_data <- readRDS(paste0(cpsr_config[['required_args']][['data_dir']],
+                            '/data/',
+                            cpsr_config[['required_args']][['genome_assembly']],
+                            '/rds/pcgr_data.rds'))
 
 pcgr_data[['assembly']][['seqinfo']] <- 
    GenomeInfoDb::Seqinfo(seqnames = GenomeInfoDb::seqlevels(GenomeInfoDb::seqinfo(BSgenome.Hsapiens.UCSC.hg38)), 
                          seqlengths = GenomeInfoDb::seqlengths(GenomeInfoDb::seqinfo(BSgenome.Hsapiens.UCSC.hg38)), genome = 'hg38')
 pcgr_data[['assembly']][['bsg']] <- BSgenome.Hsapiens.UCSC.hg38
-if(genome_assembly == 'grch37'){
+if(cpsr_config[['required_args']][['genome_assembly']] == 'grch37'){
   pcgr_data[['assembly']][['bsg']] <- BSgenome.Hsapiens.UCSC.hg19
   pcgr_data[['assembly']][['seqinfo']] <- 
      GenomeInfoDb::Seqinfo(seqnames = GenomeInfoDb::seqlevels(GenomeInfoDb::seqinfo(BSgenome.Hsapiens.UCSC.hg19)), 
                            seqlengths = GenomeInfoDb::seqlengths(GenomeInfoDb::seqinfo(BSgenome.Hsapiens.UCSC.hg19)), genome = 'hg19')
 }
 
-## Load default CPSR configurations
-cpsr_config <- NULL
-default_configuration_file <- paste0(data_dir,'/data/',genome_assembly,'/cpsr_configuration_default.toml')
-if(file.exists(default_configuration_file)){
-	cpsr_config <- RcppTOML::parseTOML(default_configuration_file, fromFile = T)
-}
-user_config <- RcppTOML::parseTOML(configuration_file, fromFile = T)
-
-## Override configurations with user-defined settings
-for(section in names(cpsr_config)){
-  if(!is.null(user_config[[section]])){
-    for(element in names(cpsr_config[[section]])){
-      if(!is.null(user_config[[section]][[element]])){
-        cpsr_config[[section]][[element]] <- user_config[[section]][[element]]
-      }
-    }
-  }
+my_log4r_layout <- function(level, ...) {
+  paste0(format(Sys.time()), " - cpsr-report-generation - ", level, " - ", ..., "\n", collapse = "")
 }
 
-cpsr_config[['ignore_noncoding']] <- as.logical(ignore_noncoding)
-cpsr_config[['secondary_findings']] <- as.logical(secondary_findings)
-cpsr_config[['gwas_findings']] <- as.logical(gwas_findings)
-cpsr_config[['classify_all']] <- as.logical(classify_all)
-cpsr_config[['maf_upper_threshold']] <- maf_upper_threshold
-cpsr_config[['diagnostic_grade_only']] <- as.logical(diagnostic_grade_only)
-cpsr_config[['clinvar_ignore_noncancer']] <- as.logical(clinvar_ignore_noncancer)
+log4r_logger <- log4r::logger(threshold = "INFO", appenders = log4r::console_appender(my_log4r_layout))
+
 
 ## Generate report content
-cps_report <- pcgrr::generate_cpsr_report(dir, query_vcf2tsv, custom_bed, pcgr_data, pcgr_version, 
-                                          cpsr_version, cpsr_config, virtual_panel_id, sample_name)
+cps_report <- pcgrr::generate_cpsr_report(
+  project_directory = cpsr_config[['required_args']][['output_dir']], 
+  pcgr_data, 
+  cpsr_config
+)
 
-## Write report contents to output files
+# ## Write report contents to output files
 if(!is.null(cps_report)){
-  pcgrr::write_report_output(dir, cps_report, sample_name, genome_assembly, tier_model = 'cpsr', output_format = 'snv_tsv')
-  pcgrr::write_report_output(dir, cps_report, sample_name, genome_assembly, tier_model = "cpsr", output_format = 'json')
-  #if(cps_report[['content']][['snv_indel']][['max_dt_rows']] < 5000){
-  pcgrr::write_report_output(dir, cps_report, sample_name, genome_assembly, tier_model = "cpsr", output_format = 'html')
-  #}
-  #else{
-  #  rlogging::message("Dataset is too big for client-side DataTables (i.e. >= 5000 pr. tier) - stand-alone HTML report file will not be produced")
-  #}
-
+  pcgrr::write_report_output(
+    cps_report, 
+    cpsr_config,
+    tier_model = 'cpsr', 
+    output_format = 'snv_tsv')
+  pcgrr::write_report_output(
+    cps_report, 
+    cpsr_config,
+    tier_model = "cpsr", 
+    output_format = 'json')
+  pcgrr::write_report_output(
+    cps_report, 
+    cpsr_config,
+    tier_model = "cpsr", 
+    output_format = 'html')
 }
 

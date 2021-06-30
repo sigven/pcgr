@@ -4,6 +4,31 @@ Tier 3 {data-navmenu="SNVs and InDels"}
 Row
 -------------------------------------
 
+```{r data_prep_tier3, include = F, eval = T}
+n_tier3_oncogene <- 0
+n_tier3_tsgene <- 0
+n_tier3_dualrole <- 0
+
+if(NROW(pcg_report$content$snv_indel$variant_set$tsv) > 0){
+  n_tier3_oncogene <- pcg_report$content$snv_indel$variant_set$tsv %>%
+    dplyr::filter(ONCOGENE == T & TUMOR_SUPPRESSOR == F & 
+                    TIER == "TIER 3") %>% 
+    nrow()
+  n_tier3_tsgene <- 
+    pcg_report$content$snv_indel$variant_set$tsv %>% 
+    dplyr::filter(TIER == "TIER 3" & TUMOR_SUPPRESSOR == T & 
+                    ONCOGENE == F) %>%
+    nrow()
+  n_tier3_dualrole <- 
+    pcg_report$content$snv_indel$variant_set$tsv %>% 
+    dplyr::filter(TIER == "TIER 3" & TUMOR_SUPPRESSOR == T & 
+                    ONCOGENE == T) %>%
+    nrow() 
+
+}
+
+```
+
 ### SNVs and InDels
 
 ```{r}
@@ -20,7 +45,7 @@ flexdashboard::valueBox(pcg_report$content$snv_indel$v_stat$n_tier3,
 ### Variants in proto-oncogenes
 
 ```{r oncogene_variants, echo = F}
-flexdashboard::valueBox(NROW(pcg_report$content$snv_indel$disp$tier3$proto_oncogene), 
+flexdashboard::valueBox(as.character(n_tier3_oncogene), 
                         color = pcg_report$metadata$color_value_box, icon = "fa-dna")
 ```
 
@@ -29,22 +54,14 @@ flexdashboard::valueBox(NROW(pcg_report$content$snv_indel$disp$tier3$proto_oncog
 
 ```{r tsgene_variants, echo = F}
 
-n_tsgene <- 
-  pcg_report$content$snv_indel$variant_set$tsv %>% 
-  dplyr::filter(TIER == "TIER 3" & TUMOR_SUPPRESSOR == T & ONCOGENE == F) %>%
-  nrow()
-flexdashboard::valueBox(n_tsgene, color = pcg_report$metadata$color_value_box, icon = "fa-dna")
+
+flexdashboard::valueBox(as.character(n_tier3_tsgene), color = pcg_report$metadata$color_value_box, icon = "fa-dna")
 ```
 
 ### Variants in genes with dual roles
 
 ```{r dual_role_variants, echo = F}
-
-n_dual_role <- 
-  pcg_report$content$snv_indel$variant_set$tsv %>% 
-  dplyr::filter(TIER == "TIER 3" & TUMOR_SUPPRESSOR == T & ONCOGENE == T) %>%
-  nrow() 
-flexdashboard::valueBox(n_dual_role, color = pcg_report$metadata$color_value_box, icon = "fa-dna")
+flexdashboard::valueBox(as.character(n_tier3_dualrole), color = pcg_report$metadata$color_value_box, icon = "fa-dna")
 ```
 
 
@@ -105,16 +122,17 @@ cat('\n')
 
 
 dt <- DT::datatable(variants_tier3_shared, escape=F,extensions=c("Buttons","Responsive"), 
-                    options = list(pageLength = 8, 
-                                   scrollY = scrollY_flexdb_container, 
-                                   buttons = c('csv','excel'), 
-                                   autoWidth = T, 
-                 fixedColumns = T,
-                 fixedHeader = T,
-                 width = "100%",
-                 #scrollX = F,
-                  columnDefs = list(list(width = '90px', targets = c(1,2,3,4,5,6))),
-                                   dom = 'Bfrtip')) %>%
+                    options = 
+                      list(pageLength = 8, 
+                           scrollY = scrollY_flexdb_container, 
+                           buttons = c('csv','excel'), 
+                           ##autoWidth = T, 
+                           #fixedColumns = T,
+                           #fixedHeader = T,
+                           width = "100%",
+                           scrollX = F,
+                           #columnDefs = list(list(width = '90px', targets = c(1,2,3,4,5,6))),
+                           dom = 'Bfrtip')) %>%
   DT::formatStyle("SYMBOL","OPENTARGETS_RANK", color = "white", backgroundColor = DT::styleInterval(pcg_report[['content']][['report_display_config']][['opentargets_rank']][['breaks']], pcg_report[['content']][['report_display_config']][['opentargets_rank']][['colors']]))
 
 if(length(mutation_hotspot_levels) > 0){

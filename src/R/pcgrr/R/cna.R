@@ -36,11 +36,11 @@ get_valid_chromosome_segments <-
     )
   if (nrow(dplyr::filter(cna_segments_df, segment_error == T)) > 0) {
     n_removed <- nrow(dplyr::filter(cna_segments_df, segment_error == T))
-    rlogging::warning(
+    pcgrr:::log4r_warn(paste0(
       "Skipping ", n_removed,
       " copy number segments that span beyond chromosomal lengths for ",
       genome_assembly,
-      " (make sure chromosomal segments are consistent with assembly)")
+      " (make sure chromosomal segments are consistent with assembly)"))
   }
   cna_segments_df <- cna_segments_df %>%
     dplyr::filter(segment_error == F) %>%
@@ -192,7 +192,7 @@ get_oncogene_tsgene_target_sets <- function(
                       paste0(MEAN_TRANSCRIPT_CNA_OVERLAP, "%")) %>%
       dplyr::mutate(CNA_TYPE = "gain")
 
-    rlogging::message(
+    pcgrr:::log4r_info(
       paste0("Detected ", nrow(onco_ts_sets[["other_target"]]),
              " drug targets to amplification (log(2) ratio >= ",
              log_r_gain, "): ",
@@ -220,7 +220,7 @@ get_oncogene_tsgene_target_sets <- function(
                                          t == "other_target",
                                        "gain", "loss"))
       if (t == "oncogene_gain") {
-        rlogging::message(
+        pcgrr:::log4r_info(
           paste0("Detected ", nrow(onco_ts_sets[[t]]),
                  " proto-oncogene(s) subject to amplification (log(2) ratio >= ",
                  log_r_gain, "): ",
@@ -234,7 +234,7 @@ get_oncogene_tsgene_target_sets <- function(
                         DRUGS_OFF_LABEL, dplyr::everything()) %>%
           dplyr::arrange(DRUGS_ON_LABEL, DRUGS_OFF_LABEL)
       }else{
-          rlogging::message(
+          pcgrr:::log4r_info(
             paste0("Detected ", nrow(onco_ts_sets[[t]]),
                    " tumor suppressor gene(s) subject to ",
                    "homozygous deletions (log(2) ratio <= ",
@@ -243,16 +243,16 @@ get_oncogene_tsgene_target_sets <- function(
       }
     }else{
       if (t == "tsgene_loss") {
-        rlogging::message("Detected 0 tumor suppressor genes subject to",
+        pcgrr:::log4r_info(paste0("Detected 0 tumor suppressor genes subject to",
                           " homozygous deletion (log(2) ratio <= ",
-                          log_r_homdel)
+                          log_r_homdel))
       }else{
         if (t == "other_target") {
-          rlogging::message("Detected 0 other drug targets subject to ",
-                            "amplification (log(2) ratio >= ", log_r_gain)
+          pcgrr:::log4r_info(paste0("Detected 0 other drug targets subject to ",
+                            "amplification (log(2) ratio >= ", log_r_gain))
         }else{
-          rlogging::message("Detected 0 proto-oncogenes subject to ",
-                            "amplification (log(2) ratio >= ", log_r_gain)
+          pcgrr:::log4r_info(paste0("Detected 0 proto-oncogenes subject to ",
+                            "amplification (log(2) ratio >= ", log_r_gain))
         }
       }
     }

@@ -105,6 +105,7 @@ crosstalk::bscols(
   list(
     crosstalk::filter_select("CONDITION_RAW", "Condition (cancer subtype)", trials_ttype, ~CONDITION_RAW),
     crosstalk::filter_select("OVERALL_STATUS", "Status", trials_ttype, ~OVERALL_STATUS),
+    crosstalk::filter_select("WORLD_REGION", "Location", trials_ttype, ~WORLD_REGION),
     crosstalk::filter_select("INTERVENTION_RAW", "Drug(s)", trials_ttype, ~INTERVENTION_RAW),
     crosstalk::filter_select("INTERVENTION_TARGET", "Drug target(s)", trials_ttype, ~INTERVENTION_TARGET),
     crosstalk::filter_select("KEYWORD", "Therapeutic context mentions (text-mined)", trials_ttype, ~KEYWORD),
@@ -151,7 +152,7 @@ trials_ttype %>%
                                buttons = c('csv','excel'), 
                                 fixedColumns = T,
                  fixedHeader = T,
-                 #scrollX = F,
+                 scrollX = "900px",
                   columnDefs = list(list(width = '110px', targets = c(1,3,5)),
                                     list(width = '200px', targets = c(2,4))),
                                dom = 'Bfrtip')) %>%

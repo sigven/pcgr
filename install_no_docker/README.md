@@ -36,8 +36,8 @@ conda install --use-local $CHANNELS pcgr
 For both alternatives you also need to download the reference data bundle for your genome build:
 
 ```
-wget http://insilico.hpc.uio.no/pcgr/pcgr.databundle.20201123.grch37.tar.gz -O grch37.tar.gz
-wget http://insilico.hpc.uio.no/pcgr/pcgr.databundle.20201123.grch38.tar.gz -O grch38.tar.gz
+wget http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch37.20210627.tgz -O grch37.tgz
+wget http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch38.20210627.tgz -O grch38.tgz
 tar -xzf grch37.tar.gz  # will extract into ./data/grch37/
 tar -xzf grch38.tar.gz  # will extract into ./data/grch38/
 ```

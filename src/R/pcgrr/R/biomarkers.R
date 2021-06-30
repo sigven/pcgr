@@ -270,7 +270,7 @@ load_eitems <- function(eitems_raw = NULL,
 
 
   if (tumor_type_specificity == "any") {
-    rlogging::message(
+    pcgrr:::log4r_info(
       paste0(
         "Loading ", alteration_type, " biomarkers for precision oncology",
         "- any tumortype"))
@@ -299,9 +299,9 @@ load_eitems <- function(eitems_raw = NULL,
         eitems,
         ontology = ontology,
         primary_site = tumor_type)
-    rlogging::message(
+    pcgrr:::log4r_info(
       paste0("Loading ", alteration_type,
-             " for precision oncology - ",
+             " biomarkers for precision oncology - ",
              tumor_type))
   }
   return(eitems)
@@ -448,13 +448,13 @@ match_eitems_to_var <- function(sample_calls,
     only_colnames = F, quiet = T)
 
   sample_calls_db <- sample_calls %>%
-    dplyr::filter(!is.na(!!sym(evidence_identifiers[1])))
+    dplyr::filter(!is.na(!!rlang::sym(evidence_identifiers[1])))
   if (nrow(sample_calls_db) > 0) {
     var_eitems <- as.data.frame(sample_calls_db %>%
-      tidyr::separate_rows(!!sym(evidence_identifiers[1]), sep = ",") %>%
+      tidyr::separate_rows(!!rlang::sym(evidence_identifiers[1]), sep = ",") %>%
       dplyr::select(
         dplyr::one_of(colset)) %>%
-      dplyr::rename(EVIDENCE_ID = !!sym(evidence_identifiers[1])) %>%
+      dplyr::rename(EVIDENCE_ID = !!rlang::sym(evidence_identifiers[1])) %>%
       dplyr::mutate(EVIDENCE_ID = as.character(EVIDENCE_ID)) %>%
       pcgrr::remove_cols_from_df(cnames = evidence_identifiers[2])
     )
@@ -709,8 +709,11 @@ deduplicate_eitems <- function(var_eitems = NULL,
   ## ignore variant biomarkers at the exon/gene level if they are
   ## already present at the codon level
   if (NROW(var_eitems[[target_type]]) > 0) {
+    assertable::assert_colnames(
+      var_eitems[[target_type]], "GENOMIC_CHANGE",
+      only_colnames = F, quiet = T)
     for (m in target_other) {
-      if (NROW(var_eitems[[m]] > 0)) {
+      if (NROW(var_eitems[[m]]) > 0) {
         assertable::assert_colnames(var_eitems[[m]], "GENOMIC_CHANGE",
                                     only_colnames = F, quiet = T)
         var_eitems[[m]] <- var_eitems[[m]] %>%
@@ -739,7 +742,7 @@ log_var_eitem_stats <- function(var_eitems = NULL,
                                          " or 'exon' or 'gene'")))
 
 
-  rlogging::message(
+  pcgrr:::log4r_info(
     paste0("Found n = ",
            NROW(var_eitems[[target_type]]),
            " other clinical evidence item(s) at the ", target_type,
@@ -749,7 +752,11 @@ log_var_eitem_stats <- function(var_eitems = NULL,
   )
 
   if (NROW(var_eitems[[target_type]]) > 0) {
-    rlogging::message(
+    assertable::assert_colnames(
+      var_eitems[[target_type]],
+      c("SYMBOL","CONSEQUENCE","PROTEIN_CHANGE"),
+      only_colnames = F, quiet = T)
+    pcgrr:::log4r_info(
       paste0("Variants: ",
              paste(unique(paste(var_eitems[[target_type]]$SYMBOL,
                                 var_eitems[[target_type]]$CONSEQUENCE,

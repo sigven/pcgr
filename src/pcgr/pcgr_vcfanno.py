@@ -22,6 +22,9 @@ def __main__():
    parser.add_argument('--num_processes', help="Number of processes vcfanno can use during annotation", default=4)
    parser.add_argument("--docm",action = "store_true", help="Annotate VCF with annotations from Database of Curated Mutations")
    parser.add_argument("--clinvar",action = "store_true", help="Annotate VCF with annotations from ClinVar")
+   parser.add_argument("--ncer",action = "store_true", help="Annotate VCF with ranking of variant deleteriousness in non-coding regions (ncER)")
+   parser.add_argument('--dbmts',action = "store_true", help="Annotate VCF file with variants predicted to cause loss/gain of miRNA target sites in 3'UTR regions")
+   parser.add_argument('--gerp',action = "store_true", help="Annotate VCF file with GERP RS scores (cancer predisposition gene/SF/GWAS loci only)")
    parser.add_argument("--dbnsfp",action = "store_true", help="Annotate VCF with annotations from database of non-synonymous functional predictions")
    parser.add_argument("--tcga",action = "store_true", help="Annotate VCF with variant frequencies from the The Cancer Genome Atlas")
    parser.add_argument("--tcga_pcdm",action = "store_true", help="Annotate VCF with putative cancer driver mutations from The Cancer Genome Atlas")
@@ -51,7 +54,7 @@ def __main__():
    conf_fname = args.out_vcf + '.tmp.conf.toml'
    print_vcf_header(args.query_vcf, vcfheader_file, chromline_only = False)
    run_vcfanno(args.num_processes, args.query_vcf, args.panel_normal_vcf, query_info_tags, vcfheader_file, 
-               args.pcgr_db_dir, conf_fname, args.out_vcf, args.docm, args.clinvar, args.tcga, args.tcga_pcdm, 
+               args.pcgr_db_dir, conf_fname, args.out_vcf, args.docm, args.clinvar, args.ncer, args.dbmts, args.gerp, args.tcga, args.tcga_pcdm, 
                args.chasmplus, args.dbnsfp, args.civic, args.cgi, args.icgc, args.uniprot, args.cancer_hotspots, 
                args.pcgr_onco_xref, args.gwas, args.rmsk, args.simplerepeats, args.winmsk, args.gnomad_cpsr, args.keep_logs)
 
@@ -64,7 +67,7 @@ def prepare_vcfanno_configuration(vcfanno_data_directory, conf_fname, vcfheader_
    append_to_vcf_header(vcfanno_data_directory, datasource, vcfheader_file)
 
 def run_vcfanno(num_processes, query_vcf, panel_normal_vcf, query_info_tags, vcfheader_file, pcgr_db_directory, conf_fname, 
-                output_vcf, docm, clinvar, tcga, tcga_pcdm, chasmplus, dbnsfp, civic, cgi, icgc, uniprot, cancer_hotspots, 
+                output_vcf, docm, clinvar, ncer, dbmts, gerp, tcga, tcga_pcdm, chasmplus, dbnsfp, civic, cgi, icgc, uniprot, cancer_hotspots, 
                 pcgr_onco_xref, gwas, rmsk, simplerepeats, winmsk, gnomad_cpsr, keep_logs):
    """
    Function that annotates a VCF file with vcfanno against a user-defined set of germline and somatic VCF files
@@ -77,6 +80,7 @@ def run_vcfanno(num_processes, query_vcf, panel_normal_vcf, query_info_tags, vcf
    tcga_info_tags = ["TCGA_FREQUENCY","TCGA_PANCANCER_COUNT"]
    tcga_pcdm_info_tags = ["PUTATIVE_DRIVER_MUTATION"]
    chasmplus_info_tags = ["CHASMPLUS_DRIVER","CHASMPLUS_TTYPE","CHASMPLUS_PANCAN"]
+   ncer_info_tags = ["NCER_PERCENTILE"]
    clinvar_info_tags = ["CLINVAR_MSID","CLINVAR_PMID","CLINVAR_CLNSIG","CLINVAR_VARIANT_ORIGIN","CLINVAR_CONFLICTED","CLINVAR_UMLS_CUI","CLINVAR_HGVSP",
                         "CLINVAR_UMLS_CUI_SOMATIC","CLINVAR_CLNSIG_SOMATIC","CLINVAR_PMID_SOMATIC","CLINVAR_ALLELE_ID","CLINVAR_MOLECULAR_EFFECT",
                         "CLINVAR_REVIEW_STATUS_STARS","CLINVAR_CLASSIFICATION","CLINVAR_ENTREZGENE"]
@@ -89,6 +93,8 @@ def run_vcfanno(num_processes, query_vcf, panel_normal_vcf, query_info_tags, vcf
    simplerepeats_info_tags = ["SIMPLEREPEATS_HIT"]
    winmsk_info_tags = ["WINMASKER_HIT"]
    panel_normal_tags = ["PANEL_OF_NORMALS"]
+   dbmts_info_tags = ["DBMTS"]
+   gerp_info_tags = ['GERP_SCORE']
 
    gnomad_cpsr_tags = []
    gnomad_cpsr_tags.append('NON_CANCER_AC_GLOBAL')
@@ -105,6 +111,12 @@ def run_vcfanno(num_processes, query_vcf, panel_normal_vcf, query_info_tags, vcf
       prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file, logger, icgc_info_tags, query_info_tags, "icgc")
    if clinvar is True:
       prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file, logger, clinvar_info_tags, query_info_tags, "clinvar")
+   if ncer is True:
+      prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file, logger, ncer_info_tags, query_info_tags, "ncer")
+   if gerp is True:
+      prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file, logger, gerp_info_tags, query_info_tags, "gerp")
+   if dbmts is True:
+      prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file, logger, dbmts_info_tags, query_info_tags, "dbmts")
    if dbnsfp is True:
       prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file, logger, dbnsfp_info_tags, query_info_tags, "dbnsfp")
    if cgi is True:
@@ -178,7 +190,50 @@ def append_to_conf_file(datasource, datasource_info_tags, pcgr_db_directory, con
    The datasource defines the set of tags that will be appended during annotation
    """
    fh = open(conf_fname,'a')
-   if datasource != 'civic' and datasource != 'uniprot' and datasource != 'cgi' and datasource != 'pcgr_onco_xref' and datasource != 'rmsk' and datasource != 'winmsk' and datasource != 'simplerepeats':
+   if datasource == 'ncer' or datasource == 'gerp':
+      fh.write('[[annotation]]\n')
+      fh.write('file="' + str(pcgr_db_directory) + '/' + str(datasource) + '/' + str(datasource) + '.bed.gz"\n')
+      fh.write('columns=[4]\n')
+      names_string = 'names=["' + '","'.join(datasource_info_tags) + '"]'
+      fh.write(names_string +'\n')
+      fh.write('ops=["mean"]\n\n')
+   elif datasource == 'pcgr_onco_xref' or datasource == 'uniprot' or datasource == 'rmsk':
+      fh.write('[[annotation]]\n')
+      fh.write('file="' + str(pcgr_db_directory) + '/' + str(datasource) + '/' + str(datasource) + '.bed.gz"\n')
+      fh.write('columns=[4]\n')
+      names_string = 'names=["' + '","'.join(datasource_info_tags) + '"]'
+      fh.write(names_string +'\n')
+      fh.write('ops=["concat"]\n\n')
+   elif datasource == 'simplerepeats' or datasource == 'winmsk':
+      fh.write('[[annotation]]\n')
+      fh.write('file="' + str(pcgr_db_directory) + '/' + str(datasource) + '/' + str(datasource) + '.bed.gz"\n')
+      fh.write('columns=[4]\n')
+      names_string = 'names=["' + '","'.join(datasource_info_tags) + '"]'
+      fh.write(names_string +'\n')
+      fh.write('ops=["flag"]\n\n')
+   elif datasource == 'civic':
+      fh.write('[[annotation]]\n')
+      fh.write('file="' + str(pcgr_db_directory) + '/' + str(datasource) + '/' + str(datasource) + '.bed.gz"\n')
+      fh.write('columns=[4]\n')
+      fh.write('names=["CIVIC_ID_SEGMENT"]\n')
+      fh.write('ops=["concat"]\n\n')
+
+      fh.write('[[annotation]]\n')
+      fh.write('file="' + str(pcgr_db_directory) + '/' + str(datasource) + '/' + str(datasource) + '.vcf.gz"\n')
+      fh.write('fields = ["CIVIC_ID"]\n')
+      fh.write('ops=["concat"]\n\n')
+   elif datasource == 'cgi':
+      fh.write('[[annotation]]\n')
+      fh.write('file="' + str(pcgr_db_directory) + '/' + str(datasource) + '/' + str(datasource) + '.bed.gz"\n')
+      fh.write('columns=[4]\n')
+      fh.write('names=["CGI_ID_SEGMENT"]\n')
+      fh.write('ops=["concat"]\n\n')
+
+      fh.write('[[annotation]]\n')
+      fh.write('file="' + str(pcgr_db_directory) + '/' + str(datasource) + '/' + str(datasource) + '.vcf.gz"\n')
+      fh.write('fields = ["CGI_ID"]\n')
+      fh.write('ops=["concat"]\n\n')
+   else:
       fh.write('[[annotation]]\n')
       fh.write('file="' + str(pcgr_db_directory) + '/' + str(datasource) + '/' + str(datasource) + '.vcf.gz"\n')
       fields_string = 'fields = ["' + '","'.join(datasource_info_tags) + '"]'
@@ -186,43 +241,6 @@ def append_to_conf_file(datasource, datasource_info_tags, pcgr_db_directory, con
       ops_string = 'ops=["' + '","'.join(ops) + '"]'
       fh.write(fields_string + '\n')
       fh.write(ops_string + '\n\n')
-   else:
-      if datasource == 'uniprot' or datasource == 'pcgr_onco_xref' or datasource == 'rmsk':
-         fh.write('[[annotation]]\n')
-         fh.write('file="' + str(pcgr_db_directory) + '/' + str(datasource) + '/' + str(datasource) + '.bed.gz"\n')
-         fh.write('columns=[4]\n')
-         names_string = 'names=["' + '","'.join(datasource_info_tags) + '"]'
-         fh.write(names_string +'\n')
-         fh.write('ops=["concat"]\n\n')
-      if datasource == 'simplerepeats' or datasource == 'winmsk':
-         fh.write('[[annotation]]\n')
-         fh.write('file="' + str(pcgr_db_directory) + '/' + str(datasource) + '/' + str(datasource) + '.bed.gz"\n')
-         fh.write('columns=[4]\n')
-         names_string = 'names=["' + '","'.join(datasource_info_tags) + '"]'
-         fh.write(names_string +'\n')
-         fh.write('ops=["flag"]\n\n')
-      if datasource == 'civic':
-         fh.write('[[annotation]]\n')
-         fh.write('file="' + str(pcgr_db_directory) + '/' + str(datasource) + '/' + str(datasource) + '.bed.gz"\n')
-         fh.write('columns=[4]\n')
-         fh.write('names=["CIVIC_ID_SEGMENT"]\n')
-         fh.write('ops=["concat"]\n\n')
-
-         fh.write('[[annotation]]\n')
-         fh.write('file="' + str(pcgr_db_directory) + '/' + str(datasource) + '/' + str(datasource) + '.vcf.gz"\n')
-         fh.write('fields = ["CIVIC_ID"]\n')
-         fh.write('ops=["concat"]\n\n')
-      if datasource == 'cgi':
-         fh.write('[[annotation]]\n')
-         fh.write('file="' + str(pcgr_db_directory) + '/' + str(datasource) + '/' + str(datasource) + '.bed.gz"\n')
-         fh.write('columns=[4]\n')
-         fh.write('names=["CGI_ID_SEGMENT"]\n')
-         fh.write('ops=["concat"]\n\n')
-
-         fh.write('[[annotation]]\n')
-         fh.write('file="' + str(pcgr_db_directory) + '/' + str(datasource) + '/' + str(datasource) + '.vcf.gz"\n')
-         fh.write('fields = ["CGI_ID"]\n')
-         fh.write('ops=["concat"]\n\n')
    fh.close()
    return
 

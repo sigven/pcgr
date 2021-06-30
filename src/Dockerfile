@@ -23,7 +23,7 @@ RUN apt-get update && apt-get -y install \
 ENV OPT /opt/vep
 ENV OPT_SRC $OPT/src
 ENV HTSLIB_DIR $OPT_SRC/htslib
-ENV BRANCH master
+ENV BRANCH release/104
 
 # Working directory
 WORKDIR $OPT_SRC
@@ -65,7 +65,7 @@ RUN if [ "$BRANCH" = "master" ]; \
   rm -rf kent-335_base_bak
 
 # Setup bioperl-ext
-WORKDIR bioperl-ext/Bio/Ext/Align/
+WORKDIR $OPT_SRC/bioperl-ext/Bio/Ext/Align/
 RUN perl -pi -e"s|(cd libs.+)CFLAGS=\\\'|\$1CFLAGS=\\\'-fPIC |" Makefile.PL
 
 # Install htslib binaries (for 'bgzip' and 'tabix')
@@ -145,13 +145,17 @@ RUN ensembl-vep/travisci/build_c.sh && \
   # Install ensembl perl dependencies (cpanm)
   cpanm --installdeps --with-recommends --notest --cpanfile ensembl_cpanfile . && \
   cpanm --installdeps --with-recommends --notest --cpanfile ensembl-vep/cpanfile . && \
+  #cpanm Devel::NYTProf && \
   # Delete bioperl and cpanfiles after the cpanm installs as bioperl will be reinstalled by the INSTALL.pl script
   rm -rf bioperl-live ensembl_cpanfile ensembl-vep/cpanfile && \
   # Configure "locale", see https://github.com/rocker-org/rocker/issues/19
   echo "$LANG_VAR UTF-8" >> /etc/locale.gen && locale-gen en_US.utf8 && \
   /usr/sbin/update-locale LANG=$LANG_VAR && \
   # Copy htslib executables. It also requires the packages 'zlib1g-dev', 'libbz2-dev' and 'liblzma-dev'
-  cp $HTSLIB_DIR/bgzip $HTSLIB_DIR/tabix $HTSLIB_DIR/htsfile /usr/local/bin/
+  cp $HTSLIB_DIR/bgzip $HTSLIB_DIR/tabix $HTSLIB_DIR/htsfile /usr/local/bin/ && \
+  # Added (Sigve Nakken) - clear cpan cache
+  rm -rf /root/.cpanm
+
 
 ENV LC_ALL $LANG_VAR
 ENV LANG $LANG_VAR
@@ -163,7 +167,7 @@ ENV PERL5LIB $PERL5LIB_TMP
 WORKDIR /
 ADD loftee_1.0.3.tgz $OPT/src/ensembl-vep/modules
 ADD UTRannotator.tgz $OPT/src/ensembl-vep/modules
-RUN wget -q "https://raw.githubusercontent.com/Ensembl/VEP_plugins/release/101/NearestExonJB.pm" -O $OPT/src/ensembl-vep/modules/NearestExonJB.pm
+RUN wget -q "https://raw.githubusercontent.com/Ensembl/VEP_plugins/release/104/NearestExonJB.pm" -O $OPT/src/ensembl-vep/modules/NearestExonJB.pm
 
 
 # Final steps
@@ -210,7 +214,9 @@ WORKDIR /
 ## PINNED VERSIONS: numpy cython scipy pandas cyvcf2 toml
 ENV PACKAGE_BIO="libhts2 bedtools"
 ENV PACKAGE_DEV="gfortran gcc-multilib autoconf libncurses5-dev libnlopt-dev libblas-dev liblapack-dev libssh2-1-dev libxml2-dev vim libcrypto++-dev libpq-dev libxt-dev libudunits2-dev libcairo2-dev libbz2-dev libcurl4-openssl-dev"
-ENV PYTHON_MODULES="numpy==1.19.2 cython==0.29.21 scipy==1.5.3 pandas==1.1.3 cyvcf2==0.20.9 toml==0.10.1"
+#ENV PYTHON_MODULES="numpy==1.19.2 cython==0.29.21 scipy==1.5.3 pandas==1.1.3 cyvcf2==0.20.9 toml==0.10.1"
+ENV PYTHON_MODULES="numpy==1.19.2 cython==0.29.21 scipy==1.5.3 pandas==1.1.3 cyvcf2==0.20.9"
+
 RUN apt-get update \
 	&& apt-get install -y --no-install-recommends \
 		nano ed locales vim-tiny fonts-texgyre \
@@ -275,34 +281,40 @@ RUN wget https://github.com/samtools/samtools/releases/download/1.10/samtools-1.
 RUN bunzip2 -dc samtools-1.10.tar.bz2 | tar xvf -
 RUN cd samtools-1.10 && ./configure --prefix=/usr/local/bin && make && make install
 
-## ADD pcgrr source package
 WORKDIR /
-ADD R/ /
-
-## Add local PCGR Python scripts/libraries
-ADD pcgr.tgz /
-
-## pcgrr dependencies: restore all R package versions and dependencies with renv package
-## PINNED versions of all packages can be found in /renv.lock (JSON format)
-RUN R -e "install.packages(repos = NULL, 'https://cloud.r-project.org/src/contrib/renv_0.12.2.tar.gz', lib = '/usr/lib/R/library/')"
-RUN cp /pcgrr/renv.lock /
-RUN R -e "library(renv); renv::restore(prompt = F, library = '/usr/lib/R/library/')"
 
 ENV PATH=$PATH:/pcgr
 ENV PYTHONPATH=:/pcgr/lib:${PYTHONPATH}
+## Add local PCGR Python scripts/libraries
+ADD pcgr.tgz /
+
+# ## ADD pcgrr source package and R dependencies
+WORKDIR /
+ADD R/ /
+
+# ## pcgrr dependencies: restore all R package versions and dependencies with renv package
+# ## PINNED versions of all packages can be found in /renv.lock (JSON format)
+RUN R -e "install.packages(repos = NULL, 'https://cloud.r-project.org/src/contrib/renv_0.13.2.tar.gz', lib = '/usr/lib/R/library/')"
+
+RUN cp /pcgrr/renv.lock /
+RUN R -e "renv::restore(prompt = F, library = '/usr/lib/R/library/')" \
+       && rm -rf /root/.local \
+       && rm -rf /root/.cache
+
 WORKDIR /
 
-## PINNED version - pcgrr
-RUN R -e "install.packages(repos = NULL, 'pcgrr_0.9.1.tar.gz', lib = '/usr/lib/R/library/')"
+# ## PINNED version - pcgrr
+RUN R -e "install.packages(repos = NULL, 'pcgrr_0.9.2.tar.gz', lib = '/usr/lib/R/library/')"
 
 WORKDIR /
-## PINNED VERSION: vcf2maf
-RUN curl -L -o mskcc-vcf2maf.tar.gz https://api.github.com/repos/mskcc/vcf2maf/tarball/v1.6.18
-RUN tar -zxf mskcc-vcf2maf.tar.gz
-RUN chmod 755 /mskcc-vcf2maf-*/*.pl
-RUN cp /mskcc-vcf2maf-*/*.pl /usr/local/bin
 
-## Add working directory, data directory and R run scripts (PCGR + CPSR)
+# ## PINNED VERSION: vcf2maf
+RUN curl -L -o mskcc-vcf2maf.tar.gz https://api.github.com/repos/mskcc/vcf2maf/tarball/v1.6.18 \
+    && tar -zxf mskcc-vcf2maf.tar.gz \
+    && chmod 755 /mskcc-vcf2maf-*/*.pl \
+    && cp /mskcc-vcf2maf-*/*.pl /usr/local/bin
+
+# ## Add working directory, data directory and R run scripts (PCGR + CPSR)
 VOLUME /workdir
 WORKDIR /workdir/
 USER root
@@ -318,19 +330,18 @@ WORKDIR /
 
 ENV PATH /usr/local/bin:/usr/local/bin/bin:$PATH
 
-## Clean Up
+# ## Clean Up
 
 RUN apt-get clean autoclean
-RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-RUN rm -rf /var/lib/{dpkg,cache,log}
-
-RUN rm -f v2.6.2.tar.gz
-RUN rm -rf nlopt-2.6.2*
-RUN rm -rf pcgrr_0.9.1.tar.gz
-RUN rm -rf $HOME/src/ensembl-vep/t/
-RUN rm -f $HOME/src/v335_base.tar.gz
-RUN rm -f $HOME/src/release-1-6-924.zip
-RUN rm -rf /vt
-RUN rm -rf /samtools-1.10*
-RUN rm -rf /mskcc-vcf2maf.tar.gz
-RUN rm -rf /tmp/*
+RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+    && rm -rf /var/lib/{dpkg,cache,log} \
+    && rm -f v2.6.2.tar.gz \
+    && rm -rf nlopt-2.6.2* \
+    && rm -rf pcgrr_0.9.2.tar.gz \
+    && rm -rf $HOME/src/ensembl-vep/t/ \
+    && rm -f $HOME/src/v335_base.tar.gz \
+    && rm -f $HOME/src/release-1-6-924.zip \
+    && rm -rf /vt \
+    && rm -rf /samtools-1.10* \
+    && rm -rf /mskcc-vcf2maf.tar.gz \
+    && rm -rf /tmp/* \

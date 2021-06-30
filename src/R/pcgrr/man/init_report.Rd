@@ -12,7 +12,7 @@ init_report(
   pcgr_version = "dev",
   cpsr_version = "dev",
   type = "somatic",
-  virtual_panel_id = -1,
+  virtual_panel_id = "-1",
   custom_bed = NULL
 )
 }
@@ -31,7 +31,7 @@ init_report(
 
 \item{type}{Type of report ('somatic' or 'germline')}
 
-\item{virtual_panel_id}{identifier for virtual panel id}
+\item{virtual_panel_id}{identifier(s) for virtual panel id}
 
 \item{custom_bed}{custom BED file with target loci for screening}
 }

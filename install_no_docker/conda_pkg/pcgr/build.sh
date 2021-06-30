@@ -23,7 +23,7 @@ chmod +x ${PREFIX}/bin/vcf_validator
 
 ## Install assertable package (not found through Conda channels), and pcgrr
 R -e "install.packages('${SRC_DIR}/src/R/assertable_0.2.7.tar.gz', lib='${PREFIX}/lib/R/library', repos = NULL)"
-R -e "install.packages('${SRC_DIR}/src/R/pcgrr_0.9.1.tar.gz', lib='${PREFIX}/lib/R/library', repos = NULL)"
+R -e "install.packages('${SRC_DIR}/src/R/pcgrr_0.9.2.tar.gz', lib='${PREFIX}/lib/R/library', repos = NULL)"
 
 ### Loftee. To make sure same LoF version is used in dockerized and non-dockerized installation.
 #   ensembl-vep conda package installs most recent version of LoF automatically, however it doesn't work with the most

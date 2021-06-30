@@ -1,4 +1,4 @@
-.container1 {
+.value_box_container {
     /*border: 2px dashed #444;*/
     height: 210px;
     /*margin: 7px;*/
@@ -9,15 +9,7 @@
     /*height: 500px;*/
 }
 
-.finding_title {
-  font-size: 130%;
-}
-
-a {
-  color: white;
-}
-
-.red, .amber, .exploratory, .green, .nolist, .custom {
+.value_box_tumor_control {
     width: 280px;
     height: 150px;
     font-family: sans-serif;
@@ -27,74 +19,10 @@ a {
     color: white;
     display: inline-block;
     text-align: center;
+    background: #000;
+    border-radius: 25px;
 
     /*display: inline;*/
     /*zoom: 1*/
 }
-/*.stretch {
-    width: 100%;
-    display: inline-block;
-    font-size: 0;
-    line-height: 0
-}
-*/
 
-.exploratory {
-  background: #000;
-  border-radius: 25px;
-}
-
-.green {
-  background: #3fad46;
-  border-radius: 25px;
-}
-
-.red {
-  background: #d9534f;
-  border-radius: 25px;
-}
-
-.nolist {
-  background: #b8b8ba;
-  border-radius: 25px;
-}
-
-.amber {
-  background: #f0ad4e;
-  border-radius: 25px;
-}
-
-.custom {
-  background: darkmagenta;
-  border-radius: 25px;
-}
-
-.custom > a:hover,
-.green > a:hover,
-.red > a:hover,
-.amber > a:hover,
-.nolist > a:hover,
-.exploratory > a:hover {
-  color: white;
-  text-decoration: underline;
-}
-
-.custom > a:link,
-.green > a:link,
-.red > a:link,
-.amber > a:link,
-.nolist > a:link,
-.exploratory > a:link{
-  text-decoration: none;
-  color: white;
-}
-
-.custom > a:visited,
-.green > a:visited,
-.red > a:visited,
-.amber > a:visited,
-.nolist > a:visited,
-.exploratory > a:visited{
-  text-decoration: none;
-  color: white;
-}

@@ -1,22 +1,32 @@
 Package: pcgrr
 Type: Package
 Title: Personal Cancer Genome ReporteR
-Version: 0.9.1
-Author: Sigve Nakken
+Version: 0.9.2
+Date: 2021-06-05
+Authors@R: 
+    c(person(given = "Sigve",
+             family = "Nakken",
+             role = c("aut", "cre"),
+             email = "sigven@ifi.uio.no",
+             comment = c(ORCID = "0000-0001-8468-2050")))
 Maintainer: Sigve Nakken <sigven@ifi.uio.no>
+URL: https://github.com/sigven/pcgr
+BugReports: https://github.com/sigven/pcgr/issues
 Description: Functions, tools and utilities for the generation of clinical cancer genome reports with PCGR.
-    This R package is an integrated part of the Docker/Conda-based PCGR workflow (https://github.com/sigven/pcgr), it should thus not be used as a stand-alone package.
+    This R package is an integrated part of the Docker/Conda-based PCGR workflow (https://github.com/sigven/pcgr), 
+    it should thus not be used as a stand-alone package.
 License: MIT
 biocViews:
-Imports: BSgenome.Hsapiens.UCSC.hg19, BSgenome.Hsapiens.UCSC.hg38, magrittr, deconstructSigs, 
-         data.table, ggplot2, BiocManager, plotly, rlogging, configr, RcppTOML, usethis, 
-         GenomicRanges, GenomeInfoDb, S4Vectors, htmltools, caret, randomForest, UpSetR,
-         Biostrings, RColorBrewer, VariantAnnotation, MutationalPatterns, flexdashboard,
-         jsonlite, DT, tidyverse, assertable, ggpubr, devtools
-Encoding: UTF-8
-LazyData: true
-RoxygenNote: 7.1.1
+Imports: BSgenome.Hsapiens.UCSC.hg19, BSgenome.Hsapiens.UCSC.hg38, magrittr, 
+         data.table, ggplot2, BiocManager, plotly, usethis, GenomicRanges, GenomeInfoDb, 
+         S4Vectors, htmltools, caret, randomForest, UpSetR, Biostrings, RColorBrewer, 
+         VariantAnnotation, MutationalPatterns, flexdashboard, jsonlite, DT, tidyverse, 
+         assertable, ggpubr, devtools, log4r
 Depends: 
     R (>= 4.0)
 Suggests: 
     testthat
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.1.1
+Roxygen: list(markdown = TRUE)

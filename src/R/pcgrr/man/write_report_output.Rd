@@ -6,23 +6,18 @@
 (Rmarkdown/flexdashboard HTML reports, JSON, tab-separated etc)}
 \usage{
 write_report_output(
-  project_directory,
   report,
-  sample_name,
-  genome_assembly,
+  config,
   tier_model = "pcgr_acmg",
   output_format = "html",
   flexdb = F
 )
 }
 \arguments{
-\item{project_directory}{working directory}
-
 \item{report}{List object with all report data (PCGR/CPSR)}
 
-\item{sample_name}{sample name}
-
-\item{genome_assembly}{genome assembly (grch37/grch38)}
+\item{config}{Configuration object with all key configurations
+(directories, sample names, genome assembly etc)}
 
 \item{tier_model}{type of tier model}
 

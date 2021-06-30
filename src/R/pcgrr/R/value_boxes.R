@@ -62,16 +62,17 @@ generate_report_data_value_box <- function(pcg_report,
                                            sample_name,
                                            pcgr_config) {
 
-  pcg_report_value_box <- pcgrr::init_report(pcgr_config,
-                                             sample_name, class = "value_box")
-  rlogging::message("------")
-  rlogging::message("Assigning elements to PCGR value boxes")
+  pcg_report_value_box <- pcgrr::init_report(config = pcgr_config,
+                                             class = "value_box")
+  pcgrr:::log4r_info("------")
+  pcgrr:::log4r_info("Assigning elements to PCGR value boxes")
 
   if (!pcg_report[["content"]][["snv_indel"]][["eval"]]) {
     return(pcg_report_value_box)
   }
 
   rep_cont <- pcg_report[["content"]]
+  tumor_properties <- pcgr_config$t_props
 
   sig_contributions <-
     rep_cont[["m_signature_mp"]][["result"]][["contributions"]]
@@ -83,42 +84,54 @@ generate_report_data_value_box <- function(pcg_report,
           dplyr::arrange(desc(prop_group))
 
         dominant_aetiology <- ranked_groups[1, "group"]
-        pcg_report_value_box[["signatures"]] <-
-          paste0("Dominant signature:\n", dominant_aetiology)
+        # pcg_report_value_box[["signatures"]] <-
+        #   paste0("Dominant signature:\n", dominant_aetiology)
+        pcg_report_value_box[["signatures"]] <- dominant_aetiology
       }
     }
   }
 
-  pcg_report_value_box[["kataegis"]] <- "Kataegis events:\nNA"
-  num_events <- NROW(rep_cont$kataegis$events)
-  if(num_events > 0){
-    num_events <- NROW(rep_cont$kataegis$events %>%
-                         dplyr::filter(confidence == 3))
-    pcg_report_value_box[["kataegis"]] <-
-      paste0("Kataegis events:\n", num_events)
+  if (rep_cont[['kataegis']][["eval"]]){
+    pcg_report_value_box[["kataegis"]] <- "None"
+      num_events <- NROW(rep_cont$kataegis$events)
+      if(num_events > 0){
+        num_events <- NROW(rep_cont$kataegis$events %>%
+                             dplyr::filter(confidence == 3))
+        # pcg_report_value_box[["kataegis"]] <-
+        #   paste0("Kataegis events:\n", num_events)
+        pcg_report_value_box[["kataegis"]] <- num_events
+      }
   }
 
   if (rep_cont[["tumor_purity"]][["eval"]]) {
-    if (!is.null(rep_cont[["tumor_purity"]][["estimate"]])) {
+    if (!is.na(tumor_properties[["tumor_purity"]])) {
+      # pcg_report_value_box[["tumor_purity"]] <-
+      #   paste0("Tumor purity:\n",
+      #          rep_cont[["tumor_purity"]][["estimate"]])
       pcg_report_value_box[["tumor_purity"]] <-
-        paste0("Tumor purity:\n",
-               rep_cont[["tumor_purity"]][["estimate"]])
+        tumor_properties[["tumor_purity"]]
     }
   }
 
   if (rep_cont[["tumor_ploidy"]][["eval"]]) {
-    if (!is.null(rep_cont[["tumor_ploidy"]][["estimate"]])) {
+    if (!is.na(tumor_properties[["tumor_ploidy"]])) {
+      # pcg_report_value_box[["tumor_ploidy"]] <-
+      #   paste0("Tumor ploidy:\n",
+      #          rep_cont[["tumor_ploidy"]][["estimate"]])
       pcg_report_value_box[["tumor_ploidy"]] <-
-        paste0("Tumor ploidy:\n",
-               rep_cont[["tumor_ploidy"]][["estimate"]])
-    }
+        tumor_properties[["tumor_ploidy"]]
+      }
   }
 
   if (rep_cont[["tmb"]][["eval"]]) {
     if (!is.null(rep_cont[["tmb"]][["v_stat"]])) {
+      # pcg_report_value_box[["tmb"]] <-
+      #   paste0("TMB:\n",
+      #          rep_cont[["tmb"]][["v_stat"]][["tmb_estimate"]],
+      #          " mutations/Mb")
+      #
       pcg_report_value_box[["tmb"]] <-
-        paste0("TMB:\n",
-               rep_cont[["tmb"]][["v_stat"]][["tmb_estimate"]],
+        paste0(rep_cont[["tmb"]][["v_stat"]][["tmb_estimate"]],
                " mutations/Mb")
     }
   }
@@ -132,19 +145,19 @@ generate_report_data_value_box <- function(pcg_report,
     if (rep_cont[["cna"]][["eval"]]) {
       if (nrow(rep_cont[["cna"]][["disp"]][["tier1"]]) > 0) {
         pcg_report_value_box[["scna"]] <-
-          paste0(
-            "SCNAs:\n",
+          # paste0(
+          #   "SCNAs:\n",
             paste(
               unique(
                 head(
                   rep_cont[["cna"]][["disp"]][["tier1"]]$SYMBOL, 2)
                 ),
               collapse = ", ")
-            )
+            #)
       }
       else{
         pcg_report_value_box[["scna"]] <-
-          "SCNAs:\nNone of strong\nclinical significance"
+          "None of strong significance"
       }
     }
   }
@@ -169,11 +182,10 @@ generate_report_data_value_box <- function(pcg_report,
               paste0(pcg_report_value_box[["'tier1"]], "++")
           }
         }
-        pcg_report_value_box[["tier1"]] <-
-          paste0("Tier 1 variants:\n", pcg_report_value_box[["tier1"]])
+        # pcg_report_value_box[["tier1"]] <-
+        #   paste0("Tier 1 variants:\n", pcg_report_value_box[["tier1"]])
       }else{
-        pcg_report_value_box[["tier1"]] <-
-          paste0("Tier 1 variants:\nNone")
+        pcg_report_value_box[["tier1"]] <- "None"
       }
       if (nrow(rep_cont[["snv_indel"]][["variant_set"]][["tier2"]]) > 0) {
         tier2_genes <-
@@ -193,10 +205,8 @@ generate_report_data_value_box <- function(pcg_report,
               paste0(pcg_report_value_box[["tier2"]], "++")
           }
         }
-        pcg_report_value_box[["tier2"]] <-
-          paste0("Tier 2 variants:\n", pcg_report_value_box[["tier2"]])
       }else{
-        pcg_report_value_box[["tier2"]] <- paste0("Tier 2 variants:\nNone")
+        pcg_report_value_box[["tier2"]] <- "None"
       }
     }
   }

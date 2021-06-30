@@ -57,7 +57,7 @@ htmltools::br()
 
 
 ```{r eval = !tumor_af_plot, results = "asis"}
-cat('*   <i>Tumor sequencing depth and allelic fraction of variants not provided - omitting plot.</i>',sep='\n')
+cat('*   <i>Missing variants OR tumor sequencing depth and allelic fraction of variants not provided - omitting plot.</i>',sep='\n')
 cat('\n')
 
 ```
@@ -74,12 +74,12 @@ __NOTE 2__: Filtering on sequencing depth/allelic fraction depends on input spec
 <br>
 
 
-```{r global_table_browse, echo=F, results = "asis", eval = T}
+```{r global_table_browse, echo=F, results = "asis", eval = NROW(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']]) > 0}
 
-if(NROW(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']]) > 5000){
-    cat('<b>NOTE - listing top 5000 variants</b><br>',sep="\n")
+if(NROW(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']]) > 2000){
+    cat('<b>NOTE - listing top 2000 variants</b><br>',sep="\n")
     cat('<br>')
-    pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']] <- head(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']], 5000)
+    pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']] <- head(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']], 2000)
 }
 
 tiers <- c('TIER 1','TIER 2','TIER 3','TIER 4','NONCODING')

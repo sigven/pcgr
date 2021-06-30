@@ -4,6 +4,19 @@ h1.title {
   color: black;
 }
 
+h2.title{
+  color: black;
+}
+
+h2 {
+  color: black;
+}
+
+h2, #TOC>ul>li {
+  color: black;
+}
+
+
 #container {
     /*border: 2px dashed #444;*/
     height: 30px;
@@ -13,7 +26,7 @@ h1.title {
     min-width: 750px;
 }
 
-.red, .amber, .exploratory, .green, .nolist, .custom {
+.red, .amber, .exploratory, .green, .nolist, .custom, .app_combo {
     width: 100px;
     height: 28px;
     /*font-family: Helvetica;*/
@@ -41,6 +54,13 @@ h1.title {
 
 }
 
+.app_combo {
+  background: #084594;
+  border-radius: 5px;
+  color: white;
+
+}
+
 .green {
   background: #3fad46;
   border-radius: 5px;
@@ -62,7 +82,7 @@ h1.title {
 
 .amber {
   background: #f0ad4e;
-    border-radius: 5px;
+  border-radius: 5px;
 
 }
 
@@ -76,6 +96,7 @@ h1.title {
 .green > a:hover,
 .red > a:hover,
 .amber > a:hover,
+.app_combo > a:hover,
 .nolist > a:hover,
 .exploratory > a:hover {
   color: white;
@@ -87,6 +108,7 @@ h1.title {
 .red > a:link,
 .amber > a:link,
 .nolist > a:link,
+.app_combo > a:link,
 .exploratory > a:link{
   text-decoration: none;
   color: white;
@@ -97,6 +119,7 @@ h1.title {
 .red > a:visited,
 .amber > a:visited,
 .nolist > a:visited,
+.app_combo > a:visited,
 .exploratory > a:visited{
   text-decoration: none;
   color: white;

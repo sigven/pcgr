@@ -682,7 +682,8 @@ make_upset_plot_data <- function(calls, config) {
     columns <- c(columns, "STATUS_DBSNP_GERMLINE")
   }
   assertable::assert_colnames(
-    calls, c("VAR_ID", "STATUS_POPFREQ_1KG_ABOVE_TOLERATED",
+    calls, c("VAR_ID",
+             "STATUS_POPFREQ_1KG_ABOVE_TOLERATED",
              "STATUS_POPFREQ_GNOMAD_ABOVE_TOLERATED",
              "STATUS_CLINVAR_GERMLINE"),
     only_colnames = F, quiet = T)

@@ -107,7 +107,7 @@ plotly::ggplotly(p)
 
 ```{r eval = !tumor_af_plot, results = "asis"}
 cat("<br>")
-cat('*   <i>Tumor sequencing depth and allelic fraction of variants not provided - omitting plot.</i>',sep='\n')
+cat('*   <i>Missing variants OR Tumor sequencing depth and allelic fraction of variants not provided - omitting plot.</i>',sep='\n')
 cat('<br>')
 
 ```
@@ -149,12 +149,12 @@ The global variant datatable (right) can be filtered according to various criter
 
 <br>
 
-```{r table_browse_allelic_depth, echo=F, results = "asis"}
+```{r table_browse_allelic_depth, echo=F, results = "asis", eval = NROW(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']]) > 0}
 
-if(NROW(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']]) > 5000){
-  cat('<b>NOTE - listing top 5000 variants</b><br>',sep="\n")
+if(NROW(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']]) > 2000){
+  cat('<b>NOTE - listing top 2000 variants</b><br>',sep="\n")
   cat('<br>')
-  pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']] <- head(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']], 5000)
+  pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']] <- head(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']], 2000)
 }
 
 
@@ -210,26 +210,31 @@ crosstalk::bscols(
 
 ### Global variant datatable {data-padding=15}
 
-```{r table_browse, eval = T}
+```{r table_browse, eval = NROW(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']]) > 0}
 
 tiers <- c('TIER 1','TIER 2','TIER 3','TIER 4','NONCODING')
 
 variants_shared %>%
-  DT::datatable(extensions=c("Buttons","Responsive"),
+  DT::datatable(
+    extensions=c("Buttons","Responsive"),
+    #plugins = "scrollResize",
     options = list(buttons = c('csv','excel'),  
                  pageLength = 8, 
-                 autoWidth = T, 
-                 width = "100%",
-                 fixedColumns = T,
-                 fixedHeader = T,
-                 #scrollX = F,
+                 ##autoWidth = T, 
+                 #width = "100%",
+                 #fixedColumns = T,
+                 #fixedHeader = T,
+                 #autoWidth = TRUE,
+                  #columnDefs = list(list(width = '80px', targets = c(1,3,4)))
+                 scrollX = "900px",
                  scrollCollapse = T,
-                  columnDefs = list(list(width = '6%', targets = c(1,3,4,5)),
-                                    list(width = '12%', targets = c(2,6))),
+                 scrollY = scrollY_flexdb_container,
+                  #columnDefs = list(list(width = '6%', targets = c(1,3,4,5)),
+                  #                  list(width = '12%', targets = c(2,6))),
                   # columnDefs = list(list(width = '80px', targets = c(1,3,4)),
                   #                   list(width = '90px', targets = 6),
                   #                   list(width = '40px', targets = 2),
-                  #                   list(width = '50px', targets = 5)),
+                  #                   list(width = '40px', targets = 5)),
                  dom = 'Bfrtip')
   ) %>%
    DT::formatStyle('TIER',color = 'white', 

@@ -2,40 +2,48 @@
 #' Function that initiates PCGR/CPSR report object
 #'
 #' @param config Object with configuration parameters
-#' @param sample_name sample identifier
 #' @param class report analysis section (NULL defaults to full report)
 #' @param pcgr_data PCGR data bundle
-#' @param pcgr_version PCGR software version
-#' @param cpsr_version CPSR software version
 #' @param type Type of report ('somatic' or 'germline')
-#' @param virtual_panel_id identifier for virtual panel id
+#' @param virtual_panel_id identifier(s) for virtual panel id
 #' @param custom_bed custom BED file with target loci for screening
 
 init_report <- function(config = NULL,
-                        sample_name = "SampleX",
                         class = NULL,
                         pcgr_data = NULL,
-                        pcgr_version = "dev",
-                        cpsr_version = "dev",
                         type = "somatic",
-                        virtual_panel_id = -1,
+                        virtual_panel_id = "-1",
                         custom_bed = NULL) {
+
+  # invisible(assertthat::assert_that(
+  #   !is.null(type), msg = "Argument 'type' must be of type character"))
+  invisible(assertthat::assert_that(
+    is.character(type), msg = "Argument 'type' must be of type character"))
+  invisible(assertthat::assert_that(
+    type == "germline" | type == "somatic", msg = "Argument 'type' must be of either 'germline' or 'somatic'"))
+
+  if(!is.null(class)){
+    invisible(assertthat::assert_that(
+      is.character(class), msg = "Argument 'class' must be of type character"))
+  }
 
   report <- list()
   for (elem in c("metadata", "content")) {
     report[[elem]] <- list()
   }
 
-  report_metadata <- pcgrr::set_report_metadata(config, pcgr_data,
-                                       cpsr_version = cpsr_version,
-                                       pcgr_version = pcgr_version,
-                                       report_type = type,
-                                       virtual_panel_id = virtual_panel_id,
-                                       custom_bed = custom_bed,
-                                       sample_name = sample_name)
+  if(!is.null(config) & !is.null(pcgr_data)){
+    report_metadata <- pcgrr::set_report_metadata(
+      config,
+      pcgr_data,
+      report_type = type,
+      virtual_panel_id = virtual_panel_id,
+      custom_bed = custom_bed
+    )
 
-  if (!is.null(report_metadata)) {
-    report[["metadata"]] <- report_metadata
+    if (!is.null(report_metadata)) {
+      report[["metadata"]] <- report_metadata
+    }
   }
 
   if (type == "germline") {
@@ -74,7 +82,7 @@ init_report <- function(config = NULL,
               pcgr_data[["phenotype_ontology"]][["oncotree"]],
               primary_site == config[["t_props"]][["tumor_type"]])
         }else{
-          rlogging::message(paste0("Cannot find tumor type ",
+          pcgrr:::log4r_info(paste0("Cannot find tumor type ",
                                    config[["t_props"]][["tumor_type"]],
                                    " in list of primary sites"))
           report[["metadata"]][["phenotype_ontology"]][["oncotree_query"]] <-
@@ -85,16 +93,28 @@ init_report <- function(config = NULL,
           pcgr_data[["phenotype_ontology"]][["oncotree"]]
       }
     }
-    for (a_elem in c("snv_indel", "tmb", "msi",
-                     "cna", "cna_plot",
-                     "m_signature_mp", "sequencing_mode",
-                     "tumor_only", "value_box",
-                     "rainfall", "kataegis",
+    for (a_elem in c("snv_indel",
+                     "tmb",
+                     "msi",
+                     "cna",
+                     "cna_plot",
+                     "m_signature_mp",
+                     "sequencing_mode",
+                     "tumor_only",
+                     "value_box",
+                     "rainfall",
+                     "kataegis",
                      "tumor_purity",
                      "tumor_ploidy",
-                     "report_display_config","clinicaltrials")) {
+                     "cpsr",
+                     "report_display_config",
+                     "clinicaltrials")) {
       report[["content"]][[a_elem]] <- list()
       report[["content"]][[a_elem]][["eval"]] <- FALSE
+
+      if(a_elem == "tumor_purity" | a_elem == "tumor_ploidy"){
+        report[["content"]][[a_elem]][["eval"]] <- TRUE
+      }
 
       if (a_elem == "kataegis") {
         report[["content"]][[a_elem]][["events"]] <- data.frame()
@@ -187,11 +207,9 @@ update_report <- function(report, report_data,
   return(report)
 }
 
-set_report_metadata <- function(config, pcgr_data,
-                                cpsr_version = NULL,
-                                pcgr_version = NULL,
-                                virtual_panel_id = -1,
-                                sample_name = NULL,
+set_report_metadata <- function(config,
+                                pcgr_data,
+                                virtual_panel_id = "-1",
                                 report_type = NULL,
                                 custom_bed = NULL) {
 
@@ -201,11 +219,11 @@ set_report_metadata <- function(config, pcgr_data,
 
   report_metadata <- list()
   report_metadata[["pcgr_db_release"]] <- pcgr_data[["release_notes"]]
-  report_metadata[["pcgr_version"]] <- pcgr_version
-  report_metadata[["cpsr_version"]] <- cpsr_version
+  report_metadata[["pcgr_version"]] <- config[['required_args']][['pcgr_version']]
+  report_metadata[["cpsr_version"]] <- config[['required_args']][['cpsr_version']]
   report_metadata[["genome_assembly"]] <-
     pcgr_data[["assembly"]][["grch_name"]]
-  report_metadata[["sample_name"]] <- sample_name
+  report_metadata[["sample_name"]] <- config[['required_args']][['sample_name']]
   report_metadata[["report_type"]] <- report_type
   report_metadata[["config"]] <- config
   report_metadata[["color_palette"]] <- pcgrr::color_palette
@@ -226,35 +244,90 @@ set_report_metadata <- function(config, pcgr_data,
   report_metadata[["phenotype_ontology"]][["oncotree_query"]] <- NULL
 
 
-  if (virtual_panel_id >= 0) {
+  if (virtual_panel_id != "-1") {
     report_metadata[["gene_panel"]] <- list()
-    report_metadata[["gene_panel"]][["genes"]] <-
-      pcgr_data[["virtual_gene_panels"]] %>%
-      dplyr::filter(id == virtual_panel_id) %>%
-      dplyr::select(symbol, confidence_level, panel_name,
-                    panel_id, panel_version, panel_url, entrezgene, genename)
+    report_metadata[["gene_panel"]][["genes"]] <- data.frame()
+
+    panel_ids <- stringr::str_split(virtual_panel_id, ",")[[1]]
+    for(pid in panel_ids){
+      p <- as.integer(pid)
+      panel_genes <- pcgr_data[["virtual_gene_panels"]] %>%
+        dplyr::filter(id == p) %>%
+        dplyr::select(symbol,
+                      ensembl_gene_id,
+                      confidence_level,
+                      panel_name,
+                      panel_id,
+                      id,
+                      panel_version,
+                      panel_url,
+                      entrezgene,
+                      genename)
+
+      report_metadata[["gene_panel"]][["genes"]] <-
+        report_metadata[["gene_panel"]][["genes"]] %>%
+        dplyr::bind_rows(panel_genes) %>%
+        dplyr::arrange(symbol)
+    }
+
     if (config[["diagnostic_grade_only"]] == T) {
       report_metadata[["gene_panel"]][["genes"]] <-
         report_metadata[["gene_panel"]][["genes"]] %>%
         dplyr::filter(confidence_level == 3 | confidence_level == 4)
     }
-    report_metadata[["gene_panel"]][["name"]] <-
-      paste0(unique(report_metadata[["gene_panel"]][["genes"]]$panel_name),
-             " - v",
-             unique(report_metadata[["gene_panel"]][["genes"]]$panel_version))
-    report_metadata[["gene_panel"]][["url"]] <-
-      unique(report_metadata[["gene_panel"]][["genes"]]$panel_url)
-    report_metadata[["gene_panel"]][["confidence"]] <-
-      "Diagnostic-grade/Borderline/Low evidence (GREEN/AMBER/RED)"
-    if (config[["diagnostic_grade_only"]] == T & virtual_panel_id != 0) {
+
+
+    ## Single gene panel from Genomics England
+    if(!(stringr::str_detect(virtual_panel_id,","))){
+
+      report_metadata[["gene_panel"]][["name"]] <-
+        paste0(unique(report_metadata[["gene_panel"]][["genes"]]$panel_name),
+               " - v",
+               unique(report_metadata[["gene_panel"]][["genes"]]$panel_version))
+      report_metadata[["gene_panel"]][["url"]] <-
+        unique(report_metadata[["gene_panel"]][["genes"]]$panel_url)
       report_metadata[["gene_panel"]][["confidence"]] <-
-        "Diagnostic-grade only (GREEN)"
-    }
-    if (virtual_panel_id == 0) {
+        "Diagnostic-grade/Borderline/Low evidence (GREEN/AMBER/RED)"
+      if (config[["diagnostic_grade_only"]] == T & virtual_panel_id != "0") {
+        report_metadata[["gene_panel"]][["confidence"]] <-
+          "Diagnostic-grade only (GREEN)"
+      }
+      if (virtual_panel_id == "0") {
+        report_metadata[["gene_panel"]][["confidence"]] <-
+          "Exploratory virtual gene panel (research)"
+      }
+    }else{
+
+      panels_included <-
+        report_metadata$gene_panel$genes %>%
+        dplyr::select(id, panel_url, panel_name) %>%
+        dplyr::arrange(id) %>%
+        dplyr::distinct() %>%
+        dplyr::mutate(link = paste0("<li><a href='",panel_url,
+                                    "' target='_blank'>",
+                                    panel_name,"</a></li>"))
+
+      report_metadata[["gene_panel"]][["genes"]] <-
+        report_metadata[["gene_panel"]][["genes"]] %>%
+        dplyr::select(-c(panel_id,panel_name, confidence_level,
+                         panel_version,panel_url,
+                         id)) %>%
+        dplyr::mutate(panel_version = NA, confidence_level = 5,
+                      panel_id = NA, panel_url = NA) %>%
+        dplyr::distinct()
+
+      report_metadata[["gene_panel"]][["url"]] <- "https://panelapp.genomicsengland.co.uk"
+      report_metadata[["gene_panel"]][["name"]] <-
+        "Genomics England PanelApp - custom combination"
       report_metadata[["gene_panel"]][["confidence"]] <-
-        "Exploratory geneset (research)"
+        paste0("<b>N = ", NROW(report_metadata[["gene_panel"]][["genes"]]),
+               "</b> unique genes combined from the following virtual panels:<br> <ul>",
+               paste(panels_included$link, collapse="\n"),"\n</ul><br>\n")
+
     }
   }else{
+
+    ## virtual_panel_id is "-1", indicating custom gene list
     if (!is.null(custom_bed)) {
       target_genes <-
         pcgrr::custom_bed_genes(custom_bed, pcgr_data = pcgr_data)
@@ -266,8 +339,7 @@ set_report_metadata <- function(config, pcgr_data,
             panel_name =
               report_metadata[["config"]][["custom_panel"]][["name"]],
             panel_id = NA, panel_version = NA,
-            panel_url =
-              report_metadata[["config"]][["custom_panel"]][["url"]])
+            panel_url = NA)
 
         report_metadata[["gene_panel"]] <- list()
         report_metadata[["gene_panel"]][["genes"]] <- target_genes
@@ -276,11 +348,11 @@ set_report_metadata <- function(config, pcgr_data,
         report_metadata[["gene_panel"]][["confidence"]] <-
           "User-defined panel (custom geneset from panel 0)"
       }else{
-        rlogging::warning(
+        pcgrr:::log4r_warn(
           paste0("Custom BED file (", custom_bed,
                  ") does not contain regions that overlap ",
                  "protein-coding transcripts (regulatory/exonic)"))
-        rlogging::message("Quitting report generation")
+        pcgrr:::log4r_info("Quitting report generation")
       }
     }
   }
@@ -306,8 +378,8 @@ init_tmb_content <- function(tcga_tmb = NULL, config = NULL){
   rep[["v_stat"]][["tmb_estimate"]] <- 0
   rep[["v_stat"]][["target_size_mb"]] <-
     config[["assay_props"]][["target_size_mb"]]
-  rep[["v_stat"]][["tmb_tertile"]] <-
-    "TMB - not determined"
+  #rep[["v_stat"]][["tmb_tertile"]] <-
+    #"TMB - not determined"
   rep[["tcga_tmb"]] <- tcga_tmb
 
   return(rep)
@@ -402,6 +474,7 @@ init_rainfall_content <- function(){
 
   rep <- list()
 
+  rep[["eval"]] <- FALSE
   rep[["rfdata"]] <- list()
   for (e in c("intercept", "chr_cum", "cex")) {
     rep[["rfdata"]][[e]] <-
@@ -427,7 +500,7 @@ init_tumor_only_content <- function(){
   rep[["eval"]] <- FALSE
 
   rep[["variant_set"]] <- list()
-  rep[["variant_set"]][["unfiltered"]] <-
+  rep[["variant_set"]][["tsv_unfiltered"]] <-
     data.frame()
   rep[["variant_set"]][["filtered"]] <-
     data.frame()
@@ -455,23 +528,23 @@ init_valuebox_content <- function(){
   rep[["eval"]] <- FALSE
 
   rep[["tmb"]] <-
-    "TMB:\nNot determined"
+    "Not determined"
   rep[["msi"]] <-
-    "MSI:\nNot determined"
+    "Not determined"
   rep[["scna"]] <-
-    "SCNA:\nNot determined"
+    "Not determined"
   rep[["tier1"]] <-
-    "Tier 1 variants:\nNot determined"
+    "Not determined"
   rep[["tier2"]] <-
-    "Tier 2 variants:\nNot determined"
+    "Not determined"
   rep[["signatures"]] <-
-    "Mutational signatures:\nNot determined"
+    "Not determined"
   rep[["tumor_ploidy"]] <-
-    "Tumor ploidy:\nNot provided/determined"
+    "Not provided"
   rep[["tumor_purity"]] <-
-    "Tumor purity:\nNot provided/determined"
+    "Not provided"
   rep[["kataegis"]] <-
-    "Kataegis events:\nNot determined"
+    "Not determined"
 
   return(rep)
 
@@ -523,7 +596,8 @@ init_germline_content <- function(){
   rep[["variant_set"]] <- list()
   rep[["zero"]] <- FALSE
   for (t in c("class1", "class2", "class3",
-              "class4", "class5", "gwas", "secondary")) {
+              "class4", "class5", "gwas",
+              "secondary")) {
     rep[["disp"]][[t]] <-
       data.frame()
     rep[["variant_set"]][[t]] <-

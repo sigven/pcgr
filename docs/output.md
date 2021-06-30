@@ -4,18 +4,16 @@
 
 An interactive and tier-structured HTML report (dashboard-like) that shows the most relevant findings in the query cancer genome has the following naming convention:
 
-__sample_id__.pcgr_acmg.__genome_assembly__.flexdb.html
+<**sample_id**>.pcgr_acmg.<**genome_assembly**>.flexdb.html
 
  - The __sample_id__ is provided as input by the user, and reflects a unique identifier of the tumor-normal sample pair to be analyzed.
-
- - <b>DOCUMENTATION COMING SOON</b>
 
 
 ### Interactive HTML report (rmarkdown)
 
 An interactive and tier-structured HTML report that shows the most relevant findings in the query cancer genome has the following naming convention:
 
-__sample_id__.pcgr_acmg.__genome_assembly__.html
+<**sample_id**>.pcgr_acmg.<**genome_assembly**>.html
 
  - The __sample_id__ is provided as input by the user, and reflects a unique identifier of the tumor-normal sample pair to be analyzed.
 
@@ -75,10 +73,13 @@ The report is structured in seven main sections, described in more detail below:
   7. __Kataegis events__
       * Detection of potential kataegis events using the algorithm outlined in the [Kataegis Portal](https://github.com/MeichunCai/KataegisPortal)
 
-  7. __Clinial trials__
+  8. __Germline findings__
+      * Main findings from CPSR report
+
+  8. __Clinial trials__
   	 * Interactive table with annotated, molecularly targeted clinical trials from [clinicaltrials.gov](https//clinicaltrials.gov) in the relevant tumor type
 
-  8. __Documentation__
+  9. __Documentation__
       * Annotation resources - software, databases and tools with version information
 	 * Report content
       * References - supporting scientific literature (key report elements)
@@ -140,16 +141,13 @@ The interactive datatables contain a number of hyperlinked annotations similar t
 
 Example reports:
 
-* [Cervical cancer sample (tumor-only)](http://insilico.hpc.uio.no/pcgr/example_reports/0.9.1/TCGA-EA-A410-01A_TO.pcgr_acmg.grch37.flexdb.html)
-* [Lung cancer sample (tumor-control)](http://insilico.hpc.uio.no/pcgr/example_reports/0.9.1/TCGA-05-4427-01A.pcgr_acmg.grch37.flexdb.html)
-* [Colorectal cancer sample (tumor-control)](http://insilico.hpc.uio.no/pcgr/example_reports/0.9.1/TCGA-AD-5900-01A.pcgr_acmg.grch37.flexdb.html)
-* [Brain cancer sample (tumor-control)](http://insilico.hpc.uio.no/pcgr/example_reports/0.9.1/TCGA-QH-A6CU-01A.pcgr_acmg.grch37.flexdb.html)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5045309.svg)](https://doi.org/10.5281/zenodo.5045309)
 
 The HTML reports have been tested using the following browsers:
 
-* Safari (Version 14.0 (15610.1.28.1.9, 15610))
+* Safari (Version 14.1.1 (16611.2.7.1.4))
 * Mozilla Firefox (83.0)
-* Google Chrome (Version 87.0.4280.67 (Official Build) (x86_64))
+* Google Chrome (Version 90.0.4430.212 (Official Build) (x86_64))
 
 ### JSON
 
@@ -163,7 +161,7 @@ This file will easen the process of extracting particular parts of the report fo
 
 A VCF file containing annotated, somatic calls (single nucleotide variants and insertion/deletions) is generated with the following naming convention:
 
-__sample_id__.pcgr_acmg.__genome_assembly__.vcf.gz
+<**sample_id**>.pcgr_acmg.<**genome_assembly**>.vcf.gz
 
 Here, the __sample_id__ is provided as input by the user, and reflects a unique identifier of the tumor-normal sample pair to be analyzed. Following common standards, the annotated VCF file is compressed with [bgzip](http://www.htslib.org/doc/tabix.html) and indexed with [tabix](http://www.htslib.org/doc/tabix.html). Below follows a description of all annotations/tags present in the VCF INFO column after processing with the PCGR annotation pipeline:
 
@@ -242,10 +240,12 @@ Here, the __sample_id__ is provided as input by the user, and reflects a unique 
 ##### _Gene information_
   - ENTREZ_ID - [Entrez](http://www.ncbi.nlm.nih.gov/gene) gene identifier
   - APPRIS - Principal isoform flags according to the [APPRIS principal isoform database](http://appris.bioinfo.cnio.es/#/downloads)
+  - MANE_SELECT - Indicating if the transcript is the MANE Select or MANE Plus Clinical transcript for the gene (picked by VEP's --flag_pick_allele_gene option)
   - UNIPROT_ID - [UniProt](http://www.uniprot.org) identifier
   - UNIPROT_ACC - [UniProt](http://www.uniprot.org) accession(s)
   - ENSEMBL_GENE_ID - Ensembl gene identifier for VEP's picked transcript (*ENSGXXXXXXX*)
   - ENSEMBL_TRANSCRIPT_ID - Ensembl transcript identifier for VEP's picked transcript (*ENSTXXXXXX*)
+  - ENSEMBL_PROTEIN_ID - Ensembl corresponding protein identifier for VEP's picked transcript
   - REFSEQ_MRNA - Corresponding RefSeq transcript(s) identifier for VEP's picked transcript (*NM_XXXXX*)
   - CORUM_ID - Associated protein complexes (identifiers) from [CORUM](http://mips.helmholtz-muenchen.de/corum/)
   - TUMOR_SUPPRESSOR - Indicates whether gene is predicted as a tumor suppressor gene, from Network of Cancer Genes (NCG) & the CancerMine text-mining resource
@@ -277,48 +277,43 @@ Here, the __sample_id__ is provided as input by the user, and reflects a unique 
   - PFAM_DOMAIN - Pfam domain identifier (from VEP)
   - INTOGEN\_DRIVER\_MUT - Indicates if existing variant is predicted as driver mutation from IntoGen Catalog of Driver Mutations
   - PUTATIVE_DRIVER_MUTATION - Variant is predicted as driver mutation in the [TCGA pan-cancer analysis of cancer driver genes and mutations](https://www.ncbi.nlm.nih.gov/pubmed/29625053)
-  - EFFECT\_PREDICTIONS - All predictions of effect of variant on protein function and pre-mRNA splicing from [database of non-synonymous functional predictions - dbNSFP](https://sites.google.com/site/jpopgen/dbNSFP). Predicted effects are provided by different sources/algorithms (separated by '&'):
+  - EFFECT\_PREDICTIONS - All predictions of effect of variant on protein function and pre-mRNA splicing from [database of non-synonymous functional predictions - dbNSFP v4.2](https://sites.google.com/site/jpopgen/dbNSFP). Predicted effects are provided by different sources/algorithms (separated by '&'), T = Tolerated, N = Neutral, D = Damaging:
 
-    1. [SIFT](https://sift.bii.a-star.edu.sg/)
-    2. [SIFT4G](https://sift.bii.a-star.edu.sg/sift4g/)
-    3. [LRT](http://www.genetics.wustl.edu/jflab/lrt_query.html) (2009)
-    4. [MutationTaster](http://www.mutationtaster.org/) (data release Nov 2015)
-    5. [MutationAssessor](http://mutationassessor.org/) (release 3)
-    6. [FATHMM](http://fathmm.biocompute.org.uk) (v2.3)
-    7. [PROVEAN](http://provean.jcvi.org/index.php) (v1.1 Jan 2015)
-    8. [FATHMM_MKL](http://fathmm.biocompute.org.uk/fathmmMKL.htm)
-    9. [PRIMATEAI](https://www.nature.com/articles/s41588-018-0167-z)
-    10. [DEOGEN2](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5570203/)
-    11. [DBNSFP\_CONSENSUS\_SVM](https://www.ncbi.nlm.nih.gov/pubmed/25552646) (Ensembl/consensus prediction, based on support vector machines)
-    12. [DBNSFP\_CONSENSUS\_LR](https://www.ncbi.nlm.nih.gov/pubmed/25552646) (Ensembl/consensus prediction, logistic regression based)
-    13. [SPLICE\_SITE\_EFFECT_ADA](http://nar.oxfordjournals.org/content/42/22/13534) (Ensembl/consensus prediction of splice-altering SNVs, based on adaptive boosting)
-    14. [SPLICE\_SITE\_EFFECT_RF](http://nar.oxfordjournals.org/content/42/22/13534) (Ensembl/consensus prediction of splice-altering SNVs, based on random forest)
-    15. [M-CAP](http://bejerano.stanford.edu/MCAP)
-    16. [MutPred](http://mutpred.mutdb.org)
-    17. [GERP](http://mendel.stanford.edu/SidowLab/downloads/gerp/)
-    18. [BayesDel](https://doi.org/10.1002/humu.23158)
-    19. [LIST-S2](https://doi.org/10.1093/nar/gkaa288)
-    20. [ALoFT](https://www.nature.com/articles/s41467-017-00443-5)
+	  1. [SIFT](https://sift.bii.a-star.edu.sg/)
+	  2. [MutationTaster](http://www.mutationtaster.org/) (data release Nov 2015)
+	  3. [MutationAssessor](http://mutationassessor.org/) (release 3)
+	  4. [FATHMM](http://fathmm.biocompute.org.uk) (v2.3)
+	  5. [PROVEAN](http://provean.jcvi.org/index.php) (v1.1 Jan 2015)
+	  6. [FATHMM_MKL](http://fathmm.biocompute.org.uk/fathmmMKL.htm)
+	  7. [PRIMATEAI](https://www.nature.com/articles/s41588-018-0167-z)
+	  8. [DEOGEN2](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5570203/)
+	  9. [DBNSFP\_CONSENSUS\_RNN](https://www.biorxiv.org/content/10.1101/2021.04.09.438706v1) (Ensembl/consensus prediction, based on deep learning)
+	  10. [SPLICE\_SITE\_EFFECT_ADA](http://nar.oxfordjournals.org/content/42/22/13534) (Ensembl/consensus prediction of splice-altering SNVs, based on adaptive boosting)
+	  11. [SPLICE\_SITE\_EFFECT_RF](http://nar.oxfordjournals.org/content/42/22/13534) (Ensembl/consensus prediction of splice-altering SNVs, based on random forest)
+	  12. [M-CAP](http://bejerano.stanford.edu/MCAP)
+	  13. [MutPred](http://mutpred.mutdb.org)
+	  14. [GERP](http://mendel.stanford.edu/SidowLab/downloads/gerp/)
+	  15. [BayesDel](https://doi.org/10.1002/humu.23158)
+	  16. [LIST-S2](https://doi.org/10.1093/nar/gkaa288)
+	  17. [ALoFT](https://www.nature.com/articles/s41467-017-00443-5)
 
-
-  - BAYESDEL_ADDAF_DBNSFP - predicted effect from BayesDel (dbNSFP)
-  - LIST_S2_DBNSFP - predicted effect from LIST-S2 (dbNSFP)
-  - SIFT_DBNSFP - predicted effect from SIFT (dbNSFP)
-  - SIFT4G_DBNSFP - predicted effect from SIFT4G (dbNSFP)
-  - PROVEAN_DBNSFP - predicted effect from PROVEAN (dbNSFP)
-  - MUTATIONTASTER_DBNSFP - predicted effect from MUTATIONTASTER (dbNSFP)
-  - MUTATIONASSESSOR_DBNSFP - predicted effect from MUTATIONASSESSOR (dbNSFP)
-  - M_CAP_DBNSFP - predicted effect from M-CAP (dbNSFP)
-  - ALOFT_DBNSFP - predicted effect from ALoFT (dbNSFP)
-  - MUTPRED_DBNSFP - score from MUTPRED (dbNSFP)
-  - FATHMM_DBNSFP - predicted effect from FATHMM (dbNSFP)
-  - PRIMATEAI_DBNSFP - predicted effect from PRIMATEAI (dbNSFP)
-  - DEOGEN2_DBNSFP - predicted effect from DEOGEN2 (dbNSFP)
-  - GERP_DBNSFP - evolutionary constraint measure from GERP (dbNSFP)
-  - FATHMM_MKL_DBNSFP - predicted effect from FATHMM-mkl (dbNSFP)
-  - META_LR_DBNSFP - predicted effect from ensemble prediction (logistic regression - dbNSFP)
-  - SPLICE_SITE_RF_DBNSFP - predicted effect of splice site disruption, using random forest (dbscSNV)
-  - SPLICE_SITE_ADA_DBNSFP - predicted effect of splice site disruption, using boosting (dbscSNV)
+  - DBNSFP_BAYESDEL_ADDAF - predicted effect from BayesDel (dbNSFP)
+  - DBNSFP_LIST_S2 - predicted effect from LIST-S2 (dbNSFP)
+  - DBNSFP_SIFT - predicted effect from SIFT (dbNSFP)
+  - DBNSFP_PROVEAN - predicted effect from PROVEAN (dbNSFP)
+  - DBNSFP_MUTATIONTASTER - predicted effect from MUTATIONTASTER (dbNSFP)
+  - DBNSFP_MUTATIONASSESSOR - predicted effect from MUTATIONASSESSOR (dbNSFP)
+  - DBNSFP_M_CAP - predicted effect from M-CAP (dbNSFP)
+  - DBNSFP_ALOFTPRED - predicted effect from ALoFT (dbNSFP)
+  - DBNSFP_MUTPRED - score from MUTPRED (dbNSFP)
+  - DBNSFP_FATHMM - predicted effect from FATHMM (dbNSFP)
+  - DBNSFP_PRIMATEAI - predicted effect from PRIMATEAI (dbNSFP)
+  - DBNSFP_DEOGEN2 - predicted effect from DEOGEN2 (dbNSFP)
+  - DBNSFP_GERP - evolutionary constraint measure from GERP (dbNSFP)
+  - DBNSFP_FATHMM_MKL - predicted effect from FATHMM-mkl (dbNSFP)
+  - DBNSFP_META_RNN - predicted effect from ensemble prediction (deep learning - dbNSFP)
+  - DBNSFP_SPLICE_SITE_RF - predicted effect of splice site disruption, using random forest (dbscSNV)
+  - DBNSFP_SPLICE_SITE_ADA - predicted effect of splice site disruption, using boosting (dbscSNV)
 
 
 ##### _Variant frequencies/annotations in germline/somatic databases_
@@ -373,7 +368,7 @@ Here, the __sample_id__ is provided as input by the user, and reflects a unique 
 ##### Annotated List of all SNVs/InDels
 We provide a tab-separated values file with most important annotations for SNVs/InDels. The file has the following naming convention:
 
-__sample_id__.pcgr_acmg.__genome_assembly__.snvs\_indels.tiers.tsv
+<**sample_id**>.pcgr_acmg.<**genome_assembly**>.snvs_indels.tiers.tsv
 
 The SNVs/InDels are organized into different __tiers__ (as defined above for the HTML report)
 
@@ -397,53 +392,57 @@ The following variables are included in the tiered TSV file:
     15. ENSEMBL_TRANSCRIPT_ID - Ensembl transcript identifier
     16. ENSEMBL_GENE_ID - Ensembl gene identifier
     17. REFSEQ_MRNA - RefSeq mRNA identifier
-    18. ONCOGENE - Gene is predicted/classified as an oncogene (CancerMine/NCG)
-    19. TUMOR_SUPPRESSOR - Gene is predicted/classified as tumor suppressor (CancerMine/NCG)
-    20. ONCOGENE_EVIDENCE - Underlying evidence for oncogene prediction/classification
-    21. TUMOR_SUPPRESSOR_EVIDENCE - Underlying evidence for tumor suppressor prediction/classification
-    22. CONSEQUENCE - Variant consequence (as defined above for VCF output:
+    18. REFSEQ_PEPTIDE - RefSeq peptide identifier
+    19. TRANSCRIPT_MANE_SELECT - MANE select transcript identifier
+    20. ONCOGENE - Gene is predicted/classified as an oncogene (CancerMine/NCG)
+    21. TUMOR_SUPPRESSOR - Gene is predicted/classified as tumor suppressor (CancerMine/NCG)
+    22. ONCOGENE_EVIDENCE - Underlying evidence for oncogene prediction/classification
+    23. TUMOR_SUPPRESSOR_EVIDENCE - Underlying evidence for tumor suppressor prediction/classification
+    24. CONSEQUENCE - Variant consequence (as defined above for VCF output:
         Consequence)
-    23. PROTEIN_CHANGE - Protein change (HGVSp without reference accession)
-    24. PROTEIN_DOMAIN - Protein domain description (Pfam)
-    25. CODING_STATUS - Coding variant status wrt. protein alteration ('coding' or 'noncoding')
-    26. EXONIC_STATUS - Exonic variant status ('exonic' or 'nonexonic')
-    27. CDS_CHANGE - composite VEP-based variable for coding change, format:
+    25. PROTEIN_CHANGE - Protein change (HGVSp without reference accession)
+    26. PROTEIN_DOMAIN - Protein domain description (Pfam)
+    27. CODING_STATUS - Coding variant status wrt. protein alteration ('coding' or 'noncoding')
+    28. EXONIC_STATUS - Exonic variant status ('exonic' or 'nonexonic')
+    29. CDS_CHANGE - composite VEP-based variable for coding change, format:
         Consequence:Feature:cDNA_position:EXON:HGVSp_short
-    28. HGVSp
-    29. HGVSc
-    30. EFFECT_PREDICTIONS - as defined above for VCF
-    31. MUTATION_HOTSPOT - mutation hotspot codon in
+    30. HGVSp
+    31. HGVSc
+    32. REGULATORY_ANNOTATION - Regulatory annotations (promoter/enhancer/TF_binding site overlap etc.) from VEP (optional)
+    33. EFFECT_PREDICTIONS - as defined above for VCF
+    34. MUTATION_HOTSPOT - mutation hotspot codon in
         cancerhotspots.org. Format: gene_symbol | codon | q-value
-    32. MUTATION_HOTSPOT_TRANSCRIPT - hotspot-associated transcripts (Ensembl transcript ID)
-    33. MUTATION_HOTSPOT_CANCERTYPE - hotspot-associated cancer types (from cancerhotspots.org)
-    34. PUTATIVE_DRIVER_MUTATION - Indicates if variant is predicted as
+    35. MUTATION_HOTSPOT_TRANSCRIPT - hotspot-associated transcripts (Ensembl transcript ID)
+    36. MUTATION_HOTSPOT_CANCERTYPE - hotspot-associated cancer types (from cancerhotspots.org)
+    37. PUTATIVE_DRIVER_MUTATION - Indicates if variant is predicted as
         driver mutation from TCGA's PanCancer study of cancer driver mutation
-    35. CHASMPLUS_DRIVER - Driver mutation predicted by CHASMplus algorithm
-    36. CHASMPLUS_TTYPE - Tumor type for which mutation is predicted as driver by CHASMplus
-    37. VEP_ALL_CSQ - all VEP transcript block consequences
-    38. DBSNPRSID - dbSNP reference cluster ID
-    39. COSMIC_MUTATION_ID - COSMIC mutation ID
-    40. TCGA_PANCANCER_COUNT - Raw variant count across all TCGA tumor types
-    41. TCGA_FREQUENCY - Frequency of variant across TCGA tumor types. Format: tumortype|
+    38. CHASMPLUS_DRIVER - Driver mutation predicted by CHASMplus algorithm
+    39. CHASMPLUS_TTYPE - Tumor type for which mutation is predicted as driver by CHASMplus
+    40. VEP_ALL_CSQ - all VEP transcript block consequences
+    41. DBSNPRSID - dbSNP reference cluster ID
+    42. COSMIC_MUTATION_ID - COSMIC mutation ID
+    43. TCGA_PANCANCER_COUNT - Raw variant count across all TCGA tumor types
+    44. TCGA_FREQUENCY - Frequency of variant across TCGA tumor types. Format: tumortype|
     percent affected|affected cases|total cases
-    42. ICGC_PCAWG_OCCURRENCE - Mutation occurrence in ICGC-PCAWG by project:
+    45. ICGC_PCAWG_OCCURRENCE - Mutation occurrence in ICGC-PCAWG by project:
     project_code|affected_donors|tested_donors|frequency
-    43. CHEMBL_COMPOUND_ID - Compounds (as ChEMBL IDs) that are targeted towards the encoded protein (from Open Targets Platform)
-    44. CHEMBL_COMPOUND_TERMS - Compounds (as drug names) that are targeted towards the encoded protein (from Open Targets Platform)
-    45. SIMPLEREPEATS_HIT - Variant overlaps UCSC _simpleRepeat_ sequence repeat track
-    46. WINMASKER_HIT - Variant overlaps UCSC _windowmaskerSdust_ sequence repeat track
-    47. OPENTARGETS_RANK - OpenTargets association score (between 0 and 1) for gene (maximum across cancer phenotypes)
-    48. CLINVAR - ClinVar association: variant origin and associated traits
-    49. CLINVAR_CLNSIG - clinical significance of ClinVar variant
-    50. GLOBAL_AF_GNOMAD - global germline allele frequency in gnomAD
-    51. GLOBAL_AF_1KG - 1000G Project - phase 3, germline allele frequency
-    52. CALL_CONFIDENCE - confidence indicator for somatic variant
-    53. DP_TUMOR - sequencing depth at variant site (tumor sample)
-    54. AF_TUMOR - allelic fraction of alternate allele (tumor sample)
-    55. DP_CONTROL - sequencing depth at variant site (control sample)
-    56. AF_CONTROL - allelic fraction of alternate allele (control sample)
-    57. TIER
-    58. TIER_DESCRIPTION
+    46. CHEMBL_COMPOUND_ID - Compounds (as ChEMBL IDs) that are targeted towards the encoded protein (from Open Targets Platform)
+    47. CHEMBL_COMPOUND_TERMS - Compounds (as drug names) that are targeted towards the encoded protein (from Open Targets Platform)
+    48. SIMPLEREPEATS_HIT - Variant overlaps UCSC _simpleRepeat_ sequence repeat track
+    49. WINMASKER_HIT - Variant overlaps UCSC _windowmaskerSdust_ sequence repeat track
+    50. OPENTARGETS_RANK - OpenTargets association score (between 0 and 1) for gene (maximum across cancer phenotypes)
+    51. CLINVAR - ClinVar association: variant origin and associated traits
+    52. CLINVAR_CLNSIG - clinical significance of ClinVar variant
+    53. GLOBAL_AF_GNOMAD - global germline allele frequency in gnomAD
+    54. GLOBAL_AF_1KG - 1000G Project - phase 3, germline allele frequency
+    55. NCER_PERCENTILE - Genome-wide percentile score (10bp bins) from the non-coding Essential Regulation (ncER) algorithm
+    56. CALL_CONFIDENCE - confidence indicator for somatic variant
+    57. DP_TUMOR - sequencing depth at variant site (tumor sample)
+    58. AF_TUMOR - allelic fraction of alternate allele (tumor sample)
+    59. DP_CONTROL - sequencing depth at variant site (control sample)
+    60. AF_CONTROL - allelic fraction of alternate allele (control sample)
+    61. TIER
+    62. TIER_DESCRIPTION
 
 
 **NOTE**: The user has the possibility to append the TSV file with data from other tags in the input VCF of interest (i.e. using the *custom_tags* option in the TOML configuration file)
@@ -452,7 +451,7 @@ The following variables are included in the tiered TSV file:
 
 We provide a tab-separated values file information about mutational signatures detected in the tumor sample. The file has the following naming convention:
 
-__sample_id__.pcgr_acmg.__genome_assembly__.mutational\_signatures.tsv
+<**sample_id**>.pcgr_acmg.<**genome_assembly**>.mutational_signatures.tsv
 
 The format of the TSV file is the following:
 
@@ -473,7 +472,7 @@ The format of the TSV file is the following:
 
  Copy number segments are intersected with the genomic coordinates of all transcripts from [GENCODE's basic gene annotation](https://www.gencodegenes.org/releases/current.html). In addition, PCGR attaches cancer-relevant annotations for the affected transcripts. The naming convention of the compressed TSV file is as follows:
 
-__sample_id__.pcgr_acmg.__genome_assembly__.cna_segments.tsv.gz
+ <**sample_id**>.pcgr_acmg.<**genome_assembly**>.cna_segments.tsv.gz
 
 __NOTE__: This is file is organized according to the _affected transcripts_ (i.e. one line/record per affected transcript).
 

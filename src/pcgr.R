@@ -10,95 +10,49 @@ suppressWarnings(suppressPackageStartupMessages(library(pcgrr)))
 suppressWarnings(suppressPackageStartupMessages(library(magrittr)))
 suppressWarnings(suppressPackageStartupMessages(library(BSgenome.Hsapiens.UCSC.hg19)))
 suppressWarnings(suppressPackageStartupMessages(library(BSgenome.Hsapiens.UCSC.hg38)))
-suppressWarnings(suppressPackageStartupMessages(library(deconstructSigs)))
 suppressWarnings(suppressPackageStartupMessages(library(randomForest)))
 suppressWarnings(suppressPackageStartupMessages(library(caret)))
-suppressWarnings(suppressPackageStartupMessages(library(RcppTOML)))
 
 dir <- as.character(args[1])
-query_vcf2tsv <- as.character(args[2])
-query_cnv <- as.character(args[3])
-sample_name <- as.character(args[4])
-configuration_file <- as.character(args[5])
-version <- as.character(args[6])
-genome_assembly <- as.character(args[7])
-data_dir <- as.character(args[8])
-query_cna_plot <- as.character(args[9])
-purity_estimate <- as.character(args[10])
-ploidy_estimate <- as.character(args[11])
-assay <- as.character(args[12])
-t_only <- as.integer(args[13])
-estimate_tmb <- as.integer(args[14])
-tmb_algorithm <- as.character(args[15])
-estimate_msi <- as.integer(args[16])
-estimate_signatures <- as.integer(args[17])
-target_size_mb <- as.numeric(args[18])
-logr_homdel <- as.numeric(args[19])
-logr_gain <- as.numeric(args[20])
-cna_overlap_pct <- as.numeric(args[21])
-min_snv_signatures <- as.integer(args[22])
-all_reference_signatures <- as.integer(args[23])
-tumor_af_min <- as.numeric(args[24])
-tumor_dp_min <- as.numeric(args[25])
-control_af_max <- as.numeric(args[26])
-control_dp_min <- as.numeric(args[27])
-cell_line <- as.integer(args[28])
-include_trials <- as.integer(args[29])
-tumor_site <- as.character(args[30])
 
+## Append settings to PCGR configuration object processed in R package
+pcgr_config <- list()
 
-tumor_site <- stringr::str_replace_all(tumor_site,"_"," ")
-tumor_site <- stringr::str_replace_all(tumor_site,"@","/")
+pcgr_config[['required_args']] <- list()
+pcgr_config[['required_args']][['query_vcf2tsv']] <- as.character(args[2])
+pcgr_config[['required_args']][['query_cna']] <- as.character(args[3])
+pcgr_config[['required_args']][['query_rna_fusion']] <- as.character(args[4])
+pcgr_config[['required_args']][['query_rna_expression']] <- as.character(args[5])
+pcgr_config[['required_args']][['cpsr_report']] <- as.character(args[6])
+pcgr_config[['required_args']][['sample_name']] <- as.character(args[7])
+pcgr_config[['required_args']][['pcgr_version']] <- as.character(args[8])
+pcgr_config[['required_args']][['genome_assembly']] <- as.character(args[9])
+pcgr_config[['required_args']][['output_dir']] <- dir
+pcgr_config[['required_args']][['data_dir']] <- as.character(args[10])
 
-rlogging::SetTimeStampFormat(ts.format="%Y-%m-%d %H:%M:%S ")
-rlogging::SetLogFile(NULL)
-
-rlogging::message(paste0("Tumor primary site: ",tumor_site))
-
-pcgr_data <- readRDS(paste0(data_dir,'/data/',genome_assembly,'/rds/pcgr_data.rds'))
-
-pcgr_data[['assembly']][['seqinfo']] <- 
-   GenomeInfoDb::Seqinfo(seqnames = GenomeInfoDb::seqlevels(GenomeInfoDb::seqinfo(BSgenome.Hsapiens.UCSC.hg38)), 
-                         seqlengths = GenomeInfoDb::seqlengths(GenomeInfoDb::seqinfo(BSgenome.Hsapiens.UCSC.hg38)), genome = 'hg38')
-pcgr_data[['assembly']][['bsg']] <- BSgenome.Hsapiens.UCSC.hg38
-if(genome_assembly == 'grch37'){
-  pcgr_data[['assembly']][['bsg']] <- BSgenome.Hsapiens.UCSC.hg19
-  pcgr_data[['assembly']][['seqinfo']] <- 
-     GenomeInfoDb::Seqinfo(seqnames = GenomeInfoDb::seqlevels(GenomeInfoDb::seqinfo(BSgenome.Hsapiens.UCSC.hg19)), 
-                           seqlengths = GenomeInfoDb::seqlengths(GenomeInfoDb::seqinfo(BSgenome.Hsapiens.UCSC.hg19)), genome = 'hg19')
+if(pcgr_config[['required_args']][['query_cna']] == "None"){
+  pcgr_config[['required_args']][['query_cna']] <- NULL
+}
+if(pcgr_config[['required_args']][['query_rna_fusion']] == "None"){
+  pcgr_config[['required_args']][['query_rna_fusion']] <- NULL
+}
+if(pcgr_config[['required_args']][['query_rna_expression']] == "None"){
+  pcgr_config[['required_args']][['query_rna_expression']] <- NULL
+}
+if(pcgr_config[['required_args']][['cpsr_report']] == "None"){
+  pcgr_config[['required_args']][['cpsr_report']] <- NULL
 }
 
-## Read default PCGR configurations
-pcgr_config <- NULL
-default_configuration_file <- paste0(data_dir,'/data/',genome_assembly,'/pcgr_configuration_default.toml')
-if(file.exists(default_configuration_file)){
-	pcgr_config <- RcppTOML::parseTOML(default_configuration_file, fromFile = T)
-}
-user_config <- RcppTOML::parseTOML(configuration_file, fromFile = T)
-
-## Override with user-defined settings
-for(section in names(pcgr_config)){
-  if(!is.null(user_config[[section]])){
-    for(element in names(pcgr_config[[section]])){
-      if(!is.null(user_config[[section]][[element]])){
-        pcgr_config[[section]][[element]] <- user_config[[section]][[element]]
-      }
-    }
-  }
-}
-
-if(query_cnv == "None"){
-  query_cnv <- NULL
-}
-
-## Append settings to PCGR configuration object (fed as arguments to main Python script (pcgr.py))
 
 ## Tumor properties (t_props): purity, ploidy, tumor type
 pcgr_config[['t_props']] <- list()
-pcgr_config[['t_props']][['tumor_purity']] <- purity_estimate
-pcgr_config[['t_props']][['tumor_ploidy']] <- ploidy_estimate
-pcgr_config[['t_props']][['tumor_type']] <- tumor_site
-if(tumor_site == "Any"){
+pcgr_config[['t_props']][['tumor_purity']] <- as.numeric(args[11])
+pcgr_config[['t_props']][['tumor_ploidy']] <- as.numeric(args[12])
+pcgr_config[['t_props']][['tumor_type']] <- stringr::str_replace_all(
+  stringr::str_replace_all(
+    as.character(args[13]),"_"," "),
+  "@","/")
+if(pcgr_config[['t_props']][['tumor_type']] == "Any"){
   pcgr_config[['t_props']][['tumor_type']] <- "Cancer, NOS"
 }
 
@@ -107,67 +61,210 @@ if(tumor_site == "Any"){
 pcgr_config[['assay_props']] <- list()
 pcgr_config[['assay_props']][['mode']] <- 'Tumor-Control'
 pcgr_config[['assay_props']][['vcf_tumor_only']] <- FALSE
-pcgr_config[['assay_props']][['target_size_mb']] <- target_size_mb
-pcgr_config[['assay_props']][['type']] <- assay
+pcgr_config[['assay_props']][['target_size_mb']] <- as.numeric(args[14])
+pcgr_config[['assay_props']][['type']] <- as.character(args[15])
 
-if(t_only == 1){
+if(as.integer(args[16]) == 1){
   pcgr_config[['assay_props']][['vcf_tumor_only']] <- TRUE
   pcgr_config[['assay_props']][['mode']] <- 'Tumor-Only'
-  if(cell_line == 1){
-      pcgr_config[['assay_props']][['mode']] <- 'Cell line (Tumor-Only)'
+  if(as.integer(args[17]) == 1){
+    pcgr_config[['assay_props']][['mode']] <- 'Cell line (Tumor-Only)'
   }
 }
+
+pcgr_config[['tumor_only']] <- list()
+
+arg_counter <- 18
+for(maf_pop in c('maf_onekg_afr','maf_onekg_amr','maf_onekg_eas',
+                 'maf_onekg_eur','maf_onekg_sas','maf_onekg_global')){
+  pcgr_config[['tumor_only']][[maf_pop]] <- 
+    as.numeric(args[arg_counter])
+  arg_counter <- arg_counter + 1
+}
+
+for(maf_pop in c('maf_gnomad_afr','maf_gnomad_amr','maf_gnomad_asj',
+                 'maf_gnomad_eas','maf_gnomad_fin','maf_gnomad_nfe',
+                 'maf_gnomad_other','maf_gnomad_sas','maf_gnomad_global')){
+  pcgr_config[['tumor_only']][[maf_pop]] <- 
+    as.numeric(args[arg_counter])
+  arg_counter <- arg_counter + 1
+  
+}
+
+for(maf_filter in c('exclude_pon','exclude_likely_het_germline',
+                    'exclude_likely_hom_germline','exclude_dbsnp_nonsomatic',
+                    'exclude_nonexonic')){
+  pcgr_config[['tumor_only']][[maf_filter]] <- 
+    as.logical(as.integer(args[arg_counter]))
+  arg_counter <- arg_counter + 1
+  
+}
+
+## Settings for analyses to be performed and included in report
+## TMB
+pcgr_config[['tmb']] <- list()
+pcgr_config[['tmb']][['run']] <- as.logical(as.integer(args[arg_counter]))
+arg_counter <- arg_counter + 1
+pcgr_config[['tmb']][['algorithm']] <- as.character(args[arg_counter])
+arg_counter <- arg_counter + 1
+
+## MSI
+pcgr_config[['msi']] <- list()
+pcgr_config[['msi']][['run']] <- as.logical(as.integer(args[arg_counter]))
+arg_counter <- arg_counter + 1
+
+## Mutational signatures
+pcgr_config[['msigs']] <- list()
+pcgr_config[['msigs']][['run']] <- as.logical(as.integer(args[arg_counter]))
+arg_counter <- arg_counter + 1
+
+pcgr_config[['msigs']][['mutation_limit']] <- as.numeric(args[arg_counter])
+arg_counter <- arg_counter + 1
+
+pcgr_config[['msigs']][['all_reference_signatures']] <- as.logical(as.integer(args[arg_counter]))
+arg_counter <- arg_counter + 1
+
+pcgr_config[['msigs']][['include_artefact_signatures']] <- as.logical(as.integer(args[arg_counter]))
+arg_counter <- arg_counter + 1
+
+## CNA arguments
+## Copy number aberration (CNA)
+pcgr_config[['cna']] <- list()
+for(cna_config in c('log_r_homdel','log_r_gain','cna_overlap_pct')){
+  pcgr_config[['cna']][[cna_config]] <- as.numeric(args[arg_counter])
+  arg_counter <- arg_counter + 1
+}
+
+## Allelic support settings (VCF) - max/min support
+for(as_setting in c('tumor_af_min','tumor_dp_min',
+                    'control_dp_min','control_af_max')){
+  pcgr_config[['allelic_support']][[as_setting]] <- as.numeric(args[arg_counter])
+  arg_counter <- arg_counter + 1
+}
+
+## Allelic support settings (VCF) - VCF INFO tags
+for(as_setting in c('tumor_af_tag','tumor_dp_tag',
+                    'control_af_tag','control_dp_tag',
+                    'call_conf_tag')){
+  pcgr_config[['allelic_support']][[as_setting]] <- as.character(args[arg_counter])
+  arg_counter <- arg_counter + 1
+}
+
+## Other arguments
+## Other settings (VEP, vcf2maf, visual theme, VCF validation, custom tags)
+pcgr_config[['clinicaltrials']] <- list()
+pcgr_config[['clinicaltrials']][['run']] <- as.logical(as.integer(args[arg_counter]))
+arg_counter <- arg_counter + 1
+pcgr_config[['other']] <- list()
+pcgr_config[['other']][['vep_n_forks']] <- as.integer(args[arg_counter])
+arg_counter <- arg_counter + 1
+pcgr_config[['other']][['vep_buffer_size']] <- as.integer(args[arg_counter])
+arg_counter <- arg_counter + 1
+pcgr_config[['other']][['vep_no_intergenic']] <- as.logical(as.integer(args[arg_counter]))
+arg_counter <- arg_counter + 1
+pcgr_config[['other']][['vep_pick_order']] <- as.character(args[arg_counter])
+arg_counter <- arg_counter + 1
+pcgr_config[['other']][['vep_regulatory']] <- as.logical(as.integer(args[arg_counter]))
+arg_counter <- arg_counter + 1
+pcgr_config[['other']][['vcf2maf']] <- as.logical(as.integer(args[arg_counter]))
+arg_counter <- arg_counter + 1
+pcgr_config[['other']][['list_noncoding']] <- as.logical(as.integer(args[arg_counter]))
+arg_counter <- arg_counter + 1
+#pcgr_config[['preserved_info_tags']] <- list()
+pcgr_config[['preserved_info_tags']] <- as.character(args[arg_counter])
+arg_counter <- arg_counter + 1
+pcgr_config[['visual']] <- list()
+pcgr_config[['visual']][['report_theme']] <- as.character(args[arg_counter])
+arg_counter <- arg_counter + 1
+pcgr_config[['visual']][['nonfloating_toc']] <- as.logical(as.integer(args[arg_counter]))
+arg_counter <- arg_counter + 1
+pcgr_config[['other']][['vcf_no_validation']] <- as.logical(as.integer(args[arg_counter]))
+
+saveRDS(pcgr_config, file=paste0(dir,"/", pcgr_config[['required_args']][['sample_name']],".pcgr_config.rds"))
+
+pcgr_data <- readRDS(paste0(pcgr_config[['required_args']][['data_dir']],
+                            '/data/',
+                            pcgr_config[['required_args']][['genome_assembly']],
+                            '/rds/pcgr_data.rds'))
+
+pcgr_data[['assembly']][['seqinfo']] <- 
+   GenomeInfoDb::Seqinfo(seqnames = GenomeInfoDb::seqlevels(GenomeInfoDb::seqinfo(BSgenome.Hsapiens.UCSC.hg38)), 
+                         seqlengths = GenomeInfoDb::seqlengths(GenomeInfoDb::seqinfo(BSgenome.Hsapiens.UCSC.hg38)), 
+                         genome = 'hg38')
+pcgr_data[['assembly']][['bsg']] <- BSgenome.Hsapiens.UCSC.hg38
+if(pcgr_config[['required_args']][['genome_assembly']] == 'grch37'){
+  pcgr_data[['assembly']][['bsg']] <- BSgenome.Hsapiens.UCSC.hg19
+  pcgr_data[['assembly']][['seqinfo']] <- 
+     GenomeInfoDb::Seqinfo(
+       seqnames = GenomeInfoDb::seqlevels(GenomeInfoDb::seqinfo(BSgenome.Hsapiens.UCSC.hg19)), 
+       seqlengths = GenomeInfoDb::seqlengths(GenomeInfoDb::seqinfo(BSgenome.Hsapiens.UCSC.hg19)), genome = 'hg19')
+}
+
+if(pcgr_config[['other']][['vep_regulatory']] == F){
+  for(e in c('tier4_display','tier5_display','all','tsv')){
+    pcgr_data[['annotation_tags']][[e]] <-
+      pcgr_data[['annotation_tags']][[e]][
+        pcgr_data[['annotation_tags']][[e]] != "REGULATORY_ANNOTATION"]
+  }
+}
+
+my_log4r_layout <- function(level, ...) {
+  paste0(format(Sys.time()), " - pcgr-report-generation - ", level, " - ", ..., "\n", collapse = "")
+}
+
+log4r_logger <- log4r::logger(threshold = "INFO", appenders = log4r::console_appender(my_log4r_layout))
 
 ## Clinical trials 
-pcgr_config[['clinicaltrials']] <- list()
-pcgr_config[['clinicaltrials']][['run']] <- as.logical(include_trials)
-
 if(pcgr_config[['t_props']][['tumor_type']] == "Cancer, NOS"){
-  rlogging::message(paste0("Clinical trials will not be included in the report when primary site is not specified - skipping"))
+  pcgrr:::log4r_info(paste0("Clinical trials will not be included in the report when primary site is not specified - skipping"))
   pcgr_config[['clinicaltrials']][['run']] <- F
-
 }
 
-## Analyses to be performed and included in report (with options for mutational signatures)
-pcgr_config[['tmb']] <- list()
-pcgr_config[['tmb']][['run']] <- as.logical(estimate_tmb)
-pcgr_config[['tmb']][['algorithm']] <- as.character(tmb_algorithm)
-pcgr_config[['msi']] <- list()
-pcgr_config[['msi']][['run']] <- as.logical(estimate_msi)
-pcgr_config[['msigs']] <- list()
-pcgr_config[['msigs']][['run']] <- as.logical(estimate_signatures)
-pcgr_config[['msigs']][['all_reference_signatures']] <- as.logical(all_reference_signatures)
-pcgr_config[['msigs']][['mutation_limit']] <- min_snv_signatures
+pcgrr::log4r_info(paste0("Tumor primary site: ",pcgr_config[['t_props']][['tumor_type']]))
 
-## Copy number aberration (CNA) settings
-pcgr_config[['cna']] <- list()
-pcgr_config[['cna']][['log_r_homdel']] <- logr_homdel
-pcgr_config[['cna']][['log_r_gain']] <- logr_gain
-pcgr_config[['cna']][['cna_overlap_pct']] <- cna_overlap_pct
+pcg_report <- NULL
 
-## Allelic support settings (VCF)
-pcgr_config[['allelic_support']][['tumor_af_min']] <- tumor_af_min
-pcgr_config[['allelic_support']][['tumor_dp_min']] <- tumor_dp_min
-pcgr_config[['allelic_support']][['control_dp_min']] <- control_dp_min
-pcgr_config[['allelic_support']][['control_af_max']] <- control_af_max
+# ## Generate report object
+pcg_report <- 
+  pcgrr::generate_pcgr_report(
+    project_directory  = pcgr_config[['required_args']][['output_dir']], 
+    pcgr_data = pcgr_data, 
+    config = pcgr_config, 
+    tier_model = 'pcgr_acmg')
 
-## Generate report object
-pcg_report <- pcgrr::generate_pcgr_report(dir, query_vcf2tsv,pcgr_data, 
-                                     pcgr_version = version, pcgr_config, sample_name = sample_name, 
-                                     cna_segments_tsv = query_cnv, cna_plot = query_cna_plot, 
-                                     tier_model = 'pcgr_acmg')
-
-## Write report and result files
+# ## Write report and result files
 if(!is.null(pcg_report)){
-  pcgrr::write_report_output(dir, pcg_report, sample_name, genome_assembly, output_format = 'json')
-  pcgrr::write_report_output(dir, pcg_report, sample_name, genome_assembly, output_format = 'snv_tsv')
-  pcgrr::write_report_output(dir, pcg_report, sample_name, genome_assembly, output_format = 'msigs_tsv')
+  pcgrr::write_report_output(
+    pcg_report, 
+    pcgr_config,
+    output_format = 'json')
+  pcgrr::write_report_output(
+    pcg_report, 
+    pcgr_config,
+    output_format = 'snv_tsv')
+  pcgrr::write_report_output(
+    pcg_report, 
+    pcgr_config,
+    output_format = 'msigs_tsv')
   if(pcgr_config[['assay_props']][['vcf_tumor_only']] == T){
-    pcgrr::write_report_output(dir, pcg_report, sample_name, genome_assembly, output_format = 'snv_tsv_unfiltered')
+    pcgrr::write_report_output(
+      pcg_report, 
+      pcgr_config,
+      output_format = 'snv_tsv_unfiltered')
   }
-  pcgrr::write_report_output(dir, pcg_report, sample_name, genome_assembly, output_format = 'cna_tsv')
-  pcgrr::write_report_output(dir, pcg_report, sample_name, genome_assembly, output_format = 'html')
-  pcgrr::write_report_output(dir, pcg_report, sample_name, genome_assembly, output_format = 'html', flexdb = T)
+  pcgrr::write_report_output(
+    pcg_report, 
+    pcgr_config,
+    output_format = 'cna_tsv')
+  pcgrr::write_report_output(
+    pcg_report, 
+    pcgr_config,
+    output_format = 'html')
+  pcgrr::write_report_output(
+    pcg_report, 
+    pcgr_config,
+    output_format = 'html', 
+    flexdb = T)
 
 }
 

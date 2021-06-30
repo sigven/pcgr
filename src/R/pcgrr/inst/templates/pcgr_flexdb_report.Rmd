@@ -37,7 +37,11 @@ scrollY_flexdb_container <- "510px"
 .datatables{
     overflow: auto;
 }
+.chart-stage-flex {
+  overflow: scroll !important;
+}
 </style>
+
 
 ```{r conditional_overview, child='pcgr_flexdb/flexdb_snv_overview.Rmd', eval = pcg_report$content$snv_indel$eval}
 ```
@@ -86,6 +90,10 @@ scrollY_flexdb_container <- "510px"
 
 ```{r conditional_mut_sigs, child='pcgr_flexdb/flexdb_mutsignatures.Rmd', eval = pcg_report$content$m_signature_mp$eval}
 ```
+
+```{r conditional_cpsr, child='pcgr_flexdb/flexdb_cpsr.Rmd', eval = pcg_report$content$cpsr$eval}
+```
+
 
 ```{r conditional_trials, child='pcgr_flexdb/flexdb_clinicaltrials.Rmd', eval = pcg_report$content$clinicaltrials$eval}
 ```

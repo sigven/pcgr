@@ -1,4 +1,4 @@
-### GWAS hits 
+## GWAS hits 
 
 <br>
 
@@ -19,7 +19,7 @@ formula_gnomad <- as.formula(paste0("~",rlang::sym(tag_gnomad)))
 
 ```{r gwas_cancer, echo=F, results = 'asis', eval = show_gwas_filters}
 
-cat('A total of ',NROW(cps_report[['content']][['snv_indel']][["disp"]][['gwas']]), ' other germline variant(s) are associated with cancer phenotypes through genome-wide association studies (p-value < ',cps_report[['metadata']][['config']][['gwas']][['p_value_min']],'):')
+cat('A total of ',NROW(cps_report[['content']][['snv_indel']][["disp"]][['gwas']]), ' other germline variant(s) in the query VCF are associated with cancer phenotypes, as found through [genome-wide association studies](https://www.ebi.ac.uk/gwas/) (p-value < ',cps_report[['metadata']][['config']][['gwas']][['p_value_min']],'):')
 cat('\n')
 htmltools::br()
 htmltools::br()
@@ -29,11 +29,16 @@ crosstalk::bscols(
   list(
     crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_gwas_cancer, ~CONSEQUENCE),
     crosstalk::filter_checkbox("GENOTYPE", "Genotype", variants_gwas_cancer, ~GENOTYPE),
-    crosstalk::filter_select("SYMBOL", "Gene", variants_gwas_cancer, ~SYMBOL)
+    crosstalk::filter_select("SYMBOL", "Gene", variants_gwas_cancer, ~SYMBOL),
+    crosstalk::filter_select("GWAS_PHENOTYPE", "GWAS phenotype", variants_gwas_cancer, ~GWAS_PHENOTYPE)
+
   ),
   list(
     crosstalk::filter_slider("GLOBAL_AF_GNOMAD", "MAF gnomAD", variants_gwas_cancer, ~GLOBAL_AF_GNOMAD, sep="",ticks = F),
-    crosstalk::filter_select("GWAS_PHENOTYPE", "GWAS phenotype", variants_gwas_cancer, ~GWAS_PHENOTYPE)
+     crosstalk::filter_slider("GERP_SCORE","Genomic conservation score (GERP)",variants_gwas_cancer, ~GERP_SCORE,
+                             min = -12.3, max = 6.17, ticks = T),
+    crosstalk::filter_select("miRNA_TARGET_HIT", "miRNA target gain/loss", variants_gwas_cancer, ~miRNA_TARGET_HIT),
+    crosstalk::filter_select("TF_BINDING_SITE_VARIANT", "TF binding site alteration", variants_gwas_cancer, ~TF_BINDING_SITE_VARIANT)
   )
 )
 

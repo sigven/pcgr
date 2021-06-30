@@ -16,9 +16,9 @@ kataegis_detect <- function(data, sample_id = "sample_id",
                             max.dis = 1000,
                             chr = "chr", pos = "pos",
                             txdb = NULL) {
-  rlogging::message("Detecting possible kataegis events (clusters of C>T ",
+  pcgrr:::log4r_info(paste0("Detecting possible kataegis events (clusters of C>T ",
                     "(APOBEC enzyme family) and C>T/G ",
-                    "(TLS DNA polymerase) mutations")
+                    "(TLS DNA polymerase) mutations"))
   assertable::assert_colnames(
     data, c(chr, pos), only_colnames = F, quiet = T)
   invisible(
@@ -114,7 +114,7 @@ kataegis_detect <- function(data, sample_id = "sample_id",
       kataegis_df$geneID <- peakAnno@anno$geneId
     }
   }
-  rlogging::message(paste(dim(kataegis_df)[1],
+  pcgrr:::log4r_info(paste(dim(kataegis_df)[1],
                           "potential kataegis events identified",
                 sep = " "))
   return(kataegis_df)
@@ -211,9 +211,12 @@ generate_report_data_kataegis <- function(variant_set,
                                           build = "grch37") {
 
   pcg_report_kataegis <- pcgrr::init_report(class = "kataegis")
+  if(NROW(variant_set) == 0){
+    return(pcg_report_kataegis)
+  }
 
-  rlogging::message("------")
-  rlogging::message(
+  pcgrr:::log4r_info("------")
+  pcgrr:::log4r_info(
     paste0("Kataegis detection from genomic distribution of SNVs"))
 
 
@@ -255,7 +258,7 @@ generate_report_data_kataegis <- function(variant_set,
                                build = build)
     }
   }else{
-    rlogging::message(
+    pcgrr:::log4r_info(
       paste0(
         "No or too few SNVs (< 100) found in input - skipping kataegis detection"))
     #pcg_report_kataegis[["eval"]] <- FALSE

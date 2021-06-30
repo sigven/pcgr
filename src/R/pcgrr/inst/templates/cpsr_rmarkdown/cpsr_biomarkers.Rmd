@@ -1,5 +1,5 @@
 
-### Variant biomarkers {.tabset}
+### Biomarkers {.tabset}
 
 - Variants (__class 4/5__) in the query sample that overlap with reported clinical biomarkers from the [database for clinical interpretations of variants in cancer, CIViC](https://civic.genome.wustl.edu/#/home) are considered. Note that several variants in the query can overlap the same existing biomarker, given that biomarkers are reported at different resolutions (variant/gene level). Total number of clinical evidence items that coincide with query variants:
     * Predisposing: __`r NROW(cps_report[['content']][['snv_indel']][['clin_eitem']][['predisposing']])`__ evidence items

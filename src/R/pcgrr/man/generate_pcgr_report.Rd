@@ -5,36 +5,20 @@
 \title{Function that generates all contents of the cancer genome report (PCGR)}
 \usage{
 generate_pcgr_report(
-  project_directory,
-  query_vcf2tsv,
+  project_directory = NULL,
   pcgr_data = NULL,
-  pcgr_version = "dev",
   config = NULL,
-  sample_name = "SampleX",
-  cna_segments_tsv = NULL,
-  cna_plot = NULL,
   tier_model = "pcgr_acmg"
 )
 }
 \arguments{
 \item{project_directory}{name of project directory}
 
-\item{query_vcf2tsv}{name of gzipped TSV file (vcf2tsv) with annotated
-query SNVs/InDels}
-
 \item{pcgr_data}{List object with multiple PCGR data bundle annotations}
-
-\item{pcgr_version}{PCGR software version}
 
 \item{config}{Object with PCGR configuration parameters}
 
-\item{sample_name}{sample identifier}
-
-\item{cna_segments_tsv}{name of CNA segments file (tab-separated values)}
-
-\item{cna_plot}{Path to PNG image with CNA plot}
-
-\item{tier_model}{Variant tier model (pcgr_acmg/cpsr)}
+\item{tier_model}{Variant tier model}
 }
 \description{
 Function that generates all contents of the cancer genome report (PCGR)

@@ -90,15 +90,16 @@ cat('\n')
 dt <- oncogene_gain_variants %>%
   DT::datatable(escape = F, 
                 extensions = c("Buttons","Responsive"), 
-                options = list(pageLength = 8, 
-                               scrollY = scrollY_flexdb_container, 
-                               buttons = c('csv','excel'), 
-                               autoWidth = T, 
-                 fixedColumns = T,
-                 fixedHeader = T,
-                 #scrollX = F,
-                  columnDefs = list(list(width = '90px', targets = c(1,2,3,4,5,6))),
-                               dom = 'Bfrtip'))
+                options = list(
+                  pageLength = 8, 
+                  scrollY = scrollY_flexdb_container, 
+                  buttons = c('csv','excel'), 
+                  #autoWidth = T, 
+                  #fixedColumns = T,
+                  #fixedHeader = T,
+                  scrollX = "900px",
+                  #columnDefs = list(list(width = '90px', targets = c(1,2,3,4,5,6))),
+                  dom = 'Bfrtip'))
 
 if(length(drug_levels) > 0){
   dt <- dt %>%

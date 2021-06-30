@@ -18,7 +18,7 @@ generate_report_data_trials <- function(pcgr_data, config, sample_name) {
     NROW(pcgr_data$clinicaltrials$trials) > 0))
 
 
-  pcg_report_trials <- pcgrr::init_report(config, sample_name,
+  pcg_report_trials <- pcgrr::init_report(config = config,
                                           class = "clinicaltrials")
   pcg_report_trials[["eval"]] <- T
 
@@ -28,55 +28,41 @@ generate_report_data_trials <- function(pcgr_data, config, sample_name) {
                     config[["t_props"]][["tumor_type"]])
 
   if (nrow(pcg_report_trials[["trials"]]) > 0) {
+
     pcg_report_trials[["trials"]] <- pcg_report_trials[["trials"]] %>%
-      dplyr::filter(
-        (!is.na(keyword) |
-           intervention_n_target > 0 |
-           !is.na(biomarker)) &
-          (stringr::str_detect(
-            study_design_primary_purpose,
-            "Treatment|Other|Prevention|Diagnostic|Basic Science")) &
-          (stringr::str_detect(
-            overall_status,
-            "ecruiting|Enrolling|Unknown|Suspended|Withdrawn|Completed")))
+      dplyr::select(nct_id, title, overall_status,
+                    cui_link, intervention_link,
+                    phase, start_date,
+                    primary_completion_date, cui_name,
+                    intervention,
+                    intervention_target,
+                    biomarker_context,
+                    chromosome_abnormality,
+                    clinical_context,
+                    world_region,
+                    metastases, gender,
+                    minimum_age, maximum_age, phase,
+                    n_primary_cancer_sites,
+                    study_design_primary_purpose) %>%
+      dplyr::rename(condition_raw = cui_name,
+                    condition = cui_link,
+                    intervention2 = intervention_link,
+                    intervention_raw = intervention,
+                    biomarker_index = biomarker_context,
+                    keyword = clinical_context,
+                    chrom_abnormalities = chromosome_abnormality,
+                    metastases_index = metastases) %>%
+      dplyr::rename(intervention = intervention2) %>%
+      magrittr::set_colnames(toupper(names(.))) %>%
+      dplyr::arrange(N_PRIMARY_CANCER_SITES,
+                     OVERALL_STATUS, desc(START_DATE),
+                     desc(nchar(BIOMARKER_INDEX),
+                          STUDY_DESIGN_PRIMARY_PURPOSE)) %>%
+      dplyr::select(-c(N_PRIMARY_CANCER_SITES, STUDY_DESIGN_PRIMARY_PURPOSE))
 
-    if (nrow(pcg_report_trials[["trials"]]) > 0) {
-
-      pcg_report_trials[["trials"]] <- pcg_report_trials[["trials"]] %>%
-        dplyr::select(nct_id, title, overall_status,
-                      cui_link, keyword, intervention_link,
-                      phase, start_date,
-                      primary_completion_date, cui_name,
-                      intervention, intervention_target,
-                      biomarker, biomarker_support,
-                      metastases, gender,
-                      minimum_age, maximum_age, phase,
-                      num_primary_sites,
-                      study_design_primary_purpose) %>%
-        dplyr::rename(condition_raw = cui_name,
-                      condition = cui_link,
-                      intervention2 = intervention_link,
-                      intervention_raw = intervention,
-                      biomarker_index = biomarker,
-                      biomarker_index_support = biomarker_support,
-                      metastases_index = metastases) %>%
-        dplyr::rename(intervention = intervention2) %>%
-        magrittr::set_colnames(toupper(names(.))) %>%
-        dplyr::select(-BIOMARKER_INDEX_SUPPORT) %>%
-        dplyr::arrange(NUM_PRIMARY_SITES,
-                       OVERALL_STATUS, desc(START_DATE),
-                       desc(nchar(BIOMARKER_INDEX),
-                            STUDY_DESIGN_PRIMARY_PURPOSE)) %>%
-        dplyr::select(-c(NUM_PRIMARY_SITES, STUDY_DESIGN_PRIMARY_PURPOSE))
-
-      if (nrow(pcg_report_trials[["trials"]]) > 2000) {
-        pcg_report_trials[["trials"]] <-
-          head(pcg_report_trials[["trials"]], 2000)
-      }
-
-
-    }else{
-      pcg_report_trials[["missing_data"]] <- T
+    if (nrow(pcg_report_trials[["trials"]]) > 2000) {
+      pcg_report_trials[["trials"]] <-
+        head(pcg_report_trials[["trials"]], 2000)
     }
 
   }else{

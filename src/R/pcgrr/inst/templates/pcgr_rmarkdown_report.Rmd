@@ -5,17 +5,7 @@ bibliography: bibliography.bib
 nocite: |
   @Tamborero2018-aj, @Poti2019-qr, @Alexandrov2020-gj, @Alexandrov2013-gs, @Griffith2017-do, @Ma2018-to, @Cortes-Ciriano2017-vl, @Li2017-ew,
   @Blokzijl2018-nc, @Lever2019-xp, @Repana2019-dd, @Chalmers2017-cz, @Yin2020-or, @Bailey2018-os, @Fernandez2019-mk
-output: 
-  html_document:
-    toc: true
-    theme: default
-    number_sections: false
-    toc_float: true
-    toc_depth: 3
-    fig_width: 5
-    fig_height: 4
-    includes:
-      after_body: disclaimer.md
+output: html_document
 ---
 
 ```{r global_options, include=FALSE}
@@ -25,11 +15,17 @@ knitr::opts_chunk$set(echo = F,warning=FALSE, dpi=72, error=F, eval=T)
 ```{r settings_data_sources, child='pcgr_rmarkdown/report_query_settings.Rmd'}
 ```
 
-```{r conditional_value_box, child='pcgr_rmarkdown/value_boxes.Rmd', eval = pcg_report[['content']][['value_box']][['eval']]}
+```{r conditional_value_box, child='pcgr_rmarkdown/value_boxes.Rmd', eval = pcg_report[['content']][['value_box']][['eval']] & pcg_report[['metadata']][['config']][['assay_props']][['vcf_tumor_only']] == F}
 ```
 
+
+```{r conditional_value_box, child='pcgr_rmarkdown/value_boxes_tumor_only.Rmd', eval = pcg_report[['content']][['value_box']][['eval']] & pcg_report[['metadata']][['config']][['assay_props']][['vcf_tumor_only']] == T}
+```
+
+<!--
 ```{r conditional_seq_mode, child='pcgr_rmarkdown/snv_indel_header.Rmd', eval = pcg_report[['content']][['sequencing_mode']][['eval']]}
 ```
+-->
 
 ## Somatic SNVs/InDels
 
@@ -118,6 +114,11 @@ htmltools::br()
 ```{r conditional_kataegis, child='pcgr_rmarkdown/kataegis.Rmd', eval = pcg_report[['content']][['kataegis']][['eval']]}
 ```
 <br><br>
+
+
+```{r conditional_cpsr, child='pcgr_rmarkdown/cpsr_main_findings.Rmd', eval = pcg_report[['content']][['cpsr']][['eval']]}
+```
+
 
 ```{r conditional_trials, child='pcgr_rmarkdown/clinicaltrials.Rmd', eval = pcg_report[['content']][['clinicaltrials']][['eval']]}
 ```

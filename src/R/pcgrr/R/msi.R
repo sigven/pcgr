@@ -246,15 +246,17 @@ predict_msi_status <- function(vcf_data_df, pcgr_data,
                        dplyr::select(msi_stats, msi_predictors))
   if (msi_class == "MSS") {
     msi_stats$predicted_class <- "MSS (Microsatellite stable)"
-    msi_stats$vb <- "MSI status:\nMSS"
+    #msi_stats$vb <- "MSI status:\nMSS"
+    msi_stats$vb <- "MSS"
   }
   else{
     msi_stats$predicted_class <- "MSI.H (Microsatellite instability - high)"
-    msi_stats$vb <- "MSI status:\nMSI - High"
+    #msi_stats$vb <- "MSI status:\nMSI - High"
+    msi_stats$vb <- "MSI - High"
   }
-  rlogging::message(paste0("Predicted MSI status: ",
+  pcgrr:::log4r_info(paste0("Predicted MSI status: ",
                            msi_stats$predicted_class))
-  rlogging::message(paste0("MSI - Indel fraction: ",
+  pcgrr:::log4r_info(paste0("MSI - Indel fraction: ",
                            round(msi_stats$fracNonRepeatIndels, digits = 3)))
   msi_data <- list("mmr_pol_variants" = mmr_pol_df,
                    "msi_stats" = msi_stats,
@@ -276,12 +278,13 @@ generate_report_data_msi <- function(sample_calls,
                                      sample_name,
                                      pcgr_config) {
 
-  pcg_report_msi <- pcgrr::init_report(pcgr_config, sample_name, class = "msi")
-  rlogging::message("------")
-  rlogging::message("Predicting microsatellite instability status")
+  pcg_report_msi <- pcgrr::init_report(config =pcgr_config,
+                                       class = "msi")
+  pcgrr:::log4r_info("------")
+  pcgrr:::log4r_info("Predicting microsatellite instability status")
 
   msi_sample_calls <- sample_calls %>% dplyr::filter(EXONIC_STATUS == "exonic")
-  rlogging::message(paste0("n = ",
+  pcgrr:::log4r_info(paste0("n = ",
                            nrow(msi_sample_calls),
                            " exonic variants used for MSI prediction"))
   if (nrow(msi_sample_calls) >= 1) {
@@ -295,7 +298,7 @@ generate_report_data_msi <- function(sample_calls,
     pcg_report_msi[["eval"]] <- TRUE
   }
   else{
-    rlogging::message("Missing variants for MSI prediction")
+    pcgrr:::log4r_info("Missing variants for MSI prediction")
     pcg_report_msi[["missing_data"]] <- TRUE
   }
 

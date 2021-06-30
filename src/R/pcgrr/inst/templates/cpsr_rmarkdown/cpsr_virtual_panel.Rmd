@@ -5,6 +5,7 @@
 Cancer predisposition geneset subject to analysis/screening in this report:
 
    *  __[`r cps_report[['metadata']][['gene_panel']][['name']]`](`r cps_report[['metadata']][['gene_panel']][['url']]`)__
+      * Diagnostic-grade genes (applicable to Genomics England panels only): __`r cps_report[['metadata']][['config']][['diagnostic_grade_only']]`__
    *  `r cps_report[['metadata']][['gene_panel']][['confidence']]`
    
 ```{r gene_selection, echo = F, eval = T}

@@ -129,9 +129,9 @@ get_valid_chromosomes <- function(vcf_data_df,
         GenomeInfoDb::seqnames(bsg)))]
   if (length(unknown_regs) > 0) {
     unknown_regs <- paste(unknown_regs, collapse = ",\ ")
-    rlogging::warning(
+    pcgrr:::log4r_warn(paste(
       "Check chr names -- not all match BSgenome.Hsapiens object:\n",
-      unknown_regs, sep = " ")
+      unknown_regs, sep = " "))
     vcf_data_df_valid <-
       vcf_data_df_valid[vcf_data_df_valid[, chromosome_column]
                         %in% GenomeInfoDb::seqnames(bsg), ]
@@ -163,7 +163,7 @@ get_ordinary_chromosomes <- function(vcf_df, chrom_var = "CHROM") {
   colnames(nuc_chromosomes_df) <- c(chrom_var)
   vcf_df <- dplyr::semi_join(vcf_df, nuc_chromosomes_df, by = chrom_var)
   n_after_exclusion <- nrow(vcf_df)
-  rlogging::message(
+  pcgrr:::log4r_info(
     paste0("Excluding ",
            n_before_exclusion - n_after_exclusion,
            " variants from non-nuclear chromosomes/scaffolds"))
@@ -428,7 +428,7 @@ append_ucsc_segment_link <- function(var_df, hgname = "hg38",
 append_tcga_var_link <- function(var_df, pcgr_data = NULL,
                                  linktype = "dbsource") {
 
-  rlogging::message("Adding annotation links - TCGA")
+  pcgrr:::log4r_info("Adding annotation links - TCGA")
 
   if (any(grepl(paste0("^TCGA_FREQUENCY$"), names(var_df))) &
       any(grepl(paste0("^VAR_ID$"), names(var_df))) &
@@ -465,9 +465,193 @@ append_tcga_var_link <- function(var_df, pcgr_data = NULL,
   return(var_df)
 }
 
+
+append_tfbs_annotation <-
+  function(var_df){
+
+    if (any(grepl(paste0("^CONSEQUENCE$"), names(var_df))) &
+        any(grepl(paste0("^VAR_ID$"), names(var_df))) &
+        any(grepl(paste0("^REGULATORY_ANNOTATION$"), names(var_df))) &
+        !is.null(pcgr_data)) {
+
+
+      pcgrr:::log4r_info("Adding TF binding site annotations for upstream and 5'UTR variants - VEP regulatory")
+
+      var_df_unique_slim <-
+        dplyr::select(var_df, VAR_ID,
+                      REGULATORY_ANNOTATION,
+                      CONSEQUENCE) %>%
+        dplyr::filter(!is.na(REGULATORY_ANNOTATION) &
+                        stringr::str_detect(
+                          CONSEQUENCE,
+                          "5_prime|upstream"
+                        )) %>%
+        dplyr::distinct()
+
+      if(nrow(var_df_unique_slim) > 0){
+        var_df_unique_slim_melted <- as.data.frame(
+          var_df_unique_slim %>%
+          tidyr::separate_rows(REGULATORY_ANNOTATION, sep=",") %>%
+          dplyr::filter(
+            stringr::str_detect(
+              REGULATORY_ANNOTATION, "TF_binding_site_variant"
+            ))
+        )
+
+        if(nrow(var_df_unique_slim_melted) > 0){
+
+          pcgrr:::log4r_info(paste0(
+            "Found TF binding site annotations for ",
+            nrow(var_df_unique_slim)," variants"))
+
+          var_df_unique_slim_melted <- as.data.frame(
+            var_df_unique_slim_melted %>%
+              dplyr::mutate(
+                REGULATORY_ANNOTATION = stringr::str_replace(
+                  REGULATORY_ANNOTATION,
+                  "TF_binding_site_variant\\|MotifFeature\\|ENSM0[0-9]{1,}\\|",
+                  "")
+              ) %>%
+              tidyr::separate(REGULATORY_ANNOTATION,
+                              into = c('cons','matrix','motif_pos',
+                                       'high_inf_pos','motif_score_change',
+                                       'transcription_factors'),
+                              sep = "\\|",
+                              remove = T) %>%
+
+              tidyr::separate_rows(transcription_factors) %>%
+              dplyr::mutate(
+                TF_BINDING_SITE_VARIANT = dplyr::case_when(
+                  high_inf_pos == "N" ~ "Overlap: non-critical motif position",
+                  high_inf_pos == "Y" ~ "Overlap: critical motif position",
+                  TRUE ~ as.character(NA)
+                )
+              ) %>%
+              dplyr::mutate(
+                TF_BINDING_SITE_VARIANT_INFO =
+                  paste(transcription_factors, matrix,
+                         motif_pos, motif_score_change,
+                         high_inf_pos,sep="|")
+              )
+          )
+
+          var_df_links <- dplyr::group_by(var_df_unique_slim_melted, VAR_ID) %>%
+            dplyr::summarise(
+              TF_BINDING_SITE_VARIANT = paste(unique(sort(TF_BINDING_SITE_VARIANT)),
+                                                  collapse = ", "),
+              TF_BINDING_SITE_VARIANT_INFO = paste(unique(
+                TF_BINDING_SITE_VARIANT_INFO),
+                collapse = ", "),
+              .groups = "drop") %>%
+            dplyr::select(VAR_ID, TF_BINDING_SITE_VARIANT,
+                          TF_BINDING_SITE_VARIANT_INFO)
+
+          var_df <- dplyr::left_join(var_df, var_df_links,
+                                     by = c("VAR_ID" = "VAR_ID"))
+
+        }else{
+          var_df$TF_BINDING_SITE_VARIANT <- NA
+          var_df$TF_BINDING_SITE_VARIANT_INFO <- NA
+        }
+      }else{
+        var_df$TF_BINDING_SITE_VARIANT <- NA
+        var_df$TF_BINDING_SITE_VARIANT_INFO <- NA
+      }
+    }
+    return(var_df)
+  }
+
+#' Function that adds HTML links to different genetic variant identifiers
+#'
+#' @param var_df data frame with variants
+#' @param linktype type of link
+#' @param pcgr_data PCGR data structure
+#'
+append_dbmts_var_link <-
+  function(var_df) {
+
+
+    if (any(grepl(paste0("^DBMTS$"), names(var_df))) &
+        any(grepl(paste0("^VAR_ID$"), names(var_df))) &
+        any(grepl(paste0("^ENSEMBL_TRANSCRIPT_ID$"), names(var_df))) &
+        !is.null(pcgr_data)) {
+
+      pcgrr:::log4r_info("Adding miRNA target site annotations (gain/loss) - dbMTS")
+
+      var_df_unique_slim <-
+        dplyr::select(var_df, VAR_ID, CLINVAR_CLASSIFICATION,
+                      DBMTS, ENSEMBL_TRANSCRIPT_ID) %>%
+        dplyr::filter(!is.na(DBMTS) & !is.na(ENSEMBL_TRANSCRIPT_ID)) %>%
+        dplyr::distinct()
+      if (nrow(var_df_unique_slim) > 0) {
+
+        pcgrr:::log4r_info(paste0(
+          "Found miRNA target site annotations for ",
+          nrow(var_df_unique_slim)," variants"))
+
+        var_df_unique_slim_melted <- as.data.frame(
+          var_df_unique_slim %>%
+            tidyr::separate_rows(DBMTS, sep = ",") %>%
+            tidyr::separate(DBMTS, c("ens_trans_id", "mirna_id",
+                                     "algorithms", "algorithms_call",
+                                     "consensus_call"),
+                            sep = "\\|", convert = T) %>%
+            dplyr::filter(ens_trans_id == ENSEMBL_TRANSCRIPT_ID)
+        )
+        if(nrow(var_df_unique_slim_melted) > 0){
+          var_df_unique_slim_melted <- var_df_unique_slim_melted %>%
+            dplyr::select(-c(ENSEMBL_TRANSCRIPT_ID, algorithms_call)) %>%
+            dplyr::mutate(miRNA_TARGET_HIT = dplyr::case_when(
+              consensus_call == "G" ~ "gain",
+              consensus_call == "L" ~ "loss",
+              TRUE ~ as.character(NA)
+            )) %>%
+            dplyr::mutate(
+              algorithms = stringr::str_replace_all(
+                stringr::str_replace(
+                  stringr::str_replace(
+                    stringr::str_replace(
+                      algorithms, "R","RNAHybrid"),
+                    "TS","TargetScan"),
+                  "M","miRanda"),
+                "&"," / ")
+            ) %>%
+            dplyr::mutate(
+              miRNA_TARGET_HIT_PREDICTION =
+                paste0("<a href='http://www.mirbase.org/cgi-bin/mirna_entry.pl?id",
+                       "=",mirna_id,"' target='_blank'>",mirna_id,"</a> - ", miRNA_TARGET_HIT,
+                       " (",algorithms,")")
+            )
+
+
+          var_df_links <- dplyr::group_by(var_df_unique_slim_melted, VAR_ID) %>%
+            dplyr::summarise(
+              miRNA_TARGET_HIT_PREDICTION = paste(miRNA_TARGET_HIT_PREDICTION,
+                                                  collapse = ", "),
+              miRNA_TARGET_HIT = paste(unique(miRNA_TARGET_HIT),
+                                       collapse = ", "),
+              .groups = "drop") %>%
+            dplyr::select(VAR_ID, miRNA_TARGET_HIT, miRNA_TARGET_HIT_PREDICTION)
+
+          var_df <- dplyr::left_join(var_df, var_df_links,
+                                     by = c("VAR_ID" = "VAR_ID"))
+        }else{
+          var_df$miRNA_TARGET_HIT_PREDICTION <- NA
+          var_df$miRNA_TARGET_HIT <- NA
+        }
+      }else{
+        var_df$miRNA_TARGET_HIT_PREDICTION <- NA
+        var_df$miRNA_TARGET_HIT <- NA
+      }
+    }
+
+    return(var_df)
+  }
+
+
 append_dbnsfp_var_link <- function(var_df, linktype = "dbsource") {
 
-  rlogging::message("Adding annotation links - dbNSFP")
+  pcgrr:::log4r_info("Adding annotation links - dbNSFP")
 
   if (any(grepl(paste0("EFFECT_PREDICTIONS"), names(var_df)))) {
     var_df <- var_df %>%
@@ -506,7 +690,8 @@ append_dbnsfp_var_link <- function(var_df, linktype = "dbsource") {
 append_drug_var_link <- function(var_df, pcgr_data = NULL,
                              linktype = "dbsource") {
 
-  rlogging::message("Adding annotation links - targeted cancer drugs")
+  pcgrr:::log4r_info("Adding annotation links - targeted cancer drugs")
+
   if (any(grepl(paste0("^CHEMBL_COMPOUND_ID$"), names(var_df))) &
       any(grepl(paste0("^SYMBOL$"), names(var_df))) &
       any(grepl(paste0("^VAR_ID$"), names(var_df))) &
@@ -583,11 +768,12 @@ append_drug_var_link <- function(var_df, pcgr_data = NULL,
 #' @param pcgr_data PCGR data structure
 #' @param oncotree Oncotree data frame
 #'
-append_otargets_pheno_link <- function(var_df, pcgr_data = NULL,
+append_otargets_pheno_link <- function(var_df,
+                                       pcgr_data = NULL,
                                        oncotree = NULL,
                                        linktype = "dbsource") {
 
-  rlogging::message(paste0("Adding annotation links - gene-cancer ",
+  pcgrr:::log4r_info(paste0("Adding annotation links - gene-cancer ",
                            "type associations (OpenTargets Platform)"))
 
   assertable::assert_colnames(oncotree, c("cui", "efo_id"),
@@ -601,7 +787,9 @@ append_otargets_pheno_link <- function(var_df, pcgr_data = NULL,
       dplyr::filter(!is.na(OPENTARGETS_DISEASE_ASSOCS)) %>%
       dplyr::distinct()
     associations_found <- 0
-    oncotree <- oncotree %>% dplyr::filter(!is.na(efo_id))
+    oncotree <- oncotree %>%
+      dplyr::filter(!is.na(efo_id)) %>%
+      dplyr::mutate(efo_id = stringr::str_replace(efo_id,":", "_"))
     if (nrow(var_df_unique_slim) > 0) {
       var_df_unique_slim_melted <- as.data.frame(
         var_df_unique_slim %>%
@@ -660,19 +848,21 @@ append_otargets_pheno_link <- function(var_df, pcgr_data = NULL,
                                          as.numeric(0), OPENTARGETS_RANK))
 
       }else{
+        pcgrr:::log4r_warn(paste0("Could not generate Open Targets association links"))
         var_df$OT_DISEASE_LINK <- NA
         var_df$OT_DISEASE_TERMS <- NA
         var_df$OPENTARGETS_RANK <- 0
       }
     }else{
       if (associations_found == 0) {
+        pcgrr:::log4r_warn(paste0("Could not generate Open Targets association links"))
         var_df$OT_DISEASE_LINK <- NA
         var_df$OT_DISEASE_TERMS <- NA
         var_df$OPENTARGETS_RANK <- 0
       }
     }
   }else{
-    rlogging::warning(paste0("Could not generate Open Targets association ", "
+    pcgrr:::log4r_warn(paste0("Could not generate Open Targets association ", "
                              links - no Open Targets annotations provided ", "
                              in annotated VCF"))
     var_df$OT_DISEASE_LINK <- NA
@@ -691,8 +881,10 @@ append_otargets_pheno_link <- function(var_df, pcgr_data = NULL,
 #'
 #'
 append_pfeature_descriptions <- function(vcf_data_df, feature_descriptions) {
-  rlogging::message(paste0("Extending annotation descriptions related",
-                    "to UniprotKB/SwissProt protein features"))
+
+  pcgrr:::log4r_info(paste0("Extending annotation descriptions related",
+                    " to UniprotKB/SwissProt protein features"))
+
 
   invisible(assertthat::assert_that(
     !is.null(vcf_data_df),
@@ -772,8 +964,8 @@ append_gwas_citation_phenotype <-
 
     gwas_citations_phenotypes <- gwas_citations_phenotypes %>%
       dplyr::filter(p_value_num <= p_value_threshold)
-    rlogging::message("Adding citations/phenotypes underlying ",
-                      "GWAS hits (NHGRI-EBI GWAS Catalog)")
+    pcgrr:::log4r_info(paste0("Adding citations/phenotypes underlying ",
+                      "GWAS hits (NHGRI-EBI GWAS Catalog)"))
 
     invisible(assertthat::assert_that(
       !is.null(vcf_data_df),
@@ -806,6 +998,8 @@ append_gwas_citation_phenotype <-
       vcf_data_df$GWAS_PHENOTYPE <- NA
       return(vcf_data_df)
     }
+
+
     feature_df <- as.data.frame(
       feature_df %>%
         tidyr::separate_rows(GWAS_HIT, sep = ",") %>%
@@ -834,6 +1028,12 @@ append_gwas_citation_phenotype <-
         dplyr::filter(!is.na(GWAS_CITATION) & !is.na(GWAS_PHENOTYPE))
     )
     if (nrow(feature_df) > 0) {
+
+      pcgrr:::log4r_info(paste0(
+        "Found n = ",
+        nrow(feature_df),
+        " variants associated with genome-wide association studies"))
+
       vcf_data_df <- vcf_data_df %>%
         dplyr::left_join(feature_df, by = c("VAR_ID" = "VAR_ID"))
     }else{
@@ -861,16 +1061,19 @@ append_gwas_citation_phenotype <-
 #'
 filter_read_support <- function(vcf_df, config = NULL, precision = 3) {
 
-  rlogging::message(
-    "Filtering tumor variants based on allelic depth/fraction (min_dp_tumor=",
+  pcgrr:::log4r_info(paste0(
+    paste0("Filtering tumor variants based on allelic depth/fraction (min_dp_tumor=",
     config$allelic_support$tumor_dp_min,
     ", min_af_tumor=",
-    config$allelic_support$tumor_af_min, ")")
-  rlogging::message(
+    config$allelic_support$tumor_af_min, ")"))
+  )
+
+  pcgrr:::log4r_info(paste0(
     "Filtering tumor variants based on allelic depth/fraction (min_dp_control=",
     config$allelic_support$control_dp_min,
     ", max_af_control=",
-    config$allelic_support$control_af_max, ")")
+    config$allelic_support$control_af_max, ")"))
+
   n_before_dp_af_filtering <- nrow(vcf_df)
   if (!any(is.na(vcf_df$DP_TUMOR))) {
     vcf_df <- dplyr::filter(vcf_df,
@@ -891,7 +1094,7 @@ filter_read_support <- function(vcf_df, config = NULL, precision = 3) {
   n_removed <- n_before_dp_af_filtering - nrow(vcf_df)
   percentage <- round(as.numeric((n_removed / n_before_dp_af_filtering) * 100),
                       digits = 2)
-  rlogging::message(
+  pcgrr:::log4r_info(
     paste0("Removed ", n_removed,
            " tumor variants (", percentage,
            "%) based on thresholds for allelic depth/fraction"
@@ -949,11 +1152,11 @@ generate_annotation_link <- function(
       #if (vardb == "DBSNP") {
       df_annotation_links <- as.data.frame(
         tmp_df %>%
-          tidyr::separate_rows(!!sym(link_key_var), sep = "&|,") %>%
+          tidyr::separate_rows(!!rlang::sym(link_key_var), sep = "&|,") %>%
           dplyr::mutate(
             tmp_link = paste0("<a href='", url_prefix,
-                              !!sym(link_key_var), "'target=\"_blank\">",
-                              !!sym(link_display_var), "</a>")
+                              !!rlang::sym(link_key_var), "'target=\"_blank\">",
+                              !!rlang::sym(link_display_var), "</a>")
           )
       )
 
@@ -1005,8 +1208,11 @@ determine_genotype <- function(vcf_df) {
 }
 
 
-data_integrity_check <- function(vcf_df, pcgr_data, workflow = "pcgr") {
-  rlogging::message("Verifying data integrity of input callset")
+data_integrity_check <- function(vcf_df,
+                                 pcgr_data,
+                                 config = NULL,
+                                 workflow = "pcgr") {
+  pcgrr:::log4r_info("Verifying data integrity of input callset")
 
   stopifnot(is.data.frame(vcf_df) & !is.null(pcgr_data))
   stopifnot(!is.null(pcgr_data[["annotation_tags"]][["vcf_cpsr"]]) &
@@ -1016,6 +1222,12 @@ data_integrity_check <- function(vcf_df, pcgr_data, workflow = "pcgr") {
   if (workflow == "pcgr") {
     vars_required <- pcgr_data[["annotation_tags"]][["vcf_pcgr"]]
     vars_required <- vars_required[!vars_required$tag == "PANEL_OF_NORMALS", ]
+
+    if(!is.null(config)){
+      if(config$other$vep_regulatory == F){
+        vars_required <- vars_required[!vars_required$tag == "REGULATORY_ANNOTATION", ]
+      }
+    }
   }
 
   vcf_required_vars <-
@@ -1032,11 +1244,11 @@ data_integrity_check <- function(vcf_df, pcgr_data, workflow = "pcgr") {
     tag <- vars_required[i, "tag"]
     if (!(tag %in% colnames(vcf_df))) {
       if (workflow == "pcgr") {
-        rlogging::stop(
+        stop(
           paste0("Missing required variable (",
                  tag, ") in annotated TSV file from PCGR workflow - quitting"))
       }else{
-        rlogging::stop(
+        stop(
           paste0("Missing required variable (",
                  tag, ") in annotated TSV file from CPSR workflow - quitting"))
       }
@@ -1071,7 +1283,7 @@ append_annotation_links <- function(vcf_data_df,
 
     name <- pcgrr::variant_db_url[i, ]$name
     if (!name %in% skip) {
-      rlogging::message(paste0("Adding annotation links - ", name))
+      pcgrr:::log4r_info(paste0("Adding annotation links - ", name))
       group_by_var <- pcgrr::variant_db_url[i, ]$group_by_var
       url_prefix <- pcgrr::variant_db_url[i, ]$url_prefix
       link_key_var <- pcgrr::variant_db_url[i, ]$link_key_var
@@ -1114,8 +1326,13 @@ append_annotation_links <- function(vcf_data_df,
 #'
 #' @return vcf_data_df
 #'
-get_calls <- function(tsv_gz_file, pcgr_data, sample_name,
-                      config, oncotree = NULL, cpsr = F, n_lines_skip = 1,
+get_calls <- function(tsv_gz_file,
+                      pcgr_data,
+                      sample_name,
+                      config,
+                      oncotree = NULL,
+                      cpsr = F,
+                      n_lines_skip = 1,
                       maf_filenames = NULL) {
 
   ## check that arguments are valid
@@ -1174,25 +1391,48 @@ get_calls <- function(tsv_gz_file, pcgr_data, sample_name,
   }
 
   ## Annotation variables added by get_calls()
-  pcgr_columns <- c("GENOME_VERSION", "PROTEIN_CHANGE",
-                    "CONSEQUENCE", "GENOMIC_CHANGE",
-                    "VAR_ID", "OPENTARGETS_ASSOCIATIONS",
-                    "DOCM_DISEASE", "DOCM_LITERATURE",
-                    "CLINVAR", "CLINVAR_TRAITS_ALL",
-                    "GENE_NAME", "GENENAME", "CANCERGENE_SUPPORT",
-                    "OPENTARGETS_RANK", "TARGETED_DRUGS",
-                    "CANCER_ASSOCIATIONS", "DBSNP",
-                    "COSMIC", "PROTEIN_DOMAIN",
-                    "CLINVAR_PHENOTYPE", "NCBI_REFSEQ",
-                    "AF_TUMOR", "DP_TUMOR",
-                    "AF_CONTROL", "DP_CONTROL",
-                    "CALL_CONFIDENCE", "PFAM_DOMAIN_NAME",
-                    "GWAS_CITATION", "GWAS_PHENOTYPE")
-  vcf_data_df <- vcf_data_df[, !(colnames(vcf_data_df) %in% pcgr_columns)]
+  pcgr_cpsr_columns <-
+    c("GENOME_VERSION",
+      "PROTEIN_CHANGE",
+      "CONSEQUENCE",
+      "GENOMIC_CHANGE",
+      "VAR_ID",
+      "OPENTARGETS_ASSOCIATIONS",
+      "DOCM_DISEASE",
+      "DOCM_LITERATURE",
+      "CLINVAR",
+      "CLINVAR_TRAITS_ALL",
+      "GENE_NAME",
+      "GENENAME",
+      "CANCERGENE_SUPPORT",
+      "OPENTARGETS_RANK",
+      "TARGETED_DRUGS",
+      "CANCER_ASSOCIATIONS",
+      "DBSNP",
+      "COSMIC",
+      "PROTEIN_DOMAIN",
+      "CLINVAR_PHENOTYPE",
+      "NCBI_REFSEQ",
+      "AF_TUMOR",
+      "DP_TUMOR",
+      "AF_CONTROL",
+      "DP_CONTROL",
+      "CALL_CONFIDENCE",
+      "PFAM_DOMAIN_NAME",
+      "GWAS_CITATION",
+      "GWAS_PHENOTYPE",
+      "TF_BINDING_SITE_VARIANT",
+      "TF_BINDING_SITE_VARIANT_INFO",
+      "miRNA_TARGET_HIT",
+      "miRNA_TARGET_HIT_PREDICTION"
+    )
+  vcf_data_df <- vcf_data_df[, !(colnames(vcf_data_df) %in% pcgr_cpsr_columns)]
 
   ## Perform data integrity check of input
   vcf_data_df <- vcf_data_df %>%
-    pcgrr::data_integrity_check(pcgr_data = pcgr_data, workflow = wflow) %>%
+    pcgrr::data_integrity_check(pcgr_data = pcgr_data,
+                                config = config,
+                                workflow = wflow) %>%
     dplyr::mutate(GENOMIC_CHANGE = paste0(CHROM, ":g.", POS, REF, ">", ALT)) %>%
     dplyr::mutate(VAR_ID = paste(CHROM, POS, REF, ALT, sep = "_")) %>%
     pcgrr::detect_vcf_sample_name(cpsr = cpsr, sample_name = sample_name) %>%
@@ -1218,6 +1458,7 @@ get_calls <- function(tsv_gz_file, pcgr_data, sample_name,
               CONSEQUENCE == "missense_variant" &
               LOSS_OF_FUNCTION == T, FALSE, LOSS_OF_FUNCTION))
     }
+    ## Add GWAS annotations (phenotypes)
     if (!is.null(config[["gwas"]][["p_value_min"]])) {
       vcf_data_df <- vcf_data_df %>%
         pcgrr::append_gwas_citation_phenotype(
@@ -1226,8 +1467,11 @@ get_calls <- function(tsv_gz_file, pcgr_data, sample_name,
           p_value_threshold = config[["gwas"]][["p_value_min"]]
           )
     }
+    ## adding miRNA target site overlap (dbMTS) & TF binding site variants (VEP)
     vcf_data_df <- vcf_data_df %>%
-      pcgrr::determine_genotype()
+      pcgrr::determine_genotype() %>%
+      pcgrr::append_dbmts_var_link() %>%
+      pcgrr::append_tfbs_annotation()
 
   }else{
     if (!("PANEL_OF_NORMALS" %in% colnames(vcf_data_df))) {
@@ -1297,7 +1541,7 @@ get_calls <- function(tsv_gz_file, pcgr_data, sample_name,
 
 
 
-  rlogging::message(paste0("Number of PASS variants: ", nrow(vcf_data_df)))
+  pcgrr:::log4r_info(paste0("Number of PASS variants: ", nrow(vcf_data_df)))
   if (any(grepl(paste0("VARIANT_CLASS$"), names(vcf_data_df)))) {
     n_snvs <-
       vcf_data_df %>% dplyr::filter(!is.na(VARIANT_CLASS) &
@@ -1314,13 +1558,13 @@ get_calls <- function(tsv_gz_file, pcgr_data, sample_name,
     n_substitutions <- vcf_data_df %>%
       dplyr::filter(!is.na(VARIANT_CLASS) & VARIANT_CLASS == "substitution") %>%
       nrow()
-    rlogging::message(
+    pcgrr:::log4r_info(
       paste0("Number of SNVs: ", n_snvs))
-    rlogging::message(
+    pcgrr:::log4r_info(
       paste0("Number of deletions: ", n_deletions))
-    rlogging::message(
+    pcgrr:::log4r_info(
       paste0("Number of insertions: ", n_insertions))
-    rlogging::message(
+    pcgrr:::log4r_info(
       paste0("Number of block substitutions: ", n_substitutions))
   }
 
@@ -1345,7 +1589,7 @@ get_calls <- function(tsv_gz_file, pcgr_data, sample_name,
   vcf_data_df <- rbind(vcf_data_df_1, vcf_data_df_2) %>%
     pcgrr::order_variants()
 
-  rlogging::message("Extending annotation descriptions related to KEGG pthws")
+  pcgrr:::log4r_info("Extending annotation descriptions related to KEGG pathways")
   vcf_data_df <- dplyr::left_join(vcf_data_df,
                                   pcgr_data[["kegg"]][["pathway_links"]],
                                   by = c("ENTREZ_ID" = "gene_id")) %>%
@@ -1356,7 +1600,7 @@ get_calls <- function(tsv_gz_file, pcgr_data, sample_name,
     dplyr::filter(!is.na(CLINVAR_MSID) & !is.na(VAR_ID))
   if ("CLINVAR_MSID" %in% colnames(vcf_data_df) &
       "VAR_ID" %in% colnames(vcf_data_df)) {
-    rlogging::message("Extending annotation descriptions related to ClinVar")
+    pcgrr:::log4r_info("Extending annotation descriptions related to ClinVar")
     vcf_data_df <-
       dplyr::left_join(vcf_data_df, clinvar,
                        by = c("CLINVAR_MSID", "VAR_ID")) %>%
@@ -1371,7 +1615,9 @@ get_calls <- function(tsv_gz_file, pcgr_data, sample_name,
   vcf_data_df <-
     pcgrr::df_string_replace(
       vcf_data_df,
-      strings = c("VEP_ALL_CSQ", "DOCM_DISEASE",
+      strings = c("VEP_ALL_CSQ",
+                  "REGULATORY_ANNOTATION",
+                  "DOCM_DISEASE",
                   "MUTATION_HOTSPOT_CANCERTYPE",
                   "ICGC_PCAWG_OCCURRENCE"),
       pattern = ",", replacement = ", ", replace_all = T)
@@ -1391,7 +1637,6 @@ get_calls <- function(tsv_gz_file, pcgr_data, sample_name,
       pcgrr::append_dbnsfp_var_link()
   }
 
-
   if ("TCGA_FREQUENCY" %in% colnames(vcf_data_df)) {
     vcf_data_df <- vcf_data_df %>%
       pcgrr::append_tcga_var_link(pcgr_data = pcgr_data)
@@ -1405,12 +1650,6 @@ get_calls <- function(tsv_gz_file, pcgr_data, sample_name,
       pcgrr::append_drug_var_link(pcgr_data = pcgr_data) %>%
       dplyr::rename(TARGETED_DRUGS = ANTINEOPHARMALINK)
   }
-
-  # if (!("CANCER_ASSOCIATIONS" %in% colnames(vcf_data_df))) {
-  #   vcf_data_df <- vcf_data_df %>%
-  #     pcgrr::append_disgenet_var_link(pcgr_data = pcgr_data) %>%
-  #     dplyr::rename(CANCER_ASSOCIATIONS = DISGENET_LINK)
-  # }
 
   if (!("OPENTARGETS_ASSOCIATIONS" %in% colnames(vcf_data_df))) {
     vcf_data_df <- vcf_data_df %>%
@@ -1430,7 +1669,7 @@ write_processed_vcf <- function(calls, sample_name = NULL,
                                 output_directory = NULL,
                                 vcf_fname = NULL) {
 
-  rlogging::message("Writing VCF file with input calls for signature analysis")
+  pcgrr:::log4r_info("Writing VCF file with input calls for signature analysis")
 
   header_lines <-
     c("##fileformat=VCFv4.2",
@@ -1440,6 +1679,9 @@ write_processed_vcf <- function(calls, sample_name = NULL,
 
   vcf_df <- calls %>%
     dplyr::select(CHROM, POS, REF, ALT) %>%
+    dplyr::filter(nchar(REF) == 1 & nchar(ALT) == 1) %>%
+    dplyr::filter(stringr::str_detect(REF,"^(A|C|T|G)$") |
+                  stringr::str_detect(ALT,"^(A|C|T|G)$")) %>%
     dplyr::mutate(QUAL = ".", FILTER = "PASS", ID = ".",
                   INFO = paste0("SAMPLE_ID=", sample_name)) %>%
     dplyr::distinct()
@@ -1489,12 +1731,13 @@ detect_vcf_sample_name <- function(df, sample_name = NULL, cpsr = FALSE) {
   stopifnot(is.data.frame(df) & !is.null(sample_name))
   if ("VCF_SAMPLE_ID" %in% colnames(df)) {
     unique_sample_names <- unique(df$VCF_SAMPLE_ID)
-    rlogging::message(paste0("Found the following VCF sample names: ",
+    pcgrr:::log4r_info(paste0("Found the following VCF sample names: ",
                              paste(unique_sample_names, collapse = ", ")))
 
     if (length(unique_sample_names) > 1 & cpsr == T) {
-      rlogging::stop("Found more than one sample name - VCF with somatic ",
-                     "calls? Expecting single sample germline VCF for CPSR")
+      pcgrr:::log4r_info(paste0("Found more than one sample name - VCF with somatic ",
+                     "calls? Expecting single sample germline VCF for CPSR"))
+      stop()
     }
   }
   df <- df %>%
@@ -1505,13 +1748,16 @@ detect_vcf_sample_name <- function(df, sample_name = NULL, cpsr = FALSE) {
 update_maf_allelic_support <- function(calls, maf_fname_tmp,
                                        maf_fname, delete_raw = T) {
 
-  assertable::assert_colnames(calls, c("CHROM", "POS",
-                                      "DP_TUMOR", "AF_TUMOR",
+  assertable::assert_colnames(calls, c("CHROM",
+                                       "POS",
+                                      "DP_TUMOR",
+                                      "AF_TUMOR",
                                       "DP_CONTROL",
-                                      "AF_CONTROL", "VARIANT_CLASS"),
+                                      "AF_CONTROL",
+                                      "VARIANT_CLASS"),
                               only_colnames = F, quiet = T)
-  rlogging::message("Updating MAF file with information regarding ",
-                    "variant sequencing depths and allelic support")
+  pcgrr:::log4r_info(paste0("Updating MAF file with information regarding ",
+                    "variant sequencing depths and allelic support"))
   maf_data <- NULL
   if (file.exists(maf_fname_tmp) & file.info(maf_fname_tmp)$size > 0) {
     maf_data <- read.table(maf_fname_tmp, skip = 1, header = T,
@@ -1543,9 +1789,10 @@ update_maf_allelic_support <- function(calls, maf_fname_tmp,
     dplyr::rename(Chromosome = CHROM, Start_Position = POS) %>%
     dplyr::mutate(VARIANT_CLASS = as.character(VARIANT_CLASS)) %>%
     dplyr::mutate(Chromosome = as.character(Chromosome)) %>%
-    dplyr::mutate(Start_Position = dplyr::if_else(VARIANT_CLASS == "deletion",
-                                                  Start_Position + 1,
-                                                  as.double(Start_Position)))
+    dplyr::mutate(Start_Position = dplyr::if_else(
+      VARIANT_CLASS == "deletion",
+      Start_Position + 1,
+      as.double(Start_Position)))
 
     if (!is.null(maf_data)) {
       if (!any(is.na(calls_maf$DP_TUMOR)) & !any(is.na(calls_maf$AF_TUMOR))) {
@@ -1616,7 +1863,7 @@ targeted_drugs_pr_ttype <- function(ttype,
                                     pcgr_data,
                                     ignore_on_label_early_phase = T){
 
-  rlogging::message(
+  pcgrr:::log4r_info(
     paste0("Retrieving targeted drugs (on-label and off-label) for ",
            "indications relevant for tumor type - ", ttype))
   assertthat::assert_that(!is.null(ttype))
@@ -1721,8 +1968,8 @@ targeted_drugs_summarise <- function(
                       paste0(drug_indication_label,
                              " (<b>", nci_concept_display_name, "</b>)")) %>%
       dplyr::group_by(symbol) %>%
-      dplyr::summarise(!!sym(link_label) := paste0(drug_link, collapse = ", "),
-                       !!sym(indication_label) := paste0(drug_indication_label,
+      dplyr::summarise(!!rlang::sym(link_label) := paste0(drug_link, collapse = ", "),
+                       !!rlang::sym(indication_label) := paste0(drug_indication_label,
                                                          collapse = "; "),
                        .groups = "drop")
   )
@@ -1730,4 +1977,16 @@ targeted_drugs_summarise <- function(
   return(candidate_drugs)
 
 
+}
+
+log4r_info <- function(msg) {
+  log4r::info(log4r_logger, msg)
+}
+
+log4r_debug <- function(msg) {
+  log4r::debug(log4r_logger, msg)
+}
+
+log4r_warn <- function(msg) {
+  log4r::warn(log4r_logger, msg)
 }

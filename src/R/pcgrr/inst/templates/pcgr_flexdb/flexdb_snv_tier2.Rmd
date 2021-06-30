@@ -138,11 +138,11 @@ variants_tier2_shared %>%
                 options = list(pageLength = 8, 
                                scrollY = scrollY_flexdb_container, 
                                buttons = c('csv','excel'), 
-                               autoWidth = T, 
+                               #autoWidth = T, 
                  fixedColumns = T,
                  fixedHeader = T,
                  width = "100%",
-                 #scrollX = F,
+                 scrollX = "900px",
                   columnDefs = list(list(width = '90px', targets = c(1,2,3,4,5,6))),
                                dom = 'Bfrtip')) %>%
   DT::formatStyle('EVIDENCE_LEVEL', 

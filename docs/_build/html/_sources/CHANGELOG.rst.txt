@@ -1,11 +1,114 @@
 CHANGELOG
 ---------
 
+0.9.2 - June 30th 2021
+^^^^^^^^^^^^^^^^^^^^^^
+
+-  Data updates: ClinVar, GWAS catalog, CIViC, CancerMine, dbNSFP, KEGG,
+   ChEMBL, Disease Ontology/EFO, Open Targets Platform, UniProt KB,
+   GENCODE
+-  Software upgrades: R v4.1, Bioconductor v3.13, VEP (104) ++
+
+Changed
+'''''''
+
+-  TOML-based configuration for PCGR is abandoned, all options to PCGR
+   are now configured through command-line parameters
+
+   -  **NOTE**: We recommend to turn on ``--show_noncoding`` and
+      ``--vcf2maf`` (prevously turned on by default in TOML). For
+      tumor-only runs, we recommend to include
+      ``--exclude_dbsnp_nonsomatic`` and ``exclude_nonexonic``
+
+Added
+'''''
+
+-  Command-line options
+
+   -  Previously set in TOML file)
+
+      -  Allelic support
+
+         -  ``--tumor_dp_tag``
+         -  ``--tumor_af_tag``
+         -  ``--control_dp_tag``
+         -  ``--control_af_tag``
+         -  ``--call_conf_tag``
+
+      -  Tumor-only options
+
+         -  ``--maf_onekg_eur``
+         -  ``--maf_onekg_amr``
+         -  ``--maf_onekg_afr``
+         -  ``--maf_onekg_eas``
+         -  ``--maf_onekg_sas``
+         -  ``--maf_onekg_global``
+         -  ``--maf_gnomad_nfe``
+         -  ``--maf_gnomad_asj``
+         -  ``--maf_gnomad_fin``
+         -  ``--maf_gnomad_oth``
+         -  ``--maf_gnomad_amr``
+         -  ``--maf_gnomad_afr``
+         -  ``--maf_gnomad_eas``
+         -  ``--maf_gnomad_sas``
+         -  ``--maf_gnomad_global``
+         -  ``--exclude_pon``
+         -  ``--exclude_likely_het_germline``
+         -  ``--exclude_likely_hom_germline``
+         -  ``--exclude_dbsnp_nonsomatic``
+         -  ``--exclude_nonexonic``
+
+      -  ``--report_theme``
+      -  ``--preserved_info_tags`` (previously ``custom_tags (TOML)``)
+      -  ``--show_noncoding`` (previously ``list_noncoding (TOML)``)
+      -  ``--vcfanno_n_proc`` (previously ``n_vcfanno_proc (TOML)``)
+      -  ``--vep_n_forks`` (previously ``n_vep_forks (TOML)``)
+      -  ``--vep_pick_order``
+      -  ``--vep_no_intergenic`` (previously
+         ``vep_skip_intergenic (TOML)``)
+      -  ``--vcf2maf``
+
+   -  New options
+
+      -  ``--report_nonfloating_toc`` (**NEW**) - add the TOC at the top
+         of the HTML report, not floating at the left of the document
+      -  ``--cpsr_report`` (**NEW**) - add a dedicated section in PCGR
+         with main germline findings from CPSR analysis - (use the
+         gzipped JSON output from CPSR as input)
+      -  ``--vep_regulatory`` (**NEW**) - append regulatory annotations
+         to variants (TF binding sites etc.)
+      -  ``--include_artefact_signatures`` (**NEW**) - include
+         sequencing artefacts in the reference collection of mutational
+         signatures (COSMIC v3.2)
+
+Fixed
+'''''
+
+-  Bug in writing (large) report contents to JSON (issue
+   `#118 <https://github.com/sigven/pcgr/issues/118>`__)
+-  Bug (typo) in merge of clinical evidence items from different sources
+   (CIVIC + CGI) (issue
+   `#126 <https://github.com/sigven/pcgr/issues/126>`__)
+-  Bug in value box for number of (high-confident) kataegis events -
+   rmarkdown (issue
+   `#122 <https://github.com/sigven/pcgr/issues/122>`__)
+-  Bug in value box for tumor purity/ploidy -rmarkdown (issue
+   `#129 <https://github.com/sigven/pcgr/issues/129>`__)
+
+Removed
+'''''''
+
+-  Command-line options
+
+   -  ``--conf`` - TOML-based configuration file
+
 0.9.1 - November 30th 2020
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 -  Data updates: ClinVar, GWAS catalog, CIViC, CancerMine, dbNSFP, KEGG,
    ChEMBL/DGIdb, Disease Ontology, Experimental Factor Ontology
+
+.. _added-1:
 
 Added
 '''''
@@ -17,6 +120,8 @@ Added
    `lintr <https://github.com/jimhester/lintr>`__
 -  Improved Conda recipe (i.e. ``meta.yaml``) with version pinning of
    all package dependencies
+
+.. _changed-1:
 
 Changed
 '''''''
@@ -40,6 +145,8 @@ Changed
    UniProt KB, dbNSFP, Pfam, KEGG, Open Targets Platform
 -  Software updates: VEP 101
 
+.. _fixed-1:
+
 Fixed
 '''''
 
@@ -48,7 +155,7 @@ Fixed
 -  Missing protein domain annotations for grch38, issue
    `#116 <https://github.com/sigven/pcgr/issues/96>`__
 
-.. _changed-1:
+.. _changed-2:
 
 Changed
 '''''''
@@ -90,7 +197,7 @@ Changed
    -  Metadata - sample and sequencing assay
    -  Report configuration
 
-.. _added-1:
+.. _added-2:
 
 Added
 '''''
@@ -134,7 +241,7 @@ Added
 -  Data updates: ClinVar, GWAS catalog, GENCODE, CIViC, CancerMine
 -  Software updates: VEP 98.2, vcf2tsv
 
-.. _fixed-1:
+.. _fixed-2:
 
 Fixed
 '''''
@@ -142,7 +249,7 @@ Fixed
 -  More improved mapping between Ensembl transcripts and UniProt
    accessions (using also RefSeq accessions where available)
 
-.. _added-2:
+.. _added-3:
 
 Added
 '''''
@@ -150,7 +257,7 @@ Added
 -  Possibility to filter evidence items by RATING in interactive data
    tables
 
-.. _changed-2:
+.. _changed-3:
 
 Changed
 '''''''
@@ -170,7 +277,7 @@ Changed
    LOFTEE (VEP plugin)
    `1.0.3 <https://github.com/konradjk/loftee/releases>`__
 
-.. _fixed-2:
+.. _fixed-3:
 
 Fixed
 '''''
@@ -187,7 +294,7 @@ Fixed
 -  Bug in UpSetPlot for cases where filtering produce less than two
    intersecting sets
 
-.. _added-3:
+.. _added-4:
 
 Added
 '''''
@@ -205,7 +312,7 @@ Added
 0.8.1 - May 22nd 2019
 ^^^^^^^^^^^^^^^^^^^^^
 
-.. _added-4:
+.. _added-5:
 
 Added
 '''''
@@ -215,7 +322,7 @@ Added
 0.8.0 - May 20th 2019
 ^^^^^^^^^^^^^^^^^^^^^
 
-.. _fixed-3:
+.. _fixed-4:
 
 Fixed
 '''''
@@ -223,7 +330,7 @@ Fixed
 -  Bug in value box for Tier 2 variants (new line carriage) `Issue
    #73 <https://github.com/sigven/pcgr/issues/73>`__
 
-.. _added-5:
+.. _added-6:
 
 Added
 '''''
@@ -346,7 +453,7 @@ Added
    -  Rating of the ClinVar variant (0-4 stars) with respect to level of
       review
 
-.. _changed-3:
+.. _changed-4:
 
 Changed
 '''''''
@@ -358,6 +465,8 @@ Changed
 -  Moved option for vcf_validation from configuration file to run script
    (``--no_vcf_validate``)
 
+.. _removed-1:
+
 Removed
 '''''''
 
@@ -366,7 +475,7 @@ Removed
 0.7.0 - Nov 27th 2018
 ^^^^^^^^^^^^^^^^^^^^^
 
-.. _fixed-4:
+.. _fixed-5:
 
 Fixed
 '''''
@@ -400,7 +509,7 @@ Fixed
 -  Removed ‘COSM’ prefix in COSMIC mutation links
 -  Bug in retrieval of splice site predictions from dbscSNV
 
-.. _added-6:
+.. _added-7:
 
 Added
 '''''
@@ -439,7 +548,7 @@ Added
 
 -  Upgraded VEP to v94
 
-.. _changed-4:
+.. _changed-5:
 
 Changed
 '''''''
@@ -456,7 +565,7 @@ Changed
 0.6.2.1 - May 14th 2018
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-.. _fixed-5:
+.. _fixed-6:
 
 Fixed
 '''''
@@ -466,7 +575,7 @@ Fixed
 0.6.2 - May 9th 2018
 ^^^^^^^^^^^^^^^^^^^^
 
-.. _fixed-6:
+.. _fixed-7:
 
 Fixed
 '''''
@@ -485,7 +594,7 @@ Fixed
 -  Bug in copy number annotation (missing protein-coding transcripts)
 -  Updated MSI prediction (variable importance, performance measures)
 
-.. _added-7:
+.. _added-8:
 
 Added
 '''''
@@ -499,7 +608,7 @@ Added
 0.6.1 - May 2nd 2018
 ^^^^^^^^^^^^^^^^^^^^
 
-.. _fixed-7:
+.. _fixed-8:
 
 Fixed
 '''''
@@ -517,7 +626,7 @@ Fixed
 0.6.0 - April 25th 2018
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-.. _added-8:
+.. _added-9:
 
 Added
 '''''
@@ -642,7 +751,7 @@ Added
    -  *MEAN_TRANSCRIPT_CNA_OVERLAP* - Mean overlap (%) betweeen gene
       transcripts and aberration segment
 
-.. _removed-1:
+.. _removed-2:
 
 Removed
 '''''''
@@ -678,7 +787,7 @@ Removed
          https://github.com/mskcc/vcf2maf will be incorporated in the
          next release
 
-.. _changed-5:
+.. _changed-6:
 
 Changed
 '''''''

@@ -64,7 +64,6 @@ The following user-defined thresholds determine copy number aberrations shown he
 
 A total of __`r NROW(pcg_report[["content"]][["cna"]][["disp"]][["segment"]])`__ unfiltered aberration segments satisfied the above criteria.
 
-<br>
 
 
 ```{r cna_segments_setup, echo=F}
@@ -90,8 +89,6 @@ if(NROW(pcg_report[["content"]][["cna"]][["disp"]][["segment"]]) > 0){
 
 ```
 
-* A total of __`r summarywidget::summarywidget(cna_segments_sd)`__ copy number segments satisfy the current filtering criteria.
-
 
 ```{r cna_segments_ampl_del, echo=F, results = "asis", eval = show_segment_filter_table}
 
@@ -113,8 +110,8 @@ DT::datatable(cna_segments_sd, extensions=c("Buttons","Responsive"),
               options = list(pageLength = 10, 
                              scrollCollapse = T, 
                              buttons = c("csv","excel"),
-                             autoWidth = T, 
-                             fixedColumns = T,
+                             #autoWidth = T, 
+                             #fixedColumns = T,
                              #fixedHeader = T,
                              #scrollX = T,
                              columnDefs = list(list(width = '20%', targets = c(1,2,3,4,5))),

@@ -6,7 +6,7 @@ This report is intended for interpretation of inherited DNA variants implicated 
 
 1. Previously classified in ClinVar (five-level significance scheme: pathogenic/likely pathogenic/VUS/likely benign/benign), or
 2. Coding variants not recorded in ClinVar with germline population frequency below the user-defined threshold, i.e. 
-    * Minor allele frequency (MAF) < `r cps_report[['metadata']][['config']][['maf_limits']][['maf_gnomad']]`) in the user-defined population set in the gnomAD database
+    * Minor allele frequency (MAF) < `r cps_report[['metadata']][['config']][['popgen']][['maf_upper_threshold']]`) in the user-defined population set in the gnomAD database
 
 
 ### Annotation resources

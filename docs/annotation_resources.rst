@@ -5,15 +5,15 @@ Basic variant consequence annotation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  `VEP <http://www.ensembl.org/info/docs/tools/vep/index.html>`__ -
-   Variant Effect Predictor release 101 (`GENCODE
-   v35 <https://www.gencodegenes.org/human/>`__ as gene reference
+   Variant Effect Predictor release 104 (`GENCODE
+   v38 <https://www.gencodegenes.org/human/>`__ as gene reference
    database (v19 for grch37))
 
 *Insilico* predictions of effect of coding variants
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  `dBNSFP <https://sites.google.com/site/jpopgen/dbNSFP>`__ - database
-   of non-synonymous functional predictions (v4.1, June 2020)
+   of non-synonymous functional predictions (v4.2, March 2021)
 
 Variant frequency databases
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -21,11 +21,11 @@ Variant frequency databases
 -  `gnomAD <http://exac.broadinstitute.org/>`__ - germline variant
    frequencies exome-wide (r2.1, October 2018)
 -  `dbSNP <http://www.ncbi.nlm.nih.gov/SNP/>`__ - database of short
-   genetic variants (build 153)
+   genetic variants (build 154)
 -  `Cancer Hotspots <http://cancerhotspots.org>`__ - a resource for
    statistically significant mutations in cancer (v2, 2017)
 -  `TCGA <https://portal.gdc.cancer.gov/>`__ - somatic mutations
-   discovered across 33 tumor type cohorts (release 27.0, October 2020)
+   discovered across 33 tumor type cohorts (release 29.0, March 2021)
 -  `ICGC-PCAWG <http://docs.icgc.org/pcawg/>`__ - ICGC Pancancer
    Analysis of Whole Genomes - (release 28, March 17th, 2019)
 
@@ -33,36 +33,37 @@ Variant databases of clinical utility
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  `ClinVar <http://www.ncbi.nlm.nih.gov/clinvar/>`__ - database of
-   clinically related variants (November 2020)
+   clinically related variants (June 2021)
 -  `DoCM <http://docm.genome.wustl.edu>`__ - database of curated
    mutations (v3.2, April 2016)
 -  `CIViC <http://civic.genome.wustl.edu>`__ - clinical interpretations
-   of variants in cancer (November 18th 2020)
+   of variants in cancer (June 15th 2021)
 -  `CGI <http://www.cancergenomeinterpreter.org/biomarkers>`__ - Cancer
    Genome Interpreter Cancer Biomarkers Database (CGI) (January 17th
    2018)
 -  `ChEMBL <https://www.ebi.ac.uk/chembl/>`__ - database of drugs,
-   drug-like small molecules and their targets (ChEMBL_27, May 2020)
+   drug-like small molecules and their targets (ChEMBL_28, February
+   2021)
 
 Protein domains/functional features
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  `UniProt/SwissProt KnowledgeBase <http://www.uniprot.org>`__ -
-   resource on protein sequence and functional information (2020_05,
-   October 2020)
+   resource on protein sequence and functional information (2021_03,
+   June 2021)
 -  `Pfam <http://pfam.xfam.org>`__ - database of protein families and
-   domains (v33, May 2020)
+   domains (v34.0, March 2021)
 
 Knowledge resources on gene and protein targets
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--  `CancerMine <https://zenodo.org/record/3525385#.XcHblUVKiL4>`__ -
+-  `CancerMine <https://zenodo.org/record/4925789#.YNT8K5MzY7Q>`__ -
    Literature-mined database of tumor suppressor genes/proto-oncogenes
-   (v30, November 2020)
+   (v36, June 2021)
 -  `Open Targets Platform <https://www.targetvalidation.org/>`__ -
    Database on disease-target associations, molecularly targeted drugs
    and tractability aggregated from multiple sources (literature,
-   pathways, mutations) (2020_09)
+   pathways, mutations) (2021_04)
 -  `TCGA driver genes <https://www.ncbi.nlm.nih.gov/pubmed/29625053>`__
    - predicted cancer driver genes based on application of multiple
    driver gene prediction tools on TCGA pan-cancer cohort
@@ -71,7 +72,7 @@ Pathway databases
 ~~~~~~~~~~~~~~~~~
 
 -  `KEGG PATHWAY Database <http://www.genome.jp/kegg/pathway.htm>`__ -
-   November 20th 2020
+   May 31st 2021
 -  `Oncogenic Signaling Pathways -
    TCGA <https://www.ncbi.nlm.nih.gov/pubmed/29625050>`__ - Sanchez-Vega
    et al., *Cell*, 2018

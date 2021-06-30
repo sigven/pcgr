@@ -9,31 +9,32 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```
 
-<div id="container">
-<div class = "exploratory">
-<br><i>TIER 1</i><br><br><mark style="font-size:128%; background-color:black; color:white"><b>POLE mutant/MMR deficiency</b></mark>
+<div id="value_box_container">
+<div class = "value_box_tumor_control">
+<br><i>TIER 1 - SNV/INDEL</i><br><br><mark style="font-size:128%; background-color:black; color:white"><b>POLE/MMR deficiency</b></mark>
 </div>
-<div class = "exploratory">
-<br><i>TIER 2</i><br><br><mark style="font-size:128%; background-color:black; color:white"><b>POLD1 mutant/MMR deficiency</b></mark>
+<div class = "value_box_tumor_control">
+<br><i>TIER 2 - SNV/INDEL</i><br><br><mark style="font-size:128%; background-color:black; color:white"><b>POLD1/MMR deficiency</b></mark>
 </div>
-<div class = "exploratory">
-<br><i>TUMOR PURITY</i><br><br><mark style="font-size:128%; background-color:black; color:white"><b>MUTYH mutant/BER deficiency</b></mark>
+<div class = "value_box_tumor_control">
+<br><i>sCNA</i><br><br><mark style="font-size:128%; background-color:black; color:white"><b>MUTYH/BER deficiency</b></mark>
 </div>
-<div class = "exploratory">
+
+<div class = "value_box_tumor_control">
+<br><i>TUMOR PURITY</i><br><br><mark style="font-size:128%; background-color:black; color:white"><b>MUTYH/BER deficiency</b></mark>
+</div>
+<div class = "value_box_tumor_control">
 <br><i>TUMOR PLOIDY</i><br><br><mark style="font-size:128%; background-color:black; color:white"><b>Aristolochic acid exposure</b></mark>
 </div>
-<div class = "exploratory">
-<br><i>MSI STATUS</i><br><br><mark style="font-size:128%; background-color:black; color:white"><b>Aristolochic acid exposure</b></mark>
+<div class = "value_box_tumor_control">
+<br><i>MSI STATUS</i><br><br><mark style="font-size:128%; background-color:black; color:white"><b>POLD1/MMR deficiency</b></mark>
 </div>
-<div class = "exploratory">
-<br><i>DOMINANT SIGNATURE ETIOLOGY</i><br><br><mark style="font-size:128%; background-color:black; color:white"><b>Sequencing artefact<br> (8-oxo-G)</b></mark>
+<div class = "value_box_tumor_control">
+<br><i>DOMINANT SIGNATURE ETIOLOGY</i><br><br><mark style="font-size:128%; background-color:black; color:white"><b>Sequencing artefact</b></mark>
 </div>
-<div class = "exploratory">
-<br><i>sCNA</i>
-</div>
-<div class = "exploratory">
+<div class = "value_box_tumor_control">
 <br><i>MUTATIONAL BURDEN</i>
 </div>
-<div class = "exploratory">
+<div class = "value_box_tumor_control">
 <br><i>KATAEGIS EVENTS</i>
 </div>

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Output &mdash; Personal Cancer Genome Reporter 0.9.1 documentation</title>
+  <title>Output &mdash; Personal Cancer Genome Reporter 0.9.2 documentation</title>
   
 
   
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                0.9.1
+                0.9.2
               </div>
             
           
@@ -195,11 +195,10 @@
 <p>An interactive and tier-structured HTML report (dashboard-like) that
 shows the most relevant findings in the query cancer genome has the
 following naming convention:</p>
-<p><strong>sample_id</strong>.pcgr_acmg.__genome_assembly__.flexdb.html</p>
+<p>&lt;<strong>sample_id</strong>&gt;.pcgr_acmg.&lt;<strong>genome_assembly</strong>&gt;.flexdb.html</p>
 <ul class="simple">
 <li><p>The <strong>sample_id</strong> is provided as input by the user, and reflects a
 unique identifier of the tumor-normal sample pair to be analyzed.</p></li>
-<li><p>DOCUMENTATION COMING SOON</p></li>
 </ul>
 </div>
 <div class="section" id="interactive-html-report-rmarkdown">
@@ -207,7 +206,7 @@ unique identifier of the tumor-normal sample pair to be analyzed.</p></li>
 <p>An interactive and tier-structured HTML report that shows the most
 relevant findings in the query cancer genome has the following naming
 convention:</p>
-<p><strong>sample_id</strong>.pcgr_acmg.__genome_assembly__.html</p>
+<p>&lt;<strong>sample_id</strong>&gt;.pcgr_acmg.&lt;<strong>genome_assembly</strong>&gt;.html</p>
 <ul class="simple">
 <li><p>The <strong>sample_id</strong> is provided as input by the user, and reflects a
 unique identifier of the tumor-normal sample pair to be analyzed.</p></li>
@@ -258,16 +257,17 @@ types and tiers</p></li>
 </li>
 <li><p><em>Global distribution - allelic support</em></p>
 <ul>
-<li><p>distribution (histogram) of variant allelic support for somatic
-variants (will only be present in the report if specific fields
-in input VCF is defined and specified by the user)</p></li>
+<li><p>distribution (histogram) of variant allelic support for
+somatic variants (will only be present in the report if
+specific fields in input VCF is defined and specified by the
+user)</p></li>
 </ul>
 </li>
 <li><p><em>Global variant browser</em></p>
 <ul>
-<li><p>permits exploration of the whole SNV/InDel dataset by filtering
-along several dimensions (call confidence, variant sequencing
-depth/support, variant consequence etc.)</p></li>
+<li><p>permits exploration of the whole SNV/InDel dataset by
+filtering along several dimensions (call confidence, variant
+sequencing depth/support, variant consequence etc.)</p></li>
 </ul>
 </li>
 <li><p><em>Tier tables</em></p>
@@ -341,6 +341,11 @@ as the underlying framework)</p></li>
 <li><p>Detection of potential kataegis events using the algorithm
 outlined in the <a class="reference external" href="https://github.com/MeichunCai/KataegisPortal">Kataegis
 Portal</a></p></li>
+</ul>
+</li>
+<li><p><strong>Germline findings</strong></p>
+<ul class="simple">
+<li><p>Main findings from CPSR report</p></li>
 </ul>
 </li>
 <li><p><strong>Clinial trials</strong></p>
@@ -430,21 +435,12 @@ user in input VCF)</p></li>
 <li><p>GENOME_VERSION - Genome assembly</p></li>
 </ul>
 <p>Example reports:</p>
-<ul class="simple">
-<li><p><a class="reference external" href="http://insilico.hpc.uio.no/pcgr/example_reports/0.9.1/TCGA-EA-A410-01A_TO.pcgr_acmg.grch37.flexdb.html">Cervical cancer sample
-(tumor-only)</a></p></li>
-<li><p><a class="reference external" href="http://insilico.hpc.uio.no/pcgr/example_reports/0.9.1/TCGA-05-4427-01A.pcgr_acmg.grch37.flexdb.html">Lung cancer sample
-(tumor-control)</a></p></li>
-<li><p><a class="reference external" href="http://insilico.hpc.uio.no/pcgr/example_reports/0.9.1/TCGA-AD-5900-01A.pcgr_acmg.grch37.flexdb.html">Colorectal cancer sample
-(tumor-control)</a></p></li>
-<li><p><a class="reference external" href="http://insilico.hpc.uio.no/pcgr/example_reports/0.9.1/TCGA-QH-A6CU-01A.pcgr_acmg.grch37.flexdb.html">Brain cancer sample
-(tumor-control)</a></p></li>
-</ul>
+<p><a class="reference external" href="https://doi.org/10.5281/zenodo.5045309"><img alt="DOI" src="https://zenodo.org/badge/DOI/10.5281/zenodo.5045309.svg" /></a></p>
 <p>The HTML reports have been tested using the following browsers:</p>
 <ul class="simple">
-<li><p>Safari (Version 14.0 (15610.1.28.1.9, 15610))</p></li>
+<li><p>Safari (Version 14.1.1 (16611.2.7.1.4))</p></li>
 <li><p>Mozilla Firefox (83.0)</p></li>
-<li><p>Google Chrome (Version 87.0.4280.67 (Official Build) (x86_64))</p></li>
+<li><p>Google Chrome (Version 90.0.4430.212 (Official Build) (x86_64))</p></li>
 </ul>
 </div>
 </div>
@@ -465,7 +461,7 @@ latter contains the various sections of the report.</p>
 <p>A VCF file containing annotated, somatic calls (single nucleotide
 variants and insertion/deletions) is generated with the following naming
 convention:</p>
-<p><strong>sample_id</strong>.pcgr_acmg.__genome_assembly__.vcf.gz</p>
+<p>&lt;<strong>sample_id</strong>&gt;.pcgr_acmg.&lt;<strong>genome_assembly</strong>&gt;.vcf.gz</p>
 <p>Here, the <strong>sample_id</strong> is provided as input by the user, and reflects a
 unique identifier of the tumor-normal sample pair to be analyzed.
 Following common standards, the annotated VCF file is compressed with
@@ -623,12 +619,17 @@ of synonymous variants</p></li>
 identifier</p></li>
 <li><p>APPRIS - Principal isoform flags according to the <a class="reference external" href="http://appris.bioinfo.cnio.es/#/downloads">APPRIS principal
 isoform database</a></p></li>
+<li><p>MANE_SELECT - Indicating if the transcript is the MANE Select or MANE
+Plus Clinical transcript for the gene (picked by VEP’s
+–flag_pick_allele_gene option)</p></li>
 <li><p>UNIPROT_ID - <a class="reference external" href="http://www.uniprot.org">UniProt</a> identifier</p></li>
 <li><p>UNIPROT_ACC - <a class="reference external" href="http://www.uniprot.org">UniProt</a> accession(s)</p></li>
 <li><p>ENSEMBL_GENE_ID - Ensembl gene identifier for VEP’s picked transcript
 (<em>ENSGXXXXXXX</em>)</p></li>
 <li><p>ENSEMBL_TRANSCRIPT_ID - Ensembl transcript identifier for VEP’s
 picked transcript (<em>ENSTXXXXXX</em>)</p></li>
+<li><p>ENSEMBL_PROTEIN_ID - Ensembl corresponding protein identifier for
+VEP’s picked transcript</p></li>
 <li><p>REFSEQ_MRNA - Corresponding RefSeq transcript(s) identifier for VEP’s
 picked transcript (<em>NM_XXXXX</em>)</p></li>
 <li><p>CORUM_ID - Associated protein complexes (identifiers) from
@@ -707,15 +708,12 @@ the <a class="reference external" href="https://www.ncbi.nlm.nih.gov/pubmed/2962
 mutations</a></p></li>
 <li><p>EFFECT_PREDICTIONS - All predictions of effect of variant on protein
 function and pre-mRNA splicing from <a class="reference external" href="https://sites.google.com/site/jpopgen/dbNSFP">database of non-synonymous
-functional predictions -
-dbNSFP</a>. Predicted
+functional predictions - dbNSFP
+v4.2</a>. Predicted
 effects are provided by different sources/algorithms (separated by
-‘&amp;’):</p>
+‘&amp;’), T = Tolerated, N = Neutral, D = Damaging:</p>
 <ol class="arabic simple">
 <li><p><a class="reference external" href="https://sift.bii.a-star.edu.sg/">SIFT</a></p></li>
-<li><p><a class="reference external" href="https://sift.bii.a-star.edu.sg/sift4g/">SIFT4G</a></p></li>
-<li><p><a class="reference external" href="http://www.genetics.wustl.edu/jflab/lrt_query.html">LRT</a>
-(2009)</p></li>
 <li><p><a class="reference external" href="http://www.mutationtaster.org/">MutationTaster</a> (data release
 Nov 2015)</p></li>
 <li><p><a class="reference external" href="http://mutationassessor.org/">MutationAssessor</a> (release 3)</p></li>
@@ -724,10 +722,8 @@ Nov 2015)</p></li>
 <li><p><a class="reference external" href="http://fathmm.biocompute.org.uk/fathmmMKL.htm">FATHMM_MKL</a></p></li>
 <li><p><a class="reference external" href="https://www.nature.com/articles/s41588-018-0167-z">PRIMATEAI</a></p></li>
 <li><p><a class="reference external" href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5570203/">DEOGEN2</a></p></li>
-<li><p><a class="reference external" href="https://www.ncbi.nlm.nih.gov/pubmed/25552646">DBNSFP_CONSENSUS_SVM</a>
-(Ensembl/consensus prediction, based on support vector machines)</p></li>
-<li><p><a class="reference external" href="https://www.ncbi.nlm.nih.gov/pubmed/25552646">DBNSFP_CONSENSUS_LR</a>
-(Ensembl/consensus prediction, logistic regression based)</p></li>
+<li><p><a class="reference external" href="https://www.biorxiv.org/content/10.1101/2021.04.09.438706v1">DBNSFP_CONSENSUS_RNN</a>
+(Ensembl/consensus prediction, based on deep learning)</p></li>
 <li><p><a class="reference external" href="http://nar.oxfordjournals.org/content/42/22/13534">SPLICE_SITE_EFFECT_ADA</a>
 (Ensembl/consensus prediction of splice-altering SNVs, based on
 adaptive boosting)</p></li>
@@ -742,27 +738,26 @@ random forest)</p></li>
 <li><p><a class="reference external" href="https://www.nature.com/articles/s41467-017-00443-5">ALoFT</a></p></li>
 </ol>
 </li>
-<li><p>BAYESDEL_ADDAF_DBNSFP - predicted effect from BayesDel (dbNSFP)</p></li>
-<li><p>LIST_S2_DBNSFP - predicted effect from LIST-S2 (dbNSFP)</p></li>
-<li><p>SIFT_DBNSFP - predicted effect from SIFT (dbNSFP)</p></li>
-<li><p>SIFT4G_DBNSFP - predicted effect from SIFT4G (dbNSFP)</p></li>
-<li><p>PROVEAN_DBNSFP - predicted effect from PROVEAN (dbNSFP)</p></li>
-<li><p>MUTATIONTASTER_DBNSFP - predicted effect from MUTATIONTASTER (dbNSFP)</p></li>
-<li><p>MUTATIONASSESSOR_DBNSFP - predicted effect from MUTATIONASSESSOR
+<li><p>DBNSFP_BAYESDEL_ADDAF - predicted effect from BayesDel (dbNSFP)</p></li>
+<li><p>DBNSFP_LIST_S2 - predicted effect from LIST-S2 (dbNSFP)</p></li>
+<li><p>DBNSFP_SIFT - predicted effect from SIFT (dbNSFP)</p></li>
+<li><p>DBNSFP_PROVEAN - predicted effect from PROVEAN (dbNSFP)</p></li>
+<li><p>DBNSFP_MUTATIONTASTER - predicted effect from MUTATIONTASTER (dbNSFP)</p></li>
+<li><p>DBNSFP_MUTATIONASSESSOR - predicted effect from MUTATIONASSESSOR
 (dbNSFP)</p></li>
-<li><p>M_CAP_DBNSFP - predicted effect from M-CAP (dbNSFP)</p></li>
-<li><p>ALOFT_DBNSFP - predicted effect from ALoFT (dbNSFP)</p></li>
-<li><p>MUTPRED_DBNSFP - score from MUTPRED (dbNSFP)</p></li>
-<li><p>FATHMM_DBNSFP - predicted effect from FATHMM (dbNSFP)</p></li>
-<li><p>PRIMATEAI_DBNSFP - predicted effect from PRIMATEAI (dbNSFP)</p></li>
-<li><p>DEOGEN2_DBNSFP - predicted effect from DEOGEN2 (dbNSFP)</p></li>
-<li><p>GERP_DBNSFP - evolutionary constraint measure from GERP (dbNSFP)</p></li>
-<li><p>FATHMM_MKL_DBNSFP - predicted effect from FATHMM-mkl (dbNSFP)</p></li>
-<li><p>META_LR_DBNSFP - predicted effect from ensemble prediction (logistic
-regression - dbNSFP)</p></li>
-<li><p>SPLICE_SITE_RF_DBNSFP - predicted effect of splice site disruption,
+<li><p>DBNSFP_M_CAP - predicted effect from M-CAP (dbNSFP)</p></li>
+<li><p>DBNSFP_ALOFTPRED - predicted effect from ALoFT (dbNSFP)</p></li>
+<li><p>DBNSFP_MUTPRED - score from MUTPRED (dbNSFP)</p></li>
+<li><p>DBNSFP_FATHMM - predicted effect from FATHMM (dbNSFP)</p></li>
+<li><p>DBNSFP_PRIMATEAI - predicted effect from PRIMATEAI (dbNSFP)</p></li>
+<li><p>DBNSFP_DEOGEN2 - predicted effect from DEOGEN2 (dbNSFP)</p></li>
+<li><p>DBNSFP_GERP - evolutionary constraint measure from GERP (dbNSFP)</p></li>
+<li><p>DBNSFP_FATHMM_MKL - predicted effect from FATHMM-mkl (dbNSFP)</p></li>
+<li><p>DBNSFP_META_RNN - predicted effect from ensemble prediction (deep
+learning - dbNSFP)</p></li>
+<li><p>DBNSFP_SPLICE_SITE_RF - predicted effect of splice site disruption,
 using random forest (dbscSNV)</p></li>
-<li><p>SPLICE_SITE_ADA_DBNSFP - predicted effect of splice site disruption,
+<li><p>DBNSFP_SPLICE_SITE_ADA - predicted effect of splice site disruption,
 using boosting (dbscSNV)</p></li>
 </ul>
 </div>
@@ -891,7 +886,7 @@ Database</a></p></li>
 <h4>Annotated List of all SNVs/InDels<a class="headerlink" href="#annotated-list-of-all-snvs-indels" title="Permalink to this headline">¶</a></h4>
 <p>We provide a tab-separated values file with most important annotations
 for SNVs/InDels. The file has the following naming convention:</p>
-<p><strong>sample_id</strong>.pcgr_acmg.__genome_assembly__.snvs_indels.tiers.tsv</p>
+<p>&lt;<strong>sample_id</strong>&gt;.pcgr_acmg.&lt;<strong>genome_assembly</strong>&gt;.snvs_indels.tiers.tsv</p>
 <p>The SNVs/InDels are organized into different <strong>tiers</strong> (as defined above
 for the HTML report)</p>
 <p>The following variables are included in the tiered TSV file:</p>
@@ -913,53 +908,57 @@ for the HTML report)</p>
 <span class="mf">15.</span> <span class="n">ENSEMBL_TRANSCRIPT_ID</span> <span class="o">-</span> <span class="n">Ensembl</span> <span class="n">transcript</span> <span class="n">identifier</span>
 <span class="mf">16.</span> <span class="n">ENSEMBL_GENE_ID</span> <span class="o">-</span> <span class="n">Ensembl</span> <span class="n">gene</span> <span class="n">identifier</span>
 <span class="mf">17.</span> <span class="n">REFSEQ_MRNA</span> <span class="o">-</span> <span class="n">RefSeq</span> <span class="n">mRNA</span> <span class="n">identifier</span>
-<span class="mf">18.</span> <span class="n">ONCOGENE</span> <span class="o">-</span> <span class="n">Gene</span> <span class="ow">is</span> <span class="n">predicted</span><span class="o">/</span><span class="n">classified</span> <span class="k">as</span> <span class="n">an</span> <span class="n">oncogene</span> <span class="p">(</span><span class="n">CancerMine</span><span class="o">/</span><span class="n">NCG</span><span class="p">)</span>
-<span class="mf">19.</span> <span class="n">TUMOR_SUPPRESSOR</span> <span class="o">-</span> <span class="n">Gene</span> <span class="ow">is</span> <span class="n">predicted</span><span class="o">/</span><span class="n">classified</span> <span class="k">as</span> <span class="n">tumor</span> <span class="n">suppressor</span> <span class="p">(</span><span class="n">CancerMine</span><span class="o">/</span><span class="n">NCG</span><span class="p">)</span>
-<span class="mf">20.</span> <span class="n">ONCOGENE_EVIDENCE</span> <span class="o">-</span> <span class="n">Underlying</span> <span class="n">evidence</span> <span class="k">for</span> <span class="n">oncogene</span> <span class="n">prediction</span><span class="o">/</span><span class="n">classification</span>
-<span class="mf">21.</span> <span class="n">TUMOR_SUPPRESSOR_EVIDENCE</span> <span class="o">-</span> <span class="n">Underlying</span> <span class="n">evidence</span> <span class="k">for</span> <span class="n">tumor</span> <span class="n">suppressor</span> <span class="n">prediction</span><span class="o">/</span><span class="n">classification</span>
-<span class="mf">22.</span> <span class="n">CONSEQUENCE</span> <span class="o">-</span> <span class="n">Variant</span> <span class="n">consequence</span> <span class="p">(</span><span class="k">as</span> <span class="n">defined</span> <span class="n">above</span> <span class="k">for</span> <span class="n">VCF</span> <span class="n">output</span><span class="p">:</span>
+<span class="mf">18.</span> <span class="n">REFSEQ_PEPTIDE</span> <span class="o">-</span> <span class="n">RefSeq</span> <span class="n">peptide</span> <span class="n">identifier</span>
+<span class="mf">19.</span> <span class="n">TRANSCRIPT_MANE_SELECT</span> <span class="o">-</span> <span class="n">MANE</span> <span class="n">select</span> <span class="n">transcript</span> <span class="n">identifier</span>
+<span class="mf">20.</span> <span class="n">ONCOGENE</span> <span class="o">-</span> <span class="n">Gene</span> <span class="ow">is</span> <span class="n">predicted</span><span class="o">/</span><span class="n">classified</span> <span class="k">as</span> <span class="n">an</span> <span class="n">oncogene</span> <span class="p">(</span><span class="n">CancerMine</span><span class="o">/</span><span class="n">NCG</span><span class="p">)</span>
+<span class="mf">21.</span> <span class="n">TUMOR_SUPPRESSOR</span> <span class="o">-</span> <span class="n">Gene</span> <span class="ow">is</span> <span class="n">predicted</span><span class="o">/</span><span class="n">classified</span> <span class="k">as</span> <span class="n">tumor</span> <span class="n">suppressor</span> <span class="p">(</span><span class="n">CancerMine</span><span class="o">/</span><span class="n">NCG</span><span class="p">)</span>
+<span class="mf">22.</span> <span class="n">ONCOGENE_EVIDENCE</span> <span class="o">-</span> <span class="n">Underlying</span> <span class="n">evidence</span> <span class="k">for</span> <span class="n">oncogene</span> <span class="n">prediction</span><span class="o">/</span><span class="n">classification</span>
+<span class="mf">23.</span> <span class="n">TUMOR_SUPPRESSOR_EVIDENCE</span> <span class="o">-</span> <span class="n">Underlying</span> <span class="n">evidence</span> <span class="k">for</span> <span class="n">tumor</span> <span class="n">suppressor</span> <span class="n">prediction</span><span class="o">/</span><span class="n">classification</span>
+<span class="mf">24.</span> <span class="n">CONSEQUENCE</span> <span class="o">-</span> <span class="n">Variant</span> <span class="n">consequence</span> <span class="p">(</span><span class="k">as</span> <span class="n">defined</span> <span class="n">above</span> <span class="k">for</span> <span class="n">VCF</span> <span class="n">output</span><span class="p">:</span>
     <span class="n">Consequence</span><span class="p">)</span>
-<span class="mf">23.</span> <span class="n">PROTEIN_CHANGE</span> <span class="o">-</span> <span class="n">Protein</span> <span class="n">change</span> <span class="p">(</span><span class="n">HGVSp</span> <span class="n">without</span> <span class="n">reference</span> <span class="n">accession</span><span class="p">)</span>
-<span class="mf">24.</span> <span class="n">PROTEIN_DOMAIN</span> <span class="o">-</span> <span class="n">Protein</span> <span class="n">domain</span> <span class="n">description</span> <span class="p">(</span><span class="n">Pfam</span><span class="p">)</span>
-<span class="mf">25.</span> <span class="n">CODING_STATUS</span> <span class="o">-</span> <span class="n">Coding</span> <span class="n">variant</span> <span class="n">status</span> <span class="n">wrt</span><span class="o">.</span> <span class="n">protein</span> <span class="n">alteration</span> <span class="p">(</span><span class="s1">&#39;coding&#39;</span> <span class="ow">or</span> <span class="s1">&#39;noncoding&#39;</span><span class="p">)</span>
-<span class="mf">26.</span> <span class="n">EXONIC_STATUS</span> <span class="o">-</span> <span class="n">Exonic</span> <span class="n">variant</span> <span class="n">status</span> <span class="p">(</span><span class="s1">&#39;exonic&#39;</span> <span class="ow">or</span> <span class="s1">&#39;nonexonic&#39;</span><span class="p">)</span>
-<span class="mf">27.</span> <span class="n">CDS_CHANGE</span> <span class="o">-</span> <span class="n">composite</span> <span class="n">VEP</span><span class="o">-</span><span class="n">based</span> <span class="n">variable</span> <span class="k">for</span> <span class="n">coding</span> <span class="n">change</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span>
+<span class="mf">25.</span> <span class="n">PROTEIN_CHANGE</span> <span class="o">-</span> <span class="n">Protein</span> <span class="n">change</span> <span class="p">(</span><span class="n">HGVSp</span> <span class="n">without</span> <span class="n">reference</span> <span class="n">accession</span><span class="p">)</span>
+<span class="mf">26.</span> <span class="n">PROTEIN_DOMAIN</span> <span class="o">-</span> <span class="n">Protein</span> <span class="n">domain</span> <span class="n">description</span> <span class="p">(</span><span class="n">Pfam</span><span class="p">)</span>
+<span class="mf">27.</span> <span class="n">CODING_STATUS</span> <span class="o">-</span> <span class="n">Coding</span> <span class="n">variant</span> <span class="n">status</span> <span class="n">wrt</span><span class="o">.</span> <span class="n">protein</span> <span class="n">alteration</span> <span class="p">(</span><span class="s1">&#39;coding&#39;</span> <span class="ow">or</span> <span class="s1">&#39;noncoding&#39;</span><span class="p">)</span>
+<span class="mf">28.</span> <span class="n">EXONIC_STATUS</span> <span class="o">-</span> <span class="n">Exonic</span> <span class="n">variant</span> <span class="n">status</span> <span class="p">(</span><span class="s1">&#39;exonic&#39;</span> <span class="ow">or</span> <span class="s1">&#39;nonexonic&#39;</span><span class="p">)</span>
+<span class="mf">29.</span> <span class="n">CDS_CHANGE</span> <span class="o">-</span> <span class="n">composite</span> <span class="n">VEP</span><span class="o">-</span><span class="n">based</span> <span class="n">variable</span> <span class="k">for</span> <span class="n">coding</span> <span class="n">change</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span>
     <span class="n">Consequence</span><span class="p">:</span><span class="n">Feature</span><span class="p">:</span><span class="n">cDNA_position</span><span class="p">:</span><span class="n">EXON</span><span class="p">:</span><span class="n">HGVSp_short</span>
-<span class="mf">28.</span> <span class="n">HGVSp</span>
-<span class="mf">29.</span> <span class="n">HGVSc</span>
-<span class="mf">30.</span> <span class="n">EFFECT_PREDICTIONS</span> <span class="o">-</span> <span class="k">as</span> <span class="n">defined</span> <span class="n">above</span> <span class="k">for</span> <span class="n">VCF</span>
-<span class="mf">31.</span> <span class="n">MUTATION_HOTSPOT</span> <span class="o">-</span> <span class="n">mutation</span> <span class="n">hotspot</span> <span class="n">codon</span> <span class="ow">in</span>
+<span class="mf">30.</span> <span class="n">HGVSp</span>
+<span class="mf">31.</span> <span class="n">HGVSc</span>
+<span class="mf">32.</span> <span class="n">REGULATORY_ANNOTATION</span> <span class="o">-</span> <span class="n">Regulatory</span> <span class="n">annotations</span> <span class="p">(</span><span class="n">promoter</span><span class="o">/</span><span class="n">enhancer</span><span class="o">/</span><span class="n">TF_binding</span> <span class="n">site</span> <span class="n">overlap</span> <span class="n">etc</span><span class="o">.</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">VEP</span> <span class="p">(</span><span class="n">optional</span><span class="p">)</span>
+<span class="mf">33.</span> <span class="n">EFFECT_PREDICTIONS</span> <span class="o">-</span> <span class="k">as</span> <span class="n">defined</span> <span class="n">above</span> <span class="k">for</span> <span class="n">VCF</span>
+<span class="mf">34.</span> <span class="n">MUTATION_HOTSPOT</span> <span class="o">-</span> <span class="n">mutation</span> <span class="n">hotspot</span> <span class="n">codon</span> <span class="ow">in</span>
     <span class="n">cancerhotspots</span><span class="o">.</span><span class="n">org</span><span class="o">.</span> <span class="n">Format</span><span class="p">:</span> <span class="n">gene_symbol</span> <span class="o">|</span> <span class="n">codon</span> <span class="o">|</span> <span class="n">q</span><span class="o">-</span><span class="n">value</span>
-<span class="mf">32.</span> <span class="n">MUTATION_HOTSPOT_TRANSCRIPT</span> <span class="o">-</span> <span class="n">hotspot</span><span class="o">-</span><span class="n">associated</span> <span class="n">transcripts</span> <span class="p">(</span><span class="n">Ensembl</span> <span class="n">transcript</span> <span class="n">ID</span><span class="p">)</span>
-<span class="mf">33.</span> <span class="n">MUTATION_HOTSPOT_CANCERTYPE</span> <span class="o">-</span> <span class="n">hotspot</span><span class="o">-</span><span class="n">associated</span> <span class="n">cancer</span> <span class="n">types</span> <span class="p">(</span><span class="kn">from</span> <span class="nn">cancerhotspots.org</span><span class="p">)</span>
-<span class="mf">34.</span> <span class="n">PUTATIVE_DRIVER_MUTATION</span> <span class="o">-</span> <span class="n">Indicates</span> <span class="k">if</span> <span class="n">variant</span> <span class="ow">is</span> <span class="n">predicted</span> <span class="k">as</span>
+<span class="mf">35.</span> <span class="n">MUTATION_HOTSPOT_TRANSCRIPT</span> <span class="o">-</span> <span class="n">hotspot</span><span class="o">-</span><span class="n">associated</span> <span class="n">transcripts</span> <span class="p">(</span><span class="n">Ensembl</span> <span class="n">transcript</span> <span class="n">ID</span><span class="p">)</span>
+<span class="mf">36.</span> <span class="n">MUTATION_HOTSPOT_CANCERTYPE</span> <span class="o">-</span> <span class="n">hotspot</span><span class="o">-</span><span class="n">associated</span> <span class="n">cancer</span> <span class="n">types</span> <span class="p">(</span><span class="kn">from</span> <span class="nn">cancerhotspots.org</span><span class="p">)</span>
+<span class="mf">37.</span> <span class="n">PUTATIVE_DRIVER_MUTATION</span> <span class="o">-</span> <span class="n">Indicates</span> <span class="k">if</span> <span class="n">variant</span> <span class="ow">is</span> <span class="n">predicted</span> <span class="k">as</span>
     <span class="n">driver</span> <span class="n">mutation</span> <span class="kn">from</span> <span class="nn">TCGA</span><span class="s1">&#39;s PanCancer study of cancer driver mutation</span>
-<span class="mf">35.</span> <span class="n">CHASMPLUS_DRIVER</span> <span class="o">-</span> <span class="n">Driver</span> <span class="n">mutation</span> <span class="n">predicted</span> <span class="n">by</span> <span class="n">CHASMplus</span> <span class="n">algorithm</span>
-<span class="mf">36.</span> <span class="n">CHASMPLUS_TTYPE</span> <span class="o">-</span> <span class="n">Tumor</span> <span class="nb">type</span> <span class="k">for</span> <span class="n">which</span> <span class="n">mutation</span> <span class="ow">is</span> <span class="n">predicted</span> <span class="k">as</span> <span class="n">driver</span> <span class="n">by</span> <span class="n">CHASMplus</span>
-<span class="mf">37.</span> <span class="n">VEP_ALL_CSQ</span> <span class="o">-</span> <span class="nb">all</span> <span class="n">VEP</span> <span class="n">transcript</span> <span class="n">block</span> <span class="n">consequences</span>
-<span class="mf">38.</span> <span class="n">DBSNPRSID</span> <span class="o">-</span> <span class="n">dbSNP</span> <span class="n">reference</span> <span class="n">cluster</span> <span class="n">ID</span>
-<span class="mf">39.</span> <span class="n">COSMIC_MUTATION_ID</span> <span class="o">-</span> <span class="n">COSMIC</span> <span class="n">mutation</span> <span class="n">ID</span>
-<span class="mf">40.</span> <span class="n">TCGA_PANCANCER_COUNT</span> <span class="o">-</span> <span class="n">Raw</span> <span class="n">variant</span> <span class="n">count</span> <span class="n">across</span> <span class="nb">all</span> <span class="n">TCGA</span> <span class="n">tumor</span> <span class="n">types</span>
-<span class="mf">41.</span> <span class="n">TCGA_FREQUENCY</span> <span class="o">-</span> <span class="n">Frequency</span> <span class="n">of</span> <span class="n">variant</span> <span class="n">across</span> <span class="n">TCGA</span> <span class="n">tumor</span> <span class="n">types</span><span class="o">.</span> <span class="n">Format</span><span class="p">:</span> <span class="n">tumortype</span><span class="o">|</span>
+<span class="mf">38.</span> <span class="n">CHASMPLUS_DRIVER</span> <span class="o">-</span> <span class="n">Driver</span> <span class="n">mutation</span> <span class="n">predicted</span> <span class="n">by</span> <span class="n">CHASMplus</span> <span class="n">algorithm</span>
+<span class="mf">39.</span> <span class="n">CHASMPLUS_TTYPE</span> <span class="o">-</span> <span class="n">Tumor</span> <span class="nb">type</span> <span class="k">for</span> <span class="n">which</span> <span class="n">mutation</span> <span class="ow">is</span> <span class="n">predicted</span> <span class="k">as</span> <span class="n">driver</span> <span class="n">by</span> <span class="n">CHASMplus</span>
+<span class="mf">40.</span> <span class="n">VEP_ALL_CSQ</span> <span class="o">-</span> <span class="nb">all</span> <span class="n">VEP</span> <span class="n">transcript</span> <span class="n">block</span> <span class="n">consequences</span>
+<span class="mf">41.</span> <span class="n">DBSNPRSID</span> <span class="o">-</span> <span class="n">dbSNP</span> <span class="n">reference</span> <span class="n">cluster</span> <span class="n">ID</span>
+<span class="mf">42.</span> <span class="n">COSMIC_MUTATION_ID</span> <span class="o">-</span> <span class="n">COSMIC</span> <span class="n">mutation</span> <span class="n">ID</span>
+<span class="mf">43.</span> <span class="n">TCGA_PANCANCER_COUNT</span> <span class="o">-</span> <span class="n">Raw</span> <span class="n">variant</span> <span class="n">count</span> <span class="n">across</span> <span class="nb">all</span> <span class="n">TCGA</span> <span class="n">tumor</span> <span class="n">types</span>
+<span class="mf">44.</span> <span class="n">TCGA_FREQUENCY</span> <span class="o">-</span> <span class="n">Frequency</span> <span class="n">of</span> <span class="n">variant</span> <span class="n">across</span> <span class="n">TCGA</span> <span class="n">tumor</span> <span class="n">types</span><span class="o">.</span> <span class="n">Format</span><span class="p">:</span> <span class="n">tumortype</span><span class="o">|</span>
 <span class="n">percent</span> <span class="n">affected</span><span class="o">|</span><span class="n">affected</span> <span class="n">cases</span><span class="o">|</span><span class="n">total</span> <span class="n">cases</span>
-<span class="mf">42.</span> <span class="n">ICGC_PCAWG_OCCURRENCE</span> <span class="o">-</span> <span class="n">Mutation</span> <span class="n">occurrence</span> <span class="ow">in</span> <span class="n">ICGC</span><span class="o">-</span><span class="n">PCAWG</span> <span class="n">by</span> <span class="n">project</span><span class="p">:</span>
+<span class="mf">45.</span> <span class="n">ICGC_PCAWG_OCCURRENCE</span> <span class="o">-</span> <span class="n">Mutation</span> <span class="n">occurrence</span> <span class="ow">in</span> <span class="n">ICGC</span><span class="o">-</span><span class="n">PCAWG</span> <span class="n">by</span> <span class="n">project</span><span class="p">:</span>
 <span class="n">project_code</span><span class="o">|</span><span class="n">affected_donors</span><span class="o">|</span><span class="n">tested_donors</span><span class="o">|</span><span class="n">frequency</span>
-<span class="mf">43.</span> <span class="n">CHEMBL_COMPOUND_ID</span> <span class="o">-</span> <span class="n">Compounds</span> <span class="p">(</span><span class="k">as</span> <span class="n">ChEMBL</span> <span class="n">IDs</span><span class="p">)</span> <span class="n">that</span> <span class="n">are</span> <span class="n">targeted</span> <span class="n">towards</span> <span class="n">the</span> <span class="n">encoded</span> <span class="n">protein</span> <span class="p">(</span><span class="kn">from</span> <span class="nn">Open</span> <span class="n">Targets</span> <span class="n">Platform</span><span class="p">)</span>
-<span class="mf">44.</span> <span class="n">CHEMBL_COMPOUND_TERMS</span> <span class="o">-</span> <span class="n">Compounds</span> <span class="p">(</span><span class="k">as</span> <span class="n">drug</span> <span class="n">names</span><span class="p">)</span> <span class="n">that</span> <span class="n">are</span> <span class="n">targeted</span> <span class="n">towards</span> <span class="n">the</span> <span class="n">encoded</span> <span class="n">protein</span> <span class="p">(</span><span class="kn">from</span> <span class="nn">Open</span> <span class="n">Targets</span> <span class="n">Platform</span><span class="p">)</span>
-<span class="mf">45.</span> <span class="n">SIMPLEREPEATS_HIT</span> <span class="o">-</span> <span class="n">Variant</span> <span class="n">overlaps</span> <span class="n">UCSC</span> <span class="n">_simpleRepeat_</span> <span class="n">sequence</span> <span class="n">repeat</span> <span class="n">track</span>
-<span class="mf">46.</span> <span class="n">WINMASKER_HIT</span> <span class="o">-</span> <span class="n">Variant</span> <span class="n">overlaps</span> <span class="n">UCSC</span> <span class="n">_windowmaskerSdust_</span> <span class="n">sequence</span> <span class="n">repeat</span> <span class="n">track</span>
-<span class="mf">47.</span> <span class="n">OPENTARGETS_RANK</span> <span class="o">-</span> <span class="n">OpenTargets</span> <span class="n">association</span> <span class="n">score</span> <span class="p">(</span><span class="n">between</span> <span class="mi">0</span> <span class="ow">and</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">gene</span> <span class="p">(</span><span class="n">maximum</span> <span class="n">across</span> <span class="n">cancer</span> <span class="n">phenotypes</span><span class="p">)</span>
-<span class="mf">48.</span> <span class="n">CLINVAR</span> <span class="o">-</span> <span class="n">ClinVar</span> <span class="n">association</span><span class="p">:</span> <span class="n">variant</span> <span class="n">origin</span> <span class="ow">and</span> <span class="n">associated</span> <span class="n">traits</span>
-<span class="mf">49.</span> <span class="n">CLINVAR_CLNSIG</span> <span class="o">-</span> <span class="n">clinical</span> <span class="n">significance</span> <span class="n">of</span> <span class="n">ClinVar</span> <span class="n">variant</span>
-<span class="mf">50.</span> <span class="n">GLOBAL_AF_GNOMAD</span> <span class="o">-</span> <span class="k">global</span> <span class="n">germline</span> <span class="n">allele</span> <span class="n">frequency</span> <span class="ow">in</span> <span class="n">gnomAD</span>
-<span class="mf">51.</span> <span class="n">GLOBAL_AF_1KG</span> <span class="o">-</span> <span class="mi">1000</span><span class="n">G</span> <span class="n">Project</span> <span class="o">-</span> <span class="n">phase</span> <span class="mi">3</span><span class="p">,</span> <span class="n">germline</span> <span class="n">allele</span> <span class="n">frequency</span>
-<span class="mf">52.</span> <span class="n">CALL_CONFIDENCE</span> <span class="o">-</span> <span class="n">confidence</span> <span class="n">indicator</span> <span class="k">for</span> <span class="n">somatic</span> <span class="n">variant</span>
-<span class="mf">53.</span> <span class="n">DP_TUMOR</span> <span class="o">-</span> <span class="n">sequencing</span> <span class="n">depth</span> <span class="n">at</span> <span class="n">variant</span> <span class="n">site</span> <span class="p">(</span><span class="n">tumor</span> <span class="n">sample</span><span class="p">)</span>
-<span class="mf">54.</span> <span class="n">AF_TUMOR</span> <span class="o">-</span> <span class="n">allelic</span> <span class="n">fraction</span> <span class="n">of</span> <span class="n">alternate</span> <span class="n">allele</span> <span class="p">(</span><span class="n">tumor</span> <span class="n">sample</span><span class="p">)</span>
-<span class="mf">55.</span> <span class="n">DP_CONTROL</span> <span class="o">-</span> <span class="n">sequencing</span> <span class="n">depth</span> <span class="n">at</span> <span class="n">variant</span> <span class="n">site</span> <span class="p">(</span><span class="n">control</span> <span class="n">sample</span><span class="p">)</span>
-<span class="mf">56.</span> <span class="n">AF_CONTROL</span> <span class="o">-</span> <span class="n">allelic</span> <span class="n">fraction</span> <span class="n">of</span> <span class="n">alternate</span> <span class="n">allele</span> <span class="p">(</span><span class="n">control</span> <span class="n">sample</span><span class="p">)</span>
-<span class="mf">57.</span> <span class="n">TIER</span>
-<span class="mf">58.</span> <span class="n">TIER_DESCRIPTION</span>
+<span class="mf">46.</span> <span class="n">CHEMBL_COMPOUND_ID</span> <span class="o">-</span> <span class="n">Compounds</span> <span class="p">(</span><span class="k">as</span> <span class="n">ChEMBL</span> <span class="n">IDs</span><span class="p">)</span> <span class="n">that</span> <span class="n">are</span> <span class="n">targeted</span> <span class="n">towards</span> <span class="n">the</span> <span class="n">encoded</span> <span class="n">protein</span> <span class="p">(</span><span class="kn">from</span> <span class="nn">Open</span> <span class="n">Targets</span> <span class="n">Platform</span><span class="p">)</span>
+<span class="mf">47.</span> <span class="n">CHEMBL_COMPOUND_TERMS</span> <span class="o">-</span> <span class="n">Compounds</span> <span class="p">(</span><span class="k">as</span> <span class="n">drug</span> <span class="n">names</span><span class="p">)</span> <span class="n">that</span> <span class="n">are</span> <span class="n">targeted</span> <span class="n">towards</span> <span class="n">the</span> <span class="n">encoded</span> <span class="n">protein</span> <span class="p">(</span><span class="kn">from</span> <span class="nn">Open</span> <span class="n">Targets</span> <span class="n">Platform</span><span class="p">)</span>
+<span class="mf">48.</span> <span class="n">SIMPLEREPEATS_HIT</span> <span class="o">-</span> <span class="n">Variant</span> <span class="n">overlaps</span> <span class="n">UCSC</span> <span class="n">_simpleRepeat_</span> <span class="n">sequence</span> <span class="n">repeat</span> <span class="n">track</span>
+<span class="mf">49.</span> <span class="n">WINMASKER_HIT</span> <span class="o">-</span> <span class="n">Variant</span> <span class="n">overlaps</span> <span class="n">UCSC</span> <span class="n">_windowmaskerSdust_</span> <span class="n">sequence</span> <span class="n">repeat</span> <span class="n">track</span>
+<span class="mf">50.</span> <span class="n">OPENTARGETS_RANK</span> <span class="o">-</span> <span class="n">OpenTargets</span> <span class="n">association</span> <span class="n">score</span> <span class="p">(</span><span class="n">between</span> <span class="mi">0</span> <span class="ow">and</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">gene</span> <span class="p">(</span><span class="n">maximum</span> <span class="n">across</span> <span class="n">cancer</span> <span class="n">phenotypes</span><span class="p">)</span>
+<span class="mf">51.</span> <span class="n">CLINVAR</span> <span class="o">-</span> <span class="n">ClinVar</span> <span class="n">association</span><span class="p">:</span> <span class="n">variant</span> <span class="n">origin</span> <span class="ow">and</span> <span class="n">associated</span> <span class="n">traits</span>
+<span class="mf">52.</span> <span class="n">CLINVAR_CLNSIG</span> <span class="o">-</span> <span class="n">clinical</span> <span class="n">significance</span> <span class="n">of</span> <span class="n">ClinVar</span> <span class="n">variant</span>
+<span class="mf">53.</span> <span class="n">GLOBAL_AF_GNOMAD</span> <span class="o">-</span> <span class="k">global</span> <span class="n">germline</span> <span class="n">allele</span> <span class="n">frequency</span> <span class="ow">in</span> <span class="n">gnomAD</span>
+<span class="mf">54.</span> <span class="n">GLOBAL_AF_1KG</span> <span class="o">-</span> <span class="mi">1000</span><span class="n">G</span> <span class="n">Project</span> <span class="o">-</span> <span class="n">phase</span> <span class="mi">3</span><span class="p">,</span> <span class="n">germline</span> <span class="n">allele</span> <span class="n">frequency</span>
+<span class="mf">55.</span> <span class="n">NCER_PERCENTILE</span> <span class="o">-</span> <span class="n">Genome</span><span class="o">-</span><span class="n">wide</span> <span class="n">percentile</span> <span class="n">score</span> <span class="p">(</span><span class="mi">10</span><span class="n">bp</span> <span class="n">bins</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">the</span> <span class="n">non</span><span class="o">-</span><span class="n">coding</span> <span class="n">Essential</span> <span class="n">Regulation</span> <span class="p">(</span><span class="n">ncER</span><span class="p">)</span> <span class="n">algorithm</span>
+<span class="mf">56.</span> <span class="n">CALL_CONFIDENCE</span> <span class="o">-</span> <span class="n">confidence</span> <span class="n">indicator</span> <span class="k">for</span> <span class="n">somatic</span> <span class="n">variant</span>
+<span class="mf">57.</span> <span class="n">DP_TUMOR</span> <span class="o">-</span> <span class="n">sequencing</span> <span class="n">depth</span> <span class="n">at</span> <span class="n">variant</span> <span class="n">site</span> <span class="p">(</span><span class="n">tumor</span> <span class="n">sample</span><span class="p">)</span>
+<span class="mf">58.</span> <span class="n">AF_TUMOR</span> <span class="o">-</span> <span class="n">allelic</span> <span class="n">fraction</span> <span class="n">of</span> <span class="n">alternate</span> <span class="n">allele</span> <span class="p">(</span><span class="n">tumor</span> <span class="n">sample</span><span class="p">)</span>
+<span class="mf">59.</span> <span class="n">DP_CONTROL</span> <span class="o">-</span> <span class="n">sequencing</span> <span class="n">depth</span> <span class="n">at</span> <span class="n">variant</span> <span class="n">site</span> <span class="p">(</span><span class="n">control</span> <span class="n">sample</span><span class="p">)</span>
+<span class="mf">60.</span> <span class="n">AF_CONTROL</span> <span class="o">-</span> <span class="n">allelic</span> <span class="n">fraction</span> <span class="n">of</span> <span class="n">alternate</span> <span class="n">allele</span> <span class="p">(</span><span class="n">control</span> <span class="n">sample</span><span class="p">)</span>
+<span class="mf">61.</span> <span class="n">TIER</span>
+<span class="mf">62.</span> <span class="n">TIER_DESCRIPTION</span>
 </pre></div>
 </div>
 <p><strong>NOTE</strong>: The user has the possibility to append the TSV file with data
@@ -971,7 +970,7 @@ from other tags in the input VCF of interest (i.e. using the
 <p>We provide a tab-separated values file information about mutational
 signatures detected in the tumor sample. The file has the following
 naming convention:</p>
-<p><strong>sample_id</strong>.pcgr_acmg.__genome_assembly__.mutational_signatures.tsv</p>
+<p>&lt;<strong>sample_id</strong>&gt;.pcgr_acmg.&lt;<strong>genome_assembly</strong>&gt;.mutational_signatures.tsv</p>
 <p>The format of the TSV file is the following:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">1.</span> <span class="n">signature_id</span> <span class="o">-</span> <span class="n">identifier</span> <span class="k">for</span> <span class="n">signature</span>
 <span class="mf">2.</span> <span class="n">sample_id</span> <span class="o">-</span> <span class="n">sample</span> <span class="n">identifier</span>
@@ -997,7 +996,7 @@ annotation</a>. In
 addition, PCGR attaches cancer-relevant annotations for the affected
 transcripts. The naming convention of the compressed TSV file is as
 follows:</p>
-<p><strong>sample_id</strong>.pcgr_acmg.__genome_assembly__.cna_segments.tsv.gz</p>
+<p>&lt;<strong>sample_id</strong>&gt;.pcgr_acmg.&lt;<strong>genome_assembly</strong>&gt;.cna_segments.tsv.gz</p>
 <p><strong>NOTE</strong>: This is file is organized according to the <em>affected
 transcripts</em> (i.e. one line/record per affected transcript).</p>
 <p>The format of the compressed TSV file is the following:</p>
@@ -1050,7 +1049,7 @@ transcripts</em> (i.e. one line/record per affected transcript).</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017-2020, Sigve Nakken
+        &copy; Copyright 2017-2021, Sigve Nakken
 
     </p>
   </div>

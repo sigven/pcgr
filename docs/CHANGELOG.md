@@ -1,6 +1,70 @@
 
 ## CHANGELOG
 
+#### 0.9.2 - June 30th 2021
+
+* Data updates: ClinVar, GWAS catalog, CIViC, CancerMine, dbNSFP, KEGG, ChEMBL, Disease Ontology/EFO, Open Targets Platform, UniProt KB, GENCODE
+* Software upgrades: R v4.1, Bioconductor v3.13, VEP (104) ++
+
+##### Changed
+* TOML-based configuration for PCGR is abandoned, all options to PCGR are now configured through command-line parameters
+  * __NOTE__: We recommend to turn on `--show_noncoding` and `--vcf2maf` (prevously turned on by default in TOML). For tumor-only runs, we recommend to include `--exclude_dbsnp_nonsomatic` and `exclude_nonexonic`
+
+##### Added
+* Command-line options
+  * Previously set in TOML file)
+     * Allelic support
+	     * `--tumor_dp_tag`
+	     * `--tumor_af_tag`
+	     * `--control_dp_tag`
+	     * `--control_af_tag`
+	     * `--call_conf_tag`
+	* Tumor-only options
+		* `--maf_onekg_eur`
+		* `--maf_onekg_amr`
+		* `--maf_onekg_afr`
+		* `--maf_onekg_eas`
+		* `--maf_onekg_sas`
+		* `--maf_onekg_global`
+		* `--maf_gnomad_nfe`
+		* `--maf_gnomad_asj`
+		* `--maf_gnomad_fin`
+		* `--maf_gnomad_oth`
+		* `--maf_gnomad_amr`
+		* `--maf_gnomad_afr`
+		* `--maf_gnomad_eas`
+		* `--maf_gnomad_sas`
+		* `--maf_gnomad_global`
+		* `--exclude_pon`
+		* `--exclude_likely_het_germline`
+		* `--exclude_likely_hom_germline`
+		* `--exclude_dbsnp_nonsomatic`
+		* `--exclude_nonexonic`
+	* `--report_theme`
+	* `--preserved_info_tags` (previously `custom_tags (TOML)`)
+	* `--show_noncoding` (previously `list_noncoding (TOML)`)
+	* `--vcfanno_n_proc` (previously `n_vcfanno_proc (TOML)`)
+	* `--vep_n_forks` (previously `n_vep_forks (TOML)`)
+	* `--vep_pick_order`
+	* `--vep_no_intergenic` (previously `vep_skip_intergenic (TOML)`)
+	* `--vcf2maf`
+  * New options
+	* `--report_nonfloating_toc` (**NEW**) - add the TOC at the top of the HTML report, not floating at the left of the document
+     * `--cpsr_report` (**NEW**) - add a dedicated section in PCGR with main germline findings from CPSR analysis - (use the gzipped JSON output from CPSR as input)
+     * `--vep_regulatory` (**NEW**) - append regulatory annotations to variants (TF binding sites etc.)
+     * `--include_artefact_signatures` (**NEW**) - include sequencing artefacts in the reference collection of mutational signatures (COSMIC v3.2)
+
+
+##### Fixed
+ * Bug in writing (large) report contents to JSON (issue [#118](https://github.com/sigven/pcgr/issues/118))
+ * Bug (typo) in merge of clinical evidence items from different sources (CIVIC + CGI) (issue [#126](https://github.com/sigven/pcgr/issues/126))
+ * Bug in value box for number of (high-confident) kataegis events - rmarkdown (issue [#122](https://github.com/sigven/pcgr/issues/122))
+ * Bug in value box for tumor purity/ploidy -rmarkdown (issue [#129](https://github.com/sigven/pcgr/issues/129))
+
+##### Removed
+ * Command-line options
+    * `--conf` - TOML-based configuration file
+
 #### 0.9.1 - November 30th 2020
  * Data updates: ClinVar, GWAS catalog, CIViC, CancerMine, dbNSFP, KEGG, ChEMBL/DGIdb, Disease Ontology, Experimental Factor Ontology
 

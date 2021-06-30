@@ -20,20 +20,22 @@ Here, we apply the **MutationalPatterns** package ([Blokzijl et al., 2018](https
 
 cat('Specifically, for tumors of type <b>', pcg_report$metadata$config$t_props$tumor_type,'</b>, mutational signature reconstruction is here limited to the following reference collection:<br>',sep="")
 
-dat <- pcg_report$content$m_signature_mp$result$reference_data$aetiology
+dat <- pcg_report$content$m_signature_mp$result$reference_data
 if("signature_id" %in% colnames(dat) & "aetiology_keyword" %in% colnames(dat)){
   cat('<ul>')
   i <- 1
   
-  refsig_collection_site <- pcg_report$content$m_signature_mp$result$reference_data$aetiology %>%
+  refsig_collection_site <- pcg_report$content$m_signature_mp$result$reference_data %>%
     dplyr::mutate(tmp_id = as.numeric(
       stringr::str_replace(
         stringr::str_replace(
           stringr::str_replace(
-            stringr::str_replace(signature_id,"SBS",""),
-            "a",".3"),
-          "b",".7"),
-        "c", ".9"))) %>%
+            stringr::str_replace(
+              stringr::str_replace(signature_id,"SBS",""),
+              "a",".2"),
+            "b",".4"),
+          "d", ".6"),
+        "c", ".8"))) %>%
     dplyr::arrange(tmp_id) %>%
     dplyr::select(signature_id, aetiology_keyword) %>%
     dplyr::distinct()
@@ -49,7 +51,7 @@ if("signature_id" %in% colnames(dat) & "aetiology_keyword" %in% colnames(dat)){
 
 
 ```{r results = "asis", include = !missing_data_norun & pcg_report$metadata$config$msigs$all_reference_signatures}
-cat("For this analysis, '--all_reference_signatures' have been turned on, which means that all reference signatures (n = 67) have been considered during optimal reconstruction of the mutational profile with reference signatures",sep="\n")
+cat("For this analysis, '--all_reference_signatures' have been turned on, which means that all reference signatures (n = 60) have been considered during optimal reconstruction of the mutational profile with reference signatures",sep="\n")
 htmltools::br()
 
 ```
@@ -101,7 +103,7 @@ scale_fill <-
   pcg_report$content$m_signature_mp$result$scale_fill_values
 names(scale_fill) <- pcg_report$content$m_signature_mp$result$scale_fill_names
 
-ggplot2::ggplot(plot_data, aes(x = 2, y = prop_group, fill = group)) +
+ggplot2::ggplot(plot_data, ggplot2::aes(x = 2, y = prop_group, fill = group)) +
      ggplot2::geom_bar(width = 1, stat = "identity", color = "white") +
      ggplot2::coord_polar(theta = "y", start = 0) +
      ggplot2::scale_fill_manual(values = scale_fill) +

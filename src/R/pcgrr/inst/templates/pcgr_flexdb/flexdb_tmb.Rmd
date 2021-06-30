@@ -1,4 +1,4 @@
-TMB and MSI
+TMB & MSI
 ================================================================== 
 
 ```{r check_analysis_status_msi, echo = F}
@@ -225,14 +225,15 @@ if(NROW(pcg_report[['content']][['msi']][['prediction']][['mmr_pol_variants']]) 
   DT::datatable(pcg_report[['content']][['msi']][['prediction']][['mmr_pol_variants']], 
                 escape=F,extensions=c("Buttons","Responsive"), 
                 width = "100%",
-                options=list(buttons = c('csv','excel'), 
-                             scrollY = scrollY_flexdb_container, 
-                             autoWidth = T, 
-                 #fixedColumns = T,
-                 fixedHeader = T,
-                 #scrollX = F,
-                  columnDefs = list(list(width = '90px', targets = c(1,2,3,4,5))),
-                             dom = 'Bfrtip'))
+                options=list(
+                  buttons = c('csv','excel'), 
+                  scrollY = scrollY_flexdb_container, 
+                  #autoWidth = T, 
+                  #fixedColumns = T,
+                  #fixedHeader = T,
+                  scrollX = "900px",
+                  #columnDefs = list(list(width = '90px', targets = c(1,2,3,4,5))),
+                  dom = 'Bfrtip'))
 }else{
   cat('<i>No variants found.</i>',sep='\n')
   cat('\n')

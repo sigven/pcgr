@@ -1,4 +1,6 @@
 
+## Variant classification
+
 ```{r prepare_classified_variant_data, echo=F, results='asis'}
 
 dtable_pageLength <- 6
@@ -17,7 +19,7 @@ for(c in c('class1','class2','class3','class4','class5')){
     missing_class_items[[c]][[m]] <- T
     if(NROW(cps_report[['content']][['snv_indel']][["disp"]][[c]]) > 0){
       tot_variants[[c]][[m]] <- NROW(cps_report[['content']][['snv_indel']][["disp"]][[c]] %>% 
-                                     dplyr::filter(SOURCE == m))
+                                     dplyr::filter(CPSR_CLASSIFICATION_SOURCE == m))
     }
     if(tot_variants[[c]][[m]] > 0){
       show_class_filters[[c]][[m]] <- T
@@ -35,19 +37,11 @@ formula_gnomad <- as.formula(paste0("~",rlang::sym(tag_gnomad)))
 ```
 
 
-## Germline SNVs/InDels
+<!--
+## <span style="color:`r pcgrr::color_palette$pathogenicity$values[1]`">Class 5 - <b>Pathogenic</b> variants</span> {.tabset .tabset-pills .nav-justified}
+-->
 
-### Variant statistics 
-
-Variant numbers in the selected cancer predisposition genes (n = `r NROW(cps_report[['metadata']][['gene_panel']][['genes']])`)
-
-* Number of SNVs: __`r cps_report[['content']][['snv_indel']][['v_stat_cpg']][['n_snv']]`__
-* Number of InDels: __`r cps_report[['content']][['snv_indel']][['v_stat_cpg']][['n_indel']]`__
-* Number of protein-coding variants: __`r cps_report[['content']][['snv_indel']][['v_stat_cpg']][['n_coding']]`__
-
-<br><br>
-
-### <span style="color:`r pcgrr::color_palette$pathogenicity$values[1]`">Class 5 - <b>Pathogenic</b> variants</span> {.tabset .tabset-pills .nav-justified}
+### Class 5 - <b>Pathogenic</b></span> variants {.tabset .tabset-pills .nav-justified}
 
 <br>
 
@@ -77,13 +71,13 @@ htmltools::br()
 
 
 variants_class5_clinvar <- 
-  dplyr::filter(cps_report[['content']][['snv_indel']][["disp"]][['class5']], SOURCE == 'ClinVar')
+  dplyr::filter(cps_report[['content']][['snv_indel']][["disp"]][['class5']], CPSR_CLASSIFICATION_SOURCE == 'ClinVar')
 
-if(NROW(variants_class5_clinvar) > 5000){
-  cat('<b>NOTE - only considering top 5000 variants (due to limitations with client-side tables) </b><br>',sep="\n")
+if(NROW(variants_class5_clinvar) > 2000){
+  cat('<b>NOTE - only considering top 2000 variants (due to limitations with client-side tables) </b><br>',sep="\n")
   cat('<br>')
   variants_class5_clinvar <- 
-    head(variants_class5_clinvar, 5000)
+    head(variants_class5_clinvar, 2000)
 }
 
 variants_class5_clinvar <- variants_class5_clinvar %>% 
@@ -112,10 +106,10 @@ htmltools::br()
 
 DT::datatable(variants_class5_1, escape=F,extensions=c("Buttons","Responsive"),
               options = list(
-                 pageLength = dtable_pageLength,
-                  #scrollY = dtable_scrollY,
-                  scrollCollapse = T,
-                autowidth = T,
+                pageLength = dtable_pageLength,
+                #scrollY = dtable_scrollY,
+                scrollCollapse = T,
+                #autoWidth = T,
                 buttons = c('csv','excel'),
                 dom = 'Bfrtip',
                 initComplete = DT::JS(
@@ -148,13 +142,13 @@ if(missing_class_items[['class5']][['ClinVar']] == T & missing_class_items[['cla
 ```{r class5_cpsr_other, echo=F, results = 'asis', eval = show_class_filters[['class5']][['Other']]}
 
 variants_class5_other <- 
-  dplyr::filter(cps_report[['content']][['snv_indel']][["disp"]][['class5']], SOURCE == 'Other')
+  dplyr::filter(cps_report[['content']][['snv_indel']][["disp"]][['class5']], CPSR_CLASSIFICATION_SOURCE == 'Other')
 
-if(NROW(variants_class5_other) > 5000){
-  cat('<b>NOTE - only considering top 5000 variants (ranked according to CPSR classification score) </b><br>',sep="\n")
+if(NROW(variants_class5_other) > 2000){
+  cat('<b>NOTE - only considering top 2000 variants (ranked according to CPSR classification score) </b><br>',sep="\n")
   cat('<br>')
   variants_class5_other <- 
-    head(variants_class5_other, 5000)
+    head(variants_class5_other, 2000)
 }
 
 variants_class5_other <- variants_class5_other %>% 
@@ -202,8 +196,10 @@ htmltools::br()
 ```
 
 
-
-### <span style="color:`r pcgrr::color_palette$pathogenicity$values[2]`">Class 4 - <b>Likely Pathogenic</b> variants</span> {.tabset .tabset-pills .nav-justified}
+<!--
+## <span style="color:`r pcgrr::color_palette$pathogenicity$values[2]`">Class 4 - <b>Likely Pathogenic</b> variants</span> {.tabset .tabset-pills .nav-justified}
+-->
+### Class 4 - <b>Likely Pathogenic</b> variants {.tabset .tabset-pills .nav-justified}
 
 <br>
 
@@ -231,13 +227,13 @@ cat('\n')
 htmltools::br()
 
 variants_class4_clinvar <- 
-  dplyr::filter(cps_report[['content']][['snv_indel']][["disp"]][['class4']], SOURCE == 'ClinVar')
+  dplyr::filter(cps_report[['content']][['snv_indel']][["disp"]][['class4']], CPSR_CLASSIFICATION_SOURCE == 'ClinVar')
 
-if(NROW(variants_class4_clinvar) > 5000){
-  cat('<b>NOTE - only considering top 5000 variants (due to limitations with client-side tables) </b><br>',sep="\n")
+if(NROW(variants_class4_clinvar) > 2000){
+  cat('<b>NOTE - only considering top 2000 variants (due to limitations with client-side tables) </b><br>',sep="\n")
   cat('<br>')
   variants_class4_clinvar <- 
-    head(variants_class4_clinvar, 5000)
+    head(variants_class4_clinvar, 2000)
 }
 
 variants_class4_clinvar <- variants_class4_clinvar %>% 
@@ -302,13 +298,13 @@ cat('\n')
 htmltools::br()
 
 variants_class4_other <- 
-  dplyr::filter(cps_report[['content']][['snv_indel']][["disp"]][['class4']], SOURCE == 'Other')
+  dplyr::filter(cps_report[['content']][['snv_indel']][["disp"]][['class4']], CPSR_CLASSIFICATION_SOURCE == 'Other')
 
-if(NROW(variants_class4_other) > 5000){
-  cat('<b>NOTE - only considering top 5000 variants (ranked according to CPSR classification score) </b><br>',sep="\n")
+if(NROW(variants_class4_other) > 2000){
+  cat('<b>NOTE - only considering top 2000 variants (ranked according to CPSR classification score) </b><br>',sep="\n")
   cat('<br>')
   variants_class4_other <- 
-    head(variants_class4_other, 5000)
+    head(variants_class4_other, 2000)
 }
 
 variants_class4_other <- variants_class4_other %>% 
@@ -355,7 +351,12 @@ htmltools::br()
 ```
 
 
-### <span style="color:`r pcgrr::color_palette$pathogenicity$values[3]`">Class 3 - <b>Variants of Uncertain Significance (VUS)</b></span> {.tabset .tabset-pills .nav-justified}
+<!--
+## <span style="color:`r pcgrr::color_palette$pathogenicity$values[3]`">Class 3 - <b>Variants of Uncertain Significance (VUS)</b></span> {.tabset .tabset-pills .nav-justified}
+-->
+
+### Class 3 - Variants of <b>Uncertain Significance (VUS)</b> {.tabset .tabset-pills .nav-justified}
+
 
 <br>
 
@@ -383,13 +384,13 @@ cat('\n')
 htmltools::br()
 
 variants_class3_clinvar <- 
-  dplyr::filter(cps_report[['content']][['snv_indel']][["disp"]][['class3']], SOURCE == 'ClinVar')
+  dplyr::filter(cps_report[['content']][['snv_indel']][["disp"]][['class3']], CPSR_CLASSIFICATION_SOURCE == 'ClinVar')
 
-if(NROW(variants_class3_clinvar) > 5000){
-  cat('<b>NOTE - only considering top 5000 variants (due to limitations with client-side tables) </b><br>',sep="\n")
+if(NROW(variants_class3_clinvar) > 2000){
+  cat('<b>NOTE - only considering top 2000 variants (due to limitations with client-side tables) </b><br>',sep="\n")
   cat('<br>')
   variants_class3_clinvar <- 
-    head(variants_class3_clinvar, 5000)
+    head(variants_class3_clinvar, 2000)
 }
 
 variants_class3_clinvar <- variants_class3_clinvar %>% 
@@ -401,13 +402,17 @@ crosstalk::bscols(
   list(
     crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_class3_1, ~CONSEQUENCE),
     crosstalk::filter_checkbox("GENOTYPE", "Genotype", variants_class3_1, ~GENOTYPE),
-    crosstalk::filter_select("SYMBOL", "Gene", variants_class3_1, ~SYMBOL)
+    crosstalk::filter_select("SYMBOL", "Gene", variants_class3_1, ~SYMBOL),
+    crosstalk::filter_slider("GERP_SCORE","Genomic conservation score (GERP)",variants_class3_1, ~GERP_SCORE,
+                             min = -12.3, max = 6.17, ticks = T),
+    crosstalk::filter_slider(tag_gnomad, paste0("MAF gnomAD (",desc_gnomad,")"), variants_class3_1, formula_gnomad, sep="",ticks = F)
   ),
   list(
+    crosstalk::filter_select("miRNA_TARGET_HIT", "miRNA target gain/loss", variants_class3_1, ~miRNA_TARGET_HIT),
+    crosstalk::filter_select("TF_BINDING_SITE_VARIANT", "TF binding site alteration", variants_class3_1, ~TF_BINDING_SITE_VARIANT),
     crosstalk::filter_select("CLINVAR_PHENOTYPE", "ClinVar phenotype(s)", variants_class3_1, ~CLINVAR_PHENOTYPE),
     crosstalk::filter_slider("CLINVAR_REVIEW_STATUS_STARS", "ClinVar review status stars", variants_class3_1, ~CLINVAR_REVIEW_STATUS_STARS, min = 0, max = 4, step = 1, ticks = T),
-    crosstalk::filter_select("CLINVAR_CONFLICTED", "ClinVar conflicting interpretations", variants_class3_1, ~CLINVAR_CONFLICTED),
-    crosstalk::filter_slider(tag_gnomad, paste0("MAF gnomAD (",desc_gnomad,")"), variants_class3_1, formula_gnomad, sep="",ticks = F)
+    crosstalk::filter_select("CLINVAR_CONFLICTED", "ClinVar conflicting interpretations", variants_class3_1, ~CLINVAR_CONFLICTED)
   )
 )
 
@@ -448,19 +453,31 @@ if(missing_class_items[['class3']][['ClinVar']] == T & missing_class_items[['cla
 }
 ```
 
+
+```{r vus_caution_note, echo=F, results = "asis", include = show_class_filters[['class3']][['Other']]}
+
+htmltools::br()
+
+cat('<ul><li><b>IMPORTANT NOTE:</b> Non-ClinVar variants with a CPSR pathogenicity score of 2.0 (maximum score for VUS in CPSR) represent the most challenging collection of variants when it comes to classification. Based on calibration of classification score thresholds with high-confident ClinVar variants, we discovered a heterogeneous mix of _Likely Pathogenic_, _Pathogenic_, and _VUS_ variants that were all attributed with this score. Henceforth, we recommend that these variants should be prioritized for careful examination, and any such cases are <mark style="background-color:#ff7518; font-weight:bold; color:black">conveniently higlighted</mark> in the table below</li></ul>:\n')
+
+htmltools::br()
+```
+
+
+
 ```{r class3_cpsr_other, echo=F, results = 'asis', eval = show_class_filters[['class3']][['Other']]}
 
 cat('\n')
 htmltools::br()
 
 variants_class3_other <- 
-  dplyr::filter(cps_report[['content']][['snv_indel']][["disp"]][['class3']], SOURCE == 'Other')
+  dplyr::filter(cps_report[['content']][['snv_indel']][["disp"]][['class3']], CPSR_CLASSIFICATION_SOURCE == 'Other')
 
-if(NROW(variants_class3_other) > 5000){
-  cat('<b>NOTE - only considering top 5000 variants (ranked according to CPSR classification score) </b><br>',sep="\n")
+if(NROW(variants_class3_other) > 2000){
+  cat('<b>NOTE - only considering top 2000 variants (ranked according to CPSR classification score) </b><br>',sep="\n")
   cat('<br>')
   variants_class3_other <- 
-    head(variants_class3_other, 5000)
+    head(variants_class3_other, 2000)
 }
 
 variants_class3_other <- variants_class3_other %>% 
@@ -472,9 +489,13 @@ crosstalk::bscols(
   list(
     crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_class3_2, ~CONSEQUENCE),
     crosstalk::filter_checkbox("GENOTYPE", "Genotype", variants_class3_2, ~GENOTYPE),
-    crosstalk::filter_select("SYMBOL", "Gene", variants_class3_2, ~SYMBOL)
+    crosstalk::filter_select("SYMBOL", "Gene", variants_class3_2, ~SYMBOL),
+    crosstalk::filter_slider("GERP_SCORE","Genomic conservation score (GERP)",variants_class3_2, ~GERP_SCORE,
+                             min = -12.3, max = 6.17, ticks = T)
   ),
   list(
+    crosstalk::filter_select("miRNA_TARGET_HIT", "miRNA target gain/loss", variants_class3_2, ~miRNA_TARGET_HIT),
+    crosstalk::filter_select("TF_BINDING_SITE_VARIANT", "TF binding site alteration", variants_class3_2, ~TF_BINDING_SITE_VARIANT),
     crosstalk::filter_select("CPSR_CLASSIFICATION_CODE", "CPSR classification (ACMG criteria codes)", variants_class3_2, ~CPSR_CLASSIFICATION_CODE),
     crosstalk::filter_slider("CPSR_PATHOGENICITY_SCORE", "CPSR pathogenicity score", variants_class3_2, ~CPSR_PATHOGENICITY_SCORE, step = 0.5, ticks = T),
     crosstalk::filter_slider(tag_gnomad, paste0("MAF gnomAD (",desc_gnomad,")"), variants_class3_2, formula_gnomad, sep="",ticks = F)
@@ -497,16 +518,27 @@ DT::datatable(variants_class3_2, escape=F,extensions=c("Buttons","Responsive"),
                   "function(settings, json) {",
                   "$(this.api().table().header()).css({'background-color':'#000000', 'color': '#fff'});",
                   "}")
-              )
-)
-
+              ) 
+) %>%
+  DT::formatStyle(color = "black", 
+                  columns = "SYMBOL", 
+                  valueColumns = "CPSR_PATHOGENICITY_SCORE", 
+                  backgroundColor = DT::styleEqual(
+                    c(-1.0, -0.5, 0, 0.5, 1.0, 1.5, 2.0),
+                    c('#FFFFFF','#FFFFFF','#FFFFFF','#FFFFFF','#FFFFFF','#FFFFFF','#ff7518')
+                  )
+  )
+ 
 htmltools::br()
 htmltools::br()
 htmltools::br()
 
 ```
 
-### <span style="color:`r pcgrr::color_palette$pathogenicity$values[4]`">Class 2 - <b>Likely Benign</b> variants</span> {.tabset .tabset-pills .nav-justified}
+<!--
+## <span style="color:`r pcgrr::color_palette$pathogenicity$values[4]`">Class 2 - <b>Likely Benign</b> variants</span> {.tabset .tabset-pills .nav-justified}
+-->
+### Class 2 - <b>Likely Benign</b> variants {.tabset .tabset-pills .nav-justified}
 
 <br>
 
@@ -534,13 +566,13 @@ cat('\n')
 htmltools::br()
 
 variants_class2_clinvar <- 
-  dplyr::filter(cps_report[['content']][['snv_indel']][["disp"]][['class2']], SOURCE == 'ClinVar')
+  dplyr::filter(cps_report[['content']][['snv_indel']][["disp"]][['class2']], CPSR_CLASSIFICATION_SOURCE == 'ClinVar')
 
-if(NROW(variants_class2_clinvar) > 5000){
-  cat('<b>NOTE - only considering top 5000 variants (due to limitations with client-side tables) </b><br>',sep="\n")
+if(NROW(variants_class2_clinvar) > 2000){
+  cat('<b>NOTE - only considering top 2000 variants (due to limitations with client-side tables) </b><br>',sep="\n")
   cat('<br>')
   variants_class2_clinvar <- 
-    head(variants_class2_clinvar, 5000)
+    head(variants_class2_clinvar, 2000)
 }
 
 variants_class2_clinvar <- variants_class2_clinvar %>% 
@@ -605,13 +637,13 @@ cat('\n')
 htmltools::br()
 
 variants_class2_other <- 
-  dplyr::filter(cps_report[['content']][['snv_indel']][["disp"]][['class2']], SOURCE == 'Other')
+  dplyr::filter(cps_report[['content']][['snv_indel']][["disp"]][['class2']], CPSR_CLASSIFICATION_SOURCE == 'Other')
 
-if(NROW(variants_class2_other) > 5000){
-  cat('<b>NOTE - only considering top 5000 variants (ranked according to CPSR classification score) </b><br>',sep="\n")
+if(NROW(variants_class2_other) > 2000){
+  cat('<b>NOTE - only considering top 2000 variants (ranked according to CPSR classification score) </b><br>',sep="\n")
   cat('<br>')
   variants_class2_other <- 
-    head(variants_class2_other, 5000)
+    head(variants_class2_other, 2000)
 }
 
 variants_class2_other <- variants_class2_other %>% 
@@ -657,8 +689,12 @@ htmltools::br()
 
 ```
 
+<!--
+## <span style="color:`r pcgrr::color_palette$pathogenicity$values[5]`">Class 1 - <b>Benign</b> variants</span> {.tabset .tabset-pills .nav-justified}
+-->
 
-### <span style="color:`r pcgrr::color_palette$pathogenicity$values[5]`">Class 1 - <b>Benign</b> variants</span> {.tabset .tabset-pills .nav-justified}
+### Class 1 - <b>Benign</b> variants {.tabset .tabset-pills .nav-justified}
+
 
 <br>
 
@@ -686,13 +722,13 @@ cat('\n')
 htmltools::br()
 
 variants_class1_clinvar <- 
-  dplyr::filter(cps_report[['content']][['snv_indel']][["disp"]][['class1']], SOURCE == 'ClinVar')
+  dplyr::filter(cps_report[['content']][['snv_indel']][["disp"]][['class1']], CPSR_CLASSIFICATION_SOURCE == 'ClinVar')
 
-if(NROW(variants_class1_clinvar) > 5000){
-  cat('<b>NOTE - only considering top 5000 variants (due to limitations with client-side tables) </b><br>',sep="\n")
+if(NROW(variants_class1_clinvar) > 2000){
+  cat('<b>NOTE - only considering top 2000 variants (due to limitations with client-side tables) </b><br>',sep="\n")
   cat('<br>')
   variants_class1_clinvar <- 
-    head(variants_class1_clinvar, 5000)
+    head(variants_class1_clinvar, 2000)
 }
 
 variants_class1_clinvar <- variants_class1_clinvar %>% 
@@ -759,13 +795,13 @@ cat('\n')
 htmltools::br()
 
 variants_class1_other <- 
-  dplyr::filter(cps_report[['content']][['snv_indel']][["disp"]][['class1']], SOURCE == 'Other')
+  dplyr::filter(cps_report[['content']][['snv_indel']][["disp"]][['class1']], CPSR_CLASSIFICATION_SOURCE == 'Other')
 
-if(NROW(variants_class1_other) > 5000){
-  cat('<b>NOTE - only considering top 5000 variants (ranked according to CPSR classification score) </b><br>',sep="\n")
+if(NROW(variants_class1_other) > 2000){
+  cat('<b>NOTE - only considering top 2000 variants (ranked according to CPSR classification score) </b><br>',sep="\n")
   cat('<br>')
   variants_class1_other <- 
-    head(variants_class1_other, 5000)
+    head(variants_class1_other, 2000)
 }
 
 variants_class1_other <- variants_class1_other %>% 

@@ -14,12 +14,13 @@ generate_report_data_tmb <- function(sample_calls,
   tmb_consequence_pattern <-
     "^(stop_|start_lost|frameshift_|missense_|synonymous_|inframe_)"
 
-  rlogging::message("------")
-  rlogging::message(paste0("Calculating tumor mutational burden"))
+  pcgrr:::log4r_info("------")
+  pcgrr:::log4r_info(paste0("Calculating tumor mutational burden"))
 
   pcg_report_tmb <-
-    pcgrr::init_report(pcgr_config, sample_name = sample_name,
-                       class = "tmb", pcgr_data = pcgr_data)
+    pcgrr::init_report(config = pcgr_config,
+                       class = "tmb",
+                       pcgr_data = pcgr_data)
 
   if (pcgr_config[["tmb"]][["algorithm"]] == "nonsyn") {
     tmb_consequence_pattern <- "^(missense_)"
@@ -28,11 +29,15 @@ generate_report_data_tmb <- function(sample_calls,
   }
 
   pcg_report_tmb[["eval"]] <- TRUE
-  pcg_report_tmb[["v_stat"]][["n_tmb"]] <-
-    sample_calls %>%
-    dplyr::filter(
-      stringr::str_detect(CONSEQUENCE, tmb_consequence_pattern)) %>%
-    nrow()
+
+  if(NROW(sample_calls) > 0){
+    pcg_report_tmb[["v_stat"]][["n_tmb"]] <-
+      sample_calls %>%
+      dplyr::filter(
+        stringr::str_detect(CONSEQUENCE, tmb_consequence_pattern)) %>%
+      nrow()
+  }
+
   if (pcg_report_tmb[["v_stat"]][["n_tmb"]] > 0 &
       pcgr_config$assay_props$target_size_mb > 0) {
     pcg_report_tmb[["v_stat"]][["tmb_estimate"]] <-
@@ -41,13 +46,13 @@ generate_report_data_tmb <- function(sample_calls,
                      pcg_report_tmb[["v_stat"]][["target_size_mb"]]),
         digits = 2)
   }
-  rlogging::message(
+  pcgrr:::log4r_info(
     paste0("Number of variants for mutational burden analysis: ",
            pcg_report_tmb[["v_stat"]][["n_tmb"]]))
-  rlogging::message(
+  pcgrr:::log4r_info(
     paste0("Coding target size sequencing assay (Mb): ",
            pcg_report_tmb[["v_stat"]][["target_size_mb"]]))
-  rlogging::message(
+  pcgrr:::log4r_info(
     paste0("Estimated mutational burden: ",
            pcg_report_tmb[["v_stat"]][["tmb_estimate"]],
            " mutations/Mb"))

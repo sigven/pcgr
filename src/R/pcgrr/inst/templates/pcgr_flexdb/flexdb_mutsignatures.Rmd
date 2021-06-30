@@ -84,7 +84,7 @@ scale_fill <-
 names(scale_fill) <- pcg_report$content$m_signature_mp$result$scale_fill_names
 
 
-ggplot2::ggplot(plot_data, aes(x = 2, y = prop_group, fill = group)) +
+ggplot2::ggplot(plot_data, ggplot2::aes(x = 2, y = prop_group, fill = group)) +
      ggplot2::geom_bar(width = 1, stat = "identity", color = "white") +
      ggplot2::coord_polar(theta = "y", start = 0) +
      ggplot2::scale_fill_manual(values = scale_fill) +
@@ -120,7 +120,7 @@ signature_colors <- pcg_report[['content']][['m_signature_mp']][['result']][['co
 
 myOptions <- list(buttons = c('csv','excel'),
                   dom = 'Bfrtip', 
-                  autoWidth = T, 
+                  #autoWidth = T, 
                   fixedColumns = T,
                   columnDefs = list(list(width = '10%', targets = c(1,2)),
                                     list(width = '40%', targets = 5),
@@ -130,7 +130,7 @@ myOptions <- list(buttons = c('csv','excel'),
                   scrollCollapse = T)
 dat <- dplyr::select(pcg_report$content$m_signature_mp$result$contributions$per_signature, -c(sample_id,col,prop_signature)) %>%
   dplyr::select(signature_id, contribution, group, dplyr::everything())
-DT::datatable(dat ,options = myOptions,extensions=c("Buttons","Responsive"),escape=F) %>%
+DT::datatable(dat ,options = myOptions, extensions=c("Buttons")) %>%
  DT::formatStyle('contribution',fontWeight = 'bold') %>%
  DT::formatStyle('signature_id',color = 'white', 
                  backgroundColor = DT::styleEqual(signature_ids, signature_colors), 

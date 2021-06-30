@@ -1,0 +1,52 @@
+## Main results
+
+<div id="value_box_container">
+<div class = "value_box">
+<br><i>TIER 1 - SNV/INDEL</i><br><br><mark style="font-size:118%; background-color:#593196; color:white">
+<b>`r pcg_report[["content"]][["value_box"]][["tier1"]]`</b></mark>
+</div>
+
+<div class = "value_box">
+<br><i>TIER 2 - SNV/INDEL</i><br><br><mark style="font-size:118%; background-color:#593196; color:white">
+<b>`r pcg_report[["content"]][["value_box"]][["tier2"]]`</b></mark>
+</div>
+
+
+<div class = "value_box">
+<br><i>sCNA</i><br><br><mark style="font-size:118%; background-color:#593196; color:white">
+<b>`r pcg_report[["content"]][["value_box"]][["scna"]]`</b></mark>
+</div>
+
+
+<div class = "value_box">
+<br><i>TUMOR PURITY</i><br><br><mark style="font-size:118%; background-color:#593196; color:white">
+<b>`r  pcg_report[["content"]][["value_box"]][["tumor_purity"]]`</b></mark>
+</div>
+
+<div class = "value_box">
+<br><i>TUMOR PLOIDY</i><br><br><mark style="font-size:118%; background-color:#593196; color:white">
+<b>`r pcg_report[["content"]][["value_box"]][["tumor_ploidy"]]`</b></mark>
+</div>
+
+<div class = "value_box">
+<br><i>MSI STATUS</i><br><br><mark style="font-size:118%; background-color:#593196; color:white">
+<b>`r pcg_report[["content"]][["value_box"]][["msi"]]`</b></mark>
+</div>
+
+<div class = "value_box">
+<br><i>DOMINANT SIGNATURE</i><br><br><mark style="font-size:118%; background-color:#593196; color:white">
+<b>`r pcg_report[["content"]][["value_box"]][["signatures"]]`</b></mark>
+</div>
+
+<div class = "value_box">
+<br><i>MUTATIONAL BURDEN</i><br><br><mark style="font-size:118%; background-color:#593196; color:white">
+<b>`r pcg_report[["content"]][["value_box"]][["tmb"]]`</b></mark>
+</div>
+
+<div class = "value_box">
+<br><i>KATAEGIS EVENTS</i><br><br><mark style="font-size:118%; background-color:#593196; color:white">
+<b>`r pcg_report[["content"]][["value_box"]][["kataegis"]]`</b></mark>
+</div>
+</div>
+
+<br><br>

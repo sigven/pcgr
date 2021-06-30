@@ -6,19 +6,12 @@ STEP 0: Python
 
 An installation of Python (version *3.6*) is required to run PCGR. Check
 that Python is installed by typing ``python --version`` in your terminal
-window. In addition, a `Python library <https://github.com/uiri/toml>`__
-for parsing configuration files encoded with
-`TOML <https://github.com/toml-lang/toml>`__ is needed. To install,
-simply run the following command:
-
-::
-
-   pip install toml
+window.
 
 **IMPORTANT NOTE**: STEP 1 & 2 outline installation guidelines for
 running PCGR with Docker. If you want to install and run PCGR without
 the use of Docker (i.e. through Conda), follow `these
-instructions <https://github.com/sigven/pcgr/install_no_docker/README.md>`__
+instructions <https://github.com/sigven/pcgr/blob/master/install_no_docker/README.md>`__
 
 STEP 1: Installation of Docker
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -50,44 +43,21 @@ STEP 1: Installation of Docker
 STEP 2: Download PCGR and data bundle
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Development version
-^^^^^^^^^^^^^^^^^^^
-
-a. Clone the PCGR GitHub repository (includes run script and default
-   configuration file): ``git clone https://github.com/sigven/pcgr.git``
-
-b. Download and unpack the latest data bundles in the PCGR directory
-
-   -  `grch37 data bundle -
-      20201123 <http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch37.20201123.tgz>`__
-      (approx 17Gb)
-   -  `grch38 data bundle -
-      20201123 <http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch38.20201123.tgz>`__
-      (approx 18Gb)
-   -  *Unpacking*:
-      ``gzip -dc pcgr.databundle.grch37.YYYYMMDD.tgz | tar xvf -``
-
-c. Pull the `PCGR Docker image
-   (dev) <https://hub.docker.com/r/sigven/pcgr/>`__ from DockerHub
-   (approx 5.1Gb):
-
--  ``docker pull sigven/pcgr:dev`` (PCGR annotation engine)
-
 Latest release
 ^^^^^^^^^^^^^^
 
 a. Download and unpack the `latest software release
-   (0.9.1) <https://github.com/sigven/pcgr/releases/tag/v0.9.1>`__
+   (0.9.2) <https://github.com/sigven/pcgr/releases/tag/v0.9.2>`__
 
 b. Download and unpack the assembly-specific data bundle in the PCGR
    directory
 
 -  `grch37 data bundle -
-   20201123 <http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch37.20201123.tgz>`__
-   (approx 17Gb)
+   20210627 <http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch37.20210627.tgz>`__
+   (approx 20Gb)
 -  `grch38 data bundle -
-   20201123 <http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch38.20201123.tgz>`__
-   (approx 18Gb)
+   20210627 <http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch38.20210627.tgz>`__
+   (approx 21Gb)
 
    -  *Unpacking*:
       ``gzip -dc pcgr.databundle.grch37.YYYYMMDD.tgz | tar xvf -``
@@ -96,10 +66,33 @@ b. Download and unpack the assembly-specific data bundle in the PCGR
    have been produced
 
 c. Pull the `PCGR Docker image
-   (0.9.1) <https://hub.docker.com/r/sigven/pcgr/>`__ from DockerHub
-   (approx 5.1Gb):
+   (0.9.2) <https://hub.docker.com/r/sigven/pcgr/>`__ from DockerHub
+   (approx 5.0Gb):
 
-   -  ``docker pull sigven/pcgr:0.9.1`` (PCGR annotation engine)
+   -  ``docker pull sigven/pcgr:0.9.2`` (PCGR annotation engine)
+
+Development version
+^^^^^^^^^^^^^^^^^^^
+
+a. Clone the PCGR GitHub repository (includes run script and default
+   configuration file): ``git clone https://github.com/sigven/pcgr.git``
+
+b. Download and unpack the latest data bundles in the PCGR directory
+
+-  `grch37 data bundle -
+   20210627 <http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch37.20210627.tgz>`__
+   (approx 20Gb)
+-  `grch38 data bundle -
+   20210627 <http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch38.20210627.tgz>`__
+   (approx 21Gb)
+-  *Unpacking*:
+   ``gzip -dc pcgr.databundle.grch37.YYYYMMDD.tgz | tar xvf -``
+
+c. Pull the `PCGR Docker image
+   (dev) <https://hub.docker.com/r/sigven/pcgr/>`__ from DockerHub
+   (approx 5.0Gb):
+
+-  ``docker pull sigven/pcgr:dev`` (PCGR annotation engine)
 
 STEP 3: Input preprocessing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -145,52 +138,156 @@ formatted correctly according to PCGR’s requirements:
 STEP 4: Configure your PCGR workflow
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The PCGR software bundle comes with a default configuration file in the
-*conf/* folder, to be used as a starting point for runnning the PCGR
-workflow. The configuration file, formatted using
-`TOML <https://github.com/toml-lang/toml>`__, enables the user to
-configure a number of options related to the following:
+The PCGR software comes with a range of options to configure the report
+and analysis, depending on the type of sequencing assay
+(**tumor-control** vs. **tumor_only**), types of data available
+(SNVs/InDels, copy number aberration) etc.
 
--  **IMPORTANT**: Designation of VCF INFO tags that denote variant
-   depth/allelic fraction
+-  **IMPORTANT**: Proper designation of VCF INFO tags that denote
+   variant depth/allelic fraction is critical to make the report as
+   comprehensive as possible (options ``--tumor_dp_tag``,
+   ``--tumor_af_tag``,\ ``--control_dp_tag``,\ ``--control_af_tag``, and
+   ``--call_conf_tag``)
 
-   -  If this is not available/properly set, the report contents will be
-      less informative **AND** it will not be possible to preset
-      thresholds for depth/allelic fraction
+   -  If these items are not available/properly set, the report contents
+      will be less informative **AND** it will not be possible to preset
+      thresholds for variant depth/allelic fraction
 
--  Tumor-only analysis options
+Furthermore, to make the report as complete as possible, take a note of
+the following arguments which can be used in the report generation:
 
-   -  tick on/off various filtering schemes for exclusion of germline
-      variants (for input VCFs coming from tumor-only sequencing assays)
-
--  VEP/*vcfanno* options
-
-More details about the exact nature of the `configuration
-options <http://pcgr.readthedocs.io/en/latest/input.html#pcgr-configuration-file>`__.
+-  Tumor purity estimate (``--tumor_ploidy``, for display only)
+-  Tumor ploidy estimate (``--tumor_purity``, for display only)
+-  Type of sequencing assay (``--assay``)
+-  Cell line sample (``--cell_line``, for display only)
+-  Coding target size of sequencing assay (``--target_size_mb``)
 
 STEP 5: Run example
 ~~~~~~~~~~~~~~~~~~~
 
 ::
 
-   usage: pcgr.py -h [options] --input_vcf INPUT_VCF --pcgr_dir PCGR_DIR --output_dir OUTPUT_DIR --genome_assembly  GENOME_ASSEMBLY --conf CONFIG_FILE --sample_id SAMPLE_ID
+   usage:
+   pcgr.py -h [options]
+   --input_vcf <INPUT_VCF>
+   --pcgr_dir <PCGR_DIR>
+   --output_dir <OUTPUT_DIR>
+   --genome_assembly <GENOME_ASSEMBLY>
+   --sample_id <SAMPLE_ID>
+
 
    Personal Cancer Genome Reporter (PCGR) workflow for clinical interpretation of somatic nucleotide variants and copy number aberration segments
 
    Required arguments:
    --input_vcf INPUT_VCF
                    VCF input file with somatic variants in tumor sample, SNVs/InDels
-   --pcgr_dir PCGR_DIR   PCGR base directory with accompanying data directory, e.g. ~/pcgr-0.9.1
+   --pcgr_dir PCGR_DIR   PCGR base directory with accompanying data directory, e.g. ~/pcgr-0.9.2
    --output_dir OUTPUT_DIR
                    Output directory
    --genome_assembly {grch37,grch38}
                    Human genome assembly build: grch37 or grch38
-   --conf CONFIGURATION_FILE
-                   PCGR configuration file in TOML format
    --sample_id SAMPLE_ID
                    Tumor sample/cancer genome identifier - prefix for output files
 
-   Optional arguments:
+   vcfanno options:
+   --vcfanno_n_proc VCFANNO_N_PROC
+                   Number of vcfanno processes (option '-p' in vcfanno), default: 4
+
+   VEP options:
+   --vep_n_forks VEP_N_FORKS
+                   Number of forks (option '--fork' in VEP), default: 4
+   --vep_buffer_size VEP_BUFFER_SIZE
+                   Variant buffer size (variants read into memory simultaneously, option '--buffer_size' in VEP)
+                   - set lower to reduce memory usage, default: 100
+   --vep_pick_order VEP_PICK_ORDER
+                   Comma-separated string of ordered transcript/variant properties for selection of primary variant consequence
+                   ( option '--pick_order' in VEP), default: canonical,appris,biotype,ccds,rank,tsl,length,mane
+   --vep_no_intergenic   Skip intergenic variants during processing (option '--no_intergenic' in VEP), default: False
+   --vep_regulatory      Add VEP regulatory annotations (option '--regulatory' )or non-coding interpretation, default: False
+
+   Tumor mutational burden (TMB) and MSI options:
+   --target_size_mb TARGET_SIZE_MB
+                   For mutational burden analysis - approximate protein-coding target size in Mb of sequencing assay (default: 34 (WES/WGS))
+   --estimate_tmb        Estimate tumor mutational burden from the total number of somatic mutations and target region size, default: False
+   --estimate_msi_status
+                   Predict microsatellite instability status from patterns of somatic mutations/indels, default: False
+   --tmb_algorithm {all_coding,nonsyn}
+                   Method for calculation of TMB, all coding variants (Chalmers et al., Genome Medicine, 2017), or non-synonymous variants only, default: all_coding
+
+   Mutatonal signature options:
+   --estimate_signatures
+                   Estimate relative contributions of reference mutational signatures in query sample and detect potential kataegis events, default: False
+   --min_mutations_signatures MIN_MUTATIONS_SIGNATURES
+                   Minimum number of SNVs required for reconstruction of mutational signatures (SBS) by MutationalPatterns (default: 200, minimum n = 100)
+   --all_reference_signatures
+                   Use all reference mutational signatures (SBS, n = 67) in signature reconstruction rather than only those already attributed to the tumor type (default: False)
+   --include_artefact_signatures
+                   Include sequencing artefacts in the collection of reference signatures (default: False
+
+   Tumor-only options:
+   --tumor_only          Input VCF comes from tumor-only sequencing, calls will be filtered for variants of germline origin, (default: False)
+   --cell_line           Input VCF comes from tumor cell line sequencing (requires --tumor_only), calls will be filtered for variants of germline origin, (default: False)
+   --pon_vcf PON_VCF     VCF file with germline calls from Panel of Normals (PON) - i.e. blacklisted variants, (default: None)
+   --maf_onekg_eur MAF_ONEKG_EUR
+                   Exclude variants in tumor (SNVs/InDels, tumor-only mode) with MAF above the given percent threshold (1000 Genomes Project - European pop, default: 0.002)
+   --maf_onekg_amr MAF_ONEKG_AMR
+                   Exclude variants in tumor (SNVs/InDels, tumor-only mode) with MAF above the given percent threshold (1000 Genomes Project - Ad Mixed American pop, default: 0.002)
+   --maf_onekg_afr MAF_ONEKG_AFR
+                   Exclude variants in tumor (SNVs/InDels, tumor-only mode) with MAF above the given percent threshold (1000 Genomes Project - African pop, default: 0.002)
+   --maf_onekg_eas MAF_ONEKG_EAS
+                   Exclude variants in tumor (SNVs/InDels, tumor-only mode) with MAF above the given percent threshold (1000 Genomes Project - East Asian pop, default: 0.002)
+   --maf_onekg_sas MAF_ONEKG_SAS
+                   Exclude variants in tumor (SNVs/InDels, tumor-only mode) with MAF above the given percent threshold (1000 Genomes Project - South Asian pop, default: 0.002)
+   --maf_onekg_global MAF_ONEKG_GLOBAL
+                   Exclude variants in tumor (SNVs/InDels, tumor-only mode) with MAF above the given percent threshold (1000 Genomes Project - global pop, default: 0.002)
+   --maf_gnomad_nfe MAF_GNOMAD_NFE
+                   Exclude variants in tumor (SNVs/InDels, tumor-only mode) with MAF above the given percent threshold, (gnomAD - European (non-Finnish), default: 0.002)
+   --maf_gnomad_asj MAF_GNOMAD_ASJ
+                   Exclude variants in tumor (SNVs/InDels, tumor-only mode) with MAF above the given percent threshold, (gnomAD - Ashkenazi Jewish, default: 0.002)
+   --maf_gnomad_fin MAF_GNOMAD_FIN
+                   Exclude variants in tumor (SNVs/InDels, tumor-only mode) with MAF above the given percent threshold, (gnomAD - European (Finnish), default: 0.002)
+   --maf_gnomad_oth MAF_GNOMAD_OTH
+                   Exclude variants in tumor (SNVs/InDels, tumor-only mode) with MAF above the given percent threshold, (gnomAD - Other, default: 0.002)
+   --maf_gnomad_amr MAF_GNOMAD_AMR
+                   Exclude variants in tumor (SNVs/InDels, tumor-only mode) with MAF above the given percent threshold, (gnomAD - Latino/Admixed American, default: 0.002)
+   --maf_gnomad_afr MAF_GNOMAD_AFR
+                   Exclude variants in tumor (SNVs/InDels, tumor-only mode) with MAF above the given percent threshold, (gnomAD - African/African-American, default: 0.002)
+   --maf_gnomad_eas MAF_GNOMAD_EAS
+                   Exclude variants in tumor (SNVs/InDels, tumor-only mode) with MAF above the given percent threshold, (gnomAD - East Asian, default: 0.002)
+   --maf_gnomad_sas MAF_GNOMAD_SAS
+                   Exclude variants in tumor (SNVs/InDels, tumor-only mode) with MAF above the given percent threshold, (gnomAD - South Asian, default: 0.002)
+   --maf_gnomad_global MAF_GNOMAD_GLOBAL
+                   Exclude variants in tumor (SNVs/InDels, tumor-only mode) with MAF above the given percent threshold, (gnomAD - global population, default: 0.002)
+   --exclude_pon         Exclude variants occurring in PoN (Panel of Normals, if provided as VCF (--pon_vcf), default: False)
+   --exclude_likely_hom_germline
+                   Exclude likely homozygous germline variants (100 pct allelic fraction for alternate allele in tumor, very unlikely somatic event, default: False)
+   --exclude_likely_het_germline
+                   Exclude likely heterozygous germline variants (40-60 pct allelic fraction, AND presence in dbSNP + gnomAD, AND not existing as somatic event in COSMIC/TCGA, default: False)
+   --exclude_dbsnp_nonsomatic
+                   Exclude variants found in dbSNP (only those that are NOT found in ClinVar(somatic origin)/DoCM/TCGA/COSMIC, defult: False)
+   --exclude_nonexonic   Exclude non-exonic variants, defult: False)
+
+   Allelic support options:
+   --tumor_dp_tag TUMOR_DP_TAG
+                   Specify VCF INFO tag for sequencing depth (tumor, must be Type=Integer, default: _NA_
+   --tumor_af_tag TUMOR_AF_TAG
+                   Specify VCF INFO tag for variant allelic fraction (tumor,  must be Type=Float, default: _NA_
+   --control_dp_tag CONTROL_DP_TAG
+                   Specify VCF INFO tag for sequencing depth (control, must be Type=Integer, default: _NA_
+   --control_af_tag CONTROL_AF_TAG
+                   Specify VCF INFO tag for variant allelic fraction (control, must be Type=Float, default: _NA_
+   --call_conf_tag CALL_CONF_TAG
+                   Specify VCF INFO tag for somatic variant call confidence (must be categorical, e.g. Type=String, default: _NA_
+   --tumor_dp_min TUMOR_DP_MIN
+                   If VCF INFO tag for sequencing depth (tumor) is specified and found, set minimum required depth for inclusion in report (default: 0)
+   --tumor_af_min TUMOR_AF_MIN
+                   If VCF INFO tag for variant allelic fraction (tumor) is specified and found, set minimum required AF for inclusion in report (default: 0)
+   --control_dp_min CONTROL_DP_MIN
+                   If VCF INFO tag for sequencing depth (control) is specified and found, set minimum required depth for inclusion in report (default: 0)
+   --control_af_max CONTROL_AF_MAX
+                   If VCF INFO tag for variant allelic fraction (control) is specified and found, set maximum tolerated AF for inclusion in report (default: 1)
+
+   Other options:
    --input_cna INPUT_CNA
                    Somatic copy number alteration segments (tab-separated values)
    --logr_gain LOGR_GAIN
@@ -199,7 +296,6 @@ STEP 5: Run example
                    Log ratio-threshold for regions containing homozygous deletions (default: -0.8)
    --cna_overlap_pct CNA_OVERLAP_PCT
                    Mean percent overlap between copy number segment and gene transcripts for reporting of gains/losses in tumor suppressor genes/oncogenes, (default: 50)
-   --pon_vcf PON_VCF     VCF file with germline calls from Panel of Normals (PON) - i.e. blacklisted variants, (default: None)
    --tumor_site TSITE    Optional integer code to specify primary tumor type/site of query sample,
                    choose any of the following identifiers:
                    1 = Adrenal Gland
@@ -237,39 +333,26 @@ STEP 5: Run example
                    Estimated tumor purity (between 0 and 1, (default: None)
    --tumor_ploidy TUMOR_PLOIDY
                    Estimated tumor ploidy (default: None)
-   --tumor_dp_min TUMOR_DP_MIN
-                   If VCF INFO tag for sequencing depth (tumor) is provided and found, set minimum required depth for inclusion in report (default: 0)
-   --tumor_af_min TUMOR_AF_MIN
-                   If VCF INFO tag for variant allelic fraction (tumor) is provided and found, set minimum required AF for inclusion in report (default: 0)
-   --control_dp_min CONTROL_DP_MIN
-                   If VCF INFO tag for sequencing depth (control) is provided and found, set minimum required depth for inclusion in report (default: 0)
-   --control_af_max CONTROL_AF_MAX
-                   If VCF INFO tag for variant allelic fraction (control) is provided and found, set maximum tolerated AF for inclusion in report (default: 1)
-   --target_size_mb TARGET_SIZE_MB
-                   For mutational burden analysis - approximate protein-coding target size of sequencing assay (default: 34 Mb (WES/WGS))
-   --tumor_only          Input VCF comes from tumor-only sequencing, calls will be filtered for variants of germline origin (set configurations for filtering in .toml file), (default: False)
-   --cell_line           Input VCF comes from tumor cell line sequencing (requires --tumor_only), calls will be filtered for variants of germline origin (set configurations for filtering in .toml file), (default: False)
+   --cpsr_report CPSR_REPORT
+                   CPSR report file (Gzipped JSON - file ending with 'cpsr.<genome_assembly>.json.gz' -  germline report of patient's blood/control sample
+   --vcf2maf             Generate a MAF file for input VCF using https://github.com/mskcc/vcf2maf (default: False)
+   --show_noncoding      List non-coding (i.e. non protein-altering) variants in report, default: False
    --assay {WES,WGS,TARGETED}
                    Type of DNA sequencing assay performed for input data (VCF) default: WES
    --include_trials      (Beta) Include relevant ongoing or future clinical trials, focusing on studies with molecularly targeted interventions
-   --estimate_tmb        Estimate tumor mutational burden from the total number of somatic mutations and target region size, default: False
-   --estimate_msi_status
-                   Predict microsatellite instability status from patterns of somatic mutations/indels, default: False
-   --estimate_signatures
-                   Estimate relative contributions of reference mutational signatures in query sample and detect potential kataegis events), default: False
-   --tmb_algorithm {all_coding,nonsyn}
-                    Method for calculation of TMB, all coding variants (Chalmers et al., Genome Medicine, 2017), or non-synonymous variants only, default: all_coding
-   --min_mutations_signatures MIN_MUTATIONS_SIGNATURES
-                   Minimum number of SNVs required for reconstruction of mutational signatures (SBS) by MutationalPatterns (default: 200, minimum n = 100)
-   --all_reference_signatures
-                   Use all reference mutational signatures (SBS, n = 67) in signature reconstruction rather than only those already attributed to the tumor type (default: False)
-   --force_overwrite     By default, the script will fail with an error if any output file already exists. You can force the overwrite of existing result files by using this flag
+   --preserved_info_tags PRESERVED_INFO_TAGS
+                   Comma-separated string of VCF INFO tags from query VCF that should be kept in PCGR output TSV file
+   --report_theme {default,cerulean,journal,flatly,readable,spacelab,united,cosmo,lumen,paper,sandstone,simplex,yeti}
+                   Visual report theme (rmarkdown)
+   --report_nonfloating_toc
+                   Do not float the table of contents (TOC) in output report (rmarkdown), default: False
+   --force_overwrite     By default, the script will fail with an error if any output file already exists. You can force the overwrite of existing result files by using this flag, default: False
    --version             show program's version number and exit
    --basic               Run functional variant annotation on VCF through VEP/vcfanno, omit other analyses (i.e. Tier assignment/MSI/TMB/Signatures etc. and report generation (STEP 4), default: False
-   --no_vcf_validate     Skip validation of input VCF with Ensembl's vcf-validator
-   --docker-uid DOCKER_USER_ID
+   --no_vcf_validate     Skip validation of input VCF with Ensembl's vcf-validator, default: False
+   --docker_uid DOCKER_USER_ID
                    Docker user ID. default is the host system user ID. If you are experiencing permission errors, try setting this up to root (`--docker-uid root`)
-   --no-docker           Run the PCGR workflow in a non-Docker mode (see install_no_docker/ folder for instructions)
+   --no_docker           Run the PCGR workflow in a non-Docker mode (see install_no_docker/ folder for instructions)
    --debug               Print full Docker commands to log, default: False
 
 The *examples* folder contain input VCF files from two tumor samples
@@ -280,15 +363,17 @@ terminal window:
 
 ::
 
-   python ~/pcgr-0.9.1/pcgr.py
-   --pcgr_dir ~/pcgr-0.9.1
-   --output_dir ~/pcgr-0.9.1
+   python ~/pcgr-0.9.2/pcgr.py
+   --pcgr_dir ~/pcgr-0.9.2
+   --output_dir ~/pcgr-0.9.2
    --sample_id tumor_sample.COAD
+   --tumor_dp_tag TDP
+   --tumor_af_tag TVAF
+   --call_conf_tag TAL
    --genome_assembly grch37
-   --conf ~/pcgr-0.9.1/examples/example_COAD.toml
-   --input_vcf ~/pcgr-0.9.1/examples/tumor_sample.COAD.vcf.gz
+   --input_vcf ~/pcgr-0.9.2/examples/tumor_sample.COAD.vcf.gz
    --tumor_site 9
-   --input_cna ~/pcgr-0.9.1/examples/tumor_sample.COAD.cna.tsv
+   --input_cna ~/pcgr-0.9.2/examples/tumor_sample.COAD.cna.tsv
    --tumor_purity 0.9
    --tumor_ploidy 2.0
    --include_trials
@@ -302,20 +387,25 @@ This command will run the Docker-based PCGR workflow and produce the
 following output files in the *examples* folder:
 
 1. **tumor_sample.COAD.pcgr_acmg.grch37.html** - An interactive HTML
-   report for clinical interpretation
-2. **tumor_sample.COAD.pcgr_acmg.grch37.pass.vcf.gz** - Bgzipped VCF
+   report for clinical interpretation (rmarkdown)
+2. **tumor_sample.COAD.pcgr_acmg.grch37.flexdb.html** - An interactive
+   HTML report for clinical interpretation (flexdashboard)
+3. **tumor_sample.COAD.pcgr_acmg.grch37.vcf.gz (.tbi)** - Bgzipped VCF
    file with rich set of annotations for precision oncology
-3. **tumor_sample.COAD.pcgr_acmg.grch37.pass.tsv.gz** - Compressed
+4. **tumor_sample.COAD.pcgr_acmg.grch37.pass.vcf.gz (.tbi)** - Bgzipped
+   VCF file with rich set of annotations for precision oncology (PASS
+   variants only)
+5. **tumor_sample.COAD.pcgr_acmg.grch37.pass.tsv.gz** - Compressed
    vcf2tsv-converted file with rich set of annotations for precision
    oncology
-4. **tumor_sample.COAD.pcgr_acmg.grch37.snvs_indels.tiers.tsv** -
+6. **tumor_sample.COAD.pcgr_acmg.grch37.snvs_indels.tiers.tsv** -
    Tab-separated values file with variants organized according to tiers
    of functional relevance
-5. **tumor_sample.COAD.pcgr_acmg.grch37.mutational_signatures.tsv** -
+7. **tumor_sample.COAD.pcgr_acmg.grch37.mutational_signatures.tsv** -
    Tab-separated values file with information on contribution of
    mutational signatures
-6. **tumor_sample.COAD.pcgr_acmg.grch37.json.gz** - Compressed JSON dump
+8. **tumor_sample.COAD.pcgr_acmg.grch37.json.gz** - Compressed JSON dump
    of HTML report content
-7. **tumor_sample.COAD.pcgr_acmg.grch37.cna_segments.tsv.gz** -
+9. **tumor_sample.COAD.pcgr_acmg.grch37.cna_segments.tsv.gz** -
    Compressed tab-separated values file with annotations of gene
    transcripts that overlap with somatic copy number aberrations
