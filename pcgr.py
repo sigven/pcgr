@@ -1127,8 +1127,8 @@ def run_pcgr(arg_dict, host_directories, config_options):
                            str(config_options["cna"]["cna_overlap_pct"]) + " " + \
                            str(config_options["allelic_support"]["tumor_af_min"]) + " " + \
                            str(config_options["allelic_support"]["tumor_dp_min"]) + " " + \
-                           str(config_options["allelic_support"]["control_af_max"]) + " " + \
                            str(config_options["allelic_support"]["control_dp_min"]) + " " + \
+                           str(config_options["allelic_support"]["control_af_max"]) + " " + \
                            str(config_options["allelic_support"]["tumor_af_tag"]) + " " + \
                            str(config_options["allelic_support"]["tumor_dp_tag"]) + " " + \
                            str(config_options["allelic_support"]["control_af_tag"]) + " " + \
