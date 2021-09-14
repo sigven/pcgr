@@ -438,7 +438,7 @@ This command will run the Docker-based PCGR workflow and produce the following o
 
   __10. Is it possible for the users to update the data bundle to get the most recent versions of all underlying data sources?__
 
-  _Answer: As of now, the data bundle is updated only with each release of PCGR. This is not yet supported, but we want to allow for such updates in the future._
+  _Answer: As of now, the data bundle is updated only with each release of PCGR. The data harmonization pipeline of knowledge databases in PCGR contain numerous and complex procedures, with several quality control and re-formatting steps, and and cannot be fully automated in its present form. The version of all databases and key software elements are outlined in each PCGR report._
 
 
 
