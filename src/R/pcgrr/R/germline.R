@@ -1,4 +1,4 @@
-
+#' @export
 max_af_gnomad <- function(sample_calls){
   invisible(
     assertthat::assert_that(is.data.frame(sample_calls),
@@ -29,6 +29,7 @@ max_af_gnomad <- function(sample_calls){
   return(sample_calls)
 }
 
+#' @export
 max_af_onekg <- function(sample_calls){
   invisible(
     assertthat::assert_that(is.data.frame(sample_calls),
@@ -58,6 +59,7 @@ max_af_onekg <- function(sample_calls){
   return(sample_calls)
 }
 
+#' @export
 clinvar_germline_status <- function(sample_calls){
 
   invisible(
@@ -73,15 +75,16 @@ clinvar_germline_status <- function(sample_calls){
       dplyr::mutate(
         STATUS_CLINVAR_GERMLINE =
           dplyr::if_else(
-            !is.na(CLINVAR_MSID) &
-              stringr::str_detect(CLINVAR_VARIANT_ORIGIN, "germline") &
-              !stringr::str_detect(CLINVAR_VARIANT_ORIGIN, "somatic"),
+            !is.na(.data$CLINVAR_MSID) &
+              stringr::str_detect(.data$CLINVAR_VARIANT_ORIGIN, "germline") &
+              !stringr::str_detect(.data$CLINVAR_VARIANT_ORIGIN, "somatic"),
             TRUE, FALSE))
   }
   return(sample_calls)
 }
 
 
+#' @export
 dbsnp_germline_status <- function(sample_calls){
 
   invisible(
@@ -98,23 +101,24 @@ dbsnp_germline_status <- function(sample_calls){
     sample_calls <- sample_calls %>%
       dplyr::mutate(
         STATUS_DBSNP_GERMLINE =
-          dplyr::if_else(!is.na(DBSNPRSID), TRUE, FALSE)) %>%
+          dplyr::if_else(!is.na(.data$DBSNPRSID), TRUE, FALSE)) %>%
       dplyr::mutate(
         STATUS_DBSNP_GERMLINE =
-          dplyr::if_else(STATUS_DBSNP_GERMLINE == T &
-                           !is.na(DOCM_PMID),
-                         FALSE, STATUS_DBSNP_GERMLINE)) %>%
+          dplyr::if_else(.data$STATUS_DBSNP_GERMLINE == T &
+                           !is.na(.data$DOCM_PMID),
+                         FALSE, .data$STATUS_DBSNP_GERMLINE)) %>%
       dplyr::mutate(
         STATUS_DBSNP_GERMLINE =
           dplyr::if_else(
-            STATUS_DBSNP_GERMLINE == T &
-              !is.na(CLINVAR_MSID) &
-              stringr::str_detect(CLINVAR_VARIANT_ORIGIN, "somatic"),
-            FALSE, STATUS_DBSNP_GERMLINE))
+            .data$STATUS_DBSNP_GERMLINE == T &
+              !is.na(.data$CLINVAR_MSID) &
+              stringr::str_detect(.data$CLINVAR_VARIANT_ORIGIN, "somatic"),
+            FALSE, .data$STATUS_DBSNP_GERMLINE))
   }
   return(sample_calls)
 }
 
+#' @export
 tcga_somatic_status <- function(sample_calls){
 
   invisible(
@@ -128,12 +132,13 @@ tcga_somatic_status <- function(sample_calls){
     sample_calls <- sample_calls %>%
       dplyr::mutate(
         STATUS_TCGA_SOMATIC =
-          dplyr::if_else(!is.na(TCGA_PANCANCER_COUNT), TRUE, FALSE))
+          dplyr::if_else(!is.na(.data$TCGA_PANCANCER_COUNT), TRUE, FALSE))
   }
   return(sample_calls)
 
 }
 
+#' @export
 cosmic_somatic_status <- function(sample_calls){
 
   invisible(
@@ -147,12 +152,13 @@ cosmic_somatic_status <- function(sample_calls){
     sample_calls <- sample_calls %>%
       dplyr::mutate(
         STATUS_COSMIC =
-          dplyr::if_else(!is.na(COSMIC_MUTATION_ID), TRUE, FALSE))
+          dplyr::if_else(!is.na(.data$COSMIC_MUTATION_ID), TRUE, FALSE))
   }
   return(sample_calls)
 
 }
 
+#' @export
 hom_af_status <- function(sample_calls){
 
 
@@ -167,12 +173,13 @@ hom_af_status <- function(sample_calls){
     sample_calls <- sample_calls %>%
       dplyr::mutate(
         STATUS_LIKELY_GERMLINE_HOMOZYGOUS =
-          dplyr::if_else(!is.na(AF_TUMOR) & AF_TUMOR == 1,
+          dplyr::if_else(!is.na(.data$AF_TUMOR) & .data$AF_TUMOR == 1,
                          TRUE, FALSE))
   }
   return(sample_calls)
 }
 
+#' @export
 pon_status <- function(sample_calls){
 
   invisible(
@@ -186,12 +193,13 @@ pon_status <- function(sample_calls){
     sample_calls <- sample_calls %>%
       dplyr::mutate(
         STATUS_PON =
-          dplyr::if_else(PANEL_OF_NORMALS == TRUE,
+          dplyr::if_else(.data$PANEL_OF_NORMALS == TRUE,
                          TRUE, FALSE))
   }
   return(sample_calls)
 }
 
+#' @export
 het_af_germline_status <- function(sample_calls){
 
   invisible(
@@ -211,12 +219,12 @@ het_af_germline_status <- function(sample_calls){
     sample_calls <- sample_calls %>%
       dplyr::mutate(
         STATUS_LIKELY_GERMLINE_HETEROZYGOUS =
-          dplyr::if_else(!is.na(MAX_AF_GNOMAD) &
-                           STATUS_DBSNP_GERMLINE == TRUE &
-                           !is.na(AF_TUMOR) &
-                           AF_TUMOR >= 0.40 & AF_TUMOR <= 0.60 &
-                           STATUS_TCGA_SOMATIC == FALSE &
-                           STATUS_COSMIC == FALSE, TRUE, FALSE))
+          dplyr::if_else(!is.na(.data$MAX_AF_GNOMAD) &
+                           .data$STATUS_DBSNP_GERMLINE == TRUE &
+                           !is.na(.data$AF_TUMOR) &
+                           .data$AF_TUMOR >= 0.40 & .data$AF_TUMOR <= 0.60 &
+                           .data$STATUS_TCGA_SOMATIC == FALSE &
+                           .data$STATUS_COSMIC == FALSE, TRUE, FALSE))
   }
   return(sample_calls)
 }
@@ -231,6 +239,7 @@ het_af_germline_status <- function(sample_calls){
 #'
 #' @return sample_calls
 #'
+#' @export
 
 assign_somatic_classification <- function(sample_calls, config) {
 
@@ -257,39 +266,39 @@ assign_somatic_classification <- function(sample_calls, config) {
   sample_calls <- sample_calls %>%
     dplyr::mutate(
       SOMATIC_CLASSIFICATION =
-        dplyr::if_else(STATUS_POPFREQ_1KG_ABOVE_TOLERATED == TRUE,
-                       "GERMLINE_1KG", SOMATIC_CLASSIFICATION)) %>%
+        dplyr::if_else(.data$STATUS_POPFREQ_1KG_ABOVE_TOLERATED == TRUE,
+                       "GERMLINE_1KG", .data$SOMATIC_CLASSIFICATION)) %>%
     dplyr::mutate(
       SOMATIC_CLASSIFICATION =
-        dplyr::if_else(STATUS_POPFREQ_GNOMAD_ABOVE_TOLERATED == TRUE &
-                         SOMATIC_CLASSIFICATION == "SOMATIC",
-                       "GERMLINE_GNOMAD", SOMATIC_CLASSIFICATION)) %>%
+        dplyr::if_else(.data$STATUS_POPFREQ_GNOMAD_ABOVE_TOLERATED == TRUE &
+                         .data$SOMATIC_CLASSIFICATION == "SOMATIC",
+                       "GERMLINE_GNOMAD", .data$SOMATIC_CLASSIFICATION)) %>%
     dplyr::mutate(
       SOMATIC_CLASSIFICATION =
-        dplyr::if_else(STATUS_CLINVAR_GERMLINE == TRUE &
-                         SOMATIC_CLASSIFICATION == "SOMATIC",
-                       "GERMLINE_CLINVAR", SOMATIC_CLASSIFICATION)) %>%
+        dplyr::if_else(.data$STATUS_CLINVAR_GERMLINE == TRUE &
+                         .data$SOMATIC_CLASSIFICATION == "SOMATIC",
+                       "GERMLINE_CLINVAR", .data$SOMATIC_CLASSIFICATION)) %>%
     dplyr::mutate(
       SOMATIC_CLASSIFICATION =
-        dplyr::if_else(STATUS_PON == TRUE &
+        dplyr::if_else(.data$STATUS_PON == TRUE &
                          config[["tumor_only"]][["exclude_pon"]] == TRUE &
-                         SOMATIC_CLASSIFICATION == "SOMATIC",
-                       "GERMLINE_PON", SOMATIC_CLASSIFICATION)) %>%
+                         .data$SOMATIC_CLASSIFICATION == "SOMATIC",
+                       "GERMLINE_PON", .data$SOMATIC_CLASSIFICATION)) %>%
 
     dplyr::mutate(
       SOMATIC_CLASSIFICATION =
         dplyr::if_else(
-          STATUS_LIKELY_GERMLINE_HOMOZYGOUS == TRUE &
+          .data$STATUS_LIKELY_GERMLINE_HOMOZYGOUS == TRUE &
             config[["tumor_only"]][["exclude_likely_hom_germline"]] == TRUE &
-            SOMATIC_CLASSIFICATION == "SOMATIC",
-          "GERMLINE_HOMOZYGOUS", SOMATIC_CLASSIFICATION)) %>%
+            .data$SOMATIC_CLASSIFICATION == "SOMATIC",
+          "GERMLINE_HOMOZYGOUS", .data$SOMATIC_CLASSIFICATION)) %>%
     dplyr::mutate(
       SOMATIC_CLASSIFICATION =
         dplyr::if_else(
-          STATUS_LIKELY_GERMLINE_HETEROZYGOUS == TRUE &
+          .data$STATUS_LIKELY_GERMLINE_HETEROZYGOUS == TRUE &
             config[["tumor_only"]][["exclude_likely_het_germline"]] == TRUE &
-            SOMATIC_CLASSIFICATION == "SOMATIC",
-          "GERMLINE_HETEROZYGOUS", SOMATIC_CLASSIFICATION))
+            .data$SOMATIC_CLASSIFICATION == "SOMATIC",
+          "GERMLINE_HETEROZYGOUS", .data$SOMATIC_CLASSIFICATION))
 
   ## set variants found in DBSNP as germline if this option is set to TRUE
   if (config[["tumor_only"]][["exclude_dbsnp_nonsomatic"]] == TRUE) {
@@ -297,11 +306,11 @@ assign_somatic_classification <- function(sample_calls, config) {
     sample_calls <- sample_calls %>%
       dplyr::mutate(
         SOMATIC_CLASSIFICATION =
-          dplyr::if_else(STATUS_DBSNP_GERMLINE == TRUE &
-                           STATUS_TCGA_SOMATIC == FALSE &
-                           STATUS_COSMIC == FALSE &
-                           SOMATIC_CLASSIFICATION == "SOMATIC",
-                         "GERMLINE_DBSNP", SOMATIC_CLASSIFICATION))
+          dplyr::if_else(.data$STATUS_DBSNP_GERMLINE == TRUE &
+                           .data$STATUS_TCGA_SOMATIC == FALSE &
+                           .data$STATUS_COSMIC == FALSE &
+                           .data$SOMATIC_CLASSIFICATION == "SOMATIC",
+                         "GERMLINE_DBSNP", .data$SOMATIC_CLASSIFICATION))
 
   }
 
@@ -316,6 +325,7 @@ assign_somatic_classification <- function(sample_calls, config) {
 #'
 #' @return sample_calls
 #'
+#' @export
 
 assign_somatic_germline_evidence <- function(sample_calls, config) {
 
@@ -486,6 +496,7 @@ assign_somatic_germline_evidence <- function(sample_calls, config) {
 #'
 #' @return sample_calls
 #'
+#' @export
 assign_germline_popfreq_status <- function(sample_calls,
                                            pop = "EUR",
                                            dbquery = "1KG",
@@ -543,6 +554,7 @@ assign_germline_popfreq_status <- function(sample_calls,
 #'
 #' @return pop_tag_info
 #'
+#' @export
 get_population_tag <- function(population_code, db = "1KG", subset = NA) {
   pop_tag_info <-
     list("vcf_tag" = paste0(toupper(population_code), "_AF_", db),
@@ -640,16 +652,16 @@ get_population_tag <- function(population_code, db = "1KG", subset = NA) {
 
   if (db == "1KG") {
     pop_entry <- dplyr::filter(pop_descriptions_1KG,
-                               code == population_code)
+                               .data$code == population_code)
     pop_tag_info[["pop_description"]] <- pop_entry$pop_description
   }
   if (db == "GNOMAD") {
     pop_entry <- dplyr::filter(pop_descriptions_gnomad,
-                               code == population_code)
+                               .data$code == population_code)
     pop_tag_info[["pop_description"]] <- pop_entry$pop_description
     if (subset == "non_cancer") {
       pop_entry <- dplyr::filter(pop_descriptions_gnomad_non_cancer,
-                                 code == population_code)
+                                 .data$code == population_code)
       pop_tag_info[["pop_description"]] <- pop_entry$pop_description
     }
 
@@ -666,6 +678,7 @@ get_population_tag <- function(population_code, db = "1KG", subset = NA) {
 #'
 #' @return upset data
 #'
+#' @export
 make_upset_plot_data <- function(calls, config) {
 
   columns <- c()
@@ -687,9 +700,9 @@ make_upset_plot_data <- function(calls, config) {
              "STATUS_POPFREQ_GNOMAD_ABOVE_TOLERATED",
              "STATUS_CLINVAR_GERMLINE"),
     only_colnames = F, quiet = T)
-  df <- dplyr::select(calls, VAR_ID, STATUS_POPFREQ_1KG_ABOVE_TOLERATED,
-                      STATUS_POPFREQ_GNOMAD_ABOVE_TOLERATED,
-                      STATUS_CLINVAR_GERMLINE)
+  df <- dplyr::select(calls, .data$VAR_ID, .data$STATUS_POPFREQ_1KG_ABOVE_TOLERATED,
+                      .data$STATUS_POPFREQ_GNOMAD_ABOVE_TOLERATED,
+                      .data$STATUS_CLINVAR_GERMLINE)
   for (c in columns) {
     if (c %in% colnames(calls)) {
       df[, c] <- calls[, c]
@@ -701,24 +714,25 @@ make_upset_plot_data <- function(calls, config) {
       df[, v] <- as.integer(df[, v])
     }
   }
-  df <- dplyr::rename(df, gnomAD = STATUS_POPFREQ_GNOMAD_ABOVE_TOLERATED,
-                      OneKGP = STATUS_POPFREQ_1KG_ABOVE_TOLERATED,
-                      ClinVar = STATUS_CLINVAR_GERMLINE)
+  df <- dplyr::rename(df, gnomAD = .data$STATUS_POPFREQ_GNOMAD_ABOVE_TOLERATED,
+                      OneKGP = .data$STATUS_POPFREQ_1KG_ABOVE_TOLERATED,
+                      ClinVar = .data$STATUS_CLINVAR_GERMLINE)
   if ("STATUS_PON" %in% colnames(df)) {
-    df <- dplyr::rename(df, Panel_Of_Normals = STATUS_PON)
+    df <- dplyr::rename(df, Panel_Of_Normals = .data$STATUS_PON)
   }
   if ("STATUS_LIKELY_GERMLINE_HOMOZYGOUS" %in% colnames(df)) {
-    df <- dplyr::rename(df, HomAF = STATUS_LIKELY_GERMLINE_HOMOZYGOUS)
+    df <- dplyr::rename(df, HomAF = .data$STATUS_LIKELY_GERMLINE_HOMOZYGOUS)
   }
   if ("STATUS_LIKELY_GERMLINE_HETEROZYGOUS" %in% colnames(df)) {
-    df <- dplyr::rename(df, HetAF = STATUS_LIKELY_GERMLINE_HETEROZYGOUS)
+    df <- dplyr::rename(df, HetAF = .data$STATUS_LIKELY_GERMLINE_HETEROZYGOUS)
   }
   if ("STATUS_DBSNP_GERMLINE" %in% colnames(df)) {
-    df <- dplyr::rename(df, dbSNP = STATUS_DBSNP_GERMLINE)
+    df <- dplyr::rename(df, dbSNP = .data$STATUS_DBSNP_GERMLINE)
   }
   return(df)
 
 }
+
 #' Function that makes an upset calls for germline-filtered variants
 #' classification procedure
 #'
@@ -726,6 +740,7 @@ make_upset_plot_data <- function(calls, config) {
 #'
 #' @return p
 #'
+#' @export
 upset_plot_tumor_only <- function(upset_data) {
 
   isets <- c()

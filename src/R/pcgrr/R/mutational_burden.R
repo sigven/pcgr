@@ -6,7 +6,7 @@
 #' @param pcgr_config Object with PCGR configuration parameters
 #'
 #' @return pcg_report_data data frame with all report elements
-#'
+#' @export
 generate_report_data_tmb <- function(sample_calls,
                                      pcgr_data,
                                      sample_name, pcgr_config) {
@@ -14,8 +14,8 @@ generate_report_data_tmb <- function(sample_calls,
   tmb_consequence_pattern <-
     "^(stop_|start_lost|frameshift_|missense_|synonymous_|inframe_)"
 
-  pcgrr:::log4r_info("------")
-  pcgrr:::log4r_info(paste0("Calculating tumor mutational burden"))
+  log4r_info("------")
+  log4r_info(paste0("Calculating tumor mutational burden"))
 
   pcg_report_tmb <-
     pcgrr::init_report(config = pcgr_config,
@@ -34,7 +34,7 @@ generate_report_data_tmb <- function(sample_calls,
     pcg_report_tmb[["v_stat"]][["n_tmb"]] <-
       sample_calls %>%
       dplyr::filter(
-        stringr::str_detect(CONSEQUENCE, tmb_consequence_pattern)) %>%
+        stringr::str_detect(.data$CONSEQUENCE, tmb_consequence_pattern)) %>%
       nrow()
   }
 
@@ -46,13 +46,13 @@ generate_report_data_tmb <- function(sample_calls,
                      pcg_report_tmb[["v_stat"]][["target_size_mb"]]),
         digits = 2)
   }
-  pcgrr:::log4r_info(
+  log4r_info(
     paste0("Number of variants for mutational burden analysis: ",
            pcg_report_tmb[["v_stat"]][["n_tmb"]]))
-  pcgrr:::log4r_info(
+  log4r_info(
     paste0("Coding target size sequencing assay (Mb): ",
            pcg_report_tmb[["v_stat"]][["target_size_mb"]]))
-  pcgrr:::log4r_info(
+  log4r_info(
     paste0("Estimated mutational burden: ",
            pcg_report_tmb[["v_stat"]][["tmb_estimate"]],
            " mutations/Mb"))
@@ -60,6 +60,7 @@ generate_report_data_tmb <- function(sample_calls,
   return(pcg_report_tmb)
 }
 
+#' @export
 plot_tmb_primary_site_tcga <- function(tcga_tmb, p_site = "Liver",
                                        tmb_estimate = 5,
                                        algorithm = "all_coding") {
@@ -68,34 +69,34 @@ plot_tmb_primary_site_tcga <- function(tcga_tmb, p_site = "Liver",
   tmb_site_colors <- data.frame(primary_site =
                                   unique(tcga_tmb$primary_site),
                                 stringsAsFactors = F) %>%
-    dplyr::filter(!is.na(primary_site))
+    dplyr::filter(!is.na(.data$primary_site))
   tmb_site_colors$color <- "#f0f0f0"
   tmb_site_colors <-
     dplyr::mutate(tmb_site_colors,
                   color = dplyr::if_else(
-                    primary_site == p_site,
-                    pcgrr::color_palette[["tier"]][["values"]][1], color))
+                    .data$primary_site == p_site,
+                    pcgrr::color_palette[["tier"]][["values"]][1], .data$color))
 
   tmb_site_color_vec <- tmb_site_colors$color
   names(tmb_site_color_vec) <- tmb_site_colors$primary_site
 
   tcga_tmb <- tcga_tmb %>%
-    dplyr::filter(!is.na(primary_site)) %>%
-    dplyr::select(primary_site, tmb_log10, tmb)
+    dplyr::filter(!is.na(.data$primary_site)) %>%
+    dplyr::select(.data$primary_site, .data$tmb_log10, .data$tmb)
 
   if (algorithm == "nonsyn") {
     tcga_tmb <- tcga_tmb %>%
-      dplyr::filter(!is.na(primary_site)) %>%
-      dplyr::select(primary_site, tmb_ns_log10, tmb_ns) %>%
-      dplyr::rename(tmb = tmb_ns, tmb_log10 = tmb_ns_log10)
+      dplyr::filter(!is.na(.data$primary_site)) %>%
+      dplyr::select(.data$primary_site, .data$tmb_ns_log10, .data$tmb_ns) %>%
+      dplyr::rename(tmb = .data$tmb_ns, tmb_log10 = .data$tmb_ns_log10)
   }
 
   tmb_plot_site <-
     ggplot2::ggplot(data = tcga_tmb) +
     ggplot2::geom_boxplot(mapping =
-                            ggplot2::aes(x = reorder(primary_site, tmb_log10,
-                                                     FUN = median),
-                                         y = tmb, fill = primary_site)) +
+                            ggplot2::aes(x = stats::reorder(.data$primary_site, .data$tmb_log10,
+                                                     FUN = stats::median),
+                                         y = .data$tmb, fill = .data$primary_site)) +
     ggplot2::theme_classic() +
     ggplot2::scale_y_continuous(trans = scales::log_trans(base = 10),
                                 breaks = c(0.01, 1, 10, 100, 1000),
