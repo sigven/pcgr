@@ -6,11 +6,8 @@
 \usage{
 init_report(
   config = NULL,
-  sample_name = "SampleX",
   class = NULL,
   pcgr_data = NULL,
-  pcgr_version = "dev",
-  cpsr_version = "dev",
   type = "somatic",
   virtual_panel_id = "-1",
   custom_bed = NULL
@@ -19,15 +16,9 @@ init_report(
 \arguments{
 \item{config}{Object with configuration parameters}
 
-\item{sample_name}{sample identifier}
-
 \item{class}{report analysis section (NULL defaults to full report)}
 
 \item{pcgr_data}{PCGR data bundle}
-
-\item{pcgr_version}{PCGR software version}
-
-\item{cpsr_version}{CPSR software version}
 
 \item{type}{Type of report ('somatic' or 'germline')}
 
