@@ -10,13 +10,13 @@
 #'
 #' @return kataegis_df data frame with potential kataegis events
 #'
-#'
+#' @export
 kataegis_detect <- function(data, sample_id = "sample_id",
                             build = "grch37", min.mut = 6,
                             max.dis = 1000,
                             chr = "chr", pos = "pos",
                             txdb = NULL) {
-  pcgrr:::log4r_info(paste0("Detecting possible kataegis events (clusters of C>T ",
+  log4r_info(paste0("Detecting possible kataegis events (clusters of C>T ",
                     "(APOBEC enzyme family) and C>T/G ",
                     "(TLS DNA polymerase) mutations"))
   assertable::assert_colnames(
@@ -76,7 +76,7 @@ kataegis_detect <- function(data, sample_id = "sample_id",
       Cmutnum <- 0
     }
   }
-  kataegis_df <- data.frame(na.omit(katPoint))
+  kataegis_df <- data.frame(stats::na.omit(katPoint))
   names(kataegis_df) <- c("sample_id", "chrom", "start",
                           "end", "chrom.arm", "length", "number.mut",
                           "weight.C>X")
@@ -98,13 +98,13 @@ kataegis_detect <- function(data, sample_id = "sample_id",
         }
       }
     }
-    kataegis_df <- kataegis_df %>% dplyr::arrange(desc(confidence))
+    kataegis_df <- kataegis_df %>% dplyr::arrange(dplyr::desc(.data$confidence))
 
     if (!is.null(txdb)) {
       gr <-
         GenomicRanges::GRanges(
-          seqnames = Rle(kataegis_df$chrom),
-          ranges = IRanges(start = as.numeric(as.character(kataegis_df$start)),
+          seqnames = S4Vectors::Rle(kataegis_df$chrom),
+          ranges = IRanges::IRanges(start = as.numeric(as.character(kataegis_df$start)),
                            end = as.numeric(as.character(kataegis_df$end))))
       peakAnno <- annotatePeak(gr, tssRegion = c(-3000, 3000),
                                TxDb = txdb, annoDb = "org.Hs.eg.db")
@@ -114,7 +114,7 @@ kataegis_detect <- function(data, sample_id = "sample_id",
       kataegis_df$geneID <- peakAnno@anno$geneId
     }
   }
-  pcgrr:::log4r_info(paste(dim(kataegis_df)[1],
+  log4r_info(paste(dim(kataegis_df)[1],
                           "potential kataegis events identified",
                 sep = " "))
   return(kataegis_df)
@@ -131,8 +131,7 @@ kataegis_detect <- function(data, sample_id = "sample_id",
 #' @param build genome build (grch37 or hg38)
 #' @param k size of neighbouring sequence context
 #'
-#'
-
+#' @export
 kataegis_input <- function(variant_set, chr = "chr",
                            pos = "pos", ref = "ref",
                          alt = "alt", build = NULL) {
@@ -161,10 +160,10 @@ kataegis_input <- function(variant_set, chr = "chr",
   context_size <- 10
   if (nrow(mut_data) > 100) {
     bsg <- BSgenome.Hsapiens.UCSC.hg19
-    chr.lens <- as.integer(head(GenomeInfoDb::seqlengths(bsg), 24))
+    chr.lens <- as.integer(utils::head(GenomeInfoDb::seqlengths(bsg), 24))
     if (build == "grch38") {
       bsg <- BSgenome.Hsapiens.UCSC.hg38
-      chr.lens <- as.integer(head(GenomeInfoDb::seqlengths(bsg), 24))
+      chr.lens <- as.integer(utils::head(GenomeInfoDb::seqlengths(bsg), 24))
     }
     mut_data$build <- build
     ref_base <-  Biostrings::DNAStringSet(mut_data$ref)
@@ -206,6 +205,7 @@ kataegis_input <- function(variant_set, chr = "chr",
 #' @param sample_name name of tumor sample
 #' @param build genome assembly (grch37/grch38)
 #'
+#' @export
 generate_report_data_kataegis <- function(variant_set,
                                           sample_name = "SampleX",
                                           build = "grch37") {
@@ -215,8 +215,8 @@ generate_report_data_kataegis <- function(variant_set,
     return(pcg_report_kataegis)
   }
 
-  pcgrr:::log4r_info("------")
-  pcgrr:::log4r_info(
+  log4r_info("------")
+  log4r_info(
     paste0("Kataegis detection from genomic distribution of SNVs"))
 
 
@@ -240,7 +240,7 @@ generate_report_data_kataegis <- function(variant_set,
   }
   if (chr_prefix == F) {
     variant_set <- variant_set %>%
-      dplyr::mutate(CHROM = paste0("chr", CHROM))
+      dplyr::mutate(CHROM = paste0("chr", .data$CHROM))
   }
 
   kataegis_data <- pcgrr::kataegis_input(variant_set, chr = "CHROM",
@@ -258,7 +258,7 @@ generate_report_data_kataegis <- function(variant_set,
                                build = build)
     }
   }else{
-    pcgrr:::log4r_info(
+    log4r_info(
       paste0(
         "No or too few SNVs (< 100) found in input - skipping kataegis detection"))
     #pcg_report_kataegis[["eval"]] <- FALSE

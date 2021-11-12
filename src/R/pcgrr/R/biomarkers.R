@@ -6,6 +6,7 @@
 #' @param eitems data frame with clinical evidence items
 #'
 #' @return list
+#' @export
 
 get_clin_assocs_snv_indel <- function(sample_calls,
                                       annotation_tags = NULL,
@@ -142,6 +143,7 @@ get_clin_assocs_snv_indel <- function(sample_calls,
 #' @param eitems Data frame with clinical evidence items
 #'
 #' @return list
+#' @export
 #'
 get_clin_assocs_cna <- function(onco_ts_sets,
                                 annotation_tags = NULL,
@@ -206,6 +208,7 @@ get_clin_assocs_cna <- function(onco_ts_sets,
 
 }
 
+#' @export
 load_eitems <- function(eitems_raw = NULL,
                         ontology = NULL,
                         alteration_type = "MUT",
@@ -270,7 +273,7 @@ load_eitems <- function(eitems_raw = NULL,
 
 
   if (tumor_type_specificity == "any") {
-    pcgrr:::log4r_info(
+    log4r_info(
       paste0(
         "Loading ", alteration_type, " biomarkers for precision oncology",
         "- any tumortype"))
@@ -299,7 +302,7 @@ load_eitems <- function(eitems_raw = NULL,
         eitems,
         ontology = ontology,
         primary_site = tumor_type)
-    pcgrr:::log4r_info(
+    log4r_info(
       paste0("Loading ", alteration_type,
              " biomarkers for precision oncology - ",
              tumor_type))
@@ -309,6 +312,7 @@ load_eitems <- function(eitems_raw = NULL,
 
 }
 
+#' @export
 load_all_eitems <- function(eitems_raw = NULL,
                             alteration_type = "MUT",
                             origin = "Somatic") {
@@ -356,10 +360,10 @@ load_all_eitems <- function(eitems_raw = NULL,
     if(alteration_type == "CNA") {
       selected_eitems[[db]] <-
         eitems_raw[[db]] %>%
-          dplyr::filter(ALTERATION_TYPE == alteration_type &
-                          !is.na(EITEM_CONSEQUENCE) &
-                          stringr::str_detect(VARIANT_ORIGIN, origin)) %>%
-          dplyr::rename(CNA_TYPE = EITEM_CONSEQUENCE) %>%
+          dplyr::filter(.data$ALTERATION_TYPE == alteration_type &
+                          !is.na(.data$EITEM_CONSEQUENCE) &
+                          stringr::str_detect(.data$VARIANT_ORIGIN, origin)) %>%
+          dplyr::rename(CNA_TYPE = .data$EITEM_CONSEQUENCE) %>%
           pcgrr::remove_cols_from_df(
             cnames =
               c("VARIANT_NAME",
@@ -374,8 +378,8 @@ load_all_eitems <- function(eitems_raw = NULL,
     if (alteration_type == "MUT" | alteration_type == "MUT_LOF") {
       selected_eitems[[db]] <-
         eitems_raw[[db]] %>%
-        dplyr::filter(ALTERATION_TYPE == alteration_type &
-                        stringr::str_detect(VARIANT_ORIGIN, origin)) %>%
+        dplyr::filter(.data$ALTERATION_TYPE == alteration_type &
+                        stringr::str_detect(.data$VARIANT_ORIGIN, origin)) %>%
         pcgrr::remove_cols_from_df(
           cnames =
             c("VARIANT_NAME",
@@ -397,6 +401,7 @@ load_all_eitems <- function(eitems_raw = NULL,
 }
 
 
+#' @export
 match_eitems_to_var <- function(sample_calls,
                                db = "civic",
                                colset = NULL,
@@ -455,7 +460,7 @@ match_eitems_to_var <- function(sample_calls,
       dplyr::select(
         dplyr::one_of(colset)) %>%
       dplyr::rename(EVIDENCE_ID = !!rlang::sym(evidence_identifiers[1])) %>%
-      dplyr::mutate(EVIDENCE_ID = as.character(EVIDENCE_ID)) %>%
+      dplyr::mutate(EVIDENCE_ID = as.character(.data$EVIDENCE_ID)) %>%
       pcgrr::remove_cols_from_df(cnames = evidence_identifiers[2])
     )
   }
@@ -475,8 +480,7 @@ match_eitems_to_var <- function(sample_calls,
 
 }
 
-##
-##
+#' @export
 qc_var_eitems <- function(var_eitems = NULL,
                           marker_type = "codon") {
 
@@ -503,13 +507,13 @@ qc_var_eitems <- function(var_eitems = NULL,
     if (nrow(var_eitems[!is.na(var_eitems$EITEM_CODON) &
                     var_eitems$BIOMARKER_MAPPING == "codon", ]) > 0) {
       filtered_var_eitems <- var_eitems %>%
-        dplyr::filter(!is.na(EITEM_CODON) & BIOMARKER_MAPPING == "codon") %>%
-        dplyr::filter(EITEM_CODON <= AMINO_ACID_END &
-                        EITEM_CODON >= AMINO_ACID_START &
-                        (!is.na(EITEM_CONSEQUENCE) &
-                           startsWith(CONSEQUENCE, EITEM_CONSEQUENCE) |
-                           is.na(EITEM_CONSEQUENCE)) &
-                        CODING_STATUS == "coding")
+        dplyr::filter(!is.na(.data$EITEM_CODON) & .data$BIOMARKER_MAPPING == "codon") %>%
+        dplyr::filter(.data$EITEM_CODON <= .data$AMINO_ACID_END &
+                        .data$EITEM_CODON >= .data$AMINO_ACID_START &
+                        (!is.na(.data$EITEM_CONSEQUENCE) &
+                           startsWith(.data$CONSEQUENCE, .data$EITEM_CONSEQUENCE) |
+                           is.na(.data$EITEM_CONSEQUENCE)) &
+                        .data$CODING_STATUS == "coding")
 
     }
   }
@@ -518,22 +522,22 @@ qc_var_eitems <- function(var_eitems = NULL,
     if (nrow(var_eitems[!is.na(var_eitems$EITEM_EXON) &
                     var_eitems$BIOMARKER_MAPPING == "exon", ]) > 0) {
       filtered_var_eitems <- var_eitems %>%
-        dplyr::filter(!is.na(EITEM_EXON) & BIOMARKER_MAPPING == "exon") %>%
-        dplyr::filter(EXON == EITEM_EXON &
-                        (!is.na(EITEM_CONSEQUENCE) &
-                          startsWith(CONSEQUENCE, EITEM_CONSEQUENCE) |
-                         is.na(EITEM_CONSEQUENCE)) & CODING_STATUS == "coding")
+        dplyr::filter(!is.na(.data$EITEM_EXON) & .data$BIOMARKER_MAPPING == "exon") %>%
+        dplyr::filter(.data$EXON == .data$EITEM_EXON &
+                        (!is.na(.data$EITEM_CONSEQUENCE) &
+                          startsWith(.data$CONSEQUENCE, .data$EITEM_CONSEQUENCE) |
+                         is.na(.data$EITEM_CONSEQUENCE)) & .data$CODING_STATUS == "coding")
     }
   }
 
   if (marker_type == "gene") {
     if (nrow(var_eitems[var_eitems$BIOMARKER_MAPPING == "gene", ]) > 0) {
       filtered_var_eitems <- var_eitems %>%
-        dplyr::filter(BIOMARKER_MAPPING == "gene" &
-                        CODING_STATUS == "coding") %>%
-        dplyr::filter((!is.na(EITEM_CONSEQUENCE) &
-                         startsWith(CONSEQUENCE, EITEM_CONSEQUENCE) |
-                         is.na(EITEM_CONSEQUENCE)) & CODING_STATUS == "coding")
+        dplyr::filter(.data$BIOMARKER_MAPPING == "gene" &
+                        .data$CODING_STATUS == "coding") %>%
+        dplyr::filter((!is.na(.data$EITEM_CONSEQUENCE) &
+                         startsWith(.data$CONSEQUENCE, .data$EITEM_CONSEQUENCE) |
+                         is.na(.data$EITEM_CONSEQUENCE)) & .data$CODING_STATUS == "coding")
 
     }
   }
@@ -544,11 +548,11 @@ qc_var_eitems <- function(var_eitems = NULL,
        "ALTERATION_TYPE" %in% colnames(filtered_var_eitems)){
 
       filtered_var_eitems <- filtered_var_eitems %>%
-        dplyr::filter((LOSS_OF_FUNCTION == T &
-                         ALTERATION_TYPE == "MUT_LOF") |
-                        is.na(LOSS_OF_FUNCTION) |
-                        (LOSS_OF_FUNCTION == F &
-                           ALTERATION_TYPE != "MUT_LOF"))
+        dplyr::filter((.data$LOSS_OF_FUNCTION == T &
+                         .data$ALTERATION_TYPE == "MUT_LOF") |
+                        is.na(.data$LOSS_OF_FUNCTION) |
+                        (.data$LOSS_OF_FUNCTION == F &
+                           .data$ALTERATION_TYPE != "MUT_LOF"))
     }
   }
 
@@ -561,6 +565,7 @@ qc_var_eitems <- function(var_eitems = NULL,
 
 }
 
+#' @export
 filter_eitems_by_site <- function(eitems = NULL,
                                   ontology = NULL,
                                   primary_site = "") {
@@ -603,10 +608,10 @@ filter_eitems_by_site <- function(eitems = NULL,
   tumor_phenotypes_site <-
     dplyr::semi_join(
       dplyr::select(ontology,
-                    primary_site, do_id, cui, cui_name),
+                    .data$primary_site, .data$do_id, .data$cui, .data$cui_name),
       data.frame("primary_site" = primary_site, stringsAsFactors = F),
       by = c("primary_site" = "primary_site")) %>%
-    dplyr::filter(!is.na(do_id)) %>%
+    dplyr::filter(!is.na(.data$do_id)) %>%
     dplyr::distinct()
 
   eitems <- eitems %>%
@@ -616,6 +621,7 @@ filter_eitems_by_site <- function(eitems = NULL,
   return(eitems)
 }
 
+#' @export
 structure_var_eitems <- function(var_eitems,
                               annotation_tags,
                               alteration_type = "MUT") {
@@ -637,27 +643,27 @@ structure_var_eitems <- function(var_eitems,
     for (type in c("prognostic", "diagnostic", "predictive")) {
       clin_eitems_list[[type]][["any"]] <- var_eitems %>%
         dplyr::select(dplyr::one_of(tags_display)) %>%
-        dplyr::filter(EVIDENCE_TYPE == stringr::str_to_title(type)) %>%
-        dplyr::arrange(EVIDENCE_LEVEL, desc(RATING))
+        dplyr::filter(.data$EVIDENCE_TYPE == stringr::str_to_title(type)) %>%
+        dplyr::arrange(.data$EVIDENCE_LEVEL, dplyr::desc(.data$RATING))
       if (nrow(clin_eitems_list[[type]][["any"]]) > 0) {
         clin_eitems_list[[type]][["A_B"]] <-
           clin_eitems_list[[type]][["any"]] %>%
-          dplyr::filter(stringr::str_detect(EVIDENCE_LEVEL, "^(A|B|B1|B2):"))
+          dplyr::filter(stringr::str_detect(.data$EVIDENCE_LEVEL, "^(A|B|B1|B2):"))
 
         if (NROW(clin_eitems_list[[type]][["A_B"]]) > 0) {
           clin_eitems_list[[type]][["A_B"]] <-
             clin_eitems_list[[type]][["A_B"]] %>%
-            dplyr::arrange(EVIDENCE_LEVEL, desc(RATING))
+            dplyr::arrange(.data$EVIDENCE_LEVEL, dplyr::desc(.data$RATING))
         }
 
         clin_eitems_list[[type]][["C_D_E"]] <-
           clin_eitems_list[[type]][["any"]] %>%
-          dplyr::filter(stringr::str_detect(EVIDENCE_LEVEL, "^(C|D|E):"))
+          dplyr::filter(stringr::str_detect(.data$EVIDENCE_LEVEL, "^(C|D|E):"))
 
         if (NROW(clin_eitems_list[[type]][["C_D_E"]]) > 0) {
           clin_eitems_list[[type]][["C_D_E"]] <-
             clin_eitems_list[[type]][["C_D_E"]] %>%
-            dplyr::arrange(EVIDENCE_LEVEL, desc(RATING))
+            dplyr::arrange(.data$EVIDENCE_LEVEL, dplyr::desc(.data$RATING))
         }
       }
     }
@@ -667,6 +673,7 @@ structure_var_eitems <- function(var_eitems,
 
 }
 
+#' @export
 deduplicate_eitems <- function(var_eitems = NULL,
                                target_type = "exact",
                                target_other = c("codon","exon","gene")){
@@ -718,7 +725,7 @@ deduplicate_eitems <- function(var_eitems = NULL,
                                     only_colnames = F, quiet = T)
         var_eitems[[m]] <- var_eitems[[m]] %>%
           dplyr::anti_join(
-            dplyr::select(var_eitems[[target_type]], GENOMIC_CHANGE),
+            dplyr::select(var_eitems[[target_type]], .data$GENOMIC_CHANGE),
             by = c("GENOMIC_CHANGE"))
       }
     }
@@ -726,6 +733,7 @@ deduplicate_eitems <- function(var_eitems = NULL,
   return(var_eitems)
 }
 
+#' @export
 log_var_eitem_stats <- function(var_eitems = NULL,
                                target_type = "exact"){
 
@@ -742,7 +750,7 @@ log_var_eitem_stats <- function(var_eitems = NULL,
                                          " or 'exon' or 'gene'")))
 
 
-  pcgrr:::log4r_info(
+  log4r_info(
     paste0("Found n = ",
            NROW(var_eitems[[target_type]]),
            " other clinical evidence item(s) at the ", target_type,
@@ -756,7 +764,7 @@ log_var_eitem_stats <- function(var_eitems = NULL,
       var_eitems[[target_type]],
       c("SYMBOL","CONSEQUENCE","PROTEIN_CHANGE"),
       only_colnames = F, quiet = T)
-    pcgrr:::log4r_info(
+    log4r_info(
       paste0("Variants: ",
              paste(unique(paste(var_eitems[[target_type]]$SYMBOL,
                                 var_eitems[[target_type]]$CONSEQUENCE,

@@ -1,11 +1,10 @@
-
-
 #' Function that assigns one of six mutation types to a list of mutations
 #'
 #' @param var_df data frame with variants
 #'
 #' @return var_df
 #'
+#' @export
 assign_mutation_type <- function(var_df) {
 
   invisible(
@@ -52,7 +51,7 @@ assign_mutation_type <- function(var_df) {
 #' @param tier_df data frame with somatic mutations
 #' @return maf_df
 #'
-#'
+#' @export
 get_proper_maf_alleles <- function(maf_df, genome_seq, seqinfo) {
 
   maf_df_valid <-
@@ -60,17 +59,17 @@ get_proper_maf_alleles <- function(maf_df, genome_seq, seqinfo) {
                                  chromosome_column = "Chromosome",
                                  bsg = genome_seq)
   if ("end" %in% colnames(maf_df_valid)) {
-    maf_df_valid <- dplyr::select(maf_df_valid, -end)
+    maf_df_valid <- dplyr::select(maf_df_valid, -.data$end)
   }
 
   maf_snv <- maf_df_valid %>%
-    dplyr::filter(Variant_Type == "SNP") %>%
-    dplyr::mutate(REF = Reference_Allele,
-                  ALT = Tumor_Seq_Allele2, POS = Start_Position)
+    dplyr::filter(.data$Variant_Type == "SNP") %>%
+    dplyr::mutate(REF = .data$Reference_Allele,
+                  ALT = .data$Tumor_Seq_Allele2, POS = .data$Start_Position)
 
   maf_all <- maf_snv
-  maf_ins <- dplyr::filter(maf_df_valid, Variant_Type == "INS")
-  maf_del <- dplyr::filter(maf_df_valid, Variant_Type == "DEL")
+  maf_ins <- dplyr::filter(maf_df_valid, .data$Variant_Type == "INS")
+  maf_del <- dplyr::filter(maf_df_valid, .data$Variant_Type == "DEL")
 
   if (nrow(maf_del) > 0) {
     ## get appropriate alleles (VCF-like) of reference and alternate (DELETIONS)

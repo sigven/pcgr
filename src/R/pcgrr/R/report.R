@@ -7,7 +7,7 @@
 #' @param type Type of report ('somatic' or 'germline')
 #' @param virtual_panel_id identifier(s) for virtual panel id
 #' @param custom_bed custom BED file with target loci for screening
-
+#' @export
 init_report <- function(config = NULL,
                         class = NULL,
                         pcgr_data = NULL,
@@ -50,7 +50,7 @@ init_report <- function(config = NULL,
     if (!is.null(pcgr_data)) {
       report[["metadata"]][["phenotype_ontology"]][["oncotree_query"]] <-
         dplyr::filter(pcgr_data[["phenotype_ontology"]][["oncotree"]],
-                      is.na(primary_site))
+                      is.na(.data$primary_site))
     }
 
     report[["content"]][["snv_indel"]] <-
@@ -75,14 +75,14 @@ init_report <- function(config = NULL,
         tumor_group_entry <-
           dplyr::filter(
             pcgr_data[["phenotype_ontology"]][["cancer_groups"]],
-            primary_site == config[["t_props"]][["tumor_type"]])
+            .data$primary_site == config[["t_props"]][["tumor_type"]])
         if (nrow(tumor_group_entry) == 1) {
           report[["metadata"]][["phenotype_ontology"]][["oncotree_query"]] <-
             dplyr::filter(
               pcgr_data[["phenotype_ontology"]][["oncotree"]],
-              primary_site == config[["t_props"]][["tumor_type"]])
+              .data$primary_site == config[["t_props"]][["tumor_type"]])
         }else{
-          pcgrr:::log4r_info(paste0("Cannot find tumor type ",
+          log4r_info(paste0("Cannot find tumor type ",
                                    config[["t_props"]][["tumor_type"]],
                                    " in list of primary sites"))
           report[["metadata"]][["phenotype_ontology"]][["oncotree_query"]] <-
@@ -190,7 +190,7 @@ init_report <- function(config = NULL,
 #' @param report PCGR final report
 #' @param report_data Object with PCGR report data
 #' @param a_elem section of PCGR report
-
+#' @export
 update_report <- function(report, report_data,
                           a_elem = "snv_indel") {
 
@@ -207,6 +207,7 @@ update_report <- function(report, report_data,
   return(report)
 }
 
+#' @export
 set_report_metadata <- function(config,
                                 pcgr_data,
                                 virtual_panel_id = "-1",
@@ -252,28 +253,28 @@ set_report_metadata <- function(config,
     for(pid in panel_ids){
       p <- as.integer(pid)
       panel_genes <- pcgr_data[["virtual_gene_panels"]] %>%
-        dplyr::filter(id == p) %>%
-        dplyr::select(symbol,
-                      ensembl_gene_id,
-                      confidence_level,
-                      panel_name,
-                      panel_id,
-                      id,
-                      panel_version,
-                      panel_url,
-                      entrezgene,
-                      genename)
+        dplyr::filter(.data$id == p) %>%
+        dplyr::select(.data$symbol,
+                      .data$ensembl_gene_id,
+                      .data$confidence_level,
+                      .data$panel_name,
+                      .data$panel_id,
+                      .data$id,
+                      .data$panel_version,
+                      .data$panel_url,
+                      .data$entrezgene,
+                      .data$genename)
 
       report_metadata[["gene_panel"]][["genes"]] <-
         report_metadata[["gene_panel"]][["genes"]] %>%
         dplyr::bind_rows(panel_genes) %>%
-        dplyr::arrange(symbol)
+        dplyr::arrange(.data$symbol)
     }
 
     if (config[["diagnostic_grade_only"]] == T) {
       report_metadata[["gene_panel"]][["genes"]] <-
         report_metadata[["gene_panel"]][["genes"]] %>%
-        dplyr::filter(confidence_level == 3 | confidence_level == 4)
+        dplyr::filter(.data$confidence_level == 3 | .data$confidence_level == 4)
     }
 
 
@@ -300,18 +301,18 @@ set_report_metadata <- function(config,
 
       panels_included <-
         report_metadata$gene_panel$genes %>%
-        dplyr::select(id, panel_url, panel_name) %>%
-        dplyr::arrange(id) %>%
+        dplyr::select(.data$id, .data$panel_url, .data$panel_name) %>%
+        dplyr::arrange(.data$id) %>%
         dplyr::distinct() %>%
-        dplyr::mutate(link = paste0("<li><a href='",panel_url,
+        dplyr::mutate(link = paste0("<li><a href='",.data$panel_url,
                                     "' target='_blank'>",
-                                    panel_name,"</a></li>"))
+                                    .data$panel_name,"</a></li>"))
 
       report_metadata[["gene_panel"]][["genes"]] <-
         report_metadata[["gene_panel"]][["genes"]] %>%
-        dplyr::select(-c(panel_id,panel_name, confidence_level,
-                         panel_version,panel_url,
-                         id)) %>%
+        dplyr::select(-c(.data$panel_id, .data$panel_name, .data$confidence_level,
+                         .data$panel_version, .data$panel_url,
+                         .data$id)) %>%
         dplyr::mutate(panel_version = NA, confidence_level = 5,
                       panel_id = NA, panel_url = NA) %>%
         dplyr::distinct()
@@ -348,17 +349,18 @@ set_report_metadata <- function(config,
         report_metadata[["gene_panel"]][["confidence"]] <-
           "User-defined panel (custom geneset from panel 0)"
       }else{
-        pcgrr:::log4r_warn(
+        log4r_warn(
           paste0("Custom BED file (", custom_bed,
                  ") does not contain regions that overlap ",
                  "protein-coding transcripts (regulatory/exonic)"))
-        pcgrr:::log4r_info("Quitting report generation")
+        log4r_info("Quitting report generation")
       }
     }
   }
   return(report_metadata)
 }
 
+#' @export
 init_tmb_content <- function(tcga_tmb = NULL, config = NULL){
 
   invisible(assertthat::assert_that(!is.null(tcga_tmb)))
@@ -385,6 +387,7 @@ init_tmb_content <- function(tcga_tmb = NULL, config = NULL){
   return(rep)
 }
 
+#' @export
 init_cna_content <- function(rep = NULL){
 
   invisible(assertthat::assert_that(!is.null(rep)))
@@ -411,6 +414,7 @@ init_cna_content <- function(rep = NULL){
 
 }
 
+#' @export
 init_snv_indel_content <- function(rep = NULL){
 
   invisible(assertthat::assert_that(!is.null(rep)))
@@ -441,6 +445,7 @@ init_snv_indel_content <- function(rep = NULL){
   return(rep)
 }
 
+#' @export
 init_m_signature_content <- function(){
 
   rep <- list()
@@ -470,6 +475,7 @@ init_m_signature_content <- function(){
 #init_msi_content <- function(){}
 #init_kataegis_content <- function(){}
 
+#' @export
 init_rainfall_content <- function(){
 
   rep <- list()
@@ -494,6 +500,7 @@ init_rainfall_content <- function(){
 
 }
 
+#' @export
 init_tumor_only_content <- function(){
 
   rep <- list()
@@ -522,6 +529,7 @@ init_tumor_only_content <- function(){
   return(rep)
 }
 
+#' @export
 init_valuebox_content <- function(){
   rep <- list()
 
@@ -550,6 +558,7 @@ init_valuebox_content <- function(){
 
 }
 
+#' @export
 init_report_display_content <- function(){
 
   rep <- list()
@@ -564,7 +573,10 @@ init_report_display_content <- function(){
   return(rep)
 
 }
+
 #init_ctrial_content <- function(){}
+
+#' @export
 init_var_content <- function(){
 
   rep <- list()
@@ -587,6 +599,7 @@ init_var_content <- function(){
   return(rep)
 }
 
+#' @export
 init_germline_content <- function(){
   rep <- list()
 

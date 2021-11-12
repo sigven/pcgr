@@ -5,7 +5,7 @@
 #' @param pcg_report pcg report with list elements
 #' @return p
 #'
-#'
+#' @export
 
 plot_value_boxes <- function(pcg_report) {
   df <- data.frame(
@@ -37,8 +37,8 @@ plot_value_boxes <- function(pcg_report) {
     color <- rep(pcgrr::color_palette[["report_color"]][["values"]][2], 9)
   }
 
-  p <- ggplot2::ggplot(df, ggplot2::aes(x, y, height = h, width = w,
-                                        label = info, fill = color)) +
+  p <- ggplot2::ggplot(df, ggplot2::aes(.data$x, .data$y, height = .data$h, width = .data$w,
+                                        label = .data$info, fill = color)) +
     ggplot2::geom_tile() +
     ggplot2::geom_text(color = "white", fontface = "bold", size = 7) +
     ggplot2::coord_fixed() +
@@ -57,6 +57,7 @@ plot_value_boxes <- function(pcg_report) {
 #' @param sample_name sample identifier
 #' @param pcgr_config Object with PCGR configuration parameters
 #'
+#' @export
 generate_report_data_value_box <- function(pcg_report,
                                            pcgr_data,
                                            sample_name,
@@ -64,8 +65,8 @@ generate_report_data_value_box <- function(pcg_report,
 
   pcg_report_value_box <- pcgrr::init_report(config = pcgr_config,
                                              class = "value_box")
-  pcgrr:::log4r_info("------")
-  pcgrr:::log4r_info("Assigning elements to PCGR value boxes")
+  log4r_info("------")
+  log4r_info("Assigning elements to PCGR value boxes")
 
   if (!pcg_report[["content"]][["snv_indel"]][["eval"]]) {
     return(pcg_report_value_box)
@@ -81,7 +82,7 @@ generate_report_data_value_box <- function(pcg_report,
     if (!is.null(sig_contributions)) {
       if (nrow(sig_contributions[["per_group"]]) > 0) {
         ranked_groups <- sig_contributions[["per_group"]] %>%
-          dplyr::arrange(desc(prop_group))
+          dplyr::arrange(dplyr::desc(.data$prop_group))
 
         dominant_aetiology <- ranked_groups[1, "group"]
         # pcg_report_value_box[["signatures"]] <-
@@ -96,7 +97,7 @@ generate_report_data_value_box <- function(pcg_report,
       num_events <- NROW(rep_cont$kataegis$events)
       if(num_events > 0){
         num_events <- NROW(rep_cont$kataegis$events %>%
-                             dplyr::filter(confidence == 3))
+                             dplyr::filter(.data$confidence == 3))
         # pcg_report_value_box[["kataegis"]] <-
         #   paste0("Kataegis events:\n", num_events)
         pcg_report_value_box[["kataegis"]] <- num_events
@@ -149,7 +150,7 @@ generate_report_data_value_box <- function(pcg_report,
           #   "SCNAs:\n",
             paste(
               unique(
-                head(
+                utils::head(
                   rep_cont[["cna"]][["disp"]][["tier1"]]$SYMBOL, 2)
                 ),
               collapse = ", ")
@@ -170,10 +171,10 @@ generate_report_data_value_box <- function(pcg_report,
             unlist(rep_cont[["snv_indel"]][["variant_set"]][["tier1"]]$SYMBOL)
             )
         pcg_report_value_box[["tier1"]] <-
-          paste(head(tier1_genes, 2), collapse = ", ")
+          paste(utils::head(tier1_genes, 2), collapse = ", ")
         if (length(tier1_genes) > 2) {
           pcg_report_value_box[["tier1"]] <-
-            paste(paste(head(tier1_genes, 2), collapse = ", "),
+            paste(paste(utils::head(tier1_genes, 2), collapse = ", "),
                   paste(tier1_genes[3:min(4, length(tier1_genes))],
                         collapse = ", "),
                   sep = "\n")
@@ -193,10 +194,10 @@ generate_report_data_value_box <- function(pcg_report,
             unlist(
               rep_cont[["snv_indel"]][["variant_set"]][["tier2"]]$SYMBOL))
         pcg_report_value_box[["tier2"]] <-
-          paste(head(tier2_genes, 2), collapse = ", ")
+          paste(utils::head(tier2_genes, 2), collapse = ", ")
         if (length(tier2_genes) > 2) {
           pcg_report_value_box[["tier2"]] <-
-            paste(paste(head(tier2_genes, 2), collapse = ", "),
+            paste(paste(utils::head(tier2_genes, 2), collapse = ", "),
                   paste(tier2_genes[3:min(4, length(tier2_genes))],
                         collapse = ", "),
                   sep = "\n")

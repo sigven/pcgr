@@ -5,7 +5,7 @@
 #' @param sample_name sample name
 #'
 #' @return pcg_report_trials data frame with all report elements
-#'
+#' @export
 
 generate_report_data_trials <- function(pcgr_data, config, sample_name) {
 
@@ -24,45 +24,45 @@ generate_report_data_trials <- function(pcgr_data, config, sample_name) {
 
   pcg_report_trials[["trials"]] <-
     pcgr_data[["clinicaltrials"]][["trials"]] %>%
-    dplyr::filter(primary_site ==
+    dplyr::filter(.data$primary_site ==
                     config[["t_props"]][["tumor_type"]])
 
   if (nrow(pcg_report_trials[["trials"]]) > 0) {
 
     pcg_report_trials[["trials"]] <- pcg_report_trials[["trials"]] %>%
-      dplyr::select(nct_id, title, overall_status,
-                    cui_link, intervention_link,
-                    phase, start_date,
-                    primary_completion_date, cui_name,
-                    intervention,
-                    intervention_target,
-                    biomarker_context,
-                    chromosome_abnormality,
-                    clinical_context,
-                    world_region,
-                    metastases, gender,
-                    minimum_age, maximum_age, phase,
-                    n_primary_cancer_sites,
-                    study_design_primary_purpose) %>%
-      dplyr::rename(condition_raw = cui_name,
-                    condition = cui_link,
-                    intervention2 = intervention_link,
-                    intervention_raw = intervention,
-                    biomarker_index = biomarker_context,
-                    keyword = clinical_context,
-                    chrom_abnormalities = chromosome_abnormality,
-                    metastases_index = metastases) %>%
-      dplyr::rename(intervention = intervention2) %>%
+      dplyr::select(.data$nct_id, .data$title, .data$overall_status,
+                    .data$cui_link, .data$intervention_link,
+                    .data$phase, .data$start_date,
+                    .data$primary_completion_date, .data$cui_name,
+                    .data$intervention,
+                    .data$intervention_target,
+                    .data$biomarker_context,
+                    .data$chromosome_abnormality,
+                    .data$clinical_context,
+                    .data$world_region,
+                    .data$metastases, .data$gender,
+                    .data$minimum_age, .data$maximum_age, .data$phase,
+                    .data$n_primary_cancer_sites,
+                    .data$study_design_primary_purpose) %>%
+      dplyr::rename(condition_raw = .data$cui_name,
+                    condition = .data$cui_link,
+                    intervention2 = .data$intervention_link,
+                    intervention_raw = .data$intervention,
+                    biomarker_index = .data$biomarker_context,
+                    keyword = .data$clinical_context,
+                    chrom_abnormalities = .data$chromosome_abnormality,
+                    metastases_index = .data$metastases) %>%
+      dplyr::rename(intervention = .data$intervention2) %>%
       magrittr::set_colnames(toupper(names(.))) %>%
-      dplyr::arrange(N_PRIMARY_CANCER_SITES,
-                     OVERALL_STATUS, desc(START_DATE),
-                     desc(nchar(BIOMARKER_INDEX),
-                          STUDY_DESIGN_PRIMARY_PURPOSE)) %>%
-      dplyr::select(-c(N_PRIMARY_CANCER_SITES, STUDY_DESIGN_PRIMARY_PURPOSE))
+      dplyr::arrange(.data$N_PRIMARY_CANCER_SITES,
+                     .data$OVERALL_STATUS, dplyr::desc(.data$START_DATE),
+                     dplyr::desc(nchar(.data$BIOMARKER_INDEX),
+                          .data$STUDY_DESIGN_PRIMARY_PURPOSE)) %>%
+      dplyr::select(-c(.data$N_PRIMARY_CANCER_SITES, .data$STUDY_DESIGN_PRIMARY_PURPOSE))
 
     if (nrow(pcg_report_trials[["trials"]]) > 2000) {
       pcg_report_trials[["trials"]] <-
-        head(pcg_report_trials[["trials"]], 2000)
+        utils::head(pcg_report_trials[["trials"]], 2000)
     }
 
   }else{
