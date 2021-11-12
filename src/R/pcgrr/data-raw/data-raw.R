@@ -1,7 +1,8 @@
+#---- cpsr_acmg ----#
 cpsr_acmg <- list()
 cpsr_acmg[["score2tier"]] <- data.frame()
 cpsr_acmg[["evidence_codes"]] <-
-  read.table(file = "data-raw/acmg_evidence.tsv",
+  utils::read.table(file = "acmg_evidence.tsv",
              header = T, stringsAsFactors = F,
              comment.char = "", na.strings = c("NA"),
              sep = "\t")
@@ -33,6 +34,7 @@ cpsr_acmg[["score2tier"]] <-
     data.frame("CPSR_CLASSIFICATION" = "Benign",
                "CPSR_PATHOGENICITY_SCORE" = "<b>[, -5]</b>"))
 
+#---- color_palette ----#
 color_palette <- list()
 for (c in c("pathogenicity", "clinical_evidence", "tier",
            "report_color", "warning", "success", "none")) {
@@ -92,6 +94,7 @@ for (c in c("pathogenicity", "clinical_evidence", "tier",
 usethis::use_data(color_palette, overwrite = T)
 usethis::use_data(cpsr_acmg, overwrite = T)
 
+#---- (hetero/homo)zygous_states ----#
 heterozygous_states <- c()
 ref_allele_index <- 0
 while (ref_allele_index < 20) {
@@ -119,6 +122,7 @@ while (hom_allele_index <= 10) {
 usethis::use_data(heterozygous_states, overwrite = T)
 usethis::use_data(homozygous_states, overwrite = T)
 
+#---- variant_db_url ----#
 variant_db_url <-
   data.frame(
     name = "DBSNP",
@@ -153,70 +157,43 @@ variant_db_url <-
 
 usethis::use_data(variant_db_url, overwrite = T)
 
+#---- effect_prediction_algos ----#
 effect_prediction_algos <-
-  read.table(file = "data-raw/effect_prediction_algorithms.tsv",
+  utils::read.table(file = "effect_prediction_algorithms.tsv",
              header = T, sep = "\t", quote = "", stringsAsFactors = F)
 usethis::use_data(effect_prediction_algos, overwrite = T)
 
+#---- cancer_phenotypes_regex ----#
 cancer_phenotypes_regex <-
-  "(cancer|carcinoma|tumor|neoplasm|gangliom|lymphom|leukem|meningiom"
-cancer_phenotypes_regex <-
-  paste0(cancer_phenotypes_regex,
-         "|blastoma|melanom|chordom|adenoma|sarcom|mesotheli|ependymom|glioma")
-cancer_phenotypes_regex <-
-  paste0(cancer_phenotypes_regex,
-         "|neurofibro|keratoacan|nevus|brca|polyposis|myelodysplastic|cowden")
-cancer_phenotypes_regex <-
-  paste0(
-    cancer_phenotypes_regex,
-    "|gardner|noonan|fanconi|carney|bullosa|schwanno|li-fraumeni|xeroderma")
-cancer_phenotypes_regex <-
-  paste0(cancer_phenotypes_regex,
-         "|leiomyom|muir-|nijmegen|neoplasia|trichoepithelioma|brooke|turcot")
-cancer_phenotypes_regex <-
-  paste0(
-    cancer_phenotypes_regex,
-    "|exostoses|lynch|drash|wilm|perlman|fibrofolliculomas|hippel|hamartom")
-cancer_phenotypes_regex <-
-  paste0(cancer_phenotypes_regex,
-         "|bloom|werner|peutz|legius|tuberous|exostosis|angiomyolipoma")
-cancer_phenotypes_regex <-
-  paste0(
-    cancer_phenotypes_regex,
-    "|lymphoproliferative|stat3|teratoma|thrombocytop|tp63|wiskott|weaver")
-cancer_phenotypes_regex <-
-  paste0(cancer_phenotypes_regex,
-         "|pheochromo|gorlin|telangiectasia|hemangiom|osteochondro|response")
-cancer_phenotypes_regex <-
-  paste0(cancer_phenotypes_regex,
-         "|polg-related|ras-associated|dyskeratosis")
-cancer_phenotypes_regex <-
-  paste0(
-    cancer_phenotypes_regex,
-    "|waardenburg|beckwidth|birt-hogg|costello|diamond|cardio-facio|frasier")
-cancer_phenotypes_regex <-
-  paste0(cancer_phenotypes_regex,
-         "|hirschsprung|hydrocephalus|hyperparathyroidism|immunodeficiency")
-cancer_phenotypes_regex <-
-  paste0(
-    cancer_phenotypes_regex,
-    "|infantile myofibromatosis|leopard|proteus|rothmund|russel)")
+  paste0("(cancer|carcinoma|tumor|neoplasm|gangliom|lymphom|leukem|meningiom",
+         "|blastoma|melanom|chordom|adenoma|sarcom|mesotheli|ependymom|glioma",
+         "|neurofibro|keratoacan|nevus|brca|polyposis|myelodysplastic|cowden",
+         "|gardner|noonan|fanconi|carney|bullosa|schwanno|li-fraumeni|xeroderma",
+         "|leiomyom|muir-|nijmegen|neoplasia|trichoepithelioma|brooke|turcot",
+         "|exostoses|lynch|drash|wilm|perlman|fibrofolliculomas|hippel|hamartom",
+         "|bloom|werner|peutz|legius|tuberous|exostosis|angiomyolipoma",
+         "|lymphoproliferative|stat3|teratoma|thrombocytop|tp63|wiskott|weaver",
+         "|pheochromo|gorlin|telangiectasia|hemangiom|osteochondro|response",
+         "|polg-related|ras-associated|dyskeratosis",
+         "|waardenburg|beckwidth|birt-hogg|costello|diamond|cardio-facio|frasier",
+         "|hirschsprung|hydrocephalus|hyperparathyroidism|immunodeficiency",
+         "|infantile myofibromatosis|leopard|proteus|rothmund|russel)")
 usethis::use_data(cancer_phenotypes_regex, overwrite = T)
 
-rm(cancer_phenotypes_regex)
-rm(phased_gt)
-rm(phased_gt_1)
-rm(phased_gt_2)
-rm(unphased_gt)
-rm(unphased_gt_1)
-rm(unphased_gt_2)
-rm(ref_allele_index)
-rm(homozygous_states)
-rm(heterozygous_states)
-rm(alt_allele_index)
-rm(hom_allele_index)
-rm(color_palette)
-rm(cpsr_acmg)
-rm(effect_prediction_algos)
-rm(variant_db_url)
-rm(c)
+rm(cancer_phenotypes_regex,
+   phased_gt,
+   phased_gt_1,
+   phased_gt_2,
+   unphased_gt,
+   unphased_gt_1,
+   unphased_gt_2,
+   ref_allele_index,
+   homozygous_states,
+   heterozygous_states,
+   alt_allele_index,
+   hom_allele_index,
+   color_palette,
+   cpsr_acmg,
+   effect_prediction_algos,
+   variant_db_url,
+   c)
