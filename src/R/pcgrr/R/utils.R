@@ -1,3 +1,4 @@
+#' @export
 check_common_colnames <- function(df1 = NULL, df2 = NULL, cnames = NULL) {
 
   invisible(assertthat::assert_that(
@@ -19,6 +20,7 @@ check_common_colnames <- function(df1 = NULL, df2 = NULL, cnames = NULL) {
 
 }
 
+#' @export
 remove_cols_from_df <- function(df, cnames = NULL) {
 
   invisible(assertthat::assert_that(
@@ -43,7 +45,7 @@ remove_cols_from_df <- function(df, cnames = NULL) {
 #' @param bin_size size of bins for allelic frequency
 #' @return p geom_histogram plot from ggplot2
 #'
-#'
+#' @export
 tier_af_distribution <- function(tier_df, bin_size = 0.1) {
 
   af_bin_df <- data.frame()
@@ -83,13 +85,13 @@ tier_af_distribution <- function(tier_df, bin_size = 0.1) {
                         breaks = seq(from = 0, to = 1, by = bin_size),
                         right = F, include.lowest = T, labels = F))
   tier_df_trans_bin <- as.data.frame(
-    dplyr::group_by(tier_df_trans, TIER, bin) %>%
+    dplyr::group_by(tier_df_trans, .data$TIER, .data$bin) %>%
       dplyr::summarise(Count = dplyr::n()))
   af_bin_df <- af_bin_df %>%
     dplyr::left_join(tier_df_trans_bin, by = c("bin", "TIER")) %>%
-    dplyr::mutate(Count = dplyr::if_else(is.na(Count),
+    dplyr::mutate(Count = dplyr::if_else(is.na(.data$Count),
                                          as.numeric(0),
-                                         as.numeric(Count)))
+                                         as.numeric(.data$Count)))
 
   return(af_bin_df)
 
@@ -103,6 +105,7 @@ tier_af_distribution <- function(tier_df, bin_size = 0.1) {
 #' @param pattern pattern to replace
 #' @return vcf_data_df_valid data frame with valid mutations
 #'
+#' @export
 get_valid_chromosomes <- function(vcf_data_df,
                                   chromosome_column = "CHROM",
                                   bsg = BSgenome.Hsapiens.UCSC.hg19) {
@@ -129,7 +132,7 @@ get_valid_chromosomes <- function(vcf_data_df,
         GenomeInfoDb::seqnames(bsg)))]
   if (length(unknown_regs) > 0) {
     unknown_regs <- paste(unknown_regs, collapse = ",\ ")
-    pcgrr:::log4r_warn(paste(
+    log4r_warn(paste(
       "Check chr names -- not all match BSgenome.Hsapiens object:\n",
       unknown_regs, sep = " "))
     vcf_data_df_valid <-
@@ -148,6 +151,7 @@ get_valid_chromosomes <- function(vcf_data_df,
 #' @param chrom_var variable name of chromosome in data frame
 #' @return vcf_df data frame with mutations from nuclear chromosomes only
 #'
+#' @export
 get_ordinary_chromosomes <- function(vcf_df, chrom_var = "CHROM") {
   invisible(assertthat::assert_that(
     is.data.frame(vcf_df),
@@ -163,7 +167,7 @@ get_ordinary_chromosomes <- function(vcf_df, chrom_var = "CHROM") {
   colnames(nuc_chromosomes_df) <- c(chrom_var)
   vcf_df <- dplyr::semi_join(vcf_df, nuc_chromosomes_df, by = chrom_var)
   n_after_exclusion <- nrow(vcf_df)
-  pcgrr:::log4r_info(
+  log4r_info(
     paste0("Excluding ",
            n_before_exclusion - n_after_exclusion,
            " variants from non-nuclear chromosomes/scaffolds"))
@@ -179,6 +183,7 @@ get_ordinary_chromosomes <- function(vcf_df, chrom_var = "CHROM") {
 #' @param pos_var variable name for chromosomal position
 #' @return vcf_df data frame with ordered mutations
 #'
+#' @export
 order_variants <- function(vcf_df, chrom_var = "CHROM", pos_var = "POS") {
   stopifnot(is.data.frame(vcf_df) &
               chrom_var %in% colnames(vcf_df) &
@@ -205,7 +210,7 @@ order_variants <- function(vcf_df, chrom_var = "CHROM", pos_var = "POS") {
 #' @param end_segment name of column that indicates end of chromosomal segment
 #' @return df_final data frame with sorted chromosomal segments
 #'
-#'
+#' @export
 sort_chromosomal_segments <- function(df,
                                       chromosome_column = "CHROM",
                                       start_segment = "POS",
@@ -272,6 +277,7 @@ sort_chromosomal_segments <- function(df,
 #' @return df
 #'
 #'
+#' @export
 df_string_replace <- function(df, strings, pattern,
                               replacement, replace_all = F) {
   stopifnot(is.data.frame(df))
@@ -301,6 +307,7 @@ df_string_replace <- function(df, strings, pattern,
 #' @param calls data frame with variants in predisposition_genes
 #' @param name type of variant group
 #'
+#' @export
 variant_stats_report <- function(calls, name = "v_stat") {
 
   call_stats <- list()
@@ -312,16 +319,16 @@ variant_stats_report <- function(calls, name = "v_stat") {
   call_stats[[name]][["n"]] <- calls %>%
     nrow()
   call_stats[[name]][["n_snv"]] <- calls %>%
-    dplyr::filter(VARIANT_CLASS == "SNV") %>%
+    dplyr::filter(.data$VARIANT_CLASS == "SNV") %>%
     nrow()
   call_stats[[name]][["n_indel"]] <- calls %>%
-    dplyr::filter(VARIANT_CLASS != "SNV") %>%
+    dplyr::filter(.data$VARIANT_CLASS != "SNV") %>%
     nrow()
   call_stats[[name]][["n_coding"]] <- calls %>%
-    dplyr::filter(CODING_STATUS == "coding") %>%
+    dplyr::filter(.data$CODING_STATUS == "coding") %>%
     nrow()
   call_stats[[name]][["n_noncoding"]] <- calls %>%
-    dplyr::filter(CODING_STATUS != "coding") %>%
+    dplyr::filter(.data$CODING_STATUS != "coding") %>%
     nrow()
 
   return(call_stats)
@@ -336,6 +343,7 @@ variant_stats_report <- function(calls, name = "v_stat") {
 #'
 #' @return vcf_df
 #'
+#' @export
 append_read_support <- function(vcf_df, config = NULL, precision = 3) {
 
   invisible(assertthat::assert_that(
@@ -346,7 +354,7 @@ append_read_support <- function(vcf_df, config = NULL, precision = 3) {
   invisible(assertthat::assert_that(
     !is.null(config), msg = "Argument 'config' cannot not be NULL"))
   invisible(assertthat::assert_that(
-    is(config, "list"),
+    methods::is(config, "list"),
     msg = paste0("Argument 'config' must be of type list, not ",
                  class(config)[2])))
   if (is.null(config$allelic_support))return(vcf_df)
@@ -393,6 +401,7 @@ append_read_support <- function(vcf_df, config = NULL, precision = 3) {
   return(vcf_df)
 }
 
+#' @export
 append_ucsc_segment_link <- function(var_df, hgname = "hg38",
                                      chrom = NULL,
                                      start = NULL, end = NULL) {
@@ -425,39 +434,40 @@ append_ucsc_segment_link <- function(var_df, hgname = "hg38",
 #' @param linktype type of link
 #' @param pcgr_data PCGR data structure
 #'
+#' @export
 append_tcga_var_link <- function(var_df, pcgr_data = NULL,
                                  linktype = "dbsource") {
 
-  pcgrr:::log4r_info("Adding annotation links - TCGA")
+  log4r_info("Adding annotation links - TCGA")
 
   if (any(grepl(paste0("^TCGA_FREQUENCY$"), names(var_df))) &
       any(grepl(paste0("^VAR_ID$"), names(var_df))) &
       !is.null(pcgr_data)) {
-    var_df_unique_slim <- dplyr::select(var_df, VAR_ID, TCGA_FREQUENCY) %>%
-      dplyr::filter(!is.na(TCGA_FREQUENCY)) %>%
+    var_df_unique_slim <- dplyr::select(var_df, .data$VAR_ID, .data$TCGA_FREQUENCY) %>%
+      dplyr::filter(!is.na(.data$TCGA_FREQUENCY)) %>%
       dplyr::distinct()
     if (nrow(var_df_unique_slim) > 0) {
       var_df_unique_slim_melted <- var_df_unique_slim %>%
-        tidyr::separate_rows(TCGA_FREQUENCY, sep = ",") %>%
-        tidyr::separate(TCGA_FREQUENCY, c("tumor", "percentage",
+        tidyr::separate_rows(.data$TCGA_FREQUENCY, sep = ",") %>%
+        tidyr::separate(.data$TCGA_FREQUENCY, c("tumor", "percentage",
                                           "affected", "cohort_size"),
                         sep = "\\|", convert = T) %>%
         dplyr::left_join(pcgr_data[["tcga"]][["projects"]], by = "tumor") %>%
-        dplyr::arrange(VAR_ID, desc(percentage))
+        dplyr::arrange(.data$VAR_ID, dplyr::desc(.data$percentage))
       if (linktype == "dbsource") {
         var_df_unique_slim_melted <- var_df_unique_slim_melted %>%
           dplyr::mutate(tmp_assoc = paste0(
             "<a href='https://portal.gdc.cancer.gov/projects/TCGA-",
-            tumor, "' target=\"_blank\">", name, "</a>: ",
-            percentage, "% (", affected, "/", cohort_size, ")"))
+            .data$tumor, "' target=\"_blank\">", .data$name, "</a>: ",
+            .data$percentage, "% (", .data$affected, "/", .data$cohort_size, ")"))
       }
 
-      var_df_links <- dplyr::group_by(var_df_unique_slim_melted, VAR_ID) %>%
-        dplyr::summarise(TCGALINK = unlist(paste(tmp_assoc, collapse = ", ")),
+      var_df_links <- dplyr::group_by(var_df_unique_slim_melted, .data$VAR_ID) %>%
+        dplyr::summarise(TCGALINK = unlist(paste(.data$tmp_assoc, collapse = ", ")),
                          .groups = "drop") %>%
-        dplyr::select(VAR_ID, TCGALINK) %>%
+        dplyr::select(.data$VAR_ID, .data$TCGALINK) %>%
         magrittr::set_colnames(c("VAR_ID", "TCGA_FREQUENCY"))
-      var_df <- dplyr::rename(var_df, TCGA_FREQUENCY_RAW = TCGA_FREQUENCY)
+      var_df <- dplyr::rename(var_df, TCGA_FREQUENCY_RAW = .data$TCGA_FREQUENCY)
       var_df <- dplyr::left_join(var_df, var_df_links,
                                  by = c("VAR_ID" = "VAR_ID"))
     }
@@ -466,6 +476,7 @@ append_tcga_var_link <- function(var_df, pcgr_data = NULL,
 }
 
 
+#' @export
 append_tfbs_annotation <-
   function(var_df){
 
@@ -475,15 +486,15 @@ append_tfbs_annotation <-
         !is.null(pcgr_data)) {
 
 
-      pcgrr:::log4r_info("Adding TF binding site annotations for upstream and 5'UTR variants - VEP regulatory")
+      log4r_info("Adding TF binding site annotations for upstream and 5'UTR variants - VEP regulatory")
 
       var_df_unique_slim <-
-        dplyr::select(var_df, VAR_ID,
-                      REGULATORY_ANNOTATION,
-                      CONSEQUENCE) %>%
-        dplyr::filter(!is.na(REGULATORY_ANNOTATION) &
+        dplyr::select(var_df, .data$VAR_ID,
+                      .data$REGULATORY_ANNOTATION,
+                      .data$CONSEQUENCE) %>%
+        dplyr::filter(!is.na(.data$REGULATORY_ANNOTATION) &
                         stringr::str_detect(
-                          CONSEQUENCE,
+                          .data$CONSEQUENCE,
                           "5_prime|upstream"
                         )) %>%
         dplyr::distinct()
@@ -491,16 +502,16 @@ append_tfbs_annotation <-
       if(nrow(var_df_unique_slim) > 0){
         var_df_unique_slim_melted <- as.data.frame(
           var_df_unique_slim %>%
-          tidyr::separate_rows(REGULATORY_ANNOTATION, sep=",") %>%
+          tidyr::separate_rows(.data$REGULATORY_ANNOTATION, sep=",") %>%
           dplyr::filter(
             stringr::str_detect(
-              REGULATORY_ANNOTATION, "TF_binding_site_variant"
+              .data$REGULATORY_ANNOTATION, "TF_binding_site_variant"
             ))
         )
 
         if(nrow(var_df_unique_slim_melted) > 0){
 
-          pcgrr:::log4r_info(paste0(
+          log4r_info(paste0(
             "Found TF binding site annotations for ",
             nrow(var_df_unique_slim)," variants"))
 
@@ -508,43 +519,43 @@ append_tfbs_annotation <-
             var_df_unique_slim_melted %>%
               dplyr::mutate(
                 REGULATORY_ANNOTATION = stringr::str_replace(
-                  REGULATORY_ANNOTATION,
+                  .data$REGULATORY_ANNOTATION,
                   "TF_binding_site_variant\\|MotifFeature\\|ENSM0[0-9]{1,}\\|",
                   "")
               ) %>%
-              tidyr::separate(REGULATORY_ANNOTATION,
+              tidyr::separate(.data$REGULATORY_ANNOTATION,
                               into = c('cons','matrix','motif_pos',
                                        'high_inf_pos','motif_score_change',
                                        'transcription_factors'),
                               sep = "\\|",
                               remove = T) %>%
 
-              tidyr::separate_rows(transcription_factors) %>%
+              tidyr::separate_rows(.data$transcription_factors) %>%
               dplyr::mutate(
                 TF_BINDING_SITE_VARIANT = dplyr::case_when(
-                  high_inf_pos == "N" ~ "Overlap: non-critical motif position",
-                  high_inf_pos == "Y" ~ "Overlap: critical motif position",
+                  .data$high_inf_pos == "N" ~ "Overlap: non-critical motif position",
+                  .data$high_inf_pos == "Y" ~ "Overlap: critical motif position",
                   TRUE ~ as.character(NA)
                 )
               ) %>%
               dplyr::mutate(
                 TF_BINDING_SITE_VARIANT_INFO =
-                  paste(transcription_factors, matrix,
-                         motif_pos, motif_score_change,
-                         high_inf_pos,sep="|")
+                  paste(.data$transcription_factors, .data$matrix,
+                         .data$motif_pos, .data$motif_score_change,
+                         .data$high_inf_pos, sep="|")
               )
           )
 
-          var_df_links <- dplyr::group_by(var_df_unique_slim_melted, VAR_ID) %>%
+          var_df_links <- dplyr::group_by(var_df_unique_slim_melted, .data$VAR_ID) %>%
             dplyr::summarise(
-              TF_BINDING_SITE_VARIANT = paste(unique(sort(TF_BINDING_SITE_VARIANT)),
+              TF_BINDING_SITE_VARIANT = paste(unique(sort(.data$TF_BINDING_SITE_VARIANT)),
                                                   collapse = ", "),
               TF_BINDING_SITE_VARIANT_INFO = paste(unique(
-                TF_BINDING_SITE_VARIANT_INFO),
+                .data$TF_BINDING_SITE_VARIANT_INFO),
                 collapse = ", "),
               .groups = "drop") %>%
-            dplyr::select(VAR_ID, TF_BINDING_SITE_VARIANT,
-                          TF_BINDING_SITE_VARIANT_INFO)
+            dplyr::select(.data$VAR_ID, .data$TF_BINDING_SITE_VARIANT,
+                          .data$TF_BINDING_SITE_VARIANT_INFO)
 
           var_df <- dplyr::left_join(var_df, var_df_links,
                                      by = c("VAR_ID" = "VAR_ID"))
@@ -567,6 +578,7 @@ append_tfbs_annotation <-
 #' @param linktype type of link
 #' @param pcgr_data PCGR data structure
 #'
+#' @export
 append_dbmts_var_link <-
   function(var_df) {
 
@@ -576,34 +588,34 @@ append_dbmts_var_link <-
         any(grepl(paste0("^ENSEMBL_TRANSCRIPT_ID$"), names(var_df))) &
         !is.null(pcgr_data)) {
 
-      pcgrr:::log4r_info("Adding miRNA target site annotations (gain/loss) - dbMTS")
+      log4r_info("Adding miRNA target site annotations (gain/loss) - dbMTS")
 
       var_df_unique_slim <-
-        dplyr::select(var_df, VAR_ID, CLINVAR_CLASSIFICATION,
-                      DBMTS, ENSEMBL_TRANSCRIPT_ID) %>%
-        dplyr::filter(!is.na(DBMTS) & !is.na(ENSEMBL_TRANSCRIPT_ID)) %>%
+        dplyr::select(var_df, .data$VAR_ID, .data$CLINVAR_CLASSIFICATION,
+                      .data$DBMTS, .data$ENSEMBL_TRANSCRIPT_ID) %>%
+        dplyr::filter(!is.na(.data$DBMTS) & !is.na(.data$ENSEMBL_TRANSCRIPT_ID)) %>%
         dplyr::distinct()
       if (nrow(var_df_unique_slim) > 0) {
 
-        pcgrr:::log4r_info(paste0(
+        log4r_info(paste0(
           "Found miRNA target site annotations for ",
           nrow(var_df_unique_slim)," variants"))
 
         var_df_unique_slim_melted <- as.data.frame(
           var_df_unique_slim %>%
-            tidyr::separate_rows(DBMTS, sep = ",") %>%
-            tidyr::separate(DBMTS, c("ens_trans_id", "mirna_id",
+            tidyr::separate_rows(.data$DBMTS, sep = ",") %>%
+            tidyr::separate(.data$DBMTS, c("ens_trans_id", "mirna_id",
                                      "algorithms", "algorithms_call",
                                      "consensus_call"),
                             sep = "\\|", convert = T) %>%
-            dplyr::filter(ens_trans_id == ENSEMBL_TRANSCRIPT_ID)
+            dplyr::filter(.data$ens_trans_id == .data$ENSEMBL_TRANSCRIPT_ID)
         )
         if(nrow(var_df_unique_slim_melted) > 0){
           var_df_unique_slim_melted <- var_df_unique_slim_melted %>%
-            dplyr::select(-c(ENSEMBL_TRANSCRIPT_ID, algorithms_call)) %>%
+            dplyr::select(-c(.data$ENSEMBL_TRANSCRIPT_ID, .data$algorithms_call)) %>%
             dplyr::mutate(miRNA_TARGET_HIT = dplyr::case_when(
-              consensus_call == "G" ~ "gain",
-              consensus_call == "L" ~ "loss",
+              .data$consensus_call == "G" ~ "gain",
+              .data$consensus_call == "L" ~ "loss",
               TRUE ~ as.character(NA)
             )) %>%
             dplyr::mutate(
@@ -611,7 +623,7 @@ append_dbmts_var_link <-
                 stringr::str_replace(
                   stringr::str_replace(
                     stringr::str_replace(
-                      algorithms, "R","RNAHybrid"),
+                      .data$algorithms, "R","RNAHybrid"),
                     "TS","TargetScan"),
                   "M","miRanda"),
                 "&"," / ")
@@ -619,19 +631,19 @@ append_dbmts_var_link <-
             dplyr::mutate(
               miRNA_TARGET_HIT_PREDICTION =
                 paste0("<a href='http://www.mirbase.org/cgi-bin/mirna_entry.pl?id",
-                       "=",mirna_id,"' target='_blank'>",mirna_id,"</a> - ", miRNA_TARGET_HIT,
-                       " (",algorithms,")")
+                       "=",.data$mirna_id,"' target='_blank'>",.data$mirna_id,"</a> - ", .data$miRNA_TARGET_HIT,
+                       " (",.data$algorithms,")")
             )
 
 
-          var_df_links <- dplyr::group_by(var_df_unique_slim_melted, VAR_ID) %>%
+          var_df_links <- dplyr::group_by(var_df_unique_slim_melted, .data$VAR_ID) %>%
             dplyr::summarise(
-              miRNA_TARGET_HIT_PREDICTION = paste(miRNA_TARGET_HIT_PREDICTION,
+              miRNA_TARGET_HIT_PREDICTION = paste(.data$miRNA_TARGET_HIT_PREDICTION,
                                                   collapse = ", "),
-              miRNA_TARGET_HIT = paste(unique(miRNA_TARGET_HIT),
+              miRNA_TARGET_HIT = paste(unique(.data$miRNA_TARGET_HIT),
                                        collapse = ", "),
               .groups = "drop") %>%
-            dplyr::select(VAR_ID, miRNA_TARGET_HIT, miRNA_TARGET_HIT_PREDICTION)
+            dplyr::select(.data$VAR_ID, .data$miRNA_TARGET_HIT, .data$miRNA_TARGET_HIT_PREDICTION)
 
           var_df <- dplyr::left_join(var_df, var_df_links,
                                      by = c("VAR_ID" = "VAR_ID"))
@@ -649,13 +661,14 @@ append_dbmts_var_link <-
   }
 
 
+#' @export
 append_dbnsfp_var_link <- function(var_df, linktype = "dbsource") {
 
-  pcgrr:::log4r_info("Adding annotation links - dbNSFP")
+  log4r_info("Adding annotation links - dbNSFP")
 
   if (any(grepl(paste0("EFFECT_PREDICTIONS"), names(var_df)))) {
     var_df <- var_df %>%
-      dplyr::mutate(PREDICTED_EFFECT = EFFECT_PREDICTIONS)
+      dplyr::mutate(PREDICTED_EFFECT = .data$EFFECT_PREDICTIONS)
     i <- 1
     while (i <= nrow(pcgrr::effect_prediction_algos)) {
       str_to_replace <-
@@ -669,7 +682,7 @@ append_dbnsfp_var_link <- function(var_df, linktype = "dbsource") {
       var_df <- var_df %>%
         dplyr::mutate(
           PREDICTED_EFFECT =
-            stringr::str_replace(PREDICTED_EFFECT,
+            stringr::str_replace(.data$PREDICTED_EFFECT,
                                  str_to_replace, replacement_str))
       i <- i + 1
     }
@@ -687,32 +700,33 @@ append_dbnsfp_var_link <- function(var_df, linktype = "dbsource") {
 #' @param linktype type of link
 #' @param pcgr_data PCGR data structure
 #'
+#' @export
 append_drug_var_link <- function(var_df, pcgr_data = NULL,
                              linktype = "dbsource") {
 
-  pcgrr:::log4r_info("Adding annotation links - targeted cancer drugs")
+  log4r_info("Adding annotation links - targeted cancer drugs")
 
   if (any(grepl(paste0("^CHEMBL_COMPOUND_ID$"), names(var_df))) &
       any(grepl(paste0("^SYMBOL$"), names(var_df))) &
       any(grepl(paste0("^VAR_ID$"), names(var_df))) &
       !is.null(pcgr_data)) {
-    var_df_unique_slim <- dplyr::select(var_df, VAR_ID,
-                                        SYMBOL, CHEMBL_COMPOUND_ID) %>%
-      dplyr::filter(!is.na(CHEMBL_COMPOUND_ID)) %>%
+    var_df_unique_slim <- dplyr::select(var_df, .data$VAR_ID,
+                                        .data$SYMBOL, .data$CHEMBL_COMPOUND_ID) %>%
+      dplyr::filter(!is.na(.data$CHEMBL_COMPOUND_ID)) %>%
       dplyr::distinct()
     if (nrow(var_df_unique_slim) > 0) {
       var_df_unique_slim_melted <- var_df_unique_slim %>%
-        tidyr::separate_rows(CHEMBL_COMPOUND_ID, sep = "&")
+        tidyr::separate_rows(.data$CHEMBL_COMPOUND_ID, sep = "&")
       chembl_drugs <-
         dplyr::select(pcgr_data[["antineopharma"]][["antineopharma"]],
-                      molecule_chembl_id, symbol, nci_concept_display_name) %>%
-        dplyr::arrange(symbol) %>%
+                      .data$molecule_chembl_id, .data$symbol, .data$nci_concept_display_name) %>%
+        dplyr::arrange(.data$symbol) %>%
         dplyr::distinct()
       var_df_unique_slim_melted <- var_df_unique_slim_melted %>%
         dplyr::left_join(chembl_drugs,
                          by = c("CHEMBL_COMPOUND_ID" = "molecule_chembl_id",
                                               "SYMBOL" = "symbol")) %>%
-        dplyr::filter(!is.na(nci_concept_display_name)) %>%
+        dplyr::filter(!is.na(.data$nci_concept_display_name)) %>%
         dplyr::distinct()
       if (nrow(var_df_unique_slim_melted) > 0) {
         if (linktype == "dbsource") {
@@ -722,21 +736,21 @@ append_drug_var_link <- function(var_df, pcgr_data = NULL,
               tmp_antineopharma =
                 paste0(
                   "<a href='https://www.targetvalidation.org/summary?drug=",
-                  CHEMBL_COMPOUND_ID, "' target=\"_blank\">",
-                  nci_concept_display_name, "</a>"))
+                  .data$CHEMBL_COMPOUND_ID, "' target=\"_blank\">",
+                  .data$nci_concept_display_name, "</a>"))
         }
         var_df_unique_slim_melted_terms <-
           dplyr::select(var_df_unique_slim_melted,
-                        VAR_ID, nci_concept_display_name)
+                        .data$VAR_ID, .data$nci_concept_display_name)
         var_df_terms <- dplyr::group_by(var_df_unique_slim_melted_terms,
-                                        VAR_ID) %>%
+                                        .data$VAR_ID) %>%
           dplyr::summarise(CHEMBL_COMPOUND_TERMS =
-                             paste(nci_concept_display_name, collapse = ", "))
-        var_df_links <- dplyr::group_by(var_df_unique_slim_melted, VAR_ID) %>%
+                             paste(.data$nci_concept_display_name, collapse = ", "))
+        var_df_links <- dplyr::group_by(var_df_unique_slim_melted, .data$VAR_ID) %>%
           dplyr::summarise(ANTINEOPHARMALINK =
-                             unlist(paste(tmp_antineopharma,
+                             unlist(paste(.data$tmp_antineopharma,
                                           collapse = ", "))) %>%
-          dplyr::select(VAR_ID, ANTINEOPHARMALINK) %>%
+          dplyr::select(.data$VAR_ID, .data$ANTINEOPHARMALINK) %>%
           dplyr::distinct()
         var_df <- dplyr::left_join(var_df, var_df_links,
                                    by = c("VAR_ID" = "VAR_ID"))
@@ -768,12 +782,13 @@ append_drug_var_link <- function(var_df, pcgr_data = NULL,
 #' @param pcgr_data PCGR data structure
 #' @param oncotree Oncotree data frame
 #'
+#' @export
 append_otargets_pheno_link <- function(var_df,
                                        pcgr_data = NULL,
                                        oncotree = NULL,
                                        linktype = "dbsource") {
 
-  pcgrr:::log4r_info(paste0("Adding annotation links - gene-cancer ",
+  log4r_info(paste0("Adding annotation links - gene-cancer ",
                            "type associations (OpenTargets Platform)"))
 
   assertable::assert_colnames(oncotree, c("cui", "efo_id"),
@@ -782,36 +797,36 @@ append_otargets_pheno_link <- function(var_df,
   if (any(grepl(paste0("^OPENTARGETS_DISEASE_ASSOCS$"), names(var_df))) &
       any(grepl(paste0("^ENSEMBL_GENE_ID$"), names(var_df))) &
       !is.null(pcgr_data) & nrow(oncotree) > 0) {
-    var_df_unique_slim <- dplyr::select(var_df, ENSEMBL_GENE_ID,
-                                        OPENTARGETS_DISEASE_ASSOCS) %>%
-      dplyr::filter(!is.na(OPENTARGETS_DISEASE_ASSOCS)) %>%
+    var_df_unique_slim <- dplyr::select(var_df, .data$ENSEMBL_GENE_ID,
+                                        .data$OPENTARGETS_DISEASE_ASSOCS) %>%
+      dplyr::filter(!is.na(.data$OPENTARGETS_DISEASE_ASSOCS)) %>%
       dplyr::distinct()
     associations_found <- 0
     oncotree <- oncotree %>%
-      dplyr::filter(!is.na(efo_id)) %>%
-      dplyr::mutate(efo_id = stringr::str_replace(efo_id,":", "_"))
+      dplyr::filter(!is.na(.data$efo_id)) %>%
+      dplyr::mutate(efo_id = stringr::str_replace(.data$efo_id,":", "_"))
     if (nrow(var_df_unique_slim) > 0) {
       var_df_unique_slim_melted <- as.data.frame(
         var_df_unique_slim %>%
-          tidyr::separate_rows(OPENTARGETS_DISEASE_ASSOCS, sep = "&") %>%
-          tidyr::separate(OPENTARGETS_DISEASE_ASSOCS,
+          tidyr::separate_rows(.data$OPENTARGETS_DISEASE_ASSOCS, sep = "&") %>%
+          tidyr::separate(.data$OPENTARGETS_DISEASE_ASSOCS,
                           c("efo_id", "ot_is_direct", "ot_score"),
                           sep = ":", remove = T) %>%
-          dplyr::inner_join(dplyr::select(oncotree, efo_id, cui),
+          dplyr::inner_join(dplyr::select(oncotree, .data$efo_id, .data$cui),
                             by = c("efo_id" = "efo_id")) %>%
           dplyr::left_join(pcgr_data[["phenotype_ontology"]][["umls"]],
                            by = c("cui" = "cui")) %>%
-          dplyr::mutate(ot_score = as.numeric(ot_score))
+          dplyr::mutate(ot_score = as.numeric(.data$ot_score))
       )
 
       if (nrow(var_df_unique_slim_melted) > 0) {
         associations_found <- 1
         var_df_unique_slim_melted <- as.data.frame(
           var_df_unique_slim_melted %>%
-            dplyr::group_by(ENSEMBL_GENE_ID, efo_id, cui_name) %>%
-            dplyr::summarise(score = max(ot_score, na.rm = T)) %>%
+            dplyr::group_by(.data$ENSEMBL_GENE_ID, .data$efo_id, .data$cui_name) %>%
+            dplyr::summarise(score = max(.data$ot_score, na.rm = T)) %>%
             dplyr::distinct() %>%
-            dplyr::arrange(desc(score))
+            dplyr::arrange(dplyr::desc(.data$score))
         )
 
         if (linktype == "dbsource") {
@@ -820,49 +835,49 @@ append_otargets_pheno_link <- function(var_df,
             dplyr::mutate(
               tmp_assoc =
                 paste0("<a href='https://www.targetvalidation.org/evidence/",
-                       ENSEMBL_GENE_ID, "/", efo_id, "' target=\"_blank\">",
-                       cui_name, "</a>"))
+                       .data$ENSEMBL_GENE_ID, "/", .data$efo_id, "' target=\"_blank\">",
+                       .data$cui_name, "</a>"))
         }
 
         var_df_unique_slim_melted_terms <-
-          dplyr::select(var_df_unique_slim_melted, ENSEMBL_GENE_ID, cui_name)
+          dplyr::select(var_df_unique_slim_melted, .data$ENSEMBL_GENE_ID, .data$cui_name)
         var_df_terms <- dplyr::group_by(
-          var_df_unique_slim_melted_terms, ENSEMBL_GENE_ID) %>%
-          dplyr::summarise(OT_DISEASE_TERMS = paste(cui_name, collapse = "&"))
+          var_df_unique_slim_melted_terms, .data$ENSEMBL_GENE_ID) %>%
+          dplyr::summarise(OT_DISEASE_TERMS = paste(.data$cui_name, collapse = "&"))
         var_df_links <-
-          dplyr::group_by(var_df_unique_slim_melted, ENSEMBL_GENE_ID) %>%
-          dplyr::summarise(OT_DISEASE_LINK = unlist(paste(tmp_assoc,
+          dplyr::group_by(var_df_unique_slim_melted, .data$ENSEMBL_GENE_ID) %>%
+          dplyr::summarise(OT_DISEASE_LINK = unlist(paste(.data$tmp_assoc,
                                                           collapse = ", ")),
-                           OPENTARGETS_RANK = max(score))
+                           OPENTARGETS_RANK = max(.data$score))
         var_df_links <- dplyr::select(var_df_links,
-                                      ENSEMBL_GENE_ID,
-                                      OT_DISEASE_LINK,
-                                      OPENTARGETS_RANK)
+                                      .data$ENSEMBL_GENE_ID,
+                                      .data$OT_DISEASE_LINK,
+                                      .data$OPENTARGETS_RANK)
         var_df <- dplyr::left_join(
           var_df, var_df_links, by = c("ENSEMBL_GENE_ID" = "ENSEMBL_GENE_ID"))
         var_df <- dplyr::left_join(
           var_df, var_df_terms, by = c("ENSEMBL_GENE_ID" = "ENSEMBL_GENE_ID"))
         var_df <- var_df %>%
           dplyr::mutate(OPENTARGETS_RANK =
-                          dplyr::if_else(is.na(OPENTARGETS_RANK),
-                                         as.numeric(0), OPENTARGETS_RANK))
+                          dplyr::if_else(is.na(.data$OPENTARGETS_RANK),
+                                         as.numeric(0), .data$OPENTARGETS_RANK))
 
       }else{
-        pcgrr:::log4r_warn(paste0("Could not generate Open Targets association links"))
+        log4r_warn(paste0("Could not generate Open Targets association links"))
         var_df$OT_DISEASE_LINK <- NA
         var_df$OT_DISEASE_TERMS <- NA
         var_df$OPENTARGETS_RANK <- 0
       }
     }else{
       if (associations_found == 0) {
-        pcgrr:::log4r_warn(paste0("Could not generate Open Targets association links"))
+        log4r_warn(paste0("Could not generate Open Targets association links"))
         var_df$OT_DISEASE_LINK <- NA
         var_df$OT_DISEASE_TERMS <- NA
         var_df$OPENTARGETS_RANK <- 0
       }
     }
   }else{
-    pcgrr:::log4r_warn(paste0("Could not generate Open Targets association ", "
+    log4r_warn(paste0("Could not generate Open Targets association ", "
                              links - no Open Targets annotations provided ", "
                              in annotated VCF"))
     var_df$OT_DISEASE_LINK <- NA
@@ -879,10 +894,10 @@ append_otargets_pheno_link <- function(var_df,
 #' @param feature_descriptions Data frame with SwissProt feature descriptions
 #' @return vcf_data_df
 #'
-#'
+#' @export
 append_pfeature_descriptions <- function(vcf_data_df, feature_descriptions) {
 
-  pcgrr:::log4r_info(paste0("Extending annotation descriptions related",
+  log4r_info(paste0("Extending annotation descriptions related",
                     " to UniprotKB/SwissProt protein features"))
 
 
@@ -901,9 +916,9 @@ append_pfeature_descriptions <- function(vcf_data_df, feature_descriptions) {
     c("UNIPROT_FEATURE", "PF", "UNIPROT_ID"),
     only_colnames = T, quiet = T)
 
-  feature_df <- dplyr::select(vcf_data_df, UNIPROT_FEATURE,
-                              VAR_ID, CONSEQUENCE, UNIPROT_ID) %>%
-    dplyr::filter(!is.na(UNIPROT_FEATURE) & !is.na(UNIPROT_ID)) %>%
+  feature_df <- dplyr::select(vcf_data_df, .data$UNIPROT_FEATURE,
+                              .data$VAR_ID, .data$CONSEQUENCE, .data$UNIPROT_ID) %>%
+    dplyr::filter(!is.na(.data$UNIPROT_FEATURE) & !is.na(.data$UNIPROT_ID)) %>%
     dplyr::distinct()
   if (nrow(feature_df) == 0) {
     vcf_data_df$PROTEIN_FEATURE <- NA
@@ -911,34 +926,34 @@ append_pfeature_descriptions <- function(vcf_data_df, feature_descriptions) {
   }
   feature_df <- as.data.frame(
     feature_df %>%
-      tidyr::separate_rows(UNIPROT_FEATURE, sep = "&") %>%
-      tidyr::separate_rows(UNIPROT_FEATURE, sep = ",") %>%
+      tidyr::separate_rows(.data$UNIPROT_FEATURE, sep = "&") %>%
+      tidyr::separate_rows(.data$UNIPROT_FEATURE, sep = ",") %>%
       dplyr::left_join(
-        dplyr::select(feature_descriptions, UNIPROT_FEATURE, UNIPROT_ID, PF),
+        dplyr::select(feature_descriptions, .data$UNIPROT_FEATURE, .data$UNIPROT_ID, .data$PF),
         by = c("UNIPROT_FEATURE", "UNIPROT_ID")
       ) %>%
-      dplyr::filter(!is.na(PF)) %>%
-      dplyr::group_by(VAR_ID, CONSEQUENCE) %>%
-      dplyr::summarise(PROTEIN_FEATURE = paste(PF, collapse = ", ")) %>%
+      dplyr::filter(!is.na(.data$PF)) %>%
+      dplyr::group_by(.data$VAR_ID, .data$CONSEQUENCE) %>%
+      dplyr::summarise(PROTEIN_FEATURE = paste(.data$PF, collapse = ", ")) %>%
       dplyr::ungroup() %>%
       dplyr::mutate(
         PROTEIN_FEATURE =
-          dplyr::if_else(PROTEIN_FEATURE == "NA",
+          dplyr::if_else(.data$PROTEIN_FEATURE == "NA",
                          as.character(NA),
-                         as.character(PROTEIN_FEATURE))) %>%
+                         as.character(.data$PROTEIN_FEATURE))) %>%
       dplyr::mutate(
         PROTEIN_FEATURE =
           dplyr::if_else(
-            !is.na(PROTEIN_FEATURE) &
-              !stringr::str_detect(CONSEQUENCE,
+            !is.na(.data$PROTEIN_FEATURE) &
+              !stringr::str_detect(.data$CONSEQUENCE,
                                    "^(synonymous|missense|stop|start)"),
             as.character(NA),
-            as.character(PROTEIN_FEATURE))) %>%
-      dplyr::filter(!is.na(PROTEIN_FEATURE))
+            as.character(.data$PROTEIN_FEATURE))) %>%
+      dplyr::filter(!is.na(.data$PROTEIN_FEATURE))
   )
 
   if (nrow(feature_df) > 0) {
-    vcf_data_df <- dplyr::select(vcf_data_df, -UNIPROT_FEATURE) %>%
+    vcf_data_df <- dplyr::select(vcf_data_df, -.data$UNIPROT_FEATURE) %>%
       dplyr::left_join(feature_df, by = c("VAR_ID", "CONSEQUENCE"))
   }
   else{
@@ -958,13 +973,13 @@ append_pfeature_descriptions <- function(vcf_data_df, feature_descriptions) {
 #'
 #' @return vcf_data_df
 #'
-#'
+#' @export
 append_gwas_citation_phenotype <-
   function(vcf_data_df, gwas_citations_phenotypes, p_value_threshold = 1e-6) {
 
     gwas_citations_phenotypes <- gwas_citations_phenotypes %>%
-      dplyr::filter(p_value_num <= p_value_threshold)
-    pcgrr:::log4r_info(paste0("Adding citations/phenotypes underlying ",
+      dplyr::filter(.data$p_value_num <= .data$p_value_threshold)
+    log4r_info(paste0("Adding citations/phenotypes underlying ",
                       "GWAS hits (NHGRI-EBI GWAS Catalog)"))
 
     invisible(assertthat::assert_that(
@@ -990,8 +1005,8 @@ append_gwas_citation_phenotype <-
 
   if ("GWAS_HIT" %in% colnames(vcf_data_df) &
       "VAR_ID" %in% colnames(vcf_data_df)) {
-    feature_df <- dplyr::select(vcf_data_df, GWAS_HIT, VAR_ID) %>%
-      dplyr::filter(!is.na(GWAS_HIT)) %>%
+    feature_df <- dplyr::select(vcf_data_df, .data$GWAS_HIT, .data$VAR_ID) %>%
+      dplyr::filter(!is.na(.data$GWAS_HIT)) %>%
       dplyr::distinct()
     if (nrow(feature_df) == 0) {
       vcf_data_df$GWAS_CITATION <- NA
@@ -1002,34 +1017,34 @@ append_gwas_citation_phenotype <-
 
     feature_df <- as.data.frame(
       feature_df %>%
-        tidyr::separate_rows(GWAS_HIT, sep = ",") %>%
-        tidyr::separate(GWAS_HIT,
+        tidyr::separate_rows(.data$GWAS_HIT, sep = ",") %>%
+        tidyr::separate(.data$GWAS_HIT,
                         into = c("rsid", "risk_allele", "pmid",
                                  "tagsnp", "p_value", "efo_id"),
                         sep = "\\|", remove = F) %>%
-        dplyr::mutate(gwas_key = paste(rsid, efo_id, pmid, sep = "_")) %>%
+        dplyr::mutate(gwas_key = paste(.data$rsid, .data$efo_id, .data$pmid, sep = "_")) %>%
         dplyr::left_join(dplyr::select(gwas_citations_phenotypes,
-                                       gwas_key, GWAS_PH, GWAS_CIT),
+                                       .data$gwas_key, .data$GWAS_PH, .data$GWAS_CIT),
                          by = c("gwas_key")) %>%
-        dplyr::filter(!is.na(GWAS_CIT)) %>%
-        dplyr::group_by(VAR_ID) %>%
-        dplyr::summarise(GWAS_PHENOTYPE = paste(unique(GWAS_PH),
+        dplyr::filter(!is.na(.data$GWAS_CIT)) %>%
+        dplyr::group_by(.data$VAR_ID) %>%
+        dplyr::summarise(GWAS_PHENOTYPE = paste(unique(.data$GWAS_PH),
                                                 collapse = "; "),
-                         GWAS_CITATION = paste(unique(GWAS_CIT),
+                         GWAS_CITATION = paste(unique(.data$GWAS_CIT),
                                                collapse = "; ")) %>%
         dplyr::mutate(GWAS_CITATION =
-                        dplyr::if_else(GWAS_CITATION == "NA",
+                        dplyr::if_else(.data$GWAS_CITATION == "NA",
                                        as.character(NA),
-                                       as.character(GWAS_CITATION))) %>%
+                                       as.character(.data$GWAS_CITATION))) %>%
         dplyr::mutate(GWAS_PHENOTYPE =
-                        dplyr::if_else(GWAS_PHENOTYPE == "NA",
+                        dplyr::if_else(.data$GWAS_PHENOTYPE == "NA",
                                        as.character(NA),
-                                       as.character(GWAS_PHENOTYPE))) %>%
-        dplyr::filter(!is.na(GWAS_CITATION) & !is.na(GWAS_PHENOTYPE))
+                                       as.character(.data$GWAS_PHENOTYPE))) %>%
+        dplyr::filter(!is.na(.data$GWAS_CITATION) & !is.na(.data$GWAS_PHENOTYPE))
     )
     if (nrow(feature_df) > 0) {
 
-      pcgrr:::log4r_info(paste0(
+      log4r_info(paste0(
         "Found n = ",
         nrow(feature_df),
         " variants associated with genome-wide association studies"))
@@ -1059,16 +1074,17 @@ append_gwas_citation_phenotype <-
 #'
 #' @return vcf_df
 #'
+#' @export
 filter_read_support <- function(vcf_df, config = NULL, precision = 3) {
 
-  pcgrr:::log4r_info(paste0(
+  log4r_info(paste0(
     paste0("Filtering tumor variants based on allelic depth/fraction (min_dp_tumor=",
     config$allelic_support$tumor_dp_min,
     ", min_af_tumor=",
     config$allelic_support$tumor_af_min, ")"))
   )
 
-  pcgrr:::log4r_info(paste0(
+  log4r_info(paste0(
     "Filtering tumor variants based on allelic depth/fraction (min_dp_control=",
     config$allelic_support$control_dp_min,
     ", max_af_control=",
@@ -1077,24 +1093,24 @@ filter_read_support <- function(vcf_df, config = NULL, precision = 3) {
   n_before_dp_af_filtering <- nrow(vcf_df)
   if (!any(is.na(vcf_df$DP_TUMOR))) {
     vcf_df <- dplyr::filter(vcf_df,
-                            DP_TUMOR >= config$allelic_support$tumor_dp_min)
+                            .data$DP_TUMOR >= config$allelic_support$tumor_dp_min)
   }
   if (!any(is.na(vcf_df$AF_TUMOR))) {
     vcf_df <- dplyr::filter(vcf_df,
-                            AF_TUMOR >= config$allelic_support$tumor_af_min)
+                            .data$AF_TUMOR >= config$allelic_support$tumor_af_min)
   }
   if (!any(is.na(vcf_df$AF_CONTROL))) {
     vcf_df <- dplyr::filter(vcf_df,
-                            AF_CONTROL <= config$allelic_support$control_af_max)
+                            .data$AF_CONTROL <= config$allelic_support$control_af_max)
   }
   if (!any(is.na(vcf_df$DP_CONTROL))) {
     vcf_df <- dplyr::filter(vcf_df,
-                            DP_CONTROL >= config$allelic_support$control_dp_min)
+                            .data$DP_CONTROL >= config$allelic_support$control_dp_min)
   }
   n_removed <- n_before_dp_af_filtering - nrow(vcf_df)
   percentage <- round(as.numeric((n_removed / n_before_dp_af_filtering) * 100),
                       digits = 2)
-  pcgrr:::log4r_info(
+  log4r_info(
     paste0("Removed ", n_removed,
            " tumor variants (", percentage,
            "%) based on thresholds for allelic depth/fraction"
@@ -1116,7 +1132,7 @@ filter_read_support <- function(vcf_df, config = NULL, precision = 3) {
 #' @param link_display_var variable used in url for display
 #' @return df_annotation_links
 #'
-
+#' @export
 generate_annotation_link <- function(
   df,
   vardb = "DBSNP",
@@ -1163,8 +1179,8 @@ generate_annotation_link <- function(
       if (nrow(df_annotation_links) > 0) {
         df_annotation_links <- as.data.frame(
           df_annotation_links %>%
-            dplyr::group_by(VAR_ID) %>%
-            dplyr::summarise(link = unlist(paste(tmp_link, collapse = ", ")),
+            dplyr::group_by(.data$VAR_ID) %>%
+            dplyr::summarise(link = unlist(paste(.data$tmp_link, collapse = ", ")),
                              .groups = "drop")
         )
       }
@@ -1185,6 +1201,7 @@ generate_annotation_link <- function(
 #'
 #' @return vcf_df
 #'
+#' @export
 determine_genotype <- function(vcf_df) {
 
   invisible(assertthat::assert_that(
@@ -1208,11 +1225,12 @@ determine_genotype <- function(vcf_df) {
 }
 
 
+#' @export
 data_integrity_check <- function(vcf_df,
                                  pcgr_data,
                                  config = NULL,
                                  workflow = "pcgr") {
-  pcgrr:::log4r_info("Verifying data integrity of input callset")
+  log4r_info("Verifying data integrity of input callset")
 
   stopifnot(is.data.frame(vcf_df) & !is.null(pcgr_data))
   stopifnot(!is.null(pcgr_data[["annotation_tags"]][["vcf_cpsr"]]) &
@@ -1261,6 +1279,7 @@ data_integrity_check <- function(vcf_df,
   return(vcf_df)
 }
 
+#' @export
 recode_logical_vars <- function(vcf_data_df) {
   for (v in c("ONCOGENE", "TUMOR_SUPPRESSOR", "NETWORK_CG",
               "LAST_EXON", "LAST_INTRON", "PANEL_OF_NORMALS",
@@ -1276,6 +1295,7 @@ recode_logical_vars <- function(vcf_data_df) {
 
 }
 
+#' @export
 append_annotation_links <- function(vcf_data_df,
                                     pcgr_data = NULL, skip = NULL) {
   i <- 1
@@ -1283,7 +1303,7 @@ append_annotation_links <- function(vcf_data_df,
 
     name <- pcgrr::variant_db_url[i, ]$name
     if (!name %in% skip) {
-      pcgrr:::log4r_info(paste0("Adding annotation links - ", name))
+      log4r_info(paste0("Adding annotation links - ", name))
       group_by_var <- pcgrr::variant_db_url[i, ]$group_by_var
       url_prefix <- pcgrr::variant_db_url[i, ]$url_prefix
       link_key_var <- pcgrr::variant_db_url[i, ]$link_key_var
@@ -1326,6 +1346,7 @@ append_annotation_links <- function(vcf_data_df,
 #'
 #' @return vcf_data_df
 #'
+#' @export
 get_calls <- function(tsv_gz_file,
                       pcgr_data,
                       sample_name,
@@ -1339,7 +1360,7 @@ get_calls <- function(tsv_gz_file,
   invisible(assertthat::assert_that(
     !is.null(sample_name), msg = "Argument 'sample_name' cannot not be NULL"))
   invisible(assertthat::assert_that(
-    is(sample_name, "character"),
+    methods::is(sample_name, "character"),
     msg = paste0("Argument 'sample_name' must be of type 'character', not ",
                  class(sample_name))))
   invisible(assertthat::assert_that(
@@ -1353,7 +1374,7 @@ get_calls <- function(tsv_gz_file,
   invisible(assertthat::assert_that(
     !is.null(pcgr_data), msg = "Argument 'pcgr_data' cannot not be NULL"))
   invisible(assertthat::assert_that(
-    is(pcgr_data, "list"),
+    methods::is(pcgr_data, "list"),
     msg = paste0("Argument 'pcgr_data' must be of type list, not ",
                  class(pcgr_data))))
   invisible(
@@ -1361,14 +1382,14 @@ get_calls <- function(tsv_gz_file,
                             msg = "Argument 'config' cannot not be NULL"))
   invisible(
     assertthat::assert_that(
-      is(config, "list"),
+      methods::is(config, "list"),
       msg = paste0("Argument 'config' must be of type list, not ",
                    class(config)[2])))
   invisible(assertthat::assert_that(
     !is.null(oncotree), msg = "Argument 'oncotree' cannot not be NULL"))
 
   ## read VCF data
-  vcf_data_df <- read.table(gzfile(tsv_gz_file), skip = n_lines_skip,
+  vcf_data_df <- utils::read.table(gzfile(tsv_gz_file), skip = n_lines_skip,
                             sep = "\t", header = T, stringsAsFactors = F,
                             quote = "", comment.char = "",
                             na.strings = c("."))
@@ -1433,15 +1454,15 @@ get_calls <- function(tsv_gz_file,
     pcgrr::data_integrity_check(pcgr_data = pcgr_data,
                                 config = config,
                                 workflow = wflow) %>%
-    dplyr::mutate(GENOMIC_CHANGE = paste0(CHROM, ":g.", POS, REF, ">", ALT)) %>%
-    dplyr::mutate(VAR_ID = paste(CHROM, POS, REF, ALT, sep = "_")) %>%
+    dplyr::mutate(GENOMIC_CHANGE = paste0(.data$CHROM, ":g.", .data$POS, .data$REF, ">", .data$ALT)) %>%
+    dplyr::mutate(VAR_ID = paste(.data$CHROM, .data$POS, .data$REF, .data$ALT, sep = "_")) %>%
     pcgrr::detect_vcf_sample_name(cpsr = cpsr, sample_name = sample_name) %>%
     pcgrr::get_ordinary_chromosomes(chrom_var = "CHROM")
   if (nrow(vcf_data_df) == 0) return(vcf_data_df)
 
   vcf_data_df <- vcf_data_df %>%
     pcgrr::order_variants() %>%
-    dplyr::rename(CONSEQUENCE = Consequence)
+    dplyr::rename(CONSEQUENCE = .data$Consequence)
 
   ##
   if (cpsr == T) {
@@ -1449,14 +1470,14 @@ get_calls <- function(tsv_gz_file,
       vcf_data_df <- vcf_data_df %>%
         dplyr::mutate(
           LOSS_OF_FUNCTION = dplyr::if_else(
-            !is.na(LoF) & LoF == "HC",
+            !is.na(.data$LoF) & .data$LoF == "HC",
             TRUE, FALSE, FALSE)) %>%
         ## Ignore LoF predictions for missense variants (bug in LofTee?)
         dplyr::mutate(
           LOSS_OF_FUNCTION = dplyr::if_else(
-            !is.na(CONSEQUENCE) &
-              CONSEQUENCE == "missense_variant" &
-              LOSS_OF_FUNCTION == T, FALSE, LOSS_OF_FUNCTION))
+            !is.na(.data$CONSEQUENCE) &
+              .data$CONSEQUENCE == "missense_variant" &
+              .data$LOSS_OF_FUNCTION == T, FALSE, .data$LOSS_OF_FUNCTION))
     }
     ## Add GWAS annotations (phenotypes)
     if (!is.null(config[["gwas"]][["p_value_min"]])) {
@@ -1490,81 +1511,81 @@ get_calls <- function(tsv_gz_file,
       pcgrr::filter_read_support(config = config) %>%
       dplyr::mutate(
         PUTATIVE_DRIVER_MUTATION =
-          dplyr::if_else(!is.na(PUTATIVE_DRIVER_MUTATION),
+          dplyr::if_else(!is.na(.data$PUTATIVE_DRIVER_MUTATION),
                          TRUE, FALSE))
   }
 
   if (nrow(vcf_data_df) == 0) return(vcf_data_df)
 
   vcf_data_df <- vcf_data_df %>%
-    dplyr::mutate(SYMBOL = SYMBOL_ENTREZ) %>%
+    dplyr::mutate(SYMBOL = .data$SYMBOL_ENTREZ) %>%
     dplyr::mutate(
       CLINVAR_CONFLICTED = dplyr::case_when(
-        CLINVAR_CONFLICTED == "1" ~ TRUE,
-        CLINVAR_CONFLICTED == "0" ~ FALSE,
-        FALSE ~ as.logical(CLINVAR_CONFLICTED))) %>%
+        .data$CLINVAR_CONFLICTED == "1" ~ TRUE,
+        .data$CLINVAR_CONFLICTED == "0" ~ FALSE,
+        FALSE ~ as.logical(.data$CLINVAR_CONFLICTED))) %>%
     dplyr::mutate(
       GENOME_VERSION = pcgr_data[["assembly"]][["grch_name"]],
-      PROTEIN_CHANGE = HGVSp) %>%
+      PROTEIN_CHANGE = .data$HGVSp) %>%
     dplyr::mutate(
       PROTEIN_CHANGE = dplyr::if_else(
-        stringr::str_detect(PROTEIN_CHANGE, ":"),
-        stringr::str_split_fixed(PROTEIN_CHANGE, pattern = ":", 2)[, 2],
-        as.character(PROTEIN_CHANGE))) %>%
+        stringr::str_detect(.data$PROTEIN_CHANGE, ":"),
+        stringr::str_split_fixed(.data$PROTEIN_CHANGE, pattern = ":", 2)[, 2],
+        as.character(.data$PROTEIN_CHANGE))) %>%
     dplyr::mutate(
       PROTEIN_CHANGE = dplyr::if_else(
-        stringr::str_detect(PROTEIN_CHANGE, "^ENSP"),
+        stringr::str_detect(.data$PROTEIN_CHANGE, "^ENSP"),
         as.character(NA),
-        as.character(PROTEIN_CHANGE))) %>%
-    dplyr::mutate(CLINVAR_MSID = as.integer(CLINVAR_MSID)) %>%
-    dplyr::mutate(EXON = stringr::str_replace(EXON, "-[0-9]{1,}", "")) %>%
+        as.character(.data$PROTEIN_CHANGE))) %>%
+    dplyr::mutate(CLINVAR_MSID = as.integer(.data$CLINVAR_MSID)) %>%
+    dplyr::mutate(EXON = stringr::str_replace(.data$EXON, "-[0-9]{1,}", "")) %>%
     dplyr::mutate(
       EXON = dplyr::if_else(
-        !is.na(EXON) & stringr::str_detect(EXON, "^([0-9]{1,}/[0-9]{1,})$"),
-        as.integer(stringr::str_split_fixed(EXON, "/", 2)[, 1]),
+        !is.na(.data$EXON) & stringr::str_detect(.data$EXON, "^([0-9]{1,}/[0-9]{1,})$"),
+        as.integer(stringr::str_split_fixed(.data$EXON, "/", 2)[, 1]),
         as.integer(NA))) %>%
     pcgrr::append_pfeature_descriptions(
       feature_descriptions =
         pcgr_data[["protein_features"]][["swissprot"]]) %>%
     dplyr::mutate(
       PFAM_DOMAIN = as.character(
-        stringr::str_replace(PFAM_DOMAIN, "Pfam_domain:", ""))) %>%
+        stringr::str_replace(.data$PFAM_DOMAIN, "Pfam_domain:", ""))) %>%
     dplyr::left_join(
       dplyr::select(pcgr_data[["protein_domains"]][["pfam"]],
-                    pfam_id, pfam_name),
+                    .data$pfam_id, .data$pfam_name),
       by = c("PFAM_DOMAIN" = "pfam_id")) %>%
-    dplyr::rename(PFAM_DOMAIN_NAME = pfam_name) %>%
+    dplyr::rename(PFAM_DOMAIN_NAME = .data$pfam_name) %>%
     dplyr::left_join(pcgr_data[["biomarkers"]][["docm"]], by = c("VAR_ID")) %>%
-    dplyr::mutate(ENTREZ_ID = as.character(ENTREZ_ID)) %>%
-    dplyr::mutate(Gene = as.character(Gene)) %>%
+    dplyr::mutate(ENTREZ_ID = as.character(.data$ENTREZ_ID)) %>%
+    dplyr::mutate(Gene = as.character(.data$Gene)) %>%
     pcgrr::recode_logical_vars()
 
 
 
-  pcgrr:::log4r_info(paste0("Number of PASS variants: ", nrow(vcf_data_df)))
+  log4r_info(paste0("Number of PASS variants: ", nrow(vcf_data_df)))
   if (any(grepl(paste0("VARIANT_CLASS$"), names(vcf_data_df)))) {
     n_snvs <-
-      vcf_data_df %>% dplyr::filter(!is.na(VARIANT_CLASS) &
-                                      VARIANT_CLASS == "SNV") %>%
+      vcf_data_df %>% dplyr::filter(!is.na(.data$VARIANT_CLASS) &
+                                      .data$VARIANT_CLASS == "SNV") %>%
       nrow()
     n_deletions <- vcf_data_df %>%
       dplyr::filter(
-        !is.na(VARIANT_CLASS) &
-          (VARIANT_CLASS == "deletion" | VARIANT_CLASS == "indel")) %>%
+        !is.na(.data$VARIANT_CLASS) &
+          (.data$VARIANT_CLASS == "deletion" | .data$VARIANT_CLASS == "indel")) %>%
       nrow()
     n_insertions <- vcf_data_df %>%
-      dplyr::filter(!is.na(VARIANT_CLASS) & VARIANT_CLASS == "insertion") %>%
+      dplyr::filter(!is.na(.data$VARIANT_CLASS) & .data$VARIANT_CLASS == "insertion") %>%
       nrow()
     n_substitutions <- vcf_data_df %>%
-      dplyr::filter(!is.na(VARIANT_CLASS) & VARIANT_CLASS == "substitution") %>%
+      dplyr::filter(!is.na(.data$VARIANT_CLASS) & .data$VARIANT_CLASS == "substitution") %>%
       nrow()
-    pcgrr:::log4r_info(
+    log4r_info(
       paste0("Number of SNVs: ", n_snvs))
-    pcgrr:::log4r_info(
+    log4r_info(
       paste0("Number of deletions: ", n_deletions))
-    pcgrr:::log4r_info(
+    log4r_info(
       paste0("Number of insertions: ", n_insertions))
-    pcgrr:::log4r_info(
+    log4r_info(
       paste0("Number of block substitutions: ", n_substitutions))
   }
 
@@ -1574,37 +1595,37 @@ get_calls <- function(tsv_gz_file,
 
   vcf_data_df_1 <-
     dplyr::left_join(
-      dplyr::filter(vcf_data_df, !is.na(ENTREZ_ID)),
+      dplyr::filter(vcf_data_df, !is.na(.data$ENTREZ_ID)),
       dplyr::filter(dplyr::select(pcgr_data[["gene_xref"]][["gencode"]],
-                                  ENTREZ_ID, Gene,
-                                  GENENAME, CANCERGENE_SUPPORT),
-                                   !is.na(ENTREZ_ID)),
+                                  .data$ENTREZ_ID, .data$Gene,
+                                  .data$GENENAME, .data$CANCERGENE_SUPPORT),
+                                   !is.na(.data$ENTREZ_ID)),
       by = c("ENTREZ_ID", "Gene"))
   vcf_data_df_2 <-
     dplyr::left_join(
-      dplyr::filter(vcf_data_df, is.na(ENTREZ_ID)),
+      dplyr::filter(vcf_data_df, is.na(.data$ENTREZ_ID)),
       dplyr::select(pcgr_data[["gene_xref"]][["gencode"]],
-                    Gene, GENENAME, CANCERGENE_SUPPORT),
+                    .data$Gene, .data$GENENAME, .data$CANCERGENE_SUPPORT),
       by = c("Gene"))
   vcf_data_df <- rbind(vcf_data_df_1, vcf_data_df_2) %>%
     pcgrr::order_variants()
 
-  pcgrr:::log4r_info("Extending annotation descriptions related to KEGG pathways")
+  log4r_info("Extending annotation descriptions related to KEGG pathways")
   vcf_data_df <- dplyr::left_join(vcf_data_df,
                                   pcgr_data[["kegg"]][["pathway_links"]],
                                   by = c("ENTREZ_ID" = "gene_id")) %>%
-    dplyr::rename(KEGG_PATHWAY = kegg_pathway_urls)
+    dplyr::rename(KEGG_PATHWAY = .data$kegg_pathway_urls)
 
   clinvar <- dplyr::select(pcgr_data[["clinvar"]][["variants"]],
-                           CLINVAR_TRAITS_ALL, CLINVAR_MSID, VAR_ID) %>%
-    dplyr::filter(!is.na(CLINVAR_MSID) & !is.na(VAR_ID))
+                           .data$CLINVAR_TRAITS_ALL, .data$CLINVAR_MSID, .data$VAR_ID) %>%
+    dplyr::filter(!is.na(.data$CLINVAR_MSID) & !is.na(.data$VAR_ID))
   if ("CLINVAR_MSID" %in% colnames(vcf_data_df) &
       "VAR_ID" %in% colnames(vcf_data_df)) {
-    pcgrr:::log4r_info("Extending annotation descriptions related to ClinVar")
+    log4r_info("Extending annotation descriptions related to ClinVar")
     vcf_data_df <-
       dplyr::left_join(vcf_data_df, clinvar,
                        by = c("CLINVAR_MSID", "VAR_ID")) %>%
-      dplyr::mutate(CLINVAR_MSID = as.character(CLINVAR_MSID))
+      dplyr::mutate(CLINVAR_MSID = as.character(.data$CLINVAR_MSID))
   }
 
   vcf_data_df <-
@@ -1627,13 +1648,13 @@ get_calls <- function(tsv_gz_file,
     vcf_data_df <- vcf_data_df %>%
       dplyr::mutate(
         EFFECT_PREDICTIONS = stringr::str_replace_all(
-          EFFECT_PREDICTIONS, "\\.&|\\.$", "NA&"))  %>%
+          .data$EFFECT_PREDICTIONS, "\\.&|\\.$", "NA&"))  %>%
       dplyr::mutate(
         EFFECT_PREDICTIONS = stringr::str_replace_all(
-          EFFECT_PREDICTIONS, "&$", "")) %>%
+          .data$EFFECT_PREDICTIONS, "&$", "")) %>%
       dplyr::mutate(
         EFFECT_PREDICTIONS = stringr::str_replace_all(
-          EFFECT_PREDICTIONS, "&", ", ")) %>%
+          .data$EFFECT_PREDICTIONS, "&", ", ")) %>%
       pcgrr::append_dbnsfp_var_link()
   }
 
@@ -1648,14 +1669,14 @@ get_calls <- function(tsv_gz_file,
   if (!("TARGETED_DRUGS" %in% colnames(vcf_data_df))) {
     vcf_data_df <- vcf_data_df %>%
       pcgrr::append_drug_var_link(pcgr_data = pcgr_data) %>%
-      dplyr::rename(TARGETED_DRUGS = ANTINEOPHARMALINK)
+      dplyr::rename(TARGETED_DRUGS = .data$ANTINEOPHARMALINK)
   }
 
   if (!("OPENTARGETS_ASSOCIATIONS" %in% colnames(vcf_data_df))) {
     vcf_data_df <- vcf_data_df %>%
       pcgrr::append_otargets_pheno_link(pcgr_data = pcgr_data,
                                         oncotree = oncotree) %>%
-      dplyr::rename(OPENTARGETS_ASSOCIATIONS = OT_DISEASE_LINK)
+      dplyr::rename(OPENTARGETS_ASSOCIATIONS = .data$OT_DISEASE_LINK)
   }
 
 
@@ -1665,11 +1686,12 @@ get_calls <- function(tsv_gz_file,
 
 
 
+#' @export
 write_processed_vcf <- function(calls, sample_name = NULL,
                                 output_directory = NULL,
                                 vcf_fname = NULL) {
 
-  pcgrr:::log4r_info("Writing VCF file with input calls for signature analysis")
+  log4r_info("Writing VCF file with input calls for signature analysis")
 
   header_lines <-
     c("##fileformat=VCFv4.2",
@@ -1678,10 +1700,10 @@ write_processed_vcf <- function(calls, sample_name = NULL,
       "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO")
 
   vcf_df <- calls %>%
-    dplyr::select(CHROM, POS, REF, ALT) %>%
-    dplyr::filter(nchar(REF) == 1 & nchar(ALT) == 1) %>%
-    dplyr::filter(stringr::str_detect(REF,"^(A|C|T|G)$") |
-                  stringr::str_detect(ALT,"^(A|C|T|G)$")) %>%
+    dplyr::select(.data$CHROM, .data$POS, .data$REF, .data$ALT) %>%
+    dplyr::filter(nchar(.data$REF) == 1 & nchar(.data$ALT) == 1) %>%
+    dplyr::filter(stringr::str_detect(.data$REF,"^(A|C|T|G)$") |
+                  stringr::str_detect(.data$ALT,"^(A|C|T|G)$")) %>%
     dplyr::mutate(QUAL = ".", FILTER = "PASS", ID = ".",
                   INFO = paste0("SAMPLE_ID=", sample_name)) %>%
     dplyr::distinct()
@@ -1694,11 +1716,11 @@ write_processed_vcf <- function(calls, sample_name = NULL,
 
   sample_vcf <- vcf_df[, c("CHROM", "POS", "ID", "REF",
                           "ALT", "QUAL", "FILTER", "INFO")] %>%
-    dplyr::mutate(REF = as.character(REF)) %>%
-    dplyr::mutate(ALT = as.character(ALT))
+    dplyr::mutate(REF = as.character(.data$REF)) %>%
+    dplyr::mutate(ALT = as.character(.data$ALT))
 
   options(scipen = 999)
-  write.table(sample_vcf, file =
+  utils::write.table(sample_vcf, file =
                 sample_vcf_content_fname,
               sep = "\t", col.names = F,
               quote = F, row.names = F)
@@ -1721,21 +1743,21 @@ write_processed_vcf <- function(calls, sample_name = NULL,
 #' A function that detects whether the sample name in
 #' variant data frame is unique, throws an error if
 #' multiple sample names are present for the CPSR workflow
-#
+#'
 #' @param df VCF data frame
 #' @param cpsr logical indicating CPSR workflow
 #' @return df Vranges object
 #'
-#'
+#' @export
 detect_vcf_sample_name <- function(df, sample_name = NULL, cpsr = FALSE) {
   stopifnot(is.data.frame(df) & !is.null(sample_name))
   if ("VCF_SAMPLE_ID" %in% colnames(df)) {
     unique_sample_names <- unique(df$VCF_SAMPLE_ID)
-    pcgrr:::log4r_info(paste0("Found the following VCF sample names: ",
+    log4r_info(paste0("Found the following VCF sample names: ",
                              paste(unique_sample_names, collapse = ", ")))
 
     if (length(unique_sample_names) > 1 & cpsr == T) {
-      pcgrr:::log4r_info(paste0("Found more than one sample name - VCF with somatic ",
+      log4r_info(paste0("Found more than one sample name - VCF with somatic ",
                      "calls? Expecting single sample germline VCF for CPSR"))
       stop()
     }
@@ -1745,6 +1767,7 @@ detect_vcf_sample_name <- function(df, sample_name = NULL, cpsr = FALSE) {
   return(df)
 }
 
+#' @export
 update_maf_allelic_support <- function(calls, maf_fname_tmp,
                                        maf_fname, delete_raw = T) {
 
@@ -1756,15 +1779,15 @@ update_maf_allelic_support <- function(calls, maf_fname_tmp,
                                       "AF_CONTROL",
                                       "VARIANT_CLASS"),
                               only_colnames = F, quiet = T)
-  pcgrr:::log4r_info(paste0("Updating MAF file with information regarding ",
+  log4r_info(paste0("Updating MAF file with information regarding ",
                     "variant sequencing depths and allelic support"))
   maf_data <- NULL
   if (file.exists(maf_fname_tmp) & file.info(maf_fname_tmp)$size > 0) {
-    maf_data <- read.table(maf_fname_tmp, skip = 1, header = T,
+    maf_data <- utils::read.table(maf_fname_tmp, skip = 1, header = T,
                            sep = "\t", na.strings = c(""),
                            stringsAsFactors = F,
                            quote = "", comment.char = "") %>%
-      dplyr::mutate(Chromosome = as.character(Chromosome))
+      dplyr::mutate(Chromosome = as.character(.data$Chromosome))
 
   allele_columns <- c("Reference_Allele",
                       "Tumor_Seq_Allele1",
@@ -1784,15 +1807,15 @@ update_maf_allelic_support <- function(calls, maf_fname_tmp,
   }
 
   calls_maf <- calls %>%
-    dplyr::select(CHROM, POS, DP_TUMOR, AF_TUMOR,
-                  DP_CONTROL, AF_CONTROL, VARIANT_CLASS) %>%
-    dplyr::rename(Chromosome = CHROM, Start_Position = POS) %>%
-    dplyr::mutate(VARIANT_CLASS = as.character(VARIANT_CLASS)) %>%
-    dplyr::mutate(Chromosome = as.character(Chromosome)) %>%
+    dplyr::select(.data$CHROM, .data$POS, .data$DP_TUMOR, .data$AF_TUMOR,
+                  .data$DP_CONTROL, .data$AF_CONTROL, .data$VARIANT_CLASS) %>%
+    dplyr::rename(Chromosome = .data$CHROM, Start_Position = .data$POS) %>%
+    dplyr::mutate(VARIANT_CLASS = as.character(.data$VARIANT_CLASS)) %>%
+    dplyr::mutate(Chromosome = as.character(.data$Chromosome)) %>%
     dplyr::mutate(Start_Position = dplyr::if_else(
-      VARIANT_CLASS == "deletion",
-      Start_Position + 1,
-      as.double(Start_Position)))
+      .data$VARIANT_CLASS == "deletion",
+      .data$Start_Position + 1,
+      as.double(.data$Start_Position)))
 
     if (!is.null(maf_data)) {
       if (!any(is.na(calls_maf$DP_TUMOR)) & !any(is.na(calls_maf$AF_TUMOR))) {
@@ -1803,18 +1826,18 @@ update_maf_allelic_support <- function(calls, maf_fname_tmp,
         calls_maf$t_alt_count_estimate <-
           calls_maf$DP_TUMOR - calls_maf$t_ref_count_estimate
         calls_maf <- calls_maf %>%
-          dplyr::select(-c(DP_TUMOR, AF_TUMOR)) %>%
-          dplyr::mutate(Chromosome = as.character(Chromosome))
+          dplyr::select(-c(.data$DP_TUMOR, .data$AF_TUMOR)) %>%
+          dplyr::mutate(Chromosome = as.character(.data$Chromosome))
 
         maf_data <- maf_data %>%
-          dplyr::mutate(Chromosome = as.character(Chromosome)) %>%
-          dplyr::mutate(VARIANT_CLASS = as.character(VARIANT_CLASS)) %>%
+          dplyr::mutate(Chromosome = as.character(.data$Chromosome)) %>%
+          dplyr::mutate(VARIANT_CLASS = as.character(.data$VARIANT_CLASS)) %>%
           dplyr::left_join(
-            dplyr::select(calls_maf, -c(DP_CONTROL, AF_CONTROL)),
+            dplyr::select(calls_maf, -c(.data$DP_CONTROL, .data$AF_CONTROL)),
             by = c("Chromosome", "Start_Position", "VARIANT_CLASS")) %>%
-          dplyr::mutate(t_depth = t_depth_estimate,
-                        t_ref_count = t_ref_count_estimate,
-                        t_alt_count = t_alt_count_estimate) %>%
+          dplyr::mutate(t_depth = .data$t_depth_estimate,
+                        t_ref_count = .data$t_ref_count_estimate,
+                        t_alt_count = .data$t_alt_count_estimate) %>%
           dplyr::mutate(t_depth_estimate = NULL,
                         t_ref_count_estimate = NULL,
                         t_alt_count_estimate = NULL)
@@ -1829,8 +1852,8 @@ update_maf_allelic_support <- function(calls, maf_fname_tmp,
         calls_maf$n_alt_count_estimate <-
           calls_maf$DP_CONTROL - calls_maf$n_ref_count_estimate
         calls_maf <- calls_maf %>%
-          dplyr::select(-c(DP_CONTROL, AF_CONTROL)) %>%
-          dplyr::mutate(Chromosome = as.character(Chromosome))
+          dplyr::select(-c(.data$DP_CONTROL, .data$AF_CONTROL)) %>%
+          dplyr::mutate(Chromosome = as.character(.data$Chromosome))
 
 
         maf_data <- maf_data %>%
@@ -1838,9 +1861,9 @@ update_maf_allelic_support <- function(calls, maf_fname_tmp,
                              c("Chromosome",
                                "Start_Position",
                                "VARIANT_CLASS")) %>%
-          dplyr::mutate(n_depth = n_depth_estimate,
-                        n_ref_count = n_ref_count_estimate,
-                        n_alt_count = n_alt_count_estimate) %>%
+          dplyr::mutate(n_depth = .data$n_depth_estimate,
+                        n_ref_count = .data$n_ref_count_estimate,
+                        n_alt_count = .data$n_alt_count_estimate) %>%
           dplyr::mutate(n_depth_estimate = NULL,
                         n_ref_count_estimate = NULL,
                         n_alt_count_estimate = NULL)
@@ -1848,7 +1871,7 @@ update_maf_allelic_support <- function(calls, maf_fname_tmp,
       }
 
       write("#version 2.4", file = maf_fname, sep = "\n")
-      write.table(maf_data, file = maf_fname, col.names = T, append = T,
+      utils::write.table(maf_data, file = maf_fname, col.names = T, append = T,
                   row.names = F, na = "", quote = F, sep = "\t")
       if (delete_raw == T) {
         system(paste0("rm -f ", maf_fname_tmp))
@@ -1859,11 +1882,12 @@ update_maf_allelic_support <- function(calls, maf_fname_tmp,
 
 }
 
+#' @export
 targeted_drugs_pr_ttype <- function(ttype,
                                     pcgr_data,
                                     ignore_on_label_early_phase = T){
 
-  pcgrr:::log4r_info(
+  log4r_info(
     paste0("Retrieving targeted drugs (on-label and off-label) for ",
            "indications relevant for tumor type - ", ttype))
   assertthat::assert_that(!is.null(ttype))
@@ -1923,20 +1947,21 @@ targeted_drugs_pr_ttype <- function(ttype,
   }
 
   all_drug_target_candidates <- all_candidates %>%
-    dplyr::rename(SYMBOL = symbol) %>%
-    dplyr::arrange(SYMBOL)
+    dplyr::rename(SYMBOL = .data$symbol) %>%
+    dplyr::arrange(.data$SYMBOL)
 
   if (ignore_on_label_early_phase == T) {
     all_drug_target_candidates <- all_drug_target_candidates %>%
       pcgrr::remove_cols_from_df(
         cnames = c("DRUGS_ON_LABEL_EARLY_PHASE",
                    "DRUGS_ON_LABEL_EARLY_PHASE_INDICATIONS")) %>%
-      dplyr::filter(!is.na(DRUGS_ON_LABEL) | !is.na(DRUGS_OFF_LABEL))
+      dplyr::filter(!is.na(.data$DRUGS_ON_LABEL) | !is.na(.data$DRUGS_OFF_LABEL))
   }
 
   return(all_drug_target_candidates)
 }
 
+#' @export
 targeted_drugs_summarise <- function(
   candidate_drugs = NULL,
   link_label = "DRUGS_ON_LABEL",
@@ -1953,23 +1978,23 @@ targeted_drugs_summarise <- function(
 
   candidate_drugs <- as.data.frame(
     candidate_drugs %>%
-      dplyr::select(symbol, nci_concept_display_name,
-                    drug_link, max_phase, drug_indication_label) %>%
-      tidyr::separate_rows(drug_indication_label, sep = "\\|") %>%
-      dplyr::arrange(symbol, desc(max_phase)) %>%
+      dplyr::select(.data$symbol, .data$nci_concept_display_name,
+                    .data$drug_link, .data$max_phase, .data$drug_indication_label) %>%
+      tidyr::separate_rows(.data$drug_indication_label, sep = "\\|") %>%
+      dplyr::arrange(.data$symbol, dplyr::desc(.data$max_phase)) %>%
       dplyr::distinct() %>%
-      dplyr::group_by(symbol, nci_concept_display_name, drug_link) %>%
+      dplyr::group_by(.data$symbol, .data$nci_concept_display_name, .data$drug_link) %>%
       dplyr::summarise(drug_indication_label =
-                         paste(unique(drug_indication_label),
+                         paste(unique(.data$drug_indication_label),
                                collapse = ", "),
                        .groups = "drop") %>%
       dplyr::ungroup() %>%
       dplyr::mutate(drug_indication_label =
-                      paste0(drug_indication_label,
-                             " (<b>", nci_concept_display_name, "</b>)")) %>%
-      dplyr::group_by(symbol) %>%
-      dplyr::summarise(!!rlang::sym(link_label) := paste0(drug_link, collapse = ", "),
-                       !!rlang::sym(indication_label) := paste0(drug_indication_label,
+                      paste0(.data$drug_indication_label,
+                             " (<b>", .data$nci_concept_display_name, "</b>)")) %>%
+      dplyr::group_by(.data$symbol) %>%
+      dplyr::summarise(!!rlang::sym(link_label) := paste0(.data$drug_link, collapse = ", "),
+                       !!rlang::sym(indication_label) := paste0(.data$drug_indication_label,
                                                          collapse = "; "),
                        .groups = "drop")
   )

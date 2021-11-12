@@ -5,6 +5,7 @@
 #' @param config Object with PCGR configuration parameters
 #' @param tier_model Variant tier model
 #'
+#' @export
 
 generate_pcgr_report <-
   function(project_directory = NULL,
@@ -38,8 +39,8 @@ generate_pcgr_report <-
     pcgr_version <- config[['required_args']][['pcgr_version']]
     cpsr_report_fname <- config[['required_args']][['cpsr_report']]
 
-    pcgrr:::log4r_info(paste0("Initializing PCGR report - sample ", sample_name))
-    pcgrr:::log4r_info("------")
+    log4r_info(paste0("Initializing PCGR report - sample ", sample_name))
+    log4r_info("------")
 
 
     if (!is.null(cna_segments_tsv)) {
@@ -353,6 +354,7 @@ generate_pcgr_report <-
 #'
 #' @return pcg_report_data data frame with all report elements
 #'
+#' @export
 generate_report_data_snv_indel <- function(
   sample_calls,
   pcgr_data,
@@ -362,8 +364,8 @@ generate_report_data_snv_indel <- function(
   biomarker_mapping_stringency = 1,
   tier_model = "pcgr_acmg") {
 
-  pcgrr:::log4r_info("------")
-  pcgrr:::log4r_info(
+  log4r_info("------")
+  log4r_info(
     paste0("Generating data for tiered cancer genome report - ",
            callset, " tier model '", tier_model, "'"))
 
@@ -379,7 +381,7 @@ generate_report_data_snv_indel <- function(
     pcg_report_snv_indel[["v_stat"]][[stat]] <-
       call_stats[["v_stat"]][[stat]]
   }
-  pcgrr:::log4r_info(
+  log4r_info(
     paste0("Number of protein-coding variants: ",
            pcg_report_snv_indel[["v_stat"]][["n_coding"]]))
 
@@ -478,8 +480,8 @@ generate_report_data_snv_indel <- function(
     pcg_report_snv_indel[["variant_set"]][["tier3"]] <-
       dplyr::select(pcg_report_snv_indel[["variant_set"]][["all"]],
                     dplyr::one_of(annotation_tags[["all"]])) %>%
-      dplyr::filter(CODING_STATUS == "coding") %>%
-      dplyr::filter(ONCOGENE == TRUE | TUMOR_SUPPRESSOR == TRUE)
+      dplyr::filter(.data$CODING_STATUS == "coding") %>%
+      dplyr::filter(.data$ONCOGENE == TRUE | .data$TUMOR_SUPPRESSOR == TRUE)
     if (nrow(tier12) > 0 &
         nrow(pcg_report_snv_indel[["variant_set"]][["tier3"]]) > 0) {
       pcg_report_snv_indel[["variant_set"]][["tier3"]] <-
@@ -490,31 +492,31 @@ generate_report_data_snv_indel <- function(
     if (nrow(pcg_report_snv_indel[["variant_set"]][["tier3"]]) > 0) {
       pcg_report_snv_indel[["variant_set"]][["tier3"]] <-
         pcg_report_snv_indel[["variant_set"]][["tier3"]] %>%
-        dplyr::arrange(desc(OPENTARGETS_RANK))
+        dplyr::arrange(dplyr::desc(.data$OPENTARGETS_RANK))
       tier123 <- tier12 %>%
         dplyr::bind_rows(
           dplyr::select(pcg_report_snv_indel[["variant_set"]][["tier3"]],
-                        GENOMIC_CHANGE)) %>%
+                        .data$GENOMIC_CHANGE)) %>%
         dplyr::distinct()
       pcg_report_snv_indel[["disp"]][["tier3"]][["proto_oncogene"]] <-
         dplyr::select(
           pcg_report_snv_indel[["variant_set"]][["tier3"]],
           dplyr::one_of(annotation_tags[["tier3_display"]])) %>%
-        dplyr::filter(ONCOGENE == TRUE &
-                        (is.na(TUMOR_SUPPRESSOR) |
-                           TUMOR_SUPPRESSOR == FALSE))
+        dplyr::filter(.data$ONCOGENE == TRUE &
+                        (is.na(.data$TUMOR_SUPPRESSOR) |
+                           .data$TUMOR_SUPPRESSOR == FALSE))
       pcg_report_snv_indel[["disp"]][["tier3"]][["tumor_suppressor"]] <-
         dplyr::select(
           pcg_report_snv_indel[["variant_set"]][["tier3"]],
           dplyr::one_of(annotation_tags[["tier3_display"]])) %>%
-        dplyr::filter(TUMOR_SUPPRESSOR == TRUE)
+        dplyr::filter(.data$TUMOR_SUPPRESSOR == TRUE)
     }
 
     ## Determine TIER 4: Other coding mutations
     pcg_report_snv_indel[["variant_set"]][["tier4"]] <-
       dplyr::select(pcg_report_snv_indel[["variant_set"]][["all"]],
                     dplyr::one_of(annotation_tags[["all"]])) %>%
-      dplyr::filter(CODING_STATUS == "coding")
+      dplyr::filter(.data$CODING_STATUS == "coding")
     if (nrow(tier123) > 0 &
         nrow(pcg_report_snv_indel[["variant_set"]][["tier4"]]) > 0) {
       pcg_report_snv_indel[["variant_set"]][["tier4"]] <-
@@ -524,7 +526,7 @@ generate_report_data_snv_indel <- function(
     if (nrow(pcg_report_snv_indel[["variant_set"]][["tier4"]]) > 0) {
       pcg_report_snv_indel[["variant_set"]][["tier4"]] <-
         pcg_report_snv_indel[["variant_set"]][["tier4"]] %>%
-        dplyr::arrange(desc(OPENTARGETS_RANK))
+        dplyr::arrange(dplyr::desc(.data$OPENTARGETS_RANK))
       pcg_report_snv_indel[["disp"]][["tier4"]] <-
         dplyr::select(
           pcg_report_snv_indel[["variant_set"]][["tier4"]],
@@ -535,7 +537,7 @@ generate_report_data_snv_indel <- function(
     pcg_report_snv_indel[["variant_set"]][["noncoding"]] <-
       dplyr::select(pcg_report_snv_indel[["variant_set"]][["all"]],
                     dplyr::one_of(annotation_tags[["all"]])) %>%
-      dplyr::filter(CODING_STATUS == "noncoding")
+      dplyr::filter(.data$CODING_STATUS == "noncoding")
     if (nrow(pcg_report_snv_indel[["variant_set"]][["noncoding"]]) > 0) {
       if (nrow(tier123) > 0) {
         pcg_report_snv_indel[["variant_set"]][["noncoding"]] <-
@@ -545,7 +547,7 @@ generate_report_data_snv_indel <- function(
       }
       pcg_report_snv_indel[["variant_set"]][["noncoding"]] <-
         pcg_report_snv_indel[["variant_set"]][["noncoding"]] %>%
-        dplyr::arrange(desc(OPENTARGETS_RANK))
+        dplyr::arrange(dplyr::desc(.data$OPENTARGETS_RANK))
       pcg_report_snv_indel[["disp"]][["noncoding"]] <-
         dplyr::select(
           pcg_report_snv_indel[["variant_set"]][["noncoding"]],
@@ -579,6 +581,7 @@ generate_report_data_snv_indel <- function(
 #' @param genome_seq BSgenome object
 #' @param genome_assembly human genome assembly version
 #'
+#' @export
 generate_report_data_tumor_only <-
   function(unfiltered_sample_calls,
            sample_name,
@@ -619,27 +622,27 @@ generate_report_data_tumor_only <-
   gline_filter_stats[["remain_post_onekg"]] <-
     nrow(vcalls) -
     nrow(vcalls[vcalls$SOMATIC_CLASSIFICATION == "GERMLINE_1KG", ])
-  pcgrr:::log4r_info(paste0("Excluding coinciding germline variants in ",
+  log4r_info(paste0("Excluding coinciding germline variants in ",
                            "1000 Genomes Project populations"))
-  pcgrr:::log4r_info(paste0("Total sample calls remaining: ",
+  log4r_info(paste0("Total sample calls remaining: ",
                            gline_filter_stats[["remain_post_onekg"]]))
 
   ## excluded germline calls found in gnomAD
   gline_filter_stats[["remain_post_gnomad"]] <-
     gline_filter_stats[["remain_post_onekg"]] -
     nrow(vcalls[vcalls$SOMATIC_CLASSIFICATION == "GERMLINE_GNOMAD", ])
-  pcgrr:::log4r_info(
+  log4r_info(
     paste0("Excluding coinciding germline variants in any ",
            "population in the genome aggregation database (gnomAD)"))
-  pcgrr:::log4r_info(paste0("Total sample calls remaining: ",
+  log4r_info(paste0("Total sample calls remaining: ",
                            gline_filter_stats[["remain_post_gnomad"]]))
 
   ## excluded germline calls found in ClinVar
   gline_filter_stats[["remain_post_clinvar"]] <-
     gline_filter_stats[["remain_post_gnomad"]] -
     nrow(vcalls[vcalls$SOMATIC_CLASSIFICATION == "GERMLINE_CLINVAR", ])
-  pcgrr:::log4r_info(paste0("Excluding coinciding germline variants in ClinVar"))
-  pcgrr:::log4r_info(paste0("Total sample calls remaining: ",
+  log4r_info(paste0("Excluding coinciding germline variants in ClinVar"))
+  log4r_info(paste0("Total sample calls remaining: ",
                            gline_filter_stats[["remain_post_clinvar"]]))
 
 
@@ -650,10 +653,10 @@ generate_report_data_tumor_only <-
     gline_filter_stats[["remain_post_pon"]] <-
       gline_filter_stats[["remain_post_pon"]] -
       nrow(vcalls[vcalls$SOMATIC_CLASSIFICATION == "GERMLINE_PON", ])
-    pcgrr:::log4r_info(
-      "Excluding putative germline variants found in calls ",
-      "from panel-of-normals (PON)")
-    pcgrr:::log4r_info(
+    log4r_info(
+      paste0("Excluding putative germline variants found in calls ",
+      "from panel-of-normals (PON)"))
+    log4r_info(
       paste0("Total sample calls remaining: ",
              gline_filter_stats[["remain_post_pon"]]))
   }
@@ -666,10 +669,10 @@ generate_report_data_tumor_only <-
     gline_filter_stats[["remain_post_hom"]] <-
       gline_filter_stats[["remain_post_hom"]] -
       nrow(vcalls[vcalls$SOMATIC_CLASSIFICATION == "GERMLINE_HOMOZYGOUS", ])
-    pcgrr:::log4r_info(
+    log4r_info(
       paste0("Excluding likely homozygous germline variants found ",
              "as variants with 100% allelic fraction"))
-    pcgrr:::log4r_info(paste0("Total sample calls remaining: ",
+    log4r_info(paste0("Total sample calls remaining: ",
                              gline_filter_stats[["remain_post_hom"]]))
   }
 
@@ -680,10 +683,10 @@ generate_report_data_tumor_only <-
     gline_filter_stats[["remain_post_het"]] <-
       gline_filter_stats[["remain_post_het"]] -
       nrow(vcalls[vcalls$SOMATIC_CLASSIFICATION == "GERMLINE_HETEROZYGOUS", ])
-    pcgrr:::log4r_info(paste0(
+    log4r_info(paste0(
       "Excluding likely heterozygous germline variants found as variants ",
       "with 40-60% allelic fraction and recorded in gnomAD + dbSNP"))
-    pcgrr:::log4r_info(paste0("Total sample calls remaining: ",
+    log4r_info(paste0("Total sample calls remaining: ",
                              gline_filter_stats[["remain_post_het"]]))
   }
 
@@ -692,7 +695,7 @@ generate_report_data_tumor_only <-
     gline_filter_stats[["remain_post_het"]]
   if (pcgr_config[["tumor_only"]][["exclude_dbsnp_nonsomatic"]] == TRUE) {
 
-    pcgrr:::log4r_info(
+    log4r_info(
       paste0("Excluding non-somatically associated dbSNP variants ",
              "(dbSNP - not recorded as somatic in DoCM/ClinVar",
              "and not registered in COSMIC or found in TCGA"))
@@ -700,41 +703,41 @@ generate_report_data_tumor_only <-
     gline_filter_stats[["remain_post_dbsnp"]] <-
       gline_filter_stats[["remain_post_dbsnp"]] -
       nrow(vcalls[vcalls$SOMATIC_CLASSIFICATION == "GERMLINE_DBSNP", ])
-    pcgrr:::log4r_info(paste0("Total sample calls remaining: ",
+    log4r_info(paste0("Total sample calls remaining: ",
                              gline_filter_stats[["remain_post_dbsnp"]]))
   }
 
   unfiltered_sample_calls <- vcalls
   vcalls <- vcalls %>%
-    dplyr::filter(SOMATIC_CLASSIFICATION == "SOMATIC")
+    dplyr::filter(.data$SOMATIC_CLASSIFICATION == "SOMATIC")
 
   gline_filter_stats[["remain_post_nonexonic"]] <-
     gline_filter_stats[["remain_post_dbsnp"]]
   if (pcgr_config[["tumor_only"]][["exclude_nonexonic"]] == TRUE) {
-    pcgrr:::log4r_info(paste0("Excluding non-exonic variants"))
-    vcalls <- dplyr::filter(vcalls, EXONIC_STATUS == "exonic")
-    pcgrr:::log4r_info(paste0("Total sample calls remaining: ",
+    log4r_info(paste0("Excluding non-exonic variants"))
+    vcalls <- dplyr::filter(vcalls, .data$EXONIC_STATUS == "exonic")
+    log4r_info(paste0("Total sample calls remaining: ",
                              nrow(vcalls)))
     gline_filter_stats[["remain_post_nonexonic"]] <- nrow(vcalls)
   }
 
   pcg_report_to[["eval"]] <- TRUE
   pcg_report_to[["variant_set"]][["tsv_unfiltered"]] <- unfiltered_sample_calls %>%
-    dplyr::select(GENOMIC_CHANGE,
-                  VAR_ID,
-                  DP_TUMOR,
-                  AF_TUMOR,
-                  SYMBOL,
-                  EXONIC_STATUS,
-                  CONSEQUENCE,
-                  STATUS_PON,
-                  STATUS_LIKELY_GERMLINE_HOMOZYGOUS,
-                  STATUS_LIKELY_GERMLINE_HETEROZYGOUS,
-                  STATUS_DBSNP_GERMLINE,
-                  STATUS_POPFREQ_1KG_ABOVE_TOLERATED,
-                  STATUS_POPFREQ_GNOMAD_ABOVE_TOLERATED,
-                  STATUS_CLINVAR_GERMLINE,
-                  SOMATIC_CLASSIFICATION)
+    dplyr::select(.data$GENOMIC_CHANGE,
+                  .data$VAR_ID,
+                  .data$DP_TUMOR,
+                  .data$AF_TUMOR,
+                  .data$SYMBOL,
+                  .data$EXONIC_STATUS,
+                  .data$CONSEQUENCE,
+                  .data$STATUS_PON,
+                  .data$STATUS_LIKELY_GERMLINE_HOMOZYGOUS,
+                  .data$STATUS_LIKELY_GERMLINE_HETEROZYGOUS,
+                  .data$STATUS_DBSNP_GERMLINE,
+                  .data$STATUS_POPFREQ_1KG_ABOVE_TOLERATED,
+                  .data$STATUS_POPFREQ_GNOMAD_ABOVE_TOLERATED,
+                  .data$STATUS_CLINVAR_GERMLINE,
+                  .data$SOMATIC_CLASSIFICATION)
   pcg_report_to[["variant_set"]][["filtered"]] <- vcalls
   pcg_report_to[["v_stat"]][["unfiltered_n"]] <-
     nrow(unfiltered_sample_calls)
@@ -777,6 +780,7 @@ generate_report_data_tumor_only <-
 #' @param transcript_overlap_pct required aberration overlap fraction
 #' (percent) for reported transcripts (default 100 percent)
 #'
+#' @export
 generate_report_data_cna <-
   function(cna_segments_tsv,
            pcgr_data,
@@ -796,31 +800,31 @@ generate_report_data_cna <-
     tumor_type <- pcgr_config[["t_props"]][["tumor_type"]]
     MEGABASE <- 1000000
 
-    pcgrr:::log4r_info("------")
-    pcgrr:::log4r_info(paste0("Generating report data for copy number segment file ",
+    log4r_info("------")
+    log4r_info(paste0("Generating report data for copy number segment file ",
                       cna_segments_tsv))
 
     ## READ INPUT FILE, VALIDATE INPUT CHROMOSOMES AND SEGMENTS, ADD CYTOBAND INFO
-    cna_df <- read.table(file = cna_segments_tsv, header = T,
+    cna_df <- utils::read.table(file = cna_segments_tsv, header = T,
                          stringsAsFactors = F, sep = "\t",
                          comment.char = "", quote = "") %>%
-      dplyr::rename(chromosome = Chromosome, LogR = Segment_Mean,
-                    segment_start = Start, segment_end = End) %>%
+      dplyr::rename(chromosome = .data$Chromosome, LogR = .data$Segment_Mean,
+                    segment_start = .data$Start, segment_end = .data$End) %>%
       dplyr::distinct() %>%
-      dplyr::select(chromosome, LogR, segment_start, segment_end) %>%
+      dplyr::select(.data$chromosome, .data$LogR, .data$segment_start, .data$segment_end) %>%
       dplyr::mutate(
-        chromosome = stringr::str_replace(chromosome, "^chr", "")) %>%
+        chromosome = stringr::str_replace(.data$chromosome, "^chr", "")) %>%
       pcgrr::get_valid_chromosomes(
         chromosome_column = "chromosome",
         bsg = pcgr_data[["assembly"]][["bsg"]]) %>%
       pcgrr::get_valid_chromosome_segments(
         genome_assembly = pcgr_data[["assembly"]][["grch_name"]],
         bsg = pcgr_data[["assembly"]][["bsg"]]) %>%
-      dplyr::filter(!is.na(LogR)) %>%
-      dplyr::mutate(LogR = round(as.numeric(LogR), digits = 3)) %>%
-      dplyr::mutate(SEGMENT_ID = paste0(chromosome, ":",
-                                        segment_start, "-",
-                                        segment_end)) %>%
+      dplyr::filter(!is.na(.data$LogR)) %>%
+      dplyr::mutate(LogR = round(as.numeric(.data$LogR), digits = 3)) %>%
+      dplyr::mutate(SEGMENT_ID = paste0(.data$chromosome, ":",
+                                        .data$segment_start, "-",
+                                        .data$segment_end)) %>%
       pcgrr::get_cna_cytoband(pcgr_data = pcgr_data) %>%
       dplyr::mutate(SAMPLE_ID = sample_name) %>%
       pcgrr::append_ucsc_segment_link(
@@ -829,15 +833,15 @@ generate_report_data_cna <-
         start = "segment_start",
         end = "segment_end") %>%
       dplyr::mutate(SEGMENT_LENGTH_MB =
-                      round((as.numeric((segment_end - segment_start) /
+                      round((as.numeric((.data$segment_end - .data$segment_start) /
                                           MEGABASE)),
                             digits = 5)) %>%
-      dplyr::rename(SEGMENT = SEGMENT_LINK, LOG_R = LogR)
+      dplyr::rename(SEGMENT = .data$SEGMENT_LINK, LOG_R = .data$LogR)
 
     ## MAKE SIMPLE SEGMENTS DATA FRAME FOR FILTERING IN REPORT
     cna_segments <- cna_df %>%
-      dplyr::select(SEGMENT, SEGMENT_LENGTH_MB,
-                    CYTOBAND, LOG_R, EVENT_TYPE) %>%
+      dplyr::select(.data$SEGMENT, .data$SEGMENT_LENGTH_MB,
+                    .data$CYTOBAND, .data$LOG_R, .data$EVENT_TYPE) %>%
       dplyr::distinct()
 
     #### FIND AND APPEND GENCODE TRANSCRIPTS THAT OVERLAP
@@ -846,48 +850,48 @@ generate_report_data_cna <-
 
     #### GENERATE DATAFRAME OF UNIQUE TRANSCRIPT-CNA SEGMENTS FOR OUTPUT TSV
     cna_transcript_df_print <- cna_transcript_df %>%
-      dplyr::select(chrom, segment_start, segment_end,
-                    SEGMENT_ID, SEGMENT_LENGTH_MB,
-                    EVENT_TYPE, CYTOBAND, LOG_R, SAMPLE_ID, ensembl_gene_id,
-                    symbol, ensembl_transcript_id, transcript_start,
-                    transcript_end, transcript_overlap_percent,
-                    name, biotype,
-                    tumor_suppressor, oncogene,
-                    intogen_drivers, chembl_compound_id,
-                    gencode_tag, gencode_release) %>%
+      dplyr::select(.data$chrom, .data$segment_start, .data$segment_end,
+                    .data$SEGMENT_ID, .data$SEGMENT_LENGTH_MB,
+                    .data$EVENT_TYPE, .data$CYTOBAND, .data$LOG_R, .data$SAMPLE_ID, .data$ensembl_gene_id,
+                    .data$symbol, .data$ensembl_transcript_id, .data$transcript_start,
+                    .data$transcript_end, .data$transcript_overlap_percent,
+                    .data$name, .data$biotype,
+                    .data$tumor_suppressor, .data$oncogene,
+                    .data$intogen_drivers, .data$chembl_compound_id,
+                    .data$gencode_tag, .data$gencode_release) %>%
       magrittr::set_colnames(tolower(names(.)))
 
     avg_transcript_overlap <- as.data.frame(
       cna_transcript_df %>%
-        dplyr::filter(biotype == "protein_coding") %>%
-        dplyr::group_by(SEGMENT_ID, symbol) %>%
+        dplyr::filter(.data$biotype == "protein_coding") %>%
+        dplyr::group_by(.data$SEGMENT_ID, .data$symbol) %>%
         dplyr::summarise(
-          MEAN_TRANSCRIPT_CNA_OVERLAP = mean(transcript_overlap_percent),
-          TRANSCRIPTS = paste0(ensembl_transcript_id, collapse = ", ")) %>%
-        dplyr::rename(SYMBOL = symbol) %>%
+          MEAN_TRANSCRIPT_CNA_OVERLAP = mean(.data$transcript_overlap_percent),
+          TRANSCRIPTS = paste0(.data$ensembl_transcript_id, collapse = ", ")) %>%
+        dplyr::rename(SYMBOL = .data$symbol) %>%
         dplyr::mutate(
           MEAN_TRANSCRIPT_CNA_OVERLAP =
-            round(MEAN_TRANSCRIPT_CNA_OVERLAP, digits = 2))
+            round(.data$MEAN_TRANSCRIPT_CNA_OVERLAP, digits = 2))
     )
 
-    cna_transcript_df <- dplyr::select(cna_transcript_df, -ensembl_transcript_id) %>%
-      dplyr::filter(biotype == "protein_coding") %>%
+    cna_transcript_df <- dplyr::select(cna_transcript_df, -.data$ensembl_transcript_id) %>%
+      dplyr::filter(.data$biotype == "protein_coding") %>%
       dplyr::distinct() %>%
       dplyr::mutate(VAR_ID = as.character(rep(1:nrow(.)))) %>%
       magrittr::set_colnames(toupper(names(.))) %>%
-      dplyr::select(VAR_ID, SEGMENT_ID, SYMBOL, ONCOGENE,
-                    ONCOGENE_EVIDENCE, TUMOR_SUPPRESSOR,
-                    TUMOR_SUPPRESSOR_EVIDENCE, CANCERGENE_SUPPORT,
-                    ENTREZGENE, CHROM, NAME, EVENT_TYPE,
-                    SEGMENT_LENGTH_MB, SEGMENT,
-                    TRANSCRIPT_OVERLAP_PERCENT, LOG_R) %>%
-      dplyr::mutate(ENTREZ_ID = as.character(ENTREZGENE)) %>%
-      dplyr::rename(GENENAME = NAME,
-                    TRANSCRIPT_OVERLAP = TRANSCRIPT_OVERLAP_PERCENT,
-                    CHROMOSOME = CHROM) %>%
+      dplyr::select(.data$VAR_ID, .data$SEGMENT_ID, .data$SYMBOL, .data$ONCOGENE,
+                    .data$ONCOGENE_EVIDENCE, .data$TUMOR_SUPPRESSOR,
+                    .data$TUMOR_SUPPRESSOR_EVIDENCE, .data$CANCERGENE_SUPPORT,
+                    .data$ENTREZGENE, .data$CHROM, .data$NAME, .data$EVENT_TYPE,
+                    .data$SEGMENT_LENGTH_MB, .data$SEGMENT,
+                    .data$TRANSCRIPT_OVERLAP_PERCENT, .data$LOG_R) %>%
+      dplyr::mutate(ENTREZ_ID = as.character(.data$ENTREZGENE)) %>%
+      dplyr::rename(GENENAME = .data$NAME,
+                    TRANSCRIPT_OVERLAP = .data$TRANSCRIPT_OVERLAP_PERCENT,
+                    CHROMOSOME = .data$CHROM) %>%
       dplyr::left_join(pcgr_data[["kegg"]][["pathway_links"]],
                        by = c("ENTREZ_ID" = "gene_id")) %>%
-      dplyr::rename(KEGG_PATHWAY = kegg_pathway_urls)
+      dplyr::rename(KEGG_PATHWAY = .data$kegg_pathway_urls)
 
     ## Get gene annotation links
     entrezgene_annotation_links <-
@@ -901,24 +905,24 @@ generate_report_data_cna <-
 
     cna_transcript_df <- cna_transcript_df %>%
       dplyr::left_join(dplyr::rename(entrezgene_annotation_links,
-                                     GENE_NAME = link),
+                                     GENE_NAME = .data$link),
                        by = c("VAR_ID")) %>%
-      dplyr::select(SEGMENT_ID, CHROMOSOME, SYMBOL, GENE_NAME, KEGG_PATHWAY,
-                    TUMOR_SUPPRESSOR, TUMOR_SUPPRESSOR_EVIDENCE, ONCOGENE,
-                    ONCOGENE_EVIDENCE, CANCERGENE_SUPPORT, SEGMENT_LENGTH_MB,
-                    SEGMENT, EVENT_TYPE, LOG_R) %>%
+      dplyr::select(.data$SEGMENT_ID, .data$CHROMOSOME, .data$SYMBOL, .data$GENE_NAME, .data$KEGG_PATHWAY,
+                    .data$TUMOR_SUPPRESSOR, .data$TUMOR_SUPPRESSOR_EVIDENCE, .data$ONCOGENE,
+                    .data$ONCOGENE_EVIDENCE, .data$CANCERGENE_SUPPORT, .data$SEGMENT_LENGTH_MB,
+                    .data$SEGMENT, .data$EVENT_TYPE, .data$LOG_R) %>%
       dplyr::distinct() %>%
       dplyr::left_join(avg_transcript_overlap, by = c("SEGMENT_ID", "SYMBOL"))
 
 
-    n_cna_loss <- dplyr::filter(cna_segments, LOG_R <= log_r_homdel) %>%
+    n_cna_loss <- dplyr::filter(cna_segments, .data$LOG_R <= log_r_homdel) %>%
       nrow()
-    n_cna_gain <- dplyr::filter(cna_segments, LOG_R >= log_r_gain) %>%
+    n_cna_gain <- dplyr::filter(cna_segments, .data$LOG_R >= log_r_gain) %>%
       nrow()
     cna_segments_filtered <- cna_segments %>%
-      dplyr::filter(LOG_R >= log_r_gain | LOG_R <= log_r_homdel) %>%
-      dplyr::arrange(desc(LOG_R))
-    pcgrr:::log4r_info(
+      dplyr::filter(.data$LOG_R >= log_r_gain | .data$LOG_R <= log_r_homdel) %>%
+      dplyr::arrange(dplyr::desc(.data$LOG_R))
+    log4r_info(
       paste0("Detected ", nrow(cna_segments_filtered),
              " segments subject to amplification/deletion (",
              n_cna_loss, " deletions, ", n_cna_gain,
@@ -1017,6 +1021,7 @@ generate_report_data_cna <-
 #' @return tsv_variants data frame with tier-annotated list of
 #' variants for tab-separated output
 #'
+#' @export
 generate_tier_tsv <- function(variant_set,
                               config,
                               annotation_tags,
@@ -1030,7 +1035,7 @@ generate_tier_tsv <- function(variant_set,
           config[["preserved_info_tags"]], pattern = ",")[[1]]
     }
   }
-  pcgrr:::log4r_info(paste0(
+  log4r_info(paste0(
     "Generating tiered set of result variants for output",
     " in tab-separated values (TSV) file"))
   tsv_variants <- NULL
@@ -1112,6 +1117,7 @@ generate_tier_tsv <- function(variant_set,
 #' (html/json/tsv/cna_tsv etc)
 #' @param flexdb logical indicating if HTML output should be dashboard
 
+#' @export
 write_report_output <- function(report,
                                 config,
                                 tier_model = "pcgr_acmg",
@@ -1228,8 +1234,8 @@ write_report_output <- function(report,
   if (output_format == "html") {
 
     if (flexdb == T & tier_model == "pcgr_acmg") {
-      pcgrr:::log4r_info("------")
-      pcgrr:::log4r_info(
+      log4r_info("------")
+      log4r_info(
         "Writing HTML file (.html) with report contents - flexdashboard")
       navbar_items <- list()
       navbar_items[[1]] <-
@@ -1279,8 +1285,8 @@ write_report_output <- function(report,
         toc_float <- F
       }
 
-      pcgrr:::log4r_info("------")
-      pcgrr:::log4r_info(paste0(
+      log4r_info("------")
+      log4r_info(paste0(
         "Writing HTML file (.html) with report contents - rmarkdown (theme = '",
         report_theme,"')"))
       rmarkdown::render(
@@ -1312,8 +1318,8 @@ write_report_output <- function(report,
     if (!is.null(report[["tmb"]][["tcga_tmb"]])) {
       report[["tmb"]][["tcga_tmb"]] <- NULL
     }
-    pcgrr:::log4r_info("------")
-    pcgrr:::log4r_info("Writing JSON file (.json) with report contents")
+    log4r_info("------")
+    log4r_info("Writing JSON file (.json) with report contents")
     pcgr_json <- jsonlite::toJSON(report, pretty = T, na = "string",
                                   null = "null", force = T)
     write(pcgr_json, fnames[["json"]])
@@ -1325,26 +1331,26 @@ write_report_output <- function(report,
     output_format_slim <- stringr::str_replace(output_format, "snv_", "")
     if (NROW(
       report[["content"]][["snv_indel"]][["variant_set"]][[output_format_slim]]) > 0) {
-      pcgrr:::log4r_info("------")
+      log4r_info("------")
       if (tier_model == "pcgr_acmg") {
-        pcgrr:::log4r_info(
+        log4r_info(
           paste0("Writing SNV/InDel tab-separated output file with ",
                  "PCGR annotations - ('",
                  output_format_slim, "')"))
       }
       if (tier_model == "cpsr") {
-        pcgrr:::log4r_info(
+        log4r_info(
           paste0("Writing SNV/InDel tab-separated output file ",
                  "with CPSR annotations - ('",
                  output_format_slim, "')"))
       }
-      write.table(
+      utils::write.table(
         report[["content"]][["snv_indel"]][["variant_set"]][[output_format_slim]],
         file = fnames[[output_format]], sep = "\t", col.names = T,
         row.names = F, quote = F)
 
       # if(tier_model == "pcgr_acmg"){
-      #   pcgrr:::log4r_info(
+      #   log4r_info(
       #     paste0("Writing SNV/InDel Excel output file with ",
       #            "PCGR annotations"))
       #   workbook <- openxlsx::createWorkbook()
@@ -1379,11 +1385,11 @@ write_report_output <- function(report,
   if (output_format == "msigs_tsv") {
     if (
       NROW(report[["content"]][["m_signature_mp"]][["result"]][["tsv"]]) > 0) {
-      pcgrr:::log4r_info("------")
-      pcgrr:::log4r_info(paste0(
+      log4r_info("------")
+      log4r_info(paste0(
         "Writing tab-separated output file with details ",
         "of contributing mutational signatures - ('tsv')"))
-      write.table(report[["content"]][["m_signature_mp"]][["result"]][["tsv"]],
+      utils::write.table(report[["content"]][["m_signature_mp"]][["result"]][["tsv"]],
                   file = fnames[[output_format]], sep = "\t", col.names = T,
                   row.names = F, quote = F)
     }
@@ -1391,10 +1397,10 @@ write_report_output <- function(report,
 
   if (output_format == "cna_tsv") {
     if (NROW(report[["content"]][["cna"]][["variant_set"]][["tsv"]]) > 0) {
-      pcgrr:::log4r_info("------")
-      pcgrr:::log4r_info(
+      log4r_info("------")
+      log4r_info(
         "Writing CNA tab-separated output file with PCGR annotations (.tsv.gz)")
-      write.table(report[["content"]][["cna"]][["variant_set"]][["tsv"]],
+      utils::write.table(report[["content"]][["cna"]][["variant_set"]][["tsv"]],
                   file = fnames[["cna_tsv"]], sep = "\t", col.names = T,
                   row.names = F, quote = F)
       gzip_command <- paste0("gzip -f ", fnames[["cna_tsv"]])
