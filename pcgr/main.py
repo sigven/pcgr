@@ -475,84 +475,85 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
     print()
 
     # Generation of HTML reports for VEP/vcfanno-annotated VCF and copy number segment file
-    if not arg_dict["basic"]:
+    if not arg_dict['basic']:
         co = config_options
-        ttype = co["tumor_type"]["type"].replace(
-            " ", "_").replace("/", "@")
-        logger = getlogger("pcgr-writer")
-        logger.info(
-            "PCGR - STEP 4: Generation of output files - variant interpretation report for precision oncology")
-        pcgr_report_command = docker_cmd_run1 + os.path.join(r_scripts_dir, "pcgr.R") + " " + \
-            output_dir + " " + \
-            str(output_pass_tsv) + ".gz" + " " + \
-            input_cna_docker + " " + \
-            input_rna_fusion_docker + " " + \
-            input_rna_expression_docker + " " + \
-            input_cpsr_report_docker + " " + \
-            str(arg_dict["sample_id"]) + " " + \
-            str(pcgr_vars.PCGR_VERSION) + " " +  \
-            str(arg_dict["genome_assembly"]) + " " + \
-            str(data_dir) + " " + \
-            str(co["tumor_purity"]) + " " + \
-            str(co["tumor_ploidy"]) + " " + \
-            str(ttype) + " " + \
-            str(co["tmb"]["target_size_mb"]) + " " + \
-            str(co["assay"]) + " " + \
-            str(tumor_only) + " " + \
-            str(cell_line) + " " + \
-            str(co["tumor_only"]["maf_onekg_afr"]) + " " + \
-            str(co["tumor_only"]["maf_onekg_amr"]) + " " + \
-            str(co["tumor_only"]["maf_onekg_eas"]) + " " + \
-            str(co["tumor_only"]["maf_onekg_eur"]) + " " + \
-            str(co["tumor_only"]["maf_onekg_sas"]) + " " + \
-            str(co["tumor_only"]["maf_onekg_global"]) + " " + \
-            str(co["tumor_only"]["maf_gnomad_afr"]) + " " + \
-            str(co["tumor_only"]["maf_gnomad_amr"]) + " " + \
-            str(co["tumor_only"]["maf_gnomad_asj"]) + " " + \
-            str(co["tumor_only"]["maf_gnomad_eas"]) + " " + \
-            str(co["tumor_only"]["maf_gnomad_fin"]) + " " + \
-            str(co["tumor_only"]["maf_gnomad_nfe"]) + " " + \
-            str(co["tumor_only"]["maf_gnomad_oth"]) + " " + \
-            str(co["tumor_only"]["maf_gnomad_sas"]) + " " + \
-            str(co["tumor_only"]["maf_gnomad_global"]) + " " + \
-            str(co["tumor_only"]["exclude_pon"]) + " " + \
-            str(co["tumor_only"]["exclude_likely_hom_germline"]) + " " + \
-            str(co["tumor_only"]["exclude_likely_het_germline"]) + " " + \
-            str(co["tumor_only"]["exclude_dbsnp_nonsomatic"]) + " " + \
-            str(co["tumor_only"]["exclude_nonexonic"]) + " " + \
-            str(co["tmb"]["run"]) + " " + \
-            str(co["tmb"]["algorithm"]) + " " + \
-            str(co["msi"]["run"]) + " " + \
-            str(co["msigs"]["run"]) + " " + \
-            str(co["msigs"]["mutation_limit"]) + " " + \
-            str(co["msigs"]["all_reference_signatures"]) + " " + \
-            str(co["msigs"]["include_artefact_signatures"]) + " " + \
-            str(co["cna"]["logR_homdel"]) + " " + \
-            str(co["cna"]["logR_gain"]) + " " + \
-            str(co["cna"]["cna_overlap_pct"]) + " " + \
-            str(co["allelic_support"]["tumor_af_min"]) + " " + \
-            str(co["allelic_support"]["tumor_dp_min"]) + " " + \
-            str(co["allelic_support"]["control_dp_min"]) + " " + \
-            str(co["allelic_support"]["control_af_max"]) + " " + \
-            str(co["allelic_support"]["tumor_af_tag"]) + " " + \
-            str(co["allelic_support"]["tumor_dp_tag"]) + " " + \
-            str(co["allelic_support"]["control_af_tag"]) + " " + \
-            str(co["allelic_support"]["control_dp_tag"]) + " " + \
-            str(co["allelic_support"]["call_conf_tag"]) + " " + \
-            str(co["clinicaltrials"]["run"]) + " " + \
-            str(co["other"]["vep_n_forks"]) + " " + \
-            str(co["other"]["vep_buffer_size"]) + " " + \
-            str(co["other"]["vep_no_intergenic"]) + " " + \
-            str(co["other"]["vep_pick_order"]) + " " + \
-            str(co["other"]["vep_regulatory"]) + " " + \
-            str(co["other"]["vcf2maf"]) + " " + \
-            str(co["other"]["list_noncoding"]) + " " + \
-            str(co["other"]["preserved_info_tags"]) + " " + \
-            str(co["other"]["visual_theme"]) + " " + \
-            str(report_nonfloating_toc) + " " + \
-            str(co["other"]["no_vcf_validate"]) + docker_cmd_run_end
+        ttype = co['tumor_type']['type'].replace(' ', '_').replace('/', '@')
+        logger = getlogger('pcgr-writer')
+        logger.info('PCGR - STEP 4: Generation of output files - variant interpretation report for precision oncology')
+        pcgr_report_command = (
+                f"{docker_cmd_run1} {os.path.join(r_scripts_dir, 'pcgr.R')} {output_dir} "
+                f"{output_pass_tsv}.gz "
+                f"{input_cna_docker} "
+                f"{input_rna_fusion_docker} "
+                f"{input_rna_expression_docker} "
+                f"{input_cpsr_report_docker} "
+                f"{arg_dict['sample_id']} "
+                f"{pcgr_vars.PCGR_VERSION} "
+                f"{arg_dict['genome_assembly']} "
+                f"{data_dir} "
+                f"{co['tumor_purity']} "
+                f"{co['tumor_ploidy']} "
+                f"{ttype} "
+                f"{co['tmb']['target_size_mb']} "
+                f"{co['assay']} "
+                f"{tumor_only} "
+                f"{cell_line} "
+                f"{co['tumor_only']['maf_onekg_afr']} "
+                f"{co['tumor_only']['maf_onekg_amr']} "
+                f"{co['tumor_only']['maf_onekg_eas']} "
+                f"{co['tumor_only']['maf_onekg_eur']} "
+                f"{co['tumor_only']['maf_onekg_sas']} "
+                f"{co['tumor_only']['maf_onekg_global']} "
+                f"{co['tumor_only']['maf_gnomad_afr']} "
+                f"{co['tumor_only']['maf_gnomad_amr']} "
+                f"{co['tumor_only']['maf_gnomad_asj']} "
+                f"{co['tumor_only']['maf_gnomad_eas']} "
+                f"{co['tumor_only']['maf_gnomad_fin']} "
+                f"{co['tumor_only']['maf_gnomad_nfe']} "
+                f"{co['tumor_only']['maf_gnomad_oth']} "
+                f"{co['tumor_only']['maf_gnomad_sas']} "
+                f"{co['tumor_only']['maf_gnomad_global']} "
+                f"{co['tumor_only']['exclude_pon']} "
+                f"{co['tumor_only']['exclude_likely_hom_germline']} "
+                f"{co['tumor_only']['exclude_likely_het_germline']} "
+                f"{co['tumor_only']['exclude_dbsnp_nonsomatic']} "
+                f"{co['tumor_only']['exclude_nonexonic']} "
+                f"{co['tmb']['run']} "
+                f"{co['tmb']['algorithm']} "
+                f"{co['msi']['run']} "
+                f"{co['msigs']['run']} "
+                f"{co['msigs']['mutation_limit']} "
+                f"{co['msigs']['all_reference_signatures']} "
+                f"{co['msigs']['include_artefact_signatures']} "
+                f"{co['cna']['logR_homdel']} "
+                f"{co['cna']['logR_gain']} "
+                f"{co['cna']['cna_overlap_pct']} "
+                f"{co['allelic_support']['tumor_af_min']} "
+                f"{co['allelic_support']['tumor_dp_min']} "
+                f"{co['allelic_support']['control_dp_min']} "
+                f"{co['allelic_support']['control_af_max']} "
+                f"{co['allelic_support']['tumor_af_tag']} "
+                f"{co['allelic_support']['tumor_dp_tag']} "
+                f"{co['allelic_support']['control_af_tag']} "
+                f"{co['allelic_support']['control_dp_tag']} "
+                f"{co['allelic_support']['call_conf_tag']} "
+                f"{co['clinicaltrials']['run']} "
+                f"{co['other']['vep_n_forks']} "
+                f"{co['other']['vep_buffer_size']} "
+                f"{co['other']['vep_no_intergenic']} "
+                f"{co['other']['vep_pick_order']} "
+                f"{co['other']['vep_regulatory']} "
+                f"{co['other']['vcf2maf']} "
+                f"{co['other']['list_noncoding']} "
+                f"{co['other']['preserved_info_tags']} "
+                f"{co['other']['visual_theme']} "
+                f"{report_nonfloating_toc} "
+                f"{co['other']['no_vcf_validate']} "
+                f"{docker_cmd_run_end}"
+                )
 
-        check_subprocess(logger, pcgr_report_command, debug)
+        print(pcgr_report_command)
+        #check_subprocess(logger, pcgr_report_command, debug)
         logger.info("Finished")
 
     print()
