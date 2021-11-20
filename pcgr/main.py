@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from pcgr import pcgr_vars, arg_checker, config_options
+from pcgr import pcgr_vars, arg_checker, config
 from pcgr.utils import getlogger, check_subprocess
 import re
 import argparse
@@ -409,7 +409,7 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
                     f'--tumor-id {arg_dict["sample_id"]} --output-maf {output_maf} --ref-fasta {fasta_assembly} '
                     f'--filter-vcf 0 --ncbi-build {NCBI_BUILD_MAF} > {output_vcf2maf_log} 2>&1 {docker_cmd_run_end}'
                     )
-            clean_vcf2maf_command = f'{docker_cmd_run1} rm -f {output_vcf2maf_log}' + re.sub(r'(\.vcf$)', '.vep.vcf', input_vcf_pcgr_ready_uncompressed) + f' {docker_cmd_run_end}'
+            clean_vcf2maf_command = f'{docker_cmd_run1} rm -f {output_vcf2maf_log} ' + re.sub(r'(\.vcf$)', '.vep.vcf', input_vcf_pcgr_ready_uncompressed) + f' {docker_cmd_run_end}'
             check_subprocess(logger, vcf2maf_command, debug)
             check_subprocess(logger, clean_vcf2maf_command, debug)
         logger.info('Finished')

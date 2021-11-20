@@ -241,7 +241,7 @@ def verify_input_files(arg_dict, logger):
         pcgr_error_message(err_msg, logger)
 
     # check the existence of given output folder
-    output_dir_full = os.path.abspath(arg_dict[.output_dir.])
+    output_dir_full = os.path.abspath(arg_dict['output_dir'])
     if not os.path.isdir(output_dir_full):
         err_msg = f'Output directory ({output_dir_full}) does not exist'
         pcgr_error_message(err_msg, logger)

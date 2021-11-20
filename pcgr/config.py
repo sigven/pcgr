@@ -83,7 +83,6 @@ def create_config(arg_dict):
             config_options['tumor_only'][tag] = float(arg_dict[tag])
 
     config_options['tumor_type'] = {}
-    config_options['tumor_type']['type'] = str(
-        pcgr_vars.tsites[arg_dict['tsite']])
+    config_options['tumor_type']['type'] = str(pcgr_vars.tsites[arg_dict['tsite']])
 
     return config_options
