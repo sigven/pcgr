@@ -1,6 +1,7 @@
 # Byte-compiled / optimized / DLL files
 *.pyc
 __pycache__/
+*.egg-info/
 
 # Sphinx documentation
 docs/_build/
