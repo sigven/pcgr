@@ -1,0 +1,25 @@
+name: pcgr_dev
+
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+
+dependencies:
+  - python >=3.7.3
+  - r-base >=4.0
+  - r-argparse
+  - r-tidyverse
+  - ensembl-vep >=104.3
+  - cython >=0.29.21
+  - scipy >=1.5.3
+  - pandas >=1.1.3
+  - htslib
+  - cyvcf2 >=0.20.9
+  - samtools =1.10
+  - bedtools =2.26
+  - vcfanno =0.3.2
+  - tabix
+  - vt
+  - vcf2maf =1.6.18
+  - nlopt =2.6.2
