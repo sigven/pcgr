@@ -2,16 +2,16 @@
 % Please edit documentation in R/utils.R
 \name{determine_genotype}
 \alias{determine_genotype}
-\title{Function that assigns genotype (het/hom) from VCF GT tag}
+\title{Function that assigns explicit genotype (heterozygous/homozygous) from VCF GT tag}
 \usage{
 determine_genotype(vcf_df)
 }
 \arguments{
-\item{vcf_df}{}
+\item{vcf_df}{data frame with variant data from VCF}
 }
 \value{
 vcf_df
 }
 \description{
-Function that assigns genotype (het/hom) from VCF GT tag
+Function that assigns explicit genotype (heterozygous/homozygous) from VCF GT tag
 }

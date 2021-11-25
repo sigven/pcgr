@@ -3,13 +3,15 @@
 \name{detect_vcf_sample_name}
 \alias{detect_vcf_sample_name}
 \title{A function that detects whether the sample name in
-variant data frame is unique, throws an error if
+variant data frame is unique (as present in column name VCF_SAMPLE_ID), throws an error if
 multiple sample names are present for the CPSR workflow}
 \usage{
 detect_vcf_sample_name(df, sample_name = NULL, cpsr = FALSE)
 }
 \arguments{
 \item{df}{VCF data frame}
+
+\item{sample_name}{name of sample identifier}
 
 \item{cpsr}{logical indicating CPSR workflow}
 }
@@ -18,6 +20,6 @@ df Vranges object
 }
 \description{
 A function that detects whether the sample name in
-variant data frame is unique, throws an error if
+variant data frame is unique (as present in column name VCF_SAMPLE_ID), throws an error if
 multiple sample names are present for the CPSR workflow
 }

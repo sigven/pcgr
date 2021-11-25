@@ -1,3 +1,9 @@
+
+#' Function that assigns a maximum value to a variable (MAX_AF_GNOMAD) reflecting
+#' the maximum allele frequency for a given variant across gnomAD populations
+#'
+#' @param sample_calls data frame with sample variant calls
+#'
 #' @export
 max_af_gnomad <- function(sample_calls){
   invisible(
@@ -29,6 +35,11 @@ max_af_gnomad <- function(sample_calls){
   return(sample_calls)
 }
 
+#' Function that assigns a maximum value to a variable (MAX_AF_1KG) reflecting
+#' the maximum allele frequency for a given variant across oneKG populations
+#'
+#' @param sample_calls data frame with sample variant calls
+#'
 #' @export
 max_af_onekg <- function(sample_calls){
   invisible(
@@ -59,6 +70,14 @@ max_af_onekg <- function(sample_calls){
   return(sample_calls)
 }
 
+
+#' Function that assigns a logical to STATUS_CLINVAR_GERMLINE based on
+#' whether a ClinVar entry of germline origin is found for a given variant
+#' (for entries in a data frame)
+#'
+#' @param sample_calls data frame with sample calls
+#'
+#'
 #' @export
 clinvar_germline_status <- function(sample_calls){
 
@@ -83,7 +102,11 @@ clinvar_germline_status <- function(sample_calls){
   return(sample_calls)
 }
 
-
+#' Function that assigns a logical (STATUS_DBSNP_GERMLINE) reflecting whether
+#' a variant co-incides with an entry in dbSNP (germline)
+#'
+#' @param sample_calls data frame with sample variant calls
+#'
 #' @export
 dbsnp_germline_status <- function(sample_calls){
 
@@ -118,6 +141,11 @@ dbsnp_germline_status <- function(sample_calls){
   return(sample_calls)
 }
 
+#' Function that assigns a logical (STATUS_TCGA_SOMATIC) reflecting whether
+#' a variant co-incides with an entry in TCGA (somatic)
+#'
+#' @param sample_calls data frame with sample variant calls
+#'
 #' @export
 tcga_somatic_status <- function(sample_calls){
 
@@ -138,6 +166,11 @@ tcga_somatic_status <- function(sample_calls){
 
 }
 
+#' Function that assigns a logical (STATUS_COSMIC) reflecting whether
+#' a variant co-incides with an entry in COSMIC (germline)
+#'
+#' @param sample_calls data frame with sample variant calls
+#'
 #' @export
 cosmic_somatic_status <- function(sample_calls){
 
@@ -158,6 +191,11 @@ cosmic_somatic_status <- function(sample_calls){
 
 }
 
+#' Function that assigns a logical (STATUS_LIKELY_GERMLINE_HOMOZYGOUS) reflecting whether
+#' a variant is likely homozygous (germline) - based on allelic fraction (AF_TUMOR)
+#'
+#' @param sample_calls data frame with sample variant calls
+#'
 #' @export
 hom_af_status <- function(sample_calls){
 
@@ -179,6 +217,12 @@ hom_af_status <- function(sample_calls){
   return(sample_calls)
 }
 
+#' Function that assigns a logical (STATUS_PON) reflecting whether
+#' a variant is co-inciding with a variant present in a panel-of-normals database
+#' (PANEL_OF_NORMALS column is TRUE)
+#'
+#' @param sample_calls data frame with sample variant calls
+#'
 #' @export
 pon_status <- function(sample_calls){
 
@@ -199,6 +243,12 @@ pon_status <- function(sample_calls){
   return(sample_calls)
 }
 
+#' Function that assigns a logical (STATUS_LIKELY_GERMLINE_HETEROZYGOUS) reflecting whether
+#' a variant is likely heterozygous (germline) - based on allelic fraction (AF_TUMOR),
+#' presence in gnomAD and dbSNP, and no presence in TCGA and COSMIC
+#'
+#' @param sample_calls data frame with sample variant calls
+#'
 #' @export
 het_af_germline_status <- function(sample_calls){
 
@@ -368,119 +418,6 @@ assign_somatic_germline_evidence <- function(sample_calls, config) {
     hom_af_status() %>%
     pon_status() %>%
     het_af_germline_status()
-
-  ## assign MAX_AF_1KG / MAX_AF_GNOMAD
-  # gnomad_cols <- c("GLOBAL_AF_GNOMAD", "NFE_AF_GNOMAD", "AMR_AF_GNOMAD",
-  #                  "AFR_AF_GNOMAD", "SAS_AF_GNOMAD",
-  #                  "EAS_AF_GNOMAD", "ASJ_AF_GNOMAD",
-  #                  "FIN_AF_GNOMAD", "OTH_AF_GNOMAD")
-  # onekg_cols <- c("GLOBAL_AF_1KG", "AMR_AF_1KG", "AFR_AF_1KG",
-  #                 "EAS_AF_1KG", "SAS_AF_1KG", "EUR_AF_1KG")
-  #
-  # sample_calls$MAX_AF_1KG <- 0
-  # for (c in onekg_cols) {
-  #   if (nrow(sample_calls[!is.na(sample_calls[, c]) &
-  #                        sample_calls[, c] > sample_calls$MAX_AF_1KG,]) > 0) {
-  #     sample_calls[!is.na(sample_calls[, c]) &
-  #                    sample_calls[, c] > sample_calls$MAX_AF_1KG, "MAX_AF_1KG"] <-
-  #       sample_calls[!is.na(sample_calls[, c]) &
-  #                      sample_calls[, c] > sample_calls$MAX_AF_1KG, c]
-  #   }
-  #
-  # }
-  #
-  # sample_calls$MAX_AF_GNOMAD <- 0
-  # for (c in gnomad_cols) {
-  #   if (nrow(sample_calls[!is.na(sample_calls[, c]) &
-  #                        sample_calls[, c] > sample_calls$MAX_AF_GNOMAD, ]) > 0) {
-  #     sample_calls[!is.na(sample_calls[, c]) &
-  #                    sample_calls[, c] > sample_calls$MAX_AF_GNOMAD,
-  #                  "MAX_AF_GNOMAD"] <-
-  #       sample_calls[!is.na(sample_calls[, c]) &
-  #                      sample_calls[, c] > sample_calls$MAX_AF_GNOMAD, c]
-  #   }
-  #
-  # }
-  #
-  # ## assign STATUS_DBSNP_GERMLINE status to all calls recorded in
-  # ## dbSNP (except relevant in a somatic setting, as defined by ClinVar/DoCM)
-  # if ("DBSNPRSID" %in% colnames(sample_calls)) {
-  #   sample_calls <- sample_calls %>%
-  #     dplyr::mutate(
-  #       STATUS_DBSNP_GERMLINE =
-  #                     dplyr::if_else(!is.na(DBSNPRSID), TRUE, FALSE)) %>%
-  #     dplyr::mutate(
-  #       STATUS_DBSNP_GERMLINE =
-  #         dplyr::if_else(STATUS_DBSNP_GERMLINE == T & !is.na(DOCM_PMID),
-  #                        FALSE, STATUS_DBSNP_GERMLINE)) %>%
-  #     dplyr::mutate(
-  #       STATUS_DBSNP_GERMLINE =
-  #         dplyr::if_else(
-  #           STATUS_DBSNP_GERMLINE == T &
-  #             !is.na(CLINVAR_MSID) &
-  #             stringr::str_detect(CLINVAR_VARIANT_ORIGIN, "somatic"),
-  #           FALSE, STATUS_DBSNP_GERMLINE))
-  # }
-
-  ## assign STATUS_CLINVAR_GERMLINE status to all calls recorded
-  ## in ClinVar with a "germline" variant-of-origin
-  # if ("CLINVAR_MSID" %in% colnames(sample_calls)) {
-  #   sample_calls <- sample_calls %>%
-  #     dplyr::mutate(
-  #       STATUS_CLINVAR_GERMLINE =
-  #         dplyr::if_else(
-  #           !is.na(CLINVAR_MSID) &
-  #             stringr::str_detect(CLINVAR_VARIANT_ORIGIN, "germline") &
-  #             !stringr::str_detect(CLINVAR_VARIANT_ORIGIN, "somatic"),
-  #           TRUE, FALSE))
-  # }
-
-  ## assign STATUS_LIKELY_GERMLINE_HOMOZYGOUS to all calls
-  ## with 100% allelic fraction of alternative allele
-  # if ("AF_TUMOR" %in% colnames(sample_calls)) {
-  #   sample_calls <- sample_calls %>%
-  #     dplyr::mutate(
-  #       STATUS_LIKELY_GERMLINE_HOMOZYGOUS =
-  #         dplyr::if_else(!is.na(AF_TUMOR) & AF_TUMOR == 1, TRUE, FALSE))
-  # }
-
-
-  # ## assign STATUS_COSMIC to all calls with an identifier in COSMIC
-  # if ("COSMIC_MUTATION_ID" %in% colnames(sample_calls)) {
-  #   sample_calls <- sample_calls %>%
-  #     dplyr::mutate(
-  #       STATUS_COSMIC =
-  #         dplyr::if_else(!is.na(COSMIC_MUTATION_ID), TRUE, FALSE))
-  # }
-
-  ## assign STATUS_PON to all calls overlapping the
-  ## user-defined panel-of-normals VCF
-  # if ("PANEL_OF_NORMALS" %in% colnames(sample_calls)) {
-  #   sample_calls <- sample_calls %>%
-  #     dplyr::mutate(
-  #       STATUS_PON =
-  #         dplyr::if_else(PANEL_OF_NORMALS == TRUE, TRUE, FALSE))
-  # }
-
-  ## assign STATUS_LIKELY_GERMLINE_HETEROZYGOUS to all calls
-  ## that i) have the alternative allele
-  ## in the [0.40,0.60] AF range, ii) are registered in dbSNP,
-  ## iii) in gnomAD (yet below the user-defined thresholds,
-  ## and iv) not present in COSMIC/TCGA
-  # if ("AF_TUMOR" %in% colnames(sample_calls) &
-  #     "MAX_AF_GNOMAD" %in% colnames(sample_calls) &
-  #     "STATUS_COSMIC" %in% colnames(sample_calls) &
-  #     "STATUS_TCGA_SOMATIC" %in% colnames(sample_calls)) {
-  #   sample_calls <- sample_calls %>%
-  #     dplyr::mutate(
-  #       STATUS_LIKELY_GERMLINE_HETEROZYGOUS =
-  #         dplyr::if_else(!is.na(MAX_AF_GNOMAD) &
-  #                          STATUS_DBSNP_GERMLINE == TRUE &
-  #                          !is.na(AF_TUMOR) &
-  #                          AF_TUMOR >= 0.40 & AF_TUMOR <= 0.60 &
-  #                          STATUS_TCGA_SOMATIC == FALSE &
-  #                          STATUS_COSMIC == FALSE, TRUE, FALSE))
-  # }
 
   return(sample_calls)
 }

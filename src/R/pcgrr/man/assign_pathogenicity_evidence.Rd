@@ -9,7 +9,7 @@ assign_pathogenicity_evidence(cpg_calls, cpsr_config, pcgr_data)
 \arguments{
 \item{cpg_calls}{sample calls with dbnsfp annotations}
 
-\item{cpsr_config}{pcgr configuration object}
+\item{cpsr_config}{cpsr configuration object}
 
 \item{pcgr_data}{pcgr data object}
 }

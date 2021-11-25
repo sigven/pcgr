@@ -11,9 +11,6 @@
 get_clin_assocs_snv_indel <- function(sample_calls,
                                       annotation_tags = NULL,
                                       eitems = NULL) {
-                                      #tumor_type = NA,
-                                      #tumor_type_specificity = "any",
-                                      #mapping_stringency = 1) {
 
   invisible(assertthat::assert_that(!is.null(annotation_tags)))
   invisible(assertthat::assert_that(!is.null(eitems)))
@@ -208,6 +205,19 @@ get_clin_assocs_cna <- function(onco_ts_sets,
 
 }
 
+#' Function that loads specific set of clinical variant evidence items (CIViC + CGI) based
+#' on given parameters (mutation type, variant origin, tumor type etc)
+#'
+#' @param eitems_raw complete set of clinical variant evidence items
+#' @param ontology phenotype ontology data frame
+#' @param alteration_type type of alteration ('MUT', 'CNA', 'MUT_LOF')
+#' @param origin variant origin ('Somatic','Germline')
+#' @param tumor_type_specificity tumor type specificity ('any', 'specific')
+#' @param tumor_type primary tumor site
+#'
+#' @return eitems variant evidence items
+#'
+#'
 #' @export
 load_eitems <- function(eitems_raw = NULL,
                         ontology = NULL,
@@ -312,6 +322,15 @@ load_eitems <- function(eitems_raw = NULL,
 
 }
 
+#' Function that loads all evidence items from CIViC and CGI, and
+#' combines them in a unified data.frame
+#'
+#' @param eitems_raw raw data frame with evidence items
+#' @param alteration_type type of alteration ('MUT','MUT_LOF','CNA')
+#' @param origin variant origin ('Germline','Somatic')
+#'
+#' @return all_eitems
+#'
 #' @export
 load_all_eitems <- function(eitems_raw = NULL,
                             alteration_type = "MUT",
@@ -401,6 +420,15 @@ load_all_eitems <- function(eitems_raw = NULL,
 }
 
 
+#' Function that matches variants to evidence items
+#'
+#' @param sample_calls data frame with variant calls
+#' @param db database with evidence items ('civic','cgi')
+#' @param colset character vector with column names to pull out from sample_calls
+#' @param eitems raw list of evidence items
+#' @param region_marker logical indication if region biomarkers are to be matched or not
+#'
+#'
 #' @export
 match_eitems_to_var <- function(sample_calls,
                                db = "civic",
@@ -480,6 +508,12 @@ match_eitems_to_var <- function(sample_calls,
 
 }
 
+#' Function that makes a quality control check of evidence items assigned
+#' to variants
+#'
+#' @param var_eitems variant-evidence items
+#' @param marker_type type of biomarker
+#'
 #' @export
 qc_var_eitems <- function(var_eitems = NULL,
                           marker_type = "codon") {
@@ -565,6 +599,12 @@ qc_var_eitems <- function(var_eitems = NULL,
 
 }
 
+#' Function that filters clinical evidence items by tumor type/primary site
+#'
+#' @param eitems data frame with clinical evidence items
+#' @param ontology phenotype ontology data frame
+#' @param primary_site primary tumor site
+#'
 #' @export
 filter_eitems_by_site <- function(eitems = NULL,
                                   ontology = NULL,
@@ -621,6 +661,14 @@ filter_eitems_by_site <- function(eitems = NULL,
   return(eitems)
 }
 
+#' Function that structures variant evidence items according
+#' to strength of evidence
+#'
+#' @param var_eitems variant evidence items
+#' @param annotation_tags annotation tags to include for display
+#' @param alteration_type type of alteration ('MUT','CNA')
+#'
+
 #' @export
 structure_var_eitems <- function(var_eitems,
                               annotation_tags,
@@ -673,6 +721,18 @@ structure_var_eitems <- function(var_eitems,
 
 }
 
+
+#' Function that removes redundancy in variant evidence items (i.e. if
+#' a variant is assicated with evidence at the codon level, evidence
+#' at the exon/gene level is ignored)
+#'
+#' @param var_eitems data frame with variant evidence items
+#' @param target_type which resolution level should be used as the
+#' "best" level ('exact' or 'codon)
+#' @param target_other resolution levels for other evidence items
+#' that should be ignored if evidence is found at the target_type level
+#'
+#'
 #' @export
 deduplicate_eitems <- function(var_eitems = NULL,
                                target_type = "exact",
@@ -732,6 +792,15 @@ deduplicate_eitems <- function(var_eitems = NULL,
   }
   return(var_eitems)
 }
+
+#' Function that logs the number of evidence items found, for different
+#' levels of resolution
+#'
+#' @param var_eitems data frame with variant evidence items
+#' @param target_type resolution of evidence items
+#'
+#'
+#'
 
 #' @export
 log_var_eitem_stats <- function(var_eitems = NULL,

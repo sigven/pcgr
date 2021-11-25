@@ -11,8 +11,7 @@ generate_annotation_link(
   group_by_var = "VAR_ID",
   url_prefix = "http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=",
   link_key_var = "DBSNPRSID",
-  link_display_var = "DBSNPRSID",
-  genome_assembly = "grch37"
+  link_display_var = "DBSNPRSID"
 )
 }
 \arguments{

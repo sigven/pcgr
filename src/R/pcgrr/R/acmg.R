@@ -2,7 +2,7 @@
 #' Function that assigns evidence items for SNVs/InDels to ACMG tiers 1 and 2
 #' @param pcg_report_snv_indel report object for snv/indels
 #'
-#' @return pcg_report_data data frame with all report elements
+#' @return pcg_report_snv_indel data frame with all report elements
 #' @export
 
 assign_tier1_tier2_acmg <- function(pcg_report_snv_indel) {
@@ -148,9 +148,9 @@ assign_tier1_tier2_acmg <- function(pcg_report_snv_indel) {
 }
 
 #' Function that assigns evidence items for SCNAs to ACMG tiers 1 and 2
-#' @param pcg_report_snv_indel report object for snv/indels
+#' @param pcg_report_cna report object for CNAs
 #'
-#' @return pcg_report_data data frame with all report elements
+#' @return pcg_report_cna data frame with all report elements
 #'
 #' @export
 

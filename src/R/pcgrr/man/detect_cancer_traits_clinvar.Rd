@@ -8,11 +8,11 @@ to cancer-related conditions according to ClinVar}
 detect_cancer_traits_clinvar(cpg_calls, oncotree, umls_map)
 }
 \arguments{
+\item{cpg_calls}{data frame with variants in predisposition_genes}
+
 \item{oncotree}{data frame with hereditary cancer phenotypes from OncoTree}
 
-\item{umls_map}{}
-
-\item{calls}{data frame with variants in predisposition_genes}
+\item{umls_map}{data frame with UMLS phenotype entries}
 }
 \description{
 Function that retrieves variants in cancer predisposition genes linked

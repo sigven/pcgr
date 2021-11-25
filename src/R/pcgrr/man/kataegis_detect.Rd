@@ -21,6 +21,8 @@ kataegis_detect(
 
 \item{sample_id}{sample identifier}
 
+\item{build}{genomoe assembly build}
+
 \item{min.mut}{minimum number of mutations in localized hypermutated region}
 
 \item{max.dis}{maximum distance of kataegis event (basepairs)}
@@ -28,6 +30,8 @@ kataegis_detect(
 \item{chr}{column name in data that denotes chromosome}
 
 \item{pos}{column name in data that denotes position}
+
+\item{txdb}{transcript database (txdb)}
 }
 \value{
 kataegis_df data frame with potential kataegis events

@@ -48,8 +48,11 @@ assign_mutation_type <- function(var_df) {
 #' Function that transforms a tier-structured variant data frame
 #' into a MAF-like data frame (for input to 2020plus, MutSigCV)
 #'
-#' @param tier_df data frame with somatic mutations
-#' @return maf_df
+#' @param maf_df data frame with somatic mutations
+#' @param genome_seq BSgenome object
+#' @param seqinfo seqinfo object
+
+#' @return maf_all
 #'
 #' @export
 get_proper_maf_alleles <- function(maf_df, genome_seq, seqinfo) {

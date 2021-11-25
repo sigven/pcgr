@@ -70,20 +70,21 @@ get_cna_cytoband <- function(cna_df, pcgr_data = NULL) {
   cytoband_gr <- pcgr_data[["genomic_ranges"]][["cytoband"]]
 
   invisible(
-    assertthat::assert_that("focalCNAthreshold" %in% names(mcols(cytoband_gr))))
+    assertthat::assert_that("focalCNAthreshold" %in%
+                              names(S4Vectors::mcols(cytoband_gr))))
   cyto_hits <- GenomicRanges::findOverlaps(
     cna_gr, cytoband_gr, type = "any", select = "all")
   ranges <- cytoband_gr[S4Vectors::subjectHits(cyto_hits)]
-  mcols(ranges) <-
-    c(mcols(ranges),
-      mcols(cna_gr[S4Vectors::queryHits(cyto_hits)]))
-  cyto_df <- as.data.frame(mcols(ranges)) %>%
+  S4Vectors::mcols(ranges) <-
+    c(S4Vectors::mcols(ranges),
+      S4Vectors::mcols(cna_gr[S4Vectors::queryHits(cyto_hits)]))
+  cyto_df <- as.data.frame(S4Vectors::mcols(ranges)) %>%
     dplyr::mutate(segment_start =
-                    start(ranges(cna_gr[S4Vectors::queryHits(cyto_hits)]))) %>%
+                    BiocGenerics::start(ranges(cna_gr[S4Vectors::queryHits(cyto_hits)]))) %>%
     dplyr::mutate(segment_end =
-                    end(ranges(cna_gr[S4Vectors::queryHits(cyto_hits)]))) %>%
+                    BiocGenerics::end(ranges(cna_gr[S4Vectors::queryHits(cyto_hits)]))) %>%
     dplyr::mutate(segment_length =
-                    width(ranges(cna_gr[S4Vectors::queryHits(cyto_hits)])))
+                    BiocGenerics::width(ranges(cna_gr[S4Vectors::queryHits(cyto_hits)])))
 
   cyto_stats <- as.data.frame(
     cyto_df %>%
@@ -133,6 +134,18 @@ get_cna_cytoband <- function(cna_df, pcgr_data = NULL) {
 
 }
 
+#' Function that detects and assigns oncogenes subject to copy number
+#' amplifications, and tumor suppressor genes subject to homozygous deletions
+#' Also detects other drug targets subject to copy number amplifications
+#'
+#' @param cna_df data frame with copy number-transcript records
+#' @param transcript_overlap_pct minimum level of overlap for transcripts (pct)
+#' @param log_r_gain logR threshold for copy number amplifications
+#' @param log_r_homdel logR threshold for homozygous deletions
+#' @param tumor_type type of tumor
+#' @param pcgr_data PCGR data object
+#'
+#'
 #' @export
 get_oncogene_tsgene_target_sets <- function(
   cna_df,
@@ -265,6 +278,13 @@ get_oncogene_tsgene_target_sets <- function(
 
 }
 
+#' Functions that finds all transcripts that overlap with CNA segments. A
+#' new data frame with one entry per transcript-CNA overlap entry is returned
+#'
+#' @param cna_df data frame with copy number segments
+#' @param pcgr_data PCGR list object with data
+#'
+#'
 #' @export
 get_cna_overlapping_transcripts <- function(cna_df, pcgr_data) {
 
@@ -281,23 +301,26 @@ get_cna_overlapping_transcripts <- function(cna_df, pcgr_data) {
     type = "any", select = "all")
   ranges <-
     pcgr_data[["genomic_ranges"]][["gencode_genes"]][S4Vectors::subjectHits(hits)]
-  mcols(ranges) <-
-    c(mcols(ranges), mcols(cna_gr[S4Vectors::queryHits(hits)]))
+  S4Vectors::mcols(ranges) <-
+    c(S4Vectors::mcols(ranges),
+      S4Vectors::mcols(cna_gr[S4Vectors::queryHits(hits)]))
 
   cna_transcript_df <-
     as.data.frame(
       as.data.frame(
-        mcols(ranges)) %>%
+        S4Vectors::mcols(ranges)) %>%
         dplyr::mutate(
           segment_start =
-            as.integer(start(ranges(cna_gr[S4Vectors::queryHits(hits)])))) %>%
+            as.integer(BiocGenerics::start(
+              ranges(cna_gr[S4Vectors::queryHits(hits)])))) %>%
         dplyr::mutate(
           segment_end =
-            as.integer(end(ranges(cna_gr[S4Vectors::queryHits(hits)])))) %>%
+            as.integer(BiocGenerics::end(
+              ranges(cna_gr[S4Vectors::queryHits(hits)])))) %>%
         dplyr::mutate(
-          transcript_start = start(ranges)) %>%
+          transcript_start = BiocGenerics::start(ranges)) %>%
         dplyr::mutate(
-          transcript_end = end(ranges)) %>%
+          transcript_end = BiocGenerics::end(ranges)) %>%
         dplyr::mutate(
           chrom = as.character(GenomeInfoDb::seqnames(ranges))) %>%
         dplyr::rowwise() %>%
@@ -308,9 +331,10 @@ get_cna_overlapping_transcripts <- function(cna_df, pcgr_data) {
                                (.data$transcript_end - .data$transcript_start)) * 100,
                   digits = 2))
     ) %>%
-    pcgrr::sort_chromosomal_segments(chromosome_column = "chrom",
-                                     start_segment = "segment_start",
-                                     end_segment = "segment_end")
+    pcgrr::sort_chromosomal_segments(
+      chromosome_column = "chrom",
+      start_segment = "segment_start",
+      end_segment = "segment_end")
 
   return(cna_transcript_df)
 }

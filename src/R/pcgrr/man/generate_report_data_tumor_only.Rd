@@ -17,12 +17,6 @@ generate_report_data_tumor_only(
 \item{sample_name}{sample identifier}
 
 \item{pcgr_config}{Object with PCGR configuration parameters}
-
-\item{pcgr_version}{PCGR software version}
-
-\item{genome_seq}{BSgenome object}
-
-\item{genome_assembly}{human genome assembly version}
 }
 \description{
 Function that generates germline-filtered callset and PCGR

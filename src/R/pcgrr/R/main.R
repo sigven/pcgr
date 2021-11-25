@@ -347,9 +347,9 @@ generate_pcgr_report <-
 #' @param sample_calls variant calls subject to mutational signature analysis
 #' @param pcgr_data object with PCGR annotation data
 #' @param sample_name sample identifier
-#' @param pcgr_config Object with PCGR configuration parameters
-#' @param biomarker_mapping_stringency quality level for biomarkers
+#' @param config Object with PCGR configuration parameters
 #' @param callset type of calls
+#' @param biomarker_mapping_stringency quality level for biomarkers
 #' @param tier_model tier model (pcgr_acmg)
 #'
 #' @return pcg_report_data data frame with all report elements
@@ -575,11 +575,8 @@ generate_report_data_snv_indel <- function(
 #' report statistics for a given tumor-only callsets
 #'
 #' @param unfiltered_sample_calls variant calls
-#' @param pcgr_version PCGR software version
 #' @param sample_name sample identifier
 #' @param pcgr_config Object with PCGR configuration parameters
-#' @param genome_seq BSgenome object
-#' @param genome_assembly human genome assembly version
 #'
 #' @export
 generate_report_data_tumor_only <-

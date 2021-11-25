@@ -2,7 +2,7 @@
 % Please edit documentation in R/cpsr.R
 \name{get_germline_biomarkers}
 \alias{get_germline_biomarkers}
-\title{Function that retrieves clinical evidence items (CIVIC, CBMDB) for
+\title{Function that retrieves clinical evidence items (CIVIC, CGI) for
 somatic cancer variants}
 \usage{
 get_germline_biomarkers(sample_calls, colset = NULL, eitems = NULL)
@@ -20,6 +20,6 @@ impact on therapeutic response/diagnosis/prognosis etc}
 list
 }
 \description{
-Function that retrieves clinical evidence items (CIVIC, CBMDB) for
+Function that retrieves clinical evidence items (CIVIC, CGI) for
 somatic cancer variants
 }

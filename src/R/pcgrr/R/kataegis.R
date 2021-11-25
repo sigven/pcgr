@@ -3,10 +3,12 @@
 #'
 #' @param data data frame with somatic mutations, as produced by kataegis_input
 #' @param sample_id sample identifier
+#' @param build genomoe assembly build
 #' @param min.mut minimum number of mutations in localized hypermutated region
 #' @param max.dis maximum distance of kataegis event (basepairs)
 #' @param chr column name in data that denotes chromosome
 #' @param pos column name in data that denotes position
+#' @param txdb transcript database (txdb)
 #'
 #' @return kataegis_df data frame with potential kataegis events
 #'
@@ -98,21 +100,22 @@ kataegis_detect <- function(data, sample_id = "sample_id",
         }
       }
     }
-    kataegis_df <- kataegis_df %>% dplyr::arrange(dplyr::desc(.data$confidence))
+    kataegis_df <- kataegis_df %>%
+      dplyr::arrange(dplyr::desc(.data$confidence))
 
-    if (!is.null(txdb)) {
-      gr <-
-        GenomicRanges::GRanges(
-          seqnames = S4Vectors::Rle(kataegis_df$chrom),
-          ranges = IRanges::IRanges(start = as.numeric(as.character(kataegis_df$start)),
-                           end = as.numeric(as.character(kataegis_df$end))))
-      peakAnno <- annotatePeak(gr, tssRegion = c(-3000, 3000),
-                               TxDb = txdb, annoDb = "org.Hs.eg.db")
-      kataegis_df$annotation <- peakAnno@anno$annotation
-      kataegis_df$distanceToTSS <- peakAnno@anno$distanceToTSS
-      kataegis_df$geneName <- peakAnno@anno$SYMBOL
-      kataegis_df$geneID <- peakAnno@anno$geneId
-    }
+    # if (!is.null(txdb)) {
+    #   gr <-
+    #     GenomicRanges::GRanges(
+    #       seqnames = S4Vectors::Rle(kataegis_df$chrom),
+    #       ranges = IRanges::IRanges(start = as.numeric(as.character(kataegis_df$start)),
+    #                        end = as.numeric(as.character(kataegis_df$end))))
+    #   peakAnno <- annotatePeak(gr, tssRegion = c(-3000, 3000),
+    #                            TxDb = txdb, annoDb = "org.Hs.eg.db")
+    #   kataegis_df$annotation <- peakAnno@anno$annotation
+    #   kataegis_df$distanceToTSS <- peakAnno@anno$distanceToTSS
+    #   kataegis_df$geneName <- peakAnno@anno$SYMBOL
+    #   kataegis_df$geneID <- peakAnno@anno$geneId
+    # }
   }
   log4r_info(paste(dim(kataegis_df)[1],
                           "potential kataegis events identified",
@@ -129,12 +132,13 @@ kataegis_detect <- function(data, sample_id = "sample_id",
 #' @param ref column name in data that denotes reference allele
 #' @param alt column name in data that denotes alternate allele
 #' @param build genome build (grch37 or hg38)
-#' @param k size of neighbouring sequence context
+#' @param context_size size of neighbouring sequence context
 #'
 #' @export
 kataegis_input <- function(variant_set, chr = "chr",
                            pos = "pos", ref = "ref",
-                         alt = "alt", build = NULL) {
+                         alt = "alt", build = NULL,
+                         context_size = 10) {
 
   invisible(assertthat::assert_that(
     !is.null(build),
@@ -157,7 +161,7 @@ kataegis_input <- function(variant_set, chr = "chr",
                     stringr::str_detect(ref, "^(A|C|T|G)$") &
                     stringr::str_detect(alt, "^(A|C|G|T)$"))
 
-  context_size <- 10
+  #context_size <- 10
   if (nrow(mut_data) > 100) {
     bsg <- BSgenome.Hsapiens.UCSC.hg19
     chr.lens <- as.integer(utils::head(GenomeInfoDb::seqlengths(bsg), 24))

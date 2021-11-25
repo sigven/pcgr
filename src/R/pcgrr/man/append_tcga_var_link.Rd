@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{append_tcga_var_link}
 \alias{append_tcga_var_link}
-\title{Function that adds HTML links to different genetic variant identifiers}
+\title{Function that adds TCGA annotations (cohort, frequency etc.) to variant identifiers}
 \usage{
 append_tcga_var_link(var_df, pcgr_data = NULL, linktype = "dbsource")
 }
@@ -13,6 +13,9 @@ append_tcga_var_link(var_df, pcgr_data = NULL, linktype = "dbsource")
 
 \item{linktype}{type of link}
 }
+\value{
+var_df
+}
 \description{
-Function that adds HTML links to different genetic variant identifiers
+Function that adds TCGA annotations (cohort, frequency etc.) to variant identifiers
 }

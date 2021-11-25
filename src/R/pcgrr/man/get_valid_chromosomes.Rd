@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{get_valid_chromosomes}
 \alias{get_valid_chromosomes}
-\title{Function that check for valid mutations/chromosomes in input}
+\title{Function that check for valid chromosome names in data frame of variants}
 \usage{
 get_valid_chromosomes(
   vcf_data_df,
@@ -13,14 +13,13 @@ get_valid_chromosomes(
 \arguments{
 \item{vcf_data_df}{data frame}
 
-\item{chromosome_column}{name of columns for which string replace
-is to be performed}
+\item{chromosome_column}{name of chromosome column}
 
-\item{pattern}{pattern to replace}
+\item{bsg}{BSGenome object}
 }
 \value{
-vcf_data_df_valid data frame with valid mutations
+vcf_data_df valid data frame with valid mutations
 }
 \description{
-Function that check for valid mutations/chromosomes in input
+Function that check for valid chromosome names in data frame of variants
 }

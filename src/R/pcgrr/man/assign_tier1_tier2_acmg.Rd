@@ -10,7 +10,7 @@ assign_tier1_tier2_acmg(pcg_report_snv_indel)
 \item{pcg_report_snv_indel}{report object for snv/indels}
 }
 \value{
-pcg_report_data data frame with all report elements
+pcg_report_snv_indel data frame with all report elements
 }
 \description{
 Function that assigns evidence items for SNVs/InDels to ACMG tiers 1 and 2

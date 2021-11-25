@@ -8,10 +8,14 @@ into a MAF-like data frame (for input to 2020plus, MutSigCV)}
 get_proper_maf_alleles(maf_df, genome_seq, seqinfo)
 }
 \arguments{
-\item{tier_df}{data frame with somatic mutations}
+\item{maf_df}{data frame with somatic mutations}
+
+\item{genome_seq}{BSgenome object}
+
+\item{seqinfo}{seqinfo object}
 }
 \value{
-maf_df
+maf_all
 }
 \description{
 Function that transforms a tier-structured variant data frame

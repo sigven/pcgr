@@ -207,6 +207,16 @@ update_report <- function(report, report_data,
   return(report)
 }
 
+#' Function that set PCGR report metadata
+#'
+#' @param config PCGR config object
+#' @param pcgr_data PCGR data list object
+#' @param virtual_panel_id identifier for virtual panel
+#' @param report_type type of report ('germline' or 'somatic')
+#' @param custom_bed  custom BED file with target loci for screening
+#'
+#' @return report_metadata Object with PCGR report metadata
+#'
 #' @export
 set_report_metadata <- function(config,
                                 pcgr_data,
@@ -360,8 +370,16 @@ set_report_metadata <- function(config,
   return(report_metadata)
 }
 
+#' Function that initiates report element with TMB information
+#'
+#' @param tcga_tmb data frame with TMB distribution in TCGA samples
+#' @param config PCGR configuration object
+#
+#' @return rep TMB report element
+#'
 #' @export
-init_tmb_content <- function(tcga_tmb = NULL, config = NULL){
+init_tmb_content <- function(tcga_tmb = NULL,
+                             config = NULL){
 
   invisible(assertthat::assert_that(!is.null(tcga_tmb)))
   invisible(assertthat::assert_that(is.data.frame(tcga_tmb) &
@@ -387,6 +405,11 @@ init_tmb_content <- function(tcga_tmb = NULL, config = NULL){
   return(rep)
 }
 
+#' Function that initiates report element with CNA information
+#'
+#' @param rep PCGR report structure
+#
+#' @return rep updated PCGR report structure - initialized for CNA content
 #' @export
 init_cna_content <- function(rep = NULL){
 
@@ -414,6 +437,11 @@ init_cna_content <- function(rep = NULL){
 
 }
 
+#' Function that initiates report element with SNV/InDel information
+#'
+#' @param rep PCGR report structure
+#
+#' @return rep updated PCGR report structure - initialized for SNV/InDel content
 #' @export
 init_snv_indel_content <- function(rep = NULL){
 
@@ -445,6 +473,9 @@ init_snv_indel_content <- function(rep = NULL){
   return(rep)
 }
 
+#' Function that initiates report element with mutational signatures information
+#'
+#' @return rep Report structure initialized for signature data
 #' @export
 init_m_signature_content <- function(){
 
@@ -475,6 +506,9 @@ init_m_signature_content <- function(){
 #init_msi_content <- function(){}
 #init_kataegis_content <- function(){}
 
+#' Function that initiates report element with rainfall information
+#'
+#' @return rep Report structure initialized for rainfall data
 #' @export
 init_rainfall_content <- function(){
 
@@ -500,6 +534,9 @@ init_rainfall_content <- function(){
 
 }
 
+#' Function that initiates report element with tumor-only information
+#'
+#' @return rep Report structure initialized for tumor-only data
 #' @export
 init_tumor_only_content <- function(){
 
@@ -529,6 +566,9 @@ init_tumor_only_content <- function(){
   return(rep)
 }
 
+#' Function that initiates report element with value box information
+#'
+#' @return rep Report structure initialized for value box data
 #' @export
 init_valuebox_content <- function(){
   rep <- list()
@@ -558,6 +598,9 @@ init_valuebox_content <- function(){
 
 }
 
+#' Function that initiates ranked report display information
+#'
+#' @return rep Report structure initialized for ranked display
 #' @export
 init_report_display_content <- function(){
 
@@ -574,8 +617,10 @@ init_report_display_content <- function(){
 
 }
 
-#init_ctrial_content <- function(){}
 
+#' Function that initiates report element with variant data
+#'
+#' @return rep Report structure initialized for variant data
 #' @export
 init_var_content <- function(){
 
@@ -599,6 +644,9 @@ init_var_content <- function(){
   return(rep)
 }
 
+#' Function that initiates report element with germline variant information (CPSR)
+#'
+#' @return rep Report structure initialized for germline data (CPSR)
 #' @export
 init_germline_content <- function(){
   rep <- list()

@@ -1,3 +1,12 @@
+#' Function that checks whether a set of column names are present in two
+#' different data frames
+#'
+#' @param df1 data frame 1
+#' @param df2 data frame 2
+#' @param cnames character vector with column names to be check for presence
+#'
+#' @return existing_common_columns T/F
+#'
 #' @export
 check_common_colnames <- function(df1 = NULL, df2 = NULL, cnames = NULL) {
 
@@ -20,6 +29,13 @@ check_common_colnames <- function(df1 = NULL, df2 = NULL, cnames = NULL) {
 
 }
 
+#' Function that removes column(s) from data frame
+#'
+#' @param df data.frame with data
+#' @param cnames character vector with column names
+#'
+#' @return df data.frame with columns removed (if present originally)
+#'
 #' @export
 remove_cols_from_df <- function(df, cnames = NULL) {
 
@@ -43,6 +59,7 @@ remove_cols_from_df <- function(df, cnames = NULL) {
 #'
 #' @param tier_df data frame with somatic mutations
 #' @param bin_size size of bins for allelic frequency
+#'
 #' @return p geom_histogram plot from ggplot2
 #'
 #' @export
@@ -97,13 +114,13 @@ tier_af_distribution <- function(tier_df, bin_size = 0.1) {
 
 }
 
-#' Function that check for valid mutations/chromosomes in input
+#' Function that check for valid chromosome names in data frame of variants
 #'
 #' @param vcf_data_df data frame
-#' @param chromosome_column name of columns for which string replace
-#' is to be performed
-#' @param pattern pattern to replace
-#' @return vcf_data_df_valid data frame with valid mutations
+#' @param chromosome_column name of chromosome column
+#' @param bsg BSGenome object
+#'
+#' @return vcf_data_df valid data frame with valid mutations
 #'
 #' @export
 get_valid_chromosomes <- function(vcf_data_df,
@@ -334,6 +351,52 @@ variant_stats_report <- function(calls, name = "v_stat") {
   return(call_stats)
 }
 
+#' Function that appends multiple HTML annotation links to variant identifiers
+#' e.g. COSMIC, CLINVAR, REFSEQ etc
+#'
+#' @param vcf_data_df data frame with variant entries
+#' @param skip elements to be ignored during annotation
+#'
+#' @export
+append_annotation_links <- function(vcf_data_df,
+                                    skip = NULL) {
+  i <- 1
+  while (i <= nrow(pcgrr::variant_db_url)) {
+
+    name <- pcgrr::variant_db_url[i, ]$name
+    if (!name %in% skip) {
+      log4r_info(paste0("Adding annotation links - ", name))
+      group_by_var <- pcgrr::variant_db_url[i, ]$group_by_var
+      url_prefix <- pcgrr::variant_db_url[i, ]$url_prefix
+      link_key_var <- pcgrr::variant_db_url[i, ]$link_key_var
+      link_display_var <- pcgrr::variant_db_url[i, ]$link_display_var
+      if (!(name %in% colnames(vcf_data_df))) {
+        annotation_links <-
+          pcgrr::generate_annotation_link(
+            vcf_data_df,
+            vardb = name,
+            group_by_var = group_by_var,
+            url_prefix = url_prefix,
+            link_key_var = link_key_var,
+            link_display_var = link_display_var
+          )
+        if (nrow(annotation_links) > 0) {
+          vcf_data_df <- vcf_data_df %>%
+            dplyr::left_join(dplyr::rename(annotation_links,
+                                           !!rlang::sym(name) := .data$link),
+                             by = c("VAR_ID"))
+        }else{
+          vcf_data_df[, name] <- NA
+        }
+      }
+    }
+    i <- i + 1
+  }
+  return(vcf_data_df)
+}
+
+
+
 #' Function that adds read support (depth, allelic fraction) for
 #' tumor and normal and filters according to settings
 #'
@@ -400,9 +463,18 @@ append_read_support <- function(vcf_df, config = NULL, precision = 3) {
   }
   return(vcf_df)
 }
-
+#' Function that appends a link to UCSC for a genomic segment
+#'
+#' @param var_df data frame with genomic variants
+#' @param hgname name of genoome assembly ('hg38','hg19')
+#' @param chrom chromosome name
+#' @param start chromosome start coordinate
+#' @param end chromosome end coordinate
+#'
+#' @return var_df
 #' @export
-append_ucsc_segment_link <- function(var_df, hgname = "hg38",
+append_ucsc_segment_link <- function(var_df,
+                                     hgname = "hg38",
                                      chrom = NULL,
                                      start = NULL, end = NULL) {
   ucsc_browser_prefix <-
@@ -428,14 +500,17 @@ append_ucsc_segment_link <- function(var_df, hgname = "hg38",
 
 }
 
-#' Function that adds HTML links to different genetic variant identifiers
+#' Function that adds TCGA annotations (cohort, frequency etc.) to variant identifiers
 #'
 #' @param var_df data frame with variants
-#' @param linktype type of link
 #' @param pcgr_data PCGR data structure
+#' @param linktype type of link
+#'
+#' @return var_df
 #'
 #' @export
-append_tcga_var_link <- function(var_df, pcgr_data = NULL,
+append_tcga_var_link <- function(var_df,
+                                 pcgr_data = NULL,
                                  linktype = "dbsource") {
 
   log4r_info("Adding annotation links - TCGA")
@@ -475,15 +550,17 @@ append_tcga_var_link <- function(var_df, pcgr_data = NULL,
   return(var_df)
 }
 
-
+#' Function that adds TFBS annotations (dbMTS) to genetic variant identifiers
+#'
+#' @param var_df data frame with variants
+#'
 #' @export
 append_tfbs_annotation <-
   function(var_df){
 
     if (any(grepl(paste0("^CONSEQUENCE$"), names(var_df))) &
         any(grepl(paste0("^VAR_ID$"), names(var_df))) &
-        any(grepl(paste0("^REGULATORY_ANNOTATION$"), names(var_df))) &
-        !is.null(pcgr_data)) {
+        any(grepl(paste0("^REGULATORY_ANNOTATION$"), names(var_df)))) {
 
 
       log4r_info("Adding TF binding site annotations for upstream and 5'UTR variants - VEP regulatory")
@@ -572,11 +649,9 @@ append_tfbs_annotation <-
     return(var_df)
   }
 
-#' Function that adds HTML links to different genetic variant identifiers
+#' Function that adds miRNA target annotations (dbMTS) to genetic variant identifiers
 #'
 #' @param var_df data frame with variants
-#' @param linktype type of link
-#' @param pcgr_data PCGR data structure
 #'
 #' @export
 append_dbmts_var_link <-
@@ -585,8 +660,7 @@ append_dbmts_var_link <-
 
     if (any(grepl(paste0("^DBMTS$"), names(var_df))) &
         any(grepl(paste0("^VAR_ID$"), names(var_df))) &
-        any(grepl(paste0("^ENSEMBL_TRANSCRIPT_ID$"), names(var_df))) &
-        !is.null(pcgr_data)) {
+        any(grepl(paste0("^ENSEMBL_TRANSCRIPT_ID$"), names(var_df)))) {
 
       log4r_info("Adding miRNA target site annotations (gain/loss) - dbMTS")
 
@@ -660,9 +734,14 @@ append_dbmts_var_link <-
     return(var_df)
   }
 
-
+#' Function that assigns HTML links to dbNSFP prediction entries
+#'
+#' @param var_df data frame with variant entries
+#'
+#' @return var_df
+#'
 #' @export
-append_dbnsfp_var_link <- function(var_df, linktype = "dbsource") {
+append_dbnsfp_var_link <- function(var_df) {
 
   log4r_info("Adding annotation links - dbNSFP")
 
@@ -964,23 +1043,20 @@ append_pfeature_descriptions <- function(vcf_data_df, feature_descriptions) {
 
 }
 
-#' Function that adds GWAS citation/phenotype to GWAS hit found
-#' through PCGR annotation
+#' Function that adds GWAS citation/phenotype to GWAS hit found through PCGR annotation
 #'
 #' @param vcf_data_df Data frame of sample variants from VCF
-#' @param pcgr_data PCGR data structure
+#' @param gwas_citations_phenotypes data frame with variant-phenotype associations (including citations) from GWAS
 #' @param p_value_threshold Required p-value to report associations from GWAS catalog
 #'
 #' @return vcf_data_df
 #'
 #' @export
 append_gwas_citation_phenotype <-
-  function(vcf_data_df, gwas_citations_phenotypes, p_value_threshold = 1e-6) {
+  function(vcf_data_df = NULL,
+           gwas_citations_phenotypes = NULL,
+           p_value_threshold = 1e-6) {
 
-    gwas_citations_phenotypes <- gwas_citations_phenotypes %>%
-      dplyr::filter(.data$p_value_num <= .data$p_value_threshold)
-    log4r_info(paste0("Adding citations/phenotypes underlying ",
-                      "GWAS hits (NHGRI-EBI GWAS Catalog)"))
 
     invisible(assertthat::assert_that(
       !is.null(vcf_data_df),
@@ -1000,8 +1076,14 @@ append_gwas_citation_phenotype <-
       only_colnames = F, quiet = T)
     assertable::assert_colnames(
       gwas_citations_phenotypes,
-      c("gwas_key", "GWAS_PH", "GWAS_CIT"),
+      c("gwas_key", "GWAS_PH", "GWAS_CIT","p_value_num"),
       only_colnames = F, quiet = T)
+
+    gwas_citations_phenotypes <- gwas_citations_phenotypes %>%
+      dplyr::filter(.data$p_value_num <= .data$p_value_threshold)
+    log4r_info(paste0("Adding citations/phenotypes underlying ",
+                      "GWAS hits (NHGRI-EBI GWAS Catalog)"))
+
 
   if ("GWAS_HIT" %in% colnames(vcf_data_df) &
       "VAR_ID" %in% colnames(vcf_data_df)) {
@@ -1139,8 +1221,7 @@ generate_annotation_link <- function(
   group_by_var = "VAR_ID",
   url_prefix = "http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=",
   link_key_var = "DBSNPRSID",
-  link_display_var = "DBSNPRSID",
-  genome_assembly = "grch37") {
+  link_display_var = "DBSNPRSID") {
 
   df_annotation_links <- data.frame()
   invisible(assertthat::assert_that(
@@ -1195,9 +1276,9 @@ generate_annotation_link <- function(
 }
 
 
-#' Function that assigns genotype (het/hom) from VCF GT tag
+#' Function that assigns explicit genotype (heterozygous/homozygous) from VCF GT tag
 #'
-#' @param vcf_df
+#' @param vcf_df data frame with variant data from VCF
 #'
 #' @return vcf_df
 #'
@@ -1224,7 +1305,15 @@ determine_genotype <- function(vcf_df) {
   return(vcf_df)
 }
 
-
+#' Function that performs a sanity check of query VCF for pcgrr package,
+#' ensuring that all required tags are present in annotated VCF
+#'
+#' @param vcf_df data frame with variants from VCF
+#' @param pcgr_data PCGR data object
+#' @param config PCGR/CPSR config object
+#' @param workflow type of workflow (pcgr/cpsr)
+#'
+#'
 #' @export
 data_integrity_check <- function(vcf_df,
                                  pcgr_data,
@@ -1279,6 +1368,11 @@ data_integrity_check <- function(vcf_df,
   return(vcf_df)
 }
 
+#' Function that assigns proper logical values to logical entries
+#' read from VCF file (TRUE = True (VCF), FALSE = False (VCF))
+#'
+#' @param vcf_data_df variant data frame
+#'
 #' @export
 recode_logical_vars <- function(vcf_data_df) {
   for (v in c("ONCOGENE", "TUMOR_SUPPRESSOR", "NETWORK_CG",
@@ -1295,43 +1389,6 @@ recode_logical_vars <- function(vcf_data_df) {
 
 }
 
-#' @export
-append_annotation_links <- function(vcf_data_df,
-                                    pcgr_data = NULL, skip = NULL) {
-  i <- 1
-  while (i <= nrow(pcgrr::variant_db_url)) {
-
-    name <- pcgrr::variant_db_url[i, ]$name
-    if (!name %in% skip) {
-      log4r_info(paste0("Adding annotation links - ", name))
-      group_by_var <- pcgrr::variant_db_url[i, ]$group_by_var
-      url_prefix <- pcgrr::variant_db_url[i, ]$url_prefix
-      link_key_var <- pcgrr::variant_db_url[i, ]$link_key_var
-      link_display_var <- pcgrr::variant_db_url[i, ]$link_display_var
-      if (!(name %in% colnames(vcf_data_df))) {
-        annotation_links <-
-          pcgrr::generate_annotation_link(
-            vcf_data_df, vardb = name,
-            group_by_var = group_by_var,
-            url_prefix = url_prefix,
-            link_key_var = link_key_var,
-            link_display_var = link_display_var,
-            genome_assembly = pcgr_data[["assembly"]][["grch_name"]]
-            )
-        if (nrow(annotation_links) > 0) {
-          vcf_data_df <- vcf_data_df %>%
-            dplyr::left_join(dplyr::rename(annotation_links,
-                                           !!rlang::sym(name) := link),
-                             by = c("VAR_ID"))
-        }else{
-          vcf_data_df[, name] <- NA
-        }
-      }
-    }
-    i <- i + 1
-  }
-  return(vcf_data_df)
-}
 
 #' Function that reads a fully annotated VCF from PCGR VEP/vcfanno pipeline
 #'
@@ -1686,6 +1743,14 @@ get_calls <- function(tsv_gz_file,
 
 
 
+#' Function that writes a VCF intended for mutational signature analysis
+#'
+#' @param calls data frame with calls
+#' @param sample_name sample name
+#' @param output_directory Output directory for output file
+#' @param vcf_fname filename for VCF
+#'
+#'
 #' @export
 write_processed_vcf <- function(calls, sample_name = NULL,
                                 output_directory = NULL,
@@ -1741,10 +1806,11 @@ write_processed_vcf <- function(calls, sample_name = NULL,
 
 
 #' A function that detects whether the sample name in
-#' variant data frame is unique, throws an error if
+#' variant data frame is unique (as present in column name VCF_SAMPLE_ID), throws an error if
 #' multiple sample names are present for the CPSR workflow
 #'
 #' @param df VCF data frame
+#' @param sample_name name of sample identifier
 #' @param cpsr logical indicating CPSR workflow
 #' @return df Vranges object
 #'
@@ -1767,7 +1833,15 @@ detect_vcf_sample_name <- function(df, sample_name = NULL, cpsr = FALSE) {
   return(df)
 }
 
+#' Function that updates a MAF file (produced by vcf2maf) with allelic support data
+#'
+#' @param calls data frame with variant calls
+#' @param maf_fname_tmp Filename for MAF produced by vcf2maf
+#' @param maf_fname Filename for MAF that includes variant allelic support (final MAF)
+#' @param delete_raw logical indicating if initial MAF should be deleted
+
 #' @export
+#'
 update_maf_allelic_support <- function(calls, maf_fname_tmp,
                                        maf_fname, delete_raw = T) {
 
@@ -1882,6 +1956,13 @@ update_maf_allelic_support <- function(calls, maf_fname_tmp,
 
 }
 
+#' Function that retrieves targeted drugs for a given tumor type/primary site
+#'
+#' @param ttype primary site/tumor type
+#' @param pcgr_data PCGR data object
+#' @param ignore_on_label_early_phase ignore early phase drugs (on label)
+#'
+#'
 #' @export
 targeted_drugs_pr_ttype <- function(ttype,
                                     pcgr_data,
@@ -1961,6 +2042,13 @@ targeted_drugs_pr_ttype <- function(ttype,
   return(all_drug_target_candidates)
 }
 
+#' Function that summarises available targeted drugs for a given target
+#'
+#' @param candidate_drugs data frame with candidate drugs
+#' @param link_label column name for list of aggregated drugs pr. target
+#' @param indication_label column name for drug indications
+#'
+#'
 #' @export
 targeted_drugs_summarise <- function(
   candidate_drugs = NULL,
@@ -2004,14 +2092,14 @@ targeted_drugs_summarise <- function(
 
 }
 
-log4r_info <- function(msg) {
+log4r_info <- function(log4r_logger, msg) {
   log4r::info(log4r_logger, msg)
 }
 
-log4r_debug <- function(msg) {
+log4r_debug <- function(log4r_logger, msg) {
   log4r::debug(log4r_logger, msg)
 }
 
-log4r_warn <- function(msg) {
+log4r_warn <- function(log4r_logger, msg) {
   log4r::warn(log4r_logger, msg)
 }

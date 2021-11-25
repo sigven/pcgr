@@ -7,10 +7,10 @@
 assign_tier1_tier2_acmg_cna(pcg_report_cna)
 }
 \arguments{
-\item{pcg_report_snv_indel}{report object for snv/indels}
+\item{pcg_report_cna}{report object for CNAs}
 }
 \value{
-pcg_report_data data frame with all report elements
+pcg_report_cna data frame with all report elements
 }
 \description{
 Function that assigns evidence items for SCNAs to ACMG tiers 1 and 2

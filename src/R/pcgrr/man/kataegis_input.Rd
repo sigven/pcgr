@@ -11,7 +11,8 @@ kataegis_input(
   pos = "pos",
   ref = "ref",
   alt = "alt",
-  build = NULL
+  build = NULL,
+  context_size = 10
 )
 }
 \arguments{
@@ -27,7 +28,7 @@ kataegis_input(
 
 \item{build}{genome build (grch37 or hg38)}
 
-\item{k}{size of neighbouring sequence context}
+\item{context_size}{size of neighbouring sequence context}
 }
 \description{
 Function that detects kataegis events from a data frame

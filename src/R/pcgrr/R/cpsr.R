@@ -473,6 +473,13 @@ generate_cpsr_report <- function(project_directory = NULL,
 }
 
 
+#' Function that gets the maximum number of rows across different
+#' tier data frames in CPSR report
+#'
+#' @param cps_report CPSR report structure with tier data frames
+#'
+#' @return max_row_nr maximum number of rows
+#'
 #' @export
 get_max_rows_pr_datatable <- function(cps_report) {
 
@@ -571,7 +578,7 @@ get_insilico_prediction_statistics <- function(cpg_calls) {
 #' Function that assigns variant pathogenicity evidence based on ACMG guidelines
 #'
 #' @param cpg_calls sample calls with dbnsfp annotations
-#' @param cpsr_config pcgr configuration object
+#' @param cpsr_config cpsr configuration object
 #' @param pcgr_data pcgr data object
 #'
 #' @return cpg_calls
@@ -1168,6 +1175,14 @@ assign_pathogenicity_evidence <- function(cpg_calls, cpsr_config, pcgr_data) {
 }
 
 
+#' Function that assigns final pathogenicity classification (B, LB, VUS, P, LP)
+#' based on accumulated scores from different ACMG criteria and pre-defined
+#' cutoffs (calibrated against ClinVar)
+#'
+#' @param cpg_calls data frame with variant calls in predisposition genes
+#'
+#' @return cpg_calls data frame with pathogenicity classification appended
+#'
 #' @export
 determine_pathogenicity_classification <- function(cpg_calls) {
 
@@ -1707,9 +1722,9 @@ retrieve_secondary_calls <- function(calls, umls_map) {
 #' Function that retrieves variants in cancer predisposition genes linked
 #' to cancer-related conditions according to ClinVar
 #'
-#' @param calls data frame with variants in predisposition_genes
+#' @param cpg_calls data frame with variants in predisposition_genes
 #' @param oncotree data frame with hereditary cancer phenotypes from OncoTree
-#' @param umls_map
+#' @param umls_map data frame with UMLS phenotype entries
 #'
 #' @export
 detect_cancer_traits_clinvar <- function(cpg_calls, oncotree, umls_map) {
@@ -1865,6 +1880,11 @@ summary_donut_chart <- function(variants_tsv, plot_type = "ClinVar") {
 }
 
 
+#' Function that makes a HTML display of virtual gene panel
+#'
+#' @param gene_df data frame with genes targeted in virtual panel
+#'
+#'
 #' @export
 virtual_panel_display_html <- function(gene_df) {
 
@@ -1919,7 +1939,7 @@ virtual_panel_display_html <- function(gene_df) {
 }
 
 
-#' Function that retrieves clinical evidence items (CIVIC, CBMDB) for
+#' Function that retrieves clinical evidence items (CIVIC, CGI) for
 #'somatic cancer variants
 #'
 #' @param sample_calls data frame with germline variant callset from

@@ -60,6 +60,15 @@ generate_report_data_tmb <- function(sample_calls,
   return(pcg_report_tmb)
 }
 
+#' Function that makes a plot with TMB boxplots for TCGA cohorts, highlighting
+#' the TMB estimate for a given sample and the cohort/primary site of interest
+#'
+#' @param tcga_tmb data frame with TMB estimates for TCGA samples
+#' @param p_site primary tumor_site (sample)
+#' @param tmb_estimate estimate of mutational burden (sample)
+#' @param algorithm type of TMB algorithm
+#'
+#'
 #' @export
 plot_tmb_primary_site_tcga <- function(tcga_tmb, p_site = "Liver",
                                        tmb_estimate = 5,

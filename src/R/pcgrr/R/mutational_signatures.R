@@ -65,7 +65,7 @@ generate_report_data_signatures_mp <-
 
       ## assign variants to variant set
       pcg_report_signatures[["variant_set"]][["all"]] <-
-        data.frame('VAR_ID' = rownames(mcols(vcfs[[1]])),
+        data.frame('VAR_ID' = rownames(S4Vectors::mcols(vcfs[[1]])),
                         stringsAsFactors = F) %>%
         tidyr::separate(.data$VAR_ID, c('CHROM', 'pos_ref_alt'),
                         sep=":", remove = T) %>%
@@ -232,6 +232,15 @@ generate_report_data_signatures_mp <-
 }
 
 
+#' Function that retrieves prevalent signatures for a given tumor type/primary site
+#' Data is collected from COSMIC v3.2.
+#'
+#' @param site Primary tumor site
+#' @param custom_collection Custom collection of signatures from COSMIC
+#' @param pcgr_data PCGR data object
+#' @param prevalence_pct Minimum prevalence (pct) of signature in cohorts associated with primary site
+#' @param incl_poss_artifacts logical indicating if artefact signatures are to be included
+#'
 #' @export
 get_prevalent_site_signatures <-
   function(site = "Any",

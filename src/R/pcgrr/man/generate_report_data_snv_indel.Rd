@@ -21,13 +21,13 @@ generate_report_data_snv_indel(
 
 \item{sample_name}{sample identifier}
 
+\item{config}{Object with PCGR configuration parameters}
+
 \item{callset}{type of calls}
 
 \item{biomarker_mapping_stringency}{quality level for biomarkers}
 
 \item{tier_model}{tier model (pcgr_acmg)}
-
-\item{pcgr_config}{Object with PCGR configuration parameters}
 }
 \value{
 pcg_report_data data frame with all report elements
