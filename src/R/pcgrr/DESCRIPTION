@@ -32,6 +32,7 @@ Imports:
     GenomeInfoDb,
     ggplot2,
     ggpubr,
+    glue,
     htmltools,
     IRanges,
     jsonlite,

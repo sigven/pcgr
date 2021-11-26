@@ -163,7 +163,7 @@ pcgr_config[['t_props']][['tumor_purity']] <- ifelse(purity == 'NA', NA_real_, a
 pcgr_config[['t_props']][['tumor_ploidy']] <- ifelse(ploidy == 'NA', NA_real_, as.numeric(ploidy))
 pcgr_config[['t_props']][['tumor_type']] <- stringr::str_replace_all(
   stringr::str_replace_all(
-    args$tumor_type, "_", " "),
+    args[['tumor_type']], "_", " "),
   "@", "/")
 if (pcgr_config[['t_props']][['tumor_type']] == "Any") {
   pcgr_config[['t_props']][['tumor_type']] <- "Cancer, NOS"
