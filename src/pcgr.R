@@ -1,8 +1,7 @@
 #!/usr/bin/env Rscript
 
 suppressWarnings(suppressPackageStartupMessages(library(argparse)))
-suppressWarnings(suppressPackageStartupMessages(library(glue)))
-
+suppressWarnings(suppressPackageStartupMessages(library(pcgrr)))
 ##---- Argument Parsing ----##
 p <- argparse::ArgumentParser(description='Process some integers', prog='pcgrr')
 
@@ -25,7 +24,7 @@ p$add_argument('data_dir')             # 10
 t_props_args <- c('tumor_purity', 'tumor_ploidy', 'tumor_type')
 p$add_argument('tumor_purity')         # 11
 p$add_argument('tumor_ploidy')         # 12
-p$add_argument('tumor_type')                          # 13
+p$add_argument('tumor_type')           # 13
 # assay props
 assay_props_args <- c('target_size_mb', 'type')
 p$add_argument('target_size_mb', type='double')     # 14
@@ -91,7 +90,7 @@ p$add_argument('control_af_tag')  # 54
 p$add_argument('control_dp_tag')  # 55
 p$add_argument('call_conf_tag')   # 56
 # clinicaltrials
-p$add_argument('clinicaltrials', type='integer')      # 57
+p$add_argument('clinicaltrials_run', type='integer')  # 57
 # other
 p$add_argument('vep_n_forks', type='integer')         # 58
 p$add_argument('vep_buffer_size', type='integer')     # 59
@@ -125,7 +124,7 @@ pcgr_config <- list(
   ),
   cna = args[cna_args],
   allelic_support = args[allelic_support_args],
-  clinicaltrials = as.logical(args[['clinicaltrials']]),
+  clinicaltrials = list(run = as.logical(args[['clinicaltrials_run']])),
   other = list(vep_n_forks = args[['vep_n_forks']],
                vep_buffer_size = args[['vep_buffer_size']],
                vep_no_intergenic = as.logical(args[['vep_no_intergenic']]),
@@ -139,7 +138,6 @@ pcgr_config <- list(
   visual = list(report_theme = args[['report_theme']],
                 nonfloating_toc = as.logical(args[['nonfloating_toc']])
   )
-
 )
 
 ##---- Argument Processing ----##
@@ -158,6 +156,11 @@ if (pcgr_config[['required_args']][['cpsr_report']] == "None"){
 }
 
 # tumor props
+# Handle case when 'NA'
+purity <- pcgr_config[['t_props']][['tumor_purity']]
+ploidy <- pcgr_config[['t_props']][['tumor_ploidy']]
+pcgr_config[['t_props']][['tumor_purity']] <- ifelse(purity == 'NA', NA_real_, as.numeric(purity))
+pcgr_config[['t_props']][['tumor_ploidy']] <- ifelse(ploidy == 'NA', NA_real_, as.numeric(ploidy))
 pcgr_config[['t_props']][['tumor_type']] <- stringr::str_replace_all(
   stringr::str_replace_all(
     args$tumor_type, "_", " "),
@@ -184,30 +187,27 @@ for (mf in tumor_only_args[['filter']]) {
   pcgr_config[['tumor_only']][[mf]] <- as.logical(args[[mf]])
 }
 
-Hmisc::list.tree(pcgr_config)
+pcgr_config_rds <- file.path(pcgr_config[['required_args']][['output_dir']],
+                             paste0(pcgr_config[['required_args']][['sample_name']],
+                                    ".pcgr_config.rds"))
+saveRDS(pcgr_config, file = pcgr_config_rds)
+### Arg processing END
 
-saveRDS(pcgr_config, file=paste0(dir,"/", pcgr_config[['required_args']][['sample_name']],".pcgr_config.rds"))
-
-pcgr_data <- readRDS(paste0(pcgr_config[['required_args']][['data_dir']],
-                            '/data/',
-                            pcgr_config[['required_args']][['genome_assembly']],
-                            '/rds/pcgr_data.rds'))
-
+pcgr_data <- readRDS(file.path(pcgr_config[['required_args']][['data_dir']],
+                               'data',
+                               pcgr_config[['required_args']][['genome_assembly']],
+                               'rds/pcgr_data.rds'))
+genome_assembly <- pcgr_config[['required_args']][['genome_assembly']]
+bsgenome_obj <- pcgrr::get_genome_obj(genome_assembly)
+genome_grch2hg <- c("grch38" = "hg38", "grch37" = "hg19")
 pcgr_data[['assembly']][['seqinfo']] <-
-   GenomeInfoDb::Seqinfo(seqnames = GenomeInfoDb::seqlevels(GenomeInfoDb::seqinfo(BSgenome.Hsapiens.UCSC.hg38)),
-                         seqlengths = GenomeInfoDb::seqlengths(GenomeInfoDb::seqinfo(BSgenome.Hsapiens.UCSC.hg38)),
-                         genome = 'hg38')
-pcgr_data[['assembly']][['bsg']] <- BSgenome.Hsapiens.UCSC.hg38
-if(pcgr_config[['required_args']][['genome_assembly']] == 'grch37'){
-  pcgr_data[['assembly']][['bsg']] <- BSgenome.Hsapiens.UCSC.hg19
-  pcgr_data[['assembly']][['seqinfo']] <-
-     GenomeInfoDb::Seqinfo(
-       seqnames = GenomeInfoDb::seqlevels(GenomeInfoDb::seqinfo(BSgenome.Hsapiens.UCSC.hg19)),
-       seqlengths = GenomeInfoDb::seqlengths(GenomeInfoDb::seqinfo(BSgenome.Hsapiens.UCSC.hg19)), genome = 'hg19')
-}
+  GenomeInfoDb::Seqinfo(seqnames = GenomeInfoDb::seqlevels(GenomeInfoDb::seqinfo(bsgenome_obj)),
+                        seqlengths = GenomeInfoDb::seqlengths(GenomeInfoDb::seqinfo(bsgenome_obj)),
+                        genome = genome_grch2hg[genome_assembly])
+pcgr_data[['assembly']][['bsg']] <- bsgenome_obj
 
-if(pcgr_config[['other']][['vep_regulatory']] == F){
-  for(e in c('tier4_display','tier5_display','all','tsv')){
+if (pcgr_config[['other']][['vep_regulatory']] == F){
+  for (e in c('tier4_display','tier5_display','all','tsv')){
     pcgr_data[['annotation_tags']][[e]] <-
       pcgr_data[['annotation_tags']][[e]][
         pcgr_data[['annotation_tags']][[e]] != "REGULATORY_ANNOTATION"]
@@ -220,13 +220,16 @@ my_log4r_layout <- function(level, ...) {
 
 log4r_logger <- log4r::logger(threshold = "INFO", appenders = log4r::console_appender(my_log4r_layout))
 
+# this gets passed on to all the log4r_* functions inside the pkg
+options("PCGRR_LOG4R_LOGGER" = log4r_logger)
+
 ## Clinical trials
-if(pcgr_config[['t_props']][['tumor_type']] == "Cancer, NOS"){
-  pcgrr:::log4r_info(paste0("Clinical trials will not be included in the report when primary site is not specified - skipping"))
+if (pcgr_config[['t_props']][['tumor_type']] == "Cancer, NOS"){
+  log4r_info(paste0("Clinical trials will not be included in the report when primary site is not specified - skipping"))
   pcgr_config[['clinicaltrials']][['run']] <- F
 }
 
-pcgrr::log4r_info(paste0("Tumor primary site: ",pcgr_config[['t_props']][['tumor_type']]))
+pcgrr::log4r_info(paste0("Tumor primary site: ", pcgr_config[['t_props']][['tumor_type']]))
 
 pcg_report <- NULL
 
@@ -239,7 +242,7 @@ pcg_report <-
     tier_model = 'pcgr_acmg')
 
 # ## Write report and result files
-if(!is.null(pcg_report)){
+if (!is.null(pcg_report)) {
   pcgrr::write_report_output(
     pcg_report,
     pcgr_config,
@@ -252,7 +255,7 @@ if(!is.null(pcg_report)){
     pcg_report,
     pcgr_config,
     output_format = 'msigs_tsv')
-  if(pcgr_config[['assay_props']][['vcf_tumor_only']] == T){
+  if (pcgr_config[['assay_props']][['vcf_tumor_only']] == T){
     pcgrr::write_report_output(
       pcg_report,
       pcgr_config,
@@ -271,6 +274,4 @@ if(!is.null(pcg_report)){
     pcgr_config,
     output_format = 'html',
     flexdb = T)
-
 }
-
