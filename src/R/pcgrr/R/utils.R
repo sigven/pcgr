@@ -1721,7 +1721,7 @@ get_calls <- function(tsv_gz_file,
   }
 
   vcf_data_df <- vcf_data_df %>%
-    pcgrr::append_annotation_links(pcgr_data = pcgr_data)
+    pcgrr::append_annotation_links()
 
   if (!("TARGETED_DRUGS" %in% colnames(vcf_data_df))) {
     vcf_data_df <- vcf_data_df %>%
