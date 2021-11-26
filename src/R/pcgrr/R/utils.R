@@ -2092,15 +2092,18 @@ targeted_drugs_summarise <- function(
 
 }
 
-log4r_info <- function(log4r_logger, msg) {
+log4r_info <- function(msg) {
+  log4r_logger <- getOption("PCGRR_LOG4R_LOGGER")
   log4r::info(log4r_logger, msg)
 }
 
-log4r_debug <- function(log4r_logger, msg) {
+log4r_debug <- function(msg) {
+  log4r_logger <- getOption("PCGRR_LOG4R_LOGGER")
   log4r::debug(log4r_logger, msg)
 }
 
-log4r_warn <- function(log4r_logger, msg) {
+log4r_warn <- function(msg) {
+  log4r_logger <- getOption("PCGRR_LOG4R_LOGGER")
   log4r::warn(log4r_logger, msg)
 }
 
