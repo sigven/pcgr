@@ -1721,7 +1721,7 @@ get_calls <- function(tsv_gz_file,
   }
 
   vcf_data_df <- vcf_data_df %>%
-    pcgrr::append_annotation_links(pcgr_data = pcgr_data)
+    pcgrr::append_annotation_links()
 
   if (!("TARGETED_DRUGS" %in% colnames(vcf_data_df))) {
     vcf_data_df <- vcf_data_df %>%
@@ -2092,14 +2092,64 @@ targeted_drugs_summarise <- function(
 
 }
 
-log4r_info <- function(log4r_logger, msg) {
+log4r_info <- function(msg) {
+  log4r_logger <- getOption("PCGRR_LOG4R_LOGGER")
   log4r::info(log4r_logger, msg)
 }
 
-log4r_debug <- function(log4r_logger, msg) {
+log4r_debug <- function(msg) {
+  log4r_logger <- getOption("PCGRR_LOG4R_LOGGER")
   log4r::debug(log4r_logger, msg)
 }
 
-log4r_warn <- function(log4r_logger, msg) {
+log4r_warn <- function(msg) {
+  log4r_logger <- getOption("PCGRR_LOG4R_LOGGER")
   log4r::warn(log4r_logger, msg)
+}
+
+#' Get BSgenome Object
+#'
+#' Gets BSgenome object given a human genome assembly string.
+#'
+#' @param genome Human genome assembly string: hg38 or hg19.
+#'
+#' @return BSgenome object.
+#'
+#' @examples
+#' \dontrun{
+#' get_genome_obj("hg38")
+#' }
+#' @export
+get_genome_obj <- function(genome) {
+  bsgenome <- c(
+    grch37 = "BSgenome.Hsapiens.UCSC.hg19",
+    grch38 = "BSgenome.Hsapiens.UCSC.hg38"
+  )
+  pkg <- bsgenome[genome]
+  assertthat::assert_that(
+    genome %in% names(bsgenome),
+    msg = glue::glue(
+      "Instead of '{genome}', pick one of: ",
+      "{paste(names(bsgenome), collapse = ', ')}"
+    )
+  )
+  if (!pkg_exists(pkg)) {
+    stop(glue::glue(
+      "{pkg} is not installed on your system.\n",
+      "Please install with:\n'BiocManager::install(\"{pkg}\")'"
+    ))
+  }
+  return(eval(parse(text = glue::glue("{pkg}::{pkg}"))))
+}
+
+#' Does R Package Exist
+#'
+#' Checks if the specified R package exists on the local system.
+#'
+#' @param p The R package to check for.
+#' @return TRUE if package exists, FALSE otherwise.
+#'
+pkg_exists <- function(p) {
+  assertthat::assert_that(is.character(p))
+  nzchar(system.file(package = p))
 }
