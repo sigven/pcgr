@@ -21,5 +21,6 @@ setup(
         'scripts/pcgr_validate_input.py',
         'scripts/pcgr_vcfanno.py',
         'scripts/vcf2tsv.py',
+        'scripts/pcgrr.R'
     ]
 )

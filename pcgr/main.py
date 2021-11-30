@@ -274,7 +274,6 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
         data_dir = '/data'
         output_dir = '/workdir/output'
         vep_dir = '/usr/local/share/vep/data'
-        r_scripts_dir = '/'
 
     # If running non-Dockerized - specify paths for input files and directories
     else:
@@ -294,7 +293,6 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
         data_dir = host_directories['base_dir_host']
         output_dir = host_directories['output_dir_host']
         vep_dir = vepdb_dir_host
-        r_scripts_dir = ''
 
     check_subprocess(logger, docker_cmd_run1.replace(f'-u {uid}', '') + f'mkdir -p {output_dir}{docker_cmd_run_end}', debug)
 
@@ -481,7 +479,7 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
         logger = getlogger('pcgr-writer')
         logger.info('PCGR - STEP 4: Generation of output files - variant interpretation report for precision oncology')
         pcgr_report_command = (
-                f"{docker_cmd_run1} {os.path.join(r_scripts_dir, 'pcgr.R')} {output_dir} "
+                f"{docker_cmd_run1} pcgrr.R {output_dir} "
                 f"{output_pass_tsv}.gz "
                 f"{input_cna_docker} "
                 f"{input_rna_fusion_docker} "
@@ -553,7 +551,7 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
                 )
 
         print(pcgr_report_command)
-        #check_subprocess(logger, pcgr_report_command, debug)
+        check_subprocess(logger, pcgr_report_command, debug)
         logger.info("Finished")
 
     print()
