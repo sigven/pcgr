@@ -7,23 +7,20 @@
 #' @param bsg BSgenome object
 #'
 #' @export
-get_valid_chromosome_segments <-
-  function(cna_segments_df,
-           genome_assembly = "grch37",
-           bsg = BSgenome.Hsapiens.UCSC.hg19) {
+get_valid_chromosome_segments <- function(cna_segments_df, genome_assembly, bsg) {
 
   invisible(
     assertthat::assert_that(
       !is.null(cna_segments_df) & is.data.frame(cna_segments_df),
       msg = "Argument 'cna_segments_df' must be a valid data.frame() object"))
-    assertable::assert_colnames(
-      cna_segments_df, c("chromosome", "segment_end"),
-      only_colnames = F, quiet = T)
+  assertable::assert_colnames(
+    cna_segments_df, c("chromosome", "segment_end"),
+    only_colnames = FALSE, quiet = TRUE)
   assertable::assert_coltypes(
     cna_segments_df,
     list(chromosome = character(),
          segment_end = integer()),
-    quiet = T)
+    quiet = TRUE)
 
   chromosome_lengths <-
     data.frame(chromosome = utils::head(names(GenomeInfoDb::seqlengths(bsg)), 24),
@@ -34,7 +31,7 @@ get_valid_chromosome_segments <-
       dplyr::left_join(chromosome_lengths, by = c("chromosome")) %>%
       dplyr::rowwise() %>%
       dplyr::mutate(segment_error = .data$segment_end > .data$chrom_length)
-    )
+  )
   if (nrow(dplyr::filter(cna_segments_df, .data$segment_error == T)) > 0) {
     n_removed <- nrow(dplyr::filter(cna_segments_df, .data$segment_error == T))
     log4r_warn(paste0(

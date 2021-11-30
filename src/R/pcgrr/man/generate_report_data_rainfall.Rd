@@ -8,8 +8,8 @@ along genome, considering SNVs only)}
 generate_report_data_rainfall(
   variant_set,
   colors = NULL,
-  autosomes = F,
-  build = "grch37"
+  autosomes = FALSE,
+  build = NULL
 )
 }
 \arguments{

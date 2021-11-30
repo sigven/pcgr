@@ -2,13 +2,9 @@
 % Please edit documentation in R/utils.R
 \name{get_valid_chromosomes}
 \alias{get_valid_chromosomes}
-\title{Function that check for valid chromosome names in data frame of variants}
+\title{Checks for valid chromosome names in data frame of variants}
 \usage{
-get_valid_chromosomes(
-  vcf_data_df,
-  chromosome_column = "CHROM",
-  bsg = BSgenome.Hsapiens.UCSC.hg19
-)
+get_valid_chromosomes(vcf_data_df, chromosome_column = "CHROM", bsg = NULL)
 }
 \arguments{
 \item{vcf_data_df}{data frame}
@@ -21,5 +17,5 @@ get_valid_chromosomes(
 vcf_data_df valid data frame with valid mutations
 }
 \description{
-Function that check for valid chromosome names in data frame of variants
+Checks for valid chromosome names in data frame of variants
 }

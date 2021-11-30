@@ -400,7 +400,7 @@ get_prevalent_site_signatures <-
 #'
 #' @export
 generate_report_data_rainfall <- function(variant_set, colors = NULL,
-                                          autosomes = F, build = "grch37") {
+                                          autosomes = FALSE, build = NULL) {
 
   pcg_report_rainfall <- pcgrr::init_report(class = "rainfall")
   if(NROW(variant_set) == 0){
@@ -478,14 +478,10 @@ generate_report_data_rainfall <- function(variant_set, colors = NULL,
                          as.character(.data$MUTATION_TYPE))) %>%
       pcgrr::sort_chromosomal_segments()
 
-    bsg <- BSgenome.Hsapiens.UCSC.hg19
+    bsg <- get_genome_obj(build)
     chr_length <- utils::head(GenomeInfoDb::seqlengths(bsg), 24)
     chromosomes <- utils::head(GenomeInfoDb::seqnames(bsg), 24)
-    if (build == "grch38") {
-      bsg <- BSgenome.Hsapiens.UCSC.hg38
-      chr_length <- utils::head(GenomeInfoDb::seqlengths(bsg), 24)
-    }
-    if (autosomes == T) {
+    if (autosomes == TRUE) {
       chr_length <- utils::head(chr_length, 22)
     }
 

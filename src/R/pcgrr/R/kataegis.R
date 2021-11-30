@@ -135,14 +135,9 @@ kataegis_detect <- function(data, sample_id = "sample_id",
 #' @param context_size size of neighbouring sequence context
 #'
 #' @export
-kataegis_input <- function(variant_set, chr = "chr",
-                           pos = "pos", ref = "ref",
-                         alt = "alt", build = NULL,
-                         context_size = 10) {
+kataegis_input <- function(variant_set, chr = "chr", pos = "pos", ref = "ref",
+                           alt = "alt", build = NULL, context_size = 10) {
 
-  invisible(assertthat::assert_that(
-    !is.null(build),
-    msg = "Argument 'build' cannot be NULL, any of 'grch37' or 'grch38'"))
   invisible(assertthat::assert_that(
     is.data.frame(variant_set),
     msg = paste0("Argument 'variant_set' needs be of type data.frame")))
@@ -163,12 +158,8 @@ kataegis_input <- function(variant_set, chr = "chr",
 
   #context_size <- 10
   if (nrow(mut_data) > 100) {
-    bsg <- BSgenome.Hsapiens.UCSC.hg19
+    bsg <- get_genome_obj(build)
     chr.lens <- as.integer(utils::head(GenomeInfoDb::seqlengths(bsg), 24))
-    if (build == "grch38") {
-      bsg <- BSgenome.Hsapiens.UCSC.hg38
-      chr.lens <- as.integer(utils::head(GenomeInfoDb::seqlengths(bsg), 24))
-    }
     mut_data$build <- build
     ref_base <-  Biostrings::DNAStringSet(mut_data$ref)
     alt_base <-  Biostrings::DNAStringSet(mut_data$alt)
@@ -196,7 +187,7 @@ kataegis_input <- function(variant_set, chr = "chr",
     chr.lens.sum <-  c(0, chr.lens.sum)
     mut_data$dis <-  c(mut_data$pos[1],
                        diff(mut_data$pos + chr.lens.sum[mut_data$seq]))
-  }else{
+  } else {
     mut_data <- NULL
   }
   return(mut_data)

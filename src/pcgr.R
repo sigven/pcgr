@@ -225,11 +225,11 @@ options("PCGRR_LOG4R_LOGGER" = log4r_logger)
 
 ## Clinical trials
 if (pcgr_config[['t_props']][['tumor_type']] == "Cancer, NOS"){
-  log4r_info(paste0("Clinical trials will not be included in the report when primary site is not specified - skipping"))
+  pcgrr:::log4r_info(paste0("Clinical trials will not be included in the report when primary site is not specified - skipping"))
   pcgr_config[['clinicaltrials']][['run']] <- F
 }
 
-pcgrr::log4r_info(paste0("Tumor primary site: ", pcgr_config[['t_props']][['tumor_type']]))
+pcgrr:::log4r_info(paste0("Tumor primary site: ", pcgr_config[['t_props']][['tumor_type']]))
 
 pcg_report <- NULL
 

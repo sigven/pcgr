@@ -114,7 +114,7 @@ tier_af_distribution <- function(tier_df, bin_size = 0.1) {
 
 }
 
-#' Function that check for valid chromosome names in data frame of variants
+#' Checks for valid chromosome names in data frame of variants
 #'
 #' @param vcf_data_df data frame
 #' @param chromosome_column name of chromosome column
@@ -125,13 +125,15 @@ tier_af_distribution <- function(tier_df, bin_size = 0.1) {
 #' @export
 get_valid_chromosomes <- function(vcf_data_df,
                                   chromosome_column = "CHROM",
-                                  bsg = BSgenome.Hsapiens.UCSC.hg19) {
+                                  bsg = NULL) {
   assertthat::assert_that(
     is.data.frame(vcf_data_df),
     msg = paste0("Argument 'vcf_data_df' must be of type data.frame, not ",
                  class(vcf_data_df)))
+  assertthat::assert_that(!is.null(bsg),
+                          msg = "Please provide a valid BSgenome.Hsapiens object")
   assertable::assert_colnames(
-    vcf_data_df, chromosome_column, only_colnames = F, quiet = T)
+    vcf_data_df, chromosome_column, only_colnames = FALSE, quiet = TRUE)
   vcf_data_df_valid <- vcf_data_df
   vcf_data_df_valid[, chromosome_column] <-
     factor(vcf_data_df_valid[, chromosome_column])
@@ -141,7 +143,7 @@ get_valid_chromosomes <- function(vcf_data_df,
     sub("^MT", "chrM", levels(vcf_data_df_valid[, chromosome_column]))
   levels(vcf_data_df_valid[, chromosome_column]) <-
     sub("^(GL[0-9]+).[0-9]", "chrUn_\\L\\1",
-        levels(vcf_data_df_valid[, chromosome_column]), perl = T)
+        levels(vcf_data_df_valid[, chromosome_column]), perl = TRUE)
   unknown_regs <-
     levels(vcf_data_df_valid[, chromosome_column])
   unknown_regs <- unknown_regs[which(
@@ -2123,7 +2125,9 @@ log4r_warn <- function(msg) {
 get_genome_obj <- function(genome) {
   bsgenome <- c(
     grch37 = "BSgenome.Hsapiens.UCSC.hg19",
-    grch38 = "BSgenome.Hsapiens.UCSC.hg38"
+    grch38 = "BSgenome.Hsapiens.UCSC.hg38",
+    hg19 = "BSgenome.Hsapiens.UCSC.hg19",
+    hg38 = "BSgenome.Hsapiens.UCSC.hg38"
   )
   pkg <- bsgenome[genome]
   assertthat::assert_that(
