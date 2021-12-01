@@ -66,7 +66,7 @@ remove_cols_from_df <- function(df, cnames = NULL) {
 tier_af_distribution <- function(tier_df, bin_size = 0.1) {
 
   af_bin_df <- data.frame()
-  assertable::assert_colnames(tier_df, c("AF_TUMOR"),
+  assertable::assert_colnames(tier_df, c("AF_TUMOR","TIER"),
                               only_colnames = F, quiet = T)
   i <- 1
   num_bins <- as.integer(1 / bin_size)
@@ -96,19 +96,22 @@ tier_af_distribution <- function(tier_df, bin_size = 0.1) {
     i <- i + 1
   }
 
-  tier_df_trans <-
-    transform(tier_df,
-              bin = cut(AF_TUMOR,
-                        breaks = seq(from = 0, to = 1, by = bin_size),
-                        right = F, include.lowest = T, labels = F))
+  tier_df_trans <- tier_df %>%
+    dplyr::mutate(
+      bin = cut(.data$AF_TUMOR,
+                breaks = c(from = 0, to = 1, by = bin_size),
+                right = F, include.lowest = T, labels = F))
+
   tier_df_trans_bin <- as.data.frame(
     dplyr::group_by(tier_df_trans, .data$TIER, .data$bin) %>%
-      dplyr::summarise(Count = dplyr::n()))
+      dplyr::summarise(Count = dplyr::n(),
+                       .groups = "drop"))
   af_bin_df <- af_bin_df %>%
     dplyr::left_join(tier_df_trans_bin, by = c("bin", "TIER")) %>%
-    dplyr::mutate(Count = dplyr::if_else(is.na(.data$Count),
-                                         as.numeric(0),
-                                         as.numeric(.data$Count)))
+    dplyr::mutate(Count = dplyr::if_else(
+      is.na(.data$Count),
+      as.numeric(0),
+      as.numeric(.data$Count)))
 
   return(af_bin_df)
 
