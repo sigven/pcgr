@@ -5,7 +5,9 @@ set -x
 
 # VCF validator
 mkdir -p ${PREFIX}/bin
-wget https://github.com/EBIvariation/vcf-validator/releases/download/v0.9.3/vcf_validator_linux -O ${PREFIX}/bin/vcf_validator
+curl -L \
+    https://github.com/EBIvariation/vcf-validator/releases/download/v0.9.3/vcf_validator_linux \
+    -o ${PREFIX}/bin/vcf_validator
 chmod +x ${PREFIX}/bin/vcf_validator
 
 ### Loftee. To make sure same LoF version is used in dockerized and non-dockerized installation.
@@ -15,3 +17,6 @@ chmod +x ${PREFIX}/bin/vcf_validator
 #   with https://github.com/bioconda/bioconda-recipes/pull/18808 once merged)
 mkdir ${PREFIX}/share/loftee
 tar -xzf ${SRC_DIR}/src/loftee_1.0.3.tgz -C ${PREFIX}/share/loftee
+
+$PYTHON setup.py install #--single-version-externally-managed --root=/
+#chmod -R o+r $PREFIX/lib/python*/site-packages/*
