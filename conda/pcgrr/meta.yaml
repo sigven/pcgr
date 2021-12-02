@@ -23,7 +23,7 @@ requirements:
     - {{ posix }}zip               # [win]
 
   host:
-    - r-base ==4.0.5
+    - r-base ==4.1.1
     - r-assertable
     - r-assertthat
     - bioconductor-biocgenerics
@@ -61,7 +61,7 @@ requirements:
     - bioconductor-variantannotation
 
   run:
-    - r-base ==4.0.5
+    - r-base ==4.1.1
     - r-assertable
     - r-assertthat
     - bioconductor-biocgenerics
