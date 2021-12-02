@@ -20,6 +20,7 @@ biocViews:
 Imports:
     assertable,
     assertthat,
+    BiocGenerics,
     BiocManager,
     Biostrings,
     caret,
@@ -52,8 +53,7 @@ Imports:
     tidyr,
     UpSetR,
     usethis,
-    VariantAnnotation,
-    BiocGenerics
+    VariantAnnotation
 Depends:
     R (>= 4.0)
 Suggests:
