@@ -1,29 +1,12 @@
 #!/usr/bin/env bash
 set -x
 
-# For the reference: CONDA env vars: https://conda.io/docs/user-guide/tasks/build-packages/environment-variables.html
-
-# Changing permissions to executables
-chmod +x ${SRC_DIR}/src/pcgr/*.py
-chmod +x ${SRC_DIR}/*.py
-chmod +x ${SRC_DIR}/src/*.R
-chmod +x ${SRC_DIR}/src/R/*.tar.gz
-# Moving libraries and scripts
-mkdir -p ${PREFIX}/lib/R/library
-mkdir -p ${PREFIX}/bin
-mkdir -p ${SP_DIR}
-#mv ${SRC_DIR}/src/R/ $PREFIX/lib/R/library/
-mv ${SRC_DIR}/src/pcgr/lib/* ${SP_DIR}/  # python modules
-mv ${SRC_DIR}/src/pcgr/*.py ${SRC_DIR}/*.py ${PREFIX}/bin/  # python scripts
-mv ${SRC_DIR}/src/*.R ${PREFIX}/bin/  # R scripts
+# Conda env vars: https://docs.conda.io/projects/conda-build/en/latest/user-guide/environment-variables.html
 
 # VCF validator
+mkdir -p ${PREFIX}/bin
 wget https://github.com/EBIvariation/vcf-validator/releases/download/v0.9.3/vcf_validator_linux -O ${PREFIX}/bin/vcf_validator
 chmod +x ${PREFIX}/bin/vcf_validator
-
-## Install assertable package (not found through Conda channels), and pcgrr
-R -e "install.packages('${SRC_DIR}/src/R/assertable_0.2.7.tar.gz', lib='${PREFIX}/lib/R/library', repos = NULL)"
-R -e "install.packages('${SRC_DIR}/src/R/pcgrr_0.9.2.tar.gz', lib='${PREFIX}/lib/R/library', repos = NULL)"
 
 ### Loftee. To make sure same LoF version is used in dockerized and non-dockerized installation.
 #   ensembl-vep conda package installs most recent version of LoF automatically, however it doesn't work with the most
