@@ -3,7 +3,7 @@
 suppressWarnings(suppressPackageStartupMessages(library(argparse)))
 suppressWarnings(suppressPackageStartupMessages(library(pcgrr)))
 ##---- Argument Parsing ----##
-p <- argparse::ArgumentParser(description='Process some integers', prog='pcgrr')
+p <- argparse::ArgumentParser(description='PCGR HTML generation step', prog='pcgrr')
 
 # required args
 required_args <- c(
