@@ -1,59 +1,18 @@
 name: pcgr_dev
 
 channels:
+  - pdiakumis
   - conda-forge
   - bioconda
   - defaults
 
 dependencies:
-  - python ==3.9.7
-  - r-base ==4.0.5
-  - ensembl-vep ==104.3
-  - cython ==0.29.24
-  - scipy ==1.7.3
-  - pandas ==1.3.4
-  - htslib ==1.10.2
-  - cyvcf2 ==0.30.11
-  - bedtools ==2.30.0
-  - vcfanno ==0.3.3
-  - vt ==0.57721
-  - vcf2maf ==1.6.18
-
-  # R packages
-  - r-argparse
-  - r-assertable
-  - r-assertthat
-  - bioconductor-biocgenerics
-  - r-biocmanager
+  - python ==3.6.13
+  - pcgr
+  - r-base ==4.1.1
+  - r-pcgrr # this comes with pcgr but anyway
   - bioconductor-bsgenome.hsapiens.ucsc.hg38
-  - bioconductor-biostrings
-  - r-caret
-  - r-data.table
-  - r-devtools
-  - r-dt
-  - r-dplyr
-  - r-flexdashboard
-  - bioconductor-genomicranges
-  - bioconductor-genomeinfodb
-  - r-ggplot2
-  - r-ggpubr
-  - r-glue
-  - r-htmltools
-  - bioconductor-iranges
-  - r-jsonlite
-  - r-log4r
-  - r-magrittr
-  - bioconductor-mutationalpatterns
-  - r-plotly
-  - r-randomforest
-  - r-rcolorbrewer
-  - r-reshape2
-  - r-rlang
-  - r-rmarkdown
+  # for R development
   - r-roxygen2
-  - bioconductor-s4vectors
-  - r-scales
-  - r-tidyr
-  - r-upsetr
-  - r-usethis
-  - bioconductor-variantannotation
+  - r-rmarkdown
+  - r-devtools
