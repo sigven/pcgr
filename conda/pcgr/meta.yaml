@@ -22,12 +22,14 @@ requirements:
     - pip
     - python ==3.6.13
     - r-base ==4.1.1
-    - r-pcgrr
   run:
     - python ==3.6.13
     - r-base ==4.1.1
     - r-pcgrr
+    - r-argparse
     - ensembl-vep ==104.3
+    - pandas
+    - scipy
     - cyvcf2 ==0.10.0
     - htslib ==1.12
     - bedtools ==2.30.0

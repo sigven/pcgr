@@ -25,7 +25,6 @@ Imports:
     Biostrings,
     caret,
     data.table,
-    devtools,
     DT,
     dplyr,
     flexdashboard,
@@ -58,6 +57,7 @@ Depends:
     R (>= 4.0)
 Suggests:
     testthat,
+    devtools,
     BSgenome.Hsapiens.UCSC.hg19,
     BSgenome.Hsapiens.UCSC.hg38
 Encoding: UTF-8
