@@ -6,7 +6,7 @@ package:
   version: {{ version }}
 
 source:
-  path: ../../
+  path: ../../..
 
 build:
   number: 0
@@ -20,27 +20,22 @@ requirements:
     - unzip
     - tar
     - pip
-    - python ==3.6.13
-    - r-base ==4.1.1
+    - python ==3.7.12
   run:
-    - python ==3.6.13
-    - r-base ==4.1.1
-    - r-pcgrr
-    - r-argparse
+    - python ==3.7.12
+    - bedtools ==2.30.0
+    - cyvcf2 ==0.30.11
     - ensembl-vep ==104.3
+    - htslib ==1.10.2
     - pandas
     - scipy
-    - cyvcf2 ==0.10.0
-    - htslib ==1.12
-    - bedtools ==2.30.0
     - vcfanno ==0.3.3
-    - vt ==0.57721
-    - vcf2maf ==1.6.18
+    - vt
+    - vcf2maf ==1.6.21
 
 test:
   commands:
     - pcgr --version
-    - $R -e "library('pcgrr')"
 
 about:
   home: https://github.com/sigven/pcgr

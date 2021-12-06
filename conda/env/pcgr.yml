@@ -1,0 +1,10 @@
+name: pcgr
+
+channels:
+  - pdiakumis
+  - conda-forge
+  - bioconda
+  - defaults
+
+dependencies:
+  - pcgr

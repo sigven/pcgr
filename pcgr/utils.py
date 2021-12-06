@@ -2,6 +2,7 @@
 import sys
 import subprocess
 import logging
+import os
 
 
 def pcgr_error_message(message, logger):
@@ -27,6 +28,13 @@ def check_subprocess(logger, command, debug):
         print(e.output.decode())
         exit(0)
 
+def export_conda(env_path):
+    f'export PATH={env_path}/bin:$PATH; '
+
+def pcgrr_conda():
+    conda_prefix = os.environ.get('CONDA_PREFIX')
+    env_dir = os.path.dirname(conda_prefix)
+    return(os.path.join(env_dir, 'pcgrr'))
 
 def getlogger(logger_name):
     logger = logging.getLogger(logger_name)

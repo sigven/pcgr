@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from pcgr import pcgr_vars, arg_checker, config
-from pcgr.utils import getlogger, check_subprocess
+from pcgr.utils import getlogger, check_subprocess, export_conda, pcgrr_conda
 import re
 import argparse
 import os
@@ -478,6 +478,7 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
         ttype = co['tumor_type']['type'].replace(' ', '_').replace('/', '@')
         logger = getlogger('pcgr-writer')
         logger.info('PCGR - STEP 4: Generation of output files - variant interpretation report for precision oncology')
+
         pcgr_report_command = (
                 f"{docker_cmd_run1} pcgrr.R {output_dir} "
                 f"{output_pass_tsv}.gz "
@@ -551,6 +552,8 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
                 )
 
         print(pcgr_report_command)
+
+        check_subprocess(logger, 'export_conda(pcgrr_conda())', debug)
         check_subprocess(logger, pcgr_report_command, debug)
         logger.info("Finished")
 
