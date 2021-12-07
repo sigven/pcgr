@@ -26,10 +26,11 @@ docker run -it --rm \
 
 Python package
 --------------
+
 The `vcf_validator` repo has a binary for Linux and Mac (and no conda release),
 so need to build separately for each:
 
-### Linux
+### Linux (Docker)
 
 ```
 cd path/to/pcgr
@@ -45,7 +46,7 @@ docker run -it --rm \
 ```
 
 - result will be output to `conda/recipe/out/linux-64/pcgr-0.9.2-py37r41_0.tar.bz2`):
-- should take around 5-10 min (MacOS Big Sur 2017)
+- should take around 6 min (MacOS Big Sur 2017)
 
 ### MacOS
 
@@ -65,5 +66,5 @@ conda mambabuild conda/pcgr \
 ```
 
 - result will be output to `conda/recipe/out/osx-64/pcgr-0.9.2-py37r41_0.tar.bz2`
-- should take around 5-10 min (MacOS Big Sur 2017)
+- should take around 5 min (MacOS Big Sur 2017)
 - expect lots of warnings and noise in the screen - you've been warned!

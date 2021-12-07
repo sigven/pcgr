@@ -30,7 +30,7 @@ requirements:
     - pandas
     - scipy
     - vcfanno ==0.3.3
-    - vt
+    - vt # this gets a different version pulled in Linux and Mac, so leave unpinned
     - vcf2maf ==1.6.21
 
 test:
