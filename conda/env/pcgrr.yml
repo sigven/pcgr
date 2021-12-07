@@ -1,0 +1,13 @@
+name: pcgrr
+
+channels:
+  - pdiakumis
+  - conda-forge
+  - bioconda
+  - defaults
+
+dependencies:
+  - python
+  - r-pcgrr
+  - r-argparse
+  - bioconductor-bsgenome.hsapiens.ucsc.hg38
