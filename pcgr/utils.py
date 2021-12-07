@@ -29,7 +29,7 @@ def check_subprocess(logger, command, debug):
         exit(0)
 
 def export_conda(env_path):
-    f'export PATH={env_path}/bin:$PATH; '
+    return(f'export PATH={env_path}/bin:$PATH; ')
 
 def pcgrr_conda():
     conda_prefix = os.environ.get('CONDA_PREFIX')
