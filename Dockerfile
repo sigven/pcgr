@@ -16,15 +16,14 @@ RUN apt-get update && \
     rm mambaforge.sh
 
 # create conda envs
-ARG MAMBA_BIN="/opt/mambaforge/bin/mamba"
-ARG CONDA_BIN="/opt/mambaforge/bin/conda"
+ENV PATH="/opt/mambaforge/bin:$PATH"
 ARG PCGR_CONDA_ENV_DIR=/home/pcgr_conda_envs
-ARG PCGR_ENV_NAME="pcgr"
 COPY ./conda/env ${PCGR_CONDA_ENV_DIR}
-RUN ${MAMBA_BIN} env create --file ${PCGR_CONDA_ENV_DIR}/pcgr.yml
-RUN ${MAMBA_BIN} env create --file ${PCGR_CONDA_ENV_DIR}/pcgrr.yml
-RUN ${MAMBA_BIN} clean --all --force-pkgs-dirs --yes
+RUN mamba env create --file ${PCGR_CONDA_ENV_DIR}/pcgr.yml
+RUN mamba env create --file ${PCGR_CONDA_ENV_DIR}/pcgrr.yml
+RUN mamba clean --all --force-pkgs-dirs --yes
 
+ARG PCGR_ENV_NAME="pcgr"
 # pcgr env is activated by default
-ENV PATH="/opt/mambaforge/envs/${PCGR_ENV_NAME}/bin:/opt/mambaforge/bin:${PATH}"
+ENV PATH="/opt/mambaforge/envs/${PCGR_ENV_NAME}/bin:${PATH}"
 ENV CONDA_PREFIX="/opt/mambaforge/envs/${PCGR_ENV_NAME}"
