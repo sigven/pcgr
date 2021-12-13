@@ -48,13 +48,14 @@ generate_report_data_signatures_mp <-
 
   ## read MutationalPattern VCF file
   if(file.exists(vcf_fname)){
-    vcfs <- suppressWarnings(
+    vcfs <- suppressMessages(suppressWarnings(
       MutationalPatterns::read_vcfs_as_granges(
         vcf_files = vcf_fname,
         sample_names = sample_name,
         genome = pcgr_data[["assembly"]][["ref_genome"]],
         predefined_dbs_mbs = T),
       )
+    )
 
     log4r_info(paste0("Number of SNVs for signature analysis: ",
                              length(vcfs[[1]])))

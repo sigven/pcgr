@@ -1950,8 +1950,10 @@ update_maf_allelic_support <- function(calls, maf_fname_tmp,
       }
 
       write("#version 2.4", file = maf_fname, sep = "\n")
-      utils::write.table(maf_data, file = maf_fname, col.names = T, append = T,
-                  row.names = F, na = "", quote = F, sep = "\t")
+      suppressWarnings(
+        utils::write.table(maf_data, file = maf_fname, col.names = T, append = T,
+                           row.names = F, na = "", quote = F, sep = "\t")
+      )
       if (delete_raw == T) {
         system(paste0("rm -f ", maf_fname_tmp))
       }

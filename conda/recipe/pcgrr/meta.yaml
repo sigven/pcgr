@@ -5,7 +5,7 @@ package:
   version: {{ version|replace("-", "_") }}
 
 source:
-  path: ../../pcgrr
+  path: ../../../pcgrr
 
 build:
   number: 0

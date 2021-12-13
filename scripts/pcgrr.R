@@ -78,8 +78,11 @@ p$add_argument('log_r_gain', type='double')        # 46
 p$add_argument('cna_overlap_pct', type='double')   # 47
 # allelic support args
 allelic_support_args <- c(
-  'tumor_af_min', 'tumor_dp_min', 'control_dp_min', 'control_af_max',
-  'tumor_af_tag', 'tumor_dp_tag', 'control_af_tag', 'control_dp_tag', 'call_conf_tag')
+  'tumor_af_min', 'tumor_dp_min',
+  'control_dp_min', 'control_af_max',
+  'tumor_af_tag', 'tumor_dp_tag',
+  'control_af_tag', 'control_dp_tag',
+  'call_conf_tag')
 p$add_argument('tumor_af_min', type='double')   # 48
 p$add_argument('tumor_dp_min', type='double')   # 49
 p$add_argument('control_dp_min', type='double') # 50
@@ -159,8 +162,10 @@ if (pcgr_config[['required_args']][['cpsr_report']] == "None"){
 # Handle case when 'NA'
 purity <- pcgr_config[['t_props']][['tumor_purity']]
 ploidy <- pcgr_config[['t_props']][['tumor_ploidy']]
-pcgr_config[['t_props']][['tumor_purity']] <- ifelse(purity == 'NA', NA_real_, as.numeric(purity))
-pcgr_config[['t_props']][['tumor_ploidy']] <- ifelse(ploidy == 'NA', NA_real_, as.numeric(ploidy))
+pcgr_config[['t_props']][['tumor_purity']] <-
+  ifelse(purity == 'NA', NA_real_, as.numeric(purity))
+pcgr_config[['t_props']][['tumor_ploidy']] <-
+  ifelse(ploidy == 'NA', NA_real_, as.numeric(ploidy))
 pcgr_config[['t_props']][['tumor_type']] <- stringr::str_replace_all(
   stringr::str_replace_all(
     args[['tumor_type']], "_", " "),
@@ -187,23 +192,26 @@ for (mf in tumor_only_args[['filter']]) {
   pcgr_config[['tumor_only']][[mf]] <- as.logical(args[[mf]])
 }
 
-pcgr_config_rds <- file.path(pcgr_config[['required_args']][['output_dir']],
-                             paste0(pcgr_config[['required_args']][['sample_name']],
-                                    ".pcgr_config.rds"))
+pcgr_config_rds <- file.path(
+  pcgr_config[['required_args']][['output_dir']],
+  paste0(pcgr_config[['required_args']][['sample_name']],
+         ".pcgr_config.rds"))
 saveRDS(pcgr_config, file = pcgr_config_rds)
 ### Arg processing END
 
-pcgr_data <- readRDS(file.path(pcgr_config[['required_args']][['data_dir']],
-                               'data',
-                               pcgr_config[['required_args']][['genome_assembly']],
-                               'rds/pcgr_data.rds'))
+pcgr_data <- readRDS(
+  file.path(pcgr_config[['required_args']][['data_dir']],
+            'data',
+            pcgr_config[['required_args']][['genome_assembly']],
+            'rds/pcgr_data.rds'))
 genome_assembly <- pcgr_config[['required_args']][['genome_assembly']]
 bsgenome_obj <- pcgrr::get_genome_obj(genome_assembly)
 genome_grch2hg <- c("grch38" = "hg38", "grch37" = "hg19")
 pcgr_data[['assembly']][['seqinfo']] <-
-  GenomeInfoDb::Seqinfo(seqnames = GenomeInfoDb::seqlevels(GenomeInfoDb::seqinfo(bsgenome_obj)),
-                        seqlengths = GenomeInfoDb::seqlengths(GenomeInfoDb::seqinfo(bsgenome_obj)),
-                        genome = genome_grch2hg[genome_assembly])
+  GenomeInfoDb::Seqinfo(
+    seqnames = GenomeInfoDb::seqlevels(GenomeInfoDb::seqinfo(bsgenome_obj)),
+    seqlengths = GenomeInfoDb::seqlengths(GenomeInfoDb::seqinfo(bsgenome_obj)),
+    genome = genome_grch2hg[genome_assembly])
 pcgr_data[['assembly']][['bsg']] <- bsgenome_obj
 
 if (pcgr_config[['other']][['vep_regulatory']] == F){
@@ -215,10 +223,12 @@ if (pcgr_config[['other']][['vep_regulatory']] == F){
 }
 
 my_log4r_layout <- function(level, ...) {
-  paste0(format(Sys.time()), " - pcgr-report-generation - ", level, " - ", ..., "\n", collapse = "")
+  paste0(format(Sys.time()), " - pcgr-report-generation - ",
+         level, " - ", ..., "\n", collapse = "")
 }
 
-log4r_logger <- log4r::logger(threshold = "INFO", appenders = log4r::console_appender(my_log4r_layout))
+log4r_logger <- log4r::logger(threshold = "INFO",
+                              appenders = log4r::console_appender(my_log4r_layout))
 
 # this gets passed on to all the log4r_* functions inside the pkg
 options("PCGRR_LOG4R_LOGGER" = log4r_logger)
@@ -233,6 +243,11 @@ pcgrr:::log4r_info(paste0("Tumor primary site: ", pcgr_config[['t_props']][['tum
 
 pcg_report <- NULL
 
+defaultW <- getOption("warn")
+options(warn = -1)
+
+
+
 # ## Generate report object
 pcg_report <-
   pcgrr::generate_pcgr_report(
@@ -240,6 +255,9 @@ pcg_report <-
     pcgr_data = pcgr_data,
     config = pcgr_config,
     tier_model = 'pcgr_acmg')
+
+options(warn = defaultW)
+
 
 # ## Write report and result files
 if (!is.null(pcg_report)) {

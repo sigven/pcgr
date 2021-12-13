@@ -555,7 +555,8 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
                 f"{docker_cmd_run_end}"
                 )
 
-        print(pcgr_report_command)
+        if debug:
+          print(pcgr_report_command)
         check_subprocess(logger, pcgr_report_command, debug)
         logger.info("Finished")
 
