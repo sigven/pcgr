@@ -14,5 +14,4 @@ mkdir ${PREFIX}/share/loftee
 tar -xzf ${SRC_DIR}/src/loftee_1.0.3.tgz -C ${PREFIX}/share/loftee
 
 #---- PCGR Python Package Installation ----#
-#$PYTHON setup.py install # deprecation warnings (but works)
-$PYTHON -m pip install . --no-deps -vv
+$PYTHON setup.py install
