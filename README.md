@@ -21,6 +21,11 @@ A few screenshots of the dashboard-type HTML output (new in 0.9.0) is shown belo
 ![PCGR overview](pcgr_dashboard_views.png)
 
 ### News
+* _December 2021_: **0.9.3 release**
+  * Complete restructure of Python and R components. 
+  * Remove VCF validation step. Feedback from users suggested that Ensembl's
+    `vcf-validator` was often too stringent so its use has been deprecated.
+    The `--no_vcf_validate` option remains for backwards compatibility.
 * _June 30th 2021_: **0.9.2 release**
    * Data bundle updates (CIViC, ClinVar, CancerMine, UniProt KB, PFAM)
    * Software upgrades: VEP (104), R v4.1/BioConductor 3.13
