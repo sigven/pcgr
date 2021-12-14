@@ -3,16 +3,8 @@ set -x
 
 # Conda env vars: https://docs.conda.io/projects/conda-build/en/latest/user-guide/environment-variables.html
 
-#---- VCF validator ----#
-mkdir -p ${PREFIX}/bin
-# releases available for mac and linux
-PLATFORM_INFERRED=$(uname -s)
-[[ $PLATFORM_INFERRED == "Darwin" ]] && VCF_VALIDATOR_SUFFIX="macos" || VCF_VALIDATOR_SUFFIX="linux"
-VCF_VALIDATOR_RELEASE="https://github.com/EBIvariation/vcf-validator/releases/download/v0.9.3/vcf_validator_${VCF_VALIDATOR_SUFFIX}"
-curl -L $VCF_VALIDATOR_RELEASE -o ${PREFIX}/bin/vcf_validator
-chmod +x ${PREFIX}/bin/vcf_validator
-
-#---- Loftee ----#
+#---- Loftee ----# 
+# This is used in CPSR for now.
 # To make sure same LoF version is used in dockerized and non-dockerized installation.
 # ensembl-vep conda package installs most recent version of LoF automatically, however
 # it doesn't work with the most recent perl 5.26 (see https://github.com/sigven/cpsr/issues/2).
