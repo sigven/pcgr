@@ -28,7 +28,7 @@ A screenshot of the dashboard-type HTML output (new in 0.9.0) is shown below.
 
 ## News
 
-* _December 2021_: **0.9.3 release**
+* _December 2021_: **0.9.4 release**
   * Complete restructure of Python and R components.
     * Installation now relies on two separate [conda](https://docs.conda.io/en/latest/)
       packages, `pcgr` (Python component) and `pcgrr` (R component).
@@ -79,6 +79,8 @@ Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, Ola Mykleb
 
 
 ## Getting started
+
+- Start by creating a `PCGR` directory to install the data bundle and GitHub codebase.
 
 ### STEP 1: Download Data Bundle
 
