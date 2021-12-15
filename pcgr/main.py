@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from pcgr import pcgr_vars, arg_checker, config
-from pcgr.utils import getlogger, check_subprocess, export_conda, pcgrr_conda
+from pcgr.utils import getlogger, check_subprocess, rscript_path, pcgrr_script_path, get_docker_user_id
 import re
 import argparse
 import os
@@ -181,20 +181,7 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
         VEP_ASSEMBLY = 'GRCh37'
     logger = getlogger('pcgr-get-OS')
 
-    if docker_user_id:
-        uid = docker_user_id
-    elif platform.system() == 'Linux' or platform.system() == 'Darwin' or sys.platform == 'darwin' or sys.platform == 'linux2' or sys.platform == 'linux':
-        uid = os.getuid()
-    else:
-        if platform.system() == 'Windows' or sys.platform == 'win32' or sys.platform == 'cygwin':
-            uid = getpass.getuser()
-
-    if uid == '':
-        warn_msg = (f'Was not able to get user id/username for logged-in user on the underlying platform '
-                    f'(platform.system(): {platform.system()},  sys.platform: {sys.platform}, now running PCGR as root')
-        logger.warning(warn_msg)
-        uid = 'root'
-
+    uid = get_docker_user_id(docker_user_id)
     vepdb_dir_host = os.path.join(str(host_directories['db_dir_host']), '.vep')
     input_vcf_docker = 'None'
     input_cna_docker = 'None'
@@ -479,12 +466,15 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
         logger = getlogger('pcgr-writer')
         logger.info('PCGR - STEP 4: Generation of output files - variant interpretation report for precision oncology')
 
-        # export PATH to R conda env
-        export_pcgrr_conda_env = export_conda(pcgrr_conda())
+        # export PATH to R conda env Rscript
+        rscript = rscript_path(DOCKER_IMAGE_VERSION)
+        pcgrr_script = pcgrr_script_path(DOCKER_IMAGE_VERSION)
+        print(rscript)
+        print(pcgrr_script)
         pcgr_report_command = (
                 f"{docker_cmd_run1} "
-                f"{export_pcgrr_conda_env} "
-                f"pcgrr.R {output_dir} "
+                f"{rscript} {pcgrr_script} "
+                f"{output_dir} "
                 f"{output_pass_tsv}.gz "
                 f"{input_cna_docker} "
                 f"{input_rna_fusion_docker} "
