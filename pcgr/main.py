@@ -469,8 +469,6 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
         # export PATH to R conda env Rscript
         rscript = rscript_path(DOCKER_IMAGE_VERSION)
         pcgrr_script = pcgrr_script_path(DOCKER_IMAGE_VERSION)
-        print(rscript)
-        print(pcgrr_script)
         pcgr_report_command = (
                 f"{docker_cmd_run1} "
                 f"{rscript} {pcgrr_script} "
@@ -546,7 +544,7 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
                 )
 
         if debug:
-          print(pcgr_report_command)
+            print(pcgr_report_command)
         check_subprocess(logger, pcgr_report_command, debug)
         logger.info("Finished")
 
