@@ -3,6 +3,7 @@ import sys
 import subprocess
 import logging
 import os
+import platform
 
 
 def pcgr_error_message(message, logger):
@@ -28,13 +29,22 @@ def check_subprocess(logger, command, debug):
         print(e.output.decode())
         exit(0)
 
-def export_conda(env_path):
-    return(f'export PATH={env_path}/bin:$PATH; ')
+def rscript_path(docker_run):
+    prefix = conda_env_path('pcgrr', docker_run)
+    return os.path.join(prefix, 'bin/Rscript')
 
-def pcgrr_conda():
-    conda_prefix = os.environ.get('CONDA_PREFIX')
-    env_dir = os.path.dirname(conda_prefix)
-    return(os.path.join(env_dir, 'pcgrr'))
+def pcgrr_script_path(docker_run):
+    prefix = conda_env_path('pcgr', docker_run)
+    return os.path.join(prefix, 'bin/pcgrr.R')
+
+def conda_env_path(env, docker_run):
+    if docker_run:
+        env_path = f'/opt/mambaforge/envs/{env}'
+    else:
+        cp = os.environ.get('CONDA_PREFIX')
+        envdir = os.path.dirname(cp)
+        env_path = os.path.join(envdir, env)
+    return env_path
 
 def getlogger(logger_name):
     logger = logging.getLogger(logger_name)
@@ -55,3 +65,21 @@ def getlogger(logger_name):
     ch.setFormatter(formatter)
 
     return logger
+
+def get_docker_user_id(docker_user_id):
+    logger = getlogger('pcgr-get-OS')
+    uid = ''
+    if docker_user_id:
+        uid = docker_user_id
+    elif platform.system() == 'Linux' or platform.system() == 'Darwin' or sys.platform == 'darwin' or sys.platform == 'linux2' or sys.platform == 'linux':
+        uid = os.getuid()
+    else:
+        if platform.system() == 'Windows' or sys.platform == 'win32' or sys.platform == 'cygwin':
+            uid = getpass.getuser()
+
+    if uid == '':
+        warn_msg = (f'Was not able to get user id/username for logged-in user on the underlying platform '
+                    f'(platform.system(): {platform.system()},  sys.platform: {sys.platform}, now running PCGR as root')
+        logger.warning(warn_msg)
+        uid = 'root'
+    return uid
