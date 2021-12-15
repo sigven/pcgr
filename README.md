@@ -96,7 +96,7 @@ Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, Ola Mykleb
 
 ```bash
 PCGR_VERSION="0.9.4"
-git clone -b v${PCGR_VERSION} --depth 1
+git clone -b v${PCGR_VERSION} --depth 1 https://github.com/sigven/pcgr.git
 ```
 
 ### STEP 3: Set Up Conda Environments
