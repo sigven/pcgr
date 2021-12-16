@@ -1,6 +1,8 @@
+{% set data = load_setup_py_data() %}
+
 package:
   name: pcgr
-  version: 0.9.4
+  version: {{ data.get('version') }}
 
 source:
   path: ../../..
@@ -25,6 +27,6 @@ test:
     - pcgr --version
 
 about:
-  home: https://github.com/sigven/pcgr
-  license: MIT
-  summary: Personal Cancer Genome Reporter (PCGR) - variant interpretation report for precision cancer medicine
+  home: {{ data.get('url') }}
+  license: {{ data.get('license') }}
+  summary: {{ data.get('description') }}

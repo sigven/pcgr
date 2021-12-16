@@ -366,7 +366,7 @@ Personal Cancer Genome Reporter (PCGR) workflow for clinical interpretation of s
 
 Required arguments:
   --input_vcf INPUT_VCF - VCF input file with somatic variants in tumor sample, SNVs/InDels
-  --pcgr_dir PCGR_DIR - PCGR base directory with accompanying data directory, e.g. ~/pcgr-0.9.3.900
+  --pcgr_dir PCGR_DIR - PCGR base directory with accompanying data directory, e.g. ~/pcgr-0.9.4
   --output_dir OUTPUT_DIR - Output directory
   --genome_assembly {grch37,grch38} - Human genome assembly build: grch37 or grch38
   --sample_id SAMPLE_ID - Tumor sample/cancer genome identifier - prefix for output files
