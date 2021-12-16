@@ -7,5 +7,12 @@ channels:
   - defaults
 
 dependencies:
-  - pcgr
-  - pandoc =2.16 # for pcgrr.R
+  - pcgr ==0.9.4
+  - bedtools ==2.30.0
+  - cyvcf2 ==0.30.11
+  - ensembl-vep ==104.3
+  - htslib ==1.10.2
+  - vcfanno ==0.3.3
+  - vt
+  - vcf2maf ==1.6.21
+  - pandoc =2.16

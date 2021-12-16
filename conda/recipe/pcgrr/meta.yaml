@@ -1,8 +1,6 @@
-{% set version = '0.9.2' %}
-
 package:
   name: r-pcgrr
-  version: {{ version|replace("-", "_") }}
+  version: 0.9.4
 
 source:
   path: ../../../pcgrr
