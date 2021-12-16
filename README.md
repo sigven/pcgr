@@ -157,8 +157,9 @@ create the required conda environments for the Python component (`pcgr`)
 and the R component (`pcgrr`):
 
 ```bash
-mamba env create --file pcgr/conda/pcgr.yml
-mamba env create --file pcgr/conda/pcgrr.yml
+PLATFORM="osx-64" # or "linux-64"
+mamba create -n pcgr --file pcgr/conda/env/lock/pcgr/pcgr-${PLATFORM}.lock
+mamba create -n pcgrr --file pcgr/conda/env/lock/pcgrr/pcgrr-${PLATFORM}.lock
 ```
 
 The above process takes 10-15min. In the end, you can confirm your conda
