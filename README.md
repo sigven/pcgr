@@ -2,6 +2,7 @@
 
 ## Contents
 
+
 * [Overview](#overview)
 * [News](#news)
 * [Example reports](#example-reports)
@@ -10,8 +11,7 @@
 * [Getting started](#getting-started)
     * [STEP 1: Download Data Bundle](#step-1-download-data-bundle)
     * [STEP 2: Download PCGR GitHub Repository](#step-2-download-pcgr-github-repository)
-    * [STEP 3: Set Up Conda Environments](#step-3-set-up-conda-environments)
-    * [Alternative Installation: Docker](#alternative-installation-docker)
+    * [STEP 3: Set Up Conda or Docker](#step-3-set-up-conda-or-docker)
     * [STEP 4: Input preprocessing](#step-4-input-preprocessing)
     * [STEP 5: Configure your PCGR workflow](#step-5-configure-your-pcgr-workflow)
     * [STEP 6: Run example](#step-6-run-example)
@@ -80,30 +80,50 @@ Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, Ola Mykleb
 
 ## Getting started
 
-- Start by creating a `PCGR` directory to install the data bundle and GitHub codebase.
+PCGR requires a __data bundle__ that contains the reference data,
+__patient inputs__ (e.g. somatic variants in a VCF), and an
+__output directory__ to output the results to.
+
+Here's an example scenario that will be used in the following sections:
+
+- data bundle downloaded in `/Users/you/dir1/data`;
+- sample inputs at `/Users/you/dir2/pcgr_inputs`;
+- output goes to `/Users/you/dir3/pcgr_outputs` (make sure this directory
+  exists!);
+- your PCGR codebase is installed in `/Users/you/dir4/pcgr`;
 
 ### STEP 1: Download Data Bundle
 
-- Download and unpack the human assembly-specific data bundle in the PCGR directory:
-  * [grch37 data bundle - 20210627](http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch37.20210627.tgz) (approx 20Gb)
-  * [grch38 data bundle - 20210627](http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch38.20210627.tgz) (approx 21Gb)
-     * *Unpacking*: `gzip -dc pcgr.databundle.grch3X.YYYYMMDD.tgz | tar xvf -`
-- A _data/_ folder within the _pcgr-X.X_ software folder should now have been produced.
+Download and unpack the human assembly-specific data bundle:
+
+- [grch37 data bundle - 20210627](http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch37.20210627.tgz) (approx 20Gb)
+- [grch38 data bundle - 20210627](http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch38.20210627.tgz) (approx 21Gb)
+  - Unpacking: `gzip -dc pcgr.databundle.grch3X.YYYYMMDD.tgz | tar xvf -`
+
+A _data/_ folder within the _pcgr-X.X_ software folder should now have been produced.
 
 ### STEP 2: Download PCGR GitHub Repository
 
-- Download and unpack the latest software release
-  (v0.9.4 - December 2021) from <https://github.com/sigven/pcgr/releases>.
-- Alternatively if you have `git` installed, you can do:
+Download and unpack the latest software release from <https://github.com/sigven/pcgr/releases>.
+
+Alternatively if you have `git` installed, you can do:
 
 ```bash
+cd /Users/you/dir4
 PCGR_VERSION="0.9.4"
 git clone -b v${PCGR_VERSION} --depth 1 https://github.com/sigven/pcgr.git
 ```
 
-### STEP 3: Set Up Conda Environments
+### STEP 3: Set Up Conda or Docker
 
-#### 3a: Miniconda and Mamba
+Step 3 depends on if you want to use Conda or Docker:
+
+- For Conda, continue reading the [PCGR Conda setup](#condasetup).
+- For Docker, skip to the [PCGR Docker setup](#dockersetup).
+
+#### Option 1: Conda {#condasetup}
+
+##### a) Miniconda and Mamba
 
 1. Download and install the Miniconda installer from <https://docs.conda.io/en/latest/miniconda.html>:
   - Make sure to download the Linux or MacOSX script according to which system you're currently on:
@@ -114,36 +134,50 @@ git clone -b v${PCGR_VERSION} --depth 1 https://github.com/sigven/pcgr.git
   - Exit your current terminal session and open a new one. You should now notice something like a `(base)` string as a
     prefix in your terminal prompt. This means that you're in the `base` conda environment, and you're ready to start
     installing the conda environments for PCGR.
-2. Install [Mamba](https://github.com/mamba-org/mamba), which is a very fast conda package installer:
-  - `conda install -c conda-forge mamba`
-  - Check if it works correctly with e.g. `mamba --version`:
+2. Install [Mamba](https://github.com/mamba-org/mamba) in this `base`
+  environment, which is a very fast conda package installer.
 
 ```text
+$ wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh && chmod +x miniconda.sh
+$ bash miniconda.sh
+[... (safe to answer 'yes' to all prompts)]
+# exit terminal and open new one - you should now see:
+(base) $
+(base) $ conda install -c conda-forge mamba`
+[... (lots of messages)]
 (base) $ mamba --version
 mamba 0.17.0
 conda 4.10.3
 ```
 
-#### STEP 3b: Create PCGR Conda Environments
+##### b) Create PCGR Conda Environments
 
-- The `pcgr/conda/env` directory contains two YAML files which can be used to
-  create the required conda environments for the Python component (`pcgr`)
-  and the R component (`pcgrr`):
-
-```bash
-mamba env create --file pcgr/conda/pcgr.yml
-mamba env create --file pcgr/conda/pcgrr.yml
-```
-
-#### STEP 3c: Activate pcgr Conda Environment
-
-- You need to activate the `pcgr` conda environment:
+The `pcgr/conda/env` directory contains two YAML files which can be used to
+create the required conda environments for the Python component (`pcgr`)
+and the R component (`pcgrr`):
 
 ```bash
-conda activate pcgr
+PLATFORM="osx-64" # or "linux-64"
+mamba create -n pcgr --file pcgr/conda/env/lock/pcgr/pcgr-${PLATFORM}.lock
+mamba create -n pcgrr --file pcgr/conda/env/lock/pcgrr/pcgrr-${PLATFORM}.lock
 ```
 
-- Test that it works correctly with e.g. `pcgr --version`:
+The above process takes 10-15min. In the end, you can confirm your conda
+environments have been installed correctly:
+
+```text
+$ (base) conda env list
+# conda environments:
+#
+base    *  /Users/me/conda
+pcgr       /Users/me/conda/envs/pcgr
+pcgrr      /Users/me/conda/envs/pcgrr
+```
+
+##### c) Activate pcgr Conda Environment
+
+You need to activate the `pcgr` conda environment, and test that it works
+correctly with e.g. `pcgr --version`.
 
 ```text
 (base) $ conda activate pcgr
@@ -155,31 +189,92 @@ pcgr 0.9.4
 /Users/me/conda/envs/pcgr/bin/pcgrr.R
 ```
 
-- You should now be all set to run PCGR!
+You should now be all set up to run PCGR! Continue on to STEP 4.
 
-### Alternative Installation: Docker
+#### Option 2: Docker {#dockersetup}
 
-- If you don't want to use conda, you can use Docker.
-  - For installing Docker, follow the instructions at <https://docs.docker.com/engine/install/>
-    for your Linux or MacOSX machine. NOTE: We have not been able to perform enough testing on the Windows platform,
-    and we have received feedback that particular versions of Docker/Windows do not work with PCGR (an example being
-    [mounting of data volumes](https://github.com/docker/toolbox/issues/607)).
-    - Test that Docker is running, e.g. by typing `docker ps` or `docker images` in the terminal window.
-    - Adjust the computing resources dedicated to the Docker, i.e.: Memory of minimum 5GB, CPUs minimum 4 ([How to - MacOSX](https://docs.docker.com/desktop/mac/))
+##### a) Install Docker
 
-1. Pull the [PCGR Docker image](https://hub.docker.com/r/sigven/pcgr/tags) from DockerHub (approx 5.7Gb):
-  - `docker pull sigven/pcgr:v0.9.4`
-2. Install the PCGR Python component on your local machine. Only requirement is Python > 3.6.
-  I would _strongly_ advise to install it in a virtual Python environment with conda (or virtualenv).
-  Or else it will (probably) use your system's Python and you'll end up in a situation like <https://xkcd.com/1987/>.
-  Here's an example using conda/mamba, with only Python 3.7 as a dependency:
+For installing Docker, follow the instructions at <https://docs.docker.com/engine/install/>
+for your Linux or MacOSX machine. NOTE: We have not been able to perform enough
+testing on the Windows platform, and we have received feedback that particular
+versions of Docker/Windows do not work with PCGR (an example being [mounting of data volumes](https://github.com/docker/toolbox/issues/607)).
+
+- Test that Docker is running, e.g. by typing `docker ps` or `docker images`
+  in the terminal window.
+- Adjust the computing resources dedicated to the Docker, i.e.: Memory of
+  minimum 5GB, CPUs minimum 4 (see e.g. how to do that on
+  [MacOSX](https://docs.docker.com/desktop/mac/)).
+
+##### b) Download PCGR Docker Image
+
+- Pull the [PCGR Docker image](https://hub.docker.com/r/sigven/pcgr/tags) from
+  DockerHub (approx 5.7Gb) with: `docker pull sigven/pcgr:v0.9.4`
+
+##### c) Run PCGR Docker Container directly (_recommended_) or indirectly
+
+This next step depends on how familiar you are with working with Docker volumes
+(<https://docs.docker.com/storage/volumes/>).
+
+- If you know how to use the `-v <host>:<container>` Docker syntax, you can
+  use the PCGR Docker image directly, which would not involve
+  having to set up a Python environment.
+  Jump to the [PCGR Docker direct setup](#dockerdirectsetup) for more details.
+- Alternatively, you can allow PCGR itself to handle the Docker volume setup
+  intricacies, but this requires a Python environment setup (which can be a bit
+  cumbersome if you're not too familiar with conda or virtualenv).
+  Jump to the [PCGR Docker indirect setup](#dockerindirectsetup) for more details.
+
+###### Directly {##dockerdirectsetup}
+
+You'll need to map your PCGR inputs to Docker container paths. For example, say
+you have the input VCF `sampleX.vcf.gz` stored in the
+directory `/Users/you/project1`. You would need to supply Docker with a
+`--volume` (or `-v`) option mapping the directory of that VCF with
+a directory inside the Docker container, e.g. `/home/input_vcf_dir`.
+That would become: `-v /Users/you/project1:/home/input_vcf_dir`
+(note the `:` separating your directory from the container's directory).
+
+Then your command would look something like this:
+
+```bash
+docker container run -it --rm \
+    -v /Users/you/dir1/data:/root/pcgr_data \
+    -v /Users/you/dir2/pcgr_inputs:/root/pcgr_inputs \
+    -v /Users/you/dir3/pcgr_outputs:/root/pcgr_outputs \
+    sigven/pcgr:v0.9.4 \
+    pcgr \
+      --input_vcf "/root/pcgr_inputs/tumor_sample.BRCA.vcf.gz" \
+      --pcgr_dir "/root/pcgr_data" \
+      --output_dir "/root/pcgr_outputs" \
+      --genome_assembly "grch38" \
+      --sample_id "SampleB" \
+      --assay "WGS" \
+      --vcf2maf \
+      --no_docker
+```
+
+- Note the `--no_docker` option in the above command. Since you're running that
+  command _directly_ inside the container, you need to use that option to bypass
+  the _indirect_ Docker PCGR run.
+- Also note the path mappings. You're using the _container_ paths in the
+  command, not the _host_ (your machine's) paths.
+
+###### Indirectly (not recommended) {##dockerindirectsetup}
+
+Install the PCGR Python component on your local machine. Only requirement is
+Python > 3.6. We would _strongly_ advise to install it in a virtual Python
+environment with conda (or virtualenv) (read the previous sections for how to
+install conda). Or else it will (probably) use your
+system's default Python and you'll end up in a situation like <https://xkcd.com/1987/>.
+Here's an example using conda/mamba, with only Python 3.7 as a dependency:
 
 ```bash
 (base) $ mamba create -n pcgr_docker_env -c conda-forge python=3.7
 (base) $ conda activate pcgr_docker_env
 (pcgr_docker_env) $ which python
 /Users/me/conda/envs/pcgr_docker/bin/python
-(pcgr_docker_env) $ cd pcgr
+(pcgr_docker_env) $ cd path/to/pcgr
 
 (pcgr_docker_env) $ pip install -e .
 Obtaining file:///Users/me/path/to/pcgr
@@ -194,7 +289,24 @@ Successfully installed pcgr-0.9.4
 pcgr 0.9.4
 ```
 
-- You should now be all set to run PCGR!
+You should now be all set up to run PCGR from within that `pcgr_docker_env`
+conda environment! Here's an example command:
+
+```bash
+(pcgr_docker_env) $ pcgr \
+  --input_vcf "/Users/you/dir1/tumor_sample.BRCA.vcf.gz" \
+  --pcgr_dir "/Users/you/dir2/data" \
+  --output_dir "/Users/you/dir3/pcgr_outputs" \
+  --genome_assembly "grch38" \
+  --sample_id "SampleB" \
+  --assay "WGS"
+```
+
+- Note that we do not specify the `--no_docker` option. PCGR will
+  automatically look for the more recent Docker container on your
+  machine, and then run the above command inside it _indirectly_.
+- Also note the path mappings. You're using the actual _host_ (your machine's)
+  paths, not the _container_ paths.
 
 ### STEP 4: Input preprocessing
 
@@ -202,7 +314,7 @@ pcgr 0.9.4
   - An unannotated, single-sample VCF file (>= v4.2) with called somatic variants (SNVs/InDels) - __required__
   - A copy number segment file - __optional__
 
-- We __strongly__ recommend that the input VCF is compressed and indexed using [bgzip](http://www.htslib.org/doc/tabix.html) and [tabix](http://www.htslib.org/doc/tabix.html).
+- We __strongly__ recommend that the input VCF is compressed and indexed using [bgzip](http://www.htslib.org/doc/bgzip.html) and [tabix](http://www.htslib.org/doc/tabix.html).
 - If the input VCF contains multi-allelic sites, these will be subject to [decomposition](http://genome.sph.umich.edu/wiki/Vt#Decompose).
   Optimally, try to decompose multi-allelic variants in the input VCF prior to analysis.
 - Variants used for reporting should be designated as 'PASS' in the VCF FILTER column
@@ -348,31 +460,29 @@ Other options:
   --debug               Print full Docker commands to log, default: False
 ```
 
-
 The _examples_ folder contains input VCF files from two tumor samples sequenced within TCGA (**GRCh37** only). It also contains a PCGR configuration file customized for these VCFs. A report for a colorectal tumor case can be generated by running the following command in your terminal window:
 
 ```bash
 $ (base) conda activate pcgr_docker
 $ (pcgr_docker)
 pcgr \
-    --pcgr_dir ~/pcgr-0.9.2 \
-    --output_dir ~/pcgr-0.9.2 \
+    --pcgr_dir /Users/you/dir2/data \
+    --output_dir /Users/you/dir3/pcgr_outputs \
     --sample_id tumor_sample.COAD \
     --tumor_dp_tag TDP \
     --tumor_af_tag TVAF \
     --call_conf_tag TAL \
     --genome_assembly grch37 \
-    --input_vcf ~/pcgr-0.9.2/examples/tumor_sample.COAD.vcf.gz \
+    --input_vcf /Users/you/pcgr/examples/tumor_sample.COAD.vcf.gz \
     --tumor_site 9 \
-    --input_cna ~/pcgr-0.9.2/examples/tumor_sample.COAD.cna.tsv \
+    --input_cna /Users/you/pcgr/examples/tumor_sample.COAD.cna.tsv \
     --tumor_purity 0.9 \
     --tumor_ploidy 2.0 \
     --include_trials \
     --assay WES \
     --estimate_signatures \
     --estimate_msi_status \
-    --estimate_tmb \
-    --no_vcf_validate
+    --estimate_tmb
 ```
 
 This command will run the Docker-based PCGR workflow and produce the following output files in the _examples_ folder:

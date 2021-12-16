@@ -1,37 +1,24 @@
-{% set name = 'pcgr' %}
-{% set version = '0.9.2' %}
-
 package:
-  name: {{ name }}
-  version: {{ version }}
+  name: pcgr
+  version: 0.9.4
 
 source:
   path: ../../..
 
 build:
   number: 0
-  rpaths:
-    - lib/R/lib/
-    - lib/
+  noarch: python
 
 requirements:
   build:
     - curl
     - unzip
     - tar
-    - pip
     - python ==3.7.12
   run:
     - python ==3.7.12
-    - bedtools ==2.30.0
-    - cyvcf2 ==0.30.11
-    - ensembl-vep ==104.3
-    - htslib ==1.10.2
     - pandas
     - scipy
-    - vcfanno ==0.3.3
-    - vt # this gets a different version pulled in Linux and Mac, so leave unpinned
-    - vcf2maf ==1.6.21
 
 test:
   commands:
