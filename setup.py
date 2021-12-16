@@ -1,14 +1,14 @@
-from setuptools import setup, find_packages
+import setuptools
 
-setup(
+setuptools.setup(
     name='pcgr',
-    version='0.9.4',
+    version='0.10.0',
     license='MIT',
     author='Sigve Nakken',
     author_email='sigven@gmail.com',
     description='Personal Cancer Genome Reporter (PCGR) - variant interpretation for precision cancer medicine',
     url='https://github.com/sigven/pcgr',
-    packages=find_packages(),
+    packages=setuptools.find_packages(),
     entry_points={
         'console_scripts': [
             'pcgr = pcgr.main:cli'

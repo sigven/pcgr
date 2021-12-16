@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from pcgr._version import __version__
+
 tsites = {
     0: 'Any',
     1: 'Adrenal Gland',
@@ -35,7 +37,7 @@ tsites = {
 }
 
 tumor_sites = '\n'.join([f'{k} = {tsites[k]}' for k in tsites]) # for displaying in help
-PCGR_VERSION = '0.9.4'
+PCGR_VERSION = __version__
 DB_VERSION = 'PCGR_DB_VERSION = 20210627'
 VEP_VERSION = '104'
 GENCODE_VERSION = '38'
