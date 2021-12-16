@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pcgr',
-    version='0.9.3.9000',
+    version='0.9.4',
     license='MIT',
     author='Sigve Nakken',
     author_email='sigven@gmail.com',
