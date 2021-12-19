@@ -5,11 +5,14 @@ on:
     branches:
       - master
       - dev
-
+env:
+  atoken: ${{ secrets.ANACONDA_UPLOAD_TOKEN }}
+  recipe_path: conda/recipe
+  env_yml_path: conda/env/yml
+  env_lock_path: conda/env/lock
 jobs:
-  build-conda:
+  build_conda_pkgs:
     # When merging to one of the branches above and the commit message matches
-    #if: "startsWith(github.event.head_commit.message, 'CI Test')"
     if: "startsWith(github.event.head_commit.message, 'Bump version:')"
     name: Build conda packages
     runs-on: ubuntu-latest
@@ -28,9 +31,52 @@ jobs:
           show-channel-urls: true
           auto-activate-base: false
           activate-environment: condabuild
-          environment-file: conda/env/yml/condabuild.yml
+          environment-file: ${{ env.env_yml_path }}/condabuild.yml
           use-mamba: true
       - name: Build + upload pcgr/pcgrr conda pkgs
         run: |
-          conda mambabuild conda/recipe/pcgr -c conda-forge -c bioconda --token ${{ secrets.ANACONDA_UPLOAD_TOKEN }}
-          conda mambabuild conda/recipe/pcgrr -c conda-forge -c bioconda --token ${{ secrets.ANACONDA_UPLOAD_TOKEN }}
+          conda mambabuild ${recipe_path}/pcgr -c conda-forge -c bioconda --token ${atoken} --quiet
+          conda mambabuild ${recipe_path}/pcgrr -c conda-forge -c bioconda --token ${atoken} --quiet
+
+  conda_lock:
+    name: Conda lock
+    runs-on: ubuntu-latest
+    needs: build_conda_pkgs
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Set up Mambaforge
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          miniforge-variant: Mambaforge
+          miniforge-version: 4.11.0-0
+          show-channel-urls: true
+          auto-activate-base: false
+          activate-environment: condabuild
+          environment-file: ${{ env.env_yml_path }}/condabuild.yml
+          use-mamba: true
+      - name: Generate conda locks
+        run: |
+          conda-lock lock --mamba --file ${env_yml_path}/pcgr.yml --filename-template 'pcgr-{platform}.lock' -p osx-64 -p linux-64
+          conda-lock lock --mamba --file ${env_yml_path}/pcgrr.yml --filename-template 'pcgrr-{platform}.lock' -p osx-64 -p linux-64
+          mv pcgrr-*.lock ${env_lock_path}
+          mv pcgr-*.lock ${env_lock_path}
+      - name: Git Status
+        run: |
+          git status
+      - name: Create Pull Request
+        id: cpr
+        uses: peter-evans/create-pull-request@v3
+        with:
+          commit-message: Update conda locks
+          committer: GitHub <noreply@github.com>
+          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+          branch: create-pull-request/patch
+          delete-branch: true
+          title: 'GH Actions: update conda locks'
+          assignees: pdiakumis
+          reviewers: sigven,pdiakumis
