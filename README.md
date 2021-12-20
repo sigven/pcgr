@@ -7,7 +7,7 @@
 * [News](#news)
 * [Example reports](#example-reports)
 * [PCGR documentation](#pcgr-documentation)
-* [Annotation resources included in PCGR - 0.9.4](#annotation-resources-included-in-pcgr---094)
+* [Annotation resources included in PCGR - 0.10.2](#annotation-resources-included-in-pcgr---0102)
 * [Getting started](#getting-started)
     * [STEP 1: Download Data Bundle](#step-1-download-data-bundle)
     * [STEP 2: Download PCGR GitHub Repository](#step-2-download-pcgr-github-repository)
@@ -22,13 +22,11 @@
 
 The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for functional annotation and translation of individual cancer genomes for precision cancer medicine. Currently, it interprets both somatic SNVs/InDels and copy number aberrations. The software extends basic gene and variant annotations from the [Ensembl’s Variant Effect Predictor (VEP)](http://www.ensembl.org/info/docs/tools/vep/index.html) with oncology-relevant, up-to-date annotations retrieved flexibly through [vcfanno](https://github.com/brentp/vcfanno), and produces interactive HTML reports intended for clinical interpretation. __NOTE__: If you want to generate a personal report with respect to cancer predisposition for germline variants, try the accompanying tool [Cancer Predisposition Sequencing Reporter (CPSR)](https://github.com/sigven/cpsr).
 
-A screenshot of the dashboard-type HTML output (new in 0.9.0) is shown below.
-
 ![PCGR overview](pcgr_dashboard_views.png)
 
 ## News
 
-* _December 2021_: **0.9.4 release**
+* _December 2021_: **0.10.2 release**
   * Complete restructure of Python and R components.
     * Installation now relies on two separate [conda](https://docs.conda.io/en/latest/)
       packages, `pcgr` (Python component) and `pcgrr` (R component).
@@ -60,7 +58,7 @@ A screenshot of the dashboard-type HTML output (new in 0.9.0) is shown below.
 
 Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, Ola Myklebost, and Eivind Hovig. __Personal Cancer Genome Reporter: variant interpretation report for precision oncology__ (2017). _Bioinformatics_. 34(10):1778–1780. doi:[10.1093/bioinformatics/btx817](https://doi.org/10.1093/bioinformatics/btx817)
 
-## Annotation resources included in PCGR - 0.9.4
+## Annotation resources included in PCGR - 0.10.2
 
 * [VEP](http://www.ensembl.org/info/docs/tools/vep/index.html) - Variant Effect Predictor v104 (GENCODE v38/v19 as the gene reference dataset)
 * [CIViC](http://civic.genome.wustl.edu) - Clinical interpretations of variants in cancer (June 15th 2021)
@@ -110,7 +108,7 @@ Alternatively if you have `git` installed, you can do:
 
 ```bash
 cd /Users/you/dir4
-PCGR_VERSION="0.9.4"
+PCGR_VERSION="0.10.2"
 git clone -b v${PCGR_VERSION} --depth 1 https://github.com/sigven/pcgr.git
 ```
 
@@ -160,8 +158,8 @@ and the R component (`pcgrr`):
 
 ```bash
 PLATFORM="osx-64" # or "linux-64"
-mamba create -n pcgr --file pcgr/conda/env/lock/pcgr/pcgr-${PLATFORM}.lock
-mamba create -n pcgrr --file pcgr/conda/env/lock/pcgrr/pcgrr-${PLATFORM}.lock
+mamba create -n pcgr --file pcgr/conda/env/lock/pcgr-${PLATFORM}.lock
+mamba create -n pcgrr --file pcgr/conda/env/lock/pcgrr-${PLATFORM}.lock
 ```
 
 The above process takes 10-15min. In the end, you can confirm your conda
@@ -186,7 +184,7 @@ correctly with e.g. `pcgr --version`.
 (pcgr) $ which pcgr
 /Users/me/conda/envs/pcgr/bin/pcgr
 (pcgr) $ pcgr --version
-pcgr 0.9.4
+pcgr 0.10.2
 (pcgr) $ which pcgrr.R
 /Users/me/conda/envs/pcgr/bin/pcgrr.R
 ```
@@ -214,7 +212,7 @@ versions of Docker/Windows do not work with PCGR (an example being [mounting of 
 ##### b) Download PCGR Docker Image
 
 - Pull the [PCGR Docker image](https://hub.docker.com/r/sigven/pcgr/tags) from
-  DockerHub (approx 5.7Gb) with: `docker pull sigven/pcgr:v0.9.4`
+  DockerHub (approx 5.7Gb) with: `docker pull sigven/pcgr:v0.10.2`
 
 ##### c) Run PCGR Docker Container directly (_recommended_) or indirectly
 
