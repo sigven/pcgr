@@ -19,8 +19,8 @@ RUN apt-get update && \
 ENV PATH="/opt/mambaforge/bin:$PATH"
 ARG PCGR_CONDA_ENV_DIR=/home/pcgr_conda_envs
 COPY ./conda/env/lock ${PCGR_CONDA_ENV_DIR}
-RUN mamba create -n pcgr --file ${PCGR_CONDA_ENV_DIR}/pcgr/pcgr-linux-64.lock
-RUN mamba create -n pcgrr --file ${PCGR_CONDA_ENV_DIR}/pcgrr/pcgrr-linux-64.lock
+RUN mamba create -n pcgr --file ${PCGR_CONDA_ENV_DIR}/pcgr-linux-64.lock
+RUN mamba create -n pcgrr --file ${PCGR_CONDA_ENV_DIR}/pcgrr-linux-64.lock
 RUN mamba clean --all --force-pkgs-dirs --yes
 
 ARG PCGR_ENV_NAME="pcgr"

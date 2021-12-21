@@ -11,3 +11,4 @@ dependencies:
   - r-pcgrr ==0.10.2 # versioned by bump2version
   - r-argparse
   - bioconductor-bsgenome.hsapiens.ucsc.hg38
+  - bioconductor-bsgenome.hsapiens.ucsc.hg19
