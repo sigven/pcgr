@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-from pcgr import pcgr_vars, arg_checker, config
-from pcgr.utils import getlogger, check_subprocess, rscript_path, pcgrr_script_path, get_docker_user_id
+from pcgr import pcgr_vars, arg_checker, config, utils
+from pcgr.utils import getlogger, check_subprocess
 import re
 import argparse
 import os
@@ -181,7 +181,7 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
         VEP_ASSEMBLY = 'GRCh37'
     logger = getlogger('pcgr-get-OS')
 
-    uid = get_docker_user_id(docker_user_id)
+    uid = utils.get_docker_user_id(docker_user_id)
     vepdb_dir_host = os.path.join(str(host_directories['db_dir_host']), '.vep')
     input_vcf_docker = 'None'
     input_cna_docker = 'None'
@@ -367,7 +367,7 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
             vep_options += ' --verbose'
 
         # Compose full VEP command
-        vep_main_command = f'{docker_cmd_run1} vep --input_file {input_vcf_pcgr_ready} --output_file {vep_vcf} {vep_options} --fasta {fasta_assembly} {docker_cmd_run_end}'
+        vep_main_command = f'{docker_cmd_run1} {utils.get_perl_exports()} && vep --input_file {input_vcf_pcgr_ready} --output_file {vep_vcf} {vep_options} --fasta {fasta_assembly} {docker_cmd_run_end}'
         vep_bgzip_command = f'{docker_cmd_run1} bgzip -f -c {vep_vcf} > {vep_vcf}.gz {docker_cmd_run_end}'
         vep_tabix_command = f'{docker_cmd_run1} tabix -f -p vcf {vep_vcf}.gz {docker_cmd_run_end}'
 
@@ -467,8 +467,8 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
         logger.info('PCGR - STEP 4: Generation of output files - variant interpretation report for precision oncology')
 
         # export PATH to R conda env Rscript
-        rscript = rscript_path(DOCKER_IMAGE_VERSION)
-        pcgrr_script = pcgrr_script_path(DOCKER_IMAGE_VERSION)
+        rscript = utils.rscript_path(DOCKER_IMAGE_VERSION)
+        pcgrr_script = utils.pcgrr_script_path(DOCKER_IMAGE_VERSION)
         pcgr_report_command = (
                 f"{docker_cmd_run1} "
                 f"{rscript} {pcgrr_script} "
