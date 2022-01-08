@@ -1,5 +1,7 @@
 #!/usr/bin/env Rscript
 
+.libPaths(R.home("library")) # use conda R pkgs, not e.g. user's local installation
+
 suppressWarnings(suppressPackageStartupMessages(library(argparse)))
 suppressWarnings(suppressPackageStartupMessages(library(pcgrr)))
 ##---- Argument Parsing ----##
