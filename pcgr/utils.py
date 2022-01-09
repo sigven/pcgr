@@ -83,3 +83,22 @@ def get_docker_user_id(docker_user_id):
         logger.warning(warn_msg)
         uid = 'root'
     return uid
+
+def get_pcgr_bin():
+    return os.path.dirname(os.path.realpath(sys.executable))
+
+def perl_cmd():
+    """Retrieve path to locally installed conda Perl or first in PATH.
+    """
+    perl = which(os.path.join(get_pcgr_bin(), "perl"))
+    if perl:
+        return perl
+    else:
+        return which("perl")
+
+def get_perl_exports():
+    """Environmental exports to use conda installed perl.
+    """
+    perl_path = os.path.dirname(perl_cmd())
+    out = f"unset PERL5LIB && export PATH={perl_path}:\"$PATH\""
+    return out

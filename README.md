@@ -108,7 +108,7 @@ Alternatively if you have `git` installed, you can do:
 
 ```bash
 cd /Users/you/dir4
-PCGR_VERSION="0.10.2"
+PCGR_VERSION="x.x.x"
 git clone -b v${PCGR_VERSION} --depth 1 https://github.com/sigven/pcgr.git
 ```
 
@@ -126,9 +126,7 @@ Step 3 depends on if you want to use Conda or Docker:
 ##### a) Miniconda and Mamba
 
 1. Download and install the Miniconda installer from <https://docs.conda.io/en/latest/miniconda.html>:
-  - Make sure to download the Linux or MacOSX script according to which system you're currently on:
-    - MacOSX: `wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh && chmod +x miniconda.sh`
-    - Linux:  `wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh && chmod +x miniconda.sh`
+  - Make sure to download the Linux or MacOSX script according to which platform you're currently on.
   - Run `bash miniconda.sh` and follow the prompts (it should be okay to accept the defaults, unless you want to choose a different
     installation location than the default `~/miniconda3`).
   - Exit your current terminal session and open a new one. You should now notice something like a `(base)` string as a
@@ -138,12 +136,13 @@ Step 3 depends on if you want to use Conda or Docker:
   environment, which is a very fast conda package installer.
 
 ```text
-$ wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh && chmod +x miniconda.sh
+$ PLATFORM="MacOSX" # or "Linux"
+$ wget https://repo.continuum.io/miniconda/Miniconda3-latest-${PLATFORM}-x86_64.sh -O miniconda.sh && chmod +x miniconda.sh
 $ bash miniconda.sh
 [... (safe to answer 'yes' to all prompts)]
 # exit terminal and open new one - you should now see:
 (base) $
-(base) $ conda install -c conda-forge mamba`
+(base) $ conda install -c conda-forge mamba
 [... (lots of messages)]
 (base) $ mamba --version
 mamba 0.17.0
@@ -152,41 +151,49 @@ conda 4.10.3
 
 ##### b) Create PCGR Conda Environments
 
-The `pcgr/conda/env` directory contains two YAML files which can be used to
-create the required conda environments for the Python component (`pcgr`)
-and the R component (`pcgrr`):
+The `conda/env` directory in the PCGR codebase contains two YAML files which
+can be used to create the required conda environments for the Python component
+(`pcgr`) and the R component (`pcgrr`). We install the conda dependencies for these
+two environments in the `conda/env` directory:
 
 ```bash
+cd /Users/you/dir4/pcgr
 PLATFORM="osx-64" # or "linux-64"
-mamba create -n pcgr --file pcgr/conda/env/lock/pcgr-${PLATFORM}.lock
-mamba create -n pcgrr --file pcgr/conda/env/lock/pcgrr-${PLATFORM}.lock
+mamba create --prefix ./conda/env/pcgr --file conda/env/lock/pcgr-${PLATFORM}.lock
+mamba create --prefix ./conda/env/pcgrr --file conda/env/lock/pcgrr-${PLATFORM}.lock
 ```
 
-The above process takes 10-15min. In the end, you can confirm your conda
-environments have been installed correctly:
+The above process takes 10-15min when installing from scratch. In the end, you
+can confirm your conda environments have been installed correctly (notice how
+the paths are different to the `base` env installation):
 
 ```text
 $ (base) conda env list
 # conda environments:
 #
-base    *  /Users/me/conda
-pcgr       /Users/me/conda/envs/pcgr
-pcgrr      /Users/me/conda/envs/pcgrr
+base    *  /Users/you/miniconda3
+pcgr       /Users/you/dir4/pcgr/conda/env/pcgr
+pcgrr      /Users/you/dir4/pcgr/conda/env/pcgrr
 ```
 
 ##### c) Activate pcgr Conda Environment
 
-You need to activate the `pcgr` conda environment, and test that it works
-correctly with e.g. `pcgr --version`.
+You need to activate the `./conda/env/pcgr` conda environment, and test that it works
+correctly with e.g. `pcgr --version`:
 
 ```text
-(base) $ conda activate pcgr
-(pcgr) $ which pcgr
-/Users/me/conda/envs/pcgr/bin/pcgr
-(pcgr) $ pcgr --version
+$ cd /Users/you/dir4/pcgr
+(base) $ conda activate ./conda/env/pcgr
+# note how the full path to the locally installed conda environment is now displayed
+
+(/Users/you/dir4/pcgr) $ which pcgr
+/Users/you/dir4/pcgr/conda/env/pcgr/bin/pcgr
+
+(/Users/you/dir4/pcgr) $ pcgr --version
 pcgr 0.10.2
-(pcgr) $ which pcgrr.R
-/Users/me/conda/envs/pcgr/bin/pcgrr.R
+
+(/Users/you/dir4/pcgr) $ which pcgrr.R
+/Users/you/dir4/pcgr/conda/env/pcgr/bin/pcgrr.R
 ```
 
 You should now be all set up to run PCGR! Continue on to STEP 4.
@@ -194,7 +201,6 @@ You should now be all set up to run PCGR! Continue on to STEP 4.
 <a name="dockersetup"></a>
 
 #### Option 2: Docker
-
 
 ##### a) Install Docker
 
@@ -212,14 +218,14 @@ versions of Docker/Windows do not work with PCGR (an example being [mounting of 
 ##### b) Download PCGR Docker Image
 
 - Pull the [PCGR Docker image](https://hub.docker.com/r/sigven/pcgr/tags) from
-  DockerHub (approx 5.7Gb) with: `docker pull sigven/pcgr:v0.10.2`
+  DockerHub (approx 5.7Gb) with: `docker pull sigven/pcgr:vX.X.X`
 
 ##### c) Run PCGR Docker Container directly (_recommended_) or indirectly
 
 This next step depends on how familiar you are with working with Docker volumes
 (<https://docs.docker.com/storage/volumes/>).
 
-- If you know how to use the `-v <host>:<container>` Docker syntax, you can
+- If you know how to use the `-v <host>:<container>` Docker option, you can
   use the PCGR Docker image directly, which would not involve
   having to set up a Python environment.
   Jump to the [PCGR Docker direct setup](#dockerdirectsetup) for more details.
@@ -289,19 +295,20 @@ Here's an example using conda/mamba, with only Python 3.7 as a dependency:
 ```bash
 (base) $ mamba create -n pcgr_docker_env -c conda-forge python=3.7
 (base) $ conda activate pcgr_docker_env
+
 (pcgr_docker_env) $ which python
-/Users/me/conda/envs/pcgr_docker/bin/python
-(pcgr_docker_env) $ cd path/to/pcgr
+/Users/you/miniconda3/envs/pcgr_docker_env/bin/python
+(pcgr_docker_env) $ cd /Users/you/dir4/pcgr
 
 (pcgr_docker_env) $ pip install -e .
-Obtaining file:///Users/me/path/to/pcgr
+Obtaining file:///Users/you/dir4/pcgr
   Preparing metadata (setup.py) ... done
 Installing collected packages: pcgr
   Running setup.py develop for pcgr
 Successfully installed pcgr-0.9.4
 
 (pcgr_docker_env) $ which pcgr
-/Users/me/conda/envs/pcgr_docker/bin/pcgr
+/Users/you/miniconda3/envs/pcgr_docker/bin/pcgr
 (pcgr_docker_env) $ pcgr --version
 pcgr 0.9.4
 ```

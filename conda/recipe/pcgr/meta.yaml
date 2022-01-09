@@ -21,6 +21,7 @@ requirements:
     - python ==3.7.12
     - pandas
     - scipy
+    - pip
 
 test:
   commands:
