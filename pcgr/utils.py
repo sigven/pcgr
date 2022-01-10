@@ -5,6 +5,30 @@ import logging
 import os
 import platform
 
+def which(program, env=None):
+    """ returns the path to an executable or None if it can't be found"""
+    if env is None:
+        env = os.environ.copy()
+
+    def is_exe(fpath):
+        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+
+    fpath, fname = os.path.split(program)
+    if fpath:
+        if is_exe(program):
+            return program
+    else:
+        for path in env["PATH"].split(os.pathsep):
+            exe_file = os.path.join(path, program)
+            if is_exe(exe_file):
+                return exe_file
+    for path in get_all_conda_bins():
+        exe_file = os.path.join(path, program)
+        if is_exe(exe_file):
+            return exe_file
+    return None
+
+
 
 def pcgr_error_message(message, logger):
     logger.error("")
