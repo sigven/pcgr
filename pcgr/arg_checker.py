@@ -153,7 +153,7 @@ def check_args(arg_dict, logger):
                     pcgr_error_message(err_msg, logger)
 
         for pop in ['nfe', 'fin', 'amr', 'eas', 'sas', 'asj', 'oth', 'afr', 'global']:
-            tag = 'maf_gnomad_{pop}'
+            tag = f'maf_gnomad_{pop}'
             if arg_dict[tag]:
                 if float(arg_dict[tag]) < 0 or float(arg_dict[tag]) > 1:
                     err_msg = f"MAF threshold (tumor-only germline filter) for gnomAD (pop '{pop.upper()}') must be within the [0, 1] range, current value is {arg_dict[tag]}"
