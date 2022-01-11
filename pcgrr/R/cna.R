@@ -77,11 +77,11 @@ get_cna_cytoband <- function(cna_df, pcgr_data = NULL) {
       S4Vectors::mcols(cna_gr[S4Vectors::queryHits(cyto_hits)]))
   cyto_df <- as.data.frame(S4Vectors::mcols(ranges)) %>%
     dplyr::mutate(segment_start =
-                    BiocGenerics::start(ranges(cna_gr[S4Vectors::queryHits(cyto_hits)]))) %>%
+                    BiocGenerics::start(IRanges::ranges(cna_gr[S4Vectors::queryHits(cyto_hits)]))) %>%
     dplyr::mutate(segment_end =
-                    BiocGenerics::end(ranges(cna_gr[S4Vectors::queryHits(cyto_hits)]))) %>%
+                    BiocGenerics::end(IRanges::ranges(cna_gr[S4Vectors::queryHits(cyto_hits)]))) %>%
     dplyr::mutate(segment_length =
-                    BiocGenerics::width(ranges(cna_gr[S4Vectors::queryHits(cyto_hits)])))
+                    BiocGenerics::width(IRanges::ranges(cna_gr[S4Vectors::queryHits(cyto_hits)])))
 
   cyto_stats <- as.data.frame(
     cyto_df %>%
@@ -309,11 +309,11 @@ get_cna_overlapping_transcripts <- function(cna_df, pcgr_data) {
         dplyr::mutate(
           segment_start =
             as.integer(BiocGenerics::start(
-              ranges(cna_gr[S4Vectors::queryHits(hits)])))) %>%
+              IRanges::ranges(cna_gr[S4Vectors::queryHits(hits)])))) %>%
         dplyr::mutate(
           segment_end =
             as.integer(BiocGenerics::end(
-              ranges(cna_gr[S4Vectors::queryHits(hits)])))) %>%
+              IRanges::ranges(cna_gr[S4Vectors::queryHits(hits)])))) %>%
         dplyr::mutate(
           transcript_start = BiocGenerics::start(ranges)) %>%
         dplyr::mutate(
