@@ -102,10 +102,11 @@ plot_tmb_primary_site_tcga <- function(tcga_tmb, p_site = "Liver",
 
   tmb_plot_site <-
     ggplot2::ggplot(data = tcga_tmb) +
-    ggplot2::geom_boxplot(mapping =
-                            ggplot2::aes(x = stats::reorder(.data$primary_site, .data$tmb_log10,
-                                                     FUN = stats::median),
-                                         y = .data$tmb, fill = .data$primary_site)) +
+    ggplot2::geom_boxplot(
+      mapping =
+        ggplot2::aes(x = stats::reorder(.data$primary_site, .data$tmb_log10,
+                                        FUN = stats::median),
+                     y = .data$tmb, fill = .data$primary_site)) +
     ggplot2::theme_classic() +
     ggplot2::scale_y_continuous(trans = scales::log_trans(base = 10),
                                 breaks = c(0.01, 1, 10, 100, 1000),
@@ -129,10 +130,15 @@ plot_tmb_primary_site_tcga <- function(tcga_tmb, p_site = "Liver",
                    plot.margin =
                      (grid::unit(c(0.5, 2, 2, 0.5), "cm")),
                    legend.text = ggplot2::element_text(family = "Helvetica",
-                                                       size = 14)) +
-    ggplot2::geom_hline(yintercept = as.numeric(tmb_estimate), size = 0.9,
-                        linetype = 4,
-                        colour = pcgrr::color_palette[["tier"]][["values"]][1])
+                                                       size = 14))
+
+  if(tmb_estimate > 0){
+    tmb_plot_site <- tmb_plot_site +
+      ggplot2::geom_hline(
+        yintercept = as.numeric(tmb_estimate), size = 0.9,
+        linetype = 4,
+        colour = pcgrr::color_palette[["tier"]][["values"]][1])
+  }
 
 
   return(tmb_plot_site)

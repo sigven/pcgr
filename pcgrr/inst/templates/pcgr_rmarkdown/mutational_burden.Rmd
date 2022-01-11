@@ -2,10 +2,9 @@
 
 For estimation of TMB, PCGR employs two different approaches/algorithms ( __all_coding__, and __nonsyn__, see details outlined in the [Documentation](#Documentation) below).
 
-TMB algorithm chosen by user: __`r pcg_report[['metadata']][['config']][['tmb']][['algorithm']]`__
-Size of targeted coding region: __`r pcg_report[['metadata']][['config']][["assay_props"]][['target_size_mb']]` Mb__
-
-Estimated mutational burden: __`r pcg_report[['content']][['tmb']][['v_stat']][['tmb_estimate']]`__ __mutations/Mb__ 
+* TMB algorithm chosen by user: __`r pcg_report[['metadata']][['config']][['tmb']][['algorithm']]`__
+* Size of targeted coding region: __`r pcg_report[['metadata']][['config']][["assay_props"]][['target_size_mb']]` Mb__
+* Estimated mutational burden: __`r pcg_report[['content']][['tmb']][['v_stat']][['tmb_estimate']]`__ __mutations/Mb__ 
 
 <br><br>
 

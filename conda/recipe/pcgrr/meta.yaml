@@ -28,6 +28,7 @@ requirements:
     - r-dt
     - r-dplyr
     - r-flexdashboard
+    - r-crosstalk ==1.1.1
     - bioconductor-genomicranges
     - bioconductor-genomeinfodb
     - r-ggplot2
@@ -66,6 +67,7 @@ requirements:
     - r-dt
     - r-dplyr
     - r-flexdashboard
+    - r-crosstalk ==1.1.1
     - bioconductor-genomicranges
     - bioconductor-genomeinfodb
     - r-ggplot2
