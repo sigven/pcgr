@@ -453,7 +453,7 @@ match_eitems_to_var <- function(sample_calls,
       "Argument 'sample_calls' must be of type data frame, not ",
       class(sample_calls))))
   assertable::assert_colnames(
-    eitems, c("EVIDENCE_ID", "SYMBOL"),
+    eitems, c("EVIDENCE_ID", "SYMBOL","HGVS_ALIAS"),
     only_colnames = F, quiet = T)
 
   invisible(assertthat::assert_that(!is.null(colset)))
@@ -477,7 +477,7 @@ match_eitems_to_var <- function(sample_calls,
 
   assertable::assert_colnames(
     sample_calls,
-    c(evidence_identifiers, "SYMBOL"),
+    c(evidence_identifiers, "PROTEIN_CHANGE","SYMBOL"),
     only_colnames = F, quiet = T)
 
   sample_calls_db <- sample_calls %>%
@@ -501,6 +501,38 @@ match_eitems_to_var <- function(sample_calls,
       dplyr::distinct() %>%
       pcgrr::remove_cols_from_df(cnames = evidence_identifiers)
     )
+  }
+
+
+  ## Add additional var_eitems based on matching against
+  ## HGVS (protein_change) + SYMBOL
+
+  if(region_marker == F){
+    eitems_hgvs <- eitems %>%
+      dplyr::filter(!is.na(HGVS_ALIAS))
+
+    if(NROW(eitems_hgvs) > 0){
+      eitems_hgvs <- eitems_hgvs %>%
+        tidyr::separate_rows(HGVS_ALIAS, sep = "\\|") %>%
+        dplyr::rename(PROTEIN_CHANGE = HGVS_ALIAS)
+
+      var_eitems_hgvs_mapped <- var_eitems %>%
+        dplyr::filter(!is.na(PROTEIN_CHANGE))
+
+      if(nrow(var_eitems_hgvs_mapped) > 0){
+        var_eitems_hgvs_mapped <- as.data.frame(var_eitems_hgvs_mapped %>%
+          dplyr::inner_join(eitems_hgvs, by = c("SYMBOL","PROTEIN_CHANGE")) %>%
+          dplyr::distinct() %>%
+          ## skip duplicates from exact matching at nucleotide level
+          dplyr::anti_join(var_eitems, by = c("VAR_ID"))
+        )
+
+        var_eitems <- var_eitems %>%
+          dplyr::bind_rows(var_eitems_hgvs_mapped) %>%
+          dplyr::distinct()
+      }
+    }
+
   }
 
 
