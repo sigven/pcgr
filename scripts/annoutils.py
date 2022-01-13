@@ -45,6 +45,22 @@ def check_subprocess(command):
       exit(0)
 
 
+def read_genexref_namemap(gene_xref_namemap_tsv):
+  
+  """
+   Function that reads a file that lists names of tags in PCGR_ONCO_XREF annotation.
+  """
+  
+   namemap_xref = {} ##dictionary returned
+   if not os.path.exists(gene_xref_namemap_tsv):
+      return namemap_xref
+   tsvfile = open(gene_xref_namemap_tsv, 'r')
+   reader = csv.DictReader(tsvfile, delimiter='\t')
+   for row in reader:
+      namemap_xref[row['name']] = int(row['index'])
+
+   return namemap_xref
+
 def is_integer(n):
     try:
         float(n)
