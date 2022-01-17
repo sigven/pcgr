@@ -1580,7 +1580,7 @@ get_calls <- function(tsv_gz_file,
   if (nrow(vcf_data_df) == 0) return(vcf_data_df)
 
   vcf_data_df <- vcf_data_df %>%
-    dplyr::mutate(SYMBOL = .data$SYMBOL_ENTREZ) %>%
+    #dplyr::mutate(SYMBOL = .data$SYMBOL_ENTREZ) %>%
     dplyr::mutate(
       CLINVAR_CONFLICTED = dplyr::case_when(
         .data$CLINVAR_CONFLICTED == "1" ~ TRUE,
