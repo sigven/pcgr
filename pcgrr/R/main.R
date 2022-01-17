@@ -44,14 +44,16 @@ generate_pcgr_report <-
 
 
     if (!is.null(cna_segments_tsv)) {
-      invisible(assertthat::assert_that(
-        file.exists(cna_segments_tsv),
-        msg = paste0("Filename provided for argument 'cna_segments_tsv' (",
-                     cna_segments_tsv, ") does not exist")))
-      invisible(assertthat::assert_that(
-        file.size(cna_segments_tsv) > 0,
-        msg = paste0("File provided for argument 'cna_segments_tsv' (",
-                     cna_segments_tsv, ") has a filesize of zero")))
+      if(length(cna_segments_tsv) > 0){
+        invisible(assertthat::assert_that(
+          file.exists(cna_segments_tsv),
+          msg = paste0("Filename provided for argument 'cna_segments_tsv' (",
+                       cna_segments_tsv, ") does not exist")))
+        invisible(assertthat::assert_that(
+          file.size(cna_segments_tsv) > 0,
+          msg = paste0("File provided for argument 'cna_segments_tsv' (",
+                       cna_segments_tsv, ") has a filesize of zero")))
+      }
     }
     if (!is.null(query_vcf2tsv)) {
       invisible(assertthat::assert_that(
@@ -65,14 +67,17 @@ generate_pcgr_report <-
 
     }
     if (!is.null(cpsr_report_fname)) {
-      invisible(assertthat::assert_that(
-        file.exists(cpsr_report_fname),
-        msg = paste0("Filename provided for argument 'cpsr_report' (",
-                     cpsr_report_fname, ") does not exist")))
-      invisible(assertthat::assert_that(
-        file.size(cpsr_report_fname) > 0,
-        msg = paste0("File provided for argument 'cpsr_report' (",
-                     cpsr_report_fname, ") has a filesize of zero")))
+      if(length(cpsr_report_fname) > 0){
+
+        invisible(assertthat::assert_that(
+          file.exists(cpsr_report_fname),
+          msg = paste0("Filename provided for argument 'cpsr_report' (",
+                       cpsr_report_fname, ") does not exist")))
+        invisible(assertthat::assert_that(
+          file.size(cpsr_report_fname) > 0,
+          msg = paste0("File provided for argument 'cpsr_report' (",
+                       cpsr_report_fname, ") has a filesize of zero")))
+      }
 
     }
 
