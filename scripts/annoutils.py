@@ -47,9 +47,9 @@ def check_subprocess(command):
 
 def read_genexref_namemap(gene_xref_namemap_tsv):
   
-  """
+   """
    Function that reads a file that lists names of tags in PCGR_ONCO_XREF annotation.
-  """
+   """
   
    namemap_xref = {} ##dictionary returned
    if not os.path.exists(gene_xref_namemap_tsv):
