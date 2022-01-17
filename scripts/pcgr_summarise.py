@@ -60,7 +60,7 @@ def extend_vcf_annotations(query_vcf, pcgr_db_directory, logger, pon_annotation,
    vcf_infotags_meta = annoutils.read_infotag_file(os.path.join(pcgr_db_directory,'pcgr_infotags.tsv'))
    if cpsr is True:
       vcf_infotags_meta = annoutils.read_infotag_file(os.path.join(pcgr_db_directory,'cpsr_infotags.tsv'))
-   pcgr_onco_xref_map = annoutils.read_genexref_namemap(os.path.join(pcgr_db_directory,'pcgr_onco_xref', 'pcgr_onco_xref.namemap.tsv'))
+   pcgr_onco_xref_map = annoutils.read_genexref_namemap(os.path.join(pcgr_db_directory, 'pcgr_onco_xref', 'pcgr_onco_xref_namemap.tsv'))
 
 
    out_vcf = re.sub(r'\.vcf(\.gz){0,}$','.annotated.vcf',query_vcf)
