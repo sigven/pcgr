@@ -516,14 +516,15 @@ match_eitems_to_var <- function(sample_calls,
         tidyr::separate_rows(HGVS_ALIAS, sep = "\\|") %>%
         dplyr::rename(PROTEIN_CHANGE = HGVS_ALIAS)
 
-      var_eitems_hgvs_mapped <- var_eitems %>%
+      var_eitems_hgvs_mapped <- sample_calls %>%
         dplyr::filter(!is.na(PROTEIN_CHANGE))
 
       if(nrow(var_eitems_hgvs_mapped) > 0){
         var_eitems_hgvs_mapped <- as.data.frame(var_eitems_hgvs_mapped %>%
           dplyr::inner_join(eitems_hgvs, by = c("SYMBOL","PROTEIN_CHANGE")) %>%
           dplyr::distinct() %>%
-          ## skip duplicates from exact matching at nucleotide level
+          pcgrr::remove_cols_from_df(cnames = evidence_identifiers) %>%
+          ## skip duplicates already found from exact matching at nucleotide level
           dplyr::anti_join(var_eitems, by = c("VAR_ID"))
         )
 
