@@ -288,7 +288,7 @@ load_eitems <- function(eitems_raw = NULL,
     log4r_info(
       paste0(
         "Loading ", alteration_type, " biomarkers for precision oncology",
-        "- any tumortype"))
+        " - any tumortype"))
   }else{
 
     ## limit clinical evidence items by primary tumor site if this
@@ -504,7 +504,7 @@ match_eitems_to_var <- function(sample_calls,
     if (nrow(var_eitems) > 0) {
       var_eitems_exact <- as.data.frame(
         var_eitems %>%
-          dplyr::full_join(eitems_db,
+          dplyr::inner_join(eitems_db,
                            by = c("EVIDENCE_ID", "SYMBOL")) %>%
           dplyr::distinct() %>%
           pcgrr::remove_cols_from_df(
@@ -872,7 +872,7 @@ log_var_eitem_stats <- function(var_eitems = NULL,
   log4r_info(
     paste0("Found n = ",
            NROW(var_eitems[[target_type]]),
-           " other clinical evidence item(s) at the ", target_type,
+           " clinical evidence item(s) at the ", target_type,
            " level, ",
            length(unique(var_eitems[[target_type]]$GENOMIC_CHANGE)),
            " unique variant(s)")
