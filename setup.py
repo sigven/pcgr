@@ -11,7 +11,8 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     entry_points={
         'console_scripts': [
-            'pcgr = pcgr.main:cli'
+            'pcgr = pcgr.main:cli',
+            'cpsr = pcgr.cpsr:run'
         ]
     },
     scripts=[
@@ -21,6 +22,7 @@ setuptools.setup(
         'scripts/pcgr_validate_input.py',
         'scripts/pcgr_vcfanno.py',
         'scripts/vcf2tsv.py',
-        'scripts/pcgrr.R'
+        'scripts/pcgrr.R',
+        'scripts/cpsr.R'
     ]
 )

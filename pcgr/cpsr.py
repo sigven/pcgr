@@ -11,20 +11,14 @@ import getpass
 import platform
 #import toml
 from argparse import RawTextHelpFormatter
-#from pcgr.arg_checker import arg_checker as pcgr_arg_checker
-from pcgr import utils, arg_checker
+from pcgr.arg_checker import get_docker_image_version
 from pcgr.utils import check_subprocess
+from pcgr import pcgr_vars
 
-PCGR_VERSION = '0.9.2'
 CPSR_VERSION = '0.6.2'
 DB_VERSION = 'PCGR_DB_VERSION = 20210627'
-VEP_VERSION = '104'
-GENCODE_VERSION = '38'
-VEP_ASSEMBLY = 'GRCh38'
-DOCKER_IMAGE_VERSION = 'sigven/pcgr:' + str(PCGR_VERSION)
 
 global debug
-#global VEP_ASSEMBLY
 
 GE_panels = {
       0: "CPSR exploratory cancer predisposition panel (n = 433, Genomics England PanelApp / TCGA Germline Study / Cancer Gene Census / Other)",
@@ -127,7 +121,7 @@ def get_args():
    optional_vep.add_argument('--vep_no_intergenic', action = "store_true", help="Skip intergenic variants during processing (option '--no_intergenic' in VEP), default: %(default)s")
 
    required.add_argument('--input_vcf', help='VCF input file with germline query variants (SNVs/InDels).', required = True)
-   required.add_argument('--pcgr_dir',help="Directory that contains the PCGR data bundle directory, e.g. ~/pcgr-" + str(PCGR_VERSION), required = True)
+   required.add_argument('--pcgr_dir',help=f"Directory that contains the PCGR data bundle directory, e.g. ~/pcgr-{pcgr_vars.PCGR_VERSION}", required = True)
    required.add_argument('--output_dir',help='Output directory', required = True)
    required.add_argument('--genome_assembly',choices = ['grch37','grch38'], help='Genome assembly build: grch37 or grch38', required = True)
    required.add_argument('--sample_id',help="Sample identifier - prefix for output files", required = True)
@@ -139,17 +133,16 @@ def run():
     arg_dict = get_args()
 
     logger = getlogger('cpsr-validate-input-arguments')
-    print()
     logger.info("STEP 0: Validate input data")
 
     # check parsed arguments
     check_args(arg_dict, logger)
     # check and get docker image version
-    DOCKER_IMAGE_VERSION = pcgr_arg_checker.get_docker_image_version(arg_dict, logger)
+    DOCKER_IMAGE_VERSION = get_docker_image_version(arg_dict, logger)
     ## Map local input directories and files to internal paths/volumes in container (Docker)
     host_directories = verify_input_files(arg_dict, logger)
     ## Run CPSR workflow
-    run_cpsr(arg_dict, host_directories)
+    run_cpsr(arg_dict, host_directories, DOCKER_IMAGE_VERSION)
 
 
 def check_args(arg_dict, logger):
@@ -384,7 +377,7 @@ def getlogger(logger_name):
 
    return logger
 
-def run_cpsr(arg_dict, host_directories):
+def run_cpsr(arg_dict, host_directories, DOCKER_IMAGE_VERSION):
    """
    Main function to run the CPSR workflow (Docker/Conda)
    """
@@ -444,7 +437,9 @@ def run_cpsr(arg_dict, host_directories):
    output_pass_vcf = 'None'
    output_pass_tsv = 'None'
    uid = ''
-   global GENCODE_VERSION, VEP_ASSEMBLY
+   GENCODE_VERSION = pcgr_vars.GENCODE_VERSION
+   VEP_ASSEMBLY = pcgr_vars.VEP_ASSEMBLY
+   VEP_VERSION = pcgr_vars.VEP_VERSION
    if arg_dict['genome_assembly'] == 'grch37':
       GENCODE_VERSION = '19'
       VEP_ASSEMBLY = 'GRCh37'
@@ -663,7 +658,7 @@ def run_cpsr(arg_dict, host_directories):
       cpsr_report_command = docker_command_run1 + os.path.join(r_scripts_dir, "cpsr.R") + " " + output_dir + " " + \
          str(output_pass_tsv) + ".gz " +  \
          str(arg_dict['sample_id'])  + " " + \
-         str(PCGR_VERSION) + " " + \
+         str(pcgr_vars.PCGR_VERSION) + " " + \
          str(CPSR_VERSION) + " " + \
          str(arg_dict['genome_assembly']) + " " + \
          str(data_dir) + " " + \
