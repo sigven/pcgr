@@ -115,6 +115,12 @@ def cli():
     required.add_argument("--output_dir", dest="output_dir", help="Output directory", required=True)
     required.add_argument("--genome_assembly", dest="genome_assembly", choices=["grch37", "grch38"], help="Human genome assembly build: grch37 or grch38", required=True)
     required.add_argument("--sample_id", dest="sample_id", help="Tumor sample/cancer genome identifier - prefix for output files", required=True)
+    
+    # Handle CPSR
+    subparser_name = 'subparser_name'
+    subparsers = parser.add_subparsers(title='subcommands', description='valid subcommands', help='subcommand help', dest=subparser_name)
+    parser_cpsr = subparsers.add_parser('cpsr', help='cpsr help')
+
 
     # Parse required and optional arguments
     args = parser.parse_args()

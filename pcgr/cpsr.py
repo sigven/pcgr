@@ -11,6 +11,9 @@ import getpass
 import platform
 #import toml
 from argparse import RawTextHelpFormatter
+#from pcgr.arg_checker import arg_checker as pcgr_arg_checker
+from pcgr import utils, arg_checker
+from pcgr.utils import check_subprocess
 
 PCGR_VERSION = '0.9.2'
 CPSR_VERSION = '0.6.2'
@@ -24,7 +27,7 @@ global debug
 #global VEP_ASSEMBLY
 
 GE_panels = {
-		0: "CPSR exploratory cancer predisposition panel (n = 433, Genomics England PanelApp / TCGA Germline Study / Cancer Gene Census / Other)",
+      0: "CPSR exploratory cancer predisposition panel (n = 433, Genomics England PanelApp / TCGA Germline Study / Cancer Gene Census / Other)",
       1: "Adult solid tumours cancer susceptibility (Genomics England PanelApp)",
       2: "Adult solid tumours for rare disease (Genomics England PanelApp)",
       3: "Bladder cancer pertinent cancer susceptibility (Genomics England PanelApp)",
@@ -67,54 +70,11 @@ GE_panels = {
       40: "Thyroid cancer pertinent cancer susceptibility (Genomics England PanelApp)",
       41: "Tumour predisposition - childhood onset (Genomics England PanelApp)",
       42: "Upper gastrointestinal cancer pertinent cancer susceptibility (Genomics England PanelApp)"
-	}
+}
 
+panels = '\n'.join([f'{k} = {GE_panels[k]}' for k in GE_panels]) # for displaying in help
 
-def __main__():
-
-   panels = "0 = CPSR exploratory cancer predisposition panel\n (n = 335, Genomics England PanelApp / TCGA Germline Study / Cancer Gene Census / Other)\n"
-   panels = panels + "1 = Adult solid tumours cancer susceptibility (Genomics England PanelApp)\n"
-   panels = panels + "2 = Adult solid tumours for rare disease (Genomics England PanelApp)\n"
-   panels = panels + "3 = Bladder cancer pertinent cancer susceptibility (Genomics England PanelApp)\n"
-   panels = panels + "4 = Brain cancer pertinent cancer susceptibility (Genomics England PanelApp)\n"
-   panels = panels + "5 = Breast cancer pertinent cancer susceptibility (Genomics England PanelApp)\n"
-   panels = panels + "6 = Childhood solid tumours cancer susceptibility (Genomics England PanelApp)\n"
-   panels = panels + "7 = Colorectal cancer pertinent cancer susceptibility (Genomics England PanelApp)\n"
-   panels = panels + "8 = Endometrial cancer pertinent cancer susceptibility (Genomics England PanelApp)\n"
-   panels = panels + "9 = Familial Tumours Syndromes of the central & peripheral Nervous system (Genomics England PanelApp)\n"
-   panels = panels + "10 = Familial breast cancer (Genomics England PanelApp)\n"
-   panels = panels + "11 = Familial melanoma (Genomics England PanelApp)\n"
-   panels = panels + "12 = Familial prostate cancer (Genomics England PanelApp)\n"
-   panels = panels + "13 = Familial rhabdomyosarcoma (Genomics England PanelApp)\n"
-   panels = panels + "14 = GI tract tumours (Genomics England PanelApp)\n"
-   panels = panels + "15 = Genodermatoses with malignancies (Genomics England PanelApp)\n"
-   panels = panels + "16 = Haematological malignancies cancer susceptibility (Genomics England PanelApp)\n"
-   panels = panels + "17 = Haematological malignancies for rare disease (Genomics England PanelApp)\n"
-   panels = panels + "18 = Head and neck cancer pertinent cancer susceptibility (Genomics England PanelApp)\n"
-   panels = panels + "19 = Inherited MMR deficiency (Lynch syndrome) - Genomics England PanelApp\n"
-   panels = panels + "20 = Inherited non-medullary thyroid cancer (Genomics England PanelApp)\n"
-   panels = panels + "21 = Inherited ovarian cancer (without breast cancer) (Genomics England PanelApp)\n"
-   panels = panels + "22 = Inherited pancreatic cancer (Genomics England PanelApp)\n"
-   panels = panels + "23 = Inherited polyposis (Genomics England PanelApp)\n"
-   panels = panels + "24 = Inherited predisposition to acute myeloid leukaemia (AML) - Genomics England PanelApp\n"
-   panels = panels + "25 = Inherited predisposition to GIST (Genomics England PanelApp)\n"
-   panels = panels + "26 = Inherited renal cancer (Genomics England PanelApp)\n"
-   panels = panels + "27 = Inherited phaeochromocytoma and paraganglioma (Genomics England PanelApp)\n"
-   panels = panels + "28 = Melanoma pertinent cancer susceptibility (Genomics England PanelApp)\n"
-   panels = panels + "29 = Multiple endocrine tumours (Genomics England PanelApp)\n"
-   panels = panels + "30 = Multiple monogenic benign skin tumours (Genomics England PanelApp)\n"
-   panels = panels + "31 = Neuroendocrine cancer pertinent cancer susceptibility (Genomics England PanelApp)\n"
-   panels = panels + "32 = Neurofibromatosis Type 1 (Genomics England PanelApp)\n"
-   panels = panels + "33 = Ovarian cancer pertinent cancer susceptibility (Genomics England PanelApp)\n"
-   panels = panels + "34 = Parathyroid Cancer (Genomics England PanelApp)\n"
-   panels = panels + "35 = Prostate cancer pertinent cancer susceptibility (Genomics England PanelApp)\n"
-   panels = panels + "36 = Renal cancer pertinent cancer susceptibility (Genomics England PanelApp)\n"
-   panels = panels + "37 = Rhabdoid tumour predisposition (Genomics England PanelApp)\n"
-   panels = panels + "38 = Sarcoma cancer susceptibility (Genomics England PanelApp)\n"
-   panels = panels + "39 = Sarcoma susceptibility (Genomics England PanelApp)\n"
-   panels = panels + "40 = Thyroid cancer pertinent cancer susceptibility (Genomics England PanelApp)\n"
-   panels = panels + "41 = Tumour predisposition - childhood onset (Genomics England PanelApp)\n"
-   panels = panels + "42 = Upper gastrointestinal cancer pertinent cancer susceptibility (Genomics England PanelApp)\n\n"
+def get_args():
    
    program_description = "Cancer Predisposition Sequencing Reporter - report of " + \
       "clinically significant cancer-predisposing germline variants"
@@ -173,132 +133,128 @@ def __main__():
    required.add_argument('--sample_id',help="Sample identifier - prefix for output files", required = True)
    
    args = parser.parse_args()
-   arg_dict = vars(args)
+   return vars(args)
 
-   logger = getlogger('cpsr-validate-input-arguments')
-   print()
-   logger.info("STEP 0: Validate input data")
+def run():
+    arg_dict = get_args()
 
-   arg_dict['vep_regulatory'] = True
-   ## Required arguments
-   ## Check that query VCF is set and exists
-   if arg_dict['input_vcf'] is None or not os.path.exists(arg_dict['input_vcf']):
-      err_msg = "Required argument '--input_vcf' does not exist (" + str(arg_dict['input_vcf']) + "). Type cpsr.py --help to view all options and required arguments"
-      error_message(err_msg,logger)
+    logger = getlogger('cpsr-validate-input-arguments')
+    print()
+    logger.info("STEP 0: Validate input data")
 
-   ## Check that PCGR directory (with data bundle) is provided and exists
-   if arg_dict['pcgr_dir'] is None or not os.path.exists(arg_dict['pcgr_dir']):
-      err_msg = "Required argument '--pcgr_dir' does not exist (" + str(arg_dict['pcgr_dir']) + "). Type cpsr.py --help to view all options and required arguments"
-      error_message(err_msg,logger)
-   
-   ## Check that output directory is provided and exists
-   if arg_dict['output_dir'] is None or not os.path.exists(arg_dict['output_dir']):
-      err_msg = "Required argument '--output_dir' does not exist (" + str(arg_dict['output_dir']) + "). Type cpsr.py --help to view all options and required arguments"
-      error_message(err_msg,logger)
-   
-
-   ## Check that genome assembly is set
-   if arg_dict['genome_assembly'] is None:
-      err_msg = "Required argument '--genome_assembly' has no/undefined value (\'" + str(arg_dict['genome_assembly']) + "'). Type cpsr.py --help to view all options and required arguments"
-      error_message(err_msg,logger)
-   
-   ## Check that sample identifier is set and is of appropriate length (minimum two characters)
-   if arg_dict['sample_id'] is None:
-      err_msg = "Required argument '--sample_id' has no/undefined value (" + str(arg_dict['sample_id']) + "). Type cpsr.py --help to view all options and required arguments"
-      error_message(err_msg,logger)
-
-   if len(arg_dict['sample_id']) <= 2:
-      err_msg = "Sample name identifier ('--sample_id') requires a name with more than two characters. Current sample identifier: " + str(arg_dict['sample_id'])
-      error_message(err_msg,logger)
-
-   ### Optional arguments
-   ## Provide virtual_panel_id or a custom list from panel 0
-   if arg_dict['virtual_panel_id'] == "-1" and not arg_dict['custom_list']:
-      err_msg = 'Provide valid virtual panel identifier(s) through --panel_id (0 - 42) or provide custom list of panel 0 genes (single column text file) through --custom_list'
-      error_message(err_msg,logger)
-
-   if arg_dict['custom_list'] and arg_dict['virtual_panel_id'] != "-1":
-      err_msg =  "Option --panel_id cannot be used in conjunction with --custom_list"
-      error_message(err_msg, logger)
-
-   if arg_dict['maf_upper_threshold'] <= 0 or arg_dict['maf_upper_threshold'] > 1:
-      err_msg = 'MAF upper threshold must be greater than 0 and below 1, current value is ' + str(arg_dict['maf_upper_threshold'])
-      error_message(err_msg,logger)
-
-   if arg_dict['vcfanno_n_proc'] <= 0 or arg_dict['vcfanno_n_proc'] > 15:
-      err_msg = 'Number of processes that vcfanno can use during annotation must be above 0 and not more than 15, current value is ' + str(arg_dict['vcfanno_n_proc'])
-      error_message(err_msg,logger)
-   
-   
-   ## Check that panel identifier(s) are set appropriately
-   if arg_dict['virtual_panel_id'] != "-1" and not arg_dict['custom_list']:
-      if not ',' in arg_dict['virtual_panel_id']:
-         if str(arg_dict['virtual_panel_id']).isdigit():
-            panel_id = int(arg_dict['virtual_panel_id'])
-            if not (panel_id >= 0 and panel_id <= 42):
-               err_msg =  'A single panel chosen with \'--panel_id\' must be in the range 0 - 42'
-               error_message(err_msg, logger)
-         else:
-            err_msg =  'A single panel chosen with \'--panel_id\' must be a proper integer - not \'' + str(arg_dict['virtual_panel_id']) + '\''
-            error_message(err_msg, logger)
-      else:
-         panels = str(arg_dict['virtual_panel_id']).split(',')
-         for p in panels:
-            #p = int(p)
-            if str(p).isdigit():
-               panel_id = int(p)
-               if panel_id < 1 or panel_id > 42:
-                  err_msg =  'Multiple panels submitted as comma-separated string with \'--panel_id\' must take values in the range 1 - 42'
-                  error_message(err_msg, logger)
-            else:
-               err_msg =  'Multiple panels submitted as comma-separated string with \'--panel_id\' must contain proper integer values only -  \'' + str(arg_dict['virtual_panel_id']) + '\' contains non-integer entries'
-               error_message(err_msg, logger)
+    # check parsed arguments
+    check_args(arg_dict, logger)
+    # check and get docker image version
+    DOCKER_IMAGE_VERSION = pcgr_arg_checker.get_docker_image_version(arg_dict, logger)
+    ## Map local input directories and files to internal paths/volumes in container (Docker)
+    host_directories = verify_input_files(arg_dict, logger)
+    ## Run CPSR workflow
+    run_cpsr(arg_dict, host_directories)
 
 
-   if (arg_dict['custom_list'] or arg_dict['virtual_panel_id'] == "0" ) and arg_dict['diagnostic_grade_only']:
-      warn_msg = 'Option \'--diagnostic_grade_only\' applies ONLY to panel identifiers from Genomics England PanelApp - will be ignored'
-      warn_message(warn_msg, logger)
+def check_args(arg_dict, logger):
+    arg_dict['vep_regulatory'] = True
+    ## Required arguments
+    ## Check that query VCF is set and exists
+    if arg_dict['input_vcf'] is None or not os.path.exists(arg_dict['input_vcf']):
+       err_msg = "Required argument '--input_vcf' does not exist (" + str(arg_dict['input_vcf']) + "). Type cpsr.py --help to view all options and required arguments"
+       error_message(err_msg,logger)
 
-   ## VEP options
-   if arg_dict['vep_n_forks'] <= 0 or arg_dict['vep_n_forks'] > 4:
-      err_msg = 'Number of forks that VEP can use during annotation must be above 0 and not more than 4, current value is ' + str(arg_dict['vep_n_forks'])
-      error_message(err_msg,logger)
-   
-   if arg_dict['vep_buffer_size'] <= 0 or arg_dict['vep_buffer_size'] > 30000:
-      err_msg = 'Internal VEP buffer size, corresponding to the number of variants that are read in to memory simultaneously, must be above 0 and not more than 30,000, current value is ' + str(arg_dict['vep_buffer_size'])
-      error_message(err_msg,logger)
+    ## Check that PCGR directory (with data bundle) is provided and exists
+    if arg_dict['pcgr_dir'] is None or not os.path.exists(arg_dict['pcgr_dir']):
+       err_msg = "Required argument '--pcgr_dir' does not exist (" + str(arg_dict['pcgr_dir']) + "). Type cpsr.py --help to view all options and required arguments"
+       error_message(err_msg,logger)
+    
+    ## Check that output directory is provided and exists
+    if arg_dict['output_dir'] is None or not os.path.exists(arg_dict['output_dir']):
+       err_msg = "Required argument '--output_dir' does not exist (" + str(arg_dict['output_dir']) + "). Type cpsr.py --help to view all options and required arguments"
+       error_message(err_msg,logger)
+    
 
-   ## Check that VEP pick criteria is formatted correctly
-   if not arg_dict['vep_pick_order'] is None:
-      values = str(arg_dict['vep_pick_order']).split(',')
-      permitted_sources = ['canonical','appris','tsl','biotype','ccds','rank','length','mane']
-      num_permitted_sources = 0
-      for v in values:
-         if v in permitted_sources:
-            num_permitted_sources += 1
-               
-      if num_permitted_sources != 8:
-         err_msg = "Option 'vep_pick_order' = " + str(arg_dict['vep_pick_order']) + " is formatted incorrectly, should be " + \
-            "a comma-separated string of the following values: canonical,appris,tsl,biotype,ccds,rank,length,mane"
-         error_message(err_msg, logger)
+    ## Check that genome assembly is set
+    if arg_dict['genome_assembly'] is None:
+       err_msg = "Required argument '--genome_assembly' has no/undefined value (\'" + str(arg_dict['genome_assembly']) + "'). Type cpsr.py --help to view all options and required arguments"
+       error_message(err_msg,logger)
+    
+    ## Check that sample identifier is set and is of appropriate length (minimum two characters)
+    if arg_dict['sample_id'] is None:
+       err_msg = "Required argument '--sample_id' has no/undefined value (" + str(arg_dict['sample_id']) + "). Type cpsr.py --help to view all options and required arguments"
+       error_message(err_msg,logger)
 
-   ## Check that Docker image contains (if not --no_docker option set)
-   global DOCKER_IMAGE_VERSION
-   if arg_dict['no_docker']:
-      DOCKER_IMAGE_VERSION = None
-   else:
-      # check that script and Docker image version correspond
-      check_docker_command = 'docker images -q ' + str(DOCKER_IMAGE_VERSION)
-      output = subprocess.check_output(str(check_docker_command), stderr=subprocess.STDOUT, shell=True)
-      if(len(output) == 0):
-          err_msg = 'Docker image ' + str(DOCKER_IMAGE_VERSION) + ' does not exist, pull image from Dockerhub (docker pull ' + str(DOCKER_IMAGE_VERSION) + ')'
-          error_message(err_msg,logger)
-   
-   ## Map local input directories and files to internal paths/volumes in container (Docker)
-   host_directories = verify_input_files(arg_dict, logger)
-   
-   ## Run CPSR workflow
-   run_cpsr(arg_dict, host_directories)
+    if len(arg_dict['sample_id']) <= 2:
+       err_msg = "Sample name identifier ('--sample_id') requires a name with more than two characters. Current sample identifier: " + str(arg_dict['sample_id'])
+       error_message(err_msg,logger)
+
+    ### Optional arguments
+    ## Provide virtual_panel_id or a custom list from panel 0
+    if arg_dict['virtual_panel_id'] == "-1" and not arg_dict['custom_list']:
+       err_msg = 'Provide valid virtual panel identifier(s) through --panel_id (0 - 42) or provide custom list of panel 0 genes (single column text file) through --custom_list'
+       error_message(err_msg,logger)
+
+    if arg_dict['custom_list'] and arg_dict['virtual_panel_id'] != "-1":
+       err_msg =  "Option --panel_id cannot be used in conjunction with --custom_list"
+       error_message(err_msg, logger)
+
+    if arg_dict['maf_upper_threshold'] <= 0 or arg_dict['maf_upper_threshold'] > 1:
+       err_msg = 'MAF upper threshold must be greater than 0 and below 1, current value is ' + str(arg_dict['maf_upper_threshold'])
+       error_message(err_msg,logger)
+
+    if arg_dict['vcfanno_n_proc'] <= 0 or arg_dict['vcfanno_n_proc'] > 15:
+       err_msg = 'Number of processes that vcfanno can use during annotation must be above 0 and not more than 15, current value is ' + str(arg_dict['vcfanno_n_proc'])
+       error_message(err_msg,logger)
+    
+    
+    ## Check that panel identifier(s) are set appropriately
+    if arg_dict['virtual_panel_id'] != "-1" and not arg_dict['custom_list']:
+       if not ',' in arg_dict['virtual_panel_id']:
+          if str(arg_dict['virtual_panel_id']).isdigit():
+             panel_id = int(arg_dict['virtual_panel_id'])
+             if not (panel_id >= 0 and panel_id <= 42):
+                err_msg =  'A single panel chosen with \'--panel_id\' must be in the range 0 - 42'
+                error_message(err_msg, logger)
+          else:
+             err_msg =  'A single panel chosen with \'--panel_id\' must be a proper integer - not \'' + str(arg_dict['virtual_panel_id']) + '\''
+             error_message(err_msg, logger)
+       else:
+          panels = str(arg_dict['virtual_panel_id']).split(',')
+          for p in panels:
+             #p = int(p)
+             if str(p).isdigit():
+                panel_id = int(p)
+                if panel_id < 1 or panel_id > 42:
+                   err_msg =  'Multiple panels submitted as comma-separated string with \'--panel_id\' must take values in the range 1 - 42'
+                   error_message(err_msg, logger)
+             else:
+                err_msg =  'Multiple panels submitted as comma-separated string with \'--panel_id\' must contain proper integer values only -  \'' + str(arg_dict['virtual_panel_id']) + '\' contains non-integer entries'
+                error_message(err_msg, logger)
+
+
+    if (arg_dict['custom_list'] or arg_dict['virtual_panel_id'] == "0" ) and arg_dict['diagnostic_grade_only']:
+       warn_msg = 'Option \'--diagnostic_grade_only\' applies ONLY to panel identifiers from Genomics England PanelApp - will be ignored'
+       warn_message(warn_msg, logger)
+
+    ## VEP options
+    if arg_dict['vep_n_forks'] <= 0 or arg_dict['vep_n_forks'] > 4:
+       err_msg = 'Number of forks that VEP can use during annotation must be above 0 and not more than 4, current value is ' + str(arg_dict['vep_n_forks'])
+       error_message(err_msg,logger)
+    
+    if arg_dict['vep_buffer_size'] <= 0 or arg_dict['vep_buffer_size'] > 30000:
+       err_msg = 'Internal VEP buffer size, corresponding to the number of variants that are read in to memory simultaneously, must be above 0 and not more than 30,000, current value is ' + str(arg_dict['vep_buffer_size'])
+       error_message(err_msg,logger)
+
+    ## Check that VEP pick criteria is formatted correctly
+    if not arg_dict['vep_pick_order'] is None:
+       values = str(arg_dict['vep_pick_order']).split(',')
+       permitted_sources = ['canonical','appris','tsl','biotype','ccds','rank','length','mane']
+       num_permitted_sources = 0
+       for v in values:
+          if v in permitted_sources:
+             num_permitted_sources += 1
+                
+       if num_permitted_sources != 8:
+          err_msg = "Option 'vep_pick_order' = " + str(arg_dict['vep_pick_order']) + " is formatted incorrectly, should be " + \
+             "a comma-separated string of the following values: canonical,appris,tsl,biotype,ccds,rank,length,mane"
+          error_message(err_msg, logger)
 
 
 def error_message(message, logger):
@@ -409,18 +365,6 @@ def verify_input_files(arg_dict, logger):
 
    return host_directories
    
-def check_subprocess(logger, command):
-   if debug:
-      logger.info(command)
-   try:
-      output = subprocess.check_output(str(command), stderr=subprocess.STDOUT, shell=True)
-      if len(output) > 0:
-         print (str(output.decode()).rstrip())
-   except subprocess.CalledProcessError as e:
-      print (e.output.decode())
-      exit(0)
-
-
 def getlogger(logger_name):
    logger = logging.getLogger(logger_name)
    logger.setLevel(logging.DEBUG)
@@ -446,7 +390,6 @@ def run_cpsr(arg_dict, host_directories):
    """
 
    ## get options
-   global debug
    debug = arg_dict['debug']
    docker_user_id = arg_dict['docker_user_id']
    diagnostic_grade_only = 0
@@ -571,7 +514,7 @@ def run_cpsr(arg_dict, host_directories):
       vep_dir = vepdb_dir_host
       r_scripts_dir = ''
 
-   check_subprocess(logger, docker_command_run1.replace("-u " + str(uid), "") + 'mkdir -p ' + output_dir + docker_command_run_end)
+   check_subprocess(logger, docker_command_run1.replace("-u " + str(uid), "") + 'mkdir -p ' + output_dir + docker_command_run_end, debug)
 
    ## CPSR|Validate input VCF - check formatting, non-overlap with CPSR INFO tags, and whether sample contains any variants in cancer predisposition loci
    vcf_validate_command = docker_command_run1 + "cpsr_validate_input.py" + " " + data_dir + " " + str(input_vcf_docker) + " " + \
@@ -583,7 +526,7 @@ def run_cpsr(arg_dict, host_directories):
       vcf_validate_command += ' --output_dir ' + output_dir + docker_command_run_end
    else:
       vcf_validate_command += docker_command_run_end
-   check_subprocess(logger, vcf_validate_command)
+   check_subprocess(logger, vcf_validate_command, debug)
    logger.info('Finished')
 
 
@@ -665,9 +608,9 @@ def run_cpsr(arg_dict, host_directories):
       logger.info("VEP configuration - look for overlap with regulatory regions: " + str(vep_regulatory))
       logger.info("VEP configuration - plugins in use: " + str(plugins_in_use))
       logger.info("VEP configuration - buffer_size/number of forks: " + str(arg_dict['vep_buffer_size']) + '/' + str(arg_dict['vep_n_forks']))
-      check_subprocess(logger, vep_main_command)
-      check_subprocess(logger, vep_bgzip_command)
-      check_subprocess(logger, vep_tabix_command)
+      check_subprocess(logger, vep_main_command, debug)
+      check_subprocess(logger, vep_bgzip_command, debug)
+      check_subprocess(logger, vep_tabix_command, debug)
       logger.info("Finished")
    
       ## CPSR|vcfanno - run vcfanno on query VCF with a number of relevant annotated VCFs
@@ -677,7 +620,7 @@ def run_cpsr(arg_dict, host_directories):
       pcgr_vcfanno_command = str(docker_command_run2) + "pcgr_vcfanno.py --num_processes "  + str(arg_dict['vcfanno_n_proc']) + \
          " --dbnsfp --clinvar --cancer_hotspots --dbmts --ncer --gerp --civic --uniprot --gnomad_cpsr --pcgr_onco_xref --gwas --rmsk " + str(vep_vcf) + ".gz " + \
          str(vep_vcfanno_vcf) + " " + os.path.join(data_dir, "data", str(arg_dict['genome_assembly'])) + docker_command_run_end      
-      check_subprocess(logger, pcgr_vcfanno_command)
+      check_subprocess(logger, pcgr_vcfanno_command, debug)
       logger.info("Finished")
 
       ## CPSR|summarise - expand annotations with separate VCF INFO tags
@@ -688,7 +631,7 @@ def run_cpsr(arg_dict, host_directories):
       if debug:
          pcgr_summarise_command  += ' --debug'
       logger.info("STEP 3: Cancer gene annotations with cpsr-summarise")
-      check_subprocess(logger, pcgr_summarise_command)
+      check_subprocess(logger, pcgr_summarise_command, debug)
 
       ## CPSR|clean - rename output files, remove temporary files
       create_output_vcf_command1 = str(docker_command_run2) + 'mv ' + str(vep_vcfanno_annotated_vcf) + ' ' + str(output_vcf) + docker_command_run_end
@@ -697,17 +640,17 @@ def run_cpsr(arg_dict, host_directories):
       create_output_vcf_command4 = str(docker_command_run2) + 'mv ' + str(vep_vcfanno_annotated_pass_vcf) + '.tbi ' + str(output_pass_vcf) + '.tbi' + docker_command_run_end
       clean_command = str(docker_command_run2) + 'rm -f ' + str(vep_vcf) + '* ' + str(vep_vcfanno_annotated_vcf) + ' ' + \
          str(vep_vcfanno_annotated_pass_vcf) + '* ' + str(vep_vcfanno_vcf) + '* ' +  str(input_vcf_cpsr_ready_uncompressed) + "* " + docker_command_run_end
-      check_subprocess(logger, create_output_vcf_command1)
-      check_subprocess(logger, create_output_vcf_command2)
-      check_subprocess(logger, create_output_vcf_command3)
-      check_subprocess(logger, create_output_vcf_command4)
+      check_subprocess(logger, create_output_vcf_command1, debug)
+      check_subprocess(logger, create_output_vcf_command2, debug)
+      check_subprocess(logger, create_output_vcf_command3, debug)
+      check_subprocess(logger, create_output_vcf_command4, debug)
 
       ## CPSR|vcf2tsv - perform vcf2tsv conversion on the final annotated VCF file
       cpsr_vcf2tsv_command = str(docker_command_run2) + "vcf2tsv.py " + str(output_pass_vcf) + " --compress " + str(output_pass_tsv) + docker_command_run_end
       logger.info("Converting VCF to TSV with https://github.com/sigven/vcf2tsv")
-      check_subprocess(logger, cpsr_vcf2tsv_command)
+      check_subprocess(logger, cpsr_vcf2tsv_command, debug)
       if not debug:
-         check_subprocess(logger, clean_command)
+         check_subprocess(logger, clean_command, debug)
       logger.info("Finished")
 
   
@@ -746,10 +689,10 @@ def run_cpsr(arg_dict, host_directories):
          str(clinvar_ignore_noncancer) + " " + \
          str(diagnostic_grade_only) + docker_command_run_end
 
-      check_subprocess(logger, cpsr_report_command)
+      check_subprocess(logger, cpsr_report_command, debug)
       logger.info("Finished")
    
 
    
-if __name__=="__main__": __main__()
+if __name__=="__main__": run()
 
