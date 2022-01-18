@@ -453,7 +453,7 @@ match_eitems_to_var <- function(sample_calls,
       "Argument 'sample_calls' must be of type data frame, not ",
       class(sample_calls))))
   assertable::assert_colnames(
-    eitems, c("EVIDENCE_ID", "SYMBOL","HGVS_ALIAS"),
+    eitems, c("EVIDENCE_ID", "SYMBOL","HGVS_ALIAS","SOURCE_DB","GDNA"),
     only_colnames = F, quiet = T)
 
   invisible(assertthat::assert_that(!is.null(colset)))
@@ -466,11 +466,21 @@ match_eitems_to_var <- function(sample_calls,
   if (region_marker == T) {
     evidence_identifiers <- c("CIVIC_ID_SEGMENT", "CIVIC_ID")
   }
+  eitems_db <- eitems %>%
+    dplyr::filter(SOURCE_DB == "civic") %>%
+    dplyr::select(-GDNA) %>%
+    dplyr::distinct()
+
+
   if(db == "cgi"){
     evidence_identifiers <- c("CGI_ID", "CGI_ID_SEGMENT")
     if (region_marker == T) {
       evidence_identifiers <- c("CGI_ID_SEGMENT", "CGI_ID")
     }
+    eitems_db <- eitems %>%
+      dplyr::filter(SOURCE_DB == "cgi") %>%
+      dplyr::select(-GDNA) %>%
+      dplyr::distinct()
   }
 
   var_eitems <- data.frame()
@@ -496,7 +506,7 @@ match_eitems_to_var <- function(sample_calls,
 
   if (nrow(var_eitems) > 0) {
     var_eitems <- as.data.frame(var_eitems %>%
-      dplyr::inner_join(eitems,
+      dplyr::inner_join(eitems_db,
                         by = c("EVIDENCE_ID", "SYMBOL")) %>%
       dplyr::distinct() %>%
       pcgrr::remove_cols_from_df(cnames = evidence_identifiers)
@@ -508,7 +518,7 @@ match_eitems_to_var <- function(sample_calls,
   ## HGVS (protein_change) + SYMBOL
 
   if(region_marker == F){
-    eitems_hgvs <- eitems %>%
+    eitems_hgvs <- eitems_db %>%
       dplyr::filter(!is.na(HGVS_ALIAS))
 
     if(NROW(eitems_hgvs) > 0){
@@ -525,7 +535,7 @@ match_eitems_to_var <- function(sample_calls,
           dplyr::distinct() %>%
           pcgrr::remove_cols_from_df(cnames = evidence_identifiers) %>%
           ## skip duplicates already found from exact matching at nucleotide level
-          dplyr::anti_join(var_eitems, by = c("VAR_ID"))
+          dplyr::anti_join(var_eitems, by = c("GENOMIC_CHANGE"))
         )
 
         var_eitems <- var_eitems %>%
