@@ -85,6 +85,8 @@ def cli():
     optional_vep.add_argument("--vep_pick_order", default="canonical,appris,biotype,ccds,rank,tsl,length,mane", help=f"Comma-separated string of ordered transcript/variant properties for selection of primary variant consequence\n(option '--pick_order' in VEP), default: %(default)s")
     optional_vep.add_argument("--vep_no_intergenic", action="store_true", help="Skip intergenic variants during processing (option '--no_intergenic' in VEP), default: %(default)s")
     optional_vep.add_argument("--vep_regulatory", action="store_true", help="Add VEP regulatory annotations (option '--regulatory' )or non-coding interpretation, default: %(default)s")
+    optional_vep.add_argument('--vep_gencode_all', action='store_true', help = "Consider all GENCODE transcripts with Variant Effect Predictor (VEP) (option '--gencode_basic' in VEP is used by default in PCGR).")
+
 
     optional_tumor_only.add_argument("--tumor_only", action="store_true", help="Input VCF comes from tumor-only sequencing, calls will be filtered for variants of germline origin, (default: %(default)s)")
     optional_tumor_only.add_argument("--cell_line", action="store_true", help="Input VCF comes from tumor cell line sequencing (requires --tumor_only), calls will be filtered for variants of germline origin, (default: %(default)s)")
@@ -348,7 +350,7 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
         # List all VEP flags used when calling VEP
         vep_flags = (
                 f'--hgvs --af --af_1kg --af_gnomad --variant_class --domains --symbol --protein --ccds --mane '
-                f'--uniprot --appris --biotype --tsl --canonical --gencode_basic --cache --numbers --total_length --allele_number '
+                f'--uniprot --appris --biotype --tsl --canonical --format vcf --cache --numbers --total_length --allele_number '
                 f'--no_stats --no_escape --xref_refseq --vcf --check_ref --dont_skip --flag_pick_allele --plugin NearestExonJB,max_range=50000'
                 )
         vep_options = (
@@ -356,11 +358,16 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
                 f'{config_options["other"]["vep_buffer_size"]} --species homo_sapiens --assembly {VEP_ASSEMBLY} --offline --fork '
                 f'{config_options["other"]["vep_n_forks"]} {vep_flags} --dir {vep_dir}'
                 )
+        
+        gencode_set_in_use = "GENCODE - all transcripts"
         vep_options += f' --cache_version {pcgr_vars.VEP_VERSION}'
         if config_options['other']['vep_no_intergenic'] == 1:
             vep_options += ' --no_intergenic'
         if config_options['other']['vep_regulatory'] == 1:
             vep_options += ' --regulatory'
+        if config_options['other']['vep_gencode_all'] == 0:
+            vep_options += ' --gencode_basic'
+            gencode_set_in_use = "GENCODE - basic transcript set (--gencode_basic)"
         if not debug:
             vep_options += ' --quiet'
         if debug:
@@ -378,6 +385,7 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
         logger.info(f'VEP configuration - one primary consequence block pr. alternative allele (--flag_pick_allele)')
         logger.info(f'VEP configuration - transcript pick order: {config_options["other"]["vep_pick_order"]}')
         logger.info(f'VEP configuration - transcript pick order: See more at https://www.ensembl.org/info/docs/tools/vep/script/vep_other.html#pick_options')
+        logger.info(f'VEP configuration - GENCODE set: {gencode_set_in_use}')
         logger.info(f'VEP configuration - skip intergenic: {config_options["other"]["vep_no_intergenic"]}')
         logger.info(f'VEP configuration - regulatory annotation: {vep_regulatory_annotation}')
         logger.info(f'VEP configuration - buffer_size/number of forks: {arg_dict["vep_buffer_size"]}/{arg_dict["vep_n_forks"]}')
@@ -534,6 +542,7 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
                 f"{co['other']['vep_no_intergenic']} "
                 f"{co['other']['vep_pick_order']} "
                 f"{co['other']['vep_regulatory']} "
+                f"{co['other']['vep_gencode_all']} "
                 f"{co['other']['vcf2maf']} "
                 f"{co['other']['list_noncoding']} "
                 f"{co['other']['preserved_info_tags']} "

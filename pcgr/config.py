@@ -23,6 +23,7 @@ def create_config(arg_dict):
     config_options['other']['nonfloating_toc'] = int(arg_dict['report_nonfloating_toc'])
     config_options['other']['vep_no_intergenic'] = int(arg_dict['vep_no_intergenic'])
     config_options['other']['vep_regulatory'] = int(arg_dict['vep_regulatory'])
+    config_options['other']['vep_gencode_all'] = int(arg_dict['vep_gencode_all'])
     config_options['other']['vcf2maf'] = int(arg_dict['vcf2maf'])
     config_options['other']['basic'] = int(arg_dict['basic'])
     config_options['other']['preserved_info_tags'] = str(arg_dict['preserved_info_tags'])

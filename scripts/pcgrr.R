@@ -102,15 +102,16 @@ p$add_argument('vep_buffer_size', type='integer')     # 59
 p$add_argument('vep_no_intergenic', type='integer')   # 60
 p$add_argument('vep_pick_order')                      # 61
 p$add_argument('vep_regulatory', type='integer')      # 62
-p$add_argument('vcf2maf', type='integer')             # 63
-p$add_argument('list_noncoding', type='integer')      # 64
+p$add_argument('vep_gencode_all', type='integer')     # 63
+p$add_argument('vcf2maf', type='integer')             # 64
+p$add_argument('list_noncoding', type='integer')      # 65
 # preserved_info_tags
-p$add_argument('preserved_info_tags')                 # 65
+p$add_argument('preserved_info_tags')                 # 66
 # visual
-p$add_argument('report_theme')                        # 66
-p$add_argument('nonfloating_toc', type='integer')     # 67
+p$add_argument('report_theme')                        # 67
+p$add_argument('nonfloating_toc', type='integer')     # 68
 # other
-p$add_argument('vcf_no_validation', type='integer')   # 68
+p$add_argument('vcf_no_validation', type='integer')   # 69
 
 args <- p$parse_args()
 
@@ -135,6 +136,7 @@ pcgr_config <- list(
                vep_no_intergenic = as.logical(args[['vep_no_intergenic']]),
                vep_pick_order = args[['vep_pick_order']],
                vep_regulatory = as.logical(args[['vep_regulatory']]),
+               vep_gencode_all = as.logical(args[['vep_gencode_all']]),
                vcf2maf = as.logical(args[['vcf2maf']]),
                list_noncoding = as.logical(args[['list_noncoding']]),
                vcf_no_validation = as.logical(args[['vcf_no_validation']])
