@@ -52,7 +52,8 @@ get_clin_assocs_snv_indel <- function(sample_calls,
     var_eitems[["exact"]] <- var_eitems[["exact"]] %>%
       dplyr::bind_rows(var_eitems_exact) %>%
       pcgrr::remove_cols_from_df(
-        cnames = c("EITEM_CONSEQUENCE", "EITEM_CODON",
+        cnames = c("EITEM_CONSEQUENCE",
+                   "EITEM_CODON",
                    "EITEM_EXON"))
 
   }
@@ -160,9 +161,10 @@ get_clin_assocs_cna <- function(onco_ts_sets,
     "all" %in% names(annotation_tags) &
       "cna_display" %in% names(annotation_tags)))
 
-  assertable::assert_colnames(eitems,
-                              colnames = c("SYMBOL", "CNA_TYPE"),
-                              quiet = T, only_colnames = F)
+  assertable::assert_colnames(
+    eitems,
+    colnames = c("SYMBOL", "CNA_TYPE"),
+    quiet = T, only_colnames = F)
 
   variant_set <- data.frame()
 
@@ -459,9 +461,6 @@ match_eitems_to_var <- function(sample_calls,
   invisible(assertthat::assert_that(!is.null(colset)))
   invisible(assertthat::assert_that(is.character(colset)))
 
-  # invisible(assertthat::assert_that("all" %in%
-  #                                     names(annotation_tags)))
-
   evidence_identifiers <- c("CIVIC_ID", "CIVIC_ID_SEGMENT")
   if (region_marker == T) {
     evidence_identifiers <- c("CIVIC_ID_SEGMENT", "CIVIC_ID")
@@ -483,11 +482,11 @@ match_eitems_to_var <- function(sample_calls,
       dplyr::distinct()
   }
 
-  var_eitems <- data.frame()
+  var_eitems_exact <- data.frame()
 
   assertable::assert_colnames(
     sample_calls,
-    c(evidence_identifiers, "PROTEIN_CHANGE","SYMBOL"),
+    c(evidence_identifiers, colset),
     only_colnames = F, quiet = T)
 
   sample_calls_db <- sample_calls %>%
@@ -501,17 +500,21 @@ match_eitems_to_var <- function(sample_calls,
       dplyr::mutate(EVIDENCE_ID = as.character(.data$EVIDENCE_ID)) %>%
       pcgrr::remove_cols_from_df(cnames = evidence_identifiers[2])
     )
+
+    if (nrow(var_eitems) > 0) {
+      var_eitems_exact <- as.data.frame(
+        var_eitems %>%
+          dplyr::full_join(eitems_db,
+                           by = c("EVIDENCE_ID", "SYMBOL")) %>%
+          dplyr::distinct() %>%
+          pcgrr::remove_cols_from_df(
+            cnames = c("HGVS_ALIAS", evidence_identifiers))
+      )
+    }
   }
 
 
-  if (nrow(var_eitems) > 0) {
-    var_eitems <- as.data.frame(var_eitems %>%
-      dplyr::inner_join(eitems_db,
-                        by = c("EVIDENCE_ID", "SYMBOL")) %>%
-      dplyr::distinct() %>%
-      pcgrr::remove_cols_from_df(cnames = evidence_identifiers)
-    )
-  }
+
 
 
   ## Add additional var_eitems based on matching against
@@ -527,18 +530,23 @@ match_eitems_to_var <- function(sample_calls,
         dplyr::rename(PROTEIN_CHANGE = HGVS_ALIAS)
 
       var_eitems_hgvs_mapped <- sample_calls %>%
-        dplyr::filter(!is.na(PROTEIN_CHANGE))
+        dplyr::filter(!is.na(PROTEIN_CHANGE)) %>%
+        dplyr::select(dplyr::one_of(colset))
 
       if(nrow(var_eitems_hgvs_mapped) > 0){
         var_eitems_hgvs_mapped <- as.data.frame(var_eitems_hgvs_mapped %>%
           dplyr::inner_join(eitems_hgvs, by = c("SYMBOL","PROTEIN_CHANGE")) %>%
           dplyr::distinct() %>%
-          pcgrr::remove_cols_from_df(cnames = evidence_identifiers) %>%
-          ## skip duplicates already found from exact matching at nucleotide level
-          dplyr::anti_join(var_eitems, by = c("GENOMIC_CHANGE"))
+          pcgrr::remove_cols_from_df(cnames = evidence_identifiers)
         )
 
-        var_eitems <- var_eitems %>%
+        ## skip duplicate evidence items already found from exact matching at genomic level
+        if(nrow(var_eitems_hgvs_mapped) > 0){
+          var_eitems_hgvs_mapped <- var_eitems_hgvs_mapped %>%
+            dplyr::anti_join(var_eitems, by = c("GENOMIC_CHANGE"))
+        }
+
+        var_eitems_exact <- var_eitems_exact %>%
           dplyr::bind_rows(var_eitems_hgvs_mapped) %>%
           dplyr::distinct()
       }
@@ -546,8 +554,7 @@ match_eitems_to_var <- function(sample_calls,
 
   }
 
-
-  return(var_eitems)
+  return(var_eitems_exact)
 
 }
 
@@ -876,13 +883,17 @@ log_var_eitem_stats <- function(var_eitems = NULL,
       var_eitems[[target_type]],
       c("SYMBOL","CONSEQUENCE","PROTEIN_CHANGE"),
       only_colnames = F, quiet = T)
-    log4r_info(
-      paste0("Variants: ",
-             paste(unique(paste(var_eitems[[target_type]]$SYMBOL,
-                                var_eitems[[target_type]]$CONSEQUENCE,
-                                var_eitems[[target_type]]$PROTEIN_CHANGE,
-                                sep = ":")),
-                   collapse = ", "))
-    )
+
+    variants_found_log <-
+      paste(unique(paste(var_eitems[[target_type]]$SYMBOL,
+                         var_eitems[[target_type]]$CONSEQUENCE,
+                         var_eitems[[target_type]]$PROTEIN_CHANGE,
+                         sep = ":")),
+            collapse = ", ")
+    if(nchar(variants_found_log) <= 200){
+      log4r_info(
+        variants_found_log
+      )
+    }
   }
 }
