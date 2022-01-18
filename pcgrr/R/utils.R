@@ -1746,9 +1746,9 @@ get_calls <- function(tsv_gz_file,
   if(NROW(vcf_data_df) > 0){
     num_rows <- NROW(vcf_data_df)
     for (n in colnames(vcf_data_df)){
-      if(length(sample_calls[is.na(sample_calls[,n]),n]) == num_rows){
-        if(typeof(sample_calls[,n]) == "logical"){
-          sample_calls[,n] <- as.character(sample_calls[,n])
+      if(length(vcf_data_df[is.na(vcf_data_df[,n]),n]) == num_rows){
+        if(typeof(vcf_data_df[,n]) == "logical"){
+          vcf_data_df[,n] <- as.character(vcf_data_df[,n])
         }
       }
     }
