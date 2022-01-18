@@ -75,7 +75,7 @@ GE_panels = {
 panels = '\n'.join([f'{k} = {GE_panels[k]}' for k in GE_panels]) # for displaying in help
 
 def get_args():
-   
+
    program_description = "Cancer Predisposition Sequencing Reporter - report of " + \
       "clinically significant cancer-predisposing germline variants"
    program_options = " --input_vcf <INPUT_VCF> --pcgr_dir <PCGR_DIR> --output_dir <OUTPUT_DIR> --genome_assembly " + \
@@ -105,7 +105,7 @@ def get_args():
    optional_other.add_argument('--preserved_info_tags', dest ='preserved_info_tags', default='None', help='Comma-separated string of VCF INFO tags from query VCF that should be kept in CPSR output TSV')
    optional_other.add_argument('--report_theme',choices = ['default','cerulean','journal','flatly','readable','spacelab','united','cosmo','lumen','paper','sandstone','simplex','yeti'], default = 'default', help='Visual report theme (rmarkdown),  default: %(default)s' )
    optional_other.add_argument('--report_nonfloating_toc', action='store_true', help='Do not float the table of contents (TOC) in output HTML report, default: %(default)s')
-   optional_other.add_argument('--report_table_display', choices = ['full','light'], default='light', help="Set the level of detail/comprehensiveness in interactive datables of HTML report, very comprehensive (option 'full') or slim/focused ('light'), default: %(default)s")   
+   optional_other.add_argument('--report_table_display', choices = ['full','light'], default='light', help="Set the level of detail/comprehensiveness in interactive datables of HTML report, very comprehensive (option 'full') or slim/focused ('light'), default: %(default)s")
    optional_other.add_argument('--ignore_noncoding', action='store_true',dest='ignore_noncoding',default=False,help='Do not list non-coding variants in HTML report, default: %(default)s')
    optional_other.add_argument('--secondary_findings', action='store_true',dest='secondary_findings',default=False, help='Include variants found in ACMG-recommended list for secondary findings (v3.0), default: %(default)s')
    optional_other.add_argument('--gwas_findings', action='store_true',dest='gwas_findings',default=False, help='Report overlap with low to moderate cancer risk variants (tag SNPs) identified from genome-wide association studies, default: %(default)s')
@@ -115,23 +115,23 @@ def get_args():
    optional_other.add_argument('--classify_all', action='store_true',dest='classify_all',help='Provide CPSR variant classifications (TIER 1-5) also for variants with exising ClinVar classifications in output TSV, default: %(default)s')
    optional_other.add_argument('--clinvar_ignore_noncancer', action='store_true', help='Ignore (exclude from report) ClinVar-classified variants reported only for phenotypes/conditions NOT related to cancer, default: %(default)s')
    optional_other.add_argument('--debug',action='store_true',default=False, help='Print full docker commands to log, default: %(default)s')
-   
+
    optional_vcfanno.add_argument('--vcfanno_n_proc', default = 4, type = int, help="Number of vcfanno processes (option '-p' in vcfanno), default: %(default)s")
-   
-   optional_vep.add_argument('--vep_n_forks', default = 4, type = int, help="Number of forks (option '--fork' in VEP), default: %(default)s")   
+
+   optional_vep.add_argument('--vep_n_forks', default = 4, type = int, help="Number of forks (option '--fork' in VEP), default: %(default)s")
    optional_vep.add_argument('--vep_buffer_size', default = 500, type = int, help="Variant buffer size (variants read into memory simultaneously, option '--buffer_size' in VEP) " + \
       "\n- set lower to reduce memory usage, default: %(default)s")
    #optional_vep.add_argument('--vep_regulatory', action='store_true', help = 'Enable Variant Effect Predictor (VEP) to look for overlap with regulatory regions (option --regulatory in VEP).')
    optional_vep.add_argument('--vep_pick_order', default = "canonical,appris,biotype,ccds,rank,tsl,length,mane", help="Comma-separated string " + \
       "of ordered transcript properties for primary variant pick\n ( option '--pick_order' in VEP), default: %(default)s")
    optional_vep.add_argument('--vep_no_intergenic', action = "store_true", help="Skip intergenic variants during processing (option '--no_intergenic' in VEP), default: %(default)s")
-   
+
    required.add_argument('--input_vcf', help='VCF input file with germline query variants (SNVs/InDels).', required = True)
    required.add_argument('--pcgr_dir',help="Directory that contains the PCGR data bundle directory, e.g. ~/pcgr-" + str(PCGR_VERSION), required = True)
    required.add_argument('--output_dir',help='Output directory', required = True)
    required.add_argument('--genome_assembly',choices = ['grch37','grch38'], help='Genome assembly build: grch37 or grch38', required = True)
    required.add_argument('--sample_id',help="Sample identifier - prefix for output files", required = True)
-   
+
    args = parser.parse_args()
    return vars(args)
 
@@ -164,18 +164,18 @@ def check_args(arg_dict, logger):
     if arg_dict['pcgr_dir'] is None or not os.path.exists(arg_dict['pcgr_dir']):
        err_msg = "Required argument '--pcgr_dir' does not exist (" + str(arg_dict['pcgr_dir']) + "). Type cpsr.py --help to view all options and required arguments"
        error_message(err_msg,logger)
-    
+
     ## Check that output directory is provided and exists
     if arg_dict['output_dir'] is None or not os.path.exists(arg_dict['output_dir']):
        err_msg = "Required argument '--output_dir' does not exist (" + str(arg_dict['output_dir']) + "). Type cpsr.py --help to view all options and required arguments"
        error_message(err_msg,logger)
-    
+
 
     ## Check that genome assembly is set
     if arg_dict['genome_assembly'] is None:
        err_msg = "Required argument '--genome_assembly' has no/undefined value (\'" + str(arg_dict['genome_assembly']) + "'). Type cpsr.py --help to view all options and required arguments"
        error_message(err_msg,logger)
-    
+
     ## Check that sample identifier is set and is of appropriate length (minimum two characters)
     if arg_dict['sample_id'] is None:
        err_msg = "Required argument '--sample_id' has no/undefined value (" + str(arg_dict['sample_id']) + "). Type cpsr.py --help to view all options and required arguments"
@@ -202,8 +202,8 @@ def check_args(arg_dict, logger):
     if arg_dict['vcfanno_n_proc'] <= 0 or arg_dict['vcfanno_n_proc'] > 15:
        err_msg = 'Number of processes that vcfanno can use during annotation must be above 0 and not more than 15, current value is ' + str(arg_dict['vcfanno_n_proc'])
        error_message(err_msg,logger)
-    
-    
+
+
     ## Check that panel identifier(s) are set appropriately
     if arg_dict['virtual_panel_id'] != "-1" and not arg_dict['custom_list']:
        if not ',' in arg_dict['virtual_panel_id']:
@@ -237,7 +237,7 @@ def check_args(arg_dict, logger):
     if arg_dict['vep_n_forks'] <= 0 or arg_dict['vep_n_forks'] > 4:
        err_msg = 'Number of forks that VEP can use during annotation must be above 0 and not more than 4, current value is ' + str(arg_dict['vep_n_forks'])
        error_message(err_msg,logger)
-    
+
     if arg_dict['vep_buffer_size'] <= 0 or arg_dict['vep_buffer_size'] > 30000:
        err_msg = 'Internal VEP buffer size, corresponding to the number of variants that are read in to memory simultaneously, must be above 0 and not more than 30,000, current value is ' + str(arg_dict['vep_buffer_size'])
        error_message(err_msg,logger)
@@ -250,7 +250,7 @@ def check_args(arg_dict, logger):
        for v in values:
           if v in permitted_sources:
              num_permitted_sources += 1
-                
+
        if num_permitted_sources != 8:
           err_msg = "Option 'vep_pick_order' = " + str(arg_dict['vep_pick_order']) + " is formatted incorrectly, should be " + \
              "a comma-separated string of the following values: canonical,appris,tsl,biotype,ccds,rank,length,mane"
@@ -276,19 +276,19 @@ def verify_input_files(arg_dict, logger):
    input_vcf_basename = "NA"
    input_customlist_basename = "NA"
    input_customlist_dir = "NA"
-   
+
    ## check the existence of given output folder
    output_dir_full = os.path.abspath(arg_dict['output_dir'])
    if not os.path.isdir(output_dir_full):
       err_msg = "Output directory (" + str(output_dir_full) + ") does not exist"
       error_message(err_msg,logger)
-   
+
    ## check if input BED exist
    if not arg_dict['custom_list'] is None:
       if not os.path.exists(os.path.abspath(arg_dict['custom_list'])):
          err_msg = "Input file (" + str(arg_dict['custom_list']) + ") does not exist"
          error_message(err_msg,logger)
-      
+
       input_customlist_basename = os.path.basename(str(arg_dict['custom_list']))
       input_customlist_dir = os.path.dirname(os.path.abspath(arg_dict['custom_list']))
 
@@ -317,43 +317,43 @@ def verify_input_files(arg_dict, logger):
       if os.path.exists(output_vcf) and arg_dict['force_overwrite'] is False:
          err_msg = "Output files (e.g. " + str(output_vcf) + ") already exist - please specify different sample_id or add option --force_overwrite"
          error_message(err_msg,logger)
-   
+
    ## check the existence of base folder
    base_dir = os.path.abspath(arg_dict['pcgr_dir'])
    if not os.path.isdir(base_dir):
       err_msg = "Base directory (" + str(base_dir) + ") does not exist"
       error_message(err_msg,logger)
-   
+
    ## check the existence of data folder within the base folder
    db_dir = os.path.join(os.path.abspath(arg_dict['pcgr_dir']),'data')
    if not os.path.isdir(db_dir):
       err_msg = "Data directory (" + str(db_dir) + ") does not exist"
       error_message(err_msg,logger)
-   
+
    ## check the existence of specified assembly data folder within the base folder
    db_assembly_dir = os.path.join(os.path.abspath(arg_dict['pcgr_dir']),'data',arg_dict['genome_assembly'])
    if not os.path.isdir(db_assembly_dir):
       err_msg = "Data directory for the specified genome assembly (" + str(db_assembly_dir) + ") does not exist"
       error_message(err_msg,logger)
-   
+
    ## check the existence of RELEASE_NOTES
    rel_notes_file = os.path.join(os.path.abspath(arg_dict['pcgr_dir']),'data',arg_dict['genome_assembly'],'RELEASE_NOTES')
    if not os.path.exists(rel_notes_file):
       err_msg = 'The PCGR data bundle is outdated - please download the latest data bundle (see github.com/sigven/cpsr for instructions)'
       error_message(err_msg,logger)
-      
+
    f_rel_not = open(rel_notes_file,'r')
    compliant_data_bundle = 0
    for line in f_rel_not:
       if DB_VERSION in line:
          compliant_data_bundle = 1
-   
+
    f_rel_not.close()
-    
+
    if compliant_data_bundle == 0:
       err_msg = 'The PCGR data bundle is not compliant with the software version - please download the latest software and data bundle (see https://github.com/sigven/cpsr for instructions)'
       error_message(err_msg,logger)
-   
+
    host_directories = {}
    host_directories['input_vcf_dir_host'] = input_vcf_dir
    host_directories['input_customlist_dir_host'] = input_customlist_dir
@@ -364,7 +364,7 @@ def verify_input_files(arg_dict, logger):
    host_directories['input_customlist_basename_host'] = input_customlist_basename
 
    return host_directories
-   
+
 def getlogger(logger_name):
    logger = logging.getLogger(logger_name)
    logger.setLevel(logging.DEBUG)
@@ -375,13 +375,13 @@ def getlogger(logger_name):
 
    # add ch to logger
    logger.addHandler(ch)
-   
+
    # create formatter
    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", "20%y-%m-%d %H:%M:%S")
-   
+
    #add formatter to ch
    ch.setFormatter(formatter)
-   
+
    return logger
 
 def run_cpsr(arg_dict, host_directories):
@@ -460,13 +460,13 @@ def run_cpsr(arg_dict, host_directories):
    if uid == '':
       logger.warning('Was not able to get user id/username for logged-in user on the underlying platform (platform.system(): ' + str(platform.system()) + ', sys.platform: ' + str(sys.platform) + '), now running CPSR as root')
       uid = 'root'
-      
+
    vepdb_dir_host = os.path.join(str(host_directories['db_dir_host']),'.vep')
-   
+
 
    input_vcf_docker = 'None'
    input_customlist_docker = 'None'
-   
+
 
    ## Determine basic Docker commands
 
@@ -544,9 +544,9 @@ def run_cpsr(arg_dict, host_directories):
    logger.info("Include low to moderate cancer risk variants from genome-wide association studies: " + str(gwas_findings_set))
    logger.info("Reference population, germline variant frequencies (gnomAD): " + str(arg_dict['pop_gnomad']).upper())
    logger.info("Genome assembly: " + str(arg_dict['genome_assembly']))
-   
+
    if not input_vcf_docker == 'None':
-      
+
       ## Define input, output and temporary file names
       pcgr_model = 'cpsr'
       output_vcf = os.path.join(output_dir, str(arg_dict['sample_id']) + '.cpsr.' + str(arg_dict['genome_assembly']) + '.vcf.gz')
@@ -563,7 +563,7 @@ def run_cpsr(arg_dict, host_directories):
       ## File names for assembly-specific genome fasta files (VEP)
       fasta_assembly = os.path.join(vep_dir, "homo_sapiens", str(VEP_VERSION) + "_" + str(VEP_ASSEMBLY), "Homo_sapiens." + str(VEP_ASSEMBLY) + ".dna.primary_assembly.fa.gz")
       ancestor_assembly = os.path.join(vep_dir, "homo_sapiens", str(VEP_VERSION) + "_" + str(VEP_ASSEMBLY), "human_ancestor.fa.gz")
-      
+
       ## Set all flags used in VEP run
       plugins_in_use = "NearestExonJB, LoF"
       vep_flags = "--format vcf --vcf --check_ref --flag_pick_allele_gene --hgvs --dont_skip --failed 1 --af --af_1kg --af_gnomad " + \
@@ -589,7 +589,7 @@ def run_cpsr(arg_dict, host_directories):
          vep_options += " --plugin LoF,loftee_path:" + loftee_dir + ",human_ancestor_fa:" + str(ancestor_assembly)  + ",use_gerp_end_trunc:0 --dir_plugins " + loftee_dir
       if not debug:
          vep_options += " --quiet"
-      
+
       ## Compose full VEP command
       vep_main_command = str(docker_command_run1) + "vep --input_file " + str(input_vcf_cpsr_ready) + " --output_file " + str(vep_vcf) + \
          " " + str(vep_options) + " --fasta " + str(fasta_assembly) + docker_command_run_end
@@ -612,14 +612,14 @@ def run_cpsr(arg_dict, host_directories):
       check_subprocess(logger, vep_bgzip_command, debug)
       check_subprocess(logger, vep_tabix_command, debug)
       logger.info("Finished")
-   
+
       ## CPSR|vcfanno - run vcfanno on query VCF with a number of relevant annotated VCFs
       print()
       logger = getlogger('cpsr-vcfanno')
       logger.info("STEP 2: Annotation for cancer predisposition with cpsr-vcfanno (ClinVar, CIViC, dbNSFP, dbMTS, UniProtKB, cancerhotspots.org, ncER, GERP RS scores, GWAS catalog, gnomAD non-cancer subset)")
       pcgr_vcfanno_command = str(docker_command_run2) + "pcgr_vcfanno.py --num_processes "  + str(arg_dict['vcfanno_n_proc']) + \
          " --dbnsfp --clinvar --cancer_hotspots --dbmts --ncer --gerp --civic --uniprot --gnomad_cpsr --pcgr_onco_xref --gwas --rmsk " + str(vep_vcf) + ".gz " + \
-         str(vep_vcfanno_vcf) + " " + os.path.join(data_dir, "data", str(arg_dict['genome_assembly'])) + docker_command_run_end      
+         str(vep_vcfanno_vcf) + " " + os.path.join(data_dir, "data", str(arg_dict['genome_assembly'])) + docker_command_run_end
       check_subprocess(logger, pcgr_vcfanno_command, debug)
       logger.info("Finished")
 
@@ -653,11 +653,11 @@ def run_cpsr(arg_dict, host_directories):
          check_subprocess(logger, clean_command, debug)
       logger.info("Finished")
 
-  
+
    print()
-   
+
    ## Generation of HTML reports for VEP/vcfanno-annotated VCF file
-   if not arg_dict['basic']: 
+   if not arg_dict['basic']:
       logger = getlogger('cpsr-writer')
       logger.info("STEP 4: Generation of output files - Cancer predisposition sequencing report")
       cpsr_report_command = docker_command_run1 + os.path.join(r_scripts_dir, "cpsr.R") + " " + output_dir + " " + \
@@ -691,8 +691,8 @@ def run_cpsr(arg_dict, host_directories):
 
       check_subprocess(logger, cpsr_report_command, debug)
       logger.info("Finished")
-   
 
-   
+
+
 if __name__=="__main__": run()
 
