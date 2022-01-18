@@ -1742,6 +1742,18 @@ get_calls <- function(tsv_gz_file,
   }
 
 
+  ## convert all columns with only NA values to character type
+  if(NROW(vcf_data_df) > 0){
+    num_rows <- NROW(vcf_data_df)
+    for (n in colnames(vcf_data_df)){
+      if(length(sample_calls[is.na(sample_calls[,n]),n]) == num_rows){
+        if(typeof(sample_calls[,n]) == "logical"){
+          sample_calls[,n] <- as.character(sample_calls[,n])
+        }
+      }
+    }
+  }
+
   return(vcf_data_df)
 
 }
