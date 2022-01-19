@@ -2009,6 +2009,11 @@ targeted_drugs_pr_ttype <- function(ttype,
   drug_candidates[["off_label"]] <-
     site_candidates[["off_label"]]
 
+  ## If tumor type not specified, off-label indications make no sense
+  if(ttype == "Any"){
+    drug_candidates[["off_label"]] <- data.frame()
+  }
+
   if (nrow(drug_candidates[["on_label"]]) > 0) {
 
     drug_candidates[["on_label"]] <-
