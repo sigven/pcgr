@@ -165,7 +165,7 @@ htmltools::br()
 
 cat('\n')
 
-cat(paste0('-   <b>NOT DETERMINED (ND)</b>: The number of SNV calls (n = ',nrow(pcg_report[['content']][['m_signature_mp']][['variant_set']][['all']]),') is too limited. A minimum of ',pcg_report[['metadata']][['config']][['migs']][['mutation_limit']],' SNVs is currently required for a mutational signature analysis to be performed.'), sep ="\n")
+cat(paste0('-   <b>NOT DETERMINED (ND)</b>: The number of SNV calls (n = ',nrow(pcg_report[['content']][['m_signature_mp']][['variant_set']][['all']]),') is too limited. A minimum of ',pcg_report[['metadata']][['config']][['msigs']][['mutation_limit']],' SNVs is currently required for a mutational signature analysis to be performed.'), sep ="\n")
 
 
 

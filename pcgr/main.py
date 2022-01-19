@@ -488,6 +488,7 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
                 f"{input_cpsr_report_docker} "
                 f"{arg_dict['sample_id']} "
                 f"{pcgr_vars.PCGR_VERSION} "
+                f"{pcgr_vars.DB_VERSION} "
                 f"{arg_dict['genome_assembly']} "
                 f"{data_dir} "
                 f"{co['tumor_purity']} "

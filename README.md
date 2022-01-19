@@ -31,7 +31,7 @@ The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for
     * Installation now relies on two separate [conda](https://docs.conda.io/en/latest/)
       packages, `pcgr` (Python component) and `pcgrr` (R component).
       Direct Docker support remains, with the Dockerfile simplified to rely
-      exclusively on the installation of the above conda packages.
+      exclusively on the installation of the above Conda packages.
   * Remove VCF validation step. Feedback from users suggested that Ensembl's
     `vcf-validator` was often too stringent so its use has been deprecated.
     The `--no_vcf_validate` option remains for backwards compatibility.
@@ -60,26 +60,26 @@ Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, Ola Mykleb
 
 ## Annotation resources included in PCGR - 0.10.2
 
-* [VEP](http://www.ensembl.org/info/docs/tools/vep/index.html) - Variant Effect Predictor v104 (GENCODE v38/v19 as the gene reference dataset)
-* [CIViC](http://civic.genome.wustl.edu) - Clinical interpretations of variants in cancer (June 15th 2021)
-* [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - Database of variants with clinical significance (June 2021)
+* [VEP](http://www.ensembl.org/info/docs/tools/vep/index.html) - Variant Effect Predictor v105 (GENCODE v39/v19 as the gene reference dataset)
+* [CIViC](http://civic.genome.wustl.edu) - Clinical interpretations of variants in cancer (January 18th 2022)
+* [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - Database of variants with clinical significance (January 2022)
 * [DoCM](http://docm.genome.wustl.edu) - Database of curated mutations (v3.2, Apr 2016)
 * [CGI](http://www.cancergenomeinterpreter.org/biomarkers) - Cancer Biomarkers database (Jan 17th 2018)
 * [Cancer Hotspots](http://cancerhotspots.org) - Resource for statistically significant mutations in cancer (v2 - 2017)
 * [dBNSFP](https://sites.google.com/site/jpopgen/dbNSFP) - Database of non-synonymous functional predictions (v4.2, March 2021)
-* [TCGA](https://portal.gdc.cancer.gov/) - somatic mutations discovered across 33 tumor type cohorts (The Cancer Genome Atlas (TCGA), release 29, March 2021)
+* [TCGA](https://portal.gdc.cancer.gov/) - somatic mutations discovered across 33 tumor type cohorts (The Cancer Genome Atlas (TCGA), release 31, October 2021)
 * [CHASMplus](https://karchinlab.github.io/CHASMplus/) - predicted driver mutations across 33 tumor type cohorts in TCGA
-* [UniProt/SwissProt KnowledgeBase](http://www.uniprot.org) - Resource on protein sequence and functional information (2021_03, June 2021)
-* [Pfam](http://pfam.xfam.org) - Database of protein families and domains (v34, March 2021)
-* [Open Targets Platform](https://targetvalidation.org) - Target-disease and target-drug associations  (2021_04, April 2021)
+* [UniProt/SwissProt KnowledgeBase](http://www.uniprot.org) - Resource on protein sequence and functional information (2021_04, November 2021)
+* [Pfam](http://pfam.xfam.org) - Database of protein families and domains (v35, November 2021)
+* [Open Targets Platform](https://targetvalidation.org) - Target-disease and target-drug associations  (2021_11, November 2021)
 * [ChEMBL](https://www.ebi.ac.uk/chembl/) - Manually curated database of bioactive molecules (v28, February 2021)
-* [CancerMine](https://zenodo.org/record/4270451#.X7t43qpKiHE) - Literature-mined database of tumor suppressor genes/proto-oncogenes (v36, June 2021)
+* [CancerMine](https://zenodo.org/record/4270451#.X7t43qpKiHE) - Literature-mined database of tumor suppressor genes/proto-oncogenes (v42, December 2021)
 
 
 ## Getting started
 
 PCGR requires a __data bundle__ that contains the reference data,
-__patient inputs__ (e.g. somatic variants in a VCF), and an
+__sample inputs__ (e.g. somatic variants in a VCF), and an
 __output directory__ to output the results to.
 
 Here's an example scenario that will be used in the following sections:
@@ -90,7 +90,7 @@ Here's an example scenario that will be used in the following sections:
   exists!);
 - your PCGR codebase is installed in `/Users/you/dir4/pcgr`;
 
-### STEP 1: Download Data Bundle
+### STEP 1: Download data bundle
 
 Download and unpack the human assembly-specific data bundle:
 
@@ -100,7 +100,7 @@ Download and unpack the human assembly-specific data bundle:
 
 A _data/_ folder within the _pcgr-X.X_ software folder should now have been produced.
 
-### STEP 2: Download PCGR GitHub Repository
+### STEP 2: Download PCGR GitHub repository
 
 Download and unpack the latest software release from <https://github.com/sigven/pcgr/releases>.
 
@@ -112,7 +112,7 @@ PCGR_VERSION="x.x.x"
 git clone -b v${PCGR_VERSION} --depth 1 https://github.com/sigven/pcgr.git
 ```
 
-### STEP 3: Set Up Conda or Docker
+### STEP 3: Set up Conda or Docker
 
 Step 3 depends on if you want to use Conda or Docker:
 
@@ -149,7 +149,7 @@ mamba 0.17.0
 conda 4.10.3
 ```
 
-##### b) Create PCGR Conda Environments
+##### b) Create PCGR conda environments
 
 The `conda/env` directory in the PCGR codebase contains two YAML files which
 can be used to create the required conda environments for the Python component
@@ -176,7 +176,7 @@ pcgr       /Users/you/dir4/pcgr/conda/env/pcgr
 pcgrr      /Users/you/dir4/pcgr/conda/env/pcgrr
 ```
 
-##### c) Activate pcgr Conda Environment
+##### c) Activate pcgr conda environment
 
 You need to activate the `./conda/env/pcgr` conda environment, and test that it works
 correctly with e.g. `pcgr --version`:

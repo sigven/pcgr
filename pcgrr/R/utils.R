@@ -99,7 +99,7 @@ tier_af_distribution <- function(tier_df, bin_size = 0.1) {
   tier_df_trans <- tier_df %>%
     dplyr::mutate(
       bin = cut(.data$AF_TUMOR,
-                breaks = c(from = 0, to = 1, by = bin_size),
+                breaks = seq(0,1,bin_size),
                 right = F, include.lowest = T, labels = F))
 
   tier_df_trans_bin <- as.data.frame(

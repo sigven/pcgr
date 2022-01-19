@@ -230,6 +230,9 @@ set_report_metadata <- function(config,
 
   report_metadata <- list()
   report_metadata[["pcgr_db_release"]] <- pcgr_data[["release_notes"]]
+  report_metadata[['pcgr_db_release']][["bundle_version"]] <- list()
+  report_metadata[["pcgr_db_release"]][["bundle_version"]][["version"]] <-
+    config[['required_args']][['pcgr_bundle_version']]
   report_metadata[["pcgr_version"]] <- config[['required_args']][['pcgr_version']]
   report_metadata[["cpsr_version"]] <- config[['required_args']][['cpsr_version']]
   report_metadata[["genome_assembly"]] <-

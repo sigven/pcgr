@@ -11,7 +11,7 @@ p <- argparse::ArgumentParser(description='PCGR HTML generation step', prog='pcg
 required_args <- c(
   'output_dir', 'query_vcf2tsv', 'query_cna', 'query_rna_fusion',
   'query_rna_expression', 'cpsr_report', 'sample_name',
-  'pcgr_version', 'genome_assembly', 'data_dir')
+  'pcgr_version', 'pcgr_bundle_version','genome_assembly', 'data_dir')
 p$add_argument('output_dir')           #  1
 p$add_argument('query_vcf2tsv')        #  2
 p$add_argument('query_cna')            #  3
@@ -20,20 +20,21 @@ p$add_argument('query_rna_expression') #  5
 p$add_argument('cpsr_report')          #  6
 p$add_argument('sample_name')          #  7
 p$add_argument('pcgr_version')         #  8
-p$add_argument('genome_assembly')      #  9
-p$add_argument('data_dir')             # 10
+p$add_argument('pcgr_bundle_version')  #  9
+p$add_argument('genome_assembly')      # 10
+p$add_argument('data_dir')             # 11
 # tumor props
 t_props_args <- c('tumor_purity', 'tumor_ploidy', 'tumor_type')
-p$add_argument('tumor_purity')         # 11
-p$add_argument('tumor_ploidy')         # 12
-p$add_argument('tumor_type')           # 13
+p$add_argument('tumor_purity')         # 12
+p$add_argument('tumor_ploidy')         # 13
+p$add_argument('tumor_type')           # 14
 # assay props
 assay_props_args <- c('target_size_mb', 'type')
-p$add_argument('target_size_mb', type='double')     # 14
-p$add_argument('type')                              # 15
+p$add_argument('target_size_mb', type='double')     # 15
+p$add_argument('type')                              # 16
 # used to populate 'vcf_tumor_only' and 'mode' in the 'assay_props' list
-p$add_argument('vcf_tumor_only1')                   # 16
-p$add_argument('mode1')                             # 17
+p$add_argument('vcf_tumor_only1')                   # 17
+p$add_argument('mode1')                             # 18
 # tumor only args
 tumor_only_args <- list(
   onekg = c('maf_onekg_afr', 'maf_onekg_amr', 'maf_onekg_eas',
@@ -44,40 +45,40 @@ tumor_only_args <- list(
   filter = c('exclude_pon', 'exclude_likely_het_germline',
              'exclude_likely_hom_germline', 'exclude_dbsnp_nonsomatic',
              'exclude_nonexonic'))
-p$add_argument('maf_onekg_afr', type='double')      # 18
-p$add_argument('maf_onekg_amr', type='double')      # 19
-p$add_argument('maf_onekg_eas', type='double')      # 20
-p$add_argument('maf_onekg_eur', type='double')      # 21
-p$add_argument('maf_onekg_sas', type='double')      # 22
-p$add_argument('maf_onekg_global', type='double')   # 23
-p$add_argument('maf_gnomad_afr', type='double')     # 24
-p$add_argument('maf_gnomad_amr', type='double')     # 25
-p$add_argument('maf_gnomad_asj', type='double')     # 26
-p$add_argument('maf_gnomad_eas', type='double')     # 27
-p$add_argument('maf_gnomad_fin', type='double')     # 28
-p$add_argument('maf_gnomad_nfe', type='double')     # 29
-p$add_argument('maf_gnomad_other', type='double')   # 30
-p$add_argument('maf_gnomad_sas', type='double')     # 31
-p$add_argument('maf_gnomad_global', type='double')  # 32
-p$add_argument('exclude_pon', type='integer')                 # 33
-p$add_argument('exclude_likely_het_germline', type='integer') # 34
-p$add_argument('exclude_likely_hom_germline', type='integer') # 35
-p$add_argument('exclude_dbsnp_nonsomatic', type='integer')    # 36
-p$add_argument('exclude_nonexonic', type='integer')           # 37
+p$add_argument('maf_onekg_afr', type='double')      # 19
+p$add_argument('maf_onekg_amr', type='double')      # 20
+p$add_argument('maf_onekg_eas', type='double')      # 21
+p$add_argument('maf_onekg_eur', type='double')      # 22
+p$add_argument('maf_onekg_sas', type='double')      # 23
+p$add_argument('maf_onekg_global', type='double')   # 24
+p$add_argument('maf_gnomad_afr', type='double')     # 25
+p$add_argument('maf_gnomad_amr', type='double')     # 26
+p$add_argument('maf_gnomad_asj', type='double')     # 27
+p$add_argument('maf_gnomad_eas', type='double')     # 28
+p$add_argument('maf_gnomad_fin', type='double')     # 29
+p$add_argument('maf_gnomad_nfe', type='double')     # 30
+p$add_argument('maf_gnomad_other', type='double')   # 31
+p$add_argument('maf_gnomad_sas', type='double')     # 32
+p$add_argument('maf_gnomad_global', type='double')  # 33
+p$add_argument('exclude_pon', type='integer')                 # 34
+p$add_argument('exclude_likely_het_germline', type='integer') # 35
+p$add_argument('exclude_likely_hom_germline', type='integer') # 36
+p$add_argument('exclude_dbsnp_nonsomatic', type='integer')    # 37
+p$add_argument('exclude_nonexonic', type='integer')           # 38
 # tmb args
-p$add_argument('tmb_run', type='integer') # 38
-p$add_argument('tmb_algo')                # 39
+p$add_argument('tmb_run', type='integer') # 39
+p$add_argument('tmb_algo')                # 40
 # msi/msigs args
-p$add_argument('msi_run', type='integer') # 40
-p$add_argument('msigs_run', type='integer')           # 41
-p$add_argument('msigs_mut_lim', type='double')        # 42
-p$add_argument('msigs_all_ref_sigs', type='integer')  # 43
-p$add_argument('msigs_incl_art_sigs', type='integer') # 44
+p$add_argument('msi_run', type='integer') # 41
+p$add_argument('msigs_run', type='integer')           # 42
+p$add_argument('msigs_mut_lim', type='double')        # 43
+p$add_argument('msigs_all_ref_sigs', type='integer')  # 44
+p$add_argument('msigs_incl_art_sigs', type='integer') # 45
 # cna args
 cna_args <- c('log_r_homdel', 'log_r_gain', 'cna_overlap_pct')
-p$add_argument('log_r_homdel', type='double')      # 45
-p$add_argument('log_r_gain', type='double')        # 46
-p$add_argument('cna_overlap_pct', type='double')   # 47
+p$add_argument('log_r_homdel', type='double')      # 46
+p$add_argument('log_r_gain', type='double')        # 47
+p$add_argument('cna_overlap_pct', type='double')   # 48
 # allelic support args
 allelic_support_args <- c(
   'tumor_af_min', 'tumor_dp_min',
@@ -85,33 +86,33 @@ allelic_support_args <- c(
   'tumor_af_tag', 'tumor_dp_tag',
   'control_af_tag', 'control_dp_tag',
   'call_conf_tag')
-p$add_argument('tumor_af_min', type='double')   # 48
-p$add_argument('tumor_dp_min', type='double')   # 49
-p$add_argument('control_dp_min', type='double') # 50
-p$add_argument('control_af_max', type='double') # 51
-p$add_argument('tumor_af_tag')    # 52
-p$add_argument('tumor_dp_tag')    # 53
-p$add_argument('control_af_tag')  # 54
-p$add_argument('control_dp_tag')  # 55
-p$add_argument('call_conf_tag')   # 56
+p$add_argument('tumor_af_min', type='double')   # 49
+p$add_argument('tumor_dp_min', type='double')   # 50
+p$add_argument('control_dp_min', type='double') # 51
+p$add_argument('control_af_max', type='double') # 52
+p$add_argument('tumor_af_tag')    # 53
+p$add_argument('tumor_dp_tag')    # 54
+p$add_argument('control_af_tag')  # 55
+p$add_argument('control_dp_tag')  # 56
+p$add_argument('call_conf_tag')   # 57
 # clinicaltrials
-p$add_argument('clinicaltrials_run', type='integer')  # 57
+p$add_argument('clinicaltrials_run', type='integer')  # 58
 # other
-p$add_argument('vep_n_forks', type='integer')         # 58
-p$add_argument('vep_buffer_size', type='integer')     # 59
-p$add_argument('vep_no_intergenic', type='integer')   # 60
-p$add_argument('vep_pick_order')                      # 61
-p$add_argument('vep_regulatory', type='integer')      # 62
-p$add_argument('vep_gencode_all', type='integer')     # 63
-p$add_argument('vcf2maf', type='integer')             # 64
-p$add_argument('list_noncoding', type='integer')      # 65
+p$add_argument('vep_n_forks', type='integer')         # 59
+p$add_argument('vep_buffer_size', type='integer')     # 60
+p$add_argument('vep_no_intergenic', type='integer')   # 61
+p$add_argument('vep_pick_order')                      # 62
+p$add_argument('vep_regulatory', type='integer')      # 63
+p$add_argument('vep_gencode_all', type='integer')     # 64
+p$add_argument('vcf2maf', type='integer')             # 65
+p$add_argument('list_noncoding', type='integer')      # 66
 # preserved_info_tags
-p$add_argument('preserved_info_tags')                 # 66
+p$add_argument('preserved_info_tags')                 # 67
 # visual
-p$add_argument('report_theme')                        # 67
-p$add_argument('nonfloating_toc', type='integer')     # 68
+p$add_argument('report_theme')                        # 68
+p$add_argument('nonfloating_toc', type='integer')     # 69
 # other
-p$add_argument('vcf_no_validation', type='integer')   # 69
+p$add_argument('vcf_no_validation', type='integer')   # 70
 
 args <- p$parse_args()
 
