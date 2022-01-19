@@ -38,7 +38,7 @@ tsites = {
 
 tumor_sites = '\n'.join([f'{k} = {tsites[k]}' for k in tsites]) # for displaying in help
 PCGR_VERSION = __version__
-DB_VERSION = 'PCGR_DB_VERSION = 20220119'
+DB_VERSION = '20220119'
 VEP_VERSION = '105'
 GENCODE_VERSION = '38'
 NCBI_BUILD_MAF = 'GRCh38'
