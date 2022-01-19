@@ -94,8 +94,8 @@ Here's an example scenario that will be used in the following sections:
 
 Download and unpack the human assembly-specific data bundle:
 
-- [grch37 data bundle - 20220118](http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch37.20220118.tgz) (approx 20Gb)
-- [grch38 data bundle - 20220118](http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch38.20220118.tgz) (approx 21Gb)
+- [grch37 data bundle - 20220119](http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch37.20220119.tgz) (approx 20Gb)
+- [grch38 data bundle - 20220119](http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch38.20220119.tgz) (approx 21Gb)
   - Unpacking: `gzip -dc pcgr.databundle.grch3X.YYYYMMDD.tgz | tar xvf -`
 
 A _data/_ folder within the _pcgr-X.X_ software folder should now have been produced.
