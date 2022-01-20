@@ -129,7 +129,7 @@ def get_args():
    args = parser.parse_args()
    return vars(args)
 
-def run():
+def main():
     arg_dict = get_args()
 
     logger = getlogger('cpsr-validate-input-arguments')
@@ -689,5 +689,5 @@ def run_cpsr(arg_dict, host_directories, DOCKER_IMAGE_VERSION):
 
 
 
-if __name__=="__main__": run()
+if __name__=="__main__": main()
 

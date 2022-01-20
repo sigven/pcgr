@@ -12,7 +12,7 @@ setuptools.setup(
     entry_points={
         'console_scripts': [
             'pcgr = pcgr.main:cli',
-            'cpsr = pcgr.cpsr:run'
+            'cpsr = pcgr.cpsr:main'
         ]
     },
     scripts=[
