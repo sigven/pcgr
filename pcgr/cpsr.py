@@ -12,7 +12,7 @@ import platform
 #import toml
 from argparse import RawTextHelpFormatter
 from pcgr.arg_checker import get_docker_image_version
-from pcgr.utils import check_subprocess
+from pcgr.utils import check_subprocess, get_perl_exports
 from pcgr import pcgr_vars
 
 CPSR_VERSION = '0.6.2'
@@ -586,8 +586,7 @@ def run_cpsr(arg_dict, host_directories, DOCKER_IMAGE_VERSION):
          vep_options += " --quiet"
 
       ## Compose full VEP command
-      vep_main_command = str(docker_command_run1) + "vep --input_file " + str(input_vcf_cpsr_ready) + " --output_file " + str(vep_vcf) + \
-         " " + str(vep_options) + " --fasta " + str(fasta_assembly) + docker_command_run_end
+      vep_main_command = f'{docker_command_run1} {get_perl_exports()} && vep --input_file {input_vcf_cpsr_ready} --output_file {vep_vcf} {vep_options} --fasta {fasta_assembly} {docker_command_run_end}'
       vep_bgzip_command = str(docker_command_run1) + "bgzip -f " + str(vep_vcf) + docker_command_run_end
       vep_tabix_command = str(docker_command_run1) + "tabix -f -p vcf " + str(vep_vcf) + ".gz" + docker_command_run_end
       logger = getlogger('cpsr-vep')
