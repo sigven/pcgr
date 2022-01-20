@@ -1,14 +1,13 @@
 #!/usr/bin/env Rscript
 
 options(warn=-1)
-.libPaths(R.home("library"))
+.libPaths(R.home("library")) # use conda R pkgs, not e.g. user's local installation
 
 args = commandArgs(trailingOnly=TRUE)
 
 suppressWarnings(suppressPackageStartupMessages(library(pcgrr)))
-suppressWarnings(suppressPackageStartupMessages(library(magrittr)))
-suppressWarnings(suppressPackageStartupMessages(library(BSgenome.Hsapiens.UCSC.hg19)))
-suppressWarnings(suppressPackageStartupMessages(library(BSgenome.Hsapiens.UCSC.hg38)))
+suppressWarnings(suppressPackageStartupMessages(library(GenomeInfoDb)))
+suppressWarnings(suppressPackageStartupMessages(library(log4r)))
 
 dir <- as.character(args[1])
 
@@ -65,16 +64,16 @@ pcgr_data <- readRDS(paste0(cpsr_config[['required_args']][['data_dir']],
                             cpsr_config[['required_args']][['genome_assembly']],
                             '/rds/pcgr_data.rds'))
 
-pcgr_data[['assembly']][['seqinfo']] <- 
-   GenomeInfoDb::Seqinfo(seqnames = GenomeInfoDb::seqlevels(GenomeInfoDb::seqinfo(BSgenome.Hsapiens.UCSC.hg38)), 
-                         seqlengths = GenomeInfoDb::seqlengths(GenomeInfoDb::seqinfo(BSgenome.Hsapiens.UCSC.hg38)), genome = 'hg38')
-pcgr_data[['assembly']][['bsg']] <- BSgenome.Hsapiens.UCSC.hg38
-if(cpsr_config[['required_args']][['genome_assembly']] == 'grch37'){
-  pcgr_data[['assembly']][['bsg']] <- BSgenome.Hsapiens.UCSC.hg19
-  pcgr_data[['assembly']][['seqinfo']] <- 
-     GenomeInfoDb::Seqinfo(seqnames = GenomeInfoDb::seqlevels(GenomeInfoDb::seqinfo(BSgenome.Hsapiens.UCSC.hg19)), 
-                           seqlengths = GenomeInfoDb::seqlengths(GenomeInfoDb::seqinfo(BSgenome.Hsapiens.UCSC.hg19)), genome = 'hg19')
-}
+# set up genome assembly
+genome_assembly <- cpsr_config[['required_args']][['genome_assembly']]
+bsgenome_obj <- pcgrr::get_genome_obj(genome_assembly)
+genome_grch2hg <- c("grch38" = "hg38", "grch37" = "hg19")
+pcgr_data[['assembly']][['seqinfo']] <-
+  GenomeInfoDb::Seqinfo(
+    seqnames = GenomeInfoDb::seqlevels(GenomeInfoDb::seqinfo(bsgenome_obj)),
+    seqlengths = GenomeInfoDb::seqlengths(GenomeInfoDb::seqinfo(bsgenome_obj)),
+    genome = genome_grch2hg[genome_assembly])
+pcgr_data[['assembly']][['bsg']] <- bsgenome_obj
 
 my_log4r_layout <- function(level, ...) {
   paste0(format(Sys.time()), " - cpsr-report-generation - ", level, " - ", ..., "\n", collapse = "")
@@ -82,30 +81,31 @@ my_log4r_layout <- function(level, ...) {
 
 log4r_logger <- log4r::logger(threshold = "INFO", appenders = log4r::console_appender(my_log4r_layout))
 
+# this gets passed on to all the log4r_* functions inside the pkg
+options("PCGRR_LOG4R_LOGGER" = log4r_logger)
 
 ## Generate report content
 cps_report <- pcgrr::generate_cpsr_report(
-  project_directory = cpsr_config[['required_args']][['output_dir']], 
-  pcgr_data, 
+  project_directory = cpsr_config[['required_args']][['output_dir']],
+  pcgr_data,
   cpsr_config
 )
 
 # ## Write report contents to output files
 if(!is.null(cps_report)){
   pcgrr::write_report_output(
-    cps_report, 
+    cps_report,
     cpsr_config,
-    tier_model = 'cpsr', 
+    tier_model = 'cpsr',
     output_format = 'snv_tsv')
   pcgrr::write_report_output(
-    cps_report, 
+    cps_report,
     cpsr_config,
-    tier_model = "cpsr", 
+    tier_model = "cpsr",
     output_format = 'json')
   pcgrr::write_report_output(
-    cps_report, 
+    cps_report,
     cpsr_config,
-    tier_model = "cpsr", 
+    tier_model = "cpsr",
     output_format = 'html')
 }
-

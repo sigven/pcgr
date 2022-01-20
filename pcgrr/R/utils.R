@@ -2116,16 +2116,19 @@ targeted_drugs_summarise <- function(
 
 }
 
+#' @export
 log4r_info <- function(msg) {
   log4r_logger <- getOption("PCGRR_LOG4R_LOGGER")
   log4r::info(log4r_logger, msg)
 }
 
+#' @export
 log4r_debug <- function(msg) {
   log4r_logger <- getOption("PCGRR_LOG4R_LOGGER")
   log4r::debug(log4r_logger, msg)
 }
 
+#' @export
 log4r_warn <- function(msg) {
   log4r_logger <- getOption("PCGRR_LOG4R_LOGGER")
   log4r::warn(log4r_logger, msg)
