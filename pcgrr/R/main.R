@@ -859,7 +859,7 @@ generate_report_data_cna <-
                     .data$transcript_end, .data$transcript_overlap_percent,
                     .data$name, .data$biotype,
                     .data$tumor_suppressor, .data$oncogene,
-                    .data$intogen_drivers, .data$chembl_compound_id,
+                    .data$intogen_driver, .data$chembl_compound_id,
                     .data$gencode_tag, .data$gencode_release) %>%
       magrittr::set_colnames(tolower(names(.)))
 

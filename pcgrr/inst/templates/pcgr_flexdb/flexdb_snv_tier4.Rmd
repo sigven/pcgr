@@ -87,7 +87,7 @@ crosstalk::bscols(
   list(
     crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_tier4_shared, ~CONSEQUENCE),
     crosstalk::filter_select("SYMBOL", "Gene", variants_tier4_shared, ~SYMBOL),
-    crosstalk::filter_select("CHEMBL_COMPOUND_TERMS", "Targeted drugs", variants_tier4_shared, ~TARGETED_DRUGS)
+    crosstalk::filter_select("CHEMBL_COMPOUND_TERMS", "Targeted drugs", variants_tier4_shared, ~CHEMBL_COMPOUND_TERMS)
   )
 )
 

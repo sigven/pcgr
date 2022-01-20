@@ -99,7 +99,7 @@ tier_af_distribution <- function(tier_df, bin_size = 0.1) {
   tier_df_trans <- tier_df %>%
     dplyr::mutate(
       bin = cut(.data$AF_TUMOR,
-                breaks = c(from = 0, to = 1, by = bin_size),
+                breaks = seq(0,1,bin_size),
                 right = F, include.lowest = T, labels = F))
 
   tier_df_trans_bin <- as.data.frame(
@@ -1742,6 +1742,18 @@ get_calls <- function(tsv_gz_file,
   }
 
 
+  ## convert all columns with only NA values to character type
+  if(NROW(vcf_data_df) > 0){
+    num_rows <- NROW(vcf_data_df)
+    for (n in colnames(vcf_data_df)){
+      if(length(vcf_data_df[is.na(vcf_data_df[,n]),n]) == num_rows){
+        if(typeof(vcf_data_df[,n]) == "logical"){
+          vcf_data_df[,n] <- as.character(vcf_data_df[,n])
+        }
+      }
+    }
+  }
+
   return(vcf_data_df)
 
 }
@@ -1996,6 +2008,11 @@ targeted_drugs_pr_ttype <- function(ttype,
     site_candidates[["on_label"]][["early_phase"]]
   drug_candidates[["off_label"]] <-
     site_candidates[["off_label"]]
+
+  ## If tumor type not specified, off-label indications make no sense
+  if(ttype == "Any"){
+    drug_candidates[["off_label"]] <- data.frame()
+  }
 
   if (nrow(drug_candidates[["on_label"]]) > 0) {
 

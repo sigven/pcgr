@@ -4,10 +4,14 @@
 
 The analysis performed in the cancer genome report is based on the following underlying tools and knowledge resources:
 
+* __Bundle version__
+
+  * __`r pcg_report$metadata$pcgr_db_release$bundle_version$version`__
+
 * __Software__ 
 ```{r list_software, echo=F,results='asis'}
 for(n in names(pcg_report$metadata$pcgr_db_release)){
-  if(n == 'mosdepth'){
+  if(n == 'mosdepth' | n == 'bundle_version'){
     next
   }
   if(pcg_report$metadata$pcgr_db_release[[n]]$resource_type == 'software'){

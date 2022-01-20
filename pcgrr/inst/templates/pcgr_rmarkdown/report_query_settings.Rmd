@@ -13,6 +13,12 @@ if(pcg_report$content$m_signature_mp$eval == F){
 if(pcg_report$content$tmb$eval == F){
   mutational_burden <- 'OFF'
 }
+
+transcript_set_gencode <- "GENCODE - basic set ('--gencode_basic')"
+if(pcg_report[['metadata']][['config']][['other']][['vep_gencode_all']] == T){
+  transcript_set_gencode <- "GENCODE - all transcripts"
+}
+
 ```
 
 ### Metadata - sample and sequencing assay
@@ -41,5 +47,10 @@ The report is generated with _[PCGR](https://github.com/sigven/pcgr)_ version `r
   * All reference signatures: <b> __`r pcg_report[['metadata']][['config']][['msigs']][['all_reference_signatures']]`__ </b>
   * Inclusion of artefact signatures: <b> __`r pcg_report[['metadata']][['config']][['msigs']][['include_artefact_signatures']]`__ </b>
 * Report theme (Bootstrap): __`r pcg_report[['metadata']][['config']][['visual']][['report_theme']]`__
+* Variant Effect Predictor (VEP) settings:
+  * Transcript set: __`r transcript_set_gencode`__
+  * Transcript pick order: __`r pcg_report[['metadata']][['config']][['other']][['vep_pick_order']]`__
+  * Regulatory regions annotation: __`r pcg_report[['metadata']][['config']][['other']][['vep_regulatory']]`__
+
 
 
