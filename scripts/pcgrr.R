@@ -4,6 +4,9 @@
 
 suppressWarnings(suppressPackageStartupMessages(library(argparse)))
 suppressWarnings(suppressPackageStartupMessages(library(pcgrr)))
+suppressWarnings(suppressPackageStartupMessages(library(GenomeInfoDb)))
+suppressWarnings(suppressPackageStartupMessages(library(stringr)))
+
 ##---- Argument Parsing ----##
 p <- argparse::ArgumentParser(description='PCGR HTML generation step', prog='pcgrr')
 
@@ -206,6 +209,8 @@ pcgr_data <- readRDS(
             'data',
             pcgr_config[['required_args']][['genome_assembly']],
             'rds/pcgr_data.rds'))
+
+# set up genome assembly
 genome_assembly <- pcgr_config[['required_args']][['genome_assembly']]
 bsgenome_obj <- pcgrr::get_genome_obj(genome_assembly)
 genome_grch2hg <- c("grch38" = "hg38", "grch37" = "hg19")
