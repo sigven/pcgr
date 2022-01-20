@@ -81,29 +81,31 @@ my_log4r_layout <- function(level, ...) {
 
 log4r_logger <- log4r::logger(threshold = "INFO", appenders = log4r::console_appender(my_log4r_layout))
 
+# this gets passed on to all the log4r_* functions inside the pkg
+options("PCGRR_LOG4R_LOGGER" = log4r_logger)
 
 ## Generate report content
 cps_report <- pcgrr::generate_cpsr_report(
-  project_directory = cpsr_config[['required_args']][['output_dir']], 
-  pcgr_data, 
+  project_directory = cpsr_config[['required_args']][['output_dir']],
+  pcgr_data,
   cpsr_config
 )
 
 # ## Write report contents to output files
 if(!is.null(cps_report)){
   pcgrr::write_report_output(
-    cps_report, 
+    cps_report,
     cpsr_config,
-    tier_model = 'cpsr', 
+    tier_model = 'cpsr',
     output_format = 'snv_tsv')
   pcgrr::write_report_output(
-    cps_report, 
+    cps_report,
     cpsr_config,
-    tier_model = "cpsr", 
+    tier_model = "cpsr",
     output_format = 'json')
   pcgrr::write_report_output(
-    cps_report, 
+    cps_report,
     cpsr_config,
-    tier_model = "cpsr", 
+    tier_model = "cpsr",
     output_format = 'html')
 }
