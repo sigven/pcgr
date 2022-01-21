@@ -61,6 +61,10 @@ def pcgrr_script_path(docker_run):
     prefix = conda_env_path('pcgr', docker_run)
     return os.path.join(prefix, 'bin/pcgrr.R')
 
+def cpsrr_script_path(docker_run):
+    prefix = conda_env_path('pcgr', docker_run)
+    return os.path.join(prefix, 'bin/cpsr.R')
+
 def conda_env_path(env, docker_run):
     if docker_run:
         env_path = f'/opt/mambaforge/envs/{env}'

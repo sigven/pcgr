@@ -728,10 +728,10 @@ assign_pathogenicity_evidence <- function(cpg_calls, cpsr_config, pcgr_data) {
 
   predisposition_gene_info <-
     dplyr::select(pcgr_data[["predisposition"]][["genes"]], .data$symbol,
-                  .data$mechanism_of_disease, .data$path_truncation_rate,
+                  .data$cancer_predisposition_mod, .data$path_truncation_rate,
                   .data$benign_missense_rate) %>%
     dplyr::rename(SYMBOL = .data$symbol,
-                  MOD = .data$mechanism_of_disease,
+                  MOD = .data$cancer_predisposition_mod,
                   PATH_TRUNCATION_RATE = .data$path_truncation_rate,
                   BENIGN_MISSENSE_RATE = .data$benign_missense_rate)
 
