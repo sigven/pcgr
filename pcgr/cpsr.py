@@ -16,7 +16,6 @@ from pcgr.utils import check_subprocess, get_perl_exports
 from pcgr import pcgr_vars
 
 CPSR_VERSION = '0.6.2'
-DB_VERSION = 'PCGR_DB_VERSION = 20210627'
 
 global debug
 
@@ -338,7 +337,7 @@ def verify_input_files(arg_dict, logger):
    f_rel_not = open(rel_notes_file,'r')
    compliant_data_bundle = 0
    for line in f_rel_not:
-      if DB_VERSION in line:
+      if pcgr_vars.DB_VERSION in line:
          compliant_data_bundle = 1
 
    f_rel_not.close()
