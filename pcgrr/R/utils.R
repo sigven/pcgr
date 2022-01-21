@@ -1085,7 +1085,7 @@ append_gwas_citation_phenotype <-
       only_colnames = F, quiet = T)
 
     gwas_citations_phenotypes <- gwas_citations_phenotypes %>%
-      dplyr::filter(.data$p_value_num <= .data$p_value_threshold)
+      dplyr::filter(.data$p_value_num <= p_value_threshold)
     log4r_info(paste0("Adding citations/phenotypes underlying ",
                       "GWAS hits (NHGRI-EBI GWAS Catalog)"))
 
