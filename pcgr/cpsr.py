@@ -653,34 +653,43 @@ def run_cpsr(arg_dict, host_directories, DOCKER_IMAGE_VERSION):
    if not arg_dict['basic']:
       logger = getlogger('cpsr-writer')
       logger.info("STEP 4: Generation of output files - Cancer predisposition sequencing report")
-      cpsr_report_command = docker_command_run1 + os.path.join(r_scripts_dir, "cpsr.R") + " " + output_dir + " " + \
-         str(output_pass_tsv) + ".gz " +  \
-         str(arg_dict['sample_id'])  + " " + \
-         str(pcgr_vars.PCGR_VERSION) + " " + \
-         str(CPSR_VERSION) + " " + \
-         str(arg_dict['genome_assembly']) + " " + \
-         str(data_dir) + " " + \
-         str(virtual_panel_id) + " " + \
-         str(preserved_info_tags) + " " + \
-         str(custom_bed) + " " + \
-         str(arg_dict['custom_list_name']) + " " +  \
-         str(arg_dict['report_theme']) + " " + \
-         str(arg_dict['report_table_display']) + " " + \
-         str(report_nonfloating_toc) + " " + \
-         str(gwas_findings) + " " + \
-         str(arg_dict['gwas_p_value']) + " " + \
-         str(arg_dict['pop_gnomad']) + " " + \
-         str(arg_dict['maf_upper_threshold']) + " " + \
-         str(arg_dict['vep_pick_order']) + " " + \
-         str(arg_dict['vep_n_forks']) + " " + \
-         str(arg_dict['vep_buffer_size']) + " " + \
-         str(vep_no_intergenic) + " " + \
-         str(vep_regulatory) + " " + \
-         str(secondary_findings) + " " + \
-         str(classify_all) + " " + \
-         str(ignore_noncoding) + " " + \
-         str(clinvar_ignore_noncancer) + " " + \
-         str(diagnostic_grade_only) + docker_command_run_end
+
+      # export PATH to R conda env Rscript
+      rscript = utils.rscript_path(DOCKER_IMAGE_VERSION)
+      cpsrr_script = utils.cpsrr_script_path(DOCKER_IMAGE_VERSION)
+      cpsr_report_command = (
+              f"{docker_command_run1} "
+              f"{rscript} {cpsrr_script} "
+              f"{output_dir} "
+              f"{output_pass_tsv}.gz "
+              f"{arg_dict['sample_id']} "
+              f"{pcgr_vars.PCGR_VERSION} "
+              f"{CPSR_VERSION} "
+              f"{arg_dict['genome_assembly']} "
+              f"{data_dir} "
+              f"{virtual_panel_id} "
+              f"{preserved_info_tags} "
+              f"{custom_bed} "
+              f"{arg_dict['custom_list_name']} "
+              f"{arg_dict['report_theme']} "
+              f"{arg_dict['report_table_display']} "
+              f"{report_nonfloating_toc} "
+              f"{gwas_findings} "
+              f"{arg_dict['gwas_p_value']} "
+              f"{arg_dict['pop_gnomad']} "
+              f"{arg_dict['maf_upper_threshold']} "
+              f"{arg_dict['vep_pick_order']} "
+              f"{arg_dict['vep_n_forks']} "
+              f"{arg_dict['vep_buffer_size']} "
+              f"{vep_no_intergenic} "
+              f"{vep_regulatory} "
+              f"{secondary_findings} "
+              f"{classify_all} "
+              f"{ignore_noncoding} "
+              f"{clinvar_ignore_noncancer} "
+              f"{diagnostic_grade_only} "
+              f"{docker_command_run_end}"
+         )
 
       check_subprocess(logger, cpsr_report_command, debug)
       logger.info("Finished")
