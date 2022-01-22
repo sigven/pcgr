@@ -224,6 +224,15 @@ pcgr_data[['assembly']][['seqinfo']] <-
     genome = genome_grch2hg[genome_assembly])
 pcgr_data[['assembly']][['bsg']] <- bsgenome_obj
 
+## temporary type fix
+pcgr_data$biomarkers$cgi$ACTIONABILITY_SCORE <-
+  as.numeric(pcgr_data$biomarkers$cgi$ACTIONABILITY_SCORE)
+for(col in c('VARIANT_TYPE','DRUG_INTERACTION_TYPE')){
+  pcgr_data$biomarkers$cgi[,col] <- as.character(
+    pcgr_data$biomarkers$cgi[,col]
+  )
+}
+
 if (pcgr_config[['other']][['vep_regulatory']] == F){
   for (e in c('tier4_display','tier5_display','all','tsv')){
     pcgr_data[['annotation_tags']][[e]] <-

@@ -64,6 +64,15 @@ pcgr_data <- readRDS(paste0(cpsr_config[['required_args']][['data_dir']],
                             cpsr_config[['required_args']][['genome_assembly']],
                             '/rds/pcgr_data.rds'))
 
+## temporary type fix
+pcgr_data$biomarkers$cgi$ACTIONABILITY_SCORE <-
+  as.numeric(pcgr_data$biomarkers$cgi$ACTIONABILITY_SCORE)
+for(col in c('VARIANT_TYPE','DRUG_INTERACTION_TYPE')){
+  pcgr_data$biomarkers$cgi[,col] <- as.character(
+    pcgr_data$biomarkers$cgi[,col]
+  )
+}
+
 # set up genome assembly
 genome_assembly <- cpsr_config[['required_args']][['genome_assembly']]
 bsgenome_obj <- pcgrr::get_genome_obj(genome_assembly)
