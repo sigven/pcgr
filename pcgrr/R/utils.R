@@ -2039,10 +2039,16 @@ targeted_drugs_pr_ttype <- function(ttype,
         indication_label = "DRUGS_OFF_LABEL_INDICATIONS")
   }
 
-  all_candidates <- dplyr::full_join(drug_candidates[["off_label"]],
-                                     drug_candidates[["on_label_early_phase"]],
-                                     by = "symbol")
-  if (nrow(drug_candidates[["on_label"]]) > 0) {
+  all_candidates <- drug_candidates[["on_label_early_phase"]]
+  if(NROW(drug_candidates[['off_label']]) > 0){
+    all_candidates <- dplyr::full_join(drug_candidates[["off_label"]],
+                                       drug_candidates[["on_label_early_phase"]],
+                                       by = "symbol")
+  }else{
+    all_candidates$DRUGS_OFF_LABEL <- NA
+    all_candidates$DRUGS_OFF_LABEL_INDICATIONS <- NA
+  }
+  if (NROW(drug_candidates[["on_label"]]) > 0) {
     all_candidates <- dplyr::full_join(all_candidates,
                                        drug_candidates[["on_label"]],
                                        by = "symbol")
