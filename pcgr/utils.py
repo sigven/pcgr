@@ -30,14 +30,14 @@ def which(program, env=None):
 
 
 
-def pcgr_error_message(message, logger):
+def error_message(message, logger):
     logger.error("")
     logger.error(message)
     logger.error("")
     sys.exit(1)
 
 
-def pcgr_warn_message(message, logger):
+def warn_message(message, logger):
     logger.warning(message)
 
 

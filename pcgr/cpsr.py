@@ -13,11 +13,9 @@ import platform
 from argparse import RawTextHelpFormatter
 from pcgr import pcgr_vars, utils
 from pcgr.arg_checker import get_docker_image_version
-from pcgr.utils import check_subprocess
+from pcgr.utils import check_subprocess, getlogger, error_message, warn_message
 
 CPSR_VERSION = '0.6.2'
-
-global debug
 
 GE_panels = {
       0: "CPSR exploratory cancer predisposition panel (n = 433, Genomics England PanelApp / TCGA Germline Study / Cancer Gene Census / Other)",
@@ -249,16 +247,6 @@ def check_args(arg_dict, logger):
           error_message(err_msg, logger)
 
 
-def error_message(message, logger):
-   logger.error('')
-   logger.error(message)
-   logger.error('')
-   exit(0)
-   #sys.exit(1)
-
-def warn_message(message, logger):
-   logger.warning(message)
-
 def verify_input_files(arg_dict, logger):
 
    input_vcf_dir = "NA"
@@ -356,25 +344,6 @@ def verify_input_files(arg_dict, logger):
    host_directories['input_customlist_basename_host'] = input_customlist_basename
 
    return host_directories
-
-def getlogger(logger_name):
-   logger = logging.getLogger(logger_name)
-   logger.setLevel(logging.DEBUG)
-
-   # create console handler and set level to debug
-   ch = logging.StreamHandler(sys.stdout)
-   ch.setLevel(logging.DEBUG)
-
-   # add ch to logger
-   logger.addHandler(ch)
-
-   # create formatter
-   formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", "20%y-%m-%d %H:%M:%S")
-
-   #add formatter to ch
-   ch.setFormatter(formatter)
-
-   return logger
 
 def run_cpsr(arg_dict, host_directories, DOCKER_IMAGE_VERSION):
    """
