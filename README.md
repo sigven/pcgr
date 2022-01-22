@@ -87,7 +87,7 @@ Here's an example scenario that will be used in the following sections:
 - data bundle downloaded in `/Users/you/dir1/data`;
 - sample inputs at `/Users/you/dir2/pcgr_inputs`;
 - output goes to `/Users/you/dir3/pcgr_outputs` (make sure this directory
-  exists!);
+  exists);
 - your PCGR codebase is installed in `/Users/you/dir4/pcgr`;
 
 ### STEP 1: Download data bundle
@@ -97,8 +97,7 @@ Download and unpack the human assembly-specific data bundle:
 - [grch37 data bundle - 20220119](http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch37.20220119.tgz) (approx 20Gb)
 - [grch38 data bundle - 20220119](http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch38.20220119.tgz) (approx 21Gb)
   - Unpacking: `gzip -dc pcgr.databundle.grch3X.YYYYMMDD.tgz | tar xvf -`
-
-A _data/_ folder within the _pcgr-X.X_ software folder should now have been produced.
+  - This should produce a `data/` folder.
 
 ### STEP 2: Download PCGR GitHub repository
 
@@ -153,7 +152,7 @@ conda 4.10.3
 
 The `conda/env` directory in the PCGR codebase contains two YAML files which
 can be used to create the required conda environments for the Python component
-(`pcgr`) and the R component (`pcgrr`). We install the conda dependencies for these
+(`pcgr`) and the R components (`pcgrr` (and `cpsr`)). We install the conda dependencies for these
 two environments in the `conda/env` directory:
 
 ```bash
