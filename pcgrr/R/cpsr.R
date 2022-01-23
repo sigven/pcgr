@@ -388,9 +388,12 @@ generate_cpsr_report <- function(project_directory = NULL,
 
         eitems_all <- dplyr::bind_rows(eitems_mut_germline,
                                        eitems_mut_lof_germline) %>%
-          pcgrr::remove_cols_from_df(cnames = c("DISEASE_ONTOLOGY_ID",
-                                                "VARIANT_ORIGIN",
-                                                "SOURCE_DB"))
+          pcgrr::remove_cols_from_df(
+            cnames = c("DISEASE_ONTOLOGY_ID",
+                       "VARIANT_ORIGIN",
+                       "VARIANT_TYPE",
+                       "ACTIONABILITY_SCORE")) %>%
+          dplyr::distinct()
 
         snv_indel_report$clin_eitem <-
           pcgrr::get_germline_biomarkers(
@@ -2017,15 +2020,17 @@ get_germline_biomarkers <- function(sample_calls,
     }
   }
 
-  var_eitems <- pcgrr::deduplicate_eitems(var_eitems = var_eitems,
-                                          target_type = "exact",
-                                          target_other =
-                                            c("codon", "exon", "gene"))
+  var_eitems <- pcgrr::deduplicate_eitems(
+    var_eitems = var_eitems,
+    target_type = "exact",
+    target_other =
+      c("codon", "exon", "gene"))
 
-  var_eitems <- pcgrr::deduplicate_eitems(var_eitems = var_eitems,
-                                          target_type = "codon",
-                                          target_other =
-                                            c("exon", "gene"))
+  var_eitems <- pcgrr::deduplicate_eitems(
+    var_eitems = var_eitems,
+    target_type = "codon",
+    target_other =
+      c("exon", "gene"))
 
   ## log the types and number of clinical
   ## evidence items found (exact / codon / exon)
@@ -2053,10 +2058,14 @@ get_germline_biomarkers <- function(sample_calls,
       clin_eitems_list[[type]] <- all_var_evidence_items %>%
         dplyr::filter(.data$EVIDENCE_TYPE == stringr::str_to_title(.data$type)) %>%
         dplyr::arrange(.data$EVIDENCE_LEVEL, .data$RATING) %>%
-        dplyr::select(.data$SYMBOL, .data$GENE_NAME, .data$CANCER_TYPE, .data$CLINICAL_SIGNIFICANCE,
-                      .data$EVIDENCE_LEVEL, .data$RATING, .data$EVIDENCE_DIRECTION, .data$CITATION,
-                      .data$THERAPEUTIC_CONTEXT, .data$EVIDENCE_TYPE, .data$DESCRIPTION, .data$BIOMARKER_MAPPING,
-                      .data$CDS_CHANGE, .data$LOSS_OF_FUNCTION, .data$GENOMIC_CHANGE) %>%
+        dplyr::select(.data$SYMBOL, .data$GENE_NAME,
+                      .data$CANCER_TYPE, .data$CLINICAL_SIGNIFICANCE,
+                      .data$EVIDENCE_LEVEL, .data$RATING,
+                      .data$EVIDENCE_DIRECTION, .data$CITATION,
+                      .data$THERAPEUTIC_CONTEXT, .data$EVIDENCE_TYPE,
+                      .data$DESCRIPTION, .data$BIOMARKER_MAPPING,
+                      .data$CDS_CHANGE, .data$LOSS_OF_FUNCTION,
+                      .data$GENOMIC_CHANGE) %>%
         dplyr::distinct()
     }
   }
