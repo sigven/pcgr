@@ -1754,6 +1754,31 @@ get_calls <- function(tsv_gz_file,
     }
   }
 
+  ## set correct type of population-specific allele freq columns
+  af_pop_columns_numeric <-
+    colnames(vcf_data_df)[stringr::str_detect(colnames(vcf_data_df), "_AF_[0-9A-Z]{1,}$")]
+
+  if(NROW(vcf_data_df) > 0){
+    for (col in af_pop_columns_numeric){
+      if(typeof(vcf_data_df[, col]) != "double"){
+        vcf_data_df[, col] <- as.numeric(vcf_data_df[, col])
+      }
+    }
+  }
+
+  af_pop_columns_integer <-
+    colnames(vcf_data_df)[stringr::str_detect(colnames(vcf_data_df), "NON_CANCER_(AC|AN|NHOMALT)")]
+
+  if(NROW(vcf_data_df) > 0){
+    for (col in af_pop_columns_integer){
+      if(typeof(vcf_data_df[, col]) != "integer"){
+        vcf_data_df[, col] <- as.integer(vcf_data_df[, col])
+      }
+    }
+  }
+
+
+
   return(vcf_data_df)
 
 }

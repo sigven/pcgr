@@ -813,11 +813,16 @@ assign_pathogenicity_evidence <- function(cpg_calls, cpsr_config, pcgr_data) {
       gad_AC_tag %in% colnames(cpg_calls) &
       gad_NHOMALT_tag %in% colnames(cpg_calls)) {
 
+    # cpg_calls2 <- cpg_calls %>%
+    #   dplyr::mutate(!!rlang::sym(gad_AN_tag) := as.double(!!rlang::sym(gad_AN_tag))) %>%
+    #   dplyr::mutate(!!rlang::sym(gad_AC_tag) := as.double(!!rlang::sym(gad_AC_tag))) %>%
+    #   dplyr::mutate(!!rlang::sym(gad_NHOMALT_tag)  := as.double(!!rlang::sym(gad_NHOMALT_tag)))
+
     cpg_calls <- cpg_calls %>%
       dplyr::mutate(
         gad_af =
           dplyr::if_else(!!rlang::sym(gad_AN_tag) >= min_an,
-                         as.numeric(!!rlang::sym(gad_AC_tag) /
+                         as.double(!!rlang::sym(gad_AC_tag) /
                                       !!rlang::sym(gad_AN_tag)),
                          as.double(NA), as.double(NA))) %>%
       dplyr::mutate(
@@ -1018,10 +1023,10 @@ assign_pathogenicity_evidence <- function(cpg_calls, cpsr_config, pcgr_data) {
     dplyr::mutate(
       ACMG_BP7 =
         dplyr::if_else((
-          (.data$INTRON_POSITION < 0 & .data$INTRON_POSITION < -3) |
-            (.data$INTRON_POSITION > 0 & .data$INTRON_POSITION > 6) |
-            (.data$EXON_POSITION < 0 & .data$EXON_POSITION < -2) |
-            (.data$EXON_POSITION > 0 & .data$EXON_POSITION > 1)) &
+          (as.integer(.data$INTRON_POSITION) < 0 & as.integer(.data$INTRON_POSITION) < -3) |
+            (as.integer(.data$INTRON_POSITION) > 0 & as.integer(.data$INTRON_POSITION) > 6) |
+            (as.integer(.data$EXON_POSITION) < 0 & as.integer(.data$EXON_POSITION) < -2) |
+            (as.integer(.data$EXON_POSITION) > 0 & as.integer(.data$EXON_POSITION) > 1)) &
             stringr::str_detect(
               .data$CONSEQUENCE,
               "^(synonymous_variant|intron_variant|splice_region_variant)"),
