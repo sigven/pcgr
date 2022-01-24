@@ -59,7 +59,10 @@ for (opt in c('secondary_findings','classify_all','ignore_noncoding',
 }
 
 saveRDS(cpsr_config,
-        file = file.path(dir, cpsr_config[['required_args']][['sample_name']],".cpsr_config.rds"))
+        file = file.path(
+          cpsr_config[['required_args']][['output_dir']],
+          paste0(cpsr_config[['required_args']][['sample_name']],".cpsr_config.rds"))
+)
 
 pcgr_data <- readRDS(
   file.path(
