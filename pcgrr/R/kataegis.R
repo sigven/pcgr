@@ -157,7 +157,7 @@ kataegis_input <- function(variant_set, chr = "chr", pos = "pos", ref = "ref",
                     stringr::str_detect(alt, "^(A|C|G|T)$"))
 
   #context_size <- 10
-  if (nrow(mut_data) > 100) {
+  if (nrow(mut_data) >= 100) {
     bsg <- get_genome_obj(build)
     chr.lens <- as.integer(utils::head(GenomeInfoDb::seqlengths(bsg), 24))
     mut_data$build <- build

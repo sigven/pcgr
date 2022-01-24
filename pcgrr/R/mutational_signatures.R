@@ -247,7 +247,7 @@ get_prevalent_site_signatures <-
   function(site = "Any",
            custom_collection = NULL,
            pcgr_data = NULL,
-           prevalence_pct = 5,
+           prevalence_pct = 2,
            incl_poss_artifacts = T) {
 
     if(is.null(custom_collection)){
@@ -322,8 +322,11 @@ get_prevalent_site_signatures <-
                  "prevalence - considering all"))
         signatures_prevalence <-
           pcgr_data[["mutational_signatures"]][["aetiologies"]] %>%
-          dplyr::select(.data$signature_id, .data$aetiology_keyword, .data$aetiology,
-                        .data$associated_signatures, .data$comments) %>%
+          dplyr::select(.data$signature_id,
+                        .data$aetiology_keyword,
+                        .data$aetiology,
+                        .data$associated_signatures,
+                        .data$comments) %>%
           dplyr::distinct()
       }else{
         signatures_prevalence <-
@@ -336,8 +339,10 @@ get_prevalent_site_signatures <-
                         .data$prevalence_above_10pct,
                         .data$prevalence_above_15pct,
                         .data$prevalence_above_20pct,
-                        .data$aetiology_keyword, .data$aetiology,
-                        .data$associated_signatures, .data$comments) %>%
+                        .data$aetiology_keyword,
+                        .data$aetiology,
+                        .data$associated_signatures,
+                        .data$comments) %>%
           dplyr::distinct()
 
         if (prevalence_pct > 0) {
@@ -358,11 +363,17 @@ get_prevalent_site_signatures <-
             signatures_prevalence <- signatures_prevalence %>%
               dplyr::filter(.data$prevalence_above_20pct == T |
                               is.na(.data$prevalence_above_20pct))
+          }else if (prevalence_pct == 2){
+            signatures_prevalence <- signatures_prevalence %>%
+              dplyr::filter(!is.na(.data$prevalence_pct)) %>%
+              dplyr::filter(.data$prevalence_pct >= prevalence_pct)
           }
         }
         signatures_prevalence <- signatures_prevalence %>%
-          dplyr::select(-c(.data$primary_site, .data$prevalence_above_5pct,
-                           .data$prevalence_above_10pct, .data$prevalence_above_15pct,
+          dplyr::select(-c(.data$primary_site,
+                           .data$prevalence_above_5pct,
+                           .data$prevalence_above_10pct,
+                           .data$prevalence_above_15pct,
                            .data$prevalence_above_20pct)) %>%
           dplyr::distinct() %>%
           dplyr::arrange(dplyr::desc(.data$prevalence_pct)) %>%
