@@ -1661,6 +1661,18 @@ assign_variant_tiers <-
 #' @export
 retrieve_secondary_calls <- function(calls, umls_map) {
 
+  assertable::assert_colnames(
+    calls, colnames = c("CANCER_PREDISPOSITION_SOURCE",
+             "CLINVAR_CLASSIFICATION",
+             "CLINVAR_UMLS_CUI",
+             "GENOTYPE",
+             "SYMBOL",
+             "VAR_ID",
+             "LOSS_OF_FUNCTION",
+             "PROTEIN_CHANGE"),
+    only_colnames = F, quiet = T
+  )
+
   secondary_calls <- calls %>%
     dplyr::filter(!is.na(.data$CANCER_PREDISPOSITION_SOURCE) &
                     .data$CANCER_PREDISPOSITION_SOURCE == "ACMG_SF30" &
@@ -1668,13 +1680,24 @@ retrieve_secondary_calls <- function(calls, umls_map) {
     dplyr::filter(.data$CLINVAR_CLASSIFICATION == "Pathogenic" |
                     .data$CLINVAR_CLASSIFICATION == "Likely_Pathogenic") %>%
     ## only LOF for TTN
-    dplyr::filter(.data$SYMBOL != "TTN" | (.data$SYMBOL == "TTN" & .data$LOSS_OF_FUNCTION == T))
+    dplyr::filter(.data$SYMBOL != "TTN" |
+                    (.data$SYMBOL == "TTN" &
+                       .data$LOSS_OF_FUNCTION == T)) %>%
+
+    ## only homozygotes p.Cys282Tyr HFE carriers
+    dplyr::filter(.data$SYMBOL != "HFE" |
+                    (.data$SYMBOL == "HFE" &
+                       stringr::str_detect(.data$PROTEIN_CHANGE,"Cys282Tyr") &
+                       .data$GENOTYPE == "homozygous"))
+
 
 
   ## AR genes
   min_two_variants_required <-
     data.frame(SYMBOL = 'MUTYH', stringsAsFactors = F) %>%
     dplyr::bind_rows(
+      data.frame(SYMBOL = 'CASQ2', stringsAsFactors = F),
+      data.frame(SYMBOL = 'TRDN', stringsAsFactors = F),
       data.frame(SYMBOL = 'RPE65', stringsAsFactors = F),
       data.frame(SYMBOL = 'GAA', stringsAsFactors = F),
       data.frame(SYMBOL = 'BTD', stringsAsFactors = F),
@@ -1710,10 +1733,11 @@ retrieve_secondary_calls <- function(calls, umls_map) {
       dplyr::distinct()
 
     secondary_calls <-
-      dplyr::inner_join(secondary_calls,
-                        dplyr::select(secondary_calls_per_trait,
-                                      .data$VAR_ID, .data$CLINVAR_PHENOTYPE),
-                        by = c("VAR_ID" = "VAR_ID"))
+      dplyr::inner_join(
+        secondary_calls,
+        dplyr::select(secondary_calls_per_trait,
+                      .data$VAR_ID, .data$CLINVAR_PHENOTYPE),
+        by = c("VAR_ID" = "VAR_ID"))
 
     log4r_info(paste0(
       "Found n = ",
@@ -1736,15 +1760,17 @@ retrieve_secondary_calls <- function(calls, umls_map) {
 #'
 #' @export
 detect_cancer_traits_clinvar <- function(cpg_calls, oncotree, umls_map) {
-  if (nrow(cpg_calls) > 0 & "CLINVAR_UMLS_CUI" %in% colnames(cpg_calls)
-      & "VAR_ID" %in% colnames(cpg_calls)) {
+  if (nrow(cpg_calls) > 0 &
+      "CLINVAR_UMLS_CUI" %in% colnames(cpg_calls) &
+      "VAR_ID" %in% colnames(cpg_calls)) {
 
     oncotree <- oncotree %>%
       dplyr::select(.data$cui) %>%
       dplyr::mutate(CANCER_PHENOTYPE = 1) %>%
       dplyr::distinct()
 
-    n_clinvar <- cpg_calls %>% dplyr::filter(!is.na(.data$CLINVAR_UMLS_CUI)) %>%
+    n_clinvar <- cpg_calls %>%
+      dplyr::filter(!is.na(.data$CLINVAR_UMLS_CUI)) %>%
       nrow()
 
     if (n_clinvar > 0) {

@@ -211,7 +211,7 @@ pcgr_data <- readRDS(
   file.path(pcgr_config[['required_args']][['data_dir']],
             'data',
             pcgr_config[['required_args']][['genome_assembly']],
-            'rds/pcgr_data.rds'))
+            'rds','pcgr_data.rds'))
 
 # set up genome assembly
 genome_assembly <- pcgr_config[['required_args']][['genome_assembly']]
