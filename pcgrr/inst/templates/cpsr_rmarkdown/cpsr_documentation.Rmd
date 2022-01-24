@@ -13,10 +13,15 @@ This report is intended for interpretation of inherited DNA variants implicated 
 
 The analysis performed in the cancer genome report is based on the following underlying tools and knowledge resources:
 
+* __PCGR databundle version__
+
+  * __`r pcg_report$metadata$pcgr_db_release$bundle_version$version`__
+
+
 * __Software__ 
 ```{r list_software, echo=F,results='asis'}
 for(n in names(cps_report$metadata$pcgr_db_release)){
-  if(n == 'mosdepth' | n == 'mutationalpatterns' | n == 'vcf2maf'){
+  if(n == 'mosdepth' | n == 'mutationalpatterns' | n == 'vcf2maf' | n == 'bundle_version'){
     next
   }
   if(cps_report$metadata$pcgr_db_release[[n]]$resource_type == 'software'){
@@ -32,7 +37,7 @@ for(n in names(cps_report$metadata$pcgr_db_release)){
 ```{r list_db, echo=F,results='asis'}
 for(n in names(cps_report$metadata$pcgr_db_release)){
   if(cps_report$metadata$pcgr_db_release[[n]]$resource_type != 'software'){
-    if(n != 'cbmdb' & n != 'chembl' & n != 'corum' & n != 'icgc' & n != 'tcga' & n != 'cosmic' & n != 'dgidb' & n != 'ct' & 
+    if(n != 'cbmdb' & n != 'chembl' & n != 'corum' & n != 'icgc' & n != 'bundle_version' & n != 'tcga' & n != 'cosmic' & n != 'dgidb' & n != 'ct' & 
        n != 'kegg' & n != 'onekg' &  n != 'tcga-pcdm' & n != 'opentargets'){
       s <- paste0('    * [',cps_report$metadata$pcgr_db_release[[n]]$name,'](',cps_report$metadata$pcgr_db_release[[n]]$url,') - ',cps_report$metadata$pcgr_db_release[[n]]$description, ' (',cps_report$metadata$pcgr_db_release[[n]]$version,')')
       cat(s,sep="\n")

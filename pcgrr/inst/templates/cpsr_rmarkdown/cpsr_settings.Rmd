@@ -1,5 +1,14 @@
 ## Settings
 
+```{r on_off_settings, echo=F}
+
+transcript_set_gencode <- "GENCODE - basic set ('--gencode_basic')"
+if(cps_report[['metadata']][['config']][['other']][['vep_gencode_all']] == T){
+  transcript_set_gencode <- "GENCODE - all transcripts"
+}
+
+```
+
 ### Sample metadata
 
 * Sample name &nbsp;:&nbsp; <span style="background-color:#000000; color:white"><b>&nbsp;`r cps_report[['metadata']][['sample_name']]`&nbsp;</b></span>
@@ -23,3 +32,7 @@ __`r cps_report[['metadata']][['config']][['clinvar_ignore_noncancer']]`__
 * Include [secondary findings](https://www.ncbi.nlm.nih.gov/clinvar/docs/acmg/) in report: __`r cps_report[['metadata']][['config']][['secondary_findings']]`__
 * Include GWAS hits in report: __`r cps_report[['metadata']][['config']][['gwas']][['run']]`__
     * Minimum p-value for association: __`r cps_report[['metadata']][['config']][['gwas']][['p_value_min']]`__
+* Variant Effect Predictor (VEP) settings:
+  * Transcript set: __`r transcript_set_gencode`__
+  * Transcript pick order: __`r cps_report[['metadata']][['config']][['other']][['vep_pick_order']]`__
+  * Regulatory regions annotation: __`r cps_report[['metadata']][['config']][['other']][['vep_regulatory']]`__

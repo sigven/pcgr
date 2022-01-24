@@ -63,7 +63,7 @@ Estimated properties on DNA cellularity and ploidy:
 
 The report generated with PCGR is based on the following underlying tools and knowledge resources:
 
-* __Databundle version__
+* __PCGR databundle version__
   
   * __`r pcg_report$metadata$pcgr_db_release$bundle_version$version`__
   
