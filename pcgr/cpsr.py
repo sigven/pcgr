@@ -15,7 +15,7 @@ from pcgr import pcgr_vars, utils
 from pcgr.arg_checker import get_docker_image_version
 from pcgr.utils import check_subprocess, getlogger, error_message, warn_message
 
-CPSR_VERSION = '0.6.2'
+CPSR_VERSION = '0.7.1'
 
 GE_panels = {
       0: "CPSR exploratory cancer predisposition panel (n = 433, Genomics England PanelApp / TCGA Germline Study / Cancer Gene Census / Other)",
@@ -113,6 +113,7 @@ def get_args():
    optional_vep.add_argument('--vep_buffer_size', default = 500, type = int, help="Variant buffer size (variants read into memory simultaneously, option '--buffer_size' in VEP) " + \
       "\n- set lower to reduce memory usage, default: %(default)s")
    #optional_vep.add_argument('--vep_regulatory', action='store_true', help = 'Enable Variant Effect Predictor (VEP) to look for overlap with regulatory regions (option --regulatory in VEP).')
+   optional_vep.add_argument('--vep_gencode_all', action='store_true', help = "Consider all GENCODE transcripts with Variant Effect Predictor (VEP) (option '--gencode_basic' in VEP is used by default in PCGR).")
    optional_vep.add_argument('--vep_pick_order', default = "canonical,appris,biotype,ccds,rank,tsl,length,mane", help="Comma-separated string " + \
       "of ordered transcript properties for primary variant pick\n ( option '--pick_order' in VEP), default: %(default)s")
    optional_vep.add_argument('--vep_no_intergenic', action = "store_true", help="Skip intergenic variants during processing (option '--no_intergenic' in VEP), default: %(default)s")
@@ -530,13 +531,18 @@ def run_cpsr(arg_dict, host_directories, DOCKER_IMAGE_VERSION):
       ## Set all flags used in VEP run
       plugins_in_use = "NearestExonJB, LoF"
       vep_flags = "--format vcf --vcf --check_ref --flag_pick_allele_gene --hgvs --dont_skip --failed 1 --af --af_1kg --af_gnomad " + \
-         "--variant_class --domains --symbol --protein --ccds --uniprot --appris --biotype --canonical --gencode_basic --cache " + \
+         "--variant_class --domains --symbol --protein --ccds --uniprot --appris --biotype --canonical --cache " + \
          "--numbers --total_length --no_stats --allele_number --no_escape --xref_refseq --plugin NearestExonJB,max_range=50000"
       vep_options = "--pick_order " + str(arg_dict['vep_pick_order']) + " --force_overwrite --buffer_size " + \
          str(arg_dict['vep_buffer_size']) + " --species homo_sapiens --assembly " + \
          str(VEP_ASSEMBLY) + " --offline --fork " + str(arg_dict['vep_n_forks']) + " " + str(vep_flags) + " --dir " + str(vep_dir)
-      vep_options += " --cache_version " + str(VEP_VERSION)
       loftee_dir = '/opt/vep/src/ensembl-vep/modules'
+      
+      vep_options += f' --cache_version {pcgr_vars.VEP_VERSION}'
+      gencode_set_in_use = "GENCODE - all transcripts"
+      if arg_dict['vep_gencode_all'] == 0:
+         vep_options += ' --gencode_basic'
+         gencode_set_in_use = "GENCODE - basic transcript set (--gencode_basic)"
       if arg_dict['vep_no_intergenic'] == 1:
          vep_options = vep_options + " --no_intergenic"
       if arg_dict['vep_regulatory'] == 1:
@@ -566,6 +572,7 @@ def run_cpsr(arg_dict, host_directories, DOCKER_IMAGE_VERSION):
       logger.info("VEP configuration - one primary consequence block pr. alternative allele (--flag_pick_allele)")
       logger.info("VEP configuration - transcript pick order: " + str(arg_dict['vep_pick_order']))
       logger.info("VEP configuration - transcript pick order: See more at https://www.ensembl.org/info/docs/tools/vep/script/vep_other.html#pick_options")
+      logger.info(f'VEP configuration - GENCODE set: {gencode_set_in_use}')
       logger.info("VEP configuration - skip intergenic: " + str(arg_dict['vep_no_intergenic']))
       logger.info("VEP configuration - look for overlap with regulatory regions: " + str(vep_regulatory))
       logger.info("VEP configuration - plugins in use: " + str(plugins_in_use))
@@ -650,6 +657,7 @@ def run_cpsr(arg_dict, host_directories, DOCKER_IMAGE_VERSION):
               f"{arg_dict['vep_pick_order']} "
               f"{arg_dict['vep_n_forks']} "
               f"{arg_dict['vep_buffer_size']} "
+              f"{arg_dict['vep_gencode_all']} "
               f"{vep_no_intergenic} "
               f"{vep_regulatory} "
               f"{secondary_findings} "

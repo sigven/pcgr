@@ -47,22 +47,26 @@ cpsr_config[['other']] <- list()
 cpsr_config[['other']][['vep_pick_order']] <- as.character(args[19])
 cpsr_config[['other']][['vep_n_forks']] <- as.integer(args[20])
 cpsr_config[['other']][['vep_buffer_size']] <- as.integer(args[21])
-cpsr_config[['other']][['vep_skip_intergenic']] <- as.logical(as.integer(args[22]))
-cpsr_config[['other']][['vep_regulatory']] <- as.logical(as.integer(args[23]))
+cpsr_config[['other']][['vep_gencode_all']] <- as.logical(args[22])
+cpsr_config[['other']][['vep_skip_intergenic']] <- as.logical(as.integer(args[23]))
+cpsr_config[['other']][['vep_regulatory']] <- as.logical(as.integer(args[24]))
 
-arg_counter <- 24
+arg_counter <- 25
 for (opt in c('secondary_findings','classify_all','ignore_noncoding',
               'clinvar_ignore_noncancer','diagnostic_grade_only')){
   cpsr_config[opt] <- as.logical(as.integer(args[arg_counter]))
   arg_counter <- arg_counter + 1
 }
 
-saveRDS(cpsr_config, file=paste0(dir,"/", cpsr_config[['required_args']][['sample_name']],".cpsr_config.rds"))
+saveRDS(cpsr_config,
+        file = file.path(dir, cpsr_config[['required_args']][['sample_name']],".cpsr_config.rds"))
 
-pcgr_data <- readRDS(paste0(cpsr_config[['required_args']][['data_dir']],
-                            '/data/',
-                            cpsr_config[['required_args']][['genome_assembly']],
-                            '/rds/pcgr_data.rds'))
+pcgr_data <- readRDS(
+  file.path(
+    cpsr_config[['required_args']][['data_dir']],
+    'data', cpsr_config[['required_args']][['genome_assembly']],
+    'rds', 'pcgr_data.rds')
+  )
 
 ## temporary type fix
 pcgr_data$biomarkers$cgi$ACTIONABILITY_SCORE <-
