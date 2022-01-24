@@ -1674,6 +1674,16 @@ retrieve_secondary_calls <- function(calls, umls_map) {
   )
 
   secondary_calls <- calls %>%
+    ## do not consider secondary variant findings if
+    ## genotypes have not been retrieved properly
+    dplyr::filter(!is.na(GENOTYPE) & !is.na(SYMBOL))
+
+
+  if(nrow(secondary_calls) == 0){
+    return(secondary_calls)
+  }
+
+  secondary_calls <- secondary_calls %>%
     dplyr::filter(!is.na(.data$CANCER_PREDISPOSITION_SOURCE) &
                     .data$CANCER_PREDISPOSITION_SOURCE == "ACMG_SF30" &
                     !is.na(.data$CLINVAR_CLASSIFICATION)) %>%
@@ -1687,7 +1697,8 @@ retrieve_secondary_calls <- function(calls, umls_map) {
     ## only homozygotes p.Cys282Tyr HFE carriers
     dplyr::filter(.data$SYMBOL != "HFE" |
                     (.data$SYMBOL == "HFE" &
-                       stringr::str_detect(.data$PROTEIN_CHANGE,"Cys282Tyr") &
+                       (!is.na(PROTEIN_CHANGE) &
+                          stringr::str_detect(.data$PROTEIN_CHANGE,"Cys282Tyr")) &
                        .data$GENOTYPE == "homozygous"))
 
 
