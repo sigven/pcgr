@@ -2056,7 +2056,7 @@ get_germline_biomarkers <- function(sample_calls,
   if (nrow(all_var_evidence_items) > 0) {
     for (type in c("prognostic", "diagnostic", "predictive", "predisposing")) {
       clin_eitems_list[[type]] <- all_var_evidence_items %>%
-        dplyr::filter(.data$EVIDENCE_TYPE == stringr::str_to_title(.data$type)) %>%
+        dplyr::filter(.data$EVIDENCE_TYPE == stringr::str_to_title(type)) %>%
         dplyr::arrange(.data$EVIDENCE_LEVEL, .data$RATING) %>%
         dplyr::select(.data$SYMBOL, .data$GENE_NAME,
                       .data$CANCER_TYPE, .data$CLINICAL_SIGNIFICANCE,
