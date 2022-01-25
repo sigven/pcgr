@@ -1,0 +1,29 @@
+citHeader("To cite PCGR in publications use:")
+
+citEntry(
+  entry = "Article",
+  title = paste0("Personal Cancer Genome Reporter: variant interpretation ",
+                 "report for precision oncology"),
+  author = personList(
+    as.person("Sigve Nakken"),
+    as.person("Ghislain Fournous"),
+    as.person("Daniel Vodák"),
+    as.person("Lars Birger Aasheim"),
+    as.person("Ola Myklebost"),
+    as.person("Eivind Hovig")
+  ),
+  journal = "Bioinformatics",
+  year = "2017",
+  month = "12",
+  volume = "34",
+  number = "10",
+  pages = "1778-1780",
+  url = "https://doi.org/10.1093/bioinformatics/btx817",
+  textVersion  = paste0(
+    "Sigve Nakken, Ghislain Fournous, Daniel Vodák, ",
+    "Lars Birger Aaasheim, Ola Myklebost, and Eivind Hovig. ",
+    "Personal Cancer Genome Reporter: variant interpretation ",
+    "report for precision oncology (2017). Bioinformatics. ",
+    "34(10):1778–1780. doi:10.1093/bioinformatics/btx817"
+  )
+)
