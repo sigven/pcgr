@@ -10,7 +10,8 @@ Authors@R:
              email = "sigven@ifi.uio.no",
              comment = c(ORCID = "0000-0001-8468-2050")))
 Maintainer: Sigve Nakken <sigven@ifi.uio.no>
-URL: https://github.com/sigven/pcgr
+URL: https://github.com/sigven/pcgr,
+    https://sigven.github.io/pcgr/
 BugReports: https://github.com/sigven/pcgr/issues
 Description: Functions, tools and utilities for the generation of clinical cancer genome reports with PCGR.
     This R package is an integrated part of the Docker/Conda-based PCGR workflow (https://github.com/sigven/pcgr),
