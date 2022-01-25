@@ -35,4 +35,4 @@ jobs:
             conda activate pkgdown
             printf "pcgrr version:\n"
             Rscript -e "packageVersion('pcgrr')"
-            Rscript -e "pkgdown::deploy_to_branch(pkg = '.', commit_message = paste(pkgdown:::construct_commit_message('.'), '- see https://umccr.github.io/pcgr/'), branch = 'gh-pages', new_process = FALSE)"
+            Rscript -e "pkgdown::deploy_to_branch(pkg = 'pcgrr', commit_message = paste(pkgdown:::construct_commit_message('.'), '- see https://umccr.github.io/pcgr/'), branch = 'gh-pages', new_process = FALSE)"
