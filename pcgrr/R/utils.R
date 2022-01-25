@@ -2274,3 +2274,28 @@ virtual_panel_display_html <- function(gene_df) {
   html_string <- paste0(html_string, "</div>")
   return(html_string)
 }
+
+
+#' Function that reports protein-coding geneset that overlaps BED file
+#'
+#' @param bed_file BED file name with selected transcripts from panel 0
+#' @param pcgr_data object with PCGR annotation data
+#' @export
+custom_bed_genes <- function(bed_file, pcgr_data) {
+
+  invisible(assertthat::assert_that(file.exists(bed_file),
+                                    msg = paste0("BED file", bed_file, " does not exist")))
+  bed_df <- as.data.frame(
+    utils::read.table(file = bed_file, header = F, stringsAsFactors = F,
+                           comment.char = "", quote = "", sep = "\t") %>%
+    magrittr::set_colnames(c("chromosome", "segment_start", "segment_end", "onco_xref")) %>%
+    dplyr::rowwise() %>%
+    dplyr::mutate(symbol = unlist(strsplit(.data$onco_xref, "\\|"))[4]) %>%
+    dplyr::select(.data$symbol) %>%
+    dplyr::left_join(dplyr::select(pcgr_data$gene_xref$gencode, .data$symbol, .data$ENTREZ_ID, .data$GENENAME), by = "symbol") %>%
+    dplyr::rename(genename = .data$GENENAME, entrezgene = .data$ENTREZ_ID) %>%
+    dplyr::select(.data$symbol, .data$genename, .data$entrezgene) %>%
+    dplyr::distinct()
+  )
+  return(bed_df)
+}
