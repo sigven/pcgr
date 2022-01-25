@@ -1179,7 +1179,7 @@ write_report_output <- function(report,
   sequencing_design <- "Germline"
   disclaimer <- system.file("templates",
                             "disclaimer_predisposition.md",
-                            package = "pcgrr")
+                            package = "cpsr")
   markdown_input <- system.file("templates",
                                 "cpsr_rmarkdown_report.Rmd",
                                 package = "cpsr")
