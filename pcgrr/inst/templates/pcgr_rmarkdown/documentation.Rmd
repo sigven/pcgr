@@ -4,7 +4,7 @@
 
 The analysis performed in the cancer genome report is based on the following underlying tools and knowledge resources:
 
-* ____PCGR databundle version____
+* __PCGR databundle version__
 
   * __`r pcg_report$metadata$pcgr_db_release$bundle_version$version`__
 
@@ -26,7 +26,7 @@ for(n in names(pcg_report$metadata$pcgr_db_release)){
 * __Databases/datasets__ 
 ```{r list_db, echo=F,results='asis'}
 for(n in names(pcg_report$metadata$pcgr_db_release)){
-  if(pcg_report$metadata$pcgr_db_release[[n]]$resource_type == 'db' & n != 'gwas' & n != 'ct'){
+  if(pcg_report$metadata$pcgr_db_release[[n]]$resource_type == 'db' & n != 'gwas' & n != 'ct' & n != 'bundle_version'){
     s <- paste0('    * [',pcg_report$metadata$pcgr_db_release[[n]]$name,'](',pcg_report$metadata$pcgr_db_release[[n]]$url,') - ',pcg_report$metadata$pcgr_db_release[[n]]$description, ' (',pcg_report$metadata$pcgr_db_release[[n]]$version,')')
     cat(s,sep="\n")
   }
