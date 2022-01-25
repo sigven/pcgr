@@ -1182,9 +1182,9 @@ write_report_output <- function(report,
                             package = "pcgrr")
   markdown_input <- system.file("templates",
                                 "cpsr_rmarkdown_report.Rmd",
-                                package = "pcgrr")
+                                package = "cpsr")
   css_fname <- system.file("templates", "cpsr.css",
-                           package = "pcgrr")
+                           package = "cpsr")
   report_theme <-
     report[["metadata"]][["config"]][["visual"]][["report_theme"]]
 
