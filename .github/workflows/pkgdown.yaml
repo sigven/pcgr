@@ -1,36 +1,38 @@
-# Workflow derived from https://github.com/r-lib/actions/tree/master/examples
-# Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
-#on:
-  #workflow_dispatch
+name: pkgdown
 on:
   push:
     branches:
       - pkgdown
 
-name: pkgdown
+env:
+  env_yml_path: conda/env/yml
 
 jobs:
-  pkgdown:
+  pkgdown-site:
+    name: Deploy pkgdown website
     runs-on: ubuntu-latest
-    env:
-      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    defaults:
+      run:
+        shell: bash -l {0}
     steps:
-      - uses: actions/checkout@v2
-
-      - uses: r-lib/actions/setup-pandoc@v1
-
-      - uses: r-lib/actions/setup-r@v1
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Set up miniconda
+        uses: conda-incubator/setup-miniconda@v2
         with:
-          use-public-rspm: true
-
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: pkgdown
-          needs: website
-          working-directory: './pcgrr'
-
-      - name: Deploy package
+          # Do everything inside the base env
+          auto-update-conda: true
+          auto-activate-base: true
+          activate-environment: ""
+          mamba-version: "*"
+          channels: "pcgr,conda-forge,bioconda"
+      - name: Install conda packages
+        run: mamba env create -n pkgdown -f ${env_yml_path}/pkgdown.yml
+      - name: Publish pkgdown website
         run: |
-          git config --local user.name "$GITHUB_ACTOR"
-          git config --local user.email "$GITHUB_ACTOR@users.noreply.github.com"
-          Rscript -e 'pkgdown::deploy_to_branch(pkg = "./pcgrr", branch = "gh-pages", new_process = FALSE)'
+            git config --local user.email "actions@github.com"
+            git config --local user.name "GitHub Actions"
+            conda activate pkgdown
+            printf "pcgrr version:\n"
+            Rscript -e "packageVersion('pcgrr')"
+            Rscript -e "pkgdown::deploy_to_branch(pkg = '.', commit_message = paste(pkgdown:::construct_commit_message('.'), '- see https://umccr.github.io/pcgr/'), branch = 'gh-pages', new_process = FALSE)"
