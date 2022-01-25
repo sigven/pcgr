@@ -1,5 +1,6 @@
-# pcgr dev (January 2022)
+# pcgr dev
 
+# pcgr xxx (January 2022)
 - Complete restructure of Python and R components.
   - Installation now relies on two separate [conda](https://docs.conda.io/en/latest/)
     packages, `pcgr` (Python component) and `pcgrr` (R component).
