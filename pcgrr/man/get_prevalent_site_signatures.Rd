@@ -9,7 +9,7 @@ get_prevalent_site_signatures(
   site = "Any",
   custom_collection = NULL,
   pcgr_data = NULL,
-  prevalence_pct = 5,
+  prevalence_pct = 2,
   incl_poss_artifacts = T
 )
 }

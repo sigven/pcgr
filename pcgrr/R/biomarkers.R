@@ -466,8 +466,8 @@ match_eitems_to_var <- function(sample_calls,
     evidence_identifiers <- c("CIVIC_ID_SEGMENT", "CIVIC_ID")
   }
   eitems_db <- eitems %>%
-    dplyr::filter(SOURCE_DB == "civic") %>%
-    dplyr::select(-GDNA) %>%
+    dplyr::filter(.data$SOURCE_DB == "civic") %>%
+    dplyr::select(-.data$GDNA) %>%
     dplyr::distinct()
 
 
@@ -477,8 +477,8 @@ match_eitems_to_var <- function(sample_calls,
       evidence_identifiers <- c("CGI_ID_SEGMENT", "CGI_ID")
     }
     eitems_db <- eitems %>%
-      dplyr::filter(SOURCE_DB == "cgi") %>%
-      dplyr::select(-GDNA) %>%
+      dplyr::filter(.data$SOURCE_DB == "cgi") %>%
+      dplyr::select(-.data$GDNA) %>%
       dplyr::distinct()
   }
 
@@ -523,15 +523,15 @@ match_eitems_to_var <- function(sample_calls,
 
   if(region_marker == F){
     eitems_hgvs <- eitems_db %>%
-      dplyr::filter(!is.na(HGVS_ALIAS))
+      dplyr::filter(!is.na(.data$HGVS_ALIAS))
 
     if(NROW(eitems_hgvs) > 0){
       eitems_hgvs <- eitems_hgvs %>%
-        tidyr::separate_rows(HGVS_ALIAS, sep = "\\|") %>%
-        dplyr::rename(PROTEIN_CHANGE = HGVS_ALIAS)
+        tidyr::separate_rows(.data$HGVS_ALIAS, sep = "\\|") %>%
+        dplyr::rename(PROTEIN_CHANGE = .data$HGVS_ALIAS)
 
       var_eitems_hgvs_mapped <- sample_calls %>%
-        dplyr::filter(!is.na(PROTEIN_CHANGE)) %>%
+        dplyr::filter(!is.na(.data$PROTEIN_CHANGE)) %>%
         dplyr::select(dplyr::one_of(colset))
 
       if(nrow(var_eitems_hgvs_mapped) > 0){
