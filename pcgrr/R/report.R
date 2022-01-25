@@ -33,7 +33,7 @@ init_report <- function(config = NULL,
   }
 
   if(!is.null(config) & !is.null(pcgr_data)){
-    report_metadata <- pcgrr::set_report_metadata(
+    report_metadata <- set_report_metadata(
       config,
       pcgr_data,
       report_type = type,
@@ -59,7 +59,7 @@ init_report <- function(config = NULL,
     if (!is.null(report[["metadata"]][["config"]][["popgen"]])) {
       if (report[["metadata"]][["config"]][["popgen"]][["pop_gnomad"]] != "") {
         pop_tag_info <-
-          pcgrr::get_population_tag(config[["popgen"]][["pop_gnomad"]],
+          get_population_tag(config[["popgen"]][["pop_gnomad"]],
                                     db = "GNOMAD", subset = "non_cancer")
         report[["metadata"]][["config"]][["popgen"]][["vcftag_gnomad"]] <-
           pop_tag_info$vcf_tag
@@ -347,7 +347,7 @@ set_report_metadata <- function(config,
     ## virtual_panel_id is "-1", indicating custom gene list
     if (!is.null(custom_bed)) {
       target_genes <-
-        pcgrr::custom_bed_genes(custom_bed, pcgr_data = pcgr_data)
+        custom_bed_genes(custom_bed, pcgr_data = pcgr_data)
       if (nrow(target_genes) > 0) {
 
         target_genes <- target_genes %>%

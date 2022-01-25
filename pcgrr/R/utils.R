@@ -2215,3 +2215,87 @@ pkg_exists <- function(p) {
   assertthat::assert_that(is.character(p))
   nzchar(system.file(package = p))
 }
+
+
+#' Function that makes a HTML display of virtual gene panel
+#'
+#' @param gene_df data frame with genes targeted in virtual panel
+#'
+#'
+#' @export
+virtual_panel_display_html <- function(gene_df) {
+
+  i <- 1
+  gene_df <- gene_df %>%
+    dplyr::arrange(dplyr::desc(.data$confidence_level), symbol)
+
+  html_string <- "<div id=\"container\">"
+  while(i <= nrow(gene_df)) {
+    confidence_level <- gene_df[i,"confidence_level"]
+    css_class <- "exploratory"
+    if (confidence_level == 3) {
+      css_class <- "green"
+    }
+    if (confidence_level == 2) {
+      css_class <- "amber"
+    }
+    if (confidence_level == 1) {
+      css_class <- "red"
+    }
+    if (confidence_level == -1) {
+      css_class <- "custom"
+    }
+    if (confidence_level == 0) {
+      css_class <- "nolist"
+    }
+    if (confidence_level == 5) {
+      css_class <- "app_combo"
+    }
+    symbol <- gene_df[i, "symbol"]
+    name <- gene_df[i, "genename"]
+    entrezgene <- gene_df[i, "entrezgene"]
+    panel_id <- gene_df[i, "panel_id"]
+
+    gene_url <- paste0("https://www.ncbi.nlm.nih.gov/gene/", entrezgene)
+    if (!is.na(panel_id)) {
+      gene_url <- paste0("https://panelapp.genomicsengland.co.uk/panels/",
+                         panel_id, "/", symbol)
+    }
+
+    entry_string <- paste0("  <div class=\"", css_class, "\"><a href=\"",
+                           gene_url, "\" target=\"_blank\" title=\"",
+                           name, "\">", symbol, "</a></div>")
+    html_string <- paste0(html_string, entry_string)
+    if (i %% 7 == 0) {
+      html_string <- paste0(html_string, "</div>  <div id=\"container\">")
+    }
+    i <- i + 1
+  }
+  html_string <- paste0(html_string, "</div>")
+  return(html_string)
+}
+
+
+#' Function that reports protein-coding geneset that overlaps BED file
+#'
+#' @param bed_file BED file name with selected transcripts from panel 0
+#' @param pcgr_data object with PCGR annotation data
+#' @export
+custom_bed_genes <- function(bed_file, pcgr_data) {
+
+  invisible(assertthat::assert_that(file.exists(bed_file),
+                                    msg = paste0("BED file", bed_file, " does not exist")))
+  bed_df <- as.data.frame(
+    utils::read.table(file = bed_file, header = F, stringsAsFactors = F,
+                           comment.char = "", quote = "", sep = "\t") %>%
+    magrittr::set_colnames(c("chromosome", "segment_start", "segment_end", "onco_xref")) %>%
+    dplyr::rowwise() %>%
+    dplyr::mutate(symbol = unlist(strsplit(.data$onco_xref, "\\|"))[4]) %>%
+    dplyr::select(.data$symbol) %>%
+    dplyr::left_join(dplyr::select(pcgr_data$gene_xref$gencode, .data$symbol, .data$ENTREZ_ID, .data$GENENAME), by = "symbol") %>%
+    dplyr::rename(genename = .data$GENENAME, entrezgene = .data$ENTREZ_ID) %>%
+    dplyr::select(.data$symbol, .data$genename, .data$entrezgene) %>%
+    dplyr::distinct()
+  )
+  return(bed_df)
+}
