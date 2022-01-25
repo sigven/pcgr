@@ -1,0 +1,35 @@
+url: https://umccr.github.io/pcgr/
+title: pcgr
+template:
+  bootstrap: 5
+authors:
+  Sigve Nakken:
+    href: https://github.com/sigven
+navbar:
+  structure:
+    left:  [home, installation, running, faq, news]
+    right: [reference, search, github]
+  components:
+    home:
+      text: Intro
+      href: index.html
+    installation:
+      text: Installation
+      href: articles/installation.html
+    running:
+      text: Running
+      href: articles/running.html
+    faq:
+      text: FAQ
+      href: articles/faq.html
+
+home:
+  sidebar:
+    structure: [links, license, community, citation, authors, dev]
+    components:
+      citation:
+          title: Citation
+          text: "[Citing PCGR](authors.html#citation)"
+
+news:
+  one_page: true

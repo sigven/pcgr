@@ -1,0 +1,6 @@
+name: pkgdown
+dependencies:
+  - r-pcgrr ==0.10.9
+  - r-cpsr
+  - r-pkgdown
+  - pandoc
