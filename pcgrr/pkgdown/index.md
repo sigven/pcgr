@@ -1,6 +1,6 @@
-# PCGR
+# Personal Cancer Genome Reporter
 
-The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for functional annotation and translation of individual cancer genomes for precision cancer medicine. It interprets both somatic SNVs/InDels and copy number aberrations. The software extends basic gene and variant annotations from the [Ensembl’s Variant Effect Predictor (VEP)](http://www.ensembl.org/info/docs/tools/vep/index.html) with oncology-relevant, up-to-date annotations retrieved flexibly through [vcfanno](https://github.com/brentp/vcfanno). Variants are classified into [tiers of clinical significance](tier_systems.md), and interactive HTML output reports permits exploration of the final results.
+The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for functional annotation and translation of individual cancer genomes for precision cancer medicine. It interprets both somatic SNVs/InDels and copy number aberrations. The software extends basic gene and variant annotations from the [Ensembl’s Variant Effect Predictor (VEP)](http://www.ensembl.org/info/docs/tools/vep/index.html) with oncology-relevant, up-to-date annotations retrieved flexibly through [vcfanno](https://github.com/brentp/vcfanno). Variants are classified into [tiers of clinical significance](articles/variant_classification.html), and interactive HTML output reports permits exploration of the final results.
 
 Example views from the dashboard HTML output:
 
@@ -19,17 +19,22 @@ PCGR has been developed by scientists affiliated with the [Norwegian Cancer Geno
 
 ## Why use PCGR?
 
-The great complexity of acquired mutations in individual tumor genomes poses a severe challenge for clinical interpretation. There is a general scarcity of tools that can _i)_ systematically interrogate cancer genomes in the context of diagnostic, prognostic, and therapeutic biomarkers, _ii)_ prioritize and highlight the most important findings, and _iii)_ present the results in a format  accessible to clinical experts. PCGR integrates a comprehensive set of knowledge resources related to tumor biology and therapeutic biomarkers, both at the gene and variant level. The application generates a tiered report that will aid the interpretation of individual cancer genomes in a clinical setting.
+The great complexity of acquired mutations in individual tumor genomes poses a severe challenge for clinical interpretation. There is a general scarcity of tools that can
+
+- **i)** systematically interrogate cancer genomes in the context of diagnostic, prognostic, and therapeutic biomarkers,
+
+- **ii)** prioritize and highlight the most important findings, and
+
+- **iii)** present the results in a format  accessible to clinical experts.
+
+PCGR integrates a [comprehensive set of knowledge resources](articles/annotation_resources.html) related to tumor biology and therapeutic biomarkers, both at the gene and variant level. The application generates a tiered report that will aid the interpretation of individual cancer genomes in a clinical setting.
+
+## Citation
 
 If you use PCGR, please cite our publication:
 
 Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, Ola Myklebost, and Eivind Hovig. __Personal Cancer Genome Reporter: variant interpretation report for precision oncology__ (2017). _Bioinformatics_. 34(10):1778–1780. doi:[10.1093/bioinformatics/btx817](https://doi.org/10.1093/bioinformatics/btx817)
 
-## Docker-based technology
-
-The PCGR workflow is developed using the [Docker technology](https://www.docker.com/what-docker). The software is thus packaged into isolated containers, in which the installation of all software libraries/tools and required dependencies have been taken care of. In addition to the bundled software, in the form of a Docker image, the workflow only needs to be attached with an [annotation data bundle for precision oncology](annotation_resources.html).
-
-![](img/docker-logo50.png)
 
 ## Contact
 

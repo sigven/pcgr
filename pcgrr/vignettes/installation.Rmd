@@ -120,7 +120,7 @@ pcgr 0.10.2
 /Users/you/dir4/pcgr/conda/env/pcgr/bin/pcgrr.R
 ```
 
-You should now be all set up to run PCGR! Continue on to STEP 4.
+You should now be all set up to run PCGR! Continue on to [an example run](running.html#example-run).
 
 <a name="dockersetup"></a>
 
@@ -257,5 +257,3 @@ conda environment! Here's an example command:
   paths, not the _container_ paths.
 
 </details>
-
-

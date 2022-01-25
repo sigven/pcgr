@@ -1,5 +1,5 @@
 url: https://umccr.github.io/pcgr/
-title: pcgr
+title: PCGR
 template:
   bootstrap: 5
 authors:
@@ -7,7 +7,7 @@ authors:
     href: https://github.com/sigven
 navbar:
   structure:
-    left:  [home, installation, running, faq, news]
+    left:  [home, installation, running, articles, faq, news]
     right: [reference, search, github]
   components:
     home:
@@ -19,6 +19,17 @@ navbar:
     running:
       text: Running
       href: articles/running.html
+    articles:
+      text: Articles
+      menu:
+      - text: Input files
+        href: articles/input.html
+      - text: Output files
+        href: articles/output.html
+      - text: Variant classification
+        href: articles/variant_classification.html
+      - text: Annotation resources
+        href: articles/annotation_resources.html
     faq:
       text: FAQ
       href: articles/faq.html

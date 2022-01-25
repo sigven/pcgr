@@ -27,7 +27,7 @@ def cli():
     optional_vcfanno = parser.add_argument_group("vcfanno options")
     optional_vep = parser.add_argument_group("VEP options")
     optional_tmb_msi = parser.add_argument_group("Tumor mutational burden (TMB) and MSI options")
-    optional_signatures = parser.add_argument_group("Mutatonal signature options")
+    optional_signatures = parser.add_argument_group("Mutational signature options")
     optional_tumor_only = parser.add_argument_group("Tumor-only options")
     optional_allelic_support = parser.add_argument_group("Allelic support options")
     optional_other = parser.add_argument_group("Other options")
