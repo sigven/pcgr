@@ -482,6 +482,7 @@ match_eitems_to_var <- function(sample_calls,
       dplyr::distinct()
   }
 
+  var_eitems <- data.frame()
   var_eitems_exact <- data.frame()
 
   assertable::assert_colnames(
@@ -542,8 +543,10 @@ match_eitems_to_var <- function(sample_calls,
 
         ## skip duplicate evidence items already found from exact matching at genomic level
         if(nrow(var_eitems_hgvs_mapped) > 0){
-          var_eitems_hgvs_mapped <- var_eitems_hgvs_mapped %>%
-            dplyr::anti_join(var_eitems, by = c("GENOMIC_CHANGE"))
+          if(NROW(var_eitems) > 0){
+            var_eitems_hgvs_mapped <- var_eitems_hgvs_mapped %>%
+              dplyr::anti_join(var_eitems, by = c("GENOMIC_CHANGE"))
+          }
         }
 
         var_eitems_exact <- var_eitems_exact %>%
