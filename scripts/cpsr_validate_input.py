@@ -347,11 +347,9 @@ def validate_cpsr_input(pcgr_directory, input_vcf, custom_list_fname, preserved_
    #config_options = annoutils.read_config_options(configuration_file, pcgr_directory, genome_assembly, logger, wflow = 'cpsr')
    if not input_vcf == 'None':
       if vcf_validation == 1:
-         valid_vcf = annoutils.is_valid_vcf(input_vcf, output_dir, logger, debug)
-         if valid_vcf == -1:
-            return -1
+         logger.info('Skipping validation of VCF file (deprecated as of Dec 2021)')
       else:
-         logger.info('Skipping validation of VCF file - as provided by option --no_vcf_validate')
+         logger.info('Skipping validation of VCF file as provided by option --no_vcf_validate')
 
       tag_check = check_existing_vcf_info_tags(input_vcf, pcgr_directory, genome_assembly, logger)
       if tag_check == -1:

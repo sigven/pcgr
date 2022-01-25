@@ -478,7 +478,7 @@ def validate_pcgr_input(pcgr_directory,
 
       ## Perform VCF validation if this option is set
       if vcf_validation == 1:
-         logger.info('Skipping validation of VCF file since it is deprecated as of December 2021.')
+         logger.info('Skipping validation of VCF file (deprecated as of Dec 2021)')
       else:
          logger.info('Skipping validation of VCF file as provided by option --no_vcf_validate')
 
