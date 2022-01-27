@@ -1,6 +1,23 @@
 
 ## CHANGELOG
 
+#### 0.11.0 - January 28th 2022
+
+* Data updates: ClinVar, GWAS catalog, CIViC, CancerMine, dbNSFP, KEGG, ChEMBL/DGIdb, Disease Ontology, Experimental Factor Ontology
+
+##### Added
+
+* Command-line options
+  - 
+
+##### Changed
+
+* Complete restructure of Python and R components.Installation now relies on two separate [conda](https://docs.conda.io/en/latest/) packages, `pcgr` (Python component) and `pcgrr` (R component). Direct Docker support remains, with the Dockerfile simplified to rely exclusively on the installation of the above Conda packages.
+
+##### Removed 
+
+* VCF validation step. Feedback from users suggested that Ensembl's `vcf-validator` was often too stringent so its use has been deprecated. The `--no_vcf_validate` option remains for backwards compatibility.
+
 #### 0.9.2 - June 30th 2021
 
 * Data updates: ClinVar, GWAS catalog, CIViC, CancerMine, dbNSFP, KEGG, ChEMBL, Disease Ontology/EFO, Open Targets Platform, UniProt KB, GENCODE

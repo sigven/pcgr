@@ -3,9 +3,11 @@ title: "Output files"
 output: rmarkdown::html_document
 ---
 
-## Output
+## Output files
 
-### Interactive HTML report (flexdashboard)
+PCGR generates multiple output files, including interactive HTML reports and pure variant annotation files (tab-separated values (TSV)).
+
+### HTML report - dashboard
 
 An interactive and tier-structured HTML report (dashboard-like) that shows the most relevant findings in the query cancer genome has the following naming convention:
 
@@ -14,7 +16,7 @@ An interactive and tier-structured HTML report (dashboard-like) that shows the m
  - The __sample_id__ is provided as input by the user, and reflects a unique identifier of the tumor-normal sample pair to be analyzed.
 
 
-### Interactive HTML report (rmarkdown)
+### HTML report - rmarkdown
 
 An interactive and tier-structured HTML report that shows the most relevant findings in the query cancer genome has the following naming convention:
 
@@ -160,9 +162,9 @@ A compressed JSON file that stores all the essential content of the report is pr
 
 This file will easen the process of extracting particular parts of the report for further analysis or integration with other workflows. The JSON contains two main objects, *metadata* and *content*, where the former contains information about the settings, data versions, and the latter contains the various sections of the report.
 
-### Output files - somatic SNVs/InDels
+### SNVs/InDels
 
-#### Variant call format - VCF
+#### 1. Variant call format - VCF
 
 A VCF file containing annotated, somatic calls (single nucleotide variants and insertion/deletions) is generated with the following naming convention:
 
@@ -368,9 +370,9 @@ Here, the __sample_id__ is provided as input by the user, and reflects a unique 
   - CIVIC\_ID, CIVIC\_ID_SEGMENT - Variant/segment (exon, codon) identifiers in the [CIViC database](http://civic.genome.wustl.edu)
   - CGI_ID, CGI_ID_SEGMENT - Variant/segment (exon, codon) identifier in the [Cancer Genome Interpreter Cancer Biomarkers Database](https://www.cancergenomeinterpreter.org/biomarkers)
 
-#### Tab-separated values (TSV)
+#### 2. Tab-separated values (TSV)
 
-##### Annotated List of all SNVs/InDels
+##### List of all SNVs/InDels
 We provide a tab-separated values file with most important annotations for SNVs/InDels. The file has the following naming convention:
 
 <**sample_id**>.pcgr_acmg.<**genome_assembly**>.snvs_indels.tiers.tsv
@@ -471,7 +473,7 @@ The format of the TSV file is the following:
     9. fitting_accuracy - accuracy of mutational signature fitting
 
 
-### Output files - somatic copy number aberrations
+### Copy number aberrations
 
 #### 1. Tab-separated values (TSV)
 

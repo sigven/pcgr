@@ -3,8 +3,6 @@ title: "Annotation resources"
 output: rmarkdown::html_document
 ---
 
-## PCGR annotation resources
-
 ### Basic variant consequence annotation
   * [VEP](http://www.ensembl.org/info/docs/tools/vep/index.html) - Variant Effect Predictor release 105 ([GENCODE v39](https://www.gencodegenes.org/human/) as gene reference database (v19 for grch37))
 

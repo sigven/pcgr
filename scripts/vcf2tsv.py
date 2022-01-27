@@ -7,7 +7,7 @@ import re
 import math
 import subprocess
 
-version = '0.3.5'
+version = '0.3.7.1'
 
 
 def __main__():
@@ -169,6 +169,7 @@ def vcf2tsv(query_vcf, out_tsv, skip_info_data, skip_genotype_data, keep_rejecte
       #print(str(vcf_info_data))
       #dictionary, with sample names as keys, values being genotype data (dictionary with format tags as keys)
       vcf_sample_genotype_data = {}
+
       if len(samples) > 0 and skip_genotype_data is False:
          gt_cyvcf = rec.gt_types
          i = 0
@@ -200,7 +201,15 @@ def vcf2tsv(query_vcf, out_tsv, skip_info_data, skip_genotype_data, keep_rejecte
             ## sample-wise
             while j < dim[0]:
                if sample_dat[j].size > 1:
+
                   d = ','.join(str(e) for e in np.ndarray.tolist(sample_dat[j]))
+                  if column_types[format_tag] == 'Float':
+                     d = ','.join(str(round(e, 4)) for e in np.ndarray.tolist(sample_dat[j]))
+                  ## undefined/missing value
+                  if '-2147483648' in d:
+                     d = d.replace('-2147483648', '.')
+                  if 'nan' in d.casefold():
+                     d = d.casefold().replace('nan', '.')
                   if samples[j] in vcf_sample_genotype_data:
                      vcf_sample_genotype_data[samples[j]][format_tag] = d
                else:
@@ -212,11 +221,13 @@ def vcf2tsv(query_vcf, out_tsv, skip_info_data, skip_genotype_data, keep_rejecte
                      d = str(sample_dat[j])
                   if column_types[format_tag] == 'Integer':
                      d = str(sample_dat[j][0])
+                  ## undefined/missing value
+                  if d == '-2147483648' or d.casefold() == 'nan':
+                     d = '.'
                   if samples[j] in vcf_sample_genotype_data:
                      vcf_sample_genotype_data[samples[j]][format_tag] = d
                j = j + 1
       
-      #print(str(vcf_sample_genotype_data))
       tsv_elements = []
       tsv_elements.append(fixed_fields_string)
       if skip_info_data is False:

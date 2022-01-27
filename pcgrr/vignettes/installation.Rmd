@@ -3,6 +3,8 @@ title: "Installation"
 output: rmarkdown::html_document
 ---
 
+## Instructions
+
 PCGR requires a __data bundle__ that contains the reference data,
 __sample inputs__ (e.g. somatic variants in a VCF), and an
 __output directory__ to output the results to.
@@ -15,7 +17,7 @@ Here's an example scenario that will be used in the following sections:
   exists);
 - your PCGR codebase is installed in `/Users/you/dir4/pcgr`;
 
-## STEP 1: Download data bundle
+### STEP 1: Download data bundle
 
 Download and unpack the human assembly-specific data bundle:
 
@@ -24,7 +26,7 @@ Download and unpack the human assembly-specific data bundle:
   - Unpacking: `gzip -dc pcgr.databundle.grch3X.YYYYMMDD.tgz | tar xvf -`
   - This should produce a `data/` folder.
 
-## STEP 2: Download PCGR GitHub repository
+### STEP 2: Download PCGR GitHub repository
 
 Download and unpack the latest software release from <https://github.com/sigven/pcgr/releases>.
 
@@ -36,7 +38,7 @@ PCGR_VERSION="x.x.x"
 git clone -b v${PCGR_VERSION} --depth 1 https://github.com/sigven/pcgr.git
 ```
 
-## STEP 3: Set up Conda or Docker
+### STEP 3: Set up Conda or Docker
 
 Step 3 depends on if you want to use Conda or Docker:
 

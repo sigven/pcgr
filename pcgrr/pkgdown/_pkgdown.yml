@@ -1,5 +1,7 @@
 url: https://sigven.github.io/pcgr/
 title: PCGR
+toc:
+  depth: 3
 template:
   bootstrap: 5
 authors:
