@@ -30,7 +30,7 @@
     
     <a class="navbar-brand me-2" href="index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.10</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.11</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -85,9 +85,10 @@
   </div>
 </nav><div class="container template-home">
 <div class="row">
-  <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="personal-cancer-genome-reporter">Personal Cancer Genome Reporter<a class="anchor" aria-label="anchor" href="#personal-cancer-genome-reporter"></a>
-</h1></div>
+  <main id="main" class="col-md-9"><p><br></p>
+<div class="section level2">
+<h2 id="personal-cancer-genome-reporter">Personal Cancer Genome Reporter<a class="anchor" aria-label="anchor" href="#personal-cancer-genome-reporter"></a>
+</h2>
 <p>The Personal Cancer Genome Reporter (PCGR) is a stand-alone software
 package for functional annotation and translation of individual cancer
 genomes for precision cancer medicine. It interprets both somatic
@@ -103,9 +104,9 @@ exploration of the final results.</p>
 <p>PCGR has been developed by scientists affiliated with the <a href="http://cancergenomics.no" class="external-link">Norwegian Cancer Genomics
 Consortium</a>, at the <a href="http://radium.no" class="external-link">Institute for Cancer
 Research/Oslo University Hospital</a>.</p>
-<div class="section level2">
-<h2 id="example-reports">Example reports<a class="anchor" aria-label="anchor" href="#example-reports"></a>
-</h2>
+<div class="section level3">
+<h3 id="example-reports">Example reports<a class="anchor" aria-label="anchor" href="#example-reports"></a>
+</h3>
 <ul>
 <li><a href="http://insilico.hpc.uio.no/pcgr/example_reports/0.9.2/TCGA-FU-A3HZ-01A_TO.pcgr_acmg.grch37.flexdb.html" class="external-link">Cervical
 cancer sample (tumor-only)</a></li>
@@ -119,9 +120,9 @@ cancer sample (tumor-control)</a></li>
 <p>(to view the rmarkdown-based reports, simply remove <em>.flexdb.</em>
 in the file names for the flexdashboard reports)</p>
 </div>
-<div class="section level2">
-<h2 id="why-use-pcgr">Why use PCGR?<a class="anchor" aria-label="anchor" href="#why-use-pcgr"></a>
-</h2>
+<div class="section level3">
+<h3 id="why-use-pcgr">Why use PCGR?<a class="anchor" aria-label="anchor" href="#why-use-pcgr"></a>
+</h3>
 <p>The great complexity of acquired mutations in individual tumor
 genomes poses a severe challenge for clinical interpretation. There is a
 general scarcity of tools that can</p>
@@ -140,21 +141,48 @@ at the gene and variant level. The application generates a tiered report
 that will aid the interpretation of individual cancer genomes in a
 clinical setting.</p>
 </div>
-<div class="section level2">
-<h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
-</h2>
+<div class="section level3">
+<h3 id="getting-started">Getting started<a class="anchor" aria-label="anchor" href="#getting-started"></a>
+</h3>
+<ul>
+<li><p><a href="articles/installation.html">Installation
+instructions</a></p></li>
+<li><p><a href="articles/running.html#example-run">Run through an
+example</a></p></li>
+<li>
+<p>Learn more about</p>
+<ol style="list-style-type: decimal">
+<li>Details regarding <a href="articles/input.html">PCGR input
+files</a>, and how they should be formatted</li>
+<li>The types of <a href="articles/output.html">PCGR output
+files</a>
+</li>
+<li><a href="articles/variant_classification.html">Tier system
+implemented in PCGR</a></li>
+<li>The list of <a href="articles/virtual_panels.html">gene and variant
+annotation resources</a> available in PCGR</li>
+</ol>
+</li>
+<li><p><a href="articles/faq.html">Frequenty asked questions
+(FAQ)</a></p></li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
+</h3>
 <p>If you use PCGR, please cite our publication:</p>
 <p>Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim,
 Ola Myklebost, and Eivind Hovig. <strong>Personal Cancer Genome
 Reporter: variant interpretation report for precision oncology</strong>
-(2017). <em>Bioinformatics</em>. 34(10):1778–1780. <a href="doi:%5B10.1093/bioinformatics/btx817" class="uri">doi:[10.1093/bioinformatics/btx817</a>](<a href="https://doi.org/10.1093/bioinformatics/btx817" class="external-link uri">https://doi.org/10.1093/bioinformatics/btx817</a>)</p>
+(2017). <em>Bioinformatics</em>. 34(10):1778–1780. <a href="https://doi.org/10.1093/bioinformatics/btx817" class="external-link">doi.org/10.1093/bioinformatics/btx817</a></p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="contact">Contact<a class="anchor" aria-label="anchor" href="#contact"></a>
 </h2>
 <p><a href="mailto:sigven@ifi.uio.no" class="email">sigven@ifi.uio.no</a></p>
 </div>
-</div>
+
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
@@ -184,6 +212,7 @@ Reporter: variant interpretation report for precision oncology</strong>
 <ul class="list-unstyled">
 <li>
 <a href="https://github.com/sigven" class="external-link">Sigve Nakken</a> <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0001-8468-2050" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>Peter Diakumis <br><small class="roles"> Author, contributor </small> <a href="https://orcid.org/0000-0002-7502-7545" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
 </ul>
 </div>
 
@@ -195,8 +224,8 @@ Reporter: variant interpretation report for precision oncology</strong>
 
     <footer><div class="pkgdown-footer-left">
   <p></p>
-<p>Developed by <a href="https://github.com/sigven" class="external-link">Sigve
-Nakken</a>.</p>
+<p>Developed by <a href="https://github.com/sigven" class="external-link">Sigve Nakken</a>,
+Peter Diakumis.</p>
 </div>
 
 <div class="pkgdown-footer-right">

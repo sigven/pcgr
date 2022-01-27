@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.10</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.11</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -96,10 +96,13 @@
     
     
 <div class="section level2">
-<h2 id="output">Output<a class="anchor" aria-label="anchor" href="#output"></a>
+<h2 id="output-files">Output files<a class="anchor" aria-label="anchor" href="#output-files"></a>
 </h2>
+<p>PCGR generates multiple output files, including interactive HTML
+reports and pure variant annotation files (tab-separated values
+(TSV)).</p>
 <div class="section level3">
-<h3 id="interactive-html-report-flexdashboard">Interactive HTML report (flexdashboard)<a class="anchor" aria-label="anchor" href="#interactive-html-report-flexdashboard"></a>
+<h3 id="html-report---dashboard">HTML report - dashboard<a class="anchor" aria-label="anchor" href="#html-report---dashboard"></a>
 </h3>
 <p>An interactive and tier-structured HTML report (dashboard-like) that
 shows the most relevant findings in the query cancer genome has the
@@ -112,7 +115,7 @@ analyzed.</li>
 </ul>
 </div>
 <div class="section level3">
-<h3 id="interactive-html-report-rmarkdown">Interactive HTML report (rmarkdown)<a class="anchor" aria-label="anchor" href="#interactive-html-report-rmarkdown"></a>
+<h3 id="html-report---rmarkdown">HTML report - rmarkdown<a class="anchor" aria-label="anchor" href="#html-report---rmarkdown"></a>
 </h3>
 <p>An interactive and tier-structured HTML report that shows the most
 relevant findings in the query cancer genome has the following naming
@@ -392,10 +395,10 @@ where the former contains information about the settings, data versions,
 and the latter contains the various sections of the report.</p>
 </div>
 <div class="section level3">
-<h3 id="output-files---somatic-snvsindels">Output files - somatic SNVs/InDels<a class="anchor" aria-label="anchor" href="#output-files---somatic-snvsindels"></a>
+<h3 id="snvsindels">SNVs/InDels<a class="anchor" aria-label="anchor" href="#snvsindels"></a>
 </h3>
 <div class="section level4">
-<h4 id="variant-call-format---vcf">Variant call format - VCF<a class="anchor" aria-label="anchor" href="#variant-call-format---vcf"></a>
+<h4 id="variant-call-format---vcf">1. Variant call format - VCF<a class="anchor" aria-label="anchor" href="#variant-call-format---vcf"></a>
 </h4>
 <p>A VCF file containing annotated, somatic calls (single nucleotide
 variants and insertion/deletions) is generated with the following naming
@@ -844,10 +847,10 @@ Genome Interpreter Cancer Biomarkers Database</a>
 </div>
 </div>
 <div class="section level4">
-<h4 id="tab-separated-values-tsv">Tab-separated values (TSV)<a class="anchor" aria-label="anchor" href="#tab-separated-values-tsv"></a>
+<h4 id="tab-separated-values-tsv">2. Tab-separated values (TSV)<a class="anchor" aria-label="anchor" href="#tab-separated-values-tsv"></a>
 </h4>
 <div class="section level5">
-<h5 id="annotated-list-of-all-snvsindels">Annotated List of all SNVs/InDels<a class="anchor" aria-label="anchor" href="#annotated-list-of-all-snvsindels"></a>
+<h5 id="list-of-all-snvsindels">List of all SNVs/InDels<a class="anchor" aria-label="anchor" href="#list-of-all-snvsindels"></a>
 </h5>
 <p>We provide a tab-separated values file with most important
 annotations for SNVs/InDels. The file has the following naming
@@ -950,7 +953,7 @@ naming convention:</p>
 </div>
 </div>
 <div class="section level3">
-<h3 id="output-files---somatic-copy-number-aberrations">Output files - somatic copy number aberrations<a class="anchor" aria-label="anchor" href="#output-files---somatic-copy-number-aberrations"></a>
+<h3 id="copy-number-aberrations">Copy number aberrations<a class="anchor" aria-label="anchor" href="#copy-number-aberrations"></a>
 </h3>
 <div class="section level4">
 <h4 id="tab-separated-values-tsv-1">1. Tab-separated values (TSV)<a class="anchor" aria-label="anchor" href="#tab-separated-values-tsv-1"></a>
@@ -999,8 +1002,8 @@ transcript).</p>
 
     <footer><div class="pkgdown-footer-left">
   <p></p>
-<p>Developed by <a href="https://github.com/sigven" class="external-link">Sigve
-Nakken</a>.</p>
+<p>Developed by <a href="https://github.com/sigven" class="external-link">Sigve Nakken</a>,
+Peter Diakumis.</p>
 </div>
 
 <div class="pkgdown-footer-right">

@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.10</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.11</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -95,6 +95,9 @@
 
     
     
+<div class="section level2">
+<h2 id="instructions">Instructions<a class="anchor" aria-label="anchor" href="#instructions"></a>
+</h2>
 <p>PCGR requires a <strong>data bundle</strong> that contains the
 reference data, <strong>sample inputs</strong> (e.g. somatic variants in
 a VCF), and an <strong>output directory</strong> to output the results
@@ -109,9 +112,9 @@ this directory exists);</li>
 <li>your PCGR codebase is installed in
 <code>/Users/you/dir4/pcgr</code>;</li>
 </ul>
-<div class="section level2">
-<h2 id="step-1-download-data-bundle">STEP 1: Download data bundle<a class="anchor" aria-label="anchor" href="#step-1-download-data-bundle"></a>
-</h2>
+<div class="section level3">
+<h3 id="step-1-download-data-bundle">STEP 1: Download data bundle<a class="anchor" aria-label="anchor" href="#step-1-download-data-bundle"></a>
+</h3>
 <p>Download and unpack the human assembly-specific data bundle:</p>
 <ul>
 <li>
@@ -129,18 +132,18 @@ xvf -</code>
 </li>
 </ul>
 </div>
-<div class="section level2">
-<h2 id="step-2-download-pcgr-github-repository">STEP 2: Download PCGR GitHub repository<a class="anchor" aria-label="anchor" href="#step-2-download-pcgr-github-repository"></a>
-</h2>
+<div class="section level3">
+<h3 id="step-2-download-pcgr-github-repository">STEP 2: Download PCGR GitHub repository<a class="anchor" aria-label="anchor" href="#step-2-download-pcgr-github-repository"></a>
+</h3>
 <p>Download and unpack the latest software release from <a href="https://github.com/sigven/pcgr/releases" class="external-link uri">https://github.com/sigven/pcgr/releases</a>.</p>
 <p>Alternatively if you have <code>git</code> installed, you can do:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /Users/you/dir4</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="va">PCGR_VERSION</span><span class="op">=</span><span class="st">"x.x.x"</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone <span class="at">-b</span> v<span class="va">${PCGR_VERSION}</span> <span class="at">--depth</span> 1 https://github.com/sigven/pcgr.git</span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="step-3-set-up-conda-or-docker">STEP 3: Set up Conda or Docker<a class="anchor" aria-label="anchor" href="#step-3-set-up-conda-or-docker"></a>
-</h2>
+<div class="section level3">
+<h3 id="step-3-set-up-conda-or-docker">STEP 3: Set up Conda or Docker<a class="anchor" aria-label="anchor" href="#step-3-set-up-conda-or-docker"></a>
+</h3>
 <p>Step 3 depends on if you want to use Conda or Docker:</p>
 <ul>
 <li>For Conda, continue reading the <a href="#condasetup">PCGR Conda
@@ -149,6 +152,7 @@ setup</a>.</li>
 setup</a>.</li>
 </ul>
 <p><a name="condasetup"></a></p>
+</div>
 <div class="section level3">
 <h3 id="option-1-conda">Option 1: Conda<a class="anchor" aria-label="anchor" href="#option-1-conda"></a>
 </h3>
@@ -378,8 +382,8 @@ your machine, and then run the above command inside it
 
     <footer><div class="pkgdown-footer-left">
   <p></p>
-<p>Developed by <a href="https://github.com/sigven" class="external-link">Sigve
-Nakken</a>.</p>
+<p>Developed by <a href="https://github.com/sigven" class="external-link">Sigve Nakken</a>,
+Peter Diakumis.</p>
 </div>
 
 <div class="pkgdown-footer-right">
