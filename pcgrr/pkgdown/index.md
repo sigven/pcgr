@@ -21,15 +21,15 @@ PCGR has been developed by scientists affiliated with the [Norwegian Cancer Geno
 
 ### Why use PCGR?
 
-The great complexity of acquired mutations in individual tumor genomes poses a severe challenge for clinical interpretation. There is a general scarcity of tools that can
+The great complexity of acquired mutations in individual tumor genomes poses a severe challenge for clinical interpretation. PCGR aims to be a comprehensive reporting platform that can
 
--   **i)** systematically interrogate cancer genomes in the context of diagnostic, prognostic, and therapeutic biomarkers,
+-   systematically interrogate tumor-specific variants in the context of diagnostic, prognostic, and therapeutic biomarkers,
 
--   **ii)** prioritize and highlight the most important findings, and
+-   prioritize and highlight the most relevant findings, and
 
--   **iii)** present the results in a format accessible to clinical experts.
+-   present the results in a format accessible to clinical experts.
 
-PCGR integrates a [comprehensive set of knowledge resources](articles/annotation_resources.html) related to tumor biology and therapeutic biomarkers, both at the gene and variant level. The application generates a tiered report that will aid the interpretation of individual cancer genomes in a clinical setting.
+PCGR integrates a [comprehensive set of knowledge resources](articles/annotation_resources.html) related to tumor biology and therapeutic biomarkers, both at the gene, and variant level. The software generates a tiered genome report that will aid the translation of individual cancer genomes for novel treatment strategies.
 
 ### Getting started
 
@@ -43,7 +43,8 @@ PCGR integrates a [comprehensive set of knowledge resources](articles/annotation
     2)  The types of [PCGR output files](articles/output.html)
     3)  [Tier system implemented in PCGR](articles/variant_classification.html)
     4)  The list of [gene and variant annotation resources](articles/virtual_panels.html) available in PCGR
-    
+  
+  
 -   [Frequenty asked questions (FAQ)](articles/faq.html)
 
 ### Citation

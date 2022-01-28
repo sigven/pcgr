@@ -101,7 +101,7 @@ log4r_logger <- log4r::logger(threshold = "INFO", appenders = log4r::console_app
 options("PCGRR_LOG4R_LOGGER" = log4r_logger)
 
 ## Generate report content
-cps_report <- pcgrr::generate_cpsr_report(
+cps_report <- cpsr::generate_cpsr_report(
   project_directory = cpsr_config[['required_args']][['output_dir']],
   pcgr_data,
   cpsr_config

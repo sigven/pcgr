@@ -1,14 +1,15 @@
 
 ## CHANGELOG
 
-#### 0.11.0 - January 28th 2022
+#### x.x.x - January 28th 2022
 
-* Data updates: ClinVar, GWAS catalog, CIViC, CancerMine, dbNSFP, KEGG, ChEMBL/DGIdb, Disease Ontology, Experimental Factor Ontology
+* Data updates: ClinVar, GWAS catalog, GENCODE, CIViC, CancerMine, KEGG, ChEMBL, Open Targets Platform, Disease Ontology, Experimental Factor Ontology
 
 ##### Added
 
 * Command-line options
-  - 
+  - VEP options
+	   * `--vep_gencode_all` - use all GENCODE transcripts during VEP annotation (not only the basic GENCODE set)
 
 ##### Changed
 
