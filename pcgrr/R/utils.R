@@ -1306,6 +1306,8 @@ determine_genotype <- function(vcf_df) {
         TRUE ~ as.character("ND")
 
       ))
+  }else{
+    log4r_warn(paste0("Genotype tag (GT) not provided in input VCF - variant genotypes NOT determined"))
   }
   return(vcf_df)
 }
