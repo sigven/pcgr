@@ -225,12 +225,17 @@ pcgr_data[['assembly']][['seqinfo']] <-
 pcgr_data[['assembly']][['bsg']] <- bsgenome_obj
 
 ## temporary type fix
-pcgr_data$biomarkers$cgi$ACTIONABILITY_SCORE <-
-  as.numeric(pcgr_data$biomarkers$cgi$ACTIONABILITY_SCORE)
+## temporary type fix
+if("ACTIONABILITY_SCORE" %in% colnames(pcgr_data$biomarkers$cgi)){
+  pcgr_data$biomarkers$cgi$ACTIONABILITY_SCORE <-
+    as.numeric(pcgr_data$biomarkers$cgi$ACTIONABILITY_SCORE)
+}
 for(col in c('VARIANT_TYPE','DRUG_INTERACTION_TYPE','GDNA')){
-  pcgr_data$biomarkers$cgi[,col] <- as.character(
-    pcgr_data$biomarkers$cgi[,col]
-  )
+  if(col %in% colnames(pcgr_data$biomarkers$cgi)){
+    pcgr_data$biomarkers$cgi[,col] <- as.character(
+      pcgr_data$biomarkers$cgi[,col]
+    )
+  }
 }
 
 if (pcgr_config[['other']][['vep_regulatory']] == F){
@@ -264,8 +269,6 @@ pcg_report <- NULL
 
 defaultW <- getOption("warn")
 options(warn = -1)
-
-
 
 # ## Generate report object
 pcg_report <-
