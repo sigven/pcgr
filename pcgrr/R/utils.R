@@ -754,10 +754,10 @@ append_dbnsfp_var_link <- function(var_df) {
     var_df <- var_df %>%
       dplyr::mutate(PREDICTED_EFFECT = .data$EFFECT_PREDICTIONS) %>%
       dplyr::mutate(PREDICTED_EFFECT = stringr::str_replace_all(
-        PREDICTED_EFFECT, ":D,", ":Damaging,"
+        .data$PREDICTED_EFFECT, ":D,", ":Damaging,"
       )) %>%
       dplyr::mutate(PREDICTED_EFFECT = stringr::str_replace_all(
-        PREDICTED_EFFECT, ":T,", ":Tolerated,"
+        .data$PREDICTED_EFFECT, ":T,", ":Tolerated,"
       )) %>%
     i <- 1
     while (i <= nrow(pcgrr::effect_prediction_algos)) {
