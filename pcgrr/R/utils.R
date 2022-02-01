@@ -1635,19 +1635,24 @@ get_calls <- function(tsv_gz_file,
   log4r_info(paste0("Number of PASS variants: ", nrow(vcf_data_df)))
   if (any(grepl(paste0("VARIANT_CLASS$"), names(vcf_data_df)))) {
     n_snvs <-
-      vcf_data_df %>% dplyr::filter(!is.na(.data$VARIANT_CLASS) &
-                                      .data$VARIANT_CLASS == "SNV") %>%
+      vcf_data_df %>%
+      dplyr::filter(
+        !is.na(.data$VARIANT_CLASS) &
+          .data$VARIANT_CLASS == "SNV") %>%
       nrow()
     n_deletions <- vcf_data_df %>%
       dplyr::filter(
         !is.na(.data$VARIANT_CLASS) &
-          (.data$VARIANT_CLASS == "deletion" | .data$VARIANT_CLASS == "indel")) %>%
+          (.data$VARIANT_CLASS == "deletion" |
+             .data$VARIANT_CLASS == "indel")) %>%
       nrow()
     n_insertions <- vcf_data_df %>%
-      dplyr::filter(!is.na(.data$VARIANT_CLASS) & .data$VARIANT_CLASS == "insertion") %>%
+      dplyr::filter(!is.na(.data$VARIANT_CLASS) &
+                      .data$VARIANT_CLASS == "insertion") %>%
       nrow()
     n_substitutions <- vcf_data_df %>%
-      dplyr::filter(!is.na(.data$VARIANT_CLASS) & .data$VARIANT_CLASS == "substitution") %>%
+      dplyr::filter(!is.na(.data$VARIANT_CLASS) &
+                      .data$VARIANT_CLASS == "substitution") %>%
       nrow()
     log4r_info(
       paste0("Number of SNVs: ", n_snvs))
@@ -1663,13 +1668,18 @@ get_calls <- function(tsv_gz_file,
 
   if (nrow(vcf_data_df) == 0)return(vcf_data_df)
 
+  pcgr_data$gene_xref$gencode$Gene <-
+    stringr::str_replace(pcgr_data$gene_xref$gencode$Gene,
+                         "\\.[0-9]{1,}$","")
+
   vcf_data_df_1 <-
     dplyr::left_join(
       dplyr::filter(vcf_data_df, !is.na(.data$ENTREZ_ID)),
-      dplyr::filter(dplyr::select(pcgr_data[["gene_xref"]][["gencode"]],
-                                  .data$ENTREZ_ID, .data$Gene,
-                                  .data$GENENAME, .data$CANCERGENE_SUPPORT),
-                                   !is.na(.data$ENTREZ_ID)),
+      dplyr::filter(dplyr::select(
+        pcgr_data[["gene_xref"]][["gencode"]],
+        .data$ENTREZ_ID, .data$Gene,
+        .data$GENENAME, .data$CANCERGENE_SUPPORT),
+        !is.na(.data$ENTREZ_ID)),
       by = c("ENTREZ_ID", "Gene"))
   vcf_data_df_2 <-
     dplyr::left_join(
@@ -1681,9 +1691,10 @@ get_calls <- function(tsv_gz_file,
     pcgrr::order_variants()
 
   log4r_info("Extending annotation descriptions related to KEGG pathways")
-  vcf_data_df <- dplyr::left_join(vcf_data_df,
-                                  pcgr_data[["kegg"]][["pathway_links"]],
-                                  by = c("ENTREZ_ID" = "gene_id")) %>%
+  vcf_data_df <- dplyr::left_join(
+    vcf_data_df,
+    pcgr_data[["kegg"]][["pathway_links"]],
+    by = c("ENTREZ_ID" = "gene_id")) %>%
     dplyr::rename(KEGG_PATHWAY = .data$kegg_pathway_urls)
 
   clinvar <- dplyr::select(pcgr_data[["clinvar"]][["variants"]],
