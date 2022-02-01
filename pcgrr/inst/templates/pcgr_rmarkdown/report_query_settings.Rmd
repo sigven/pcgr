@@ -14,9 +14,19 @@ if(pcg_report$content$tmb$eval == F){
   mutational_burden <- 'OFF'
 }
 
-transcript_set_gencode <- "GENCODE - basic set ('--gencode_basic')"
+gencode_versions <- unlist(stringr::str_split_fixed(
+  stringr::str_replace(
+    pcg_report$metadata$pcgr_db_release$gencode$version,"release ",""),
+  "/", 2))[1,]
+  
+gencode_version <- gencode_versions[2]
+if(pcg_report[['metadata']][['genome_assembly']] == "grch38"){
+  gencode_version <- gencode_versions[1]
+}
+
+transcript_set_gencode <- paste0("GENCODE - basic set (v", gencode_version,")")
 if(pcg_report[['metadata']][['config']][['other']][['vep_gencode_all']] == T){
-  transcript_set_gencode <- "GENCODE - all transcripts"
+  transcript_set_gencode <- paste0("GENCODE - all transcripts (v", gencode_version,")")
 }
 
 ```
