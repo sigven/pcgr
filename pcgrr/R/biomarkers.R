@@ -455,7 +455,7 @@ match_eitems_to_var <- function(sample_calls,
       "Argument 'sample_calls' must be of type data frame, not ",
       class(sample_calls))))
   assertable::assert_colnames(
-    eitems, c("EVIDENCE_ID", "SYMBOL","HGVS_ALIAS","SOURCE_DB","GDNA"),
+    eitems, c("EVIDENCE_ID", "SYMBOL","HGVS_ALIAS","SOURCE_DB"),
     only_colnames = F, quiet = T)
 
   invisible(assertthat::assert_that(!is.null(colset)))
@@ -467,7 +467,6 @@ match_eitems_to_var <- function(sample_calls,
   }
   eitems_db <- eitems %>%
     dplyr::filter(.data$SOURCE_DB == "civic") %>%
-    dplyr::select(-.data$GDNA) %>%
     dplyr::distinct()
 
 
@@ -478,7 +477,6 @@ match_eitems_to_var <- function(sample_calls,
     }
     eitems_db <- eitems %>%
       dplyr::filter(.data$SOURCE_DB == "cgi") %>%
-      dplyr::select(-.data$GDNA) %>%
       dplyr::distinct()
   }
 
