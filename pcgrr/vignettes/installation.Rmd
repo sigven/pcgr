@@ -3,7 +3,10 @@ title: "Installation"
 output: rmarkdown::html_document
 ---
 
-## Instructions
+## Installation Instructions
+
+**Tip:** Check out the <https://github.com/sigven/pcgr/tree/master/install>
+directory for installation helper scripts.
 
 PCGR requires a __data bundle__ that contains the reference data,
 __sample inputs__ (e.g. somatic variants in a VCF), and an
