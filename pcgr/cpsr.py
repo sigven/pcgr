@@ -638,7 +638,7 @@ def run_cpsr(arg_dict, host_directories, DOCKER_IMAGE_VERSION):
               f"{output_pass_tsv}.gz "
               f"{arg_dict['sample_id']} "
               f"{pcgr_vars.PCGR_VERSION} "
-              f"UNUSED_ARG "
+              f"{pcgr_vars.DB_VERSION} "
               f"{arg_dict['genome_assembly']} "
               f"{data_dir} "
               f"{virtual_panel_id} "

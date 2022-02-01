@@ -32,8 +32,8 @@ def cli():
     optional_allelic_support = parser.add_argument_group("Allelic support options")
     optional_other = parser.add_argument_group("Other options")
 
-    # optional_rna.add_argument("--rna_fusion", dest = "rna_fusion_tumor", help = "File with RNA fusion transcripts detected in tumor (tab-separated values)")
-    # optional_rna.add_argument("--rna_expression", dest = "rna_exp_tumor", help = "File with RNA expression levels (bulk) and differential expression status of genes in tumor (tab-separated values)")
+    # optional_rna.add_argument("--input_rna_fusion", dest = "rna_fusion_tumor", help = "File with RNA fusion transcripts detected in tumor (tab-separated values)")
+    # optional_rna.add_argument("--input_rna_expression", dest = "rna_exp_tumor", help = "File with RNA expression levels (bulk) of genes in tumor (tab-separated values)")
 
     optional_other.add_argument("--input_cna", dest="input_cna", help="Somatic copy number alteration segments (tab-separated values)")
     optional_other.add_argument("--logr_gain", type=float, default=0.8, dest="logr_gain", help="Log ratio-threshold for regions containing copy number gains/amplifications (default: %(default)s)")

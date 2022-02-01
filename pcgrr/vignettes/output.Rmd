@@ -176,10 +176,11 @@ Here, the __sample_id__ is provided as input by the user, and reflects a unique 
   - CSQ - Complete consequence annotations from VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|
   INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|
   Codons|Existing_variation|ALLELE_NUM|DISTANCE|STRAND|FLAGS|PICK|VARIANT_CLASS|
-  SYMBOL_SOURCE|HGNC_ID|CANONICAL|APPRIS|CCDS|ENSP|SWISSPROT|TREMBL|UNIPARC|
+  SYMBOL_SOURCE|HGNC_ID|CANONICAL|MANE_SELET|MANE_PLUS_CLINICAL|TSL|APPRIS|CCDS|  
+  ENSP|SWISSPROT|TREMBL|UNIPARC|UNIPROT_ISOFORM| 
   RefSeq|DOMAINS|HGVS_OFFSET|AF|AFR_AF|AMR_AF|EAS_AF|EUR_AF|SAS_AF|gnomAD_AF|
   gnomAD_AFR_AF|gnomAD_AMR_AF|gnomAD_ASJ_AF|gnomAD_EAS_AF|gnomAD_FIN_AF|
-  gnomAD_NFE_AF|gnomAD_OTH_AF|gnomAD_SAS_AF|CLIN_SIG|SOMATIC|PHENO|
+  gnomAD_NFE_AF|gnomAD_OTH_AF|gnomAD_SAS_AF|CLIN_SIG|SOMATIC|PHENO|CHECK_REF| 
   MOTIF_NAME|MOTIF_POS|HIGH_INF_POS|MOTIF_SCORE_CHANGE|TRANSCRIPTION_FACTORS|NearestExonJB
   - Consequence - Impact modifier for the consequence type (picked by VEP's --flag\_pick\_allele option)
   - Gene - Ensembl stable ID of affected gene (picked by VEP's --flag\_pick\_allele option)
