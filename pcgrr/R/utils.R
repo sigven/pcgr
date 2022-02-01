@@ -758,7 +758,7 @@ append_dbnsfp_var_link <- function(var_df) {
       )) %>%
       dplyr::mutate(PREDICTED_EFFECT = stringr::str_replace_all(
         .data$PREDICTED_EFFECT, ":T,", ":Tolerated,"
-      )) %>%
+      ))
     i <- 1
     while (i <= nrow(pcgrr::effect_prediction_algos)) {
       str_to_replace <-
