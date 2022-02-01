@@ -834,21 +834,26 @@ generate_report_data_cna <-
         chrom = "chromosome",
         start = "segment_start",
         end = "segment_end") %>%
-      dplyr::mutate(SEGMENT_LENGTH_MB =
-                      round((as.numeric((.data$segment_end - .data$segment_start) /
-                                          MEGABASE)),
-                            digits = 5)) %>%
+      dplyr::mutate(
+        SEGMENT_LENGTH_MB =
+          round((as.numeric((.data$segment_end - .data$segment_start) /
+                              MEGABASE)),
+                digits = 5)) %>%
       dplyr::rename(SEGMENT = .data$SEGMENT_LINK, LOG_R = .data$LogR)
 
     ## MAKE SIMPLE SEGMENTS DATA FRAME FOR FILTERING IN REPORT
     cna_segments <- cna_df %>%
-      dplyr::select(.data$SEGMENT, .data$SEGMENT_LENGTH_MB,
-                    .data$CYTOBAND, .data$LOG_R, .data$EVENT_TYPE) %>%
+      dplyr::select(.data$SEGMENT,
+                    .data$SEGMENT_LENGTH_MB,
+                    .data$CYTOBAND,
+                    .data$LOG_R,
+                    .data$EVENT_TYPE) %>%
       dplyr::distinct()
 
     #### FIND AND APPEND GENCODE TRANSCRIPTS THAT OVERLAP
     cna_transcript_df <-
-      pcgrr::get_cna_overlapping_transcripts(cna_df, pcgr_data = pcgr_data)
+      pcgrr::get_cna_overlapping_transcripts(
+        cna_df, pcgr_data = pcgr_data)
 
     #### GENERATE DATAFRAME OF UNIQUE TRANSCRIPT-CNA SEGMENTS FOR OUTPUT TSV
     cna_transcript_df_print <- cna_transcript_df %>%
@@ -882,7 +887,8 @@ generate_report_data_cna <-
         dplyr::filter(.data$biotype == "protein_coding") %>%
         dplyr::group_by(.data$SEGMENT_ID, .data$symbol) %>%
         dplyr::summarise(
-          MEAN_TRANSCRIPT_CNA_OVERLAP = mean(.data$transcript_overlap_percent),
+          MEAN_TRANSCRIPT_CNA_OVERLAP = mean(
+            .data$transcript_overlap_percent),
           TRANSCRIPTS = paste0(.data$ensembl_transcript_id, collapse = ", ")) %>%
         dplyr::rename(SYMBOL = .data$symbol) %>%
         dplyr::mutate(
@@ -896,13 +902,23 @@ generate_report_data_cna <-
       dplyr::distinct() %>%
       dplyr::mutate(VAR_ID = as.character(rep(1:nrow(.)))) %>%
       magrittr::set_colnames(toupper(names(.))) %>%
-      dplyr::select(.data$VAR_ID, .data$SEGMENT_ID, .data$SYMBOL, .data$ONCOGENE,
-                    .data$ONCOGENE_EVIDENCE, .data$TUMOR_SUPPRESSOR,
-                    .data$TUMOR_SUPPRESSOR_EVIDENCE, .data$CANCERGENE_SUPPORT,
-                    .data$ENTREZGENE, .data$CHROM, .data$NAME, .data$EVENT_TYPE,
-                    .data$SEGMENT_LENGTH_MB, .data$SEGMENT,
-                    .data$TRANSCRIPT_OVERLAP_PERCENT, .data$LOG_R) %>%
-      dplyr::mutate(ENTREZ_ID = as.character(.data$ENTREZGENE)) %>%
+      dplyr::select(.data$VAR_ID,
+                    .data$SEGMENT_ID,
+                    .data$SYMBOL,
+                    .data$ONCOGENE,
+                    .data$ONCOGENE_EVIDENCE,
+                    .data$TUMOR_SUPPRESSOR,
+                    .data$TUMOR_SUPPRESSOR_EVIDENCE,
+                    .data$CANCERGENE_SUPPORT,
+                    .data$ENTREZ_ID,
+                    .data$CHROM,
+                    .data$NAME,
+                    .data$EVENT_TYPE,
+                    .data$SEGMENT_LENGTH_MB,
+                    .data$SEGMENT,
+                    .data$TRANSCRIPT_OVERLAP_PERCENT,
+                    .data$LOG_R) %>%
+      dplyr::mutate(ENTREZ_ID = as.character(.data$ENTREZ_ID)) %>%
       dplyr::rename(GENENAME = .data$NAME,
                     TRANSCRIPT_OVERLAP = .data$TRANSCRIPT_OVERLAP_PERCENT,
                     CHROMOSOME = .data$CHROM) %>%
@@ -921,20 +937,34 @@ generate_report_data_cna <-
         url_prefix = "http://www.ncbi.nlm.nih.gov/gene/")
 
     cna_transcript_df <- cna_transcript_df %>%
-      dplyr::left_join(dplyr::rename(entrezgene_annotation_links,
-                                     GENE_NAME = .data$link),
-                       by = c("VAR_ID")) %>%
-      dplyr::select(.data$SEGMENT_ID, .data$CHROMOSOME, .data$SYMBOL, .data$GENE_NAME, .data$KEGG_PATHWAY,
-                    .data$TUMOR_SUPPRESSOR, .data$TUMOR_SUPPRESSOR_EVIDENCE, .data$ONCOGENE,
-                    .data$ONCOGENE_EVIDENCE, .data$CANCERGENE_SUPPORT, .data$SEGMENT_LENGTH_MB,
-                    .data$SEGMENT, .data$EVENT_TYPE, .data$LOG_R) %>%
+      dplyr::left_join(
+        dplyr::rename(entrezgene_annotation_links,
+                      GENE_NAME = .data$link),
+        by = c("VAR_ID")) %>%
+      dplyr::select(.data$SEGMENT_ID,
+                    .data$CHROMOSOME,
+                    .data$SYMBOL,
+                    .data$GENE_NAME,
+                    .data$KEGG_PATHWAY,
+                    .data$TUMOR_SUPPRESSOR,
+                    .data$TUMOR_SUPPRESSOR_EVIDENCE,
+                    .data$ONCOGENE,
+                    .data$ONCOGENE_EVIDENCE,
+                    .data$CANCERGENE_SUPPORT,
+                    .data$SEGMENT_LENGTH_MB,
+                    .data$SEGMENT,
+                    .data$EVENT_TYPE,
+                    .data$LOG_R) %>%
       dplyr::distinct() %>%
-      dplyr::left_join(avg_transcript_overlap, by = c("SEGMENT_ID", "SYMBOL"))
+      dplyr::left_join(avg_transcript_overlap,
+                       by = c("SEGMENT_ID", "SYMBOL"))
 
 
-    n_cna_loss <- dplyr::filter(cna_segments, .data$LOG_R <= log_r_homdel) %>%
+    n_cna_loss <-
+      dplyr::filter(cna_segments, .data$LOG_R <= log_r_homdel) %>%
       nrow()
-    n_cna_gain <- dplyr::filter(cna_segments, .data$LOG_R >= log_r_gain) %>%
+    n_cna_gain <-
+      dplyr::filter(cna_segments, .data$LOG_R >= log_r_gain) %>%
       nrow()
     cna_segments_filtered <- cna_segments %>%
       dplyr::filter(.data$LOG_R >= log_r_gain | .data$LOG_R <= log_r_homdel) %>%
@@ -949,11 +979,12 @@ generate_report_data_cna <-
     ## Get aberration sets related to tumor suppressor genes
     ## /oncogenes/drug targets
     onco_ts_sets <-
-      pcgrr::get_oncogene_tsgene_target_sets(cna_transcript_df,
-                                             log_r_homdel = log_r_homdel,
-                                             log_r_gain = log_r_gain,
-                                             tumor_type = tumor_type,
-                                             pcgr_data = pcgr_data)
+      pcgrr::get_oncogene_tsgene_target_sets(
+        cna_transcript_df,
+        log_r_homdel = log_r_homdel,
+        log_r_gain = log_r_gain,
+        tumor_type = tumor_type,
+        pcgr_data = pcgr_data)
 
     ## load all clinical evidence items ()
     eitems_any_tt <- pcgrr::load_eitems(
@@ -969,9 +1000,10 @@ generate_report_data_cna <-
     ## Get all clinical evidence items that are related to
     ## tumor suppressor genes/oncogenes/drug targets (NOT tumor-type specific)
     biomarker_hits_cna_any <-
-      pcgrr::get_clin_assocs_cna(onco_ts_sets,
-                                 annotation_tags = pcgr_data$annotation_tags,
-                                 eitems = eitems_any_tt)
+      pcgrr::get_clin_assocs_cna(
+        onco_ts_sets,
+        annotation_tags = pcgr_data$annotation_tags,
+        eitems = eitems_any_tt)
 
     pcg_report_cna[["clin_eitem"]][["any_ttype"]] <-
       biomarker_hits_cna_any[["clin_eitem"]]
@@ -993,9 +1025,10 @@ generate_report_data_cna <-
         tumor_type = tumor_type)
 
       biomarker_hits_cna_specific <-
-        pcgrr::get_clin_assocs_cna(onco_ts_sets,
-                                   annotation_tags = pcgr_data$annotation_tags,
-                                   eitems = eitems_specific_tt)
+        pcgrr::get_clin_assocs_cna(
+          onco_ts_sets,
+          annotation_tags = pcgr_data$annotation_tags,
+          eitems = eitems_specific_tt)
 
       ## Assign putative TIER 1 variant set
       pcg_report_cna[["clin_eitem"]][["specific_ttype"]] <-
