@@ -852,15 +852,29 @@ generate_report_data_cna <-
 
     #### GENERATE DATAFRAME OF UNIQUE TRANSCRIPT-CNA SEGMENTS FOR OUTPUT TSV
     cna_transcript_df_print <- cna_transcript_df %>%
-      dplyr::select(.data$chrom, .data$segment_start, .data$segment_end,
-                    .data$SEGMENT_ID, .data$SEGMENT_LENGTH_MB,
-                    .data$EVENT_TYPE, .data$CYTOBAND, .data$LOG_R, .data$SAMPLE_ID, .data$ensembl_gene_id,
-                    .data$symbol, .data$ensembl_transcript_id, .data$transcript_start,
-                    .data$transcript_end, .data$transcript_overlap_percent,
-                    .data$name, .data$biotype,
-                    .data$tumor_suppressor, .data$oncogene,
-                    .data$intogen_driver, .data$chembl_compound_id,
-                    .data$gencode_tag, .data$gencode_release) %>%
+      dplyr::select(.data$chrom,
+                    .data$segment_start,
+                    .data$segment_end,
+                    .data$SEGMENT_ID,
+                    .data$SEGMENT_LENGTH_MB,
+                    .data$EVENT_TYPE,
+                    .data$CYTOBAND,
+                    .data$LOG_R,
+                    .data$SAMPLE_ID,
+                    .data$ensembl_gene_id,
+                    .data$symbol,
+                    .data$ensembl_transcript_id,
+                    .data$transcript_start,
+                    .data$transcript_end,
+                    .data$transcript_overlap_percent,
+                    .data$name,
+                    .data$biotype,
+                    .data$tumor_suppressor,
+                    .data$oncogene,
+                    .data$intogen_driver,
+                    .data$chembl_compound_id,
+                    .data$gencode_tag,
+                    .data$gencode_release) %>%
       magrittr::set_colnames(tolower(names(.)))
 
     avg_transcript_overlap <- as.data.frame(
@@ -876,7 +890,8 @@ generate_report_data_cna <-
             round(.data$MEAN_TRANSCRIPT_CNA_OVERLAP, digits = 2))
     )
 
-    cna_transcript_df <- dplyr::select(cna_transcript_df, -.data$ensembl_transcript_id) %>%
+    cna_transcript_df <-
+      dplyr::select(cna_transcript_df, -.data$ensembl_transcript_id) %>%
       dplyr::filter(.data$biotype == "protein_coding") %>%
       dplyr::distinct() %>%
       dplyr::mutate(VAR_ID = as.character(rep(1:nrow(.)))) %>%

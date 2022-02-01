@@ -752,7 +752,13 @@ append_dbnsfp_var_link <- function(var_df) {
 
   if (any(grepl(paste0("EFFECT_PREDICTIONS"), names(var_df)))) {
     var_df <- var_df %>%
-      dplyr::mutate(PREDICTED_EFFECT = .data$EFFECT_PREDICTIONS)
+      dplyr::mutate(PREDICTED_EFFECT = .data$EFFECT_PREDICTIONS) %>%
+      dplyr::mutate(PREDICTED_EFFECT = stringr::str_replace_all(
+        PREDICTED_EFFECT, ":D,", ":Damaging,"
+      )) %>%
+      dplyr::mutate(PREDICTED_EFFECT = stringr::str_replace_all(
+        PREDICTED_EFFECT, ":T,", ":Tolerated,"
+      )) %>%
     i <- 1
     while (i <= nrow(pcgrr::effect_prediction_algos)) {
       str_to_replace <-
@@ -2294,7 +2300,9 @@ custom_bed_genes <- function(bed_file, pcgr_data) {
     dplyr::rowwise() %>%
     dplyr::mutate(symbol = unlist(strsplit(.data$onco_xref, "\\|"))[4]) %>%
     dplyr::select(.data$symbol) %>%
-    dplyr::left_join(dplyr::select(pcgr_data$gene_xref$gencode, .data$symbol, .data$ENTREZ_ID, .data$GENENAME), by = "symbol") %>%
+    dplyr::left_join(
+      dplyr::select(pcgr_data$gene_xref$gencode, .data$symbol,
+                    .data$ENTREZ_ID, .data$GENENAME), by = "symbol") %>%
     dplyr::rename(genename = .data$GENENAME, entrezgene = .data$ENTREZ_ID) %>%
     dplyr::select(.data$symbol, .data$genename, .data$entrezgene) %>%
     dplyr::distinct()
