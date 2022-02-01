@@ -1124,7 +1124,7 @@ write_report_output <- function(report,
                                 config,
                                 tier_model = "pcgr_acmg",
                                 output_format = "html",
-                                flexdb = F) {
+                                flexdb = FALSE) {
 
   project_directory <- config[['required_args']][['output_dir']]
   sample_name <- config[['required_args']][['sample_name']]
@@ -1177,28 +1177,18 @@ write_report_output <- function(report,
 
   ## Set to CPSR/germline settings as default
   sequencing_design <- "Germline"
-  disclaimer <- system.file(
-    "templates",
-    "disclaimer_predisposition.md",
-    package = "cpsr")
-  markdown_input <- system.file(
-    "templates",
-    "cpsr_rmarkdown_report.Rmd",
-    package = "cpsr")
-  css_fname <- system.file(
-    "templates",
-    "cpsr.css",
-    package = "cpsr")
+  cpsr_tmpl <- system.file("templates", package = "cpsr")
+  disclaimer <- file.path(cpsr_tmpl, "disclaimer_predisposition.md")
+  markdown_input <- file.path(cpsr_tmpl, "cpsr_rmarkdown_report.Rmd")
+  css_fname <- file.path(cpsr_tmpl, "cpsr.css")
   report_theme <-
     report[["metadata"]][["config"]][["visual"]][["report_theme"]]
 
   ## Somatic/tumor report settings
-  if(tier_model == "pcgr_acmg"){
+  if (tier_model == "pcgr_acmg"){
+    pcgrr_tmpl <- system.file("templates", package = "pcgrr")
 
-    disclaimer <- system.file(
-      "templates",
-      "disclaimer.md",
-      package = "pcgrr")
+    disclaimer <- file.path(pcgrr_tmpl, "disclaimer.md")
     assay_props <-
       report[["metadata"]][["config"]][["assay_props"]]
     sequencing_assay <-
@@ -1206,40 +1196,22 @@ write_report_output <- function(report,
 
     ## Flexdashboard layout
     sequencing_design <- "Tumor-Control"
-    markdown_input <- system.file(
-      "templates",
-      "pcgr_flexdb_report.Rmd",
-      package = "pcgrr")
-    css_fname <- system.file(
-      "templates",
-      "pcgr_flexdb_tumor_control.css",
-      package = "pcgrr")
+    markdown_input <- file.path(pcgrr_tmpl, "pcgr_flexdb_report.Rmd")
+    css_fname <- file.path(pcgrr_tmpl, "pcgr_flexdb_tumor_control.css")
 
     ## Rmarkdown layout
-    if(flexdb == F){
-      markdown_input <-
-        system.file(
-          "templates",
-          "pcgr_rmarkdown_report.Rmd",
-          package = "pcgrr")
-      css_fname <-
-        system.file(
-          "templates",
-          "pcgr_rmarkdown_tumor_control.css",
-          package = "pcgrr")
+    if (flexdb == FALSE) {
+      markdown_input <- file.path(pcgrr_tmpl, "pcgr_rmarkdown_report.Rmd")
+      css_fname <- file.path(pcgrr_tmpl, "pcgr_rmarkdown_tumor_control.css")
     }
 
     ## Tumor-only settings (CSS)
     if (assay_props[["vcf_tumor_only"]] == T) {
       sequencing_design <- "Tumor-Only"
-      css_fname <-
-        system.file("templates", "pcgr_flexdb_tumor_only.css",
-                    package = "pcgrr")
+      css_fname <- file.path(pcgrr_tmpl, "pcgr_flexdb_tumor_only.css")
 
-      if (flexdb == F){
-        css_fname <-
-          system.file("templates", "pcgr_rmarkdown_tumor_only.css",
-                      package = "pcgrr")
+      if (flexdb == FALSE){
+        css_fname <- file.path(pcgrr_tmpl, "pcgr_rmarkdown_tumor_only.css")
       }
     }
   }

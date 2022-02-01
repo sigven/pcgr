@@ -15,8 +15,6 @@ from pcgr import pcgr_vars, utils
 from pcgr.arg_checker import get_docker_image_version
 from pcgr.utils import check_subprocess, getlogger, error_message, warn_message
 
-CPSR_VERSION = '0.7.1'
-
 GE_panels = {
       0: "CPSR exploratory cancer predisposition panel (n = 433, Genomics England PanelApp / TCGA Germline Study / Cancer Gene Census / Other)",
       1: "Adult solid tumours cancer susceptibility (Genomics England PanelApp)",
@@ -88,7 +86,7 @@ def get_args():
 
 
    optional_other.add_argument('--force_overwrite', action = "store_true", help='By default, the script will fail with an error if any output file already exists.\n You can force the overwrite of existing result files by using this flag, default: %(default)s')
-   optional_other.add_argument('--version', action='version', version='%(prog)s ' + str(CPSR_VERSION))
+   #optional_other.add_argument('--version', action='version', version='%(prog)s ' + str(CPSR_VERSION))
    optional_other.add_argument('--basic',action="store_true",help="Run functional variant annotation on VCF through VEP/vcfanno, omit Tier assignment/report generation (STEP 4), default: %(default)s")
    optional_other.add_argument('--no_vcf_validate', action = "store_true",help="Skip validation of input VCF with Ensembl's vcf-validator, default: %(default)s")
    optional_other.add_argument('--docker_uid', dest='docker_user_id', help='Docker user ID. Default is the host system user ID. If you are experiencing permission errors,\n try setting this up to root (`--docker_uid root`), default: %(default)s')
@@ -640,7 +638,7 @@ def run_cpsr(arg_dict, host_directories, DOCKER_IMAGE_VERSION):
               f"{output_pass_tsv}.gz "
               f"{arg_dict['sample_id']} "
               f"{pcgr_vars.PCGR_VERSION} "
-              f"{CPSR_VERSION} "
+              f"UNUSED_ARG "
               f"{arg_dict['genome_assembly']} "
               f"{data_dir} "
               f"{virtual_panel_id} "
