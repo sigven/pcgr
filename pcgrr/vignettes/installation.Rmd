@@ -3,7 +3,10 @@ title: "Installation"
 output: rmarkdown::html_document
 ---
 
-## Instructions
+## Installation Instructions
+
+**Tip:** Check out the <https://github.com/sigven/pcgr/tree/master/install>
+directory for installation helper scripts.
 
 PCGR requires a __data bundle__ that contains the reference data,
 __sample inputs__ (e.g. somatic variants in a VCF), and an
@@ -15,7 +18,7 @@ Here's an example scenario that will be used in the following sections:
 - sample inputs at `/Users/you/dir2/pcgr_inputs`;
 - output goes to `/Users/you/dir3/pcgr_outputs` (make sure this directory
   exists);
-- your PCGR codebase is installed in `/Users/you/dir4/pcgr`;
+- your PCGR codebase is installed in `/Users/you/dir4/PCGR`;
 
 ### STEP 1: Download data bundle
 
@@ -23,8 +26,16 @@ Download and unpack the human assembly-specific data bundle:
 
 - [grch37 data bundle - 20220119](http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch37.20220119.tgz) (approx 20Gb)
 - [grch38 data bundle - 20220119](http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch38.20220119.tgz) (approx 21Gb)
-  - Unpacking: `gzip -dc pcgr.databundle.grch3X.YYYYMMDD.tgz | tar xvf -`
-  - This should produce a `data/` folder.
+
+- Example:
+
+```bash
+GENOME="grch38" # or "grch37"
+BUNDLE="pcgr.databundle.${GENOME}.20220119.tgz"
+
+wget http://insilico.hpc.uio.no/pcgr/${BUNDLE}
+gzip -dc ${BUNDLE} | tar xvf -
+```
 
 ### STEP 2: Download PCGR GitHub repository
 
@@ -33,9 +44,14 @@ Download and unpack the latest software release from <https://github.com/sigven/
 Alternatively if you have `git` installed, you can do:
 
 ```bash
-cd /Users/you/dir4
-PCGR_VERSION="x.x.x"
-git clone -b v${PCGR_VERSION} --depth 1 https://github.com/sigven/pcgr.git
+PCGR_VERSION="X.X.X"
+OUTPUT_DIRECTORY="PCGR"
+
+git clone \
+    -b v${PCGR_VERSION} \
+    --depth 1 \
+    https://github.com/sigven/pcgr.git \
+    ${OUTPUT_DIRECTORY}
 ```
 
 ### STEP 3: Set up Conda or Docker
@@ -61,32 +77,37 @@ Step 3 depends on if you want to use Conda or Docker:
 2. Install [Mamba](https://github.com/mamba-org/mamba) in this `base`
   environment, which is a very fast conda package installer.
 
+```bash
+PLATFORM="MacOSX" # or "Linux"
+MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-${PLATFORM}-x86_64.sh"
+wget ${MINICONDA_URL} -O miniconda.sh && chmod +x miniconda.sh
+bash miniconda.sh
+```
+
 ```text
-$ PLATFORM="MacOSX" # or "Linux"
-$ wget https://repo.continuum.io/miniconda/Miniconda3-latest-${PLATFORM}-x86_64.sh -O miniconda.sh && chmod +x miniconda.sh
-$ bash miniconda.sh
-[... (safe to answer 'yes' to all prompts)]
 # exit terminal and open new one - you should now see:
 (base) $
 (base) $ conda install -c conda-forge mamba
-[... (lots of messages)]
+
 (base) $ mamba --version
-mamba 0.17.0
-conda 4.10.3
+mamba 0.19.1
+conda 4.11.0
 ```
 
 #### b) Create PCGR conda environments
 
 The `conda/env` directory in the PCGR codebase contains two YAML files which
 can be used to create the required conda environments for the Python component
-(`pcgr`) and the R components (`pcgrr` (and `cpsr`)). We install the conda dependencies for these
-two environments in the `conda/env` directory:
+(`pcgr`) and the R components (`pcgrr` (and `cpsr`)). We install the conda
+dependencies for these two environments in the `conda/env` directory:
 
 ```bash
-cd /Users/you/dir4/pcgr
+cd /Users/you/dir4/PCGR
 PLATFORM="osx-64" # or "linux-64"
-mamba create --prefix ./conda/env/pcgr --file conda/env/lock/pcgr-${PLATFORM}.lock
-mamba create --prefix ./conda/env/pcgrr --file conda/env/lock/pcgrr-${PLATFORM}.lock
+PCGR_CONDA_ENV_DIR="./conda/env"
+
+mamba create --prefix ${PCGR_CONDA_ENV_DIR}/pcgr --file ${PCGR_CONDA_ENV_DIR}/env/lock/pcgr-${PLATFORM}.lock
+mamba create --prefix ${PCGR_CONDA_ENV_DIR}/pcgrr --file ${PCGR_CONDA_ENV_DIR}/env/lock/pcgrr-${PLATFORM}.lock
 ```
 
 The above process takes 10-15min when installing from scratch. In the end, you
@@ -98,28 +119,28 @@ $ (base) conda env list
 # conda environments:
 #
 base    *  /Users/you/miniconda3
-pcgr       /Users/you/dir4/pcgr/conda/env/pcgr
-pcgrr      /Users/you/dir4/pcgr/conda/env/pcgrr
+pcgr       /Users/you/dir4/PCGR/conda/env/pcgr
+pcgrr      /Users/you/dir4/PCGR/conda/env/pcgrr
 ```
 
 #### c) Activate pcgr conda environment
 
-You need to activate the `./conda/env/pcgr` conda environment, and test that it works
+You need to activate the `PCGR/conda/env/pcgr` conda environment, and test that it works
 correctly with e.g. `pcgr --version`:
 
 ```text
-$ cd /Users/you/dir4/pcgr
+$ cd /Users/you/dir4/PCGR
 (base) $ conda activate ./conda/env/pcgr
 # note how the full path to the locally installed conda environment is now displayed
 
-(/Users/you/dir4/pcgr) $ which pcgr
-/Users/you/dir4/pcgr/conda/env/pcgr/bin/pcgr
+(/Users/you/dir4/PCGR) $ which pcgr
+/Users/you/dir4/PCGR/conda/env/pcgr/bin/pcgr
 
-(/Users/you/dir4/pcgr) $ pcgr --version
-pcgr 0.10.2
+(/Users/you/dir4/PCGR) $ pcgr --version
+pcgr X.X.X
 
-(/Users/you/dir4/pcgr) $ which pcgrr.R
-/Users/you/dir4/pcgr/conda/env/pcgr/bin/pcgrr.R
+(/Users/you/dir4/PCGR) $ which pcgrr.R
+/Users/you/dir4/PCGR/conda/env/pcgr/bin/pcgrr.R
 ```
 
 You should now be all set up to run PCGR! Continue on to [an example run](running.html#example-run).
@@ -224,19 +245,19 @@ Here's an example using conda/mamba, with only Python 3.7 as a dependency:
 
 (pcgr_docker_env) $ which python
 /Users/you/miniconda3/envs/pcgr_docker_env/bin/python
-(pcgr_docker_env) $ cd /Users/you/dir4/pcgr
+(pcgr_docker_env) $ cd /Users/you/dir4/PCGR
 
 (pcgr_docker_env) $ pip install -e .
-Obtaining file:///Users/you/dir4/pcgr
+Obtaining file:///Users/you/dir4/PCGR
   Preparing metadata (setup.py) ... done
 Installing collected packages: pcgr
   Running setup.py develop for pcgr
-Successfully installed pcgr-0.9.4
+Successfully installed pcgr-X.X.X
 
 (pcgr_docker_env) $ which pcgr
 /Users/you/miniconda3/envs/pcgr_docker/bin/pcgr
 (pcgr_docker_env) $ pcgr --version
-pcgr 0.9.4
+pcgr X.X.X
 ```
 
 You should now be all set up to run PCGR from within that `pcgr_docker_env`
