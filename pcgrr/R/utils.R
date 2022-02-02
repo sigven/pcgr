@@ -758,6 +758,15 @@ append_dbnsfp_var_link <- function(var_df) {
       )) %>%
       dplyr::mutate(PREDICTED_EFFECT = stringr::str_replace_all(
         .data$PREDICTED_EFFECT, ":T,", ":Tolerated,"
+      )) %>%
+      dplyr::mutate(PREDICTED_EFFECT = stringr::str_replace_all(
+        .data$PREDICTED_EFFECT, ":SN,", ":SplicingNeutral,"
+      )) %>%
+      dplyr::mutate(PREDICTED_EFFECT = stringr::str_replace_all(
+        .data$PREDICTED_EFFECT, ":AS,", ":AffectSplicing,"
+      )) %>%
+      dplyr::mutate(PREDICTED_EFFECT = stringr::str_replace_all(
+        .data$PREDICTED_EFFECT, ":PD,", ":ProbablyDamaging,"
       ))
     i <- 1
     while (i <= nrow(pcgrr::effect_prediction_algos)) {
@@ -887,8 +896,9 @@ append_otargets_pheno_link <- function(var_df,
   if (any(grepl(paste0("^OPENTARGETS_DISEASE_ASSOCS$"), names(var_df))) &
       any(grepl(paste0("^ENSEMBL_GENE_ID$"), names(var_df))) &
       !is.null(pcgr_data) & nrow(oncotree) > 0) {
-    var_df_unique_slim <- dplyr::select(var_df, .data$ENSEMBL_GENE_ID,
-                                        .data$OPENTARGETS_DISEASE_ASSOCS) %>%
+    var_df_unique_slim <- dplyr::select(
+      var_df, .data$ENSEMBL_GENE_ID,
+      .data$OPENTARGETS_DISEASE_ASSOCS) %>%
       dplyr::filter(!is.na(.data$OPENTARGETS_DISEASE_ASSOCS)) %>%
       dplyr::distinct()
     associations_found <- 0
@@ -913,7 +923,10 @@ append_otargets_pheno_link <- function(var_df,
         associations_found <- 1
         var_df_unique_slim_melted <- as.data.frame(
           var_df_unique_slim_melted %>%
-            dplyr::group_by(.data$ENSEMBL_GENE_ID, .data$efo_id, .data$cui_name) %>%
+            dplyr::group_by(
+              .data$ENSEMBL_GENE_ID,
+              .data$efo_id,
+              .data$cui_name) %>%
             dplyr::summarise(score = max(.data$ot_score, na.rm = T)) %>%
             dplyr::distinct() %>%
             dplyr::arrange(dplyr::desc(.data$score))
@@ -930,10 +943,14 @@ append_otargets_pheno_link <- function(var_df,
         }
 
         var_df_unique_slim_melted_terms <-
-          dplyr::select(var_df_unique_slim_melted, .data$ENSEMBL_GENE_ID, .data$cui_name)
+          dplyr::select(var_df_unique_slim_melted,
+                        .data$ENSEMBL_GENE_ID,
+                        .data$cui_name)
         var_df_terms <- dplyr::group_by(
-          var_df_unique_slim_melted_terms, .data$ENSEMBL_GENE_ID) %>%
-          dplyr::summarise(OT_DISEASE_TERMS = paste(.data$cui_name, collapse = "&"))
+          var_df_unique_slim_melted_terms,
+          .data$ENSEMBL_GENE_ID) %>%
+          dplyr::summarise(OT_DISEASE_TERMS = paste(
+            .data$cui_name, collapse = "&"))
         var_df_links <-
           dplyr::group_by(var_df_unique_slim_melted, .data$ENSEMBL_GENE_ID) %>%
           dplyr::summarise(OT_DISEASE_LINK = unlist(paste(.data$tmp_assoc,
@@ -1533,6 +1550,13 @@ get_calls <- function(tsv_gz_file,
   vcf_data_df <- vcf_data_df %>%
     pcgrr::order_variants() %>%
     dplyr::rename(CONSEQUENCE = .data$Consequence)
+
+  if("ENSEMBL_GENE_ID" %in% colnames(vcf_data_df)){
+    vcf_data_df$ENSEMBL_GENE_ID <- stringr::str_replace(
+      vcf_data_df$ENSEMBL_GENE_ID, "\\.[0-9]{1,}$", ""
+    )
+  }
+
 
   ##
   if (cpsr == T) {
