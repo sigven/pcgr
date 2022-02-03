@@ -119,6 +119,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+      - name: Pull lock commit
         run: |
             git pull --no-rebase # for pulling in the changed locks
             git --no-pager log --decorate=short --pretty=oneline -n3
