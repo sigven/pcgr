@@ -23,7 +23,7 @@ https://conda.anaconda.org/conda-forge/linux-64/libgcc-ng-11.2.0-h1d223b6_12.tar
 https://conda.anaconda.org/conda-forge/linux-64/bzip2-1.0.8-h7f98852_4.tar.bz2#a1fd65c7ccbf10880423d82bca54eb54
 https://conda.anaconda.org/conda-forge/linux-64/c-ares-1.18.1-h7f98852_0.tar.bz2#f26ef8098fab1f719c91eb760d63381a
 https://conda.anaconda.org/bioconda/linux-64/clustalw-2.1-h7d875b9_6.tar.bz2#a37e307dfe34767e18ee983678d28c70
-https://conda.anaconda.org/conda-forge/linux-64/expat-2.4.3-h9c3ff4c_0.tar.bz2#bd783d12b65023e333bb7016de41570b
+https://conda.anaconda.org/conda-forge/linux-64/expat-2.4.4-h9c3ff4c_0.tar.bz2#3cedab1fd76644efd516e1b271f2da95
 https://conda.anaconda.org/conda-forge/linux-64/fribidi-1.0.10-h36c2ea0_0.tar.bz2#ac7bc6a654f8f41b352b38f4051135f8
 https://conda.anaconda.org/conda-forge/linux-64/graphite2-1.3.13-h58526e2_1001.tar.bz2#8c54672728e8ec6aa6db90cf2806d220
 https://conda.anaconda.org/conda-forge/linux-64/icu-69.1-h9c3ff4c_0.tar.bz2#e0773c9556d588b062a4e1424a6a02fa
@@ -49,7 +49,7 @@ https://conda.anaconda.org/conda-forge/linux-64/perl-5.26.2-h36c2ea0_1008.tar.bz
 https://conda.anaconda.org/conda-forge/linux-64/pixman-0.40.0-h36c2ea0_0.tar.bz2#660e72c82f2e75a6b3fe6a6e75c79f19
 https://conda.anaconda.org/conda-forge/linux-64/pthread-stubs-0.4-h36c2ea0_1001.tar.bz2#22dad4df6e8630e8dff2428f6f6a7036
 https://conda.anaconda.org/bioconda/linux-64/tidyp-1.04-h779adbc_3.tar.bz2#71ace33baf54641fbe19f283e9da0b12
-https://conda.anaconda.org/conda-forge/linux-64/unzip-6.0-h7f98852_2.tar.bz2#24f72768ec2d6a6ac2706c85905beb29
+https://conda.anaconda.org/conda-forge/linux-64/unzip-6.0-h7f98852_3.tar.bz2#7cb7109505433a5abbf68bb34b31edac
 https://conda.anaconda.org/conda-forge/linux-64/xorg-kbproto-1.0.7-h7f98852_1002.tar.bz2#4b230e8381279d76131116660f5a241a
 https://conda.anaconda.org/conda-forge/linux-64/xorg-libice-1.0.10-h7f98852_0.tar.bz2#d6b0b50b49eccfe0be0373be628be0f3
 https://conda.anaconda.org/conda-forge/linux-64/xorg-libxau-1.0.9-h7f98852_0.tar.bz2#bf6f803a544f26ebbdc3bfff272eb179
@@ -269,7 +269,7 @@ https://conda.anaconda.org/conda-forge/noarch/pytz-2021.3-pyhd8ed1ab_0.tar.bz2#7
 https://conda.anaconda.org/conda-forge/noarch/six-1.16.0-pyh6c4a22f_0.tar.bz2#e5f25f8dbc060e9a8d912e432202afc2
 https://conda.anaconda.org/conda-forge/noarch/typing_extensions-4.0.1-pyha770c72_0.tar.bz2#1fc03816925d3cb7fdab9ab234e7fea7
 https://conda.anaconda.org/conda-forge/noarch/wheel-0.37.1-pyhd8ed1ab_0.tar.bz2#1ca02aaf78d9c70d9a81a3bed5752022
-https://conda.anaconda.org/conda-forge/noarch/zipp-3.7.0-pyhd8ed1ab_0.tar.bz2#947f7f41958eabc0f6e886557512bb76
+https://conda.anaconda.org/conda-forge/noarch/zipp-3.7.0-pyhd8ed1ab_1.tar.bz2#b689b2cbc8481b224777415e1a193170
 https://conda.anaconda.org/conda-forge/linux-64/cairo-1.16.0-ha00ac49_1009.tar.bz2#d1dff57b8731c245d3247b46d002e1c9
 https://conda.anaconda.org/conda-forge/linux-64/curl-7.81.0-h2574ce0_0.tar.bz2#3a95d393b490f82aa406f1892fad84d9
 https://conda.anaconda.org/bioconda/linux-64/htslib-1.10.2-hd3b49d5_1.tar.bz2#9fd6a8d4f8f11589bed2c6a59d9ee451
@@ -291,7 +291,7 @@ https://conda.anaconda.org/conda-forge/noarch/python-dateutil-2.8.2-pyhd8ed1ab_0
 https://conda.anaconda.org/conda-forge/linux-64/setuptools-59.8.0-py37h89c1867_0.tar.bz2#1da18279642c5070b8252f9ef937823e
 https://conda.anaconda.org/conda-forge/linux-64/click-8.0.3-py37h89c1867_1.tar.bz2#2fadfe6ffa39e2520122134bd3e3a10b
 https://conda.anaconda.org/conda-forge/noarch/coloredlogs-15.0.1-pyhd8ed1ab_3.tar.bz2#7b4fc18b7f66382257c45424eaf81935
-https://conda.anaconda.org/conda-forge/linux-64/harfbuzz-3.2.0-hb4a5f5f_0.tar.bz2#d03d53e6bcb97e6a97a1659fb38aa76e
+https://conda.anaconda.org/conda-forge/linux-64/harfbuzz-3.3.1-hb4a5f5f_0.tar.bz2#abe529a4b140720078f0febe1b6014a4
 https://conda.anaconda.org/conda-forge/linux-64/mysql-8.0.28-ha770c72_0.tar.bz2#d7640ffb55425169ccf2e7c5d56e360e
 https://conda.anaconda.org/conda-forge/linux-64/pandas-1.3.5-py37he8f5f7f_0.tar.bz2#6ebf1968b199a141a5cce6adaedb3651
 https://conda.anaconda.org/bioconda/linux-64/perl-class-load-0.25-pl526_0.tar.bz2#03c73103dc5e4f7daabd6bb0931193b6
@@ -304,7 +304,7 @@ https://conda.anaconda.org/bioconda/linux-64/perl-package-deprecationmanager-0.1
 https://conda.anaconda.org/bioconda/linux-64/perl-www-robotrules-6.02-pl526_3.tar.bz2#8b06331804b3b94eb99b3c1c4b7a4d72
 https://conda.anaconda.org/bioconda/linux-64/perl-xml-libxslt-1.94-pl526_1.tar.bz2#d9e8421667819f405cba79dab4723bab
 https://conda.anaconda.org/bioconda/linux-64/perl-xml-simple-2.25-pl526_1.tar.bz2#f410354a825d186da9f843f6ff9cd15e
-https://conda.anaconda.org/conda-forge/noarch/pip-22.0-pyhd8ed1ab_0.tar.bz2#338e81bf6be5870df5030d1f9ad24768
+https://conda.anaconda.org/conda-forge/noarch/pip-22.0.2-pyhd8ed1ab_1.tar.bz2#4ff342bf8610a77e9e09ff833833f84d
 https://conda.anaconda.org/bioconda/linux-64/samtools-1.10-h2e538c0_3.tar.bz2#259ef670bda6e30a5007e3fa30a8efdc
 https://conda.anaconda.org/conda-forge/linux-64/scipy-1.7.3-py37hf2a6cf1_0.tar.bz2#129c613e1d0f09d9fd0473a0da6161a9
 https://conda.anaconda.org/bioconda/linux-64/t_coffee-11.0.8-py37hea885bf_8.tar.bz2#eee20ab46d13f264a8957fed239d39b7

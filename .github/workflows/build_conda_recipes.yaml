@@ -1,4 +1,4 @@
-name: mambabuild
+name: deploy
 
 on:
   push:
@@ -39,6 +39,8 @@ jobs:
           conda mambabuild ${recipe_path}/pcgr -c conda-forge -c bioconda --token ${atoken} --quiet
           conda mambabuild ${recipe_path}/pcgrr -c conda-forge -c bioconda --token ${atoken} --quiet
 
+  # spin up fresh instance since conda-lock
+  # takes ages when run on previous one
   conda_lock:
     name: Conda lock
     runs-on: ubuntu-latest
@@ -66,14 +68,14 @@ jobs:
           conda-lock lock --mamba --file ${env_yml_path}/pcgrr.yml --filename-template 'pcgrr-{platform}.lock' -p osx-64 -p linux-64
           mv pcgrr-*.lock ${env_lock_path}
           mv pcgr-*.lock ${env_lock_path}
-      - name: Git Status
-        run: |
-          git status
       - name: Commit changes
         run: |
+          git status
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
-          git commit -am "[bot] Updating conda-lock files."
+          MSG="[bot] Updating conda-lock files (v${VERSION})"
+          git add .
+          git commit -m "${MSG}"
           git push
 
   pkgdown-site:
@@ -117,16 +119,26 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+      - id: pull_lock_commit
+        name: Pull lock commit
+        run: |
+            git pull --no-rebase # for pulling in the changed locks
+            git --no-pager log --decorate=short --pretty=oneline -n3
+            LATEST_COMMIT_HASH="$(git --no-pager log -1 --format='%H')"
+            echo "::set-output name=latest_commit_hash::${LATEST_COMMIT_HASH}"
       - name: Create tag
         uses: actions/github-script@v5
+        env:
+          LATEST_COMMIT_HASH: ${{ steps.pull_lock_commit.outputs.latest_commit_hash }}
         with:
           script: |
             const the_tag_name = 'refs/tags/v' + process.env.VERSION
+            const the_sha = process.env.LATEST_COMMIT_HASH
             github.rest.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
               ref: the_tag_name,
-              sha: context.sha
+              sha: the_sha
             })
 
       # checkout tag from above
@@ -134,6 +146,9 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref: v${{ env.VERSION }}
+      - name: test
+        run: |
+            git --no-pager log --decorate=short --pretty=oneline -n5
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v1

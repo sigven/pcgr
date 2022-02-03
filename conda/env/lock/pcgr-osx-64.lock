@@ -30,10 +30,10 @@ https://conda.anaconda.org/bioconda/osx-64/paml-4.9-hb4d813b_6.tar.bz2#aeb40f81e
 https://conda.anaconda.org/conda-forge/osx-64/perl-5.26.2-hbcb3906_1008.tar.bz2#6beb52b2725bab4b0d757a1119a2d7bb
 https://conda.anaconda.org/conda-forge/osx-64/pixman-0.40.0-hbcb3906_0.tar.bz2#09a583a6f172715be21d93aaa1b42d71
 https://conda.anaconda.org/bioconda/osx-64/tidyp-1.04-hb4d813b_3.tar.bz2#71ef6dbbd5c6d143988c28bb861fe133
-https://conda.anaconda.org/conda-forge/osx-64/unzip-6.0-hbcf498f_2.tar.bz2#33895ca593e32c60328ee6b0eb5af937
+https://conda.anaconda.org/conda-forge/osx-64/unzip-6.0-h0d85af4_3.tar.bz2#e4bc5df44c5bb4892929b02596dc68c9
 https://conda.anaconda.org/conda-forge/osx-64/xz-5.2.5-haf1e3a3_1.tar.bz2#41116deb499e9bc58048c297d6403ce6
 https://conda.anaconda.org/bioconda/osx-64/clustalw-2.1-hb280591_6.tar.bz2#b906da5b63f02dfb018b162637623067
-https://conda.anaconda.org/conda-forge/osx-64/expat-2.4.3-he49afe7_0.tar.bz2#614c72d51e72af190dca284a35d2dd0d
+https://conda.anaconda.org/conda-forge/osx-64/expat-2.4.4-he49afe7_0.tar.bz2#96f068e8e62b43d609184f0e1809dc36
 https://conda.anaconda.org/conda-forge/noarch/fonts-conda-forge-1-0.tar.bz2#f766549260d6815b0c52253f1fb1bb29
 https://conda.anaconda.org/conda-forge/osx-64/gettext-0.19.8.1-hd1a6beb_1008.tar.bz2#28c370fc39becf486601d9e491a5e184
 https://conda.anaconda.org/conda-forge/osx-64/graphite2-1.3.13-h2e338ed_1001.tar.bz2#5f6e7f98caddd0fc2d345b207531814c
@@ -247,7 +247,7 @@ https://conda.anaconda.org/conda-forge/noarch/pytz-2021.3-pyhd8ed1ab_0.tar.bz2#7
 https://conda.anaconda.org/conda-forge/noarch/six-1.16.0-pyh6c4a22f_0.tar.bz2#e5f25f8dbc060e9a8d912e432202afc2
 https://conda.anaconda.org/conda-forge/noarch/typing_extensions-4.0.1-pyha770c72_0.tar.bz2#1fc03816925d3cb7fdab9ab234e7fea7
 https://conda.anaconda.org/conda-forge/noarch/wheel-0.37.1-pyhd8ed1ab_0.tar.bz2#1ca02aaf78d9c70d9a81a3bed5752022
-https://conda.anaconda.org/conda-forge/noarch/zipp-3.7.0-pyhd8ed1ab_0.tar.bz2#947f7f41958eabc0f6e886557512bb76
+https://conda.anaconda.org/conda-forge/noarch/zipp-3.7.0-pyhd8ed1ab_1.tar.bz2#b689b2cbc8481b224777415e1a193170
 https://conda.anaconda.org/conda-forge/osx-64/cairo-1.16.0-he01c77b_1009.tar.bz2#411a2d76183a0ec4dbbdae034ac5bde4
 https://conda.anaconda.org/conda-forge/osx-64/curl-7.81.0-hf45b732_0.tar.bz2#11c453fee87eb4bd10ab92c8f5354a82
 https://conda.anaconda.org/bioconda/osx-64/htslib-1.10.2-h422799e_1.tar.bz2#09f7d2fad41c25d45559c0e61752ea89
@@ -270,7 +270,7 @@ https://conda.anaconda.org/conda-forge/noarch/python-dateutil-2.8.2-pyhd8ed1ab_0
 https://conda.anaconda.org/conda-forge/osx-64/setuptools-59.8.0-py37hf985489_0.tar.bz2#913beba86709488821743d712911ee2f
 https://conda.anaconda.org/conda-forge/osx-64/click-8.0.3-py37hf985489_1.tar.bz2#0ee466c4a8f35bf5644ce76838ec0e8f
 https://conda.anaconda.org/conda-forge/noarch/coloredlogs-15.0.1-pyhd8ed1ab_3.tar.bz2#7b4fc18b7f66382257c45424eaf81935
-https://conda.anaconda.org/conda-forge/osx-64/harfbuzz-3.2.0-h447b35c_0.tar.bz2#af22cc361ce943ae0970d4ccf503de3f
+https://conda.anaconda.org/conda-forge/osx-64/harfbuzz-3.3.1-h447b35c_0.tar.bz2#556b94e1688dc95dffc72be34853eba6
 https://conda.anaconda.org/conda-forge/osx-64/mysql-8.0.28-h694c41f_0.tar.bz2#fbc23b7ea6e7907524c3721484d90c3c
 https://conda.anaconda.org/conda-forge/osx-64/numpy-1.21.5-py37h3c8089f_0.tar.bz2#7edae7bd5f874398e47b2fe4b4346c5e
 https://conda.anaconda.org/bioconda/osx-64/perl-class-load-0.25-pl526_0.tar.bz2#0a851bd54e06a59b3a0b84f445c6a659
@@ -283,7 +283,7 @@ https://conda.anaconda.org/bioconda/osx-64/perl-package-deprecationmanager-0.17-
 https://conda.anaconda.org/bioconda/osx-64/perl-www-robotrules-6.02-pl526_3.tar.bz2#5ca5965efd911e74584d2cbdac17361f
 https://conda.anaconda.org/bioconda/osx-64/perl-xml-libxslt-1.94-pl526_1.tar.bz2#538bee151da392dfe42ce9ba7db5703a
 https://conda.anaconda.org/bioconda/osx-64/perl-xml-simple-2.25-pl526_1.tar.bz2#967b6424f30954f9aaa96496f161e982
-https://conda.anaconda.org/conda-forge/noarch/pip-22.0-pyhd8ed1ab_0.tar.bz2#338e81bf6be5870df5030d1f9ad24768
+https://conda.anaconda.org/conda-forge/noarch/pip-22.0.2-pyhd8ed1ab_1.tar.bz2#4ff342bf8610a77e9e09ff833833f84d
 https://conda.anaconda.org/bioconda/osx-64/samtools-1.10-hf7e01e7_3.tar.bz2#0438d1e794829c8ce720d1df57f98720
 https://conda.anaconda.org/bioconda/osx-64/vt-0.57721-ha767433_3.tar.bz2#c705c6c0a383184ac8a70cb5645a036c
 https://conda.anaconda.org/bioconda/osx-64/cyvcf2-0.30.11-py37h2ad577e_0.tar.bz2#81fae953888d41c2098bd4c5e1b81741
