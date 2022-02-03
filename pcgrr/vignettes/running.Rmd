@@ -3,18 +3,86 @@ title: "Running"
 output: rmarkdown::html_document
 ---
 
-The PCGR software comes with a range of options to configure the report and analysis, depending on the type of sequencing assay (__tumor-control__ vs. __tumor_only__), types of data available (SNVs/InDels, copy number aberration) etc.
+The PCGR software comes with a range of options to configure the analyses performed and to customize the output report.
 
-* __IMPORTANT__: Proper designation of VCF INFO tags that denote variant depth/allelic fraction is critical to make the report as comprehensive as possible (options `--tumor_dp_tag`, `tumor_af_tag`,`--control_dp_tag`,`--control_af_tag`, and `--call_conf_tag`)
-  * If this is not available/properly set, the report contents will be less informative __AND__ it will not be possible to preset thresholds for variant depth/allelic fraction
+## Key settings
 
-Furthermore, to make the report as accurate and complete as possible, take a note of the following arguments which can be used in the report generation:
+Below, we will outline key settings that are important with respect to the sequencing assay that has been conducted.
 
-* Tumor purity estimate (`--tumor_ploidy`, for display only)
-* Tumor ploidy estimate (`--tumor_purity`, for display only)
-* Type of sequencing assay (`--assay`)
-* Cell line sample (`--cell_line`, for display only)
-* Coding target size of sequencing assay (`--target_size_mb`)
+### Whole-genome, whole-exome or targeted sequencing assay
+
+By default, PCGR expects that the input VCF comes from whole-exome sequencing. This can be adjusted with the `assay` option, which takes three alternative values:
+
+* `--assay <WGS|WES|TARGETED>`
+
+ If the input VCF comes from a targeted sequencing assay (i.e. `--assay TARGETED`), the target size of the assay should be adjusted accordingly, which is critical for tumor mutational burden estimation. Assay target size, reflecting the _protein-coding portion of the assayed genomic region_ in megabases, can be configured through the following option:
+
+ * `--target_size_mb <value>`
+
+### Tumor-control vs. tumor-only
+
+By default, PCGR expects that the input VCF contains somatic variants identified from a tumor-control sequencing setup. This implies that the VCF contains information with respect to variant allelic depth/support both for the tumor sample and the corresponding control sample.
+
+If the input VCF comes from a __tumor-only__ assay, turn on the `--tumor_only` option. In this mode, PCGR conducts a set of successive filtering steps on the raw input set of variants, aiming to exclude the majority of germline variants from the tumor-only input set. In addition to default filtering applied against variants found in the gnomAD/1000 Genomes Project databases (population-specific allele frequency thresholds can be configured, see below), additional filtering procedures can be explicitly set, i.e.:
+
+* `--exclude_dbsnp_nonsomatic`
+* `--exclude_likely_het_germline`
+* `--exclude_likely_hom_germline`
+* `--exclude_nonexonic`
+
+If the user has provided a panel-of-normals VCF (`--pon_vcf`), one may also opt to remove variants found in that variant collection using the `--exclude_pon` option.
+
+#### Panel-of-normals (PON)
+
+The user can submit a panel-of-normals VCF to PCGR, indicating variants that should be excluded/filtered from the input VCF in a tumor-only setting.
+
+* `--pon_vcf <VCF_FILE>`
+
+The panel-of-normals VCF need to contain the following.
+
+1. The current description needs to be present in the VCF header:
+
+	`##INFO=<ID=PANEL_OF_NORMALS,Number=0,Type=Flag,Description="Overlap with germline call among panel of normals">`
+
+2. Each record in the panel-of-normals VCF needs to contain the `PANEL_OF_NORMALS` flag in the INFO field
+
+
+__IMPORTANT NOTE__: Note that a number of the analyses available in PCGR is not particularly well-suited for tumor-only input, e.g. mutational signature analysis and MSI status prediction.
+
+### Sample properties
+
+A few properties of the tumor sample can be fed to the report, currently only used for display/reporting:
+
+* `--tumor_ploidy <value>` - ploidy estimate
+* `--tumor_purity <value>` - purity estimate
+* `--cell_line` - cell line sample
+
+### Allelic support
+
+Proper designation of INFO tags in the input VCF that denote variant depth/allelic fraction is critical to make the report as comprehensive as possible. See the [input section](input.html) on how to accomplish this.
+
+Several options are used to inform PCGR about tags in the VCF INFO field that encodes this information:
+
+- `--tumor_dp_tag <value>`
+- `--tumor_af_tag <value>`
+- `--control_dp_tag <value>`
+- `--control_af_tag <value>`
+- `--call_conf_tag <value>`
+
+If these tags are set correctly, one may set thresholds (sequencing depth and/or allelic fraction) on the variants to be included in the report, i.e. through:
+
+- `--tumor_dp_min <value>`
+- `--tumor_af_min <value>`
+- `--control_dp_min <value>`
+- `--control_af_max <value>`
+
+### Tumor site
+
+The primary tissue/site of the tumor sample that is analyzed can and should be be provided, through the following option:
+
+* `--tumor_site <value>`
+
+This option takes a value between 0 and 30, reflecting the main primary sites/tissues for human cancers. Note that the default value is __0__ (implies __Any__ tissue/site), which essentially prohibits the presence of [tier 1 variants](variant_classification.html) occurring in the report.
 
 ## All options
 
@@ -102,8 +170,8 @@ Allelic support options:
 
 Other options:
   --input_cna INPUT_CNA - Somatic copy number alteration segments (tab-separated values)
-  --logr_gain LOGR_GAIN - Log ratio-threshold for regions containing copy number gains/amplifications (default: 0.8)
-  --logr_homdel LOGR_HOMDEL - Log ratio-threshold for regions containing homozygous deletions (default: -0.8)
+  --logr_gain LOGR_GAIN - Log ratio-threshold (minimum) for segments containing copy number gains/amplifications (default: 0.8)
+  --logr_homdel LOGR_HOMDEL - Log ratio-threshold (maximum) for segments containing homozygous deletions (default: -0.8)
   --cna_overlap_pct CNA_OVERLAP_PCT - Mean percent overlap between copy number segment and gene transcripts for reporting of gains/losses in tumor suppressor genes/oncogenes, (default: 50)
   --tumor_site TSITE  - Optional integer code to specify primary tumor type/site of query sample, choose any of the following identifiers:
                         0 = Any, 1 = Adrenal Gland, 2 = Ampulla of Vater, 3 = Biliary Tract, 4 = Bladder/Urinary Tract, 5 = Bone, 6 = Breast, 7 = Cervix, 8 = CNS/Brain, 9 = Colon/Rectum, 10 = Esophagus/Stomach,
@@ -170,4 +238,3 @@ This command will run the Conda-based PCGR workflow and produce the following ou
 8. __tumor_sample.COAD.pcgr_acmg.grch37.json.gz__ - Compressed JSON dump of HTML report content
 9. __tumor_sample.COAD.pcgr_acmg.grch37.cna_segments.tsv.gz__ - Compressed tab-separated values file with annotations of gene transcripts that overlap with somatic copy number aberrations
 10. __tumor_sample.COAD.cpsr_config.rds__ - PCGR configuration object (RDS format), mostly for debugging purposes
-

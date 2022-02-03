@@ -176,11 +176,11 @@ Here, the __sample_id__ is provided as input by the user, and reflects a unique 
   - CSQ - Complete consequence annotations from VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|
   INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|
   Codons|Existing_variation|ALLELE_NUM|DISTANCE|STRAND|FLAGS|PICK|VARIANT_CLASS|
-  SYMBOL_SOURCE|HGNC_ID|CANONICAL|MANE_SELET|MANE_PLUS_CLINICAL|TSL|APPRIS|CCDS|  
-  ENSP|SWISSPROT|TREMBL|UNIPARC|UNIPROT_ISOFORM| 
+  SYMBOL_SOURCE|HGNC_ID|CANONICAL|MANE_SELECT|MANE_PLUS_CLINICAL|TSL|APPRIS|CCDS|
+  ENSP|SWISSPROT|TREMBL|UNIPARC|UNIPROT_ISOFORM|
   RefSeq|DOMAINS|HGVS_OFFSET|AF|AFR_AF|AMR_AF|EAS_AF|EUR_AF|SAS_AF|gnomAD_AF|
   gnomAD_AFR_AF|gnomAD_AMR_AF|gnomAD_ASJ_AF|gnomAD_EAS_AF|gnomAD_FIN_AF|
-  gnomAD_NFE_AF|gnomAD_OTH_AF|gnomAD_SAS_AF|CLIN_SIG|SOMATIC|PHENO|CHECK_REF| 
+  gnomAD_NFE_AF|gnomAD_OTH_AF|gnomAD_SAS_AF|CLIN_SIG|SOMATIC|PHENO|CHECK_REF|
   MOTIF_NAME|MOTIF_POS|HIGH_INF_POS|MOTIF_SCORE_CHANGE|TRANSCRIPTION_FACTORS|NearestExonJB
   - Consequence - Impact modifier for the consequence type (picked by VEP's --flag\_pick\_allele option)
   - Gene - Ensembl stable ID of affected gene (picked by VEP's --flag\_pick\_allele option)
@@ -255,6 +255,10 @@ Here, the __sample_id__ is provided as input by the user, and reflects a unique 
   - ENSEMBL_TRANSCRIPT_ID - Ensembl transcript identifier for VEP's picked transcript (*ENSTXXXXXX*)
   - ENSEMBL_PROTEIN_ID - Ensembl corresponding protein identifier for VEP's picked transcript
   - REFSEQ_MRNA - Corresponding RefSeq transcript(s) identifier for VEP's picked transcript (*NM_XXXXX*)
+  - TRANSCRIPT_MANE_SELECT - MANE select transcript identifer: one high-quality representative transcript per protein-coding gene that is well-supported by experimental data and represents the biology of the gene
+  - TRANSCRIPT_MANE_PLUS_CLINICAL - transcripts chosen to supplement MANE Select when needed for clinical variant reporting
+  - GENCODE_TAG - tag for gencode transcript (basic etc)
+  - GENCODE_TRANSCRIPT_TYPE - type of transcript (protein-coding etc.)
   - CORUM_ID - Associated protein complexes (identifiers) from [CORUM](http://mips.helmholtz-muenchen.de/corum/)
   - TUMOR_SUPPRESSOR - Indicates whether gene is predicted as a tumor suppressor gene, from Network of Cancer Genes (NCG) & the CancerMine text-mining resource
   - TUMOR_SUPPRESSOR_EVIDENCE - Underlying evidence for gene being a tumor suppressor. Format: NCG:<TRUE|FALSE>&CancerMine:<LC|MC|HC>:num_citations
@@ -403,8 +407,8 @@ The following variables are included in the tiered TSV file:
     18. REFSEQ_PEPTIDE - RefSeq peptide identifier
     19. TRANSCRIPT_MANE_SELECT - MANE select transcript identifier
     20. ONCOGENE - Gene is predicted/classified as an oncogene (CancerMine/NCG)
-    21. TUMOR_SUPPRESSOR - Gene is predicted/classified as tumor suppressor (CancerMine/NCG)
-    22. ONCOGENE_EVIDENCE - Underlying evidence for oncogene prediction/classification
+    21. ONCOGENE_EVIDENCE - Underlying evidence for oncogene prediction/classification
+    22. TUMOR_SUPPRESSOR - Gene is predicted/classified as tumor suppressor (CancerMine/NCG)
     23. TUMOR_SUPPRESSOR_EVIDENCE - Underlying evidence for tumor suppressor prediction/classification
     24. CONSEQUENCE - Variant consequence (as defined above for VCF output:
         Consequence)

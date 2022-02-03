@@ -7,21 +7,53 @@ output: rmarkdown::html_document
 
 The PCGR workflow accepts two types of input files:
 
-  * An unannotated, single-sample VCF file (>= v4.2) with called somatic variants (SNVs/InDels)
+  * An unannotated, single-sample [VCF file](https://github.com/samtools/hts-specs#variant-calling-data-files) (>= v4.2) with called somatic variants (SNVs/InDels)
   * A copy number segment file
 
 
-PCGR can be run with either or both of the two input files present.
+The input VCF is a required input file, while the somatic copy number file is optional. The following arguments to the `pcgr` command are used for input files:
+
+* `--input_vcf` (required argument to `pcgr`)
+* `--input_cna`
 
 ### VCF
 
 * We __strongly__ recommend that the input VCF is compressed and indexed using [bgzip](http://www.htslib.org/doc/tabix.html) and [tabix](http://www.htslib.org/doc/tabix.html)
-* If the input VCF contains multi-allelic sites, these will be subject to [decomposition](http://genome.sph.umich.edu/wiki/Vt#Decompose)
-* Variants used for reporting should be designated as 'PASS' in the VCF FILTER column
+* If the input VCF contains [multi-allelic sites](https://glow.readthedocs.io/en/latest/etl/variant-splitter.html), these will be subject to [decomposition](http://genome.sph.umich.edu/wiki/Vt#Decompose). Either way, we encourage that users prepare the input VCF without the presence of multi-allelic sites.
+* Variants used for reporting should be designated as `PASS` in the VCF FILTER column. Variants denoted with e.g. `Reject` as a FILTER value will not be subject to analysis in PCGR. For records with undefined values in the FILTER column (`'.'`), these will be considered as `PASS` variants.
 
-__IMPORTANT NOTE 1__: Considering the VCF output for the [numerous somatic SNV/InDel callers](https://www.biostars.org/p/19104/) that have been developed, we have a experienced a general lack of uniformity and robustness for the representation of somatic variant genotype data (e.g. variant allelic depths (tumor/normal), genotype quality etc.). Variant genotype data found as INFO tags in the input VCF can be specified as optional arguments to the PCGR workflow, which in turn can be used for interactive exploration in the tumor report.
+#### Formatting of allelic depth/support (DP/AD)
 
-__IMPORTANT NOTE 2__: PCGR generates a number of VCF INFO annotation tags that is appended to the query VCF. We will therefore encourage the users to submit query VCF files that have not been subject to annotations by other means, but rather a VCF file that comes directly from variant calling. If not, there are likely to be INFO tags in the query VCF file that coincide with those produced by PCGR.
+The representation of variant genotype data (allelic depth and support in tumor vs. control sample) is usually formatted in the genotype fields of a VCF file, on a per-sample basis. However, considering the VCF output for the [numerous somatic SNV/InDel callers](https://www.biostars.org/p/19104/) that are in use, we have a experienced a general lack of uniformity for how this information is encoded in the genotype fields. In order for PCGR to recognize this type of information robustly, we currently require that you encode this unambiguously in the INFO field of your VCF file.
+
+Shown below is how the VCF header for these entries should look like in your input VCF, and how the corresponding variant data is encoded per record:
+
+__VCF header__
+
+```
+##INFO=<ID=TVAF,Number=.,Type=Float,Description="Allelic fraction of alternative allele in tumor">
+##INFO=<ID=TDP,Number=.,Type=Integer,Description="Read depth across variant site in tumor">
+```
+
+__VCF records__
+
+```
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1       23519660        .       G       C       .       PASS    TVAF=0.0980;TDP=51
+```
+
+When you run PCGR, make sure to feed the name of the INFO tags to the tool, i.e. using the `tumor_dp_tag`and `tumor_af_tag` options:
+
+```
+pcgr --tumor_dp_tag TDP --tumor_af_tag TVAF
+```
+
+As an effort to support the users with this procedure, we are currently trying to establish a _VCF pre-processing script_, that accepts any VCF (from any caller), and that will ensure that the file adheres to the formatting requirements of PCGR. See also [this issue](htts://github.com/sigven/pcgr/issues/136).
+
+#### Other notes regarding input VCF
+
+* PCGR generates a number of VCF INFO annotation tags that is appended to the query VCF. We will therefore encourage the users to submit query VCF files that have not been subject to annotations by other means, but rather a VCF file that comes directly from variant calling. If not, there are likely to be INFO tags in the query VCF file that coincide with those produced by PCGR.
+* Note that you can preserve particular tags in the INFO field towards the TSV output of PCGR. Sometimes, it can be convenient to investigate particular properties of the variants (encoded in the VCF) against functional annotations (as provided by PCGR). To achieve this, use the option `--preserved_info_tags <TAG1>,<TAG2> etc`.
 
 ### Copy number segments
 
@@ -32,12 +64,17 @@ The tab-separated values file with copy number aberrations __MUST__ contain the 
 * End
 * Segment_Mean
 
-Here, _Chromosome_, _Start_, and _End_ denote the chromosomal segment, and __Segment_Mean__ denotes the log(2) ratio for a particular segment, which is a common output of somatic copy number alteration callers. Note that coordinates must be **one-based** (i.e. chromosomes start at 1, not 0). Below shows the initial part of a copy number segment file that is formatted correctly according to PCGR's requirements:
+Here, _Chromosome_, _Start_, and _End_ denote the chromosomal segment, and _Segment_Mean_ denotes the log(2) ratio for a particular segment, which is a common output of somatic copy number alteration callers. Note that coordinates must be **one-based** (i.e. chromosomes start at 1, not 0). Below shows the initial part of a copy number segment file that is formatted correctly according to PCGR's requirements:
 
       Chromosome	Start	End	Segment_Mean
       1 3218329 3550598 0.0024
       1 3552451 4593614 0.1995
       1 4593663 6433129 -1.0277
+
+Importantly, you can configure predefined log(2) thresholds for segments that are considered to be high-level copy-number amplifications and homozygous deletions, through the following options:
+
+* `--logr_gain` (minimum log(2) value for a segment to be considered an amplification, _default 0.8_)
+* `--logr_homdel` (maximum log(2) value for a segment to be considered a homozygous deletion, _default -0.8_)
 
 ### CPSR report
 

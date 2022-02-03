@@ -8,7 +8,7 @@ Example views from the dashboard HTML output:
 
 ![](img/pcgr_dashboard_views.png)
 
-PCGR has been developed by scientists affiliated with the [Norwegian Cancer Genomics Consortium](http://cancergenomics.no), at the [Institute for Cancer Research/Oslo University Hospital](http://radium.no).
+PCGR originates from the [Norwegian Cancer Genomics Consortium (NCGC)](http://cancergenomics.no), at the [Institute for Cancer Research, Oslo University Hospital, Norway](http://radium.no).
 
 ### Example reports
 
@@ -40,11 +40,12 @@ PCGR integrates a [comprehensive set of knowledge resources](articles/annotation
 -   Learn more about
 
     1)  Details regarding [PCGR input files](articles/input.html), and how they should be formatted
-    2)  The types of [PCGR output files](articles/output.html)
-    3)  [Tier system implemented in PCGR](articles/variant_classification.html)
-    4)  The list of [gene and variant annotation resources](articles/virtual_panels.html) available in PCGR
-  
-  
+    2)  Configuration of [key settings](articles/running.html#key-settings)
+    3)  The types and contents of [PCGR output files](articles/output.html)
+    4)  [Variant tier system implemented in PCGR](articles/variant_classification.html)
+    5)  The list of [gene and variant annotation resources](articles/virtual_panels.html) available in PCGR
+
+
 -   [Frequenty asked questions (FAQ)](articles/faq.html)
 
 ### Citation

@@ -9,7 +9,7 @@ authors:
     href: https://github.com/sigven
 navbar:
   structure:
-    left:  [home, installation, running, articles, faq, news]
+    left:  [home, installation, running, articles, faq, changelog]
     right: [reference, search, github]
   components:
     home:
@@ -35,7 +35,9 @@ navbar:
     faq:
       text: FAQ
       href: articles/faq.html
-
+    changelog:
+      text: CHANGELOG
+      href: articles/CHANGELOG.html
 home:
   sidebar:
     structure: [links, license, community, citation, authors, dev]
