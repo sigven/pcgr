@@ -19,7 +19,7 @@ output: rmarkdown::html_document
 ### Variant databases of clinical utility
   * [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - database of clinically related variants (January 2022)
   * [DoCM](http://docm.genome.wustl.edu) - database of curated mutations (v3.2, April 2016)
-  * [CIViC](http://civic.genome.wustl.edu) - clinical interpretations of variants in cancer (January 13th 2022)
+  * [CIViC](http://civic.genome.wustl.edu) - clinical interpretations of variants in cancer (February 2nd 2022)
   * [CGI](http://www.cancergenomeinterpreter.org/biomarkers) - Cancer Genome Interpreter Cancer Biomarkers Database (CGI) (January 17th 2018)
   * [ChEMBL](https://www.ebi.ac.uk/chembl/) - database of drugs, drug-like small molecules and their targets (ChEMBL_28, February 2021)
 
