@@ -7,7 +7,7 @@ Row
 ### Molecularly targeted trials
 
 ```{r}
-flexdashboard::valueBox("Clinical trials (Beta)", caption = NULL, color = '#000000', icon = NULL)
+flexdashboard::valueBox("Clinical trials", caption = NULL, color = '#000000', icon = NULL)
 n_not_recruiting <- pcg_report[['content']][['clinicaltrials']][['trials']] %>% 
   dplyr::filter(OVERALL_STATUS == "Not yet recruiting") %>% NROW()
 

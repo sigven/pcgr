@@ -1,5 +1,5 @@
 
-## Clinical trials (Beta)
+## Clinical trials
 
 * Ongoing or planned clinical trials in the relevant tumor type have been retrieved from [clinicaltrials.gov](https://clinicaltrials.gov), focusing on the subset with molecularly targeted therapies
 * Key information entities (interventions/drugs, conditions) in trial records have been mapped to established thesauri ([ChEMBL](https://www.ebi.ac.uk/chembl/), [NCI Thesaurus](https://ncithesaurus.nci.nih.gov/ncitbrowser/), [UMLS/MedGen](https://www.ncbi.nlm.nih.gov/medgen/))

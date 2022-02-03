@@ -108,7 +108,8 @@ if(length(drug_levels) > 0){
                     backgroundColor = DT::styleEqual(drug_levels, rep("black", length(drug_levels)))
     )
 }
-dt
+dt %>%
+  DT::formatStyle("SYMBOL","OPENTARGETS_RANK", color = "white", backgroundColor = DT::styleInterval(pcg_report[['content']][['report_display_config']][['opentargets_rank']][['breaks']], pcg_report[['content']][['report_display_config']][['opentargets_rank']][['colors']]))
 
 ```
 

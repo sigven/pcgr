@@ -167,7 +167,8 @@ get_oncogene_tsgene_target_sets <- function(
   onco_ts_sets <- list()
   onco_ts_sets[["oncogene_gain"]] <- data.frame()
   onco_ts_sets[["oncogene_gain"]] <-
-    dplyr::filter(cna_df, .data$ONCOGENE == T & .data$TUMOR_SUPPRESSOR == F &
+    dplyr::filter(cna_df, .data$ONCOGENE == T &
+                    .data$TUMOR_SUPPRESSOR == F &
                     .data$MEAN_TRANSCRIPT_CNA_OVERLAP >= transcript_overlap_pct &
                     .data$LOG_R >= log_r_gain)
   onco_ts_sets[["tsgene_loss"]] <- data.frame()
@@ -178,7 +179,8 @@ get_oncogene_tsgene_target_sets <- function(
 
   onco_ts_sets[["other_target"]] <- data.frame()
   onco_ts_sets[["other_target"]] <-
-    dplyr::filter(cna_df, .data$TUMOR_SUPPRESSOR == F & .data$ONCOGENE == F &
+    dplyr::filter(cna_df, .data$TUMOR_SUPPRESSOR == F &
+                    .data$ONCOGENE == F &
                     .data$MEAN_TRANSCRIPT_CNA_OVERLAP >= transcript_overlap_pct  &
                     .data$LOG_R >= log_r_gain)
 
@@ -191,16 +193,30 @@ get_oncogene_tsgene_target_sets <- function(
   if (nrow(onco_ts_sets[["other_target"]]) > 0) {
     onco_ts_sets[["other_target"]] <- onco_ts_sets[["other_target"]] %>%
       dplyr::left_join(drug_target_site, by = "SYMBOL") %>%
-      dplyr::filter(!is.na(.data$DRUGS_ON_LABEL) | !is.na(.data$DRUGS_OFF_LABEL)) %>%
-      dplyr::select(-c(.data$TUMOR_SUPPRESSOR, .data$ONCOGENE,
-                       .data$TUMOR_SUPPRESSOR_EVIDENCE, .data$ONCOGENE_EVIDENCE)) %>%
+      dplyr::filter(!is.na(.data$DRUGS_ON_LABEL) |
+                      !is.na(.data$DRUGS_OFF_LABEL)) %>%
+      dplyr::select(-c(.data$TUMOR_SUPPRESSOR,
+                       .data$ONCOGENE,
+                       .data$TUMOR_SUPPRESSOR_EVIDENCE,
+                       .data$ONCOGENE_EVIDENCE)) %>%
       dplyr::distinct() %>%
-      dplyr::select(.data$CHROMOSOME, .data$SYMBOL, .data$GENE_NAME, .data$SEGMENT, .data$EVENT_TYPE,
-                    .data$DRUGS_ON_LABEL, .data$DRUGS_OFF_LABEL,
-                    .data$SEGMENT_LENGTH_MB, .data$LOG_R, .data$SEGMENT_ID,
+      dplyr::select(.data$CHROMOSOME,
+                    .data$SYMBOL,
+                    .data$GENE_NAME,
+                    .data$SEGMENT,
+                    .data$EVENT_TYPE,
+                    .data$DRUGS_ON_LABEL,
+                    .data$DRUGS_OFF_LABEL,
+                    .data$SEGMENT_LENGTH_MB,
+                    .data$LOG_R,
+                    .data$SEGMENT_ID,
+                    .data$OPENTARGETS_ASSOCIATIONS,
+                    .data$OPENTARGETS_RANK,
                     .data$DRUGS_ON_LABEL_INDICATIONS,
-                    .data$DRUGS_OFF_LABEL_INDICATIONS, .data$MEAN_TRANSCRIPT_CNA_OVERLAP,
-                    .data$KEGG_PATHWAY, .data$TRANSCRIPTS) %>%
+                    .data$DRUGS_OFF_LABEL_INDICATIONS,
+                    .data$MEAN_TRANSCRIPT_CNA_OVERLAP,
+                    .data$KEGG_PATHWAY,
+                    .data$TRANSCRIPTS) %>%
       dplyr::mutate(MEAN_TRANSCRIPT_CNA_OVERLAP =
                       paste0(.data$MEAN_TRANSCRIPT_CNA_OVERLAP, "%")) %>%
       dplyr::mutate(CNA_TYPE = "gain")
@@ -219,12 +235,19 @@ get_oncogene_tsgene_target_sets <- function(
       onco_ts_sets[[t]] <- onco_ts_sets[[t]] %>%
         dplyr::select(-c(.data$TUMOR_SUPPRESSOR, .data$ONCOGENE)) %>%
         dplyr::distinct() %>%
-        dplyr::select(.data$CHROMOSOME, .data$SYMBOL, .data$GENE_NAME,
-                      .data$SEGMENT, .data$LOG_R, .data$EVENT_TYPE,
+        dplyr::select(.data$CHROMOSOME,
+                      .data$SYMBOL,
+                      .data$GENE_NAME,
+                      .data$SEGMENT,
+                      .data$LOG_R,
+                      .data$EVENT_TYPE,
                       .data$SEGMENT_LENGTH_MB,
                       .data$MEAN_TRANSCRIPT_CNA_OVERLAP,
                       .data$KEGG_PATHWAY,
-                      .data$TRANSCRIPTS, .data$SEGMENT_ID) %>%
+                      .data$OPENTARGETS_ASSOCIATIONS,
+                      .data$OPENTARGETS_RANK,
+                      .data$TRANSCRIPTS,
+                      .data$SEGMENT_ID) %>%
         dplyr::mutate(
           MEAN_TRANSCRIPT_CNA_OVERLAP = paste0(
             .data$MEAN_TRANSCRIPT_CNA_OVERLAP, "%")) %>%
@@ -240,9 +263,12 @@ get_oncogene_tsgene_target_sets <- function(
                  paste0(unique(onco_ts_sets[[t]]$SYMBOL), collapse = ", ")))
         onco_ts_sets[[t]] <- onco_ts_sets[[t]] %>%
           dplyr::left_join(drug_target_site, by = "SYMBOL") %>%
-          dplyr::select(.data$CHROMOSOME, .data$SYMBOL,
-                        .data$GENE_NAME, .data$SEGMENT,
-                        .data$LOG_R, .data$EVENT_TYPE,
+          dplyr::select(.data$CHROMOSOME,
+                        .data$SYMBOL,
+                        .data$GENE_NAME,
+                        .data$SEGMENT,
+                        .data$LOG_R,
+                        .data$EVENT_TYPE,
                         .data$DRUGS_ON_LABEL,
                         .data$DRUGS_OFF_LABEL, dplyr::everything()) %>%
           dplyr::arrange(.data$DRUGS_ON_LABEL, .data$DRUGS_OFF_LABEL)
@@ -320,6 +346,11 @@ get_cna_overlapping_transcripts <- function(cna_df, pcgr_data) {
           transcript_end = BiocGenerics::end(ranges)) %>%
         dplyr::mutate(
           chrom = as.character(GenomeInfoDb::seqnames(ranges))) %>%
+        dplyr::mutate(
+          ensembl_gene_id = stringr::str_replace(
+            ensembl_gene_id, "\\.[0-9]{1,}$", ""
+          )
+        ) %>%
         dplyr::rowwise() %>%
         dplyr::mutate(
           transcript_overlap_percent =
