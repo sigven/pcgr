@@ -355,7 +355,8 @@ set_report_metadata <- function(config,
             confidence_level = -1,
             panel_name =
               report_metadata[["config"]][["custom_panel"]][["name"]],
-            panel_id = NA, panel_version = NA,
+            panel_id = NA,
+            panel_version = NA,
             panel_url = NA)
 
         report_metadata[["gene_panel"]] <- list()

@@ -955,7 +955,8 @@ append_otargets_pheno_link <- function(var_df,
           dplyr::group_by(var_df_unique_slim_melted, .data$ENSEMBL_GENE_ID) %>%
           dplyr::summarise(OT_DISEASE_LINK = unlist(paste(.data$tmp_assoc,
                                                           collapse = ", ")),
-                           OPENTARGETS_RANK = max(.data$score))
+                           OPENTARGETS_RANK = round(max(.data$score), digits = 4),
+                           .groups = "drop")
         var_df_links <- dplyr::select(var_df_links,
                                       .data$ENSEMBL_GENE_ID,
                                       .data$OT_DISEASE_LINK,
@@ -2332,6 +2333,9 @@ custom_bed_genes <- function(bed_file, pcgr_data) {
     utils::read.table(file = bed_file, header = F, stringsAsFactors = F,
                            comment.char = "", quote = "", sep = "\t") %>%
     magrittr::set_colnames(c("chromosome", "segment_start", "segment_end", "onco_xref")) %>%
+    ## ignore GWAS variants and secondary findings when detecting the custom target set
+    dplyr::filter(!stringr::str_detect(onco_xref, "^rs[0-9]{1,}")) %>%
+    dplyr::filter(!stringr::str_detect(onco_xref,"\\|ACMG_SF30\\|")) %>%
     dplyr::rowwise() %>%
     dplyr::mutate(symbol = unlist(strsplit(.data$onco_xref, "\\|"))[4]) %>%
     dplyr::select(.data$symbol) %>%

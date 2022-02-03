@@ -305,6 +305,7 @@ generate_pcgr_report <-
           pcgr_data,
           sample_name,
           config,
+          oncotree = pcg_report[["metadata"]][["phenotype_ontology"]][["oncotree_query"]],
           transcript_overlap_pct = config[["cna"]][["cna_overlap_pct"]])
       pcg_report <-
         pcgrr::update_report(pcg_report,
@@ -779,6 +780,7 @@ generate_report_data_tumor_only <-
 #' @param pcgr_data object with PCGR annotation data
 #' @param sample_name sample identifier
 #' @param pcgr_config Object with PCGR configuration parameters
+#' @param oncotree Data frame with phenotype terms relevant for tumor type
 #' @param transcript_overlap_pct required aberration overlap fraction
 #' (percent) for reported transcripts (default 100 percent)
 #'
@@ -788,6 +790,7 @@ generate_report_data_cna <-
            pcgr_data,
            sample_name,
            pcgr_config,
+           oncotree,
            transcript_overlap_pct = 100) {
 
     invisible(
@@ -853,7 +856,9 @@ generate_report_data_cna <-
     #### FIND AND APPEND GENCODE TRANSCRIPTS THAT OVERLAP
     cna_transcript_df <-
       pcgrr::get_cna_overlapping_transcripts(
-        cna_df, pcgr_data = pcgr_data)
+         cna_df, pcgr_data = pcgr_data)
+    #get_cna_overlapping_transcripts(
+    #  cna_df, pcgr_data = pcgr_data)
 
     #### GENERATE DATAFRAME OF UNIQUE TRANSCRIPT-CNA SEGMENTS FOR OUTPUT TSV
     cna_transcript_df_print <- cna_transcript_df %>%
@@ -889,7 +894,8 @@ generate_report_data_cna <-
         dplyr::summarise(
           MEAN_TRANSCRIPT_CNA_OVERLAP = mean(
             .data$transcript_overlap_percent),
-          TRANSCRIPTS = paste0(.data$ensembl_transcript_id, collapse = ", ")) %>%
+          TRANSCRIPTS = paste0(.data$ensembl_transcript_id, collapse = ", "),
+          .groups = "drop") %>%
         dplyr::rename(SYMBOL = .data$symbol) %>%
         dplyr::mutate(
           MEAN_TRANSCRIPT_CNA_OVERLAP =
@@ -902,6 +908,11 @@ generate_report_data_cna <-
       dplyr::distinct() %>%
       dplyr::mutate(VAR_ID = as.character(rep(1:nrow(.)))) %>%
       magrittr::set_colnames(toupper(names(.))) %>%
+      pcgrr::append_otargets_pheno_link(
+        pcgr_data = pcgr_data,
+        oncotree = oncotree) %>%
+      dplyr::rename(OPENTARGETS_ASSOCIATIONS =
+                      .data$OT_DISEASE_LINK) %>%
       dplyr::select(.data$VAR_ID,
                     .data$SEGMENT_ID,
                     .data$SYMBOL,
@@ -910,6 +921,8 @@ generate_report_data_cna <-
                     .data$TUMOR_SUPPRESSOR,
                     .data$TUMOR_SUPPRESSOR_EVIDENCE,
                     .data$CANCERGENE_SUPPORT,
+                    .data$OPENTARGETS_ASSOCIATIONS,
+                    .data$OPENTARGETS_RANK,
                     .data$ENTREZ_ID,
                     .data$CHROM,
                     .data$NAME,
@@ -951,6 +964,8 @@ generate_report_data_cna <-
                     .data$ONCOGENE,
                     .data$ONCOGENE_EVIDENCE,
                     .data$CANCERGENE_SUPPORT,
+                    .data$OPENTARGETS_ASSOCIATIONS,
+                    .data$OPENTARGETS_RANK,
                     .data$SEGMENT_LENGTH_MB,
                     .data$SEGMENT,
                     .data$EVENT_TYPE,
@@ -979,7 +994,7 @@ generate_report_data_cna <-
     ## Get aberration sets related to tumor suppressor genes
     ## /oncogenes/drug targets
     onco_ts_sets <-
-      pcgrr::get_oncogene_tsgene_target_sets(
+      get_oncogene_tsgene_target_sets(
         cna_transcript_df,
         log_r_homdel = log_r_homdel,
         log_r_gain = log_r_gain,

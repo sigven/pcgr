@@ -36,8 +36,8 @@ def cli():
     # optional_rna.add_argument("--input_rna_expression", dest = "rna_exp_tumor", help = "File with RNA expression levels (bulk) of genes in tumor (tab-separated values)")
 
     optional_other.add_argument("--input_cna", dest="input_cna", help="Somatic copy number alteration segments (tab-separated values)")
-    optional_other.add_argument("--logr_gain", type=float, default=0.8, dest="logr_gain", help="Log ratio-threshold for regions containing copy number gains/amplifications (default: %(default)s)")
-    optional_other.add_argument("--logr_homdel", type=float, default=-0.8, dest="logr_homdel", help="Log ratio-threshold for regions containing homozygous deletions (default: %(default)s)")
+    optional_other.add_argument("--logr_gain", type=float, default=0.8, dest="logr_gain", help="Log ratio-threshold (minimum) for segments containing copy number gains/amplifications (default: %(default)s)")
+    optional_other.add_argument("--logr_homdel", type=float, default=-0.8, dest="logr_homdel", help="Log ratio-threshold (maximum) for segments containing homozygous deletions (default: %(default)s)")
     optional_other.add_argument("--cna_overlap_pct", type=float, default=50, dest="cna_overlap_pct", help="Mean percent overlap between copy number segment and gene transcripts for reporting of gains/losses in tumor suppressor genes/oncogenes, (default: %(default)s)")
     optional_other.add_argument("--tumor_site", dest="tsite", type=int, default=0, help="Optional integer code to specify primary tumor type/site of query sample,\n choose any of the following identifiers:\n" + str(pcgr_vars.tumor_sites) + "\n(default: %(default)s - any tumor type)")
     optional_other.add_argument("--tumor_purity", type=float, dest="tumor_purity", help="Estimated tumor purity (between 0 and 1, (default: %(default)s)")

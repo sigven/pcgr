@@ -15,7 +15,7 @@ By default, PCGR expects that the input VCF comes from whole-exome sequencing. T
 
 * `--assay <WGS|WES|TARGETED>`
 
- If the input VCF comes from a targeted sequencing assay (i.e. `--assay TARGETED`), the target size of the assay should be adjusted accordingly, which is critical for tumor mutational burden estimation. Assay target size, reflecting the _protein-coding portion of the assayed genomic region_ in megabases, can be configured through the following option:
+ If the input VCF comes from a targeted sequencing assay/panel (i.e. `--assay TARGETED`), the target size of the assay/panel should be adjusted accordingly, which is critical for tumor mutational burden estimation. Assay target size, reflecting the _protein-coding portion of the assayed genomic region_ in megabases, can be configured through the following option:
 
  * `--target_size_mb <value>`
 
@@ -25,7 +25,7 @@ By default, PCGR expects that the input VCF contains somatic variants identified
 
 If the input VCF comes from a __tumor-only__ assay, turn on the `--tumor_only` option. In this mode, PCGR conducts a set of successive filtering steps on the raw input set of variants, aiming to exclude the majority of germline variants from the tumor-only input set. In addition to default filtering applied against variants found in the gnomAD/1000 Genomes Project databases (population-specific allele frequency thresholds can be configured, see below), additional filtering procedures can be explicitly set, i.e.:
 
-* `--exclude_dbsnp_nonsomatic`
+* `--exclude_dbsnp_nonsomatic` (recommended)
 * `--exclude_likely_het_germline`
 * `--exclude_likely_hom_germline`
 * `--exclude_nonexonic`
