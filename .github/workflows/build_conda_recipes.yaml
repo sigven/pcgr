@@ -1,10 +1,11 @@
-name: mambabuild
+name: deploy
 
 on:
   push:
     branches:
       - master
       - dev
+      - fix_versioning
 env:
   atoken: ${{ secrets.ANACONDA_UPLOAD_TOKEN }}
   recipe_path: conda/recipe
@@ -39,6 +40,8 @@ jobs:
           conda mambabuild ${recipe_path}/pcgr -c conda-forge -c bioconda --token ${atoken} --quiet
           conda mambabuild ${recipe_path}/pcgrr -c conda-forge -c bioconda --token ${atoken} --quiet
 
+  # spin up fresh instance since conda-lock
+  # takes ages when run on previous one
   conda_lock:
     name: Conda lock
     runs-on: ubuntu-latest
@@ -66,14 +69,13 @@ jobs:
           conda-lock lock --mamba --file ${env_yml_path}/pcgrr.yml --filename-template 'pcgrr-{platform}.lock' -p osx-64 -p linux-64
           mv pcgrr-*.lock ${env_lock_path}
           mv pcgr-*.lock ${env_lock_path}
-      - name: Git Status
-        run: |
-          git status
       - name: Commit changes
         run: |
+          git status
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
-          git commit -am "[bot] Updating conda-lock files."
+          MSG="[bot] Updating conda-lock files (v${VERSION})"
+          git commit -am ${MSG}
           git push
 
   pkgdown-site:
@@ -117,6 +119,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        run: |
+            git pull --no-rebase # for pulling in the changed locks
+            git --no-pager log --decorate=short --pretty=oneline -n3
       - name: Create tag
         uses: actions/github-script@v5
         with:
