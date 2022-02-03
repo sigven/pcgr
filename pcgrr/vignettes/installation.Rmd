@@ -23,7 +23,6 @@ conda activate ./pcgr
 
 # test that it works
 pcgr --version
-# pcgr 0.10.13
 ```
 
 For downloading the data bundle, see `STEP 1` further below.
@@ -69,7 +68,7 @@ Download and unpack the latest software release from <https://github.com/sigven/
 Alternatively if you have `git` installed, you can do:
 
 ```bash
-PCGR_VERSION="X.X.X"
+PCGR_VERSION="0.10.13"
 OUTPUT_DIRECTORY="PCGR"
 
 git clone \
