@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.12</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.13</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -134,8 +134,7 @@ downstream multi-sample analysis.</em></p>
 <strong>ALL</strong> information presented in the report. Explore the
 JSON contents e.g. with the</em> <a href="https://github.com/jeroen/jsonlite" class="external-link">jsonlite package</a> <em>in
 R:</em></p>
-<p><code>report_data &lt;-
-jsonlite::fromJSON('&lt;sample_id&gt;.pcgr_acmg.grch37.json.gz')</code></p>
+<p><code>report_data &lt;- jsonlite::fromJSON('&lt;sample_id&gt;.pcgr_acmg.grch37.json.gz')</code></p>
 <p><em>E.g. tiered SNV/InDel output</em>:</p>
 <p><code>head(report_data$content$snv_indel$variant_set$tsv)</code></p>
 <p><em>Or TMB estimate</em>:</p>
