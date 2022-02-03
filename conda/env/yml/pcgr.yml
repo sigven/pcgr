@@ -7,7 +7,7 @@ channels:
   - defaults
 
 dependencies:
-  - pcgr ==0.10.12 # versioned by bump2version
+  - pcgr ==0.10.13 # versioned by bump2version
   - bedtools ==2.30.0
   - cyvcf2 ==0.30.11
   - ensembl-vep ==105.0
