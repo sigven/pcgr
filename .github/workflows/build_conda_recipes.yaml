@@ -25,16 +25,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Set up Mambaforge
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          miniforge-variant: Mambaforge
-          miniforge-version: 4.11.0-0
-          show-channel-urls: true
-          auto-activate-base: false
-          activate-environment: condabuild
-          environment-file: ${{ env.env_yml_path }}/condabuild.yml
-          use-mamba: true
+#     - name: Set up Mambaforge
+#       uses: conda-incubator/setup-miniconda@v2
+#       with:
+#         miniforge-variant: Mambaforge
+#         miniforge-version: 4.11.0-0
+#         show-channel-urls: true
+#         auto-activate-base: false
+#         activate-environment: condabuild
+#         environment-file: ${{ env.env_yml_path }}/condabuild.yml
+#         use-mamba: true
       - name: Build + upload pcgr/pcgrr conda pkgs
         run: |
           echo "build conda pkgs bla bla"
@@ -54,23 +54,24 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Set up Mambaforge
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          miniforge-variant: Mambaforge
-          miniforge-version: 4.11.0-0
-          show-channel-urls: true
-          auto-activate-base: false
-          activate-environment: condabuild
-          environment-file: ${{ env.env_yml_path }}/condabuild.yml
-          use-mamba: true
+#     - name: Set up Mambaforge
+#       uses: conda-incubator/setup-miniconda@v2
+#       with:
+#         miniforge-variant: Mambaforge
+#         miniforge-version: 4.11.0-0
+#         show-channel-urls: true
+#         auto-activate-base: false
+#         activate-environment: condabuild
+#         environment-file: ${{ env.env_yml_path }}/condabuild.yml
+#         use-mamba: true
       - name: Generate conda locks
         run: |
-          echo "foo" > pcgrr-tmp.lock
+          echo "foo2" > pcgrr-tmp.lock
+          echo "bar" > pcgr-tmp.lock
           #conda-lock lock --mamba --file ${env_yml_path}/pcgr.yml --filename-template 'pcgr-{platform}.lock' -p osx-64 -p linux-64
           #conda-lock lock --mamba --file ${env_yml_path}/pcgrr.yml --filename-template 'pcgrr-{platform}.lock' -p osx-64 -p linux-64
           mv pcgrr-*.lock ${env_lock_path}
-          #mv pcgr-*.lock ${env_lock_path}
+          mv pcgr-*.lock ${env_lock_path}
       - name: Commit changes
         run: |
           git status
