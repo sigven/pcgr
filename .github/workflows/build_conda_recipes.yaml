@@ -37,8 +37,9 @@ jobs:
           use-mamba: true
       - name: Build + upload pcgr/pcgrr conda pkgs
         run: |
-          conda mambabuild ${recipe_path}/pcgr -c conda-forge -c bioconda --token ${atoken} --quiet
-          conda mambabuild ${recipe_path}/pcgrr -c conda-forge -c bioconda --token ${atoken} --quiet
+          echo "build conda pkgs bla bla"
+          #conda mambabuild ${recipe_path}/pcgr -c conda-forge -c bioconda --token ${atoken} --quiet
+          #conda mambabuild ${recipe_path}/pcgrr -c conda-forge -c bioconda --token ${atoken} --quiet
 
   # spin up fresh instance since conda-lock
   # takes ages when run on previous one
