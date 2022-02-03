@@ -55,6 +55,22 @@ As an effort to support the users with this procedure, we are currently trying t
 * PCGR generates a number of VCF INFO annotation tags that is appended to the query VCF. We will therefore encourage the users to submit query VCF files that have not been subject to annotations by other means, but rather a VCF file that comes directly from variant calling. If not, there are likely to be INFO tags in the query VCF file that coincide with those produced by PCGR.
 * Note that you can preserve particular tags in the INFO field towards the TSV output of PCGR. Sometimes, it can be convenient to investigate particular properties of the variants (encoded in the VCF) against functional annotations (as provided by PCGR). To achieve this, use the option `--preserved_info_tags <TAG1>,<TAG2> etc`.
 
+
+### Panel-of-normals (PON) VCF
+
+The user can submit a panel-of-normals VCF file to PCGR, indicating variants that should be excluded/filtered from the input VCF in a __tumor-only setting__ (i.e. option `--tumor_only`).
+
+* `--pon_vcf <VCF_FILE>`
+
+The panel-of-normals VCF file needs to contain the following.
+
+1. The following description needs to be present in the VCF header:
+
+	`##INFO=<ID=PANEL_OF_NORMALS,Number=0,Type=Flag,Description="Overlap with germline call among panel of normals">`
+
+2. Each record in the panel-of-normals VCF file needs to contain the `PANEL_OF_NORMALS` flag in the INFO field
+
+
 ### Copy number segments
 
 The tab-separated values file with copy number aberrations __MUST__ contain the following four columns:

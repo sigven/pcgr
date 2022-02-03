@@ -43,7 +43,6 @@ PCGR integrates a [comprehensive set of knowledge resources](articles/annotation
     4)  [Variant tier system implemented in PCGR](articles/variant_classification.html)
     5)  The list of [gene and variant annotation resources](articles/virtual_panels.html) available in PCGR
 
-
 -   [Frequenty asked questions (FAQ)](articles/faq.html)
 
 ### Citation

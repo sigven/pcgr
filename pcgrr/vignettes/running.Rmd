@@ -30,22 +30,11 @@ If the input VCF comes from a __tumor-only__ assay, turn on the `--tumor_only` o
 * `--exclude_likely_hom_germline`
 * `--exclude_nonexonic`
 
-If the user has provided a panel-of-normals VCF (`--pon_vcf`), one may also opt to remove variants found in that variant collection using the `--exclude_pon` option.
+If the user has provided a [panel-of-normals VCF file](input.html#panel-of-normals-pon-vcf) as input(`--pon_vcf`), one may also opt to remove variants found in that variant collection using a dedicated option:
 
-#### Panel-of-normals (PON)
+* `--exclude_pon`
 
-The user can submit a panel-of-normals VCF to PCGR, indicating variants that should be excluded/filtered from the input VCF in a tumor-only setting.
-
-* `--pon_vcf <VCF_FILE>`
-
-The panel-of-normals VCF need to contain the following.
-
-1. The current description needs to be present in the VCF header:
-
-	`##INFO=<ID=PANEL_OF_NORMALS,Number=0,Type=Flag,Description="Overlap with germline call among panel of normals">`
-
-2. Each record in the panel-of-normals VCF needs to contain the `PANEL_OF_NORMALS` flag in the INFO field
-
+<hr>
 
 __IMPORTANT NOTE__: Note that a number of the analyses available in PCGR is not particularly well-suited for tumor-only input, e.g. mutational signature analysis and MSI status prediction.
 
