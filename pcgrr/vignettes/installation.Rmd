@@ -3,7 +3,32 @@ title: "Installation"
 output: rmarkdown::html_document
 ---
 
-## Installation Instructions
+## Quick Installation
+
+If you know what [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html)
+is, you only need to run the following commands in order to install the PCGR
+software requirements:
+
+```bash
+PCGR_VERSION="0.10.13"
+PCGR_REPO="https://raw.githubusercontent.com/sigven/pcgr/v${PCGR_VERSION}/conda/env/lock/"
+PLATFORM="linux" # or "osx"
+
+# mamba is a much faster alternative to conda
+conda install mamba -c conda-forge
+
+mamba create --file ${PCGR_REPO}/pcgr-${PLATFORM}-64.lock --prefix ./pcgr
+mamba create --file ${PCGR_REPO}/pcgrr-${PLATFORM}-64.lock --prefix ./pcgrr
+conda activate ./pcgr
+
+# test that it works
+pcgr --version
+# pcgr 0.10.13
+```
+
+For downloading the data bundle, see `STEP 1` further below.
+
+## Detailed Installation
 
 **Tip:** Check out the <https://github.com/sigven/pcgr/tree/master/install>
 directory for installation helper scripts.

@@ -6,7 +6,9 @@ template:
   bootstrap: 5
 authors:
   Sigve Nakken:
-    href: https://github.com/sigven
+    href: "https://github.com/sigven"
+  Peter Diakumis:
+    href: "https://github.com/pdiakumis"
 navbar:
   structure:
     left:  [home, installation, running, articles, faq, news]
@@ -32,6 +34,8 @@ navbar:
         href: articles/variant_classification.html
       - text: Annotation resources
         href: articles/annotation_resources.html
+      - text: Developer notes
+        href: articles/developers.html
     faq:
       text: FAQ
       href: articles/faq.html
@@ -43,6 +47,5 @@ home:
       citation:
           title: Citation
           text: "[Citing PCGR](authors.html#citation)"
-
 news:
   one_page: true
