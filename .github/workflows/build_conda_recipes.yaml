@@ -75,7 +75,8 @@ jobs:
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
           MSG="[bot] Updating conda-lock files (v${VERSION})"
-          git commit -am ${MSG}
+          git add .
+          git commit -m "${MSG}"
           git push
 
   pkgdown-site:
