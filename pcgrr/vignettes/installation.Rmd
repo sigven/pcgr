@@ -49,14 +49,14 @@ Here's an example scenario that will be used in the following sections:
 
 Download and unpack the human assembly-specific data bundle:
 
-- [grch37 data bundle - 20220119](http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch37.20220119.tgz) (approx 20Gb)
-- [grch38 data bundle - 20220119](http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch38.20220119.tgz) (approx 21Gb)
+- [grch37 data bundle - 20220203](http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch37.20220203.tgz) (approx 20Gb)
+- [grch38 data bundle - 20220203](http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch38.20220203.tgz) (approx 21Gb)
 
 - Example:
 
 ```bash
 GENOME="grch38" # or "grch37"
-BUNDLE="pcgr.databundle.${GENOME}.20220119.tgz"
+BUNDLE="pcgr.databundle.${GENOME}.20220203.tgz"
 
 wget http://insilico.hpc.uio.no/pcgr/${BUNDLE}
 gzip -dc ${BUNDLE} | tar xvf -
