@@ -1,6 +1,6 @@
-# Personal Cancer Genome Reporter (PCGR) - variant interpretation for precision cancer medicine
+## Personal Cancer Genome Reporter (PCGR) - variant interpretation for precision cancer medicine
 
-## Overview
+### Overview
 
 The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for translation of individual tumor genomes for precision cancer medicine.
 
@@ -18,7 +18,7 @@ If you want to generate a personal report with respect to cancer predisposition 
 
 ![PCGR overview](pcgrr/pkgdown/assets/img/pcgr_dashboard_views.png)
 
-## News
+### News
 
 -   *February 2022*: **x.x.x release**
 
@@ -42,11 +42,11 @@ If you want to generate a personal report with respect to cancer predisposition 
     -   Data bundle updates (CIViC, ClinVar, CancerMine, UniProt KB)
     -   [CHANGELOG](http://pcgr.readthedocs.io/en/latest/CHANGELOG.html)
 
-## Example reports
+### Example reports
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5045309.svg)](https://doi.org/10.5281/zenodo.5045309)
 
-## Getting started
+### Getting started
 
 -   [Installation instructions](https://sigven.github.io/pcgr/articles/installation.html)
 -   [Run through an example](https://sigven.github.io/pcgr/articles/running.html#example-run)
@@ -59,7 +59,7 @@ If you want to generate a personal report with respect to cancer predisposition 
 
 -   [Frequenty asked questions (FAQ)](https://sigven.github.io/pcgr/articles/faq.html)
 
-## Citation
+### Citation
 
 If you use PCGR, please cite the publication:
 
