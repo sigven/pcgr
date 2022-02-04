@@ -10,7 +10,7 @@ is, you only need to run the following commands in order to install the PCGR
 software requirements:
 
 ```bash
-PCGR_VERSION="0.10.13"
+PCGR_VERSION="0.10.14"
 PCGR_REPO="https://raw.githubusercontent.com/sigven/pcgr/v${PCGR_VERSION}/conda/env/lock/"
 PLATFORM="linux" # or "osx"
 
@@ -68,7 +68,7 @@ Download and unpack the latest software release from <https://github.com/sigven/
 Alternatively if you have `git` installed, you can do:
 
 ```bash
-PCGR_VERSION="0.10.13"
+PCGR_VERSION="0.10.14"
 OUTPUT_DIRECTORY="PCGR"
 
 git clone \
