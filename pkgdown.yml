@@ -2,14 +2,16 @@ pandoc: 2.17.1.1
 pkgdown: 2.0.2
 pkgdown_sha: ~
 articles:
+  CHANGELOG: CHANGELOG.html
   annotation_resources: annotation_resources.html
+  developers: developers.html
   faq: faq.html
   input: input.html
   installation: installation.html
   output: output.html
   running: running.html
   variant_classification: variant_classification.html
-last_built: 2022-02-03T10:38Z
+last_built: 2022-02-04T00:23Z
 urls:
   reference: https://sigven.github.io/pcgr/reference
   article: https://sigven.github.io/pcgr/articles

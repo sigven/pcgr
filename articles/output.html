@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.13</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.14</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,13 +51,14 @@
     <a class="dropdown-item" href="../articles/output.html">Output files</a>
     <a class="dropdown-item" href="../articles/variant_classification.html">Variant classification</a>
     <a class="dropdown-item" href="../articles/annotation_resources.html">Annotation resources</a>
+    <a class="dropdown-item" href="../articles/developers.html">Developer notes</a>
   </div>
 </li>
 <li class="nav-item">
   <a class="nav-link" href="../articles/faq.html">FAQ</a>
 </li>
 <li class="nav-item">
-  <a class="nav-link" href="../news/index.html">Changelog</a>
+  <a class="nav-link" href="../articles/CHANGELOG.html">CHANGELOG</a>
 </li>
       </ul>
 <form class="form-inline my-2 my-lg-0" role="search">
@@ -420,7 +421,7 @@ processing with the PCGR annotation pipeline:</p>
 Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|
 INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|
 Codons|Existing_variation|ALLELE_NUM|DISTANCE|STRAND|FLAGS|PICK|VARIANT_CLASS|
-SYMBOL_SOURCE|HGNC_ID|CANONICAL|MANE_SELET|MANE_PLUS_CLINICAL|TSL|APPRIS|CCDS|<br>
+SYMBOL_SOURCE|HGNC_ID|CANONICAL|MANE_SELECT|MANE_PLUS_CLINICAL|TSL|APPRIS|CCDS|
 ENSP|SWISSPROT|TREMBL|UNIPARC|UNIPROT_ISOFORM|
 RefSeq|DOMAINS|HGVS_OFFSET|AF|AFR_AF|AMR_AF|EAS_AF|EUR_AF|SAS_AF|gnomAD_AF|
 gnomAD_AFR_AF|gnomAD_AMR_AF|gnomAD_ASJ_AF|gnomAD_EAS_AF|gnomAD_FIN_AF|
@@ -583,6 +584,15 @@ picked transcript (<em>ENSTXXXXXX</em>)</li>
 VEP’s picked transcript</li>
 <li>REFSEQ_MRNA - Corresponding RefSeq transcript(s) identifier for
 VEP’s picked transcript (<em>NM_XXXXX</em>)</li>
+<li>TRANSCRIPT_MANE_SELECT - MANE select transcript identifer: one
+high-quality representative transcript per protein-coding gene that is
+well-supported by experimental data and represents the biology of the
+gene</li>
+<li>TRANSCRIPT_MANE_PLUS_CLINICAL - transcripts chosen to supplement
+MANE Select when needed for clinical variant reporting</li>
+<li>GENCODE_TAG - tag for gencode transcript (basic etc)</li>
+<li>GENCODE_TRANSCRIPT_TYPE - type of transcript (protein-coding
+etc.)</li>
 <li>CORUM_ID - Associated protein complexes (identifiers) from <a href="http://mips.helmholtz-muenchen.de/corum/" class="external-link">CORUM</a>
 </li>
 <li>TUMOR_SUPPRESSOR - Indicates whether gene is predicted as a tumor
@@ -881,8 +891,8 @@ convention:</p>
 18. REFSEQ_PEPTIDE - RefSeq peptide identifier
 19. TRANSCRIPT_MANE_SELECT - MANE select transcript identifier
 20. ONCOGENE - Gene is predicted/classified as an oncogene (CancerMine/NCG)
-21. TUMOR_SUPPRESSOR - Gene is predicted/classified as tumor suppressor (CancerMine/NCG)
-22. ONCOGENE_EVIDENCE - Underlying evidence for oncogene prediction/classification
+21. ONCOGENE_EVIDENCE - Underlying evidence for oncogene prediction/classification
+22. TUMOR_SUPPRESSOR - Gene is predicted/classified as tumor suppressor (CancerMine/NCG)
 23. TUMOR_SUPPRESSOR_EVIDENCE - Underlying evidence for tumor suppressor prediction/classification
 24. CONSEQUENCE - Variant consequence (as defined above for VCF output:
     Consequence)
@@ -1004,7 +1014,7 @@ transcript).</p>
     <footer><div class="pkgdown-footer-left">
   <p></p>
 <p>Developed by <a href="https://github.com/sigven" class="external-link">Sigve Nakken</a>,
-Peter Diakumis.</p>
+<a href="https://github.com/pdiakumis" class="external-link">Peter Diakumis</a>.</p>
 </div>
 
 <div class="pkgdown-footer-right">

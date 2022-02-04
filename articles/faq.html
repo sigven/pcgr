@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.13</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.14</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,13 +51,14 @@
     <a class="dropdown-item" href="../articles/output.html">Output files</a>
     <a class="dropdown-item" href="../articles/variant_classification.html">Variant classification</a>
     <a class="dropdown-item" href="../articles/annotation_resources.html">Annotation resources</a>
+    <a class="dropdown-item" href="../articles/developers.html">Developer notes</a>
   </div>
 </li>
 <li class="active nav-item">
   <a class="nav-link" href="../articles/faq.html">FAQ</a>
 </li>
 <li class="nav-item">
-  <a class="nav-link" href="../news/index.html">Changelog</a>
+  <a class="nav-link" href="../articles/CHANGELOG.html">CHANGELOG</a>
 </li>
       </ul>
 <form class="form-inline my-2 my-lg-0" role="search">
@@ -97,28 +98,21 @@
     
 <p>Frequently asked questions regarding PCGR usage and
 functionality:</p>
-<p><strong>1. Why do I get a long list of lines with “ERROR: Line ..”
-during “STEP 0: validate input data”?</strong></p>
-<p><em>Answer: Your query VCF does not pass the VCF validation check
-by</em> <a href="https://github.com/EBIvariation/vcf-validator" class="external-link">EBI’s
-vcf-validator</a>. <em>Solution: 1) Fix the VCF so that it adheres to
-the VCF standard, or 2) run PCGR with option
-<code>--vcf_no_validate</code> if you think the formatting problems are
-not critical to the contents of the VCF.</em> <strong>NOTE</strong>: as
-of December 2021 VCF validation is deprecated.</p>
-<p><strong>2. I am not sure how to specify depth/allelic fraction in my
-query VCF. Why cannot PCGR pull out this information automatically from
-my VCF file?</strong></p>
-<p><em>Answer: This is something that you as a user need to handle
-yourself. To our knowledge, there is currently no standard way that
-variant callers format these types of data (allelic fraction/depth,
-tumor/normal) in the VCF, and this makes it very challenging for PCGR to
-automatically grab this information from the variety of VCFs produced by
-different variant callers. Please take a careful look at the example VCF
-files (<code>examples</code> folder) that comes with PCGR for how PCGR
-expects this information to be formatted, and make sure your VCF is
-formatted accordingly.</em></p>
-<p><strong>3. Is it possible to utilize PCGR for analysis of multiple
+<p><strong>1. I do not see any data related to allelic depth/support in
+my report. I thought that PCGR can grab this information automatically
+from my VCF?</strong></p>
+<p><em>Answer: VCF variant genotype data (i.e. AD/DP) is something that
+you as a user need to specify explicitly when running PCGR. In our
+experience, there is currently no uniform way that variant callers
+format these types of data (allelic fraction/depth, tumor/normal) in the
+VCF, and this makes it very challenging for PCGR to automatically grab
+this information from any VCF. Please take a careful look at the example
+VCF files (<code>examples</code> folder) that comes with PCGR for how
+PCGR expects this information to be formatted, and make sure your VCF is
+formatted accordingly. There is also an in-depth explanation on the
+matter <a href="articles/input.html#ormatting-of-allelic-depthsupport-dpad">described
+here</a></em></p>
+<p><strong>2. Is it possible to utilize PCGR for analysis of multiple
 samples?</strong></p>
 <p><em>Answer: As the name of the tool implies, PCGR was developed for
 the detailed analysis of individual tumor samples. However, if you take
@@ -139,7 +133,7 @@ R:</em></p>
 <p><code>head(report_data$content$snv_indel$variant_set$tsv)</code></p>
 <p><em>Or TMB estimate</em>:</p>
 <p><code>report_data$content$tmb$variant_statistic$tmb_estimate</code></p>
-<p><strong>4. I do not see the expected transcript-specific consequence
+<p><strong>3. I do not see the expected transcript-specific consequence
 for a particular variant. In what way is the primary variant consequence
 established?</strong></p>
 <p><em>Answer: PCGR relies upon</em> <a href="https://www.ensembl.org/info/docs/tools/vep/index.html" class="external-link">VEP</a>
@@ -148,16 +142,16 @@ transcript-specific consequence is chosen as the primary variant
 consequence. In the PCGR configuration file, you may customise how this
 is chosen by changing the order of criteria applied when choosing a
 primary consequence block - parameter</em> <a href="https://www.ensembl.org/info/docs/tools/vep/script/vep_other.html#pick_options" class="external-link">vep_pick_order</a></p>
-<p><strong>5. Is it possible to use RefSeq as the underlying gene
+<p><strong>4. Is it possible to use RefSeq as the underlying gene
 transcript model in PCGR?</strong></p>
 <p><em>Answer: PCGR uses GENCODE as the primary gene transcript model,
 but we provide cross-references to corresponding RefSeq transcripts when
 this is available.</em></p>
-<p><strong>6. I have a VCF with structural variants detected in my tumor
+<p><strong>5. I have a VCF with structural variants detected in my tumor
 sample, can PCGR process those as well?</strong></p>
 <p><em>Answer: This is currently not supported as input for PCGR, but is
 something we want to incorporate in the future.</em></p>
-<p><strong>7. I am surprised to see a particular gene being located in
+<p><strong>6. I am surprised to see a particular gene being located in
 TIER 3 for my sample, since I know that this gene is of potential
 clinical significance in the tumor type I am investigating?</strong></p>
 <p><em>Answer: PCGR classifies variants into tiers of significance
@@ -166,15 +160,15 @@ guidelines by ACMG/AMP</a>. <em>No manual efforts for individual tumor
 types are conducted beyond this rule-based scheme. The users need to
 keep this in mind when interpreting the tier contents of the
 report.</em></p>
-<p><strong>8. Is it possible to see all the invididual cancer subtypes
+<p><strong>7. Is it possible to see all the invididual cancer subtypes
 that belong to each of the 30 different tumor sites?</strong></p>
 <p><em>Answer: Yes, see</em> <a href="https://raw.githubusercontent.com/sigven/pcgr/master/oncotree_ontology_xref.tsv" class="external-link">oncotree_ontology_xref.tsv</a></p>
-<p><strong>9. Is there any plans to incorporate data from</strong> <a href="https://www.oncokb.org" class="external-link">OncoKB</a> <strong>in PCGR?</strong></p>
+<p><strong>8. Is there any plans to incorporate data from</strong> <a href="https://www.oncokb.org" class="external-link">OncoKB</a> <strong>in PCGR?</strong></p>
 <p><em>Answer: No. PCGR relies upon publicly available open-source
 resources, and further that the PCGR data bundle can be distributed
 freely to the user community. It is our understanding that</em> <a href="https://www.oncokb.org/terms" class="external-link">OncoKB’s terms of use</a> <em>do not
 fit well with this strategy.</em></p>
-<p><strong>10. Is it possible for the users to update the data bundle to
+<p><strong>9. Is it possible for the users to update the data bundle to
 get the most recent versions of all underlying data
 sources?</strong></p>
 <p><em>Answer: As of now, the data bundle is updated only with each
@@ -191,7 +185,7 @@ are outlined in each PCGR report.</em></p>
     <footer><div class="pkgdown-footer-left">
   <p></p>
 <p>Developed by <a href="https://github.com/sigven" class="external-link">Sigve Nakken</a>,
-Peter Diakumis.</p>
+<a href="https://github.com/pdiakumis" class="external-link">Peter Diakumis</a>.</p>
 </div>
 
 <div class="pkgdown-footer-right">

@@ -30,7 +30,7 @@
     
     <a class="navbar-brand me-2" href="index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.13</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.14</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -55,13 +55,14 @@
     <a class="dropdown-item" href="articles/output.html">Output files</a>
     <a class="dropdown-item" href="articles/variant_classification.html">Variant classification</a>
     <a class="dropdown-item" href="articles/annotation_resources.html">Annotation resources</a>
+    <a class="dropdown-item" href="articles/developers.html">Developer notes</a>
   </div>
 </li>
 <li class="nav-item">
   <a class="nav-link" href="articles/faq.html">FAQ</a>
 </li>
 <li class="nav-item">
-  <a class="nav-link" href="news/index.html">Changelog</a>
+  <a class="nav-link" href="articles/CHANGELOG.html">CHANGELOG</a>
 </li>
       </ul>
 <form class="form-inline my-2 my-lg-0" role="search">
@@ -90,7 +91,7 @@
 <h2 id="personal-cancer-genome-reporter">Personal Cancer Genome Reporter<a class="anchor" aria-label="anchor" href="#personal-cancer-genome-reporter"></a>
 </h2>
 <p>The Personal Cancer Genome Reporter (PCGR) is a stand-alone software
-package for functional annotation and translation of individual cancer
+package for functional annotation and translation of individual tumor
 genomes for precision cancer medicine. It interprets both somatic
 SNVs/InDels and copy number aberrations. The software extends basic gene
 and variant annotations from the <a href="http://www.ensembl.org/info/docs/tools/vep/index.html" class="external-link">Ensembl’s
@@ -101,9 +102,9 @@ clinical significance</a>, and interactive HTML output reports permits
 exploration of the final results.</p>
 <p>Example views from the dashboard HTML output:</p>
 <p><img src="img/pcgr_dashboard_views.png"></p>
-<p>PCGR has been developed by scientists affiliated with the <a href="http://cancergenomics.no" class="external-link">Norwegian Cancer Genomics
-Consortium</a>, at the <a href="http://radium.no" class="external-link">Institute for Cancer
-Research/Oslo University Hospital</a>.</p>
+<p>PCGR originates from the <a href="http://cancergenomics.no" class="external-link">Norwegian
+Cancer Genomics Consortium (NCGC)</a>, at the <a href="http://radium.no" class="external-link">Institute for Cancer Research, Oslo University
+Hospital, Norway</a>.</p>
 <div class="section level3">
 <h3 id="example-reports">Example reports<a class="anchor" aria-label="anchor" href="#example-reports"></a>
 </h3>
@@ -127,11 +128,10 @@ in the file names for the flexdashboard reports)</p>
 genomes poses a severe challenge for clinical interpretation. PCGR aims
 to be a comprehensive reporting platform that can</p>
 <ul>
-<li><p>systematically interrogate tumor-specific variants in the context
-of diagnostic, prognostic, and therapeutic biomarkers,</p></li>
-<li><p>prioritize and highlight the most relevant findings, and</p></li>
-<li><p>present the results in a format accessible to clinical
-experts.</p></li>
+<li>systematically interrogate tumor-specific variants in the context of
+known therapeutic and prognostic biomarkers</li>
+<li>prioritize and highlight the most relevant findings</li>
+<li>present the results in a format accessible to clinical experts</li>
 </ul>
 <p>PCGR integrates a <a href="articles/annotation_resources.html">comprehensive set of knowledge
 resources</a> related to tumor biology and therapeutic biomarkers, both
@@ -152,10 +152,13 @@ example</a></p></li>
 <ol style="list-style-type: decimal">
 <li>Details regarding <a href="articles/input.html">PCGR input
 files</a>, and how they should be formatted</li>
-<li>The types of <a href="articles/output.html">PCGR output
+<li>Configuration of <a href="articles/running.html#key-settings">key
+settings</a>
+</li>
+<li>The types and contents of <a href="articles/output.html">PCGR output
 files</a>
 </li>
-<li><a href="articles/variant_classification.html">Tier system
+<li><a href="articles/variant_classification.html">Variant tier system
 implemented in PCGR</a></li>
 <li>The list of <a href="articles/virtual_panels.html">gene and variant
 annotation resources</a> available in PCGR</li>
@@ -210,7 +213,8 @@ Reporter: variant interpretation report for precision oncology</strong>
 <ul class="list-unstyled">
 <li>
 <a href="https://github.com/sigven" class="external-link">Sigve Nakken</a> <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0001-8468-2050" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
-<li>Peter Diakumis <br><small class="roles"> Author, contributor </small> <a href="https://orcid.org/0000-0002-7502-7545" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>
+<a href="https://github.com/pdiakumis" class="external-link">Peter Diakumis</a> <br><small class="roles"> Author, contributor </small> <a href="https://orcid.org/0000-0002-7502-7545" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
 </ul>
 </div>
 
@@ -223,7 +227,7 @@ Reporter: variant interpretation report for precision oncology</strong>
     <footer><div class="pkgdown-footer-left">
   <p></p>
 <p>Developed by <a href="https://github.com/sigven" class="external-link">Sigve Nakken</a>,
-Peter Diakumis.</p>
+<a href="https://github.com/pdiakumis" class="external-link">Peter Diakumis</a>.</p>
 </div>
 
 <div class="pkgdown-footer-right">
