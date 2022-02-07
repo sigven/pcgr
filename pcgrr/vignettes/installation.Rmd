@@ -228,7 +228,7 @@ docker container run -it --rm \
     -v /Users/you/dir1/data:/root/pcgr_data \
     -v /Users/you/dir2/pcgr_inputs:/root/pcgr_inputs \
     -v /Users/you/dir3/pcgr_outputs:/root/pcgr_outputs \
-    sigven/pcgr:v0.9.4 \
+    sigven/pcgr:0.10.14 \
     pcgr \
       --input_vcf "/root/pcgr_inputs/tumor_sample.BRCA.vcf.gz" \
       --pcgr_dir "/root/pcgr_data" \

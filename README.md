@@ -14,7 +14,7 @@ PCGR interprets primarily **somatic SNVs/InDels and copy number aberrations**. T
 - Kataegis detection
 - Microsatellite instability (MSI) classification
 
-If you want to generate a personal report with respect to cancer predisposition for germline variants, we recommend trying the accompanying tool [Cancer Predisposition Sequencing Reporter (CPSR)](https://github.com/sigven/cpsr).
+If you want to interrogate germline variants and their relation to cancer predisposition, we recommend trying the accompanying tool [Cancer Predisposition Sequencing Reporter (CPSR)](https://github.com/sigven/cpsr).
 
 ![PCGR overview](pcgrr/pkgdown/assets/img/pcgr_dashboard_views.png)
 
