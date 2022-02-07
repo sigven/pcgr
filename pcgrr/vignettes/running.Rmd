@@ -226,4 +226,4 @@ This command will run the Conda-based PCGR workflow and produce the following ou
 7. __tumor_sample.COAD.pcgr_acmg.grch37.mutational_signatures.tsv__ - Tab-separated values file with information on contribution of mutational signatures
 8. __tumor_sample.COAD.pcgr_acmg.grch37.json.gz__ - Compressed JSON dump of HTML report content
 9. __tumor_sample.COAD.pcgr_acmg.grch37.cna_segments.tsv.gz__ - Compressed tab-separated values file with annotations of gene transcripts that overlap with somatic copy number aberrations
-10. __tumor_sample.COAD.cpsr_config.rds__ - PCGR configuration object (RDS format), mostly for debugging purposes
+10. __tumor_sample.COAD.pcgr_config.rds__ - PCGR configuration object (RDS format), mostly for debugging purposes
