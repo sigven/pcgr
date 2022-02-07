@@ -1,2 +1,2 @@
 # versioned by bump2version
-__version__ = '0.10.14'
+__version__ = '0.10.15'
