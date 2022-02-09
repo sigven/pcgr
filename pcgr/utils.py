@@ -13,10 +13,8 @@ def error_message(message, logger):
     logger.error("")
     sys.exit(1)
 
-
 def warn_message(message, logger):
     logger.warning(message)
-
 
 def check_subprocess(logger, command, debug):
     if debug:
@@ -47,7 +45,7 @@ def conda_env_path(env, docker_run):
         env_path = f'/opt/mambaforge/envs/{env}'
     else:
         cp = os.environ.get('CONDA_PREFIX')
-        envdir = os.path.dirname(cp)
+        envdir = os.path.dirname(os.path.normpath(cp))
         env_path = os.path.join(envdir, env)
     return env_path
 
@@ -104,6 +102,6 @@ def perl_cmd():
 def get_perl_exports():
     """Environmental exports to use conda installed perl.
     """
-    perl_path = os.path.dirname(perl_cmd())
+    perl_path = os.path.dirname(os.path.normpath(perl_cmd()))
     out = f"unset PERL5LIB && export PATH={perl_path}:\"$PATH\""
     return out
