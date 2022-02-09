@@ -5,7 +5,7 @@ output: rmarkdown::html_document
 
 ## Input files
 
-The PCGR workflow accepts two types of input files:
+The PCGR workflow accepts two main input files:
 
   * An unannotated, single-sample [VCF file](https://github.com/samtools/hts-specs#variant-calling-data-files) (>= v4.2) with called somatic variants (SNVs/InDels)
   * A copy number segment file
@@ -16,10 +16,12 @@ The input VCF is a required input file, while the somatic copy number file is op
 * `--input_vcf` (required argument to `pcgr`)
 * `--input_cna`
 
+In addition to these two main input files, the user can also opt to provide a [panel-of-normals VCF](#panel-of-normals-pon-vcf) file, as well as a [CPSR report (JSON)](#cpsr-report), as input.
+
 ### VCF
 
-* We __strongly__ recommend that the input VCF is compressed and indexed using [bgzip](http://www.htslib.org/doc/tabix.html) and [tabix](http://www.htslib.org/doc/tabix.html)
-* If the input VCF contains [multi-allelic sites](https://glow.readthedocs.io/en/latest/etl/variant-splitter.html), these will be subject to [decomposition](http://genome.sph.umich.edu/wiki/Vt#Decompose). Either way, we encourage that users prepare the input VCF without the presence of multi-allelic sites.
+* We __strongly__ recommend that the input VCF is compressed and indexed using [bgzip](http://www.htslib.org/doc/bgzip.html) and [tabix](http://www.htslib.org/doc/tabix.html)
+* If the input VCF contains [multi-allelic sites](https://glow.readthedocs.io/en/latest/etl/variant-splitter.html), these will be subject to [decomposition](http://genome.sph.umich.edu/wiki/Vt#Decompose). Either way, we encourage that users prepare the input VCF _without the presence of multi-allelic sites_.
 * Variants used for reporting should be designated as `PASS` in the VCF FILTER column. Variants denoted with e.g. `Reject` as a FILTER value will not be subject to analysis in PCGR. For records with undefined values in the FILTER column (`'.'`), these will be considered as `PASS` variants.
 
 #### Formatting of allelic depth/support (DP/AD)
@@ -94,4 +96,4 @@ Importantly, you can configure predefined log(2) thresholds for segments that ar
 
 ### CPSR report
 
-One may feed the contents of a CPSR analysis (https://github.com/sigven/cpsr) with PCGR through the `--cpsr_report` option. This will result in a dedicated germline section of the PCGR report. Note that one should here input the compressed JSON file that is output by CPSR.
+One may feed the output from a cancer predisposition analysis with CPSR (https://github.com/sigven/cpsr) into PCGR through the `--cpsr_report` option. This will result in a dedicated germline section of the PCGR report. Note that one should here input the compressed JSON file that is output by CPSR.
