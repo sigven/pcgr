@@ -31,9 +31,6 @@ For downloading the data bundle, see [STEP 1](#step1) further below.
 
 ## Detailed Installation
 
-**Tip:** Check out the <https://github.com/sigven/pcgr/tree/master/install>
-directory for installation helper scripts.
-
 PCGR requires a __data bundle__ that contains the reference data,
 __sample inputs__ (e.g. somatic variants in a VCF), and an
 __output directory__ to output the results to.
@@ -59,7 +56,8 @@ Download and unpack the human assembly-specific data bundle:
 
 ```bash
 GENOME="grch38" # or "grch37"
-BUNDLE="pcgr.databundle.${GENOME}.20220203.tgz"
+BUNDLE_VERSION="20220203"
+BUNDLE="pcgr.databundle.${GENOME}.${BUNDLE_VERSION}.tgz"
 
 wget http://insilico.hpc.uio.no/pcgr/${BUNDLE}
 gzip -dc ${BUNDLE} | tar xvf -
