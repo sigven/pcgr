@@ -630,7 +630,7 @@ def run_cpsr(arg_dict, host_directories, DOCKER_IMAGE_VERSION):
 
       # export PATH to R conda env Rscript
       rscript = utils.rscript_path(DOCKER_IMAGE_VERSION)
-      cpsrr_script = utils.cpsrr_script_path(DOCKER_IMAGE_VERSION)
+      cpsrr_script = utils.script_path('pcgr', 'bin/cpsr.R', DOCKER_IMAGE_VERSION)
       cpsr_report_command = (
               f"{docker_command_run1} "
               f"{rscript} {cpsrr_script} "

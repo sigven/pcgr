@@ -475,8 +475,8 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
         logger.info('PCGR - STEP 4: Generation of output files - variant interpretation report for precision oncology')
 
         # export PATH to R conda env Rscript
-        rscript = utils.rscript_path(DOCKER_IMAGE_VERSION)
-        pcgrr_script = utils.pcgrr_script_path(DOCKER_IMAGE_VERSION)
+        rscript = utils.script_path('pcgrr', 'bin/Rscript', DOCKER_IMAGE_VERSION)
+        pcgrr_script = utils.script_path('pcgr', 'bin/pcgrr.R', DOCKER_IMAGE_VERSION)
         pcgr_report_command = (
                 f"{docker_cmd_run1} "
                 f"{rscript} {pcgrr_script} "
