@@ -19,13 +19,15 @@ conda install mamba -c conda-forge
 
 mamba create --file ${PCGR_REPO}/pcgr-${PLATFORM}-64.lock --prefix ./pcgr
 mamba create --file ${PCGR_REPO}/pcgrr-${PLATFORM}-64.lock --prefix ./pcgrr
+
+# you need to specify the directory of the conda env when using --prefix
 conda activate ./pcgr
 
 # test that it works
 pcgr --version
 ```
 
-For downloading the data bundle, see `STEP 1` further below.
+For downloading the data bundle, see [STEP 1](#step1) further below.
 
 ## Detailed Installation
 
@@ -43,6 +45,8 @@ Here's an example scenario that will be used in the following sections:
 - output goes to `/Users/you/dir3/pcgr_outputs` (make sure this directory
   exists);
 - your PCGR codebase is installed in `/Users/you/dir4/PCGR`;
+
+<a name="step1"></a>
 
 ### STEP 1: Download data bundle
 
@@ -72,10 +76,10 @@ PCGR_VERSION="0.10.15"
 OUTPUT_DIRECTORY="PCGR"
 
 git clone \
-    -b v${PCGR_VERSION} \
+    -b "v${PCGR_VERSION}" \
     --depth 1 \
     https://github.com/sigven/pcgr.git \
-    ${OUTPUT_DIRECTORY}
+    "${OUTPUT_DIRECTORY}"
 ```
 
 ### STEP 3: Set up Conda or Docker
@@ -120,23 +124,29 @@ conda 4.11.0
 
 #### b) Create PCGR conda environments
 
-The `conda/env` directory in the PCGR codebase contains two YAML files which
+The `conda/env/lock` directory in the PCGR codebase contains two `.lock` files which
 can be used to create the required conda environments for the Python component
 (`pcgr`) and the R components (`pcgrr` (and `cpsr`)). We install the conda
-dependencies for these two environments in the `conda/env` directory:
+dependencies for these two environments in the local `conda/env` directory in the
+following example:
 
 ```bash
 cd /Users/you/dir4/PCGR
 PLATFORM="osx-64" # or "linux-64"
 PCGR_CONDA_ENV_DIR="./conda/env"
 
-mamba create --prefix ${PCGR_CONDA_ENV_DIR}/pcgr --file ${PCGR_CONDA_ENV_DIR}/env/lock/pcgr-${PLATFORM}.lock
-mamba create --prefix ${PCGR_CONDA_ENV_DIR}/pcgrr --file ${PCGR_CONDA_ENV_DIR}/env/lock/pcgrr-${PLATFORM}.lock
+mamba create --prefix ${PCGR_CONDA_ENV_DIR}/pcgr --file ${PCGR_CONDA_ENV_DIR}/lock/pcgr-${PLATFORM}.lock
+mamba create --prefix ${PCGR_CONDA_ENV_DIR}/pcgrr --file ${PCGR_CONDA_ENV_DIR}/lock/pcgrr-${PLATFORM}.lock
+
+## Alternatively, for installing in your central conda directory, use the following:
+# mamba create --name pcgr --file ${PCGR_CONDA_ENV_DIR}/lock/pcgr-${PLATFORM}.lock
+# mamba create --name pcgrr --file ${PCGR_CONDA_ENV_DIR}/lock/pcgrr-${PLATFORM}.lock
 ```
 
 The above process takes 10-15min when installing from scratch. In the end, you
 can confirm your conda environments have been installed correctly (notice how
-the paths are different to the `base` env installation):
+the paths are different to the `base` env installation after using the
+`--prefix` option above):
 
 ```text
 $ (base) conda env list
