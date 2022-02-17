@@ -40,7 +40,7 @@ cpsr_config[['gwas']] <- list()
 cpsr_config[['gwas']][['run']] <- as.logical(as.integer(args[15]))
 cpsr_config[['gwas']][['p_value_min']] <- as.numeric(args[16])
 cpsr_config[['popgen']] <- list()
-cpsr_config[['popgen']][['pop_gnomad']] <- as.character(args[17])
+cpsr_config[['popgen']][['pop_gnomad']] <- toupper(as.character(args[17]))
 cpsr_config[['popgen']][['maf_upper_threshold']] <- as.numeric(args[18])
 
 cpsr_config[['other']] <- list()
