@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.15</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.16</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -99,7 +99,7 @@
 <div class="section level2">
 <h2 id="input-files">Input files<a class="anchor" aria-label="anchor" href="#input-files"></a>
 </h2>
-<p>The PCGR workflow accepts two types of input files:</p>
+<p>The PCGR workflow accepts two main input files:</p>
 <ul>
 <li>An unannotated, single-sample <a href="https://github.com/samtools/hts-specs#variant-calling-data-files" class="external-link">VCF
 file</a> (&gt;= v4.2) with called somatic variants (SNVs/InDels)</li>
@@ -114,17 +114,21 @@ command are used for input files:</p>
 <code>pcgr</code>)</li>
 <li><code>--input_cna</code></li>
 </ul>
+<p>In addition to these two main input files, the user can also opt to
+provide a <a href="#panel-of-normals-pon-vcf">panel-of-normals VCF</a>
+file, as well as a <a href="#cpsr-report">CPSR report (JSON)</a>, as
+input.</p>
 <div class="section level3">
 <h3 id="vcf">VCF<a class="anchor" aria-label="anchor" href="#vcf"></a>
 </h3>
 <ul>
 <li>We <strong>strongly</strong> recommend that the input VCF is
-compressed and indexed using <a href="http://www.htslib.org/doc/tabix.html" class="external-link">bgzip</a> and <a href="http://www.htslib.org/doc/tabix.html" class="external-link">tabix</a>
+compressed and indexed using <a href="http://www.htslib.org/doc/bgzip.html" class="external-link">bgzip</a> and <a href="http://www.htslib.org/doc/tabix.html" class="external-link">tabix</a>
 </li>
 <li>If the input VCF contains <a href="https://glow.readthedocs.io/en/latest/etl/variant-splitter.html" class="external-link">multi-allelic
 sites</a>, these will be subject to <a href="http://genome.sph.umich.edu/wiki/Vt#Decompose" class="external-link">decomposition</a>.
-Either way, we encourage that users prepare the input VCF without the
-presence of multi-allelic sites.</li>
+Either way, we encourage that users prepare the input VCF <em>without
+the presence of multi-allelic sites</em>.</li>
 <li>Variants used for reporting should be designated as
 <code>PASS</code> in the VCF FILTER column. Variants denoted with
 e.g. <code>Reject</code> as a FILTER value will not be subject to
@@ -239,7 +243,8 @@ considered a homozygous deletion, <em>default -0.8</em>)</li>
 <div class="section level3">
 <h3 id="cpsr-report">CPSR report<a class="anchor" aria-label="anchor" href="#cpsr-report"></a>
 </h3>
-<p>One may feed the contents of a CPSR analysis (<a href="https://github.com/sigven/cpsr" class="external-link uri">https://github.com/sigven/cpsr</a>) with PCGR through the
+<p>One may feed the output from a cancer predisposition analysis with
+CPSR (<a href="https://github.com/sigven/cpsr" class="external-link uri">https://github.com/sigven/cpsr</a>) into PCGR through the
 <code>--cpsr_report</code> option. This will result in a dedicated
 germline section of the PCGR report. Note that one should here input the
 compressed JSON file that is output by CPSR.</p>
