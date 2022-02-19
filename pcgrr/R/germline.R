@@ -496,11 +496,15 @@ get_population_tag <- function(population_code, db = "1KG", subset = NA) {
   pop_tag_info <-
     list("vcf_tag" = paste0(toupper(population_code), "_AF_", db),
          "pop_description" = NA)
-  if (db == "GNOMAD" & subset == "non_cancer") {
-    pop_tag_info <-
-      list("vcf_tag" =
-             paste0("NON_CANCER_AF_", toupper(population_code)),
-           "pop_description" = NA)
+  if (db == "GNOMAD"){
+    if(!is.na(subset)){
+      if(subset == "non_cancer"){
+        pop_tag_info <-
+          list("vcf_tag" =
+                 paste0("NON_CANCER_AF_", toupper(population_code)),
+               "pop_description" = NA)
+      }
+    }
   }
 
   pop_descriptions_1KG <-
@@ -594,12 +598,14 @@ get_population_tag <- function(population_code, db = "1KG", subset = NA) {
   }
   if (db == "GNOMAD") {
     pop_entry <- dplyr::filter(pop_descriptions_gnomad,
-                               .data$code == population_code)
+                               .data$code == tolower(population_code))
     pop_tag_info[["pop_description"]] <- pop_entry$pop_description
-    if (subset == "non_cancer") {
-      pop_entry <- dplyr::filter(pop_descriptions_gnomad_non_cancer,
-                                 .data$code == population_code)
-      pop_tag_info[["pop_description"]] <- pop_entry$pop_description
+    if(!is.na(subset)){
+      if (subset == "non_cancer") {
+        pop_entry <- dplyr::filter(pop_descriptions_gnomad_non_cancer,
+                                   .data$code == tolower(population_code))
+        pop_tag_info[["pop_description"]] <- pop_entry$pop_description
+      }
     }
 
   }
