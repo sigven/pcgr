@@ -1,6 +1,6 @@
 package:
   name: r-pcgrr
-  version: 0.10.17 # versioned by bump2version
+  version: 0.10.18 # versioned by bump2version
 
 source:
   path: ../../../pcgrr

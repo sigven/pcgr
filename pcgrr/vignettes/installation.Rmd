@@ -10,7 +10,7 @@ is, you only need to run the following commands in order to install the PCGR
 software requirements:
 
 ```bash
-PCGR_VERSION="0.10.17"
+PCGR_VERSION="0.10.18"
 PCGR_REPO="https://raw.githubusercontent.com/sigven/pcgr/v${PCGR_VERSION}/conda/env/lock/"
 PLATFORM="linux" # or "osx"
 
@@ -70,7 +70,7 @@ Download and unpack the latest software release from <https://github.com/sigven/
 Alternatively if you have `git` installed, you can do:
 
 ```bash
-PCGR_VERSION="0.10.17"
+PCGR_VERSION="0.10.18"
 OUTPUT_DIRECTORY="PCGR"
 
 git clone \
@@ -236,7 +236,7 @@ docker container run -it --rm \
     -v /Users/you/dir1/data:/root/pcgr_data \
     -v /Users/you/dir2/pcgr_inputs:/root/pcgr_inputs \
     -v /Users/you/dir3/pcgr_outputs:/root/pcgr_outputs \
-    sigven/pcgr:0.10.17 \
+    sigven/pcgr:0.10.18 \
     pcgr \
       --input_vcf "/root/pcgr_inputs/tumor_sample.BRCA.vcf.gz" \
       --pcgr_dir "/root/pcgr_data" \
