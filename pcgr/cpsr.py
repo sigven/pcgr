@@ -629,7 +629,7 @@ def run_cpsr(arg_dict, host_directories, DOCKER_IMAGE_VERSION):
       logger.info("STEP 4: Generation of output files - Cancer predisposition sequencing report")
 
       # export PATH to R conda env Rscript
-      rscript = utils.rscript_path(DOCKER_IMAGE_VERSION)
+      rscript = utils.script_path('pcgrr', 'bin/Rscript', DOCKER_IMAGE_VERSION)
       cpsrr_script = utils.script_path('pcgr', 'bin/cpsr.R', DOCKER_IMAGE_VERSION)
       cpsr_report_command = (
               f"{docker_command_run1} "
