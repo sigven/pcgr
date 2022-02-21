@@ -3,15 +3,18 @@ title: "Changelog"
 output: rmarkdown::html_document
 ---
 
-## x.x.x - February 2022
+## v1.0.0
 
-* Data updates: ClinVar, GWAS catalog, GENCODE, CIViC, CancerMine, KEGG, ChEMBL, Open Targets Platform, Disease Ontology, Experimental Factor Ontology
+ * Date: **2022-02-xx**
+
+ * Data updates: ClinVar, GWAS catalog, GENCODE, CIViC, CancerMine, KEGG, ChEMBL, Open Targets Platform, Disease Ontology, Experimental Factor Ontology
 
 ##### Added
 
 * Command-line options
   - VEP options
 	   * `--vep_gencode_all` - use all GENCODE transcripts during VEP annotation (not only the basic GENCODE set)
+	   * `--prevalence_reference_signatures` - set minimum prevalence (percent) for selection of reference signatures included in refitting procedure for a given tumor type
 
 ##### Changed
 
@@ -21,7 +24,9 @@ output: rmarkdown::html_document
 
 * VCF validation step. Feedback from users suggested that Ensembl's `vcf-validator` was often too stringent so its use has been deprecated. The `--no_vcf_validate` option remains for backwards compatibility.
 
-## 0.9.2 - June 30th 2021
+## v0.9.2
+
+* Date: **2021-06-30**
 
 * Data updates: ClinVar, GWAS catalog, CIViC, CancerMine, dbNSFP, KEGG, ChEMBL, Disease Ontology/EFO, Open Targets Platform, UniProt KB, GENCODE
 * Software upgrades: R v4.1, Bioconductor v3.13, VEP (104) ++
@@ -85,8 +90,19 @@ output: rmarkdown::html_document
  * Command-line options
     * `--conf` - TOML-based configuration file
 
-## 0.9.1 - November 30th 2020
- * Data updates: ClinVar, GWAS catalog, CIViC, CancerMine, dbNSFP, KEGG, ChEMBL/DGIdb, Disease Ontology, Experimental Factor Ontology
+## v0.9.1
+
+ * Date: **2020-11-30**
+
+ * Data updates: 
+   * ClinVar, 
+   * GWAS catalog
+   * CIViC
+   * CancerMine
+   * dbNSFP
+   * KEGG
+   * ChEMBL/DGIdb
+   * Disease Ontology, Experimental Factor Ontology
 
 ##### Added
  * added possibility to configure algorithm for TMB calculation, optional argument `tmb_algorithm` - all coding variants (__all_coding__) or non-synonymous variants only (__nonsyn__)
@@ -101,10 +117,12 @@ output: rmarkdown::html_document
 		 * bedtools, samtools, numpy, cython, scipy, cyvcf2, toml, pandas
 
 
-#### 0.9.0rc - September 24th 2020
+## v0.9.0rc
 
-- Data updates: ClinVar, GWAS catalog, GENCODE, CIViC, CancerMine, UniProt KB, dbNSFP, Pfam, KEGG, Open Targets Platform
-- Software updates: VEP 101
+ * Date: **2020-09-24**
+
+ - Data updates: ClinVar, GWAS catalog, GENCODE, CIViC, CancerMine, UniProt KB, dbNSFP, Pfam, KEGG, Open Targets Platform
+ - Software updates: VEP 101
 
 ##### Fixed
  * An extra comma was mistakenly present in the template for tier 2 variants, issue [#96](https://github.com/sigven/pcgr/issues/96)
@@ -141,15 +159,19 @@ output: rmarkdown::html_document
  * Detailed documentation of report contents are added to the Documentation section
  * References are updated and all provided with DOI
 
-## 0.8.4 - November 18th 2019
+## v0.8.4
+ 
+ * Date: **2019-11-18**
 
-- Data updates: ClinVar, CIViC, CancerMine, UniProt KB
-- Software updates: VEP 98.3
+ - Data updates: ClinVar, CIViC, CancerMine, UniProt KB
+ - Software updates: VEP 98.3
 
-## 0.8.3 - October 14th 2019
+## v0.8.3
 
-- Data updates: ClinVar, GWAS catalog, GENCODE, CIViC, CancerMine
-- Software updates: VEP 98.2, vcf2tsv
+ * Date: **2019-10-14**
+
+ - Data updates: ClinVar, GWAS catalog, GENCODE, CIViC, CancerMine
+ - Software updates: VEP 98.2, vcf2tsv
 
 ##### Fixed
  * More improved mapping between Ensembl transcripts and UniProt accessions (using also RefSeq accessions where available)
@@ -161,10 +183,12 @@ output: rmarkdown::html_document
  * Option _target_size_mb_ in pcgr.py replaces _target_size_mb_ in configuration file, more convenient in terms of configuring runs
  * Option _tumor_type_ in pcgr.py replaces _tumor_type_ in configuration file
 
-## 0.8.2 - Sep 29th 2019
+## v0.8.2
 
-- Data updates: ClinVar, GWAS catalog, GENCODE, DiseaseOntology, CIViC, CancerMine, UniProt KB
-- Software updates: VEP 97.3, vcfanno [0.3.2](https://github.com/brentp/vcfanno/releases/tag/v0.3.2), LOFTEE (VEP plugin) [1.0.3](https://github.com/konradjk/loftee/releases)
+ * Date: **2019-09-29**
+
+ - Data updates: ClinVar, GWAS catalog, GENCODE, DiseaseOntology, CIViC, CancerMine, UniProt KB
+ - Software updates: VEP 97.3, vcfanno [0.3.2](https://github.com/brentp/vcfanno/releases/tag/v0.3.2), LOFTEE (VEP plugin) [1.0.3](https://github.com/konradjk/loftee/releases)
 
 ##### Fixed
  * Bug in concatenation of clinical evidence items from different sources (CIVIC + CBMDB) (issues [#83](https://github.com/sigven/pcgr/issues/83),[#87](https://github.com/sigven/pcgr/issues/87))
@@ -179,12 +203,16 @@ output: rmarkdown::html_document
  * Capturing allelic depth (t_depth, t_ref_count etc.) in vcf2maf output (enhancement [#52](https://github.com/sigven/pcgr/issues/52))
  * Option _tumor_only_ in pcgr.py, replaces _vcf_tumor_only_ in configuration file, more convenient in terms of configuration
 
-## 0.8.1 - May 22nd 2019
+## v0.8.1
+
+ * Date: **2019-05-22**
 
 ##### Added
   * *Cancer_NOS.toml* as configuration file for unspecified tumor types
 
-## 0.8.0 - May 20th 2019
+## v0.8.0 
+
+ * Date: **2019-05-20**
 
 ##### Fixed
  * Bug in value box for Tier 2 variants (new line carriage) [Issue #73](https://github.com/sigven/pcgr/issues/73)
@@ -241,7 +269,9 @@ output: rmarkdown::html_document
  * Original tier model 'pcgr'
 
 
-## 0.7.0 - Nov 27th 2018
+## v0.7.0
+ 
+ * Date: **2018-11-27**
 
 ##### Fixed
  * Bug in assignment of variants to tier1/tier2 [Issue #61](https://github.com/sigven/pcgr/issues/61)
@@ -281,13 +311,17 @@ output: rmarkdown::html_document
  * Moved from [TSGene 2.0](https://bioinfo.uth.edu/TSGene/) to [CancerMine](https://zenodo.org/record/1336650#.W9QMdRMzaL4) for annotation of tumor suppressor genes and proto-oncogenes
 	 * A minimum of n=3 citations were required to include literatured-mined tumor suppressor genes and proto-oncogenes from CancerMine
 
-## 0.6.2.1 - May 14th 2018
+## v0.6.2.1
+
+ * Date: **2018-05-14**
 
 ##### Fixed
 
  * Bug in copy number annotation (broad/focal)
 
-## 0.6.2 - May 9th 2018
+## v0.6.2
+
+ * Date: **2018-05-09**
 
 ##### Fixed
  * Bug in copy number segment display (missing variable initalization, [Issue #34](https://github.com/sigven/pcgr/issues/34)))
@@ -304,15 +338,19 @@ output: rmarkdown::html_document
  * Issue warning for copy number segment that goes beyond chromosomal lengths of specified assembly (segments will be skipped)
  * Added missing subtypes for 'Skin_Cancer_NOS' in the cancer phenotype dataset
 
-## 0.6.1 - May 2nd 2018
+## v0.6.1
 
+ * Date: **2018-05-02**
+ 
 ##### Fixed
  * Bug in tier assignment 'pcgr_acmg' (case for no variants in tier1,2,3)
  * Bug in tier assignment 'pcgr_acmg' (no tumor type specified, evidence items with weak support detected)
  * Bug: duplicated variants in 'Tier 3' resulting from genes encoded with dual roles as tumor suppressor genes/oncogenes
  * Bug: duplicated variants in 'Tier 1/Noncoding variants' resulting from rare cases of noncoding variants occurring in Tier 1 (synonymous variants with biomarker role)
 
-## 0.6.0 - April 25th 2018
+## v0.6.0
+
+ * Date: **2018-04-25**
 
 ##### Added
  * New argument in pcgr.py
