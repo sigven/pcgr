@@ -77,11 +77,12 @@ p$add_argument('msigs_run', type='integer')           # 42
 p$add_argument('msigs_mut_lim', type='double')        # 43
 p$add_argument('msigs_all_ref_sigs', type='integer')  # 44
 p$add_argument('msigs_incl_art_sigs', type='integer') # 45
+p$add_argument('msigs_prevalence_ref_sigs', type='integer') # 46
 # cna args
 cna_args <- c('log_r_homdel', 'log_r_gain', 'cna_overlap_pct')
-p$add_argument('log_r_homdel', type='double')      # 46
-p$add_argument('log_r_gain', type='double')        # 47
-p$add_argument('cna_overlap_pct', type='double')   # 48
+p$add_argument('log_r_homdel', type='double')      # 47
+p$add_argument('log_r_gain', type='double')        # 48
+p$add_argument('cna_overlap_pct', type='double')   # 49
 # allelic support args
 allelic_support_args <- c(
   'tumor_af_min', 'tumor_dp_min',
@@ -89,33 +90,33 @@ allelic_support_args <- c(
   'tumor_af_tag', 'tumor_dp_tag',
   'control_af_tag', 'control_dp_tag',
   'call_conf_tag')
-p$add_argument('tumor_af_min', type='double')   # 49
-p$add_argument('tumor_dp_min', type='double')   # 50
-p$add_argument('control_dp_min', type='double') # 51
-p$add_argument('control_af_max', type='double') # 52
-p$add_argument('tumor_af_tag')    # 53
-p$add_argument('tumor_dp_tag')    # 54
-p$add_argument('control_af_tag')  # 55
-p$add_argument('control_dp_tag')  # 56
-p$add_argument('call_conf_tag')   # 57
+p$add_argument('tumor_af_min', type='double')   # 50
+p$add_argument('tumor_dp_min', type='double')   # 51
+p$add_argument('control_dp_min', type='double') # 52
+p$add_argument('control_af_max', type='double') # 53
+p$add_argument('tumor_af_tag')    # 54
+p$add_argument('tumor_dp_tag')    # 55
+p$add_argument('control_af_tag')  # 56
+p$add_argument('control_dp_tag')  # 57
+p$add_argument('call_conf_tag')   # 58
 # clinicaltrials
-p$add_argument('clinicaltrials_run', type='integer')  # 58
+p$add_argument('clinicaltrials_run', type='integer')  # 59
 # other
-p$add_argument('vep_n_forks', type='integer')         # 59
-p$add_argument('vep_buffer_size', type='integer')     # 60
-p$add_argument('vep_no_intergenic', type='integer')   # 61
-p$add_argument('vep_pick_order')                      # 62
-p$add_argument('vep_regulatory', type='integer')      # 63
-p$add_argument('vep_gencode_all', type='integer')     # 64
-p$add_argument('vcf2maf', type='integer')             # 65
-p$add_argument('list_noncoding', type='integer')      # 66
+p$add_argument('vep_n_forks', type='integer')         # 60
+p$add_argument('vep_buffer_size', type='integer')     # 61
+p$add_argument('vep_no_intergenic', type='integer')   # 62
+p$add_argument('vep_pick_order')                      # 63
+p$add_argument('vep_regulatory', type='integer')      # 64
+p$add_argument('vep_gencode_all', type='integer')     # 65
+p$add_argument('vcf2maf', type='integer')             # 66
+p$add_argument('list_noncoding', type='integer')      # 67
 # preserved_info_tags
-p$add_argument('preserved_info_tags')                 # 67
+p$add_argument('preserved_info_tags')                 # 68
 # visual
-p$add_argument('report_theme')                        # 68
-p$add_argument('nonfloating_toc', type='integer')     # 69
+p$add_argument('report_theme')                        # 69
+p$add_argument('nonfloating_toc', type='integer')     # 70
 # other
-p$add_argument('vcf_no_validation', type='integer')   # 70
+p$add_argument('vcf_no_validation', type='integer')   # 71
 
 args <- p$parse_args()
 
@@ -130,7 +131,8 @@ pcgr_config <- list(
   msigs = list(run = as.logical(args[['msigs_run']]),
                mutation_limit = args[['msigs_mut_lim']],
                all_reference_signatures = as.logical(args[['msigs_all_ref_sigs']]),
-               include_artefact_signatures = as.logical(args[['msigs_incl_art_sigs']])
+               include_artefact_signatures = as.logical(args[['msigs_incl_art_sigs']]),
+               prevalence_reference_signatures = as.integer(args[['msigs_prevalence_ref_sigs']])
   ),
   cna = args[cna_args],
   allelic_support = args[allelic_support_args],

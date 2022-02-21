@@ -42,6 +42,7 @@ def create_config(arg_dict):
     config_options['msigs']['mutation_limit'] = int(arg_dict['min_mutations_signatures'])
     config_options['msigs']['all_reference_signatures'] = int(arg_dict['all_reference_signatures'])
     config_options['msigs']['include_artefact_signatures'] = int(arg_dict['include_artefact_signatures'])
+    config_options['msigs']['prevalence_reference_signatures'] = int(arg_dict['prevalence_reference_signatures'])
 
     config_options['tmb'] = {}
     config_options['tmb']['run'] = int(arg_dict['estimate_tmb'])

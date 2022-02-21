@@ -431,8 +431,7 @@ init_cna_content <- function(rep = NULL){
   rep[["variant_set"]][["tier2"]] <-
     data.frame()
   for (t in c("n_cna_loss", "n_cna_gain")) {
-    rep[["v_stat"]][[t]] <-
-      data.frame()
+    rep[["v_stat"]][[t]] <- 0
   }
   for (t in c("segment", "oncogene_gain", "tsgene_loss",
               "other_target", "biomarker", "tier1", "tier2")) {

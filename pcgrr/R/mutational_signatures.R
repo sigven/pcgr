@@ -33,6 +33,7 @@ generate_report_data_signatures_mp <-
     prevalent_site_signatures <-
       pcgrr::get_prevalent_site_signatures(
         site = pcgr_config[["t_props"]][["tumor_type"]],
+        min_prevalence_pct = pcgr_config[["msigs"]][["prevalence_reference_signatures"]],
         pcgr_data = pcgr_data,
         incl_poss_artifacts =
           pcgr_config[["msigs"]][["include_artefact_signatures"]])
@@ -41,6 +42,7 @@ generate_report_data_signatures_mp <-
     prevalent_site_signatures <-
       pcgrr::get_prevalent_site_signatures(
         site = "Any",
+        min_prevalence_pct = pcgr_config[["msigs"]][["prevalence_reference_signatures"]],
         pcgr_data = pcgr_data,
         incl_poss_artifacts =
           pcgr_config[["msigs"]][["include_artefact_signatures"]])
@@ -239,7 +241,7 @@ generate_report_data_signatures_mp <-
 #' @param site Primary tumor site
 #' @param custom_collection Custom collection of signatures from COSMIC
 #' @param pcgr_data PCGR data object
-#' @param prevalence_pct Minimum prevalence (pct) of signature in cohorts associated with primary site
+#' @param min_prevalence_pct Minimum prevalence (pct) of signature in cohorts associated with primary site
 #' @param incl_poss_artifacts logical indicating if artefact signatures are to be included
 #'
 #' @export
@@ -247,13 +249,13 @@ get_prevalent_site_signatures <-
   function(site = "Any",
            custom_collection = NULL,
            pcgr_data = NULL,
-           prevalence_pct = 2,
+           min_prevalence_pct = 5,
            incl_poss_artifacts = T) {
 
     if(is.null(custom_collection)){
       log4r_info(paste0(
         "Retrieving prevalent (prevalence >= ",
-        prevalence_pct, " percent) reference signatures for ",
+        min_prevalence_pct, " percent) reference signatures for ",
         site, ", using COSMIC v3.2 collection"))
     }
     log4r_info(paste0(
@@ -271,11 +273,11 @@ get_prevalent_site_signatures <-
         msg = "Reference aetiologies must be of type data.frame()"))
     invisible(
       assertthat::assert_that(
-        prevalence_pct == 0 |
-          prevalence_pct == 2 | prevalence_pct == 5 |
-          prevalence_pct == 10 | prevalence_pct == 15 |
-          prevalence_pct == 20,
-        msg = "Argument 'prevalence_pct' must be any of '0, 2, 5, 10, 15 or 20'"))
+        min_prevalence_pct == 0 |
+          min_prevalence_pct == 2 | min_prevalence_pct == 5 |
+          min_prevalence_pct == 10 | min_prevalence_pct == 15 |
+          min_prevalence_pct == 20,
+        msg = "Argument 'min_prevalence_pct' must be any of '0, 2, 5, 10, 15 or 20'"))
 
     valid_signature_ids <-
       unique(pcgr_data[["mutational_signatures"]][["aetiologies"]]$signature_id)
@@ -345,28 +347,28 @@ get_prevalent_site_signatures <-
                         .data$comments) %>%
           dplyr::distinct()
 
-        if (prevalence_pct > 0) {
-          if (prevalence_pct == 5) {
+        if (min_prevalence_pct > 0) {
+          if (min_prevalence_pct == 5) {
             signatures_prevalence <- signatures_prevalence %>%
               dplyr::filter(.data$prevalence_above_5pct == T |
                               is.na(.data$prevalence_above_5pct))
-          }else if (prevalence_pct == 10) {
+          }else if (min_prevalence_pct == 10) {
             signatures_prevalence <- signatures_prevalence %>%
               dplyr::filter(.data$prevalence_above_10pct == T |
                               is.na(.data$prevalence_above_10pct))
           }
-          else if (prevalence_pct == 15) {
+          else if (min_prevalence_pct == 15) {
             signatures_prevalence <- signatures_prevalence %>%
               dplyr::filter(.data$prevalence_above_15pct == T |
                               is.na(.data$prevalence_above_15pct))
-          }else if (prevalence_pct == 20) {
+          }else if (min_prevalence_pct == 20) {
             signatures_prevalence <- signatures_prevalence %>%
               dplyr::filter(.data$prevalence_above_20pct == T |
                               is.na(.data$prevalence_above_20pct))
-          }else if (prevalence_pct == 2){
+          }else if (min_prevalence_pct == 2){
             signatures_prevalence <- signatures_prevalence %>%
               dplyr::filter(!is.na(.data$prevalence_pct)) %>%
-              dplyr::filter(.data$prevalence_pct >= prevalence_pct)
+              dplyr::filter(.data$prevalence_pct >= min_prevalence_pct)
           }
         }
         signatures_prevalence <- signatures_prevalence %>%

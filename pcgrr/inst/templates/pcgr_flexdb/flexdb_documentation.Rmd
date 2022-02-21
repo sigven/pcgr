@@ -44,6 +44,7 @@ Key report configuration settings:
   * Minimum number of mutations required: __`r pcg_report[['metadata']][['config']][['msigs']][['mutation_limit']]`__
   * All reference signatures: <b> __`r pcg_report[['metadata']][['config']][['msigs']][['all_reference_signatures']]`__ </b>
   * Inclusion of artefact signatures: <b> __`r pcg_report[['metadata']][['config']][['msigs']][['include_artefact_signatures']]`__ </b>
+  * Minimum tumor-type prevalence (percent) of reference signatures used for refitting: <b> __`r pcg_report[['metadata']][['config']][['msigs']][['prevalence_reference_signatures']]`__</b>
 * Clinical trial inclusion: <b> __`r trial_inclusion`__ </b>
 * Variant Effect Predictor (VEP) settings:
   * Transcript set: __`r transcript_set_gencode`__
