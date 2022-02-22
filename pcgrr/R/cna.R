@@ -348,7 +348,7 @@ get_cna_overlapping_transcripts <- function(cna_df, pcgr_data) {
           chrom = as.character(GenomeInfoDb::seqnames(ranges))) %>%
         dplyr::mutate(
           ensembl_gene_id = stringr::str_replace(
-            ensembl_gene_id, "\\.[0-9]{1,}$", ""
+            .data$ensembl_gene_id, "\\.[0-9]{1,}$", ""
           )
         ) %>%
         dplyr::rowwise() %>%

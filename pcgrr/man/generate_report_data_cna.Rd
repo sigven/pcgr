@@ -9,6 +9,7 @@ generate_report_data_cna(
   pcgr_data,
   sample_name,
   pcgr_config,
+  oncotree,
   transcript_overlap_pct = 100
 )
 }
@@ -20,6 +21,8 @@ generate_report_data_cna(
 \item{sample_name}{sample identifier}
 
 \item{pcgr_config}{Object with PCGR configuration parameters}
+
+\item{oncotree}{Data frame with phenotype terms relevant for tumor type}
 
 \item{transcript_overlap_pct}{required aberration overlap fraction
 (percent) for reported transcripts (default 100 percent)}

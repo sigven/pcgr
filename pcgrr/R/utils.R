@@ -2334,8 +2334,8 @@ custom_bed_genes <- function(bed_file, pcgr_data) {
                            comment.char = "", quote = "", sep = "\t") %>%
     magrittr::set_colnames(c("chromosome", "segment_start", "segment_end", "onco_xref")) %>%
     ## ignore GWAS variants and secondary findings when detecting the custom target set
-    dplyr::filter(!stringr::str_detect(onco_xref, "^rs[0-9]{1,}")) %>%
-    dplyr::filter(!stringr::str_detect(onco_xref,"\\|ACMG_SF30\\|")) %>%
+    dplyr::filter(!stringr::str_detect(.data$onco_xref, "^rs[0-9]{1,}")) %>%
+    dplyr::filter(!stringr::str_detect(.data$onco_xref,"\\|ACMG_SF30\\|")) %>%
     dplyr::rowwise() %>%
     dplyr::mutate(symbol = unlist(strsplit(.data$onco_xref, "\\|"))[4]) %>%
     dplyr::select(.data$symbol) %>%
