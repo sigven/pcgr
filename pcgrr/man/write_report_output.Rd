@@ -10,7 +10,7 @@ write_report_output(
   config,
   tier_model = "pcgr_acmg",
   output_format = "html",
-  flexdb = F
+  flexdb = FALSE
 )
 }
 \arguments{

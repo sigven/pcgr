@@ -9,7 +9,7 @@ get_prevalent_site_signatures(
   site = "Any",
   custom_collection = NULL,
   pcgr_data = NULL,
-  prevalence_pct = 2,
+  min_prevalence_pct = 5,
   incl_poss_artifacts = T
 )
 }
@@ -20,7 +20,7 @@ get_prevalent_site_signatures(
 
 \item{pcgr_data}{PCGR data object}
 
-\item{prevalence_pct}{Minimum prevalence (pct) of signature in cohorts associated with primary site}
+\item{min_prevalence_pct}{Minimum prevalence (pct) of signature in cohorts associated with primary site}
 
 \item{incl_poss_artifacts}{logical indicating if artefact signatures are to be included}
 }
