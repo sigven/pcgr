@@ -11,18 +11,16 @@ PCGR generates multiple output files, including interactive HTML reports and pur
 
 An interactive and tier-structured HTML report (dashboard-like) that shows the most relevant findings in the query cancer genome has the following naming convention:
 
-<**sample_id**>.pcgr_acmg.<**genome_assembly**>.flexdb.html
-
- - The __sample_id__ is provided as input by the user, and reflects a unique identifier of the tumor-normal sample pair to be analyzed.
+- `<sample_id>.pcgr_acmg.<genome_assembly>.flexdb.html`
+  - The __sample_id__ is provided as input by the user, and reflects a unique identifier of the tumor-normal sample pair to be analyzed.
 
 
 ### HTML report - rmarkdown
 
 An interactive and tier-structured HTML report that shows the most relevant findings in the query cancer genome has the following naming convention:
 
-<**sample_id**>.pcgr_acmg.<**genome_assembly**>.html
-
- - The __sample_id__ is provided as input by the user, and reflects a unique identifier of the tumor-normal sample pair to be analyzed.
+- `<sample_id>.pcgr_acmg.<genome_assembly>.html`
+  - The __sample_id__ is provided as input by the user, and reflects a unique identifier of the tumor-normal sample pair to be analyzed.
 
 The report is structured in seven main sections, described in more detail below:
 
