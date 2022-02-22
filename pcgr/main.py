@@ -62,7 +62,7 @@ def cli():
     optional_signatures.add_argument("--min_mutations_signatures", type=int, default=200, dest="min_mutations_signatures", help="Minimum number of SNVs required for reconstruction of mutational signatures (SBS) by MutationalPatterns (default: %(default)s, minimum n = 100)")
     optional_signatures.add_argument("--all_reference_signatures", action="store_true", help="Use all reference mutational signatures (SBS, n = 67) in signature reconstruction rather than only those already attributed to the tumor type (default: %(default)s)")
     optional_signatures.add_argument('--include_artefact_signatures', action="store_true", help="Include sequencing artefacts in the collection of reference signatures (default: %(default)s")
-    optional_signatures.add_argument('--prevalence_reference_signatures', type=int, default=5, choices=[0,2,5,10,15,20], help="Minimum tumor-type prevalence (in percent) of reference signatures to be included in refitting procedure (default: %(default)s)")
+    optional_signatures.add_argument('--prevalence_reference_signatures', type=int, default=5, choices=[1,2,5,10,15,20], help="Minimum tumor-type prevalence (in percent) of reference signatures to be included in refitting procedure (default: %(default)s)")
 
     optional_other.add_argument("--cpsr_report", dest="cpsr_report", help="CPSR report file (Gzipped JSON - file ending with 'cpsr.<genome_assembly>.json.gz' -  germline report of patient's blood/control sample")
     optional_other.add_argument("--vcf2maf", action="store_true", help="Generate a MAF file for input VCF using https://github.com/mskcc/vcf2maf (default: %(default)s)")

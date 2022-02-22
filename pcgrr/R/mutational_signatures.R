@@ -241,7 +241,8 @@ generate_report_data_signatures_mp <-
 #' @param site Primary tumor site
 #' @param custom_collection Custom collection of signatures from COSMIC
 #' @param pcgr_data PCGR data object
-#' @param min_prevalence_pct Minimum prevalence (pct) of signature in cohorts associated with primary site
+#' @param min_prevalence_pct Minimum prevalence (pct) of signature in cohorts associated with primary site -
+#' used to select reference signatures for inclusion in signature reconstruction
 #' @param incl_poss_artifacts logical indicating if artefact signatures are to be included
 #'
 #' @export
@@ -273,7 +274,7 @@ get_prevalent_site_signatures <-
         msg = "Reference aetiologies must be of type data.frame()"))
     invisible(
       assertthat::assert_that(
-        min_prevalence_pct == 0 |
+        min_prevalence_pct == 1 |
           min_prevalence_pct == 2 | min_prevalence_pct == 5 |
           min_prevalence_pct == 10 | min_prevalence_pct == 15 |
           min_prevalence_pct == 20,
@@ -365,7 +366,7 @@ get_prevalent_site_signatures <-
             signatures_prevalence <- signatures_prevalence %>%
               dplyr::filter(.data$prevalence_above_20pct == T |
                               is.na(.data$prevalence_above_20pct))
-          }else if (min_prevalence_pct == 2){
+          }else if (min_prevalence_pct == 2 | min_prevalence_pct == 1){
             signatures_prevalence <- signatures_prevalence %>%
               dplyr::filter(!is.na(.data$prevalence_pct)) %>%
               dplyr::filter(.data$prevalence_pct >= min_prevalence_pct)
