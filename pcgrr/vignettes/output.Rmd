@@ -367,7 +367,7 @@ The following variables are included in the tiered TSV file (VCF tags issued by 
 | 2. `POS` | Position (VCF-based) |
 | 3. `REF` | Reference allele |
 | 4. `ALT` | Alternate allele |
-| 5. `GENOMIC_CHANGE` | Identifier for variant at the genome (VCF) level, e.g. `1:g.152382569A>G`. Format: `<chrom>: g.<position><ref_allele><alt_allele>` |
+| 5. `GENOMIC_CHANGE` | Identifier for variant at the genome (VCF) level, e.g. `1:g.152382569A>G`. Format: `<chrom>:g.<position><ref_allele><alt_allele>` |
 | 6. `GENOME_VERSION` | Assembly version, e.g. GRCh37 |
 | 7. `VCF_SAMPLE_ID` | Sample identifier |
 | 8. `VARIANT_CLASS` | Variant type, e.g. SNV/insertion/deletion |
@@ -391,7 +391,7 @@ The following variables are included in the tiered TSV file (VCF tags issued by 
 | 26. `PROTEIN_DOMAIN` | Protein domain description (Pfam) |
 | 27. `CODING_STATUS` | Coding variant status wrt. protein alteration (`coding` or `noncoding`) |
 | 28. `EXONIC_STATUS` | Exonic variant status (`exonic` or `nonexonic`) |
-| 29. `CDS_CHANGE` | composite VEP-based variable for coding change, format: `Consequence : Feature : cDNA_position : EXON : HGVSp_short`  |
+| 29. `CDS_CHANGE` | composite VEP-based variable for coding change, format: `Consequence:Feature:cDNA_position:EXON:HGVSp_short`  |
 | 30. `HGVSp` | |
 | 31. `HGVSc` | |
 | 32. `REGULATORY_ANNOTATION` | Regulatory annotations (promoter/enhancer/TF\_binding site overlap etc.) from VEP (optional) |

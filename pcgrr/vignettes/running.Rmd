@@ -121,7 +121,7 @@ Mutational signature options:
   --min_mutations_signatures MIN_MUTATIONS_SIGNATURES - Minimum number of SNVs required for reconstruction of mutational signatures (SBS) by MutationalPatterns (default: 200, minimum n = 100)
   --all_reference_signatures - Use all reference mutational signatures (SBS, n = 67) in signature reconstruction rather than only those already attributed to the tumor type (default: False)
   --include_artefact_signatures - Include sequencing artefacts in the collection of reference signatures (default: False
-  --prevalence_reference_signatures {0,2,5,10,15,20} - Minimum tumor-type prevalence (in percent) of reference signatures to be included in refitting procedure (default: 5)
+  --prevalence_reference_signatures {1,2,5,10,15,20} - Minimum tumor-type prevalence (in percent) of reference signatures to be included in refitting procedure (default: 5)
 
 Tumor-only options:
   --tumor_only          - Input VCF comes from tumor-only sequencing, calls will be filtered for variants of germline origin, (default: False)
