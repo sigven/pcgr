@@ -36,6 +36,8 @@ navbar:
         href: articles/annotation_resources.html
       - text: Developer notes
         href: articles/developers.html
+      - text: Primary tumor sites
+        href: articles/primary_tumor_sites.html
     faq:
       text: FAQ
       href: articles/faq.html

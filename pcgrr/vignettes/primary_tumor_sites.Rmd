@@ -1,0 +1,20 @@
+---
+title: "Primary Tumor Sites"
+output: rmarkdown::html_document
+---
+
+```{r load_pkgs, echo=FALSE, message=FALSE, warning=FALSE}
+require(DT)
+require(readr)
+```
+
+```{r read_table, echo=FALSE, message=FALSE, warning=FALSE}
+tab <- system.file("extdata/oncotree_phenotypes.tsv.gz", package = "pcgrr")
+readr::read_tsv(tab, col_types = readr::cols(.default = "character")) |>
+  DT::datatable(filter = list(position = "top", clear = FALSE, plain = TRUE),
+                class = "cell-border display compact",
+                rownames = FALSE, extensions = c("Buttons", "KeyTable"),
+                options = list(
+                  pageLength = 300, autoWidth = FALSE, keys = TRUE,
+                  buttons = c("csv", "excel"), dom = "Blfrtip"))
+```
