@@ -24,6 +24,8 @@ _E.g. tiered SNV/InDel output_:
 _Or TMB estimate_:
 
  `report_data$content$tmb$variant_statistic$tmb_estimate`
+ 
+_Expanding further upon the example commands shown above, we are planning to offer a cohort analysis module in the pcgrr R package in the near future, which can assist users more easily with the aggregation of findings across individual samples._
 
 __3. I do not see the expected transcript-specific consequence for a particular variant. In what way is the primary variant consequence established?__
 
@@ -43,7 +45,7 @@ _Answer: PCGR classifies variants into tiers of significance through an implemen
 
 __7. Is it possible to see all the invididual cancer subtypes that belong to each of the 30 different tumor sites?__
 
-_Answer: Yes, see_ [an overview of phenotypes associated with primary tumor sites](primary_tumor_sites.html)
+_Answer: Yes, see_ [an overview of phenotypes associated with primary tumor sites](primary_tumor_sites.html). See also the related GitHub repository [oncoPhenoMap](https://github.com/sigven/oncoPhenoMap)
 
 __8. Is there any plans to incorporate data from__ [OncoKB](https://www.oncokb.org) __in PCGR?__
 

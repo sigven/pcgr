@@ -36,13 +36,13 @@ PCGR integrates a [comprehensive set of knowledge resources](articles/annotation
 -   [Run through an example](articles/running.html#example-run)
 
 -   Learn more about
-
     1)  Details regarding [PCGR input files](articles/input.html), and how they should be formatted
     2)  Configuration of [key settings](articles/running.html#key-settings)
     3)  The types and contents of [PCGR output files](articles/output.html)
     4)  [Variant tier system implemented in PCGR](articles/variant_classification.html)
-    5)  The list of [gene and variant annotation resources](articles/virtual_panels.html) available in PCGR
-
+    5)  [Primary tumor sites used in PCGR](articles/primary_tumor_sites.html)
+    6)  The list of [gene and variant annotation resources](articles/virtual_panels.html) available in PCGR  
+    <br>
 -   [Frequenty asked questions (FAQ)](articles/faq.html)
 
 ### Citation
