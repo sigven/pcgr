@@ -12,10 +12,9 @@ PCGR originates from the [Norwegian Cancer Genomics Consortium (NCGC)](http://ca
 
 ### Example reports
 
--   [Cervical cancer sample (tumor-only)](http://insilico.hpc.uio.no/pcgr/example_reports/0.9.2/TCGA-FU-A3HZ-01A_TO.pcgr_acmg.grch37.flexdb.html)
--   [Lung cancer sample (tumor-control)](http://insilico.hpc.uio.no/pcgr/example_reports/0.9.2/TCGA-95-7039-01A.pcgr_acmg.grch37.flexdb.html)
--   [Breast cancer sample (tumor-control)](http://insilico.hpc.uio.no/pcgr/example_reports/0.9.2/TCGA-EW-A1J5-01A.pcgr_acmg.grch37.flexdb.html)
--   [Brain cancer sample (tumor-control)](http://insilico.hpc.uio.no/pcgr/example_reports/0.9.2/TCGA-14-0866-01B.pcgr_acmg.grch37.flexdb.html)
+-   [Cervical cancer sample (tumor-control)](http://insilico.hpc.uio.no/pcgr/example_reports/latest/cervix_tumor_control.grch37.flexdb.html)
+-   [Stomach cancer sample (tumor-control)](http://insilico.hpc.uio.no/pcgr/example_reports/latest/esophagus_stomach_tumor_control.grch37.flexdb.html)
+-   [Breast cancer sample (tumor-only)](http://insilico.hpc.uio.no/pcgr/example_reports/latest/breast_tumor_only.grch37.flexdb.html)
 
 (to view the rmarkdown-based reports, simply remove *.flexdb.* in the file names for the flexdashboard reports)
 
