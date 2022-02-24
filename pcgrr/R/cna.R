@@ -219,7 +219,12 @@ get_oncogene_tsgene_target_sets <- function(
                     .data$TRANSCRIPTS) %>%
       dplyr::mutate(MEAN_TRANSCRIPT_CNA_OVERLAP =
                       paste0(.data$MEAN_TRANSCRIPT_CNA_OVERLAP, "%")) %>%
-      dplyr::mutate(CNA_TYPE = "gain")
+      dplyr::mutate(CNA_TYPE = "gain") %>%
+      dplyr::arrange(
+        desc(.data$OPENTARGETS_RANK),
+        desc(nchar(.data$DRUGS_ON_LABEL)),
+        desc(nchar(.data$DRUGS_OFF_LABEL))
+      )
 
     log4r_info(
       paste0("Detected ", nrow(onco_ts_sets[["other_target"]]),
@@ -271,7 +276,11 @@ get_oncogene_tsgene_target_sets <- function(
                         .data$EVENT_TYPE,
                         .data$DRUGS_ON_LABEL,
                         .data$DRUGS_OFF_LABEL, dplyr::everything()) %>%
-          dplyr::arrange(.data$DRUGS_ON_LABEL, .data$DRUGS_OFF_LABEL)
+          dplyr::arrange(
+            desc(.data$OPENTARGETS_RANK),
+            desc(nchar(.data$DRUGS_ON_LABEL)),
+            desc(nchar(.data$DRUGS_OFF_LABEL))
+            )
       }else{
           log4r_info(
             paste0("Detected ", nrow(onco_ts_sets[[t]]),
