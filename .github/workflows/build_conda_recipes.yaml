@@ -10,7 +10,7 @@ env:
   recipe_path: conda/recipe
   env_yml_path: conda/env/yml
   env_lock_path: conda/env/lock
-  VERSION: '0.10.18' # versioned by bump2version
+  VERSION: '0.10.19' # versioned by bump2version
 jobs:
   build_conda_pkgs:
     # When merging to one of the branches above and the commit message matches
