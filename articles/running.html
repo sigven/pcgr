@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.18</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.19</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -52,6 +52,7 @@
     <a class="dropdown-item" href="../articles/variant_classification.html">Variant classification</a>
     <a class="dropdown-item" href="../articles/annotation_resources.html">Annotation resources</a>
     <a class="dropdown-item" href="../articles/developers.html">Developer notes</a>
+    <a class="dropdown-item" href="../articles/primary_tumor_sites.html">Primary tumor sites</a>
   </div>
 </li>
 <li class="nav-item">
@@ -151,9 +152,13 @@ found in that variant collection using a dedicated option:</p>
 <li><code>--exclude_pon</code></li>
 </ul>
 <hr>
-<p><strong>IMPORTANT NOTE</strong>: Note that a number of the analyses
+<p><strong>IMPORTANT NOTE 1</strong>: Note that a number of the analyses
 available in PCGR is not particularly well-suited for tumor-only input,
-e.g. mutational signature analysis and MSI status prediction.</p>
+e.g. mutational signature analysis and MSI status prediction.
+<strong>IMPORTANT NOTE 2</strong>: If you run PCGR on tumor-only WGS
+assays, we strongly recommend that you pre-filter your VCF against the
+exome, since we have frequently encountered that the large unfiltered
+variant set from such assays will cause a crash in PCGR. See also <a href="https://github.com/sigven/pcgr/issues/178" class="external-link">this issue</a>.</p>
 </div>
 <div class="section level3">
 <h3 id="sample-properties">Sample properties<a class="anchor" aria-label="anchor" href="#sample-properties"></a>
@@ -257,6 +262,7 @@ Mutational signature options:
   --min_mutations_signatures MIN_MUTATIONS_SIGNATURES - Minimum number of SNVs required for reconstruction of mutational signatures (SBS) by MutationalPatterns (default: 200, minimum n = 100)
   --all_reference_signatures - Use all reference mutational signatures (SBS, n = 67) in signature reconstruction rather than only those already attributed to the tumor type (default: False)
   --include_artefact_signatures - Include sequencing artefacts in the collection of reference signatures (default: False
+  --prevalence_reference_signatures {1,2,5,10,15,20} - Minimum tumor-type prevalence (in percent) of reference signatures to be included in refitting procedure (default: 5)
 
 Tumor-only options:
   --tumor_only          - Input VCF comes from tumor-only sequencing, calls will be filtered for variants of germline origin, (default: False)

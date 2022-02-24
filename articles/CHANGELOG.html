@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.18</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.19</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -52,6 +52,7 @@
     <a class="dropdown-item" href="../articles/variant_classification.html">Variant classification</a>
     <a class="dropdown-item" href="../articles/annotation_resources.html">Annotation resources</a>
     <a class="dropdown-item" href="../articles/developers.html">Developer notes</a>
+    <a class="dropdown-item" href="../articles/primary_tumor_sites.html">Primary tumor sites</a>
   </div>
 </li>
 <li class="nav-item">
@@ -97,12 +98,13 @@
     
     
 <div class="section level2">
-<h2 id="x-x-x---february-2022">x.x.x - February 2022<a class="anchor" aria-label="anchor" href="#x-x-x---february-2022"></a>
+<h2 id="v1-0-0">v1.0.0<a class="anchor" aria-label="anchor" href="#v1-0-0"></a>
 </h2>
 <ul>
-<li>Data updates: ClinVar, GWAS catalog, GENCODE, CIViC, CancerMine,
+<li><p>Date: <strong>2022-02-xx</strong></p></li>
+<li><p>Data updates: ClinVar, GWAS catalog, GENCODE, CIViC, CancerMine,
 KEGG, ChEMBL, Open Targets Platform, Disease Ontology, Experimental
-Factor Ontology</li>
+Factor Ontology</p></li>
 </ul>
 <div class="section level5">
 <h5 id="added">Added<a class="anchor" aria-label="anchor" href="#added"></a>
@@ -115,6 +117,10 @@ Factor Ontology</li>
 <li>
 <code>--vep_gencode_all</code> - use all GENCODE transcripts during
 VEP annotation (not only the basic GENCODE set)</li>
+<li>
+<code>--prevalence_reference_signatures</code> - set minimum
+prevalence (percent) for selection of reference signatures included in
+refitting procedure for a given tumor type</li>
 </ul>
 </li>
 </ul>
@@ -145,13 +151,15 @@ backwards compatibility.</li>
 </div>
 </div>
 <div class="section level2">
-<h2 id="june-30th-2021">0.9.2 - June 30th 2021<a class="anchor" aria-label="anchor" href="#june-30th-2021"></a>
+<h2 id="v0-9-2">v0.9.2<a class="anchor" aria-label="anchor" href="#v0-9-2"></a>
 </h2>
 <ul>
-<li>Data updates: ClinVar, GWAS catalog, CIViC, CancerMine, dbNSFP,
+<li><p>Date: <strong>2021-06-30</strong></p></li>
+<li><p>Data updates: ClinVar, GWAS catalog, CIViC, CancerMine, dbNSFP,
 KEGG, ChEMBL, Disease Ontology/EFO, Open Targets Platform, UniProt KB,
-GENCODE</li>
-<li>Software upgrades: R v4.1, Bioconductor v3.13, VEP (104) ++</li>
+GENCODE</p></li>
+<li><p>Software upgrades: R v4.1, Bioconductor v3.13, VEP (104)
+++</p></li>
 </ul>
 <div class="section level5">
 <h5 id="changed-1">Changed<a class="anchor" aria-label="anchor" href="#changed-1"></a>
@@ -281,11 +289,23 @@ rmarkdown (issue <a href="https://github.com/sigven/pcgr/issues/122" class="exte
 </div>
 </div>
 <div class="section level2">
-<h2 id="november-30th-2020">0.9.1 - November 30th 2020<a class="anchor" aria-label="anchor" href="#november-30th-2020"></a>
+<h2 id="v0-9-1">v0.9.1<a class="anchor" aria-label="anchor" href="#v0-9-1"></a>
 </h2>
 <ul>
-<li>Data updates: ClinVar, GWAS catalog, CIViC, CancerMine, dbNSFP,
-KEGG, ChEMBL/DGIdb, Disease Ontology, Experimental Factor Ontology</li>
+<li><p>Date: <strong>2020-11-30</strong></p></li>
+<li>
+<p>Data updates:</p>
+<ul>
+<li>ClinVar,</li>
+<li>GWAS catalog</li>
+<li>CIViC</li>
+<li>CancerMine</li>
+<li>dbNSFP</li>
+<li>KEGG</li>
+<li>ChEMBL/DGIdb</li>
+<li>Disease Ontology, Experimental Factor Ontology</li>
+</ul>
+</li>
 </ul>
 <div class="section level5">
 <h5 id="added-2">Added<a class="anchor" aria-label="anchor" href="#added-2"></a>
@@ -321,13 +341,15 @@ pinned:
 </li>
 </ul>
 </div>
-<div class="section level4">
-<h4 id="rc---september-24th-2020">0.9.0rc - September 24th 2020<a class="anchor" aria-label="anchor" href="#rc---september-24th-2020"></a>
-</h4>
+</div>
+<div class="section level2">
+<h2 id="v0-9-0rc">v0.9.0rc<a class="anchor" aria-label="anchor" href="#v0-9-0rc"></a>
+</h2>
 <ul>
-<li>Data updates: ClinVar, GWAS catalog, GENCODE, CIViC, CancerMine,
-UniProt KB, dbNSFP, Pfam, KEGG, Open Targets Platform</li>
-<li>Software updates: VEP 101</li>
+<li><p>Date: <strong>2020-09-24</strong></p></li>
+<li><p>Data updates: ClinVar, GWAS catalog, GENCODE, CIViC, CancerMine,
+UniProt KB, dbNSFP, Pfam, KEGG, Open Targets Platform</p></li>
+<li><p>Software updates: VEP 101</p></li>
 </ul>
 <div class="section level5">
 <h5 id="fixed-1">Fixed<a class="anchor" aria-label="anchor" href="#fixed-1"></a>
@@ -432,21 +454,23 @@ Documentation section</li>
 </ul>
 </div>
 </div>
-</div>
 <div class="section level2">
-<h2 id="november-18th-2019">0.8.4 - November 18th 2019<a class="anchor" aria-label="anchor" href="#november-18th-2019"></a>
+<h2 id="v0-8-4">v0.8.4<a class="anchor" aria-label="anchor" href="#v0-8-4"></a>
 </h2>
 <ul>
-<li>Data updates: ClinVar, CIViC, CancerMine, UniProt KB</li>
-<li>Software updates: VEP 98.3</li>
+<li><p>Date: <strong>2019-11-18</strong></p></li>
+<li><p>Data updates: ClinVar, CIViC, CancerMine, UniProt KB</p></li>
+<li><p>Software updates: VEP 98.3</p></li>
 </ul>
 </div>
 <div class="section level2">
-<h2 id="october-14th-2019">0.8.3 - October 14th 2019<a class="anchor" aria-label="anchor" href="#october-14th-2019"></a>
+<h2 id="v0-8-3">v0.8.3<a class="anchor" aria-label="anchor" href="#v0-8-3"></a>
 </h2>
 <ul>
-<li>Data updates: ClinVar, GWAS catalog, GENCODE, CIViC, CancerMine</li>
-<li>Software updates: VEP 98.2, vcf2tsv</li>
+<li><p>Date: <strong>2019-10-14</strong></p></li>
+<li><p>Data updates: ClinVar, GWAS catalog, GENCODE, CIViC,
+CancerMine</p></li>
+<li><p>Software updates: VEP 98.2, vcf2tsv</p></li>
 </ul>
 <div class="section level5">
 <h5 id="fixed-2">Fixed<a class="anchor" aria-label="anchor" href="#fixed-2"></a>
@@ -477,14 +501,14 @@ in configuration file</li>
 </div>
 </div>
 <div class="section level2">
-<h2 id="sep-29th-2019">0.8.2 - Sep 29th 2019<a class="anchor" aria-label="anchor" href="#sep-29th-2019"></a>
+<h2 id="v0-8-2">v0.8.2<a class="anchor" aria-label="anchor" href="#v0-8-2"></a>
 </h2>
 <ul>
-<li>Data updates: ClinVar, GWAS catalog, GENCODE, DiseaseOntology,
-CIViC, CancerMine, UniProt KB</li>
-<li>Software updates: VEP 97.3, vcfanno <a href="https://github.com/brentp/vcfanno/releases/tag/v0.3.2" class="external-link">0.3.2</a>,
-LOFTEE (VEP plugin) <a href="https://github.com/konradjk/loftee/releases" class="external-link">1.0.3</a>
-</li>
+<li><p>Date: <strong>2019-09-29</strong></p></li>
+<li><p>Data updates: ClinVar, GWAS catalog, GENCODE, DiseaseOntology,
+CIViC, CancerMine, UniProt KB</p></li>
+<li><p>Software updates: VEP 97.3, vcfanno <a href="https://github.com/brentp/vcfanno/releases/tag/v0.3.2" class="external-link">0.3.2</a>,
+LOFTEE (VEP plugin) <a href="https://github.com/konradjk/loftee/releases" class="external-link">1.0.3</a></p></li>
 </ul>
 <div class="section level5">
 <h5 id="fixed-3">Fixed<a class="anchor" aria-label="anchor" href="#fixed-3"></a>
@@ -519,8 +543,12 @@ of configuration</li>
 </div>
 </div>
 <div class="section level2">
-<h2 id="may-22nd-2019">0.8.1 - May 22nd 2019<a class="anchor" aria-label="anchor" href="#may-22nd-2019"></a>
+<h2 id="v0-8-1">v0.8.1<a class="anchor" aria-label="anchor" href="#v0-8-1"></a>
 </h2>
+<ul>
+<li>Date: <strong>2019-05-22</strong>
+</li>
+</ul>
 <div class="section level5">
 <h5 id="added-6">Added<a class="anchor" aria-label="anchor" href="#added-6"></a>
 </h5>
@@ -532,8 +560,12 @@ types</li>
 </div>
 </div>
 <div class="section level2">
-<h2 id="may-20th-2019">0.8.0 - May 20th 2019<a class="anchor" aria-label="anchor" href="#may-20th-2019"></a>
+<h2 id="v0-8-0">v0.8.0<a class="anchor" aria-label="anchor" href="#v0-8-0"></a>
 </h2>
+<ul>
+<li>Date: <strong>2019-05-20</strong>
+</li>
+</ul>
 <div class="section level5">
 <h5 id="fixed-4">Fixed<a class="anchor" aria-label="anchor" href="#fixed-4"></a>
 </h5>
@@ -712,8 +744,12 @@ script (<code>--no_vcf_validate</code>)</li>
 </div>
 </div>
 <div class="section level2">
-<h2 id="nov-27th-2018">0.7.0 - Nov 27th 2018<a class="anchor" aria-label="anchor" href="#nov-27th-2018"></a>
+<h2 id="v0-7-0">v0.7.0<a class="anchor" aria-label="anchor" href="#v0-7-0"></a>
 </h2>
+<ul>
+<li>Date: <strong>2018-11-27</strong>
+</li>
+</ul>
 <div class="section level5">
 <h5 id="fixed-5">Fixed<a class="anchor" aria-label="anchor" href="#fixed-5"></a>
 </h5>
@@ -808,8 +844,12 @@ CancerMine</li>
 </div>
 </div>
 <div class="section level2">
-<h2 id="may-14th-2018">0.6.2.1 - May 14th 2018<a class="anchor" aria-label="anchor" href="#may-14th-2018"></a>
+<h2 id="v0-6-2-1">v0.6.2.1<a class="anchor" aria-label="anchor" href="#v0-6-2-1"></a>
 </h2>
+<ul>
+<li>Date: <strong>2018-05-14</strong>
+</li>
+</ul>
 <div class="section level5">
 <h5 id="fixed-6">Fixed<a class="anchor" aria-label="anchor" href="#fixed-6"></a>
 </h5>
@@ -819,8 +859,12 @@ CancerMine</li>
 </div>
 </div>
 <div class="section level2">
-<h2 id="may-9th-2018">0.6.2 - May 9th 2018<a class="anchor" aria-label="anchor" href="#may-9th-2018"></a>
+<h2 id="v0-6-2">v0.6.2<a class="anchor" aria-label="anchor" href="#v0-6-2"></a>
 </h2>
+<ul>
+<li>Date: <strong>2018-05-09</strong>
+</li>
+</ul>
 <div class="section level5">
 <h5 id="fixed-7">Fixed<a class="anchor" aria-label="anchor" href="#fixed-7"></a>
 </h5>
@@ -854,8 +898,12 @@ dataset</li>
 </div>
 </div>
 <div class="section level2">
-<h2 id="may-2nd-2018">0.6.1 - May 2nd 2018<a class="anchor" aria-label="anchor" href="#may-2nd-2018"></a>
+<h2 id="v0-6-1">v0.6.1<a class="anchor" aria-label="anchor" href="#v0-6-1"></a>
 </h2>
+<ul>
+<li>Date: <strong>2018-05-02</strong>
+</li>
+</ul>
 <div class="section level5">
 <h5 id="fixed-8">Fixed<a class="anchor" aria-label="anchor" href="#fixed-8"></a>
 </h5>
@@ -873,8 +921,12 @@ variants with biomarker role)</li>
 </div>
 </div>
 <div class="section level2">
-<h2 id="april-25th-2018">0.6.0 - April 25th 2018<a class="anchor" aria-label="anchor" href="#april-25th-2018"></a>
+<h2 id="v0-6-0">v0.6.0<a class="anchor" aria-label="anchor" href="#v0-6-0"></a>
 </h2>
+<ul>
+<li>Date: <strong>2018-04-25</strong>
+</li>
+</ul>
 <div class="section level5">
 <h5 id="added-10">Added<a class="anchor" aria-label="anchor" href="#added-10"></a>
 </h5>

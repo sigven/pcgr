@@ -9,9 +9,10 @@ articles:
   input: input.html
   installation: installation.html
   output: output.html
+  primary_tumor_sites: primary_tumor_sites.html
   running: running.html
   variant_classification: variant_classification.html
-last_built: 2022-02-19T23:17Z
+last_built: 2022-02-24T10:20Z
 urls:
   reference: https://sigven.github.io/pcgr/reference
   article: https://sigven.github.io/pcgr/articles

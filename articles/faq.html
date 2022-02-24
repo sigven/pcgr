@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.18</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.19</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -52,6 +52,7 @@
     <a class="dropdown-item" href="../articles/variant_classification.html">Variant classification</a>
     <a class="dropdown-item" href="../articles/annotation_resources.html">Annotation resources</a>
     <a class="dropdown-item" href="../articles/developers.html">Developer notes</a>
+    <a class="dropdown-item" href="../articles/primary_tumor_sites.html">Primary tumor sites</a>
   </div>
 </li>
 <li class="active nav-item">
@@ -110,7 +111,7 @@ this information from any VCF. Please take a careful look at the example
 VCF files (<code>examples</code> folder) that comes with PCGR for how
 PCGR expects this information to be formatted, and make sure your VCF is
 formatted accordingly. There is also an in-depth explanation on the
-matter <a href="articles/input.html#ormatting-of-allelic-depthsupport-dpad">described
+matter <a href="input.html#formatting-of-allelic-depthsupport-dpad">described
 here</a></em></p>
 <p><strong>2. Is it possible to utilize PCGR for analysis of multiple
 samples?</strong></p>
@@ -133,6 +134,10 @@ R:</em></p>
 <p><code>head(report_data$content$snv_indel$variant_set$tsv)</code></p>
 <p><em>Or TMB estimate</em>:</p>
 <p><code>report_data$content$tmb$variant_statistic$tmb_estimate</code></p>
+<p><em>Expanding further upon the example commands shown above, we are
+planning to offer a cohort analysis module in the pcgrr R package in the
+near future, which can assist users more easily with the aggregation of
+findings across individual samples.</em></p>
 <p><strong>3. I do not see the expected transcript-specific consequence
 for a particular variant. In what way is the primary variant consequence
 established?</strong></p>
@@ -155,14 +160,15 @@ something we want to incorporate in the future.</em></p>
 TIER 3 for my sample, since I know that this gene is of potential
 clinical significance in the tumor type I am investigating?</strong></p>
 <p><em>Answer: PCGR classifies variants into tiers of significance
-through an implementation of</em> <a href="https://pcgr.readthedocs.io/en/latest/tier_systems.html" class="external-link">published
-guidelines by ACMG/AMP</a>. <em>No manual efforts for individual tumor
-types are conducted beyond this rule-based scheme. The users need to
-keep this in mind when interpreting the tier contents of the
-report.</em></p>
+through an implementation of</em> <a href="variant_classification.html">published guidelines by ACMG/AMP</a>.
+<em>No manual efforts for individual tumor types are conducted beyond
+this rule-based scheme. The users need to keep this in mind when
+interpreting the tier contents of the report.</em></p>
 <p><strong>7. Is it possible to see all the invididual cancer subtypes
 that belong to each of the 30 different tumor sites?</strong></p>
-<p><em>Answer: Yes, see</em> <a href="https://raw.githubusercontent.com/sigven/pcgr/master/oncotree_ontology_xref.tsv" class="external-link">oncotree_ontology_xref.tsv</a></p>
+<p><em>Answer: Yes, see</em> <a href="primary_tumor_sites.html">an
+overview of phenotypes associated with primary tumor sites</a>. See also
+the related GitHub repository <a href="https://github.com/sigven/oncoPhenoMap" class="external-link">oncoPhenoMap</a></p>
 <p><strong>8. Is there any plans to incorporate data from</strong> <a href="https://www.oncokb.org" class="external-link">OncoKB</a> <strong>in PCGR?</strong></p>
 <p><em>Answer: No. PCGR relies upon publicly available open-source
 resources, and further that the PCGR data bundle can be distributed
