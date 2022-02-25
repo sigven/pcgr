@@ -1,0 +1,55 @@
+url: https://sigven.github.io/pcgr/
+title: PCGR
+toc:
+  depth: 3
+template:
+  bootstrap: 5
+authors:
+  Sigve Nakken:
+    href: "https://github.com/sigven"
+  Peter Diakumis:
+    href: "https://github.com/pdiakumis"
+navbar:
+  structure:
+    left:  [home, installation, running, articles, faq, changelog]
+    right: [reference, search, github]
+  components:
+    home:
+      text: Intro
+      href: index.html
+    installation:
+      text: Installation
+      href: articles/installation.html
+    running:
+      text: Running
+      href: articles/running.html
+    articles:
+      text: Articles
+      menu:
+      - text: Input files
+        href: articles/input.html
+      - text: Output files
+        href: articles/output.html
+      - text: Variant classification
+        href: articles/variant_classification.html
+      - text: Annotation resources
+        href: articles/annotation_resources.html
+      - text: Developer notes
+        href: articles/developers.html
+      - text: Primary tumor sites
+        href: articles/primary_tumor_sites.html
+    faq:
+      text: FAQ
+      href: articles/faq.html
+    changelog:
+      text: CHANGELOG
+      href: articles/CHANGELOG.html
+home:
+  sidebar:
+    structure: [links, license, community, citation, authors, dev]
+    components:
+      citation:
+          title: Citation
+          text: "[Citing PCGR](authors.html#citation)"
+news:
+  one_page: true

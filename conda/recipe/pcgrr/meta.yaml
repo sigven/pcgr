@@ -1,0 +1,107 @@
+package:
+  name: r-pcgrr
+  version: 0.10.19 # versioned by bump2version
+
+source:
+  path: ../../../pcgrr
+
+build:
+  number: 0
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - git
+  host:
+    - r-base ==4.1.1
+    - r-assertable
+    - r-assertthat
+    - bioconductor-biocgenerics
+    - r-biocmanager
+    - bioconductor-biostrings
+    - r-caret
+    - r-data.table
+    - r-devtools
+    - r-dt
+    - r-dplyr
+    - r-flexdashboard
+    - r-crosstalk ==1.1.1
+    - bioconductor-genomicranges
+    - bioconductor-genomeinfodb
+    - r-ggplot2
+    - r-ggpubr
+    - r-glue
+    - r-htmltools
+    - bioconductor-iranges
+    - r-jsonlite
+    - r-log4r
+    - r-magrittr
+    - bioconductor-mutationalpatterns
+    - r-plotly
+    - r-randomforest
+    - r-rcolorbrewer
+    - r-reshape2
+    - r-rlang
+    - r-rmarkdown
+    - r-roxygen2
+    - bioconductor-s4vectors
+    - r-scales
+    - r-tidyr
+    - r-upsetr
+    - r-usethis
+    - bioconductor-variantannotation
+
+  run:
+    - r-base ==4.1.1
+    - r-assertable
+    - r-assertthat
+    - bioconductor-biocgenerics
+    - r-biocmanager
+    - bioconductor-biostrings
+    - r-caret
+    - r-data.table
+    - r-devtools
+    - r-dt
+    - r-dplyr
+    - r-flexdashboard
+    - r-crosstalk ==1.1.1
+    - bioconductor-genomicranges
+    - bioconductor-genomeinfodb
+    - r-ggplot2
+    - r-ggpubr
+    - r-glue
+    - r-htmltools
+    - bioconductor-iranges
+    - r-jsonlite
+    - r-log4r
+    - r-magrittr
+    - bioconductor-mutationalpatterns
+    - r-plotly
+    - r-randomforest
+    - r-rcolorbrewer
+    - r-reshape2
+    - r-rlang
+    - r-rmarkdown
+    - r-roxygen2
+    - bioconductor-s4vectors
+    - r-scales
+    - r-tidyr
+    - r-upsetr
+    - r-usethis
+    - bioconductor-variantannotation
+
+test:
+  commands:
+    - $R -e "library('pcgrr')"
+
+about:
+  home: https://github.com/sigven/pcgr/pcgrr
+  license: MIT
+  summary: Personal Cancer Genome ReporteR.
+    Functions, tools and utilities for the generation of clinical
+    cancer genome reports with PCGR. This R package is an integrated
+    part of the Docker/Conda-based PCGR workflow (https://github.com/sigven/pcgr),
+    it should thus not be used as a stand-alone package.

@@ -1,0 +1,7 @@
+name: pkgdown
+dependencies:
+  - r-pcgrr ==0.10.19 # versioned by bump2version
+  - r-cpsr
+  - r-pkgdown
+  - r-readr
+  - pandoc

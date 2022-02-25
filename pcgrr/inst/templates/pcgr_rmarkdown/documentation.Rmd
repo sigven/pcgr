@@ -1,0 +1,193 @@
+## Documentation
+
+### Annotation resources
+
+The analysis performed in the cancer genome report is based on the following underlying tools and knowledge resources:
+
+* __PCGR databundle version__
+
+  * __`r pcg_report$metadata$pcgr_db_release$bundle_version$version`__
+
+* __Software__ 
+```{r list_software, echo=F,results='asis'}
+for(n in names(pcg_report$metadata$pcgr_db_release)){
+  if(n == 'mosdepth' | n == 'bundle_version'){
+    next
+  }
+  if(pcg_report$metadata$pcgr_db_release[[n]]$resource_type == 'software'){
+    s <- paste0('    * [',pcg_report$metadata$pcgr_db_release[[n]]$name,'](',pcg_report$metadata$pcgr_db_release[[n]]$url,') - ',pcg_report$metadata$pcgr_db_release[[n]]$description, ' (',pcg_report$metadata$pcgr_db_release[[n]]$version,')')
+    cat(s,sep="\n")
+  }
+}
+
+```
+<br><br>
+
+* __Databases/datasets__ 
+```{r list_db, echo=F,results='asis'}
+for(n in names(pcg_report$metadata$pcgr_db_release)){
+  if(pcg_report$metadata$pcgr_db_release[[n]]$resource_type == 'db' & n != 'gwas' & n != 'ct' & n != 'bundle_version'){
+    s <- paste0('    * [',pcg_report$metadata$pcgr_db_release[[n]]$name,'](',pcg_report$metadata$pcgr_db_release[[n]]$url,') - ',pcg_report$metadata$pcgr_db_release[[n]]$description, ' (',pcg_report$metadata$pcgr_db_release[[n]]$version,')')
+    cat(s,sep="\n")
+  }
+}
+
+```
+
+
+### Report content
+
+<br>
+
+#### SNVs/InDels
+
+The prioritization of SNV and InDels found in the tumor sample is done according to a four-tiered structure, adopting the joint consensus recommendation by AMP/ACMG [Li et al., 2017](https://www.ncbi.nlm.nih.gov/pubmed/27993330).
+
+- **TIER 1: Variants of strong clinical significance** - constitutes variants linked to predictive, prognostic, or diagnostic biomarkers in the [CIViC database](http://civic.genome.wustl.edu) and the [Cancer Biomarkers Database](https://www.cancergenomeinterpreter.org/biomarkers) that are
+	 - Found within the same tumor type/class as specified by the user, **AND**
+	 - Of strong clinical evidence (i.e. part of guidelines, validated or discovered in late clinical trials ([CIViC evidence levels A/B](https://civic.readthedocs.io/en/latest/model/evidence/level.html)))
+	 - overlap between variants in the tumor sample and reported biomarkers must occur at the _exact variant level_ or at the _codon/exon level_
+	 
+ - **TIER 2: Variants of potential clinical significance** - constitutes other variants linked to predictive, prognostic, or diagnostic biomarkers in the [CIViC database](http://civic.genome.wustl.edu) and the [Cancer Biomarkers Database](https://www.cancergenomeinterpreter.org/biomarkers) that are either
+	 - Of strong clinical evidence in other tumor types/classes than the one specified by the user, **OR**
+	 - Of weak clinical evidence (early trials, case reports etc. ([CIViC evidence levels C/D/E](https://civic.readthedocs.io/en/latest/model/evidence/level.html)))) in the same tumor type/class as specified by the user
+	 - overlap between variants in the tumor sample and reported biomarkers must occur at the _exact variant level_ or at the _codon/exon level_
+	 
+ - **TIER 3: Variants of uncertain clinical significance** - includes other coding variants found in oncogenes or tumor suppressor genes
+   - Status as oncogenes and/or tumor suppressors genes are done according to the following scheme in PCGR:
+     - Five or more publications in the biomedical literature that suggests an oncogenic/tumor suppressor role for a given gene (as collected from the [CancerMine text-mining resource](http://bionlp.bcgsc.ca/cancermine/)), **OR**
+     - At least two publications from CancerMine that suggests an oncogenic/tumor suppressor role for a given gene **AND** an existing record for the same gene as a tumor suppressor/oncogene in the [Network of Cancer Genes (NCG)](http://ncg.kcl.ac.uk/)
+     - Status as oncogene is ignored if a given gene has three times as much (literature evidence) support for a role as a tumor suppressor gene (and vice versa)
+     - Oncogenes/tumor suppressor candidates from CancerMine/NCG that are found in the [curated list of false positive cancer drivers compiled by Bailey et al. (Cell, 2018)](https://www.ncbi.nlm.nih.gov/pubmed/30096302) have been excluded
+     
+ - **TIER 4** - includes other protein-coding variants
+     - <i>Protein-coding</i> refers here to variants with the following consequences: 
+      - missense_variant
+      - stop_gain/stop_loss
+      - frameshift_variant
+      - inframe_insertions/inframe_deletions
+      - splice_donor_variant/splice_acceptor_variant
+      - start_loss
+ - **NONCODING** - includes other non-(protein)coding variants
+ 
+A complete list of reported biomarkers that associate with variants in the tumor sample (not necessarily qualifying for assignment to TIER 1/TIER 2) is also shown in a separate section.
+
+<br>
+
+#### Somatic copy number aberrations
+
+Somatic copy number aberrations identified in the tumor sample are classified into **two main tiers**:
+
+- **TIER 1: Aberrations of strong clinical significance** - constitutes amplified/lost genes linked to predictive, prognostic, or diagnostic biomarkers in the [CIViC database](http://civic.genome.wustl.edu) and the [Cancer Biomarkers Database](https://www.cancergenomeinterpreter.org/biomarkers) that are
+	 - Found within the same tumor type/class as specified by the user, **AND**
+	 - Of strong clinical evidence (i.e. part of guidelines, validated or discovered in late clinical trials ([CIViC evidence levels A/B](https://civic.readthedocs.io/en/latest/model/evidence/level.html)))
+	 	 
+- **TIER 2: Aberrations of potential clinical significance** - constitutes amplified/lost genes linked to predictive, prognostic, or diagnostic biomarkers in the [CIViC database](http://civic.genome.wustl.edu) and the [Cancer Biomarkers Database](https://www.cancergenomeinterpreter.org/biomarkers) that are either
+	 - Of strong clinical evidence in other tumor types/classes than the one specified by the user, **OR**
+	 - Of weak clinical evidence (early trials, case reports etc. ([CIViC evidence levels C/D/E](https://civic.readthedocs.io/en/latest/model/evidence/level.html)))) in the same tumor type/class as specified by the user
+	 
+Included in the report is also a complete list of **all oncogenes subject to amplifications**, **tumor suppressor genes subject to homozygous deletions**, and **other drug targets subject to amplifications**
+
+<br>
+
+#### Mutational signatures
+
+The set of somatic mutations observed in a tumor reflects the varied mutational processes that have been active during its life history, providing insights into the routes taken to carcinogenesis. Exogenous mutagens, such as tobacco smoke and ultraviolet light, and endogenous processes, such as APOBEC enzymatic family functional activity or DNA mismatch repair deficiency, result in characteristic patterns of mutation. Mutational signatures can have significant clinical impact in certain tumor types ([Póti et al., 2019](https://www.ncbi.nlm.nih.gov/pubmed/31727117), [Ma et al., 2018](https://www.ncbi.nlm.nih.gov/pubmed/30120226))
+
+The **MutationalPatterns** package ([Blokzijl et al., 2018](https://www.ncbi.nlm.nih.gov/pubmed/29695279)) is used to estimate the relative contribution of known mutational signatures in a single tumor sample. [MutationalPatterns](https://github.com/UMCUGenetics/MutationalPatterns) makes an optimal reconstruction of the mutations observed in a given sample with [COSMIC's (V3.2) reference collection of n = 78 mutational signatures (SBS, including sequencing artefacts)](https://cancer.sanger.ac.uk/signatures/sbs/). By default, we restrict the signatures in the reference collection to those already observed in the tumor type in question (i.e. from large-scale <i>de novo</i> signature extraction on ICGC-PCAWG tumor samples). 
+
+```{r results = "asis", eval = pcg_report$content$m_signature_mp$eval == T & !pcg_report$content$m_signature_mp$missing_data}
+
+cat("Specifically, for tumors of type <b>", pcg_report$metadata$config$t_props$tumor_type,"</b>, mutational signature reconstruction is limited to the following reference collection:",sep="")
+
+dat <- pcg_report$content$m_signature_mp$result$reference_data
+if("signature_id" %in% colnames(dat) & "aetiology_keyword" %in% colnames(dat) & NROW(dat) > 0){
+  cat('<ul>')
+  i <- 1
+  refsig_collection_site <- pcg_report$content$m_signature_mp$result$reference_data %>%
+    dplyr::mutate(tmp_id = as.numeric(
+      stringr::str_replace(
+        stringr::str_replace(
+          stringr::str_replace(
+            stringr::str_replace(
+              stringr::str_replace(signature_id,"SBS",""),
+              "a",".2"),
+            "b",".4"),
+          "c", ".6"),
+        "d",".8"))) %>%
+    dplyr::arrange(tmp_id) %>%
+    dplyr::select(signature_id, aetiology_keyword) %>%
+    dplyr::distinct()
+  
+  while(i <= nrow(refsig_collection_site)){
+    cat(paste0("<li><b>",refsig_collection_site[i,]$signature_id, "</b> - ", refsig_collection_site[i,]$aetiology_keyword),'</li>\n')
+    i <- i + 1
+  }
+  cat('</ul>')
+}
+
+if(pcg_report$metadata$config$msigs$all_reference_signatures == T){
+  cat("<b><NOTE>:</b> Option '--all_reference_signatures' have been applied for this query, which means that all reference signatures (n = 67) have been considered during optimal reconstruction of the mutational profile with reference signatures",sep="\n")
+}
+
+if(pcg_report$metadata$config$msigs$include_artefact_signatures == T){
+  cat("<b>NOTE:</b> Option <i>'--all_reference_signatures'</i> have been applied for this query, which means that all reference signatures (n = 67) have been considered during optimal reconstruction of the mutational profile with reference signatures",sep="\n")
+}
+```   
+
+```{r results = "asis", eval = pcg_report$metadata$config$msigs$run == T & pcg_report$content$m_signature_mp$missing_data}
+cat("<b>NOTE</b>: This sample contains too few variants for estimation of mutational signature contributions",sep="\n")
+```
+```{r results = "asis", eval = pcg_report$metadata$config$msigs$run == T & !pcg_report$content$m_signature_mp$missing_data}
+cat("The accuracy of signature fitting reflects how well the mutational profile can be reconstructed with signatures from the reference collection. Reconstructions with fitting accuracy below 90% should be interpreted with caution.",sep="\n")
+```
+
+<br>
+
+#### Tumor mutational burden (TMB)
+
+Tumor mutational load or mutational burden is a measure of the number of mutations within a tumor genome, defined as the total number of mutations per coding area of a tumour genome. TMB may serve as a proxy for determining the number of neoantigens per tumor, which in turn may have implications for response to immunotherapy. For estimation of TMB, PCGR employs two different algorithms (one to be chosen by the user):
+
+  1) __all_coding__: the same approach as was outlined in a recently published large-scale study of TMB ([Chalmers et al., 2017](https://www.ncbi.nlm.nih.gov/pubmed/28420421)), i.e. counting all somatic base substitutions and indels in the protein-coding regions of the sequencing assay, including synonymous alterations. 
+  2) __nonsyn__: non-synonymous variants only, i.e. as employed by [Fernandez et al., 2019](https://www.ncbi.nlm.nih.gov/pubmed/31475242)
+
+Numbers obtained with 1) or 2) are next divided by the coding target size of the sequencing assay.
+
+<br>
+
+#### MSI classification
+
+Microsatellite instability (MSI) is the result of impaired DNA mismatch repair and constitutes a cellular phenotype of clinical significance in many cancer types, most prominently colorectal cancers, stomach cancers, endometrial cancers, and ovarian cancers ([Cortes-Ciriano et al., 2017](https://www.ncbi.nlm.nih.gov/pubmed/28585546)). We have built a statistical MSI classifier from somatic mutation profiles that separates _MSI.H_ (MSI-high) from _MSS_ (MS stable) tumors. The MSI classifier was trained using 999 exome-sequenced TCGA tumor samples with known MSI status (i.e. assayed from mononucleotide markers), and obtained a [positive predictive value](https://en.wikipedia.org/wiki/Positive_and_negative_predictive_values#Positive_predictive_value) of 100% and a [negative predictive value](https://en.wikipedia.org/wiki/Positive_and_negative_predictive_values#Negative_predictive_value) of 99.4% on an independent test set of 427 samples. Details of the MSI classification approach can be found <a href="https://rpubs.com/sigven/msi2020_v2" target="_blank">here</a>.
+
+Note that the MSI classifier is applied only for WGS/WES tumor-control sequencing assays.
+
+<br>
+
+#### Kataegis
+
+Kataegis describes a pattern of localized hypermutations identified in some cancer genomes, in which a large number of highly-patterned basepair mutations occur in a small region of DNA (ref Wikipedia). Kataegis is prevalently seen among breast cancer patients, and it is also exists in lung cancers, cervical, head and neck, and bladder cancers, as shown in the results from tracing APOBEC mutation signatures (ref Wikipedia). PCGR implements the kataegis detection algorithm outlined in the [KataegisPortal R package](https://github.com/MeichunCai/KataegisPortal). 
+
+Explanation of key columns in the resulting table of potential kataegis events: 
+
+* __weight.C>X__: proportion of C>X mutations
+* __confidence__: confidence degree of potential kataegis events (range: 0 to 3)
+    - 0 - a hypermutation with weight.C>X < 0.8; 
+    - 1 - one hypermutation with weight.C>X >= 0.8 in a chromosome; 
+    - 2 - two hypermutations with weight.C>X >= 0.8 in a chromosome; 
+    - 3 - high confidence with three or more hypermutations with weight.C>X >= 0.8 in a chromosome)
+
+<br>
+
+#### Germline findings
+
+For PCGR reports that are fueled with CPSR report contents (JSON), we here list the main findings from the CPSR report, i.e. the collection of __Pathogenic/Likely Pathogenic/VUS variants__ (ClinVar and novel CPSR-classified variants). We also show whether any of the query variants are associated with established biomarker evidence items with respect to cancer predisposition, prognosis, therapeutic regimens etc.
+
+<br>
+
+#### Clinical trials
+
+Each report is provided with a list of trials for the tumor type in question, where we limit the trials listed to ongoing or forthcoming trials with a "molecular focus" (presence of molecular biomarkers in inclusion criteria, targeted drugs as interventions etc.). Recognition of biomarkers in trials is conducted through an in-house text mining procedure. 
+
+Note that the trials have currently not been subject to any matching with respect to the molecular profile of the tumor, trials are thus basically unprioritized, and have to be explored interactively by the user in order to discover relevant trials. 
+
+<br>

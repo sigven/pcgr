@@ -1,0 +1,19 @@
+name: pcgr
+
+channels:
+  - pcgr
+  - conda-forge
+  - bioconda
+  - defaults
+
+dependencies:
+  - pcgr ==0.10.19 # versioned by bump2version
+  - bedtools ==2.30.0
+  - cyvcf2 ==0.30.11
+  - ensembl-vep ==105.0
+  - htslib ==1.10.2
+  - pandoc ==2.16
+  - perl-bio-bigfile ==1.07
+  - vcfanno ==0.3.3
+  - vt
+  - vcf2maf ==1.6.21
