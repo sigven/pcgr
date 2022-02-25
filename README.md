@@ -20,7 +20,7 @@ If you want to interrogate germline variants and their relation to cancer predis
 
 ### News
 
--   *February 2022*: **x.x.x release**
+-   *February 2022*: **1.0.0 release**
 
     -   Complete restructure of Python and R components. Installation now relies on two separate [conda](https://docs.conda.io/en/latest/) packages, `pcgr` (Python component) and `pcgrr` (R component). Direct Docker support remains, with the Dockerfile simplified to rely exclusively on the installation of the above Conda packages. Significant contributon by the great [@pdiakumis](https://github.com/pdiakumis)
     -   VCF validation step removed. Feedback from users suggested that Ensembl's `vcf-validator` was often too stringent so its use has been deprecated. The `--no_vcf_validate` option remains for backwards compatibility.
@@ -34,17 +34,17 @@ If you want to interrogate germline variants and their relation to cancer predis
     -   Software upgrades: VEP (104), R v4.1/BioConductor 3.13
     -   **NEW**: TOML configuration removed - all options to PCGR are now command-line based
     -   **NEW**: Feed PCGR with a [CPSR report](https://github.com/sigven/cpsr) to view key germline findings in the tumor report
-    -   [CHANGELOG](http://pcgr.readthedocs.io/en/latest/CHANGELOG.html)
+    -   [CHANGELOG](http://sigven.github.io/pcgr/articles/CHANGELOG.html)
     -   Planned for next release: Support for analysis of RNA fusions
 
 -   *November 30th 2020*: **0.9.1 release**
 
     -   Data bundle updates (CIViC, ClinVar, CancerMine, UniProt KB)
-    -   [CHANGELOG](http://pcgr.readthedocs.io/en/latest/CHANGELOG.html)
+    -   [CHANGELOG](http://sigven.github.io/pcgr/articles/CHANGELOG.html)
 
 ### Example reports
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5045309.svg)](https://doi.org/10.5281/zenodo.5045309)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6275299.svg)](https://doi.org/10.5281/zenodo.6275299)
 
 ### Getting started
 

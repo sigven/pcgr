@@ -5,7 +5,7 @@ output: rmarkdown::html_document
 
 ## v1.0.0
 
- * Date: **2022-02-xx**
+ * Date: **2022-02-25**
 
  * Data updates: ClinVar, GWAS catalog, GENCODE, CIViC, CancerMine, KEGG, ChEMBL, Open Targets Platform, Disease Ontology, Experimental Factor Ontology
 
