@@ -2,7 +2,7 @@
 cpsr_acmg <- list()
 cpsr_acmg[["score2tier"]] <- data.frame()
 cpsr_acmg[["evidence_codes"]] <-
-  utils::read.table(file = "acmg_evidence.tsv",
+  utils::read.table(file = "data-raw/acmg_evidence.tsv",
              header = T, stringsAsFactors = F,
              comment.char = "", na.strings = c("NA"),
              sep = "\t")
@@ -63,13 +63,16 @@ for (c in c("pathogenicity", "clinical_evidence", "tier",
       c("TIER1", "TIER2", "TIER3", "TIER4", "NONCODING",
         "COL6", "COL7", "COL8", "COL9", "COL10", "COL11",
         "COL12", "COL13", "COL14", "COL15", "COL16",
-        "COL17", "COL18")
+        "COL17", "COL18", "COL19", "COL20", "COL21",
+        "COL22", "COL23", "COL24", "COL25")
     color_palette[[c]][["values"]] <-
       c("#0073C2", "#EFC000", "#CD534C", "#7AA6DC",
         "#8F7700", "#003C67", "#3B3B3B", "#868686",
         "#593196", "#1B9E77", "#276419", "#D95F02",
         "#000000", "#E31A1C", "#E7298A", "#009999",
-        "#003366", "#660033")
+        "#003366", "#660033", "#4DAC26",
+        "#F1B6DA", "#E69F00", "#F0E442",
+        "#F4A582", "#0072B2", "#BABABA")
   }
   if (c == "report_color") {
     color_palette[[c]][["levels"]] <- c("tumor_control", "tumor_only")
@@ -159,7 +162,7 @@ usethis::use_data(variant_db_url, overwrite = T)
 
 #---- effect_prediction_algos ----#
 effect_prediction_algos <-
-  utils::read.table(file = "effect_prediction_algorithms.tsv",
+  utils::read.table(file = "data-raw/effect_prediction_algorithms.tsv",
              header = T, sep = "\t", quote = "", stringsAsFactors = F)
 usethis::use_data(effect_prediction_algos, overwrite = T)
 
