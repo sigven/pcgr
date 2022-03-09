@@ -1434,17 +1434,10 @@ write_report_output <- function(report,
             quiet = T
           )
 
-          if(o == 'tsv'){
-            report_strip$content$snv_indel$consequence_stat_tsv <-
-              plyr::count(
-                report_strip$content$snv_indel$variant_set[[o]]$CONSEQUENCE)
-          }else{
-            report_strip$content$snv_indel$consequence_stat_tsv_unfiltered <-
-              plyr::count(
-                report_strip$content$snv_indel$variant_set[[o]]$CONSEQUENCE)
-          }
+          # report_strip$content$snv_indel$consequence_stat_tsv <-
+          #   plyr::count(
+          #     report_strip$content$snv_indel$variant_set[[o]]$CONSEQUENCE)
 
-          #log4r_info("Excluding intergenic/intronic variants from JSON output")
           report_strip$content$snv_indel$variant_set[[o]] <-
             dplyr::select(
               report_strip$content$snv_indel$variant_set[[o]],
@@ -1463,7 +1456,7 @@ write_report_output <- function(report,
 
     ## NOTE: set max size of report object to 750 Mb - have not figured out
     ## what the exact size should be for jsonlite::toJSON to succeed/fail
-    if(object.size(report_strip) < 750000000){
+    if(utils::object.size(report_strip) < 750000000){
 
       pcgr_json <- jsonlite::toJSON(
         report_strip, pretty = T, na = "string",

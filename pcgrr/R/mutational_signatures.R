@@ -163,7 +163,7 @@ generate_report_data_signatures_mp <-
         dplyr::arrange(dplyr::desc(.data$prop_group)) %>%
         dplyr::select(.data$group) %>%
         dplyr::distinct() %>%
-        head(25)
+        utils::head(25)
 
       color_vec <- utils::head(
         pcgrr::color_palette[["tier"]][["values"]], min(25, nrow(cols)))

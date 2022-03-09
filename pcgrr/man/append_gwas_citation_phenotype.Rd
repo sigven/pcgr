@@ -7,7 +7,7 @@
 append_gwas_citation_phenotype(
   vcf_data_df = NULL,
   gwas_citations_phenotypes = NULL,
-  p_value_threshold = 1e-06
+  p_value_threshold = 0.000001
 )
 }
 \arguments{
