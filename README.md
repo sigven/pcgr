@@ -20,6 +20,14 @@ If you want to interrogate germline variants and their relation to cancer predis
 
 ### News
 
+-   *March 2022*: **1.0.1 release**
+
+    -   Fixed bug for huge input sets that cause JSON output crash
+        - huge input variant sets (WGS) are now reduced prior to reporting with R, i.e. exclusion of intronic and intergenic variants, as well as upstream/downstream gene variants
+    -   Fixed bug for cases where mutational signature analysis reports > 18 different aetiologies after fitting
+    -   [CHANGELOG](http://sigven.github.io/pcgr/articles/CHANGELOG.html)
+
+
 -   *February 2022*: **1.0.0 release**
 
     -   Complete restructure of Python and R components. Installation now relies on two separate [conda](https://docs.conda.io/en/latest/) packages, `pcgr` (Python component) and `pcgrr` (R component). Direct Docker support remains, with the Dockerfile simplified to rely exclusively on the installation of the above Conda packages. Significant contributon by the great [@pdiakumis](https://github.com/pdiakumis)

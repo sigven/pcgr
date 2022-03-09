@@ -483,8 +483,16 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
                     # Exclude intronic and intergenic variants prior to analysis with pcgrr (reporting and further analysis)
                     var_data_filtered = var_data[~var_data.Consequence.str.contains('^intron') & ~var_data.Consequence.str.contains('^intergenic')]
                     
-                    num_variants_excluded = num_variants_raw - len(var_data_filtered)
-                    logger.info(f'Number of intergenic/intronic variants excluded: {num_variants_excluded}')
+                    num_variants_excluded1 = num_variants_raw - len(var_data_filtered)
+                    logger.info(f'Number of intergenic/intronic variants excluded: {num_variants_excluded1}')
+
+                    # Exclude upstream_gene/downstream_gene variants if size of filtered variant set is still above MAX_VARIANTS_FOR_REPORT
+                    var_data_filtered_final = var_data_filtered
+                    if len(var_data_filtered) > MAX_VARIANTS_FOR_REPORT:
+                        var_data_filtered_final = var_data_filtered[~var_data_filtered.Consequence.str.contains('^upstream_gene') & ~var_data_filtered.Consequence.str.contains('^downstream_gene')]
+                        num_variants_excluded2 = len(var_data_filtered) - len(var_data_filtered_final)
+                        logger.info(f'Number of upstream_gene/downstream_gene variants excluded: {num_variants_excluded2}')
+
 
                     # get vcf2tsv header and pipe to output TSV file
                     get_vcf2tsv_header = f'{docker_cmd_run2} gzip -dc {output_pass_tsv_gz} | egrep \'^#\' > {output_pass_tsv} {docker_cmd_run_end}'
@@ -495,7 +503,7 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
                     check_subprocess(logger, rename_output_tsv, debug)
 
                     # append filtered data output to output TSV file
-                    var_data_filtered.to_csv(output_pass_tsv, sep='\t', encoding='utf-8', mode = 'a', index = False)
+                    var_data_filtered_final.to_csv(output_pass_tsv, sep='\t', encoding='utf-8', mode = 'a', index = False)
 
                     # gzip filtered output TSV file
                     gzip_filtered_output_tsv = f'{docker_cmd_run2} gzip -f {output_pass_tsv} {docker_cmd_run_end}'
