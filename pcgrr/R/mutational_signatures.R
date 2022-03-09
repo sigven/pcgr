@@ -186,6 +186,9 @@ generate_report_data_signatures_mp <-
                           "showing signatures from 25 different aetiologies only"))
         contributions_per_signature <- contributions_per_signature %>%
           dplyr::filter(!is.na(.data$col))
+
+        contributions_per_group <- contributions_per_group %>%
+          dplyr::anti_join(missing_aetiologies, by = "group")
       }
 
 
