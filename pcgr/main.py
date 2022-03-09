@@ -472,31 +472,32 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
 
             output_pass_tsv_gz = str(output_pass_tsv) + '.gz'
 
+            # check that output file exist
             if os.path.exists(output_pass_tsv_gz):
-            #check that output file exist and has file size greater than zero
-            ## get number of rows/variants annotated
+                # get number of rows/variants annotated, using pandas
                 var_data = pandas.read_csv(output_pass_tsv_gz, sep = '\t', low_memory = False, header = [1])
                 num_variants_raw = len(var_data)
-                #var_limit = 500
                 if num_variants_raw > MAX_VARIANTS_FOR_REPORT:
                     logger.info(f'Number of raw variants in input VCF exceeds {MAX_VARIANTS_FOR_REPORT} - intergenic/intronic variants will be excluded prior to reporting')
+
+                    # Exclude intronic and intergenic variants prior to analysis with pcgrr (reporting and further analysis)
                     var_data_filtered = var_data[~var_data.Consequence.str.contains('^intron') & ~var_data.Consequence.str.contains('^intergenic')]
                     
                     num_variants_excluded = num_variants_raw - len(var_data_filtered)
                     logger.info(f'Number of intergenic/intronic variants excluded: {num_variants_excluded}')
 
-                    ## get vcf2tsv header and pipe to output tsv
+                    # get vcf2tsv header and pipe to output TSV file
                     get_vcf2tsv_header = f'{docker_cmd_run2} gzip -dc {output_pass_tsv_gz} | egrep \'^#\' > {output_pass_tsv} {docker_cmd_run_end}'
                     check_subprocess(logger, get_vcf2tsv_header, debug)
 
-                    ## rename original vcf2tsv (gzipped) to 'raw' filename 
+                    # rename original vcf2tsv (gzipped) to 'raw' filename 
                     rename_output_tsv = f'{docker_cmd_run2} mv {output_pass_tsv_gz} {output_pass_raw_tsv_gz} {docker_cmd_run_end}'
                     check_subprocess(logger, rename_output_tsv, debug)
 
-                    ## append filtereddata  output to output TSV
+                    # append filtered data output to output TSV file
                     var_data_filtered.to_csv(output_pass_tsv, sep='\t', encoding='utf-8', mode = 'a', index = False)
 
-                    ## gzip filtered output TSV
+                    # gzip filtered output TSV file
                     gzip_filtered_output_tsv = f'{docker_cmd_run2} gzip -f {output_pass_tsv} {docker_cmd_run_end}'
                     check_subprocess(logger, gzip_filtered_output_tsv, debug)
 
