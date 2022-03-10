@@ -285,10 +285,7 @@ options(warn = defaultW)
 
 # ## Write report and result files
 if (!is.null(pcg_report)) {
-  pcgrr::write_report_output(
-    pcg_report,
-    pcgr_config,
-    output_format = 'json')
+  
   pcgrr::write_report_output(
     pcg_report,
     pcgr_config,
@@ -316,4 +313,8 @@ if (!is.null(pcg_report)) {
     pcgr_config,
     output_format = 'html',
     flexdb = T)
+  pcgrr::write_report_output(
+    pcg_report,
+    pcgr_config,
+    output_format = 'json')
 }

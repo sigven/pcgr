@@ -3,6 +3,17 @@ title: "Changelog"
 output: rmarkdown::html_document
 ---
 
+## v1.0.1
+
+ * Date: **2022-03-09**
+
+##### Fixed
+ 
+ * Writing to JSON crashes when size of input VCF is huge (variants in the order of millions). If raw input set (VCF) contains > 500,000 variants, this set will, prior to reporting, be reduced by 
+      * A) exclusion of intergenic and intronic variants, and
+      * B) exclusion of upstream_gene/downstream_gene variants (if variant set is still above 500,000 after step A)
+ * [Bug in signature analysis](https://github.com/sigven/pcgr/issues/187) for cases where the input variant set fits to > 18 different aetiologies. 
+
 ## v1.0.0
 
  * Date: **2022-02-25**

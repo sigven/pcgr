@@ -72,7 +72,13 @@ The primary tissue/site of the tumor sample that is analyzed can and should be b
 
 * `--tumor_site <value>`
 
-This option takes a value between 0 and 30, reflecting the main primary sites/tissues for human cancers. Note that the default value is __0__ (implies __Any__ tissue/site), which essentially prohibits the presence of [tier 1 variants](variant_classification.html) occurring in the report.
+This option takes a value between 0 and 30, reflecting the main primary sites/tissues for human cancers. Note that the default value is __0__ (implies __Any__ tissue/site), which essentially prohibits the presence of [tier 1 variants](variant_classification.html) occurring in the report. If you want to check the nature of cancer subtypes attributed to each of the primary tissue/sites, take a look at the [table with phenotype terms and associated primary sites](primary_tumor_sites.html).
+
+### Large input sets (VCF)
+
+For input VCF files with > 500,000 variants, note that these will be subject to filtering prior to the final step in PCGR (step 4: reporting). For such scenarios, raw input sets will be filtered according to consequence type, in the sense that intergenic/intronic/upstream/downstream gene variants will be excluded prior to reporting. This is a necessary step to avoid memory issues etc. during processing with the PCGR R package. 
+
+If you have a large input VCF, and have sufficient memory capacity on your compute platform, we also recommend to increase the [VEP buffer size](https://www.ensembl.org/info/docs/tools/vep/script/vep_options.html#cacheopt) (option `--vep_buffer_size`), as this will speed up the VEP processing significantly.
 
 ## All options
 

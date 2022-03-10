@@ -158,20 +158,39 @@ generate_report_data_signatures_mp <-
                          .groups = "drop")
 
       )
-      ## FIX: if more than 18 aetiology types (unlikely), this will fail
+
       cols <- contributions_per_group %>%
         dplyr::arrange(dplyr::desc(.data$prop_group)) %>%
         dplyr::select(.data$group) %>%
-        dplyr::distinct()
+        dplyr::distinct() %>%
+        utils::head(25)
 
-      color_vec <- utils::head(pcgrr::color_palette[["tier"]][["values"]], nrow(cols))
+      color_vec <- utils::head(
+        pcgrr::color_palette[["tier"]][["values"]], min(25, nrow(cols)))
 
       names(color_vec) <- cols$group
       color_vec2 <- color_vec
       names(color_vec2) <- NULL
-      cols <- cols %>% dplyr::mutate(col = color_vec2)
+
+      cols <- cols %>%
+        dplyr::mutate(col = color_vec2)
       contributions_per_signature <- contributions_per_signature %>%
         dplyr::left_join(cols, by = "group")
+
+      ## emit warning if more than 25 different aetiologies are found
+      ## choose only signatures attributed to 25 different aetiologies
+      missing_aetiologies <- contributions_per_signature %>%
+        dplyr::filter(is.na(.data$col))
+      if(nrow(missing_aetiologies) > 0){
+        log4r_warn(paste0("Found contributions from more than 25 aetiologies - ",
+                          "showing signatures from 25 different aetiologies only"))
+        contributions_per_signature <- contributions_per_signature %>%
+          dplyr::filter(!is.na(.data$col))
+
+        contributions_per_group <- contributions_per_group %>%
+          dplyr::anti_join(missing_aetiologies, by = "group")
+      }
+
 
       contributions <- list()
       contributions[["per_group"]] <-  contributions_per_group

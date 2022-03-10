@@ -1367,12 +1367,107 @@ write_report_output <- function(report,
       report[["tmb"]][["tcga_tmb"]] <- NULL
     }
     log4r_info("------")
-    log4r_info("Writing JSON file (.json) with report contents")
-    pcgr_json <- jsonlite::toJSON(report, pretty = T, na = "string",
-                                  null = "null", force = T)
-    write(pcgr_json, fnames[["json"]])
-    gzip_command <- paste0("gzip -f ", fnames[["json"]])
-    system(gzip_command, intern = F)
+    log4r_info("Writing JSON file (.json) with key report contents")
+
+    report_strip <- report
+    if(!is.null(report_strip$content$rainfall)){
+      report_strip$content$rainfall <- NULL
+    }
+    if(!is.null(report_strip$content$tmb)){
+      report_strip$content$tmb$tcga_tmb <- NULL
+    }
+    if(!is.null(report_strip$content$clinicaltrials)){
+      report_strip$content$clinicaltrials <- NULL
+    }
+    if(!is.null(report_strip$content$msi)){
+      if(!is.null(report_strip$content$msi$prediction)){
+        report_strip$content$msi$prediction$tcga_dataset <- NULL
+      }
+    }
+
+    if(!is.null(report_strip$content$snv_indel$disp)){
+      report_strip$content$snv_indel$disp <- NULL
+    }
+
+    if(!is.null(report_strip$content$snv_indel$variant_set)){
+      if(!is.null(report_strip$content$snv_indel$variant_set$maf)){
+        report_strip$content$snv_indel$variant_set$maf <- NULL
+      }
+    }
+
+    key_tsv_cols <- c("GENOMIC_CHANGE",
+                      "VARIANT_CLASS",
+                      "SYMBOL",
+                      "ENTREZ_ID",
+                      "ENSEMBL_TRANSCRIPT_ID",
+                      "TUMOR_SUPPRESSOR",
+                      "ONCOGENE",
+                      "CONSEQUENCE",
+                      "PROTEIN_CHANGE",
+                      "PROTEIN_DOMAIN",
+                      "CODING_STATUS",
+                      "EXONIC_STATUS",
+                      "HGVSp",
+                      "MUTATION_HOTSPOT",
+                      "DBSNPRSID",
+                      "COSMIC_MUTATION_ID",
+                      "CALL_CONFIDENCE",
+                      "DP_TUMOR",
+                      "AF_TUMOR",
+                      "DP_CONTROL",
+                      "AF_CONTROL",
+                      "TIER")
+
+    if(!is.null(report_strip$content$snv_indel$variant_set)){
+
+      for(o in c('tsv')){
+
+        if(!is.null(report_strip$content$snv_indel$variant_set[[o]])){
+
+          if(nrow(report_strip$content$snv_indel$variant_set[[o]]) == 0){
+            next
+          }
+          assertable::assert_colnames(
+            report_strip$content$snv_indel$variant_set[[o]],
+            colnames = key_tsv_cols,
+            only_colnames = F,
+            quiet = T
+          )
+
+          # report_strip$content$snv_indel$consequence_stat_tsv <-
+          #   plyr::count(
+          #     report_strip$content$snv_indel$variant_set[[o]]$CONSEQUENCE)
+
+          report_strip$content$snv_indel$variant_set[[o]] <-
+            dplyr::select(
+              report_strip$content$snv_indel$variant_set[[o]],
+              dplyr::any_of(key_tsv_cols)
+            )
+
+        }
+      }
+    }
+
+
+    size <- format(utils::object.size(report_strip), units = "auto")
+    #hsize <- R.utils::hsize.object_size(size)
+    log4r_info(paste0("Size of PCGR report object for JSON output: ", size))
+
+
+    ## NOTE: set max size of report object to 750 Mb - have not figured out
+    ## what the exact size should be for jsonlite::toJSON to succeed/fail
+    if(utils::object.size(report_strip) < 750000000){
+
+      pcgr_json <- jsonlite::toJSON(
+        report_strip, pretty = T, na = "string",
+        null = "null", force = T)
+      write(pcgr_json, fnames[["json"]])
+      gzip_command <- paste0("gzip -f ", fnames[["json"]])
+      system(gzip_command, intern = F)
+    }else{
+      log4r_info("JSON output not possible - report contents too large (> 750Mb)")
+
+    }
   }
 
   if (output_format == "snv_tsv" | output_format == "snv_tsv_unfiltered") {
