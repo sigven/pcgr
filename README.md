@@ -24,7 +24,7 @@ If you want to interrogate germline variants and their relation to cancer predis
 
     -   Fixed bug for huge input sets that cause JSON output crash
         - huge input variant sets (WGS) are now reduced prior to reporting with R, i.e. exclusion of intronic and intergenic variants, as well as upstream/downstream gene variants ([#178](https://github.com/sigven/pcgr/issues/178)).
-    -   Fixed bug for cases where mutational signature analysis reports > 18 different aetiologies after fitting
+    -   Fixed bug for cases where mutational signature analysis reports > 18 different aetiologies after fitting ([#187](https://github.com/sigven/pcgr/issues/187)).
     -   [CHANGELOG](http://sigven.github.io/pcgr/articles/CHANGELOG.html)
 
 
