@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -212,7 +212,24 @@ should be be provided, through the following option:</p>
 primary sites/tissues for human cancers. Note that the default value is
 <strong>0</strong> (implies <strong>Any</strong> tissue/site), which
 essentially prohibits the presence of <a href="variant_classification.html">tier 1 variants</a> occurring in the
-report.</p>
+report. If you want to check the nature of cancer subtypes attributed to
+each of the primary tissue/sites, take a look at the <a href="primary_tumor_sites.html">table with phenotype terms and
+associated primary sites</a>.</p>
+</div>
+<div class="section level3">
+<h3 id="large-input-sets-vcf">Large input sets (VCF)<a class="anchor" aria-label="anchor" href="#large-input-sets-vcf"></a>
+</h3>
+<p>For input VCF files with &gt; 500,000 variants, note that these will
+be subject to filtering prior to the final step in PCGR (step 4:
+reporting). For such scenarios, raw input sets will be filtered
+according to consequence type, in the sense that
+intergenic/intronic/upstream/downstream gene variants will be excluded
+prior to reporting. This is a necessary step to avoid memory issues etc.
+during processing with the PCGR R package.</p>
+<p>If you have a large input VCF, and have sufficient memory capacity on
+your compute platform, we also recommend to increase the <a href="https://www.ensembl.org/info/docs/tools/vep/script/vep_options.html#cacheopt" class="external-link">VEP
+buffer size</a> (option <code>--vep_buffer_size</code>), as this will
+speed up the VEP processing significantly.</p>
 </div>
 </div>
 <div class="section level2">
