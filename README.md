@@ -20,6 +20,10 @@ If you want to interrogate germline variants and their relation to cancer predis
 
 ### News
 
+-   *March 2022*: **1.0.2 release**
+    
+    - Fixed [CPSR issue #44](https://github.com/sigven/cpsr/issues/44)
+    
 -   *March 2022*: **1.0.1 release**
 
     -   Fixed bug for huge input sets that cause JSON output crash
