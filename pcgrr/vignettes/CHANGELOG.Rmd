@@ -3,6 +3,14 @@ title: "Changelog"
 output: rmarkdown::html_document
 ---
 
+## v1.0.2
+ 
+ * Date: **2022-03-30**
+
+##### Fixed
+
+ * JSON output for CPSR, [#44](https://github.com/sigven/cpsr/issues/44)
+
 ## v1.0.1
 
  * Date: **2022-03-09**
