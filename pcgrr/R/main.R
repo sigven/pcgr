@@ -1370,83 +1370,83 @@ write_report_output <- function(report,
     log4r_info("Writing JSON file (.json) with key report contents")
 
     report_strip <- report
-    if(!is.null(report_strip$content$rainfall)){
-      report_strip$content$rainfall <- NULL
-    }
-    if(!is.null(report_strip$content$tmb)){
-      report_strip$content$tmb$tcga_tmb <- NULL
-    }
-    if(!is.null(report_strip$content$clinicaltrials)){
-      report_strip$content$clinicaltrials <- NULL
-    }
-    if(!is.null(report_strip$content$msi)){
-      if(!is.null(report_strip$content$msi$prediction)){
-        report_strip$content$msi$prediction$tcga_dataset <- NULL
+
+    if(tier_model != "cpsr"){
+      if(!is.null(report_strip$content$rainfall)){
+        report_strip$content$rainfall <- NULL
       }
-    }
-
-    if(!is.null(report_strip$content$snv_indel$disp)){
-      report_strip$content$snv_indel$disp <- NULL
-    }
-
-    if(!is.null(report_strip$content$snv_indel$variant_set)){
-      if(!is.null(report_strip$content$snv_indel$variant_set$maf)){
-        report_strip$content$snv_indel$variant_set$maf <- NULL
+      if(!is.null(report_strip$content$tmb)){
+        report_strip$content$tmb$tcga_tmb <- NULL
       }
-    }
-
-    key_tsv_cols <- c("GENOMIC_CHANGE",
-                      "VARIANT_CLASS",
-                      "SYMBOL",
-                      "ENTREZ_ID",
-                      "ENSEMBL_TRANSCRIPT_ID",
-                      "TUMOR_SUPPRESSOR",
-                      "ONCOGENE",
-                      "CONSEQUENCE",
-                      "PROTEIN_CHANGE",
-                      "PROTEIN_DOMAIN",
-                      "CODING_STATUS",
-                      "EXONIC_STATUS",
-                      "HGVSp",
-                      "MUTATION_HOTSPOT",
-                      "DBSNPRSID",
-                      "COSMIC_MUTATION_ID",
-                      "CALL_CONFIDENCE",
-                      "DP_TUMOR",
-                      "AF_TUMOR",
-                      "DP_CONTROL",
-                      "AF_CONTROL",
-                      "TIER")
-
-    if(!is.null(report_strip$content$snv_indel$variant_set)){
-
-      for(o in c('tsv')){
-
-        if(!is.null(report_strip$content$snv_indel$variant_set[[o]])){
-
-          if(nrow(report_strip$content$snv_indel$variant_set[[o]]) == 0){
-            next
-          }
-          assertable::assert_colnames(
-            report_strip$content$snv_indel$variant_set[[o]],
-            colnames = key_tsv_cols,
-            only_colnames = F,
-            quiet = T
-          )
-
-          # report_strip$content$snv_indel$consequence_stat_tsv <-
-          #   plyr::count(
-          #     report_strip$content$snv_indel$variant_set[[o]]$CONSEQUENCE)
-
-          report_strip$content$snv_indel$variant_set[[o]] <-
-            dplyr::select(
-              report_strip$content$snv_indel$variant_set[[o]],
-              dplyr::any_of(key_tsv_cols)
-            )
-
+      if(!is.null(report_strip$content$clinicaltrials)){
+        report_strip$content$clinicaltrials <- NULL
+      }
+      if(!is.null(report_strip$content$msi)){
+        if(!is.null(report_strip$content$msi$prediction)){
+          report_strip$content$msi$prediction$tcga_dataset <- NULL
         }
       }
-    }
+
+      if(!is.null(report_strip$content$snv_indel$disp)){
+        report_strip$content$snv_indel$disp <- NULL
+      }
+
+      if(!is.null(report_strip$content$snv_indel$variant_set)){
+        if(!is.null(report_strip$content$snv_indel$variant_set$maf)){
+          report_strip$content$snv_indel$variant_set$maf <- NULL
+        }
+      }
+
+      key_tsv_cols <- c("GENOMIC_CHANGE",
+                        "VARIANT_CLASS",
+                        "SYMBOL",
+                        "ENTREZ_ID",
+                        "ENSEMBL_TRANSCRIPT_ID",
+                        "TUMOR_SUPPRESSOR",
+                        "ONCOGENE",
+                        "CONSEQUENCE",
+                        "PROTEIN_CHANGE",
+                        "PROTEIN_DOMAIN",
+                        "CODING_STATUS",
+                        "EXONIC_STATUS",
+                        "HGVSp",
+                        "MUTATION_HOTSPOT",
+                        "DBSNPRSID",
+                        "COSMIC_MUTATION_ID",
+                        "CALL_CONFIDENCE",
+                        "DP_TUMOR",
+                        "AF_TUMOR",
+                        "DP_CONTROL",
+                        "AF_CONTROL",
+                        "TIER")
+
+      if(!is.null(report_strip$content$snv_indel$variant_set)){
+
+        for(o in c('tsv')){
+
+          if(!is.null(report_strip$content$snv_indel$variant_set[[o]])){
+
+            if(nrow(report_strip$content$snv_indel$variant_set[[o]]) == 0){
+              next
+            }
+            assertable::assert_colnames(
+              report_strip$content$snv_indel$variant_set[[o]],
+              colnames = key_tsv_cols,
+              only_colnames = F,
+              quiet = T
+            )
+
+            report_strip$content$snv_indel$variant_set[[o]] <-
+              dplyr::select(
+                report_strip$content$snv_indel$variant_set[[o]],
+                dplyr::any_of(key_tsv_cols)
+              )
+
+          }
+        }
+      }
+
+    } ## if tier_model != "cpsr"
 
 
     size <- format(utils::object.size(report_strip), units = "auto")
