@@ -55,9 +55,10 @@ generate_report_data_trials <- function(pcgr_data, config, sample_name) {
       dplyr::rename(intervention = .data$intervention2) %>%
       magrittr::set_colnames(toupper(names(.))) %>%
       dplyr::arrange(.data$N_PRIMARY_CANCER_SITES,
-                     .data$OVERALL_STATUS, dplyr::desc(.data$START_DATE),
-                     dplyr::desc(nchar(.data$BIOMARKER_INDEX),
-                          .data$STUDY_DESIGN_PRIMARY_PURPOSE)) %>%
+                     .data$OVERALL_STATUS,
+                     dplyr::desc(.data$START_DATE),
+                     dplyr::desc(nchar(.data$BIOMARKER_INDEX)),
+                     dplyr::desc(.data$STUDY_DESIGN_PRIMARY_PURPOSE)) %>%
       dplyr::select(-c(.data$N_PRIMARY_CANCER_SITES, .data$STUDY_DESIGN_PRIMARY_PURPOSE))
 
     if (nrow(pcg_report_trials[["trials"]]) > 2000) {
