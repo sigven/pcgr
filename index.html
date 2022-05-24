@@ -30,7 +30,7 @@
     
     <a class="navbar-brand me-2" href="index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -91,94 +91,59 @@
 <div class="section level2">
 <h2 id="personal-cancer-genome-reporter">Personal Cancer Genome Reporter<a class="anchor" aria-label="anchor" href="#personal-cancer-genome-reporter"></a>
 </h2>
-<p>The Personal Cancer Genome Reporter (PCGR) is a stand-alone software
-package for functional annotation and translation of individual tumor
-genomes for precision cancer medicine. It interprets both somatic
-SNVs/InDels and copy number aberrations. The software extends basic gene
-and variant annotations from the <a href="http://www.ensembl.org/info/docs/tools/vep/index.html" class="external-link">Ensembl’s
-Variant Effect Predictor (VEP)</a> with oncology-relevant, up-to-date
-annotations retrieved flexibly through <a href="https://github.com/brentp/vcfanno" class="external-link">vcfanno</a>. Variants are
-further classified into <a href="articles/variant_classification.html">tiers of clinical
-significance</a>. Interactive HTML output reports allow the user to
-interrogate the clinical impact of the molecular findings in an
-individual tumor.</p>
+<p>The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for functional annotation and translation of individual tumor genomes for precision cancer medicine. It interprets both somatic SNVs/InDels and copy number aberrations. The software extends basic gene and variant annotations from the <a href="http://www.ensembl.org/info/docs/tools/vep/index.html" class="external-link">Ensembl’s Variant Effect Predictor (VEP)</a> with oncology-relevant, up-to-date annotations retrieved flexibly through <a href="https://github.com/brentp/vcfanno" class="external-link">vcfanno</a>. Variants are further classified into <a href="articles/variant_classification.html">tiers of clinical significance</a>. Interactive HTML output reports allow the user to interrogate the clinical impact of the molecular findings in an individual tumor.</p>
 <p>Example views from the dashboard HTML output:</p>
 <p><img src="img/pcgr_dashboard_views.png"></p>
-<p>PCGR originates from the <a href="http://cancergenomics.no" class="external-link">Norwegian
-Cancer Genomics Consortium (NCGC)</a>, at the <a href="http://radium.no" class="external-link">Institute for Cancer Research, Oslo University
-Hospital, Norway</a>.</p>
+<p>PCGR originates from the <a href="http://cancergenomics.no" class="external-link">Norwegian Cancer Genomics Consortium (NCGC)</a>, at the <a href="http://radium.no" class="external-link">Institute for Cancer Research, Oslo University Hospital, Norway</a>.</p>
 <div class="section level3">
 <h3 id="example-reports">Example reports<a class="anchor" aria-label="anchor" href="#example-reports"></a>
 </h3>
 <ul>
-<li><a href="http://insilico.hpc.uio.no/pcgr/example_reports/latest/cervix_tumor_control.grch37.flexdb.html" class="external-link">Cervical
-cancer sample (tumor-control)</a></li>
-<li><a href="http://insilico.hpc.uio.no/pcgr/example_reports/latest/esophagus_stomach_tumor_control.grch37.flexdb.html" class="external-link">Stomach
-cancer sample (tumor-control)</a></li>
-<li><a href="http://insilico.hpc.uio.no/pcgr/example_reports/latest/breast_tumor_only.grch37.flexdb.html" class="external-link">Breast
-cancer sample (tumor-only)</a></li>
+<li><a href="http://insilico.hpc.uio.no/pcgr/example_reports/latest/cervix_tumor_control.grch37.flexdb.html" class="external-link">Cervical cancer sample (tumor-control)</a></li>
+<li><a href="http://insilico.hpc.uio.no/pcgr/example_reports/latest/esophagus_stomach_tumor_control.grch37.flexdb.html" class="external-link">Stomach cancer sample (tumor-control)</a></li>
+<li><a href="http://insilico.hpc.uio.no/pcgr/example_reports/latest/breast_tumor_only.grch37.flexdb.html" class="external-link">Breast cancer sample (tumor-only)</a></li>
 </ul>
-<p>(to view the rmarkdown-based reports, simply remove <em>.flexdb.</em>
-in the file names for the flexdashboard reports)</p>
+<p>(to view the rmarkdown-based reports, simply remove <em>.flexdb.</em> in the file names for the flexdashboard reports)</p>
 </div>
 <div class="section level3">
 <h3 id="why-use-pcgr">Why use PCGR?<a class="anchor" aria-label="anchor" href="#why-use-pcgr"></a>
 </h3>
-<p>The great complexity of acquired mutations in individual tumor
-genomes poses a severe challenge for clinical interpretation. PCGR aims
-to be a comprehensive reporting platform that can</p>
+<p>The great complexity of acquired mutations in individual tumor genomes poses a severe challenge for clinical interpretation. PCGR aims to be a comprehensive reporting platform that can</p>
 <ul>
-<li>systematically interrogate tumor-specific variants in the context of
-known therapeutic and prognostic biomarkers</li>
+<li>systematically interrogate tumor-specific variants in the context of known therapeutic and prognostic biomarkers</li>
 <li>prioritize and highlight the most relevant findings</li>
 <li>present the results in a format accessible to clinical experts</li>
 </ul>
-<p>PCGR integrates a <a href="articles/annotation_resources.html">comprehensive set of knowledge
-resources</a> related to tumor biology and therapeutic biomarkers, both
-at the gene, and variant level. The software generates a tiered genome
-report that will aid the translation of individual cancer genomes for
-novel treatment strategies.</p>
+<p>PCGR integrates a <a href="articles/annotation_resources.html">comprehensive set of knowledge resources</a> related to tumor biology and therapeutic biomarkers, both at the gene, and variant level. The software generates a tiered genome report that will aid the translation of individual cancer genomes for novel treatment strategies.</p>
 </div>
 <div class="section level3">
 <h3 id="getting-started">Getting started<a class="anchor" aria-label="anchor" href="#getting-started"></a>
 </h3>
 <ul>
-<li><p><a href="articles/installation.html">Installation
-instructions</a></p></li>
-<li><p><a href="articles/running.html#example-run">Run through an
-example</a></p></li>
+<li><p><a href="articles/installation.html">Installation instructions</a></p></li>
+<li><p><a href="articles/running.html#example-run">Run through an example</a></p></li>
 <li>
 <p>Learn more about</p>
 <ol style="list-style-type: decimal">
-<li>Details regarding <a href="articles/input.html">PCGR input
-files</a>, and how they should be formatted</li>
-<li>Configuration of <a href="articles/running.html#key-settings">key
-settings</a>
+<li>Details regarding <a href="articles/input.html">PCGR input files</a>, and how they should be formatted</li>
+<li>Configuration of <a href="articles/running.html#key-settings">key settings</a>
 </li>
-<li>The types and contents of <a href="articles/output.html">PCGR output
-files</a>
+<li>The types and contents of <a href="articles/output.html">PCGR output files</a>
 </li>
-<li><a href="articles/variant_classification.html">Variant tier system
-implemented in PCGR</a></li>
-<li><a href="articles/primary_tumor_sites.html">Primary tumor sites used
-in PCGR</a></li>
-<li>The list of <a href="articles/virtual_panels.html">gene and variant
-annotation resources</a> available in PCGR<br><br>
+<li><a href="articles/variant_classification.html">Variant tier system implemented in PCGR</a></li>
+<li><a href="articles/primary_tumor_sites.html">Primary tumor sites used in PCGR</a></li>
+<li>The list of <a href="articles/virtual_panels.html">gene and variant annotation resources</a> available in PCGR<br><br>
 </li>
 </ol>
 </li>
-<li><p><a href="articles/faq.html">Frequenty asked questions
-(FAQ)</a></p></li>
+<li><p><a href="articles/faq.html">Frequenty asked questions (FAQ)</a></p></li>
 </ul>
 </div>
 <div class="section level3">
 <h3 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h3>
 <p>If you use PCGR, please cite our publication:</p>
-<p>Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim,
-Ola Myklebost, and Eivind Hovig. <strong>Personal Cancer Genome
-Reporter: variant interpretation report for precision oncology</strong>
-(2017). <em>Bioinformatics</em>. 34(10):1778–1780. <a href="https://doi.org/10.1093/bioinformatics/btx817" class="external-link">doi.org/10.1093/bioinformatics/btx817</a></p>
+<p>Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, Ola Myklebost, and Eivind Hovig. <strong>Personal Cancer Genome Reporter: variant interpretation report for precision oncology</strong> (2017). <em>Bioinformatics</em>. 34(10):1778–1780. <a href="https://doi.org/10.1093/bioinformatics/btx817" class="external-link">doi.org/10.1093/bioinformatics/btx817</a></p>
 </div>
 </div>
 <div class="section level2">
@@ -229,14 +194,12 @@ Reporter: variant interpretation report for precision oncology</strong>
 
     <footer><div class="pkgdown-footer-left">
   <p></p>
-<p>Developed by <a href="https://github.com/sigven" class="external-link">Sigve Nakken</a>,
-<a href="https://github.com/pdiakumis" class="external-link">Peter Diakumis</a>.</p>
+<p>Developed by <a href="https://github.com/sigven" class="external-link">Sigve Nakken</a>, <a href="https://github.com/pdiakumis" class="external-link">Peter Diakumis</a>.</p>
 </div>
 
 <div class="pkgdown-footer-right">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.2.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
 </div>
 
     </footer>
