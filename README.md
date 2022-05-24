@@ -20,6 +20,10 @@ If you want to interrogate germline variants and their relation to cancer predis
 
 ### News
 
+-   *May 2022*: **1.0.3 release**
+
+    - Merged [PR #191](https://github.com/sigven/pcgr/pull/191)
+    
 -   *March 2022*: **1.0.2 release**
     
     - Fixed [CPSR issue #44](https://github.com/sigven/cpsr/issues/44)
