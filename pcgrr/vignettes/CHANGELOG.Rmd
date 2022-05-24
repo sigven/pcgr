@@ -3,6 +3,14 @@ title: "Changelog"
 output: rmarkdown::html_document
 ---
 
+## v1.0.3
+
+ * Date: **2022-05-24**
+
+##### Fixed
+
+ * Bug in clinical trials sorting, [#191](https://github.com/sigven/pcgr/pull/191)
+
 ## v1.0.2
  
  * Date: **2022-03-30**
