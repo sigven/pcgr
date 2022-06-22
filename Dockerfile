@@ -11,7 +11,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -r /var/lib/apt/lists/* && \
     rm -r /var/cache/apt/* && \
-    curl -L "${MINI_URL}" -o "mambaforge.sh" && \
+    curl --silent -L "${MINI_URL}" -o "mambaforge.sh" && \
     /bin/bash mambaforge.sh -b -p /opt/mambaforge/ && \
     rm mambaforge.sh
 
