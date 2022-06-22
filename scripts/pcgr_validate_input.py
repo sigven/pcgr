@@ -344,34 +344,34 @@ def check_format_ad_dp_tags(vcf,
    
    
    if call_conf_tag != '_NA_' and found_call_conf_tag == 0:
-      logger.warn('Could not find the specified call_conf_tag (' + str(call_conf_tag) + ') in INFO column of input VCF')
+      logger.warning(f"Could not find the specified call_conf_tag ('{call_conf_tag}') in INFO column of input VCF")
    if tumor_dp_tag != '_NA_' and found_tdp_tag == 0:
-      logger.warn('Could not find the specified tumor_dp_tag (' + str(tumor_dp_tag) + ') in INFO column of input VCF')
+      logger.warning(f"Could not find the specified tumor_dp_tag ('{tumor_dp_tag}') in INFO column of input VCF")
    if tumor_af_tag != '_NA_' and found_taf_tag == 0:
-      logger.warn('Could not find the specified tumor_af_tag (' + str(tumor_af_tag) + ') in INFO column of input VCF')
+      logger.warning(f"Could not find the specified tumor_af_tag ('{tumor_af_tag}') in INFO column of input VCF")
    if control_dp_tag != '_NA_' and found_ndp_tag == 0:
-      logger.warn('Could not find the specified control_dp_tag (' + str(control_dp_tag) + ') in INFO column of input VCF')
+      logger.warning(f"Could not find the specified control_dp_tag ('{control_dp_tag}') in INFO column of input VCF")
    if control_af_tag != '_NA_' and found_naf_tag == 0:
-      logger.warn('Could not find the specified control_af_tag (' + str(control_af_tag) + ') in INFO column of input VCF')
+      logger.warning(f"Could not find the specified control_af_tag ('{control_af_tag}') in INFO column of input VCF")
    
    if exclude_hom_germline is True and tumor_only == 1 and found_taf_tag == 0:
-      logger.warn('Could not find the specified tumor_af_tag (' + str(tumor_af_tag) + ') in INFO column of input VCF - filtering of homozygous germline variants in tumor-only mode will be ignored')
+      logger.warning(f"Could not find the specified tumor_af_tag ('{tumor_af_tag}') in INFO column of input VCF - filtering of homozygous germline variants in tumor-only mode will be ignored")
 
    if exclude_het_germline is True and tumor_only == 1 and found_taf_tag == 0:
-      logger.warn('Could not find the specified tumor_af_tag (' + str(tumor_af_tag) + ') in INFO column of input VCF - filtering of heterozygous germline variants in tumor-only mode will be ignored')
+      logger.warning(f"Could not find the specified tumor_af_tag ('{tumor_af_tag}') in INFO column of input VCF - filtering of heterozygous germline variants in tumor-only mode will be ignored")
 
 
    if found_tdp_tag == 1 and found_taf_tag == 0:
-      logger.warn('BOTH \' tumor_dp_tag\' AND \' tumor_af_tag\' need to be specified for use in tumor report (\'tumor_af_tag\' is missing)')
+      logger.warning('BOTH \' tumor_dp_tag\' AND \' tumor_af_tag\' need to be specified for use in tumor report (\'tumor_af_tag\' is missing)')
    
    if found_tdp_tag == 0 and found_taf_tag == 1:
-      logger.warn('BOTH \'tumor_dp_tag\' AND \'tumor_af_tag\' need to be specified for use in tumor report (\'tumor_dp_tag\' is missing)')
+      logger.warning('BOTH \'tumor_dp_tag\' AND \'tumor_af_tag\' need to be specified for use in tumor report (\'tumor_dp_tag\' is missing)')
    
    if found_ndp_tag == 1 and found_naf_tag == 0:
-      logger.warn('BOTH \'control_dp_tag\' AND \'control_af_tag\' need to be specified for use in tumor report (\'control_af_tag\' is missing)')
+      logger.warning('BOTH \'control_dp_tag\' AND \'control_af_tag\' need to be specified for use in tumor report (\'control_af_tag\' is missing)')
    
    if found_ndp_tag == 0 and found_naf_tag == 1:
-      logger.warn('BOTH \'control_dp_tag\' AND \'control_af_tag\' need to be specified for use in tumor report (\'control_dp_tag\' is missing)')
+      logger.warning('BOTH \'control_dp_tag\' AND \'control_af_tag\' need to be specified for use in tumor report (\'control_dp_tag\' is missing)')
    
    ## if filtering turned on for AF-based tumor-only filtering, return error if TVAF not defined
 
@@ -472,7 +472,7 @@ def validate_pcgr_input(pcgr_directory,
    logger = annoutils.getlogger('pcgr-validate-arguments-input')
 
    # if panel_normal_vcf == "None" and tumor_only == 1 and config_options['tumor_only']['exclude_pon'] is True:
-   #    logger.warn('Panel-of-normals VCF is not present - exclusion of calls found in panel-of-normals will be ignored')
+   #    logger.warning('Panel-of-normals VCF is not present - exclusion of calls found in panel-of-normals will be ignored')
 
    if not input_vcf == 'None':
 

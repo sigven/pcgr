@@ -362,7 +362,7 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
                 f'{config_options["other"]["vep_buffer_size"]} --species homo_sapiens --assembly {VEP_ASSEMBLY} --offline --fork '
                 f'{config_options["other"]["vep_n_forks"]} {vep_flags} --dir {vep_dir}'
                 )
-        
+
         gencode_set_in_use = "GENCODE - all transcripts"
         vep_options += f' --cache_version {pcgr_vars.VEP_VERSION}'
         if config_options['other']['vep_no_intergenic'] == 1:
@@ -482,7 +482,7 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
 
                     # Exclude intronic and intergenic variants prior to analysis with pcgrr (reporting and further analysis)
                     var_data_filtered = var_data[~var_data.Consequence.str.contains('^intron') & ~var_data.Consequence.str.contains('^intergenic')]
-                    
+
                     num_variants_excluded1 = num_variants_raw - len(var_data_filtered)
                     logger.info(f'Number of intergenic/intronic variants excluded: {num_variants_excluded1}')
 
@@ -498,7 +498,7 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
                     get_vcf2tsv_header = f'{docker_cmd_run2} gzip -dc {output_pass_tsv_gz} | egrep \'^#\' > {output_pass_tsv} {docker_cmd_run_end}'
                     check_subprocess(logger, get_vcf2tsv_header, debug)
 
-                    # rename original vcf2tsv (gzipped) to 'raw' filename 
+                    # rename original vcf2tsv (gzipped) to 'raw' filename
                     rename_output_tsv = f'{docker_cmd_run2} mv {output_pass_tsv_gz} {output_pass_raw_tsv_gz} {docker_cmd_run_end}'
                     check_subprocess(logger, rename_output_tsv, debug)
 
@@ -509,7 +509,7 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
                     gzip_filtered_output_tsv = f'{docker_cmd_run2} gzip -f {output_pass_tsv} {docker_cmd_run_end}'
                     check_subprocess(logger, gzip_filtered_output_tsv, debug)
 
-        
+
         logger.info('Finished')
 
 
