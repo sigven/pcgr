@@ -14,7 +14,6 @@ global debug
 csv.field_size_limit(500 * 1024 * 1024)
 
 def __main__():
-   
    parser = argparse.ArgumentParser(description='Cancer gene annotations from PCGR pipeline (SNVs/InDels)')
    parser.add_argument('vcf_file', help='VCF file with VEP-annotated query variants (SNVs/InDels)')
    parser.add_argument('pon_annotation',default=0,type=int,help='Include Panel of Normals annotation')
@@ -85,7 +84,7 @@ def extend_vcf_annotations(query_vcf, pcgr_db_directory, logger, pon_annotation,
    w = Writer(out_vcf, vcf)
    current_chrom = None
    num_chromosome_records_processed = 0
-   
+
    vcf_info_element_types = {}
    for e in vcf.header_iter():
       header_element = e.info()
@@ -101,14 +100,14 @@ def extend_vcf_annotations(query_vcf, pcgr_db_directory, logger, pon_annotation,
       else:
          if str(rec.CHROM) != current_chrom:
             if not current_chrom is None:
-               logger.info('Completed summary of functional annotations for ' + str(num_chromosome_records_processed) + ' variants on chromosome ' + str(current_chrom))
+               logger.info(f"Completed summary of functional annotations for {num_chromosome_records_processed} variants on chr{current_chrom}")
             current_chrom = str(rec.CHROM)
             num_chromosome_records_processed = 0
       if rec.INFO.get('CSQ') is None:
          alt_allele = ','.join(rec.ALT)
          pos = rec.start + 1
-         variant_id = 'g.' + str(rec.CHROM) + ':' + str(pos) + str(rec.REF) + '>' + alt_allele
-         logger.warning('Variant record ' + str(variant_id) + ' does not have CSQ tag from Variant Effect Predictor (vep_skip_intergenic in config set to true?)  - variant will be skipped')
+         variant_id = f"g.{rec.CHROM}:{pos}{rec.REF}>{alt_allele}"
+         logger.warning(f"Variant record {variant_id} has no CSQ tag from VEP (--vep_no_intergenic flag set?)  - skipping variant")
          continue
 
       num_chromosome_records_processed += 1
@@ -126,7 +125,6 @@ def extend_vcf_annotations(query_vcf, pcgr_db_directory, logger, pon_annotation,
          rec.INFO['VEP_ALL_CSQ'] = ','.join(csq_record_results_pick['vep_all_csq'])
       if 'vep_block' in csq_record_results_pick:
          vep_csq_records = csq_record_results_pick['vep_block']
-         
          block_idx = 0
          if cpsr is True:
             block_idx = annoutils.get_correct_cpg_transcript(vep_csq_records)
@@ -138,14 +136,13 @@ def extend_vcf_annotations(query_vcf, pcgr_db_directory, logger, pon_annotation,
                else:
                   if not record[k] is None:
                      rec.INFO[k] = record[k]
-      
       if not rec.INFO.get('DBNSFP') is None:
          annoutils.map_variant_effect_predictors(rec, dbnsfp_prediction_algorithms)
 
       w.write_record(rec)
    w.close()
    if current_chrom is not None:
-      logger.info('Completed summary of functional annotations for ' + str(num_chromosome_records_processed) + ' variants on chromosome ' + str(current_chrom))
+      logger.info(f"Completed summary of functional annotations for {num_chromosome_records_processed} variants on chr{current_chrom}")
    vcf.close()
 
    if os.path.exists(out_vcf):
