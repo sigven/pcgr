@@ -285,7 +285,7 @@ options(warn = defaultW)
 
 # ## Write report and result files
 if (!is.null(pcg_report)) {
-  
+
   pcgrr::write_report_output(
     pcg_report,
     pcgr_config,

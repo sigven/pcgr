@@ -80,6 +80,9 @@ git clone \
     "${OUTPUT_DIRECTORY}"
 ```
 
+Note that the `--depth 1` option ensures you only clone the specific version,
+and not the entire git history of the repo.
+
 ### STEP 3: Set up Conda or Docker
 
 Step 3 depends on if you want to use Conda or Docker:
@@ -139,6 +142,10 @@ mamba create --prefix ${PCGR_CONDA_ENV_DIR}/pcgrr --file ${PCGR_CONDA_ENV_DIR}/l
 ## Alternatively, for installing in your central conda directory, use the following:
 # mamba create --name pcgr --file ${PCGR_CONDA_ENV_DIR}/lock/pcgr-${PLATFORM}.lock
 # mamba create --name pcgrr --file ${PCGR_CONDA_ENV_DIR}/lock/pcgrr-${PLATFORM}.lock
+
+## For MacOS M1, you need to have 'CONDA_SUBDIR=osx-64' before the mamba command, i.e.:
+# CONDA_SUBDIR=osx-64 mamba create --prefix [...] --file [...]
+## See https://github.com/conda-forge/miniforge/issues/165#issuecomment-860233092
 ```
 
 The above process takes 10-15min when installing from scratch. In the end, you

@@ -23,7 +23,6 @@ def get_docker_image_version(arg_dict, logger):
 
 
 def check_args(arg_dict, logger):
-    # Required arguments
     # Check the existence of required arguments
     help_msg = 'Type pcgr.py --help to view all options and required arguments'
     if arg_dict['pcgr_dir'] is None or not os.path.exists(arg_dict['pcgr_dir']):
@@ -209,8 +208,7 @@ def check_args(arg_dict, logger):
 
 def verify_input_files(arg_dict, logger):
     """
-    Function that
-    1. Checks the input files and directories provided by the user (dictionary arg_dict) and checks for their existence
+    1. Checks existence of input files/dirs (arg_dict)
     2. Checks that the data bundle is of correct date
     """
 
@@ -425,24 +423,24 @@ def verify_input_files(arg_dict, logger):
         err_msg = "The PCGR data bundle is not compliant with the software version - please download the latest software and data bundle (see https://github.com/sigven/pcgr for instructions)"
         error_message(err_msg, logger)
 
-    host_directories = {}
-    host_directories["input_vcf_dir_host"] = input_vcf_dir
-    host_directories["input_cna_dir_host"] = input_cna_dir
-    host_directories["input_rna_fusion_dir_host"] = input_rna_fusion_dir
-    host_directories["input_rna_expression_dir_host"] = input_rna_expression_dir
-    host_directories["input_cpsr_report_dir_host"] = input_cpsr_report_dir
-    host_directories["input_cna_plot_dir_host"] = input_cna_plot_dir
-
-    host_directories["panel_normal_vcf_dir_host"] = panel_normal_vcf_dir
-    host_directories["db_dir_host"] = db_assembly_dir
-    host_directories["base_dir_host"] = base_dir
-    host_directories["output_dir_host"] = output_dir_full
-    host_directories["panel_normal_vcf_basename_host"] = panel_normal_vcf_basename
-    host_directories["input_vcf_basename_host"] = input_vcf_basename
-    host_directories["input_cna_basename_host"] = input_cna_basename
-    host_directories["input_rna_fusion_basename_host"] = input_rna_fusion_basename
-    host_directories["input_rna_expression_basename_host"] = input_rna_expression_basename
-    host_directories["input_cpsr_report_basename_host"] = input_cpsr_report_basename
-    host_directories["input_cna_plot_basename_host"] = input_cna_plot_basename
+    host_directories = {
+      "input_vcf_dir_host": input_vcf_dir,
+      "input_cna_dir_host": input_cna_dir,
+      "input_rna_fusion_dir_host": input_rna_fusion_dir,
+      "input_rna_expression_dir_host": input_rna_expression_dir,
+      "input_cpsr_report_dir_host": input_cpsr_report_dir,
+      "input_cna_plot_dir_host": input_cna_plot_dir,
+      "panel_normal_vcf_dir_host": panel_normal_vcf_dir,
+      "db_dir_host": db_assembly_dir,
+      "base_dir_host": base_dir,
+      "output_dir_host": output_dir_full,
+      "panel_normal_vcf_basename_host": panel_normal_vcf_basename,
+      "input_vcf_basename_host": input_vcf_basename,
+      "input_cna_basename_host": input_cna_basename,
+      "input_rna_fusion_basename_host": input_rna_fusion_basename,
+      "input_rna_expression_basename_host": input_rna_expression_basename,
+      "input_cpsr_report_basename_host": input_cpsr_report_basename,
+      "input_cna_plot_basename_host": input_cna_plot_basename,
+    }
 
     return host_directories
