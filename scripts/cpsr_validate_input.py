@@ -26,7 +26,7 @@ def __main__():
    parser.add_argument('sample_id',help='CPSR sample_name')
    parser.add_argument('virtual_panel_id',type=str,help='virtual panel identifier(s)')
    parser.add_argument('diagnostic_grade_only', type=int, default=0, choices=[0,1], help="Green virtual panels only (Genomics England PanelApp)")
-   parser.add_argument('--output_dir', dest='output_dir', help='Output directory', default='/workdir/output')
+   parser.add_argument('--output_dir', dest='output_dir', help='Output directory')
    parser.add_argument('--debug',action='store_true',default=False, help='Print full docker commands to log')
    args = parser.parse_args()
 
