@@ -32,7 +32,7 @@ def __main__():
    parser.add_argument('exclude_hom_germline', help='Logical indicating if homozygote germline calls are to be filtered based on allelic fraction')
    parser.add_argument('exclude_het_germline', help='Logical indicating if heterozygote germline calls are to be filtered based on allelic fraction')
 
-   parser.add_argument('--output_dir', dest='output_dir', help='Output directory', default='/workdir/output')
+   parser.add_argument('--output_dir', dest='output_dir', help='Output directory')
    args = parser.parse_args()
 
    ret = validate_pcgr_input(args.pcgr_dir,
