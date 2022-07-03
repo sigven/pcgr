@@ -52,7 +52,7 @@ def get_args():
     optional_other.add_argument('--gwas_p_value', type = float, default = 0.000005, dest = 'gwas_p_value',help='Required p-value for variants listed as hits from genome-wide association studies, default: %(default)s')
     optional_other.add_argument('--pop_gnomad',choices = ['afr','amr','eas','sas','asj','nfe','fin','global'], default='nfe', help='Population source in gnomAD used for variant frequency assessment (ACMG classification), default: %(default)s')
     optional_other.add_argument('--maf_upper_threshold', type = float, default = 0.9, dest = 'maf_upper_threshold',help='Upper MAF limit (gnomAD global population frequency) for variants to be included in the report, default: %(default)s')
-    optional_other.add_argument('--classify_all', action='store_true',dest='classify_all',help='Provide CPSR variant classifications (TIER 1-5) also for variants with exising ClinVar classifications in output TSV, default: %(default)s')
+    optional_other.add_argument('--classify_all', action='store_true',dest='classify_all',help='Provide CPSR variant classifications (TIER 1-5) also for variants with existing ClinVar classifications in output TSV, default: %(default)s')
     optional_other.add_argument('--clinvar_ignore_noncancer', action='store_true', help='Ignore (exclude from report) ClinVar-classified variants reported only for phenotypes/conditions NOT related to cancer, default: %(default)s')
     optional_other.add_argument('--debug',action='store_true',default=False, help='Print full docker commands to log, default: %(default)s')
 
