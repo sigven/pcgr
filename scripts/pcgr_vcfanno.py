@@ -10,8 +10,6 @@ import sys
 from pcgr import utils
 from pcgr.utils import check_subprocess
 
-logger = utils.getlogger('pcgr-vcfanno')
-
 def __main__():
     parser = argparse.ArgumentParser(description='Run brentp/vcfanno - annotate a VCF file against multiple VCF files in parallel', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('query_vcf', help='Bgzipped input VCF file with query variants (SNVs/InDels)')
@@ -44,14 +42,16 @@ def __main__():
 
     args = parser.parse_args()
 
+    logger = utils.getlogger('pcgr-vcfanno')
+
     query_info_tags = get_vcf_info_tags(args.query_vcf)
     vcfheader_file = args.out_vcf + '.tmp.' + str(random.randrange(0,10000000)) + '.header.txt'
     conf_fname = args.out_vcf + '.tmp.conf.toml'
-    print_vcf_header(args.query_vcf, vcfheader_file, chromline_only = False)
+    print_vcf_header(args.query_vcf, vcfheader_file, logger, chromline_only = False)
     run_vcfanno(args.num_processes, args.query_vcf, args.panel_normal_vcf, query_info_tags, vcfheader_file,
                 args.pcgr_db_dir, conf_fname, args.out_vcf, args.docm, args.clinvar, args.ncer, args.dbmts, args.gerp, args.tcga, args.tcga_pcdm,
                 args.chasmplus, args.dbnsfp, args.civic, args.cgi, args.icgc, args.uniprot, args.cancer_hotspots,
-                args.pcgr_onco_xref, args.gwas, args.rmsk, args.simplerepeats, args.winmsk, args.gnomad_cpsr, args.keep_logs)
+                args.pcgr_onco_xref, args.gwas, args.rmsk, args.simplerepeats, args.winmsk, args.gnomad_cpsr, args.keep_logs, args.debug, logger)
 
 
 def prepare_vcfanno_configuration(vcfanno_data_directory, conf_fname, vcfheader_file, logger, datasource_info_tags, query_info_tags, datasource):
@@ -59,11 +59,11 @@ def prepare_vcfanno_configuration(vcfanno_data_directory, conf_fname, vcfheader_
        if t in query_info_tags:
            logger.warning("Query VCF has INFO tag " + str(t) + ' - this is also present in the ' + str(datasource) + ' VCF/BED annotation file. This tag will be overwritten if not renamed in the query VCF')
    append_to_conf_file(datasource, datasource_info_tags, vcfanno_data_directory, conf_fname)
-   append_to_vcf_header(vcfanno_data_directory, datasource, vcfheader_file)
+   append_to_vcf_header(vcfanno_data_directory, datasource, vcfheader_file, logger)
 
 def run_vcfanno(num_processes, query_vcf, panel_normal_vcf, query_info_tags, vcfheader_file, pcgr_db_directory, conf_fname,
                 output_vcf, docm, clinvar, ncer, dbmts, gerp, tcga, tcga_pcdm, chasmplus, dbnsfp, civic, cgi, icgc, uniprot, cancer_hotspots,
-                pcgr_onco_xref, gwas, rmsk, simplerepeats, winmsk, gnomad_cpsr, keep_logs):
+                pcgr_onco_xref, gwas, rmsk, simplerepeats, winmsk, gnomad_cpsr, keep_logs, debug, logger):
     """
     Function that annotates a VCF file with vcfanno against a user-defined set of germline and somatic VCF files
     """
@@ -146,7 +146,7 @@ def run_vcfanno(num_processes, query_vcf, panel_normal_vcf, query_info_tags, vcf
     if not panel_normal_vcf is None:
         if "PANEL_OF_NORMALS" in query_info_tags:
             logger.warning("Query VCF has INFO tag \"PANEL_OF_NORMALS\" - this is also present in the panel of normal VCF file. This tag will be overwritten if not renamed in the query VCF")
-        append_to_vcf_header(pcgr_db_directory, "panel_of_normals", vcfheader_file)
+        append_to_vcf_header(pcgr_db_directory, "panel_of_normals", vcfheader_file, logger)
         fh = open(conf_fname,'a')
         fh.write('[[annotation]]\n')
         fh.write('file="' + str(panel_normal_vcf) + '"\n')
@@ -159,23 +159,23 @@ def run_vcfanno(num_processes, query_vcf, panel_normal_vcf, query_info_tags, vcf
 
     out_vcf_vcfanno_unsorted1 = output_vcf + '.tmp.unsorted.1'
     query_prefix = re.sub(r'\.vcf.gz$','',query_vcf)
-    print_vcf_header(query_vcf, vcfheader_file, chromline_only = True)
-    command1 = "vcfanno -p=" + str(num_processes) + " " + str(conf_fname) + " " + str(query_vcf) + " > " + str(out_vcf_vcfanno_unsorted1) + " 2> " + str(query_prefix) + '.vcfanno.log'
-    check_subprocess(command1)
+    print_vcf_header(query_vcf, vcfheader_file, logger, chromline_only = True)
+    command1 = f"vcfanno -p={num_processes} {conf_fname} {query_vcf} > {out_vcf_vcfanno_unsorted1} 2> {query_prefix}.vcfanno.log"
+    check_subprocess(logger, command1, debug)
 
-    check_subprocess('cat ' + str(vcfheader_file) + ' > ' + str(output_vcf))
-    check_subprocess('cat ' + str(out_vcf_vcfanno_unsorted1) + ' | grep -v \'^#\' >> ' + str(output_vcf))
+    check_subprocess(logger, f'cat {vcfheader_file} > {output_vcf}', debug=False)
+    check_subprocess(logger, f'cat {out_vcf_vcfanno_unsorted1} | grep -v \'^#\' >> {output_vcf}', debug=False)
     if not keep_logs is True:
-        check_subprocess('rm -f ' + str(output_vcf) + '.tmp*')
-    check_subprocess('bgzip -f ' + str(output_vcf))
-    check_subprocess('tabix -f -p vcf ' + str(output_vcf) + '.gz')
+        check_subprocess(logger, f'rm -f {output_vcf}.tmp*', debug=False)
+    check_subprocess(logger, f'bgzip -f {output_vcf}', debug=False)
+    check_subprocess(logger, f'tabix -f -p vcf {output_vcf}.gz', debug=False)
 
-def append_to_vcf_header(pcgr_db_directory, datasource, vcfheader_file):
+def append_to_vcf_header(pcgr_db_directory, datasource, vcfheader_file, logger):
     """
     Function that appends the VCF header information for a given 'datasource' (containing INFO tag formats/descriptions, and datasource version)
     """
     vcf_info_tags_file = str(pcgr_db_directory) + '/' + str(datasource) + '/' + str(datasource) + '.vcfanno.vcf_info_tags.txt'
-    check_subprocess('cat ' + str(vcf_info_tags_file) + ' >> ' + str(vcfheader_file))
+    check_subprocess(logger, f'cat {vcf_info_tags_file} >> {vcfheader_file}', debug=False)
 
 
 def append_to_conf_file(datasource, datasource_info_tags, pcgr_db_directory, conf_fname):
@@ -250,11 +250,11 @@ def get_vcf_info_tags(vcffile):
     return info_tags
 
 
-def print_vcf_header(query_vcf, vcfheader_file, chromline_only = False):
+def print_vcf_header(query_vcf, vcfheader_file, logger, chromline_only = False):
     if chromline_only == True:
-        check_subprocess('bgzip -dc ' + str(query_vcf) + ' | egrep \'^#\' | egrep \'^#CHROM\' >> ' + str(vcfheader_file))
+        check_subprocess(logger, f'bgzip -dc {query_vcf} | egrep \'^#\' | egrep \'^#CHROM\' >> {vcfheader_file}', debug=False)
     else:
-        check_subprocess('bgzip -dc ' + str(query_vcf) + ' | egrep \'^#\' | egrep -v \'^#CHROM\' > ' + str(vcfheader_file))
+        check_subprocess(logger, f'bgzip -dc {query_vcf} | egrep \'^#\' | egrep -v \'^#CHROM\' > {vcfheader_file}', debug=False)
 
 
 if __name__=="__main__":
