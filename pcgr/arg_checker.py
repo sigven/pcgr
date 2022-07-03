@@ -6,22 +6,6 @@ import os
 import subprocess
 
 
-def get_docker_image_version(arg_dict, logger):
-    docker_image_version = pcgr_vars.DOCKER_IMAGE_VERSION
-    # Check the existence of Docker (if not --no_docker is set)
-    if arg_dict['no_docker']:
-        docker_image_version = None
-    else:
-        # check that script and Docker image version correspond
-        check_docker_command = f'docker images -q {docker_image_version}'
-        output = subprocess.check_output(check_docker_command, stderr=subprocess.STDOUT, shell=True)
-        if(len(output) == 0):
-            err_msg = (f'Docker image {docker_image_version} does not exist; '
-                       f'pull image from Dockerhub (docker pull {docker_image_version}')
-            error_message(err_msg, logger)
-    return docker_image_version
-
-
 def check_args(arg_dict, logger):
     # Check the existence of required arguments
     help_msg = 'Type pcgr.py --help to view all options and required arguments'
@@ -273,19 +257,17 @@ def verify_input_files(arg_dict, logger):
             panel_normal_vcf_dir = os.path.dirname(
                 os.path.abspath(arg_dict["pon_vcf"]))
 
-    # check if input vcf exist
+    # check if input vcf exists
     if not arg_dict["input_vcf"] is None:
         if not os.path.exists(os.path.abspath(arg_dict["input_vcf"])):
-            err_msg = "Input file (" + \
-                str(arg_dict["input_vcf"]) + ") does not exist"
+            err_msg = f'Input file ({arg_dict["input_vcf"]}) does not exist'
             error_message(err_msg, logger)
 
         if not (os.path.abspath(arg_dict["input_vcf"]).endswith(".vcf") or os.path.abspath(arg_dict["input_vcf"]).endswith(".vcf.gz")):
-            err_msg = "VCF input file (" + os.path.abspath(
-                arg_dict["input_vcf"]) + ") does not have the correct file extension (.vcf or .vcf.gz)"
+            err_msg = f'VCF input file ({os.path.abspath(arg_dict["input_vcf"])}) does not have the correct file extension (.vcf or .vcf.gz)'
             error_message(err_msg, logger)
 
-        # check that tabix file exist if bgzipped files is given
+        # check that tabix file exists if bgzipped file is given
         if os.path.abspath(arg_dict["input_vcf"]).endswith(".vcf.gz"):
             tabix_file = arg_dict["input_vcf"] + ".tbi"
             if not os.path.exists(os.path.abspath(tabix_file)):
@@ -423,24 +405,24 @@ def verify_input_files(arg_dict, logger):
         err_msg = "The PCGR data bundle is not compliant with the software version - please download the latest software and data bundle (see https://github.com/sigven/pcgr for instructions)"
         error_message(err_msg, logger)
 
-    host_directories = {
-      "input_vcf_dir_host": input_vcf_dir,
-      "input_cna_dir_host": input_cna_dir,
-      "input_rna_fusion_dir_host": input_rna_fusion_dir,
-      "input_rna_expression_dir_host": input_rna_expression_dir,
-      "input_cpsr_report_dir_host": input_cpsr_report_dir,
-      "input_cna_plot_dir_host": input_cna_plot_dir,
-      "panel_normal_vcf_dir_host": panel_normal_vcf_dir,
-      "db_dir_host": db_assembly_dir,
-      "base_dir_host": base_dir,
-      "output_dir_host": output_dir_full,
-      "panel_normal_vcf_basename_host": panel_normal_vcf_basename,
-      "input_vcf_basename_host": input_vcf_basename,
-      "input_cna_basename_host": input_cna_basename,
-      "input_rna_fusion_basename_host": input_rna_fusion_basename,
-      "input_rna_expression_basename_host": input_rna_expression_basename,
-      "input_cpsr_report_basename_host": input_cpsr_report_basename,
-      "input_cna_plot_basename_host": input_cna_plot_basename,
+    pcgr_paths = {
+      "input_vcf_dir": input_vcf_dir,
+      "input_cna_dir": input_cna_dir,
+      "input_rna_fusion_dir": input_rna_fusion_dir,
+      "input_rna_expression_dir": input_rna_expression_dir,
+      "input_cpsr_report_dir": input_cpsr_report_dir,
+      "input_cna_plot_dir": input_cna_plot_dir,
+      "panel_normal_vcf_dir": panel_normal_vcf_dir,
+      "db_dir": db_assembly_dir,
+      "base_dir": base_dir,
+      "output_dir": output_dir_full,
+      "panel_normal_vcf_basename": panel_normal_vcf_basename,
+      "input_vcf_basename": input_vcf_basename,
+      "input_cna_basename": input_cna_basename,
+      "input_rna_fusion_basename": input_rna_fusion_basename,
+      "input_rna_expression_basename": input_rna_expression_basename,
+      "input_cpsr_report_basename": input_cpsr_report_basename,
+      "input_cna_plot_basename": input_cna_plot_basename,
     }
 
-    return host_directories
+    return pcgr_paths
