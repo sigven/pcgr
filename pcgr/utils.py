@@ -84,3 +84,11 @@ def get_perl_exports():
     perl_path_parent = os.path.dirname(perl_path) # /conda/env/pcgr/bin
     out = f"unset PERL5LIB && export PATH={perl_path_parent}:\"$PATH\""
     return out
+
+def is_integer(n):
+    try:
+        float(n)
+    except ValueError:
+        return False
+    else:
+        return float(n).is_integer()

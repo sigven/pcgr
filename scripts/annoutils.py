@@ -6,7 +6,7 @@ import logging
 import gzip
 from cyvcf2 import VCF, Writer
 import subprocess
-
+from pcgr import utils
 
 csv.field_size_limit(500 * 1024 * 1024)
 threeLettertoOneLetterAA = {'Ala':'A','Arg':'R','Asn':'N','Asp':'D','Cys':'C','Glu':'E','Gln':'Q','Gly':'G','His':'H','Ile':'I','Leu':'L','Lys':'K', 'Met':'M','Phe':'F','Pro':'P','Ser':'S','Thr':'T','Trp':'W','Tyr':'Y','Val':'V','Ter':'X'}
@@ -33,18 +33,6 @@ def read_infotag_file(vcf_info_tags_tsv):
 
    return info_tag_xref
 
-def check_subprocess(command):
-   #if debug:
-      #logger.info(command)
-   try:
-      output = subprocess.check_output(str(command), stderr=subprocess.STDOUT, shell=True)
-      if len(output) > 0:
-         print (str(output.decode()).rstrip())
-   except subprocess.CalledProcessError as e:
-      print (e.output.decode())
-      exit(0)
-
-
 def read_genexref_namemap(gene_xref_namemap_tsv):
 
    """
@@ -60,20 +48,6 @@ def read_genexref_namemap(gene_xref_namemap_tsv):
       namemap_xref[row['name']] = int(row['index'])
 
    return namemap_xref
-
-def is_integer(n):
-    try:
-        float(n)
-    except ValueError:
-        return False
-    else:
-        return float(n).is_integer()
-
-def error_message(message, logger):
-   logger.error('')
-   logger.error(message)
-   logger.error('')
-   exit(1)
 
 def write_pass_vcf(annotated_vcf, logger):
    """
@@ -106,95 +80,6 @@ def write_pass_vcf(annotated_vcf, logger):
    os.system('tabix -f -p vcf ' + str(out_vcf) + '.gz')
 
    return
-
-def warn_message(message, logger):
-   logger.warning(message)
-
-def getlogger(logger_name):
-	logger = logging.getLogger(logger_name)
-	logger.setLevel(logging.DEBUG)
-
-	# create console handler and set level to debug
-	ch = logging.StreamHandler(sys.stdout)
-	ch.setLevel(logging.DEBUG)
-
-	# add ch to logger
-	logger.addHandler(ch)
-	
-	# create formatter
-	formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", "20%y-%m-%d %H:%M:%S")
-	
-	#add formatter to ch
-	ch.setFormatter(formatter)
-	
-	return logger
-
-
-def is_valid_vcf(input_vcf, output_dir, logger, debug):
-   """
-   Function that reads the output file of EBIvariation/vcf-validator and reports potential errors and validation status
-   """
-
-   logger.info('Validating VCF file with EBIvariation/vcf-validator (v0.9.3)')
-
-   ## Filename for output file from VCF validation
-   vcf_validation_output_file = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)', '.vcf_validator_output', os.path.basename(input_vcf)))
-
-   ## Command for running vcf-validator
-   command_v42 = 'vcf_validator -i ' + str(input_vcf) + ' -l warning -r text -o ' + str(output_dir) + ' > ' + str(vcf_validation_output_file)  + ' 2>&1'
-   if debug:
-      logger.info(command_v42)
-   try:
-      subprocess.run(command_v42, stderr=subprocess.STDOUT, shell=True)
-   except subprocess.CalledProcessError as e:
-      print (e.output.decode())
-      exit(0)
-
-   ## read output file from vcf-validator and get name of log/error file
-   validation_results = {}
-   validation_results['validation_status'] = 0
-   validation_results['error_messages'] = []
-   validation_log_fname = None
-   if os.path.exists(vcf_validation_output_file):
-      f = open(vcf_validation_output_file, 'r')
-      for line in f:
-         if 'Text report written to' in line.rstrip():
-            validation_log_fname = re.split(r' : ',line.rstrip(),maxsplit=2)[1]
-      f.close()
-      if not debug:
-         check_subprocess('rm -f ' + str(vcf_validation_output_file))
-
-   if validation_log_fname is None:
-      err_msg = 'Cannot find file with error messages from vcf_validator'
-      return error_message(err_msg, logger)
-
-   if os.path.exists(validation_log_fname):
-      f = open(validation_log_fname, 'r')
-      for line in f:
-         if not re.search(r' \(warning\)$|^Reading from ',line.rstrip()): ## ignore warnings
-            if line.startswith('Line '):
-               validation_results['error_messages'].append('ERROR: ' + line.rstrip())
-            if 'the input file is valid' in line.rstrip(): ## valid VCF
-               validation_results['validation_status'] = 1
-            if 'the input file is not valid' in line.rstrip():  ## non-valid VCF
-               validation_results['validation_status'] = 0
-      f.close()
-      if not debug:
-         check_subprocess('rm -f ' + str(validation_log_fname))
-   else:
-      err_msg = str(validation_log_fname) + ' does not exist'
-      return error_message(err_msg, logger)
-
-   if validation_results['validation_status'] == 0:
-      error_string_42 = '\n'.join(validation_results['error_messages'])
-      validation_status = 'According to the VCF specification, the VCF file (' + str(input_vcf) + ') is NOT valid'
-      err_msg = validation_status + ':\n' + str(error_string_42)
-      return error_message(err_msg, logger)
-   else:
-      validation_status = 'According to the VCF specification, the VCF file ' + str(input_vcf) + ' is valid'
-      logger.info(validation_status)
-   return 0
-
 
 def map_regulatory_variant_annotations(vep_csq_records):
    """
@@ -382,12 +267,12 @@ def detect_reserved_info_tag(tag, tag_name, logger):
    reserved_tags = ['AA','AC','AF','AN','BQ','CIGAR','DB','DP','END','H2','H3','MQ','MQ0','NS','SB','SOMATIC','VALIDATED','1000G']
    if tag in reserved_tags:
       err_msg = f'Custom INFO tag ({tag_name}) needs another name - \'{tag}\' is a reserved field in the VCF specification (INFO)'
-      return error_message(err_msg, logger)
+      return utils.error_message(err_msg, logger)
 
    reserved_format_tags = ['GT','DP','FT','GL','GLE','GQ','PL','HQ','PS','PQ','EC','MQ']
    if tag in reserved_format_tags:
       err_msg = 'Custom INFO tag ({tag_name}) needs another name - \'{tag}\' is a reserved field in the VCF specification (FORMAT)'
-      return error_message(err_msg, logger)
+      return utils.error_message(err_msg, logger)
 
 
 def assign_cds_exon_intron_annotations(csq_record):
@@ -417,7 +302,7 @@ def assign_cds_exon_intron_annotations(csq_record):
       match = re.search(r"((-|\+)[0-9]{1,}(dup|del|inv|((ins|del|dup|inv|delins)(A|G|C|T){1,})|(A|C|T|G){1,}>(A|G|C|T){1,}))$", str(csq_record['HGVSc']))
       if match is not None:
          pos = re.sub(r"(\+|dup|del|delins|ins|inv|(A|G|C|T){1,}|>)","",match.group(0))
-         if is_integer(pos):
+         if utils.is_integer(pos):
             csq_record['INTRON_POSITION'] = int(pos)
 
    if 'NearestExonJB' in csq_record.keys():
@@ -425,9 +310,9 @@ def assign_cds_exon_intron_annotations(csq_record):
          if re.match(r"synonymous_|missense_|stop_|inframe_|start_", str(csq_record['Consequence'])) and str(csq_record['NearestExonJB']) != "":
             exon_pos_info = csq_record['NearestExonJB'].split("+")
             if len(exon_pos_info) == 4:
-               if is_integer(exon_pos_info[1]) and str(exon_pos_info[2]) == "end":
+               if utils.is_integer(exon_pos_info[1]) and str(exon_pos_info[2]) == "end":
                   csq_record['EXON_POSITION'] = -int(exon_pos_info[1])
-               if is_integer(exon_pos_info[1]) and str(exon_pos_info[2]) == "start":
+               if utils.is_integer(exon_pos_info[1]) and str(exon_pos_info[2]) == "start":
                   csq_record['EXON_POSITION'] = int(exon_pos_info[1])
 
 

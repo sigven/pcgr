@@ -4,12 +4,12 @@ import argparse
 import subprocess
 from cyvcf2 import VCF
 import random
-import annoutils
 import os
 import re
 import sys
+from pcgr import utils
 
-logger = annoutils.getlogger('pcgr-vcfanno')
+logger = utils.getlogger('pcgr-vcfanno')
 
 global debug
 

@@ -4,12 +4,13 @@ import csv
 import re
 import argparse
 import os
-import subprocess
 import logging
 import sys
 import annoutils
 import pandas as np
 from cyvcf2 import VCF
+from pcgr import utils
+from pcgr.utils import error_message, check_subprocess
 
 def __main__():
 
@@ -33,6 +34,7 @@ def __main__():
     parser.add_argument('exclude_het_germline', help='Logical indicating if heterozygote germline calls are to be filtered based on allelic fraction')
 
     parser.add_argument('--output_dir', dest='output_dir', help='Output directory')
+    parser.add_argument("--debug", action="store_true", default=False, help="Print full commands to log, default: %(default)s")
     args = parser.parse_args()
 
     ret = validate_pcgr_input(args.pcgr_dir,
@@ -52,25 +54,10 @@ def __main__():
                               args.vcf_validation,
                               args.tumor_only,
                               args.genome_assembly,
-                              args.output_dir)
+                              args.output_dir,
+                              args.debug)
     if ret != 0:
-      sys.exit(1)
-
-def pcgr_error_message(message, logger):
-    logger.error('')
-    logger.error(message)
-    logger.error('')
-    return -1
-
-
-def check_subprocess(command):
-    try:
-        output = subprocess.check_output(str(command), stderr=subprocess.STDOUT, shell=True)
-        if len(output) > 0:
-            print(str(output.decode()).rstrip())
-    except subprocess.CalledProcessError as e:
-        print(e.output.decode())
-        exit(0)
+        sys.exit(1)
 
 def check_preserved_vcf_info_tags(input_vcf, preserved_tags, logger):
 
@@ -94,7 +81,7 @@ def check_preserved_vcf_info_tags(input_vcf, preserved_tags, logger):
     for t in tags:
         if not t in info_elements_query_vcf:
             err_msg = f"Preserved INFO tag '{t}' not found among INFO tags in query VCF - make sure preserved VCF INFO tags are set correctly"
-            return annoutils.error_message(err_msg, logger)
+            return error_message(err_msg, logger)
         else:
             logger.info(f"Preserved INFO tag '{t}' detected among INFO tags in query VCF")
 
@@ -108,30 +95,30 @@ def is_valid_cna(cna_segment_file, logger):
     ## check that required columns are present
     if not ('Chromosome' in cna_reader.fieldnames and 'Segment_Mean' in cna_reader.fieldnames and 'Start' in cna_reader.fieldnames and 'End' in cna_reader.fieldnames):
         err_msg = "Copy number segment file (" + str(cna_segment_file) + ") is missing required column(s): 'Chromosome', 'Start', 'End', or  'Segment_Mean'\n. Column names present in file: " + str(cna_reader.fieldnames)
-        return pcgr_error_message(err_msg, logger)
+        return error_message(err_msg, logger)
 
     cna_dataframe = np.read_csv(cna_segment_file, sep="\t")
     if cna_dataframe.empty is True:
         err_msg = 'Copy number segment file is empty - contains NO segments'
-        return pcgr_error_message(err_msg, logger)
+        return error_message(err_msg, logger)
     if not cna_dataframe['Start'].dtype.kind in 'i': ## check that 'Start' is of type integer
         err_msg = '\'Start\' column of copy number segment file contains non-integer values'
-        return pcgr_error_message(err_msg, logger)
+        return error_message(err_msg, logger)
     if not cna_dataframe['End'].dtype.kind in 'i': ## check that 'End' is of type integer
         err_msg = '\'End\' column of copy number segment file contains non-integer values'
-        return pcgr_error_message(err_msg, logger)
+        return error_message(err_msg, logger)
 
     if not cna_dataframe['Segment_Mean'].dtype.kind in 'if': ## check that 'Segment_Mean' is of type integer/float
         err_msg = '\'Segment_Mean\' column of copy number segment file contains non-numerical values'
-        return pcgr_error_message(err_msg, logger)
+        return error_message(err_msg, logger)
 
     for rec in cna_reader:
         if int(rec['End']) < int(rec['Start']): ## check that 'End' is always greather than 'Start'
             err_msg = 'Detected wrongly formatted chromosomal segment - \'Start\' is greater than \'End\' (' + str(rec['Chromosome']) + ':' + str(rec['Start']) + '-' + str(rec['End']) + ')'
-            return pcgr_error_message(err_msg, logger)
+            return error_message(err_msg, logger)
         if int(rec['End']) < 1 or int(rec['Start']) < 1: ## check that 'Start' and 'End' is always non-negative
             err_msg = 'Detected wrongly formatted chromosomal segment - \'Start\' or \'End\' is less than or equal to zero (' + str(rec['Chromosome']) + ':' + str(rec['Start']) + '-' + str(rec['End']) + ')'
-            return pcgr_error_message(err_msg, logger)
+            return error_message(err_msg, logger)
     logger.info(f'Copy number segment file ({cna_segment_file}) adheres to the correct format')
     return 0
 
@@ -144,32 +131,32 @@ def is_valid_rna_fusion(rna_fusion_file, logger):
     ## check that required columns are present
     if not ('GeneA' in rna_fusion_reader.fieldnames and 'GeneB' in rna_fusion_reader.fieldnames and 'Confidence' in rna_fusion_reader.fieldnames):
         err_msg = "RNA fusion file (" + str(rna_fusion_file) + ") is missing required column(s): 'Gene1', 'Gene2', or  'Confidence'\n. Column names present in file: " + str(rna_fusion_reader.fieldnames)
-        return pcgr_error_message(err_msg, logger)
+        return error_message(err_msg, logger)
 
     rna_fusion_dataframe = np.read_csv(rna_fusion_file, sep="\t")
     if rna_fusion_dataframe.empty is True:
         err_msg = 'RNA fusion file is empty - contains NO fusions'
-        return pcgr_error_message(err_msg, logger)
+        return error_message(err_msg, logger)
     if not rna_fusion_dataframe['Gene1'].dtype.kind in 'O': ## check that 'Gene1' is of type object
         err_msg = "'Gene1' column of RNA fusion file cannot not be of type '" + str(rna_fusion_dataframe['Gene1'].dtype) + "'"
-        return pcgr_error_message(err_msg, logger)
+        return error_message(err_msg, logger)
     if not rna_fusion_dataframe['Gene2'].dtype.kind in 'O': ## check that 'Gene2' is of type object
         err_msg = "'Gene2' column of RNA fusion file cannot not be of type '" + str(rna_fusion_dataframe['Gene2'].dtype) + "'"
-        return pcgr_error_message(err_msg, logger)
+        return error_message(err_msg, logger)
     if not rna_fusion_dataframe['Confidence'].dtype.kind in 'O': ## check that 'Confidence' is of type object
         err_msg = "'Confidence' column of RNA fusion file cannot not be of type '" + str(rna_fusion_dataframe['Confidence'].dtype) + "'"
-        return pcgr_error_message(err_msg, logger)
+        return error_message(err_msg, logger)
 
     observed_variants = {}
     for rec in rna_fusion_reader:
         if not (rec['Confidence'] == 'high' or rec['Confidence'] == 'medium' or rec['Confidence'] == 'low'): ## check that 'Confidence' column harbor permitted values
             err_msg = "Confidence column contains non-permitted values - only 'high','medium', or 'low' permitted. Value entered was " + str(rec['Confidence'])
-            return pcgr_error_message(err_msg, logger)
+            return error_message(err_msg, logger)
 
         variant_key = str(rec['Gene1']) + "_" + str(rec['Gene2'])
         if variant_key in observed_variants.keys():
             err_msg = "Duplicate entry in RNA fusion variants: " + str(variant_key) + " is found in multiple rows"
-            return pcgr_error_message(err_msg, logger)
+            return error_message(err_msg, logger)
         observed_variants[variant_key] = 1
 
 
@@ -184,39 +171,39 @@ def is_valid_rna_expression(rna_exp_file, logger):
     ## check that required columns are present
     if not ('Gene' in rna_exp_reader.fieldnames and 'TPM' in rna_exp_reader.fieldnames and 'Log2FC' in rna_exp_reader.fieldnames and 'PAdj' in rna_exp_reader.fieldnames and 'DiffExp' in rna_exp_reader.fieldnames):
         err_msg = "RNA fusion file (" + str(rna_exp_file) + ") is missing required column(s): 'Gene', 'TPM', 'Log2FC','PAdj', or 'DiffExp'\n. Column names present in file: " + str(rna_exp_reader.fieldnames)
-        return pcgr_error_message(err_msg, logger)
+        return error_message(err_msg, logger)
 
     rna_exp_dataframe = np.read_csv(rna_exp_file, sep="\t")
     if rna_exp_dataframe.empty is True:
         err_msg = 'RNA gene expression file is empty - contains NO gene expression estimates'
-        return pcgr_error_message(err_msg, logger)
+        return error_message(err_msg, logger)
     if not rna_exp_dataframe['Gene'].dtype.kind in 'O': ## check that 'Gene' is of type object
         err_msg = "'Gene' column of RNA expression file cannot not be of type '" + str(rna_exp_dataframe['Gene'].dtype) + "'"
-        return pcgr_error_message(err_msg, logger)
+        return error_message(err_msg, logger)
     if not rna_exp_dataframe['TPM'].dtype.kind in 'if': ## check that 'TPM' is of type object
         err_msg = "'TPM' column of RNA expression file cannot not be of type '" + str(rna_exp_dataframe['TPM'].dtype) + "'"
-        return pcgr_error_message(err_msg, logger)
+        return error_message(err_msg, logger)
     if not rna_exp_dataframe['Log2FC'].dtype.kind in 'if': ## check that 'LogFC' is of type object
         err_msg = "'Log2FC' column of RNA expression file cannot not be of type '" + str(rna_exp_dataframe['Log2FC'].dtype) + "'"
-        return pcgr_error_message(err_msg, logger)
+        return error_message(err_msg, logger)
     if not rna_exp_dataframe['PAdj'].dtype.kind in 'if': ## check that 'PAdj' is of type object
         err_msg = "'TPM' column of RNA expression file cannot not be of type '" + str(rna_exp_dataframe['PAdj'].dtype) + "'"
-        return pcgr_error_message(err_msg, logger)
+        return error_message(err_msg, logger)
     if not rna_exp_dataframe['DiffExp'].dtype.kind in 'O': ## check that 'DiffExp' is of type object
         err_msg = "'DiffExp' column of RNA expression file cannot not be of type '" + str(rna_exp_dataframe['DiffExp'].dtype) + "'"
-        return pcgr_error_message(err_msg, logger)
+        return error_message(err_msg, logger)
 
     for rec in rna_exp_reader:
         if not (rec['DiffExp'] == 'over' or rec['DiffExp'] == 'under' or rec['DiffExp'] == 'NS'): ## check that 'DiffExp' column harbors permitted values
             err_msg = "Confidence column contains non-permitted values - only 'over','under', or 'NS' permitted. Value entered was " + str(rec['DiffExp'])
-            return pcgr_error_message(err_msg, logger)
+            return error_message(err_msg, logger)
 
-       if not (rec['TPM'] >= 0):
-           err_msg = "'TPM' column cannot contain negative values - value was " + str(rec['TPM'])
-           return pcgr_error_message(err_msg, logger)
-       if not (rec['PAdj'] >= 0):
-           err_msg = "'PAdj' column (adjusted p-value from differential expression testing) cannot contain negative values - value was " + str(rec['PAdj'])
-           return pcgr_error_message(err_msg, logger)
+        if not (rec['TPM'] >= 0):
+            err_msg = "'TPM' column cannot contain negative values - value was " + str(rec['TPM'])
+            return error_message(err_msg, logger)
+        if not (rec['PAdj'] >= 0):
+            err_msg = "'PAdj' column (adjusted p-value from differential expression testing) cannot contain negative values - value was " + str(rec['PAdj'])
+            return error_message(err_msg, logger)
 
     logger.info('RNA expression file (' + str(rna_exp_file) + ') adheres to the correct format')
     return 0
@@ -240,10 +227,10 @@ def check_existing_vcf_info_tags(input_vcf, pcgr_directory, genome_assembly, log
             if header_element['HeaderType'] == 'INFO':
                 if header_element['ID'] in pcgr_infotags_desc.keys():
                     err_msg = f'INFO tag {header_element["ID"]} in the query VCF coincides with a VCF annotation tag produced by PCGR - please remove or rename this tag in your query VCF'
-                    return pcgr_error_message(err_msg, logger)
+                    return error_message(err_msg, logger)
                 if header_element['ID'] == 'DP_TUMOR' or header_element['ID'] == 'AF_TUMOR' or header_element['ID'] == 'AF_NORMAL' or header_element['ID'] == 'DP_NORMAL' or header_element['ID'] == 'CALL_CONFIDENCE':
                     err_msg = f'INFO tag {header_element["ID"]} in the query VCF coincides with a VCF annotation tag produced by PCGR - please remove or rename this tag in your query VCF'
-                    return pcgr_error_message(err_msg, logger)
+                    return error_message(err_msg, logger)
 
     logger.info('No query VCF INFO tags coincide with PCGR INFO tags')
     return ret
@@ -266,7 +253,7 @@ def validate_panel_normal_vcf(vcf, logger):
 
     if ret == -1:
         err_msg = 'INFO flag \'PANEL_OF_NORMALS\' is missing from the panel of normal VCF header'
-        return pcgr_error_message(err_msg, logger)
+        return error_message(err_msg, logger)
 
     return ret
 
@@ -308,35 +295,35 @@ def check_format_ad_dp_tags(vcf,
                         found_tdp_tag = 1
                     else:
                         err_msg = f'INFO tag for tumor variant sequencing depth (tumor_dp_tag {tumor_dp_tag}) is not correctly specified in input VCF (Type={header_element["Type"]}), should be Type=Integer'
-                        return pcgr_error_message(err_msg, logger)
+                        return error_message(err_msg, logger)
                 if header_element['ID'] == tumor_af_tag:
                     if header_element['Type'] == 'Float':
                         logger.info(f'Found INFO tag for tumor variant allelic fraction (tumor_af_tag {tumor_af_tag}) in input VCF')
                         found_taf_tag = 1
                     else:
                         err_msg = f'INFO tag for tumor variant allelic fraction (tumor_af_tag {tumor_af_tag}) is not correctly specified in input VCF (Type={header_element["Type"]}), should be Type=Float'
-                        return pcgr_error_message(err_msg, logger)
+                        return error_message(err_msg, logger)
                 if header_element['ID'] == control_dp_tag:
                     if header_element['Type'] == 'Integer':
                         logger.info(f'Found INFO tag for normal/control variant sequencing depth (control_dp_tag {control_dp_tag}) in input VCF')
                         found_ndp_tag = 1
                     else:
                         err_msg = f'INFO tag for normal/control variant sequencing depth (control_dp_tag {control_dp_tag}) is not correctly specified in input VCF (Type={header_element["Type"]}), should be Type=Integer'
-                        return pcgr_error_message(err_msg, logger)
+                        return error_message(err_msg, logger)
                 if header_element['ID'] == control_af_tag:
                     if header_element['Type'] == 'Float':
                         logger.info(f'Found INFO tag for normal/control allelic fraction (control_af_tag {control_af_tag}) in input VCF')
                         found_naf_tag = 1
                     else:
                         err_msg = f'INFO tag for for normal/control allelic fraction (control_af_tag {control_af_tag}) is not correctly specified in input VCF (Type={header_element["Type"]}) should be Type=Float'
-                        return pcgr_error_message(err_msg, logger)
+                        return error_message(err_msg, logger)
                 if header_element['ID'] == call_conf_tag:
                     if header_element['Type'] == 'String':
                         logger.info(f'Found INFO tag for variant call confidence (call_conf_tag {call_conf_tag}) in input VCF')
                         found_call_conf_tag = 1
                     else:
                         err_msg = f'INFO tag for variant call confidence (call_conf_tag) is not correctly specified in input VCF (Type={header_element["Type"]}), should be Type=String'
-                        return pcgr_error_message(err_msg, logger)
+                        return error_message(err_msg, logger)
 
 
     if call_conf_tag != '_NA_' and found_call_conf_tag == 0:
@@ -374,7 +361,7 @@ def check_format_ad_dp_tags(vcf,
     return 0
 
 
-def simplify_vcf(input_vcf, vcf, output_dir, logger):
+def simplify_vcf(input_vcf, vcf, output_dir, logger, debug):
     """
     Function that performs the following on the validated input VCF:
     1. Strip of any genotype data
@@ -408,22 +395,22 @@ def simplify_vcf(input_vcf, vcf, output_dir, logger):
         command_vcf_sample_free4 = f'bgzip -dc {input_vcf} | egrep -v \'^#\' | sed \'s/^chr//\' | cut -f1-8 | egrep -v \'^[0-9]\' | egrep \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> {input_vcf_pcgr_ready}'
         command_vcf_sample_free5 = f'bgzip -dc {input_vcf} | egrep -v \'^#\' | sed \'s/^chr//\' | cut -f1-8 | egrep -v \'^[0-9]\' | egrep -v \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> {input_vcf_pcgr_ready}'
 
-    check_subprocess(command_vcf_sample_free1)
-    check_subprocess(command_vcf_sample_free2)
-    check_subprocess(command_vcf_sample_free3)
-    check_subprocess(command_vcf_sample_free4)
-    check_subprocess(command_vcf_sample_free5)
+    check_subprocess(logger, command_vcf_sample_free1, debug=False)
+    check_subprocess(logger, command_vcf_sample_free2, debug=False)
+    check_subprocess(logger, command_vcf_sample_free3, debug=False)
+    check_subprocess(logger, command_vcf_sample_free4, debug=False)
+    check_subprocess(logger, command_vcf_sample_free5, debug=False)
 
     if multiallelic_alt == 1:
         logger.info('Decomposing multi-allelic sites in input VCF file using \'vt decompose\'')
         command_decompose = f'vt decompose -s {input_vcf_pcgr_ready} > {input_vcf_pcgr_ready_decomposed} 2> {os.path.join(output_dir, "decompose.log")}'
-        check_subprocess(command_decompose)
+        check_subprocess(logger, command_decompose, debug)
     else:
-        check_subprocess(f'cp {input_vcf_pcgr_ready} {input_vcf_pcgr_ready_decomposed}')
+        check_subprocess(logger, f'cp {input_vcf_pcgr_ready} {input_vcf_pcgr_ready_decomposed}', debug=False)
 
     # TODO: Ditch the -c option, else you have an uncompressed VCF hanging around.
-    check_subprocess(f'bgzip -cf {input_vcf_pcgr_ready_decomposed} > {input_vcf_pcgr_ready_decomposed}.gz')
-    check_subprocess(f'tabix -p vcf {input_vcf_pcgr_ready_decomposed}.gz')
+    check_subprocess(logger, f'bgzip -cf {input_vcf_pcgr_ready_decomposed} > {input_vcf_pcgr_ready_decomposed}.gz', debug=False)
+    check_subprocess(logger, f'tabix -p vcf {input_vcf_pcgr_ready_decomposed}.gz', debug=False)
 
     if os.path.exists(input_vcf_pcgr_ready_decomposed + '.gz') and os.path.getsize(input_vcf_pcgr_ready_decomposed + '.gz') > 0:
         vcf = VCF(input_vcf_pcgr_ready_decomposed + '.gz')
@@ -437,7 +424,7 @@ def simplify_vcf(input_vcf, vcf, output_dir, logger):
             exit(1)
 
      # TODO: use 'os.remove()' instead of 'rm -f'
-    check_subprocess(f'rm -f {input_vcf_pcgr_ready} {os.path.join(output_dir, "decompose.log")}')
+    check_subprocess(logger, f'rm -f {input_vcf_pcgr_ready} {os.path.join(output_dir, "decompose.log")}', debug=False)
 
 def validate_pcgr_input(pcgr_directory,
                         input_vcf,
@@ -456,7 +443,8 @@ def validate_pcgr_input(pcgr_directory,
                         vcf_validation,
                         tumor_only,
                         genome_assembly,
-                        output_dir):
+                        output_dir,
+                        debug):
     """
     Function that reads the input files to PCGR (VCF file and Tab-separated values file with copy number segments) and performs the following checks:
     1. no INFO annotation tags in the query VCF coincides with those generated by PCGR
@@ -469,7 +457,7 @@ def validate_pcgr_input(pcgr_directory,
     8. Check that RNA fusion variant file has required columns and correct data types
     9. Check that RNA expression file has required columns and correct data types
     """
-    logger = annoutils.getlogger('pcgr-validate-arguments-input')
+    logger = utils.getlogger('pcgr-validate-arguments-input')
 
     # if panel_normal_vcf == "None" and tumor_only == 1 and config_options['tumor_only']['exclude_pon'] is True:
     #    logger.warning('Panel-of-normals VCF is not present - exclusion of calls found in panel-of-normals will be ignored')
@@ -501,10 +489,10 @@ def validate_pcgr_input(pcgr_directory,
             return -1
 
         ## Simplify VCF - remove multiallelic variants
-        simplify_vcf(input_vcf, vcf, output_dir, logger)
+        simplify_vcf(input_vcf, vcf, output_dir, logger, debug)
 
 
-    ## Validate panel-of-normals VCF is this is provided
+    ## Validate panel-of-normals VCF is provided
     if not panel_normal_vcf == "None":
         valid_panel_normals = validate_panel_normal_vcf(panel_normal_vcf, logger)
         if valid_panel_normals == -1:

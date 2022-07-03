@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 
 from pcgr import pcgr_vars
-from pcgr.utils import error_message, warn_message
+from pcgr.utils import getlogger, error_message, warn_message
 import os
 import subprocess
 
 
-def check_args(arg_dict, logger):
+def check_args(arg_dict):
+
+    logger = getlogger("pcgr-validate-arguments-input-a")
     # Check the existence of required arguments
     help_msg = 'Type pcgr.py --help to view all options and required arguments'
     if arg_dict['pcgr_dir'] is None or not os.path.exists(arg_dict['pcgr_dir']):
@@ -190,11 +192,12 @@ def check_args(arg_dict, logger):
     return
 
 
-def verify_input_files(arg_dict, logger):
+def verify_input_files(arg_dict):
     """
     1. Checks existence of input files/dirs (arg_dict)
     2. Checks that the data bundle is of correct date
     """
+    logger = getlogger("pcgr-validate-arguments-input-b")
 
     input_vcf_dir = 'NA'
     input_cna_dir = 'NA'
