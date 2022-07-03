@@ -59,6 +59,9 @@ def conda_env_path(env):
     env_path = os.path.join(env_dir, env)                  # /path/to/conda/envs/{env}
     return env_path
 
+def get_loftee_dir():
+    return script_path("pcgr", "share/loftee")
+
 def get_pcgr_bin():
     """Return abs path to e.g. conda/env/pcgr/bin
     """
