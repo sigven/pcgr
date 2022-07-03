@@ -16,10 +16,10 @@ def read_infotag_file(vcf_info_tags_tsv):
    """
    Function that reads a file that lists VCF INFO tags produced by PCGR/CPSR/gvanno.
    An example line of the VCF info tag file is the following:
-   
+
    tag	number	type	description category
    Consequence	.	String	"Impact modifier for the consequence type (picked by VEP's --flag_pick_allele option)."   vep
-   
+
    A dictionary is returned, with the tag as the key, and the full dictionary record as the value
    """
    info_tag_xref = {} ##dictionary returned
@@ -30,7 +30,7 @@ def read_infotag_file(vcf_info_tags_tsv):
    for row in reader:
       if not row['tag'] in info_tag_xref:
          info_tag_xref[row['tag']] = row
-   
+
    return info_tag_xref
 
 def check_subprocess(command):
@@ -46,11 +46,11 @@ def check_subprocess(command):
 
 
 def read_genexref_namemap(gene_xref_namemap_tsv):
-  
+
    """
    Function that reads a file that lists names of tags in PCGR_ONCO_XREF annotation.
    """
-  
+
    namemap_xref = {} ##dictionary returned
    if not os.path.exists(gene_xref_namemap_tsv):
       return namemap_xref
@@ -78,7 +78,6 @@ def error_message(message, logger):
 def write_pass_vcf(annotated_vcf, logger):
    """
    Function prints all PASS variants from a VCF file. New VCF file appends '.pass.' to the filename.
-   
    """
    #out_vcf = re.sub(r'\.annotated\.vcf\.gz$','.annotated.pass.vcf',annotated_vcf)
    out_vcf = re.sub(r'\.vcf\.gz$','.pass.vcf',annotated_vcf)
@@ -96,7 +95,7 @@ def write_pass_vcf(annotated_vcf, logger):
 
    vcf.close()
    w.close()
-   
+
    logger.info('Number of non-PASS/REJECTED variant calls: ' + str(num_rejected))
    logger.info('Number of PASSed variant calls: ' + str(num_pass))
    if num_pass == 0:
@@ -140,7 +139,7 @@ def is_valid_vcf(input_vcf, output_dir, logger, debug):
 
    ## Filename for output file from VCF validation
    vcf_validation_output_file = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)', '.vcf_validator_output', os.path.basename(input_vcf)))
-   
+
    ## Command for running vcf-validator
    command_v42 = 'vcf_validator -i ' + str(input_vcf) + ' -l warning -r text -o ' + str(output_dir) + ' > ' + str(vcf_validation_output_file)  + ' 2>&1'
    if debug:
@@ -199,7 +198,7 @@ def is_valid_vcf(input_vcf, output_dir, logger, debug):
 
 def map_regulatory_variant_annotations(vep_csq_records):
    """
-   Function that considers an array of VEP CSQ records and appends all regulatory variant consequent annotations (open chromatin, TF_binding_site, 
+   Function that considers an array of VEP CSQ records and appends all regulatory variant consequent annotations (open chromatin, TF_binding_site,
    CTCF_binding_site, promoter (flanks), enhancers ) into a single comma-separated string. Each individual regulatory annotation is formatted as:
    <Consequence>|<Feature_type>|<Feature>|<BIOTYPE>|<MOTIF_NAME>|<MOTIF_POS>|<HIGH_INF_POS>|<MOTIF_SCORE_CHANGE>|<TRANSCRIPTION_FACTORS>
    """
@@ -223,7 +222,7 @@ def map_regulatory_variant_annotations(vep_csq_records):
             biotype = ""
             if re.match(r"^(enhancer|promoter|open|CTCF|TF_)", vep_csq_records[j]['BIOTYPE']):
                biotype = vep_csq_records[j]['BIOTYPE']
-            
+
             annotation = str(vep_csq_records[j]['Consequence']) + '|' + \
                str(vep_csq_records[j]['Feature_type']) + '|' + \
                str(vep_csq_records[j]['Feature']) + '|' + \
@@ -237,7 +236,7 @@ def map_regulatory_variant_annotations(vep_csq_records):
             for annotation in ['MOTIF_NAME','MOTIF_POS','HIGH_INF_POS','MOTIF_SCORE_CHANGE','TRANSCRIPTION_FACTORS']:
                if not annotation in vep_csq_records[j].keys():
                   missing_motif_annotation = True
-            
+
             if missing_motif_annotation is False:
                annotation = str(vep_csq_records[j]['Consequence']) + '|' + \
                   str(vep_csq_records[j]['Feature_type']) + '|' + \
@@ -249,26 +248,26 @@ def map_regulatory_variant_annotations(vep_csq_records):
                   str(vep_csq_records[j]['TRANSCRIPTION_FACTORS'])
 
                regulatory_annotations.append(annotation)
-      
+
       j = j + 1
-   
+
    if len(regulatory_annotations) > 0:
       regulatory_annotation = ','.join(regulatory_annotations)
 
    return(regulatory_annotation)
-               
+
 def get_correct_cpg_transcript(vep_csq_records):
    """
    Function that considers an array of VEP CSQ records and picks most relevant consequence (and gene) from
    neighbouring genes/transcripts of relevance for cancer predisposition (cpg = cancer predisposition gene)
    """
 
-  
+
    csq_idx = 0
    if len(vep_csq_records) == 1:
       return csq_idx
-   
-   
+
+
    ## some variants iare assigned multiple transcript consequences
    ## if cancer predisposition genes are in the vicinity of other genes, choose the cancer predisposition gene
    ## if there are neighbouring cancer-predispositon genes, choose custom gene, preferring coding change (see below, KLLN/PTEN, XPC/TMEM43, NTHL1/TSC2)
@@ -289,17 +288,17 @@ def get_correct_cpg_transcript(vep_csq_records):
                   csq_idx = j  # prefer coding on over anything else
                   csq_idx_dict[str(vep_csq_records[j]['SYMBOL'])]['coding'] = True
       j = j + 1
-   
+
    if csq_idx_dict['KLLN']['idx'] != -1 and csq_idx_dict['PTEN']['idx'] != -1:
       csq_idx = csq_idx_dict['PTEN']['idx']
       if csq_idx_dict['KLLN']['coding'] is True:
          csq_idx = csq_idx_dict['KLLN']['idx']
-   
+
    if csq_idx_dict['XPC']['idx'] != -1 and csq_idx_dict['TMEM43']['idx'] != -1:
       csq_idx = csq_idx_dict['XPC']['idx']
       if csq_idx_dict['TMEM43']['coding'] is True:
          csq_idx = csq_idx_dict['TMEM43']['idx']
-   
+
    if csq_idx_dict['TSC2']['idx'] != -1 and csq_idx_dict['NTHL1']['idx'] != -1:
       csq_idx = csq_idx_dict['TSC2']['idx']
       if csq_idx_dict['NTHL1']['coding'] is True:
@@ -319,13 +318,13 @@ def threeToOneAA(aa_change):
    return aa_change
 
 def map_variant_effect_predictors(rec, algorithms):
-   
+
    dbnsfp_predictions = map_dbnsfp_predictions(str(rec.INFO.get('DBNSFP')), algorithms)
    if rec.INFO.get('Gene') is None or rec.INFO.get('Consequence') is None:
       return
    gene_id = str(rec.INFO.get('Gene'))
    consequence = str(rec.INFO.get('Consequence'))
-     
+
    dbnsfp_key = ''
 
    found_key = 0
@@ -334,7 +333,7 @@ def map_variant_effect_predictors(rec, algorithms):
       dbnsfp_key = gene_id + ':' + str(aa_change)
       if dbnsfp_key in dbnsfp_predictions:
          found_key = 1
-   
+
    if found_key == 0 and re.search('splice_',consequence):
       dbnsfp_key = gene_id
 
@@ -382,12 +381,12 @@ def map_variant_effect_predictors(rec, algorithms):
 def detect_reserved_info_tag(tag, tag_name, logger):
    reserved_tags = ['AA','AC','AF','AN','BQ','CIGAR','DB','DP','END','H2','H3','MQ','MQ0','NS','SB','SOMATIC','VALIDATED','1000G']
    if tag in reserved_tags:
-      err_msg = 'Custom INFO tag (' + str(tag_name) + ') needs another name - ' + str(tag) + ' is a reserved field in the VCF specification (INFO)'
+      err_msg = f'Custom INFO tag ({tag_name}) needs another name - \'{tag}\' is a reserved field in the VCF specification (INFO)'
       return error_message(err_msg, logger)
-   
+
    reserved_format_tags = ['GT','DP','FT','GL','GLE','GQ','PL','HQ','PS','PQ','EC','MQ']
    if tag in reserved_format_tags:
-      err_msg = 'Custom INFO tag (' + str(tag_name) + ') needs another name - ' + str(tag) + ' is a reserved field in the VCF specification (FORMAT)'
+      err_msg = 'Custom INFO tag ({tag_name}) needs another name - \'{tag}\' is a reserved field in the VCF specification (FORMAT)'
       return error_message(err_msg, logger)
 
 
@@ -398,16 +397,16 @@ def assign_cds_exon_intron_annotations(csq_record):
    csq_record['NULL_VARIANT'] = False
    csq_record['INTRON_POSITION'] = 0
    csq_record['EXON_POSITION'] = 0
-   
+
    coding_csq_pattern = r"^(stop_|start_lost|frameshift_|missense_|splice_donor|splice_acceptor|protein_altering|inframe_)"
    wes_csq_pattern = r"^(stop_|start_lost|frameshift_|missense_|splice_donor|splice_acceptor|inframe_|protein_altering|synonymous)"
    null_pattern = r"^(stop_|frameshift_)"
    if re.match(coding_csq_pattern, str(csq_record['Consequence'])):
       csq_record['CODING_STATUS'] = 'coding'
-   
+
    if re.match(wes_csq_pattern, str(csq_record['Consequence'])):
       csq_record['EXONIC_STATUS'] = 'exonic'
-   
+
    if re.match(null_pattern, str(csq_record['Consequence'])):
       csq_record['NULL_VARIANT'] = True
 
@@ -420,7 +419,7 @@ def assign_cds_exon_intron_annotations(csq_record):
          pos = re.sub(r"(\+|dup|del|delins|ins|inv|(A|G|C|T){1,}|>)","",match.group(0))
          if is_integer(pos):
             csq_record['INTRON_POSITION'] = int(pos)
-   
+
    if 'NearestExonJB' in csq_record.keys():
       if not csq_record['NearestExonJB'] is None:
          if re.match(r"synonymous_|missense_|stop_|inframe_|start_", str(csq_record['Consequence'])) and str(csq_record['NearestExonJB']) != "":
@@ -457,7 +456,7 @@ def assign_cds_exon_intron_annotations(csq_record):
          if protein_position.isdigit():
             csq_record['AMINO_ACID_START'] = protein_position
             csq_record['AMINO_ACID_END'] = protein_position
-   
+
    if not csq_record['HGVSp'] is None:
       if csq_record['HGVSp'] != '.':
          if ':' in csq_record['HGVSp']:
@@ -465,12 +464,12 @@ def assign_cds_exon_intron_annotations(csq_record):
             if protein_identifier.startswith('ENSP'):
                protein_change_VEP = str(csq_record['HGVSp'].split(':')[1])
                protein_change = threeToOneAA(protein_change_VEP)
-  
+
    if 'synonymous_variant' in csq_record['Consequence']:
       protein_change = 'p.' + str(csq_record['Amino_acids']) + str(protein_position) + str(csq_record['Amino_acids'])
       if 'stop_lost' in str(csq_record['Consequence']) and '/' in str(csq_record['Amino_acids']):
          protein_change = 'p.X' + str(protein_position) + str(csq_record['Amino_acids']).split('/')[1]
-    
+
    csq_record['HGVSp_short'] = protein_change
    exon_number = 'NA'
    if not csq_record['EXON'] is None:
@@ -498,11 +497,9 @@ def assign_cds_exon_intron_annotations(csq_record):
    return
 
 def map_dbnsfp_predictions(dbnsfp_tag, algorithms):
-   
+
    effect_predictions = {}
-   
    for v in dbnsfp_tag.split(','):
-   
       dbnsfp_info = v.split('|')
       if len(dbnsfp_info) == 1:
          return effect_predictions
@@ -512,7 +509,7 @@ def map_dbnsfp_predictions(dbnsfp_tag, algorithms):
       unique_ids = {}
       for s in all_ids:
          unique_ids[s] = 1
-         
+
       isoform_aa_keys = []
       if ref_aa != '.' and alt_aa != '.' and ref_aa != '' and alt_aa != '':
          aa_pos = dbnsfp_info[6].split('&')
@@ -524,21 +521,21 @@ def map_dbnsfp_predictions(dbnsfp_tag, algorithms):
          #continue
          for gene_id in unique_ids:
             isoform_aa_keys.append(gene_id)
-   
+
       algorithm_raw_predictions = {}
-   
+
       i = 7
       v = 0
-      
+
       if len(algorithms) != len(dbnsfp_info[7:]):
          return effect_predictions
-      
+
       while i < len(dbnsfp_info):
          algorithm_raw_predictions[str(algorithms[v]).lower()] = dbnsfp_info[i].split('&')
          i = i + 1
          v = v + 1
       dbnsfp_predictions = {}
-      
+
       for k in isoform_aa_keys:
          if not k in dbnsfp_predictions:
             dbnsfp_predictions[k] = {}
@@ -553,7 +550,7 @@ def map_dbnsfp_predictions(dbnsfp_tag, algorithms):
                   unique_algo_predictions['.'] = 1
             if len(unique_algo_predictions.keys()) > 1 and '.' in unique_algo_predictions.keys():
                del unique_algo_predictions['.']
-            dbnsfp_predictions[k][algo] = str(algo) + ':' + '|'.join(unique_algo_predictions.keys())  
+            dbnsfp_predictions[k][algo] = str(algo) + ':' + '|'.join(unique_algo_predictions.keys())
             all_preds.append(dbnsfp_predictions[k][algo])
          effect_predictions[k] = '&'.join(all_preds)
 
@@ -573,7 +570,7 @@ def make_transcript_xref_map(rec, fieldmap, xref_tag = 'PCGR_ONCO_XREF'):
                continue
             if xrefs[annotation_index] != '':
                transcript_xref_map[ensembl_transcript_id][annotation] = xrefs[annotation_index]
-   
+
    return(transcript_xref_map)
 
 def vep_dbnsfp_meta_vcf(query_vcf, info_tags_wanted):
@@ -590,7 +587,7 @@ def vep_dbnsfp_meta_vcf(query_vcf, info_tags_wanted):
                      'AMR_AF':'AMR_AF_1KG',
                      'SAS_AF':'SAS_AF_1KG',
                      'EUR_AF':'EUR_AF_1KG',
-                     'EAS_AF':'EAS_AF_1KG', 
+                     'EAS_AF':'EAS_AF_1KG',
                      'AF':'GLOBAL_AF_1KG'}
 
    vcf = VCF(query_vcf)
@@ -677,7 +674,7 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, logger, pick_onl
                         for v in domain_identifiers:
                            if v.startswith('Pfam'):
                               csq_record['PFAM_DOMAIN'] = str(re.sub(r'\.[0-9]{1,}$','',re.sub(r'Pfam:','',v)))
-                        
+
                         csq_record['DOMAINS'] = None
                      ## Assign COSMIC/DBSNP mutation ID's as individual key,value pairs in the csq_record object
                      if vep_csq_fields_map['index2field'][j] == 'Existing_variation':
@@ -698,7 +695,7 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, logger, pick_onl
                   else:
                      csq_record[vep_csq_fields_map['index2field'][j]] = None
                j = j + 1
-            
+
             ## Assign coding status, protein change, coding sequence change, last exon/intron status etc
             assign_cds_exon_intron_annotations(csq_record)
             ## Append transcript consequence to all_csq_pick
@@ -707,16 +704,15 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, logger, pick_onl
          symbol = '.'
          if csq_fields[vep_csq_fields_map['field2index']['SYMBOL']] != "":
             symbol = str(csq_fields[vep_csq_fields_map['field2index']['SYMBOL']])
-         consequence_entry = (str(csq_fields[vep_csq_fields_map['field2index']['Consequence']]) + ':' +  
-            str(symbol) + ':' + 
-            str(csq_fields[vep_csq_fields_map['field2index']['Feature_type']]) + ':' + 
-            str(csq_fields[vep_csq_fields_map['field2index']['Feature']]) + ':' + 
+         consequence_entry = (str(csq_fields[vep_csq_fields_map['field2index']['Consequence']]) + ':' +
+            str(symbol) + ':' +
+            str(csq_fields[vep_csq_fields_map['field2index']['Feature_type']]) + ':' +
+            str(csq_fields[vep_csq_fields_map['field2index']['Feature']]) + ':' +
             str(csq_fields[vep_csq_fields_map['field2index']['BIOTYPE']]))
          all_transcript_consequences.append(consequence_entry)
-         
+
    vep_csq_results = {}
    vep_csq_results['vep_block'] = all_csq_pick
    vep_csq_results['vep_all_csq'] = all_transcript_consequences
 
    return(vep_csq_results)
-      
