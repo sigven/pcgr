@@ -130,28 +130,26 @@ def cli():
 
     # check parsed arguments
     arg_checker.check_args(arg_dict, logger)
-    # check and get docker image version
-    DOCKER_IMAGE_VERSION = arg_checker.get_docker_image_version(arg_dict, logger)
     # create config options
     config_options = config.create_config(arg_dict)
 
     # Verify existence of input files
-    host_directories = arg_checker.verify_input_files(arg_dict, logger)
+    pcgr_paths = arg_checker.verify_input_files(arg_dict, logger)
 
-    # print(f"arg_dict: {arg_dict}\n")
-    # print(f"host_directories: {host_directories}\n")
-    # print(f"config_options: {config_options}\n")
+    import json
+    # print(json.dumps(arg_dict, indent=4))
+    # print(json.dumps(config_options, indent=4))
+    print(json.dumps(pcgr_paths, indent=4))
 
-    # Run PCGR workflow ( VEP + vcfanno + summarise + vcf2tsv + HTML report generation)
-    run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION)
+    # Run PCGR workflow (VEP + vcfanno + summarise + vcf2tsv + HTML report generation)
+    #run_pcgr(arg_dict, pcgr_paths, config_options)
 
-def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
+def run_pcgr(arg_dict, pcgr_paths, config_options):
     """
     Main function to run the PCGR workflow
     """
 
     debug = arg_dict['debug']
-    docker_user_id = arg_dict['docker_user_id']
 
     report_nonfloating_toc = 1 if config_options['other']['nonfloating_toc'] else 0
     vep_regulatory_annotation = 'ON' if config_options['other']['vep_regulatory'] == 1 else 'OFF'
@@ -170,12 +168,11 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
         if config_options['tumor_only']['cell_line']:
             cell_line = 1
             assay_mode = 'Tumor-Only (cell line)'
-    # set basic Docker run commands
+    # set basic run commands
     output_vcf = 'None'
     output_pass_vcf = 'None'
     output_pass_tsv = 'None'
     output_maf = 'None'
-    uid = ''
     GENCODE_VERSION = pcgr_vars.GENCODE_VERSION
     NCBI_BUILD_MAF = pcgr_vars.NCBI_BUILD_MAF
     VEP_ASSEMBLY = pcgr_vars.VEP_ASSEMBLY
@@ -186,117 +183,46 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
         VEP_ASSEMBLY = 'GRCh37'
     logger = getlogger('pcgr-get-OS')
 
-    uid = utils.get_docker_user_id(docker_user_id)
-    vepdb_dir_host = os.path.join(str(host_directories['db_dir_host']), '.vep')
-    input_vcf_docker = 'None'
-    input_cna_docker = 'None'
-    input_rna_fusion_docker = 'None'
-    input_rna_expression_docker = 'None'
-    input_cpsr_report_docker = 'None'
-    panel_normal_docker = 'None'
-    docker_cmd_run1 = ''
-    docker_cmd_run2 = ''
-    docker_cmd_run_end = ''
+    vepdb_dir = os.path.join(str(pcgr_paths['db_dir']), '.vep')
+    input_vcf = 'None'
+    input_cna = 'None'
+    input_rna_fusion = 'None'
+    input_rna_expression = 'None'
+    input_cpsr_report = 'None'
+    panel_normal = 'None'
     # panel-of-normals annotation
     pon_annotation = 0
 
-    # Map input files and directories to files/directories within the Docker container
-    if DOCKER_IMAGE_VERSION:
-        if host_directories['input_vcf_basename_host'] != 'NA':
-            input_vcf_docker = f'/workdir/input_vcf/{host_directories["input_vcf_basename_host"]}'
-        if host_directories['input_cna_basename_host'] != 'NA':
-            input_cna_docker = f'/workdir/input_cna/{host_directories["input_cna_basename_host"]}'
-        if host_directories['input_rna_expression_basename_host'] != 'NA':
-            input_rna_expression_docker = f'/workdir/input_rna_expression/{host_directories["input_rna_expression_basename_host"]}'
-        if host_directories['input_rna_fusion_basename_host'] != 'NA':
-            input_rna_fusion_docker = f'/workdir/input_rna_fusion/{host_directories["input_rna_fusion_basename_host"]}'
-        if host_directories['input_cpsr_report_basename_host'] != 'NA':
-            input_cpsr_report_docker = f'/workdir/input_cpsr/{host_directories["input_cpsr_report_basename_host"]}'
-        if host_directories['panel_normal_vcf_basename_host'] != 'NA':
-            panel_normal_docker = f'/workdir/panel_normal_vcf/{host_directories["panel_normal_vcf_basename_host"]}'
+    # Specify paths for input files and directories
+    if pcgr_paths['input_vcf_basename'] != 'NA':
+        input_vcf = os.path.join(pcgr_paths['input_vcf_dir'], pcgr_paths['input_vcf_basename'])
+    if pcgr_paths['input_cna_basename'] != 'NA':
+        input_cna = os.path.join(pcgr_paths['input_cna_dir'], pcgr_paths['input_cna_basename'])
+    if pcgr_paths['input_rna_fusion_basename'] != 'NA':
+        input_rna_fusion = os.path.join(pcgr_paths['input_rna_fusion_dir'], pcgr_paths['input_rna_fusion_basename'])
+    if pcgr_paths['input_rna_expression_basename'] != 'NA':
+        input_rna_expression = os.path.join(pcgr_paths['input_rna_expression_dir'], pcgr_paths['input_rna_expression_basename'])
+    if pcgr_paths['input_cpsr_report_basename'] != 'NA':
+        input_cpsr_report = os.path.join(pcgr_paths['input_cpsr_report_dir'], pcgr_paths['input_cpsr_report_basename'])
+    if pcgr_paths['panel_normal_vcf_basename'] != 'NA':
+        panel_normal = os.path.join(pcgr_paths['panel_normal_vcf_dir'], pcgr_paths['panel_normal_vcf_basename'])
 
-        vep_volume_mapping = f'{vepdb_dir_host}:/usr/local/share/vep/data'
-        databundle_volume_mapping = f'{host_directories["base_dir_host"]}:/data'
-        input_cna_volume_mapping = f'{host_directories["input_cna_dir_host"]}:/workdir/input_cna'
-        input_vcf_volume_mapping = f'{host_directories["input_vcf_dir_host"]}:/workdir/input_vcf'
-        input_rna_fusion_volume_mapping = f'{host_directories["input_rna_fusion_dir_host"]}:/workdir/input_rna_fusion'
-        input_rna_expression_volume_mapping = f'{host_directories["input_rna_expression_dir_host"]}:/workdir/input_rna_expression'
-        input_cpsr_report_volume_mapping = f'{host_directories["input_cpsr_report_dir_host"]}:/workdir/input_cpsr'
-        output_volume_mapping = f'{host_directories["output_dir_host"]}:/workdir/output'
-        panel_normal_vcf_volume_mapping = f'{host_directories["panel_normal_vcf_dir_host"]}:/workdir/panel_normal_vcf'
+    data_dir = pcgr_paths['base_dir']
+    output_dir = pcgr_paths['output_dir']
+    vep_dir = vepdb_dir
 
-        docker_cmd_run1 = 'NA'
-
-        # VCF file only
-        docker_run_basic = f'docker run --rm -t -u {uid}'
-        docker_cmd_run1 = f'{docker_run_basic} -v={databundle_volume_mapping} -v={vep_volume_mapping} -v={output_volume_mapping}'
-
-        if host_directories['input_vcf_dir_host'] != 'NA' and host_directories['input_cna_dir_host'] == 'NA':
-            docker_cmd_run1 = f'{docker_cmd_run1} -v={input_vcf_volume_mapping}'
-
-        # CNA file and VCF file provided
-        if host_directories['input_vcf_dir_host'] != 'NA' and host_directories['input_cna_dir_host'] != 'NA':
-            docker_cmd_run1 = f'{docker_cmd_run1} -v={input_vcf_volume_mapping} -v={input_cna_volume_mapping}'
-
-        # Panel of normal VCFs provided
-        if host_directories['panel_normal_vcf_dir_host'] != 'NA':
-            docker_cmd_run1 = f'{docker_cmd_run1} -v={panel_normal_vcf_volume_mapping}'
-
-        # RNA fusion variants provided
-        if host_directories['input_rna_fusion_dir_host'] != 'NA':
-            docker_cmd_run1 = f'{docker_cmd_run1} -v={input_rna_fusion_volume_mapping}'
-
-        # RNA expression estimates provided
-        if host_directories['input_rna_expression_dir_host'] != 'NA':
-            docker_cmd_run1 = f'{docker_cmd_run1} -v={input_rna_expression_volume_mapping}'
-
-        # CPSR report provided
-        if host_directories['input_cpsr_report_dir_host'] != 'NA':
-            docker_cmd_run1 = f'{docker_cmd_run1} -v={input_cpsr_report_volume_mapping}'
-
-        docker_cmd_run1 = f'{docker_cmd_run1} -w=/workdir/output {DOCKER_IMAGE_VERSION} sh -c "'
-
-        docker_cmd_run2 = f'{docker_run_basic} -v={databundle_volume_mapping} -v={output_volume_mapping}'
-        if host_directories['panel_normal_vcf_dir_host'] != 'NA':
-            docker_cmd_run2 = f'{docker_cmd_run2} -v={panel_normal_vcf_volume_mapping}'
-
-        docker_cmd_run2 = f'{docker_cmd_run2} -w=/workdir/output {DOCKER_IMAGE_VERSION} sh -c "'
-        docker_cmd_run_end = "\""
-
-        data_dir = '/data'
-        output_dir = '/workdir/output'
-        vep_dir = '/usr/local/share/vep/data'
-
-    # If running non-Dockerized - specify paths for input files and directories
-    else:
-        if host_directories['input_vcf_basename_host'] != 'NA':
-            input_vcf_docker = os.path.join(host_directories['input_vcf_dir_host'], host_directories['input_vcf_basename_host'])
-        if host_directories['input_cna_basename_host'] != 'NA':
-            input_cna_docker = os.path.join(host_directories['input_cna_dir_host'], host_directories['input_cna_basename_host'])
-        if host_directories['input_rna_fusion_basename_host'] != 'NA':
-            input_rna_fusion_docker = os.path.join(host_directories['input_rna_fusion_dir_host'], host_directories['input_rna_fusion_basename_host'])
-        if host_directories['input_rna_expression_basename_host'] != 'NA':
-            input_rna_expression_docker = os.path.join(host_directories['input_rna_expression_dir_host'], host_directories['input_rna_expression_basename_host'])
-        if host_directories['input_cpsr_report_basename_host'] != 'NA':
-            input_cpsr_report_docker = os.path.join(host_directories['input_cpsr_report_dir_host'], host_directories['input_cpsr_report_basename_host'])
-        if host_directories['panel_normal_vcf_basename_host'] != 'NA':
-            panel_normal_docker = os.path.join(host_directories['panel_normal_vcf_dir_host'], host_directories['panel_normal_vcf_basename_host'])
-
-        data_dir = host_directories['base_dir_host']
-        output_dir = host_directories['output_dir_host']
-        vep_dir = vepdb_dir_host
-
-    check_subprocess(logger, docker_cmd_run1.replace(f'-u {uid}', '') + f'mkdir -p {output_dir}{docker_cmd_run_end}', debug)
+    check_subprocess(logger, f'mkdir -p {output_dir}', debug)
 
     # PCGR|validate_input - verify that VCF and CNA segment file is of appropriate format
     logger = getlogger("pcgr-validate-arguments-input")
     vcf_validate_command = (
-            f'{docker_cmd_run1} pcgr_validate_input.py {data_dir} '
-            f'{input_vcf_docker} '
-            f'{input_cna_docker} '
-            f'{input_rna_fusion_docker} '
-            f'{input_rna_expression_docker} '
-            f'{panel_normal_docker} '
+            f'pcgr_validate_input.py '
+            f'{data_dir} '
+            f'{input_vcf} '
+            f'{input_cna} '
+            f'{input_rna_fusion} '
+            f'{input_rna_expression} '
+            f'{panel_normal} '
             f'{vcf_validation} '
             f'{tumor_only} '
             f'{arg_dict["genome_assembly"]} '
@@ -305,11 +231,9 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
             f'{config_options["allelic_support"]["control_dp_tag"]} {config_options["allelic_support"]["control_af_tag"]} '
             f'{config_options["allelic_support"]["call_conf_tag"]} '
             f'{config_options["tumor_only"]["exclude_likely_hom_germline"]} '
-            f'{config_options["tumor_only"]["exclude_likely_het_germline"]}')
-    if not DOCKER_IMAGE_VERSION:
-        vcf_validate_command += f' --output_dir {output_dir}{docker_cmd_run_end}'
-    else:
-        vcf_validate_command += docker_cmd_run_end
+            f'{config_options["tumor_only"]["exclude_likely_het_germline"]} '
+            f'--output_dir {output_dir}'
+            )
     check_subprocess(logger, vcf_validate_command, debug)
     logger.info('Finished')
 
@@ -332,7 +256,7 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
     logger.info(f'Mutational burden estimation: {tmb_estimation_set}')
     logger.info(f'Include molecularly targeted clinical trials (beta): {clinical_trials_set}')
 
-    if not input_vcf_docker == 'None':
+    if not input_vcf == 'None':
 
         # Define temporary output file names
         output_vcf = os.path.join(output_dir, f'{arg_dict["sample_id"]}.pcgr_acmg.{arg_dict["genome_assembly"]}.vcf.gz')
@@ -341,8 +265,8 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
         output_pass_raw_tsv_gz = os.path.join(output_dir, f'{arg_dict["sample_id"]}.pcgr_acmg.{arg_dict["genome_assembly"]}.pass.raw.tsv.gz')
         output_maf = os.path.join(output_dir, f'{arg_dict["sample_id"]}.pcgr_acmg.{arg_dict["genome_assembly"]}.tmp.maf')
         output_vcf2maf_log = os.path.join(output_dir, f'{arg_dict["sample_id"]}.pcgr_acmg.{arg_dict["genome_assembly"]}.maf.log')
-        input_vcf_pcgr_ready = os.path.join(output_dir, re.sub(r"(\.vcf$|\.vcf\.gz$)", ".pcgr_ready.vcf.gz", host_directories["input_vcf_basename_host"]))
-        input_vcf_pcgr_ready_uncompressed = os.path.join(output_dir, re.sub(r"(\.vcf$|\.vcf\.gz$)", ".pcgr_ready.vcf", host_directories["input_vcf_basename_host"]))
+        input_vcf_pcgr_ready = os.path.join(output_dir, re.sub(r"(\.vcf$|\.vcf\.gz$)", ".pcgr_ready.vcf.gz", pcgr_paths["input_vcf_basename"]))
+        input_vcf_pcgr_ready_uncompressed = os.path.join(output_dir, re.sub(r"(\.vcf$|\.vcf\.gz$)", ".pcgr_ready.vcf", pcgr_paths["input_vcf_basename"]))
         vep_vcf = re.sub(r"(\.vcf$|\.vcf\.gz$)", ".vep.vcf", input_vcf_pcgr_ready)
         vep_vcfanno_vcf = re.sub(r"(\.vcf$|\.vcf\.gz$)", ".vep.vcfanno.vcf", input_vcf_pcgr_ready)
         vep_vcfanno_annotated_vcf = re.sub(r"\.vcfanno", ".vcfanno.annotated", vep_vcfanno_vcf) + ".gz"
@@ -378,9 +302,9 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
             vep_options += ' --verbose'
 
         # Compose full VEP command
-        vep_main_command = f'{docker_cmd_run1} {utils.get_perl_exports()} && vep --input_file {input_vcf_pcgr_ready} --output_file {vep_vcf} {vep_options} --fasta {fasta_assembly} {docker_cmd_run_end}'
-        vep_bgzip_command = f'{docker_cmd_run1} bgzip -f -c {vep_vcf} > {vep_vcf}.gz {docker_cmd_run_end}'
-        vep_tabix_command = f'{docker_cmd_run1} tabix -f -p vcf {vep_vcf}.gz {docker_cmd_run_end}'
+        vep_main_command = f'{utils.get_perl_exports()} && vep --input_file {input_vcf_pcgr_ready} --output_file {vep_vcf} {vep_options} --fasta {fasta_assembly}'
+        vep_bgzip_command = f'bgzip -f -c {vep_vcf} > {vep_vcf}.gz'
+        vep_tabix_command = f'tabix -f -p vcf {vep_vcf}.gz'
 
         # PCGR|VEP - run consequence annotation with Variant Effect Predictor
         print()
@@ -401,12 +325,13 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
         # PCGR|vcf2maf - if option set, convert VCF to MAF with https://github.com/mskcc/vcf2maf
         if config_options['other']['vcf2maf'] == 1:
             logger.info('Converting VEP-annotated VCF to MAF with https://github.com/mskcc/vcf2maf')
+            # TODO: use 'os.remove()' instead of 'rm -f'
             vcf2maf_command = (
-                    f'{docker_cmd_run1} vcf2maf.pl --inhibit-vep --input-vcf {input_vcf_pcgr_ready_uncompressed} '
+                    f'vcf2maf.pl --inhibit-vep --input-vcf {input_vcf_pcgr_ready_uncompressed} '
                     f'--tumor-id {arg_dict["sample_id"]} --output-maf {output_maf} --ref-fasta {fasta_assembly} '
-                    f'--ncbi-build {NCBI_BUILD_MAF} > {output_vcf2maf_log} 2>&1 {docker_cmd_run_end}'
+                    f'--ncbi-build {NCBI_BUILD_MAF} > {output_vcf2maf_log} 2>&1'
                     )
-            clean_vcf2maf_command = f'{docker_cmd_run1} rm -f {output_vcf2maf_log} ' + re.sub(r'(\.vcf$)', '.vep.vcf', input_vcf_pcgr_ready_uncompressed) + f' {docker_cmd_run_end}'
+            clean_vcf2maf_command = f'rm -f {output_vcf2maf_log} ' + re.sub(r'(\.vcf$)', '.vep.vcf', input_vcf_pcgr_ready_uncompressed)
             check_subprocess(logger, vcf2maf_command, debug)
             check_subprocess(logger, clean_vcf2maf_command, debug)
         logger.info('Finished')
@@ -415,21 +340,20 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
         print()
         logger = getlogger("pcgr-vcfanno")
         pcgr_vcfanno_command = (
-                f'{docker_cmd_run2} pcgr_vcfanno.py --num_processes {config_options["other"]["vcfanno_n_proc"]} '
+                f'pcgr_vcfanno.py --num_processes {config_options["other"]["vcfanno_n_proc"]} '
                 f'--chasmplus --dbnsfp --docm --clinvar --icgc --civic --cgi --tcga_pcdm --winmsk --simplerepeats '
                 f'--tcga --uniprot --cancer_hotspots --pcgr_onco_xref {vep_vcf}.gz {vep_vcfanno_vcf} {os.path.join(data_dir, "data", str(arg_dict["genome_assembly"]))}'
                 )
         if debug:
             pcgr_vcfanno_command += " --debug"
-        if panel_normal_docker != "None":
+        if panel_normal != "None":
             pon_annotation = 1
-            pcgr_vcfanno_command = f'{pcgr_vcfanno_command} --panel_normal_vcf {panel_normal_docker}'
+            pcgr_vcfanno_command = f'{pcgr_vcfanno_command} --panel_normal_vcf {panel_normal}'
             logger.info("PCGR - STEP 2: Annotation for precision oncology with pcgr-vcfanno")
             logger.info("Annotation sources: Panel-of-Normals, ClinVar, dbNSFP, UniProtKB, cancerhotspots.org, CiVIC, CGI, DoCM, CHASMplus driver mutations, TCGA, ICGC-PCAWG")
         else:
             logger.info("PCGR - STEP 2: Annotation for precision oncology with pcgr-vcfanno")
             logger.info("Annotation sources: ClinVar, dbNSFP, UniProtKB, cancerhotspots.org, CiVIC, CGI, DoCM, CHASMplus driver mutations, TCGA, ICGC-PCAWG")
-        pcgr_vcfanno_command = f'{pcgr_vcfanno_command} {docker_cmd_run_end}'
         check_subprocess(logger, pcgr_vcfanno_command, debug)
         logger.info("Finished")
 
@@ -437,9 +361,9 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
         print()
         logger = getlogger("pcgr-summarise")
         pcgr_summarise_command = (
-                f'{docker_cmd_run2} pcgr_summarise.py {vep_vcfanno_vcf}.gz {pon_annotation} '
+                f'pcgr_summarise.py {vep_vcfanno_vcf}.gz {pon_annotation} '
                 f'{config_options["other"]["vep_regulatory"]} '
-                f'{os.path.join(data_dir, "data", str(arg_dict["genome_assembly"]))} {docker_cmd_run_end}'
+                f'{os.path.join(data_dir, "data", str(arg_dict["genome_assembly"]))}'
                 )
         if debug:
             pcgr_summarise_command += " --debug"
@@ -447,14 +371,15 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
         check_subprocess(logger, pcgr_summarise_command, debug)
 
         # PCGR|clean - move output files and clean up temporary files
-        create_output_vcf_command1 = f'{docker_cmd_run2} mv {vep_vcfanno_annotated_vcf} {output_vcf} {docker_cmd_run_end}'
-        create_output_vcf_command2 = f'{docker_cmd_run2} mv {vep_vcfanno_annotated_vcf}.tbi {output_vcf}.tbi {docker_cmd_run_end}'
-        create_output_vcf_command3 = f'{docker_cmd_run2} mv {vep_vcfanno_annotated_pass_vcf} {output_pass_vcf} {docker_cmd_run_end}'
-        create_output_vcf_command4 = f'{docker_cmd_run2} mv {vep_vcfanno_annotated_pass_vcf}.tbi {output_pass_vcf}.tbi {docker_cmd_run_end}'
+        create_output_vcf_command1 = f'mv {vep_vcfanno_annotated_vcf} {output_vcf}'
+        create_output_vcf_command2 = f'mv {vep_vcfanno_annotated_vcf}.tbi {output_vcf}.tbi'
+        create_output_vcf_command3 = f'mv {vep_vcfanno_annotated_pass_vcf} {output_pass_vcf}'
+        create_output_vcf_command4 = f'mv {vep_vcfanno_annotated_pass_vcf}.tbi {output_pass_vcf}.tbi'
+        # TODO: use 'os.remove()' instead of 'rm -f'
         clean_command = (
-                f'{docker_cmd_run2} rm -f {vep_vcf}* {vep_vcfanno_annotated_vcf} '
+                f'rm -f {vep_vcf}* {vep_vcfanno_annotated_vcf} '
                 f'{vep_vcfanno_annotated_pass_vcf}* {vep_vcfanno_vcf}* '
-                f'{input_vcf_pcgr_ready_uncompressed}* {docker_cmd_run_end}'
+                f'{input_vcf_pcgr_ready_uncompressed}*'
                 )
         check_subprocess(logger, create_output_vcf_command1, debug)
         check_subprocess(logger, create_output_vcf_command2, debug)
@@ -462,7 +387,7 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
         check_subprocess(logger, create_output_vcf_command4, debug)
 
         # PCGR|vcf2tsv - convert VCF to TSV with https://github.com/sigven/vcf2tsv
-        pcgr_vcf2tsv_command = f'{docker_cmd_run2} vcf2tsv.py {output_pass_vcf} --compress {output_pass_tsv} {docker_cmd_run_end}'
+        pcgr_vcf2tsv_command = f'vcf2tsv.py {output_pass_vcf} --compress {output_pass_tsv}'
         logger.info("Converting VCF to TSV with https://github.com/sigven/vcf2tsv")
         check_subprocess(logger, pcgr_vcf2tsv_command, debug)
         if not debug:
@@ -495,18 +420,18 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
 
 
                     # get vcf2tsv header and pipe to output TSV file
-                    get_vcf2tsv_header = f'{docker_cmd_run2} gzip -dc {output_pass_tsv_gz} | egrep \'^#\' > {output_pass_tsv} {docker_cmd_run_end}'
+                    get_vcf2tsv_header = f'gzip -dc {output_pass_tsv_gz} | egrep \'^#\' > {output_pass_tsv}'
                     check_subprocess(logger, get_vcf2tsv_header, debug)
 
                     # rename original vcf2tsv (gzipped) to 'raw' filename
-                    rename_output_tsv = f'{docker_cmd_run2} mv {output_pass_tsv_gz} {output_pass_raw_tsv_gz} {docker_cmd_run_end}'
+                    rename_output_tsv = f'mv {output_pass_tsv_gz} {output_pass_raw_tsv_gz}'
                     check_subprocess(logger, rename_output_tsv, debug)
 
                     # append filtered data output to output TSV file
                     var_data_filtered_final.to_csv(output_pass_tsv, sep='\t', encoding='utf-8', mode = 'a', index = False)
 
                     # gzip filtered output TSV file
-                    gzip_filtered_output_tsv = f'{docker_cmd_run2} gzip -f {output_pass_tsv} {docker_cmd_run_end}'
+                    gzip_filtered_output_tsv = f'gzip -f {output_pass_tsv}'
                     check_subprocess(logger, gzip_filtered_output_tsv, debug)
 
 
@@ -523,17 +448,16 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
         logger.info('PCGR - STEP 4: Generation of output files - variant interpretation report for precision oncology')
 
         # export PATH to R conda env Rscript
-        rscript = utils.script_path('pcgrr', 'bin/Rscript', DOCKER_IMAGE_VERSION)
-        pcgrr_script = utils.script_path('pcgr', 'bin/pcgrr.R', DOCKER_IMAGE_VERSION)
+        rscript = utils.script_path('pcgrr', 'bin/Rscript')
+        pcgrr_script = utils.script_path('pcgr', 'bin/pcgrr.R')
         pcgr_report_command = (
-                f"{docker_cmd_run1} "
                 f"{rscript} {pcgrr_script} "
                 f"{output_dir} "
                 f"{output_pass_tsv}.gz "
-                f"{input_cna_docker} "
-                f"{input_rna_fusion_docker} "
-                f"{input_rna_expression_docker} "
-                f"{input_cpsr_report_docker} "
+                f"{input_cna} "
+                f"{input_rna_fusion} "
+                f"{input_rna_expression} "
+                f"{input_cpsr_report} "
                 f"{arg_dict['sample_id']} "
                 f"{pcgr_vars.PCGR_VERSION} "
                 f"{pcgr_vars.DB_VERSION} "
@@ -598,8 +522,7 @@ def run_pcgr(arg_dict, host_directories, config_options, DOCKER_IMAGE_VERSION):
                 f"{co['other']['preserved_info_tags']} "
                 f"{co['other']['visual_theme']} "
                 f"{report_nonfloating_toc} "
-                f"{co['other']['no_vcf_validate']} "
-                f"{docker_cmd_run_end}"
+                f"{co['other']['no_vcf_validate']}"
                 )
 
         if debug:
