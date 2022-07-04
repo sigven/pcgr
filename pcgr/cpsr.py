@@ -54,7 +54,7 @@ def get_args():
     optional_other.add_argument('--maf_upper_threshold', type = float, default = 0.9, dest = 'maf_upper_threshold',help='Upper MAF limit (gnomAD global population frequency) for variants to be included in the report, default: %(default)s')
     optional_other.add_argument('--classify_all', action='store_true',dest='classify_all',help='Provide CPSR variant classifications (TIER 1-5) also for variants with existing ClinVar classifications in output TSV, default: %(default)s')
     optional_other.add_argument('--clinvar_ignore_noncancer', action='store_true', help='Ignore (exclude from report) ClinVar-classified variants reported only for phenotypes/conditions NOT related to cancer, default: %(default)s')
-    optional_other.add_argument('--debug',action='store_true',default=False, help='Print full docker commands to log, default: %(default)s')
+    optional_other.add_argument("--debug", action="store_true", default=False, help="Print full commands to log, default: %(default)s")
 
     optional_vcfanno.add_argument('--vcfanno_n_proc', default = 4, type = int, help="Number of vcfanno processes (option '-p' in vcfanno), default: %(default)s")
 
@@ -78,14 +78,10 @@ def get_args():
 
 def main():
     arg_dict = get_args()
-
-    logger = getlogger('cpsr-validate-input-arguments')
-    logger.info("STEP 0: Validate input data")
-
     # check parsed arguments
-    arg_checker.check_args_cpsr(arg_dict, logger)
+    arg_checker.check_args_cpsr(arg_dict)
     # Verify existence of input files
-    cpsr_paths = verify_input_files_cpsr(arg_dict, logger)
+    cpsr_paths = arg_checker.verify_input_files_cpsr(arg_dict)
     ## Run CPSR workflow
     run_cpsr(arg_dict, cpsr_paths)
 
@@ -112,34 +108,32 @@ def run_cpsr(arg_dict, cpsr_paths):
     gwas_findings_set = "OFF"
 
     if arg_dict['vep_regulatory']:
-       vep_regulatory = 1
+        vep_regulatory = 1
     if arg_dict["vep_no_intergenic"]:
-       vep_no_intergenic = 1
+        vep_no_intergenic = 1
     if arg_dict['clinvar_ignore_noncancer']:
-       clinvar_ignore_noncancer = 1
+        clinvar_ignore_noncancer = 1
     if arg_dict['classify_all']:
-       classify_all = 1
+        classify_all = 1
     if arg_dict['gwas_findings']:
-       gwas_findings = 1
-       gwas_findings_set = "ON"
+        gwas_findings = 1
+        gwas_findings_set = "ON"
     if arg_dict['secondary_findings']:
-       secondary_findings = 1
-       secondary_findings_set = "ON"
+        secondary_findings = 1
+        secondary_findings_set = "ON"
     if arg_dict['diagnostic_grade_only']:
-       diagnostic_grade_only = 1
-       diagnostic_grade_set = "ON"
+        diagnostic_grade_only = 1
+        diagnostic_grade_set = "ON"
     if arg_dict['report_nonfloating_toc']:
-       report_nonfloating_toc = 1
+        report_nonfloating_toc = 1
     if arg_dict['no_vcf_validate']:
-       vcf_validation = 0
+        vcf_validation = 0
     if arg_dict['virtual_panel_id'] != "-1":
-       virtual_panel_id = arg_dict['virtual_panel_id']
+        virtual_panel_id = arg_dict['virtual_panel_id']
     if arg_dict['custom_list']:
-       virtual_panel_id = "-1"
+        virtual_panel_id = "-1"
     if arg_dict['ignore_noncoding']:
-       ignore_noncoding = 1
-
-    logger = getlogger('cpsr-validate-input-arguments')
+        ignore_noncoding = 1
 
     output_vcf = 'None'
     output_pass_vcf = 'None'
@@ -149,22 +143,24 @@ def run_cpsr(arg_dict, cpsr_paths):
     VEP_ASSEMBLY = pcgr_vars.VEP_ASSEMBLY
     VEP_VERSION = pcgr_vars.VEP_VERSION
     if arg_dict['genome_assembly'] == 'grch37':
-       GENCODE_VERSION = '19'
-       VEP_ASSEMBLY = 'GRCh37'
+        GENCODE_VERSION = '19'
+        VEP_ASSEMBLY = 'GRCh37'
 
     vepdb_dir = os.path.join(str(cpsr_paths['db_dir']),'.vep')
     input_vcf = 'None'
     input_customlist = 'None'
 
     if cpsr_paths['input_vcf_basename'] != 'NA':
-       input_vcf = os.path.join(cpsr_paths['input_vcf_dir'], cpsr_paths['input_vcf_basename'])
+        input_vcf = os.path.join(cpsr_paths['input_vcf_dir'], cpsr_paths['input_vcf_basename'])
     if cpsr_paths['input_customlist_basename'] != 'NA':
-       input_customlist = os.path.join(cpsr_paths['input_customlist_dir'], cpsr_paths['input_customlist_basename'])
+        input_customlist = os.path.join(cpsr_paths['input_customlist_dir'], cpsr_paths['input_customlist_basename'])
 
     data_dir = cpsr_paths['base_dir']
     output_dir = cpsr_paths['output_dir']
     vep_dir = vepdb_dir
 
+    logger = getlogger('cpsr-validate-input-arguments')
+    logger.info("STEP 0: Validate input data")
     check_subprocess(logger, f'mkdir -p {output_dir}', debug)
 
     ## CPSR|Validate input VCF - check formatting, non-overlap with CPSR INFO tags, and whether sample contains any variants in cancer predisposition loci
@@ -179,23 +175,20 @@ def run_cpsr(arg_dict, cpsr_paths):
             f'{arg_dict["sample_id"]} '
             f'{virtual_panel_id} '
             f'{diagnostic_grade_only} '
-            f'--output_dir {output_dir}'
+            f'--output_dir {output_dir} {"--debug" if debug else ""}'
             )
-    if debug:
-       vcf_validate_command  += ' --debug'
     check_subprocess(logger, vcf_validate_command, debug)
-    logger.info('Finished')
-
+    logger.info('Finished cpsr-validate-input-arguments')
+    print('----')
 
     ## CPSR|Start - log key information about run
     logger = getlogger("cpsr-start")
-    print()
     logger.info("--- Cancer Predisposition Sequencing Reporter workflow ----")
     logger.info(f"Sample name: {arg_dict['sample_id']}")
     if not input_customlist == 'None':
         logger.info(f"Virtual gene panel: custom-made list from panel 0: {input_customlist}")
     else:
-       #logger.info("Virtual gene panel(s): " + str(pcgr_vars.GE_panels[virtual_panel_id]))
+        #logger.info("Virtual gene panel(s): " + str(pcgr_vars.GE_panels[virtual_panel_id]))
         logger.info(f"Diagnostic-grade genes in virtual panels (GE PanelApp): {diagnostic_grade_set}")
     logger.info(f"Include incidental findings (ACMG recommended list v3.0): {secondary_findings_set}")
     logger.info(f"Include low to moderate cancer risk variants from genome-wide association studies: {gwas_findings_set}")
@@ -204,164 +197,164 @@ def run_cpsr(arg_dict, cpsr_paths):
 
     if not input_vcf == 'None':
 
-       ## Define input, output and temporary file names
-       pcgr_model = 'cpsr'
-       output_vcf = os.path.join(output_dir, str(arg_dict['sample_id']) + '.cpsr.' + str(arg_dict['genome_assembly']) + '.vcf.gz')
-       output_pass_vcf = os.path.join(output_dir, str(arg_dict['sample_id']) + '.cpsr.' + str(arg_dict['genome_assembly']) + '.pass.vcf.gz')
-       output_pass_tsv = os.path.join(output_dir, str(arg_dict['sample_id']) + '.cpsr.' + str(arg_dict['genome_assembly']) + '.pass.tsv')
-       input_vcf_cpsr_ready = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)','.cpsr_ready_target.vcf.gz', cpsr_paths['input_vcf_basename']))
-       input_vcf_cpsr_ready_uncompressed = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)','.cpsr_ready_target.vcf', cpsr_paths['input_vcf_basename']))
-       vep_vcf = re.sub(r'(\.vcf$|\.vcf\.gz$)','.cpsr_vep.vcf',input_vcf_cpsr_ready)
-       vep_vcfanno_vcf = re.sub(r'(\.vcf$|\.vcf\.gz$)','.cpsr_vep.vcfanno.vcf',input_vcf_cpsr_ready)
-       vep_vcfanno_annotated_vcf = re.sub(r'\.vcfanno','.vcfanno.annotated',vep_vcfanno_vcf) + '.gz'
-       vep_vcfanno_annotated_pass_vcf = re.sub(r'\.vcfanno','.vcfanno.annotated.pass',vep_vcfanno_vcf) + '.gz'
-       custom_bed = os.path.join(output_dir, str(arg_dict['sample_id']) + '.' + str(pcgr_model) + '.' + str(arg_dict['genome_assembly']) + '.custom_list.bed')
+        ## Define input, output and temporary file names
+        pcgr_model = 'cpsr'
+        output_vcf = os.path.join(output_dir, str(arg_dict['sample_id']) + '.cpsr.' + str(arg_dict['genome_assembly']) + '.vcf.gz')
+        output_pass_vcf = os.path.join(output_dir, str(arg_dict['sample_id']) + '.cpsr.' + str(arg_dict['genome_assembly']) + '.pass.vcf.gz')
+        output_pass_tsv = os.path.join(output_dir, str(arg_dict['sample_id']) + '.cpsr.' + str(arg_dict['genome_assembly']) + '.pass.tsv')
+        input_vcf_cpsr_ready = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)','.cpsr_ready_target.vcf.gz', cpsr_paths['input_vcf_basename']))
+        input_vcf_cpsr_ready_uncompressed = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)','.cpsr_ready_target.vcf', cpsr_paths['input_vcf_basename']))
+        vep_vcf = re.sub(r'(\.vcf$|\.vcf\.gz$)','.cpsr_vep.vcf',input_vcf_cpsr_ready)
+        vep_vcfanno_vcf = re.sub(r'(\.vcf$|\.vcf\.gz$)','.cpsr_vep.vcfanno.vcf',input_vcf_cpsr_ready)
+        vep_vcfanno_annotated_vcf = re.sub(r'\.vcfanno','.vcfanno.annotated',vep_vcfanno_vcf) + '.gz'
+        vep_vcfanno_annotated_pass_vcf = re.sub(r'\.vcfanno','.vcfanno.annotated.pass',vep_vcfanno_vcf) + '.gz'
+        custom_bed = os.path.join(output_dir, str(arg_dict['sample_id']) + '.' + str(pcgr_model) + '.' + str(arg_dict['genome_assembly']) + '.custom_list.bed')
 
-       ## File names for assembly-specific genome fasta files (VEP)
-       fasta_assembly = os.path.join(vep_dir, f"homo_sapiens/{VEP_VERSION}_{VEP_ASSEMBLY}/Homo_sapiens.{VEP_ASSEMBLY}.dna.primary_assembly.fa.gz")
-       ancestor_assembly = os.path.join(vep_dir, f"homo_sapiens/{VEP_VERSION}_{VEP_ASSEMBLY}/human_ancestor.fa.gz")
+        ## File names for assembly-specific genome fasta files (VEP)
+        fasta_assembly = os.path.join(vep_dir, f"homo_sapiens/{VEP_VERSION}_{VEP_ASSEMBLY}/Homo_sapiens.{VEP_ASSEMBLY}.dna.primary_assembly.fa.gz")
+        ancestor_assembly = os.path.join(vep_dir, f"homo_sapiens/{VEP_VERSION}_{VEP_ASSEMBLY}/human_ancestor.fa.gz")
 
-       ## Set all flags used in VEP run
-       plugins_in_use = "NearestExonJB, LoF"
-       vep_flags = (
-           f"--format vcf --vcf --check_ref --flag_pick_allele_gene --hgvs --dont_skip --failed 1 --af --af_1kg --af_gnomad "
-           f"--variant_class --domains --symbol --protein --ccds --uniprot --appris --biotype --canonical --cache "
-           f"--numbers --total_length --no_stats --allele_number --no_escape --xref_refseq --plugin NearestExonJB,max_range=50000"
-           )
-       vep_options = (
-           f"--pick_order {arg_dict['vep_pick_order']} --force_overwrite --buffer_size {arg_dict['vep_buffer_size']} "
-           f"--species homo_sapiens --assembly {VEP_ASSEMBLY} --offline --fork {arg_dict['vep_n_forks']} {vep_flags} --dir {vep_dir} "
-           f"--cache_version {VEP_VERSION}"
-           )
-       gencode_set_in_use = "GENCODE - all transcripts"
-       if arg_dict['vep_gencode_all'] == 0:
-          vep_options += ' --gencode_basic'
-          gencode_set_in_use = "GENCODE - basic transcript set (--gencode_basic)"
-       if arg_dict['vep_no_intergenic'] == 1:
-          vep_options = vep_options + " --no_intergenic"
-       if arg_dict['vep_regulatory'] == 1:
-          vep_options = vep_options + " --regulatory"
-       if arg_dict['genome_assembly'] == "grch38":
-          vep_options = vep_options +  " --mane"
-       loftee_dir = utils.get_loftee_dir()
-       assert os.path.isdir(loftee_dir), f'LoF VEP plugin is not found in {loftee_dir}. Please make sure you installed pcgr conda package and have corresponding conda environment active.'
-       vep_options += f" --plugin LoF,loftee_path:{loftee_dir},human_ancestor_fa:{ancestor_assembly},use_gerp_end_trunc:0 --dir_plugins {loftee_dir}"
-       if not debug:
-          vep_options += " --quiet"
+        ## Set all flags used in VEP run
+        plugins_in_use = "NearestExonJB, LoF"
+        vep_flags = (
+            f"--format vcf --vcf --check_ref --flag_pick_allele_gene --hgvs --dont_skip --failed 1 --af --af_1kg --af_gnomad "
+            f"--variant_class --domains --symbol --protein --ccds --uniprot --appris --biotype --canonical --cache "
+            f"--numbers --total_length --no_stats --allele_number --no_escape --xref_refseq --plugin NearestExonJB,max_range=50000"
+            )
+        vep_options = (
+            f"--pick_order {arg_dict['vep_pick_order']} --force_overwrite --buffer_size {arg_dict['vep_buffer_size']} "
+            f"--species homo_sapiens --assembly {VEP_ASSEMBLY} --offline --fork {arg_dict['vep_n_forks']} {vep_flags} --dir {vep_dir} "
+            f"--cache_version {VEP_VERSION}"
+            )
+        gencode_set_in_use = "GENCODE - all transcripts"
+        if arg_dict['vep_gencode_all'] == 0:
+            vep_options += ' --gencode_basic'
+            gencode_set_in_use = "GENCODE - basic transcript set (--gencode_basic)"
+        if arg_dict['vep_no_intergenic'] == 1:
+            vep_options = vep_options + " --no_intergenic"
+        if arg_dict['vep_regulatory'] == 1:
+            vep_options = vep_options + " --regulatory"
+        if arg_dict['genome_assembly'] == "grch38":
+            vep_options = vep_options +  " --mane"
+        loftee_dir = utils.get_loftee_dir()
+        assert os.path.isdir(loftee_dir), f'LoF VEP plugin is not found in {loftee_dir}. Please make sure you installed pcgr conda package and have corresponding conda environment active.'
+        vep_options += f" --plugin LoF,loftee_path:{loftee_dir},human_ancestor_fa:{ancestor_assembly},use_gerp_end_trunc:0 --dir_plugins {loftee_dir}"
+        if not debug:
+            vep_options += " --quiet"
 
-       ## Compose full VEP command
-       vep_main_command = f'{utils.get_perl_exports()} && vep --input_file {input_vcf_cpsr_ready} --output_file {vep_vcf} {vep_options} --fasta {fasta_assembly}'
-       vep_bgzip_command = f'bgzip -f {vep_vcf}'
-       vep_tabix_command = f'tabix -f -p vcf {vep_vcf}.gz'
-       logger = getlogger('cpsr-vep')
+        ## Compose full VEP command
+        vep_main_command = f'{utils.get_perl_exports()} && vep --input_file {input_vcf_cpsr_ready} --output_file {vep_vcf} {vep_options} --fasta {fasta_assembly}'
+        vep_bgzip_command = f'bgzip -f {vep_vcf}'
+        vep_tabix_command = f'tabix -f -p vcf {vep_vcf}.gz'
+        logger = getlogger('cpsr-vep')
 
-       ## CPSR|VEP - run Variant Effect Predictor on query VCF with LoF and NearestExonJB plugins
-       print()
-       logger.info(f"CPSR - STEP 1: Basic variant annotation with Variant Effect Predictor ({VEP_VERSION}, GENCODE {GENCODE_VERSION}, {arg_dict['genome_assembly']})")
-       logger.info(f"VEP configuration - one primary consequence block pr. alternative allele (--flag_pick_allele)")
-       logger.info(f"VEP configuration - transcript pick order: {arg_dict['vep_pick_order']}")
-       logger.info(f"VEP configuration - transcript pick order: See more at https://www.ensembl.org/info/docs/tools/vep/script/vep_other.html#pick_options")
-       logger.info(f"VEP configuration - GENCODE set: {gencode_set_in_use}")
-       logger.info(f"VEP configuration - skip intergenic: {arg_dict['vep_no_intergenic']}")
-       logger.info(f"VEP configuration - look for overlap with regulatory regions: {vep_regulatory}")
-       logger.info(f"VEP configuration - plugins in use: {plugins_in_use}")
-       logger.info(f"VEP configuration - buffer_size/number of forks: {arg_dict['vep_buffer_size']}/{arg_dict['vep_n_forks']}")
-       check_subprocess(logger, vep_main_command, debug)
-       check_subprocess(logger, vep_bgzip_command, debug)
-       check_subprocess(logger, vep_tabix_command, debug)
-       logger.info("Finished")
+        ## CPSR|VEP - run Variant Effect Predictor on query VCF with LoF and NearestExonJB plugins
+        logger.info(f"CPSR - STEP 1: Basic variant annotation with Variant Effect Predictor ({VEP_VERSION}, GENCODE {GENCODE_VERSION}, {arg_dict['genome_assembly']})")
+        logger.info(f"VEP configuration - one primary consequence block pr. alternative allele (--flag_pick_allele)")
+        logger.info(f"VEP configuration - transcript pick order: {arg_dict['vep_pick_order']}")
+        logger.info(f"VEP configuration - transcript pick order: See more at https://www.ensembl.org/info/docs/tools/vep/script/vep_other.html#pick_options")
+        logger.info(f"VEP configuration - GENCODE set: {gencode_set_in_use}")
+        logger.info(f"VEP configuration - skip intergenic: {arg_dict['vep_no_intergenic']}")
+        logger.info(f"VEP configuration - look for overlap with regulatory regions: {vep_regulatory}")
+        logger.info(f"VEP configuration - plugins in use: {plugins_in_use}")
+        logger.info(f"VEP configuration - buffer_size/number of forks: {arg_dict['vep_buffer_size']}/{arg_dict['vep_n_forks']}")
+        check_subprocess(logger, vep_main_command, debug)
+        check_subprocess(logger, vep_bgzip_command, debug)
+        check_subprocess(logger, vep_tabix_command, debug)
+        logger.info("Finished cpsr-vep")
+        print('----')
 
-       ## CPSR|vcfanno - run vcfanno on query VCF with a number of relevant annotated VCFs
-       print()
-       logger = getlogger('cpsr-vcfanno')
-       logger.info("STEP 2: Annotation for cancer predisposition with cpsr-vcfanno (ClinVar, CIViC, dbNSFP, dbMTS, UniProtKB, cancerhotspots.org, ncER, GERP RS scores, GWAS catalog, gnomAD non-cancer subset)")
-       pcgr_vcfanno_command = (
-               f"pcgr_vcfanno.py --num_processes {arg_dict['vcfanno_n_proc']} --dbnsfp --clinvar "
-               f"--cancer_hotspots --dbmts --ncer --gerp --civic --uniprot --gnomad_cpsr --pcgr_onco_xref "
-               f"--gwas --rmsk {vep_vcf}.gz {vep_vcfanno_vcf} {os.path.join(data_dir, 'data', str(arg_dict['genome_assembly']))}"
-               )
-       check_subprocess(logger, pcgr_vcfanno_command, debug)
-       logger.info("Finished")
+        ## CPSR|vcfanno - run vcfanno on query VCF with a number of relevant annotated VCFs
+        print()
+        logger = getlogger('cpsr-vcfanno')
+        logger.info("STEP 2: Annotation for cancer predisposition with cpsr-vcfanno (ClinVar, CIViC, dbNSFP, dbMTS, UniProtKB, cancerhotspots.org, ncER, GERP RS scores, GWAS catalog, gnomAD non-cancer subset)")
+        pcgr_vcfanno_command = (
+                f"pcgr_vcfanno.py --num_processes {arg_dict['vcfanno_n_proc']} --dbnsfp --clinvar "
+                f"--cancer_hotspots --dbmts --ncer --gerp --civic --uniprot --gnomad_cpsr --pcgr_onco_xref "
+                f"--gwas --rmsk {vep_vcf}.gz {vep_vcfanno_vcf} {os.path.join(data_dir, 'data', str(arg_dict['genome_assembly']))}"
+                )
+        check_subprocess(logger, pcgr_vcfanno_command, debug)
+        logger.info("Finished")
 
-       ## CPSR|summarise - expand annotations with separate VCF INFO tags
-       print()
-       logger = getlogger("cpsr-summarise")
-       pcgr_summarise_command = (
-               f'pcgr_summarise.py {vep_vcfanno_vcf}.gz 0 {vep_regulatory} '
-               f'{os.path.join(data_dir, "data", arg_dict["genome_assembly"])} '
-               f'--cpsr'
-               )
-       if debug:
-          pcgr_summarise_command  += ' --debug'
-       logger.info("STEP 3: Cancer gene annotations with cpsr-summarise")
-       check_subprocess(logger, pcgr_summarise_command, debug)
+        ## CPSR|summarise - expand annotations with separate VCF INFO tags
+        print()
+        logger = getlogger("cpsr-summarise")
+        pcgr_summarise_command = (
+                f'pcgr_summarise.py {vep_vcfanno_vcf}.gz 0 {vep_regulatory} '
+                f'{os.path.join(data_dir, "data", arg_dict["genome_assembly"])} '
+                f'--cpsr'
+                )
+        if debug:
+            pcgr_summarise_command  += ' --debug'
+        logger.info("STEP 3: Cancer gene annotations with cpsr-summarise")
+        check_subprocess(logger, pcgr_summarise_command, debug)
 
-       ## CPSR|clean - rename output files, remove temporary files
-       create_output_vcf_command1 = f'mv {vep_vcfanno_annotated_vcf} {output_vcf}'
-       create_output_vcf_command2 = f'mv {vep_vcfanno_annotated_vcf}.tbi {output_vcf}.tbi'
-       create_output_vcf_command3 = f'mv {vep_vcfanno_annotated_pass_vcf} {output_pass_vcf}'
-       create_output_vcf_command4 = f'mv {vep_vcfanno_annotated_pass_vcf}.tbi {output_pass_vcf}.tbi'
-       # TODO: use 'os.remove()' instead of 'rm -f'
-       clean_command = f'rm -f {vep_vcf}* {vep_vcfanno_annotated_vcf} {vep_vcfanno_annotated_pass_vcf}* {vep_vcfanno_vcf}* {input_vcf_cpsr_ready_uncompressed}*'
-       check_subprocess(logger, create_output_vcf_command1, debug)
-       check_subprocess(logger, create_output_vcf_command2, debug)
-       check_subprocess(logger, create_output_vcf_command3, debug)
-       check_subprocess(logger, create_output_vcf_command4, debug)
+        ## CPSR|clean - rename output files, remove temporary files
+        create_output_vcf_command1 = f'mv {vep_vcfanno_annotated_vcf} {output_vcf}'
+        create_output_vcf_command2 = f'mv {vep_vcfanno_annotated_vcf}.tbi {output_vcf}.tbi'
+        create_output_vcf_command3 = f'mv {vep_vcfanno_annotated_pass_vcf} {output_pass_vcf}'
+        create_output_vcf_command4 = f'mv {vep_vcfanno_annotated_pass_vcf}.tbi {output_pass_vcf}.tbi'
+        # TODO: use 'os.remove()' instead of 'rm -f'
+        clean_command = f'rm -f {vep_vcf}* {vep_vcfanno_annotated_vcf} {vep_vcfanno_annotated_pass_vcf}* {vep_vcfanno_vcf}* {input_vcf_cpsr_ready_uncompressed}*'
+        check_subprocess(logger, create_output_vcf_command1, debug)
+        check_subprocess(logger, create_output_vcf_command2, debug)
+        check_subprocess(logger, create_output_vcf_command3, debug)
+        check_subprocess(logger, create_output_vcf_command4, debug)
 
-       ## CPSR|vcf2tsv - perform vcf2tsv conversion on the final annotated VCF file
-       cpsr_vcf2tsv_command = f"vcf2tsv.py {output_pass_vcf} --compress {output_pass_tsv}"
-       logger.info("Converting VCF to TSV with https://github.com/sigven/vcf2tsv")
-       check_subprocess(logger, cpsr_vcf2tsv_command, debug)
-       if not debug:
-          check_subprocess(logger, clean_command, debug)
-       logger.info("Finished")
+        ## CPSR|vcf2tsv - perform vcf2tsv conversion on the final annotated VCF file
+        cpsr_vcf2tsv_command = f"vcf2tsv.py {output_pass_vcf} --compress {output_pass_tsv}"
+        logger.info("Converting VCF to TSV with https://github.com/sigven/vcf2tsv")
+        check_subprocess(logger, cpsr_vcf2tsv_command, debug)
+        if not debug:
+            check_subprocess(logger, clean_command, debug)
+        logger.info("Finished")
 
 
     print()
 
     ## Generation of HTML reports for VEP/vcfanno-annotated VCF file
     if not arg_dict['basic']:
-       logger = getlogger('cpsr-writer')
-       logger.info("STEP 4: Generation of output files - Cancer predisposition sequencing report")
+        logger = getlogger('cpsr-writer')
+        logger.info("STEP 4: Generation of output files - Cancer predisposition sequencing report")
 
-       # export PATH to R conda env Rscript
-       rscript = utils.script_path('pcgrr', 'bin/Rscript')
-       cpsrr_script = utils.script_path('pcgr', 'bin/cpsr.R')
-       cpsr_report_command = (
-               f"{rscript} {cpsrr_script} "
-               f"{output_dir} "
-               f"{output_pass_tsv}.gz "
-               f"{arg_dict['sample_id']} "
-               f"{pcgr_vars.PCGR_VERSION} "
-               f"{pcgr_vars.DB_VERSION} "
-               f"{arg_dict['genome_assembly']} "
-               f"{data_dir} "
-               f"{virtual_panel_id} "
-               f"{preserved_info_tags} "
-               f"{custom_bed} "
-               f"{arg_dict['custom_list_name']} "
-               f"{arg_dict['report_theme']} "
-               f"{arg_dict['report_table_display']} "
-               f"{report_nonfloating_toc} "
-               f"{gwas_findings} "
-               f"{arg_dict['gwas_p_value']} "
-               f"{arg_dict['pop_gnomad']} "
-               f"{arg_dict['maf_upper_threshold']} "
-               f"{arg_dict['vep_pick_order']} "
-               f"{arg_dict['vep_n_forks']} "
-               f"{arg_dict['vep_buffer_size']} "
-               f"{arg_dict['vep_gencode_all']} "
-               f"{vep_no_intergenic} "
-               f"{vep_regulatory} "
-               f"{secondary_findings} "
-               f"{classify_all} "
-               f"{ignore_noncoding} "
-               f"{clinvar_ignore_noncancer} "
-               f"{diagnostic_grade_only}"
-          )
+        # export PATH to R conda env Rscript
+        rscript = utils.script_path('pcgrr', 'bin/Rscript')
+        cpsrr_script = utils.script_path('pcgr', 'bin/cpsr.R')
+        cpsr_report_command = (
+                f"{rscript} {cpsrr_script} "
+                f"{output_dir} "
+                f"{output_pass_tsv}.gz "
+                f"{arg_dict['sample_id']} "
+                f"{pcgr_vars.PCGR_VERSION} "
+                f"{pcgr_vars.DB_VERSION} "
+                f"{arg_dict['genome_assembly']} "
+                f"{data_dir} "
+                f"{virtual_panel_id} "
+                f"{preserved_info_tags} "
+                f"{custom_bed} "
+                f"{arg_dict['custom_list_name']} "
+                f"{arg_dict['report_theme']} "
+                f"{arg_dict['report_table_display']} "
+                f"{report_nonfloating_toc} "
+                f"{gwas_findings} "
+                f"{arg_dict['gwas_p_value']} "
+                f"{arg_dict['pop_gnomad']} "
+                f"{arg_dict['maf_upper_threshold']} "
+                f"{arg_dict['vep_pick_order']} "
+                f"{arg_dict['vep_n_forks']} "
+                f"{arg_dict['vep_buffer_size']} "
+                f"{arg_dict['vep_gencode_all']} "
+                f"{vep_no_intergenic} "
+                f"{vep_regulatory} "
+                f"{secondary_findings} "
+                f"{classify_all} "
+                f"{ignore_noncoding} "
+                f"{clinvar_ignore_noncancer} "
+                f"{diagnostic_grade_only}"
+           )
 
-       check_subprocess(logger, cpsr_report_command, debug)
-       logger.info("Finished")
+        check_subprocess(logger, cpsr_report_command, debug)
+        logger.info("Finished")
 
 
 if __name__=="__main__":

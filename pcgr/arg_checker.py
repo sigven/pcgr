@@ -10,25 +10,24 @@ def check_args(arg_dict):
 
     logger = getlogger("pcgr-validate-arguments-input-a")
     # Check the existence of required arguments
-    help_msg = 'Type pcgr.py --help to view all options and required arguments'
     if arg_dict['pcgr_dir'] is None or not os.path.exists(arg_dict['pcgr_dir']):
-        err_msg = f"Required argument '--pcgr_dir' does not exist ({arg_dict['pcgr_dir']}). {help_msg}"
+        err_msg = f"Required argument '--pcgr_dir' does not exist ({arg_dict['pcgr_dir']})."
         error_message(err_msg, logger)
 
     if arg_dict['output_dir'] is None or not os.path.exists(arg_dict['output_dir']):
-        err_msg = f"Required argument '--output_dir' does not exist ({arg_dict['output_dir']}). {help_msg}"
+        err_msg = f"Required argument '--output_dir' does not exist ({arg_dict['output_dir']})."
         error_message(err_msg, logger)
 
     if arg_dict['genome_assembly'] is None:
-        err_msg = f"Required argument '--genome_assembly' has no/undefined value ({arg_dict['genome_assembly']}). {help_msg}"
+        err_msg = f"Required argument '--genome_assembly' has no/undefined value ({arg_dict['genome_assembly']})."
         error_message(err_msg, logger)
 
     if arg_dict['input_vcf'] is None:
-        err_msg = f"Required argument '--input_vcf' does not exist ({arg_dict['input_vcf']}). {help_msg}"
+        err_msg = f"Required argument '--input_vcf' does not exist ({arg_dict['input_vcf']})."
         error_message(err_msg, logger)
 
     if arg_dict['sample_id'] is None:
-        err_msg = f"Required argument '--sample_id' has no/undefined value ({arg_dict['sample_id']}). {help_msg}"
+        err_msg = f"Required argument '--sample_id' has no/undefined value ({arg_dict['sample_id']})."
         error_message(err_msg, logger)
 
     if len(arg_dict['sample_id']) <= 2 or len(arg_dict['sample_id']) > 35:
@@ -432,206 +431,201 @@ def verify_input_files(arg_dict):
 
 ##---- CPSR ----##
 
-def check_args_cpsr(arg_dict, logger):
+def check_args_cpsr(arg_dict):
+
+    logger = getlogger('cpsr-validate-input-arguments-a')
     arg_dict['vep_regulatory'] = True
     ## Required arguments
     ## Check that query VCF is set and exists
     if arg_dict['input_vcf'] is None or not os.path.exists(arg_dict['input_vcf']):
-       err_msg = f"Required argument '--input_vcf' does not exist ({arg_dict['input_vcf']})."
-       error_message(err_msg,logger)
-
+        err_msg = f"Required argument '--input_vcf' does not exist ({arg_dict['input_vcf']})."
+        error_message(err_msg,logger)
     ## Check that PCGR directory (with data bundle) is provided and exists
     if arg_dict['pcgr_dir'] is None or not os.path.exists(arg_dict['pcgr_dir']):
-       err_msg = f"Required argument '--pcgr_dir' does not exist ({arg_dict['pcgr_dir']})."
-       error_message(err_msg,logger)
-
+        err_msg = f"Required argument '--pcgr_dir' does not exist ({arg_dict['pcgr_dir']})."
+        error_message(err_msg,logger)
     ## Check that output directory is provided and exists
     if arg_dict['output_dir'] is None or not os.path.exists(arg_dict['output_dir']):
-       err_msg = f"Required argument '--output_dir' does not exist ({arg_dict['output_dir']})."
-       error_message(err_msg,logger)
-
+        err_msg = f"Required argument '--output_dir' does not exist ({arg_dict['output_dir']})."
+        error_message(err_msg,logger)
     ## Check that genome assembly is set
     if arg_dict['genome_assembly'] is None:
-       err_msg = f"Required argument '--genome_assembly' has no/undefined value ({arg_dict['genome_assembly']})."
-       error_message(err_msg,logger)
-
+        err_msg = f"Required argument '--genome_assembly' has no/undefined value ({arg_dict['genome_assembly']})."
+        error_message(err_msg,logger)
     ## Check that sample identifier is set and is of appropriate length (minimum two characters)
     if arg_dict['sample_id'] is None:
-       err_msg = f"Required argument '--sample_id' has no/undefined value ({arg_dict['sample_id']})."
-       error_message(err_msg,logger)
+        err_msg = f"Required argument '--sample_id' has no/undefined value ({arg_dict['sample_id']})."
+        error_message(err_msg,logger)
 
     if len(arg_dict['sample_id']) <= 2:
-       err_msg = f"Sample name identifier ('--sample_id') requires a name with more than two characters ({arg_dict['sample_id']})."
-       error_message(err_msg,logger)
+        err_msg = f"Sample name identifier ('--sample_id') requires a name with more than two characters ({arg_dict['sample_id']})."
+        error_message(err_msg,logger)
 
     ### Optional arguments
     ## Provide virtual_panel_id or a custom list from panel 0
     if arg_dict['virtual_panel_id'] == "-1" and not arg_dict['custom_list']:
-       err_msg = 'Provide valid virtual panel identifier(s) through --panel_id (0 - 42) or provide custom list of panel 0 genes (single column text file) through --custom_list'
-       error_message(err_msg,logger)
-
+        err_msg = 'Provide valid virtual panel identifier(s) through --panel_id (0 - 42) or provide custom list of panel 0 genes (single column text file) through --custom_list'
+        error_message(err_msg,logger)
     if arg_dict['custom_list'] and arg_dict['virtual_panel_id'] != "-1":
-       err_msg =  "Option --panel_id cannot be used in conjunction with --custom_list"
-       error_message(err_msg, logger)
-
+        err_msg =  "Option --panel_id cannot be used in conjunction with --custom_list"
+        error_message(err_msg, logger)
     if arg_dict['maf_upper_threshold'] <= 0 or arg_dict['maf_upper_threshold'] > 1:
-       err_msg = f"MAF upper threshold must be greater than 0 and below 1, current value is {arg_dict['maf_upper_threshold']}"
-       error_message(err_msg,logger)
-
+        err_msg = f"MAF upper threshold must be greater than 0 and below 1, current value is {arg_dict['maf_upper_threshold']}"
+        error_message(err_msg,logger)
     if arg_dict['vcfanno_n_proc'] <= 0 or arg_dict['vcfanno_n_proc'] > 15:
-       err_msg = f"Number of processes that vcfanno can use during annotation must be above 0 and not more than 15, current value is {arg_dict['vcfanno_n_proc']}."
-       error_message(err_msg,logger)
-
+        err_msg = f"Number of processes that vcfanno can use during annotation must be above 0 and not more than 15, current value is {arg_dict['vcfanno_n_proc']}."
+        error_message(err_msg,logger)
 
     ## Check that panel identifier(s) are set appropriately
     if arg_dict['virtual_panel_id'] != "-1" and not arg_dict['custom_list']:
-       if not ',' in arg_dict['virtual_panel_id']:
-          if str(arg_dict['virtual_panel_id']).isdigit():
-             panel_id = int(arg_dict['virtual_panel_id'])
-             if not (panel_id >= 0 and panel_id <= 42):
-                err_msg =  'A single panel chosen with \'--panel_id\' must be in the range 0 - 42'
+        if not ',' in arg_dict['virtual_panel_id']:
+            if str(arg_dict['virtual_panel_id']).isdigit():
+                panel_id = int(arg_dict['virtual_panel_id'])
+                if not (panel_id >= 0 and panel_id <= 42):
+                    err_msg =  'A single panel chosen with \'--panel_id\' must be in the range 0 - 42'
+                    error_message(err_msg, logger)
+            else:
+                err_msg =  'A single panel chosen with \'--panel_id\' must be a proper integer - not \'' + str(arg_dict['virtual_panel_id']) + '\''
                 error_message(err_msg, logger)
-          else:
-             err_msg =  'A single panel chosen with \'--panel_id\' must be a proper integer - not \'' + str(arg_dict['virtual_panel_id']) + '\''
-             error_message(err_msg, logger)
-       else:
-          panels = str(arg_dict['virtual_panel_id']).split(',')
-          for p in panels:
-             #p = int(p)
-             if str(p).isdigit():
-                panel_id = int(p)
-                if panel_id < 1 or panel_id > 42:
-                   err_msg =  'Multiple panels submitted as comma-separated string with \'--panel_id\' must take values in the range 1 - 42'
-                   error_message(err_msg, logger)
-             else:
-                err_msg =  f"Multiple panels submitted as comma-separated string with '--panel_id' must contain proper integer values only - \'{arg_dict['virtual_panel_id']}\' contains non-integer entries."
-                error_message(err_msg, logger)
+        else:
+            panels = str(arg_dict['virtual_panel_id']).split(',')
+            for p in panels:
+                #p = int(p)
+                if str(p).isdigit():
+                    panel_id = int(p)
+                    if panel_id < 1 or panel_id > 42:
+                        err_msg =  'Multiple panels submitted as comma-separated string with \'--panel_id\' must take values in the range 1 - 42'
+                        error_message(err_msg, logger)
+                else:
+                    err_msg =  f"Multiple panels submitted as comma-separated string with '--panel_id' must contain proper integer values only - \'{arg_dict['virtual_panel_id']}\' contains non-integer entries."
+                    error_message(err_msg, logger)
 
 
     if (arg_dict['custom_list'] or arg_dict['virtual_panel_id'] == "0" ) and arg_dict['diagnostic_grade_only']:
-       warn_msg = 'Option \'--diagnostic_grade_only\' applies ONLY to panel identifiers from Genomics England PanelApp - will be ignored'
-       warn_message(warn_msg, logger)
+        warn_msg = 'Option \'--diagnostic_grade_only\' applies ONLY to panel identifiers from Genomics England PanelApp - will be ignored'
+        warn_message(warn_msg, logger)
 
     ## VEP options
     if arg_dict['vep_n_forks'] <= 0 or arg_dict['vep_n_forks'] > 4:
-       err_msg = f"Number of forks that VEP can use during annotation must be above 0 and not more than 4, current value is {arg_dict['vep_n_forks']}"
-       error_message(err_msg,logger)
+        err_msg = f"Number of forks that VEP can use during annotation must be above 0 and not more than 4, current value is {arg_dict['vep_n_forks']}"
+        error_message(err_msg,logger)
 
     if arg_dict['vep_buffer_size'] <= 0 or arg_dict['vep_buffer_size'] > 30000:
-       err_msg = "Internal VEP buffer size, corresponding to the number of variants that are read in to memory simultaneously, must be above 0 and not more than 30,000, current value is {arg_dict['vep_buffer_size']}"
-       error_message(err_msg,logger)
+        err_msg = "Internal VEP buffer size, corresponding to the number of variants that are read in to memory simultaneously, must be above 0 and not more than 30,000, current value is {arg_dict['vep_buffer_size']}"
+        error_message(err_msg,logger)
 
     ## Check that VEP pick criteria is formatted correctly
     if not arg_dict['vep_pick_order'] is None:
-       values = str(arg_dict['vep_pick_order']).split(',')
-       permitted_sources = ['canonical','appris','tsl','biotype','ccds','rank','length','mane']
-       num_permitted_sources = 0
-       for v in values:
-          if v in permitted_sources:
-             num_permitted_sources += 1
+        values = str(arg_dict['vep_pick_order']).split(',')
+        permitted_sources = ['canonical','appris','tsl','biotype','ccds','rank','length','mane']
+        num_permitted_sources = 0
+        for v in values:
+            if v in permitted_sources:
+                num_permitted_sources += 1
 
-       if num_permitted_sources != 8:
-          err_msg = "Option 'vep_pick_order' = " + str(arg_dict['vep_pick_order']) + " is formatted incorrectly, should be " + \
-             "a comma-separated string of the following values: canonical,appris,tsl,biotype,ccds,rank,length,mane"
-          error_message(err_msg, logger)
+        if num_permitted_sources != 8:
+            err_msg = "Option 'vep_pick_order' = " + str(arg_dict['vep_pick_order']) + " is formatted incorrectly, should be " + \
+               "a comma-separated string of the following values: canonical,appris,tsl,biotype,ccds,rank,length,mane"
+            error_message(err_msg, logger)
     return
 
 
-def verify_input_files_cpsr(arg_dict, logger):
+def verify_input_files_cpsr(arg_dict):
 
-   input_vcf_dir = "NA"
-   db_dir = "NA"
-   base_dir = "NA"
-   output_dir_full = "NA"
-   input_vcf_basename = "NA"
-   input_customlist_basename = "NA"
-   input_customlist_dir = "NA"
+    logger = getlogger('cpsr-validate-input-arguments-b')
+    input_vcf_dir = "NA"
+    db_dir = "NA"
+    base_dir = "NA"
+    output_dir_full = "NA"
+    input_vcf_basename = "NA"
+    input_customlist_basename = "NA"
+    input_customlist_dir = "NA"
 
-   ## check the existence of given output folder
-   output_dir_full = os.path.abspath(arg_dict['output_dir'])
-   if not os.path.isdir(output_dir_full):
-      err_msg = "Output directory (" + str(output_dir_full) + ") does not exist"
-      error_message(err_msg,logger)
+    ## check the existence of given output folder
+    output_dir_full = os.path.abspath(arg_dict['output_dir'])
+    if not os.path.isdir(output_dir_full):
+        err_msg = f"Output directory ({output_dir_full}) does not exist"
+        error_message(err_msg,logger)
 
-   ## check if input BED exist
-   if not arg_dict['custom_list'] is None:
-      if not os.path.exists(os.path.abspath(arg_dict['custom_list'])):
-         err_msg = "Input file (" + str(arg_dict['custom_list']) + ") does not exist"
-         error_message(err_msg,logger)
-
-      input_customlist_basename = os.path.basename(str(arg_dict['custom_list']))
-      input_customlist_dir = os.path.dirname(os.path.abspath(arg_dict['custom_list']))
-
-   ## check if input vcf exist
-   if not arg_dict['input_vcf'] is None:
-      if not os.path.exists(os.path.abspath(arg_dict['input_vcf'])):
-         err_msg = "Input file (" + str(arg_dict['input_vcf']) + ") does not exist"
-         error_message(err_msg,logger)
-
-      if not (os.path.abspath(arg_dict['input_vcf']).endswith('.vcf') or os.path.abspath(arg_dict['input_vcf']).endswith('.vcf.gz')):
-         err_msg = "VCF input file (" + os.path.abspath(arg_dict['input_vcf']) + ") does not have the correct file extension (.vcf or .vcf.gz)"
-         error_message(err_msg,logger)
-
-      ## check that tabix file exist if bgzipped files is given
-      if os.path.abspath(arg_dict['input_vcf']).endswith('.vcf.gz'):
-         tabix_file = arg_dict['input_vcf'] + '.tbi'
-         if not os.path.exists(os.path.abspath(tabix_file)):
-            err_msg = "Tabix file (i.e. '.gz.tbi') is not present for the bgzipped VCF input file (" + os.path.abspath(arg_dict['input_vcf']) + "). Please make sure your input VCF is properly compressed and indexed (bgzip + tabix)"
+    ## check if input BED exist
+    if not arg_dict['custom_list'] is None:
+        if not os.path.exists(os.path.abspath(arg_dict['custom_list'])):
+            err_msg = f"Input file ({arg_dict['custom_list']}) does not exist"
             error_message(err_msg,logger)
 
-      input_vcf_basename = os.path.basename(str(arg_dict['input_vcf']))
-      input_vcf_dir = os.path.dirname(os.path.abspath(arg_dict['input_vcf']))
+        input_customlist_basename = os.path.basename(str(arg_dict['custom_list']))
+        input_customlist_dir = os.path.dirname(os.path.abspath(arg_dict['custom_list']))
 
-      ## if output vcf exist and overwrite not set
-      output_vcf = os.path.join(str(output_dir_full),str(arg_dict['sample_id'])) + '.cpsr.' + str(arg_dict['genome_assembly']) + '.vcf.gz'
-      if os.path.exists(output_vcf) and arg_dict['force_overwrite'] is False:
-         err_msg = "Output files (e.g. " + str(output_vcf) + ") already exist - please specify different sample_id or add option --force_overwrite"
-         error_message(err_msg,logger)
+    ## check if input vcf exist
+    if not arg_dict['input_vcf'] is None:
+        if not os.path.exists(os.path.abspath(arg_dict['input_vcf'])):
+            err_msg = f"Input file ({arg_dict['input_vcf']}) does not exist"
+            error_message(err_msg,logger)
 
-   ## check the existence of base folder
-   base_dir = os.path.abspath(arg_dict['pcgr_dir'])
-   if not os.path.isdir(base_dir):
-      err_msg = "Base directory (" + str(base_dir) + ") does not exist"
-      error_message(err_msg,logger)
+        if not (os.path.abspath(arg_dict['input_vcf']).endswith('.vcf') or os.path.abspath(arg_dict['input_vcf']).endswith('.vcf.gz')):
+            err_msg = f"VCF input file ({os.path.abspath(arg_dict['input_vcf'])}) does not have the correct file extension (.vcf or .vcf.gz)"
+            error_message(err_msg,logger)
 
-   ## check the existence of data folder within the base folder
-   db_dir = os.path.join(os.path.abspath(arg_dict['pcgr_dir']),'data')
-   if not os.path.isdir(db_dir):
-      err_msg = "Data directory (" + str(db_dir) + ") does not exist"
-      error_message(err_msg,logger)
+        ## check that tabix file exist if bgzipped files is given
+        if os.path.abspath(arg_dict['input_vcf']).endswith('.vcf.gz'):
+            tabix_file = arg_dict['input_vcf'] + '.tbi'
+            if not os.path.exists(os.path.abspath(tabix_file)):
+                err_msg = "Tabix file (i.e. '.gz.tbi') is not present for the bgzipped VCF input file (" + os.path.abspath(arg_dict['input_vcf']) + "). Please make sure your input VCF is properly compressed and indexed (bgzip + tabix)"
+                error_message(err_msg,logger)
 
-   ## check the existence of specified assembly data folder within the base folder
-   db_assembly_dir = os.path.join(os.path.abspath(arg_dict['pcgr_dir']),'data',arg_dict['genome_assembly'])
-   if not os.path.isdir(db_assembly_dir):
-      err_msg = "Data directory for the specified genome assembly (" + str(db_assembly_dir) + ") does not exist"
-      error_message(err_msg,logger)
+        input_vcf_basename = os.path.basename(str(arg_dict['input_vcf']))
+        input_vcf_dir = os.path.dirname(os.path.abspath(arg_dict['input_vcf']))
 
-   ## check the existence of RELEASE_NOTES
-   rel_notes_file = os.path.join(os.path.abspath(arg_dict['pcgr_dir']),'data',arg_dict['genome_assembly'],'RELEASE_NOTES')
-   if not os.path.exists(rel_notes_file):
-      err_msg = 'The PCGR data bundle is outdated - please download the latest data bundle (see github.com/sigven/cpsr for instructions)'
-      error_message(err_msg,logger)
+        ## if output vcf exist and overwrite not set
+        output_vcf = os.path.join(str(output_dir_full), str(arg_dict['sample_id'])) + '.cpsr.' + str(arg_dict['genome_assembly']) + '.vcf.gz'
+        if os.path.exists(output_vcf) and arg_dict['force_overwrite'] is False:
+            err_msg = f"Output files (e.g. {output_vcf}) already exist - please specify different sample_id or add option --force_overwrite"
+            error_message(err_msg,logger)
 
-   f_rel_not = open(rel_notes_file,'r')
-   compliant_data_bundle = 0
-   for line in f_rel_not:
-      if pcgr_vars.DB_VERSION in line:
-         compliant_data_bundle = 1
+    ## check the existence of base folder
+    base_dir = os.path.abspath(arg_dict['pcgr_dir'])
+    if not os.path.isdir(base_dir):
+        err_msg = f"Base directory ({base_dir}) does not exist"
+        error_message(err_msg,logger)
 
-   f_rel_not.close()
+    ## check the existence of data folder within the base folder
+    db_dir = os.path.join(os.path.abspath(arg_dict['pcgr_dir']), 'data')
+    if not os.path.isdir(db_dir):
+        err_msg = f"Data directory ({db_dir}) does not exist"
+        error_message(err_msg,logger)
 
-   if compliant_data_bundle == 0:
-      err_msg = 'The PCGR data bundle is not compliant with the software version - please download the latest software and data bundle (see https://github.com/sigven/cpsr for instructions)'
-      error_message(err_msg,logger)
+    ## check the existence of specified assembly data folder within the base folder
+    db_assembly_dir = os.path.join(os.path.abspath(arg_dict['pcgr_dir']), 'data', arg_dict['genome_assembly'])
+    if not os.path.isdir(db_assembly_dir):
+        err_msg = f"Data directory for the specified genome assembly ({db_assembly_dir}) does not exist"
+        error_message(err_msg,logger)
 
-   cpsr_paths = {
-     "input_vcf_dir": input_vcf_dir,
-     "input_customlist_dir": input_customlist_dir,
-     "db_dir": db_assembly_dir,
-     "base_dir": base_dir,
-     "output_dir": output_dir_full,
-     "input_vcf_basename": input_vcf_basename,
-     "input_customlist_basename": input_customlist_basename,
-   }
+    ## check the existence of RELEASE_NOTES
+    rel_notes_file = os.path.join(os.path.abspath(arg_dict['pcgr_dir']), 'data', arg_dict['genome_assembly'],'RELEASE_NOTES')
+    if not os.path.exists(rel_notes_file):
+        err_msg = 'The PCGR data bundle is outdated - please download the latest data bundle (see github.com/sigven/cpsr for instructions)'
+        error_message(err_msg,logger)
 
-   return cpsr_paths
+    f_rel_not = open(rel_notes_file,'r')
+    compliant_data_bundle = 0
+    for line in f_rel_not:
+        if pcgr_vars.DB_VERSION in line:
+            compliant_data_bundle = 1
+
+    f_rel_not.close()
+
+    if compliant_data_bundle == 0:
+        err_msg = 'The PCGR data bundle is not compliant with the software version - please download the latest software and data bundle (see https://github.com/sigven/cpsr for instructions)'
+        error_message(err_msg,logger)
+
+    cpsr_paths = {
+            "input_vcf_dir": input_vcf_dir,
+            "input_customlist_dir": input_customlist_dir,
+            "db_dir": db_assembly_dir,
+            "base_dir": base_dir,
+            "output_dir": output_dir_full,
+            "input_vcf_basename": input_vcf_basename,
+            "input_customlist_basename": input_customlist_basename,
+            }
+
+    return cpsr_paths
