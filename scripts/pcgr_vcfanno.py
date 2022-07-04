@@ -1,12 +1,9 @@
 #!/usr/bin/env python
 
 import argparse
-import subprocess
-from cyvcf2 import VCF
+import cyvcf2
 import random
-import os
 import re
-import sys
 from pcgr import utils
 from pcgr.utils import check_subprocess
 
@@ -239,7 +236,7 @@ def append_to_conf_file(datasource, datasource_info_tags, pcgr_db_directory, con
     return
 
 def get_vcf_info_tags(vcffile):
-    vcf = VCF(vcffile)
+    vcf = cyvcf2.VCF(vcffile)
     info_tags = {}
     for e in vcf.header_iter():
         header_element = e.info()

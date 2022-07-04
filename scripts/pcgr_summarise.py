@@ -3,10 +3,8 @@
 import csv
 import re
 import argparse
-from cyvcf2 import VCF, Writer
-import gzip
+import cyvcf2
 import os
-import subprocess
 import annoutils
 from pcgr import utils
 from pcgr.utils import error_message, check_subprocess
@@ -42,9 +40,9 @@ def extend_vcf_annotations(query_vcf, pcgr_db_directory, logger, pon_annotation,
     """
 
     ## read VEP and PCGR tags to be appended to VCF file
-    vcf_infotags_meta = annoutils.read_infotag_file(os.path.join(pcgr_db_directory,'pcgr_infotags.tsv'))
+    vcf_infotags_meta = annoutils.read_infotag_file(os.path.join(pcgr_db_directory, 'pcgr_infotags.tsv'))
     if cpsr is True:
-        vcf_infotags_meta = annoutils.read_infotag_file(os.path.join(pcgr_db_directory,'cpsr_infotags.tsv'))
+        vcf_infotags_meta = annoutils.read_infotag_file(os.path.join(pcgr_db_directory, 'cpsr_infotags.tsv'))
     pcgr_onco_xref_map = annoutils.read_genexref_namemap(os.path.join(pcgr_db_directory, 'pcgr_onco_xref', 'pcgr_onco_xref_namemap.tsv'))
 
 
@@ -53,7 +51,7 @@ def extend_vcf_annotations(query_vcf, pcgr_db_directory, logger, pon_annotation,
     meta_vep_dbnsfp_info = annoutils.vep_dbnsfp_meta_vcf(query_vcf, vcf_infotags_meta)
     dbnsfp_prediction_algorithms = meta_vep_dbnsfp_info['dbnsfp_prediction_algorithms']
     vep_csq_fields_map = meta_vep_dbnsfp_info['vep_csq_fieldmap']
-    vcf = VCF(query_vcf)
+    vcf = cyvcf2.VCF(query_vcf)
     for tag in sorted(vcf_infotags_meta):
         if pon_annotation == 0 and regulatory_annotation == 0:
             if not tag.startswith('PANEL_OF_NORMALS') and not tag.startswith('REGULATORY_'):
@@ -67,7 +65,7 @@ def extend_vcf_annotations(query_vcf, pcgr_db_directory, logger, pon_annotation,
         else:
             vcf.add_info_to_header({'ID': tag, 'Description': str(vcf_infotags_meta[tag]['description']),'Type':str(vcf_infotags_meta[tag]['type']), 'Number': str(vcf_infotags_meta[tag]['number'])})
 
-    w = Writer(out_vcf, vcf)
+    w = cyvcf2.Writer(out_vcf, vcf)
     current_chrom = None
     num_chromosome_records_processed = 0
 
@@ -79,6 +77,7 @@ def extend_vcf_annotations(query_vcf, pcgr_db_directory, logger, pon_annotation,
             fieldtype = str(header_element['Type'])
             vcf_info_element_types[identifier] = fieldtype
 
+    vars_no_csq = list()
     for rec in vcf:
         if current_chrom is None:
             current_chrom = str(rec.CHROM)
@@ -93,7 +92,7 @@ def extend_vcf_annotations(query_vcf, pcgr_db_directory, logger, pon_annotation,
             alt_allele = ','.join(rec.ALT)
             pos = rec.start + 1
             variant_id = f"g.{rec.CHROM}:{pos}{rec.REF}>{alt_allele}"
-            logger.warning(f"Variant record {variant_id} has no CSQ tag from VEP (--vep_no_intergenic flag set?)  - skipping variant")
+            vars_no_csq.append(variant_id)
             continue
 
         num_chromosome_records_processed += 1
@@ -126,6 +125,11 @@ def extend_vcf_annotations(query_vcf, pcgr_db_directory, logger, pon_annotation,
             annoutils.map_variant_effect_predictors(rec, dbnsfp_prediction_algorithms)
 
         w.write_record(rec)
+    if vars_no_csq:
+        logger.warning(f"The following {len(vars_no_csq)} records do not have a CSQ tag from VEP (was --vep_no_intergenic flag set?) - skipping these variants:")
+        print('----')
+        print(', '.join(vars_no_csq))
+        print('----')
     w.close()
     if current_chrom is not None:
         logger.info(f"Completed summary of functional annotations for {num_chromosome_records_processed} variants on chr{current_chrom}")
