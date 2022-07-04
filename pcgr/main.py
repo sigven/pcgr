@@ -201,7 +201,7 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
     output_dir = pcgr_paths['output_dir']
     vep_dir = vepdb_dir
 
-    check_subprocess(logger, f'mkdir -p {output_dir}', debug=False)
+    check_subprocess(logger, f'mkdir -p {output_dir}', debug)
     # PCGR|validate_input - verify that VCF and CNA segment file is of appropriate format
     logger = getlogger("pcgr-validate-arguments-input")
     logger.info("PCGR - STEP 0: Validate input data and options")
@@ -305,8 +305,8 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
         logger.info(f'VEP configuration - buffer_size/number of forks: {arg_dict["vep_buffer_size"]}/{arg_dict["vep_n_forks"]}')
 
         check_subprocess(logger, vep_main_command, debug)
-        check_subprocess(logger, vep_bgzip_command, debug=False)
-        check_subprocess(logger, vep_tabix_command, debug=False)
+        check_subprocess(logger, vep_bgzip_command, debug)
+        check_subprocess(logger, vep_tabix_command, debug)
         logger.info('Finished pcgr-vep')
         print('----')
 
@@ -321,7 +321,7 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
                     )
             clean_vcf2maf_command = f'rm -f {output_vcf2maf_log} ' + re.sub(r'(\.vcf$)', '.vep.vcf', input_vcf_pcgr_ready_uncompressed)
             check_subprocess(logger, vcf2maf_command, debug)
-            check_subprocess(logger, clean_vcf2maf_command, debug=False)
+            check_subprocess(logger, clean_vcf2maf_command, debug)
             logger.info('Finished pcgr-vep-vcf2maf')
             print('----')
 
@@ -367,10 +367,10 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
                 f'{vep_vcfanno_annotated_pass_vcf}* {vep_vcfanno_vcf}* '
                 f'{input_vcf_pcgr_ready_uncompressed}*'
                 )
-        check_subprocess(logger, create_output_vcf_command1, debug=False)
-        check_subprocess(logger, create_output_vcf_command2, debug=False)
-        check_subprocess(logger, create_output_vcf_command3, debug=False)
-        check_subprocess(logger, create_output_vcf_command4, debug=False)
+        check_subprocess(logger, create_output_vcf_command1, debug)
+        check_subprocess(logger, create_output_vcf_command2, debug)
+        check_subprocess(logger, create_output_vcf_command3, debug)
+        check_subprocess(logger, create_output_vcf_command4, debug)
         logger.info('Finished pcgr-summarise main command')
 
         # PCGR|vcf2tsv - convert VCF to TSV with https://github.com/sigven/vcf2tsv

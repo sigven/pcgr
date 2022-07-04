@@ -160,7 +160,7 @@ def run_cpsr(arg_dict, cpsr_paths):
     vep_dir = vepdb_dir
 
     logger = getlogger('cpsr-validate-input-arguments')
-    logger.info("STEP 0: Validate input data")
+    logger.info("CPSR - STEP 0: Validate input data")
     check_subprocess(logger, f'mkdir -p {output_dir}', debug)
 
     ## CPSR|Validate input VCF - check formatting, non-overlap with CPSR INFO tags, and whether sample contains any variants in cancer predisposition loci
@@ -265,28 +265,26 @@ def run_cpsr(arg_dict, cpsr_paths):
         print('----')
 
         ## CPSR|vcfanno - run vcfanno on query VCF with a number of relevant annotated VCFs
-        print()
         logger = getlogger('cpsr-vcfanno')
-        logger.info("STEP 2: Annotation for cancer predisposition with cpsr-vcfanno (ClinVar, CIViC, dbNSFP, dbMTS, UniProtKB, cancerhotspots.org, ncER, GERP RS scores, GWAS catalog, gnomAD non-cancer subset)")
+        logger.info("CPSR - STEP 2: Annotation for cancer predisposition with cpsr-vcfanno")
+        logger.info("(ClinVar, CIViC, dbNSFP, dbMTS, UniProtKB, cancerhotspots.org, ncER, GERP RS scores, GWAS catalog, gnomAD non-cancer subset)")
         pcgr_vcfanno_command = (
                 f"pcgr_vcfanno.py --num_processes {arg_dict['vcfanno_n_proc']} --dbnsfp --clinvar "
                 f"--cancer_hotspots --dbmts --ncer --gerp --civic --uniprot --gnomad_cpsr --pcgr_onco_xref "
                 f"--gwas --rmsk {vep_vcf}.gz {vep_vcfanno_vcf} {os.path.join(data_dir, 'data', str(arg_dict['genome_assembly']))}"
                 )
         check_subprocess(logger, pcgr_vcfanno_command, debug)
-        logger.info("Finished")
+        logger.info("Finished cpsr-vcfanno")
+        print('----')
 
         ## CPSR|summarise - expand annotations with separate VCF INFO tags
-        print()
         logger = getlogger("cpsr-summarise")
         pcgr_summarise_command = (
                 f'pcgr_summarise.py {vep_vcfanno_vcf}.gz 0 {vep_regulatory} '
                 f'{os.path.join(data_dir, "data", arg_dict["genome_assembly"])} '
-                f'--cpsr'
+                f'--cpsr {"--debug" if debug else ""}'
                 )
-        if debug:
-            pcgr_summarise_command  += ' --debug'
-        logger.info("STEP 3: Cancer gene annotations with cpsr-summarise")
+        logger.info("CPSR - STEP 3: Cancer gene annotations with cpsr-summarise")
         check_subprocess(logger, pcgr_summarise_command, debug)
 
         ## CPSR|clean - rename output files, remove temporary files
@@ -300,22 +298,23 @@ def run_cpsr(arg_dict, cpsr_paths):
         check_subprocess(logger, create_output_vcf_command2, debug)
         check_subprocess(logger, create_output_vcf_command3, debug)
         check_subprocess(logger, create_output_vcf_command4, debug)
+        logger.info('Finished cpsr-summarise main command')
 
         ## CPSR|vcf2tsv - perform vcf2tsv conversion on the final annotated VCF file
         cpsr_vcf2tsv_command = f"vcf2tsv.py {output_pass_vcf} --compress {output_pass_tsv}"
         logger.info("Converting VCF to TSV with https://github.com/sigven/vcf2tsv")
         check_subprocess(logger, cpsr_vcf2tsv_command, debug)
+        # do not clean if debugging
         if not debug:
             check_subprocess(logger, clean_command, debug)
-        logger.info("Finished")
-
-
-    print()
+        logger.info('Finished cpsr-summarise-vcf2tsv')
+    logger.info('Finished cpsr-summarise')
+    print('----')
 
     ## Generation of HTML reports for VEP/vcfanno-annotated VCF file
     if not arg_dict['basic']:
         logger = getlogger('cpsr-writer')
-        logger.info("STEP 4: Generation of output files - Cancer predisposition sequencing report")
+        logger.info("CPSR - STEP 4: Generation of output files - Cancer predisposition sequencing report")
 
         # export PATH to R conda env Rscript
         rscript = utils.script_path('pcgrr', 'bin/Rscript')
@@ -353,8 +352,12 @@ def run_cpsr(arg_dict, cpsr_paths):
                 f"{diagnostic_grade_only}"
            )
 
+        if debug:
+            print(cpsr_report_command)
         check_subprocess(logger, cpsr_report_command, debug)
-        logger.info("Finished")
+        logger.info("Finished CPSR!")
+        print('----')
+    print()
 
 
 if __name__=="__main__":
