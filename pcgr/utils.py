@@ -92,3 +92,9 @@ def is_integer(n):
         return False
     else:
         return float(n).is_integer()
+
+def get_cpsr_version():
+    # use pcgrr's Rscript to grab cpsr's R pkg version
+    rscript = script_path("pcgrr", "bin/Rscript")
+    v_cmd = f"{rscript} -e 'x <- paste0(\"cpsr \", as.character(packageVersion(\"cpsr\"))); cat(x, \"\n\")'"
+    return subprocess.check_output(v_cmd, shell=True).decode("utf-8")

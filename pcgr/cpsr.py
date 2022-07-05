@@ -35,9 +35,8 @@ def get_args():
     optional_panel.add_argument('--custom_list_name',dest = "custom_list_name", default="Custom_Panel", help="Set name for custom made panel/list (single word - no whitespace), will be displayed in the report")
     optional_panel.add_argument('--diagnostic_grade_only', action="store_true",help="For panel_id's 1-42 (Genomics England PanelApp) - consider genes with a GREEN status only, default: %(default)s")
 
-
     optional_other.add_argument('--force_overwrite', action = "store_true", help='By default, the script will fail with an error if any output file already exists.\n You can force the overwrite of existing result files by using this flag, default: %(default)s')
-    #optional_other.add_argument('--version', action='version', version='%(prog)s ' + str(CPSR_VERSION))
+    optional_other.add_argument('--version', action='version', version=str(utils.get_cpsr_version()))
     optional_other.add_argument('--basic',action="store_true",help="Run functional variant annotation on VCF through VEP/vcfanno, omit Tier assignment/report generation (STEP 4), default: %(default)s")
     optional_other.add_argument('--no_vcf_validate', action = "store_true",help="Skip validation of input VCF with Ensembl's vcf-validator, default: %(default)s")
     optional_other.add_argument('--docker_uid', dest='docker_user_id', help='Docker user ID. Default is the host system user ID. If you are experiencing permission errors,\n try setting this up to root (`--docker_uid root`), default: %(default)s')
@@ -317,7 +316,6 @@ def run_cpsr(arg_dict, cpsr_paths):
         logger.info("CPSR - STEP 4: Generation of output files - Cancer predisposition sequencing report")
 
         # export PATH to R conda env Rscript
-        rscript = utils.script_path('pcgrr', 'bin/Rscript')
         cpsrr_script = utils.script_path('pcgr', 'bin/cpsr.R')
         cpsr_report_command = (
                 f"{rscript} {cpsrr_script} "
