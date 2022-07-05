@@ -77,8 +77,6 @@ def cli():
     optional_other.add_argument("--version", action="version", version="%(prog)s " + str(pcgr_vars.PCGR_VERSION))
     optional_other.add_argument("--basic", action="store_true", help="Run functional variant annotation on VCF through VEP/vcfanno, omit other analyses (i.e. Tier assignment/MSI/TMB/Signatures etc. and report generation (STEP 4), default: %(default)s")
     optional_other.add_argument("--no_vcf_validate", action="store_true", help="Skip validation of input VCF with Ensembl's vcf-validator, default: %(default)s")
-    optional_other.add_argument("--docker_uid", dest="docker_user_id", help="Docker user ID. default is the host system user ID. If you are experiencing permission errors, try setting this up to root (`--docker-uid root`)")
-    optional_other.add_argument("--no_docker", action="store_true", dest="no_docker", default=False, help="Run the PCGR workflow in a non-Docker mode (see install_no_docker/ folder for instructions)")
     optional_other.add_argument("--debug", action="store_true", help="Print full commands to log")
 
     optional_vcfanno.add_argument("--vcfanno_n_proc", default=4, type=int, help="Number of vcfanno processes (option '-p' in vcfanno), default: %(default)s")

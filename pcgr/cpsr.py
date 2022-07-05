@@ -39,8 +39,6 @@ def get_args():
     optional_other.add_argument('--version', action='version', version=str(utils.get_cpsr_version()))
     optional_other.add_argument('--basic',action="store_true",help="Run functional variant annotation on VCF through VEP/vcfanno, omit Tier assignment/report generation (STEP 4), default: %(default)s")
     optional_other.add_argument('--no_vcf_validate', action = "store_true",help="Skip validation of input VCF with Ensembl's vcf-validator, default: %(default)s")
-    optional_other.add_argument('--docker_uid', dest='docker_user_id', help='Docker user ID. Default is the host system user ID. If you are experiencing permission errors,\n try setting this up to root (`--docker_uid root`), default: %(default)s')
-    optional_other.add_argument('--no_docker', action='store_true', dest='no_docker', default=False, help='Run the CPSR workflow in a non-Docker mode, default: %(default)s')
     optional_other.add_argument('--preserved_info_tags', dest ='preserved_info_tags', default='None', help='Comma-separated string of VCF INFO tags from query VCF that should be kept in CPSR output TSV')
     optional_other.add_argument('--report_theme',choices = ['default','cerulean','journal','flatly','readable','spacelab','united','cosmo','lumen','paper','sandstone','simplex','yeti'], default = 'default', help='Visual report theme (rmarkdown),  default: %(default)s' )
     optional_other.add_argument('--report_nonfloating_toc', action='store_true', help='Do not float the table of contents (TOC) in output HTML report, default: %(default)s')
