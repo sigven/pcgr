@@ -34,7 +34,7 @@ def __main__():
     parser.add_argument('exclude_het_germline', help='Logical indicating if heterozygote germline calls are to be filtered based on allelic fraction')
 
     parser.add_argument('--output_dir', dest='output_dir', help='Output directory')
-    parser.add_argument("--debug", action="store_true", default=False, help="Print full commands to log, default: %(default)s")
+    parser.add_argument("--debug", action="store_true", help="Print full commands to log")
     args = parser.parse_args()
 
     ret = validate_pcgr_input(args.pcgr_dir,
@@ -372,13 +372,13 @@ def simplify_vcf(input_vcf, vcf, output_dir, logger, debug):
     input_vcf_pcgr_ready = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)', '.pcgr_ready.tmp.vcf', os.path.basename(input_vcf)))
     input_vcf_pcgr_ready_decomposed = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)', '.pcgr_ready.vcf', os.path.basename(input_vcf)))
 
-    multiallelic_alt = 0
+    multiallelic_list = list()
     for rec in vcf:
         POS = rec.start + 1
         alt = ",".join(str(n) for n in rec.ALT)
         if len(rec.ALT) > 1:
-            logger.warning(f"Multiallelic site detected:{rec.CHROM}\t{POS}\t{rec.REF}\t{alt}")
-            multiallelic_alt = 1
+            variant_id = f"{rec.CHROM}:{POS}_{rec.REF}->{alt}"
+            multiallelic_list.append(variant_id)
     # Remove FORMAT metadata lines
     command_vcf_sample_free1 = f'egrep \'^##\' {input_vcf} | egrep -v \'^##FORMAT=\' > {input_vcf_pcgr_ready}'
     # Output first 8 column names (CHROM-INFO, so ignore FORMAT + sample columns)
@@ -401,7 +401,11 @@ def simplify_vcf(input_vcf, vcf, output_dir, logger, debug):
     check_subprocess(logger, command_vcf_sample_free4, debug=False)
     check_subprocess(logger, command_vcf_sample_free5, debug=False)
 
-    if multiallelic_alt == 1:
+    if multiallelic_list:
+        logger.warning(f"The following {len(multiallelic_list)} multiallelic sites were detected:")
+        print('----')
+        print(', '.join(multiallelic_list))
+        print('----')
         logger.info('Decomposing multi-allelic sites in input VCF file using \'vt decompose\'')
         command_decompose = f'vt decompose -s {input_vcf_pcgr_ready} > {input_vcf_pcgr_ready_decomposed} 2> {os.path.join(output_dir, "decompose.log")}'
         check_subprocess(logger, command_decompose, debug)
@@ -457,7 +461,7 @@ def validate_pcgr_input(pcgr_directory,
     8. Check that RNA fusion variant file has required columns and correct data types
     9. Check that RNA expression file has required columns and correct data types
     """
-    logger = utils.getlogger('pcgr-validate-arguments-input')
+    logger = utils.getlogger('pcgr-validate-input-arguments')
 
     # if panel_normal_vcf == "None" and tumor_only == 1 and config_options['tumor_only']['exclude_pon'] is True:
     #    logger.warning('Panel-of-normals VCF is not present - exclusion of calls found in panel-of-normals will be ignored')

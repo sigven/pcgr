@@ -79,7 +79,7 @@ def cli():
     optional_other.add_argument("--no_vcf_validate", action="store_true", help="Skip validation of input VCF with Ensembl's vcf-validator, default: %(default)s")
     optional_other.add_argument("--docker_uid", dest="docker_user_id", help="Docker user ID. default is the host system user ID. If you are experiencing permission errors, try setting this up to root (`--docker-uid root`)")
     optional_other.add_argument("--no_docker", action="store_true", dest="no_docker", default=False, help="Run the PCGR workflow in a non-Docker mode (see install_no_docker/ folder for instructions)")
-    optional_other.add_argument("--debug", action="store_true", default=False, help="Print full commands to log, default: %(default)s")
+    optional_other.add_argument("--debug", action="store_true", help="Print full commands to log")
 
     optional_vcfanno.add_argument("--vcfanno_n_proc", default=4, type=int, help="Number of vcfanno processes (option '-p' in vcfanno), default: %(default)s")
     optional_vep.add_argument("--vep_n_forks", default=4, type=int, help="Number of forks (option '--fork' in VEP), default: %(default)s")
@@ -203,7 +203,7 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
 
     check_subprocess(logger, f'mkdir -p {output_dir}', debug)
     # PCGR|validate_input - verify that VCF and CNA segment file is of appropriate format
-    logger = getlogger("pcgr-validate-arguments-input")
+    logger = getlogger("pcgr-validate-input-arguments")
     logger.info("PCGR - STEP 0: Validate input data and options")
 
     vcf_validate_command = (
@@ -226,7 +226,7 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
             f'--output_dir {output_dir} {"--debug" if debug else ""}'
             )
     check_subprocess(logger, vcf_validate_command, debug)
-    logger.info('Finished pcgr-validate-arguments-input')
+    logger.info('Finished pcgr-validate-input-arguments')
     print('----')
 
     # PCGR|start - Log key information about sample, options and sequencing assay/design

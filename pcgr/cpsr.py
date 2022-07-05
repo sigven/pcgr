@@ -53,7 +53,7 @@ def get_args():
     optional_other.add_argument('--maf_upper_threshold', type = float, default = 0.9, dest = 'maf_upper_threshold',help='Upper MAF limit (gnomAD global population frequency) for variants to be included in the report, default: %(default)s')
     optional_other.add_argument('--classify_all', action='store_true',dest='classify_all',help='Provide CPSR variant classifications (TIER 1-5) also for variants with existing ClinVar classifications in output TSV, default: %(default)s')
     optional_other.add_argument('--clinvar_ignore_noncancer', action='store_true', help='Ignore (exclude from report) ClinVar-classified variants reported only for phenotypes/conditions NOT related to cancer, default: %(default)s')
-    optional_other.add_argument("--debug", action="store_true", default=False, help="Print full commands to log, default: %(default)s")
+    optional_other.add_argument("--debug", action="store_true", help="Print full commands to log")
 
     optional_vcfanno.add_argument('--vcfanno_n_proc', default = 4, type = int, help="Number of vcfanno processes (option '-p' in vcfanno), default: %(default)s")
 
@@ -316,6 +316,7 @@ def run_cpsr(arg_dict, cpsr_paths):
         logger.info("CPSR - STEP 4: Generation of output files - Cancer predisposition sequencing report")
 
         # export PATH to R conda env Rscript
+        rscript = utils.script_path("pcgrr", "bin/Rscript")
         cpsrr_script = utils.script_path('pcgr', 'bin/cpsr.R')
         cpsr_report_command = (
                 f"{rscript} {cpsrr_script} "
