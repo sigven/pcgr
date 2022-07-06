@@ -126,9 +126,9 @@ def extend_vcf_annotations(query_vcf, pcgr_db_directory, logger, pon_annotation,
 
         w.write_record(rec)
     if vars_no_csq:
-        logger.warning(f"The following {len(vars_no_csq)} records do not have a CSQ tag from VEP (was --vep_no_intergenic flag set?) - skipping these variants:")
+        logger.warning(f"There were {len(vars_no_csq)} records with no CSQ tag from VEP (was --vep_no_intergenic flag set?). Skipping them and showing (up to) the first 100:")
         print('----')
-        print(', '.join(vars_no_csq))
+        print(', '.join(vars_no_csq[:100]))
         print('----')
     w.close()
     if current_chrom is not None:

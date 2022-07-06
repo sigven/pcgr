@@ -247,9 +247,9 @@ def simplify_vcf(input_vcf, vcf, custom_bed, pcgr_directory, genome_assembly, vi
    check_subprocess(logger, command_vcf_sample_free5, debug)
 
    if multiallelic_list:
-      logger.warning(f"The following {len(multiallelic_list)} multiallelic sites were detected:")
+      logger.warning(f"There were {len(multiallelic_list)} multiallelic sites detected. Showing (up to) the first 100:")
       print('----')
-      print(', '.join(multiallelic_list))
+      print(', '.join(multiallelic_list[:100]))
       print('----')
       logger.info('Decomposing multi-allelic sites in input VCF file using \'vt decompose\'')
       command_decompose = f'vt decompose -s {input_vcf_cpsr_ready} > {input_vcf_cpsr_ready_decomposed}  2> {os.path.join(output_dir, "decompose.log")}'
