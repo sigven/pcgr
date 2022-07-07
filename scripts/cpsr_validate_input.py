@@ -227,18 +227,15 @@ def simplify_vcf(input_vcf, vcf, custom_bed, pcgr_directory, genome_assembly, vi
       if len(rec.ALT) > 1:
          variant_id = f"{rec.CHROM}:{POS}_{rec.REF}->{alt}"
          multiallelic_list.append(variant_id)
-   command_vcf_sample_free1 = f'egrep \'^##\' {input_vcf} > {input_vcf_cpsr_ready}'
-   command_vcf_sample_free2 = f'egrep \'^#CHROM\' {input_vcf} >> {input_vcf_cpsr_ready}'
-   command_vcf_sample_free3 = f'egrep -v \'^#\' {input_vcf} | sed \'s/^chr//\' | egrep \'^[0-9]\' | sort -k1,1n -k2,2n -k4,4 -k5,5 >> {input_vcf_cpsr_ready}'
-   command_vcf_sample_free4 = f'egrep -v \'^#\' {input_vcf} | sed \'s/^chr//\' | egrep -v \'^[0-9]\' | egrep \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> {input_vcf_cpsr_ready}'
-   command_vcf_sample_free5 = f'egrep -v \'^#\' {input_vcf} | sed \'s/^chr//\' | egrep -v \'^[0-9]\' | egrep -v \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> {input_vcf_cpsr_ready}'
 
-   if input_vcf.endswith('.gz'):
-      command_vcf_sample_free1 = f'bgzip -dc {input_vcf} | egrep \'^##\' > {input_vcf_cpsr_ready}'
-      command_vcf_sample_free2 = f'bgzip -dc {input_vcf} | egrep \'^#CHROM\'  >> {input_vcf_cpsr_ready}'
-      command_vcf_sample_free3 = f'bgzip -dc {input_vcf} | egrep -v \'^#\' | sed \'s/^chr//\' | egrep \'^[0-9]\' | sort -k1,1n -k2,2n -k4,4 -k5,5 >> {input_vcf_cpsr_ready}'
-      command_vcf_sample_free4 = f'bgzip -dc {input_vcf} | egrep -v \'^#\' | sed \'s/^chr//\' | egrep -v \'^[0-9]\' | egrep \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> {input_vcf_cpsr_ready}'
-      command_vcf_sample_free5 = f'bgzip -dc {input_vcf} | egrep -v \'^#\' | sed \'s/^chr//\' | egrep -v \'^[0-9]\' | egrep -v \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> {input_vcf_cpsr_ready}'
+   is_gzipped = True if input_vcf.endswith('.gz') else False
+   unzip_if_gzipped_cmd = f"bgzip -dc {input_vcf} | " if is_gzipped else ""
+
+   command_vcf_sample_free1 = f'{unzip_if_gzipped_cmd} egrep \'^##\' {input_vcf} > {input_vcf_cpsr_ready}'
+   command_vcf_sample_free2 = f'{unzip_if_gzipped_cmd} egrep \'^#CHROM\' {input_vcf} >> {input_vcf_cpsr_ready}'
+   command_vcf_sample_free3 = f'{unzip_if_gzipped_cmd} egrep -v \'^#\' {input_vcf} | sed \'s/^chr//\' | egrep \'^[0-9]\' | sort -k1,1n -k2,2n -k4,4 -k5,5 >> {input_vcf_cpsr_ready}'
+   command_vcf_sample_free4 = f'{unzip_if_gzipped_cmd} egrep -v \'^#\' {input_vcf} | sed \'s/^chr//\' | egrep -v \'^[0-9]\' | egrep \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> {input_vcf_cpsr_ready}'
+   command_vcf_sample_free5 = f'{unzip_if_gzipped_cmd} egrep -v \'^#\' {input_vcf} | sed \'s/^chr//\' | egrep -v \'^[0-9]\' | egrep -v \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> {input_vcf_cpsr_ready}'
 
    check_subprocess(logger, command_vcf_sample_free1, debug)
    check_subprocess(logger, command_vcf_sample_free2, debug)

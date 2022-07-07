@@ -379,27 +379,23 @@ def simplify_vcf(input_vcf, vcf, output_dir, logger, debug):
         if len(rec.ALT) > 1:
             variant_id = f"{rec.CHROM}:{POS}_{rec.REF}->{alt}"
             multiallelic_list.append(variant_id)
-    # Remove FORMAT metadata lines
-    command_vcf_sample_free1 = f'egrep \'^##\' {input_vcf} | egrep -v \'^##FORMAT=\' > {input_vcf_pcgr_ready}'
-    # Output first 8 column names (CHROM-INFO, so ignore FORMAT + sample columns)
-    command_vcf_sample_free2 = f'egrep \'^#CHROM\' {input_vcf} | cut -f1-8 >> {input_vcf_pcgr_ready}'
-    # Looking at variant rows, remove chr prefix, grab CHROM-INFO, sort separately for auto/XYM/rest chrom by cols 1+2 (CHROM+POS) then cols 4+5 (REF+ALT)
-    command_vcf_sample_free3 = f'egrep -v \'^#\' {input_vcf} | sed \'s/^chr//\' | cut -f1-8 | egrep \'^[0-9]\' | sort -k1,1n -k2,2n -k4,4 -k5,5 >> {input_vcf_pcgr_ready}'
-    command_vcf_sample_free4 = f'egrep -v \'^#\' {input_vcf} | sed \'s/^chr//\' | cut -f1-8 | egrep -v \'^[0-9]\' | egrep \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> {input_vcf_pcgr_ready}'
-    command_vcf_sample_free5 = f'egrep -v \'^#\' {input_vcf} | sed \'s/^chr//\' | cut -f1-8 | egrep -v \'^[0-9]\' | egrep -v \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> {input_vcf_pcgr_ready}'
-    # TODO: maybe just gzip the input_vcf and get rid of above chunk?
-    if input_vcf.endswith('.gz'):
-        command_vcf_sample_free1 = f'bgzip -dc {input_vcf} | egrep \'^##\' | egrep -v \'^##FORMAT=\' > {input_vcf_pcgr_ready}'
-        command_vcf_sample_free2 = f'bgzip -dc {input_vcf} | egrep \'^#CHROM\' | cut -f1-8 >> {input_vcf_pcgr_ready}'
-        command_vcf_sample_free3 = f'bgzip -dc {input_vcf} | egrep -v \'^#\' | sed \'s/^chr//\' | cut -f1-8 | egrep \'^[0-9]\' | sort -k1,1n -k2,2n -k4,4 -k5,5 >> {input_vcf_pcgr_ready}'
-        command_vcf_sample_free4 = f'bgzip -dc {input_vcf} | egrep -v \'^#\' | sed \'s/^chr//\' | cut -f1-8 | egrep -v \'^[0-9]\' | egrep \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> {input_vcf_pcgr_ready}'
-        command_vcf_sample_free5 = f'bgzip -dc {input_vcf} | egrep -v \'^#\' | sed \'s/^chr//\' | cut -f1-8 | egrep -v \'^[0-9]\' | egrep -v \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> {input_vcf_pcgr_ready}'
 
-    check_subprocess(logger, command_vcf_sample_free1, debug=False)
-    check_subprocess(logger, command_vcf_sample_free2, debug=False)
-    check_subprocess(logger, command_vcf_sample_free3, debug=False)
-    check_subprocess(logger, command_vcf_sample_free4, debug=False)
-    check_subprocess(logger, command_vcf_sample_free5, debug=False)
+    is_gzipped = True if input_vcf.endswith('.gz') else False
+    unzip_if_gzipped_cmd = f"bgzip -dc {input_vcf} | " if is_gzipped else ""
+    # Remove FORMAT metadata lines
+    command_vcf_sample_free1 = f'{unzip_if_gzipped_cmd} egrep \'^##\' {input_vcf} | egrep -v \'^##FORMAT=\' > {input_vcf_pcgr_ready}'
+    # Output first 8 column names (CHROM-INFO, so ignore FORMAT + sample columns)
+    command_vcf_sample_free2 = f'{unzip_if_gzipped_cmd} egrep \'^#CHROM\' {input_vcf} | cut -f1-8 >> {input_vcf_pcgr_ready}'
+    # Looking at variant rows, remove chr prefix, grab CHROM-INFO, sort separately for auto/XYM/rest chrom by cols 1+2 (CHROM+POS) then cols 4+5 (REF+ALT)
+    command_vcf_sample_free3 = f'{unzip_if_gzipped_cmd} egrep -v \'^#\' {input_vcf} | sed \'s/^chr//\' | cut -f1-8 | egrep \'^[0-9]\' | sort -k1,1n -k2,2n -k4,4 -k5,5 >> {input_vcf_pcgr_ready}'
+    command_vcf_sample_free4 = f'{unzip_if_gzipped_cmd} egrep -v \'^#\' {input_vcf} | sed \'s/^chr//\' | cut -f1-8 | egrep -v \'^[0-9]\' | egrep \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> {input_vcf_pcgr_ready}'
+    command_vcf_sample_free5 = f'{unzip_if_gzipped_cmd} egrep -v \'^#\' {input_vcf} | sed \'s/^chr//\' | cut -f1-8 | egrep -v \'^[0-9]\' | egrep -v \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> {input_vcf_pcgr_ready}'
+
+    check_subprocess(logger, command_vcf_sample_free1, debug)
+    check_subprocess(logger, command_vcf_sample_free2, debug)
+    check_subprocess(logger, command_vcf_sample_free3, debug)
+    check_subprocess(logger, command_vcf_sample_free4, debug)
+    check_subprocess(logger, command_vcf_sample_free5, debug)
 
     if multiallelic_list:
         logger.warning(f"There were {len(multiallelic_list)} multiallelic sites detected. Showing (up to) the first 100:")
@@ -410,11 +406,11 @@ def simplify_vcf(input_vcf, vcf, output_dir, logger, debug):
         command_decompose = f'vt decompose -s {input_vcf_pcgr_ready} > {input_vcf_pcgr_ready_decomposed} 2> {os.path.join(output_dir, "decompose.log")}'
         check_subprocess(logger, command_decompose, debug)
     else:
-        check_subprocess(logger, f'cp {input_vcf_pcgr_ready} {input_vcf_pcgr_ready_decomposed}', debug=False)
+        check_subprocess(logger, f'cp {input_vcf_pcgr_ready} {input_vcf_pcgr_ready_decomposed}', debug)
 
     # TODO: Ditch the -c option, else you have an uncompressed VCF hanging around.
-    check_subprocess(logger, f'bgzip -cf {input_vcf_pcgr_ready_decomposed} > {input_vcf_pcgr_ready_decomposed}.gz', debug=False)
-    check_subprocess(logger, f'tabix -p vcf {input_vcf_pcgr_ready_decomposed}.gz', debug=False)
+    check_subprocess(logger, f'bgzip -cf {input_vcf_pcgr_ready_decomposed} > {input_vcf_pcgr_ready_decomposed}.gz', debug)
+    check_subprocess(logger, f'tabix -p vcf {input_vcf_pcgr_ready_decomposed}.gz', debug)
 
     if os.path.exists(input_vcf_pcgr_ready_decomposed + '.gz') and os.path.getsize(input_vcf_pcgr_ready_decomposed + '.gz') > 0:
         vcf = VCF(input_vcf_pcgr_ready_decomposed + '.gz')
@@ -428,7 +424,7 @@ def simplify_vcf(input_vcf, vcf, output_dir, logger, debug):
             exit(1)
 
      # TODO: use 'os.remove()' instead of 'rm -f'
-    check_subprocess(logger, f'rm -f {input_vcf_pcgr_ready} {os.path.join(output_dir, "decompose.log")}', debug=False)
+    check_subprocess(logger, f'rm -f {input_vcf_pcgr_ready} {os.path.join(output_dir, "decompose.log")}', debug)
 
 def validate_pcgr_input(pcgr_directory,
                         input_vcf,
