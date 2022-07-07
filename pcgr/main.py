@@ -298,7 +298,7 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
         logger.info(f'VEP configuration - transcript pick order: {config_options["other"]["vep_pick_order"]}')
         logger.info(f'VEP configuration - transcript pick order: See more at https://www.ensembl.org/info/docs/tools/vep/script/vep_other.html#pick_options')
         logger.info(f'VEP configuration - GENCODE set: {gencode_set_in_use}')
-        logger.info(f'VEP configuration - skip intergenic: {config_options["other"]["vep_no_intergenic"]}')
+        logger.info(f'VEP configuration - skip intergenic: {"TRUE" if config_options["other"]["vep_no_intergenic"] else "FALSE"}')
         logger.info(f'VEP configuration - regulatory annotation: {vep_regulatory_annotation}')
         logger.info(f'VEP configuration - buffer_size/number of forks: {arg_dict["vep_buffer_size"]}/{arg_dict["vep_n_forks"]}')
 
