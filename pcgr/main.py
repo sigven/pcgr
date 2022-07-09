@@ -199,6 +199,7 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
     output_dir = pcgr_paths['output_dir']
     vep_dir = vepdb_dir
 
+    # TODO: currently we error out if output_dir doesn't already exist...
     check_subprocess(logger, f'mkdir -p {output_dir}', debug)
     # PCGR|validate_input - verify that VCF and CNA segment file is of appropriate format
     logger = getlogger("pcgr-validate-input-arguments")

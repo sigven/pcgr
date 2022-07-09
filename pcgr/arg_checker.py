@@ -3,7 +3,6 @@
 from pcgr import pcgr_vars
 from pcgr.utils import getlogger, error_message, warn_message
 import os
-import subprocess
 
 
 def check_args(arg_dict):
@@ -281,11 +280,9 @@ def verify_input_files(arg_dict):
         input_vcf_dir = os.path.dirname(os.path.abspath(arg_dict["input_vcf"]))
 
         # if output vcf exist and overwrite not set
-        output_vcf = os.path.join(str(output_dir_full), str(
-            arg_dict["sample_id"])) + ".pcgr_acmg." + str(arg_dict["genome_assembly"]) + ".vcf.gz"
+        output_vcf = os.path.join(str(output_dir_full), f"{arg_dict['sample_id']}.pcgr_acmg.{arg_dict['genome_assembly']}.vcf.gz")
         if os.path.exists(output_vcf) and arg_dict["force_overwrite"] is False:
-            err_msg = "Output files (e.g. " + str(output_vcf) + \
-                ") already exist - please specify different sample_id or add option --force_overwrite"
+            err_msg = f"Output files (e.g. {output_vcf}) already exist - please specify different sample_id or add option --force_overwrite"
             error_message(err_msg, logger)
 
     # check if input cna plot file exist
