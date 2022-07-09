@@ -381,15 +381,15 @@ def simplify_vcf(input_vcf, vcf, output_dir, logger, debug):
             multiallelic_list.append(variant_id)
 
     is_gzipped = True if input_vcf.endswith('.gz') else False
-    unzip_if_gzipped_cmd = f"bgzip -dc {input_vcf} | " if is_gzipped else ""
+    cat_vcf = f"bgzip -dc {input_vcf}" if is_gzipped else "cat {input_vcf}"
     # Remove FORMAT metadata lines
-    command_vcf_sample_free1 = f'{unzip_if_gzipped_cmd} egrep \'^##\' {input_vcf} | egrep -v \'^##FORMAT=\' > {input_vcf_pcgr_ready}'
+    command_vcf_sample_free1 = f'{cat_vcf} | egrep \'^##\' | egrep -v \'^##FORMAT=\' > {input_vcf_pcgr_ready}'
     # Output first 8 column names (CHROM-INFO, so ignore FORMAT + sample columns)
-    command_vcf_sample_free2 = f'{unzip_if_gzipped_cmd} egrep \'^#CHROM\' {input_vcf} | cut -f1-8 >> {input_vcf_pcgr_ready}'
+    command_vcf_sample_free2 = f'{cat_vcf} | egrep \'^#CHROM\' | cut -f1-8 >> {input_vcf_pcgr_ready}'
     # Looking at variant rows, remove chr prefix, grab CHROM-INFO, sort separately for auto/XYM/rest chrom by cols 1+2 (CHROM+POS) then cols 4+5 (REF+ALT)
-    command_vcf_sample_free3 = f'{unzip_if_gzipped_cmd} egrep -v \'^#\' {input_vcf} | sed \'s/^chr//\' | cut -f1-8 | egrep \'^[0-9]\' | sort -k1,1n -k2,2n -k4,4 -k5,5 >> {input_vcf_pcgr_ready}'
-    command_vcf_sample_free4 = f'{unzip_if_gzipped_cmd} egrep -v \'^#\' {input_vcf} | sed \'s/^chr//\' | cut -f1-8 | egrep -v \'^[0-9]\' | egrep \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> {input_vcf_pcgr_ready}'
-    command_vcf_sample_free5 = f'{unzip_if_gzipped_cmd} egrep -v \'^#\' {input_vcf} | sed \'s/^chr//\' | cut -f1-8 | egrep -v \'^[0-9]\' | egrep -v \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> {input_vcf_pcgr_ready}'
+    command_vcf_sample_free3 = f'{cat_vcf} | egrep -v \'^#\' | sed \'s/^chr//\' | cut -f1-8 | egrep \'^[0-9]\' | sort -k1,1n -k2,2n -k4,4 -k5,5 >> {input_vcf_pcgr_ready}'
+    command_vcf_sample_free4 = f'{cat_vcf} | egrep -v \'^#\' | sed \'s/^chr//\' | cut -f1-8 | egrep -v \'^[0-9]\' | egrep \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> {input_vcf_pcgr_ready}'
+    command_vcf_sample_free5 = f'{cat_vcf} | egrep -v \'^#\' | sed \'s/^chr//\' | cut -f1-8 | egrep -v \'^[0-9]\' | egrep -v \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> {input_vcf_pcgr_ready}'
 
     check_subprocess(logger, command_vcf_sample_free1, debug)
     check_subprocess(logger, command_vcf_sample_free2, debug)
