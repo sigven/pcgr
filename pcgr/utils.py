@@ -4,6 +4,7 @@ import subprocess
 import shutil
 import logging
 import os
+import errno
 import platform
 
 
@@ -98,3 +99,11 @@ def get_cpsr_version():
     rscript = script_path("pcgrr", "bin/Rscript")
     v_cmd = f"{rscript} -e 'x <- paste0(\"cpsr \", as.character(packageVersion(\"cpsr\"))); cat(x, \"\n\")'"
     return subprocess.check_output(v_cmd, shell=True).decode("utf-8")
+
+# https://stackoverflow.com/a/10840586/2169986
+def remove(filename):
+    try:
+        os.remove(filename)
+    except OSError as e:
+        if e.errno != errno.ENOENT: # errno.ENOENT = no such file or directory
+            raise # re-raise exception if a different error occurred
