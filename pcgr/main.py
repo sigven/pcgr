@@ -146,7 +146,7 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
     msig_estimation_set = 'ON' if config_options['msigs']['run'] else 'OFF'
     tmb_estimation_set = 'ON' if config_options['tmb']['run'] else 'OFF'
     vcf_validation = 0 if config_options['other']['no_vcf_validate'] else 1
-
+    run_vcf2maf = arg_dict['vcf2maf']
     assay_mode = 'Tumor vs. Control'
     tumor_only = 0
     cell_line = 0
@@ -171,7 +171,7 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
         VEP_ASSEMBLY = 'GRCh37'
     logger = getlogger('pcgr-get-OS')
 
-    vepdb_dir = os.path.join(str(pcgr_paths['db_dir']), '.vep')
+    vep_dir = os.path.join(str(pcgr_paths['db_dir']), '.vep')
     input_vcf = 'None'
     input_cna = 'None'
     input_rna_fusion = 'None'
@@ -197,7 +197,6 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
 
     data_dir = pcgr_paths['base_dir']
     output_dir = pcgr_paths['output_dir']
-    vep_dir = vepdb_dir
 
     # TODO: currently we error out if output_dir doesn't already exist...
     check_subprocess(logger, f'mkdir -p {output_dir}', debug)
@@ -222,11 +221,13 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
             f'{config_options["allelic_support"]["call_conf_tag"]} '
             f'{config_options["tumor_only"]["exclude_likely_hom_germline"]} '
             f'{config_options["tumor_only"]["exclude_likely_het_germline"]} '
+            f'{"--keep_uncompressed" if run_vcf2maf else ""} '
             f'--output_dir {output_dir} {"--debug" if debug else ""}'
             )
     check_subprocess(logger, vcf_validate_command, debug)
     logger.info('Finished pcgr-validate-input-arguments')
     print('----')
+    return
 
     # PCGR|start - Log key information about sample, options and sequencing assay/design
     logger = getlogger('pcgr-start')
@@ -248,13 +249,14 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
     if not input_vcf == 'None':
 
         # Define temporary output file names
-        output_vcf = os.path.join(output_dir, f'{arg_dict["sample_id"]}.pcgr_acmg.{arg_dict["genome_assembly"]}.vcf.gz')
-        output_pass_vcf = os.path.join(output_dir, f'{arg_dict["sample_id"]}.pcgr_acmg.{arg_dict["genome_assembly"]}.pass.vcf.gz')
-        output_pass_tsv = os.path.join(output_dir, f'{arg_dict["sample_id"]}.pcgr_acmg.{arg_dict["genome_assembly"]}.pass.tsv')
-        output_pass_raw_tsv_gz = os.path.join(output_dir, f'{arg_dict["sample_id"]}.pcgr_acmg.{arg_dict["genome_assembly"]}.pass.raw.tsv.gz')
-        output_maf = os.path.join(output_dir, f'{arg_dict["sample_id"]}.pcgr_acmg.{arg_dict["genome_assembly"]}.tmp.maf')
-        output_vcf2maf_log = os.path.join(output_dir, f'{arg_dict["sample_id"]}.pcgr_acmg.{arg_dict["genome_assembly"]}.maf.log')
-        input_vcf_pcgr_ready = os.path.join(output_dir, re.sub(r"(\.vcf$|\.vcf\.gz$)", ".pcgr_ready.vcf.gz", pcgr_paths["input_vcf_basename"]))
+        prefix = f'{arg_dict["sample_id"]}.pcgr_acmg.{arg_dict["genome_assembly"]}'
+        output_vcf =             os.path.join(output_dir, f'{prefix}.vcf.gz')
+        output_pass_vcf =        os.path.join(output_dir, f'{prefix}.pass.vcf.gz')
+        output_pass_tsv =        os.path.join(output_dir, f'{prefix}.pass.tsv')
+        output_pass_raw_tsv_gz = os.path.join(output_dir, f'{prefix}.pass.raw.tsv.gz')
+        output_maf =             os.path.join(output_dir, f'{prefix}.tmp.maf')
+        output_vcf2maf_log =     os.path.join(output_dir, f'{prefix}.maf.log')
+        input_vcf_pcgr_ready =   os.path.join(output_dir, re.sub(r"(\.vcf$|\.vcf\.gz$)", ".pcgr_ready.vcf.gz", pcgr_paths["input_vcf_basename"]))
         # needs to be uncompressed for vcf2maf.pl
         input_vcf_pcgr_ready_uncompressed = os.path.join(output_dir, re.sub(r"(\.vcf$|\.vcf\.gz$)", ".pcgr_ready.vcf", pcgr_paths["input_vcf_basename"]))
         vep_vcf = re.sub(r"(\.vcf$|\.vcf\.gz$)", ".vep.vcf", input_vcf_pcgr_ready)

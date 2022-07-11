@@ -33,6 +33,7 @@ def __main__():
     parser.add_argument('exclude_hom_germline', help='Logical indicating if homozygote germline calls are to be filtered based on allelic fraction')
     parser.add_argument('exclude_het_germline', help='Logical indicating if heterozygote germline calls are to be filtered based on allelic fraction')
 
+    parser.add_argument('--keep_uncompressed', action="store_true", help='Keep uncompressed VCF for vcf2maf.pl')
     parser.add_argument('--output_dir', dest='output_dir', help='Output directory')
     parser.add_argument("--debug", action="store_true", help="Print full commands to log")
     args = parser.parse_args()
@@ -54,6 +55,7 @@ def __main__():
                               args.vcf_validation,
                               args.tumor_only,
                               args.genome_assembly,
+                              args.keep_uncompressed,
                               args.output_dir,
                               args.debug)
     if ret != 0:
@@ -361,7 +363,7 @@ def check_format_ad_dp_tags(vcf,
     return 0
 
 
-def simplify_vcf(input_vcf, vcf, output_dir, logger, debug):
+def simplify_vcf(input_vcf, vcf, output_dir, keep_uncompressed, logger, debug):
     """
     Function that performs the following on the validated input VCF:
     1. Strip of any genotype data
@@ -406,14 +408,16 @@ def simplify_vcf(input_vcf, vcf, output_dir, logger, debug):
         command_decompose = f'vt decompose -s {input_vcf_pcgr_ready} > {input_vcf_pcgr_ready_decomposed} 2> {os.path.join(output_dir, "decompose.log")}'
         check_subprocess(logger, command_decompose, debug)
     else:
+        logger.info('All sites seem to be decomposed, so skipping decompostion')
         check_subprocess(logger, f'cp {input_vcf_pcgr_ready} {input_vcf_pcgr_ready_decomposed}', debug)
 
-    # TODO: Ditch the -c option, else you have an uncompressed VCF hanging around.
-    check_subprocess(logger, f'bgzip -cf {input_vcf_pcgr_ready_decomposed} > {input_vcf_pcgr_ready_decomposed}.gz', debug)
+    # need to keep uncompressed copy for vcf2maf.pl
+    bgzip_cmd = f"bgzip -cf {input_vcf_pcgr_ready_decomposed} > {input_vcf_pcgr_ready_decomposed}.gz" if keep_uncompressed else f"bgzip -f {input_vcf_pcgr_ready_decomposed}"
+    check_subprocess(logger, bgzip_cmd, debug)
     check_subprocess(logger, f'tabix -p vcf {input_vcf_pcgr_ready_decomposed}.gz', debug)
 
-    if os.path.exists(input_vcf_pcgr_ready_decomposed + '.gz') and os.path.getsize(input_vcf_pcgr_ready_decomposed + '.gz') > 0:
-        vcf = VCF(input_vcf_pcgr_ready_decomposed + '.gz')
+    if os.path.exists(f'{input_vcf_pcgr_ready_decomposed}.gz') and os.path.getsize(f'{input_vcf_pcgr_ready_decomposed}.gz') > 0:
+        vcf = VCF(f'{input_vcf_pcgr_ready_decomposed}.gz')
         i = 0
         for rec in vcf:
             i = i + 1
@@ -423,8 +427,9 @@ def simplify_vcf(input_vcf, vcf, output_dir, logger, debug):
             logger.info('')
             exit(1)
 
-     # TODO: use 'os.remove()' instead of 'rm -f'
-    check_subprocess(logger, f'rm -f {input_vcf_pcgr_ready} {os.path.join(output_dir, "decompose.log")}', debug)
+    print(input_vcf_pcgr_ready)
+    utils.remove(input_vcf_pcgr_ready)
+    utils.remove(os.path.join(output_dir, "decompose.log"))
 
 def validate_pcgr_input(pcgr_directory,
                         input_vcf,
@@ -443,6 +448,7 @@ def validate_pcgr_input(pcgr_directory,
                         vcf_validation,
                         tumor_only,
                         genome_assembly,
+                        keep_uncompressed,
                         output_dir,
                         debug):
     """
@@ -489,7 +495,7 @@ def validate_pcgr_input(pcgr_directory,
             return -1
 
         ## Simplify VCF - remove multiallelic variants
-        simplify_vcf(input_vcf, vcf, output_dir, logger, debug)
+        simplify_vcf(input_vcf, vcf, output_dir, keep_uncompressed, logger, debug)
 
 
     ## Validate panel-of-normals VCF is provided
