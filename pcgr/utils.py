@@ -6,23 +6,6 @@ import logging
 import os
 import platform
 
-def get_docker_user_id(docker_user_id):
-    logger = getlogger('pcgr-get-OS')
-    uid = ''
-    if docker_user_id:
-        uid = docker_user_id
-    elif platform.system() == 'Linux' or platform.system() == 'Darwin' or sys.platform == 'darwin' or sys.platform == 'linux2' or sys.platform == 'linux':
-        uid = os.getuid()
-    else:
-        if platform.system() == 'Windows' or sys.platform == 'win32' or sys.platform == 'cygwin':
-            uid = getpass.getuser()
-
-    if uid == '':
-        warn_msg = (f'Was not able to get user id/username for logged-in user on the underlying platform '
-                    f'(platform.system(): {platform.system()},  sys.platform: {sys.platform}, now running PCGR as root')
-        logger.warning(warn_msg)
-        uid = 'root'
-    return uid
 
 def getlogger(logger_name):
     logger = logging.getLogger(logger_name)
@@ -60,24 +43,24 @@ def check_subprocess(logger, command, debug):
         print(e.output.decode())
         exit(0)
 
-def script_path(env, bin_script, docker_run):
+def script_path(env, bin_script):
     """Returns e.g. /path/conda/envs/{env}/{bin_script}
     """
-    prefix = conda_env_path(env, docker_run)
+    prefix = conda_env_path(env)
     return os.path.join(prefix, bin_script)
 
-def conda_env_path(env, docker_run):
+def conda_env_path(env):
     """Construct absolute path to a conda env
     using the current activated env as a prefix.
     e.g. /path/to/conda/envs/{env}
     """
-    if docker_run:
-        env_path = f'/opt/mambaforge/envs/{env}'
-    else:
-        cp = os.path.normpath(os.environ.get('CONDA_PREFIX'))  # /path/to/conda/envs/FOO
-        env_dir = os.path.dirname(cp)                          # /path/to/conda/envs
-        env_path = os.path.join(env_dir, env)                  # /path/to/conda/envs/{env}
+    cp = os.path.normpath(os.environ.get('CONDA_PREFIX'))  # /path/to/conda/envs/FOO
+    env_dir = os.path.dirname(cp)                          # /path/to/conda/envs
+    env_path = os.path.join(env_dir, env)                  # /path/to/conda/envs/{env}
     return env_path
+
+def get_loftee_dir():
+    return script_path("pcgr", "share/loftee")
 
 def get_pcgr_bin():
     """Return abs path to e.g. conda/env/pcgr/bin
@@ -101,3 +84,17 @@ def get_perl_exports():
     perl_path_parent = os.path.dirname(perl_path) # /conda/env/pcgr/bin
     out = f"unset PERL5LIB && export PATH={perl_path_parent}:\"$PATH\""
     return out
+
+def is_integer(n):
+    try:
+        float(n)
+    except ValueError:
+        return False
+    else:
+        return float(n).is_integer()
+
+def get_cpsr_version():
+    # use pcgrr's Rscript to grab cpsr's R pkg version
+    rscript = script_path("pcgrr", "bin/Rscript")
+    v_cmd = f"{rscript} -e 'x <- paste0(\"cpsr \", as.character(packageVersion(\"cpsr\"))); cat(x, \"\n\")'"
+    return subprocess.check_output(v_cmd, shell=True).decode("utf-8")

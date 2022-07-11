@@ -10,9 +10,8 @@ import sys
 import annoutils
 import pandas as np
 from cyvcf2 import VCF
-
-logger = logging.getLogger('cpsr-validate-input-arguments')
-global debug
+from pcgr import utils
+from pcgr.utils import error_message, check_subprocess
 
 def __main__():
 
@@ -26,76 +25,56 @@ def __main__():
    parser.add_argument('sample_id',help='CPSR sample_name')
    parser.add_argument('virtual_panel_id',type=str,help='virtual panel identifier(s)')
    parser.add_argument('diagnostic_grade_only', type=int, default=0, choices=[0,1], help="Green virtual panels only (Genomics England PanelApp)")
-   parser.add_argument('--output_dir', dest='output_dir', help='Output directory', default='/workdir/output')
-   parser.add_argument('--debug',action='store_true',default=False, help='Print full docker commands to log')
+   parser.add_argument('--output_dir', dest='output_dir', help='Output directory')
+   parser.add_argument("--debug", action="store_true", help="Print full commands to log")
    args = parser.parse_args()
 
-   global debug
-   debug = args.debug
-
-   ret = validate_cpsr_input(args.pcgr_dir, 
-                             args.input_vcf, 
-                             args.custom_list, 
-                             args.preserved_info_tags, 
-                             args.vcf_validation, 
-                             args.genome_assembly, 
-                             args.sample_id, 
-                             args.virtual_panel_id, 
-                             args.diagnostic_grade_only, 
-                             args.output_dir)
+   ret = validate_cpsr_input(args.pcgr_dir,
+                             args.input_vcf,
+                             args.custom_list,
+                             args.preserved_info_tags,
+                             args.vcf_validation,
+                             args.genome_assembly,
+                             args.sample_id,
+                             args.virtual_panel_id,
+                             args.diagnostic_grade_only,
+                             args.output_dir,
+                             args.debug)
    if ret != 0:
       sys.exit(1)
-
-def check_subprocess(command):
-   if debug:
-      logger.info(command)
-   try:
-      output = subprocess.check_output(str(command), stderr=subprocess.STDOUT, shell=True)
-      if len(output) > 0:
-         print (str(output.decode()).rstrip())
-   except subprocess.CalledProcessError as e:
-      print (e.output.decode())
-      exit(0)
-
 
 # def is_valid_custom_bed(bed_file, logger):
 #    """
 #    Function that checks whether the custom panel (BED) adheres to the correct format
 #    """
-   
-   
 #    bed_reader = csv.DictReader(open(bed_file,'r'), delimiter='\t')
 #    for row in bed_reader:
 #       if len(row) != 4:
 #          err_msg = 'BED file with custom screening regions must contain four columns: \'Chromosome\', \'Start\',\'End\',\'GeneSymbol\' - found entry containing ' + len(row) + ' columns'
-#          return annoutils.error_message(err_msg, logger)
-   
+#          return error_message(err_msg, logger)
 #    bed_reader = csv.DictReader(open(bed_file,'r'), delimiter='\t', fieldnames=['Chromosome','Start','End','Symbol'])
-   
 #    bed_dataframe = np.read_csv(bed_file, usecols = [0,1,2,3], sep="\t",names=["Chromosome", "Start", "End","Symbol"])
 #    if not bed_dataframe['Start'].dtype.kind in 'i': ## check that 'Start' is of type integer
 #       err_msg = '\'Start\' column of BED file (custom panel) contains non-integer values'
-#       return annoutils.error_message(err_msg, logger)
+#       return error_message(err_msg, logger)
 #    if not bed_dataframe['End'].dtype.kind in 'i': ## check that 'End' is of type integer
 #       err_msg = '\'End\' column of BED file (custom panel) contains non-integer values'
-#       return annoutils.error_message(err_msg, logger)
-
+#       return error_message(err_msg, logger)
 #    for rec in bed_reader:
 #       if int(rec['End']) < int(rec['Start']): ## check that 'End' is always greather than 'Start'
 #          err_msg = 'Detected wrongly formatted BED segment - \'Start\' is greater than \'End\' (' + str(rec['Chromosome']) + ':' + str(rec['Start']) + '-' + str(rec['End']) + ')'
-#          return annoutils.error_message(err_msg, logger)
+#          return error_message(err_msg, logger)
 #       if int(rec['End']) < 1 or int(rec['Start']) < 0: ## check that 'Start' and 'End' is always non-negative
 #          err_msg = 'Detected wrongly formatted BED segment - \'Start\' or \'End\' is less than or equal to zero (' + str(rec['Chromosome']) + ':' + str(rec['Start']) + '-' + str(rec['End']) + ')'
-#          return annoutils.error_message(err_msg, logger)
+#          return error_message(err_msg, logger)
 #    logger.info('Custom panel BED file (' + str(bed_file) + ') adheres to the correct format (gene symbols not checked)')
 
 #    return 0
 
-def get_valid_custom_genelist(genelist_fname, genelist_bed_fname, pcgr_dir, genome_assembly, logger):
+def get_valid_custom_genelist(genelist_fname, genelist_bed_fname, pcgr_dir, genome_assembly, logger, debug):
    """
    Function that checks whether the custom genelist contains valid entries from the complete exploratory track
    """
-   
    genelist_reader = csv.DictReader(open(genelist_fname,'r'), delimiter='\n', fieldnames=['ensembl_gene_id'])
    superpanel_track_bed = os.path.join(pcgr_dir, "data", genome_assembly, "virtual_panels",  "0." + genome_assembly + ".bed.gz")
    superpanel_track_tsv = os.path.join(pcgr_dir, "data", genome_assembly, "virtual_panels", "cpsr_superpanel." + genome_assembly + ".tsv")
@@ -110,10 +89,10 @@ def get_valid_custom_genelist(genelist_fname, genelist_bed_fname, pcgr_dir, geno
    for row in genelist_reader:
       if not re.match(r'^ENSG[0-9]{1,}$',str(row['ensembl_gene_id']).rstrip()):
          err_msg = "Custom list of genes from CPSR superpanel (panel 0) should be provided as Ensembl gene identifiers, '" + str(row['ensembl_gene_id']) + "' is not a valid identifier"
-         return annoutils.error_message(err_msg, logger)
+         return error_message(err_msg, logger)
       else:
          customlist_identifiers[str(row['ensembl_gene_id']).strip()] = 1
-      
+
    superpanel_reader = csv.DictReader(open(superpanel_track_tsv, 'r'), delimiter = '\t')
 
    for row in superpanel_reader:
@@ -145,17 +124,17 @@ def get_valid_custom_genelist(genelist_fname, genelist_bed_fname, pcgr_dir, geno
 
    ## Add secondary findings genes to target BED
    cmd_secondary_regions_bed = 'bgzip -dc ' + str(superpanel_track_bed) + ' | egrep \'\|ACMG_SF30\|\' > ' + str(genelist_bed_fname_unsorted)
-   check_subprocess(cmd_secondary_regions_bed)
+   check_subprocess(logger, cmd_secondary_regions_bed, debug)
 
    ## Add GWAS hits to target BED
    cmd_gwas_regions_bed = 'bgzip -dc ' + str(superpanel_track_bed) + ' | egrep \'rs[0-9]{3,}\|\' >> ' + str(genelist_bed_fname_unsorted)
-   check_subprocess(cmd_gwas_regions_bed)
+   check_subprocess(logger, cmd_gwas_regions_bed, debug)
 
    ## Add custom set genes to target BED
    logger.info('Creating BED file with custom target genes: ' + str(genelist_bed_fname))
    for g in valid_custom_identifiers:
       cmd_target_regions_bed = 'bgzip -dc ' + str(superpanel_track_bed) + ' | egrep \'\|' + g + '\|\' >> ' + str(genelist_bed_fname_unsorted)
-      check_subprocess(cmd_target_regions_bed)
+      check_subprocess(logger, cmd_target_regions_bed, debug)
 
    ## Sort regions in target BED
    if os.path.exists(genelist_bed_fname_unsorted) and os.stat(genelist_bed_fname_unsorted).st_size != 0:
@@ -163,10 +142,10 @@ def get_valid_custom_genelist(genelist_fname, genelist_bed_fname, pcgr_dir, geno
       cmd_sort_custom_bed2 = 'egrep -v \'^[0-9]\' ' + str(genelist_bed_fname_unsorted) + ' | egrep \'^[XYM]\' | sort -k1,1 -k2,2n -k3,3n >> ' + str(genelist_bed_fname)
       cmd_rm_unsorted = 'rm -f ' + str(genelist_bed_fname_unsorted)
 
-      check_subprocess(cmd_sort_custom_bed1)
-      check_subprocess(cmd_sort_custom_bed2)
+      check_subprocess(logger, cmd_sort_custom_bed1, debug)
+      check_subprocess(logger, cmd_sort_custom_bed2, debug)
       if not debug:
-         check_subprocess(cmd_rm_unsorted)
+         check_subprocess(logger, cmd_rm_unsorted, debug)
    #else:
       #print('balle')
 
@@ -191,7 +170,7 @@ def check_existing_vcf_info_tags(input_vcf, pcgr_directory, genome_assembly, log
          if header_element['HeaderType'] == 'INFO':
             if header_element['ID'] in pcgr_infotags_desc.keys():
                err_msg = 'INFO tag ' + str(header_element['ID']) + ' in the query VCF coincides with a VCF annotation tag produced by CPSR - please remove or rename this tag in your query VCF'
-               return annoutils.error_message(err_msg, logger)
+               return error_message(err_msg, logger)
 
    logger.info('No query VCF INFO tags coincide with CPSR INFO tags')
    return ret
@@ -214,18 +193,18 @@ def check_preserved_vcf_info_tags(input_vcf, preserved_info_tags, logger):
       if 'ID' in header_element.keys() and 'HeaderType' in header_element.keys():
          if header_element['HeaderType'] == 'INFO':
             info_elements_query_vcf.append(header_element['ID'])
-   
+
 
    for t in tags:
       if not t in info_elements_query_vcf:
          err_msg = "Preserved INFO tag '" + str(t) + "' not found among INFO tags in query VCF - make sure preserved VCF INFO tags are set correctly"
-         return annoutils.error_message(err_msg, logger)
+         return error_message(err_msg, logger)
       else:
          logger.info("Preserved INFO tag '" + str(t) + "' detected among INFO tags in query VCF")
 
    return ret
 
-def simplify_vcf(input_vcf, vcf, custom_bed, pcgr_directory, genome_assembly, virtual_panel_id, sample_id, diagnostic_grade_only, output_dir, logger):
+def simplify_vcf(input_vcf, vcf, custom_bed, pcgr_directory, genome_assembly, virtual_panel_id, sample_id, diagnostic_grade_only, output_dir, logger, debug):
 
    """
    Function that performs four separate checks/filters on the validated input VCF:
@@ -241,46 +220,47 @@ def simplify_vcf(input_vcf, vcf, custom_bed, pcgr_directory, genome_assembly, vi
    virtual_panels_tmp_bed = os.path.join(output_dir, "virtual_panels_all." + str(sample_id) + ".tmp.bed")
    virtual_panels_bed = os.path.join(output_dir, "virtual_panels_all." + str(sample_id) + ".bed")
 
-   multiallelic_alt = 0
+   multiallelic_list = list()
    for rec in vcf:
       POS = rec.start + 1
       alt = ",".join(str(n) for n in rec.ALT)
       if len(rec.ALT) > 1:
-         logger.warning("Multiallelic site detected:" + str(rec.CHROM) + '\t' + str(POS) + '\t' + str(rec.REF) + '\t' + str(alt))
-         multiallelic_alt = 1
-   command_vcf_sample_free1 = 'egrep \'^##\' ' + str(input_vcf) + ' > ' + str(input_vcf_cpsr_ready)
-   command_vcf_sample_free2 = 'egrep \'^#CHROM\' ' + str(input_vcf) + ' >> ' + str(input_vcf_cpsr_ready)
-   command_vcf_sample_free3 = 'egrep -v \'^#\' ' + str(input_vcf) + ' | sed \'s/^chr//\' | egrep \'^[0-9]\' | sort -k1,1n -k2,2n -k4,4 -k5,5 >> ' + str(input_vcf_cpsr_ready)
-   command_vcf_sample_free4 = 'egrep -v \'^#\' ' + str(input_vcf) + ' | sed \'s/^chr//\' | egrep -v \'^[0-9]\' | egrep \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> ' + str(input_vcf_cpsr_ready)
-   command_vcf_sample_free5 = 'egrep -v \'^#\' ' + str(input_vcf) + ' | sed \'s/^chr//\' | egrep -v \'^[0-9]\' | egrep -v \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> ' + str(input_vcf_cpsr_ready)
-   
-   if input_vcf.endswith('.gz'):
-      command_vcf_sample_free1 = 'bgzip -dc ' + str(input_vcf) + ' | egrep \'^##\' > ' + str(input_vcf_cpsr_ready)
-      command_vcf_sample_free2 = 'bgzip -dc ' + str(input_vcf) + ' | egrep \'^#CHROM\'  >> ' + str(input_vcf_cpsr_ready)
-      command_vcf_sample_free3 = 'bgzip -dc ' + str(input_vcf) + ' | egrep -v \'^#\' | sed \'s/^chr//\' | egrep \'^[0-9]\' | sort -k1,1n -k2,2n -k4,4 -k5,5 >> ' + str(input_vcf_cpsr_ready)
-      command_vcf_sample_free4 = 'bgzip -dc ' + str(input_vcf) + ' | egrep -v \'^#\' | sed \'s/^chr//\' | egrep -v \'^[0-9]\' | egrep \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> ' + str(input_vcf_cpsr_ready)
-      command_vcf_sample_free5 = 'bgzip -dc ' + str(input_vcf) + ' | egrep -v \'^#\' | sed \'s/^chr//\' | egrep -v \'^[0-9]\' | egrep -v \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> ' + str(input_vcf_cpsr_ready)
+         variant_id = f"{rec.CHROM}:{POS}_{rec.REF}->{alt}"
+         multiallelic_list.append(variant_id)
 
-   check_subprocess(command_vcf_sample_free1)
-   check_subprocess(command_vcf_sample_free2)
-   check_subprocess(command_vcf_sample_free3)
-   check_subprocess(command_vcf_sample_free4)
-   check_subprocess(command_vcf_sample_free5)
-  
-   if multiallelic_alt == 1:
+   is_gzipped = True if input_vcf.endswith('.gz') else False
+   cat_vcf = f"bgzip -dc {input_vcf}" if is_gzipped else "cat {input_vcf}"
+
+   command_vcf_sample_free1 = f'{cat_vcf} | egrep \'^##\' > {input_vcf_cpsr_ready}'
+   command_vcf_sample_free2 = f'{cat_vcf} | egrep \'^#CHROM\' >> {input_vcf_cpsr_ready}'
+   command_vcf_sample_free3 = f'{cat_vcf} | egrep -v \'^#\' | sed \'s/^chr//\' | egrep \'^[0-9]\' | sort -k1,1n -k2,2n -k4,4 -k5,5 >> {input_vcf_cpsr_ready}'
+   command_vcf_sample_free4 = f'{cat_vcf} | egrep -v \'^#\' | sed \'s/^chr//\' | egrep -v \'^[0-9]\' | egrep \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> {input_vcf_cpsr_ready}'
+   command_vcf_sample_free5 = f'{cat_vcf} | egrep -v \'^#\' | sed \'s/^chr//\' | egrep -v \'^[0-9]\' | egrep -v \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> {input_vcf_cpsr_ready}'
+
+   check_subprocess(logger, command_vcf_sample_free1, debug)
+   check_subprocess(logger, command_vcf_sample_free2, debug)
+   check_subprocess(logger, command_vcf_sample_free3, debug)
+   check_subprocess(logger, command_vcf_sample_free4, debug)
+   check_subprocess(logger, command_vcf_sample_free5, debug)
+
+   if multiallelic_list:
+      logger.warning(f"There were {len(multiallelic_list)} multiallelic sites detected. Showing (up to) the first 100:")
+      print('----')
+      print(', '.join(multiallelic_list[:100]))
+      print('----')
       logger.info('Decomposing multi-allelic sites in input VCF file using \'vt decompose\'')
-      command_decompose = 'vt decompose -s ' + str(input_vcf_cpsr_ready) + ' > ' + str(input_vcf_cpsr_ready_decomposed) + ' 2> ' + os.path.join(output_dir, 'decompose.log')
-      check_subprocess(command_decompose)
+      command_decompose = f'vt decompose -s {input_vcf_cpsr_ready} > {input_vcf_cpsr_ready_decomposed}  2> {os.path.join(output_dir, "decompose.log")}'
+      check_subprocess(logger, command_decompose, debug)
    else:
-      command_copy = 'cp ' + str(input_vcf_cpsr_ready) + ' ' + str(input_vcf_cpsr_ready_decomposed)
-      check_subprocess(command_copy)
+      command_copy = f'cp {input_vcf_cpsr_ready} {input_vcf_cpsr_ready_decomposed}'
+      check_subprocess(logger, command_copy, debug)
 
 
    if not custom_bed == 'None':
       logger.info('Limiting variant set to user-defined screening loci (custom list from panel 0)')
       if os.path.exists(custom_bed) and os.stat(custom_bed).st_size != 0:
          target_variants_intersect_cmd = "bedtools intersect -wa -u -header -a " + str(input_vcf_cpsr_ready_decomposed) + " -b " + str(custom_bed) + " > " + str(input_vcf_cpsr_ready_decomposed_target)
-         check_subprocess(target_variants_intersect_cmd)
+         check_subprocess(logger, target_variants_intersect_cmd, debug)
       else:
          logger.info('Custom BED file has a filesize of zero or does not exist')
    else:
@@ -292,28 +272,28 @@ def simplify_vcf(input_vcf, vcf, custom_bed, pcgr_directory, genome_assembly, vi
          target_bed_gz = os.path.join(pcgr_directory,'data',genome_assembly, 'virtual_panels', str(pid) + "." + genome_assembly + ".bed.gz")
          if diagnostic_grade_only == 1 and virtual_panel_id != 0:
             logger.info('Considering diagnostic-grade only genes in panel ' + str(pid) + ' - (GREEN status in Genomics England PanelApp)')
-            target_bed_gz = os.path.join(pcgr_directory, 'data', genome_assembly, 'virtual_panels', str(pid) + "." + genome_assembly + ".GREEN.bed.gz")         
-         check_subprocess('bgzip -dc ' + str(target_bed_gz) + ' >> ' + str(virtual_panels_tmp_bed))
-      
+            target_bed_gz = os.path.join(pcgr_directory, 'data', genome_assembly, 'virtual_panels', str(pid) + "." + genome_assembly + ".GREEN.bed.gz")
+         check_subprocess(logger, f'bgzip -dc {target_bed_gz} >> {virtual_panels_tmp_bed}', debug)
+
       ## sort the collection of virtual panels
       if os.path.exists(virtual_panels_tmp_bed) and os.stat(virtual_panels_tmp_bed).st_size != 0:
          cmd_sort_virtual_panel_bed1 = 'egrep \'^[0-9]\' ' + str(virtual_panels_tmp_bed) + ' | sort -k1,1n -k2,2n -k3,3n | uniq > ' + str(virtual_panels_bed)
          cmd_sort_virtual_panel_bed2 = 'egrep -v \'^[0-9]\' ' + str(virtual_panels_tmp_bed) + ' | egrep \'^[XYM]\' | sort -k1,1 -k2,2n -k3,3n | uniq >> ' + str(virtual_panels_bed)
          cmd_rm_unsorted_vp = 'rm -f ' + str(virtual_panels_tmp_bed)
-         check_subprocess(cmd_sort_virtual_panel_bed1)
-         check_subprocess(cmd_sort_virtual_panel_bed2)
+         check_subprocess(logger, cmd_sort_virtual_panel_bed1, debug)
+         check_subprocess(logger, cmd_sort_virtual_panel_bed2, debug)
          if not debug:
-            check_subprocess(cmd_rm_unsorted_vp)
+            check_subprocess(logger, cmd_rm_unsorted_vp, debug)
 
          if os.path.exists(virtual_panels_bed):
             target_variants_intersect_cmd = 'bedtools intersect -wa -u -header -a ' + str(input_vcf_cpsr_ready_decomposed) + ' -b ' + str(virtual_panels_bed) + ' > ' + str(input_vcf_cpsr_ready_decomposed_target)
-            check_subprocess(target_variants_intersect_cmd)
-       
-   
-   check_subprocess('bgzip -cf ' + str(input_vcf_cpsr_ready_decomposed_target) + ' > ' + str(input_vcf_cpsr_ready_decomposed_target) + '.gz')
-   check_subprocess('tabix -p vcf ' + str(input_vcf_cpsr_ready_decomposed_target) + '.gz')
+            check_subprocess(logger, target_variants_intersect_cmd, debug)
+
+
+   check_subprocess(logger, f'bgzip -cf {input_vcf_cpsr_ready_decomposed_target} > {input_vcf_cpsr_ready_decomposed_target}.gz', debug)
+   check_subprocess(logger, f'tabix -p vcf {input_vcf_cpsr_ready_decomposed_target}.gz', debug)
    if not debug:
-      check_subprocess('rm -f ' + str(input_vcf_cpsr_ready) + ' ' + str(virtual_panels_bed) + ' ' + str(input_vcf_cpsr_ready_decomposed) + ' ' + os.path.join(output_dir, 'decompose.log'))
+      check_subprocess(logger, f'rm -f {input_vcf_cpsr_ready} {virtual_panels_bed} {input_vcf_cpsr_ready_decomposed} {os.path.join(output_dir, "decompose.log")}', debug)
 
    if os.path.exists(input_vcf_cpsr_ready_decomposed_target + '.gz') and os.path.getsize(input_vcf_cpsr_ready_decomposed_target + '.gz') > 0:
       vcf = VCF(input_vcf_cpsr_ready_decomposed_target + '.gz')
@@ -326,23 +306,23 @@ def simplify_vcf(input_vcf, vcf, custom_bed, pcgr_directory, genome_assembly, vi
          logger.info('')
          exit(1)
 
-def validate_cpsr_input(pcgr_directory, input_vcf, custom_list_fname, preserved_info_tags, vcf_validation, genome_assembly, sample_id, virtual_panel_id, diagnostic_grade_only, output_dir):
+def validate_cpsr_input(pcgr_directory, input_vcf, custom_list_fname, preserved_info_tags, vcf_validation, genome_assembly, sample_id, virtual_panel_id, diagnostic_grade_only, output_dir, debug):
    """
    Function that reads the input files to CPSR (VCF file) and performs the following checks:
    1. Check that VCF file is properly formatted (according to EBIvariation/vcf-validator - VCF v4.2) - optional (vcf_validation in config file)
    2. Check that no INFO annotation tags in the query VCF coincides with those generated by CPSR
    3. Check that custom VCF INFO tags set by user as retained for output is found in query VCF
    4. Check that if VCF have variants with multiple alternative alleles (e.g. 'A,T') run vt decompose
-   5. Check that VCF contains a single sample column 
+   5. Check that VCF contains a single sample column
    6. The resulting VCF file is sorted and indexed (bgzip + tabix)
    """
-   logger = annoutils.getlogger('cpsr-validate-input')
+   logger = utils.getlogger('cpsr-validate-input-arguments')
 
    custom_list_bed_fname = 'None'
    if not custom_list_fname == 'None':
       logger.info('Establishing BED track with custom list of genes from panel 0')
-      custom_list_bed_fname = os.path.join(output_dir, sample_id + '.cpsr.' + genome_assembly + '.custom_list.bed') 
-      get_valid_custom_genelist(custom_list_fname, custom_list_bed_fname, pcgr_directory, genome_assembly, logger)
+      custom_list_bed_fname = os.path.join(output_dir, sample_id + '.cpsr.' + genome_assembly + '.custom_list.bed')
+      get_valid_custom_genelist(custom_list_fname, custom_list_bed_fname, pcgr_directory, genome_assembly, logger, debug)
 
    #config_options = annoutils.read_config_options(configuration_file, pcgr_directory, genome_assembly, logger, wflow = 'cpsr')
    if not input_vcf == 'None':
@@ -354,7 +334,7 @@ def validate_cpsr_input(pcgr_directory, input_vcf, custom_list_fname, preserved_
       tag_check = check_existing_vcf_info_tags(input_vcf, pcgr_directory, genome_assembly, logger)
       if tag_check == -1:
          return -1
-      
+
       if preserved_info_tags != "None":
          custom_check = check_preserved_vcf_info_tags(input_vcf, preserved_info_tags, logger)
          if custom_check == -1:
@@ -364,9 +344,10 @@ def validate_cpsr_input(pcgr_directory, input_vcf, custom_list_fname, preserved_
       samples = vcf.samples
       if len(samples) > 1:
          err_msg = "Query VCF contains more than one sample column (" + ', '.join(samples) + ") - CPSR expects a germline VCF with a single sample column - exiting"
-         return annoutils.error_message(err_msg, logger)
-      simplify_vcf(input_vcf, vcf, custom_list_bed_fname, pcgr_directory, genome_assembly, virtual_panel_id, sample_id, diagnostic_grade_only, output_dir, logger)
+         return error_message(err_msg, logger)
+      simplify_vcf(input_vcf, vcf, custom_list_bed_fname, pcgr_directory, genome_assembly, virtual_panel_id, sample_id, diagnostic_grade_only, output_dir, logger, debug)
 
    return 0
 
-if __name__=="__main__": __main__()
+if __name__=="__main__":
+    __main__()

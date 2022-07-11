@@ -320,8 +320,8 @@ A VCF file containing annotated, somatic calls (single nucleotide variants and i
 | `COSMIC_MUTATION_ID` | Mutation identifier in [Catalog of somatic mutations in cancer](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/) database, as provided by VEP |
 | `TCGA_PANCANCER_COUNT` | Raw variant count across all TCGA tumor types |
 | `TCGA_FREQUENCY` | Frequency of variant across TCGA tumor types. Format: `tumortype| percent affected|affected cases|total cases` |
-| `ICGC_PCAWG_OCCURRENCE` | Mutation occurrence in [ICGC|PCAWG](http://docs.icgc.org/pcawg/). By project: `project_code|affected_donors|tested_donors|frequency` |
-| `ICGC_PCAWG_AFFECTED_DONORS` | Number of donors with the current mutation in [ICGC|PCAWG](http://docs.icgc.org/pcawg/) |
+| `ICGC_PCAWG_OCCURRENCE` | Mutation occurrence in [ICGC-PCAWG](http://docs.icgc.org/pcawg/). By project: `project_code|tumor_type|affected_donors|tested_donors|frequency` |
+| `ICGC_PCAWG_AFFECTED_DONORS` (**?**) | Number of donors with the current mutation in [ICGC-PCAWG](http://docs.icgc.org/pcawg/) |
 
 ##### _Clinical associations_
 
