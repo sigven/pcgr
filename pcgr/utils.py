@@ -4,6 +4,7 @@ import subprocess
 import shutil
 import logging
 import os
+import time
 import errno
 import platform
 
@@ -107,3 +108,24 @@ def remove(filename):
     except OSError as e:
         if e.errno != errno.ENOENT: # errno.ENOENT = no such file or directory
             raise # re-raise exception if a different error occurred
+
+
+# from https://github.com/bcbio/bcbio-nextgen/blob/master/bcbio/utils.py
+def safe_makedir(dname):
+    """Make a directory if it does not exist, handling concurrent race conditions.
+    """
+    if not dname:
+        return dname
+    num_tries = 0
+    max_tries = 5
+    while not os.path.exists(dname):
+        # we could get an error here if multiple processes are creating
+        # the directory at the same time. Grr, concurrency.
+        try:
+            os.makedirs(dname)
+        except OSError:
+            if num_tries > max_tries:
+                raise
+            num_tries += 1
+            time.sleep(2)
+    return dname

@@ -13,10 +13,6 @@ def check_args(arg_dict):
         err_msg = f"Required argument '--pcgr_dir' does not exist ({arg_dict['pcgr_dir']})."
         error_message(err_msg, logger)
 
-    if arg_dict['output_dir'] is None or not os.path.exists(arg_dict['output_dir']):
-        err_msg = f"Required argument '--output_dir' does not exist ({arg_dict['output_dir']})."
-        error_message(err_msg, logger)
-
     if arg_dict['genome_assembly'] is None:
         err_msg = f"Required argument '--genome_assembly' has no/undefined value ({arg_dict['genome_assembly']})."
         error_message(err_msg, logger)
@@ -223,11 +219,8 @@ def verify_input_files(arg_dict):
         err_msg = 'Please specifiy either a VCF input file (--input_vcf) or a copy number segment file (--input_cna)'
         error_message(err_msg, logger)
 
-    # check the existence of given output folder
-    output_dir_full = os.path.abspath(arg_dict['output_dir'])
-    if not os.path.isdir(output_dir_full):
-        err_msg = f'Output directory ({output_dir_full}) does not exist'
-        error_message(err_msg, logger)
+    # create output folder (if not already exists)
+    output_dir_full = safe_makedir(os.path.abspath(arg_dict['output_dir']))
 
     # check if panel of normal VCF exist
     if not arg_dict["pon_vcf"] is None:
@@ -441,10 +434,6 @@ def check_args_cpsr(arg_dict):
     if arg_dict['pcgr_dir'] is None or not os.path.exists(arg_dict['pcgr_dir']):
         err_msg = f"Required argument '--pcgr_dir' does not exist ({arg_dict['pcgr_dir']})."
         error_message(err_msg,logger)
-    ## Check that output directory is provided and exists
-    if arg_dict['output_dir'] is None or not os.path.exists(arg_dict['output_dir']):
-        err_msg = f"Required argument '--output_dir' does not exist ({arg_dict['output_dir']})."
-        error_message(err_msg,logger)
     ## Check that genome assembly is set
     if arg_dict['genome_assembly'] is None:
         err_msg = f"Required argument '--genome_assembly' has no/undefined value ({arg_dict['genome_assembly']})."
@@ -538,11 +527,8 @@ def verify_input_files_cpsr(arg_dict):
     input_customlist_basename = "NA"
     input_customlist_dir = "NA"
 
-    ## check the existence of given output folder
-    output_dir_full = os.path.abspath(arg_dict['output_dir'])
-    if not os.path.isdir(output_dir_full):
-        err_msg = f"Output directory ({output_dir_full}) does not exist"
-        error_message(err_msg,logger)
+    # create output folder (if not already exists)
+    output_dir_full = safe_makedir(os.path.abspath(arg_dict['output_dir']))
 
     ## check if input BED exist
     if not arg_dict['custom_list'] is None:
