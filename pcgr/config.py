@@ -5,6 +5,9 @@ from pcgr import pcgr_vars
 
 def create_config(arg_dict):
     config_options = {
+      'sample_id': arg_dict['sample_id'],
+      'genome_assembly': arg_dict['genome_assembly'],
+      'debug': arg_dict['debug'],
       'tumor_purity': 'NA',
       'tumor_ploidy': 'NA',
       'tumor_type': {

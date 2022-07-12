@@ -130,14 +130,14 @@ def cli():
     # Verify existence of input files
     pcgr_paths = arg_checker.verify_input_files(arg_dict)
     # Run PCGR workflow (vep, vcfanno, summarise, vcf2tsv, html)
-    run_pcgr(arg_dict, pcgr_paths, config_options)
+    run_pcgr(pcgr_paths, config_options)
 
-def run_pcgr(arg_dict, pcgr_paths, config_options):
+def run_pcgr(pcgr_paths, config_options):
     """
     Main function to run the PCGR workflow
     """
 
-    debug = arg_dict['debug']
+    debug = config_options['debug']
 
     report_nonfloating_toc = 1 if config_options['other']['nonfloating_toc'] else 0
     vep_regulatory_annotation = 'ON' if config_options['other']['vep_regulatory'] == 1 else 'OFF'
@@ -146,7 +146,7 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
     msig_estimation_set = 'ON' if config_options['msigs']['run'] else 'OFF'
     tmb_estimation_set = 'ON' if config_options['tmb']['run'] else 'OFF'
     vcf_validation = 0 if config_options['other']['no_vcf_validate'] else 1
-    run_vcf2maf = arg_dict['vcf2maf']
+    run_vcf2maf = config_options['other']['vcf2maf']
     assay_mode = 'Tumor vs. Control'
     tumor_only = 0
     cell_line = 0
@@ -165,7 +165,7 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
     NCBI_BUILD_MAF = pcgr_vars.NCBI_BUILD_MAF
     VEP_ASSEMBLY = pcgr_vars.VEP_ASSEMBLY
     MAX_VARIANTS_FOR_REPORT = pcgr_vars.MAX_VARIANTS_FOR_REPORT
-    if arg_dict['genome_assembly'] == 'grch37':
+    if config_options['genome_assembly'] == 'grch37':
         NCBI_BUILD_MAF = 'GRCh37'
         GENCODE_VERSION = 'release 19'
         VEP_ASSEMBLY = 'GRCh37'
@@ -214,7 +214,7 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
             f'{panel_normal} '
             f'{vcf_validation} '
             f'{tumor_only} '
-            f'{arg_dict["genome_assembly"]} '
+            f'{config_options["genome_assembly"]} '
             f'{config_options["other"]["preserved_info_tags"]} '
             f'{config_options["allelic_support"]["tumor_dp_tag"]} {config_options["allelic_support"]["tumor_af_tag"]} '
             f'{config_options["allelic_support"]["control_dp_tag"]} {config_options["allelic_support"]["control_af_tag"]} '
@@ -227,12 +227,11 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
     check_subprocess(logger, vcf_validate_command, debug)
     logger.info('Finished pcgr-validate-input-arguments')
     print('----')
-    return
 
     # PCGR|start - Log key information about sample, options and sequencing assay/design
     logger = getlogger('pcgr-start')
     logger.info('--- Personal Cancer Genome Reporter workflow ----')
-    logger.info(f'Sample name: {arg_dict["sample_id"]}')
+    logger.info(f'Sample name: {config_options["sample_id"]}')
     if config_options['tumor_type']['type'] == 'Cancer_NOS':
         logger.info('Tumor type: Cancer_NOS (Any tumortype)')
     else:
@@ -240,7 +239,7 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
     logger.info(f'Sequencing assay - type: {config_options["assay"]}')
     logger.info(f'Sequencing assay - mode: {assay_mode}')
     logger.info(f'Sequencing assay - coding target size: {config_options["tmb"]["target_size_mb"]}Mb')
-    logger.info(f'Genome assembly: {arg_dict["genome_assembly"]}')
+    logger.info(f'Genome assembly: {config_options["genome_assembly"]}')
     logger.info(f'Mutational signature estimation: {msig_estimation_set}')
     logger.info(f'MSI classification: {msi_prediction_set}')
     logger.info(f'Mutational burden estimation: {tmb_estimation_set}')
@@ -249,7 +248,7 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
     if not input_vcf == 'None':
 
         # Define temporary output file names
-        prefix = f'{arg_dict["sample_id"]}.pcgr_acmg.{arg_dict["genome_assembly"]}'
+        prefix = f'{config_options["sample_id"]}.pcgr_acmg.{config_options["genome_assembly"]}'
         output_vcf =             os.path.join(output_dir, f'{prefix}.vcf.gz')
         output_pass_vcf =        os.path.join(output_dir, f'{prefix}.pass.vcf.gz')
         output_pass_tsv =        os.path.join(output_dir, f'{prefix}.pass.tsv')
@@ -296,14 +295,14 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
         # PCGR|VEP - run consequence annotation with Variant Effect Predictor
         print('----')
         logger = getlogger('pcgr-vep')
-        logger.info(f'PCGR - STEP 1: Basic variant annotation with Variant Effect Predictor ({pcgr_vars.VEP_VERSION}, GENCODE {GENCODE_VERSION}, {arg_dict["genome_assembly"]})')
+        logger.info(f'PCGR - STEP 1: Basic variant annotation with Variant Effect Predictor ({pcgr_vars.VEP_VERSION}, GENCODE {GENCODE_VERSION}, {config_options["genome_assembly"]})')
         logger.info(f'VEP configuration - one primary consequence block pr. alternative allele (--flag_pick_allele)')
         logger.info(f'VEP configuration - transcript pick order: {config_options["other"]["vep_pick_order"]}')
         logger.info(f'VEP configuration - transcript pick order: See more at https://www.ensembl.org/info/docs/tools/vep/script/vep_other.html#pick_options')
         logger.info(f'VEP configuration - GENCODE set: {gencode_set_in_use}')
         logger.info(f'VEP configuration - skip intergenic: {"TRUE" if config_options["other"]["vep_no_intergenic"] else "FALSE"}')
         logger.info(f'VEP configuration - regulatory annotation: {vep_regulatory_annotation}')
-        logger.info(f'VEP configuration - buffer_size/number of forks: {arg_dict["vep_buffer_size"]}/{arg_dict["vep_n_forks"]}')
+        logger.info(f'VEP configuration - buffer_size/number of forks: {config_options["other"]["vep_buffer_size"]}/{config_options["other"]["vep_n_forks"]}')
 
         check_subprocess(logger, vep_main_command, debug)
         check_subprocess(logger, vep_bgzip_command, debug)
@@ -317,7 +316,7 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
             # TODO: use 'os.remove()' instead of 'rm -f'
             vcf2maf_command = (
                     f'vcf2maf.pl --inhibit-vep --input-vcf {input_vcf_pcgr_ready_uncompressed} '
-                    f'--tumor-id {arg_dict["sample_id"]} --output-maf {output_maf} --ref-fasta {fasta_assembly} '
+                    f'--tumor-id {config_options["sample_id"]} --output-maf {output_maf} --ref-fasta {fasta_assembly} '
                     f'--ncbi-build {NCBI_BUILD_MAF} > {output_vcf2maf_log} 2>&1'
                     )
             clean_vcf2maf_command = f'rm -f {output_vcf2maf_log} ' + re.sub(r'(\.vcf$)', '.vep.vcf', input_vcf_pcgr_ready_uncompressed)
@@ -332,7 +331,7 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
                 f'pcgr_vcfanno.py --num_processes {config_options["other"]["vcfanno_n_proc"]} '
                 f'--chasmplus --dbnsfp --docm --clinvar --icgc --civic --cgi --tcga_pcdm --winmsk --simplerepeats '
                 f'--tcga --uniprot --cancer_hotspots --pcgr_onco_xref {vep_vcf}.gz {vep_vcfanno_vcf} '
-                f'{os.path.join(data_dir, "data", str(arg_dict["genome_assembly"]))} {"--debug" if debug else ""}'
+                f'{os.path.join(data_dir, "data", str(config_options["genome_assembly"]))} {"--debug" if debug else ""}'
                 )
         anno_src_msg = (
                 f"Annotation sources: {'Panel-of-Normals, ' if panel_normal != 'None' else ''}ClinVar, dbNSFP, "
@@ -352,7 +351,7 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
         pcgr_summarise_command = (
                 f'pcgr_summarise.py {vep_vcfanno_vcf}.gz {pon_annotation} '
                 f'{config_options["other"]["vep_regulatory"]} '
-                f'{os.path.join(data_dir, "data", str(arg_dict["genome_assembly"]))} {"--debug" if debug else ""}'
+                f'{os.path.join(data_dir, "data", str(config_options["genome_assembly"]))} {"--debug" if debug else ""}'
                 )
         logger.info("PCGR - STEP 3: Cancer gene annotations with pcgr-summarise")
         check_subprocess(logger, pcgr_summarise_command, debug)
@@ -427,7 +426,7 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
         print('----')
 
     # Generation of HTML reports for VEP/vcfanno-annotated VCF and copy number segment file
-    if not arg_dict['basic']:
+    if not config_options['other']['basic']:
         co = config_options
         ttype = co['tumor_type']['type'].replace(' ', '_').replace('/', '@')
         logger = getlogger('pcgr-writer')
@@ -444,10 +443,10 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
                 f"{input_rna_fusion} "
                 f"{input_rna_expression} "
                 f"{input_cpsr_report} "
-                f"{arg_dict['sample_id']} "
+                f"{config_options['sample_id']} "
                 f"{pcgr_vars.PCGR_VERSION} "
                 f"{pcgr_vars.DB_VERSION} "
-                f"{arg_dict['genome_assembly']} "
+                f"{config_options['genome_assembly']} "
                 f"{data_dir} "
                 f"{co['tumor_purity']} "
                 f"{co['tumor_ploidy']} "
