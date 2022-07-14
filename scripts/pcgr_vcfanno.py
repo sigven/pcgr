@@ -4,6 +4,7 @@ import argparse
 import cyvcf2
 import random
 import re
+import glob
 from pcgr import utils
 from pcgr.utils import check_subprocess
 
@@ -162,10 +163,11 @@ def run_vcfanno(num_processes, query_vcf, panel_normal_vcf, query_info_tags, vcf
 
     check_subprocess(logger, f'cat {vcfheader_file} > {output_vcf}', debug=False)
     check_subprocess(logger, f'cat {out_vcf_vcfanno_unsorted1} | grep -v \'^#\' >> {output_vcf}', debug=False)
-    if not keep_logs is True:
-        check_subprocess(logger, f'rm -f {output_vcf}.tmp*', debug=False)
-    check_subprocess(logger, f'bgzip -f {output_vcf}', debug=False)
-    check_subprocess(logger, f'tabix -f -p vcf {output_vcf}.gz', debug=False)
+    check_subprocess(logger, f'bgzip -f {output_vcf}', debug)
+    check_subprocess(logger, f'tabix -f -p vcf {output_vcf}.gz', debug)
+    if not keep_logs:
+        for tmpf in glob.glob(f"{output_vcf}.tmp*"):
+            utils.remove(tmpf)
 
 def append_to_vcf_header(pcgr_db_directory, datasource, vcfheader_file, logger):
     """

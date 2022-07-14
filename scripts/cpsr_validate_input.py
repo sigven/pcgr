@@ -140,12 +140,11 @@ def get_valid_custom_genelist(genelist_fname, genelist_bed_fname, pcgr_dir, geno
    if os.path.exists(genelist_bed_fname_unsorted) and os.stat(genelist_bed_fname_unsorted).st_size != 0:
       cmd_sort_custom_bed1 = 'egrep \'^[0-9]\' ' + str(genelist_bed_fname_unsorted) + ' | sort -k1,1n -k2,2n -k3,3n > ' + str(genelist_bed_fname)
       cmd_sort_custom_bed2 = 'egrep -v \'^[0-9]\' ' + str(genelist_bed_fname_unsorted) + ' | egrep \'^[XYM]\' | sort -k1,1 -k2,2n -k3,3n >> ' + str(genelist_bed_fname)
-      cmd_rm_unsorted = 'rm -f ' + str(genelist_bed_fname_unsorted)
 
       check_subprocess(logger, cmd_sort_custom_bed1, debug)
       check_subprocess(logger, cmd_sort_custom_bed2, debug)
       if not debug:
-         check_subprocess(logger, cmd_rm_unsorted, debug)
+         utils.remove(str(genelist_bed_fname_unsorted))
    #else:
       #print('balle')
 
@@ -279,21 +278,22 @@ def simplify_vcf(input_vcf, vcf, custom_bed, pcgr_directory, genome_assembly, vi
       if os.path.exists(virtual_panels_tmp_bed) and os.stat(virtual_panels_tmp_bed).st_size != 0:
          cmd_sort_virtual_panel_bed1 = 'egrep \'^[0-9]\' ' + str(virtual_panels_tmp_bed) + ' | sort -k1,1n -k2,2n -k3,3n | uniq > ' + str(virtual_panels_bed)
          cmd_sort_virtual_panel_bed2 = 'egrep -v \'^[0-9]\' ' + str(virtual_panels_tmp_bed) + ' | egrep \'^[XYM]\' | sort -k1,1 -k2,2n -k3,3n | uniq >> ' + str(virtual_panels_bed)
-         cmd_rm_unsorted_vp = 'rm -f ' + str(virtual_panels_tmp_bed)
          check_subprocess(logger, cmd_sort_virtual_panel_bed1, debug)
          check_subprocess(logger, cmd_sort_virtual_panel_bed2, debug)
          if not debug:
-            check_subprocess(logger, cmd_rm_unsorted_vp, debug)
+            utils.remove(str(virtual_panels_tmp_bed))
 
          if os.path.exists(virtual_panels_bed):
-            target_variants_intersect_cmd = 'bedtools intersect -wa -u -header -a ' + str(input_vcf_cpsr_ready_decomposed) + ' -b ' + str(virtual_panels_bed) + ' > ' + str(input_vcf_cpsr_ready_decomposed_target)
+            target_variants_intersect_cmd = f'bedtools intersect -wa -u -header -a {input_vcf_cpsr_ready_decomposed} -b {virtual_panels_bed} > {input_vcf_cpsr_ready_decomposed_target}'
             check_subprocess(logger, target_variants_intersect_cmd, debug)
 
 
    check_subprocess(logger, f'bgzip -cf {input_vcf_cpsr_ready_decomposed_target} > {input_vcf_cpsr_ready_decomposed_target}.gz', debug)
    check_subprocess(logger, f'tabix -p vcf {input_vcf_cpsr_ready_decomposed_target}.gz', debug)
    if not debug:
-      check_subprocess(logger, f'rm -f {input_vcf_cpsr_ready} {virtual_panels_bed} {input_vcf_cpsr_ready_decomposed} {os.path.join(output_dir, "decompose.log")}', debug)
+      for fn in [input_vcf_cpsr_ready, virtual_panels_bed, input_vcf_cpsr_ready_decomposed, os.path.join(output_dir, "decompose.log")]:
+         #print(f"Deleting {fn}")
+         utils.remove(fn)
 
    if os.path.exists(input_vcf_cpsr_ready_decomposed_target + '.gz') and os.path.getsize(input_vcf_cpsr_ready_decomposed_target + '.gz') > 0:
       vcf = VCF(input_vcf_cpsr_ready_decomposed_target + '.gz')

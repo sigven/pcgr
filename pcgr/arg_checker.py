@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from pcgr import pcgr_vars
+from pcgr import pcgr_vars, utils
 from pcgr.utils import getlogger, error_message, warn_message
 import os
 
@@ -220,7 +220,7 @@ def verify_input_files(arg_dict):
         error_message(err_msg, logger)
 
     # create output folder (if not already exists)
-    output_dir_full = safe_makedir(os.path.abspath(arg_dict['output_dir']))
+    output_dir_full = utils.safe_makedir(os.path.abspath(arg_dict['output_dir']))
 
     # check if panel of normal VCF exist
     if not arg_dict["pon_vcf"] is None:
@@ -528,7 +528,7 @@ def verify_input_files_cpsr(arg_dict):
     input_customlist_dir = "NA"
 
     # create output folder (if not already exists)
-    output_dir_full = safe_makedir(os.path.abspath(arg_dict['output_dir']))
+    output_dir_full = utils.safe_makedir(os.path.abspath(arg_dict['output_dir']))
 
     ## check if input BED exist
     if not arg_dict['custom_list'] is None:

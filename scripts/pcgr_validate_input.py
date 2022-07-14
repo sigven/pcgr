@@ -408,10 +408,10 @@ def simplify_vcf(input_vcf, vcf, output_dir, keep_uncompressed, logger, debug):
         command_decompose = f'vt decompose -s {input_vcf_pcgr_ready} > {input_vcf_pcgr_ready_decomposed} 2> {os.path.join(output_dir, "decompose.log")}'
         check_subprocess(logger, command_decompose, debug)
     else:
-        logger.info('All sites seem to be decomposed, so skipping decompostion')
+        logger.info('All sites seem to be decomposed - skipping decomposition!')
         check_subprocess(logger, f'cp {input_vcf_pcgr_ready} {input_vcf_pcgr_ready_decomposed}', debug)
 
-    # need to keep uncompressed copy for vcf2maf.pl
+    # need to keep uncompressed copy for vcf2maf.pl if selected
     bgzip_cmd = f"bgzip -cf {input_vcf_pcgr_ready_decomposed} > {input_vcf_pcgr_ready_decomposed}.gz" if keep_uncompressed else f"bgzip -f {input_vcf_pcgr_ready_decomposed}"
     check_subprocess(logger, bgzip_cmd, debug)
     check_subprocess(logger, f'tabix -p vcf {input_vcf_pcgr_ready_decomposed}.gz', debug)
@@ -427,7 +427,6 @@ def simplify_vcf(input_vcf, vcf, output_dir, keep_uncompressed, logger, debug):
             logger.info('')
             exit(1)
 
-    print(input_vcf_pcgr_ready)
     utils.remove(input_vcf_pcgr_ready)
     utils.remove(os.path.join(output_dir, "decompose.log"))
 
