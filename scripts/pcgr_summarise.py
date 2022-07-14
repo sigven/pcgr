@@ -27,7 +27,7 @@ def __main__():
 
     extend_vcf_annotations(args.vcf_file, args.pcgr_db_dir, logger, args.pon_annotation, args.regulatory_annotation, args.cpsr, args.debug)
 
-def extend_vcf_annotations(query_vcf, pcgr_db_directory, logger, pon_annotation, regulatory_annotation, cpsr, debug):
+def extend_vcf_annotations(query_vcf, pcgr_db_dir, logger, pon_annotation, regulatory_annotation, cpsr, debug):
     """
     Function that reads VEP/vcfanno-annotated VCF and extends the VCF INFO column with tags from
     1. CSQ elements within the primary transcript consequence picked by VEP, e.g. SYMBOL, Feature, Gene, Consequence etc.
@@ -36,14 +36,14 @@ def extend_vcf_annotations(query_vcf, pcgr_db_directory, logger, pon_annotation,
     4. Variant effect predictions
     5. Panel-of-normal (blacklisted variants) annotation
 
-    List of INFO tags to be produced is provided by the 'infotags' files in the pcgr_db_directory
+    List of INFO tags to be produced is provided by the 'infotags' files in the pcgr_db_dir
     """
 
     ## read VEP and PCGR tags to be appended to VCF file
-    vcf_infotags_meta = annoutils.read_infotag_file(os.path.join(pcgr_db_directory, 'pcgr_infotags.tsv'))
+    vcf_infotags_meta = annoutils.read_infotag_file(os.path.join(pcgr_db_dir, 'pcgr_infotags.tsv'))
     if cpsr is True:
-        vcf_infotags_meta = annoutils.read_infotag_file(os.path.join(pcgr_db_directory, 'cpsr_infotags.tsv'))
-    pcgr_onco_xref_map = annoutils.read_genexref_namemap(os.path.join(pcgr_db_directory, 'pcgr_onco_xref', 'pcgr_onco_xref_namemap.tsv'))
+        vcf_infotags_meta = annoutils.read_infotag_file(os.path.join(pcgr_db_dir, 'cpsr_infotags.tsv'))
+    pcgr_onco_xref_map = annoutils.read_genexref_namemap(os.path.join(pcgr_db_dir, 'pcgr_onco_xref', 'pcgr_onco_xref_namemap.tsv'))
 
 
     out_vcf = re.sub(r'\.vcf(\.gz){0,}$','.annotated.vcf',query_vcf)

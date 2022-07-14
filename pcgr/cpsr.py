@@ -9,7 +9,7 @@ import logging
 import sys
 import getpass
 import platform
-#import toml
+from glob import glob
 from argparse import RawTextHelpFormatter
 from pcgr import pcgr_vars, arg_checker, utils
 from pcgr.utils import check_subprocess, getlogger, error_message, warn_message
@@ -285,25 +285,27 @@ def run_cpsr(arg_dict, cpsr_paths):
         check_subprocess(logger, pcgr_summarise_command, debug)
 
         ## CPSR|clean - rename output files, remove temporary files
-        create_output_vcf_command1 = f'mv {vep_vcfanno_annotated_vcf} {output_vcf}'
-        create_output_vcf_command2 = f'mv {vep_vcfanno_annotated_vcf}.tbi {output_vcf}.tbi'
-        create_output_vcf_command3 = f'mv {vep_vcfanno_annotated_pass_vcf} {output_pass_vcf}'
-        create_output_vcf_command4 = f'mv {vep_vcfanno_annotated_pass_vcf}.tbi {output_pass_vcf}.tbi'
-        # TODO: use 'os.remove()' instead of 'rm -f'
-        clean_command = f'rm -f {vep_vcf}* {vep_vcfanno_annotated_vcf} {vep_vcfanno_annotated_pass_vcf}* {vep_vcfanno_vcf}* {input_vcf_cpsr_ready_uncompressed}*'
-        check_subprocess(logger, create_output_vcf_command1, debug)
-        check_subprocess(logger, create_output_vcf_command2, debug)
-        check_subprocess(logger, create_output_vcf_command3, debug)
-        check_subprocess(logger, create_output_vcf_command4, debug)
+        os.rename(vep_vcfanno_annotated_vcf, output_vcf)
+        os.rename(f'{vep_vcfanno_annotated_vcf}.tbi', f'{output_vcf}.tbi')
+        os.rename(vep_vcfanno_annotated_pass_vcf, output_pass_vcf)
+        os.rename(f'{vep_vcfanno_annotated_pass_vcf}.tbi', f'{output_pass_vcf}.tbi')
+        delete_files = (
+                glob(f'{vep_vcf}*') +
+                glob(f'{vep_vcfanno_annotated_vcf}') +
+                glob(f'{vep_vcfanno_annotated_pass_vcf}*') +
+                glob(f'{vep_vcfanno_vcf}*') +
+                glob(f'{input_vcf_cpsr_ready_uncompressed}*')
+                )
+        # do not delete if debugging
+        if not debug:
+            for fn in delete_files:
+                #print(f"Deleting {fn}")
+                utils.remove(fn)
         logger.info('Finished cpsr-summarise main command')
-
         ## CPSR|vcf2tsv - perform vcf2tsv conversion on the final annotated VCF file
         cpsr_vcf2tsv_command = f"vcf2tsv.py {output_pass_vcf} --compress {output_pass_tsv}"
         logger.info("Converting VCF to TSV with https://github.com/sigven/vcf2tsv")
         check_subprocess(logger, cpsr_vcf2tsv_command, debug)
-        # do not clean if debugging
-        if not debug:
-            check_subprocess(logger, clean_command, debug)
         logger.info('Finished cpsr-summarise-vcf2tsv')
     logger.info('Finished cpsr-summarise')
     print('----')

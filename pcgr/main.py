@@ -9,6 +9,7 @@ import os
 import sys
 import getpass
 import platform
+from glob import glob
 from argparse import RawTextHelpFormatter
 
 
@@ -130,14 +131,14 @@ def cli():
     # Verify existence of input files
     pcgr_paths = arg_checker.verify_input_files(arg_dict)
     # Run PCGR workflow (vep, vcfanno, summarise, vcf2tsv, html)
-    run_pcgr(arg_dict, pcgr_paths, config_options)
+    run_pcgr(pcgr_paths, config_options)
 
-def run_pcgr(arg_dict, pcgr_paths, config_options):
+def run_pcgr(pcgr_paths, config_options):
     """
     Main function to run the PCGR workflow
     """
 
-    debug = arg_dict['debug']
+    debug = config_options['debug']
 
     report_nonfloating_toc = 1 if config_options['other']['nonfloating_toc'] else 0
     vep_regulatory_annotation = 'ON' if config_options['other']['vep_regulatory'] == 1 else 'OFF'
@@ -146,7 +147,7 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
     msig_estimation_set = 'ON' if config_options['msigs']['run'] else 'OFF'
     tmb_estimation_set = 'ON' if config_options['tmb']['run'] else 'OFF'
     vcf_validation = 0 if config_options['other']['no_vcf_validate'] else 1
-
+    run_vcf2maf = config_options['other']['vcf2maf']
     assay_mode = 'Tumor vs. Control'
     tumor_only = 0
     cell_line = 0
@@ -165,13 +166,13 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
     NCBI_BUILD_MAF = pcgr_vars.NCBI_BUILD_MAF
     VEP_ASSEMBLY = pcgr_vars.VEP_ASSEMBLY
     MAX_VARIANTS_FOR_REPORT = pcgr_vars.MAX_VARIANTS_FOR_REPORT
-    if arg_dict['genome_assembly'] == 'grch37':
+    if config_options['genome_assembly'] == 'grch37':
         NCBI_BUILD_MAF = 'GRCh37'
         GENCODE_VERSION = 'release 19'
         VEP_ASSEMBLY = 'GRCh37'
     logger = getlogger('pcgr-get-OS')
 
-    vepdb_dir = os.path.join(str(pcgr_paths['db_dir']), '.vep')
+    vep_dir = os.path.join(str(pcgr_paths['db_dir']), '.vep')
     input_vcf = 'None'
     input_cna = 'None'
     input_rna_fusion = 'None'
@@ -197,10 +198,7 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
 
     data_dir = pcgr_paths['base_dir']
     output_dir = pcgr_paths['output_dir']
-    vep_dir = vepdb_dir
 
-    # TODO: currently we error out if output_dir doesn't already exist...
-    check_subprocess(logger, f'mkdir -p {output_dir}', debug)
     # PCGR|validate_input - verify that VCF and CNA segment file is of appropriate format
     logger = getlogger("pcgr-validate-input-arguments")
     logger.info("PCGR - STEP 0: Validate input data and options")
@@ -215,14 +213,16 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
             f'{panel_normal} '
             f'{vcf_validation} '
             f'{tumor_only} '
-            f'{arg_dict["genome_assembly"]} '
+            f'{config_options["genome_assembly"]} '
             f'{config_options["other"]["preserved_info_tags"]} '
             f'{config_options["allelic_support"]["tumor_dp_tag"]} {config_options["allelic_support"]["tumor_af_tag"]} '
             f'{config_options["allelic_support"]["control_dp_tag"]} {config_options["allelic_support"]["control_af_tag"]} '
             f'{config_options["allelic_support"]["call_conf_tag"]} '
             f'{config_options["tumor_only"]["exclude_likely_hom_germline"]} '
             f'{config_options["tumor_only"]["exclude_likely_het_germline"]} '
-            f'--output_dir {output_dir} {"--debug" if debug else ""}'
+            f'--output_dir {output_dir} '
+            f'{"--debug " if debug else ""}'
+            f'{"--keep_uncompressed" if run_vcf2maf else ""} '
             )
     check_subprocess(logger, vcf_validate_command, debug)
     logger.info('Finished pcgr-validate-input-arguments')
@@ -231,7 +231,7 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
     # PCGR|start - Log key information about sample, options and sequencing assay/design
     logger = getlogger('pcgr-start')
     logger.info('--- Personal Cancer Genome Reporter workflow ----')
-    logger.info(f'Sample name: {arg_dict["sample_id"]}')
+    logger.info(f'Sample name: {config_options["sample_id"]}')
     if config_options['tumor_type']['type'] == 'Cancer_NOS':
         logger.info('Tumor type: Cancer_NOS (Any tumortype)')
     else:
@@ -239,98 +239,96 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
     logger.info(f'Sequencing assay - type: {config_options["assay"]}')
     logger.info(f'Sequencing assay - mode: {assay_mode}')
     logger.info(f'Sequencing assay - coding target size: {config_options["tmb"]["target_size_mb"]}Mb')
-    logger.info(f'Genome assembly: {arg_dict["genome_assembly"]}')
+    logger.info(f'Genome assembly: {config_options["genome_assembly"]}')
     logger.info(f'Mutational signature estimation: {msig_estimation_set}')
     logger.info(f'MSI classification: {msi_prediction_set}')
     logger.info(f'Mutational burden estimation: {tmb_estimation_set}')
     logger.info(f'Include molecularly targeted clinical trials (beta): {clinical_trials_set}')
 
     if not input_vcf == 'None':
-
         # Define temporary output file names
-        output_vcf = os.path.join(output_dir, f'{arg_dict["sample_id"]}.pcgr_acmg.{arg_dict["genome_assembly"]}.vcf.gz')
-        output_pass_vcf = os.path.join(output_dir, f'{arg_dict["sample_id"]}.pcgr_acmg.{arg_dict["genome_assembly"]}.pass.vcf.gz')
-        output_pass_tsv = os.path.join(output_dir, f'{arg_dict["sample_id"]}.pcgr_acmg.{arg_dict["genome_assembly"]}.pass.tsv')
-        output_pass_raw_tsv_gz = os.path.join(output_dir, f'{arg_dict["sample_id"]}.pcgr_acmg.{arg_dict["genome_assembly"]}.pass.raw.tsv.gz')
-        output_maf = os.path.join(output_dir, f'{arg_dict["sample_id"]}.pcgr_acmg.{arg_dict["genome_assembly"]}.tmp.maf')
-        output_vcf2maf_log = os.path.join(output_dir, f'{arg_dict["sample_id"]}.pcgr_acmg.{arg_dict["genome_assembly"]}.maf.log')
-        input_vcf_pcgr_ready = os.path.join(output_dir, re.sub(r"(\.vcf$|\.vcf\.gz$)", ".pcgr_ready.vcf.gz", pcgr_paths["input_vcf_basename"]))
-        # needs to be uncompressed for vcf2maf.pl
+        prefix = os.path.join(output_dir, f'{config_options["sample_id"]}.pcgr_acmg.{config_options["genome_assembly"]}')
+        output_vcf =             f'{prefix}.vcf.gz'
+        output_pass_vcf =        f'{prefix}.pass.vcf.gz'
+        output_pass_tsv =        f'{prefix}.pass.tsv'
+        output_pass_raw_tsv_gz = f'{prefix}.pass.raw.tsv.gz'
+        output_maf =             f'{prefix}.tmp.maf'
+        output_vcf2maf_log =     f'{prefix}.maf.log'
+        input_vcf_pcgr_ready =   os.path.join(output_dir, re.sub(r"(\.vcf$|\.vcf\.gz$)", ".pcgr_ready.vcf.gz", pcgr_paths["input_vcf_basename"]))
+        # needs to be uncompressed for vcf2maf
         input_vcf_pcgr_ready_uncompressed = os.path.join(output_dir, re.sub(r"(\.vcf$|\.vcf\.gz$)", ".pcgr_ready.vcf", pcgr_paths["input_vcf_basename"]))
-        vep_vcf = re.sub(r"(\.vcf$|\.vcf\.gz$)", ".vep.vcf", input_vcf_pcgr_ready)
+        vep_vcf = re.sub(r"(\.vcf$|\.vcf\.gz$)", ".vep.vcf.gz", input_vcf_pcgr_ready)
         vep_vcfanno_vcf = re.sub(r"(\.vcf$|\.vcf\.gz$)", ".vep.vcfanno.vcf", input_vcf_pcgr_ready)
         vep_vcfanno_annotated_vcf = re.sub(r"\.vcfanno", ".vcfanno.annotated", vep_vcfanno_vcf) + ".gz"
         vep_vcfanno_annotated_pass_vcf = re.sub(r"\.vcfanno", ".vcfanno.annotated.pass", vep_vcfanno_vcf) + ".gz"
-
-        # Path for human genome assembly file (FASTA)
         fasta_assembly = os.path.join(vep_dir, 'homo_sapiens', f'{pcgr_vars.VEP_VERSION}_{VEP_ASSEMBLY}', f'Homo_sapiens.{VEP_ASSEMBLY}.dna.primary_assembly.fa.gz')
-
         # List all VEP flags used when calling VEP
         vep_flags = (
                 f'--hgvs --af --af_1kg --af_gnomad --variant_class --domains --symbol --protein --ccds --mane '
                 f'--uniprot --appris --biotype --tsl --canonical --format vcf --cache --numbers --total_length --allele_number '
-                f'--no_stats --no_escape --xref_refseq --vcf --check_ref --dont_skip --flag_pick_allele --plugin NearestExonJB,max_range=50000'
+                f'--no_stats --no_escape --xref_refseq --vcf --check_ref --dont_skip --flag_pick_allele --plugin NearestExonJB,max_range=50000 '
+                f'--force_overwrite --species homo_sapiens --offline --compress_output bgzip'
                 )
         vep_options = (
-                f'--pick_order {config_options["other"]["vep_pick_order"]} --force_overwrite --buffer_size '
-                f'{config_options["other"]["vep_buffer_size"]} --species homo_sapiens --assembly {VEP_ASSEMBLY} --offline --fork '
-                f'{config_options["other"]["vep_n_forks"]} {vep_flags} --dir {vep_dir} {"--verbose" if debug else "--quiet"}'
+                f'--dir {vep_dir} --assembly {VEP_ASSEMBLY} --cache_version {pcgr_vars.VEP_VERSION} '
+                f'--fasta {fasta_assembly} --pick_order {config_options["other"]["vep_pick_order"]} '
+                f'--buffer_size {config_options["other"]["vep_buffer_size"]} '
+                f'--fork {config_options["other"]["vep_n_forks"]} '
+                f'{vep_flags} '
+                f'{"--verbose" if debug else "--quiet"} '
                 )
         gencode_set_in_use = "GENCODE - all transcripts"
-        vep_options += f' --cache_version {pcgr_vars.VEP_VERSION}'
         if config_options['other']['vep_no_intergenic'] == 1:
-            vep_options += ' --no_intergenic'
+            vep_options += '--no_intergenic '
         if config_options['other']['vep_regulatory'] == 1:
-            vep_options += ' --regulatory'
+            vep_options += '--regulatory '
         if config_options['other']['vep_gencode_all'] == 0:
-            vep_options += ' --gencode_basic'
+            vep_options += '--gencode_basic '
             gencode_set_in_use = "GENCODE - basic transcript set (--gencode_basic)"
 
         # Compose full VEP command
-        vep_main_command = f'{utils.get_perl_exports()} && vep --input_file {input_vcf_pcgr_ready} --output_file {vep_vcf} {vep_options} --fasta {fasta_assembly}'
-        vep_bgzip_command = f'bgzip -f -c {vep_vcf} > {vep_vcf}.gz'
-        vep_tabix_command = f'tabix -f -p vcf {vep_vcf}.gz'
+        vep_main_command = f'{utils.get_perl_exports()} && vep --input_file {input_vcf_pcgr_ready} --output_file {vep_vcf} {vep_options}'
+        vep_tabix_command = f'tabix -f -p vcf {vep_vcf}'
 
         # PCGR|VEP - run consequence annotation with Variant Effect Predictor
         print('----')
         logger = getlogger('pcgr-vep')
-        logger.info(f'PCGR - STEP 1: Basic variant annotation with Variant Effect Predictor ({pcgr_vars.VEP_VERSION}, GENCODE {GENCODE_VERSION}, {arg_dict["genome_assembly"]})')
+        logger.info(f'PCGR - STEP 1: Basic variant annotation with Variant Effect Predictor ({pcgr_vars.VEP_VERSION}, GENCODE {GENCODE_VERSION}, {config_options["genome_assembly"]})')
         logger.info(f'VEP configuration - one primary consequence block pr. alternative allele (--flag_pick_allele)')
         logger.info(f'VEP configuration - transcript pick order: {config_options["other"]["vep_pick_order"]}')
         logger.info(f'VEP configuration - transcript pick order: See more at https://www.ensembl.org/info/docs/tools/vep/script/vep_other.html#pick_options')
         logger.info(f'VEP configuration - GENCODE set: {gencode_set_in_use}')
         logger.info(f'VEP configuration - skip intergenic: {"TRUE" if config_options["other"]["vep_no_intergenic"] else "FALSE"}')
         logger.info(f'VEP configuration - regulatory annotation: {vep_regulatory_annotation}')
-        logger.info(f'VEP configuration - buffer_size/number of forks: {arg_dict["vep_buffer_size"]}/{arg_dict["vep_n_forks"]}')
+        logger.info(f'VEP configuration - buffer_size/number of forks: {config_options["other"]["vep_buffer_size"]}/{config_options["other"]["vep_n_forks"]}')
 
         check_subprocess(logger, vep_main_command, debug)
-        check_subprocess(logger, vep_bgzip_command, debug)
         check_subprocess(logger, vep_tabix_command, debug)
         logger.info('Finished pcgr-vep')
         print('----')
 
         # PCGR|vcf2maf - if option set, convert VCF to MAF with https://github.com/mskcc/vcf2maf
-        if config_options['other']['vcf2maf'] == 1:
+        if run_vcf2maf:
             logger.info('Converting VEP-annotated VCF to MAF with https://github.com/mskcc/vcf2maf')
-            # TODO: use 'os.remove()' instead of 'rm -f'
             vcf2maf_command = (
                     f'vcf2maf.pl --inhibit-vep --input-vcf {input_vcf_pcgr_ready_uncompressed} '
-                    f'--tumor-id {arg_dict["sample_id"]} --output-maf {output_maf} --ref-fasta {fasta_assembly} '
+                    f'--tumor-id {config_options["sample_id"]} --output-maf {output_maf} --ref-fasta {fasta_assembly} '
                     f'--ncbi-build {NCBI_BUILD_MAF} > {output_vcf2maf_log} 2>&1'
                     )
-            clean_vcf2maf_command = f'rm -f {output_vcf2maf_log} ' + re.sub(r'(\.vcf$)', '.vep.vcf', input_vcf_pcgr_ready_uncompressed)
             check_subprocess(logger, vcf2maf_command, debug)
-            check_subprocess(logger, clean_vcf2maf_command, debug)
+            utils.remove(input_vcf_pcgr_ready_uncompressed)
+            utils.remove(output_vcf2maf_log)
             logger.info('Finished pcgr-vep-vcf2maf')
             print('----')
 
         # PCGR|vcfanno - annotate VCF against a number of variant annotation resources
         logger = getlogger("pcgr-vcfanno")
         pcgr_vcfanno_command = (
-                f'pcgr_vcfanno.py --num_processes {config_options["other"]["vcfanno_n_proc"]} '
+                f'pcgr_vcfanno.py {vep_vcf} {vep_vcfanno_vcf} {pcgr_paths["db_dir"]} '
+                f'--num_processes {config_options["other"]["vcfanno_n_proc"]} '
                 f'--chasmplus --dbnsfp --docm --clinvar --icgc --civic --cgi --tcga_pcdm --winmsk --simplerepeats '
-                f'--tcga --uniprot --cancer_hotspots --pcgr_onco_xref {vep_vcf}.gz {vep_vcfanno_vcf} '
-                f'{os.path.join(data_dir, "data", str(arg_dict["genome_assembly"]))} {"--debug" if debug else ""}'
+                f'--tcga --uniprot --cancer_hotspots --pcgr_onco_xref '
+                f'{"--debug " if debug else ""}'
                 )
         anno_src_msg = (
                 f"Annotation sources: {'Panel-of-Normals, ' if panel_normal != 'None' else ''}ClinVar, dbNSFP, "
@@ -340,7 +338,7 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
         logger.info(anno_src_msg)
         if panel_normal != "None":
             pon_annotation = 1
-            pcgr_vcfanno_command = f'{pcgr_vcfanno_command} --panel_normal_vcf {panel_normal}'
+            pcgr_vcfanno_command += f'--panel_normal_vcf {panel_normal}'
         check_subprocess(logger, pcgr_vcfanno_command, debug)
         logger.info("Finished pcgr-vcfanno")
         print('----')
@@ -350,26 +348,30 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
         pcgr_summarise_command = (
                 f'pcgr_summarise.py {vep_vcfanno_vcf}.gz {pon_annotation} '
                 f'{config_options["other"]["vep_regulatory"]} '
-                f'{os.path.join(data_dir, "data", str(arg_dict["genome_assembly"]))} {"--debug" if debug else ""}'
+                f'{pcgr_paths["db_dir"]} '
+                f'{"--debug" if debug else ""}'
                 )
         logger.info("PCGR - STEP 3: Cancer gene annotations with pcgr-summarise")
         check_subprocess(logger, pcgr_summarise_command, debug)
 
         # PCGR|clean - move output files and clean up temporary files
-        create_output_vcf_command1 = f'mv {vep_vcfanno_annotated_vcf} {output_vcf}'
-        create_output_vcf_command2 = f'mv {vep_vcfanno_annotated_vcf}.tbi {output_vcf}.tbi'
-        create_output_vcf_command3 = f'mv {vep_vcfanno_annotated_pass_vcf} {output_pass_vcf}'
-        create_output_vcf_command4 = f'mv {vep_vcfanno_annotated_pass_vcf}.tbi {output_pass_vcf}.tbi'
-        # TODO: use 'os.remove()' instead of 'rm -f'
-        clean_command = (
-                f'rm -f {vep_vcf}* {vep_vcfanno_annotated_vcf} '
-                f'{vep_vcfanno_annotated_pass_vcf}* {vep_vcfanno_vcf}* '
-                f'{input_vcf_pcgr_ready_uncompressed}*'
+        os.rename(vep_vcfanno_annotated_vcf, output_vcf)
+        os.rename(f'{vep_vcfanno_annotated_vcf}.tbi', f'{output_vcf}.tbi')
+        os.rename(vep_vcfanno_annotated_pass_vcf, output_pass_vcf)
+        os.rename(f'{vep_vcfanno_annotated_pass_vcf}.tbi', f'{output_pass_vcf}.tbi')
+        delete_files = (
+                glob(f'{vep_vcf}*') +
+                glob(f'{vep_vcfanno_annotated_vcf}') +
+                glob(f'{vep_vcfanno_annotated_pass_vcf}*') +
+                glob(f'{vep_vcfanno_vcf}*') +
+                glob(f'{input_vcf_pcgr_ready_uncompressed}*')
                 )
-        check_subprocess(logger, create_output_vcf_command1, debug)
-        check_subprocess(logger, create_output_vcf_command2, debug)
-        check_subprocess(logger, create_output_vcf_command3, debug)
-        check_subprocess(logger, create_output_vcf_command4, debug)
+        # do not delete if debugging
+        if not debug:
+            for fn in delete_files:
+                #print(f"Deleting {fn}")
+                utils.remove(fn)
+
         logger.info('Finished pcgr-summarise main command')
 
         # PCGR|vcf2tsv - convert VCF to TSV with https://github.com/sigven/vcf2tsv
@@ -377,9 +379,6 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
         logger.info("Converting VCF to TSV with https://github.com/sigven/vcf2tsv")
         check_subprocess(logger, pcgr_vcf2tsv_command, debug)
         logger.info('Finished pcgr-summarise-vcf2tsv')
-        # do not clean if debugging
-        if not debug:
-            check_subprocess(logger, clean_command, debug)
 
         if config_options['assay'] == 'WGS' or config_options['assay'] == 'WES':
             output_pass_tsv_gz = f'{output_pass_tsv}.gz'
@@ -425,7 +424,7 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
         print('----')
 
     # Generation of HTML reports for VEP/vcfanno-annotated VCF and copy number segment file
-    if not arg_dict['basic']:
+    if not config_options['other']['basic']:
         co = config_options
         ttype = co['tumor_type']['type'].replace(' ', '_').replace('/', '@')
         logger = getlogger('pcgr-writer')
@@ -442,10 +441,10 @@ def run_pcgr(arg_dict, pcgr_paths, config_options):
                 f"{input_rna_fusion} "
                 f"{input_rna_expression} "
                 f"{input_cpsr_report} "
-                f"{arg_dict['sample_id']} "
+                f"{config_options['sample_id']} "
                 f"{pcgr_vars.PCGR_VERSION} "
                 f"{pcgr_vars.DB_VERSION} "
-                f"{arg_dict['genome_assembly']} "
+                f"{config_options['genome_assembly']} "
                 f"{data_dir} "
                 f"{co['tumor_purity']} "
                 f"{co['tumor_ploidy']} "
