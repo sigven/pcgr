@@ -996,6 +996,7 @@ generate_report_data_cna <-
     onco_ts_sets <-
       get_oncogene_tsgene_target_sets(
         cna_transcript_df,
+        transcript_overlap_pct = transcript_overlap_pct,
         log_r_homdel = log_r_homdel,
         log_r_gain = log_r_gain,
         tumor_type = tumor_type,
