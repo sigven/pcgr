@@ -7,7 +7,7 @@ The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for
 PCGR interprets primarily **somatic SNVs/InDels and copy number aberrations**. The software extends basic gene and variant annotations from the [Ensembl's Variant Effect Predictor (VEP)](http://www.ensembl.org/info/docs/tools/vep/index.html) with oncology-relevant, up-to-date annotations retrieved flexibly through [vcfanno](https://github.com/brentp/vcfanno), and produces interactive HTML reports intended for clinical interpretation. PCGR can perform multiple types of analyses, including:
 
 - Somatic variant classification (ACMG/AMP)
-	- mapping the therapeutic and prognostic implications of somatic DNA aberrations
+  - mapping the therapeutic and prognostic implications of somatic DNA aberrations
 - Tumor mutational burden (TMB) estimation
 - Tumor-only analysis (variant filtering)
 - Mutational signature analysis
@@ -20,14 +20,25 @@ If you want to interrogate germline variants and their relation to cancer predis
 
 ### News
 
+-   *October 2022*: **1.1.0 release**
+
+    - Remove Docker command wrappers
+    - Deprecate `--no_docker` and `--docker_uid` CLI options
+    - Merged PRs
+      [pr192](https://github.com/sigven/pcgr/pull/192),
+      [pr193](https://github.com/sigven/pcgr/pull/193),
+      [pr194](https://github.com/sigven/pcgr/pull/194),
+      [pr196](https://github.com/sigven/pcgr/pull/196).
+    - See [CHANGELOG](http://sigven.github.io/pcgr/articles/CHANGELOG.html) for a few more changes.
+
 -   *May 2022*: **1.0.3 release**
 
     - Merged [PR #191](https://github.com/sigven/pcgr/pull/191)
-    
+
 -   *March 2022*: **1.0.2 release**
-    
+
     - Fixed [CPSR issue #44](https://github.com/sigven/cpsr/issues/44)
-    
+
 -   *March 2022*: **1.0.1 release**
 
     -   Fixed bug for huge input sets that cause JSON output crash
