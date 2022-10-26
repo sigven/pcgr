@@ -3,6 +3,32 @@ title: "Changelog"
 output: rmarkdown::html_document
 ---
 
+## v1.1.0
+
+- Date: **2022-10-XX**
+- [Diff between v1.1.0 and v1.0.3](https://github.com/sigven/pcgr/compare/v1.0.3...v1.1.0)
+
+### Changes
+
+- Remove Docker command wrappers (note: this does not remove the Docker _functionality_ from PCGR; instead
+  it removes the legacy wrappers that were created in the original PCGR version). This along with a lot of
+  other general changes are summarised in [pr193](https://github.com/sigven/pcgr/pull/193). Of note:
+  - `--no_docker` and `--docker_uid` CLI arguments are now obsolete.
+  - `--version` CLI argument added for `pcgr/cpsr.py`
+  - declutter repetitive log messages
+  - refactor `pcgr/cpsr.py` script
+- Update documentation and declutter logging; refactor dict creation ([pr192](https://github.com/sigven/pcgr/pull/192))
+- Minor refactor ([pr194](https://github.com/sigven/pcgr/pull/194)):
+  - switch to using Python's native `os.remove` and `os.rename` for glob cleanup
+  - keep decompressed VCF only if `--vcf2maf` option is specified.
+    The [vcf2maf](https://github.com/mskcc/vcf2maf) tool does not support compressed VCFs - see
+    [issue235](https://github.com/mskcc/vcf2maf/issues/235).
+- Fix for CLI argument `--cna_overlap_pct` ([pr196](https://github.com/sigven/pcgr/pull/196).
+
+### New Contributors
+
+- [@niklasmueboe](https://github.com/niklasmueboe) ([pr196](https://github.com/sigven/pcgr/pull/196).
+
 ## v1.0.3
 
  * Date: **2022-05-24**
@@ -12,7 +38,7 @@ output: rmarkdown::html_document
  * Bug in clinical trials sorting, [#191](https://github.com/sigven/pcgr/pull/191)
 
 ## v1.0.2
- 
+
  * Date: **2022-03-30**
 
 ##### Fixed
@@ -24,11 +50,11 @@ output: rmarkdown::html_document
  * Date: **2022-03-09**
 
 ##### Fixed
- 
- * Writing to JSON crashes when size of input VCF is huge (variants in the order of millions). If raw input set (VCF) contains > 500,000 variants, this set will, prior to reporting, be reduced by 
+
+ * Writing to JSON crashes when size of input VCF is huge (variants in the order of millions). If raw input set (VCF) contains > 500,000 variants, this set will, prior to reporting, be reduced by
       * A) exclusion of intergenic and intronic variants, and
       * B) exclusion of upstream_gene/downstream_gene variants (if variant set is still above 500,000 after step A)
- * [Bug in signature analysis](https://github.com/sigven/pcgr/issues/187) for cases where the input variant set fits to > 18 different aetiologies. 
+ * [Bug in signature analysis](https://github.com/sigven/pcgr/issues/187) for cases where the input variant set fits to > 18 different aetiologies.
 
 ## v1.0.0
 
@@ -47,7 +73,7 @@ output: rmarkdown::html_document
 
 * Complete restructure of Python and R components.Installation now relies on two separate [conda](https://docs.conda.io/en/latest/) packages, `pcgr` (Python component) and `pcgrr` (R component). Direct Docker support remains, with the Dockerfile simplified to rely exclusively on the installation of the above Conda packages.
 
-##### Removed 
+##### Removed
 
 * VCF validation step. Feedback from users suggested that Ensembl's `vcf-validator` was often too stringent so its use has been deprecated. The `--no_vcf_validate` option remains for backwards compatibility.
 
@@ -121,8 +147,8 @@ output: rmarkdown::html_document
 
  * Date: **2020-11-30**
 
- * Data updates: 
-   * ClinVar, 
+ * Data updates:
+   * ClinVar,
    * GWAS catalog
    * CIViC
    * CancerMine
@@ -187,7 +213,7 @@ output: rmarkdown::html_document
  * References are updated and all provided with DOI
 
 ## v0.8.4
- 
+
  * Date: **2019-11-18**
 
  - Data updates: ClinVar, CIViC, CancerMine, UniProt KB
@@ -237,7 +263,7 @@ output: rmarkdown::html_document
 ##### Added
   * *Cancer_NOS.toml* as configuration file for unspecified tumor types
 
-## v0.8.0 
+## v0.8.0
 
  * Date: **2019-05-20**
 
@@ -297,7 +323,7 @@ output: rmarkdown::html_document
 
 
 ## v0.7.0
- 
+
  * Date: **2018-11-27**
 
 ##### Fixed
@@ -368,7 +394,7 @@ output: rmarkdown::html_document
 ## v0.6.1
 
  * Date: **2018-05-02**
- 
+
 ##### Fixed
  * Bug in tier assignment 'pcgr_acmg' (case for no variants in tier1,2,3)
  * Bug in tier assignment 'pcgr_acmg' (no tumor type specified, evidence items with weak support detected)
