@@ -1,6 +1,13 @@
-<br>
+---
+editor_options: 
+  markdown: 
+    wrap: 72
+---
 
-## Personal Cancer Genome Reporter
+
+# Personal Cancer Genome Reporter <a href="https://sigven.github.io/pcgr/"><img src="man/figures/logo.png" align="right" height="118" width="100"/></a>
+
+<br>
 
 The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for functional annotation and translation of individual tumor genomes for precision cancer medicine. It interprets both somatic SNVs/InDels and copy number aberrations. The software extends basic gene and variant annotations from the [Ensembl's Variant Effect Predictor (VEP)](http://www.ensembl.org/info/docs/tools/vep/index.html) with oncology-relevant, up-to-date annotations retrieved flexibly through [vcfanno](https://github.com/brentp/vcfanno). Variants are further classified into [tiers of clinical significance](articles/variant_classification.html). Interactive HTML output reports allow the user to interrogate the clinical impact of the molecular findings in an individual tumor.
 
@@ -10,7 +17,7 @@ Example views from the dashboard HTML output:
 
 PCGR originates from the [Norwegian Cancer Genomics Consortium (NCGC)](http://cancergenomics.no), at the [Institute for Cancer Research, Oslo University Hospital, Norway](http://radium.no).
 
-### Example reports
+## Example reports
 
 -   [Cervical cancer sample (tumor-control)](http://insilico.hpc.uio.no/pcgr/example_reports/latest/cervix_tumor_control.grch37.flexdb.html)
 -   [Stomach cancer sample (tumor-control)](http://insilico.hpc.uio.no/pcgr/example_reports/latest/esophagus_stomach_tumor_control.grch37.flexdb.html)
@@ -18,7 +25,7 @@ PCGR originates from the [Norwegian Cancer Genomics Consortium (NCGC)](http://ca
 
 (to view the rmarkdown-based reports, simply remove *.flexdb.* in the file names for the flexdashboard reports)
 
-### Why use PCGR?
+## Why use PCGR?
 
 The great complexity of acquired mutations in individual tumor genomes poses a severe challenge for clinical interpretation. PCGR aims to be a comprehensive reporting platform that can
 
@@ -28,7 +35,7 @@ The great complexity of acquired mutations in individual tumor genomes poses a s
 
 PCGR integrates a [comprehensive set of knowledge resources](articles/annotation_resources.html) related to tumor biology and therapeutic biomarkers, both at the gene, and variant level. The software generates a tiered genome report that will aid the translation of individual cancer genomes for novel treatment strategies.
 
-### Getting started
+## Getting started
 
 -   [Installation instructions](articles/installation.html)
 
@@ -44,7 +51,7 @@ PCGR integrates a [comprehensive set of knowledge resources](articles/annotation
     <br>
 -   [Frequenty asked questions (FAQ)](articles/faq.html)
 
-### Citation
+## Citation
 
 If you use PCGR, please cite our publication:
 
