@@ -7,12 +7,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="description" content="pcgrr">
 <title>Installation • PCGR</title>
+<!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
+<link rel="apple-touch-icon" type="image/png" sizes="180x180" href="../apple-touch-icon.png">
+<link rel="apple-touch-icon" type="image/png" sizes="120x120" href="../apple-touch-icon-120x120.png">
+<link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png">
+<link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.1.0/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.1.0/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
+<link href="../deps/bootstrap-5.1.3/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.1.3/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Installation">
 <meta property="og:description" content="pcgrr">
+<meta property="og:image" content="https://sigven.github.io/pcgr/logo.png">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -26,7 +33,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -87,8 +94,8 @@
 
 
 <div class="row">
-  <main id="main"><div class="page-header">
-      <img src="" class="logo" alt=""><h1>Installation</h1>
+  <main id="main" class="col-md-9"><div class="page-header">
+      <img src="../logo.png" class="logo" alt=""><h1>Installation</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/sigven/pcgr/blob/HEAD/../vignettes/installation.Rmd" class="external-link"><code>../vignettes/installation.Rmd</code></a></small>
@@ -100,10 +107,15 @@
 <div class="section level2">
 <h2 id="quick-installation">Quick Installation<a class="anchor" aria-label="anchor" href="#quick-installation"></a>
 </h2>
-<p>If you know what <a href="https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html" class="external-link">conda</a>
+<div class="section level3">
+<h3 id="conda">Conda<a class="anchor" aria-label="anchor" href="#conda"></a>
+</h3>
+<ul>
+<li>If you know what <a href="https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html" class="external-link">conda</a>
 is, you only need to run the following commands in order to install the
-PCGR software requirements:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="va">PCGR_VERSION</span><span class="op">=</span><span class="st">"1.0.3"</span></span>
+PCGR software requirements:</li>
+</ul>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="va">PCGR_VERSION</span><span class="op">=</span><span class="st">"1.1.0"</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="va">PCGR_REPO</span><span class="op">=</span><span class="st">"https://raw.githubusercontent.com/sigven/pcgr/v</span><span class="va">${PCGR_VERSION}</span><span class="st">/conda/env/lock/"</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="va">PLATFORM</span><span class="op">=</span><span class="st">"linux"</span> <span class="co"># or "osx"</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -118,8 +130,23 @@ PCGR software requirements:</p>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co"># test that it works</span></span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="ex">pcgr</span> <span class="at">--version</span></span></code></pre></div>
-<p>For downloading the data bundle, see <a href="#step1">STEP 1</a>
-further below.</p>
+</div>
+<div class="section level3">
+<h3 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a>
+</h3>
+<ul>
+<li>For downloading the data bundle, see <a href="#step1">STEP 1</a>
+further below.</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="docker">Docker<a class="anchor" aria-label="anchor" href="#docker"></a>
+</h3>
+<ul>
+<li>If you know what <a href="https://www.docker.com/" class="external-link">Docker</a> is,
+instead of using the above conda method you can jump straight to the <a href="#dockersetup">PCGR Docker setup</a> section.</li>
+</ul>
+</div>
 </div>
 <div class="section level2">
 <h2 id="detailed-installation">Detailed Installation<a class="anchor" aria-label="anchor" href="#detailed-installation"></a>
@@ -162,7 +189,7 @@ data bundle - 20220203</a> (approx 21Gb)</p></li>
 </h3>
 <p>Download and unpack the latest software release from <a href="https://github.com/sigven/pcgr/releases" class="external-link uri">https://github.com/sigven/pcgr/releases</a>.</p>
 <p>Alternatively if you have <code>git</code> installed, you can do:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="va">PCGR_VERSION</span><span class="op">=</span><span class="st">"1.0.3"</span></span>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="va">PCGR_VERSION</span><span class="op">=</span><span class="st">"1.1.0"</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="va">OUTPUT_DIRECTORY</span><span class="op">=</span><span class="st">"PCGR"</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone <span class="dt">\</span></span>
@@ -170,6 +197,8 @@ data bundle - 20220203</a> (approx 21Gb)</p></li>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">--depth</span> 1 <span class="dt">\</span></span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    https://github.com/sigven/pcgr.git <span class="dt">\</span></span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"</span><span class="va">${OUTPUT_DIRECTORY}</span><span class="st">"</span></span></code></pre></div>
+<p>Note that the <code>--depth 1</code> option ensures you only clone
+the specific version, and not the entire git history of the repo.</p>
 </div>
 <div class="section level3">
 <h3 id="step-3-set-up-conda-or-docker">STEP 3: Set up Conda or Docker<a class="anchor" aria-label="anchor" href="#step-3-set-up-conda-or-docker"></a>
@@ -239,7 +268,11 @@ install the conda dependencies for these two environments in the local
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co">## Alternatively, for installing in your central conda directory, use the following:</span></span>
 <span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co"># mamba create --name pcgr --file ${PCGR_CONDA_ENV_DIR}/lock/pcgr-${PLATFORM}.lock</span></span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co"># mamba create --name pcgrr --file ${PCGR_CONDA_ENV_DIR}/lock/pcgrr-${PLATFORM}.lock</span></span></code></pre></div>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co"># mamba create --name pcgrr --file ${PCGR_CONDA_ENV_DIR}/lock/pcgrr-${PLATFORM}.lock</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co">## For MacOS M1, you need to have 'CONDA_SUBDIR=osx-64' before the mamba command, i.e.:</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co"># CONDA_SUBDIR=osx-64 mamba create --prefix [...] --file [...]</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="co">## See https://github.com/conda-forge/miniforge/issues/165#issuecomment-860233092</span></span></code></pre></div>
 <p>The above process takes 10-15min when installing from scratch. In the
 end, you can confirm your conda environments have been installed
 correctly (notice how the paths are different to the <code>base</code>
@@ -303,44 +336,26 @@ Docker image</a> from DockerHub (approx 5.7Gb) with:
 </ul>
 </div>
 <div class="section level4">
-<h4 id="c-run-pcgr-docker-container-directly-recommended-or-indirectly">c) Run PCGR Docker Container directly (<em>recommended</em>) or
-indirectly<a class="anchor" aria-label="anchor" href="#c-run-pcgr-docker-container-directly-recommended-or-indirectly"></a>
+<h4 id="c-run-pcgr-docker-container">c) Run PCGR Docker Container<a class="anchor" aria-label="anchor" href="#c-run-pcgr-docker-container"></a>
 </h4>
-<p>This next step depends on how familiar you are with working with
-Docker volumes (<a href="https://docs.docker.com/storage/volumes/" class="external-link uri">https://docs.docker.com/storage/volumes/</a>).</p>
-<ul>
-<li>If you know how to use the
-<code>-v &lt;host&gt;:&lt;container&gt;</code> Docker option, you can
-use the PCGR Docker image directly, which would not involve having to
-set up a Python environment. Jump to the <a href="#dockerdirectsetup">PCGR Docker direct setup</a> for more
-details.</li>
-<li>Alternatively, you can allow PCGR itself to handle the Docker volume
-setup intricacies, but this requires a Python environment setup (which
-can be a bit cumbersome if you’re not too familiar with conda or
-virtualenv). Jump to the <a href="#dockerindirectsetup">PCGR Docker
-indirect setup</a> for more details.</li>
-</ul>
-<p><a name="dockerdirectsetup"></a></p>
-<div class="section level5">
-<h5 id="directly">Directly<a class="anchor" aria-label="anchor" href="#directly"></a>
-</h5>
-<details><summary>
-CLICK ME!
-</summary><p>You’ll need to map your PCGR inputs to Docker container paths. For
-example, say you have the input VCF <code>sampleX.vcf.gz</code> stored
-in the directory <code>/Users/you/project1</code>. You would need to
-supply Docker with a <code>--volume</code> (or <code>-v</code>) option
-mapping the directory of that VCF with a directory inside the Docker
-container, e.g. <code>/home/input_vcf_dir</code>. That would become:
-<code>-v /Users/you/project1:/home/input_vcf_dir</code> (note the
-<code>:</code> separating your directory from the container’s
+<p>If you are familiar with working with Docker volumes (<a href="https://docs.docker.com/storage/volumes/" class="external-link uri">https://docs.docker.com/storage/volumes/</a>) you can run
+PCGR using Docker instead of conda using the
+<code>-v &lt;host&gt;:&lt;container&gt;</code> Docker option. You’ll
+need to map your PCGR inputs to Docker container paths.</p>
+<p>For example, say you have the input VCF <code>sampleX.vcf.gz</code>
+stored in the directory <code>/Users/you/project1</code>. You would need
+to supply Docker with a <code>--volume</code> (or <code>-v</code>)
+option mapping the directory of that VCF with a directory inside the
+Docker container, e.g. <code>/home/input_vcf_dir</code>. That would
+become: <code>-v /Users/you/project1:/home/input_vcf_dir</code> (note
+the <code>:</code> separating your directory from the container’s
 directory).</p>
 <p>Then your command would look something like this:</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> container run <span class="at">-it</span> <span class="at">--rm</span> <span class="dt">\</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">-v</span> /Users/you/dir1/data:/root/pcgr_data <span class="dt">\</span></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">-v</span> /Users/you/dir2/pcgr_inputs:/root/pcgr_inputs <span class="dt">\</span></span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">-v</span> /Users/you/dir3/pcgr_outputs:/root/pcgr_outputs <span class="dt">\</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    sigven/pcgr:1.0.3 <span class="dt">\</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    sigven/pcgr:1.1.0 <span class="dt">\</span></span>
 <span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    pcgr <span class="dt">\</span></span>
 <span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>      <span class="at">--input_vcf</span> <span class="st">"/root/pcgr_inputs/tumor_sample.BRCA.vcf.gz"</span> <span class="dt">\</span></span>
 <span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">--pcgr_dir</span> <span class="st">"/root/pcgr_data"</span> <span class="dt">\</span></span>
@@ -348,66 +363,11 @@ directory).</p>
 <span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>      <span class="at">--genome_assembly</span> <span class="st">"grch38"</span> <span class="dt">\</span></span>
 <span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>      <span class="at">--sample_id</span> <span class="st">"SampleB"</span> <span class="dt">\</span></span>
 <span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>      <span class="at">--assay</span> <span class="st">"WGS"</span> <span class="dt">\</span></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>      <span class="at">--vcf2maf</span> <span class="dt">\</span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">--no_docker</span></span></code></pre></div>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>      <span class="at">--vcf2maf</span></span></code></pre></div>
 <ul>
-<li>Note the <code>--no_docker</code> option in the above command. Since
-you’re running that command <em>directly</em> inside the container, you
-need to use that option to bypass the <em>indirect</em> Docker PCGR
-run.</li>
-<li>Also note the path mappings. You’re using the <em>container</em>
-paths in the command, not the <em>host</em> (your machine’s) paths.</li>
-</ul></details><p><a name="dockerindirectsetup"></a></p>
-</div>
-<div class="section level5">
-<h5 id="indirectly-not-recommended">Indirectly (not recommended)<a class="anchor" aria-label="anchor" href="#indirectly-not-recommended"></a>
-</h5>
-<details><summary>
-CLICK ME!
-</summary><p>Install the PCGR Python component on your local machine. Only
-requirement is Python &gt; 3.6. We would <em>strongly</em> advise to
-install it in a virtual Python environment with conda (or virtualenv)
-(read the previous sections for how to install conda). Or else it will
-(probably) use your system’s default Python and you’ll end up in a
-situation like <a href="https://xkcd.com/1987/" class="external-link uri">https://xkcd.com/1987/</a>. Here’s an example using
-conda/mamba, with only Python 3.7 as a dependency:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span><span class="ex">base</span><span class="kw">)</span> <span class="ex">$</span> mamba create <span class="at">-n</span> pcgr_docker_env <span class="at">-c</span> conda-forge python=3.7</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span><span class="ex">base</span><span class="kw">)</span> <span class="ex">$</span> conda activate pcgr_docker_env</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span><span class="ex">pcgr_docker_env</span><span class="kw">)</span> <span class="ex">$</span> which python</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="ex">/Users/you/miniconda3/envs/pcgr_docker_env/bin/python</span></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span><span class="ex">pcgr_docker_env</span><span class="kw">)</span> <span class="ex">$</span> cd /Users/you/dir4/PCGR</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span><span class="ex">pcgr_docker_env</span><span class="kw">)</span> <span class="ex">$</span> pip install <span class="at">-e</span> .</span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="ex">Obtaining</span> file:///Users/you/dir4/PCGR</span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="ex">Preparing</span> metadata <span class="er">(</span><span class="ex">setup.py</span><span class="kw">)</span> <span class="ex">...</span> done</span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="ex">Installing</span> collected packages: pcgr</span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  <span class="ex">Running</span> setup.py develop for pcgr</span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="ex">Successfully</span> installed pcgr-X.X.X</span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span><span class="ex">pcgr_docker_env</span><span class="kw">)</span> <span class="ex">$</span> which pcgr</span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="ex">/Users/you/miniconda3/envs/pcgr_docker/bin/pcgr</span></span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span><span class="ex">pcgr_docker_env</span><span class="kw">)</span> <span class="ex">$</span> pcgr <span class="at">--version</span></span>
-<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a><span class="ex">pcgr</span> X.X.X</span></code></pre></div>
-<p>You should now be all set up to run PCGR from within that
-<code>pcgr_docker_env</code> conda environment! Here’s an example
-command:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span><span class="ex">pcgr_docker_env</span><span class="kw">)</span> <span class="ex">$</span> pcgr <span class="dt">\</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">--input_vcf</span> <span class="st">"/Users/you/dir1/tumor_sample.BRCA.vcf.gz"</span> <span class="dt">\</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--pcgr_dir</span> <span class="st">"/Users/you/dir2/data"</span> <span class="dt">\</span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--output_dir</span> <span class="st">"/Users/you/dir3/pcgr_outputs"</span> <span class="dt">\</span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--genome_assembly</span> <span class="st">"grch38"</span> <span class="dt">\</span></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--sample_id</span> <span class="st">"SampleB"</span> <span class="dt">\</span></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">--assay</span> <span class="st">"WGS"</span></span></code></pre></div>
-<ul>
-<li>Note that we do not specify the <code>--no_docker</code> option.
-PCGR will automatically look for the more recent Docker container on
-your machine, and then run the above command inside it
-<em>indirectly</em>.</li>
-<li>Also note the path mappings. You’re using the actual <em>host</em>
-(your machine’s) paths, not the <em>container</em> paths.</li>
-</ul></details>
-</div>
+<li>Note the path mappings. You’re using the <em>container</em> paths in
+the command, not the <em>host</em> (your machine’s) paths.</li>
+</ul>
 </div>
 </div>
 </div>
@@ -424,7 +384,7 @@ your machine, and then run the above command inside it
 
 <div class="pkgdown-footer-right">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
     </footer>
