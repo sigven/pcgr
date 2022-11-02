@@ -41,8 +41,8 @@ def cli():
     optional_other.add_argument("--logr_gain", type=float, default=0.8, dest="logr_gain", help="Log ratio-threshold (minimum) for segments containing copy number gains/amplifications (default: %(default)s)")
     optional_other.add_argument("--logr_homdel", type=float, default=-0.8, dest="logr_homdel", help="Log ratio-threshold (maximum) for segments containing homozygous deletions (default: %(default)s)")
     optional_other.add_argument("--cna_overlap_pct", type=float, default=50, dest="cna_overlap_pct", help="Mean percent overlap between copy number segment and gene transcripts for reporting of gains/losses in tumor suppressor genes/oncogenes, (default: %(default)s)")
-    optional_other.add_argument("--tumor_site", dest="tsite", type=int, default=0, help="Optional integer code to specify primary tumor type/site of query sample,\n choose any of the following identifiers:\n" + str(pcgr_vars.tumor_sites) + "\n(default: %(default)s - any tumor type)")
-    optional_other.add_argument("--tumor_purity", type=float, dest="tumor_purity", help="Estimated tumor purity (between 0 and 1, (default: %(default)s)")
+    optional_other.add_argument("--tumor_site", dest="tsite", type=int, default=0, help="Optional integer code to specify primary tumor type/site of query sample,\nchoose any of the following identifiers:\n" + str(pcgr_vars.tumor_sites) + "\n(default: %(default)s - any tumor type)")
+    optional_other.add_argument("--tumor_purity", type=float, dest="tumor_purity", help="Estimated tumor purity (between 0 and 1) (default: %(default)s)")
     optional_other.add_argument("--tumor_ploidy", type=float, dest="tumor_ploidy", help="Estimated tumor ploidy (default: %(default)s)")
 
     optional_allelic_support.add_argument("--tumor_dp_tag", dest="tumor_dp_tag", default="_NA_", help="Specify VCF INFO tag for sequencing depth (tumor, must be Type=Integer, default: %(default)s")
@@ -85,7 +85,7 @@ def cli():
     optional_vep.add_argument("--vep_buffer_size", default=100, type=int, help=f"Variant buffer size (variants read into memory simultaneously, option '--buffer_size' in VEP)\n- set lower to reduce memory usage, default: %(default)s")
     optional_vep.add_argument("--vep_pick_order", default="canonical,appris,biotype,ccds,rank,tsl,length,mane", help=f"Comma-separated string of ordered transcript/variant properties for selection of primary variant consequence\n(option '--pick_order' in VEP), default: %(default)s")
     optional_vep.add_argument("--vep_no_intergenic", action="store_true", help="Skip intergenic variants during processing (option '--no_intergenic' in VEP), default: %(default)s")
-    optional_vep.add_argument("--vep_regulatory", action="store_true", help="Add VEP regulatory annotations (option '--regulatory' )or non-coding interpretation, default: %(default)s")
+    optional_vep.add_argument("--vep_regulatory", action="store_true", help="Add VEP regulatory annotations (option '--regulatory') or non-coding interpretation, default: %(default)s")
     optional_vep.add_argument('--vep_gencode_all', action='store_true', help = "Consider all GENCODE transcripts with Variant Effect Predictor (VEP) (option '--gencode_basic' in VEP is used by default in PCGR).")
 
 
