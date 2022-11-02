@@ -383,7 +383,7 @@ def simplify_vcf(input_vcf, vcf, output_dir, keep_uncompressed, logger, debug):
             multiallelic_list.append(variant_id)
 
     is_gzipped = True if input_vcf.endswith('.gz') else False
-    cat_vcf = f"bgzip -dc {input_vcf}" if is_gzipped else "cat {input_vcf}"
+    cat_vcf = f"bgzip -dc {input_vcf}" if is_gzipped else f"cat {input_vcf}"
     # Remove FORMAT metadata lines
     command_vcf_sample_free1 = f'{cat_vcf} | egrep \'^##\' | egrep -v \'^##FORMAT=\' > {input_vcf_pcgr_ready}'
     # Output first 8 column names (CHROM-INFO, so ignore FORMAT + sample columns)

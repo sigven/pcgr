@@ -228,7 +228,7 @@ def simplify_vcf(input_vcf, vcf, custom_bed, pcgr_directory, genome_assembly, vi
          multiallelic_list.append(variant_id)
 
    is_gzipped = True if input_vcf.endswith('.gz') else False
-   cat_vcf = f"bgzip -dc {input_vcf}" if is_gzipped else "cat {input_vcf}"
+   cat_vcf = f"bgzip -dc {input_vcf}" if is_gzipped else f"cat {input_vcf}"
 
    command_vcf_sample_free1 = f'{cat_vcf} | egrep \'^##\' > {input_vcf_cpsr_ready}'
    command_vcf_sample_free2 = f'{cat_vcf} | egrep \'^#CHROM\' >> {input_vcf_cpsr_ready}'
