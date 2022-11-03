@@ -227,20 +227,13 @@ def simplify_vcf(input_vcf, vcf, custom_bed, pcgr_directory, genome_assembly, vi
          variant_id = f"{rec.CHROM}:{POS}_{rec.REF}->{alt}"
          multiallelic_list.append(variant_id)
 
-   is_gzipped = True if input_vcf.endswith('.gz') else False
-   cat_vcf = f"bgzip -dc {input_vcf}" if is_gzipped else f"cat {input_vcf}"
+   # Grab metadata lines
+   cmd_vcf1 = f'bcftools view -h {input_vcf} > {input_vcf_cpsr_ready}'
+   # Now sort VCF and keep only auto/XY/M/MT
+   cmd_vcf2 = f'bcftools sort {input_vcf} | bcftools view -H | sed \'s/^chr//\' | grep -w \'^[1-9]\|^[1-2][0-9]\|^[XYM]\|^MT\' >> {input_vcf_cpsr_ready}'
 
-   command_vcf_sample_free1 = f'{cat_vcf} | egrep \'^##\' > {input_vcf_cpsr_ready}'
-   command_vcf_sample_free2 = f'{cat_vcf} | egrep \'^#CHROM\' >> {input_vcf_cpsr_ready}'
-   command_vcf_sample_free3 = f'{cat_vcf} | egrep -v \'^#\' | sed \'s/^chr//\' | egrep \'^[0-9]\' | sort -k1,1n -k2,2n -k4,4 -k5,5 >> {input_vcf_cpsr_ready}'
-   command_vcf_sample_free4 = f'{cat_vcf} | egrep -v \'^#\' | sed \'s/^chr//\' | egrep -v \'^[0-9]\' | egrep \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> {input_vcf_cpsr_ready}'
-   command_vcf_sample_free5 = f'{cat_vcf} | egrep -v \'^#\' | sed \'s/^chr//\' | egrep -v \'^[0-9]\' | egrep -v \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> {input_vcf_cpsr_ready}'
-
-   check_subprocess(logger, command_vcf_sample_free1, debug)
-   check_subprocess(logger, command_vcf_sample_free2, debug)
-   check_subprocess(logger, command_vcf_sample_free3, debug)
-   check_subprocess(logger, command_vcf_sample_free4, debug)
-   check_subprocess(logger, command_vcf_sample_free5, debug)
+   check_subprocess(logger, cmd_vcf1, debug)
+   check_subprocess(logger, cmd_vcf2, debug)
 
    if multiallelic_list:
       logger.warning(f"There were {len(multiallelic_list)} multiallelic sites detected. Showing (up to) the first 100:")
