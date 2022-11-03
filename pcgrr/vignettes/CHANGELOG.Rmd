@@ -3,9 +3,19 @@ title: "Changelog"
 output: rmarkdown::html_document
 ---
 
+## v1.2.0-rc
+
+- Date: **2022-11-XX**
+- [Diff between v1.2.0 and v1.1.0](https://github.com/sigven/pcgr/compare/v1.1.0...v1.2.0)
+
+### Changes
+
+- Keep only autosomal, X, Y, M/MT chromosomes
+- Import bcftools as dependency
+
 ## v1.1.0
 
-- Date: **2022-10-XX**
+- Date: **2022-10-28**
 - [Diff between v1.1.0 and v1.0.3](https://github.com/sigven/pcgr/compare/v1.0.3...v1.1.0)
 
 ### Changes
@@ -17,17 +27,17 @@ output: rmarkdown::html_document
   - `--version` CLI argument added for `pcgr/cpsr.py`
   - declutter repetitive log messages
   - refactor `pcgr/cpsr.py` script
-- Update documentation and declutter logging; refactor dict creation ([pr192](https://github.com/sigven/pcgr/pull/192))
+- Update documentation and declutter logging; refactor dict creation ([pr192](https://github.com/sigven/pcgr/pull/192)).
 - Minor refactor ([pr194](https://github.com/sigven/pcgr/pull/194)):
   - switch to using Python's native `os.remove` and `os.rename` for glob cleanup
   - keep decompressed VCF only if `--vcf2maf` option is specified.
     The [vcf2maf](https://github.com/mskcc/vcf2maf) tool does not support compressed VCFs - see
     [issue235](https://github.com/mskcc/vcf2maf/issues/235).
-- Fix for CLI argument `--cna_overlap_pct` ([pr196](https://github.com/sigven/pcgr/pull/196).
+- Fix for CLI argument `--cna_overlap_pct` ([pr196](https://github.com/sigven/pcgr/pull/196)).
 
 ### New Contributors
 
-- [@niklasmueboe](https://github.com/niklasmueboe) ([pr196](https://github.com/sigven/pcgr/pull/196).
+- [@niklasmueboe](https://github.com/niklasmueboe) ([pr196](https://github.com/sigven/pcgr/pull/196)).
 
 ## v1.0.3
 
