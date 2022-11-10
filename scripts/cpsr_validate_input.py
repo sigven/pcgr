@@ -213,7 +213,9 @@ def simplify_vcf(input_vcf, vcf, custom_bed, pcgr_directory, genome_assembly, vi
    4. Final VCF file is sorted and indexed (bgzip + tabix)
    """
 
-   input_vcf_cpsr_ready = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)','.cpsr_ready.tmp.vcf', os.path.basename(input_vcf)))
+   tmp_vcf1 = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)', '.cpsr_ready.tmp1.vcf', os.path.basename(input_vcf)))
+   tmp_vcf2 = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)', '.cpsr_ready.tmp2.vcf.gz', os.path.basename(input_vcf)))
+   tmp_vcf3 = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)', '.cpsr_ready.tmp3.vcf.gz', os.path.basename(input_vcf)))
    input_vcf_cpsr_ready_decomposed = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)','.cpsr_ready.vcf', os.path.basename(input_vcf)))
    input_vcf_cpsr_ready_decomposed_target = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)','.cpsr_ready_target.vcf', os.path.basename(input_vcf)))
    virtual_panels_tmp_bed = os.path.join(output_dir, "virtual_panels_all." + str(sample_id) + ".tmp.bed")
@@ -227,20 +229,16 @@ def simplify_vcf(input_vcf, vcf, custom_bed, pcgr_directory, genome_assembly, vi
          variant_id = f"{rec.CHROM}:{POS}_{rec.REF}->{alt}"
          multiallelic_list.append(variant_id)
 
-   is_gzipped = True if input_vcf.endswith('.gz') else False
-   cat_vcf = f"bgzip -dc {input_vcf}" if is_gzipped else "cat {input_vcf}"
+   # bgzip + tabix required for sorting
+   cmd_vcf1 = f'bcftools view {input_vcf} | bgzip -cf > {tmp_vcf2} && tabix -p vcf {tmp_vcf2} && bcftools sort -Oz {tmp_vcf2} > {tmp_vcf3} && tabix -p vcf {tmp_vcf3}'
 
-   command_vcf_sample_free1 = f'{cat_vcf} | egrep \'^##\' > {input_vcf_cpsr_ready}'
-   command_vcf_sample_free2 = f'{cat_vcf} | egrep \'^#CHROM\' >> {input_vcf_cpsr_ready}'
-   command_vcf_sample_free3 = f'{cat_vcf} | egrep -v \'^#\' | sed \'s/^chr//\' | egrep \'^[0-9]\' | sort -k1,1n -k2,2n -k4,4 -k5,5 >> {input_vcf_cpsr_ready}'
-   command_vcf_sample_free4 = f'{cat_vcf} | egrep -v \'^#\' | sed \'s/^chr//\' | egrep -v \'^[0-9]\' | egrep \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> {input_vcf_cpsr_ready}'
-   command_vcf_sample_free5 = f'{cat_vcf} | egrep -v \'^#\' | sed \'s/^chr//\' | egrep -v \'^[0-9]\' | egrep -v \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> {input_vcf_cpsr_ready}'
+   # Keep only autosomal/sex/mito chrom (handle hg38 and hg19), sub chr prefix
+   chrom_to_keep = [str(x) for x in [*range(1,23), 'X', 'Y', 'M', 'MT']]
+   chrom_to_keep = ','.join([*['chr' + chrom for chrom in chrom_to_keep], *[chrom for chrom in chrom_to_keep]])
+   cmd_vcf2 = f'bcftools view --regions {chrom_to_keep} {tmp_vcf3} | sed \'s/^chr//\' > {tmp_vcf1}'
 
-   check_subprocess(logger, command_vcf_sample_free1, debug)
-   check_subprocess(logger, command_vcf_sample_free2, debug)
-   check_subprocess(logger, command_vcf_sample_free3, debug)
-   check_subprocess(logger, command_vcf_sample_free4, debug)
-   check_subprocess(logger, command_vcf_sample_free5, debug)
+   check_subprocess(logger, cmd_vcf1, debug)
+   check_subprocess(logger, cmd_vcf2, debug)
 
    if multiallelic_list:
       logger.warning(f"There were {len(multiallelic_list)} multiallelic sites detected. Showing (up to) the first 100:")
@@ -248,10 +246,10 @@ def simplify_vcf(input_vcf, vcf, custom_bed, pcgr_directory, genome_assembly, vi
       print(', '.join(multiallelic_list[:100]))
       print('----')
       logger.info('Decomposing multi-allelic sites in input VCF file using \'vt decompose\'')
-      command_decompose = f'vt decompose -s {input_vcf_cpsr_ready} > {input_vcf_cpsr_ready_decomposed}  2> {os.path.join(output_dir, "decompose.log")}'
+      command_decompose = f'vt decompose -s {tmp_vcf1} > {input_vcf_cpsr_ready_decomposed} 2> {os.path.join(output_dir, "decompose.log")}'
       check_subprocess(logger, command_decompose, debug)
    else:
-      command_copy = f'cp {input_vcf_cpsr_ready} {input_vcf_cpsr_ready_decomposed}'
+      command_copy = f'cp {tmp_vcf1} {input_vcf_cpsr_ready_decomposed}'
       check_subprocess(logger, command_copy, debug)
 
 
@@ -291,7 +289,7 @@ def simplify_vcf(input_vcf, vcf, custom_bed, pcgr_directory, genome_assembly, vi
    check_subprocess(logger, f'bgzip -cf {input_vcf_cpsr_ready_decomposed_target} > {input_vcf_cpsr_ready_decomposed_target}.gz', debug)
    check_subprocess(logger, f'tabix -p vcf {input_vcf_cpsr_ready_decomposed_target}.gz', debug)
    if not debug:
-      for fn in [input_vcf_cpsr_ready, virtual_panels_bed, input_vcf_cpsr_ready_decomposed, os.path.join(output_dir, "decompose.log")]:
+      for fn in [tmp_vcf1, tmp_vcf2, tmp_vcf3,  virtual_panels_bed, input_vcf_cpsr_ready_decomposed, os.path.join(output_dir, "decompose.log")]:
          #print(f"Deleting {fn}")
          utils.remove(fn)
 

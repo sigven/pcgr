@@ -15,14 +15,14 @@ from argparse import RawTextHelpFormatter
 
 def cli():
 
-    program_description = (f'Personal Cancer Genome Reporter (PCGR) workflow for clinical interpretation of '
-                           f'somatic nucleotide variants and copy number aberration segments')
+    program_description = (f"Personal Cancer Genome Reporter (PCGR) workflow for clinical interpretation of "
+                           f"somatic nucleotide variants and copy number aberration segments")
     program_options = "\n\t--input_vcf <INPUT_VCF>\n\t--pcgr_dir <PCGR_DIR>\n\t--output_dir <OUTPUT_DIR>\n\t--genome_assembly" + \
     " <GENOME_ASSEMBLY>\n\t--sample_id <SAMPLE_ID>"
 
     parser = argparse.ArgumentParser(description=program_description,
                                      formatter_class=RawTextHelpFormatter,
-                                     usage=f'\n\t%(prog)s -h [options] {program_options} \n\n')
+                                     usage=f"\n\t%(prog)s -h [options] {program_options} \n\n")
     parser._action_groups.pop()
     required = parser.add_argument_group("Required arguments")
     # optional_rna = parser.add_argument_group("Bulk RNA-seq and RNA fusion options")
@@ -41,8 +41,8 @@ def cli():
     optional_other.add_argument("--logr_gain", type=float, default=0.8, dest="logr_gain", help="Log ratio-threshold (minimum) for segments containing copy number gains/amplifications (default: %(default)s)")
     optional_other.add_argument("--logr_homdel", type=float, default=-0.8, dest="logr_homdel", help="Log ratio-threshold (maximum) for segments containing homozygous deletions (default: %(default)s)")
     optional_other.add_argument("--cna_overlap_pct", type=float, default=50, dest="cna_overlap_pct", help="Mean percent overlap between copy number segment and gene transcripts for reporting of gains/losses in tumor suppressor genes/oncogenes, (default: %(default)s)")
-    optional_other.add_argument("--tumor_site", dest="tsite", type=int, default=0, help="Optional integer code to specify primary tumor type/site of query sample,\n choose any of the following identifiers:\n" + str(pcgr_vars.tumor_sites) + "\n(default: %(default)s - any tumor type)")
-    optional_other.add_argument("--tumor_purity", type=float, dest="tumor_purity", help="Estimated tumor purity (between 0 and 1, (default: %(default)s)")
+    optional_other.add_argument("--tumor_site", dest="tsite", type=int, default=0, help="Optional integer code to specify primary tumor type/site of query sample,\nchoose any of the following identifiers:\n" + str(pcgr_vars.tumor_sites) + "\n(default: %(default)s - any tumor type)")
+    optional_other.add_argument("--tumor_purity", type=float, dest="tumor_purity", help="Estimated tumor purity (between 0 and 1) (default: %(default)s)")
     optional_other.add_argument("--tumor_ploidy", type=float, dest="tumor_ploidy", help="Estimated tumor ploidy (default: %(default)s)")
 
     optional_allelic_support.add_argument("--tumor_dp_tag", dest="tumor_dp_tag", default="_NA_", help="Specify VCF INFO tag for sequencing depth (tumor, must be Type=Integer, default: %(default)s")
@@ -63,8 +63,8 @@ def cli():
     optional_signatures.add_argument("--estimate_signatures", action="store_true", help="Estimate relative contributions of reference mutational signatures in query sample and detect potential kataegis events, default: %(default)s")
     optional_signatures.add_argument("--min_mutations_signatures", type=int, default=200, dest="min_mutations_signatures", help="Minimum number of SNVs required for reconstruction of mutational signatures (SBS) by MutationalPatterns (default: %(default)s, minimum n = 100)")
     optional_signatures.add_argument("--all_reference_signatures", action="store_true", help="Use all reference mutational signatures (SBS, n = 67) in signature reconstruction rather than only those already attributed to the tumor type (default: %(default)s)")
-    optional_signatures.add_argument('--include_artefact_signatures', action="store_true", help="Include sequencing artefacts in the collection of reference signatures (default: %(default)s")
-    optional_signatures.add_argument('--prevalence_reference_signatures', type=int, default=5, choices=[1,2,5,10,15,20], help="Minimum tumor-type prevalence (in percent) of reference signatures to be included in refitting procedure (default: %(default)s)")
+    optional_signatures.add_argument("--include_artefact_signatures", action="store_true", help="Include sequencing artefacts in the collection of reference signatures (default: %(default)s")
+    optional_signatures.add_argument("--prevalence_reference_signatures", type=int, default=5, choices=[1,2,5,10,15,20], help="Minimum tumor-type prevalence (in percent) of reference signatures to be included in refitting procedure (default: %(default)s)")
 
     optional_other.add_argument("--cpsr_report", dest="cpsr_report", help="CPSR report file (Gzipped JSON - file ending with 'cpsr.<genome_assembly>.json.gz' -  germline report of patient's blood/control sample")
     optional_other.add_argument("--vcf2maf", action="store_true", help="Generate a MAF file for input VCF using https://github.com/mskcc/vcf2maf (default: %(default)s)")
@@ -72,21 +72,22 @@ def cli():
     optional_other.add_argument("--assay", dest="assay", choices=["WES", "WGS", "TARGETED"], default="WES", help="Type of DNA sequencing assay performed for input data (VCF) default: %(default)s")
     optional_other.add_argument("--include_trials", action="store_true", help="(Beta) Include relevant ongoing or future clinical trials, focusing on studies with molecularly targeted interventions")
     optional_other.add_argument("--preserved_info_tags", dest="preserved_info_tags", default="None", help="Comma-separated string of VCF INFO tags from query VCF that should be kept in PCGR output TSV file")
-    optional_other.add_argument("--report_theme", choices=["default", "cerulean", "journal", "flatly", "readable", "spacelab", "united", "cosmo", "lumen", "paper", "sandstone", "simplex", "yeti"], help="Visual report theme (rmarkdown)", default='default')
-    optional_other.add_argument('--report_nonfloating_toc', action='store_true', help='Do not float the table of contents (TOC) in output report (rmarkdown), default: %(default)s')
+    optional_other.add_argument("--report_theme", choices=["default", "cerulean", "journal", "flatly", "readable", "spacelab", "united", "cosmo", "lumen", "paper", "sandstone", "simplex", "yeti"], help="Visual report theme (rmarkdown)", default="default")
+    optional_other.add_argument("--report_nonfloating_toc", action="store_true", help="Do not float the table of contents (TOC) in output report (rmarkdown), default: %(default)s")
     optional_other.add_argument("--force_overwrite", action="store_true", help="By default, the script will fail with an error if any output file already exists. You can force the overwrite of existing result files by using this flag, default: %(default)s")
     optional_other.add_argument("--version", action="version", version="%(prog)s " + str(pcgr_vars.PCGR_VERSION))
     optional_other.add_argument("--basic", action="store_true", help="Run functional variant annotation on VCF through VEP/vcfanno, omit other analyses (i.e. Tier assignment/MSI/TMB/Signatures etc. and report generation (STEP 4), default: %(default)s")
     optional_other.add_argument("--no_vcf_validate", action="store_true", help="Skip validation of input VCF with Ensembl's vcf-validator, default: %(default)s")
     optional_other.add_argument("--debug", action="store_true", help="Print full commands to log")
+    optional_other.add_argument("--pcgrr_conda", default="pcgrr", help="pcgrr conda env name (default: %(default)s)")
 
     optional_vcfanno.add_argument("--vcfanno_n_proc", default=4, type=int, help="Number of vcfanno processes (option '-p' in vcfanno), default: %(default)s")
     optional_vep.add_argument("--vep_n_forks", default=4, type=int, help="Number of forks (option '--fork' in VEP), default: %(default)s")
     optional_vep.add_argument("--vep_buffer_size", default=100, type=int, help=f"Variant buffer size (variants read into memory simultaneously, option '--buffer_size' in VEP)\n- set lower to reduce memory usage, default: %(default)s")
     optional_vep.add_argument("--vep_pick_order", default="canonical,appris,biotype,ccds,rank,tsl,length,mane", help=f"Comma-separated string of ordered transcript/variant properties for selection of primary variant consequence\n(option '--pick_order' in VEP), default: %(default)s")
     optional_vep.add_argument("--vep_no_intergenic", action="store_true", help="Skip intergenic variants during processing (option '--no_intergenic' in VEP), default: %(default)s")
-    optional_vep.add_argument("--vep_regulatory", action="store_true", help="Add VEP regulatory annotations (option '--regulatory' )or non-coding interpretation, default: %(default)s")
-    optional_vep.add_argument('--vep_gencode_all', action='store_true', help = "Consider all GENCODE transcripts with Variant Effect Predictor (VEP) (option '--gencode_basic' in VEP is used by default in PCGR).")
+    optional_vep.add_argument("--vep_regulatory", action="store_true", help="Add VEP regulatory annotations (option '--regulatory') or non-coding interpretation, default: %(default)s")
+    optional_vep.add_argument("--vep_gencode_all", action="store_true", help = "Consider all GENCODE transcripts with Variant Effect Predictor (VEP) (option '--gencode_basic' in VEP is used by default in PCGR).")
 
 
     optional_tumor_only.add_argument("--tumor_only", action="store_true", help="Input VCF comes from tumor-only sequencing, calls will be filtered for variants of germline origin, (default: %(default)s)")
@@ -431,7 +432,8 @@ def run_pcgr(pcgr_paths, config_options):
         logger.info('PCGR - STEP 4: Generation of output files - variant interpretation report for precision oncology')
 
         # export PATH to R conda env Rscript
-        rscript = utils.script_path('pcgrr', 'bin/Rscript')
+        pcgrr_conda = config_options['pcgrr_conda']
+        rscript = utils.script_path(pcgrr_conda, 'bin/Rscript')
         pcgrr_script = utils.script_path('pcgr', 'bin/pcgrr.R')
         pcgr_report_command = (
                 f"{rscript} {pcgrr_script} "

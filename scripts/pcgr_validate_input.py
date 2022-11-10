@@ -365,13 +365,17 @@ def check_format_ad_dp_tags(vcf,
 
 def simplify_vcf(input_vcf, vcf, output_dir, keep_uncompressed, logger, debug):
     """
+    input_vcf: path to input VCF
+    vcf: parsed cyvcf2 object
     Function that performs the following on the validated input VCF:
     1. Strip of any genotype data
     2. If VCF has variants with multiple alternative alleles ("multiallelic", e.g. 'A,T'), these are decomposed into variants with a single alternative allele
     3. Final VCF file is sorted and indexed (bgzip + tabix)
     """
 
-    input_vcf_pcgr_ready = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)', '.pcgr_ready.tmp.vcf', os.path.basename(input_vcf)))
+    tmp_vcf1 = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)', '.pcgr_ready.tmp1.vcf', os.path.basename(input_vcf)))
+    tmp_vcf2 = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)', '.pcgr_ready.tmp2.vcf.gz', os.path.basename(input_vcf)))
+    tmp_vcf3 = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)', '.pcgr_ready.tmp3.vcf.gz', os.path.basename(input_vcf)))
     input_vcf_pcgr_ready_decomposed = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)', '.pcgr_ready.vcf', os.path.basename(input_vcf)))
 
     multiallelic_list = list()
@@ -382,22 +386,15 @@ def simplify_vcf(input_vcf, vcf, output_dir, keep_uncompressed, logger, debug):
             variant_id = f"{rec.CHROM}:{POS}_{rec.REF}->{alt}"
             multiallelic_list.append(variant_id)
 
-    is_gzipped = True if input_vcf.endswith('.gz') else False
-    cat_vcf = f"bgzip -dc {input_vcf}" if is_gzipped else "cat {input_vcf}"
-    # Remove FORMAT metadata lines
-    command_vcf_sample_free1 = f'{cat_vcf} | egrep \'^##\' | egrep -v \'^##FORMAT=\' > {input_vcf_pcgr_ready}'
-    # Output first 8 column names (CHROM-INFO, so ignore FORMAT + sample columns)
-    command_vcf_sample_free2 = f'{cat_vcf} | egrep \'^#CHROM\' | cut -f1-8 >> {input_vcf_pcgr_ready}'
-    # Looking at variant rows, remove chr prefix, grab CHROM-INFO, sort separately for auto/XYM/rest chrom by cols 1+2 (CHROM+POS) then cols 4+5 (REF+ALT)
-    command_vcf_sample_free3 = f'{cat_vcf} | egrep -v \'^#\' | sed \'s/^chr//\' | cut -f1-8 | egrep \'^[0-9]\' | sort -k1,1n -k2,2n -k4,4 -k5,5 >> {input_vcf_pcgr_ready}'
-    command_vcf_sample_free4 = f'{cat_vcf} | egrep -v \'^#\' | sed \'s/^chr//\' | cut -f1-8 | egrep -v \'^[0-9]\' | egrep \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> {input_vcf_pcgr_ready}'
-    command_vcf_sample_free5 = f'{cat_vcf} | egrep -v \'^#\' | sed \'s/^chr//\' | cut -f1-8 | egrep -v \'^[0-9]\' | egrep -v \'^[XYM]\' | sort -k1,1 -k2,2n -k4,4 -k5,5 >> {input_vcf_pcgr_ready}'
+    # bgzip + tabix required for sorting
+    cmd_vcf1 = f'bcftools view {input_vcf} | bgzip -cf > {tmp_vcf2} && tabix -p vcf {tmp_vcf2} && bcftools sort -Oz {tmp_vcf2} > {tmp_vcf3} && tabix -p vcf {tmp_vcf3}'
+    # Keep only autosomal/sex/mito chrom (handle hg38 and hg19), remove FORMAT metadata lines, keep cols 1-8, sub chr prefix
+    chrom_to_keep = [str(x) for x in [*range(1,23), 'X', 'Y', 'M', 'MT']]
+    chrom_to_keep = ','.join([*['chr' + chrom for chrom in chrom_to_keep], *[chrom for chrom in chrom_to_keep]])
+    cmd_vcf2 = f'bcftools view --regions {chrom_to_keep} {tmp_vcf3} | egrep -v \'^##FORMAT=\' | cut -f1-8 | sed \'s/^chr//\' > {tmp_vcf1}'
 
-    check_subprocess(logger, command_vcf_sample_free1, debug)
-    check_subprocess(logger, command_vcf_sample_free2, debug)
-    check_subprocess(logger, command_vcf_sample_free3, debug)
-    check_subprocess(logger, command_vcf_sample_free4, debug)
-    check_subprocess(logger, command_vcf_sample_free5, debug)
+    check_subprocess(logger, cmd_vcf1, debug)
+    check_subprocess(logger, cmd_vcf2, debug)
 
     if multiallelic_list:
         logger.warning(f"There were {len(multiallelic_list)} multiallelic sites detected. Showing (up to) the first 100:")
@@ -405,11 +402,11 @@ def simplify_vcf(input_vcf, vcf, output_dir, keep_uncompressed, logger, debug):
         print(', '.join(multiallelic_list[:100]))
         print('----')
         logger.info('Decomposing multi-allelic sites in input VCF file using \'vt decompose\'')
-        command_decompose = f'vt decompose -s {input_vcf_pcgr_ready} > {input_vcf_pcgr_ready_decomposed} 2> {os.path.join(output_dir, "decompose.log")}'
+        command_decompose = f'vt decompose -s {tmp_vcf1} > {input_vcf_pcgr_ready_decomposed} 2> {os.path.join(output_dir, "decompose.log")}'
         check_subprocess(logger, command_decompose, debug)
     else:
         logger.info('All sites seem to be decomposed - skipping decomposition!')
-        check_subprocess(logger, f'cp {input_vcf_pcgr_ready} {input_vcf_pcgr_ready_decomposed}', debug)
+        check_subprocess(logger, f'cp {tmp_vcf1} {input_vcf_pcgr_ready_decomposed}', debug)
 
     # need to keep uncompressed copy for vcf2maf.pl if selected
     bgzip_cmd = f"bgzip -cf {input_vcf_pcgr_ready_decomposed} > {input_vcf_pcgr_ready_decomposed}.gz" if keep_uncompressed else f"bgzip -f {input_vcf_pcgr_ready_decomposed}"
@@ -427,7 +424,8 @@ def simplify_vcf(input_vcf, vcf, output_dir, keep_uncompressed, logger, debug):
             logger.info('')
             exit(1)
 
-    utils.remove(input_vcf_pcgr_ready)
+    utils.remove(tmp_vcf1)
+    utils.remove(tmp_vcf2)
     utils.remove(os.path.join(output_dir, "decompose.log"))
 
 def validate_pcgr_input(pcgr_directory,

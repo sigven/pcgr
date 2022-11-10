@@ -8,6 +8,7 @@ def create_config(arg_dict):
       'sample_id': arg_dict['sample_id'],
       'genome_assembly': arg_dict['genome_assembly'],
       'debug': arg_dict['debug'],
+      'pcgrr_conda': arg_dict['pcgrr_conda'],
       'tumor_purity': 'NA',
       'tumor_ploidy': 'NA',
       'tumor_type': {

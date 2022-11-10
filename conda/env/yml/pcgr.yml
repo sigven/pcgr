@@ -9,6 +9,7 @@ channels:
 dependencies:
   - pcgr ==1.1.0 # versioned by bump2version
   - bedtools ==2.30.0
+  - bcftools ==1.10.2
   - cyvcf2 ==0.30.11
   - ensembl-vep ==105.0
   - htslib ==1.10.2
