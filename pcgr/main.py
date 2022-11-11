@@ -329,7 +329,7 @@ def run_pcgr(pcgr_paths, config_options):
                 f'--num_processes {config_options["other"]["vcfanno_n_proc"]} '
                 f'--chasmplus --dbnsfp --docm --clinvar --icgc --civic --cgi --tcga_pcdm --winmsk --simplerepeats '
                 f'--tcga --uniprot --cancer_hotspots --pcgr_onco_xref '
-                f'{"--debug " if debug else ""}'
+                f'{"--debug --keep_logs" if debug else ""}'
                 )
         anno_src_msg = (
                 f"Annotation sources: {'Panel-of-Normals, ' if panel_normal != 'None' else ''}ClinVar, dbNSFP, "
@@ -339,7 +339,7 @@ def run_pcgr(pcgr_paths, config_options):
         logger.info(anno_src_msg)
         if panel_normal != "None":
             pon_annotation = 1
-            pcgr_vcfanno_command += f'--panel_normal_vcf {panel_normal}'
+            pcgr_vcfanno_command += f' --panel_normal_vcf {panel_normal}'
         check_subprocess(logger, pcgr_vcfanno_command, debug)
         logger.info("Finished pcgr-vcfanno")
         print('----')

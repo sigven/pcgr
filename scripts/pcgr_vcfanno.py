@@ -168,6 +168,7 @@ def run_vcfanno(num_processes, query_vcf, panel_normal_vcf, query_info_tags, vcf
     if not keep_logs:
         for tmpf in glob.glob(f"{output_vcf}.tmp*"):
             utils.remove(tmpf)
+        utils.remove(f"{query_prefix}.vcfanno.log")
 
 def append_to_vcf_header(pcgr_db_directory, datasource, vcfheader_file, logger):
     """

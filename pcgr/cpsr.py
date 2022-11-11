@@ -191,6 +191,8 @@ def run_cpsr(arg_dict, cpsr_paths):
     logger.info(f"Include low to moderate cancer risk variants from genome-wide association studies: {gwas_findings_set}")
     logger.info(f"Reference population, germline variant frequencies (gnomAD): {str(arg_dict['pop_gnomad']).upper()}")
     logger.info(f"Genome assembly: {arg_dict['genome_assembly']}")
+    print('----')
+
 
     if not input_vcf == 'None':
 

@@ -20,6 +20,11 @@ If you want to interrogate germline variants and their relation to cancer predis
 
 ### News
 
+-   *November 2022*: **1.2.0 release**
+    -    Keep only autosomal, X, Y, M/MT chromosomes
+    -    Import bcftools as dependency
+
+
 -   *October 2022*: **1.1.0 release**
 
     -   Remove Docker command wrappers

@@ -386,8 +386,9 @@ def simplify_vcf(input_vcf, vcf, output_dir, keep_uncompressed, logger, debug):
             variant_id = f"{rec.CHROM}:{POS}_{rec.REF}->{alt}"
             multiallelic_list.append(variant_id)
 
+    logger.info('Extracting variants on autosomal/sex/mito chromosomes only (1-22,X,Y, M/MT) with bcftools')
     # bgzip + tabix required for sorting
-    cmd_vcf1 = f'bcftools view {input_vcf} | bgzip -cf > {tmp_vcf2} && tabix -p vcf {tmp_vcf2} && bcftools sort -Oz {tmp_vcf2} > {tmp_vcf3} && tabix -p vcf {tmp_vcf3}'
+    cmd_vcf1 = f'bcftools view {input_vcf} | bgzip -cf > {tmp_vcf2} && tabix -p vcf {tmp_vcf2} && bcftools sort --temp-dir {output_dir} -Oz {tmp_vcf2} > {tmp_vcf3} 2> {os.path.join(output_dir, "bcftools_1.pcgr_simplify_vcf.log")} && tabix -p vcf {tmp_vcf3}'
     # Keep only autosomal/sex/mito chrom (handle hg38 and hg19), remove FORMAT metadata lines, keep cols 1-8, sub chr prefix
     chrom_to_keep = [str(x) for x in [*range(1,23), 'X', 'Y', 'M', 'MT']]
     chrom_to_keep = ','.join([*['chr' + chrom for chrom in chrom_to_keep], *[chrom for chrom in chrom_to_keep]])
@@ -402,7 +403,7 @@ def simplify_vcf(input_vcf, vcf, output_dir, keep_uncompressed, logger, debug):
         print(', '.join(multiallelic_list[:100]))
         print('----')
         logger.info('Decomposing multi-allelic sites in input VCF file using \'vt decompose\'')
-        command_decompose = f'vt decompose -s {tmp_vcf1} > {input_vcf_pcgr_ready_decomposed} 2> {os.path.join(output_dir, "decompose.log")}'
+        command_decompose = f'vt decompose -s {tmp_vcf1} > {input_vcf_pcgr_ready_decomposed} 2> {os.path.join(output_dir, "vt_decompose.pcgr_simplify_vcf.log")}'
         check_subprocess(logger, command_decompose, debug)
     else:
         logger.info('All sites seem to be decomposed - skipping decomposition!')
@@ -424,9 +425,14 @@ def simplify_vcf(input_vcf, vcf, output_dir, keep_uncompressed, logger, debug):
             logger.info('')
             exit(1)
 
-    utils.remove(tmp_vcf1)
-    utils.remove(tmp_vcf2)
-    utils.remove(os.path.join(output_dir, "decompose.log"))
+    if not debug:
+        utils.remove(tmp_vcf1)
+        utils.remove(tmp_vcf2)
+        utils.remove(tmp_vcf3)
+        utils.remove(tmp_vcf2 + str('.tbi'))
+        utils.remove(tmp_vcf3 + str('.tbi'))
+        utils.remove(os.path.join(output_dir, "vt_decompose.pcgr_simplify_vcf.log"))
+        utils.remove(os.path.join(output_dir, "bcftools_1.pcgr_simplify_vcf.log"))
 
 def validate_pcgr_input(pcgr_directory,
                         input_vcf,

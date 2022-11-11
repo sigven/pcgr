@@ -3,9 +3,9 @@ title: "Changelog"
 output: rmarkdown::html_document
 ---
 
-## v1.2.0-rc
+## v1.2.0
 
-- Date: **2022-11-XX**
+- Date: **2022-11-11**
 - [Diff between v1.2.0 and v1.1.0](https://github.com/sigven/pcgr/compare/v1.1.0...v1.2.0)
 
 ### Changes

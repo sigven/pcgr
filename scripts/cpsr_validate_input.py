@@ -230,8 +230,9 @@ def simplify_vcf(input_vcf, vcf, custom_bed, pcgr_directory, genome_assembly, vi
          multiallelic_list.append(variant_id)
 
    # bgzip + tabix required for sorting
-   cmd_vcf1 = f'bcftools view {input_vcf} | bgzip -cf > {tmp_vcf2} && tabix -p vcf {tmp_vcf2} && bcftools sort -Oz {tmp_vcf2} > {tmp_vcf3} && tabix -p vcf {tmp_vcf3}'
 
+   cmd_vcf1 = f'bcftools view {input_vcf} | bgzip -cf > {tmp_vcf2} && tabix -p vcf {tmp_vcf2} && bcftools sort --temp-dir {output_dir} -Oz {tmp_vcf2} > {tmp_vcf3} 2> {os.path.join(output_dir, "bcftools_1.cpsr_simplify_vcf.log")} && tabix -p vcf {tmp_vcf3}'
+   logger.info('Extracting variants on autosomal/sex/mito chromosomes only (1-22,X,Y, M/MT) with bcftools')
    # Keep only autosomal/sex/mito chrom (handle hg38 and hg19), sub chr prefix
    chrom_to_keep = [str(x) for x in [*range(1,23), 'X', 'Y', 'M', 'MT']]
    chrom_to_keep = ','.join([*['chr' + chrom for chrom in chrom_to_keep], *[chrom for chrom in chrom_to_keep]])
@@ -289,9 +290,12 @@ def simplify_vcf(input_vcf, vcf, custom_bed, pcgr_directory, genome_assembly, vi
    check_subprocess(logger, f'bgzip -cf {input_vcf_cpsr_ready_decomposed_target} > {input_vcf_cpsr_ready_decomposed_target}.gz', debug)
    check_subprocess(logger, f'tabix -p vcf {input_vcf_cpsr_ready_decomposed_target}.gz', debug)
    if not debug:
-      for fn in [tmp_vcf1, tmp_vcf2, tmp_vcf3,  virtual_panels_bed, input_vcf_cpsr_ready_decomposed, os.path.join(output_dir, "decompose.log")]:
+      for fn in [tmp_vcf1, tmp_vcf2, tmp_vcf3,  virtual_panels_bed, input_vcf_cpsr_ready_decomposed, os.path.join(output_dir, "decompose.log"), os.path.join(output_dir, "bcftools_1.cpsr_simplify_vcf.log")]:
          #print(f"Deleting {fn}")
          utils.remove(fn)
+      
+      utils.remove(tmp_vcf2 + str('.tbi'))
+      utils.remove(tmp_vcf3 + str('.tbi'))
 
    if os.path.exists(input_vcf_cpsr_ready_decomposed_target + '.gz') and os.path.getsize(input_vcf_cpsr_ready_decomposed_target + '.gz') > 0:
       vcf = VCF(input_vcf_cpsr_ready_decomposed_target + '.gz')
