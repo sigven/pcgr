@@ -15,33 +15,33 @@ from pcgr.utils import error_message, check_subprocess
 
 def __main__():
 
-   parser = argparse.ArgumentParser(description='Verify input data for CPSR')
-   parser.add_argument('pcgr_dir',help='Docker location of PCGR base directory with accompanying data directory, e.g. /data')
-   parser.add_argument('input_vcf', help='VCF input file with query variants (SNVs/InDels)')
-   parser.add_argument('custom_list',help='Custom text file indicating target genes form panel 0 for screening and reporting')
-   parser.add_argument('preserved_info_tags',help='Comma-separated string of VCF INFO tags in query VCF to be retained for output')
-   parser.add_argument('vcf_validation',type=int, default=0,choices=[0,1], help="Perform VCF validation with Ensembl's vcf-validator")
-   parser.add_argument('genome_assembly',help='grch37 or grch38')
-   parser.add_argument('sample_id',help='CPSR sample_name')
-   parser.add_argument('virtual_panel_id',type=str,help='virtual panel identifier(s)')
-   parser.add_argument('diagnostic_grade_only', type=int, default=0, choices=[0,1], help="Green virtual panels only (Genomics England PanelApp)")
-   parser.add_argument('--output_dir', dest='output_dir', help='Output directory')
-   parser.add_argument("--debug", action="store_true", help="Print full commands to log")
-   args = parser.parse_args()
+    parser = argparse.ArgumentParser(description='Verify input data for CPSR')
+    parser.add_argument('pcgr_dir',help='PCGR base directory with accompanying data directory')
+    parser.add_argument('input_vcf', help='VCF input file with query variants (SNVs/InDels)')
+    parser.add_argument('custom_list',help='Custom text file indicating target genes from panel 0 for screening and reporting')
+    parser.add_argument('preserved_info_tags',help='Comma-separated string of VCF INFO tags in query VCF to be retained for output')
+    parser.add_argument('vcf_validation',type=int, default=0,choices=[0,1], help="Perform VCF validation with Ensembl's vcf-validator")
+    parser.add_argument('genome_assembly',help='grch37 or grch38')
+    parser.add_argument('sample_id',help='CPSR sample_name')
+    parser.add_argument('virtual_panel_id',type=str,help='virtual panel identifier(s)')
+    parser.add_argument('diagnostic_grade_only', type=int, default=0, choices=[0,1], help="Green virtual panels only (Genomics England PanelApp)")
+    parser.add_argument('--output_dir', dest='output_dir', help='Output directory')
+    parser.add_argument("--debug", action="store_true", help="Print full commands to log")
+    args = parser.parse_args()
 
-   ret = validate_cpsr_input(args.pcgr_dir,
-                             args.input_vcf,
-                             args.custom_list,
-                             args.preserved_info_tags,
-                             args.vcf_validation,
-                             args.genome_assembly,
-                             args.sample_id,
-                             args.virtual_panel_id,
-                             args.diagnostic_grade_only,
-                             args.output_dir,
-                             args.debug)
-   if ret != 0:
-      sys.exit(1)
+    ret = validate_cpsr_input(args.pcgr_dir,
+                              args.input_vcf,
+                              args.custom_list,
+                              args.preserved_info_tags,
+                              args.vcf_validation,
+                              args.genome_assembly,
+                              args.sample_id,
+                              args.virtual_panel_id,
+                              args.diagnostic_grade_only,
+                              args.output_dir,
+                              args.debug)
+    if ret != 0:
+       sys.exit(1)
 
 # def is_valid_custom_bed(bed_file, logger):
 #    """
@@ -87,7 +87,7 @@ def get_valid_custom_genelist(genelist_fname, genelist_bed_fname, pcgr_dir, geno
    valid_custom_symbols = []
 
    for row in genelist_reader:
-      if not re.match(r'^ENSG[0-9]{1,}$',str(row['ensembl_gene_id']).rstrip()):
+      if not re.match(r'^ENSG[0-9]{1,}$', str(row['ensembl_gene_id']).rstrip()):
          err_msg = "Custom list of genes from CPSR superpanel (panel 0) should be provided as Ensembl gene identifiers, '" + str(row['ensembl_gene_id']) + "' is not a valid identifier"
          return error_message(err_msg, logger)
       else:
@@ -132,9 +132,12 @@ def get_valid_custom_genelist(genelist_fname, genelist_bed_fname, pcgr_dir, geno
 
    ## Add custom set genes to target BED
    logger.info('Creating BED file with custom target genes: ' + str(genelist_bed_fname))
-   for g in valid_custom_identifiers:
-      cmd_target_regions_bed = 'bgzip -dc ' + str(superpanel_track_bed) + ' | egrep \'\|' + g + '\|\' >> ' + str(genelist_bed_fname_unsorted)
-      check_subprocess(logger, cmd_target_regions_bed, debug)
+   id_pat = '|'.join([f"\|{g}\|" for g in valid_custom_identifiers])
+   cmd_target_regions_bed = f"bgzip -dc {superpanel_track_bed} | egrep '{id_pat}' >> {genelist_bed_fname_unsorted}"
+   check_subprocess(logger, cmd_target_regions_bed, debug)
+   #for g in valid_custom_identifiers:
+   #    cmd_target_regions_bed = 'bgzip -dc ' + str(superpanel_track_bed) + ' | egrep \'\|' + g + '\|\' >> ' + str(genelist_bed_fname_unsorted)
+   #    check_subprocess(logger, cmd_target_regions_bed, debug)
 
    ## Sort regions in target BED
    if os.path.exists(genelist_bed_fname_unsorted) and os.stat(genelist_bed_fname_unsorted).st_size != 0:

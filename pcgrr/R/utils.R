@@ -2191,18 +2191,31 @@ targeted_drugs_summarise <- function(
 
 }
 
+#' Write messages to logs at a given priority level
+#'
+#' See [log4r::levellog()]
+#' @param msg Message to log.
+#'
 #' @export
 log4r_info <- function(msg) {
   log4r_logger <- getOption("PCGRR_LOG4R_LOGGER")
   log4r::info(log4r_logger, msg)
 }
 
+#' Write messages to logs at a given priority level
+#'
+#' See [log4r::levellog()]
+#' @inheritParams log4r_info
 #' @export
 log4r_debug <- function(msg) {
   log4r_logger <- getOption("PCGRR_LOG4R_LOGGER")
   log4r::debug(log4r_logger, msg)
 }
 
+#' Write messages to logs at a given priority level
+#'
+#' See [log4r::levellog()]
+#' @inheritParams log4r_info
 #' @export
 log4r_warn <- function(msg) {
   log4r_logger <- getOption("PCGRR_LOG4R_LOGGER")

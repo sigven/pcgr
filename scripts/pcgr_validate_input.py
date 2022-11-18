@@ -15,7 +15,7 @@ from pcgr.utils import error_message, check_subprocess
 def __main__():
 
     parser = argparse.ArgumentParser(description='Verify input data for PCGR')
-    parser.add_argument('pcgr_dir',help='Docker location of PCGR base directory with accompanying data directory, e.g. /data')
+    parser.add_argument('pcgr_dir',help='PCGR base directory with accompanying data directory')
     parser.add_argument('input_vcf', help='VCF input file with somatic (tumor) query variants (SNVs/InDels)')
     parser.add_argument('input_cna', help='Somatic (tumor) copy number query segments (tab-separated values)')
     parser.add_argument('input_rna_fusion', help='Somatic (tumor) RNA fusion variants (tab-separated values)')
