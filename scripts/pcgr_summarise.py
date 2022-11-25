@@ -113,6 +113,21 @@ def extend_vcf_annotations(query_vcf, pcgr_db_dir, logger, pon_annotation, regul
             block_idx = 0
             if cpsr is True:
                 block_idx = annoutils.get_correct_cpg_transcript(vep_csq_records)
+	    
+            ## if multiple transcript-specific variant consequences highlighted by --pick_allele_gene , 
+            ## choose block of consequence which is protein-coding (assuming the other picked transcript/gene carries
+            ## another BIOTYPE nature)
+            if len(vep_csq_records) > 0:
+                selected_block_idx = 0
+                i = 0
+                for rec in vep_csq_records:
+                    if 'BIOTYPE' in rec:
+                        if not rec['BIOTYPE'] is None:
+                            if rec['BIOTYPE'] == "protein_coding":
+                                selected_block_idx = i
+                    i = i + 1
+                block_idx = selected_block_idx
+
             record = vep_csq_records[block_idx]
             for k in record:
                 if k in vcf_info_element_types:
