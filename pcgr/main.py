@@ -267,7 +267,7 @@ def run_pcgr(pcgr_paths, config_options):
         vep_flags = (
                 f'--hgvs --af --af_1kg --af_gnomad --variant_class --domains --symbol --protein --ccds --mane '
                 f'--uniprot --appris --biotype --tsl --canonical --format vcf --cache --numbers --total_length --allele_number '
-                f'--no_stats --no_escape --xref_refseq --vcf --check_ref --dont_skip --flag_pick_allele --plugin NearestExonJB,max_range=50000 '
+                f'--no_stats --no_escape --xref_refseq --vcf --check_ref --dont_skip --flag_pick_allele_gene --plugin NearestExonJB,max_range=50000 '
                 f'--force_overwrite --species homo_sapiens --offline --compress_output bgzip'
                 )
         vep_options = (
