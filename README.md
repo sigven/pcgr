@@ -1,5 +1,8 @@
 ## Personal Cancer Genome Reporter (PCGR) <a href="https://sigven.github.io/pcgr/"><img src="pcgrr/man/figures/logo.png" align="right" height="118" width="100"/></a>
 
+[![Conda install ver](https://anaconda.org/pcgr/pcgr/badges/version.svg)](https://anaconda.org/pcgr/pcgr)
+[![Conda install lrd](https://anaconda.org/pcgr/pcgr/badges/latest_release_date.svg)](https://anaconda.org/pcgr/pcgr)
+
 ### Overview
 
 The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for translation of individual tumor genomes for precision cancer medicine.
@@ -19,6 +22,13 @@ If you want to interrogate germline variants and their relation to cancer predis
 ![PCGR overview](pcgrr/pkgdown/assets/img/pcgr_dashboard_views.png)
 
 ### News
+
+-   *February 2023*: **1.3.0 release**
+    - `pcgr_summarise.py`: proritize protein-coding BIOTYPE csq ([pr201](https://github.com/sigven/pcgr/pull/201))
+    - `cpsr.py`: expose `--pcgrr_conda` option to flexibly activate pcgrr env by a non-default pcgrr name
+    - docs: update `input.Rmd`, `running.Rmd`
+    - `cpsr_validate_input.py`: refactor for efficient custome gene egrep
+    - code reformat via autopep8 for `annoutils.py`, `pcgr_vcfanno.py`
 
 -   *November 2022*: **1.2.0 release**
     -    Keep only autosomal, X, Y, M/MT chromosomes

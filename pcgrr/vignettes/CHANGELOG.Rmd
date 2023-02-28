@@ -3,6 +3,19 @@ title: "Changelog"
 output: rmarkdown::html_document
 ---
 
+## v1.3.0
+
+- Date: **2023-02-28**
+- [Diff between v1.3.0 and v1.2.0](https://github.com/sigven/pcgr/compare/v1.2.0...v1.3.0)
+
+### Changes
+
+- `pcgr_summarise.py`: proritize protein-coding BIOTYPE csq ([pr201](https://github.com/sigven/pcgr/pull/201))
+- `cpsr.py`: expose `--pcgrr_conda` option to flexibly activate pcgrr env by a non-default pcgrr name
+- docs: update `input.Rmd`, `running.Rmd`
+- `cpsr_validate_input.py`: refactor for efficient custome gene egrep
+- code reformat via autopep8 for `annoutils.py`, `pcgr_vcfanno.py`
+
 ## v1.2.0
 
 - Date: **2022-11-11**
