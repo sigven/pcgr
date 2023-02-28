@@ -24,11 +24,10 @@ If you want to interrogate germline variants and their relation to cancer predis
 ### News
 
 -   *February 2023*: **1.3.0 release**
-    - `pcgr_summarise.py`: proritize protein-coding BIOTYPE csq ([pr201](https://github.com/sigven/pcgr/pull/201))
-    - `cpsr.py`: expose `--pcgrr_conda` option to flexibly activate pcgrr env by a non-default pcgrr name
-    - docs: update `input.Rmd`, `running.Rmd`
-    - `cpsr_validate_input.py`: refactor for efficient custome gene egrep
-    - code reformat via autopep8 for `annoutils.py`, `pcgr_vcfanno.py`
+    - Details at [CHANGELOG](http://sigven.github.io/pcgr/articles/CHANGELOG.html)
+    - proritize protein-coding BIOTYPE csq ([pr201](https://github.com/sigven/pcgr/pull/201))
+    - expose `--pcgrr_conda` option to flexibly activate pcgrr env via a non-default pcgrr name
+    - `cpsr_validate_input.py`: refactor for efficient custom gene egrep
 
 -   *November 2022*: **1.2.0 release**
     -    Keep only autosomal, X, Y, M/MT chromosomes

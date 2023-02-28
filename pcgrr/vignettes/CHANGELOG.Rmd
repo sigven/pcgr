@@ -13,8 +13,12 @@ output: rmarkdown::html_document
 - `pcgr_summarise.py`: proritize protein-coding BIOTYPE csq ([pr201](https://github.com/sigven/pcgr/pull/201))
 - `cpsr.py`: expose `--pcgrr_conda` option to flexibly activate pcgrr env by a non-default pcgrr name
 - docs: update `input.Rmd`, `running.Rmd`
-- `cpsr_validate_input.py`: refactor for efficient custome gene egrep
+- `cpsr_validate_input.py`: refactor for efficient custom gene egrep
 - code reformat via autopep8 for `annoutils.py`, `pcgr_vcfanno.py`
+- GitHub Actions:
+  - bump docker actions `setup-buildx-action` (v1--v2), `build-push-action` (v2--v4)
+  - use `miniforge-variant` instead of `mamba-version: "*"`
+  - replace `::set-output` since deprecated
 
 ## v1.2.0
 

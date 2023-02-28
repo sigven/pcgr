@@ -28,7 +28,7 @@ jobs:
         uses: conda-incubator/setup-miniconda@v2
         with:
           miniforge-variant: Mambaforge
-          miniforge-version: 4.11.0-0
+          miniforge-version: "latest"
           show-channel-urls: true
           auto-activate-base: false
           activate-environment: condabuild
@@ -56,7 +56,7 @@ jobs:
         uses: conda-incubator/setup-miniconda@v2
         with:
           miniforge-variant: Mambaforge
-          miniforge-version: 4.11.0-0
+          miniforge-version: "latest"
           show-channel-urls: true
           auto-activate-base: false
           activate-environment: condabuild
@@ -91,10 +91,11 @@ jobs:
       - name: Set up miniconda
         uses: conda-incubator/setup-miniconda@v2
         with:
+          miniforge-variant: Mambaforge
+          miniforge-version: "latest"
           auto-update-conda: true
           auto-activate-base: true
           activate-environment: ""
-          mamba-version: "*"
           channels: "pcgr,conda-forge,bioconda"
       - name: Install conda packages
         run: mamba env create -n pkgdown -f ${env_yml_path}/pkgdown.yml
@@ -125,7 +126,7 @@ jobs:
             git pull --no-rebase # for pulling in the changed locks
             git --no-pager log --decorate=short --pretty=oneline -n3
             LATEST_COMMIT_HASH="$(git --no-pager log -1 --format='%H')"
-            echo "::set-output name=latest_commit_hash::${LATEST_COMMIT_HASH}"
+            echo "latest_commit_hash=${LATEST_COMMIT_HASH}" >> $GITHUB_OUTPUT
       - name: 🔖 Tag creation
         uses: actions/github-script@v5
         env:
@@ -148,14 +149,14 @@ jobs:
           ref: v${{ env.VERSION }}
       - name: Buildx setup
         id: buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
       - name: DockerHub login
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: 🐳 Docker img build and push to DockerHub
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v4
         with:
           context: . # yes, dot
           push: true
