@@ -286,6 +286,15 @@
     <loc>https://sigven.github.io/pcgr/reference/load_eitems.html</loc>
   </url>
   <url>
+    <loc>https://sigven.github.io/pcgr/reference/log4r_debug.html</loc>
+  </url>
+  <url>
+    <loc>https://sigven.github.io/pcgr/reference/log4r_info.html</loc>
+  </url>
+  <url>
+    <loc>https://sigven.github.io/pcgr/reference/log4r_warn.html</loc>
+  </url>
+  <url>
     <loc>https://sigven.github.io/pcgr/reference/log_var_eitem_stats.html</loc>
   </url>
   <url>
