@@ -320,8 +320,9 @@ def run_cpsr(arg_dict, cpsr_paths):
 
         # export PATH to R conda env Rscript
         pcgrr_conda = arg_dict['pcgrr_conda']
+        pcgr_conda = utils.conda_prefix_basename()
         rscript = utils.script_path(pcgrr_conda, 'bin/Rscript')
-        cpsrr_script = utils.script_path('pcgr', 'bin/cpsr.R')
+        cpsrr_script = utils.script_path(pcgr_conda, 'bin/cpsr.R')
         cpsr_report_command = (
                 f"{rscript} {cpsrr_script} "
                 f"{output_dir} "

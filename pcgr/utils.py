@@ -51,18 +51,29 @@ def script_path(env, bin_script):
     prefix = conda_env_path(env)
     return os.path.join(prefix, bin_script)
 
+def conda_prefix():
+    return os.path.normpath(os.environ.get('CONDA_PREFIX'))
+
+def conda_prefix_basename():
+    cp = conda_prefix()          # /conda/envs/FOO
+    return(os.path.basename(cp)) # FOO
+
+def conda_prefix_dirname():
+    cp = conda_prefix()       # /path/to/conda/envs/FOO
+    return(os.path.dirname(cp)) # /path/to/conda/envs
+
 def conda_env_path(env):
     """Construct absolute path to a conda env
     using the current activated env as a prefix.
     e.g. /path/to/conda/envs/{env}
     """
-    cp = os.path.normpath(os.environ.get('CONDA_PREFIX'))  # /path/to/conda/envs/FOO
-    env_dir = os.path.dirname(cp)                          # /path/to/conda/envs
-    env_path = os.path.join(env_dir, env)                  # /path/to/conda/envs/{env}
+    env_dir = conda_prefix_dirname()  # /path/to/conda/envs
+    env_path = os.path.join(env_dir, env) # /path/to/conda/envs/{env}
     return env_path
 
 def get_loftee_dir():
-    return script_path("pcgr", "share/loftee")
+    pcgr_conda_env = conda_prefix_basename()
+    return script_path(pcgr_conda_env, "share/loftee")
 
 def get_pcgr_bin():
     """Return abs path to e.g. conda/env/pcgr/bin
@@ -97,7 +108,11 @@ def is_integer(n):
 
 def get_cpsr_version():
     # use pcgrr's Rscript to grab cpsr's R pkg version
+    # NOTE: this relies on the pcgrr conda env being named the default pcgrr. If
+    # you're using a different name (e.g. foo_pcgrr), it returns UNKNOWN.
     rscript = script_path("pcgrr", "bin/Rscript")
+    if not os.path.exists(rscript):
+        return "UNKNOWN - check your pcgrr conda env is named 'pcgrr'"
     v_cmd = f"{rscript} -e 'x <- paste0(\"cpsr \", as.character(packageVersion(\"cpsr\"))); cat(x, \"\n\")'"
     return subprocess.check_output(v_cmd, shell=True).decode("utf-8")
 
