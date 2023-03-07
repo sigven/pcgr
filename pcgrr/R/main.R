@@ -1303,6 +1303,9 @@ write_report_output <- function(report,
         output_format =
           flexdashboard::flex_dashboard(
             orientation = "rows",
+            favicon = system.file(
+              "templates","favicon-16x16.png",
+              package = "pcgrr"),
             theme = "cosmo",
             css = css_fname,
             navbar = navbar_items),
@@ -1334,6 +1337,16 @@ write_report_output <- function(report,
         toc_float <- F
       }
 
+      disclaimer <- system.file(
+        "templates",
+        "disclaimer.md",
+        package = "pcgrr")
+
+      header <- system.file(
+        "templates",
+        "header.html",
+        package = "pcgrr")
+
       log4r_info("------")
       log4r_info(paste0(
         "Writing HTML file (.html) with report contents - rmarkdown (theme = '",
@@ -1352,6 +1365,7 @@ write_report_output <- function(report,
             css = css_fname,
             includes =
               rmarkdown::includes(
+                in_header = header,
                 after_body = disclaimer)),
         output_file = fnames[["html"]],
         output_dir = project_directory,
