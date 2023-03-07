@@ -258,7 +258,8 @@ def run_pcgr(pcgr_paths, config_options):
         input_vcf_pcgr_ready =   os.path.join(output_dir, re.sub(r"(\.vcf$|\.vcf\.gz$)", ".pcgr_ready.vcf.gz", pcgr_paths["input_vcf_basename"]))
         # needs to be uncompressed for vcf2maf
         input_vcf_pcgr_ready_uncompressed = os.path.join(output_dir, re.sub(r"(\.vcf$|\.vcf\.gz$)", ".pcgr_ready.vcf", pcgr_paths["input_vcf_basename"]))
-        vep_vcf = re.sub(r"(\.vcf$|\.vcf\.gz$)", ".vep.vcf.gz", input_vcf_pcgr_ready)
+        vep_vcf = re.sub(r"(\.vcf$|\.vcf\.gz$)", ".vep.vcf", input_vcf_pcgr_ready)
+        vep_vcf_gz = f'{vep_vcf}.gz'
         vep_vcfanno_vcf = re.sub(r"(\.vcf$|\.vcf\.gz$)", ".vep.vcfanno.vcf", input_vcf_pcgr_ready)
         vep_vcfanno_annotated_vcf = re.sub(r"\.vcfanno", ".vcfanno.annotated", vep_vcfanno_vcf) + ".gz"
         vep_vcfanno_annotated_pass_vcf = re.sub(r"\.vcfanno", ".vcfanno.annotated.pass", vep_vcfanno_vcf) + ".gz"
@@ -268,7 +269,7 @@ def run_pcgr(pcgr_paths, config_options):
                 f'--hgvs --af --af_1kg --af_gnomad --variant_class --domains --symbol --protein --ccds --mane '
                 f'--uniprot --appris --biotype --tsl --canonical --format vcf --cache --numbers --total_length --allele_number '
                 f'--no_stats --no_escape --xref_refseq --vcf --check_ref --dont_skip --flag_pick_allele_gene --plugin NearestExonJB,max_range=50000 '
-                f'--force_overwrite --species homo_sapiens --offline --compress_output bgzip'
+                f'--force_overwrite --species homo_sapiens --offline'
                 )
         vep_options = (
                 f'--dir {vep_dir} --assembly {VEP_ASSEMBLY} --cache_version {pcgr_vars.VEP_VERSION} '
@@ -289,7 +290,8 @@ def run_pcgr(pcgr_paths, config_options):
 
         # Compose full VEP command
         vep_main_command = f'{utils.get_perl_exports()} && vep --input_file {input_vcf_pcgr_ready} --output_file {vep_vcf} {vep_options}'
-        vep_tabix_command = f'tabix -f -p vcf {vep_vcf}'
+        vep_bgzip_command = f'bgzip -f -c {vep_vcf} > {vep_vcf_gz}'
+        vep_tabix_command = f'tabix -f -p vcf {vep_vcf_gz}'
 
         # PCGR|VEP - run consequence annotation with Variant Effect Predictor
         print('----')
@@ -304,6 +306,7 @@ def run_pcgr(pcgr_paths, config_options):
         logger.info(f'VEP configuration - buffer_size/number of forks: {config_options["other"]["vep_buffer_size"]}/{config_options["other"]["vep_n_forks"]}')
 
         check_subprocess(logger, vep_main_command, debug)
+        check_subprocess(logger, vep_bgzip_command, debug)
         check_subprocess(logger, vep_tabix_command, debug)
         logger.info('Finished pcgr-vep')
         print('----')
@@ -312,20 +315,22 @@ def run_pcgr(pcgr_paths, config_options):
         if run_vcf2maf:
             logger.info('Converting VEP-annotated VCF to MAF with https://github.com/mskcc/vcf2maf')
             vcf2maf_command = (
-                    f'vcf2maf.pl --inhibit-vep --input-vcf {input_vcf_pcgr_ready_uncompressed} '
+                    f'vcf2maf.pl --inhibit-vep --input-vcf {vep_vcf} '
                     f'--tumor-id {config_options["sample_id"]} --output-maf {output_maf} --ref-fasta {fasta_assembly} '
                     f'--ncbi-build {NCBI_BUILD_MAF} > {output_vcf2maf_log} 2>&1'
                     )
             check_subprocess(logger, vcf2maf_command, debug)
-            utils.remove(input_vcf_pcgr_ready_uncompressed)
-            utils.remove(output_vcf2maf_log)
+            if not debug:
+                utils.remove(vep_vcf)
+                utils.remove(input_vcf_pcgr_ready_uncompressed)
+                utils.remove(output_vcf2maf_log)
             logger.info('Finished pcgr-vep-vcf2maf')
             print('----')
 
         # PCGR|vcfanno - annotate VCF against a number of variant annotation resources
         logger = getlogger("pcgr-vcfanno")
         pcgr_vcfanno_command = (
-                f'pcgr_vcfanno.py {vep_vcf} {vep_vcfanno_vcf} {pcgr_paths["db_dir"]} '
+                f'pcgr_vcfanno.py {vep_vcf_gz} {vep_vcfanno_vcf} {pcgr_paths["db_dir"]} '
                 f'--num_processes {config_options["other"]["vcfanno_n_proc"]} '
                 f'--chasmplus --dbnsfp --docm --clinvar --icgc --civic --cgi --tcga_pcdm --winmsk --simplerepeats '
                 f'--tcga --uniprot --cancer_hotspots --pcgr_onco_xref '
