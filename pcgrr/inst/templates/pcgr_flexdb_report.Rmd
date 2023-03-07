@@ -40,6 +40,12 @@ scrollY_flexdb_container <- "510px"
 .chart-stage-flex {
   overflow: scroll !important;
 }
+.value-box .value {
+    color: white;
+}
+.value-box .caption {
+    color: white;
+}
 </style>
 
 
