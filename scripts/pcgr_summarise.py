@@ -100,42 +100,26 @@ def extend_vcf_annotations(query_vcf, pcgr_db_dir, logger, pon_annotation, regul
 
         if regulatory_annotation == 1:
             csq_record_results_all = annoutils.parse_vep_csq(rec, pcgr_onco_xref, vep_csq_fields_map, logger, pick_only = False, csq_identifier = 'CSQ')
-            if 'vep_block' in csq_record_results_all:
-                vep_csq_records_all = csq_record_results_all['vep_block']
+            if 'picked_gene_csq' in csq_record_results_all:
+                vep_csq_records_all = csq_record_results_all['picked_gene_csq']
                 rec.INFO['REGULATORY_ANNOTATION'] = annoutils.map_regulatory_variant_annotations(vep_csq_records_all)
 
-        csq_record_results_pick = annoutils.parse_vep_csq(rec, pcgr_onco_xref, vep_csq_fields_map, logger, pick_only = True, csq_identifier = 'CSQ')
-        vep_csq_records = None
-        if 'vep_all_csq' in csq_record_results_pick:
-            rec.INFO['VEP_ALL_CSQ'] = ','.join(csq_record_results_pick['vep_all_csq'])
-        if 'vep_block' in csq_record_results_pick:
-            vep_csq_records = csq_record_results_pick['vep_block']
-            block_idx = 0
-            if cpsr is True:
-                block_idx = annoutils.get_correct_cpg_transcript(vep_csq_records)
-	    
-            ## if multiple transcript-specific variant consequences highlighted by --pick_allele_gene , 
-            ## choose block of consequence which is protein-coding (assuming the other picked transcript/gene carries
-            ## another BIOTYPE nature)
-            if len(vep_csq_records) > 0:
-                selected_block_idx = 0
-                i = 0
-                for rec in vep_csq_records:
-                    if 'BIOTYPE' in rec:
-                        if not rec['BIOTYPE'] is None:
-                            if rec['BIOTYPE'] == "protein_coding":
-                                selected_block_idx = i
-                    i = i + 1
-                block_idx = selected_block_idx
+        vep_csq_record_results = annoutils.parse_vep_csq(rec, pcgr_onco_xref, vep_csq_fields_map, logger, pick_only = True, csq_identifier = 'CSQ')
 
-            record = vep_csq_records[block_idx]
-            for k in record:
+        vep_csq_records = None
+        if 'all_csq' in vep_csq_record_results:
+            rec.INFO['VEP_ALL_CSQ'] = ','.join(vep_csq_record_results['all_csq'])
+
+        if 'picked_csq' in vep_csq_record_results:
+            csq_record = vep_csq_record_results['picked_csq']
+            for k in csq_record:
                 if k in vcf_info_element_types:
-                    if vcf_info_element_types[k] == "Flag" and record[k] == "1":
+                    if vcf_info_element_types[k] == "Flag" and csq_record[k] == "1":
                         rec.INFO[k] = True
                     else:
-                        if not record[k] is None:
-                            rec.INFO[k] = record[k]
+                        if not csq_record[k] is None:
+                            rec.INFO[k] = csq_record[k]
+        
         if not rec.INFO.get('DBNSFP') is None:
             annoutils.map_variant_effect_predictors(rec, dbnsfp_prediction_algorithms)
 

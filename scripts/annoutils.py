@@ -636,8 +636,59 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, logger, pick_onl
                                  str(csq_fields[vep_csq_fields_map['field2index']['BIOTYPE']]))
             all_transcript_consequences.append(consequence_entry)
 
+  
+    vep_chosen_csq_idx = 0
     vep_csq_results = {}
-    vep_csq_results['vep_block'] = all_csq_pick
-    vep_csq_results['vep_all_csq'] = all_transcript_consequences
+    vep_csq_results['picked_gene_csq'] = all_csq_pick
+    vep_csq_results['all_csq'] = all_transcript_consequences
+    vep_csq_results['picked_csq'] = None
+
+    ## IF multiple transcript-specific variant consequences highlighted by --pick_allele_gene , 
+    ## prioritize/choose block of consequence which has
+    ## - A gene with BIOTYPE equal to 'protein-coding' (the other picked transcript/gene may potentialy carry another BIOTYPE nature)
+    ## - A gene consequence classified as 'exonic' (the other picked transcript/gene likely carries a nonexonic consequence)
+    if len(vep_csq_results['picked_gene_csq']) > 0:
+        vep_selected_idx = {}
+        vep_selected_idx['exonic_status'] = {}
+        vep_selected_idx['consequence'] = {}
+
+        i = 0
+        #print('')
+        for trans_rec in vep_csq_results['picked_gene_csq']:
+            if 'BIOTYPE' in trans_rec and 'Consequence' in trans_rec and 'EXONIC_STATUS' in trans_rec:
+                if not trans_rec['BIOTYPE'] is None and not trans_rec['Consequence'] is None:
+                    if trans_rec['BIOTYPE'] == "protein_coding":
+                        ## for protein-coding genes - record the exonic variant consequence status (exonic/nonexonic), and the consequence
+                        vep_selected_idx['exonic_status'][i] = trans_rec['EXONIC_STATUS']
+                        vep_selected_idx['consequence'][i] = trans_rec['Consequence']
+                        #print(str(i) + '\t' + str(trans_rec['SYMBOL']) + '\t' + str(vep_selected_idx['exonic_status'][i]) + '\t'  + str(vep_selected_idx['consequence'][i]))
+            i = i + 1
+            
+        ## when multiple transcript gene blocks are picked by VEP, prioritize the block with 'exonic' consequence
+        if len(vep_selected_idx['exonic_status'].keys()) > 1:
+            exonic_cons_found = 0
+            for j in vep_selected_idx['exonic_status'].keys():
+                ## This should happen at most once (i.e. variants hitting two different (picked) gene transcripts with exonic consequence should not happen)
+                if vep_selected_idx['exonic_status'][j] == 'exonic':
+                    exonic_cons_found = 1
+                    vep_chosen_csq_idx = j
+
+            ## if multiple non-exonic variants are found, prioritize UTR variants over other nonexonic
+            if exonic_cons_found == 0:
+                for j in vep_selected_idx['consequence'].keys():
+                    if vep_selected_idx['consequence'][j] == '5_prime_UTR_variant' or vep_selected_idx['consequence'][j] == '3_prime_UTR_variant':                  
+                        vep_chosen_csq_idx = j
+
+        else:
+            if len(vep_selected_idx['exonic_status'].keys()) == 1:
+                for k in vep_selected_idx['exonic_status'].keys():
+                    vep_chosen_csq_idx = k
+      
+        vep_csq_results['picked_csq'] = vep_csq_results['picked_gene_csq'][vep_chosen_csq_idx]
+        #print('Final index: ' + str(vep_csq_results['picked_csq']['Consequence'] + '\t' + str(vep_csq_results['picked_csq']['EXONIC_STATUS'])))
+
+    else:
+        logger.info('ERROR: No VEP block chosen by --pick_allele_gene')
+
 
     return (vep_csq_results)
