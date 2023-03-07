@@ -438,8 +438,9 @@ def run_pcgr(pcgr_paths, config_options):
 
         # export PATH to R conda env Rscript
         pcgrr_conda = config_options['pcgrr_conda']
+        pcgr_conda = utils.conda_prefix_basename()
         rscript = utils.script_path(pcgrr_conda, 'bin/Rscript')
-        pcgrr_script = utils.script_path('pcgr', 'bin/pcgrr.R')
+        pcgrr_script = utils.script_path(pcgr_conda, 'bin/pcgrr.R')
         pcgr_report_command = (
                 f"{rscript} {pcgrr_script} "
                 f"{output_dir} "
