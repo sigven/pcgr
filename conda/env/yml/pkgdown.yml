@@ -1,6 +1,6 @@
 name: pkgdown
 dependencies:
-  - r-pcgrr ==1.3.0 # versioned by bump2version
+  - r-pcgrr ==1.4.0 # versioned by bump2version
   - r-cpsr
   - r-pkgdown
   - r-readr
