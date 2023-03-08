@@ -1342,10 +1342,10 @@ write_report_output <- function(report,
         "disclaimer.md",
         package = "pcgrr")
 
-      header <- system.file(
-        "templates",
-        "header.html",
-        package = "pcgrr")
+      # header <- system.file(
+      #   "templates",
+      #   "header.html",
+      #   package = "pcgrr")
 
       log4r_info("------")
       log4r_info(paste0(
@@ -1365,7 +1365,7 @@ write_report_output <- function(report,
             css = css_fname,
             includes =
               rmarkdown::includes(
-                in_header = header,
+                #in_header = header,
                 after_body = disclaimer)),
         output_file = fnames[["html"]],
         output_dir = project_directory,
