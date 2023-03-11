@@ -131,7 +131,7 @@ def cli():
     config_options = config.create_config(arg_dict)
     # Verify existence of input files
     pcgr_paths = arg_checker.verify_input_files(arg_dict)
-    # Run PCGR workflow (vep, vcfanno, summarise, vcf2tsv, html)
+    # Run PCGR workflow (vep, vcfanno, summarise, vcf2tsvpy, html)
     run_pcgr(pcgr_paths, config_options)
 
 def run_pcgr(pcgr_paths, config_options):
@@ -380,9 +380,9 @@ def run_pcgr(pcgr_paths, config_options):
 
         logger.info('Finished pcgr-summarise main command')
 
-        # PCGR|vcf2tsv - convert VCF to TSV with https://github.com/sigven/vcf2tsv
-        pcgr_vcf2tsv_command = f'vcf2tsv.py {output_pass_vcf} --compress {output_pass_tsv}'
-        logger.info("Converting VCF to TSV with https://github.com/sigven/vcf2tsv")
+        # PCGR|vcf2tsvpy - convert VCF to TSV with https://github.com/sigven/vcf2tsvpy
+        pcgr_vcf2tsv_command = f'vcf2tsvpy {output_pass_vcf} --compress {output_pass_tsv}'
+        logger.info("Converting VCF to TSV with https://github.com/sigven/vcf2tsvpy")
         check_subprocess(logger, pcgr_vcf2tsv_command, debug)
         logger.info('Finished pcgr-summarise-vcf2tsv')
 
