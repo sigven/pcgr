@@ -381,7 +381,7 @@ def run_pcgr(pcgr_paths, config_options):
         logger.info('Finished pcgr-summarise main command')
 
         # PCGR|vcf2tsvpy - convert VCF to TSV with https://github.com/sigven/vcf2tsvpy
-        pcgr_vcf2tsv_command = f'vcf2tsvpy {output_pass_vcf} --compress {output_pass_tsv}'
+        pcgr_vcf2tsv_command = f'vcf2tsvpy --input_vcf {output_pass_vcf} --out_tsv {output_pass_tsv} --compress'
         logger.info("Converting VCF to TSV with https://github.com/sigven/vcf2tsvpy")
         check_subprocess(logger, pcgr_vcf2tsv_command, debug)
         logger.info('Finished pcgr-summarise-vcf2tsv')
