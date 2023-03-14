@@ -305,9 +305,9 @@ def run_cpsr(arg_dict, cpsr_paths):
                 #print(f"Deleting {fn}")
                 utils.remove(fn)
         logger.info('Finished cpsr-summarise main command')
-        ## CPSR|vcf2tsv - perform vcf2tsv conversion on the final annotated VCF file
-        cpsr_vcf2tsv_command = f"vcf2tsv.py {output_pass_vcf} --compress {output_pass_tsv}"
-        logger.info("Converting VCF to TSV with https://github.com/sigven/vcf2tsv")
+        ## CPSR|vcf2tsvpy - perform vcf2tsv conversion on the final annotated VCF file
+        cpsr_vcf2tsv_command = f"vcf2tsvpy --input_vcf {output_pass_vcf} --out_tsv {output_pass_tsv} --compress"
+        logger.info("Converting VCF to TSV with https://github.com/sigven/vcf2tsvpy")
         check_subprocess(logger, cpsr_vcf2tsv_command, debug)
         logger.info('Finished cpsr-summarise-vcf2tsv')
     logger.info('Finished cpsr-summarise')

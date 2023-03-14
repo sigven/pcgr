@@ -21,7 +21,6 @@ setuptools.setup(
         'scripts/pcgr_summarise.py',
         'scripts/pcgr_validate_input.py',
         'scripts/pcgr_vcfanno.py',
-        'scripts/vcf2tsv.py',
         'scripts/pcgrr.R',
         'scripts/cpsr.R'
     ]

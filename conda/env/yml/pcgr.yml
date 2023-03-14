@@ -18,3 +18,4 @@ dependencies:
   - vcfanno ==0.3.3
   - vt
   - vcf2maf ==1.6.21
+  - bioconda::vcf2tsvpy ==0.6.1
