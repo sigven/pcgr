@@ -3,14 +3,84 @@ title: "Changelog"
 output: rmarkdown::html_document
 ---
 
-## v1.3.0
+```{r load_pkgs, echo=FALSE, message=FALSE, warning=FALSE}
+require(htmltools, include.only = c("a"))
+require(dplyr)
+require(glue, include.only = "glue")
+require(assertthat, include.only = "assert_that")
+```
 
-- Date: **2023-02-28**
-- [Diff between v1.3.0 and v1.2.0](https://github.com/sigven/pcgr/compare/v1.2.0...v1.3.0)
+```{r funcs, echo=FALSE}
+diff <- function(new, old) {
+  assert_that(utils::compareVersion(new, old) == 1)
+  a(
+    href = glue("https://github.com/sigven/pcgr/compare/v{old}...v{new}"),
+    glue("Diff between v{new} and v{old}")
+  )
+}
+
+pr_or_issue <- function(n, type) {
+  assert_that(is.numeric(n), n > 0, type %in% c("issue", "pr"))
+  type2 <- dplyr::if_else(type == "pr", "pull", "issue")
+  a(
+    href = glue("https://github.com/sigven/pcgr/{type2}/{n}"),
+    glue("{type}{n}")
+  )
+}
+
+issue <- function(n) {
+  pr_or_issue(n, "issue")
+}
+
+pr <- function(n) {
+  pr_or_issue(n, "pr")
+}
+
+user <- function(x) {
+  a(
+    href = glue("https://github.com/{x}"),
+    glue("@{x}")
+  )
+}
+sigven <- user("sigven")
+pdiakumis <- user("pdiakumis")
+```
+
+
+## v1.5.0rc
+
+- Date: **2023-xx-xx**
+- `r diff("1.5.0", "1.4.0")`
 
 ### Changes
 
-- `pcgr_summarise.py`: proritize protein-coding BIOTYPE csq ([pr201](https://github.com/sigven/pcgr/pull/201))
+- Skip favicon for Rmarkdown by `r sigven` in `r pr(210)`
+- Use biocondarised vcf2tsvpy by `r pdiakumis` in `r pr(211)`
+
+---
+
+## v1.4.0
+
+- Date: **2023-03-08**
+- `r diff("1.4.0", "1.3.0")`
+
+### Changes
+
+- Pick trans consequence patch by `r sigven` in `r pr(206)`
+- Use VEP vcf as input to vcf2maf.pl by `r sigven` in `r pr(207)`
+- Better handling of pcgr/pcgrr conda env custom naming by `r pdiakumis` in `r pr(208)`
+- Update report style by `r sigven` in `r pr(209)`
+
+---
+
+## v1.3.0
+
+- Date: **2023-02-28**
+- `r diff("1.3.0", "1.2.0")`
+
+### Changes
+
+- `pcgr_summarise.py`: proritize protein-coding BIOTYPE csq (`r pr(201)`)
 - `cpsr.py`: expose `--pcgrr_conda` option to flexibly activate pcgrr env by a non-default pcgrr name
 - docs: update `input.Rmd`, `running.Rmd`
 - `cpsr_validate_input.py`: refactor for efficient custom gene egrep
@@ -20,41 +90,47 @@ output: rmarkdown::html_document
   - use `miniforge-variant` instead of `mamba-version: "*"`
   - replace `::set-output` since deprecated
 
+---
+
 ## v1.2.0
 
 - Date: **2022-11-11**
-- [Diff between v1.2.0 and v1.1.0](https://github.com/sigven/pcgr/compare/v1.1.0...v1.2.0)
+- `r diff("1.2.0", "1.1.0")`
 
 ### Changes
 
 - Keep only autosomal, X, Y, M/MT chromosomes
 - Import bcftools as dependency
 
+---
+
 ## v1.1.0
 
 - Date: **2022-10-28**
-- [Diff between v1.1.0 and v1.0.3](https://github.com/sigven/pcgr/compare/v1.0.3...v1.1.0)
+- `r diff("1.1.0", "1.0.3")`
 
 ### Changes
 
 - Remove Docker command wrappers (note: this does not remove the Docker _functionality_ from PCGR; instead
   it removes the legacy wrappers that were created in the original PCGR version). This along with a lot of
-  other general changes are summarised in [pr193](https://github.com/sigven/pcgr/pull/193). Of note:
+  other general changes are summarised in `r pr(193)`. Of note:
   - `--no_docker` and `--docker_uid` CLI arguments are now obsolete.
   - `--version` CLI argument added for `pcgr/cpsr.py`
   - declutter repetitive log messages
   - refactor `pcgr/cpsr.py` script
-- Update documentation and declutter logging; refactor dict creation ([pr192](https://github.com/sigven/pcgr/pull/192)).
-- Minor refactor ([pr194](https://github.com/sigven/pcgr/pull/194)):
+- Update documentation and declutter logging; refactor dict creation (`r pr(192)`).
+- Minor refactor (`r pr(194)`):
   - switch to using Python's native `os.remove` and `os.rename` for glob cleanup
   - keep decompressed VCF only if `--vcf2maf` option is specified.
     The [vcf2maf](https://github.com/mskcc/vcf2maf) tool does not support compressed VCFs - see
     [issue235](https://github.com/mskcc/vcf2maf/issues/235).
-- Fix for CLI argument `--cna_overlap_pct` ([pr196](https://github.com/sigven/pcgr/pull/196)).
+- Fix for CLI argument `--cna_overlap_pct` `r pr(196)`.
 
 ### New Contributors
 
-- [@niklasmueboe](https://github.com/niklasmueboe) ([pr196](https://github.com/sigven/pcgr/pull/196)).
+- `r user("niklasmueboe")` (`r pr(196)`).
+
+---
 
 ## v1.0.3
 
@@ -62,7 +138,9 @@ output: rmarkdown::html_document
 
 ##### Fixed
 
- * Bug in clinical trials sorting, [#191](https://github.com/sigven/pcgr/pull/191)
+ * Bug in clinical trials sorting, `r pr(191)`
+
+---
 
 ## v1.0.2
 
@@ -70,7 +148,9 @@ output: rmarkdown::html_document
 
 ##### Fixed
 
- * JSON output for CPSR, [#44](https://github.com/sigven/cpsr/issues/44)
+ * JSON output for CPSR, `r issue(44)`
+
+---
 
 ## v1.0.1
 
@@ -81,7 +161,7 @@ output: rmarkdown::html_document
  * Writing to JSON crashes when size of input VCF is huge (variants in the order of millions). If raw input set (VCF) contains > 500,000 variants, this set will, prior to reporting, be reduced by
       * A) exclusion of intergenic and intronic variants, and
       * B) exclusion of upstream_gene/downstream_gene variants (if variant set is still above 500,000 after step A)
- * [Bug in signature analysis](https://github.com/sigven/pcgr/issues/187) for cases where the input variant set fits to > 18 different aetiologies.
+ * Bug in signature analysis (`r issue(187)`) for cases where the input variant set fits to > 18 different aetiologies.
 
 ## v1.0.0
 
