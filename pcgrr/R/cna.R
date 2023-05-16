@@ -168,7 +168,7 @@ get_oncogene_tsgene_target_sets <- function(
   onco_ts_sets[["oncogene_gain"]] <- data.frame()
   onco_ts_sets[["oncogene_gain"]] <-
     dplyr::filter(cna_df, .data$ONCOGENE == T &
-                    .data$TUMOR_SUPPRESSOR == F &
+                    #.data$TUMOR_SUPPRESSOR == F &
                     .data$MEAN_TRANSCRIPT_CNA_OVERLAP >= transcript_overlap_pct &
                     .data$LOG_R >= log_r_gain)
   onco_ts_sets[["tsgene_loss"]] <- data.frame()
