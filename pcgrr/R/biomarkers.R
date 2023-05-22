@@ -262,17 +262,13 @@ load_eitems <- function(eitems_raw = NULL,
 
 
 
-  for(alteration_type in alteration_types){
+allowed_alt_types <- c("MUT", "CNA", "MUT_LOF")
+assertthat::assert_that(
+  all(alteration_types %in% allowed_alt_types),
+  msg = paste0("Argument 'alteration_types' can only take the following values: ",
+               paste0(allowed_alt_types, collapse = ", "), " and NOT: ",
+               paste0(alteration_types[!alteration_types %in% allowed_alt_types], collapse = ", ")))
 
-    invisible(
-      assertthat::assert_that(
-        alteration_type == "MUT" |
-          alteration_type == "CNA" |
-          alteration_type == "MUT_LOF",
-        msg = paste0("Argument 'alteration_type' can only take ",
-                     "three values: 'MUT' or 'CNA' or 'MUT_LOF', and NOT: ",
-                     alteration_type)))
-  }
 
   invisible(
     assertthat::assert_that(
