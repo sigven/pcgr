@@ -226,7 +226,35 @@ pcgr_data[['assembly']][['seqinfo']] <-
     genome = genome_grch2hg[genome_assembly])
 pcgr_data[['assembly']][['bsg']] <- bsgenome_obj
 
-## temporary type fix
+## temporary fix - some evidence items from CIViC are not
+## assigned as codon markers, but rather as exact (variant level markers)
+pcgr_data$biomarkers$civic <- suppressWarnings(
+  pcgr_data$biomarkers$civic |>
+  dplyr::mutate(BIOMARKER_MAPPING = dplyr::if_else(
+    stringr::str_detect(VARIANT_NAME,"^[A-Z][0-9]{1,}$") &
+      BIOMARKER_MAPPING == "exact",
+    "codon",
+    as.character(BIOMARKER_MAPPING)
+  )) |>
+  dplyr::mutate(MAPPING_RANK = dplyr::if_else(
+    stringr::str_detect(VARIANT_NAME,"^[A-Z][0-9]{1,}$") &
+      BIOMARKER_MAPPING == "codon",
+    2,
+    as.integer(MAPPING_RANK)
+  )) |>
+  dplyr::mutate(EITEM_CODON = dplyr::if_else(
+    stringr::str_detect(VARIANT_NAME,"^[A-Z][0-9]{1,}$") &
+      BIOMARKER_MAPPING == "codon" &
+      is.na(EITEM_CODON),
+    as.integer(
+      as.character(stringr::str_replace(
+        VARIANT_NAME, "^[A-Z]",""
+      )
+    )),
+    as.integer(EITEM_CODON)
+  ))
+)
+
 ## temporary type fix
 if("ACTIONABILITY_SCORE" %in% colnames(pcgr_data$biomarkers$cgi)){
   pcgr_data$biomarkers$cgi$ACTIONABILITY_SCORE <-

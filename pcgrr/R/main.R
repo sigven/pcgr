@@ -428,7 +428,7 @@ generate_report_data_snv_indel <- function(
     ## load all clinical evidence items ()
     eitems_any_tt <- pcgrr::load_eitems(
       eitems_raw = pcgr_data$biomarkers,
-      alteration_type = "MUT",
+      alteration_types = c("MUT","MUT_LOF"),
       ontology =
         pcgr_data$phenotype_ontology$oncotree,
       origin = "Somatic",
@@ -455,7 +455,7 @@ generate_report_data_snv_indel <- function(
       ## load tumor-type specific evidence items ()
       eitems_specific_tt <- pcgrr::load_eitems(
         eitems_raw = pcgr_data$biomarkers,
-        alteration_type = "MUT",
+        alteration_types = c("MUT","MUT_LOF"),
         ontology =
           pcgr_data$phenotype_ontology$oncotree,
         origin = "Somatic",
