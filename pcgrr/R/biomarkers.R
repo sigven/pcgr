@@ -72,7 +72,7 @@ get_clin_assocs_snv_indel <- function(sample_calls,
   ## (making sure variants are of correct consequence,
   ## at the correct amino acid position etc)
   for (m in c("codon", "exon", "gene")) {
-    if (nrow(var_eitems_regional) > 0) {
+    if (NROW(var_eitems_regional) > 0) {
       var_eitems[[m]] <-
         pcgrr::qc_var_eitems(var_eitems = var_eitems_regional,
                              marker_type = m)
@@ -115,7 +115,7 @@ get_clin_assocs_snv_indel <- function(sample_calls,
       alteration_type = "MUT")
 
   variant_set <- data.frame()
-  if (nrow(all_var_evidence_items) > 0) {
+  if (NROW(all_var_evidence_items) > 0) {
     variant_tags <-
       annotation_tags[["all"]][!annotation_tags[["all"]]
                                               %in% c("CIVIC_ID",
@@ -182,7 +182,7 @@ get_clin_assocs_cna <- function(onco_ts_sets,
                          onco_ts_sets[[type]],
                          by = c("SYMBOL", "CNA_TYPE"))
       )
-      if (nrow(eitem_hits) > 0) {
+      if (NROW(eitem_hits) > 0) {
         variant_set <- dplyr::bind_rows(variant_set, eitem_hits) %>%
           dplyr::select(
             dplyr::one_of(annotation_tags[["cna_display"]])) %>%
@@ -509,7 +509,7 @@ match_eitems_to_var <- function(sample_calls,
 
   sample_calls_db <- sample_calls %>%
     dplyr::filter(!is.na(!!rlang::sym(evidence_identifiers[1])))
-  if (nrow(sample_calls_db) > 0) {
+  if (NROW(sample_calls_db) > 0) {
     var_eitems_by_id <- as.data.frame(sample_calls_db %>%
       tidyr::separate_rows(!!rlang::sym(evidence_identifiers[1]), sep = ",") %>%
       dplyr::select(
@@ -519,7 +519,7 @@ match_eitems_to_var <- function(sample_calls,
       pcgrr::remove_cols_from_df(cnames = evidence_identifiers[2])
     )
 
-    if (nrow(var_eitems_by_id) > 0) {
+    if (NROW(var_eitems_by_id) > 0) {
       var_eitems[['by_id']] <- as.data.frame(
         var_eitems_by_id %>%
           dplyr::inner_join(eitems_db,
