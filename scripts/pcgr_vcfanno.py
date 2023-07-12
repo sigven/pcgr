@@ -3,8 +3,9 @@
 import argparse
 import cyvcf2
 import random
-import re
+import re, os
 import glob
+import annoutils
 from pcgr import utils
 from pcgr.utils import check_subprocess
 
@@ -20,48 +21,32 @@ def __main__():
         'pcgr_db_dir', help='PCGR assembly-specific data directory')
     parser.add_argument(
         '--num_processes', help="Number of processes vcfanno can use during annotation", default=4)
-    parser.add_argument("--docm", action="store_true",
-                        help="Annotate VCF with annotations from Database of Curated Mutations")
     parser.add_argument("--clinvar", action="store_true",
                         help="Annotate VCF with annotations from ClinVar")
-    parser.add_argument("--ncer", action="store_true",
-                        help="Annotate VCF with ranking of variant deleteriousness in non-coding regions (ncER)")
+    # parser.add_argument("--ncer", action="store_true",
+    #                     help="Annotate VCF with ranking of variant deleteriousness in non-coding regions (ncER)")
     parser.add_argument('--dbmts', action="store_true",
                         help="Annotate VCF file with variants predicted to cause loss/gain of miRNA target sites in 3'UTR regions")
     parser.add_argument('--gerp', action="store_true",
-                        help="Annotate VCF file with GERP RS scores (cancer predisposition gene/SF/GWAS loci only)")
+                        help="Annotate VCF file with GERP RS scores (cancer predisposition genes/actionable/secondary findings/GWAS loci only)")
     parser.add_argument("--dbnsfp", action="store_true",
                         help="Annotate VCF with annotations from database of non-synonymous functional predictions")
     parser.add_argument("--tcga", action="store_true",
                         help="Annotate VCF with variant frequencies from the The Cancer Genome Atlas")
-    parser.add_argument("--tcga_pcdm", action="store_true",
-                        help="Annotate VCF with putative cancer driver mutations from The Cancer Genome Atlas")
-    parser.add_argument("--chasmplus", action="store_true",
-                        help="Annotate VCF with putative cancer driver mutations from CHASMplus algorithm")
-    parser.add_argument("--civic", action="store_true",
-                        help="Annotate VCF with annotations from the Clinical Interpretation of Variants in Cancer database")
-    parser.add_argument("--cgi", action="store_true",
-                        help="Annotate VCF with annotations from the Cancer bioMarkers database")
-    parser.add_argument("--icgc", action="store_true",
-                        help="Annotate VCF with known variants found in the ICGC-PCAWG sequencing project")
-    parser.add_argument("--cancer_hotspots", action="store_true",
-                        help="Annotate VCF with mutation hotspots from cancerhotspots.org")
-    parser.add_argument("--uniprot", action="store_true",
-                        help="Annotate VCF with protein functional features from the UniProt Knowledgebase")
-    parser.add_argument("--pcgr_onco_xref", action="store_true",
-                        help="Annotate VCF with transcript annotations from PCGR (targeted drugs, protein complexes, cancer gene associations, etc)")
+    parser.add_argument("--gene_transcript_xref", action="store_true",
+                        help="Annotate VCF with transcript annotations from PCGR (drug targets, actionable genes, cancer gene roles, etc)")
     parser.add_argument("--gwas", action="store_true",
-                        help="Annotate VCF against known loci associated with cancer, as identified from genome-wide association studies (GWAS)")
+                        help="Annotate VCF against moderate-to-low cancer risk variants, as identified from genome-wide association studies (GWAS)")
     parser.add_argument("--rmsk", action="store_true",
                         help="Annotate VCF against known sequence repeats, as identified by RepeatMasker (rmsk)")
     parser.add_argument("--simplerepeats", action="store_true",
                         help="Annotate VCF against known sequence repeats, as identified by Tandem Repeats Finder (simplerepeats)")
     parser.add_argument("--winmsk", action="store_true",
                         help="Annotate VCF against known sequence repeats, as identified by Windowmasker (winmsk)")
-    parser.add_argument("--gnomad_cpsr", action="store_true",
-                        help="Annotate VCF with population-specific allelic counts and frequencies in cancer predisposition genes (gnomAD non-cancer subset)")
-    parser.add_argument("--panel_normal_vcf", dest="panel_normal_vcf",
-                        help="Annotate VCF with germline calls from panel of normals")
+    parser.add_argument("--gnomad_non_cancer", action="store_true",
+                        help="Annotate VCF with population-specific allele frequencies in gnomAD non-cancer subjects (cancer predisposition genes/actionable/secondary findings/GWAS loci only)")
+    parser.add_argument("--pon_vcf", dest="pon_vcf",
+                        help="Annotate VCF with calls from panel of normals (PON VCF)")
     parser.add_argument("--keep_logs", action="store_true")
     parser.add_argument("--debug", action="store_true", default=False,
                         help="Print full commands to log, default: %(default)s")
@@ -76,136 +61,91 @@ def __main__():
     conf_fname = args.out_vcf + '.tmp.conf.toml'
     print_vcf_header(args.query_vcf, vcfheader_file,
                      logger, chromline_only=False)
-    run_vcfanno(args.num_processes, args.query_vcf, args.panel_normal_vcf, query_info_tags, vcfheader_file,
-                args.pcgr_db_dir, conf_fname, args.out_vcf, args.docm, args.clinvar, args.ncer, args.dbmts, args.gerp, args.tcga, args.tcga_pcdm,
-                args.chasmplus, args.dbnsfp, args.civic, args.cgi, args.icgc, args.uniprot, args.cancer_hotspots,
-                args.pcgr_onco_xref, args.gwas, args.rmsk, args.simplerepeats, args.winmsk, args.gnomad_cpsr, args.keep_logs, args.debug, logger)
+    
+    vcfanno_tracks = {}
+    ## BED
+    vcfanno_tracks['rmsk'] = args.rmsk
+    vcfanno_tracks['winmsk'] = args.winmsk
+    vcfanno_tracks['simplerepeats'] = args.simplerepeats
+    vcfanno_tracks['gene_transcript_xref'] = args.gene_transcript_xref
+
+    ## VCF
+    vcfanno_tracks['tcga'] = args.tcga
+    vcfanno_tracks['gwas'] = args.gwas
+    vcfanno_tracks['dbmts'] = args.dbmts
+    vcfanno_tracks['dbnsfp'] = args.dbnsfp
+    vcfanno_tracks['gerp'] = args.gerp
+    vcfanno_tracks['clinvar'] = args.clinvar
+    vcfanno_tracks['gnomad_non_cancer'] = args.gnomad_non_cancer
+
+    run_vcfanno(args.num_processes, args.query_vcf, vcfanno_tracks, query_info_tags, vcfheader_file,
+                args.pcgr_db_dir, conf_fname, args.pon_vcf, args.out_vcf, args.keep_logs, args.debug, logger)
 
 
-def prepare_vcfanno_configuration(vcfanno_data_directory, conf_fname, vcfheader_file, logger, datasource_info_tags, query_info_tags, datasource):
-    for t in datasource_info_tags:
-        if t in query_info_tags:
-            logger.warning("Query VCF has INFO tag " + str(t) + ' - this is also present in the ' + str(
-                datasource) + ' VCF/BED annotation file. This tag will be overwritten if not renamed in the query VCF')
-    append_to_conf_file(datasource, datasource_info_tags,
-                        vcfanno_data_directory, conf_fname)
-    append_to_vcf_header(vcfanno_data_directory,
-                         datasource, vcfheader_file, logger)
+def run_vcfanno(num_processes, query_vcf, vcfanno_tracks, query_info_tags, vcfheader_file, pcgr_db_dir, conf_fname,
+                pon_vcf, output_vcf, keep_logs, debug, logger):
 
-
-def run_vcfanno(num_processes, query_vcf, panel_normal_vcf, query_info_tags, vcfheader_file, pcgr_db_directory, conf_fname,
-                output_vcf, docm, clinvar, ncer, dbmts, gerp, tcga, tcga_pcdm, chasmplus, dbnsfp, civic, cgi, icgc, uniprot, cancer_hotspots,
-                pcgr_onco_xref, gwas, rmsk, simplerepeats, winmsk, gnomad_cpsr, keep_logs, debug, logger):
     """
     Function that annotates a VCF file with vcfanno against a user-defined set of germline and somatic VCF files
     """
 
-    civic_info_tags = ["CIVIC_ID", "CIVIC_ID_SEGMENT"]
-    cgi_info_tags = ["CGI_ID", "CGI_ID_SEGMENT"]
-    icgc_info_tags = ["ICGC_PCAWG_OCCURRENCE", "ICGC_PCAWG_AFFECTED_DONORS"]
-    docm_info_tags = ["DOCM_PMID"]
-    tcga_info_tags = ["TCGA_FREQUENCY", "TCGA_PANCANCER_COUNT"]
-    tcga_pcdm_info_tags = ["PUTATIVE_DRIVER_MUTATION"]
-    chasmplus_info_tags = ["CHASMPLUS_DRIVER",
-                           "CHASMPLUS_TTYPE", "CHASMPLUS_PANCAN"]
-    ncer_info_tags = ["NCER_PERCENTILE"]
-    clinvar_info_tags = ["CLINVAR_MSID", "CLINVAR_PMID", "CLINVAR_CLNSIG", "CLINVAR_VARIANT_ORIGIN", "CLINVAR_CONFLICTED", "CLINVAR_UMLS_CUI", "CLINVAR_HGVSP",
-                         "CLINVAR_UMLS_CUI_SOMATIC", "CLINVAR_CLNSIG_SOMATIC", "CLINVAR_PMID_SOMATIC", "CLINVAR_ALLELE_ID", "CLINVAR_MOLECULAR_EFFECT",
-                         "CLINVAR_REVIEW_STATUS_STARS", "CLINVAR_CLASSIFICATION", "CLINVAR_ENTREZGENE"]
-    cancer_hotspots_info_tags = [
-        "MUTATION_HOTSPOT", "MUTATION_HOTSPOT_TRANSCRIPT", "MUTATION_HOTSPOT_CANCERTYPE"]
-    dbnsfp_info_tags = ["DBNSFP"]
-    uniprot_info_tags = ["UNIPROT_FEATURE"]
-    pcgr_onco_xref_info_tags = ["PCGR_ONCO_XREF"]
-    gwas_info_tags = ["GWAS_HIT"]
-    rmsk_info_tags = ["RMSK_HIT"]
-    simplerepeats_info_tags = ["SIMPLEREPEATS_HIT"]
-    winmsk_info_tags = ["WINMASKER_HIT"]
+    ## Collect metadata (VCF INFO tags) for annotations populated with vcfanno
+    metadata_vcf_infotags = {}
+    infotags = {}
+
+    track_file_info = {}
+
+    ## INFO tags used for vcfanno annotation
+    track_file_info['tags_fname'] = {}
+
+    ## Source file (VCF/BED) used for vcfanno annotation
+    track_file_info['track_fname'] = {}
+    
+    for variant_track in ['clinvar','tcga','gwas','dbmts','dbnsfp','gnomad_non_cancer']:
+        track_file_info['tags_fname'][variant_track] = os.path.join(pcgr_db_dir,'variant','vcf', variant_track, f'{variant_track}.vcfanno.vcf_info_tags.txt')
+        track_file_info['track_fname'][variant_track] = os.path.join(pcgr_db_dir,'variant','vcf', variant_track, f'{variant_track}.vcf.gz')
+
+    for bed_track in ['simplerepeat','winmsk','rmsk','gerp']:
+        track_file_info['tags_fname'][bed_track] = os.path.join(pcgr_db_dir,'misc','bed', bed_track, f'{bed_track}.vcfanno.vcf_info_tags.txt')
+        track_file_info['track_fname'][bed_track] = os.path.join(pcgr_db_dir,'misc','bed', bed_track, f'{bed_track}.bed.gz')
+
+    track_file_info['tags_fname']['gene_transcript_xref'] = os.path.join(pcgr_db_dir,'gene','bed', 'gene_transcript_xref', 'gene_transcript_xref.vcfanno.vcf_info_tags.txt')
+    track_file_info['track_fname']['gene_transcript_xref'] = os.path.join(pcgr_db_dir,'gene','bed', 'gene_transcript_xref', 'gene_transcript_xref.bed.gz')
+    
+    for track in track_file_info['tags_fname']:
+
+        if not vcfanno_tracks[track] is True:
+            continue
+
+        infotags_vcfanno = annoutils.read_vcfanno_tag_file(track_file_info['tags_fname'][track], logger)
+        infotags[track] = infotags_vcfanno.keys()
+        for tag in infotags_vcfanno:
+            if tag in query_info_tags:
+                logger.warning("Query VCF has INFO tag " + str(t) + ' - this is also present in the ' + str(
+                    track) + ' VCF/BED annotation file. This tag will be overwritten if not renamed in the query VCF')
+            metadata_vcf_infotags[tag] = infotags_vcfanno[tag]
+        
+        ## append track to vcfanno configuration file
+        append_to_conf_file(track, infotags[track], track_file_info['track_fname'][track], conf_fname)
+
+        ## Append VCF INFO tags to VCF header file
+        check_subprocess(logger, f'cat {track_file_info["tags_fname"][track]} >> {vcfheader_file}', debug=False)
+    
+    
+   
     panel_normal_tags = ["PANEL_OF_NORMALS"]
-    dbmts_info_tags = ["DBMTS"]
-    gerp_info_tags = ['GERP_SCORE']
-
-    gnomad_cpsr_tags = []
-    gnomad_cpsr_tags.append('NON_CANCER_AC_GLOBAL')
-    gnomad_cpsr_tags.append('NON_CANCER_NHOMALT_GLOBAL')
-    gnomad_cpsr_tags.append('NON_CANCER_AN_GLOBAL')
-    gnomad_cpsr_tags.append('NON_CANCER_AF_GLOBAL')
-    for pop in ['ASJ', 'NFE', 'SAS', 'FIN', 'EAS', 'AMR', 'AFR', 'OTH']:
-        gnomad_cpsr_tags.append('NON_CANCER_AC_' + str(pop))
-        gnomad_cpsr_tags.append('NON_CANCER_AN_' + str(pop))
-        gnomad_cpsr_tags.append('NON_CANCER_AF_' + str(pop))
-        gnomad_cpsr_tags.append('NON_CANCER_NHOMALT_' + str(pop))
-
-    if icgc is True:
-        prepare_vcfanno_configuration(
-            pcgr_db_directory, conf_fname, vcfheader_file, logger, icgc_info_tags, query_info_tags, "icgc")
-    if clinvar is True:
-        prepare_vcfanno_configuration(
-            pcgr_db_directory, conf_fname, vcfheader_file, logger, clinvar_info_tags, query_info_tags, "clinvar")
-    if ncer is True:
-        prepare_vcfanno_configuration(
-            pcgr_db_directory, conf_fname, vcfheader_file, logger, ncer_info_tags, query_info_tags, "ncer")
-    if gerp is True:
-        prepare_vcfanno_configuration(
-            pcgr_db_directory, conf_fname, vcfheader_file, logger, gerp_info_tags, query_info_tags, "gerp")
-    if dbmts is True:
-        prepare_vcfanno_configuration(
-            pcgr_db_directory, conf_fname, vcfheader_file, logger, dbmts_info_tags, query_info_tags, "dbmts")
-    if dbnsfp is True:
-        prepare_vcfanno_configuration(
-            pcgr_db_directory, conf_fname, vcfheader_file, logger, dbnsfp_info_tags, query_info_tags, "dbnsfp")
-    if cgi is True:
-        prepare_vcfanno_configuration(
-            pcgr_db_directory, conf_fname, vcfheader_file, logger, cgi_info_tags, query_info_tags, "cgi")
-    if tcga is True:
-        prepare_vcfanno_configuration(
-            pcgr_db_directory, conf_fname, vcfheader_file, logger, tcga_info_tags, query_info_tags, "tcga")
-    if tcga_pcdm is True:
-        prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file,
-                                      logger, tcga_pcdm_info_tags, query_info_tags, "tcga_pcdm")
-    if chasmplus is True:
-        prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file,
-                                      logger, chasmplus_info_tags, query_info_tags, "chasmplus")
-    if civic is True:
-        prepare_vcfanno_configuration(
-            pcgr_db_directory, conf_fname, vcfheader_file, logger, civic_info_tags, query_info_tags, "civic")
-    if cancer_hotspots is True:
-        prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file,
-                                      logger, cancer_hotspots_info_tags, query_info_tags, "cancer_hotspots")
-    if uniprot is True:
-        prepare_vcfanno_configuration(
-            pcgr_db_directory, conf_fname, vcfheader_file, logger, uniprot_info_tags, query_info_tags, "uniprot")
-    if docm is True:
-        prepare_vcfanno_configuration(
-            pcgr_db_directory, conf_fname, vcfheader_file, logger, docm_info_tags, query_info_tags, "docm")
-    if pcgr_onco_xref is True:
-        prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file,
-                                      logger, pcgr_onco_xref_info_tags, query_info_tags, "pcgr_onco_xref")
-    if gwas is True:
-        prepare_vcfanno_configuration(
-            pcgr_db_directory, conf_fname, vcfheader_file, logger, gwas_info_tags, query_info_tags, "gwas")
-    if rmsk is True:
-        prepare_vcfanno_configuration(
-            pcgr_db_directory, conf_fname, vcfheader_file, logger, rmsk_info_tags, query_info_tags, "rmsk")
-    if simplerepeats is True:
-        prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file,
-                                      logger, simplerepeats_info_tags, query_info_tags, "simplerepeats")
-    if winmsk is True:
-        prepare_vcfanno_configuration(
-            pcgr_db_directory, conf_fname, vcfheader_file, logger, winmsk_info_tags, query_info_tags, "winmsk")
-    if gnomad_cpsr is True:
-        prepare_vcfanno_configuration(pcgr_db_directory, conf_fname, vcfheader_file,
-                                      logger, gnomad_cpsr_tags, query_info_tags, "gnomad_cpsr")
-
-    if not panel_normal_vcf is None:
+   
+    if not pon_vcf is None:
         if "PANEL_OF_NORMALS" in query_info_tags:
             logger.warning(
                 "Query VCF has INFO tag \"PANEL_OF_NORMALS\" - this is also present in the panel of normal VCF file. This tag will be overwritten if not renamed in the query VCF")
-        append_to_vcf_header(
-            pcgr_db_directory, "panel_of_normals", vcfheader_file, logger)
+        
+        vcf_info_tags_file = os.path.join(pcgr_db_dir,'variant','vcf', 'panel_of_normals', 'panel_of_normals.vcfanno.vcf_info_tags.txt')
+        check_subprocess(
+            logger, f'cat {vcf_info_tags_file} >> {vcfheader_file}', debug=False)
         fh = open(conf_fname, 'a')
         fh.write('[[annotation]]\n')
-        fh.write('file="' + str(panel_normal_vcf) + '"\n')
+        fh.write('file="' + str(pon_vcf) + '"\n')
         fields_string = 'fields = ["' + '","'.join(panel_normal_tags) + '"]'
         ops = ['self'] * len(panel_normal_tags)
         ops_string = 'ops=["' + '","'.join(ops) + '"]'
@@ -231,76 +171,30 @@ def run_vcfanno(num_processes, query_vcf, panel_normal_vcf, query_info_tags, vcf
         utils.remove(f"{query_prefix}.vcfanno.log")
 
 
-def append_to_vcf_header(pcgr_db_directory, datasource, vcfheader_file, logger):
-    """
-    Function that appends the VCF header information for a given 'datasource' (containing INFO tag formats/descriptions, and datasource version)
-    """
-    vcf_info_tags_file = str(pcgr_db_directory) + '/' + str(datasource) + \
-        '/' + str(datasource) + '.vcfanno.vcf_info_tags.txt'
-    check_subprocess(
-        logger, f'cat {vcf_info_tags_file} >> {vcfheader_file}', debug=False)
-
-
-def append_to_conf_file(datasource, datasource_info_tags, pcgr_db_directory, conf_fname):
+def append_to_conf_file(datasource, datasource_info_tags, datasource_track_fname, conf_fname):
     """
     Function that appends data to a vcfanno conf file ('conf_fname') according to user-defined ('datasource').
     The datasource defines the set of tags that will be appended during annotation
     """
     fh = open(conf_fname, 'a')
-    if datasource == 'ncer' or datasource == 'gerp':
-        fh.write('[[annotation]]\n')
-        fh.write('file="' + str(pcgr_db_directory) + '/' +
-                 str(datasource) + '/' + str(datasource) + '.bed.gz"\n')
+    fh.write('[[annotation]]\n')
+    fh.write('file="' + str(datasource_track_fname) + '"\n')
+    if datasource == 'ncer' or datasource == 'gerp':        
         fh.write('columns=[4]\n')
         names_string = 'names=["' + '","'.join(datasource_info_tags) + '"]'
         fh.write(names_string + '\n')
         fh.write('ops=["mean"]\n\n')
-    elif datasource == 'pcgr_onco_xref' or datasource == 'uniprot' or datasource == 'rmsk':
-        fh.write('[[annotation]]\n')
-        fh.write('file="' + str(pcgr_db_directory) + '/' +
-                 str(datasource) + '/' + str(datasource) + '.bed.gz"\n')
+    elif datasource == 'gene_transcript_xref' or datasource == 'rmsk':       
         fh.write('columns=[4]\n')
         names_string = 'names=["' + '","'.join(datasource_info_tags) + '"]'
         fh.write(names_string + '\n')
         fh.write('ops=["concat"]\n\n')
-    elif datasource == 'simplerepeats' or datasource == 'winmsk':
-        fh.write('[[annotation]]\n')
-        fh.write('file="' + str(pcgr_db_directory) + '/' +
-                 str(datasource) + '/' + str(datasource) + '.bed.gz"\n')
+    elif datasource == 'simplerepeats' or datasource == 'winmsk':        
         fh.write('columns=[4]\n')
         names_string = 'names=["' + '","'.join(datasource_info_tags) + '"]'
         fh.write(names_string + '\n')
         fh.write('ops=["flag"]\n\n')
-    elif datasource == 'civic':
-        fh.write('[[annotation]]\n')
-        fh.write('file="' + str(pcgr_db_directory) + '/' +
-                 str(datasource) + '/' + str(datasource) + '.bed.gz"\n')
-        fh.write('columns=[4]\n')
-        fh.write('names=["CIVIC_ID_SEGMENT"]\n')
-        fh.write('ops=["concat"]\n\n')
-
-        fh.write('[[annotation]]\n')
-        fh.write('file="' + str(pcgr_db_directory) + '/' +
-                 str(datasource) + '/' + str(datasource) + '.vcf.gz"\n')
-        fh.write('fields = ["CIVIC_ID"]\n')
-        fh.write('ops=["concat"]\n\n')
-    elif datasource == 'cgi':
-        fh.write('[[annotation]]\n')
-        fh.write('file="' + str(pcgr_db_directory) + '/' +
-                 str(datasource) + '/' + str(datasource) + '.bed.gz"\n')
-        fh.write('columns=[4]\n')
-        fh.write('names=["CGI_ID_SEGMENT"]\n')
-        fh.write('ops=["concat"]\n\n')
-
-        fh.write('[[annotation]]\n')
-        fh.write('file="' + str(pcgr_db_directory) + '/' +
-                 str(datasource) + '/' + str(datasource) + '.vcf.gz"\n')
-        fh.write('fields = ["CGI_ID"]\n')
-        fh.write('ops=["concat"]\n\n')
-    else:
-        fh.write('[[annotation]]\n')
-        fh.write('file="' + str(pcgr_db_directory) + '/' +
-                 str(datasource) + '/' + str(datasource) + '.vcf.gz"\n')
+    else:        
         fields_string = 'fields = ["' + '","'.join(datasource_info_tags) + '"]'
         ops = ['concat'] * len(datasource_info_tags)
         ops_string = 'ops=["' + '","'.join(ops) + '"]'

@@ -332,15 +332,15 @@ def run_pcgr(pcgr_paths, config_options):
         pcgr_vcfanno_command = (
                 f'pcgr_vcfanno.py {vep_vcf_gz} {vep_vcfanno_vcf} {pcgr_paths["db_dir"]} '
                 f'--num_processes {config_options["other"]["vcfanno_n_proc"]} '
-                f'--chasmplus --dbnsfp --docm --clinvar --icgc --civic --cgi --tcga_pcdm --winmsk --simplerepeats '
-                f'--tcga --uniprot --cancer_hotspots --pcgr_onco_xref '
+                f'--dbnsfp --clinvar --rmsk --winmsk --simplerepeats '
+                f'--tcga --gene_transcript_xref --dbmts --gwas '
                 f'{"--debug --keep_logs" if debug else ""}'
                 )
         anno_src_msg = (
                 f"Annotation sources: {'Panel-of-Normals, ' if panel_normal != 'None' else ''}ClinVar, dbNSFP, "
-                f"UniProtKB, cancerhotspots.org, CiVIC, CGI, DoCM, CHASMplus driver mutations, TCGA, ICGC-PCAWG"
+                f"dbMTS, cancerhotspots.org, CiVIC, CGI, DoCM, TCGA"
                 )
-        logger.info("PCGR - STEP 2: Annotation for precision oncology with pcgr-vcfanno")
+        logger.info("PCGR - STEP 2: Annotation for cancer precision medicine  with pcgr-vcfanno")
         logger.info(anno_src_msg)
         if panel_normal != "None":
             pon_annotation = 1
@@ -352,8 +352,8 @@ def run_pcgr(pcgr_paths, config_options):
         # PCGR|pcgr_summarise - expand annotations in VCF file
         logger = getlogger("pcgr-summarise")
         pcgr_summarise_command = (
-                f'pcgr_summarise.py {vep_vcfanno_vcf}.gz {pon_annotation} '
-                f'{config_options["other"]["vep_regulatory"]} '
+                f'pcgr_summarise.py {vep_vcfanno_vcf}.gz {pon_annotation}'
+                f'{config_options["other"]["vep_regulatory"]} 1 '
                 f'{pcgr_paths["db_dir"]} '
                 f'{"--debug" if debug else ""}'
                 )

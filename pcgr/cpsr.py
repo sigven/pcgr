@@ -266,11 +266,11 @@ def run_cpsr(arg_dict, cpsr_paths):
 
         ## CPSR|vcfanno - run vcfanno on query VCF with a number of relevant annotated VCFs
         logger = getlogger('cpsr-vcfanno')
-        logger.info("CPSR - STEP 2: Annotation for cancer predisposition with cpsr-vcfanno")
-        logger.info("(ClinVar, CIViC, dbNSFP, dbMTS, UniProtKB, cancerhotspots.org, ncER, GERP RS scores, GWAS catalog, gnomAD non-cancer subset)")
+        logger.info("CPSR - STEP 2: Annotation with BED/VCF tracks with cpsr-vcfanno")
+        logger.info("(ClinVar, CIViC, dbNSFP, dbMTS, GERP, GWAS catalog, gnomAD non-cancer subset)")
         pcgr_vcfanno_command = (
                 f"pcgr_vcfanno.py --num_processes {arg_dict['vcfanno_n_proc']} --dbnsfp --clinvar "
-                f"--cancer_hotspots --dbmts --ncer --gerp --civic --uniprot --gnomad_cpsr --pcgr_onco_xref "
+                f"--dbmts --gerp --civic --tcga --gnomad_cpsr --gene_transcript_xref "
                 f"--gwas --rmsk {vep_vcf}.gz {vep_vcfanno_vcf} {os.path.join(data_dir, 'data', str(arg_dict['genome_assembly']))}"
                 )
         check_subprocess(logger, pcgr_vcfanno_command, debug)
@@ -280,7 +280,7 @@ def run_cpsr(arg_dict, cpsr_paths):
         ## CPSR|summarise - expand annotations with separate VCF INFO tags
         logger = getlogger("cpsr-summarise")
         pcgr_summarise_command = (
-                f'pcgr_summarise.py {vep_vcfanno_vcf}.gz 0 {vep_regulatory} '
+                f'pcgr_summarise.py {vep_vcfanno_vcf}.gz 0 {vep_regulatory} 0 '
                 f'{os.path.join(data_dir, "data", arg_dict["genome_assembly"])} '
                 f'--cpsr {"--debug" if debug else ""}'
                 )

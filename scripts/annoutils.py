@@ -36,14 +36,48 @@ def read_infotag_file(vcf_info_tags_tsv):
 
     return info_tag_xref
 
+def read_vcfanno_tag_file(vcfanno_tag_file, logger):
 
-def read_genexref_namemap(gene_xref_namemap_tsv):
+    infotag_results = {}
+
+    if not os.path.exists(vcfanno_tag_file):
+        logger.critical(f"vcfanno configuration file ({vcfanno_tag_file}) does not exist")
+        return infotag_results
+    
+    f = open(vcfanno_tag_file, "r")
+    info_elements = f.readlines()
+    f.close()
+
+
+    for i in info_elements:
+        elem_info_content = i.rstrip().split(',')
+        row = {}
+        for elem in elem_info_content:
+            if elem.startswith('Type'):
+                row['type'] = elem.replace('Type=', '')
+            if elem.startswith('##INFO'):
+                row['tag'] = elem.replace('##INFO=<ID=', '')
+            if elem.startswith('Number'):
+                row['number'] = elem.replace('Number=', '')
+            if elem.startswith('Description'):
+                row['description'] = re.sub(r'">|Description="', '', elem)        
+            
+        if 'tag' in row and not row['tag'] in infotag_results:
+            infotag_results[row['tag']] = row
+    
+    return(infotag_results)
+        
+    
+
+
+def read_genexref_namemap(gene_xref_namemap_tsv, logger):
     """
-    Function that reads a file that lists names of tags in PCGR_ONCO_XREF annotation.
+    Function that reads a file that lists names of tags in GENE_TRANSCRIPT_XREF annotation.
     """
 
     namemap_xref = {}  # dictionary returned
     if not os.path.exists(gene_xref_namemap_tsv):
+        logger.critical(f"gene_transcript_xref BED mapping file ({gene_xref_namemap_tsv}) does not exist")
         return namemap_xref
     tsvfile = open(gene_xref_namemap_tsv, 'r')
     reader = csv.DictReader(tsvfile, delimiter='\t')
@@ -470,7 +504,7 @@ def map_dbnsfp_predictions(dbnsfp_tag, algorithms):
     return effect_predictions
 
 
-def make_transcript_xref_map(rec, fieldmap, xref_tag='PCGR_ONCO_XREF'):
+def make_transcript_xref_map(rec, fieldmap, xref_tag='GENE_TRANSCRIPT_XREF'):
     transcript_xref_map = {}
     if not rec.INFO.get(xref_tag) is None:
         for tref in rec.INFO.get(xref_tag).split(','):
