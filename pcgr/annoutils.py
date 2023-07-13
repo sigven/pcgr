@@ -4,16 +4,37 @@ import os
 import re
 import sys
 import csv
-import logging
-import gzip
 from cyvcf2 import VCF, Writer
-import subprocess
 from pcgr import utils
+from pcgr.utils import check_subprocess
 
 csv.field_size_limit(500 * 1024 * 1024)
 threeLettertoOneLetterAA = {'Ala': 'A', 'Arg': 'R', 'Asn': 'N', 'Asp': 'D', 'Cys': 'C', 'Glu': 'E', 'Gln': 'Q', 'Gly': 'G', 'His': 'H',
                             'Ile': 'I', 'Leu': 'L', 'Lys': 'K', 'Met': 'M', 'Phe': 'F', 'Pro': 'P', 'Ser': 'S', 'Thr': 'T', 'Trp': 'W', 'Tyr': 'Y', 'Val': 'V', 'Ter': 'X'}
 
+
+
+
+
+def get_vcf_info_tags(vcffile):
+    vcf = cyvcf2.VCF(vcffile)
+    info_tags = {}
+    for e in vcf.header_iter():
+        header_element = e.info()
+        if 'ID' in header_element.keys() and 'HeaderType' in header_element.keys():
+            if header_element['HeaderType'] == 'INFO':
+                info_tags[str(header_element['ID'])] = 1
+
+    return info_tags
+
+
+def print_vcf_header(query_vcf, vcfheader_file, logger, chromline_only=False):
+    if chromline_only == True:
+        check_subprocess(
+            logger, f'bgzip -dc {query_vcf} | egrep \'^#\' | egrep \'^#CHROM\' >> {vcfheader_file}', debug=False)
+    else:
+        check_subprocess(
+            logger, f'bgzip -dc {query_vcf} | egrep \'^#\' | egrep -v \'^#CHROM\' > {vcfheader_file}', debug=False)
 
 def read_infotag_file(vcf_info_tags_tsv):
     """
@@ -68,8 +89,6 @@ def read_vcfanno_tag_file(vcfanno_tag_file, logger):
     return(infotag_results)
         
     
-
-
 def read_genexref_namemap(gene_xref_namemap_tsv, logger):
     """
     Function that reads a file that lists names of tags in GENE_TRANSCRIPT_XREF annotation.
@@ -246,73 +265,6 @@ def threeToOneAA(aa_change):
     return aa_change
 
 
-def map_variant_effect_predictors(rec, algorithms):
-
-    dbnsfp_predictions = map_dbnsfp_predictions(
-        str(rec.INFO.get('DBNSFP')), algorithms)
-    if rec.INFO.get('Gene') is None or rec.INFO.get('Consequence') is None:
-        return
-    gene_id = str(rec.INFO.get('Gene'))
-    consequence = str(rec.INFO.get('Consequence'))
-
-    dbnsfp_key = ''
-
-    found_key = 0
-    if not rec.INFO.get('HGVSp_short') is None and not rec.INFO.get('HGVSp_short') == '.':
-        aa_change = str(rec.INFO.get('HGVSp_short'))
-        dbnsfp_key = gene_id + ':' + str(aa_change)
-        if dbnsfp_key in dbnsfp_predictions:
-            found_key = 1
-
-    if found_key == 0 and re.search('splice_', consequence):
-        dbnsfp_key = gene_id
-
-    if dbnsfp_key != '':
-        if dbnsfp_key in dbnsfp_predictions:
-            rec.INFO['EFFECT_PREDICTIONS'] = dbnsfp_predictions[dbnsfp_key]
-            for algo_pred in rec.INFO['EFFECT_PREDICTIONS'].split('&'):
-                if algo_pred.startswith('sift:'):
-                    rec.INFO['DBNSFP_SIFT'] = str(algo_pred.split(':')[1])
-                if algo_pred.startswith('provean:'):
-                    rec.INFO['DBNSFP_PROVEAN'] = str(algo_pred.split(':')[1])
-                if algo_pred.startswith('m-cap:'):
-                    rec.INFO['DBNSFP_M_CAP'] = str(algo_pred.split(':')[1])
-                if algo_pred.startswith('mutpred:'):
-                    rec.INFO['DBNSFP_MUTPRED'] = str(algo_pred.split(':')[1])
-                if algo_pred.startswith('metarnn:'):
-                    rec.INFO['DBNSFP_META_RNN'] = str(algo_pred.split(':')[1])
-                if algo_pred.startswith('fathmm:'):
-                    rec.INFO['DBNSFP_FATHMM'] = str(algo_pred.split(':')[1])
-                if algo_pred.startswith('fathmm_mkl_coding:'):
-                    rec.INFO['DBNSFP_FATHMM_MKL'] = str(
-                        algo_pred.split(':')[1])
-                if algo_pred.startswith('mutationtaster:'):
-                    rec.INFO['DBNSFP_MUTATIONTASTER'] = str(
-                        algo_pred.split(':')[1])
-                if algo_pred.startswith('mutationassessor:'):
-                    rec.INFO['DBNSFP_MUTATIONASSESSOR'] = str(
-                        algo_pred.split(':')[1])
-                if algo_pred.startswith('deogen2:'):
-                    rec.INFO['DBNSFP_DEOGEN2'] = str(algo_pred.split(':')[1])
-                if algo_pred.startswith('primateai:'):
-                    rec.INFO['DBNSFP_PRIMATEAI'] = str(algo_pred.split(':')[1])
-                if algo_pred.startswith('list_s2:'):
-                    rec.INFO['DBNSFP_LIST_S2'] = str(algo_pred.split(':')[1])
-                if algo_pred.startswith('gerp_rs:'):
-                    rec.INFO['DBNSFP_GERP'] = str(algo_pred.split(':')[1])
-                if algo_pred.startswith('bayesdel_addaf:'):
-                    rec.INFO['DBNSFP_BAYESDEL_ADDAF'] = str(
-                        algo_pred.split(':')[1])
-                if algo_pred.startswith('aloft:'):
-                    rec.INFO['DBNSFP_ALOFTPRED'] = str(algo_pred.split(':')[1])
-                if algo_pred.startswith('splice_site_rf:'):
-                    rec.INFO['DBNSFP_SPLICE_SITE_RF'] = str(
-                        algo_pred.split(':')[1])
-                if algo_pred.startswith('splice_site_ada:'):
-                    rec.INFO['DBNSFP_SPLICE_SITE_ADA'] = str(
-                        algo_pred.split(':')[1])
-
-
 def detect_reserved_info_tag(tag, tag_name, logger):
     reserved_tags = ['AA', 'AC', 'AF', 'AN', 'BQ', 'CIGAR', 'DB', 'DP', 'END',
                      'H2', 'H3', 'MQ', 'MQ0', 'NS', 'SB', 'SOMATIC', 'VALIDATED', '1000G']
@@ -328,12 +280,15 @@ def detect_reserved_info_tag(tag, tag_name, logger):
 
 
 def assign_cds_exon_intron_annotations(csq_record):
+
     csq_record['CODING_STATUS'] = 'noncoding'
     csq_record['EXONIC_STATUS'] = 'nonexonic'
     csq_record['SPLICE_DONOR_RELEVANT'] = False
     csq_record['NULL_VARIANT'] = False
     csq_record['INTRON_POSITION'] = 0
     csq_record['EXON_POSITION'] = 0
+    csq_record['CDS_CHANGE'] = '.'
+    csq_record['HGVSp_short'] = '.'
 
     coding_csq_pattern = r"^(stop_|start_lost|frameshift_|missense_|splice_donor|splice_acceptor|protein_altering|inframe_)"
     wes_csq_pattern = r"^(stop_|start_lost|frameshift_|missense_|splice_donor|splice_acceptor|inframe_|protein_altering|synonymous)"
@@ -369,8 +324,7 @@ def assign_cds_exon_intron_annotations(csq_record):
                     if utils.is_integer(exon_pos_info[1]) and str(exon_pos_info[2]) == "start":
                         csq_record['EXON_POSITION'] = int(exon_pos_info[1])
 
-    for m in ['HGVSp_short', 'CDS_CHANGE']:
-        csq_record[m] = '.'
+    
     if not csq_record['HGVSc'] is None:
         if csq_record['HGVSc'] != '.':
             if 'splice_acceptor_variant' in csq_record['Consequence'] or 'splice_donor_variant' in csq_record['Consequence']:
@@ -441,69 +395,6 @@ def assign_cds_exon_intron_annotations(csq_record):
     return
 
 
-def map_dbnsfp_predictions(dbnsfp_tag, algorithms):
-
-    effect_predictions = {}
-    for v in dbnsfp_tag.split(','):
-        dbnsfp_info = v.split('|')
-        if len(dbnsfp_info) == 1:
-            return effect_predictions
-        ref_aa = dbnsfp_info[0]
-        alt_aa = dbnsfp_info[1]
-        all_ids = dbnsfp_info[4].split('&')
-        unique_ids = {}
-        for s in all_ids:
-            unique_ids[s] = 1
-
-        isoform_aa_keys = []
-        if ref_aa != '.' and alt_aa != '.' and ref_aa != '' and alt_aa != '':
-            aa_pos = dbnsfp_info[6].split('&')
-            for pos in aa_pos:
-                for gene_id in unique_ids:
-                    k = str(gene_id) + ':p.' + str(ref_aa) + pos + str(alt_aa)
-                    isoform_aa_keys.append(k)
-        else:
-            # continue
-            for gene_id in unique_ids:
-                isoform_aa_keys.append(gene_id)
-
-        algorithm_raw_predictions = {}
-
-        i = 7
-        v = 0
-
-        if len(algorithms) != len(dbnsfp_info[7:]):
-            return effect_predictions
-
-        while i < len(dbnsfp_info):
-            algorithm_raw_predictions[str(
-                algorithms[v]).lower()] = dbnsfp_info[i].split('&')
-            i = i + 1
-            v = v + 1
-        dbnsfp_predictions = {}
-
-        for k in isoform_aa_keys:
-            if not k in dbnsfp_predictions:
-                dbnsfp_predictions[k] = {}
-            all_preds = []
-            for algo in algorithm_raw_predictions.keys():
-                unique_algo_predictions = {}
-                for pred in algorithm_raw_predictions[algo]:
-                    if pred != '':
-                        if not pred in unique_algo_predictions:
-                            unique_algo_predictions[pred] = 1
-                    else:
-                        unique_algo_predictions['.'] = 1
-                if len(unique_algo_predictions.keys()) > 1 and '.' in unique_algo_predictions.keys():
-                    del unique_algo_predictions['.']
-                dbnsfp_predictions[k][algo] = str(
-                    algo) + ':' + '|'.join(unique_algo_predictions.keys())
-                all_preds.append(dbnsfp_predictions[k][algo])
-            effect_predictions[k] = '&'.join(all_preds)
-
-    return effect_predictions
-
-
 def make_transcript_xref_map(rec, fieldmap, xref_tag='GENE_TRANSCRIPT_XREF'):
     transcript_xref_map = {}
     if not rec.INFO.get(xref_tag) is None:
@@ -521,69 +412,32 @@ def make_transcript_xref_map(rec, fieldmap, xref_tag='GENE_TRANSCRIPT_XREF'):
     return (transcript_xref_map)
 
 
-def vep_dbnsfp_meta_vcf(query_vcf, info_tags_wanted):
-    vep_to_pcgr_af = {'gnomAD_AMR_AF': 'AMR_AF_GNOMAD',
-                      'gnomAD_AFR_AF': 'AFR_AF_GNOMAD',
-                      'gnomAD_EAS_AF': 'EAS_AF_GNOMAD',
-                      'gnomAD_NFE_AF': 'NFE_AF_GNOMAD',
-                      'gnomAD_AF': 'GLOBAL_AF_GNOMAD',
-                      'gnomAD_SAS_AF': 'SAS_AF_GNOMAD',
-                      'gnomAD_OTH_AF': 'OTH_AF_GNOMAD',
-                      'gnomAD_ASJ_AF': 'ASJ_AF_GNOMAD',
-                      'gnomAD_FIN_AF': 'FIN_AF_GNOMAD',
-                      'AFR_AF': 'AFR_AF_1KG',
-                      'AMR_AF': 'AMR_AF_1KG',
-                      'SAS_AF': 'SAS_AF_1KG',
-                      'EUR_AF': 'EUR_AF_1KG',
-                      'EAS_AF': 'EAS_AF_1KG',
-                      'AF': 'GLOBAL_AF_1KG'}
-
-    vcf = VCF(query_vcf)
-    vep_csq_index2fields = {}
-    vep_csq_fields2index = {}
-    dbnsfp_prediction_algorithms = []
-    for e in vcf.header_iter():
-        header_element = e.info()
-        if 'ID' in header_element.keys():
-            identifier = str(header_element['ID'])
-            if identifier == 'CSQ' or identifier == 'DBNSFP':
-                description = str(header_element['Description'])
-                if 'Format: ' in description:
-                    subtags = description.split('Format: ')[1].split('|')
-                    if identifier == 'CSQ':
-                        i = 0
-                        for t in subtags:
-                            v = t.replace('"', '')
-                            if t in vep_to_pcgr_af:
-                                v = str(vep_to_pcgr_af[t])
-                            if v in info_tags_wanted:
-                                vep_csq_index2fields[i] = v
-                                vep_csq_fields2index[v] = i
-                            i = i + 1
-                    if identifier == 'DBNSFP':
-                        i = 7
-                        while (i < len(subtags)):
-                            dbnsfp_prediction_algorithms.append(
-                                str(re.sub(r'((_score)|(_pred))"*$', '', subtags[i])))
-                            i = i + 1
-
-    vep_dbnsfp_meta_info = {}
-    vep_dbnsfp_meta_info['vep_csq_fieldmap'] = {}
-    vep_dbnsfp_meta_info['vep_csq_fieldmap']['field2index'] = vep_csq_fields2index
-    vep_dbnsfp_meta_info['vep_csq_fieldmap']['index2field'] = vep_csq_index2fields
-    vep_dbnsfp_meta_info['dbnsfp_prediction_algorithms'] = dbnsfp_prediction_algorithms
-
-    return vep_dbnsfp_meta_info
-
-
-def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, logger, pick_only=True, csq_identifier='CSQ'):
+def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, logger, pick_only=True, csq_identifier='CSQ', debug = 0):
 
     all_csq_pick = []
     all_transcript_consequences = []
 
+    varkey = str(rec.CHROM) + '_' + str(rec.POS) + '_' + str(rec.REF) + '_' + str(','.join(rec.ALT))
+
     for csq in rec.INFO.get(csq_identifier).split(','):
         csq_fields = csq.split('|')
 
+        entrezgene = '.'
+
+        ## Entrez gene identifier is not provided directly by VEP, pull out this from 'transcript_xref_map' for a given transcript-specific CSQ block
+        ##  - used for 'consequence_entry' object that are added to 'vep_all_csq' array
+        k = 0
+        while(k < len(csq_fields)):
+            if k in vep_csq_fields_map['index2field']:
+                if vep_csq_fields_map['index2field'][k] == 'Feature':
+                    ensembl_transcript_id = csq_fields[k]
+                    if ensembl_transcript_id != '' and ensembl_transcript_id.startswith('ENST'):
+                        if ensembl_transcript_id in transcript_xref_map.keys():
+                            if 'ENTREZGENE' in transcript_xref_map[ensembl_transcript_id].keys():
+                                entrezgene = transcript_xref_map[ensembl_transcript_id]['ENTREZGENE']
+            k = k + 1
+        
+        
         if pick_only is False:
             j = 0
             csq_record = {}
@@ -607,7 +461,6 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, logger, pick_onl
                 while (j < len(csq_fields)):
                     if j in vep_csq_fields_map['index2field']:
                         if csq_fields[j] != '':
-                            #print(str(vep_csq_fields_map['index2field'][j]) + '\t' + str(csq_fields[j]))
                             csq_record[vep_csq_fields_map['index2field'][j]] = str(
                                 csq_fields[j])
                             if vep_csq_fields_map['index2field'][j] == 'Feature':
@@ -659,15 +512,28 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, logger, pick_onl
                 # Append transcript consequence to all_csq_pick
                 # print(csq_record)
                 all_csq_pick.append(csq_record)
-            symbol = '.'
+            symbol = "."
+            hgvsc = "."
+            hgvsp = "."
+            exon = "."
+            if csq_fields[vep_csq_fields_map['field2index']['EXON']] != "":
+                if "/" in csq_fields[vep_csq_fields_map['field2index']['EXON']]:
+                    exon = str(csq_fields[vep_csq_fields_map['field2index']['EXON']].split('/')[0])
             if csq_fields[vep_csq_fields_map['field2index']['SYMBOL']] != "":
-                symbol = str(
-                    csq_fields[vep_csq_fields_map['field2index']['SYMBOL']])
-            consequence_entry = (str(csq_fields[vep_csq_fields_map['field2index']['Consequence']]) + ':' +
-                                 str(symbol) + ':' +
-                                 str(csq_fields[vep_csq_fields_map['field2index']['Feature_type']]) + ':' +
-                                 str(csq_fields[vep_csq_fields_map['field2index']['Feature']]) + ':' +
-                                 str(csq_fields[vep_csq_fields_map['field2index']['BIOTYPE']]))
+                symbol = str(csq_fields[vep_csq_fields_map['field2index']['SYMBOL']])
+            if csq_fields[vep_csq_fields_map['field2index']['HGVSc']] != "":
+                hgvsc = str(csq_fields[vep_csq_fields_map['field2index']['HGVSc']].split(':')[1])
+            if csq_fields[vep_csq_fields_map['field2index']['HGVSp']] != "":
+                hgvsp = str(csq_fields[vep_csq_fields_map['field2index']['HGVSp']].split(':')[1])
+            consequence_entry = (str(csq_fields[vep_csq_fields_map['field2index']['Consequence']]) + ":" +  
+                str(symbol) + ":" + 
+                str(entrezgene) + ":" +
+                str(hgvsc) + ":" + 
+                str(hgvsp) + ":" + 
+                str(exon) + ":" +
+                str(csq_fields[vep_csq_fields_map['field2index']['Feature_type']]) + ":" + 
+                str(csq_fields[vep_csq_fields_map['field2index']['Feature']]) + ":" + 
+                str(csq_fields[vep_csq_fields_map['field2index']['BIOTYPE']]))
             all_transcript_consequences.append(consequence_entry)
 
   
@@ -687,8 +553,33 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, logger, pick_onl
         vep_selected_idx['consequence'] = {}
 
         i = 0
+        picked_blocks = []
+
         #print('')
         for trans_rec in vep_csq_results['picked_gene_csq']:
+
+            if debug:
+                biotype = '.'
+                consequence = '.'
+                exonic_status = '.'
+                genesymbol = '.'
+                distance = '.'
+                feature = '.'
+                if not trans_rec['Consequence'] is None:
+                    consequence = trans_rec['Consequence']
+                if not trans_rec['SYMBOL'] is None:
+                    genesymbol = trans_rec['SYMBOL']
+                if not trans_rec['BIOTYPE'] is None:
+                    biotype = trans_rec['BIOTYPE']
+                if not trans_rec['EXONIC_STATUS'] is None:
+                    exonic_status = trans_rec['EXONIC_STATUS']
+                if not trans_rec['DISTANCE'] is None:
+                    distance = trans_rec['DISTANCE']
+                if not trans_rec['Feature'] is None:
+                    feature = trans_rec['Feature']
+                block = str(genesymbol) + ':' + str(feature) + ':' + str(consequence) + ':' + str(distance) + ':' + str(biotype) + ':' + str(exonic_status)
+                picked_blocks.append(block)
+
             if 'BIOTYPE' in trans_rec and 'Consequence' in trans_rec and 'EXONIC_STATUS' in trans_rec:
                 if not trans_rec['BIOTYPE'] is None and not trans_rec['Consequence'] is None:
                     if trans_rec['BIOTYPE'] == "protein_coding":
@@ -697,6 +588,10 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, logger, pick_onl
                         vep_selected_idx['consequence'][i] = trans_rec['Consequence']
                         #print(str(i) + '\t' + str(trans_rec['SYMBOL']) + '\t' + str(vep_selected_idx['exonic_status'][i]) + '\t'  + str(vep_selected_idx['consequence'][i]))
             i = i + 1
+        
+        if debug:
+            print(str(varkey) + " - picked CSQ blocks: " + ' /// '.join(picked_blocks))
+
             
         ## when multiple transcript gene blocks are picked by VEP, prioritize the block with 'exonic' consequence
         if len(vep_selected_idx['exonic_status'].keys()) > 1:

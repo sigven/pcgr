@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
-import os,re,sys
+import os,re
 import csv
 import gzip
-import annoutils
+from pcgr import annoutils
+from pcgr.annoutils import threeToOneAA
 
 def load_biomarkers(logger, biomarker_variant_fname, biomarker_clinical_fname):
 
@@ -19,12 +20,16 @@ def load_biomarkers(logger, biomarker_variant_fname, biomarker_clinical_fname):
    
 
    variant_to_clinical_evidence = {}
+   variant_to_origin = {}
    with gzip.open(biomarker_clinical_fname, mode='rt') as f:
       reader = csv.DictReader(f, delimiter='\t')
       for row in reader:
          if not row['variant_id'] in variant_to_clinical_evidence:
             variant_to_clinical_evidence[row['variant_id']] = {}
          variant_to_clinical_evidence[row['variant_id']][row['evidence_id']] = 1
+         if not row['variant_id'] in variant_to_origin:
+            variant_to_origin[row['variant_id']] = {}
+         variant_to_origin[row['variant_id']][row['variant_origin']] = 1
 
    f.close()
 
@@ -43,11 +48,13 @@ def load_biomarkers(logger, biomarker_variant_fname, biomarker_clinical_fname):
                row['clinical_evidence_items_id'] = '.'
                if row['variant_id'] in variant_to_clinical_evidence.keys():
                   row['clinical_evidence_items_id'] = variant_to_clinical_evidence[row['variant_id']]
+               if row['variant_id'] in variant_to_origin.keys():
+                  row['variant_origin'] = variant_to_origin[row['variant_id']]
                entry_alias_type = str(row['alias_type']).replace("_grch37", "")
                entry_alias_type = entry_alias_type.replace("_grch38", "")
 
                if entry_alias_type == "other":
-                  if bool(re.search(r'^((ACTIVATING )?MUTATION|LOSS|START LOSS)$')) is True:
+                  if bool(re.search(r'^((ACTIVATING )?MUTATION|LOSS|START LOSS)$', row['variant_alias'])) is True:
                      varkey = str(row['entrezgene'])
                      if not varkey in variant_biomarkers['other']:
                         variant_biomarkers['other'][varkey] = []
@@ -76,117 +83,168 @@ def load_biomarkers(logger, biomarker_variant_fname, biomarker_clinical_fname):
    return variant_biomarkers
 
 
-def match_csq_biomarker(transcript_csq_elements, variant_biomarkers, rec, principal_hgvsp, principal_hgvsc):
+def match_csq_biomarker(transcript_csq_elements, variant_biomarkers, rec, principal_csq_properties):
 
+   ## Picked CSQ by VEP
+   principal_hgvsp = principal_csq_properties['hgvsp']
+   principal_hgvsc = principal_csq_properties['hgvsc']
+   principal_entrezgene = principal_csq_properties['entrezgene']
+   principal_codon = principal_csq_properties['codon'] 
+   principal_exon = principal_csq_properties['exon']   
+
+   biomarker_hits_all = {}
    
-   principal_codon = '.'
-   if re.match(r'^(p.[A-Z]{1}[0-9]{1,}[A-Za-z]{1,})', principal_hgvsp):
-      codon_match = re.findall(r'[A-Z][0-9]{1,}', principal_hgvsp)
-      if len(codon_match) == 1:
-         principal_codon = codon_match[0]
-   
-   ## loop through all transcript-specific consequences ('csq_elements') for a given variant, check for the presence of
-   ## 1. Exonic, protein-altering mutations (dictionary key = entrezgene + hgvsp) that overlap biomarker entries (alias_type = "hgvsp")
-   ##    - assert whether a potentially hit reflects the principal hgvsp ('by_hgvsp_principal') or an alternative hgvsp ('by_hgvsp_nonprincipal')
-   ## 2. Splice site mutations (dictionary key = entrezgene + hgvsc) that overlap known cancer hotspots (NOTE: only a subset have been curated)
-   ##    - assert whether a potentially hit reflects the principal hgvsc ('by_hgvsc_principal') or an alternative hgvsc ('by_hgvsc_nonprincipal')
-
-
-   #genomic_var_id = f"g.{rec.CHROM}:{pos}{rec.REF}>{alt_allele}"
+   ## Match variant by genomic coordinate
    genomic_var_key = f"{rec.CHROM}_{rec.POS}_{rec.REF}_{rec.ALT}"
+
    if genomic_var_key in variant_biomarkers['genomic']:
-      biomarker_data = variant_biomarkers['genomic'][genomic_var_key]
+      hits_genomic = variant_biomarkers['genomic'][genomic_var_key]
 
-   for csq in transcript_csq_elements:
-      (consequence, symbol, entrezgene, hgvsc, hgvsp, feature_type, feature, biotype) = csq.split(':')
+      for i in hits_genomic:
+         bkey = f"{hits_genomic[i]['biomarker_source']}|{hits_genomic[i]['variant_origin']}|{hits_genomic[i]['variant_id']}|{hits_genomic[i]['clinical_evidence_id']}"
+         if not bkey in biomarker_hits_all:            
+            biomarker_hits_all[bkey] = {}
+         biomarker_hits_all[bkey]['by_genomic_coord'] = 1
+         
 
-      if not bool(re.search(r'^(missense|stop|start|inframe|splice_donor|splice_acceptor|frameshift)', consequence)) is True:
-         continue
+   mut_lof_fs = False
+   mut_lof = False
+   mut_protein = False
+   for csq_elem in transcript_csq_elements:
+      (consequence, symbol, entrezgene, hgvsc, hgvsp, exon, feature_type, feature, biotype) = csq_elem.split(':')
 
-      hgvsp_short = annoutils.threeToOneAA(hgvsp)
-      biomarker_key = "."
+      if bool(re.search(r'^(missense|stop|start|inframe|splice_donor|protein|splice_acceptor|frameshift)', consequence)) is True:
+         mut_protein = True
+      if bool(re.search(r'^(stop_gain|splice_donor_variant|splice_acceptor_variant|frameshift)', consequence)) is True:
+         mut_lof = True
+      if bool(re.search(r'^(frameshift)', consequence)) is True:
+         mut_lof_fs = True
+
+
+      principal_csq_hgvsp = False
+      principal_csq_entrezgene = False
+      principal_csq_hgvsc = False
+
+      hgvsp_short = threeToOneAA(hgvsp)
+
+      if hgvsp_short == principal_hgvsp:
+         principal_csq_hgvsp = True
+      if entrezgene == principal_entrezgene:
+         principal_csq_entrezgene = True
+      if hgvsc == principal_hgvsc:
+         principal_csq_hgvsc = True
+
       codon_match = []
       if entrezgene != "." and hgvsp != ".":
-         biomarker_key = str(entrezgene) + '_' + str(hgvsp_short)
+         biomarker_key_hgvsp = str(entrezgene) + '_' + str(hgvsp_short)
          codon_match = re.findall(r'p.[A-Z][0-9]{1,}',hgvsp_short)
+
+         ## match biomarkers annotated at the amino acid level - with HGVSp coordinates
+         if biomarker_key_hgvsp in variant_biomarkers['hgvsp']:
+            hits = variant_biomarkers['hgvsp'][biomarker_key_hgvsp]
+            for i in hits:
+               bkey = f"{hits[i]['biomarker_source']}|{hits[i]['variant_origin']}{hits[i]['variant_id']}|{hits[i]['clinical_evidence_id']}"
+               if not bkey in biomarker_hits_all:            
+                  biomarker_hits_all[bkey] = {}
+               if principal_csq_entrezgene is True:
+                  ## principal hgvsp (VEP's picked csq)
+                  if principal_csq_hgvsp is True:
+                     biomarker_hits_all[bkey]['by_hgvsp_principal'] = 1
+                  else:
+                     ## nonprincipal hgvsp
+                     biomarker_hits_all[bkey]['by_hgvsp_nonprincipal'] = 1
+         
+         if len(codon_match) > 0:
+            biomarker_key_codon = str(entrezgene) + '_' + str(codon_match[0])
+
+            ## match biomarkers annotated as "CODON" only for a given gene
+            if biomarker_key_codon in variant_biomarkers['hgvsp']:
+               hits_codon = variant_biomarkers['hgvsp'][biomarker_key_codon]
+               for j in hits_codon:
+                  bkey2 = f"{hits_codon[j]['biomarker_source']}||{hits_codon[j]['variant_origin']}{hits_codon[j]['variant_id']}|{hits_codon[j]['clinical_evidence_id']}"
+                  if not bkey2 in biomarker_hits_all:            
+                     biomarker_hits_all[bkey2] = {}
+                  if principal_csq_entrezgene is True:
+                     ## principal codon (VEP's picked csq)
+                     if codon_match[0] == principal_codon:
+                        biomarker_hits_all[bkey2]['by_codon_principal'] = 1
+                     else:
+                        ## nonprincipal codon
+                        biomarker_hits_all[bkey2]['by_codon_nonprincipal'] = 1
+         
 
       if entrezgene != "." and (consequence == 'splice_donor_variant' or consequence == 'splice_acceptor_variant'):
          hgvsc_key = re.sub(r'>(A|G|C|T)$','',hgvsc)
-         biomarker_key = str(entrezgene) + '-' + str(hgvsc_key)
+         hgvsc_biomarker_key = str(entrezgene) + '_' + str(hgvsc_key)
 
-      if biomarker_key == ".":
-         continue
+      
+      if entrezgene != "." and principal_csq_entrezgene is True and exon != ".":
+         exon_biomarker_key = str(entrezgene) + '_' + str(exon)
+         if exon_biomarker_key in variant_biomarkers['exon'].keys():
+            hits_exon = variant_biomarkers['exon'][exon_biomarker_key]
 
-      if biomarker_key in variant_biomarkers['hgvsp']:
-         hotspot_info = variant_biomarkers['hgvsp'][biomarker_key]
-         #hotspot_info_ttype = cancer_hotspots['mutation'][hotspot_key_mutation]['MUTATION_HOTSPOT_CANCERTYPE']
-         #unique_hotspot_mutations['exonic|' + str(hotspot_info)] = hotspot_info_ttype
-
-      # if biomarker_key in variant_biomarkers['splice']:
-      #    hotspot_info = cancer_hotspots['splice'][hotspot_key_mutation]['MUTATION_HOTSPOT2']
-      #    hotspot_info_ttype = cancer_hotspots['splice'][hotspot_key_mutation]['MUTATION_HOTSPOT_CANCERTYPE']
-      #    unique_hotspot_mutations['splice|' + str(hotspot_info)] = hotspot_info_ttype
-
+            for j in hits_exon:
+               if hits_exon[j]['variant_consequence'] == "exon_variant" and re.search(r'MUTATION', hits_exon[j]['variant_alias']) and re.search(r'^(missense|coding|protein)', consequence):
+                  bkey4 = f"{hits_exon[j]['biomarker_source']}|{hits_exon[j]['variant_origin']}|{hits_exon[j]['variant_id']}|{hits_exon[j]['clinical_evidence_id']}"
+                  if not bkey4 in biomarker_hits_all:            
+                     biomarker_hits_all[bkey4] = {}
+                  if exon == principal_exon:
+                     biomarker_hits_all[bkey3]['by_exon_mut_principal'] = 1
+                  else:
+                     biomarker_hits_all[bkey3]['by_exon_mut_nonprincipal'] = 1
                
-      # if len(codon_match) > 0:
-      #    hotspot_key_codon = str(entrezgene) + '-' + str(codon_match[0])
+               if hits_exon[j]['variant_consequence'] == "inframe_deletion" and re.search(r'^inframe_deletion', consequence):
+                  bkey4 = f"{hits_exon[j]['biomarker_source']}|{hits_exon[j]['variant_origin']}|{hits_exon[j]['variant_id']}|{hits_exon[j]['clinical_evidence_id']}"
+                  if not bkey4 in biomarker_hits_all:            
+                     biomarker_hits_all[bkey4] = {}
+                  if exon == principal_exon:
+                     biomarker_hits_all[bkey3]['by_exon_deletion_principal'] = 1
+                  else:
+                     biomarker_hits_all[bkey3]['by_exon_deletion_nonprincipal'] = 1
+               
+               if hits_exon[j]['variant_consequence'] == "inframe_insertion" and re.search(r'^inframe_insertion', consequence):
+                  bkey4 = f"{hits_exon[j]['biomarker_source']}|{hits_exon[j]['variant_origin']}|{hits_exon[j]['variant_id']}|{hits_exon[j]['clinical_evidence_id']}"
+                  if not bkey4 in biomarker_hits_all:            
+                     biomarker_hits_all[bkey4] = {}
+                  if exon == principal_exon:
+                     biomarker_hits_all[bkey3]['by_exon_insertion_principal'] = 1
+                  else:
+                     biomarker_hits_all[bkey3]['by_exon_insertion_nonprincipal'] = 1
+               
 
-      #    if hotspot_key_codon in cancer_hotspots['codon']:            
-      #       unique_hotspot_codons[str('exonic|') + cancer_hotspots['codon'][hotspot_key_codon]['MUTATION_HOTSPOT2']] =  \
-      #          cancer_hotspots['codon'][hotspot_key_codon]['MUTATION_HOTSPOT_CANCERTYPE']
-         
-   # if len(unique_hotspot_mutations.keys()) > 0:
-   #    if len(unique_hotspot_mutations.keys()) == 1:
-   #       for gene_mutation_key in unique_hotspot_mutations.keys():
-   #          rec.INFO['MUTATION_HOTSPOT'] = gene_mutation_key
-   #          rec.INFO['MUTATION_HOTSPOT_CANCERTYPE'] = unique_hotspot_mutations[gene_mutation_key]
 
-   #          if gene_mutation_key.split('|')[0] == 'exonic':
-   #             rec.INFO['MUTATION_HOTSPOT_MATCH'] = 'by_hgvsp_nonprincipal'
-   #             hgvsp_candidate = 'p.' + str(gene_mutation_key.split('|')[3]) + str(gene_mutation_key.split('|')[4])
-   #             if hgvsp_candidate == principal_hgvsp:
-   #                rec.INFO['MUTATION_HOTSPOT_MATCH'] = 'by_hgvsp_principal'
-   #          else:
-   #             rec.INFO['MUTATION_HOTSPOT_MATCH'] = 'by_hgvsc_nonprincipal'
-   #             hgvsc_candidate = re.sub(r'>(A|G|C|T){1,}$', '' , str(gene_mutation_key.split('|')[4]))
-   #             if hgvsc_candidate == principal_hgvsc:
-   #                rec.INFO['MUTATION_HOTSPOT_MATCH'] = 'by_hgvsc_principal'
-   #    else:
-   #       ## multiple hotspot matches for alternative hgvsp keys
-   #       ## - keep only match against principal HGVSp 
-   #       for hotspot_info in unique_hotspot_mutations.keys():
-   #          if hotspot_info.split('|')[0] == 'exonic':
-   #             hgvsp_candidate = "p." + str(hotspot_info.split('|')[3]) + str(hotspot_info.split('|')[4]) 
+      if entrezgene != "." and principal_csq_entrezgene is True:
+         if str(entrezgene) in variant_biomarkers['other'].keys():
+            hits_gene = variant_biomarkers['other'][str(entrezgene)]
+            for k in hits_gene:
+               
+               ## match biomarkers annotated as "Mutation" only for a given gene - consider only the principal consequence (VEP's picked)
+               if hits_gene[k]['alteration_type'] == 'MUT' and mut_protein is True and (principal_csq_hgvsc is True or principal_csq_hgvsp is True):
+                  bkey3 = f"{hits_gene[j]['biomarker_source']}|{hits_gene[j]['variant_origin']}|{hits_gene[j]['variant_id']}|{hits_gene[j]['clinical_evidence_id']}"
+                  if not bkey3 in biomarker_hits_all:            
+                     biomarker_hits_all[bkey3] = {}
+                  biomarker_hits_all[bkey3]['by_gene_mut'] = 1
+               
+               ## match biomarkers annotated as "Mutation - loss of function" only for a given gene - consider only the principal consequence (VEP's picked)
+               if hits_gene[k]['alteration_type'] == 'MUT_LOF' and mut_lof is True and (principal_csq_hgvsc is True or principal_csq_hgvsp is True):
+                  bkey3 = f"{hits_gene[j]['biomarker_source']}|{hits_gene[j]['variant_origin']}|{hits_gene[j]['variant_id']}|{hits_gene[j]['clinical_evidence_id']}"
+                  if not bkey3 in biomarker_hits_all:            
+                     biomarker_hits_all[bkey3] = {}
+                  biomarker_hits_all[bkey3]['by_gene_mut_lof'] = 1
+               
+               ## match biomarkers annotated as "Mutation - loss of function - frameshift" only for a given gene - consider only the principal consequence (VEP's picked)
+               if hits_gene[k]['alteration_type'] == 'MUT_LOF_FS' and mut_lof_fs is True and (principal_csq_hgvsc is True or principal_csq_hgvsp is True):
+                  bkey3 = f"{hits_gene[j]['biomarker_source']}|{hits_gene[j]['variant_origin']}|{hits_gene[j]['variant_id']}|{hits_gene[j]['clinical_evidence_id']}"
+                  if not bkey3 in biomarker_hits_all:            
+                     biomarker_hits_all[bkey3] = {}
+                  biomarker_hits_all[bkey3]['by_gene_mut_lof_fs'] = 1
 
-   #             if hgvsp_candidate == principal_hgvsp:
-   #                rec.INFO['MUTATION_HOTSPOT'] = hotspot_info
-   #                rec.INFO['MUTATION_HOTSPOT_CANCERTYPE'] = unique_hotspot_mutations[hotspot_info]
-   #                rec.INFO['MUTATION_HOTSPOT_MATCH'] = 'by_hgvsp_principal'
-   #          else:
-   #             hgvsc_candidate = re.sub(r'>(A|G|C|T){1,}$', '' , str(hotspot_info.split('|')[4]))
-
-   #             if hgvsc_candidate == principal_hgvsc:
-   #                rec.INFO['MUTATION_HOTSPOT'] = hotspot_info
-   #                rec.INFO['MUTATION_HOTSPOT_CANCERTYPE'] = unique_hotspot_mutations[hotspot_info]
-   #                rec.INFO['MUTATION_HOTSPOT_MATCH'] = 'by_hgvsc_principal'
-
-   # else:
-   #    if len(unique_hotspot_codons.keys()) > 0:
-   #       if len(unique_hotspot_codons.keys()) == 1:
-   #          for gene_codon_key in unique_hotspot_codons.keys():
-
-   #             if '|' in gene_codon_key:
-
-   #                codon = str(gene_codon_key.split('|')[3])
-
-   #                if codon == principal_codon:
-   #                   rec.INFO['MUTATION_HOTSPOT'] = gene_codon_key
-   #                   rec.INFO['MUTATION_HOTSPOT_CANCERTYPE'] = unique_hotspot_codons[gene_codon_key]
-   #                   rec.INFO['MUTATION_HOTSPOT_MATCH'] = 'by_codon_principal'
-   #                else:
-   #                   rec.INFO['MUTATION_HOTSPOT'] = gene_codon_key
-   #                   rec.INFO['MUTATION_HOTSPOT_CANCERTYPE'] = unique_hotspot_codons[gene_codon_key]
-   #                   rec.INFO['MUTATION_HOTSPOT_MATCH'] = 'by_codon_nonprincipal'
-
+      
+      biomarker_var_matches = {}
+      for bm in biomarker_hits_all.keys():
+         match_types = '&'.join(biomarker_hits_all[bm].keys())
+         biomarker_var_matches[f"{bm}|{match_types}"] = 1
+      
+      rec.INFO['BIOMARKER_MATCH'] = ','.join(biomarker_var_matches.keys())
 
    return

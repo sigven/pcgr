@@ -16,7 +16,6 @@ setuptools.setup(
         ]
     },
     scripts=[
-        'scripts/annoutils.py',
         'scripts/cpsr_validate_input.py',
         'scripts/pcgr_summarise.py',
         'scripts/pcgr_validate_input.py',

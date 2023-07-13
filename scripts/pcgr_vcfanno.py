@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 
 import argparse
-import cyvcf2
 import random
 import re, os
 import glob
-import annoutils
+
 from pcgr import utils
 from pcgr.utils import check_subprocess
+from pcgr import annoutils
+from pcgr.annoutils import read_vcfanno_tag_file, get_vcf_info_tags, print_vcf_header
 
 
 def __main__():
@@ -117,7 +118,7 @@ def run_vcfanno(num_processes, query_vcf, vcfanno_tracks, query_info_tags, vcfhe
         if not vcfanno_tracks[track] is True:
             continue
 
-        infotags_vcfanno = annoutils.read_vcfanno_tag_file(track_file_info['tags_fname'][track], logger)
+        infotags_vcfanno = read_vcfanno_tag_file(track_file_info['tags_fname'][track], logger)
         infotags[track] = infotags_vcfanno.keys()
         for tag in infotags_vcfanno:
             if tag in query_info_tags:
@@ -203,26 +204,6 @@ def append_to_conf_file(datasource, datasource_info_tags, datasource_track_fname
     fh.close()
     return
 
-
-def get_vcf_info_tags(vcffile):
-    vcf = cyvcf2.VCF(vcffile)
-    info_tags = {}
-    for e in vcf.header_iter():
-        header_element = e.info()
-        if 'ID' in header_element.keys() and 'HeaderType' in header_element.keys():
-            if header_element['HeaderType'] == 'INFO':
-                info_tags[str(header_element['ID'])] = 1
-
-    return info_tags
-
-
-def print_vcf_header(query_vcf, vcfheader_file, logger, chromline_only=False):
-    if chromline_only == True:
-        check_subprocess(
-            logger, f'bgzip -dc {query_vcf} | egrep \'^#\' | egrep \'^#CHROM\' >> {vcfheader_file}', debug=False)
-    else:
-        check_subprocess(
-            logger, f'bgzip -dc {query_vcf} | egrep \'^#\' | egrep -v \'^#CHROM\' > {vcfheader_file}', debug=False)
 
 
 if __name__ == "__main__":

@@ -6,9 +6,11 @@ import argparse
 import os
 import logging
 import sys
-import annoutils
 import pandas as np
 from cyvcf2 import VCF
+
+from pcgr import annoutils
+from pcgr.annoutils import read_infotag_file, detect_reserved_info_tag
 from pcgr import utils
 from pcgr.utils import error_message, check_subprocess
 
@@ -218,7 +220,7 @@ def check_existing_vcf_info_tags(input_vcf, pcgr_directory, genome_assembly, log
     If any coinciding tags, an error will be returned
     """
 
-    pcgr_infotags_desc = annoutils.read_infotag_file(os.path.join(pcgr_directory,'data',genome_assembly, 'pcgr_infotags.tsv'))
+    pcgr_infotags_desc = read_infotag_file(os.path.join(pcgr_directory,'data',genome_assembly, 'pcgr_infotags.tsv'))
 
     vcf = VCF(input_vcf)
     logger.info('Checking if existing INFO tags of query VCF file coincide with PCGR INFO tags')
@@ -281,11 +283,11 @@ def check_format_ad_dp_tags(vcf,
     found_ndp_tag = 0
     found_call_conf_tag = 0
 
-    annoutils.detect_reserved_info_tag(tumor_dp_tag,'tumor_dp_tag', logger)
-    annoutils.detect_reserved_info_tag(control_dp_tag,'control_dp_tag', logger)
-    annoutils.detect_reserved_info_tag(tumor_af_tag,'tumor_af_tag', logger)
-    annoutils.detect_reserved_info_tag(control_af_tag,'control_af_tag', logger)
-    annoutils.detect_reserved_info_tag(call_conf_tag,'call_conf_tag', logger)
+    detect_reserved_info_tag(tumor_dp_tag,'tumor_dp_tag', logger)
+    detect_reserved_info_tag(control_dp_tag,'control_dp_tag', logger)
+    detect_reserved_info_tag(tumor_af_tag,'tumor_af_tag', logger)
+    detect_reserved_info_tag(control_af_tag,'control_af_tag', logger)
+    detect_reserved_info_tag(call_conf_tag,'call_conf_tag', logger)
 
     for e in vcf.header_iter():
         header_element = e.info()

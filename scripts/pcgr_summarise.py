@@ -5,8 +5,11 @@ import re
 import argparse
 import cyvcf2
 import os
-import annoutils
 
+from pcgr import annoutils
+from pcgr.annotuils import read_infotag_file, make_transcript_xref_map, read_genexref_namemap, map_regulatory_variant_annotations, parse_vep_csq,  write_pass_vcf
+from pcgr import dbnsfp 
+from pcgr.dbnsfp import vep_dbnsfp_meta_vcf, map_variant_effect_predictors
 from pcgr import oncogenicity
 from pcgr.oncogenicity import assign_oncogenicity_evidence
 from pcgr import mutation_hotspot
@@ -46,8 +49,8 @@ def extend_vcf_annotations(query_vcf, pcgr_db_dir, logger, pon_annotation, regul
 
     List of VCF INFO tags to be appended is defined by the 'infotags' files in the pcgr_db_dir
     """
-    vcf_infotags_pcgr = annoutils.read_infotag_file(os.path.join(pcgr_db_dir, 'misc','tsv','pcgr_vcf_infotags.tsv'))
-    vcf_infotags_vep = annoutils.read_infotag_file(os.path.join(pcgr_db_dir, 'misc','tsv','vep_vcf_infotags.tsv'))
+    vcf_infotags_pcgr = read_infotag_file(os.path.join(pcgr_db_dir, 'pcgr_vcf_infotags.tsv'))
+    vcf_infotags_vep = read_infotag_file(os.path.join(pcgr_db_dir, 'vep_vcf_infotags.tsv'))
 
     for tag in vcf_infotags_pcgr:
         vcf_infotags_meta[tag] = vcf_infotags_pcgr[tag]
@@ -55,9 +58,9 @@ def extend_vcf_annotations(query_vcf, pcgr_db_dir, logger, pon_annotation, regul
         vcf_infotags_meta[tag] = vcf_infotags_vep[tag]
 
     if cpsr is True:
-        vcf_infotags_meta = annoutils.read_infotag_file(os.path.join(pcgr_db_dir, 'misc','tsv','cpsr_vcf_infotags.tsv'))
+        vcf_infotags_meta = read_infotag_file(os.path.join(pcgr_db_dir, 'cpsr_vcf_infotags.tsv'))
         ## add gnomad non-cancer
-    gene_transcript_xref_map = annoutils.read_genexref_namemap(os.path.join(pcgr_db_dir, 'gene','tsv','gene_transcript_xref', 'gene_transcript_xref_bedmap.tsv.gz'))
+    gene_transcript_xref_map = read_genexref_namemap(os.path.join(pcgr_db_dir, 'gene','tsv','gene_transcript_xref', 'gene_transcript_xref_bedmap.tsv.gz'))
     cancer_hotspots = load_mutation_hotspots(logger, os.path.join(pcgr_db_dir, 'misc','tsv','hotspot', 'hotspot.tsv.gz'))
 
     biomarkers = {}
@@ -68,7 +71,7 @@ def extend_vcf_annotations(query_vcf, pcgr_db_dir, logger, pon_annotation, regul
 
     out_vcf = re.sub(r'\.vcf(\.gz){0,}$','.annotated.vcf',query_vcf)
 
-    meta_vep_dbnsfp_info = annoutils.vep_dbnsfp_meta_vcf(query_vcf, vcf_infotags_meta)
+    meta_vep_dbnsfp_info = vep_dbnsfp_meta_vcf(query_vcf, vcf_infotags_meta)
     dbnsfp_prediction_algorithms = meta_vep_dbnsfp_info['dbnsfp_prediction_algorithms']
     vep_csq_fields_map = meta_vep_dbnsfp_info['vep_csq_fieldmap']
     vcf = cyvcf2.VCF(query_vcf)
@@ -116,21 +119,25 @@ def extend_vcf_annotations(query_vcf, pcgr_db_dir, logger, pon_annotation, regul
             continue
 
         num_chromosome_records_processed += 1
-        pcgr_onco_xref = annoutils.make_transcript_xref_map(rec, gene_transcript_xref_map, xref_tag = "GENE_TRANSCRIPT_XREF")
+        pcgr_onco_xref = make_transcript_xref_map(rec, gene_transcript_xref_map, xref_tag = "GENE_TRANSCRIPT_XREF")
 
         if regulatory_annotation == 1:
-            csq_record_results_all = annoutils.parse_vep_csq(rec, pcgr_onco_xref, vep_csq_fields_map, logger, pick_only = False, csq_identifier = 'CSQ')
+            csq_record_results_all = parse_vep_csq(rec, pcgr_onco_xref, vep_csq_fields_map, logger, pick_only = False, csq_identifier = 'CSQ')
             if 'picked_gene_csq' in csq_record_results_all:
                 vep_csq_records_all = csq_record_results_all['picked_gene_csq']
-                rec.INFO['REGULATORY_ANNOTATION'] = annoutils.map_regulatory_variant_annotations(vep_csq_records_all)
+                rec.INFO['REGULATORY_ANNOTATION'] = map_regulatory_variant_annotations(vep_csq_records_all)
 
-        vep_csq_record_results = annoutils.parse_vep_csq(rec, pcgr_onco_xref, vep_csq_fields_map, logger, pick_only = True, csq_identifier = 'CSQ')
+        vep_csq_record_results = parse_vep_csq(rec, pcgr_onco_xref, vep_csq_fields_map, logger, pick_only = True, csq_identifier = 'CSQ')
 
         vep_csq_records = None
-        principal_hgvsp = '.'
-        principal_hgvsc = '.'
-        if 'all_csq' in vep_csq_record_results:
-            rec.INFO['VEP_ALL_CSQ'] = ','.join(vep_csq_record_results['all_csq'])
+
+        principal_csq_properties = {}
+
+        principal_csq_properties['hgvsp'] = '.'
+        principal_csq_properties['hgvsc'] = '.'
+        principal_csq_properties['entrezgene'] = '.'
+        principal_csq_properties['exon'] = '.'
+        principal_csq_properties['codon'] = '.'
 
         if 'picked_csq' in vep_csq_record_results:
             csq_record = vep_csq_record_results['picked_csq']
@@ -143,20 +150,31 @@ def extend_vcf_annotations(query_vcf, pcgr_db_dir, logger, pon_annotation, regul
                             rec.INFO[k] = csq_record[k]
 
                             if k == 'HGVSp_short':
-                                principal_hgvsp = csq_record[k]
+                                principal_csq_properties['hgvsp'] = csq_record[k]
+                                if re.match(r'^(p.[A-Z]{1}[0-9]{1,}[A-Za-z]{1,})', principal_csq_properties['hgvsp']):
+                                    codon_match = re.findall(r'[A-Z][0-9]{1,}', principal_csq_properties['hgvsp'])
+                                    if len(codon_match) == 1:
+                                        principal_csq_properties['codon'] = codon_match[0]
                      
                             if k == 'HGVSc':
-                                principal_hgvsc = csq_record[k].split(':')[1]
+                                principal_csq_properties['hgvsc'] = csq_record[k].split(':')[1]
+                            
+                            if k == 'ENTREZ_ID':
+                                principal_csq_properties['entrezgene'] = csq_record[k]
+                            
+                            if k == 'EXON':
+                                if "/" in csq_record[k]:
+                                    principal_csq_properties['exon'] = csq_record[k].split('/')[0]
         
         if 'all_csq' in vep_csq_record_results:
             rec.INFO['VEP_ALL_CSQ'] = ','.join(vep_csq_record_results['all_csq'])
-            match_csq_mutation_hotspot(vep_csq_record_results['all_csq'], cancer_hotspots, rec, principal_hgvsp, principal_hgvsc)
+            match_csq_mutation_hotspot(vep_csq_record_results['all_csq'], cancer_hotspots, rec, principal_csq_properties)
 
-            # for db in ['civic','cgi']:
-            #     match_csq_biomarker(vep_csq_record_results['all_csq'], biomarkers[db], rec, principal_hgvsp, principal_hgvsc)
+            for db in ['civic','cgi']:
+                match_csq_biomarker(vep_csq_record_results['all_csq'], biomarkers[db], rec, principal_csq_properties)
 
         if not rec.INFO.get('DBNSFP') is None:
-            annoutils.map_variant_effect_predictors(rec, dbnsfp_prediction_algorithms)
+            map_variant_effect_predictors(rec, dbnsfp_prediction_algorithms)
         
         if oncogenicity_annotation == 1:
             assign_oncogenicity_evidence(rec, tumortype = "Any")
@@ -177,7 +195,7 @@ def extend_vcf_annotations(query_vcf, pcgr_db_dir, logger, pon_annotation, regul
             check_subprocess(logger, f'bgzip -f {out_vcf}', debug=False)
             check_subprocess(logger, f'tabix -f -p vcf {out_vcf}.gz', debug=False)
             annotated_vcf = f'{out_vcf}.gz'
-            annoutils.write_pass_vcf(annotated_vcf, logger)
+            write_pass_vcf(annotated_vcf, logger)
         else:
             error_message('No remaining PASS variants found in query VCF - exiting and skipping STEP 4', logger)
     else:

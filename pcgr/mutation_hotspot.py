@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 
-import os,re,sys
+import os,re
 import csv
-import logging
 import gzip
-import subprocess
-import annoutils
+from pcgr import annoutils
+from pcgr.annoutils import threeToOneAA
 
 def load_mutation_hotspots(logger, hotspots_fname):
 
@@ -34,16 +33,15 @@ def load_mutation_hotspots(logger, hotspots_fname):
    return hotspots
 
 
-def match_csq_mutation_hotspot(transcript_csq_elements, cancer_hotspots, rec, principal_hgvsp, principal_hgvsc):
+def match_csq_mutation_hotspot(transcript_csq_elements, cancer_hotspots, rec, principal_csq_properties):
 
    unique_hotspot_mutations = {}
    unique_hotspot_codons = {}
 
-   principal_codon = '.'
-   if re.match(r'^(p.[A-Z]{1}[0-9]{1,}[A-Za-z]{1,})', principal_hgvsp):
-      codon_match = re.findall(r'[A-Z][0-9]{1,}',principal_hgvsp)
-      if len(codon_match) == 1:
-         principal_codon = codon_match[0]
+   principal_hgvsp = principal_csq_properties['hgvsp']
+   principal_hgvsc = principal_csq_properties['hgvsc']
+   principal_entrezgene = principal_csq_properties['entrezgene']
+   principal_codon = principal_csq_properties['codon']   
    
    ## loop through all transcript-specific consequences ('csq_elements') for a given variant, check for the presence of
    ## 1. Exonic, protein-altering mutations (dictionary key = entrezgene + hgvsp) that overlap known cancer hotspots (https://github.com/sigven/cancerHotspots)
@@ -52,12 +50,12 @@ def match_csq_mutation_hotspot(transcript_csq_elements, cancer_hotspots, rec, pr
    ##    - assert whether a potentially hit reflects the principal hgvsc ('by_hgvsc_principal') or an alternative hgvsc ('by_hgvsc_nonprincipal')
 
    for csq in transcript_csq_elements:
-      (consequence, symbol, entrezgene, hgvsc, hgvsp, feature_type, feature, biotype) = csq.split(':')
+      (consequence, symbol, entrezgene, hgvsc, hgvsp, exon, feature_type, feature, biotype) = csq.split(':')
 
       if not bool(re.search(r'^(missense|stop|start|inframe|splice_donor|splice_acceptor|frameshift)', consequence)) is True:
          continue
 
-      hgvsp_short = annoutils.threeToOneAA(hgvsp)
+      hgvsp_short = threeToOneAA(hgvsp)
       hotspot_key_mutation = "."
       codon_match = []
       if entrezgene != "." and hgvsp != ".":
