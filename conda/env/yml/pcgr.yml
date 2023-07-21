@@ -1,6 +1,7 @@
 name: pcgr
 
 channels:
+  - umccr
   - pcgr
   - conda-forge
   - bioconda
