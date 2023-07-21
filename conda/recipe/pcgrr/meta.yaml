@@ -16,7 +16,7 @@ requirements:
   build:
     - git
   host:
-    - r-base ==4.1.1
+    - r-base ==4.2.3
     - r-assertable
     - r-assertthat
     - bioconductor-biocgenerics
@@ -28,7 +28,7 @@ requirements:
     - r-dt
     - r-dplyr
     - r-flexdashboard
-    - r-crosstalk ==1.1.1
+    - r-crosstalk
     - bioconductor-genomicranges
     - bioconductor-genomeinfodb
     - r-ggplot2
@@ -55,7 +55,7 @@ requirements:
     - bioconductor-variantannotation
 
   run:
-    - r-base ==4.1.1
+    - r-base ==4.2.3
     - r-assertable
     - r-assertthat
     - bioconductor-biocgenerics
@@ -67,7 +67,7 @@ requirements:
     - r-dt
     - r-dplyr
     - r-flexdashboard
-    - r-crosstalk ==1.1.1
+    - r-crosstalk
     - bioconductor-genomicranges
     - bioconductor-genomeinfodb
     - r-ggplot2
