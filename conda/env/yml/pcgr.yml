@@ -8,7 +8,7 @@ channels:
   - defaults
 
 dependencies:
-  - pcgr ==1.4.3 # versioned by bump2version
+  - pcgr ==1.4.4 # versioned by bump2version
   - bedtools
   - bcftools
   - cyvcf2
