@@ -9,7 +9,7 @@ channels:
 
 dependencies:
   - python
-  - r-pcgrr ==1.4.1 # versioned by bump2version
+  - r-pcgrr ==1.4.2 # versioned by bump2version
   - r-cpsr
   - r-argparse
   - bioconductor-bsgenome.hsapiens.ucsc.hg38
