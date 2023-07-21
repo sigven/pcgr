@@ -20,6 +20,9 @@ jobs:
     defaults:
       run:
         shell: bash -l {0}
+    strategy:
+      matrix:
+        pyversion: ["3.9", "3.10"]
 
     steps:
       - name: Code checkout
@@ -36,14 +39,10 @@ jobs:
           use-mamba: true
       - name: 🐍 Conda pkg build and upload
         run: |
-          conda mambabuild ${recipe_path}/pcgr -c conda-forge -c bioconda --token ${atoken} --quiet
+          conda mambabuild ${recipe_path}/pcgr --python=${{ matrix.pyversion }} -c conda-forge -c bioconda --token ${atoken} --quiet
           conda mambabuild ${recipe_path}/pcgrr -c conda-forge -c bioconda --token ${atoken} --quiet
-      - name: Conda cleanup
-        run: |
-          mamba clean --all --force-pkgs-dirs
 
-# # spin up fresh instance since conda-lock
-# # takes ages when run on previous one
+  # spin up fresh instance since conda-lock takes ages when run on previous one
 # conda_lock:
 #   name: Conda lock
 #   runs-on: ubuntu-latest
@@ -55,7 +54,7 @@ jobs:
 #   steps:
 #     - name: Code checkout
 #       uses: actions/checkout@v3
-#     - name: Set up Mambaforge
+#     - name: Mambaforge setup
 #       uses: conda-incubator/setup-miniconda@v2
 #       with:
 #         miniforge-variant: Mambaforge
@@ -65,34 +64,34 @@ jobs:
 #         activate-environment: condabuild
 #         environment-file: ${{ env.env_yml_path }}/condabuild.yml
 #         use-mamba: true
-      - name: Generate conda locks
-        run: |
-          # 1. generate a combined lock file
-          # 2. render platform-specific locks
-          conda-lock lock --file ${env_yml_path}/pcgr.yml -p osx-64 -p linux-64
-          conda-lock render --kind explicit -p osx-64 -p linux-64 conda-lock.yml --filename-template 'pcgr-{platform}.lock' && rm conda-lock.yml
-          conda-lock lock --file ${env_yml_path}/pcgrr.yml -p osx-64 -p linux-64
-          conda-lock render --kind explicit -p osx-64 -p linux-64 conda-lock.yml --filename-template 'pcgrr-{platform}.lock' && rm conda-lock.yml
-          mv pcgrr-*.lock ${env_lock_path}
-          mv pcgr-*.lock ${env_lock_path}
-      - name: Commit changes
-        run: |
-          git status
-          git config --local user.email "actions@github.com"
-          git config --local user.name "GitHub Actions"
-          MSG="[bot] Updating conda-lock files (v${VERSION})"
-          git add .
-          git commit -m "${MSG}"
-          git push
-      - name: 🌐 Website publish
-        run: |
-          mamba activate
-          mamba env create -n pkgdown_env -f ${env_yml_path}/pkgdown.yml
-          mamba activate pkgdown_env
-          cp pcgrr/DESCRIPTION . # hack for pkgdown to work
-          printf "pcgrr version:\n"
-          Rscript -e "packageVersion('pcgrr')"
-          Rscript -e "pkgdown::deploy_to_branch(pkg = 'pcgrr', commit_message = paste(pkgdown:::construct_commit_message('.'), '- see https://sigven.github.io/pcgr/'), branch = 'gh-pages', new_process = FALSE)"
+#     - name: Generate conda locks
+#       run: |
+#         # 1. generate a combined lock file
+#         # 2. render platform-specific locks
+#         conda-lock lock --file ${env_yml_path}/pcgr.yml -p osx-64 -p linux-64
+#         conda-lock render --kind explicit -p osx-64 -p linux-64 conda-lock.yml --filename-template 'pcgr-{platform}.lock' && rm conda-lock.yml
+#         conda-lock lock --file ${env_yml_path}/pcgrr.yml -p osx-64 -p linux-64
+#         conda-lock render --kind explicit -p osx-64 -p linux-64 conda-lock.yml --filename-template 'pcgrr-{platform}.lock' && rm conda-lock.yml
+#         mv pcgrr-*.lock ${env_lock_path}
+#         mv pcgr-*.lock ${env_lock_path}
+#     - name: Commit changes
+#       run: |
+#         git status
+#         git config --local user.email "actions@github.com"
+#         git config --local user.name "GitHub Actions"
+#         MSG="[bot] Updating conda-lock files (v${VERSION})"
+#         git add .
+#         git commit -m "${MSG}"
+#         git push
+#     - name: 🌐 Website publish
+#       run: |
+#         mamba activate
+#         mamba env create -n pkgdown_env -f ${env_yml_path}/pkgdown.yml
+#         mamba activate pkgdown_env
+#         cp pcgrr/DESCRIPTION . # hack for pkgdown to work
+#         printf "pcgrr version:\n"
+#         Rscript -e "packageVersion('pcgrr')"
+#         Rscript -e "pkgdown::deploy_to_branch(pkg = 'pcgrr', commit_message = paste(pkgdown:::construct_commit_message('.'), '- see https://sigven.github.io/pcgr/'), branch = 'gh-pages', new_process = FALSE)"
 
 # docker_deploy:
 #   name: Build and deploy Docker
