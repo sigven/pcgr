@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - master
-      - dev
+      - conda_update_pd1
 env:
   atoken: ${{ secrets.ANACONDA_UPLOAD_TOKEN }}
   recipe_path: conda/recipe
@@ -38,34 +38,41 @@ jobs:
         run: |
           conda mambabuild ${recipe_path}/pcgr -c conda-forge -c bioconda --token ${atoken} --quiet
           conda mambabuild ${recipe_path}/pcgrr -c conda-forge -c bioconda --token ${atoken} --quiet
+      - name: Conda cleanup
+        run: |
+          mamba clean --all --force-pkgs-dirs
 
-  # spin up fresh instance since conda-lock
-  # takes ages when run on previous one
-  conda_lock:
-    name: Conda lock
-    runs-on: ubuntu-latest
-    needs: build_conda_pkgs
-    defaults:
-      run:
-        shell: bash -l {0}
+# # spin up fresh instance since conda-lock
+# # takes ages when run on previous one
+# conda_lock:
+#   name: Conda lock
+#   runs-on: ubuntu-latest
+#   needs: build_conda_pkgs
+#   defaults:
+#     run:
+#       shell: bash -l {0}
 
-    steps:
-      - name: Code checkout
-        uses: actions/checkout@v3
-      - name: Set up Mambaforge
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          miniforge-variant: Mambaforge
-          miniforge-version: "latest"
-          show-channel-urls: true
-          auto-activate-base: false
-          activate-environment: condabuild
-          environment-file: ${{ env.env_yml_path }}/condabuild.yml
-          use-mamba: true
+#   steps:
+#     - name: Code checkout
+#       uses: actions/checkout@v3
+#     - name: Set up Mambaforge
+#       uses: conda-incubator/setup-miniconda@v2
+#       with:
+#         miniforge-variant: Mambaforge
+#         miniforge-version: "latest"
+#         show-channel-urls: true
+#         auto-activate-base: false
+#         activate-environment: condabuild
+#         environment-file: ${{ env.env_yml_path }}/condabuild.yml
+#         use-mamba: true
       - name: Generate conda locks
         run: |
-          conda-lock lock --mamba --file ${env_yml_path}/pcgr.yml --filename-template 'pcgr-{platform}.lock' -p osx-64 -p linux-64
-          conda-lock lock --mamba --file ${env_yml_path}/pcgrr.yml --filename-template 'pcgrr-{platform}.lock' -p osx-64 -p linux-64
+          # 1. generate a combined lock file
+          # 2. render platform-specific locks
+          conda-lock lock --file ${env_yml_path}/pcgr.yml -p osx-64 -p linux-64
+          conda-lock render --kind explicit -p osx-64 -p linux-64 conda-lock.yml --filename-template 'pcgr-{platform}.lock' && rm conda-lock.yml
+          conda-lock lock --file ${env_yml_path}/pcgrr.yml -p osx-64 -p linux-64
+          conda-lock render --kind explicit -p osx-64 -p linux-64 conda-lock.yml --filename-template 'pcgrr-{platform}.lock' && rm conda-lock.yml
           mv pcgrr-*.lock ${env_lock_path}
           mv pcgr-*.lock ${env_lock_path}
       - name: Commit changes
@@ -77,89 +84,67 @@ jobs:
           git add .
           git commit -m "${MSG}"
           git push
-
-  pkgdown-site:
-    name: Deploy pkgdown website
-    runs-on: ubuntu-latest
-    needs: build_conda_pkgs
-    defaults:
-      run:
-        shell: bash -l {0}
-    steps:
-      - name: Code checkout
-        uses: actions/checkout@v3
-      - name: Set up miniconda
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          miniforge-variant: Mambaforge
-          miniforge-version: "latest"
-          auto-update-conda: true
-          auto-activate-base: true
-          activate-environment: ""
-          channels: "pcgr,conda-forge,bioconda"
-      - name: Install conda packages
-        run: mamba env create -n pkgdown -f ${env_yml_path}/pkgdown.yml
       - name: 🌐 Website publish
         run: |
-            git config --local user.email "actions@github.com"
-            git config --local user.name "GitHub Actions"
-            conda activate pkgdown
-            cp pcgrr/DESCRIPTION . # hack for pkgdown to work
-            printf "pcgrr version:\n"
-            Rscript -e "packageVersion('pcgrr')"
-            Rscript -e "pkgdown::deploy_to_branch(pkg = 'pcgrr', commit_message = paste(pkgdown:::construct_commit_message('.'), '- see https://sigven.github.io/pcgr/'), branch = 'gh-pages', new_process = FALSE)"
+          mamba activate
+          mamba env create -n pkgdown_env -f ${env_yml_path}/pkgdown.yml
+          mamba activate pkgdown_env
+          cp pcgrr/DESCRIPTION . # hack for pkgdown to work
+          printf "pcgrr version:\n"
+          Rscript -e "packageVersion('pcgrr')"
+          Rscript -e "pkgdown::deploy_to_branch(pkg = 'pcgrr', commit_message = paste(pkgdown:::construct_commit_message('.'), '- see https://sigven.github.io/pcgr/'), branch = 'gh-pages', new_process = FALSE)"
 
-  docker_deploy:
-    name: Build and deploy Docker
-    runs-on: ubuntu-latest
-    needs: conda_lock
-    defaults:
-      run:
-        shell: bash -l {0}
+# docker_deploy:
+#   name: Build and deploy Docker
+#   runs-on: ubuntu-latest
+#   needs: conda_lock
+#   defaults:
+#     run:
+#       shell: bash -l {0}
 
-    steps:
-      - name: Code checkout
-        uses: actions/checkout@v3
-      - id: pull_lock_commit
-        name: 📥 Pull lock commit
-        run: |
-            git pull --no-rebase # for pulling in the changed locks
-            git --no-pager log --decorate=short --pretty=oneline -n3
-            LATEST_COMMIT_HASH="$(git --no-pager log -1 --format='%H')"
-            echo "latest_commit_hash=${LATEST_COMMIT_HASH}" >> $GITHUB_OUTPUT
-      - name: 🔖 Tag creation
-        uses: actions/github-script@v5
-        env:
-          LATEST_COMMIT_HASH: ${{ steps.pull_lock_commit.outputs.latest_commit_hash }}
-        with:
-          script: |
-            const the_tag_name = 'refs/tags/v' + process.env.VERSION
-            const the_sha = process.env.LATEST_COMMIT_HASH
-            github.rest.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: the_tag_name,
-              sha: the_sha
-            })
+#   steps:
+#     - name: Code checkout
+#       uses: actions/checkout@v3
+#     - id: pull_lock_commit
+#       name: 📥 Pull lock commit
+#       run: |
+#           git pull --no-rebase # for pulling in the changed locks
+#           git --no-pager log --decorate=short --pretty=oneline -n3
+#           LATEST_COMMIT_HASH="$(git --no-pager log -1 --format='%H')"
+#           echo "latest_commit_hash=${LATEST_COMMIT_HASH}" >> $GITHUB_OUTPUT
+#     - name: 🔖 Tag creation
+#       uses: actions/github-script@v5
+#       env:
+#         LATEST_COMMIT_HASH: ${{ steps.pull_lock_commit.outputs.latest_commit_hash }}
+#       with:
+#         script: |
+#           const the_tag_name = 'refs/tags/v' + process.env.VERSION
+#           const the_sha = process.env.LATEST_COMMIT_HASH
+#           github.rest.git.createRef({
+#             owner: context.repo.owner,
+#             repo: context.repo.repo,
+#             ref: the_tag_name,
+#             sha: the_sha
+#           })
 
-      # work with tag from above
-      - name: Code checkout
-        uses: actions/checkout@v3
-        with:
-          ref: v${{ env.VERSION }}
-      - name: Buildx setup
-        id: buildx
-        uses: docker/setup-buildx-action@v2
-      - name: DockerHub login
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: 🐳 Docker img build and push to DockerHub
-        uses: docker/build-push-action@v4
-        with:
-          context: . # yes, dot
-          push: true
-          platforms: linux/amd64
-          tags: |
-            sigven/pcgr:${{ env.VERSION }}
+#     # work with tag from above
+#     - name: Code checkout
+#       uses: actions/checkout@v3
+#       with:
+#         ref: v${{ env.VERSION }}
+#     - name: Buildx setup
+#       id: buildx
+#       uses: docker/setup-buildx-action@v2
+#     - name: DockerHub login
+#       uses: docker/login-action@v2
+#       with:
+#         username: ${{ secrets.DOCKERHUB_USERNAME }}
+#         password: ${{ secrets.DOCKERHUB_TOKEN }}
+#     - name: 🐳 Docker img build and push to DockerHub
+#       uses: docker/build-push-action@v4
+#       with:
+#         context: . # yes, dot
+#         push: true
+#         platforms: linux/amd64
+#         tags: |
+#           sigven/pcgr:${{ env.VERSION }}
