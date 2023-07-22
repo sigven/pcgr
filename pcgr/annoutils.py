@@ -4,6 +4,9 @@ import os
 import re
 import sys
 import csv
+import cyvcf2
+import gzip
+
 from cyvcf2 import VCF, Writer
 from pcgr import utils
 from pcgr.utils import check_subprocess
@@ -98,10 +101,12 @@ def read_genexref_namemap(gene_xref_namemap_tsv, logger):
     if not os.path.exists(gene_xref_namemap_tsv):
         logger.critical(f"gene_transcript_xref BED mapping file ({gene_xref_namemap_tsv}) does not exist")
         return namemap_xref
-    tsvfile = open(gene_xref_namemap_tsv, 'r')
-    reader = csv.DictReader(tsvfile, delimiter='\t')
-    for row in reader:
-        namemap_xref[row['name']] = int(row['index'])
+    
+    with gzip.open(gene_xref_namemap_tsv, mode='rt') as f:
+        reader = csv.DictReader(f, delimiter='\t')
+        for row in reader:
+            namemap_xref[row['name']] = int(row['index'])
+    f.close()
 
     return namemap_xref
 

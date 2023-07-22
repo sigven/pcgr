@@ -378,9 +378,9 @@ def verify_input_files(arg_dict):
             db_assembly_dir) + ") does not exist"
         error_message(err_msg, logger)
 
-    # check the existence of RELEASE_NOTES (starting from 0.4.0)
+    # check the existence of .PCGR_BUNDLE_VERSION (starting from 1.5.0)
     rel_notes_file = os.path.join(os.path.abspath(
-        arg_dict["pcgr_dir"]), "data", arg_dict["genome_assembly"], "RELEASE_NOTES")
+        arg_dict["pcgr_dir"]), "data", arg_dict["genome_assembly"], ".PCGR_BUNDLE_VERSION")
     if not os.path.exists(rel_notes_file):
         err_msg = "The PCGR data bundle is outdated - please download the latest data bundle (see github.com/sigven/pcgr for instructions)"
         error_message(err_msg, logger)

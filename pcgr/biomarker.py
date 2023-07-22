@@ -49,7 +49,7 @@ def load_biomarkers(logger, biomarker_variant_fname, biomarker_clinical_fname):
                if row['variant_id'] in variant_to_clinical_evidence.keys():
                   row['clinical_evidence_items_id'] = variant_to_clinical_evidence[row['variant_id']]
                if row['variant_id'] in variant_to_origin.keys():
-                  row['variant_origin'] = variant_to_origin[row['variant_id']]
+                  row['variant_origin'] = '&'.join(variant_to_origin[row['variant_id']].keys())
                entry_alias_type = str(row['alias_type']).replace("_grch37", "")
                entry_alias_type = entry_alias_type.replace("_grch38", "")
 
@@ -95,16 +95,18 @@ def match_csq_biomarker(transcript_csq_elements, variant_biomarkers, rec, princi
    biomarker_hits_all = {}
    
    ## Match variant by genomic coordinate
-   genomic_var_key = f"{rec.CHROM}_{rec.POS}_{rec.REF}_{rec.ALT}"
+   genomic_var_key = f"{principal_entrezgene}_{rec.CHROM}_{rec.POS}_{rec.REF}_{rec.ALT[0]}"
 
-   if genomic_var_key in variant_biomarkers['genomic']:
+   if genomic_var_key in variant_biomarkers['genomic'].keys():
       hits_genomic = variant_biomarkers['genomic'][genomic_var_key]
 
-      for i in hits_genomic:
-         bkey = f"{hits_genomic[i]['biomarker_source']}|{hits_genomic[i]['variant_origin']}|{hits_genomic[i]['variant_id']}|{hits_genomic[i]['clinical_evidence_id']}"
-         if not bkey in biomarker_hits_all:            
-            biomarker_hits_all[bkey] = {}
-         biomarker_hits_all[bkey]['by_genomic_coord'] = 1
+      #print("BALLE")
+
+      for ghit in hits_genomic:
+         bkey_genomic = f"{ghit['biomarker_source']}|{ghit['variant_origin']}|{ghit['variant_id']}|{ghit['clinical_evidence_items_id']}"
+         if not bkey_genomic in biomarker_hits_all.keys():            
+            biomarker_hits_all[bkey_genomic] = {}
+         biomarker_hits_all[bkey_genomic]['by_genomic_coord'] = 1
          
 
    mut_lof_fs = False
@@ -139,12 +141,13 @@ def match_csq_biomarker(transcript_csq_elements, variant_biomarkers, rec, princi
          biomarker_key_hgvsp = str(entrezgene) + '_' + str(hgvsp_short)
          codon_match = re.findall(r'p.[A-Z][0-9]{1,}',hgvsp_short)
 
+         print(biomarker_key_hgvsp)
          ## match biomarkers annotated at the amino acid level - with HGVSp coordinates
          if biomarker_key_hgvsp in variant_biomarkers['hgvsp']:
             hits = variant_biomarkers['hgvsp'][biomarker_key_hgvsp]
-            for i in hits:
-               bkey = f"{hits[i]['biomarker_source']}|{hits[i]['variant_origin']}{hits[i]['variant_id']}|{hits[i]['clinical_evidence_id']}"
-               if not bkey in biomarker_hits_all:            
+            for h in hits:
+               bkey = f"{h['biomarker_source']}|{h['variant_origin']}|{h['variant_id']}|{h['clinical_evidence_items_id']}"
+               if not bkey in biomarker_hits_all.keys():            
                   biomarker_hits_all[bkey] = {}
                if principal_csq_entrezgene is True:
                   ## principal hgvsp (VEP's picked csq)
@@ -160,9 +163,9 @@ def match_csq_biomarker(transcript_csq_elements, variant_biomarkers, rec, princi
             ## match biomarkers annotated as "CODON" only for a given gene
             if biomarker_key_codon in variant_biomarkers['hgvsp']:
                hits_codon = variant_biomarkers['hgvsp'][biomarker_key_codon]
-               for j in hits_codon:
-                  bkey2 = f"{hits_codon[j]['biomarker_source']}||{hits_codon[j]['variant_origin']}{hits_codon[j]['variant_id']}|{hits_codon[j]['clinical_evidence_id']}"
-                  if not bkey2 in biomarker_hits_all:            
+               for chit in hits_codon:
+                  bkey2 = f"{chit['biomarker_source']}|{chit['variant_origin']}|{chit['variant_id']}|{chit['clinical_evidence_items_id']}"
+                  if not bkey2 in biomarker_hits_all.keys():            
                      biomarker_hits_all[bkey2] = {}
                   if principal_csq_entrezgene is True:
                      ## principal codon (VEP's picked csq)
@@ -183,68 +186,67 @@ def match_csq_biomarker(transcript_csq_elements, variant_biomarkers, rec, princi
          if exon_biomarker_key in variant_biomarkers['exon'].keys():
             hits_exon = variant_biomarkers['exon'][exon_biomarker_key]
 
-            for j in hits_exon:
-               if hits_exon[j]['variant_consequence'] == "exon_variant" and re.search(r'MUTATION', hits_exon[j]['variant_alias']) and re.search(r'^(missense|coding|protein)', consequence):
-                  bkey4 = f"{hits_exon[j]['biomarker_source']}|{hits_exon[j]['variant_origin']}|{hits_exon[j]['variant_id']}|{hits_exon[j]['clinical_evidence_id']}"
-                  if not bkey4 in biomarker_hits_all:            
+            for ehit in hits_exon:
+               bkey4 = f"{ehit['biomarker_source']}|{ehit['variant_origin']}|{ehit['variant_id']}|{ehit['clinical_evidence_items_id']}"
+               if ehit['variant_consequence'] == "exon_variant" and re.search(r'MUTATION', ehit['variant_alias']) and re.search(r'^(missense|coding|protein)', consequence):
+                  if not bkey4 in biomarker_hits_all.keys():            
                      biomarker_hits_all[bkey4] = {}
                   if exon == principal_exon:
-                     biomarker_hits_all[bkey3]['by_exon_mut_principal'] = 1
+                     biomarker_hits_all[bkey4]['by_exon_mut_principal'] = 1
                   else:
-                     biomarker_hits_all[bkey3]['by_exon_mut_nonprincipal'] = 1
+                     biomarker_hits_all[bkey4]['by_exon_mut_nonprincipal'] = 1
                
-               if hits_exon[j]['variant_consequence'] == "inframe_deletion" and re.search(r'^inframe_deletion', consequence):
-                  bkey4 = f"{hits_exon[j]['biomarker_source']}|{hits_exon[j]['variant_origin']}|{hits_exon[j]['variant_id']}|{hits_exon[j]['clinical_evidence_id']}"
-                  if not bkey4 in biomarker_hits_all:            
+               elif ehit['variant_consequence'] == "inframe_deletion" and re.search(r'^inframe_deletion', consequence):                  
+                  if not bkey4 in biomarker_hits_all.keys():            
                      biomarker_hits_all[bkey4] = {}
                   if exon == principal_exon:
-                     biomarker_hits_all[bkey3]['by_exon_deletion_principal'] = 1
+                     biomarker_hits_all[bkey4]['by_exon_deletion_principal'] = 1
                   else:
-                     biomarker_hits_all[bkey3]['by_exon_deletion_nonprincipal'] = 1
+                     biomarker_hits_all[bkey4]['by_exon_deletion_nonprincipal'] = 1
                
-               if hits_exon[j]['variant_consequence'] == "inframe_insertion" and re.search(r'^inframe_insertion', consequence):
-                  bkey4 = f"{hits_exon[j]['biomarker_source']}|{hits_exon[j]['variant_origin']}|{hits_exon[j]['variant_id']}|{hits_exon[j]['clinical_evidence_id']}"
-                  if not bkey4 in biomarker_hits_all:            
-                     biomarker_hits_all[bkey4] = {}
-                  if exon == principal_exon:
-                     biomarker_hits_all[bkey3]['by_exon_insertion_principal'] = 1
-                  else:
-                     biomarker_hits_all[bkey3]['by_exon_insertion_nonprincipal'] = 1
+               else:
+                  if ehit['variant_consequence'] == "inframe_insertion" and re.search(r'^inframe_insertion', consequence):
+                     if not bkey4 in biomarker_hits_all.keys():            
+                        biomarker_hits_all[bkey4] = {}
+                     if exon == principal_exon:
+                        biomarker_hits_all[bkey4]['by_exon_insertion_principal'] = 1
+                     else:
+                        biomarker_hits_all[bkey4]['by_exon_insertion_nonprincipal'] = 1
                
 
 
       if entrezgene != "." and principal_csq_entrezgene is True:
          if str(entrezgene) in variant_biomarkers['other'].keys():
             hits_gene = variant_biomarkers['other'][str(entrezgene)]
-            for k in hits_gene:
-               
+            for ghit in hits_gene:
+               bkey3 = f"{ghit['biomarker_source']}|{ghit['variant_origin']}|{ghit['variant_id']}|{ghit['clinical_evidence_items_id']}"
                ## match biomarkers annotated as "Mutation" only for a given gene - consider only the principal consequence (VEP's picked)
-               if hits_gene[k]['alteration_type'] == 'MUT' and mut_protein is True and (principal_csq_hgvsc is True or principal_csq_hgvsp is True):
-                  bkey3 = f"{hits_gene[j]['biomarker_source']}|{hits_gene[j]['variant_origin']}|{hits_gene[j]['variant_id']}|{hits_gene[j]['clinical_evidence_id']}"
-                  if not bkey3 in biomarker_hits_all:            
+               if ghit['alteration_type'] == 'MUT' and mut_protein is True and (principal_csq_hgvsc is True or principal_csq_hgvsp is True):
+                  if not bkey3 in biomarker_hits_all.keys():            
                      biomarker_hits_all[bkey3] = {}
                   biomarker_hits_all[bkey3]['by_gene_mut'] = 1
                
                ## match biomarkers annotated as "Mutation - loss of function" only for a given gene - consider only the principal consequence (VEP's picked)
-               if hits_gene[k]['alteration_type'] == 'MUT_LOF' and mut_lof is True and (principal_csq_hgvsc is True or principal_csq_hgvsp is True):
-                  bkey3 = f"{hits_gene[j]['biomarker_source']}|{hits_gene[j]['variant_origin']}|{hits_gene[j]['variant_id']}|{hits_gene[j]['clinical_evidence_id']}"
-                  if not bkey3 in biomarker_hits_all:            
+               elif ghit['alteration_type'] == 'MUT_LOF' and mut_lof is True and (principal_csq_hgvsc is True or principal_csq_hgvsp is True):
+                  if not bkey3 in biomarker_hits_all.keys():            
                      biomarker_hits_all[bkey3] = {}
                   biomarker_hits_all[bkey3]['by_gene_mut_lof'] = 1
                
                ## match biomarkers annotated as "Mutation - loss of function - frameshift" only for a given gene - consider only the principal consequence (VEP's picked)
-               if hits_gene[k]['alteration_type'] == 'MUT_LOF_FS' and mut_lof_fs is True and (principal_csq_hgvsc is True or principal_csq_hgvsp is True):
-                  bkey3 = f"{hits_gene[j]['biomarker_source']}|{hits_gene[j]['variant_origin']}|{hits_gene[j]['variant_id']}|{hits_gene[j]['clinical_evidence_id']}"
-                  if not bkey3 in biomarker_hits_all:            
-                     biomarker_hits_all[bkey3] = {}
-                  biomarker_hits_all[bkey3]['by_gene_mut_lof_fs'] = 1
+               else:
+                  if ghit['alteration_type'] == 'MUT_LOF_FS' and mut_lof_fs is True and (principal_csq_hgvsc is True or principal_csq_hgvsp is True):
+                     if not bkey3 in biomarker_hits_all.keys():            
+                        biomarker_hits_all[bkey3] = {}
+                     biomarker_hits_all[bkey3]['by_gene_mut_lof_fs'] = 1
 
-      
+   
+   if len(biomarker_hits_all.keys()) > 0:
       biomarker_var_matches = {}
       for bm in biomarker_hits_all.keys():
          match_types = '&'.join(biomarker_hits_all[bm].keys())
-         biomarker_var_matches[f"{bm}|{match_types}"] = 1
-      
-      rec.INFO['BIOMARKER_MATCH'] = ','.join(biomarker_var_matches.keys())
+         vkey = f"{bm}|{match_types}"
+         biomarker_var_matches[vkey] = 1
+
+      rec.INFO['BIOMARKER_MATCH'] = str(','.join(sorted(biomarker_var_matches.keys())))
 
    return

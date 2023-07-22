@@ -40,7 +40,7 @@ def __main__():
                         help="Annotate VCF against moderate-to-low cancer risk variants, as identified from genome-wide association studies (GWAS)")
     parser.add_argument("--rmsk", action="store_true",
                         help="Annotate VCF against known sequence repeats, as identified by RepeatMasker (rmsk)")
-    parser.add_argument("--simplerepeats", action="store_true",
+    parser.add_argument("--simplerepeat", action="store_true",
                         help="Annotate VCF against known sequence repeats, as identified by Tandem Repeats Finder (simplerepeats)")
     parser.add_argument("--winmsk", action="store_true",
                         help="Annotate VCF against known sequence repeats, as identified by Windowmasker (winmsk)")
@@ -67,7 +67,7 @@ def __main__():
     ## BED
     vcfanno_tracks['rmsk'] = args.rmsk
     vcfanno_tracks['winmsk'] = args.winmsk
-    vcfanno_tracks['simplerepeats'] = args.simplerepeats
+    vcfanno_tracks['simplerepeat'] = args.simplerepeat
     vcfanno_tracks['gene_transcript_xref'] = args.gene_transcript_xref
 
     ## VCF
@@ -157,8 +157,11 @@ def run_vcfanno(num_processes, query_vcf, vcfanno_tracks, query_info_tags, vcfhe
     out_vcf_vcfanno_unsorted1 = output_vcf + '.tmp.unsorted.1'
     query_prefix = re.sub(r'\.vcf.gz$', '', query_vcf)
     print_vcf_header(query_vcf, vcfheader_file, logger, chromline_only=True)
-    command1 = f"vcfanno -p={num_processes} {conf_fname} {query_vcf} > {out_vcf_vcfanno_unsorted1} 2> {query_prefix}.vcfanno.log"
-    check_subprocess(logger, command1, debug)
+    
+    vcfanno_command = f"vcfanno -p={num_processes} {conf_fname} {query_vcf} > {out_vcf_vcfanno_unsorted1} 2> {query_prefix}.vcfanno.log"
+    if debug:
+        logger.info(f"vcfanno command: {vcfanno_command}")
+    check_subprocess(logger, vcfanno_command, debug)
 
     check_subprocess(
         logger, f'cat {vcfheader_file} > {output_vcf}', debug=False)
@@ -190,7 +193,7 @@ def append_to_conf_file(datasource, datasource_info_tags, datasource_track_fname
         names_string = 'names=["' + '","'.join(datasource_info_tags) + '"]'
         fh.write(names_string + '\n')
         fh.write('ops=["concat"]\n\n')
-    elif datasource == 'simplerepeats' or datasource == 'winmsk':        
+    elif datasource == 'simplerepeat' or datasource == 'winmsk':        
         fh.write('columns=[4]\n')
         names_string = 'names=["' + '","'.join(datasource_info_tags) + '"]'
         fh.write(names_string + '\n')

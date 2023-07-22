@@ -7,7 +7,7 @@ import cyvcf2
 import os
 
 from pcgr import annoutils
-from pcgr.annotuils import read_infotag_file, make_transcript_xref_map, read_genexref_namemap, map_regulatory_variant_annotations, parse_vep_csq,  write_pass_vcf
+from pcgr.annoutils import read_infotag_file, make_transcript_xref_map, read_genexref_namemap, map_regulatory_variant_annotations, parse_vep_csq,  write_pass_vcf
 from pcgr import dbnsfp 
 from pcgr.dbnsfp import vep_dbnsfp_meta_vcf, map_variant_effect_predictors
 from pcgr import oncogenicity
@@ -43,14 +43,19 @@ def extend_vcf_annotations(query_vcf, pcgr_db_dir, logger, pon_annotation, regul
     Function that reads VEP/vcfanno-annotated VCF and extends the VCF INFO column with tags from
     1. CSQ elements within the primary transcript consequence picked by VEP, e.g. SYMBOL, Feature, Gene, Consequence etc.
     2. Cancer-relevant gene annotations (GENE_TRANSCRIPT_XREF), e.g. known oncogenes/tumor suppressors, driver genes etc
-    3. Mutation hotspots in cancer
-    4. Variant effect predictions - dbNSFP
-    5. Panel-of-normal (blacklisted variants) annotation
+    3. Variant effect predictions - dbNSFP
+    4. Panel-of-normal (blacklisted variants) annotation
+
+    Moreover, it uses 
+    1. Information from VEP's CSQ information (HGVSp/HGVSc) to match known mutation hotspots in cancer
+    2. Gene annotations (tumor suppressor, oncogene) and variant annotations (loss-of-function, gnomAD variant frequencies, variant effect predictions) to assign
+       variant oncogenicity levels ("Oncogenic", "Likely oncogenic", "VUS", "Likely Benign", "Benign")
 
     List of VCF INFO tags to be appended is defined by the 'infotags' files in the pcgr_db_dir
     """
     vcf_infotags_pcgr = read_infotag_file(os.path.join(pcgr_db_dir, 'pcgr_vcf_infotags.tsv'))
     vcf_infotags_vep = read_infotag_file(os.path.join(pcgr_db_dir, 'vep_vcf_infotags.tsv'))
+    vcf_infotags_meta = {}
 
     for tag in vcf_infotags_pcgr:
         vcf_infotags_meta[tag] = vcf_infotags_pcgr[tag]
@@ -60,8 +65,8 @@ def extend_vcf_annotations(query_vcf, pcgr_db_dir, logger, pon_annotation, regul
     if cpsr is True:
         vcf_infotags_meta = read_infotag_file(os.path.join(pcgr_db_dir, 'cpsr_vcf_infotags.tsv'))
         ## add gnomad non-cancer
-    gene_transcript_xref_map = read_genexref_namemap(os.path.join(pcgr_db_dir, 'gene','tsv','gene_transcript_xref', 'gene_transcript_xref_bedmap.tsv.gz'))
-    cancer_hotspots = load_mutation_hotspots(logger, os.path.join(pcgr_db_dir, 'misc','tsv','hotspot', 'hotspot.tsv.gz'))
+    gene_transcript_xref_map = read_genexref_namemap(os.path.join(pcgr_db_dir, 'gene','tsv','gene_transcript_xref', 'gene_transcript_xref_bedmap.tsv.gz'), logger)
+    cancer_hotspots = load_mutation_hotspots(os.path.join(pcgr_db_dir, 'misc','tsv','hotspot', 'hotspot.tsv.gz'), logger)
 
     biomarkers = {}
     for db in ['cgi','civic']:
@@ -149,6 +154,7 @@ def extend_vcf_annotations(query_vcf, pcgr_db_dir, logger, pon_annotation, regul
                         if not csq_record[k] is None:
                             rec.INFO[k] = csq_record[k]
 
+                            #print(k)
                             if k == 'HGVSp_short':
                                 principal_csq_properties['hgvsp'] = csq_record[k]
                                 if re.match(r'^(p.[A-Z]{1}[0-9]{1,}[A-Za-z]{1,})', principal_csq_properties['hgvsp']):
@@ -159,7 +165,7 @@ def extend_vcf_annotations(query_vcf, pcgr_db_dir, logger, pon_annotation, regul
                             if k == 'HGVSc':
                                 principal_csq_properties['hgvsc'] = csq_record[k].split(':')[1]
                             
-                            if k == 'ENTREZ_ID':
+                            if k == 'ENTREZGENE':
                                 principal_csq_properties['entrezgene'] = csq_record[k]
                             
                             if k == 'EXON':

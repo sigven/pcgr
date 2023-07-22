@@ -6,7 +6,7 @@ import gzip
 from pcgr import annoutils
 from pcgr.annoutils import threeToOneAA
 
-def load_mutation_hotspots(logger, hotspots_fname):
+def load_mutation_hotspots(hotspots_fname, logger):
 
    ## load cancer hotspot entries from 'misc/tsv/hotspot/hotspot.tsv.gz' (provided by github.com/sigven/cancerHotspots)
 

@@ -2,6 +2,9 @@
 
 import os
 import re
+import cyvcf2
+
+from cyvcf2 import VCF
 
 def map_variant_effect_predictors(rec, algorithms):
 
