@@ -160,7 +160,7 @@ def extend_vcf_annotations(query_vcf, pcgr_db_dir, logger, pon_annotation, regul
                                 if re.match(r'^(p.[A-Z]{1}[0-9]{1,}[A-Za-z]{1,})', principal_csq_properties['hgvsp']):
                                     codon_match = re.findall(r'[A-Z][0-9]{1,}', principal_csq_properties['hgvsp'])
                                     if len(codon_match) == 1:
-                                        principal_csq_properties['codon'] = codon_match[0]
+                                        principal_csq_properties['codon'] = 'p.' + codon_match[0]
                      
                             if k == 'HGVSc':
                                 principal_csq_properties['hgvsc'] = csq_record[k].split(':')[1]

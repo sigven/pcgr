@@ -11,7 +11,7 @@ def load_biomarkers(logger, biomarker_variant_fname, biomarker_clinical_fname):
    ## load actionable cancer variants from 'variant.tsv.gz' (provided by github.com/sigven/cancerHotspots)
 
    variant_biomarkers = {} ##dictionary to return
-   for variant_alias_type in ['dbsnp','hgvsp','hgvsc','genomic','exon','other']:
+   for variant_alias_type in ['dbsnp','hgvsp','hgvsc','genomic','exon','other','aa_region']:
       variant_biomarkers[variant_alias_type] = {}
 
    if not os.path.exists(biomarker_clinical_fname):
@@ -52,7 +52,7 @@ def load_biomarkers(logger, biomarker_variant_fname, biomarker_clinical_fname):
                   row['variant_origin'] = '&'.join(variant_to_origin[row['variant_id']].keys())
                entry_alias_type = str(row['alias_type']).replace("_grch37", "")
                entry_alias_type = entry_alias_type.replace("_grch38", "")
-
+              
                if entry_alias_type == "other":
                   if bool(re.search(r'^((ACTIVATING )?MUTATION|LOSS|START LOSS)$', row['variant_alias'])) is True:
                      varkey = str(row['entrezgene'])
@@ -69,12 +69,26 @@ def load_biomarkers(logger, biomarker_variant_fname, biomarker_clinical_fname):
                            variant_biomarkers['exon'][varkey] = []
                         variant_biomarkers['exon'][varkey].append(row)
 
-               for alias_type in ['dbsnp','hgvsp','hgvsc','genomic']:                 
+               for alias_type in ['dbsnp','hgvsp','hgvsc','genomic','aa_region']:                 
                   if entry_alias_type == alias_type:
-                     varkey = str(row['entrezgene']) + '_' + str(row['variant_alias'])
-                     if not varkey in variant_biomarkers[alias_type]:
-                        variant_biomarkers[alias_type][varkey] = []
-                     variant_biomarkers[alias_type][varkey].append(row)
+                     if entry_alias_type != 'aa_region':
+                        varkey = str(row['entrezgene']) + '_' + str(row['variant_alias'])
+                        if not varkey in variant_biomarkers[alias_type]:
+                           variant_biomarkers[alias_type][varkey] = []
+                        variant_biomarkers[alias_type][varkey].append(row)
+                     else:
+                        if entry_alias_type == "aa_region":                           
+                           aa_region = re.sub(r"aa(_|-)region:","",row["variant_alias"]).split("-")
+                           aa_region_start = int(aa_region[0])
+                           aa_region_end = int(aa_region[1])
+                           aa_index = aa_region_start
+                           while aa_index <= aa_region_end:
+                              varkey = str(row['entrezgene']) + '_' + str(aa_index)
+                              if not varkey in variant_biomarkers[entry_alias_type].keys():
+                                 variant_biomarkers[entry_alias_type][varkey] = []
+                              variant_biomarkers[entry_alias_type][varkey].append(row)
+                              aa_index = aa_index + 1
+
 
                
 
@@ -99,8 +113,6 @@ def match_csq_biomarker(transcript_csq_elements, variant_biomarkers, rec, princi
 
    if genomic_var_key in variant_biomarkers['genomic'].keys():
       hits_genomic = variant_biomarkers['genomic'][genomic_var_key]
-
-      #print("BALLE")
 
       for ghit in hits_genomic:
          bkey_genomic = f"{ghit['biomarker_source']}|{ghit['variant_origin']}|{ghit['variant_id']}|{ghit['clinical_evidence_items_id']}"
@@ -136,12 +148,12 @@ def match_csq_biomarker(transcript_csq_elements, variant_biomarkers, rec, princi
       if hgvsc == principal_hgvsc:
          principal_csq_hgvsc = True
 
+      ## Match biomarkers by HGVSp or codon - "exact" or "codon" level resolution
       codon_match = []
       if entrezgene != "." and hgvsp != ".":
          biomarker_key_hgvsp = str(entrezgene) + '_' + str(hgvsp_short)
          codon_match = re.findall(r'p.[A-Z][0-9]{1,}',hgvsp_short)
 
-         print(biomarker_key_hgvsp)
          ## match biomarkers annotated at the amino acid level - with HGVSp coordinates
          if biomarker_key_hgvsp in variant_biomarkers['hgvsp']:
             hits = variant_biomarkers['hgvsp'][biomarker_key_hgvsp]
@@ -163,7 +175,10 @@ def match_csq_biomarker(transcript_csq_elements, variant_biomarkers, rec, princi
             ## match biomarkers annotated as "CODON" only for a given gene
             if biomarker_key_codon in variant_biomarkers['hgvsp']:
                hits_codon = variant_biomarkers['hgvsp'][biomarker_key_codon]
+
                for chit in hits_codon:
+                  if not chit['alteration_type'] == "CODON":
+                     continue
                   bkey2 = f"{chit['biomarker_source']}|{chit['variant_origin']}|{chit['variant_id']}|{chit['clinical_evidence_items_id']}"
                   if not bkey2 in biomarker_hits_all.keys():            
                      biomarker_hits_all[bkey2] = {}
@@ -174,13 +189,40 @@ def match_csq_biomarker(transcript_csq_elements, variant_biomarkers, rec, princi
                      else:
                         ## nonprincipal codon
                         biomarker_hits_all[bkey2]['by_codon_nonprincipal'] = 1
-         
-
-      if entrezgene != "." and (consequence == 'splice_donor_variant' or consequence == 'splice_acceptor_variant'):
-         hgvsc_key = re.sub(r'>(A|G|C|T)$','',hgvsc)
-         hgvsc_biomarker_key = str(entrezgene) + '_' + str(hgvsc_key)
-
       
+
+      ## Match biomarkers by amino-acid (protein) region - "region level" resolution
+      if entrezgene != "." and not rec.INFO.get('AMINO_ACID_START') is None and not rec.INFO.get('AMINO_ACID_END') is None:
+         if principal_csq_entrezgene is True:
+            aa_region_start_key = entrezgene + "_" + str(rec.INFO.get('AMINO_ACID_START'))
+            aa_region_end_key = entrezgene + "_" + str(rec.INFO.get('AMINO_ACID_END'))
+            if aa_region_start_key in variant_biomarkers['aa_region'].keys() and aa_region_end_key in variant_biomarkers['aa_region'].keys():
+               for rhit in variant_biomarkers['aa_region'][aa_region_start_key]:
+                  if re.search(str(consequence), rhit['variant_consequence']):
+                     region_hit = f"{rhit['biomarker_source']}|{rhit['variant_origin']}|{rhit['variant_id']}|{rhit['clinical_evidence_items_id']}"
+                     if principal_csq_hgvsc is True:
+                        if not region_hit in biomarker_hits_all.keys():
+                           biomarker_hits_all[region_hit] = {}
+                        biomarker_hits_all[region_hit]['by_aa_region_principal'] = 1
+                     
+
+
+      ## Match biomarkers by HGVSc identifier - "exact" resolution
+      if entrezgene != "." and not rec.INFO.get('HGVSc') is None:
+         hgvsc_elements = str(rec.INFO.get('HGVSc')).split(':')
+         if len(hgvsc_elements) == 2:
+            hgvsc_biomarker_key = str(entrezgene) + '_' + str(hgvsc_elements[1])              
+            if hgvsc_biomarker_key in variant_biomarkers['hgvsc'].keys():                  
+               hits_hgvsc = variant_biomarkers['hgvsc'][hgvsc_biomarker_key]
+               for hit_hgvsc in hits_hgvsc:
+                  hgvsc_hit = f"{hit_hgvsc['biomarker_source']}|{hit_hgvsc['variant_origin']}|{hit_hgvsc['variant_id']}|{hit_hgvsc['clinical_evidence_items_id']}"
+                  if principal_csq_hgvsc is True:
+                     biomarker_hits_all[hgvsc_hit]['by_hgvsc_principal'] = 1
+                  else:
+                     biomarker_hits_all[hgvsc_hit]['by_hgvsc_nonprincipal'] = 1
+
+
+      ## Match biomarkers indicated by exon number (and consequence) - "exon level" resolution
       if entrezgene != "." and principal_csq_entrezgene is True and exon != ".":
          exon_biomarker_key = str(entrezgene) + '_' + str(exon)
          if exon_biomarker_key in variant_biomarkers['exon'].keys():
@@ -214,7 +256,7 @@ def match_csq_biomarker(transcript_csq_elements, variant_biomarkers, rec, princi
                         biomarker_hits_all[bkey4]['by_exon_insertion_nonprincipal'] = 1
                
 
-
+      ## Match biomarkers indicated by gene only - "gene level" resolution
       if entrezgene != "." and principal_csq_entrezgene is True:
          if str(entrezgene) in variant_biomarkers['other'].keys():
             hits_gene = variant_biomarkers['other'][str(entrezgene)]
@@ -244,9 +286,14 @@ def match_csq_biomarker(transcript_csq_elements, variant_biomarkers, rec, princi
       biomarker_var_matches = {}
       for bm in biomarker_hits_all.keys():
          match_types = '&'.join(biomarker_hits_all[bm].keys())
+
+         ## Aggregate all types of matching performed ('by_exon, by_hgvsp, by_hgvsc' etc.) for a given variant
          vkey = f"{bm}|{match_types}"
          biomarker_var_matches[vkey] = 1
 
-      rec.INFO['BIOMARKER_MATCH'] = str(','.join(sorted(biomarker_var_matches.keys())))
+      if not rec.INFO.get('BIOMARKER_MATCH') is None:
+         rec.INFO['BIOMARKER_MATCH'] = rec.INFO['BIOMARKER_MATCH'] + ',' + str(','.join(sorted(biomarker_var_matches.keys())))
+      else:
+         rec.INFO['BIOMARKER_MATCH'] = str(','.join(sorted(biomarker_var_matches.keys())))
 
    return

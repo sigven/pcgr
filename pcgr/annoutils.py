@@ -15,10 +15,6 @@ csv.field_size_limit(500 * 1024 * 1024)
 threeLettertoOneLetterAA = {'Ala': 'A', 'Arg': 'R', 'Asn': 'N', 'Asp': 'D', 'Cys': 'C', 'Glu': 'E', 'Gln': 'Q', 'Gly': 'G', 'His': 'H',
                             'Ile': 'I', 'Leu': 'L', 'Lys': 'K', 'Met': 'M', 'Phe': 'F', 'Pro': 'P', 'Ser': 'S', 'Thr': 'T', 'Trp': 'W', 'Tyr': 'Y', 'Val': 'V', 'Ter': 'X'}
 
-
-
-
-
 def get_vcf_info_tags(vcffile):
     vcf = cyvcf2.VCF(vcffile)
     info_tags = {}
@@ -450,8 +446,7 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, logger, pick_onl
             while (j < len(csq_fields)):
                 if j in vep_csq_fields_map['index2field']:
                     if csq_fields[j] != '':
-                        csq_record[vep_csq_fields_map['index2field']
-                                   [j]] = str(csq_fields[j])
+                        csq_record[vep_csq_fields_map['index2field'][j]] = str(csq_fields[j])
                 j = j + 1
             all_csq_pick.append(csq_record)
 
@@ -462,12 +457,15 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, logger, pick_onl
                 j = 0
                 csq_record = {}
 
+                #print(str(rec.CHROM) + '\t' + str(rec.POS) + '\t' + str(rec.REF) + '\t' + str(','.join(rec.ALT)) + '\t' + csq_fields[1] + '\t' + csq_fields[3]+ '\t' + csq_fields[11])
+                ensembl_transcript_id = '.'
                 # loop over block annotation elements (separated with '|'), and assign their values to the csq_record dictionary object
                 while (j < len(csq_fields)):
                     if j in vep_csq_fields_map['index2field']:
+                        
+                        ## consider non-empty CSQ fields
                         if csq_fields[j] != '':
-                            csq_record[vep_csq_fields_map['index2field'][j]] = str(
-                                csq_fields[j])
+                            csq_record[vep_csq_fields_map['index2field'][j]] = str(csq_fields[j])
                             if vep_csq_fields_map['index2field'][j] == 'Feature':
                                 ensembl_transcript_id = str(csq_fields[j])
                                 if ensembl_transcript_id in transcript_xref_map:
@@ -490,6 +488,7 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, logger, pick_onl
                                             re.sub(r'\.[0-9]{1,}$', '', re.sub(r'Pfam:', '', v)))
 
                                 csq_record['DOMAINS'] = None
+
                             # Assign COSMIC/DBSNP mutation ID's as individual key,value pairs in the csq_record object
                             if vep_csq_fields_map['index2field'][j] == 'Existing_variation':
                                 var_identifiers = str(csq_fields[j]).split('&')
@@ -508,11 +507,16 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, logger, pick_onl
                                 if len(dbsnp_identifiers) > 0:
                                     csq_record['DBSNPRSID'] = '&'.join(
                                         dbsnp_identifiers)
-                        else:
+                        else:                            
                             csq_record[vep_csq_fields_map['index2field'][j]] = None
                     j = j + 1
+                
+                ## if VEP/Ensembl does not provide a symbol, use symbol provided by PCGR/CPSR gene_transcript_xref map
+                if csq_record['SYMBOL'] is None and ensembl_transcript_id != ".":
+                    if ensembl_transcript_id in transcript_xref_map:
+                        csq_record['SYMBOL'] = transcript_xref_map[ensembl_transcript_id]['SYMBOL']
 
-                # Assign coding status, protein change, coding sequence change, last exon/intron status etc
+                # Assign coding status, protein change, coding sequence change, last exon/intron status etc as VCF info tags
                 assign_cds_exon_intron_annotations(csq_record)
                 # Append transcript consequence to all_csq_pick
                 # print(csq_record)

@@ -146,12 +146,30 @@ def vep_dbnsfp_meta_vcf(query_vcf, info_tags_wanted):
                       'gnomAD_OTH_AF': 'OTH_AF_GNOMAD',
                       'gnomAD_ASJ_AF': 'ASJ_AF_GNOMAD',
                       'gnomAD_FIN_AF': 'FIN_AF_GNOMAD',
-                      'AFR_AF': 'AFR_AF_1KG',
-                      'AMR_AF': 'AMR_AF_1KG',
-                      'SAS_AF': 'SAS_AF_1KG',
-                      'EUR_AF': 'EUR_AF_1KG',
-                      'EAS_AF': 'EAS_AF_1KG',
-                      'AF': 'GLOBAL_AF_1KG'}
+                      'gnomADe_AMR_AF': 'AMR_AF_GNOMADe',
+                      'gnomADe_AFR_AF': 'AFR_AF_GNOMADe',
+                      'gnomADe_EAS_AF': 'EAS_AF_GNOMADe',
+                      'gnomADe_NFE_AF': 'NFE_AF_GNOMADe',
+                      'gnomADe_AF': 'GLOBAL_AF_GNOMADe',
+                      'gnomADe_SAS_AF': 'SAS_AF_GNOMADe',
+                      'gnomADe_OTH_AF': 'OTH_AF_GNOMADe',
+                      'gnomADe_ASJ_AF': 'ASJ_AF_GNOMADe',
+                      'gnomADe_FIN_AF': 'FIN_AF_GNOMADe',
+                      'gnomADg_AMR_AF': 'AMR_AF_GNOMADg',
+                      'gnomADg_AFR_AF': 'AFR_AF_GNOMADg',
+                      'gnomADg_EAS_AF': 'EAS_AF_GNOMADg',
+                      'gnomADg_NFE_AF': 'NFE_AF_GNOMADg',
+                      'gnomADg_AF': 'GLOBAL_AF_GNOMADg',
+                      'gnomADg_SAS_AF': 'SAS_AF_GNOMADg',
+                      'gnomADg_OTH_AF': 'OTH_AF_GNOMADg',
+                      'gnomADg_ASJ_AF': 'ASJ_AF_GNOMADg',
+                      'gnomADg_FIN_AF': 'FIN_AF_GNOMADg'}
+                      #'AFR_AF': 'AFR_AF_1KG',
+                      #'AMR_AF': 'AMR_AF_1KG',
+                      #'SAS_AF': 'SAS_AF_1KG',
+                      #'EUR_AF': 'EUR_AF_1KG',
+                      #'EAS_AF': 'EAS_AF_1KG',
+                      #'AF': 'GLOBAL_AF_1KG'}
 
     vcf = VCF(query_vcf)
     vep_csq_index2fields = {}
