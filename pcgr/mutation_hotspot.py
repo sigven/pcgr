@@ -9,7 +9,7 @@ from pcgr.annoutils import threeToOneAA
 def load_mutation_hotspots(hotspots_fname, logger):
 
    """
-   Function that load cancer mutational hotspot entries from data bundle
+   Function that loads cancer mutational hotspot entries from file in PCGR data bundle
    - 'misc/tsv/hotspot/hotspot.tsv.gz' (provided by github.com/sigven/cancerHotspots)
    """
 

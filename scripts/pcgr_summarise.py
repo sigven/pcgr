@@ -58,9 +58,10 @@ def extend_vcf_annotations(arg_dict, logger):
     5. Information from VEP's CSQ information (HGVSp/HGVSc) to match known mutation hotspots in cancer
     6. Information from VEP's CSQ information (Consequence, HGVSp/HGVSc) and genomic coordinates to match known biomarkers in cancer
     
-    Finally, it computes somatic variant oncogenicity, using
+    Finally, it assesses somatic variant oncogenicity, using
     7. Gene annotations (tumor suppressor, oncogene) and variant annotations (loss-of-function, gnomAD variant frequencies, variant effect predictions).
        Variant oncogenicity levels are provided for all variants using a recommended five-level scheme ("Oncogenic", "Likely oncogenic", "VUS", "Likely Benign", "Benign")
+       - Recommended scoring scheme for variant oncogenicity classification outlined by VICC/ClinGen consortia (Horak et al., Genet Med, 2022)
 
     List of VCF INFO tags to be appended is defined by the 'infotags' files in the pcgr_db_dir
     """
@@ -145,10 +146,7 @@ def extend_vcf_annotations(arg_dict, logger):
 
         vep_csq_record_results = parse_vep_csq(rec, pcgr_onco_xref, vep_csq_fields_map, arg_dict['vep_pick_order'], logger, pick_only = True, csq_identifier = 'CSQ')
 
-        vep_csq_records = None
-
         principal_csq_properties = {}
-
         principal_csq_properties['hgvsp'] = '.'
         principal_csq_properties['hgvsc'] = '.'
         principal_csq_properties['entrezgene'] = '.'
@@ -196,6 +194,7 @@ def extend_vcf_annotations(arg_dict, logger):
         if arg_dict['oncogenicity_annotation'] == 1:
             assign_oncogenicity_evidence(rec, tumortype = arg_dict['tumortype'])
 
+        del rec.INFO['GENE_TRANSCRIPT_XREF']
         w.write_record(rec)
     if vars_no_csq:
         logger.warning(f"There were {len(vars_no_csq)} records with no CSQ tag from VEP (was --vep_no_intergenic flag set?). Skipping them and showing (up to) the first 100:")

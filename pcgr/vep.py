@@ -8,6 +8,76 @@ from pcgr.annoutils import assign_cds_exon_intron_annotations
 from pcgr import pcgr_vars
 
 
+def get_csq_record_annotations(csq_fields, varkey, logger, vep_csq_fields_map, transcript_xref_map):
+
+    j = 0
+    csq_record = {}
+
+    csq_record['VARKEY'] = varkey
+    ensembl_transcript_id = '.'
+                
+    # loop over block annotation elements (separated with '|'), and assign their values to the csq_record dictionary object
+    while (j < len(csq_fields)):
+        if j in vep_csq_fields_map['index2field']:
+                        
+            ## consider non-empty CSQ fields
+            if csq_fields[j] != '':
+                csq_record[vep_csq_fields_map['index2field'][j]] = str(csq_fields[j])
+                if vep_csq_fields_map['index2field'][j] == 'Feature':
+                    
+                    ensembl_transcript_id = str(csq_fields[j])
+                    if ensembl_transcript_id in transcript_xref_map:
+                        for annotation in transcript_xref_map[ensembl_transcript_id].keys():
+                            if annotation != 'SYMBOL':
+                                ## assign additional (non-VEP provided) gene/transcript annotations from the custom 
+                                ## transcript_xref_map as key,value pairs in the csq_record object
+                                csq_record[annotation] = transcript_xref_map[ensembl_transcript_id][annotation]
+                    else:
+                        if re.match(r'ENST', ensembl_transcript_id):
+                            logger.warning(
+                                'Could not find transcript xrefs for ' + str(ensembl_transcript_id))
+
+                # Specifically assign PFAM protein domain as a csq_record key
+                if vep_csq_fields_map['index2field'][j] == 'DOMAINS':
+                    domain_identifiers = str(csq_fields[j]).split('&')
+                    for v in domain_identifiers:
+                        if v.startswith('Pfam'):
+                            csq_record['PFAM_DOMAIN'] = str(re.sub(r'\.[0-9]{1,}$', '', re.sub(r'Pfam:', '', v)))                            
+
+                # Assign COSMIC/DBSNP mutation ID's as individual key,value pairs in the csq_record object
+                if vep_csq_fields_map['index2field'][j] == 'Existing_variation':
+                    var_identifiers = str(csq_fields[j]).split('&')
+                    parsed_identifiers = {'COSMIC_MUTATION_ID':[], 'DBSNPRSID':[]}                                
+                    for v in var_identifiers:
+                        if v.startswith('COSV') or v.startswith('COSM'):
+                            parsed_identifiers['COSMIC_MUTATION_ID'].append(v)                                   
+                        if v.startswith('rs'):
+                            parsed_identifiers['DBSNPRSID'].append(v)
+                    for db in parsed_identifiers.keys():
+                        if len(parsed_identifiers[db]) > 0:
+                            csq_record[db] = '&'.join(parsed_identifiers[db])   
+                
+                ## Sort (potentially multiple) variant consequence elements from VEP (they appear unsorted in some cases) 
+                ## Example: intron_variant&splice_region_variant                            
+                if vep_csq_fields_map['index2field'][j] == "Consequence":
+                    consequence_elements = sorted(str(csq_fields[j]).split('&'))
+                    csq_record['Consequence'] = '&'.join(consequence_elements)
+
+            else:                            
+                csq_record[vep_csq_fields_map['index2field'][j]] = None
+        j = j + 1
+        
+    ## if VEP/Ensembl does not provide a symbol, use symbol provided by PCGR/CPSR gene_transcript_xref map
+    if csq_record['SYMBOL'] is None and ensembl_transcript_id != ".":
+        if ensembl_transcript_id in transcript_xref_map:
+            csq_record['SYMBOL'] = transcript_xref_map[ensembl_transcript_id]['SYMBOL']
+    
+    # Assign coding status, protein change, coding sequence change, last exon/intron status etc as VCF info tags
+    assign_cds_exon_intron_annotations(csq_record)
+    
+    return(csq_record)
+
+
 def pick_single_gene_csq(vep_csq_results, logger, pick_criteria_ordered = "mane,canonical,appris,tsl,biotype,ccds,rank,length"):
     
     csq_candidates = []
@@ -23,8 +93,9 @@ def pick_single_gene_csq(vep_csq_results, logger, pick_criteria_ordered = "mane,
         csq_candidate['tsl'] = 6
         csq_candidate['ccds'] = 1
         csq_candidate['rank'] = '.'
-        csq_candidate['transcript_id'] = csq_elem['ENSEMBL_TRANSCRIPT_ID']
-
+        
+        ## set to picked as default
+        csq_candidate['PICKED'] = True
         csq_candidate['varkey'] = csq_elem['VARKEY']
 
         ## MANE status - lower value prioritized
@@ -52,8 +123,6 @@ def pick_single_gene_csq(vep_csq_results, logger, pick_criteria_ordered = "mane,
         if not csq_elem['CCDS'] is None:
             csq_candidate['ccds'] = 0
 
-        csq_candidate['PICKED'] = True
-
         ## Consequence rank - lower value prioritized
         if not csq_elem['Consequence'] is None:
             main_cons = csq_elem['Consequence'].split('&')[0]
@@ -67,8 +136,9 @@ def pick_single_gene_csq(vep_csq_results, logger, pick_criteria_ordered = "mane,
         csq_candidates.append(csq_candidate)
 
 
-    ## Go through pick criteria - when there is only one element with 'PICKED' equal to TRUE,
-    ## break out of the loop, and report the chosen transcript CSQ element
+    ## Go through pick criteria in pre-defined order 
+    ## - set 'PICKED' = False for all csq elements with a score above the minimum value for a given criterion
+    ## - when there is only one element with 'PICKED' equal to TRUE, break out of the loop, and report the chosen transcript CSQ element
     chosen_csq_index = 0
     for rank_criterion in pick_criteria_ordered.split(','):
         if rank_criterion != 'length':        
@@ -94,16 +164,19 @@ def pick_single_gene_csq(vep_csq_results, logger, pick_criteria_ordered = "mane,
             if num_picked == 1:
                 break
 
-    #for c in csq_candidates:
-    #    print(str(c))
-
-    #if num_with_lowest_score == 0:
-    #     logger.warning('Unable to prioritize among multiple CSQ elements')
-
     return(chosen_csq_index)
 
 def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, vep_pick_order, logger, pick_only=True, csq_identifier='CSQ', debug = 0):
 
+
+    """
+    Function that parses the comma-separated CSQ elements found in the rec.INFO object (VCF)
+    - creates an individual CSQ record for all transcript-specific elements provided as comma-separated elements in the CSQ tag
+    - each individual record is gathered as a dictionary of properties (defined by vep_csq_field_map), i.e.
+    - 'CSQ=A|missense_variant|KRAS++' in the VCF INFO element gives csq_record['Consequence'] = 'missense_variant', 
+       csq_record['SYMBOL'] = 'KRAS' etc. 
+    - if argument 'pick_only' is TRUE, 
+    """
     all_csq_pick = []
     all_transcript_consequences = []
 
@@ -116,7 +189,8 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, vep_pick_order, 
 
         entrezgene = '.'
 
-        ## Entrez gene identifier is not provided by VEP, pull out this from 'transcript_xref_map' for a given transcript-specific CSQ block
+        ## Entrez gene identifier is not provided by VEP, pull out this from 'transcript_xref_map' for a given 
+        ## vtranscript-specific CSQ block
         ##  - used for 'consequence_entry' object that are added to 'vep_all_csq' array
         k = 0
         while(k < len(csq_fields)):
@@ -130,111 +204,39 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, vep_pick_order, 
             k = k + 1
         
         
-        if pick_only is False:
-            j = 0
-            csq_record = {}
-            csq_record['VARKEY'] = varkey
-
-            while (j < len(csq_fields)):
-                if j in vep_csq_fields_map['index2field']:
-                    if csq_fields[j] != '':
-                        csq_record[vep_csq_fields_map['index2field'][j]] = str(csq_fields[j])
-                j = j + 1
+        if pick_only is False:        
+            csq_record = get_csq_record_annotations(csq_fields, varkey, logger, vep_csq_fields_map, transcript_xref_map)
             all_csq_pick.append(csq_record)
-
         else:
             # loop over VEP consequence blocks PICK'ed according to VEP's ranking scheme
             # only consider the primary/picked consequence when expanding with annotation tags
             if csq_fields[vep_csq_fields_map['field2index']['PICK']] == "1":
-                j = 0
-                csq_record = {}
-
-                csq_record['VARKEY'] = varkey
-                ensembl_transcript_id = '.'
-                # loop over block annotation elements (separated with '|'), and assign their values to the csq_record dictionary object
-                while (j < len(csq_fields)):
-                    if j in vep_csq_fields_map['index2field']:
-                        
-                        ## consider non-empty CSQ fields
-                        if csq_fields[j] != '':
-                            csq_record[vep_csq_fields_map['index2field'][j]] = str(csq_fields[j])
-                            if vep_csq_fields_map['index2field'][j] == 'Feature':
-                                ensembl_transcript_id = str(csq_fields[j])
-                                if ensembl_transcript_id in transcript_xref_map:
-                                    for annotation in transcript_xref_map[ensembl_transcript_id].keys():
-                                        if annotation != 'SYMBOL':
-                                            # assign additional gene/transcript annotations from the custom transcript xref map (PCGR/CPSR) as key,value pairs in the csq_record object
-                                            csq_record[annotation] = transcript_xref_map[ensembl_transcript_id][annotation]
-                                else:
-                                    if re.match(r'ENST', ensembl_transcript_id):
-                                        logger.warning(
-                                            'Could not find transcript xrefs for ' + str(ensembl_transcript_id))
-
-                            # Specifically assign PFAM protein domain as a csq_record key
-                            if vep_csq_fields_map['index2field'][j] == 'DOMAINS':
-                                domain_identifiers = str(
-                                    csq_fields[j]).split('&')
-                                for v in domain_identifiers:
-                                    if v.startswith('Pfam'):
-                                        csq_record['PFAM_DOMAIN'] = str(
-                                            re.sub(r'\.[0-9]{1,}$', '', re.sub(r'Pfam:', '', v)))
-                                csq_record['DOMAINS'] = None
-
-                            # Assign COSMIC/DBSNP mutation ID's as individual key,value pairs in the csq_record object
-                            if vep_csq_fields_map['index2field'][j] == 'Existing_variation':
-                                var_identifiers = str(csq_fields[j]).split('&')
-                                parsed_identifiers = {'COSMIC_MUTATION_ID':[], 'DBSNPRSID':[]}                                
-                                for v in var_identifiers:
-                                    if v.startswith('COSV') or v.startswith('COSM'):
-                                        parsed_identifiers['COSMIC_MUTATION_ID'].append(v)                                   
-                                    if v.startswith('rs'):
-                                        parsed_identifiers['DBSNPRSID'].append(v)
-                                for db in parsed_identifiers.keys():
-                                    if len(parsed_identifiers[db]) > 0:
-                                        csq_record[db] = '&'.join(
-                                            parsed_identifiers[db])   
-                            ## Sort (potentially multiple) variant consequence elements from VEP (they appear unsorted in som cases) 
-                            ## Example: intron_variant&splice_region_variant                            
-                            if vep_csq_fields_map['index2field'][j] == "Consequence":
-                                consequence_elements = sorted(str(csq_fields[j]).split('&'))
-                                csq_record['Consequence'] = '&'.join(consequence_elements)
-
-                        else:                            
-                            csq_record[vep_csq_fields_map['index2field'][j]] = None
-                    j = j + 1
-                
-                ## if VEP/Ensembl does not provide a symbol, use symbol provided by PCGR/CPSR gene_transcript_xref map
-                if csq_record['SYMBOL'] is None and ensembl_transcript_id != ".":
-                    if ensembl_transcript_id in transcript_xref_map:
-                        csq_record['SYMBOL'] = transcript_xref_map[ensembl_transcript_id]['SYMBOL']
-
-                # Assign coding status, protein change, coding sequence change, last exon/intron status etc as VCF info tags
-                assign_cds_exon_intron_annotations(csq_record)
+                csq_record = get_csq_record_annotations(csq_fields, varkey, logger, vep_csq_fields_map, transcript_xref_map)                           
                 # Append transcript consequence to all_csq_pick
                 all_csq_pick.append(csq_record)
-            symbol = "."
-            hgvsc = "."
-            hgvsp = "."
-            exon = "."
-            if csq_fields[vep_csq_fields_map['field2index']['EXON']] != "":
-                if "/" in csq_fields[vep_csq_fields_map['field2index']['EXON']]:
-                    exon = str(csq_fields[vep_csq_fields_map['field2index']['EXON']].split('/')[0])
-            if csq_fields[vep_csq_fields_map['field2index']['SYMBOL']] != "":
-                symbol = str(csq_fields[vep_csq_fields_map['field2index']['SYMBOL']])
-            if csq_fields[vep_csq_fields_map['field2index']['HGVSc']] != "":
-                hgvsc = str(csq_fields[vep_csq_fields_map['field2index']['HGVSc']].split(':')[1])
-            if csq_fields[vep_csq_fields_map['field2index']['HGVSp']] != "":
-                hgvsp = str(csq_fields[vep_csq_fields_map['field2index']['HGVSp']].split(':')[1])
-            consequence_entry = (str(csq_fields[vep_csq_fields_map['field2index']['Consequence']]) + ":" +  
-                str(symbol) + ":" + 
-                str(entrezgene) + ":" +
-                str(hgvsc) + ":" + 
-                str(hgvsp) + ":" + 
-                str(exon) + ":" +
-                str(csq_fields[vep_csq_fields_map['field2index']['Feature_type']]) + ":" + 
-                str(csq_fields[vep_csq_fields_map['field2index']['Feature']]) + ":" + 
-                str(csq_fields[vep_csq_fields_map['field2index']['BIOTYPE']]))
-            all_transcript_consequences.append(consequence_entry)
+        symbol = "."
+        hgvsc = "."
+        hgvsp = "."
+        exon = "."
+        if csq_fields[vep_csq_fields_map['field2index']['EXON']] != "":
+            if "/" in csq_fields[vep_csq_fields_map['field2index']['EXON']]:
+                exon = str(csq_fields[vep_csq_fields_map['field2index']['EXON']].split('/')[0])
+        if csq_fields[vep_csq_fields_map['field2index']['SYMBOL']] != "":
+            symbol = str(csq_fields[vep_csq_fields_map['field2index']['SYMBOL']])
+        if csq_fields[vep_csq_fields_map['field2index']['HGVSc']] != "":
+            hgvsc = str(csq_fields[vep_csq_fields_map['field2index']['HGVSc']].split(':')[1])
+        if csq_fields[vep_csq_fields_map['field2index']['HGVSp']] != "":
+            hgvsp = str(csq_fields[vep_csq_fields_map['field2index']['HGVSp']].split(':')[1])
+        consequence_entry = (str(csq_fields[vep_csq_fields_map['field2index']['Consequence']]) + ":" +  
+            str(symbol) + ":" + 
+            str(entrezgene) + ":" +
+            str(hgvsc) + ":" + 
+            str(hgvsp) + ":" + 
+            str(exon) + ":" +
+            str(csq_fields[vep_csq_fields_map['field2index']['Feature_type']]) + ":" + 
+            str(csq_fields[vep_csq_fields_map['field2index']['Feature']]) + ":" + 
+            str(csq_fields[vep_csq_fields_map['field2index']['BIOTYPE']]))
+        all_transcript_consequences.append(consequence_entry)
 
   
     vep_csq_results = {}
