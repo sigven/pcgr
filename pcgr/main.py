@@ -85,7 +85,7 @@ def cli():
     optional_vcfanno.add_argument("--vcfanno_n_proc", default=4, type=int, help="Number of vcfanno processes (option '-p' in vcfanno), default: %(default)s")
     optional_vep.add_argument("--vep_n_forks", default=4, type=int, help="Number of forks (option '--fork' in VEP), default: %(default)s")
     optional_vep.add_argument("--vep_buffer_size", default=100, type=int, help=f"Variant buffer size (variants read into memory simultaneously, option '--buffer_size' in VEP)\n- set lower to reduce memory usage, default: %(default)s")
-    optional_vep.add_argument("--vep_pick_order", default="canonical,appris,biotype,ccds,rank,tsl,length,mane", help=f"Comma-separated string of ordered transcript/variant properties for selection of primary variant consequence\n(option '--pick_order' in VEP), default: %(default)s")
+    optional_vep.add_argument("--vep_pick_order", default="mane,canonical,appris,tsl,biotype,ccds,rank,length", help=f"Comma-separated string of ordered transcript/variant properties for selection of primary variant consequence\n(option '--pick_order' in VEP), default: %(default)s")
     optional_vep.add_argument("--vep_no_intergenic", action="store_true", help="Skip intergenic variants during processing (option '--no_intergenic' in VEP), default: %(default)s")
     optional_vep.add_argument("--vep_regulatory", action="store_true", help="Add VEP regulatory annotations (option '--regulatory') or non-coding interpretation, default: %(default)s")
     optional_vep.add_argument("--vep_gencode_all", action="store_true", help = "Consider all GENCODE transcripts with Variant Effect Predictor (VEP) (option '--gencode_basic' in VEP is used by default in PCGR).")
@@ -266,9 +266,13 @@ def run_pcgr(pcgr_paths, config_options):
         vep_vcfanno_annotated_vcf = re.sub(r"\.vcfanno", ".vcfanno.annotated", vep_vcfanno_vcf) + ".gz"
         vep_vcfanno_annotated_pass_vcf = re.sub(r"\.vcfanno", ".vcfanno.annotated.pass", vep_vcfanno_vcf) + ".gz"
         fasta_assembly = os.path.join(vep_dir, 'homo_sapiens', f'{pcgr_vars.VEP_VERSION}_{VEP_ASSEMBLY}', f'Homo_sapiens.{VEP_ASSEMBLY}.dna.primary_assembly.fa.gz')
+        ancestor_assembly = os.path.join(vep_dir, 'homo_sapiens', f'{pcgr_vars.VEP_VERSION}_{VEP_ASSEMBLY}', f'human_ancestor.fa.gz')
+
+        plugins_in_use = "NearestExonJB, LoF"
+
         # List all VEP flags used when calling VEP
         vep_flags = (
-                f'--hgvs --af --af_1kg --af_gnomad --variant_class --domains --symbol --protein --ccds --mane '
+                f'--hgvs --af_gnomad --variant_class --domains --symbol --protein --ccds --mane '
                 f'--uniprot --appris --biotype --tsl --canonical --format vcf --cache --numbers --total_length --allele_number '
                 f'--no_stats --no_escape --xref_refseq --vcf --check_ref --dont_skip --flag_pick_allele_gene --plugin NearestExonJB,max_range=50000 '
                 f'--force_overwrite --species homo_sapiens --offline'
@@ -279,16 +283,22 @@ def run_pcgr(pcgr_paths, config_options):
                 f'--buffer_size {config_options["other"]["vep_buffer_size"]} '
                 f'--fork {config_options["other"]["vep_n_forks"]} '
                 f'{vep_flags} '
-                f'{"--verbose" if debug else "--quiet"} '
+                f'{"--verbose" if debug else "--quiet"}'
                 )
         gencode_set_in_use = "GENCODE - all transcripts"
         if config_options['other']['vep_no_intergenic'] == 1:
-            vep_options += '--no_intergenic '
+            vep_options += ' --no_intergenic'
         if config_options['other']['vep_regulatory'] == 1:
-            vep_options += '--regulatory '
+            vep_options += ' --regulatory'
         if config_options['other']['vep_gencode_all'] == 0:
-            vep_options += '--gencode_basic '
+            vep_options += ' --gencode_basic'
             gencode_set_in_use = "GENCODE - basic transcript set (--gencode_basic)"
+
+        ## LOFTEE plugin - variant loss-of-function annotation        
+        loftee_dir = utils.get_loftee_dir()
+        assert os.path.isdir(loftee_dir), f'LoF VEP plugin is not found in {loftee_dir}. Please make sure you installed pcgr conda package and have corresponding conda environment active.'
+        vep_options += f" --plugin LoF,loftee_path:{loftee_dir},human_ancestor_fa:{ancestor_assembly},use_gerp_end_trunc:0 --dir_plugins {loftee_dir}"
+
 
         # Compose full VEP command
         vep_main_command = f'{utils.get_perl_exports()} && vep --input_file {input_vcf_pcgr_ready} --output_file {vep_vcf} {vep_options}'
@@ -306,6 +316,7 @@ def run_pcgr(pcgr_paths, config_options):
         logger.info(f'VEP configuration - skip intergenic: {"TRUE" if config_options["other"]["vep_no_intergenic"] else "FALSE"}')
         logger.info(f'VEP configuration - regulatory annotation: {vep_regulatory_annotation}')
         logger.info(f'VEP configuration - buffer_size/number of forks: {config_options["other"]["vep_buffer_size"]}/{config_options["other"]["vep_n_forks"]}')
+        logger.info(f'VEP - plugins in use: {plugins_in_use}')
 
         check_subprocess(logger, vep_main_command, debug)
         check_subprocess(logger, vep_bgzip_command, debug)
@@ -338,12 +349,12 @@ def run_pcgr(pcgr_paths, config_options):
                 f'--tcga --gene_transcript_xref --dbmts --gwas '
                 f'{"--debug --keep_logs" if debug else ""}'
                 )
-        anno_src_msg = (
-                f"Annotation sources: {'Panel-of-Normals, ' if panel_normal != 'None' else ''}ClinVar, dbNSFP, "
+        vcfanno_db_src_msg = (
+                f"Annotation sources (vcfanno): {'Panel-of-Normals, ' if panel_normal != 'None' else ''}ClinVar, dbNSFP, "
                 f"dbMTS, cancerhotspots.org, DoCM, TCGA, GWAS catalog, RepeatMasker, SimpleRepeats, WindowMaskerSDust, gnomAD non-cancer subset"
                 )
         logger.info("PCGR - STEP 2: Variant annotation for cancer precision medicine with pcgr-vcfanno")
-        logger.info(anno_src_msg)
+        logger.info(vcfanno_db_src_msg)
         if panel_normal != "None":
             pon_annotation = 1
             pcgr_vcfanno_command += f' --panel_normal_vcf {panel_normal}'
@@ -356,10 +367,19 @@ def run_pcgr(pcgr_paths, config_options):
         pcgr_summarise_command = (
                 f'pcgr_summarise.py {vep_vcfanno_vcf}.gz {pon_annotation} '
                 f'{config_options["other"]["vep_regulatory"]} {oncogenicity_annotation} '
-                f'{pcgr_paths["db_dir"]} '
+                f'{config_options["tumor_type"]["type"]} {config_options["other"]["vep_pick_order"]} {pcgr_paths["db_dir"]} '
                 f'{"--debug" if debug else ""}'
                 )
-        logger.info("PCGR - STEP 3: Cancer gene annotations with pcgr-summarise")
+        summarise_db_src_msg = (
+                f"Annotation sources: cancerhotspots.org, CIViC, Cancer Biomarkers database (CGI), Cancer Gene Census (CGC), "
+                f"Network of Cancer Genes (NCG), CancerMine, IntOGen, TCGA driver genes"
+                )
+
+        logger.info("PCGR - STEP 3: Variant and cancer gene annotations with pcgr-summarise")
+        logger.info(summarise_db_src_msg)
+        logger.info('Variant oncogenicity classification according to ClinGen/VICC recommendations (Horak et al., Genet Med, 2022)')
+        logger.info('Variant biomarker matching (CIViC, CGI) at multiple resolutions (genes, exons, amino acid positions, exact)')
+        logger.info('Tumor suppressor/oncogene annotations based on multiple sources (NCG, CGC, CancerMine)')
         check_subprocess(logger, pcgr_summarise_command, debug)
 
         # PCGR|clean - move output files and clean up temporary files

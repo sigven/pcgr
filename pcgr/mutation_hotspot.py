@@ -8,7 +8,10 @@ from pcgr.annoutils import threeToOneAA
 
 def load_mutation_hotspots(hotspots_fname, logger):
 
-   ## load cancer hotspot entries from 'misc/tsv/hotspot/hotspot.tsv.gz' (provided by github.com/sigven/cancerHotspots)
+   """
+   Function that load cancer mutational hotspot entries from data bundle
+   - 'misc/tsv/hotspot/hotspot.tsv.gz' (provided by github.com/sigven/cancerHotspots)
+   """
 
    hotspots = {} ##dictionary to return
    mutation_hotspots = {}
@@ -34,6 +37,10 @@ def load_mutation_hotspots(hotspots_fname, logger):
 
 
 def match_csq_mutation_hotspot(transcript_csq_elements, cancer_hotspots, rec, principal_csq_properties):
+
+   """
+   Function that matches consequence entries from VEP (transcript_csq_elements) with entries in mutation hotspots
+   """
 
    unique_hotspot_mutations = {}
    unique_hotspot_codons = {}

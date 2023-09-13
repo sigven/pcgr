@@ -115,8 +115,8 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
       "SYMBOL",
       "ONCOGENE",
       "ONCOGENE_EVIDENCE",
-      "TUMOR_SUPPRESSOR",
-      "TUMOR_SUPPRESSOR_EVIDENCE",
+      "TSG",
+      "TSG_EVIDENCE",
       "LoF",
       "INTRON_POSITION",
       "EXON_POSITION",
@@ -143,7 +143,7 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
    variant_data = {}
    for col in required_oncogenicity_vars:
       if rec.INFO.get(col) is None:
-         if col == "TUMOR_SUPPRESSOR" or col == "ONCOGENE":
+         if col == "TSG" or col == "ONCOGENE":
             variant_data[col] = False
          elif col == "LoF":
             variant_data['LOSS_OF_FUNCTION'] = False
@@ -284,20 +284,20 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
          variant_data["CLINGEN_VICC_OP4"] = True
     
    ## check if variant is a loss-of-function variant (LOFTEE) in a tumor suppressor gene (Cancer Gene Census/CancerMine)
-   if "TUMOR_SUPPRESSOR" in variant_data.keys() and \
+   if "TSG" in variant_data.keys() and \
       "ONCOGENE" in variant_data.keys() and \
       "LOSS_OF_FUNCTION" in variant_data.keys() and \
       "Consequence" in variant_data.keys():
 
-      if variant_data['LOSS_OF_FUNCTION'] is True and variant_data['TUMOR_SUPPRESSOR'] is True:
+      if variant_data['LOSS_OF_FUNCTION'] is True and variant_data['TSG'] is True:
          variant_data['CLINGEN_VICC_OVS1'] = True
   
       ## check if variant is creating a stop-lost or protein-length change in oncogene/tumor suppressor genes
       if variant_data['CLINGEN_VICC_OVS1'] is False and \
          ((re.match(r'^(inframe_deletion|inframe_insertion)', variant_data['Consequence']) and \
-            (variant_data['TUMOR_SUPPRESSOR'] is True or variant_data['ONCOGENE'] is True)) or \
+            (variant_data['TSG'] is True or variant_data['ONCOGENE'] is True)) or \
          (re.match(r'^(stop_lost)', variant_data['Consequence']) and \
-            variant_data['TUMOR_SUPPRESSOR'] is True)):
+            variant_data['TSG'] is True)):
             variant_data['CLINGEN_VICC_OM2'] = True
    
    ## check if variant is silent (synonymous|splice) and outside critical splice region
@@ -393,25 +393,25 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
                   else:
                      variant_data[e] = f'{variant_data[e]}|{code}'
 
-   lb_upper_limit = -1
-   lb_lower_limit = -6
-   b_upper_limit = -7
+   likely_benign_upper_limit = -1
+   likely_benign_lower_limit = -6
+   benign_upper_limit = -7
    #vus_lower_limit = 0
    #vus_upper_limit = 4
-   lo_lower_limit = 6
-   lo_upper_limit = 9
-   o_lower_limit = 10
+   likely_oncogenic_lower_limit = 6
+   likely_oncogenic_upper_limit = 9
+   oncogenic_lower_limit = 10
 
    variant_data['ONCOGENICITY_SCORE'] = onc_score_benign + onc_score_pathogenic
-   if variant_data['ONCOGENICITY_SCORE'] <= lb_upper_limit and \
-      variant_data['ONCOGENICITY_SCORE'] >= lb_lower_limit:
+   if variant_data['ONCOGENICITY_SCORE'] <= likely_benign_upper_limit and \
+      variant_data['ONCOGENICITY_SCORE'] >= likely_benign_lower_limit:
       variant_data['ONCOGENICITY_CLASSIFICATION'] = "Likely_Benign"
-   if variant_data['ONCOGENICITY_SCORE'] >= lo_lower_limit and \
-      variant_data['ONCOGENICITY_SCORE'] <= lo_upper_limit:
+   if variant_data['ONCOGENICITY_SCORE'] >= likely_oncogenic_lower_limit and \
+      variant_data['ONCOGENICITY_SCORE'] <= likely_oncogenic_upper_limit:
       variant_data['ONCOGENICITY_CLASSIFICATION'] = "Likely_Oncogenic"
-   if variant_data['ONCOGENICITY_SCORE'] <= b_upper_limit:
+   if variant_data['ONCOGENICITY_SCORE'] <= benign_upper_limit:
       variant_data['ONCOGENICITY_CLASSIFICATION'] = "Benign"
-   if variant_data['ONCOGENICITY_SCORE'] >= o_lower_limit:
+   if variant_data['ONCOGENICITY_SCORE'] >= oncogenic_lower_limit:
       variant_data['ONCOGENICITY_CLASSIFICATION'] = "Oncogenic"
    
    for e in ['ONCOGENICITY_SCORE',

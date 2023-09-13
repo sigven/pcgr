@@ -291,22 +291,24 @@ def assign_cds_exon_intron_annotations(csq_record):
     csq_record['CDS_CHANGE'] = '.'
     csq_record['HGVSp_short'] = '.'
 
-    coding_csq_pattern = r"^(stop_|start_lost|frameshift_|missense_|splice_donor|splice_acceptor|protein_altering|inframe_)"
-    wes_csq_pattern = r"^(stop_|start_lost|frameshift_|missense_|splice_donor|splice_acceptor|inframe_|protein_altering|synonymous)"
-    null_pattern = r"^(stop_|frameshift_)"
-    if re.match(coding_csq_pattern, str(csq_record['Consequence'])):
+    coding_csq_pattern = r"(stop_(lost|gained)|start_lost|frameshift_|missense_|splice_(donor|acceptor)|protein_altering|inframe_)"
+    wes_csq_pattern = r"(stop_(lost|gained)|start_lost|frameshift_|missense_|splice_(donor|acceptor)|protein_altering|inframe_|synonymous|(start|stop)_retained)"
+    null_pattern = r"(stop_gained|frameshift_)"
+    splice_region_pattern = r"(splice_|intron_variant)"
+    splice_donor_pattern = r"(splice_region_variant|splice_donor_variant|splice_donor_region_variant|splice_donor_5th_base_variant)"
+    if re.search(coding_csq_pattern, str(csq_record['Consequence'])) is not None:
         csq_record['CODING_STATUS'] = 'coding'
 
-    if re.match(wes_csq_pattern, str(csq_record['Consequence'])):
+    if re.search(wes_csq_pattern, str(csq_record['Consequence'])) is not None:
         csq_record['EXONIC_STATUS'] = 'exonic'
 
-    if re.match(null_pattern, str(csq_record['Consequence'])):
+    if re.search(null_pattern, str(csq_record['Consequence'])) is not None:
         csq_record['NULL_VARIANT'] = True
-
-    if re.match(r"^splice_region_variant", str(csq_record['Consequence'])) and re.search(r'(\+3(A|G)>|\+4G>|\+5G>)', str(csq_record['HGVSc'])):
+    
+    if re.search(splice_donor_pattern, str(csq_record['Consequence'])) is not None and re.search(r'(\+3(A|G)>|\+4A>|\+5G>)', str(csq_record['HGVSc'])) is not None:
         csq_record['SPLICE_DONOR_RELEVANT'] = True
 
-    if re.match(r"splice_region_variant|intron_variant", str(csq_record['Consequence'])):
+    if re.search(splice_region_pattern, str(csq_record['Consequence'])) is not None:
         match = re.search(
             r"((-|\+)[0-9]{1,}(dup|del|inv|((ins|del|dup|inv|delins)(A|G|C|T){1,})|(A|C|T|G){1,}>(A|G|C|T){1,}))$", str(csq_record['HGVSc']))
         if match is not None:
@@ -317,7 +319,7 @@ def assign_cds_exon_intron_annotations(csq_record):
 
     if 'NearestExonJB' in csq_record.keys():
         if not csq_record['NearestExonJB'] is None:
-            if re.match(r"synonymous_|missense_|stop_|inframe_|start_", str(csq_record['Consequence'])) and str(csq_record['NearestExonJB']) != "":
+            if re.search(r"synonymous_|missense_|stop_|inframe_|start_", str(csq_record['Consequence'])) is not None and str(csq_record['NearestExonJB']) != "":
                 exon_pos_info = csq_record['NearestExonJB'].split("+")
                 if len(exon_pos_info) == 4:
                     if utils.is_integer(exon_pos_info[1]) and str(exon_pos_info[2]) == "end":
@@ -325,15 +327,18 @@ def assign_cds_exon_intron_annotations(csq_record):
                     if utils.is_integer(exon_pos_info[1]) and str(exon_pos_info[2]) == "start":
                         csq_record['EXON_POSITION'] = int(exon_pos_info[1])
 
-    
     if not csq_record['HGVSc'] is None:
         if csq_record['HGVSc'] != '.':
-            if 'splice_acceptor_variant' in csq_record['Consequence'] or 'splice_donor_variant' in csq_record['Consequence']:
+            if 'splice_acceptor_variant' in csq_record['Consequence'] or 'splice_donor_variant' in csq_record['Consequence'] \
+                or 'splice_donor_5th_base_variant' in csq_record['Consequence'] or 'splice_region_variant' in csq_record['Consequence'] \
+                    or 'splice_polypyrimidine_tract_variant' in csq_record['Consequence']:
                 key = str(csq_record['Consequence']) + \
                     ':' + str(csq_record['HGVSc'])
                 csq_record['CDS_CHANGE'] = key
+
     if csq_record['Amino_acids'] is None or csq_record['Protein_position'] is None or csq_record['Consequence'] is None:
         return
+    
     if not csq_record['Protein_position'] is None:
         if csq_record['Protein_position'].startswith('-'):
             return
@@ -389,8 +394,7 @@ def assign_cds_exon_intron_annotations(csq_record):
     if not csq_record['HGVSc'] is None:
         if csq_record['HGVSc'] != '.':
             if protein_change != '.':
-                key = str(csq_record['Consequence']) + ':' + str(csq_record['HGVSc']
-                                                                 ) + ':exon' + str(exon_number) + ':' + str(protein_change)
+                key = str(csq_record['Consequence']) + ':' + str(csq_record['HGVSc']) + ':exon' + str(exon_number) + ':' + str(protein_change)
                 csq_record['CDS_CHANGE'] = key
 
     return
@@ -411,222 +415,3 @@ def make_transcript_xref_map(rec, fieldmap, xref_tag='GENE_TRANSCRIPT_XREF'):
                     transcript_xref_map[ensembl_transcript_id][annotation] = xrefs[annotation_index]
 
     return (transcript_xref_map)
-
-
-def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, logger, pick_only=True, csq_identifier='CSQ', debug = 0):
-
-    all_csq_pick = []
-    all_transcript_consequences = []
-
-    varkey = str(rec.CHROM) + '_' + str(rec.POS) + '_' + str(rec.REF) + '_' + str(','.join(rec.ALT))
-
-    for csq in rec.INFO.get(csq_identifier).split(','):
-        csq_fields = csq.split('|')
-
-        entrezgene = '.'
-
-        ## Entrez gene identifier is not provided directly by VEP, pull out this from 'transcript_xref_map' for a given transcript-specific CSQ block
-        ##  - used for 'consequence_entry' object that are added to 'vep_all_csq' array
-        k = 0
-        while(k < len(csq_fields)):
-            if k in vep_csq_fields_map['index2field']:
-                if vep_csq_fields_map['index2field'][k] == 'Feature':
-                    ensembl_transcript_id = csq_fields[k]
-                    if ensembl_transcript_id != '' and ensembl_transcript_id.startswith('ENST'):
-                        if ensembl_transcript_id in transcript_xref_map.keys():
-                            if 'ENTREZGENE' in transcript_xref_map[ensembl_transcript_id].keys():
-                                entrezgene = transcript_xref_map[ensembl_transcript_id]['ENTREZGENE']
-            k = k + 1
-        
-        
-        if pick_only is False:
-            j = 0
-            csq_record = {}
-
-            while (j < len(csq_fields)):
-                if j in vep_csq_fields_map['index2field']:
-                    if csq_fields[j] != '':
-                        csq_record[vep_csq_fields_map['index2field'][j]] = str(csq_fields[j])
-                j = j + 1
-            all_csq_pick.append(csq_record)
-
-        else:
-            # loop over VEP consequence blocks PICK'ed according to VEP's ranking scheme
-            # only consider the primary/picked consequence when expanding with annotation tags
-            if csq_fields[vep_csq_fields_map['field2index']['PICK']] == "1":
-                j = 0
-                csq_record = {}
-
-                #print(str(rec.CHROM) + '\t' + str(rec.POS) + '\t' + str(rec.REF) + '\t' + str(','.join(rec.ALT)) + '\t' + csq_fields[1] + '\t' + csq_fields[3]+ '\t' + csq_fields[11])
-                ensembl_transcript_id = '.'
-                # loop over block annotation elements (separated with '|'), and assign their values to the csq_record dictionary object
-                while (j < len(csq_fields)):
-                    if j in vep_csq_fields_map['index2field']:
-                        
-                        ## consider non-empty CSQ fields
-                        if csq_fields[j] != '':
-                            csq_record[vep_csq_fields_map['index2field'][j]] = str(csq_fields[j])
-                            if vep_csq_fields_map['index2field'][j] == 'Feature':
-                                ensembl_transcript_id = str(csq_fields[j])
-                                if ensembl_transcript_id in transcript_xref_map:
-                                    for annotation in transcript_xref_map[ensembl_transcript_id].keys():
-                                        if annotation != 'SYMBOL':
-                                            # assign additional gene/transcript annotations from the custom transcript xref map (PCGR/CPSR) as key,value pairs in the csq_record object
-                                            csq_record[annotation] = transcript_xref_map[ensembl_transcript_id][annotation]
-                                else:
-                                    if re.match(r'ENST', ensembl_transcript_id):
-                                        logger.warning(
-                                            'Could not find transcript xrefs for ' + str(ensembl_transcript_id))
-
-                            # Specifically assign PFAM protein domain as a csq_record key
-                            if vep_csq_fields_map['index2field'][j] == 'DOMAINS':
-                                domain_identifiers = str(
-                                    csq_fields[j]).split('&')
-                                for v in domain_identifiers:
-                                    if v.startswith('Pfam'):
-                                        csq_record['PFAM_DOMAIN'] = str(
-                                            re.sub(r'\.[0-9]{1,}$', '', re.sub(r'Pfam:', '', v)))
-
-                                csq_record['DOMAINS'] = None
-
-                            # Assign COSMIC/DBSNP mutation ID's as individual key,value pairs in the csq_record object
-                            if vep_csq_fields_map['index2field'][j] == 'Existing_variation':
-                                var_identifiers = str(csq_fields[j]).split('&')
-                                cosmic_identifiers = []
-                                dbsnp_identifiers = []
-                                for v in var_identifiers:
-                                    if v.startswith('COSV'):
-                                        cosmic_identifiers.append(v)
-                                    if v.startswith('COSM'):
-                                        cosmic_identifiers.append(v)
-                                    if v.startswith('rs'):
-                                        dbsnp_identifiers.append(v)
-                                if len(cosmic_identifiers) > 0:
-                                    csq_record['COSMIC_MUTATION_ID'] = '&'.join(
-                                        cosmic_identifiers)
-                                if len(dbsnp_identifiers) > 0:
-                                    csq_record['DBSNPRSID'] = '&'.join(
-                                        dbsnp_identifiers)
-                        else:                            
-                            csq_record[vep_csq_fields_map['index2field'][j]] = None
-                    j = j + 1
-                
-                ## if VEP/Ensembl does not provide a symbol, use symbol provided by PCGR/CPSR gene_transcript_xref map
-                if csq_record['SYMBOL'] is None and ensembl_transcript_id != ".":
-                    if ensembl_transcript_id in transcript_xref_map:
-                        csq_record['SYMBOL'] = transcript_xref_map[ensembl_transcript_id]['SYMBOL']
-
-                # Assign coding status, protein change, coding sequence change, last exon/intron status etc as VCF info tags
-                assign_cds_exon_intron_annotations(csq_record)
-                # Append transcript consequence to all_csq_pick
-                # print(csq_record)
-                all_csq_pick.append(csq_record)
-            symbol = "."
-            hgvsc = "."
-            hgvsp = "."
-            exon = "."
-            if csq_fields[vep_csq_fields_map['field2index']['EXON']] != "":
-                if "/" in csq_fields[vep_csq_fields_map['field2index']['EXON']]:
-                    exon = str(csq_fields[vep_csq_fields_map['field2index']['EXON']].split('/')[0])
-            if csq_fields[vep_csq_fields_map['field2index']['SYMBOL']] != "":
-                symbol = str(csq_fields[vep_csq_fields_map['field2index']['SYMBOL']])
-            if csq_fields[vep_csq_fields_map['field2index']['HGVSc']] != "":
-                hgvsc = str(csq_fields[vep_csq_fields_map['field2index']['HGVSc']].split(':')[1])
-            if csq_fields[vep_csq_fields_map['field2index']['HGVSp']] != "":
-                hgvsp = str(csq_fields[vep_csq_fields_map['field2index']['HGVSp']].split(':')[1])
-            consequence_entry = (str(csq_fields[vep_csq_fields_map['field2index']['Consequence']]) + ":" +  
-                str(symbol) + ":" + 
-                str(entrezgene) + ":" +
-                str(hgvsc) + ":" + 
-                str(hgvsp) + ":" + 
-                str(exon) + ":" +
-                str(csq_fields[vep_csq_fields_map['field2index']['Feature_type']]) + ":" + 
-                str(csq_fields[vep_csq_fields_map['field2index']['Feature']]) + ":" + 
-                str(csq_fields[vep_csq_fields_map['field2index']['BIOTYPE']]))
-            all_transcript_consequences.append(consequence_entry)
-
-  
-    vep_chosen_csq_idx = 0
-    vep_csq_results = {}
-    vep_csq_results['picked_gene_csq'] = all_csq_pick
-    vep_csq_results['all_csq'] = all_transcript_consequences
-    vep_csq_results['picked_csq'] = None
-
-    ## IF multiple transcript-specific variant consequences highlighted by --pick_allele_gene , 
-    ## prioritize/choose block of consequence which has
-    ## - A gene with BIOTYPE equal to 'protein-coding' (the other picked transcript/gene may potentialy carry another BIOTYPE nature)
-    ## - A gene consequence classified as 'exonic' (the other picked transcript/gene likely carries a nonexonic consequence)
-    if len(vep_csq_results['picked_gene_csq']) > 0:
-        vep_selected_idx = {}
-        vep_selected_idx['exonic_status'] = {}
-        vep_selected_idx['consequence'] = {}
-
-        i = 0
-        picked_blocks = []
-
-        #print('')
-        for trans_rec in vep_csq_results['picked_gene_csq']:
-
-            if debug:
-                biotype = '.'
-                consequence = '.'
-                exonic_status = '.'
-                genesymbol = '.'
-                distance = '.'
-                feature = '.'
-                if not trans_rec['Consequence'] is None:
-                    consequence = trans_rec['Consequence']
-                if not trans_rec['SYMBOL'] is None:
-                    genesymbol = trans_rec['SYMBOL']
-                if not trans_rec['BIOTYPE'] is None:
-                    biotype = trans_rec['BIOTYPE']
-                if not trans_rec['EXONIC_STATUS'] is None:
-                    exonic_status = trans_rec['EXONIC_STATUS']
-                if not trans_rec['DISTANCE'] is None:
-                    distance = trans_rec['DISTANCE']
-                if not trans_rec['Feature'] is None:
-                    feature = trans_rec['Feature']
-                block = str(genesymbol) + ':' + str(feature) + ':' + str(consequence) + ':' + str(distance) + ':' + str(biotype) + ':' + str(exonic_status)
-                picked_blocks.append(block)
-
-            if 'BIOTYPE' in trans_rec and 'Consequence' in trans_rec and 'EXONIC_STATUS' in trans_rec:
-                if not trans_rec['BIOTYPE'] is None and not trans_rec['Consequence'] is None:
-                    if trans_rec['BIOTYPE'] == "protein_coding":
-                        ## for protein-coding genes - record the exonic variant consequence status (exonic/nonexonic), and the consequence
-                        vep_selected_idx['exonic_status'][i] = trans_rec['EXONIC_STATUS']
-                        vep_selected_idx['consequence'][i] = trans_rec['Consequence']
-                        #print(str(i) + '\t' + str(trans_rec['SYMBOL']) + '\t' + str(vep_selected_idx['exonic_status'][i]) + '\t'  + str(vep_selected_idx['consequence'][i]))
-            i = i + 1
-        
-        if debug:
-            print(str(varkey) + " - picked CSQ blocks: " + ' /// '.join(picked_blocks))
-
-            
-        ## when multiple transcript gene blocks are picked by VEP, prioritize the block with 'exonic' consequence
-        if len(vep_selected_idx['exonic_status'].keys()) > 1:
-            exonic_cons_found = 0
-            for j in vep_selected_idx['exonic_status'].keys():
-                ## This should happen at most once (i.e. variants hitting two different (picked) gene transcripts with exonic consequence should not happen)
-                if vep_selected_idx['exonic_status'][j] == 'exonic':
-                    exonic_cons_found = 1
-                    vep_chosen_csq_idx = j
-
-            ## if multiple non-exonic variants are found, prioritize UTR variants over other nonexonic
-            if exonic_cons_found == 0:
-                for j in vep_selected_idx['consequence'].keys():
-                    if vep_selected_idx['consequence'][j] == '5_prime_UTR_variant' or vep_selected_idx['consequence'][j] == '3_prime_UTR_variant':                  
-                        vep_chosen_csq_idx = j
-
-        else:
-            if len(vep_selected_idx['exonic_status'].keys()) == 1:
-                for k in vep_selected_idx['exonic_status'].keys():
-                    vep_chosen_csq_idx = k
-      
-        vep_csq_results['picked_csq'] = vep_csq_results['picked_gene_csq'][vep_chosen_csq_idx]
-        #print('Final index: ' + str(vep_csq_results['picked_csq']['Consequence'] + '\t' + str(vep_csq_results['picked_csq']['EXONIC_STATUS'])))
-
-    else:
-        logger.info('ERROR: No VEP block chosen by --pick_allele_gene')
-
-
-    return (vep_csq_results)

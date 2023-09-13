@@ -122,7 +122,7 @@ def run_vcfanno(num_processes, query_vcf, vcfanno_tracks, query_info_tags, vcfhe
         infotags[track] = infotags_vcfanno.keys()
         for tag in infotags_vcfanno:
             if tag in query_info_tags:
-                logger.warning("Query VCF has INFO tag " + str(t) + ' - this is also present in the ' + str(
+                logger.warning("Query VCF has INFO tag " + str(tag) + ' - this is also present in the ' + str(
                     track) + ' VCF/BED annotation file. This tag will be overwritten if not renamed in the query VCF')
             metadata_vcf_infotags[tag] = infotags_vcfanno[tag]
         

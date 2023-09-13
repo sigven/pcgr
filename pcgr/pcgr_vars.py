@@ -3,7 +3,7 @@
 from pcgr._version import __version__
 
 PCGR_VERSION = __version__
-DB_VERSION = '20230702'
+DB_VERSION = '20230902'
 VEP_VERSION = '105'
 GENCODE_VERSION = '39'
 NCBI_BUILD_MAF = 'GRCh38'
@@ -93,3 +93,50 @@ GE_panels = {
 }
 
 panels = '\n'.join([f'{k} = {GE_panels[k]}' for k in GE_panels]) # for displaying in help
+
+## https://www.ensembl.org/info/genome/variation/prediction/predicted_data.html#consequences
+VEP_consequence_rank = {
+
+    'transcript_ablation': 1,
+    'splice_acceptor_variant': 2,
+    'splice_donor_variant': 3,
+    'stop_gained': 4,
+    'frameshift_variant': 5,
+    'stop_lost': 6,
+    'start_lost' : 7,
+    'transcript_amplification': 8,
+    'feature_elongation': 9,
+    'feature_truncation': 10,
+    'inframe_insertion': 11,
+    'inframe_deletion': 12,
+    'missense_variant': 13,
+    'protein_altering_variant': 14,
+    'splice_donor_5th_base_variant': 15,
+    'splice_region_variant': 16,
+    'splice_donor_region_variant': 17,
+    'splice_polypyrimidine_tract_variant': 18,
+    'incomplete_terminal_codon_variant': 19,
+    'start_retained_variant': 20,
+    'stop_retained_variant': 21,
+    'synonymous_variant': 22,
+    'coding_sequence_variant': 23,
+    'mature_miRNA_variant': 24,
+    '5_prime_UTR_variant': 25,
+    '3_prime_UTR_variant': 26,
+    'non_coding_transcript_exon_variant': 27,
+    'intron_variant': 28,
+    'NMD_transcript_variant': 29,
+    'non_coding_transcript_variant': 30,
+    'coding_transcript_variant': 31,
+    'upstream_gene_variant': 32,
+    'downstream_gene_variant': 33,
+    'TFBS_ablation': 34,
+    'TFBS_amplification': 35,
+    'TF_binding_site_variant': 36,
+    'regulatory_binding_ablation': 37,
+    'regulatory_region_amplification': 38,
+    'regulatory_region_variant': 39,
+    'intergenic_variant': 40,
+    'sequence_variant': 41
+}
+

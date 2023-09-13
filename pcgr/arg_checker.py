@@ -181,7 +181,7 @@ def check_args(arg_dict):
 
         if num_permitted_sources != 8:
             err_msg = (f"'--vep_pick_order' = {arg_dict['vep_pick_order']} is formatted incorrectly, should be "
-                "a comma-separated string of the following values: canonical,appris,tsl,biotype,ccds,rank,length,mane")
+                "a comma-separated string of the following values: mane,canonical,appris,tsl,biotype,ccds,rank,length")
             error_message(err_msg, logger)
     return
 

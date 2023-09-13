@@ -8,8 +8,6 @@ from pcgr.annoutils import threeToOneAA
 
 def load_biomarkers(logger, biomarker_variant_fname, biomarker_clinical_fname):
 
-   ## load actionable cancer variants from 'variant.tsv.gz' (provided by github.com/sigven/cancerHotspots)
-
    variant_biomarkers = {} ##dictionary to return
    for variant_alias_type in ['dbsnp','hgvsp','hgvsc','genomic','exon','other','aa_region']:
       variant_biomarkers[variant_alias_type] = {}
@@ -18,7 +16,7 @@ def load_biomarkers(logger, biomarker_variant_fname, biomarker_clinical_fname):
       logger.info("ERROR: File '" + str(biomarker_clinical_fname) + "' does not exist - exiting")
       exit(1)
    
-
+   ## load actionable cancer variants from 'variant.tsv.gz'
    variant_to_clinical_evidence = {}
    variant_to_origin = {}
    with gzip.open(biomarker_clinical_fname, mode='rt') as f:
@@ -216,6 +214,8 @@ def match_csq_biomarker(transcript_csq_elements, variant_biomarkers, rec, princi
                hits_hgvsc = variant_biomarkers['hgvsc'][hgvsc_biomarker_key]
                for hit_hgvsc in hits_hgvsc:
                   hgvsc_hit = f"{hit_hgvsc['biomarker_source']}|{hit_hgvsc['variant_origin']}|{hit_hgvsc['variant_id']}|{hit_hgvsc['clinical_evidence_items_id']}"
+                  if not hgvsc_hit in biomarker_hits_all.keys():
+                        biomarker_hits_all[hgvsc_hit] = {}
                   if principal_csq_hgvsc is True:
                      biomarker_hits_all[hgvsc_hit]['by_hgvsc_principal'] = 1
                   else:
