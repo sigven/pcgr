@@ -168,22 +168,23 @@ def pick_single_gene_csq(vep_csq_results, logger, pick_criteria_ordered = "mane,
 
 def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, vep_pick_order, logger, pick_only=True, csq_identifier='CSQ', debug = 0):
 
-
     """
     Function that parses the comma-separated CSQ elements found in the rec.INFO object (VCF)
     - creates an individual CSQ record for all transcript-specific elements provided as comma-separated elements in the CSQ tag
     - each individual record is gathered as a dictionary of properties (defined by vep_csq_field_map), i.e.
     - 'CSQ=A|missense_variant|KRAS++' in the VCF INFO element gives csq_record['Consequence'] = 'missense_variant', 
        csq_record['SYMBOL'] = 'KRAS' etc. 
-    - if argument 'pick_only' is TRUE, 
+    - if argument 'pick_only' is TRUE, only elements with 'PICK' == 1' is chosen
     """
+    
     all_csq_pick = []
     all_transcript_consequences = []
 
     varkey = str(rec.CHROM) + '_' + str(rec.POS) + '_' + str(rec.REF) + '_' + str(','.join(rec.ALT))
 
     ## Retrieve the INFO element provided by VEP (default 'CSQ') in the VCF object, and 
-    ## loop through all transcript-specific consequence blocks provided, e.g. CSQ=A|intron_variant|||..,A|splice_region_variant|||, and so on.
+    ## loop through all transcript-specific consequence blocks provided, e.g. 
+    #  CSQ=A|intron_variant|||.., A|splice_region_variant|||, and so on.
     for csq in rec.INFO.get(csq_identifier).split(','):
         csq_fields = csq.split('|')
 

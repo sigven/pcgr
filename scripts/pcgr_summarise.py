@@ -194,7 +194,8 @@ def extend_vcf_annotations(arg_dict, logger):
         if arg_dict['oncogenicity_annotation'] == 1:
             assign_oncogenicity_evidence(rec, tumortype = arg_dict['tumortype'])
 
-        del rec.INFO['GENE_TRANSCRIPT_XREF']
+        if 'GENE_TRANSCRIPT_XREF' in rec.INFO:
+            del rec.INFO['GENE_TRANSCRIPT_XREF']
         w.write_record(rec)
     if vars_no_csq:
         logger.warning(f"There were {len(vars_no_csq)} records with no CSQ tag from VEP (was --vep_no_intergenic flag set?). Skipping them and showing (up to) the first 100:")
