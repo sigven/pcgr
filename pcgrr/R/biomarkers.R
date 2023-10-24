@@ -500,6 +500,7 @@ match_eitems_to_var <- function(sample_calls,
   }
 
   var_eitems <- list()
+  var_eitems[['all']] <- data.frame()
   #var_eitems_exact <- data.frame()
 
   assertable::assert_colnames(
@@ -574,7 +575,7 @@ match_eitems_to_var <- function(sample_calls,
           }
 
           if(NROW(var_eitems_hgvs_mapped) > 0){
-            var_eitems[['all']] <- var_eitems_exact %>%
+            var_eitems[['all']] <- var_eitems[['all']] %>%
               dplyr::bind_rows(var_eitems_hgvs_mapped) %>%
               dplyr::distinct()
           }
@@ -600,45 +601,51 @@ match_eitems_to_var <- function(sample_calls,
 
       colset <- c('AA_CODON', colset)
 
-      vars_codon_mapped <- sample_calls %>%
-        dplyr::filter(
-          !is.na(.data$PROTEIN_CHANGE) &
-            !is.na(AMINO_ACID_START) &
-            !is.na(AMINO_ACID_END) &
-            !is.na(Amino_acids) &
-            AMINO_ACID_START == AMINO_ACID_END) |>
-        dplyr::mutate(
-          AA_CODON = paste0(
-            stringr::str_replace(
-              Amino_acids, "/([A-Z]|\\*)$",""
-            ), AMINO_ACID_START
-          )) |>
-        dplyr::select(dplyr::one_of(colset))
+      if("Amino_acids" %in% colnames(sample_calls) &
+         "AMINO_ACID_START" %in% colnames(sample_calls) &
+         "AMINO_ACID_END" %in% colnames(sample_calls) &
+         "PROTEIN_CHANGE" %in% colnames(sample_calls)){
 
-      if(NROW(vars_codon_mapped) > 0){
-        var_eitems_codon_mapped <- as.data.frame(
-          vars_codon_mapped %>%
-            dplyr::inner_join(
-              eitems_hgvs_codon, by = c("SYMBOL","AA_CODON")) %>%
-            dplyr::distinct() %>%
-            pcgrr::remove_cols_from_df(
-              cnames = evidence_identifiers)
-        )
+        vars_codon_mapped <- sample_calls %>%
+          dplyr::filter(
+            !is.na(.data$PROTEIN_CHANGE) &
+              !is.na(.data$AMINO_ACID_START) &
+              !is.na(.data$AMINO_ACID_END) &
+              !is.na(.data$Amino_acids) &
+              .data$AMINO_ACID_START == .data$AMINO_ACID_END) |>
+          dplyr::mutate(
+            AA_CODON = paste0(
+              stringr::str_replace(
+                .data$Amino_acids, "/([A-Z]|\\*)$",""
+              ), .data$AMINO_ACID_START
+            )) |>
+          dplyr::select(dplyr::one_of(colset))
 
-        ## skip duplicate evidence items already found from
-        ## exact matching at genomic level
-        if(nrow(var_eitems_codon_mapped) > 0){
-          if(NROW(var_eitems[['by_id']]) > 0){
-            var_eitems_codon_mapped <- var_eitems_codon_mapped %>%
-              dplyr::select(-c("AA_CODON")) |>
-              dplyr::anti_join(
-                var_eitems[['by_id']],
-                by = c("GENOMIC_CHANGE","BIOMARKER_MAPPING"))
+        if(NROW(vars_codon_mapped) > 0){
+          var_eitems_codon_mapped <- as.data.frame(
+            vars_codon_mapped %>%
+              dplyr::inner_join(
+                eitems_hgvs_codon, by = c("SYMBOL","AA_CODON")) %>%
+              dplyr::distinct() %>%
+              pcgrr::remove_cols_from_df(
+                cnames = evidence_identifiers)
+          )
+
+          ## skip duplicate evidence items already found from
+          ## exact matching at genomic level
+          if(nrow(var_eitems_codon_mapped) > 0){
+            if(NROW(var_eitems[['by_id']]) > 0){
+              var_eitems_codon_mapped <- var_eitems_codon_mapped %>%
+                dplyr::select(-c("AA_CODON")) |>
+                dplyr::anti_join(
+                  var_eitems[['by_id']],
+                  by = c("GENOMIC_CHANGE","BIOMARKER_MAPPING"))
+            }
+
+            var_eitems[['all']] <- var_eitems[['all']] %>%
+              dplyr::bind_rows(var_eitems_codon_mapped) %>%
+              dplyr::distinct()
           }
-
-          var_eitems[['all']] <- var_eitems[['all']] %>%
-            dplyr::bind_rows(var_eitems_codon_mapped) %>%
-            dplyr::distinct()
         }
       }
     }
