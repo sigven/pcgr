@@ -7,6 +7,8 @@ import os
 import time
 import errno
 import platform
+import string
+import random
 
 
 def getlogger(logger_name):
@@ -32,6 +34,11 @@ def error_message(message, logger):
 
 def warn_message(message, logger):
     logger.warning(message)
+    
+def random_string(length):
+    letters = string.ascii_lowercase
+    result_str = ''.join(random.choice(letters) for i in range(length))
+    return result_str
 
 def check_subprocess(logger, command, debug):
     if debug:
@@ -144,3 +151,45 @@ def safe_makedir(dname):
             num_tries += 1
             time.sleep(2)
     return dname
+
+def sort_bed(unsorted_bed_fname: str, sorted_bed_fname: str, debug = False, logger = None):
+    
+    ## Sort regions in target BED
+    if os.path.exists(unsorted_bed_fname) and os.stat(unsorted_bed_fname).st_size != 0:
+        cmd_sort_custom_bed1 = 'egrep \'^[0-9]\' ' + str(unsorted_bed_fname) + \
+            ' | sort -k1,1n -k2,2n -k3,3n > ' + str(sorted_bed_fname)
+        cmd_sort_custom_bed2 = 'egrep -v \'^[0-9]\' ' + str(unsorted_bed_fname) + \
+            ' | egrep \'^[XYM]\' | sort -k1,1 -k2,2n -k3,3n >> ' + str(sorted_bed_fname)
+
+        check_subprocess(logger, cmd_sort_custom_bed1, debug)
+        check_subprocess(logger, cmd_sort_custom_bed2, debug)
+        if not debug:
+            remove(str(unsorted_bed_fname))
+    else:
+        err_msg = 'File ' + str(unsorted_bed_fname) + ' does not exist or is empty'
+        error_message(err_msg, logger)
+
+
+def check_file_exists(fname: str, logger = None) -> bool:
+    err = 0
+    if not os.path.isfile(fname):
+        err = 1
+    else:
+        if os.stat(fname).st_size == 0:
+            err = 1
+    if err == 1:
+        err_msg = f"File {fname} does not exist or has zero size"
+        error_message(err_msg, logger)
+    
+    return(True)
+
+def check_tabix_file(fname: str, logger = None) -> bool:
+    tabix_file = os.path.abspath(f'{fname}.tbi')
+    if not os.path.exists(tabix_file):
+        err_msg = f"Tabix file (i.e. '.gz.tbi') is not present for the bgzipped VCF input file ({fname}" + \
+            "). Please make sure your input VCF is properly compressed and indexed (bgzip + tabix)"
+        error_message(err_msg, logger)
+    else:
+        ## check file size is more than zero
+        check_file_exists(tabix_file)
+    return(True)

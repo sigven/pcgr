@@ -23,54 +23,36 @@ def map_variant_effect_predictors(rec, algorithms):
         dbnsfp_key = gene_id + ':' + str(aa_change)
         if dbnsfp_key in dbnsfp_predictions:
             found_key = 1
-
+    
     if found_key == 0 and re.search('splice_', consequence):
         dbnsfp_key = gene_id
+
+    algo_mapping = {
+        'sift': 'DBNSFP_SIFT',
+        'provean': 'DBNSFP_PROVEAN',
+        'm-cap': 'DBNSFP_M_CAP',
+        'mutpred': 'DBNSFP_MUTPRED',
+        'metarnn': 'DBNSFP_META_RNN',
+        'fathmm': 'DBNSFP_FATHMM',
+        'fathmm_mkl_coding': 'DBNSFP_FATHMM_MKL',
+        'mutationassessor': 'DBNSFP_MUTATIONASSESSOR',
+        'mutationtaster': 'DBNSFP_MUTATIONTASTER',
+        'deogen2': 'DBNSFP_DEOGEN2',
+        'primateai': 'DBNSFP_PRIMATEAI', 
+        'list_s2': 'DBNSFP_LIST_S2',
+        'gerp_rs': 'DBNSFP_GERP',       
+        'aloft': 'DBNSFP_ALOFTPRED',
+        'bayesdel_addaf': 'DBNSFP_BAYESDEL_ADDAF',
+        'splice_site_ada': 'DBNSFP_SPLICE_SITE_ADA',
+        'splice_site_rf': 'DBNSFP_SPLICE_SITE_RF'
+    }
 
     if dbnsfp_key != '':
         if dbnsfp_key in dbnsfp_predictions:
             rec.INFO['EFFECT_PREDICTIONS'] = dbnsfp_predictions[dbnsfp_key]
             for algo_pred in rec.INFO['EFFECT_PREDICTIONS'].split('&'):
-                if algo_pred.startswith('sift:'):
-                    rec.INFO['DBNSFP_SIFT'] = str(algo_pred.split(':')[1])
-                if algo_pred.startswith('provean:'):
-                    rec.INFO['DBNSFP_PROVEAN'] = str(algo_pred.split(':')[1])
-                if algo_pred.startswith('m-cap:'):
-                    rec.INFO['DBNSFP_M_CAP'] = str(algo_pred.split(':')[1])
-                if algo_pred.startswith('mutpred:'):
-                    rec.INFO['DBNSFP_MUTPRED'] = str(algo_pred.split(':')[1])
-                if algo_pred.startswith('metarnn:'):
-                    rec.INFO['DBNSFP_META_RNN'] = str(algo_pred.split(':')[1])
-                if algo_pred.startswith('fathmm:'):
-                    rec.INFO['DBNSFP_FATHMM'] = str(algo_pred.split(':')[1])
-                if algo_pred.startswith('fathmm_mkl_coding:'):
-                    rec.INFO['DBNSFP_FATHMM_MKL'] = str(
-                        algo_pred.split(':')[1])
-                if algo_pred.startswith('mutationtaster:'):
-                    rec.INFO['DBNSFP_MUTATIONTASTER'] = str(
-                        algo_pred.split(':')[1])
-                if algo_pred.startswith('mutationassessor:'):
-                    rec.INFO['DBNSFP_MUTATIONASSESSOR'] = str(
-                        algo_pred.split(':')[1])
-                if algo_pred.startswith('deogen2:'):
-                    rec.INFO['DBNSFP_DEOGEN2'] = str(algo_pred.split(':')[1])
-                if algo_pred.startswith('primateai:'):
-                    rec.INFO['DBNSFP_PRIMATEAI'] = str(algo_pred.split(':')[1])
-                if algo_pred.startswith('list_s2:'):
-                    rec.INFO['DBNSFP_LIST_S2'] = str(algo_pred.split(':')[1])
-                if algo_pred.startswith('gerp_rs:'):
-                    rec.INFO['DBNSFP_GERP'] = str(algo_pred.split(':')[1])
-                if algo_pred.startswith('bayesdel_addaf:'):
-                    rec.INFO['DBNSFP_BAYESDEL_ADDAF'] = str(
-                        algo_pred.split(':')[1])
-                if algo_pred.startswith('aloft:'):
-                    rec.INFO['DBNSFP_ALOFTPRED'] = str(algo_pred.split(':')[1])
-                if algo_pred.startswith('splice_site_rf:'):
-                    rec.INFO['DBNSFP_SPLICE_SITE_RF'] = str(
-                        algo_pred.split(':')[1])
-                if algo_pred.startswith('splice_site_ada:'):
-                    rec.INFO['DBNSFP_SPLICE_SITE_ADA'] = str(
-                        algo_pred.split(':')[1])
+                if algo_pred.split(':')[0] in algo_mapping:
+                    rec.INFO[algo_mapping[algo_pred.split(':')[0]]] = str(algo_pred.split(':')[1])
 
 
 def map_dbnsfp_predictions(dbnsfp_tag, algorithms):
@@ -82,14 +64,14 @@ def map_dbnsfp_predictions(dbnsfp_tag, algorithms):
             return effect_predictions
         ref_aa = dbnsfp_info[0]
         alt_aa = dbnsfp_info[1]
-        all_ids = dbnsfp_info[4].split('&')
+        all_ids = dbnsfp_info[3].split('&')
         unique_ids = {}
         for s in all_ids:
             unique_ids[s] = 1
 
         isoform_aa_keys = []
         if ref_aa != '.' and alt_aa != '.' and ref_aa != '' and alt_aa != '':
-            aa_pos = dbnsfp_info[6].split('&')
+            aa_pos = dbnsfp_info[5].split('&')
             for pos in aa_pos:
                 for gene_id in unique_ids:
                     k = str(gene_id) + ':p.' + str(ref_aa) + pos + str(alt_aa)
@@ -101,10 +83,10 @@ def map_dbnsfp_predictions(dbnsfp_tag, algorithms):
 
         algorithm_raw_predictions = {}
 
-        i = 7
+        i = 6
         v = 0
-
-        if len(algorithms) != len(dbnsfp_info[7:]):
+       
+        if len(algorithms) != len(dbnsfp_info[6:]):
             return effect_predictions
 
         while i < len(dbnsfp_info):
@@ -137,43 +119,7 @@ def map_dbnsfp_predictions(dbnsfp_tag, algorithms):
 
 
 def vep_dbnsfp_meta_vcf(query_vcf, info_tags_wanted):
-    vep_to_pcgr_af = {'gnomAD_AMR_AF': 'AMR_AF_GNOMAD',
-                      'gnomAD_AFR_AF': 'AFR_AF_GNOMAD',
-                      'gnomAD_EAS_AF': 'EAS_AF_GNOMAD',
-                      'gnomAD_NFE_AF': 'NFE_AF_GNOMAD',
-                      'gnomAD_AF': 'GLOBAL_AF_GNOMAD',
-                      'gnomAD_SAS_AF': 'SAS_AF_GNOMAD',
-                      'gnomAD_OTH_AF': 'OTH_AF_GNOMAD',
-                      'gnomAD_ASJ_AF': 'ASJ_AF_GNOMAD',
-                      'gnomAD_FIN_AF': 'FIN_AF_GNOMAD',
-                      'gnomADe_AMR_AF': 'AMR_AF_GNOMADe',
-                      'gnomADe_AFR_AF': 'AFR_AF_GNOMADe',
-                      'gnomADe_EAS_AF': 'EAS_AF_GNOMADe',
-                      'gnomADe_NFE_AF': 'NFE_AF_GNOMADe',
-                      'gnomADe_AF': 'GLOBAL_AF_GNOMADe',
-                      'gnomADe_SAS_AF': 'SAS_AF_GNOMADe',
-                      'gnomADe_OTH_AF': 'OTH_AF_GNOMADe',
-                      'gnomADe_ASJ_AF': 'ASJ_AF_GNOMADe',
-                      'gnomADe_FIN_AF': 'FIN_AF_GNOMADe',
-                      
-                      'gnomADg_AF': 'GLOBAL_AF_GNOMADg',
-                      'gnomADg_AFR_AF': 'AFR_AF_GNOMADg',
-                      'gnomADg_AMI_AF': 'AMI_AF_GNOMADg',
-                      'gnomADg_AMR_AF': 'AMR_AF_GNOMADg',
-                      'gnomADg_ASJ_AF': 'ASJ_AF_GNOMADg',
-                      'gnomADg_EAS_AF': 'EAS_AF_GNOMADg',
-                      'gnomADg_FIN_AF': 'FIN_AF_GNOMADg',
-                      'gnomADg_MID_AF': 'MID_AF_GNOMADg',
-                      'gnomADg_NFE_AF': 'NFE_AF_GNOMADg',
-                      'gnomADg_OTH_AF': 'OTH_AF_GNOMADg',
-                      'gnomADg_SAS_AF': 'SAS_AF_GNOMADg'}
-                      #'AFR_AF': 'AFR_AF_1KG',
-                      #'AMR_AF': 'AMR_AF_1KG',
-                      #'SAS_AF': 'SAS_AF_1KG',
-                      #'EUR_AF': 'EUR_AF_1KG',
-                      #'EAS_AF': 'EAS_AF_1KG',
-                      #'AF': 'GLOBAL_AF_1KG'}
-
+    
     vcf = VCF(query_vcf)
     vep_csq_index2fields = {}
     vep_csq_fields2index = {}
@@ -189,15 +135,13 @@ def vep_dbnsfp_meta_vcf(query_vcf, info_tags_wanted):
                     if identifier == 'CSQ':
                         i = 0
                         for t in subtags:
-                            v = t.replace('"', '')
-                            if t in vep_to_pcgr_af:
-                                v = str(vep_to_pcgr_af[t])
+                            v = t.replace('"', '')                            
                             if v in info_tags_wanted:
                                 vep_csq_index2fields[i] = v
                                 vep_csq_fields2index[v] = i
                             i = i + 1
                     if identifier == 'DBNSFP':
-                        i = 7
+                        i = 6
                         while (i < len(subtags)):
                             dbnsfp_prediction_algorithms.append(
                                 str(re.sub(r'((_score)|(_pred))"*$', '', subtags[i])))

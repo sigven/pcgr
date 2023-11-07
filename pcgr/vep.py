@@ -3,12 +3,98 @@
 import os,re
 import csv
 import gzip
-from pcgr import annoutils
+
+from pcgr import annoutils, utils
 from pcgr.annoutils import assign_cds_exon_intron_annotations
 from pcgr import pcgr_vars
 
 
+
+def get_command(file_paths, config_options, input_vcf, output_vcf, debug = False):
+    
+    output_vcf_gz = f'{output_vcf}.gz'
+    
+    VEP_ASSEMBLY = pcgr_vars.VEP_ASSEMBLY
+    GENCODE_VERSION = pcgr_vars.GENCODE_VERSION
+    if config_options['genome_assembly'] == 'grch37':
+        GENCODE_VERSION = 'release 19'
+        VEP_ASSEMBLY = 'GRCh37'
+    
+    vep_dir = os.path.join(str(file_paths['db_dir']), '.vep')
+    fasta_assembly = os.path.join(
+        vep_dir, 'homo_sapiens', 
+        f'{pcgr_vars.VEP_VERSION}_{VEP_ASSEMBLY}', 
+        f'Homo_sapiens.{VEP_ASSEMBLY}.dna.primary_assembly.fa.gz')
+    ancestor_assembly = os.path.join(
+        vep_dir, 'homo_sapiens', 
+        f'{pcgr_vars.VEP_VERSION}_{VEP_ASSEMBLY}', 
+        f'human_ancestor.fa.gz')
+
+    plugins_in_use = "NearestExonJB, LoF"
+
+    # List all VEP flags used when calling VEP
+    vep_flags = (
+        f'--hgvs --af_gnomad --variant_class --domains --symbol --protein --ccds --mane '
+        f'--uniprot --appris --biotype --tsl --canonical --format vcf --cache --numbers '
+        f'--total_length --allele_number --failed 1 --no_stats --no_escape --xref_refseq --vcf '
+        f'--check_ref --dont_skip --flag_pick_allele_gene --plugin NearestExonJB,max_range=50000 '
+        f'--force_overwrite --species homo_sapiens --offline')
+    vep_options = (
+        f'--dir {vep_dir} --assembly {VEP_ASSEMBLY} --cache_version {pcgr_vars.VEP_VERSION} '
+        f'--fasta {fasta_assembly} --pick_order {config_options["vep"]["vep_pick_order"]} '
+        f'--buffer_size {config_options["vep"]["vep_buffer_size"]} '
+        f'--fork {config_options["vep"]["vep_n_forks"]} '
+        f'{vep_flags} '
+        f'{"--verbose" if debug else "--quiet"}')
+    
+    gencode_set_in_use = "GENCODE - all transcripts"
+    if config_options['vep']['vep_no_intergenic'] == 1:
+        vep_options += ' --no_intergenic'
+    if config_options['vep']['vep_regulatory'] == 1:
+        vep_options += ' --regulatory'
+    if config_options['vep']['vep_gencode_all'] == 0:
+        vep_options += ' --gencode_basic'
+    gencode_set_in_use = "GENCODE - basic transcript set (--gencode_basic)"
+
+    ## LOFTEE plugin - variant loss-of-function annotation        
+    loftee_dir = utils.get_loftee_dir()
+    assert os.path.isdir(loftee_dir), f'LoF VEP plugin is not found in {loftee_dir}. Please make sure you installed pcgr conda package and have corresponding conda environment active.'
+    vep_options += f" --plugin LoF,loftee_path:{loftee_dir},human_ancestor_fa:{ancestor_assembly},use_gerp_end_trunc:0 --dir_plugins {loftee_dir}"
+
+    
+    # Compose full VEP command
+    vep_main_command = f'{utils.get_perl_exports()} && vep --input_file {input_vcf} --output_file {output_vcf} {vep_options}'
+    vep_bgzip_command = f'bgzip -f -c {output_vcf} > {output_vcf_gz}'
+    vep_tabix_command = f'tabix -f -p vcf {output_vcf_gz}'
+    if debug:
+        print(vep_main_command)
+    
+    vep_cmd = {}
+    vep_cmd['main'] = vep_main_command
+    vep_cmd['bgzip'] = vep_bgzip_command
+    vep_cmd['tabix'] = vep_tabix_command
+    vep_cmd['gencode_set_in_use'] = gencode_set_in_use
+    vep_cmd['plugins_in_use'] = plugins_in_use
+    vep_cmd['fasta_assembly'] = fasta_assembly
+    vep_cmd['GENCODE_VERSION'] = GENCODE_VERSION
+    
+    return(vep_cmd)
+
+
 def get_csq_record_annotations(csq_fields, varkey, logger, vep_csq_fields_map, transcript_xref_map):
+    """
+    Generates a dictionary object containing the annotations of a CSQ record.
+
+    Parameters:
+    - csq_fields (list): A list of CSQ fields.
+    - varkey (str): The VARKEY value.
+    - logger (Logger): The logger object.
+    - vep_csq_fields_map (dict): A dictionary mapping VEP CSQ fields to their indices.
+    - transcript_xref_map (dict): A dictionary mapping Ensembl transcript IDs to their annotations.
+
+    Returns:
+    - csq_record (dict): A dictionary object containing the annotations of a CSQ record.
+    """
 
     j = 0
     csq_record = {}
@@ -66,7 +152,7 @@ def get_csq_record_annotations(csq_fields, varkey, logger, vep_csq_fields_map, t
             else:                            
                 csq_record[vep_csq_fields_map['index2field'][j]] = None
         j = j + 1
-        
+    
     ## if VEP/Ensembl does not provide a symbol, use symbol provided by PCGR/CPSR gene_transcript_xref map
     if csq_record['SYMBOL'] is None and ensembl_transcript_id != ".":
         if ensembl_transcript_id in transcript_xref_map:
@@ -79,6 +165,7 @@ def get_csq_record_annotations(csq_fields, varkey, logger, vep_csq_fields_map, t
 
 
 def pick_single_gene_csq(vep_csq_results, logger, pick_criteria_ordered = "mane,canonical,appris,tsl,biotype,ccds,rank,length"):
+
     
     csq_candidates = []
 

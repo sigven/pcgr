@@ -9,33 +9,15 @@ import gzip
 
 from cyvcf2 import VCF, Writer
 from pcgr import utils
-from pcgr.utils import check_subprocess
+from pcgr.utils import check_subprocess, error_message
 
 csv.field_size_limit(500 * 1024 * 1024)
 threeLettertoOneLetterAA = {'Ala': 'A', 'Arg': 'R', 'Asn': 'N', 'Asp': 'D', 'Cys': 'C', 'Glu': 'E', 'Gln': 'Q', 'Gly': 'G', 'His': 'H',
                             'Ile': 'I', 'Leu': 'L', 'Lys': 'K', 'Met': 'M', 'Phe': 'F', 'Pro': 'P', 'Ser': 'S', 'Thr': 'T', 'Trp': 'W', 'Tyr': 'Y', 'Val': 'V', 'Ter': 'X'}
 
-def get_vcf_info_tags(vcffile):
-    vcf = cyvcf2.VCF(vcffile)
-    info_tags = {}
-    for e in vcf.header_iter():
-        header_element = e.info()
-        if 'ID' in header_element.keys() and 'HeaderType' in header_element.keys():
-            if header_element['HeaderType'] == 'INFO':
-                info_tags[str(header_element['ID'])] = 1
+nuclear_chromosomes = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'X', 'Y', 'M']
 
-    return info_tags
-
-
-def print_vcf_header(query_vcf, vcfheader_file, logger, chromline_only=False):
-    if chromline_only == True:
-        check_subprocess(
-            logger, f'bgzip -dc {query_vcf} | egrep \'^#\' | egrep \'^#CHROM\' >> {vcfheader_file}', debug=False)
-    else:
-        check_subprocess(
-            logger, f'bgzip -dc {query_vcf} | egrep \'^#\' | egrep -v \'^#CHROM\' > {vcfheader_file}', debug=False)
-
-def read_infotag_file(vcf_info_tags_tsv):
+def read_infotag_file(vcf_info_tags_tsv, scope = "vep"):
     """
     Function that reads a file that lists VCF INFO tags produced by PCGR/CPSR/gvanno.
     An example line of the VCF info tag file is the following:
@@ -47,12 +29,14 @@ def read_infotag_file(vcf_info_tags_tsv):
     """
     info_tag_xref = {}  # dictionary returned
     if not os.path.exists(vcf_info_tags_tsv):
+        ## issue warning
         return info_tag_xref
     tsvfile = open(vcf_info_tags_tsv, 'r')
     reader = csv.DictReader(tsvfile, delimiter='\t')
     for row in reader:
         if not row['tag'] in info_tag_xref:
-            info_tag_xref[row['tag']] = row
+            if scope in row['category']:
+                info_tag_xref[row['tag']] = row
 
     return info_tag_xref
 
@@ -61,8 +45,8 @@ def read_vcfanno_tag_file(vcfanno_tag_file, logger):
     infotag_results = {}
 
     if not os.path.exists(vcfanno_tag_file):
-        logger.critical(f"vcfanno configuration file ({vcfanno_tag_file}) does not exist")
-        return infotag_results
+        err_msg = f"vcfanno configuration file ({vcfanno_tag_file}) does not exist"
+        error_message(err_msg, logger)
     
     f = open(vcfanno_tag_file, "r")
     info_elements = f.readlines()
@@ -95,8 +79,8 @@ def read_genexref_namemap(gene_xref_namemap_tsv, logger):
 
     namemap_xref = {}  # dictionary returned
     if not os.path.exists(gene_xref_namemap_tsv):
-        logger.critical(f"gene_transcript_xref BED mapping file ({gene_xref_namemap_tsv}) does not exist")
-        return namemap_xref
+        err_msg = f"gene_transcript_xref BED mapping file ({gene_xref_namemap_tsv}) does not exist"
+        error_message(err_msg, logger)
     
     with gzip.open(gene_xref_namemap_tsv, mode='rt') as f:
         reader = csv.DictReader(f, delimiter='\t')
@@ -266,20 +250,6 @@ def threeToOneAA(aa_change):
     return aa_change
 
 
-def detect_reserved_info_tag(tag, tag_name, logger):
-    reserved_tags = ['AA', 'AC', 'AF', 'AN', 'BQ', 'CIGAR', 'DB', 'DP', 'END',
-                     'H2', 'H3', 'MQ', 'MQ0', 'NS', 'SB', 'SOMATIC', 'VALIDATED', '1000G']
-    if tag in reserved_tags:
-        err_msg = f'Custom INFO tag ({tag_name}) needs another name - \'{tag}\' is a reserved field in the VCF specification (INFO)'
-        return utils.error_message(err_msg, logger)
-
-    reserved_format_tags = ['GT', 'DP', 'FT', 'GL',
-                            'GLE', 'GQ', 'PL', 'HQ', 'PS', 'PQ', 'EC', 'MQ']
-    if tag in reserved_format_tags:
-        err_msg = 'Custom INFO tag ({tag_name}) needs another name - \'{tag}\' is a reserved field in the VCF specification (FORMAT)'
-        return utils.error_message(err_msg, logger)
-
-
 def assign_cds_exon_intron_annotations(csq_record):
 
     csq_record['CODING_STATUS'] = 'noncoding'
@@ -290,6 +260,9 @@ def assign_cds_exon_intron_annotations(csq_record):
     csq_record['EXON_POSITION'] = 0
     csq_record['CDS_CHANGE'] = '.'
     csq_record['HGVSp_short'] = '.'
+    csq_record['PROTEIN_CHANGE'] = '.'
+    csq_record['EXON_AFFECTED'] = '.'
+    csq_record['LOSS_OF_FUNCTION'] = False
 
     coding_csq_pattern = r"(stop_(lost|gained)|start_lost|frameshift_|missense_|splice_(donor|acceptor)|protein_altering|inframe_)"
     wes_csq_pattern = r"(stop_(lost|gained)|start_lost|frameshift_|missense_|splice_(donor|acceptor)|protein_altering|inframe_|synonymous|(start|stop)_retained)"
@@ -301,6 +274,16 @@ def assign_cds_exon_intron_annotations(csq_record):
 
     if re.search(wes_csq_pattern, str(csq_record['Consequence'])) is not None:
         csq_record['EXONIC_STATUS'] = 'exonic'
+
+    if 'LoF' in csq_record:
+        if csq_record['LoF'] != '.':
+            csq_record['LOSS_OF_FUNCTION'] = True
+            
+        ## Don't list LoF as True if consequence is assigned as missense
+        if re.search(r"^missense", csq_record['Consequence']) is not None:
+            if csq_record['LOSS_OF_FUNCTION'] is True:
+                csq_record['LOSS_OF_FUNCTION'] = False
+        
 
     if re.search(null_pattern, str(csq_record['Consequence'])) is not None:
         csq_record['NULL_VARIANT'] = True
@@ -363,6 +346,7 @@ def assign_cds_exon_intron_annotations(csq_record):
                 if protein_identifier.startswith('ENSP'):
                     protein_change_VEP = str(csq_record['HGVSp'].split(':')[1])
                     protein_change = threeToOneAA(protein_change_VEP)
+                    csq_record['PROTEIN_CHANGE'] = protein_change_VEP
 
     if 'synonymous_variant' in csq_record['Consequence']:
         protein_change = 'p.' + \
@@ -379,6 +363,9 @@ def assign_cds_exon_intron_annotations(csq_record):
         if csq_record['EXON'] != '.':
             if '/' in csq_record['EXON']:
                 exon_number = str(csq_record['EXON']).split('/')[0]
+                csq_record['AFFECTED_EXON'] = exon_number
+                if '-' in exon_number:
+                    csq_record['AFFECTED_EXON'] = exon_number.split('-')[0]
                 num_exons = str(csq_record['EXON']).split('/')[1]
                 if exon_number == num_exons:
                     csq_record['LAST_EXON'] = True

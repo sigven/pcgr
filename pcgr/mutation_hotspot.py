@@ -6,34 +6,51 @@ import gzip
 from pcgr import annoutils
 from pcgr.annoutils import threeToOneAA
 
-def load_mutation_hotspots(hotspots_fname, logger):
+from typing import Dict
+from logging import Logger
 
-   """
-   Function that loads cancer mutational hotspot entries from file in PCGR data bundle
-   - 'misc/tsv/hotspot/hotspot.tsv.gz' (provided by github.com/sigven/cancerHotspots)
-   """
+def load_mutation_hotspots(hotspots_fname: str, logger: Logger) -> Dict[str, Dict[str, Dict[str, str]]]:
+    """
+    Load mutation hotspots from a file and create a dictionary of hotspots.
 
-   hotspots = {} ##dictionary to return
-   mutation_hotspots = {}
-   codon_hotspots = {}
-   splice_hotspots = {}
-   if not os.path.exists(hotspots_fname):
-      logger.info("ERROR: File '" + str(hotspots_fname) + "' does not exist - exiting")
-      exit(1)
-   
-   with gzip.open(hotspots_fname, mode='rt') as f:
-      reader = csv.DictReader(f, delimiter='\t')
-      for row in reader:
-         mutation_hotspots[str(row['entrezgene']) + '-' + row['hgvsp2']] = row
-         codon_hotspots[str(row['entrezgene']) + '-' + row['codon']] = row
-         if row['hgvsc'] != '.':
-            splice_hotspots[str(row['entrezgene']) + '-' + str(row['hgvsc'])] = row
-   f.close()
+    Parameters:
+        hotspots_fname (str): The file path of the mutation hotspots file.
+        logger (Logger): The logger object to log messages.
 
-   hotspots['mutation'] = mutation_hotspots
-   hotspots['codon'] = codon_hotspots
-   hotspots['splice'] = splice_hotspots
-   return hotspots
+    Returns:
+        Dict[str, Dict[str, Dict[str, str]]]: A dictionary containing mutation hotspots categorized by mutation type.
+            The dictionary has three keys: 'mutation', 'codon', and 'splice'.
+            Each key maps to a sub-dictionary that contains the hotspots for that mutation type.
+            The sub-dictionaries are indexed by a combination of gene and mutation identifier.
+
+    Raises:
+        SystemExit: If the mutation hotspots file does not exist.
+
+    """
+    hotspots: Dict[str, Dict[str, Dict[str, str]]] = {
+        'mutation': {},
+        'codon': {},
+        'splice': {}
+    }
+
+    if not os.path.exists(hotspots_fname):
+        logger.info(f"ERROR: File '{hotspots_fname}' does not exist - exiting")
+        exit(1)
+
+    with gzip.open(hotspots_fname, mode='rt') as f:
+        reader = csv.DictReader(f, delimiter='\t')
+        for row in reader:
+            gene = str(row['entrezgene'])
+            hgvsp2 = row['hgvsp2']
+            codon = row['codon']
+            hgvsc = row['hgvsc']
+
+            hotspots['mutation'][gene + '-' + hgvsp2] = row
+            hotspots['codon'][gene + '-' + codon] = row
+            if hgvsc != '.':
+                hotspots['splice'][gene + '-' + hgvsc] = row
+
+    return hotspots
 
 
 def match_csq_mutation_hotspot(transcript_csq_elements, cancer_hotspots, rec, principal_csq_properties):

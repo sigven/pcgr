@@ -3,7 +3,7 @@
 from pcgr._version import __version__
 
 PCGR_VERSION = __version__
-DB_VERSION = '20230902'
+DB_VERSION = '20231018'
 VEP_VERSION = '105'
 GENCODE_VERSION = '39'
 NCBI_BUILD_MAF = 'GRCh38'
@@ -47,7 +47,7 @@ tsites = {
 tumor_sites = '\n'.join([f'{k} = {tsites[k]}' for k in tsites]) # for displaying in help
 
 GE_panels = {
-      0: "CPSR exploratory cancer predisposition panel (n = 433, GEP / TCGA Germline Study / Cancer Gene Census / Other)",
+      0: "CPSR exploratory cancer predisposition panel (PanelApp genes / TCGA's germline study / Cancer Gene Census / Other)",
       1: "Adult solid tumours cancer susceptibility (GEP)",
       2: "Adult solid tumours for rare disease (GEP)",
       3: "Bladder cancer pertinent cancer susceptibility (GEP)",
