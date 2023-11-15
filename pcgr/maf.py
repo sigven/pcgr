@@ -35,7 +35,7 @@ def update_maf_allelic_support(maf_tmp_fname: str,
     with open(maf_tmp_fname) as f:
         header_line = f.readline().strip('\n')
     f.close()
-    
+        
     raw_maf_data = pd.read_csv(maf_tmp_fname, sep="\t", header=1)
     if update_allelic_support is False:
         # write to file
@@ -44,9 +44,9 @@ def update_maf_allelic_support(maf_tmp_fname: str,
     else:
     
         if 'tumor_dp_tag' in allelic_support_tags:
-            if allelic_support_tags['tumor_dp_tag'] != "_NA_":                    
+            if allelic_support_tags['tumor_dp_tag'] != "_NA_":                               
                 if {allelic_support_tags['tumor_dp_tag']}.issubset(raw_maf_data.columns):
-                    if len(raw_maf_data[allelic_support_tags['tumor_dp_tag']].isna() == True) == 0:
+                    if raw_maf_data[raw_maf_data[allelic_support_tags['tumor_dp_tag']].isna() == True].empty is True:
                         raw_maf_data = raw_maf_data.astype({allelic_support_tags['tumor_dp_tag']:'int'})                                        
                         raw_maf_data.loc[:,"t_depth"] = raw_maf_data.loc[:,allelic_support_tags['tumor_dp_tag']]
                         
@@ -54,7 +54,7 @@ def update_maf_allelic_support(maf_tmp_fname: str,
                             if allelic_support_tags['tumor_af_tag'] != "_NA_":    
                                 if {allelic_support_tags['tumor_af_tag']}.issubset(raw_maf_data.columns):
                                     
-                                    if len(raw_maf_data[allelic_support_tags['tumor_af_tag']].isna() == True) == 0:
+                                    if raw_maf_data[raw_maf_data[allelic_support_tags['tumor_af_tag']].isna() == True].empty is True:
                                         raw_maf_data.loc[:,"t_alt_count"] = \
                                             raw_maf_data.loc[:,allelic_support_tags['tumor_af_tag']] * \
                                             raw_maf_data.loc[:,"t_depth"]
@@ -67,7 +67,7 @@ def update_maf_allelic_support(maf_tmp_fname: str,
         if 'control_dp_tag' in allelic_support_tags:
             if allelic_support_tags['control_dp_tag'] != "_NA_":                    
                 if {allelic_support_tags['control_dp_tag']}.issubset(raw_maf_data.columns):
-                    if len(raw_maf_data[allelic_support_tags['control_dp_tag']].isna() == True) == 0:
+                    if raw_maf_data[raw_maf_data[allelic_support_tags['control_dp_tag']].isna() == True].empty is True:
                         raw_maf_data = raw_maf_data.astype({allelic_support_tags['control_dp_tag']:'int'})                    
                         raw_maf_data.loc[:,"n_depth"] = raw_maf_data.loc[:,allelic_support_tags['control_dp_tag']]
                         
@@ -75,7 +75,7 @@ def update_maf_allelic_support(maf_tmp_fname: str,
                             if allelic_support_tags['control_af_tag'] != "_NA_":    
                                 if {allelic_support_tags['control_af_tag']}.issubset(raw_maf_data.columns):
                                     
-                                    if len(raw_maf_data[allelic_support_tags['control_af_tag']].isna() == True) == 0:
+                                    if raw_maf_data[raw_maf_data[allelic_support_tags['control_af_tag']].isna() == True].empty is True:
                                         raw_maf_data.loc[:,"n_alt_count"] = \
                                             raw_maf_data.loc[:,allelic_support_tags['control_af_tag']] * \
                                             raw_maf_data.loc[:,"n_depth"]
@@ -86,7 +86,7 @@ def update_maf_allelic_support(maf_tmp_fname: str,
                                             raw_maf_data.loc[:,"n_depth"] - raw_maf_data.loc[:,"n_alt_count"]
         
         raw_maf_data = raw_maf_data.fillna("")
-        with open(maf_fname, 'a') as f:
+        with open(maf_fname, 'w') as f:
             f.write(f'{header_line}\n')
         f.close()
         raw_maf_data.to_csv(maf_fname, sep="\t", index=False, mode='a')

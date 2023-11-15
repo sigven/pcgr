@@ -54,7 +54,7 @@ def check_args(arg_dict):
 
     # check that minimum/maximum depth/allelic fractions are set correctly
     if arg_dict['tumor_dp_min'] < 0:
-        err_msg = f"Minimum depth tumor ('tumor_dp_min' = {arg_dict['tumor_dp_min']}) must be >= 0"
+        err_msg = f"Minimum sequencing depth tumor ('tumor_dp_min' = {arg_dict['tumor_dp_min']}) must be >= 0"
         error_message(err_msg, logger)
 
     if arg_dict['tumor_af_min'] < 0 or arg_dict['tumor_af_min'] > 1:
@@ -62,22 +62,42 @@ def check_args(arg_dict):
         error_message(err_msg, logger)
 
     if arg_dict['control_dp_min'] < 0:
-        err_msg = f"Minimum depth control ('control_dp_min' = {arg_dict['control_dp_min']}) must be >= 0"
+        err_msg = f"Minimum sequencing depth control ('control_dp_min' = {arg_dict['control_dp_min']}) must be >= 0"
         error_message(err_msg, logger)
 
     if arg_dict['control_af_max'] < 0 or arg_dict['control_af_max'] > 1:
         err_msg = f"Maximum AF control ('control_af_max' = {arg_dict['control_af_max']}) must be within [0, 1]"
         error_message(err_msg, logger)
+    
+    
+     # TMB: check that minimum/maximum depth/allelic fractions are set correctly
+    if arg_dict['tmb_dp_min'] < 0:
+        err_msg = f"Minimum sequencing depth tumor - TMB calculation ('tmb_dp_min' = {arg_dict['tmb_dp_min']}) must be >= 0"
+        error_message(err_msg, logger)
+        
+    if arg_dict['tmb_dp_min'] < arg_dict['tumor_dp_min']:
+        err_msg = f"Minimum sequencing depth (tumor) for TMB calculation ('tmb_dp_min' = {arg_dict['tmb_dp_min']}) must be ",
+        err_msg += f"greater or equal to minimum sequencing depth tumor {arg_dict['tumor_dp_min']} (i.e. filter for variant inclusion in report)"
+        error_message(err_msg, logger)
+
+    if arg_dict['tmb_af_min'] < 0 or arg_dict['tmb_af_min'] > 1:
+        err_msg = f"Minimum AF (tumor) for TMB calculation ('tmb_af_min' = {arg_dict['tmb_af_min']}) must be within [0, 1]"
+        error_message(err_msg, logger)
+        
+    if arg_dict['tmb_af_min'] < arg_dict['tumor_af_min']:
+        err_msg = f"Minimum AF (tumor) for TMB calculation ('tmb_af_min' = {arg_dict['tmb_af_min']}) must be ",
+        err_msg += f"greater or equal to minimum AF tumor {arg_dict['tumor_dp_min']} (i.e. filter for variant inclusion in report)"
+        error_message(err_msg, logger)
 
     # Check that coding target size region of sequencing assay is set correctly
-    if arg_dict['target_size_mb'] < 0 or arg_dict['target_size_mb'] > 34:
-        err_msg = f"Coding target size region in Mb ('--target_size_mb' = {arg_dict['target_size_mb']}) is not positive or larger than the likely maximum size of the coding human genome (34 Mb))"
+    if arg_dict['effective_target_size_mb'] < 0 or arg_dict['effective_target_size_mb'] > 34:
+        err_msg = f"Coding target size region in Mb ('--effective_target_size_mb' = {arg_dict['effective_target_size_mb']}) is not positive or larger than the likely maximum size of the coding human genome (34 Mb))"
         error_message(err_msg, logger)
-    if arg_dict['target_size_mb'] < 1:
-        warn_msg = f"Coding target size region in Mb ('--target_size_mb' = {arg_dict['target_size_mb']}) must be greater than 1 Mb for mutational burden estimate to be robust"
+    if arg_dict['effective_target_size_mb'] < 1:
+        warn_msg = f"Coding target size region in Mb ('--effective_target_size_mb' = {arg_dict['effective_target_size_mb']}) must be greater than 1 Mb for mutational burden estimate to be robust"
         warn_message(warn_msg, logger)
-    if arg_dict['target_size_mb'] < 34 and arg_dict['assay'] != 'TARGETED':
-        warn_msg = f"Coding target size region in Mb ('--target_size_mb' = {arg_dict['target_size_mb']}) is less than default for WES/WGS (34Mb), assay must be set to 'TARGETED'"
+    if arg_dict['effective_target_size_mb'] < 34 and arg_dict['assay'] != 'TARGETED':
+        warn_msg = f"Coding target size region in Mb ('--effective_target_size_mb' = {arg_dict['effective_target_size_mb']}) is less than default for WES/WGS (34Mb), assay must be set to 'TARGETED'"
         warn_message(warn_msg, logger)
 
     # if assay is targeted or mode is Tumor-Only, MSI prediction will not be performed/switched off
@@ -123,14 +143,6 @@ def check_args(arg_dict):
             warn_msg = "Estimation of mutational signatures in tumor-only mode is suboptimal - results must be interpreted with caution"
             warn_message(warn_msg, logger)
 
-        # Emit errors when tumor-only filtering thresholds are not properly set
-        for pop in ['eur', 'afr', 'amr', 'eas', 'sas', 'global']:
-            tag = f'maf_onekg_{pop}'
-            if arg_dict[tag]:
-                if float(arg_dict[tag]) < 0 or float(arg_dict[tag]) > 1:
-                    err_msg = f"MAF threshold (tumor-only germline filter) for 1000 Genomes Project (pop '{pop.upper()}') must be within the [0, 1] range, current value is {arg_dict[tag]}"
-                    error_message(err_msg, logger)
-
         for pop in ['nfe', 'fin', 'amr', 'eas', 'sas', 'asj', 'oth', 'afr', 'global']:
             tag = f'maf_gnomad_{pop}'
             if arg_dict[tag]:
@@ -138,32 +150,22 @@ def check_args(arg_dict):
                     err_msg = f"MAF threshold (tumor-only germline filter) for gnomAD (pop '{pop.upper()}') must be within the [0, 1] range, current value is {arg_dict[tag]}"
                     error_message(err_msg, logger)
 
-    ## tumor-only is False
-    # else:
-    #    for t in ["exclude_pon","exclude_likely_het_germline","exclude_likely_hom_germline","exclude_dbsnp_nonsomatic","exclude_nonexonic"]:
-    #       if arg_dict[t] is True:
-    #          warn_msg = "Option "--" + str(t) + "" requires "--tumor_only" option (not currently set)"
-    #          warn_message(warn_msg, logger)
-
     # Emit warning that mutational signature estimation is (likely) not optimal for small/targeted sequencing assays
     if arg_dict['estimate_signatures'] is True and arg_dict['assay'] == 'TARGETED':
         warn_msg = "Estimation of mutational signatures ('--estimate_signatures') is not optimal for TARGETED sequencing assays - results must be interpreted with caution"
         warn_message(warn_msg, logger)
 
-    # Check that log ratio thresholds for homozygous deletions and amplifications are properly set, and that segment overlap with transcripts are set appropriately
-    if arg_dict['logr_homdel'] >= 0:
-        err_msg = f"Log ratio for homozygous deletions ('--logr_homdel' = {arg_dict['logr_homdel']}) should be < 0"
-        error_message(err_msg, logger)
-    if arg_dict['logr_gain'] <= 0:
-        err_msg = f"Log ratio for copy number gains/amplifications ('--logr_gain' = {arg_dict['logr_gain']}) should be > 0"
+    # Check that threshold for gains/amplifications are properly set, and that segment overlap with transcripts are set appropriately
+    if arg_dict['n_copy_gain'] <= 0:
+        err_msg = f"Totaly copy number threshold for gains/amplifications ('--n_copy_gain' = {arg_dict['n_copy_gain']}) should be > 0"
         error_message(err_msg, logger)
     if arg_dict['cna_overlap_pct'] > 100 or arg_dict['cna_overlap_pct'] <= 0:
         err_msg = f"Minimum percent overlap between copy number segment and gene transcript ('--cna_overlap_pct' = {arg_dict['cna_overlap_pct']}) must be within (0, 100]"
         error_message(err_msg, logger)
 
     # VEP options
-    if arg_dict['vep_n_forks'] <= 0 or arg_dict['vep_n_forks'] > 4:
-        err_msg = f"Number of forks that VEP can use during annotation ('--vep_n_forks' = {arg_dict['vep_n_forks']}must be within (0, 4]"
+    if arg_dict['vep_n_forks'] <= 0 or arg_dict['vep_n_forks'] > 8:
+        err_msg = f"Number of forks that VEP can use during annotation must be above 0 and not more than 8 (recommended is 4), current value is {arg_dict['vep_n_forks']}"
         error_message(err_msg, logger)
 
     if arg_dict['vep_buffer_size'] <= 0 or arg_dict['vep_buffer_size'] > 30000:

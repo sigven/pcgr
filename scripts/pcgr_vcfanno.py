@@ -5,10 +5,10 @@ import random
 import re, os
 import glob
 
-from pcgr import utils
+from pcgr.vcf import get_vcf_info_tags, print_vcf_header
 from pcgr.utils import check_subprocess
-from pcgr import annoutils
-from pcgr.annoutils import read_vcfanno_tag_file, get_vcf_info_tags, print_vcf_header
+from pcgr.annoutils import read_vcfanno_tag_file
+from pcgr import utils
 
 
 def __main__():

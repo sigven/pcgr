@@ -10,13 +10,13 @@ from pcgr import pcgr_vars
 
 
 
-def get_command(file_paths, config_options, input_vcf, output_vcf, debug = False):
+def get_command(file_paths, conf_options, input_vcf, output_vcf, debug = False):
     
     output_vcf_gz = f'{output_vcf}.gz'
     
     VEP_ASSEMBLY = pcgr_vars.VEP_ASSEMBLY
     GENCODE_VERSION = pcgr_vars.GENCODE_VERSION
-    if config_options['genome_assembly'] == 'grch37':
+    if conf_options['genome_assembly'] == 'grch37':
         GENCODE_VERSION = 'release 19'
         VEP_ASSEMBLY = 'GRCh37'
     
@@ -41,18 +41,18 @@ def get_command(file_paths, config_options, input_vcf, output_vcf, debug = False
         f'--force_overwrite --species homo_sapiens --offline')
     vep_options = (
         f'--dir {vep_dir} --assembly {VEP_ASSEMBLY} --cache_version {pcgr_vars.VEP_VERSION} '
-        f'--fasta {fasta_assembly} --pick_order {config_options["vep"]["vep_pick_order"]} '
-        f'--buffer_size {config_options["vep"]["vep_buffer_size"]} '
-        f'--fork {config_options["vep"]["vep_n_forks"]} '
+        f'--fasta {fasta_assembly} --pick_order {conf_options["conf"]["vep"]["vep_pick_order"]} '
+        f'--buffer_size {conf_options["conf"]["vep"]["vep_buffer_size"]} '
+        f'--fork {conf_options["conf"]["vep"]["vep_n_forks"]} '
         f'{vep_flags} '
         f'{"--verbose" if debug else "--quiet"}')
     
     gencode_set_in_use = "GENCODE - all transcripts"
-    if config_options['vep']['vep_no_intergenic'] == 1:
+    if conf_options['conf']['vep']['vep_no_intergenic'] == 1:
         vep_options += ' --no_intergenic'
-    if config_options['vep']['vep_regulatory'] == 1:
+    if conf_options['conf']['vep']['vep_regulatory'] == 1:
         vep_options += ' --regulatory'
-    if config_options['vep']['vep_gencode_all'] == 0:
+    if conf_options['conf']['vep']['vep_gencode_all'] == 0:
         vep_options += ' --gencode_basic'
     gencode_set_in_use = "GENCODE - basic transcript set (--gencode_basic)"
 
@@ -159,17 +159,19 @@ def get_csq_record_annotations(csq_fields, varkey, logger, vep_csq_fields_map, t
             csq_record['SYMBOL'] = transcript_xref_map[ensembl_transcript_id]['SYMBOL']
     
     # Assign coding status, protein change, coding sequence change, last exon/intron status etc as VCF info tags
-    assign_cds_exon_intron_annotations(csq_record)
+    csq_record = assign_cds_exon_intron_annotations(csq_record)
     
     return(csq_record)
 
 
-def pick_single_gene_csq(vep_csq_results, logger, pick_criteria_ordered = "mane,canonical,appris,tsl,biotype,ccds,rank,length"):
+def pick_single_gene_csq(vep_csq_results, pick_criteria_ordered = "mane,canonical,appris,tsl,biotype,ccds,rank,length"):
 
     
     csq_candidates = []
 
     for csq_elem in vep_csq_results['picked_gene_csq']:
+        if csq_elem is None:
+            continue
         csq_candidate = {}
 
         ## default values (undefined properties)
@@ -253,7 +255,8 @@ def pick_single_gene_csq(vep_csq_results, logger, pick_criteria_ordered = "mane,
 
     return(chosen_csq_index)
 
-def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, vep_pick_order, logger, pick_only=True, csq_identifier='CSQ', debug = 0):
+def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, vep_pick_order, logger, pick_only=True, 
+                  csq_identifier='CSQ', debug = 0, targets_ensembl_gene = None):
 
     """
     Function that parses the comma-separated CSQ elements found in the rec.INFO object (VCF)
@@ -265,6 +268,7 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, vep_pick_order, 
     """
     
     all_csq_pick = []
+    alternative_csq_pick = []
     all_transcript_consequences = []
 
     varkey = str(rec.CHROM) + '_' + str(rec.POS) + '_' + str(rec.REF) + '_' + str(','.join(rec.ALT))
@@ -292,13 +296,26 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, vep_pick_order, 
             k = k + 1
         
         
-        if pick_only is False:        
+        ## CPSR - consider all consequences (considering that a variant may overlap other, non-CPSR targets)
+        if pick_only is False: 
             csq_record = get_csq_record_annotations(csq_fields, varkey, logger, vep_csq_fields_map, transcript_xref_map)
-            all_csq_pick.append(csq_record)
+            if 'Feature_type' in csq_record:
+                if csq_record['Feature_type'] == 'RegulatoryFeature':
+                    all_csq_pick.append(csq_record)
+                    alternative_csq_pick.append(csq_record)
+                if csq_record['Feature_type'] == 'Transcript':
+                    if 'ENSEMBL_GENE_ID' in csq_record.keys():
+                        ## Consequence in CPSR target - append to all_csq_pick
+                        if csq_record['ENSEMBL_GENE_ID'] in targets_ensembl_gene:
+                            all_csq_pick.append(csq_record)
+                        else:
+                            alternative_csq_pick.append(csq_record)
+
+        ## PCGR - consider picked consequence only                
         else:
             # loop over VEP consequence blocks PICK'ed according to VEP's ranking scheme
             # only consider the primary/picked consequence when expanding with annotation tags
-            if csq_fields[vep_csq_fields_map['field2index']['PICK']] == "1":
+            if csq_fields[vep_csq_fields_map['field2index']['PICK']] == "1":                
                 csq_record = get_csq_record_annotations(csq_fields, varkey, logger, vep_csq_fields_map, transcript_xref_map)                           
                 # Append transcript consequence to all_csq_pick
                 all_csq_pick.append(csq_record)
@@ -327,27 +344,29 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, vep_pick_order, 
         all_transcript_consequences.append(consequence_entry)
 
   
+    if len(all_csq_pick) == 0 and pick_only is False:
+        logger.warning('WARNING: No VEP block with a Consequence/transcript that matches CPSR target genes - considering alternative consequences')
+        all_csq_pick = alternative_csq_pick
+        
     vep_csq_results = {}
     vep_csq_results['picked_gene_csq'] = all_csq_pick
     vep_csq_results['all_csq'] = all_transcript_consequences
     vep_csq_results['picked_csq'] = None
-
+    
     vep_chosen_csq_idx = 0
 
     ## If multiple transcript-specific variant consequences highlighted by --pick_allele_gene, 
     ## prioritize/choose block of consequence according to 'vep_pick_order'
     if len(vep_csq_results['picked_gene_csq']) > 1:
-
-        vep_chosen_csq_idx = pick_single_gene_csq(vep_csq_results, logger, pick_criteria_ordered = vep_pick_order)        
+        vep_chosen_csq_idx = pick_single_gene_csq(vep_csq_results, pick_criteria_ordered = vep_pick_order)        
         vep_csq_results['picked_csq'] = vep_csq_results['picked_gene_csq'][vep_chosen_csq_idx]
-    
     else:
         ## check that size if 1, otherwise prompt error below
         #logger.info('ERROR: No VEP block chosen by --pick_allele_gene')
         if len(vep_csq_results['picked_gene_csq']) == 1:
             vep_csq_results['picked_csq'] = vep_csq_results['picked_gene_csq'][vep_chosen_csq_idx]
         else:
-            logger.info('ERROR: No VEP block chosen by --pick_allele_gene')
+            logger.error('ERROR: No VEP block chosen by --pick_allele_gene')
 
 
 

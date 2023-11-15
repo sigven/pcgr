@@ -80,6 +80,38 @@ def append_annotations(vcf2tsv_gz_fname: str, pcgr_db_dir: str, logger):
             vcf2tsv_df = vcf2tsv_df.fillna('.')
     
     return(vcf2tsv_df)
+
+def set_allelic_support(variant_set: pd.DataFrame, allelic_support_tags: dict) -> pd.DataFrame:
+    """
+    Set allelic support for variants
+    """
+    
+    if allelic_support_tags['control_dp_tag'] != "_NA_":
+        if {allelic_support_tags['control_dp_tag'],'DP_CONTROL'}.issubset(variant_set.columns):
+            variant_set['DP_CONTROL'] = variant_set[allelic_support_tags['control_dp_tag']].astype(int)
+    
+    if allelic_support_tags['tumor_dp_tag'] != "_NA_":
+        if {allelic_support_tags['tumor_dp_tag'],'DP_TUMOR'}.issubset(variant_set.columns):
+            variant_set['DP_TUMOR'] = variant_set[allelic_support_tags['tumor_dp_tag']].astype(int)
+    
+    if allelic_support_tags['control_af_tag'] != "_NA_":
+        if {allelic_support_tags['control_af_tag'],'AF_CONTROL'}.issubset(variant_set.columns):
+            variant_set['AF_CONTROL'] = variant_set[allelic_support_tags['control_af_tag']].astype(float).round(3)
+    
+    if allelic_support_tags['tumor_af_tag'] != "_NA_":
+        if {allelic_support_tags['tumor_af_tag'],'AF_TUMOR'}.issubset(variant_set.columns):
+            variant_set['AF_TUMOR'] = variant_set[allelic_support_tags['tumor_af_tag']].astype(float).round(3)
+    
+    return variant_set
+
+def calculate_tmb(variant_set: pd.DataFrame, tmb_fname: str) -> int:
+    """
+    Calculate TMB for somatic variant set
+    """
+    
+    if tmb_fname != "_NA_":
+        if {tmb_fname,'TMB'}.issubset(variant_set.columns):
+            variant_set['TMB'] = variant_set[tmb_fname].astype(float)
     
     
     

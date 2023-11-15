@@ -164,7 +164,8 @@ def map_regulatory_variant_annotations(vep_csq_records):
             # MotifFeature annotations (TF)
             if vep_csq_records[j]['Feature_type'] == 'MotifFeature':
                 missing_motif_annotation = False
-                for annotation in ['MOTIF_NAME', 'MOTIF_POS', 'HIGH_INF_POS', 'MOTIF_SCORE_CHANGE', 'TRANSCRIPTION_FACTORS']:
+                for annotation in ['MOTIF_NAME', 'MOTIF_POS', 'HIGH_INF_POS', 
+                                   'MOTIF_SCORE_CHANGE', 'TRANSCRIPTION_FACTORS']:
                     if not annotation in vep_csq_records[j].keys():
                         missing_motif_annotation = True
 
@@ -276,8 +277,10 @@ def assign_cds_exon_intron_annotations(csq_record):
         csq_record['EXONIC_STATUS'] = 'exonic'
 
     if 'LoF' in csq_record:
-        if csq_record['LoF'] != '.':
-            csq_record['LOSS_OF_FUNCTION'] = True
+        csq_record['LOSS_OF_FUNCTION'] = False        
+        if not csq_record['LoF'] is None:
+            if csq_record['LoF'] == 'HC':
+                csq_record['LOSS_OF_FUNCTION'] = True
             
         ## Don't list LoF as True if consequence is assigned as missense
         if re.search(r"^missense", csq_record['Consequence']) is not None:
@@ -320,11 +323,11 @@ def assign_cds_exon_intron_annotations(csq_record):
                 csq_record['CDS_CHANGE'] = key
 
     if csq_record['Amino_acids'] is None or csq_record['Protein_position'] is None or csq_record['Consequence'] is None:
-        return
+        return(csq_record)
     
     if not csq_record['Protein_position'] is None:
         if csq_record['Protein_position'].startswith('-'):
-            return
+            return(csq_record)
 
     protein_change = '.'
     if '/' in csq_record['Protein_position']:
@@ -363,9 +366,9 @@ def assign_cds_exon_intron_annotations(csq_record):
         if csq_record['EXON'] != '.':
             if '/' in csq_record['EXON']:
                 exon_number = str(csq_record['EXON']).split('/')[0]
-                csq_record['AFFECTED_EXON'] = exon_number
+                csq_record['EXON_AFFECTED'] = exon_number
                 if '-' in exon_number:
-                    csq_record['AFFECTED_EXON'] = exon_number.split('-')[0]
+                    csq_record['EXON_AFFECTED'] = exon_number.split('-')[0]
                 num_exons = str(csq_record['EXON']).split('/')[1]
                 if exon_number == num_exons:
                     csq_record['LAST_EXON'] = True
@@ -384,7 +387,7 @@ def assign_cds_exon_intron_annotations(csq_record):
                 key = str(csq_record['Consequence']) + ':' + str(csq_record['HGVSc']) + ':exon' + str(exon_number) + ':' + str(protein_change)
                 csq_record['CDS_CHANGE'] = key
 
-    return
+    return(csq_record)
 
 
 def make_transcript_xref_map(rec, fieldmap, xref_tag='GENE_TRANSCRIPT_XREF'):

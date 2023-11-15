@@ -5,6 +5,8 @@ import re
 import argparse
 import cyvcf2
 import os
+import sys
+import yaml
 
 from pcgr import annoutils
 from pcgr.annoutils import read_infotag_file, make_transcript_xref_map, read_genexref_namemap, map_regulatory_variant_annotations, write_pass_vcf
@@ -26,15 +28,19 @@ from pcgr.vep import parse_vep_csq
 csv.field_size_limit(500 * 1024 * 1024)
 
 def __main__():
-    parser = argparse.ArgumentParser(description='Cancer gene annotations from PCGR pipeline (SNVs/InDels)')
-    parser.add_argument('vcf_file', help='VCF file with VEP-annotated query variants (SNVs/InDels)')
-    parser.add_argument('pon_annotation',default=0,type=int,help='Include Panel of Normals annotation')
+    parser = argparse.ArgumentParser(description='Summarise VEP annotations (gene/variant) from PCGR/CPSR pipeline (SNVs/InDels)')
+    parser.add_argument('vcf_file_in', help='Bgzipped VCF file with VEP-annotated query variants (SNVs/InDels)')
+    parser.add_argument('vcf_file_out', help='Bgzipped VCF file with extended VEP-annotated query variants (SNVs/InDels)')
+    parser.add_argument('pon_annotation',default=0,type=int,help='Include Panel of Normals annotation (0/1)')
     parser.add_argument('regulatory_annotation',default=0,type=int,help='Inclusion of VEP regulatory annotations (0/1)')
     parser.add_argument('oncogenicity_annotation',default=0,type=int,help='Include oncogenicity annotation (0/1)')
     parser.add_argument('tumortype', default='Any', help='Primary tumor type of query VCF')
-    parser.add_argument('vep_pick_order', default="mane,canonical,appris,biotype,ccds,rank,tsl,length", help=f"Comma-separated string of ordered transcript/variant properties for selection of primary variant consequence")
+    parser.add_argument('vep_pick_order', default="mane,canonical,appris,biotype,ccds,rank,tsl,length", 
+                        help=f"Comma-separated string of ordered transcript/variant properties for selection of primary variant consequence")
     parser.add_argument('pcgr_db_dir',help='PCGR data directory')
+    parser.add_argument('--compress_output_vcf', action="store_true", default=False, help="Compress output VCF file")
     parser.add_argument('--cpsr',action="store_true",help="Aggregate cancer gene annotations for Cancer Predisposition Sequencing Reporter (CPSR)")
+    parser.add_argument('--cpsr_yaml',dest="cpsr_yaml", default=None, help='YAML file with list of targeted genes by CPSR (custom, or panel-defined)')
     parser.add_argument("--debug", action="store_true", default=False, help="Print full commands to log, default: %(default)s")
     args = parser.parse_args()
 
@@ -43,7 +49,7 @@ def __main__():
         logger = utils.getlogger('cpsr-gene-annotate')
     
     arg_dict = vars(args)
-
+    
     extend_vcf_annotations(arg_dict, logger)
 
 def extend_vcf_annotations(arg_dict, logger):
@@ -63,49 +69,69 @@ def extend_vcf_annotations(arg_dict, logger):
        Variant oncogenicity levels are provided for all variants using a recommended five-level scheme ("Oncogenic", "Likely oncogenic", "VUS", "Likely Benign", "Benign")
        - Recommended scoring scheme for variant oncogenicity classification outlined by VICC/ClinGen consortia (Horak et al., Genet Med, 2022)
 
-    List of VCF INFO tags to be appended is defined by the 'infotags' files in the pcgr_db_dir
+    List of VCF INFO tags appended by this procedure is defined by the 'infotags' files in the pcgr_db_dir
     """
-    vcf_infotags_pcgr = read_infotag_file(os.path.join(arg_dict['pcgr_db_dir'], 'pcgr_vcf_infotags.tsv'))
-    vcf_infotags_vep = read_infotag_file(os.path.join(arg_dict['pcgr_db_dir'], 'vep_vcf_infotags.tsv'))
-    vcf_infotags_meta = {}
-
-    for tag in vcf_infotags_pcgr:
-        vcf_infotags_meta[tag] = vcf_infotags_pcgr[tag]
-    for tag in vcf_infotags_vep:
-        vcf_infotags_meta[tag] = vcf_infotags_vep[tag]
-
+    
+    vcf_infotags = {}
+    
+    vcf_infotags['other'] = read_infotag_file(os.path.join(arg_dict['pcgr_db_dir'], 'vcf_infotags_other.tsv'), scope = "pcgr")
     if arg_dict['cpsr'] is True:
-        vcf_infotags_meta = read_infotag_file(os.path.join(arg_dict['pcgr_db_dir'], 'cpsr_vcf_infotags.tsv'))
-        ## add gnomad non-cancer
-    gene_transcript_xref_map = read_genexref_namemap(os.path.join(arg_dict['pcgr_db_dir'], 'gene','tsv','gene_transcript_xref', 'gene_transcript_xref_bedmap.tsv.gz'), logger)
-    cancer_hotspots = load_mutation_hotspots(os.path.join(arg_dict['pcgr_db_dir'], 'misc','tsv','hotspot', 'hotspot.tsv.gz'), logger)
+        vcf_infotags['other'] = read_infotag_file(os.path.join(arg_dict['pcgr_db_dir'], 'vcf_infotags_other.tsv'), scope = "cpsr")
+    vcf_infotags['vep'] = read_infotag_file(os.path.join(arg_dict['pcgr_db_dir'], 'vcf_infotags_vep.tsv'), scope = "vep")
+    vcf_infotags['other'].update(vcf_infotags['vep'])
+    vcf_info_metadata = vcf_infotags['other']
+    
+    
+    ## load CPSR target genes from YAML file
+    cpsr_target_genes = {}
+    if arg_dict['cpsr'] is True:
+        if not arg_dict['cpsr_yaml'] is None:
+            if os.path.exists(arg_dict['cpsr_yaml']):
+                with open(arg_dict['cpsr_yaml'], 'r') as f:
+                    yaml_data = yaml.safe_load(f)
+                    if yaml_data is not None:
+                        panel_genes = yaml_data['conf']['gene_panel']['panel_genes']
+                        for g in panel_genes:
+                            if 'ensembl_gene_id' in g:
+                                cpsr_target_genes[g['ensembl_gene_id']] = 1
+                            
+            
+        vcf_infotags['cpsr'] = read_infotag_file(os.path.join(arg_dict['pcgr_db_dir'], 'vcf_infotags_cpsr.tsv'), scope = "cpsr")
+        vcf_infotags['other'].update(vcf_infotags['cpsr'])
+        vcf_info_metadata.update(vcf_infotags['cpsr'])
+
+    gene_transcript_xref_map = read_genexref_namemap(
+        os.path.join(arg_dict['pcgr_db_dir'], 'gene','tsv','gene_transcript_xref', 'gene_transcript_xref_bedmap.tsv.gz'), logger)
+    cancer_hotspots = load_mutation_hotspots(
+        os.path.join(arg_dict['pcgr_db_dir'], 'misc','tsv','hotspot', 'hotspot.tsv.gz'), logger)
 
     biomarkers = {}
     for db in ['cgi','civic']:
         variant_fname = os.path.join(arg_dict['pcgr_db_dir'], 'biomarker','tsv', f"{db}.variant.tsv.gz")
         clinical_fname = os.path.join(arg_dict['pcgr_db_dir'], 'biomarker','tsv', f"{db}.clinical.tsv.gz")
-        biomarkers[db] = load_biomarkers(logger, variant_fname, clinical_fname)
+        biomarkers[db] = load_biomarkers(logger, variant_fname, clinical_fname, biomarker_vartype = 'MUT')
 
-    out_vcf = re.sub(r'\.vcf(\.gz){0,}$','.annotated.vcf',arg_dict['vcf_file'])
+    out_vcf = re.sub(r'(\.gz)$','',arg_dict['vcf_file_out'])
 
-    meta_vep_dbnsfp_info = vep_dbnsfp_meta_vcf(arg_dict['vcf_file'], vcf_infotags_meta)
+    meta_vep_dbnsfp_info = vep_dbnsfp_meta_vcf(arg_dict['vcf_file_in'], vcf_info_metadata)
     dbnsfp_prediction_algorithms = meta_vep_dbnsfp_info['dbnsfp_prediction_algorithms']
     vep_csq_fields_map = meta_vep_dbnsfp_info['vep_csq_fieldmap']
-    vcf = cyvcf2.VCF(arg_dict['vcf_file'])
-    for tag in sorted(vcf_infotags_meta):
+    
+    vcf = cyvcf2.VCF(arg_dict['vcf_file_in'])
+    for tag in sorted(vcf_info_metadata):
         if arg_dict['pon_annotation'] == 0 and arg_dict['regulatory_annotation'] == 0:
             if not tag.startswith('PANEL_OF_NORMALS') and not tag.startswith('REGULATORY_'):
-                vcf.add_info_to_header({'ID': tag, 'Description': str(vcf_infotags_meta[tag]['description']),'Type':str(vcf_infotags_meta[tag]['type']), 'Number': str(vcf_infotags_meta[tag]['number'])})
+                vcf.add_info_to_header({'ID': tag, 'Description': str(vcf_info_metadata[tag]['description']),'Type':str(vcf_info_metadata[tag]['type']), 'Number': str(vcf_info_metadata[tag]['number'])})
         elif arg_dict['pon_annotation'] == 1 and arg_dict['regulatory_annotation'] == 0:
             if not tag.startswith('REGULATORY_'):
-                vcf.add_info_to_header({'ID': tag, 'Description': str(vcf_infotags_meta[tag]['description']),'Type':str(vcf_infotags_meta[tag]['type']), 'Number': str(vcf_infotags_meta[tag]['number'])})
+                vcf.add_info_to_header({'ID': tag, 'Description': str(vcf_info_metadata[tag]['description']),'Type':str(vcf_info_metadata[tag]['type']), 'Number': str(vcf_info_metadata[tag]['number'])})
         elif arg_dict['pon_annotation'] == 0 and arg_dict['regulatory_annotation'] == 1:
             if not tag.startswith('PANEL_OF_NORMALS'):
-                vcf.add_info_to_header({'ID': tag, 'Description': str(vcf_infotags_meta[tag]['description']),'Type':str(vcf_infotags_meta[tag]['type']), 'Number': str(vcf_infotags_meta[tag]['number'])})
+                vcf.add_info_to_header({'ID': tag, 'Description': str(vcf_info_metadata[tag]['description']),'Type':str(vcf_info_metadata[tag]['type']), 'Number': str(vcf_info_metadata[tag]['number'])})
         else:
-            vcf.add_info_to_header({'ID': tag, 'Description': str(vcf_infotags_meta[tag]['description']),'Type':str(vcf_infotags_meta[tag]['type']), 'Number': str(vcf_infotags_meta[tag]['number'])})
+            vcf.add_info_to_header({'ID': tag, 'Description': str(vcf_info_metadata[tag]['description']),'Type':str(vcf_info_metadata[tag]['type']), 'Number': str(vcf_info_metadata[tag]['number'])})
 
-    w = cyvcf2.Writer(out_vcf, vcf)
+    w = cyvcf2.Writer(arg_dict['vcf_file_out'], vcf)
     current_chrom = None
     num_chromosome_records_processed = 0
 
@@ -136,15 +162,21 @@ def extend_vcf_annotations(arg_dict, logger):
             continue
 
         num_chromosome_records_processed += 1
-        pcgr_onco_xref = make_transcript_xref_map(rec, gene_transcript_xref_map, xref_tag = "GENE_TRANSCRIPT_XREF")
+        transcript_xref_map = make_transcript_xref_map(rec, gene_transcript_xref_map, xref_tag = "GENE_TRANSCRIPT_XREF")
 
-        if arg_dict['regulatory_annotation'] == 1:
-            csq_record_results_all = parse_vep_csq(rec, pcgr_onco_xref, vep_csq_fields_map, arg_dict['vep_pick_order'], logger, pick_only = False, csq_identifier = 'CSQ')
-            if 'picked_gene_csq' in csq_record_results_all:
-                vep_csq_records_all = csq_record_results_all['picked_gene_csq']
+        vep_csq_record_results = {}
+        if arg_dict['cpsr'] is True:
+            vep_csq_record_results = \
+                parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, arg_dict['vep_pick_order'], 
+                              logger, pick_only = False, csq_identifier = 'CSQ', 
+                              targets_ensembl_gene = cpsr_target_genes)
+            if 'picked_gene_csq' in vep_csq_record_results:
+                vep_csq_records_all = vep_csq_record_results['picked_gene_csq']
                 rec.INFO['REGULATORY_ANNOTATION'] = map_regulatory_variant_annotations(vep_csq_records_all)
-
-        vep_csq_record_results = parse_vep_csq(rec, pcgr_onco_xref, vep_csq_fields_map, arg_dict['vep_pick_order'], logger, pick_only = True, csq_identifier = 'CSQ')
+        else:
+            vep_csq_record_results = \
+                parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, arg_dict['vep_pick_order'], 
+                              logger, pick_only = True, csq_identifier = 'CSQ')
 
         principal_csq_properties = {}
         principal_csq_properties['hgvsp'] = '.'
@@ -152,7 +184,7 @@ def extend_vcf_annotations(arg_dict, logger):
         principal_csq_properties['entrezgene'] = '.'
         principal_csq_properties['exon'] = '.'
         principal_csq_properties['codon'] = '.'
-
+        
         if 'picked_csq' in vep_csq_record_results:
             csq_record = vep_csq_record_results['picked_csq']
             for k in csq_record:
@@ -163,7 +195,6 @@ def extend_vcf_annotations(arg_dict, logger):
                         if not csq_record[k] is None:
                             rec.INFO[k] = csq_record[k]
 
-                            #print(k)
                             if k == 'HGVSp_short':
                                 principal_csq_properties['hgvsp'] = csq_record[k]
                                 if re.match(r'^(p.[A-Z]{1}[0-9]{1,}[A-Za-z]{1,})', principal_csq_properties['hgvsp']):
@@ -194,8 +225,10 @@ def extend_vcf_annotations(arg_dict, logger):
         if arg_dict['oncogenicity_annotation'] == 1:
             assign_oncogenicity_evidence(rec, tumortype = arg_dict['tumortype'])
 
-        if 'GENE_TRANSCRIPT_XREF' in rec.INFO:
-            del rec.INFO['GENE_TRANSCRIPT_XREF']
+        if "GENE_TRANSCRIPT_XREF" in vcf_info_element_types:
+            gene_xref_tag = rec.INFO.get('GENE_TRANSCRIPT_XREF')
+            if not gene_xref_tag is None:
+                del rec.INFO['GENE_TRANSCRIPT_XREF']                
         w.write_record(rec)
     if vars_no_csq:
         logger.warning(f"There were {len(vars_no_csq)} records with no CSQ tag from VEP (was --vep_no_intergenic flag set?). Skipping them and showing (up to) the first 100:")
@@ -207,12 +240,13 @@ def extend_vcf_annotations(arg_dict, logger):
         logger.info(f"Completed summary of functional annotations for {num_chromosome_records_processed} variants on chr{current_chrom}")
     vcf.close()
 
-    if os.path.exists(out_vcf):
-        if os.path.getsize(out_vcf) > 0:
-            check_subprocess(logger, f'bgzip -f {out_vcf}', debug=arg_dict['debug'])
-            check_subprocess(logger, f'tabix -f -p vcf {out_vcf}.gz', debug=arg_dict['debug'])
-            annotated_vcf = f'{out_vcf}.gz'
-            write_pass_vcf(annotated_vcf, logger)
+    if os.path.exists(arg_dict['vcf_file_out']):
+        if os.path.getsize(arg_dict['vcf_file_out']) > 0:
+            if arg_dict['compress_output_vcf'] is True:
+                check_subprocess(logger, f'bgzip -f {out_vcf}', debug=arg_dict['debug'])
+                check_subprocess(logger, f'tabix -f -p vcf {out_vcf}.gz', debug=arg_dict['debug'])
+                summarized_vcf = f'{arg_dict["vcf_file_out"]}.gz'
+                write_pass_vcf(summarized_vcf, logger)
         else:
             error_message('No remaining PASS variants found in query VCF - exiting and skipping STEP 4', logger)
     else:

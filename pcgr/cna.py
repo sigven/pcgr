@@ -206,7 +206,6 @@ def annotate_cytoband(cna_segments_bt: BedTool, output_dir: str, pcgr_build_db_d
     cytoband_last_annotations.columns = ['last_cytoband','last_arm','last_arm_length','last_focal_threshold']
         
     cytoband_all = pd.concat([segments_cytoband, cytoband_first_annotations, cytoband_last_annotations], axis = 1)
-    print(str(cytoband_all.head()))  
     cytoband_all['segment_start'] = cytoband_all['segment_start'].astype(int)
     cytoband_all['segment_end'] = cytoband_all['segment_end'].astype(int)       
     cytoband_all.loc[:,'segment_length'] = cytoband_all['segment_end'] - cytoband_all['segment_start']

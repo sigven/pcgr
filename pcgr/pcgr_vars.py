@@ -3,7 +3,7 @@
 from pcgr._version import __version__
 
 PCGR_VERSION = __version__
-DB_VERSION = '20231018'
+DB_VERSION = '20231107'
 VEP_VERSION = '105'
 GENCODE_VERSION = '39'
 NCBI_BUILD_MAF = 'GRCh38'
