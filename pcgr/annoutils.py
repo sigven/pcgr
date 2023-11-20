@@ -8,7 +8,7 @@ import cyvcf2
 import gzip
 
 from cyvcf2 import VCF, Writer
-from pcgr import utils
+from pcgr import utils, pcgr_vars
 from pcgr.utils import check_subprocess, error_message
 
 csv.field_size_limit(500 * 1024 * 1024)
@@ -188,59 +188,6 @@ def map_regulatory_variant_annotations(vep_csq_records):
 
     return (regulatory_annotation)
 
-
-def get_correct_cpg_transcript(vep_csq_records):
-    """
-    Function that considers an array of VEP CSQ records and picks most relevant consequence (and gene) from
-    neighbouring genes/transcripts of relevance for cancer predisposition (cpg = cancer predisposition gene)
-    """
-
-    csq_idx = 0
-    if len(vep_csq_records) == 1:
-        return csq_idx
-
-    # some variants iare assigned multiple transcript consequences
-    # if cancer predisposition genes are in the vicinity of other genes, choose the cancer predisposition gene
-    # if there are neighbouring cancer-predispositon genes, choose custom gene, preferring coding change (see below, KLLN/PTEN, XPC/TMEM43, NTHL1/TSC2)
-    csq_idx_dict = {}
-    for g in ['KLLN', 'PTEN', 'XPC', 'TMEM43', 'NTHL1', 'TSC2']:
-        csq_idx_dict[g] = {}
-        csq_idx_dict[g]['idx'] = -1
-        csq_idx_dict[g]['coding'] = False
-
-    j = 0
-    while j < len(vep_csq_records):
-        if 'CANCER_PREDISPOSITION_SOURCE' in vep_csq_records[j].keys() or 'GE_PANEL_ID' in vep_csq_records[j].keys():
-            csq_idx = j
-            if 'SYMBOL' in vep_csq_records[j].keys():
-                if vep_csq_records[j]['SYMBOL'] in csq_idx_dict.keys():
-                    csq_idx_dict[str(vep_csq_records[j]['SYMBOL'])]['idx'] = j
-                    if vep_csq_records[j]['CODING_STATUS'] == 'coding':
-                        csq_idx = j  # prefer coding on over anything else
-                        csq_idx_dict[str(vep_csq_records[j]
-                                         ['SYMBOL'])]['coding'] = True
-        j = j + 1
-
-    if csq_idx_dict['KLLN']['idx'] != -1 and csq_idx_dict['PTEN']['idx'] != -1:
-        csq_idx = csq_idx_dict['PTEN']['idx']
-        if csq_idx_dict['KLLN']['coding'] is True:
-            csq_idx = csq_idx_dict['KLLN']['idx']
-
-    if csq_idx_dict['XPC']['idx'] != -1 and csq_idx_dict['TMEM43']['idx'] != -1:
-        csq_idx = csq_idx_dict['XPC']['idx']
-        if csq_idx_dict['TMEM43']['coding'] is True:
-            csq_idx = csq_idx_dict['TMEM43']['idx']
-
-    if csq_idx_dict['TSC2']['idx'] != -1 and csq_idx_dict['NTHL1']['idx'] != -1:
-        csq_idx = csq_idx_dict['TSC2']['idx']
-        if csq_idx_dict['NTHL1']['coding'] is True:
-            csq_idx = csq_idx_dict['NTHL1']['idx']
-
-    if csq_idx is None:
-        csq_idx = 0
-    return csq_idx
-
-
 def threeToOneAA(aa_change):
 
     for three_letter_aa in threeLettertoOneLetterAA.keys():
@@ -265,15 +212,10 @@ def assign_cds_exon_intron_annotations(csq_record):
     csq_record['EXON_AFFECTED'] = '.'
     csq_record['LOSS_OF_FUNCTION'] = False
 
-    coding_csq_pattern = r"(stop_(lost|gained)|start_lost|frameshift_|missense_|splice_(donor|acceptor)|protein_altering|inframe_)"
-    wes_csq_pattern = r"(stop_(lost|gained)|start_lost|frameshift_|missense_|splice_(donor|acceptor)|protein_altering|inframe_|synonymous|(start|stop)_retained)"
-    null_pattern = r"(stop_gained|frameshift_)"
-    splice_region_pattern = r"(splice_|intron_variant)"
-    splice_donor_pattern = r"(splice_region_variant|splice_donor_variant|splice_donor_region_variant|splice_donor_5th_base_variant)"
-    if re.search(coding_csq_pattern, str(csq_record['Consequence'])) is not None:
+    if re.search(pcgr_vars.CSQ_CODING_PATTERN, str(csq_record['Consequence'])) is not None:
         csq_record['CODING_STATUS'] = 'coding'
 
-    if re.search(wes_csq_pattern, str(csq_record['Consequence'])) is not None:
+    if re.search(pcgr_vars.CSQ_CODING_SILENT_PATTERN, str(csq_record['Consequence'])) is not None:
         csq_record['EXONIC_STATUS'] = 'exonic'
 
     if 'LoF' in csq_record:
@@ -283,18 +225,19 @@ def assign_cds_exon_intron_annotations(csq_record):
                 csq_record['LOSS_OF_FUNCTION'] = True
             
         ## Don't list LoF as True if consequence is assigned as missense
-        if re.search(r"^missense", csq_record['Consequence']) is not None:
+        if re.search(pcgr_vars.CSQ_MISSENSE_PATTERN, csq_record['Consequence']) is not None:
             if csq_record['LOSS_OF_FUNCTION'] is True:
                 csq_record['LOSS_OF_FUNCTION'] = False
         
 
-    if re.search(null_pattern, str(csq_record['Consequence'])) is not None:
+    if re.search(pcgr_vars.CSQ_NULL_PATTERN, str(csq_record['Consequence'])) is not None:
         csq_record['NULL_VARIANT'] = True
     
-    if re.search(splice_donor_pattern, str(csq_record['Consequence'])) is not None and re.search(r'(\+3(A|G)>|\+4A>|\+5G>)', str(csq_record['HGVSc'])) is not None:
+    if re.search(pcgr_vars.CSQ_SPLICE_DONOR_PATTERN, str(csq_record['Consequence'])) is not None \
+        and re.search(r'(\+3(A|G)>|\+4A>|\+5G>)', str(csq_record['HGVSc'])) is not None:
         csq_record['SPLICE_DONOR_RELEVANT'] = True
 
-    if re.search(splice_region_pattern, str(csq_record['Consequence'])) is not None:
+    if re.search(pcgr_vars.CSQ_SPLICE_REGION_PATTERN, str(csq_record['Consequence'])) is not None:
         match = re.search(
             r"((-|\+)[0-9]{1,}(dup|del|inv|((ins|del|dup|inv|delins)(A|G|C|T){1,})|(A|C|T|G){1,}>(A|G|C|T){1,}))$", str(csq_record['HGVSc']))
         if match is not None:

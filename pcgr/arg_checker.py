@@ -53,51 +53,55 @@ def check_args(arg_dict):
             error_message(err_msg, logger)
 
     # check that minimum/maximum depth/allelic fractions are set correctly
-    if arg_dict['tumor_dp_min'] < 0:
+    if int(arg_dict['tumor_dp_min']) < 0:
         err_msg = f"Minimum sequencing depth tumor ('tumor_dp_min' = {arg_dict['tumor_dp_min']}) must be >= 0"
         error_message(err_msg, logger)
 
-    if arg_dict['tumor_af_min'] < 0 or arg_dict['tumor_af_min'] > 1:
+    if float(arg_dict['tumor_af_min']) < 0 or float(arg_dict['tumor_af_min']) > 1:
         err_msg = f"Minimum AF tumor ('tumor_af_min' = {arg_dict['tumor_af_min']}) must be within [0, 1]"
         error_message(err_msg, logger)
 
-    if arg_dict['control_dp_min'] < 0:
+    if int(arg_dict['control_dp_min']) < 0:
         err_msg = f"Minimum sequencing depth control ('control_dp_min' = {arg_dict['control_dp_min']}) must be >= 0"
         error_message(err_msg, logger)
 
-    if arg_dict['control_af_max'] < 0 or arg_dict['control_af_max'] > 1:
+    if float(arg_dict['control_af_max']) < 0 or float(arg_dict['control_af_max']) > 1:
         err_msg = f"Maximum AF control ('control_af_max' = {arg_dict['control_af_max']}) must be within [0, 1]"
         error_message(err_msg, logger)
     
     
      # TMB: check that minimum/maximum depth/allelic fractions are set correctly
-    if arg_dict['tmb_dp_min'] < 0:
+    if int(arg_dict['tmb_dp_min']) < 0:
         err_msg = f"Minimum sequencing depth tumor - TMB calculation ('tmb_dp_min' = {arg_dict['tmb_dp_min']}) must be >= 0"
         error_message(err_msg, logger)
         
-    if arg_dict['tmb_dp_min'] < arg_dict['tumor_dp_min']:
+    if int(arg_dict['tmb_dp_min']) < int(arg_dict['tumor_dp_min']):
         err_msg = f"Minimum sequencing depth (tumor) for TMB calculation ('tmb_dp_min' = {arg_dict['tmb_dp_min']}) must be ",
         err_msg += f"greater or equal to minimum sequencing depth tumor {arg_dict['tumor_dp_min']} (i.e. filter for variant inclusion in report)"
         error_message(err_msg, logger)
 
-    if arg_dict['tmb_af_min'] < 0 or arg_dict['tmb_af_min'] > 1:
+    if float(arg_dict['tmb_af_min']) < 0 or float(arg_dict['tmb_af_min']) > 1:
         err_msg = f"Minimum AF (tumor) for TMB calculation ('tmb_af_min' = {arg_dict['tmb_af_min']}) must be within [0, 1]"
         error_message(err_msg, logger)
         
-    if arg_dict['tmb_af_min'] < arg_dict['tumor_af_min']:
+    if float(arg_dict['tmb_af_min']) < float(arg_dict['tumor_af_min']):
         err_msg = f"Minimum AF (tumor) for TMB calculation ('tmb_af_min' = {arg_dict['tmb_af_min']}) must be ",
         err_msg += f"greater or equal to minimum AF tumor {arg_dict['tumor_dp_min']} (i.e. filter for variant inclusion in report)"
         error_message(err_msg, logger)
 
     # Check that coding target size region of sequencing assay is set correctly
-    if arg_dict['effective_target_size_mb'] < 0 or arg_dict['effective_target_size_mb'] > 34:
-        err_msg = f"Coding target size region in Mb ('--effective_target_size_mb' = {arg_dict['effective_target_size_mb']}) is not positive or larger than the likely maximum size of the coding human genome (34 Mb))"
+    if float(arg_dict['effective_target_size_mb']) < 0 or float(arg_dict['effective_target_size_mb']) > float(pcgr_vars.CODING_EXOME_SIZE_MB):
+        err_msg = (
+            f"Coding target size region in Mb ('--effective_target_size_mb' = {arg_dict['effective_target_size_mb']}) is not ",
+            f"positive or larger than the approximate size of the coding human genome ({float(pcgr_vars.CODING_EXOME_SIZE_MB)} Mb))")
         error_message(err_msg, logger)
-    if arg_dict['effective_target_size_mb'] < 1:
+    if float(arg_dict['effective_target_size_mb']) < 1:
         warn_msg = f"Coding target size region in Mb ('--effective_target_size_mb' = {arg_dict['effective_target_size_mb']}) must be greater than 1 Mb for mutational burden estimate to be robust"
         warn_message(warn_msg, logger)
-    if arg_dict['effective_target_size_mb'] < 34 and arg_dict['assay'] != 'TARGETED':
-        warn_msg = f"Coding target size region in Mb ('--effective_target_size_mb' = {arg_dict['effective_target_size_mb']}) is less than default for WES/WGS (34Mb), assay must be set to 'TARGETED'"
+    if float(arg_dict['effective_target_size_mb']) < float(pcgr_vars.CODING_EXOME_SIZE_MB) and arg_dict['assay'] != 'TARGETED':
+        warn_msg = (
+            f"Coding target size region in Mb ('--effective_target_size_mb' = {arg_dict['effective_target_size_mb']}) is less than ",
+            f"the default for WES/WGS ({float(pcgr_vars.CODING_EXOME_SIZE_MB)} Mb), assay must be set to 'TARGETED'")
         warn_message(warn_msg, logger)
 
     # if assay is targeted or mode is Tumor-Only, MSI prediction will not be performed/switched off
@@ -110,10 +114,12 @@ def check_args(arg_dict):
         arg_dict['estimate_msi_status'] = 0
 
     # minimum number of mutations required for mutational signature reconstruction cannot be less than 100 (somewhat arbitrary lower threshold, recommended value is 200)
-    if arg_dict['min_mutations_signatures'] < 200:
-        warn_msg = f"Minimum number of mutations required for mutational signature analysis ('--min_mutations_signatures' = {arg_dict['min_mutations_signatures']}) is less than the recommended number (n = 200)"
+    if int(arg_dict['min_mutations_signatures']) < int(pcgr_vars.RECOMMENDED_N_MUT_SIGNATURE):
+        warn_msg = (
+            f"Minimum number of mutations required for mutational signature analysis ('--min_mutations_signatures' ",
+            f"= {arg_dict['min_mutations_signatures']}) is less than the recommended number (n = {pcgr_vars.RECOMMENDED_N_MUT_SIGNATURE})")
         warn_message(warn_msg, logger)
-        if arg_dict['min_mutations_signatures'] < 100:
+        if int(arg_dict['min_mutations_signatures']) < 100:
             err_msg = f"Minimum number of mutations required for mutational signature analysis ('--min_mutations_signatures' = {arg_dict['min_mutations_signatures']}) must be >= 100"
             error_message(err_msg, logger)
 
@@ -164,12 +170,16 @@ def check_args(arg_dict):
         error_message(err_msg, logger)
 
     # VEP options
-    if arg_dict['vep_n_forks'] <= 0 or arg_dict['vep_n_forks'] > 8:
-        err_msg = f"Number of forks that VEP can use during annotation must be above 0 and not more than 8 (recommended is 4), current value is {arg_dict['vep_n_forks']}"
+    if int(arg_dict['vep_n_forks']) <= 0 or int(arg_dict['vep_n_forks']) > int(pcgr_vars.VEP_MAX_FORKS):
+        err_msg = (
+            f"Number of forks that VEP can use during annotation must be above 0 and not more than {pcgr_vars.VEP_MAX_FORKS}",
+            f" (recommended is 4), current value is {arg_dict['vep_n_forks']}")
         error_message(err_msg, logger)
 
-    if arg_dict['vep_buffer_size'] <= 0 or arg_dict['vep_buffer_size'] > 30000:
-        err_msg = f"Internal VEP buffer size, corresponding to the number of variants that are read in to memory simultaneously ('--vep_buffer_size' = {arg_dict['vep_buffer_size']}),  must be within (0, 30000]"
+    if int(arg_dict['vep_buffer_size']) <= 0 or int(arg_dict['vep_buffer_size']) > int(pcgr_vars.VEP_MAX_BUFFER_SIZE):
+        err_msg = (
+            f"Internal VEP buffer size, corresponding to the number of variants that are read in to memory simultaneously ",
+            f"('--vep_buffer_size' = {arg_dict['vep_buffer_size']}),  must be within (0, {pcgr_vars.VEP_MAX_BUFFER_SIZE}]")
         error_message(err_msg, logger)
 
     # Check that VEP pick criteria is formatted correctly

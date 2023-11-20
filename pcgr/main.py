@@ -5,6 +5,7 @@ from pcgr.utils import getlogger, check_subprocess
 from pcgr.config import populate_config_data
 from pcgr.maf import update_maf_allelic_support
 
+
 import re
 import argparse
 import pandas
@@ -65,11 +66,11 @@ def cli():
     optional_tmb_msi.add_argument("--estimate_tmb", action="store_true", help="Estimate tumor mutational burden from the total number of somatic mutations and target region size, default: %(default)s")
     optional_tmb_msi.add_argument("--estimate_msi_status", action="store_true", help="Predict microsatellite instability status from patterns of somatic mutations/indels, default: %(default)s")
     optional_tmb_msi.add_argument("--tmb_algorithm", dest="tmb_algorithm", default="all_coding", choices=[ "all_coding", "nonsyn"], help="Method for calculation of TMB, all coding variants (Chalmers et al., Genome Medicine, 2017), or non-synonymous variants only, default: %(default)s")
-    optional_tmb_msi.add_argument("--tmb_af_min", dest="tmb_af_min", default=0, help="If VCF INFO tag for sequencing depth (tumor) is specified and found, set minimum required sequencing depth for TMB calculation: default: %(default)s")
-    optional_tmb_msi.add_argument("--tmb_dp_min", dest="tmb_dp_min", default=0, help="If VCF INFO tag for allelic fraction (tumor) is specified and found, set minimum required allelic fraction for TMB calculation: default: %(default)s")
+    optional_tmb_msi.add_argument("--tmb_dp_min", dest="tmb_dp_min", default=0, help="If VCF INFO tag for sequencing depth (tumor) is specified and found, set minimum required sequencing depth for TMB calculation: default: %(default)s")
+    optional_tmb_msi.add_argument("--tmb_af_min", dest="tmb_af_min", default=0, help="If VCF INFO tag for allelic fraction (tumor) is specified and found, set minimum required allelic fraction for TMB calculation: default: %(default)s")
 
     optional_assay.add_argument("--assay", dest="assay", default="WES", choices=[ "WGS", "WES","TARGETED"], help="Type of DNA sequencing assay performed for input data (VCF), default: %(default)s")
-    optional_assay.add_argument("--effective_target_size_mb", type=float, default=34, dest="effective_target_size_mb", help="Effective target size in Mb of sequencing assay (e.g. for TMB analysis) (default: %(default)s (WES/WGS))")
+    optional_assay.add_argument("--effective_target_size_mb", type=float, default=34, dest="effective_target_size_mb", help="Effective target size in Mb (potentially limited by read depth) of sequencing assay (for TMB analysis) (default: %(default)s (WES/WGS))")
     optional_assay.add_argument("--tumor_only", action="store_true", help="Input VCF comes from tumor-only sequencing, calls will be filtered for variants of germline origin, (default: %(default)s)")
     optional_assay.add_argument("--cell_line", action="store_true", help="Input VCF comes from tumor cell line sequencing (requires --tumor_only), calls will be filtered for variants of germline origin, (default: %(default)s)")
     
@@ -269,6 +270,7 @@ def run_pcgr(pcgr_paths, conf_options):
         output_maf =             f'{prefix}.maf'
         output_vcf2maf_log =     f'{prefix}.maf.log'
         yaml_fname =             f'{prefix}.conf.yaml'
+        tmb_fname =              f'{prefix}.tmb.tsv'
         
         input_vcf_pcgr_ready =   os.path.join(
             output_dir, re.sub(r'\.vcf(\.gz)?$', ".pcgr_ready.vcf.gz", pcgr_paths["input_vcf_basename"]))
@@ -439,7 +441,7 @@ def run_pcgr(pcgr_paths, conf_options):
         check_subprocess(logger, pcgr_vcf2tsv_command, debug)
         
         ## Append additional (space-containing) annotations not suitable for VCF INFO        
-        logger.info("Appending ClinVar and protein domain (Pfam) annotations")        
+        logger.info("Appending ClinVar, gene names, and protein domain annotations")        
         variant_set = \
            variant.append_annotations(
               output_pass_vcf2tsv_gz, pcgr_db_dir = pcgr_paths["db_dir"], logger = logger)
@@ -450,6 +452,8 @@ def run_pcgr(pcgr_paths, conf_options):
         variant_set['EFFECT_PREDICTIONS'] = variant_set['EFFECT_PREDICTIONS'].str.replace("&", ", ", regex = True)
         variant_set.loc[variant_set['CLINVAR_CONFLICTED'] == 1, "CLINVAR_CONFLICTED"] = True
         variant_set.loc[variant_set['CLINVAR_CONFLICTED'] != 1, "CLINVAR_CONFLICTED"] = False
+        variant_set['VCF_SAMPLE_ID'] = yaml_data['sample_id']
+        variant_set['GENOME_VERSION'] = yaml_data['genome_assembly']        
         variant_set['GENOMIC_CHANGE'] = variant_set['CHROM'].astype(str) + ":g." + variant_set['POS'].astype(str) + \
             variant_set['REF'].astype(str) + ">" + variant_set['ALT'].astype(str)
         if not {'PANEL_OF_NORMALS'}.issubset(variant_set.columns):
@@ -500,9 +504,19 @@ def run_pcgr(pcgr_paths, conf_options):
                     gzip_filtered_output_tsv = f'gzip -f {output_pass_tsv}'
                     check_subprocess(logger, gzip_filtered_output_tsv, debug)
         
+        if yaml_data['conf']['somatic_snv']['tmb']['run'] == 1:
+            logger_tmb = getlogger('pcgr-calculate-tmb')
+            variant.calculate_tmb(
+                variant_set = variant_set,
+                tumor_dp_min = int(yaml_data['conf']['somatic_snv']['tmb']['tmb_dp_min']),
+                tumor_af_min = float(yaml_data['conf']['somatic_snv']['tmb']['tmb_af_min']),
+                target_size_mb = float(yaml_data['conf']['assay_properties']['effective_target_size_mb']),
+                sample_id = yaml_data['sample_id'],
+                tmb_fname = tmb_fname,
+                logger = logger_tmb)
+        
         logger.info('Finished pcgr-summarise')
         print('----')
-
 
     if not input_cna == 'None':
         logger = getlogger("pcgr-annotate-cna-segments")

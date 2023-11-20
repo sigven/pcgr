@@ -11,6 +11,10 @@ load_reference_data <- function(
 
   pcgr_ref_data <- list()
 
+
+  log4r_info(paste0(
+    "Loading reference datasets - genome assembly: ", genome_assembly))
+
   pcgr_ref_data[["assembly"]] <- list()
   pcgr_ref_data[["assembly"]][["grch_name"]] <- genome_assembly
   pcgr_ref_data[["assembly"]][["grch_name"]] <- "hg19"
@@ -122,6 +126,8 @@ load_reference_data <- function(
     readr::read_tsv(cpg_tsv_fname, show_col_types = F,
                     comment = "", na = c(".",""))
   )
+  colnames(pcgr_ref_data[['gene']][['cpg']]) <-
+    toupper(colnames(pcgr_ref_data[['gene']][['cpg']]))
 
 
   panels_tsv_fname <- file.path(
@@ -134,6 +140,9 @@ load_reference_data <- function(
     readr::read_tsv(panels_tsv_fname, show_col_types = F,
                     comment = "", na = c("","."))
   )
+  colnames(pcgr_ref_data[['gene']][['panel']]) <-
+    toupper(colnames(pcgr_ref_data[['gene']][['panel']]))
+
 
   gene_xref_tsv_fname <- file.path(
     pcgr_db_assembly_dir, "gene", "tsv",
@@ -189,8 +198,37 @@ load_reference_data <- function(
       )
     )
 
+  colnames(pcgr_ref_data[['gene']][['gene_xref']]) <-
+    toupper(colnames(pcgr_ref_data[['gene']][['gene_xref']]))
 
   ## 2. Variant annotations
+  pcgr_ref_data[['variant']] <- list()
+  ## ClinVar
+  clinvar_sites_tsv_fname <-
+    file.path(
+      pcgr_db_assembly_dir, "variant", "tsv",
+      "clinvar", "clinvar_sites.tsv.gz"
+    )
+  check_file_exists(clinvar_sites_tsv_fname)
+  pcgr_ref_data[['variant']][['clinvar_sites']] <- as.data.frame(
+    readr::read_tsv(
+      clinvar_sites_tsv_fname, show_col_types = F)
+  )
+  colnames(pcgr_ref_data[['variant']][['clinvar_sites']]) <-
+    toupper(colnames(pcgr_ref_data[['variant']][['clinvar_sites']]))
+
+  clinvar_gene_varstats_tsv_fname <-
+    file.path(
+      pcgr_db_assembly_dir, "variant", "tsv",
+      "clinvar", "clinvar_gene_varstats.tsv.gz"
+    )
+  check_file_exists(clinvar_gene_varstats_tsv_fname)
+  pcgr_ref_data[['variant']][['clinvar_gene_stats']] <- as.data.frame(
+    readr::read_tsv(
+      clinvar_gene_varstats_tsv_fname, show_col_types = F)
+  )
+  colnames(pcgr_ref_data[['variant']][['clinvar_gene_stats']]) <-
+    toupper(colnames(pcgr_ref_data[['variant']][['clinvar_gene_stats']]))
 
   ## GWAS
   gwas_tsv_fname <-
@@ -198,10 +236,13 @@ load_reference_data <- function(
       pcgr_db_assembly_dir, "variant", "tsv", "gwas", "gwas.tsv.gz"
     )
   check_file_exists(gwas_tsv_fname)
-  pcgr_ref_data[['gwas']] <- as.data.frame(
+  pcgr_ref_data[['variant']][['gwas']] <- as.data.frame(
     readr::read_tsv(
       gwas_tsv_fname, show_col_types = F)
   )
+  colnames(pcgr_ref_data[['variant']][['gwas']]) <-
+    toupper(colnames(pcgr_ref_data[['variant']][['gwas']]))
+
 
 
   ## 3. Phenotype ontologies
@@ -224,6 +265,9 @@ load_reference_data <- function(
     pcgr_ref_data[['phenotype']][['cancer_groups']][
       !is.na(pcgr_ref_data[['phenotype']][['cancer_groups']])]
 
+  colnames(pcgr_ref_data[['phenotype']][['oncotree']]) <-
+    toupper(colnames(pcgr_ref_data[['phenotype']][['oncotree']]))
+
   umls_tsv_fname <-
     file.path(
       pcgr_db_assembly_dir, "phenotype", "tsv",
@@ -235,7 +279,8 @@ load_reference_data <- function(
       umls_tsv_fname, show_col_types = F,
       na = ".")
   )
-
+  colnames(pcgr_ref_data[['phenotype']][['umls']]) <-
+    toupper(colnames(pcgr_ref_data[['phenotype']][['umls']]))
 
   ## 4. MSI classification
   msi_model_rds <-
@@ -264,6 +309,9 @@ load_reference_data <- function(
         fname_misc, show_col_types = F,
         na = ".")
     )
+    colnames(pcgr_ref_data[[elem]]) <-
+      toupper(colnames(pcgr_ref_data[[elem]]))
+
   }
 
   tmp = pcgr_ref_data[['pathway']]
@@ -271,8 +319,8 @@ load_reference_data <- function(
   pcgr_ref_data[['pathway']][['long']] <- tmp
   pcgr_ref_data[['pathway']][['wide']] <- as.data.frame(
     tmp |>
-    dplyr::group_by(gene_id) |>
-    dplyr::summarise(link = paste(url_html, collapse = ", ")))
+    dplyr::group_by(GENE_ID) |>
+    dplyr::summarise(LINK = paste(URL_HTML, collapse = ", ")))
 
 
   ## 6. Drugs
@@ -285,7 +333,8 @@ load_reference_data <- function(
   pcgr_ref_data[['drug']] <- as.data.frame(
     readr::read_tsv(drug_tsv_fname, show_col_types = F, na = ".")
   )
-
+  colnames(pcgr_ref_data[['drug']]) <-
+    toupper(colnames(pcgr_ref_data[['drug']]))
 
   ## 7. Biomarkers
   pcgr_ref_data[['biomarker']] <- list()
@@ -310,6 +359,9 @@ load_reference_data <- function(
         data
       )
     }
+    colnames(pcgr_ref_data[['biomarker']][[elem]]) <-
+      toupper(colnames(pcgr_ref_data[['biomarker']][[elem]]))
+
   }
 
   ## Metadata

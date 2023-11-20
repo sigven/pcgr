@@ -294,7 +294,8 @@ def run_cpsr(conf_options, cpsr_paths):
         variant_set.loc[variant_set['CLINVAR_CONFLICTED'] == 1, "CLINVAR_CONFLICTED"] = True
         variant_set.loc[variant_set['CLINVAR_CONFLICTED'] != 1, "CLINVAR_CONFLICTED"] = False
         variant_set['GENOMIC_CHANGE'] = variant_set['CHROM'].astype(str) + ":g." + variant_set['POS'].astype(str) + \
-            variant_set['REF'].astype(str) + ">" + variant_set['ALT'].astype(str)        
+            variant_set['REF'].astype(str) + ">" + variant_set['ALT'].astype(str)
+        variant_set['GENOME_VERSION'] = yaml_data['genome_assembly']        
         variant_set.to_csv(output_pass_tsv_gz, sep="\t", compression="gzip", index=False)
         utils.remove(output_pass_vcf2tsv_gz)
                 

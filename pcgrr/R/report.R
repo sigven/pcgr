@@ -1,98 +1,68 @@
 
 #' Function that initiates PCGR/CPSR report object
 #'
-#' @param config Object with configuration parameters
-#' @param class report analysis section (NULL defaults to full report)
-#' @param pcgr_data PCGR data bundle
-#' @param type Type of report ('somatic' or 'germline')
-#' @param virtual_panel_id identifier(s) for virtual panel id
-#' @param custom_bed custom BED file with target loci for screening
+#' @param yaml_fname Yaml file with configuration settings and paths
+#' to annotated molecular datasets
+#' @param report_mode Type of report ('PCGR' or 'CPSR')
 #' @export
-init_report <- function(config = NULL,
-                        class = NULL,
-                        pcgr_data = NULL,
-                        type = "somatic",
-                        virtual_panel_id = "-1",
-                        custom_bed = NULL) {
+init_report <- function(yaml_fname = NULL,
+                        report_mode = "PCGR") {
 
   # invisible(assertthat::assert_that(
   #   !is.null(type), msg = "Argument 'type' must be of type character"))
   invisible(assertthat::assert_that(
-    is.character(type), msg = "Argument 'type' must be of type character"))
+    is.character(report_mode),
+    msg = "Argument 'report_mode' must be of type character"))
   invisible(assertthat::assert_that(
-    type == "germline" | type == "somatic", msg = "Argument 'type' must be of either 'germline' or 'somatic'"))
-
-  if(!is.null(class)){
-    invisible(assertthat::assert_that(
-      is.character(class), msg = "Argument 'class' must be of type character"))
-  }
+    report_mode == "PCGR" | report_mode == "CPSR",
+    msg = "Argument 'report_mode' must be of either 'PCGR' or 'CPSR'"))
 
   report <- list()
-  for (elem in c("metadata", "content")) {
+  for (elem in c("settings", "content")) {
     report[[elem]] <- list()
   }
 
-  if(!is.null(config) & !is.null(pcgr_data)){
-    report_metadata <- set_report_metadata(
-      config,
-      pcgr_data,
-      report_type = type,
-      virtual_panel_id = virtual_panel_id,
-      custom_bed = custom_bed
+  yaml_data <- list()
+  ref_data <- list()
+  if (!is.null(yaml_fname)) {
+    yaml_data <- load_yaml(
+      yaml_fname,
+      report_mode = report_mode
     )
 
-    if (!is.null(report_metadata)) {
-      report[["metadata"]] <- report_metadata
+    if (!is.null(yaml_data)) {
+      report[["settings"]] <- yaml_data$settings
+      ref_data <- yaml_data$ref_data
     }
   }
 
-  if (type == "germline") {
-    if (!is.null(pcgr_data)) {
-      report[["metadata"]][["phenotype_ontology"]][["oncotree_query"]] <-
-        dplyr::filter(pcgr_data[["phenotype_ontology"]][["oncotree"]],
-                      is.na(.data$primary_site))
-    }
-
+  if (report_mode == "CPSR") {
     report[["content"]][["snv_indel"]] <-
       init_germline_content()
 
-    if (!is.null(report[["metadata"]][["config"]][["popgen"]])) {
-      if (report[["metadata"]][["config"]][["popgen"]][["pop_gnomad"]] != "") {
-        pop_tag_info <-
-          get_population_tag(config[["popgen"]][["pop_gnomad"]],
-                                    db = "GNOMAD", subset = "non_cancer")
-        report[["metadata"]][["config"]][["popgen"]][["vcftag_gnomad"]] <-
-          pop_tag_info$vcf_tag
-        report[["metadata"]][["config"]][["popgen"]][["popdesc_gnomad"]] <-
-          pop_tag_info$pop_description
+    if (!is.null(report[["settings"]][["conf"]][["variant_classification"]][["pop_gnomad"]])) {
+      if (report[["settings"]][["conf"]][["variant_classification"]][["pop_gnomad"]] != "") {
+        population <-
+          report[["settings"]][["conf"]][["variant_classification"]][["pop_gnomad"]]
+        vcf_tag <- "gnomADe_non_cancer_AF"
+        if(population != "global"){
+          vcf_tag <-
+            paste0("gnomADe_non_cancer_",toupper(population),"_AF")
+        }
+        pop_desc_df <-
+          ref_data$vcf_infotags[ref_data$vcf_infotags$tag == vcf_tag,]
+        if(NROW(pop_desc_df) == 1){
+          population_description <- pop_desc_df$description
+          report[["settings"]][["conf"]][["variant_classification"]][["vcftag_gnomad"]] <-
+            vcf_tag
+          report[["settings"]][["conf"]][["variant_classification"]][["popdesc_gnomad"]] <-
+            population_description
+        }
       }
     }
 
   }else{
 
-    if (!is.null(pcgr_data)) {
-      if (config[["t_props"]][["tumor_type"]] != "Cancer, NOS") {
-        tumor_group_entry <-
-          dplyr::filter(
-            pcgr_data[["phenotype_ontology"]][["cancer_groups"]],
-            .data$primary_site == config[["t_props"]][["tumor_type"]])
-        if (nrow(tumor_group_entry) == 1) {
-          report[["metadata"]][["phenotype_ontology"]][["oncotree_query"]] <-
-            dplyr::filter(
-              pcgr_data[["phenotype_ontology"]][["oncotree"]],
-              .data$primary_site == config[["t_props"]][["tumor_type"]])
-        }else{
-          log4r_info(paste0("Cannot find tumor type ",
-                                   config[["t_props"]][["tumor_type"]],
-                                   " in list of primary sites"))
-          report[["metadata"]][["phenotype_ontology"]][["oncotree_query"]] <-
-            pcgr_data[["phenotype_ontology"]][["oncotree"]]
-        }
-      }else{
-        report[["metadata"]][["phenotype_ontology"]][["oncotree_query"]] <-
-          pcgr_data[["phenotype_ontology"]][["oncotree"]]
-      }
-    }
     for (a_elem in c("snv_indel",
                      "tmb",
                      "msi",
@@ -160,10 +130,10 @@ init_report <- function(config = NULL,
         report[["content"]][[a_elem]] <-
           init_m_signature_content()
       }
-      if (a_elem == "tmb" & !is.null(pcgr_data)) {
+      if (a_elem == "tmb" & !is.null(ref_data)) {
         report[["content"]][[a_elem]] <-
-          init_tmb_content(tcga_tmb = pcgr_data$tcga$tmb,
-                           config = config)
+          init_tmb_content(tcga_tmb = ref_data$tmb,
+                           config = report$settings$conf)
       }
       if (a_elem == "msi") {
         report[["content"]][[a_elem]][["missing_data"]] <- FALSE
@@ -176,19 +146,20 @@ init_report <- function(config = NULL,
       }
     }
   }
-  if (!is.null(class)) {
-    if (!is.null(report[["content"]][[class]])) {
-      return(report[["content"]][[class]])
-    }
-  }
+  # if (!is.null(class)) {
+  #   if (!is.null(report[["content"]][[class]])) {
+  #     return(report[["content"]][[class]])
+  #   }
+  # }
 
-  return(report)
+  return(list('report' = report,
+              'ref_data' = ref_data))
 }
 
-#' Function that initates PCGR report object
+#' Function that updates a PCGR/CPSR report object structure
 #'
-#' @param report PCGR final report
-#' @param report_data Object with PCGR report data
+#' @param report PCGR/CPSR report
+#' @param report_data Object with report contents
 #' @param a_elem section of PCGR report
 #' @export
 update_report <- function(report, report_data,
@@ -207,175 +178,6 @@ update_report <- function(report, report_data,
   return(report)
 }
 
-#' Function that set PCGR report metadata
-#'
-#' @param config PCGR config object
-#' @param pcgr_data PCGR data list object
-#' @param virtual_panel_id identifier for virtual panel
-#' @param report_type type of report ('germline' or 'somatic')
-#' @param custom_bed  custom BED file with target loci for screening
-#'
-#' @return report_metadata Object with PCGR report metadata
-#'
-#' @export
-set_report_metadata <- function(config,
-                                pcgr_data,
-                                virtual_panel_id = "-1",
-                                report_type = NULL,
-                                custom_bed = NULL) {
-
-  if(is.null(pcgr_data)) {
-    return(NULL)
-  }
-
-  report_metadata <- list()
-  report_metadata[["pcgr_db_release"]] <- pcgr_data[["release_notes"]]
-  report_metadata[["pcgr_db_release"]][["bundle_version"]] <-
-    list('url' = 'https://github.com/sigven',
-         'description' = 'PCGR databundle',
-         'version' = config[['required_args']][['pcgr_bundle_version']],
-         'name' = 'pcgr_bundle_version',
-         'resource_type' = 'db')
-  report_metadata[["pcgr_version"]] <- config[['required_args']][['pcgr_version']]
-  report_metadata[["cpsr_version"]] <- config[['required_args']][['cpsr_version']]
-  report_metadata[["genome_assembly"]] <-
-    pcgr_data[["assembly"]][["grch_name"]]
-  report_metadata[["sample_name"]] <- config[['required_args']][['sample_name']]
-  report_metadata[["report_type"]] <- report_type
-  report_metadata[["config"]] <- config
-  report_metadata[["color_palette"]] <- pcgrr::color_palette
-  report_metadata[["color_none"]] <-
-    pcgrr::color_palette[["none"]][["values"]][1]
-  report_metadata[["color_value_box"]] <-
-    pcgrr::color_palette[["report_color"]][["values"]][1]
-  if(report_type == "somatic" &
-     !is.null(report_metadata[["config"]][["assay_props"]])) {
-    if(report_metadata[["config"]][["assay_props"]][["vcf_tumor_only"]] == T) {
-      report_metadata[["color_value_box"]] <-
-        pcgrr::color_palette[["report_color"]][["values"]][2]
-    }
-  }
-  report_metadata[["phenotype_ontology"]] <- list()
-  report_metadata[["phenotype_ontology"]][["oncotree"]] <-
-    pcgr_data[["phenotype_ontology"]][["oncotree"]]
-  report_metadata[["phenotype_ontology"]][["oncotree_query"]] <- NULL
-
-
-  if (virtual_panel_id != "-1") {
-    report_metadata[["gene_panel"]] <- list()
-    report_metadata[["gene_panel"]][["genes"]] <- data.frame()
-
-    panel_ids <- stringr::str_split(virtual_panel_id, ",")[[1]]
-    for(pid in panel_ids){
-      p <- as.integer(pid)
-      panel_genes <- pcgr_data[["virtual_gene_panels"]] %>%
-        dplyr::filter(.data$id == p) %>%
-        dplyr::select(.data$symbol,
-                      .data$ensembl_gene_id,
-                      .data$confidence_level,
-                      .data$panel_name,
-                      .data$panel_id,
-                      .data$id,
-                      .data$panel_version,
-                      .data$panel_url,
-                      .data$entrezgene,
-                      .data$genename)
-
-      report_metadata[["gene_panel"]][["genes"]] <-
-        report_metadata[["gene_panel"]][["genes"]] %>%
-        dplyr::bind_rows(panel_genes) %>%
-        dplyr::arrange(.data$symbol)
-    }
-
-    if (config[["diagnostic_grade_only"]] == T) {
-      report_metadata[["gene_panel"]][["genes"]] <-
-        report_metadata[["gene_panel"]][["genes"]] %>%
-        dplyr::filter(.data$confidence_level == 3 | .data$confidence_level == 4)
-    }
-
-
-    ## Single gene panel from Genomics England
-    if(!(stringr::str_detect(virtual_panel_id,","))){
-
-      report_metadata[["gene_panel"]][["name"]] <-
-        paste0(unique(report_metadata[["gene_panel"]][["genes"]]$panel_name),
-               " - v",
-               unique(report_metadata[["gene_panel"]][["genes"]]$panel_version))
-      report_metadata[["gene_panel"]][["url"]] <-
-        unique(report_metadata[["gene_panel"]][["genes"]]$panel_url)
-      report_metadata[["gene_panel"]][["confidence"]] <-
-        "Diagnostic-grade/Borderline/Low evidence (GREEN/AMBER/RED)"
-      if (config[["diagnostic_grade_only"]] == T & virtual_panel_id != "0") {
-        report_metadata[["gene_panel"]][["confidence"]] <-
-          "Diagnostic-grade only (GREEN)"
-      }
-      if (virtual_panel_id == "0") {
-        report_metadata[["gene_panel"]][["confidence"]] <-
-          "Exploratory virtual gene panel (research)"
-      }
-    }else{
-
-      panels_included <-
-        report_metadata$gene_panel$genes %>%
-        dplyr::select(.data$id, .data$panel_url, .data$panel_name) %>%
-        dplyr::arrange(.data$id) %>%
-        dplyr::distinct() %>%
-        dplyr::mutate(link = paste0("<li><a href='",.data$panel_url,
-                                    "' target='_blank'>",
-                                    .data$panel_name,"</a></li>"))
-
-      report_metadata[["gene_panel"]][["genes"]] <-
-        report_metadata[["gene_panel"]][["genes"]] %>%
-        dplyr::select(-c(.data$panel_id, .data$panel_name, .data$confidence_level,
-                         .data$panel_version, .data$panel_url,
-                         .data$id)) %>%
-        dplyr::mutate(panel_version = NA, confidence_level = 5,
-                      panel_id = NA, panel_url = NA) %>%
-        dplyr::distinct()
-
-      report_metadata[["gene_panel"]][["url"]] <- "https://panelapp.genomicsengland.co.uk"
-      report_metadata[["gene_panel"]][["name"]] <-
-        "Genomics England PanelApp - custom combination"
-      report_metadata[["gene_panel"]][["confidence"]] <-
-        paste0("<b>N = ", NROW(report_metadata[["gene_panel"]][["genes"]]),
-               "</b> unique genes combined from the following virtual panels:<br> <ul>",
-               paste(panels_included$link, collapse="\n"),"\n</ul><br>\n")
-
-    }
-  }else{
-
-    ## virtual_panel_id is "-1", indicating custom gene list
-    if (!is.null(custom_bed)) {
-      target_genes <-
-        custom_bed_genes(custom_bed, pcgr_data = pcgr_data)
-      if (nrow(target_genes) > 0) {
-
-        target_genes <- target_genes %>%
-          dplyr::mutate(
-            confidence_level = -1,
-            panel_name =
-              report_metadata[["config"]][["custom_panel"]][["name"]],
-            panel_id = NA,
-            panel_version = NA,
-            panel_url = NA)
-
-        report_metadata[["gene_panel"]] <- list()
-        report_metadata[["gene_panel"]][["genes"]] <- target_genes
-        report_metadata[["gene_panel"]][["name"]] <-
-          report_metadata[["config"]][["custom_panel"]][["name"]]
-        report_metadata[["gene_panel"]][["confidence"]] <-
-          "User-defined panel (custom geneset from panel 0)"
-      }else{
-        log4r_warn(
-          paste0("Custom BED file (", custom_bed,
-                 ") does not contain regions that overlap ",
-                 "protein-coding transcripts (regulatory/exonic)"))
-        log4r_info("Quitting report generation")
-      }
-    }
-  }
-  return(report_metadata)
-}
 
 #' Function that initiates report element with TMB information
 #'
@@ -392,9 +194,9 @@ init_tmb_content <- function(tcga_tmb = NULL,
   invisible(assertthat::assert_that(is.data.frame(tcga_tmb) &
                                       nrow(tcga_tmb) > 0))
   invisible(assertthat::assert_that(!is.null(config)))
-  invisible(assertthat::assert_that(!is.null(config[['assay_props']])))
-  invisible(assertthat::assert_that("target_size_mb" %in%
-                                      names(config[['assay_props']])))
+  invisible(assertthat::assert_that(!is.null(config[['assay_properties']])))
+  invisible(assertthat::assert_that("effective_target_size_mb" %in%
+                                      names(config[['assay_properties']])))
 
   rep <- list()
   rep[["eval"]] <- FALSE
@@ -403,8 +205,8 @@ init_tmb_content <- function(tcga_tmb = NULL,
   rep[["v_stat"]] <- list()
   rep[["v_stat"]][["n_tmb"]] <- 0
   rep[["v_stat"]][["tmb_estimate"]] <- 0
-  rep[["v_stat"]][["target_size_mb"]] <-
-    config[["assay_props"]][["target_size_mb"]]
+  rep[["v_stat"]][["effective_target_size_mb"]] <-
+    config[["assay_properties"]][["effective_target_size_mb"]]
   #rep[["v_stat"]][["tmb_tertile"]] <-
     #"TMB - not determined"
   rep[["tcga_tmb"]] <- tcga_tmb
@@ -433,8 +235,13 @@ init_cna_content <- function(rep = NULL){
   for (t in c("n_cna_loss", "n_cna_gain")) {
     rep[["v_stat"]][[t]] <- 0
   }
-  for (t in c("segment", "oncogene_gain", "tsgene_loss",
-              "other_target", "biomarker", "tier1", "tier2")) {
+  for (t in c("segment",
+              "oncogene_gain",
+              "tsgene_loss",
+              "other_target",
+              "biomarker",
+              "tier1",
+              "tier2")) {
     rep[["disp"]][[t]] <-
       data.frame()
   }
@@ -461,7 +268,8 @@ init_snv_indel_content <- function(rep = NULL){
       data.frame()
     if (t == "tier3") {
       rep[["disp"]][[t]] <- list()
-      for (c in c("proto_oncogene", "tumor_suppressor")) {
+      for (c in c("proto_oncogene",
+                  "tumor_suppressor")) {
         rep[["disp"]][[t]][[c]] <-
           data.frame()
       }
@@ -558,11 +366,11 @@ init_tumor_only_content <- function(){
   rep[["upset_plot_valid"]] <- FALSE
   rep[["v_stat"]] <- list()
 
-  for (successive_filter in c("unfiltered_n", "onekg_n_remain",
+  for (successive_filter in c("unfiltered_n",
                               "gnomad_n_remain", "clinvar_n_remain",
                               "pon_n_remain", "hom_n_remain",
                               "het_n_remain", "dbsnp_n_remain",
-                              "nonexonic_n_remain", "onekg_frac_remain",
+                              "nonexonic_n_remain",
                               "gnomad_frac_remain", "clinvar_frac_remain",
                               "dbsnp_frac_remain", "pon_frac_remain",
                               "hom_frac_remain", "het_frac_remain",
@@ -688,5 +496,187 @@ init_germline_content <- function(){
   }
 
   return(rep)
+
+}
+
+#' Function that loads YAML data with settings and file paths
+#' to annotated molecular profiles
+#'
+#' @param yml_fname Yaml file with configuration settings and paths
+#' to annotated molecular datasets
+#' @param report_mode Type of report ('PCGR' or 'CPSR')
+#'
+#' @export
+load_yaml <- function(yml_fname, report_mode = "CPSR") {
+
+  if(!file.exists(yml_fname)){
+    log4r_fatal(
+      paste0("YAML file '",yml_fname,"' does not exist - exiting"))
+  }
+  report_settings <- yaml::read_yaml(yml_fname)
+  missing_yaml_info <- F
+  for(t in c('sample_id',
+             'genome_assembly',
+             'workflow',
+             'output_dir')){
+    if(is.null(report_settings[[t]])){
+      missing_yaml_info <- T
+    }else{
+      if(identical(typeof(report_settings[[t]]),"character") == F){
+        missing_yaml_info <- T
+      }
+    }
+  }
+  for(t in c('conf',
+             'molecular_data',
+             'reference_data',
+             'software')){
+    if(is.null(report_settings[[t]])){
+      missing_yaml_info <- T
+    }else{
+      if(identical(typeof(report_settings[[t]]),"list") == F){
+        missing_yaml_info <- T
+      }
+    }
+  }
+  if(missing_yaml_info == F){
+    log4r_info(paste0(
+      "Successfully parsed YAML configuration file - reporting mode:", report_mode))
+  }else{
+    log4r_fatal(paste0(
+      "YAML configuration lacks necessary properties - reporting mode:", report_mode))
+  }
+
+  ## check the validity of the yaml file
+  ## check that it matches the report_mode
+  ## return it
+
+  if(report_settings[['workflow']] != report_mode){
+    log4r_fatal(
+      paste0("Cannot read YAML file from ",
+             report_settings[['workflow']],
+             "when report_mode is set to '",
+             report_mode,"'"))
+  }
+
+  ref_data <- list()
+  if(dir.exists(
+    report_settings[['reference_data']][['path']]
+  )){
+    ref_data <- load_reference_data(
+      pcgr_db_assembly_dir = report_settings[['reference_data']][['path']],
+      genome_assembly = report_settings[['genome_assembly']]
+    )
+  }
+
+  if (identical(
+    typeof(report_settings[['conf']][['sample_properties']][['phenotype']]),
+               "character")) {
+    report_settings[['conf']][['sample_properties']][['phenotype']] <-
+      ref_data[['phenotype']][['oncotree']]
+
+    if (report_mode == "PCGR") {
+      report_settings[['conf']][['sample_properties']][['phenotype']] <-
+        report_settings[['conf']][['sample_properties']][['phenotype']] |>
+        dplyr::filter(!is.na(.data$primary_site))
+
+    }
+
+  }else{
+    if (identical(
+      typeof(
+        report_settings[['conf']][['sample_properties']][['phenotype']]),
+      "list")){
+      report_settings[['conf']][['sample_properties']][['phenotype']] <-
+        as.data.frame(
+          rrapply::rrapply(
+            report_settings[['conf']][['sample_properties']][['phenotype']],
+            how = "bind"))
+    }
+
+    for(col in c('do_id','do_name','efo_id','efo_name',
+                 'icd10_code','ot_name','ot_primary_site',
+                 'primary_site','ot_code','ot_code_path')){
+
+      if(NROW(report_settings[['conf']][['sample_properties']][['phenotype']][
+        report_settings[['conf']][['sample_properties']][['phenotype']][[col]] == "NaN",]) > 0){
+          report_settings[['conf']][['sample_properties']][['phenotype']][
+            report_settings[['conf']][['sample_properties']][['phenotype']][[col]] == "NaN",col] <-
+          as.character(NA)
+      }
+
+      if(NROW(report_settings[['conf']][['sample_properties']][['phenotype']][
+        is.nan(report_settings[['conf']][['sample_properties']][['phenotype']][[col]]),]) > 0){
+        report_settings[['conf']][['sample_properties']][['phenotype']][
+          is.nan(report_settings[['conf']][['sample_properties']][['phenotype']]),col] <-
+          as.character(NA)
+      }
+    }
+
+    for(col in c('do_cancer_slim','ot_level')){
+      if(NROW(report_settings[['conf']][['sample_properties']][['phenotype']][
+        is.nan(report_settings[['conf']][['sample_properties']][['phenotype']][[col]]),]) > 0){
+        report_settings[['conf']][['sample_properties']][['phenotype']][
+          is.nan(report_settings[['conf']][['sample_properties']][['phenotype']][[col]]),col] <-
+          as.numeric(NA)
+      }
+    }
+  }
+
+  report_settings[['reference_data']][['source_metadata']] <-
+    as.data.frame(
+      rrapply::rrapply(
+        report_settings$reference_data$source_metadata,
+        how = "bind"))
+
+  for(col in c('source_version',
+               'source_license',
+               'source_license_url',
+               'source_url',
+               'source_citation')){
+
+    if(NROW(report_settings[['reference_data']][['source_metadata']][
+      report_settings[['reference_data']][['source_metadata']][[col]] == "NaN",]) > 0){
+      report_settings[['reference_data']][['source_metadata']][
+        report_settings[['reference_data']][['source_metadata']][[col]] == "NaN",col] <-
+        as.character(NA)
+    }
+  }
+
+  if(report_mode == "CPSR"){
+
+    report_settings[['conf']][['gene_panel']][['panel_genes']] <-
+      as.data.frame(
+        rrapply::rrapply(
+          report_settings$conf$gene_panel$panel_genes,
+          how = "bind"))
+
+    for(col in c('panel_id','panel_version')){
+
+      if(NROW(report_settings[['conf']][['gene_panel']][['panel_genes']][
+        is.nan(report_settings[['conf']][['gene_panel']][['panel_genes']][[col]]),]) > 0){
+        report_settings[['conf']][['gene_panel']][['panel_genes']][
+          is.nan(report_settings[['conf']][['gene_panel']][['panel_genes']][[col]]),col] <-
+          as.numeric(NA)
+      }
+    }
+  }
+
+  report_settings$conf$visual_reporting[["color_palette"]] <-
+    pcgrr::color_palette
+  report_settings$conf$visual_reporting[["color_none"]] <-
+    pcgrr::color_palette[["none"]][["values"]][1]
+  report_settings$conf$visual_reporting[["color_value_box"]] <-
+    pcgrr::color_palette[["report_color"]][["values"]][1]
+  if(report_mode == "PCGR" &
+     !is.null(report_settings$conf$assay_properties)) {
+    if(report_settings$conf$assay_properties$vcf_tumor_only == 1) {
+      report_settings$conf$visual_reporting[["color_value_box"]] <-
+        pcgrr::color_palette[["report_color"]][["values"]][2]
+    }
+  }
+
+  return(list('settings' = report_settings,
+              'ref_data' = ref_data))
 
 }

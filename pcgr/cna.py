@@ -149,6 +149,18 @@ def annotate_cna_segments(output_fname: str,
     ## remove all temporary files
     for fname in temp_files:
         utils.remove(fname)
+        
+    cna_query_segment_df.columns = map(str.upper, cna_query_segment_df.columns)
+    cna_query_segment_df.rename(columns = {'CHROMOSOME':'CHROM'}, inplace = True)
+    hgname = "hg38"
+    if build == "grch37":
+        hgname = "hg19"
+    ucsc_browser_prefix = \
+        f"http://genome.ucsc.edu/cgi-bin/hgTracks?db={hgname}&position="
+        
+    cna_query_segment_df['SEGMENT_LINK'] = \
+        "<a href='" + ucsc_browser_prefix + cna_query_segment_df['SEGMENT_ID'].astype(str) + \
+            "' target='_blank'>" + cna_query_segment_df['SEGMENT_ID'].astype(str) + "</a>"
     
     cna_query_segment_df.to_csv(output_fname, sep="\t", header=True, index=False)
                 
@@ -251,6 +263,8 @@ def annotate_transcripts(cna_segments_bt: BedTool, output_dir: str,
     # BED file with protein-coding transcripts
     gene_transcript_bed_fname = \
         os.path.join(pcgr_build_db_dir, 'gene','bed','gene_transcript_xref', 'gene_transcript_xref_pc_nopad.bed.gz')
+    gene_xref_tsv_fname = \
+        os.path.join(pcgr_build_db_dir, "gene", "tsv", "gene_transcript_xref", "gene_transcript_xref.tsv.gz")
         
     cna_segments_annotated = pd.DataFrame()
 
@@ -306,6 +320,20 @@ def annotate_transcripts(cna_segments_bt: BedTool, output_dir: str,
                 gene_annotations.loc[gene_annotations[elem] == "", elem] = "."
             
             cna_segments_annotated = pd.concat([core_segment_annotations, gene_annotations], axis = 1)
+            
+            if {'genename'}.issubset(cna_segments_annotated.columns):
+                cna_segments_annotated.drop('genename', inplace=True, axis=1)
+            
+            if os.path.exists(gene_xref_tsv_fname):
+                gene_xref_df = pd.read_csv(gene_xref_tsv_fname, sep="\t", na_values=".", usecols=["entrezgene","name"])
+                gene_xref_df = gene_xref_df.astype({'entrezgene':'string'})
+                gene_xref_df = gene_xref_df[gene_xref_df['entrezgene'].notnull()].drop_duplicates()
+                gene_xref_df.rename(columns = {'name':'genename'}, inplace = True)                                        
+                cna_segments_annotated = cna_segments_annotated.merge(
+                    gene_xref_df, left_on=["entrezgene"], right_on=["entrezgene"], how="left")
+                cna_segments_annotated = cna_segments_annotated.fillna('.')
+            else:
+                logger.error(f"Could not find {gene_xref_tsv_fname} needed for gene name annotation - exiting")
             cna_segments_annotated = cna_segments_annotated.astype({'n_major':'int','n_minor':'int'})
             
         else:

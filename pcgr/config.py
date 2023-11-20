@@ -97,8 +97,7 @@ def create_config(arg_dict, workflow = "PCGR"):
             'run': int(arg_dict['estimate_msi_status'])
         }
         conf_options['somatic_snv']['tmb'] = {
-            'run': int(arg_dict['estimate_tmb']),
-            
+            'run': int(arg_dict['estimate_tmb']),            
             'algorithm': arg_dict['tmb_algorithm'],
             'tmb_dp_min': arg_dict['tmb_dp_min'],
             'tmb_af_min': arg_dict['tmb_af_min']

@@ -9,6 +9,10 @@ GENCODE_VERSION = '39'
 NCBI_BUILD_MAF = 'GRCh38'
 VEP_ASSEMBLY = 'GRCh38'
 MAX_VARIANTS_FOR_REPORT = 500_000
+CODING_EXOME_SIZE_MB = 34.0
+RECOMMENDED_N_MUT_SIGNATURE = 200
+VEP_MAX_FORKS = 8
+VEP_MAX_BUFFER_SIZE = 30000
 
 tsites = {
     0: 'Any',
@@ -139,4 +143,11 @@ VEP_consequence_rank = {
     'intergenic_variant': 40,
     'sequence_variant': 41
 }
+
+CSQ_MISSENSE_PATTERN = r"^missense_variant"
+CSQ_CODING_PATTERN = r"^(stop_(lost|gained)|start_lost|frameshift_|missense_|splice_(donor|acceptor)|protein_altering|inframe_)"
+CSQ_CODING_SILENT_PATTERN = r"^(stop_(lost|gained)|start_lost|frameshift_|missense_|splice_(donor|acceptor)|protein_altering|inframe_|synonymous|(start|stop)_retained)"
+CSQ_NULL_PATTERN = r"^(stop_gained|frameshift_)"
+CSQ_SPLICE_REGION_PATTERN = r"^(splice_|intron_variant)"
+CSQ_SPLICE_DONOR_PATTERN = r"^(splice_region_variant|splice_donor_variant|splice_donor_region_variant|splice_donor_5th_base_variant)"
 

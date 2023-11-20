@@ -97,6 +97,130 @@ for (c in c("pathogenicity", "clinical_evidence", "tier",
 usethis::use_data(color_palette, overwrite = T)
 usethis::use_data(cpsr_acmg, overwrite = T)
 
+
+#-----input column names/types-----#
+data_coltype_defs <- list()
+data_coltype_defs[['cna_somatic_raw']] <- readr::cols_only(
+  CHROM = readr::col_character(),
+  SEGMENT_START = readr::col_double(),
+  SEGMENT_END = readr::col_double(),
+  SEGMENT_ID = readr::col_character(),
+  N_MAJOR = readr::col_integer(),
+  N_MINOR = readr::col_integer(),
+  CHROMOSOME_ARM = readr::col_character(),
+  CYTOBAND = readr::col_character(),
+  EVENT_TYPE = readr::col_character(),
+  TRANSCRIPT_OVERLAP_PERCENT = readr::col_number(),
+  TRANSCRIPT_START = readr::col_double(),
+  TRANSCRIPT_END = readr::col_double(),
+  ENSEMBL_TRANSCRIPT_ID = readr::col_character(),
+  ENSEMBL_GENE_ID = readr::col_character(),
+  SYMBOL = readr::col_character(),
+  ENTREZGENE = readr::col_character(),
+  REFSEQ_TRANSCRIPT_ID = readr::col_character(),
+  ACTIONABLE_GENE	= readr::col_logical(),
+  TSG	= readr::col_logical(),
+  TSG_SUPPORT	= readr::col_character(),
+  TSG_RANK = readr::col_integer(),
+  ONCOGENE	= readr::col_logical(),
+  ONCOGENE_SUPPORT = readr::col_character(),
+  ONCOGENE_RANK	= readr::col_logical(),
+  SEGMENT_LENGTH_MB = readr::col_number(),
+  BIOMARKER_MATCH = readr::col_character(),
+  SEGMENT_LINK = readr::col_character())
+
+data_coltype_defs[['snv_indel_somatic_raw']] <- readr::cols_only(
+  CHROM = readr::col_character(),
+  POS = readr::col_double(),
+  REF = readr::col_character(),
+  ALT = readr::col_character(),
+  DP_TUMOR = readr::col_integer(),
+  AF_TUMOR = readr::col_number(),
+  DP_CONTROL = readr::col_integer(),
+  AF_CONTROL = readr::col_number(),
+  CALL_CONFIDENCE = readr::col_character(),
+  GENOMIC_CHANGE = readr::col_character(),
+  VAR_ID = readr::col_character(),
+  VARIANT_CLASS = readr::col_character(),
+  CONSEQUENCE = readr::col_character(),
+  IMPACT = readr::col_character(),
+  LOSS_OF_FUNCTION = readr::col_logical(),
+  SPLICE_DONOR_RELEVANT = readr::col_logical(),
+  NULL_VARIANT = readr::col_logical(),
+  CODING_STATUS = readr::col_character(),
+  EXONIC_STATUS = readr::col_character(),
+  PROTEIN_CHANGE = readr::col_character(),
+  CDS_CHANGE = readr::col_character(),
+  EXON_AFFECTED = readr::col_character(),
+  MUTATION_HOTSPOT = readr::col_character(),
+  MUTATION_HOTSPOT_CANCERTYPE = readr::col_character(),
+  MUTATION_HOTSPOT_MATCH = readr::col_character(),
+  BIOMARKER_MATCH = readr::col_character(),
+  ONCOGENICITY_CLASSIFICATION = readr::col_character(),
+  ONCOGENICITY_CLASSIFICATION_CODE = readr::col_character(),
+  ONCOGENICITY_SCORE = readr::col_number(),
+  PFAM_DOMAIN = readr::col_character(),
+  PFAM_DOMAIN_NAME = readr::col_character(),
+  SYMBOL = readr::col_character(),
+  ENSEMBL_GENE_ID = readr::col_character(),
+  ENSEMBL_TRANSCRIPT_ID = readr::col_character(),
+  ENSEMBL_PROTEIN_ID = readr::col_character(),
+  REFSEQ_TRANSCRIPT_ID = readr::col_character(),
+  REFSEQ_PROTEIN_ID = readr::col_character(),
+  UNIPROT_ACC = readr::col_character(),
+  UNIPROT_ID = readr::col_character(),
+  APPRIS = readr::col_character(),
+  CCDS = readr::col_character(),
+  CANONICAL = readr::col_character(),
+  BIOTYPE = readr::col_character(),
+  TRANSCRIPT_MANE_SELECT = readr::col_character(),
+  TRANSCRIPT_MANE_PLUS_CLINICAL = readr::col_character(),
+  TSG = readr::col_logical(),
+  TSG_RANK = readr::col_integer(),
+  TSG_SUPPORT = readr::col_character(),
+  ONCOGENE = readr::col_logical(),
+  ONCOGENE_RANK = readr::col_integer(),
+  ONCOGENE_SUPPORT = readr::col_character(),
+  INTOGEN_DRIVER = readr::col_character(),
+  INTOGEN_ROLE = readr::col_character(),
+  CGC_SOMATIC = readr::col_logical(),
+  CGC_GERMLINE = readr::col_logical(),
+  CGC_TIER = readr::col_character(),
+  CLINVAR_TRAITS_ALL = readr::col_character(),
+  CLINVAR_MSID = readr::col_character(),
+  CLINVAR_CLNSIG = readr::col_character(),
+  CLINVAR_CLASSIFICATION = readr::col_character(),
+  CLINVAR_CONFLICTED = readr::col_logical(),
+  CLINVAR_REVIEW_STATUS_STARS = readr::col_integer(),
+  CLINVAR_NUM_SUBMITTERS = readr::col_integer(),
+  PANEL_OF_NORMALS = readr::col_logical(),
+  DBSNPRSID = readr::col_character(),
+  COSMIC_MUTATION_ID = readr::col_character(),
+  TCGA_PANCANCER_COUNT = readr::col_integer(),
+  TCGA_FREQUENCY = readr::col_character(),
+  REGULATORY_ANNOTATION = readr::col_character(),
+  TRANSCRIPTION_FACTORS = readr::col_character(),
+  MOTIF_SCORE_CHANGE = readr::col_character(),
+  MOTIF_NAME = readr::col_character(),
+  RMSK_HIT = readr::col_character(),
+  SIMPLEREPEATS_HIT = readr::col_logical(),
+  WINMASKER_HIT = readr::col_logical(),
+  VEP_ALL_CSQ = readr::col_character(),
+  gnomAD_AF = readr::col_number(),
+  gnomAD_AMR_AF = readr::col_number(),
+  gnomAD_AFR_AF = readr::col_number(),
+  gnomAD_EAS_AF = readr::col_number(),
+  gnomAD_FIN_AF = readr::col_number(),
+  gnomAD_ASJ_AF = readr::col_number(),
+  gnomAD_OTH_AF = readr::col_number(),
+  gnomAD_NFE_AF = readr::col_number(),
+  gnomAD_SAS_AF = readr::col_number(),
+  EFFECT_PREDICTIONS = readr::col_character(),
+  VCF_SAMPLE_ID = readr::col_character()
+)
+
+usethis::use_data(data_coltype_defs, overwrite = T)
+
 #---- (hetero/homo)zygous_states ----#
 heterozygous_states <- c()
 ref_allele_index <- 0
@@ -131,31 +255,39 @@ variant_db_url <-
     name = "DBSNP",
     group_by_var = "VAR_ID",
     url_prefix = "https://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=",
-    link_key_var = "DBSNPRSID", link_display_var = "DBSNPRSID",
-    stringsAsFactors = F)
+    link_key_var = "DBSNPRSID",
+    link_display_var = "DBSNPRSID")
 variant_db_url <-
   dplyr::bind_rows(
     variant_db_url,
-    data.frame(name = "CLINVAR", group_by_var = "VAR_ID",
+    data.frame(name = "CLINVAR",
+               group_by_var = "VAR_ID",
                url_prefix = "http://www.ncbi.nlm.nih.gov/clinvar/variation/",
                link_key_var = "CLINVAR_MSID",
-               link_display_var = "CLINVAR_TRAITS_ALL", stringsAsFactors = F),
-    data.frame(name = "GENE_NAME", group_by_var = "VAR_ID",
+               link_display_var = "CLINVAR_TRAITS_ALL"),
+    data.frame(name = "GENE_NAME",
+               group_by_var = "VAR_ID",
                url_prefix = "https://www.ncbi.nlm.nih.gov/gene/",
-               link_key_var = "ENTREZ_ID",
-               link_display_var = "GENENAME", stringsAsFactors = F),
-    data.frame(name = "PROTEIN_DOMAIN", group_by_var = "VAR_ID",
-               url_prefix = "http://pfam.xfam.org/family/",
+               link_key_var = "ENTREZGENE",
+               link_display_var = "GENENAME"),
+    data.frame(name = "PROTEIN_DOMAIN",
+               group_by_var = "VAR_ID",
+               url_prefix = "https://www.ebi.ac.uk/interpro/entry/pfam/",
                link_key_var = "PFAM_DOMAIN",
-               link_display_var = "PFAM_DOMAIN_NAME", stringsAsFactors = F),
-    data.frame(name = "COSMIC", group_by_var = "VAR_ID",
+               link_display_var = "PFAM_DOMAIN_NAME",
+               stringsAsFactors = F),
+    data.frame(name = "COSMIC",
+               group_by_var = "VAR_ID",
                url_prefix = "https://cancer.sanger.ac.uk/cosmic/search?q=",
                link_key_var = "COSMIC_MUTATION_ID",
-               link_display_var = "COSMIC_MUTATION_ID", stringsAsFactors = F),
-    data.frame(name = "NCBI_REFSEQ", group_by_var = "VAR_ID",
+               link_display_var = "COSMIC_MUTATION_ID",
+               stringsAsFactors = F),
+    data.frame(name = "REFSEQ",
+               group_by_var = "VAR_ID",
                url_prefix = "https://www.ncbi.nlm.nih.gov/nuccore/",
-               link_key_var = "REFSEQ_MRNA",
-               link_display_var = "REFSEQ_MRNA", stringsAsFactors = F)
+               link_key_var = "REFSEQ_TRANSCRIPT_ID",
+               link_display_var = "REFSEQ_TRANSCRIPT_ID",
+               stringsAsFactors = F)
   )
 
 usethis::use_data(variant_db_url, overwrite = T)
@@ -182,6 +314,23 @@ cancer_phenotypes_regex <-
          "|hirschsprung|hydrocephalus|hyperparathyroidism|immunodeficiency",
          "|infantile myofibromatosis|leopard|proteus|rothmund|russel)")
 usethis::use_data(cancer_phenotypes_regex, overwrite = T)
+
+
+tcga_cohorts <- as.data.frame(
+  TCGAbiolinks::getGDCprojects() |>
+  dplyr::filter(
+    stringr::str_detect(project_id,"TCGA")
+  ) |>
+  dplyr::select(
+    tumor, name
+  ) |>
+  dplyr::rename(
+    tcga_cancer_code = tumor,
+    tcga_cancer_name = name
+  )
+)
+
+usethis::use_data(tcga_cohorts, overwrite = T)
 
 rm(cancer_phenotypes_regex,
    phased_gt,
