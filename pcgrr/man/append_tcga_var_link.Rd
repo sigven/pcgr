@@ -4,14 +4,14 @@
 \alias{append_tcga_var_link}
 \title{Function that adds TCGA annotations (cohort, frequency etc.) to variant identifiers}
 \usage{
-append_tcga_var_link(var_df, pcgr_data = NULL, linktype = "dbsource")
+append_tcga_var_link(var_df, linktype = "dbsource")
 }
 \arguments{
 \item{var_df}{data frame with variants}
 
-\item{pcgr_data}{PCGR data structure}
-
 \item{linktype}{type of link}
+
+\item{pcgr_data}{PCGR data structure}
 }
 \value{
 var_df

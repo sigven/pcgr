@@ -171,8 +171,8 @@ def extend_vcf_annotations(arg_dict, logger):
                               logger, pick_only = False, csq_identifier = 'CSQ', 
                               targets_ensembl_gene = cpsr_target_genes)
             if 'picked_gene_csq' in vep_csq_record_results:
-                vep_csq_records_all = vep_csq_record_results['picked_gene_csq']
-                rec.INFO['REGULATORY_ANNOTATION'] = map_regulatory_variant_annotations(vep_csq_records_all)
+                rec.INFO['REGULATORY_ANNOTATION'] = map_regulatory_variant_annotations(
+                    vep_csq_record_results['picked_gene_csq'])
         else:
             vep_csq_record_results = \
                 parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, arg_dict['vep_pick_order'], 

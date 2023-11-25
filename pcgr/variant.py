@@ -25,7 +25,7 @@ def append_annotations(vcf2tsv_gz_fname: str, pcgr_db_dir: str, logger):
             low_memory = False)
         if {'CHROM','POS','REF','ALT','CLINVAR_MSID','PFAM_DOMAIN','ENTREZGENE'}.issubset(vcf2tsv_df.columns):
             for elem in ['CHROM','POS','REF','ALT','CLINVAR_MSID','PFAM_DOMAIN','ENTREZGENE']:
-                vcf2tsv_df = vcf2tsv_df.astype({elem:'string'})
+                vcf2tsv_df = vcf2tsv_df.astype({elem:'string'})            
             vcf2tsv_df['CLINVAR_MSID'] = vcf2tsv_df['CLINVAR_MSID'].str.replace("\\.[0-9]{1,}$", "", regex = True)
             vcf2tsv_df['PFAM_DOMAIN'] = vcf2tsv_df['PFAM_DOMAIN'].str.replace("\\.[0-9]{1,}$", "", regex = True)
             vcf2tsv_df["VAR_ID"] = vcf2tsv_df["CHROM"].str.cat(
@@ -33,7 +33,8 @@ def append_annotations(vcf2tsv_gz_fname: str, pcgr_db_dir: str, logger):
                     vcf2tsv_df["REF"], sep = "_").str.cat(
                         vcf2tsv_df["ALT"], sep = "_")
 
-            vcf2tsv_df.drop('CLINVAR_TRAITS_ALL', inplace=True, axis=1)
+            if {'CLINVAR_TRAITS_ALL'}.issubset(vcf2tsv_df.columns):
+                vcf2tsv_df.drop('CLINVAR_TRAITS_ALL', inplace=True, axis=1)
         
             ## check number of variants with ClinVar ID's
             num_recs_with_clinvar_hits = vcf2tsv_df["CLINVAR_MSID"].notna().sum()
@@ -72,7 +73,8 @@ def append_annotations(vcf2tsv_gz_fname: str, pcgr_db_dir: str, logger):
                 vcf2tsv_df.drop('PFAM_DOMAIN_NAME', inplace=True, axis=1)
                 
                 if os.path.exists(protein_domain_tsv_fname):
-                    prot_domains_data_df = pd.read_csv(protein_domain_tsv_fname, sep="\t", usecols=["pfam_id","pfam_name"]).drop_duplicates()
+                    prot_domains_data_df = pd.read_csv(
+                        protein_domain_tsv_fname, sep="\t", usecols=["pfam_id","pfam_name"]).drop_duplicates()
                     prot_domains_data_df.rename(columns = {'pfam_id':'PFAM_DOMAIN', 'pfam_name':'PFAM_DOMAIN_NAME'}, inplace = True)                                        
                     vcf2tsv_df = vcf2tsv_df.merge(prot_domains_data_df, left_on=["PFAM_DOMAIN"], right_on=["PFAM_DOMAIN"], how="left")
                     vcf2tsv_df = vcf2tsv_df.fillna('.')
@@ -88,11 +90,15 @@ def append_annotations(vcf2tsv_gz_fname: str, pcgr_db_dir: str, logger):
                     vcf2tsv_df.drop('GENENAME', inplace=True, axis=1)
                 
                 if os.path.exists(gene_xref_tsv_fname):
-                    gene_xref_df = pd.read_csv(gene_xref_tsv_fname, sep="\t", na_values=".", usecols=["entrezgene","name"])
-                    gene_xref_df = gene_xref_df.astype({'entrezgene':'string'})
+                    gene_xref_df = pd.read_csv(
+                        gene_xref_tsv_fname, sep="\t", na_values=".", 
+                        usecols=["entrezgene","name"])
                     gene_xref_df = gene_xref_df[gene_xref_df['entrezgene'].notnull()].drop_duplicates()
-                    gene_xref_df.rename(columns = {'entrezgene':'ENTREZGENE', 'name':'GENENAME'}, inplace = True)                                        
+                    gene_xref_df["entrezgene"] = gene_xref_df["entrezgene"].astype("int64").astype("string")
+                    #print(gene_xref_df.head)
+                    gene_xref_df.rename(columns = {'entrezgene':'ENTREZGENE', 'name':'GENENAME'}, inplace = True)
                     vcf2tsv_df = vcf2tsv_df.merge(gene_xref_df, left_on=["ENTREZGENE"], right_on=["ENTREZGENE"], how="left")
+                    vcf2tsv_df["ENTREZGENE"] = vcf2tsv_df['ENTREZGENE'].str.replace("\\.[0-9]{1,}$", "", regex = True)
                     vcf2tsv_df = vcf2tsv_df.fillna('.')
                 else:
                     logger.error(f"Could not find {gene_xref_tsv_fname} needed for gene name annotation - exiting")
@@ -201,8 +207,53 @@ def calculate_tmb(variant_set: pd.DataFrame, tumor_dp_min: int, tumor_af_min: fl
                          'tmb_estimate',
                          'tmb_unit'])
             df.to_csv(tmb_fname, sep="\t", header=True, index=False)
-            
+
+def clean_annotations(variant_set: pd.DataFrame, yaml_data: dict) -> pd.DataFrame:
     
+    if {'Consequence','EFFECT_PREDICTIONS','CLINVAR_CONFLICTED'}.issubset(variant_set.columns):
+        variant_set.rename(columns = {'Consequence':'CONSEQUENCE'}, inplace = True)
+        variant_set['EFFECT_PREDICTIONS'] = variant_set['EFFECT_PREDICTIONS'].str.replace("\\.&|\\.$", "NA&", regex = True)
+        variant_set['EFFECT_PREDICTIONS'] = variant_set['EFFECT_PREDICTIONS'].str.replace("&$", "", regex = True)
+        variant_set['EFFECT_PREDICTIONS'] = variant_set['EFFECT_PREDICTIONS'].str.replace("&", ", ", regex = True)
+        variant_set.loc[variant_set['CLINVAR_CONFLICTED'] == 1, "CLINVAR_CONFLICTED"] = True
+        variant_set.loc[variant_set['CLINVAR_CONFLICTED'] != 1, "CLINVAR_CONFLICTED"] = False
     
+    if not {'VCF_SAMPLE_ID'}.issubset(variant_set.columns):
+        variant_set['VCF_SAMPLE_ID'] = yaml_data['sample_id']
+    variant_set['GENOME_VERSION'] = yaml_data['genome_assembly']
+    if {'CHROM','POS','REF','ALT',}.issubset(variant_set.columns):      
+        variant_set['GENOMIC_CHANGE'] = variant_set['CHROM'].astype(str) + ":g." + variant_set['POS'].astype(str) + \
+            variant_set['REF'].astype(str) + ">" + variant_set['ALT'].astype(str)
+    if not {'PANEL_OF_NORMALS'}.issubset(variant_set.columns):
+        variant_set['PANEL_OF_NORMALS'] = False
+        
+    ## Make sure that specific tags are formatted as integers (not float) during to_csv export
+    if {'AMINO_ACID_END','AMINO_ACID_START'}.issubset(variant_set.columns):
+        variant_set.loc[variant_set['AMINO_ACID_START'] == ".","AMINO_ACID_START"] = -1
+        variant_set.loc[variant_set['AMINO_ACID_END'] == ".","AMINO_ACID_END"] = -1
+        variant_set['AMINO_ACID_END'] = variant_set['AMINO_ACID_END'].astype(float).astype(int)
+        variant_set['AMINO_ACID_START'] = variant_set['AMINO_ACID_START'].astype(float).astype(int)
     
+    for pop in ['AFR','AMR','ASJ','FIN','EAS','NFE','SAS','OTH','']:
+        for tag in ['AN','AC','NHOMALT']:
+            vcf_info_tag = 'gnomADe_non_cancer_' + str(pop) + '_' + str(tag)
+            if vcf_info_tag in variant_set.columns:
+                variant_set[vcf_info_tag] = variant_set[vcf_info_tag].astype(str)
+                variant_set.loc[variant_set[vcf_info_tag] != ".", vcf_info_tag] = \
+                    variant_set.loc[variant_set[vcf_info_tag] != ".", vcf_info_tag].astype(float).astype(int)
     
+    for elem in ['NUM_SUBMITTERS','ALLELE_ID','ENTREZGENE','REVIEW_STATUS_STARS','MSID']:
+        vcf_info_tag = 'CLINVAR_' + str(elem)
+        if vcf_info_tag in variant_set.columns:
+            variant_set[vcf_info_tag] = variant_set[vcf_info_tag].astype(str)            
+            variant_set.loc[variant_set[vcf_info_tag] != ".", vcf_info_tag] = \
+                variant_set.loc[variant_set[vcf_info_tag] != ".", vcf_info_tag].astype(float).astype(int)
+    
+    for vcf_info_tag in ['ONCOGENE_RANK','TSG_RANK','TCGA_PANCANCER_COUNT','CGC_TIER','DISTANCE',
+                         'EXON_AFFECTED','INTRON_POSITION','EXON_POSITION']:
+        if vcf_info_tag in variant_set.columns:
+            variant_set[vcf_info_tag] = variant_set[vcf_info_tag].astype(str)
+            variant_set.loc[variant_set[vcf_info_tag] != ".", vcf_info_tag] = \
+                variant_set.loc[variant_set[vcf_info_tag] != ".", vcf_info_tag].astype(float).astype(int)
+    
+    return variant_set

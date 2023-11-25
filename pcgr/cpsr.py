@@ -123,65 +123,70 @@ def run_cpsr(conf_options, cpsr_paths):
     if cpsr_paths['input_customlist_basename'] != 'NA' and cpsr_paths['input_customlist_dir'] != 'NA':
         input_customlist = os.path.join(
             cpsr_paths['input_customlist_dir'], cpsr_paths['input_customlist_basename'])
-        output_custom_bed =      f'{prefix}.custom_panel.bed'
+        output_custom_bed =  f'{prefix}.custom_panel.bed'
         if conf_options['gene_panel']['custom_list_name'] == "None":
             warn_msg = "No custom list name provided, use argument '--custom_list_name' to provide name for custom defined panel"
             warn_message(warn_msg, logger)
 
-    data_dir = cpsr_paths['base_dir']
-    output_dir = cpsr_paths['output_dir']
-
-    check_subprocess(logger, f'mkdir -p {output_dir}', debug)
-
-    ## CPSR|Validate input VCF - check formatting, non-overlap with CPSR INFO tags, and whether sample contains any variants in cancer predisposition loci
-    vcf_validate_command = (
-            f'cpsr_validate_input.py '
-            f'{data_dir} '
-            f'{input_vcf} '
-            f'{input_customlist} '
-            f'{output_custom_bed} '
-            f'{conf_options["other"]["retained_vcf_info_tags"]} '
-            f'{conf_options["genome_assembly"]} '
-            f'{conf_options["sample_id"]} '
-            f'{conf_options["gene_panel"]["panel_id"]} '
-            f'{conf_options["gene_panel"]["diagnostic_grade_only"]} '
-            f'{conf_options["variant_classification"]["gwas_findings"]} '
-            f'{conf_options["variant_classification"]["secondary_findings"]} '
-            f'--output_dir {output_dir} {"--debug" if debug else ""}'
-            )
-    check_subprocess(logger, vcf_validate_command, debug)
- 
-    logger.info('Finished cpsr-validate-input-arguments')
-    print('----')
-
-    ## CPSR|Start - log key information about run
-    logger = getlogger("cpsr-start")
-    logger.info("--- Cancer Predisposition Sequencing Reporter workflow ----")
-    logger.info(f"Sample name: {conf_options['sample_id']}")
-    if not input_customlist == 'None':
-        logger.info(f"Virtual gene panel: custom-made list from panel 0: {input_customlist}")
-    else:
-        logger.info(f"Diagnostic-grade genes in virtual panels (GE PanelApp): " + \
-                    f"{'ON' if conf_options['gene_panel']['diagnostic_grade_only'] else 'OFF'}")
-    logger.info(f"Include incidental findings (ACMG recommended list v3.1): " + \
-                f"{'ON' if conf_options['variant_classification']['secondary_findings'] else 'OFF'}")
-    logger.info(f"Include low to moderate cancer risk variants from genome-wide association studies: " + \
-                f"{'ON' if conf_options['variant_classification']['gwas_findings'] else 'OFF'}")
-    logger.info(f"Reference population, germline variant frequencies (gnomAD): {str(conf_options['variant_classification']['pop_gnomad']).upper()}")
-    logger.info(f"Genome assembly: {conf_options['genome_assembly']}")
-    print('----')
-
-
     if not input_vcf == 'None':
+        data_dir = cpsr_paths['base_dir']
+        output_dir = cpsr_paths['output_dir']
 
-        ## Define input, output and temporary file names        
-        output_vcf =             f'{prefix}.vcf.gz'
-        output_pass_vcf =        f'{prefix}.pass.vcf.gz'
-        output_pass_vcf2tsv =    f'{prefix}.pass.vcf2tsv.tsv'
-        output_pass_vcf2tsv_gz = f'{output_pass_vcf2tsv}.gz'
-        output_pass_tsv =        f'{prefix}.pass.tsv'
-        output_pass_tsv_gz =     f'{output_pass_tsv}.gz'
-        yaml_fname =             f'{prefix}.conf.yaml'
+        check_subprocess(logger, f'mkdir -p {output_dir}', debug)
+        
+        ## Define input, output and temporary file names
+        input_vcf_validated =             f'{conf_options["sample_id"]}.cpsr_ready_target.vcf.gz'
+        input_vcf_validated_uncompr =     f'{conf_options["sample_id"]}.cpsr_ready_target.vcf'
+        vep_vcf =                         f'{conf_options["sample_id"]}.vep.vcf'
+        vep_vcfanno_vcf =                 f'{conf_options["sample_id"]}.vep.vcfanno.vcf'
+        vep_vcfanno_summarised_vcf =      f'{conf_options["sample_id"]}.vep.vcfanno.summarised.vcf'
+        vep_vcfanno_summarised_pass_vcf = f'{conf_options["sample_id"]}.vep.vcfanno.summarised.pass.vcf'           
+        output_vcf =                      f'{prefix}.vcf.gz'
+        output_pass_vcf =                 f'{prefix}.pass.vcf.gz'
+        output_pass_vcf2tsv =             f'{prefix}.pass.vcf2tsv.tsv'
+        output_pass_vcf2tsv_gz =          f'{output_pass_vcf2tsv}.gz'
+        output_pass_tsv =                 f'{prefix}.pass.tsv'
+        output_pass_tsv_gz =              f'{output_pass_tsv}.gz'
+        yaml_fname =                      f'{prefix}.conf.yaml'
+
+        ## CPSR|Validate input VCF - check formatting, non-overlap with CPSR INFO tags, and whether sample contains any variants in cancer predisposition loci
+        vcf_validate_command = (
+                f'cpsr_validate_input.py '
+                f'{data_dir} '
+                f'{input_vcf} '
+                f'{input_vcf_validated_uncompr} '
+                f'{input_customlist} '
+                f'{output_custom_bed} '
+                f'{conf_options["other"]["retained_vcf_info_tags"]} '
+                f'{conf_options["genome_assembly"]} '
+                f'{conf_options["sample_id"]} '
+                f'{conf_options["gene_panel"]["panel_id"]} '
+                f'{conf_options["gene_panel"]["diagnostic_grade_only"]} '
+                f'{conf_options["variant_classification"]["gwas_findings"]} '
+                f'{conf_options["variant_classification"]["secondary_findings"]} '
+                f'--output_dir {output_dir} {"--debug" if debug else ""}'
+                )
+        check_subprocess(logger, vcf_validate_command, debug)
+    
+        logger.info('Finished cpsr-validate-input-arguments')
+        print('----')
+
+        ## CPSR|Start - log key information about run
+        logger = getlogger("cpsr-start")
+        logger.info("--- Cancer Predisposition Sequencing Reporter workflow ----")
+        logger.info(f"Sample name: {conf_options['sample_id']}")
+        if not input_customlist == 'None':
+            logger.info(f"Virtual gene panel: custom-made list from panel 0: {input_customlist}")
+        else:
+            logger.info(f"Diagnostic-grade genes in virtual panels (GE PanelApp): " + \
+                        f"{'ON' if conf_options['gene_panel']['diagnostic_grade_only'] else 'OFF'}")
+        logger.info(f"Include incidental findings (ACMG recommended list v3.1): " + \
+                    f"{'ON' if conf_options['variant_classification']['secondary_findings'] else 'OFF'}")
+        logger.info(f"Include low to moderate cancer risk variants from genome-wide association studies: " + \
+                    f"{'ON' if conf_options['variant_classification']['gwas_findings'] else 'OFF'}")
+        logger.info(f"Reference population, germline variant frequencies (gnomAD): {str(conf_options['variant_classification']['pop_gnomad']).upper()}")
+        logger.info(f"Genome assembly: {conf_options['genome_assembly']}")
+        print('----')
         
         conf_options['annotated_tsv'] = output_pass_tsv_gz
         conf_options['annotated_vcf'] = output_vcf
@@ -190,31 +195,17 @@ def run_cpsr(conf_options, cpsr_paths):
         if not input_customlist == 'None':
             conf_options['gene_panel']['custom_list_bed'] = output_custom_bed
         
+        ## Write YAML configuration file  - settings, path to files, reference bundle etc
         yaml_data = populate_config_data(conf_options, data_dir, workflow = "CPSR", logger = logger)
         
         with open(yaml_fname, "w") as outfile:
             outfile.write(yaml.dump(yaml_data))
         outfile.close()
-        
-        input_vcf_cpsr_ready =   os.path.join(
-            output_dir, 
-            re.sub(r"(\.vcf$|\.vcf\.gz$)", 
-                   ".cpsr_ready_target.vcf.gz", 
-                   cpsr_paths["input_vcf_basename"]))
-        input_vcf_cpsr_ready_uncompressed = os.path.join(
-            output_dir, 
-            re.sub(r"(\.vcf$|\.vcf\.gz$)", 
-                    ".cpsr_ready_target.vcf", 
-                    cpsr_paths["input_vcf_basename"]))
-        vep_vcf = re.sub(r"(\.vcf$|\.vcf\.gz$)", ".cpsr_vep.vcf", input_vcf_cpsr_ready)
-        vep_vcfanno_vcf = re.sub(r"(\.vcf$|\.vcf\.gz$)", ".cpsr_vep.vcfanno.vcf", input_vcf_cpsr_ready)
-        vep_vcfanno_summarized_vcf = re.sub(r"\.vcfanno", ".vcfanno.summarized", vep_vcfanno_vcf)
-        vep_vcfanno_summarized_pass_vcf = re.sub(r"\.vcfanno", ".vcfanno.summarized.pass", vep_vcfanno_vcf)
 
         ## CPSR|VEP - run Variant Effect Predictor on query VCF with LoF and NearestExonJB plugins
         vep_command = vep.get_command(file_paths = cpsr_paths, 
                                       conf_options = yaml_data, 
-                                      input_vcf = input_vcf_cpsr_ready, 
+                                      input_vcf = input_vcf_validated, 
                                       output_vcf = vep_vcf)
 
         logger = getlogger('cpsr-vep')
@@ -236,7 +227,7 @@ def run_cpsr(conf_options, cpsr_paths):
 
         ## CPSR|vcfanno - run vcfanno on query VCF with a number of relevant annotated VCFs
         logger = getlogger('cpsr-vcfanno')
-        logger.info("CPSR - STEP 2: Annotation with BED/VCF tracks with cpsr-vcfanno")
+        logger.info("CPSR - STEP 2: Annotation against BED/VCF tracks with cpsr-vcfanno")
         logger.info("(ClinVar, CIViC, dbNSFP, dbMTS, GERP, GWAS catalog, gnomAD non-cancer subset)")
         pcgr_vcfanno_command = (
                 f"pcgr_vcfanno.py --num_processes {yaml_data['conf']['other']['vcfanno_n_proc']} --dbnsfp --clinvar "
@@ -250,7 +241,7 @@ def run_cpsr(conf_options, cpsr_paths):
         ## CPSR|summarise - expand annotations with separate VCF INFO tags
         logger = getlogger("cpsr-summarise")
         cpsr_summarise_command = (
-                f'pcgr_summarise.py {vep_vcfanno_vcf}.gz {vep_vcfanno_summarized_vcf} 0 '
+                f'pcgr_summarise.py {vep_vcfanno_vcf}.gz {vep_vcfanno_summarised_vcf} 0 '
                 f'{yaml_data["conf"]["vep"]["vep_regulatory"]} 0 '
                 f'Any {yaml_data["conf"]["vep"]["vep_pick_order"]} '
                 f'{cpsr_paths["db_dir"]} --compress_output_vcf '
@@ -261,16 +252,16 @@ def run_cpsr(conf_options, cpsr_paths):
         check_subprocess(logger, cpsr_summarise_command, debug)
 
         ## CPSR|clean - rename output files, remove temporary files
-        os.rename(f'{vep_vcfanno_summarized_vcf}.gz', output_vcf)
-        os.rename(f'{vep_vcfanno_summarized_vcf}.gz.tbi', f'{output_vcf}.tbi')
-        os.rename(f'{vep_vcfanno_summarized_pass_vcf}.gz', output_pass_vcf)
-        os.rename(f'{vep_vcfanno_summarized_pass_vcf}.gz.tbi', f'{output_pass_vcf}.tbi')
+        os.rename(f'{vep_vcfanno_summarised_vcf}.gz', output_vcf)
+        os.rename(f'{vep_vcfanno_summarised_vcf}.gz.tbi', f'{output_vcf}.tbi')
+        os.rename(f'{vep_vcfanno_summarised_pass_vcf}.gz', output_pass_vcf)
+        os.rename(f'{vep_vcfanno_summarised_pass_vcf}.gz.tbi', f'{output_pass_vcf}.tbi')
         delete_files = (
                 glob(f'{vep_vcf}*') +
-                glob(f'{vep_vcfanno_summarized_vcf}*') +
-                glob(f'{vep_vcfanno_summarized_pass_vcf}*') +
+                glob(f'{vep_vcfanno_summarised_vcf}*') +
+                glob(f'{vep_vcfanno_summarised_pass_vcf}*') +
                 glob(f'{vep_vcfanno_vcf}*') +
-                glob(f'{input_vcf_cpsr_ready_uncompressed}*')
+                glob(f'{input_vcf_validated}*')
                 )
         # do not delete if debugging
         if not debug:
@@ -283,28 +274,16 @@ def run_cpsr(conf_options, cpsr_paths):
         logger.info("Converting VCF to TSV with https://github.com/sigven/vcf2tsvpy")        
         check_subprocess(logger, cpsr_vcf2tsv_command, debug) 
         logger.info('Finished cpsr-summarise-vcf2tsv')       
-        logger.info("Appending ClinVar and protein domain (Pfam) annotations")        
+        logger.info("Appending ClinVar traits, official gene names, and protein domain annotations")        
         variant_set = \
            variant.append_annotations(
               output_pass_vcf2tsv_gz, pcgr_db_dir = cpsr_paths["db_dir"], logger = logger)
-        variant_set.rename(columns = {'Consequence':'CONSEQUENCE'}, inplace = True)
-        variant_set['EFFECT_PREDICTIONS'] = variant_set['EFFECT_PREDICTIONS'].str.replace("\\.&|\\.$", "NA&", regex = True)
-        variant_set['EFFECT_PREDICTIONS'] = variant_set['EFFECT_PREDICTIONS'].str.replace("&$", "", regex = True)
-        variant_set['EFFECT_PREDICTIONS'] = variant_set['EFFECT_PREDICTIONS'].str.replace("&", ", ", regex = True)
-        variant_set.loc[variant_set['CLINVAR_CONFLICTED'] == 1, "CLINVAR_CONFLICTED"] = True
-        variant_set.loc[variant_set['CLINVAR_CONFLICTED'] != 1, "CLINVAR_CONFLICTED"] = False
-        variant_set['GENOMIC_CHANGE'] = variant_set['CHROM'].astype(str) + ":g." + variant_set['POS'].astype(str) + \
-            variant_set['REF'].astype(str) + ">" + variant_set['ALT'].astype(str)
-        variant_set['GENOME_VERSION'] = yaml_data['genome_assembly']        
+        variant_set = variant.clean_annotations(variant_set, yaml_data)        
         variant_set.to_csv(output_pass_tsv_gz, sep="\t", compression="gzip", index=False)
         utils.remove(output_pass_vcf2tsv_gz)
                 
         logger.info('Finished cpsr-summarise')
-        
-        # CPSR|Generate YAML file - containing configuration options and paths to annotated molecular profile dataset
-        # - VCF/TSV files (SNVs/InDels)       
-        logger = getlogger('pcgr-write-yaml')
-        
+                
     print('----')
 
     ## Generation of HTML reports for VEP/vcfanno-annotated VCF file

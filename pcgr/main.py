@@ -153,31 +153,22 @@ def run_pcgr(pcgr_paths, conf_options):
     tmb_estimation_set = 'ON' if conf_options['somatic_snv']['tmb']['run'] else 'OFF'
     run_vcf2maf = conf_options['other']['vcf2maf']
     assay_mode = 'Tumor vs. Control'
-    tumor_only = 0
-    cell_line = 0
     oncogenicity_annotation = 1
     if conf_options['assay_properties']['vcf_tumor_only']:
         assay_mode = 'Tumor-only'
-        tumor_only = 1
         if conf_options['assay_properties']['cell_line']:
-            cell_line = 1
             assay_mode = 'Tumor-only (cell line)'
     # set basic run commands
     output_vcf = 'None'
     output_pass_vcf = 'None'
     output_pass_tsv = 'None'
     output_maf = 'None'
-    #GENCODE_VERSION = pcgr_vars.GENCODE_VERSION
     NCBI_BUILD_MAF = pcgr_vars.NCBI_BUILD_MAF
-    #VEP_ASSEMBLY = pcgr_vars.VEP_ASSEMBLY
     MAX_VARIANTS_FOR_REPORT = pcgr_vars.MAX_VARIANTS_FOR_REPORT
     if conf_options['genome_assembly'] == 'grch37':
         NCBI_BUILD_MAF = 'GRCh37'
-        #GENCODE_VERSION = 'release 19'
-        #VEP_ASSEMBLY = 'GRCh37'
     logger = getlogger('pcgr-get-OS')
 
-    vep_dir = os.path.join(str(pcgr_paths['db_dir']), '.vep')
     input_vcf = 'None'
     input_cna = 'None'
     input_rna_fusion = 'None'
@@ -201,63 +192,19 @@ def run_pcgr(pcgr_paths, conf_options):
     if pcgr_paths['panel_normal_vcf_basename'] != 'NA':
         panel_normal = os.path.join(pcgr_paths['panel_normal_vcf_dir'], pcgr_paths['panel_normal_vcf_basename'])
 
-    data_dir = pcgr_paths['base_dir']
-    output_dir = pcgr_paths['output_dir']
-
-    # PCGR|validate_input - verify that VCF and CNA segment file is of appropriate format
-    logger = getlogger("pcgr-validate-input-arguments")
-    print('')
-    logger.info("PCGR - STEP 0: Validate input data and options")
-
-    vcf_validate_command = (
-            f'pcgr_validate_input.py '
-            f'{data_dir} '
-            f'{input_vcf} '
-            f'{input_cna} '
-            f'{input_rna_fusion} '
-            f'{input_rna_expression} '
-            f'{panel_normal} '
-            f'{tumor_only} '
-            f'{conf_options["genome_assembly"]} '
-            f'{conf_options["other"]["retained_vcf_info_tags"]} '
-            f'{conf_options["somatic_snv"]["allelic_support"]["tumor_dp_tag"]} '
-            f'{conf_options["somatic_snv"]["allelic_support"]["tumor_af_tag"]} '
-            f'{conf_options["somatic_snv"]["allelic_support"]["control_dp_tag"]} '
-            f'{conf_options["somatic_snv"]["allelic_support"]["control_af_tag"]} '
-            f'{conf_options["somatic_snv"]["allelic_support"]["call_conf_tag"]} '
-            f'{conf_options["somatic_snv"]["tumor_only"]["exclude_likely_hom_germline"]} '
-            f'{conf_options["somatic_snv"]["tumor_only"]["exclude_likely_het_germline"]} '
-            f'--output_dir {output_dir} '
-            f'{"--debug " if debug else ""}'
-            f'{"--keep_uncompressed" if run_vcf2maf else ""} '
-            )
-    check_subprocess(logger, vcf_validate_command, debug)
-    logger.info('Finished pcgr-validate-input-arguments')
-    print('----')
-
-    # PCGR|start - Log key information about sample, options and sequencing assay/design
-    logger = getlogger('pcgr-start')
-    logger.info('--- Personal Cancer Genome Reporter workflow ----')
-    logger.info(f'Sample name: {conf_options["sample_id"]}')
-    if conf_options['sample_properties']['site'] == 'Any':
-        logger.info('Tumor type: Cancer_NOS (Any tumortype)')
-    else:
-        logger.info(f'Tumor type: {conf_options["sample_properties"]["site"]}')
-    logger.info(f'Sequencing assay - type: {conf_options["assay_properties"]["type"]}')
-    logger.info(f'Sequencing assay - mode: {assay_mode}')
-    logger.info(f'Sequencing assay - effective (coding) target size: {conf_options["assay_properties"]["effective_target_size_mb"]}Mb')
-    logger.info(f'Variant filtering settings - minimum sequencing depth tumor: {conf_options["somatic_snv"]["allelic_support"]["tumor_dp_min"]}')
-    logger.info(f'Variant filtering settings - minimum allelic fraction tumor: {conf_options["somatic_snv"]["allelic_support"]["tumor_af_min"]}')
-    logger.info(f'Variant filtering settings - minimum sequencing depth control: {conf_options["somatic_snv"]["allelic_support"]["control_dp_min"]}')
-    logger.info(f'Variant filtering settings - maximum allelic fraction control: {conf_options["somatic_snv"]["allelic_support"]["control_af_max"]}')
-    logger.info(f'Genome assembly: {conf_options["genome_assembly"]}')
-    logger.info(f'Mutational signature estimation: {msig_estimation_set}')
-    logger.info(f'MSI classification: {msi_prediction_set}')
-    logger.info(f'Mutational burden estimation: {tmb_estimation_set}')
-    logger.info(f'Include molecularly targeted clinical trials (beta): {clinical_trials_set}')
-
     if not input_vcf == 'None':
+        data_dir = pcgr_paths['base_dir']
+        output_dir = pcgr_paths['output_dir']
+        
+        check_subprocess(logger, f'mkdir -p {output_dir}', debug)
+
         # Define temporary output file names
+        input_vcf_validated =             f'{conf_options["sample_id"]}.pcgr_ready.vcf.gz'
+        input_vcf_validated_uncompr =     f'{conf_options["sample_id"]}.pcgr_ready.vcf'
+        vep_vcf =                         f'{conf_options["sample_id"]}.vep.vcf'
+        vep_vcfanno_vcf =                 f'{conf_options["sample_id"]}.vep.vcfanno.vcf'
+        vep_vcfanno_summarised_vcf =      f'{conf_options["sample_id"]}.vep.vcfanno.summarised.vcf'
+        vep_vcfanno_summarised_pass_vcf = f'{conf_options["sample_id"]}.vep.vcfanno.summarised.pass.vcf'
         prefix = os.path.join(output_dir, f'{conf_options["sample_id"]}.pcgr_acmg.{conf_options["genome_assembly"]}')
         output_vcf =             f'{prefix}.vcf.gz'
         output_pass_vcf =        f'{prefix}.pass.vcf.gz'
@@ -271,17 +218,60 @@ def run_pcgr(pcgr_paths, conf_options):
         output_vcf2maf_log =     f'{prefix}.maf.log'
         yaml_fname =             f'{prefix}.conf.yaml'
         tmb_fname =              f'{prefix}.tmb.tsv'
-        
-        input_vcf_pcgr_ready =   os.path.join(
-            output_dir, re.sub(r'\.vcf(\.gz)?$', ".pcgr_ready.vcf.gz", pcgr_paths["input_vcf_basename"]))
-        # needs to be uncompressed for vcf2maf
-        input_vcf_pcgr_ready_uncompressed = os.path.join(
-            output_dir, re.sub(r'\.vcf(\.gz)?$', ".pcgr_ready.vcf", pcgr_paths["input_vcf_basename"]))
-        vep_vcf = re.sub(r'\.vcf(\.gz)?$', ".vep.vcf", input_vcf_pcgr_ready)
-        vep_vcf_gz = f'{vep_vcf}.gz'
-        vep_vcfanno_vcf = re.sub(r'\.vcf(\.gz)?$', ".vep.vcfanno.vcf", input_vcf_pcgr_ready)
-        vep_vcfanno_summarized_vcf = re.sub(r"\.vcfanno", ".vcfanno.summarized", vep_vcfanno_vcf)
-        vep_vcfanno_summarized_pass_vcf = re.sub(r"\.vcfanno", ".vcfanno.summarized.pass", vep_vcfanno_vcf)
+
+        # PCGR|validate_input - verify that VCF and CNA segment file is of appropriate format
+        logger = getlogger("pcgr-validate-input-arguments")
+        print('')
+        logger.info("PCGR - STEP 0: Validate input data and options")
+
+        vcf_validate_command = (
+                f'pcgr_validate_input.py '
+                f'{data_dir} '
+                f'{input_vcf} '
+                f'{input_vcf_validated_uncompr} '
+                f'{input_cna} '
+                f'{input_rna_fusion} '
+                f'{input_rna_expression} '
+                f'{panel_normal} '
+                f'{conf_options["assay_properties"]["vcf_tumor_only"]} '
+                f'{conf_options["genome_assembly"]} '
+                f'{conf_options["sample_id"]} '
+                f'{conf_options["other"]["retained_vcf_info_tags"]} '
+                f'{conf_options["somatic_snv"]["allelic_support"]["tumor_dp_tag"]} '
+                f'{conf_options["somatic_snv"]["allelic_support"]["tumor_af_tag"]} '
+                f'{conf_options["somatic_snv"]["allelic_support"]["control_dp_tag"]} '
+                f'{conf_options["somatic_snv"]["allelic_support"]["control_af_tag"]} '
+                f'{conf_options["somatic_snv"]["allelic_support"]["call_conf_tag"]} '
+                f'{conf_options["somatic_snv"]["tumor_only"]["exclude_likely_hom_germline"]} '
+                f'{conf_options["somatic_snv"]["tumor_only"]["exclude_likely_het_germline"]} '
+                f'--output_dir {output_dir} '
+                f'{"--debug " if debug else ""}'
+                f'{"--keep_uncompressed" if run_vcf2maf else ""} '
+                )
+        check_subprocess(logger, vcf_validate_command, debug)
+        logger.info('Finished pcgr-validate-input-arguments')
+        print('----')
+
+        # PCGR|start - Log key information about sample, options and sequencing assay/design
+        logger = getlogger('pcgr-start')
+        logger.info('--- Personal Cancer Genome Reporter workflow ----')
+        logger.info(f'Sample name: {conf_options["sample_id"]}')
+        if conf_options['sample_properties']['site'] == 'Any':
+            logger.info('Tumor type: Cancer_NOS (Any tumortype)')
+        else:
+            logger.info(f'Tumor type: {conf_options["sample_properties"]["site"]}')
+        logger.info(f'Sequencing assay - type: {conf_options["assay_properties"]["type"]}')
+        logger.info(f'Sequencing assay - mode: {assay_mode}')
+        logger.info(f'Sequencing assay - effective (coding) target size: {conf_options["assay_properties"]["effective_target_size_mb"]}Mb')
+        logger.info(f'Variant filtering settings - minimum sequencing depth tumor: {conf_options["somatic_snv"]["allelic_support"]["tumor_dp_min"]}')
+        logger.info(f'Variant filtering settings - minimum allelic fraction tumor: {conf_options["somatic_snv"]["allelic_support"]["tumor_af_min"]}')
+        logger.info(f'Variant filtering settings - minimum sequencing depth control: {conf_options["somatic_snv"]["allelic_support"]["control_dp_min"]}')
+        logger.info(f'Variant filtering settings - maximum allelic fraction control: {conf_options["somatic_snv"]["allelic_support"]["control_af_max"]}')
+        logger.info(f'Genome assembly: {conf_options["genome_assembly"]}')
+        logger.info(f'Mutational signature estimation: {msig_estimation_set}')
+        logger.info(f'MSI classification: {msi_prediction_set}')
+        logger.info(f'Mutational burden estimation: {tmb_estimation_set}')
+        logger.info(f'Include molecularly targeted clinical trials (beta): {clinical_trials_set}')
         
         # CPSR|Generate YAML file - containing configuration options and paths to annotated molecular profile datasets
         # - VCF/TSV files (SNVs/InDels)
@@ -304,7 +294,7 @@ def run_pcgr(pcgr_paths, conf_options):
         
         vep_command = vep.get_command(file_paths = pcgr_paths, 
                                       conf_options = yaml_data, 
-                                      input_vcf = input_vcf_pcgr_ready, 
+                                      input_vcf = input_vcf_validated, 
                                       output_vcf = vep_vcf)
 
         # PCGR|VEP - run consequence annotation with Variant Effect Predictor
@@ -368,10 +358,10 @@ def run_pcgr(pcgr_paths, conf_options):
             logger.info('Finished pcgr-vep-vcf2maf')
             print('----')
 
-        # PCGR|vcfanno - annotate VCF against a number of variant annotation resources
+        # PCGR|vcfanno - annotate VCF against a number of variant annotation tracks (BED/VCF)
         logger = getlogger("pcgr-vcfanno")
         pcgr_vcfanno_command = (
-                f'pcgr_vcfanno.py {vep_vcf_gz} {vep_vcfanno_vcf} {pcgr_paths["db_dir"]} '
+                f'pcgr_vcfanno.py {vep_vcf}.gz {vep_vcfanno_vcf} {pcgr_paths["db_dir"]} '
                 f'--num_processes {conf_options["other"]["vcfanno_n_proc"]} '
                 f'--dbnsfp --clinvar --rmsk --winmsk --simplerepeat '
                 f'--tcga --gene_transcript_xref --dbmts --gwas '
@@ -396,7 +386,7 @@ def run_pcgr(pcgr_paths, conf_options):
         # PCGR|pcgr_summarise - expand annotations in VCF file
         logger = getlogger("pcgr-summarise")
         pcgr_summarise_command = (
-                f'pcgr_summarise.py {vep_vcfanno_vcf}.gz {vep_vcfanno_summarized_vcf} {pon_annotation} '
+                f'pcgr_summarise.py {vep_vcfanno_vcf}.gz {vep_vcfanno_summarised_vcf} {pon_annotation} '
                 f'{yaml_data["conf"]["vep"]["vep_regulatory"]} {oncogenicity_annotation} '
                 f'{yaml_data["conf"]["sample_properties"]["site"]} {yaml_data["conf"]["vep"]["vep_pick_order"]} '
                 f'{pcgr_paths["db_dir"]} --compress_output_vcf '
@@ -417,16 +407,16 @@ def run_pcgr(pcgr_paths, conf_options):
         check_subprocess(logger, pcgr_summarise_command, debug)
 
         # PCGR|clean - move output files and clean up temporary files
-        os.rename(f'{vep_vcfanno_summarized_vcf}.gz', output_vcf)
-        os.rename(f'{vep_vcfanno_summarized_vcf}.gz.tbi', f'{output_vcf}.tbi')
-        os.rename(f'{vep_vcfanno_summarized_pass_vcf}.gz', output_pass_vcf)
-        os.rename(f'{vep_vcfanno_summarized_pass_vcf}.gz.tbi', f'{output_pass_vcf}.tbi')
+        os.rename(f'{vep_vcfanno_summarised_vcf}.gz', output_vcf)
+        os.rename(f'{vep_vcfanno_summarised_vcf}.gz.tbi', f'{output_vcf}.tbi')
+        os.rename(f'{vep_vcfanno_summarised_pass_vcf}.gz', output_pass_vcf)
+        os.rename(f'{vep_vcfanno_summarised_pass_vcf}.gz.tbi', f'{output_pass_vcf}.tbi')
         delete_files = (
                 glob(f'{vep_vcf}*') +
-                glob(f'{vep_vcfanno_summarized_vcf}') +
-                glob(f'{vep_vcfanno_summarized_pass_vcf}*') +
+                glob(f'{vep_vcfanno_summarised_vcf}') +
+                glob(f'{vep_vcfanno_summarised_pass_vcf}*') +
                 glob(f'{vep_vcfanno_vcf}*') +
-                glob(f'{input_vcf_pcgr_ready_uncompressed}*')
+                glob(f'{input_vcf_validated_uncompr}*')
                 )
         # do not delete if debugging
         if not debug:
@@ -441,23 +431,12 @@ def run_pcgr(pcgr_paths, conf_options):
         check_subprocess(logger, pcgr_vcf2tsv_command, debug)
         
         ## Append additional (space-containing) annotations not suitable for VCF INFO        
-        logger.info("Appending ClinVar, gene names, and protein domain annotations")        
+        logger.info("Appending ClinVar traits, official gene names, and protein domain annotations")        
         variant_set = \
            variant.append_annotations(
               output_pass_vcf2tsv_gz, pcgr_db_dir = pcgr_paths["db_dir"], logger = logger)
         variant_set = variant.set_allelic_support(variant_set, allelic_support_tags = yaml_data["conf"]['somatic_snv']['allelic_support'])
-        variant_set.rename(columns = {'Consequence':'CONSEQUENCE'}, inplace = True)
-        variant_set['EFFECT_PREDICTIONS'] = variant_set['EFFECT_PREDICTIONS'].str.replace("\\.&|\\.$", "NA&", regex = True)
-        variant_set['EFFECT_PREDICTIONS'] = variant_set['EFFECT_PREDICTIONS'].str.replace("&$", "", regex = True)
-        variant_set['EFFECT_PREDICTIONS'] = variant_set['EFFECT_PREDICTIONS'].str.replace("&", ", ", regex = True)
-        variant_set.loc[variant_set['CLINVAR_CONFLICTED'] == 1, "CLINVAR_CONFLICTED"] = True
-        variant_set.loc[variant_set['CLINVAR_CONFLICTED'] != 1, "CLINVAR_CONFLICTED"] = False
-        variant_set['VCF_SAMPLE_ID'] = yaml_data['sample_id']
-        variant_set['GENOME_VERSION'] = yaml_data['genome_assembly']        
-        variant_set['GENOMIC_CHANGE'] = variant_set['CHROM'].astype(str) + ":g." + variant_set['POS'].astype(str) + \
-            variant_set['REF'].astype(str) + ">" + variant_set['ALT'].astype(str)
-        if not {'PANEL_OF_NORMALS'}.issubset(variant_set.columns):
-            variant_set['PANEL_OF_NORMALS'] = False
+        variant_set = variant.clean_annotations(variant_set, yaml_data)        
         variant_set.to_csv(output_pass_tsv_gz, sep="\t", compression="gzip", index=False)
         utils.remove(output_pass_vcf2tsv_gz)
         

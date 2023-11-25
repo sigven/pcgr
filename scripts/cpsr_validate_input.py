@@ -20,6 +20,7 @@ def __main__():
     parser = argparse.ArgumentParser(description='Verify input data for CPSR')
     parser.add_argument('pcgr_dir',help='PCGR base directory with accompanying data directory')
     parser.add_argument('input_vcf', help='VCF input file with query variants (SNVs/InDels)')
+    parser.add_argument('validated_vcf',help="Name of VCF file with validated, decomposed query variants that overlap target genes (SNVs/InDels)")
     parser.add_argument('custom_target_tsv',help='Custom text/TSV file indicating user-defined target genes from panel 0 for screening and reporting')
     parser.add_argument('custom_target_bed',help='Name of BED file populated with regions associated with custom target genes defined by user')
     parser.add_argument('retained_info_tags',help='Comma-separated string of VCF INFO tags in query VCF to be retained for output')
@@ -35,6 +36,7 @@ def __main__():
 
     ret = validate_cpsr_input(args.pcgr_dir,
                               args.input_vcf,
+                              args.validated_vcf,
                               args.custom_target_tsv,
                               args.custom_target_bed,
                               args.retained_info_tags,
@@ -129,7 +131,7 @@ def get_valid_custom_genelist(genelist_fname, genelist_bed_fname, pcgr_dir, geno
     return 0
 
 
-def simplify_vcf(input_vcf, vcf, custom_bed, pcgr_directory, genome_assembly, virtual_panel_id, 
+def simplify_vcf(input_vcf, validated_vcf, vcf, custom_bed, pcgr_directory, genome_assembly, virtual_panel_id, 
                  sample_id, diagnostic_grade_only, gwas_findings, secondary_findings, output_dir, logger, debug):
 
     """
@@ -141,27 +143,25 @@ def simplify_vcf(input_vcf, vcf, custom_bed, pcgr_directory, genome_assembly, vi
     4. Final VCF file is sorted and indexed (bgzip + tabix)
     """
 
-    random_strings = [random_string(15), random_string(15), random_string(15), random_string(15)] 
+    random_str = random_string(10) 
 
     temp_files = {}
-    temp_files['tmp_vcf_1'] = \
-        os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)', f'.cpsr_ready.{random_strings[0]}.vcf', os.path.basename(input_vcf)))
-    temp_files['tmp_vcf_2'] = \
-        os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)', f'.cpsr_ready.{random_strings[1]}.vcf.gz', os.path.basename(input_vcf)))
-    temp_files['tmp_vcf_3'] = \
-        os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)', f'.cpsr_ready.{random_strings[2]}.vcf', os.path.basename(input_vcf)))
-    temp_files['tmp_vcf_4'] = \
-        os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)','.cpsr_ready.vcf', os.path.basename(input_vcf)))
-    temp_files['tmp_vcf_5'] = \
-        os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)','.cpsr_ready_target.vcf', os.path.basename(input_vcf)))
-    
-    tmp_vcf1 = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)', '.cpsr_ready.' + random_string(15) + '.vcf', os.path.basename(input_vcf)))
-    tmp_vcf2 = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)', '.cpsr_ready.' + random_string(15) + '.vcf.gz', os.path.basename(input_vcf)))
-    tmp_vcf3 = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)', '.cpsr_ready.' + random_string(15) + '.vcf.gz', os.path.basename(input_vcf)))
-    input_vcf_cpsr_ready_decomposed = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)','.cpsr_ready.vcf', os.path.basename(input_vcf)))
-    input_vcf_cpsr_ready_decomposed_target = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)','.cpsr_ready_target.vcf', os.path.basename(input_vcf)))
-    virtual_panels_tmp_bed = os.path.join(output_dir, "virtual_panels_all." + str(sample_id) + ".tmp.bed")
-    virtual_panels_bed = os.path.join(output_dir, "virtual_panels_all." + str(sample_id) + ".bed")
+    temp_files['vcf_1'] = \
+        os.path.join(output_dir, f'{sample_id}.cpsr_validate.bcftools.{random_str}_1.vcf')
+    temp_files['vcf_2'] = \
+        os.path.join(output_dir, f'{sample_id}.cpsr_validate.bcftools.{random_str}_2.vcf.gz')
+    temp_files['vcf_3'] = \
+        os.path.join(output_dir, f'{sample_id}.cpsr_validate.bftools.{random_str}_3.vcf')
+    temp_files['vcf_4'] = \
+        os.path.join(output_dir, f'{sample_id}.cpsr_validate.decomp.{random_str}_4.vcf')
+    bcftools_simplify_log = \
+        os.path.join(output_dir, f'{sample_id}.cpsr_validate.bcftools.{random_str}.log')
+    vt_decompose_log = \
+        os.path.join(output_dir, f'{sample_id}.cpsr_validate.vt_decompose.{random_str}.log')
+    virtual_panels_tmp_bed = \
+        os.path.join(output_dir, f'{sample_id}.virtual_panels_all.{random_str}.tmp.bed')
+    virtual_panels_bed = \
+        os.path.join(output_dir, f'{sample_id}.virtual_panels_all.{random_str}.bed')
 
     multiallelic_list = list()
     for rec in vcf:
@@ -172,15 +172,14 @@ def simplify_vcf(input_vcf, vcf, custom_bed, pcgr_directory, genome_assembly, vi
             multiallelic_list.append(variant_id)
 
     # bgzip + tabix required for sorting
-
-    cmd_vcf1 = f'bcftools view {input_vcf} | bgzip -cf > {tmp_vcf2} && tabix -p vcf {tmp_vcf2} && ' + \
-        f'bcftools sort --temp-dir {output_dir} -Oz {tmp_vcf2} > {tmp_vcf3} 2> {os.path.join(output_dir, "bcftools_1.cpsr_simplify_vcf.log")}' + \
-        f' && tabix -p vcf {tmp_vcf3}'
+    cmd_vcf1 = f'bcftools view {input_vcf} | bgzip -cf > {temp_files["vcf_2"]} && tabix -p vcf {temp_files["vcf_2"]} && ' + \
+        f'bcftools sort --temp-dir {output_dir} -Oz {temp_files["vcf_2"]} > {temp_files["vcf_3"]} 2> {bcftools_simplify_log}' + \
+        f' && tabix -p vcf {temp_files["vcf_3"]}'
     logger.info('Extracting variants on autosomal/sex/mito chromosomes only (1-22,X,Y, M/MT) with bcftools')
     # Keep only autosomal/sex/mito chrom (handle hg38 and hg19), sub chr prefix
     chrom_to_keep = [str(x) for x in [*range(1,23), 'X', 'Y', 'M', 'MT']]
     chrom_to_keep = ','.join([*['chr' + chrom for chrom in chrom_to_keep], *[chrom for chrom in chrom_to_keep]])
-    cmd_vcf2 = f'bcftools view --regions {chrom_to_keep} {tmp_vcf3} | sed \'s/^chr//\' > {tmp_vcf1}'
+    cmd_vcf2 = f'bcftools view --regions {chrom_to_keep} {temp_files["vcf_3"]} | sed \'s/^chr//\' > {temp_files["vcf_1"]}'
 
     check_subprocess(logger, cmd_vcf1, debug)
     check_subprocess(logger, cmd_vcf2, debug)
@@ -191,10 +190,10 @@ def simplify_vcf(input_vcf, vcf, custom_bed, pcgr_directory, genome_assembly, vi
         print(', '.join(multiallelic_list[:100]))
         print('----')
         logger.info('Decomposing multi-allelic sites in input VCF file using \'vt decompose\'')
-        command_decompose = f'vt decompose -s {tmp_vcf1} > {input_vcf_cpsr_ready_decomposed} 2> {os.path.join(output_dir, "decompose.log")}'
+        command_decompose = f'vt decompose -s {temp_files["vcf_1"]} > {temp_files["vcf_4"]} 2> {vt_decompose_log}'
         check_subprocess(logger, command_decompose, debug)
     else:
-        command_copy = f'cp {tmp_vcf1} {input_vcf_cpsr_ready_decomposed}'
+        command_copy = f'cp {temp_files["vcf_1"]} {temp_files["vcf_4"]}'
         check_subprocess(logger, command_copy, debug)
 
 
@@ -202,8 +201,8 @@ def simplify_vcf(input_vcf, vcf, custom_bed, pcgr_directory, genome_assembly, vi
         logger.info('Limiting variant set to user-defined screening loci (custom list from panel 0)')
         if check_file_exists(custom_bed):
             target_variants_intersect_cmd = \
-                "bedtools intersect -wa -u -header -a " + str(input_vcf_cpsr_ready_decomposed) + \
-                " -b " + str(custom_bed) + " > " + str(input_vcf_cpsr_ready_decomposed_target)
+                "bedtools intersect -wa -u -header -a " + str(temp_files['vcf_4']) + \
+                " -b " + str(custom_bed) + " > " + str(validated_vcf)
             check_subprocess(logger, target_variants_intersect_cmd, debug)
     else:
         logger.info('Limiting variant set to cancer predisposition loci - virtual panel id(s): ' + str(virtual_panel_id))
@@ -211,21 +210,24 @@ def simplify_vcf(input_vcf, vcf, custom_bed, pcgr_directory, genome_assembly, vi
         ## Concatenate all panel BEDs to one big virtual panel BED, sort and make unique
         panel_ids = str(virtual_panel_id).split(',')
         for pid in panel_ids:
+            ge_panel_identifier = "GE_PANEL_" + str(pid)
             target_bed_gz = os.path.join(
                 pcgr_directory,'data',genome_assembly, 'gene','bed','gene_virtual_panel', str(pid) + ".bed.gz")
             if diagnostic_grade_only == 1 and virtual_panel_id != "0":
                 logger.info('Considering diagnostic-grade only genes in panel ' + str(pid) + ' - (GREEN status in Genomics England PanelApp)')
                 target_bed_gz = os.path.join(
-                    pcgr_directory, 'data', genome_assembly, 'gene','bed','gene_virtual_panel', str(pid) + ".GREEN.bed.gz")
-            
+                    pcgr_directory, 'data', genome_assembly, 'gene','bed','gene_virtual_panel', str(pid) + ".GREEN.bed.gz")            
             check_file_exists(target_bed_gz, logger)
             
+            ## awk command to ignore secondary finding records while keeping records that belong to target (and that can potentially
+            ## be part of the secondary findings list)
+            awk_command = "awk 'BEGIN{FS=\"\\t\"}{if($4 !~ /ACMG_SF/ || ($4 ~ /ACMG_SF/ && $4 ~ /" + str(ge_panel_identifier) + "/))print;}'"
             if gwas_findings == 0 and secondary_findings == 1:
                 check_subprocess(logger, f'bgzip -dc {target_bed_gz} | egrep -v "(\|tag\|)" >> {virtual_panels_tmp_bed}', debug)
-            elif gwas_findings == 0 and secondary_findings == 0:
-                check_subprocess(logger, f'bgzip -dc {target_bed_gz} | egrep -v "(\|tag\|)|(\ACMG_SF\|)" >> {virtual_panels_tmp_bed}', debug)
+            elif gwas_findings == 0 and secondary_findings == 0:                
+                check_subprocess(logger, f'bgzip -dc {target_bed_gz} | egrep -v "(\|tag\|)" | {awk_command} >> {virtual_panels_tmp_bed}', debug)
             elif gwas_findings == 1 and secondary_findings == 0:
-                check_subprocess(logger, f'bgzip -dc {target_bed_gz} | egrep -v "(\ACMG_SF\|)" >> {virtual_panels_tmp_bed}', debug)
+                check_subprocess(logger, f'bgzip -dc {target_bed_gz} | {awk_command} >> {virtual_panels_tmp_bed}', debug)
             else:
                 check_subprocess(logger, f'bgzip -dc {target_bed_gz} >> {virtual_panels_tmp_bed}', debug)
 
@@ -233,27 +235,29 @@ def simplify_vcf(input_vcf, vcf, custom_bed, pcgr_directory, genome_assembly, vi
         sort_bed(virtual_panels_tmp_bed, virtual_panels_bed, debug, logger)
 
         if check_file_exists(virtual_panels_bed):
-            target_variants_intersect_cmd = f'bedtools intersect -wa -u -header -a {input_vcf_cpsr_ready_decomposed} -b ' + \
-                f'{virtual_panels_bed} > {input_vcf_cpsr_ready_decomposed_target}'
+            target_variants_intersect_cmd = f'bedtools intersect -wa -u -header -a {temp_files["vcf_4"]} -b ' + \
+                f'{virtual_panels_bed} > {validated_vcf}'
             check_subprocess(logger, target_variants_intersect_cmd, debug)
 
 
-    check_subprocess(logger, f'bgzip -cf {input_vcf_cpsr_ready_decomposed_target} > {input_vcf_cpsr_ready_decomposed_target}.gz', debug)
-    check_subprocess(logger, f'tabix -p vcf {input_vcf_cpsr_ready_decomposed_target}.gz', debug)
+    check_subprocess(logger, f'bgzip -cf {validated_vcf} > {validated_vcf}.gz', debug)
+    check_subprocess(logger, f'tabix -p vcf {validated_vcf}.gz', debug)
     if not debug:
-        for fn in [tmp_vcf1, tmp_vcf2, tmp_vcf3,  
-                   virtual_panels_bed, 
-                   input_vcf_cpsr_ready_decomposed, 
-                   os.path.join(output_dir, "decompose.log"), 
-                   os.path.join(output_dir, "bcftools_1.cpsr_simplify_vcf.log")]:
+        for fn in [virtual_panels_bed, 
+                   temp_files["vcf_1"],
+                   temp_files["vcf_2"],
+                   temp_files["vcf_3"],
+                   temp_files["vcf_4"],
+                   bcftools_simplify_log, 
+                   vt_decompose_log]:
             #print(f"Deleting {fn}")
             utils.remove(fn)
         
-        utils.remove(tmp_vcf2 + str('.tbi'))
-        utils.remove(tmp_vcf3 + str('.tbi'))
+        utils.remove(temp_files["vcf_2"] + str('.tbi'))
+        utils.remove(temp_files["vcf_3"] + str('.tbi'))
 
-    if check_file_exists(f'{input_vcf_cpsr_ready_decomposed_target}.gz'):
-        vcf = VCF(input_vcf_cpsr_ready_decomposed_target + '.gz')
+    if check_file_exists(f'{validated_vcf}.gz'):
+        vcf = VCF(validated_vcf + '.gz')
         i = 0
         for rec in vcf:
             i = i + 1
@@ -266,6 +270,7 @@ def simplify_vcf(input_vcf, vcf, custom_bed, pcgr_directory, genome_assembly, vi
 
 def validate_cpsr_input(pcgr_directory, 
                         input_vcf, 
+                        validated_vcf,
                         custom_list_fname, 
                         custom_list_bed_fname,
                         retained_info_tags, 
@@ -316,6 +321,7 @@ def validate_cpsr_input(pcgr_directory,
         if tag_check == -1:
             return -1        
 
+        ## Check that retained VCF INFO tags requested by user are present in VCF
         if retained_info_tags != "None":
             custom_check = vcf.check_retained_vcf_info_tags(vcf_object, retained_info_tags, logger)
             if custom_check == -1:
@@ -328,6 +334,7 @@ def validate_cpsr_input(pcgr_directory,
             return error_message(err_msg, logger)
         
         simplify_vcf(input_vcf, 
+                     validated_vcf,
                      vcf_object, 
                      custom_target_fname['bed'], 
                      pcgr_directory, 

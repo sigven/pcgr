@@ -19,12 +19,14 @@ def __main__():
     parser = argparse.ArgumentParser(description='Verify input data for PCGR')
     parser.add_argument('pcgr_dir',help='PCGR base directory with accompanying data directory')
     parser.add_argument('input_vcf', help='VCF input file with somatic (tumor) query variants (SNVs/InDels)')
+    parser.add_argument('validated_vcf', help="Validated VCF file with somatic (tumor) query variants (SNVs/InDels)")
     parser.add_argument('input_cna', help='Somatic (tumor) copy number query segments (tab-separated values)')
     parser.add_argument('input_rna_fusion', help='Somatic (tumor) RNA fusion variants (tab-separated values)')
     parser.add_argument('input_rna_exp', help='Somatic/ (tumor) gene expression estimates (tab-separated values)')
     parser.add_argument('panel_normal_vcf',help="VCF file with germline calls from panel of normals")
     parser.add_argument('tumor_only',type=int, default=0,choices=[0,1],help="Tumor only sequencing")
     parser.add_argument('genome_assembly',help='grch37 or grch38')
+    parser.add_argument('sample_id',help='PCGR sample_name')
     parser.add_argument('retained_info_tags', help="Comma-separated string of custom VCF INFO tags to be kept in PCGR output")
     parser.add_argument('tumor_dp_tag', help='VCF INFO tag that denotes tumor sequencing depth')
     parser.add_argument('tumor_af_tag', help='VCF INFO tag that denotes tumor variant allelic fraction')
@@ -33,7 +35,6 @@ def __main__():
     parser.add_argument('call_conf_tag', help='VCF INFO tag that denotes somatic variant call confidence')
     parser.add_argument('exclude_hom_germline', help='Logical indicating if homozygote germline calls are to be filtered based on allelic fraction')
     parser.add_argument('exclude_het_germline', help='Logical indicating if heterozygote germline calls are to be filtered based on allelic fraction')
-
     parser.add_argument('--keep_uncompressed', action="store_true", help='Keep uncompressed VCF for vcf2maf.pl')
     parser.add_argument('--output_dir', dest='output_dir', help='Output directory')
     parser.add_argument("--debug", action="store_true", help="Print full commands to log")
@@ -41,6 +42,7 @@ def __main__():
 
     ret = validate_pcgr_input(args.pcgr_dir,
                               args.input_vcf,
+                              args.validated_vcf,
                               args.input_cna,
                               args.input_rna_fusion,
                               args.input_rna_exp,
@@ -55,6 +57,7 @@ def __main__():
                               args.retained_info_tags,
                               args.tumor_only,
                               args.genome_assembly,
+                              args.sample_id,
                               args.keep_uncompressed,
                               args.output_dir,
                               args.debug)
@@ -172,9 +175,10 @@ def validate_panel_normal_vcf(vcf, logger):
 
 
 
-def simplify_vcf(input_vcf, vcf, output_dir, keep_uncompressed, logger, debug):
+def simplify_vcf(input_vcf, validated_vcf, vcf, output_dir, sample_id, keep_uncompressed, logger, debug):
     """
     input_vcf: path to input VCF
+    validated_vcf: path to validated VCF
     vcf: parsed cyvcf2 object
     Function that performs the following on the validated input VCF:
     1. Strip of any genotype data
@@ -183,10 +187,19 @@ def simplify_vcf(input_vcf, vcf, output_dir, keep_uncompressed, logger, debug):
     3. Final VCF file is sorted and indexed (bgzip + tabix)
     """
 
-    tmp_vcf1 = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)', '.pcgr_ready.' + random_string(15) + '.vcf', os.path.basename(input_vcf)))
-    tmp_vcf2 = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)', '.pcgr_ready.' + random_string(15) + '.vcf.gz', os.path.basename(input_vcf)))
-    tmp_vcf3 = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)', '.pcgr_ready.' + random_string(15) + '.vcf.gz', os.path.basename(input_vcf)))
-    input_vcf_pcgr_ready_decomposed = os.path.join(output_dir, re.sub(r'(\.vcf$|\.vcf\.gz$)', '.pcgr_ready.vcf', os.path.basename(input_vcf)))
+    random_str = random_string(10) 
+
+    temp_files = {}
+    temp_files['vcf_1'] = \
+        os.path.join(output_dir, f'{sample_id}.pcgr_validate.bcftools.{random_str}_1.vcf')
+    temp_files['vcf_2'] = \
+        os.path.join(output_dir, f'{sample_id}.pcgr_validate.bcftools.{random_str}_2.vcf.gz')
+    temp_files['vcf_3'] = \
+        os.path.join(output_dir, f'{sample_id}.pcgr_validate.bftools.{random_str}_3.vcf.gz')
+    bcftools_simplify_log = \
+        os.path.join(output_dir, f'{sample_id}.pcgr_validate.bcftools.{random_str}.log')
+    vt_decompose_log = \
+        os.path.join(output_dir, f'{sample_id}.pcgr_validate.vt_decompose.{random_str}.log')
 
     multiallelic_list = list()
     for rec in vcf:
@@ -198,11 +211,14 @@ def simplify_vcf(input_vcf, vcf, output_dir, keep_uncompressed, logger, debug):
 
     logger.info('Extracting variants on autosomal/sex/mito chromosomes only (1-22,X,Y, M/MT) with bcftools')
     # bgzip + tabix required for sorting
-    cmd_vcf1 = f'bcftools view {input_vcf} | bgzip -cf > {tmp_vcf2} && tabix -p vcf {tmp_vcf2} && bcftools sort --temp-dir {output_dir} -Oz {tmp_vcf2} > {tmp_vcf3} 2> {os.path.join(output_dir, "bcftools_1.pcgr_simplify_vcf.log")} && tabix -p vcf {tmp_vcf3}'
+    cmd_vcf1 = f'bcftools view {input_vcf} | bgzip -cf > {temp_files["vcf_2"]} && tabix -p vcf {temp_files["vcf_2"]} && ' + \
+        f'bcftools sort --temp-dir {output_dir} -Oz {temp_files["vcf_2"]} > {temp_files["vcf_3"]} 2> {bcftools_simplify_log} && ' + \
+        f'tabix -p vcf {temp_files["vcf_3"]}'
     # Keep only autosomal/sex/mito chrom (handle hg38 and hg19), remove FORMAT metadata lines, keep cols 1-8, sub chr prefix
     chrom_to_keep = [str(x) for x in [*range(1,23), 'X', 'Y', 'M', 'MT']]
     chrom_to_keep = ','.join([*['chr' + chrom for chrom in chrom_to_keep], *[chrom for chrom in chrom_to_keep]])
-    cmd_vcf2 = f'bcftools view --regions {chrom_to_keep} {tmp_vcf3} | egrep -v \'^##FORMAT=\' | cut -f1-8 | sed \'s/^chr//\' > {tmp_vcf1}'
+    cmd_vcf2 = f'bcftools view --regions {chrom_to_keep} {temp_files["vcf_3"]} | egrep -v \'^##FORMAT=\' ' + \
+        f'| cut -f1-8 | sed \'s/^chr//\' > {temp_files["vcf_1"]}'
 
     check_subprocess(logger, cmd_vcf1, debug)
     check_subprocess(logger, cmd_vcf2, debug)
@@ -213,19 +229,19 @@ def simplify_vcf(input_vcf, vcf, output_dir, keep_uncompressed, logger, debug):
         print(', '.join(multiallelic_list[:100]))
         print('----')
         logger.info('Decomposing multi-allelic sites in input VCF file using \'vt decompose\'')
-        command_decompose = f'vt decompose -s {tmp_vcf1} > {input_vcf_pcgr_ready_decomposed} 2> {os.path.join(output_dir, "vt_decompose.pcgr_simplify_vcf.log")}'
+        command_decompose = f'vt decompose -s {temp_files["vcf_1"]} > {validated_vcf} 2> {vt_decompose_log}'
         check_subprocess(logger, command_decompose, debug)
     else:
         logger.info('All sites seem to be decomposed - skipping decomposition!')
-        check_subprocess(logger, f'cp {tmp_vcf1} {input_vcf_pcgr_ready_decomposed}', debug)
+        check_subprocess(logger, f'cp {temp_files["vcf_1"]} {validated_vcf}', debug)
 
     # need to keep uncompressed copy for vcf2maf.pl if selected
-    bgzip_cmd = f"bgzip -cf {input_vcf_pcgr_ready_decomposed} > {input_vcf_pcgr_ready_decomposed}.gz" if keep_uncompressed else f"bgzip -f {input_vcf_pcgr_ready_decomposed}"
+    bgzip_cmd = f"bgzip -cf {validated_vcf} > {validated_vcf}.gz" if keep_uncompressed else f"bgzip -f {validated_vcf}"
     check_subprocess(logger, bgzip_cmd, debug)
-    check_subprocess(logger, f'tabix -p vcf {input_vcf_pcgr_ready_decomposed}.gz', debug)
+    check_subprocess(logger, f'tabix -p vcf {validated_vcf}.gz', debug)
 
-    if os.path.exists(f'{input_vcf_pcgr_ready_decomposed}.gz') and os.path.getsize(f'{input_vcf_pcgr_ready_decomposed}.gz') > 0:
-        vcf = VCF(f'{input_vcf_pcgr_ready_decomposed}.gz')
+    if os.path.exists(f'{validated_vcf}.gz') and os.path.getsize(f'{validated_vcf}.gz') > 0:
+        vcf = VCF(f'{validated_vcf}.gz')
         i = 0
         for rec in vcf:
             i = i + 1
@@ -236,16 +252,17 @@ def simplify_vcf(input_vcf, vcf, output_dir, keep_uncompressed, logger, debug):
             exit(1)
 
     if not debug:
-        utils.remove(tmp_vcf1)
-        utils.remove(tmp_vcf2)
-        utils.remove(tmp_vcf3)
-        utils.remove(tmp_vcf2 + str('.tbi'))
-        utils.remove(tmp_vcf3 + str('.tbi'))
-        utils.remove(os.path.join(output_dir, "vt_decompose.pcgr_simplify_vcf.log"))
-        utils.remove(os.path.join(output_dir, "bcftools_1.pcgr_simplify_vcf.log"))
+        utils.remove(temp_files["vcf_1"])
+        utils.remove(temp_files["vcf_2"])
+        utils.remove(temp_files["vcf_3"])
+        utils.remove(temp_files["vcf_2"] + str('.tbi'))
+        utils.remove(temp_files["vcf_3"] + str('.tbi'))
+        utils.remove(bcftools_simplify_log)
+        utils.remove(vt_decompose_log)
 
 def validate_pcgr_input(pcgr_directory,
                         input_vcf,
+                        validated_vcf,
                         input_cna,
                         input_rna_fusion,
                         input_rna_expression,
@@ -260,6 +277,7 @@ def validate_pcgr_input(pcgr_directory,
                         retained_info_tags,
                         tumor_only,
                         genome_assembly,
+                        sample_id,
                         keep_uncompressed,
                         output_dir,
                         debug):
@@ -286,8 +304,10 @@ def validate_pcgr_input(pcgr_directory,
 
         ## Check that VCF does not contain INFO tags that will be appended with PCGR annotation
         vcf_infotags = {}
-        vcf_infotags['pcgr'] = read_infotag_file(os.path.join(pcgr_directory,'data',genome_assembly, 'vcf_infotags_other.tsv'), scope = "pcgr")
-        vcf_infotags['vep'] = read_infotag_file(os.path.join(pcgr_directory,'data',genome_assembly, 'vcf_infotags_vep.tsv'), scope = "vep")
+        vcf_infotags['pcgr'] = read_infotag_file(
+            os.path.join(pcgr_directory,'data',genome_assembly, 'vcf_infotags_other.tsv'), scope = "pcgr")
+        vcf_infotags['vep'] = read_infotag_file(
+            os.path.join(pcgr_directory,'data',genome_assembly, 'vcf_infotags_vep.tsv'), scope = "vep")
         vcf_infotags['pcgr'].update(vcf_infotags['vep'])
         vcf_tags_pcgr = vcf_infotags['pcgr']
         
@@ -302,14 +322,15 @@ def validate_pcgr_input(pcgr_directory,
 
         ## Check whether specified tags for depth/allelic fraction are properly defined in VCF
         
-        allelic_support_check = vcf.check_format_ad_dp_tags(vcf_object, tumor_dp_tag, tumor_af_tag, control_dp_tag,
-                                                        control_af_tag, call_conf_tag, exclude_hom_germline,
-                                                        exclude_het_germline, tumor_only, logger)
+        allelic_support_check = vcf.check_format_ad_dp_tags(
+            vcf_object, tumor_dp_tag, tumor_af_tag, control_dp_tag,
+            control_af_tag, call_conf_tag, exclude_hom_germline,
+            exclude_het_germline, tumor_only, logger)
         if allelic_support_check == -1:
             return -1
 
         ## Simplify VCF - remove multiallelic variants
-        simplify_vcf(input_vcf, vcf_object, output_dir, keep_uncompressed, logger, debug)
+        simplify_vcf(input_vcf, validated_vcf, vcf_object, output_dir, sample_id, keep_uncompressed, logger, debug)
 
 
     ## Validate panel-of-normals VCF is provided

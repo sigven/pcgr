@@ -4,14 +4,12 @@
 \alias{append_drug_var_link}
 \title{Function that adds HTML links to different genetic variant identifiers}
 \usage{
-append_drug_var_link(var_df, pcgr_data = NULL, linktype = "dbsource")
+append_drug_var_link(vcf_data_df, ref_data = NULL)
 }
 \arguments{
-\item{var_df}{data frame with variants}
+\item{vcf_data_df}{data frame with variants}
 
-\item{pcgr_data}{PCGR data structure}
-
-\item{linktype}{type of link}
+\item{ref_data}{PCGR/CPSR reference data object}
 }
 \description{
 Function that adds HTML links to different genetic variant identifiers

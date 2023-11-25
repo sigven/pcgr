@@ -54,7 +54,7 @@ def get_command(file_paths, conf_options, input_vcf, output_vcf, debug = False):
         vep_options += ' --regulatory'
     if conf_options['conf']['vep']['vep_gencode_all'] == 0:
         vep_options += ' --gencode_basic'
-    gencode_set_in_use = "GENCODE - basic transcript set (--gencode_basic)"
+        gencode_set_in_use = "GENCODE - basic transcript set (--gencode_basic)"
 
     ## LOFTEE plugin - variant loss-of-function annotation        
     loftee_dir = utils.get_loftee_dir()
@@ -181,7 +181,7 @@ def pick_single_gene_csq(vep_csq_results, pick_criteria_ordered = "mane,canonica
         csq_candidate['biotype'] = 1
         csq_candidate['tsl'] = 6
         csq_candidate['ccds'] = 1
-        csq_candidate['rank'] = '.'
+        csq_candidate['rank'] = 42
         
         ## set to picked as default
         csq_candidate['PICKED'] = True
@@ -216,7 +216,9 @@ def pick_single_gene_csq(vep_csq_results, pick_criteria_ordered = "mane,canonica
         if not csq_elem['Consequence'] is None:
             main_cons = csq_elem['Consequence'].split('&')[0]
             if main_cons in pcgr_vars.VEP_consequence_rank:
-                csq_candidate['rank'] = int(pcgr_vars.VEP_consequence_rank[main_cons])            
+                csq_candidate['rank'] = int(pcgr_vars.VEP_consequence_rank[main_cons])
+            else:
+                print("Missing Consequence in pcgr_vars.VEP_consequence_rank: " + str(csq_elem['Consequence']) + ' - ' + str(main_cons))          
 
         ## TSL - lower value prioritized
         if not csq_elem['TSL'] is None:
@@ -309,7 +311,12 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, vep_pick_order, 
                         if csq_record['ENSEMBL_GENE_ID'] in targets_ensembl_gene:
                             all_csq_pick.append(csq_record)
                         else:
+                            
                             alternative_csq_pick.append(csq_record)
+                else:
+                    ## intergenic
+                    if csq_record['Feature_type'] is None:
+                        alternative_csq_pick.append(csq_record)
 
         ## PCGR - consider picked consequence only                
         else:
@@ -345,7 +352,7 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, vep_pick_order, 
 
   
     if len(all_csq_pick) == 0 and pick_only is False:
-        logger.warning('WARNING: No VEP block with a Consequence/transcript that matches CPSR target genes - considering alternative consequences')
+        logger.warning('No picked VEP block with a Consequence/transcript that matches CPSR target genes - considering alternative consequences')
         all_csq_pick = alternative_csq_pick
         
     vep_csq_results = {}

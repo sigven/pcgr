@@ -246,10 +246,12 @@ def set_virtual_target_genes(panel_id: str, db_dir: str, genome_assembly: str, d
         all_virtual_panels = pd.read_csv(all_panels_fname, sep="\t", na_values=".")
         all_virtual_panels['id'] = all_virtual_panels['id'].astype(str)
         all_virtual_panels = \
-            all_virtual_panels.drop(['gepa_phenotype', 'genome_build','gepa_penetrance','gepa_moi'], axis=1)
+            all_virtual_panels.drop(['gepa_phenotype', 'genome_build','gepa_penetrance'], axis=1)
         all_virtual_panels = \
             all_virtual_panels.rename(
-                columns={'gepa_panel_version': 'panel_version', 
+                columns={'gepa_moi': 'moi',
+                         'gepa_mod': 'mod',
+                         'gepa_panel_version': 'panel_version', 
                          'gepa_confidence_level': 'confidence_level',
                          'gepa_panel_url': 'panel_url',
                          'gepa_panel_name': 'panel_name',

@@ -40,6 +40,7 @@ def annotate_cna_segments(output_fname: str,
     temp_files = []
     
     # Read user-defined copy number aberrations segment file
+    check_file_exists(cna_segment_file, logger)
     cna_query_segment_df = pd.read_csv(cna_segment_file, sep="\t", na_values=".")
     
     ## Check that required columns are present
@@ -78,14 +79,14 @@ def annotate_cna_segments(output_fname: str,
     chromsizes_fname = \
         os.path.join(pcgr_build_db_dir, 'chromsize.' + build + '.tsv')
     
-    check_fname = check_file_exists(chromsizes_fname, logger)
+    check_file_exists(chromsizes_fname, logger)
     chromsizes = pd.read_csv(chromsizes_fname, sep="\t", header=None, names=['Chromosome', 'ChromLength'])
     cna_query_segment_df = cna_query_segment_df.merge(
         chromsizes, left_on=["Chromosome"], right_on=["Chromosome"], how="left")
     segments_beyond_chromlength = \
         cna_query_segment_df[cna_query_segment_df['End'] > cna_query_segment_df['ChromLength']]
     
-        ## Issue warning if segments exceed chromosome lengths
+    ## Issue warning if segments exceed chromosome lengths
     if not segments_beyond_chromlength.empty is True:
         warn_msg = f"Ignoring n = {len(segments_beyond_chromlength)} copy number segments that " + \
             f"exceed the chromosomal lengths of {build}"
@@ -99,10 +100,10 @@ def annotate_cna_segments(output_fname: str,
     cna_query_segment_bed = pybedtools.BedTool.from_dataframe(cna_query_segment_df)
     temp_files.append(cna_query_segment_bed.fn)
     
-    ## append cytoband overlaps
+    ## annotate segments with cytobands
     cna_query_segment_df = annotate_cytoband(cna_query_segment_bed, output_dir, pcgr_build_db_dir)
 
-    ## append protein-coding transcript overlaps
+    ## annotate with protein-coding transcripts
     cna_query_segment_bed = pybedtools.BedTool.from_dataframe(cna_query_segment_df)
     temp_files.append(cna_query_segment_bed.fn)
     
@@ -112,22 +113,26 @@ def annotate_cna_segments(output_fname: str,
     cna_query_segment_df['segment_length_mb'] = \
         ((cna_query_segment_df['segment_end'] - cna_query_segment_df['segment_start']) / 1e6).astype(float).round(5)
     
-    ## load copy-number biomarker evidence (targetable amplifications in cancer)
+    ## load copy-number biomarker evidence
+   
     biomarkers = {}
     cna_actionable_dict = {}
     
     for db in ['cgi','civic']:
         variant_fname = os.path.join(pcgr_build_db_dir, 'biomarker','tsv', f"{db}.variant.tsv.gz")
         clinical_fname = os.path.join(pcgr_build_db_dir, 'biomarker','tsv', f"{db}.clinical.tsv.gz")
+        logger.info(f"Loading copy-number biomarker evidence from {db} ..")
         biomarkers[db] = load_biomarkers(
             logger, variant_fname, clinical_fname, biomarker_vartype = 'CNA')
         
         for key in biomarkers[db]['other']:
             biomarker_data = biomarkers[db]['other'][key]
-            if not key in cna_actionable_dict:
-                cna_actionable_dict[key] = str(biomarker_data[0]['clinical_evidence_items'])
+            biomarker_item = str(db) + '|' + str(biomarker_data[0]['variant_id']) + \
+                    '|' + str(biomarker_data[0]['clinical_evidence_items']) + '|by_cna_segment'
+            if not key in cna_actionable_dict:               
+                cna_actionable_dict[key] = biomarker_item
             else:
-                cna_actionable_dict[key] = cna_actionable_dict[key] + ',' + str(biomarker_data[0]['clinical_evidence_items'])
+                cna_actionable_dict[key] = cna_actionable_dict[key] + ',' + biomarker_item
             
     cna_actionable_df = pd.DataFrame(cna_actionable_dict.items(), columns=['aberration_key', 'biomarker_match'])
     
@@ -138,11 +143,19 @@ def annotate_cna_segments(output_fname: str,
     
     cna_query_segment_df.loc[cna_query_segment_df.amp_cond, 'aberration_key'] =  \
         cna_query_segment_df.loc[cna_query_segment_df.amp_cond, 'entrezgene'].astype(str) + '_amplification'
+    
+    ## Mark homozygous deletions in input
+    cna_query_segment_df.loc[cna_query_segment_df['n_major'] + cna_query_segment_df['n_minor'] > 0,"loss_cond"] = False
+    cna_query_segment_df.loc[cna_query_segment_df['n_major'] + cna_query_segment_df['n_minor'] == 0,"loss_cond"] = True
+    
+    cna_query_segment_df.loc[cna_query_segment_df.loss_cond, 'aberration_key'] =  \
+        cna_query_segment_df.loc[cna_query_segment_df.loss_cond, 'entrezgene'].astype(str) + '_ablation'
 
     ## Append actionability evidence to input amplifications (column 'biomarker_match')
     cna_query_segment_df = cna_query_segment_df.merge(
         cna_actionable_df, left_on=["aberration_key"], right_on=["aberration_key"], how="left")
     cna_query_segment_df.drop('amp_cond', axis=1, inplace=True)
+    cna_query_segment_df.drop('loss_cond', axis=1, inplace=True)
     cna_query_segment_df.drop('aberration_key', axis=1, inplace=True)
     cna_query_segment_df.loc[cna_query_segment_df['biomarker_match'].isnull(),"biomarker_match"] = '.'
     
@@ -151,7 +164,7 @@ def annotate_cna_segments(output_fname: str,
         utils.remove(fname)
         
     cna_query_segment_df.columns = map(str.upper, cna_query_segment_df.columns)
-    cna_query_segment_df.rename(columns = {'CHROMOSOME':'CHROM'}, inplace = True)
+    cna_query_segment_df.rename(columns = {'CHROMOSOME':'CHROM','SEGMENT_ID':'VAR_ID'}, inplace = True)
     hgname = "hg38"
     if build == "grch37":
         hgname = "hg19"
@@ -159,8 +172,12 @@ def annotate_cna_segments(output_fname: str,
         f"http://genome.ucsc.edu/cgi-bin/hgTracks?db={hgname}&position="
         
     cna_query_segment_df['SEGMENT_LINK'] = \
-        "<a href='" + ucsc_browser_prefix + cna_query_segment_df['SEGMENT_ID'].astype(str) + \
-            "' target='_blank'>" + cna_query_segment_df['SEGMENT_ID'].astype(str) + "</a>"
+        "<a href='" + ucsc_browser_prefix + cna_query_segment_df['VAR_ID'].astype(str) + \
+            "' target='_blank'>" + cna_query_segment_df['VAR_ID'].astype(str) + "</a>"
+    cna_query_segment_df['VAR_ID'] = \
+        cna_query_segment_df['VAR_ID'].str.cat(
+            cna_query_segment_df['N_MAJOR'].astype(str), sep=":").str.cat(
+                cna_query_segment_df['N_MINOR'].astype(str), sep=":")
     
     cna_query_segment_df.to_csv(output_fname, sep="\t", header=True, index=False)
                 
@@ -303,7 +320,7 @@ def annotate_transcripts(cna_segments_bt: BedTool, output_dir: str,
                                             'n_major','n_minor','chromosome_arm','cytoband','event_type',
                                             'transcript_overlap_percent',
                                             'transcript_start','transcript_end']]
-            
+            core_segment_annotations = core_segment_annotations.astype({'n_major':'int','n_minor':'int'})
             ## pull out gene cross-reference annotations
             gene_annotations = cna_transcript_annotations.transcript_annotations.str.split('\\|', expand = True)
             gene_annotations.columns = ["ensembl_transcript_id", "ensembl_gene_id","symbol","entrezgene",
@@ -326,15 +343,16 @@ def annotate_transcripts(cna_segments_bt: BedTool, output_dir: str,
             
             if os.path.exists(gene_xref_tsv_fname):
                 gene_xref_df = pd.read_csv(gene_xref_tsv_fname, sep="\t", na_values=".", usecols=["entrezgene","name"])
-                gene_xref_df = gene_xref_df.astype({'entrezgene':'string'})
                 gene_xref_df = gene_xref_df[gene_xref_df['entrezgene'].notnull()].drop_duplicates()
+                gene_xref_df["entrezgene"] = gene_xref_df["entrezgene"].astype("int64").astype("string")
                 gene_xref_df.rename(columns = {'name':'genename'}, inplace = True)                                        
                 cna_segments_annotated = cna_segments_annotated.merge(
                     gene_xref_df, left_on=["entrezgene"], right_on=["entrezgene"], how="left")
+                cna_segments_annotated["entrezgene"] = cna_segments_annotated['entrezgene'].str.replace("\\.[0-9]{1,}$", "", regex = True)
                 cna_segments_annotated = cna_segments_annotated.fillna('.')
             else:
                 logger.error(f"Could not find {gene_xref_tsv_fname} needed for gene name annotation - exiting")
-            cna_segments_annotated = cna_segments_annotated.astype({'n_major':'int','n_minor':'int'})
+            
             
         else:
             logger.error(f"{transcript_cna_annotations.fn} is empty or not found - exiting")

@@ -2,17 +2,17 @@
 % Please edit documentation in R/report.R
 \name{update_report}
 \alias{update_report}
-\title{Function that initates PCGR report object}
+\title{Function that updates a PCGR/CPSR report object structure}
 \usage{
 update_report(report, report_data, a_elem = "snv_indel")
 }
 \arguments{
-\item{report}{PCGR final report}
+\item{report}{PCGR/CPSR report}
 
-\item{report_data}{Object with PCGR report data}
+\item{report_data}{Object with report contents}
 
 \item{a_elem}{section of PCGR report}
 }
 \description{
-Function that initates PCGR report object
+Function that updates a PCGR/CPSR report object structure
 }
