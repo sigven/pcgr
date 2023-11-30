@@ -1,16 +1,14 @@
 name: pcgrr
 
 channels:
-  - umccr
   - pcgr
-  - conda-forge
   - bioconda
-  - defaults
+  - conda-forge
 
 dependencies:
   - python
-  - r-pcgrr ==1.4.6 # versioned by bump2version
-  - r-cpsr
+  - pcgr::r-pcgrr ==1.4.6 # versioned by bump2version
+  - pcgr::r-cpsr
   - r-argparse
   - bioconductor-bsgenome.hsapiens.ucsc.hg38
   - bioconductor-bsgenome.hsapiens.ucsc.hg19

@@ -23,12 +23,12 @@ requirements:
     - r-biocmanager
     - bioconductor-biostrings
     - r-caret
+    #- r-cpsr # this is grabbed during the conda env build so ignore
     - r-data.table
     - r-devtools
     - r-dt
     - r-dplyr
     - r-flexdashboard
-    - r-crosstalk
     - bioconductor-genomicranges
     - bioconductor-genomeinfodb
     - r-ggplot2
@@ -49,6 +49,7 @@ requirements:
     - r-roxygen2
     - bioconductor-s4vectors
     - r-scales
+    - r-stringr
     - r-tidyr
     - r-upsetr
     - r-usethis
@@ -62,12 +63,12 @@ requirements:
     - r-biocmanager
     - bioconductor-biostrings
     - r-caret
+    #- r-cpsr # this is grabbed during the conda env build so ignore
     - r-data.table
     - r-devtools
     - r-dt
     - r-dplyr
     - r-flexdashboard
-    - r-crosstalk
     - bioconductor-genomicranges
     - bioconductor-genomeinfodb
     - r-ggplot2
@@ -88,6 +89,7 @@ requirements:
     - r-roxygen2
     - bioconductor-s4vectors
     - r-scales
+    - r-stringr
     - r-tidyr
     - r-upsetr
     - r-usethis

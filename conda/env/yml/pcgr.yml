@@ -1,18 +1,16 @@
 name: pcgr
 
 channels:
-  - umccr
   - pcgr
-  - conda-forge
   - bioconda
-  - defaults
+  - conda-forge
 
 dependencies:
-  - pcgr ==1.4.6 # versioned by bump2version
+  - pcgr::pcgr ==1.4.6 # versioned by bump2version
   - bedtools
   - bcftools
   - cyvcf2
-  - bioconda::ensembl-vep ==110.1
+  - ensembl-vep ==110.1
   - htslib
   - pandoc
   - vcfanno
