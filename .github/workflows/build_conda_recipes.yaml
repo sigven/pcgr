@@ -3,7 +3,7 @@ name: deploy
 on:
   push:
     branches:
-      - conda_update_pd1
+      - master
 env:
   atoken: ${{ secrets.ANACONDA_UPLOAD_TOKEN }}
   recipe_path: conda/recipe
@@ -21,17 +21,11 @@ jobs:
         shell: bash -l {0}
     steps:
       - name: Code checkout
-        uses: actions/checkout@v3
-      - name: Mambaforge setup
-        uses: conda-incubator/setup-miniconda@v2
+        uses: actions/checkout@v4
+      - name: Micromamba setup
+        uses: mamba-org/setup-micromamba@v1
         with:
-          miniforge-variant: Mambaforge
-          miniforge-version: "latest"
-          show-channel-urls: true
-          auto-activate-base: false
-          activate-environment: condabuild
           environment-file: ${{ env.env_yml_path }}/condabuild.yml
-          use-mamba: true
       - name: 🐍 Conda pkg build and upload
         run: |
           conda mambabuild ${recipe_path}/pcgrr -c conda-forge -c bioconda --token ${atoken} --quiet
@@ -88,67 +82,66 @@ jobs:
           git add .
           git commit -m "${MSG}"
           git push
-#     - name: 🌐 Website publish
-#       run: |
-#         mamba activate
-#         mamba env create -n pkgdown_env -f ${env_yml_path}/pkgdown.yml
-#         mamba activate pkgdown_env
-#         cp pcgrr/DESCRIPTION . # hack for pkgdown to work
-#         printf "pcgrr version:\n"
-#         Rscript -e "packageVersion('pcgrr')"
-#         Rscript -e "pkgdown::deploy_to_branch(pkg = 'pcgrr', commit_message = paste(pkgdown:::construct_commit_message('.'), '- see https://sigven.github.io/pcgr/'), branch = 'gh-pages', new_process = FALSE)"
+      - name: 🌐 Website publish
+        run: |
+          micromamba env create -n pkgdownenv -f ${env_yml_path}/pkgdown.yml
+          micromamba activate pkgdownenv
+          cp pcgrr/DESCRIPTION . # hack for pkgdown to work
+          printf "pcgrr version:\n"
+          Rscript -e "packageVersion('pcgrr')"
+          Rscript -e "pkgdown::deploy_to_branch(pkg = 'pcgrr', commit_message = paste(pkgdown:::construct_commit_message('.'), '- see https://sigven.github.io/pcgr/'), branch = 'gh-pages', new_process = FALSE)"
 
-# docker_deploy:
-#   name: Build and deploy Docker
-#   runs-on: ubuntu-latest
-#   needs: conda_lock
-#   defaults:
-#     run:
-#       shell: bash -l {0}
+  docker_deploy:
+    name: Build and deploy Docker
+    runs-on: ubuntu-latest
+    needs: conda_lock
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - name: Code checkout
+        uses: actions/checkout@v4
+      - id: pull_lock_commit
+        name: 📥 Pull lock commit
+        run: |
+            git pull --no-rebase # for pulling in the changed locks
+            git --no-pager log --decorate=short --pretty=oneline -n3
+            LATEST_COMMIT_HASH="$(git --no-pager log -1 --format='%H')"
+            echo "latest_commit_hash=${LATEST_COMMIT_HASH}" >> $GITHUB_OUTPUT
+      - name: 🔖 Tag creation
+        uses: actions/github-script@v7
+        env:
+          LATEST_COMMIT_HASH: ${{ steps.pull_lock_commit.outputs.latest_commit_hash }}
+        with:
+          script: |
+            const the_tag_name = 'refs/tags/v' + process.env.VERSION
+            const the_sha = process.env.LATEST_COMMIT_HASH
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: the_tag_name,
+              sha: the_sha
+            })
 
-#   steps:
-#     - name: Code checkout
-#       uses: actions/checkout@v3
-#     - id: pull_lock_commit
-#       name: 📥 Pull lock commit
-#       run: |
-#           git pull --no-rebase # for pulling in the changed locks
-#           git --no-pager log --decorate=short --pretty=oneline -n3
-#           LATEST_COMMIT_HASH="$(git --no-pager log -1 --format='%H')"
-#           echo "latest_commit_hash=${LATEST_COMMIT_HASH}" >> $GITHUB_OUTPUT
-#     - name: 🔖 Tag creation
-#       uses: actions/github-script@v5
-#       env:
-#         LATEST_COMMIT_HASH: ${{ steps.pull_lock_commit.outputs.latest_commit_hash }}
-#       with:
-#         script: |
-#           const the_tag_name = 'refs/tags/v' + process.env.VERSION
-#           const the_sha = process.env.LATEST_COMMIT_HASH
-#           github.rest.git.createRef({
-#             owner: context.repo.owner,
-#             repo: context.repo.repo,
-#             ref: the_tag_name,
-#             sha: the_sha
-#           })
-
-#     # work with tag from above
-#     - name: Code checkout
-#       uses: actions/checkout@v3
-#       with:
-#         ref: v${{ env.VERSION }}
-#     - name: Buildx setup
-#       id: buildx
-#       uses: docker/setup-buildx-action@v2
-#     - name: DockerHub login
-#       uses: docker/login-action@v2
-#       with:
-#         username: ${{ secrets.DOCKERHUB_USERNAME }}
-#         password: ${{ secrets.DOCKERHUB_TOKEN }}
-#     - name: 🐳 Docker img build and push to DockerHub
-#       uses: docker/build-push-action@v4
-#       with:
-#         context: . # yes, dot
-#         push: true
-#         platforms: linux/amd64
-#         tags: |
-#           sigven/pcgr:${{ env.VERSION }}
+      # work with tag from above
+      - name: Code checkout
+        uses: actions/checkout@v4
+        with:
+          ref: v${{ env.VERSION }}
+      - name: 🏰 QEMU setup
+        uses: docker/setup-qemu-action@v2
+      - name: 🏯 Buildx setup
+        uses: docker/setup-buildx-action@v2
+      - name: DockerHub login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: 🐳 Docker img build and push to DockerHub
+        uses: docker/build-push-action@v5
+        with:
+          context: . # yes, dot
+          push: true
+          platforms: linux/amd64
+          tags: |
+            sigven/pcgr:${{ env.VERSION }}
