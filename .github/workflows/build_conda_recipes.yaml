@@ -45,17 +45,11 @@ jobs:
         shell: bash -l {0}
     steps:
       - name: Code checkout
-        uses: actions/checkout@v3
-      - name: Mambaforge setup
-        uses: conda-incubator/setup-miniconda@v2
+        uses: actions/checkout@v4
+      - name: Micromamba setup
+        uses: mamba-org/setup-micromamba@v1
         with:
-          miniforge-variant: Mambaforge
-          miniforge-version: "latest"
-          show-channel-urls: true
-          auto-activate-base: false
-          activate-environment: condabuild
           environment-file: ${{ env.env_yml_path }}/condabuild.yml
-          use-mamba: true
       - name: 🐍 Conda pkg build and upload
         run: |
           conda mambabuild ${recipe_path}/pcgr -c conda-forge -c bioconda --token ${atoken} --quiet
@@ -70,18 +64,12 @@ jobs:
         shell: bash -l {0}
     steps:
       - name: Code checkout
-        uses: actions/checkout@v3
-      - name: Mambaforge setup
-        uses: conda-incubator/setup-miniconda@v2
+        uses: actions/checkout@v4
+      - name: Micromamba setup
+        uses: mamba-org/setup-micromamba@v1
         with:
-          miniforge-variant: Mambaforge
-          miniforge-version: "latest"
-          show-channel-urls: true
-          auto-activate-base: false
-          activate-environment: condabuild
           environment-file: ${{ env.env_yml_path }}/condabuild.yml
-          use-mamba: true
-      - name: Generate conda locks
+      - name: 🔒 Conda lock
         run: |
           # 1. generate a combined lock file
           # 2. render platform-specific locks
