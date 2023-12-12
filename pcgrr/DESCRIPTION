@@ -50,6 +50,7 @@ Imports:
     methods,
     MutationalPatterns,
     plotly,
+    quarto,
     randomForest,
     RColorBrewer,
     reshape2,

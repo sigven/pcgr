@@ -41,6 +41,8 @@ requirements:
     - r-magrittr
     - bioconductor-mutationalpatterns
     - r-plotly
+    - r-quarto
+    - quarto
     - r-randomforest
     - r-rcolorbrewer
     - r-reshape2
@@ -81,6 +83,8 @@ requirements:
     - r-magrittr
     - bioconductor-mutationalpatterns
     - r-plotly
+    - r-quarto
+    - quarto
     - r-randomforest
     - r-rcolorbrewer
     - r-reshape2
