@@ -49,6 +49,7 @@ requirements:
     - r-rlang
     - r-rmarkdown
     - r-roxygen2
+    - r-rrapply
     - bioconductor-s4vectors
     - r-scales
     - r-stringr
@@ -91,6 +92,7 @@ requirements:
     - r-rlang
     - r-rmarkdown
     - r-roxygen2
+    - r-rrapply
     - bioconductor-s4vectors
     - r-scales
     - r-stringr
