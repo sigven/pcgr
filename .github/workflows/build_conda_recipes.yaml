@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - bundle_update_2023
 env:
   atoken: ${{ secrets.ANACONDA_UPLOAD_TOKEN }}
   recipe_path: conda/recipe
