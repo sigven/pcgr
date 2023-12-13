@@ -13,7 +13,7 @@ assign_mutation_type <- function(var_df) {
       msg = "Argument 'var_df' must be a valid data.frame"))
   assertable::assert_colnames(var_df, c("VARIANT_CLASS", "REF", "ALT"),
                               only_colnames = F, quiet = T)
-  var_df <- var_df %>%
+  var_df <- var_df |>
     dplyr::mutate(
       MUTATION_TYPE =
         dplyr::case_when(VARIANT_CLASS == "SNV" & REF == "G" &
@@ -65,8 +65,8 @@ get_proper_maf_alleles <- function(maf_df, genome_seq, seqinfo) {
     maf_df_valid <- dplyr::select(maf_df_valid, -.data$end)
   }
 
-  maf_snv <- maf_df_valid %>%
-    dplyr::filter(.data$Variant_Type == "SNP") %>%
+  maf_snv <- maf_df_valid |>
+    dplyr::filter(.data$Variant_Type == "SNP") |>
     dplyr::mutate(REF = .data$Reference_Allele,
                   ALT = .data$Tumor_Seq_Allele2, POS = .data$Start_Position)
 

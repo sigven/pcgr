@@ -2,10 +2,13 @@
 % Please edit documentation in R/utils.R
 \name{check_file_exists}
 \alias{check_file_exists}
-\title{Function that checks the existens of a file}
+\title{Function that checks the existence of a file}
 \usage{
 check_file_exists(fname)
 }
+\arguments{
+\item{fname}{Name of file to check}
+}
 \description{
-Function that checks the existens of a file
+Function that checks the existence of a file
 }

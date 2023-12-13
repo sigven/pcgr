@@ -125,7 +125,10 @@ load_reference_data <- function(
   pcgr_ref_data[['gene']][['cpg']] <- as.data.frame(
     readr::read_tsv(cpg_tsv_fname, show_col_types = F,
                     comment = "", na = c(".",""))
-  )
+  ) |>
+    dplyr::mutate(
+      entrezgene = as.character(.data$entrezgene)
+    )
   colnames(pcgr_ref_data[['gene']][['cpg']]) <-
     toupper(colnames(pcgr_ref_data[['gene']][['cpg']]))
 
@@ -139,7 +142,10 @@ load_reference_data <- function(
   pcgr_ref_data[['gene']][['panel']] <- as.data.frame(
     readr::read_tsv(panels_tsv_fname, show_col_types = F,
                     comment = "", na = c("","."))
-  )
+  ) |>
+    dplyr::mutate(
+      entrezgene = as.character(.data$entrezgene)
+    )
   colnames(pcgr_ref_data[['gene']][['panel']]) <-
     toupper(colnames(pcgr_ref_data[['gene']][['panel']]))
 
@@ -153,48 +159,49 @@ load_reference_data <- function(
   pcgr_ref_data[['gene']][['gene_xref']] <- as.data.frame(
     readr::read_tsv(gene_xref_tsv_fname, show_col_types = F)) |>
     dplyr::select(
-      ensembl_gene_id,
-      gene_biotype,
-      symbol,
-      entrezgene,
-      name,
-      driver,
-      driver_support,
-      tsg,
-      tsg_support,
-      tsg_rank,
-      oncogene,
-      oncogene_support,
-      oncogene_rank,
-      cancergene_evidence
+      c("ensembl_gene_id",
+      "gene_biotype",
+      "symbol",
+      "entrezgene",
+      "name",
+      "driver",
+      "driver_support",
+      "tsg",
+      "tsg_support",
+      "tsg_rank",
+      "oncogene",
+      "oncogene_support",
+      "oncogene_rank",
+      "cancergene_evidence")
     ) |>
     dplyr::rename(
-      genename = name
+      genename = .data$name
     ) |>
     dplyr::mutate(
-      entrezgene = as.character(entrezgene)
+      entrezgene = as.character(.data$entrezgene)
     ) |>
-    dplyr::filter(gene_biotype == "protein_coding") |>
+    dplyr::filter(
+      .data$gene_biotype == "protein_coding") |>
     dplyr::distinct() |>
     dplyr::mutate(
       oncogene = dplyr::if_else(
-        oncogene == ".",
+        .data$oncogene == ".",
         FALSE,
-        as.logical(oncogene)
+        as.logical(.data$oncogene)
       )
     ) |>
     dplyr::mutate(
       tsg = dplyr::if_else(
-        tsg == ".",
+        .data$tsg == ".",
         FALSE,
-        as.logical(tsg)
+        as.logical(.data$tsg)
       )
     ) |>
     dplyr::mutate(
       driver = dplyr::if_else(
-        driver == ".",
+        .data$driver == ".",
         FALSE,
-        as.logical(driver)
+        as.logical(.data$driver)
       )
     )
 
@@ -212,8 +219,8 @@ load_reference_data <- function(
   check_file_exists(clinvar_sites_tsv_fname)
   pcgr_ref_data[['variant']][['clinvar_sites']] <- as.data.frame(
     readr::read_tsv(
-      clinvar_sites_tsv_fname, show_col_types = F)
-  )
+      clinvar_sites_tsv_fname, show_col_types = F)) |>
+    dplyr::mutate(entrezgene = as.character(.data$entrezgene))
   colnames(pcgr_ref_data[['variant']][['clinvar_sites']]) <-
     toupper(colnames(pcgr_ref_data[['variant']][['clinvar_sites']]))
 
@@ -225,8 +232,8 @@ load_reference_data <- function(
   check_file_exists(clinvar_gene_varstats_tsv_fname)
   pcgr_ref_data[['variant']][['clinvar_gene_stats']] <- as.data.frame(
     readr::read_tsv(
-      clinvar_gene_varstats_tsv_fname, show_col_types = F)
-  )
+      clinvar_gene_varstats_tsv_fname, show_col_types = F)) |>
+    dplyr::mutate(entrezgene = as.character(.data$entrezgene))
   colnames(pcgr_ref_data[['variant']][['clinvar_gene_stats']]) <-
     toupper(colnames(pcgr_ref_data[['variant']][['clinvar_gene_stats']]))
 
@@ -319,8 +326,8 @@ load_reference_data <- function(
   pcgr_ref_data[['pathway']][['long']] <- tmp
   pcgr_ref_data[['pathway']][['wide']] <- as.data.frame(
     tmp |>
-    dplyr::group_by(GENE_ID) |>
-    dplyr::summarise(LINK = paste(URL_HTML, collapse = ", ")))
+    dplyr::group_by(.data$GENE_ID) |>
+    dplyr::summarise(LINK = paste(.data$URL_HTML, collapse = ", ")))
 
 
   ## 6. Drugs
@@ -347,16 +354,17 @@ load_reference_data <- function(
           paste0(db,".", elem,".tsv.gz")
         )
       check_file_exists(fname)
-      data <- as.data.frame(
+      bm_data <- as.data.frame(
         readr::read_tsv(fname, show_col_types = F, na = "."))
-      if("source_id" %in% colnames(data)){
-        data <- data |>
-          dplyr::mutate(source_id = as.character(source_id))
+      if("source_id" %in% colnames(bm_data)){
+        bm_data <- bm_data |>
+          dplyr::mutate(
+            source_id = as.character(.data$source_id))
       }
 
       pcgr_ref_data[['biomarker']][[elem]] <- dplyr::bind_rows(
         pcgr_ref_data[['biomarker']][[elem]],
-        data
+        bm_data
       )
     }
     colnames(pcgr_ref_data[['biomarker']][[elem]]) <-
@@ -376,11 +384,26 @@ load_reference_data <- function(
     check_file_exists(fname)
     metadata_dtype <- as.data.frame(
       readr::read_tsv(fname, show_col_types = F)) |>
-      dplyr::mutate(datatype = dtype)
+      dplyr::mutate(datatype = dtype) |>
+      dplyr::mutate(wflow = dplyr::case_when(
+        stringr::str_detect(
+          source_abbreviation,
+          paste0(
+            "^(gepa|cpg_other|maxwell2016|acmg_sf|dbmts|",
+            "woods_dnarepair|gerp|tcga_pancan_2018|gwas_catalog)")) ~ "cpsr",
+        stringr::str_detect(
+          source_abbreviation,
+          "^(cytoband|mitelmandb|tcga|nci|intogen|opentargets|dgidb|pubchem)$") ~ "pcgr",
+        TRUE ~ as.character("pcgr_cpsr")
+      ))
 
     pcgr_ref_data[['metadata']] <-
       pcgr_ref_data[['metadata']] |>
-      dplyr::bind_rows(metadata_dtype)
+      dplyr::bind_rows(metadata_dtype) |>
+      dplyr::filter(
+        source_abbreviation != "foundation_one" &
+          source_abbreviation != "illumina"
+      )
   }
 
   return(pcgr_ref_data)

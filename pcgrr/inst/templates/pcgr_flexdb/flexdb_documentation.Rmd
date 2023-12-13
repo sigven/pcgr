@@ -174,7 +174,7 @@ if("signature_id" %in% colnames(dat) & "aetiology_keyword" %in% colnames(dat) & 
   cat('<ul>')
   i <- 1
   
-  refsig_collection_site <- pcg_report$content$m_signature_mp$result$reference_data %>%
+  refsig_collection_site <- pcg_report$content$m_signature_mp$result$reference_data |>
     dplyr::mutate(tmp_id = as.numeric(
       stringr::str_replace(
         stringr::str_replace(
@@ -184,9 +184,9 @@ if("signature_id" %in% colnames(dat) & "aetiology_keyword" %in% colnames(dat) & 
               "a",".2"),
             "b",".4"),
           "c", ".6"),
-        "d",".8"))) %>%
-    dplyr::arrange(tmp_id) %>%
-    dplyr::select(signature_id, aetiology_keyword) %>%
+        "d",".8"))) |>
+    dplyr::arrange(tmp_id) |>
+    dplyr::select(signature_id, aetiology_keyword) |>
     dplyr::distinct()
   
   while(i <= nrow(refsig_collection_site)){

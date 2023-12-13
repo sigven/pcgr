@@ -10,19 +10,19 @@ n_tier3_tsgene <- 0
 n_tier3_dualrole <- 0
 
 if(NROW(pcg_report$content$snv_indel$variant_set$tsv) > 0){
-  n_tier3_oncogene <- pcg_report$content$snv_indel$variant_set$tsv %>%
+  n_tier3_oncogene <- pcg_report$content$snv_indel$variant_set$tsv |>
     dplyr::filter(ONCOGENE == T & TUMOR_SUPPRESSOR == F & 
-                    TIER == "TIER 3") %>% 
+                    TIER == "TIER 3") |> 
     nrow()
   n_tier3_tsgene <- 
-    pcg_report$content$snv_indel$variant_set$tsv %>% 
+    pcg_report$content$snv_indel$variant_set$tsv |> 
     dplyr::filter(TIER == "TIER 3" & TUMOR_SUPPRESSOR == T & 
-                    ONCOGENE == F) %>%
+                    ONCOGENE == F) |>
     nrow()
   n_tier3_dualrole <- 
-    pcg_report$content$snv_indel$variant_set$tsv %>% 
+    pcg_report$content$snv_indel$variant_set$tsv |> 
     dplyr::filter(TIER == "TIER 3" & TUMOR_SUPPRESSOR == T & 
-                    ONCOGENE == T) %>%
+                    ONCOGENE == T) |>
     nrow() 
 
 }
@@ -79,7 +79,7 @@ tier3_vars <- dplyr::bind_rows(pcg_report[['content']][['snv_indel']][["disp"]][
 
 mutation_hotspot_levels <- levels(as.factor(tier3_vars$MUTATION_HOTSPOT))
 if(length(mutation_hotspot_levels) > 0){
-  tier3_vars <- tier3_vars %>%
+  tier3_vars <- tier3_vars |>
     dplyr::arrange(MUTATION_HOTSPOT, desc(OPENTARGETS_RANK))
 }
 
@@ -132,11 +132,11 @@ dt <- DT::datatable(variants_tier3_shared, escape=F,extensions=c("Buttons","Resp
                            width = "100%",
                            scrollX = F,
                            #columnDefs = list(list(width = '90px', targets = c(1,2,3,4,5,6))),
-                           dom = 'Bfrtip')) %>%
+                           dom = 'Bfrtip')) |>
   DT::formatStyle("SYMBOL","OPENTARGETS_RANK", color = "white", backgroundColor = DT::styleInterval(pcg_report[['content']][['report_display_config']][['opentargets_rank']][['breaks']], pcg_report[['content']][['report_display_config']][['opentargets_rank']][['colors']]))
 
 if(length(mutation_hotspot_levels) > 0){
-  dt <- dt %>%
+  dt <- dt |>
     DT::formatStyle("MUTATION_HOTSPOT","MUTATION_HOTSPOT",
                     color = "white", fontWeight = "bold",
                     backgroundColor = DT::styleEqual(mutation_hotspot_levels, rep("black", length(mutation_hotspot_levels)))

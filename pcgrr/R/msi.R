@@ -19,7 +19,7 @@ predict_msi_status <- function(vcf_data_df, pcgr_data,
     vcf_data_df,
     chromosome_column = "CHROM",
     bsg = pcgr_data[["assembly"]][["bsg"]])
-  mutations_valid <- mutations_valid %>%
+  mutations_valid <- mutations_valid |>
     dplyr::select(.data$CHROM, .data$POS, .data$REF, .data$ALT, .data$CONSEQUENCE, .data$SYMBOL,
                   .data$GENOMIC_CHANGE, .data$VARIANT_CLASS, .data$PROTEIN_DOMAIN,
                   .data$GENE_NAME, .data$PROTEIN_CHANGE, .data$MUTATION_HOTSPOT,
@@ -27,133 +27,133 @@ predict_msi_status <- function(vcf_data_df, pcgr_data,
                   .data$AF_CONTROL, .data$DP_CONTROL, .data$CALL_CONFIDENCE,
                   .data$SIMPLEREPEATS_HIT, .data$WINMASKER_HIT)
 
-  vcf_df_repeatAnnotated <- mutations_valid %>%
+  vcf_df_repeatAnnotated <- mutations_valid |>
     dplyr::mutate(repeatStatus =
                     dplyr::if_else(.data$SIMPLEREPEATS_HIT == T,
-                                   "simpleRepeat", as.character(NA))) %>%
+                                   "simpleRepeat", as.character(NA))) |>
     dplyr::mutate(winMaskStatus =
                     dplyr::if_else(.data$WINMASKER_HIT == T,
                                    "winMaskDust", as.character(NA)))
 
   msi_stats <- data.frame("sample_name" = sample_name, stringsAsFactors = F)
 
-  msi_stats1 <- vcf_df_repeatAnnotated %>%
+  msi_stats1 <- vcf_df_repeatAnnotated |>
     dplyr::filter(!is.na(.data$repeatStatus) & (.data$VARIANT_CLASS == "insertion" |
-                                            .data$VARIANT_CLASS == "deletion")) %>%
+                                            .data$VARIANT_CLASS == "deletion")) |>
     dplyr::summarise(repeat_indels = dplyr::n())
 
-  msi_stats2 <- vcf_df_repeatAnnotated %>%
-    dplyr::filter(!is.na(.data$repeatStatus) & .data$VARIANT_CLASS == "SNV") %>%
+  msi_stats2 <- vcf_df_repeatAnnotated |>
+    dplyr::filter(!is.na(.data$repeatStatus) & .data$VARIANT_CLASS == "SNV") |>
     dplyr::summarise(repeat_SNVs = dplyr::n())
 
-  msi_stats3 <- vcf_df_repeatAnnotated %>%
-    dplyr::filter(!is.na(.data$repeatStatus)) %>%
+  msi_stats3 <- vcf_df_repeatAnnotated |>
+    dplyr::filter(!is.na(.data$repeatStatus)) |>
     dplyr::summarise(repeat_indelSNVs = dplyr::n())
 
-  winmask_indels <- vcf_df_repeatAnnotated %>%
+  winmask_indels <- vcf_df_repeatAnnotated |>
     dplyr::filter(!is.na(.data$winMaskStatus) &
                     (.data$VARIANT_CLASS == "insertion" |
-                       .data$VARIANT_CLASS == "deletion")) %>%
+                       .data$VARIANT_CLASS == "deletion")) |>
     dplyr::summarise(winmask_indels = dplyr::n())
 
-  winmask_snvs <- vcf_df_repeatAnnotated %>%
-    dplyr::filter(!is.na(.data$winMaskStatus) & .data$VARIANT_CLASS == "SNV") %>%
+  winmask_snvs <- vcf_df_repeatAnnotated |>
+    dplyr::filter(!is.na(.data$winMaskStatus) & .data$VARIANT_CLASS == "SNV") |>
     dplyr::summarise(winmask_SNVs = dplyr::n())
 
-  winmask_tot <- vcf_df_repeatAnnotated %>%
-    dplyr::filter(!is.na(.data$winMaskStatus)) %>%
+  winmask_tot <- vcf_df_repeatAnnotated |>
+    dplyr::filter(!is.na(.data$winMaskStatus)) |>
     dplyr::summarise(winmask_indelSNVs = dplyr::n())
 
-  msi_stats4 <- vcf_df_repeatAnnotated %>%
+  msi_stats4 <- vcf_df_repeatAnnotated |>
     dplyr::filter(is.na(.data$repeatStatus) &
                     (.data$VARIANT_CLASS == "insertion" |
-                       .data$VARIANT_CLASS == "deletion")) %>%
+                       .data$VARIANT_CLASS == "deletion")) |>
     dplyr::summarise(nonRepeat_indels = dplyr::n())
 
-  msi_stats5 <- vcf_df_repeatAnnotated %>%
-    dplyr::filter(is.na(.data$repeatStatus) & .data$VARIANT_CLASS == "SNV") %>%
+  msi_stats5 <- vcf_df_repeatAnnotated |>
+    dplyr::filter(is.na(.data$repeatStatus) & .data$VARIANT_CLASS == "SNV") |>
     dplyr::summarise(nonRepeat_SNVs = dplyr::n())
 
-  msi_stats6 <- vcf_df_repeatAnnotated %>%
-    dplyr::filter(is.na(.data$repeatStatus)) %>%
+  msi_stats6 <- vcf_df_repeatAnnotated |>
+    dplyr::filter(is.na(.data$repeatStatus)) |>
     dplyr::summarise(nonRepeat_indelSNVs = dplyr::n())
 
-  msi_stats7 <- vcf_df_repeatAnnotated %>%
+  msi_stats7 <- vcf_df_repeatAnnotated |>
     dplyr::filter(.data$VARIANT_CLASS == "insertion" |
-                    .data$VARIANT_CLASS == "deletion") %>%
+                    .data$VARIANT_CLASS == "deletion") |>
     dplyr::summarise(indels = dplyr::n())
 
-  msi_stats8 <- vcf_df_repeatAnnotated %>%
-    dplyr::filter(.data$VARIANT_CLASS == "SNV") %>%
+  msi_stats8 <- vcf_df_repeatAnnotated |>
+    dplyr::filter(.data$VARIANT_CLASS == "SNV") |>
     dplyr::summarise(SNVs = dplyr::n())
 
-  msi_stats9 <- vcf_df_repeatAnnotated %>%
+  msi_stats9 <- vcf_df_repeatAnnotated |>
     dplyr::summarise(indelSNVs = dplyr::n())
 
-  msi_stats10 <- vcf_df_repeatAnnotated %>%
+  msi_stats10 <- vcf_df_repeatAnnotated |>
     dplyr::filter(
       .data$SYMBOL == "MLH1" &
         stringr::str_detect(
           .data$CONSEQUENCE,
-          "frameshift_|missense_|splice_|stop_|start_|inframe_")) %>%
+          "frameshift_|missense_|splice_|stop_|start_|inframe_")) |>
     dplyr::summarise(MLH1 = dplyr::n())
 
-  msi_stats11 <- vcf_df_repeatAnnotated %>%
+  msi_stats11 <- vcf_df_repeatAnnotated |>
     dplyr::filter(
       .data$SYMBOL == "MLH3" &
         stringr::str_detect(
           .data$CONSEQUENCE,
-          "frameshift_|missense_|splice_|stop_|start_|inframe_")) %>%
+          "frameshift_|missense_|splice_|stop_|start_|inframe_")) |>
     dplyr::summarise(MLH3 = dplyr::n())
 
-  msi_stats12 <- vcf_df_repeatAnnotated %>%
+  msi_stats12 <- vcf_df_repeatAnnotated |>
     dplyr::filter(
       .data$SYMBOL == "MSH2" &
         stringr::str_detect(
           .data$CONSEQUENCE,
-          "frameshift_|missense_|splice_|stop_|start_|inframe_")) %>%
+          "frameshift_|missense_|splice_|stop_|start_|inframe_")) |>
     dplyr::summarise(MSH2 = dplyr::n())
 
-  msi_stats13 <- vcf_df_repeatAnnotated %>%
+  msi_stats13 <- vcf_df_repeatAnnotated |>
     dplyr::filter(
       .data$SYMBOL == "MSH3" &
         stringr::str_detect(
-          .data$CONSEQUENCE, "frameshift_|missense_|splice_|stop_|start_|frame_")) %>%
+          .data$CONSEQUENCE, "frameshift_|missense_|splice_|stop_|start_|frame_")) |>
     dplyr::summarise(MSH3 = dplyr::n())
 
-  msi_stats14 <- vcf_df_repeatAnnotated %>%
+  msi_stats14 <- vcf_df_repeatAnnotated |>
     dplyr::filter(
       .data$SYMBOL == "MSH6" &
         stringr::str_detect(
-          .data$CONSEQUENCE, "frameshift_|missense_|splice_|stop_|start_|frame_")) %>%
+          .data$CONSEQUENCE, "frameshift_|missense_|splice_|stop_|start_|frame_")) |>
     dplyr::summarise(MSH6 = dplyr::n())
 
-  msi_stats15 <- vcf_df_repeatAnnotated %>%
+  msi_stats15 <- vcf_df_repeatAnnotated |>
     dplyr::filter(
       .data$SYMBOL == "PMS1" &
         stringr::str_detect(
-          .data$CONSEQUENCE, "frameshift_|missense_|splice_|stop_|start_|frame_")) %>%
+          .data$CONSEQUENCE, "frameshift_|missense_|splice_|stop_|start_|frame_")) |>
     dplyr::summarise(PMS1 = dplyr::n())
 
-  msi_stats16 <- vcf_df_repeatAnnotated %>%
+  msi_stats16 <- vcf_df_repeatAnnotated |>
     dplyr::filter(
       .data$SYMBOL == "PMS2" &
         stringr::str_detect(
-          .data$CONSEQUENCE, "frameshift_|missense_|splice_|stop_|start_|frame_")) %>%
+          .data$CONSEQUENCE, "frameshift_|missense_|splice_|stop_|start_|frame_")) |>
     dplyr::summarise(PMS2 = dplyr::n())
 
-  msi_stats17 <- vcf_df_repeatAnnotated %>%
+  msi_stats17 <- vcf_df_repeatAnnotated |>
     dplyr::filter(
       .data$SYMBOL == "POLE" &
         stringr::str_detect(
-          .data$CONSEQUENCE, "frameshift_|missense_|splice_|stop_|start_|frame_")) %>%
+          .data$CONSEQUENCE, "frameshift_|missense_|splice_|stop_|start_|frame_")) |>
     dplyr::summarise(POLE = dplyr::n())
 
-  msi_stats18 <- vcf_df_repeatAnnotated %>%
+  msi_stats18 <- vcf_df_repeatAnnotated |>
     dplyr::filter(
       .data$SYMBOL == "POLD1" &
         stringr::str_detect(
-          .data$CONSEQUENCE, "frameshift_|missense_|splice_|stop_|start_|frame_")) %>%
+          .data$CONSEQUENCE, "frameshift_|missense_|splice_|stop_|start_|frame_")) |>
     dplyr::summarise(POLD1 = dplyr::n())
 
   msi_stats1$sample_name <- sample_name
@@ -178,27 +178,27 @@ predict_msi_status <- function(vcf_data_df, pcgr_data,
   winmask_snvs$sample_name <- sample_name
   winmask_tot$sample_name <- sample_name
 
-  msi_stats <- msi_stats %>%
-    dplyr::left_join(msi_stats1, by = "sample_name") %>%
-    dplyr::left_join(msi_stats2, by = "sample_name") %>%
-    dplyr::left_join(msi_stats3, by = "sample_name") %>%
-    dplyr::left_join(msi_stats4, by = "sample_name") %>%
-    dplyr::left_join(msi_stats5, by = "sample_name") %>%
-    dplyr::left_join(msi_stats6, by = "sample_name") %>%
-    dplyr::left_join(msi_stats7, by = "sample_name") %>%
-    dplyr::left_join(msi_stats8, by = "sample_name") %>%
-    dplyr::left_join(msi_stats9, by = "sample_name") %>%
-    dplyr::left_join(msi_stats10, by = "sample_name") %>%
-    dplyr::left_join(msi_stats11, by = "sample_name") %>%
-    dplyr::left_join(msi_stats12, by = "sample_name") %>%
-    dplyr::left_join(msi_stats13, by = "sample_name") %>%
-    dplyr::left_join(msi_stats14, by = "sample_name") %>%
-    dplyr::left_join(msi_stats15, by = "sample_name") %>%
-    dplyr::left_join(msi_stats16, by = "sample_name") %>%
-    dplyr::left_join(msi_stats17, by = "sample_name") %>%
-    dplyr::left_join(msi_stats18, by = "sample_name") %>%
-    dplyr::left_join(winmask_tot, by = "sample_name") %>%
-    dplyr::left_join(winmask_snvs, by = "sample_name") %>%
+  msi_stats <- msi_stats |>
+    dplyr::left_join(msi_stats1, by = "sample_name") |>
+    dplyr::left_join(msi_stats2, by = "sample_name") |>
+    dplyr::left_join(msi_stats3, by = "sample_name") |>
+    dplyr::left_join(msi_stats4, by = "sample_name") |>
+    dplyr::left_join(msi_stats5, by = "sample_name") |>
+    dplyr::left_join(msi_stats6, by = "sample_name") |>
+    dplyr::left_join(msi_stats7, by = "sample_name") |>
+    dplyr::left_join(msi_stats8, by = "sample_name") |>
+    dplyr::left_join(msi_stats9, by = "sample_name") |>
+    dplyr::left_join(msi_stats10, by = "sample_name") |>
+    dplyr::left_join(msi_stats11, by = "sample_name") |>
+    dplyr::left_join(msi_stats12, by = "sample_name") |>
+    dplyr::left_join(msi_stats13, by = "sample_name") |>
+    dplyr::left_join(msi_stats14, by = "sample_name") |>
+    dplyr::left_join(msi_stats15, by = "sample_name") |>
+    dplyr::left_join(msi_stats16, by = "sample_name") |>
+    dplyr::left_join(msi_stats17, by = "sample_name") |>
+    dplyr::left_join(msi_stats18, by = "sample_name") |>
+    dplyr::left_join(winmask_tot, by = "sample_name") |>
+    dplyr::left_join(winmask_snvs, by = "sample_name") |>
     dplyr::left_join(winmask_indels, by = "sample_name")
 
   msi_stats$fracWinMaskIndels <-
@@ -222,7 +222,7 @@ predict_msi_status <- function(vcf_data_df, pcgr_data,
     }
   }
 
-  mmr_pol_df <- mutations_valid %>%
+  mmr_pol_df <- mutations_valid |>
     dplyr::filter(
       stringr::str_detect(.data$SYMBOL,
                           "^(MLH1|MLH3|MSH2|MSH3|MSH6|PMS1|PMS2|POLD1|POLE)$") &
@@ -230,7 +230,7 @@ predict_msi_status <- function(vcf_data_df, pcgr_data,
                             "frameshift_|missense_|splice_|stop_|inframe_"))
   mmr_pol_df <- dplyr::select(mmr_pol_df, -c(.data$CHROM, .data$POS, .data$REF, .data$ALT))
   mmr_pol_df <- dplyr::rename(mmr_pol_df, GENE = .data$SYMBOL)
-  mmr_pol_df <- mmr_pol_df %>%
+  mmr_pol_df <- mmr_pol_df |>
     dplyr::select(.data$GENE, .data$CONSEQUENCE, .data$PROTEIN_CHANGE,
                   .data$GENE_NAME, .data$VARIANT_CLASS, .data$PROTEIN_DOMAIN,
                   dplyr::everything())
@@ -254,9 +254,9 @@ predict_msi_status <- function(vcf_data_df, pcgr_data,
     #msi_stats$vb <- "MSI status:\nMSI - High"
     msi_stats$vb <- "MSI - High"
   }
-  log4r_info(paste0("Predicted MSI status: ",
+  pcgrr::log4r_info(paste0("Predicted MSI status: ",
                            msi_stats$predicted_class))
-  log4r_info(paste0("MSI - Indel fraction: ",
+  pcgrr::log4r_info(paste0("MSI - Indel fraction: ",
                            round(msi_stats$fracNonRepeatIndels, digits = 3)))
   msi_data <- list("mmr_pol_variants" = mmr_pol_df,
                    "msi_stats" = msi_stats,
@@ -281,11 +281,11 @@ generate_report_data_msi <- function(sample_calls,
 
   pcg_report_msi <- pcgrr::init_report(config =pcgr_config,
                                        class = "msi")
-  log4r_info("------")
-  log4r_info("Predicting microsatellite instability status")
+  pcgrr::log4r_info("------")
+  pcgrr::log4r_info("Predicting microsatellite instability status")
 
-  msi_sample_calls <- sample_calls %>% dplyr::filter(.data$EXONIC_STATUS == "exonic")
-  log4r_info(paste0("n = ",
+  msi_sample_calls <- sample_calls |> dplyr::filter(.data$EXONIC_STATUS == "exonic")
+  pcgrr::log4r_info(paste0("n = ",
                            nrow(msi_sample_calls),
                            " exonic variants used for MSI prediction"))
   if (nrow(msi_sample_calls) >= 1) {
@@ -299,7 +299,7 @@ generate_report_data_msi <- function(sample_calls,
     pcg_report_msi[["eval"]] <- TRUE
   }
   else{
-    log4r_info("Missing variants for MSI prediction")
+    pcgrr::log4r_info("Missing variants for MSI prediction")
     pcg_report_msi[["missing_data"]] <- TRUE
   }
 

@@ -2,7 +2,7 @@ Package: pcgrr
 Type: Package
 Title: Personal Cancer Genome ReporteR
 Version: 1.4.1
-Date: 2022-03-30
+Date: 2023-12-12
 Authors@R:
     c(person(given = "Sigve",
              family = "Nakken",

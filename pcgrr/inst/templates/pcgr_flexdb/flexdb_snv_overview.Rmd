@@ -158,18 +158,18 @@ if(NROW(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']]) > 2000
 }
 
 
-vars <- pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']] %>% 
+vars <- pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']] |> 
   dplyr::select(SYMBOL, CONSEQUENCE, PROTEIN_CHANGE, TIER, VARIANT_CLASS,
                 GENOMIC_CHANGE, GENOME_VERSION, DP_TUMOR, 
-                AF_TUMOR, CALL_CONFIDENCE, DP_CONTROL, AF_CONTROL) %>%
+                AF_TUMOR, CALL_CONFIDENCE, DP_CONTROL, AF_CONTROL) |>
   dplyr::mutate(CONSEQUENCE = stringr::str_replace_all(CONSEQUENCE,"&",","))
 
 tiers <- c('TIER 1','TIER 2','TIER 3','TIER 4','NONCODING')
 
-vars <- pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']] %>% 
+vars <- pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']] |> 
   dplyr::select(SYMBOL, CONSEQUENCE, PROTEIN_CHANGE, VARIANT_CLASS, TIER, 
                 GENOMIC_CHANGE, GENOME_VERSION, CALL_CONFIDENCE, DP_TUMOR, 
-                AF_TUMOR, DP_CONTROL, AF_CONTROL) %>%
+                AF_TUMOR, DP_CONTROL, AF_CONTROL) |>
   dplyr::mutate(CONSEQUENCE = stringr::str_replace_all(CONSEQUENCE,"&",","))
 
 variants_shared <- crosstalk::SharedData$new(vars)
@@ -214,7 +214,7 @@ crosstalk::bscols(
 
 tiers <- c('TIER 1','TIER 2','TIER 3','TIER 4','NONCODING')
 
-variants_shared %>%
+variants_shared |>
   DT::datatable(
     extensions=c("Buttons","Responsive"),
     #plugins = "scrollResize",
@@ -236,7 +236,7 @@ variants_shared %>%
                   #                   list(width = '40px', targets = 2),
                   #                   list(width = '40px', targets = 5)),
                  dom = 'Bfrtip')
-  ) %>%
+  ) |>
    DT::formatStyle('TIER',color = 'white', 
                    backgroundColor = DT::styleEqual(tiers, head(pcg_report[['metadata']][['color_palette']][['tier']][['values']],5)), 
                    fontWeight = 'bold', `text-align` = 'center')

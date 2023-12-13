@@ -34,7 +34,7 @@ flexdashboard::valueBox(pcg_report$content$snv_indel$v_stat$n_snv, color = col, 
 
 ```{r mutsig_dominant_box}
 if(!missing_data_norun){
-  m <- pcg_report$content$m_signature_mp$result$contributions$per_group %>% 
+  m <- pcg_report$content$m_signature_mp$result$contributions$per_group |> 
     dplyr::arrange(desc(prop_group))
   flexdashboard::valueBox(m$group[1], color = pcg_report$metadata$color_value_box)
 }else{
@@ -62,7 +62,7 @@ if(!missing_data_norun){
 ```{r mutsig_kataegis_box}
 num_events <- NROW(pcg_report$content$kataegis$events)
 if(num_events > 0){
-  num_events <- NROW(pcg_report$content$kataegis$events %>% dplyr::filter(confidence == 3))
+  num_events <- NROW(pcg_report$content$kataegis$events |> dplyr::filter(confidence == 3))
 }
 flexdashboard::valueBox(num_events, color = ifelse(num_events > 0,
                         pcg_report[['metadata']][['color_palette']][['success']][['values']][1],
@@ -128,10 +128,10 @@ myOptions <- list(buttons = c('csv','excel'),
                   # columnDefs = list(list(width = '70px', targets = c(1,2)),
                   #                   list(width = '220px', targets = c(3,4))),
                   scrollCollapse = T)
-dat <- dplyr::select(pcg_report$content$m_signature_mp$result$contributions$per_signature, -c(sample_id,col,prop_signature)) %>%
+dat <- dplyr::select(pcg_report$content$m_signature_mp$result$contributions$per_signature, -c(sample_id,col,prop_signature)) |>
   dplyr::select(signature_id, contribution, group, dplyr::everything())
-DT::datatable(dat ,options = myOptions, extensions=c("Buttons")) %>%
- DT::formatStyle('contribution',fontWeight = 'bold') %>%
+DT::datatable(dat ,options = myOptions, extensions=c("Buttons")) |>
+ DT::formatStyle('contribution',fontWeight = 'bold') |>
  DT::formatStyle('signature_id',color = 'white', 
                  backgroundColor = DT::styleEqual(signature_ids, signature_colors), 
                  fontWeight = 'bold', `text-align` = 'center')
@@ -207,7 +207,7 @@ plot <- ggplot2::ggplot(rfdat$data, ggplot2::aes(x = location, y = distance)) +
       axis.text.x = ggplot2::element_blank()) +
     ggplot2::guides(colour = ggplot2::guide_legend(nrow = 1))
 
-plot <- plot %>% plotly::ggplotly()
+plot <- plot |> plotly::ggplotly()
 plot
 #   plotly::ggplotly()
 ```

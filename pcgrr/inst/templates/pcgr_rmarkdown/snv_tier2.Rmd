@@ -30,7 +30,7 @@ for(type in c('diagnostic','prognostic','predictive')){
   missing_tier2_items[[type]] <- T
   eitems[[type]] <- data.frame()
   if(NROW(pcg_report[['content']][['snv_indel']][['clin_eitem']][['other_ttype']][[type]][['A_B']]) > 0 | NROW(pcg_report[['content']][['snv_indel']][['clin_eitem']][['specific_ttype']][[type]][['C_D_E']]) > 0){
-    eitems[[type]] <- dplyr::bind_rows(pcg_report[['content']][['snv_indel']][['clin_eitem']][['other_ttype']][[type]][['A_B']], pcg_report[['content']][['snv_indel']][['clin_eitem']][['specific_ttype']][[type]][['C_D_E']]) %>%
+    eitems[[type]] <- dplyr::bind_rows(pcg_report[['content']][['snv_indel']][['clin_eitem']][['other_ttype']][[type]][['A_B']], pcg_report[['content']][['snv_indel']][['clin_eitem']][['specific_ttype']][[type]][['C_D_E']]) |>
       dplyr::arrange(desc(RATING))
     show_tier2_filters[[type]] <- T
     missing_tier2_items[[type]] <- F
@@ -78,13 +78,13 @@ htmltools::br()
 htmltools::br()
 
 DT::datatable(variants_tier2_predictive_shared,  escape=F,extensions=c("Buttons","Responsive"), 
-              options=list(buttons = c('csv','excel'), scrollCollapse = T, dom = 'Bfrtip')) %>%
+              options=list(buttons = c('csv','excel'), scrollCollapse = T, dom = 'Bfrtip')) |>
   DT::formatStyle('EVIDENCE_LEVEL', 
                   backgroundColor = DT::styleEqual(c('A: Validated','A: FDA/NCCN/ELN guidelines',
                                                      'B: Clinical evidence','B1: Clinical evidence: late trials',
                                                      'B2: Clinical evidence: early trials','C: Case study',
                                                      'D: Preclinical evidence','E: Indirect evidence'), 
-                                                   c("#009E73","#009E73","#56B4E9", "#56B4E9","#56B4E9","#0072B2","#E69F00", "#F0E442"))) %>%
+                                                   c("#009E73","#009E73","#56B4E9", "#56B4E9","#56B4E9","#0072B2","#E69F00", "#F0E442"))) |>
   DT::formatStyle(color="white", "SYMBOL", "BIOMARKER_MAPPING", fontWeight = 'bold', `text-align` = 'center',
                   backgroundColor = DT::styleEqual(c('exact','codon','exon','gene'), 
                                                    c('#000','#000',pcg_report[['metadata']][['color_palette']][['warning']][['values']][1], pcg_report[['metadata']][['color_palette']][['warning']][['values']][1])))
@@ -138,13 +138,13 @@ htmltools::br()
 htmltools::br()
 
 DT::datatable(variants_tier2_prognostic_shared, escape=F,extensions=c("Buttons","Responsive"), 
-              options=list(buttons = c('csv','excel'), scrollCollapse = T, dom = 'Bfrtip')) %>%
+              options=list(buttons = c('csv','excel'), scrollCollapse = T, dom = 'Bfrtip')) |>
   DT::formatStyle('EVIDENCE_LEVEL', 
                   backgroundColor = DT::styleEqual(c('A: Validated','A: FDA/NCCN/ELN guidelines',
                                                      'B: Clinical evidence','B1: Clinical evidence: late trials',
                                                      'B2: Clinical evidence: early trials','C: Case study',
                                                      'D: Preclinical evidence','E: Indirect evidence'), 
-                                                   c("#009E73","#009E73","#56B4E9", "#56B4E9","#56B4E9","#0072B2","#E69F00", "#F0E442"))) %>%
+                                                   c("#009E73","#009E73","#56B4E9", "#56B4E9","#56B4E9","#0072B2","#E69F00", "#F0E442"))) |>
    DT::formatStyle(color="white", "SYMBOL", "BIOMARKER_MAPPING", fontWeight = 'bold', `text-align` = 'center',
                   backgroundColor = DT::styleEqual(c('exact','codon','exon','gene'), 
                                                    c('#000','#000',pcg_report[['metadata']][['color_palette']][['warning']][['values']][1], pcg_report[['metadata']][['color_palette']][['warning']][['values']][1])))
@@ -200,7 +200,7 @@ htmltools::br()
 
 DT::datatable(variants_tier2_diagnostic_shared, 
               escape=F,extensions=c("Buttons","Responsive"), 
-              options=list(buttons = c('csv','excel'), scrollCollapse = T, dom = 'Bfrtip')) %>%
+              options=list(buttons = c('csv','excel'), scrollCollapse = T, dom = 'Bfrtip')) |>
   DT::formatStyle('EVIDENCE_LEVEL', 
                   backgroundColor = DT::styleEqual(c('A: Validated',
                                                      'A: FDA/NCCN/ELN guidelines',
@@ -210,7 +210,7 @@ DT::datatable(variants_tier2_diagnostic_shared,
                                                      'C: Case study',
                                                      'D: Preclinical evidence',
                                                      'E: Indirect evidence'), 
-                                                   c("#009E73","#009E73","#56B4E9", "#56B4E9","#56B4E9","#0072B2","#E69F00", "#F0E442"))) %>%
+                                                   c("#009E73","#009E73","#56B4E9", "#56B4E9","#56B4E9","#0072B2","#E69F00", "#F0E442"))) |>
    DT::formatStyle(color="white", "SYMBOL", "BIOMARKER_MAPPING", fontWeight = 'bold', `text-align` = 'center',
                   backgroundColor = DT::styleEqual(c('exact','codon','exon','gene'), 
                                                    c('#000','#000',pcg_report[['metadata']][['color_palette']][['warning']][['values']][1], pcg_report[['metadata']][['color_palette']][['warning']][['values']][1])))

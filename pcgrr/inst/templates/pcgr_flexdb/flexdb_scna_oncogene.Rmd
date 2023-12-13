@@ -56,7 +56,7 @@ cat('\nProto-oncogenes subject to amplifications (right panel) can be filtered a
 
 drug_levels <- levels(as.factor(pcg_report[["content"]][["cna"]][["disp"]][["oncogene_gain"]]$DRUGS_ON_LABEL))
 # if(length(drug_levels) > 0){
-#   tier3_vars <- tier3_vars %>%
+#   tier3_vars <- tier3_vars |>
 #     dplyr::arrange(MUTATION_HOTSPOT, desc(OPENTARGETS_RANK))
 # }
 
@@ -87,7 +87,7 @@ cat('\n')
 
 ```{r table_scna_oncogene, eval = NROW(pcg_report$content$cna$disp$oncogene_gain) > 0}
 
-dt <- oncogene_gain_variants %>%
+dt <- oncogene_gain_variants |>
   DT::datatable(escape = F, 
                 extensions = c("Buttons","Responsive"), 
                 options = list(
@@ -102,13 +102,13 @@ dt <- oncogene_gain_variants %>%
                   dom = 'Bfrtip'))
 
 if(length(drug_levels) > 0){
-  dt <- dt %>%
+  dt <- dt |>
     DT::formatStyle("DRUGS_ON_LABEL","DRUGS_ON_LABEL",
                     color = "white", fontWeight = "bold",
                     backgroundColor = DT::styleEqual(drug_levels, rep("black", length(drug_levels)))
     )
 }
-dt %>%
+dt |>
   DT::formatStyle("SYMBOL","OPENTARGETS_RANK", color = "white", backgroundColor = DT::styleInterval(pcg_report[['content']][['report_display_config']][['opentargets_rank']][['breaks']], pcg_report[['content']][['report_display_config']][['opentargets_rank']][['colors']]))
 
 ```

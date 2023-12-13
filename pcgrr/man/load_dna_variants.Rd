@@ -3,16 +3,28 @@
 \name{load_dna_variants}
 \alias{load_dna_variants}
 \title{Function that reads and validates CNA or SNV/InDel TSV files
-file from PCGR pre-report pipeline}
+file from PCGR/CPSR pre-report pipeline}
 \usage{
-load_dna_variants(fname, cols = NULL, ref_data = NULL)
+load_dna_variants(
+  fname = NA,
+  cols = NULL,
+  ref_data = NULL,
+  retained_info_tags = "None",
+  variant_origin = "Somatic"
+)
 }
 \arguments{
-\item{fname}{Path to raw file with DNA aberrations}
+\item{fname}{Path to raw file with DNA aberrations (PCGR/CPSR)}
 
-\item{cols}{}
+\item{cols}{column type definitions of input}
+
+\item{ref_data}{reference data object}
+
+\item{retained_info_tags}{VCF INFO tags to be retained in output (SNVs/InDels)}
+
+\item{variant_origin}{Germline/Somatic}
 }
 \description{
 Function that reads and validates CNA or SNV/InDel TSV files
-file from PCGR pre-report pipeline
+file from PCGR/CPSR pre-report pipeline
 }

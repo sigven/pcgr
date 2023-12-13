@@ -25,7 +25,7 @@ if("signature_id" %in% colnames(dat) & "aetiology_keyword" %in% colnames(dat)){
   cat('<ul>')
   i <- 1
   
-  refsig_collection_site <- pcg_report$content$m_signature_mp$result$reference_data %>%
+  refsig_collection_site <- pcg_report$content$m_signature_mp$result$reference_data |>
     dplyr::mutate(tmp_id = as.numeric(
       stringr::str_replace(
         stringr::str_replace(
@@ -35,9 +35,9 @@ if("signature_id" %in% colnames(dat) & "aetiology_keyword" %in% colnames(dat)){
               "a",".2"),
             "b",".4"),
           "d", ".6"),
-        "c", ".8"))) %>%
-    dplyr::arrange(tmp_id) %>%
-    dplyr::select(signature_id, aetiology_keyword) %>%
+        "c", ".8"))) |>
+    dplyr::arrange(tmp_id) |>
+    dplyr::select(signature_id, aetiology_keyword) |>
     dplyr::distinct()
   
   while(i <= nrow(refsig_collection_site)){
@@ -133,10 +133,10 @@ signature_ids <- pcg_report[['content']][['m_signature_mp']][['result']][['contr
 signature_colors <- pcg_report[['content']][['m_signature_mp']][['result']][['contributions']][['per_signature']]$col
 
 myOptions <- list(buttons = c('csv','excel'),dom = 'Bfrtip', scrollCollapse = T)
-dat <- dplyr::select(pcg_report$content$m_signature_mp$result$contributions$per_signature, -c(sample_id,col,prop_signature)) %>%
+dat <- dplyr::select(pcg_report$content$m_signature_mp$result$contributions$per_signature, -c(sample_id,col,prop_signature)) |>
   dplyr::select(signature_id, contribution, group, dplyr::everything())
-DT::datatable(dat ,options = myOptions,extensions=c("Buttons","Responsive"),escape=F) %>%
- DT::formatStyle('contribution',fontWeight = 'bold') %>%
+DT::datatable(dat ,options = myOptions,extensions=c("Buttons","Responsive"),escape=F) |>
+ DT::formatStyle('contribution',fontWeight = 'bold') |>
  DT::formatStyle('signature_id',color = 'white', 
                  backgroundColor = DT::styleEqual(signature_ids, signature_colors), 
                  fontWeight = 'bold', `text-align` = 'center')

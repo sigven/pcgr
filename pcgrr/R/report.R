@@ -18,7 +18,7 @@ init_report <- function(yaml_fname = NULL,
     msg = "Argument 'report_mode' must be of either 'PCGR' or 'CPSR'"))
 
   report <- list()
-  for (elem in c("settings", "content")) {
+  for (elem in c("settings", "content","ref_data")) {
     report[[elem]] <- list()
   }
 
@@ -32,7 +32,7 @@ init_report <- function(yaml_fname = NULL,
 
     if (!is.null(yaml_data)) {
       report[["settings"]] <- yaml_data$settings
-      ref_data <- yaml_data$ref_data
+      report[["ref_data"]] <- yaml_data$ref_data
     }
   }
 
@@ -44,17 +44,33 @@ init_report <- function(yaml_fname = NULL,
       if (report[["settings"]][["conf"]][["variant_classification"]][["pop_gnomad"]] != "") {
         population <-
           report[["settings"]][["conf"]][["variant_classification"]][["pop_gnomad"]]
-        vcf_tag <- "gnomADe_non_cancer_AF"
+        vcf_tag_AF <- "gnomADe_non_cancer_AF"
+        vcf_tag_AN <- "gnomADe_non_cancer_AN"
+        vcf_tag_AC <- "gnomADe_non_cancer_AC"
+        vcf_tag_NHOMALT <- "gnomADe_non_cancer_NHOMALT"
         if(population != "global"){
-          vcf_tag <-
+          vcf_tag_AF <-
             paste0("gnomADe_non_cancer_",toupper(population),"_AF")
+          vcf_tag_AN <-
+            paste0("gnomADe_non_cancer_",toupper(population),"_AN")
+          vcf_tag_AC <-
+            paste0("gnomADe_non_cancer_",toupper(population),"_AC")
+          vcf_tag_NHOMALT <-
+            paste0("gnomADe_non_cancer_",toupper(population),"_NHOMALT")
         }
         pop_desc_df <-
-          ref_data$vcf_infotags[ref_data$vcf_infotags$tag == vcf_tag,]
+          report$ref_data$vcf_infotags[
+            report$ref_data$vcf_infotags$tag == vcf_tag_AF,]
         if(NROW(pop_desc_df) == 1){
           population_description <- pop_desc_df$description
-          report[["settings"]][["conf"]][["variant_classification"]][["vcftag_gnomad"]] <-
-            vcf_tag
+          report[["settings"]][["conf"]][["variant_classification"]][["vcftag_gnomad_AF"]] <-
+            vcf_tag_AF
+          report[["settings"]][["conf"]][["variant_classification"]][["vcftag_gnomad_AN"]] <-
+            vcf_tag_AN
+          report[["settings"]][["conf"]][["variant_classification"]][["vcftag_gnomad_AC"]] <-
+            vcf_tag_AC
+          report[["settings"]][["conf"]][["variant_classification"]][["vcftag_gnomad_NHOMALT"]] <-
+            vcf_tag_NHOMALT
           report[["settings"]][["conf"]][["variant_classification"]][["popdesc_gnomad"]] <-
             population_description
         }
@@ -130,9 +146,9 @@ init_report <- function(yaml_fname = NULL,
         report[["content"]][[a_elem]] <-
           init_m_signature_content()
       }
-      if (a_elem == "tmb" & !is.null(ref_data)) {
+      if (a_elem == "tmb" & !is.null(report$ref_data$tmb)) {
         report[["content"]][[a_elem]] <-
-          init_tmb_content(tcga_tmb = ref_data$tmb,
+          init_tmb_content(tcga_tmb = report$ref_data$tmb,
                            config = report$settings$conf)
       }
       if (a_elem == "msi") {
@@ -152,8 +168,7 @@ init_report <- function(yaml_fname = NULL,
   #   }
   # }
 
-  return(list('report' = report,
-              'ref_data' = ref_data))
+  return(report)
 }
 
 #' Function that updates a PCGR/CPSR report object structure
@@ -481,13 +496,16 @@ init_germline_content <- function(){
   rep[["variant_set"]][["tsv"]] <-
     data.frame()
   rep[["clin_eitem"]] <- list()
-  for (evidence_type in c("prognostic", "diagnostic", "
-                            predictive", "predisposing")) {
-    rep[["clin_eitem"]][[evidence_type]] <-
-      data.frame()
+  for (evidence_type in pcgrr::evidence_types) {
+    rep[["clin_eitem"]][[evidence_type]] <- list()
+    for(level in pcgrr::evidence_levels){
+      rep[["clin_eitem"]][[evidence_type]][[level]] <-
+        data.frame()
+    }
   }
 
-  for (cl in c("v_stat", "v_stat_cpg",
+  for (cl in c("v_stat",
+               "v_stat_cpg",
                "v_stat_secondary")) {
     rep[[cl]] <- list()
     for (t in c("n", "n_snv", "n_indel", "n_coding", "n_noncoding")) {
@@ -541,10 +559,10 @@ load_yaml <- function(yml_fname, report_mode = "CPSR") {
   }
   if(missing_yaml_info == F){
     log4r_info(paste0(
-      "Successfully parsed YAML configuration file - reporting mode:", report_mode))
+      "Successfully parsed YAML configuration file - reporting mode: ", report_mode))
   }else{
     log4r_fatal(paste0(
-      "YAML configuration lacks necessary properties - reporting mode:", report_mode))
+      "YAML configuration lacks necessary properties - reporting mode: ", report_mode))
   }
 
   ## check the validity of the yaml file
@@ -578,7 +596,7 @@ load_yaml <- function(yml_fname, report_mode = "CPSR") {
     if (report_mode == "PCGR") {
       report_settings[['conf']][['sample_properties']][['phenotype']] <-
         report_settings[['conf']][['sample_properties']][['phenotype']] |>
-        dplyr::filter(!is.na(.data$primary_site))
+        dplyr::filter(!is.na(.data$PRIMARY_SITE))
 
     }
 
@@ -644,22 +662,48 @@ load_yaml <- function(yml_fname, report_mode = "CPSR") {
   }
 
   if(report_mode == "CPSR"){
-
     report_settings[['conf']][['gene_panel']][['panel_genes']] <-
       as.data.frame(
         rrapply::rrapply(
           report_settings$conf$gene_panel$panel_genes,
           how = "bind"))
 
-    for(col in c('panel_id','panel_version')){
+    if(NROW(report_settings[['conf']][['gene_panel']][['panel_genes']]) == 1){
+      for(e in c('panel_id','panel_url','panel_version')){
+        report_settings[['conf']][['gene_panel']][['panel_genes']][,e] <- NA
+      }
+      for(e in c('mod','moi')){
+        if(is.nan(report_settings$conf$gene_panel$panel_genes[,e])){
+          report_settings[['conf']][['gene_panel']][['panel_genes']][,e] <- NA
+        }
+      }
+    }else{
 
-      if(NROW(report_settings[['conf']][['gene_panel']][['panel_genes']][
-        is.nan(report_settings[['conf']][['gene_panel']][['panel_genes']][[col]]),]) > 0){
-        report_settings[['conf']][['gene_panel']][['panel_genes']][
-          is.nan(report_settings[['conf']][['gene_panel']][['panel_genes']][[col]]),col] <-
-          as.numeric(NA)
+      for(col in c('panel_id','panel_version')){
+
+        if(NROW(report_settings[['conf']][['gene_panel']][['panel_genes']][
+          is.nan(report_settings[['conf']][['gene_panel']][['panel_genes']][[col]]),]) > 0){
+          report_settings[['conf']][['gene_panel']][['panel_genes']][
+            is.nan(report_settings[['conf']][['gene_panel']][['panel_genes']][[col]]),col] <-
+            as.numeric(NA)
+        }
+      }
+      for(col in c('mod','moi')){
+
+        if(NROW(report_settings[['conf']][['gene_panel']][['panel_genes']][
+          is.nan(report_settings[['conf']][['gene_panel']][['panel_genes']][[col]]),]) > 0){
+          report_settings[['conf']][['gene_panel']][['panel_genes']][
+            is.nan(report_settings[['conf']][['gene_panel']][['panel_genes']][[col]]),col] <-
+            as.character(NA)
+        }
       }
     }
+    colnames(
+      report_settings[['conf']][['gene_panel']][['panel_genes']]) <-
+      toupper(
+        colnames(
+          report_settings[['conf']][['gene_panel']][['panel_genes']])
+      )
   }
 
   report_settings$conf$visual_reporting[["color_palette"]] <-

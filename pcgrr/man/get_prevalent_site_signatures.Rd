@@ -20,10 +20,12 @@ get_prevalent_site_signatures(
 
 \item{pcgr_data}{PCGR data object}
 
-\item{min_prevalence_pct}{Minimum prevalence (pct) of signature in cohorts associated with primary site -
+\item{min_prevalence_pct}{Minimum prevalence (pct) of signature in
+cohorts associated with primary site -
 used to select reference signatures for inclusion in signature reconstruction}
 
-\item{incl_poss_artifacts}{logical indicating if artefact signatures are to be included}
+\item{incl_poss_artifacts}{logical indicating if artefact signatures
+are to be included}
 }
 \description{
 Function that retrieves prevalent signatures for a given tumor type/primary site

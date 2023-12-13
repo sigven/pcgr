@@ -14,8 +14,8 @@ generate_report_data_tmb <- function(sample_calls,
   tmb_consequence_pattern <-
     "^(stop_|start_lost|frameshift_|missense_|synonymous_|inframe_)"
 
-  log4r_info("------")
-  log4r_info(paste0("Calculating tumor mutational burden"))
+  pcgrr::log4r_info("------")
+  pcgrr::log4r_info(paste0("Calculating tumor mutational burden"))
 
   pcg_report_tmb <-
     pcgrr::init_report(config = pcgr_config,
@@ -32,9 +32,9 @@ generate_report_data_tmb <- function(sample_calls,
 
   if(NROW(sample_calls) > 0){
     pcg_report_tmb[["v_stat"]][["n_tmb"]] <-
-      sample_calls %>%
+      sample_calls |>
       dplyr::filter(
-        stringr::str_detect(.data$CONSEQUENCE, tmb_consequence_pattern)) %>%
+        stringr::str_detect(.data$CONSEQUENCE, tmb_consequence_pattern)) |>
       nrow()
   }
 
@@ -46,13 +46,13 @@ generate_report_data_tmb <- function(sample_calls,
                      pcg_report_tmb[["v_stat"]][["target_size_mb"]]),
         digits = 2)
   }
-  log4r_info(
+  pcgrr::log4r_info(
     paste0("Number of variants for mutational burden analysis: ",
            pcg_report_tmb[["v_stat"]][["n_tmb"]]))
-  log4r_info(
+  pcgrr::log4r_info(
     paste0("Coding target size sequencing assay (Mb): ",
            pcg_report_tmb[["v_stat"]][["target_size_mb"]]))
-  log4r_info(
+  pcgrr::log4r_info(
     paste0("Estimated mutational burden: ",
            pcg_report_tmb[["v_stat"]][["tmb_estimate"]],
            " mutations/Mb"))
@@ -77,7 +77,7 @@ plot_tmb_primary_site_tcga <- function(tcga_tmb, p_site = "Liver",
 
   tmb_site_colors <- data.frame(primary_site =
                                   unique(tcga_tmb$primary_site),
-                                stringsAsFactors = F) %>%
+                                stringsAsFactors = F) |>
     dplyr::filter(!is.na(.data$primary_site))
   tmb_site_colors$color <- "#f0f0f0"
   tmb_site_colors <-
@@ -89,14 +89,14 @@ plot_tmb_primary_site_tcga <- function(tcga_tmb, p_site = "Liver",
   tmb_site_color_vec <- tmb_site_colors$color
   names(tmb_site_color_vec) <- tmb_site_colors$primary_site
 
-  tcga_tmb <- tcga_tmb %>%
-    dplyr::filter(!is.na(.data$primary_site)) %>%
+  tcga_tmb <- tcga_tmb |>
+    dplyr::filter(!is.na(.data$primary_site)) |>
     dplyr::select(.data$primary_site, .data$tmb_log10, .data$tmb)
 
   if (algorithm == "nonsyn") {
-    tcga_tmb <- tcga_tmb %>%
-      dplyr::filter(!is.na(.data$primary_site)) %>%
-      dplyr::select(.data$primary_site, .data$tmb_ns_log10, .data$tmb_ns) %>%
+    tcga_tmb <- tcga_tmb |>
+      dplyr::filter(!is.na(.data$primary_site)) |>
+      dplyr::select(.data$primary_site, .data$tmb_ns_log10, .data$tmb_ns) |>
       dplyr::rename(tmb = .data$tmb_ns, tmb_log10 = .data$tmb_ns_log10)
   }
 

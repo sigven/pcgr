@@ -80,7 +80,7 @@ cat('\n')
 
 ```{r table_scna_other, eval = NROW(pcg_report$content$cna$disp$other_target) > 0}
 
-other_target_variants %>%
+other_target_variants |>
   DT::datatable(escape = F, 
                 extensions = c("Buttons","Responsive"), 
                 options = list(pageLength = 8, 
@@ -91,7 +91,7 @@ other_target_variants %>%
                  fixedHeader = T,
                  scrollX = "900px",
                   columnDefs = list(list(width = '90px', targets = c(1,2,3,4,5,6))),
-                               dom = 'Bfrtip')) %>%
+                               dom = 'Bfrtip')) |>
   DT::formatStyle("SYMBOL","OPENTARGETS_RANK", color = "white", backgroundColor = DT::styleInterval(pcg_report[['content']][['report_display_config']][['opentargets_rank']][['breaks']], pcg_report[['content']][['report_display_config']][['opentargets_rank']][['colors']]))
 
 ```

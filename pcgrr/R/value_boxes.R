@@ -65,8 +65,8 @@ generate_report_data_value_box <- function(pcg_report,
 
   pcg_report_value_box <- pcgrr::init_report(config = pcgr_config,
                                              class = "value_box")
-  log4r_info("------")
-  log4r_info("Assigning elements to PCGR value boxes")
+  pcgrr::log4r_info("------")
+  pcgrr::log4r_info("Assigning elements to PCGR value boxes")
 
   if (!pcg_report[["content"]][["snv_indel"]][["eval"]]) {
     return(pcg_report_value_box)
@@ -81,7 +81,7 @@ generate_report_data_value_box <- function(pcg_report,
   if (rep_cont[["m_signature_mp"]][["eval"]]) {
     if (!is.null(sig_contributions)) {
       if (nrow(sig_contributions[["per_group"]]) > 0) {
-        ranked_groups <- sig_contributions[["per_group"]] %>%
+        ranked_groups <- sig_contributions[["per_group"]] |>
           dplyr::arrange(dplyr::desc(.data$prop_group))
 
         dominant_aetiology <- ranked_groups[1, "group"]
@@ -96,7 +96,7 @@ generate_report_data_value_box <- function(pcg_report,
     pcg_report_value_box[["kataegis"]] <- "None"
       num_events <- NROW(rep_cont$kataegis$events)
       if(num_events > 0){
-        num_events <- NROW(rep_cont$kataegis$events %>%
+        num_events <- NROW(rep_cont$kataegis$events |>
                              dplyr::filter(.data$confidence == 3))
         # pcg_report_value_box[["kataegis"]] <-
         #   paste0("Kataegis events:\n", num_events)

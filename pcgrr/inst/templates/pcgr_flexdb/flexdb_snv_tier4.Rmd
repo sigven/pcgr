@@ -10,16 +10,16 @@ n_tier4_indel <- 0
 n_tier4_block <- 0
 
 if(NROW(pcg_report$content$snv_indel$variant_set$tsv) > 0){
-  n_tier4_snv <- pcg_report$content$snv_indel$variant_set$tsv %>%
-    dplyr::filter(VARIANT_CLASS == "SNV" & TIER == "TIER 4") %>% 
+  n_tier4_snv <- pcg_report$content$snv_indel$variant_set$tsv |>
+    dplyr::filter(VARIANT_CLASS == "SNV" & TIER == "TIER 4") |> 
     nrow()
-  n_tier4_indel <- pcg_report$content$snv_indel$variant_set$tsv %>% 
+  n_tier4_indel <- pcg_report$content$snv_indel$variant_set$tsv |> 
     dplyr::filter((VARIANT_CLASS == "insertion" | 
                      VARIANT_CLASS == "deletion" | 
-                     VARIANT_CLASS == "indel") & TIER == "TIER 4") %>%
+                     VARIANT_CLASS == "indel") & TIER == "TIER 4") |>
     nrow()
-  n_tier4_block <-  pcg_report$content$snv_indel$variant_set$tsv %>% 
-    dplyr::filter(VARIANT_CLASS == "substitution" & TIER == "TIER 4") %>% 
+  n_tier4_block <-  pcg_report$content$snv_indel$variant_set$tsv |> 
+    dplyr::filter(VARIANT_CLASS == "substitution" & TIER == "TIER 4") |> 
     nrow()
 }
 
@@ -117,7 +117,7 @@ options=list(buttons = c('csv','excel'),
              width = "100%",
                  scrollX = "900px",
                   columnDefs = list(list(width = '90px', targets = c(1,2,3,4,5,6))),
-             dom = 'Bfrtip')) %>%
+             dom = 'Bfrtip')) |>
   DT::formatStyle("SYMBOL","OPENTARGETS_RANK", color = "white", backgroundColor = DT::styleInterval(pcg_report[['content']][['report_display_config']][['opentargets_rank']][['breaks']], pcg_report[['content']][['report_display_config']][['opentargets_rank']][['colors']]))
   
 ```

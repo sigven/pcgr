@@ -29,48 +29,48 @@ cpsr_biomarker_eitems <- data.frame()
 
 for(n in c('diagnostic','prognostic','predictive','predisposing')){
   if(NROW(cpsr_rep[['content']][['snv_indel']][['clin_eitem']][[n]]) > 0){
-    cpsr_biomarker_eitems <- cpsr_biomarker_eitems %>%
+    cpsr_biomarker_eitems <- cpsr_biomarker_eitems |>
       dplyr::bind_rows(
         cpsr_rep[['content']][['snv_indel']][['clin_eitem']][[n]]
-      ) %>%
+      ) |>
       dplyr::select(SYMBOL, GENE_NAME, CANCER_TYPE, EVIDENCE_TYPE,
                     EVIDENCE_LEVEL, dplyr::everything())
   }
 }
 
-n_biomarkers <- cpsr_biomarker_eitems %>% NROW()
+n_biomarkers <- cpsr_biomarker_eitems |> NROW()
 
 cpsr_clinvar_variants <- data.frame()
 cpsr_other_variants <- data.frame()
 
 if(NROW(class543_germline_variants) > 0){
   
-  class543_germline_variants <- class543_germline_variants %>%
+  class543_germline_variants <- class543_germline_variants |>
     dplyr::mutate(GENOTYPE = as.character(GENOTYPE))
   
-  cpsr_clinvar_variants <- class543_germline_variants %>%
+  cpsr_clinvar_variants <- class543_germline_variants |>
     dplyr::filter(CPSR_CLASSIFICATION_SOURCE == "ClinVar")
   
   if(NROW(cpsr_clinvar_variants) > 0){
-    cpsr_clinvar_variants <- cpsr_clinvar_variants %>%
+    cpsr_clinvar_variants <- cpsr_clinvar_variants |>
       dplyr::select(-c(CPSR_CLASSIFICATION, CPSR_PATHOGENICITY_SCORE,
-                       CPSR_CLASSIFICATION_DOC, CPSR_CLASSIFICATION_CODE)) %>%
+                       CPSR_CLASSIFICATION_DOC, CPSR_CLASSIFICATION_CODE)) |>
     dplyr::select(SYMBOL, CLINVAR_CLASSIFICATION,
                   dplyr::everything())
   }
   
     
-  cpsr_other_variants <- class543_germline_variants %>%
+  cpsr_other_variants <- class543_germline_variants |>
     dplyr::filter(CPSR_CLASSIFICATION_SOURCE == "Other")
   
   if(NROW(cpsr_other_variants) > 0){
-    cpsr_other_variants <- cpsr_other_variants %>%
+    cpsr_other_variants <- cpsr_other_variants |>
       dplyr::select(-c(CLINVAR, 
                        CLINVAR_REVIEW_STATUS_STARS, 
                        CLINVAR_VARIANT_ORIGIN, 
                        CLINVAR_CLASSIFICATION, 
                        CLINVAR_CONFLICTED, 
-                       CLINVAR_PHENOTYPE)) %>%
+                       CLINVAR_PHENOTYPE)) |>
       dplyr::select(SYMBOL, CPSR_CLASSIFICATION,
                     dplyr::everything())
   }
@@ -83,28 +83,28 @@ formula_gnomad <- as.formula(paste0("~",rlang::sym(tag_gnomad)))
 
 
 if(NROW(cpsr_rep$content$snv_indel$variant_set$class5) > 0){
-  n_pathogenic <- cpsr_rep$content$snv_indel$variant_set$class5 %>%
+  n_pathogenic <- cpsr_rep$content$snv_indel$variant_set$class5 |>
     dplyr::filter(
       (!is.na(CPSR_CLASSIFICATION) & CPSR_CLASSIFICATION == "Pathogenic") |
-        (!is.na(CLINVAR_CLASSIFICATION) & CLINVAR_CLASSIFICATION == "Pathogenic")) %>%
+        (!is.na(CLINVAR_CLASSIFICATION) & CLINVAR_CLASSIFICATION == "Pathogenic")) |>
     NROW()
     
 }
 
 if(NROW(cpsr_rep$content$snv_indel$variant_set$class4) > 0){
-  n_likely_pathogenic <- cpsr_rep$content$snv_indel$variant_set$class4 %>%
+  n_likely_pathogenic <- cpsr_rep$content$snv_indel$variant_set$class4 |>
     dplyr::filter(
       (!is.na(CPSR_CLASSIFICATION) & CPSR_CLASSIFICATION == "Likely_Pathogenic") |
-        (!is.na(CLINVAR_CLASSIFICATION) & CLINVAR_CLASSIFICATION == "Likely_Pathogenic")) %>%
+        (!is.na(CLINVAR_CLASSIFICATION) & CLINVAR_CLASSIFICATION == "Likely_Pathogenic")) |>
     NROW()
     
 }
 
 if(NROW(cpsr_rep$content$snv_indel$variant_set$class3) > 0){
-  n_vus <- cpsr_rep$content$snv_indel$variant_set$class3 %>%
+  n_vus <- cpsr_rep$content$snv_indel$variant_set$class3 |>
     dplyr::filter(
       (!is.na(CPSR_CLASSIFICATION) & CPSR_CLASSIFICATION == "VUS") |
-        (!is.na(CLINVAR_CLASSIFICATION) & CLINVAR_CLASSIFICATION == "VUS")) %>%
+        (!is.na(CLINVAR_CLASSIFICATION) & CLINVAR_CLASSIFICATION == "VUS")) |>
     NROW()
     
 }
@@ -238,7 +238,7 @@ DT::datatable(
     #fixedHeader = T,
     #scrollX = "900px"
   )
-) %>%
+) |>
   DT::formatStyle(
     columns = c("SYMBOL"),
     valueColumns = c("CLINVAR_CLASSIFICATION"),
@@ -313,7 +313,7 @@ DT::datatable(
     #fixedHeader = T,
     #scrollX = "900px"
   )
-) %>%
+) |>
   DT::formatStyle(
     columns = c("SYMBOL"),
     valueColumns = c("CPSR_CLASSIFICATION"),
@@ -362,7 +362,7 @@ DT::datatable(
          scrollY="100vh", 
           scrollCollapse = FALSE,
          dom = 'Bfrtip')
-  ) %>%
+  ) |>
   DT::formatStyle(
     'EVIDENCE_LEVEL', 
     backgroundColor = DT::styleEqual(
@@ -376,7 +376,7 @@ DT::datatable(
         'E: Indirect evidence'), 
       c("#009E73","#009E73","#56B4E9", 
         "#56B4E9","#56B4E9","#0072B2",
-        "#E69F00", "#F0E442"))) %>%
+        "#E69F00", "#F0E442"))) |>
   DT::formatStyle(
     color="white", "SYMBOL", 
     "BIOMARKER_MAPPING", 

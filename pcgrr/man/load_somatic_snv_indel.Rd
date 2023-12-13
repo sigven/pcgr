@@ -5,12 +5,14 @@
 \title{Function that reads and validates an annotated somatic SNV/InDel
 file from PCGR pre-reporting pipeline}
 \usage{
-load_somatic_snv_indel(fname, ref_data = NULL)
+load_somatic_snv_indel(fname = NA, ref_data = NULL, settings = NULL)
 }
 \arguments{
 \item{fname}{Path to file name}
 
 \item{ref_data}{Object with reference data}
+
+\item{settings}{Object with PCGR report configuration}
 }
 \description{
 Function that reads and validates an annotated somatic SNV/InDel

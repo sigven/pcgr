@@ -44,7 +44,7 @@ htmltools::br()
 htmltools::br()
 
   DT::datatable(variants_tsgene_shared, escape=F,extensions=c("Buttons","Responsive"), 
-                options = list(buttons = c('csv','excel'), scrollCollapse = T, dom = 'Bfrtip')) %>%
+                options = list(buttons = c('csv','excel'), scrollCollapse = T, dom = 'Bfrtip')) |>
   DT::formatStyle("SYMBOL","OPENTARGETS_RANK", color = "white", backgroundColor = DT::styleInterval(pcg_report[['content']][['report_display_config']][['opentargets_rank']][['breaks']], pcg_report[['content']][['report_display_config']][['opentargets_rank']][['colors']]))
 
 
@@ -83,7 +83,7 @@ htmltools::br()
 htmltools::br()
 
 DT::datatable(variants_oncogene_shared, escape=F,extensions=c("Buttons","Responsive"),
-              options=list(buttons = c('csv','excel'), scrollCollapse=T, dom = 'Bfrtip')) %>%
+              options=list(buttons = c('csv','excel'), scrollCollapse=T, dom = 'Bfrtip')) |>
   DT::formatStyle("SYMBOL","OPENTARGETS_RANK", color = "white", backgroundColor = DT::styleInterval(pcg_report[['content']][['report_display_config']][['opentargets_rank']][['breaks']], pcg_report[['content']][['report_display_config']][['opentargets_rank']][['colors']]))
 
 

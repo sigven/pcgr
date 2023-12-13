@@ -61,7 +61,7 @@ crosstalk::bscols(
 
 htmltools::br()
   DT::datatable(cna_segments_sd, extensions=c("Buttons","Responsive"),escape = F, 
-                options = myOptions) %>%
+                options = myOptions) |>
   DT::formatStyle('LOG_R',color='white', fontWeight = 'bold', `text-align` = 'center',
                   backgroundColor = DT::styleInterval(pcg_report[['metadata']][['config']][['cna']][['log_r_homdel']], 
                                                                              c('#CD534C', '#00a65a')))

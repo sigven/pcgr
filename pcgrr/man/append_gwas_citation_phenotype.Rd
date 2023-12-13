@@ -4,18 +4,12 @@
 \alias{append_gwas_citation_phenotype}
 \title{Function that adds GWAS citation/phenotype to GWAS hit found through PCGR annotation}
 \usage{
-append_gwas_citation_phenotype(
-  vcf_data_df = NULL,
-  gwas_citations_phenotypes = NULL,
-  p_value_threshold = 1e-06
-)
+append_gwas_citation_phenotype(vcf_data_df = NULL, ref_data = NULL)
 }
 \arguments{
 \item{vcf_data_df}{Data frame of sample variants from VCF}
 
-\item{gwas_citations_phenotypes}{data frame with variant-phenotype associations (including citations) from GWAS}
-
-\item{p_value_threshold}{Required p-value to report associations from GWAS catalog}
+\item{ref_data}{PCGR/CPSR reference data object}
 }
 \value{
 vcf_data_df

@@ -14,8 +14,8 @@ flexdashboard::valueBox("TIER 1", caption = NULL, color = '#000000', icon = NULL
 
 ```{r}
 
-tier1_evidence_items <- pcg_report$content$snv_indel$clin_eitem$specific_ttype$diagnostic$A_B %>%
-     dplyr::bind_rows(pcg_report$content$snv_indel$clin_eitem$specific_ttype$prognostic$A_B) %>%
+tier1_evidence_items <- pcg_report$content$snv_indel$clin_eitem$specific_ttype$diagnostic$A_B |>
+     dplyr::bind_rows(pcg_report$content$snv_indel$clin_eitem$specific_ttype$prognostic$A_B) |>
      dplyr::bind_rows(pcg_report$content$snv_indel$clin_eitem$specific_ttype$predictive$A_B)
 
 flexdashboard::valueBox(length(unique(tier1_evidence_items$SYMBOL)), 
@@ -120,7 +120,7 @@ cat('\n')
 
 ```{r table_tier1, eval = pcg_report$content$snv_indel$v_stat$n_tier1 > 0}
 
-variants_tier1_shared %>%
+variants_tier1_shared |>
   DT::datatable(escape = F, 
                extensions = c("Buttons","Responsive"), 
                 options = list(pageLength = 8, 
@@ -132,7 +132,7 @@ variants_tier1_shared %>%
                  width = "100%",
                  scrollX = "900px",
                   columnDefs = list(list(width = '90px', targets = c(1,2,3,4,5,6))),
-                               dom = 'Bfrtip')) %>%
+                               dom = 'Bfrtip')) |>
   DT::formatStyle('EVIDENCE_LEVEL', 
                  backgroundColor = DT::styleEqual(c('A: Validated',
                                                     'A: FDA/NCCN/ELN guidelines',
@@ -142,7 +142,7 @@ variants_tier1_shared %>%
                                                     'C: Case study',
                                                     'D: Preclinical evidence',
                                                     'E: Indirect evidence'), 
-                                                  c("#009E73","#009E73","#56B4E9", "#56B4E9","#56B4E9","#0072B2","#E69F00", "#F0E442"))) %>%
+                                                  c("#009E73","#009E73","#56B4E9", "#56B4E9","#56B4E9","#0072B2","#E69F00", "#F0E442"))) |>
   DT::formatStyle(color="white", "SYMBOL", "BIOMARKER_MAPPING", fontWeight = 'bold', `text-align` = 'center',
                   backgroundColor = DT::styleEqual(c('exact','codon','exon','gene'), 
                                                    c('#000','#000',pcg_report[['metadata']][['color_palette']][['warning']][['values']][1], pcg_report[['metadata']][['color_palette']][['warning']][['values']][1])))

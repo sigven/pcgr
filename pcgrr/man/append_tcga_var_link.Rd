@@ -10,8 +10,6 @@ append_tcga_var_link(var_df, linktype = "dbsource")
 \item{var_df}{data frame with variants}
 
 \item{linktype}{type of link}
-
-\item{pcgr_data}{PCGR data structure}
 }
 \value{
 var_df

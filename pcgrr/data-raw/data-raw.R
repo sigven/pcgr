@@ -1,41 +1,3 @@
-#---- cpsr_acmg ----#
-cpsr_acmg <- list()
-cpsr_acmg[["score2tier"]] <- data.frame()
-cpsr_acmg[["evidence_codes"]] <-
-  utils::read.table(file = "data-raw/acmg_evidence.tsv",
-             header = T, stringsAsFactors = F,
-             comment.char = "", na.strings = c("NA"),
-             sep = "\t")
-cpsr_acmg[["pathogenic_range_gnomad"]] <- list()
-cpsr_acmg[["pathogenic_range_gnomad"]][["af"]] <- 0.0005
-cpsr_acmg[["pathogenic_range_gnomad"]][["min_an"]] <- 12000
-cpsr_acmg[["insilico_pred_min_majority"]] <- 8
-cpsr_acmg[["insilico_pred_max_minority"]] <- 2
-
-cpsr_acmg[["score2tier"]] <-
-  data.frame("CPSR_CLASSIFICATION" = "Pathogenic",
-             "CPSR_PATHOGENICITY_SCORE" = "<b>[5, ]</b>")
-cpsr_acmg[["score2tier"]] <-
-  dplyr::bind_rows(
-    cpsr_acmg[["score2tier"]],
-    data.frame("CPSR_CLASSIFICATION" = "Likely Pathogenic",
-               "CPSR_PATHOGENICITY_SCORE" = "<b>[2.5, 4.5]</b>"))
-cpsr_acmg[["score2tier"]] <-
-  dplyr::bind_rows(
-    cpsr_acmg[["score2tier"]],
-    data.frame("CPSR_CLASSIFICATION" = "VUS",
-               "CPSR_PATHOGENICITY_SCORE" = "<b>[-1.0, 2.0]</b>"))
-cpsr_acmg[["score2tier"]] <-
-  dplyr::bind_rows(
-    cpsr_acmg[["score2tier"]],
-    data.frame("CPSR_CLASSIFICATION" = "Likely Benign",
-               "CPSR_PATHOGENICITY_SCORE" = "<b>[-4.5, -1.5]</b>"))
-cpsr_acmg[["score2tier"]] <-
-  dplyr::bind_rows(
-    cpsr_acmg[["score2tier"]],
-    data.frame("CPSR_CLASSIFICATION" = "Benign",
-               "CPSR_PATHOGENICITY_SCORE" = "<b>[, -5]</b>"))
-
 #---- color_palette ----#
 color_palette <- list()
 for (c in c("pathogenicity", "clinical_evidence", "tier",
@@ -46,7 +8,8 @@ for (c in c("pathogenicity", "clinical_evidence", "tier",
 
   if (c == "pathogenicity") {
     color_palette[[c]][["levels"]] <-
-      c("Pathogenic", "Likely_Pathogenic", "VUS", "Likely_Benign", "Benign")
+      c("Pathogenic", "Likely_Pathogenic",
+        "VUS", "Likely_Benign", "Benign")
     color_palette[[c]][["values"]] <-
       c("#9E0142", "#D53E4F", "#000000", "#78C679", "#077009")
   }
@@ -97,7 +60,15 @@ for (c in c("pathogenicity", "clinical_evidence", "tier",
 }
 
 usethis::use_data(color_palette, overwrite = T)
-usethis::use_data(cpsr_acmg, overwrite = T)
+
+#-----evidence types---------#
+evidence_types <- c("predictive","prognostic","diagnostic",
+                    "oncogenic","predisposing","functional")
+usethis::use_data(evidence_types)
+
+#-----evidence levels---------#
+evidence_levels <- c("any","A_B","C_D_E")
+usethis::use_data(evidence_levels)
 
 
 #-----input column names/types-----#
@@ -130,7 +101,8 @@ data_coltype_defs[['cna_somatic_raw']] <- readr::cols_only(
   ONCOGENE_RANK	= readr::col_logical(),
   SEGMENT_LENGTH_MB = readr::col_number(),
   BIOMARKER_MATCH = readr::col_character(),
-  SEGMENT_LINK = readr::col_character())
+  SEGMENT_LINK = readr::col_character(),
+  SAMPLE_ID = readr::col_character())
 
 data_coltype_defs[['snv_indel_somatic_raw']] <- readr::cols_only(
   CHROM = readr::col_character(),
@@ -154,7 +126,10 @@ data_coltype_defs[['snv_indel_somatic_raw']] <- readr::cols_only(
   EXONIC_STATUS = readr::col_character(),
   PROTEIN_CHANGE = readr::col_character(),
   HGVSp_short = readr::col_character(),
+  HGVSc = readr::col_character(),
+  HGVSp = readr::col_character(),
   CDS_CHANGE = readr::col_character(),
+  EXON = readr::col_character(),
   EXON_AFFECTED = readr::col_character(),
   MUTATION_HOTSPOT = readr::col_character(),
   MUTATION_HOTSPOT_CANCERTYPE = readr::col_character(),
@@ -222,7 +197,9 @@ data_coltype_defs[['snv_indel_somatic_raw']] <- readr::cols_only(
   gnomAD_NFE_AF = readr::col_number(),
   gnomAD_SAS_AF = readr::col_number(),
   EFFECT_PREDICTIONS = readr::col_character(),
-  VCF_SAMPLE_ID = readr::col_character()
+  SAMPLE_ID = readr::col_character(),
+  VCF_SAMPLE_ID = readr::col_character(),
+  GENOME_VERSION = readr::col_character()
 )
 
 data_coltype_defs[['snv_indel_germline_raw']] <- readr::cols_only(
@@ -231,6 +208,7 @@ data_coltype_defs[['snv_indel_germline_raw']] <- readr::cols_only(
   REF = readr::col_character(),
   ALT = readr::col_character(),
   GENOMIC_CHANGE = readr::col_character(),
+  GENOTYPE = readr::col_character(),
   VAR_ID = readr::col_character(),
   VARIANT_CLASS = readr::col_character(),
   CONSEQUENCE = readr::col_character(),
@@ -242,16 +220,20 @@ data_coltype_defs[['snv_indel_germline_raw']] <- readr::cols_only(
   EXONIC_STATUS = readr::col_character(),
   PROTEIN_CHANGE = readr::col_character(),
   HGVSp_short = readr::col_character(),
+  HGVSc = readr::col_character(),
+  HGVSp = readr::col_character(),
   CDS_CHANGE = readr::col_character(),
+  EXON = readr::col_character(),
   EXON_AFFECTED = readr::col_character(),
-  LAST_INTRON = readr::col_logical(),
-  INTRON_POSITION = readr::col_integer(),
   EXON_POSITION = readr::col_integer(),
   LAST_EXON = readr::col_logical(),
+  LAST_INTRON = readr::col_logical(),
+  INTRON_POSITION = readr::col_integer(),
   MUTATION_HOTSPOT = readr::col_character(),
   MUTATION_HOTSPOT_CANCERTYPE = readr::col_character(),
   MUTATION_HOTSPOT_MATCH = readr::col_character(),
   BIOMARKER_MATCH = readr::col_character(),
+  GWAS_HIT = readr::col_character(),
   PFAM_DOMAIN = readr::col_character(),
   PFAM_DOMAIN_NAME = readr::col_character(),
   SYMBOL = readr::col_character(),
@@ -281,6 +263,8 @@ data_coltype_defs[['snv_indel_germline_raw']] <- readr::cols_only(
   CGC_SOMATIC = readr::col_logical(),
   CGC_GERMLINE = readr::col_logical(),
   CGC_TIER = readr::col_character(),
+  CPG_SOURCE = readr::col_character(),
+  GERP_SCORE = readr::col_number(),
   CLINVAR_TRAITS_ALL = readr::col_character(),
   CLINVAR_MSID = readr::col_character(),
   CLINVAR_CLNSIG = readr::col_character(),
@@ -289,6 +273,7 @@ data_coltype_defs[['snv_indel_germline_raw']] <- readr::cols_only(
   CLINVAR_CONFLICTED = readr::col_logical(),
   CLINVAR_REVIEW_STATUS_STARS = readr::col_integer(),
   CLINVAR_NUM_SUBMITTERS = readr::col_integer(),
+  CLINVAR_VARIANT_ORIGIN = readr::col_character(),
   PANEL_OF_NORMALS = readr::col_logical(),
   DBSNPRSID = readr::col_character(),
   COSMIC_MUTATION_ID = readr::col_character(),
@@ -361,39 +346,13 @@ data_coltype_defs[['snv_indel_germline_raw']] <- readr::cols_only(
   gnomADe_non_cancer_EAS_AF = readr::col_number(),
   DBMTS = readr::col_character(),
   EFFECT_PREDICTIONS = readr::col_character(),
-  VCF_SAMPLE_ID = readr::col_character()
+  SAMPLE_ID = readr::col_character(),
+  VCF_SAMPLE_ID = readr::col_character(),
+  GENOME_VERSION = readr::col_character()
 )
 
 
 usethis::use_data(data_coltype_defs, overwrite = T)
-
-#---- (hetero/homo)zygous_states ----#
-heterozygous_states <- c()
-ref_allele_index <- 0
-while (ref_allele_index < 20) {
-  alt_allele_index <- ref_allele_index + 1
-  while (alt_allele_index <= 20) {
-    phased_gt_1 <- paste0(ref_allele_index, "|", alt_allele_index)
-    phased_gt_2 <- paste0(alt_allele_index, "|", ref_allele_index)
-    unphased_gt_1 <- paste0(ref_allele_index, "/", alt_allele_index)
-    unphased_gt_2 <- paste0(alt_allele_index, "/", ref_allele_index)
-    heterozygous_states <- c(heterozygous_states, phased_gt_1,
-                             phased_gt_2, unphased_gt_1, unphased_gt_2)
-    alt_allele_index <- alt_allele_index + 1
-  }
-  ref_allele_index <- ref_allele_index + 1
-}
-homozygous_states <- c()
-hom_allele_index <- 1
-while (hom_allele_index <= 10) {
-  phased_gt <- paste0(hom_allele_index, "|", hom_allele_index)
-  unphased_gt <- paste0(hom_allele_index, "/", hom_allele_index)
-  homozygous_states <- c(homozygous_states, phased_gt, unphased_gt)
-  hom_allele_index <- hom_allele_index + 1
-}
-
-usethis::use_data(heterozygous_states, overwrite = T)
-usethis::use_data(homozygous_states, overwrite = T)
 
 #---- variant_db_url ----#
 variant_db_url <-
@@ -482,18 +441,8 @@ rm(cancer_phenotypes_regex,
    data_coltype_defs,
    effect_prediction_algos,
    tcga_cohorts,
+   evidence_types,
+   evidence_levels,
    variant_db_url,
-   phased_gt,
-   phased_gt_1,
-   phased_gt_2,
-   unphased_gt,
-   unphased_gt_1,
-   unphased_gt_2,
-   ref_allele_index,
-   homozygous_states,
-   heterozygous_states,
-   alt_allele_index,
-   hom_allele_index,
    color_palette,
-   cpsr_acmg,
    c)

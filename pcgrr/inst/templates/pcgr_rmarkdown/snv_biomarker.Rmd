@@ -2,28 +2,28 @@
 
 ```{r prepare_bm_data, eval = T}
 
-all_evidence_items <- pcg_report$content$snv_indel$clin_eitem$any_ttype$diagnostic$any %>%
-     dplyr::bind_rows(pcg_report$content$snv_indel$clin_eitem$any_ttype$prognostic$any) %>%
+all_evidence_items <- pcg_report$content$snv_indel$clin_eitem$any_ttype$diagnostic$any |>
+     dplyr::bind_rows(pcg_report$content$snv_indel$clin_eitem$any_ttype$prognostic$any) |>
      dplyr::bind_rows(pcg_report$content$snv_indel$clin_eitem$any_ttype$predictive$any)
 
 n_all <- NROW(all_evidence_items)
 
 n_entries_diagnostic <- 0
 if(NROW(all_evidence_items) > 0){
-  n_entries_diagnostic <- all_evidence_items %>%
-    dplyr::filter(EVIDENCE_TYPE == "Diagnostic") %>%
+  n_entries_diagnostic <- all_evidence_items |>
+    dplyr::filter(EVIDENCE_TYPE == "Diagnostic") |>
     nrow()
 }
 n_entries_prognostic <- 0
 if(NROW(all_evidence_items) > 0){
-  n_entries_prognostic <- all_evidence_items %>%
-    dplyr::filter(EVIDENCE_TYPE == "Prognostic") %>%
+  n_entries_prognostic <- all_evidence_items |>
+    dplyr::filter(EVIDENCE_TYPE == "Prognostic") |>
     nrow()
 }
 n_entries_predictive <- 0
 if(NROW(all_evidence_items) > 0){
-  n_entries_predictive <- all_evidence_items %>%
-    dplyr::filter(EVIDENCE_TYPE == "Predictive") %>%
+  n_entries_predictive <- all_evidence_items |>
+    dplyr::filter(EVIDENCE_TYPE == "Predictive") |>
     nrow()
 }
 
@@ -83,22 +83,25 @@ cat('\n')
 
 ```{r biomarker_table_all, eval = n_all > 0}
 
-variants_all_shared %>%
+variants_all_shared |>
   DT::datatable(escape = F, 
                 extensions = c("Buttons","Responsive"), 
                 options = list(pageLength = 8, 
                                buttons = c('csv','excel'), 
-                               dom = 'Bfrtip')) %>%
+                               dom = 'Bfrtip')) |>
   DT::formatStyle('EVIDENCE_LEVEL', 
-                 backgroundColor = DT::styleEqual(c('A: Validated',
-                                                    'A: FDA/NCCN/ELN guidelines',
-                                                    'B: Clinical evidence',
-                                                    'B1: Clinical evidence: late trials',
-                                                    'B2: Clinical evidence: early trials',
-                                                    'C: Case study',
-                                                    'D: Preclinical evidence',
-                                                    'E: Indirect evidence'), 
-                                                  c("#009E73","#009E73","#56B4E9", "#56B4E9","#56B4E9","#0072B2","#E69F00", "#F0E442"))) %>%
+                  backgroundColor = DT::styleEqual(
+                    c('A: Validated',
+                      'A: FDA/NCCN/ELN guidelines',
+                      'B: Clinical evidence',
+                      'B1: Clinical evidence: late trials',
+                      'B2: Clinical evidence: early trials',
+                      'C: Case study',
+                      'D: Preclinical evidence',
+                      'E: Indirect evidence'), 
+                    c("#009E73","#009E73","#56B4E9", 
+                      "#56B4E9","#56B4E9","#0072B2",
+                      "#E69F00", "#F0E442"))) |>
   DT::formatStyle(color="white", "SYMBOL", "BIOMARKER_MAPPING", fontWeight = 'bold', `text-align` = 'center',
                   backgroundColor = DT::styleEqual(c('exact','codon','exon','gene'), 
                                                    c('#000','#000',pcg_report[['metadata']][['color_palette']][['warning']][['values']][1], pcg_report[['metadata']][['color_palette']][['warning']][['values']][1])))

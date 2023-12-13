@@ -4,27 +4,13 @@
 \alias{init_report}
 \title{Function that initiates PCGR/CPSR report object}
 \usage{
-init_report(
-  config = NULL,
-  class = NULL,
-  pcgr_data = NULL,
-  type = "somatic",
-  virtual_panel_id = "-1",
-  custom_bed = NULL
-)
+init_report(yaml_fname = NULL, report_mode = "PCGR")
 }
 \arguments{
-\item{config}{Object with configuration parameters}
+\item{yaml_fname}{Yaml file with configuration settings and paths
+to annotated molecular datasets}
 
-\item{class}{report analysis section (NULL defaults to full report)}
-
-\item{pcgr_data}{PCGR data bundle}
-
-\item{type}{Type of report ('somatic' or 'germline')}
-
-\item{virtual_panel_id}{identifier(s) for virtual panel id}
-
-\item{custom_bed}{custom BED file with target loci for screening}
+\item{report_mode}{Type of report ('PCGR' or 'CPSR')}
 }
 \description{
 Function that initiates PCGR/CPSR report object

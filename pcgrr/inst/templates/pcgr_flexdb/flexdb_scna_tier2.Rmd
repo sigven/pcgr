@@ -76,7 +76,7 @@ variants_tier2 <- dplyr::bind_rows(
   pcg_report[['content']][['cna']][['clin_eitem']][['other_ttype']][['prognostic']][['A_B']],
   pcg_report[['content']][['cna']][['clin_eitem']][['specific_ttype']][['diagnostic']][['C_D_E']],
   pcg_report[['content']][['cna']][['clin_eitem']][['specific_ttype']][['predictive']][['C_D_E']],
-  pcg_report[['content']][['cna']][['clin_eitem']][['specific_ttype']][['prognostic']][['C_D_E']]) %>%
+  pcg_report[['content']][['cna']][['clin_eitem']][['specific_ttype']][['prognostic']][['C_D_E']]) |>
   dplyr::arrange(EVIDENCE_LEVEL, RATING)
 
 
@@ -114,7 +114,7 @@ cat('\n')
 
 ```{r table_scna_tier2, eval = NROW(pcg_report$content$cna$disp$tier2) > 0}
 
-variants_tier2_shared %>%
+variants_tier2_shared |>
   DT::datatable(escape = F, 
                 extensions=c("Buttons","Responsive"), 
                 options=
@@ -127,7 +127,7 @@ variants_tier2_shared %>%
                        #fixedHeader = T,
                        scrollX = "900px",
                        #columnDefs = list(list(width = '90px', targets = c(1,2,3,4,5,6))),
-                       dom = 'Bfrtip')) %>%
+                       dom = 'Bfrtip')) |>
   DT::formatStyle('EVIDENCE_LEVEL', 
                  backgroundColor = DT::styleEqual(c('A: Validated','A: FDA/NCCN/ELN guidelines','B: Clinical evidence','B1: Clinical evidence: late trials','B2: Clinical evidence: early trials','C: Case study','D: Preclinical evidence','E: Indirect evidence'), c("#009E73","#009E73","#56B4E9", "#56B4E9","#56B4E9","#0072B2","#E69F00", "#F0E442")))
 

@@ -10,16 +10,16 @@ n_noncoding_indel <- 0
 n_noncoding_block <- 0
 
 if(NROW(pcg_report$content$snv_indel$variant_set$tsv) > 0){
-  n_noncoding_snv <- pcg_report$content$snv_indel$variant_set$tsv %>%
-    dplyr::filter(VARIANT_CLASS == "SNV" & TIER == "NONCODING") %>% 
+  n_noncoding_snv <- pcg_report$content$snv_indel$variant_set$tsv |>
+    dplyr::filter(VARIANT_CLASS == "SNV" & TIER == "NONCODING") |> 
     nrow()
-  n_noncoding_indel <- pcg_report$content$snv_indel$variant_set$tsv %>% 
+  n_noncoding_indel <- pcg_report$content$snv_indel$variant_set$tsv |> 
     dplyr::filter((VARIANT_CLASS == "insertion" | 
                      VARIANT_CLASS == "deletion" | 
-                     VARIANT_CLASS == "indel") & TIER == "NONCODING") %>%
+                     VARIANT_CLASS == "indel") & TIER == "NONCODING") |>
     nrow()
-  n_noncoding_block <-  pcg_report$content$snv_indel$variant_set$tsv %>% 
-    dplyr::filter(VARIANT_CLASS == "substitution" & TIER == "NONCODING") %>% 
+  n_noncoding_block <-  pcg_report$content$snv_indel$variant_set$tsv |> 
+    dplyr::filter(VARIANT_CLASS == "substitution" & TIER == "NONCODING") |> 
     nrow()
 }
 
@@ -110,7 +110,7 @@ options=list(buttons = c('csv','excel'),
                  fixedHeader = T,
                  scrollX = "900px",
                   columnDefs = list(list(width = '90px', targets = c(1,2,3,4,5,6))),
-             dom = 'Bfrtip')) %>%
+             dom = 'Bfrtip')) |>
   DT::formatStyle("SYMBOL","OPENTARGETS_RANK", color = "white", backgroundColor = DT::styleInterval(pcg_report[['content']][['report_display_config']][['opentargets_rank']][['breaks']], pcg_report[['content']][['report_display_config']][['opentargets_rank']][['colors']]))
   
 ```

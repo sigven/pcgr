@@ -30,10 +30,10 @@ assign_tier1_tier2_acmg <- function(pcg_report_snv_indel) {
     if (nrow(eitems_specific_ttype[[etype]][["A_B"]]) > 0) {
       vars <-
         dplyr::select(eitems_specific_ttype[[etype]][["A_B"]],
-                      .data$GENOMIC_CHANGE) %>%
+                      .data$GENOMIC_CHANGE) |>
         dplyr::distinct()
       unique_variants_tier1 <-
-        rbind(unique_variants_tier1, vars) %>%
+        rbind(unique_variants_tier1, vars) |>
         dplyr::distinct()
     }
   }
@@ -69,10 +69,10 @@ assign_tier1_tier2_acmg <- function(pcg_report_snv_indel) {
           }
         }
         if (nrow(eitems_other_ttype[[etype]][["A_B"]]) > 0) {
-          unique_variants_tier2 <- unique_variants_tier2 %>%
+          unique_variants_tier2 <- unique_variants_tier2 |>
             dplyr::bind_rows(
               dplyr::select(eitems_other_ttype[[etype]][["A_B"]],
-                            .data$GENOMIC_CHANGE)) %>%
+                            .data$GENOMIC_CHANGE)) |>
             dplyr::distinct()
         }
       }
@@ -90,10 +90,10 @@ assign_tier1_tier2_acmg <- function(pcg_report_snv_indel) {
         }
       }
       if (nrow(eitems_specific_ttype[[etype]][["C_D_E"]]) > 0) {
-        unique_variants_tier2 <- unique_variants_tier2 %>%
+        unique_variants_tier2 <- unique_variants_tier2 |>
           dplyr::bind_rows(
             dplyr::select(eitems_specific_ttype[[etype]][["C_D_E"]],
-                          .data$GENOMIC_CHANGE)) %>%
+                          .data$GENOMIC_CHANGE)) |>
           dplyr::distinct()
       }
     }
@@ -179,9 +179,9 @@ assign_tier1_tier2_acmg_cna <- function(pcg_report_cna) {
                                   only_colnames = F, quiet = T)
 
       vars <- dplyr::select(eitems_specific_ttype[[etype]][["A_B"]],
-                            .data$SYMBOL, .data$SEGMENT, .data$CNA_TYPE) %>%
+                            .data$SYMBOL, .data$SEGMENT, .data$CNA_TYPE) |>
         dplyr::distinct()
-      unique_variants_tier1 <- rbind(unique_variants_tier1, vars) %>%
+      unique_variants_tier1 <- rbind(unique_variants_tier1, vars) |>
         dplyr::distinct()
     }
   }
@@ -222,10 +222,10 @@ assign_tier1_tier2_acmg_cna <- function(pcg_report_cna) {
                                       c("SYMBOL", "SEGMENT", "CNA_TYPE"),
                                       only_colnames = F, quiet = T)
 
-          unique_variants_tier2 <- unique_variants_tier2 %>%
+          unique_variants_tier2 <- unique_variants_tier2 |>
             dplyr::bind_rows(
               dplyr::select(eitems_other_ttype[[etype]][["A_B"]],
-                            .data$SYMBOL, .data$SEGMENT, .data$CNA_TYPE)) %>%
+                            .data$SYMBOL, .data$SEGMENT, .data$CNA_TYPE)) |>
             dplyr::distinct()
         }
       }
@@ -249,10 +249,10 @@ assign_tier1_tier2_acmg_cna <- function(pcg_report_cna) {
                                     c("SYMBOL", "SEGMENT", "CNA_TYPE"),
                                     only_colnames = F, quiet = T)
 
-        unique_variants_tier2 <- unique_variants_tier2 %>%
+        unique_variants_tier2 <- unique_variants_tier2 |>
           dplyr::bind_rows(
             dplyr::select(eitems_specific_ttype[[etype]][["C_D_E"]],
-                          .data$SYMBOL, .data$SEGMENT, .data$CNA_TYPE)) %>%
+                          .data$SYMBOL, .data$SEGMENT, .data$CNA_TYPE)) |>
           dplyr::distinct()
       }
     }

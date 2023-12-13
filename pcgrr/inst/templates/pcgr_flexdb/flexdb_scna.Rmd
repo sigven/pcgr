@@ -115,7 +115,7 @@ DT::datatable(cna_segments_sd, extensions=c("Buttons","Responsive"),
                              #fixedHeader = T,
                              #scrollX = T,
                              columnDefs = list(list(width = '20%', targets = c(1,2,3,4,5))),
-                             dom = "Bfrtip")) %>%
+                             dom = "Bfrtip")) |>
 DT::formatStyle("LOG_R",color="white", `text-align` = 'center', fontWeight = "bold", backgroundColor = DT::styleInterval(pcg_report[["metadata"]][["config"]][["cna"]][["log_r_homdel"]], c("#CD534CFF", "#00a65a")))
 
 

@@ -7,17 +7,13 @@
 \usage{
 write_report_output(
   report,
-  config,
   tier_model = "pcgr_acmg",
   output_format = "html",
   flexdb = FALSE
 )
 }
 \arguments{
-\item{report}{List object with all report data (PCGR/CPSR)}
-
-\item{config}{Configuration object with all key configurations
-(directories, sample names, genome assembly etc)}
+\item{report}{List object with all report data (PCGR/CPSR), settings etc.}
 
 \item{tier_model}{type of tier model}
 

@@ -15,7 +15,7 @@ if(NROW(pcg_report[['content']][['snv_indel']][["disp"]][['noncoding']]) > 0){
       head(pcg_report[['content']][['snv_indel']][["disp"]][['noncoding']], 2000)
   }
   DT::datatable(pcg_report[['content']][['snv_indel']][["disp"]][['noncoding']], 
-                options = myOptions, escape=F, extensions = c("Buttons","Responsive")) %>%
+                options = myOptions, escape=F, extensions = c("Buttons","Responsive")) |>
   DT::formatStyle("SYMBOL","OPENTARGETS_RANK", color = "white", backgroundColor = DT::styleInterval(pcg_report[['content']][['report_display_config']][['opentargets_rank']][['breaks']], pcg_report[['content']][['report_display_config']][['opentargets_rank']][['colors']]))
 }
 

@@ -44,12 +44,12 @@ cat('\n')
 
 ```{r trials_table_all, eval = !pcg_report[['content']][['clinicaltrials']][['missing_data']]}
 
-trials_ttype %>%
+trials_ttype |>
   DT::datatable(escape = F, 
                 extensions = c("Buttons","Responsive"), 
                 options = list(pageLength = 10, 
                                buttons = c('csv','excel'), 
-                               dom = 'Bfrtip')) %>%
+                               dom = 'Bfrtip')) |>
   DT::formatStyle("OVERALL_STATUS",color="white", 
                   backgroundColor = DT::styleEqual(c('Recruiting',
                                                      'Not yet recruiting',

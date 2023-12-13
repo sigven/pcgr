@@ -8,20 +8,20 @@ Row
 
 ```{r}
 flexdashboard::valueBox("Clinical trials", caption = NULL, color = '#000000', icon = NULL)
-n_not_recruiting <- pcg_report[['content']][['clinicaltrials']][['trials']] %>% 
-  dplyr::filter(OVERALL_STATUS == "Not yet recruiting") %>% NROW()
+n_not_recruiting <- pcg_report[['content']][['clinicaltrials']][['trials']] |> 
+  dplyr::filter(OVERALL_STATUS == "Not yet recruiting") |> NROW()
 
-n_recruiting <- pcg_report[['content']][['clinicaltrials']][['trials']] %>% 
-  dplyr::filter(OVERALL_STATUS == "Recruiting") %>% NROW()
+n_recruiting <- pcg_report[['content']][['clinicaltrials']][['trials']] |> 
+  dplyr::filter(OVERALL_STATUS == "Recruiting") |> NROW()
 
-n_enrolling <- pcg_report[['content']][['clinicaltrials']][['trials']] %>% 
-  dplyr::filter(OVERALL_STATUS == "Enrolling by invitation") %>% NROW()
+n_enrolling <- pcg_report[['content']][['clinicaltrials']][['trials']] |> 
+  dplyr::filter(OVERALL_STATUS == "Enrolling by invitation") |> NROW()
 
-n_active <- pcg_report[['content']][['clinicaltrials']][['trials']] %>% 
-  dplyr::filter(OVERALL_STATUS == "Active, not recruiting") %>% NROW()
+n_active <- pcg_report[['content']][['clinicaltrials']][['trials']] |> 
+  dplyr::filter(OVERALL_STATUS == "Active, not recruiting") |> NROW()
 
-n_unknown <- pcg_report[['content']][['clinicaltrials']][['trials']] %>% 
-  dplyr::filter(OVERALL_STATUS == "Unknown status") %>% NROW()
+n_unknown <- pcg_report[['content']][['clinicaltrials']][['trials']] |> 
+  dplyr::filter(OVERALL_STATUS == "Unknown status") |> NROW()
 ``` 
 
 ### Not yet recruiting
@@ -143,7 +143,7 @@ if(NROW(trials_ttype) > 2000){
 }
 
 
-trials_ttype %>%
+trials_ttype |>
   DT::datatable(escape = F, 
                 width = "100%",
                 extensions = c("Buttons","Responsive"), 
@@ -155,7 +155,7 @@ trials_ttype %>%
                  scrollX = "900px",
                   columnDefs = list(list(width = '110px', targets = c(1,3,5)),
                                     list(width = '200px', targets = c(2,4))),
-                               dom = 'Bfrtip')) %>%
+                               dom = 'Bfrtip')) |>
   DT::formatStyle("OVERALL_STATUS",color="white", `text-align` = 'center', fontWeight = "bold",
                   backgroundColor = DT::styleEqual(c('Recruiting',
                                                      'Not yet recruiting',

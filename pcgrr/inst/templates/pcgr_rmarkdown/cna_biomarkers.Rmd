@@ -80,7 +80,7 @@ htmltools::br()
 htmltools::br()
 
 DT::datatable(cna_predictive_shared_strong, escape=F,extensions=c("Buttons","Responsive"),
-              options=list(buttons = c('csv','excel'), scrollCollapse=T, dom = 'Bfrtip')) %>%
+              options=list(buttons = c('csv','excel'), scrollCollapse=T, dom = 'Bfrtip')) |>
   DT::formatStyle('EVIDENCE_LEVEL', 
                   backgroundColor = DT::styleEqual(c('A: Validated','A: FDA/NCCN/ELN guidelines',
                                                      'B: Clinical evidence',
@@ -137,7 +137,7 @@ htmltools::br()
 htmltools::br()
 
 DT::datatable(cna_prognostic_shared_strong, escape=F,extensions=c("Buttons","Responsive"),
-              options=list(buttons = c('csv','excel'), scrollCollapse=T, dom = 'Bfrtip')) %>%
+              options=list(buttons = c('csv','excel'), scrollCollapse=T, dom = 'Bfrtip')) |>
   DT::formatStyle('EVIDENCE_LEVEL', 
                   backgroundColor = DT::styleEqual(c('A: Validated','A: FDA/NCCN/ELN guidelines',
                                                      'B: Clinical evidence',
@@ -196,7 +196,7 @@ htmltools::br()
 htmltools::br()
 
 DT::datatable(cna_diagnostic_shared_strong, escape=F,extensions=c("Buttons","Responsive"),
-              options=list(buttons = c('csv','excel'), scrollCollapse=T, dom = 'Bfrtip')) %>%
+              options=list(buttons = c('csv','excel'), scrollCollapse=T, dom = 'Bfrtip')) |>
   DT::formatStyle('EVIDENCE_LEVEL', 
                   backgroundColor = DT::styleEqual(c('A: Validated','A: FDA/NCCN/ELN guidelines',
                                                      'B: Clinical evidence',
@@ -257,7 +257,7 @@ htmltools::br()
 htmltools::br()
 
 DT::datatable(cna_predictive_shared, escape=F,extensions=c("Buttons","Responsive"),
-              options=list(buttons = c('csv','excel'), scrollCollapse = T, dom = 'Bfrtip')) %>%
+              options=list(buttons = c('csv','excel'), scrollCollapse = T, dom = 'Bfrtip')) |>
   DT::formatStyle('EVIDENCE_LEVEL', 
                   backgroundColor = DT::styleEqual(c('A: Validated','A: FDA/NCCN/ELN guidelines',
                                                      'B: Clinical evidence',
@@ -315,16 +315,17 @@ htmltools::br()
 htmltools::br()
 
 DT::datatable(cna_prognostic_shared, escape=F, extensions=c("Buttons","Responsive"),
-              options=list(buttons = c('csv','excel'), scrollCollapse=T, dom = 'Bfrtip')) %>%
+              options=list(buttons = c('csv','excel'), scrollCollapse=T, dom = 'Bfrtip')) |>
   DT::formatStyle('EVIDENCE_LEVEL', 
-                  backgroundColor = DT::styleEqual(c('A: Validated','A: FDA/NCCN/ELN guidelines',
-                                                     'B: Clinical evidence',
-                                                     'B1: Clinical evidence: late trials',
-                                                     'B2: Clinical evidence: early trials',
-                                                     'C: Case study',
-                                                     'D: Preclinical evidence',
-                                                     'E: Indirect evidence'), 
-                                                   c("#009E73","#009E73","#56B4E9", "#56B4E9","#56B4E9","#0072B2","#E69F00", "#F0E442")))
+                  backgroundColor = DT::styleEqual(
+                    c('A: Validated','A: FDA/NCCN/ELN guidelines',
+                      'B: Clinical evidence',
+                      'B1: Clinical evidence: late trials',
+                      'B2: Clinical evidence: early trials',
+                      'C: Case study',
+                      'D: Preclinical evidence',
+                      'E: Indirect evidence'), 
+                    c("#009E73","#009E73","#56B4E9", "#56B4E9","#56B4E9","#0072B2","#E69F00", "#F0E442")))
 
 
 
@@ -372,15 +373,17 @@ htmltools::br()
 htmltools::br()
 
 DT::datatable(cna_diagnostic_shared, escape=F,extensions=c("Buttons","Responsive"),
-              options=list(buttons = c('csv','excel'),  scrollCollapse=T, dom = 'Bfrtip')) %>%
+              options=list(buttons = c('csv','excel'),  scrollCollapse=T, dom = 'Bfrtip')) |>
   DT::formatStyle('EVIDENCE_LEVEL', 
-                  backgroundColor = DT::styleEqual(c('A: Validated','A: FDA/NCCN/ELN guidelines',
-                                                     'B: Clinical evidence',
-                                                     'B1: Clinical evidence: late trials',
-                                                     'B2: Clinical evidence: early trials',
-                                                     'C: Case study',
-                                                     'D: Preclinical evidence',
-                                                     'E: Indirect evidence'), 
+                  backgroundColor = DT::styleEqual(
+                    c('A: Validated',
+                      'A: FDA/NCCN/ELN guidelines',
+                      'B: Clinical evidence',
+                      'B1: Clinical evidence: late trials',
+                      'B2: Clinical evidence: early trials',
+                      'C: Case study',
+                      'D: Preclinical evidence',
+                      'E: Indirect evidence'), 
                                                    c("#009E73","#009E73","#56B4E9", "#56B4E9","#56B4E9","#0072B2","#E69F00", "#F0E442")))
 
 

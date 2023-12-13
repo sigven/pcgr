@@ -18,7 +18,7 @@ Below you can browse all the various phenotype terms that are associated with ea
 ```{r read_table, echo=FALSE, message=FALSE, warning=FALSE}
 tab <- system.file("extdata/oncotree_phenotypes.tsv.gz", package = "pcgrr")
 readr::read_tsv(tab, col_types = readr::cols(.default = "character")) |>
-  dplyr::arrange(primary_site) %>%
+  dplyr::arrange(primary_site) |>
   DT::datatable(filter = list(position = "top", clear = FALSE, plain = TRUE),
                 class = "cell-border display compact",
                 rownames = FALSE, extensions = c("Buttons", "KeyTable"),

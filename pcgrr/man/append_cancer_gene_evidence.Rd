@@ -4,12 +4,12 @@
 \alias{append_cancer_gene_evidence}
 \title{Function that appends cancer gene evidence links}
 \usage{
-append_cancer_gene_evidence(vcf_data_df = NULL, pcgr_data = NULL)
+append_cancer_gene_evidence(vcf_data_df = NULL, ref_data = NULL)
 }
 \arguments{
 \item{vcf_data_df}{Data frame of sample variants from VCF}
 
-\item{pcgr_data}{PCGR reference data bundle object}
+\item{ref_data}{PCGR reference data bundle object}
 }
 \value{
 vcf_data_df
