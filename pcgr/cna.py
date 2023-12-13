@@ -5,11 +5,12 @@ import csv
 import gzip
 import pybedtools
 import pandas as pd
+import logging
 
 from pcgr import utils
 from pybedtools import BedTool
 from pcgr.annoutils import nuclear_chromosomes
-from pcgr.utils import getlogger, error_message, warn_message, check_file_exists
+from pcgr.utils import error_message, warn_message, check_file_exists
 from pcgr.biomarker import load_biomarkers
 
 def annotate_cna_segments(output_fname: str, 
@@ -17,8 +18,10 @@ def annotate_cna_segments(output_fname: str,
                           cna_segment_file: str, 
                           pcgr_build_db_dir: str, 
                           build: str, 
+                          sample_id: str,
                           n_copy_amplifications: int = 5,
-                          overlap_fraction: float = 0.5):
+                          overlap_fraction: float = 0.5,
+                          logger: logging.Logger = None) -> int:
     """
     Annotate copy number aberrations in a given segment file.
     Args:
@@ -27,6 +30,7 @@ def annotate_cna_segments(output_fname: str,
         cna_segment_file (str): Path to the user-provided copy number aberrations segment file.
         pcgr_build_db_dir (str): Path to the build-specific PCGR database directory.
         build (str): Genome assembly build of input data.
+        sample_id( (str): Sample identifier
         output_dir (str): Directory to save the annotated file.
         n_copy_amplifications (int, optional): Number of copies to consider as gains/amplifications. Defaults to 5.
         overlap_fraction (float, optional): Fraction of overlap required for annotation. Defaults to 0.5.
@@ -34,7 +38,7 @@ def annotate_cna_segments(output_fname: str,
         int: 0 if successful.
     """
     
-    logger = getlogger("pcgr-annotate-cna-segments")
+    #logger = getlogger("pcgr-annotate-cna-segments")
     pybedtools.set_tempdir(output_dir)
     
     temp_files = []
@@ -101,14 +105,14 @@ def annotate_cna_segments(output_fname: str,
     temp_files.append(cna_query_segment_bed.fn)
     
     ## annotate segments with cytobands
-    cna_query_segment_df = annotate_cytoband(cna_query_segment_bed, output_dir, pcgr_build_db_dir)
+    cna_query_segment_df = annotate_cytoband(cna_query_segment_bed, output_dir, pcgr_build_db_dir, logger)
 
     ## annotate with protein-coding transcripts
     cna_query_segment_bed = pybedtools.BedTool.from_dataframe(cna_query_segment_df)
     temp_files.append(cna_query_segment_bed.fn)
     
     cna_query_segment_df = annotate_transcripts(
-       cna_query_segment_bed, output_dir, pcgr_build_db_dir, overlap_fraction=overlap_fraction)
+       cna_query_segment_bed, output_dir, pcgr_build_db_dir, overlap_fraction=overlap_fraction, logger=logger)
 
     cna_query_segment_df['segment_length_mb'] = \
         ((cna_query_segment_df['segment_end'] - cna_query_segment_df['segment_start']) / 1e6).astype(float).round(5)
@@ -154,9 +158,7 @@ def annotate_cna_segments(output_fname: str,
     ## Append actionability evidence to input amplifications (column 'biomarker_match')
     cna_query_segment_df = cna_query_segment_df.merge(
         cna_actionable_df, left_on=["aberration_key"], right_on=["aberration_key"], how="left")
-    cna_query_segment_df.drop('amp_cond', axis=1, inplace=True)
-    cna_query_segment_df.drop('loss_cond', axis=1, inplace=True)
-    cna_query_segment_df.drop('aberration_key', axis=1, inplace=True)
+    cna_query_segment_df.drop(['amp_cond', 'loss_cond', 'aberration_key'], axis=1, inplace=True)    
     cna_query_segment_df.loc[cna_query_segment_df['biomarker_match'].isnull(),"biomarker_match"] = '.'
     
     ## remove all temporary files
@@ -179,17 +181,15 @@ def annotate_cna_segments(output_fname: str,
             cna_query_segment_df['N_MAJOR'].astype(str), sep=":").str.cat(
                 cna_query_segment_df['N_MINOR'].astype(str), sep=":")
     
+    cna_query_segment_bed['SAMPLE_ID'] = sample_id
     cna_query_segment_df.to_csv(output_fname, sep="\t", header=True, index=False)
                 
     return 0
 
 
-def annotate_cytoband(cna_segments_bt: BedTool, output_dir: str, pcgr_build_db_dir: str) -> pd.DataFrame:
+def annotate_cytoband(cna_segments_bt: BedTool, output_dir: str, pcgr_build_db_dir: str, logger: logging.Logger) -> pd.DataFrame:
     
-    pybedtools.set_tempdir(output_dir)
-    
-    logger = getlogger("pcgr-annotate-cna-cytobands")
-    
+    pybedtools.set_tempdir(output_dir)    
     temp_files = []
     
     # BED file with cytoband annotations
@@ -198,7 +198,7 @@ def annotate_cytoband(cna_segments_bt: BedTool, output_dir: str, pcgr_build_db_d
     
     cytoband_annotated_segments = pd.DataFrame()
     
-    check_fname = check_file_exists(cytoband_bed_fname, logger)
+    check_file_exists(cytoband_bed_fname, logger)
     cytoband_bed = pybedtools.BedTool(cytoband_bed_fname)
         
     tmp = cna_segments_bt.intersect(cytoband_bed, loj=True)        
@@ -257,7 +257,8 @@ def annotate_cytoband(cna_segments_bt: BedTool, output_dir: str, pcgr_build_db_d
 
 
 def annotate_transcripts(cna_segments_bt: BedTool, output_dir: str,
-                         pcgr_build_db_dir: str, overlap_fraction: float) -> pd.DataFrame:
+                         pcgr_build_db_dir: str, overlap_fraction: float,
+                         logger: logging.Logger) -> pd.DataFrame:
     
     """
     Annotate the CNA segments with gene transcripts and return the annotated segments as a DataFrame.
@@ -274,9 +275,7 @@ def annotate_transcripts(cna_segments_bt: BedTool, output_dir: str,
     
     pybedtools.set_tempdir(output_dir)
     temp_files = []
-    
-    logger = getlogger("pcgr-annotate-cna-transcripts")
-    
+        
     # BED file with protein-coding transcripts
     gene_transcript_bed_fname = \
         os.path.join(pcgr_build_db_dir, 'gene','bed','gene_transcript_xref', 'gene_transcript_xref_pc_nopad.bed.gz')
@@ -351,13 +350,14 @@ def annotate_transcripts(cna_segments_bt: BedTool, output_dir: str,
                 cna_segments_annotated["entrezgene"] = cna_segments_annotated['entrezgene'].str.replace("\\.[0-9]{1,}$", "", regex = True)
                 cna_segments_annotated = cna_segments_annotated.fillna('.')
             else:
-                logger.error(f"Could not find {gene_xref_tsv_fname} needed for gene name annotation - exiting")
-            
-            
+                err_msg = f"Could not find {gene_xref_tsv_fname} needed for gene name annotation - exiting"
+                error_message(err_msg, logger)                
         else:
-            logger.error(f"{transcript_cna_annotations.fn} is empty or not found - exiting")
+            err_msg = f"{transcript_cna_annotations.fn} is empty or not found - exiting"
+            error_message(err_msg, logger)
     else:
-        logger.error(f"{gene_transcript_bed_fname} is empty or not found - exiting")
+        err_msg = f"{gene_transcript_bed_fname} is empty or not found - exiting"
+        error_message(err_msg, logger)
     
     ## remove all temporary files
     for fname in temp_files:

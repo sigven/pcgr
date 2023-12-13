@@ -170,16 +170,18 @@ def check_args(arg_dict):
         error_message(err_msg, logger)
 
     # VEP options
-    if int(arg_dict['vep_n_forks']) <= 0 or int(arg_dict['vep_n_forks']) > int(pcgr_vars.VEP_MAX_FORKS):
+    if int(arg_dict['vep_n_forks']) <= int(pcgr_vars.VEP_MIN_FORKS) or int(arg_dict['vep_n_forks']) > int(pcgr_vars.VEP_MAX_FORKS):
         err_msg = (
-            f"Number of forks that VEP can use during annotation must be above 0 and not more than {pcgr_vars.VEP_MAX_FORKS}",
-            f" (recommended is 4), current value is {arg_dict['vep_n_forks']}")
+            f"Number of forks that VEP can use during annotation must be above {str(pcgr_vars.VEP_MIN_FORKS)} and not "
+            f"more than {str(pcgr_vars.VEP_MAX_FORKS)} (recommended is 4), current value is {arg_dict['vep_n_forks']}"
+            )
         error_message(err_msg, logger)
 
-    if int(arg_dict['vep_buffer_size']) <= 0 or int(arg_dict['vep_buffer_size']) > int(pcgr_vars.VEP_MAX_BUFFER_SIZE):
+    if int(arg_dict['vep_buffer_size']) < int(pcgr_vars.VEP_MIN_BUFFER_SIZE) or int(arg_dict['vep_buffer_size']) > int(pcgr_vars.VEP_MAX_BUFFER_SIZE):
         err_msg = (
-            f"Internal VEP buffer size, corresponding to the number of variants that are read in to memory simultaneously ",
-            f"('--vep_buffer_size' = {arg_dict['vep_buffer_size']}),  must be within (0, {pcgr_vars.VEP_MAX_BUFFER_SIZE}]")
+            f"Internal VEP buffer size, corresponding to the number of variants that are read in to memory simultaneously "
+            f"('--vep_buffer_size' = {arg_dict['vep_buffer_size']}),  "
+            f"must be within [{str(pcgr_vars.VEP_MIN_BUFFER_SIZE)}, {str(pcgr_vars.VEP_MAX_BUFFER_SIZE)}]")
         error_message(err_msg, logger)
 
     # Check that VEP pick criteria is formatted correctly
@@ -243,7 +245,7 @@ def verify_input_files(arg_dict):
 
     # check if panel of normal VCF exist
     if not arg_dict["pon_vcf"] is None:
-        check_pon = check_file_exists(os.path.abspath(arg_dict["pon_vcf"]))
+        check_file_exists(os.path.abspath(arg_dict["pon_vcf"]), logger)
 
         if not (os.path.abspath(arg_dict["pon_vcf"]).endswith(".vcf.gz")):
             err_msg = "Panel of normals VCF file (" + os.path.abspath(
@@ -265,7 +267,7 @@ def verify_input_files(arg_dict):
 
     # check if input vcf exists
     if not arg_dict["input_vcf"] is None:
-        check_input_vcf = check_file_exists(os.path.abspath(arg_dict["input_vcf"]))
+        check_file_exists(os.path.abspath(arg_dict["input_vcf"]), logger)
 
         if not (os.path.abspath(arg_dict["input_vcf"]).endswith(".vcf") or os.path.abspath(arg_dict["input_vcf"]).endswith(".vcf.gz")):
             err_msg = f'VCF input file ({os.path.abspath(arg_dict["input_vcf"])}) does not have the correct file extension (.vcf or .vcf.gz)'
@@ -285,7 +287,7 @@ def verify_input_files(arg_dict):
 
     # check if input cna segments exist
     if not arg_dict["input_cna"] is None:
-        check_cna = check_file_exists(os.path.abspath(arg_dict["input_cna"]))
+        check_file_exists(os.path.abspath(arg_dict["input_cna"]), logger)
         
         if not (os.path.abspath(arg_dict["input_cna"]).endswith(".tsv") or os.path.abspath(arg_dict["input_cna"]).endswith(".txt")):
             err_msg = "CNA segment input file (" + os.path.abspath(
@@ -302,7 +304,7 @@ def verify_input_files(arg_dict):
 
     # check if input rna fusion variants exist
     if not arg_dict["input_rna_fusion"] is None:
-        check_rna_fusion = check_file_exists(os.path.abspath(arg_dict["input_rna_fusion"]))
+        check_file_exists(os.path.abspath(arg_dict["input_rna_fusion"]), logger)
        
         if not (os.path.abspath(arg_dict["input_rna_fusion"]).endswith(".tsv") or os.path.abspath(arg_dict["input_rna_fusion"]).endswith(".txt")):
             err_msg = "RNA fusion variants file (" + os.path.abspath(
@@ -315,7 +317,7 @@ def verify_input_files(arg_dict):
 
     # check if input rna expression exist
     if not arg_dict["input_rna_exp"] is None:
-        check_rna_exp = check_file_exists(os.path.abspath(arg_dict["input_rna_fusion"]))
+        check_file_exists(os.path.abspath(arg_dict["input_rna_fusion"]), logger)
        
         if not (os.path.abspath(arg_dict["input_rna_exp"]).endswith(".tsv") or os.path.abspath(arg_dict["input_rna_exp"]).endswith(".txt")):
             err_msg = "RNA gene expression file (" + os.path.abspath(
@@ -435,7 +437,9 @@ def check_args_cpsr(arg_dict):
     ### Optional arguments
     ## Provide virtual_panel_id or a custom list from panel 0
     if arg_dict['virtual_panel_id'] == "-1" and not arg_dict['custom_list']:
-        err_msg = 'Provide valid virtual panel identifier(s) through --panel_id (0 - 42) or provide custom list of panel 0 genes (single column text file) through --custom_list'
+        err_msg = (
+            f"Provide valid virtual panel identifier(s) through '--panel_id' or provide custom list of panel 0 "
+            f"genes (single column text file) through '--custom_list'")
         error_message(err_msg,logger)
     if arg_dict['custom_list'] and arg_dict['virtual_panel_id'] != "-1":
         err_msg =  "Option --panel_id cannot be used in conjunction with --custom_list"
@@ -443,8 +447,10 @@ def check_args_cpsr(arg_dict):
     if arg_dict['maf_upper_threshold'] <= 0 or arg_dict['maf_upper_threshold'] > 1:
         err_msg = f"MAF upper threshold must be greater than 0 and below 1, current value is {arg_dict['maf_upper_threshold']}"
         error_message(err_msg,logger)
-    if arg_dict['vcfanno_n_proc'] <= 0 or arg_dict['vcfanno_n_proc'] > 15:
-        err_msg = f"Number of processes that vcfanno can use during annotation must be above 0 and not more than 15, current value is {arg_dict['vcfanno_n_proc']}."
+    if arg_dict['vcfanno_n_proc'] < 1 or arg_dict['vcfanno_n_proc'] > int(pcgr_vars.VCFANNO_MAX_PROC):
+        err_msg = (
+            f"Number of processes that vcfanno can use during annotation must be above 0 and "
+            f"not more than {pcgr_vars.VCFANNO_MAX_PROC}, current value is {arg_dict['vcfanno_n_proc']}.")
         error_message(err_msg,logger)
 
     ## Check that panel identifier(s) are set appropriately
@@ -452,52 +458,68 @@ def check_args_cpsr(arg_dict):
         if not ',' in arg_dict['virtual_panel_id']:
             if str(arg_dict['virtual_panel_id']).isdigit():
                 panel_id = int(arg_dict['virtual_panel_id'])
-                if not (panel_id >= 0 and panel_id <= 42):
-                    err_msg = 'A single panel chosen with \'--panel_id\' must be in the range 0 - 42'
+                if not (panel_id >= 0 and panel_id <= len(pcgr_vars.GE_panels) - 1):
+                    err_msg = f"A single panel chosen with '--panel_id' must be in the range 0 - {len(pcgr_vars.GE_panels) - 1}"
                     error_message(err_msg, logger)
             else:
                 err_msg =  'A single panel chosen with \'--panel_id\' must be a proper integer - not \'' + str(arg_dict['virtual_panel_id']) + '\''
                 error_message(err_msg, logger)
         else:
             panels = str(arg_dict['virtual_panel_id']).split(',')
+            #if arg_dict['diagnostic_grade_only']:
+            #    err_msg = 'Option \'--diagnostic_grade_only\' applies ONLY to single panel identifiers from Genomics England PanelApp'
+            #    error_message(err_msg, logger)
             for p in panels:
                 if str(p).isdigit():
                     panel_id = int(p)
-                    if panel_id < 1 or panel_id > 42:
-                        err_msg =  'Multiple panels submitted as comma-separated string with \'--panel_id\' must take values in the range 1 - 42'
+                    if panel_id < 1 or panel_id > len(pcgr_vars.GE_panels) - 1:
+                        err_msg = (
+                            f'Multiple panels submitted as comma-separated string with \'--panel_id\' '
+                            f'must take values in the range 1 - {len(pcgr_vars.GE_panels) - 1}')
                         error_message(err_msg, logger)
                 else:
-                    err_msg =  f"Multiple panels submitted as comma-separated string with '--panel_id' must contain proper integer values only - \'{arg_dict['virtual_panel_id']}\' contains non-integer entries."
+                    err_msg =  (
+                        f"Multiple panels submitted as comma-separated string with '--panel_id' must contain "
+                        f"proper integer values only - \'{arg_dict['virtual_panel_id']}\' contains non-integer entries.")
                     error_message(err_msg, logger)
 
 
     if (arg_dict['custom_list'] or arg_dict['virtual_panel_id'] == "0" ) and arg_dict['diagnostic_grade_only']:
-        warn_msg = 'Option \'--diagnostic_grade_only\' applies ONLY to panel identifiers from Genomics England PanelApp - will be ignored'
+        warn_msg = 'Option \'--diagnostic_grade_only\' applies ONLY to panel identifiers from Genomics England PanelApp - fall back to default (False)'
         warn_message(warn_msg, logger)
+        arg_dict['diagnostic_grade_only'] = False
 
     ## VEP options
-    if arg_dict['vep_n_forks'] <= 0 or arg_dict['vep_n_forks'] > 8:
-        err_msg = f"Number of forks that VEP can use during annotation must be above 0 and not more than 8 (recommended is 4), current value is {arg_dict['vep_n_forks']}"
+    if arg_dict['vep_n_forks'] <= pcgr_vars.VEP_MIN_FORKS or arg_dict['vep_n_forks'] > pcgr_vars.VEP_MAX_FORKS:
+        err_msg = (
+            f"Number of forks that VEP can use during annotation must be above 0 and not more "
+            f"than {pcgr_vars.VEP_MAX_FORKS} (recommended is 4), current value is {arg_dict['vep_n_forks']}")
         error_message(err_msg,logger)
 
-    if arg_dict['vep_buffer_size'] <= 0 or arg_dict['vep_buffer_size'] > 30000:
-        err_msg = f"Internal VEP buffer size, corresponding to the number of variants that are read in to memory simultaneously, must be above 0 and not more than 30,000, current value is {arg_dict['vep_buffer_size']}"
+    if arg_dict['vep_buffer_size'] < pcgr_vars.VEP_MIN_BUFFER_SIZE or arg_dict['vep_buffer_size'] > pcgr_vars.VEP_MAX_BUFFER_SIZE:
+        err_msg = (
+            f"Internal VEP buffer size, corresponding to the number of variants that are read in to memory simultaneously, "
+            f"must be above {pcgr_vars.VEP_MIN_BUFFER_SIZE} and not more than {pcgr_vars.VEP_MAX_BUFFER_SIZE}, "
+            f"current value is {arg_dict['vep_buffer_size']}"
+        )
         error_message(err_msg,logger)
 
     ## Check that VEP pick criteria is formatted correctly
     if not arg_dict['vep_pick_order'] is None:
         values = str(arg_dict['vep_pick_order']).split(',')
-        permitted_sources = ['canonical','appris','tsl','biotype','ccds','rank','length','mane']
+        permitted_sources = pcgr_vars.VEP_PICK_CRITERIA
         num_permitted_sources = 0
         for v in values:
             if v in permitted_sources:
                 num_permitted_sources += 1
 
         if num_permitted_sources != 8:
-            err_msg = "Option 'vep_pick_order' = " + str(arg_dict['vep_pick_order']) + " is formatted incorrectly, should be " + \
-               "a comma-separated string of the following values: canonical,appris,tsl,biotype,ccds,rank,length,mane"
+            err_msg = (
+                f"Option '--vep_pick_order' = {str(arg_dict['vep_pick_order'])} is formatted incorrectly, should be " 
+                f"a comma-separated string of the following values: '{' '.join(pcgr_vars.VEP_PICK_CRITERIA)}'"
+            )
             error_message(err_msg, logger)
-    return
+    return(arg_dict)
 
 
 def verify_input_files_cpsr(arg_dict):
@@ -524,9 +546,7 @@ def verify_input_files_cpsr(arg_dict):
 
     ## check if input vcf exist
     if not arg_dict['input_vcf'] is None:
-        if not os.path.exists(os.path.abspath(arg_dict['input_vcf'])):
-            err_msg = f"Input file ({arg_dict['input_vcf']}) does not exist"
-            error_message(err_msg,logger)
+        check_file_exists(os.path.abspath(arg_dict['input_vcf']))        
 
         if not (os.path.abspath(arg_dict['input_vcf']).endswith('.vcf') or os.path.abspath(arg_dict['input_vcf']).endswith('.vcf.gz')):
             err_msg = f"VCF input file ({os.path.abspath(arg_dict['input_vcf'])}) does not have the correct file extension (.vcf or .vcf.gz)"
@@ -586,7 +606,9 @@ def verify_input_files_cpsr(arg_dict):
     f_rel_not.close()
 
     if compliant_data_bundle == 0:
-        err_msg = 'The PCGR data bundle is not compliant with the software version - please download the latest software and data bundle (see https://github.com/sigven/cpsr for instructions)'
+        err_msg = (
+            f'The PCGR data bundle is not compliant with the software version - please download the '
+            f'latest software and data bundle (see https://github.com/sigven/cpsr for instructions)')
         error_message(err_msg,logger)
 
     cpsr_paths = {

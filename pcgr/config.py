@@ -25,7 +25,7 @@ def create_config(arg_dict, workflow = "PCGR"):
             'vep_n_forks': int(arg_dict['vep_n_forks']),
             'vep_no_intergenic': int(arg_dict['vep_no_intergenic']),
             'vep_regulatory': 1,
-            'vep_gencode_all': int(arg_dict['vep_gencode_all'])            
+            'vep_gencode_basic': int(arg_dict['vep_gencode_basic'])            
         }
             
         conf_options['visual_reporting'] = {
@@ -37,7 +37,7 @@ def create_config(arg_dict, workflow = "PCGR"):
             'vcfanno_n_proc': int(arg_dict['vcfanno_n_proc']),                                          
             'no_reporting': int(arg_dict['no_reporting']),
             'retained_vcf_info_tags': str(arg_dict['retained_info_tags']),
-            'show_noncoding': int(arg_dict['show_noncoding']),
+            'show_noncoding': not int(arg_dict['ignore_noncoding']),
             'force_overwrite': int(arg_dict['force_overwrite'])
         }
         conf_options['sample_properties'] = {}
@@ -98,7 +98,6 @@ def create_config(arg_dict, workflow = "PCGR"):
         }
         conf_options['somatic_snv']['tmb'] = {
             'run': int(arg_dict['estimate_tmb']),            
-            'algorithm': arg_dict['tmb_algorithm'],
             'tmb_dp_min': arg_dict['tmb_dp_min'],
             'tmb_af_min': arg_dict['tmb_af_min']
         }
@@ -136,7 +135,7 @@ def create_config(arg_dict, workflow = "PCGR"):
             'pop_gnomad': str(arg_dict['pop_gnomad']),
             'maf_upper_threshold': float(arg_dict['maf_upper_threshold']),
             'classify_all': int(arg_dict['classify_all']),
-            'clinvar_ignore_noncancer': int(arg_dict['clinvar_ignore_noncancer'])
+            'clinvar_report_noncancer': int(arg_dict['clinvar_report_noncancer'])
         }
             
 
@@ -228,19 +227,27 @@ def populate_config_data(conf_options: dict, db_dir: str, workflow = "PCGR", log
                 conf_data['genome_assembly'],
                 conf_data['conf']['gene_panel']['diagnostic_grade_only'], 
                 conf_data['conf']['gene_panel']['custom_list_bed'],
+                bool(conf_data['conf']['variant_classification']['secondary_findings']),
                 logger)
         
 
     return(conf_data)
 
-def set_virtual_target_genes(panel_id: str, db_dir: str, genome_assembly: str, diagnostic_grade_only: bool, custom_list_bed: str, logger=None):
+def set_virtual_target_genes(panel_id: str, db_dir: str, genome_assembly: str, diagnostic_grade_only: bool, 
+                             custom_list_bed: str, secondary_findings: bool, logger=None):
     
     all_panels_fname = os.path.join(
         db_dir, "data", genome_assembly,
         "gene","tsv","gene_virtual_panel", 
         "gene_virtual_panel.tsv.gz")
     
+    all_cpg_fname = os.path.join(
+        db_dir, "data", genome_assembly,
+        "gene","tsv","gene_cpg", 
+        "gene_cpg.tsv.gz")
+        
     all_virtual_panels = pd.DataFrame()
+    all_secondary_finding_targets = pd.DataFrame()
     panel_targets = pd.DataFrame()
     if check_file_exists(all_panels_fname, logger):    
         all_virtual_panels = pd.read_csv(all_panels_fname, sep="\t", na_values=".")
@@ -256,6 +263,31 @@ def set_virtual_target_genes(panel_id: str, db_dir: str, genome_assembly: str, d
                          'gepa_panel_url': 'panel_url',
                          'gepa_panel_name': 'panel_name',
                          'gepa_panel_id': 'panel_id'})
+        all_virtual_panels['primary_target'] = True
+        for f in ['panel_url', 'panel_name','ensembl_gene_id','moi','mod','symbol']:
+            all_virtual_panels[f] = all_virtual_panels[f].astype(str)
+    
+    if secondary_findings is True:
+        if check_file_exists(all_cpg_fname, logger):
+            all_secondary_finding_targets = pd.read_csv(all_cpg_fname, sep="\t", na_values=".")    
+            all_secondary_finding_targets = \
+                all_secondary_finding_targets[all_secondary_finding_targets.cpg_source.str.match('ACMG_SF')]    
+            all_secondary_finding_targets = \
+                all_secondary_finding_targets.drop(
+                    ['cpg_phenotypes', 'cpg_cancer_cui','cpg_source','cpg_syndrome_cui'], axis=1)
+            all_secondary_finding_targets = \
+                all_secondary_finding_targets.rename(
+                    columns={'cpg_moi': 'moi',
+                             'cpg_mod': 'mod'}) 
+            all_secondary_finding_targets['confidence_level'] = -1
+            all_secondary_finding_targets['panel_id'] = float(3.2)
+            all_secondary_finding_targets['panel_url'] = "https://www.ncbi.nlm.nih.gov/clinvar/docs/acmg/"
+            all_secondary_finding_targets['panel_version'] = float(3.2)
+            all_secondary_finding_targets['panel_name'] = "ACMG_SF"
+            all_secondary_finding_targets['primary_target'] = False
+            all_secondary_finding_targets['id'] = str("-2")
+            for f in ['panel_url', 'panel_name','moi','mod','symbol','ensembl_gene_id']:
+                all_secondary_finding_targets[f] = all_secondary_finding_targets[f].astype(str)
 
 
     if panel_id == "-1":
@@ -280,17 +312,27 @@ def set_virtual_target_genes(panel_id: str, db_dir: str, genome_assembly: str, d
                 panel_targets.loc[:,'panel_id'] = None
                 panel_targets.loc[:,'panel_url'] = None
                 panel_targets.loc[:,'panel_version'] = None
+                panel_targets.loc[:,'panel_name'] = "CustomPanel"
+                for f in ['panel_url', 'panel_name','moi','mod','symbol','ensembl_gene_id']:
+                    panel_targets[f] = panel_targets[f].astype(str)
             
     else:
         panel_ids = panel_id.split(',')            
         panel_targets = all_virtual_panels[all_virtual_panels['id'].isin(panel_ids)].copy()
         if diagnostic_grade_only:
             panel_targets = panel_targets[panel_targets['confidence_level'] >= 3]
-        if len(panel_targets) == 0:
-            m = 1 ## issue error
-        else:
-            if len(panel_ids) > 0:
-                panel_targets.loc[:,'confidence_level'] = 5  
-                    
-    return panel_targets.to_dict(orient='records')
+            if len(panel_targets) == 0:
+                err_msg = \
+                    f"No set of target genes in PanelApp panel(s) '{panel_ids}' that are diagnostic-grade (green level) - consider skipping 'diagnostic_grade_only'"
+                error_message(err_msg, logger)
+            
+        if len(panel_ids) > 1:
+           panel_targets.loc[:,'confidence_level'] = 5  
+
+    all_targets = panel_targets
+    
+    if len(all_secondary_finding_targets) > 0:
+        all_targets = pd.concat([panel_targets, all_secondary_finding_targets], axis=0)
+    
+    return all_targets.to_dict(orient='records')
     

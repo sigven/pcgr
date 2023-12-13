@@ -3,16 +3,28 @@
 from pcgr._version import __version__
 
 PCGR_VERSION = __version__
-DB_VERSION = '20231107'
-VEP_VERSION = '105'
-GENCODE_VERSION = '39'
+DB_VERSION = '20231212'
+
+## MISCELLANEOUS
 NCBI_BUILD_MAF = 'GRCh38'
-VEP_ASSEMBLY = 'GRCh38'
 MAX_VARIANTS_FOR_REPORT = 500_000
 CODING_EXOME_SIZE_MB = 34.0
 RECOMMENDED_N_MUT_SIGNATURE = 200
+
+## GENCODE
+GENCODE_VERSION = {'grch38': 39,'grch37': 19}
+
+## vcfanno
+VCFANNO_MAX_PROC = 15
+
+## VEP settings/versions
+VEP_VERSION = '105'
+VEP_ASSEMBLY = {'grch38': 'GRCh38','grch37': 'GRCh37'}
+VEP_MIN_FORKS = 1
 VEP_MAX_FORKS = 8
+VEP_MIN_BUFFER_SIZE = 50
 VEP_MAX_BUFFER_SIZE = 30000
+VEP_PICK_CRITERIA = ['mane','canonical','appris','tsl','biotype','ccds','rank','length']
 
 tsites = {
     0: 'Any',
@@ -74,33 +86,34 @@ GE_panels = {
       20: "Inherited non-medullary thyroid cancer (GEP)",
       21: "Inherited ovarian cancer (without breast cancer) (GEP)",
       22: "Inherited pancreatic cancer (GEP)",
-      23: "Inherited polyposis (GEP)",
+      23: "Inherited polyposis and early onset colorectal cancer (GEP)",
       24: "Inherited predisposition to acute myeloid leukaemia (AML) (GEP)",
-      25: "Inherited predisposition to GIST (GEP)",
-      26: "Inherited renal cancer (GEP)",
-      27: "Inherited phaeochromocytoma and paraganglioma (GEP)",
-      28: "Melanoma pertinent cancer susceptibility (GEP)",
-      29: "Multiple endocrine tumours (GEP)",
-      30: "Multiple monogenic benign skin tumours (GEP)",
-      31: "Neuroendocrine cancer pertinent cancer susceptibility (GEP)",
-      32: "Neurofibromatosis Type 1 (GEP)",
-      33: "Ovarian cancer pertinent cancer susceptibility (GEP)",
-      34: "Parathyroid Cancer (GEP)",
-      35: "Prostate cancer pertinent cancer susceptibility (GEP)",
-      36: "Renal cancer pertinent cancer susceptibility (GEP)",
-      37: "Rhabdoid tumour predisposition (GEP)",
-      38: "Sarcoma cancer susceptibility (GEP)",
-      39: "Sarcoma susceptbility (GEP)",
-      40: "Thyroid cancer pertinent cancer susceptibility (GEP)",
-      41: "Tumour predisposition - childhood onset (GEP)",
-      42: "Upper gastrointestinal cancer pertinent cancer susceptibility (GEP)"
+      25: "Inherited susceptibility to acute lymphoblastoid leukaemia (ALL) (GEP)",
+      26: "Inherited predisposition to GIST (GEP)",
+      27: "Inherited renal cancer (GEP)",
+      28: "Inherited phaeochromocytoma and paraganglioma (GEP)",
+      29: "Melanoma pertinent cancer susceptibility (GEP)",
+      30: "Multiple endocrine tumours (GEP)",
+      31: "Multiple monogenic benign skin tumours (GEP)",
+      32: "Neuroendocrine cancer pertinent cancer susceptibility (GEP)",
+      33: "Neurofibromatosis Type 1 (GEP)",
+      34: "Ovarian cancer pertinent cancer susceptibility (GEP)",
+      35: "Parathyroid Cancer (GEP)",
+      36: "Prostate cancer pertinent cancer susceptibility (GEP)",
+      37: "Renal cancer pertinent cancer susceptibility (GEP)",
+      38: "Rhabdoid tumour predisposition (GEP)",
+      39: "Sarcoma cancer susceptibility (GEP)",
+      40: "Sarcoma susceptbility (GEP)",
+      41: "Thyroid cancer pertinent cancer susceptibility (GEP)",
+      42: "Tumour predisposition - childhood onset (GEP)",
+      43: "Upper gastrointestinal cancer pertinent cancer susceptibility (GEP)",
+      44: "DNA repair genes pertinent cancer susceptibility (GEP)"
 }
 
 panels = '\n'.join([f'{k} = {GE_panels[k]}' for k in GE_panels]) # for displaying in help
 
 ## https://www.ensembl.org/info/genome/variation/prediction/predicted_data.html#consequences
 VEP_consequence_rank = {
-
     'transcript_ablation': 1,
     'splice_acceptor_variant': 2,
     'splice_donor_variant': 3,
@@ -137,7 +150,7 @@ VEP_consequence_rank = {
     'TFBS_ablation': 34,
     'TFBS_amplification': 35,
     'TF_binding_site_variant': 36,
-    'regulatory_binding_ablation': 37,
+    'regulatory_region_ablation': 37,
     'regulatory_region_amplification': 38,
     'regulatory_region_variant': 39,
     'intergenic_variant': 40,

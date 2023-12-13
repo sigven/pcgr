@@ -2,7 +2,7 @@
 
 import logging
 
-from pcgr.utils import error_message, check_subprocess
+from pcgr.utils import error_message, warn_message, check_subprocess
 from cyvcf2 import VCF
 from typing import Union
 
@@ -44,32 +44,31 @@ def detect_reserved_info_tag(tag, tag_name, logger):
 
 def check_retained_vcf_info_tags(vcf: VCF, retained_info_tags: str, logger: logging.Logger) -> int:
 
-   """
-   Function that compares the INFO tags in the query VCF and retained INFO tags set by the user as retained for output
-   If any retained tag is not in query VCF, an error will be returned
-   """
+    """
+    Function that compares the INFO tags in the query VCF and retained INFO tags set by the user as retained for output
+    If any retained tag is not in query VCF, an error will be returned
+    """
 
-   tags = str(retained_info_tags).split(',')
-   info_elements_query_vcf = []
+    tags = str(retained_info_tags).split(',')
+    info_elements_query_vcf = []
 
-   #vcf = VCF(input_vcf)
-   logger.info('Checking if existing INFO tags of query VCF file matches retained INFO tags set by the user')
-   ret = 1
-   for e in vcf.header_iter():
-      header_element = e.info()
-      if 'ID' in header_element.keys() and 'HeaderType' in header_element.keys():
-         if header_element['HeaderType'] == 'INFO':
-            info_elements_query_vcf.append(header_element['ID'])
+    #vcf = VCF(input_vcf)
+    logger.info('Checking if existing INFO tags of query VCF file matches retained INFO tags set by the user')
+    ret = 1
+    for e in vcf.header_iter():
+        header_element = e.info()
+        if 'ID' in header_element.keys() and 'HeaderType' in header_element.keys():
+            if header_element['HeaderType'] == 'INFO':
+                info_elements_query_vcf.append(header_element['ID'])
 
-
-   for t in tags:
-      if not t in info_elements_query_vcf:
-         err_msg = "Retained INFO tag '" + str(t) + "' not found among INFO tags in query VCF - make sure retained VCF INFO tags are set correctly"
-         return error_message(err_msg, logger)
-      else:
-         logger.info("Retained INFO tag '" + str(t) + "' detected among INFO tags in query VCF")
-
-   return ret
+    for t in tags:
+        if not t in info_elements_query_vcf:
+            err_msg = "Retained INFO tag '" + str(t) + "' not found among INFO tags in query VCF - make sure retained VCF INFO tags are set correctly"
+            error_message(err_msg, logger)
+        else:
+            logger.info("Retained INFO tag '" + str(t) + "' detected among INFO tags in query VCF")
+        
+    return ret
 
 
 

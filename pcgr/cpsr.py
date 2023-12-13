@@ -47,7 +47,7 @@ def get_args():
     optional_other.add_argument('--report_theme',choices = ['default','cerulean','journal','flatly','readable','spacelab','united','cosmo','lumen','paper','sandstone','simplex','yeti'], default = 'default', help='Visual report theme (rmarkdown),  default: %(default)s' )
     optional_other.add_argument('--report_nonfloating_toc', action='store_true', help='Do not float the table of contents (TOC) in output HTML report, default: %(default)s')
     optional_other.add_argument('--report_table_display', choices = ['full','light'], default='light', help="Set the level of detail/comprehensiveness in interactive datables of HTML report, very comprehensive (option 'full') or slim/focused ('light'), default: %(default)s")
-    optional_other.add_argument('--ignore_noncoding', action='store_true',dest='ignore_noncoding',default=False,help='Do not list non-coding variants in HTML report, default: %(default)s')
+    optional_other.add_argument('--ignore_noncoding', action='store_true',dest='ignore_noncoding',default=False,help='Ignore non-coding (i.e. non protein-altering) variants in report, default: %(default)s')
     optional_other.add_argument("--debug", action="store_true", help="Print full commands to log")
     optional_other.add_argument("--pcgrr_conda", default="pcgrr", help="pcgrr conda env name (default: %(default)s)")
     
@@ -56,14 +56,14 @@ def get_args():
     optional_classification.add_argument('--pop_gnomad',choices = ['afr','amr','eas','sas','asj','nfe','fin','global'], default='nfe', help='Population source in gnomAD (non-cancer subset) used for variant frequency assessment (ACMG classification), default: %(default)s')
     optional_classification.add_argument('--maf_upper_threshold', type = float, default = 0.9, dest = 'maf_upper_threshold',help='Upper MAF limit (gnomAD global population frequency) for variants to be included in the report, default: %(default)s')
     optional_classification.add_argument('--classify_all', action='store_true',dest='classify_all',help='Provide CPSR variant classifications (TIER 1-5) also for variants with existing ClinVar classifications in output TSV, default: %(default)s')
-    optional_classification.add_argument('--clinvar_ignore_noncancer', action='store_true', help='Ignore (exclude from report) ClinVar-classified variants reported only for phenotypes/conditions NOT related to cancer, default: %(default)s')
+    optional_classification.add_argument('--clinvar_report_noncancer', action='store_true', help='Report also ClinVar-classified variants attributed to phenotypes/conditions NOT related to cancer, default: %(default)s')
     
     optional_vcfanno.add_argument('--vcfanno_n_proc', default = 4, type = int, help="Number of vcfanno processes (option '-p' in vcfanno), default: %(default)s")
 
     optional_vep.add_argument('--vep_n_forks', default = 4, type = int, help="Number of forks (option '--fork' in VEP), default: %(default)s")
     optional_vep.add_argument('--vep_buffer_size', default = 500, type = int, help="Variant buffer size (variants read into memory simultaneously, option '--buffer_size' in VEP) " + \
        "\n- set lower to reduce memory usage, default: %(default)s")
-    optional_vep.add_argument('--vep_gencode_all', action='store_true', help = "Consider all GENCODE transcripts with Variant Effect Predictor (VEP) (option '--gencode_basic' in VEP is used by default).")
+    optional_vep.add_argument("--vep_gencode_basic", action="store_true", help = "Consider basic GENCODE transcript set only with Variant Effect Predictor (VEP) (option '--gencode_basic' in VEP).")
     optional_vep.add_argument('--vep_pick_order', default = "canonical,appris,biotype,ccds,rank,tsl,length,mane", help="Comma-separated string " + \
        "of ordered transcript properties for primary variant pick\n ( option '--pick_order' in VEP), default: %(default)s")
     optional_vep.add_argument('--vep_no_intergenic', action = "store_true", help="Skip intergenic variants during processing (option '--no_intergenic' in VEP), default: %(default)s")
@@ -79,7 +79,6 @@ def get_args():
 
 def main():
     arg_dict = get_args()
-    arg_dict['show_noncoding'] = int(not arg_dict['ignore_noncoding'])
     # check parsed arguments
     arg_checker.check_args_cpsr(arg_dict)
     # Verify existence of input files
@@ -106,11 +105,7 @@ def run_cpsr(conf_options, cpsr_paths):
     output_pass_vcf = 'None'
     output_pass_tsv = 'None'
     uid = ''
-    GENCODE_VERSION = pcgr_vars.GENCODE_VERSION
-    VEP_VERSION = pcgr_vars.VEP_VERSION
-    if conf_options['genome_assembly'] == 'grch37':
-        GENCODE_VERSION = '19'
-
+    genome_assembly = str(conf_options['genome_assembly'])
     input_vcf = 'None'
     input_customlist = 'None'
     output_custom_bed = 'None'
@@ -172,7 +167,7 @@ def run_cpsr(conf_options, cpsr_paths):
         print('----')
 
         ## CPSR|Start - log key information about run
-        logger = getlogger("cpsr-start")
+        logger = getlogger("cpsr-settings")
         logger.info("--- Cancer Predisposition Sequencing Reporter workflow ----")
         logger.info(f"Sample name: {conf_options['sample_id']}")
         if not input_customlist == 'None':
@@ -184,7 +179,8 @@ def run_cpsr(conf_options, cpsr_paths):
                     f"{'ON' if conf_options['variant_classification']['secondary_findings'] else 'OFF'}")
         logger.info(f"Include low to moderate cancer risk variants from genome-wide association studies: " + \
                     f"{'ON' if conf_options['variant_classification']['gwas_findings'] else 'OFF'}")
-        logger.info(f"Reference population, germline variant frequencies (gnomAD): {str(conf_options['variant_classification']['pop_gnomad']).upper()}")
+        logger.info(f"Reference population, germline variant frequencies (gnomAD): " + \
+                    f"{str(conf_options['variant_classification']['pop_gnomad']).upper()}")
         logger.info(f"Genome assembly: {conf_options['genome_assembly']}")
         print('----')
         
@@ -210,7 +206,9 @@ def run_cpsr(conf_options, cpsr_paths):
 
         logger = getlogger('cpsr-vep')
 
-        logger.info(f"CPSR - STEP 1: Basic variant annotation with Variant Effect Predictor ({VEP_VERSION}, GENCODE {GENCODE_VERSION}, {yaml_data['genome_assembly']})")
+        logger.info((
+            f"CPSR - STEP 1: Basic variant annotation with Variant Effect Predictor (version {pcgr_vars.VEP_VERSION}, "
+            f"GENCODE release {pcgr_vars.GENCODE_VERSION[genome_assembly]}, genome assembly {yaml_data['genome_assembly']})"))
         logger.info(f"VEP configuration - one primary consequence block pr. alternative allele (--flag_pick_allele_gene)")
         logger.info(f"VEP configuration - transcript pick order: {yaml_data['conf']['vep']['vep_pick_order']}")
         logger.info(f"VEP configuration - transcript pick order: See more at https://www.ensembl.org/info/docs/tools/vep/script/vep_other.html#pick_options")
@@ -218,7 +216,9 @@ def run_cpsr(conf_options, cpsr_paths):
         logger.info(f'VEP configuration - skip intergenic variants: {vep_skip_intergenic_set}')
         logger.info(f"VEP configuration - look for overlap with regulatory regions: ON")
         logger.info(f"VEP configuration - plugins in use: {vep_command['plugins_in_use']}")
-        logger.info(f"VEP configuration - buffer_size/number of forks: {yaml_data['conf']['vep']['vep_buffer_size']}/{yaml_data['conf']['vep']['vep_n_forks']}")
+        logger.info((
+            f"VEP configuration - buffer size/number of forks: "
+            f"{yaml_data['conf']['vep']['vep_buffer_size']}/{yaml_data['conf']['vep']['vep_n_forks']}"))
         check_subprocess(logger, vep_command["main"], debug)
         check_subprocess(logger, vep_command["bgzip"], debug)
         check_subprocess(logger, vep_command["tabix"], debug)
@@ -231,8 +231,10 @@ def run_cpsr(conf_options, cpsr_paths):
         logger.info("(ClinVar, CIViC, dbNSFP, dbMTS, GERP, GWAS catalog, gnomAD non-cancer subset)")
         pcgr_vcfanno_command = (
                 f"pcgr_vcfanno.py --num_processes {yaml_data['conf']['other']['vcfanno_n_proc']} --dbnsfp --clinvar "
+                f'{"--debug" if debug else ""} '
                 f"--dbmts --gerp --tcga --gnomad_non_cancer --gene_transcript_xref "
-                f"--gwas --rmsk {vep_vcf}.gz {vep_vcfanno_vcf} {os.path.join(data_dir, 'data', str(yaml_data['genome_assembly']))}"
+                f"--gwas --rmsk {vep_vcf}.gz {vep_vcfanno_vcf} "
+                f"{os.path.join(data_dir, 'data', str(yaml_data['genome_assembly']))}"
                 )
         check_subprocess(logger, pcgr_vcfanno_command, debug)
         logger.info("Finished cpsr-vcfanno")
@@ -261,7 +263,7 @@ def run_cpsr(conf_options, cpsr_paths):
                 glob(f'{vep_vcfanno_summarised_vcf}*') +
                 glob(f'{vep_vcfanno_summarised_pass_vcf}*') +
                 glob(f'{vep_vcfanno_vcf}*') +
-                glob(f'{input_vcf_validated}*')
+                glob(f'{input_vcf_validated_uncompr}*')
                 )
         # do not delete if debugging
         if not debug:
@@ -278,7 +280,7 @@ def run_cpsr(conf_options, cpsr_paths):
         variant_set = \
            variant.append_annotations(
               output_pass_vcf2tsv_gz, pcgr_db_dir = cpsr_paths["db_dir"], logger = logger)
-        variant_set = variant.clean_annotations(variant_set, yaml_data)        
+        variant_set = variant.clean_annotations(variant_set, yaml_data, germline = True, logger = logger)        
         variant_set.to_csv(output_pass_tsv_gz, sep="\t", compression="gzip", index=False)
         utils.remove(output_pass_vcf2tsv_gz)
                 

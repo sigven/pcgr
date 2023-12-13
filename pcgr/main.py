@@ -64,10 +64,11 @@ def cli():
     optional_allelic_support.add_argument("--control_af_max", type=float, default=1, dest="control_af_max", help="If VCF INFO tag for variant allelic fraction (control) is specified and found, set maximum tolerated AF for inclusion in report (default: %(default)s)")
 
     optional_tmb_msi.add_argument("--estimate_tmb", action="store_true", help="Estimate tumor mutational burden from the total number of somatic mutations and target region size, default: %(default)s")
-    optional_tmb_msi.add_argument("--estimate_msi_status", action="store_true", help="Predict microsatellite instability status from patterns of somatic mutations/indels, default: %(default)s")
-    optional_tmb_msi.add_argument("--tmb_algorithm", dest="tmb_algorithm", default="all_coding", choices=[ "all_coding", "nonsyn"], help="Method for calculation of TMB, all coding variants (Chalmers et al., Genome Medicine, 2017), or non-synonymous variants only, default: %(default)s")
+    #optional_tmb_msi.add_argument("--tmb_algorithm", dest="tmb_algorithm", default="all_coding", choices=[ "all_coding", "nonsyn"], help="Method for calculation of TMB, all coding variants (Chalmers et al., Genome Medicine, 2017), or non-synonymous variants only, default: %(default)s")
     optional_tmb_msi.add_argument("--tmb_dp_min", dest="tmb_dp_min", default=0, help="If VCF INFO tag for sequencing depth (tumor) is specified and found, set minimum required sequencing depth for TMB calculation: default: %(default)s")
     optional_tmb_msi.add_argument("--tmb_af_min", dest="tmb_af_min", default=0, help="If VCF INFO tag for allelic fraction (tumor) is specified and found, set minimum required allelic fraction for TMB calculation: default: %(default)s")
+    optional_tmb_msi.add_argument("--estimate_msi_status", action="store_true", help="Predict microsatellite instability status from patterns of somatic mutations/indels, default: %(default)s")
+
 
     optional_assay.add_argument("--assay", dest="assay", default="WES", choices=[ "WGS", "WES","TARGETED"], help="Type of DNA sequencing assay performed for input data (VCF), default: %(default)s")
     optional_assay.add_argument("--effective_target_size_mb", type=float, default=34, dest="effective_target_size_mb", help="Effective target size in Mb (potentially limited by read depth) of sequencing assay (for TMB analysis) (default: %(default)s (WES/WGS))")
@@ -82,7 +83,7 @@ def cli():
 
     optional_other.add_argument("--cpsr_report", dest="cpsr_report", help="CPSR report file (Gzipped JSON - file ending with 'cpsr.<genome_assembly>.json.gz' -  germline report of patient's blood/control sample")
     optional_other.add_argument("--vcf2maf", action="store_true", help="Generate a MAF file for input VCF using https://github.com/mskcc/vcf2maf (default: %(default)s)")
-    optional_other.add_argument("--show_noncoding", action="store_true", help="List non-coding (i.e. non protein-altering) variants in report, default: %(default)s")
+    optional_other.add_argument("--ignore_noncoding", action="store_true", help="Ignore non-coding (i.e. non protein-altering) variants in report, default: %(default)s")
     optional_other.add_argument("--include_trials", action="store_true", help="(Beta) Include relevant ongoing or future clinical trials, focusing on studies with molecularly targeted interventions")
     optional_other.add_argument("--retained_info_tags", dest="retained_info_tags", default="None", help="Comma-separated string of VCF INFO tags from query VCF that should be kept in PCGR output TSV file")
     optional_other.add_argument("--report_theme", choices=["default", "cerulean", "journal", "flatly", "readable", "spacelab", "united", "cosmo", "lumen", "paper", "sandstone", "simplex", "yeti"], help="Visual report theme (rmarkdown)", default="default")
@@ -94,12 +95,12 @@ def cli():
     optional_other.add_argument("--pcgrr_conda", default="pcgrr", help="pcgrr conda env name (default: %(default)s)")
 
     optional_vcfanno.add_argument("--vcfanno_n_proc", default=4, type=int, help="Number of vcfanno processes (option '-p' in vcfanno), default: %(default)s")
-    optional_vep.add_argument("--vep_n_forks", default=4, type=int, help="Number of forks (option '--fork' in VEP), default: %(default)s")
-    optional_vep.add_argument("--vep_buffer_size", default=500, type=int, help=f"Variant buffer size (variants read into memory simultaneously, option '--buffer_size' in VEP)\n- set lower to reduce memory usage, default: %(default)s")
+    optional_vep.add_argument("--vep_n_forks", default=4, type=int, help="Number of forks (VEP option '--fork'), default: %(default)s")
+    optional_vep.add_argument("--vep_buffer_size", default=500, type=int, help=f"Variant buffer size (variants read into memory simultaneously, VEP option '--buffer_size')\n- set lower to reduce memory usage, default: %(default)s")
     optional_vep.add_argument("--vep_pick_order", default="mane,canonical,appris,tsl,biotype,ccds,rank,length", help=f"Comma-separated string of ordered transcript/variant properties for selection of primary variant consequence\n(option '--pick_order' in VEP), default: %(default)s")
-    optional_vep.add_argument("--vep_no_intergenic", action="store_true", help="Skip intergenic variants during processing (option '--no_intergenic' in VEP), default: %(default)s")
-    optional_vep.add_argument("--vep_regulatory", action="store_true", help="Add VEP regulatory annotations (option '--regulatory') or non-coding interpretation, default: %(default)s")
-    optional_vep.add_argument("--vep_gencode_all", action="store_true", help = "Consider all GENCODE transcripts with Variant Effect Predictor (VEP) (option '--gencode_basic' in VEP is used by default in PCGR).")
+    optional_vep.add_argument("--vep_no_intergenic", action="store_true", help="Skip intergenic variants during processing (VEP option '--no_intergenic' in VEP), default: %(default)s")
+    optional_vep.add_argument("--vep_regulatory", action="store_true", help="Add VEP regulatory annotations (VEP option '--regulatory') or non-coding interpretation, default: %(default)s")
+    optional_vep.add_argument("--vep_gencode_basic", action="store_true", help = "Consider basic GENCODE transcript set only with Variant Effect Predictor (VEP) (VEP option '--gencode_basic').")
 
     optional_tumor_only.add_argument("--pon_vcf", dest="pon_vcf", help="VCF file with germline calls from Panel of Normals (PON) - i.e. blacklisted variants, (default: %(default)s)")
     maf_help_msg = "Exclude variants in tumor (SNVs/InDels, tumor-only mode) with MAF > pct"
@@ -164,7 +165,6 @@ def run_pcgr(pcgr_paths, conf_options):
     output_pass_tsv = 'None'
     output_maf = 'None'
     NCBI_BUILD_MAF = pcgr_vars.NCBI_BUILD_MAF
-    MAX_VARIANTS_FOR_REPORT = pcgr_vars.MAX_VARIANTS_FOR_REPORT
     if conf_options['genome_assembly'] == 'grch37':
         NCBI_BUILD_MAF = 'GRCh37'
     logger = getlogger('pcgr-get-OS')
@@ -253,7 +253,7 @@ def run_pcgr(pcgr_paths, conf_options):
         print('----')
 
         # PCGR|start - Log key information about sample, options and sequencing assay/design
-        logger = getlogger('pcgr-start')
+        logger = getlogger('pcgr-settings')
         logger.info('--- Personal Cancer Genome Reporter workflow ----')
         logger.info(f'Sample name: {conf_options["sample_id"]}')
         if conf_options['sample_properties']['site'] == 'Any':
@@ -262,11 +262,21 @@ def run_pcgr(pcgr_paths, conf_options):
             logger.info(f'Tumor type: {conf_options["sample_properties"]["site"]}')
         logger.info(f'Sequencing assay - type: {conf_options["assay_properties"]["type"]}')
         logger.info(f'Sequencing assay - mode: {assay_mode}')
-        logger.info(f'Sequencing assay - effective (coding) target size: {conf_options["assay_properties"]["effective_target_size_mb"]}Mb')
-        logger.info(f'Variant filtering settings - minimum sequencing depth tumor: {conf_options["somatic_snv"]["allelic_support"]["tumor_dp_min"]}')
-        logger.info(f'Variant filtering settings - minimum allelic fraction tumor: {conf_options["somatic_snv"]["allelic_support"]["tumor_af_min"]}')
-        logger.info(f'Variant filtering settings - minimum sequencing depth control: {conf_options["somatic_snv"]["allelic_support"]["control_dp_min"]}')
-        logger.info(f'Variant filtering settings - maximum allelic fraction control: {conf_options["somatic_snv"]["allelic_support"]["control_af_max"]}')
+        logger.info((
+            f'Sequencing assay - effective (coding) target size: '
+            f'{conf_options["assay_properties"]["effective_target_size_mb"]}Mb'))
+        logger.info((
+            f'Variant filtering settings - minimum sequencing depth tumor: '
+            f'{conf_options["somatic_snv"]["allelic_support"]["tumor_dp_min"]}'))
+        logger.info((
+            f'Variant filtering settings - minimum allelic fraction tumor: '
+            f'{conf_options["somatic_snv"]["allelic_support"]["tumor_af_min"]}'))
+        logger.info((
+            f'Variant filtering settings - minimum sequencing depth control: '
+            f'{conf_options["somatic_snv"]["allelic_support"]["control_dp_min"]}'))
+        logger.info((
+            f'Variant filtering settings - maximum allelic fraction control: '
+            f'{conf_options["somatic_snv"]["allelic_support"]["control_af_max"]}'))
         logger.info(f'Genome assembly: {conf_options["genome_assembly"]}')
         logger.info(f'Mutational signature estimation: {msig_estimation_set}')
         logger.info(f'MSI classification: {msi_prediction_set}')
@@ -287,7 +297,8 @@ def run_pcgr(pcgr_paths, conf_options):
         if not input_cna == 'None': 
             conf_options['annotated_cna'] = pcgr_paths["output_cna"]
         yaml_data = populate_config_data(conf_options, data_dir, workflow = "PCGR", logger = logger)
-        
+        genome_assembly = yaml_data['genome_assembly']
+
         with open(yaml_fname, "w") as outfile:
             outfile.write(yaml.dump(yaml_data))
         outfile.close()
@@ -301,14 +312,16 @@ def run_pcgr(pcgr_paths, conf_options):
         print('----')
         logger = getlogger('pcgr-vep')
         logger.info(f'PCGR - STEP 1: Basic variant annotation with Variant Effect Predictor {pcgr_vars.VEP_VERSION}' + \
-                    f', GENCODE {vep_command["GENCODE_VERSION"]}, {yaml_data["genome_assembly"]}')
+                    f', GENCODE release {pcgr_vars.GENCODE_VERSION[genome_assembly]}, genome assembly {yaml_data["genome_assembly"]}')
         logger.info(f'VEP configuration - one primary consequence block pr. alternative gene allele (--flag_pick_allele_gene)')
         logger.info(f'VEP configuration - transcript pick order: {yaml_data["conf"]["vep"]["vep_pick_order"]}')
         logger.info(f'VEP configuration - transcript pick order: See more at https://www.ensembl.org/info/docs/tools/vep/script/vep_other.html#pick_options')
         logger.info(f'VEP configuration - GENCODE set: {vep_command["gencode_set_in_use"]}')
         logger.info(f'VEP configuration - skip intergenic variants: {"ON" if yaml_data["conf"]["vep"]["vep_no_intergenic"] == 1 else "OFF"}')
         logger.info(f'VEP configuration - regulatory variant annotation: {"ON" if yaml_data["conf"]["vep"]["vep_regulatory"] == 1 else "OFF"}')
-        logger.info(f'VEP configuration - buffer_size/number of forks: {yaml_data["conf"]["vep"]["vep_buffer_size"]}/{yaml_data["conf"]["vep"]["vep_n_forks"]}')
+        logger.info((
+            f'VEP configuration - buffer size/number of forks: '
+            f'{yaml_data["conf"]["vep"]["vep_buffer_size"]}/{yaml_data["conf"]["vep"]["vep_n_forks"]}'))
         logger.info(f'VEP - plugins in use: {vep_command["plugins_in_use"]}')
 
         check_subprocess(logger, vep_command['main'], debug)
@@ -365,7 +378,7 @@ def run_pcgr(pcgr_paths, conf_options):
                 f'--num_processes {conf_options["other"]["vcfanno_n_proc"]} '
                 f'--dbnsfp --clinvar --rmsk --winmsk --simplerepeat '
                 f'--tcga --gene_transcript_xref --dbmts --gwas '
-                f'{"--debug --keep_logs" if debug else ""}'
+                f'{"--debug" if debug else ""}'
                 )
         vcfanno_db_src_msg1 = (
                 f"Annotation sources (vcfanno): {'Panel-of-Normals, ' if panel_normal != 'None' else ''}ClinVar, dbNSFP, "
@@ -436,20 +449,19 @@ def run_pcgr(pcgr_paths, conf_options):
            variant.append_annotations(
               output_pass_vcf2tsv_gz, pcgr_db_dir = pcgr_paths["db_dir"], logger = logger)
         variant_set = variant.set_allelic_support(variant_set, allelic_support_tags = yaml_data["conf"]['somatic_snv']['allelic_support'])
-        variant_set = variant.clean_annotations(variant_set, yaml_data)        
+        variant_set = variant.clean_annotations(variant_set, yaml_data, germline = False, logger = logger)        
         variant_set.to_csv(output_pass_tsv_gz, sep="\t", compression="gzip", index=False)
         utils.remove(output_pass_vcf2tsv_gz)
         
-
         if yaml_data["conf"]['assay_properties']['type'] == 'WGS' or yaml_data["conf"]['assay_properties']['type'] == 'WES':
             # check that output file exist
             if os.path.exists(output_pass_tsv_gz):
                 # get number of rows/variants annotated, using pandas
                 var_data = pandas.read_csv(output_pass_tsv_gz, sep = '\t', low_memory = False, header = [1])
                 num_variants_raw = len(var_data)
-                if num_variants_raw > MAX_VARIANTS_FOR_REPORT:
+                if num_variants_raw > pcgr_vars.MAX_VARIANTS_FOR_REPORT:
                     logger.info(f'Number of raw variants in input VCF ({num_variants_raw}) exceeds ' + \
-                                f'{MAX_VARIANTS_FOR_REPORT} - intergenic/intronic variants will be excluded prior to reporting')
+                                f'{pcgr_vars.MAX_VARIANTS_FOR_REPORTT} - intergenic/intronic variants will be excluded prior to reporting')
 
                     # Exclude intronic and intergenic variants prior to analysis with pcgrr (reporting and further analysis)
                     var_data_filtered = var_data[~var_data.CONSEQUENCE.str.contains('^intron') & 
@@ -460,7 +472,7 @@ def run_pcgr(pcgr_paths, conf_options):
                     # Exclude upstream_gene/downstream_gene variants if size of filtered variant set is still above MAX_VARIANTS_FOR_REPORT
                     # TODO: in this case, the TMB calculation will be an underestimate (but still likely huge)
                     var_data_filtered_final = var_data_filtered
-                    if len(var_data_filtered) > MAX_VARIANTS_FOR_REPORT:
+                    if len(var_data_filtered) > pcgr_vars.MAX_VARIANTS_FOR_REPORT:
                         var_data_filtered_final = \
                             var_data_filtered[~var_data_filtered.CONSEQUENCE.str.contains('^upstream_gene') & 
                                               ~var_data_filtered.Consequence.str.contains('^downstream_gene')]
@@ -506,9 +518,11 @@ def run_pcgr(pcgr_paths, conf_options):
             cna_segment_file = os.path.join(
                 pcgr_paths['input_cna_dir'],pcgr_paths['input_cna_basename']),
             build = yaml_data['genome_assembly'],
+            sample_id = yaml_data['sample_id'],
             pcgr_build_db_dir = pcgr_paths['db_dir'], 
             n_copy_amplifications = yaml_data["conf"]['somatic_cna']['n_copy_gain'],
-            overlap_fraction = 0.5)
+            overlap_fraction = 0.5,
+            logger = logger)
             #overlap_fraction = float(conf_options['cna']['cna_overlap_pct'] / 100))
         if cna_annotation == 0:
             logger.info('Finished pcgr-annotate-cna-segments')

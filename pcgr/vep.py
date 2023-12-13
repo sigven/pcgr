@@ -13,21 +13,16 @@ from pcgr import pcgr_vars
 def get_command(file_paths, conf_options, input_vcf, output_vcf, debug = False):
     
     output_vcf_gz = f'{output_vcf}.gz'
-    
-    VEP_ASSEMBLY = pcgr_vars.VEP_ASSEMBLY
-    GENCODE_VERSION = pcgr_vars.GENCODE_VERSION
-    if conf_options['genome_assembly'] == 'grch37':
-        GENCODE_VERSION = 'release 19'
-        VEP_ASSEMBLY = 'GRCh37'
+    genome_assembly = conf_options['genome_assembly']
     
     vep_dir = os.path.join(str(file_paths['db_dir']), '.vep')
     fasta_assembly = os.path.join(
         vep_dir, 'homo_sapiens', 
-        f'{pcgr_vars.VEP_VERSION}_{VEP_ASSEMBLY}', 
-        f'Homo_sapiens.{VEP_ASSEMBLY}.dna.primary_assembly.fa.gz')
+        f'{pcgr_vars.VEP_VERSION}_{pcgr_vars.VEP_ASSEMBLY[genome_assembly]}', 
+        f'Homo_sapiens.{pcgr_vars.VEP_ASSEMBLY[genome_assembly]}.dna.primary_assembly.fa.gz')
     ancestor_assembly = os.path.join(
         vep_dir, 'homo_sapiens', 
-        f'{pcgr_vars.VEP_VERSION}_{VEP_ASSEMBLY}', 
+        f'{pcgr_vars.VEP_VERSION}_{pcgr_vars.VEP_ASSEMBLY[genome_assembly]}', 
         f'human_ancestor.fa.gz')
 
     plugins_in_use = "NearestExonJB, LoF"
@@ -40,8 +35,9 @@ def get_command(file_paths, conf_options, input_vcf, output_vcf, debug = False):
         f'--check_ref --dont_skip --flag_pick_allele_gene --plugin NearestExonJB,max_range=50000 '
         f'--force_overwrite --species homo_sapiens --offline')
     vep_options = (
-        f'--dir {vep_dir} --assembly {VEP_ASSEMBLY} --cache_version {pcgr_vars.VEP_VERSION} '
-        f'--fasta {fasta_assembly} --pick_order {conf_options["conf"]["vep"]["vep_pick_order"]} '
+        f'--dir {vep_dir} --assembly {pcgr_vars.VEP_ASSEMBLY[genome_assembly]} --cache_version {pcgr_vars.VEP_VERSION} '
+        f'--fasta {fasta_assembly} '
+        f'--pick_order {conf_options["conf"]["vep"]["vep_pick_order"]} '
         f'--buffer_size {conf_options["conf"]["vep"]["vep_buffer_size"]} '
         f'--fork {conf_options["conf"]["vep"]["vep_n_forks"]} '
         f'{vep_flags} '
@@ -52,7 +48,7 @@ def get_command(file_paths, conf_options, input_vcf, output_vcf, debug = False):
         vep_options += ' --no_intergenic'
     if conf_options['conf']['vep']['vep_regulatory'] == 1:
         vep_options += ' --regulatory'
-    if conf_options['conf']['vep']['vep_gencode_all'] == 0:
+    if conf_options['conf']['vep']['vep_gencode_basic'] == 1:
         vep_options += ' --gencode_basic'
         gencode_set_in_use = "GENCODE - basic transcript set (--gencode_basic)"
 
@@ -76,7 +72,7 @@ def get_command(file_paths, conf_options, input_vcf, output_vcf, debug = False):
     vep_cmd['gencode_set_in_use'] = gencode_set_in_use
     vep_cmd['plugins_in_use'] = plugins_in_use
     vep_cmd['fasta_assembly'] = fasta_assembly
-    vep_cmd['GENCODE_VERSION'] = GENCODE_VERSION
+    #vep_cmd['GENCODE_VERSION'] = 'release ' + str(pcgr_vars.GENCODE_VERSION[genome_assembly])
     
     return(vep_cmd)
 
@@ -164,7 +160,7 @@ def get_csq_record_annotations(csq_fields, varkey, logger, vep_csq_fields_map, t
     return(csq_record)
 
 
-def pick_single_gene_csq(vep_csq_results, pick_criteria_ordered = "mane,canonical,appris,tsl,biotype,ccds,rank,length"):
+def pick_single_gene_csq(vep_csq_results, pick_criteria_ordered = "mane,canonical,appris,tsl,biotype,ccds,rank,length", logger = None):
 
     
     csq_candidates = []
@@ -218,7 +214,9 @@ def pick_single_gene_csq(vep_csq_results, pick_criteria_ordered = "mane,canonica
             if main_cons in pcgr_vars.VEP_consequence_rank:
                 csq_candidate['rank'] = int(pcgr_vars.VEP_consequence_rank[main_cons])
             else:
-                print("Missing Consequence in pcgr_vars.VEP_consequence_rank: " + str(csq_elem['Consequence']) + ' - ' + str(main_cons))          
+                warn_msg = f"Missing Consequence in pcgr_vars.VEP_consequence_rank: {csq_elem['Consequence']} -  '{main_cons}'"
+                if not logger is None:
+                    logger.warn(warn_msg)                      
 
         ## TSL - lower value prioritized
         if not csq_elem['TSL'] is None:
@@ -258,7 +256,7 @@ def pick_single_gene_csq(vep_csq_results, pick_criteria_ordered = "mane,canonica
     return(chosen_csq_index)
 
 def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, vep_pick_order, logger, pick_only=True, 
-                  csq_identifier='CSQ', debug = 0, targets_ensembl_gene = None):
+                  csq_identifier='CSQ', debug = 0, targets_entrez_gene = None):
 
     """
     Function that parses the comma-separated CSQ elements found in the rec.INFO object (VCF)
@@ -275,10 +273,16 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, vep_pick_order, 
 
     varkey = str(rec.CHROM) + '_' + str(rec.POS) + '_' + str(rec.REF) + '_' + str(','.join(rec.ALT))
 
+    var_gwas_info = rec.INFO.get('GWAS_HIT')
+    gwas_hit = False
+    if not var_gwas_info is None:
+        gwas_hit = True
+    
     ## Retrieve the INFO element provided by VEP (default 'CSQ') in the VCF object, and 
     ## loop through all transcript-specific consequence blocks provided, e.g. 
     #  CSQ=A|intron_variant|||.., A|splice_region_variant|||, and so on.
     for csq in rec.INFO.get(csq_identifier).split(','):
+        #print(csq)
         csq_fields = csq.split('|')
 
         entrezgene = '.'
@@ -300,19 +304,20 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, vep_pick_order, 
         
         ## CPSR - consider all consequences (considering that a variant may overlap other, non-CPSR targets)
         if pick_only is False: 
-            csq_record = get_csq_record_annotations(csq_fields, varkey, logger, vep_csq_fields_map, transcript_xref_map)
+            csq_record = get_csq_record_annotations(csq_fields, varkey, logger, vep_csq_fields_map, transcript_xref_map)                    
             if 'Feature_type' in csq_record:
                 if csq_record['Feature_type'] == 'RegulatoryFeature':
                     all_csq_pick.append(csq_record)
                     alternative_csq_pick.append(csq_record)
                 if csq_record['Feature_type'] == 'Transcript':
-                    if 'ENSEMBL_GENE_ID' in csq_record.keys():
+                    if 'ENTREZGENE' in csq_record.keys():
                         ## Consequence in CPSR target - append to all_csq_pick
-                        if csq_record['ENSEMBL_GENE_ID'] in targets_ensembl_gene:
+                        if csq_record['ENTREZGENE'] in targets_entrez_gene.keys():
                             all_csq_pick.append(csq_record)
-                        else:
-                            
+                        else:                            
                             alternative_csq_pick.append(csq_record)
+                    else:
+                        warning = 1
                 else:
                     ## intergenic
                     if csq_record['Feature_type'] is None:
@@ -322,6 +327,7 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, vep_pick_order, 
         else:
             # loop over VEP consequence blocks PICK'ed according to VEP's ranking scheme
             # only consider the primary/picked consequence when expanding with annotation tags
+                
             if csq_fields[vep_csq_fields_map['field2index']['PICK']] == "1":                
                 csq_record = get_csq_record_annotations(csq_fields, varkey, logger, vep_csq_fields_map, transcript_xref_map)                           
                 # Append transcript consequence to all_csq_pick
@@ -350,29 +356,39 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, vep_pick_order, 
             str(csq_fields[vep_csq_fields_map['field2index']['BIOTYPE']]))
         all_transcript_consequences.append(consequence_entry)
 
-  
-    if len(all_csq_pick) == 0 and pick_only is False:
-        logger.warning('No picked VEP block with a Consequence/transcript that matches CPSR target genes - considering alternative consequences')
-        all_csq_pick = alternative_csq_pick
+    ## CPSR - consider all picked VEP blocks
+    if pick_only is False:
+        if len(all_csq_pick) == 0:
+            if gwas_hit is False:
+                logger.warning(f"Picked VEP block for {varkey} does not match virtual panel target genes - considering alternative consequences")
+            if len(alternative_csq_pick) > 0:
+                all_csq_pick = alternative_csq_pick
+            else:
+                logger.info(f"NO VEP BLOCK FOUND")
+                exit(1)
+        else:
+            ## don't consider regulatory consequence as single chosen consequence
+            if len(all_csq_pick) == 1 and len(alternative_csq_pick) > 0:
+                if all_csq_pick[0]['Feature_type'] == 'RegulatoryFeature':
+                    all_csq_pick = alternative_csq_pick
         
     vep_csq_results = {}
     vep_csq_results['picked_gene_csq'] = all_csq_pick
     vep_csq_results['all_csq'] = all_transcript_consequences
     vep_csq_results['picked_csq'] = None
-    
     vep_chosen_csq_idx = 0
 
     ## If multiple transcript-specific variant consequences highlighted by --pick_allele_gene, 
     ## prioritize/choose block of consequence according to 'vep_pick_order'
     if len(vep_csq_results['picked_gene_csq']) > 1:
-        vep_chosen_csq_idx = pick_single_gene_csq(vep_csq_results, pick_criteria_ordered = vep_pick_order)        
+        vep_chosen_csq_idx = pick_single_gene_csq(vep_csq_results, pick_criteria_ordered = vep_pick_order, logger = logger)        
         vep_csq_results['picked_csq'] = vep_csq_results['picked_gene_csq'][vep_chosen_csq_idx]
     else:
         ## check that size if 1, otherwise prompt error below
         #logger.info('ERROR: No VEP block chosen by --pick_allele_gene')
         if len(vep_csq_results['picked_gene_csq']) == 1:
             vep_csq_results['picked_csq'] = vep_csq_results['picked_gene_csq'][vep_chosen_csq_idx]
-        else:
+        else:            
             logger.error('ERROR: No VEP block chosen by --pick_allele_gene')
 
 

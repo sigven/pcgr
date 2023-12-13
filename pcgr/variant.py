@@ -9,6 +9,44 @@ import warnings
 from pcgr import pcgr_vars
 warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 
+
+def set_genotype(variant_set: pd.DataFrame, logger) -> pd.DataFrame:
+    """
+    Set verbose genotype (homozygous, heterozygous) for each variant
+    """
+    variant_set['GENOTYPE'] = '.'    
+    if {'GT'}.issubset(variant_set.columns):
+        logger.info("Assignment of genotype (homozygous, heterozygous) for each variant based on 'GT' tag")
+        heterozygous_states = []
+        ref_allele_index = 0
+        while ref_allele_index < 20:
+            alt_allele_index = ref_allele_index + 1
+            while alt_allele_index <= 20:
+                phased_gt_1 = str(ref_allele_index) + "|" + str(alt_allele_index)
+                phased_gt_2 = str(alt_allele_index) + "|" + str(ref_allele_index)
+                unphased_gt_1 = str(ref_allele_index) + "/" + str(alt_allele_index)
+                unphased_gt_2 = str(alt_allele_index) + "/" + str(ref_allele_index)
+                gts = [phased_gt_1, phased_gt_2, unphased_gt_1, unphased_gt_2]
+                heterozygous_states.extend(gts)
+                
+                alt_allele_index = alt_allele_index + 1
+            ref_allele_index = ref_allele_index + 1
+            
+        homozygous_states = []    
+        hom_allele_index = 1
+        while hom_allele_index <= 20:
+            phased_gt = str(hom_allele_index) + "|" + str(hom_allele_index)
+            unphased_gt = str(hom_allele_index) + "/" + str(hom_allele_index)
+            homozygous_states.extend([phased_gt, unphased_gt])
+            hom_allele_index = hom_allele_index + 1
+        
+        variant_set.loc[variant_set['GT'].isin(homozygous_states), "GENOTYPE"] = "homozygous"
+        variant_set.loc[variant_set['GT'].isin(heterozygous_states),"GENOTYPE"] = "heterozygous"
+    else:
+        variant_set['GENOTYPE'] = "undefined"
+        
+    return(variant_set)
+
 def append_annotations(vcf2tsv_gz_fname: str, pcgr_db_dir: str, logger):
     
     clinvar_tsv_fname = os.path.join(pcgr_db_dir, 'variant','tsv','clinvar', 'clinvar.tsv.gz')
@@ -208,7 +246,7 @@ def calculate_tmb(variant_set: pd.DataFrame, tumor_dp_min: int, tumor_af_min: fl
                          'tmb_unit'])
             df.to_csv(tmb_fname, sep="\t", header=True, index=False)
 
-def clean_annotations(variant_set: pd.DataFrame, yaml_data: dict) -> pd.DataFrame:
+def clean_annotations(variant_set: pd.DataFrame, yaml_data: dict, germline: bool, logger) -> pd.DataFrame:
     
     if {'Consequence','EFFECT_PREDICTIONS','CLINVAR_CONFLICTED'}.issubset(variant_set.columns):
         variant_set.rename(columns = {'Consequence':'CONSEQUENCE'}, inplace = True)
@@ -219,7 +257,8 @@ def clean_annotations(variant_set: pd.DataFrame, yaml_data: dict) -> pd.DataFram
         variant_set.loc[variant_set['CLINVAR_CONFLICTED'] != 1, "CLINVAR_CONFLICTED"] = False
     
     if not {'VCF_SAMPLE_ID'}.issubset(variant_set.columns):
-        variant_set['VCF_SAMPLE_ID'] = yaml_data['sample_id']
+        variant_set['VCF_SAMPLE_ID'] = yaml_data['sample_id'].astype(str)
+    variant_set['SAMPLE_ID'] = str(yaml_data['sample_id'])
     variant_set['GENOME_VERSION'] = yaml_data['genome_assembly']
     if {'CHROM','POS','REF','ALT',}.issubset(variant_set.columns):      
         variant_set['GENOMIC_CHANGE'] = variant_set['CHROM'].astype(str) + ":g." + variant_set['POS'].astype(str) + \
@@ -255,5 +294,8 @@ def clean_annotations(variant_set: pd.DataFrame, yaml_data: dict) -> pd.DataFram
             variant_set[vcf_info_tag] = variant_set[vcf_info_tag].astype(str)
             variant_set.loc[variant_set[vcf_info_tag] != ".", vcf_info_tag] = \
                 variant_set.loc[variant_set[vcf_info_tag] != ".", vcf_info_tag].astype(float).astype(int)
+    
+    if germline is True:
+        variant_set = set_genotype(variant_set, logger)
     
     return variant_set

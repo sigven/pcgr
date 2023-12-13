@@ -33,12 +33,17 @@ def error_message(message, logger):
     sys.exit(1)
 
 def warn_message(message, logger):
+    logger.warning("")
     logger.warning(message)
-    
-def random_string(length):
-    letters = string.ascii_lowercase
-    result_str = ''.join(random.choice(letters) for i in range(length))
-    return result_str
+    logger.warning("")
+ 
+def random_id_generator(size = 10, chars = string.ascii_lowercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))   
+
+#def random_string(length):
+#    letters = string.ascii_lowercase
+#    result_str = ''.join(random.choice(letters) for i in range(length))
+#    return result_str
 
 def check_subprocess(logger, command, debug):
     if debug:

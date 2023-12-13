@@ -92,8 +92,8 @@ def extend_vcf_annotations(arg_dict, logger):
                     if yaml_data is not None:
                         panel_genes = yaml_data['conf']['gene_panel']['panel_genes']
                         for g in panel_genes:
-                            if 'ensembl_gene_id' in g:
-                                cpsr_target_genes[g['ensembl_gene_id']] = 1
+                            if 'entrezgene' in g:                                
+                                cpsr_target_genes[str(g['entrezgene'])] = 1
                             
             
         vcf_infotags['cpsr'] = read_infotag_file(os.path.join(arg_dict['pcgr_db_dir'], 'vcf_infotags_cpsr.tsv'), scope = "cpsr")
@@ -109,7 +109,10 @@ def extend_vcf_annotations(arg_dict, logger):
     for db in ['cgi','civic']:
         variant_fname = os.path.join(arg_dict['pcgr_db_dir'], 'biomarker','tsv', f"{db}.variant.tsv.gz")
         clinical_fname = os.path.join(arg_dict['pcgr_db_dir'], 'biomarker','tsv', f"{db}.clinical.tsv.gz")
-        biomarkers[db] = load_biomarkers(logger, variant_fname, clinical_fname, biomarker_vartype = 'MUT')
+        if arg_dict['cpsr'] is True:
+            biomarkers[db] = load_biomarkers(logger, variant_fname, clinical_fname, biomarker_vartype = 'MUT', biomarker_variant_origin = 'Both')
+        else:
+            biomarkers[db] = load_biomarkers(logger, variant_fname, clinical_fname, biomarker_vartype = 'MUT', biomarker_variant_origin = 'Somatic')
 
     out_vcf = re.sub(r'(\.gz)$','',arg_dict['vcf_file_out'])
 
@@ -145,6 +148,9 @@ def extend_vcf_annotations(arg_dict, logger):
 
     vars_no_csq = list()
     for rec in vcf:
+        alt_allele = ','.join(rec.ALT)
+        pos = rec.start + 1
+        variant_id = f"g.{rec.CHROM}:{pos}{rec.REF}>{alt_allele}"
         if current_chrom is None:
             current_chrom = str(rec.CHROM)
             num_chromosome_records_processed = 0
@@ -155,9 +161,7 @@ def extend_vcf_annotations(arg_dict, logger):
                 current_chrom = str(rec.CHROM)
                 num_chromosome_records_processed = 0
         if rec.INFO.get('CSQ') is None:
-            alt_allele = ','.join(rec.ALT)
-            pos = rec.start + 1
-            variant_id = f"g.{rec.CHROM}:{pos}{rec.REF}>{alt_allele}"
+            
             vars_no_csq.append(variant_id)
             continue
 
@@ -169,7 +173,7 @@ def extend_vcf_annotations(arg_dict, logger):
             vep_csq_record_results = \
                 parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, arg_dict['vep_pick_order'], 
                               logger, pick_only = False, csq_identifier = 'CSQ', 
-                              targets_ensembl_gene = cpsr_target_genes)
+                              targets_entrez_gene = cpsr_target_genes)
             if 'picked_gene_csq' in vep_csq_record_results:
                 rec.INFO['REGULATORY_ANNOTATION'] = map_regulatory_variant_annotations(
                     vep_csq_record_results['picked_gene_csq'])
@@ -184,6 +188,7 @@ def extend_vcf_annotations(arg_dict, logger):
         principal_csq_properties['entrezgene'] = '.'
         principal_csq_properties['exon'] = '.'
         principal_csq_properties['codon'] = '.'
+        principal_csq_properties['lof'] = '.'
         
         if 'picked_csq' in vep_csq_record_results:
             csq_record = vep_csq_record_results['picked_csq']
@@ -208,6 +213,9 @@ def extend_vcf_annotations(arg_dict, logger):
                             if k == 'ENTREZGENE':
                                 principal_csq_properties['entrezgene'] = csq_record[k]
                             
+                            if k == 'LOSS_OF_FUNCTION':
+                                principal_csq_properties['lof'] = csq_record[k]
+                            
                             if k == 'EXON':
                                 if "/" in csq_record[k]:
                                     principal_csq_properties['exon'] = csq_record[k].split('/')[0]
@@ -216,7 +224,7 @@ def extend_vcf_annotations(arg_dict, logger):
             rec.INFO['VEP_ALL_CSQ'] = ','.join(vep_csq_record_results['all_csq'])
             match_csq_mutation_hotspot(vep_csq_record_results['all_csq'], cancer_hotspots, rec, principal_csq_properties)
 
-            for db in ['civic','cgi']:
+            for db in ['civic','cgi']:                
                 match_csq_biomarker(vep_csq_record_results['all_csq'], biomarkers[db], rec, principal_csq_properties)
 
         if not rec.INFO.get('DBNSFP') is None:

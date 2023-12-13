@@ -11,8 +11,8 @@ import pandas as pd
 import gzip
 
 from cyvcf2 import VCF
-from pcgr import utils, annoutils, vcf
-from pcgr.utils import error_message, check_subprocess, random_string, sort_bed, check_file_exists
+from pcgr import utils, annoutils, vcf, pcgr_vars
+from pcgr.utils import error_message, check_subprocess, random_id_generator, sort_bed, check_file_exists
 
 
 def __main__():
@@ -58,14 +58,14 @@ def get_valid_custom_genelist(genelist_fname, genelist_bed_fname, pcgr_dir, geno
     Function that checks whether the custom genelist contains valid entries from the complete exploratory track
     """
     
-    random_strings = [random_string(15), random_string(15), random_string(15), random_string(15)]
+    random_id = random_id_generator(15)
     
     genelist_reader = csv.DictReader(open(genelist_fname,'r'), delimiter='\n', fieldnames=['ensembl_gene_id'])
     virtualpanel_track_bed = os.path.join(
         pcgr_dir, "data", genome_assembly, "gene","bed","gene_virtual_panel", "0.bed.gz")
     virtualpanel_track_tsv = os.path.join(
         pcgr_dir, "data", genome_assembly, "gene","tsv","gene_virtual_panel", "gene_virtual_panel.tsv.gz")
-    genelist_bed_fname_unsorted = f'{genelist_bed_fname}.{random_strings[0]}.unsorted.bed'
+    genelist_bed_fname_unsorted = f'{genelist_bed_fname}.{random_id}.unsorted.bed'
 
     customlist_identifiers = {}
     superpanel_track = []
@@ -143,7 +143,7 @@ def simplify_vcf(input_vcf, validated_vcf, vcf, custom_bed, pcgr_directory, geno
     4. Final VCF file is sorted and indexed (bgzip + tabix)
     """
 
-    random_str = random_string(10) 
+    random_str = random_id_generator(10) 
 
     temp_files = {}
     temp_files['vcf_1'] = \
@@ -204,8 +204,17 @@ def simplify_vcf(input_vcf, validated_vcf, vcf, custom_bed, pcgr_directory, geno
                 "bedtools intersect -wa -u -header -a " + str(temp_files['vcf_4']) + \
                 " -b " + str(custom_bed) + " > " + str(validated_vcf)
             check_subprocess(logger, target_variants_intersect_cmd, debug)
-    else:
-        logger.info('Limiting variant set to cancer predisposition loci - virtual panel id(s): ' + str(virtual_panel_id))
+    else:        
+        if gwas_findings == 0 and secondary_findings == 1:
+            logger.info(f"Limiting variant set to cancer predisposition loci (virtual panel id(s): '{str(virtual_panel_id)}' and secondary findings (ACMG)")
+        elif gwas_findings == 0 and secondary_findings == 0:
+            logger.info(f"Limiting variant set to cancer predisposition loci (virtual panel id(s): '{str(virtual_panel_id)}'")                
+        elif gwas_findings == 1 and secondary_findings == 0:
+            logger.info(f"Limiting variant set to cancer predisposition loci (virtual panel id(s): '{str(virtual_panel_id)}' and GWAS hits (NHGRI-EBI Catalog)")
+        else:
+            logger.info((
+                f"Limiting variant set to cancer predisposition loci (virtual panel id(s): '{str(virtual_panel_id)}', "
+                f"secondary findings (ACMG), and GWAS hits (NHGRI-EBI Catalog)"))
 
         ## Concatenate all panel BEDs to one big virtual panel BED, sort and make unique
         panel_ids = str(virtual_panel_id).split(',')
@@ -224,11 +233,11 @@ def simplify_vcf(input_vcf, validated_vcf, vcf, custom_bed, pcgr_directory, geno
             awk_command = "awk 'BEGIN{FS=\"\\t\"}{if($4 !~ /ACMG_SF/ || ($4 ~ /ACMG_SF/ && $4 ~ /" + str(ge_panel_identifier) + "/))print;}'"
             if gwas_findings == 0 and secondary_findings == 1:
                 check_subprocess(logger, f'bgzip -dc {target_bed_gz} | egrep -v "(\|tag\|)" >> {virtual_panels_tmp_bed}', debug)
-            elif gwas_findings == 0 and secondary_findings == 0:                
+            elif gwas_findings == 0 and secondary_findings == 0:
                 check_subprocess(logger, f'bgzip -dc {target_bed_gz} | egrep -v "(\|tag\|)" | {awk_command} >> {virtual_panels_tmp_bed}', debug)
             elif gwas_findings == 1 and secondary_findings == 0:
                 check_subprocess(logger, f'bgzip -dc {target_bed_gz} | {awk_command} >> {virtual_panels_tmp_bed}', debug)
-            else:
+            else:                
                 check_subprocess(logger, f'bgzip -dc {target_bed_gz} >> {virtual_panels_tmp_bed}', debug)
 
         ## sort the collection of virtual panels
@@ -293,8 +302,8 @@ def validate_cpsr_input(pcgr_directory,
 
     custom_target_fname = {}
     custom_target_fname['tsv'] = custom_list_fname
-
     custom_target_fname['bed'] = 'None'
+    
     if not custom_target_fname['tsv'] == 'None':
         logger.info('Establishing BED track with custom list of genes from panel 0')
         custom_target_fname['bed'] = custom_list_bed_fname

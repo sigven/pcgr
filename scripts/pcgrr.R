@@ -82,7 +82,8 @@ p$add_argument('msigs_prevalence_ref_sigs', type='integer') # 46
 cna_args <- c('log_r_homdel', 'log_r_gain', 'cna_overlap_pct')
 p$add_argument('log_r_homdel', type='double')      # 47
 p$add_argument('log_r_gain', type='double')        # 48
-p$add_argument('cna_overlap_pct', type='double')   # 49
+p$add_argument('min_copies_ampl', type='integer')  # 49
+p$add_argument('cna_overlap_pct', type='double')   # 50
 # allelic support args
 allelic_support_args <- c(
   'tumor_af_min', 'tumor_dp_min',
@@ -90,33 +91,32 @@ allelic_support_args <- c(
   'tumor_af_tag', 'tumor_dp_tag',
   'control_af_tag', 'control_dp_tag',
   'call_conf_tag')
-p$add_argument('tumor_af_min', type='double')   # 50
-p$add_argument('tumor_dp_min', type='double')   # 51
-p$add_argument('control_dp_min', type='double') # 52
-p$add_argument('control_af_max', type='double') # 53
-p$add_argument('tumor_af_tag')    # 54
-p$add_argument('tumor_dp_tag')    # 55
-p$add_argument('control_af_tag')  # 56
-p$add_argument('control_dp_tag')  # 57
-p$add_argument('call_conf_tag')   # 58
+p$add_argument('tumor_af_min', type='double')   # 51
+p$add_argument('tumor_dp_min', type='double')   # 52
+p$add_argument('control_dp_min', type='double') # 53
+p$add_argument('control_af_max', type='double') # 54
+p$add_argument('tumor_af_tag')    # 55
+p$add_argument('tumor_dp_tag')    # 56
+p$add_argument('control_af_tag')  # 57
+p$add_argument('control_dp_tag')  # 58
+p$add_argument('call_conf_tag')   # 59
 # clinicaltrials
-p$add_argument('clinicaltrials_run', type='integer')  # 59
+p$add_argument('clinicaltrials_run', type='integer')  # 60
 # other
-p$add_argument('vep_n_forks', type='integer')         # 60
-p$add_argument('vep_buffer_size', type='integer')     # 61
-p$add_argument('vep_no_intergenic', type='integer')   # 62
-p$add_argument('vep_pick_order')                      # 63
-p$add_argument('vep_regulatory', type='integer')      # 64
-p$add_argument('vep_gencode_all', type='integer')     # 65
-p$add_argument('vcf2maf', type='integer')             # 66
-p$add_argument('list_noncoding', type='integer')      # 67
-# preserved_info_tags
-p$add_argument('preserved_info_tags')                 # 68
+p$add_argument('vep_n_forks', type='integer')         # 61
+p$add_argument('vep_buffer_size', type='integer')     # 62
+p$add_argument('vep_no_intergenic', type='integer')   # 63
+p$add_argument('vep_pick_order')                      # 64
+p$add_argument('vep_regulatory', type='integer')      # 65
+p$add_argument('vep_gencode_all', type='integer')     # 66
+p$add_argument('vcf2maf', type='integer')             # 67
+p$add_argument('list_noncoding', type='integer')      # 68
+# retained_info_tags
+p$add_argument('retained_info_tags')                 # 69
 # visual
-p$add_argument('report_theme')                        # 69
-p$add_argument('nonfloating_toc', type='integer')     # 70
+p$add_argument('report_theme')                        # 70
+p$add_argument('nonfloating_toc', type='integer')     # 71
 # other
-p$add_argument('vcf_no_validation', type='integer')   # 71
 
 args <- p$parse_args()
 
@@ -126,28 +126,31 @@ pcgr_config <- list(
   t_props = args[t_props_args],
   assay_props = args[assay_props_args],
   tumor_only = args[unlist(tumor_only_args)],
-  tmb = list(run = as.logical(args[['tmb_run']]), algorithm = args[['tmb_algo']]),
+  tmb = list(
+    run = as.logical(args[['tmb_run']]),
+    algorithm = args[['tmb_algo']]),
   msi = list(run = as.logical(args[['msi_run']])),
-  msigs = list(run = as.logical(args[['msigs_run']]),
-               mutation_limit = args[['msigs_mut_lim']],
-               all_reference_signatures = as.logical(args[['msigs_all_ref_sigs']]),
-               include_artefact_signatures = as.logical(args[['msigs_incl_art_sigs']]),
-               prevalence_reference_signatures = as.integer(args[['msigs_prevalence_ref_sigs']])
+  msigs = list(
+    run = as.logical(args[['msigs_run']]),
+    mutation_limit = args[['msigs_mut_lim']],
+    all_reference_signatures = as.logical(args[['msigs_all_ref_sigs']]),
+    include_artefact_signatures = as.logical(args[['msigs_incl_art_sigs']]),
+    prevalence_reference_signatures = as.integer(args[['msigs_prevalence_ref_sigs']])
   ),
   cna = args[cna_args],
   allelic_support = args[allelic_support_args],
   clinicaltrials = list(run = as.logical(args[['clinicaltrials_run']])),
-  other = list(vep_n_forks = args[['vep_n_forks']],
+  vep = list(vep_n_forks = args[['vep_n_forks']],
                vep_buffer_size = args[['vep_buffer_size']],
                vep_no_intergenic = as.logical(args[['vep_no_intergenic']]),
                vep_pick_order = args[['vep_pick_order']],
                vep_regulatory = as.logical(args[['vep_regulatory']]),
-               vep_gencode_all = as.logical(args[['vep_gencode_all']]),
-               vcf2maf = as.logical(args[['vcf2maf']]),
+               vep_gencode_all = as.logical(args[['vep_gencode_all']])),
+  other = list(vcf2maf = as.logical(args[['vcf2maf']]),
                list_noncoding = as.logical(args[['list_noncoding']]),
                vcf_no_validation = as.logical(args[['vcf_no_validation']])
   ),
-  preserved_info_tags = args[['preserved_info_tags']],
+  retained_info_tags = args[['retained_info_tags']],
   visual = list(report_theme = args[['report_theme']],
                 nonfloating_toc = as.logical(args[['nonfloating_toc']])
   )
@@ -202,147 +205,101 @@ for (mf in tumor_only_args[['filter']]) {
   pcgr_config[['tumor_only']][[mf]] <- as.logical(args[[mf]])
 }
 
-pcgr_config_rds <- file.path(
+pcgr_config_rds_fname <- file.path(
   pcgr_config[['required_args']][['output_dir']],
   paste0(pcgr_config[['required_args']][['sample_name']],
          ".pcgr_config.rds"))
-saveRDS(pcgr_config, file = pcgr_config_rds)
+pcgr_config_json_fname <- file.path(
+  pcgr_config[['required_args']][['output_dir']],
+  paste0(pcgr_config[['required_args']][['sample_name']],
+         ".pcgr_config.json"))
+pcgr_config_json <- jsonlite::toJSON(pcgr_config)
+saveRDS(pcgr_config, file = pcgr_config_rds_fname)
+jsonlite::write_json(pcgr_config_json, path = pcgr_config_json_fname)
+
 ### Arg processing END
 
-pcgr_data <- readRDS(
-  file.path(pcgr_config[['required_args']][['data_dir']],
-            'data',
-            pcgr_config[['required_args']][['genome_assembly']],
-            'rds','pcgr_data.rds'))
-
-# set up genome assembly
-genome_assembly <- pcgr_config[['required_args']][['genome_assembly']]
-bsgenome_obj <- pcgrr::get_genome_obj(genome_assembly)
-genome_grch2hg <- c("grch38" = "hg38", "grch37" = "hg19")
-pcgr_data[['assembly']][['seqinfo']] <-
-  GenomeInfoDb::Seqinfo(
-    seqnames = GenomeInfoDb::seqlevels(GenomeInfoDb::seqinfo(bsgenome_obj)),
-    seqlengths = GenomeInfoDb::seqlengths(GenomeInfoDb::seqinfo(bsgenome_obj)),
-    genome = genome_grch2hg[genome_assembly])
-pcgr_data[['assembly']][['bsg']] <- bsgenome_obj
-
-## temporary fix - some evidence items from CIViC are not
-## assigned as codon markers, but rather as exact (variant level markers)
-pcgr_data$biomarkers$civic <- suppressWarnings(
-  pcgr_data$biomarkers$civic |>
-  dplyr::mutate(BIOMARKER_MAPPING = dplyr::if_else(
-    stringr::str_detect(VARIANT_NAME,"^[A-Z][0-9]{1,}$") &
-      BIOMARKER_MAPPING == "exact",
-    "codon",
-    as.character(BIOMARKER_MAPPING)
-  )) |>
-  dplyr::mutate(MAPPING_RANK = dplyr::if_else(
-    stringr::str_detect(VARIANT_NAME,"^[A-Z][0-9]{1,}$") &
-      BIOMARKER_MAPPING == "codon",
-    2,
-    as.integer(MAPPING_RANK)
-  )) |>
-  dplyr::mutate(EITEM_CODON = dplyr::if_else(
-    stringr::str_detect(VARIANT_NAME,"^[A-Z][0-9]{1,}$") &
-      BIOMARKER_MAPPING == "codon" &
-      is.na(EITEM_CODON),
-    as.integer(
-      as.character(stringr::str_replace(
-        VARIANT_NAME, "^[A-Z]",""
-      )
-    )),
-    as.integer(EITEM_CODON)
-  ))
-)
-
-## temporary type fix
-if("ACTIONABILITY_SCORE" %in% colnames(pcgr_data$biomarkers$cgi)){
-  pcgr_data$biomarkers$cgi$ACTIONABILITY_SCORE <-
-    as.numeric(pcgr_data$biomarkers$cgi$ACTIONABILITY_SCORE)
-}
-for(col in c('VARIANT_TYPE','DRUG_INTERACTION_TYPE','GDNA')){
-  if(col %in% colnames(pcgr_data$biomarkers$cgi)){
-    pcgr_data$biomarkers$cgi[,col] <- as.character(
-      pcgr_data$biomarkers$cgi[,col]
-    )
-  }
-}
-
-if (pcgr_config[['other']][['vep_regulatory']] == F){
-  for (e in c('tier4_display','tier5_display','all','tsv')){
-    pcgr_data[['annotation_tags']][[e]] <-
-      pcgr_data[['annotation_tags']][[e]][
-        pcgr_data[['annotation_tags']][[e]] != "REGULATORY_ANNOTATION"]
-  }
-}
-
-my_log4r_layout <- function(level, ...) {
-  paste0(format(Sys.time()), " - pcgr-report-generation - ",
-         level, " - ", ..., "\n", collapse = "")
-}
-
-log4r_logger <- log4r::logger(threshold = "INFO",
-                              appenders = log4r::console_appender(my_log4r_layout))
-
-# this gets passed on to all the log4r_* functions inside the pkg
-options("PCGRR_LOG4R_LOGGER" = log4r_logger)
-
-## Clinical trials
-if (pcgr_config[['t_props']][['tumor_type']] == "Cancer, NOS"){
-  pcgrr:::log4r_info(paste0("Clinical trials will not be included in the report when primary site is not specified - skipping"))
-  pcgr_config[['clinicaltrials']][['run']] <- F
-}
-
-pcgrr:::log4r_info(paste0("Tumor primary site: ", pcgr_config[['t_props']][['tumor_type']]))
-
-pcg_report <- NULL
-
-defaultW <- getOption("warn")
-options(warn = -1)
-
-# ## Generate report object
-pcg_report <-
-  pcgrr::generate_pcgr_report(
-    project_directory  = pcgr_config[['required_args']][['output_dir']],
-    pcgr_data = pcgr_data,
-    config = pcgr_config,
-    tier_model = 'pcgr_acmg')
-
-options(warn = defaultW)
+#pcgr_data <- pcgrr::load_reference_data(
+#  pcgr_db_dir = pcgr_config[['required_args']][['data_dir']],
+#  genome_assembly = pcgr_config[['required_args']][['genome_assembly']])
 
 
-# ## Write report and result files
-if (!is.null(pcg_report)) {
 
-  pcgrr::write_report_output(
-    pcg_report,
-    pcgr_config,
-    output_format = 'snv_tsv')
-  pcgrr::write_report_output(
-    pcg_report,
-    pcgr_config,
-    output_format = 'msigs_tsv')
-  if (pcgr_config[['assay_props']][['vcf_tumor_only']] == T){
-    pcgrr::write_report_output(
-      pcg_report,
-      pcgr_config,
-      output_format = 'snv_tsv_unfiltered')
-  }
-  pcgrr::write_report_output(
-    pcg_report,
-    pcgr_config,
-    output_format = 'cna_tsv')
-  pcgrr::write_report_output(
-    pcg_report,
-    pcgr_config,
-    output_format = 'html')
-  pcgrr::write_report_output(
-    pcg_report,
-    pcgr_config,
-    output_format = 'html',
-    flexdb = T)
-  pcgrr::write_report_output(
-    pcg_report,
-    pcgr_config,
-    output_format = 'json')
-}
+# if (pcgr_config[['other']][['vep_regulatory']] == F){
+#   for (e in c('tier4_display','tier5_display','all','tsv')){
+#     pcgr_data[['annotation_tags']][[e]] <-
+#       pcgr_data[['annotation_tags']][[e]][
+#         pcgr_data[['annotation_tags']][[e]] != "REGULATORY_ANNOTATION"]
+#   }
+# }
+
+# my_log4r_layout <- function(level, ...) {
+#   paste0(format(Sys.time()), " - pcgr-report-generation - ",
+#          level, " - ", ..., "\n", collapse = "")
+# }
+
+# log4r_logger <- log4r::logger(threshold = "INFO",
+#                               appenders = log4r::console_appender(my_log4r_layout))
+
+# # this gets passed on to all the log4r_* functions inside the pkg
+# options("PCGRR_LOG4R_LOGGER" = log4r_logger)
+
+# ## Clinical trials
+# if (pcgr_config[['t_props']][['tumor_type']] == "Cancer, NOS"){
+#   pcgrr:::log4r_info(paste0("Clinical trials will not be included in the report when primary site is not specified - skipping"))
+#   pcgr_config[['clinicaltrials']][['run']] <- F
+# }
+
+# pcgrr:::log4r_info(paste0("Tumor primary site: ", pcgr_config[['t_props']][['tumor_type']]))
+
+# pcg_report <- NULL
+
+# defaultW <- getOption("warn")
+# options(warn = -1)
+
+# # ## Generate report object
+# pcg_report <-
+#   pcgrr::generate_pcgr_report(
+#     project_directory  = pcgr_config[['required_args']][['output_dir']],
+#     pcgr_data = pcgr_data,
+#     config = pcgr_config,
+#     tier_model = 'pcgr_acmg')
+
+# options(warn = defaultW)
+
+
+# # ## Write report and result files
+# if (!is.null(pcg_report)) {
+
+#   pcgrr::write_report_output(
+#     pcg_report,
+#     pcgr_config,
+#     output_format = 'snv_tsv')
+#   pcgrr::write_report_output(
+#     pcg_report,
+#     pcgr_config,
+#     output_format = 'msigs_tsv')
+#   if (pcgr_config[['assay_props']][['vcf_tumor_only']] == T){
+#     pcgrr::write_report_output(
+#       pcg_report,
+#       pcgr_config,
+#       output_format = 'snv_tsv_unfiltered')
+#   }
+#   pcgrr::write_report_output(
+#     pcg_report,
+#     pcgr_config,
+#     output_format = 'cna_tsv')
+#   pcgrr::write_report_output(
+#     pcg_report,
+#     pcgr_config,
+#     output_format = 'html')
+#   pcgrr::write_report_output(
+#     pcg_report,
+#     pcgr_config,
+#     output_format = 'html',
+#     flexdb = T)
+#   pcgrr::write_report_output(
+#     pcg_report,
+#     pcgr_config,
+#     output_format = 'json')
+# }
