@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - master
-      - dev
 env:
   atoken: ${{ secrets.ANACONDA_UPLOAD_TOKEN }}
   recipe_path: conda/recipe
@@ -12,60 +11,66 @@ env:
   env_lock_path: conda/env/lock
   VERSION: '1.4.1' # versioned by bump2version
 jobs:
-  build_conda_pkgs:
+  build_pcgrr_conda_pkg:
     # When merging to one of the branches above and the commit message matches
     if: "startsWith(github.event.head_commit.message, 'Bump version:')"
-    name: Build conda packages
+    name: Build pcgrr conda pkg
     runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash -l {0}
-
     steps:
       - name: Code checkout
-        uses: actions/checkout@v3
-      - name: Mambaforge setup
-        uses: conda-incubator/setup-miniconda@v2
+        uses: actions/checkout@v4
+      - name: Micromamba setup
+        uses: mamba-org/setup-micromamba@v1
         with:
-          miniforge-variant: Mambaforge
-          miniforge-version: "latest"
-          show-channel-urls: true
-          auto-activate-base: false
-          activate-environment: condabuild
           environment-file: ${{ env.env_yml_path }}/condabuild.yml
-          use-mamba: true
+      - name: 🐍 Conda pkg build and upload
+        run: |
+          conda mambabuild ${recipe_path}/pcgrr -c conda-forge -c bioconda --token ${atoken} --quiet
+  build_pcgr_conda_pkg:
+    # When merging to one of the branches above and the commit message matches
+    if: "startsWith(github.event.head_commit.message, 'Bump version:')"
+    name: Build pcgr conda pkg
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - name: Code checkout
+        uses: actions/checkout@v4
+      - name: Micromamba setup
+        uses: mamba-org/setup-micromamba@v1
+        with:
+          environment-file: ${{ env.env_yml_path }}/condabuild.yml
       - name: 🐍 Conda pkg build and upload
         run: |
           conda mambabuild ${recipe_path}/pcgr -c conda-forge -c bioconda --token ${atoken} --quiet
-          conda mambabuild ${recipe_path}/pcgrr -c conda-forge -c bioconda --token ${atoken} --quiet
 
-  # spin up fresh instance since conda-lock
-  # takes ages when run on previous one
+  # spin up fresh instance since conda-lock takes ages when run on previous one
   conda_lock:
     name: Conda lock
     runs-on: ubuntu-latest
-    needs: build_conda_pkgs
+    needs: [build_pcgr_conda_pkg, build_pcgrr_conda_pkg]
     defaults:
       run:
         shell: bash -l {0}
-
     steps:
       - name: Code checkout
-        uses: actions/checkout@v3
-      - name: Set up Mambaforge
-        uses: conda-incubator/setup-miniconda@v2
+        uses: actions/checkout@v4
+      - name: Micromamba setup
+        uses: mamba-org/setup-micromamba@v1
         with:
-          miniforge-variant: Mambaforge
-          miniforge-version: "latest"
-          show-channel-urls: true
-          auto-activate-base: false
-          activate-environment: condabuild
           environment-file: ${{ env.env_yml_path }}/condabuild.yml
-          use-mamba: true
-      - name: Generate conda locks
+      - name: 🔒 Conda lock
         run: |
-          conda-lock lock --mamba --file ${env_yml_path}/pcgr.yml --filename-template 'pcgr-{platform}.lock' -p osx-64 -p linux-64
-          conda-lock lock --mamba --file ${env_yml_path}/pcgrr.yml --filename-template 'pcgrr-{platform}.lock' -p osx-64 -p linux-64
+          # 1. generate a combined lock file
+          # 2. render platform-specific locks
+          conda-lock lock --file ${env_yml_path}/pcgr.yml -p osx-64 -p linux-64
+          conda-lock render --kind explicit -p osx-64 -p linux-64 conda-lock.yml --filename-template 'pcgr-{platform}.lock' && rm conda-lock.yml
+          conda-lock lock --file ${env_yml_path}/pcgrr.yml -p osx-64 -p linux-64
+          conda-lock render --kind explicit -p osx-64 -p linux-64 conda-lock.yml --filename-template 'pcgrr-{platform}.lock' && rm conda-lock.yml
           mv pcgrr-*.lock ${env_lock_path}
           mv pcgr-*.lock ${env_lock_path}
       - name: Commit changes
@@ -77,37 +82,14 @@ jobs:
           git add .
           git commit -m "${MSG}"
           git push
-
-  pkgdown-site:
-    name: Deploy pkgdown website
-    runs-on: ubuntu-latest
-    needs: build_conda_pkgs
-    defaults:
-      run:
-        shell: bash -l {0}
-    steps:
-      - name: Code checkout
-        uses: actions/checkout@v3
-      - name: Set up miniconda
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          miniforge-variant: Mambaforge
-          miniforge-version: "latest"
-          auto-update-conda: true
-          auto-activate-base: true
-          activate-environment: ""
-          channels: "pcgr,conda-forge,bioconda"
-      - name: Install conda packages
-        run: mamba env create -n pkgdown -f ${env_yml_path}/pkgdown.yml
       - name: 🌐 Website publish
         run: |
-            git config --local user.email "actions@github.com"
-            git config --local user.name "GitHub Actions"
-            conda activate pkgdown
-            cp pcgrr/DESCRIPTION . # hack for pkgdown to work
-            printf "pcgrr version:\n"
-            Rscript -e "packageVersion('pcgrr')"
-            Rscript -e "pkgdown::deploy_to_branch(pkg = 'pcgrr', commit_message = paste(pkgdown:::construct_commit_message('.'), '- see https://sigven.github.io/pcgr/'), branch = 'gh-pages', new_process = FALSE)"
+          micromamba env create -n pkgdownenv -f ${env_yml_path}/pkgdown.yml
+          micromamba activate pkgdownenv
+          cp pcgrr/DESCRIPTION . # hack for pkgdown to work
+          printf "pcgrr version:\n"
+          Rscript -e "packageVersion('pcgrr')"
+          Rscript -e "pkgdown::deploy_to_branch(pkg = 'pcgrr', commit_message = paste(pkgdown:::construct_commit_message('.'), '- see https://sigven.github.io/pcgr/'), branch = 'gh-pages', new_process = FALSE)"
 
   docker_deploy:
     name: Build and deploy Docker
@@ -116,10 +98,9 @@ jobs:
     defaults:
       run:
         shell: bash -l {0}
-
     steps:
       - name: Code checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - id: pull_lock_commit
         name: 📥 Pull lock commit
         run: |
@@ -128,7 +109,7 @@ jobs:
             LATEST_COMMIT_HASH="$(git --no-pager log -1 --format='%H')"
             echo "latest_commit_hash=${LATEST_COMMIT_HASH}" >> $GITHUB_OUTPUT
       - name: 🔖 Tag creation
-        uses: actions/github-script@v5
+        uses: actions/github-script@v7
         env:
           LATEST_COMMIT_HASH: ${{ steps.pull_lock_commit.outputs.latest_commit_hash }}
         with:
@@ -144,19 +125,20 @@ jobs:
 
       # work with tag from above
       - name: Code checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: v${{ env.VERSION }}
-      - name: Buildx setup
-        id: buildx
+      - name: 🏰 QEMU setup
+        uses: docker/setup-qemu-action@v2
+      - name: 🏯 Buildx setup
         uses: docker/setup-buildx-action@v2
       - name: DockerHub login
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: 🐳 Docker img build and push to DockerHub
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: . # yes, dot
           push: true
