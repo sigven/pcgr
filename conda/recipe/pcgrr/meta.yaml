@@ -23,7 +23,6 @@ requirements:
     - r-biocmanager
     - bioconductor-biostrings
     - r-caret
-    #- r-cpsr # this is grabbed during the conda env build so ignore
     - r-data.table
     - r-devtools
     - r-dt
@@ -66,7 +65,6 @@ requirements:
     - r-biocmanager
     - bioconductor-biostrings
     - r-caret
-    #- r-cpsr # this is grabbed during the conda env build so ignore
     - r-data.table
     - r-devtools
     - r-dt

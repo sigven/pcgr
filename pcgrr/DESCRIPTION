@@ -23,8 +23,6 @@ Description: Functions, tools and utilities for the generation of clinical cance
     it should thus not be used as a stand-alone package.
 License: MIT + file LICENSE
 biocViews:
-Remotes:
-    sigven/cpsr
 Imports:
     assertable,
     assertthat,
@@ -32,7 +30,6 @@ Imports:
     BiocManager,
     Biostrings,
     caret,
-    cpsr,
     data.table,
     DT,
     dplyr,
