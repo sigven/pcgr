@@ -13,7 +13,9 @@ dependencies:
   - ensembl-vep ==110.1
   - htslib
   - pandoc
+  - pybedtools
   - vcfanno
   - vt
   - bioconda::vcf2maf-umccr ==1.6.21.20230511
   - bioconda::vcf2tsvpy ==0.6.1
+  - yaml
