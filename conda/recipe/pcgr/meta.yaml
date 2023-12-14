@@ -21,7 +21,11 @@ requirements:
     - python
     - pandas
     - scipy
+    - numpy
     - pip
+    - pybedtools
+    - cyvcf2
+    - pyyaml
 
 test:
   commands:
