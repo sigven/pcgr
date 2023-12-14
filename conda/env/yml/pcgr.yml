@@ -13,6 +13,7 @@ dependencies:
   - ensembl-vep ==110.1
   - htslib
   - pandoc
+  - conda-forge::perl-compress-raw-zlib
   - pybedtools
   - vcfanno
   - vt
