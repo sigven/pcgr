@@ -110,8 +110,8 @@ def is_valid_rna_expression(rna_exp_file, logger):
     """
     rna_exp_reader = csv.DictReader(open(rna_exp_file,'r'), delimiter='\t')
     ## check that required columns are present
-    if not ('Gene' in rna_exp_reader.fieldnames and 'TPM' in rna_exp_reader.fieldnames and 'Log2FC' in rna_exp_reader.fieldnames and 'PAdj' in rna_exp_reader.fieldnames and 'DiffExp' in rna_exp_reader.fieldnames):
-        err_msg = "RNA fusion file (" + str(rna_exp_file) + ") is missing required column(s): 'Gene', 'TPM', 'Log2FC','PAdj', or 'DiffExp'\n. Column names present in file: " + str(rna_exp_reader.fieldnames)
+    if not ('Gene' in rna_exp_reader.fieldnames and 'TPM' in rna_exp_reader.fieldnames):
+        err_msg = "Bulk-RNA expression file (" + str(rna_exp_file) + ") is missing required column(s): 'Gene', 'TPM'\n. Column names present in file: " + str(rna_exp_reader.fieldnames)
         return error_message(err_msg, logger)
 
     rna_exp_dataframe = np.read_csv(rna_exp_file, sep="\t")
@@ -124,27 +124,11 @@ def is_valid_rna_expression(rna_exp_file, logger):
     if not rna_exp_dataframe['TPM'].dtype.kind in 'if': ## check that 'TPM' is of type object
         err_msg = "'TPM' column of RNA expression file cannot not be of type '" + str(rna_exp_dataframe['TPM'].dtype) + "'"
         return error_message(err_msg, logger)
-    if not rna_exp_dataframe['Log2FC'].dtype.kind in 'if': ## check that 'LogFC' is of type object
-        err_msg = "'Log2FC' column of RNA expression file cannot not be of type '" + str(rna_exp_dataframe['Log2FC'].dtype) + "'"
-        return error_message(err_msg, logger)
-    if not rna_exp_dataframe['PAdj'].dtype.kind in 'if': ## check that 'PAdj' is of type object
-        err_msg = "'TPM' column of RNA expression file cannot not be of type '" + str(rna_exp_dataframe['PAdj'].dtype) + "'"
-        return error_message(err_msg, logger)
-    if not rna_exp_dataframe['DiffExp'].dtype.kind in 'O': ## check that 'DiffExp' is of type object
-        err_msg = "'DiffExp' column of RNA expression file cannot not be of type '" + str(rna_exp_dataframe['DiffExp'].dtype) + "'"
-        return error_message(err_msg, logger)
 
-    for rec in rna_exp_reader:
-        if not (rec['DiffExp'] == 'over' or rec['DiffExp'] == 'under' or rec['DiffExp'] == 'NS'): ## check that 'DiffExp' column harbors permitted values
-            err_msg = "Confidence column contains non-permitted values - only 'over','under', or 'NS' permitted. Value entered was " + str(rec['DiffExp'])
-            return error_message(err_msg, logger)
-
+    for rec in rna_exp_reader:        
         if not (rec['TPM'] >= 0):
             err_msg = "'TPM' column cannot contain negative values - value was " + str(rec['TPM'])
-            return error_message(err_msg, logger)
-        if not (rec['PAdj'] >= 0):
-            err_msg = "'PAdj' column (adjusted p-value from differential expression testing) cannot contain negative values - value was " + str(rec['PAdj'])
-            return error_message(err_msg, logger)
+            return error_message(err_msg, logger)       
 
     logger.info('RNA expression file (' + str(rna_exp_file) + ') adheres to the correct format')
     return 0
@@ -351,7 +335,7 @@ def validate_pcgr_input(pcgr_directory,
         if valid_rna_fusion == -1:
             return -1
 
-    ## Check whether file with RNA fusion variants is properly formatted
+    ## Check whether file with RNA gene expression data is properly formatted
     if not input_rna_expression == 'None':
         valid_rna_expression = is_valid_rna_expression(input_rna_expression, logger)
         if valid_rna_expression == -1:
