@@ -158,7 +158,7 @@ def populate_config_data(conf_options: dict, db_dir: str, workflow = "PCGR", log
     conf_data['molecular_data']['fname_mut_vcf'] = conf_options['annotated_vcf']
     conf_data['molecular_data']['fname_mut_tsv'] = conf_options['annotated_tsv']
     conf_data['molecular_data']['fname_cna_tsv'] = "None"
-    if workflow == "PCGR" and conf_options['annotated_cna'] is not "None":
+    if workflow == "PCGR" and conf_options['annotated_cna'] != "None":
         conf_data['molecular_data']['fname_cna_tsv'] = conf_options['annotated_cna']
         del conf_options['annotated_cna']
     
@@ -187,7 +187,7 @@ def populate_config_data(conf_options: dict, db_dir: str, workflow = "PCGR", log
         if check_file_exists(metadata_fname, logger):
             metadata_df = pd.read_csv(metadata_fname, sep="\t", na_values=".")
             metadata_df["source_type"] = dtype
-            metadata_pd = metadata_pd.append(metadata_df, ignore_index=True)
+            metadata_pd = metadata_pd._append(metadata_df, ignore_index=True)
     
     conf_data['reference_data']['source_metadata'] = metadata_pd.to_dict(orient='records')
 

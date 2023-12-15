@@ -160,7 +160,9 @@ def get_csq_record_annotations(csq_fields, varkey, logger, vep_csq_fields_map, t
     return(csq_record)
 
 
-def pick_single_gene_csq(vep_csq_results, pick_criteria_ordered = "mane,canonical,appris,tsl,biotype,ccds,rank,length", logger = None):
+def pick_single_gene_csq(vep_csq_results, 
+                         pick_criteria_ordered = "mane_select,mane_plus_clinical,canonical,appris,tsl,biotype,ccds,rank,length", 
+                         logger = None):
 
     
     csq_candidates = []
@@ -171,7 +173,8 @@ def pick_single_gene_csq(vep_csq_results, pick_criteria_ordered = "mane,canonica
         csq_candidate = {}
 
         ## default values (undefined properties)
-        csq_candidate['mane'] = 1
+        csq_candidate['mane_select'] = 1
+        csq_candidate['mane_plus_clinical'] = 1        
         csq_candidate['canonical'] = 1
         csq_candidate['appris'] = 8
         csq_candidate['biotype'] = 1
@@ -183,9 +186,13 @@ def pick_single_gene_csq(vep_csq_results, pick_criteria_ordered = "mane,canonica
         csq_candidate['PICKED'] = True
         csq_candidate['varkey'] = csq_elem['VARKEY']
 
-        ## MANE status - lower value prioritized
+        ## MANE select status - lower value prioritized
         if not csq_elem['MANE_SELECT'] is None:
-            csq_candidate['mane'] = 0
+            csq_candidate['mane_select'] = 0
+        
+        ## MANE PLUS clnical status - lower value prioritized
+        if not csq_elem['MANE_PLUS_CLINICAL'] is None:
+            csq_candidate['mane_plus_clinical'] = 0
 
         ## CANONICAL status - lower value prioritized
         if not csq_elem['CANONICAL'] is None:

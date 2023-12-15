@@ -187,15 +187,15 @@ def check_args(arg_dict):
     # Check that VEP pick criteria is formatted correctly
     if not arg_dict['vep_pick_order'] is None:
         values = str(arg_dict['vep_pick_order']).split(',')
-        permitted_sources = ['canonical', 'appris', 'tsl', 'biotype', 'ccds', 'rank', 'length', 'mane']
+        permitted_sources = ['canonical', 'appris', 'tsl', 'biotype', 'ccds', 'rank', 'length', 'mane_select','mane_plus_clinical']
         num_permitted_sources = 0
         for v in values:
             if v in permitted_sources:
                 num_permitted_sources += 1
 
-        if num_permitted_sources != 8:
+        if num_permitted_sources != 9:
             err_msg = (f"'--vep_pick_order' = {arg_dict['vep_pick_order']} is formatted incorrectly, should be "
-                "a comma-separated string of the following values: mane,canonical,appris,tsl,biotype,ccds,rank,length")
+                "a comma-separated string of the following values: mane_select,mane_plus_clinical,canonical,appris,tsl,biotype,ccds,rank,length")
             error_message(err_msg, logger)
     return
 

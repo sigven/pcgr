@@ -97,7 +97,8 @@ def cli():
     optional_vcfanno.add_argument("--vcfanno_n_proc", default=4, type=int, help="Number of vcfanno processes (option '-p' in vcfanno), default: %(default)s")
     optional_vep.add_argument("--vep_n_forks", default=4, type=int, help="Number of forks (VEP option '--fork'), default: %(default)s")
     optional_vep.add_argument("--vep_buffer_size", default=500, type=int, help=f"Variant buffer size (variants read into memory simultaneously, VEP option '--buffer_size')\n- set lower to reduce memory usage, default: %(default)s")
-    optional_vep.add_argument("--vep_pick_order", default="mane,canonical,appris,tsl,biotype,ccds,rank,length", help=f"Comma-separated string of ordered transcript/variant properties for selection of primary variant consequence\n(option '--pick_order' in VEP), default: %(default)s")
+    optional_vep.add_argument("--vep_pick_order", default="mane_select,mane_plus_clinical,canonical,appris,tsl,biotype,ccds,rank,length", help=f"Comma-separated string " + \
+        "of ordered transcript/variant properties for selection of primary variant consequence\n(option '--pick_order' in VEP), default: %(default)s")
     optional_vep.add_argument("--vep_no_intergenic", action="store_true", help="Skip intergenic variants during processing (VEP option '--no_intergenic' in VEP), default: %(default)s")
     optional_vep.add_argument("--vep_regulatory", action="store_true", help="Add VEP regulatory annotations (VEP option '--regulatory') or non-coding interpretation, default: %(default)s")
     optional_vep.add_argument("--vep_gencode_basic", action="store_true", help = "Consider basic GENCODE transcript set only with Variant Effect Predictor (VEP) (VEP option '--gencode_basic').")
@@ -329,6 +330,7 @@ def run_pcgr(pcgr_paths, conf_options):
         check_subprocess(logger, vep_command['tabix'], debug)
         logger.info('Finished pcgr-vep')
         print('----')
+        exit(0)
 
         # PCGR|vcf2maf - if option set, convert VCF to MAF with https://github.com/mskcc/vcf2maf
         if run_vcf2maf:
