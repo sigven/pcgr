@@ -330,7 +330,6 @@ def run_pcgr(pcgr_paths, conf_options):
         check_subprocess(logger, vep_command['tabix'], debug)
         logger.info('Finished pcgr-vep')
         print('----')
-        exit(0)
 
         # PCGR|vcf2maf - if option set, convert VCF to MAF with https://github.com/mskcc/vcf2maf
         if run_vcf2maf:
