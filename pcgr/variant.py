@@ -257,7 +257,7 @@ def clean_annotations(variant_set: pd.DataFrame, yaml_data: dict, germline: bool
         variant_set.loc[variant_set['CLINVAR_CONFLICTED'] != 1, "CLINVAR_CONFLICTED"] = False
     
     if not {'VCF_SAMPLE_ID'}.issubset(variant_set.columns):
-        variant_set['VCF_SAMPLE_ID'] = yaml_data['sample_id'].astype(str)
+        variant_set['VCF_SAMPLE_ID'] = str(yaml_data['sample_id'])
     variant_set['SAMPLE_ID'] = str(yaml_data['sample_id'])
     variant_set['GENOME_VERSION'] = yaml_data['genome_assembly']
     if {'CHROM','POS','REF','ALT',}.issubset(variant_set.columns):      

@@ -12,15 +12,15 @@ max_af_gnomad <- function(sample_calls){
                                          "type data.frame"))
   )
   ## set maximum AF from gnomAD (all populations)
-  gnomad_cols <- c("gnomAD_AF",
-                   "gnomAD_NFE_AF",
-                   "gnomAD_AMR_AF",
-                   "gnomAD_AFR_AF",
-                   "gnomAD_SAS_AF",
-                   "gnomAD_EAS_AF",
-                   "gnomAD_ASJ_AF",
-                   "gnomAD_FIN_AF",
-                   "gnomAD_OTH_AF")
+  gnomad_cols <- c("gnomADe_AF",
+                   "gnomADe_NFE_AF",
+                   "gnomADe_AMR_AF",
+                   "gnomADe_AFR_AF",
+                   "gnomADe_SAS_AF",
+                   "gnomADe_EAS_AF",
+                   "gnomADe_ASJ_AF",
+                   "gnomADe_FIN_AF",
+                   "gnomADe_OTH_AF")
   sample_calls$MAX_AF_GNOMAD <- 0
   for (c in gnomad_cols) {
     if(c %in% colnames(sample_calls)){
@@ -358,7 +358,7 @@ assign_somatic_germline_evidence <- function(sample_calls, config) {
       pcgrr::assign_germline_popfreq_status(
         sample_calls,
         pop = pop,
-        dbquery = "gnomAD",
+        dbquery = "gnomADe",
         max_tolerated_af =
           config[["tumor_only"]][[paste0("maf_gnomad_", tolower(pop))]])
   }
@@ -382,7 +382,7 @@ assign_somatic_germline_evidence <- function(sample_calls, config) {
 #'
 #' @param sample_calls data frame with variants
 #' @param pop population code (1000 Genomes/gnomAD)
-#' @param dbquery 1KG or gnomAD
+#' @param dbquery gnomADe
 #' @param max_tolerated_af max tolerated germline allele frequency
 #'
 #' @return sample_calls
@@ -390,15 +390,15 @@ assign_somatic_germline_evidence <- function(sample_calls, config) {
 #' @export
 assign_germline_popfreq_status <- function(sample_calls,
                                            pop = "EUR",
-                                           dbquery = "1KG",
+                                           dbquery = "gnomADe",
                                            max_tolerated_af = 0.01) {
 
 
-  if (dbquery == "gnomAD") {
+  if (dbquery == "gnomADe") {
     if (!("STATUS_POPFREQ_GNOMAD_ABOVE_TOLERATED" %in% colnames(sample_calls))) {
       sample_calls$STATUS_POPFREQ_GNOMAD_ABOVE_TOLERATED <- FALSE
     }
-    col <- paste0(pop, "_AF_GNOMAD")
+    col <- paste0(dbquery,"_",pop, "_AF")
     if (any(grepl(paste0("^", col, "$"), names(sample_calls)))) {
 
       sample_calls$max_tolerated_af <- max_tolerated_af
