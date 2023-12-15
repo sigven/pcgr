@@ -24,7 +24,7 @@ VEP_MIN_FORKS = 1
 VEP_MAX_FORKS = 8
 VEP_MIN_BUFFER_SIZE = 50
 VEP_MAX_BUFFER_SIZE = 30000
-VEP_PICK_CRITERIA = ['mane','canonical','appris','tsl','biotype','ccds','rank','length']
+VEP_PICK_CRITERIA = ['mane_select','mane_plus_clinical','canonical','appris','tsl','biotype','ccds','rank','length']
 
 tsites = {
     0: 'Any',
