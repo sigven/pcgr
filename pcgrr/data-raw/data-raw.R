@@ -64,11 +64,11 @@ usethis::use_data(color_palette, overwrite = T)
 #-----evidence types---------#
 evidence_types <- c("predictive","prognostic","diagnostic",
                     "oncogenic","predisposing","functional")
-usethis::use_data(evidence_types)
+usethis::use_data(evidence_types, overwrite = T)
 
 #-----evidence levels---------#
 evidence_levels <- c("any","A_B","C_D_E")
-usethis::use_data(evidence_levels)
+usethis::use_data(evidence_levels, overwrite = T)
 
 
 #-----input column names/types-----#

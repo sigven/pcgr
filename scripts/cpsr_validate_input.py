@@ -230,7 +230,7 @@ def simplify_vcf(input_vcf, validated_vcf, vcf, custom_bed, pcgr_directory, geno
             
             ## awk command to ignore secondary finding records while keeping records that belong to target (and that can potentially
             ## be part of the secondary findings list)
-            awk_command = "awk 'BEGIN{FS=\"\\t\"}{if($4 !~ /ACMG_SF/ || ($4 ~ /ACMG_SF/ && $4 ~ /" + str(ge_panel_identifier) + "/))print;}'"
+            awk_command = "awk 'BEGIN{FS=\"\\t\"}{if($4 !~ /ACMG_SF/ || ($4 ~ /ACMG_SF/ && $4 ~ /" + str(ge_panel_identifier) + ":/))print;}'"
             if gwas_findings == 0 and secondary_findings == 1:
                 check_subprocess(logger, f'bgzip -dc {target_bed_gz} | egrep -v "(\|tag\|)" >> {virtual_panels_tmp_bed}', debug)
             elif gwas_findings == 0 and secondary_findings == 0:

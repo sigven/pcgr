@@ -452,7 +452,8 @@ def run_pcgr(pcgr_paths, conf_options):
         variant_set = variant.set_allelic_support(variant_set, allelic_support_tags = yaml_data["conf"]['somatic_snv']['allelic_support'])
         variant_set = variant.clean_annotations(variant_set, yaml_data, germline = False, logger = logger)        
         variant_set.to_csv(output_pass_tsv_gz, sep="\t", compression="gzip", index=False)
-        utils.remove(output_pass_vcf2tsv_gz)
+        if not debug:
+            utils.remove(output_pass_vcf2tsv_gz)
         
         if yaml_data["conf"]['assay_properties']['type'] == 'WGS' or yaml_data["conf"]['assay_properties']['type'] == 'WES':
             # check that output file exist

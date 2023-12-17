@@ -81,6 +81,7 @@ def append_annotations(vcf2tsv_gz_fname: str, pcgr_db_dir: str, logger):
             ## check number of variants with Ensembl gene ID's
             num_recs_with_entrez_hits = vcf2tsv_df["ENTREZGENE"].notna().sum()
     
+            #print(str(num_recs_with_entrez_hits))
             ## merge variant set with ClinVar trait and variant origin annotations
             if num_recs_with_clinvar_hits > 0:
                 if os.path.exists(clinvar_tsv_fname):
@@ -133,7 +134,6 @@ def append_annotations(vcf2tsv_gz_fname: str, pcgr_db_dir: str, logger):
                         usecols=["entrezgene","name"])
                     gene_xref_df = gene_xref_df[gene_xref_df['entrezgene'].notnull()].drop_duplicates()
                     gene_xref_df["entrezgene"] = gene_xref_df["entrezgene"].astype("int64").astype("string")
-                    #print(gene_xref_df.head)
                     gene_xref_df.rename(columns = {'entrezgene':'ENTREZGENE', 'name':'GENENAME'}, inplace = True)
                     vcf2tsv_df = vcf2tsv_df.merge(gene_xref_df, left_on=["ENTREZGENE"], right_on=["ENTREZGENE"], how="left")
                     vcf2tsv_df["ENTREZGENE"] = vcf2tsv_df['ENTREZGENE'].str.replace("\\.[0-9]{1,}$", "", regex = True)
@@ -253,8 +253,12 @@ def clean_annotations(variant_set: pd.DataFrame, yaml_data: dict, germline: bool
         variant_set['EFFECT_PREDICTIONS'] = variant_set['EFFECT_PREDICTIONS'].str.replace("\\.&|\\.$", "NA&", regex = True)
         variant_set['EFFECT_PREDICTIONS'] = variant_set['EFFECT_PREDICTIONS'].str.replace("&$", "", regex = True)
         variant_set['EFFECT_PREDICTIONS'] = variant_set['EFFECT_PREDICTIONS'].str.replace("&", ", ", regex = True)
-        variant_set.loc[variant_set['CLINVAR_CONFLICTED'] == 1, "CLINVAR_CONFLICTED"] = True
-        variant_set.loc[variant_set['CLINVAR_CONFLICTED'] != 1, "CLINVAR_CONFLICTED"] = False
+        variant_set['clinvar_conflicted_bool'] = True
+        variant_set.loc[variant_set['CLINVAR_CONFLICTED'] == 1, "clinvar_conflicted_bool"] = True
+        variant_set.loc[variant_set['CLINVAR_CONFLICTED'] != 1, "clinvar_conflicted_bool"] = False
+        variant_set.drop('CLINVAR_CONFLICTED', inplace=True, axis=1)        
+        variant_set.rename(columns = {'clinvar_conflicted_bool':'CLINVAR_CONFLICTED'}, inplace = True)
+        
     
     if not {'VCF_SAMPLE_ID'}.issubset(variant_set.columns):
         variant_set['VCF_SAMPLE_ID'] = str(yaml_data['sample_id'])
