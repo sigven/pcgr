@@ -225,7 +225,7 @@ def assign_cds_exon_intron_annotations(csq_record):
                 csq_record['LOSS_OF_FUNCTION'] = True
             
         ## Don't list LoF as True if consequence is assigned as missense
-        if re.search(pcgr_vars.CSQ_MISSENSE_PATTERN, csq_record['Consequence']) is not None:
+        if re.search(r'^missense_variant$', csq_record['Consequence']) is not None:
             if csq_record['LOSS_OF_FUNCTION'] is True:
                 csq_record['LOSS_OF_FUNCTION'] = False
         

@@ -35,11 +35,7 @@ if(!is.null(cps_report)){
   cpsr::write_cpsr_output(
     cps_report,
     output_format = 'xlsx')
-  saveRDS(cps_report, file=file.path(
-    cps_report$settings$output_dir,
-    paste0(cps_report$settings$sample_id,
-           ".cpsr.grch38.rds")))
-  #cpsr::write_cpsr_output(
-  #   cps_report,
-  #   output_format = 'html')
+  cpsr::write_cpsr_output(
+     cps_report,
+     output_format = 'html')
 }

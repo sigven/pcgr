@@ -988,3 +988,111 @@ log_var_eitem_stats <- function(var_eitems = NULL,
     }
   }
 }
+
+#' Function that expands biomarker evidence items with variant annotations
+#'
+#' @param callset list object with 'variant' and 'biomarker_evidence' data
+#' frames
+#' @param variant_origin 'somatic' or 'germline'
+#' @param target_genes data frame with target genes of interest
+#'
+#' @export
+#'
+expand_biomarker_items <- function(
+    callset = NULL,
+    variant_origin = "somatic",
+    target_genes = NULL){
+
+  if("variant" %in% names(callset) &
+     "biomarker_evidence" %in% names(callset)){
+
+    variant_properties <-
+      c("VAR_ID",
+        "GENOMIC_CHANGE",
+        "GENOME_VERSION",
+        "SAMPLE_ID",
+        "SYMBOL",
+        "ENTREZGENE",
+        "CONSEQUENCE",
+        "PROTEIN_CHANGE",
+        "MUTATION_HOTSPOT",
+        "CDS_CHANGE",
+        "LOSS_OF_FUNCTION",
+        "HGVSc",
+        "HGVSp",
+        "REFSEQ",
+        "OFFICIAL_GENENAME",
+        "PREDICTED_EFFECT",
+        "PROTEIN_DOMAIN",
+        "DBSNP",
+        "CLINVAR",
+        "COSMIC",
+        "VEP_ALL_CSQ")
+
+    if(variant_origin == "germline"){
+      variant_properties <- c(
+        variant_properties,
+        "CLINVAR_CLASSIFICATION",
+        "CPSR_CLASSIFICATION"
+      )
+    }
+    if(variant_origin == "somatic"){
+      variant_properties <- c(
+        variant_properties,
+        "DP_TUMOR",
+        "AF_TUMOR",
+        "DP_CONTROL",
+        "AF_CONTROL"
+      )
+    }
+
+    ## check col existence callset[['variant]], variant_properties
+
+    for (type in c(pcgrr::evidence_types,
+                   "all")) {
+      for (elevel in c("any", "A_B", "C_D_E")) {
+        if(NROW(callset[['biomarker_evidence']][[type]][[elevel]]) > 0){
+          callset[['biomarker_evidence']][[type]][[elevel]] <-
+            callset[['biomarker_evidence']][[type]][[elevel]] |>
+            dplyr::left_join(
+              dplyr::select(
+                callset[['variant']],
+                variant_properties),
+              by = c("VAR_ID")) |>
+            dplyr::arrange(
+              .data$EVIDENCE_LEVEL,
+              .data$PROTEIN_CHANGE,
+              dplyr::desc(
+                .data$RATING))
+
+          if(variant_origin == "germline"){
+            callset[['biomarker_evidence']][[type]][[elevel]] <-
+              callset[['biomarker_evidence']][[type]][[elevel]] |>
+              dplyr::filter(
+                (!is.na(CLINVAR_CLASSIFICATION) &
+                   stringr::str_detect(
+                     tolower(CLINVAR_CLASSIFICATION), "pathogenic")) |
+                  (is.na(CLINVAR_CLASSIFICATION) &
+                     !is.na(CPSR_CLASSIFICATION) &
+                     stringr::str_detect(
+                       tolower(CPSR_CLASSIFICATION), "pathogenic"))
+              )
+
+            if(NROW(callset[['biomarker_evidence']][[type]][[elevel]]) > 0 &
+               is.data.frame(target_genes) &
+               NROW(target_genes) > 0 &
+               "ENTREZGENE" %in% colnames(target_genes)){
+              callset[['biomarker_evidence']][[type]][[elevel]] <-
+                callset[['biomarker_evidence']][[type]][[elevel]] |>
+                dplyr::semi_join(target_genes, by = "ENTREZGENE")
+
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return(callset)
+
+}

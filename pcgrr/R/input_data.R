@@ -54,54 +54,10 @@ load_somatic_snv_indel <- function(
     pcgrr::append_tfbs_annotation() |>
     pcgrr::append_cancer_gene_evidence(ref_data = ref_data)
 
-  for (type in c("diagnostic", "prognostic",
-                 "oncogenic", "functional",
-                 "predictive","predisposition")) {
-    for (elevel in c("any", "A_B", "C_D_E")) {
-      if(NROW(callset[['biomarker_evidence']][[type]][[elevel]]) > 0){
-        callset[['biomarker_evidence']][[type]][[elevel]] <-
-          callset[['biomarker_evidence']][[type]][[elevel]] |>
-          dplyr::left_join(
-            dplyr::select(
-              callset[['variant']],
-              c("VAR_ID",
-                "GENOMIC_CHANGE",
-                "GENOME_VERSION",
-                "SYMBOL",
-                "ENTREZGENE",
-                "CONSEQUENCE",
-                "PROTEIN_CHANGE",
-                "MUTATION_HOTSPOT",
-                "CDS_CHANGE",
-                "LOSS_OF_FUNCTION",
-                "HGVSc",
-                "HGVSp",
-                "REFSEQ",
-                "OFFICIAL_GENENAME",
-                "PREDICTED_EFFECT",
-                "PROTEIN_DOMAIN",
-                "TARGETED_DRUGS",
-                "DBSNP",
-                "CLINVAR",
-                "COSMIC",
-                "VEP_ALL_CSQ",
-                "TCGA_FREQUENCY",
-                "DP_TUMOR",
-                "DP_CONTROL",
-                "AF_TUMOR",
-                "AF_CONTROL")
-            ),
-            by = c("VAR_ID")
-          ) |>
-          dplyr::arrange(
-            .data$EVIDENCE_LEVEL,
-            .data$PROTEIN_CHANGE,
-            dplyr::desc(
-              .data$RATING))
-      }
-    }
-  }
-
+  callset <-
+    pcgrr::expand_biomarker_items(
+      callset = callset,
+      variant_origin = "somatic")
 
   return(callset)
 
@@ -199,7 +155,10 @@ load_dna_variants <- function(
   results <- list()
   results[['variant']] <- calls
   results[['biomarker_evidence']] <- list()
-  results[['biomarker_evidence']][['all']] <- data.frame()
+  results[['biomarker_evidence']][['all']] <- list()
+  for (elevel in pcgrr::evidence_levels) {
+    results[['biomarker_evidence']][['all']][[elevel]] <- data.frame()
+  }
 
   for (type in pcgrr::evidence_types) {
     results[['biomarker_evidence']][[type]] <- list()
@@ -270,7 +229,7 @@ load_dna_variants <- function(
     )
 
     if(NROW(biomarker_set) > 0){
-      results[['biomarker_evidence']][['all']] <-
+      results[['biomarker_evidence']][['all']][['any']] <-
         as.data.frame(
           biomarker_set |>
             dplyr::select(
@@ -279,9 +238,9 @@ load_dna_variants <- function(
               ) |>
             dplyr::distinct() |>
             tidyr::separate_rows(
-              .data$BIOMARKER_MATCH, sep=",") |>
+              "BIOMARKER_MATCH", sep=",") |>
             tidyr::separate(
-              .data$BIOMARKER_MATCH,
+              "BIOMARKER_MATCH",
               into = c("BIOMARKER_SOURCE",
                        "VARIANT_ID",
                        "EVIDENCE_ITEMS",
@@ -311,9 +270,9 @@ load_dna_variants <- function(
               TRUE ~ as.character('other')
             )) |>
             tidyr::separate_rows(
-              .data$EVIDENCE_ITEMS, sep="&") |>
+              "EVIDENCE_ITEMS", sep="&") |>
             tidyr::separate(
-              .data$EVIDENCE_ITEMS,
+              "EVIDENCE_ITEMS",
               into = c("EVIDENCE_ID",
                        "PRIMARY_SITE",
                        "CLINICAL_SIGNIFICANCE",
@@ -347,16 +306,17 @@ load_dna_variants <- function(
                 "MOLECULAR_PROFILE_TYPE",
                 "RATING",
                 "EVIDENCE_DIRECTION")
-              ), by = c("EVIDENCE_ID")
+              ), by = c("EVIDENCE_ID"),
+              relationship = "many-to-many"
             ) |>
             dplyr::distinct()
         )
 
-      if(NROW(results[['biomarker_evidence']][['all']]) > 0){
+      if(NROW(results[['biomarker_evidence']][['all']][['any']]) > 0){
 
         for (type in pcgrr::evidence_types) {
           results[['biomarker_evidence']][[type]][["any"]] <-
-            results[['biomarker_evidence']][['all']] |>
+            results[['biomarker_evidence']][['all']][['any']] |>
             dplyr::filter(
               .data$VARIANT_ORIGIN == variant_origin &
                 .data$EVIDENCE_TYPE == stringr::str_to_title(type))

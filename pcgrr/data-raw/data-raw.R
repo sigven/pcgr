@@ -410,14 +410,13 @@ cancer_phenotypes_regex <-
          "|neurofibro|keratoacan|nevus|brca|polyposis|myelodysplastic|cowden",
          "|gardner|noonan|fanconi|carney|bullosa|schwanno|li-fraumeni|xeroderma",
          "|leiomyom|muir-|nijmegen|neoplasia|trichoepithelioma|brooke|turcot",
-         "|exostoses|lynch|drash|wilm|perlman|fibrofolliculomas|hippel|hamartom",
-         "|bloom|werner|peutz|legius|tuberous|exostosis|angiomyolipoma",
-         "|lymphoproliferative|stat3|teratoma|thrombocytop|tp63|wiskott|weaver",
+         "|exostos|lynch|drash|wilm|perlman|fibrofolliculomas|hippel|hamartom",
+         "|bloom|werner|peutz|tuberous|angiomyolipoma",
+         "|lymphoproliferative|stat3|teratoma|thrombocytop|tp63|weaver",
          "|pheochromo|gorlin|telangiectasia|hemangiom|osteochondro|response",
          "|polg-related|ras-associated|dyskeratosis",
-         "|waardenburg|beckwidth|birt-hogg|costello|diamond|cardio-facio|frasier",
-         "|hirschsprung|hydrocephalus|hyperparathyroidism|immunodeficiency",
-         "|infantile myofibromatosis|leopard|proteus|rothmund|russel)")
+         "|waardenburg|beckwidth|birt-hogg|diamond|frasier",
+         "|infantile myofibromatosis|proteus|rothmund|russel)")
 usethis::use_data(cancer_phenotypes_regex, overwrite = T)
 
 

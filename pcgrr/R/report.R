@@ -502,6 +502,11 @@ init_germline_content <- function(){
       rep[["clin_eitem"]][[evidence_type]][[level]] <-
         data.frame()
     }
+    rep[['clin_eitem']][['all']] <- list()
+    for(level in pcgrr::evidence_levels){
+      rep[["clin_eitem"]][['all']][[level]] <-
+        data.frame()
+    }
   }
 
   for (cl in c("v_stat",

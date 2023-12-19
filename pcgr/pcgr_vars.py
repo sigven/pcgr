@@ -158,9 +158,9 @@ VEP_consequence_rank = {
 }
 
 CSQ_MISSENSE_PATTERN = r"^missense_variant"
-CSQ_CODING_PATTERN = r"^(stop_(lost|gained)|start_lost|frameshift_|missense_|splice_(donor|acceptor)|protein_altering|inframe_)"
-CSQ_CODING_SILENT_PATTERN = r"^(stop_(lost|gained)|start_lost|frameshift_|missense_|splice_(donor|acceptor)|protein_altering|inframe_|synonymous|(start|stop)_retained)"
-CSQ_NULL_PATTERN = r"^(stop_gained|frameshift_)"
-CSQ_SPLICE_REGION_PATTERN = r"^(splice_|intron_variant)"
-CSQ_SPLICE_DONOR_PATTERN = r"^(splice_region_variant|splice_donor_variant|splice_donor_region_variant|splice_donor_5th_base_variant)"
+CSQ_CODING_PATTERN = r"(stop_(lost|gained)|start_lost|frameshift_|missense_|splice_(donor|acceptor)|protein_altering|inframe_)"
+CSQ_CODING_SILENT_PATTERN = r"(stop_(lost|gained)|start_lost|frameshift_|missense_|splice_(donor|acceptor)|protein_altering|inframe_|synonymous|(start|stop)_retained)"
+CSQ_NULL_PATTERN = r"(stop_gained|frameshift_)"
+CSQ_SPLICE_REGION_PATTERN = r"(splice_|intron_variant)"
+CSQ_SPLICE_DONOR_PATTERN = r"(splice_region_variant|splice_donor_variant|splice_donor_region_variant|splice_donor_5th_base_variant)"
 
