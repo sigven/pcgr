@@ -284,6 +284,7 @@ def run_cpsr(conf_options, cpsr_paths):
             if variant_set.loc[variant_set['GENOTYPE'] == '.'].empty and variant_set.loc[variant_set['GENOTYPE'] == 'undefined'].empty:
                 yaml_data['conf']['sample_properties']['genotypes_available'] = 1
         
+        yaml_data['conf']['gene_panel']['panel_id'] = re.sub(r',',';', yaml_data['conf']['gene_panel']['panel_id'])
         with open(yaml_fname, "w") as outfile:
             outfile.write(yaml.dump(yaml_data))
         outfile.close()
