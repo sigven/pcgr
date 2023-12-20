@@ -208,8 +208,7 @@ def populate_config_data(conf_options: dict, db_dir: str, workflow = "PCGR", log
                 conf_data['conf']['sample_properties']['phenotype'] = 'None'
     
     if workflow == "CPSR":
-        if conf_data['conf']['gene_panel']['panel_id'] is not None and \
-            conf_data['conf']['gene_panel']['diagnostic_grade_only'] is not None:
+        if conf_data['conf']['gene_panel']['panel_id'] is not None:
                 
             if conf_data['conf']['gene_panel']['panel_id'] == "-1":
                 conf_data['conf']['gene_panel']['description'] = 'User-defined panel (custom geneset from panel 0)'
@@ -227,7 +226,7 @@ def populate_config_data(conf_options: dict, db_dir: str, workflow = "PCGR", log
                 db_dir, 
                 conf_data['genome_assembly'],
                 conf_data['conf']['gene_panel']['diagnostic_grade_only'], 
-                conf_data['conf']['gene_panel']['custom_list_bed'],
+                conf_data['conf']['gene_panel']['custom_list_tsv'],
                 bool(conf_data['conf']['variant_classification']['secondary_findings']),
                 logger)
         
@@ -235,7 +234,7 @@ def populate_config_data(conf_options: dict, db_dir: str, workflow = "PCGR", log
     return(conf_data)
 
 def set_virtual_target_genes(panel_id: str, db_dir: str, genome_assembly: str, diagnostic_grade_only: bool, 
-                             custom_list_bed: str, secondary_findings: bool, logger=None):
+                             custom_list_tsv: str, secondary_findings: bool, logger=None):
     
     all_panels_fname = os.path.join(
         db_dir, "data", genome_assembly,
@@ -292,15 +291,12 @@ def set_virtual_target_genes(panel_id: str, db_dir: str, genome_assembly: str, d
 
 
     if panel_id == "-1":
-        if not custom_list_bed == 'None':
+        if not custom_list_tsv == 'None':
             custom_ensembl_gene_ids = {}
-            if check_file_exists(custom_list_bed, logger):
-                with open(custom_list_bed) as f:
-                    reader = csv.reader(f, delimiter='\t')
-                    for row in reader:
-                        ensembl_gene_id = row[3].split('|')[1]
-                        custom_ensembl_gene_ids[ensembl_gene_id] = 1
-                f.close()
+            if check_file_exists(custom_list_tsv, logger):
+                custom_genes = csv.DictReader(open(custom_list_tsv,'r'), delimiter='\n', fieldnames=['ensembl_gene_id'])                
+                for row in custom_genes:
+                    custom_ensembl_gene_ids[row['ensembl_gene_id']] = 1            
             
             panel_targets = all_virtual_panels[all_virtual_panels['id'] == "0"].copy()
             panel_targets = panel_targets[panel_targets['ensembl_gene_id'].isin(custom_ensembl_gene_ids)]
@@ -310,10 +306,11 @@ def set_virtual_target_genes(panel_id: str, db_dir: str, genome_assembly: str, d
                 error_message(err_msg, logger)
             else:
                 panel_targets.loc[:,'confidence_level'] = -1
-                panel_targets.loc[:,'panel_id'] = None
-                panel_targets.loc[:,'panel_url'] = None
-                panel_targets.loc[:,'panel_version'] = None
+                panel_targets.loc[:,'panel_id'] = -5
+                panel_targets.loc[:,'panel_url'] = 'None'
+                panel_targets.loc[:,'panel_version'] = 1.0
                 panel_targets.loc[:,'panel_name'] = "CustomPanel"
+                panel_targets.loc[:,'primary_target'] = True
                 for f in ['panel_url', 'panel_name','moi','mod','symbol','ensembl_gene_id']:
                     panel_targets[f] = panel_targets[f].astype(str)
             
@@ -332,7 +329,7 @@ def set_virtual_target_genes(panel_id: str, db_dir: str, genome_assembly: str, d
 
     all_targets = panel_targets
     
-    if len(all_secondary_finding_targets) > 0:
+    if len(all_secondary_finding_targets) > 0:        
         all_targets = pd.concat([panel_targets, all_secondary_finding_targets], axis=0)
     
     return all_targets.to_dict(orient='records')

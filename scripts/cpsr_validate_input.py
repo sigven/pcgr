@@ -112,17 +112,19 @@ def get_valid_custom_genelist(genelist_fname, genelist_bed_fname, pcgr_dir, geno
 
     ## Add custom set of genes to target BED
     logger.info('Creating BED file with custom target genes: ' + str(genelist_bed_fname))
-    id_pat = '|'.join([f"\|{g}\|" for g in valid_custom_identifiers])
+    id_pat = '|'.join([f"{g}" for g in valid_custom_identifiers])
     
-    id_pat_ext = id_pat + '|(\|tag\|)|' + '(\|ACMG_SF\|)'
+    id_pat_ext = id_pat + '|(\|tag\|)|' + 'ACMG_SF'
+    awk_command = "awk 'BEGIN{FS=\"\\t\"}{if($4 !~ /ACMG_SF/ || ($4 ~ /ACMG_SF/ && $4 ~ /" + '|'.join(valid_custom_identifiers) + "/))print;}'"
     cmd_target_regions_bed = f"bgzip -dc {virtualpanel_track_bed} | egrep '{id_pat_ext}' > {genelist_bed_fname_unsorted}"
     if gwas_findings == 0 and secondary_findings == 1:
-        cmd_target_regions_bed = f"bgzip -dc {virtualpanel_track_bed} | egrep '{id_pat}' | egrep -v '(\|tag\|)' > {genelist_bed_fname_unsorted}"
+        cmd_target_regions_bed = f"bgzip -dc {virtualpanel_track_bed} | egrep '{id_pat_ext}' | egrep -v '(\|tag\|)' > {genelist_bed_fname_unsorted}"
     if gwas_findings == 0 and secondary_findings == 0:
-        cmd_target_regions_bed = f"bgzip -dc {virtualpanel_track_bed} | egrep '{id_pat}' | egrep -v '(\|tag\|)|(\ACMG_SF\|)' > {genelist_bed_fname_unsorted}"
+        cmd_target_regions_bed = f"bgzip -dc {virtualpanel_track_bed} | egrep '{id_pat_ext}' | egrep -v '(\|tag\|)' | {awk_command} > {genelist_bed_fname_unsorted}"
     if gwas_findings == 1 and secondary_findings == 0:
-        cmd_target_regions_bed = f"bgzip -dc {virtualpanel_track_bed} | egrep '{id_pat}' | egrep -v '(\ACMG_SF\|)' > {genelist_bed_fname_unsorted}"
+        cmd_target_regions_bed = f"bgzip -dc {virtualpanel_track_bed} | egrep '{id_pat_ext}' | {awk_command} > {genelist_bed_fname_unsorted}"
     
+    #print(cmd_target_regions_bed)
     check_subprocess(logger, cmd_target_regions_bed, debug)
     
     ## Sort regions in target BED
@@ -218,7 +220,7 @@ def simplify_vcf(input_vcf, validated_vcf, vcf, custom_bed, pcgr_directory, geno
 
         ## Concatenate all panel BEDs to one big virtual panel BED, sort and make unique
         panel_ids = str(virtual_panel_id).split(',')
-        for pid in panel_ids:
+        for pid in set(panel_ids):
             ge_panel_identifier = "GE_PANEL_" + str(pid)
             target_bed_gz = os.path.join(
                 pcgr_directory,'data',genome_assembly, 'gene','bed','gene_virtual_panel', str(pid) + ".bed.gz")
