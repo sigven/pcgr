@@ -119,6 +119,7 @@ def create_config(arg_dict, workflow = "PCGR"):
     if workflow == "CPSR":        
         conf_options['sample_properties']['phenotype'] = 'None'
         conf_options['sample_properties']['site'] = 'Hereditary (blood)'
+        conf_options['sample_properties']['genotypes_available'] = 0
         conf_options['visual_reporting']['table_display'] = str(arg_dict['report_table_display'])
         conf_options['gene_panel'] = {
             'panel_id': str(arg_dict['virtual_panel_id']),

@@ -193,11 +193,10 @@ def run_cpsr(conf_options, cpsr_paths):
         
         ## Write YAML configuration file  - settings, path to files, reference bundle etc
         yaml_data = populate_config_data(conf_options, data_dir, workflow = "CPSR", logger = logger)
-        
         with open(yaml_fname, "w") as outfile:
             outfile.write(yaml.dump(yaml_data))
         outfile.close()
-
+        
         ## CPSR|VEP - run Variant Effect Predictor on query VCF with LoF and NearestExonJB plugins
         vep_command = vep.get_command(file_paths = cpsr_paths, 
                                       conf_options = yaml_data, 
@@ -280,7 +279,15 @@ def run_cpsr(conf_options, cpsr_paths):
         variant_set = \
            variant.append_annotations(
               output_pass_vcf2tsv_gz, pcgr_db_dir = cpsr_paths["db_dir"], logger = logger)
-        variant_set = variant.clean_annotations(variant_set, yaml_data, germline = True, logger = logger)        
+        variant_set = variant.clean_annotations(variant_set, yaml_data, germline = True, logger = logger)
+        if {'GENOTYPE'}.issubset(variant_set.columns):
+            if variant_set.loc[variant_set['GENOTYPE'] == '.'].empty and variant_set.loc[variant_set['GENOTYPE'] == 'undefined'].empty:
+                yaml_data['conf']['sample_properties']['genotypes_available'] = 1
+        
+        with open(yaml_fname, "w") as outfile:
+            outfile.write(yaml.dump(yaml_data))
+        outfile.close()
+        
         variant_set.to_csv(output_pass_tsv_gz, sep="\t", compression="gzip", index=False)
         if not debug:
             utils.remove(output_pass_vcf2tsv_gz)

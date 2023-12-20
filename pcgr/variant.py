@@ -44,7 +44,8 @@ def set_genotype(variant_set: pd.DataFrame, logger) -> pd.DataFrame:
         variant_set.loc[variant_set['GT'].isin(heterozygous_states),"GENOTYPE"] = "heterozygous"
     else:
         variant_set['GENOTYPE'] = "undefined"
-        
+    
+    variant_set = variant_set.astype({'GENOTYPE':'string'})  
     return(variant_set)
 
 def append_annotations(vcf2tsv_gz_fname: str, pcgr_db_dir: str, logger):

@@ -247,26 +247,27 @@ load_dna_variants <- function(
                        "BIOMARKER_MATCHTYPE"),
               sep = "\\|"
             ) |>
-            dplyr::mutate(BIOMARKER_MAPPING = dplyr::case_when(
-              stringr::str_detect(.data$BIOMARKER_MATCHTYPE,"by_genomic_coord") ~ "genomic",
-              !stringr::str_detect(.data$BIOMARKER_MATCHTYPE,"by_genomic_coord") &
-                stringr::str_detect(.data$BIOMARKER_MATCHTYPE,"by_hgvsp_principal") ~ "hgvsp",
-              !stringr::str_detect(.data$BIOMARKER_MATCHTYPE,"by_genomic_coord") &
-                !stringr::str_detect(.data$BIOMARKER_MATCHTYPE,"by_hgvsp_principal") &
-                stringr::str_detect(.data$BIOMARKER_MATCHTYPE,"by_codon_principal") ~ "codon",
-              !stringr::str_detect(.data$BIOMARKER_MATCHTYPE,"by_genomic_coord") &
-                !stringr::str_detect(.data$BIOMARKER_MATCHTYPE,"by_hgvsp_principal") &
-                !stringr::str_detect(.data$BIOMARKER_MATCHTYPE,"by_codon_principal") &
-                stringr::str_detect(.data$BIOMARKER_MATCHTYPE,"by_hgvsp_nonprincipal")~ "hgvsp_nonprincipal",
-              !stringr::str_detect(.data$BIOMARKER_MATCHTYPE,"by_genomic_coord") &
-                !stringr::str_detect(.data$BIOMARKER_MATCHTYPE,"by_hgvsp_principal") &
-                !stringr::str_detect(.data$BIOMARKER_MATCHTYPE,"by_codon_principal") &
-                stringr::str_detect(.data$BIOMARKER_MATCHTYPE,"by_exon_") ~ "exon",
-              !stringr::str_detect(.data$BIOMARKER_MATCHTYPE,"by_genomic_coord") &
-                !stringr::str_detect(.data$BIOMARKER_MATCHTYPE,"by_hgvsp_") &
-                !stringr::str_detect(.data$BIOMARKER_MATCHTYPE,"by_codon_") &
-                !stringr::str_detect(.data$BIOMARKER_MATCHTYPE,"by_exon_") &
-                stringr::str_detect(.data$BIOMARKER_MATCHTYPE,"by_gene_") ~ "gene",
+            dplyr::rename(BIOMARKER_MATCH = BIOMARKER_MATCHTYPE) |>
+            dplyr::mutate(BIOMARKER_RESOLUTION = dplyr::case_when(
+              stringr::str_detect(.data$BIOMARKER_MATCH,"by_genomic_coord") ~ "genomic",
+              !stringr::str_detect(.data$BIOMARKER_MATCH,"by_genomic_coord") &
+                stringr::str_detect(.data$BIOMARKER_MATCH,"by_hgvsp_principal") ~ "hgvsp",
+              !stringr::str_detect(.data$BIOMARKER_MATCH,"by_genomic_coord") &
+                !stringr::str_detect(.data$BIOMARKER_MATCH,"by_hgvsp_principal") &
+                stringr::str_detect(.data$BIOMARKER_MATCH,"by_codon_principal") ~ "codon",
+              !stringr::str_detect(.data$BIOMARKER_MATCH,"by_genomic_coord") &
+                !stringr::str_detect(.data$BIOMARKER_MATCH,"by_hgvsp_principal") &
+                !stringr::str_detect(.data$BIOMARKER_MATCH,"by_codon_principal") &
+                stringr::str_detect(.data$BIOMARKER_MATCH,"by_hgvsp_nonprincipal")~ "hgvsp_nonprincipal",
+              !stringr::str_detect(.data$BIOMARKER_MATCH,"by_genomic_coord") &
+                !stringr::str_detect(.data$BIOMARKER_MATCH,"by_hgvsp_principal") &
+                !stringr::str_detect(.data$BIOMARKER_MATCH,"by_codon_principal") &
+                stringr::str_detect(.data$BIOMARKER_MATCH,"by_exon_") ~ "exon",
+              !stringr::str_detect(.data$BIOMARKER_MATCH,"by_genomic_coord") &
+                !stringr::str_detect(.data$BIOMARKER_MATCH,"by_hgvsp_") &
+                !stringr::str_detect(.data$BIOMARKER_MATCH,"by_codon_") &
+                !stringr::str_detect(.data$BIOMARKER_MATCH,"by_exon_") &
+                stringr::str_detect(.data$BIOMARKER_MATCH,"by_gene_") ~ "gene",
               TRUE ~ as.character('other')
             )) |>
             tidyr::separate_rows(
