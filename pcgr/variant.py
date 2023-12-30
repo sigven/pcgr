@@ -67,14 +67,13 @@ def append_annotations(vcf2tsv_gz_fname: str, pcgr_db_dir: str, logger):
                 vcf2tsv_df = vcf2tsv_df.astype({elem:'string'})            
             vcf2tsv_df['CLINVAR_MSID'] = vcf2tsv_df['CLINVAR_MSID'].str.replace("\\.[0-9]{1,}$", "", regex = True)
             vcf2tsv_df['PFAM_DOMAIN'] = vcf2tsv_df['PFAM_DOMAIN'].str.replace("\\.[0-9]{1,}$", "", regex = True)
+            vcf2tsv_df['ENTREZGENE'] = vcf2tsv_df['ENTREZGENE'].str.replace("\\.[0-9]{1,}$", "", regex = True)
             vcf2tsv_df["VAR_ID"] = vcf2tsv_df["CHROM"].str.cat(
                 vcf2tsv_df["POS"], sep = "_").str.cat(
                     vcf2tsv_df["REF"], sep = "_").str.cat(
                         vcf2tsv_df["ALT"], sep = "_")
 
-            if {'CLINVAR_TRAITS_ALL'}.issubset(vcf2tsv_df.columns):
-                vcf2tsv_df.drop('CLINVAR_TRAITS_ALL', inplace=True, axis=1)
-        
+           
             ## check number of variants with ClinVar ID's
             num_recs_with_clinvar_hits = vcf2tsv_df["CLINVAR_MSID"].notna().sum()
             ## check number of variants with PFAM ID's
@@ -85,6 +84,10 @@ def append_annotations(vcf2tsv_gz_fname: str, pcgr_db_dir: str, logger):
             #print(str(num_recs_with_entrez_hits))
             ## merge variant set with ClinVar trait and variant origin annotations
             if num_recs_with_clinvar_hits > 0:
+                
+                if {'CLINVAR_TRAITS_ALL'}.issubset(vcf2tsv_df.columns):
+                    vcf2tsv_df.drop('CLINVAR_TRAITS_ALL', inplace=True, axis=1)
+        
                 if os.path.exists(clinvar_tsv_fname):
                     clinvar_data_df = pd.read_csv(
                         clinvar_tsv_fname, sep="\t", 
@@ -99,30 +102,27 @@ def append_annotations(vcf2tsv_gz_fname: str, pcgr_db_dir: str, logger):
                     
                     vcf2tsv_df = vcf2tsv_df.merge(
                         clinvar_data_df, left_on=["VAR_ID", "CLINVAR_MSID"], right_on=["VAR_ID", "CLINVAR_MSID"], how="left")
-                    vcf2tsv_df = vcf2tsv_df.fillna('.')
                 else:
                     logger.error(f"Could not find {clinvar_tsv_fname} needed for ClinVar variant annotation - exiting")
             else:
                 vcf2tsv_df['CLINVAR_TRAITS_ALL'] = '.'
-                vcf2tsv_df = vcf2tsv_df.fillna('.')
                 
             
             ## merge variant set with PFAM domain annotations
             if num_recs_with_pfam_hits > 0:
                 
-                vcf2tsv_df.drop('PFAM_DOMAIN_NAME', inplace=True, axis=1)
+                if {'PFAM_DOMAIN_NAME'}.issubset(vcf2tsv_df.columns):
+                    vcf2tsv_df.drop('PFAM_DOMAIN_NAME', inplace=True, axis=1)
                 
                 if os.path.exists(protein_domain_tsv_fname):
                     prot_domains_data_df = pd.read_csv(
                         protein_domain_tsv_fname, sep="\t", usecols=["pfam_id","pfam_name"]).drop_duplicates()
                     prot_domains_data_df.rename(columns = {'pfam_id':'PFAM_DOMAIN', 'pfam_name':'PFAM_DOMAIN_NAME'}, inplace = True)                                        
                     vcf2tsv_df = vcf2tsv_df.merge(prot_domains_data_df, left_on=["PFAM_DOMAIN"], right_on=["PFAM_DOMAIN"], how="left")
-                    vcf2tsv_df = vcf2tsv_df.fillna('.')
                 else:
                     logger.error(f"Could not find {protein_domain_tsv_fname} needed for PFAM domain annotation - exiting")
             else:
                 vcf2tsv_df['PFAM_DOMAIN_NAME'] = '.'
-                vcf2tsv_df = vcf2tsv_df.fillna('.')
             
             if num_recs_with_entrez_hits > 0:
                 
@@ -134,17 +134,21 @@ def append_annotations(vcf2tsv_gz_fname: str, pcgr_db_dir: str, logger):
                         gene_xref_tsv_fname, sep="\t", na_values=".", 
                         usecols=["entrezgene","name"])
                     gene_xref_df = gene_xref_df[gene_xref_df['entrezgene'].notnull()].drop_duplicates()
-                    gene_xref_df["entrezgene"] = gene_xref_df["entrezgene"].astype("int64").astype("string")
-                    gene_xref_df.rename(columns = {'entrezgene':'ENTREZGENE', 'name':'GENENAME'}, inplace = True)
+                    gene_xref_df = gene_xref_df[gene_xref_df['entrezgene'].notna()].drop_duplicates()
+                    gene_xref_df["entrezgene"] = gene_xref_df["entrezgene"].astype(float).astype(int).astype(str)
+                    
+                    vcf2tsv_df["ENTREZGENE"] = vcf2tsv_df["ENTREZGENE"].astype(str)
+                    vcf2tsv_df.loc[vcf2tsv_df["ENTREZGENE"].isna(), "ENTREZGENE"] = "-1"
+                    gene_xref_df.rename(columns = {'entrezgene':'ENTREZGENE', 'name':'GENENAME'}, inplace = True)                
                     vcf2tsv_df = vcf2tsv_df.merge(gene_xref_df, left_on=["ENTREZGENE"], right_on=["ENTREZGENE"], how="left")
                     vcf2tsv_df["ENTREZGENE"] = vcf2tsv_df['ENTREZGENE'].str.replace("\\.[0-9]{1,}$", "", regex = True)
-                    vcf2tsv_df = vcf2tsv_df.fillna('.')
+                    #vcf2tsv_df = vcf2tsv_df.fillna('.')
                 else:
                     logger.error(f"Could not find {gene_xref_tsv_fname} needed for gene name annotation - exiting")
             else:
                 vcf2tsv_df['GENENAME'] = '.'
-                vcf2tsv_df = vcf2tsv_df.fillna('.')
-    
+                
+    #vcf2tsv_df = vcf2tsv_df.fillna('.')
     return(vcf2tsv_df)
 
 def set_allelic_support(variant_set: pd.DataFrame, allelic_support_tags: dict) -> pd.DataFrame:
@@ -273,8 +277,8 @@ def clean_annotations(variant_set: pd.DataFrame, yaml_data: dict, germline: bool
         
     ## Make sure that specific tags are formatted as integers (not float) during to_csv export
     if {'AMINO_ACID_END','AMINO_ACID_START'}.issubset(variant_set.columns):
-        variant_set.loc[variant_set['AMINO_ACID_START'] == ".","AMINO_ACID_START"] = -1
-        variant_set.loc[variant_set['AMINO_ACID_END'] == ".","AMINO_ACID_END"] = -1
+        variant_set.loc[variant_set['AMINO_ACID_START'].isna(),"AMINO_ACID_START"] = -1        
+        variant_set.loc[variant_set['AMINO_ACID_END'].isna(),"AMINO_ACID_END"] = -1
         variant_set['AMINO_ACID_END'] = variant_set['AMINO_ACID_END'].astype(float).astype(int)
         variant_set['AMINO_ACID_START'] = variant_set['AMINO_ACID_START'].astype(float).astype(int)
     
@@ -283,22 +287,21 @@ def clean_annotations(variant_set: pd.DataFrame, yaml_data: dict, germline: bool
             vcf_info_tag = 'gnomADe_non_cancer_' + str(pop) + '_' + str(tag)
             if vcf_info_tag in variant_set.columns:
                 variant_set[vcf_info_tag] = variant_set[vcf_info_tag].astype(str)
-                variant_set.loc[variant_set[vcf_info_tag] != ".", vcf_info_tag] = \
-                    variant_set.loc[variant_set[vcf_info_tag] != ".", vcf_info_tag].astype(float).astype(int)
-    
-    for elem in ['NUM_SUBMITTERS','ALLELE_ID','ENTREZGENE','REVIEW_STATUS_STARS','MSID']:
+                
+                variant_set.loc[variant_set[vcf_info_tag].notna(), vcf_info_tag] = \
+                    variant_set.loc[variant_set[vcf_info_tag].notna(), vcf_info_tag].astype(float).astype(int)
+               
+    for elem in ['NUM_SUBMITTERS','ALLELE_ID','ENTREZGENE','REVIEW_STATUS_STARS']:
         vcf_info_tag = 'CLINVAR_' + str(elem)
         if vcf_info_tag in variant_set.columns:
-            variant_set[vcf_info_tag] = variant_set[vcf_info_tag].astype(str)            
-            variant_set.loc[variant_set[vcf_info_tag] != ".", vcf_info_tag] = \
-                variant_set.loc[variant_set[vcf_info_tag] != ".", vcf_info_tag].astype(float).astype(int)
-    
+            variant_set.loc[variant_set[vcf_info_tag].notna(), vcf_info_tag] = \
+                variant_set.loc[variant_set[vcf_info_tag].notna(), vcf_info_tag].astype(str).astype(float).astype(int)           
+           
     for vcf_info_tag in ['ONCOGENE_RANK','TSG_RANK','TCGA_PANCANCER_COUNT','CGC_TIER','DISTANCE',
                          'EXON_AFFECTED','INTRON_POSITION','EXON_POSITION']:
-        if vcf_info_tag in variant_set.columns:
-            variant_set[vcf_info_tag] = variant_set[vcf_info_tag].astype(str)
-            variant_set.loc[variant_set[vcf_info_tag] != ".", vcf_info_tag] = \
-                variant_set.loc[variant_set[vcf_info_tag] != ".", vcf_info_tag].astype(float).astype(int)
+        if vcf_info_tag in variant_set.columns:                        
+            variant_set.loc[variant_set[vcf_info_tag].notna(), vcf_info_tag] = \
+                variant_set.loc[variant_set[vcf_info_tag].notna(), vcf_info_tag].astype(str).astype(float).astype(int)                
     
     if germline is True:
         variant_set = set_genotype(variant_set, logger)

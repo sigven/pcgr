@@ -1,19 +1,17 @@
 #!/usr/bin/env python
 
-from pcgr import pcgr_vars, arg_checker, config, utils, variant, cna, vep
-from pcgr.utils import getlogger, check_subprocess
-from pcgr.config import populate_config_data
+from pcgr import pcgr_vars, arg_checker, utils, cna
+from pcgr.utils import getlogger, check_subprocess, remove_file, random_id_generator
+from pcgr.config import populate_config_data, create_config
 from pcgr.maf import update_maf_allelic_support
-
+from pcgr.vep import get_command
+from pcgr.variant import clean_annotations, set_allelic_support, append_annotations, calculate_tmb
 
 import re
 import argparse
 import pandas
 import yaml
 import os
-import sys
-import getpass
-import platform
 from glob import glob
 from argparse import RawTextHelpFormatter
 
@@ -134,7 +132,7 @@ def cli():
     arg_checker.check_args(arg_dict)
     
     # create config options
-    conf_options = config.create_config(arg_dict, workflow = "PCGR")
+    conf_options = create_config(arg_dict, workflow = "PCGR")
     
     # Verify existence of input files
     pcgr_paths = arg_checker.verify_input_files(arg_dict)
@@ -199,13 +197,14 @@ def run_pcgr(pcgr_paths, conf_options):
         
         check_subprocess(logger, f'mkdir -p {output_dir}', debug)
 
+        random_id = random_id_generator(15) 
         # Define temporary output file names
-        input_vcf_validated =             f'{conf_options["sample_id"]}.pcgr_ready.vcf.gz'
-        input_vcf_validated_uncompr =     f'{conf_options["sample_id"]}.pcgr_ready.vcf'
-        vep_vcf =                         f'{conf_options["sample_id"]}.vep.vcf'
-        vep_vcfanno_vcf =                 f'{conf_options["sample_id"]}.vep.vcfanno.vcf'
-        vep_vcfanno_summarised_vcf =      f'{conf_options["sample_id"]}.vep.vcfanno.summarised.vcf'
-        vep_vcfanno_summarised_pass_vcf = f'{conf_options["sample_id"]}.vep.vcfanno.summarised.pass.vcf'
+        input_vcf_validated =             f'{conf_options["sample_id"]}.{random_id}.pcgr_ready.vcf.gz'
+        input_vcf_validated_uncompr =     f'{conf_options["sample_id"]}.{random_id}.pcgr_ready.vcf'
+        vep_vcf =                         f'{conf_options["sample_id"]}.{random_id}.vep.vcf'
+        vep_vcfanno_vcf =                 f'{conf_options["sample_id"]}.{random_id}.vep.vcfanno.vcf'
+        vep_vcfanno_summarised_vcf =      f'{conf_options["sample_id"]}.{random_id}.vep.vcfanno.summarised.vcf'
+        vep_vcfanno_summarised_pass_vcf = f'{conf_options["sample_id"]}.{random_id}.vep.vcfanno.summarised.pass.vcf'
         prefix = os.path.join(output_dir, f'{conf_options["sample_id"]}.pcgr_acmg.{conf_options["genome_assembly"]}')
         output_vcf =             f'{prefix}.vcf.gz'
         output_pass_vcf =        f'{prefix}.pass.vcf.gz'
@@ -304,10 +303,10 @@ def run_pcgr(pcgr_paths, conf_options):
             outfile.write(yaml.dump(yaml_data))
         outfile.close()
         
-        vep_command = vep.get_command(file_paths = pcgr_paths, 
-                                      conf_options = yaml_data, 
-                                      input_vcf = input_vcf_validated, 
-                                      output_vcf = vep_vcf)
+        vep_command = get_command(file_paths = pcgr_paths, 
+                                conf_options = yaml_data, 
+                                input_vcf = input_vcf_validated, 
+                                output_vcf = vep_vcf)
 
         # PCGR|VEP - run consequence annotation with Variant Effect Predictor
         print('----')
@@ -358,7 +357,7 @@ def run_pcgr(pcgr_paths, conf_options):
                     )
             check_subprocess(logger, vcf2maf_command, debug)
             if not debug:                
-                utils.remove(output_vcf2maf_log)
+                remove_file(output_vcf2maf_log)
             
             ## add information on allelic support in MAF file (n_depth, n_ref_count, n_alt_count, t_depth, t_ref_count, t_alt_count)   
             update_maf_allelic_support(
@@ -435,7 +434,7 @@ def run_pcgr(pcgr_paths, conf_options):
         # do not delete if debugging
         if not debug:
             for fn in delete_files:
-                utils.remove(fn)
+                remove_file(fn)
 
         logger.info('Finished pcgr-summarise main command')
 
@@ -447,13 +446,13 @@ def run_pcgr(pcgr_paths, conf_options):
         ## Append additional (space-containing) annotations not suitable for VCF INFO        
         logger.info("Appending ClinVar traits, official gene names, and protein domain annotations")        
         variant_set = \
-           variant.append_annotations(
+           append_annotations(
               output_pass_vcf2tsv_gz, pcgr_db_dir = pcgr_paths["db_dir"], logger = logger)
-        variant_set = variant.set_allelic_support(variant_set, allelic_support_tags = yaml_data["conf"]['somatic_snv']['allelic_support'])
-        variant_set = variant.clean_annotations(variant_set, yaml_data, germline = False, logger = logger)        
-        variant_set.to_csv(output_pass_tsv_gz, sep="\t", compression="gzip", index=False)
+        variant_set = set_allelic_support(variant_set, allelic_support_tags = yaml_data["conf"]['somatic_snv']['allelic_support'])
+        variant_set = clean_annotations(variant_set, yaml_data, germline = False, logger = logger)        
+        variant_set.fillna('.').to_csv(output_pass_tsv_gz, sep="\t", compression="gzip", index=False)
         if not debug:
-            utils.remove(output_pass_vcf2tsv_gz)
+            remove_file(output_pass_vcf2tsv_gz)
         
         if yaml_data["conf"]['assay_properties']['type'] == 'WGS' or yaml_data["conf"]['assay_properties']['type'] == 'WES':
             # check that output file exist
@@ -499,7 +498,7 @@ def run_pcgr(pcgr_paths, conf_options):
         
         if yaml_data['conf']['somatic_snv']['tmb']['run'] == 1:
             logger_tmb = getlogger('pcgr-calculate-tmb')
-            variant.calculate_tmb(
+            calculate_tmb(
                 variant_set = variant_set,
                 tumor_dp_min = int(yaml_data['conf']['somatic_snv']['tmb']['tmb_dp_min']),
                 tumor_af_min = float(yaml_data['conf']['somatic_snv']['tmb']['tmb_af_min']),

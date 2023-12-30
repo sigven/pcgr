@@ -129,7 +129,7 @@ def get_cpsr_version():
     return subprocess.check_output(v_cmd, shell=True).decode("utf-8")
 
 # https://stackoverflow.com/a/10840586/2169986
-def remove(filename):
+def remove_file(filename):
     try:
         os.remove(filename)
     except OSError as e:

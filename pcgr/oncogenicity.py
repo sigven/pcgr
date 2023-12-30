@@ -120,11 +120,11 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
       "LOSS_OF_FUNCTION",
       "INTRON_POSITION",
       "EXON_POSITION",
-      "gnomAD_EAS_AF",
-      "gnomAD_NFE_AF",
-      "gnomAD_AFR_AF",
-      "gnomAD_AMR_AF",
-      "gnomAD_SAS_AF",
+      "gnomADe_EAS_AF",
+      "gnomADe_NFE_AF",
+      "gnomADe_AFR_AF",
+      "gnomADe_AMR_AF",
+      "gnomADe_SAS_AF",
       "DBNSFP_SIFT",
       "DBNSFP_PROVEAN",
       "DBNSFP_META_RNN",
@@ -152,7 +152,7 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
       else:
          if rec.INFO.get(col) == '':
             variant_data[col] = True
-         else:            
+         else: 
             variant_data[col] = rec.INFO.get(col)
    
    for code in clingen_vicc_ev_codes:
@@ -246,19 +246,19 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
             variant_data['CLINGEN_VICC_OP3'] = True
    
 
-   if "gnomAD_EAS_AF" in variant_data.keys() and \
-      "gnomAD_SAS_AF" in variant_data.keys() and \
-      "gnomAD_AMR_AF" in variant_data.keys() and \
-      "gnomAD_AFR_AF" in variant_data.keys() and \
-      "gnomAD_NFE_AF" in variant_data.keys():
+   if "gnomADe_EAS_AF" in variant_data.keys() and \
+      "gnomADe_SAS_AF" in variant_data.keys() and \
+      "gnomADe_AMR_AF" in variant_data.keys() and \
+      "gnomADe_AFR_AF" in variant_data.keys() and \
+      "gnomADe_NFE_AF" in variant_data.keys():
 
       ## check if variant has MAF > 0.01 (SBVS1) or > 0.05 in any of five major gnomAD subpopulations (exome set)
-      for pop in ['gnomAD_SAS_AF','gnomAD_EAS_AF','gnomAD_AMR_AF','gnomAD_AFR_AF','gnomAD_NFE_AF']:
+      for pop in ['gnomADe_SAS_AF','gnomADe_EAS_AF','gnomADe_AMR_AF','gnomADe_AFR_AF','gnomADe_NFE_AF']:
          if not variant_data[pop] is None:
             ## MAF for this population >= 0.05
             if float(variant_data[pop]) >= 0.05:
                variant_data["CLINGEN_VICC_SBVS1"] = True
-      for pop in ['gnomAD_SAS_AF','gnomAD_EAS_AF','gnomAD_AMR_AF','gnomAD_AFR_AF','gnomAD_NFE_AF']:
+      for pop in ['gnomADe_SAS_AF','gnomADe_EAS_AF','gnomADe_AMR_AF','gnomADe_AFR_AF','gnomADe_NFE_AF']:
          if not variant_data[pop] is None:
             ## MAF for this population >= 0.01 (< 0.05)
             if float(variant_data[pop]) >= 0.01 and variant_data["CLINGEN_VICC_SBVS1"] is False:
@@ -266,7 +266,7 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
 
       #missing_pop_freq = 0
       approx_zero_pop_freq = 0
-      for pop in ['gnomAD_SAS_AF','gnomAD_EAS_AF','gnomAD_AMR_AF','gnomAD_AFR_AF','gnomAD_NFE_AF']:
+      for pop in ['gnomADe_SAS_AF','gnomADe_EAS_AF','gnomADe_AMR_AF','gnomADe_AFR_AF','gnomADe_NFE_AF']:
          ## no MAF recorded in gnomAD for this population
          if variant_data[pop] is None:
             approx_zero_pop_freq = approx_zero_pop_freq + 1
@@ -278,6 +278,7 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
       ## check if variant is missing or with MAF approximately zero in all five major gnomAD subpopulations (exome set)
       if approx_zero_pop_freq == 5:
          variant_data["CLINGEN_VICC_OP4"] = True
+  
     
    ## check if variant is a loss-of-function variant (LOFTEE) in a tumor suppressor gene (Cancer Gene Census/CancerMine)
    if "TSG" in variant_data.keys() and \
@@ -397,9 +398,6 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
    likely_oncogenic_lower_limit = 5
    likely_oncogenic_upper_limit = 9
    oncogenic_lower_limit = 10
-   
-   #if variant_data['SYMBOL'] == "PIK3CA":
-   #   print(str(variant_data))
 
    variant_data['ONCOGENICITY_SCORE'] = onc_score_benign + onc_score_pathogenic
    if variant_data['ONCOGENICITY_SCORE'] <= likely_benign_upper_limit and \

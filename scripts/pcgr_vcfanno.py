@@ -6,9 +6,8 @@ import re, os
 import glob
 
 from pcgr.vcf import get_vcf_info_tags, print_vcf_header
-from pcgr.utils import check_subprocess, random_id_generator
+from pcgr.utils import check_subprocess, random_id_generator, getlogger, remove_file
 from pcgr.annoutils import read_vcfanno_tag_file
-from pcgr import utils
 
 
 def __main__():
@@ -53,7 +52,7 @@ def __main__():
 
     args = parser.parse_args()
 
-    logger = utils.getlogger('pcgr-vcfanno')
+    logger = getlogger('pcgr-vcfanno')
 
     query_info_tags = get_vcf_info_tags(args.query_vcf)
     vcfheader_file = args.out_vcf + '.tmp.' + \
@@ -172,7 +171,7 @@ def run_vcfanno(num_processes, query_vcf, vcfanno_tracks, query_info_tags, vcfhe
     check_subprocess(logger, f'tabix -f -p vcf {output_vcf}.gz', debug)
     if not debug:
         for intermediate_file in glob.glob(f"{query_prefix}.{random_id}.tmp.vcfanno*"):
-            utils.remove(intermediate_file)
+            remove_file(intermediate_file)
     
     return
 

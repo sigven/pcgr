@@ -5,8 +5,7 @@ import csv
 import gzip
 import pandas as pd
 
-from pcgr import utils
-from pcgr.utils import getlogger, error_message, warn_message, check_file_exists
+from pcgr.utils import check_file_exists, remove_file
 
 def update_maf_allelic_support(maf_tmp_fname: str, 
                                maf_fname: str, 
@@ -90,7 +89,7 @@ def update_maf_allelic_support(maf_tmp_fname: str,
             f.write(f'{header_line}\n')
         f.close()
         raw_maf_data.to_csv(maf_fname, sep="\t", index=False, mode='a')
-        utils.remove(maf_tmp_fname)                     
+        remove_file(maf_tmp_fname)                     
                 
                 
         

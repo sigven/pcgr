@@ -8,21 +8,13 @@ import os
 import sys
 import yaml
 
-from pcgr import annoutils
 from pcgr.annoutils import read_infotag_file, make_transcript_xref_map, read_genexref_namemap, map_regulatory_variant_annotations, write_pass_vcf
-from pcgr import dbnsfp 
-from pcgr import vep
 from pcgr.vep import parse_vep_csq
 from pcgr.dbnsfp import vep_dbnsfp_meta_vcf, map_variant_effect_predictors
-from pcgr import oncogenicity
 from pcgr.oncogenicity import assign_oncogenicity_evidence
-from pcgr import mutation_hotspot
 from pcgr.mutation_hotspot import load_mutation_hotspots, match_csq_mutation_hotspot
-from pcgr import biomarker
 from pcgr.biomarker import load_biomarkers, match_csq_biomarker
-from pcgr import utils
-from pcgr.utils import error_message, check_subprocess
-from pcgr import vep
+from pcgr.utils import error_message, check_subprocess, getlogger
 from pcgr.vep import parse_vep_csq
 
 csv.field_size_limit(500 * 1024 * 1024)
@@ -44,9 +36,9 @@ def __main__():
     parser.add_argument("--debug", action="store_true", default=False, help="Print full commands to log, default: %(default)s")
     args = parser.parse_args()
 
-    logger = utils.getlogger('pcgr-gene-annotate')
+    logger = getlogger('pcgr-gene-annotate')
     if args.cpsr is True:
-        logger = utils.getlogger('cpsr-gene-annotate')
+        logger = getlogger('cpsr-gene-annotate')
     
     arg_dict = vars(args)
     

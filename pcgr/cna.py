@@ -142,7 +142,7 @@ def annotate_cna_segments(output_fname: str,
     
     ## Mark copy number amplifications (threshold defined by user) in input
     cna_query_segment_df['aberration_key'] = 'nan'
-    cna_query_segment_df['loss_cond'] = True
+    cna_query_segment_df['amp_cond'] = True
     cna_query_segment_df.loc[cna_query_segment_df['n_major'] + cna_query_segment_df['n_minor'] < n_copy_amplifications,"amp_cond"] = False
     cna_query_segment_df.loc[cna_query_segment_df['n_major'] + cna_query_segment_df['n_minor'] >= n_copy_amplifications,"amp_cond"] = True
     
@@ -150,7 +150,7 @@ def annotate_cna_segments(output_fname: str,
         cna_query_segment_df.loc[cna_query_segment_df.amp_cond, 'entrezgene'].astype(str) + '_amplification'
     
     ## Mark homozygous deletions in input
-    cna_query_segment_df['amp_cond'] = True
+    cna_query_segment_df['loss_cond'] = True
     cna_query_segment_df.loc[cna_query_segment_df['n_major'] + cna_query_segment_df['n_minor'] > 0,"loss_cond"] = False
     cna_query_segment_df.loc[cna_query_segment_df['n_major'] + cna_query_segment_df['n_minor'] == 0,"loss_cond"] = True
     

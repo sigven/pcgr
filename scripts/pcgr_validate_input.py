@@ -9,10 +9,9 @@ import sys
 import pandas as np
 from cyvcf2 import VCF
 
-from pcgr import annoutils, utils, vcf, cna
+from pcgr import vcf, cna
 from pcgr.annoutils import read_infotag_file
-from pcgr import utils
-from pcgr.utils import error_message, check_subprocess, random_id_generator
+from pcgr.utils import error_message, check_subprocess, remove_file, random_id_generator, getlogger
 
 def __main__():
 
@@ -158,7 +157,6 @@ def validate_panel_normal_vcf(vcf, logger):
 
 
 
-
 def simplify_vcf(input_vcf, validated_vcf, vcf, output_dir, sample_id, keep_uncompressed, logger, debug):
     """
     input_vcf: path to input VCF
@@ -236,13 +234,13 @@ def simplify_vcf(input_vcf, validated_vcf, vcf, output_dir, sample_id, keep_unco
             exit(1)
 
     if not debug:
-        utils.remove(temp_files["vcf_1"])
-        utils.remove(temp_files["vcf_2"])
-        utils.remove(temp_files["vcf_3"])
-        utils.remove(temp_files["vcf_2"] + str('.tbi'))
-        utils.remove(temp_files["vcf_3"] + str('.tbi'))
-        utils.remove(bcftools_simplify_log)
-        utils.remove(vt_decompose_log)
+        remove_file(temp_files["vcf_1"])
+        remove_file(temp_files["vcf_2"])
+        remove_file(temp_files["vcf_3"])
+        remove_file(temp_files["vcf_2"] + str('.tbi'))
+        remove_file(temp_files["vcf_3"] + str('.tbi'))
+        remove_file(bcftools_simplify_log)
+        remove_file(vt_decompose_log)
 
 def validate_pcgr_input(pcgr_directory,
                         input_vcf,
@@ -277,7 +275,7 @@ def validate_pcgr_input(pcgr_directory,
     8. Check that RNA fusion variant file has required columns and correct data types
     9. Check that RNA expression file has required columns and correct data types
     """
-    logger = utils.getlogger('pcgr-validate-input-arguments')
+    logger = getlogger('pcgr-validate-input-arguments')
 
     # if panel_normal_vcf == "None" and tumor_only == 1 and config_options['tumor_only']['exclude_pon'] is True:
     #    logger.warning('Panel-of-normals VCF is not present - exclusion of calls found in panel-of-normals will be ignored')
