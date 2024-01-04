@@ -12,7 +12,7 @@ import gzip
 
 from cyvcf2 import VCF
 from pcgr import utils, annoutils, vcf, pcgr_vars
-from pcgr.utils import error_message, check_subprocess, random_id_generator, sort_bed, check_file_exists
+from pcgr.utils import error_message, check_subprocess, random_id_generator, sort_bed, check_file_exists, remove_file
 
 
 def __main__():
@@ -262,10 +262,10 @@ def simplify_vcf(input_vcf, validated_vcf, vcf, custom_bed, pcgr_directory, geno
                    bcftools_simplify_log, 
                    vt_decompose_log]:
             #print(f"Deleting {fn}")
-            utils.remove(fn)
+            remove_file(fn)
         
-        utils.remove(temp_files["vcf_2"] + str('.tbi'))
-        utils.remove(temp_files["vcf_3"] + str('.tbi'))
+        remove_file(temp_files["vcf_2"] + str('.tbi'))
+        remove_file(temp_files["vcf_3"] + str('.tbi'))
 
     if check_file_exists(f'{validated_vcf}.gz'):
         vcf = VCF(validated_vcf + '.gz')

@@ -169,7 +169,7 @@ def sort_bed(unsorted_bed_fname: str, sorted_bed_fname: str, debug = False, logg
         check_subprocess(logger, cmd_sort_custom_bed1, debug)
         check_subprocess(logger, cmd_sort_custom_bed2, debug)
         if not debug:
-            remove(str(unsorted_bed_fname))
+            remove_file(str(unsorted_bed_fname))
     else:
         err_msg = 'File ' + str(unsorted_bed_fname) + ' does not exist or is empty'
         error_message(err_msg, logger)

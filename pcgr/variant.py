@@ -286,10 +286,10 @@ def clean_annotations(variant_set: pd.DataFrame, yaml_data: dict, germline: bool
         for tag in ['AN','AC','NHOMALT']:
             vcf_info_tag = 'gnomADe_non_cancer_' + str(pop) + '_' + str(tag)
             if vcf_info_tag in variant_set.columns:
-                variant_set[vcf_info_tag] = variant_set[vcf_info_tag].astype(str)
+                #variant_set[vcf_info_tag] = variant_set[vcf_info_tag].astype(str)
                 
                 variant_set.loc[variant_set[vcf_info_tag].notna(), vcf_info_tag] = \
-                    variant_set.loc[variant_set[vcf_info_tag].notna(), vcf_info_tag].astype(float).astype(int)
+                    variant_set.loc[variant_set[vcf_info_tag].notna(), vcf_info_tag].astype(str).astype(float).astype(int)
                
     for elem in ['NUM_SUBMITTERS','ALLELE_ID','ENTREZGENE','REVIEW_STATUS_STARS']:
         vcf_info_tag = 'CLINVAR_' + str(elem)

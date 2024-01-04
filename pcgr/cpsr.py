@@ -15,7 +15,7 @@ import yaml
 from glob import glob
 from argparse import RawTextHelpFormatter
 from pcgr import pcgr_vars, arg_checker, utils, vep, config, variant
-from pcgr.utils import check_subprocess, getlogger, error_message, warn_message
+from pcgr.utils import check_subprocess, getlogger, error_message, warn_message, remove_file
 from pcgr.config import populate_config_data
 
 def get_args():
@@ -267,7 +267,7 @@ def run_cpsr(conf_options, cpsr_paths):
         # do not delete if debugging
         if not debug:
             for fn in delete_files:
-                utils.remove(fn)
+                remove_file(fn)
         logger.info('Finished cpsr-summarise main command')
         
         # CPSR|vcf2tsvpy - convert VCF to TSV with https://github.com/sigven/vcf2tsvpy
@@ -291,7 +291,7 @@ def run_cpsr(conf_options, cpsr_paths):
         
         variant_set.to_csv(output_pass_tsv_gz, sep="\t", compression="gzip", index=False)
         if not debug:
-            utils.remove(output_pass_vcf2tsv_gz)
+            remove_file(output_pass_vcf2tsv_gz)
                 
         logger.info('Finished cpsr-summarise')
                 

@@ -75,18 +75,18 @@ def check_args(arg_dict):
         err_msg = f"Minimum sequencing depth tumor - TMB calculation ('tmb_dp_min' = {arg_dict['tmb_dp_min']}) must be >= 0"
         error_message(err_msg, logger)
         
-    if int(arg_dict['tmb_dp_min']) < int(arg_dict['tumor_dp_min']):
-        err_msg = f"Minimum sequencing depth (tumor) for TMB calculation ('tmb_dp_min' = {arg_dict['tmb_dp_min']}) must be ",
-        err_msg += f"greater or equal to minimum sequencing depth tumor {arg_dict['tumor_dp_min']} (i.e. filter for variant inclusion in report)"
+    if int(arg_dict['tmb_dp_min']) > 0 and (int(arg_dict['tmb_dp_min']) < int(arg_dict['tumor_dp_min'])):
+        err_msg = f"Minimum sequencing depth (tumor) for TMB calculation ('tmb_dp_min' = {str(arg_dict['tmb_dp_min'])}) must be ",
+        err_msg += f"greater or equal to minimum sequencing depth tumor {str(arg_dict['tumor_dp_min'])} (i.e. filter for variant inclusion in report)"
         error_message(err_msg, logger)
 
     if float(arg_dict['tmb_af_min']) < 0 or float(arg_dict['tmb_af_min']) > 1:
         err_msg = f"Minimum AF (tumor) for TMB calculation ('tmb_af_min' = {arg_dict['tmb_af_min']}) must be within [0, 1]"
         error_message(err_msg, logger)
         
-    if float(arg_dict['tmb_af_min']) < float(arg_dict['tumor_af_min']):
-        err_msg = f"Minimum AF (tumor) for TMB calculation ('tmb_af_min' = {arg_dict['tmb_af_min']}) must be ",
-        err_msg += f"greater or equal to minimum AF tumor {arg_dict['tumor_dp_min']} (i.e. filter for variant inclusion in report)"
+    if float(arg_dict['tmb_af_min']) > 0 and (float(arg_dict['tmb_af_min']) < float(arg_dict['tumor_af_min'])):
+        err_msg = f"Minimum AF (tumor) for TMB calculation ('tmb_af_min' = {str(arg_dict['tmb_af_min'])}) must be ",
+        err_msg += f"greater or equal to minimum AF tumor {str(arg_dict['tumor_dp_min'])} (i.e. filter for variant inclusion in report)"
         error_message(err_msg, logger)
 
     # Check that coding target size region of sequencing assay is set correctly
