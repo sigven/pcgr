@@ -6,11 +6,11 @@ channels:
   - conda-forge
 
 dependencies:
-  - pcgr::pcgr ==1.4.1.9000 # versioned by bump2version
+  - pcgr::pcgr ==1.4.1.9001 # versioned by bump2version
   - bedtools
   - bcftools
   - cyvcf2
-  - ensembl-vep ==110.1
+  - ensembl-vep ==111.0
   - htslib
   - pandoc
   - bioconda::perl-bio-bigfile

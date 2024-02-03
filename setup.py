@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name='pcgr',
-    version='1.4.1.9000', # versioned by bump2version
+    version='1.4.1.9001', # versioned by bump2version
     license='MIT',
     author='Sigve Nakken',
     author_email='sigven@gmail.com',
