@@ -15,10 +15,14 @@ for (c in c("pathogenicity", "clinical_evidence", "tier",
   }
   if (c == "clinical_evidence") {
     color_palette[[c]][["levels"]] <-
-      c("A: Validated", "A: FDA/NCCN/ELN guidelines",
-        "B: Clinical evidence", "B1: Clinical evidence: late trials",
-        "B2: Clinical evidence: early trials", "C: Case study",
-        "D: Preclinical evidence", "E: Indirect evidence")
+      c("A: Validated",
+        "A: FDA/NCCN/ELN guidelines",
+        "B: Clinical evidence",
+        "B1: Clinical evidence: late trials",
+        "B2: Clinical evidence: early trials",
+        "C: Case study",
+        "D: Preclinical evidence",
+        "E: Indirect evidence")
     color_palette[[c]][["values"]] <-
       c("#009E73", "#009E73", "#56B4E9", "#56B4E9",
         "#56B4E9", "#0072B2", "#E69F00", "#F0E442")

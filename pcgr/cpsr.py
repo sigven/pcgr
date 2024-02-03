@@ -175,7 +175,7 @@ def run_cpsr(conf_options, cpsr_paths):
         else:
             logger.info(f"Diagnostic-grade genes in virtual panels (GE PanelApp): " + \
                         f"{'ON' if conf_options['gene_panel']['diagnostic_grade_only'] else 'OFF'}")
-        logger.info(f"Include incidental findings (ACMG recommended list v3.1): " + \
+        logger.info(f"Include incidental findings (ACMG recommended list v3.2): " + \
                     f"{'ON' if conf_options['variant_classification']['secondary_findings'] else 'OFF'}")
         logger.info(f"Include low to moderate cancer risk variants from genome-wide association studies: " + \
                     f"{'ON' if conf_options['variant_classification']['gwas_findings'] else 'OFF'}")
@@ -204,6 +204,7 @@ def run_cpsr(conf_options, cpsr_paths):
                                       output_vcf = vep_vcf)
 
         logger = getlogger('cpsr-vep')
+        #print(str(vep_command["main"]))
 
         logger.info((
             f"CPSR - STEP 1: Basic variant annotation with Variant Effect Predictor (version {pcgr_vars.VEP_VERSION}, "
@@ -223,6 +224,7 @@ def run_cpsr(conf_options, cpsr_paths):
         check_subprocess(logger, vep_command["tabix"], debug)
         logger.info("Finished cpsr-vep")
         print('----')
+        #exit(0)
 
         ## CPSR|vcfanno - run vcfanno on query VCF with a number of relevant annotated VCFs
         logger = getlogger('cpsr-vcfanno')
@@ -289,7 +291,7 @@ def run_cpsr(conf_options, cpsr_paths):
             outfile.write(yaml.dump(yaml_data))
         outfile.close()
         
-        variant_set.to_csv(output_pass_tsv_gz, sep="\t", compression="gzip", index=False)
+        variant_set.fillna('.').to_csv(output_pass_tsv_gz, sep="\t", compression="gzip", index=False)
         if not debug:
             remove_file(output_pass_vcf2tsv_gz)
                 

@@ -219,7 +219,7 @@ load_dna_variants <- function(
         .data$EVIDENCE_ID, sep=";"
       ) |>
       dplyr::group_by(
-        .data$EVIDENCE_ID
+        EVIDENCE_ID
       ) |>
       dplyr::summarise(
         CITATION = paste(

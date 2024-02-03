@@ -3,7 +3,7 @@
 from pcgr._version import __version__
 
 PCGR_VERSION = __version__
-DB_VERSION = '20231212'
+DB_VERSION = '20240203'
 
 ## MISCELLANEOUS
 NCBI_BUILD_MAF = 'GRCh38'
@@ -12,13 +12,13 @@ CODING_EXOME_SIZE_MB = 34.0
 RECOMMENDED_N_MUT_SIGNATURE = 200
 
 ## GENCODE
-GENCODE_VERSION = {'grch38': 44,'grch37': 19}
+GENCODE_VERSION = {'grch38': 45,'grch37': 19}
 
 ## vcfanno
 VCFANNO_MAX_PROC = 15
 
 ## VEP settings/versions
-VEP_VERSION = '110'
+VEP_VERSION = '111'
 VEP_ASSEMBLY = {'grch38': 'GRCh38','grch37': 'GRCh37'}
 VEP_MIN_FORKS = 1
 VEP_MAX_FORKS = 8

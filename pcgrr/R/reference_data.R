@@ -115,6 +115,7 @@ load_reference_data <- function(
   pcgr_ref_data[["gene"]][["panel"]] <- data.frame()
   pcgr_ref_data[["gene"]][["cpg"]] <- data.frame()
   pcgr_ref_data[['gene']][['gene_xref']] <- data.frame()
+  pcgr_ref_data[['gene']][['transcript_xref']] <- data.frame()
 
   cpg_tsv_fname <- file.path(
     pcgr_db_assembly_dir, "gene", "tsv",
@@ -156,6 +157,23 @@ load_reference_data <- function(
     "gene_transcript_xref.tsv.gz"
   )
   check_file_exists(gene_xref_tsv_fname)
+
+  pcgr_ref_data[['gene']][['transcript_xref']] <- as.data.frame(
+    readr::read_tsv(gene_xref_tsv_fname, show_col_types = F)) |>
+    dplyr::select(
+      c("chrom",
+        "ensembl_gene_id",
+        "ensembl_transcript_id",
+        "gencode_transcript_biotype",
+        "gene_biotype"
+      )
+    ) |>
+    dplyr::distinct()
+
+  colnames(pcgr_ref_data[['gene']][['transcript_xref']]) <-
+    toupper(colnames(pcgr_ref_data[['gene']][['transcript_xref']]))
+
+
   pcgr_ref_data[['gene']][['gene_xref']] <- as.data.frame(
     readr::read_tsv(gene_xref_tsv_fname, show_col_types = F)) |>
     dplyr::select(
@@ -175,7 +193,7 @@ load_reference_data <- function(
       "cancergene_evidence")
     ) |>
     dplyr::rename(
-      genename = .data$name
+      genename = name
     ) |>
     dplyr::mutate(
       entrezgene = as.character(.data$entrezgene)
@@ -251,6 +269,27 @@ load_reference_data <- function(
     toupper(colnames(pcgr_ref_data[['variant']][['gwas']]))
 
 
+  pcgr_ref_data[['variant']][['varstats']] <- list()
+  ## Get variant statistics
+  for(vardb in c('clinvar','gwas','tcga',
+                 'gnomad_non_cancer','dbmts',
+                 'dbnsfp')){
+    varstats_fname <-
+      file.path(
+        pcgr_db_assembly_dir, "variant", "vcf", vardb,
+        paste0(vardb,".vcf_varstats.tsv")
+      )
+
+    if(file.exists(varstats_fname)){
+      pcgr_ref_data[['variant']][['varstats']][[vardb]] <-
+        as.data.frame(
+          readr::read_tsv(
+            varstats_fname, show_col_types = F))
+    }
+
+  }
+
+
 
   ## 3. Phenotype ontologies
 
@@ -294,54 +333,79 @@ load_reference_data <- function(
     file.path(
       pcgr_db_assembly_dir, "misc", "other",
       "msi_classification",
-      "msi_classification.rds"
+      "tcga_msi_classifier.rds"
     )
   check_file_exists(msi_model_rds)
   pcgr_ref_data[['msi']] <-
     readRDS(msi_model_rds)
 
 
+  pcgr_ref_data[['misc']] <- list()
   ## 5. Miscellaneous
   for(elem in c('tmb',
                 'mutational_signature',
-                'pathway')){
+                'pathway',
+                'hotspot',
+                'protein_domain')){
 
     fname_misc <- file.path(
       pcgr_db_assembly_dir, "misc", "tsv", elem,
       paste0(elem,".tsv.gz")
     )
+
+    # if(elem == 'hotspot'){
+    #   fname_misc <- file.path(
+    #     pcgr_db_assembly_dir, "misc", "tsv", elem,
+    #     paste0(elem,".tsv.gz")
+    #   )
+    # }
+
     check_file_exists(fname_misc)
-    pcgr_ref_data[[elem]] <- as.data.frame(
+    pcgr_ref_data[['misc']][[elem]] <- as.data.frame(
       readr::read_tsv(
         fname_misc, show_col_types = F,
         na = ".")
     )
-    colnames(pcgr_ref_data[[elem]]) <-
-      toupper(colnames(pcgr_ref_data[[elem]]))
+    colnames(pcgr_ref_data[['misc']][[elem]]) <-
+      toupper(colnames(pcgr_ref_data[['misc']][[elem]]))
 
   }
 
-  tmp = pcgr_ref_data[['pathway']]
-  pcgr_ref_data[['pathway']] <- list()
-  pcgr_ref_data[['pathway']][['long']] <- tmp
-  pcgr_ref_data[['pathway']][['wide']] <- as.data.frame(
+  tmp = pcgr_ref_data[['misc']][['pathway']]
+  pcgr_ref_data[['misc']][['pathway']] <- list()
+  pcgr_ref_data[['misc']][['pathway']][['long']] <- tmp
+  pcgr_ref_data[['misc']][['pathway']][['wide']] <- as.data.frame(
     tmp |>
     dplyr::group_by(.data$GENE_ID) |>
     dplyr::summarise(LINK = paste(.data$URL_HTML, collapse = ", ")))
 
 
   ## 6. Drugs
+
+  pcgr_ref_data[['drug']] <- list()
   drug_tsv_fname <-
     file.path(
       pcgr_db_assembly_dir, "drug",
-      "tsv", "drug.tsv.gz"
+      "tsv", "drug_targeted.tsv.gz"
     )
   check_file_exists(drug_tsv_fname)
-  pcgr_ref_data[['drug']] <- as.data.frame(
+  pcgr_ref_data[['drug']][['targeted']] <- as.data.frame(
     readr::read_tsv(drug_tsv_fname, show_col_types = F, na = ".")
   )
-  colnames(pcgr_ref_data[['drug']]) <-
-    toupper(colnames(pcgr_ref_data[['drug']]))
+  colnames(pcgr_ref_data[['drug']][['targeted']]) <-
+    toupper(colnames(pcgr_ref_data[['drug']][['targeted']]))
+
+  drug_all_tsv_fname <-
+    file.path(
+      pcgr_db_assembly_dir, "drug",
+      "tsv", "drug_all.tsv.gz"
+    )
+  check_file_exists(drug_all_tsv_fname)
+  pcgr_ref_data[['drug']][['all']] <- as.data.frame(
+    readr::read_tsv(drug_all_tsv_fname, show_col_types = F, na = ".")
+  )
+  colnames(pcgr_ref_data[['drug']][['all']]) <-
+    toupper(colnames(pcgr_ref_data[['drug']][['all']]))
 
   ## 7. Biomarkers
   pcgr_ref_data[['biomarker']] <- list()
