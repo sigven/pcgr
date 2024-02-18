@@ -1,156 +1,104 @@
 #' Function that generates all contents of the cancer genome report (PCGR)
 #'
-#' @param project_directory name of project directory
-#' @param pcgr_data List object with multiple PCGR data bundle annotations
-#' @param config Object with PCGR configuration parameters
-#' @param tier_model Variant tier model
+#' @param yaml_fname Name of PCGR configuration file (yaml)
 #'
 #' @export
 
-generate_pcgr_report <-
-  function(project_directory = NULL,
-           pcgr_data = NULL,
-           config = NULL,
-           tier_model = "pcgr_acmg") {
+generate_pcgr_report2 <-
+  function(yaml_fname = NULL) {
 
-    ## Assert argument values - config
     invisible(assertthat::assert_that(
-      !is.null(config) & is.list(config),
-      msg = "Argument 'config' must be a non-NULL list object"))
-
-    ## Assert argument values - pcgr_data
-    invisible(assertthat::assert_that(
-      !is.null(pcgr_data) & is.list(pcgr_data),
-      msg = "Argument 'pcgr_data' must be a non-NULL list object"))
-
-    ## Assert argument values - tier_model
-    invisible(assertthat::assert_that(
-      is.character(tier_model),
-      msg = "Argument 'tier_model' must be of type character"))
-
-    ## Assert argument values - tier_model
-    invisible(assertthat::assert_that(
-      tier_model == "pcgr_acmg" | tier_model == "cpsr",
-      msg = "Argument 'tier_model' must be either 'pcgr_acmg' or 'cpsr"))
-
-    query_vcf2tsv <- config[['required_args']][['query_vcf2tsv']]
-    sample_name <- config[['required_args']][['sample_name']]
-    cna_segments_tsv <- config[['required_args']][['query_cna']]
-    pcgr_version <- config[['required_args']][['pcgr_version']]
-    cpsr_report_fname <- config[['required_args']][['cpsr_report']]
-
-    pcgrr::log4r_info(paste0("Initializing PCGR report - sample ", sample_name))
-    pcgrr::log4r_info("------")
-
-
-    if (!is.null(cna_segments_tsv)) {
-      if (length(cna_segments_tsv) > 0) {
-        invisible(assertthat::assert_that(
-          file.exists(cna_segments_tsv),
-          msg = paste0("Filename provided for argument 'cna_segments_tsv' (",
-                       cna_segments_tsv, ") does not exist")))
-        invisible(assertthat::assert_that(
-          file.size(cna_segments_tsv) > 0,
-          msg = paste0("File provided for argument 'cna_segments_tsv' (",
-                       cna_segments_tsv, ") has a filesize of zero")))
-      }
-    }
-    if (!is.null(query_vcf2tsv)) {
-      invisible(assertthat::assert_that(
-        file.exists(query_vcf2tsv),
-        msg = paste0("Filename provided for argument 'query_vcf2tsv' (",
-                     query_vcf2tsv, ") does not exist")))
-      invisible(assertthat::assert_that(
-        file.size(query_vcf2tsv) > 0,
-        msg = paste0("File provided for argument 'query_vcf2tsv' (",
-                     query_vcf2tsv, ") has a filesize of zero")))
-
-    }
-    if (!is.null(cpsr_report_fname)) {
-      if (length(cpsr_report_fname) > 0) {
-
-        invisible(assertthat::assert_that(
-          file.exists(cpsr_report_fname),
-          msg = paste0("Filename provided for argument 'cpsr_report' (",
-                       cpsr_report_fname, ") does not exist")))
-        invisible(assertthat::assert_that(
-          file.size(cpsr_report_fname) > 0,
-          msg = paste0("File provided for argument 'cpsr_report' (",
-                       cpsr_report_fname, ") has a filesize of zero")))
-      }
-
-    }
+      !is.null(yaml_fname),
+      msg = "Object 'yaml_fname' cannot be NULL"
+    ))
+    pcgrr::check_file_exists(yaml_fname)
 
     pcg_report <- pcgrr::init_report(
-      config = config,
-      class = NULL,
-      pcgr_data = pcgr_data
-    )
+      yaml_fname = yaml_fname,
+      report_mode = "PCGR")
 
-    ## Set output and temporary file names
-    sample_fname_pattern <-
-      paste(sample_name, tier_model,
-            pcgr_data[["assembly"]][["grch_name"]], sep = ".")
+    settings <- pcg_report$settings
+    ref_data <- pcg_report$ref_data
 
-    fnames <- list()
-    fnames[["maf"]] <-
-      file.path(project_directory, paste0(sample_fname_pattern, ".maf"))
-    fnames[["maf_tmp"]] <-
-      file.path(project_directory, paste0(sample_fname_pattern, ".tmp.maf"))
-    fnames[["vcf_mp"]] <-
-      file.path(project_directory, paste0(sample_fname_pattern, ".mp_input.vcf"))
+    callset_snv <-
+      pcgrr::load_somatic_snv_indel(
+        fname = settings$molecular_data$fname_mut_tsv,
+        ref_data = ref_data,
+        settings = settings
+      )
 
+    callset_cna <- NULL
+    if (settings$molecular_data$fname_cna_tsv != "None") {
+      callset_cna <-
+        pcgrr::load_somatic_cna(
+          fname = settings$molecular_data$fname_cna_tsv,
+          ref_data = ref_data,
+          settings = settings
+        )
+    }
+
+
+    conf_somatic_snv <-
+      settings$conf$somatic_snv
+    conf_somatic_cna <-
+      settings$conf$somatic_cna
+    conf_other <-
+      settings$conf$other
+    assay_properties <-
+      settings$conf$assay_properties
+    sample_properties <-
+      settings$conf$sample_properties
+
+    #pcgrr::log4r_info(paste0("Initializing PCGR report - sample ", sample_name))
+    #pcgrr::log4r_info("------")
+
+    # if (!is.null(cpsr_report_fname)) {
+    #   if (length(cpsr_report_fname) > 0) {
+    #
+    #     invisible(assertthat::assert_that(
+    #       file.exists(cpsr_report_fname),
+    #       msg = paste0("Filename provided for argument 'cpsr_report' (",
+    #                    cpsr_report_fname, ") does not exist")))
+    #     invisible(assertthat::assert_that(
+    #       file.size(cpsr_report_fname) > 0,
+    #       msg = paste0("File provided for argument 'cpsr_report' (",
+    #                    cpsr_report_fname, ") has a filesize of zero")))
+    #   }
+    #
+    # }
 
     ## Retrieve relevant clinical trials for the tumor type in question
 
-    if (config[["clinicaltrials"]][["run"]] == T) {
-      pcg_report_trials <-
-        pcgrr::generate_report_data_trials(
-          pcgr_data = pcgr_data,
-          sample_name = sample_name,
-          config = config)
-      ## Update genome report with trial data
-      pcg_report <-
-        pcgrr::update_report(pcg_report, pcg_report_trials,
-                             a_elem = "clinicaltrials")
+    if (as.logical(settings$conf$clinicaltrials$run) == T) {
+      # pcg_report_trials <-
+      #   pcgrr::generate_report_data_trials(
+      #     ref_data = ref_data,
+      #     settings = settings)
+      # ## Update genome report with trial data
+      # pcg_report <-
+      #   pcgrr::update_report(pcg_report, pcg_report_trials,
+      #                        a_elem = "clinicaltrials")
     }
 
-
-
-    ## Load sample calls (check integrity, filter variants for
-    ## depth/allelic fraction, append links etc)
-    sample_calls <-
-      pcgrr::get_calls(
-        query_vcf2tsv,
-        pcgr_data,
-        sample_name,
-        config,
-        oncotree =
-          pcg_report[["metadata"]][["phenotype"]][["oncotree_query"]],
-        maf_filenames = fnames)
-
-
-    if (nrow(sample_calls) > 0) {
-
-      assay_props <-
-        pcg_report[["metadata"]][["config"]][["assay_props"]]
+    if (NROW(callset_snv$variant) > 0) {
 
       ## Perform analyses in tumor-only mode
-      if (assay_props[["vcf_tumor_only"]] == TRUE) {
+      if (assay_properties[["vcf_tumor_only"]] == TRUE) {
         pcg_report_tumor_only <-
-          pcgrr::generate_report_data_tumor_only(sample_calls,
-                                                 sample_name, config)
+          pcgrr::generate_report_data_tumor_only(
+            sample_calls,
+            sample_name, config)
 
         ## Generate data for SNVs/InDels
         ## -
-        pcg_report_snv_indel_filtered <-
-          pcgrr::generate_report_data_snv_indel(
-            pcg_report_tumor_only[["variant_set"]][["filtered"]],
-            pcgr_data,
-            sample_name,
-            config,
-            callset = "germline-filtered callset",
-            tier_model = tier_model)
+        # pcg_report_snv_indel_filtered <-
+        #   pcgrr::generate_report_data_snv_indel(
+        #     pcg_report_tumor_only[["variant_set"]][["filtered"]],
+        #     pcgr_data,
+        #     sample_name,
+        #     config,
+        #     callset = "germline-filtered callset",
+        #     tier_model = tier_model)
 
         pcg_report_tumor_only[["upset_data"]] <-
           pcgrr::make_upset_plot_data(
@@ -189,48 +137,38 @@ generate_pcgr_report <-
         ## Generate report data for SNVs/InDels
         pcg_report_snv_indel <-
           pcgrr::generate_report_data_snv_indel(
-            sample_calls,
-            pcgr_data,
-            sample_name,
-            config, tier_model = tier_model)
+            pcg_report,
+            callset = callset_snv,
+            tier_model = "pcgr_acmg")
 
         ## Update genome report
         pcg_report <- pcgrr::update_report(
           pcg_report, pcg_report_snv_indel,
           a_elem = "snv_indel")
       }
-      rm(sample_calls)
 
       ## Estimate contribution of mutational signatures
-      if (pcg_report[["metadata"]][["config"]][["msigs"]][["run"]] == T) {
+      if (conf_somatic_snv[["mutational_signatures"]][["run"]] == T) {
 
-        if (NROW(pcg_report$content$snv_indel$variant_set$tsv) > 0) {
-          pcgrr::write_processed_vcf(
-            calls = pcg_report$content$snv_indel$variant_set$tsv,
-            sample_name = sample_name,
-            output_directory = project_directory,
-            vcf_fname = fnames[["vcf_mp"]])
-
+        if (NROW(callset_snv$variant) > 0) {
           pcg_report_signatures <-
             pcgrr::generate_report_data_signatures_mp(
-              vcf_fname = paste0(fnames[["vcf_mp"]], ".gz"),
-              pcgr_data,
-              sample_name,
-              config,
-              type_specific =
-                !config[["msigs"]][["all_reference_signatures"]])
+              callset_snv = callset_snv,
+              settings = pcg_report$settings,
+              ref_data = pcg_report$ref_data)
 
           ## Update genome report with signature info
           pcg_report <- pcgrr::update_report(
-            pcg_report, pcg_report_signatures,
+            pcg_report,
+            pcg_report_signatures,
             a_elem = "m_signature_mp")
         }
 
         ## Generate report data for rainfall plot
         pcg_report_rainfall <-
           pcgrr::generate_report_data_rainfall(
-            variant_set = pcg_report$content$snv_indel$variant_set$tsv,
-            build = pcg_report$metadata$genome_assembly)
+            variant_set = callset_snv$variant,
+            build = pcg_report$settings$genome_assembly)
 
         ## Update genome report
         pcg_report <-
@@ -240,38 +178,41 @@ generate_pcgr_report <-
 
         ## Generate report data for kataegis events (for WES/WGS runs)
         if (stringr::str_detect(
-          assay_props[["type"]],
+          assay_properties[["type"]],
           "WGS|WES")) {
           pcg_report_kataegis <-
             pcgrr::generate_report_data_kataegis(
-              variant_set = pcg_report$content$snv_indel$variant_set$tsv,
-              sample_name = sample_name,
-              build = pcg_report$metadata$genome_assembly)
+              variant_set = callset_snv$variant,
+              sample_name = settings$sample_id,
+              build = settings$genome_assembly)
           ## Update genome report
           pcg_report <- pcgrr::update_report(
-            pcg_report, pcg_report_kataegis,
+            pcg_report,
+            pcg_report_kataegis,
             a_elem = "kataegis")
         }
       }
 
       ## If assay is Tumor-Control and WES/WGS - perform MSI prediction
-      if (pcg_report[["metadata"]][["config"]][["msi"]][["run"]] == T &
-          stringr::str_detect(assay_props[["type"]], "WGS|WES") &
-          assay_props[["vcf_tumor_only"]] == FALSE) {
+      if (as.logical(settings$conf$somatic_snv$msi$run) == T &
+          stringr::str_detect(assay_properties[["type"]], "WGS|WES") &
+          as.logical(assay_properties[["vcf_tumor_only"]]) == FALSE) {
         pcg_report_msi <-
           pcgrr::generate_report_data_msi(
-            pcg_report[["content"]][["snv_indel"]][["variant_set"]][["tsv"]],
-            pcgr_data, sample_name, config)
+            variant_set = callset_snv$variant,
+            ref_data = ref_data,
+            settings = settings)
 
         ## Update genome report with MSI info
         pcg_report <-
-          pcgrr::update_report(pcg_report,
-                               pcg_report_msi,
-                               a_elem = "msi")
+          pcgrr::update_report(
+            pcg_report,
+            pcg_report_msi,
+            a_elem = "msi")
       }
 
       ## Generate report contents for analysis of mutational burden (TMB)
-      if (pcg_report[["metadata"]][["config"]][["tmb"]][["run"]] == T) {
+      if (settings$conf$somatic_snv$tmb$run == T) {
         pcg_report_tmb <-
           pcgrr::generate_report_data_tmb(
             pcg_report[["content"]][["snv_indel"]][["variant_set"]][["tsv"]],
@@ -279,7 +220,8 @@ generate_pcgr_report <-
 
         ## Update genome report with TMB info
         pcg_report <- pcgrr::update_report(
-          pcg_report, pcg_report_tmb,
+          pcg_report,
+          pcg_report_tmb,
           a_elem = "tmb")
       }
     }else{
@@ -287,16 +229,16 @@ generate_pcgr_report <-
       pcg_report[["metadata"]][["config"]][["other"]][["list_noncoding"]] <- FALSE
     }
 
-    if (!is.null(cpsr_report_fname)) {
-      pcg_report[["content"]][["cpsr"]][['eval']] <- TRUE
-
-      pcg_report[['content']][['cpsr']][['report']] <-
-        jsonlite::fromJSON(
-          gzfile(cpsr_report_fname)
-        )
-
-      ## append report elements in pcg_report[['content']][['cpsr]][['cpsr_json']]
-    }
+    # if (!is.null(cpsr_report_fname)) {
+    #   pcg_report[["content"]][["cpsr"]][['eval']] <- TRUE
+    #
+    #   pcg_report[['content']][['cpsr']][['report']] <-
+    #     jsonlite::fromJSON(
+    #       gzfile(cpsr_report_fname)
+    #     )
+    #
+    #   ## append report elements in pcg_report[['content']][['cpsr]][['cpsr_json']]
+    # }
 
     if (!is.null(cna_segments_tsv)) {
       pcg_report_cna <-
@@ -357,23 +299,24 @@ generate_pcgr_report <-
 #' @return pcg_report_data data frame with all report elements
 #'
 #' @export
-generate_report_data_snv_indel <- function(
-  pcg_report = NULL,
-  callset = NULL,
-  tier_model = "pcgr_acmg") {
+generate_report_data_snv_indel2 <- function(
+    pcg_report = NULL,
+    callset = NULL,
+    tier_model = "pcgr_acmg") {
 
   pcgrr::log4r_info("------")
   pcgrr::log4r_info(
     paste0("Generating data for tiered cancer genome report - ",
-           callset, " tier model '", tier_model, "'"))
+           " tier model '", tier_model, "'"))
 
   pcg_report_snv_indel <- pcg_report[['content']][['snv_indel']]
   pcg_report_snv_indel[["eval"]] <- TRUE
-  pcg_report_snv_indel[["variant_set"]][["all"]] <- sample_calls
+  pcg_report_snv_indel[["variant_set"]][["all"]] <- callset[['variant']]
 
   ## Get basic variant statistics (type, coding status)
-  call_stats <- pcgrr::variant_stats_report(sample_calls,
-                                            name = "v_stat")
+  call_stats <- pcgrr::variant_stats_report(
+    callset[['variant']],
+    name = "v_stat")
   for (stat in c("n", "n_snv", "n_indel", "n_coding", "n_noncoding")) {
     pcg_report_snv_indel[["v_stat"]][[stat]] <-
       call_stats[["v_stat"]][[stat]]
@@ -382,186 +325,189 @@ generate_report_data_snv_indel <- function(
     paste0("Number of protein-coding variants: ",
            pcg_report_snv_indel[["v_stat"]][["n_coding"]]))
 
-  annotation_tags <- pcgr_data[["annotation_tags"]]
-
-  ## Add custom annotation tags to lists of tags to display
-  if (!is.null(config[["preserved_info_tags"]])) {
-    if (config[["preserved_info_tags"]] != "None") {
-      tags <- stringr::str_split(
-        config[["preserved_info_tags"]],
-        pattern = ",")[[1]]
-      for (t in tags) {
-        t <- stringr::str_trim(t)
-        if (t %in% colnames(sample_calls)) {
-          annotation_tags[["all"]] <-
-            c(annotation_tags[["all"]], t)
-        }
-      }
-    }
-  }
-
-  ## remove REGULATORY_ANNOTATION from display tags
-  ## if regulatory annotation is not turned on
-  if (!is.null(config)) {
-    if (config[['other']][['vep_regulatory']] == FALSE) {
-      for(e in c('all','tier4_display','tier5_display',
-                 'tsv')) {
-        annotation_tags[[e]] <-
-          annotation_tags[[e]][!annotation_tags[[e]] == "REGULATORY_ANNOTATION"]
-      }
-    }
-  }
-
-  if (pcg_report_snv_indel[["v_stat"]][["n"]] > 0) {
-
-    tumor_type <- config[["t_props"]][["tumor_type"]]
-
-    ## load all clinical evidence items ()
-    eitems_any_tt <- pcgrr::load_eitems(
-      eitems_raw = pcgr_data$biomarkers,
-      alteration_types = c("MUT","MUT_LOF"),
-      ontology =
-        pcgr_data$phenotype$oncotree,
-      origin = "Somatic",
-      tumor_type_specificity = "any")
-
-    ## Get all clinical evidence items that overlap
-    ## query set (NOT tumor-type specific)
-    biomarker_hits_snv_indels_any <-
-      pcgrr::get_clin_assocs_snv_indel(
-        sample_calls = pcg_report_snv_indel[["variant_set"]][["all"]],
-        annotation_tags = annotation_tags,
-        eitems = eitems_any_tt)
-
-    ## Assign putative TIER 2 variant set
-    pcg_report_snv_indel[["clin_eitem"]][["any_ttype"]] <-
-      biomarker_hits_snv_indels_any$clin_eitem
-    pcg_report_snv_indel[["variant_set"]][["tier2"]] <-
-      biomarker_hits_snv_indels_any$variant_set
-
-    ## Get all clinical evidence items that
-    ## overlap query set (if tumor type is specified)
-    if (tumor_type != "Cancer, NOS") {
-
-      ## load tumor-type specific evidence items ()
-      eitems_specific_tt <- pcgrr::load_eitems(
-        eitems_raw = pcgr_data$biomarkers,
-        alteration_types = c("MUT","MUT_LOF"),
-        ontology =
-          pcgr_data$phenotype$oncotree,
-        origin = "Somatic",
-        tumor_type_specificity = "specific",
-        tumor_type = tumor_type)
-
-      biomarker_hits_snv_indels_specific <-
-        pcgrr::get_clin_assocs_snv_indel(
-          sample_calls = pcg_report_snv_indel[["variant_set"]][["all"]],
-          annotation_tags = annotation_tags,
-          eitems = eitems_specific_tt)
-
-      ## Assign putative TIER 1 variant set
-      pcg_report_snv_indel[["clin_eitem"]][["query_ttype"]] <-
-        biomarker_hits_snv_indels_specific$clin_eitem
-      pcg_report_snv_indel[["variant_set"]][["tier1"]] <-
-        biomarker_hits_snv_indels_specific$variant_set
-    }
-
-    ## Remove potential overlap/redundancies and assign final
-    ## TIER1/TIER2 classification
-    pcg_report_snv_indel <- pcgrr::assign_tier1_tier2_acmg(pcg_report_snv_indel)
-    tier12 <- rbind(pcg_report_snv_indel[["disp"]][["tier1"]],
-                    pcg_report_snv_indel[["disp"]][["tier2"]])
-
-    ## Determine TIER 3 variant set: coding mutations in
-    ## oncogenes/tumor suppressors/cancer census genes
-    pcg_report_snv_indel[["variant_set"]][["tier3"]] <-
-      dplyr::select(pcg_report_snv_indel[["variant_set"]][["all"]],
-                    dplyr::one_of(annotation_tags[["all"]])) |>
-      dplyr::filter(.data$CODING_STATUS == "coding") |>
-      dplyr::filter(.data$ONCOGENE == TRUE | .data$TUMOR_SUPPRESSOR == TRUE)
-    if (nrow(tier12) > 0 &
-        nrow(pcg_report_snv_indel[["variant_set"]][["tier3"]]) > 0) {
-      pcg_report_snv_indel[["variant_set"]][["tier3"]] <-
-        dplyr::anti_join(pcg_report_snv_indel[["variant_set"]][["tier3"]],
-                         tier12, by = c("GENOMIC_CHANGE"))
-    }
-    tier123 <- tier12
-    if (nrow(pcg_report_snv_indel[["variant_set"]][["tier3"]]) > 0) {
-      pcg_report_snv_indel[["variant_set"]][["tier3"]] <-
-        pcg_report_snv_indel[["variant_set"]][["tier3"]] |>
-        dplyr::arrange(dplyr::desc(.data$OPENTARGETS_RANK))
-      tier123 <- tier12 |>
-        dplyr::bind_rows(
-          dplyr::select(pcg_report_snv_indel[["variant_set"]][["tier3"]],
-                        .data$GENOMIC_CHANGE)) |>
-        dplyr::distinct()
-      pcg_report_snv_indel[["disp"]][["tier3"]][["proto_oncogene"]] <-
-        dplyr::select(
-          pcg_report_snv_indel[["variant_set"]][["tier3"]],
-          dplyr::one_of(annotation_tags[["tier3_display"]])) |>
-        dplyr::filter(.data$ONCOGENE == TRUE &
-                        (is.na(.data$TUMOR_SUPPRESSOR) |
-                           .data$TUMOR_SUPPRESSOR == FALSE))
-      pcg_report_snv_indel[["disp"]][["tier3"]][["tumor_suppressor"]] <-
-        dplyr::select(
-          pcg_report_snv_indel[["variant_set"]][["tier3"]],
-          dplyr::one_of(annotation_tags[["tier3_display"]])) |>
-        dplyr::filter(.data$TUMOR_SUPPRESSOR == TRUE)
-    }
-
-    ## Determine TIER 4: Other coding mutations
-    pcg_report_snv_indel[["variant_set"]][["tier4"]] <-
-      dplyr::select(pcg_report_snv_indel[["variant_set"]][["all"]],
-                    dplyr::one_of(annotation_tags[["all"]])) |>
-      dplyr::filter(.data$CODING_STATUS == "coding")
-    if (nrow(tier123) > 0 &
-        nrow(pcg_report_snv_indel[["variant_set"]][["tier4"]]) > 0) {
-      pcg_report_snv_indel[["variant_set"]][["tier4"]] <-
-        dplyr::anti_join(pcg_report_snv_indel[["variant_set"]][["tier4"]],
-                         tier123, by = c("GENOMIC_CHANGE"))
-    }
-    if (nrow(pcg_report_snv_indel[["variant_set"]][["tier4"]]) > 0) {
-      pcg_report_snv_indel[["variant_set"]][["tier4"]] <-
-        pcg_report_snv_indel[["variant_set"]][["tier4"]] |>
-        dplyr::arrange(dplyr::desc(.data$OPENTARGETS_RANK))
-      pcg_report_snv_indel[["disp"]][["tier4"]] <-
-        dplyr::select(
-          pcg_report_snv_indel[["variant_set"]][["tier4"]],
-          dplyr::one_of(annotation_tags[["tier4_display"]]))
-    }
-
-    ## Determine non-coding mutation set
-    pcg_report_snv_indel[["variant_set"]][["noncoding"]] <-
-      dplyr::select(pcg_report_snv_indel[["variant_set"]][["all"]],
-                    dplyr::one_of(annotation_tags[["all"]])) |>
-      dplyr::filter(.data$CODING_STATUS == "noncoding")
-    if (nrow(pcg_report_snv_indel[["variant_set"]][["noncoding"]]) > 0) {
-      if (nrow(tier123) > 0) {
-        pcg_report_snv_indel[["variant_set"]][["noncoding"]] <-
-          dplyr::anti_join(pcg_report_snv_indel[["variant_set"]][["noncoding"]],
-                           tier123,
-                           by = c("GENOMIC_CHANGE"))
-      }
-      pcg_report_snv_indel[["variant_set"]][["noncoding"]] <-
-        pcg_report_snv_indel[["variant_set"]][["noncoding"]] |>
-        dplyr::arrange(dplyr::desc(.data$OPENTARGETS_RANK))
-      pcg_report_snv_indel[["disp"]][["noncoding"]] <-
-        dplyr::select(
-          pcg_report_snv_indel[["variant_set"]][["noncoding"]],
-          dplyr::one_of(annotation_tags[["tier5_display"]]))
-    }
+  # if (pcg_report_snv_indel[["v_stat"]][["n"]] > 0) {
+  #
+  #   tumor_type <-
+  #     pcg_report[["settings"]][["conf"]][["sample_properties"]][["site"]]
+  #
+  #   ## Assign putative TIER 2 variant set
+  #   for(etype in c('predictive','prognostic','diagnostic')) {
+  #     pcg_report_snv_indel[["clin_eitem"]][["any_ttype"]][[etype]] <-
+  #       callset[['biomarker_evidence']][[etype]]
+  #   }
+  #
+  #   pcg_report_snv_indel[["variant_set"]][["tier2"]] <-
+  #     callset[["biomarker_evidence"]][["all"]][["any"]] |>
+  #     dplyr::filter(EVIDENCE_TYPE == "Prognostic" |
+  #                     EVIDENCE_TYPE == "Predictive" |
+  #                     EVIDENCE_TYPE == "Diagnostic")
+  #
+  #   if (NROW(pcg_report_snv_indel[["variant_set"]][["tier2"]]) > 0) {
+  #     pcg_report_snv_indel[["variant_set"]][["tier2"]] <-
+  #       pcg_report_snv_indel[["variant_set"]][["tier2"]] |>
+  #       dplyr::select("VAR_ID") |>
+  #       dplyr::distinct() |>
+  #       dplyr::inner_join(
+  #         pcg_report_snv_indel[["variant_set"]][["all"]],
+  #         by = "VAR_ID")
+  #   }
+  #
+  #   ## Get all clinical evidence items that
+  #   ## overlap query set (if tumor type is specified)
+  #   if (tumor_type != "Cancer, NOS") {
+  #
+  #     ## Assign putative TIER 1 variant set
+  #     for(etype in c('predictive','prognostic','diagnostic')) {
+  #       for(elevel in c('any','A_B','C_D_E')) {
+  #         if (NROW(callset[['biomarker_evidence']][[etype]][[elevel]]) > 0) {
+  #           pcg_report_snv_indel[["clin_eitem"]][["query_ttype"]][[etype]][[elevel]] <-
+  #             callset[['biomarker_evidence']][[etype]][[elevel]] |>
+  #             dplyr::filter(!is.na(PRIMARY_SITE) & PRIMARY_SITE == tumor_type)
+  #
+  #           pcg_report_snv_indel[["clin_eitem"]][["other_ttype"]][[etype]][[elevel]] <-
+  #             callset[['biomarker_evidence']][[etype]][[elevel]] |>
+  #             dplyr::filter(is.na(PRIMARY_SITE) | PRIMARY_SITE != tumor_type)
+  #         }
+  #       }
+  #     }
+  #
+  #     pcg_report_snv_indel[["variant_set"]][["tier1"]] <-
+  #       callset[["biomarker_evidence"]][["all"]][["any"]] |>
+  #       dplyr::filter(PRIMARY_SITE == tumor_type &
+  #                       stringr::str_detect(
+  #                         EVIDENCE_LEVEL,"^(A|B)") &
+  #                       (EVIDENCE_TYPE == "Prognostic" |
+  #                          EVIDENCE_TYPE == "Predictive" |
+  #                          EVIDENCE_TYPE == "Diagnostic"))
+  #
+  #     if (NROW(pcg_report_snv_indel[["variant_set"]][["tier1"]]) > 0) {
+  #       pcg_report_snv_indel[["variant_set"]][["tier1"]] <-
+  #         pcg_report_snv_indel[["variant_set"]][["tier1"]] |>
+  #         dplyr::select("VAR_ID") |>
+  #         dplyr::distinct() |>
+  #         dplyr::inner_join(
+  #           pcg_report_snv_indel[["variant_set"]][["all"]],
+  #           by = "VAR_ID")
+  #
+  #       if (NROW(pcg_report_snv_indel[["variant_set"]][["tier1"]]) > 0) {
+  #         pcg_report_snv_indel[["variant_set"]][["tier2"]] <-
+  #           pcg_report_snv_indel[["variant_set"]][["tier2"]] |>
+  #           dplyr::anti_join(
+  #             dplyr::select(pcg_report_snv_indel[["variant_set"]][["tier1"]],
+  #                           VAR_ID),
+  #             by = "VAR_ID"
+  #           )
+  #       }
+  #     }
+  #   }
+  #
+  #   ## Remove potential overlap/redundancies and assign final
+  #   ## TIER1/TIER2 classification
+  #   #pcg_report_snv_indel <- pcgrr::assign_tier1_tier2_acmg(pcg_report_snv_indel)
+  #   tier12 <- dplyr::bind_rows(
+  #     data.frame(
+  #       'VAR_ID' = unique(
+  #         pcg_report_snv_indel[["variant_set"]][["tier1"]]$VAR_ID)),
+  #     data.frame(
+  #       'VAR_ID' = unique(
+  #         pcg_report_snv_indel[["variant_set"]][["tier2"]]$VAR_ID)))
+  #
+  #   ## Determine TIER 3 variant set: coding mutations in
+  #   ## oncogenes/tumor suppressors/cancer census genes
+  #   pcg_report_snv_indel[["variant_set"]][["tier3"]] <-
+  #     pcg_report_snv_indel[["variant_set"]][["all"]] |>
+  #     dplyr::filter(.data$CODING_STATUS == "coding") |>
+  #     dplyr::filter(
+  #       (!is.na(.data$ONCOGENE) & .data$ONCOGENE == TRUE) |
+  #         (!is.na(.data$TUMOR_SUPPRESSOR) & .data$TUMOR_SUPPRESSOR == TRUE))
+  #
+  #   if (NROW(tier12) > 0 &
+  #       NROW(pcg_report_snv_indel[["variant_set"]][["tier3"]]) > 0) {
+  #     pcg_report_snv_indel[["variant_set"]][["tier3"]] <-
+  #       dplyr::anti_join(pcg_report_snv_indel[["variant_set"]][["tier3"]],
+  #                        tier12, by = c("VAR_ID"))
+  #   }
+  #   tier123 <- tier12
+  #   if (nrow(pcg_report_snv_indel[["variant_set"]][["tier3"]]) > 0) {
+  #     pcg_report_snv_indel[["variant_set"]][["tier3"]] <-
+  #       pcg_report_snv_indel[["variant_set"]][["tier3"]] |>
+  #       dplyr::arrange(dplyr::desc(.data$ONCOGENICITY_SCORE),
+  #                      dplyr::desc(.data$TISSUE_ASSOC_RANK),
+  #                      dplyr::desc(.data$GLOBAL_ASSOC_RANK))
+  #     tier123 <- tier12 |>
+  #       dplyr::bind_rows(
+  #         dplyr::select(pcg_report_snv_indel[["variant_set"]][["tier3"]],
+  #                       "VAR_ID")) |>
+  #       dplyr::distinct()
+  #     pcg_report_snv_indel[["disp"]][["tier3"]][["proto_oncogene"]] <-
+  #       dplyr::select(
+  #         pcg_report_snv_indel[["variant_set"]][["tier3"]],
+  #         dplyr::any_of(annotation_tags[["tier3_display"]])) |>
+  #       dplyr::filter(.data$ONCOGENE == TRUE &
+  #                       (is.na(.data$TUMOR_SUPPRESSOR) |
+  #                          .data$TUMOR_SUPPRESSOR == FALSE))
+  #     pcg_report_snv_indel[["disp"]][["tier3"]][["tumor_suppressor"]] <-
+  #       dplyr::select(
+  #         pcg_report_snv_indel[["variant_set"]][["tier3"]],
+  #         dplyr::any_of(annotation_tags[["tier3_display"]])) |>
+  #       dplyr::filter(!is.na(.data$TUMOR_SUPPRESSOR) &
+  #                       .data$TUMOR_SUPPRESSOR == TRUE)
+  #   }
+  #
+  #   ## Determine TIER 4: Other coding mutations
+  #   pcg_report_snv_indel[["variant_set"]][["tier4"]] <-
+  #     dplyr::select(pcg_report_snv_indel[["variant_set"]][["all"]],
+  #                   dplyr::any_of(annotation_tags[["all"]])) |>
+  #     dplyr::filter(.data$CODING_STATUS == "coding")
+  #   if (NROW(tier123) > 0 &
+  #       NROW(pcg_report_snv_indel[["variant_set"]][["tier4"]]) > 0) {
+  #     pcg_report_snv_indel[["variant_set"]][["tier4"]] <-
+  #       dplyr::anti_join(pcg_report_snv_indel[["variant_set"]][["tier4"]],
+  #                        tier123, by = c("GENOMIC_CHANGE"))
+  #   }
+  #   if (nrow(pcg_report_snv_indel[["variant_set"]][["tier4"]]) > 0) {
+  #     pcg_report_snv_indel[["variant_set"]][["tier4"]] <-
+  #       pcg_report_snv_indel[["variant_set"]][["tier4"]] |>
+  #       dplyr::arrange(dplyr::desc(.data$TISSUE_ASSOC_RANK),
+  #                      dplyr::desc(.data$GLOBAL_ASSOC_RANK))
+  #     pcg_report_snv_indel[["disp"]][["tier4"]] <-
+  #       dplyr::select(
+  #         pcg_report_snv_indel[["variant_set"]][["tier4"]],
+  #         dplyr::any_of(annotation_tags[["tier4_display"]]))
+  #   }
+  #
+  #   ## Determine non-coding mutation set
+  #   pcg_report_snv_indel[["variant_set"]][["noncoding"]] <-
+  #     dplyr::select(pcg_report_snv_indel[["variant_set"]][["all"]],
+  #                   dplyr::any_of(annotation_tags[["all"]])) |>
+  #     dplyr::filter(.data$CODING_STATUS == "noncoding")
+  #   if (nrow(pcg_report_snv_indel[["variant_set"]][["noncoding"]]) > 0) {
+  #     if (nrow(tier123) > 0) {
+  #       pcg_report_snv_indel[["variant_set"]][["noncoding"]] <-
+  #         dplyr::anti_join(pcg_report_snv_indel[["variant_set"]][["noncoding"]],
+  #                          tier123,
+  #                          by = c("VAR_ID"))
+  #     }
+  #     pcg_report_snv_indel[["variant_set"]][["noncoding"]] <-
+  #       pcg_report_snv_indel[["variant_set"]][["noncoding"]] |>
+  #       dplyr::arrange(dplyr::desc(.data$OPENTARGETS_RANK))
+  #     pcg_report_snv_indel[["disp"]][["noncoding"]] <-
+  #       dplyr::select(
+  #         pcg_report_snv_indel[["variant_set"]][["noncoding"]],
+  #         dplyr::any_of(annotation_tags[["tier5_display"]]))
+  #   }
 
     ## Make TSV content with variant set
-    pcg_report_snv_indel[["v_stat"]][["n_noncoding"]] <-
-      pcg_report_snv_indel[["variant_set"]][["noncoding"]] |> nrow()
-    pcg_report_snv_indel[["variant_set"]][["tsv"]] <-
-      pcgrr::generate_tier_tsv(
-        pcg_report_snv_indel[["variant_set"]],
-        config,
-        annotation_tags,
-        sample_name = sample_name)
+    # pcg_report_snv_indel[["v_stat"]][["n_noncoding"]] <-
+    #   pcg_report_snv_indel[["variant_set"]][["noncoding"]] |> nrow()
+    # pcg_report_snv_indel[["variant_set"]][["tsv"]] <-
+    #   pcgrr::generate_tier_tsv(
+    #     pcg_report_snv_indel[["variant_set"]],
+    #     config,
+    #     annotation_tags,
+    #     sample_name = sample_name)
 
-  }
+ # }
 
   return(pcg_report_snv_indel)
 
@@ -595,8 +541,7 @@ generate_report_data_tumor_only <-
 
   ## initiate report
   pcg_report_to <-
-    pcgrr::init_report(config = pcgr_config,
-                       class = "tumor_only")
+    pcgrr::init_tumor_only_content()
 
   ## assign evidence tags for germline/somatic state of variants,
   ## partially based on user-defined criteria
@@ -1429,7 +1374,7 @@ generate_tier_tsv <- function(variant_set,
         tierset$TIER <- "NONCODING"
       }
       tierset <- tierset |>
-        dplyr::select(dplyr::one_of(tsv_columns)) |>
+        dplyr::select(dplyr::any_of(tsv_columns)) |>
         dplyr::distinct()
 
       tsv_variants <- dplyr::bind_rows(tsv_variants, tierset)

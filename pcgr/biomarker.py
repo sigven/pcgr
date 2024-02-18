@@ -21,7 +21,7 @@ def load_biomarkers(logger, biomarker_variant_fname, biomarker_clinical_fname, b
 
    Returns:
    - variant_biomarkers: A dictionary containing variant biomarkers. The keys are variant alias types 
-     ('dbsnp', 'hgvsp', 'hgvsc', 'genomic', 'exon', 'other', 'aa_region'), and the values are 
+     ('dbsnp', 'hgvsp', 'hgvsc', 'genomic', 'exon', 'other_gene', 'aa_region'), and the values are 
      dictionaries containing variant information.
 
    Note:
@@ -33,7 +33,7 @@ def load_biomarkers(logger, biomarker_variant_fname, biomarker_clinical_fname, b
    """
 
    variant_biomarkers = {} ##dictionary to return
-   for variant_alias_type in ['dbsnp','hgvsp','hgvsc','genomic','exon','other','aa_region']:
+   for variant_alias_type in ['dbsnp','hgvsp','hgvsc','genomic','exon','other_gene','aa_region']:
       variant_biomarkers[variant_alias_type] = {}
    check_file_exists(biomarker_clinical_fname, logger)
    
@@ -92,12 +92,12 @@ def load_biomarkers(logger, biomarker_variant_fname, biomarker_clinical_fname, b
                entry_alias_type = str(row['alias_type']).replace("_grch37", "")
                entry_alias_type = entry_alias_type.replace("_grch38", "")
               
-               if entry_alias_type == "other":
+               if entry_alias_type == "other_gene":
                   if bool(re.search(r'^((ACTIVATING )?MUTATION|LOSS|START LOSS)$', row['variant_alias'])) is True:
                      varkey = str(row['entrezgene'])
-                     if not varkey in variant_biomarkers['other']:
-                        variant_biomarkers['other'][varkey] = []
-                     variant_biomarkers['other'][varkey].append(row)
+                     if not varkey in variant_biomarkers['other_gene']:
+                        variant_biomarkers['other_gene'][varkey] = []
+                     variant_biomarkers['other_gene'][varkey].append(row)
 
                if entry_alias_type == 'exon':
                   exons = row['variant_exon']
@@ -131,20 +131,18 @@ def load_biomarkers(logger, biomarker_variant_fname, biomarker_clinical_fname, b
                if biomarker_vartype == 'CNA' and (row['alteration_type'].startswith('CNA')):
                   row['clinical_evidence_items'] = '.'
                   if row['variant_id'] in variant_to_clinical_evidence.keys():
-                     row['clinical_evidence_items'] = variant_to_clinical_evidence[row['variant_id']]                 
-                  entry_alias_type = str(row['alias_type']).replace("_grch37", "")
-                  entry_alias_type = entry_alias_type.replace("_grch38", "")
+                     row['clinical_evidence_items'] = variant_to_clinical_evidence[row['variant_id']]                                 
                   
-                  if entry_alias_type == "other":
+                  if row['alias_type'] == "other_gene":
                      if bool(re.search(r'^(AMPLIFICATION|DELETION)$', row['variant_alias'])) is True:
                         varkey = str(row['entrezgene']) + "_" + \
                            re.sub(r"transcript_","",str(row['variant_consequence']))
-                        if not varkey in variant_biomarkers['other']:
-                           variant_biomarkers['other'][varkey] = []
+                        if not varkey in variant_biomarkers['other_gene']:
+                           variant_biomarkers['other_gene'][varkey] = []
                         del row['variant_exon']
                         del row['gene']
                         del row['alias_type']
-                        variant_biomarkers['other'][varkey].append(row)
+                        variant_biomarkers['other_gene'][varkey].append(row)
 
                
 
@@ -327,8 +325,8 @@ def match_csq_biomarker(transcript_csq_elements, variant_biomarkers, rec, princi
 
       ## Match biomarkers indicated by gene only - "gene level" resolution
       if entrezgene != "." and principal_csq_entrezgene is True:
-         if str(entrezgene) in variant_biomarkers['other'].keys():
-            hits_gene = variant_biomarkers['other'][str(entrezgene)]
+         if str(entrezgene) in variant_biomarkers['other_gene'].keys():
+            hits_gene = variant_biomarkers['other_gene'][str(entrezgene)]
             for ghit in hits_gene:
                bkey3 = f"{ghit['biomarker_source']}|{ghit['variant_id']}|{ghit['clinical_evidence_items']}"
                ## match biomarkers annotated as "Mutation" only for a given gene - 

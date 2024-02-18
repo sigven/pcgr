@@ -5,12 +5,12 @@
 \title{Function that appends several tags denoting
 evidence for somatic/germline status of variants}
 \usage{
-assign_somatic_germline_evidence(sample_calls, config)
+assign_somatic_germline_evidence(sample_calls, settings = NULL)
 }
 \arguments{
 \item{sample_calls}{data frame with variants}
 
-\item{config}{configuration object}
+\item{settings}{PCGR configuration settings}
 }
 \value{
 sample_calls

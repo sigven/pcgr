@@ -30,7 +30,7 @@ generate_report_data_tmb <- function(sample_calls,
 
   pcg_report_tmb[["eval"]] <- TRUE
 
-  if(NROW(sample_calls) > 0){
+  if (NROW(sample_calls) > 0) {
     pcg_report_tmb[["v_stat"]][["n_tmb"]] <-
       sample_calls |>
       dplyr::filter(
@@ -132,7 +132,7 @@ plot_tmb_primary_site_tcga <- function(tcga_tmb, p_site = "Liver",
                    legend.text = ggplot2::element_text(family = "Helvetica",
                                                        size = 14))
 
-  if(tmb_estimate > 0){
+  if (tmb_estimate > 0) {
     tmb_plot_site <- tmb_plot_site +
       ggplot2::geom_hline(
         yintercept = as.numeric(tmb_estimate), size = 0.9,

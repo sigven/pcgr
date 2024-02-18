@@ -5,12 +5,14 @@
 \title{Function that reads and validates a fully annotated CNA file from PCGR
 pre-report pipeline}
 \usage{
-load_somatic_cna(fname, ref_data = NULL)
+load_somatic_cna(fname, ref_data = NULL, settings = NULL)
 }
 \arguments{
 \item{fname}{Path to file name}
 
 \item{ref_data}{Object with reference data}
+
+\item{settings}{Object with PCGR report configuration}
 }
 \description{
 Function that reads and validates a fully annotated CNA file from PCGR

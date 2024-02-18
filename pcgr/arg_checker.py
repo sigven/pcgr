@@ -106,12 +106,12 @@ def check_args(arg_dict):
 
     # if assay is targeted or mode is Tumor-Only, MSI prediction will not be performed/switched off
     assay_type = 'Tumor-Control'
-    if arg_dict['estimate_msi_status'] is True and (arg_dict['assay'] == 'TARGETED' or arg_dict['tumor_only'] is True):
+    if arg_dict['estimate_msi'] is True and (arg_dict['assay'] == 'TARGETED' or arg_dict['tumor_only'] is True):
         if arg_dict['tumor_only'] is True:
             assay_type = 'Tumor-Only'
         warn_msg = f"MSI status prediction can be applied for WGS/WES tumor-control assays only (query type: {arg_dict['assay']}|{assay_type}) - analysis will be omitted"
         warn_message(warn_msg, logger)
-        arg_dict['estimate_msi_status'] = 0
+        arg_dict['estimate_msi'] = 0
 
     # minimum number of mutations required for mutational signature reconstruction cannot be less than 100 (somewhat arbitrary lower threshold, recommended value is 200)
     if int(arg_dict['min_mutations_signatures']) < int(pcgr_vars.RECOMMENDED_N_MUT_SIGNATURE):
@@ -124,8 +124,8 @@ def check_args(arg_dict):
             error_message(err_msg, logger)
 
     # if MSI status is to be estimated, mutational burden must be turned on
-    if arg_dict['estimate_msi_status'] is True and arg_dict['estimate_tmb'] is False:
-        err_msg = "Prediction of MSI status ('--estimate_msi_status') requires mutational burden analysis ('--estimate_tmb')"
+    if arg_dict['estimate_msi'] is True and arg_dict['estimate_tmb'] is False:
+        err_msg = "Prediction of MSI status ('--estimate_msi') requires mutational burden analysis ('--estimate_tmb')"
         error_message(err_msg, logger)
 
     if arg_dict['tumor_only'] is True:

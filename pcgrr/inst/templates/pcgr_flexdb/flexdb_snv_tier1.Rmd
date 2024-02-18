@@ -14,9 +14,9 @@ flexdashboard::valueBox("TIER 1", caption = NULL, color = '#000000', icon = NULL
 
 ```{r}
 
-tier1_evidence_items <- pcg_report$content$snv_indel$clin_eitem$specific_ttype$diagnostic$A_B |>
-     dplyr::bind_rows(pcg_report$content$snv_indel$clin_eitem$specific_ttype$prognostic$A_B) |>
-     dplyr::bind_rows(pcg_report$content$snv_indel$clin_eitem$specific_ttype$predictive$A_B)
+tier1_evidence_items <- pcg_report$content$snv_indel$clin_eitem$query_ttype$diagnostic$A_B |>
+     dplyr::bind_rows(pcg_report$content$snv_indel$clin_eitem$query_ttype$prognostic$A_B) |>
+     dplyr::bind_rows(pcg_report$content$snv_indel$clin_eitem$query_ttype$predictive$A_B)
 
 flexdashboard::valueBox(length(unique(tier1_evidence_items$SYMBOL)), 
                         color = pcg_report$metadata$color_value_box)
@@ -34,7 +34,7 @@ flexdashboard::valueBox(pcg_report$content$snv_indel$v_stat$n_tier1,
 ### Diagnostic evidence items
 
 ```{r}
-entries_diagnostic <- NROW(pcg_report$content$snv_indel$clin_eitem$specific_ttype$diagnostic$A_B)
+entries_diagnostic <- NROW(pcg_report$content$snv_indel$clin_eitem$query_ttype$diagnostic$A_B)
 flexdashboard::valueBox(entries_diagnostic, color = ifelse(entries_diagnostic > 0,
                         pcg_report[['metadata']][['color_palette']][['success']][['values']][1],
                         pcg_report$metadata$color_none), icon = "fa-file-prescription")
@@ -43,7 +43,7 @@ flexdashboard::valueBox(entries_diagnostic, color = ifelse(entries_diagnostic > 
 ### Prognostic evidence items
 
 ```{r}
-entries_prognostic <- NROW(pcg_report$content$snv_indel$clin_eitem$specific_ttype$prognostic$A_B)
+entries_prognostic <- NROW(pcg_report$content$snv_indel$clin_eitem$query_ttype$prognostic$A_B)
 flexdashboard::valueBox(entries_prognostic, color = ifelse(entries_prognostic > 0,
                         pcg_report[['metadata']][['color_palette']][['success']][['values']][1],
                         pcg_report$metadata$color_none), icon = "fa-file-prescription")
@@ -52,7 +52,7 @@ flexdashboard::valueBox(entries_prognostic, color = ifelse(entries_prognostic > 
 ### Predictive evidence items
 
 ```{r}
-entries_predictive <- NROW(pcg_report$content$snv_indel$clin_eitem$specific_ttype$predictive$A_B)
+entries_predictive <- NROW(pcg_report$content$snv_indel$clin_eitem$query_ttype$predictive$A_B)
 flexdashboard::valueBox(entries_predictive, color = ifelse(entries_predictive > 0,
                         pcg_report[['metadata']][['color_palette']][['success']][['values']][1],
                         pcg_report$metadata$color_none), icon = "fa-file-prescription")
@@ -71,9 +71,9 @@ Row
 cat('\nEvidence items associated with variants in tier 1 (right panel) can be filtered according to various criteria:\n')
 
 variants_tier1 <- dplyr::bind_rows(
-  pcg_report[['content']][['snv_indel']][['clin_eitem']][['specific_ttype']][['diagnostic']][['A_B']],
-  pcg_report[['content']][['snv_indel']][['clin_eitem']][['specific_ttype']][['predictive']][['A_B']],
-  pcg_report[['content']][['snv_indel']][['clin_eitem']][['specific_ttype']][['prognostic']][['A_B']])
+  pcg_report[['content']][['snv_indel']][['clin_eitem']][['query_ttype']][['diagnostic']][['A_B']],
+  pcg_report[['content']][['snv_indel']][['clin_eitem']][['query_ttype']][['predictive']][['A_B']],
+  pcg_report[['content']][['snv_indel']][['clin_eitem']][['query_ttype']][['prognostic']][['A_B']])
 
 variants_tier1_shared <- crosstalk::SharedData$new(variants_tier1)
 crosstalk::bscols(

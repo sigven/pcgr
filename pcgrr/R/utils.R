@@ -466,7 +466,7 @@ append_tcga_var_link <- function(var_df,
 #'
 #' @export
 append_tfbs_annotation <-
-  function(var_df){
+  function(var_df) {
 
     if (any(grepl(paste0("^CONSEQUENCE$"), names(var_df))) &
         any(grepl(paste0("^VAR_ID$"), names(var_df))) &
@@ -485,7 +485,7 @@ append_tfbs_annotation <-
                         )) |>
         dplyr::distinct()
 
-      if(nrow(var_df_unique_slim) > 0){
+      if (nrow(var_df_unique_slim) > 0) {
         var_df_unique_slim_melted <- as.data.frame(
           var_df_unique_slim |>
           tidyr::separate_rows(.data$REGULATORY_ANNOTATION, sep=",") |>
@@ -495,7 +495,7 @@ append_tfbs_annotation <-
             ))
         )
 
-        if(nrow(var_df_unique_slim_melted) > 0){
+        if (nrow(var_df_unique_slim_melted) > 0) {
 
           pcgrr::log4r_info(paste0(
             "Found TF binding site annotations for ",
@@ -595,7 +595,7 @@ append_dbmts_var_link <-
                             sep = "\\|", convert = T) |>
             dplyr::filter(.data$ens_trans_id == .data$ENSEMBL_TRANSCRIPT_ID)
         )
-        if(nrow(var_df_unique_slim_melted) > 0){
+        if (nrow(var_df_unique_slim_melted) > 0) {
           var_df_unique_slim_melted <- var_df_unique_slim_melted |>
             dplyr::select(-c(.data$ENSEMBL_TRANSCRIPT_ID, .data$algorithms_call)) |>
             dplyr::mutate(miRNA_TARGET_HIT = dplyr::case_when(
@@ -707,7 +707,7 @@ append_dbnsfp_var_link <- function(var_df) {
 #' @export
 append_drug_var_link <- function(
     vcf_data_df,
-    ref_data = NULL){
+    ref_data = NULL) {
 
   pcgrr::log4r_info("Adding annotation links - targeted cancer drugs")
 
@@ -719,27 +719,38 @@ append_drug_var_link <- function(
       dplyr::filter(!is.na(.data$SYMBOL)) |>
       dplyr::distinct()
     if (nrow(var_drug_df) > 0) {
+
       cancer_drugs <-
-        dplyr::select(ref_data[["drug"]],
-                      c("SYMBOL","DRUG_NAME",
+        dplyr::select(ref_data[["drug"]][['targeted']],
+                      c("SYMBOL",
+                        "ATC_TREATMENT_CATEGORY",
+                        "ATC_LEVEL3",
+                        "DRUG_NAME",
                         "DRUG_MAX_PHASE_INDICATION",
                         "DRUG_ACTION_TYPE",
                         "DRUG_LINK")) |>
+        dplyr::filter(
+          .data$ATC_TREATMENT_CATEGORY != "cancer_unclassified") |>
         dplyr::distinct() |>
         dplyr::mutate(
           DRUG_ACTION_TYPE = stringr::str_to_title(
             .data$DRUG_ACTION_TYPE
         )) |>
+        dplyr::filter(
+          .data$DRUG_ACTION_TYPE != "Other") |>
+        dplyr::filter(
+          .data$DRUG_MAX_PHASE_INDICATION > 1) |>
         dplyr::arrange(
           .data$SYMBOL,
           dplyr::desc(.data$DRUG_MAX_PHASE_INDICATION)) |>
         dplyr::select(-c("DRUG_MAX_PHASE_INDICATION")) |>
         dplyr::distinct() |>
         dplyr::group_by(
-          .data$SYMBOL,
-          .data$DRUG_ACTION_TYPE
+          .data$SYMBOL
         ) |>
         dplyr::summarise(
+          DRUG_ACTION_TYPE = paste(
+            unique(.data$DRUG_ACTION_TYPE), collapse=", "),
           TARGETED_CANCER_DRUGS = paste(
             .data$DRUG_LINK, collapse=", "),
           TARGETED_CANCER_DRUGS2 = paste(
@@ -749,13 +760,17 @@ append_drug_var_link <- function(
       var_drug_df <- var_drug_df |>
         dplyr::left_join(
           cancer_drugs,
-          by = c("SYMBOL" = "SYMBOL")) |>
+          by = c("SYMBOL")) |>
         dplyr::filter(!is.na(.data$TARGETED_CANCER_DRUGS2)) |>
+        dplyr::select(-c("DRUG_ACTION_TYPE")) |>
         dplyr::distinct()
       if (NROW(var_drug_df) > 0) {
-        vcf_data_df <- dplyr::left_join(
-          vcf_data_df, var_drug_df,
-          by = c("VAR_ID" = "VAR_ID"))
+        vcf_data_df <-
+          dplyr::left_join(
+            vcf_data_df,
+            var_drug_df,
+            by = c("VAR_ID","SYMBOL")
+          )
       }else{
         vcf_data_df$TARGETED_CANCER_DRUGS <- NA
         vcf_data_df$TARGETED_CANCER_DRUGS2 <- NA
@@ -896,17 +911,32 @@ append_otargets_pheno_link <- function(var_df,
 #'
 #' @param vcf_data_df Data frame of sample variants from VCF
 #' @param ref_data PCGR reference data bundle object
+#' @param site Primary tumor site
+#' @param pos_var variable reflecting chromosome order (POS/SEGMENT_START)
 #' @return vcf_data_df
 #'
 #' @export
 append_cancer_gene_evidence <-
   function(vcf_data_df = NULL,
-           ref_data = NULL){
+           ref_data = NULL,
+           site = 'Any',
+           pos_var = 'POS') {
 
     if (any(grepl(paste0("^ENTREZGENE$"), names(vcf_data_df))) &
-        any(grepl(paste0("^ENSEMBL_GENE_ID$"), names(vcf_data_df)))){
+        any(grepl(paste0("^ENSEMBL_GENE_ID$"), names(vcf_data_df)))) {
 
       pcgrr::log4r_info(paste0("Adding literature evidence for cancer-relevant genes"))
+
+
+      tissue_gene_ranks <- ref_data[['gene']][['otp_rank']] |>
+        dplyr::select(c("ENTREZGENE", "PRIMARY_SITE", "TISSUE_ASSOC_RANK")) |>
+        dplyr::filter(.data$PRIMARY_SITE == site) |>
+        dplyr::distinct()
+
+      global_gene_ranks <- ref_data[['gene']][['otp_rank']] |>
+        dplyr::select(c("ENTREZGENE", "GLOBAL_ASSOC_RANK")) |>
+        dplyr::distinct()
+
 
       vcf_data_df_1 <- vcf_data_df |>
         dplyr::filter(!is.na(.data$ENTREZGENE))
@@ -919,7 +949,7 @@ append_cancer_gene_evidence <-
           is.na(.data$ENTREZGENE) &
             is.na(.data$ENSEMBL_GENE_ID))
 
-      if(NROW(vcf_data_df_1) > 0){
+      if (NROW(vcf_data_df_1) > 0) {
 
         vcf_data_df_1 <- vcf_data_df_1 |>
           dplyr::left_join(
@@ -931,20 +961,48 @@ append_cancer_gene_evidence <-
                   "CANCERGENE_EVIDENCE")),
               !is.na(.data$ENTREZGENE)),
             by = c("ENTREZGENE" = "ENTREZGENE",
-                   "ENSEMBL_GENE_ID" = "ENSEMBL_GENE_ID"))
+                   "ENSEMBL_GENE_ID" = "ENSEMBL_GENE_ID")) |>
+          dplyr::distinct()
+
+        ## Add gene ranks (Open Targets Platform)
+        ## - according to primary tumor types/sites
+        ## - globally (across all tumor types/sites)
+        vcf_data_df_1 <- vcf_data_df_1 |>
+          dplyr::left_join(
+            global_gene_ranks, by = "ENTREZGENE") |>
+          dplyr::mutate(GLOBAL_ASSOC_RANK = dplyr::if_else(
+            is.na(.data$GLOBAL_ASSOC_RANK),
+            as.numeric(0),
+            as.numeric(.data$GLOBAL_ASSOC_RANK)
+          ))
+        if (NROW(tissue_gene_ranks) > 0) {
+          tissue_gene_ranks$PRIMARY_SITE <- NULL
+          vcf_data_df_1 <- vcf_data_df_1 |>
+            dplyr::left_join(
+              tissue_gene_ranks, by = "ENTREZGENE") |>
+            dplyr::mutate(TISSUE_ASSOC_RANK = dplyr::if_else(
+              is.na(.data$TISSUE_ASSOC_RANK),
+              as.numeric(0),
+              as.numeric(.data$TISSUE_ASSOC_RANK)
+            ))
+        }else{
+          vcf_data_df_1 <- vcf_data_df_1 |>
+            dplyr::mutate(TISSUE_ASSOC_RANK = as.numeric(0))
+        }
 
       }
 
-      if(NROW(vcf_data_df_2) > 0){
+      if (NROW(vcf_data_df_2) > 0) {
 
         vcf_data_df_2 <- vcf_data_df_2 |>
           dplyr::left_join(
             dplyr::filter(
               dplyr::select(
                 ref_data[["gene"]][["gene_xref"]],
-                c("ENTREZGENE", "ENSEMBL_GENE_ID","CANCERGENE_EVIDENCE")),
-              !is.na(.data$ENTREZGENE)),
-            by = c("ENSEMBL_GENE_ID" = "ENSEMBL_GENE_ID"))
+                c("ENSEMBL_GENE_ID","CANCERGENE_EVIDENCE")),
+              !is.na(.data$ENSEMBL_GENE_ID)),
+            by = c("ENSEMBL_GENE_ID")) |>
+          dplyr::distinct()
 
       }
 
@@ -953,7 +1011,12 @@ append_cancer_gene_evidence <-
         vcf_data_df_2,
         vcf_data_df_3) |>
         dplyr::distinct() |>
-        pcgrr::order_variants()
+        dplyr::mutate(CANCERGENE_EVIDENCE = dplyr::if_else(
+          .data$CANCERGENE_EVIDENCE == ".",
+          as.character(NA),
+          as.character(.data$CANCERGENE_EVIDENCE)
+        )) |>
+        pcgrr::order_variants(pos_var = pos_var)
 
     }
 
@@ -971,7 +1034,7 @@ append_cancer_gene_evidence <-
 #' @export
 append_gwas_citation_phenotype <-
   function(vcf_data_df = NULL,
-           ref_data = NULL){
+           ref_data = NULL) {
 
 
     invisible(assertthat::assert_that(
@@ -1435,11 +1498,11 @@ get_calls <- function(tsv_gz_file,
 
 
   ## convert all columns with only NA values to character type
-  if(NROW(vcf_data_df) > 0){
+  if (NROW(vcf_data_df) > 0) {
     num_rows <- NROW(vcf_data_df)
-    for (n in colnames(vcf_data_df)){
-      if(length(vcf_data_df[is.na(vcf_data_df[,n]),n]) == num_rows){
-        if(typeof(vcf_data_df[,n]) == "logical"){
+    for (n in colnames(vcf_data_df)) {
+      if (length(vcf_data_df[is.na(vcf_data_df[,n]),n]) == num_rows) {
+        if (typeof(vcf_data_df[,n]) == "logical") {
           vcf_data_df[,n] <- as.character(vcf_data_df[,n])
         }
       }
@@ -1450,9 +1513,9 @@ get_calls <- function(tsv_gz_file,
   af_pop_columns_numeric <-
     colnames(vcf_data_df)[stringr::str_detect(colnames(vcf_data_df), "_AF_[0-9A-Z]{1,}$")]
 
-  if(NROW(vcf_data_df) > 0){
-    for (col in af_pop_columns_numeric){
-      if(typeof(vcf_data_df[, col]) != "double"){
+  if (NROW(vcf_data_df) > 0) {
+    for (col in af_pop_columns_numeric) {
+      if (typeof(vcf_data_df[, col]) != "double") {
         vcf_data_df[, col] <- as.numeric(vcf_data_df[, col])
       }
     }
@@ -1463,9 +1526,9 @@ get_calls <- function(tsv_gz_file,
       colnames(vcf_data_df),
       "NON_CANCER_(AC|AN|NHOMALT)")]
 
-  if(NROW(vcf_data_df) > 0){
-    for (col in af_pop_columns_integer){
-      if(typeof(vcf_data_df[, col]) != "integer"){
+  if (NROW(vcf_data_df) > 0) {
+    for (col in af_pop_columns_integer) {
+      if (typeof(vcf_data_df[, col]) != "integer") {
         vcf_data_df[, col] <- as.integer(vcf_data_df[, col])
       }
     }
@@ -1488,7 +1551,8 @@ get_calls <- function(tsv_gz_file,
 #'
 #'
 #' @export
-write_processed_vcf <- function(calls, sample_name = NULL,
+write_processed_vcf <- function(calls,
+                                sample_name = NULL,
                                 output_directory = NULL,
                                 vcf_fname = NULL) {
 
@@ -1512,7 +1576,9 @@ write_processed_vcf <- function(calls, sample_name = NULL,
   sample_vcf_content_fname <-
     file.path(output_directory,
               paste0(sample_name, ".",
-                     sample(100000, 1), ".vcf_content.tsv"))
+                     stringi::stri_rand_strings(
+                        1, 15, pattern = "[A-Za-z0-9]"),
+                     ".vcf_content.tsv"))
   write(header_lines, file = vcf_fname, sep = "\n")
 
   sample_vcf <- vcf_df[, c("CHROM", "POS", "ID", "REF",
@@ -1579,7 +1645,7 @@ detect_vcf_sample_name <- function(df, sample_name = NULL, cpsr = FALSE) {
 #' @export
 targeted_drugs_pr_ttype <- function(ttype,
                                     pcgr_data,
-                                    ignore_on_label_early_phase = T){
+                                    ignore_on_label_early_phase = T) {
 
   pcgrr::log4r_info(
     paste0("Retrieving targeted drugs (on-label and off-label) for ",
@@ -1604,7 +1670,7 @@ targeted_drugs_pr_ttype <- function(ttype,
     site_candidates[["off_label"]]
 
   ## If tumor type not specified, off-label indications make no sense
-  if(ttype == "Any"){
+  if (ttype == "Any") {
     drug_candidates[["off_label"]] <- data.frame()
   }
 
@@ -1634,7 +1700,7 @@ targeted_drugs_pr_ttype <- function(ttype,
   }
 
   all_candidates <- drug_candidates[["on_label_early_phase"]]
-  if(NROW(drug_candidates[['off_label']]) > 0){
+  if (NROW(drug_candidates[['off_label']]) > 0) {
     all_candidates <- dplyr::full_join(drug_candidates[["off_label"]],
                                        drug_candidates[["on_label_early_phase"]],
                                        by = "symbol")
@@ -1677,7 +1743,7 @@ targeted_drugs_pr_ttype <- function(ttype,
 targeted_drugs_summarise <- function(
   candidate_drugs = NULL,
   link_label = "DRUGS_ON_LABEL",
-  indication_label = "DRUGS_ON_LABEL_INDICATIONS"){
+  indication_label = "DRUGS_ON_LABEL_INDICATIONS") {
 
   invisible(assertthat::assert_that(!is.null(candidate_drugs)))
   invisible(assertthat::assert_that(is.data.frame(candidate_drugs)))
@@ -1814,10 +1880,10 @@ pkg_exists <- function(p) {
 #' @param fname Name of file to check
 #'
 #' @export
-check_file_exists <- function(fname){
+check_file_exists <- function(fname) {
 
-  if(file.exists(fname)){
-    if(file.size(fname) == 0){
+  if (file.exists(fname)) {
+    if (file.size(fname) == 0) {
       log4r_fatal(
         paste0("File ", fname, " has zero size - exiting")
       )

@@ -3,10 +3,10 @@
 
 A total of __`r NROW(pcg_report[['content']][['cna']][["disp"]][['tier1']]) + NROW(pcg_report[['content']][['cna']][["disp"]][['tier2']])`__ aberrations are associated with clinical evidence items in the [database for clinical interpretations of variants in cancer, CIViC](https://civic.genome.wustl.edu/#/home), with the following number of evidence items:
 
- *  Predictive: __`r NROW(pcg_report[['content']][['cna']][['clin_eitem']][['specific_ttype']][['predictive']][['A_B']]) + NROW(pcg_report[['content']][['cna']][['clin_eitem']][['other_ttype']][['predictive']][['A_B']]) + NROW(pcg_report[['content']][['cna']][['clin_eitem']][['specific_ttype']][['predictive']][['C_D_E']])`__ evidence items
- *  Prognostic: __`r NROW(pcg_report[['content']][['cna']][['clin_eitem']][['specific_ttype']][['prognostic']][['A_B']]) + NROW(pcg_report[['content']][['cna']][['clin_eitem']][['other_ttype']][['prognostic']][['A_B']]) + NROW(pcg_report[['content']][['cna']][['clin_eitem']][['specific_ttype']][['prognostic']][['C_D_E']])`__ evidence items
- *  Diagnostic: __`r NROW(pcg_report[['content']][['cna']][['clin_eitem']][['specific_ttype']][['diagnostic']][['A_B']]) + NROW(pcg_report[['content']][['cna']][['clin_eitem']][['other_ttype']][['diagnostic']][['A_B']]) +
-NROW(pcg_report[['content']][['cna']][['clin_eitem']][['specific_ttype']][['diagnostic']][['C_D_E']])`__ evidence items
+ *  Predictive: __`r NROW(pcg_report[['content']][['cna']][['clin_eitem']][['query_ttype']][['predictive']][['A_B']]) + NROW(pcg_report[['content']][['cna']][['clin_eitem']][['other_ttype']][['predictive']][['A_B']]) + NROW(pcg_report[['content']][['cna']][['clin_eitem']][['query_ttype']][['predictive']][['C_D_E']])`__ evidence items
+ *  Prognostic: __`r NROW(pcg_report[['content']][['cna']][['clin_eitem']][['query_ttype']][['prognostic']][['A_B']]) + NROW(pcg_report[['content']][['cna']][['clin_eitem']][['other_ttype']][['prognostic']][['A_B']]) + NROW(pcg_report[['content']][['cna']][['clin_eitem']][['query_ttype']][['prognostic']][['C_D_E']])`__ evidence items
+ *  Diagnostic: __`r NROW(pcg_report[['content']][['cna']][['clin_eitem']][['query_ttype']][['diagnostic']][['A_B']]) + NROW(pcg_report[['content']][['cna']][['clin_eitem']][['other_ttype']][['diagnostic']][['A_B']]) +
+NROW(pcg_report[['content']][['cna']][['clin_eitem']][['query_ttype']][['diagnostic']][['C_D_E']])`__ evidence items
 
 <br><br>
 
@@ -23,17 +23,17 @@ for(sig in c('strong_significance','potential_significance')){
     show_cna_filters[[sig]][[type]] <- F
     missing_cna_variants[[sig]][[type]] <- T
     cna_evidence_items[[sig]][[type]] <- data.frame()
-    if(sig == 'strong_significance' & NROW(pcg_report[['content']][['cna']][['clin_eitem']][['specific_ttype']][[type]][['A_B']]) > 0){
+    if(sig == 'strong_significance' & NROW(pcg_report[['content']][['cna']][['clin_eitem']][['query_ttype']][[type]][['A_B']]) > 0){
       show_cna_filters[[sig]][[type]] <- T
       missing_cna_variants[[sig]][[type]] <- F
-      cna_evidence_items[[sig]][[type]] <- pcg_report[['content']][['cna']][['clin_eitem']][['specific_ttype']][[type]][['A_B']]
+      cna_evidence_items[[sig]][[type]] <- pcg_report[['content']][['cna']][['clin_eitem']][['query_ttype']][[type]][['A_B']]
     }
     
-    if(sig == 'potential_significance' & (NROW(pcg_report[['content']][['cna']][['clin_eitem']][['specific_ttype']][[type]][['C_D_E']]) > 0 | NROW(pcg_report[['content']][['cna']][['clin_eitem']][['other_ttype']][[type]][['A_B']]) > 0)){
+    if(sig == 'potential_significance' & (NROW(pcg_report[['content']][['cna']][['clin_eitem']][['query_ttype']][[type]][['C_D_E']]) > 0 | NROW(pcg_report[['content']][['cna']][['clin_eitem']][['other_ttype']][[type]][['A_B']]) > 0)){
       show_cna_filters[[sig]][[type]] <- T
       missing_cna_variants[[sig]][[type]] <- F
       cna_evidence_items[[sig]][[type]] <- 
-        dplyr::bind_rows(pcg_report[['content']][['cna']][['clin_eitem']][['other_ttype']][[type]][['A_B']], pcg_report[['content']][['cna']][['clin_eitem']][['specific_ttype']][[type]][['C_D_E']])
+        dplyr::bind_rows(pcg_report[['content']][['cna']][['clin_eitem']][['other_ttype']][[type]][['A_B']], pcg_report[['content']][['cna']][['clin_eitem']][['query_ttype']][[type]][['C_D_E']])
     }
   }
 }

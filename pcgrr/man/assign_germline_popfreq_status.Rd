@@ -8,7 +8,7 @@ if any population frequency exceeds max_tolerated_af}
 \usage{
 assign_germline_popfreq_status(
   sample_calls,
-  pop = "EUR",
+  pop = "NFE",
   dbquery = "gnomADe",
   max_tolerated_af = 0.01
 )

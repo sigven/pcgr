@@ -2,9 +2,9 @@
 ### Tier 1 - Variants of strong clinical significance {.tabset}
 
 - Considering evidence items with strongest evidence levels (A & B) for the query tumor type (_`r pcg_report[['metadata']][['config']][["t_props"]][['tumor_type']]`_)  in the [database for clinical interpretations of variants in cancer, CIViC](https://civic.genome.wustl.edu/#/home) or [Cancer Biomarkers database](https://www.cancergenomeinterpreter.org/biomarkers), a total of __`r NROW(pcg_report[['content']][['snv_indel']][["disp"]][['tier1']])`__ unique, somatic variants were found, with the following number of evidence items:
-    * Tier 1 - Predictive/Therapeutic: __`r NROW(pcg_report[['content']][['snv_indel']][['clin_eitem']][['specific_ttype']][['predictive']][['A_B']])`__ evidence items
-    * Tier 1 - Prognostic: __`r NROW(pcg_report[['content']][['snv_indel']][['clin_eitem']][['specific_ttype']][['prognostic']][['A_B']])`__ evidence items
-    * Tier 1 - Diagnostic: __`r NROW(pcg_report[['content']][['snv_indel']][['clin_eitem']][['specific_ttype']][['diagnostic']][['A_B']])`__ evidence items
+    * Tier 1 - Predictive/Therapeutic: __`r NROW(pcg_report[['content']][['snv_indel']][['clin_eitem']][['query_ttype']][['predictive']][['A_B']])`__ evidence items
+    * Tier 1 - Prognostic: __`r NROW(pcg_report[['content']][['snv_indel']][['clin_eitem']][['query_ttype']][['prognostic']][['A_B']])`__ evidence items
+    * Tier 1 - Diagnostic: __`r NROW(pcg_report[['content']][['snv_indel']][['clin_eitem']][['query_ttype']][['diagnostic']][['A_B']])`__ evidence items
 
 <br><br>
 
@@ -28,7 +28,7 @@ missing_tier1_items <- list()
 for(type in c('diagnostic','prognostic','predictive')){
   show_tier1_filters[[type]] <- F
   missing_tier1_items[[type]] <- T
-  if(NROW(pcg_report[['content']][['snv_indel']][['clin_eitem']][['specific_ttype']][[type]][['A_B']]) > 0){
+  if(NROW(pcg_report[['content']][['snv_indel']][['clin_eitem']][['query_ttype']][[type]][['A_B']]) > 0){
     show_tier1_filters[[type]] <- T
     missing_tier1_items[[type]] <- F
   }
@@ -55,7 +55,7 @@ if(missing_tier1_items[['predictive']] == F |
 
 ```{r tier1_predictive, echo=F, results = 'asis', eval = show_tier1_filters[['predictive']]}
 
-variants_tier1_predictive_shared <- crosstalk::SharedData$new(pcg_report[['content']][['snv_indel']][['clin_eitem']][['specific_ttype']][['predictive']][['A_B']])
+variants_tier1_predictive_shared <- crosstalk::SharedData$new(pcg_report[['content']][['snv_indel']][['clin_eitem']][['query_ttype']][['predictive']][['A_B']])
 crosstalk::bscols(
   list(
     crosstalk::filter_select("CANCER_TYPE", "Cancer type", variants_tier1_predictive_shared, ~CANCER_TYPE),
@@ -116,7 +116,7 @@ if(missing_tier1_items[['prognostic']] == F &
 
 ```{r tier1_prognostic, echo=F, results='asis', eval = show_tier1_filters[['prognostic']]}
 
-variants_tier1_prognostic_shared <- crosstalk::SharedData$new(pcg_report[['content']][['snv_indel']][['clin_eitem']][['specific_ttype']][['prognostic']][['A_B']])
+variants_tier1_prognostic_shared <- crosstalk::SharedData$new(pcg_report[['content']][['snv_indel']][['clin_eitem']][['query_ttype']][['prognostic']][['A_B']])
 crosstalk::bscols(
   list(
     crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_tier1_prognostic_shared, ~CONSEQUENCE),
@@ -175,7 +175,7 @@ if(missing_tier1_items[['diagnostic']] == F &
 
 ```{r tier1_diagnostic, echo=F, results='asis', eval = show_tier1_filters[['diagnostic']]}
 
-variants_tier1_diagnostic_shared <- crosstalk::SharedData$new(pcg_report[['content']][['snv_indel']][['clin_eitem']][['specific_ttype']][['diagnostic']][['A_B']])
+variants_tier1_diagnostic_shared <- crosstalk::SharedData$new(pcg_report[['content']][['snv_indel']][['clin_eitem']][['query_ttype']][['diagnostic']][['A_B']])
 crosstalk::bscols(
   list(
     crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_tier1_diagnostic_shared, ~CONSEQUENCE),

@@ -62,10 +62,9 @@ def cli():
     optional_allelic_support.add_argument("--control_af_max", type=float, default=1, dest="control_af_max", help="If VCF INFO tag for variant allelic fraction (control) is specified and found, set maximum tolerated AF for inclusion in report (default: %(default)s)")
 
     optional_tmb_msi.add_argument("--estimate_tmb", action="store_true", help="Estimate tumor mutational burden from the total number of somatic mutations and target region size, default: %(default)s")
-    #optional_tmb_msi.add_argument("--tmb_algorithm", dest="tmb_algorithm", default="all_coding", choices=[ "all_coding", "nonsyn"], help="Method for calculation of TMB, all coding variants (Chalmers et al., Genome Medicine, 2017), or non-synonymous variants only, default: %(default)s")
     optional_tmb_msi.add_argument("--tmb_dp_min", dest="tmb_dp_min", default=0, help="If VCF INFO tag for sequencing depth (tumor) is specified and found, set minimum required sequencing depth for TMB calculation: default: %(default)s")
     optional_tmb_msi.add_argument("--tmb_af_min", dest="tmb_af_min", default=0, help="If VCF INFO tag for allelic fraction (tumor) is specified and found, set minimum required allelic fraction for TMB calculation: default: %(default)s")
-    optional_tmb_msi.add_argument("--estimate_msi_status", action="store_true", help="Predict microsatellite instability status from patterns of somatic mutations/indels, default: %(default)s")
+    optional_tmb_msi.add_argument("--estimate_msi", action="store_true", help="Predict microsatellite instability status from patterns of somatic mutations/indels, default: %(default)s")
 
 
     optional_assay.add_argument("--assay", dest="assay", default="WES", choices=[ "WGS", "WES","TARGETED"], help="Type of DNA sequencing assay performed for input data (VCF), default: %(default)s")
@@ -77,7 +76,7 @@ def cli():
     optional_signatures.add_argument("--min_mutations_signatures", type=int, default=200, dest="min_mutations_signatures", help="Minimum number of SNVs required for reconstruction of mutational signatures (SBS) by MutationalPatterns (default: %(default)s, minimum n = 100)")
     optional_signatures.add_argument("--all_reference_signatures", action="store_true", help="Use all reference mutational signatures (SBS, n = 67) in signature reconstruction rather than only those already attributed to the tumor type (default: %(default)s)")
     optional_signatures.add_argument("--include_artefact_signatures", action="store_true", help="Include sequencing artefacts in the collection of reference signatures (default: %(default)s")
-    optional_signatures.add_argument("--prevalence_reference_signatures", type=int, default=5, choices=[1,2,5,10,15,20], help="Minimum tumor-type prevalence (in percent) of reference signatures to be included in refitting procedure (default: %(default)s)")
+    optional_signatures.add_argument("--prevalence_reference_signatures", type=int, default=1, choices=[1,2,5,10,15,20], help="Minimum tumor-type prevalence (in percent) of reference signatures to be included in refitting procedure (default: %(default)s)")
 
     optional_other.add_argument("--cpsr_report", dest="cpsr_report", help="CPSR report file (Gzipped JSON - file ending with 'cpsr.<genome_assembly>.json.gz' -  germline report of patient's blood/control sample")
     optional_other.add_argument("--vcf2maf", action="store_true", help="Generate a MAF file for input VCF using https://github.com/mskcc/vcf2maf (default: %(default)s)")

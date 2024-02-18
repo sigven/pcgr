@@ -104,7 +104,7 @@ get_clin_assocs_snv_indel <- function(sample_calls,
   pcgrr::log_var_eitem_stats(var_eitems = var_eitems, target_type = "exon")
 
   ## Organize all variants in a list object 'clin_items', organized through
-  ## 1) tumor type (specific_ttype|any_ttype|other_ttype)
+  ## 1) tumor type (query_ttype|any_ttype|other_ttype)
   ## 2) evidence type (diagnostic|prognostic|predictive)
   ## 3) clinical significance ('A_B','C_D_E','any')
 
@@ -145,7 +145,7 @@ get_clin_assocs_snv_indel <- function(sample_calls,
 #'
 get_clin_assocs_cna <- function(onco_ts_sets,
                                 annotation_tags = NULL,
-                                eitems = NULL){
+                                eitems = NULL) {
 
   assertthat::assert_that(
     "oncogene_gain" %in% names(onco_ts_sets) &
@@ -193,7 +193,7 @@ get_clin_assocs_cna <- function(onco_ts_sets,
 
 
   ## Organize all variants in a list object 'clin_items', organized through
-  ## 1) tumor type (specific_ttype|any_ttype|other_ttype)
+  ## 1) tumor type (query_ttype|any_ttype|other_ttype)
   ## 2) evidence type (diagnostic|prognostic|predictive)
   ## 3) clinical significance ('A_B','C_D_E','any')
 
@@ -243,7 +243,7 @@ load_eitems <- function(eitems_raw = NULL,
                    "two values: 'Germline' or 'Somatic' and NOT: ",
                    origin)))
 
-  if(origin == "Somatic"){
+  if (origin == "Somatic") {
     invisible(
       assertthat::assert_that(
         !is.null(tumor_type_specificity),
@@ -291,7 +291,7 @@ assertthat::assert_that(
   ## mutation type and origin
   eitems_all <- data.frame()
 
-  for(alteration_type in alteration_types){
+  for(alteration_type in alteration_types) {
     eitems_alteration_type <-
       pcgrr::load_all_eitems(
         eitems_raw = eitems_raw,
@@ -397,7 +397,7 @@ load_all_eitems <- function(eitems_raw = NULL,
       only_colnames = F,
       quiet = T)
 
-    if(alteration_type == "CNA") {
+    if (alteration_type == "CNA") {
       selected_eitems[[db]] <-
         eitems_raw[[db]] |>
           dplyr::filter(.data$ALTERATION_TYPE == alteration_type &
@@ -489,7 +489,7 @@ load_all_eitems <- function(eitems_raw = NULL,
 #     dplyr::distinct()
 #
 #
-#   if(db == "cgi"){
+#   if (db == "cgi") {
 #     evidence_identifiers <- c("CGI_ID", "CGI_ID_SEGMENT")
 #     if (region_marker == T) {
 #       evidence_identifiers <- c("CGI_ID_SEGMENT", "CGI_ID")
@@ -529,7 +529,7 @@ load_all_eitems <- function(eitems_raw = NULL,
 #             cnames = c("HGVS_ALIAS", evidence_identifiers))
 #       )
 #
-#       if(NROW(var_eitems[['by_id']]) > 0){
+#       if (NROW(var_eitems[['by_id']]) > 0) {
 #         var_eitems[['all']] <- var_eitems[['by_id']]
 #       }
 #
@@ -539,11 +539,11 @@ load_all_eitems <- function(eitems_raw = NULL,
 #   ## Add additional var_eitems based on matching against
 #   ## HGVS (protein_change) + SYMBOL
 #
-#   if(region_marker == F){
+#   if (region_marker == F) {
 #     eitems_hgvs <- eitems_db |>
 #       dplyr::filter(!is.na(.data$HGVS_ALIAS))
 #
-#     if(NROW(eitems_hgvs) > 0){
+#     if (NROW(eitems_hgvs) > 0) {
 #       eitems_hgvs <- eitems_hgvs |>
 #         tidyr::separate_rows(
 #           .data$HGVS_ALIAS, sep = "\\|") |>
@@ -555,7 +555,7 @@ load_all_eitems <- function(eitems_raw = NULL,
 #         dplyr::filter(!is.na(.data$PROTEIN_CHANGE)) |>
 #         dplyr::select(dplyr::one_of(colset))
 #
-#       if(NROW(vars_hgvs_mapped) > 0){
+#       if (NROW(vars_hgvs_mapped) > 0) {
 #         var_eitems_hgvs_mapped <- as.data.frame(vars_hgvs_mapped |>
 #           dplyr::inner_join(
 #             eitems_hgvs, by = c("SYMBOL","PROTEIN_CHANGE")) |>
@@ -565,15 +565,15 @@ load_all_eitems <- function(eitems_raw = NULL,
 #
 #         ## skip duplicate evidence items already found from
 #         ## exact matching at genomic level
-#         if(NROW(var_eitems_hgvs_mapped) > 0){
-#           if(NROW(var_eitems[['by_id']]) > 0){
+#         if (NROW(var_eitems_hgvs_mapped) > 0) {
+#           if (NROW(var_eitems[['by_id']]) > 0) {
 #             var_eitems_hgvs_mapped <-
 #               var_eitems_hgvs_mapped |>
 #               dplyr::anti_join(
 #                 var_eitems[['by_id']], by = c("GENOMIC_CHANGE"))
 #           }
 #
-#           if(NROW(var_eitems_hgvs_mapped) > 0){
+#           if (NROW(var_eitems_hgvs_mapped) > 0) {
 #             var_eitems[['all']] <- var_eitems_exact |>
 #               dplyr::bind_rows(var_eitems_hgvs_mapped) |>
 #               dplyr::distinct()
@@ -591,7 +591,7 @@ load_all_eitems <- function(eitems_raw = NULL,
 #       dplyr::filter(!is.na(.data$HGVS_ALIAS)) |>
 #       dplyr::filter(BIOMARKER_MAPPING == "codon")
 #
-#     if(NROW(eitems_hgvs_codon) > 0){
+#     if (NROW(eitems_hgvs_codon) > 0) {
 #       eitems_hgvs_codon <- eitems_hgvs_codon |>
 #         tidyr::separate_rows(.data$HGVS_ALIAS, sep = "\\|") |>
 #         dplyr::filter(
@@ -615,7 +615,7 @@ load_all_eitems <- function(eitems_raw = NULL,
 #           )) |>
 #         dplyr::select(dplyr::one_of(colset))
 #
-#       if(NROW(vars_codon_mapped) > 0){
+#       if (NROW(vars_codon_mapped) > 0) {
 #         var_eitems_codon_mapped <- as.data.frame(
 #           vars_codon_mapped |>
 #             dplyr::inner_join(
@@ -627,8 +627,8 @@ load_all_eitems <- function(eitems_raw = NULL,
 #
 #         ## skip duplicate evidence items already found from
 #         ## exact matching at genomic level
-#         if(nrow(var_eitems_codon_mapped) > 0){
-#           if(NROW(var_eitems[['by_id']]) > 0){
+#         if (nrow(var_eitems_codon_mapped) > 0) {
+#           if (NROW(var_eitems[['by_id']]) > 0) {
 #             var_eitems_codon_mapped <- var_eitems_codon_mapped |>
 #               dplyr::select(-c("AA_CODON")) |>
 #               dplyr::anti_join(
@@ -719,8 +719,8 @@ qc_var_eitems <- function(var_eitems = NULL,
 
   if (nrow(filtered_var_eitems) > 0) {
 
-    if("LOSS_OF_FUNCTION" %in% colnames(filtered_var_eitems) &
-       "ALTERATION_TYPE" %in% colnames(filtered_var_eitems)){
+    if ("LOSS_OF_FUNCTION" %in% colnames(filtered_var_eitems) &
+       "ALTERATION_TYPE" %in% colnames(filtered_var_eitems)) {
 
       filtered_var_eitems <- filtered_var_eitems |>
         dplyr::filter((.data$LOSS_OF_FUNCTION == T &
@@ -877,7 +877,7 @@ structure_var_eitems <- function(var_eitems,
 #' @export
 deduplicate_eitems <- function(var_eitems = NULL,
                                target_type = "exact",
-                               target_other = c("codon","exon","gene")){
+                               target_other = c("codon","exon","gene")) {
 
   invisible(
     assertthat::assert_that(!is.null(var_eitems),
@@ -887,7 +887,7 @@ deduplicate_eitems <- function(var_eitems = NULL,
                             msg = paste0("Argument 'target_type' can only",
                                          "take on values 'codon' or 'exact'")))
 
-  if(target_type == "exact"){
+  if (target_type == "exact") {
     invisible(
       assertthat::assert_that(
         ("codon" %in% target_other &
@@ -945,7 +945,7 @@ deduplicate_eitems <- function(var_eitems = NULL,
 
 #' @export
 log_var_eitem_stats <- function(var_eitems = NULL,
-                               target_type = "exact"){
+                               target_type = "exact") {
 
   invisible(
     assertthat::assert_that(!is.null(var_eitems),
@@ -981,7 +981,7 @@ log_var_eitem_stats <- function(var_eitems = NULL,
                          var_eitems[[target_type]]$PROTEIN_CHANGE,
                          sep = ":")),
             collapse = ", ")
-    if(nchar(variants_found_log) <= 200){
+    if (nchar(variants_found_log) <= 200) {
       pcgrr::log4r_info(
         variants_found_log
       )
@@ -1001,51 +1001,62 @@ log_var_eitem_stats <- function(var_eitems = NULL,
 expand_biomarker_items <- function(
     callset = NULL,
     variant_origin = "somatic",
-    target_genes = NULL){
+    target_genes = NULL) {
 
-  if("variant" %in% names(callset) &
-     "biomarker_evidence" %in% names(callset)){
+  if ("variant" %in% names(callset) &
+     "biomarker_evidence" %in% names(callset)) {
 
     variant_properties <-
       c("VAR_ID",
         "GENOMIC_CHANGE",
         "GENOME_VERSION",
         "SAMPLE_ID",
-        "GENOTYPE",
         "VARIANT_CLASS",
         "SYMBOL",
         "GENENAME",
         "ENTREZGENE",
+        "REFSEQ_TRANSCRIPT_ID",
+        "ENSEMBL_TRANSCRIPT_ID",
+        "ENSEMBL_PROTEIN_ID",
         "CONSEQUENCE",
         "PROTEIN_CHANGE",
         "MUTATION_HOTSPOT",
+        "MUTATION_HOTSPOT_CANCERTYPE",
         "CDS_CHANGE",
         "LOSS_OF_FUNCTION",
+        "ONCOGENICITY",
+        "ONCOGENICITY_CLASSIFICATION_CODE",
+        "ONCOGENICITY_SCORE",
         "HGVSc",
         "HGVSp",
         "REFSEQ",
         "OFFICIAL_GENENAME",
+        "TARGETED_CANCER_DRUGS",
         "PREDICTED_EFFECT",
         "PROTEIN_DOMAIN",
+        "TCGA_FREQUENCY",
         "DBSNP",
         "CLINVAR",
         "COSMIC",
         "VEP_ALL_CSQ")
 
-    if(variant_origin == "germline"){
+    if (variant_origin == "germline") {
       variant_properties <- c(
         variant_properties,
+        "GENOTYPE",
         "CLINVAR_CLASSIFICATION",
         "CPSR_CLASSIFICATION"
       )
     }
-    if(variant_origin == "somatic"){
+    if (variant_origin == "somatic") {
       variant_properties <- c(
         variant_properties,
+        "CALL_CONFIDENCE",
         "DP_TUMOR",
         "AF_TUMOR",
         "DP_CONTROL",
-        "AF_CONTROL"
+        "AF_CONTROL",
+        "GENOME_VERSION"
       )
     }
 
@@ -1054,7 +1065,7 @@ expand_biomarker_items <- function(
     for (type in c(pcgrr::evidence_types,
                    "all")) {
       for (elevel in c("any", "A_B", "C_D_E")) {
-        if(NROW(callset[['biomarker_evidence']][[type]][[elevel]]) > 0){
+        if (NROW(callset[['biomarker_evidence']][[type]][[elevel]]) > 0) {
           callset[['biomarker_evidence']][[type]][[elevel]] <-
             callset[['biomarker_evidence']][[type]][[elevel]] |>
             dplyr::left_join(
@@ -1068,23 +1079,23 @@ expand_biomarker_items <- function(
               dplyr::desc(
                 .data$RATING))
 
-          if(variant_origin == "germline"){
+          if (variant_origin == "germline") {
             callset[['biomarker_evidence']][[type]][[elevel]] <-
               callset[['biomarker_evidence']][[type]][[elevel]] |>
               dplyr::filter(
-                (!is.na(CLINVAR_CLASSIFICATION) &
+                (!is.na(.data$CLINVAR_CLASSIFICATION) &
                    stringr::str_detect(
-                     tolower(CLINVAR_CLASSIFICATION), "pathogenic")) |
-                  (is.na(CLINVAR_CLASSIFICATION) &
-                     !is.na(CPSR_CLASSIFICATION) &
+                     tolower(.data$CLINVAR_CLASSIFICATION), "pathogenic")) |
+                  (is.na(.data$CLINVAR_CLASSIFICATION) &
+                     !is.na(.data$CPSR_CLASSIFICATION) &
                      stringr::str_detect(
-                       tolower(CPSR_CLASSIFICATION), "pathogenic"))
+                       tolower(.data$CPSR_CLASSIFICATION), "pathogenic"))
               )
 
-            if(NROW(callset[['biomarker_evidence']][[type]][[elevel]]) > 0 &
+            if (NROW(callset[['biomarker_evidence']][[type]][[elevel]]) > 0 &
                is.data.frame(target_genes) &
                NROW(target_genes) > 0 &
-               "ENTREZGENE" %in% colnames(target_genes)){
+               "ENTREZGENE" %in% colnames(target_genes)) {
               callset[['biomarker_evidence']][[type]][[elevel]] <-
                 callset[['biomarker_evidence']][[type]][[elevel]] |>
                 dplyr::semi_join(target_genes, by = "ENTREZGENE")
@@ -1099,3 +1110,5 @@ expand_biomarker_items <- function(
   return(callset)
 
 }
+
+#assign_classification <-

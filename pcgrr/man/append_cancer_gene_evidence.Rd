@@ -4,12 +4,21 @@
 \alias{append_cancer_gene_evidence}
 \title{Function that appends cancer gene evidence links}
 \usage{
-append_cancer_gene_evidence(vcf_data_df = NULL, ref_data = NULL)
+append_cancer_gene_evidence(
+  vcf_data_df = NULL,
+  ref_data = NULL,
+  site = "Any",
+  pos_var = "POS"
+)
 }
 \arguments{
 \item{vcf_data_df}{Data frame of sample variants from VCF}
 
 \item{ref_data}{PCGR reference data bundle object}
+
+\item{site}{Primary tumor site}
+
+\item{pos_var}{variable reflecting chromosome order (POS/SEGMENT_START)}
 }
 \value{
 vcf_data_df

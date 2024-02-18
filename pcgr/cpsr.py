@@ -38,7 +38,7 @@ def get_args():
     optional_panel.add_argument('--panel_id',dest = "virtual_panel_id",type = str, default = "-1", help="Comma-separated string with identifier(s) of predefined virtual cancer predisposition gene panels,\nchoose any combination of the following identifiers (GEP = Genomics England PanelApp):\n" + str(pcgr_vars.panels))
     optional_panel.add_argument('--custom_list',dest = "custom_list",help="Provide custom list of genes from virtual panel 0 (single-column .txt/.tsv file with Ensembl gene identifiers),\n alternative to predefined panels provided with --panel_id)")
     optional_panel.add_argument('--custom_list_name',dest = "custom_list_name", default="None", help="Set name for custom made panel/list (single word - no whitespace), will be displayed in the report")
-    optional_panel.add_argument('--diagnostic_grade_only', action="store_true",help="For panel_id's 1-42 (Genomics England PanelApp) - consider genes with a GREEN status only, default: %(default)s")
+    optional_panel.add_argument('--diagnostic_grade_only', action="store_true",help="For panel_id's 1-44 (Genomics England PanelApp) - consider genes with a GREEN status only, default: %(default)s")
 
     optional_other.add_argument('--force_overwrite', action = "store_true", help='By default, the script will fail with an error if any output file already exists.\n You can force the overwrite of existing result files by using this flag, default: %(default)s')
     optional_other.add_argument('--version', action='version', version=str(utils.get_cpsr_version()))
@@ -204,7 +204,6 @@ def run_cpsr(conf_options, cpsr_paths):
                                       output_vcf = vep_vcf)
 
         logger = getlogger('cpsr-vep')
-        #print(str(vep_command["main"]))
 
         logger.info((
             f"CPSR - STEP 1: Basic variant annotation with Variant Effect Predictor (version {pcgr_vars.VEP_VERSION}, "
@@ -224,7 +223,6 @@ def run_cpsr(conf_options, cpsr_paths):
         check_subprocess(logger, vep_command["tabix"], debug)
         logger.info("Finished cpsr-vep")
         print('----')
-        #exit(0)
 
         ## CPSR|vcfanno - run vcfanno on query VCF with a number of relevant annotated VCFs
         logger = getlogger('cpsr-vcfanno')

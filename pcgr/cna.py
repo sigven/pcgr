@@ -10,7 +10,7 @@ import logging
 from pcgr import utils
 from pybedtools import BedTool
 from pcgr.annoutils import nuclear_chromosomes
-from pcgr.utils import error_message, warn_message, check_file_exists
+from pcgr.utils import error_message, warn_message, check_file_exists, remove_file
 from pcgr.biomarker import load_biomarkers
 
 def annotate_cna_segments(output_fname: str, 
@@ -129,8 +129,8 @@ def annotate_cna_segments(output_fname: str,
         biomarkers[db] = load_biomarkers(
             logger, variant_fname, clinical_fname, biomarker_vartype = 'CNA')
         
-        for key in biomarkers[db]['other']:
-            biomarker_data = biomarkers[db]['other'][key]
+        for key in biomarkers[db]['other_gene']:
+            biomarker_data = biomarkers[db]['other_gene'][key]
             biomarker_item = str(db) + '|' + str(biomarker_data[0]['variant_id']) + \
                     '|' + str(biomarker_data[0]['clinical_evidence_items']) + '|by_cna_segment'
             if not key in cna_actionable_dict:               
@@ -154,6 +154,10 @@ def annotate_cna_segments(output_fname: str,
     cna_query_segment_df.loc[cna_query_segment_df['n_major'] + cna_query_segment_df['n_minor'] > 0,"loss_cond"] = False
     cna_query_segment_df.loc[cna_query_segment_df['n_major'] + cna_query_segment_df['n_minor'] == 0,"loss_cond"] = True
     
+    cna_query_segment_df['variant_class'] = 'undefined'
+    cna_query_segment_df.loc[cna_query_segment_df.amp_cond, 'variant_class'] = 'gain'
+    cna_query_segment_df.loc[cna_query_segment_df.loss_cond, 'variant_class'] = 'homdel'
+    
     cna_query_segment_df.loc[cna_query_segment_df.loss_cond, 'aberration_key'] =  \
         cna_query_segment_df.loc[cna_query_segment_df.loss_cond, 'entrezgene'].astype(str) + '_ablation'
 
@@ -165,7 +169,7 @@ def annotate_cna_segments(output_fname: str,
     
     ## remove all temporary files
     for fname in temp_files:
-        utils.remove(fname)
+        remove_file(fname)
         
     cna_query_segment_df.columns = map(str.upper, cna_query_segment_df.columns)
     cna_query_segment_df.rename(columns = {'CHROMOSOME':'CHROM','SEGMENT_ID':'VAR_ID'}, inplace = True)
@@ -253,7 +257,7 @@ def annotate_cytoband(cna_segments_bt: BedTool, output_dir: str, pcgr_build_db_d
     
     ## remove all temporary files
     for fname in temp_files:
-        utils.remove(fname)
+        remove_file(fname)
             
     return cytoband_annotated_segments
 
@@ -363,7 +367,7 @@ def annotate_transcripts(cna_segments_bt: BedTool, output_dir: str,
     
     ## remove all temporary files
     for fname in temp_files:
-        utils.remove(fname)
+        remove_file(fname)
     
     return(cna_segments_annotated)
         

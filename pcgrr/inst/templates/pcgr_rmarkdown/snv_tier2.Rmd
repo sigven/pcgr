@@ -2,9 +2,9 @@
 ### Tier 2 - Variants of potential clinical significance {.tabset}
 
 - Tier 2 considers evidence items of _i)_ strong evidence levels (A & B) in other tumor types, and _ii)_ weak evidence levels (C, D & E) in the query tumor type (_`r pcg_report[['metadata']][['config']][["t_props"]][['tumor_type']]`_). Using the [database for clinical interpretations of variants in cancer (CIViC) ](https://civic.genome.wustl.edu/#/home) and [Cancer Biomarkers database](https://www.cancergenomeinterpreter.org/biomarkers), a total of __`r NROW(pcg_report[['content']][['snv_indel']][["disp"]][['tier2']])`__ unique, somatic variants were found in the tumor sample:
-    * Tier 2 - Predictive/Therapeutic: __`r NROW(pcg_report[['content']][['snv_indel']][['clin_eitem']][['other_ttype']][['predictive']][['A_B']]) + NROW(pcg_report[['content']][['snv_indel']][['clin_eitem']][['specific_ttype']][['predictive']][['C_D_E']])`__ evidence items
-    * Tier 2 - Prognostic: __`r NROW(pcg_report[['content']][['snv_indel']][['clin_eitem']][['other_ttype']][['prognostic']][['A_B']]) + NROW(pcg_report[['content']][['snv_indel']][['clin_eitem']][['specific_ttype']][['prognostic']][['C_D_E']])`__ evidence items
-    * Tier 2 - Diagnostic: __`r NROW(pcg_report[['content']][['snv_indel']][['clin_eitem']][['other_ttype']][['diagnostic']][['A_B']]) + NROW(pcg_report[['content']][['snv_indel']][['clin_eitem']][['specific_ttype']][['diagnostic']][['C_D_E']])`__ evidence items
+    * Tier 2 - Predictive/Therapeutic: __`r NROW(pcg_report[['content']][['snv_indel']][['clin_eitem']][['other_ttype']][['predictive']][['A_B']]) + NROW(pcg_report[['content']][['snv_indel']][['clin_eitem']][['query_ttype']][['predictive']][['C_D_E']])`__ evidence items
+    * Tier 2 - Prognostic: __`r NROW(pcg_report[['content']][['snv_indel']][['clin_eitem']][['other_ttype']][['prognostic']][['A_B']]) + NROW(pcg_report[['content']][['snv_indel']][['clin_eitem']][['query_ttype']][['prognostic']][['C_D_E']])`__ evidence items
+    * Tier 2 - Diagnostic: __`r NROW(pcg_report[['content']][['snv_indel']][['clin_eitem']][['other_ttype']][['diagnostic']][['A_B']]) + NROW(pcg_report[['content']][['snv_indel']][['clin_eitem']][['query_ttype']][['diagnostic']][['C_D_E']])`__ evidence items
 
 <br><br>
 
@@ -29,8 +29,8 @@ for(type in c('diagnostic','prognostic','predictive')){
   show_tier2_filters[[type]] <- F
   missing_tier2_items[[type]] <- T
   eitems[[type]] <- data.frame()
-  if(NROW(pcg_report[['content']][['snv_indel']][['clin_eitem']][['other_ttype']][[type]][['A_B']]) > 0 | NROW(pcg_report[['content']][['snv_indel']][['clin_eitem']][['specific_ttype']][[type]][['C_D_E']]) > 0){
-    eitems[[type]] <- dplyr::bind_rows(pcg_report[['content']][['snv_indel']][['clin_eitem']][['other_ttype']][[type]][['A_B']], pcg_report[['content']][['snv_indel']][['clin_eitem']][['specific_ttype']][[type]][['C_D_E']]) |>
+  if(NROW(pcg_report[['content']][['snv_indel']][['clin_eitem']][['other_ttype']][[type]][['A_B']]) > 0 | NROW(pcg_report[['content']][['snv_indel']][['clin_eitem']][['query_ttype']][[type]][['C_D_E']]) > 0){
+    eitems[[type]] <- dplyr::bind_rows(pcg_report[['content']][['snv_indel']][['clin_eitem']][['other_ttype']][[type]][['A_B']], pcg_report[['content']][['snv_indel']][['clin_eitem']][['query_ttype']][[type]][['C_D_E']]) |>
       dplyr::arrange(desc(RATING))
     show_tier2_filters[[type]] <- T
     missing_tier2_items[[type]] <- F

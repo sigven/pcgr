@@ -205,8 +205,9 @@ generate_report_data_kataegis <- function(variant_set,
                                           sample_name = "SampleX",
                                           build = "grch37") {
 
-  pcg_report_kataegis <- pcgrr::init_report(class = "kataegis")
-  if(NROW(variant_set) == 0){
+  pcg_report_kataegis <-
+    pcgrr::init_kataegis_content()
+  if (NROW(variant_set) == 0) {
     return(pcg_report_kataegis)
   }
 

@@ -3,7 +3,7 @@
 from pcgr._version import __version__
 
 PCGR_VERSION = __version__
-DB_VERSION = '20240203'
+DB_VERSION = '20240209'
 
 ## MISCELLANEOUS
 NCBI_BUILD_MAF = 'GRCh38'
@@ -103,7 +103,7 @@ GE_panels = {
       37: "Renal cancer pertinent cancer susceptibility (GEP)",
       38: "Rhabdoid tumour predisposition (GEP)",
       39: "Sarcoma cancer susceptibility (GEP)",
-      40: "Sarcoma susceptbility (GEP)",
+      40: "Sarcoma susceptibility (GEP)",
       41: "Thyroid cancer pertinent cancer susceptibility (GEP)",
       42: "Tumour predisposition - childhood onset (GEP)",
       43: "Upper gastrointestinal cancer pertinent cancer susceptibility (GEP)",

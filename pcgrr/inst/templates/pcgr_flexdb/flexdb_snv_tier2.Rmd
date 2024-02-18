@@ -16,11 +16,11 @@ flexdashboard::valueBox("TIER 2", caption = NULL, color = '#000000', icon = NULL
 ```{r}
 # flexdashboard::valueBox(stringr::str_replace_all(pcg_report$content$value_box$tier2,"Tier 2 variants:\n",""), color = pcg_report$metadata$color_value_box, icon = "fa-dna")
 
-tier2_evidence_items <- dplyr::bind_rows(pcg_report$content$snv_indel$clin_eitem$specific_ttype$diagnostic$C_D_E,
+tier2_evidence_items <- dplyr::bind_rows(pcg_report$content$snv_indel$clin_eitem$query_ttype$diagnostic$C_D_E,
                                        pcg_report$content$snv_indel$clin_eitem$other_ttype$diagnostic$A_B,
-                                       pcg_report$content$snv_indel$clin_eitem$specific_ttype$prognostic$C_D_E,
+                                       pcg_report$content$snv_indel$clin_eitem$query_ttype$prognostic$C_D_E,
                                        pcg_report$content$snv_indel$clin_eitem$other_ttype$prognostic$A_B,
-                                       pcg_report$content$snv_indel$clin_eitem$specific_ttype$predictive$C_D_E,
+                                       pcg_report$content$snv_indel$clin_eitem$query_ttype$predictive$C_D_E,
                                        pcg_report$content$snv_indel$clin_eitem$other_ttype$predictive$A_B)
 
 
@@ -39,7 +39,7 @@ flexdashboard::valueBox(pcg_report$content$snv_indel$v_stat$n_tier2, color = pcg
 ### Diagnostic evidence items
 
 ```{r}
-entries_diagnostic <- NROW(pcg_report$content$snv_indel$clin_eitem$specific_ttype$diagnostic$C_D_E) +
+entries_diagnostic <- NROW(pcg_report$content$snv_indel$clin_eitem$query_ttype$diagnostic$C_D_E) +
                       NROW(pcg_report$content$snv_indel$clin_eitem$other_ttype$diagnostic$A_B)
 flexdashboard::valueBox(entries_diagnostic, color = ifelse(entries_diagnostic > 0,
                         "#00a65a",
@@ -49,7 +49,7 @@ flexdashboard::valueBox(entries_diagnostic, color = ifelse(entries_diagnostic > 
 ### Prognostic evidence items
 
 ```{r}
-entries_prognostic <- NROW(pcg_report$content$snv_indel$clin_eitem$specific_ttype$prognostic$C_D_E) +
+entries_prognostic <- NROW(pcg_report$content$snv_indel$clin_eitem$query_ttype$prognostic$C_D_E) +
                       NROW(pcg_report$content$snv_indel$clin_eitem$other_ttype$prognostic$A_B)
 flexdashboard::valueBox(entries_prognostic, color = ifelse(entries_prognostic > 0,
                         "#00a65a",
@@ -59,7 +59,7 @@ flexdashboard::valueBox(entries_prognostic, color = ifelse(entries_prognostic > 
 ### Predictive evidence items
 
 ```{r}
-entries_predictive <- NROW(pcg_report$content$snv_indel$clin_eitem$specific_ttype$predictive$C_D_E) +
+entries_predictive <- NROW(pcg_report$content$snv_indel$clin_eitem$query_ttype$predictive$C_D_E) +
                       NROW(pcg_report$content$snv_indel$clin_eitem$other_ttype$predictive$A_B)
 flexdashboard::valueBox(entries_predictive, color = ifelse(entries_predictive > 0,
                         "#00a65a",
@@ -79,9 +79,9 @@ Row
 cat('\nEvidence items associated with variants in TIER 2 (right panel) can be interactively explored according to various criteria\n:')
 
 variants_tier2 <- dplyr::bind_rows(
-  pcg_report[['content']][['snv_indel']][['clin_eitem']][['specific_ttype']][['diagnostic']][['C_D_E']],
-  pcg_report[['content']][['snv_indel']][['clin_eitem']][['specific_ttype']][['predictive']][['C_D_E']],
-  pcg_report[['content']][['snv_indel']][['clin_eitem']][['specific_ttype']][['diagnostic']][['C_D_E']],
+  pcg_report[['content']][['snv_indel']][['clin_eitem']][['query_ttype']][['diagnostic']][['C_D_E']],
+  pcg_report[['content']][['snv_indel']][['clin_eitem']][['query_ttype']][['predictive']][['C_D_E']],
+  pcg_report[['content']][['snv_indel']][['clin_eitem']][['query_ttype']][['diagnostic']][['C_D_E']],
   pcg_report[['content']][['snv_indel']][['clin_eitem']][['other_ttype']][['diagnostic']][['A_B']],
   pcg_report[['content']][['snv_indel']][['clin_eitem']][['other_ttype']][['predictive']][['A_B']],
   pcg_report[['content']][['snv_indel']][['clin_eitem']][['other_ttype']][['prognostic']][['A_B']]) |>

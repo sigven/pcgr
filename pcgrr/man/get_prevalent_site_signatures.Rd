@@ -3,12 +3,12 @@
 \name{get_prevalent_site_signatures}
 \alias{get_prevalent_site_signatures}
 \title{Function that retrieves prevalent signatures for a given tumor type/primary site
-Data is collected from COSMIC v3.2.}
+Data is collected from COSMIC v3.4.}
 \usage{
 get_prevalent_site_signatures(
   site = "Any",
   custom_collection = NULL,
-  pcgr_data = NULL,
+  ref_data = NULL,
   min_prevalence_pct = 5,
   incl_poss_artifacts = T
 )
@@ -18,7 +18,7 @@ get_prevalent_site_signatures(
 
 \item{custom_collection}{Custom collection of signatures from COSMIC}
 
-\item{pcgr_data}{PCGR data object}
+\item{ref_data}{PCGR reference data object}
 
 \item{min_prevalence_pct}{Minimum prevalence (pct) of signature in
 cohorts associated with primary site -
@@ -29,5 +29,5 @@ are to be included}
 }
 \description{
 Function that retrieves prevalent signatures for a given tumor type/primary site
-Data is collected from COSMIC v3.2.
+Data is collected from COSMIC v3.4.
 }

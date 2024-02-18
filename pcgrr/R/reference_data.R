@@ -7,7 +7,7 @@
 #'
 load_reference_data <- function(
     pcgr_db_assembly_dir = NULL,
-    genome_assembly = "grch38"){
+    genome_assembly = "grch38") {
 
   pcgr_ref_data <- list()
 
@@ -17,11 +17,11 @@ load_reference_data <- function(
 
   pcgr_ref_data[["assembly"]] <- list()
   pcgr_ref_data[["assembly"]][["grch_name"]] <- genome_assembly
-  pcgr_ref_data[["assembly"]][["grch_name"]] <- "hg19"
+  pcgr_ref_data[["assembly"]][["hg_name"]] <- "hg19"
   pcgr_ref_data[["assembly"]][["ref_genome"]] <- "BSgenome.Hsapiens.UCSC.hg19"
   if (genome_assembly == "grch38") {
     pcgr_ref_data[["assembly"]][["grch_name"]] <- genome_assembly
-    pcgr_ref_data[["assembly"]][["grch_name"]] <- "hg38"
+    pcgr_ref_data[["assembly"]][["hg_name"]] <- "hg38"
     pcgr_ref_data[["assembly"]][["ref_genome"]] <- "BSgenome.Hsapiens.UCSC.hg38"
   }
 
@@ -36,7 +36,7 @@ load_reference_data <- function(
 
 
   pcgr_ref_data[['vcf_infotags']] <- data.frame()
-  for(t in c('vep','other')){
+  for(t in c('vep','other')) {
     infotag_fname <- file.path(
       pcgr_db_assembly_dir,
       paste0("vcf_infotags_", t, ".tsv"))
@@ -53,32 +53,32 @@ load_reference_data <- function(
     )
   }
   for(cat in c('tcga','clinvar','gwas','gnomad_non_cancer',
-               'dbmts','dbnsfp','panel_of_normals')){
+               'dbmts','dbnsfp','panel_of_normals')) {
     vcfanno_fname <- file.path(
       pcgr_db_assembly_dir,"variant","vcf",cat,
       paste0(cat,".vcfanno.vcf_info_tags.txt"))
 
     raw_lines <- readLines(vcfanno_fname)
-    for(l in raw_lines){
-      if(startsWith(l,"##INFO")){
+    for(l in raw_lines) {
+      if (startsWith(l,"##INFO")) {
         tag <- stringr::str_replace(
           stringr::str_match(l,"ID=[A-Za-z|_]{1,}")[,1],
           "ID=","")
         number <- NA
-        if(stringr::str_detect(l, "Number=1,")){
+        if (stringr::str_detect(l, "Number=1,")) {
           number <- 1
         }
-        if(stringr::str_detect(l, "Number=0,")){
+        if (stringr::str_detect(l, "Number=0,")) {
           number <- 0
         }
         type <- "String"
-        if(stringr::str_detect(l, "Type=Integer,")){
+        if (stringr::str_detect(l, "Type=Integer,")) {
           type <- "Integer"
         }
-        if(stringr::str_detect(l, "Type=Float,")){
+        if (stringr::str_detect(l, "Type=Float,")) {
           type <- "Float"
         }
-        if(stringr::str_detect(l, "Type=Flag,")){
+        if (stringr::str_detect(l, "Type=Flag,")) {
           type <- "Flag"
         }
         description <-
@@ -89,10 +89,10 @@ load_reference_data <- function(
             "Description=\\\"|\\\">","")
 
         category <- "pcgr_cpsr"
-        if(cat == "dbmts" | cat == "gnomad_non_cancer"){
+        if (cat == "dbmts" | cat == "gnomad_non_cancer") {
           category <- "cpsr"
         }
-        if(cat == "panel_of_normals"){
+        if (cat == "panel_of_normals") {
           category <- "pcgr"
         }
         df <- data.frame(
@@ -116,6 +116,7 @@ load_reference_data <- function(
   pcgr_ref_data[["gene"]][["cpg"]] <- data.frame()
   pcgr_ref_data[['gene']][['gene_xref']] <- data.frame()
   pcgr_ref_data[['gene']][['transcript_xref']] <- data.frame()
+  pcgr_ref_data[['gene']][['otp_rank']] <- data.frame()
 
   cpg_tsv_fname <- file.path(
     pcgr_db_assembly_dir, "gene", "tsv",
@@ -170,9 +171,23 @@ load_reference_data <- function(
     ) |>
     dplyr::distinct()
 
-  colnames(pcgr_ref_data[['gene']][['transcript_xref']]) <-
-    toupper(colnames(pcgr_ref_data[['gene']][['transcript_xref']]))
+  otp_rank_tsv_fname <- file.path(
+    pcgr_db_assembly_dir, "gene", "tsv",
+    "gene_transcript_xref",
+    "otp_rank.tsv.gz"
+  )
+  check_file_exists(otp_rank_tsv_fname)
 
+  pcgr_ref_data[['gene']][['otp_rank']] <- as.data.frame(
+    readr::read_tsv(
+      otp_rank_tsv_fname, show_col_types = F,
+      na = c('.'))) |>
+    dplyr::filter(!is.na(.data$entrezgene)) |>
+    dplyr::mutate(entrezgene = as.character(.data$entrezgene)) |>
+    dplyr::distinct()
+
+  colnames(pcgr_ref_data[['gene']][['otp_rank']]) <-
+    toupper(colnames(pcgr_ref_data[['gene']][['otp_rank']]))
 
   pcgr_ref_data[['gene']][['gene_xref']] <- as.data.frame(
     readr::read_tsv(gene_xref_tsv_fname, show_col_types = F)) |>
@@ -193,7 +208,7 @@ load_reference_data <- function(
       "cancergene_evidence")
     ) |>
     dplyr::rename(
-      genename = name
+      genename = .data$name
     ) |>
     dplyr::mutate(
       entrezgene = as.character(.data$entrezgene)
@@ -273,14 +288,14 @@ load_reference_data <- function(
   ## Get variant statistics
   for(vardb in c('clinvar','gwas','tcga',
                  'gnomad_non_cancer','dbmts',
-                 'dbnsfp')){
+                 'dbnsfp')) {
     varstats_fname <-
       file.path(
         pcgr_db_assembly_dir, "variant", "vcf", vardb,
         paste0(vardb,".vcf_varstats.tsv")
       )
 
-    if(file.exists(varstats_fname)){
+    if (file.exists(varstats_fname)) {
       pcgr_ref_data[['variant']][['varstats']][[vardb]] <-
         as.data.frame(
           readr::read_tsv(
@@ -346,14 +361,14 @@ load_reference_data <- function(
                 'mutational_signature',
                 'pathway',
                 'hotspot',
-                'protein_domain')){
+                'protein_domain')) {
 
     fname_misc <- file.path(
       pcgr_db_assembly_dir, "misc", "tsv", elem,
       paste0(elem,".tsv.gz")
     )
 
-    # if(elem == 'hotspot'){
+    # if (elem == 'hotspot') {
     #   fname_misc <- file.path(
     #     pcgr_db_assembly_dir, "misc", "tsv", elem,
     #     paste0(elem,".tsv.gz")
@@ -409,9 +424,9 @@ load_reference_data <- function(
 
   ## 7. Biomarkers
   pcgr_ref_data[['biomarker']] <- list()
-  for(elem in c('clinical','variant','literature')){
+  for(elem in c('clinical','variant','literature')) {
     pcgr_ref_data[['biomarker']][[elem]] <- data.frame()
-    for(db in c('cgi','civic')){
+    for(db in c('cgi','civic')) {
       fname <-
         file.path(
           pcgr_db_assembly_dir, "biomarker", "tsv",
@@ -420,10 +435,21 @@ load_reference_data <- function(
       check_file_exists(fname)
       bm_data <- as.data.frame(
         readr::read_tsv(fname, show_col_types = F, na = "."))
-      if("source_id" %in% colnames(bm_data)){
+      if ("source_id" %in% colnames(bm_data)) {
         bm_data <- bm_data |>
           dplyr::mutate(
             source_id = as.character(.data$source_id))
+      }
+
+      if ('entrezgene' %in% colnames(bm_data)) {
+        bm_data <- bm_data |>
+          dplyr::mutate(
+            entrezgene = as.character(.data$entrezgene))
+      }
+      if ('variant_id' %in% colnames(bm_data)) {
+        bm_data <- bm_data |>
+          dplyr::mutate(
+            variant_id = as.character(.data$variant_id))
       }
 
       pcgr_ref_data[['biomarker']][[elem]] <- dplyr::bind_rows(
@@ -439,7 +465,7 @@ load_reference_data <- function(
   ## Metadata
   pcgr_ref_data[['metadata']] <- data.frame()
   for(dtype in c('gene','gwas','hotspot','other',
-                 'phenotype','biomarker','drug')){
+                 'phenotype','biomarker','drug')) {
 
     fname <- file.path(
       pcgr_db_assembly_dir, ".METADATA", "tsv",
@@ -451,12 +477,12 @@ load_reference_data <- function(
       dplyr::mutate(datatype = dtype) |>
       dplyr::mutate(wflow = dplyr::case_when(
         stringr::str_detect(
-          source_abbreviation,
+          .data$source_abbreviation,
           paste0(
             "^(gepa|cpg_other|maxwell2016|acmg_sf|dbmts|",
             "woods_dnarepair|gerp|tcga_pancan_2018|gwas_catalog)")) ~ "cpsr",
         stringr::str_detect(
-          source_abbreviation,
+          .data$source_abbreviation,
           "^(cytoband|mitelmandb|tcga|nci|intogen|opentargets|dgidb|pubchem)$") ~ "pcgr",
         TRUE ~ as.character("pcgr_cpsr")
       ))
@@ -465,8 +491,8 @@ load_reference_data <- function(
       pcgr_ref_data[['metadata']] |>
       dplyr::bind_rows(metadata_dtype) |>
       dplyr::filter(
-        source_abbreviation != "foundation_one" &
-          source_abbreviation != "illumina"
+        .data$source_abbreviation != "foundation_one" &
+          .data$source_abbreviation != "illumina"
       )
   }
 

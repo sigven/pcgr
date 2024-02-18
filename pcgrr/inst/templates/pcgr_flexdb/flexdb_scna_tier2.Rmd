@@ -31,7 +31,7 @@ flexdashboard::valueBox(length(unique(pcg_report$content$cna$disp$tier2$SEGMENT)
 
 ```{r}
 entries_diagnostic <- NROW(pcg_report$content$cna$clin_eitem$other_ttype$diagnostic$A_B) + 
-  NROW(pcg_report$content$cna$clin_eitem$specific_ttype$diagnostic$C_D_E)
+  NROW(pcg_report$content$cna$clin_eitem$query_ttype$diagnostic$C_D_E)
 flexdashboard::valueBox(entries_diagnostic, color = ifelse(entries_diagnostic > 0,
                         pcg_report[['metadata']][['color_palette']][['success']][['values']][1],
                         pcg_report$metadata$color_none), icon = "fa-file-prescription")
@@ -41,7 +41,7 @@ flexdashboard::valueBox(entries_diagnostic, color = ifelse(entries_diagnostic > 
 
 ```{r}
 entries_prognostic <- NROW(pcg_report$content$cna$clin_eitem$other_ttype$prognostic$A_B) + 
-  NROW(pcg_report$content$cna$clin_eitem$specific_ttype$prognosticc$C_D_E)
+  NROW(pcg_report$content$cna$clin_eitem$query_ttype$prognosticc$C_D_E)
 flexdashboard::valueBox(entries_prognostic, color = ifelse(entries_prognostic > 0,
                         pcg_report[['metadata']][['color_palette']][['success']][['values']][1],
                         pcg_report$metadata$color_none), icon = "fa-file-prescription")
@@ -51,7 +51,7 @@ flexdashboard::valueBox(entries_prognostic, color = ifelse(entries_prognostic > 
 
 ```{r}
 entries_predictive <- NROW(pcg_report$content$cna$clin_eitem$other_ttype$predictive$A_B) + 
-  NROW(pcg_report$content$cna$clin_eitem$specific_ttype$predictive$C_D_E)
+  NROW(pcg_report$content$cna$clin_eitem$query_ttype$predictive$C_D_E)
 flexdashboard::valueBox(entries_predictive, color = ifelse(entries_predictive > 0,
                         "#00a65a",
                         pcg_report$metadata$color_none), icon = "fa-file-prescription")
@@ -74,9 +74,9 @@ variants_tier2 <- dplyr::bind_rows(
   pcg_report[['content']][['cna']][['clin_eitem']][['other_ttype']][['diagnostic']][['A_B']],
   pcg_report[['content']][['cna']][['clin_eitem']][['other_ttype']][['predictive']][['A_B']],
   pcg_report[['content']][['cna']][['clin_eitem']][['other_ttype']][['prognostic']][['A_B']],
-  pcg_report[['content']][['cna']][['clin_eitem']][['specific_ttype']][['diagnostic']][['C_D_E']],
-  pcg_report[['content']][['cna']][['clin_eitem']][['specific_ttype']][['predictive']][['C_D_E']],
-  pcg_report[['content']][['cna']][['clin_eitem']][['specific_ttype']][['prognostic']][['C_D_E']]) |>
+  pcg_report[['content']][['cna']][['clin_eitem']][['query_ttype']][['diagnostic']][['C_D_E']],
+  pcg_report[['content']][['cna']][['clin_eitem']][['query_ttype']][['predictive']][['C_D_E']],
+  pcg_report[['content']][['cna']][['clin_eitem']][['query_ttype']][['prognostic']][['C_D_E']]) |>
   dplyr::arrange(EVIDENCE_LEVEL, RATING)
 
 

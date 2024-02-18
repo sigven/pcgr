@@ -3,21 +3,45 @@
 #'
 #' @param fname Path to file name
 #' @param ref_data Object with reference data
+#' @param settings Object with PCGR report configuration
 #'
 #' @export
-load_somatic_cna <- function(fname, ref_data = NULL){
+load_somatic_cna <- function(
+    fname,
+    ref_data = NULL,
+    settings = NULL) {
 
   log4r_info(paste0(
     "Reading annotated molecular dataset (DNA) - somatic copy number aberrations"))
 
-  callset <- load_dna_variants(
+  callset_cna <- pcgrr::load_dna_variants(
     fname = fname,
     cols = pcgrr::data_coltype_defs$cna_somatic_raw,
     ref_data = ref_data,
+    vartype = 'cna',
+    primary_site = settings[['conf']][['sample_properties']]$site,
     retained_info_tags = "None",
     variant_origin = "Somatic")
 
-  return(callset)
+  tumor_site <-
+    settings[['conf']][['sample_properties']][['site']]
+
+  if (NROW(callset_cna$variant) > 0) {
+    callset_cna[['variant']] <- callset_cna[['variant']] |>
+      pcgrr::append_cancer_gene_evidence(
+        ref_data = ref_data,
+        site = tumor_site,
+        pos_var = 'SEGMENT_START') |>
+      pcgrr::append_drug_var_link(
+        ref_data = ref_data
+      ) |>
+      dplyr::arrange(
+        .data$TIER,
+        dplyr::desc(.data$TISSUE_ASSOC_RANK),
+        dplyr::desc(.data$GLOBAL_ASSOC_RANK))
+  }
+
+  return(callset_cna)
 
 }
 
@@ -32,19 +56,26 @@ load_somatic_cna <- function(fname, ref_data = NULL){
 load_somatic_snv_indel <- function(
     fname = NA,
     ref_data = NULL,
-    settings = NULL){
+    settings = NULL) {
 
   log4r_info(paste0(
     "Reading annotated molecular dataset (DNA) - somatic SNV/InDels"))
 
-  callset <- load_dna_variants(
+  callset <- pcgrr::load_dna_variants(
     fname = fname,
     cols = pcgrr::data_coltype_defs$snv_indel_somatic_raw,
     ref_data = ref_data,
+    vartype = 'snv_indel',
+    primary_site = settings[['conf']][['sample_properties']]$site,
     retained_info_tags =
       settings[['conf']][['other']]$retained_vcf_info_tags,
     variant_origin = "Somatic")
 
+  tumor_site <-
+    settings[['conf']][['sample_properties']][['site']]
+
+
+  callset[['variant_unfiltered']] <- data.frame()
   callset[['variant']] <- callset[['variant']] |>
     pcgrr::append_dbnsfp_var_link() |>
     pcgrr::append_dbmts_var_link() |>
@@ -52,12 +83,34 @@ load_somatic_snv_indel <- function(
     pcgrr::append_annotation_links() |>
     pcgrr::append_drug_var_link(ref_data = ref_data) |>
     pcgrr::append_tfbs_annotation() |>
-    pcgrr::append_cancer_gene_evidence(ref_data = ref_data)
+    pcgrr::append_cancer_gene_evidence(ref_data = ref_data,
+                                       site = tumor_site)
 
-  callset <-
-    pcgrr::expand_biomarker_items(
-      callset = callset,
-      variant_origin = "somatic")
+  if (settings$conf$assay_properties$vcf_tumor_only == 1) {
+    callset[['variant_unfiltered']] <- callset[['variant']]
+    callset[['variant']] <- callset[['variant']] |>
+      ## assign evidence tags for germline/somatic state of variants,
+      ## partially based on user-defined criteria
+      ## (population allele frequency thresholds)
+        pcgrr::assign_somatic_germline_evidence2(
+          settings = settings) |>
+
+      ## assign somatic classification based on accumulation
+      ## of evidence tags and user-defined options
+        pcgrr::assign_somatic_classification(
+          settings = settings)
+  }
+
+  callset[['variant']] <- callset[['variant']] |>
+    dplyr::arrange(.data$TIER,
+                   dplyr::desc(.data$ONCOGENICITY_SCORE),
+                   dplyr::desc(.data$TISSUE_ASSOC_RANK),
+                   dplyr::desc(.data$GLOBAL_ASSOC_RANK))
+
+  # callset <-
+  #   pcgrr::expand_biomarker_items(
+  #     callset = callset,
+  #     variant_origin = "somatic")
 
   return(callset)
 
@@ -65,11 +118,13 @@ load_somatic_snv_indel <- function(
 }
 
 #' Function that reads and validates CNA or SNV/InDel TSV files
-#' file from PCGR/CPSR pre-report pipeline
+#' file from PCGR/CPSR pre-report (Python) pipeline
 #'
-#' @param fname Path to raw file with DNA aberrations (PCGR/CPSR)
-#' @param cols column type definitions of input
+#' @param fname Path to raw input file with DNA aberrations (PCGR/CPSR)
+#' @param cols column type definitions of raw input file
 #' @param ref_data reference data object
+#' @param vartype type of DNA aberrations ('snv_indel','cna')
+#' @param primary_site primary site of tumor
 #' @param retained_info_tags VCF INFO tags to be retained in output (SNVs/InDels)
 #' @param variant_origin Germline/Somatic
 #'
@@ -79,8 +134,10 @@ load_dna_variants <- function(
     fname = NA,
     cols = NULL,
     ref_data = NULL,
+    vartype = 'snv_indel',
+    primary_site = "Any",
     retained_info_tags = "None",
-    variant_origin = "Somatic"){
+    variant_origin = "Somatic") {
 
   pcgrr::check_file_exists(fname)
   calls_raw <- suppressWarnings(
@@ -101,7 +158,7 @@ load_dna_variants <- function(
 
   raw_col_check <-
     tibble::has_name(calls_raw, compulsary_cols)
-  if(FALSE %in% raw_col_check){
+  if (FALSE %in% raw_col_check) {
     missing_cols <-
       compulsary_cols[!raw_col_check]
     log4r_fatal(
@@ -112,11 +169,11 @@ load_dna_variants <- function(
 
   cols_including_retained <- cols
   retained_cols <- NULL
-  if(retained_info_tags != "None"){
+  if (retained_info_tags != "None") {
     retained_cols <- stringr::str_split(
       retained_info_tags, pattern = ",")[[1]]
-    for(c in retained_cols){
-      if(c %in% colnames(calls_raw)){
+    for(c in retained_cols) {
+      if (c %in% colnames(calls_raw)) {
         col_retain <- readr::cols_only(
           !!rlang::sym(c) := readr::col_character()
         )
@@ -139,9 +196,9 @@ load_dna_variants <- function(
   )
 
   retained_cols_renamed <- c()
-  if(!is.null(retained_cols)){
-    for(c in retained_cols){
-      if(c %in% colnames(calls)){
+  if (!is.null(retained_cols)) {
+    for(c in retained_cols) {
+      if (c %in% colnames(calls)) {
         new_col <- paste0('VCF_INFO_', c)
         retained_cols_renamed <- c(
           retained_cols_renamed, new_col
@@ -155,30 +212,27 @@ load_dna_variants <- function(
   results <- list()
   results[['variant']] <- calls
   results[['biomarker_evidence']] <- list()
-  results[['biomarker_evidence']][['all']] <- list()
-  for (elevel in pcgrr::evidence_levels) {
-    results[['biomarker_evidence']][['all']][[elevel]] <- data.frame()
-  }
+  results[['biomarker_evidence']][['items']] <-
+    data.frame()
 
-  for (type in pcgrr::evidence_types) {
-    results[['biomarker_evidence']][[type]] <- list()
-    for (elevel in pcgrr::evidence_levels) {
-      results[['biomarker_evidence']][[type]][[elevel]] <- data.frame()
-    }
-  }
-
-  results[['retained_info_tags']] <- paste(
-    retained_cols_renamed, collapse=","
-  )
-
-  if("TSG" %in% colnames(results[['variant']])){
+  ## Rename annotations for more clarity
+  if ("TSG" %in% colnames(results[['variant']])) {
     results[['variant']] <-
       results[['variant']] |>
       dplyr::rename(
         TUMOR_SUPPRESSOR = "TSG"
       )
   }
-  if("VEP_ALL_CSQ" %in% colnames(results[['variant']])){
+
+  if ("ONCOGENICITY_CLASSIFICATION" %in% colnames(results[['variant']])) {
+    results[['variant']] <-
+      results[['variant']] |>
+      dplyr::rename(
+        ONCOGENICITY = "ONCOGENICITY_CLASSIFICATION"
+      )
+  }
+
+  if ("VEP_ALL_CSQ" %in% colnames(results[['variant']])) {
     results[['variant']] <-
       results[['variant']] |>
       dplyr::mutate(
@@ -187,14 +241,16 @@ load_dna_variants <- function(
         )
       )
   }
-  if("HGVSp_short" %in% colnames(results[['variant']])){
+
+  if ("HGVSp_short" %in% colnames(results[['variant']])) {
     results[['variant']] <-
       results[['variant']] |>
       dplyr::rename(
         HGVSP = "HGVSp_short"
       )
   }
-  if("TSG_RANK" %in% colnames(results[['variant']])){
+
+  if ("TSG_RANK" %in% colnames(results[['variant']])) {
     results[['variant']] <-
       results[['variant']] |>
       dplyr::rename(
@@ -202,39 +258,75 @@ load_dna_variants <- function(
       )
   }
 
-  if("BIOMARKER_MATCH" %in% colnames(calls) &
-     "VAR_ID" %in% colnames(calls)){
+  if (vartype == 'cna') {
+
+    results[['variant']] <-
+      results[['variant']] |>
+      dplyr::mutate(REFSEQ_TRANSCRIPT_ID = dplyr::if_else(
+        is.na(.data$REFSEQ_TRANSCRIPT_ID),
+        "",
+        as.character(.data$REFSEQ_TRANSCRIPT_ID)
+      )) |>
+      dplyr::mutate(
+        TRANSCRIPT_OVERLAP = paste(
+          .data$ENSEMBL_TRANSCRIPT_ID,
+          .data$REFSEQ_TRANSCRIPT_ID,
+          .data$TRANSCRIPT_START,
+          .data$TRANSCRIPT_END,
+          .data$TRANSCRIPT_OVERLAP_PERCENT, sep="|"
+        )) |>
+      dplyr::select(
+        -c("ENSEMBL_TRANSCRIPT_ID",
+           "REFSEQ_TRANSCRIPT_ID",
+           "TRANSCRIPT_START",
+           "TRANSCRIPT_END")) |>
+      dplyr::group_by(
+        dplyr::across(-c("TRANSCRIPT_OVERLAP",
+                         "TRANSCRIPT_OVERLAP_PERCENT"))) |>
+      dplyr::summarise(
+        TRANSCRIPT_OVERLAP = paste(.data$TRANSCRIPT_OVERLAP, collapse=", "),
+        MAX_TRANSCRIPT_OVERLAP_PERCENT =
+          max(.data$TRANSCRIPT_OVERLAP_PERCENT, na.rm = T),
+        .groups = "drop"
+      )
+
+  }
+
+  if ("BIOMARKER_MATCH" %in% colnames(results[['variant']]) &
+     "VAR_ID" %in% colnames(results[['variant']])) {
 
     biomarker_set <-
-      calls |>
+      results[['variant']] |>
       dplyr::filter(!is.na(.data$BIOMARKER_MATCH))
 
-    citations <- as.data.frame(
-      ref_data[['biomarker']][['literature']] |>
-      dplyr::select(
-        c("EVIDENCE_ID",
-        "LINK")
-      ) |>
-      tidyr::separate_rows(
-        .data$EVIDENCE_ID, sep=";"
-      ) |>
-      dplyr::group_by(
-        EVIDENCE_ID
-      ) |>
-      dplyr::summarise(
-        CITATION = paste(
-          unique(.data$LINK), collapse = ", "
-        )
-      )
-    )
+    if (NROW(biomarker_set) > 0) {
 
-    if(NROW(biomarker_set) > 0){
-      results[['biomarker_evidence']][['all']][['any']] <-
+      citations <- as.data.frame(
+        ref_data[['biomarker']][['literature']] |>
+          dplyr::select(
+            c("EVIDENCE_ID",
+              "LINK")
+          ) |>
+          tidyr::separate_rows(
+            c("EVIDENCE_ID"),
+            sep=";"
+          ) |>
+          dplyr::group_by(
+            EVIDENCE_ID
+          ) |>
+          dplyr::summarise(
+            CITATION = paste(
+              unique(.data$LINK), collapse = ", "
+            )
+          )
+      )
+      results[['biomarker_evidence']][['items']] <-
         as.data.frame(
           biomarker_set |>
             dplyr::select(
               c("VAR_ID",
-              "BIOMARKER_MATCH"),
+                "VARIANT_CLASS",
+                "BIOMARKER_MATCH"),
               ) |>
             dplyr::distinct() |>
             tidyr::separate_rows(
@@ -247,8 +339,15 @@ load_dna_variants <- function(
                        "BIOMARKER_MATCHTYPE"),
               sep = "\\|"
             ) |>
-            dplyr::rename(BIOMARKER_MATCH = BIOMARKER_MATCHTYPE) |>
+            dplyr::mutate(VARIANT_ID = as.character(.data$VARIANT_ID)) |>
+            dplyr::left_join(
+              dplyr::select(
+                ref_data[['biomarker']][['variant']],
+                c("VARIANT_ID", "ENTREZGENE","BIOMARKER_SOURCE")),
+              by = c("VARIANT_ID","BIOMARKER_SOURCE")) |>
+            dplyr::rename(BIOMARKER_MATCH = .data$BIOMARKER_MATCHTYPE) |>
             dplyr::mutate(BIOMARKER_RESOLUTION = dplyr::case_when(
+              stringr::str_detect(.data$BIOMARKER_MATCH,"by_cna_segment") ~ "gene",
               stringr::str_detect(.data$BIOMARKER_MATCH,"by_genomic_coord") ~ "genomic",
               !stringr::str_detect(.data$BIOMARKER_MATCH,"by_genomic_coord") &
                 stringr::str_detect(.data$BIOMARKER_MATCH,"by_hgvsp_principal") ~ "hgvsp",
@@ -310,53 +409,69 @@ load_dna_variants <- function(
               ), by = c("EVIDENCE_ID"),
               relationship = "many-to-many"
             ) |>
+            dplyr::rename(
+              BM_VARIANT_ID = .data$VARIANT_ID,
+              BM_EVIDENCE_ID = .data$EVIDENCE_ID,
+              BM_SOURCE = .data$BIOMARKER_SOURCE,
+              BM_RESOLUTION = .data$BIOMARKER_RESOLUTION,
+              BM_MATCH = .data$BIOMARKER_MATCH,
+              BM_PRIMARY_SITE = .data$PRIMARY_SITE,
+              BM_EVIDENCE_TYPE = .data$EVIDENCE_TYPE,
+              BM_CANCER_TYPE = .data$CANCER_TYPE,
+              BM_VARIANT_ORIGIN = .data$VARIANT_ORIGIN,
+              BM_EVIDENCE_LEVEL = .data$EVIDENCE_LEVEL,
+              BM_EVIDENCE_DESCRIPTION = .data$EVIDENCE_DESCRIPTION,
+              BM_THERAPEUTIC_CONTEXT = .data$THERAPEUTIC_CONTEXT,
+              BM_CLINICAL_SIGNIFICANCE = .data$CLINICAL_SIGNIFICANCE,
+              BM_CITATION = .data$CITATION,
+              BM_RATING = .data$RATING,
+              BM_EVIDENCE_DIRECTION = .data$EVIDENCE_DIRECTION,
+              BM_MOLECULAR_PROFILE_NAME = .data$MOLECULAR_PROFILE_NAME,
+              BM_MOLECULAR_PROFILE_TYPE = .data$MOLECULAR_PROFILE_TYPE
+            ) |>
+            dplyr::select(
+              c("VAR_ID",
+                "VARIANT_CLASS",
+                "ENTREZGENE",
+                "BM_SOURCE",
+                "BM_VARIANT_ID",
+                "BM_EVIDENCE_ID",
+                "BM_EVIDENCE_TYPE",
+                "BM_EVIDENCE_LEVEL",
+                "BM_EVIDENCE_DESCRIPTION",
+                "BM_EVIDENCE_DIRECTION",
+                "BM_CLINICAL_SIGNIFICANCE",
+                "BM_VARIANT_ORIGIN",
+                "BM_CANCER_TYPE",
+                "BM_PRIMARY_SITE",
+                "BM_MATCH",
+                "BM_RESOLUTION"),
+              dplyr::everything()
+            ) |>
+            dplyr::filter(
+                .data$BM_VARIANT_ORIGIN == variant_origin &
+                  .data$BM_MOLECULAR_PROFILE_TYPE == "Any") |>
             dplyr::distinct()
         )
-
-      if(NROW(results[['biomarker_evidence']][['all']][['any']]) > 0){
-
-        for (type in pcgrr::evidence_types) {
-          results[['biomarker_evidence']][[type]][["any"]] <-
-            results[['biomarker_evidence']][['all']][['any']] |>
-            dplyr::filter(
-              .data$VARIANT_ORIGIN == variant_origin &
-                .data$EVIDENCE_TYPE == stringr::str_to_title(type))
-          if (NROW(results[['biomarker_evidence']][[type]][["any"]]) > 0) {
-            results[['biomarker_evidence']][[type]][["A_B"]] <-
-              results[['biomarker_evidence']][[type]][["any"]] |>
-              dplyr::filter(
-                stringr::str_detect(
-                  .data$EVIDENCE_LEVEL, "^(A|B|B1|B2):"))
-
-            if (NROW(results[['biomarker_evidence']][[type]][["A_B"]]) > 0) {
-              results[['biomarker_evidence']][[type]][["A_B"]] <-
-                results[['biomarker_evidence']][[type]][["A_B"]] |>
-                dplyr::arrange(
-                  .data$EVIDENCE_LEVEL,
-                  dplyr::desc(
-                    .data$RATING))
-            }
-
-            results[['biomarker_evidence']][[type]][["C_D_E"]] <-
-              results[['biomarker_evidence']][[type]][["any"]] |>
-              dplyr::filter(
-                stringr::str_detect(
-                  .data$EVIDENCE_LEVEL, "^(C|D|E):"))
-
-            if (NROW(results[['biomarker_evidence']][[type]][["C_D_E"]]) > 0) {
-              results[['biomarker_evidence']][[type]][["C_D_E"]] <-
-                results[['biomarker_evidence']][[type]][["C_D_E"]] |>
-                dplyr::arrange(
-                  .data$EVIDENCE_LEVEL,
-                  dplyr::desc(.data$RATING))
-            }
-          }
-        }
-      }
     }
+
+    if (variant_origin == "Somatic") {
+      results <- pcgrr::assign_acmg_tiers(
+        vartype = vartype,
+        variants_df = results$variant,
+        primary_site = primary_site,
+        biomarker_items =
+          results$biomarker_evidence$items
+      )
+    }
+
   }else{
     log4r_fatal("Input data does not contain 'BIOMARKER_MATCH' column - fatal")
   }
+
+  results[['retained_info_tags']] <- paste(
+    retained_cols_renamed, collapse=","
+  )
 
   return(results)
 

@@ -5,8 +5,8 @@
 \title{Function that predicts MSI status based on fraction of indels among calls}
 \usage{
 predict_msi_status(
-  vcf_data_df,
-  pcgr_data,
+  variant_set,
+  ref_data,
   msi_prediction_model,
   msi_prediction_dataset,
   target_size_mb,
@@ -14,9 +14,9 @@ predict_msi_status(
 )
 }
 \arguments{
-\item{vcf_data_df}{data frame with somatic mutations/indels}
+\item{variant_set}{data frame with somatic mutations/indels}
 
-\item{pcgr_data}{object with PCGR datasets}
+\item{ref_data}{PCGR reference data object}
 
 \item{msi_prediction_model}{statistical model for MSI prediction}
 

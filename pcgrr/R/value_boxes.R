@@ -92,10 +92,10 @@ generate_report_data_value_box <- function(pcg_report,
     }
   }
 
-  if (rep_cont[['kataegis']][["eval"]]){
+  if (rep_cont[['kataegis']][["eval"]]) {
     pcg_report_value_box[["kataegis"]] <- "None"
       num_events <- NROW(rep_cont$kataegis$events)
-      if(num_events > 0){
+      if (num_events > 0) {
         num_events <- NROW(rep_cont$kataegis$events |>
                              dplyr::filter(.data$confidence == 3))
         # pcg_report_value_box[["kataegis"]] <-

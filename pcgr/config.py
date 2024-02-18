@@ -94,7 +94,7 @@ def create_config(arg_dict, workflow = "PCGR"):
             'exclude_nonexonic': int(arg_dict['exclude_nonexonic'])
         }
         conf_options['somatic_snv']['msi'] = {
-            'run': int(arg_dict['estimate_msi_status'])
+            'run': int(arg_dict['estimate_msi'])
         }
         conf_options['somatic_snv']['tmb'] = {
             'run': int(arg_dict['estimate_tmb']),            

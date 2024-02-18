@@ -2,9 +2,8 @@
 % Please edit documentation in R/germline.R
 \name{make_upset_plot_data}
 \alias{make_upset_plot_data}
-\title{Function that makes input data for an UpSet plot
-(filtering/intersection results) for the somatic-germline
-classification procedure}
+\title{Function that retrieves name of VCF INFO tag and
+population description for gnomad/1000G population}
 \usage{
 make_upset_plot_data(calls, config)
 }

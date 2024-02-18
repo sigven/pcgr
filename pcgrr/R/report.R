@@ -48,7 +48,7 @@ init_report <- function(yaml_fname = NULL,
         vcf_tag_AN <- "gnomADe_non_cancer_AN"
         vcf_tag_AC <- "gnomADe_non_cancer_AC"
         vcf_tag_NHOMALT <- "gnomADe_non_cancer_NHOMALT"
-        if(population != "global"){
+        if (population != "global") {
           vcf_tag_AF <-
             paste0("gnomADe_non_cancer_",toupper(population),"_AF")
           vcf_tag_AN <-
@@ -61,7 +61,7 @@ init_report <- function(yaml_fname = NULL,
         pop_desc_df <-
           report$ref_data$vcf_infotags[
             report$ref_data$vcf_infotags$tag == vcf_tag_AF,]
-        if(NROW(pop_desc_df) == 1){
+        if (NROW(pop_desc_df) == 1) {
           population_description <- pop_desc_df$description
           report[["settings"]][["conf"]][["variant_classification"]][["vcftag_gnomad_AF"]] <-
             vcf_tag_AF
@@ -98,7 +98,7 @@ init_report <- function(yaml_fname = NULL,
       report[["content"]][[a_elem]] <- list()
       report[["content"]][[a_elem]][["eval"]] <- FALSE
 
-      if(a_elem == "tumor_purity" | a_elem == "tumor_ploidy"){
+      if (a_elem == "tumor_purity" | a_elem == "tumor_ploidy") {
         report[["content"]][[a_elem]][["eval"]] <- TRUE
       }
 
@@ -203,7 +203,7 @@ update_report <- function(report, report_data,
 #'
 #' @export
 init_tmb_content <- function(tcga_tmb = NULL,
-                             config = NULL){
+                             config = NULL) {
 
   invisible(assertthat::assert_that(!is.null(tcga_tmb)))
   invisible(assertthat::assert_that(is.data.frame(tcga_tmb) &
@@ -235,7 +235,7 @@ init_tmb_content <- function(tcga_tmb = NULL,
 #
 #' @return rep updated PCGR report structure - initialized for CNA content
 #' @export
-init_cna_content <- function(rep = NULL){
+init_cna_content <- function(rep = NULL) {
 
   invisible(assertthat::assert_that(!is.null(rep)))
   invisible(assertthat::assert_that(!is.null(rep[['disp']])))
@@ -271,7 +271,7 @@ init_cna_content <- function(rep = NULL){
 #
 #' @return rep updated PCGR report structure - initialized for SNV/InDel content
 #' @export
-init_snv_indel_content <- function(rep = NULL){
+init_snv_indel_content <- function(rep = NULL) {
 
   invisible(assertthat::assert_that(!is.null(rep)))
   invisible(assertthat::assert_that(!is.null(rep[['disp']])))
@@ -306,7 +306,7 @@ init_snv_indel_content <- function(rep = NULL){
 #'
 #' @return rep Report structure initialized for signature data
 #' @export
-init_m_signature_content <- function(){
+init_m_signature_content <- function() {
 
   rep <- list()
   rep[["eval"]] <- FALSE
@@ -332,14 +332,38 @@ init_m_signature_content <- function(){
   return(rep)
 }
 
-#init_msi_content <- function(){}
-#init_kataegis_content <- function(){}
+#' Function that initiates report element with MSI classification
+#'
+#' @export
+init_msi_content <- function() {
+  rep <- list()
+
+  rep[["eval"]] <- FALSE
+  rep[["missing_data"]] <- FALSE
+  rep[["prediction"]] <- list()
+
+  return(rep)
+
+}
+
+#' Function that initiates report element with kataegis information
+#'
+#' @export
+init_kataegis_content <- function() {
+  rep <- list()
+
+  rep[["eval"]] <- FALSE
+  rep[["events"]] <- data.frame()
+
+  return(rep)
+
+}
 
 #' Function that initiates report element with rainfall information
 #'
 #' @return rep Report structure initialized for rainfall data
 #' @export
-init_rainfall_content <- function(){
+init_rainfall_content <- function() {
 
   rep <- list()
 
@@ -367,7 +391,7 @@ init_rainfall_content <- function(){
 #'
 #' @return rep Report structure initialized for tumor-only data
 #' @export
-init_tumor_only_content <- function(){
+init_tumor_only_content <- function() {
 
   rep <- list()
   rep[["eval"]] <- FALSE
@@ -399,7 +423,7 @@ init_tumor_only_content <- function(){
 #'
 #' @return rep Report structure initialized for value box data
 #' @export
-init_valuebox_content <- function(){
+init_valuebox_content <- function() {
   rep <- list()
 
   rep[["eval"]] <- FALSE
@@ -431,7 +455,7 @@ init_valuebox_content <- function(){
 #'
 #' @return rep Report structure initialized for ranked display
 #' @export
-init_report_display_content <- function(){
+init_report_display_content <- function() {
 
   rep <- list()
   rep[["eval"]] <- FALSE
@@ -451,7 +475,7 @@ init_report_display_content <- function(){
 #'
 #' @return rep Report structure initialized for variant data
 #' @export
-init_var_content <- function(){
+init_var_content <- function() {
 
   rep <- list()
 
@@ -461,7 +485,7 @@ init_var_content <- function(){
   rep[["variant_set"]] <- list()
   rep[["v_stat"]] <- list()
   rep[["zero"]] <- FALSE
-  for (tumorclass in c("any_ttype", "other_ttype", "specific_ttype")) {
+  for (tumorclass in c("any_ttype", "other_ttype", "query_ttype")) {
     rep[["clin_eitem"]][[tumorclass]] <- list()
     for (e_type in c("prognostic", "diagnostic", "predictive")) {
       for (e_level in c("A_B", "C_D_E", "any")) {
@@ -477,7 +501,7 @@ init_var_content <- function(){
 #'
 #' @return rep Report structure initialized for germline data (CPSR)
 #' @export
-init_germline_content <- function(){
+init_germline_content <- function() {
   rep <- list()
 
   rep[["max_dt_rows"]] <- 0
@@ -498,12 +522,12 @@ init_germline_content <- function(){
   rep[["clin_eitem"]] <- list()
   for (evidence_type in pcgrr::evidence_types) {
     rep[["clin_eitem"]][[evidence_type]] <- list()
-    for(level in pcgrr::evidence_levels){
+    for(level in pcgrr::evidence_levels) {
       rep[["clin_eitem"]][[evidence_type]][[level]] <-
         data.frame()
     }
     rep[['clin_eitem']][['all']] <- list()
-    for(level in pcgrr::evidence_levels){
+    for(level in pcgrr::evidence_levels) {
       rep[["clin_eitem"]][['all']][[level]] <-
         data.frame()
     }
@@ -532,7 +556,7 @@ init_germline_content <- function(){
 #' @export
 load_yaml <- function(yml_fname, report_mode = "CPSR") {
 
-  if(!file.exists(yml_fname)){
+  if (!file.exists(yml_fname)) {
     log4r_fatal(
       paste0("YAML file '",yml_fname,"' does not exist - exiting"))
   }
@@ -541,11 +565,11 @@ load_yaml <- function(yml_fname, report_mode = "CPSR") {
   for(t in c('sample_id',
              'genome_assembly',
              'workflow',
-             'output_dir')){
-    if(is.null(report_settings[[t]])){
+             'output_dir')) {
+    if (is.null(report_settings[[t]])) {
       missing_yaml_info <- T
     }else{
-      if(identical(typeof(report_settings[[t]]),"character") == F){
+      if (identical(typeof(report_settings[[t]]),"character") == F) {
         missing_yaml_info <- T
       }
     }
@@ -553,16 +577,16 @@ load_yaml <- function(yml_fname, report_mode = "CPSR") {
   for(t in c('conf',
              'molecular_data',
              'reference_data',
-             'software')){
-    if(is.null(report_settings[[t]])){
+             'software')) {
+    if (is.null(report_settings[[t]])) {
       missing_yaml_info <- T
     }else{
-      if(identical(typeof(report_settings[[t]]),"list") == F){
+      if (identical(typeof(report_settings[[t]]),"list") == F) {
         missing_yaml_info <- T
       }
     }
   }
-  if(missing_yaml_info == F){
+  if (missing_yaml_info == F) {
     log4r_info(paste0(
       "Successfully parsed YAML configuration file - reporting mode: ", report_mode))
   }else{
@@ -574,7 +598,7 @@ load_yaml <- function(yml_fname, report_mode = "CPSR") {
   ## check that it matches the report_mode
   ## return it
 
-  if(report_settings[['workflow']] != report_mode){
+  if (report_settings[['workflow']] != report_mode) {
     log4r_fatal(
       paste0("Cannot read YAML file from ",
              report_settings[['workflow']],
@@ -583,9 +607,9 @@ load_yaml <- function(yml_fname, report_mode = "CPSR") {
   }
 
   ref_data <- list()
-  if(dir.exists(
+  if (dir.exists(
     report_settings[['reference_data']][['path']]
-  )){
+  )) {
     ref_data <- load_reference_data(
       pcgr_db_assembly_dir = report_settings[['reference_data']][['path']],
       genome_assembly = report_settings[['genome_assembly']]
@@ -609,7 +633,7 @@ load_yaml <- function(yml_fname, report_mode = "CPSR") {
     if (identical(
       typeof(
         report_settings[['conf']][['sample_properties']][['phenotype']]),
-      "list")){
+      "list")) {
       report_settings[['conf']][['sample_properties']][['phenotype']] <-
         as.data.frame(
           rrapply::rrapply(
@@ -619,26 +643,26 @@ load_yaml <- function(yml_fname, report_mode = "CPSR") {
 
     for(col in c('do_id','do_name','efo_id','efo_name',
                  'icd10_code','ot_name','ot_primary_site',
-                 'primary_site','ot_code','ot_code_path')){
+                 'primary_site','ot_code','ot_code_path')) {
 
-      if(NROW(report_settings[['conf']][['sample_properties']][['phenotype']][
-        report_settings[['conf']][['sample_properties']][['phenotype']][[col]] == "NaN",]) > 0){
+      if (NROW(report_settings[['conf']][['sample_properties']][['phenotype']][
+        report_settings[['conf']][['sample_properties']][['phenotype']][[col]] == "NaN",]) > 0) {
           report_settings[['conf']][['sample_properties']][['phenotype']][
             report_settings[['conf']][['sample_properties']][['phenotype']][[col]] == "NaN",col] <-
           as.character(NA)
       }
 
-      if(NROW(report_settings[['conf']][['sample_properties']][['phenotype']][
-        is.nan(report_settings[['conf']][['sample_properties']][['phenotype']][[col]]),]) > 0){
+      if (NROW(report_settings[['conf']][['sample_properties']][['phenotype']][
+        is.nan(report_settings[['conf']][['sample_properties']][['phenotype']][[col]]),]) > 0) {
         report_settings[['conf']][['sample_properties']][['phenotype']][
           is.nan(report_settings[['conf']][['sample_properties']][['phenotype']]),col] <-
           as.character(NA)
       }
     }
 
-    for(col in c('do_cancer_slim','ot_level')){
-      if(NROW(report_settings[['conf']][['sample_properties']][['phenotype']][
-        is.nan(report_settings[['conf']][['sample_properties']][['phenotype']][[col]]),]) > 0){
+    for(col in c('do_cancer_slim','ot_level')) {
+      if (NROW(report_settings[['conf']][['sample_properties']][['phenotype']][
+        is.nan(report_settings[['conf']][['sample_properties']][['phenotype']][[col]]),]) > 0) {
         report_settings[['conf']][['sample_properties']][['phenotype']][
           is.nan(report_settings[['conf']][['sample_properties']][['phenotype']][[col]]),col] <-
           as.numeric(NA)
@@ -656,47 +680,47 @@ load_yaml <- function(yml_fname, report_mode = "CPSR") {
                'source_license',
                'source_license_url',
                'source_url',
-               'source_citation')){
+               'source_citation')) {
 
-    if(NROW(report_settings[['reference_data']][['source_metadata']][
-      report_settings[['reference_data']][['source_metadata']][[col]] == "NaN",]) > 0){
+    if (NROW(report_settings[['reference_data']][['source_metadata']][
+      report_settings[['reference_data']][['source_metadata']][[col]] == "NaN",]) > 0) {
       report_settings[['reference_data']][['source_metadata']][
         report_settings[['reference_data']][['source_metadata']][[col]] == "NaN",col] <-
         as.character(NA)
     }
   }
 
-  if(report_mode == "CPSR"){
+  if (report_mode == "CPSR") {
     report_settings[['conf']][['gene_panel']][['panel_genes']] <-
       as.data.frame(
         rrapply::rrapply(
           report_settings$conf$gene_panel$panel_genes,
           how = "bind"))
 
-    if(NROW(report_settings[['conf']][['gene_panel']][['panel_genes']]) == 1){
-      for(e in c('panel_id','panel_url','panel_version')){
+    if (NROW(report_settings[['conf']][['gene_panel']][['panel_genes']]) == 1) {
+      for(e in c('panel_id','panel_url','panel_version')) {
         report_settings[['conf']][['gene_panel']][['panel_genes']][,e] <- NA
       }
-      for(e in c('mod','moi')){
-        if(is.nan(report_settings$conf$gene_panel$panel_genes[,e])){
+      for(e in c('mod','moi')) {
+        if (is.nan(report_settings$conf$gene_panel$panel_genes[,e])) {
           report_settings[['conf']][['gene_panel']][['panel_genes']][,e] <- NA
         }
       }
     }else{
 
-      for(col in c('panel_id','panel_version')){
+      for(col in c('panel_id','panel_version')) {
 
-        if(NROW(report_settings[['conf']][['gene_panel']][['panel_genes']][
-          is.nan(report_settings[['conf']][['gene_panel']][['panel_genes']][[col]]),]) > 0){
+        if (NROW(report_settings[['conf']][['gene_panel']][['panel_genes']][
+          is.nan(report_settings[['conf']][['gene_panel']][['panel_genes']][[col]]),]) > 0) {
           report_settings[['conf']][['gene_panel']][['panel_genes']][
             is.nan(report_settings[['conf']][['gene_panel']][['panel_genes']][[col]]),col] <-
             as.numeric(NA)
         }
       }
-      for(col in c('mod','moi')){
+      for(col in c('mod','moi')) {
 
-        if(NROW(report_settings[['conf']][['gene_panel']][['panel_genes']][
-          is.nan(report_settings[['conf']][['gene_panel']][['panel_genes']][[col]]),]) > 0){
+        if (NROW(report_settings[['conf']][['gene_panel']][['panel_genes']][
+          is.nan(report_settings[['conf']][['gene_panel']][['panel_genes']][[col]]),]) > 0) {
           report_settings[['conf']][['gene_panel']][['panel_genes']][
             is.nan(report_settings[['conf']][['gene_panel']][['panel_genes']][[col]]),col] <-
             as.character(NA)
@@ -717,9 +741,9 @@ load_yaml <- function(yml_fname, report_mode = "CPSR") {
     pcgrr::color_palette[["none"]][["values"]][1]
   report_settings$conf$visual_reporting[["color_value_box"]] <-
     pcgrr::color_palette[["report_color"]][["values"]][1]
-  if(report_mode == "PCGR" &
+  if (report_mode == "PCGR" &
      !is.null(report_settings$conf$assay_properties)) {
-    if(report_settings$conf$assay_properties$vcf_tumor_only == 1) {
+    if (report_settings$conf$assay_properties$vcf_tumor_only == 1) {
       report_settings$conf$visual_reporting[["color_value_box"]] <-
         pcgrr::color_palette[["report_color"]][["values"]][2]
     }

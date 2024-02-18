@@ -5,25 +5,17 @@
 \title{Function that generates mutational signatures data for PCGR report}
 \usage{
 generate_report_data_signatures_mp(
-  vcf_fname,
-  pcgr_data,
-  sample_name,
-  pcgr_config,
-  type_specific = T
+  callset_snv = NULL,
+  ref_data = NULL,
+  settings = NULL
 )
 }
 \arguments{
-\item{vcf_fname}{VCF file processed with PCGR annotation pipeline -
-possibly filtered for depth/allelic fraction}
+\item{callset_snv}{Somatic callset (SNV)}
 
-\item{pcgr_data}{object with PCGR annotation data}
+\item{ref_data}{PCGR reference data object}
 
-\item{sample_name}{sample identifier}
-
-\item{pcgr_config}{Object with PCGR configuration parameters}
-
-\item{type_specific}{logical indicating if all reference signatures are to be
-included (F) rather than those known to be prevalent in the tumor (T)}
+\item{settings}{PCGR configuration settings object}
 }
 \description{
 Function that generates mutational signatures data for PCGR report
