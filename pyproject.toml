@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "pcgr"
+version = "1.4.1.9001" # versioned by bump2version
+description = "Personal Cancer Genome Reporter (PCGR) - variant interpretation for precision cancer medicine"
+authors = [
+    {name = "Sigve Nakken", email = "sigven@gmail.com"},
+    ]
+maintainers = [
+    {name = "Sigve Nakken", email = "sigven@gmail.com"},
+    {name = "Peter Diakumis", email = "peterdiakumis@gmail.com"},
+    ]
+readme = "README.md"
+license = {file = "LICENSE"}
+keywords = ["cancer", "genomics", "pcgr"]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: POSIX",
+    "Operating System :: Unix",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: R",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    ]
+
+
+[project.urls]
+Homepage = "https://sigven.github.io/pcgr/"
+Documentation = "https://sigven.github.io/pcgr/"
+Repository = "https://github.com/sigven/pcgr"
+Changelog = "https://sigven.github.io/pcgr/articles/CHANGELOG.html"
+
+
+[project.scripts]
+pcgr = "pcgr.main:cli"
+cpsr = "pcgr.cpsr:main"
+
+
+[tool.setuptools.packages]
+find = {}
+
+
+[tool.setuptools]
+script-files = [
+    "scripts/cpsr_validate_input.py",
+    "scripts/pcgr_summarise.py",
+    "scripts/pcgr_validate_input.py",
+    "scripts/pcgr_vcfanno.py",
+    "scripts/pcgrr.R",
+    "scripts/cpsr.R",
+    ]
