@@ -455,6 +455,9 @@ load_dna_variants <- function(
         )
     }
 
+    ## Assign each variant a tier according to
+    ## ACMG/AMP guidelines for clinical actionability
+    ## of somatic variants
     if (variant_origin == "Somatic") {
       results <- pcgrr::assign_acmg_tiers(
         vartype = vartype,

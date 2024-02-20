@@ -2,7 +2,7 @@ Package: pcgrr
 Type: Package
 Title: Personal Cancer Genome ReporteR
 Version: 1.4.1.9001
-Date: 2024-12-18
+Date: 2024-02-18
 Authors@R:
     c(person(given = "Sigve",
              family = "Nakken",
@@ -18,9 +18,10 @@ Maintainer: Sigve Nakken <sigven@ifi.uio.no>, Peter Diakumis <peterdiakumis@gmai
 URL: https://github.com/sigven/pcgr,
     https://sigven.github.io/pcgr/
 BugReports: https://github.com/sigven/pcgr/issues
-Description: Functions, tools and utilities for the generation of clinical cancer genome reports with PCGR.
-    This R package is an integrated part of the PCGR workflow (https://github.com/sigven/pcgr),
-    it should thus not be used as a stand-alone package.
+Description: Functions, tools and utilities for the generation of clinical 
+    cancer genome reports with PCGR. This R package is an integrated part of 
+    the PCGR workflow (https://github.com/sigven/pcgr), it should thus not be 
+    used as a stand-alone package.
 License: MIT + file LICENSE
 biocViews:
 Imports:
