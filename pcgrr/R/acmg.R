@@ -1,273 +1,3 @@
-
-#' Function that assigns evidence items for SNVs/InDels to ACMG tiers 1 and 2
-#' @param pcg_report_snv_indel report object for snv/indels
-#'
-#' @return pcg_report_snv_indel data frame with all report elements
-#' @export
-
-assign_tier1_tier2_acmg <- function(pcg_report_snv_indel) {
-
-  ## Assign get evidence items to tier 1 and tier 2
-  ## TIER 1: evidence items in specific tumor type and
-  ## of high clinical evidence (A_B)
-  ## TIER 2: evidence items in other tumor types of high
-  ## clinical evidence (A_B) and low clinical evidence in
-  ## specific tumor type
-
-  unique_variants_tier1 <- data.frame()
-  unique_variants_tier2 <- data.frame()
-
-  ## eitems
-  eitems_query_ttype <-
-    pcg_report_snv_indel[["clin_eitem"]][["query_ttype"]]
-  eitems_any_ttype <-
-    pcg_report_snv_indel[["clin_eitem"]][["any_ttype"]]
-  eitems_other_ttype <-
-    pcg_report_snv_indel[["clin_eitem"]][["other_ttype"]]
-
-
-  for (etype in c("diagnostic", "predictive", "prognostic")) {
-    if (nrow(eitems_query_ttype[[etype]][["A_B"]]) > 0) {
-      vars <-
-        dplyr::select(eitems_query_ttype[[etype]][["A_B"]],
-                      .data$GENOMIC_CHANGE) |>
-        dplyr::distinct()
-      unique_variants_tier1 <-
-        rbind(unique_variants_tier1, vars) |>
-        dplyr::distinct()
-    }
-  }
-
-  for (etype in c("diagnostic", "predictive", "prognostic")) {
-    if (nrow(eitems_any_ttype[[etype]][["A_B"]]) > 0) {
-      eitems_other_ttype[[etype]][["A_B"]] <-
-        eitems_any_ttype[[etype]][["A_B"]]
-
-      if (nrow(eitems_query_ttype[[etype]][["A_B"]]) > 0) {
-
-        if (pcgrr::check_common_colnames(
-          df1 = eitems_any_ttype[[etype]][["A_B"]],
-          df2 = eitems_query_ttype[[etype]][["A_B"]],
-          cnames = c("GENOMIC_CHANGE"))) {
-
-          eitems_other_ttype[[etype]][["A_B"]] <-
-            dplyr::anti_join(eitems_any_ttype[[etype]][["A_B"]],
-                             eitems_query_ttype[[etype]][["A_B"]],
-                             by = c("GENOMIC_CHANGE"))
-        }
-      }
-      if (nrow(eitems_other_ttype[[etype]][["A_B"]]) > 0) {
-        if (nrow(unique_variants_tier1) > 0) {
-          if (pcgrr::check_common_colnames(
-            df1 = unique_variants_tier1,
-            df2 = eitems_other_ttype[[etype]][["A_B"]],
-            cnames = c("GENOMIC_CHANGE"))) {
-            eitems_other_ttype[[etype]][["A_B"]] <-
-              dplyr::anti_join(eitems_other_ttype[[etype]][["A_B"]],
-                               unique_variants_tier1,
-                               by = c("GENOMIC_CHANGE"))
-          }
-        }
-        if (nrow(eitems_other_ttype[[etype]][["A_B"]]) > 0) {
-          unique_variants_tier2 <- unique_variants_tier2 |>
-            dplyr::bind_rows(
-              dplyr::select(eitems_other_ttype[[etype]][["A_B"]],
-                            .data$GENOMIC_CHANGE)) |>
-            dplyr::distinct()
-        }
-      }
-    }
-    if (nrow(eitems_query_ttype[[etype]][["C_D_E"]]) > 0) {
-      if (nrow(unique_variants_tier1) > 0) {
-        if (pcgrr::check_common_colnames(
-          df1 = unique_variants_tier1,
-          df2 = eitems_query_ttype[[etype]][["C_D_E"]],
-          cnames = c("GENOMIC_CHANGE"))) {
-          eitems_query_ttype[[etype]][["C_D_E"]] <-
-            dplyr::anti_join(
-              eitems_query_ttype[[etype]][["C_D_E"]],
-              unique_variants_tier1, by = c("GENOMIC_CHANGE"))
-        }
-      }
-      if (nrow(eitems_query_ttype[[etype]][["C_D_E"]]) > 0) {
-        unique_variants_tier2 <- unique_variants_tier2 |>
-          dplyr::bind_rows(
-            dplyr::select(eitems_query_ttype[[etype]][["C_D_E"]],
-                          .data$GENOMIC_CHANGE)) |>
-          dplyr::distinct()
-      }
-    }
-  }
-
-  pcg_report_snv_indel[["disp"]][["tier1"]] <-
-    unique_variants_tier1
-  pcg_report_snv_indel[["disp"]][["tier2"]] <-
-    unique_variants_tier2
-  pcg_report_snv_indel[["clin_eitem"]][["query_ttype"]] <-
-    eitems_query_ttype
-  pcg_report_snv_indel[["clin_eitem"]][["any_ttype"]] <-
-    eitems_any_ttype
-  pcg_report_snv_indel[["clin_eitem"]][["other_ttype"]] <-
-    eitems_other_ttype
-
-  if (nrow(unique_variants_tier1) > 0) {
-    if (pcgrr::check_common_colnames(
-      df1 = pcg_report_snv_indel[["variant_set"]][["tier1"]],
-      df2 = unique_variants_tier1,
-      cnames = c("GENOMIC_CHANGE"))) {
-      pcg_report_snv_indel[["variant_set"]][["tier1"]] <-
-        dplyr::semi_join(pcg_report_snv_indel[["variant_set"]][["tier1"]],
-                         unique_variants_tier1, by = c("GENOMIC_CHANGE"))
-    }
-    if (pcgrr::check_common_colnames(
-      df1 = pcg_report_snv_indel[["variant_set"]][["tier2"]],
-      df2 = unique_variants_tier1,
-      cnames = c("GENOMIC_CHANGE"))) {
-      pcg_report_snv_indel[["variant_set"]][["tier2"]] <-
-        dplyr::anti_join(pcg_report_snv_indel[["variant_set"]][["tier2"]],
-                         unique_variants_tier1, by = c("GENOMIC_CHANGE"))
-    }
-  }
-  else{
-    pcg_report_snv_indel[["variant_set"]][["tier1"]] <- data.frame()
-  }
-  if (nrow(unique_variants_tier2) == 0) {
-    pcg_report_snv_indel[["variant_set"]][["tier2"]] <- data.frame()
-  } else{
-    if (pcgrr::check_common_colnames(
-      df1 = pcg_report_snv_indel[["variant_set"]][["tier2"]],
-      df2 = unique_variants_tier2,
-      cnames = c("GENOMIC_CHANGE"))) {
-      pcg_report_snv_indel[["variant_set"]][["tier2"]] <-
-        dplyr::semi_join(pcg_report_snv_indel[["variant_set"]][["tier2"]],
-                         unique_variants_tier2, by = c("GENOMIC_CHANGE"))
-    }
-  }
-
-  return(pcg_report_snv_indel)
-}
-
-#' Function that assigns evidence items for SCNAs to ACMG tiers 1 and 2
-#' @param pcg_report_cna report object for CNAs
-#'
-#' @return pcg_report_cna data frame with all report elements
-#'
-#' @export
-
-assign_tier1_tier2_acmg_cna <- function(pcg_report_cna) {
-
-  ## Assign get evidence items to tier 1 and tier 2
-  ## TIER 1: evidence items in specific tumor type and
-  ## of high clinical evidence (A_B)
-  ## TIER 2: evidence items in other tumor types of high
-  ## clinical evidence (A_B) and low clinical evidence in
-  ## specific tumor type
-
-  unique_variants_tier1 <- data.frame()
-  unique_variants_tier2 <- data.frame()
-
-  ## eitems
-  eitems_query_ttype <- pcg_report_cna[["clin_eitem"]][["query_ttype"]]
-  eitems_any_ttype <- pcg_report_cna[["clin_eitem"]][["any_ttype"]]
-  eitems_other_ttype <- pcg_report_cna[["clin_eitem"]][["other_ttype"]]
-
-  for (etype in c("diagnostic", "predictive", "prognostic")) {
-    if (nrow(eitems_query_ttype[[etype]][["A_B"]]) > 0) {
-
-      assertable::assert_colnames(eitems_query_ttype[[etype]][["A_B"]],
-                                  c("SYMBOL", "SEGMENT", "CNA_TYPE"),
-                                  only_colnames = F, quiet = T)
-
-      vars <- dplyr::select(eitems_query_ttype[[etype]][["A_B"]],
-                            .data$SYMBOL, .data$SEGMENT, .data$CNA_TYPE) |>
-        dplyr::distinct()
-      unique_variants_tier1 <- rbind(unique_variants_tier1, vars) |>
-        dplyr::distinct()
-    }
-  }
-
-  for (etype in c("diagnostic", "predictive", "prognostic")) {
-    if (nrow(eitems_any_ttype[[etype]][["A_B"]]) > 0) {
-      eitems_other_ttype[[etype]][["A_B"]] <-
-        eitems_any_ttype[[etype]][["A_B"]]
-
-      if (nrow(eitems_query_ttype[[etype]][["A_B"]]) > 0) {
-
-        if (pcgrr::check_common_colnames(
-          df1 = eitems_any_ttype[[etype]][["A_B"]],
-          df2 = eitems_query_ttype[[etype]][["A_B"]],
-          cnames = c("SYMBOL", "SEGMENT", "CNA_TYPE"))) {
-
-          eitems_other_ttype[[etype]][["A_B"]] <-
-            dplyr::anti_join(eitems_any_ttype[[etype]][["A_B"]],
-                             eitems_query_ttype[[etype]][["A_B"]],
-                             by = c("SYMBOL", "SEGMENT", "CNA_TYPE"))
-        }
-      }
-      if (nrow(eitems_other_ttype[[etype]][["A_B"]]) > 0) {
-        if (nrow(unique_variants_tier1) > 0) {
-          if (pcgrr::check_common_colnames(
-            df1 = unique_variants_tier1,
-            df2 = eitems_other_ttype[[etype]][["A_B"]],
-            cnames = c("SYMBOL", "SEGMENT", "CNA_TYPE"))) {
-            eitems_other_ttype[[etype]][["A_B"]] <-
-              dplyr::anti_join(eitems_other_ttype[[etype]][["A_B"]],
-                               unique_variants_tier1,
-                               by = c("SYMBOL", "SEGMENT", "CNA_TYPE"))
-          }
-        }
-        if (nrow(eitems_other_ttype[[etype]][["A_B"]]) > 0) {
-
-          assertable::assert_colnames(eitems_other_ttype[[etype]][["A_B"]],
-                                      c("SYMBOL", "SEGMENT", "CNA_TYPE"),
-                                      only_colnames = F, quiet = T)
-
-          unique_variants_tier2 <- unique_variants_tier2 |>
-            dplyr::bind_rows(
-              dplyr::select(eitems_other_ttype[[etype]][["A_B"]],
-                            .data$SYMBOL, .data$SEGMENT, .data$CNA_TYPE)) |>
-            dplyr::distinct()
-        }
-      }
-    }
-    if (nrow(eitems_query_ttype[[etype]][["C_D_E"]]) > 0) {
-      if (nrow(unique_variants_tier1) > 0) {
-        if (pcgrr::check_common_colnames(
-          df1 = unique_variants_tier1,
-          df2 = eitems_query_ttype[[etype]][["C_D_E"]],
-          cnames = c("SYMBOL", "SEGMENT", "CNA_TYPE"))) {
-          eitems_query_ttype[[etype]][["C_D_E"]] <-
-            dplyr::anti_join(
-              eitems_query_ttype[[etype]][["C_D_E"]],
-              unique_variants_tier1,
-              by = c("SYMBOL", "SEGMENT", "CNA_TYPE"))
-        }
-      }
-      if (nrow(eitems_query_ttype[[etype]][["C_D_E"]]) > 0) {
-
-        assertable::assert_colnames(eitems_query_ttype[[etype]][["C_D_E"]],
-                                    c("SYMBOL", "SEGMENT", "CNA_TYPE"),
-                                    only_colnames = F, quiet = T)
-
-        unique_variants_tier2 <- unique_variants_tier2 |>
-          dplyr::bind_rows(
-            dplyr::select(eitems_query_ttype[[etype]][["C_D_E"]],
-                          .data$SYMBOL, .data$SEGMENT, .data$CNA_TYPE)) |>
-          dplyr::distinct()
-      }
-    }
-  }
-
-  pcg_report_cna[["disp"]][["tier1"]] <- unique_variants_tier1
-  pcg_report_cna[["disp"]][["tier2"]] <- unique_variants_tier2
-  pcg_report_cna[["clin_eitem"]][["query_ttype"]] <- eitems_query_ttype
-  pcg_report_cna[["clin_eitem"]][["any_ttype"]] <- eitems_any_ttype
-  pcg_report_cna[["clin_eitem"]][["other_ttype"]] <- eitems_other_ttype
-
-  return(pcg_report_cna)
-
-}
-
 #' Function that assigns tier classifications to somatic CNA segments and
 #' SNVs/InDels, based on the presence of biomarker evidence found in
 #' the variant set
@@ -311,7 +41,6 @@ assign_acmg_tiers <- function(
   if (NROW(biomarker_items) > 0) {
     tier_classification <-
       biomarker_items |>
-      #results[['biomarker_evidence']][['items']] |>
       dplyr::select(
         c("VAR_ID",
           "VARIANT_CLASS",
@@ -320,16 +49,25 @@ assign_acmg_tiers <- function(
           "BM_PRIMARY_SITE")) |>
       dplyr::distinct() |>
       dplyr::mutate(ACMG_AMP_TIER = dplyr::case_when(
+
+        # Biomarker site matches primary site of query tumor - strong evidence
+        # TIER 1
         .data$BM_PRIMARY_SITE == primary_site &
           primary_site != "Any" &
           stringr::str_detect(
             .data$BM_EVIDENCE_LEVEL, "^(A|B)"
           ) ~ as.integer(1),
+
+        ## Biomarker site does not match primary site of query tumor - strong evidence
+        # TIER 2
         .data$BM_PRIMARY_SITE != primary_site &
           #primary_site != "Any" &
           stringr::str_detect(
             .data$BM_EVIDENCE_LEVEL, "^(A|B)"
           ) ~ as.integer(2),
+
+        ## Biomarker site matches primary site of query tumor - weak evidence
+        # TIER 2
         .data$BM_PRIMARY_SITE == primary_site &
           primary_site != "Any" &
           stringr::str_detect(
@@ -475,6 +213,8 @@ assign_acmg_tiers <- function(
       by = c("VAR_ID","ENTREZGENE")
     ) |>
     dplyr::mutate(ACMG_AMP_TIER = dplyr::case_when(
+
+      ## update variant tier status for individual evidence items
       .data$BM_PRIMARY_SITE == primary_site &
         primary_site != "Any" &
       as.integer(.data$ACMG_AMP_TIER) == 1 &
@@ -492,24 +232,50 @@ assign_acmg_tiers <- function(
         .data$ACMG_AMP_TIER == 1 ~ as.integer(NA),
       TRUE ~ as.integer(.data$ACMG_AMP_TIER)
     )) |>
-    dplyr::arrange(.data$ACMG_AMP_TIER,
-                   .data$BM_EVIDENCE_LEVEL,
-                   dplyr::desc(.data$BM_RATING)) |>
+    dplyr::arrange(
+      .data$ACMG_AMP_TIER,
+      .data$BM_EVIDENCE_LEVEL,
+      dplyr::desc(.data$BM_RATING)) |>
     dplyr::distinct()
 
   results_acmg[['variant']] <- variants_df |>
     dplyr::rename(TIER = .data$ACMG_AMP_TIER) |>
-    dplyr::mutate(TIER_GUIDELINE = "ACMG_AMP")
+    dplyr::mutate(TIER_GUIDELINE = "ACMG_AMP") |>
+    dplyr::mutate(TIER_DESCRIPTION = dplyr::case_when(
+      TIER == 1 ~ "Variants of strong clinical significance",
+      TIER == 2 ~ "Variants of potential clinical significance",
+      TIER == 3 ~ "Variants of uncertain significance",
+      TIER == 4 ~ "Other coding mutation",
+      TIER == 5 ~ "Noncoding mutation",
+      TRUE ~ as.character("Undefined")
+    ))
+
 
   results_acmg[['biomarker_evidence']][['items']] <-
     biomarker_items |>
     dplyr::rename(TIER = .data$ACMG_AMP_TIER) |>
-    dplyr::mutate(TIER_GUIDELINE = "ACMG_AMP")
+    dplyr::mutate(TIER_GUIDELINE = "ACMG_AMP") |>
+    dplyr::mutate(TIER_DESCRIPTION = dplyr::case_when(
+      TIER == 1 ~ "Variants of strong clinical significance",
+      TIER == 2 ~ "Variants of potential clinical significance",
+      TIER == 3 ~ "Variants of uncertain significance",
+      TIER == 4 ~ "Other coding mutation",
+      TIER == 5 ~ "Noncoding mutation",
+      TRUE ~ as.character("Undefined")
+    ))
 
   results_acmg[['biomarker_evidence']][['tier_classification']] <-
     tier_classification |>
     dplyr::rename(TIER = .data$ACMG_AMP_TIER) |>
-    dplyr::mutate(TIER_GUIDELINE = "ACMG_AMP")
+    dplyr::mutate(TIER_GUIDELINE = "ACMG_AMP") |>
+    dplyr::mutate(TIER_DESCRIPTION = dplyr::case_when(
+      TIER == 1 ~ "Variants of strong clinical significance",
+      TIER == 2 ~ "Variants of potential clinical significance",
+      TIER == 3 ~ "Variants of uncertain significance",
+      TIER == 4 ~ "Other coding mutation",
+      TIER == 5 ~ "Noncoding mutation",
+      TRUE ~ as.character("Undefined")
+    ))
 
   return(results_acmg)
 

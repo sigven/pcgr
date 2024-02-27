@@ -2,7 +2,8 @@
 % Please edit documentation in R/utils.R
 \name{append_dbmts_var_link}
 \alias{append_dbmts_var_link}
-\title{Function that adds miRNA target annotations (dbMTS) to genetic variant identifiers}
+\title{Function that adds miRNA target annotations (dbMTS) to
+genetic variant identifiers}
 \usage{
 append_dbmts_var_link(var_df)
 }
@@ -10,5 +11,6 @@ append_dbmts_var_link(var_df)
 \item{var_df}{data frame with variants}
 }
 \description{
-Function that adds miRNA target annotations (dbMTS) to genetic variant identifiers
+Function that adds miRNA target annotations (dbMTS) to
+genetic variant identifiers
 }

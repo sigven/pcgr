@@ -17,13 +17,13 @@ flexdashboard::valueBox("TIER 2", caption = NULL, color = '#000000', icon = NULL
 #if(stringr::str_count(markers, pattern="\\|") > 1){
   #markers <- paste0(paste(head(unique(pcg_report$content$cna$disp$tier2$SYMBOL), 2), collapse = "|"), "++")
 #}
-flexdashboard::valueBox(length(unique(pcg_report$content$cna$disp$tier2$SYMBOL)), color = pcg_report$metadata$color_value_box)
+flexdashboard::valueBox(length(unique(pcg_report$content$cna$disp$tier2$SYMBOL)), color = pcg_report$settings$conf$visual_reporting$color_value_box)
 ```
 
 ### Biomarker aberrations
 
 ```{r}
-flexdashboard::valueBox(length(unique(pcg_report$content$cna$disp$tier2$SEGMENT)), color = pcg_report$metadata$color_value_box, icon = "fa-dna")
+flexdashboard::valueBox(length(unique(pcg_report$content$cna$disp$tier2$SEGMENT)), color = pcg_report$settings$conf$visual_reporting$color_value_box, icon = "fa-dna")
 ```
 
 
@@ -33,8 +33,8 @@ flexdashboard::valueBox(length(unique(pcg_report$content$cna$disp$tier2$SEGMENT)
 entries_diagnostic <- NROW(pcg_report$content$cna$clin_eitem$other_ttype$diagnostic$A_B) + 
   NROW(pcg_report$content$cna$clin_eitem$query_ttype$diagnostic$C_D_E)
 flexdashboard::valueBox(entries_diagnostic, color = ifelse(entries_diagnostic > 0,
-                        pcg_report[['metadata']][['color_palette']][['success']][['values']][1],
-                        pcg_report$metadata$color_none), icon = "fa-file-prescription")
+                        pcg_report$settings$conf$visual_reporting$color_palette[['success']][['values']][1],
+                        pcg_report$settings$conf$visual_reporting$color_none), icon = "fa-file-prescription")
 ```
 
 ### Prognostic evidence items
@@ -43,8 +43,8 @@ flexdashboard::valueBox(entries_diagnostic, color = ifelse(entries_diagnostic > 
 entries_prognostic <- NROW(pcg_report$content$cna$clin_eitem$other_ttype$prognostic$A_B) + 
   NROW(pcg_report$content$cna$clin_eitem$query_ttype$prognosticc$C_D_E)
 flexdashboard::valueBox(entries_prognostic, color = ifelse(entries_prognostic > 0,
-                        pcg_report[['metadata']][['color_palette']][['success']][['values']][1],
-                        pcg_report$metadata$color_none), icon = "fa-file-prescription")
+                        pcg_report$settings$conf$visual_reporting$color_palette[['success']][['values']][1],
+                        pcg_report$settings$conf$visual_reporting$color_none), icon = "fa-file-prescription")
 ```
 
 ### Predictive evidence items
@@ -54,7 +54,7 @@ entries_predictive <- NROW(pcg_report$content$cna$clin_eitem$other_ttype$predict
   NROW(pcg_report$content$cna$clin_eitem$query_ttype$predictive$C_D_E)
 flexdashboard::valueBox(entries_predictive, color = ifelse(entries_predictive > 0,
                         "#00a65a",
-                        pcg_report$metadata$color_none), icon = "fa-file-prescription")
+                        pcg_report$settings$conf$visual_reporting$color_none), icon = "fa-file-prescription")
 ```
 
 
@@ -77,22 +77,22 @@ variants_tier2 <- dplyr::bind_rows(
   pcg_report[['content']][['cna']][['clin_eitem']][['query_ttype']][['diagnostic']][['C_D_E']],
   pcg_report[['content']][['cna']][['clin_eitem']][['query_ttype']][['predictive']][['C_D_E']],
   pcg_report[['content']][['cna']][['clin_eitem']][['query_ttype']][['prognostic']][['C_D_E']]) |>
-  dplyr::arrange(EVIDENCE_LEVEL, RATING)
+  dplyr::arrange(BM_EVIDENCE_LEVEL, RATING)
 
 
 variants_tier2_shared <- crosstalk::SharedData$new(variants_tier2)
 crosstalk::bscols(
   list(
-    crosstalk::filter_select("CANCER_TYPE", "Cancer type", variants_tier2_shared, ~CANCER_TYPE),
-    crosstalk::filter_select("CLINICAL_SIGNIFICANCE", "Clinical significance", variants_tier2_shared, ~CLINICAL_SIGNIFICANCE),
+    crosstalk::filter_select("BM_CANCER_TYPE", "Cancer type", variants_tier2_shared, ~BM_CANCER_TYPE),
+    crosstalk::filter_select("BM_CLINICAL_SIGNIFICANCE", "Clinical significance", variants_tier2_shared, ~BM_CLINICAL_SIGNIFICANCE),
     crosstalk::filter_select("CNA_TYPE", "Loss/gain", variants_tier2_shared, ~CNA_TYPE),
     crosstalk::filter_slider("RATING", "Rating", variants_tier2_shared, ~RATING, min = 0, max = 5, step = 1, ticks = T)
 
   ),
   list(
-    crosstalk::filter_select("EVIDENCE_TYPE", "Evidence type", variants_tier2_shared, ~EVIDENCE_TYPE),
-    crosstalk::filter_select("EVIDENCE_LEVEL", "Evidence level", variants_tier2_shared, ~EVIDENCE_LEVEL),
-    crosstalk::filter_select("THERAPEUTIC_CONTEXT", "Therapeutic context", variants_tier2_shared, ~THERAPEUTIC_CONTEXT),
+    crosstalk::filter_select("BM_EVIDENCE_TYPE", "Evidence type", variants_tier2_shared, ~BM_EVIDENCE_TYPE),
+    crosstalk::filter_select("BM_EVIDENCE_LEVEL", "Evidence level", variants_tier2_shared, ~BM_EVIDENCE_LEVEL),
+    crosstalk::filter_select("BM_THERAPEUTIC_CONTEXT", "Therapeutic context", variants_tier2_shared, ~BM_THERAPEUTIC_CONTEXT),
     crosstalk::filter_select("SEGMENT_ID", "Segment identifier", variants_tier2_shared, ~SEGMENT_ID)
   )
 )
@@ -128,7 +128,7 @@ variants_tier2_shared |>
                        scrollX = "900px",
                        #columnDefs = list(list(width = '90px', targets = c(1,2,3,4,5,6))),
                        dom = 'Bfrtip')) |>
-  DT::formatStyle('EVIDENCE_LEVEL', 
+  DT::formatStyle('BM_EVIDENCE_LEVEL', 
                  backgroundColor = DT::styleEqual(c('A: Validated','A: FDA/NCCN/ELN guidelines','B: Clinical evidence','B1: Clinical evidence: late trials','B2: Clinical evidence: early trials','C: Case study','D: Preclinical evidence','E: Indirect evidence'), c("#009E73","#009E73","#56B4E9", "#56B4E9","#56B4E9","#0072B2","#E69F00", "#F0E442")))
 
 ```

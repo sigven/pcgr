@@ -48,11 +48,11 @@ def set_genotype(variant_set: pd.DataFrame, logger) -> pd.DataFrame:
     variant_set = variant_set.astype({'GENOTYPE':'string'})  
     return(variant_set)
 
-def append_annotations(vcf2tsv_gz_fname: str, pcgr_db_dir: str, logger):
+def append_annotations(vcf2tsv_gz_fname: str, db_assembly_dir: str, logger):
     
-    clinvar_tsv_fname = os.path.join(pcgr_db_dir, 'variant','tsv','clinvar', 'clinvar.tsv.gz')
-    protein_domain_tsv_fname = os.path.join(pcgr_db_dir, 'misc','tsv','protein_domain', 'protein_domain.tsv.gz') 
-    gene_xref_tsv_fname = os.path.join(pcgr_db_dir, 'gene','tsv','gene_transcript_xref', 'gene_transcript_xref.tsv.gz')
+    clinvar_tsv_fname = os.path.join(db_assembly_dir, 'variant','tsv','clinvar', 'clinvar.tsv.gz')
+    protein_domain_tsv_fname = os.path.join(db_assembly_dir, 'misc','tsv','protein_domain', 'protein_domain.tsv.gz') 
+    gene_xref_tsv_fname = os.path.join(db_assembly_dir, 'gene','tsv','gene_transcript_xref', 'gene_transcript_xref.tsv.gz')
     vcf2tsv_df = None
     clinvar_data_df = None
     
@@ -274,13 +274,6 @@ def clean_annotations(variant_set: pd.DataFrame, yaml_data: dict, germline: bool
             variant_set['REF'].astype(str) + ">" + variant_set['ALT'].astype(str)
     if not {'PANEL_OF_NORMALS'}.issubset(variant_set.columns):
         variant_set['PANEL_OF_NORMALS'] = False
-        
-    ## Make sure that specific tags are formatted as integers (not float) during to_csv export
-    if {'AMINO_ACID_END','AMINO_ACID_START'}.issubset(variant_set.columns):
-        variant_set.loc[variant_set['AMINO_ACID_START'].isna(),"AMINO_ACID_START"] = -1        
-        variant_set.loc[variant_set['AMINO_ACID_END'].isna(),"AMINO_ACID_END"] = -1
-        variant_set['AMINO_ACID_END'] = variant_set['AMINO_ACID_END'].astype(float).astype(int)
-        variant_set['AMINO_ACID_START'] = variant_set['AMINO_ACID_START'].astype(float).astype(int)
     
     for pop in ['AFR','AMR','ASJ','FIN','EAS','NFE','SAS','OTH','']:
         for tag in ['AN','AC','NHOMALT']:
@@ -289,19 +282,31 @@ def clean_annotations(variant_set: pd.DataFrame, yaml_data: dict, germline: bool
                 #variant_set[vcf_info_tag] = variant_set[vcf_info_tag].astype(str)
                 
                 variant_set.loc[variant_set[vcf_info_tag].notna(), vcf_info_tag] = \
-                    variant_set.loc[variant_set[vcf_info_tag].notna(), vcf_info_tag].astype(str).astype(float).astype(int)
-               
-    for elem in ['NUM_SUBMITTERS','ALLELE_ID','ENTREZGENE','REVIEW_STATUS_STARS']:
-        vcf_info_tag = 'CLINVAR_' + str(elem)
-        if vcf_info_tag in variant_set.columns:
-            variant_set.loc[variant_set[vcf_info_tag].notna(), vcf_info_tag] = \
-                variant_set.loc[variant_set[vcf_info_tag].notna(), vcf_info_tag].astype(str).astype(float).astype(int)           
-           
-    for vcf_info_tag in ['ONCOGENE_RANK','TSG_RANK','TCGA_PANCANCER_COUNT','CGC_TIER','DISTANCE',
-                         'EXON_AFFECTED','INTRON_POSITION','EXON_POSITION']:
-        if vcf_info_tag in variant_set.columns:                        
-            variant_set.loc[variant_set[vcf_info_tag].notna(), vcf_info_tag] = \
-                variant_set.loc[variant_set[vcf_info_tag].notna(), vcf_info_tag].astype(str).astype(float).astype(int)                
+                    variant_set.loc[variant_set[vcf_info_tag].notna(), vcf_info_tag].astype(str).astype(float).astype(int)   
+    
+    ## Make sure that specific tags are formatted as integers (not float) when exported to TSV
+    ## Trick - convert to str and then back to int
+    for vcf_info_tag in ['ONCOGENE_RANK',
+                         'TSG_RANK',
+                         'TCGA_PANCANCER_COUNT',
+                         'CGC_TIER',
+                         'DP_TUMOR',
+                         'DP_CONTROL',
+                         'DISTANCE',
+                         'EXON_AFFECTED',
+                         'INTRON_POSITION',
+                         'EXON_POSITION',
+                         'AMINO_ACID_END',
+                         'AMINO_ACID_START',
+                         'ONCOGENICITY_SCORE',
+                         'CLINVAR_NUM_SUBMITTERS',
+                         'CLINVAR_ALLELE_ID',
+                         'CLINVAR_ENTREZGENE',
+                         'CLINVAR_REVIEW_STATUS_STARS']:
+        if vcf_info_tag in variant_set.columns: 
+            variant_set.loc[variant_set[vcf_info_tag].isna(),vcf_info_tag] = -123456789           
+            variant_set[vcf_info_tag] = variant_set[vcf_info_tag].apply(lambda x: str(int(x)) )
+            variant_set.loc[variant_set[vcf_info_tag] == "-123456789", vcf_info_tag] = "."              
     
     if germline is True:
         variant_set = set_genotype(variant_set, logger)

@@ -18,7 +18,7 @@ def __main__():
     parser.add_argument(
         'out_vcf', help='Output VCF file with appended annotations from multiple VCF files')
     parser.add_argument(
-        'pcgr_db_dir', help='PCGR assembly-specific data directory')
+        'db_assembly_dir', help='PCGR assembly-specific data directory')
     parser.add_argument(
         '--num_processes', help="Number of processes vcfanno can use during annotation", default=4)
     parser.add_argument("--clinvar", action="store_true",
@@ -78,10 +78,10 @@ def __main__():
     vcfanno_tracks['gnomad_non_cancer'] = args.gnomad_non_cancer
 
     run_vcfanno(args.num_processes, args.query_vcf, vcfanno_tracks, query_info_tags, vcfheader_file,
-                args.pcgr_db_dir, conf_fname, args.pon_vcf, args.out_vcf, args.debug, logger)
+                args.db_assembly_dir, conf_fname, args.pon_vcf, args.out_vcf, args.debug, logger)
 
 
-def run_vcfanno(num_processes, query_vcf, vcfanno_tracks, query_info_tags, vcfheader_file, pcgr_db_dir, conf_fname,
+def run_vcfanno(num_processes, query_vcf, vcfanno_tracks, query_info_tags, vcfheader_file, db_assembly_dir, conf_fname,
                 pon_vcf, output_vcf, debug, logger):
 
     """
@@ -101,15 +101,15 @@ def run_vcfanno(num_processes, query_vcf, vcfanno_tracks, query_info_tags, vcfhe
     track_file_info['track_fname'] = {}
     
     for variant_track in ['clinvar','tcga','gwas','dbmts','dbnsfp','gnomad_non_cancer']:
-        track_file_info['tags_fname'][variant_track] = os.path.join(pcgr_db_dir,'variant','vcf', variant_track, f'{variant_track}.vcfanno.vcf_info_tags.txt')
-        track_file_info['track_fname'][variant_track] = os.path.join(pcgr_db_dir,'variant','vcf', variant_track, f'{variant_track}.vcf.gz')
+        track_file_info['tags_fname'][variant_track] = os.path.join(db_assembly_dir,'variant','vcf', variant_track, f'{variant_track}.vcfanno.vcf_info_tags.txt')
+        track_file_info['track_fname'][variant_track] = os.path.join(db_assembly_dir,'variant','vcf', variant_track, f'{variant_track}.vcf.gz')
 
     for bed_track in ['simplerepeat','winmsk','rmsk','gerp']:
-        track_file_info['tags_fname'][bed_track] = os.path.join(pcgr_db_dir,'misc','bed', bed_track, f'{bed_track}.vcfanno.vcf_info_tags.txt')
-        track_file_info['track_fname'][bed_track] = os.path.join(pcgr_db_dir,'misc','bed', bed_track, f'{bed_track}.bed.gz')
+        track_file_info['tags_fname'][bed_track] = os.path.join(db_assembly_dir,'misc','bed', bed_track, f'{bed_track}.vcfanno.vcf_info_tags.txt')
+        track_file_info['track_fname'][bed_track] = os.path.join(db_assembly_dir,'misc','bed', bed_track, f'{bed_track}.bed.gz')
 
-    track_file_info['tags_fname']['gene_transcript_xref'] = os.path.join(pcgr_db_dir,'gene','bed', 'gene_transcript_xref', 'gene_transcript_xref.vcfanno.vcf_info_tags.txt')
-    track_file_info['track_fname']['gene_transcript_xref'] = os.path.join(pcgr_db_dir,'gene','bed', 'gene_transcript_xref', 'gene_transcript_xref.bed.gz')
+    track_file_info['tags_fname']['gene_transcript_xref'] = os.path.join(db_assembly_dir,'gene','bed', 'gene_transcript_xref', 'gene_transcript_xref.vcfanno.vcf_info_tags.txt')
+    track_file_info['track_fname']['gene_transcript_xref'] = os.path.join(db_assembly_dir,'gene','bed', 'gene_transcript_xref', 'gene_transcript_xref.bed.gz')
     
     for track in track_file_info['tags_fname']:
 
@@ -137,7 +137,7 @@ def run_vcfanno(num_processes, query_vcf, vcfanno_tracks, query_info_tags, vcfhe
             logger.warning(
                 "Query VCF has INFO tag \"PANEL_OF_NORMALS\" - this is also present in the panel of normal VCF file. This tag will be overwritten if not renamed in the query VCF")
         
-        vcf_info_tags_file = os.path.join(pcgr_db_dir,'variant','vcf', 'panel_of_normals', 'panel_of_normals.vcfanno.vcf_info_tags.txt')
+        vcf_info_tags_file = os.path.join(db_assembly_dir,'variant','vcf', 'panel_of_normals', 'panel_of_normals.vcfanno.vcf_info_tags.txt')
         check_subprocess(
             logger, f'cat {vcf_info_tags_file} >> {vcfheader_file}', debug=False)
         fh = open(conf_fname, 'a')

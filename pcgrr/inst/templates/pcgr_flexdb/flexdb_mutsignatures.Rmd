@@ -4,7 +4,7 @@ Mutational signatures
 
 ```{r check_analysis_status, echo = F}
 missing_data_norun <- F
-if(pcg_report$content$m_signature_mp$eval == F | pcg_report$content$m_signature_mp$missing_data == T){
+if(pcg_report$content$mutational_signatures$eval == F | pcg_report$content$mutational_signatures$missing_data == T){
   missing_data_norun <- T
 }
 ```
@@ -22,11 +22,11 @@ flexdashboard::valueBox("SIGNATURES", caption = NULL, color = '#000000', icon = 
 ### SNVs eligible for analysis
 
 ```{r mutsig_snv_box}
-col <- pcg_report$metadata$color_value_box
-if(pcg_report$content$snv_indel$v_stat$n_snv < 100){
-  col <- pcg_report[['metadata']][['color_palette']][['warning']][['values']][1]
+col <- pcg_report$settings$conf$visual_reporting$color_value_box
+if(pcg_report$content$snv_indel$vstats$n_snv < 100){
+  col <- pcg_report$settings$conf$visual_reporting$color_palette[['warning']][['values']][1]
 }
-flexdashboard::valueBox(pcg_report$content$snv_indel$v_stat$n_snv, color = col, icon = "fa-dna")
+flexdashboard::valueBox(pcg_report$content$snv_indel$vstats$n_snv, color = col, icon = "fa-dna")
 ```
 
 
@@ -34,11 +34,11 @@ flexdashboard::valueBox(pcg_report$content$snv_indel$v_stat$n_snv, color = col, 
 
 ```{r mutsig_dominant_box}
 if(!missing_data_norun){
-  m <- pcg_report$content$m_signature_mp$result$contributions$per_group |> 
+  m <- pcg_report$content$mutational_signatures$result$contributions$per_group |> 
     dplyr::arrange(desc(prop_group))
-  flexdashboard::valueBox(m$group[1], color = pcg_report$metadata$color_value_box)
+  flexdashboard::valueBox(m$group[1], color = pcg_report$settings$conf$visual_reporting$color_value_box)
 }else{
-  flexdashboard::valueBox("ND", color = pcg_report$metadata$color_none)
+  flexdashboard::valueBox("ND", color = pcg_report$settings$conf$visual_reporting$color_none)
 
 }
 ```
@@ -48,12 +48,12 @@ if(!missing_data_norun){
 
 ```{r mutsig_accuracy_box}
 if(!missing_data_norun){
-  cosine_sim <- pcg_report$content$m_signature_mp$result$goodness_of_fit
+  cosine_sim <- pcg_report$content$mutational_signatures$result$goodness_of_fit
   flexdashboard::valueBox(cosine_sim, color = ifelse(cosine_sim > 90,
-                          pcg_report[['metadata']][['color_palette']][['success']][['values']][1],
-                          pcg_report[['metadata']][['color_palette']][['warning']][['values']][1]))
+                          pcg_report$settings$conf$visual_reporting$color_palette[['success']][['values']][1],
+                          pcg_report$settings$conf$visual_reporting$color_palette[['warning']][['values']][1]))
 }else{
-  flexdashboard::valueBox("ND", color = pcg_report$metadata$color_none)
+  flexdashboard::valueBox("ND", color = pcg_report$settings$conf$visual_reporting$color_none)
 }
 ```
 
@@ -65,8 +65,8 @@ if(num_events > 0){
   num_events <- NROW(pcg_report$content$kataegis$events |> dplyr::filter(confidence == 3))
 }
 flexdashboard::valueBox(num_events, color = ifelse(num_events > 0,
-                        pcg_report[['metadata']][['color_palette']][['success']][['values']][1],
-                        pcg_report$metadata$color_none))
+                        pcg_report$settings$conf$visual_reporting$color_palette[['success']][['values']][1],
+                        pcg_report$settings$conf$visual_reporting$color_none))
 ```
 
 
@@ -78,10 +78,10 @@ Row {data-height=580}
 ```{r mutsigs_donut, eval = !missing_data_norun}
 
 plot_data <- 
-  pcg_report$content$m_signature_mp$result$contributions$per_group
+  pcg_report$content$mutational_signatures$result$contributions$per_group
 scale_fill <- 
-  pcg_report$content$m_signature_mp$result$scale_fill_values
-names(scale_fill) <- pcg_report$content$m_signature_mp$result$scale_fill_names
+  pcg_report$content$mutational_signatures$result$scale_fill_values
+names(scale_fill) <- pcg_report$content$mutational_signatures$result$scale_fill_names
 
 
 ggplot2::ggplot(plot_data, ggplot2::aes(x = 2, y = prop_group, fill = group)) +
@@ -105,7 +105,7 @@ htmltools::br()
 
 cat('\n')
 
-cat(paste0('-   <b>NOT DETERMINED (ND)</b>: The number of SNV calls (n = ',nrow(pcg_report[['content']][['m_signature_mp']][['variant_set']][['all']]),') is too limited. A minimum of ',pcg_report[['metadata']][['config']][['msigs']][['mutation_limit']],' SNVs is currently required for a mutational signature analysis to be performed.'), sep ="\n")
+cat(paste0('-   <b>NOT DETERMINED (ND)</b>: The number of SNV calls (n = ',nrow(pcg_report[['content']][['mutational_signatures']][['variant_set']][['all']]),') is too limited. A minimum of ',pcg_report[['metadata']][['config']][['msigs']][['mutation_limit']],' SNVs is currently required for a mutational signature analysis to be performed.'), sep ="\n")
 
 ```
 
@@ -115,8 +115,8 @@ cat(paste0('-   <b>NOT DETERMINED (ND)</b>: The number of SNV calls (n = ',nrow(
     
 ```{r mutsigs_aetiologies, echo = F, eval = !missing_data_norun}
 
-signature_ids <- pcg_report[['content']][['m_signature_mp']][['result']][['contributions']][['per_signature']]$signature_id
-signature_colors <- pcg_report[['content']][['m_signature_mp']][['result']][['contributions']][['per_signature']]$col
+signature_ids <- pcg_report[['content']][['mutational_signatures']][['result']][['contributions']][['per_signature']]$signature_id
+signature_colors <- pcg_report[['content']][['mutational_signatures']][['result']][['contributions']][['per_signature']]$col
 
 myOptions <- list(buttons = c('csv','excel'),
                   dom = 'Bfrtip', 
@@ -128,7 +128,7 @@ myOptions <- list(buttons = c('csv','excel'),
                   # columnDefs = list(list(width = '70px', targets = c(1,2)),
                   #                   list(width = '220px', targets = c(3,4))),
                   scrollCollapse = T)
-dat <- dplyr::select(pcg_report$content$m_signature_mp$result$contributions$per_signature, -c(sample_id,col,prop_signature)) |>
+dat <- dplyr::select(pcg_report$content$mutational_signatures$result$contributions$per_signature, -c(sample_id,col,prop_signature)) |>
   dplyr::select(signature_id, contribution, group, dplyr::everything())
 DT::datatable(dat ,options = myOptions, extensions=c("Buttons")) |>
  DT::formatStyle('contribution',fontWeight = 'bold') |>
@@ -143,7 +143,7 @@ htmltools::br()
 
 cat('\n')
 
-cat(paste0('-   <b>NOT DETERMINED (ND)</b>: The number of SNV calls (n = ',nrow(pcg_report[['content']][['m_signature_mp']][['variant_set']][['all']]),') is too limited. A minimum of ',pcg_report[['metadata']][['config']][['msigs']][['mutation_limit']],' SNVs is currently required for a mutational signature analysis to be performed.'), sep ="\n")
+cat(paste0('-   <b>NOT DETERMINED (ND)</b>: The number of SNV calls (n = ',nrow(pcg_report[['content']][['mutational_signatures']][['variant_set']][['all']]),') is too limited. A minimum of ',pcg_report[['metadata']][['config']][['msigs']][['mutation_limit']],' SNVs is currently required for a mutational signature analysis to be performed.'), sep ="\n")
 
 
 ```
@@ -156,7 +156,7 @@ Row {.tabset .tabset-fade}
 
 ```{r mutsigs_context_frequency, fig.width = 20, fig.height = 3, eval = !missing_data_norun}
 ## frequency of mutation contexts (96)
-MutationalPatterns::plot_96_profile(pcg_report$content$m_signature_mp$result$mut_mat, 
+MutationalPatterns::plot_96_profile(pcg_report$content$mutational_signatures$result$mut_mat, 
                                     colors = RColorBrewer::brewer.pal(6, "Dark2"), ymax = 0.3)
 ```   
  
@@ -165,7 +165,7 @@ htmltools::br()
 
 cat('\n')
 
-cat(paste0('-   <b>NOT DETERMINED (ND)</b>: The number of SNV calls (n = ',nrow(pcg_report[['content']][['m_signature_mp']][['variant_set']][['all']]),') is too limited. A minimum of ',pcg_report[['metadata']][['config']][['msigs']][['mutation_limit']],' SNVs is currently required for a mutational signature analysis to be performed.'), sep ="\n")
+cat(paste0('-   <b>NOT DETERMINED (ND)</b>: The number of SNV calls (n = ',nrow(pcg_report[['content']][['mutational_signatures']][['variant_set']][['all']]),') is too limited. A minimum of ',pcg_report[['metadata']][['config']][['msigs']][['mutation_limit']],' SNVs is currently required for a mutational signature analysis to be performed.'), sep ="\n")
 
 
 

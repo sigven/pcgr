@@ -64,12 +64,12 @@ if(missing_cna_variants[['strong_significance']][['predictive']] == F |
 cna_predictive_shared_strong <- crosstalk::SharedData$new(cna_evidence_items[['strong_significance']][['predictive']])
 crosstalk::bscols(
   list(
-    crosstalk::filter_select("CANCER_TYPE", "Cancer type", cna_predictive_shared_strong, ~CANCER_TYPE),
-    crosstalk::filter_select("CLINICAL_SIGNIFICANCE", "Clinical significance", cna_predictive_shared_strong, ~CLINICAL_SIGNIFICANCE),
-    crosstalk::filter_select("EVIDENCE_LEVEL", "Evidence level", cna_predictive_shared_strong, ~EVIDENCE_LEVEL)
+    crosstalk::filter_select("BM_CANCER_TYPE", "Cancer type", cna_predictive_shared_strong, ~BM_CANCER_TYPE),
+    crosstalk::filter_select("BM_CLINICAL_SIGNIFICANCE", "Clinical significance", cna_predictive_shared_strong, ~BM_CLINICAL_SIGNIFICANCE),
+    crosstalk::filter_select("BM_EVIDENCE_LEVEL", "Evidence level", cna_predictive_shared_strong, ~BM_EVIDENCE_LEVEL)
   ),
   list(
-    crosstalk::filter_select("THERAPEUTIC_CONTEXT", "Therapeutic context", cna_predictive_shared_strong, ~THERAPEUTIC_CONTEXT),
+    crosstalk::filter_select("BM_THERAPEUTIC_CONTEXT", "Therapeutic context", cna_predictive_shared_strong, ~BM_THERAPEUTIC_CONTEXT),
     crosstalk::filter_slider("LogR", "Log-ratio", cna_predictive_shared_strong, ~LOG_R, ticks = F),
     crosstalk::filter_slider("RATING", "Rating", cna_predictive_shared_strong, ~RATING, min = 0, max = 5, step = 1, ticks = T)
   )
@@ -81,7 +81,7 @@ htmltools::br()
 
 DT::datatable(cna_predictive_shared_strong, escape=F,extensions=c("Buttons","Responsive"),
               options=list(buttons = c('csv','excel'), scrollCollapse=T, dom = 'Bfrtip')) |>
-  DT::formatStyle('EVIDENCE_LEVEL', 
+  DT::formatStyle('BM_EVIDENCE_LEVEL', 
                   backgroundColor = DT::styleEqual(c('A: Validated','A: FDA/NCCN/ELN guidelines',
                                                      'B: Clinical evidence',
                                                      'B1: Clinical evidence: late trials',
@@ -123,12 +123,12 @@ if(missing_cna_variants[['strong_significance']][['prognostic']] == F &
 cna_prognostic_shared_strong <- crosstalk::SharedData$new(cna_evidence_items[['strong_significance']][['prognostic']])
 crosstalk::bscols(
   list(
-    crosstalk::filter_select("CANCER_TYPE", "Cancer type", cna_prognostic_shared_strong, ~CANCER_TYPE),
-    crosstalk::filter_select("CLINICAL_SIGNIFICANCE", "Clinical significance", cna_prognostic_shared_strong, ~CLINICAL_SIGNIFICANCE),
+    crosstalk::filter_select("BM_CANCER_TYPE", "Cancer type", cna_prognostic_shared_strong, ~BM_CANCER_TYPE),
+    crosstalk::filter_select("BM_CLINICAL_SIGNIFICANCE", "Clinical significance", cna_prognostic_shared_strong, ~BM_CLINICAL_SIGNIFICANCE),
     crosstalk::filter_slider("RATING", "Rating", cna_prognostic_shared_strong, ~RATING, min = 0, max = 5, step = 1, ticks = T)
   ),
   list(
-    crosstalk::filter_select("EVIDENCE_LEVEL", "Evidence level", cna_prognostic_shared_strong, ~EVIDENCE_LEVEL),
+    crosstalk::filter_select("BM_EVIDENCE_LEVEL", "Evidence level", cna_prognostic_shared_strong, ~BM_EVIDENCE_LEVEL),
     crosstalk::filter_slider("LOG_R", "Log-ratio", cna_prognostic_shared_strong, ~LOG_R, ticks = F)    
   )
 )
@@ -138,7 +138,7 @@ htmltools::br()
 
 DT::datatable(cna_prognostic_shared_strong, escape=F,extensions=c("Buttons","Responsive"),
               options=list(buttons = c('csv','excel'), scrollCollapse=T, dom = 'Bfrtip')) |>
-  DT::formatStyle('EVIDENCE_LEVEL', 
+  DT::formatStyle('BM_EVIDENCE_LEVEL', 
                   backgroundColor = DT::styleEqual(c('A: Validated','A: FDA/NCCN/ELN guidelines',
                                                      'B: Clinical evidence',
                                                      'B1: Clinical evidence: late trials',
@@ -182,12 +182,12 @@ if(missing_cna_variants[['strong_significance']][['diagnostic']] == F &
 cna_diagnostic_shared_strong <- crosstalk::SharedData$new(cna_evidence_items[['strong_significance']][['diagnostic']])
 crosstalk::bscols(
   list(
-    crosstalk::filter_select("CANCER_TYPE", "Cancer type", cna_diagnostic_shared_strong, ~CANCER_TYPE),
-    crosstalk::filter_select("CLINICAL_SIGNIFICANCE", "Clinical association", cna_diagnostic_shared_strong, ~CLINICAL_SIGNIFICANCE),
+    crosstalk::filter_select("BM_CANCER_TYPE", "Cancer type", cna_diagnostic_shared_strong, ~BM_CANCER_TYPE),
+    crosstalk::filter_select("BM_CLINICAL_SIGNIFICANCE", "Clinical association", cna_diagnostic_shared_strong, ~BM_CLINICAL_SIGNIFICANCE),
     crosstalk::filter_slider("RATING", "Rating", cna_diagnostic_shared_strong, ~RATING, min = 0, max = 5, step = 1, ticks = T)
   ),
   list(
-    crosstalk::filter_select("EVIDENCE_LEVEL", "Evidence level", cna_diagnostic_shared_strong, ~EVIDENCE_LEVEL),
+    crosstalk::filter_select("BM_EVIDENCE_LEVEL", "Evidence level", cna_diagnostic_shared_strong, ~BM_EVIDENCE_LEVEL),
     crosstalk::filter_slider("LOG_R", "Log-ratio", cna_diagnostic_shared_strong, ~LOG_R, ticks = F)
   )
 )
@@ -197,7 +197,7 @@ htmltools::br()
 
 DT::datatable(cna_diagnostic_shared_strong, escape=F,extensions=c("Buttons","Responsive"),
               options=list(buttons = c('csv','excel'), scrollCollapse=T, dom = 'Bfrtip')) |>
-  DT::formatStyle('EVIDENCE_LEVEL', 
+  DT::formatStyle('BM_EVIDENCE_LEVEL', 
                   backgroundColor = DT::styleEqual(c('A: Validated','A: FDA/NCCN/ELN guidelines',
                                                      'B: Clinical evidence',
                                                      'B1: Clinical evidence: late trials',
@@ -241,12 +241,12 @@ if(missing_cna_variants[['potential_significance']][['predictive']] == F |
 cna_predictive_shared <- crosstalk::SharedData$new(cna_evidence_items[['potential_significance']][['predictive']])
 crosstalk::bscols(
   list(
-    crosstalk::filter_select("CANCER_TYPE", "Cancer type", cna_predictive_shared, ~CANCER_TYPE),
-    crosstalk::filter_select("CLINICAL_SIGNIFICANCE", "Clinical significance", cna_predictive_shared, ~CLINICAL_SIGNIFICANCE),
-    crosstalk::filter_select("EVIDENCE_LEVEL", "Evidence level", cna_predictive_shared, ~EVIDENCE_LEVEL)
+    crosstalk::filter_select("BM_CANCER_TYPE", "Cancer type", cna_predictive_shared, ~BM_CANCER_TYPE),
+    crosstalk::filter_select("BM_CLINICAL_SIGNIFICANCE", "Clinical significance", cna_predictive_shared, ~BM_CLINICAL_SIGNIFICANCE),
+    crosstalk::filter_select("BM_EVIDENCE_LEVEL", "Evidence level", cna_predictive_shared, ~BM_EVIDENCE_LEVEL)
   ),
   list(
-    crosstalk::filter_select("THERAPEUTIC_CONTEXT", "Therapeutic context", cna_predictive_shared, ~THERAPEUTIC_CONTEXT),
+    crosstalk::filter_select("BM_THERAPEUTIC_CONTEXT", "Therapeutic context", cna_predictive_shared, ~BM_THERAPEUTIC_CONTEXT),
     crosstalk::filter_slider("LOG_R", "Log-ratio", cna_predictive_shared, ~LOG_R, ticks = F),
     crosstalk::filter_slider("RATING", "Rating", cna_predictive_shared, ~RATING, min = 0, max = 5, step = 1, ticks = T)
   )
@@ -258,7 +258,7 @@ htmltools::br()
 
 DT::datatable(cna_predictive_shared, escape=F,extensions=c("Buttons","Responsive"),
               options=list(buttons = c('csv','excel'), scrollCollapse = T, dom = 'Bfrtip')) |>
-  DT::formatStyle('EVIDENCE_LEVEL', 
+  DT::formatStyle('BM_EVIDENCE_LEVEL', 
                   backgroundColor = DT::styleEqual(c('A: Validated','A: FDA/NCCN/ELN guidelines',
                                                      'B: Clinical evidence',
                                                      'B1: Clinical evidence: late trials',
@@ -301,12 +301,12 @@ if(missing_cna_variants[['potential_significance']][['prognostic']] == F &
 cna_prognostic_shared <- crosstalk::SharedData$new(cna_evidence_items[['potential_significance']][['prognostic']])
 crosstalk::bscols(
   list(
-    crosstalk::filter_select("CANCER_TYPE", "Cancer type", cna_prognostic_shared, ~CANCER_TYPE),
-    crosstalk::filter_select("CLINICAL_SIGNIFICANCE", "Clinical significance", cna_prognostic_shared, ~CLINICAL_SIGNIFICANCE),
+    crosstalk::filter_select("BM_CANCER_TYPE", "Cancer type", cna_prognostic_shared, ~BM_CANCER_TYPE),
+    crosstalk::filter_select("BM_CLINICAL_SIGNIFICANCE", "Clinical significance", cna_prognostic_shared, ~BM_CLINICAL_SIGNIFICANCE),
     crosstalk::filter_slider("RATING", "Rating", cna_prognostic_shared, ~RATING, min = 0, max = 5, step = 1, ticks = T)
   ),
   list(
-    crosstalk::filter_select("EVIDENCE_LEVEL", "Evidence level", cna_prognostic_shared, ~EVIDENCE_LEVEL),
+    crosstalk::filter_select("BM_EVIDENCE_LEVEL", "Evidence level", cna_prognostic_shared, ~BM_EVIDENCE_LEVEL),
     crosstalk::filter_slider("LOG_R", "Log-ratio", cna_prognostic_shared, ~LOG_R, ticks = F)    
   )
 )
@@ -316,7 +316,7 @@ htmltools::br()
 
 DT::datatable(cna_prognostic_shared, escape=F, extensions=c("Buttons","Responsive"),
               options=list(buttons = c('csv','excel'), scrollCollapse=T, dom = 'Bfrtip')) |>
-  DT::formatStyle('EVIDENCE_LEVEL', 
+  DT::formatStyle('BM_EVIDENCE_LEVEL', 
                   backgroundColor = DT::styleEqual(
                     c('A: Validated','A: FDA/NCCN/ELN guidelines',
                       'B: Clinical evidence',
@@ -359,12 +359,12 @@ if(missing_cna_variants[['potential_significance']][['diagnostic']] == F &
 cna_diagnostic_shared <- crosstalk::SharedData$new(cna_evidence_items[['potential_significance']][['diagnostic']])
 crosstalk::bscols(
   list(
-    crosstalk::filter_select("CANCER_TYPE", "Cancer type", cna_diagnostic_shared, ~CANCER_TYPE),
-    crosstalk::filter_select("CLINICAL_SIGNIFICANCE", "Clinical association", cna_diagnostic_shared, ~CLINICAL_SIGNIFICANCE),
+    crosstalk::filter_select("BM_CANCER_TYPE", "Cancer type", cna_diagnostic_shared, ~BM_CANCER_TYPE),
+    crosstalk::filter_select("BM_CLINICAL_SIGNIFICANCE", "Clinical association", cna_diagnostic_shared, ~BM_CLINICAL_SIGNIFICANCE),
     crosstalk::filter_slider("RATING", "Rating", cna_diagnostic_shared, ~RATING, min = 0, max = 5, step = 1, ticks = T)
   ),
   list(
-    crosstalk::filter_select("EVIDENCE_LEVEL", "Evidence level", cna_diagnostic_shared, ~EVIDENCE_LEVEL),
+    crosstalk::filter_select("BM_EVIDENCE_LEVEL", "Evidence level", cna_diagnostic_shared, ~BM_EVIDENCE_LEVEL),
     crosstalk::filter_slider("LOG_R", "Log-ratio", cna_diagnostic_shared, ~LOG_R, ticks = F)
   )
 )
@@ -374,7 +374,7 @@ htmltools::br()
 
 DT::datatable(cna_diagnostic_shared, escape=F,extensions=c("Buttons","Responsive"),
               options=list(buttons = c('csv','excel'),  scrollCollapse=T, dom = 'Bfrtip')) |>
-  DT::formatStyle('EVIDENCE_LEVEL', 
+  DT::formatStyle('BM_EVIDENCE_LEVEL', 
                   backgroundColor = DT::styleEqual(
                     c('A: Validated',
                       'A: FDA/NCCN/ELN guidelines',

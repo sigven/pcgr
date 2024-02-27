@@ -15,38 +15,42 @@ flexdashboard::valueBox("SNVs/InDels", caption = NULL, color = '#000000', icon =
 ### Total variants
 
 ```{r}
-flexdashboard::valueBox(pcg_report$content$snv_indel$v_stat$n, color = pcg_report$metadata$color_value_box, icon = "fa-dna")
+flexdashboard::valueBox(pcg_report$content$snv_indel$vstats$n, color = pcg_report$settings$conf$visual_reporting$color_value_box, icon = "fa-dna")
 ```
 
 
 ### SNVs
 
 ```{r}
-flexdashboard::valueBox(pcg_report$content$snv_indel$v_stat$n_snv, color = pcg_report$metadata$color_value_box, icon = "fa-dna")
+flexdashboard::valueBox(pcg_report$content$snv_indel$vstats$n_snv, color = pcg_report$settings$conf$visual_reporting$color_value_box, icon = "fa-dna")
 ```
 
 ### InDels
 
 ```{r}
-flexdashboard::valueBox(pcg_report$content$snv_indel$v_stat$n_indel, color = pcg_report$metadata$color_value_box, icon = "fa-dna")
+flexdashboard::valueBox(pcg_report$content$snv_indel$vstats$n_indel, color = pcg_report$settings$conf$visual_reporting$color_value_box, icon = "fa-dna")
 ```
 
 ### TIER 1 variants
 
 ```{r}
-tier1 <- pcg_report$content$snv_indel$v_stat$n_tier1
-flexdashboard::valueBox(tier1, color = ifelse(tier1 > 0,
-                        "#00a65a",
-                        pcg_report$metadata$color_none), icon = "fa-file-prescription", href="#tier-1")
+tier1 <- pcg_report$content$snv_indel$vstats$n_tier1
+flexdashboard::valueBox(
+  tier1, color = ifelse(
+    tier1 > 0,
+    pcg_report$settings$conf$visual_reporting$color_palette$success$values[1],
+    pcg_report$settings$conf$visual_reporting$color_none), icon = "fa-file-prescription", href="#tier-1")
 ```
 
 ### TIER 2 variants
 
 ```{r}
-tier2 <- pcg_report$content$snv_indel$v_stat$n_tier2
-flexdashboard::valueBox(tier2, color = ifelse(tier2 > 0,
-                        "#00a65a",
-                        pcg_report$metadata$color_none), icon = "fa-file-prescription", href="#tier-2")
+tier2 <- pcg_report$content$snv_indel$vstats$n_tier2
+flexdashboard::valueBox(
+  tier2, color = ifelse(
+    tier2 > 0,
+    pcg_report$settings$conf$visual_reporting$color_palette$success$values[1],
+    pcg_report$settings$conf$visual_reporting$color_none), icon = "fa-file-prescription", href="#tier-2")
 ```
 
 
@@ -58,24 +62,28 @@ Row {data-height=300}
 
 <br>
 
-* <font style="color:white; font-size: 125%; font-weight: bold; background-color:`r pcg_report[['metadata']][['color_palette']][['tier']][['values']][1]`"><a class="tierlink"  href="#tier-1">&nbsp;TIER 1&nbsp;&nbsp;</font></a> <b><font style="font-size: 125%">:&nbsp;`r pcg_report$content$snv_indel$v_stat$n_tier1`</font></b><br>
+* <font style="color:white; font-size: 125%; font-weight: bold; background-color:`r pcg_report$settings$conf$visual_reporting[['color_palette']][['tier']][['values']][1]`"><a class="tierlink"  href="#tier-1">&nbsp;TIER 1&nbsp;&nbsp;</font></a> <b><font style="font-size: 125%">:&nbsp;`r pcg_report$content$snv_indel$vstats$n_tier1`</font></b><br>
 
-* <font style="color:white; font-size: 125%; font-weight: bold; background-color:`r pcg_report[['metadata']][['color_palette']][['tier']][['values']][2]`"><a class="tierlink"  href="#tier-2">&nbsp;TIER 2&nbsp;&nbsp;</font></a> <b><font style="font-size: 125%">:&nbsp;`r pcg_report$content$snv_indel$v_stat$n_tier2`</font></b><br>
+* <font style="color:white; font-size: 125%; font-weight: bold; background-color:`r pcg_report$settings$conf$visual_reporting[['color_palette']][['tier']][['values']][2]`"><a class="tierlink"  href="#tier-2">&nbsp;TIER 2&nbsp;&nbsp;</font></a> <b><font style="font-size: 125%">:&nbsp;`r pcg_report$content$snv_indel$vstats$n_tier2`</font></b><br>
 
-* <font style="color:white; font-size: 125%; font-weight: bold; background-color:`r pcg_report[['metadata']][['color_palette']][['tier']][['values']][3]`"><a class="tierlink"  href="#tier-3">&nbsp;TIER 3&nbsp;&nbsp;</font></a> <b><font style="font-size: 125%">:&nbsp;`r pcg_report$content$snv_indel$v_stat$n_tier3`</font></b><br>
+* <font style="color:white; font-size: 125%; font-weight: bold; background-color:`r pcg_report$settings$conf$visual_reporting[['color_palette']][['tier']][['values']][3]`"><a class="tierlink"  href="#tier-3">&nbsp;TIER 3&nbsp;&nbsp;</font></a> <b><font style="font-size: 125%">:&nbsp;`r pcg_report$content$snv_indel$vstats$n_tier3`</font></b><br>
 
-* <font style="color:white; font-size: 125%; font-weight: bold; background-color:`r pcg_report[['metadata']][['color_palette']][['tier']][['values']][4]`"><a class="tierlink"  href="#tier-4">&nbsp;TIER 4&nbsp;&nbsp;</font></a> <b><font style="font-size: 125%">:&nbsp;`r pcg_report$content$snv_indel$v_stat$n_tier4`</font></b><br>
+* <font style="color:white; font-size: 125%; font-weight: bold; background-color:`r pcg_report$settings$conf$visual_reporting[['color_palette']][['tier']][['values']][4]`"><a class="tierlink"  href="#tier-4">&nbsp;TIER 4&nbsp;&nbsp;</font></a> <b><font style="font-size: 125%">:&nbsp;`r pcg_report$content$snv_indel$vstats$n_tier4`</font></b><br>
 
-* <font style="color:white; font-size: 125%;font-weight: bold; background-color:`r pcg_report[['metadata']][['color_palette']][['tier']][['values']][5]`"><a class="tierlink"  href="#noncoding">&nbsp;NONCODING&nbsp;&nbsp;</font></a> <b><font style="font-size: 125%">:&nbsp;`r pcg_report$content$snv_indel$v_stat$n_noncoding`</font></b>
+* <font style="color:white; font-size: 125%;font-weight: bold; background-color:`r pcg_report$settings$conf$visual_reporting[['color_palette']][['tier']][['values']][5]`"><a class="tierlink"  href="#tier-5">&nbsp;TIER 5&nbsp;&nbsp;</font></a> <b><font style="font-size: 125%">:&nbsp;`r pcg_report$content$snv_indel$vstats$n_tier5`</font></b>
 
 
 ### Allelic support plot {data-padding=10}
 
-
 ```{r vaf_plot_prep1, echo=F}
 tumor_af_plot <- F
-if(NROW(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']]) > 0){
-  if(NROW(dplyr::filter(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']], !is.na(DP_TUMOR))) > 0 & NROW(dplyr::filter(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']], !is.na(AF_TUMOR))) > 0){
+if(NROW(pcg_report$content$snv_indel$callset$variant) > 0){
+  if(NROW(dplyr::filter(
+    pcg_report$content$snv_indel$callset$variant, 
+    !is.na(DP_TUMOR))) > 0 & 
+     NROW(dplyr::filter(
+       pcg_report$content$snv_indel$callset$variant, 
+       !is.na(AF_TUMOR))) > 0){
     tumor_af_plot <- T
   }
 }
@@ -84,22 +92,32 @@ if(NROW(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']]) > 0){
 
 ```{r eval = tumor_af_plot}
 
-af_bin_df <- pcgrr::tier_af_distribution(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']])
-af_bin_df$TIER <- factor(af_bin_df$TIER, levels = c("TIER 1","TIER 2","TIER 3","TIER 4","NONCODING"))
+af_bin_df <- pcgrr::tier_af_distribution(
+  pcg_report$content$snv_indel$callset$variant)
+af_bin_df$TIER <- factor(
+  af_bin_df$TIER, 
+  levels = c("TIER 1","TIER 2","TIER 3","TIER 4","TIER 5"))
 
 p <- ggplot2::ggplot(data = af_bin_df) + 
-    ggplot2::geom_bar(mapping = ggplot2::aes(x = bin_name, y = Count, fill = TIER), stat = "identity") +
-    ggplot2::scale_color_manual(values = pcg_report[['metadata']][['color_palette']][['tier']][['values']]) +
-    ggplot2::scale_fill_manual(values = pcg_report[['metadata']][['color_palette']][['tier']][['values']]) +
+    ggplot2::geom_bar(
+      mapping = ggplot2::aes(
+        x = bin_name, y = Count, fill = TIER), 
+      stat = "identity") +
+    ggplot2::scale_color_manual(values = pcg_report$settings$conf$visual_reporting$color_palette$tier$values) +
+    ggplot2::scale_fill_manual(values = pcg_report$settings$conf$visual_reporting$color_palette$tier$values) +
     ggplot2::theme_classic() +
     ggplot2::ylab("Number of variants") +
     ggplot2::xlab("VAF - tumor") + 
-    ggplot2::theme(legend.title = ggplot2::element_blank(),
-                    axis.text.x = ggplot2::element_text(angle = 45, 
-                                                        family = "Helvetica", 
-                                                        size = 9, vjust = -0.1),
-                    axis.title.x = ggplot2::element_text(family = "Helvetica", size = 9, vjust = -2),
-                    axis.title.y = ggplot2::element_text(family = "Helvetica", size = 9, vjust = 1.5))
+  ggplot2::theme(
+    legend.title = ggplot2::element_blank(),
+    axis.text.x = ggplot2::element_text(
+      angle = 45, 
+      family = "Helvetica", 
+      size = 9, vjust = -0.1),
+    axis.title.x = ggplot2::element_text(
+      family = "Helvetica", size = 9, vjust = -2),
+    axis.title.y = ggplot2::element_text(
+      family = "Helvetica", size = 9, vjust = 1.5))
 
 plotly::ggplotly(p)
 ```
@@ -122,8 +140,8 @@ The prioritization of SNV and InDels found in the tumor sample is done according
 	 - overlap between variants in the tumor sample and reported biomarkers must occur at the _exact variant level_ or at the _codon/exon level_
 	 
  - [**TIER 2: Variants of potential clinical significance**](#tier-2) - constitutes other variants linked to predictive, prognostic, or diagnostic biomarkers in the [CIViC database](http://civic.genome.wustl.edu) and the [Cancer Biomarkers Database](https://www.cancergenomeinterpreter.org/biomarkers) that are either
-	 - Of strong clinical evidence in other tumor types/classes than the one specified by the user, **OR**
-	 - Of weak clinical evidence (early trials, case reports etc. ([CIViC evidence levels C/D/E](https://civic.readthedocs.io/en/latest/model/evidence/level.html)))) in the same tumor type/class as specified by the user
+	 - Of strong clinical evidence in other tumor types/classes than the one associated with the query sample
+	 - Of weak clinical evidence (early trials, case reports etc. ([CIViC evidence levels C/D/E](https://civic.readthedocs.io/en/latest/model/evidence/level.html)))) in the same tumor type/class as the query sample
 	 - overlap between variants in the tumor sample and reported biomarkers must occur at the _exact variant level_ or at the _codon/exon level_
 	 
  - [**TIER 3: Variants of uncertain clinical significance**](#tier-3) - includes other coding variants found in oncogenes or tumor suppressor genes
@@ -134,7 +152,7 @@ The prioritization of SNV and InDels found in the tumor sample is done according
      - Oncogenes/tumor suppressor candidates from CancerMine/NCG that are found in the [curated list of false positive cancer drivers compiled by Bailey et al. (Cell, 2018)](https://www.ncbi.nlm.nih.gov/pubmed/30096302) have been excluded
      
  - [**TIER 4**](#tier-4) - includes other protein-coding variants
- - [**NONCODING**](#noncoding) - includes other noncoding variants
+ - [**TIER 5**](#tier-5) - includes other noncoding variants
  
 Row
 -----------------------------------------------------
@@ -151,26 +169,34 @@ The global variant datatable (right) can be filtered according to various criter
 
 ```{r table_browse_allelic_depth, echo=F, results = "asis", eval = NROW(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']]) > 0}
 
-if(NROW(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']]) > 2000){
+if(NROW(pcg_report[['content']][['snv_indel']][['callset']][['variant']]) > 2000){
   cat('<b>NOTE - listing top 2000 variants</b><br>',sep="\n")
   cat('<br>')
-  pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']] <- head(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']], 2000)
+  pcg_report[['content']][['snv_indel']][['callset']][['variant']] <- head(pcg_report[['content']][['snv_indel']][['callset']][['variant']], 2000)
 }
 
 
-vars <- pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']] |> 
+vars <- pcg_report[['content']][['snv_indel']][['callset']][['variant']] |> 
   dplyr::select(SYMBOL, CONSEQUENCE, PROTEIN_CHANGE, TIER, VARIANT_CLASS,
                 GENOMIC_CHANGE, GENOME_VERSION, DP_TUMOR, 
                 AF_TUMOR, CALL_CONFIDENCE, DP_CONTROL, AF_CONTROL) |>
   dplyr::mutate(CONSEQUENCE = stringr::str_replace_all(CONSEQUENCE,"&",","))
 
-tiers <- c('TIER 1','TIER 2','TIER 3','TIER 4','NONCODING')
+tiers <- c('TIER 1','TIER 2','TIER 3','TIER 4','TIER 5')
 
-vars <- pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']] |> 
-  dplyr::select(SYMBOL, CONSEQUENCE, PROTEIN_CHANGE, VARIANT_CLASS, TIER, 
-                GENOMIC_CHANGE, GENOME_VERSION, CALL_CONFIDENCE, DP_TUMOR, 
-                AF_TUMOR, DP_CONTROL, AF_CONTROL) |>
-  dplyr::mutate(CONSEQUENCE = stringr::str_replace_all(CONSEQUENCE,"&",","))
+vars <- pcg_report[['content']][['snv_indel']][['callset']][['variant']] |> 
+  dplyr::select(
+    dplyr::any_of(
+      c("SYMBOL", "CONSEQUENCE", "PROTEIN_CHANGE", 
+        "VARIANT_CLASS", "TIER", "GENOMIC_CHANGE", 
+        "GENOME_VERSION", "CALL_CONFIDENCE", "DP_TUMOR", 
+        "AF_TUMOR", "DP_CONTROL", "AF_CONTROL")
+      )) |>
+  dplyr::mutate(
+    CONSEQUENCE = stringr::str_replace_all(CONSEQUENCE,"&",",")) |>
+  dplyr::mutate(
+    TIER = paste0("TIER ", TIER)
+  )
 
 variants_shared <- crosstalk::SharedData$new(vars)
 
@@ -178,26 +204,37 @@ variants_shared <- crosstalk::SharedData$new(vars)
 filter_set1 <- list()
 filter_set2 <- list()
 
-filter_set1[[1]] <- crosstalk::filter_select("TIER", "Tier", variants_shared, ~TIER)
-filter_set2[[1]] <- crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_shared, ~CONSEQUENCE)
+filter_set1[[1]] <- crosstalk::filter_select(
+  "TIER", "Tier", variants_shared, ~TIER)
+filter_set2[[1]] <- crosstalk::filter_select(
+  "CONSEQUENCE", "Consequence", variants_shared, ~CONSEQUENCE)
 
 i_set1 <- 2
 i_set2 <- 2
 if(any(!is.na(vars$CALL_CONFIDENCE))){
-  filter_set1[[i_set1]] <- crosstalk::filter_select("CALL_CONFIDENCE", "Call confidence", variants_shared, ~CALL_CONFIDENCE)
+  filter_set1[[i_set1]] <- crosstalk::filter_select(
+    "CALL_CONFIDENCE", "Call confidence", variants_shared, ~CALL_CONFIDENCE)
   i_set1 <- i_set1 + 1
 }
 if(any(!is.na(vars$DP_TUMOR)) & any(!is.na(vars$AF_TUMOR))){
-  filter_set1[[i_set1]] <- crosstalk::filter_slider("DP_TUMOR", "Sequencing depth tumor", variants_shared, ~DP_TUMOR, ticks = F, sep = F)
-  filter_set2[[i_set2]] <- crosstalk::filter_slider("AF_TUMOR", "Allelic fraction tumor", variants_shared, ~AF_TUMOR, 
-                                                    sep = F, min = 0, max = 1, step = 0.05, ticks = T)
+  filter_set1[[i_set1]] <- crosstalk::filter_slider(
+    "DP_TUMOR", "Sequencing depth tumor", 
+    variants_shared, ~DP_TUMOR, ticks = F, sep = F)
+  filter_set2[[i_set2]] <- crosstalk::filter_slider(
+    "AF_TUMOR", "Allelic fraction tumor", 
+    variants_shared, ~AF_TUMOR, 
+    sep = F, min = 0, max = 1, step = 0.05, ticks = T)
   i_set1 <- i_set1 + 1
   i_set2 <- i_set2 + 1
 }
 if(any(!is.na(vars$DP_CONTROL)) & any(!is.na(vars$AF_CONTROL))){
-  filter_set1[[i_set1]] <- crosstalk::filter_slider("DP_CONTROL", "Sequencing depth control", variants_shared, ~DP_CONTROL, ticks = F, sep = F)
-  filter_set2[[i_set2]] <- crosstalk::filter_slider("AF_CONTROL", "Allelic fraction control", variants_shared, ~AF_CONTROL, 
-                                                    sep = F, min = 0, max = 1, step = 0.05, ticks = T)
+  filter_set1[[i_set1]] <- crosstalk::filter_slider(
+    "DP_CONTROL", "Sequencing depth control", 
+    variants_shared, ~DP_CONTROL, ticks = F, sep = F)
+  filter_set2[[i_set2]] <- crosstalk::filter_slider(
+    "AF_CONTROL", "Allelic fraction control", 
+    variants_shared, ~AF_CONTROL, 
+    sep = F, min = 0, max = 1, step = 0.05, ticks = T)
 }
 
 crosstalk::bscols(
@@ -212,7 +249,7 @@ crosstalk::bscols(
 
 ```{r table_browse, eval = NROW(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']]) > 0}
 
-tiers <- c('TIER 1','TIER 2','TIER 3','TIER 4','NONCODING')
+tiers <- c('TIER 1','TIER 2','TIER 3','TIER 4','TIER 5')
 
 variants_shared |>
   DT::datatable(
@@ -238,7 +275,7 @@ variants_shared |>
                  dom = 'Bfrtip')
   ) |>
    DT::formatStyle('TIER',color = 'white', 
-                   backgroundColor = DT::styleEqual(tiers, head(pcg_report[['metadata']][['color_palette']][['tier']][['values']],5)), 
+                   backgroundColor = DT::styleEqual(tiers, head(pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']],5)), 
                    fontWeight = 'bold', `text-align` = 'center')
 
 

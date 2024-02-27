@@ -7,7 +7,7 @@ mutational_burden <- 'ON'
 if(pcg_report$content$msi$eval == F){
   msi_prediction <- 'OFF'
 }
-if(pcg_report$content$m_signature_mp$eval == F){
+if(pcg_report$content$mutational_signatures$eval == F){
   signatures_estimation <- 'OFF'
 }
 if(pcg_report$content$tmb$eval == F){

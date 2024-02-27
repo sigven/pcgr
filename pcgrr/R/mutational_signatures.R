@@ -1,15 +1,17 @@
 #' Function that generates mutational signatures data for PCGR report
 #'
-#' @param callset_snv Somatic callset (SNV)
+#' @param variant_set Somatic callset (SNV)
 #' @param ref_data PCGR reference data object
 #' @param settings PCGR configuration settings object
 #'
 #' @export
-generate_report_data_signatures_mp <-
-  function(callset_snv = NULL,
+generate_report_data_signatures <-
+  function(variant_set = NULL,
            ref_data = NULL,
            settings = NULL) {
 
+
+  sig_settings <- settings$conf$somatic_snv$mutational_signatures
   cosmic_metadata <-
     ref_data$metadata |>
     dplyr::filter(.data$source_abbreviation == "cosmic_mutsigs") |>
@@ -37,7 +39,7 @@ generate_report_data_signatures_mp <-
                 sep="."))
 
   pcgrr::write_processed_vcf(
-      calls = callset_snv$variant,
+      calls = variant_set,
       sample_name = settings$sample_id,
       output_directory = settings$output_dir,
       vcf_fname = vcf_name_mutsig_analysis)
@@ -47,29 +49,29 @@ generate_report_data_signatures_mp <-
     pcgrr::init_m_signature_content()
 
   fit_signatures_to_ttype <- !as.logical(
-    settings$conf$somatic_snv$mutational_signatures$all_reference_signatures
+    sig_settings$all_reference_signatures
   )
 
   ## Retrieve relevant signatures for the tumor in question
   prevalent_site_signatures <- NULL
   if (fit_signatures_to_ttype == T) {
     prevalent_site_signatures <-
-      pcgrr::get_prevalent_site_signatures2(
+      pcgrr::get_prevalent_site_signatures(
         site = settings$conf$sample_properties$site,
         min_prevalence_pct =
-          settings$conf$somatic_snv$mutational_signatures$prevalence_reference_signatures,
+          sig_settings$prevalence_reference_signatures,
         ref_data = ref_data,
         incl_poss_artifacts =
-          settings$conf$somatic_snv$mutational_signatures$include_artefact_signatures)
+          sig_settings$include_artefact_signatures)
   }else{
     prevalent_site_signatures <-
-      pcgrr::get_prevalent_site_signatures2(
+      pcgrr::get_prevalent_site_signatures(
         site = "Any",
         min_prevalence_pct =
-          settings$conf$somatic_snv$mutational_signatures$prevalence_reference_signatures,
+          sig_settings$prevalence_reference_signatures,
         ref_data = ref_data,
         incl_poss_artifacts =
-          settings$conf$somatic_snv$mutational_signatures$include_artefact_signatures)
+          sig_settings$include_artefact_signatures)
   }
 
   ## read MutationalPattern VCF file
@@ -88,7 +90,7 @@ generate_report_data_signatures_mp <-
 
     pcg_report_signatures[["eval"]] <- TRUE
 
-    if (length(vcfs[[1]]) >= settings$conf$somatic_snv$mutational_signatures[["mutation_limit"]]) {
+    if (length(vcfs[[1]]) >= sig_settings[["mutation_limit"]]) {
 
       ## assign variants to variant set
       pcg_report_signatures[["variant_set"]][["all"]] <-
@@ -119,7 +121,7 @@ generate_report_data_signatures_mp <-
         ),
         incl_poss_artifacts =
           as.logical(
-            settings$conf$somatic_snv$mutational_signatures$include_artefact_signatures
+            sig_settings$include_artefact_signatures
           )
       )
 
@@ -176,10 +178,11 @@ generate_report_data_signatures_mp <-
             .data$COMMENTS,
             .data$AETIOLOGY_KEYWORD),
           by = c("SIGNATURE_ID")) |>
-        dplyr::rename(group = .data$AETIOLOGY_KEYWORD,
-                      signature_id = .data$SIGNATURE_ID,
-                      aetiology = .data$AETIOLOGY,
-                      comments = .data$COMMENTS) |>
+        dplyr::rename(
+          group = .data$AETIOLOGY_KEYWORD,
+          signature_id = .data$SIGNATURE_ID,
+          aetiology = .data$AETIOLOGY,
+          comments = .data$COMMENTS) |>
         dplyr::mutate(
           contribution =
             paste0(round(.data$prop_signature * 100, digits = 2), "%")) |>
@@ -188,9 +191,11 @@ generate_report_data_signatures_mp <-
       contributions_per_group <- as.data.frame(
         contributions_per_signature |>
           dplyr::group_by(.data$group) |>
-          dplyr::summarise(prop_group = sum(.data$prop_signature),
-                         signature_id_group = paste(.data$SIGNATURE_ID, collapse=", "),
-                         .groups = "drop")
+          dplyr::summarise(
+            prop_group = sum(.data$prop_signature),
+            signature_id_group = paste(
+              .data$signature_id, collapse=", "),
+            .groups = "drop")
 
       )
 
@@ -248,8 +253,7 @@ generate_report_data_signatures_mp <-
               reference_collection = "COSMIC_v34",
               reference_signatures = reference_sigs,
               fitting_accuracy =
-                round(sim_original_reconstructed$cosine_sim * 100, digits = 1)) |>
-            dplyr::rename(signature_id = SIGNATURE_ID)
+                round(sim_original_reconstructed$cosine_sim * 100, digits = 1))
         }
       }
 
@@ -283,7 +287,7 @@ generate_report_data_signatures_mp <-
                  nrow(pcg_report_signatures[["variant_set"]][["all"]]),
                  ") for reconstruction of mutational signatures by ",
                  "MutationalPatterns, limit set to ",
-                 settings$conf$somatic_snv$mutational_signatures$mutation_limit))
+                 sig_settings$mutation_limit))
       }
     }
   }

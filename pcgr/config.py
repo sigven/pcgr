@@ -90,6 +90,7 @@ def create_config(arg_dict, workflow = "PCGR"):
             'exclude_pon': int(arg_dict['exclude_pon']),
             'exclude_likely_hom_germline': int(arg_dict['exclude_likely_hom_germline']),
             'exclude_likely_het_germline': int(arg_dict['exclude_likely_het_germline']),
+            'exclude_clinvar_germline': int(arg_dict['exclude_clinvar_germline']),
             'exclude_dbsnp_nonsomatic': int(arg_dict['exclude_dbsnp_nonsomatic']),
             'exclude_nonexonic': int(arg_dict['exclude_nonexonic'])
         }
@@ -97,7 +98,8 @@ def create_config(arg_dict, workflow = "PCGR"):
             'run': int(arg_dict['estimate_msi'])
         }
         conf_options['somatic_snv']['tmb'] = {
-            'run': int(arg_dict['estimate_tmb']),            
+            'run': int(arg_dict['estimate_tmb']), 
+            'tmb_display': arg_dict['tmb_display'],           
             'tmb_dp_min': arg_dict['tmb_dp_min'],
             'tmb_af_min': arg_dict['tmb_af_min']
         }
@@ -154,14 +156,20 @@ def populate_config_data(conf_options: dict, db_dir: str, workflow = "PCGR", log
     conf_data['software']['pcgr_version'] = pcgr_vars.PCGR_VERSION
     conf_data['software']['cpsr_version'] = pcgr_vars.PCGR_VERSION
     
-    ## add paths to annotated files (VCF/TSV, CNA)
+    ## add paths to annotated files (VCF/TSV, CNA, TMB)
     conf_data['molecular_data'] = {}
     conf_data['molecular_data']['fname_mut_vcf'] = conf_options['annotated_vcf']
     conf_data['molecular_data']['fname_mut_tsv'] = conf_options['annotated_tsv']
+    
     conf_data['molecular_data']['fname_cna_tsv'] = "None"
     if workflow == "PCGR" and conf_options['annotated_cna'] != "None":
         conf_data['molecular_data']['fname_cna_tsv'] = conf_options['annotated_cna']
         del conf_options['annotated_cna']
+    
+    conf_data['molecular_data']['fname_tmb'] = "None"
+    if workflow == "PCGR" and conf_options['fname_tmb'] != "None":
+        conf_data['molecular_data']['fname_tmb'] = conf_options['fname_tmb']
+        del conf_options['fname_tmb']
     
     genome_assembly = conf_options['genome_assembly']
     del conf_options['sample_id']

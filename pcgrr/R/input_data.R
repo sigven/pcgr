@@ -14,26 +14,31 @@ load_somatic_cna <- function(
   log4r_info(paste0(
     "Reading annotated molecular dataset (DNA) - somatic copy number aberrations"))
 
+  tumor_site <-
+    settings[['conf']][['sample_properties']][['site']]
+
   callset_cna <- pcgrr::load_dna_variants(
     fname = fname,
     cols = pcgrr::data_coltype_defs$cna_somatic_raw,
     ref_data = ref_data,
     vartype = 'cna',
-    primary_site = settings[['conf']][['sample_properties']]$site,
+    primary_site =
+      tumor_site,
     retained_info_tags = "None",
     variant_origin = "Somatic")
 
-  tumor_site <-
-    settings[['conf']][['sample_properties']][['site']]
 
   if (NROW(callset_cna$variant) > 0) {
+    pcgrr::log4r_info("Adding hyperlinks to gene annotations")
+
     callset_cna[['variant']] <- callset_cna[['variant']] |>
       pcgrr::append_cancer_gene_evidence(
         ref_data = ref_data,
-        site = tumor_site,
+        primary_site = tumor_site,
         pos_var = 'SEGMENT_START') |>
       pcgrr::append_drug_var_link(
-        ref_data = ref_data
+        ref_data = ref_data,
+        primary_site = tumor_site
       ) |>
       dplyr::arrange(
         .data$TIER,
@@ -61,51 +66,103 @@ load_somatic_snv_indel <- function(
   log4r_info(paste0(
     "Reading annotated molecular dataset (DNA) - somatic SNV/InDels"))
 
+  tumor_site <-
+    settings[['conf']][['sample_properties']][['site']]
+
   callset <- pcgrr::load_dna_variants(
     fname = fname,
     cols = pcgrr::data_coltype_defs$snv_indel_somatic_raw,
     ref_data = ref_data,
     vartype = 'snv_indel',
-    primary_site = settings[['conf']][['sample_properties']]$site,
+    primary_site = tumor_site,
     retained_info_tags =
       settings[['conf']][['other']]$retained_vcf_info_tags,
     variant_origin = "Somatic")
 
-  tumor_site <-
-    settings[['conf']][['sample_properties']][['site']]
-
 
   callset[['variant_unfiltered']] <- data.frame()
+  pcgrr::log4r_info("Adding hyperlinks to variant/gene annotations")
+
   callset[['variant']] <- callset[['variant']] |>
     pcgrr::append_dbnsfp_var_link() |>
     pcgrr::append_dbmts_var_link() |>
     pcgrr::append_tcga_var_link() |>
     pcgrr::append_annotation_links() |>
-    pcgrr::append_drug_var_link(ref_data = ref_data) |>
+    pcgrr::append_drug_var_link(
+      ref_data = ref_data,
+      primary_site = tumor_site) |>
     pcgrr::append_tfbs_annotation() |>
-    pcgrr::append_cancer_gene_evidence(ref_data = ref_data,
-                                       site = tumor_site)
+    pcgrr::append_cancer_gene_evidence(
+      ref_data = ref_data,
+      primary_site = tumor_site)
 
-  if (settings$conf$assay_properties$vcf_tumor_only == 1) {
-    callset[['variant_unfiltered']] <- callset[['variant']]
-    callset[['variant']] <- callset[['variant']] |>
+  ## Tumor-only input
+  if (as.logical(settings$conf$assay_properties$vcf_tumor_only) == TRUE) {
+    callset[['variant_unfiltered']] <-
+      callset[['variant']] |>
       ## assign evidence tags for germline/somatic state of variants,
-      ## partially based on user-defined criteria
+      ## partially based on user-defined options
       ## (population allele frequency thresholds)
-        pcgrr::assign_somatic_germline_evidence2(
+        pcgrr::assign_somatic_germline_evidence(
           settings = settings) |>
 
-      ## assign somatic classification based on accumulation
+      ## assign somatic variant classification/status based on accumulation
       ## of evidence tags and user-defined options
         pcgrr::assign_somatic_classification(
           settings = settings)
+
+    ## Issue warning if clinically significant variants (TIER 1/2) are excluded by
+    ## the applied filtering scheme
+
+    ## Assign calls to filtered callset (SOMATIC_CLASSIFICATION = SOMATIC)
+    if("SOMATIC_CLASSIFICATION" %in%
+       colnames(callset[['variant_unfiltered']])){
+      callset[['variant']] <- callset[['variant_unfiltered']] |>
+        dplyr::filter(.data$SOMATIC_CLASSIFICATION == "SOMATIC")
+
+      ## Issue warning if clinically actionable variants are filtered
+      ## with current filtering settings
+      n_actionable_filtered <-
+        callset[['variant_unfiltered']] |>
+        dplyr::filter(!is.na(TIER) & TIER <= 2 &
+                        SOMATIC_CLASSIFICATION != "SOMATIC") |>
+        NROW()
+
+      if(n_actionable_filtered > 0){
+        pcgrr::log4r_warn(
+          paste0(
+            "A total of n = ", n_actionable_filtered,
+            " clinically actionable ",
+            "variants were filtered as likely germline events"))
+      }
+
+      pcgrr::log4r_info(
+        paste0("Excluded n = ",
+               NROW(callset$variant_unfiltered) - NROW(callset$variant),
+               " variants aftering filtering "))
+
+
+      if(as.logical(
+        settings$conf$somatic_snv$tumor_only[["exclude_nonexonic"]]) == TRUE &
+        NROW(callset[['variant']]) > 0 &
+        "EXONIC_STATUS" %in% colnames(callset[['variant']])){
+
+        callset[['variant']] <- callset[['variant']] |>
+          dplyr::filter(.data$EXONIC_STATUS == "exonic")
+      }
+
+    }else{
+      pcgrr::log4r_fatal("Variant data.frame is lacking a 'SOMATIC_CLASSIFICATION' column")
+    }
   }
 
-  callset[['variant']] <- callset[['variant']] |>
-    dplyr::arrange(.data$TIER,
-                   dplyr::desc(.data$ONCOGENICITY_SCORE),
-                   dplyr::desc(.data$TISSUE_ASSOC_RANK),
-                   dplyr::desc(.data$GLOBAL_ASSOC_RANK))
+  if(NROW(callset[['variant']]) > 0){
+    callset[['variant']] <- callset[['variant']] |>
+      dplyr::arrange(.data$TIER,
+                     dplyr::desc(.data$ONCOGENICITY_SCORE),
+                     dplyr::desc(.data$TISSUE_ASSOC_RANK),
+                     dplyr::desc(.data$GLOBAL_ASSOC_RANK))
+  }
 
   # callset <-
   #   pcgrr::expand_biomarker_items(
@@ -284,9 +341,11 @@ load_dna_variants <- function(
         dplyr::across(-c("TRANSCRIPT_OVERLAP",
                          "TRANSCRIPT_OVERLAP_PERCENT"))) |>
       dplyr::summarise(
-        TRANSCRIPT_OVERLAP = paste(.data$TRANSCRIPT_OVERLAP, collapse=", "),
+        TRANSCRIPT_OVERLAP = paste(
+          .data$TRANSCRIPT_OVERLAP, collapse=", "),
         MAX_TRANSCRIPT_OVERLAP_PERCENT =
-          max(.data$TRANSCRIPT_OVERLAP_PERCENT, na.rm = T),
+          max(.data$TRANSCRIPT_OVERLAP_PERCENT,
+              na.rm = T),
         .groups = "drop"
       )
 
@@ -448,6 +507,10 @@ load_dna_variants <- function(
                 "BM_RESOLUTION"),
               dplyr::everything()
             ) |>
+
+            ## Make sure variant origin of patient/tumor
+            ## matches reported variant origin of biomarker
+            ## - Do not consider complex molecular profile types
             dplyr::filter(
                 .data$BM_VARIANT_ORIGIN == variant_origin &
                   .data$BM_MOLECULAR_PROFILE_TYPE == "Any") |>
@@ -459,6 +522,10 @@ load_dna_variants <- function(
     ## ACMG/AMP guidelines for clinical actionability
     ## of somatic variants
     if (variant_origin == "Somatic") {
+
+      pcgrr::log4r_info(
+        paste0("Assigning variants into tiers of clinical significance",
+               "- ACMG/AMP guidelines"))
       results <- pcgrr::assign_acmg_tiers(
         vartype = vartype,
         variants_df = results$variant,

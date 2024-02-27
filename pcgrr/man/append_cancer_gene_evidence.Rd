@@ -7,7 +7,7 @@
 append_cancer_gene_evidence(
   vcf_data_df = NULL,
   ref_data = NULL,
-  site = "Any",
+  primary_site = "Any",
   pos_var = "POS"
 )
 }
@@ -16,7 +16,7 @@ append_cancer_gene_evidence(
 
 \item{ref_data}{PCGR reference data bundle object}
 
-\item{site}{Primary tumor site}
+\item{primary_site}{Primary tumor site}
 
 \item{pos_var}{variable reflecting chromosome order (POS/SEGMENT_START)}
 }

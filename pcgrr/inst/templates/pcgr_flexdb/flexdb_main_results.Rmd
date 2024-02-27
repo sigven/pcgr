@@ -41,17 +41,21 @@ flexdashboard::valueBox("SNVs/Indels", caption = NULL, color = '#000000',
 ### Total variants (SNVs / InDels)
 
 ```{r fig.width = 3.5}
-flexdashboard::valueBox(paste(pcg_report$content$snv_indel$v_stat$n_snv, 
-                               pcg_report$content$snv_indel$v_stat$n_indel,
+flexdashboard::valueBox(paste(pcg_report$content$snv_indel$vstats$n_snv, 
+                               pcg_report$content$snv_indel$vstats$n_indel,
                                sep = " / "),
-                               color = pcg_report[['metadata']][['color_palette']][['tier']][['values']][1], icon = "fa-dna")
+                               color = pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][1], icon = "fa-dna")
 ```
 
 
 ### TIER 1 variants
 
 ```{r}
-flexdashboard::valueBox(stringr::str_replace_all(pcg_report$content$value_box$tier1,"Tier 1 variants:\n",""), color = pcg_report[['metadata']][['color_palette']][['tier']][['values']][1], icon = "fa-dna", href = "#tier-1")
+flexdashboard::valueBox(
+  stringr::str_replace_all(
+    pcg_report$content$value_box$tier1,"Tier 1 variants:\n",""), 
+  color = pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][1], 
+  icon = "fa-dna", href = "#tier-1")
 ```
 
 Row {data-height = 200}
@@ -67,17 +71,18 @@ flexdashboard::valueBox("sCNA", caption = NULL, color = '#000000',
 ### Total aberrations (loss / gains)
 
 ```{r fig.width = 3.5}
-flexdashboard::valueBox(paste(pcg_report$content$cna$v_stat$n_cna_loss, 
-                               pcg_report$content$cna$v_stat$n_cna_gain,sep=" / "), 
-                               color = pcg_report[['metadata']][['color_palette']][['tier']][['values']][1], icon = "fa-dna",
-                        href = "#overview-2")
+flexdashboard::valueBox(
+  paste(pcg_report$content$cna$vstats$n_cna_loss, 
+        pcg_report$content$cna$vstats$n_cna_gain,sep=" / "), 
+  color = pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][1], icon = "fa-dna",
+  href = "#overview-2")
 ```
 
 
 ### TIER 1 variants
 
 ```{r}
-flexdashboard::valueBox("None", color = pcg_report[['metadata']][['color_palette']][['tier']][['values']][1], icon = "fa-dna")
+flexdashboard::valueBox("None", color = pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][1], icon = "fa-dna")
 ```
 
 Row {data-height = 200}
@@ -93,15 +98,16 @@ flexdashboard::valueBox("SIGNATURES", caption = NULL, color = '#000000',
 ### Accuracy of signature fitting
 
 ```{r fig.width = 3.5}
-cosine_sim <- pcg_report$content$m_signature_mp$result$goodness_of_fit$cosine_sim
-flexdashboard::valueBox(paste0(cosine_sim," %"), color = pcg_report[['metadata']][['color_palette']][['tier']][['values']][1])
+cosine_sim <- pcg_report$content$mutational_signatures$result$goodness_of_fit$cosine_sim
+flexdashboard::valueBox(paste0(cosine_sim," %"), color = pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][1])
 ```
 
 
 ### Most dominant signature
 
 ```{r}
-flexdashboard::valueBox(pcg_report$content$m_signature_mp$result$contributions$aetiology_keyword[1], color = pcg_report[['metadata']][['color_palette']][['tier']][['values']][1], href="#mutational-signatures")
+flexdashboard::valueBox(
+  pcg_report$content$mutational_signatures$result$contributions$aetiology_keyword[1], color = pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][1], href="#mutational-signatures")
 ```
 
 Row {data-height = 200}
@@ -116,8 +122,8 @@ flexdashboard::valueBox("TMB/MSI status", caption = NULL, color = '#000000', ico
 ### TMB estimate
 
 ```{r fig.width = 3.5}
-flexdashboard::valueBox(paste0(pcg_report$content$tmb$v_stat$tmb_estimate," mut/Mb"), 
-                        color = pcg_report[['metadata']][['color_palette']][['tier']][['values']][1],
+flexdashboard::valueBox(paste0(pcg_report$content$tmb$vstats$tmb_estimate," mut/Mb"), 
+                        color = pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][1],
                         icon = "fa-dna")
 ```
 
@@ -125,8 +131,9 @@ flexdashboard::valueBox(paste0(pcg_report$content$tmb$v_stat$tmb_estimate," mut/
 ### MSI classification
 
 ```{r}
-flexdashboard::valueBox(stringr::str_replace(pcg_report$content$msi$prediction$msi_stats$vb, "MSI status:\n",""), 
-                        color = pcg_report[['metadata']][['color_palette']][['tier']][['values']][1], icon = "fa-dna")
+flexdashboard::valueBox(
+  stringr::str_replace(pcg_report$content$msi$prediction$msi_stats$vb, "MSI status:\n",""), 
+                        color = pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][1], icon = "fa-dna")
 ```
 
 Row {data-height=500}

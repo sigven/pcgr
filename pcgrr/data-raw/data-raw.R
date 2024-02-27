@@ -1,17 +1,32 @@
 #---- color_palette ----#
 color_palette <- list()
-for (c in c("pathogenicity", "clinical_evidence", "tier",
-           "report_color", "warning", "success", "none")) {
+for (c in c("pathogenicity",
+            "clinical_evidence",
+            "cancer_assoc",
+            "tier",
+            "report_color",
+            "warning",
+            "success",
+            "none")) {
   color_palette[[c]] <- list()
   color_palette[[c]][["levels"]] <- c()
   color_palette[[c]][["values"]] <- c()
+
+  if (c == "cancer_assoc") {
+    color_palette[[c]][["breaks"]] <-
+      c(0.40, 0.55, 0.70, 0.85)
+    color_palette[[c]][["values"]] <-
+      c("#b8b8ba", "#BDD7E7", "#6BAED6",
+        "#3182BD", "#08519C")
+  }
 
   if (c == "pathogenicity") {
     color_palette[[c]][["levels"]] <-
       c("Pathogenic", "Likely_Pathogenic",
         "VUS", "Likely_Benign", "Benign")
     color_palette[[c]][["values"]] <-
-      c("#9E0142", "#D53E4F", "#000000", "#78C679", "#077009")
+      c("#9E0142", "#D53E4F", "#000000",
+        "#78C679", "#077009")
   }
   if (c == "clinical_evidence") {
     color_palette[[c]][["levels"]] <-
@@ -29,11 +44,15 @@ for (c in c("pathogenicity", "clinical_evidence", "tier",
   }
   if (c == "tier") {
     color_palette[[c]][["levels"]] <-
-      c("TIER1", "TIER2", "TIER3", "TIER4", "NONCODING",
-        "COL6", "COL7", "COL8", "COL9", "COL10", "COL11",
-        "COL12", "COL13", "COL14", "COL15", "COL16",
-        "COL17", "COL18", "COL19", "COL20", "COL21",
-        "COL22", "COL23", "COL24", "COL25")
+      c("TIER1", "TIER2", "TIER3",
+        "TIER4", "TIER5",
+        "COL6", "COL7", "COL8",
+        "COL9", "COL10", "COL11",
+        "COL12", "COL13", "COL14",
+        "COL15", "COL16", "COL17",
+        "COL18", "COL19", "COL20",
+        "COL21", "COL22", "COL23",
+        "COL24", "COL25")
     color_palette[[c]][["values"]] <-
       c("#0073C2", "#EFC000", "#CD534C", "#7AA6DC",
         "#8F7700", "#003C67", "#3B3B3B", "#868686",
@@ -142,7 +161,7 @@ data_coltype_defs[['snv_indel_somatic_raw']] <- readr::cols_only(
   BIOMARKER_MATCH = readr::col_character(),
   ONCOGENICITY_CLASSIFICATION = readr::col_character(),
   ONCOGENICITY_CLASSIFICATION_CODE = readr::col_character(),
-  ONCOGENICITY_SCORE = readr::col_number(),
+  ONCOGENICITY_SCORE = readr::col_integer(),
   PFAM_DOMAIN = readr::col_character(),
   PFAM_DOMAIN_NAME = readr::col_character(),
   SYMBOL = readr::col_character(),
@@ -230,7 +249,7 @@ data_coltype_defs[['snv_indel_germline_raw']] <- readr::cols_only(
   HGVSp = readr::col_character(),
   CDS_CHANGE = readr::col_character(),
   EXON = readr::col_character(),
-  EXON_AFFECTED = readr::col_character(),
+  EXON_AFFECTED = readr::col_integer(),
   EXON_POSITION = readr::col_integer(),
   LAST_EXON = readr::col_logical(),
   LAST_INTRON = readr::col_logical(),
@@ -409,7 +428,8 @@ tsv_cols <-
     'CLINVAR',
     'CLINVAR_CLNSIG',
     'BIOMARKER_MATCH',
-    'TARGETED_CANCER_DRUGS2',
+    'TARGETED_INHIBITORS2',
+    'TARGETED_INHIBITORS_ALL2',
     'CALL_CONFIDENCE',
     'DP_TUMOR',
     'AF_TUMOR',
@@ -458,7 +478,8 @@ display_cols[['tier1_2']] <-
   'DBSNP',
   'COSMIC',
   'CLINVAR',
-  'TARGETED_CANCER_DRUGS',
+  'TARGETED_INHIBITORS',
+  'TARGETED_INHIBITORS_ALL',
   'CALL_CONFIDENCE',
   'DP_TUMOR',
   'AF_TUMOR',
@@ -490,7 +511,8 @@ display_cols[['tier3']] <-
     'VEP_ALL_CSQ',
     'DBSNP',
     'CLINVAR',
-    'TARGETED_CANCER_DRUGS',
+    'TARGETED_INHIBITORS',
+    'TARGETED_INHIBITORS_ALL',
     'ONCOGENE',
     'TUMOR_SUPPRESSOR',
     'CANCERGENE_EVIDENCE',
@@ -524,7 +546,8 @@ display_cols[['tier4']] <-
     'VEP_ALL_CSQ',
     'DBSNP',
     'CLINVAR',
-    'TARGETED_CANCER_DRUGS',
+    'TARGETED_INHIBITORS',
+    'TARGETED_INHIBITORS_ALL',
     'CALL_CONFIDENCE',
     'DP_TUMOR',
     'AF_TUMOR',

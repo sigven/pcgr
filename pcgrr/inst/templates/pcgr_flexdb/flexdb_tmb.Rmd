@@ -20,9 +20,9 @@ flexdashboard::valueBox("TMB/MSI status", caption = NULL, color = '#000000', ico
 ### Coding target size
 
 ```{r tmb_vbox_size, width = 4, echo = F}
-col <- pcg_report$metadata$color_value_box
+col <- pcg_report$settings$conf$visual_reporting$color_value_box
 if(pcg_report$metadata$config$assay_props$target_size_mb < 1){
-  col <- pcg_report[['metadata']][['color_palette']][['warning']][['values']][1]
+  col <- pcg_report$settings$conf$visual_reporting$color_palette[['warning']][['values']][1]
 }
 
 flexdashboard::valueBox(paste0(pcg_report$metadata$config$assay_props$target_size_mb," Mb"),
@@ -33,8 +33,8 @@ flexdashboard::valueBox(paste0(pcg_report$metadata$config$assay_props$target_siz
 ### Coding mutations
 
 ```{r tmb_n_muts, width = 4, echo = F}
-flexdashboard::valueBox(pcg_report$content$snv_indel$v_stat$n_coding,
-                        color = pcg_report$metadata$color_value_box,
+flexdashboard::valueBox(pcg_report$content$snv_indel$vstats$n_coding,
+                        color = pcg_report$settings$conf$visual_reporting$color_value_box,
                         icon = "fa-dna")
 ```
 
@@ -42,8 +42,8 @@ flexdashboard::valueBox(pcg_report$content$snv_indel$v_stat$n_coding,
 ### TMB estimate
 
 ```{r tmb_vbox_estimate, echo = F}
-flexdashboard::valueBox(paste0(pcg_report$content$tmb$v_stat$tmb_estimate," mut/Mb"), 
-                        color = pcg_report$metadata$color_value_box,
+flexdashboard::valueBox(paste0(pcg_report$content$tmb$vstats$tmb_estimate," mut/Mb"), 
+                        color = pcg_report$settings$conf$visual_reporting$color_value_box,
                         icon = "fa-dna")
 ```
 
@@ -57,7 +57,7 @@ if(!missing_data_norun){
 }
 
 flexdashboard::valueBox(msi_status, 
-                        color = pcg_report$metadata$color_value_box,
+                        color = pcg_report$settings$conf$visual_reporting$color_value_box,
                         icon = "fa-dna")
 ```
 
@@ -79,7 +79,7 @@ tmb_site_colors <-
     dplyr::filter(!is.na(primary_site)) |>
   dplyr::mutate(color = "#f0f0f0") |>
   dplyr::mutate(color = dplyr::if_else(primary_site == p_site,
-                                       pcg_report[['metadata']][['color_palette']][['tier']][['values']][1], color))
+                                       pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][1], color))
   
 tmb_site_color_vec <- tmb_site_colors$color
 names(tmb_site_color_vec) <- tmb_site_colors$primary_site
@@ -113,7 +113,7 @@ tmb_plot_site <-
                  axis.text.y = ggplot2::element_text(family = "Helvetica", size = 10),
                  plot.margin = (grid::unit(c(0, 0, 0, 0), "cm"))) + 
                  ggplot2::geom_hline(yintercept=as.numeric(tmb_estimate), size=0.9, 
-                                     linetype = 4, color = pcg_report[['metadata']][['color_palette']][['tier']][['values']][1])
+                                     linetype = 4, color = pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][1])
                   #ggplot2::geom_rect(ggplot2::aes(ymin = tmb_high, ymax = 1020, xmin = -Inf, xmax = Inf),
                      #fill = "gray", alpha = 0.01)
 
@@ -145,8 +145,8 @@ p <- ggplot2::ggplot(data = pcg_report[['content']][['msi']][['prediction']][['t
                             position = "dodge") +
     #ggplot2::ylab("Number of TCGA samples") +
     ggplot2::theme_classic() +
-    ggplot2::scale_color_manual(values = c(pcg_report[['metadata']][['color_palette']][['tier']][['values']][2], pcg_report[['metadata']][['color_palette']][['tier']][['values']][1])) +
-    ggplot2::scale_fill_manual(values = c(pcg_report[['metadata']][['color_palette']][['tier']][['values']][2], pcg_report[['metadata']][['color_palette']][['tier']][['values']][1])) +
+    ggplot2::scale_color_manual(values = c(pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][2], pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][1])) +
+    ggplot2::scale_fill_manual(values = c(pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][2], pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][1])) +
     ggplot2::ylab("Burden of indels (indels/Mb)") +
     ggplot2::theme(axis.text.x = ggplot2::element_text(family = "Helvetica", size = 11),
                    axis.title.x = ggplot2::element_blank(),
@@ -192,8 +192,8 @@ p <- ggplot2::ggplot(data = pcg_report[['content']][['msi']][['prediction']][['t
                             position = "dodge", binwidth = 0.01) +
     ggplot2::ylab("Number of TCGA samples") +
     ggplot2::theme_classic()+ 
-    ggplot2::scale_color_manual(values = c(pcg_report[['metadata']][['color_palette']][['tier']][['values']][2], pcg_report[['metadata']][['color_palette']][['tier']][['values']][1])) +
-    ggplot2::scale_fill_manual(values = c(pcg_report[['metadata']][['color_palette']][['tier']][['values']][2], pcg_report[['metadata']][['color_palette']][['tier']][['values']][1])) +
+    ggplot2::scale_color_manual(values = c(pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][2], pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][1])) +
+    ggplot2::scale_fill_manual(values = c(pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][2], pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][1])) +
     ggplot2::xlab("InDel fraction among somatic calls") +
     ggplot2::theme(axis.text.x = ggplot2::element_text(family = "Helvetica", size = 11),
                    axis.title.x = ggplot2::element_text(family = "Helvetica", size = 11),

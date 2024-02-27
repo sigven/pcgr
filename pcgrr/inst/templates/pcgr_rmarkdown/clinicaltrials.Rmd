@@ -62,7 +62,7 @@ trials_ttype |>
 
   # DT::formatStyle(color="white", "SYMBOL", "BIOMARKER_MAPPING", fontWeight = 'bold', `text-align` = 'center',
   #                 backgroundColor = DT::styleEqual(c('exact','codon','exon','gene'), 
-  #                                                  c('#000','#000',pcg_report[['metadata']][['color_palette']][['warning']][['values']][1], pcg_report[['metadata']][['color_palette']][['warning']][['values']][1])))
+  #                                                  c('#000','#000',pcg_report$settings$conf$visual_reporting$color_palette[['warning']][['values']][1], pcg_report$settings$conf$visual_reporting$color_palette[['warning']][['values']][1])))
 
 ```
 

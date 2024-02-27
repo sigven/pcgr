@@ -2,7 +2,7 @@
 % Please edit documentation in R/germline.R
 \name{dbsnp_germline_status}
 \alias{dbsnp_germline_status}
-\title{Function that assigns a logical (STATUS_DBSNP_GERMLINE) reflecting whether
+\title{Function that assigns a logical (STATUS_DBSNP) reflecting whether
 a variant co-incides with an entry in dbSNP (germline)}
 \usage{
 dbsnp_germline_status(sample_calls)
@@ -11,6 +11,6 @@ dbsnp_germline_status(sample_calls)
 \item{sample_calls}{data frame with sample variant calls}
 }
 \description{
-Function that assigns a logical (STATUS_DBSNP_GERMLINE) reflecting whether
+Function that assigns a logical (STATUS_DBSNP) reflecting whether
 a variant co-incides with an entry in dbSNP (germline)
 }

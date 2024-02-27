@@ -9,8 +9,8 @@ def check_args(arg_dict):
 
     logger = getlogger("pcgr-validate-arguments-input-a")
     # Check the existence of required arguments
-    if arg_dict['pcgr_dir'] is None or not os.path.isdir(arg_dict['pcgr_dir']):
-        err_msg = f"Required argument '--pcgr_dir' does not exist ({arg_dict['pcgr_dir']})."
+    if arg_dict['refdata_dir'] is None or not os.path.isdir(arg_dict['refdata_dir']):
+        err_msg = f"Required argument '--refdata_dir' does not exist ({arg_dict['refdata_dir']})."
         error_message(err_msg, logger)
 
     if arg_dict['genome_assembly'] is None:
@@ -347,20 +347,20 @@ def verify_input_files(arg_dict):
             os.path.abspath(arg_dict["cpsr_report"]))
 
     # check the existence of base folder
-    base_dir = os.path.abspath(arg_dict["pcgr_dir"])
+    base_dir = os.path.abspath(arg_dict["refdata_dir"])
     if not os.path.isdir(base_dir):
         err_msg = "Base directory (" + str(base_dir) + ") does not exist"
         error_message(err_msg, logger)
 
     # check the existence of data folder within the base folder
-    db_dir = os.path.join(os.path.abspath(arg_dict["pcgr_dir"]), "data")
+    db_dir = os.path.join(os.path.abspath(arg_dict["refdata_dir"]), "data")
     if not os.path.isdir(db_dir):
         err_msg = "Data directory (" + str(db_dir) + ") does not exist"
         error_message(err_msg, logger)
 
     # check the existence of specified assembly data folder within the base folder
     db_assembly_dir = os.path.join(os.path.abspath(
-        arg_dict["pcgr_dir"]), "data", arg_dict["genome_assembly"])
+        arg_dict["refdata_dir"]), "data", arg_dict["genome_assembly"])
     if not os.path.isdir(db_assembly_dir):
         err_msg = "Data directory for the specified genome assembly (" + str(
             db_assembly_dir) + ") does not exist"
@@ -368,7 +368,7 @@ def verify_input_files(arg_dict):
 
     # check the existence of .PCGR_BUNDLE_VERSION (starting from 1.5.0)
     rel_notes_file = os.path.join(os.path.abspath(
-        arg_dict["pcgr_dir"]), "data", arg_dict["genome_assembly"], ".PCGR_BUNDLE_VERSION")
+        arg_dict["refdata_dir"]), "data", arg_dict["genome_assembly"], ".PCGR_BUNDLE_VERSION")
     if not os.path.exists(rel_notes_file):
         err_msg = "The PCGR data bundle is outdated - please download the latest data bundle (see github.com/sigven/pcgr for instructions)"
         error_message(err_msg, logger)
@@ -393,8 +393,8 @@ def verify_input_files(arg_dict):
       "input_cpsr_report_dir": input_cpsr_report_dir,
       "input_cna_plot_dir": input_cna_plot_dir,
       "panel_normal_vcf_dir": panel_normal_vcf_dir,
-      "db_dir": db_assembly_dir,
-      "base_dir": base_dir,
+      "db_assembly_dir": db_assembly_dir,
+      "refdata_dir": base_dir,
       "output_dir": output_dir_full,
       "output_vcf": output_vcf,
       "output_cna": output_cna,
@@ -421,8 +421,8 @@ def check_args_cpsr(arg_dict):
         err_msg = f"Required argument '--input_vcf' does not exist ({arg_dict['input_vcf']})."
         error_message(err_msg,logger)
     ## Check that PCGR directory (with data bundle) is provided and exists
-    if arg_dict['pcgr_dir'] is None or not os.path.isdir(arg_dict['pcgr_dir']):
-        err_msg = f"Required argument '--pcgr_dir' does not exist ({arg_dict['pcgr_dir']})."
+    if arg_dict['refdata_dir'] is None or not os.path.isdir(arg_dict['refdata_dir']):
+        err_msg = f"Required argument '--refdata_dir' does not exist ({arg_dict['refdata_dir']})."
         error_message(err_msg,logger)
     ## Check that genome assembly is set
     if arg_dict['genome_assembly'] is None:
@@ -576,26 +576,26 @@ def verify_input_files_cpsr(arg_dict):
             error_message(err_msg,logger)
 
     ## check the existence of base folder
-    base_dir = os.path.abspath(arg_dict['pcgr_dir'])
+    base_dir = os.path.abspath(arg_dict['refdata_dir'])
     if not os.path.isdir(base_dir):
         err_msg = f"Base directory ({base_dir}) does not exist"
         error_message(err_msg,logger)
 
     ## check the existence of data folder within the base folder
-    db_dir = os.path.join(os.path.abspath(arg_dict['pcgr_dir']), 'data')
+    db_dir = os.path.join(os.path.abspath(arg_dict['refdata_dir']), 'data')
     if not os.path.isdir(db_dir):
         err_msg = f"Data directory ({db_dir}) does not exist"
         error_message(err_msg,logger)
 
     ## check the existence of specified assembly data folder within the base folder
-    db_assembly_dir = os.path.join(os.path.abspath(arg_dict['pcgr_dir']), 'data', arg_dict['genome_assembly'])
+    db_assembly_dir = os.path.join(os.path.abspath(arg_dict['refdata_dir']), 'data', arg_dict['genome_assembly'])
     if not os.path.isdir(db_assembly_dir):
         err_msg = f"Data directory for the specified genome assembly ({db_assembly_dir}) does not exist"
         error_message(err_msg,logger)
 
     ## check the existence of RELEASE_NOTES
     rel_notes_file = os.path.join(os.path.abspath(
-        arg_dict["pcgr_dir"]), "data", arg_dict["genome_assembly"], ".PCGR_BUNDLE_VERSION")
+        arg_dict["refdata_dir"]), "data", arg_dict["genome_assembly"], ".PCGR_BUNDLE_VERSION")
     if not os.path.exists(rel_notes_file):
         err_msg = 'The PCGR data bundle is outdated - please download the latest data bundle (see github.com/sigven/cpsr for instructions)'
         error_message(err_msg,logger)
@@ -617,8 +617,8 @@ def verify_input_files_cpsr(arg_dict):
     cpsr_paths = {
             "input_vcf_dir": input_vcf_dir,
             "input_customlist_dir": input_customlist_dir,
-            "db_dir": db_assembly_dir,
-            "base_dir": base_dir,
+            "db_assembly_dir": db_assembly_dir,
+            "refdata_dir": base_dir,
             "output_dir": output_dir_full,
             "output_vcf": output_vcf,
             "input_vcf_basename": input_vcf_basename,

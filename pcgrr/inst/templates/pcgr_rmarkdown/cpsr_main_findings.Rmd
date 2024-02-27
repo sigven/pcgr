@@ -59,8 +59,8 @@ for(n in c('diagnostic','prognostic','predictive','predisposing')){
       dplyr::bind_rows(
         cpsr_rep[['content']][['snv_indel']][['clin_eitem']][[n]]
       ) |>
-      dplyr::select(SYMBOL, GENE_NAME, CANCER_TYPE, EVIDENCE_TYPE,
-                    EVIDENCE_LEVEL, dplyr::everything())
+      dplyr::select(SYMBOL, GENE_NAME, BM_CANCER_TYPE, BM_EVIDENCE_TYPE,
+                    BM_EVIDENCE_LEVEL, dplyr::everything())
   }
 }
 
@@ -257,7 +257,7 @@ DT::datatable(
          dom = 'Bfrtip')
   ) |>
   DT::formatStyle(
-    'EVIDENCE_LEVEL', 
+    'BM_EVIDENCE_LEVEL', 
     backgroundColor = DT::styleEqual(
       c('A: Validated', 
         'A: FDA/NCCN/ELN guidelines', 

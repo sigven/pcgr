@@ -9,12 +9,12 @@
 <br><br>
 
 
-```{r biomarker_note2, echo=F, results = "asis", include = pcg_report$content$snv_indel$v_stat$n_tier2 > 0}
+```{r biomarker_note2, echo=F, results = "asis", include = pcg_report$content$snv_indel$vstats$n_tier2 > 0}
 
 cat('<b>NOTE:</b> Reported biomarkers in CIViC/CGI are mapped at different resolutions (i.e. filter <b>Biomarker mapping</b>). The accuracy of a match between variants in the tumor sample and the reported biomarkers will vary accordingly (highlighted by gene symbols with different color backgrounds):\n\n')
 
 cat('<ul><li>Biomarker match at the <mark style="background-color:black; font-weight:bold; color:white">exact variant/codon level</mark></li>')
-cat(paste0('<br><li>Biomarker match at the <mark style="background-color:', pcg_report[['metadata']][['color_palette']][['warning']][['values']][1],'; color:white; font-weight:bold">exon/gene level</mark></li></ul>\n'))
+cat(paste0('<br><li>Biomarker match at the <mark style="background-color:', pcg_report$settings$conf$visual_reporting$color_palette[['warning']][['values']][1],'; color:white; font-weight:bold">exon/gene level</mark></li></ul>\n'))
 
 htmltools::br()
 ```
@@ -61,15 +61,15 @@ if(missing_tier2_items[['predictive']] == F |
 variants_tier2_predictive_shared <- crosstalk::SharedData$new(eitems[['predictive']])
 crosstalk::bscols(
   list(
-    crosstalk::filter_select("CANCER_TYPE", "Cancer type", variants_tier2_predictive_shared, ~CANCER_TYPE),
-    crosstalk::filter_select("CLINICAL_SIGNIFICANCE", "Clinical significance", variants_tier2_predictive_shared, ~CLINICAL_SIGNIFICANCE),
-    crosstalk::filter_select("EVIDENCE_LEVEL", "Evidence level", variants_tier2_predictive_shared, ~EVIDENCE_LEVEL),
+    crosstalk::filter_select("BM_CANCER_TYPE", "Cancer type", variants_tier2_predictive_shared, ~BM_CANCER_TYPE),
+    crosstalk::filter_select("BM_CLINICAL_SIGNIFICANCE", "Clinical significance", variants_tier2_predictive_shared, ~BM_CLINICAL_SIGNIFICANCE),
+    crosstalk::filter_select("BM_EVIDENCE_LEVEL", "Evidence level", variants_tier2_predictive_shared, ~BM_EVIDENCE_LEVEL),
     crosstalk::filter_slider("RATING", "Rating", variants_tier2_predictive_shared, ~RATING, min = 0, max = 5, step = 1, ticks = T)
   ),
   list(
     crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_tier2_predictive_shared, ~CONSEQUENCE),
     crosstalk::filter_select("BIOMARKER_MAPPING", "Biomarker mapping", variants_tier2_predictive_shared, ~BIOMARKER_MAPPING),
-    crosstalk::filter_select("THERAPEUTIC_CONTEXT", "Therapeutic context", variants_tier2_predictive_shared, ~THERAPEUTIC_CONTEXT)
+    crosstalk::filter_select("BM_THERAPEUTIC_CONTEXT", "Therapeutic context", variants_tier2_predictive_shared, ~BM_THERAPEUTIC_CONTEXT)
   )
 )
 
@@ -79,7 +79,7 @@ htmltools::br()
 
 DT::datatable(variants_tier2_predictive_shared,  escape=F,extensions=c("Buttons","Responsive"), 
               options=list(buttons = c('csv','excel'), scrollCollapse = T, dom = 'Bfrtip')) |>
-  DT::formatStyle('EVIDENCE_LEVEL', 
+  DT::formatStyle('BM_EVIDENCE_LEVEL', 
                   backgroundColor = DT::styleEqual(c('A: Validated','A: FDA/NCCN/ELN guidelines',
                                                      'B: Clinical evidence','B1: Clinical evidence: late trials',
                                                      'B2: Clinical evidence: early trials','C: Case study',
@@ -87,7 +87,7 @@ DT::datatable(variants_tier2_predictive_shared,  escape=F,extensions=c("Buttons"
                                                    c("#009E73","#009E73","#56B4E9", "#56B4E9","#56B4E9","#0072B2","#E69F00", "#F0E442"))) |>
   DT::formatStyle(color="white", "SYMBOL", "BIOMARKER_MAPPING", fontWeight = 'bold', `text-align` = 'center',
                   backgroundColor = DT::styleEqual(c('exact','codon','exon','gene'), 
-                                                   c('#000','#000',pcg_report[['metadata']][['color_palette']][['warning']][['values']][1], pcg_report[['metadata']][['color_palette']][['warning']][['values']][1])))
+                                                   c('#000','#000',pcg_report$settings$conf$visual_reporting$color_palette[['warning']][['values']][1], pcg_report$settings$conf$visual_reporting$color_palette[['warning']][['values']][1])))
 
 
 htmltools::br()
@@ -124,11 +124,11 @@ variants_tier2_prognostic_shared <- crosstalk::SharedData$new(eitems[['prognosti
 crosstalk::bscols(
   list(
     crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_tier2_prognostic_shared, ~CONSEQUENCE),
-    crosstalk::filter_select("CANCER_TYPE", "Cancer type", variants_tier2_prognostic_shared, ~CANCER_TYPE),
-    crosstalk::filter_select("CLINICAL_SIGNIFICANCE", "Clinical significance", variants_tier2_prognostic_shared, ~CLINICAL_SIGNIFICANCE)
+    crosstalk::filter_select("BM_CANCER_TYPE", "Cancer type", variants_tier2_prognostic_shared, ~BM_CANCER_TYPE),
+    crosstalk::filter_select("BM_CLINICAL_SIGNIFICANCE", "Clinical significance", variants_tier2_prognostic_shared, ~BM_CLINICAL_SIGNIFICANCE)
   ),
   list(
-    crosstalk::filter_select("EVIDENCE_LEVEL", "Evidence level", variants_tier2_prognostic_shared, ~EVIDENCE_LEVEL),
+    crosstalk::filter_select("BM_EVIDENCE_LEVEL", "Evidence level", variants_tier2_prognostic_shared, ~BM_EVIDENCE_LEVEL),
     crosstalk::filter_select("BIOMARKER_MAPPING", "Biomarker mapping", variants_tier2_prognostic_shared, ~BIOMARKER_MAPPING),
     crosstalk::filter_slider("RATING", "Rating", variants_tier2_prognostic_shared, ~RATING, min = 0, max = 5, step = 1, ticks = T)
   )
@@ -139,7 +139,7 @@ htmltools::br()
 
 DT::datatable(variants_tier2_prognostic_shared, escape=F,extensions=c("Buttons","Responsive"), 
               options=list(buttons = c('csv','excel'), scrollCollapse = T, dom = 'Bfrtip')) |>
-  DT::formatStyle('EVIDENCE_LEVEL', 
+  DT::formatStyle('BM_EVIDENCE_LEVEL', 
                   backgroundColor = DT::styleEqual(c('A: Validated','A: FDA/NCCN/ELN guidelines',
                                                      'B: Clinical evidence','B1: Clinical evidence: late trials',
                                                      'B2: Clinical evidence: early trials','C: Case study',
@@ -147,7 +147,7 @@ DT::datatable(variants_tier2_prognostic_shared, escape=F,extensions=c("Buttons",
                                                    c("#009E73","#009E73","#56B4E9", "#56B4E9","#56B4E9","#0072B2","#E69F00", "#F0E442"))) |>
    DT::formatStyle(color="white", "SYMBOL", "BIOMARKER_MAPPING", fontWeight = 'bold', `text-align` = 'center',
                   backgroundColor = DT::styleEqual(c('exact','codon','exon','gene'), 
-                                                   c('#000','#000',pcg_report[['metadata']][['color_palette']][['warning']][['values']][1], pcg_report[['metadata']][['color_palette']][['warning']][['values']][1])))
+                                                   c('#000','#000',pcg_report$settings$conf$visual_reporting$color_palette[['warning']][['values']][1], pcg_report$settings$conf$visual_reporting$color_palette[['warning']][['values']][1])))
 
 
 htmltools::br()
@@ -185,11 +185,11 @@ variants_tier2_diagnostic_shared <- crosstalk::SharedData$new(eitems[['diagnosti
 crosstalk::bscols(
   list(
     crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_tier2_diagnostic_shared, ~CONSEQUENCE),
-    crosstalk::filter_select("CANCER_TYPE", "Cancer type", variants_tier2_diagnostic_shared, ~CANCER_TYPE),
-    crosstalk::filter_select("CLINICAL_SIGNIFICANCE", "Clinical association", variants_tier2_diagnostic_shared, ~CLINICAL_SIGNIFICANCE)
+    crosstalk::filter_select("BM_CANCER_TYPE", "Cancer type", variants_tier2_diagnostic_shared, ~BM_CANCER_TYPE),
+    crosstalk::filter_select("BM_CLINICAL_SIGNIFICANCE", "Clinical association", variants_tier2_diagnostic_shared, ~BM_CLINICAL_SIGNIFICANCE)
   ),
   list(
-    crosstalk::filter_select("EVIDENCE_LEVEL", "Evidence level", variants_tier2_diagnostic_shared, ~EVIDENCE_LEVEL),
+    crosstalk::filter_select("BM_EVIDENCE_LEVEL", "Evidence level", variants_tier2_diagnostic_shared, ~BM_EVIDENCE_LEVEL),
     crosstalk::filter_select("BIOMARKER_MAPPING", "Biomarker mapping", variants_tier2_diagnostic_shared, ~BIOMARKER_MAPPING),
     crosstalk::filter_slider("RATING", "Rating", variants_tier2_diagnostic_shared, ~RATING, min = 0, max = 5, step = 1, ticks = T)
   )
@@ -201,7 +201,7 @@ htmltools::br()
 DT::datatable(variants_tier2_diagnostic_shared, 
               escape=F,extensions=c("Buttons","Responsive"), 
               options=list(buttons = c('csv','excel'), scrollCollapse = T, dom = 'Bfrtip')) |>
-  DT::formatStyle('EVIDENCE_LEVEL', 
+  DT::formatStyle('BM_EVIDENCE_LEVEL', 
                   backgroundColor = DT::styleEqual(c('A: Validated',
                                                      'A: FDA/NCCN/ELN guidelines',
                                                      'B: Clinical evidence',
@@ -213,7 +213,7 @@ DT::datatable(variants_tier2_diagnostic_shared,
                                                    c("#009E73","#009E73","#56B4E9", "#56B4E9","#56B4E9","#0072B2","#E69F00", "#F0E442"))) |>
    DT::formatStyle(color="white", "SYMBOL", "BIOMARKER_MAPPING", fontWeight = 'bold', `text-align` = 'center',
                   backgroundColor = DT::styleEqual(c('exact','codon','exon','gene'), 
-                                                   c('#000','#000',pcg_report[['metadata']][['color_palette']][['warning']][['values']][1], pcg_report[['metadata']][['color_palette']][['warning']][['values']][1])))
+                                                   c('#000','#000',pcg_report$settings$conf$visual_reporting$color_palette[['warning']][['values']][1], pcg_report$settings$conf$visual_reporting$color_palette[['warning']][['values']][1])))
 
 
 htmltools::br()

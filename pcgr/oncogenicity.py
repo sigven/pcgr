@@ -314,11 +314,16 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
 
    og_score_data = {}
    og_score_data['code'] = \
-      ['CLINGEN_VICC_SBVS1','CLINGEN_VICC_SBS1',
-      'CLINGEN_VICC_SBP1','CLINGEN_VICC_SBP2',
-      'CLINGEN_VICC_OVS1','CLINGEN_VICC_OS3',
-      'CLINGEN_VICC_OM2','CLINGEN_VICC_OM4',
-      'CLINGEN_VICC_OP1','CLINGEN_VICC_OP3',
+      ['CLINGEN_VICC_SBVS1',
+       'CLINGEN_VICC_SBS1',
+      'CLINGEN_VICC_SBP1',
+      'CLINGEN_VICC_SBP2',
+      'CLINGEN_VICC_OVS1',
+      'CLINGEN_VICC_OS3',
+      'CLINGEN_VICC_OM2',
+      'CLINGEN_VICC_OM4',
+      'CLINGEN_VICC_OP1',
+      'CLINGEN_VICC_OP3',
       'CLINGEN_VICC_OP4']
    og_score_data['category'] = \
       ['clinpop','clinpop',

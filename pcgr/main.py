@@ -4,7 +4,7 @@ from pcgr import pcgr_vars, arg_checker, utils, cna
 from pcgr.utils import getlogger, check_subprocess, remove_file, random_id_generator
 from pcgr.config import populate_config_data, create_config
 from pcgr.maf import update_maf_allelic_support
-from pcgr.vep import get_command
+from pcgr.vep import get_vep_command
 from pcgr.variant import clean_annotations, set_allelic_support, append_annotations, calculate_tmb
 
 import re
@@ -20,7 +20,7 @@ def cli():
 
     program_description = (f"Personal Cancer Genome Reporter (PCGR) workflow for clinical interpretation of "
                            f"somatic nucleotide variants and copy number aberration segments")
-    program_options = "\n\t--input_vcf <INPUT_VCF>\n\t--pcgr_dir <PCGR_DIR>\n\t--output_dir <OUTPUT_DIR>\n\t--genome_assembly" + \
+    program_options = "\n\t--input_vcf <INPUT_VCF>\n\t--refdata_dir <REFDATA_DIR>\n\t--output_dir <OUTPUT_DIR>\n\t--genome_assembly" + \
     " <GENOME_ASSEMBLY>\n\t--sample_id <SAMPLE_ID>"
 
     parser = argparse.ArgumentParser(description=program_description,
@@ -62,6 +62,7 @@ def cli():
     optional_allelic_support.add_argument("--control_af_max", type=float, default=1, dest="control_af_max", help="If VCF INFO tag for variant allelic fraction (control) is specified and found, set maximum tolerated AF for inclusion in report (default: %(default)s)")
 
     optional_tmb_msi.add_argument("--estimate_tmb", action="store_true", help="Estimate tumor mutational burden from the total number of somatic mutations and target region size, default: %(default)s")
+    optional_tmb_msi.add_argument("--tmb_display", dest="tmb_display", default="coding_and_silent", choices=["coding_and_silent", "coding_non_silent", "missense_only"], help="Type of TMB measure to show in report, default: %(default)s")
     optional_tmb_msi.add_argument("--tmb_dp_min", dest="tmb_dp_min", default=0, help="If VCF INFO tag for sequencing depth (tumor) is specified and found, set minimum required sequencing depth for TMB calculation: default: %(default)s")
     optional_tmb_msi.add_argument("--tmb_af_min", dest="tmb_af_min", default=0, help="If VCF INFO tag for allelic fraction (tumor) is specified and found, set minimum required allelic fraction for TMB calculation: default: %(default)s")
     optional_tmb_msi.add_argument("--estimate_msi", action="store_true", help="Predict microsatellite instability status from patterns of somatic mutations/indels, default: %(default)s")
@@ -112,13 +113,14 @@ def cli():
     optional_tumor_only.add_argument("--maf_gnomad_sas", dest="maf_gnomad_sas", type=float, default=0.002, help=f"{maf_help_msg}, (gnomAD - South Asian, default: %(default)s)")
     optional_tumor_only.add_argument("--maf_gnomad_global", dest="maf_gnomad_global", type=float, default=0.002, help=f"{maf_help_msg}, (gnomAD - global population, default: %(default)s)")
     optional_tumor_only.add_argument("--exclude_pon", action="store_true", help="Exclude variants occurring in PoN (Panel of Normals, if provided as VCF (--pon_vcf), default: %(default)s)")
-    optional_tumor_only.add_argument("--exclude_likely_hom_germline", action="store_true", help="Exclude likely homozygous germline variants (100 pct allelic fraction for alternate allele in tumor, very unlikely somatic event, default: %(default)s)")
-    optional_tumor_only.add_argument("--exclude_likely_het_germline", action="store_true", help="Exclude likely heterozygous germline variants (40-60 pct allelic fraction, AND presence in dbSNP + gnomAD, AND not existing as somatic event in COSMIC/TCGA, default: %(default)s)")
-    optional_tumor_only.add_argument("--exclude_dbsnp_nonsomatic", action="store_true", help="Exclude variants found in dbSNP (only those that are NOT found in ClinVar(somatic origin)/DoCM/TCGA/COSMIC, defult: %(default)s)")
+    optional_tumor_only.add_argument("--exclude_likely_hom_germline", action="store_true", help="Exclude likely homozygous germline variants (allelic fraction of 1.0 for alternate allele in tumor - very unlikely somatic event), default: %(default)s)")
+    optional_tumor_only.add_argument("--exclude_likely_het_germline", action="store_true", help="Exclude likely heterozygous germline variants (0.4-0.6 allelic fraction, AND presence in dbSNP + gnomAD, AND not existing as somatic record in COSMIC OR TCGA, default: %(default)s)")
+    optional_tumor_only.add_argument("--exclude_clinvar_germline", action="store_true", help="Exclude variants found in ClinVar (germline variant origin), defult: %(default)s)")
+    optional_tumor_only.add_argument("--exclude_dbsnp_nonsomatic", action="store_true", help="Exclude variants found in dbSNP (except for those present in ClinVar (somatic origin) OR TCGA OR COSMIC), defult: %(default)s)")
     optional_tumor_only.add_argument("--exclude_nonexonic", action="store_true", help="Exclude non-exonic variants, default: %(default)s)")
 
     required.add_argument("--input_vcf", dest="input_vcf", help="VCF input file with somatic variants in tumor sample, SNVs/InDels", required=True)
-    required.add_argument("--pcgr_dir", dest="pcgr_dir", help="PCGR base directory with accompanying data directory, e.g. ~/pcgr-" + str(pcgr_vars.PCGR_VERSION), required=True)
+    required.add_argument("--refdata_dir", dest="refdata_dir", help="Directory with reference data bundle, e.g. ~/pcgr-data-" + str(pcgr_vars.PCGR_VERSION), required=True)
     required.add_argument("--output_dir", dest="output_dir", help="Output directory", required=True)
     required.add_argument("--genome_assembly", dest="genome_assembly", choices=["grch37", "grch38"], help="Human genome assembly build: grch37 or grch38", required=True)
     required.add_argument("--sample_id", dest="sample_id", help="Tumor sample/cancer genome identifier - prefix for output files", required=True)
@@ -191,7 +193,7 @@ def run_pcgr(pcgr_paths, conf_options):
         panel_normal = os.path.join(pcgr_paths['panel_normal_vcf_dir'], pcgr_paths['panel_normal_vcf_basename'])
 
     if not input_vcf == 'None':
-        data_dir = pcgr_paths['base_dir']
+        refdata_dir = pcgr_paths['refdata_dir']
         output_dir = pcgr_paths['output_dir']
         
         check_subprocess(logger, f'mkdir -p {output_dir}', debug)
@@ -225,7 +227,7 @@ def run_pcgr(pcgr_paths, conf_options):
 
         vcf_validate_command = (
                 f'pcgr_validate_input.py '
-                f'{data_dir} '
+                f'{refdata_dir} '
                 f'{input_vcf} '
                 f'{input_vcf_validated_uncompr} '
                 f'{input_cna} '
@@ -282,7 +284,7 @@ def run_pcgr(pcgr_paths, conf_options):
         logger.info(f'Mutational burden estimation: {tmb_estimation_set}')
         logger.info(f'Include molecularly targeted clinical trials (beta): {clinical_trials_set}')
         
-        # CPSR|Generate YAML file - containing configuration options and paths to annotated molecular profile datasets
+        # PCGR|Generate YAML file - containing configuration options and paths to annotated molecular profile datasets
         # - VCF/TSV files (SNVs/InDels)
         # - TSV files (copy number aberrations)
         # - TSV files (RNA fusion) - COMING
@@ -293,16 +295,19 @@ def run_pcgr(pcgr_paths, conf_options):
         conf_options['annotated_vcf'] = output_vcf
         conf_options['output_dir'] = output_dir
         conf_options['annotated_cna'] = "None"
+        conf_options['fname_tmb'] = "None"
+        if conf_options['somatic_snv']['tmb']['run'] == 1:
+            conf_options['fname_tmb'] = tmb_fname
         if not input_cna == 'None': 
             conf_options['annotated_cna'] = pcgr_paths["output_cna"]
-        yaml_data = populate_config_data(conf_options, data_dir, workflow = "PCGR", logger = logger)
+        yaml_data = populate_config_data(conf_options, refdata_dir, workflow = "PCGR", logger = logger)
         genome_assembly = yaml_data['genome_assembly']
 
         with open(yaml_fname, "w") as outfile:
             outfile.write(yaml.dump(yaml_data))
         outfile.close()
         
-        vep_command = get_command(file_paths = pcgr_paths, 
+        vep_command = get_vep_command(file_paths = pcgr_paths, 
                                 conf_options = yaml_data, 
                                 input_vcf = input_vcf_validated, 
                                 output_vcf = vep_vcf)
@@ -373,7 +378,7 @@ def run_pcgr(pcgr_paths, conf_options):
         # PCGR|vcfanno - annotate VCF against a number of variant annotation tracks (BED/VCF)
         logger = getlogger("pcgr-vcfanno")
         pcgr_vcfanno_command = (
-                f'pcgr_vcfanno.py {vep_vcf}.gz {vep_vcfanno_vcf} {pcgr_paths["db_dir"]} '
+                f'pcgr_vcfanno.py {vep_vcf}.gz {vep_vcfanno_vcf} {pcgr_paths["db_assembly_dir"]} '
                 f'--num_processes {conf_options["other"]["vcfanno_n_proc"]} '
                 f'--dbnsfp --clinvar --rmsk --winmsk --simplerepeat '
                 f'--tcga --gene_transcript_xref --dbmts --gwas '
@@ -401,7 +406,7 @@ def run_pcgr(pcgr_paths, conf_options):
                 f'pcgr_summarise.py {vep_vcfanno_vcf}.gz {vep_vcfanno_summarised_vcf} {pon_annotation} '
                 f'{yaml_data["conf"]["vep"]["vep_regulatory"]} {oncogenicity_annotation} '
                 f'{yaml_data["conf"]["sample_properties"]["site"]} {yaml_data["conf"]["vep"]["vep_pick_order"]} '
-                f'{pcgr_paths["db_dir"]} --compress_output_vcf '
+                f'{pcgr_paths["db_assembly_dir"]} --compress_output_vcf '
                 f'{"--debug" if debug else ""}'
                 )
         summarise_db_src_msg1 = \
@@ -446,7 +451,7 @@ def run_pcgr(pcgr_paths, conf_options):
         logger.info("Appending ClinVar traits, official gene names, and protein domain annotations")        
         variant_set = \
            append_annotations(
-              output_pass_vcf2tsv_gz, pcgr_db_dir = pcgr_paths["db_dir"], logger = logger)
+              output_pass_vcf2tsv_gz, db_assembly_dir = pcgr_paths["db_assembly_dir"], logger = logger)
         variant_set = set_allelic_support(variant_set, allelic_support_tags = yaml_data["conf"]['somatic_snv']['allelic_support'])
         variant_set = clean_annotations(variant_set, yaml_data, germline = False, logger = logger)        
         variant_set.fillna('.').to_csv(output_pass_tsv_gz, sep="\t", compression="gzip", index=False)
@@ -519,7 +524,7 @@ def run_pcgr(pcgr_paths, conf_options):
                 pcgr_paths['input_cna_dir'],pcgr_paths['input_cna_basename']),
             build = yaml_data['genome_assembly'],
             sample_id = yaml_data['sample_id'],
-            pcgr_build_db_dir = pcgr_paths['db_dir'], 
+            db_assembly_dir = pcgr_paths['db_assembly_dir'], 
             n_copy_amplifications = yaml_data["conf"]['somatic_cna']['n_copy_gain'],
             overlap_fraction = 0.5,
             logger = logger)
@@ -527,6 +532,7 @@ def run_pcgr(pcgr_paths, conf_options):
         if cna_annotation == 0:
             logger.info('Finished pcgr-annotate-cna-segments')
     else:
+        logger = getlogger("pcgr-annotate-cna-segments")
         logger.info('PCGR - STEP 4: Annotation of copy number segments - cytobands, overlapping transcripts, and biomarkers - SKIPPED (no data available)')
     print('----')
     
@@ -535,7 +541,7 @@ def run_pcgr(pcgr_paths, conf_options):
     # Generation of HTML reports for VEP/vcfanno-annotated VCF and copy number segment file
     if not conf_options['other']['no_reporting']:
         logger = getlogger('pcgr-writer')
-        logger.info('PCGR - STEP 5: Generation of output files - variant interpretation report for precision oncology')
+        logger.info('PCGR - STEP 5: Generation of output files - molecular interpretation report for precision cancer medicine')
         # export PATH to R conda env Rscript
         pcgrr_conda = conf_options['pcgrr_conda']
         pcgr_conda = utils.conda_prefix_basename()

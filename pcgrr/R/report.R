@@ -80,19 +80,17 @@ init_report <- function(yaml_fname = NULL,
   }else{
 
     for (a_elem in c("snv_indel",
+                     "cna",
+                     "value_box",
+                     "sample_properties",
+                     "assay_properties",
+                     "mutational_signatures",
                      "tmb",
                      "msi",
-                     "cna",
-                     "cna_plot",
-                     "m_signature_mp",
-                     "sequencing_mode",
-                     "tumor_only",
-                     "value_box",
                      "rainfall",
                      "kataegis",
-                     "tumor_purity",
-                     "tumor_ploidy",
-                     "cpsr",
+                     "expression",
+                     "predisposition",
                      "report_display_config",
                      "clinicaltrials")) {
       report[["content"]][[a_elem]] <- list()
@@ -111,10 +109,6 @@ init_report <- function(yaml_fname = NULL,
           init_rainfall_content()
       }
 
-      if (a_elem == "cna_plot") {
-        report[["content"]][[a_elem]][["png"]] <- NULL
-      }
-
       if (a_elem == "report_display_config") {
         report[["content"]][[a_elem]] <-
           init_report_display_content()
@@ -126,15 +120,17 @@ init_report <- function(yaml_fname = NULL,
       }
 
       if (a_elem == "snv_indel" | a_elem == "cna") {
-        report[["content"]][[a_elem]] <- init_var_content()
+        report[["content"]][[a_elem]][['callset']] <- list()
 
         if (a_elem == "snv_indel") {
-          report[["content"]][[a_elem]] <-
-            init_snv_indel_content(rep = report[["content"]][[a_elem]])
+          report[["content"]][[a_elem]][['vstats']] <-
+            init_snv_indel_vstats()
         }
         if (a_elem == "cna") {
-          report[["content"]][[a_elem]] <-
-            init_cna_content(rep = report[["content"]][[a_elem]])
+          report[["content"]][[a_elem]][['vstats']] <-
+            init_cna_vstats()
+          report[["content"]][[a_elem]][['cnaqc']] <-
+            list()
         }
       }
       if (a_elem == "clinicaltrials") {
@@ -142,14 +138,13 @@ init_report <- function(yaml_fname = NULL,
         report[["content"]][[a_elem]][["missing_data"]] <- F
       }
 
-      if (a_elem == "m_signature_mp") {
+      if (a_elem == "mutational_signatures") {
         report[["content"]][[a_elem]] <-
           init_m_signature_content()
       }
-      if (a_elem == "tmb" & !is.null(report$ref_data$tmb)) {
+      if (a_elem == "tmb") {
         report[["content"]][[a_elem]] <-
-          init_tmb_content(tcga_tmb = report$ref_data$tmb,
-                           config = report$settings$conf)
+          init_tmb_content(ref_data = report[["ref_data"]])
       }
       if (a_elem == "msi") {
         report[["content"]][[a_elem]][["missing_data"]] <- FALSE
@@ -196,110 +191,58 @@ update_report <- function(report, report_data,
 
 #' Function that initiates report element with TMB information
 #'
-#' @param tcga_tmb data frame with TMB distribution in TCGA samples
-#' @param config PCGR configuration object
+#' @param ref_data PCGR reference data list object
 #
 #' @return rep TMB report element
 #'
 #' @export
-init_tmb_content <- function(tcga_tmb = NULL,
-                             config = NULL) {
+init_tmb_content <- function(ref_data = NULL) {
 
-  invisible(assertthat::assert_that(!is.null(tcga_tmb)))
-  invisible(assertthat::assert_that(is.data.frame(tcga_tmb) &
-                                      nrow(tcga_tmb) > 0))
-  invisible(assertthat::assert_that(!is.null(config)))
-  invisible(assertthat::assert_that(!is.null(config[['assay_properties']])))
-  invisible(assertthat::assert_that("effective_target_size_mb" %in%
-                                      names(config[['assay_properties']])))
-
+  invisible(assertthat::assert_that(!is.null(ref_data)))
+  invisible(assertthat::assert_that(!is.null(ref_data$misc)))
+  invisible(assertthat::assert_that(is.data.frame(
+    ref_data$misc$tmb) &
+      nrow(ref_data$misc$tmb) > 0))
   rep <- list()
   rep[["eval"]] <- FALSE
-
-  rep[["algorithm"]] <-"all_coding"
-  rep[["v_stat"]] <- list()
-  rep[["v_stat"]][["n_tmb"]] <- 0
-  rep[["v_stat"]][["tmb_estimate"]] <- 0
-  rep[["v_stat"]][["effective_target_size_mb"]] <-
-    config[["assay_properties"]][["effective_target_size_mb"]]
-  #rep[["v_stat"]][["tmb_tertile"]] <-
-    #"TMB - not determined"
-  rep[["tcga_tmb"]] <- tcga_tmb
+  rep[["sample_estimate"]] <- data.frame()
+  rep[["tmb_reference"]] <- ref_data$misc$tmb
 
   return(rep)
 }
 
 #' Function that initiates report element with CNA information
 #'
-#' @param rep PCGR report structure
-#
 #' @return rep updated PCGR report structure - initialized for CNA content
 #' @export
-init_cna_content <- function(rep = NULL) {
+init_cna_vstats <- function(rep = NULL) {
 
-  invisible(assertthat::assert_that(!is.null(rep)))
-  invisible(assertthat::assert_that(!is.null(rep[['disp']])))
-  invisible(assertthat::assert_that(!is.null(rep[['variant_set']])))
-
-  rep[["variant_set"]][["tsv"]] <-
-    data.frame()
-  rep[["variant_set"]][["tier1"]] <-
-    data.frame()
-  rep[["variant_set"]][["tier2"]] <-
-    data.frame()
-  for (t in c("n_cna_loss", "n_cna_gain")) {
-    rep[["v_stat"]][[t]] <- 0
+  vstats <- list()
+  for (t in c("n_tsg_loss",
+              "n_oncogene_gain",
+              "n_other_drugtarget_gain",
+              "n_tier1",
+              "n_tier2",
+              "n_tier3")) {
+    vstats[[t]] <- 0
   }
-  for (t in c("segment",
-              "oncogene_gain",
-              "tsgene_loss",
-              "other_target",
-              "biomarker",
-              "tier1",
-              "tier2")) {
-    rep[["disp"]][[t]] <-
-      data.frame()
-  }
-  return(rep)
-
-
+  return(vstats)
 }
 
 #' Function that initiates report element with SNV/InDel information
 #'
-#' @param rep PCGR report structure
-#
-#' @return rep updated PCGR report structure - initialized for SNV/InDel content
+#' @return vstats updated PCGR report structure - initialized for SNV/InDel content
 #' @export
-init_snv_indel_content <- function(rep = NULL) {
+init_snv_indel_vstats <- function() {
 
-  invisible(assertthat::assert_that(!is.null(rep)))
-  invisible(assertthat::assert_that(!is.null(rep[['disp']])))
-  invisible(assertthat::assert_that(!is.null(rep[['variant_set']])))
-
-  for (t in c("tier1", "tier2", "tier3",
-              "tier4", "noncoding")) {
-    rep[["disp"]][[t]] <-
-      data.frame()
-    if (t == "tier3") {
-      rep[["disp"]][[t]] <- list()
-      for (c in c("proto_oncogene",
-                  "tumor_suppressor")) {
-        rep[["disp"]][[t]][[c]] <-
-          data.frame()
-      }
-    }
+  vstats <- list()
+  for (t in c("n", "n_snv", "n_indel",
+              "n_coding", "n_noncoding",
+              "n_tier1", "n_tier2",
+              "n_tier3", "n_tier4")) {
+    vstats[[t]] <- 0
   }
-  for (t in c("tier1", "tier2", "tier3", "tier4", "noncoding",
-              "tsv", "tsv_unfiltered", "maf", "coding", "all")) {
-    rep[["variant_set"]][[t]] <-
-      data.frame()
-  }
-  for (t in c("n", "n_snv", "n_indel", "n_coding", "n_noncoding",
-              "n_tier1", "n_tier2", "n_tier3", "n_tier4")) {
-    rep[["v_stat"]][[t]] <- 0
-  }
-  return(rep)
+  return(vstats)
 }
 
 #' Function that initiates report element with mutational signatures information
@@ -389,32 +332,33 @@ init_rainfall_content <- function() {
 
 #' Function that initiates report element with tumor-only information
 #'
-#' @return rep Report structure initialized for tumor-only data
+#' @return rep Report structure initialized for tumor-only stats
 #' @export
 init_tumor_only_content <- function() {
 
   rep <- list()
   rep[["eval"]] <- FALSE
-
-  rep[["variant_set"]] <- list()
-  rep[["variant_set"]][["tsv_unfiltered"]] <-
-    data.frame()
-  rep[["variant_set"]][["filtered"]] <-
-    data.frame()
   rep[["upset_data"]] <- data.frame()
   rep[["upset_plot_valid"]] <- FALSE
-  rep[["v_stat"]] <- list()
+  rep[["vfilter"]] <- list()
 
-  for (successive_filter in c("unfiltered_n",
-                              "gnomad_n_remain", "clinvar_n_remain",
-                              "pon_n_remain", "hom_n_remain",
-                              "het_n_remain", "dbsnp_n_remain",
-                              "nonexonic_n_remain",
-                              "gnomad_frac_remain", "clinvar_frac_remain",
-                              "dbsnp_frac_remain", "pon_frac_remain",
-                              "hom_frac_remain", "het_frac_remain",
-                              "nonexonic_frac_remain")) {
-    rep[["v_stat"]][[successive_filter]] <- 0
+  for (successive_filter in
+       c("unfiltered_n",
+         "gnomad_n_remain",
+         "clinvar_n_remain",
+         "pon_n_remain",
+         "hom_n_remain",
+         "het_n_remain",
+         "dbsnp_n_remain",
+         "nonexonic_n_remain",
+         "gnomad_frac_remain",
+         "clinvar_frac_remain",
+         "dbsnp_frac_remain",
+         "pon_frac_remain",
+         "hom_frac_remain",
+         "het_frac_remain",
+         "nonexonic_frac_remain")) {
+    rep[["vfilter"]][[successive_filter]] <- 0
   }
   return(rep)
 }

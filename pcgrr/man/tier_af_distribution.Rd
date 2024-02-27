@@ -5,7 +5,7 @@
 \title{Function that plots a histogram of the the variant allelic
 support (tumor) - grouped by tiers}
 \usage{
-tier_af_distribution(tier_df, bin_size = 0.1)
+tier_af_distribution(tier_df, bin_size = 0.05)
 }
 \arguments{
 \item{tier_df}{data frame with somatic mutations}

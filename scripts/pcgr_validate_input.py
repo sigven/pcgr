@@ -109,16 +109,16 @@ def is_valid_rna_expression(rna_exp_file, logger):
     """
     rna_exp_reader = csv.DictReader(open(rna_exp_file,'r'), delimiter='\t')
     ## check that required columns are present
-    if not ('Gene' in rna_exp_reader.fieldnames and 'TPM' in rna_exp_reader.fieldnames):
-        err_msg = "Bulk-RNA expression file (" + str(rna_exp_file) + ") is missing required column(s): 'Gene', 'TPM'\n. Column names present in file: " + str(rna_exp_reader.fieldnames)
+    if not ('TargetID' in rna_exp_reader.fieldnames and 'TPM' in rna_exp_reader.fieldnames):
+        err_msg = "Bulk-RNA expression file (" + str(rna_exp_file) + ") is missing required column(s): 'TargetID', 'TPM'\n. Column names present in file: " + str(rna_exp_reader.fieldnames)
         return error_message(err_msg, logger)
 
     rna_exp_dataframe = np.read_csv(rna_exp_file, sep="\t")
     if rna_exp_dataframe.empty is True:
         err_msg = 'RNA gene expression file is empty - contains NO gene expression estimates'
         return error_message(err_msg, logger)
-    if not rna_exp_dataframe['Gene'].dtype.kind in 'O': ## check that 'Gene' is of type object
-        err_msg = "'Gene' column of RNA expression file cannot not be of type '" + str(rna_exp_dataframe['Gene'].dtype) + "'"
+    if not rna_exp_dataframe['TargetID'].dtype.kind in 'O': ## check that 'Gene' is of type object
+        err_msg = "'TargetID' column of RNA expression file cannot not be of type '" + str(rna_exp_dataframe['TargetID'].dtype) + "'"
         return error_message(err_msg, logger)
     if not rna_exp_dataframe['TPM'].dtype.kind in 'if': ## check that 'TPM' is of type object
         err_msg = "'TPM' column of RNA expression file cannot not be of type '" + str(rna_exp_dataframe['TPM'].dtype) + "'"

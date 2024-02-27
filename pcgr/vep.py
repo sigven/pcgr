@@ -10,12 +10,12 @@ from pcgr import pcgr_vars
 
 
 
-def get_command(file_paths, conf_options, input_vcf, output_vcf, debug = False):
+def get_vep_command(file_paths, conf_options, input_vcf, output_vcf, debug = False):
     
     output_vcf_gz = f'{output_vcf}.gz'
     genome_assembly = conf_options['genome_assembly']
     
-    vep_dir = os.path.join(str(file_paths['db_dir']), '.vep')
+    vep_dir = os.path.join(str(file_paths['db_assembly_dir']), '.vep')
     fasta_assembly = os.path.join(
         vep_dir, 'homo_sapiens', 
         f'{pcgr_vars.VEP_VERSION}_{pcgr_vars.VEP_ASSEMBLY[genome_assembly]}', 

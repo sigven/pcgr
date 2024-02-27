@@ -2,22 +2,16 @@
 % Please edit documentation in R/mutational_burden.R
 \name{generate_report_data_tmb}
 \alias{generate_report_data_tmb}
-\title{Function that tiered variant sets for SNVs/InDels}
+\title{Function that reads TSV file with TMB estimates from sample}
 \usage{
-generate_report_data_tmb(sample_calls, pcgr_data, sample_name, pcgr_config)
+generate_report_data_tmb(settings = NULL)
 }
 \arguments{
-\item{sample_calls}{variant calls subject to mutational signature analysis}
-
-\item{pcgr_data}{object with PCGR annotation data}
-
-\item{sample_name}{sample identifier}
-
-\item{pcgr_config}{Object with PCGR configuration parameters}
+\item{settings}{PCGR settings configuration object}
 }
 \value{
-pcg_report_data data frame with all report elements
+tmb_estimate
 }
 \description{
-Function that tiered variant sets for SNVs/InDels
+Function that reads TSV file with TMB estimates from sample
 }

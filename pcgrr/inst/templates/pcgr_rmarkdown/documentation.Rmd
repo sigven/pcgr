@@ -96,15 +96,15 @@ The set of somatic mutations observed in a tumor reflects the varied mutational 
 
 The **MutationalPatterns** package ([Blokzijl et al., 2018](https://www.ncbi.nlm.nih.gov/pubmed/29695279)) is used to estimate the relative contribution of known mutational signatures in a single tumor sample. [MutationalPatterns](https://github.com/UMCUGenetics/MutationalPatterns) makes an optimal reconstruction of the mutations observed in a given sample with [COSMIC's (V3.2) reference collection of n = 78 mutational signatures (SBS, including sequencing artefacts)](https://cancer.sanger.ac.uk/signatures/sbs/). By default, we restrict the signatures in the reference collection to those already observed in the tumor type in question (i.e. from large-scale <i>de novo</i> signature extraction on ICGC-PCAWG tumor samples). 
 
-```{r results = "asis", eval = pcg_report$content$m_signature_mp$eval == T & !pcg_report$content$m_signature_mp$missing_data}
+```{r results = "asis", eval = pcg_report$content$mutational_signatures$eval == T & !pcg_report$content$mutational_signatures$missing_data}
 
 cat("Specifically, for tumors of type <b>", pcg_report$metadata$config$t_props$tumor_type,"</b>, mutational signature reconstruction is limited to the following reference collection:",sep="")
 
-dat <- pcg_report$content$m_signature_mp$result$reference_data
+dat <- pcg_report$content$mutational_signatures$result$reference_data
 if("signature_id" %in% colnames(dat) & "aetiology_keyword" %in% colnames(dat) & NROW(dat) > 0){
   cat('<ul>')
   i <- 1
-  refsig_collection_site <- pcg_report$content$m_signature_mp$result$reference_data |>
+  refsig_collection_site <- pcg_report$content$mutational_signatures$result$reference_data |>
     dplyr::mutate(tmp_id = as.numeric(
       stringr::str_replace(
         stringr::str_replace(
@@ -135,10 +135,10 @@ if(pcg_report$metadata$config$msigs$include_artefact_signatures == T){
 }
 ```   
 
-```{r results = "asis", eval = pcg_report$metadata$config$msigs$run == T & pcg_report$content$m_signature_mp$missing_data}
+```{r results = "asis", eval = pcg_report$metadata$config$msigs$run == T & pcg_report$content$mutational_signatures$missing_data}
 cat("<b>NOTE</b>: This sample contains too few variants for estimation of mutational signature contributions",sep="\n")
 ```
-```{r results = "asis", eval = pcg_report$metadata$config$msigs$run == T & !pcg_report$content$m_signature_mp$missing_data}
+```{r results = "asis", eval = pcg_report$metadata$config$msigs$run == T & !pcg_report$content$mutational_signatures$missing_data}
 cat("The accuracy of signature fitting reflects how well the mutational profile can be reconstructed with signatures from the reference collection. Reconstructions with fitting accuracy below 90% should be interpreted with caution.",sep="\n")
 ```
 

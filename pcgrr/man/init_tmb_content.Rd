@@ -4,12 +4,10 @@
 \alias{init_tmb_content}
 \title{Function that initiates report element with TMB information}
 \usage{
-init_tmb_content(tcga_tmb = NULL, config = NULL)
+init_tmb_content(ref_data = NULL)
 }
 \arguments{
-\item{tcga_tmb}{data frame with TMB distribution in TCGA samples}
-
-\item{config}{PCGR configuration object}
+\item{ref_data}{PCGR reference data list object}
 }
 \value{
 rep TMB report element

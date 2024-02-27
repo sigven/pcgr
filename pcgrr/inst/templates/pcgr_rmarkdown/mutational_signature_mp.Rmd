@@ -2,7 +2,7 @@
 
 ```{r echo = F}
 missing_data_norun <- F
-if(pcg_report$content$m_signature_mp$eval == F | pcg_report$content$m_signature_mp$missing_data == T){
+if(pcg_report$content$mutational_signatures$eval == F | pcg_report$content$mutational_signatures$missing_data == T){
   missing_data_norun <- T
 }
 ```
@@ -20,12 +20,12 @@ Here, we apply the **MutationalPatterns** package ([Blokzijl et al., 2018](https
 
 cat('Specifically, for tumors of type <b>', pcg_report$metadata$config$t_props$tumor_type,'</b>, mutational signature reconstruction is here limited to the following reference collection:<br>',sep="")
 
-dat <- pcg_report$content$m_signature_mp$result$reference_data
+dat <- pcg_report$content$mutational_signatures$result$reference_data
 if("signature_id" %in% colnames(dat) & "aetiology_keyword" %in% colnames(dat)){
   cat('<ul>')
   i <- 1
   
-  refsig_collection_site <- pcg_report$content$m_signature_mp$result$reference_data |>
+  refsig_collection_site <- pcg_report$content$mutational_signatures$result$reference_data |>
     dplyr::mutate(tmp_id = as.numeric(
       stringr::str_replace(
         stringr::str_replace(
@@ -58,11 +58,11 @@ htmltools::br()
 
 ```{r results = "asis", include = !missing_data_norun}
 
-cat('A total of <b>n = ',nrow(pcg_report[['content']][['m_signature_mp']][['variant_set']]$all), '</b> SNVs were used for the mutational signature analysis of this tumor.', sep = '')
+cat('A total of <b>n = ',nrow(pcg_report[['content']][['mutational_signatures']][['variant_set']]$all), '</b> SNVs were used for the mutational signature analysis of this tumor.', sep = '')
 
 cat("<br><br>")
 
-cat('Accuracy of signature fitting: <b>', pcg_report$content$m_signature_mp$result$goodness_of_fit, '% </b> (reflects how well the mutational profile can be reconstructed with signatures from the reference collection)', sep = '')
+cat('Accuracy of signature fitting: <b>', pcg_report$content$mutational_signatures$result$goodness_of_fit, '% </b> (reflects how well the mutational profile can be reconstructed with signatures from the reference collection)', sep = '')
 
 cat('<br>')
 ```
@@ -81,7 +81,7 @@ htmltools::br()
 
 ```{r mutsigs_context_frequency, fig.width=14, fig.height = 4, dpi = 200, eval = !missing_data_norun}
 
-MutationalPatterns::plot_96_profile(pcg_report$content$m_signature_mp$result$mut_mat,colors = RColorBrewer::brewer.pal(6, "Dark2"), ymax = 0.3)
+MutationalPatterns::plot_96_profile(pcg_report$content$mutational_signatures$result$mut_mat,colors = RColorBrewer::brewer.pal(6, "Dark2"), ymax = 0.3)
 
 ```   
 
@@ -97,11 +97,11 @@ cat("<h3>Signature reconstruction - aetiology contributions</h3>", sep ="\n")
 
 ```{r sig_pie_plot, echo=F, fig.width = 6, fig.height = 6, fig.align = "center", eval = !missing_data_norun}
 plot_data <- 
-  pcg_report$content$m_signature_mp$result$contributions$per_group
+  pcg_report$content$mutational_signatures$result$contributions$per_group
 
 scale_fill <- 
-  pcg_report$content$m_signature_mp$result$scale_fill_values
-names(scale_fill) <- pcg_report$content$m_signature_mp$result$scale_fill_names
+  pcg_report$content$mutational_signatures$result$scale_fill_values
+names(scale_fill) <- pcg_report$content$mutational_signatures$result$scale_fill_names
 
 ggplot2::ggplot(plot_data, ggplot2::aes(x = 2, y = prop_group, fill = group)) +
      ggplot2::geom_bar(width = 1, stat = "identity", color = "white") +
@@ -129,11 +129,11 @@ htmltools::br()
 
 ```{r aetiologies, echo=F, eval = !missing_data_norun}
 
-signature_ids <- pcg_report[['content']][['m_signature_mp']][['result']][['contributions']][['per_signature']]$signature_id
-signature_colors <- pcg_report[['content']][['m_signature_mp']][['result']][['contributions']][['per_signature']]$col
+signature_ids <- pcg_report[['content']][['mutational_signatures']][['result']][['contributions']][['per_signature']]$signature_id
+signature_colors <- pcg_report[['content']][['mutational_signatures']][['result']][['contributions']][['per_signature']]$col
 
 myOptions <- list(buttons = c('csv','excel'),dom = 'Bfrtip', scrollCollapse = T)
-dat <- dplyr::select(pcg_report$content$m_signature_mp$result$contributions$per_signature, -c(sample_id,col,prop_signature)) |>
+dat <- dplyr::select(pcg_report$content$mutational_signatures$result$contributions$per_signature, -c(sample_id,col,prop_signature)) |>
   dplyr::select(signature_id, contribution, group, dplyr::everything())
 DT::datatable(dat ,options = myOptions,extensions=c("Buttons","Responsive"),escape=F) |>
  DT::formatStyle('contribution',fontWeight = 'bold') |>

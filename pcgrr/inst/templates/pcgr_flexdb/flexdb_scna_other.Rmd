@@ -16,8 +16,8 @@ flexdashboard::valueBox("sCNA", caption = NULL, color = "#000000", icon = NULL)
 ```{r cna_gains_oncogenes2, echo = F}
 flexdashboard::valueBox(NROW(pcg_report$content$cna$disp$oncogene_gain),
                         color = ifelse(NROW(pcg_report$content$cna$disp$oncogene_gain) > 0,
-                                       pcg_report$metadata$color_value_box,
-                                       pcg_report$metadata$color_none),
+                                       pcg_report$settings$conf$visual_reporting$color_value_box,
+                                       pcg_report$settings$conf$visual_reporting$color_none),
                         icon = "fa-dna", href="#scna-oncogene")
 ```
 
@@ -26,8 +26,8 @@ flexdashboard::valueBox(NROW(pcg_report$content$cna$disp$oncogene_gain),
 ```{r cna_loss_tsgene2, echo = F}
 flexdashboard::valueBox(NROW(pcg_report$content$cna$disp$tsgene_loss),
                         color = ifelse(NROW(pcg_report$content$cna$disp$tsgene_loss) > 0,
-                                       pcg_report$metadata$color_value_box,
-                                       pcg_report$metadata$color_none),
+                                       pcg_report$settings$conf$visual_reporting$color_value_box,
+                                       pcg_report$settings$conf$visual_reporting$color_none),
                         icon = "fa-dna", href="#scna-tsgene")
 ```
 
@@ -36,8 +36,8 @@ flexdashboard::valueBox(NROW(pcg_report$content$cna$disp$tsgene_loss),
 ```{r cna_gain_target2, echo = F}
 flexdashboard::valueBox(NROW(pcg_report$content$cna$disp$other_target),
                         color = ifelse(NROW(pcg_report$content$cna$disp$other_target) > 0,
-                                       pcg_report$metadata$color_value_box,
-                                       pcg_report$metadata$color_none),
+                                       pcg_report$settings$conf$visual_reporting$color_value_box,
+                                       pcg_report$settings$conf$visual_reporting$color_none),
                         icon = "fa-dna", href="#scna-other")
 ```
 

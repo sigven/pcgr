@@ -14,20 +14,20 @@ flexdashboard::valueBox("sCNA", caption = NULL, color = "#000000", icon = NULL)
 ### Copy number gains
 
 ```{r cna_gains, echo = F}
-flexdashboard::valueBox(pcg_report$content$cna$v_stat$n_cna_gain,
-                        color = ifelse(pcg_report$content$cna$v_stat$n_cna_gain > 0,
-                                       pcg_report$metadata$color_value_box,
-                                       pcg_report$metadata$color_none),
+flexdashboard::valueBox(pcg_report$content$cna$vstats$n_cna_gain,
+                        color = ifelse(pcg_report$content$cna$vstats$n_cna_gain > 0,
+                                       pcg_report$settings$conf$visual_reporting$color_value_box,
+                                       pcg_report$settings$conf$visual_reporting$color_none),
                         icon = "fa-dna")
 ```
 
 ### Copy number losses
 
 ```{r cna_losses, echo = F}
-flexdashboard::valueBox(pcg_report$content$cna$v_stat$n_cna_loss,
-                        color = ifelse(pcg_report$content$cna$v_stat$n_cna_loss > 0,
-                                       pcg_report$metadata$color_value_box,
-                                       pcg_report$metadata$color_none),
+flexdashboard::valueBox(pcg_report$content$cna$vstats$n_cna_loss,
+                        color = ifelse(pcg_report$content$cna$vstats$n_cna_loss > 0,
+                                       pcg_report$settings$conf$visual_reporting$color_value_box,
+                                       pcg_report$settings$conf$visual_reporting$color_none),
                         icon = "fa-dna")
 ```
 
@@ -37,7 +37,7 @@ flexdashboard::valueBox(pcg_report$content$cna$v_stat$n_cna_loss,
 num_bms1 <- NROW(pcg_report[["content"]][["cna"]][["disp"]][["tier1"]])
 flexdashboard::valueBox(num_bms1, color = ifelse(num_bms1 > 0,
                         "#00a65a",
-                        pcg_report$metadata$color_none), href = "#tier-1-1", icon = "fa-file-prescription")
+                        pcg_report$settings$conf$visual_reporting$color_none), href = "#tier-1-1", icon = "fa-file-prescription")
 ```
 
 ### TIER 2 biomarkers
@@ -46,7 +46,7 @@ flexdashboard::valueBox(num_bms1, color = ifelse(num_bms1 > 0,
 num_bms2 <- NROW(pcg_report[["content"]][["cna"]][["disp"]][["tier2"]])
 flexdashboard::valueBox(num_bms2, color = ifelse(num_bms2 > 0,
                         "#00a65a",
-                        pcg_report$metadata$color_none), href = "#tier-2-1", icon = "fa-file-prescription")
+                        pcg_report$settings$conf$visual_reporting$color_none), href = "#tier-2-1", icon = "fa-file-prescription")
 ```
 
 

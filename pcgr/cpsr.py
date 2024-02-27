@@ -22,7 +22,7 @@ def get_args():
 
     program_description = "Cancer Predisposition Sequencing Reporter - report of " + \
        "clinically significant cancer-predisposing germline variants"
-    program_options = " --input_vcf <INPUT_VCF> --pcgr_dir <PCGR_DIR> --output_dir <OUTPUT_DIR> --genome_assembly " + \
+    program_options = " --input_vcf <INPUT_VCF> --refdata_dir <REFDATA_DIR> --output_dir <OUTPUT_DIR> --genome_assembly " + \
        " <GENOME_ASSEMBLY> --sample_id <SAMPLE_ID>"
 
     parser = argparse.ArgumentParser(description = program_description,
@@ -69,7 +69,7 @@ def get_args():
     optional_vep.add_argument('--vep_no_intergenic', action = "store_true", help="Skip intergenic variants during processing (option '--no_intergenic' in VEP), default: %(default)s")
 
     required.add_argument('--input_vcf', help='VCF input file with germline query variants (SNVs/InDels).', required = True)
-    required.add_argument('--pcgr_dir',help=f"Directory that contains the PCGR data bundle directory, e.g. ~/pcgr-{pcgr_vars.PCGR_VERSION}", required = True)
+    required.add_argument('--refdata_dir',help=f"Directory that contains the PCGR/CPSR reference data, e.g. ~/pcgr-data-{pcgr_vars.PCGR_VERSION}", required = True)
     required.add_argument('--output_dir',help='Output directory', required = True)
     required.add_argument('--genome_assembly',choices = ['grch37','grch38'], help='Genome assembly build: grch37 or grch38', required = True)
     required.add_argument('--sample_id',help="Sample identifier - prefix for output files", required = True)
@@ -124,7 +124,8 @@ def run_cpsr(conf_options, cpsr_paths):
             warn_message(warn_msg, logger)
 
     if not input_vcf == 'None':
-        data_dir = cpsr_paths['base_dir']
+        refdata_dir = cpsr_paths['refdata_dir']
+        db_assembly_dir = cpsr_paths['db_assembly_dir']
         output_dir = cpsr_paths['output_dir']
 
         check_subprocess(logger, f'mkdir -p {output_dir}', debug)
@@ -147,7 +148,7 @@ def run_cpsr(conf_options, cpsr_paths):
         ## CPSR|Validate input VCF - check formatting, non-overlap with CPSR INFO tags, and whether sample contains any variants in cancer predisposition loci
         vcf_validate_command = (
                 f'cpsr_validate_input.py '
-                f'{data_dir} '
+                f'{refdata_dir} '
                 f'{input_vcf} '
                 f'{input_vcf_validated_uncompr} '
                 f'{input_customlist} '
@@ -192,7 +193,7 @@ def run_cpsr(conf_options, cpsr_paths):
             conf_options['gene_panel']['custom_list_bed'] = output_custom_bed
         
         ## Write YAML configuration file  - settings, path to files, reference bundle etc
-        yaml_data = populate_config_data(conf_options, data_dir, workflow = "CPSR", logger = logger)
+        yaml_data = populate_config_data(conf_options, refdata_dir, workflow = "CPSR", logger = logger)
         with open(yaml_fname, "w") as outfile:
             outfile.write(yaml.dump(yaml_data))
         outfile.close()
@@ -233,7 +234,8 @@ def run_cpsr(conf_options, cpsr_paths):
                 f'{"--debug" if debug else ""} '
                 f"--dbmts --gerp --tcga --gnomad_non_cancer --gene_transcript_xref "
                 f"--gwas --rmsk {vep_vcf}.gz {vep_vcfanno_vcf} "
-                f"{os.path.join(data_dir, 'data', str(yaml_data['genome_assembly']))}"
+                f"{db_assembly_dir}"
+                #f"{os.path.join(refdata_dir, 'data', str(yaml_data['genome_assembly']))}"
                 )
         check_subprocess(logger, pcgr_vcfanno_command, debug)
         logger.info("Finished cpsr-vcfanno")
@@ -245,7 +247,7 @@ def run_cpsr(conf_options, cpsr_paths):
                 f'pcgr_summarise.py {vep_vcfanno_vcf}.gz {vep_vcfanno_summarised_vcf} 0 '
                 f'{yaml_data["conf"]["vep"]["vep_regulatory"]} 0 '
                 f'Any {yaml_data["conf"]["vep"]["vep_pick_order"]} '
-                f'{cpsr_paths["db_dir"]} --compress_output_vcf '
+                f'{cpsr_paths["db_assembly_dir"]} --compress_output_vcf '
                 f'--cpsr_yaml {yaml_fname} '
                 f'--cpsr {"--debug" if debug else ""}'
                 )
@@ -278,7 +280,7 @@ def run_cpsr(conf_options, cpsr_paths):
         logger.info("Appending ClinVar traits, official gene names, and protein domain annotations")        
         variant_set = \
            variant.append_annotations(
-              output_pass_vcf2tsv_gz, pcgr_db_dir = cpsr_paths["db_dir"], logger = logger)
+              output_pass_vcf2tsv_gz, db_assembly_dir = cpsr_paths["db_assembly_dir"], logger = logger)
         variant_set = variant.clean_annotations(variant_set, yaml_data, germline = True, logger = logger)
         if {'GENOTYPE'}.issubset(variant_set.columns):
             if variant_set.loc[variant_set['GENOTYPE'] == '.'].empty and variant_set.loc[variant_set['GENOTYPE'] == 'undefined'].empty:

@@ -36,25 +36,25 @@ flexdashboard::valueBox("Noncoding", caption = NULL, color = '#000000', icon = N
 ### Total variants
 
 ```{r}
-flexdashboard::valueBox(pcg_report$content$snv_indel$v_stat$n_noncoding, color = pcg_report$metadata$color_value_box, icon = "fa-dna")
+flexdashboard::valueBox(pcg_report$content$snv_indel$vstats$n_noncoding, color = pcg_report$settings$conf$visual_reporting$color_value_box, icon = "fa-dna")
 ```
 
 ### SNVs
 
 ```{r}
-flexdashboard::valueBox(as.character(n_noncoding_snv), color = pcg_report$metadata$color_value_box, icon = "fa-dna")
+flexdashboard::valueBox(as.character(n_noncoding_snv), color = pcg_report$settings$conf$visual_reporting$color_value_box, icon = "fa-dna")
 ```
 
 ### InDels
 
 ```{r}
-flexdashboard::valueBox(as.character(n_noncoding_indel), color = pcg_report$metadata$color_value_box, icon = "fa-dna")
+flexdashboard::valueBox(as.character(n_noncoding_indel), color = pcg_report$settings$conf$visual_reporting$color_value_box, icon = "fa-dna")
 ```
 
 ### Block substitutions
 
 ```{r}
-flexdashboard::valueBox(as.character(n_noncoding_block), color = pcg_report$metadata$color_value_box, icon = "fa-dna")
+flexdashboard::valueBox(as.character(n_noncoding_block), color = pcg_report$settings$conf$visual_reporting$color_value_box, icon = "fa-dna")
 ```
 
 Row
@@ -64,7 +64,7 @@ Row
 
 <br>
 
-```{r table_browse_noncoding, echo=F, results = "asis", eval = pcg_report$content$snv_indel$v_stat$n_noncoding > 0}
+```{r table_browse_noncoding, echo=F, results = "asis", eval = pcg_report$content$snv_indel$vstats$n_noncoding > 0}
 
 if(NROW(pcg_report[['content']][['snv_indel']][["disp"]][['noncoding']]) > 2000){
   cat('<b>NOTE - only considering top 2000 variants (ranked according to Open Targets phenotype association score) </b><br>',sep="\n")
@@ -90,7 +90,7 @@ crosstalk::bscols(
 ```
 
 
-```{r noncoding_missing_filters, echo=F, results = 'asis', eval = pcg_report$content$snv_indel$v_stat$n_noncoding == 0}
+```{r noncoding_missing_filters, echo=F, results = 'asis', eval = pcg_report$content$snv_indel$vstats$n_noncoding == 0}
 cat('\n*  <i> <font style="font-size: 110%"><b>No</b> noncoding variants found.</font></i>', sep = '\n')
 cat('\n')
 ```
@@ -99,7 +99,7 @@ cat('\n')
 ### Noncoding  - variant datatable {data-padding=15}
 
 
-```{r table_noncoding, eval = pcg_report$content$snv_indel$v_stat$n_noncoding > 0}
+```{r table_noncoding, eval = pcg_report$content$snv_indel$vstats$n_noncoding > 0}
 
 DT::datatable(variants_noncoding_shared, escape=F,extensions=c("Buttons","Responsive"), 
 options=list(buttons = c('csv','excel'), 
@@ -115,7 +115,7 @@ options=list(buttons = c('csv','excel'),
   
 ```
 
-```{r noncoding_missing_data, echo=F, results = 'asis', eval = pcg_report$content$snv_indel$v_stat$n_noncoding == 0}
+```{r noncoding_missing_data, echo=F, results = 'asis', eval = pcg_report$content$snv_indel$vstats$n_noncoding == 0}
 cat('\n*  <i> <font style="font-size: 110%"><b>No</b> noncoding variants found.</font></i>', sep = '\n')
 cat('\n')
 ```

@@ -38,8 +38,8 @@ af_bin_df$TIER <- factor(af_bin_df$TIER, levels = c("TIER 1","TIER 2","TIER 3","
 #af_bin_df <- pcgrr::tier_af_distribution(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']])
 p <- ggplot2::ggplot(data = af_bin_df) + 
     ggplot2::geom_bar(mapping = ggplot2::aes(x = bin_name, y = Count, fill = TIER), stat = "identity") +
-    ggplot2::scale_color_manual(values = pcg_report[['metadata']][['color_palette']][['tier']][['values']]) +
-    ggplot2::scale_fill_manual(values = pcg_report[['metadata']][['color_palette']][['tier']][['values']]) +
+    ggplot2::scale_color_manual(values = pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']]) +
+    ggplot2::scale_fill_manual(values = pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']]) +
     ggplot2::theme_classic() +
     ggplot2::ylab("Number of variants") +
     ggplot2::xlab("Variant allelic fraction - tumor") +
@@ -129,7 +129,7 @@ DT::datatable(variants_shared, extensions=c("Buttons","Responsive"),
               options=list(buttons = c('csv','excel'), scrollCollapse=T, dom = 'Bfrtip')
 ) |>
    DT::formatStyle('TIER',color = 'white', 
-                   backgroundColor = DT::styleEqual(tiers, head(pcg_report[['metadata']][['color_palette']][['tier']][['values']],5)), 
+                   backgroundColor = DT::styleEqual(tiers, head(pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']],5)), 
                    fontWeight = 'bold', `text-align` = 'center')
 
 

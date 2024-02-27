@@ -100,16 +100,16 @@ htmltools::br()
 
 ```
 
-```{r conditional_msig, child='pcgr_rmarkdown/mutational_signature_mp.Rmd', eval = pcg_report$metadata$config$msigs$run == T &  !pcg_report[['content']][['m_signature_mp']][['missing_data']]}
+```{r conditional_msig, child='pcgr_rmarkdown/mutational_signature_mp.Rmd', eval = pcg_report$metadata$config$msigs$run == T &  !pcg_report[['content']][['mutational_signatures']][['missing_data']]}
 ```
 
-```{r conditional_msig_missing, eval = pcg_report$metadata$config$msigs$run == T & pcg_report[['content']][['m_signature_mp']][['missing_data']], results = "asis"}
+```{r conditional_msig_missing, eval = pcg_report$metadata$config$msigs$run == T & pcg_report[['content']][['mutational_signatures']][['missing_data']], results = "asis"}
 
 cat("\n")
 
 cat("## Mutational signatures")
 
-cat("\nThe number of SNV calls (n = ",nrow(pcg_report[['content']][['m_signature_mp']][['variant_set']][['all']]),") is too limited. A minimum of ",pcg_report[['metadata']][['config']][['msigs']][['mutation_limit']]," SNVs is currently required for a mutational signature analysis to be performed.")
+cat("\nThe number of SNV calls (n = ",nrow(pcg_report[['content']][['mutational_signatures']][['variant_set']][['all']]),") is too limited. A minimum of ",pcg_report[['metadata']][['config']][['msigs']][['mutation_limit']]," SNVs is currently required for a mutational signature analysis to be performed.")
 
 htmltools::br()
 htmltools::br()

@@ -15,31 +15,37 @@ flexdashboard::valueBox("sCNA", caption = NULL, color = "#000000", icon = NULL)
 ### Proto-oncogenes subject to amplification
 
 ```{r cna_gains_oncogenes, echo = F}
-flexdashboard::valueBox(NROW(pcg_report$content$cna$disp$oncogene_gain),
-                        color = ifelse(NROW(pcg_report$content$cna$disp$oncogene_gain) > 0,
-                                       pcg_report$metadata$color_value_box,
-                                       pcg_report$metadata$color_none),
-                        icon = "fa-dna", href="#scna-oncogene")
+flexdashboard::valueBox(
+  pcg_report$content$cna$vstats$n_oncogene_gain,
+  color = ifelse(
+    pcg_report$content$cna$vstats$n_oncogene_gain > 0,
+    pcg_report$settings$conf$visual_reporting$color_value_box,
+    pcg_report$settings$conf$visual_reporting$color_none),
+  icon = "fa-dna", href="#scna-oncogene")
 ```
 
 ### Loss of tumor suppressor genes
 
 ```{r cna_loss_tsgene, echo = F}
-flexdashboard::valueBox(NROW(pcg_report$content$cna$disp$tsgene_loss),
-                        color = ifelse(NROW(pcg_report$content$cna$disp$tsgene_loss) > 0,
-                                       pcg_report$metadata$color_value_box,
-                                       pcg_report$metadata$color_none),
-                        icon = "fa-dna", href="#scna-tsgene")
+flexdashboard::valueBox(
+  pcg_report$content$cna$vstats$n_tsg_loss,
+  color = ifelse(
+    pcg_report$content$cna$vstats$n_tsg_loss > 0,
+    pcg_report$settings$conf$visual_reporting$color_value_box,
+    pcg_report$settings$conf$visual_reporting$color_none),
+  icon = "fa-dna", href="#scna-tsgene")
 ```
 
 ### Other drug targets subject to amplification
 
 ```{r cna_gain_target, echo = F}
-flexdashboard::valueBox(NROW(pcg_report$content$cna$disp$other_target),
-                        color = ifelse(NROW(pcg_report$content$cna$disp$other_target) > 0,
-                                       pcg_report$metadata$color_value_box,
-                                       pcg_report$metadata$color_none),
-                        icon = "fa-dna", href="#scna-other")
+flexdashboard::valueBox(
+  pcg_report$content$cna$vstats$n_other_drugtarget_gain,
+  color = ifelse(
+    pcg_report$content$cna$vstats$n_other_drugtarget_gain > 0,
+  pcg_report$settings$conf$visual_reporting$color_value_box,
+  pcg_report$settings$conf$visual_reporting$color_none),
+icon = "fa-dna", href="#scna-other")
 ```
 
 Row
@@ -50,24 +56,29 @@ Row
 
 <br><br>
 
-```{r table_browse_scna_oncogene, echo=F, results = "asis", eval = NROW(pcg_report$content$cna$disp$oncogene_gain) > 0}
+```{r table_browse_scna_oncogene, echo=F, results = "asis", eval = pcg_report$content$cna$vstats$n_oncogene_gain > 0}
 
 cat('\nProto-oncogenes subject to amplifications (right panel) can be filtered according to various criteria:\n')
 
-drug_levels <- levels(as.factor(pcg_report[["content"]][["cna"]][["disp"]][["oncogene_gain"]]$DRUGS_ON_LABEL))
+drug_levels <- levels(as.factor(
+  pcg_report[["content"]][["cna"]][["disp"]][["oncogene_gain"]]$DRUGS_ON_LABEL))
 # if(length(drug_levels) > 0){
 #   tier3_vars <- tier3_vars |>
 #     dplyr::arrange(MUTATION_HOTSPOT, desc(OPENTARGETS_RANK))
 # }
 
-oncogene_gain_variants <- crosstalk::SharedData$new(pcg_report[["content"]][["cna"]][["disp"]][["oncogene_gain"]])
+oncogene_gain_variants <- crosstalk::SharedData$new(
+  dplyr::filter(
+    pcg_report[["content"]][["cna"]][["callset"]][["variant"]],
+    TIER == 3 & ONCOGENE == TRUE))
 crosstalk::bscols(
   list(
     crosstalk::filter_select("SYMBOL", "Gene", oncogene_gain_variants, ~SYMBOL),
-    crosstalk::filter_slider("LOG_R", "Log-ratio", oncogene_gain_variants, ~LOG_R)
+    crosstalk::filter_slider("N_MAJOR", "Major copy number", oncogene_gain_variants, ~N_MAJOR),
+    crosstalk::filter_slider("N_MINOR", "Minor copy number", oncogene_gain_variants, ~N_MINOR),
   ),
   list(
-    crosstalk::filter_select("CHROMOSOME", "Chromosome", oncogene_gain_variants, ~CHROMOSOME),
+    crosstalk::filter_select("CHROMOSOME", "Chromosome", oncogene_gain_variants, ~CHROM),
     crosstalk::filter_select("EVENT_TYPE", "CNA event", oncogene_gain_variants, ~EVENT_TYPE)
   )
 )
@@ -75,7 +86,7 @@ crosstalk::bscols(
 ```
 
 
-```{r oncogene_missing_filters, echo=F, results = 'asis', eval = NROW(pcg_report$content$cna$disp$oncogene_gain) == 0}
+```{r oncogene_missing_filters, echo=F, results = 'asis', eval = pcg_report$content$cna$vstats$n_oncogene_gain == 0}
 cat('\n*  <i> <b>No</b> proto-oncogenes subject to copy number amplifications.</i>',sep='\n')
 cat('\n')
 ```
@@ -85,7 +96,7 @@ cat('\n')
 
 <br><br>
 
-```{r table_scna_oncogene, eval = NROW(pcg_report$content$cna$disp$oncogene_gain) > 0}
+```{r table_scna_oncogene, eval = pcg_report$content$cna$vstats$n_oncogene_gain > 0}
 
 dt <- oncogene_gain_variants |>
   DT::datatable(escape = F, 
@@ -109,12 +120,14 @@ if(length(drug_levels) > 0){
     )
 }
 dt |>
-  DT::formatStyle("SYMBOL","OPENTARGETS_RANK", color = "white", backgroundColor = DT::styleInterval(pcg_report[['content']][['report_display_config']][['opentargets_rank']][['breaks']], pcg_report[['content']][['report_display_config']][['opentargets_rank']][['colors']]))
+  DT::formatStyle("SYMBOL","TISSUE_ASSOC_RANK", color = "white", backgroundColor = DT::styleInterval(
+    pcg_report$settings$conf$visual_reporting$cancer_assoc$breaks,
+    pcg_report$settings$conf$visual_reporting$cancer_assoc$values))
 
 ```
 
 
-```{r oncogene_missing_data, echo=F, results = 'asis', eval = NROW(pcg_report$content$cna$disp$oncogene_gain) == 0}
+```{r oncogene_missing_data, echo=F, results = 'asis', eval = pcg_report$content$cna$vstats$n_oncogene_gain) == 0}
 cat('\n*  <i> <b>No</b> proto-oncogenes subject to copy number amplifications.</i>',sep='\n')
 cat('\n')
 ```

@@ -2,8 +2,11 @@
 title: "Cancer Genome Report by PCGR"
 bibliography: bibliography.bib
 nocite: |
-  @Tamborero2018-aj, @Poti2019-qr, @Alexandrov2020-gj, @Alexandrov2013-gs, @Griffith2017-do, @Ma2018-to, @Cortes-Ciriano2017-vl, @Li2017-ew,
-  @Blokzijl2018-nc, @Lever2019-xp, @Repana2019-dd, @Chalmers2017-cz, @Yin2020-or, @Bailey2018-os, @Fernandez2019-mk
+  @Tamborero2018-aj, @Poti2019-qr, @Alexandrov2020-gj, 
+  @Alexandrov2013-gs, @Griffith2017-do, @Ma2018-to, 
+  @Cortes-Ciriano2017-vl, @Li2017-ew,
+  @Blokzijl2018-nc, @Lever2019-xp, @Repana2019-dd, 
+  @Chalmers2017-cz, @Yin2020-or, @Bailey2018-os, @Fernandez2019-mk
 output: 
   flexdashboard::flex_dashboard:
     orientation: rows
@@ -19,7 +22,7 @@ trial_inclusion <- 'ON'
 if(pcg_report[['content']][['msi']][['eval']] == F){
   msi_prediction <- 'OFF'
 }
-if(pcg_report[['content']][['m_signature_mp']][['eval']] == F){
+if(pcg_report[['content']][['mutational_signatures']][['eval']] == F){
   signatures_estimation <- 'OFF'
 }
 if(pcg_report[['content']][['tmb']][['eval']] == F){
@@ -67,7 +70,7 @@ scrollY_flexdb_container <- "510px"
 ```{r conditional_tier4, child='pcgr_flexdb/flexdb_snv_tier4.Rmd', eval = pcg_report$content$snv_indel$eval}
 ```
 
-```{r conditional_noncoding, child='pcgr_flexdb/flexdb_snv_noncoding.Rmd', eval = pcg_report$content$snv_indel$eval}
+```{r conditional_noncoding, child='pcgr_flexdb/flexdb_snv_tier5.Rmd', eval = pcg_report$content$snv_indel$eval}
 ```
 
 ```{r conditional_biomarkers, child='pcgr_flexdb/flexdb_snv_biomarker.Rmd', eval = pcg_report$content$snv_indel$eval}
@@ -94,7 +97,7 @@ scrollY_flexdb_container <- "510px"
 ```{r conditional_tmb, child='pcgr_flexdb/flexdb_tmb.Rmd', eval = pcg_report$content$tmb$eval}
 ```
 
-```{r conditional_mut_sigs, child='pcgr_flexdb/flexdb_mutsignatures.Rmd', eval = pcg_report$content$m_signature_mp$eval}
+```{r conditional_mut_sigs, child='pcgr_flexdb/flexdb_mutsignatures.Rmd', eval = pcg_report$content$mutational_signatures$eval}
 ```
 
 ```{r conditional_cpsr, child='pcgr_flexdb/flexdb_cpsr.Rmd', eval = pcg_report$content$cpsr$eval}

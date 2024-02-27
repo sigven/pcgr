@@ -63,8 +63,7 @@ generate_report_data_value_box <- function(pcg_report,
                                            sample_name,
                                            pcgr_config) {
 
-  pcg_report_value_box <- pcgrr::init_report(config = pcgr_config,
-                                             class = "value_box")
+  pcg_report_value_box <- pcgrr:::init_valuebox_content()
   pcgrr::log4r_info("------")
   pcgrr::log4r_info("Assigning elements to PCGR value boxes")
 
@@ -96,32 +95,21 @@ generate_report_data_value_box <- function(pcg_report,
     pcg_report_value_box[["kataegis"]] <- "None"
       num_events <- NROW(rep_cont$kataegis$events)
       if (num_events > 0) {
-        num_events <- NROW(rep_cont$kataegis$events |>
-                             dplyr::filter(.data$confidence == 3))
-        # pcg_report_value_box[["kataegis"]] <-
-        #   paste0("Kataegis events:\n", num_events)
+        num_events <- NROW(
+          rep_cont$kataegis$events |>
+            dplyr::filter(.data$confidence == 3))
         pcg_report_value_box[["kataegis"]] <- num_events
       }
   }
 
-  if (rep_cont[["tumor_purity"]][["eval"]]) {
-    if (!is.na(tumor_properties[["tumor_purity"]])) {
-      # pcg_report_value_box[["tumor_purity"]] <-
-      #   paste0("Tumor purity:\n",
-      #          rep_cont[["tumor_purity"]][["estimate"]])
-      pcg_report_value_box[["tumor_purity"]] <-
-        tumor_properties[["tumor_purity"]]
-    }
+  if (rep_cont[["tumor_purity"]][["sample_properties"]][["purity"]] != "NA") {
+    pcg_report_value_box[["tumor_purity"]] <-
+      rep_cont[["tumor_purity"]][["sample_properties"]][["purity"]]
   }
 
-  if (rep_cont[["tumor_ploidy"]][["eval"]]) {
-    if (!is.na(tumor_properties[["tumor_ploidy"]])) {
-      # pcg_report_value_box[["tumor_ploidy"]] <-
-      #   paste0("Tumor ploidy:\n",
-      #          rep_cont[["tumor_ploidy"]][["estimate"]])
-      pcg_report_value_box[["tumor_ploidy"]] <-
-        tumor_properties[["tumor_ploidy"]]
-      }
+  if (rep_cont[["tumor_purity"]][["sample_properties"]][["ploidy"]] != "NA") {
+    pcg_report_value_box[["tumor_purity"]] <-
+      rep_cont[["tumor_purity"]][["sample_properties"]][["ploidy"]]
   }
 
   if (rep_cont[["tmb"]][["eval"]]) {

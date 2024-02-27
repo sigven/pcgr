@@ -16,7 +16,7 @@ from pcgr.biomarker import load_biomarkers
 def annotate_cna_segments(output_fname: str, 
                           output_dir: str, 
                           cna_segment_file: str, 
-                          pcgr_build_db_dir: str, 
+                          db_assembly_dir: str, 
                           build: str, 
                           sample_id: str,
                           n_copy_amplifications: int = 5,
@@ -28,7 +28,7 @@ def annotate_cna_segments(output_fname: str,
         output_fname (str): File name of the annotated output file.
         output_dir (str): Directory to save the annotated file.
         cna_segment_file (str): Path to the user-provided copy number aberrations segment file.
-        pcgr_build_db_dir (str): Path to the build-specific PCGR database directory.
+        db_assembly_dir (str): Path to the build-specific PCGR database directory.
         build (str): Genome assembly build of input data.
         sample_id( (str): Sample identifier
         output_dir (str): Directory to save the annotated file.
@@ -81,7 +81,7 @@ def annotate_cna_segments(output_fname: str,
     
     ## Check that 'End' of segments do not exceed chromosome lengths
     chromsizes_fname = \
-        os.path.join(pcgr_build_db_dir, 'chromsize.' + build + '.tsv')
+        os.path.join(db_assembly_dir, 'chromsize.' + build + '.tsv')
     
     check_file_exists(chromsizes_fname, logger)
     chromsizes = pd.read_csv(chromsizes_fname, sep="\t", header=None, names=['Chromosome', 'ChromLength'])
@@ -105,14 +105,14 @@ def annotate_cna_segments(output_fname: str,
     temp_files.append(cna_query_segment_bed.fn)
     
     ## annotate segments with cytobands
-    cna_query_segment_df = annotate_cytoband(cna_query_segment_bed, output_dir, pcgr_build_db_dir, logger)
+    cna_query_segment_df = annotate_cytoband(cna_query_segment_bed, output_dir, db_assembly_dir, logger)
 
     ## annotate with protein-coding transcripts
     cna_query_segment_bed = pybedtools.BedTool.from_dataframe(cna_query_segment_df)
     temp_files.append(cna_query_segment_bed.fn)
     
     cna_query_segment_df = annotate_transcripts(
-       cna_query_segment_bed, output_dir, pcgr_build_db_dir, overlap_fraction=overlap_fraction, logger=logger)
+       cna_query_segment_bed, output_dir, db_assembly_dir, overlap_fraction=overlap_fraction, logger=logger)
 
     cna_query_segment_df['segment_length_mb'] = \
         ((cna_query_segment_df['segment_end'] - cna_query_segment_df['segment_start']) / 1e6).astype(float).round(5)
@@ -123,8 +123,8 @@ def annotate_cna_segments(output_fname: str,
     cna_actionable_dict = {}
     
     for db in ['cgi','civic']:
-        variant_fname = os.path.join(pcgr_build_db_dir, 'biomarker','tsv', f"{db}.variant.tsv.gz")
-        clinical_fname = os.path.join(pcgr_build_db_dir, 'biomarker','tsv', f"{db}.clinical.tsv.gz")
+        variant_fname = os.path.join(db_assembly_dir, 'biomarker','tsv', f"{db}.variant.tsv.gz")
+        clinical_fname = os.path.join(db_assembly_dir, 'biomarker','tsv', f"{db}.clinical.tsv.gz")
         logger.info(f"Loading copy-number biomarker evidence from {db} ..")
         biomarkers[db] = load_biomarkers(
             logger, variant_fname, clinical_fname, biomarker_vartype = 'CNA')
@@ -193,14 +193,14 @@ def annotate_cna_segments(output_fname: str,
     return 0
 
 
-def annotate_cytoband(cna_segments_bt: BedTool, output_dir: str, pcgr_build_db_dir: str, logger: logging.Logger) -> pd.DataFrame:
+def annotate_cytoband(cna_segments_bt: BedTool, output_dir: str, db_assembly_dir: str, logger: logging.Logger) -> pd.DataFrame:
     
     pybedtools.set_tempdir(output_dir)    
     temp_files = []
     
     # BED file with cytoband annotations
     cytoband_bed_fname = \
-        os.path.join(pcgr_build_db_dir, 'misc','bed','cytoband', 'cytoband.bed.gz')
+        os.path.join(db_assembly_dir, 'misc','bed','cytoband', 'cytoband.bed.gz')
     
     cytoband_annotated_segments = pd.DataFrame()
     
@@ -263,7 +263,7 @@ def annotate_cytoband(cna_segments_bt: BedTool, output_dir: str, pcgr_build_db_d
 
 
 def annotate_transcripts(cna_segments_bt: BedTool, output_dir: str,
-                         pcgr_build_db_dir: str, overlap_fraction: float,
+                         db_assembly_dir: str, overlap_fraction: float,
                          logger: logging.Logger) -> pd.DataFrame:
     
     """
@@ -272,7 +272,7 @@ def annotate_transcripts(cna_segments_bt: BedTool, output_dir: str,
     Parameters:
     - cna_segments_bt: A BedTool object representing the CNA segments.
     - output_dir: A string specifying the output directory (for temporary files generation).
-    - pcgr_build_db_dir: A string specifying the directory of the build-specific PCGR data bundle.
+    - db_assembly_dir: A string specifying the directory of the build-specific PCGR data bundle.
     - overlap_fraction: A float representing the fraction of overlap required for annotation.
     
     Returns:
@@ -284,9 +284,9 @@ def annotate_transcripts(cna_segments_bt: BedTool, output_dir: str,
         
     # BED file with protein-coding transcripts
     gene_transcript_bed_fname = \
-        os.path.join(pcgr_build_db_dir, 'gene','bed','gene_transcript_xref', 'gene_transcript_xref_pc_nopad.bed.gz')
+        os.path.join(db_assembly_dir, 'gene','bed','gene_transcript_xref', 'gene_transcript_xref_pc_nopad.bed.gz')
     gene_xref_tsv_fname = \
-        os.path.join(pcgr_build_db_dir, "gene", "tsv", "gene_transcript_xref", "gene_transcript_xref.tsv.gz")
+        os.path.join(db_assembly_dir, "gene", "tsv", "gene_transcript_xref", "gene_transcript_xref.tsv.gz")
         
     cna_segments_annotated = pd.DataFrame()
 

@@ -24,7 +24,7 @@ max_af_gnomad <- function(sample_calls) {
   sample_calls$MAX_AF_GNOMAD <- 0
   for (c in gnomad_cols) {
     if (c %in% colnames(sample_calls)) {
-      if (nrow(
+      if (NROW(
         sample_calls[!is.na(sample_calls[, c]) &
                      sample_calls[, c] > sample_calls$MAX_AF_GNOMAD, ]) > 0) {
         sample_calls[!is.na(sample_calls[, c]) &
@@ -71,7 +71,7 @@ clinvar_germline_status <- function(sample_calls) {
   return(sample_calls)
 }
 
-#' Function that assigns a logical (STATUS_DBSNP_GERMLINE) reflecting whether
+#' Function that assigns a logical (STATUS_DBSNP) reflecting whether
 #' a variant co-incides with an entry in dbSNP (germline)
 #'
 #' @param sample_calls data frame with sample variant calls
@@ -91,15 +91,16 @@ dbsnp_germline_status <- function(sample_calls) {
       "CLINVAR_VARIANT_ORIGIN" %in% colnames(sample_calls)) {
     sample_calls <- sample_calls |>
       dplyr::mutate(
-        STATUS_DBSNP_GERMLINE =
+        STATUS_DBSNP =
           dplyr::if_else(!is.na(.data$DBSNPRSID), TRUE, FALSE)) |>
       dplyr::mutate(
-        STATUS_DBSNP_GERMLINE =
+        STATUS_DBSNP =
           dplyr::if_else(
-            .data$STATUS_DBSNP_GERMLINE == T &
+            .data$STATUS_DBSNP == T &
               !is.na(.data$CLINVAR_MSID) &
               stringr::str_detect(.data$CLINVAR_VARIANT_ORIGIN, "somatic"),
-            FALSE, .data$STATUS_DBSNP_GERMLINE))
+            FALSE,
+            .data$STATUS_DBSNP))
   }
   return(sample_calls)
 }
@@ -122,7 +123,7 @@ tcga_somatic_status <- function(sample_calls) {
   if ("TCGA_PANCANCER_COUNT" %in% colnames(sample_calls)) {
     sample_calls <- sample_calls |>
       dplyr::mutate(
-        STATUS_TCGA_SOMATIC =
+        STATUS_TCGA =
           dplyr::if_else(
             !is.na(.data$TCGA_PANCANCER_COUNT),
             TRUE, FALSE))
@@ -172,12 +173,12 @@ hom_af_status <- function(sample_calls) {
                           msg = paste0("Argument 'sample_calls' must be of ",
                                        "type data.frame"))
   )
-  ## assign STATUS_LIKELY_GERMLINE_HOMOZYGOUS to all calls
+  ## assign STATUS_GERMLINE_HOM to all calls
   ## with 100% allelic fraction of alternative allele
   if ("AF_TUMOR" %in% colnames(sample_calls)) {
     sample_calls <- sample_calls |>
       dplyr::mutate(
-        STATUS_LIKELY_GERMLINE_HOMOZYGOUS =
+        STATUS_GERMLINE_HOM =
           dplyr::if_else(
             !is.na(.data$AF_TUMOR) &
               .data$AF_TUMOR == 1,
@@ -229,7 +230,7 @@ het_af_germline_status <- function(sample_calls) {
                             msg = paste0("Argument 'sample_calls' must be of ",
                                          "type data.frame"))
   )
-  ## assign STATUS_LIKELY_GERMLINE_HETEROZYGOUS to all calls
+  ## assign STATUS_GERMLINE_HET to all calls
   ## that i) have the alternative allele
   ## in the [0.40,0.60] AF range, ii) are registered in dbSNP,
   ## iii) in gnomAD
@@ -237,16 +238,16 @@ het_af_germline_status <- function(sample_calls) {
   if ("AF_TUMOR" %in% colnames(sample_calls) &
       "MAX_AF_GNOMAD" %in% colnames(sample_calls) &
       "STATUS_COSMIC" %in% colnames(sample_calls) &
-      "STATUS_TCGA_SOMATIC" %in% colnames(sample_calls)) {
+      "STATUS_TCGA" %in% colnames(sample_calls)) {
     sample_calls <- sample_calls |>
       dplyr::mutate(
-        STATUS_LIKELY_GERMLINE_HETEROZYGOUS =
+        STATUS_GERMLINE_HET =
           dplyr::if_else(
             !is.na(.data$MAX_AF_GNOMAD) &
-              .data$STATUS_DBSNP_GERMLINE == TRUE &
+              .data$STATUS_DBSNP == TRUE &
               !is.na(.data$AF_TUMOR) &
               .data$AF_TUMOR >= 0.40 & .data$AF_TUMOR <= 0.60 &
-              .data$STATUS_TCGA_SOMATIC == FALSE &
+              .data$STATUS_TCGA == FALSE &
               .data$STATUS_COSMIC == FALSE, TRUE, FALSE))
   }
   return(sample_calls)
@@ -266,75 +267,108 @@ het_af_germline_status <- function(sample_calls) {
 
 assign_somatic_classification <- function(sample_calls, settings) {
 
-  sample_calls$SOMATIC_CLASSIFICATION <- "SOMATIC"
+  tumor_only_settings <-
+    settings$conf$somatic_snv$tumor_only
 
   ## Assign non-somatic classification based on various evidence criteria
-  ## 1) Frequency of variant in any of the five 1000 Genomes
-  ##    superpopulations is greater than the defined thresholds by the user
-  ## 2) Frequency of variant in any of the gnomAD populations is
-  ##    greater than the defined thresholds by the user
-  ## 3) Variant is recorded in ClinVar as germline
-  ## 4) Variant is found in the user-defined panel-of-normals VCF
-  ## 5) Evidence for a likely homozygous germline variant -
+  ## 1) Frequency of minor allele in any of the gnomAD populations is
+  ##    greater than the defined thresholds by the user (by default)
+  ##
+  ## User-defined filtering options:
+  ##
+  ## 2) Variant is recorded in ClinVar as germline
+  ## 3) Variant is found in the user-defined panel-of-normals VCF
+  ## 4) Evidence for a likely homozygous germline variant -
   ##      allelic fraction in tumor sample (AF_TUMOR) is 100%
-  ##      (vary rare for true somatic variants)
-  ## 6) Evidence for a likely heterozygous germline variant must
+  ##      (very rare scenario for true somatic variants)
+  ## 5) Evidence for a likely heterozygous germline variant must
   ##    satisfy three criteria:
   ##    i) Allelic fraction of alternative allele in tumor sample
   ##        (AF_TUMOR) is 40-60%,
   ##    ii) Variant is present in dbSNP AND gnomAD
   ##    iii) Variant is neither in COSMIC nor TCGA
-  ## 7) Variant is recorded in dbSNP (non-somatic ClinVar/DoCM/COSMIC/TCGA)
+  ## 6) Variant is recorded in dbSNP (non-somatic ClinVar/COSMIC/TCGA)
 
+  pcgrr::log4r_info("Applying variant filters on tumor-only calls - assigning somatic classification")
   sample_calls <- sample_calls |>
     dplyr::mutate(
-      SOMATIC_CLASSIFICATION =
-        dplyr::if_else(.data$gnomADe_AF_ABOVE_TOLERATED == TRUE &
-                         .data$SOMATIC_CLASSIFICATION == "SOMATIC",
-                       "GERMLINE_GNOMAD", .data$SOMATIC_CLASSIFICATION)) |>
-    dplyr::mutate(
-      SOMATIC_CLASSIFICATION =
-        dplyr::if_else(.data$STATUS_CLINVAR_GERMLINE == TRUE &
-                         .data$SOMATIC_CLASSIFICATION == "SOMATIC",
-                       "GERMLINE_CLINVAR", .data$SOMATIC_CLASSIFICATION)) |>
-    dplyr::mutate(
-      SOMATIC_CLASSIFICATION =
-        dplyr::if_else(.data$STATUS_PON == TRUE &
-                         settings$conf$somatic_snv[["exclude_pon"]] == TRUE &
-                         .data$SOMATIC_CLASSIFICATION == "SOMATIC",
-                       "GERMLINE_PON", .data$SOMATIC_CLASSIFICATION)) |>
-
-    dplyr::mutate(
-      SOMATIC_CLASSIFICATION =
+      GERMLINE_GNOMAD =
         dplyr::if_else(
-          .data$STATUS_LIKELY_GERMLINE_HOMOZYGOUS == TRUE &
-            settings$conf$somatic_snv[["exclude_likely_hom_germline"]] == TRUE &
-            .data$SOMATIC_CLASSIFICATION == "SOMATIC",
-          "GERMLINE_HOMOZYGOUS",
-          .data$SOMATIC_CLASSIFICATION)) |>
+          .data$gnomADe_AF_ABOVE_TOLERATED == TRUE,
+          "GERMLINE_GNOMAD",
+          "")) |>
     dplyr::mutate(
-      SOMATIC_CLASSIFICATION =
+      GERMLINE_CLINVAR =
         dplyr::if_else(
-          .data$STATUS_LIKELY_GERMLINE_HETEROZYGOUS == TRUE &
-            settings$conf$somatic_snv[["exclude_likely_het_germline"]] == TRUE &
-            .data$SOMATIC_CLASSIFICATION == "SOMATIC",
-          "GERMLINE_HETEROZYGOUS",
-          .data$SOMATIC_CLASSIFICATION))
+          .data$STATUS_CLINVAR_GERMLINE == TRUE &
+            tumor_only_settings[["exclude_clinvar_germline"]] == TRUE,
+          "GERMLINE_CLINVAR",
+          "")) |>
+    dplyr::mutate(
+      GERMLINE_PON =
+        dplyr::if_else(
+          .data$STATUS_PON == TRUE &
+            tumor_only_settings[["exclude_pon"]] == TRUE,
+          "GERMLINE_PON",
+          "")) |>
 
-  ## set variants found in DBSNP as germline if this option is set to TRUE
-  if (settings$conf$somatic_snv[["exclude_dbsnp_nonsomatic"]] == TRUE) {
-
-    sample_calls <- sample_calls |>
-      dplyr::mutate(
-        SOMATIC_CLASSIFICATION =
-          dplyr::if_else(
-            .data$STATUS_DBSNP_GERMLINE == TRUE &
-              .data$STATUS_TCGA_SOMATIC == FALSE &
-              .data$STATUS_COSMIC == FALSE &
-              .data$SOMATIC_CLASSIFICATION == "SOMATIC",
-            "GERMLINE_DBSNP", .data$SOMATIC_CLASSIFICATION))
-
-  }
+    dplyr::mutate(
+      GERMLINE_HOM =
+        dplyr::if_else(
+          .data$STATUS_GERMLINE_HOM == TRUE &
+            as.logical(
+              tumor_only_settings[["exclude_likely_hom_germline"]]) == TRUE,
+          "GERMLINE_HOM",
+          "")) |>
+    dplyr::mutate(
+      GERMLINE_HET =
+        dplyr::if_else(
+          .data$STATUS_GERMLINE_HET == TRUE &
+            as.logical(
+              tumor_only_settings[["exclude_likely_het_germline"]]) == TRUE,
+          "GERMLINE_HET",
+          "")) |>
+    dplyr::mutate(
+      GERMLINE_DBSNP =
+        dplyr::if_else(
+          .data$STATUS_DBSNP == TRUE &
+            .data$STATUS_TCGA == FALSE &
+            .data$STATUS_COSMIC == FALSE &
+            as.logical(
+              tumor_only_settings[["exclude_dbsnp_nonsomatic"]]) == TRUE,
+          "GERMLINE_DBSNP",
+          "")) |>
+    tidyr::unite(SOMATIC_CLASSIFICATION,
+                 c("GERMLINE_GNOMAD",
+                   "GERMLINE_CLINVAR",
+                   "GERMLINE_PON",
+                   "GERMLINE_HET",
+                   "GERMLINE_HOM",
+                   "GERMLINE_DBSNP"), sep="|",
+                 remove = TRUE) |>
+    dplyr::mutate(SOMATIC_CLASSIFICATION = stringr::str_replace_all(
+      .data$SOMATIC_CLASSIFICATION, "(\\|{1,}$)|^(\\|{1,})",""
+    )) |>
+    dplyr::mutate(SOMATIC_CLASSIFICATION = stringr::str_replace_all(
+      .data$SOMATIC_CLASSIFICATION, "(\\|{2,})","|"
+    )) |>
+    dplyr::mutate(
+      SOMATIC_CLASSIFICATION = dplyr::if_else(
+        .data$SOMATIC_CLASSIFICATION == "",
+        "SOMATIC",
+        .data$SOMATIC_CLASSIFICATION
+      )
+    ) |>
+    dplyr::select(
+      -c(
+        "STATUS_TCGA",
+        "STATUS_COSMIC",
+        "STATUS_DBSNP",
+        "STATUS_GERMLINE_HET",
+        "STATUS_GERMLINE_HOM",
+        "STATUS_PON",
+        "gnomADe_AF_ABOVE_TOLERATED",
+        "STATUS_CLINVAR_GERMLINE"))
 
   return(sample_calls)
 }
@@ -360,6 +394,9 @@ assign_somatic_germline_evidence <- function(
                    "type data.frame"))
   )
 
+  tumor_only_settings <-
+    settings$conf$somatic_snv$tumor_only
+
   ## assign STATUS_POPFREQ_GNOMAD_ABOVE_TOLERATED
   for (pop in c("GLOBAL", "NFE", "AMR", "AFR",
                 "SAS", "EAS", "ASJ", "FIN", "OTH")) {
@@ -369,7 +406,7 @@ assign_somatic_germline_evidence <- function(
         pop = pop,
         dbquery = "gnomADe",
         max_tolerated_af =
-          settings$conf$somatic_snv$tumor_only[[paste0("maf_gnomad_", tolower(pop))]])
+          tumor_only_settings[[paste0("maf_gnomad_", tolower(pop))]])
   }
 
   sample_calls <- sample_calls |>
@@ -412,7 +449,7 @@ assign_germline_popfreq_status <- function(sample_calls,
 
       sample_calls$max_tolerated_af <- max_tolerated_af
 
-      if (nrow(
+      if (NROW(
         sample_calls[!is.na(sample_calls[, col]) &
                      sample_calls[, col] > sample_calls$max_tolerated_af, ]) > 0) {
         sample_calls[!is.na(sample_calls[, col]) &
@@ -427,229 +464,244 @@ assign_germline_popfreq_status <- function(sample_calls,
 }
 
 
-#' Function that retrieves name of VCF INFO tag and
-#' population description for gnomad/1000G population
-#'
-#'
-# get_population_tag <- function(population_code, db = "1KG", subset = NA) {
-#   pop_tag_info <-
-#     list("vcf_tag" = paste0(toupper(population_code), "_AF_", db),
-#          "pop_description" = NA)
-#   if (db == "GNOMAD") {
-#     if (!is.na(subset)) {
-#       if (subset == "non_cancer") {
-#         pop_tag_info <-
-#           list("vcf_tag" =
-#                  paste0("NON_CANCER_AF_", toupper(population_code)),
-#                "pop_description" = NA)
-#       }
-#     }
-#   }
-#
-#   pop_descriptions_1KG <-
-#     data.frame(code = "afr",
-#                pop_description = "African", stringsAsFactors = F) |>
-#     rbind(data.frame(
-#       code = "amr",
-#       pop_description = "Admixed American", stringsAsFactors = F)) |>
-#     rbind(data.frame(
-#       code = "eur",
-#       pop_description = "European", stringsAsFactors = F)) |>
-#     rbind(data.frame(
-#       code = "eas",
-#       pop_description = "East Asian", stringsAsFactors = F)) |>
-#     rbind(data.frame(
-#       code = "sas",
-#       pop_description = "South Asian", stringsAsFactors = F)) |>
-#     rbind(data.frame(
-#       code = "global",
-#       pop_description = "global", stringsAsFactors = F))
-#
-#   pop_descriptions_gnomad <-
-#     data.frame(code = "afr",
-#                pop_description = "African", stringsAsFactors = F) |>
-#     rbind(data.frame(
-#       code = "amr",
-#       pop_description = "Admixed American", stringsAsFactors = F)) |>
-#     rbind(data.frame(
-#       code = "nfe",
-#       pop_description = "Non-Finnish European", stringsAsFactors = F)) |>
-#     rbind(data.frame(
-#       code = "fin",
-#       pop_description = "Finnish", stringsAsFactors = F)) |>
-#     rbind(data.frame(
-#       code = "oth",
-#       pop_description = "Other", stringsAsFactors = F)) |>
-#     rbind(data.frame(
-#       code = "asj",
-#       pop_description = "Ashkenazi Jewish", stringsAsFactors = F)) |>
-#     rbind(data.frame(
-#       code = "eas",
-#       pop_description = "East Asian", stringsAsFactors = F)) |>
-#     rbind(data.frame(
-#       code = "sas",
-#       pop_description = "South Asian", stringsAsFactors = F)) |>
-#     rbind(data.frame(
-#       code = "global",
-#       pop_description = "global", stringsAsFactors = F))
-#
-#   pop_descriptions_gnomad_non_cancer <-
-#     data.frame(code = "afr",
-#                pop_description = "African non-cancer subset",
-#                stringsAsFactors = F) |>
-#     rbind(data.frame(
-#       code = "amr",
-#       pop_description = "Admixed American non-cancer subset",
-#       stringsAsFactors = F)) |>
-#     rbind(data.frame(
-#       code = "nfe",
-#       pop_description = "Non-Finnish European non-cancer subset",
-#       stringsAsFactors = F)) |>
-#     rbind(data.frame(
-#       code = "fin",
-#       pop_description = "Finnish non-cancer subset",
-#       stringsAsFactors = F)) |>
-#     rbind(data.frame(
-#       code = "oth",
-#       pop_description = "Other non-cancer subset",
-#       stringsAsFactors = F)) |>
-#     rbind(data.frame(
-#       code = "asj",
-#       pop_description = "Ashkenazi Jewish non-cancer subset",
-#       stringsAsFactors = F)) |>
-#     rbind(data.frame(
-#       code = "eas",
-#       pop_description = "East Asian non-cancer subset",
-#       stringsAsFactors = F)) |>
-#     rbind(data.frame(
-#       code = "sas",
-#       pop_description = "South Asian non-cancer subset",
-#       stringsAsFactors = F)) |>
-#     rbind(data.frame(
-#       code = "global",
-#       pop_description = "Global non-cancer subset",
-#       stringsAsFactors = F))
-#
-#   if (db == "1KG") {
-#     pop_entry <- dplyr::filter(pop_descriptions_1KG,
-#                                .data$code == population_code)
-#     pop_tag_info[["pop_description"]] <- pop_entry$pop_description
-#   }
-#   if (db == "GNOMAD") {
-#     pop_entry <- dplyr::filter(pop_descriptions_gnomad,
-#                                .data$code == tolower(population_code))
-#     pop_tag_info[["pop_description"]] <- pop_entry$pop_description
-#     if (!is.na(subset)) {
-#       if (subset == "non_cancer") {
-#         pop_entry <- dplyr::filter(pop_descriptions_gnomad_non_cancer,
-#                                    .data$code == tolower(population_code))
-#         pop_tag_info[["pop_description"]] <- pop_entry$pop_description
-#       }
-#     }
-#
-#   }
-#   return(pop_tag_info)
-# }
-
 #' Function that makes input data for an UpSet plot
 #' (filtering/intersection results) for the somatic-germline
 #' classification procedure
 #'
-#' @param calls unfiltered calls (germline + somatic)
-#' @param config config
+#' param calls unfiltered calls (germline + somatic)
+#' param config config
 #'
-#' @return upset data
+#' return upset data
 #'
-#' @export
-make_upset_plot_data <- function(calls, config) {
-
-  columns <- c()
-  if (config[["tumor_only"]][["exclude_pon"]] == TRUE) {
-    columns <- c(columns, "STATUS_PON")
-  }
-  if (config[["tumor_only"]][["exclude_likely_hom_germline"]] == TRUE) {
-    columns <- c(columns, "STATUS_LIKELY_GERMLINE_HOMOZYGOUS")
-  }
-  if (config[["tumor_only"]][["exclude_likely_het_germline"]] == TRUE) {
-    columns <- c(columns, "STATUS_LIKELY_GERMLINE_HETEROZYGOUS")
-  }
-  if (config[["tumor_only"]][["exclude_dbsnp_nonsomatic"]] == TRUE) {
-    columns <- c(columns, "STATUS_DBSNP_GERMLINE")
-  }
-  assertable::assert_colnames(
-    calls, c("VAR_ID",
-             "STATUS_POPFREQ_GNOMAD_ABOVE_TOLERATED",
-             "STATUS_CLINVAR_GERMLINE"),
-    only_colnames = F, quiet = T)
-  df <- dplyr::select(calls, .data$VAR_ID,
-                      .data$STATUS_POPFREQ_GNOMAD_ABOVE_TOLERATED,
-                      .data$STATUS_CLINVAR_GERMLINE)
-  for (c in columns) {
-    if (c %in% colnames(calls)) {
-      df[, c] <- calls[, c]
-    }
-  }
-
-  for (v in colnames(df)) {
-    if (v != "VAR_ID") {
-      df[, v] <- as.integer(df[, v])
-    }
-  }
-  df <- dplyr::rename(df,
-                      gnomAD = .data$STATUS_POPFREQ_GNOMAD_ABOVE_TOLERATED,
-                      ClinVar = .data$STATUS_CLINVAR_GERMLINE)
-  if ("STATUS_PON" %in% colnames(df)) {
-    df <- dplyr::rename(df, Panel_Of_Normals = .data$STATUS_PON)
-  }
-  if ("STATUS_LIKELY_GERMLINE_HOMOZYGOUS" %in% colnames(df)) {
-    df <- dplyr::rename(df, HomAF = .data$STATUS_LIKELY_GERMLINE_HOMOZYGOUS)
-  }
-  if ("STATUS_LIKELY_GERMLINE_HETEROZYGOUS" %in% colnames(df)) {
-    df <- dplyr::rename(df, HetAF = .data$STATUS_LIKELY_GERMLINE_HETEROZYGOUS)
-  }
-  if ("STATUS_DBSNP_GERMLINE" %in% colnames(df)) {
-    df <- dplyr::rename(df, dbSNP = .data$STATUS_DBSNP_GERMLINE)
-  }
-  return(df)
-
-}
-
-#' Function that makes an upset calls for germline-filtered variants
-#' classification procedure
+#' export
+#' make_upset_plot_data <- function(calls, config) {
 #'
-#' @param upset_data unfiltered calls (germline + somatic)
+#'   columns <- c()
+#'   if (config[["tumor_only"]][["exclude_pon"]] == TRUE) {
+#'     columns <- c(columns, "STATUS_PON")
+#'   }
+#'   if (config[["tumor_only"]][["exclude_likely_hom_germline"]] == TRUE) {
+#'     columns <- c(columns, "STATUS_GERMLINE_HOM")
+#'   }
+#'   if (config[["tumor_only"]][["exclude_likely_het_germline"]] == TRUE) {
+#'     columns <- c(columns, "STATUS_GERMLINE_HET")
+#'   }
+#'   if (config[["tumor_only"]][["exclude_dbsnp_nonsomatic"]] == TRUE) {
+#'     columns <- c(columns, "STATUS_DBSNP")
+#'   }
+#'   assertable::assert_colnames(
+#'     calls, c("VAR_ID",
+#'              "gnomADe_AF_ABOVE_TOLERATED",
+#'              "STATUS_CLINVAR_GERMLINE"),
+#'     only_colnames = F, quiet = T)
+#'   df <- dplyr::select(calls, .data$VAR_ID,
+#'                       .data$gnomADe_AF_ABOVE_TOLERATED,
+#'                       .data$STATUS_CLINVAR_GERMLINE)
+#'   for (c in columns) {
+#'     if (c %in% colnames(calls)) {
+#'       df[, c] <- calls[, c]
+#'     }
+#'   }
 #'
-#' @return p
+#'   for (v in colnames(df)) {
+#'     if (v != "VAR_ID") {
+#'       df[, v] <- as.integer(df[, v])
+#'     }
+#'   }
+#'   df <- df |>
+#'     dplyr::rename(
+#'       gnomAD = .data$gnomADe_AF_ABOVE_TOLERATED,
+#'       ClinVar = .data$STATUS_CLINVAR_GERMLINE)
+#'   if ("STATUS_PON" %in% colnames(df)) {
+#'     df <- dplyr::rename(df, Panel_Of_Normals = .data$STATUS_PON)
+#'   }
+#'   if ("STATUS_GERMLINE_HOM" %in% colnames(df)) {
+#'     df <- dplyr::rename(df, HomAF = .data$STATUS_GERMLINE_HOM)
+#'   }
+#'   if ("STATUS_GERMLINE_HET" %in% colnames(df)) {
+#'     df <- dplyr::rename(df, HetAF = .data$STATUS_GERMLINE_HET)
+#'   }
+#'   if ("STATUS_DBSNP" %in% colnames(df)) {
+#'     df <- dplyr::rename(df, dbSNP = .data$STATUS_DBSNP)
+#'   }
+#'   return(df)
 #'
-#' @export
-upset_plot_tumor_only <- function(upset_data) {
+#' }
+#'
+#' #' #' Function that makes an upset calls for germline-filtered variants
+#' #' classification procedure
+#' #'
+#' #' param upset_data unfiltered calls (germline + somatic)
+#' #'
+#' #' return p
+#' #'
+#' #' export
+#' upset_plot_tumor_only <- function(upset_data) {
+#'
+#'   isets <- c()
+#'   all_negative_filters <- c()
+#'   for (c in colnames(upset_data)) {
+#'     if (c != "VAR_ID") {
+#'       if (length(unique(upset_data[, c] == 1)) == 1) {
+#'         if (unique(upset_data[, c] == 1) == T) {
+#'           isets <- c(isets, c)
+#'         }else{
+#'           all_negative_filters <- c(all_negative_filters, c)
+#'         }
+#'       }else{
+#'         isets <- c(isets, c)
+#'       }
+#'     }
+#'   }
+#'
+#'   for (m in all_negative_filters) {
+#'     upset_data[, m] <- NULL
+#'   }
+#'
+#'   p <- UpSetR::upset(upset_data, sets = isets,
+#'                      sets.bar.color = "#56B4E9",
+#'                      order.by = "freq", nintersects = 20,
+#'                      text.scale = 1.5, show.numbers = T,
+#'                      point.size = 6, color.pal = "Blues",
+#'                      empty.intersections = "on")
+#'   return(p)
+#'
+#' }
 
-  isets <- c()
-  all_negative_filters <- c()
-  for (c in colnames(upset_data)) {
-    if (c != "VAR_ID") {
-      if (length(unique(upset_data[, c] == 1)) == 1) {
-        if (unique(upset_data[, c] == 1) == T) {
-          isets <- c(isets, c)
-        }else{
-          all_negative_filters <- c(all_negative_filters, c)
-        }
-      }else{
-        isets <- c(isets, c)
-      }
-    }
-  }
-
-  for (m in all_negative_filters) {
-    upset_data[, m] <- NULL
-  }
-
-  p <- UpSetR::upset(upset_data, sets = isets,
-                     sets.bar.color = "#56B4E9",
-                     order.by = "freq", nintersects = 20,
-                     text.scale = 1.5, show.numbers = T,
-                     point.size = 6, color.pal = "Blues",
-                     empty.intersections = "on")
-  return(p)
-
-}
+#' Function that generates variant filtering statistics (i.e. removal of
+#' likely non-somatic/germline events) for callsets coming from
+#' tumor-only sequencing
+#'
+#' #' param callset list object with unfiltered calls (callset$variant_unfiltered)
+#' #' param settings list object with PCGR run configuration settings
+#' #'
+#' #' export
+#' tumor_only_vfilter_stats <-
+#'   function(callset = NULL,
+#'            settings = NULL) {
+#'
+#'     ## raw, unfiltered set of (PASSED) variant calls that
+#'     ## should be subject to filtering
+#'     vcalls <- callset$variant_unfiltered
+#'     to_settings <- settings$conf$somatic_snv$tumor_only
+#'
+#'     ## initiate report object with tumor-only variant filter stats
+#'     to_stats <-
+#'       pcgrr::init_tumor_only_content()
+#'
+#'     to_stats[['vfilter']][['unfiltered_n']] <-
+#'       NROW(vcalls)
+#'
+#'     ## Assign statistics to successive filtering levels for
+#'     ## different evidence criteria
+#'     ## excluded germline calls found in gnomAD
+#'     to_stats[["vfilter"]][["gnomad_n_remain"]] <-
+#'       NROW(vcalls) -
+#'       NROW(vcalls[vcalls$SOMATIC_CLASSIFICATION == "GERMLINE_GNOMAD", ])
+#'     # pcgrr::log4r_info(paste0("Excluding coinciding germline variants in ",
+#'     #                          "gnomAD populations"))
+#'     # pcgrr::log4r_info(paste0("Total sample calls remaining: ",
+#'     #                          to_stats$vfilter[["gnomad_n_remain"]]))
+#'
+#'     ## excluded germline calls found in ClinVar
+#'     to_stats$vfilter[["clinvar_n_remain"]] <-
+#'       to_stats$vfilter[["gnomad_n_remain"]] -
+#'       NROW(vcalls[vcalls$SOMATIC_CLASSIFICATION == "GERMLINE_CLINVAR", ])
+#'     # pcgrr::log4r_info(paste0("Excluding coinciding germline variants in ClinVar"))
+#'     # pcgrr::log4r_info(paste0("Total sample calls remaining: ",
+#'     #                          to_stats$vfilter[["clinvar_n_remain"]]))
+#'
+#'
+#'     ## excluded germline calls found in panel of normals (if provided)
+#'     to_stats$vfilter[["pon_n_remain"]] <-
+#'       to_stats$vfilter[["clinvar_n_remain"]]
+#'     if (as.logical(to_settings[["exclude_pon"]]) == TRUE) {
+#'       to_stats$vfilter[["pon_n_remain"]] <-
+#'         to_stats$vfilter[["pon_n_remain"]] -
+#'         NROW(vcalls[vcalls$SOMATIC_CLASSIFICATION == "GERMLINE_PON", ])
+#'       # pcgrr::log4r_info(
+#'       #   paste0("Excluding putative germline variants found in calls ",
+#'       #          "from panel-of-normals (PON)"))
+#'       # pcgrr::log4r_info(
+#'       #   paste0("Total sample calls remaining: ",
+#'       #          to_stats$vfilter[["pon_n_remain"]]))
+#'     }
+#'
+#'     ## excluded germline calls found with 100% allelic fraction
+#'     ## (likely homozygous germline variants)
+#'     to_stats$vfilter[["hom_n_remain"]] <-
+#'       to_stats$vfilter[["pon_n_remain"]]
+#'     if (as.logical(to_settings[["exclude_likely_hom_germline"]]) == TRUE) {
+#'       to_stats$vfilter[["hom_n_remain"]] <-
+#'         to_stats$vfilter[["hom_n_remain"]] -
+#'         NROW(vcalls[vcalls$SOMATIC_CLASSIFICATION == "GERMLINE_HOMOZYGOUS", ])
+#'       # pcgrr::log4r_info(
+#'       #   paste0("Excluding likely homozygous germline variants found ",
+#'       #          "as variants with 100% allelic fraction"))
+#'       # pcgrr::log4r_info(paste0("Total sample calls remaining: ",
+#'       #                          to_stats$vfilter[["hom_n_remain"]]))
+#'     }
+#'
+#'     ## excluded germline calls found as likely heterozygous germline variants
+#'     to_stats$vfilter[["het_n_remain"]] <-
+#'       to_stats$vfilter[["hom_n_remain"]]
+#'     if (as.logical(to_settings[["exclude_likely_het_germline"]]) == TRUE) {
+#'       to_stats$vfilter[["het_n_remain"]] <-
+#'         to_stats$vfilter[["het_n_remain"]] -
+#'         NROW(vcalls[vcalls$SOMATIC_CLASSIFICATION == "GERMLINE_HETEROZYGOUS", ])
+#'       # pcgrr::log4r_info(paste0(
+#'       #   "Excluding likely heterozygous germline variants found as variants ",
+#'       #   "with 40-60% allelic fraction and recorded in gnomAD + dbSNP"))
+#'       # pcgrr::log4r_info(paste0("Total sample calls remaining: ",
+#'       #                          to_stats$vfilter[["het_n_remain"]]))
+#'     }
+#'
+#'     ## excluded calls with dbSNP germline status (if set in config)
+#'     to_stats$vfilter[["dbsnp_n_remain"]] <-
+#'       to_stats$vfilter[["het_n_remain"]]
+#'     if (as.logical(to_settings[["exclude_dbsnp_nonsomatic"]]) == TRUE) {
+#'
+#'       #pcgrr::log4r_info(
+#'       #  paste0("Excluding non-somatically associated dbSNP variants ",
+#'       #         "(dbSNP - not recorded as somatic in ClinVar",
+#'       #         "and not registered in COSMIC or found in TCGA"))
+#'
+#'       to_stats$vfilter[["dbsnp_n_remain"]] <-
+#'         to_stats$vfilter[["dbsnp_n_remain"]] -
+#'         NROW(vcalls[vcalls$SOMATIC_CLASSIFICATION == "GERMLINE_DBSNP", ])
+#'       #pcgrr::log4r_info(paste0("Total sample calls remaining: ",
+#'       #                         to_stats$vfilter[["dbsnp_n_remain"]]))
+#'     }
+#'
+#'     ## excluded non-exonic calls (if set in config)
+#'     to_stats$vfilter[["nonexonic_n_remain"]] <-
+#'       to_stats$vfilter[["dbsnp_n_remain"]]
+#'     if (as.logical(to_settings[["exclude_nonexonic"]]) == TRUE) {
+#'
+#'       #pcgrr::log4r_info(
+#'       #  paste0("Excluding non-somatically associated dbSNP variants ",
+#'       #         "(dbSNP - not recorded as somatic in ClinVar",
+#'       #         "and not registered in COSMIC or found in TCGA"))
+#'
+#'       to_stats$vfilter[["nonexonic_n_remain"]] <-
+#'         to_stats$vfilter[["nonexonic_n_remain"]] -
+#'         NROW(vcalls[vcalls$EXONIC_STATUS == "nonexonic", ])
+#'       #pcgrr::log4r_info(paste0("Total sample calls remaining: ",
+#'       #                         to_stats$vfilter[["dbsnp_n_remain"]]))
+#'     }
+#'
+#'     to_stats[["eval"]] <- TRUE
+#'
+#'     for (db_filter in c("gnomad", "dbsnp", "pon",
+#'                         "clinvar", "hom", "het", "nonexonic")) {
+#'       if (to_stats[["vfilter"]][[paste0(db_filter, "_n_remain")]] > 0 &
+#'           to_stats[["vfilter"]][["unfiltered_n"]] > 0) {
+#'         to_stats[["vfilter"]][[paste0(db_filter, "_frac_remain")]] <-
+#'           round((as.numeric(to_stats[["vfilter"]][[paste0(db_filter,
+#'                                                               "_n_remain")]]) /
+#'                    to_stats[["vfilter"]][["unfiltered_n"]]) * 100, digits = 2)
+#'       }
+#'     }
+#'     return(to_stats)
+#'
+#'   }

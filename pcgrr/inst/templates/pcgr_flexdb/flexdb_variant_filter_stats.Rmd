@@ -14,20 +14,20 @@ flexdashboard::valueBox("SNVs/InDels", caption = NULL, color = '#000000', icon =
 ### Unfiltered variant set
 
 ```{r}
-flexdashboard::valueBox(pcg_report$content$tumor_only$v_stat$unfiltered_n, color = pcg_report$metadata$color_value_box, icon = "fa-dna")
+flexdashboard::valueBox(pcg_report$content$tumor_only$vstats$unfiltered_n, color = pcg_report$settings$conf$visual_reporting$color_value_box, icon = "fa-dna")
 ```
 
 
 ### Filtered variant set
 
 ```{r}
-flexdashboard::valueBox(pcg_report$content$snv_indel$v_stat$n, color = pcg_report$metadata$color_value_box, icon = "fa-dna")
+flexdashboard::valueBox(pcg_report$content$snv_indel$vstats$n, color = pcg_report$settings$conf$visual_reporting$color_value_box, icon = "fa-dna")
 ```
 
 ### Filtered coding variants
 
 ```{r}
-flexdashboard::valueBox(pcg_report$content$tumor_only$v_stat$nonexonic_n_remain, color = pcg_report$metadata$color_value_box, icon = "fa-dna")
+flexdashboard::valueBox(pcg_report$content$tumor_only$vstats$nonexonic_n_remain, color = pcg_report$settings$conf$visual_reporting$color_value_box, icon = "fa-dna")
 ```
 
 Row

@@ -2,15 +2,17 @@
 % Please edit documentation in R/utils.R
 \name{append_drug_var_link}
 \alias{append_drug_var_link}
-\title{Function that adds HTML links to different genetic variant identifiers}
+\title{Function that adds link to targeted drugs (on and off-label)
+for a list of variants and associated targeted}
 \usage{
-append_drug_var_link(vcf_data_df, ref_data = NULL)
+append_drug_var_link(vcf_data_df, primary_site = "Breast", ref_data = NULL)
 }
 \arguments{
 \item{vcf_data_df}{data frame with variants}
 
-\item{ref_data}{PCGR/CPSR reference data object}
+\item{ref_data}{PCGR/CPSR reference data list object}
 }
 \description{
-Function that adds HTML links to different genetic variant identifiers
+Function that adds link to targeted drugs (on and off-label)
+for a list of variants and associated targeted
 }
