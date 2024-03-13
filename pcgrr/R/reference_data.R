@@ -160,17 +160,21 @@ load_reference_data <- function(
   )
   check_file_exists(gene_xref_tsv_fname)
 
-  # pcgr_ref_data[['gene']][['transcript_xref']] <- as.data.frame(
-  #   readr::read_tsv(gene_xref_tsv_fname, show_col_types = F)) |>
-  #   dplyr::select(
-  #     c("chrom",
-  #       "ensembl_gene_id",
-  #       "ensembl_transcript_id",
-  #       "gencode_transcript_biotype",
-  #       "gene_biotype"
-  #     )
-  #   ) |>
-  #   dplyr::distinct()
+  pcgr_ref_data[['gene']][['transcript_biotype']] <- as.data.frame(
+    readr::read_tsv(
+      gene_xref_tsv_fname, show_col_types = F)) |>
+    dplyr::select(
+      c("chrom",
+        "ensembl_gene_id",
+        "ensembl_transcript_id",
+        "gencode_transcript_biotype",
+        "gene_biotype"
+      )
+    ) |>
+    dplyr::distinct()
+
+  colnames(pcgr_ref_data[['gene']][['transcript_biotype']]) <-
+    toupper(colnames(pcgr_ref_data[['gene']][['transcript_biotype']]))
 
 
   refseq2entrezgene <- as.data.frame(
@@ -184,12 +188,14 @@ load_reference_data <- function(
         "entrezgene"
       )
     ) |>
-    dplyr::filter(!is.na(refseq_transcript_id)) |>
-    tidyr::separate_rows(refseq_transcript_id, sep = "&") |>
-    dplyr::rename(KEY = refseq_transcript_id,
-                  VALUE = entrezgene) |>
+    dplyr::filter(
+      !is.na(.data$refseq_transcript_id)) |>
+    tidyr::separate_rows(
+      "refseq_transcript_id", sep = "&") |>
+    dplyr::rename(KEY = "refseq_transcript_id",
+                  VALUE = "entrezgene") |>
     dplyr::mutate(KEYTYPE = "refseq_transcript_id") |>
-    dplyr::select(KEY, KEYTYPE, VALUE) |>
+    dplyr::select(c("KEY", "KEYTYPE", "VALUE")) |>
     dplyr::distinct()
 
   enst2entrezgene <- as.data.frame(
@@ -203,11 +209,11 @@ load_reference_data <- function(
         "entrezgene"
       )
     ) |>
-    dplyr::filter(!is.na(ensembl_transcript_id)) |>
-    dplyr::rename(KEY = ensembl_transcript_id,
-                  VALUE = entrezgene) |>
+    dplyr::filter(!is.na(.data$ensembl_transcript_id)) |>
+    dplyr::rename(KEY = "ensembl_transcript_id",
+                  VALUE = "entrezgene") |>
     dplyr::mutate(KEYTYPE = "ensembl_transcript_id") |>
-    dplyr::select(KEY, KEYTYPE, VALUE) |>
+    dplyr::select(c("KEY", "KEYTYPE", "VALUE")) |>
     dplyr::distinct()
 
   ensg2entrezgene <- as.data.frame(
@@ -221,11 +227,11 @@ load_reference_data <- function(
         "entrezgene"
       )
     ) |>
-    dplyr::filter(!is.na(ensembl_gene_id)) |>
-    dplyr::rename(KEY = ensembl_gene_id,
-                  VALUE = entrezgene) |>
+    dplyr::filter(!is.na(.data$ensembl_gene_id)) |>
+    dplyr::rename(KEY = "ensembl_gene_id",
+                  VALUE = "entrezgene") |>
     dplyr::mutate(KEYTYPE = "ensembl_gene_id") |>
-    dplyr::select(KEY, KEYTYPE, VALUE) |>
+    dplyr::select(c("KEY", "KEYTYPE", "VALUE")) |>
     dplyr::distinct()
 
   sym2entrezgene <- as.data.frame(
@@ -239,11 +245,11 @@ load_reference_data <- function(
         "entrezgene"
       )
     ) |>
-    dplyr::filter(!is.na(symbol)) |>
-    dplyr::rename(KEY = symbol,
-                  VALUE = entrezgene) |>
+    dplyr::filter(!is.na(.data$symbol)) |>
+    dplyr::rename(KEY = "symbol",
+                  VALUE = "entrezgene") |>
     dplyr::mutate(KEYTYPE = "symbol") |>
-    dplyr::select(KEY, KEYTYPE, VALUE) |>
+    dplyr::select(c("KEY", "KEYTYPE", "VALUE")) |>
     dplyr::distinct()
 
 
@@ -252,7 +258,7 @@ load_reference_data <- function(
     dplyr::bind_rows(refseq2entrezgene) |>
     dplyr::bind_rows(ensg2entrezgene) |>
     dplyr::bind_rows(enst2entrezgene) |>
-    dplyr::arrange(VALUE)
+    dplyr::arrange(.data$VALUE)
 
 
   otp_rank_tsv_fname <- file.path(
@@ -274,7 +280,9 @@ load_reference_data <- function(
     toupper(colnames(pcgr_ref_data[['gene']][['otp_rank']]))
 
   pcgr_ref_data[['gene']][['gene_xref']] <- as.data.frame(
-    readr::read_tsv(gene_xref_tsv_fname, show_col_types = F)) |>
+    readr::read_tsv(
+      gene_xref_tsv_fname, na = c("."),
+      show_col_types = F, guess_max = 10000)) |>
     dplyr::select(
       c("ensembl_gene_id",
       "gene_biotype",
@@ -292,31 +300,31 @@ load_reference_data <- function(
       "cancergene_evidence")
     ) |>
     dplyr::rename(
-      genename = .data$name
+      genename = "name"
     ) |>
     dplyr::mutate(
       entrezgene = as.character(.data$entrezgene)
     ) |>
-    dplyr::filter(
-      .data$gene_biotype == "protein_coding") |>
+    #dplyr::filter(
+    #  .data$gene_biotype == "protein_coding") |>
     dplyr::distinct() |>
     dplyr::mutate(
       oncogene = dplyr::if_else(
-        .data$oncogene == ".",
+        is.na(.data$oncogene),
         FALSE,
         as.logical(.data$oncogene)
       )
     ) |>
     dplyr::mutate(
       tsg = dplyr::if_else(
-        .data$tsg == ".",
+        is.na(.data$tsg),
         FALSE,
         as.logical(.data$tsg)
       )
     ) |>
     dplyr::mutate(
       driver = dplyr::if_else(
-        .data$driver == ".",
+        is.na(.data$driver),
         FALSE,
         as.logical(.data$driver)
       )
@@ -362,8 +370,11 @@ load_reference_data <- function(
   check_file_exists(gwas_tsv_fname)
   pcgr_ref_data[['variant']][['gwas']] <- as.data.frame(
     readr::read_tsv(
-      gwas_tsv_fname, show_col_types = F)
-  )
+      gwas_tsv_fname,
+      na = c("."),
+      show_col_types = F)) |>
+    dplyr::filter(!is.na(.data$primary_site))
+
   colnames(pcgr_ref_data[['variant']][['gwas']]) <-
     toupper(colnames(pcgr_ref_data[['variant']][['gwas']]))
 
@@ -463,7 +474,7 @@ load_reference_data <- function(
     pcgr_ref_data[['misc']][[elem]] <- as.data.frame(
       readr::read_tsv(
         fname_misc, show_col_types = F,
-        na = ".")
+        na = ".", guess_max = 11000)
     )
     colnames(pcgr_ref_data[['misc']][[elem]]) <-
       toupper(colnames(pcgr_ref_data[['misc']][[elem]]))
@@ -522,7 +533,8 @@ load_reference_data <- function(
         "DRUG_YEAR_FIRST_APPROVAL",
         "DRUG_ACTION_TYPE",
         "DRUG_LINK")) |>
-    dplyr::rename(DRUG_CLASS = ATC_LEVEL3) |>
+    dplyr::rename(
+      DRUG_CLASS = "ATC_LEVEL3") |>
     dplyr::filter(
         .data$ATC_TREATMENT_CATEGORY != "cancer_unclassified" &
         .data$DRUG_TYPE != "Unknown") |>
@@ -557,8 +569,8 @@ load_reference_data <- function(
       .data$QUERY_SITE,
       .data$DRUG_CLASS) |>
     dplyr::summarise(
-      DRUG_NAME = paste(.data$DRUG_NAME, collapse=", "),
-      DRUG_LINK = paste(.data$DRUG_LINK, collapse=", "),
+      DRUG_NAME = paste(.data$DRUG_NAME, collapse = "|"),
+      DRUG_LINK = paste(.data$DRUG_LINK, collapse = ", "),
       n = dplyr::n(),
       .groups = "drop"
     ) |>
@@ -569,7 +581,7 @@ load_reference_data <- function(
     ) |>
     dplyr::mutate(
       DRUG_NAME = paste(
-        .data$DRUG_CLASS, .data$DRUG_NAME, sep = ": "),
+        .data$DRUG_CLASS, .data$DRUG_NAME, sep = ":"),
       DRUG_LINK = paste0(
         "<b>",.data$DRUG_CLASS,": </b>", .data$DRUG_LINK),
     ) |>
@@ -584,10 +596,12 @@ load_reference_data <- function(
     ) |>
     dplyr::summarise(
       TARGETED_INHIBITORS2 = paste(.data$DRUG_NAME, collapse=", "),
-      TARGETED_INHIBITORS = paste(.data$DRUG_LINK, collapse=", ")
+      TARGETED_INHIBITORS = paste(.data$DRUG_LINK, collapse=", "),
+      .groups = "drop"
     )
 
-  pcgr_ref_data[['drug']][['inhibitors_any_label']] <- as.data.frame(
+  pcgr_ref_data[['drug']][['inhibitors_any_label']] <-
+    as.data.frame(
     inhibitors_all |>
     dplyr::filter(
       .data$DRUG_MAX_PHASE_INDICATION > 2) |>
@@ -602,22 +616,22 @@ load_reference_data <- function(
       .data$DRUG_CLASS) |>
     dplyr::summarise(
       DRUG_PRIMARY_SITE = paste(
-        sort(unique(.data$DRUG_PRIMARY_SITE)), collapse=", "),
+        sort(unique(.data$DRUG_PRIMARY_SITE)), collapse=","),
       .groups = "drop"
     ) |>
     dplyr::ungroup() |>
     dplyr::mutate(
       DRUG_LINK = paste0(
-        .data$DRUG_LINK, " (", DRUG_PRIMARY_SITE, ")"),
+        .data$DRUG_LINK, " (", .data$DRUG_PRIMARY_SITE, ")"),
       DRUG_NAME = paste0(
-        .data$DRUG_NAME, " (", DRUG_PRIMARY_SITE, ")")
+        .data$DRUG_NAME, " (", .data$DRUG_PRIMARY_SITE, ")")
     ) |>
     dplyr::group_by(
       .data$SYMBOL,
       .data$QUERY_SITE,
       .data$DRUG_CLASS) |>
     dplyr::summarise(
-      DRUG_NAME = paste(.data$DRUG_NAME, collapse=", "),
+      DRUG_NAME = paste(.data$DRUG_NAME, collapse="|"),
       DRUG_LINK = paste(.data$DRUG_LINK, collapse=", "),
       n = dplyr::n(),
       .groups = "drop"
@@ -628,9 +642,14 @@ load_reference_data <- function(
     ) |>
     dplyr::mutate(
       DRUG_NAME = paste(
-        .data$DRUG_CLASS, .data$DRUG_NAME, sep = ": "),
+        .data$DRUG_CLASS,
+        .data$DRUG_NAME,
+        sep = ":"),
       DRUG_LINK = paste0(
-        "<b>",.data$DRUG_CLASS,": </b>", .data$DRUG_LINK),
+        "<b>",
+        .data$DRUG_CLASS,
+        ": </b>",
+        .data$DRUG_LINK),
     ) |>
     ## ignore proteasome/tubulin/CYP targets -
     dplyr::filter(
@@ -642,8 +661,10 @@ load_reference_data <- function(
       .data$QUERY_SITE
     ) |>
     dplyr::summarise(
-      TARGETED_INHIBITORS_ALL2 = paste(.data$DRUG_NAME, collapse=", "),
-      TARGETED_INHIBITORS_ALL = paste(.data$DRUG_LINK, collapse=", "),
+      TARGETED_INHIBITORS_ALL2 = paste(
+        .data$DRUG_NAME, collapse=", "),
+      TARGETED_INHIBITORS_ALL = paste(
+        .data$DRUG_LINK, collapse=", "),
       .groups = "drop"
     )
   )

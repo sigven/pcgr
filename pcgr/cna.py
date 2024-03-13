@@ -52,6 +52,8 @@ def annotate_cna_segments(output_fname: str,
         err_msg = f"Could not find required columns in CNA segment file: {cna_segment_file} - exiting."
         error_message(err_msg, logger)
     
+    cna_query_segment_df = cna_query_segment_df[['Chromosome', 'Start','End','nMajor','nMinor']]
+    
     ## Remove 'chr' prefix from chromosome names
     for elem in ['Chromosome','nMajor','nMinor']:
         cna_query_segment_df = cna_query_segment_df.astype({elem:'string'})
@@ -173,15 +175,6 @@ def annotate_cna_segments(output_fname: str,
         
     cna_query_segment_df.columns = map(str.upper, cna_query_segment_df.columns)
     cna_query_segment_df.rename(columns = {'CHROMOSOME':'CHROM','SEGMENT_ID':'VAR_ID'}, inplace = True)
-    hgname = "hg38"
-    if build == "grch37":
-        hgname = "hg19"
-    ucsc_browser_prefix = \
-        f"http://genome.ucsc.edu/cgi-bin/hgTracks?db={hgname}&position="
-        
-    cna_query_segment_df['SEGMENT_LINK'] = \
-        "<a href='" + ucsc_browser_prefix + cna_query_segment_df['VAR_ID'].astype(str) + \
-            "' target='_blank'>" + cna_query_segment_df['VAR_ID'].astype(str) + "</a>"
     cna_query_segment_df['VAR_ID'] = \
         cna_query_segment_df['VAR_ID'].str.cat(
             cna_query_segment_df['N_MAJOR'].astype(str), sep=":").str.cat(
@@ -370,52 +363,9 @@ def annotate_transcripts(cna_segments_bt: BedTool, output_dir: str,
         remove_file(fname)
     
     return(cna_segments_annotated)
-        
 
 
 def is_valid_cna(cna_segment_file, logger):
-    """
-    Function that checks whether the CNA segment file adheres to the correct format
-    """
-    cna_reader = csv.DictReader(open(cna_segment_file,'r'), delimiter='\t')
-    ## check that required columns are present
-    if not ('Chromosome' in cna_reader.fieldnames and 
-            'Segment_Mean' in cna_reader.fieldnames and 
-            'Start' in cna_reader.fieldnames and 
-            'End' in cna_reader.fieldnames):
-        err_msg = "Copy number segment file (" + str(cna_segment_file) + \
-            ") is missing required column(s): 'Chromosome', 'Start', 'End', or  'Segment_Mean'\n. " + \
-                "Column names present in file: " + str(cna_reader.fieldnames)
-        return error_message(err_msg, logger)
-
-    cna_dataframe = pd.read_csv(cna_segment_file, sep="\t")
-    if cna_dataframe.empty is True:
-        err_msg = 'Copy number segment file is empty - contains NO segments'
-        return error_message(err_msg, logger)
-    if not cna_dataframe['Start'].dtype.kind in 'i': ## check that 'Start' is of type integer
-        err_msg = '\'Start\' column of copy number segment file contains non-integer values'
-        return error_message(err_msg, logger)
-    if not cna_dataframe['End'].dtype.kind in 'i': ## check that 'End' is of type integer
-        err_msg = '\'End\' column of copy number segment file contains non-integer values'
-        return error_message(err_msg, logger)
-
-    if not cna_dataframe['Segment_Mean'].dtype.kind in 'if': ## check that 'Segment_Mean' is of type integer/float
-        err_msg = '\'Segment_Mean\' column of copy number segment file contains non-numerical values'
-        return error_message(err_msg, logger)
-
-    for rec in cna_reader:
-        if int(rec['End']) < int(rec['Start']): ## check that 'End' is always greather than 'Start'
-            err_msg = 'Detected wrongly formatted chromosomal segment - \'Start\' is greater than \'End\' (' + \
-                str(rec['Chromosome']) + ':' + str(rec['Start']) + '-' + str(rec['End']) + ')'
-            return error_message(err_msg, logger)
-        if int(rec['End']) < 1 or int(rec['Start']) < 1: ## check that 'Start' and 'End' is always non-negative
-            err_msg = 'Detected wrongly formatted chromosomal segment - \'Start\' or \'End\' is less than or equal to zero (' + \
-                str(rec['Chromosome']) + ':' + str(rec['Start']) + '-' + str(rec['End']) + ')'
-            return error_message(err_msg, logger)
-    logger.info(f'Copy number segment file ({cna_segment_file}) adheres to the correct format')
-    return 0
-
-def is_valid_cna2(cna_segment_file, logger):
     """
     Function that checks whether the CNA segment file adheres to the correct format
     """

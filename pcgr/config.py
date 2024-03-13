@@ -7,6 +7,7 @@ import pandas as pd
 import os
 import gzip
 import csv
+import re
 
 def create_config(arg_dict, workflow = "PCGR"):
     
@@ -28,10 +29,10 @@ def create_config(arg_dict, workflow = "PCGR"):
             'vep_gencode_basic': int(arg_dict['vep_gencode_basic'])            
         }
             
-        conf_options['visual_reporting'] = {
-            'visual_theme': str(arg_dict['report_theme']),
-            'nonfloating_toc': int(arg_dict['report_nonfloating_toc'])
-        }
+        #conf_options['visual_reporting'] = {
+        #    'visual_theme': str(arg_dict['report_theme']),
+        #    'nonfloating_toc': int(arg_dict['report_nonfloating_toc'])
+        #}
             
         conf_options['other'] = {
             'vcfanno_n_proc': int(arg_dict['vcfanno_n_proc']),                                          
@@ -121,8 +122,10 @@ def create_config(arg_dict, workflow = "PCGR"):
     if workflow == "CPSR":        
         conf_options['sample_properties']['phenotype'] = 'None'
         conf_options['sample_properties']['site'] = 'Hereditary (blood)'
-        conf_options['sample_properties']['genotypes_available'] = 0
-        conf_options['visual_reporting']['table_display'] = str(arg_dict['report_table_display'])
+        conf_options['sample_properties']['gt_detected'] = 0
+        conf_options['sample_properties']['dp_detected'] = 0
+        
+        #conf_options['visual_reporting']['table_display'] = str(arg_dict['report_table_display'])
         conf_options['gene_panel'] = {
             'panel_id': str(arg_dict['virtual_panel_id']),
             'description': 'Exploratory virtual gene panel (panel 0)',
@@ -165,11 +168,15 @@ def populate_config_data(conf_options: dict, db_dir: str, workflow = "PCGR", log
     if workflow == "PCGR" and conf_options['annotated_cna'] != "None":
         conf_data['molecular_data']['fname_cna_tsv'] = conf_options['annotated_cna']
         del conf_options['annotated_cna']
+    if workflow == "CPSR":
+        del conf_data['molecular_data']['fname_cna_tsv']
     
     conf_data['molecular_data']['fname_tmb'] = "None"
     if workflow == "PCGR" and conf_options['fname_tmb'] != "None":
         conf_data['molecular_data']['fname_tmb'] = conf_options['fname_tmb']
         del conf_options['fname_tmb']
+    if workflow == "CPSR":
+        del conf_data['molecular_data']['fname_tmb']
     
     genome_assembly = conf_options['genome_assembly']
     del conf_options['sample_id']
@@ -189,6 +196,10 @@ def populate_config_data(conf_options: dict, db_dir: str, workflow = "PCGR", log
     conf_data['conf']['sample_properties']['phenotype'] = {}
     
     ## add metadata information for each data source
+    
+    cpsr_sources_regex = r'^(gepa|cpg_other|maxwell2016|acmg_sf|dbmts|woods_dnarepair|gerp|tcga_pancan_2018|gwas_catalog)'
+    pcgr_sources_regex = r'^(cytoband|mitelmandb|tcga|nci|intogen|opentargets|dgidb|pubchem|cosmic_mutsigs)'
+    
     for dtype in ['gene','phenotype','biomarker','drug','gwas','hotspot','other']:
         metadata_fname = os.path.join(
             db_dir, "data", conf_data['genome_assembly'],
@@ -196,6 +207,9 @@ def populate_config_data(conf_options: dict, db_dir: str, workflow = "PCGR", log
         if check_file_exists(metadata_fname, logger):
             metadata_df = pd.read_csv(metadata_fname, sep="\t", na_values=".")
             metadata_df["source_type"] = dtype
+            metadata_df['wflow'] = 'pcgr_cpsr'
+            metadata_df.loc[metadata_df['source_abbreviation'].str.match(cpsr_sources_regex), 'wflow'] = 'cpsr' 
+            metadata_df.loc[metadata_df['source_abbreviation'].str.match(pcgr_sources_regex), 'wflow'] = 'pcgr'
             metadata_pd = metadata_pd._append(metadata_df, ignore_index=True)
     
     conf_data['reference_data']['source_metadata'] = metadata_pd.to_dict(orient='records')

@@ -25,7 +25,7 @@ init_report <- function(yaml_fname = NULL,
   yaml_data <- list()
   ref_data <- list()
   if (!is.null(yaml_fname)) {
-    yaml_data <- load_yaml(
+    yaml_data <- pcgrr::load_yaml(
       yaml_fname,
       report_mode = report_mode
     )
@@ -91,7 +91,7 @@ init_report <- function(yaml_fname = NULL,
                      "kataegis",
                      "expression",
                      "predisposition",
-                     "report_display_config",
+                     #"report_display_config",
                      "clinicaltrials")) {
       report[["content"]][[a_elem]] <- list()
       report[["content"]][[a_elem]][["eval"]] <- FALSE
@@ -107,11 +107,6 @@ init_report <- function(yaml_fname = NULL,
       if (a_elem == "rainfall") {
         report[["content"]][[a_elem]] <-
           init_rainfall_content()
-      }
-
-      if (a_elem == "report_display_config") {
-        report[["content"]][[a_elem]] <-
-          init_report_display_content()
       }
 
       if (a_elem == "value_box") {
@@ -157,11 +152,6 @@ init_report <- function(yaml_fname = NULL,
       }
     }
   }
-  # if (!is.null(class)) {
-  #   if (!is.null(report[["content"]][[class]])) {
-  #     return(report[["content"]][[class]])
-  #   }
-  # }
 
   return(report)
 }
@@ -213,14 +203,15 @@ init_tmb_content <- function(ref_data = NULL) {
 
 #' Function that initiates report element with CNA information
 #'
-#' @return rep updated PCGR report structure - initialized for CNA content
 #' @export
-init_cna_vstats <- function(rep = NULL) {
+init_cna_vstats <- function() {
 
   vstats <- list()
   for (t in c("n_tsg_loss",
               "n_oncogene_gain",
               "n_other_drugtarget_gain",
+              "n_segments_loss",
+              "n_segments_gain",
               "n_tier1",
               "n_tier2",
               "n_tier3")) {
@@ -229,17 +220,35 @@ init_cna_vstats <- function(rep = NULL) {
   return(vstats)
 }
 
-#' Function that initiates report element with SNV/InDel information
+#' Function that initiates report element with SNV/InDel statistics information
 #'
-#' @return vstats updated PCGR report structure - initialized for SNV/InDel content
 #' @export
 init_snv_indel_vstats <- function() {
 
   vstats <- list()
-  for (t in c("n", "n_snv", "n_indel",
-              "n_coding", "n_noncoding",
-              "n_tier1", "n_tier2",
-              "n_tier3", "n_tier4")) {
+  for (t in c("n",
+              "n_snv",
+              "n_indel",
+              "n_sub",
+              "n_coding",
+              "n_noncoding",
+              "n_tier1",
+              "n_tier2",
+              "n_tier3",
+              "n_tier3_tsg",
+              "n_tier3_oncogene",
+              "n_tier3_dualrole",
+              "n_tier4",
+              "n_tier5",
+              "n_eitems_diagnostic_tier1",
+              "n_eitems_predictive_tier1",
+              "n_eitems_prognostic_tier1",
+              "n_eitems_diagnostic_tier2",
+              "n_eitems_predictive_tier2",
+              "n_eitems_prognostic_tier2",
+              "n_genes_tier1",
+              "n_genes_tier2",
+              "n_genes_tier3")) {
     vstats[[t]] <- 0
   }
   return(vstats)
@@ -395,26 +404,6 @@ init_valuebox_content <- function() {
 
 }
 
-#' Function that initiates ranked report display information
-#'
-#' @return rep Report structure initialized for ranked display
-#' @export
-init_report_display_content <- function() {
-
-  rep <- list()
-  rep[["eval"]] <- FALSE
-
-  rep[["opentargets_rank"]] <- list()
-  rep[["opentargets_rank"]][["breaks"]] <-
-    c(0.40, 0.55, 0.70, 0.85)
-  rep[["opentargets_rank"]][["colors"]] <-
-    c("#b8b8ba", "#BDD7E7", "#6BAED6", "#3182BD", "#08519C")
-
-  return(rep)
-
-}
-
-
 #' Function that initiates report element with variant data
 #'
 #' @return rep Report structure initialized for variant data
@@ -448,43 +437,51 @@ init_var_content <- function() {
 init_germline_content <- function() {
   rep <- list()
 
+  rep[['callset']] <- list()
   rep[["max_dt_rows"]] <- 0
   rep[["eval"]] <- FALSE
-  rep[["disp"]] <- list()
-  rep[["variant_set"]] <- list()
+  rep[['callset']][["variant"]] <- list()
+  rep[['callset']][["variant_display"]] <- list()
+  rep[['callset']][['biomarker_evidence']] <- list()
   rep[["zero"]] <- FALSE
-  for (t in c("class1", "class2", "class3",
-              "class4", "class5", "gwas",
-              "secondary")) {
-    rep[["disp"]][[t]] <-
+  for (t in c("all",
+              "cpg_non_sf",
+              "gwas",
+              "bm",
+              "sf")) {
+    rep[["callset"]][["variant"]][[t]] <-
       data.frame()
-    rep[["variant_set"]][[t]] <-
+    rep[["callset"]][["variant_display"]][[t]] <-
       data.frame()
-  }
-  rep[["variant_set"]][["tsv"]] <-
-    data.frame()
-  rep[["clin_eitem"]] <- list()
-  for (evidence_type in pcgrr::evidence_types) {
-    rep[["clin_eitem"]][[evidence_type]] <- list()
-    for(level in pcgrr::evidence_levels) {
-      rep[["clin_eitem"]][[evidence_type]][[level]] <-
-        data.frame()
-    }
-    rep[['clin_eitem']][['all']] <- list()
-    for(level in pcgrr::evidence_levels) {
-      rep[["clin_eitem"]][['all']][[level]] <-
-        data.frame()
-    }
   }
 
   for (cl in c("v_stat",
                "v_stat_cpg",
-               "v_stat_secondary")) {
+               "v_stat_sf")) {
     rep[[cl]] <- list()
-    for (t in c("n", "n_snv", "n_indel", "n_coding", "n_noncoding")) {
+    for (t in c("n",
+                "n_snv",
+                "n_indel",
+                "n_coding",
+                "n_noncoding",
+                "n_p",
+                "n_lp",
+                "n_vus",
+                "n_lb",
+                "n_b")) {
       rep[[cl]][[t]] <- 0
     }
   }
+
+  rep[['v_stat_bm']] <- list()
+  for (cl in c("n_var_eitems",
+               "n_eitems_predictive",
+               "n_eitems_prognostic",
+               "n_eitems_diagnostic",
+               "n_eitems_predisposing")) {
+    rep[['v_stat_bm']][[cl]] <- 0
+  }
+
 
   return(rep)
 
@@ -634,6 +631,14 @@ load_yaml <- function(yml_fname, report_mode = "CPSR") {
     }
   }
 
+  ## temporary ACMG url fix
+  for(i in 1:NROW(report_settings[['reference_data']][['source_metadata']])){
+    if(report_settings[['reference_data']][['source_metadata']][i,"source_abbreviation"] == "acmg_sf"){
+      report_settings[['reference_data']][['source_metadata']][i,"source_url"] <-
+        "https://pubmed.ncbi.nlm.nih.gov/37347242/"
+    }
+  }
+
   if (report_mode == "CPSR") {
     report_settings[['conf']][['gene_panel']][['panel_genes']] <-
       as.data.frame(
@@ -679,18 +684,21 @@ load_yaml <- function(yml_fname, report_mode = "CPSR") {
       )
   }
 
-  report_settings$conf$visual_reporting[["color_palette"]] <-
-    pcgrr::color_palette
-  report_settings$conf$visual_reporting[["color_none"]] <-
-    pcgrr::color_palette[["none"]][["values"]][1]
-  report_settings$conf$visual_reporting[["color_value_box"]] <-
+  report_settings$conf$report_color <-
     pcgrr::color_palette[["report_color"]][["values"]][1]
+
+  #report_settings$conf$visual_reporting[["color_palette"]] <-
+  #  pcgrr::color_palette
+  #report_settings$conf$visual_reporting[["color_none"]] <-
+  #  pcgrr::color_palette[["none"]][["values"]][1]
+  #report_settings$conf$visual_reporting[["color_value_box"]] <-
+  #  pcgrr::color_palette[["report_color"]][["values"]][1]
   if (report_mode == "PCGR" &
-     !is.null(report_settings$conf$assay_properties)) {
-    if (report_settings$conf$assay_properties$vcf_tumor_only == 1) {
-      report_settings$conf$visual_reporting[["color_value_box"]] <-
-        pcgrr::color_palette[["report_color"]][["values"]][2]
-    }
+    !is.null(report_settings$conf$assay_properties)) {
+   if (report_settings$conf$assay_properties$vcf_tumor_only == 1) {
+     report_settings$conf$report_color <-
+       pcgrr::color_palette[["report_color"]][["values"]][2]
+   }
   }
 
   return(list('settings' = report_settings,

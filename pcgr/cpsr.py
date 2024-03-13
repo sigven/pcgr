@@ -14,16 +14,18 @@ import yaml
 
 from glob import glob
 from argparse import RawTextHelpFormatter
-from pcgr import pcgr_vars, arg_checker, utils, vep, config, variant
+from pcgr import pcgr_vars, arg_checker, utils, config, variant
 from pcgr.utils import check_subprocess, getlogger, error_message, warn_message, remove_file
 from pcgr.config import populate_config_data
+from pcgr.vep import get_vep_command
+
 
 def get_args():
 
     program_description = "Cancer Predisposition Sequencing Reporter - report of " + \
        "clinically significant cancer-predisposing germline variants"
-    program_options = " --input_vcf <INPUT_VCF> --refdata_dir <REFDATA_DIR> --output_dir <OUTPUT_DIR> --genome_assembly " + \
-       " <GENOME_ASSEMBLY> --sample_id <SAMPLE_ID>"
+    program_options = "\n\t--input_vcf <INPUT_VCF>\n\t--vep_dir <VEP_DIR>\n\t--refdata_dir <REFDATA_DIR>\n\t" + \
+        "--output_dir <OUTPUT_DIR>\n\t--genome_assembly <GENOME_ASSEMBLY>\n\t--sample_id <SAMPLE_ID>"
 
     parser = argparse.ArgumentParser(description = program_description,
                                      formatter_class=RawTextHelpFormatter, usage="%(prog)s -h [options] " + str(program_options))
@@ -44,9 +46,6 @@ def get_args():
     optional_other.add_argument('--version', action='version', version=str(utils.get_cpsr_version()))
     optional_other.add_argument('--no_reporting',action="store_true",help="Run functional variant annotation on VCF through VEP/vcfanno, omit classification/report generation (STEP 4), default: %(default)s")
     optional_other.add_argument('--retained_info_tags', dest ='retained_info_tags', default='None', help='Comma-separated string of VCF INFO tags from query VCF that should be kept in CPSR output TSV')
-    optional_other.add_argument('--report_theme',choices = ['default','cerulean','journal','flatly','readable','spacelab','united','cosmo','lumen','paper','sandstone','simplex','yeti'], default = 'default', help='Visual report theme (rmarkdown),  default: %(default)s' )
-    optional_other.add_argument('--report_nonfloating_toc', action='store_true', help='Do not float the table of contents (TOC) in output HTML report, default: %(default)s')
-    optional_other.add_argument('--report_table_display', choices = ['full','light'], default='light', help="Set the level of detail/comprehensiveness in interactive datables of HTML report, very comprehensive (option 'full') or slim/focused ('light'), default: %(default)s")
     optional_other.add_argument('--ignore_noncoding', action='store_true',dest='ignore_noncoding',default=False,help='Ignore non-coding (i.e. non protein-altering) variants in report, default: %(default)s')
     optional_other.add_argument("--debug", action="store_true", help="Print full commands to log")
     optional_other.add_argument("--pcgrr_conda", default="pcgrr", help="pcgrr conda env name (default: %(default)s)")
@@ -69,6 +68,7 @@ def get_args():
     optional_vep.add_argument('--vep_no_intergenic', action = "store_true", help="Skip intergenic variants during processing (option '--no_intergenic' in VEP), default: %(default)s")
 
     required.add_argument('--input_vcf', help='VCF input file with germline query variants (SNVs/InDels).', required = True)
+    required.add_argument("--vep_dir", dest="vep_dir", help="Directory of VEP cache, e.g.  $HOME/.vep", required=True)
     required.add_argument('--refdata_dir',help=f"Directory that contains the PCGR/CPSR reference data, e.g. ~/pcgr-data-{pcgr_vars.PCGR_VERSION}", required = True)
     required.add_argument('--output_dir',help='Output directory', required = True)
     required.add_argument('--genome_assembly',choices = ['grch37','grch38'], help='Genome assembly build: grch37 or grch38', required = True)
@@ -180,7 +180,7 @@ def run_cpsr(conf_options, cpsr_paths):
                     f"{'ON' if conf_options['variant_classification']['secondary_findings'] else 'OFF'}")
         logger.info(f"Include low to moderate cancer risk variants from genome-wide association studies: " + \
                     f"{'ON' if conf_options['variant_classification']['gwas_findings'] else 'OFF'}")
-        logger.info(f"Reference population, germline variant frequencies (gnomAD): " + \
+        logger.info(f"Reference population, germline variant frequencies (gnomAD - non-cancer subset): " + \
                     f"{str(conf_options['variant_classification']['pop_gnomad']).upper()}")
         logger.info(f"Genome assembly: {conf_options['genome_assembly']}")
         print('----')
@@ -199,7 +199,7 @@ def run_cpsr(conf_options, cpsr_paths):
         outfile.close()
         
         ## CPSR|VEP - run Variant Effect Predictor on query VCF with LoF and NearestExonJB plugins
-        vep_command = vep.get_command(file_paths = cpsr_paths, 
+        vep_command = get_vep_command(file_paths = cpsr_paths, 
                                       conf_options = yaml_data, 
                                       input_vcf = input_vcf_validated, 
                                       output_vcf = vep_vcf)
@@ -240,6 +240,7 @@ def run_cpsr(conf_options, cpsr_paths):
         check_subprocess(logger, pcgr_vcfanno_command, debug)
         logger.info("Finished cpsr-vcfanno")
         print('----')
+        #exit(0)
 
         ## CPSR|summarise - expand annotations with separate VCF INFO tags
         logger = getlogger("cpsr-summarise")
@@ -282,9 +283,14 @@ def run_cpsr(conf_options, cpsr_paths):
            variant.append_annotations(
               output_pass_vcf2tsv_gz, db_assembly_dir = cpsr_paths["db_assembly_dir"], logger = logger)
         variant_set = variant.clean_annotations(variant_set, yaml_data, germline = True, logger = logger)
+        
+        ## If no genotypes are available, set conf['sample_properties']['genotypes_available'] = 1
         if {'GENOTYPE'}.issubset(variant_set.columns):
             if variant_set.loc[variant_set['GENOTYPE'] == '.'].empty and variant_set.loc[variant_set['GENOTYPE'] == 'undefined'].empty:
-                yaml_data['conf']['sample_properties']['genotypes_available'] = 1
+                yaml_data['conf']['sample_properties']['gt_detected'] = 1
+        if {'DP_CONTROL'}.issubset(variant_set.columns):
+            if variant_set.loc[variant_set['DP_CONTROL'] == '-1'].empty:
+                yaml_data['conf']['sample_properties']['dp_detected'] = 1
         
         yaml_data['conf']['gene_panel']['panel_id'] = re.sub(r',',';', yaml_data['conf']['gene_panel']['panel_id'])
         with open(yaml_fname, "w") as outfile:
@@ -310,6 +316,7 @@ def run_cpsr(conf_options, cpsr_paths):
         rscript = utils.script_path(pcgrr_conda, 'bin/Rscript')
         cpsrr_script = utils.script_path(pcgr_conda, 'bin/cpsr.R')
         
+        ## CPSR|writer - generate HTML report
         cpsr_report_command = (
                  f"{rscript} {cpsrr_script} {yaml_fname}")
 

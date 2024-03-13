@@ -166,9 +166,9 @@ trials_ttype |>
                                                      'Withdrawn',
                                                      'Unknown status'), c("#00a65a","#00a65a","#CD534C","#CD534C","#CD534C","#CD534C","#CD534C", "#8F7700")))
 
-  # DT::formatStyle(color="white", "SYMBOL", "BIOMARKER_MAPPING", fontWeight = 'bold', `text-align` = 'center',
+  # DT::formatStyle(color="white", "SYMBOL", "BM_RESOLUTION", fontWeight = 'bold', `text-align` = 'center',
   #                 backgroundColor = DT::styleEqual(c('exact','codon','exon','gene'), 
-  #                                                  c('#000','#000',pcg_report$settings$conf$visual_reporting$color_palette[['warning']][['values']][1], pcg_report$settings$conf$visual_reporting$color_palette[['warning']][['values']][1])))
+  #                                                  c('#000','#000',pcgrr::color_palette[['warning']][['values']][1], pcgrr::color_palette[['warning']][['values']][1])))
 
 ```
 

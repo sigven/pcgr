@@ -1,0 +1,16 @@
+### Proto-oncogenes subject to copy number amplifications
+<br>
+A total of __`r NROW(pcg_report[['content']][['cna']][["disp"]][['oncogene_gain']])`__ proto-oncogenes are covered (i.e. transcript overlapping  >= `r pcg_report[['metadata']][['config']][['cna']][['cna_overlap_pct']]`%) by genomic segments subject to amplifications.
+
+```{r cna_oncogenes_amplified, echo=F}
+
+myOptions <- list(pageLength = 10, buttons = c('csv','excel'), dom = "Bfrtip", scrollCollapse = T)
+if(NROW(pcg_report[['content']][['cna']][["disp"]][['oncogene_gain']]) > 0){
+  DT::datatable(pcg_report[['content']][['cna']][["disp"]][['oncogene_gain']], 
+                options = myOptions, escape=F, extensions = "Responsive") |>
+  DT::formatStyle("SYMBOL","OPENTARGETS_RANK", color = "white", backgroundColor = DT::styleInterval(pcg_report[['content']][['report_display_config']][['opentargets_rank']][['breaks']], pcg_report[['content']][['report_display_config']][['opentargets_rank']][['colors']]))
+
+}
+```
+
+<br><br>

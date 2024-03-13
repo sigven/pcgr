@@ -70,8 +70,14 @@ tier_af_distribution <- function(tier_df, bin_size = 0.05) {
     tier_df, c("AF_TUMOR","TIER"),
     only_colnames = F, quiet = T)
   tier_df <- tier_df |>
-    dplyr::select(AF_TUMOR, TIER) |>
-    dplyr::mutate(TIER = paste0("TIER ", TIER))
+    dplyr::select(c("AF_TUMOR", "TIER")) |>
+    dplyr::mutate(
+      TIER = paste0("TIER ", .data$TIER))
+
+  if(NROW(tier_df) <= 200){
+    bin_size = 0.10
+  }
+
   i <- 1
   num_bins <- as.integer(1 / bin_size)
   bin_start <- 0
@@ -89,13 +95,6 @@ tier_af_distribution <- function(tier_df, bin_size = 0.05) {
       af_bin_df <- rbind(af_bin_df, df)
       j <- j + 1
     }
-    # TIER <- "NONCODING"
-    # df <- data.frame(bin_name = bin_name,
-    #                  bin_start = bin_start,
-    #                  bin_end = bin_end,
-    #                  bin = as.integer(i),
-    #                  TIER = TIER, stringsAsFactors = F)
-    # af_bin_df <- rbind(af_bin_df, df)
     bin_start <- bin_end
     i <- i + 1
   }
@@ -107,11 +106,13 @@ tier_af_distribution <- function(tier_df, bin_size = 0.05) {
                 right = F, include.lowest = T, labels = F))
 
   tier_df_trans_bin <- as.data.frame(
-    dplyr::group_by(tier_df_trans, .data$TIER, .data$bin) |>
+    dplyr::group_by(
+      tier_df_trans, .data$TIER, .data$bin) |>
       dplyr::summarise(Count = dplyr::n(),
                        .groups = "drop"))
   af_bin_df <- af_bin_df |>
-    dplyr::left_join(tier_df_trans_bin, by = c("bin", "TIER")) |>
+    dplyr::left_join(
+      tier_df_trans_bin, by = c("bin", "TIER")) |>
     dplyr::mutate(Count = dplyr::if_else(
       is.na(.data$Count),
       as.numeric(0),
@@ -326,10 +327,9 @@ df_string_replace <- function(df, strings, pattern,
   return(df)
 }
 
-
-
-#' Function that generate snv/indel + coding/noncoding + tier stats for
-#' a given variant set
+#' Function that generate stats for a given variant set, considering
+#' number of variants/genes affected across tiers, types of variants
+#' ()
 #'
 #' @param callset list object with callset data (CNA or SNVs/InDels)
 #' @param name type of variant statistic
@@ -345,50 +345,236 @@ variant_stats_report <- function(
   call_stats[[name]] <- list()
 
   if(vartype == 'snv_indel'){
-    for (n in c("n", "n_snv", "n_indel",
-                "n_coding", "n_noncoding")) {
+    for (n in c("n",
+                "n_snv",
+                "n_sub",
+                "n_indel",
+                "n_coding",
+                "n_noncoding")) {
       call_stats[[name]][[n]] <- 0
     }
 
     if("VARIANT_CLASS" %in% colnames(callset$variant)){
 
-      call_stats[[name]][["n"]] <- callset$variant |>
+      call_stats[[name]][["n"]] <-
+        callset$variant |>
         nrow()
-      call_stats[[name]][["n_snv"]] <- callset$variant |>
-        dplyr::filter(.data$VARIANT_CLASS == "SNV") |>
-        nrow()
-      call_stats[[name]][["n_indel"]] <- callset$variant |>
-        dplyr::filter(.data$VARIANT_CLASS != "SNV") |>
-        nrow()
-      call_stats[[name]][["n_coding"]] <- callset$variant |>
-        dplyr::filter(.data$CODING_STATUS == "coding") |>
-        nrow()
-      call_stats[[name]][["n_noncoding"]] <- callset$variant |>
-        dplyr::filter(.data$CODING_STATUS != "coding") |>
-        nrow()
+      if(call_stats[[name]][["n"]] > 0){
+        call_stats[[name]][["n_snv"]] <-
+          callset$variant |>
+          dplyr::filter(.data$VARIANT_CLASS == "SNV") |>
+          nrow()
+        call_stats[[name]][["n_indel"]] <-
+          callset$variant |>
+          dplyr::filter(
+            .data$VARIANT_CLASS == "insertion" |
+              .data$VARIANT_CLASS == "deletion" |
+              .data$VARIANT_CLASS == "indel") |>
+          nrow()
+        call_stats[[name]][["n_sub"]] <-
+          callset$variant |>
+          dplyr::filter(
+            .data$VARIANT_CLASS == "substituion") |>
+          nrow()
+        call_stats[[name]][["n_coding"]] <-
+          callset$variant |>
+          dplyr::filter(.data$CODING_STATUS == "coding") |>
+          nrow()
+        call_stats[[name]][["n_noncoding"]] <-
+          callset$variant |>
+          dplyr::filter(.data$CODING_STATUS == "noncoding") |>
+          nrow()
+      }
     }
+
   }
 
   if("TIER" %in% colnames(callset$variant)){
 
-    for (n in c("n_tier1", "n_tier2", "n_tier3",
-                "n_tier4", "n_tier5")) {
+    for (n in c("n_tier1",
+                "n_tier2",
+                "n_tier3",
+                "n_tier4",
+                "n_tier5")) {
       call_stats[[name]][[n]] <- 0
     }
 
-    call_stats[[name]][["n_tier1"]] <- callset$variant |>
-      dplyr::filter(!is.na(TIER) & TIER == 1) |> nrow()
-    call_stats[[name]][["n_tier2"]] <- callset$variant |>
-      dplyr::filter(!is.na(TIER) & TIER == 2) |> nrow()
-    call_stats[[name]][["n_tier3"]] <- callset$variant |>
-      dplyr::filter(!is.na(TIER) & TIER == 3) |> nrow()
-    call_stats[[name]][["n_tier4"]] <- callset$variant |>
-      dplyr::filter(!is.na(TIER) & TIER == 4) |> nrow()
-    call_stats[[name]][["n_tier5"]] <- callset$variant |>
-      dplyr::filter(!is.na(TIER) & TIER == 5) |> nrow()
+
+    ## only consider biomarker variants with a certain level of
+    ## resolution (i.e. not gene level) when calculating tier statistics
+    ## for SNVs/InDels
+
+    if("biomarker_evidence" %in% names(callset)){
+      biomarkers_for_stats <-
+        dplyr::select(
+          callset$biomarker_evidence$items,
+          c("TIER", "BM_RESOLUTION",
+            "VAR_ID","ENTREZGENE")) |>
+        dplyr::filter(!is.na(.data$TIER)) |>
+        dplyr::distinct()
+
+      if(NROW(biomarkers_for_stats) > 0){
+        if(vartype == "snv_indel"){
+          biomarkers_for_stats <-
+            biomarkers_for_stats |>
+            dplyr::filter(
+              !is.na(.data$TIER) &
+                .data$BM_RESOLUTION != "gene") |>
+            dplyr::select(c("VAR_ID","TIER","ENTREZGENE")) |>
+            dplyr::distinct()
+        }
+        if(NROW(biomarkers_for_stats) > 0){
+          call_stats[[name]][["n_tier1"]] <-
+            callset$variant |>
+            dplyr::filter(
+              !is.na(.data$TIER) & .data$TIER == 1) |>
+            dplyr::inner_join(
+              biomarkers_for_stats,
+              by = c("TIER","VAR_ID","ENTREZGENE")) |>
+            NROW()
+          call_stats[[name]][["n_tier2"]] <-
+            callset$variant |>
+            dplyr::filter(
+              !is.na(.data$TIER) &
+                .data$TIER == 2) |>
+            dplyr::inner_join(
+              biomarkers_for_stats,
+              by = c("TIER","VAR_ID","ENTREZGENE")) |>
+            NROW()
+        }
+      }
+      call_stats[[name]][["n_tier3"]] <-
+        callset$variant |>
+        dplyr::filter(
+          !is.na(.data$TIER) &
+            .data$TIER == 3) |>
+        NROW()
+      call_stats[[name]][["n_tier4"]] <-
+        callset$variant |>
+        dplyr::filter(
+          !is.na(.data$TIER) &
+            .data$TIER == 4) |>
+        NROW()
+      call_stats[[name]][["n_tier5"]] <-
+        callset$variant |>
+        dplyr::filter(
+          !is.na(.data$TIER) &
+            .data$TIER == 5) |>
+        NROW()
+
+      if (vartype == "cna"){
+        call_stats[[name]][["n_tier4"]] <- NULL
+        call_stats[[name]][["n_tier5"]] <- NULL
+      }
+
+      if(vartype == "snv_indel"){
+        if(call_stats[[name]][["n_tier3"]] > 0){
+          call_stats[[name]][["n_tier3_tsg"]] <-
+            callset$variant |>
+            dplyr::filter(
+              !is.na(.data$TIER) &
+                .data$TIER == 3) |>
+            dplyr::filter(
+              .data$TUMOR_SUPPRESSOR == TRUE &
+                .data$ONCOGENE == FALSE) |>
+            NROW()
+
+          call_stats[[name]][["n_tier3_oncogene"]] <-
+            callset$variant |>
+            dplyr::filter(
+              !is.na(.data$TIER) &
+                .data$TIER == 3) |>
+            dplyr::filter(
+              .data$TUMOR_SUPPRESSOR == FALSE &
+                .data$ONCOGENE == TRUE) |>
+            NROW()
+
+          call_stats[[name]][["n_tier3_dualrole"]] <-
+            callset$variant |>
+            dplyr::filter(
+              !is.na(.data$TIER) &
+                .data$TIER == 3) |>
+            dplyr::filter(
+              .data$TUMOR_SUPPRESSOR == TRUE &
+                .data$ONCOGENE == TRUE) |>
+            NROW()
+
+        }else{
+          call_stats[[name]][["n_tier3_tsg"]] <- 0
+          call_stats[[name]][["n_tier3_oncogene"]] <- 0
+          call_stats[[name]][["n_tier3_dualrole"]] <- 0
+        }
+      }
+
+      for (n in c("n_eitems_diagnostic_tier1",
+                  "n_eitems_predictive_tier1",
+                  "n_eitems_prognostic_tier1",
+                  "n_eitems_diagnostic_tier2",
+                  "n_eitems_predictive_tier2",
+                  "n_eitems_prognostic_tier2",
+                  "n_genes_tier1",
+                  "n_genes_tier2",
+                  "n_genes_tier3")) {
+        call_stats[[name]][[n]] <- 0
+      }
+
+      if(NROW(callset$biomarker_evidence$items) > 0){
+        if("BM_EVIDENCE_TYPE" %in% colnames(callset$biomarker_evidence$items) &
+           "TIER" %in% colnames(callset$biomarker_evidence$items) &
+           "ENTREZGENE" %in% colnames(callset$biomarker_evidence$items) &
+           "BM_RESOLUTION" %in% colnames(callset$biomarker_evidence$items)){
+
+          for(tier in c(1,2)){
+            for(etype in c("Diagnostic","Predictive","Prognostic")){
+              stat <- paste0("n_eitems_",tolower(etype),"_tier",tier)
+
+              if(vartype == "snv_indel"){
+                call_stats[[name]][[stat]] <-
+                  callset$biomarker_evidence$items |>
+                  dplyr::filter(
+                    .data$BM_RESOLUTION != "gene" &
+                      !is.na(.data$TIER) &
+                      .data$TIER == tier &
+                      .data$BM_EVIDENCE_TYPE == etype) |>
+                  NROW()
+              }else{
+                call_stats[[name]][[stat]] <-
+                  callset$biomarker_evidence$items |>
+                  dplyr::filter(
+                      !is.na(.data$TIER) &
+                      .data$TIER == tier &
+                      .data$BM_EVIDENCE_TYPE == etype) |>
+                  NROW()
+              }
+            }
+            stat <- paste0("n_genes_tier",tier)
+            if(vartype == "snv_indel"){
+              call_stats[[name]][[stat]] <-
+                callset$biomarker_evidence$items |>
+                dplyr::filter(
+                  .data$BM_RESOLUTION != "gene" &
+                    .data$TIER == tier) |>
+                dplyr::select(.data$ENTREZGENE) |>
+                dplyr::distinct() |>
+                NROW()
+            }else{
+              call_stats[[name]][[stat]] <-
+                callset$biomarker_evidence$items |>
+                dplyr::filter(
+                    .data$TIER == tier) |>
+                dplyr::select(.data$ENTREZGENE) |>
+                dplyr::distinct() |>
+                NROW()
+            }
+          }
+        }
+      }
+    }
   }
 
   if(vartype == 'cna' &
+     "TIER" %in% colnames(callset$variant) &
+     "VAR_ID" %in% colnames(callset$variant) &
      "VARIANT_CLASS" %in% colnames(callset$variant)){
     for (n in c("n_tsg_loss",
                 "n_oncogene_gain",
@@ -398,551 +584,97 @@ variant_stats_report <- function(
     call_stats[[name]][["n_tsg_loss"]] <-
       callset$variant |>
       dplyr::filter(
-        !is.na(TIER) & TIER == 3 &
-          VARIANT_CLASS == "homdel") |> nrow()
+        !is.na(.data$TIER) &
+          .data$TIER == 3 &
+          .data$VARIANT_CLASS == "homdel") |>
+      nrow()
     call_stats[[name]][["n_oncogene_gain"]] <-
       callset$variant |>
       dplyr::filter(
-        !is.na(TIER) & TIER == 3 &
-          VARIANT_CLASS == "gain") |> nrow()
+        !is.na(.data$TIER) &
+          .data$TIER == 3 &
+          .data$VARIANT_CLASS == "gain") |>
+      NROW()
 
-    call_stats[[name]][["n_other_drugtarget_gain"]] <-
+    if("TARGETED_INHIBITORS_ALL2" %in% colnames(callset$variant)){
+      call_stats[[name]][["n_other_drugtarget_gain"]] <-
+        callset$variant |>
+        dplyr::filter(
+          is.na(.data$TIER) &
+            .data$VARIANT_CLASS == "gain" &
+            !is.na(.data$TARGETED_INHIBITORS_ALL2)) |>
+        NROW()
+    }
+
+
+    call_stats[[name]][["n_genes_tier3"]] <-
       callset$variant |>
       dplyr::filter(
-        is.na(TIER) &
-          VARIANT_CLASS == "gain" &
-          !is.na(TARGETED_INHIBITORS_ALL2)) |>
-      nrow()
+        is.na(.data$TIER) &
+          .data$TIER == 3) |>
+      NROW()
+
+    call_stats[[name]][["n_segments_gain"]] <-
+      callset$variant |>
+      dplyr::filter(.data$VARIANT_CLASS == "gain") |>
+      dplyr::select(.data$VAR_ID) |>
+      dplyr::distinct() |>
+      NROW()
+
+    call_stats[[name]][["n_segments_loss"]] <-
+      callset$variant |>
+      dplyr::filter(.data$VARIANT_CLASS == "homdel") |>
+      dplyr::select(.data$VAR_ID) |>
+      dplyr::distinct() |>
+      NROW()
+  }
+
+  if(vartype == 'snv_indel' &
+     "FINAL_CLASSIFICATION" %in% colnames(callset$variant)){
+    if("BM_EVIDENCE_TYPE" %in% colnames(callset$variant) &
+       "GENOMIC_CHANGE" %in% colnames(callset$variant)){
+
+      call_stats[[name]][['n_eitems_predictive']] <- callset$variant |>
+        dplyr::filter(.data$BM_EVIDENCE_TYPE == "Predictive") |>
+        NROW()
+      call_stats[[name]][['n_eitems_prognostic']] <- callset$variant |>
+        dplyr::filter(.data$BM_EVIDENCE_TYPE == "Prognostic") |>
+        NROW()
+      call_stats[[name]][['n_eitems_diagnostic']] <- callset$variant |>
+        dplyr::filter(.data$BM_EVIDENCE_TYPE == "Diagnostic") |>
+        NROW()
+      call_stats[[name]][['n_eitems_predisposing']] <- callset$variant |>
+        dplyr::filter(.data$BM_EVIDENCE_TYPE == "Predisposing") |>
+        NROW()
+
+      call_stats[[name]][['n_var_eitems']] <- callset$variant |>
+        dplyr::filter(!is.na(.data$BM_EVIDENCE_TYPE)) |>
+        dplyr::select("GENOMIC_CHANGE") |>
+        dplyr::distinct() |>
+        NROW()
+    }
+
+    call_stats[[name]][['n_p']] <- callset$variant |>
+      dplyr::filter(.data$FINAL_CLASSIFICATION == "Pathogenic") |>
+      NROW()
+    call_stats[[name]][['n_lp']] <- callset$variant |>
+      dplyr::filter(.data$FINAL_CLASSIFICATION == "Likely_Pathogenic") |>
+      NROW()
+    call_stats[[name]][['n_vus']] <- callset$variant |>
+      dplyr::filter(.data$FINAL_CLASSIFICATION == "VUS") |>
+      NROW()
+    call_stats[[name]][['n_lb']] <- callset$variant |>
+      dplyr::filter(.data$FINAL_CLASSIFICATION == "Likely_Benign") |>
+      NROW()
+    call_stats[[name]][['n_b']] <- callset$variant |>
+      dplyr::filter(.data$FINAL_CLASSIFICATION == "Benign") |>
+      NROW()
 
   }
 
   return(call_stats)
 }
 
-#' Function that appends multiple HTML annotation links to variant identifiers
-#' e.g. COSMIC, CLINVAR, REFSEQ etc
-#'
-#' @param vcf_data_df data frame with variant entries
-#' @param skip elements to be ignored during annotation
-#'
-#' @export
-append_annotation_links <- function(vcf_data_df,
-                                    skip = NULL) {
-  i <- 1
-  while (i <= nrow(pcgrr::variant_db_url)) {
-
-    name <- pcgrr::variant_db_url[i, ]$name
-    if (!name %in% skip) {
-      #pcgrr::log4r_info(paste0("Adding annotation links - ", name))
-      group_by_var <- pcgrr::variant_db_url[i, ]$group_by_var
-      url_prefix <- pcgrr::variant_db_url[i, ]$url_prefix
-      link_key_var <- pcgrr::variant_db_url[i, ]$link_key_var
-      link_display_var <- pcgrr::variant_db_url[i, ]$link_display_var
-      if (!(name %in% colnames(vcf_data_df))) {
-        annotation_links <-
-          pcgrr::generate_annotation_link(
-            vcf_data_df,
-            vardb = name,
-            group_by_var = group_by_var,
-            url_prefix = url_prefix,
-            link_key_var = link_key_var,
-            link_display_var = link_display_var
-          )
-        if (nrow(annotation_links) > 0) {
-          vcf_data_df <- vcf_data_df |>
-            dplyr::left_join(dplyr::rename(annotation_links,
-                                           !!rlang::sym(name) := .data$link),
-                             by = c("VAR_ID"))
-        }else{
-          vcf_data_df[, name] <- NA
-        }
-      }
-    }
-    i <- i + 1
-  }
-  return(vcf_data_df)
-}
-
-#' Function that adds TCGA annotations (cohort, frequency etc.) to variant identifiers
-#'
-#' @param var_df data frame with variants
-#' @param linktype type of link
-#'
-#' @return var_df
-#'
-#' @export
-append_tcga_var_link <- function(var_df,
-                                 linktype = "dbsource") {
-
-
-  if (any(grepl(paste0("^TCGA_FREQUENCY$"), names(var_df))) &
-      any(grepl(paste0("^VAR_ID$"), names(var_df)))) {
-
-    #pcgrr::log4r_info("Adding annotation links - TCGA")
-
-    var_df_unique_slim <- dplyr::select(
-      var_df, .data$VAR_ID, .data$TCGA_FREQUENCY) |>
-      dplyr::filter(!is.na(.data$TCGA_FREQUENCY)) |>
-      dplyr::distinct()
-    if (NROW(var_df_unique_slim) > 0) {
-      var_df_unique_slim_melted <- var_df_unique_slim |>
-        tidyr::separate_rows(.data$TCGA_FREQUENCY, sep = ",") |>
-        tidyr::separate(
-          .data$TCGA_FREQUENCY,
-          c("tcga_cancer_code", "percentage",
-            "affected", "cohort_size"),
-          sep = "\\|", convert = T) |>
-        dplyr::left_join(
-          pcgrr::tcga_cohorts, by = "tcga_cancer_code") |>
-        dplyr::arrange(
-          .data$VAR_ID,
-          dplyr::desc(.data$percentage))
-      if (linktype == "dbsource") {
-        var_df_unique_slim_melted <- var_df_unique_slim_melted |>
-          dplyr::mutate(tmp_assoc = paste0(
-            "<a href='https://portal.gdc.cancer.gov/projects/TCGA-",
-            .data$tcga_cancer_code, "' target=\"_blank\">",
-            .data$tcga_cancer_name, "</a>: ",
-            .data$percentage, "% (",
-            .data$affected, "/", .data$cohort_size, ")"))
-      }
-
-      var_df_links <- dplyr::group_by(var_df_unique_slim_melted, .data$VAR_ID) |>
-        dplyr::summarise(TCGALINK = unlist(paste(.data$tmp_assoc, collapse = ", ")),
-                         .groups = "drop") |>
-        dplyr::select(.data$VAR_ID, .data$TCGALINK) |>
-        magrittr::set_colnames(c("VAR_ID", "TCGA_FREQUENCY"))
-      var_df <- dplyr::rename(var_df, TCGA_FREQUENCY_RAW = .data$TCGA_FREQUENCY)
-      var_df <- dplyr::left_join(var_df, var_df_links,
-                                 by = c("VAR_ID" = "VAR_ID"))
-    }else{
-      var_df$TCGA_FREQUENCY_RAW <- var_df$TCGA_FREQUENCY
-    }
-  }
-  return(var_df)
-}
-
-#' Function that adds TFBS annotations (dbMTS) to genetic variant identifiers
-#'
-#' @param var_df data frame with variants
-#'
-#' @export
-append_tfbs_annotation <-
-  function(var_df) {
-
-    if (any(grepl(paste0("^CONSEQUENCE$"), names(var_df))) &
-        any(grepl(paste0("^VAR_ID$"), names(var_df))) &
-        any(grepl(paste0("^REGULATORY_ANNOTATION$"), names(var_df)))) {
-
-      #pcgrr::log4r_info("Adding TF binding site annotations - VEP regulatory")
-
-      var_df_unique_slim <-
-        dplyr::select(var_df, .data$VAR_ID,
-                      .data$REGULATORY_ANNOTATION,
-                      .data$CONSEQUENCE) |>
-        dplyr::filter(!is.na(.data$REGULATORY_ANNOTATION) &
-                        stringr::str_detect(
-                          .data$CONSEQUENCE,
-                          "5_prime|upstream"
-                        )) |>
-        dplyr::distinct()
-
-      if (nrow(var_df_unique_slim) > 0) {
-        var_df_unique_slim_melted <- as.data.frame(
-          var_df_unique_slim |>
-          tidyr::separate_rows(.data$REGULATORY_ANNOTATION, sep=",") |>
-          dplyr::filter(
-            stringr::str_detect(
-              .data$REGULATORY_ANNOTATION, "TF_binding_site_variant"
-            ))
-        )
-
-        if (nrow(var_df_unique_slim_melted) > 0) {
-
-          pcgrr::log4r_info(paste0(
-            "Found TF binding site annotations for ",
-            nrow(var_df_unique_slim)," variants"))
-
-          var_df_unique_slim_melted <- as.data.frame(
-            var_df_unique_slim_melted |>
-              dplyr::mutate(
-                REGULATORY_ANNOTATION = stringr::str_replace(
-                  .data$REGULATORY_ANNOTATION,
-                  "TF_binding_site_variant\\|MotifFeature\\|ENSM0[0-9]{1,}\\|",
-                  "")
-              ) |>
-              tidyr::separate(.data$REGULATORY_ANNOTATION,
-                              into = c('cons','matrix','motif_pos',
-                                       'high_inf_pos','motif_score_change',
-                                       'transcription_factors'),
-                              sep = "\\|",
-                              remove = T) |>
-
-              tidyr::separate_rows(.data$transcription_factors) |>
-              dplyr::mutate(
-                TF_BINDING_SITE_VARIANT = dplyr::case_when(
-                  .data$high_inf_pos == "N" ~ "Overlap: non-critical motif position",
-                  .data$high_inf_pos == "Y" ~ "Overlap: critical motif position",
-                  TRUE ~ as.character(NA)
-                )
-              ) |>
-              dplyr::mutate(
-                TF_BINDING_SITE_VARIANT_INFO =
-                  paste(.data$transcription_factors, .data$matrix,
-                         .data$motif_pos, .data$motif_score_change,
-                         .data$high_inf_pos, sep="|")
-              )
-          )
-
-          var_df_links <- dplyr::group_by(var_df_unique_slim_melted, .data$VAR_ID) |>
-            dplyr::summarise(
-              TF_BINDING_SITE_VARIANT = paste(unique(sort(.data$TF_BINDING_SITE_VARIANT)),
-                                                  collapse = ", "),
-              TF_BINDING_SITE_VARIANT_INFO = paste(unique(
-                .data$TF_BINDING_SITE_VARIANT_INFO),
-                collapse = ", "),
-              .groups = "drop") |>
-            dplyr::select(.data$VAR_ID, .data$TF_BINDING_SITE_VARIANT,
-                          .data$TF_BINDING_SITE_VARIANT_INFO)
-
-          var_df <- dplyr::left_join(var_df, var_df_links,
-                                     by = c("VAR_ID" = "VAR_ID"))
-
-        }else{
-          var_df$TF_BINDING_SITE_VARIANT <- NA
-          var_df$TF_BINDING_SITE_VARIANT_INFO <- NA
-        }
-      }else{
-        var_df$TF_BINDING_SITE_VARIANT <- NA
-        var_df$TF_BINDING_SITE_VARIANT_INFO <- NA
-      }
-    }
-    return(var_df)
-  }
-
-#' Function that adds miRNA target annotations (dbMTS) to
-#' genetic variant identifiers
-#'
-#' @param var_df data frame with variants
-#'
-#' @export
-append_dbmts_var_link <-
-  function(var_df) {
-
-
-    if (any(grepl(paste0("^DBMTS$"), names(var_df))) &
-        any(grepl(paste0("^VAR_ID$"), names(var_df))) &
-        any(grepl(paste0("^ENSEMBL_TRANSCRIPT_ID$"), names(var_df)))) {
-
-      #pcgrr::log4r_info("Adding miRNA target site annotations (gain/loss) - dbMTS")
-
-      var_df_unique_slim <-
-        dplyr::select(
-          var_df, .data$VAR_ID, .data$CLINVAR_CLASSIFICATION,
-          .data$DBMTS, .data$ENSEMBL_TRANSCRIPT_ID) |>
-        dplyr::filter(!is.na(.data$DBMTS) &
-                        !is.na(.data$ENSEMBL_TRANSCRIPT_ID)) |>
-        dplyr::distinct()
-      if (nrow(var_df_unique_slim) > 0) {
-
-        pcgrr::log4r_info(paste0(
-          "Found miRNA target site annotations for ",
-          nrow(var_df_unique_slim)," variants"))
-
-        var_df_unique_slim_melted <- as.data.frame(
-          var_df_unique_slim |>
-            tidyr::separate_rows(.data$DBMTS, sep = ",") |>
-            tidyr::separate(.data$DBMTS, c("ens_trans_id", "mirna_id",
-                                     "algorithms", "algorithms_call",
-                                     "consensus_call"),
-                            sep = "\\|", convert = T) |>
-            dplyr::filter(.data$ens_trans_id == .data$ENSEMBL_TRANSCRIPT_ID)
-        )
-        if (nrow(var_df_unique_slim_melted) > 0) {
-          var_df_unique_slim_melted <- var_df_unique_slim_melted |>
-            dplyr::select(-c(.data$ENSEMBL_TRANSCRIPT_ID, .data$algorithms_call)) |>
-            dplyr::mutate(miRNA_TARGET_HIT = dplyr::case_when(
-              .data$consensus_call == "G" ~ "gain",
-              .data$consensus_call == "L" ~ "loss",
-              TRUE ~ as.character(NA)
-            )) |>
-            dplyr::mutate(
-              algorithms = stringr::str_replace_all(
-                stringr::str_replace(
-                  stringr::str_replace(
-                    stringr::str_replace(
-                      .data$algorithms, "R","RNAHybrid"),
-                    "TS","TargetScan"),
-                  "M","miRanda"),
-                "&"," / ")
-            ) |>
-            dplyr::mutate(
-              miRNA_TARGET_HIT_PREDICTION =
-                paste0("<a href='http://www.mirbase.org/cgi-bin/mirna_entry.pl?id",
-                       "=",.data$mirna_id,"' target='_blank'>",.data$mirna_id,"</a> - ", .data$miRNA_TARGET_HIT,
-                       " (",.data$algorithms,")")
-            )
-
-
-          var_df_links <- dplyr::group_by(var_df_unique_slim_melted, .data$VAR_ID) |>
-            dplyr::summarise(
-              miRNA_TARGET_HIT_PREDICTION = paste(.data$miRNA_TARGET_HIT_PREDICTION,
-                                                  collapse = ", "),
-              miRNA_TARGET_HIT = paste(unique(.data$miRNA_TARGET_HIT),
-                                       collapse = ", "),
-              .groups = "drop") |>
-            dplyr::select(.data$VAR_ID, .data$miRNA_TARGET_HIT, .data$miRNA_TARGET_HIT_PREDICTION)
-
-          var_df <- dplyr::left_join(var_df, var_df_links,
-                                     by = c("VAR_ID" = "VAR_ID"))
-        }else{
-          var_df$miRNA_TARGET_HIT_PREDICTION <- NA
-          var_df$miRNA_TARGET_HIT <- NA
-        }
-      }else{
-        var_df$miRNA_TARGET_HIT_PREDICTION <- NA
-        var_df$miRNA_TARGET_HIT <- NA
-      }
-    }
-
-    return(var_df)
-  }
-
-#' Function that assigns HTML links to dbNSFP prediction entries
-#'
-#' @param var_df data frame with variant entries
-#'
-#' @return var_df
-#'
-#' @export
-append_dbnsfp_var_link <- function(var_df) {
-
-  #pcgrr::log4r_info("Adding annotation links - dbNSFP")
-
-  if (any(grepl(paste0("EFFECT_PREDICTIONS"), names(var_df)))) {
-    var_df <- var_df |>
-      dplyr::mutate(PREDICTED_EFFECT = .data$EFFECT_PREDICTIONS) |>
-      dplyr::mutate(PREDICTED_EFFECT = stringr::str_replace_all(
-        .data$PREDICTED_EFFECT, ":D,", ":Damaging,"
-      )) |>
-      dplyr::mutate(PREDICTED_EFFECT = stringr::str_replace_all(
-        .data$PREDICTED_EFFECT, ":T,", ":Tolerated,"
-      )) |>
-      dplyr::mutate(PREDICTED_EFFECT = stringr::str_replace_all(
-        .data$PREDICTED_EFFECT, ":SN,", ":SplicingNeutral,"
-      )) |>
-      dplyr::mutate(PREDICTED_EFFECT = stringr::str_replace_all(
-        .data$PREDICTED_EFFECT, ":AS,", ":AffectSplicing,"
-      )) |>
-      dplyr::mutate(PREDICTED_EFFECT = stringr::str_replace_all(
-        .data$PREDICTED_EFFECT, ":PD,", ":ProbablyDamaging,"
-      ))
-    i <- 1
-    while (i <= nrow(pcgrr::effect_prediction_algos)) {
-      str_to_replace <-
-        paste0(pcgrr::effect_prediction_algos[i, "algorithm"], ":")
-      replacement_str <-
-        paste0("<a href='",
-               pcgrr::effect_prediction_algos[i, "url"], "' target='_blank'>",
-               pcgrr::effect_prediction_algos[i, "display_name"], "</a>:")
-      algorithm_display <-
-        paste0(pcgrr::effect_prediction_algos[i, "display_name"], ":")
-      var_df <- var_df |>
-        dplyr::mutate(
-          PREDICTED_EFFECT =
-            stringr::str_replace(.data$PREDICTED_EFFECT,
-                                 str_to_replace, replacement_str))
-      i <- i + 1
-    }
-  }
-  # else{
-  #   var_df$PREDICTED_EFFECT <- NA
-  # }
-  return(var_df)
-
-}
-
-#' Function that adds link to targeted drugs (on and off-label)
-#' for a list of variants and associated targeted
-#'
-#' @param vcf_data_df data frame with variants
-#' @param ref_data PCGR/CPSR reference data list object
-#'
-#' @export
-append_drug_var_link <- function(
-    vcf_data_df,
-    primary_site = "Breast",
-    ref_data = NULL) {
-
-  #pcgrr::log4r_info("Adding annotation links - targeted antineoplastic inhibitors")
-
-  if (any(grepl(paste0("^SYMBOL$"), names(vcf_data_df))) &
-      any(grepl(paste0("^VAR_ID$"), names(vcf_data_df))) &
-      !is.null(ref_data)) {
-    var_drug_df <- dplyr::select(
-      vcf_data_df, c("VAR_ID","SYMBOL")) |>
-      dplyr::filter(!is.na(.data$SYMBOL)) |>
-      dplyr::distinct()
-    if (nrow(var_drug_df) > 0) {
-      var_drug_df <- var_drug_df |>
-        dplyr::left_join(
-          dplyr::filter(
-            ref_data[['drug']][['inhibitors_any_label']],
-            .data$QUERY_SITE == primary_site),
-          by = c("SYMBOL")) |>
-        dplyr::select(-c("QUERY_SITE")) |>
-        dplyr::left_join(
-          dplyr::filter(
-            ref_data[['drug']][['inhibitors_on_label']],
-            .data$QUERY_SITE == primary_site),
-          by = c("SYMBOL")) |>
-        dplyr::select(-c("QUERY_SITE")) |>
-        dplyr::distinct() |>
-        dplyr::filter(
-          !is.na(.data$TARGETED_INHIBITORS_ALL2)) |>
-        dplyr::distinct()
-      if (NROW(var_drug_df) > 0) {
-        vcf_data_df <-
-          dplyr::left_join(
-            vcf_data_df,
-            var_drug_df,
-            by = c("VAR_ID","SYMBOL")
-          )
-      }else{
-        #vcf_data_df$TARGETED_INHIBITORS_OFF_LABEL <- NA
-        vcf_data_df$TARGETED_INHIBITORS <- NA
-        vcf_data_df$TARGETED_INHIBITORS2 <- NA
-        vcf_data_df$TARGETED_INHIBITORS_ALL2 <- NA
-        vcf_data_df$TARGETED_INHIBITORS_ALL <- NA
-      }
-    }
-    else{
-      vcf_data_df$TARGETED_INHIBITORS <- NA
-      vcf_data_df$TARGETED_INHIBITORS2 <- NA
-      vcf_data_df$TARGETED_INHIBITORS_ALL2 <- NA
-      vcf_data_df$TARGETED_INHIBITORS_ALL <- NA
-    }
-  }
-
-  return(vcf_data_df)
-}
-
-#' Function that appends cancer gene evidence links
-#'
-#' @param vcf_data_df Data frame of sample variants from VCF
-#' @param ref_data PCGR reference data bundle object
-#' @param primary_site Primary tumor site
-#' @param pos_var variable reflecting chromosome order (POS/SEGMENT_START)
-#' @return vcf_data_df
-#'
-#' @export
-append_cancer_gene_evidence <-
-  function(vcf_data_df = NULL,
-           ref_data = NULL,
-           primary_site = 'Any',
-           pos_var = 'POS') {
-
-    if (any(grepl(paste0("^ENTREZGENE$"), names(vcf_data_df))) &
-        any(grepl(paste0("^ENSEMBL_GENE_ID$"), names(vcf_data_df)))) {
-
-      #pcgrr::log4r_info(paste0("Adding literature evidence for cancer-relevant genes"))
-
-
-      tissue_gene_ranks <- ref_data[['gene']][['otp_rank']] |>
-        dplyr::select(c("ENTREZGENE", "PRIMARY_SITE", "TISSUE_ASSOC_RANK")) |>
-        dplyr::filter(.data$PRIMARY_SITE == primary_site) |>
-        dplyr::distinct()
-
-      global_gene_ranks <- ref_data[['gene']][['otp_rank']] |>
-        dplyr::select(c("ENTREZGENE", "GLOBAL_ASSOC_RANK")) |>
-        dplyr::distinct()
-
-
-      vcf_data_df_1 <- vcf_data_df |>
-        dplyr::filter(!is.na(.data$ENTREZGENE))
-      vcf_data_df_2 <- vcf_data_df |>
-          dplyr::filter(
-            is.na(.data$ENTREZGENE) &
-              !is.na(.data$ENSEMBL_GENE_ID))
-      vcf_data_df_3 <- vcf_data_df |>
-        dplyr::filter(
-          is.na(.data$ENTREZGENE) &
-            is.na(.data$ENSEMBL_GENE_ID))
-
-      if (NROW(vcf_data_df_1) > 0) {
-
-        vcf_data_df_1 <- vcf_data_df_1 |>
-          dplyr::left_join(
-            dplyr::filter(
-              dplyr::select(
-                ref_data[["gene"]][["gene_xref"]],
-                c("ENTREZGENE",
-                  "ENSEMBL_GENE_ID",
-                  "CANCERGENE_EVIDENCE")),
-              !is.na(.data$ENTREZGENE)),
-            by = c("ENTREZGENE" = "ENTREZGENE",
-                   "ENSEMBL_GENE_ID" = "ENSEMBL_GENE_ID")) |>
-          dplyr::distinct()
-
-        ## Add gene ranks (Open Targets Platform)
-        ## - according to primary tumor types/sites
-        ## - globally (across all tumor types/sites)
-        vcf_data_df_1 <- vcf_data_df_1 |>
-          dplyr::left_join(
-            global_gene_ranks, by = "ENTREZGENE") |>
-          dplyr::mutate(GLOBAL_ASSOC_RANK = dplyr::if_else(
-            is.na(.data$GLOBAL_ASSOC_RANK),
-            as.numeric(0),
-            as.numeric(.data$GLOBAL_ASSOC_RANK)
-          ))
-        if (NROW(tissue_gene_ranks) > 0) {
-          tissue_gene_ranks$PRIMARY_SITE <- NULL
-          vcf_data_df_1 <- vcf_data_df_1 |>
-            dplyr::left_join(
-              tissue_gene_ranks, by = "ENTREZGENE") |>
-            dplyr::mutate(TISSUE_ASSOC_RANK = dplyr::if_else(
-              is.na(.data$TISSUE_ASSOC_RANK),
-              as.numeric(0),
-              as.numeric(.data$TISSUE_ASSOC_RANK)
-            ))
-        }else{
-          vcf_data_df_1 <- vcf_data_df_1 |>
-            dplyr::mutate(TISSUE_ASSOC_RANK = as.numeric(0))
-        }
-
-      }
-
-      if (NROW(vcf_data_df_2) > 0) {
-
-        vcf_data_df_2 <- vcf_data_df_2 |>
-          dplyr::left_join(
-            dplyr::filter(
-              dplyr::select(
-                ref_data[["gene"]][["gene_xref"]],
-                c("ENSEMBL_GENE_ID","CANCERGENE_EVIDENCE")),
-              !is.na(.data$ENSEMBL_GENE_ID)),
-            by = c("ENSEMBL_GENE_ID")) |>
-          dplyr::distinct()
-
-      }
-
-      vcf_data_df <- dplyr::bind_rows(
-        vcf_data_df_1,
-        vcf_data_df_2,
-        vcf_data_df_3) |>
-        dplyr::distinct() |>
-        dplyr::mutate(CANCERGENE_EVIDENCE = dplyr::if_else(
-          .data$CANCERGENE_EVIDENCE == ".",
-          as.character(NA),
-          as.character(.data$CANCERGENE_EVIDENCE)
-        )) |>
-        pcgrr::order_variants(pos_var = pos_var)
-
-    }
-
-    return(vcf_data_df)
-
-  }
 
 #' Function that filters variant set on (depth, allelic fraction)
 #' for tumor and normal and filters according to settings
@@ -958,9 +690,9 @@ filter_read_support <- function(vcf_df, config = NULL, precision = 3) {
 
   pcgrr::log4r_info(paste0(
     paste0("Filtering tumor variants based on allelic depth/fraction (min_dp_tumor=",
-    config$allelic_support$tumor_dp_min,
-    ", min_af_tumor=",
-    config$somatic_snv$allelic_support$tumor_af_min, ")"))
+           config$allelic_support$tumor_dp_min,
+           ", min_af_tumor=",
+           config$somatic_snv$allelic_support$tumor_af_min, ")"))
   )
 
   pcgrr::log4r_info(paste0(
@@ -1002,81 +734,6 @@ filter_read_support <- function(vcf_df, config = NULL, precision = 3) {
 
   return(vcf_df)
 }
-
-
-#' A function that generates a HTML link for selected
-#' identifiers (DBSNP, COSMIC, CLINVAR, ENTREZ)
-#'
-#' @param df data frame
-#' @param vardb type of database
-#' @param group_by_var variable used for grouping (VAR_ID)
-#' @param url_prefix url prefix for link generation
-#' @param link_key_var variable used in url for linking
-#' @param link_display_var variable used in url for display
-#' @return df_annotation_links
-#'
-#' @export
-generate_annotation_link <- function(
-  df,
-  vardb = "DBSNP",
-  group_by_var = "VAR_ID",
-  url_prefix = "http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=",
-  link_key_var = "DBSNPRSID",
-  link_display_var = "DBSNPRSID") {
-
-  df_annotation_links <- data.frame()
-  invisible(assertthat::assert_that(
-    is.data.frame(df), msg = paste0("Object df must be of type data.frame")
-    )
-  )
-  assertable::assert_colnames(df, c(group_by_var, link_key_var,
-                                    link_display_var),
-                              only_colnames = F, quiet = T)
-
-  if (group_by_var %in% colnames(df) &
-      link_key_var %in% colnames(df) &
-      link_display_var %in% colnames(df)) {
-    selected_vars <- unique(c(group_by_var,
-                              link_key_var,
-                              link_display_var))
-    tmp_df <- df[, selected_vars]
-    tmp_df <- tmp_df[!is.na(tmp_df[, link_key_var]) &
-                       !is.na(tmp_df[, link_display_var]), ] |>
-      dplyr::distinct()
-
-
-    if (nrow(tmp_df) > 0) {
-      df_annotation_links <- data.frame()
-      #if (vardb == "DBSNP") {
-      df_annotation_links <- as.data.frame(
-        tmp_df |>
-          tidyr::separate_rows(!!rlang::sym(link_key_var), sep = "&|,") |>
-          dplyr::mutate(
-            tmp_link = paste0(
-              "<a href='", url_prefix,
-              !!rlang::sym(link_key_var), "' target='_blank'>",
-              !!rlang::sym(link_display_var), "</a>")
-          )
-      )
-
-      if (nrow(df_annotation_links) > 0) {
-        df_annotation_links <- as.data.frame(
-          df_annotation_links |>
-            dplyr::group_by(.data$VAR_ID) |>
-            dplyr::summarise(link = unlist(paste(.data$tmp_link, collapse = ", ")),
-                             .groups = "drop")
-        )
-      }
-
-    }
-  }
-  else{
-    cat("WARNING: Could not generate HTML URL links", sep = "\n")
-    cat("- missing url_key or grouping varable in df", sep = "\n")
-  }
-  return(df_annotation_links)
-}
-
 
 #' Function that writes a VCF intended for mutational signature analysis
 #'

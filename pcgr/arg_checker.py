@@ -351,6 +351,24 @@ def verify_input_files(arg_dict):
     if not os.path.isdir(base_dir):
         err_msg = "Base directory (" + str(base_dir) + ") does not exist"
         error_message(err_msg, logger)
+    
+    # check the existence of base folder
+    vep_dir = os.path.abspath(arg_dict["vep_dir"])
+    if not os.path.isdir(vep_dir):
+        err_msg = "VEP directory ('" + str(vep_dir) + "') does not exist"
+        error_message(err_msg, logger)
+    
+    vep_human_dir = os.path.join(os.path.abspath(arg_dict["vep_dir"]), "homo_sapiens")
+    if not os.path.isdir(vep_human_dir):
+        err_msg = "VEP directory ('" + str(vep_human_dir) + "') does not exist"
+        error_message(err_msg, logger)
+    
+    vep_human_version_dir = os.path.join(
+        os.path.abspath(arg_dict["vep_dir"]), "homo_sapiens", 
+        f"{pcgr_vars.VEP_VERSION}_{pcgr_vars.VEP_ASSEMBLY[arg_dict['genome_assembly']]}")
+    if not os.path.isdir(vep_human_version_dir):
+        err_msg = "VEP directory ('" + str(vep_human_version_dir) + "') does not exist"
+        error_message(err_msg, logger)
 
     # check the existence of data folder within the base folder
     db_dir = os.path.join(os.path.abspath(arg_dict["refdata_dir"]), "data")
@@ -395,6 +413,7 @@ def verify_input_files(arg_dict):
       "panel_normal_vcf_dir": panel_normal_vcf_dir,
       "db_assembly_dir": db_assembly_dir,
       "refdata_dir": base_dir,
+      "vep_dir": vep_dir,
       "output_dir": output_dir_full,
       "output_vcf": output_vcf,
       "output_cna": output_cna,
@@ -574,31 +593,51 @@ def verify_input_files_cpsr(arg_dict):
             err_msg = f"Output files (e.g. {output_vcf}) already exist - please specify different " + \
                 "sample_id or add option --force_overwrite"
             error_message(err_msg,logger)
-
-    ## check the existence of base folder
-    base_dir = os.path.abspath(arg_dict['refdata_dir'])
+    
+    # check the existence of base folder
+    base_dir = os.path.abspath(arg_dict["refdata_dir"])
     if not os.path.isdir(base_dir):
-        err_msg = f"Base directory ({base_dir}) does not exist"
-        error_message(err_msg,logger)
+        err_msg = "Base directory (" + str(base_dir) + ") does not exist"
+        error_message(err_msg, logger)
+    
+    # check the existence of base folder
+    vep_dir = os.path.abspath(arg_dict["vep_dir"])
+    if not os.path.isdir(vep_dir):
+        err_msg = "VEP directory ('" + str(vep_dir) + "') does not exist"
+        error_message(err_msg, logger)
+    
+    vep_human_dir = os.path.join(os.path.abspath(arg_dict["vep_dir"]), "homo_sapiens")
+    if not os.path.isdir(vep_human_dir):
+        err_msg = "VEP directory ('" + str(vep_human_dir) + "') does not exist"
+        error_message(err_msg, logger)
+    
+    vep_human_version_dir = os.path.join(
+        os.path.abspath(arg_dict["vep_dir"]), "homo_sapiens", 
+        f"{pcgr_vars.VEP_VERSION}_{pcgr_vars.VEP_ASSEMBLY[arg_dict['genome_assembly']]}")
+    if not os.path.isdir(vep_human_version_dir):
+        err_msg = "VEP directory ('" + str(vep_human_version_dir) + "') does not exist"
+        error_message(err_msg, logger)
 
-    ## check the existence of data folder within the base folder
-    db_dir = os.path.join(os.path.abspath(arg_dict['refdata_dir']), 'data')
+    # check the existence of data folder within the base folder
+    db_dir = os.path.join(os.path.abspath(arg_dict["refdata_dir"]), "data")
     if not os.path.isdir(db_dir):
-        err_msg = f"Data directory ({db_dir}) does not exist"
-        error_message(err_msg,logger)
+        err_msg = "Data directory (" + str(db_dir) + ") does not exist"
+        error_message(err_msg, logger)
 
-    ## check the existence of specified assembly data folder within the base folder
-    db_assembly_dir = os.path.join(os.path.abspath(arg_dict['refdata_dir']), 'data', arg_dict['genome_assembly'])
+    # check the existence of specified assembly data folder within the base folder
+    db_assembly_dir = os.path.join(os.path.abspath(
+        arg_dict["refdata_dir"]), "data", arg_dict["genome_assembly"])
     if not os.path.isdir(db_assembly_dir):
-        err_msg = f"Data directory for the specified genome assembly ({db_assembly_dir}) does not exist"
-        error_message(err_msg,logger)
+        err_msg = "Data directory for the specified genome assembly (" + str(
+            db_assembly_dir) + ") does not exist"
+        error_message(err_msg, logger)
 
-    ## check the existence of RELEASE_NOTES
+    # check the existence of .PCGR_BUNDLE_VERSION (starting from 1.5.0)
     rel_notes_file = os.path.join(os.path.abspath(
         arg_dict["refdata_dir"]), "data", arg_dict["genome_assembly"], ".PCGR_BUNDLE_VERSION")
     if not os.path.exists(rel_notes_file):
-        err_msg = 'The PCGR data bundle is outdated - please download the latest data bundle (see github.com/sigven/cpsr for instructions)'
-        error_message(err_msg,logger)
+        err_msg = "The PCGR data bundle is outdated - please download the latest data bundle (see github.com/sigven/pcgr for instructions)"
+        error_message(err_msg, logger)
 
     f_rel_not = open(rel_notes_file,'r')
     compliant_data_bundle = 0
@@ -619,6 +658,7 @@ def verify_input_files_cpsr(arg_dict):
             "input_customlist_dir": input_customlist_dir,
             "db_assembly_dir": db_assembly_dir,
             "refdata_dir": base_dir,
+            "vep_dir": vep_dir,           
             "output_dir": output_dir_full,
             "output_vcf": output_vcf,
             "input_vcf_basename": input_vcf_basename,

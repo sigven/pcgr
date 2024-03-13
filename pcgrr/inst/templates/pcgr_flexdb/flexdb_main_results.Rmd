@@ -8,7 +8,7 @@ Sidebar {.sidebar data-width=500 data-padding=40}
 <br><br>
 <font style="font-size: 110%">
 
-The report is generated with _[PCGR](https://github.com/sigven/pcgr)_ version `r pcg_report[['metadata']][['pcgr_version']]`.
+The report is generated with _[PCGR](https://github.com/sigven/pcgr)_ version `r pcg_report$settings$software$pcgr_version`.
 <br><br>
 Key configuration settings:
 
@@ -44,7 +44,7 @@ flexdashboard::valueBox("SNVs/Indels", caption = NULL, color = '#000000',
 flexdashboard::valueBox(paste(pcg_report$content$snv_indel$vstats$n_snv, 
                                pcg_report$content$snv_indel$vstats$n_indel,
                                sep = " / "),
-                               color = pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][1], icon = "fa-dna")
+                               color = pcgrr::color_palette[['tier']][['values']][1], icon = "fa-dna")
 ```
 
 
@@ -54,7 +54,7 @@ flexdashboard::valueBox(paste(pcg_report$content$snv_indel$vstats$n_snv,
 flexdashboard::valueBox(
   stringr::str_replace_all(
     pcg_report$content$value_box$tier1,"Tier 1 variants:\n",""), 
-  color = pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][1], 
+  color = pcgrr::color_palette[['tier']][['values']][1], 
   icon = "fa-dna", href = "#tier-1")
 ```
 
@@ -74,7 +74,7 @@ flexdashboard::valueBox("sCNA", caption = NULL, color = '#000000',
 flexdashboard::valueBox(
   paste(pcg_report$content$cna$vstats$n_cna_loss, 
         pcg_report$content$cna$vstats$n_cna_gain,sep=" / "), 
-  color = pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][1], icon = "fa-dna",
+  color = pcgrr::color_palette[['tier']][['values']][1], icon = "fa-dna",
   href = "#overview-2")
 ```
 
@@ -82,7 +82,7 @@ flexdashboard::valueBox(
 ### TIER 1 variants
 
 ```{r}
-flexdashboard::valueBox("None", color = pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][1], icon = "fa-dna")
+flexdashboard::valueBox("None", color = pcgrr::color_palette[['tier']][['values']][1], icon = "fa-dna")
 ```
 
 Row {data-height = 200}
@@ -99,7 +99,7 @@ flexdashboard::valueBox("SIGNATURES", caption = NULL, color = '#000000',
 
 ```{r fig.width = 3.5}
 cosine_sim <- pcg_report$content$mutational_signatures$result$goodness_of_fit$cosine_sim
-flexdashboard::valueBox(paste0(cosine_sim," %"), color = pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][1])
+flexdashboard::valueBox(paste0(cosine_sim," %"), color = pcgrr::color_palette[['tier']][['values']][1])
 ```
 
 
@@ -107,7 +107,7 @@ flexdashboard::valueBox(paste0(cosine_sim," %"), color = pcg_report$settings$con
 
 ```{r}
 flexdashboard::valueBox(
-  pcg_report$content$mutational_signatures$result$contributions$aetiology_keyword[1], color = pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][1], href="#mutational-signatures")
+  pcg_report$content$mutational_signatures$result$contributions$aetiology_keyword[1], color = pcgrr::color_palette[['tier']][['values']][1], href="#mutational-signatures")
 ```
 
 Row {data-height = 200}
@@ -123,7 +123,7 @@ flexdashboard::valueBox("TMB/MSI status", caption = NULL, color = '#000000', ico
 
 ```{r fig.width = 3.5}
 flexdashboard::valueBox(paste0(pcg_report$content$tmb$vstats$tmb_estimate," mut/Mb"), 
-                        color = pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][1],
+                        color = pcgrr::color_palette[['tier']][['values']][1],
                         icon = "fa-dna")
 ```
 
@@ -133,7 +133,7 @@ flexdashboard::valueBox(paste0(pcg_report$content$tmb$vstats$tmb_estimate," mut/
 ```{r}
 flexdashboard::valueBox(
   stringr::str_replace(pcg_report$content$msi$prediction$msi_stats$vb, "MSI status:\n",""), 
-                        color = pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][1], icon = "fa-dna")
+                        color = pcgrr::color_palette[['tier']][['values']][1], icon = "fa-dna")
 ```
 
 Row {data-height=500}

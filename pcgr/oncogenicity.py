@@ -75,19 +75,20 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
    ## Protein length changes as a result of in-frame deletions/insertions in a
    ## known oncogene/tumor suppressor genes or stop-loss variants in a
    ## tumor suppressor gene
+   # - Not applicable if OVS1 is applicable
 
-   # 12) "CLINGEN_VICC_OM3"
+   # 12) "CLINGEN_VICC_OM4"
    ## Missense variant at an amino acid residue where a different missense
    ## variant determined to be oncogenic (using this standard) has been
-   ## documented. Amino acid difference from reference amino acid should
-   ## be greater or at least approximately the same as for missense change
-   ## determined to be oncogenic.
+   ## documented. Amino acid difference from reference amino acid (Grantham distance) 
+   ## should be greater or at least approximately the same as for missense 
+   ## change determined to be oncogenic.
 
-   # 13) "CLINGEN_VICC_OM4"
+   # 13) "CLINGEN_VICC_OM3"
    ## Located in a mutation hotspot
    ## - < 50 samples with a somatic variant at the AA position (cancerhotspots.org)
    ## - Same amino acid change in >= 10 samples (cancerhotspots.org)
-   ## - Not applicable if OM1 or OM3 is applicable
+   ## - Not applicable if OM1 or OM4 is applicable
 
    # 14) "CLINGEN_VICC_OP1"
    ## All used lines of computational support an oncogenic effect
@@ -240,7 +241,7 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
             variant_data['CLINGEN_VICC_OS3'] = True
       if hotspot_mutated_samples['aa_variant'][ttype] >= 10 and \
          hotspot_mutated_samples['aa_site'][ttype] < 50:
-            variant_data['CLINGEN_VICC_OM4'] = True
+            variant_data['CLINGEN_VICC_OM3'] = True
       if hotspot_mutated_samples['aa_variant'][ttype] < 10 and \
          hotspot_mutated_samples['aa_variant'][ttype] > 0:
             variant_data['CLINGEN_VICC_OP3'] = True
@@ -321,7 +322,7 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
       'CLINGEN_VICC_OVS1',
       'CLINGEN_VICC_OS3',
       'CLINGEN_VICC_OM2',
-      'CLINGEN_VICC_OM4',
+      'CLINGEN_VICC_OM3',
       'CLINGEN_VICC_OP1',
       'CLINGEN_VICC_OP3',
       'CLINGEN_VICC_OP4']
@@ -340,13 +341,13 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
    og_score_data['description'] = \
       ['Very high MAF (> 0.05 in gnomAD - any five major continental pops)',
       'High MAF (> 0.01 in gnomAD - any five major continental pops)',
-      'Multiple lines (>=7) of computational evidence support a benign effect on the gene or gene product - from dbNSFP',
+      'Multiple lines (>=6) of computational evidence support a benign effect on the gene or gene product - from dbNSFP',
       'Silent and intronic changes outside of the consensus splice site',
       'Null variant - predicted as LoF by LOFTEE - in bona fide tumor suppressor gene',
       'Located in a mutation hotspot (cancerhotspots.org). >= 50 samples with a  variant at AA position, >= 10 samples with same AA change',
       'Protein length changes from in-frame dels/ins in known oncogene/tumor suppressor genes or stop-loss variants in a tumor suppressor gene',
       'Located in a mutation hotspot (cancerhotspots.org). < 50 samples with a variant at AA position, >= 10 samples with same AA change.',
-      'Multiple lines (>=7) of computational evidence support a damaging effect on the gene or gene product - from dbNSFP',
+      'Multiple lines (>=6) of computational evidence support a damaging effect on the gene or gene product - from dbNSFP',
       'Located in a mutation hotspot (cancerhotspots.org). < 10 samples with the same amino acid change.',
       'Absent from controls (gnomAD) / very low MAF ( < 0.0001 in all five major subpopulations)']
    
@@ -363,9 +364,9 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
             oncogenicity_scores[code][e] = float(og_score_data[e][i])
       i = i + 1
 
-   variant_data['ONCOGENICITY_CLASSIFICATION'] = "VUS"
-   variant_data["ONCOGENICITY_CLASSIFICATION_DOC"] = "."
-   variant_data["ONCOGENICITY_CLASSIFICATION_CODE"] = "."
+   variant_data['ONCOGENICITY'] = "VUS"
+   variant_data["ONCOGENICITY_DOC"] = "."
+   variant_data["ONCOGENICITY_CODE"] = "."
    variant_data["ONCOGENICITY_SCORE"] = "."
    onc_score_pathogenic = 0
    onc_score_benign = 0
@@ -381,16 +382,16 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
             if pole == "B":
                onc_score_benign = onc_score_benign + score
 
-            for e in ['ONCOGENICITY_CLASSIFICATION_DOC',
-                      'ONCOGENICITY_CLASSIFICATION_CODE']:
+            for e in ['ONCOGENICITY_DOC',
+                      'ONCOGENICITY_CODE']:
 
                if variant_data[e] == ".":
-                  if e == 'ONCOGENICITY_CLASSIFICATION_DOC':
+                  if e == 'ONCOGENICITY_DOC':
                      variant_data[e] = oncogenicity_scores[code]['description']
                   else:
                      variant_data[e] = code
                else:
-                  if e == 'ONCOGENICITY_CLASSIFICATION_DOC':
+                  if e == 'ONCOGENICITY_DOC':
                      variant_data[e] = f'{variant_data[e]}|{oncogenicity_scores[code]["description"]}'
                   else:
                      variant_data[e] = f'{variant_data[e]}|{code}'
@@ -398,8 +399,6 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
    likely_benign_upper_limit = -1
    likely_benign_lower_limit = -6
    benign_upper_limit = -7
-   #vus_lower_limit = 0
-   #vus_upper_limit = 4
    likely_oncogenic_lower_limit = 5
    likely_oncogenic_upper_limit = 9
    oncogenic_lower_limit = 10
@@ -407,18 +406,18 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
    variant_data['ONCOGENICITY_SCORE'] = onc_score_benign + onc_score_pathogenic
    if variant_data['ONCOGENICITY_SCORE'] <= likely_benign_upper_limit and \
       variant_data['ONCOGENICITY_SCORE'] >= likely_benign_lower_limit:
-      variant_data['ONCOGENICITY_CLASSIFICATION'] = "Likely_Benign"
+      variant_data['ONCOGENICITY'] = "Likely_Benign"
    if variant_data['ONCOGENICITY_SCORE'] >= likely_oncogenic_lower_limit and \
       variant_data['ONCOGENICITY_SCORE'] <= likely_oncogenic_upper_limit:
-      variant_data['ONCOGENICITY_CLASSIFICATION'] = "Likely_Oncogenic"
+      variant_data['ONCOGENICITY'] = "Likely_Oncogenic"
    if variant_data['ONCOGENICITY_SCORE'] <= benign_upper_limit:
-      variant_data['ONCOGENICITY_CLASSIFICATION'] = "Benign"
+      variant_data['ONCOGENICITY'] = "Benign"
    if variant_data['ONCOGENICITY_SCORE'] >= oncogenic_lower_limit:
-      variant_data['ONCOGENICITY_CLASSIFICATION'] = "Oncogenic"
+      variant_data['ONCOGENICITY'] = "Oncogenic"
    
    for e in ['ONCOGENICITY_SCORE',
-             'ONCOGENICITY_CLASSIFICATION',
-             'ONCOGENICITY_CLASSIFICATION_CODE']:
+             'ONCOGENICITY',
+             'ONCOGENICITY_CODE']:
       rec.INFO[e] = variant_data[e]
 
    return(rec)

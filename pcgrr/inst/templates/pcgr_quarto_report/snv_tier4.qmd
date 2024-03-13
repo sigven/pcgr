@@ -1,0 +1,21 @@
+### Tier 4 - Other coding mutations
+
+- A total of __`r NROW(pcg_report[['content']][['snv_indel']][["disp"]][['tier4']])`__ unique, coding somatic variant(s) are also found in the tumor sample.
+
+<br><br>
+```{r tier4, results='asis', echo=F}
+
+myOptions <- list(pageLength=10, scrollCollapse = T, buttons = c('csv','excel'),dom = 'Bfrtip')
+
+if(NROW(pcg_report[['content']][['snv_indel']][["disp"]][['tier4']]) > 0){
+  if(NROW(pcg_report[['content']][['snv_indel']][["disp"]][['tier4']]) > 2000){
+    cat('<b>NOTE - listing top 2000 variants (ranked according to Open Targets phenotype association score)</b><br>',sep="\n")
+    cat('<br>')
+    pcg_report[['content']][['snv_indel']][["disp"]][['tier4']] <- head(pcg_report[['content']][['snv_indel']][["disp"]][['tier4']], 2000)
+  }
+  DT::datatable(pcg_report[['content']][['snv_indel']][["disp"]][['tier4']], options = myOptions, escape=F, extensions = c("Buttons","Responsive")) |>
+  DT::formatStyle("SYMBOL","OPENTARGETS_RANK", color = "white", backgroundColor = DT::styleInterval(pcg_report[['content']][['report_display_config']][['opentargets_rank']][['breaks']], pcg_report[['content']][['report_display_config']][['opentargets_rank']][['colors']]))
+}
+
+```
+<br><br>

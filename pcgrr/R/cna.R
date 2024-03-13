@@ -58,7 +58,7 @@ make_cnaqc_object <- function(
           .data$DP_TUMOR *
             .data$AF_TUMOR,
           digits = 0)),
-      GENE = SYMBOL,
+      GENE = .data$SYMBOL,
       is_driver = FALSE,
       driver_label = paste0(
         .data$SYMBOL," ",
@@ -73,10 +73,10 @@ make_cnaqc_object <- function(
     ) |>
     dplyr::mutate(is_driver = dplyr::if_else(
       stringr::str_detect(
-        ONCOGENICITY, "Oncogenic") &
+        .data$ONCOGENICITY, "Oncogenic") &
         .data$ONCOGENE == TRUE &
         !stringr::str_detect(
-          CONSEQUENCE, "frameshift"
+          .data$CONSEQUENCE, "frameshift"
         ),
       as.logical(TRUE),
       as.logical(.data$is_driver)

@@ -23,13 +23,20 @@ log4r_logger <-
 # this gets passed on to all the log4r_* functions inside the pkg
 options("PCGRR_LOG4R_LOGGER" = log4r_logger)
 
-yaml_fname <- "/Users/sigven/project_data/packages/package__pcgr/bundle_update_2023/pcgr/tumor_sample_to.COAD.pcgr_acmg.grch38.conf.yaml"
+yaml_fname <-
+  paste0("/Users/sigven/project_data/packages/",
+         "package__pcgr/bundle_update_2023/",
+         "pcgr/tumor_sample.COAD.pcgr_acmg.grch38.conf.yaml")
 
 
 ## Generate report content
-pcg_report <- pcgrr::generate_pcgr_report(
+pcg_report <- pcgrr::generate_report(
   yaml_fname = yaml_fname
 )
+
+pcg_report$content$tmb$eval <- FALSE
+pcgrr::write_report_flexdb_html(report = pcg_report)
+
 
 
 # # ## Generate report object

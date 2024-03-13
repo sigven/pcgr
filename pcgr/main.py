@@ -20,8 +20,8 @@ def cli():
 
     program_description = (f"Personal Cancer Genome Reporter (PCGR) workflow for clinical interpretation of "
                            f"somatic nucleotide variants and copy number aberration segments")
-    program_options = "\n\t--input_vcf <INPUT_VCF>\n\t--refdata_dir <REFDATA_DIR>\n\t--output_dir <OUTPUT_DIR>\n\t--genome_assembly" + \
-    " <GENOME_ASSEMBLY>\n\t--sample_id <SAMPLE_ID>"
+    program_options = "\n\t--input_vcf <INPUT_VCF>\n\t--vep_dir <VEP_DIR>\n\t--refdata_dir <REFDATA_DIR>\n\t" + \
+        "--output_dir <OUTPUT_DIR>\n\t--genome_assembly <GENOME_ASSEMBLY>\n\t--sample_id <SAMPLE_ID>"
 
     parser = argparse.ArgumentParser(description=program_description,
                                      formatter_class=RawTextHelpFormatter,
@@ -67,7 +67,6 @@ def cli():
     optional_tmb_msi.add_argument("--tmb_af_min", dest="tmb_af_min", default=0, help="If VCF INFO tag for allelic fraction (tumor) is specified and found, set minimum required allelic fraction for TMB calculation: default: %(default)s")
     optional_tmb_msi.add_argument("--estimate_msi", action="store_true", help="Predict microsatellite instability status from patterns of somatic mutations/indels, default: %(default)s")
 
-
     optional_assay.add_argument("--assay", dest="assay", default="WES", choices=[ "WGS", "WES","TARGETED"], help="Type of DNA sequencing assay performed for input data (VCF), default: %(default)s")
     optional_assay.add_argument("--effective_target_size_mb", type=float, default=34, dest="effective_target_size_mb", help="Effective target size in Mb (potentially limited by read depth) of sequencing assay (for TMB analysis) (default: %(default)s (WES/WGS))")
     optional_assay.add_argument("--tumor_only", action="store_true", help="Input VCF comes from tumor-only sequencing, calls will be filtered for variants of germline origin, (default: %(default)s)")
@@ -84,8 +83,6 @@ def cli():
     optional_other.add_argument("--ignore_noncoding", action="store_true", help="Ignore non-coding (i.e. non protein-altering) variants in report, default: %(default)s")
     optional_other.add_argument("--include_trials", action="store_true", help="(Beta) Include relevant ongoing or future clinical trials, focusing on studies with molecularly targeted interventions")
     optional_other.add_argument("--retained_info_tags", dest="retained_info_tags", default="None", help="Comma-separated string of VCF INFO tags from query VCF that should be kept in PCGR output TSV file")
-    optional_other.add_argument("--report_theme", choices=["default", "cerulean", "journal", "flatly", "readable", "spacelab", "united", "cosmo", "lumen", "paper", "sandstone", "simplex", "yeti"], help="Visual report theme (rmarkdown)", default="default")
-    optional_other.add_argument("--report_nonfloating_toc", action="store_true", help="Do not float the table of contents (TOC) in output report (rmarkdown), default: %(default)s")
     optional_other.add_argument("--force_overwrite", action="store_true", help="By default, the script will fail with an error if any output file already exists. You can force the overwrite of existing result files by using this flag, default: %(default)s")
     optional_other.add_argument("--version", action="version", version="%(prog)s " + str(pcgr_vars.PCGR_VERSION))
     optional_other.add_argument("--no_reporting", action="store_true", help="Run functional variant annotation on VCF through VEP/vcfanno, omit other analyses (i.e. Tier assignment/MSI/TMB/Signatures etc. and report generation (STEP 4), default: %(default)s")
@@ -120,7 +117,8 @@ def cli():
     optional_tumor_only.add_argument("--exclude_nonexonic", action="store_true", help="Exclude non-exonic variants, default: %(default)s)")
 
     required.add_argument("--input_vcf", dest="input_vcf", help="VCF input file with somatic variants in tumor sample, SNVs/InDels", required=True)
-    required.add_argument("--refdata_dir", dest="refdata_dir", help="Directory with reference data bundle, e.g. ~/pcgr-data-" + str(pcgr_vars.PCGR_VERSION), required=True)
+    required.add_argument("--vep_dir", dest="vep_dir", help="Directory of VEP cache, e.g.  $HOME/.vep", required=True)
+    required.add_argument("--refdata_dir", dest="refdata_dir", help="Directory where PCGR reference data bundle was downloaded and unpacked", required=True)
     required.add_argument("--output_dir", dest="output_dir", help="Output directory", required=True)
     required.add_argument("--genome_assembly", dest="genome_assembly", choices=["grch37", "grch38"], help="Human genome assembly build: grch37 or grch38", required=True)
     required.add_argument("--sample_id", dest="sample_id", help="Tumor sample/cancer genome identifier - prefix for output files", required=True)
@@ -195,6 +193,7 @@ def run_pcgr(pcgr_paths, conf_options):
     if not input_vcf == 'None':
         refdata_dir = pcgr_paths['refdata_dir']
         output_dir = pcgr_paths['output_dir']
+        vep_dir = pcgr_paths['vep_dir']
         
         check_subprocess(logger, f'mkdir -p {output_dir}', debug)
 

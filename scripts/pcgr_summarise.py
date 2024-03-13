@@ -46,7 +46,8 @@ def __main__():
 
 def extend_vcf_annotations(arg_dict, logger):
     """
-    Function that reads VEP/vcfanno-annotated VCF and extends the VCF INFO column with tags from
+    Function that reads VEP/vcfanno-annotated VCF and populates the VCF INFO column with tags from
+    0. Information on sequencing depth and genotype (hom_ref, het, hom_alt) - for germline VCFs (CPSR) only 
     1. CSQ elements for the primary (i.e. "picked") gene transcript consequence from VEP, e.g. SYMBOL, Feature, Gene, Consequence etc.
     2. Cancer-relevant gene annotations (GENE_TRANSCRIPT_XREF), e.g. known oncogenes/tumor suppressors, driver genes etc
     3. Variant effect predictions - dbNSFP
@@ -112,7 +113,7 @@ def extend_vcf_annotations(arg_dict, logger):
     dbnsfp_prediction_algorithms = meta_vep_dbnsfp_info['dbnsfp_prediction_algorithms']
     vep_csq_fields_map = meta_vep_dbnsfp_info['vep_csq_fieldmap']
     
-    vcf = cyvcf2.VCF(arg_dict['vcf_file_in'])
+    vcf = cyvcf2.VCF(arg_dict['vcf_file_in'],  gts012=True)
     for tag in sorted(vcf_info_metadata):
         if arg_dict['pon_annotation'] == 0 and arg_dict['regulatory_annotation'] == 0:
             if not tag.startswith('PANEL_OF_NORMALS') and not tag.startswith('REGULATORY_'):
@@ -143,6 +144,22 @@ def extend_vcf_annotations(arg_dict, logger):
         alt_allele = ','.join(rec.ALT)
         pos = rec.start + 1
         variant_id = f"g.{rec.CHROM}:{pos}{rec.REF}>{alt_allele}"
+        
+        ## For germline-called VCFs (single-sample), pull out sequencing depth and genotype using cyvcf2 API
+        if arg_dict['cpsr'] is True:
+            rec.INFO['DP_CONTROL'] = "-1"
+            if len(rec.gt_depths) == 1:
+                rec.INFO['DP_CONTROL'] = str(rec.gt_depths[0])
+            rec.INFO['GENOTYPE'] = 'undefined'
+            if len(rec.gt_types) == 1:
+                if int(rec.gt_types[0]) == 0:
+                    rec.INFO['GENOTYPE'] = 'hom_ref'
+                else:
+                    if int(rec.gt_types[0]) == 1:
+                        rec.INFO['GENOTYPE'] = 'het'
+                    if int(rec.gt_types[0]) == 2:
+                        rec.INFO['GENOTYPE'] = 'hom_alt'
+                
         if current_chrom is None:
             current_chrom = str(rec.CHROM)
             num_chromosome_records_processed = 0

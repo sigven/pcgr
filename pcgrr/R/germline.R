@@ -86,13 +86,13 @@ dbsnp_germline_status <- function(sample_calls) {
   )
   ## assign STATUS_DBSNP_GERMLINE status to all calls recorded in
   ## dbSNP (except relevant in a somatic setting, as defined by ClinVar/DoCM)
-  if ("DBSNPRSID" %in% colnames(sample_calls) &
+  if ("DBSNP_RSID" %in% colnames(sample_calls) &
       "CLINVAR_MSID" %in% colnames(sample_calls) &
       "CLINVAR_VARIANT_ORIGIN" %in% colnames(sample_calls)) {
     sample_calls <- sample_calls |>
       dplyr::mutate(
         STATUS_DBSNP =
-          dplyr::if_else(!is.na(.data$DBSNPRSID), TRUE, FALSE)) |>
+          dplyr::if_else(!is.na(.data$DBSNP_RSID), TRUE, FALSE)) |>
       dplyr::mutate(
         STATUS_DBSNP =
           dplyr::if_else(
@@ -147,12 +147,12 @@ cosmic_somatic_status <- function(sample_calls) {
   )
 
   ## assign STATUS_COSMIC to all calls with an identifier in COSMIC
-  if ("COSMIC_MUTATION_ID" %in% colnames(sample_calls)) {
+  if ("COSMIC_ID" %in% colnames(sample_calls)) {
     sample_calls <- sample_calls |>
       dplyr::mutate(
         STATUS_COSMIC =
           dplyr::if_else(
-            !is.na(.data$COSMIC_MUTATION_ID),
+            !is.na(.data$COSMIC_ID),
             TRUE, FALSE))
   }
   return(sample_calls)
@@ -338,7 +338,7 @@ assign_somatic_classification <- function(sample_calls, settings) {
               tumor_only_settings[["exclude_dbsnp_nonsomatic"]]) == TRUE,
           "GERMLINE_DBSNP",
           "")) |>
-    tidyr::unite(SOMATIC_CLASSIFICATION,
+    tidyr::unite("SOMATIC_CLASSIFICATION",
                  c("GERMLINE_GNOMAD",
                    "GERMLINE_CLINVAR",
                    "GERMLINE_PON",
@@ -346,11 +346,15 @@ assign_somatic_classification <- function(sample_calls, settings) {
                    "GERMLINE_HOM",
                    "GERMLINE_DBSNP"), sep="|",
                  remove = TRUE) |>
-    dplyr::mutate(SOMATIC_CLASSIFICATION = stringr::str_replace_all(
-      .data$SOMATIC_CLASSIFICATION, "(\\|{1,}$)|^(\\|{1,})",""
+    dplyr::mutate(
+      SOMATIC_CLASSIFICATION = stringr::str_replace_all(
+      .data$SOMATIC_CLASSIFICATION,
+      "(\\|{1,}$)|^(\\|{1,})",""
     )) |>
-    dplyr::mutate(SOMATIC_CLASSIFICATION = stringr::str_replace_all(
-      .data$SOMATIC_CLASSIFICATION, "(\\|{2,})","|"
+    dplyr::mutate(
+      SOMATIC_CLASSIFICATION = stringr::str_replace_all(
+      .data$SOMATIC_CLASSIFICATION,
+      "(\\|{2,})","|"
     )) |>
     dplyr::mutate(
       SOMATIC_CLASSIFICATION = dplyr::if_else(

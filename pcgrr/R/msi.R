@@ -23,28 +23,16 @@ predict_msi_status <- function(variant_set,
     bsg = ref_data[["assembly"]][["bsg"]])
   mutations_valid <- mutations_valid |>
     dplyr::select(
-      .data$CHROM,
-      .data$POS,
-      .data$REF,
-      .data$ALT,
-      .data$CONSEQUENCE,
-      .data$SYMBOL,
-      .data$GENOMIC_CHANGE,
-      .data$VARIANT_CLASS,
-      .data$PROTEIN_DOMAIN,
-      .data$GENENAME,
-      .data$PROTEIN_CHANGE,
-      .data$MUTATION_HOTSPOT,
-      .data$CLINVAR,
-      .data$TCGA_FREQUENCY,
-      .data$AF_TUMOR,
-      .data$DP_TUMOR,
-      .data$AF_CONTROL,
-      .data$DP_CONTROL,
-      .data$CALL_CONFIDENCE,
-      .data$SIMPLEREPEATS_HIT,
-      .data$WINMASKER_HIT)
-
+      dplyr::any_of(
+        c("CHROM","POS","REF","ALT","CONSEQUENCE",
+          "SYMBOL","GENOMIC_CHANGE","VARIANT_CLASS",
+          "PFAM_DOMAIN_NAME","GENENAME","PROTEIN_CHANGE",
+          "MUTATION_HOTSPOT","CLINVAR_TRAITS_ALL",
+          "TCGA_FREQUENCY","AF_TUMOR","DP_TUMOR",
+          "AF_CONTROL","DP_CONTROL","CALL_CONFIDENCE",
+          "SIMPLEREPEATS_HIT","WINMASKER_HIT")
+      )
+    )
   vcf_df_repeatAnnotated <- mutations_valid |>
     dplyr::mutate(
       repeatStatus =
@@ -277,7 +265,7 @@ predict_msi_status <- function(variant_set,
       .data$PROTEIN_CHANGE,
       .data$GENENAME,
       .data$VARIANT_CLASS,
-      .data$PROTEIN_DOMAIN,
+      .data$PFAM_DOMAIN_NAME,
       dplyr::everything())
 
   msi_predictors <- c(

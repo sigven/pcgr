@@ -4,10 +4,7 @@
 \alias{init_cna_vstats}
 \title{Function that initiates report element with CNA information}
 \usage{
-init_cna_vstats(rep = NULL)
-}
-\value{
-rep updated PCGR report structure - initialized for CNA content
+init_cna_vstats()
 }
 \description{
 Function that initiates report element with CNA information

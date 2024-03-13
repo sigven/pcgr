@@ -2,13 +2,10 @@
 % Please edit documentation in R/report.R
 \name{init_snv_indel_vstats}
 \alias{init_snv_indel_vstats}
-\title{Function that initiates report element with SNV/InDel information}
+\title{Function that initiates report element with SNV/InDel statistics information}
 \usage{
 init_snv_indel_vstats()
 }
-\value{
-vstats updated PCGR report structure - initialized for SNV/InDel content
-}
 \description{
-Function that initiates report element with SNV/InDel information
+Function that initiates report element with SNV/InDel statistics information
 }

@@ -1,0 +1,100 @@
+
+### Tier 3 - Variants of unknown clinical significance {.tabset}
+
+- A total of __`r NROW(pcg_report[['content']][['snv_indel']][["disp"]][['tier3']][['proto_oncogene']]) + NROW(pcg_report[['content']][['snv_indel']][["disp"]][['tier3']][['tumor_suppressor']])`__ unique, somatic variant(s) in the tumor sample are of unknown clinical significance, as found within known proto-oncogenes or tumor suppressor genes.
+<br><br>
+
+
+```{r prepare_tier3_data, echo=F, results='asis'}
+
+show_tier3_filters <- list()
+missing_tier3_items <- list()
+for(type in c('proto_oncogene','tumor_suppressor')){
+  show_tier3_filters[[type]] <- F
+  missing_tier3_items[[type]] <- T
+  if(NROW(pcg_report[['content']][['snv_indel']][["disp"]][['tier3']][[type]]) > 0){
+    show_tier3_filters[[type]] <- T
+    missing_tier3_items[[type]] <- F
+  }
+}
+
+```
+
+
+#### Tumor suppressor gene mutations
+
+<br>
+
+```{r tsgene_mutations, echo=F, results = 'asis', eval = show_tier3_filters[['tumor_suppressor']]}
+
+variants_tsgene_shared <- crosstalk::SharedData$new(pcg_report[['content']][['snv_indel']][["disp"]][['tier3']][['tumor_suppressor']])
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_tsgene_shared, ~CONSEQUENCE),
+    crosstalk::filter_select("MUTATION_HOTSPOT", "Mutation hotspot", variants_tsgene_shared, ~MUTATION_HOTSPOT)
+  ),
+  list(
+    crosstalk::filter_select("PUTATIVE_DRIVER_MUTATION", "Predicted driver mutation", variants_tsgene_shared, ~PUTATIVE_DRIVER_MUTATION)
+    
+  )
+)
+
+cat('The table below lists all variants:',sep='\n')
+htmltools::br()
+htmltools::br()
+
+  DT::datatable(variants_tsgene_shared, escape=F,extensions=c("Buttons","Responsive"), 
+                options = list(buttons = c('csv','excel'), scrollCollapse = T, dom = 'Bfrtip')) |>
+  DT::formatStyle("SYMBOL","OPENTARGETS_RANK", color = "white", backgroundColor = DT::styleInterval(pcg_report[['content']][['report_display_config']][['opentargets_rank']][['breaks']], pcg_report[['content']][['report_display_config']][['opentargets_rank']][['colors']]))
+
+
+htmltools::br()
+htmltools::br()
+
+```
+
+```{r tsgene_missing, echo=F, results = 'asis', eval = missing_tier3_items[['tumor_suppressor']]}
+cat('<i>No variants found.</i>',sep='\n')
+cat('\n')
+```
+
+<br><br>
+
+#### Proto-oncogene mutations
+
+<br>
+
+```{r oncogene_mutations, echo=F, results = 'asis', eval = show_tier3_filters[['proto_oncogene']]}
+
+variants_oncogene_shared <- crosstalk::SharedData$new(pcg_report[['content']][['snv_indel']][["disp"]][['tier3']][['proto_oncogene']])
+crosstalk::bscols(
+  list(
+    crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_oncogene_shared, ~CONSEQUENCE),
+    crosstalk::filter_select("MUTATION_HOTSPOT", "Mutation hotspot", variants_oncogene_shared, ~MUTATION_HOTSPOT)
+  ),
+  list(
+    crosstalk::filter_select("PUTATIVE_DRIVER_MUTATION", "Predicted driver mutation", variants_oncogene_shared, ~PUTATIVE_DRIVER_MUTATION)
+    
+  )
+)
+
+cat('The table below lists all variants:',sep='\n')
+htmltools::br()
+htmltools::br()
+
+DT::datatable(variants_oncogene_shared, escape=F,extensions=c("Buttons","Responsive"),
+              options=list(buttons = c('csv','excel'), scrollCollapse=T, dom = 'Bfrtip')) |>
+  DT::formatStyle("SYMBOL","OPENTARGETS_RANK", color = "white", backgroundColor = DT::styleInterval(pcg_report[['content']][['report_display_config']][['opentargets_rank']][['breaks']], pcg_report[['content']][['report_display_config']][['opentargets_rank']][['colors']]))
+
+
+htmltools::br()
+htmltools::br()
+
+```
+
+```{r oncogene_missing, echo=F, results = 'asis', eval = missing_tier3_items[['proto_oncogene']]}
+cat('<i>No variants found.</i>',sep='\n')
+cat('\n')
+```
+
+<br><br>

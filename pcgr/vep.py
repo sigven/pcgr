@@ -15,14 +15,14 @@ def get_vep_command(file_paths, conf_options, input_vcf, output_vcf, debug = Fal
     output_vcf_gz = f'{output_vcf}.gz'
     genome_assembly = conf_options['genome_assembly']
     
-    vep_dir = os.path.join(str(file_paths['db_assembly_dir']), '.vep')
+    vep_dir = file_paths['vep_dir']
     fasta_assembly = os.path.join(
-        vep_dir, 'homo_sapiens', 
-        f'{pcgr_vars.VEP_VERSION}_{pcgr_vars.VEP_ASSEMBLY[genome_assembly]}', 
+        file_paths['db_assembly_dir'],
+        'misc','fasta','assembly',
         f'Homo_sapiens.{pcgr_vars.VEP_ASSEMBLY[genome_assembly]}.dna.primary_assembly.fa.gz')
     ancestor_assembly = os.path.join(
-        vep_dir, 'homo_sapiens', 
-        f'{pcgr_vars.VEP_VERSION}_{pcgr_vars.VEP_ASSEMBLY[genome_assembly]}', 
+        file_paths['db_assembly_dir'],
+        'misc','fasta','ancestor',
         f'human_ancestor.fa.gz')
 
     plugins_in_use = "NearestExonJB, LoF"
@@ -129,12 +129,12 @@ def get_csq_record_annotations(csq_fields, varkey, logger, vep_csq_fields_map, t
                 # Assign COSMIC/DBSNP mutation ID's as individual key,value pairs in the csq_record object
                 if vep_csq_fields_map['index2field'][j] == 'Existing_variation':
                     var_identifiers = str(csq_fields[j]).split('&')
-                    parsed_identifiers = {'COSMIC_MUTATION_ID':[], 'DBSNPRSID':[]}                                
+                    parsed_identifiers = {'COSMIC_ID':[], 'DBSNP_RSID':[]}                                
                     for v in var_identifiers:
                         if v.startswith('COSV') or v.startswith('COSM'):
-                            parsed_identifiers['COSMIC_MUTATION_ID'].append(v)                                   
+                            parsed_identifiers['COSMIC_ID'].append(v)                                   
                         if v.startswith('rs'):
-                            parsed_identifiers['DBSNPRSID'].append(v)
+                            parsed_identifiers['DBSNP_RSID'].append(v)
                     for db in parsed_identifiers.keys():
                         if len(parsed_identifiers[db]) > 0:
                             csq_record[db] = '&'.join(parsed_identifiers[db])   

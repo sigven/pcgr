@@ -20,31 +20,42 @@ flexdashboard::valueBox("TMB/MSI status", caption = NULL, color = '#000000', ico
 ### Coding target size
 
 ```{r tmb_vbox_size, width = 4, echo = F}
-col <- pcg_report$settings$conf$visual_reporting$color_value_box
-if(pcg_report$metadata$config$assay_props$target_size_mb < 1){
-  col <- pcg_report$settings$conf$visual_reporting$color_palette[['warning']][['values']][1]
+col <- pcg_report$settings$conf$report_color
+if(pcg_report$settings$conf$assay_properties$effective_target_size_mb < 1){
+  col <- pcgrr::color_palette$warning
 }
 
-flexdashboard::valueBox(paste0(pcg_report$metadata$config$assay_props$target_size_mb," Mb"),
-                        color = col,
-                        icon = "fa-dna")
+flexdashboard::valueBox(
+  paste0(pcg_report$settings$conf$assay_properties$effective_target_size_mb," Mb"),
+  color = col,
+  icon = "fa-dna")
 ```
 
 ### Coding mutations
 
 ```{r tmb_n_muts, width = 4, echo = F}
-flexdashboard::valueBox(pcg_report$content$snv_indel$vstats$n_coding,
-                        color = pcg_report$settings$conf$visual_reporting$color_value_box,
-                        icon = "fa-dna")
+flexdashboard::valueBox(
+  pcg_report$content$snv_indel$vstats$n_coding,
+  color = col,
+  icon = "fa-dna")
 ```
 
 
 ### TMB estimate
 
 ```{r tmb_vbox_estimate, echo = F}
-flexdashboard::valueBox(paste0(pcg_report$content$tmb$vstats$tmb_estimate," mut/Mb"), 
-                        color = pcg_report$settings$conf$visual_reporting$color_value_box,
-                        icon = "fa-dna")
+
+tmb_measure_type <- paste0(
+  "TMB_",pcg_report$settings$conf$somatic_snv$tmb$tmb_display)
+
+tmb_estimate <- 
+  pcg_report$content$tmb$sample_estimate |>
+  dplyr::filter(tmb_measure == tmb_measure_type)
+
+flexdashboard::valueBox(
+  paste0(tmb_estimate$tmb_estimate," mut/Mb"), 
+  color = col,
+  icon = "fa-dna")
 ```
 
 ### MSI prediction
@@ -53,11 +64,12 @@ flexdashboard::valueBox(paste0(pcg_report$content$tmb$vstats$tmb_estimate," mut/
 
 msi_status <- 'ND'
 if(!missing_data_norun){
-  msi_status <- stringr::str_replace(pcg_report$content$msi$prediction$msi_stats$vb,"MSI status:\n","")
+  msi_status <- stringr::str_replace(
+    pcg_report$content$msi$prediction$msi_stats$vb,"MSI status:\n","")
 }
 
 flexdashboard::valueBox(msi_status, 
-                        color = pcg_report$settings$conf$visual_reporting$color_value_box,
+                        color = col,
                         icon = "fa-dna")
 ```
 
@@ -68,36 +80,66 @@ Row {data-height=500}
 ### TCGA TMB distribution {data-width=500 data-padding=15}
 
 ```{r tmb_plot, echo = F}
-tcga_tmb <- pcg_report[['content']][['tmb']][['tcga_tmb']]
-p_site <- pcg_report[['metadata']][['config']][["t_props"]][['tumor_type']]
-tmb_estimate = pcg_report[['content']][['tmb']][['v_stat']][['tmb_estimate']]
-algorithm <- pcg_report[['content']][['tmb']][['algorithm']]
+tmb_reference <- pcg_report[['content']][['tmb']][['tmb_reference']]
+p_site <- pcg_report$settings$conf$sample_properties$site
+algorithm <- paste0("TMB_",pcg_report$settings$conf$somatic_snv$tmb$tmb_display)
+tmb_estimate = pcg_report[['content']]$tmb$sample_estimate |>
+  dplyr::filter(tmb_measure == algorithm)
 #tmb_high = pcg_report[['metadata']][['config']][['tmb']][['tmb_intermediate_limit']]
 
 tmb_site_colors <- 
-  data.frame(primary_site = unique(tcga_tmb$primary_site), stringsAsFactors = F) |>
-    dplyr::filter(!is.na(primary_site)) |>
+  data.frame(primary_site = unique(
+    tmb_reference$PRIMARY_SITE), stringsAsFactors = F) |>
+  dplyr::filter(!is.na(primary_site)) |>
   dplyr::mutate(color = "#f0f0f0") |>
-  dplyr::mutate(color = dplyr::if_else(primary_site == p_site,
-                                       pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][1], color))
+  dplyr::mutate(color = dplyr::if_else(
+    primary_site == p_site,
+    pcgrr::color_palette[['tier']][['values']][1], color))
   
 tmb_site_color_vec <- tmb_site_colors$color
 names(tmb_site_color_vec) <- tmb_site_colors$primary_site
 
-tcga_tmb <- tcga_tmb |> dplyr::filter(!is.na(primary_site))
+tmb_reference <- tmb_reference |> 
+  dplyr::filter(!is.na(.data$PRIMARY_SITE)) |>
+  dplyr::select(c("PRIMARY_SITE",
+                  "TMB_CODING_AND_SILENT",
+                  "TMB_CODING_AND_SILENT_LOG10")) |>
+  dplyr::rename(
+    primary_site = PRIMARY_SITE,
+    tmb = TMB_CODING_AND_SILENT,
+    tmb_log10 = TMB_CODING_AND_SILENT_LOG10)
 
-if(algorithm == "nonsyn"){
-  tcga_tmb <- tcga_tmb |> dplyr::filter(!is.na(primary_site)) |>
-    dplyr::select(primary_site, tmb_ns_log10, tmb_ns) |>
-    dplyr::rename(tmb = tmb_ns, tmb_log10 = tmb_ns_log10)
+if(algorithm == "TMB_missense_only"){
+  tmb_reference <- tmb_reference |>
+    dplyr::filter(!is.na(.data$PRIMARY_SITE)) |>
+    dplyr::select(c("PRIMARY_SITE",
+                    "TMB_MISSENSE_ONLY",
+                    "TMB_MISSENSE_ONLY_LOG10")) |>
+    dplyr::rename(
+      primary_site = PRIMARY_SITE,
+      tmb = TMB_MISSENSE_ONLY,
+      tmb_log10 = TMB_MISSENSE_ONLY_LOG10)
+}
+
+if(algorithm == "TMB_coding_non_silent"){
+  tmb_reference <- tmb_reference |>
+    dplyr::filter(!is.na(.data$PRIMARY_SITE)) |>
+    dplyr::select(c("PRIMARY_SITE",
+                    "TMB_CODING_NON_SILENT",
+                    "TMB_CODING_NON_SILENT_LOG10")) |>
+    dplyr::rename(
+      primary_site = PRIMARY_SITE,
+      tmb = TMB_CODING_NON_SILENT,
+      tmb_log10 = TMB_CODING_NON_SILENT_LOG10)
 }
 
 
 tmb_plot_site <-
   #ggplot2::ggplot(data = tcga_tmb[['tmb_site']]) +
-  ggplot2::ggplot(data = tcga_tmb) +
-  ggplot2::geom_boxplot(mapping = ggplot2::aes(x = reorder(primary_site, tmb_log10, FUN=median), 
-                                               y = tmb, fill = primary_site), outlier.size = 0.2) +
+  ggplot2::ggplot(data = tmb_reference) +
+  ggplot2::geom_boxplot(mapping = ggplot2::aes(
+    x = reorder(primary_site, tmb_log10, FUN=median), 
+    y = tmb, fill = primary_site), outlier.size = 0.2) +
   ggplot2::theme_classic() +
   ggplot2::scale_y_continuous(trans = scales::log_trans(base=10), 
                               breaks=c(0.01,1,10,100,1000),
@@ -105,17 +147,21 @@ tmb_plot_site <-
   ggplot2::scale_fill_manual(values = tmb_site_color_vec) +
   ggplot2::xlab("Primary Site") +
   ggplot2::ylab("TMB (mutations/mb)") +
-  ggplot2::theme(legend.title = ggplot2::element_blank(),
-                 axis.title.y = ggplot2::element_blank(),
-                 axis.title.x = ggplot2::element_blank(),
-                 legend.position = "none",
-                 axis.text.x = ggplot2::element_text(family = "Helvetica", angle = 55, vjust=0.5, size = 10),
-                 axis.text.y = ggplot2::element_text(family = "Helvetica", size = 10),
-                 plot.margin = (grid::unit(c(0, 0, 0, 0), "cm"))) + 
-                 ggplot2::geom_hline(yintercept=as.numeric(tmb_estimate), size=0.9, 
-                                     linetype = 4, color = pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][1])
-                  #ggplot2::geom_rect(ggplot2::aes(ymin = tmb_high, ymax = 1020, xmin = -Inf, xmax = Inf),
-                     #fill = "gray", alpha = 0.01)
+  ggplot2::theme(
+    legend.title = ggplot2::element_blank(),
+    axis.title.y = ggplot2::element_blank(),
+    axis.title.x = ggplot2::element_blank(),
+    legend.position = "none",
+    axis.text.x = ggplot2::element_text(
+      family = "Helvetica", angle = 55, vjust=0.5, size = 10),
+    axis.text.y = ggplot2::element_text(family = "Helvetica", size = 10),
+    plot.margin = (grid::unit(c(0, 0, 0, 0), "cm"))) + 
+  ggplot2::geom_hline(
+    yintercept = as.numeric(
+      tmb_estimate$tmb_estimate), 
+    linewidth = 0.9, 
+    linetype = 4, 
+    color = pcgrr::color_palette[['tier']][['values']][1])
 
 plotly::ggplotly(tmb_plot_site)
 ```
@@ -140,14 +186,21 @@ cat('\n')
 indel_tmb <- 
   pcg_report[['content']][['msi']][['prediction']][['msi_stats']][['tmb_indel']]
 
-p <- ggplot2::ggplot(data = pcg_report[['content']][['msi']][['prediction']][['tcga_dataset']]) +
-    ggplot2::geom_boxplot(mapping = ggplot2::aes(y = tmb_indel, x = MSI_status, color = MSI_status, fill = MSI_status),
+p <- ggplot2::ggplot(
+  data = pcg_report[['content']][['msi']][['prediction']][['tcga_dataset']]) +
+    ggplot2::geom_boxplot(
+      mapping = ggplot2::aes(y = tmb_indel, x = MSI_status, 
+                             color = MSI_status, fill = MSI_status),
                             position = "dodge") +
-    #ggplot2::ylab("Number of TCGA samples") +
-    ggplot2::theme_classic() +
-    ggplot2::scale_color_manual(values = c(pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][2], pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][1])) +
-    ggplot2::scale_fill_manual(values = c(pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][2], pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][1])) +
-    ggplot2::ylab("Burden of indels (indels/Mb)") +
+  #ggplot2::ylab("Number of TCGA samples") +
+  ggplot2::theme_classic() +
+  ggplot2::scale_color_manual(
+    values = c(pcgrr::color_palette[['tier']][['values']][2], 
+               pcgrr::color_palette[['tier']][['values']][1])) +
+  ggplot2::scale_fill_manual(
+    values = c(pcgrr::color_palette[['tier']][['values']][2], 
+               pcgrr::color_palette[['tier']][['values']][1])) +
+  ggplot2::ylab("Burden of indels (indels/Mb)") +
     ggplot2::theme(axis.text.x = ggplot2::element_text(family = "Helvetica", size = 11),
                    axis.title.x = ggplot2::element_blank(),
                    legend.title = ggplot2::element_blank(),
@@ -155,7 +208,10 @@ p <- ggplot2::ggplot(data = pcg_report[['content']][['msi']][['prediction']][['t
                    axis.text.y = ggplot2::element_text(family = "Helvetica", size = 11),
                    axis.title.y = ggplot2::element_text(family = "Helvetica", size = 11, vjust = 1.5),
                    plot.margin = ggplot2::margin(.5, .5, .5, 1.5, "cm")) +
-    ggplot2::geom_hline(yintercept = as.numeric(indel_tmb), size = 0.9, linetype = "dashed")
+    ggplot2::geom_hline(
+      yintercept = as.numeric(indel_tmb), 
+      linewidth = 0.9, 
+      linetype = "dashed")
 
 p
 
@@ -187,22 +243,31 @@ cat('\n')
 indel_fraction <- 
   pcg_report[['content']][['msi']][['prediction']][['msi_stats']]$fracIndels
 
-p <- ggplot2::ggplot(data = pcg_report[['content']][['msi']][['prediction']][['tcga_dataset']]) +
-    ggplot2::geom_histogram(mapping = ggplot2::aes(x = fracIndels, color = MSI_status, fill = MSI_status),
-                            position = "dodge", binwidth = 0.01) +
-    ggplot2::ylab("Number of TCGA samples") +
-    ggplot2::theme_classic()+ 
-    ggplot2::scale_color_manual(values = c(pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][2], pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][1])) +
-    ggplot2::scale_fill_manual(values = c(pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][2], pcg_report$settings$conf$visual_reporting$color_palette[['tier']][['values']][1])) +
-    ggplot2::xlab("InDel fraction among somatic calls") +
-    ggplot2::theme(axis.text.x = ggplot2::element_text(family = "Helvetica", size = 11),
-                   axis.title.x = ggplot2::element_text(family = "Helvetica", size = 11),
-                   legend.title = ggplot2::element_blank(),
-                   legend.text = ggplot2::element_text(family = "Helvetica", size = 11),
-                   axis.text.y = ggplot2::element_text(family = "Helvetica", size = 11),
-                   axis.title.y = ggplot2::element_text(family = "Helvetica", size = 11, vjust = 1.5),
-                   plot.margin = ggplot2::margin(0.5, 0.5, 0.5, 0.5, "cm")) +
-    ggplot2::geom_vline(xintercept = as.numeric(indel_fraction), size = 0.9, linetype = "dashed")
+p <- ggplot2::ggplot(
+  data = pcg_report[['content']][['msi']][['prediction']][['tcga_dataset']]) +
+  ggplot2::geom_histogram(
+    mapping = ggplot2::aes(
+      x = fracIndels, 
+      color = MSI_status,
+      fill = MSI_status),
+    position = "dodge", binwidth = 0.01) +
+  ggplot2::ylab("Number of TCGA samples") +
+  ggplot2::theme_classic()+ 
+  ggplot2::scale_color_manual(
+    values = c(pcgrr::color_palette[['tier']][['values']][2], 
+               pcgrr::color_palette[['tier']][['values']][1])) +
+  ggplot2::scale_fill_manual(
+    values = c(pcgrr::color_palette[['tier']][['values']][2], 
+               pcgrr::color_palette[['tier']][['values']][1])) +
+  ggplot2::xlab("InDel fraction among somatic calls") +
+  ggplot2::theme(axis.text.x = ggplot2::element_text(family = "Helvetica", size = 11),
+                 axis.title.x = ggplot2::element_text(family = "Helvetica", size = 11),
+                 legend.title = ggplot2::element_blank(),
+                 legend.text = ggplot2::element_text(family = "Helvetica", size = 11),
+                 axis.text.y = ggplot2::element_text(family = "Helvetica", size = 11),
+                 axis.title.y = ggplot2::element_text(family = "Helvetica", size = 11, vjust = 1.5),
+                 plot.margin = ggplot2::margin(0.5, 0.5, 0.5, 0.5, "cm")) +
+  ggplot2::geom_vline(xintercept = as.numeric(indel_fraction), linewidth = 0.9, linetype = "dashed")
 
 p
 
@@ -228,11 +293,7 @@ if(NROW(pcg_report[['content']][['msi']][['prediction']][['mmr_pol_variants']]) 
                 options=list(
                   buttons = c('csv','excel'), 
                   scrollY = scrollY_flexdb_container, 
-                  #autoWidth = T, 
-                  #fixedColumns = T,
-                  #fixedHeader = T,
                   scrollX = "900px",
-                  #columnDefs = list(list(width = '90px', targets = c(1,2,3,4,5))),
                   dom = 'Bfrtip'))
 }else{
   cat('<i>No variants found.</i>',sep='\n')

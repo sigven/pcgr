@@ -1,0 +1,80 @@
+---
+title: "<SAMPLE_NAME>"
+subtitle: " - _cancer genome interpretation report by PCGR_"
+date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
+bibliography: bibliography.bib
+title-block-banner: "<MAIN_REPORT_COLOR>"
+title-block-banner-color: "white"
+linkcolor: "<MAIN_REPORT_COLOR>"
+include-in-header:
+  - text: |
+      <link rel="shortcut icon" href="https://github.com/sigven/pcgr/raw/master/pcgrr/pkgdown/favicon/favicon-16x16.png" />
+      <style>
+      .panel-tabset > .tab-content {
+        border: none;
+      }
+      </style>
+nocite: |
+  @Tamborero2018-aj, @Poti2019-qr, @Alexandrov2020-gj, 
+  @Alexandrov2013-gs, @Griffith2017-do, @Ma2018-to, 
+  @Cortes-Ciriano2017-vl, @Li2017-ew,
+  @Blokzijl2018-nc, @Lever2019-xp, 
+  @Repana2019-dd, @Chalmers2017-cz, @Yin2020-or, 
+  @Bailey2018-os, @Fernandez2019-mk
+format: 
+  html:
+    embed-resources: true
+    smooth-scroll: true
+    page-layout: full
+    fontsize: 0.9em
+    toc: true
+    toc_depth: 2
+    grid:
+      body-width: 920px
+css: pcgr_rmarkdown_tumor_control.css
+---
+
+```{r global_options, include=FALSE}
+#| include: false
+knitr::opts_chunk$set(echo = F,warning=FALSE, dpi=72, error=F, eval=T)
+
+pcg_report <- readRDS(file="<PCGR_REPORT_OBJECT.rds>")
+#no_content <- !(as.logical(cps_report[['content']][['snv_indel']][['eval']]))
+
+logo_fname_path <- system.file("extdata", "logo.png", package = "pcgrr")
+
+report_color <- pcgrr::color_palette$report_color$values[1]
+if(as.logical(pcg_report$settings$conf$assay_properties$vcf_tumor_only) == TRUE){
+  report_color <- pcgrr::color_palette$report_color$values[2]
+}
+```
+
+<a href="https://sigven.github.io/pcgr">
+  <img src="`r logo_fname_path`" title="" alt="" align="right" width="80"/>
+</a>
+
+```{r settings_data_sources}
+#| child: 'pcgr_quarto_report/report_query_settings.qmd'
+#| eval: true
+```
+
+
+```{r conditional_msig}
+#| child: 'pcgr_quarto_report/mutational_signature_mp.qmd'
+#| eval: !expr pcg_report$settings$conf$somatic_snv$mutational_signatures$run == TRUE &  pcg_report$content$mutational_signatures$missing_data == FALSE
+```
+
+## References
+
+::: {#refs}
+:::
+
+```{r pcgr_disclaimer}
+#| eval: true
+#| output: asis
+
+cat('<br><br><br>\n\n::: {.callout-important}\n\n<b>MEDICAL DISCLAIMER</b>:<i>The information contained in this cancer genome report is intended for research purposes only. We make no representations or warranties of any kind, expressed or implied, about the completeness, accuracy, reliability, suitability or availability with respect to the sequencing report or the information, products, services, for interpretation or use in clinical practice, or otherwise contained in the report for any purpose. Any reliance you place on information in the report is therefore strictly at your own risk. In no event will we be liable for any loss or damage including without limitation, indirect or consequential loss or damage, or any loss or damage whatsoever arising from loss of data or profits arising out of, or in connection with, the use of this genome report.</i><br>\n\n:::')
+
+```
+
+

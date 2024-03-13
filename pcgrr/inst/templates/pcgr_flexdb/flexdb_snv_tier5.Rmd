@@ -1,121 +1,160 @@
-Noncoding {data-navmenu="SNVs and InDels"}
+Tier 5 {data-navmenu="SNVs and InDels"}
 ================================================================== 
 
 Row
 -------------------------------------
 
-```{r data_prep_noncoding, include = F, eval = T}
-n_noncoding_snv <- 0
-n_noncoding_indel <- 0
-n_noncoding_block <- 0
+```{r data_prep_tier5, include = F, eval = T}
+n_tier5_snv <- 0
+n_tier5_indel <- 0
+n_tier5_block <- 0
 
-if(NROW(pcg_report$content$snv_indel$variant_set$tsv) > 0){
-  n_noncoding_snv <- pcg_report$content$snv_indel$variant_set$tsv |>
-    dplyr::filter(VARIANT_CLASS == "SNV" & TIER == "NONCODING") |> 
+if(NROW(pcg_report$content$snv_indel$callset$variant_display) > 0){
+  n_tier5_snv <- pcg_report$content$snv_indel$callset$variant_display |>
+    dplyr::filter(.data$VARIANT_CLASS == "SNV" & 
+                  !is.na(.data$TIER) & 
+                  .data$TIER == 5) |> 
     nrow()
-  n_noncoding_indel <- pcg_report$content$snv_indel$variant_set$tsv |> 
-    dplyr::filter((VARIANT_CLASS == "insertion" | 
-                     VARIANT_CLASS == "deletion" | 
-                     VARIANT_CLASS == "indel") & TIER == "NONCODING") |>
+  n_tier5_indel <- pcg_report$content$snv_indel$callset$variant_display |> 
+    dplyr::filter((.data$VARIANT_CLASS == "insertion" | 
+                     .data$VARIANT_CLASS == "deletion" | 
+                     .data$VARIANT_CLASS == "indel") & 
+                    !is.na(.data$TIER) & 
+                    .data$TIER == 5) |>
     nrow()
-  n_noncoding_block <-  pcg_report$content$snv_indel$variant_set$tsv |> 
-    dplyr::filter(VARIANT_CLASS == "substitution" & TIER == "NONCODING") |> 
+  n_tier5_block <- pcg_report$content$snv_indel$callset$variant_display |> 
+    dplyr::filter(.data$VARIANT_CLASS == "substitution" & 
+                    !is.na(.data$TIER) &
+                    .data$TIER == 5) |> 
     nrow()
 }
 
 ```
 
-
 ### SNVs and InDels
 
 ```{r}
-flexdashboard::valueBox("Noncoding", caption = NULL, color = '#000000', icon = NULL)
+flexdashboard::valueBox(
+  "TIER 5", caption = NULL, color = '#000000', icon = NULL)
 ```
 
 
 ### Total variants
 
 ```{r}
-flexdashboard::valueBox(pcg_report$content$snv_indel$vstats$n_noncoding, color = pcg_report$settings$conf$visual_reporting$color_value_box, icon = "fa-dna")
+flexdashboard::valueBox(
+  pcg_report$content$snv_indel$vstats$n_tier5, 
+  color = pcg_report$settings$conf$report_color, 
+  icon = "fa-dna")
 ```
 
 ### SNVs
 
 ```{r}
-flexdashboard::valueBox(as.character(n_noncoding_snv), color = pcg_report$settings$conf$visual_reporting$color_value_box, icon = "fa-dna")
+flexdashboard::valueBox(
+  as.character(n_tier5_snv), 
+  color = pcg_report$settings$conf$report_color, 
+  icon = "fa-dna")
 ```
 
 ### InDels
 
 ```{r}
-flexdashboard::valueBox(as.character(n_noncoding_indel), color = pcg_report$settings$conf$visual_reporting$color_value_box, icon = "fa-dna")
+flexdashboard::valueBox(
+  as.character(n_tier5_indel), 
+  color = pcg_report$settings$conf$report_color, 
+  icon = "fa-dna")
 ```
 
 ### Block substitutions
 
 ```{r}
-flexdashboard::valueBox(as.character(n_noncoding_block), color = pcg_report$settings$conf$visual_reporting$color_value_box, icon = "fa-dna")
+flexdashboard::valueBox(
+  as.character(n_tier5_block), 
+  color = pcg_report$settings$conf$report_color, 
+  icon = "fa-dna")
 ```
+
+
 
 Row
 -----------------------------------------------------
 
-### Noncoding - variant filters {data-padding=15 data-width=250}
+### Tier 4 - variant filters {data-padding=15 data-width=250}
 
 <br>
 
-```{r table_browse_noncoding, echo=F, results = "asis", eval = pcg_report$content$snv_indel$vstats$n_noncoding > 0}
+```{r table_browse_tier5, echo=F, results = "asis", eval = pcg_report$content$snv_indel$vstats$n_tier5 > 0}
 
-if(NROW(pcg_report[['content']][['snv_indel']][["disp"]][['noncoding']]) > 2000){
-  cat('<b>NOTE - only considering top 2000 variants (ranked according to Open Targets phenotype association score) </b><br>',sep="\n")
+tier5_vars <- pcg_report$content$snv_indel$callset$variant_display |>
+  dplyr::filter(!is.na(.data$TIER) 
+                & .data$TIER == 5) |>
+  dplyr::select(
+    dplyr::any_of(
+      pcgrr::dt_display$tier5))
+  
+if(pcg_report$content$snv_indel$vstats$n_tier5 > 2000){
+  cat('<b>NOTE - only considering top 2000 variants (ranked according to gene-cancer association score) </b><br>',sep="\n")
   cat('<br>')
-  pcg_report[['content']][['snv_indel']][["disp"]][['noncoding']] <- 
-    head(pcg_report[['content']][['snv_indel']][["disp"]][['noncoding']], 2000)
+  tier5_vars <- 
+    head(tier5_vars, 2000)
 }
 htmltools::br()
 
+cat('Variants in TIER 5 (right panel) can be interactively explored according to various criteria\n:')
 
-cat('Noncoding variants (right panel) can be interactively explored according to various criteria\n:')
-
-variants_noncoding_shared <- 
-  crosstalk::SharedData$new(pcg_report[['content']][['snv_indel']][["disp"]][['noncoding']])
+variants_tier5_shared <- crosstalk::SharedData$new(tier5_vars)
 
 crosstalk::bscols(
   list(
-    crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_noncoding_shared, ~CONSEQUENCE),
-    crosstalk::filter_select("SYMBOL", "Gene", variants_noncoding_shared, ~SYMBOL)
+    crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_tier5_shared, ~CONSEQUENCE),
+    crosstalk::filter_select("SYMBOL", "Gene", variants_tier5_shared, ~SYMBOL)
   )
 )
+
 
 ```
 
 
-```{r noncoding_missing_filters, echo=F, results = 'asis', eval = pcg_report$content$snv_indel$vstats$n_noncoding == 0}
-cat('\n*  <i> <font style="font-size: 110%"><b>No</b> noncoding variants found.</font></i>', sep = '\n')
+```{r tier5_missing_filters, echo=F, results = 'asis', eval = pcg_report$content$snv_indel$vstats$n_tier5 == 0}
+cat('\n*  <i> <font style="font-size: 110%"><b>No</b> other noncoding variants found.</font></i>', sep = '\n')
 cat('\n')
 ```
 
 
-### Noncoding  - variant datatable {data-padding=15}
+### Tier 4 - variant datatable {data-padding=15}
 
+<br>
 
-```{r table_noncoding, eval = pcg_report$content$snv_indel$vstats$n_noncoding > 0}
+```{r table_tier5, eval = pcg_report$content$snv_indel$vstats$n_tier5 > 0}
 
-DT::datatable(variants_noncoding_shared, escape=F,extensions=c("Buttons","Responsive"), 
-options=list(buttons = c('csv','excel'), 
-             scrollCollapse = T,
-             scrollY = scrollY_flexdb_container,
-             #autoWidth = T, 
-                 fixedColumns = T,
-                 fixedHeader = T,
-                 scrollX = "900px",
-                  columnDefs = list(list(width = '90px', targets = c(1,2,3,4,5,6))),
-             dom = 'Bfrtip')) |>
-  DT::formatStyle("SYMBOL","OPENTARGETS_RANK", color = "white", backgroundColor = DT::styleInterval(pcg_report[['content']][['report_display_config']][['opentargets_rank']][['breaks']], pcg_report[['content']][['report_display_config']][['opentargets_rank']][['colors']]))
-  
+DT::datatable(
+  variants_tier5_shared, 
+  escape = F,
+  extensions = c("Buttons","Responsive"), 
+  options = list(
+    buttons = c('csv','excel'), 
+    scrollCollapse=T, 
+    scrollY = scrollY_flexdb_container,
+    fixedColumns = T,
+    fixedHeader = T,
+    width = "100%",
+    scrollX = "900px",
+    columnDefs = list(list(
+      width = '90px', targets = c(1,2,3,4,5,6))),
+    dom = 'Bfrtip')) |>
+  DT::formatStyle(
+    "SYMBOL",
+    "GLOBAL_ASSOC_RANK", 
+    color = "white", 
+    backgroundColor = 
+      DT::styleInterval(
+        pcgrr::color_palette$cancer_assoc$breaks, 
+        pcgrr::color_palette$cancer_assoc$values))
+
 ```
 
-```{r noncoding_missing_data, echo=F, results = 'asis', eval = pcg_report$content$snv_indel$vstats$n_noncoding == 0}
-cat('\n*  <i> <font style="font-size: 110%"><b>No</b> noncoding variants found.</font></i>', sep = '\n')
+```{r tier5_missing_data, echo=F, results = 'asis', eval = pcg_report$content$snv_indel$vstats$n_tier5 == 0}
+cat('\n*  <i> <font style="font-size: 110%"><b>No</b> other noncoding variants found.</font></i>', sep = '\n')
 cat('\n')
 ```

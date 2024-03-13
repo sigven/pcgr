@@ -14,36 +14,48 @@ flexdashboard::valueBox("Biomarkers", caption = NULL, color = '#000000', icon = 
 
 ```{r}
 
-all_evidence_items <- pcg_report$content$snv_indel$clin_eitem$any_ttype$diagnostic$any |>
-     dplyr::bind_rows(pcg_report$content$snv_indel$clin_eitem$any_ttype$prognostic$any) |>
-     dplyr::bind_rows(pcg_report$content$snv_indel$clin_eitem$any_ttype$predictive$any)
+var_eitems_all <- pcg_report$content$snv_indel$callset$variant_display |>
+  dplyr::select(
+    -c("TIER_DESCRIPTION","TIER","TIER_FRAMEWORK")) |>
+  dplyr::inner_join(
+    pcg_report$content$snv_indel$callset$biomarker_evidence$items,
+    by = c("VAR_ID","VARIANT_CLASS","ENTREZGENE")
+  ) |>
+  dplyr::distinct() |>
+  dplyr::select(
+    dplyr::any_of(
+      pcgrr::dt_display$var_eitem)) |>
+  dplyr::arrange(
+    .data$BM_EVIDENCE_LEVEL
+  ) |>
+  dplyr::distinct()
 
-n_all <- NROW(all_evidence_items)
+n_all <- NROW(var_eitems_all)
 
 n_entries_diagnostic <- 0
-if(NROW(all_evidence_items) > 0){
-  n_entries_diagnostic <- all_evidence_items |>
-    dplyr::filter(BM_EVIDENCE_TYPE == "Diagnostic") |>
+if(n_all > 0){
+  n_entries_diagnostic <- var_eitems_all |>
+    dplyr::filter(.data$BM_EVIDENCE_TYPE == "Diagnostic") |>
     nrow()
 }
 n_entries_prognostic <- 0
-if(NROW(all_evidence_items) > 0){
-  n_entries_prognostic <- all_evidence_items |>
-    dplyr::filter(BM_EVIDENCE_TYPE == "Prognostic") |>
+if(n_all > 0){
+  n_entries_prognostic <- var_eitems_all |>
+    dplyr::filter(.data$BM_EVIDENCE_TYPE == "Prognostic") |>
     nrow()
 }
 n_entries_predictive <- 0
-if(NROW(all_evidence_items) > 0){
-  n_entries_predictive <- all_evidence_items |>
-    dplyr::filter(BM_EVIDENCE_TYPE == "Predictive") |>
+if(n_all > 0){
+  n_entries_predictive <- var_eitems_all |>
+    dplyr::filter(.data$BM_EVIDENCE_TYPE == "Predictive") |>
     nrow()
 }
 
-col <- pcg_report$settings$conf$visual_reporting$color_none
-if(NROW(all_evidence_items) > 0){
-  col <- pcg_report$settings$conf$visual_reporting$color_value_box
+col <- pcgrr::color_palette$none
+if(NROW(var_eitems_all) > 0){
+  col <- pcg_report$settings$conf$report_color
 }
-flexdashboard::valueBox(length(unique(all_evidence_items$SYMBOL)), 
+flexdashboard::valueBox(length(unique(var_eitems_all$SYMBOL)), 
                         color = col)
 
 ```
@@ -52,10 +64,10 @@ flexdashboard::valueBox(length(unique(all_evidence_items$SYMBOL)),
 
 ```{r}
 n_unique_variants <- 0
-col <- pcg_report$settings$conf$visual_reporting$color_none
-if(NROW(all_evidence_items) > 0){
-  n_unique_variants <- length(unique(all_evidence_items$GENOMIC_CHANGE))
-  col <- pcg_report$settings$conf$visual_reporting$color_value_box
+col <- pcgrr::color_palette$none
+if(NROW(var_eitems_all) > 0){
+  n_unique_variants <- length(unique(var_eitems_all$GENOMIC_CHANGE))
+  col <- pcg_report$settings$conf$report_color
 }
 
 flexdashboard::valueBox(n_unique_variants, 
@@ -67,25 +79,34 @@ flexdashboard::valueBox(n_unique_variants,
 
 ```{r}
 
-flexdashboard::valueBox(n_entries_diagnostic, color = ifelse(n_entries_diagnostic > 0,
-                        pcg_report$settings$conf$visual_reporting$color_palette[['success']][['values']][1],
-                        pcg_report$settings$conf$visual_reporting$color_none), icon = "fa-file-prescription")
+flexdashboard::valueBox(
+  n_entries_diagnostic, color = ifelse(
+    n_entries_diagnostic > 0,
+    pcgrr::color_palette$success,
+    pcgrr::color_palette$none), 
+  icon = "fa-file-prescription")
 ```
 
 ### Prognostic evidence items
 
 ```{r}
-flexdashboard::valueBox(n_entries_prognostic, color = ifelse(n_entries_prognostic > 0,
-                        pcg_report$settings$conf$visual_reporting$color_palette[['success']][['values']][1],
-                        pcg_report$settings$conf$visual_reporting$color_none), icon = "fa-file-prescription")
+flexdashboard::valueBox(
+  n_entries_prognostic, color = ifelse(
+    n_entries_prognostic > 0,
+    pcgrr::color_palette$success,
+    pcgrr::color_palette$none), 
+  icon = "fa-file-prescription")
 ```
 
 ### Predictive evidence items
 
 ```{r}
-flexdashboard::valueBox(n_entries_predictive, color = ifelse(n_entries_predictive > 0,
-                        pcg_report$settings$conf$visual_reporting$color_palette[['success']][['values']][1],
-                        pcg_report$settings$conf$visual_reporting$color_none), icon = "fa-file-prescription")
+flexdashboard::valueBox(
+  n_entries_predictive, color = ifelse(
+    n_entries_predictive > 0,
+    pcgrr::color_palette$success,
+    pcgrr::color_palette$none), 
+  icon = "fa-file-prescription")
 ```
 
 
@@ -98,25 +119,37 @@ Row
 
 ```{r table_browse_biomarkers, echo=F, results = "asis", eval = n_all > 0}
 
-variants_any <- dplyr::bind_rows(
-  pcg_report[['content']][['snv_indel']][['clin_eitem']][['any_ttype']][['diagnostic']][['any']],
-  pcg_report[['content']][['snv_indel']][['clin_eitem']][['any_ttype']][['predictive']][['any']],
-  pcg_report[['content']][['snv_indel']][['clin_eitem']][['any_ttype']][['prognostic']][['any']])
-
-variants_all_shared <- crosstalk::SharedData$new(variants_any)
+variants_all_shared <- crosstalk::SharedData$new(var_eitems_all)
 crosstalk::bscols(
   list(
-    crosstalk::filter_select("BM_CANCER_TYPE", "Cancer type", variants_all_shared, ~BM_CANCER_TYPE),
-    crosstalk::filter_select("BM_CLINICAL_SIGNIFICANCE", "Clinical significance", variants_all_shared, ~BM_CLINICAL_SIGNIFICANCE),
-    crosstalk::filter_select("BM_EVIDENCE_LEVEL", "Evidence level", variants_all_shared, ~BM_EVIDENCE_LEVEL),
-    crosstalk::filter_slider("RATING", "Rating", variants_all_shared, ~RATING, min = 0, max = 5, step = 1, ticks = T)
+    crosstalk::filter_select(
+      "BM_CANCER_TYPE", "Cancer type", 
+      variants_all_shared, ~BM_CANCER_TYPE),
+    crosstalk::filter_select(
+      "BM_CLINICAL_SIGNIFICANCE", "Clinical significance", 
+      variants_all_shared, ~BM_CLINICAL_SIGNIFICANCE),
+    crosstalk::filter_select(
+      "BM_EVIDENCE_LEVEL", "Evidence level", 
+      variants_all_shared, ~BM_EVIDENCE_LEVEL),
+    crosstalk::filter_slider(
+      "BM_RATING", "Rating", 
+      variants_all_shared, ~BM_RATING, 
+      min = 0, max = 5, step = 1, ticks = T)
 
   ),
   list(
-    crosstalk::filter_select("CONSEQUENCE", "Consequence", variants_all_shared, ~CONSEQUENCE),
-    crosstalk::filter_select("BM_EVIDENCE_TYPE", "Evidence type", variants_all_shared, ~BM_EVIDENCE_TYPE),
-    crosstalk::filter_select("BIOMARKER_MAPPING", "Biomarker mapping", variants_all_shared, ~BIOMARKER_MAPPING),
-    crosstalk::filter_select("BM_THERAPEUTIC_CONTEXT", "Therapeutic context", variants_all_shared, ~BM_THERAPEUTIC_CONTEXT)
+    crosstalk::filter_select(
+      "CONSEQUENCE", "Consequence", 
+      variants_all_shared, ~CONSEQUENCE),
+    crosstalk::filter_select(
+      "BM_EVIDENCE_TYPE", "Evidence type", 
+      variants_all_shared, ~BM_EVIDENCE_TYPE),
+    crosstalk::filter_select(
+      "BM_RESOLUTION", "Biomarker resolution", 
+      variants_all_shared, ~BM_RESOLUTION),
+    crosstalk::filter_select(
+      "BM_THERAPEUTIC_CONTEXT", "Therapeutic context", 
+      variants_all_shared, ~BM_THERAPEUTIC_CONTEXT)
   )
 )
 
@@ -126,10 +159,10 @@ crosstalk::bscols(
 
 ```{r biomarker_note_4, echo=F, results = "asis", include = n_all > 0}
 
-cat('<b>NOTE:</b> Reported biomarkers in CIViC/CGI are mapped at different resolutions (i.e. filter <b>Biomarker mapping</b>). The accuracy of a match between variants in the tumor sample and the reported biomarkers will vary accordingly (highlighted by gene symbols with different color backgrounds):\n\n')
+cat('<b>NOTE:</b> Reported biomarkers in CIViC/CGI are mapped at different resolutions (i.e. filter <b>Biomarker resolution</b>). The accuracy of a match between variants in the tumor sample and the reported biomarkers will vary accordingly (highlighted by gene symbols with different color backgrounds):\n\n')
 
-cat('<ul><li>Biomarker match at the <mark style="background-color:black; font-weight:bold; color:white">exact variant/codon level</mark></li>')
-cat(paste0('<br><li>Biomarker match at the <mark style="background-color:', pcg_report$settings$conf$visual_reporting$color_palette[['warning']][['values']][1],'; color:white; font-weight:bold">exon/gene level</mark></li></ul>\n'))
+cat('<ul><li>High-confidence biomarker match at the <mark style="background-color:black; font-weight:bold; color:white">genomic variant/amino acid/codon level</mark></li>')
+cat(paste0('<br><li>Low-confidence biomarker match at the <mark style="background-color:', pcgrr::color_palette$warning,'; color:white; font-weight:bold">exon/gene level</mark></li></ul>\n'))
 
 htmltools::br()
 ```
@@ -148,30 +181,33 @@ cat('\n')
 ```{r biomarker_table_all, eval = n_all > 0}
 
 variants_all_shared |>
-  DT::datatable(escape = F, 
-                extensions = c("Buttons","Responsive"), 
-                options = list(pageLength = 8, 
-                               scrollY = scrollY_flexdb_container,
-                               buttons = c('csv','excel'), 
-                               #autoWidth = T, 
-                 fixedColumns = T,
-                 fixedHeader = T,
-                 scrollX = "900px",
-                  columnDefs = list(list(width = '90px', targets = c(1,2,3,4,5,6))),
-                               dom = 'Bfrtip')) |>
-  DT::formatStyle('BM_EVIDENCE_LEVEL', 
-                 backgroundColor = DT::styleEqual(c('A: Validated',
-                                                    'A: FDA/NCCN/ELN guidelines',
-                                                    'B: Clinical evidence',
-                                                    'B1: Clinical evidence: late trials',
-                                                    'B2: Clinical evidence: early trials',
-                                                    'C: Case study',
-                                                    'D: Preclinical evidence',
-                                                    'E: Indirect evidence'), 
-                                                  c("#009E73","#009E73","#56B4E9", "#56B4E9","#56B4E9","#0072B2","#E69F00", "#F0E442"))) |>
-  DT::formatStyle(color="white", "SYMBOL", "BIOMARKER_MAPPING", fontWeight = 'bold', `text-align` = 'center',
-                  backgroundColor = DT::styleEqual(c('exact','codon','exon','gene'), 
-                                                   c('#000','#000',pcg_report$settings$conf$visual_reporting$color_palette[['warning']][['values']][1], pcg_report$settings$conf$visual_reporting$color_palette[['warning']][['values']][1])))
+  DT::datatable(
+    escape = F, 
+    extensions = c("Buttons","Responsive"), 
+    options = list(pageLength = 8, 
+                   scrollY = scrollY_flexdb_container,
+                   buttons = c('csv','excel'), 
+                   fixedColumns = T,
+                   fixedHeader = T,
+                   scrollX = "900px",
+                   columnDefs = list(list(width = '90px', targets = c(1,2,3,4,5,6))),
+                   dom = 'Bfrtip')) |>
+  DT::formatStyle(
+    'BM_EVIDENCE_LEVEL', 
+    backgroundColor = DT::styleEqual(
+      pcgrr::color_palette$clinical_evidence$levels,
+      pcgrr::color_palette$clinical_evidence$values)) |>
+  DT::formatStyle(
+    color="white", 
+    "SYMBOL", 
+    "BM_RESOLUTION", 
+    fontWeight = 'bold', 
+    `text-align` = 'center',
+    backgroundColor = DT::styleEqual(
+      c('genomic','hgvsp','codon','exon','gene'), 
+      c('#000','#000','#000',
+        pcgrr::color_palette$warning, 
+        pcgrr::color_palette$warning)))
 
 ```
 

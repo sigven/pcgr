@@ -336,7 +336,7 @@ htmltools::br()
 
 ```{r cpsr_biomarker_note, echo=F, results = "asis", include = NROW(cpsr_biomarker_eitems) > 0}
 
-cat('<b>NOTE:</b> Reported biomarkers in CIViC are mapped at different resolutions (i.e. filter <b>Biomarker mapping</b>). The accuracy of a match between variants in the tumor sample and the reported biomarkers will vary accordingly (highlighted by gene symbols with different color backgrounds):\n\n')
+cat('<b>NOTE:</b> Reported biomarkers in CIViC are mapped at different resolutions (i.e. filter <b>Biomarker resolution</b>). The accuracy of a match between variants in the tumor sample and the reported biomarkers will vary accordingly (highlighted by gene symbols with different color backgrounds):\n\n')
 
 cat('<ul><li>Biomarker match at the <mark style="background-color:black; font-weight:bold; color:white">exact variant/codon level</mark></li>')
 cat(paste0('<br><li>Biomarker match at the <mark style="background-color:', cpsr_rep[['metadata']][['color_palette']][['warning']][['values']][1],'; color:white; font-weight:bold">exon/gene level</mark></li></ul>\n'))
@@ -379,7 +379,7 @@ DT::datatable(
         "#E69F00", "#F0E442"))) |>
   DT::formatStyle(
     color="white", "SYMBOL", 
-    "BIOMARKER_MAPPING", 
+    "BM_RESOLUTION", 
     fontWeight = 'bold', `text-align` = 'center',
     backgroundColor = DT::styleEqual(
       c('exact','codon','exon','gene'), c('#000','#000',                                      cpsr_rep[['metadata']][['color_palette']][['warning']][['values']][1], cpsr_rep[['metadata']][['color_palette']][['warning']][['values']][1])))

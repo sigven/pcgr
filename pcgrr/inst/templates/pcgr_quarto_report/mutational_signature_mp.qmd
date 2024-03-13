@@ -1,0 +1,186 @@
+
+
+```{r }
+#| echo: false
+missing_data_norun <- F
+if(pcg_report$content$mutational_signatures$eval == F | pcg_report$content$mutational_signatures$missing_data == T){
+  missing_data_norun <- T
+}
+conf <- pcg_report$settings$conf
+```
+
+
+## Mutational signatures
+
+The set of somatic mutations observed in a tumor reflects the varied mutational processes that have been active during its life history, providing insights into the routes taken to carcinogenesis. Exogenous mutagens, such as tobacco smoke and ultraviolet light, and endogenous processes, such as APOBEC enzymatic family functional activity or DNA mismatch repair deficiency, result in characteristic patterns of mutation. Mutational signatures can have significant clinical impact in certain tumor types ([Póti et al., 2019](https://www.ncbi.nlm.nih.gov/pubmed/31727117), [Ma et al., 2018](https://www.ncbi.nlm.nih.gov/pubmed/30120226))
+
+Here, we apply the **MutationalPatterns** package ([Blokzijl et al., 2018](https://www.ncbi.nlm.nih.gov/pubmed/29695279)) to deconstruct the contribution of known mutational signatures in a single tumor sample. [MutationalPatterns](https://github.com/UMCUGenetics/MutationalPatterns) attempts to make an optimal reconstruction of the mutations observed in a given sample with a [reference collection of n = 67 mutational signatures](https://www.ncbi.nlm.nih.gov/pubmed/32025018). By default, we restrict the signatures in the reference collection to those already observed in the tumor type in question (i.e. from large-scale <i>de novo</i> signature extraction on ICGC tumor samples). 
+
+
+
+```{r t1}
+#| output: asis
+#| include: !expr missing_data_norun == FALSE  & as.logical(conf$somatic_snv$mutational_signatures$all_reference_signatures) == FALSE
+
+cat('Specifically, for tumors of type <b>', conf$sample_properties$site,'</b>, mutational signature reconstruction is here limited to the following reference collection:<br>',sep="")
+
+dat <- pcg_report$content$mutational_signatures$result$reference_data
+if("SIGNATURE_ID" %in% colnames(dat) & 
+   "AETIOLOGY_KEYWORD" %in% colnames(dat)){
+  cat('<ul>')
+  i <- 1
+  
+  refsig_collection_site <- 
+    pcg_report$content$mutational_signatures$result$reference_data |>
+    dplyr::mutate(tmp_id = as.numeric(
+      stringr::str_replace(
+        stringr::str_replace(
+          stringr::str_replace(
+            stringr::str_replace(
+              stringr::str_replace(SIGNATURE_ID,"SBS",""),
+              "a",".2"),
+            "b",".4"),
+          "d", ".6"),
+        "c", ".8"))) |>
+    dplyr::arrange(tmp_id) |>
+    dplyr::select(SIGNATURE_ID, AETIOLOGY_KEYWORD) |>
+    dplyr::distinct()
+  
+  while(i <= nrow(refsig_collection_site)){
+    cat(paste0("<li><b>",refsig_collection_site[i,]$SIGNATURE_ID, "</b> - ", refsig_collection_site[i,]$AETIOLOGY_KEYWORD),'</li>\n')
+    i <- i + 1
+  }
+  cat('</ul>')
+}
+
+```   
+
+
+```{r t3}
+#| output: asis 
+#| include: !expr missing_data_norun == FALSE & as.logical(conf$somatic_snv$mutational_signatures$all_reference_signatures) == TRUE
+cat("For this analysis, '--all_reference_signatures' have been turned on, which means that all reference signatures (n = 60) have been considered during optimal reconstruction of the mutational profile with reference signatures",sep="\n")
+htmltools::br()
+
+```
+
+```{r t4}
+#| output: asis
+#| include: !expr missing_data_norun == FALSE
+
+cat('A total of <b>n = ',nrow(pcg_report[['content']][['mutational_signatures']][['variant_set']]$all), '</b> SNVs were used for the mutational signature analysis of this tumor.', sep = '')
+
+cat("<br><br>")
+
+cat('Accuracy of signature fitting: <b>', pcg_report$content$mutational_signatures$result$goodness_of_fit, '% </b> (reflects how well the mutational profile can be reconstructed with signatures from the reference collection)', sep = '')
+
+cat('<br>')
+```
+
+::: {.panel-tabset .nav-pills}
+
+
+```{r }
+#| eval: !expr missing_data_norun == FALSE
+#| output: asis
+htmltools::br()
+
+cat("\n")
+cat("### Mutational context frequency")
+cat("\n")
+
+htmltools::br()
+```
+
+
+```{r }
+#| fig-width: 14
+#| fig-height: 4
+#| dpi: 200
+#| eval: !expr missing_data_norun == FALSE
+
+MutationalPatterns::plot_96_profile(
+  pcg_report$content$mutational_signatures$result$mut_mat,colors = RColorBrewer::brewer.pal(6, "Dark2"), ymax = 0.3)
+
+```   
+
+
+```{r}
+#| eval: !expr missing_data_norun == FALSE
+#| output: asis
+
+htmltools::br()
+
+cat("\n")
+cat("### Signature reconstruction - aetiology contributions")
+cat("\n")
+
+```
+
+```{r }
+#| echo: false
+#| fig-width: 6
+#| fig-height: 6
+#| fig-align: center
+#| eval: !expr missing_data_norun == FALSE
+plot_data <- 
+  pcg_report$content$mutational_signatures$result$contributions$per_group
+
+scale_fill <- 
+  pcg_report$content$mutational_signatures$result$scale_fill_values
+names(scale_fill) <- pcg_report$content$mutational_signatures$result$scale_fill_names
+
+ggplot2::ggplot(plot_data, ggplot2::aes(x = 2, y = prop_group, fill = group)) +
+     ggplot2::geom_bar(width = 1, stat = "identity", color = "white") +
+     ggplot2::coord_polar(theta = "y", start = 0) +
+     ggplot2::scale_fill_manual(values = scale_fill) +
+     ggplot2::theme_void() + 
+     ggplot2::xlim(.5, 2.5) +
+     ggplot2::theme(legend.position = "right",
+                    legend.title = ggplot2::element_blank(),
+                    plot.margin = ggplot2::margin(0, 0, 0, 0, "cm"),
+                    legend.text = ggplot2::element_text(family = "Helvetica", size = 14))
+
+
+```
+
+
+```{r }
+#| eval: !expr missing_data_norun == FALSE
+#| output: asis
+
+cat("\n")
+cat("### Signature reconstruction - aetiologies")
+cat("\n")
+
+htmltools::br()
+```
+
+```{r }
+#| echo: false
+#| eval: !expr missing_data_norun == FALSE
+
+signature_ids <- pcg_report[['content']][['mutational_signatures']][['result']][['contributions']][['per_signature']]$signature_id
+signature_colors <- pcg_report[['content']][['mutational_signatures']][['result']][['contributions']][['per_signature']]$col
+
+myOptions <- list(
+  buttons = c('csv','excel'),
+  dom = 'Bfrtip', 
+  scrollCollapse = T)
+
+dat <- dplyr::select(
+  pcg_report$content$mutational_signatures$result$contributions$per_signature, -c(sample_id,col,prop_signature)) |>
+  dplyr::select(
+    c("signature_id", "contribution", 
+      "group"), 
+    dplyr::everything())
+
+DT::datatable(dat ,options = myOptions,extensions=c("Buttons","Responsive"),escape=F) |>
+  DT::formatStyle('contribution',fontWeight = 'bold') |>
+  DT::formatStyle('signature_id',color = 'white', 
+                  backgroundColor = DT::styleEqual(signature_ids, signature_colors), 
+                  fontWeight = 'bold', `text-align` = 'center')
+```
+<br>
+
+:::

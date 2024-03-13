@@ -10,43 +10,43 @@ from pcgr import pcgr_vars
 warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 
 
-def set_genotype(variant_set: pd.DataFrame, logger) -> pd.DataFrame:
-    """
-    Set verbose genotype (homozygous, heterozygous) for each variant
-    """
-    variant_set['GENOTYPE'] = '.'    
-    if {'GT'}.issubset(variant_set.columns):
-        logger.info("Assignment of genotype (homozygous, heterozygous) for each variant based on 'GT' tag")
-        heterozygous_states = []
-        ref_allele_index = 0
-        while ref_allele_index < 20:
-            alt_allele_index = ref_allele_index + 1
-            while alt_allele_index <= 20:
-                phased_gt_1 = str(ref_allele_index) + "|" + str(alt_allele_index)
-                phased_gt_2 = str(alt_allele_index) + "|" + str(ref_allele_index)
-                unphased_gt_1 = str(ref_allele_index) + "/" + str(alt_allele_index)
-                unphased_gt_2 = str(alt_allele_index) + "/" + str(ref_allele_index)
-                gts = [phased_gt_1, phased_gt_2, unphased_gt_1, unphased_gt_2]
-                heterozygous_states.extend(gts)
+# def set_genotype(variant_set: pd.DataFrame, logger) -> pd.DataFrame:
+#     """
+#     Set verbose genotype (homozygous, heterozygous) for each variant
+#     """
+#     variant_set['GENOTYPE'] = '.'    
+#     if {'GT'}.issubset(variant_set.columns):
+#         logger.info("Assignment of genotype (homozygous, heterozygous) for each variant based on 'GT' tag")
+#         heterozygous_states = []
+#         ref_allele_index = 0
+#         while ref_allele_index < 20:
+#             alt_allele_index = ref_allele_index + 1
+#             while alt_allele_index <= 20:
+#                 phased_gt_1 = str(ref_allele_index) + "|" + str(alt_allele_index)
+#                 phased_gt_2 = str(alt_allele_index) + "|" + str(ref_allele_index)
+#                 unphased_gt_1 = str(ref_allele_index) + "/" + str(alt_allele_index)
+#                 unphased_gt_2 = str(alt_allele_index) + "/" + str(ref_allele_index)
+#                 gts = [phased_gt_1, phased_gt_2, unphased_gt_1, unphased_gt_2]
+#                 heterozygous_states.extend(gts)
                 
-                alt_allele_index = alt_allele_index + 1
-            ref_allele_index = ref_allele_index + 1
+#                 alt_allele_index = alt_allele_index + 1
+#             ref_allele_index = ref_allele_index + 1
             
-        homozygous_states = []    
-        hom_allele_index = 1
-        while hom_allele_index <= 20:
-            phased_gt = str(hom_allele_index) + "|" + str(hom_allele_index)
-            unphased_gt = str(hom_allele_index) + "/" + str(hom_allele_index)
-            homozygous_states.extend([phased_gt, unphased_gt])
-            hom_allele_index = hom_allele_index + 1
+#         homozygous_states = []    
+#         hom_allele_index = 1
+#         while hom_allele_index <= 20:
+#             phased_gt = str(hom_allele_index) + "|" + str(hom_allele_index)
+#             unphased_gt = str(hom_allele_index) + "/" + str(hom_allele_index)
+#             homozygous_states.extend([phased_gt, unphased_gt])
+#             hom_allele_index = hom_allele_index + 1
         
-        variant_set.loc[variant_set['GT'].isin(homozygous_states), "GENOTYPE"] = "homozygous"
-        variant_set.loc[variant_set['GT'].isin(heterozygous_states),"GENOTYPE"] = "heterozygous"
-    else:
-        variant_set['GENOTYPE'] = "undefined"
+#         variant_set.loc[variant_set['GT'].isin(homozygous_states), "GENOTYPE"] = "homozygous"
+#         variant_set.loc[variant_set['GT'].isin(heterozygous_states),"GENOTYPE"] = "heterozygous"
+#     else:
+#         variant_set['GENOTYPE'] = "undefined"
     
-    variant_set = variant_set.astype({'GENOTYPE':'string'})  
-    return(variant_set)
+#     variant_set = variant_set.astype({'GENOTYPE':'string'})  
+#     return(variant_set)
 
 def append_annotations(vcf2tsv_gz_fname: str, db_assembly_dir: str, logger):
     
@@ -278,11 +278,15 @@ def clean_annotations(variant_set: pd.DataFrame, yaml_data: dict, germline: bool
     for pop in ['AFR','AMR','ASJ','FIN','EAS','NFE','SAS','OTH','']:
         for tag in ['AN','AC','NHOMALT']:
             vcf_info_tag = 'gnomADe_non_cancer_' + str(pop) + '_' + str(tag)
+            if pop == '':
+                vcf_info_tag = 'gnomADe_non_cancer_' + str(tag)
             if vcf_info_tag in variant_set.columns:
-                #variant_set[vcf_info_tag] = variant_set[vcf_info_tag].astype(str)
+                variant_set.loc[variant_set[vcf_info_tag].isna(),vcf_info_tag] = -123456789           
+                variant_set[vcf_info_tag] = variant_set[vcf_info_tag].apply(lambda x: str(int(x)) )
+                variant_set.loc[variant_set[vcf_info_tag] == "-123456789", vcf_info_tag] = "." 
                 
-                variant_set.loc[variant_set[vcf_info_tag].notna(), vcf_info_tag] = \
-                    variant_set.loc[variant_set[vcf_info_tag].notna(), vcf_info_tag].astype(str).astype(float).astype(int)   
+                #variant_set.loc[variant_set[vcf_info_tag].notna(), vcf_info_tag] = \
+                #    variant_set.loc[variant_set[vcf_info_tag].notna(), vcf_info_tag].astype(str).astype(float).astype(int)   
     
     ## Make sure that specific tags are formatted as integers (not float) when exported to TSV
     ## Trick - convert to str and then back to int
@@ -308,7 +312,7 @@ def clean_annotations(variant_set: pd.DataFrame, yaml_data: dict, germline: bool
             variant_set[vcf_info_tag] = variant_set[vcf_info_tag].apply(lambda x: str(int(x)) )
             variant_set.loc[variant_set[vcf_info_tag] == "-123456789", vcf_info_tag] = "."              
     
-    if germline is True:
-        variant_set = set_genotype(variant_set, logger)
+    #if germline is True:
+    #    variant_set = set_genotype(variant_set, logger)
     
     return variant_set

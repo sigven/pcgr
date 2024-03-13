@@ -22,11 +22,13 @@ flexdashboard::valueBox("SIGNATURES", caption = NULL, color = '#000000', icon = 
 ### SNVs eligible for analysis
 
 ```{r mutsig_snv_box}
-col <- pcg_report$settings$conf$visual_reporting$color_value_box
-if(pcg_report$content$snv_indel$vstats$n_snv < 100){
-  col <- pcg_report$settings$conf$visual_reporting$color_palette[['warning']][['values']][1]
+col <- pcg_report$settings$conf$report_color
+if(NROW(pcg_report$content$mutational_signatures$variant_set$all) < 100){
+  col <- pcgrr::color_palette$warning
 }
-flexdashboard::valueBox(pcg_report$content$snv_indel$vstats$n_snv, color = col, icon = "fa-dna")
+flexdashboard::valueBox(
+  pcg_report$content$snv_indel$vstats$n_snv, 
+  color = col, icon = "fa-dna")
 ```
 
 
@@ -36,10 +38,13 @@ flexdashboard::valueBox(pcg_report$content$snv_indel$vstats$n_snv, color = col, 
 if(!missing_data_norun){
   m <- pcg_report$content$mutational_signatures$result$contributions$per_group |> 
     dplyr::arrange(desc(prop_group))
-  flexdashboard::valueBox(m$group[1], color = pcg_report$settings$conf$visual_reporting$color_value_box)
+  flexdashboard::valueBox(
+    m$group[1], 
+    color = pcg_report$settings$conf$report_color)
 }else{
-  flexdashboard::valueBox("ND", color = pcg_report$settings$conf$visual_reporting$color_none)
-
+  flexdashboard::valueBox(
+    "ND", color = pcgrr::color_palette$none)
+  
 }
 ```
 
@@ -49,11 +54,15 @@ if(!missing_data_norun){
 ```{r mutsig_accuracy_box}
 if(!missing_data_norun){
   cosine_sim <- pcg_report$content$mutational_signatures$result$goodness_of_fit
-  flexdashboard::valueBox(cosine_sim, color = ifelse(cosine_sim > 90,
-                          pcg_report$settings$conf$visual_reporting$color_palette[['success']][['values']][1],
-                          pcg_report$settings$conf$visual_reporting$color_palette[['warning']][['values']][1]))
+  flexdashboard::valueBox(
+    cosine_sim, color = ifelse(
+      cosine_sim > 90,
+      pcgrr::color_palette$success,
+      pcgrr::color_palette$warning)
+  )
 }else{
-  flexdashboard::valueBox("ND", color = pcg_report$settings$conf$visual_reporting$color_none)
+  flexdashboard::valueBox(
+    "ND", color = pcgrr::color_palette$none)
 }
 ```
 
@@ -62,11 +71,15 @@ if(!missing_data_norun){
 ```{r mutsig_kataegis_box}
 num_events <- NROW(pcg_report$content$kataegis$events)
 if(num_events > 0){
-  num_events <- NROW(pcg_report$content$kataegis$events |> dplyr::filter(confidence == 3))
+  num_events <- 
+    NROW(pcg_report$content$kataegis$events |> 
+           dplyr::filter(confidence == 3))
 }
-flexdashboard::valueBox(num_events, color = ifelse(num_events > 0,
-                        pcg_report$settings$conf$visual_reporting$color_palette[['success']][['values']][1],
-                        pcg_report$settings$conf$visual_reporting$color_none))
+flexdashboard::valueBox(
+  num_events, color = ifelse(
+    num_events > 0,
+    pcgrr::color_palette$success,
+    pcgrr::color_palette$none))
 ```
 
 
@@ -81,7 +94,8 @@ plot_data <-
   pcg_report$content$mutational_signatures$result$contributions$per_group
 scale_fill <- 
   pcg_report$content$mutational_signatures$result$scale_fill_values
-names(scale_fill) <- pcg_report$content$mutational_signatures$result$scale_fill_names
+names(scale_fill) <- 
+  pcg_report$content$mutational_signatures$result$scale_fill_names
 
 
 ggplot2::ggplot(plot_data, ggplot2::aes(x = 2, y = prop_group, fill = group)) +
@@ -105,7 +119,7 @@ htmltools::br()
 
 cat('\n')
 
-cat(paste0('-   <b>NOT DETERMINED (ND)</b>: The number of SNV calls (n = ',nrow(pcg_report[['content']][['mutational_signatures']][['variant_set']][['all']]),') is too limited. A minimum of ',pcg_report[['metadata']][['config']][['msigs']][['mutation_limit']],' SNVs is currently required for a mutational signature analysis to be performed.'), sep ="\n")
+cat(paste0('-   <b>NOT DETERMINED (ND)</b>: The number of SNV calls (n = ',NROW(pcg_report$content$mutational_signatures$variant_set$all),') is too limited. A minimum of ',pcg_report$settings$conf$somatic_snv$mutational_signatures$mutation_limit,' SNVs is currently required for a mutational signature analysis to be performed.'), sep ="\n")
 
 ```
 
@@ -115,26 +129,31 @@ cat(paste0('-   <b>NOT DETERMINED (ND)</b>: The number of SNV calls (n = ',nrow(
     
 ```{r mutsigs_aetiologies, echo = F, eval = !missing_data_norun}
 
-signature_ids <- pcg_report[['content']][['mutational_signatures']][['result']][['contributions']][['per_signature']]$signature_id
-signature_colors <- pcg_report[['content']][['mutational_signatures']][['result']][['contributions']][['per_signature']]$col
+signature_ids <- 
+  pcg_report$content$mutational_signatures$result$contributions$per_signature$signature_id
+signature_colors <- 
+  pcg_report$content$mutational_signatures$result$contributions$per_signature$col
 
-myOptions <- list(buttons = c('csv','excel'),
-                  dom = 'Bfrtip', 
-                  #autoWidth = T, 
-                  fixedColumns = T,
-                  columnDefs = list(list(width = '10%', targets = c(1,2)),
-                                    list(width = '40%', targets = 5),
-                                    list(width = '20%', targets = c(3,4))),
-                  # columnDefs = list(list(width = '70px', targets = c(1,2)),
-                  #                   list(width = '220px', targets = c(3,4))),
-                  scrollCollapse = T)
-dat <- dplyr::select(pcg_report$content$mutational_signatures$result$contributions$per_signature, -c(sample_id,col,prop_signature)) |>
-  dplyr::select(signature_id, contribution, group, dplyr::everything())
+myOptions <- list(
+  buttons = c('csv','excel'),
+  dom = 'Bfrtip', 
+  #autoWidth = T, 
+  fixedColumns = T,
+  columnDefs = list(list(width = '10%', targets = c(1,2)),
+                    list(width = '40%', targets = 5),
+                    list(width = '20%', targets = c(3,4))),
+  scrollCollapse = T)
+dat <- dplyr::select(
+  pcg_report$content$mutational_signatures$result$contributions$per_signature, 
+  -c(sample_id,col,prop_signature)) |>
+  dplyr::select(signature_id, contribution,
+                group, dplyr::everything())
+
 DT::datatable(dat ,options = myOptions, extensions=c("Buttons")) |>
- DT::formatStyle('contribution',fontWeight = 'bold') |>
- DT::formatStyle('signature_id',color = 'white', 
-                 backgroundColor = DT::styleEqual(signature_ids, signature_colors), 
-                 fontWeight = 'bold', `text-align` = 'center')
+  DT::formatStyle('contribution',fontWeight = 'bold') |>
+  DT::formatStyle('signature_id',color = 'white', 
+                  backgroundColor = DT::styleEqual(signature_ids, signature_colors), 
+                  fontWeight = 'bold', `text-align` = 'center')
 
 ``` 
 
@@ -143,7 +162,7 @@ htmltools::br()
 
 cat('\n')
 
-cat(paste0('-   <b>NOT DETERMINED (ND)</b>: The number of SNV calls (n = ',nrow(pcg_report[['content']][['mutational_signatures']][['variant_set']][['all']]),') is too limited. A minimum of ',pcg_report[['metadata']][['config']][['msigs']][['mutation_limit']],' SNVs is currently required for a mutational signature analysis to be performed.'), sep ="\n")
+cat(paste0('-   <b>NOT DETERMINED (ND)</b>: The number of SNV calls (n = ',NROW(pcg_report$content$mutational_signatures$variant_set$all),') is too limited. A minimum of ',pcg_report$settings$conf$somatic_snv$mutational_signatures$mutation_limit,' SNVs is currently required for a mutational signature analysis to be performed.'), sep ="\n")
 
 
 ```
@@ -156,8 +175,9 @@ Row {.tabset .tabset-fade}
 
 ```{r mutsigs_context_frequency, fig.width = 20, fig.height = 3, eval = !missing_data_norun}
 ## frequency of mutation contexts (96)
-MutationalPatterns::plot_96_profile(pcg_report$content$mutational_signatures$result$mut_mat, 
-                                    colors = RColorBrewer::brewer.pal(6, "Dark2"), ymax = 0.3)
+MutationalPatterns::plot_96_profile(
+  pcg_report$content$mutational_signatures$result$mut_mat, 
+  colors = RColorBrewer::brewer.pal(6, "Dark2"), ymax = 0.3)
 ```   
  
 ```{r missing_context_frequency, eval = missing_data_norun, results = "asis"}
@@ -165,9 +185,7 @@ htmltools::br()
 
 cat('\n')
 
-cat(paste0('-   <b>NOT DETERMINED (ND)</b>: The number of SNV calls (n = ',nrow(pcg_report[['content']][['mutational_signatures']][['variant_set']][['all']]),') is too limited. A minimum of ',pcg_report[['metadata']][['config']][['msigs']][['mutation_limit']],' SNVs is currently required for a mutational signature analysis to be performed.'), sep ="\n")
-
-
+cat(paste0('-   <b>NOT DETERMINED (ND)</b>: The number of SNV calls (n = ',NROW(pcg_report$content$mutational_signatures$variant_set$all),') is too limited. A minimum of ',pcg_report$settings$conf$somatic_snv$mutational_signatures$mutation_limit,' SNVs is currently required for a mutational signature analysis to be performed.'), sep ="\n")
 
 ```   
  
@@ -184,9 +202,12 @@ cex <- 0.8
 cex_text <- 3
 
 # make rainfall plot with rfdat
-plot <- ggplot2::ggplot(rfdat$data, ggplot2::aes(x = location, y = distance)) +
-    ggplot2::geom_point(ggplot2::aes(colour = factor(type)), cex = rfdat$cex) +
-    ggplot2::geom_vline(xintercept = as.vector(rfdat$chr_cum), linetype="dotted") +
+plot <- ggplot2::ggplot(
+  rfdat$data, ggplot2::aes(x = location, y = distance)) +
+    ggplot2::geom_point(
+      ggplot2::aes(colour = factor(type)), cex = rfdat$cex) +
+    ggplot2::geom_vline(
+      xintercept = as.vector(rfdat$chr_cum), linetype="dotted") +
     ggplot2::annotate("text", x = rfdat$intercept, 
                       y = rfdat$ylim, 
                       label = rfdat$labels, 
@@ -195,7 +216,8 @@ plot <- ggplot2::ggplot(rfdat$data, ggplot2::aes(x = location, y = distance)) +
     ggplot2::ylab("Genomic Distance") +
     ggplot2::scale_y_log10() +
     ggplot2::scale_colour_manual(values = rfdat$colors) +
-    ggplot2::scale_x_continuous(expand = c(0,0), limits=c(0, max(rfdat$chr_cum))) +
+    ggplot2::scale_x_continuous(
+      expand = c(0,0), limits=c(0, max(rfdat$chr_cum))) +
     ggplot2::theme_bw() +
     ggplot2::theme(
       legend.position = "bottom",
@@ -216,9 +238,17 @@ plot
 
 ```{r mutsigs_kataegis, echo = F, eval = pcg_report$content$kataegis$eval}
 
-df <- data.frame('sample_id' = character(), 'chrom' = character(), 'start' = integer(), 'end' = integer(),
-                 'chrom.arm' = character(), 'length' = integer(), 'number.mut' = integer(), 'weight.C>X' = numeric(),
-                 'confidence' = integer(), stringsAsFactors = F)
+df <- data.frame(
+  'sample_id' = character(), 
+  'chrom' = character(), 
+  'start' = integer(), 
+  'end' = integer(),
+  'chrom.arm' = character(), 
+  'length' = integer(), 
+  'number.mut' = integer(), 
+  'weight.C>X' = numeric(),
+  'confidence' = integer(), 
+  stringsAsFactors = F)
 
 if(is.data.frame(pcg_report$content$kataegis$events)){
   df <- pcg_report$content$kataegis$events
