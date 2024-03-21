@@ -1,0 +1,142 @@
+
+Main results
+==================================================================
+
+Sidebar {.sidebar data-width=500 data-padding=40} 
+-----------------------------------------------------------------------
+
+<br><br>
+<font style="font-size: 110%">
+
+The report is generated with _[PCGR](https://github.com/sigven/pcgr)_ version `r pcg_report$settings$software$pcgr_version`.
+<br><br>
+Key configuration settings:
+
+* Genome assembly: <b> __`r pcg_report[['metadata']][['genome_assembly']]`__ </b>
+* Tumor type: <b> __`r pcg_report[['metadata']][['config']][["t_props"]][['tumor_type']]`__ </b>
+* Sequencing mode input (VCF): <b> __`r pcg_report[['metadata']][['config']][["assay_props"]][['mode']]`__ </b>
+* Sequencing type input (VCF): <b> __`r pcg_report[['metadata']][['config']][["assay_props"]][['type']]`__ </b>
+* Coding target size (VCF): <b> __`r pcg_report[['metadata']][['config']][["assay_props"]][['target_size_mb']]` Mb__ </b>
+* Minimum sequencing depth <b>tumor</b> (DP, SNV/InDel): <b> __`r pcg_report[['metadata']][['config']][['allelic_support']][['tumor_dp_min']]`__ </b>
+* Minimum allelic fraction <b>tumor</b> (VAF, SNV/InDel): <b> __`r pcg_report[['metadata']][['config']][['allelic_support']][['tumor_af_min']]`__ </b>
+* Minimum sequencing depth <b>control</b> (DP, SNV/InDel): <b> __`r pcg_report[['metadata']][['config']][['allelic_support']][['control_dp_min']]`__ </b>
+* Maximum allelic fraction <b>control</b> (VAF, SNV/InDel): <b> __`r pcg_report[['metadata']][['config']][['allelic_support']][['control_af_max']]`__ </b>
+* MSI prediction: <b> __`r msi_prediction`__ </b>
+* Mutational burden estimation: <b> __`r mutational_burden`__ </b>
+* Mutational signatures estimation: <b> __`r signatures_estimation`__ </b>
+
+<br>
+</font>
+
+Row {data-height = 200}
+-------------------------------------
+
+### Key findings
+
+```{r fig.width = 3.5}
+flexdashboard::valueBox("SNVs/Indels", caption = NULL, color = '#000000', 
+                        icon = NULL, href="#overview")
+```
+
+### Total variants (SNVs / InDels)
+
+```{r fig.width = 3.5}
+flexdashboard::valueBox(paste(pcg_report$content$snv_indel$vstats$n_snv, 
+                               pcg_report$content$snv_indel$vstats$n_indel,
+                               sep = " / "),
+                               color = pcgrr::color_palette[['tier']][['values']][1], icon = "fa-dna")
+```
+
+
+### TIER 1 variants
+
+```{r}
+flexdashboard::valueBox(
+  stringr::str_replace_all(
+    pcg_report$content$value_box$tier1,"Tier 1 variants:\n",""), 
+  color = pcgrr::color_palette[['tier']][['values']][1], 
+  icon = "fa-dna", href = "#tier-1")
+```
+
+Row {data-height = 200}
+-------------------------------------
+
+### Key findings
+
+```{r fig.width = 3.5}
+flexdashboard::valueBox("sCNA", caption = NULL, color = '#000000', 
+                        icon = NULL, href = "#overview-2")
+```
+
+### Total aberrations (loss / gains)
+
+```{r fig.width = 3.5}
+flexdashboard::valueBox(
+  paste(pcg_report$content$cna$vstats$n_cna_loss, 
+        pcg_report$content$cna$vstats$n_cna_gain,sep=" / "), 
+  color = pcgrr::color_palette[['tier']][['values']][1], icon = "fa-dna",
+  href = "#overview-2")
+```
+
+
+### TIER 1 variants
+
+```{r}
+flexdashboard::valueBox("None", color = pcgrr::color_palette[['tier']][['values']][1], icon = "fa-dna")
+```
+
+Row {data-height = 200}
+-------------------------------------
+
+### Key findings
+
+```{r fig.width = 3.5}
+flexdashboard::valueBox("SIGNATURES", caption = NULL, color = '#000000', 
+                        icon = NULL, href = "#mutational-signatures")
+```
+
+### Accuracy of signature fitting
+
+```{r fig.width = 3.5}
+cosine_sim <- pcg_report$content$mutational_signatures$result$goodness_of_fit$cosine_sim
+flexdashboard::valueBox(paste0(cosine_sim," %"), color = pcgrr::color_palette[['tier']][['values']][1])
+```
+
+
+### Most dominant signature
+
+```{r}
+flexdashboard::valueBox(
+  pcg_report$content$mutational_signatures$result$contributions$aetiology_keyword[1], color = pcgrr::color_palette[['tier']][['values']][1], href="#mutational-signatures")
+```
+
+Row {data-height = 200}
+-------------------------------------
+
+### Key findings
+
+```{r fig.width = 3.5}
+flexdashboard::valueBox("TMB/MSI status", caption = NULL, color = '#000000', icon = NULL)
+```
+
+### TMB estimate
+
+```{r fig.width = 3.5}
+flexdashboard::valueBox(paste0(pcg_report$content$tmb$vstats$tmb_estimate," mut/Mb"), 
+                        color = pcgrr::color_palette[['tier']][['values']][1],
+                        icon = "fa-dna")
+```
+
+
+### MSI classification
+
+```{r}
+flexdashboard::valueBox(
+  stringr::str_replace(pcg_report$content$msi$prediction$msi_stats$vb, "MSI status:\n",""), 
+                        color = pcgrr::color_palette[['tier']][['values']][1], icon = "fa-dna")
+```
+
+Row {data-height=500}
+-------------------------------------
+
+### Key findings

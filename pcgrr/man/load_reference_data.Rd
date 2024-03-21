@@ -3,7 +3,7 @@
 \name{load_reference_data}
 \alias{load_reference_data}
 \title{Function that parses and loads reference data from files in the
-assembly-specific PCGR bundle directories}
+assembly-specific PCGR bundle directory}
 \usage{
 load_reference_data(pcgr_db_assembly_dir = NULL, genome_assembly = "grch38")
 }
@@ -14,5 +14,5 @@ load_reference_data(pcgr_db_assembly_dir = NULL, genome_assembly = "grch38")
 }
 \description{
 Function that parses and loads reference data from files in the
-assembly-specific PCGR bundle directories
+assembly-specific PCGR bundle directory
 }

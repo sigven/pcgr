@@ -4,8 +4,10 @@ for (c in c("pathogenicity",
             "oncogenicity",
             "clinical_evidence",
             "cancer_assoc",
+            "cna_variant_class",
             "tier",
             "report_color",
+            "bg_dark",
             "warning",
             "success",
             "none")) {
@@ -14,11 +16,25 @@ for (c in c("pathogenicity",
   color_palette[[c]][["values"]] <- c()
 
   if (c == "cancer_assoc") {
+    #color_palette[[c]][["breaks"]] <-
+    #  c(0.40, 0.55, 0.70, 0.85)
+    #color_palette[[c]][["values"]] <-
+    #  c("#b8b8ba", "#BDD7E7", "#6BAED6",
+    #    "#3182BD", "#08519C")
+
+    #rep[["config"]][["disease"]] <- list()
     color_palette[[c]][["breaks"]] <-
-      c(0.40, 0.55, 0.70, 0.85)
+      c(0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)
     color_palette[[c]][["values"]] <-
-      c("#b8b8ba", "#BDD7E7", "#6BAED6",
-        "#3182BD", "#08519C")
+      c("#b8b8ba",
+        "#deebf7",
+        "#c6dbef",
+        "#9ecae1",
+        "#6baed6",
+        "#4292c6",
+        "#2171b5",
+        "#08519c",
+        "#08306b")
   }
 
   if (c == "pathogenicity") {
@@ -26,7 +42,7 @@ for (c in c("pathogenicity",
       c("Pathogenic", "Likely_Pathogenic",
         "VUS", "Likely_Benign", "Benign")
     color_palette[[c]][["values"]] <-
-      c("#9E0142", "#D53E4F", "#000000",
+      c("#9E0142", "#D53E4F", "#2c313c",
         "#78C679", "#077009")
   }
   if (c == "oncogenicity") {
@@ -34,7 +50,7 @@ for (c in c("pathogenicity",
       c("Oncogenic", "Likely_Oncogenic",
         "VUS", "Likely_Benign", "Benign")
     color_palette[[c]][["values"]] <-
-      c("#9E0142", "#D53E4F", "#000000",
+      c("#9E0142", "#D53E4F", "#2c313c",
         "#78C679", "#077009")
   }
   if (c == "clinical_evidence") {
@@ -76,20 +92,21 @@ for (c in c("pathogenicity",
     color_palette[[c]][["values"]] <- c("#2780e3", "#593196")
 
   }
+  if (c == "cna_variant_class") {
+    color_palette[[c]][["levels"]] <- c("gain", "homdel")
+    color_palette[[c]][["values"]] <- c("#00a65a", "#CD534C")
+  }
   if (c == "warning") {
     color_palette[[c]] <- "#ff7518"
-    #color_palette[[c]][["levels"]] <- c("warning")
-    #color_palette[[c]][["values"]] <- c("#ff7518")
+  }
+  if (c == "bg_dark") {
+    color_palette[[c]] <- "#2c313c"
   }
   if (c == "none") {
     color_palette[[c]] <- "#868686"
-    #color_palette[[c]][["levels"]] <- c("none")
-    #color_palette[[c]][["values"]] <- c("#868686")
   }
   if (c == "success") {
     color_palette[[c]] <- "#00a65a"
-    #color_palette[[c]][["levels"]] <- c("success")
-    #color_palette[[c]][["values"]] <- c("#00a65a")
   }
 
 }
@@ -145,9 +162,9 @@ data_coltype_defs[['snv_indel_somatic_raw']] <- readr::cols_only(
   REF = readr::col_character(),
   ALT = readr::col_character(),
   DP_TUMOR = readr::col_integer(),
-  AF_TUMOR = readr::col_number(),
+  VAF_TUMOR = readr::col_number(),
   DP_CONTROL = readr::col_integer(),
-  AF_CONTROL = readr::col_number(),
+  VAF_CONTROL = readr::col_number(),
   CALL_CONFIDENCE = readr::col_character(),
   GENOMIC_CHANGE = readr::col_character(),
   VAR_ID = readr::col_character(),
@@ -453,38 +470,91 @@ tsv_cols[['snv_indel']] <-
     'BIOMARKER_MATCH',
     'CALL_CONFIDENCE',
     'DP_TUMOR',
-    'AF_TUMOR',
+    'VAF_TUMOR',
     'DP_CONTROL',
-    'AF_CONTROL')
+    'VAF_CONTROL')
 
 usethis::use_data(tsv_cols, overwrite = T)
 
 dt_display <- list()
-dt_display[['var_eitem']] <-
-  c('SYMBOL',
+dt_display[['cna_gene_actionable']] <-
+  c("SYMBOL",
+    "GENENAME",
+    "VARIANT_CLASS",
+    "BIOMARKER_EVIDENCE",
+    "EVENT_TYPE",
+    "CN_TOTAL",
+    "CYTOBAND",
+    "ENSEMBL_GENE_ID",
+    "CANCERGENE_EVIDENCE",
+    "MOLECULAR_ALTERATION",
+    "ONCOGENE",
+    "TUMOR_SUPPRESSOR",
+    "TRANSCRIPT_OVERLAP",
+    "TISSUE_ASSOC_RANK",
+    "SEGMENT",
+    "SEGMENT_LENGTH_MB",
+    "CN_MAJOR",
+    "CN_MINOR",
+    "TARGETED_INHIBITORS_ALL",
+    "GENOME_VERSION")
+
+dt_display[['cna_eitem']] <-
+  c("MOLECULAR_ALTERATION",
+    "CN_TOTAL",
+    "BM_CANCER_TYPE",
+    "BM_EVIDENCE_LEVEL",
+    "BM_CONTEXT",
+    "BM_EVIDENCE_TYPE",
+    "BM_REFERENCE",
+    "BM_CLINICAL_SIGNIFICANCE",
+    "BM_THERAPEUTIC_CONTEXT",
+    "BM_MOLECULAR_PROFILE_NAME",
+    "BM_SOURCE_DB",
+    "BM_RATING",
+    "BM_EVIDENCE_ID",
+    "BM_EVIDENCE_DESCRIPTION",
+    "BM_EVIDENCE_DIRECTION",
+    "BM_DISEASE_ONTOLOGY_ID",
+    "BM_PRIMARY_SITE",
+    "BM_RESOLUTION"
+  )
+
+dt_display[['cna_other_oncogenic']] <-
+  c("SYMBOL",
+    "GENENAME",
+    "VARIANT_CLASS",
+    "EVENT_TYPE",
+    "CN_TOTAL",
+    "CYTOBAND",
+    "ENSEMBL_GENE_ID",
+    "CANCERGENE_EVIDENCE",
+    "ONCOGENE",
+    "TUMOR_SUPPRESSOR",
+    "TRANSCRIPT_OVERLAP",
+    "GLOBAL_ASSOC_RANK",
+    "TISSUE_ASSOC_RANK",
+    "SEGMENT",
+    "SEGMENT_LENGTH_MB",
+    "CN_MAJOR",
+    "CN_MINOR",
+    "TARGETED_INHIBITORS_ALL",
+    "GENOME_VERSION")
+
+dt_display[['snv_indel_gene_actionable']] <-
+  c('MOLECULAR_ALTERATION',
     'GENENAME',
-    'PROTEIN_CHANGE',
-    'CONSEQUENCE',
-    'BM_CANCER_TYPE',
-    'BM_EVIDENCE_LEVEL',
-    'BM_CLINICAL_SIGNIFICANCE',
-    'BM_EVIDENCE_TYPE',
-    'BM_THERAPEUTIC_CONTEXT',
-    'BM_REFERENCE',
-    'BM_MOLECULAR_PROFILE_NAME',
-    'BM_RATING',
-    'BM_EVIDENCE_DIRECTION',
-    'BM_DESCRIPTION',
-    'BM_SOURCE_DB',
-    'BM_EVIDENCE_ID',
-    'BM_VARIANT_ORIGIN',
-    'BM_DISEASE_ONTOLOGY_ID',
-    'BM_RESOLUTION',
+    'VAF_TUMOR',
+    'BIOMARKER_EVIDENCE',
     'PROTEIN_DOMAIN',
     'CDS_CHANGE',
+    'BM_TOP_RESOLUTION',
     'MUTATION_HOTSPOT',
     'MUTATION_HOTSPOT_CANCERTYPE',
     'TCGA_FREQUENCY',
+    'CONSEQUENCE',
+    'VARIANT_CLASS',
+    'SYMBOL',
     'HGVSc',
     'HGVSp',
     'PREDICTED_EFFECT',
@@ -502,13 +572,32 @@ dt_display[['var_eitem']] <-
     'TARGETED_INHIBITORS_ALL',
     'CALL_CONFIDENCE',
     'DP_TUMOR',
-    'AF_TUMOR',
     'DP_CONTROL',
-    'AF_CONTROL',
+    'VAF_CONTROL',
     'GENOMIC_CHANGE',
     'GENOME_VERSION')
 
-dt_display[['tier3']] <-
+dt_display[['snv_indel_eitem']] <-
+  c('MOLECULAR_ALTERATION',
+    'BM_CANCER_TYPE',
+    'BM_EVIDENCE_LEVEL',
+    'BM_CONTEXT',
+    'BM_CLINICAL_SIGNIFICANCE',
+    'BM_EVIDENCE_TYPE',
+    'BM_THERAPEUTIC_CONTEXT',
+    'BM_REFERENCE',
+    'BM_MOLECULAR_PROFILE_NAME',
+    'BM_RATING',
+    'BM_EVIDENCE_DIRECTION',
+    'BM_DESCRIPTION',
+    'BM_SOURCE_DB',
+    'BM_EVIDENCE_ID',
+    'BM_DISEASE_ONTOLOGY_ID',
+    'BM_RESOLUTION',
+    'BM_MATCH')
+
+
+dt_display[['snv_indel_tier3']] <-
   c('SYMBOL',
     'PROTEIN_CHANGE',
     'GENENAME',
@@ -540,9 +629,9 @@ dt_display[['tier3']] <-
     'TISSUE_ASSOC_RANK',
     'CALL_CONFIDENCE',
     'DP_TUMOR',
-    'AF_TUMOR',
+    'VAF_TUMOR',
     'DP_CONTROL',
-    'AF_CONTROL',
+    'VAF_CONTROL',
     'GENOMIC_CHANGE',
     'GENOME_VERSION')
 
@@ -576,9 +665,9 @@ dt_display[['tier4']] <-
     'TARGETED_INHIBITORS_ALL',
     'CALL_CONFIDENCE',
     'DP_TUMOR',
-    'AF_TUMOR',
+    'VAF_TUMOR',
     'DP_CONTROL',
-    'AF_CONTROL',
+    'VAF_CONTROL',
     'GENOMIC_CHANGE',
     'GENOME_VERSION')
 
@@ -600,61 +689,15 @@ dt_display[['tier5']] <-
     'VEP_ALL_CSQ',
     'CALL_CONFIDENCE',
     'DP_TUMOR',
-    'AF_TUMOR',
+    'VAF_TUMOR',
     'DP_CONTROL',
-    'AF_CONTROL',
+    'VAF_CONTROL',
     'GENOMIC_CHANGE',
     'GENOME_VERSION')
 
-dt_display[['cna_eitem']] <-
-  c('SYMBOL',
-    'GENENAME',
-    'VARIANT_CLASS',
-    'SEGMENT',
-    'BM_CANCER_TYPE',
-    'BM_EVIDENCE_LEVEL',
-    'BM_CLINICAL_SIGNIFICANCE',
-    'BM_EVIDENCE_TYPE',
-    'BM_THERAPEUTIC_CONTEXT',
-    'BM_REFERENCE',
-    'BM_MOLECULAR_PROFILE_NAME',
-    'BM_RATING',
-    'BM_EVIDENCE_DIRECTION',
-    'BM_DESCRIPTION',
-    'BM_SOURCE_DB',
-    'BM_EVIDENCE_ID',
-    'BM_VARIANT_ORIGIN',
-    'BM_DISEASE_ONTOLOGY_ID',
-    'ENSEMBL_GENE_ID',
-    'TRANSCRIPT_OVERLAP',
-    'CANCERGENE_EVIDENCE',
-    'MAX_TRANSCRIPT_OVERLAP_PERCENT',
-    'SEGMENT_LENGTH_MB',
-    'EVENT_TYPE',
-    'N_MAJOR',
-    'N_MINOR',
-    'VAR_ID',
-    'CYTOBAND',
-    'TARGETED_INHIBITORS',
-    'TARGETED_INHIBITORS_ALL',
-    'GENOME_VERSION')
 
-dt_display[['cna_other']] <-
-  c('SYMBOL',
-    'GENENAME',
-    'VARIANT_CLASS',
-    'SEGMENT',
-    'EVENT_TYPE',
-    'TARGETED_INHIBITORS',
-    'ENSEMBL_GENE_ID',
-    'TRANSCRIPT_OVERLAP',
-    'CANCERGENE_EVIDENCE',
-    'TARGETED_INHIBITORS_ALL',
-    'TISSUE_ASSOC_RANK',
-    'CYTOBAND',
-    'N_MAJOR',
-    'N_MINOR',
-    'GENOME_VERSION')
+
+
 
 usethis::use_data(dt_display, overwrite = T)
 

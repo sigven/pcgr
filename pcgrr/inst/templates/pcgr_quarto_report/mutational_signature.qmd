@@ -1,0 +1,278 @@
+
+
+```{r }
+#| echo: false
+missing_data_norun <- F
+if(pcg_report$content$mutational_signatures$eval == F | 
+   pcg_report$content$mutational_signatures$missing_data == T){
+  missing_data_norun <- T
+}
+conf <- pcg_report$settings$conf
+```
+
+
+## Mutational signatures
+
+```{r t1}
+#| output: asis
+#| include: !expr missing_data_norun == FALSE  & as.logical(conf$somatic_snv$mutational_signatures$all_reference_signatures) == FALSE
+
+cat('For <b>', conf$sample_properties$site,'</b> cancers, mutational signature identification uses the following reference collection of known signatures for the <i>refitting procedure</i>:<br>',sep="")
+
+dat <- pcg_report$content$mutational_signatures$result$reference_data
+if("SIGNATURE_ID" %in% colnames(dat) & 
+   "AETIOLOGY_KEYWORD" %in% colnames(dat)){
+  
+  i <- 1
+  
+  refsig_collection_site <- 
+    pcg_report$content$mutational_signatures$result$reference_data |>
+    dplyr::mutate(tmp_id = as.numeric(
+      stringr::str_replace(
+        stringr::str_replace(
+          stringr::str_replace(
+            stringr::str_replace(
+              stringr::str_replace(SIGNATURE_ID,"SBS",""),
+              "a",".2"),
+            "b",".4"),
+          "d", ".6"),
+        "c", ".8"))) |>
+    dplyr::arrange(tmp_id) |>
+    dplyr::select(SIGNATURE_ID, AETIOLOGY_KEYWORD) |>
+    dplyr::distinct()
+  
+  half_collection <- ceiling(nrow(refsig_collection_site) / 2)
+  
+  cat('\n\n')
+  cat(':::: {.columns}')
+  cat('\n\n')
+  cat('::: {.column width=\"35%\"}\n\n')
+  
+  cat('<ul>')
+  while(i <= half_collection){
+    cat(paste0("<li><b>",
+               refsig_collection_site[i,]$SIGNATURE_ID, "</b> - ", 
+               refsig_collection_site[i,]$AETIOLOGY_KEYWORD),'</li>\n')
+    i <- i + 1
+  }
+  cat('</ul>\n\n')
+  cat(':::\n\n')
+  cat('::: {.column width="5%"}\n<!-- space -->\n')
+  cat(':::\n\n')
+
+  cat('::: {.column width="35%"}\n\n')
+  cat('<ul>')
+  while(i <= NROW(refsig_collection_site)){
+    cat(paste0("<li><b>",
+               refsig_collection_site[i,]$SIGNATURE_ID, "</b> - ", 
+               refsig_collection_site[i,]$AETIOLOGY_KEYWORD),'</li>\n')
+    i <- i + 1
+  }
+  cat('\n</ul>\n\n')
+  cat(':::\n\n')
+  cat('::::\n')
+}
+
+```   
+
+
+```{r t3}
+#| output: asis 
+#| include: !expr missing_data_norun == FALSE & as.logical(conf$somatic_snv$mutational_signatures$all_reference_signatures) == TRUE
+cat("For this analysis, '--all_reference_signatures' have been turned on, which means that all reference signatures (n = 67) have been considered during refitting of the mutational profile with reference signatures",sep="\n")
+htmltools::br()
+
+```
+
+```{r t4}
+#| output: asis
+#| include: !expr missing_data_norun == FALSE
+
+cat('A total of <b>n = ',
+    nrow(pcg_report[['content']][['mutational_signatures']][['variant_set']]$all), 
+    '</b> SNVs were used for the mutational signature analysis of this tumor.', sep = '')
+
+cat("<br><br>")
+
+cat('Accuracy of signature fit: <b>', 
+    round(pcg_report$content$mutational_signatures$result$goodness_of_fit$estimate, digits = 3) * 100, 
+    '% [</b> (reflects how well the mutational profile can be reconstructed with signatures from the reference collection)', sep = '')
+
+cat('<br>')
+```
+
+::: {.panel-tabset .nav-pills}
+
+
+```{r }
+#| eval: !expr missing_data_norun == FALSE
+#| output: asis
+htmltools::br()
+
+
+
+# ggplot2::ggplot(tmp, ggplot2::aes(x = reorder(signature_id2, -prop_signature), y = prop_signature, fill = signature_id2)) +
+#     ggplot2::geom_bar(stat = "identity") + ggplot2::geom_errorbar(ggplot2::aes(ymin = prop_signature_ci_lower, ymax = prop_signature_ci_upper), width = .4)+
+#     #ggplot2::coord_polar(theta = "y", start = 0) 
+#     ggplot2::scale_fill_manual(values = head(pcgrr::color_palette$tier$values, NROW(tmp))) +
+#     ggplot2::theme_classic() + 
+#     ggplot2::xlab("") +
+#     ggplot2::theme(legend.position = "bottom",
+#                    legend.title = ggplot2::element_blank(),
+#                    plot.margin = ggplot2::margin(0.5, 0.5, 0.5, 0.5, "cm"), axis.text.x = ggplot2::element_blank(), 
+#                    legend.text = ggplot2::element_text(family = "Helvetica", size = 14))
+
+cat("\n")
+cat("### Mutational context frequency")
+cat("\n")
+
+htmltools::br()
+```
+
+
+```{r }
+#| fig-width: 18
+#| fig-height: 5
+#| dpi: 400
+#| column: body-outset
+#| eval: !expr missing_data_norun == FALSE
+
+catalogue_mat <- 
+  pcg_report$content$mutational_signatures$result$mut_mat
+
+# raw_context_plot <- sigminer::show_catalogue(
+#   catalogue_mat, 
+#   mode = "SBS", 
+#   normalize = "row", 
+#   x_lab = "", 
+#   palette = head(pcgrr::color_palette$tier$values, 6),  
+#   y_lab = "Relative contribution",
+#   rm_panel_border = T, 
+#   bar_width = 0.8, 
+#   x_label_angle = 45, 
+#   base_size = 18, 
+#   paint_axis_text = T)
+# 
+# raw_context_plot
+
+MutationalPatterns::plot_96_profile(
+ pcg_report$content$mutational_signatures$result$mut_mat,
+ colors = head(pcgrr::color_palette$tier$values, 6),
+ ymax = plyr::round_any(
+   max(pcg_report$content$mutational_signatures$result$contributions$per_signature$prop_signature), 0.05,f=ceiling))
+
+```   
+
+<br>
+
+```{r}
+#| eval: !expr missing_data_norun == FALSE
+#| output: asis
+
+htmltools::br()
+
+cat("\n")
+cat("### Fitted signatures - aetiology contributions")
+cat("\n")
+
+```
+
+```{r }
+#| echo: false
+#| fig-width: 6
+#| fig-height: 6
+#| fig-align: center
+#| eval: !expr missing_data_norun == FALSE
+plot_data <- 
+  pcg_report$content$mutational_signatures$result$contributions$per_group
+
+scale_fill <- 
+  pcg_report$content$mutational_signatures$result$scale_fill_values
+names(scale_fill) <- pcg_report$content$mutational_signatures$result$scale_fill_names
+
+ggplot2::ggplot(plot_data, ggplot2::aes(x = 2, y = prop_group, fill = group)) +
+     ggplot2::geom_bar(width = 1, stat = "identity", color = "white") +
+     #ggplot2::coord_polar(theta = "y", start = 0) +
+     ggplot2::scale_fill_manual(values = scale_fill) +
+     ggplot2::theme_void() + 
+     #ggplot2::xlim(.5, 2.5) +
+     ggplot2::theme(legend.position = "right",
+                    legend.title = ggplot2::element_blank(),
+                    plot.margin = ggplot2::margin(0, 0, 0, 0, "cm"),
+                    legend.text = ggplot2::element_text(family = "Helvetica", size = 14))
+
+
+```
+
+
+```{r }
+#| eval: !expr missing_data_norun == FALSE
+#| output: asis
+
+cat("\n")
+cat("### Fitted signatures - aetiologies")
+cat("\n")
+
+htmltools::br()
+```
+
+```{r }
+#| echo: false
+#| eval: !expr missing_data_norun == FALSE
+
+signature_ids <- 
+  pcg_report[['content']][['mutational_signatures']][['result']][['contributions']][['per_signature']]$signature_id
+signature_colors <- 
+  pcg_report[['content']][['mutational_signatures']][['result']][['contributions']][['per_signature']]$col
+
+myOptions <- list(
+  buttons = c('csv','excel'),
+  dom = 'Bfrtip', 
+  scrollCollapse = T)
+
+dat <- dplyr::select(
+  pcg_report$content$mutational_signatures$result$contributions$per_signature, -c(sample_id,col,prop_signature)) |>
+  dplyr::select(
+    c("signature_id", "contribution", 
+      "group"), 
+    dplyr::everything())
+
+DT::datatable(dat ,options = myOptions,extensions=c("Buttons","Responsive"),escape=F) |>
+  DT::formatStyle('contribution',fontWeight = 'bold') |>
+  DT::formatStyle('signature_id',color = 'white', 
+                  backgroundColor = DT::styleEqual(signature_ids, signature_colors), 
+                  fontWeight = 'bold', `text-align` = 'center')
+```
+<br>
+
+:::
+
+
+
+```{r}
+
+bslib::card(
+  bslib::card_header(
+    class = "bg-dark",
+    "Known signatures - SAMPLE-T_N-001"
+  ),
+  bslib::card_body(
+    DT::datatable(
+      dat,
+      extensions = "Responsive",
+      options = list(
+        pageLength = 8,
+        dom = 'tp'),
+      escape = F) |>
+      DT::formatStyle(
+        'contribution',fontWeight = 'bold') |>
+      DT::formatStyle(
+        'signature_id',color = 'white', 
+        backgroundColor = DT::styleEqual(
+          signature_ids, signature_colors), 
+        fontWeight = 'bold', 
+        `text-align` = 'center')
+  )
+)
+```
+

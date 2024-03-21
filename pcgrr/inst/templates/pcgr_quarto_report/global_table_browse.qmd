@@ -18,7 +18,7 @@ The prioritization of SNV/InDels is here done according to a four-tiered structu
 ```{r vaf_plot_prep2, echo=F}
 tumor_af_plot <- F
 if(NROW(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']]) > 0){
-  if(NROW(dplyr::filter(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']], !is.na(DP_TUMOR))) > 0 & NROW(dplyr::filter(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']], !is.na(AF_TUMOR))) > 0){
+  if(NROW(dplyr::filter(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']], !is.na(DP_TUMOR))) > 0 & NROW(dplyr::filter(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']], !is.na(VAF_TUMOR))) > 0){
     tumor_af_plot <- T
   }
 }
@@ -32,7 +32,8 @@ cat('<h3>Global distribution - allelic support</h3>',sep="\n")
 
 ```{r tumor_allelic_support, echo = F, fig.width=10, fig.height=7, eval=tumor_af_plot}
 
-af_bin_df <- pcgrr::tier_af_distribution(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']])
+af_bin_df <- pcgrr::tier_af_distribution(
+  pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']])
 af_bin_df$TIER <- factor(af_bin_df$TIER, levels = c("TIER 1","TIER 2","TIER 3","TIER 4","NONCODING"))
 
 #af_bin_df <- pcgrr::tier_af_distribution(pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']])
@@ -87,7 +88,7 @@ tiers <- c('TIER 1','TIER 2','TIER 3','TIER 4','NONCODING')
 vars <- pcg_report[['content']][['snv_indel']][['variant_set']][['tsv']] |> 
   dplyr::select(SYMBOL, CONSEQUENCE, PROTEIN_CHANGE, VARIANT_CLASS, TIER, 
                 GENOMIC_CHANGE, GENOME_VERSION, CALL_CONFIDENCE, DP_TUMOR, 
-                AF_TUMOR, DP_CONTROL, AF_CONTROL) |>
+                VAF_TUMOR, DP_CONTROL, AF_CONTROL) |>
   dplyr::mutate(CONSEQUENCE = stringr::str_replace_all(CONSEQUENCE,"&",","))
 
 variants_shared <- crosstalk::SharedData$new(vars)
@@ -105,9 +106,9 @@ if(any(!is.na(vars$CALL_CONFIDENCE))){
   filter_set1[[i_set1]] <- crosstalk::filter_select("CALL_CONFIDENCE", "Call confidence", variants_shared, ~CALL_CONFIDENCE)
   i_set1 <- i_set1 + 1
 }
-if(any(!is.na(vars$DP_TUMOR)) & any(!is.na(vars$AF_TUMOR))){
+if(any(!is.na(vars$DP_TUMOR)) & any(!is.na(vars$VAF_TUMOR))){
   filter_set1[[i_set1]] <- crosstalk::filter_slider("DP_TUMOR", "Sequencing depth tumor", variants_shared, ~DP_TUMOR, ticks = F, sep = F)
-  filter_set2[[i_set2]] <- crosstalk::filter_slider("AF_TUMOR", "Allelic fraction tumor", variants_shared, ~AF_TUMOR, 
+  filter_set2[[i_set2]] <- crosstalk::filter_slider("VAF_TUMOR", "Allelic fraction tumor", variants_shared, ~VAF_TUMOR, 
                                                     sep = F, min = 0, max = 1, step = 0.05, ticks = T)
   i_set1 <- i_set1 + 1
   i_set2 <- i_set2 + 1

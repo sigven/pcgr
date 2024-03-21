@@ -551,7 +551,7 @@ write_report <- function(report,
                         "COSMIC_ID",
                         "CALL_CONFIDENCE",
                         "DP_TUMOR",
-                        "AF_TUMOR",
+                        "VAF_TUMOR",
                         "DP_CONTROL",
                         "AF_CONTROL",
                         "TIER")

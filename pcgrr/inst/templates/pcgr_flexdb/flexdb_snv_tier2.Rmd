@@ -25,7 +25,7 @@ flexdashboard::valueBox(
 
 ```{r}
 flexdashboard::valueBox(
-  pcg_report$content$snv_indel$vstats$n_tier2, 
+  pcg_report$content$snv_indel$vstats$n_actionability_tier2, 
   color = pcg_report$settings$conf$report_color,
   icon = "fa-dna")
 ```
@@ -75,7 +75,7 @@ Row
 
 <br><br>
 
-```{r table_browse_tier2, echo=F, results = "asis", eval = pcg_report$content$snv_indel$vstats$n_tier2 > 0}
+```{r table_browse_tier2, echo=F, results = "asis", eval = pcg_report$content$snv_indel$vstats$n_actionability_tier2 > 0}
 
 cat('\nEvidence items associated with variants in TIER 2 (right panel) can be interactively explored according to various criteria\n:')
 
@@ -155,7 +155,7 @@ htmltools::br()
 ```
 
 
-```{r biomarker_note2, echo=F, results = "asis", include = pcg_report$content$snv_indel$vstats$n_tier2 > 0}
+```{r biomarker_note2, echo=F, results = "asis", include = pcg_report$content$snv_indel$vstats$n_actionability_tier2 > 0}
 
 cat('<b>NOTE:</b> Reported biomarkers in CIViC/CGI are mapped at different resolutions (i.e. filter <b>Biomarker resolution</b>). The accuracy of a match between variants in the tumor sample and the reported biomarkers will vary accordingly (highlighted by gene symbols with different color backgrounds):\n\n')
 
@@ -167,7 +167,7 @@ htmltools::br()
 ```
 
 
-```{r tier2_missing_filters, echo=F, results = 'asis', eval = pcg_report$content$snv_indel$vstats$n_tier2 == 0}
+```{r tier2_missing_filters, echo=F, results = 'asis', eval = pcg_report$content$snv_indel$vstats$n_actionability_tier2 == 0}
 cat('\n*  <i> <font style="font-size: 110%"><b>No</b> variants of potential clinical significance found.</font></i>', sep = '\n')
 cat('\n')
 ```
@@ -177,7 +177,7 @@ cat('\n')
 
 <br><br>
 
-```{r table_tier2, eval = pcg_report$content$snv_indel$vstats$n_tier2 > 0}
+```{r table_tier2, eval = pcg_report$content$snv_indel$vstats$n_actionability_tier2 > 0}
 
 warning_color <- 
   pcgrr::color_palette$warning

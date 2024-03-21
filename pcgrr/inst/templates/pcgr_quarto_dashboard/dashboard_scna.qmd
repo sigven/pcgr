@@ -1,0 +1,112 @@
+
+Overview {data-navmenu="sCNA"}
+================================================================== 
+
+Row
+-------------------------------------
+
+### Overview
+
+```{r cna_vbox_overview}
+flexdashboard::valueBox("sCNA", caption = NULL, color = "#000000", icon = NULL)
+```
+
+### Copy number gains
+
+```{r cna_gains, echo = F}
+flexdashboard::valueBox(
+  pcg_report$content$cna$vstats$n_segments_gain,
+  color = ifelse(
+    pcg_report$content$cna$vstats$n_segments_gain > 0,
+    pcg_report$settings$conf$report_color,
+    pcgrr::color_palette$none),
+  icon = "fa-dna")
+```
+
+### Copy number losses
+
+```{r cna_losses, echo = F}
+flexdashboard::valueBox(
+  pcg_report$content$cna$vstats$n_segments_loss,
+  color = ifelse(
+    pcg_report$content$cna$vstats$n_segments_loss > 0,
+    pcg_report$settings$conf$report_color,
+    pcgrr::color_palette$none),
+  icon = "fa-dna")
+```
+
+### TIER 1 biomarkers
+
+```{r cna_tier1, echo = F}
+flexdashboard::valueBox(
+  pcg_report$content$cna$vstats$n_tier1, 
+  color = ifelse(
+    pcg_report$content$cna$vstats$n_tier1 > 0,
+    pcgrr::color_palette$success,
+    pcgrr::color_palette$none), 
+  href = "#tier-1-1", icon = "fa-file-prescription")
+```
+
+### TIER 2 biomarkers
+
+```{r cna_tier2, echo = F}
+flexdashboard::valueBox(
+  pcg_report$content$cna$vstats$n_tier2, 
+  color = ifelse(
+    pcg_report$content$cna$vstats$n_tier2 > 0,
+    pcgrr::color_palette$success,
+    pcgrr::color_palette$none), 
+  href = "#tier-2-1", 
+  icon = "fa-file-prescription")
+
+```
+
+
+
+Row {data-height=700} 
+-------------------------------------
+
+### Copy number aberration plot {data-padding=15}
+
+```{r cna_segment_plot, echo=F, fig.width=20, results="asis"}
+plotly::ggplotly(CNAqc::plot_segments(
+  pcg_report$content$cna$cnaqc, cex=2
+))
+
+```
+
+Row 
+-------------------------------------
+
+### Key findings {data-width=300}
+
+<br><br>
+
+<font style="color:white; font-size: 115%; font-weight: bold">
+
+  **  [ - Proto-oncogenes subject to amplifications: `r pcg_report$content$cna$vstats$n_oncogene_gain`](#scna-oncogene)**
+
+  **  [ - Tumor suppressor genes subject to homozygous deletions: `r pcg_report$content$cna$vstats$n_tsgene_loss`](#scna-tsgene)**
+
+  **  [ - Other drug targets subject to amplification: `r pcg_report$content$cna$vstats$n_other_drugtarget_gain`](#scna-other)**
+
+</font>
+
+### Documentation {data-padding=20}
+
+Somatic copy number aberrations identified in the tumor sample are classified into **two main tiers**:
+
+- [**TIER 1: Aberrations of strong clinical significance**](#tier-1-1) - constitutes amplified/lost genes linked to predictive, prognostic, or diagnostic biomarkers in the [CIViC database](http://civic.genome.wustl.edu) and the [Cancer Biomarkers Database](https://www.cancergenomeinterpreter.org/biomarkers) that are
+	 - Found within the same tumor type/class as specified by the user, **AND**
+	 - Of strong clinical evidence (i.e. part of guidelines, validated or discovered in late clinical trials ([CIViC evidence levels A/B](https://civic.readthedocs.io/en/latest/model/evidence/level.html)))
+	 	 
+- [**TIER 2: Aberrations of potential clinical significance**](#tier-2-1) - constitutes amplified/lost genes linked to predictive, prognostic, or diagnostic biomarkers in the [CIViC database](http://civic.genome.wustl.edu) and the [Cancer Biomarkers Database](https://www.cancergenomeinterpreter.org/biomarkers) that are either
+	 - Of strong clinical evidence in other tumor types/classes than the one specified by the user, **OR**
+	 - Of weak clinical evidence (early trials, case reports etc. ([CIViC evidence levels C/D/E](https://civic.readthedocs.io/en/latest/model/evidence/level.html)))) in the same tumor type/class as specified by the user
+	 
+Included in the report is also a complete list of [**all oncogenes subject to amplifications**](#scna-oncogene), [**tumor suppressor genes subject to homozygous deletions**](#scna-tsgene), and [**other drug targets subject to amplifications**](#scna-other)
+
+- Genes are annotated as oncogenes and/or tumor suppressors genes if they
+       i) have an associated record in curated databases ([Network of Cancer Genes (NCG)](http://ncg.kcl.ac.uk/)/[Cancer Gene Census](https://www.sanger.ac.uk/data/cancer-gene-census/)), **OR**,
+       ii) have evidence from high-throughput literature mining (at least 20 publications, as collected from the [CancerMine text-mining resource](http://bionlp.bcgsc.ca/cancermine/)) 
+     

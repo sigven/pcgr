@@ -42,7 +42,47 @@ if (as.logical(pcg_report[["settings"]][["conf"]][["vep"]][["vep_gencode_basic"]
 }
 ```
 
-<!--
+The report is generated with _[pcgr](https://github.com/sigven/pcgr)_ version `r pcg_report[['settings']][['software']][['pcgr_version']]`, using the following key settings:
+
+:::: {.columns}
+
+::: {.column width="47.5%"}
+* Genome assembly: __`r pcg_report[['settings']][['genome_assembly']]`__
+* Minimum sequencing depth (DP) tumor (SNV + InDels): __`r conf[['somatic_snv']][['allelic_support']][['tumor_dp_min']]`__
+* Minimum allelic fraction (AF) tumor (SNV + InDels): __`r conf[['somatic_snv']][['allelic_support']][['tumor_af_min']]`__
+* Minimum sequencing depth (DP) control (SNV + InDels): __`r conf[['somatic_snv']][['allelic_support']][['control_dp_min']]`__
+* Maximum allelic fraction (AF) control (SNV + InDels): __`r conf[['somatic_snv']][['allelic_support']][['control_af_max']]`__
+* Tier system (VCF): __pcgr_acmg__
+* Show noncoding variants: __`r conf$other$show_noncoding `__
+* MSI prediction: __`r msi_prediction`__
+* Mutational burden estimation: __`r mutational_burden`__
+  * TMB algorithm: __`r paste0('TMB_',conf$somatic_snv[['tmb']][['tmb_display']])`__ 
+:::
+
+::: {.column width="5%"}
+<!-- empty column to create gap -->
+:::
+
+::: {.column width="47.5%"}
+* Mutational signatures estimation: __`r signatures_estimation`__
+  * Minimum number of mutations required: __`r conf$somatic_snv$mutational_signatures[['mutation_limit']]`__
+  * All reference signatures: __`r as.logical(conf$somatic_snv$mutational_signatures[['all_reference_signatures']])`__
+  * Inclusion of artefact signatures: __`r as.logical(conf$somatic_snv$mutational_signatures[['include_artefact_signatures']])`__
+  * Minimum tumor-type prevalence (percent) of reference signatures used for refitting: __`r conf$somatic_snv$mutational_signatures[['prevalence_reference_signatures']]`__
+* Variant Effect Predictor (VEP) settings:
+  * Transcript set: __`r transcript_set_gencode`__
+  * Transcript pick order: __`r stringr::str_replace_all(conf[['vep']][['vep_pick_order']],",", ", ")`__
+  * Regulatory regions annotation: __`r as.logical(conf[['vep']][['vep_regulatory']])`__
+  * Buffer size: __`r conf$vep$vep_buffer_size`__
+  * Number of forks: __`r conf$vep$vep_n_forks`__
+
+:::
+
+::::
+
+<br>
+
+
 ```{r sample_assay_properties}
 #| output: asis
 #| echo: false
@@ -50,7 +90,7 @@ if (as.logical(pcg_report[["settings"]][["conf"]][["vep"]][["vep_gencode_basic"]
 
 bslib::layout_column_wrap(
   width = 1/4,
-  height = 70,
+  height = 80,
   bslib::value_box(
     title = "Tumor site",
     value = tumor_site,
@@ -73,7 +113,7 @@ bslib::layout_column_wrap(
       bg = report_color, fg = "#fff")
   ),
   bslib::value_box(
-    title = "Effective assay target size (coding)",
+    title = "Effective target size",
     value = paste0(target_size, "Mb"),
     showcase = NULL,
     theme = bslib::value_box_theme(
@@ -81,51 +121,5 @@ bslib::layout_column_wrap(
   )
 )
 ```
--->
 
-* Sample and assay properties:
 
-    * &nbsp;&nbsp; <span style="background-color:`r report_color`; font-size:1.2em; color:white"><b>&nbsp;&nbsp;`r sample_name`</b> | <i>`r tumor_site`</i> | `r assay_mode` | `r assay_type` &nbsp;&nbsp;</span>
-<br>
-
-### Report configuration 
-
-The report is generated with _[pcgr](https://github.com/sigven/pcgr)_ version `r pcg_report[['settings']][['software']][['pcgr_version']]`, using the following key settings:
-
-:::: {.columns}
-
-::: {.column width="47.5%"}
-* Genome assembly: __`r pcg_report[['settings']][['genome_assembly']]`__
-* Tumor primary site:  __`r conf[["sample_properties"]][['site']]`__
-* Sequencing mode input (VCF): __`r conf[["assay_properties"]][['mode']]`__
-* Sequencing type input (VCF): __`r conf[["assay_properties"]][['type']]`__
-* Coding target size (VCF): __`r conf[["assay_properties"]][['effective_target_size_mb']]` Mb__
-* Minimum sequencing depth (DP) tumor (SNV + InDels): __`r conf[['somatic_snv']][['allelic_support']][['tumor_dp_min']]`__
-* Minimum allelic fraction (AF) tumor (SNV + InDels): __`r conf[['somatic_snv']][['allelic_support']][['tumor_af_min']]`__
-* Minimum sequencing depth (DP) control (SNV + InDels): __`r conf[['somatic_snv']][['allelic_support']][['control_dp_min']]`__
-* Maximum allelic fraction (AF) control (SNV + InDels): __`r conf[['somatic_snv']][['allelic_support']][['control_af_max']]`__
-* Tier system (VCF): __pcgr_acmg__
-* Show noncoding variants: __`r conf$other$show_noncoding `__
-* MSI prediction: __`r msi_prediction`__
-* Mutational burden estimation: __`r mutational_burden`__
-  * TMB algorithm: __`r paste0('TMB_',conf$somatic_snv[['tmb']][['tmb_display']])`__ 
-:::
-
-::: {.column width="5%"}
-<!-- empty column to create gap -->
-:::
-
-::: {.column width="47.5%"}
-* Mutational signatures estimation: __`r signatures_estimation`__
-  * Minimum number of mutations required: __`r conf$somatic_snv$mutational_signatures[['mutation_limit']]`__
-  * All reference signatures: <b> __`r as.logical(conf$somatic_snv$mutational_signatures[['all_reference_signatures']])`__ </b>
-  * Inclusion of artefact signatures: <b> __`r as.logical(conf$somatic_snv$mutational_signatures[['include_artefact_signatures']])`__ </b>
-  * Minimum tumor-type prevalence (percent) of reference signatures used for refitting: <b> __`r conf$somatic_snv$mutational_signatures[['prevalence_reference_signatures']]`__</b>
-* Variant Effect Predictor (VEP) settings:
-  * Transcript set: __`r transcript_set_gencode`__
-  * Transcript pick order: __`r stringr::str_replace_all(conf[['vep']][['vep_pick_order']],",", ", ")`__
-  * Regulatory regions annotation: __`r as.logical(conf[['vep']][['vep_regulatory']])`__
-
-:::
-
-::::

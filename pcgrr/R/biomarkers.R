@@ -1053,7 +1053,7 @@ expand_biomarker_items <- function(
         variant_properties,
         "CALL_CONFIDENCE",
         "DP_TUMOR",
-        "AF_TUMOR",
+        "VAF_TUMOR",
         "DP_CONTROL",
         "AF_CONTROL",
         "GENOME_VERSION"
@@ -1111,4 +1111,221 @@ expand_biomarker_items <- function(
 
 }
 
-#assign_classification <-
+
+#' Function that gathers data tables on actionable variants
+#' for display in report (tier 1 + tier 2)
+#'
+#' @param report report object
+#' @param tier tier level
+#' @param variant_class cna or snv_indel
+#'
+get_dt_tables <- function(
+    report = NULL,
+    tier = 1,
+    variant_class = 'cna'){
+
+  if(is.null(report)){
+    stop("report object is NULL")
+  }
+  if(!variant_class %in% names(report$content)){
+    stop(paste0(
+      "report$content object does not contain '", variant_class,"'"))
+  }
+
+  if(!"callset" %in% names(report$content[[variant_class]])){
+    stop("report$content$variant_class object does not contain 'callset'")
+  }
+  var_eitems <-
+    report$content[[variant_class]]$callset$variant_display |>
+    dplyr::filter(!is.na(.data$TIER) & .data$TIER == tier) |>
+    dplyr::select(-c("TIER_DESCRIPTION","TIER_FRAMEWORK")) |>
+    dplyr::inner_join(
+      report$content[[variant_class]]$callset$biomarker_evidence$items,
+      by = c("VAR_ID","TIER","VARIANT_CLASS","ENTREZGENE")
+    ) |>
+    dplyr::distinct()
+
+  biomarker_top_resolution <-
+    var_eitems |>
+    dplyr::select(
+      c("VAR_ID",
+        "VARIANT_CLASS",
+        "ENTREZGENE",
+        "BM_RESOLUTION")
+    ) |>
+    dplyr::group_by(
+      .data$VAR_ID,
+      .data$VARIANT_CLASS,
+      .data$ENTREZGENE
+    ) |>
+    dplyr::summarise(
+      BM_RESOLUTION = paste(
+        .data$BM_RESOLUTION,
+        collapse = ","),
+      .groups = "drop"
+    ) |>
+    dplyr::mutate(
+      BM_TOP_RESOLUTION = dplyr::case_when(
+        stringr::str_detect(
+          .data$BM_RESOLUTION, "genomic|hgvsp|codon") ~ "high",
+        !stringr::str_detect(
+          .data$BM_RESOLUTION, "genomic|hgvsp|codon") &
+          stringr::str_detect(
+            .data$BM_RESOLUTION, "exon|gene") ~ "low",
+        TRUE ~ "low"
+        )
+    ) |>
+    dplyr::select(-c("BM_RESOLUTION")) |>
+    dplyr::distinct()
+
+  biomarker_context <- var_eitems |>
+    dplyr::mutate(BM_CONTEXT = dplyr::case_when(
+      .data$BM_EVIDENCE_TYPE == "Predictive" ~
+        paste0(.data$BM_CLINICAL_SIGNIFICANCE, " - ",
+               .data$BM_THERAPEUTIC_CONTEXT),
+      .data$BM_EVIDENCE_TYPE == "Prognostic" |
+        .data$BM_EVIDENCE_TYPE == "Diagnostic"  ~
+        paste0(.data$BM_EVIDENCE_TYPE, " - ",
+               .data$BM_CLINICAL_SIGNIFICANCE),
+      TRUE ~ as.character(.data$BM_CLINICAL_SIGNIFICANCE)
+    )) |>
+    dplyr::mutate(BM_CONTEXT = stringr::str_replace_all(
+      .data$BM_CONTEXT, ",", ", "
+    )) |>
+    dplyr::select(
+      c("VAR_ID",
+        "VARIANT_CLASS",
+        "ENTREZGENE",
+        "BM_EVIDENCE_ID",
+        "BM_CONTEXT")
+    ) |>
+    dplyr::distinct()
+
+  biomarker_assoc_summary <-
+    var_eitems |>
+    dplyr::select(
+      c("VAR_ID",
+        "VARIANT_CLASS",
+        "ENTREZGENE",
+        "BM_EVIDENCE_TYPE",
+        "BM_CLINICAL_SIGNIFICANCE",
+        "BM_PRIMARY_SITE")
+    ) |>
+    dplyr::distinct() |>
+    dplyr::group_by(
+      .data$VAR_ID,
+      .data$VARIANT_CLASS,
+      .data$ENTREZGENE,
+      .data$BM_EVIDENCE_TYPE,
+      .data$BM_PRIMARY_SITE
+    ) |>
+    dplyr::summarise(
+      BM_CLINICAL_SIGNIFICANCE = paste(
+        sort(.data$BM_CLINICAL_SIGNIFICANCE),
+        collapse = ", "),
+      .groups = "drop") |>
+    dplyr::mutate(BM_ASSOC = dplyr::case_when(
+      .data$BM_EVIDENCE_TYPE == "Predictive" ~
+        paste0(
+          " - ",
+          .data$BM_PRIMARY_SITE, ": ",
+          .data$BM_EVIDENCE_TYPE, " | ",
+          .data$BM_CLINICAL_SIGNIFICANCE),
+      .data$BM_EVIDENCE_TYPE == "Prognostic" |
+        .data$BM_EVIDENCE_TYPE == "Diagnostic" ~
+        paste0(
+          " - ",
+          .data$BM_PRIMARY_SITE, ": ",
+          .data$BM_EVIDENCE_TYPE, " | ",
+          .data$BM_CLINICAL_SIGNIFICANCE),
+      TRUE ~ as.character(NA)
+    )) |>
+    dplyr::group_by(
+      .data$VAR_ID,
+      .data$VARIANT_CLASS,
+      .data$ENTREZGENE
+    ) |>
+    dplyr::summarise(
+      BIOMARKER_EVIDENCE = paste(
+        .data$BM_ASSOC, collapse="<br><br>"),
+      .groups = "drop"
+    )
+
+  dt <- list()
+  dt[['by_eitem']] <- data.frame()
+  dt[['by_gene']] <- data.frame()
+
+  if(variant_class == "cna"){
+    dt[['by_eitem']] <-
+      var_eitems |>
+      dplyr::left_join(
+        biomarker_context,
+        by = c("VAR_ID",
+               "VARIANT_CLASS",
+               "ENTREZGENE",
+               "BM_EVIDENCE_ID")
+      ) |>
+      dplyr::distinct() |>
+      dplyr::select(
+        dplyr::any_of(
+          pcgrr::dt_display$cna_eitem
+        )
+      )
+  }
+  if(variant_class == "snv_indel"){
+    dt[['by_eitem']] <-
+      var_eitems |>
+      dplyr::left_join(
+        biomarker_context,
+        by = c("VAR_ID",
+               "VARIANT_CLASS",
+               "ENTREZGENE",
+               "BM_EVIDENCE_ID")
+      ) |>
+      dplyr::distinct() |>
+      dplyr::select(
+        dplyr::any_of(
+          pcgrr::dt_display$snv_indel_eitem
+        )
+      )
+  }
+
+  if(variant_class == "cna"){
+    dt[['by_gene']] <-
+      var_eitems |>
+      dplyr::left_join(
+        biomarker_assoc_summary,
+        by = c("VAR_ID","VARIANT_CLASS","ENTREZGENE")
+      ) |>
+
+      dplyr::select(
+        dplyr::any_of(
+          pcgrr::dt_display$cna_gene_actionable
+        )
+      ) |>
+      dplyr::distinct()
+  }
+
+  if(variant_class == "snv_indel"){
+    dt[['by_gene']] <-
+      var_eitems |>
+      dplyr::left_join(
+        biomarker_assoc_summary,
+        by = c("VAR_ID","VARIANT_CLASS","ENTREZGENE")
+      ) |>
+      dplyr::left_join(
+        biomarker_top_resolution,
+        by = c("VAR_ID","VARIANT_CLASS","ENTREZGENE")
+      ) |>
+      dplyr::select(
+        dplyr::any_of(
+          pcgrr::dt_display$snv_indel_gene_actionable
+        )
+      ) |>
+      dplyr::distinct()
+  }
+
+
+  return(dt)
+
+}

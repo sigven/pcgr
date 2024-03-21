@@ -160,7 +160,7 @@ cosmic_somatic_status <- function(sample_calls) {
 }
 
 #' Function that assigns a logical (STATUS_LIKELY_GERMLINE_HOMOZYGOUS) reflecting whether
-#' a variant is likely homozygous (germline) - based on allelic fraction (AF_TUMOR)
+#' a variant is likely homozygous (germline) - based on allelic fraction (VAF_TUMOR)
 #'
 #' @param sample_calls data frame with sample variant calls
 #'
@@ -175,13 +175,13 @@ hom_af_status <- function(sample_calls) {
   )
   ## assign STATUS_GERMLINE_HOM to all calls
   ## with 100% allelic fraction of alternative allele
-  if ("AF_TUMOR" %in% colnames(sample_calls)) {
+  if ("VAF_TUMOR" %in% colnames(sample_calls)) {
     sample_calls <- sample_calls |>
       dplyr::mutate(
         STATUS_GERMLINE_HOM =
           dplyr::if_else(
-            !is.na(.data$AF_TUMOR) &
-              .data$AF_TUMOR == 1,
+            !is.na(.data$VAF_TUMOR) &
+              .data$VAF_TUMOR == 1,
             TRUE,
             FALSE))
   }
@@ -217,7 +217,7 @@ pon_status <- function(sample_calls) {
 }
 
 #' Function that assigns a logical (STATUS_LIKELY_GERMLINE_HETEROZYGOUS) reflecting whether
-#' a variant is likely heterozygous (germline) - based on allelic fraction (AF_TUMOR),
+#' a variant is likely heterozygous (germline) - based on allelic fraction (VAF_TUMOR),
 #' presence in gnomAD and dbSNP, and no presence in TCGA and COSMIC
 #'
 #' @param sample_calls data frame with sample variant calls
@@ -235,7 +235,7 @@ het_af_germline_status <- function(sample_calls) {
   ## in the [0.40,0.60] AF range, ii) are registered in dbSNP,
   ## iii) in gnomAD
   ## and iv) not present in COSMIC/TCGA
-  if ("AF_TUMOR" %in% colnames(sample_calls) &
+  if ("VAF_TUMOR" %in% colnames(sample_calls) &
       "MAX_AF_GNOMAD" %in% colnames(sample_calls) &
       "STATUS_COSMIC" %in% colnames(sample_calls) &
       "STATUS_TCGA" %in% colnames(sample_calls)) {
@@ -245,8 +245,8 @@ het_af_germline_status <- function(sample_calls) {
           dplyr::if_else(
             !is.na(.data$MAX_AF_GNOMAD) &
               .data$STATUS_DBSNP == TRUE &
-              !is.na(.data$AF_TUMOR) &
-              .data$AF_TUMOR >= 0.40 & .data$AF_TUMOR <= 0.60 &
+              !is.na(.data$VAF_TUMOR) &
+              .data$VAF_TUMOR >= 0.40 & .data$VAF_TUMOR <= 0.60 &
               .data$STATUS_TCGA == FALSE &
               .data$STATUS_COSMIC == FALSE, TRUE, FALSE))
   }
@@ -279,12 +279,12 @@ assign_somatic_classification <- function(sample_calls, settings) {
   ## 2) Variant is recorded in ClinVar as germline
   ## 3) Variant is found in the user-defined panel-of-normals VCF
   ## 4) Evidence for a likely homozygous germline variant -
-  ##      allelic fraction in tumor sample (AF_TUMOR) is 100%
+  ##      allelic fraction in tumor sample (VAF_TUMOR) is 100%
   ##      (very rare scenario for true somatic variants)
   ## 5) Evidence for a likely heterozygous germline variant must
   ##    satisfy three criteria:
   ##    i) Allelic fraction of alternative allele in tumor sample
-  ##        (AF_TUMOR) is 40-60%,
+  ##        (VAF_TUMOR) is 40-60%,
   ##    ii) Variant is present in dbSNP AND gnomAD
   ##    iii) Variant is neither in COSMIC nor TCGA
   ## 6) Variant is recorded in dbSNP (non-somatic ClinVar/COSMIC/TCGA)

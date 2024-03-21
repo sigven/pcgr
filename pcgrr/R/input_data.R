@@ -35,9 +35,13 @@ load_somatic_cna <- function(
 
 
   if (NROW(callset_cna$variant) > 0) {
-    #pcgrr::log4r_info("Adding hyperlinks to gene annotations")
-
     callset_cna[['variant']] <- callset_cna[['variant']] |>
+      dplyr::mutate(CN_TOTAL =
+                      as.integer(.data$N_MAJOR + .data$N_MINOR)) |>
+      dplyr::rename(CN_MINOR = "N_MINOR",
+                    CN_MAJOR = "N_MAJOR") |>
+      dplyr::mutate(MOLECULAR_ALTERATION = paste(
+        .data$SYMBOL, .data$VARIANT_CLASS)) |>
       pcgrr::append_cancer_association_ranks(
         ref_data = ref_data,
         primary_site = tumor_site,
@@ -53,6 +57,7 @@ load_somatic_cna <- function(
     pcgrr::log4r_info("Generating data frame with hyperlinked variant/gene annotations")
 
     callset_cna[['variant_display']] <- callset_cna[['variant']] |>
+
       dplyr::mutate(
         SEGMENT = glue::glue(
           "<a href='http://genome.ucsc.edu/cgi-bin/hgTracks?db={hgname}&position=",
@@ -153,7 +158,33 @@ load_somatic_snv_indel <- function(
       pos_var = 'POS') |>
     pcgrr::append_targeted_drug_annotations(
          ref_data = ref_data,
-         primary_site = tumor_site)
+         primary_site = tumor_site) |>
+    tidyr::separate(.data$HGVSc, c("ENST", "tmp_HGVSc"),
+                    sep = ":", remove = F) |>
+    dplyr::mutate(
+      MOLECULAR_ALTERATION = dplyr::case_when(
+        is.na(.data$SYMBOL) &
+          !is.na(.data$CONSEQUENCE) ~
+          as.character(.data$CONSEQUENCE),
+        !is.na(.data$CONSEQUENCE) &
+        stringr::str_detect(
+          .data$CONSEQUENCE, "^(splice_acceptor|splice_donor)") &
+          !is.na(.data$SYMBOL) &
+          !is.na(.data$tmp_HGVSc) ~
+        paste0(.data$SYMBOL," ",
+              .data$CONSEQUENCE, " - ",
+              .data$tmp_HGVSc),
+        .data$EXONIC_STATUS == "exonic" &
+          !is.na(.data$CONSEQUENCE) &
+          !is.na(.data$HGVSP) ~
+          paste0(.data$SYMBOL," ",
+                .data$CONSEQUENCE, " - ",
+                .data$HGVSP),
+        TRUE ~ as.character(paste0(
+          .data$SYMBOL," ",.data$CONSEQUENCE))
+        )) |>
+    dplyr::select(-c("tmp_HGVSc","ENST"))
+
 
   ## Tumor-only input
   if (as.logical(settings$conf$assay_properties$vcf_tumor_only) == TRUE) {
@@ -407,6 +438,22 @@ load_dna_variants <- function(
       )
   }
 
+  if ("VAF_CONTROL" %in% colnames(results[['variant']])) {
+    results[['variant']] <-
+      results[['variant']] |>
+      dplyr::mutate(
+        VAF_CONTROL = round(as.numeric(.data$VAF_CONTROL), 3)
+      )
+  }
+
+  if ("VAF_TUMOR" %in% colnames(results[['variant']])) {
+    results[['variant']] <-
+      results[['variant']] |>
+      dplyr::mutate(
+        VAF_TUMOR = round(as.numeric(.data$VAF_TUMOR), 3)
+      )
+  }
+
   if (vartype == 'cna') {
 
     results[['variant']] <-
@@ -531,12 +578,29 @@ load_dna_variants <- function(
               !stringr::str_detect(.data$BIOMARKER_MATCH,"by_genomic_coord") &
                 !stringr::str_detect(.data$BIOMARKER_MATCH,"by_hgvsp_principal") &
                 !stringr::str_detect(.data$BIOMARKER_MATCH,"by_codon_principal") &
-                stringr::str_detect(.data$BIOMARKER_MATCH,"by_exon_") ~ "exon",
+                stringr::str_detect(.data$BIOMARKER_MATCH,"by_exon_(mut|insertion|deletion)_nonprincipal") ~ "exon_nonprincipal",
+              !stringr::str_detect(.data$BIOMARKER_MATCH,"by_genomic_coord") &
+                !stringr::str_detect(.data$BIOMARKER_MATCH,"by_hgvsp_principal") &
+                !stringr::str_detect(.data$BIOMARKER_MATCH,"by_codon_principal") &
+                stringr::str_detect(.data$BIOMARKER_MATCH,"by_exon_(mut|insertion|deletion)_principal") ~ "exon",
               !stringr::str_detect(.data$BIOMARKER_MATCH,"by_genomic_coord") &
                 !stringr::str_detect(.data$BIOMARKER_MATCH,"by_hgvsp_") &
                 !stringr::str_detect(.data$BIOMARKER_MATCH,"by_codon_") &
                 !stringr::str_detect(.data$BIOMARKER_MATCH,"by_exon_") &
-                stringr::str_detect(.data$BIOMARKER_MATCH,"by_gene_") ~ "gene",
+                stringr::str_detect(.data$BIOMARKER_MATCH,"by_aa_region") ~ "gene_region_mut",
+              !stringr::str_detect(.data$BIOMARKER_MATCH,"by_genomic_coord") &
+                !stringr::str_detect(.data$BIOMARKER_MATCH,"by_hgvsp_") &
+                !stringr::str_detect(.data$BIOMARKER_MATCH,"by_codon_") &
+                !stringr::str_detect(.data$BIOMARKER_MATCH,"by_exon_") &
+                !stringr::str_detect(.data$BIOMARKER_MATCH,"by_aa_") &
+                stringr::str_detect(.data$BIOMARKER_MATCH,"by_gene_mut_lof") ~ "gene_lof",
+              !stringr::str_detect(.data$BIOMARKER_MATCH,"by_genomic_coord") &
+                !stringr::str_detect(.data$BIOMARKER_MATCH,"by_hgvsp_") &
+                !stringr::str_detect(.data$BIOMARKER_MATCH,"by_codon_") &
+                !stringr::str_detect(.data$BIOMARKER_MATCH,"by_exon_") &
+                !stringr::str_detect(.data$BIOMARKER_MATCH,"by_aa_") &
+                !stringr::str_detect(.data$BIOMARKER_MATCH,"by_gene_mut_lof") &
+                stringr::str_detect(.data$BIOMARKER_MATCH,"by_gene_mut") ~ "gene_mut",
               TRUE ~ as.character('other')
             )) |>
 
@@ -700,7 +764,7 @@ load_dna_variants <- function(
 
 
     ## Assign each variant a tier according to
-    ## ACMG/AMP guidelines for clinical actionability
+    ## ACMG/AMP guidelines for clinical actionable
     ## of somatic variants
     if (variant_origin == "Somatic") {
 

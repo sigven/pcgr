@@ -528,11 +528,8 @@ append_targeted_drug_annotations <- function(
     if (nrow(var_drug_df) > 0) {
       var_drug_df <- var_drug_df |>
         dplyr::left_join(
-          dplyr::filter(
-            ref_data[['drug']][['inhibitors_any_label']],
-            .data$QUERY_SITE == primary_site),
+          ref_data[['drug']][['inhibitors_any_label']],
           by = c("SYMBOL")) |>
-        dplyr::select(-c("QUERY_SITE")) |>
         dplyr::left_join(
           dplyr::filter(
             ref_data[['drug']][['inhibitors_on_label']],
@@ -594,11 +591,8 @@ append_drug_var_link <- function(
     if (nrow(var_drug_df) > 0) {
       var_drug_df <- var_drug_df |>
         dplyr::left_join(
-          dplyr::filter(
             ref_data[['drug']][['inhibitors_any_label']],
-            .data$QUERY_SITE == primary_site),
           by = c("SYMBOL")) |>
-        dplyr::select(-c("QUERY_SITE")) |>
         dplyr::left_join(
           dplyr::filter(
             ref_data[['drug']][['inhibitors_on_label']],

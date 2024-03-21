@@ -1,5 +1,5 @@
 #' Function that parses and loads reference data from files in the
-#' assembly-specific PCGR bundle directories
+#' assembly-specific PCGR bundle directory
 #'
 #' @param pcgr_db_assembly_dir Assembly-specific root path for data bundle
 #' @param genome_assembly grch37/grch38
@@ -10,6 +10,7 @@ load_reference_data <- function(
     genome_assembly = "grch38") {
 
   pcgr_ref_data <- list()
+
 
 
   log4r_info(paste0(
@@ -607,10 +608,8 @@ load_reference_data <- function(
       .data$DRUG_MAX_PHASE_INDICATION > 2) |>
     dplyr::filter(
         .data$QUERY_SITE != "Any") |>
-        #.data$QUERY_SITE != "Other/Unknown") |>
     dplyr::group_by(
       .data$SYMBOL,
-      .data$QUERY_SITE,
       .data$DRUG_NAME,
       .data$DRUG_LINK,
       .data$DRUG_CLASS) |>
@@ -628,7 +627,6 @@ load_reference_data <- function(
     ) |>
     dplyr::group_by(
       .data$SYMBOL,
-      .data$QUERY_SITE,
       .data$DRUG_CLASS) |>
     dplyr::summarise(
       DRUG_NAME = paste(.data$DRUG_NAME, collapse="|"),
@@ -658,7 +656,6 @@ load_reference_data <- function(
     ) |>
     dplyr::group_by(
       .data$SYMBOL,
-      .data$QUERY_SITE
     ) |>
     dplyr::summarise(
       TARGETED_INHIBITORS_ALL2 = paste(

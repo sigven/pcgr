@@ -181,17 +181,12 @@ def check_format_ad_dp_tags(vcf: VCF,
         logger.warning(f"Could not find the specified tumor_af_tag ('{tumor_af_tag}') in INFO column of input VCF - filtering of heterozygous germline variants in tumor-only mode will be ignored")
 
 
-    if found_tdp_tag == 1 and found_taf_tag == 0:
-        logger.warning('BOTH \' tumor_dp_tag\' AND \' tumor_af_tag\' need to be specified for use in tumor report (\'tumor_af_tag\' is missing)')
+    if (found_tdp_tag == 1 and found_taf_tag == 0) or (found_tdp_tag == 0 and found_taf_tag == 1):
+        logger.warning('BOTH \' tumor_dp_tag\' AND \' tumor_af_tag\' need to be specified for use in tumor report (\'tumor_af_tag\' or \'tumor_dp_tag\' is missing)')
 
-    if found_tdp_tag == 0 and found_taf_tag == 1:
-        logger.warning('BOTH \'tumor_dp_tag\' AND \'tumor_af_tag\' need to be specified for use in tumor report (\'tumor_dp_tag\' is missing)')
+    if (found_ndp_tag == 1 and found_naf_tag == 0) or (found_ndp_tag == 0 and found_naf_tag == 1):
+        logger.warning('BOTH \'control_dp_tag\' AND \'control_af_tag\' need to be specified for use in tumor report (\'control_af_tag\' or \'control_dp_tag\' is missing)')
 
-    if found_ndp_tag == 1 and found_naf_tag == 0:
-        logger.warning('BOTH \'control_dp_tag\' AND \'control_af_tag\' need to be specified for use in tumor report (\'control_af_tag\' is missing)')
-
-    if found_ndp_tag == 0 and found_naf_tag == 1:
-        logger.warning('BOTH \'control_dp_tag\' AND \'control_af_tag\' need to be specified for use in tumor report (\'control_dp_tag\' is missing)')
 
     ## if filtering turned on for AF-based tumor-only filtering, return error if TVAF not defined
 

@@ -28,7 +28,7 @@ predict_msi_status <- function(variant_set,
           "SYMBOL","GENOMIC_CHANGE","VARIANT_CLASS",
           "PFAM_DOMAIN_NAME","GENENAME","PROTEIN_CHANGE",
           "MUTATION_HOTSPOT","CLINVAR_TRAITS_ALL",
-          "TCGA_FREQUENCY","AF_TUMOR","DP_TUMOR",
+          "TCGA_FREQUENCY","VAF_TUMOR","DP_TUMOR",
           "AF_CONTROL","DP_CONTROL","CALL_CONFIDENCE",
           "SIMPLEREPEATS_HIT","WINMASKER_HIT")
       )
@@ -242,7 +242,8 @@ predict_msi_status <- function(variant_set,
                  "fracRepeatIndels",
                  "fracNonRepeatIndels",
                  "fracIndels",
-                 "tmb", "tmb_snv",
+                 "tmb",
+                 "tmb_snv",
                  "tmb_indel")) {
     if (nrow(msi_stats[is.na(msi_stats[stat]), ]) > 0) {
       msi_stats[is.na(msi_stats[stat]), ][stat] <- 0
@@ -370,11 +371,11 @@ msi_indel_fraction_plot <- function(tcga_msi_dataset, indel_fraction) {
                              color = .data$MSI_status,
                              fill = .data$MSI_status),
       position = "dodge", binwidth = 0.01) +
-    ggplot2::ylab("Number of TCGA samples") +
+    ggplot2::ylab("Number of samples") +
     ggplot2::scale_fill_manual(values = color_vec) +
     ggplot2::scale_color_manual(values = color_vec) +
     ggplot2::theme_classic() +
-    ggplot2::xlab("InDel fraction among somatic calls") +
+    ggplot2::xlab("InDel fraction - somatic variants") +
     ggplot2::theme(plot.title =
                      ggplot2::element_text(family = "Helvetica",
                                            size = 16,
@@ -396,9 +397,65 @@ msi_indel_fraction_plot <- function(tcga_msi_dataset, indel_fraction) {
                    axis.title.y =
                      ggplot2::element_text(family = "Helvetica",
                                            size = 14, vjust = 1.5),
-                   plot.margin = (grid::unit(c(0.5, 2, 2, 0.5), "cm"))) +
+                   plot.margin = (grid::unit(c(0.5, 0.5, 0.5, 0.5), "cm"))) +
     ggplot2::geom_vline(xintercept = as.numeric(indel_fraction),
-                        size = 1.4, linetype = "dashed")
+                        size = 1.1, linetype = "dotted")
+
+  return(p)
+
+}
+
+#' Function that plots the indel load for a given sample and
+#' contrasts this with the distribution for MSI-H/MSS samples from TCGA
+#'
+#' @param tcga_msi_dataset underlying dataset from TCGA used for development
+#' of statistical classifier
+#' @param indel_load fraction of indels of all mutations (SNVs + indels)
+#' @return p
+#'
+#' @export
+
+msi_indel_load_plot <- function(tcga_msi_dataset, indel_load) {
+
+  color_vec <- utils::head(
+    pcgrr::color_palette[["tier"]][["values"]], 2)
+  names(color_vec) <- c("MSS", "MSI.H")
+
+  p <- ggplot2::ggplot(data = tcga_msi_dataset) +
+    ggplot2::geom_histogram(
+      mapping = ggplot2::aes(x = .data$fracIndels,
+                             color = .data$MSI_status,
+                             fill = .data$MSI_status),
+      position = "dodge", binwidth = 0.01) +
+    ggplot2::ylab("Number of samples") +
+    ggplot2::scale_fill_manual(values = color_vec) +
+    ggplot2::scale_color_manual(values = color_vec) +
+    ggplot2::theme_classic() +
+    ggplot2::xlab("InDel load - somatic variants") +
+    ggplot2::theme(plot.title =
+                     ggplot2::element_text(family = "Helvetica",
+                                           size = 16,
+                                           hjust = 0.5, face = "bold"),
+                   axis.text.x =
+                     ggplot2::element_text(family = "Helvetica",
+                                           size = 14, face = "bold"),
+                   axis.title.x =
+                     ggplot2::element_text(family = "Helvetica",
+                                           size = 14),
+                   legend.title =
+                     ggplot2::element_blank(),
+                   legend.text =
+                     ggplot2::element_text(family = "Helvetica",
+                                           size = 14),
+                   axis.text.y =
+                     ggplot2::element_text(family = "Helvetica",
+                                           size = 14),
+                   axis.title.y =
+                     ggplot2::element_text(family = "Helvetica",
+                                           size = 14, vjust = 1.5),
+                   plot.margin = (grid::unit(c(0.5, 0.5, 0.5, 0.5), "cm"))) +
+    ggplot2::geom_vline(xintercept = as.numeric(indel_fraction),
+                        size = 1.1, linetype = "dotted")
 
   return(p)
 

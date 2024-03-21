@@ -14,7 +14,7 @@ flexdashboard::valueBox("TIER 3", caption = NULL, color = '#000000', icon = NULL
 
 ```{r}
 flexdashboard::valueBox(
-  pcg_report$content$snv_indel$vstats$n_tier3, 
+  pcg_report$content$snv_indel$vstats$n_actionability_tier3, 
   color = pcg_report$settings$conf$report_color, 
   icon = "fa-dna")
 ```
@@ -24,7 +24,7 @@ flexdashboard::valueBox(
 ```{r oncogene_variants, echo = F}
 flexdashboard::valueBox(
   as.character(
-    pcg_report$content$snv_indel$vstats$n_tier3_oncogene), 
+    pcg_report$content$snv_indel$vstats$n_actionability_tier3_oncogene), 
   color = pcg_report$settings$conf$report_color, 
   icon = "fa-dna")
 ```
@@ -35,7 +35,7 @@ flexdashboard::valueBox(
 ```{r tsgene_variants, echo = F}
 flexdashboard::valueBox(
   as.character(
-    pcg_report$content$snv_indel$vstats$n_tier3_tsg), 
+    pcg_report$content$snv_indel$vstats$n_actionability_tier3_tsg), 
   color = pcg_report$settings$conf$report_color, 
   icon = "fa-dna")
 ```
@@ -45,7 +45,7 @@ flexdashboard::valueBox(
 ```{r dual_role_variants, echo = F}
 flexdashboard::valueBox(
   as.character(
-    pcg_report$content$snv_indel$vstats$n_tier3_dualrole), 
+    pcg_report$content$snv_indel$vstats$n_actionability_tier3_dualrole), 
   color = pcg_report$settings$conf$report_color, 
   icon = "fa-dna")
 ```
@@ -115,7 +115,7 @@ cat('\n')
 <br>
 
 
-```{r table_tier3, eval = pcg_report$content$snv_indel$vstats$n_tier3 > 0}
+```{r table_tier3, eval = pcg_report$content$snv_indel$vstats$n_actionability_tier3 > 0}
 
 dt <- DT::datatable(
   variants_tier3_shared, 
@@ -153,7 +153,7 @@ dt
 
 ```
 
-```{r tier3_missing_data, echo=F, results = 'asis', eval = pcg_report$content$snv_indel$vstats$n_tier3 == 0}
+```{r tier3_missing_data, echo=F, results = 'asis', eval = pcg_report$content$snv_indel$vstats$n_actionability_tier3 == 0}
 cat('\n*  <i> <font style="font-size: 110%"><b>No</b> other variants found in proto-oncogenes or tumor suppressor genes.</font></i>', sep = '\n')
 cat('\n')
 ```

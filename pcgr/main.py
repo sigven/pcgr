@@ -31,18 +31,22 @@ def cli():
     optional_cna = parser.add_argument_group("Somatic copy number alteration (CNA) data options")
     optional_vcfanno = parser.add_argument_group("vcfanno options")
     optional_vep = parser.add_argument_group("VEP options")
-    optional_assay = parser.add_argument_group("Sequencing assay settings")
-    optional_tumor = parser.add_argument_group("Tumor sample settings")
+    optional_assay = parser.add_argument_group("Sequencing assay options")
+    optional_tumor = parser.add_argument_group("Tumor sample options")
     optional_tmb_msi = parser.add_argument_group("Tumor mutational burden (TMB) and MSI options")
-    optional_rna = parser.add_argument_group("Bulk RNA-seq and RNA fusion data settings")
+    optional_rna = parser.add_argument_group("Bulk RNA-seq and RNA fusion data options")
+    #optional_germline = parser.add_argument_group("Germline variant options")
     optional_signatures = parser.add_argument_group("Mutational signature options")
     optional_tumor_only = parser.add_argument_group("Tumor-only filtering options")
-    optional_allelic_support = parser.add_argument_group("Allelic support settings")
+    optional_allelic_support = parser.add_argument_group("Allelic support options")
     optional_other = parser.add_argument_group("Other options")
 
     optional_rna.add_argument("--input_rna_fusion", dest = "input_rna_fusion", help = "File with RNA fusion transcripts detected in tumor (tab-separated values)")
     optional_rna.add_argument("--input_rna_exp", dest = "input_rna_exp", help = "File with RNA expression counts (bulk) of genes in tumor (tab-separated values)")
-
+    
+    #optional_germline.add_argument('--input_germline_calls', dest="input_germline_calls", help="Compressed TSV file with classified germline calls from CPSR")
+    
+    
     optional_cna.add_argument("--input_cna", dest="input_cna", help="Somatic copy number alteration segments (tab-separated values)")   
     optional_cna.add_argument("--n_copy_gain", type=int, default=6, dest="n_copy_gain", help="Minimum number of total copy number for segments considered as gains/amplifications (default: %(default)s)")
     optional_cna.add_argument("--cna_overlap_pct", type=float, default=50, dest="cna_overlap_pct", help="Mean percent overlap between copy number segment and gene transcripts for reporting of gains/losses in tumor suppressor genes/oncogenes, (default: %(default)s)")
@@ -199,12 +203,12 @@ def run_pcgr(pcgr_paths, conf_options):
 
         random_id = random_id_generator(15) 
         # Define temporary output file names
-        input_vcf_validated =             f'{conf_options["sample_id"]}.{random_id}.pcgr_ready.vcf.gz'
-        input_vcf_validated_uncompr =     f'{conf_options["sample_id"]}.{random_id}.pcgr_ready.vcf'
-        vep_vcf =                         f'{conf_options["sample_id"]}.{random_id}.vep.vcf'
-        vep_vcfanno_vcf =                 f'{conf_options["sample_id"]}.{random_id}.vep.vcfanno.vcf'
-        vep_vcfanno_summarised_vcf =      f'{conf_options["sample_id"]}.{random_id}.vep.vcfanno.summarised.vcf'
-        vep_vcfanno_summarised_pass_vcf = f'{conf_options["sample_id"]}.{random_id}.vep.vcfanno.summarised.pass.vcf'
+        input_vcf_validated =             os.path.join(output_dir, f'{conf_options["sample_id"]}.{random_id}.pcgr_ready.vcf.gz')
+        input_vcf_validated_uncompr =     os.path.join(output_dir, f'{conf_options["sample_id"]}.{random_id}.pcgr_ready.vcf')
+        vep_vcf =                         os.path.join(output_dir, f'{conf_options["sample_id"]}.{random_id}.vep.vcf')
+        vep_vcfanno_vcf =                 os.path.join(output_dir, f'{conf_options["sample_id"]}.{random_id}.vep.vcfanno.vcf')
+        vep_vcfanno_summarised_vcf =      os.path.join(output_dir, f'{conf_options["sample_id"]}.{random_id}.vep.vcfanno.summarised.vcf')
+        vep_vcfanno_summarised_pass_vcf = os.path.join(output_dir, f'{conf_options["sample_id"]}.{random_id}.vep.vcfanno.summarised.pass.vcf')
         prefix = os.path.join(output_dir, f'{conf_options["sample_id"]}.pcgr_acmg.{conf_options["genome_assembly"]}')
         output_vcf =             f'{prefix}.vcf.gz'
         output_pass_vcf =        f'{prefix}.pass.vcf.gz'
@@ -454,6 +458,22 @@ def run_pcgr(pcgr_paths, conf_options):
         variant_set = set_allelic_support(variant_set, allelic_support_tags = yaml_data["conf"]['somatic_snv']['allelic_support'])
         variant_set = clean_annotations(variant_set, yaml_data, germline = False, logger = logger)        
         variant_set.fillna('.').to_csv(output_pass_tsv_gz, sep="\t", compression="gzip", index=False)
+        
+        ## Check if AD/DP properties could be pulled from VCFs
+        if {'DP_CONTROL'}.issubset(variant_set.columns):
+            if variant_set.loc[variant_set['DP_CONTROL'] == '.'].empty:
+                yaml_data['conf']['sample_properties']['dp_control_detected'] = 1
+        if {'VAF_CONTROL'}.issubset(variant_set.columns):
+            if variant_set.loc[variant_set['VAF_CONTROL'] == '.'].empty:
+                yaml_data['conf']['sample_properties']['vaf_control_detected'] = 1
+        if {'DP_TUMOR'}.issubset(variant_set.columns):
+            if variant_set.loc[variant_set['DP_TUMOR'] == '.'].empty:
+                yaml_data['conf']['sample_properties']['dp_tumor_detected'] = 1
+        if {'VAF_TUMOR'}.issubset(variant_set.columns):
+            if variant_set.loc[variant_set['VAF_TUMOR'] == '.'].empty:
+                yaml_data['conf']['sample_properties']['vaf_tumor_detected'] = 1
+        
+        
         if not debug:
             remove_file(output_pass_vcf2tsv_gz)
         

@@ -212,9 +212,8 @@ init_cna_vstats <- function() {
               "n_other_drugtarget_gain",
               "n_segments_loss",
               "n_segments_gain",
-              "n_tier1",
-              "n_tier2",
-              "n_tier3")) {
+              "n_actionable_tier1",
+              "n_actionable_tier2")) {
     vstats[[t]] <- 0
   }
   return(vstats)
@@ -232,12 +231,12 @@ init_snv_indel_vstats <- function() {
               "n_sub",
               "n_coding",
               "n_noncoding",
-              "n_tier1",
-              "n_tier2",
-              "n_tier3",
-              "n_tier3_tsg",
-              "n_tier3_oncogene",
-              "n_tier3_dualrole",
+              "n_actionable_tier1",
+              "n_actionable_tier2",
+              "n_actionable_tier3",
+              "n_actionable_tier3_tsg",
+              "n_actionable_tier3_oncogene",
+              "n_actionable_tier3_dualrole",
               "n_tier4",
               "n_tier5",
               "n_eitems_diagnostic_tier1",

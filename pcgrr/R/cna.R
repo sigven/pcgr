@@ -25,7 +25,7 @@ make_cnaqc_object <- function(
     c("CHROM","POS",
       "REF","ALT",
       "DP_TUMOR",
-      "AF_TUMOR",
+      "VAF_TUMOR",
       "SYMBOL",
       "CONSEQUENCE",
       "ONCOGENICITY",
@@ -38,8 +38,8 @@ make_cnaqc_object <- function(
     c("CHROM",
       "SEGMENT_START",
       "SEGMENT_END",
-      "N_MAJOR",
-      "N_MINOR"),
+      "CN_MAJOR",
+      "CN_MINOR"),
     only_colnames = F,
     quiet = T)
 
@@ -52,11 +52,11 @@ make_cnaqc_object <- function(
       chr = paste0('chr', .data$CHROM),
       FILTER = "PASS",
       DP = .data$DP_TUMOR,
-      VAF = .data$AF_TUMOR,
+      VAF = .data$VAF_TUMOR,
       NV = as.integer(
         round(
           .data$DP_TUMOR *
-            .data$AF_TUMOR,
+            .data$VAF_TUMOR,
           digits = 0)),
       GENE = .data$SYMBOL,
       is_driver = FALSE,
@@ -94,8 +94,8 @@ make_cnaqc_object <- function(
       length = .data$SEGMENT_END -
         .data$SEGMENT_START,
       covRatio = as.numeric(NA),
-      Major = .data$N_MAJOR,
-      minor = .data$N_MINOR) |>
+      Major = .data$CN_MAJOR,
+      minor = .data$CN_MINOR) |>
     dplyr::select(
       c("chr",
         "from",

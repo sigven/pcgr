@@ -155,7 +155,7 @@ def set_allelic_support(variant_set: pd.DataFrame, allelic_support_tags: dict) -
     """
     Set allelic support for variants
     """
-    for e in ['DP_CONTROL','DP_TUMOR','AF_CONTROL','AF_TUMOR']:
+    for e in ['DP_CONTROL','DP_TUMOR','VAF_CONTROL','VAF_TUMOR']:
         if e in variant_set.columns:
             variant_set[e] = np.nan
 
@@ -168,12 +168,12 @@ def set_allelic_support(variant_set: pd.DataFrame, allelic_support_tags: dict) -
             variant_set['DP_TUMOR'] = variant_set[allelic_support_tags['tumor_dp_tag']].astype(int)
     
     if allelic_support_tags['control_af_tag'] != "_NA_":
-        if {allelic_support_tags['control_af_tag'],'AF_CONTROL'}.issubset(variant_set.columns):
-            variant_set['AF_CONTROL'] = variant_set[allelic_support_tags['control_af_tag']].astype(float).round(4)
+        if {allelic_support_tags['control_af_tag'],'VAF_CONTROL'}.issubset(variant_set.columns):
+            variant_set['VAF_CONTROL'] = variant_set[allelic_support_tags['control_af_tag']].astype(float).round(4)
     
     if allelic_support_tags['tumor_af_tag'] != "_NA_":
-        if {allelic_support_tags['tumor_af_tag'],'AF_TUMOR'}.issubset(variant_set.columns):
-            variant_set['AF_TUMOR'] = variant_set[allelic_support_tags['tumor_af_tag']].astype(float).round(4)
+        if {allelic_support_tags['tumor_af_tag'],'VAF_TUMOR'}.issubset(variant_set.columns):
+            variant_set['VAF_TUMOR'] = variant_set[allelic_support_tags['tumor_af_tag']].astype(float).round(4)
     
     return variant_set
 
@@ -188,21 +188,21 @@ def calculate_tmb(variant_set: pd.DataFrame, tumor_dp_min: int, tumor_af_min: fl
     counts_coding_and_silent = 0
     counts_coding_non_silent = 0
     
-    if {'CONSEQUENCE','AF_TUMOR','DP_TUMOR','VARIANT_CLASS'}.issubset(variant_set.columns):
+    if {'CONSEQUENCE','VAF_TUMOR','DP_TUMOR','VARIANT_CLASS'}.issubset(variant_set.columns):
         tmb_data_set = \
-            variant_set[['CONSEQUENCE','DP_TUMOR','AF_TUMOR','VARIANT_CLASS']]
+            variant_set[['CONSEQUENCE','DP_TUMOR','VAF_TUMOR','VARIANT_CLASS']]
             
         n_rows_raw = len(tmb_data_set)
         if float(tumor_af_min) > 0:
-            ## filter variant set to those with AF_TUMOR > af_min
-            if variant_set[variant_set['AF_TUMOR'].isna() == True].empty is True:
-                tmb_data_set = tmb_data_set.loc[tmb_data_set['AF_TUMOR'] >= float(tumor_af_min),:]
+            ## filter variant set to those with VAF_TUMOR > tumor_af_min
+            if variant_set[variant_set['VAF_TUMOR'].isna() == True].empty is True:
+                tmb_data_set = tmb_data_set.loc[tmb_data_set['VAF_TUMOR'] >= float(tumor_af_min),:]
                 n_removed_af = n_rows_raw - len(tmb_data_set)
                 logger.info(f'Removing n = {n_removed_af} variants with allelic fraction (tumor sample) < {tumor_af_min}')
             else:
-                logger.info(f"Cannot filter on sequencing depth - 'AF_TUMOR' contains missing values")
+                logger.info(f"Cannot filter on sequencing depth - 'VAF_TUMOR' contains missing values")
         if int(tumor_dp_min) > 0:
-            ## filter variant set to those with AF_TUMOR > af_min
+            ## filter variant set to those with DP_TUMOR > tumor_dp_min
             if variant_set[variant_set['DP_TUMOR'].isna() == True].empty is True:
                 tmb_data_set = tmb_data_set.loc[tmb_data_set['DP_TUMOR'] >= int(tumor_dp_min),:]
                 n_removed_dp = n_rows_raw - len(tmb_data_set)

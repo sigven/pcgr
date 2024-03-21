@@ -55,6 +55,74 @@ remove_cols_from_df <- function(df, cnames = NULL) {
 }
 
 #' Function that plots a histogram of the the variant allelic
+#' support (tumor)
+#'
+#' @param var_df data frame with somatic mutations
+#' @param bin_size size of bins for allelic frequency
+#'
+#' @return p geom_histogram plot from ggplot2
+#'
+#' @export
+af_distribution <- function(var_df, bin_size = 0.05) {
+
+  af_bin_df <- data.frame()
+  assertable::assert_colnames(
+    var_df, c("VAF_TUMOR","VARIANT_CLASS"),
+    only_colnames = F, quiet = T)
+  var_df <- var_df |>
+    dplyr::select(c("VAF_TUMOR", "VARIANT_CLASS"))
+
+  if(NROW(var_df) <= 200){
+    bin_size = 0.10
+  }
+  if(NROW(var_df) > 500){
+    bin_size = 0.025
+  }
+
+  i <- 1
+  num_bins <- as.integer(1 / bin_size)
+  bin_start <- 0
+  while (i <= num_bins) {
+    bin_end <- bin_start + bin_size
+    bin_name <- as.character(paste0(bin_start, " - ", bin_end))
+    for(e in c('SNV','deletion','insertion','indel','substitution')){
+      df <- data.frame(bin_name = bin_name,
+                       bin_start = bin_start,
+                       bin_end = bin_end,
+                       bin = as.integer(i),
+                       VARIANT_CLASS = e, stringsAsFactors = F)
+      af_bin_df <- dplyr::bind_rows(
+        af_bin_df, df)
+    }
+    bin_start <- bin_end
+    i <- i + 1
+  }
+
+  var_df_trans <- var_df |>
+    dplyr::mutate(
+      bin = cut(.data$VAF_TUMOR,
+                breaks = seq(0,1,bin_size),
+                right = F, include.lowest = T, labels = F))
+
+  var_df_trans_bin <- as.data.frame(
+    dplyr::group_by(
+      var_df_trans, .data$VARIANT_CLASS, .data$bin) |>
+      dplyr::summarise(Count = dplyr::n(),
+                       .groups = "drop"))
+  af_bin_df <- af_bin_df |>
+    dplyr::left_join(
+      var_df_trans_bin, by = c("bin", "VARIANT_CLASS")) |>
+    dplyr::mutate(Count = dplyr::if_else(
+      is.na(.data$Count),
+      as.numeric(0),
+      as.numeric(.data$Count)))
+
+  return(af_bin_df)
+
+}
+
+
+#' Function that plots a histogram of the the variant allelic
 #' support (tumor) - grouped by tiers
 #'
 #' @param tier_df data frame with somatic mutations
@@ -67,15 +135,15 @@ tier_af_distribution <- function(tier_df, bin_size = 0.05) {
 
   af_bin_df <- data.frame()
   assertable::assert_colnames(
-    tier_df, c("AF_TUMOR","TIER"),
+    tier_df, c("VAF_TUMOR","TIER"),
     only_colnames = F, quiet = T)
   tier_df <- tier_df |>
-    dplyr::select(c("AF_TUMOR", "TIER")) |>
+    dplyr::select(c("VAF_TUMOR", "TIER")) |>
     dplyr::mutate(
       TIER = paste0("TIER ", .data$TIER))
 
-  if(NROW(tier_df) <= 200){
-    bin_size = 0.10
+  if(NROW(tier_df) > 500){
+    bin_size = 0.025
   }
 
   i <- 1
@@ -101,7 +169,7 @@ tier_af_distribution <- function(tier_df, bin_size = 0.05) {
 
   tier_df_trans <- tier_df |>
     dplyr::mutate(
-      bin = cut(.data$AF_TUMOR,
+      bin = cut(.data$VAF_TUMOR,
                 breaks = seq(0,1,bin_size),
                 right = F, include.lowest = T, labels = F))
 
@@ -386,14 +454,13 @@ variant_stats_report <- function(
           nrow()
       }
     }
-
   }
 
   if("TIER" %in% colnames(callset$variant)){
 
-    for (n in c("n_tier1",
-                "n_tier2",
-                "n_tier3",
+    for (n in c("n_actionable_tier1",
+                "n_actionable_tier2",
+                "n_actionable_tier3",
                 "n_tier4",
                 "n_tier5")) {
       call_stats[[name]][[n]] <- 0
@@ -424,52 +491,42 @@ variant_stats_report <- function(
             dplyr::distinct()
         }
         if(NROW(biomarkers_for_stats) > 0){
-          call_stats[[name]][["n_tier1"]] <-
-            callset$variant |>
-            dplyr::filter(
-              !is.na(.data$TIER) & .data$TIER == 1) |>
-            dplyr::inner_join(
-              biomarkers_for_stats,
-              by = c("TIER","VAR_ID","ENTREZGENE")) |>
-            NROW()
-          call_stats[[name]][["n_tier2"]] <-
-            callset$variant |>
-            dplyr::filter(
-              !is.na(.data$TIER) &
-                .data$TIER == 2) |>
-            dplyr::inner_join(
-              biomarkers_for_stats,
-              by = c("TIER","VAR_ID","ENTREZGENE")) |>
-            NROW()
+          for(i in 1:2){
+            call_stats[[name]][[paste0("n_actionable_tier",i)]] <-
+              callset$variant |>
+              dplyr::filter(
+                !is.na(.data$TIER) &
+                  .data$TIER == i) |>
+              dplyr::inner_join(
+                biomarkers_for_stats,
+                by = c("TIER","VAR_ID","ENTREZGENE")) |>
+              NROW()
+          }
         }
       }
-      call_stats[[name]][["n_tier3"]] <-
+      call_stats[[name]][["n_actionable_tier3"]] <-
         callset$variant |>
         dplyr::filter(
           !is.na(.data$TIER) &
             .data$TIER == 3) |>
         NROW()
-      call_stats[[name]][["n_tier4"]] <-
-        callset$variant |>
-        dplyr::filter(
-          !is.na(.data$TIER) &
-            .data$TIER == 4) |>
-        NROW()
-      call_stats[[name]][["n_tier5"]] <-
-        callset$variant |>
-        dplyr::filter(
-          !is.na(.data$TIER) &
-            .data$TIER == 5) |>
-        NROW()
 
+      for(i in 4:5){
+        call_stats[[name]][[paste0("n_tier",i)]] <-
+          callset$variant |>
+          dplyr::filter(
+            !is.na(.data$TIER) &
+              .data$TIER == i) |>
+          NROW()
+      }
       if (vartype == "cna"){
         call_stats[[name]][["n_tier4"]] <- NULL
         call_stats[[name]][["n_tier5"]] <- NULL
       }
 
       if(vartype == "snv_indel"){
-        if(call_stats[[name]][["n_tier3"]] > 0){
-          call_stats[[name]][["n_tier3_tsg"]] <-
+        if(call_stats[[name]][["n_actionable_tier3"]] > 0){
+          call_stats[[name]][["n_actionable_tier3_tsg"]] <-
             callset$variant |>
             dplyr::filter(
               !is.na(.data$TIER) &
@@ -479,7 +536,7 @@ variant_stats_report <- function(
                 .data$ONCOGENE == FALSE) |>
             NROW()
 
-          call_stats[[name]][["n_tier3_oncogene"]] <-
+          call_stats[[name]][["n_actionable_tier3_oncogene"]] <-
             callset$variant |>
             dplyr::filter(
               !is.na(.data$TIER) &
@@ -489,7 +546,7 @@ variant_stats_report <- function(
                 .data$ONCOGENE == TRUE) |>
             NROW()
 
-          call_stats[[name]][["n_tier3_dualrole"]] <-
+          call_stats[[name]][["n_actionable_tier3_dualrole"]] <-
             callset$variant |>
             dplyr::filter(
               !is.na(.data$TIER) &
@@ -500,9 +557,9 @@ variant_stats_report <- function(
             NROW()
 
         }else{
-          call_stats[[name]][["n_tier3_tsg"]] <- 0
-          call_stats[[name]][["n_tier3_oncogene"]] <- 0
-          call_stats[[name]][["n_tier3_dualrole"]] <- 0
+          call_stats[[name]][["n_actionable_tier3_tsg"]] <- 0
+          call_stats[[name]][["n_actionable_tier3_oncogene"]] <- 0
+          call_stats[[name]][["n_actionable_tier3_dualrole"]] <- 0
         }
       }
 
@@ -707,10 +764,10 @@ filter_read_support <- function(vcf_df, config = NULL, precision = 3) {
       vcf_df,
       .data$DP_TUMOR >= config$somatic_snv$allelic_support$tumor_dp_min)
   }
-  if (!any(is.na(vcf_df$AF_TUMOR))) {
+  if (!any(is.na(vcf_df$VAF_TUMOR))) {
     vcf_df <- dplyr::filter(
       vcf_df,
-      .data$AF_TUMOR >= config$somatic_snv$allelic_support$tumor_af_min)
+      .data$VAF_TUMOR >= config$somatic_snv$allelic_support$tumor_af_min)
   }
   if (!any(is.na(vcf_df$AF_CONTROL))) {
     vcf_df <- dplyr::filter(
@@ -741,13 +798,15 @@ filter_read_support <- function(vcf_df, config = NULL, precision = 3) {
 #' @param sample_name sample name
 #' @param output_directory Output directory for output file
 #' @param vcf_fname filename for VCF
+#' @param snv_only logical, if TRUE only SNVs are written to VCF
 #'
 #'
 #' @export
 write_processed_vcf <- function(calls,
                                 sample_name = NULL,
                                 output_directory = NULL,
-                                vcf_fname = NULL) {
+                                vcf_fname = NULL,
+                                snv_only = TRUE) {
 
   pcgrr::log4r_info("Writing VCF file with input calls for signature analysis")
 
@@ -758,12 +817,21 @@ write_processed_vcf <- function(calls,
       "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO")
 
   vcf_df <- calls |>
-    dplyr::select(.data$CHROM, .data$POS, .data$REF, .data$ALT) |>
-    dplyr::filter(nchar(.data$REF) == 1 & nchar(.data$ALT) == 1) |>
-    dplyr::filter(stringr::str_detect(.data$REF,"^(A|C|T|G)$") |
-                  stringr::str_detect(.data$ALT,"^(A|C|T|G)$")) |>
-    dplyr::mutate(QUAL = ".", FILTER = "PASS", ID = ".",
-                  INFO = paste0("SAMPLE_ID=", sample_name)) |>
+    dplyr::select(.data$CHROM, .data$POS, .data$REF, .data$ALT)
+
+  if(snv_only == TRUE){
+    vcf_df <- vcf_df |>
+      dplyr::filter(nchar(.data$REF) == 1 & nchar(.data$ALT) == 1) |>
+      dplyr::filter(stringr::str_detect(.data$REF,"^(A|C|T|G)$") |
+                    stringr::str_detect(.data$ALT,"^(A|C|T|G)$"))
+  }
+  vcf_df <- vcf_df |>
+    dplyr::mutate(
+      QUAL = ".",
+      FILTER = "PASS",
+      ID = ".",
+      INFO = paste0(
+        "SAMPLE_ID=", sample_name)) |>
     dplyr::distinct()
 
   sample_vcf_content_fname <-

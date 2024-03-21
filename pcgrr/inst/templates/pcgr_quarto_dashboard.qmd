@@ -1,0 +1,101 @@
+---
+title: "Cancer Genome Report by PCGR"
+bibliography: bibliography.bib
+nocite: |
+  @Tamborero2018-aj, @Poti2019-qr, @Alexandrov2020-gj, 
+  @Alexandrov2013-gs, @Griffith2017-do, @Ma2018-to, 
+  @Cortes-Ciriano2017-vl, @Li2017-ew,
+  @Blokzijl2018-nc, @Lever2019-xp, @Repana2019-dd, 
+  @Chalmers2017-cz, @Yin2020-or, @Bailey2018-os, @Fernandez2019-mk
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+---
+
+```{r setup, include=FALSE}
+
+signatures_estimation <- 'ON'
+msi_prediction <- 'ON'
+mutational_burden <- 'ON'
+trial_inclusion <- 'ON'
+if(pcg_report[['content']][['msi']][['eval']] == F){
+  msi_prediction <- 'OFF'
+}
+if(pcg_report[['content']][['mutational_signatures']][['eval']] == F){
+  signatures_estimation <- 'OFF'
+}
+if(pcg_report[['content']][['tmb']][['eval']] == F){
+  mutational_burden <- 'OFF'
+}
+if(pcg_report[['content']][['clinicaltrials']][['eval']] == F){
+  trial_inclusion <- 'OFF'
+}
+
+options(DT.options = list(scrollY="100vh", scrollCollapse = T))
+
+scrollY_flexdb_container <- "510px"
+```
+<style>
+.datatables{
+    overflow: auto;
+}
+.chart-stage-flex {
+  overflow: scroll !important;
+}
+.value-box .value {
+    color: white;
+}
+.value-box .caption {
+    color: white;
+}
+</style>
+
+
+```{r conditional_overview, child='pcgr_flexdb/flexdb_snv_overview.Rmd', eval = pcg_report$content$snv_indel$eval}
+```
+
+```{r conditional_tier1, child='pcgr_flexdb/flexdb_snv_tier1.Rmd', eval = pcg_report$content$snv_indel$eval}
+```
+
+```{r conditional_tier2, child='pcgr_flexdb/flexdb_snv_tier2.Rmd', eval = pcg_report$content$snv_indel$eval}
+```
+
+```{r conditional_tier3, child='pcgr_flexdb/flexdb_snv_tier3.Rmd', eval = pcg_report$content$snv_indel$eval}
+```
+
+```{r conditional_tier4, child='pcgr_flexdb/flexdb_snv_tier4.Rmd', eval = pcg_report$content$snv_indel$eval}
+```
+
+```{r conditional_tier5, child='pcgr_flexdb/flexdb_snv_tier5.Rmd', eval = pcg_report$content$snv_indel$eval}
+```
+
+```{r conditional_biomarkers, child='pcgr_flexdb/flexdb_snv_biomarker.Rmd', eval = pcg_report$content$snv_indel$eval}
+```
+
+```{r conditional_cna_overview, child='pcgr_flexdb/flexdb_scna.Rmd', eval = pcg_report$content$cna$eval}
+```
+
+```{r conditional_cna_tier1, child='pcgr_flexdb/flexdb_scna_tier1.Rmd', eval = pcg_report$content$cna$eval}
+```
+
+```{r conditional_cna_tier2, child='pcgr_flexdb/flexdb_scna_tier2.Rmd', eval = pcg_report$content$cna$eval}
+```
+
+```{r conditional_cna_oncogene, child='pcgr_flexdb/flexdb_scna_oncogene.Rmd', eval = pcg_report$content$cna$eval}
+```
+
+```{r conditional_cna_tsgene, child='pcgr_flexdb/flexdb_scna_tsgene.Rmd', eval = pcg_report$content$cna$eval}
+```
+
+```{r conditional_cna_other, child='pcgr_flexdb/flexdb_scna_other.Rmd', eval = pcg_report$content$cna$eval}
+```
+
+```{r conditional_tmb, child='pcgr_flexdb/flexdb_tmb.Rmd', eval = pcg_report$content$tmb$eval}
+```
+
+```{r conditional_mut_sigs, child='pcgr_flexdb/flexdb_mutsignatures.Rmd', eval = pcg_report$content$mutational_signatures$eval}
+```
+
+```{r conditional_doc, child='pcgr_flexdb/flexdb_documentation.Rmd', eval = T}
+```
+
