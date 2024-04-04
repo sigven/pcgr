@@ -42,13 +42,16 @@ def create_config(arg_dict, workflow = "PCGR"):
             'force_overwrite': int(arg_dict['force_overwrite'])
         }
         conf_options['sample_properties'] = {}
-
-    
+        conf_options['molecular_data'] = {}
+        conf_options['molecular_data']['fname_mut_vcf'] = "None"
+        conf_options['molecular_data']['fname_mut_tsv'] = "None"
+        
     if workflow == 'PCGR':
         conf_options['assay_properties'] = {}
         conf_options['sample_properties']['purity'] = 'NA'
         conf_options['sample_properties']['ploidy'] = 'NA'
         conf_options['sample_properties']['site'] = str(pcgr_vars.tsites[arg_dict['tsite']])
+        conf_options['sample_properties']['site2'] = str(pcgr_vars.tsites[arg_dict['tsite']]).replace(" ","_").replace("/","@")
         conf_options['sample_properties']['dp_control_detected'] = 0
         conf_options['sample_properties']['vaf_control_detected'] = 0
         conf_options['sample_properties']['dp_tumor_detected'] = 0
@@ -77,8 +80,18 @@ def create_config(arg_dict, workflow = "PCGR"):
             'cna_overlap_pct': float(arg_dict['cna_overlap_pct']),
             'n_copy_gain': int(arg_dict['n_copy_gain'])
         }
+        
+        conf_options['gene_expression'] = {}
+        conf_options['gene_expression']['similarity_analysis'] = int(arg_dict['expression_sim'])
+        conf_options['gene_expression']['similarity_db'] = {}
+        for db in arg_dict['expression_sim_db'].split(','):
+            conf_options['gene_expression']['similarity_db'][db] = 1
+            if db == 'tcga':
+                conf_options['gene_expression']['similarity_db']['tcga'] = {}
+                for cohort in pcgr_vars.TCGA_COHORTS:
+                    conf_options['gene_expression']['similarity_db']['tcga'][cohort] = 1
+                    
         conf_options['somatic_snv'] = {}
-
         conf_options['somatic_snv']['allelic_support'] = {
             'tumor_dp_min': int(arg_dict['tumor_dp_min']),
             'control_dp_min': int(arg_dict['control_dp_min']),
@@ -121,6 +134,13 @@ def create_config(arg_dict, workflow = "PCGR"):
             'include_artefact_signatures': int(arg_dict['include_artefact_signatures']),
             'prevalence_reference_signatures': int(arg_dict['prevalence_reference_signatures'])
         }
+        
+        
+        conf_options['molecular_data']['fname_cna_tsv'] = "None"
+        conf_options['molecular_data']['fname_expression_tsv'] = "None"
+        conf_options['molecular_data']['fname_tmb'] = "None"
+        for source in ['tcga','treehouse','depmap']:
+            conf_options['molecular_data']['fname_expression_sim_' + source] = "None"
 
     
     if workflow == "CPSR":        
@@ -162,32 +182,38 @@ def populate_config_data(conf_options: dict, db_dir: str, workflow = "PCGR", log
     conf_data['software'] = {}
     conf_data['software']['pcgr_version'] = pcgr_vars.PCGR_VERSION
     conf_data['software']['cpsr_version'] = pcgr_vars.PCGR_VERSION
+    conf_data['molecular_data'] = conf_options['molecular_data']
     
-    ## add paths to annotated files (VCF/TSV, CNA, TMB)
-    conf_data['molecular_data'] = {}
-    conf_data['molecular_data']['fname_mut_vcf'] = conf_options['annotated_vcf']
-    conf_data['molecular_data']['fname_mut_tsv'] = conf_options['annotated_tsv']
+    ## add paths to annotated files (VCF/TSV, CNA, TMB, EXPRESSION)
+    # conf_data['molecular_data'] = {}
+    # conf_data['molecular_data']['fname_mut_vcf'] = conf_options['annotated_vcf']
+    # conf_data['molecular_data']['fname_mut_tsv'] = conf_options['annotated_tsv']
+    # conf_data['molecular_data']['fname_cna_tsv'] = "None"
+    # conf_data['molecular_data']['fname_expression_tsv'] = "None"
+    # if workflow == "PCGR" and conf_options['annotated_cna'] != "None":
+    #     conf_data['molecular_data']['fname_cna_tsv'] = conf_options['annotated_cna']
+    #     del conf_options['annotated_cna']
+    # if workflow == "PCGR" and conf_options['annotated_exp'] != "None":
+    #     conf_data['molecular_data']['fname_expression_tsv'] = conf_options['annotated_exp']
+    #     del conf_options['annotated_exp']
+    # if workflow == "CPSR":
+    #     del conf_data['molecular_data']['fname_cna_tsv']
+    #     del conf_data['molecular_data']['fname_expression_tsv']
     
-    conf_data['molecular_data']['fname_cna_tsv'] = "None"
-    if workflow == "PCGR" and conf_options['annotated_cna'] != "None":
-        conf_data['molecular_data']['fname_cna_tsv'] = conf_options['annotated_cna']
-        del conf_options['annotated_cna']
-    if workflow == "CPSR":
-        del conf_data['molecular_data']['fname_cna_tsv']
-    
-    conf_data['molecular_data']['fname_tmb'] = "None"
-    if workflow == "PCGR" and conf_options['fname_tmb'] != "None":
-        conf_data['molecular_data']['fname_tmb'] = conf_options['fname_tmb']
-        del conf_options['fname_tmb']
-    if workflow == "CPSR":
-        del conf_data['molecular_data']['fname_tmb']
+    # conf_data['molecular_data']['fname_tmb'] = "None"
+    # if workflow == "PCGR" and conf_options['fname_tmb'] != "None":
+    #     conf_data['molecular_data']['fname_tmb'] = conf_options['fname_tmb']
+    #     del conf_options['fname_tmb']
+    # if workflow == "CPSR":
+    #     del conf_data['molecular_data']['fname_tmb']
     
     genome_assembly = conf_options['genome_assembly']
     del conf_options['sample_id']
     del conf_options['genome_assembly']
     del conf_options['output_dir']
-    del conf_options['annotated_vcf']
-    del conf_options['annotated_tsv']
+    del conf_options['molecular_data']
+    #del conf_options['annotated_vcf']
+    #del conf_options['annotated_tsv']
     conf_data['conf'] = conf_options
     
     conf_data['reference_data'] = {}

@@ -5,7 +5,7 @@ date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
 bibliography: bibliography.bib
 title-block-banner: "<MAIN_REPORT_COLOR>"
 title-block-banner-color: "white"
-linkcolor: "<MAIN_REPORT_COLOR>"
+linkcolor: '#0073C2'
 include-in-header:
   - text: |
       <link rel="shortcut icon" href="https://github.com/sigven/pcgr/raw/master/pcgrr/pkgdown/favicon/favicon-16x16.png" />
@@ -25,20 +25,25 @@ nocite: |
   @Levatic2022-hk, @Horak2022-uh
 format: 
   html:
+    link-external-newwindow: true
     embed-resources: true
     smooth-scroll: true
     page-layout: full
-    fontsize: 1em
+    fontsize: 0.93em
     toc: true
-    toc_depth: 2
+    toc-expand: 3
+    toc-depth: 3
+    toc-title: Contents
     grid:
       body-width: 940px
 css: pcgr_quarto_tumor_control.css
 lightbox: true
 ---
 
-```{r global_options, include=FALSE}
+```{r global_options}
 #| include: false
+#| eval: true
+
 knitr::opts_chunk$set(echo = F,warning=FALSE, dpi=72, error=F, eval=T)
 
 pcg_report <- readRDS(file="<PCGR_REPORT_OBJECT.rds>")
@@ -75,7 +80,7 @@ if(as.logical(pcg_report$settings$conf$assay_properties$vcf_tumor_only) == TRUE)
 
 ```{r conditional_signatures}
 #| child: 'pcgr_quarto_report/mutational_signature.qmd'
-#| eval: !expr pcg_report$settings$conf$somatic_snv$mutational_signatures$run == TRUE &  pcg_report$content$mutational_signatures$missing_data == FALSE
+#| eval: !expr as.logical(pcg_report$settings$conf$somatic_snv$mutational_signatures$run) == TRUE
 ```
 
 <br>
@@ -85,14 +90,26 @@ if(as.logical(pcg_report$settings$conf$assay_properties$vcf_tumor_only) == TRUE)
 #| eval: !expr pcg_report$settings$conf$somatic_snv$msi$run == 1
 ```
 
+```{r conditional_tmb}
+#| child: 'pcgr_quarto_report/mutational_burden.qmd'
+#| eval: !expr pcg_report$settings$conf$somatic_snv$tmb$run == 1
+```
+
+
 ```{r documentation}
 #| child: 'pcgr_quarto_report/documentation.qmd'
 ```
+
+<br>
+
+<font size="-1">
 
 ## References
 
 ::: {#refs}
 :::
+
+</font>
 
 ```{r pcgr_disclaimer}
 #| eval: true

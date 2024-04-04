@@ -3,7 +3,7 @@
 from pcgr._version import __version__
 
 PCGR_VERSION = __version__
-DB_VERSION = '20240309'
+DB_VERSION = '20240404'
 
 ## MISCELLANEOUS
 NCBI_BUILD_MAF = 'GRCh38'
@@ -25,6 +25,9 @@ VEP_MAX_FORKS = 8
 VEP_MIN_BUFFER_SIZE = 50
 VEP_MAX_BUFFER_SIZE = 30000
 VEP_PICK_CRITERIA = ['mane_select','mane_plus_clinical','canonical','appris','tsl','biotype','ccds','rank','length']
+
+## Gene expression comparative analysis resources
+EXPRESSION_DB_SOURCES = ['tcga','depmap','treehouse']
 
 tsites = {
     0: 'Any',
@@ -164,3 +167,11 @@ CSQ_NULL_PATTERN = r"(stop_gained|frameshift_)"
 CSQ_SPLICE_REGION_PATTERN = r"(splice_|intron_variant)"
 CSQ_SPLICE_DONOR_PATTERN = r"(splice_region_variant|splice_donor_variant|splice_donor_region_variant|splice_donor_5th_base_variant)"
 
+TCGA_COHORTS = ['ACC','BLCA','BRCA','CESC',
+                'CHOL','COAD','DLBC','ESCA',
+                'GBM','HNSC','KICH','KIRC',
+                'KIRP','LAML','LGG','LIHC',
+                'LUAD','LUSC','MESO','OV',
+                'PAAD','PCPG','PRAD','READ',
+                'SARC','SKCM','STAD','TGCT',
+                'THCA','THYM','UCEC','UCS','UVM']

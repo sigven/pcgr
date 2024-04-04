@@ -4,15 +4,46 @@ Microsatellite instability (MSI) is the result of impaired DNA mismatch repair a
 
 The MSI classifier was trained using 999 exome-sequenced TCGA tumor samples with known MSI status (i.e. assayed from mononucleotide markers), and obtained a [positive predictive value](https://en.wikipedia.org/wiki/Positive_and_negative_predictive_values#Positive_predictive_value) of 98.9% and a [negative predictive value](https://en.wikipedia.org/wiki/Positive_and_negative_predictive_values#Negative_predictive_value) of 98.8% on an independent test set of 427 samples. Details of the MSI classification approach can be found <a href="http://rpubs.com/sigven/msi_classification_v3" target="_blank">here</a>.
 
-<br><br>
+<br>
 
 ```{r msi_prep_plots}
 #| echo: false
 #| eval: !expr pcg_report$content$msi$missing_data == FALSE
 #| output: asis
 
+msi_content <- pcg_report[['content']][['msi']][['prediction']]
+
+coding_variant_set <- 
+  pcg_report$content$snv_indel$callset$variant_display |>
+  dplyr::filter(.data$CODING_STATUS == "coding") |>
+  dplyr::select(
+    dplyr::any_of(
+      pcgrr::dt_display$snv_indel_tier3
+    )
+  ) |>
+ dplyr::arrange(
+    dplyr::desc(.data$ONCOGENICITY_SCORE),
+    dplyr::desc(.data$TISSUE_ASSOC_RANK),
+    dplyr::desc(.data$GLOBAL_ASSOC_RANK),
+  )
+
+if(NROW(msi_content[['mmr_pol_variants']]) > 0 & 
+   NROW(coding_variant_set) > 0){
+  if("GENOMIC_CHANGE" %in% colnames(msi_content[['mmr_pol_variants']]) &
+     "GENOMIC_CHANGE" %in% colnames(coding_variant_set)){
+    msi_content[['mmr_pol_variants']] <- 
+      msi_content[['mmr_pol_variants']] |>
+      dplyr::select("GENOMIC_CHANGE") |>
+      dplyr::inner_join(
+        coding_variant_set, by = "GENOMIC_CHANGE"
+      )
+  }
+}
+
+
+
 indel_frac_plot <- pcgrr::msi_indel_fraction_plot(
-  pcg_report[['content']][['msi']][['prediction']][['tcga_dataset']], pcg_report[['content']][['msi']][['prediction']][['msi_stats']][['fracIndels']])
+  msi_content[['tcga_dataset']], msi_content[['msi_stats']][['fracIndels']])
 
 indel_fract_plot_plotly <- plotly::ggplotly(indel_frac_plot)
 indel_fract_plot_plotly$x$layout$legend$title$text <- ""
@@ -23,14 +54,14 @@ bslib::page_fillable(
     height = "140px",
     bslib::value_box(
       title = "MSI status",
-      value = pcg_report[['content']][['msi']][['prediction']][['msi_stats']][['predicted_class']],
+      value = msi_content[['msi_stats']][['predicted_class']],
       showcase = NULL,
       theme = "dark"
     ),
     bslib::value_box(
       title = "Indel mutational burden",
       value = paste0(
-        round(pcg_report[['content']][['msi']]$prediction$msi_stats$tmb_indel, 
+        round(msi_content$msi_stats$tmb_indel, 
               digits = 2), "/Mb"),
       showcase = NULL,
       theme = "dark"
@@ -38,9 +69,9 @@ bslib::page_fillable(
     bslib::value_box(
       title = "Indel fraction - somatic variants",
       value = if(!is.null(
-        pcg_report[['content']][['msi']]$prediction$msi_stats$indel_frac)){
+        msi_content$msi_stats$fracIndels)){
           paste0(
-          round(pcg_report[['content']][['msi']]$prediction$msi_stats$indel_frac, 
+          round(msi_content$msi_stats$fracIndels, 
                 digits = 2))
       }else{
         "0"
@@ -54,27 +85,37 @@ bslib::page_fillable(
     height = "350px",
     bslib::card_header(
       class = "bg-dark", 
-      paste0("Predictive MSI feature - fraction of indel variants (",
-             pcg_report$settings$sample_id,")")),
+      paste0("Fraction of indel variants - ",
+             pcg_report$settings$sample_id)),
     indel_fract_plot_plotly
   ),
   
   bslib::card(
     bslib::card_header(
       class = "bg-dark",
-      paste0("Known somatic mutations in MMR genes (",
-               pcg_report$settings$sample_id,")")
+      paste0("Somatic mutations in MMR genes - ",
+               pcg_report$settings$sample_id)
     ),
     bslib::card_body(
-      height = 60 + NROW(pcg_report$content$msi$prediction[['mmr_pol_variants']]) * 50,
-      if(NROW(pcg_report$content$msi$prediction[['mmr_pol_variants']]) > 0){
+      height = 60 + NROW(msi_content[['mmr_pol_variants']]) * 100,
+      if(NROW(msi_content[['mmr_pol_variants']]) > 0){
         DT::datatable(
-          pcg_report$content$msi$prediction[['mmr_pol_variants']],
+          msi_content[['mmr_pol_variants']],
           extensions = "Responsive",
           options = list(
             pageLength = 8,
             dom = 'tp'),
-          escape = F)
+          escape = F) |>
+          DT::formatStyle(
+            color = "white",
+            "ONCOGENICITY",
+            "ONCOGENICITY",
+            backgroundColor = 
+              DT::styleEqual(
+                pcgrr::color_palette$oncogenicity$levels,
+                pcgrr::color_palette$oncogenicity$values
+              )
+          )
       }else{
         "No somatic mutations found in MMR genes"
       }

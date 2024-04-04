@@ -1,32 +1,60 @@
+## Mutational signatures
 
 
-```{r }
+```{r setup1}
 #| echo: false
-missing_data_norun <- F
-if(pcg_report$content$mutational_signatures$eval == F | 
-   pcg_report$content$mutational_signatures$missing_data == T){
-  missing_data_norun <- T
-}
-conf <- pcg_report$settings$conf
+
+pcg_report <- readRDS(file="../../../tmp.rds")
+report_color <- pcgrr::color_palette$report_color$values[2]
 ```
 
+Here, we apply the **MutationalPatterns** package [@Blokzijl2018-nc] to estimate the relative contribution of [known mutational signatures](https://cancer.sanger.ac.uk/signatures/) in **`r pcg_report$settings$sample_id`**. Specifically, the package finds the optimal linear combination (and weights) of reference mutational signatures that most closely reconstructs the spectrum of single base substitutions (SBS) seen in the tumor. This procedure is frequently referred to as *signature refitting*. We employ a bootstrapping approach to estimate the uncertainty in the signature weights.
 
-## Mutational signatures
+```{r setup_signature_display}
+#| echo: false
+
+#pcg_report <- readRDS(file="tmp.rds")
+
+msig_content <- 
+  pcg_report$content$mutational_signatures
+
+missing_data_no_refit <- F
+if(msig_content$eval == F | 
+   msig_content$missing_data == T){
+  missing_data_no_refit <- T
+}
+conf <- pcg_report$settings$conf
+msig_conf <- conf$somatic_snv$mutational_signatures
+
+```
+
+```{r missing_data_callout}
+#| output: asis
+#| eval: !expr missing_data_no_refit == TRUE
+
+cat("\n::: {.callout-warning}\n## Limited variant data - ",
+    "refitting analysis omitted\n\nThere are too few",
+    " variants <b>(N = ",
+    NROW(pcg_report$content$mutational_signatures$variant_set$all),
+    ")</b> in the tumor sample for reliable re-fitting",
+    " of mutational signatures\n\n:::\n\n", sep="")
+
+```
 
 ```{r t1}
 #| output: asis
-#| include: !expr missing_data_norun == FALSE  & as.logical(conf$somatic_snv$mutational_signatures$all_reference_signatures) == FALSE
+#| eval: !expr missing_data_no_refit == FALSE  & as.logical(msig_conf$all_reference_signatures) == FALSE
 
-cat('For <b>', conf$sample_properties$site,'</b> cancers, mutational signature identification uses the following reference collection of known signatures for the <i>refitting procedure</i>:<br>',sep="")
+cat('For <b>', conf$sample_properties$site,'</b> cancers, mutational signature identification uses the following reference collection of known signatures for the <i>refitting procedure</i> (i.e. previously attributed to the same type of cancer): <br>',sep="")
 
-dat <- pcg_report$content$mutational_signatures$result$reference_data
+dat <- msig_content$result$reference_data
 if("SIGNATURE_ID" %in% colnames(dat) & 
    "AETIOLOGY_KEYWORD" %in% colnames(dat)){
   
   i <- 1
   
   refsig_collection_site <- 
-    pcg_report$content$mutational_signatures$result$reference_data |>
+    msig_content$result$reference_data |>
     dplyr::mutate(tmp_id = as.numeric(
       stringr::str_replace(
         stringr::str_replace(
@@ -73,12 +101,11 @@ if("SIGNATURE_ID" %in% colnames(dat) &
   cat('::::\n')
 }
 
-```   
-
+```
 
 ```{r t3}
 #| output: asis 
-#| include: !expr missing_data_norun == FALSE & as.logical(conf$somatic_snv$mutational_signatures$all_reference_signatures) == TRUE
+#| eval: !expr missing_data_no_refit == FALSE & as.logical(msig_conf$all_reference_signatures) == TRUE
 cat("For this analysis, '--all_reference_signatures' have been turned on, which means that all reference signatures (n = 67) have been considered during refitting of the mutational profile with reference signatures",sep="\n")
 htmltools::br()
 
@@ -86,7 +113,7 @@ htmltools::br()
 
 ```{r t4}
 #| output: asis
-#| include: !expr missing_data_norun == FALSE
+#| eval: !expr missing_data_no_refit == FALSE
 
 cat('A total of <b>n = ',
     nrow(pcg_report[['content']][['mutational_signatures']][['variant_set']]$all), 
@@ -94,51 +121,218 @@ cat('A total of <b>n = ',
 
 cat("<br><br>")
 
-cat('Accuracy of signature fit: <b>', 
-    round(pcg_report$content$mutational_signatures$result$goodness_of_fit$estimate, digits = 3) * 100, 
-    '% [</b> (reflects how well the mutational profile can be reconstructed with signatures from the reference collection)', sep = '')
-
-cat('<br>')
 ```
 
-::: {.panel-tabset .nav-pills}
-
-
-```{r }
-#| eval: !expr missing_data_norun == FALSE
+```{r signature_contribution_plot}
+#| eval: !expr missing_data_no_refit == FALSE
 #| output: asis
-htmltools::br()
 
 
+plot_data <- 
+  msig_content$result$contributions$per_signature |>
+  dplyr::mutate(signature_aetiology = paste0(signature_id, " - ", group)) |>
+  dplyr::mutate(prop_signature = round(prop_signature, digits = 4)) |>
+  dplyr::mutate(prop_signature_ci_lower = round(
+    prop_signature_ci_lower, digits = 4)) |>
+  dplyr::mutate(prop_signature_ci_upper = round(
+    prop_signature_ci_upper, digits = 4)) |>
+  dplyr::mutate(
+    signature_aetiology = factor(
+      signature_aetiology, levels = signature_aetiology))
 
-# ggplot2::ggplot(tmp, ggplot2::aes(x = reorder(signature_id2, -prop_signature), y = prop_signature, fill = signature_id2)) +
-#     ggplot2::geom_bar(stat = "identity") + ggplot2::geom_errorbar(ggplot2::aes(ymin = prop_signature_ci_lower, ymax = prop_signature_ci_upper), width = .4)+
-#     #ggplot2::coord_polar(theta = "y", start = 0) 
-#     ggplot2::scale_fill_manual(values = head(pcgrr::color_palette$tier$values, NROW(tmp))) +
-#     ggplot2::theme_classic() + 
-#     ggplot2::xlab("") +
-#     ggplot2::theme(legend.position = "bottom",
-#                    legend.title = ggplot2::element_blank(),
-#                    plot.margin = ggplot2::margin(0.5, 0.5, 0.5, 0.5, "cm"), axis.text.x = ggplot2::element_blank(), 
-#                    legend.text = ggplot2::element_text(family = "Helvetica", size = 14))
+signature_contribution_plot <- ggplot2::ggplot(
+  head(plot_data, 6), 
+  ggplot2::aes(
+    x = reorder(signature_aetiology, -prop_signature), 
+    y = prop_signature, 
+    fill = signature_aetiology)) +
+    ggplot2::geom_bar(stat = "identity") + 
+  ggplot2::geom_errorbar(
+    ggplot2::aes(ymin = prop_signature_ci_lower, 
+                 ymax = prop_signature_ci_upper), 
+    width = .3)+
+    ggplot2::scale_fill_manual(
+      values = head(pcgrr::color_palette$tier$values, NROW(plot_data))) +
+    ggplot2::theme_classic() +
+    ggplot2::xlab("") +
+    ggplot2::ylab("Relative contribution") +
+  ggplot2::theme(
+    legend.position = "bottom",
+    legend.title = ggplot2::element_blank(),
+    plot.margin = ggplot2::margin(0.5, 0.5, 0.5, 0.5, "cm"), 
+    axis.text.x = ggplot2::element_blank(),
+    axis.title.y = ggplot2::element_text(family = "Helvetica", size = 13),
+    axis.text.y = ggplot2::element_text(family = "Helvetica", size = 13),
+    legend.text = ggplot2::element_text(family = "Helvetica", size = 12))
 
-cat("\n")
-cat("### Mutational context frequency")
-cat("\n")
 
-htmltools::br()
+pltly_plot <- plotly::ggplotly(signature_contribution_plot)
+pltly_plot$x$layout$legend$title$text <- ""
+bslib::card(
+  height = "400px",
+  bslib::card_header(
+    class = "bg-dark",
+    paste0(
+      "Key signatures identified - ",
+      pcg_report$settings$sample_id)
+  ),
+  bslib::card_body(
+    pltly_plot
+  )
+)
 ```
 
+```{r main_signature_findings}
+#| output: asis
+#| echo: false
+#| eval: !expr missing_data_no_refit == FALSE
 
-```{r }
-#| fig-width: 18
-#| fig-height: 5
-#| dpi: 400
-#| column: body-outset
-#| eval: !expr missing_data_norun == FALSE
+t <- list(
+  family = "Helvetica",
+  size = 15)
+
+ m <- list(
+    l = 50,
+    r = 50,
+    b = 80,
+    t = 80,
+    pad = 10
+  )
+
+pie_aetiologies <- plotly::plot_ly(
+  msig_content$result$contributions$per_group, 
+  #margin = m,
+  marker = list(
+    colors = pcgrr::color_palette$tier$values,
+    line = list(color = '#FFFFFF', width = 3))) |>
+  plotly::add_pie(
+    msig_content$result$contributions$per_group, 
+    labels =~ factor(group),
+    values = ~prop_group,
+    textinfo = "percent",
+    type = 'pie') |>
+  plotly::layout(legend = list(orientation = "h", font = t)) 
+
+bslib::page_fillable(
+  bslib::layout_columns(
+    col_widths = c(4,8),
+    height = "380px",
+      bslib::layout_column_wrap(
+        width = "300px",
+        bslib::value_box(
+          title = "Dominant aetiologies",
+          value = paste(
+            head(
+              msig_content$result$contributions$per_group$group, 2),
+            collapse = ", "),
+          showcase = NULL,
+          theme = "dark"
+        ),
+        bslib::value_box(
+          title = "Goodness of signature fit",
+          value = paste0(
+            round(
+              msig_content$result$goodness_of_fit$estimate,
+              digits = 3) * 100,
+            "%"),
+          showcase = NULL,
+          theme = ifelse(
+            msig_content$result$goodness_of_fit$estimate > 0.9,
+            "dark",
+            "danger"
+            # bslib::value_box_theme(
+            #   bg = pcgrr::color_palette$warning,
+            #   fg = "#fff")
+          )
+      )
+    ),
+    bslib::card(
+      height = "340px",
+      bslib::card_header(
+        class = "bg-dark", 
+        paste0("Key underlying aetiologies - ",
+               pcg_report$settings$sample_id)),
+    pie_aetiologies
+    )
+  )
+)
+```
+
+```{r signature_contribution_table}
+#| eval: !expr missing_data_no_refit == FALSE
+#| output: asis
+
+signature_ids <- 
+  msig_content$result$contributions$per_signature$signature_id
+signature_colors <- 
+  msig_content$result$contributions$per_signature$col
+
+myOptions <- list(
+  buttons = c('csv','excel'),
+  dom = 'Bfrtip', 
+  scrollCollapse = T)
+
+dat <- dplyr::select(
+  msig_content$result$contributions$per_signature, 
+  -c(sample_id,col,prop_signature, n_bs_iterations)) |>
+  dplyr::mutate(contribution_CI = paste0(
+    round(prop_signature_ci_lower, 4) * 100," - ",
+    round(prop_signature_ci_upper, 4) * 100, "%")) |>
+  dplyr::select(-c("prop_signature_ci_lower", 
+                   "prop_signature_ci_upper")) |>
+  dplyr::select(
+    c("signature_id", "contribution", 
+      "contribution_CI", "group"),
+    dplyr::everything())
+
+bslib::card(
+  height = "600px",
+  bslib::card_header(
+    class = "bg-dark",
+    paste0(
+      "All signatures identified - ",
+      pcg_report$settings$sample_id)
+  ),
+  bslib::card_body(
+    DT::datatable(
+      dat,
+      extensions = "Responsive",
+      options = list(
+        pageLength = 6,
+        dom = 'tp'),
+      escape = F) |>
+      DT::formatStyle(
+        'contribution',fontWeight = 'bold') |>
+      DT::formatStyle(
+        'signature_id',color = 'white', 
+        backgroundColor = DT::styleEqual(
+          signature_ids, signature_colors), 
+        fontWeight = 'bold', 
+        `text-align` = 'center')
+  )
+)
+```
+
+<br>
+
+### Raw mutational spectrum
+
+As a background perspective, we here provide various views of the raw mutational spectrum for the sample, i.e. not considering a signature re-fitting analysis.
+
+::: panel-tabset
+#### SBS - mutational contexts
+
+```{r raw_context_plot}
+#| output: asis
+#| eval: !expr is.null(msig_content$result$mut_mat) == FALSE
 
 catalogue_mat <- 
-  pcg_report$content$mutational_signatures$result$mut_mat
+  msig_content$result$mut_mat
+
+y_max <- 
+  plyr::round_any(
+    max(catalogue_mat[,1] / sum(catalogue_mat[,1])),
+    0.05, f = ceiling)
 
 # raw_context_plot <- sigminer::show_catalogue(
 #   catalogue_mat, 
@@ -155,124 +349,139 @@ catalogue_mat <-
 # 
 # raw_context_plot
 
-MutationalPatterns::plot_96_profile(
- pcg_report$content$mutational_signatures$result$mut_mat,
- colors = head(pcgrr::color_palette$tier$values, 6),
- ymax = plyr::round_any(
-   max(pcg_report$content$mutational_signatures$result$contributions$per_signature$prop_signature), 0.05,f=ceiling))
+plotly::ggplotly(
+  height = 400,
+  MutationalPatterns::plot_96_profile(
+    catalogue_mat,
+    colors = head(pcgrr::color_palette$tier$values, 6),
+    ymax = y_max)
+)
 
-```   
+```
 
-<br>
+#### SBS - type occurrences
 
-```{r}
-#| eval: !expr missing_data_norun == FALSE
+```{r sbs_type_occurrences}
+#| eval: !expr is.null(msig_content$result$type_occurrences) == FALSE & as.logical(rowSums(msig_content$result$type_occurrences[1:6]) > 0) == TRUE
 #| output: asis
 
-htmltools::br()
 
-cat("\n")
-cat("### Fitted signatures - aetiology contributions")
-cat("\n")
-
-```
-
-```{r }
-#| echo: false
-#| fig-width: 6
-#| fig-height: 6
-#| fig-align: center
-#| eval: !expr missing_data_norun == FALSE
-plot_data <- 
-  pcg_report$content$mutational_signatures$result$contributions$per_group
-
-scale_fill <- 
-  pcg_report$content$mutational_signatures$result$scale_fill_values
-names(scale_fill) <- pcg_report$content$mutational_signatures$result$scale_fill_names
-
-ggplot2::ggplot(plot_data, ggplot2::aes(x = 2, y = prop_group, fill = group)) +
-     ggplot2::geom_bar(width = 1, stat = "identity", color = "white") +
-     #ggplot2::coord_polar(theta = "y", start = 0) +
-     ggplot2::scale_fill_manual(values = scale_fill) +
-     ggplot2::theme_void() + 
-     #ggplot2::xlim(.5, 2.5) +
-     ggplot2::theme(legend.position = "right",
-                    legend.title = ggplot2::element_blank(),
-                    plot.margin = ggplot2::margin(0, 0, 0, 0, "cm"),
-                    legend.text = ggplot2::element_text(family = "Helvetica", size = 14))
-
+plotly::ggplotly(
+  height = 400,
+  MutationalPatterns::plot_spectrum(
+    msig_content$result$type_occurrences, 
+    CT = TRUE,
+    error_bars = 'none',
+    colors = head(
+      pcgrr::color_palette$tier$values, 7))
+)
 
 ```
 
-
-```{r }
-#| eval: !expr missing_data_norun == FALSE
+```{r sbs_types_missing}
+#| eval: !expr is.null(msig_content$result$type_occurrences) == FALSE &as.logical(rowSums(msig_content$result$type_occurrences[1:6]) > 0) == FALSE 
 #| output: asis
 
-cat("\n")
-cat("### Fitted signatures - aetiologies")
-cat("\n")
+cat("\n::: {.callout-note}\n## No SNVs\n\nNo SNVs/single base substitutions", 
+    "were found in this sample\n\n:::\n\n")
 
-htmltools::br()
 ```
 
-```{r }
-#| echo: false
-#| eval: !expr missing_data_norun == FALSE
+#### ID - mutational contexts
 
-signature_ids <- 
-  pcg_report[['content']][['mutational_signatures']][['result']][['contributions']][['per_signature']]$signature_id
-signature_colors <- 
-  pcg_report[['content']][['mutational_signatures']][['result']][['contributions']][['per_signature']]$col
+```{r indel_contexts}
+#| eval: !expr is.null(msig_content$result$indel_counts) == FALSE
+#| column: body-outset
+#| output: asis
 
-myOptions <- list(
-  buttons = c('csv','excel'),
-  dom = 'Bfrtip', 
-  scrollCollapse = T)
+plotly::ggplotly(
+  height = 400,
+  width = 1000,
+  MutationalPatterns::plot_indel_contexts(
+    msig_content$result$indel_counts)
+)
 
-dat <- dplyr::select(
-  pcg_report$content$mutational_signatures$result$contributions$per_signature, -c(sample_id,col,prop_signature)) |>
-  dplyr::select(
-    c("signature_id", "contribution", 
-      "group"), 
-    dplyr::everything())
-
-DT::datatable(dat ,options = myOptions,extensions=c("Buttons","Responsive"),escape=F) |>
-  DT::formatStyle('contribution',fontWeight = 'bold') |>
-  DT::formatStyle('signature_id',color = 'white', 
-                  backgroundColor = DT::styleEqual(signature_ids, signature_colors), 
-                  fontWeight = 'bold', `text-align` = 'center')
 ```
-<br>
+
+<br><br>
+
+```{r indel_contexts_missing}
+#| eval: !expr is.null(msig_content$result$indel_counts) == TRUE
+#| output: asis
+
+cat("\n::: {.callout-note}\n## No InDels\n\nNo insertion/deletions",
+"were found in this sample\n\n:::\n\n")
+
+```
 
 :::
 
+<br>
 
+#### Signature similarity
 
-```{r}
+Here, we perform a comparison of the sample's raw mutational spectrum to the COSMIC known signatures (SBS), for samples with at least 30 SNVs. The cosine similarity is calculated between mutational spectrum of the sample (i.e. frequency of three-mer contexts) and all of the COSMIC signatures. The cosine similarity (*SIMILARITY* column below) ranges from 0 to 1, where 1 indicates a perfect match.
 
-bslib::card(
-  bslib::card_header(
-    class = "bg-dark",
-    "Known signatures - SAMPLE-T_N-001"
-  ),
-  bslib::card_body(
-    DT::datatable(
-      dat,
-      extensions = "Responsive",
-      options = list(
-        pageLength = 8,
-        dom = 'tp'),
-      escape = F) |>
-      DT::formatStyle(
-        'contribution',fontWeight = 'bold') |>
-      DT::formatStyle(
-        'signature_id',color = 'white', 
-        backgroundColor = DT::styleEqual(
-          signature_ids, signature_colors), 
-        fontWeight = 'bold', 
-        `text-align` = 'center')
-  )
-)
+```{r highlight_signatures}
+#| echo: false
+#| eval: !expr as.logical(pcg_report$settings$conf$somatic_snv$mutational_signatures$all_reference_signatures) == FALSE
+#| output: asis
+
+cat('\n::: {.callout-note}\n## Site-specific signatures\n\n',
+    'Signatures that are previously attributed to ',
+    conf$sample_properties$site,
+    ' cancers (prevalence >= ', 
+    as.character(msig_conf$prevalence_reference_signatures),
+    '%) are highlighted.\n\n:::\n\n', sep='')
 ```
 
+<br>
+
+```{r signature_similarity}
+#| eval: !expr is.null(msig_content$result$signature_similarity) == FALSE
+#| output: asis
+
+similarity_table <- 
+  DT::datatable(
+    msig_content$result$signature_similarity,
+    extensions = "Responsive",
+    options = list(
+      pageLength = 13,
+      dom = 'tp'),
+    escape = F) |>
+  DT::formatStyle(
+    'SIMILARITY',
+    fontWeight = 'bold') |>
+  DT::formatStyle(
+    c('SIGNATURE_ID','AETIOLOGY_KEYWORD'),
+    'SITE_SPECIFIC',
+    fontWeight = 'bold',
+    color = "white",
+    backgroundColor = DT::styleEqual(
+      c('YES','NO'), 
+      c(report_color,
+        pcgrr::color_palette$none)
+    )
+  )
+
+#similarity_table$x$data$SITE_SPECIFIC <- NULL
+
+bslib::card(
+  height = "700px",
+  bslib::card_header(
+    class = "bg-dark",
+    paste0(
+      "Similarity of ",
+      pcg_report$settings$sample_id,
+      " to COSMIC signatures (SBS)")
+  ),
+  bslib::card_body(
+    similarity_table
+  )
+)
+
+
+
+```
+
+<br>

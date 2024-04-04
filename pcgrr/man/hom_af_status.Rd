@@ -3,7 +3,7 @@
 \name{hom_af_status}
 \alias{hom_af_status}
 \title{Function that assigns a logical (STATUS_LIKELY_GERMLINE_HOMOZYGOUS) reflecting whether
-a variant is likely homozygous (germline) - based on allelic fraction (AF_TUMOR)}
+a variant is likely homozygous (germline) - based on allelic fraction (VAF_TUMOR)}
 \usage{
 hom_af_status(sample_calls)
 }
@@ -12,5 +12,5 @@ hom_af_status(sample_calls)
 }
 \description{
 Function that assigns a logical (STATUS_LIKELY_GERMLINE_HOMOZYGOUS) reflecting whether
-a variant is likely homozygous (germline) - based on allelic fraction (AF_TUMOR)
+a variant is likely homozygous (germline) - based on allelic fraction (VAF_TUMOR)
 }

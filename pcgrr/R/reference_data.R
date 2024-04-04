@@ -177,90 +177,16 @@ load_reference_data <- function(
   colnames(pcgr_ref_data[['gene']][['transcript_biotype']]) <-
     toupper(colnames(pcgr_ref_data[['gene']][['transcript_biotype']]))
 
+  gene_index_tsv_fname <- file.path(
+    pcgr_db_assembly_dir, "gene", "tsv",
+    "gene_transcript_xref",
+    "gene_index.tsv.gz"
+  )
+  check_file_exists(gene_index_tsv_fname)
 
-  refseq2entrezgene <- as.data.frame(
+  pcgr_ref_data[['gene']][['index']] <- as.data.frame(
     readr::read_tsv(
-      gene_xref_tsv_fname,
-      show_col_types = F,
-      na = c("."),
-      guess_max = 10000)) |>
-    dplyr::select(
-      c("refseq_transcript_id",
-        "entrezgene"
-      )
-    ) |>
-    dplyr::filter(
-      !is.na(.data$refseq_transcript_id)) |>
-    tidyr::separate_rows(
-      "refseq_transcript_id", sep = "&") |>
-    dplyr::rename(KEY = "refseq_transcript_id",
-                  VALUE = "entrezgene") |>
-    dplyr::mutate(KEYTYPE = "refseq_transcript_id") |>
-    dplyr::select(c("KEY", "KEYTYPE", "VALUE")) |>
-    dplyr::distinct()
-
-  enst2entrezgene <- as.data.frame(
-    readr::read_tsv(
-      gene_xref_tsv_fname,
-      show_col_types = F,
-      na = c("."),
-      guess_max = 10000)) |>
-    dplyr::select(
-      c("ensembl_transcript_id",
-        "entrezgene"
-      )
-    ) |>
-    dplyr::filter(!is.na(.data$ensembl_transcript_id)) |>
-    dplyr::rename(KEY = "ensembl_transcript_id",
-                  VALUE = "entrezgene") |>
-    dplyr::mutate(KEYTYPE = "ensembl_transcript_id") |>
-    dplyr::select(c("KEY", "KEYTYPE", "VALUE")) |>
-    dplyr::distinct()
-
-  ensg2entrezgene <- as.data.frame(
-    readr::read_tsv(
-      gene_xref_tsv_fname,
-      show_col_types = F,
-      na = c("."),
-      guess_max = 10000)) |>
-    dplyr::select(
-      c("ensembl_gene_id",
-        "entrezgene"
-      )
-    ) |>
-    dplyr::filter(!is.na(.data$ensembl_gene_id)) |>
-    dplyr::rename(KEY = "ensembl_gene_id",
-                  VALUE = "entrezgene") |>
-    dplyr::mutate(KEYTYPE = "ensembl_gene_id") |>
-    dplyr::select(c("KEY", "KEYTYPE", "VALUE")) |>
-    dplyr::distinct()
-
-  sym2entrezgene <- as.data.frame(
-    readr::read_tsv(
-      gene_xref_tsv_fname,
-      show_col_types = F,
-      na = c("."),
-      guess_max = 10000)) |>
-    dplyr::select(
-      c("symbol",
-        "entrezgene"
-      )
-    ) |>
-    dplyr::filter(!is.na(.data$symbol)) |>
-    dplyr::rename(KEY = "symbol",
-                  VALUE = "entrezgene") |>
-    dplyr::mutate(KEYTYPE = "symbol") |>
-    dplyr::select(c("KEY", "KEYTYPE", "VALUE")) |>
-    dplyr::distinct()
-
-
-  pcgr_ref_data[['gene']][['transcript_xref']] <-
-    sym2entrezgene |>
-    dplyr::bind_rows(refseq2entrezgene) |>
-    dplyr::bind_rows(ensg2entrezgene) |>
-    dplyr::bind_rows(enst2entrezgene) |>
-    dplyr::arrange(.data$VALUE)
-
+      gene_index_tsv_fname, show_col_types = F))
 
   otp_rank_tsv_fname <- file.path(
     pcgr_db_assembly_dir, "gene", "tsv",

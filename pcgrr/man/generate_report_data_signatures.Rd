@@ -7,7 +7,9 @@
 generate_report_data_signatures(
   variant_set = NULL,
   ref_data = NULL,
-  settings = NULL
+  settings = NULL,
+  n_bootstrap_iterations = 200,
+  sig_contribution_cutoff = 0.001
 )
 }
 \arguments{
@@ -16,6 +18,10 @@ generate_report_data_signatures(
 \item{ref_data}{PCGR reference data object}
 
 \item{settings}{PCGR configuration settings object}
+
+\item{n_bootstrap_iterations}{Number of bootstrap iterations for signature analysis}
+
+\item{sig_contribution_cutoff}{Minimal signature contribution for reporting}
 }
 \description{
 Function that generates mutational signatures data for PCGR report

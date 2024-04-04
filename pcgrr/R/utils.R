@@ -72,9 +72,9 @@ af_distribution <- function(var_df, bin_size = 0.05) {
   var_df <- var_df |>
     dplyr::select(c("VAF_TUMOR", "VARIANT_CLASS"))
 
-  if(NROW(var_df) <= 200){
-    bin_size = 0.10
-  }
+  # if(NROW(var_df) <= 200){
+  #   bin_size = 0.10
+  # }
   if(NROW(var_df) > 500){
     bin_size = 0.025
   }
@@ -117,7 +117,17 @@ af_distribution <- function(var_df, bin_size = 0.05) {
       as.numeric(0),
       as.numeric(.data$Count)))
 
-  return(af_bin_df)
+  af_dist_final <- af_bin_df
+  for(vclass in unique(af_bin_df$VARIANT_CLASS)){
+    sum_count <- sum(
+      af_bin_df$Count[af_bin_df$VARIANT_CLASS == vclass])
+    if(sum_count == 0){
+      af_dist_final <- af_dist_final |>
+        dplyr::filter(VARIANT_CLASS != vclass)
+    }
+  }
+
+  return(af_dist_final)
 
 }
 
@@ -817,7 +827,7 @@ write_processed_vcf <- function(calls,
       "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO")
 
   vcf_df <- calls |>
-    dplyr::select(.data$CHROM, .data$POS, .data$REF, .data$ALT)
+    dplyr::select(c("CHROM","POS","REF","ALT"))
 
   if(snv_only == TRUE){
     vcf_df <- vcf_df |>

@@ -181,6 +181,8 @@ assign_acmg_tiers <- function(
              .data$TUMOR_SUPPRESSOR == TRUE) |
             (!is.na(.data$ONCOGENE) &
                .data$ONCOGENE == TRUE) &
+            (is.na(.data$gnomADe_AF) |
+            .data$gnomADe_AF < 0.001) &
             .data$CODING_STATUS == "coding",
           as.integer(3),
           as.integer(NA)
@@ -282,6 +284,7 @@ assign_acmg_tiers <- function(
   if(NROW(biomarker_items) > 0){
     results_acmg[['biomarker_evidence']][['items_all']] <-
       biomarker_items
+  }
 
   if(NROW(biomarker_items_hires) > 0){
     results_acmg[['biomarker_evidence']][['items']] <-

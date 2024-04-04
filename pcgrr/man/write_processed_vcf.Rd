@@ -8,7 +8,8 @@ write_processed_vcf(
   calls,
   sample_name = NULL,
   output_directory = NULL,
-  vcf_fname = NULL
+  vcf_fname = NULL,
+  snv_only = TRUE
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ write_processed_vcf(
 \item{output_directory}{Output directory for output file}
 
 \item{vcf_fname}{filename for VCF}
+
+\item{snv_only}{logical, if TRUE only SNVs are written to VCF}
 }
 \description{
 Function that writes a VCF intended for mutational signature analysis

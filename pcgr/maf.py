@@ -35,7 +35,7 @@ def update_maf_allelic_support(maf_tmp_fname: str,
         header_line = f.readline().strip('\n')
     f.close()
         
-    raw_maf_data = pd.read_csv(maf_tmp_fname, sep="\t", header=1)
+    raw_maf_data = pd.read_csv(maf_tmp_fname, sep="\t", header=1, na_values=['.'])
     if update_allelic_support is False:
         # write to file
         b = 1

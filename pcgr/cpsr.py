@@ -185,8 +185,10 @@ def run_cpsr(conf_options, cpsr_paths):
         logger.info(f"Genome assembly: {conf_options['genome_assembly']}")
         print('----')
         
-        conf_options['annotated_tsv'] = output_pass_tsv_gz
-        conf_options['annotated_vcf'] = output_vcf
+        #conf_options['annotated_tsv'] = output_pass_tsv_gz
+        #conf_options['annotated_vcf'] = output_vcf
+        conf_options['molecular_data']['fname_mut_vcf'] = output_vcf
+        conf_options['molecular_data']['fname_mut_tsv'] = output_pass_tsv_gz
         conf_options['output_dir'] = output_dir
         conf_options['gene_panel']['custom_list_bed'] = "None"
         if not input_customlist == 'None':

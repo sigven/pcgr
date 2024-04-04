@@ -62,6 +62,7 @@ def append_annotations(vcf2tsv_gz_fname: str, db_assembly_dir: str, logger):
         vcf2tsv_df = pd.read_csv(
             vcf2tsv_gz_fname, skiprows=[0], sep="\t", na_values=".",
             low_memory = False)
+        
         if {'CHROM','POS','REF','ALT','CLINVAR_MSID','PFAM_DOMAIN','ENTREZGENE'}.issubset(vcf2tsv_df.columns):
             for elem in ['CHROM','POS','REF','ALT','CLINVAR_MSID','PFAM_DOMAIN','ENTREZGENE']:
                 vcf2tsv_df = vcf2tsv_df.astype({elem:'string'})            
@@ -148,7 +149,6 @@ def append_annotations(vcf2tsv_gz_fname: str, db_assembly_dir: str, logger):
             else:
                 vcf2tsv_df['GENENAME'] = '.'
                 
-    #vcf2tsv_df = vcf2tsv_df.fillna('.')
     return(vcf2tsv_df)
 
 def set_allelic_support(variant_set: pd.DataFrame, allelic_support_tags: dict) -> pd.DataFrame:
@@ -157,7 +157,7 @@ def set_allelic_support(variant_set: pd.DataFrame, allelic_support_tags: dict) -
     """
     for e in ['DP_CONTROL','DP_TUMOR','VAF_CONTROL','VAF_TUMOR']:
         if e in variant_set.columns:
-            variant_set[e] = np.nan
+            variant_set[e] = np.nan        
 
     if allelic_support_tags['control_dp_tag'] != "_NA_":
         if {allelic_support_tags['control_dp_tag'],'DP_CONTROL'}.issubset(variant_set.columns):
@@ -191,12 +191,12 @@ def calculate_tmb(variant_set: pd.DataFrame, tumor_dp_min: int, tumor_af_min: fl
     if {'CONSEQUENCE','VAF_TUMOR','DP_TUMOR','VARIANT_CLASS'}.issubset(variant_set.columns):
         tmb_data_set = \
             variant_set[['CONSEQUENCE','DP_TUMOR','VAF_TUMOR','VARIANT_CLASS']]
-            
+        
         n_rows_raw = len(tmb_data_set)
         if float(tumor_af_min) > 0:
             ## filter variant set to those with VAF_TUMOR > tumor_af_min
             if variant_set[variant_set['VAF_TUMOR'].isna() == True].empty is True:
-                tmb_data_set = tmb_data_set.loc[tmb_data_set['VAF_TUMOR'] >= float(tumor_af_min),:]
+                tmb_data_set = tmb_data_set.loc[tmb_data_set['VAF_TUMOR'].astype(float) >= float(tumor_af_min),:]
                 n_removed_af = n_rows_raw - len(tmb_data_set)
                 logger.info(f'Removing n = {n_removed_af} variants with allelic fraction (tumor sample) < {tumor_af_min}')
             else:
@@ -204,9 +204,9 @@ def calculate_tmb(variant_set: pd.DataFrame, tumor_dp_min: int, tumor_af_min: fl
         if int(tumor_dp_min) > 0:
             ## filter variant set to those with DP_TUMOR > tumor_dp_min
             if variant_set[variant_set['DP_TUMOR'].isna() == True].empty is True:
-                tmb_data_set = tmb_data_set.loc[tmb_data_set['DP_TUMOR'] >= int(tumor_dp_min),:]
+                tmb_data_set = tmb_data_set.loc[tmb_data_set['DP_TUMOR'].astype(int) >= int(tumor_dp_min),:]
                 n_removed_dp = n_rows_raw - len(tmb_data_set)
-                logger.info(f"Removing n = {n_removed_dp} variants with sequencing depth (tumor sample) < {tumor_af_min}")
+                logger.info(f"Removing n = {n_removed_dp} variants with sequencing depth (tumor sample) < {tumor_dp_min}")
             else:
                 logger.info(f"Cannot filter on sequencing depth - 'DP_TUMOR' contains missing values")
         
@@ -283,11 +283,9 @@ def clean_annotations(variant_set: pd.DataFrame, yaml_data: dict, germline: bool
             if vcf_info_tag in variant_set.columns:
                 variant_set.loc[variant_set[vcf_info_tag].isna(),vcf_info_tag] = -123456789           
                 variant_set[vcf_info_tag] = variant_set[vcf_info_tag].apply(lambda x: str(int(x)) )
-                variant_set.loc[variant_set[vcf_info_tag] == "-123456789", vcf_info_tag] = "." 
+                #variant_set.loc[variant_set[vcf_info_tag] == "-123456789", vcf_info_tag] = "." 
+                variant_set.loc[variant_set[vcf_info_tag] == "-123456789", vcf_info_tag] = np.nan
                 
-                #variant_set.loc[variant_set[vcf_info_tag].notna(), vcf_info_tag] = \
-                #    variant_set.loc[variant_set[vcf_info_tag].notna(), vcf_info_tag].astype(str).astype(float).astype(int)   
-    
     ## Make sure that specific tags are formatted as integers (not float) when exported to TSV
     ## Trick - convert to str and then back to int
     for vcf_info_tag in ['ONCOGENE_RANK',
@@ -310,8 +308,8 @@ def clean_annotations(variant_set: pd.DataFrame, yaml_data: dict, germline: bool
         if vcf_info_tag in variant_set.columns: 
             variant_set.loc[variant_set[vcf_info_tag].isna(),vcf_info_tag] = -123456789           
             variant_set[vcf_info_tag] = variant_set[vcf_info_tag].apply(lambda x: str(int(x)) )
-            variant_set.loc[variant_set[vcf_info_tag] == "-123456789", vcf_info_tag] = "."              
-    
+            #variant_set.loc[variant_set[vcf_info_tag] == "-123456789", vcf_info_tag] = "."              
+            variant_set.loc[variant_set[vcf_info_tag] == "-123456789", vcf_info_tag] = np.nan
     #if germline is True:
     #    variant_set = set_genotype(variant_set, logger)
     

@@ -21,6 +21,7 @@ if(as.logical(conf$assay_properties$vcf_tumor_only) == TRUE){
   report_color <- pcgrr::color_palette$report_color$values[2]
 }
 
+success_color <- pcgrr::color_palette$success
 
 if(pcg_report$content$msi$eval == F){
   msi_prediction <- 'OFF'
@@ -121,5 +122,49 @@ bslib::layout_column_wrap(
   )
 )
 ```
+
+```{r input_data}
+#| output: asis
+#| echo: false
+#| eval: false
+
+bslib::layout_column_wrap(
+  width = 1/4,
+  height = 80,
+  bslib::value_box(
+    title = "",
+    value = "DNA - SNVs/InDels",
+    showcase = bsicons::bs_icon("check-square", size = "0.6em"),
+    showcase_layout = "top right",
+    theme = bslib::value_box_theme(
+      bg = pcgrr::color_palette$success, fg = "#fff")
+  ),
+  bslib::value_box(
+    title = "",
+    value = "DNA - CNAs",
+    showcase = bsicons::bs_icon("check-square", size = "0.6em"),
+    showcase_layout = "top right",
+    theme = bslib::value_box_theme(
+      bg = pcgrr::color_palette$success, fg = "#fff")
+  ),
+  bslib::value_box(
+    title = "",
+    value = "RNA - gene fusions",
+    showcase = bsicons::bs_icon("check-square", size = "0.6em"),
+    showcase_layout = "top right",
+    theme = bslib::value_box_theme(
+      bg = pcgrr::color_palette$success, fg = "#fff")
+  ),
+  bslib::value_box(
+    title = "",
+    value = "RNA - gene expression",
+    showcase = bsicons::bs_icon("check-square", size = "0.6em"),
+    showcase_layout = "top right",
+    theme = bslib::value_box_theme(
+      bg = pcgrr::color_palette$success, fg = "#fff")
+  )
+)
+```
+
 
 

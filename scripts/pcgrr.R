@@ -26,29 +26,34 @@ options("PCGRR_LOG4R_LOGGER" = log4r_logger)
 yaml_fname <-
   paste0("/Users/sigven/project_data/packages/",
          "package__pcgr/bundle_update_2023/",
-         "pcgr/tumor_sample.COAD.pcgr_acmg.grch38.conf.yaml")
+         "pcgr/examples/SAMPLE-T-001.pcgr.grch38.conf.yaml")
 
 
 ## Generate report content
-pcg_report <- pcgrr::generate_report(
+pcg_report1 <- pcgrr::generate_report(
+  yaml_fname = yaml_fname
+)
+pcg_report1$settings$conf$debug = TRUE
+pcgrr::write_report_quarto_html(report = pcg_report1)
+
+
+yaml_fname <-
+  paste0("/Users/sigven/project_data/packages/",
+         "package__pcgr/bundle_update_2023/",
+         "pcgr/examples/SAMPLE-T_N-001.pcgr_acmg.grch38.conf.yaml")
+
+
+## Generate report content
+pcg_report2 <- pcgrr::generate_report(
   yaml_fname = yaml_fname
 )
 
+pcg_report2$settings$conf$debug = TRUE
+pcgrr::write_report_quarto_html(report = pcg_report2)
+
+
 pcg_report$content$tmb$eval <- FALSE
 pcgrr::write_report_flexdb_html(report = pcg_report)
-
-
-
-# # ## Generate report object
-# pcg_report <-
-#   pcgrr::generate_pcgr_report(
-#     project_directory  = pcgr_config[['required_args']][['output_dir']],
-#     pcgr_data = pcgr_data,
-#     config = pcgr_config,
-#     tier_model = 'pcgr_acmg')
-
-# options(warn = defaultW)
-
 
 # # ## Write report and result files
 # if (!is.null(pcg_report)) {

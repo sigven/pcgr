@@ -47,7 +47,7 @@ coding_stats <-
 
 t <- list(
   family = "Helvetica",
-  size = 16)
+  size = 15)
 
 varstats_plots_plotly <- list()
 varstats_plots_plotly[['coding']] <- 
@@ -115,8 +115,8 @@ bslib::page_fillable(
       height = "350px",
       bslib::card_header(
         class = "bg-dark", 
-        paste0("Variant statistics - coding effect (",
-               pcg_report$settings$sample_id,")")),
+        paste0("Variant statistics | coding effect - ",
+               pcg_report$settings$sample_id)),
       varstats_plots_plotly[['coding']]
     ),
     bslib::card(
@@ -124,8 +124,8 @@ bslib::page_fillable(
       height = "350px",
       bslib::card_header(
         class = "bg-dark", 
-        paste0("Variant statistics - type (",
-               pcg_report$settings$sample_id,")")),
+        paste0("Variant statistics | type - ",
+               pcg_report$settings$sample_id)),
       varstats_plots_plotly[['type']]
     )
   ),
@@ -134,8 +134,8 @@ bslib::page_fillable(
     height = "400px",
     bslib::card_header(
       class = "bg-dark", 
-      paste0("Variant statistics - consequence type (",
-             pcg_report$settings$sample_id,")")),
+      paste0("Variant statistics | consequence type - ",
+             pcg_report$settings$sample_id)),
     varstats_plots_plotly[['consequence']]
   )
 )
@@ -194,8 +194,8 @@ bslib::card(
   bslib::card_header(
     class = "bg-dark",
     paste0(
-      "Distribution - variant allelic fraction (",
-      pcg_report$settings$sample_id,")")
+      "Distribution - variant allelic fraction - ",
+      pcg_report$settings$sample_id)
   ),
   vaf_plot_plotly
 )
@@ -215,10 +215,17 @@ cex <- 0.8
 cex_text <- 3
 
 # make rainfall plot with rfdat
+
+type_stats <- plyr::count(rfdat$data$type) |>
+  dplyr::arrange(desc(freq))
+
+rfdat$data$type <- factor(
+  rfdat$data$type, levels = type_stats$x)
+
 genomic_dist_plot <- ggplot2::ggplot(
   rfdat$data, ggplot2::aes(x = location, y = distance)) +
     ggplot2::geom_point(
-      ggplot2::aes(colour = factor(type)), cex = rfdat$cex) +
+      ggplot2::aes(colour = type), cex = rfdat$cex) +
     ggplot2::geom_vline(
       xintercept = as.vector(rfdat$chr_cum), linetype="dotted") +
     ggplot2::annotate("text", x = rfdat$intercept, 
@@ -254,8 +261,8 @@ bslib::card(
   bslib::card_header(
     class = "bg-dark",
     paste0(
-      "Distribution - genomic location (",
-      pcg_report$settings$sample_id,")")
+      "Distribution - genomic location - ",
+      pcg_report$settings$sample_id)
   ),
   genomic_dist_plot_plotly
 )
@@ -268,7 +275,7 @@ bslib::card(
 
 ### Variant classification - oncogenicity
 
-Annotations for all short variants detected in the tumor sample can here be interrogated, e.g. with respect to VAF/DP (if provided as input), and also with respect to _oncogenicity_. For the latter, PCGR implements recently published oncogenicity criteria/guidelines developed by ClinGen/VICC [@Horak2022-uh]. The tabset below provides an overview of coding (protein-altering) versus non-coding variants found in the tumor sample.
+Annotations for all short variants detected in the tumor sample can here be interrogated, e.g. with respect to gene, variant consequence, variant allelic fraction/sequencing depth (if provided as input), and also with respect to _predicted oncogenicity_. For the latter, PCGR implements recently published oncogenicity criteria/guidelines developed by ClinGen/VICC [@Horak2022-uh]. The tabset below provides an overview of coding (protein-altering) versus non-coding variants found in the tumor sample.
 
 ::: {.callout-note}
 
@@ -316,9 +323,11 @@ filter_set1[[2]] <- crosstalk::filter_select(
   "ONCOGENICITY", "Oncogenicity", coding_variants_shared, ~ONCOGENICITY)
 filter_set2[[1]] <- crosstalk::filter_select(
   "CONSEQUENCE", "Consequence", coding_variants_shared, ~CONSEQUENCE)
+filter_set2[[2]] <- crosstalk::filter_select(
+  "MUTATION_HOTSPOT", "Mutation hotspot", coding_variants_shared, ~MUTATION_HOTSPOT)
 
 i_set1 <- 3
-i_set2 <- 2
+i_set2 <- 3
 if(any(!is.na(coding_variant_set$CALL_CONFIDENCE))){
   filter_set2[[i_set2]] <- crosstalk::filter_select(
     "CALL_CONFIDENCE", 
@@ -499,7 +508,15 @@ DT::datatable(
 ### Variant classification - actionability
 
 Acquired SNVs and InDels in the tumor sample have been assessed for
-_clinical actionability_ through an implementation of ACMG/AMP guidelines [@Li2017-ew]. The tabset below indicates which variants have been classified into three distinct _tiers of clinical significance_ according to ACMG/AMP criteria.
+_clinical actionability_ through an implementation of ACMG/AMP guidelines [@Li2017-ew]. We use CIViC [@Griffith2017-do] and CGI [@Tamborero2018-aj] as the underlying sources for actionable variants (versions indicated below). 
+
+The tabset below indicates which variants have been classified into three distinct _tiers of clinical significance_ according to ACMG/AMP criteria.
+
+::: {.callout-note}
+## Note - biomarker matching
+
+The same somatic mutation may frequently match with multiple evidence items from , pending on e.g. the _disease context_, _therapeutic context_, _biomarker resolution_, or underlying _evidence source_ (i.e. publication)
+:::
 
 ```{r}
 #| echo: false
@@ -519,7 +536,7 @@ htmltools::br()
 
 ::: {.panel-tabset .nav-pills}
 
-#### <b>TIER 1</b> - strong clinical significance
+#### <b>TIER I</b> - strong clinical significance
 
 <br>
 
@@ -631,7 +648,7 @@ DT::datatable(
     fontWeight = 'bold', 
     `text-align` = 'center',
     backgroundColor = DT::styleEqual(
-      c('hgvsp','genomic','codon',
+      c('genomic','hgvsp','codon',
         'exon','gene_region_mut',
         'gene_lof','gene_mut'), 
       c(pcgrr::color_palette$bg_dark,
@@ -659,7 +676,7 @@ htmltools::br()
 
 ```
 
-#### <b>TIER 2</b>- potential clinical significance
+#### <b>TIER II</b>- potential clinical significance
 
 
 ```{r}
@@ -802,9 +819,9 @@ htmltools::br()
 
 ```
 
-#### <b>TIER 3</b> - uncertain clinical significance
+#### <b>TIER III</b> - uncertain clinical significance
 
-Here, we list protein-altering somatic variants located in proto-oncogenes and tumor suppressors that are currently not linked to any clinical evidence items. These variants are considered to have uncertain clinical significance and are thus not recommended for clinical action.
+Here, we list protein-altering somatic variants located in proto-oncogenes and tumor suppressors that are currently _not_ linked to any clinical evidence items (as specified in [@Li2017-ew]). These variants are considered to have uncertain clinical significance and are thus not recommended for clinical action.
 
 Variants have been ranked based on their oncogenicity score, and their strength of association to cancer at the gene level (here, specifically __`r pcg_report$settings$conf$sample_properties$site`__ cancers), from <span style="background-color:`r pcgrr::color_palette$cancer_assoc$values[1]`; padding:2x; color:white"><b>&nbsp; weak associations &nbsp; </b></span>&nbsp; to <span style="background-color:`r pcgrr::color_palette$cancer_assoc$values[length(pcgrr::color_palette$cancer_assoc$values)]`; padding:2x; color:white"><b>&nbsp; strong associations &nbsp; </b></span> [@Nakken2023-ol]. 
 <br>

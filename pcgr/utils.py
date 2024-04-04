@@ -175,7 +175,7 @@ def sort_bed(unsorted_bed_fname: str, sorted_bed_fname: str, debug = False, logg
         error_message(err_msg, logger)
 
 
-def check_file_exists(fname: str, logger = None) -> bool:
+def check_file_exists(fname: str, strict = True, logger = None) -> bool:
     err = 0
     if not os.path.isfile(fname):
         err = 1
@@ -183,8 +183,12 @@ def check_file_exists(fname: str, logger = None) -> bool:
         if os.stat(fname).st_size == 0:
             err = 1
     if err == 1:
-        err_msg = f"File {fname} does not exist or has zero size"
-        error_message(err_msg, logger)
+        msg = f"File {fname} does not exist or has zero size"
+        if strict is False:
+            warn_message(msg, logger)
+            return(False)
+        else:
+            error_message(msg, logger)
     
     return(True)
 

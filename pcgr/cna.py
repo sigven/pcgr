@@ -12,6 +12,7 @@ from pybedtools import BedTool
 from pcgr.annoutils import nuclear_chromosomes
 from pcgr.utils import error_message, warn_message, check_file_exists, remove_file
 from pcgr.biomarker import load_biomarkers
+from pcgr.expression import integrate_variant_expression
 
 def annotate_cna_segments(output_fname: str, 
                           output_dir: str, 
@@ -21,6 +22,7 @@ def annotate_cna_segments(output_fname: str,
                           sample_id: str,
                           n_copy_amplifications: int = 5,
                           overlap_fraction: float = 0.5,
+                          expression_data: dict = None,
                           logger: logging.Logger = None) -> int:
     """
     Annotate copy number aberrations in a given segment file.
@@ -31,9 +33,10 @@ def annotate_cna_segments(output_fname: str,
         db_assembly_dir (str): Path to the build-specific PCGR database directory.
         build (str): Genome assembly build of input data.
         sample_id( (str): Sample identifier
-        output_dir (str): Directory to save the annotated file.
         n_copy_amplifications (int, optional): Number of copies to consider as gains/amplifications. Defaults to 5.
+        expression_data (dict, optional): Expression data. Defaults to None.
         overlap_fraction (float, optional): Fraction of overlap required for annotation. Defaults to 0.5.
+        logger (logging.Logger, optional): Logger. Defaults to None.
     Returns:
         int: 0 if successful.
     """
@@ -181,6 +184,14 @@ def annotate_cna_segments(output_fname: str,
                 cna_query_segment_df['N_MINOR'].astype(str), sep=":")
     
     cna_query_segment_df['SAMPLE_ID'] = sample_id
+    if not expression_data is None:
+        cna_query_segment_df = integrate_variant_expression(cna_query_segment_df, expression_data, logger)
+    else:
+        logger.info("No expression data provided. Skipping CNA-expression integration")
+        cna_query_segment_df['TPM_GENE'] = '.'
+        cna_query_segment_df['TPM'] = '.'
+        
+    
     cna_query_segment_df.to_csv(output_fname, sep="\t", header=True, index=False)
                 
     return 0
@@ -234,6 +245,9 @@ def annotate_cytoband(cna_segments_bt: BedTool, output_dir: str, db_assembly_dir
     cytoband_last_annotations.columns = ['last_cytoband','last_arm','last_arm_length','last_focal_threshold']
         
     cytoband_all = pd.concat([segments_cytoband, cytoband_first_annotations, cytoband_last_annotations], axis = 1)
+    #cytoband_all = pd.concat([segments_cytoband, cytoband_first_annotations], axis = 1)
+    #print(str(cytoband_all.head(3)))
+    
     cytoband_all['segment_start'] = cytoband_all['segment_start'].astype(int)
     cytoband_all['segment_end'] = cytoband_all['segment_end'].astype(int)       
     cytoband_all.loc[:,'segment_length'] = cytoband_all['segment_end'] - cytoband_all['segment_start']
@@ -247,6 +261,7 @@ def annotate_cytoband(cna_segments_bt: BedTool, output_dir: str, db_assembly_dir
     cytoband_all['segment_name'] = cytoband_all['segment_name'].str.cat(cytoband_all['first_arm'], sep = "|").str.cat(
         cytoband_all['cytoband'],sep="|").str.cat(cytoband_all['event_type'], sep="|")    
     cytoband_annotated_segments = cytoband_all[['chromosome','segment_start','segment_end','segment_name']]
+    #print(str(cytoband_annotated_segments.head(3)))
     
     ## remove all temporary files
     for fname in temp_files:
@@ -255,8 +270,10 @@ def annotate_cytoband(cna_segments_bt: BedTool, output_dir: str, db_assembly_dir
     return cytoband_annotated_segments
 
 
-def annotate_transcripts(cna_segments_bt: BedTool, output_dir: str,
-                         db_assembly_dir: str, overlap_fraction: float,
+def annotate_transcripts(cna_segments_bt: BedTool, 
+                         output_dir: str,
+                         db_assembly_dir: str, 
+                         overlap_fraction: float,
                          logger: logging.Logger) -> pd.DataFrame:
     
     """
@@ -399,5 +416,6 @@ def is_valid_cna(cna_segment_file, logger):
             err_msg = 'Detected wrongly formatted chromosomal segment - \'Start\' or \'End\' is less than or equal to zero (' + \
                 str(rec['Chromosome']) + ':' + str(rec['Start']) + '-' + str(rec['End']) + ')'
             return error_message(err_msg, logger)
-    logger.info(f'Copy number segment file ({cna_segment_file}) adheres to the correct format')
+        
+    logger.info(f"Copy number segment file ('{os.path.basename(cna_segment_file)}') adheres to the correct format")
     return 0

@@ -12,7 +12,7 @@ generate_report_data_signatures <-
            ref_data = NULL,
            settings = NULL,
            n_bootstrap_iterations = 200,
-           sig_contribution_cutoff = 0) {
+           sig_contribution_cutoff = 0.001) {
 
 
   sig_settings <- settings$conf$somatic_snv$mutational_signatures
@@ -47,7 +47,6 @@ generate_report_data_signatures <-
       output_directory = settings$output_dir,
       vcf_fname = vcf_name_mutsig_analysis,
       snv_only = F)
-
 
   pcg_report_signatures <-
     pcgrr::init_m_signature_content()
@@ -91,59 +90,130 @@ generate_report_data_signatures <-
     )
     if(class(grl)[1] == "CompressedGRangesList"){
 
-      snv_grl <- suppressMessages(MutationalPatterns::get_mut_type(
-        grl, type = "snv"))
-      indel_grl <- suppressMessages(MutationalPatterns::get_mut_type(
-        grl, type = "indel", predefined_dbs_mbs = T))
+      snv_grl <- suppressMessages(
+        MutationalPatterns::get_mut_type(
+          grl, type = "snv", predefined_dbs_mbs = T))
+      indel_grl <- suppressMessages(
+        MutationalPatterns::get_mut_type(
+          grl, type = "indel", predefined_dbs_mbs = T))
       indel_counts <- NULL
       if(length(indel_grl[[1]]) > 0){
         indel_grl <- MutationalPatterns::get_indel_context(
           indel_grl, ref_genome = ref_data$assembly$bsg)
-        indel_counts <- MutationalPatterns::count_indel_contexts(indel_grl)
+        indel_counts <- MutationalPatterns::count_indel_contexts(
+          indel_grl)
       }
 
-      type_occurrences <- MutationalPatterns::mut_type_occurrences(
+      type_occurrences <- suppressWarnings(
+        MutationalPatterns::mut_type_occurrences(
         snv_grl, ref_genome = ref_data$assembly$bsg)
+      )
+
+      if(is.data.frame(type_occurrences)){
+        if("T>A" %in% colnames(type_occurrences)){
+          type_occurrences <- type_occurrences |>
+            dplyr::rename("A>T" = "T>A")
+        }
+        if("T>C" %in% colnames(type_occurrences)){
+          type_occurrences <- type_occurrences |>
+            dplyr::rename("A>G" = "T>C")
+        }
+        if("T>G" %in% colnames(type_occurrences)){
+          type_occurrences <- type_occurrences |>
+            dplyr::rename("A>C" = "T>G")
+        }
+      }
+
       pcgrr::log4r_info(paste0("Number of SNVs for signature analysis: ",
                                length(snv_grl[[1]])))
 
+      pcg_report_signatures[["result"]][["indel_counts"]] <-
+        indel_counts
+      pcg_report_signatures[["result"]][["type_occurrences"]] <-
+        type_occurrences
       pcg_report_signatures[["eval"]] <- TRUE
 
-      if (length(snv_grl[[1]]) >= sig_settings[["mutation_limit"]]) {
 
-        ## assign variants to variant set
-        pcg_report_signatures[["variant_set"]][["all"]] <-
-          data.frame('VAR_ID' = rownames(S4Vectors::mcols(snv_grl[[1]])),
-                          stringsAsFactors = F) |>
-          tidyr::separate(.data$VAR_ID, c('CHROM', 'pos_ref_alt'),
-                          sep=":", remove = T) |>
-          tidyr::separate(.data$pos_ref_alt, c("POS","ref_alt"),
-                          sep="_", remove = T) |>
-          tidyr::separate(.data$ref_alt, c("REF","ALT"),
-                          sep = "/", remove = T) |>
-          dplyr::mutate(POS = as.integer(.data$POS))
+      ## assign variants to variant set
+      pcg_report_signatures[["variant_set"]][["all"]] <-
+        data.frame('VAR_ID' = rownames(S4Vectors::mcols(snv_grl[[1]])),
+                   stringsAsFactors = F) |>
+        tidyr::separate(.data$VAR_ID, c('CHROM', 'pos_ref_alt'),
+                        sep=":", remove = T) |>
+        tidyr::separate(.data$pos_ref_alt, c("POS","ref_alt"),
+                        sep="_", remove = T) |>
+        tidyr::separate(.data$ref_alt, c("REF","ALT"),
+                        sep = "/", remove = T) |>
+        dplyr::mutate(POS = as.integer(.data$POS))
 
-        ## get context matrix
-        mut_mat <-
-          MutationalPatterns::mut_matrix(
-            vcf_list = snv_grl,
-            ref_genome = ref_data$assembly$bsg,
-            extension = 1)
-        mut_mat <- mut_mat + 0.0001
+      ## get context matrix
+      mut_mat <-
+        MutationalPatterns::mut_matrix(
+          vcf_list = snv_grl,
+          ref_genome = ref_data$assembly$bsg,
+          extension = 1)
+      pcg_report_signatures[["result"]][["mut_mat"]] <- mut_mat
+      mut_mat <- mut_mat + 0.0001
 
-        ## get reference signatures (COSMIC v3.2)
+      # get reference signatures (COSMIC v3.4)
+      all_reference_signatures <-
+        pcgrr::cosmic_sbs_signatures_all
+
+      if(as.logical(sig_settings$include_artefact_signatures) == FALSE){
         all_reference_signatures <-
-          MutationalPatterns::get_known_signatures(
-          muttype = "snv",
-          genome = stringr::str_replace(
-            ref_data$assembly$grch_name, "grc", "GRC"
-          ),
-          incl_poss_artifacts =
-            as.logical(
-              sig_settings$include_artefact_signatures
-            )
-        )
+          pcgrr::cosmic_sbs_signatures_no_artefacts
+      }
 
+      # all_reference_signatures <-
+      #   MutationalPatterns::get_known_signatures(
+      #     muttype = "snv",
+      #     genome = stringr::str_replace(
+      #       ref_data$assembly$grch_name, "grc", "GRC"
+      #     ),
+      #     incl_poss_artifacts =
+      #       as.logical(
+      #         sig_settings$include_artefact_signatures
+      #       )
+      #   )
+
+      if (length(snv_grl[[1]]) >= 30) {
+
+        sig_similarity <-
+          MutationalPatterns::cos_sim_matrix(
+            mut_mat, all_reference_signatures)
+
+        if(length(sig_similarity) >= 67){
+          pcg_report_signatures[["result"]][['signature_similarity']] <-
+            tidyr::pivot_longer(
+            as.data.frame(sig_similarity),
+            names_to = "SIGNATURE_ID",
+            values_to = "SIMILARITY",
+            cols = dplyr::everything()) |>
+            dplyr::arrange(
+              dplyr::desc(SIMILARITY)) |>
+            dplyr::mutate(
+              SIMILARITY = round(SIMILARITY, digits = 4)) |>
+            dplyr::left_join(
+              dplyr::select(
+                prevalent_site_signatures$aetiology,
+                c("SIGNATURE_ID", "AETIOLOGY_KEYWORD")),
+              by = "SIGNATURE_ID"
+            ) |>
+            #dplyr::mutate(SITE_SPECIFIC = "NOT_DEFINED") |>
+            dplyr::mutate(SITE_SPECIFIC = dplyr::if_else(
+              as.logical(fit_signatures_to_ttype) == TRUE,
+              "NO",
+              as.character("NOT_DEFINED")
+            )) |>
+            dplyr::mutate(SITE_SPECIFIC = dplyr::case_when(
+              SIGNATURE_ID %in%
+                unique(prevalent_site_signatures$aetiology$SIGNATURE_ID)
+              & as.logical(fit_signatures_to_ttype) == TRUE ~ "YES",
+              TRUE ~ as.character(SITE_SPECIFIC)))
+        }
+      }
+
+      if (length(snv_grl[[1]]) >= sig_settings[["mutation_limit"]]) {
         ## select subset of signatures based on those prevalent in tumor type/tissue
         selected_sigs <- intersect(
           colnames(all_reference_signatures),
@@ -253,41 +323,58 @@ generate_report_data_signatures <-
             dplyr::summarise(
               prop_group = sum(.data$prop_signature),
               signature_id_group = paste(
-                .data$signature_id, collapse=", "),
-              .groups = "drop")
+                sort(.data$signature_id), collapse=", "),
+              .groups = "drop") |>
+            dplyr::arrange(
+              dplyr::desc(.data$prop_group)) |>
+            dplyr::mutate(group = dplyr::if_else(
+              .data$prop_group > 0.05,
+              .data$group,
+              "Other")) |>
+            dplyr::group_by(.data$group) |>
+            dplyr::summarise(
+              prop_group = sum(.data$prop_group),
+              signature_id_group = paste(
+                sort(.data$signature_id_group), collapse=", "),
+              .groups = "drop") |>
+            dplyr::mutate(prop_group = round(
+              .data$prop_group, digits = 3)) |>
+            dplyr::arrange(
+              dplyr::desc(.data$prop_group))
 
         )
 
-        cols <- contributions_per_group |>
-          dplyr::arrange(dplyr::desc(.data$prop_group)) |>
-          dplyr::select(.data$group) |>
+        cols <- contributions_per_signature |>
+          dplyr::arrange(dplyr::desc(.data$prop_signature)) |>
+          dplyr::select(.data$signature_id) |>
           dplyr::distinct() |>
           utils::head(25)
 
         color_vec <- utils::head(
-          pcgrr::color_palette[["tier"]][["values"]], min(25, nrow(cols)))
+          pcgrr::color_palette[["tier"]][["values"]],
+          min(25, nrow(cols)))
 
-        names(color_vec) <- cols$group
+        names(color_vec) <- cols$signature_id
         color_vec2 <- color_vec
         names(color_vec2) <- NULL
 
         cols <- cols |>
           dplyr::mutate(col = color_vec2)
         contributions_per_signature <- contributions_per_signature |>
-          dplyr::left_join(cols, by = "group")
+          dplyr::left_join(cols, by = "signature_id")
 
-        ## emit warning if more than 25 different aetiologies are found
-        ## choose only signatures attributed to 25 different aetiologies
-        missing_aetiologies <- contributions_per_signature |>
+        ## emit warning if more than 25 different signatures are found
+        ## choose only signatures attributed to 25 different signatures
+        missing_signatures <- contributions_per_signature |>
           dplyr::filter(is.na(.data$col))
-        if (nrow(missing_aetiologies) > 0) {
-          log4r_warn(paste0("Found contributions from more than 25 aetiologies - ",
-                            "showing signatures from 25 different aetiologies only"))
+        if (nrow(missing_signatures) > 0) {
+          log4r_warn(paste0("Found contributions from more than 25 signatures - ",
+                            "showing signatures from 25 different signatures only"))
           contributions_per_signature <- contributions_per_signature |>
             dplyr::filter(!is.na(.data$col))
 
           contributions_per_group <- contributions_per_group |>
-            dplyr::anti_join(missing_aetiologies, by = "group")
+            dplyr::anti_join(missing_signatures, by = "signature_id")
         }
 
 
@@ -322,9 +409,6 @@ generate_report_data_signatures <-
         chromosomes <- utils::head(GenomeInfoDb::seqnames(ref_data$assembly$bsg), 24)
 
         pcg_report_signatures[["result"]][["vr"]] <- vr
-        pcg_report_signatures[["result"]][["indel_counts"]] <- indel_counts
-        pcg_report_signatures[["result"]][["type_occurrences"]] <- type_occurrences
-        pcg_report_signatures[["result"]][["mut_mat"]] <- mut_mat
         pcg_report_signatures[["result"]][["chromosomes"]] <- chromosomes
         pcg_report_signatures[["result"]][["contributions"]] <- contributions
         pcg_report_signatures[["result"]][["tsv"]] <- tsv_data
@@ -338,11 +422,6 @@ generate_report_data_signatures <-
       }else{
         pcg_report_signatures[["missing_data"]] <- TRUE
         if (length(snv_grl[[1]]) > 0) {
-          pcg_report_signatures[["variant_set"]][["all"]] <-
-            as.data.frame(snv_grl[[1]]) |>
-            dplyr::rename(POS = .data$start, CHROM = .data$seqnames) |>
-            dplyr::select(.data$CHROM, .data$POS, .data$REF, .data$ALT) |>
-            magrittr::set_rownames(NULL)
           pcgrr::log4r_info(
             paste0("Too few SNVs (n = ",
                    nrow(pcg_report_signatures[["variant_set"]][["all"]]),
@@ -593,7 +672,7 @@ generate_report_data_rainfall <- function(variant_set,
   pcgrr::log4r_info(paste0("Calculating data for rainfall plot"))
 
 
-  sbs_types <- c("C>A", "C>G", "C>T", "T>A", "T>C", "T>G")
+  sbs_types <- c("C>T", "A>G", "A>C", "A>T", "C>G", "C>A")
   if (is.null(colors)) {
     colors <- head(pcgrr::color_palette$tier$values, 6)
   }else{
@@ -615,8 +694,13 @@ generate_report_data_rainfall <- function(variant_set,
       dplyr::mutate(CHROM = paste0("chr", .data$CHROM))
   }
 
-  dat <- dplyr::select(variant_set, .data$CHROM, .data$POS,
-                       .data$REF, .data$ALT, .data$VARIANT_CLASS) |>
+  dat <- dplyr::select(
+    variant_set,
+    c("CHROM",
+      "POS",
+      "REF",
+      "ALT",
+      "VARIANT_CLASS")) |>
     dplyr::filter(.data$VARIANT_CLASS == "SNV")
 
   if (nrow(dat) < 10 | nrow(dat) > 10000 | length(chromosome_names) < 2) {
@@ -630,16 +714,16 @@ generate_report_data_rainfall <- function(variant_set,
       pcgrr::assign_mutation_type() |>
       dplyr::mutate(
         MUTATION_TYPE =
-          dplyr::if_else(stringr::str_detect(.data$MUTATION_TYPE, "^C>"),
+          dplyr::if_else(stringr::str_detect(.data$MUTATION_TYPE, "^(C|A)>"),
                          stringr::str_replace(.data$MUTATION_TYPE,
                                               ":[A-Z]>[A-Z]$", ""),
                          as.character(.data$MUTATION_TYPE))) |>
-      dplyr::mutate(
-        MUTATION_TYPE =
-          dplyr::if_else(stringr::str_detect(.data$MUTATION_TYPE, "^A>"),
-                         stringr::str_replace(.data$MUTATION_TYPE,
-                                              "^[A-Z]>[A-Z]:", ""),
-                         as.character(.data$MUTATION_TYPE))) |>
+      # dplyr::mutate(
+      #   MUTATION_TYPE =
+      #     dplyr::if_else(stringr::str_detect(.data$MUTATION_TYPE, "^A>"),
+      #                    stringr::str_replace(.data$MUTATION_TYPE,
+      #                                         "^[A-Z]>[A-Z]:", ""),
+      #                    as.character(.data$MUTATION_TYPE))) |>
       pcgrr::sort_chromosomal_segments()
 
     bsg <- get_genome_obj(build)

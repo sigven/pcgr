@@ -1,32 +1,103 @@
-### Tumor mutational burden (TMB)
+## Tumor mutational burden (TMB)
 
-For estimation of TMB, PCGR employs two different approaches/algorithms ( __all_coding__, and __nonsyn__, see details outlined in the [Documentation](#Documentation) below).
+PCGR estimates TMB in three different ways, depending on the type of variants to include in the calculation (specifically abbreviated as __coding_non_silent__, __coding_and_silent__, and __missense_only__, see details outlined in the [Documentation](#Documentation)). Only results from one of these methods are highlighted here, as configured by the user. 
 
-* TMB algorithm chosen by user: __`r pcg_report[['metadata']][['config']][['tmb']][['algorithm']]`__
-* Size of targeted coding region: __`r pcg_report[['metadata']][['config']][["assay_props"]][['target_size_mb']]` Mb__
-* Estimated mutational burden: __`r pcg_report[['content']][['tmb']][['v_stat']][['tmb_estimate']]`__ __mutations/Mb__ 
+For TMB calculation, minimum sequencing coverage (__`r pcg_report$settings$conf$somatic_snv$tmb$tmb_dp_min`__) and variant allele frequency (VAF) thresholds are applied to filter out low-quality variants. 
 
-<br><br>
+* Minimum sequencing depth applied for TMB calculation: __`r pcg_report$settings$conf$somatic_snv$tmb$tmb_dp_min`__
+* Minimum VAF applied for TMB calculation: __`r pcg_report$settings$conf$somatic_snv$tmb$tmb_af_min`__
 
-```{r tumor_tmb_tcga_header, echo = F, results='asis', eval=T}
-cat('<h4>TMB reference distributions - TCGA</h4>',sep="\n")
-```
 <br>
-The plot below indicates how the mutational burden estimated for the query tumor sample (red dotted line) compares with the distributions observed for tumor samples in The Cancer Genome Atlas (TCGA). The grey area indicates the upper TMB tertile as defined by the user. Please note the following characteristics of the TCGA dataset presented here, which must be taken into account during TMB interpretation of the query sample:
+
+```{r key_tmb_stats}
+#| echo: false
+#| output: asis
+
+tmb_estimate <-
+  pcg_report$content$tmb$sample_estimate |>
+  dplyr::filter(
+    tmb_measure == paste0(
+      "TMB_",
+      pcg_report$settings$conf$somatic_snv$tmb$tmb_display))
+
+algo <- "Missense only"
+if(pcg_report$settings$conf$somatic_snv$tmb$tmb_display == "coding_and_silent"){
+  algo <- "Coding and silent"
+}
+if(pcg_report$settings$conf$somatic_snv$tmb$tmb_display == "coding_non_silent"){
+  algo <- "Coding non-silent"
+}
+
+    
+bslib::page_fillable(
+  bslib::layout_columns(
+    col_widths = c(4,4,4),
+    height = "140px",
+    bslib::value_box(
+      title = "TMB estimate",
+      value = paste(
+        round(tmb_estimate$tmb_estimate, 
+              digits = 2), tmb_estimate$tmb_unit),
+      showcase = NULL,
+      theme = "dark"
+    ),
+    bslib::value_box(
+      title = "TMB algorithm",
+      value = algo,
+      showcase = NULL,
+      theme = "dark"
+    ),
+    bslib::value_box(
+      title = "Effective target size",
+      value = paste(
+        pcg_report$settings$conf$assay_properties$effective_target_size_mb, "Mb"),
+      showcase = NULL,
+      theme = "dark"
+    )
+  )
+)
+
+```
+
+<br>
+
+The plot below indicates how the mutational burden estimated for the query tumor sample (dotted line) compares with reference distributions of other tumor samples (The Cancer Genome Atlas (TCGA)).
+
+::: {.callout-note}
+
+## Note - TMB reference comparison
+
+Be aware of the nature of the _reference dataset_ (TCGA), which must be taken into account during TMB interpretation of the query sample:
 
 * The TCGA tumor samples are sequenced with a mean coverage of approximately 100X
 * The TCGA somatic mutation calls are based on a consensus among variant callers (each variant is supported by a minimum of two variant calling algorithms)
-* The TCGA somatic mutation calls are based on paired tumor-control sequencing (tumor-only sequencing may produce higher numbers due to more noise)
+* The TCGA somatic mutation calls are based on paired tumor-control sequencing (tumor-only sequencing frequently produce higher numbers due to more noise)
 
-<br><br>
-```{r tumor_tmb_tcga_plot, echo = F, fig.width=12, fig.height=9, eval=T}
-tmb_plot <- pcgrr::plot_tmb_primary_site_tcga(pcg_report[['content']][['tmb']][['tcga_tmb']], 
-                                              p_site = pcg_report[['metadata']][['config']][["t_props"]][['tumor_type']], 
-                                              tmb_estimate = pcg_report[['content']][['tmb']][['v_stat']][['tmb_estimate']],
-                                              algorithm = pcg_report[['content']][['tmb']][['algorithm']])
-tmb_plot
-htmltools::br()
-```
+:::
 
 <br>
 
+```{r tmb_reference_comparison_plot}
+
+tmb_plot <- pcgrr::plot_tmb_primary_site_tcga(
+  pcg_report$content$tmb$tmb_reference, 
+  p_site = 
+    pcg_report$settings$conf$sample_properties$site, 
+  tmb_estimates = 
+    pcg_report$content$tmb$sample_estimate,
+  tmb_display_type = 
+    pcg_report$settings$conf$somatic_snv$tmb$tmb_display,
+  tumor_only = 
+    as.logical(pcg_report$settings$conf$assay_properties$vcf_tumor_only))
+
+
+bslib::card(
+    full_screen = TRUE,
+    height = "850px",
+    bslib::card_header(
+      class = "bg-dark", 
+      paste0("TMB reference cohorts comparison - ",
+             pcg_report$settings$sample_id)),
+    plotly::ggplotly(tmb_plot)
+  )
+```

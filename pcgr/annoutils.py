@@ -36,6 +36,7 @@ def read_infotag_file(vcf_info_tags_tsv, scope = "vep"):
     for row in reader:
         if not row['tag'] in info_tag_xref:
             if scope in row['category']:
+                #print(scope + '\t' + str(row['category']) + '\t' + str(row['tag']))
                 info_tag_xref[row['tag']] = row
 
     return info_tag_xref

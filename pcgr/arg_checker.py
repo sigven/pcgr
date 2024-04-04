@@ -31,6 +31,26 @@ def check_args(arg_dict):
 
     # Optional arguments
 
+    if arg_dict['expression_sim'] == True and arg_dict['input_rna_exp'] is None:
+        warn_msg = f"RNA expression similarity analysis can only be performed if --input_rna_exp is set (--input_rna_exp = {arg_dict['input_rna_exp']})."
+        warn_message(warn_msg, logger)
+        arg_dict['expression_sim'] = False
+    
+    if not arg_dict['expression_sim_db'] is None:
+        expression_sim_db_sources = str(arg_dict['expression_sim_db']).split(',')
+        permitted_exp_sources = pcgr_vars.EXPRESSION_DB_SOURCES
+        num_permitted_sources = 0
+        for v in expression_sim_db_sources:
+            if v in permitted_exp_sources:
+                num_permitted_sources += 1
+
+        if num_permitted_sources != len(expression_sim_db_sources):
+            err_msg = (
+                f"Option '--expression_sim_db' = {str(arg_dict['expression_sim_db'])} is formatted incorrectly, should be " 
+                f"a comma-separated string of the following values: '{' '.join(pcgr_vars.EXPRESSION_DB_SOURCES)}'"
+            )
+            error_message(err_msg, logger)
+
     # check if input is cancer cell line, requires --tumor_only
     if arg_dict['cell_line'] and not arg_dict['tumor_only']:
         err_msg = 'Analysis of cell line (--cell_line) needs option --tumor_only'
@@ -129,6 +149,15 @@ def check_args(arg_dict):
         error_message(err_msg, logger)
 
     if arg_dict['tumor_only'] is True:
+        
+        if arg_dict['control_dp_tag'] is not None:
+            err_msg = f"Option '--tumor_only' does not allow '--control_dp_tag' option to be set ({arg_dict['control_dp_tag']})"
+            error_message(err_msg, logger)
+        
+        if arg_dict['control_af_tag'] is not None:
+            err_msg = f"Option '--tumor_only' does not allow '--control_af_tag' option to be set ({arg_dict['control_af_tag']})"
+            error_message(err_msg, logger)
+        
         for t in ['exclude_likely_het_germline', 'exclude_likely_hom_germline']:
             if arg_dict[t]:
                 if arg_dict['tumor_af_tag'] == "_NA_":
@@ -203,43 +232,97 @@ def check_args(arg_dict):
     return
 
 
+def define_output_files(arg_dict):
+    """
+    Define output files
+    """
+    logger = getlogger("pcgr-output-files")
+    # create output folder (if not already exists)
+    output_dir = utils.safe_makedir(os.path.abspath(arg_dict['output_dir']))
+
+    # Define general output prefix
+    output_prefix = os.path.join(
+        str(output_dir), f"{arg_dict['sample_id']}.pcgr.{arg_dict['genome_assembly']}")
+
+    # Append output files to arg_dict
+    output_vcf = \
+        f"{output_prefix}.vcf.gz"
+    output_vcf_tsv = \
+        f"{output_prefix}.pass.tsv.gz"
+    output_cna = \
+        f"{output_prefix}.cna_segments.tsv.gz"
+    output_expression = \
+        f"{output_prefix}.expression.tsv.gz"
+
+    # if annotated output vcf exist and overwrite not set
+    if os.path.exists(output_vcf) and arg_dict["force_overwrite"] is False:
+        err_msg = f"Output files (e.g. {output_vcf}) already exist - please specify different sample_id or add option --force_overwrite"
+        error_message(err_msg, logger)
+    
+    # if annotated output vcf2tsv exist and overwrite not set
+    if os.path.exists(output_vcf_tsv) and arg_dict["force_overwrite"] is False:
+        err_msg = "Output files (e.g. " + str(output_vcf_tsv) + \
+            ") already exist - please specify different sample_id or add option --force_overwrite"
+        error_message(err_msg, logger)
+        
+    # if annotated output cna segments exist and overwrite not set
+    if os.path.exists(output_cna) and arg_dict["force_overwrite"] is False:
+        err_msg = "Output files (e.g. " + str(output_cna) + \
+            ") already exist - please specify different sample_id or add option --force_overwrite"
+        error_message(err_msg, logger)
+        
+    # if output annotated gene expression exist and overwrite not set
+    if os.path.exists(output_expression) and arg_dict["force_overwrite"] is False:
+        err_msg = "Output files (e.g. " + str(output_expression) + \
+            ") already exist - please specify different sample_id or add option --force_overwrite"
+        error_message(err_msg, logger)
+        
+    output_data = {}
+    output_data['prefix'] = output_prefix
+    output_data['dir'] = output_dir
+    output_data['vcf'] = output_vcf
+    output_data['vcf2tsv'] = output_vcf_tsv
+    output_data['cna'] = output_cna
+    output_data['expression'] = output_expression
+
+    return output_data
+
 def verify_input_files(arg_dict):
     """
     1. Checks existence of input files/dirs (arg_dict)
     2. Checks that the data bundle is of correct date
     """
-    logger = getlogger("pcgr-validate-arguments-input-b")
+    logger = getlogger("pcgr-check-files")
 
     input_vcf_dir = 'NA'
     input_cna_dir = 'NA'
     input_rna_fusion_dir = 'NA'
     input_cpsr_report_dir = 'NA'
     input_rna_expression_dir = 'NA'
-    input_cna_plot_dir = 'NA'
-    panel_normal_vcf_dir = 'NA'
+    pon_vcf_dir = 'NA'
     db_dir = 'NA'
     base_dir = 'NA'
-    output_vcf = 'NA'
-    output_cna = 'NA'
-    panel_normal_vcf_basename = 'NA'
+    #output_vcf = 'NA'
+    #output_cna = 'NA'
+    #output_exp = 'NA'
+    pon_vcf_basename = 'NA'
     input_vcf_basename = 'NA'
     input_cna_basename = 'NA'
     input_rna_fusion_basename = 'NA'
     input_rna_expression_basename = 'NA'
     input_cpsr_report_basename = 'NA'
-    input_cna_plot_basename = 'NA'
-
     arg_dict['rna_fusion_tumor'] = None
-    arg_dict['input_rna_exp'] = None
     
     # create output folder (if not already exists)
     output_dir_full = utils.safe_makedir(os.path.abspath(arg_dict['output_dir']))
 
     # Append output files to arg_dict
-    output_vcf = \
-        os.path.join(str(output_dir_full), f"{arg_dict['sample_id']}.pcgr_acmg.{arg_dict['genome_assembly']}.vcf.gz")
-    output_cna = \
-        os.path.join(str(output_dir_full), f"{arg_dict['sample_id']}.pcgr_acmg.{arg_dict['genome_assembly']}.cna_segments.tsv.gz")
+    #output_vcf = \
+    #    os.path.join(str(output_dir_full), f"{arg_dict['sample_id']}.pcgr.{arg_dict['genome_assembly']}.vcf.gz")
+    #output_cna = \
+    #    os.path.join(str(output_dir_full), f"{arg_dict['sample_id']}.pcgr.{arg_dict['genome_assembly']}.cna_segments.tsv.gz")
+    #output_exp = \
+    #    os.path.join(str(output_dir_full), f"{arg_dict['sample_id']}.pcgr.{arg_dict['genome_assembly']}.expression.tsv.gz")
 
     # check that either input vcf or cna segments exist
     if arg_dict['input_vcf'] is None and arg_dict['input_cna'] is None:
@@ -248,7 +331,7 @@ def verify_input_files(arg_dict):
 
     # check if panel of normal VCF exist
     if not arg_dict["pon_vcf"] is None:
-        check_file_exists(os.path.abspath(arg_dict["pon_vcf"]), logger)
+        check_file_exists(os.path.abspath(arg_dict["pon_vcf"]), strict = True, logger = logger)
 
         if not (os.path.abspath(arg_dict["pon_vcf"]).endswith(".vcf.gz")):
             err_msg = "Panel of normals VCF file (" + os.path.abspath(
@@ -263,36 +346,38 @@ def verify_input_files(arg_dict):
             warn_msg = "Ignoring panel of normal VCF file, --input_vcf missing"
             warn_message(warn_msg, logger)
         else:
-            panel_normal_vcf_basename = os.path.basename(
+            pon_vcf_basename = os.path.basename(
                 str(arg_dict["pon_vcf"]))
-            panel_normal_vcf_dir = os.path.dirname(
+            pon_vcf_dir = os.path.dirname(
                 os.path.abspath(arg_dict["pon_vcf"]))
 
     # check if input vcf exists
     if not arg_dict["input_vcf"] is None:
-        check_file_exists(os.path.abspath(arg_dict["input_vcf"]), logger)
+        check_file_exists(os.path.abspath(arg_dict["input_vcf"]), strict = True, logger = logger)
 
-        if not (os.path.abspath(arg_dict["input_vcf"]).endswith(".vcf") or os.path.abspath(arg_dict["input_vcf"]).endswith(".vcf.gz")):
+        if not (os.path.abspath(arg_dict["input_vcf"]).endswith(".vcf") or 
+                os.path.abspath(arg_dict["input_vcf"]).endswith(".vcf.gz")):
             err_msg = f'VCF input file ({os.path.abspath(arg_dict["input_vcf"])}) does not have the correct file extension (.vcf or .vcf.gz)'
             error_message(err_msg, logger)
 
         # check that tabix file exists if bgzipped file is given
         if os.path.abspath(arg_dict["input_vcf"]).endswith(".vcf.gz"):
-            check_tabix = check_tabix_file(arg_dict["input_vcf"], logger)
+            check_tabix = check_tabix_file(arg_dict["input_vcf"], logger = logger)
 
         input_vcf_basename = os.path.basename(str(arg_dict["input_vcf"]))
         input_vcf_dir = os.path.dirname(os.path.abspath(arg_dict["input_vcf"]))
 
         # if output vcf exist and overwrite not set
-        if os.path.exists(output_vcf) and arg_dict["force_overwrite"] is False:
-            err_msg = f"Output files (e.g. {output_vcf}) already exist - please specify different sample_id or add option --force_overwrite"
-            error_message(err_msg, logger)
+        #if os.path.exists(output_vcf) and arg_dict["force_overwrite"] is False:
+        #    err_msg = f"Output files (e.g. {output_vcf}) already exist - please specify different sample_id or add option --force_overwrite"
+        #    error_message(err_msg, logger)
 
     # check if input cna segments exist
     if not arg_dict["input_cna"] is None:
-        check_file_exists(os.path.abspath(arg_dict["input_cna"]), logger)
+        check_file_exists(os.path.abspath(arg_dict["input_cna"]), strict = True, logger = logger)
         
-        if not (os.path.abspath(arg_dict["input_cna"]).endswith(".tsv") or os.path.abspath(arg_dict["input_cna"]).endswith(".txt")):
+        if not (os.path.abspath(arg_dict["input_cna"]).endswith(".tsv") or 
+                os.path.abspath(arg_dict["input_cna"]).endswith(".txt")):
             err_msg = "CNA segment input file (" + os.path.abspath(
                 arg_dict["input_cna"]) + ") does not have the correct file extension (.tsv or .txt)"
             error_message(err_msg, logger)
@@ -300,16 +385,17 @@ def verify_input_files(arg_dict):
         input_cna_dir = os.path.dirname(os.path.abspath(arg_dict["input_cna"]))
 
         # if output cna segments exist and overwrite not set
-        if os.path.exists(output_cna) and arg_dict["force_overwrite"] is False:
-            err_msg = "Output files (e.g. " + str(output_cna) + \
-                ") already exist - please specify different sample_id or add option --force_overwrite"
-            error_message(err_msg, logger)
+        #if os.path.exists(output_cna) and arg_dict["force_overwrite"] is False:
+        #    err_msg = "Output files (e.g. " + str(output_cna) + \
+        #        ") already exist - please specify different sample_id or add option --force_overwrite"
+        #    error_message(err_msg, logger)
 
     # check if input rna fusion variants exist
     if not arg_dict["input_rna_fusion"] is None:
-        check_file_exists(os.path.abspath(arg_dict["input_rna_fusion"]), logger)
+        check_file_exists(os.path.abspath(arg_dict["input_rna_fusion"]), strict = True, logger = logger)
        
-        if not (os.path.abspath(arg_dict["input_rna_fusion"]).endswith(".tsv") or os.path.abspath(arg_dict["input_rna_fusion"]).endswith(".txt")):
+        if not (os.path.abspath(arg_dict["input_rna_fusion"]).endswith(".tsv") or 
+                os.path.abspath(arg_dict["input_rna_fusion"]).endswith(".txt")):
             err_msg = "RNA fusion variants file (" + os.path.abspath(
                 arg_dict["input_rna_fusion"]) + ") does not have the correct file extension (.tsv or .txt)"
             error_message(err_msg, logger)
@@ -320,9 +406,10 @@ def verify_input_files(arg_dict):
 
     # check if input rna expression exist
     if not arg_dict["input_rna_exp"] is None:
-        check_file_exists(os.path.abspath(arg_dict["input_rna_fusion"]), logger)
+        check_file_exists(os.path.abspath(arg_dict["input_rna_exp"]), strict = True, logger = logger)
        
-        if not (os.path.abspath(arg_dict["input_rna_exp"]).endswith(".tsv") or os.path.abspath(arg_dict["input_rna_exp"]).endswith(".txt")):
+        if not (os.path.abspath(arg_dict["input_rna_exp"]).endswith(".tsv") or 
+                os.path.abspath(arg_dict["input_rna_exp"]).endswith(".txt")):
             err_msg = "RNA gene expression file (" + os.path.abspath(
                 arg_dict["input_rna_exp"]) + ") does not have the correct file extension (.tsv or .txt)"
             error_message(err_msg, logger)
@@ -330,6 +417,12 @@ def verify_input_files(arg_dict):
             str(arg_dict["input_rna_exp"]))
         input_rna_expression_dir = os.path.dirname(
             os.path.abspath(arg_dict["input_rna_exp"]))
+        
+        # if output annotated gene expression exist and overwrite not set
+        #if os.path.exists(output_exp) and arg_dict["force_overwrite"] is False:
+        #    err_msg = "Output files (e.g. " + str(output_exp) + \
+        #        ") already exist - please specify different sample_id or add option --force_overwrite"
+        #    error_message(err_msg, logger)
 
       # check if input rna fusion variants exist
     if not arg_dict["cpsr_report"] is None:
@@ -403,30 +496,30 @@ def verify_input_files(arg_dict):
         err_msg = "The PCGR data bundle is not compliant with the software version - please download the latest software and data bundle (see https://github.com/sigven/pcgr for instructions)"
         error_message(err_msg, logger)
 
-    pcgr_paths = {
-      "input_vcf_dir": input_vcf_dir,
-      "input_cna_dir": input_cna_dir,
-      "input_rna_fusion_dir": input_rna_fusion_dir,
-      "input_rna_expression_dir": input_rna_expression_dir,
-      "input_cpsr_report_dir": input_cpsr_report_dir,
-      "input_cna_plot_dir": input_cna_plot_dir,
-      "panel_normal_vcf_dir": panel_normal_vcf_dir,
+    input_data = {
+      "vcf_dir": input_vcf_dir,
+      "cna_dir": input_cna_dir,
+      "rna_fusion_dir": input_rna_fusion_dir,
+      "rna_expression_dir": input_rna_expression_dir,
+      "cpsr_report_dir": input_cpsr_report_dir,
+      "cpsr_report_basename": input_cpsr_report_basename,
+      "pon_vcf_dir": pon_vcf_dir,
       "db_assembly_dir": db_assembly_dir,
       "refdata_dir": base_dir,
       "vep_dir": vep_dir,
-      "output_dir": output_dir_full,
-      "output_vcf": output_vcf,
-      "output_cna": output_cna,
-      "panel_normal_vcf_basename": panel_normal_vcf_basename,
-      "input_vcf_basename": input_vcf_basename,
-      "input_cna_basename": input_cna_basename,
-      "input_rna_fusion_basename": input_rna_fusion_basename,
-      "input_rna_expression_basename": input_rna_expression_basename,
-      "input_cpsr_report_basename": input_cpsr_report_basename,
-      "input_cna_plot_basename": input_cna_plot_basename,
+      #"output_dir": output_dir_full,
+      #"output_vcf": output_vcf,
+      #"output_cna": output_cna,
+      #"output_exp": output_exp,
+      "pon_vcf_basename": pon_vcf_basename,
+      "vcf_basename": input_vcf_basename,
+      "cna_basename": input_cna_basename,
+      "rna_fusion_basename": input_rna_fusion_basename,
+      "rna_expression_basename": input_rna_expression_basename
+      
     }
 
-    return pcgr_paths
+    return input_data
 
 ##---- CPSR ----##
 
@@ -559,16 +652,14 @@ def verify_input_files_cpsr(arg_dict):
 
     ## check if input BED exist
     if not arg_dict['custom_list'] is None:
-        if not os.path.exists(os.path.abspath(arg_dict['custom_list'])):
-            err_msg = f"Input file ({arg_dict['custom_list']}) does not exist"
-            error_message(err_msg,logger)
+        check_file_exists(os.path.abspath(arg_dict['custom_list']), strict = True, logger = logger)  
 
         input_customlist_basename = os.path.basename(str(arg_dict['custom_list']))
         input_customlist_dir = os.path.dirname(os.path.abspath(arg_dict['custom_list']))
 
     ## check if input vcf exist
     if not arg_dict['input_vcf'] is None:
-        check_file_exists(os.path.abspath(arg_dict['input_vcf']))        
+        check_file_exists(os.path.abspath(arg_dict['input_vcf']), strict = True, logger = logger)        
 
         if not (os.path.abspath(arg_dict['input_vcf']).endswith('.vcf') or os.path.abspath(arg_dict['input_vcf']).endswith('.vcf.gz')):
             err_msg = f"VCF input file ({os.path.abspath(arg_dict['input_vcf'])}) does not have the correct file extension (.vcf or .vcf.gz)"

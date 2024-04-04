@@ -89,7 +89,10 @@ for (c in c("pathogenicity",
   }
   if (c == "report_color") {
     color_palette[[c]][["levels"]] <- c("tumor_control", "tumor_only")
-    color_palette[[c]][["values"]] <- c("#2780e3", "#593196")
+    #color_palette[[c]][["values"]] <- c("#2780e3", "#593196")
+    #color_palette[[c]][["values"]] <- c("#0073C2", "#593196")
+    color_palette[[c]][["values"]] <- c("#0073C2", "#9B3297")
+
 
   }
   if (c == "cna_variant_class") {
@@ -154,7 +157,9 @@ data_coltype_defs[['cna_somatic_raw']] <- readr::cols_only(
   ONCOGENE_RANK	= readr::col_logical(),
   SEGMENT_LENGTH_MB = readr::col_number(),
   BIOMARKER_MATCH = readr::col_character(),
-  SAMPLE_ID = readr::col_character())
+  SAMPLE_ID = readr::col_character(),
+  TPM = readr::col_number(),
+  TPM_GENE = readr::col_number())
 
 data_coltype_defs[['snv_indel_somatic_raw']] <- readr::cols_only(
   CHROM = readr::col_character(),
@@ -219,6 +224,8 @@ data_coltype_defs[['snv_indel_somatic_raw']] <- readr::cols_only(
   CGC_SOMATIC = readr::col_logical(),
   CGC_GERMLINE = readr::col_logical(),
   CGC_TIER = readr::col_character(),
+  TPM = readr::col_number(),
+  TPM_GENE = readr::col_number(),
   CLINVAR_TRAITS_ALL = readr::col_character(),
   CLINVAR_MSID = readr::col_character(),
   CLINVAR_CLNSIG = readr::col_character(),
@@ -452,8 +459,7 @@ tsv_cols[['snv_indel']] <-
     'TUMOR_SUPPRESSOR',
     'TUMOR_SUPPRESSOR_SUPPORT',
     'TARGETED_INHIBITORS2',
-    'TARGETED_INHIBITORS_ALL2',
-    'PREDICTED_EFFECT',
+    'EFFECT_PREDICTIONS',
     'REGULATORY_ANNOTATION',
     'VEP_ALL_CSQ',
     'gnomADe_AF',
@@ -808,10 +814,68 @@ tcga_cohorts <- as.data.frame(
 
 usethis::use_data(tcga_cohorts, overwrite = T)
 
+#---- COSMIC reference signatures (SBS v3.4) ----#
+cosmic_signatures <-
+  utils::read.table(file = "data-raw/COSMIC_v3.4_SBS_GRCh38.txt",
+             header = T, sep = "\t", quote = "", stringsAsFactors = F)
+
+context_order <-
+  c("A[C>A]A","A[C>A]C","A[C>A]G","A[C>A]T",
+    "C[C>A]A","C[C>A]C","C[C>A]G","C[C>A]T",
+    "G[C>A]A","G[C>A]C","G[C>A]G","G[C>A]T",
+    "T[C>A]A","T[C>A]C","T[C>A]G","T[C>A]T",
+    "A[C>G]A","A[C>G]C","A[C>G]G","A[C>G]T",
+    "C[C>G]A","C[C>G]C","C[C>G]G","C[C>G]T",
+    "G[C>G]A","G[C>G]C","G[C>G]G","G[C>G]T",
+    "T[C>G]A","T[C>G]C","T[C>G]G","T[C>G]T",
+    "A[C>T]A","A[C>T]C","A[C>T]G","A[C>T]T",
+    "C[C>T]A","C[C>T]C","C[C>T]G","C[C>T]T",
+    "G[C>T]A","G[C>T]C","G[C>T]G","G[C>T]T",
+    "T[C>T]A","T[C>T]C","T[C>T]G","T[C>T]T",
+    "A[T>A]A","A[T>A]C","A[T>A]G","A[T>A]T",
+    "C[T>A]A","C[T>A]C","C[T>A]G","C[T>A]T",
+    "G[T>A]A","G[T>A]C","G[T>A]G","G[T>A]T",
+    "T[T>A]A","T[T>A]C","T[T>A]G","T[T>A]T",
+    "A[T>C]A","A[T>C]C","A[T>C]G","A[T>C]T",
+    "C[T>C]A","C[T>C]C","C[T>C]G","C[T>C]T",
+    "G[T>C]A","G[T>C]C","G[T>C]G","G[T>C]T",
+    "T[T>C]A","T[T>C]C","T[T>C]G","T[T>C]T",
+    "A[T>G]A","A[T>G]C","A[T>G]G","A[T>G]T",
+    "C[T>G]A","C[T>G]C","C[T>G]G","C[T>G]T",
+    "G[T>G]A","G[T>G]C","G[T>G]G","G[T>G]T",
+    "T[T>G]A","T[T>G]C","T[T>G]G","T[T>G]T")
+
+cosmic_signatures$Type <- factor(
+  cosmic_signatures$Type, levels = context_order)
+cosmic_signatures <- cosmic_signatures |>
+  dplyr::arrange(Type)
+cosmic_signatures$Type <- NULL
+
+artefact_signatures <-
+  c("SBS27","SBS43", paste0("SBS",rep(46:60)),
+    "SBS95")
+
+cosmic_sbs_signatures_no_artefacts <-
+  cosmic_signatures
+
+for(sig in artefact_signatures){
+  cosmic_sbs_signatures_no_artefacts[,sig] <- NULL
+}
+
+
+cosmic_sbs_signatures_all <- as.matrix(cosmic_signatures)
+cosmic_sbs_signatures_no_artefacts <- as.matrix(cosmic_sbs_signatures_no_artefacts)
+
+usethis::use_data(cosmic_sbs_signatures_all, overwrite = T)
+usethis::use_data(cosmic_sbs_signatures_no_artefacts, overwrite = T)
+
 rm(cancer_phenotypes_regex,
    data_coltype_defs,
    effect_prediction_algos,
    tcga_cohorts,
+   cosmic_signatures,
+   cosmic_sbs_signatures_no_artefacts,
+   cosmic_sbs_signatures_all,
    evidence_types,
    evidence_levels,
    variant_db_url,
