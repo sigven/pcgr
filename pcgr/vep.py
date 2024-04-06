@@ -17,13 +17,16 @@ def get_vep_command(file_paths, conf_options, input_vcf, output_vcf, debug = Fal
     
     vep_dir = file_paths['vep_dir']
     fasta_assembly = os.path.join(
-        file_paths['db_assembly_dir'],
+        file_paths['refdata_assembly_dir'],
         'misc','fasta','assembly',
         f'Homo_sapiens.{pcgr_vars.VEP_ASSEMBLY[genome_assembly]}.dna.primary_assembly.fa.gz')
     ancestor_assembly = os.path.join(
-        file_paths['db_assembly_dir'],
+        file_paths['refdata_assembly_dir'],
         'misc','fasta','ancestor',
         f'human_ancestor.fa.gz')
+    
+    utils.check_file_exists(fasta_assembly, logger = None)
+    utils.check_file_exists(ancestor_assembly, logger = None)
 
     plugins_in_use = "NearestExonJB, LoF"
 

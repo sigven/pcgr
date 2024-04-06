@@ -4,7 +4,6 @@
 ```{r setup1}
 #| echo: false
 
-pcg_report <- readRDS(file="../../../tmp.rds")
 report_color <- pcgrr::color_palette$report_color$values[2]
 ```
 
@@ -12,8 +11,6 @@ Here, we apply the **MutationalPatterns** package [@Blokzijl2018-nc] to estimate
 
 ```{r setup_signature_display}
 #| echo: false
-
-#pcg_report <- readRDS(file="tmp.rds")
 
 msig_content <- 
   pcg_report$content$mutational_signatures

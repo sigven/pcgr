@@ -12,14 +12,14 @@ from pcgr.utils import error_message, warn_message, check_file_exists, remove_fi
 
 def parse_expression(expression_fname_tsv: str,
                      sample_id: str,
-                     db_assembly_dir: str,                                                                    
+                     refdata_assembly_dir: str,                                                                    
                      logger: logging.Logger = None):
     """
     Parse the expression data from the user-provided file and verify record identifiers with 
     reference data. Aggregate transcript-level TPM values to generate gene-level TPM values.
     Args:
         expression_fname_tsv (str): Path to the user-provided gene expression file.
-        db_assembly_dir (str): Path to the build-specific PCGR database directory.
+        refdata_assembly_dir (str): Path to the build-specific PCGR reference data directory.
         logger (logging.Logger, optional): Logger. Defaults to None.
     """    
     ## Check that the expression file exists
@@ -38,7 +38,7 @@ def parse_expression(expression_fname_tsv: str,
     ## gene symbols/aliases and identifiers (Ensembl) to Entrez gene identifers and
     ## biotype
     gene_index_fname_tsv =  \
-        os.path.join(db_assembly_dir, "gene", "tsv", "gene_transcript_xref", "gene_index.tsv.gz")
+        os.path.join(refdata_assembly_dir, "gene", "tsv", "gene_transcript_xref", "gene_index.tsv.gz")
     check_file_exists(gene_index_fname_tsv, logger)
     gene_index = pd.read_csv(gene_index_fname_tsv, sep = "\t", na_values = ".",  low_memory = False)
     
@@ -127,6 +127,12 @@ def parse_expression(expression_fname_tsv: str,
                 ['ENSEMBL_GENE_ID','SYMBOL','ENTREZGENE','GENENAME','BIOTYPE']).agg({'TPM':'sum'}).reset_index()
             expression_map['gene'].columns = ['ENSEMBL_GENE_ID','SYMBOL','ENTREZGENE','GENENAME','BIOTYPE','TPM_GENE']
             expression_map['gene'] = expression_map['gene'].drop_duplicates().sort_values(by='TPM_GENE', ascending=False)
+            
+            ## for transcripts with missing TPM's, use the minimum TPM value across all transcripts
+            expression_map['gene_min_tpm'] = transcript_expression_map.groupby(
+                ['ENSEMBL_GENE_ID','SYMBOL','ENTREZGENE','GENENAME','BIOTYPE']).agg({'TPM':'min'}).reset_index()
+            expression_map['gene_min_tpm'].columns = ['ENSEMBL_GENE_ID','SYMBOL','ENTREZGENE','GENENAME','BIOTYPE','TPM_MIN']
+            expression_map['gene_min_tpm'] = expression_map['gene_min_tpm'].drop_duplicates().sort_values(by='TPM_MIN', ascending=False)
                   
     
     return(expression_map)
@@ -145,17 +151,22 @@ def integrate_variant_expression(variant_set: pd.DataFrame,
     """    
     
     if not expression_data is None:
-        if 'gene' in expression_data.keys():
-            if not expression_data['gene'] is None:
-                logger.info("Integrating gene-level expression data from tumor into somatic variant set")
-                if expression_data['gene'].empty:
-                    logger.warn('Expression file does not contain any gene-level expression data')
-                else:
-                    if 'TPM_GENE' in variant_set.columns:
-                        variant_set.drop('TPM_GENE', inplace=True, axis=1)
-                    if {'TPM_GENE','ENSEMBL_GENE_ID'}.issubset(expression_data['gene'].columns) and \
-                        'ENSEMBL_GENE_ID' in variant_set.columns:
-                        variant_set = variant_set.merge(expression_data['gene'], on = 'ENSEMBL_GENE_ID', how = 'left')
+        for s in ['gene','gene_min_tpm']:
+            if s in expression_data.keys():
+                if not expression_data[s] is None:
+                    logger.info("Integrating gene-level expression data from tumor into somatic variant set")
+                    if expression_data[s].empty:
+                        logger.warn('Expression file does not contain any gene-level expression data')
+                    else:
+                        v = 'TPM_MIN'
+                        if s == 'gene':
+                            v = 'TPM_GENE'
+                        if v in variant_set.columns:
+                            variant_set.drop(v, inplace=True, axis=1)
+                        if {v,'ENSEMBL_GENE_ID'}.issubset(expression_data[s].columns) and \
+                            'ENSEMBL_GENE_ID' in variant_set.columns:
+                                exp_gene = expression_data[s][[v,'ENSEMBL_GENE_ID']]
+                                variant_set = variant_set.merge(exp_gene, on = 'ENSEMBL_GENE_ID', how = 'left')
                     
         if 'transcript' in expression_data.keys() and 'transcript_identifier' in expression_data.keys():
             if not expression_data['transcript'] is None:
@@ -187,6 +198,7 @@ def integrate_variant_expression(variant_set: pd.DataFrame,
                             if 'TPM' in variant_set.columns:
                                 variant_set.drop('TPM', inplace=True, axis=1)
                             if {'TPM','VAR_ID','ENSEMBL_TRANSCRIPT_ID'}.issubset(var2exp.columns):
+                                var2exp = var2exp[['TPM','VAR_ID','ENSEMBL_TRANSCRIPT_ID']]
                                 variant_set = variant_set.merge(var2exp, on = ['VAR_ID','ENSEMBL_TRANSCRIPT_ID'], how = 'left')  
                         else:
                             variant_set['TPM'] = np.nan
@@ -196,7 +208,7 @@ def integrate_variant_expression(variant_set: pd.DataFrame,
 
 def correlate_sample_expression(sample_expression_data: dict, 
                                 yaml_data: dict, 
-                                db_assembly_dir: str,
+                                refdata_assembly_dir: str,
                                 protein_coding_only: bool = True,
                                 logger: logging.Logger = None) -> pd.DataFrame:
     
@@ -229,7 +241,7 @@ def correlate_sample_expression(sample_expression_data: dict,
                 
                     if 'tcga' in yaml_data['conf']['gene_expression']['similarity_db'].keys():
                         for cohort in yaml_data['conf']['gene_expression']['similarity_db']['tcga'].keys():                            
-                            exp_fname = os.path.join(db_assembly_dir, "expression", "tsv", 
+                            exp_fname = os.path.join(refdata_assembly_dir, "expression", "tsv", 
                                              "tcga", "tcga_" + str(cohort).lower() + "_tpm.tsv.gz")
                             if check_file_exists(exp_fname, strict = False, logger = logger):
                                 sample_comp_exp_mat = pd.read_csv(
@@ -245,8 +257,8 @@ def correlate_sample_expression(sample_expression_data: dict,
                                     corr_mat = correlate_samples(sample_expression_data, sample_id, 'tcga-' + str(cohort).lower(), 
                                                             protein_coding_only, sample_comp_exp_mat, logger)
                                     ## Make sure sample IDs match patient barcodes (sample metadata is organized per patient)
-                                    corr_mat['EXT_SAMPLE_ID'] = corr_mat['EXT_SAMPLE_ID'].replace(regex=r'-[0-9][0-9][A-Z]$', value='')                                                                      
-                                    metadata_fname = os.path.join(db_assembly_dir, "expression", "tsv", 
+                                    #corr_mat['EXT_SAMPLE_ID'] = corr_mat['EXT_SAMPLE_ID'].replace(regex=r'-[0-9][0-9][A-Z]$', value='')                                                                      
+                                    metadata_fname = os.path.join(refdata_assembly_dir, "expression", "tsv", 
                                         'tcga', "tcga_" + str(cohort).lower() + "_sample_metadata.tsv.gz")
                                     if check_file_exists(metadata_fname, strict = False, logger = logger):
                                         sample_metadata = pd.read_csv(
@@ -266,7 +278,7 @@ def correlate_sample_expression(sample_expression_data: dict,
                         if source == 'treehouse':
                             source_verbose = 'samples from the Treehouse Childhood Cancer Initiative'
                         if source in yaml_data['conf']['gene_expression']['similarity_db'].keys():
-                            exp_fname = os.path.join(db_assembly_dir, "expression", "tsv", 
+                            exp_fname = os.path.join(refdata_assembly_dir, "expression", "tsv", 
                                              source, source + "_tpm.tsv.gz")
                             if check_file_exists(exp_fname, strict = False, logger = logger):
                                 sample_comp_exp_mat = pd.read_csv(
@@ -286,7 +298,7 @@ def correlate_sample_expression(sample_expression_data: dict,
                                 if 'CORRELATION' in sample_exp_similarity[source].columns:
                                     sample_exp_similarity[source] = \
                                         sample_exp_similarity[source].sort_values(by=['CORRELATION'], ascending=False)
-                                    metadata_fname = os.path.join(db_assembly_dir, "expression", "tsv", 
+                                    metadata_fname = os.path.join(refdata_assembly_dir, "expression", "tsv", 
                                         source, source + "_sample_metadata.tsv.gz")
                                     if check_file_exists(metadata_fname, strict = False, logger = logger):
                                         sample_metadata = pd.read_csv(
@@ -294,7 +306,8 @@ def correlate_sample_expression(sample_expression_data: dict,
                                         sample_exp_similarity[source] = sample_exp_similarity[source].merge(
                                             sample_metadata, on = ['EXT_SAMPLE_ID'], how = 'left')
                                 
-                           
+    #else:
+        #print("BALLE")                    
     return(sample_exp_similarity)
 
 

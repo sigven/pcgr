@@ -654,7 +654,8 @@ load_reference_data <- function(
             "woods_dnarepair|gerp|tcga_pancan_2018|gwas_catalog)")) ~ "cpsr",
         stringr::str_detect(
           .data$source_abbreviation,
-          "^(cytoband|mitelmandb|tcga|nci|intogen|opentargets|dgidb|pubchem)$") ~ "pcgr",
+          paste0("^(cytoband|mitelmandb|tcga|nci|intogen|depmap|treehouse",
+                 "|opentargets|dgidb|pubchem)$")) ~ "pcgr",
         TRUE ~ as.character("pcgr_cpsr")
       ))
 

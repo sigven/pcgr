@@ -29,7 +29,7 @@ def __main__():
     parser.add_argument('tumortype', default='Any', help='Primary tumor type of query VCF')
     parser.add_argument('vep_pick_order', default="mane,canonical,appris,biotype,ccds,rank,tsl,length", 
                         help=f"Comma-separated string of ordered transcript/variant properties for selection of primary variant consequence")
-    parser.add_argument('pcgr_db_dir',help='PCGR data directory')
+    parser.add_argument('refdata_assembly_dir',help='Assembly-specific reference data directory, e.g. "pcgrdb/data/grch38')
     parser.add_argument('--compress_output_vcf', action="store_true", default=False, help="Compress output VCF file")
     parser.add_argument('--cpsr',action="store_true",help="Aggregate cancer gene annotations for Cancer Predisposition Sequencing Reporter (CPSR)")
     parser.add_argument('--cpsr_yaml',dest="cpsr_yaml", default=None, help='YAML file with list of targeted genes by CPSR (custom, or panel-defined)')
@@ -55,22 +55,22 @@ def extend_vcf_annotations(arg_dict, logger):
 
     Moreover, it performs two important matching procedures, using 
     5. Information from VEP's CSQ information (HGVSp/HGVSc) to match known mutation hotspots in cancer
-    6. Information from VEP's CSQ information (Consequence, HGVSp/HGVSc) and genomic coordinates to match known biomarkers in cancer
+    6. Information from VEP's CSQ information (Consequence, HGVSp/HGVSc, exon information etc) and genomic coordinates to match known biomarkers in cancer
     
     Finally, it assesses somatic variant oncogenicity, using
     7. Gene annotations (tumor suppressor, oncogene) and variant annotations (loss-of-function, gnomAD variant frequencies, variant effect predictions).
        Variant oncogenicity levels are provided for all variants using a recommended five-level scheme ("Oncogenic", "Likely oncogenic", "VUS", "Likely Benign", "Benign")
        - Recommended scoring scheme for variant oncogenicity classification outlined by VICC/ClinGen consortia (Horak et al., Genet Med, 2022)
 
-    List of VCF INFO tags appended by this procedure is defined by the 'infotags' files in the pcgr_db_dir
+    List of VCF INFO tags appended by this procedure is defined by the 'infotags' files in the refdata_assembly_dir
     """
     
     vcf_infotags = {}
     
-    vcf_infotags['other'] = read_infotag_file(os.path.join(arg_dict['pcgr_db_dir'], 'vcf_infotags_other.tsv'), scope = "pcgr")
+    vcf_infotags['other'] = read_infotag_file(os.path.join(arg_dict['refdata_assembly_dir'], 'vcf_infotags_other.tsv'), scope = "pcgr")
     if arg_dict['cpsr'] is True:
-        vcf_infotags['other'] = read_infotag_file(os.path.join(arg_dict['pcgr_db_dir'], 'vcf_infotags_other.tsv'), scope = "cpsr")
-    vcf_infotags['vep'] = read_infotag_file(os.path.join(arg_dict['pcgr_db_dir'], 'vcf_infotags_vep.tsv'), scope = "vep")
+        vcf_infotags['other'] = read_infotag_file(os.path.join(arg_dict['refdata_assembly_dir'], 'vcf_infotags_other.tsv'), scope = "cpsr")
+    vcf_infotags['vep'] = read_infotag_file(os.path.join(arg_dict['refdata_assembly_dir'], 'vcf_infotags_vep.tsv'), scope = "vep")
     vcf_infotags['other'].update(vcf_infotags['vep'])
     vcf_info_metadata = vcf_infotags['other']
     
@@ -89,19 +89,19 @@ def extend_vcf_annotations(arg_dict, logger):
                                 cpsr_target_genes[str(g['entrezgene'])] = 1
                             
             
-        vcf_infotags['cpsr'] = read_infotag_file(os.path.join(arg_dict['pcgr_db_dir'], 'vcf_infotags_cpsr.tsv'), scope = "cpsr")
+        vcf_infotags['cpsr'] = read_infotag_file(os.path.join(arg_dict['refdata_assembly_dir'], 'vcf_infotags_cpsr.tsv'), scope = "cpsr")
         vcf_infotags['other'].update(vcf_infotags['cpsr'])
         vcf_info_metadata.update(vcf_infotags['cpsr'])
 
     gene_transcript_xref_map = read_genexref_namemap(
-        os.path.join(arg_dict['pcgr_db_dir'], 'gene','tsv','gene_transcript_xref', 'gene_transcript_xref_bedmap.tsv.gz'), logger)
+        os.path.join(arg_dict['refdata_assembly_dir'], 'gene','tsv','gene_transcript_xref', 'gene_transcript_xref_bedmap.tsv.gz'), logger)
     cancer_hotspots = load_mutation_hotspots(
-        os.path.join(arg_dict['pcgr_db_dir'], 'misc','tsv','hotspot', 'hotspot.tsv.gz'), logger)
+        os.path.join(arg_dict['refdata_assembly_dir'], 'misc','tsv','hotspot', 'hotspot.tsv.gz'), logger)
 
     biomarkers = {}
     for db in ['cgi','civic']:
-        variant_fname = os.path.join(arg_dict['pcgr_db_dir'], 'biomarker','tsv', f"{db}.variant.tsv.gz")
-        clinical_fname = os.path.join(arg_dict['pcgr_db_dir'], 'biomarker','tsv', f"{db}.clinical.tsv.gz")
+        variant_fname = os.path.join(arg_dict['refdata_assembly_dir'], 'biomarker','tsv', f"{db}.variant.tsv.gz")
+        clinical_fname = os.path.join(arg_dict['refdata_assembly_dir'], 'biomarker','tsv', f"{db}.clinical.tsv.gz")
         if arg_dict['cpsr'] is True:
             biomarkers[db] = load_biomarkers(logger, variant_fname, clinical_fname, biomarker_vartype = 'MUT', biomarker_variant_origin = 'Both')
         else:
@@ -148,17 +148,19 @@ def extend_vcf_annotations(arg_dict, logger):
         ## For germline-called VCFs (single-sample), pull out sequencing depth and genotype using cyvcf2 API
         if arg_dict['cpsr'] is True:
             rec.INFO['DP_CONTROL'] = "-1"
-            if len(rec.gt_depths) == 1:
-                rec.INFO['DP_CONTROL'] = str(rec.gt_depths[0])
+            if not rec.gt_depths is None:
+                if len(rec.gt_depths) == 1:
+                    rec.INFO['DP_CONTROL'] = str(rec.gt_depths[0])
             rec.INFO['GENOTYPE'] = 'undefined'
-            if len(rec.gt_types) == 1:
-                if int(rec.gt_types[0]) == 0:
-                    rec.INFO['GENOTYPE'] = 'hom_ref'
-                else:
-                    if int(rec.gt_types[0]) == 1:
-                        rec.INFO['GENOTYPE'] = 'het'
-                    if int(rec.gt_types[0]) == 2:
-                        rec.INFO['GENOTYPE'] = 'hom_alt'
+            if not rec.gt_types is None:
+                if len(rec.gt_types) == 1:
+                    if int(rec.gt_types[0]) == 0:
+                        rec.INFO['GENOTYPE'] = 'hom_ref'
+                    else:
+                        if int(rec.gt_types[0]) == 1:
+                            rec.INFO['GENOTYPE'] = 'het'
+                        if int(rec.gt_types[0]) == 2:
+                            rec.INFO['GENOTYPE'] = 'hom_alt'
                 
         if current_chrom is None:
             current_chrom = str(rec.CHROM)

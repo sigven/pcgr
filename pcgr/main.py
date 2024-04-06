@@ -42,7 +42,7 @@ def cli():
     optional_allelic_support = parser.add_argument_group("Allelic support options")
     optional_other = parser.add_argument_group("Other options")
 
-    optional_rna.add_argument("--input_rna_fusion", dest = "input_rna_fusion", help = "File with RNA fusion transcripts detected in tumor (tab-separated values)")
+    #optional_rna.add_argument("--input_rna_fusion", dest = "input_rna_fusion", help = "File with RNA fusion transcripts detected in tumor (tab-separated values)")
     optional_rna.add_argument("--input_rna_expression", dest = "input_rna_exp", help = "File with bulk RNA expression counts (TPM) of transcripts in tumor (tab-separated values)")
     optional_rna.add_argument('--expression_sim', action='store_true', help="Compare expression profile of tumor sample to known expression profiles (default: %(default)s)")
     optional_rna.add_argument("--expression_sim_db", dest = "expression_sim_db", default="tcga,depmap,treehouse", help=f"Comma-separated string " + \
@@ -88,7 +88,7 @@ def cli():
     optional_other.add_argument("--cpsr_report", dest="cpsr_report", help="CPSR report file (Gzipped JSON - file ending with 'cpsr.<genome_assembly>.json.gz' -  germline report of patient's blood/control sample")
     optional_other.add_argument("--vcf2maf", action="store_true", help="Generate a MAF file for input VCF using https://github.com/mskcc/vcf2maf (default: %(default)s)")
     optional_other.add_argument("--ignore_noncoding", action="store_true", help="Ignore non-coding (i.e. non protein-altering) variants in report, default: %(default)s")
-    optional_other.add_argument("--include_trials", action="store_true", help="(Beta) Include relevant ongoing or future clinical trials, focusing on studies with molecularly targeted interventions")
+    #optional_other.add_argument("--include_trials", action="store_true", help="(Beta) Include relevant ongoing or future clinical trials, focusing on studies with molecularly targeted interventions")
     optional_other.add_argument("--retained_info_tags", dest="retained_info_tags", default="None", help="Comma-separated string of VCF INFO tags from query VCF that should be kept in PCGR output TSV file")
     optional_other.add_argument("--force_overwrite", action="store_true", help="By default, the script will fail with an error if any output file already exists. You can force the overwrite of existing result files by using this flag, default: %(default)s")
     optional_other.add_argument("--version", action="version", version="%(prog)s " + str(pcgr_vars.PCGR_VERSION))
@@ -134,17 +134,17 @@ def cli():
     args = parser.parse_args()
     arg_dict = vars(args)
 
-    # check parsed arguments
-    arg_checker.check_args(arg_dict)
+    # verify parsed arguments
+    arg_dict_verified = arg_checker.verify_args(arg_dict)
     
     # create config options
-    conf_options = create_config(arg_dict, workflow = "PCGR")
+    conf_options = create_config(arg_dict_verified, workflow = "PCGR")
     
     # Verify existence of input files, define and check existence of output files
-    input_data = arg_checker.verify_input_files(arg_dict)
-    output_data = arg_checker.define_output_files(arg_dict)
+    input_data = arg_checker.verify_input_files(arg_dict_verified)
+    output_data = arg_checker.define_output_files(arg_dict_verified)
     
-    # Run PCGR workflow (vep, vcfanno, summarise, vcf2tsvpy, html)
+    # Run PCGR workflow
     run_pcgr(input_data, output_data, conf_options)
 
 def run_pcgr(input_data, output_data,conf_options):
@@ -155,7 +155,7 @@ def run_pcgr(input_data, output_data,conf_options):
     debug = conf_options['debug']
 
     # set basic run commands
-    clinical_trials_set = 'ON' if conf_options['clinicaltrials']['run'] else 'OFF'
+    #clinical_trials_set = 'ON' if conf_options['clinicaltrials']['run'] else 'OFF'
     msi_prediction_set = 'ON' if conf_options['somatic_snv']['msi']['run'] else 'OFF'
     msig_estimation_set = 'ON' if conf_options['somatic_snv']['mutational_signatures']['run'] else 'OFF'
     tmb_estimation_set = 'ON' if conf_options['somatic_snv']['tmb']['run'] else 'OFF'
@@ -201,11 +201,8 @@ def run_pcgr(input_data, output_data,conf_options):
         pon_vcf = os.path.join(input_data['pon_vcf_dir'], input_data['pon_vcf_basename'])
 
     if not input_vcf == 'None':
-        refdata_dir = input_data['refdata_dir']
         output_dir = output_data['dir']
-        output_prefix = output_data['prefix']
-        vep_dir = input_data['vep_dir']
-        
+        output_prefix = output_data['prefix']        
         check_subprocess(logger, f'mkdir -p {output_dir}', debug)
 
         random_id = random_id_generator(15) 
@@ -213,7 +210,7 @@ def run_pcgr(input_data, output_data,conf_options):
         input_vcf_validated =             f'{output_prefix}.{random_id}.ready.vcf.gz'
         input_vcf_validated_uncompr =     f'{output_prefix}.{random_id}.ready.vcf'
         vep_vcf =                         f'{output_prefix}.{random_id}.vep.vcf'
-        vep_vcfanno_vcf =                 f'{output_prefix}.{random_id}vep.vcfanno.vcf'
+        vep_vcfanno_vcf =                 f'{output_prefix}.{random_id}.vep.vcfanno.vcf'
         vep_vcfanno_summarised_vcf =      f'{output_prefix}.{random_id}.vep.vcfanno.summarised.vcf'
         vep_vcfanno_summarised_pass_vcf = f'{output_prefix}.{random_id}.vep.vcfanno.summarised.pass.vcf'
         output_vcf =                      f'{output_prefix}.vcf.gz'
@@ -236,7 +233,7 @@ def run_pcgr(input_data, output_data,conf_options):
 
         vcf_validate_command = (
                 f'pcgr_validate_input.py '
-                f'{refdata_dir} '
+                f'{input_data["refdata_assembly_dir"]} '
                 f'{input_vcf} '
                 f'{input_vcf_validated_uncompr} '
                 f'{input_cna} '
@@ -244,7 +241,6 @@ def run_pcgr(input_data, output_data,conf_options):
                 f'{input_rna_expression} '
                 f'{pon_vcf} '
                 f'{conf_options["assay_properties"]["vcf_tumor_only"]} '
-                f'{conf_options["genome_assembly"]} '
                 f'{conf_options["sample_id"]} '
                 f'{conf_options["other"]["retained_vcf_info_tags"]} '
                 f'{conf_options["somatic_snv"]["allelic_support"]["tumor_dp_tag"]} '
@@ -293,7 +289,7 @@ def run_pcgr(input_data, output_data,conf_options):
         logger.info(f'MSI classification: {msi_prediction_set}')
         logger.info(f'Mutational burden estimation: {tmb_estimation_set}')
         logger.info(f'RNA expression similarity analysis: {rnaseq_sim_analysis_set}')
-        logger.info(f'Include molecularly targeted clinical trials (beta): {clinical_trials_set}')
+        #logger.info(f'Include molecularly targeted clinical trials (beta): {clinical_trials_set}')
         
         # PCGR|Generate YAML file - containing configuration options and paths to annotated molecular profile datasets
         # - VCF/TSV files (SNVs/InDels)
@@ -305,6 +301,7 @@ def run_pcgr(input_data, output_data,conf_options):
 
         # update conf_options with paths to output files
         conf_options['output_dir'] = output_dir
+        conf_options['output_prefix'] = output_prefix
         conf_options['molecular_data']['fname_mut_vcf'] = output_vcf
         conf_options['molecular_data']['fname_mut_tsv'] = output_pass_tsv_gz
         if conf_options['somatic_snv']['tmb']['run'] == 1:
@@ -318,7 +315,8 @@ def run_pcgr(input_data, output_data,conf_options):
                     conf_options['molecular_data']['fname_expression_sim_' + source] = f'{output_prefix}.exp_sim_{source}.tsv.gz'
 
         # make YAML file
-        yaml_data = populate_config_data(conf_options, refdata_dir, workflow = "PCGR", logger = logger)
+        yaml_data = populate_config_data(conf_options, input_data["refdata_assembly_dir"], 
+                                         workflow = "PCGR", logger = logger)
         genome_assembly = yaml_data['genome_assembly']
         
         vep_command = get_vep_command(file_paths = input_data, 
@@ -392,7 +390,7 @@ def run_pcgr(input_data, output_data,conf_options):
         # PCGR|vcfanno - annotate VCF against a number of variant annotation tracks (BED/VCF)
         logger = getlogger("pcgr-vcfanno")
         pcgr_vcfanno_command = (
-                f'pcgr_vcfanno.py {vep_vcf}.gz {vep_vcfanno_vcf} {input_data["db_assembly_dir"]} '
+                f'pcgr_vcfanno.py {vep_vcf}.gz {vep_vcfanno_vcf} {input_data["refdata_assembly_dir"]} '
                 f'--num_processes {conf_options["other"]["vcfanno_n_proc"]} '
                 f'--dbnsfp --clinvar --rmsk --winmsk --simplerepeat '
                 f'--tcga --gene_transcript_xref --dbmts --gwas '
@@ -400,7 +398,7 @@ def run_pcgr(input_data, output_data,conf_options):
                 )
         vcfanno_db_src_msg1 = (
                 f"Annotation sources (vcfanno): {'Panel-of-Normals, ' if pon_vcf != 'None' else ''}ClinVar, dbNSFP, "
-                f"dbMTS, cancerhotspots.org, DoCM, TCGA, GWAS catalog"
+                f"dbMTS, TCGA, GWAS catalog"
                 )
         vcfanno_db_src_msg2 = \
                 f"Annotation sources (vcfanno): RepeatMasker, SimpleRepeats, WindowMaskerSDust, gnomAD non-cancer subset"
@@ -420,7 +418,7 @@ def run_pcgr(input_data, output_data,conf_options):
                 f'pcgr_summarise.py {vep_vcfanno_vcf}.gz {vep_vcfanno_summarised_vcf} {pon_annotation} '
                 f'{yaml_data["conf"]["vep"]["vep_regulatory"]} {oncogenicity_annotation} '
                 f'{yaml_data["conf"]["sample_properties"]["site2"]} {yaml_data["conf"]["vep"]["vep_pick_order"]} '
-                f'{input_data["db_assembly_dir"]} --compress_output_vcf '
+                f'{input_data["refdata_assembly_dir"]} --compress_output_vcf '
                 f'{"--debug" if debug else ""}'
                 )
         summarise_db_src_msg1 = \
@@ -466,7 +464,7 @@ def run_pcgr(input_data, output_data,conf_options):
         logger.info("Appending ClinVar traits, official gene names, and protein domain annotations")        
         variant_set = \
            append_annotations(
-              output_pass_vcf2tsv_gz, db_assembly_dir = input_data["db_assembly_dir"], logger = logger)
+              output_pass_vcf2tsv_gz, refdata_assembly_dir = input_data["refdata_assembly_dir"], logger = logger)
         variant_set = set_allelic_support(variant_set, allelic_support_tags = yaml_data["conf"]['somatic_snv']['allelic_support'])
         variant_set = clean_annotations(variant_set, yaml_data, germline = False, logger = logger)        
         
@@ -484,7 +482,7 @@ def run_pcgr(input_data, output_data,conf_options):
             ## Parse expression data, verify identifiers
             expression_data = parse_expression(
                 input_rna_expression, yaml_data["sample_id"], 
-                input_data["db_assembly_dir"], logger = logger)
+                input_data["refdata_assembly_dir"], logger = logger)
             ## Write transcript-level expression data to TSV
             if 'transcript' in expression_data.keys():
                 if not expression_data['transcript'] is None:
@@ -563,17 +561,17 @@ def run_pcgr(input_data, output_data,conf_options):
     if yaml_data['conf']['gene_expression']['similarity_analysis'] == 1 and expression_data is not None:
         logger = getlogger("pcgr-expression-similarity")
         logger.info('PCGR - STEP 4: Gene expression (RNA) similarity analysis')
-                
+         
+        ## Correlate sample expression with reference samples       
         exp_similarity_results = correlate_sample_expression(
             expression_data,
             yaml_data,
-            input_data["db_assembly_dir"],
+            input_data["refdata_assembly_dir"],
             protein_coding_only = True,
             logger = logger)
         for source in exp_similarity_results.keys():
             exp_similarity_results[source].fillna('.').to_csv(
                 yaml_data['molecular_data']['fname_expression_sim_' + source],
-                #f'{output_prefix}.exp_sim_{source}.tsv.gz', 
                 sep = "\t", index = False)
         print('----')
     else:
@@ -590,7 +588,7 @@ def run_pcgr(input_data, output_data,conf_options):
             cna_segment_file = input_cna,
             build = yaml_data['genome_assembly'],
             sample_id = yaml_data['sample_id'],
-            db_assembly_dir = input_data['db_assembly_dir'], 
+            refdata_assembly_dir = input_data['refdata_assembly_dir'], 
             n_copy_amplifications = yaml_data["conf"]['somatic_cna']['n_copy_gain'],
             overlap_fraction = 0.5,
             expression_data = expression_data,

@@ -40,7 +40,7 @@ pcgrr::write_report_quarto_html(report = pcg_report1)
 yaml_fname <-
   paste0("/Users/sigven/project_data/packages/",
          "package__pcgr/bundle_update_2023/",
-         "pcgr/examples/SAMPLE-T_N-001.pcgr_acmg.grch38.conf.yaml")
+         "pcgr/examples/SAMPLE-T_N-001.pcgr.grch38.conf.yaml")
 
 
 ## Generate report content

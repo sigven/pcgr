@@ -17,7 +17,8 @@ def create_config(arg_dict, workflow = "PCGR"):
             'sample_id': arg_dict['sample_id'],
             'genome_assembly': arg_dict['genome_assembly'],
             'debug': arg_dict['debug'],
-            'pcgrr_conda': arg_dict['pcgrr_conda']                
+            'pcgrr_conda': arg_dict['pcgrr_conda'],
+            'output_prefix': "None"                
     	}
         
         conf_options['vep'] = {
@@ -72,9 +73,9 @@ def create_config(arg_dict, workflow = "PCGR"):
         if not arg_dict['tumor_ploidy'] is None:
             conf_options['sample_properties']['tumor_ploidy'] = float(arg_dict['tumor_ploidy'])
             
-        conf_options['clinicaltrials'] = {
-            'run': int(arg_dict['include_trials'])
-        }
+        #conf_options['clinicaltrials'] = {
+        #    'run': int(arg_dict['include_trials'])
+        #}
         conf_options['other']['vcf2maf'] = int(arg_dict['vcf2maf'])
         conf_options['somatic_cna'] = {            
             'cna_overlap_pct': float(arg_dict['cna_overlap_pct']),
@@ -172,11 +173,12 @@ def create_config(arg_dict, workflow = "PCGR"):
     return conf_options
 
 
-def populate_config_data(conf_options: dict, db_dir: str, workflow = "PCGR", logger=None):
+def populate_config_data(conf_options: dict, refdata_assembly_dir: str, workflow = "PCGR", logger=None):
     
     conf_data = {}
     conf_data['sample_id'] = conf_options['sample_id']
     conf_data['output_dir'] = conf_options['output_dir']
+    conf_data['output_prefix'] = conf_options['output_prefix']
     conf_data['workflow'] = workflow
     conf_data['genome_assembly'] = conf_options['genome_assembly']
     conf_data['software'] = {}
@@ -184,42 +186,17 @@ def populate_config_data(conf_options: dict, db_dir: str, workflow = "PCGR", log
     conf_data['software']['cpsr_version'] = pcgr_vars.PCGR_VERSION
     conf_data['molecular_data'] = conf_options['molecular_data']
     
-    ## add paths to annotated files (VCF/TSV, CNA, TMB, EXPRESSION)
-    # conf_data['molecular_data'] = {}
-    # conf_data['molecular_data']['fname_mut_vcf'] = conf_options['annotated_vcf']
-    # conf_data['molecular_data']['fname_mut_tsv'] = conf_options['annotated_tsv']
-    # conf_data['molecular_data']['fname_cna_tsv'] = "None"
-    # conf_data['molecular_data']['fname_expression_tsv'] = "None"
-    # if workflow == "PCGR" and conf_options['annotated_cna'] != "None":
-    #     conf_data['molecular_data']['fname_cna_tsv'] = conf_options['annotated_cna']
-    #     del conf_options['annotated_cna']
-    # if workflow == "PCGR" and conf_options['annotated_exp'] != "None":
-    #     conf_data['molecular_data']['fname_expression_tsv'] = conf_options['annotated_exp']
-    #     del conf_options['annotated_exp']
-    # if workflow == "CPSR":
-    #     del conf_data['molecular_data']['fname_cna_tsv']
-    #     del conf_data['molecular_data']['fname_expression_tsv']
-    
-    # conf_data['molecular_data']['fname_tmb'] = "None"
-    # if workflow == "PCGR" and conf_options['fname_tmb'] != "None":
-    #     conf_data['molecular_data']['fname_tmb'] = conf_options['fname_tmb']
-    #     del conf_options['fname_tmb']
-    # if workflow == "CPSR":
-    #     del conf_data['molecular_data']['fname_tmb']
-    
-    genome_assembly = conf_options['genome_assembly']
     del conf_options['sample_id']
     del conf_options['genome_assembly']
     del conf_options['output_dir']
     del conf_options['molecular_data']
-    #del conf_options['annotated_vcf']
-    #del conf_options['annotated_tsv']
+
     conf_data['conf'] = conf_options
     
     conf_data['reference_data'] = {}
     conf_data['reference_data']['version'] = pcgr_vars.DB_VERSION
     conf_data['reference_data']['path'] = \
-        os.path.join(db_dir, "data", genome_assembly)
+        refdata_assembly_dir
     
     metadata_pd = pd.DataFrame()
     conf_data['reference_data']['source_metadata'] = {}
@@ -228,11 +205,12 @@ def populate_config_data(conf_options: dict, db_dir: str, workflow = "PCGR", log
     ## add metadata information for each data source
     
     cpsr_sources_regex = r'^(gepa|cpg_other|maxwell2016|acmg_sf|dbmts|woods_dnarepair|gerp|tcga_pancan_2018|gwas_catalog)'
-    pcgr_sources_regex = r'^(cytoband|mitelmandb|tcga|nci|intogen|opentargets|dgidb|pubchem|cosmic_mutsigs)'
+    pcgr_sources_regex = r'^(cytoband|mitelmandb|tcga|nci|intogen|opentargets|depmap|treehouse|dgidb|pubchem|cosmic_mutsigs)'
+    sources_skip_regex = r'^(illumina|foundation_one)'
     
     for dtype in ['gene','phenotype','biomarker','drug','gwas','hotspot','other']:
         metadata_fname = os.path.join(
-            db_dir, "data", conf_data['genome_assembly'],
+            refdata_assembly_dir,
             ".METADATA", "tsv", dtype + "_metadata.tsv")
         if check_file_exists(metadata_fname, logger):
             metadata_df = pd.read_csv(metadata_fname, sep="\t", na_values=".")
@@ -240,11 +218,12 @@ def populate_config_data(conf_options: dict, db_dir: str, workflow = "PCGR", log
             metadata_df['wflow'] = 'pcgr_cpsr'
             metadata_df.loc[metadata_df['source_abbreviation'].str.match(cpsr_sources_regex), 'wflow'] = 'cpsr' 
             metadata_df.loc[metadata_df['source_abbreviation'].str.match(pcgr_sources_regex), 'wflow'] = 'pcgr'
+            metadata_df.loc[metadata_df['source_abbreviation'].str.match(sources_skip_regex), 'wflow'] = 'skip'
             metadata_pd = metadata_pd._append(metadata_df, ignore_index=True)
     
     conf_data['reference_data']['source_metadata'] = metadata_pd.to_dict(orient='records')
 
-    oncotree_fname = os.path.join(db_dir, "data", genome_assembly,
+    oncotree_fname = os.path.join(refdata_assembly_dir,
                                   "phenotype","tsv","phenotype_onco.tsv.gz")
     
     if check_file_exists(oncotree_fname, logger):
@@ -275,8 +254,7 @@ def populate_config_data(conf_options: dict, db_dir: str, workflow = "PCGR", log
         
             conf_data['conf']['gene_panel']['panel_genes'] = set_virtual_target_genes(
                 conf_data['conf']['gene_panel']['panel_id'], 
-                db_dir, 
-                conf_data['genome_assembly'],
+                refdata_assembly_dir,
                 conf_data['conf']['gene_panel']['diagnostic_grade_only'], 
                 conf_data['conf']['gene_panel']['custom_list_tsv'],
                 bool(conf_data['conf']['variant_classification']['secondary_findings']),
@@ -285,16 +263,16 @@ def populate_config_data(conf_options: dict, db_dir: str, workflow = "PCGR", log
 
     return(conf_data)
 
-def set_virtual_target_genes(panel_id: str, db_dir: str, genome_assembly: str, diagnostic_grade_only: bool, 
+def set_virtual_target_genes(panel_id: str, refdata_assembly_dir: str, diagnostic_grade_only: bool, 
                              custom_list_tsv: str, secondary_findings: bool, logger=None):
     
     all_panels_fname = os.path.join(
-        db_dir, "data", genome_assembly,
+        refdata_assembly_dir,
         "gene","tsv","gene_virtual_panel", 
         "gene_virtual_panel.tsv.gz")
     
     all_cpg_fname = os.path.join(
-        db_dir, "data", genome_assembly,
+        refdata_assembly_dir,
         "gene","tsv","gene_cpg", 
         "gene_cpg.tsv.gz")
         

@@ -5,32 +5,14 @@ from pcgr.utils import getlogger, error_message, warn_message, check_file_exists
 import os
 
 
-def check_args(arg_dict):
+def verify_args(arg_dict):
 
     logger = getlogger("pcgr-validate-arguments-input-a")
-    # Check the existence of required arguments
-    if arg_dict['refdata_dir'] is None or not os.path.isdir(arg_dict['refdata_dir']):
-        err_msg = f"Required argument '--refdata_dir' does not exist ({arg_dict['refdata_dir']})."
-        error_message(err_msg, logger)
-
-    if arg_dict['genome_assembly'] is None:
-        err_msg = f"Required argument '--genome_assembly' has no/undefined value ({arg_dict['genome_assembly']})."
-        error_message(err_msg, logger)
-
-    if arg_dict['input_vcf'] is None:
-        err_msg = f"Required argument '--input_vcf' does not exist ({arg_dict['input_vcf']})."
-        error_message(err_msg, logger)
-
-    if arg_dict['sample_id'] is None:
-        err_msg = f"Required argument '--sample_id' has no/undefined value ({arg_dict['sample_id']})."
-        error_message(err_msg, logger)
-
-    if len(arg_dict['sample_id']) <= 2 or len(arg_dict['sample_id']) > 35:
-        err_msg = f"Sample name identifier ('--sample_id' = {arg_dict['sample_id']}) must be between 2 and 35 characters long"
-        error_message(err_msg, logger)
+    
+    # Check the existence of required arguments    
+    verify_required_args(arg_dict, logger)
 
     # Optional arguments
-
     if arg_dict['expression_sim'] == True and arg_dict['input_rna_exp'] is None:
         warn_msg = f"RNA expression similarity analysis can only be performed if --input_rna_exp is set (--input_rna_exp = {arg_dict['input_rna_exp']})."
         warn_message(warn_msg, logger)
@@ -198,51 +180,25 @@ def check_args(arg_dict):
         err_msg = f"Minimum percent overlap between copy number segment and gene transcript ('--cna_overlap_pct' = {arg_dict['cna_overlap_pct']}) must be within (0, 100]"
         error_message(err_msg, logger)
 
-    # VEP options
-    if int(arg_dict['vep_n_forks']) <= int(pcgr_vars.VEP_MIN_FORKS) or int(arg_dict['vep_n_forks']) > int(pcgr_vars.VEP_MAX_FORKS):
-        err_msg = (
-            f"Number of forks that VEP can use during annotation must be above {str(pcgr_vars.VEP_MIN_FORKS)} and not "
-            f"more than {str(pcgr_vars.VEP_MAX_FORKS)} (recommended is 4), current value is {arg_dict['vep_n_forks']}"
-            )
-        error_message(err_msg, logger)
+    verify_vep_options(arg_dict, logger)
 
-    if int(arg_dict['vep_buffer_size']) < int(pcgr_vars.VEP_MIN_BUFFER_SIZE) or int(arg_dict['vep_buffer_size']) > int(pcgr_vars.VEP_MAX_BUFFER_SIZE):
-        err_msg = (
-            f"Internal VEP buffer size, corresponding to the number of variants that are read in to memory simultaneously "
-            f"('--vep_buffer_size' = {arg_dict['vep_buffer_size']}),  "
-            f"must be within [{str(pcgr_vars.VEP_MIN_BUFFER_SIZE)}, {str(pcgr_vars.VEP_MAX_BUFFER_SIZE)}]")
-        error_message(err_msg, logger)
-
-    # Check that VEP pick criteria is formatted correctly
-    if not arg_dict['vep_pick_order'] is None:
-        values = str(arg_dict['vep_pick_order']).split(',')
-        permitted_sources = pcgr_vars.VEP_PICK_CRITERIA
-        num_permitted_sources = 0
-        for v in values:
-            if v in permitted_sources:
-                num_permitted_sources += 1
-
-        if num_permitted_sources != len(pcgr_vars.VEP_PICK_CRITERIA):
-            err_msg = (
-                f"Option '--vep_pick_order' = {str(arg_dict['vep_pick_order'])} is formatted incorrectly, should be " 
-                f"a comma-separated string of the following values: '{' '.join(pcgr_vars.VEP_PICK_CRITERIA)}'"
-            )
-            error_message(err_msg, logger)
-    
-    return
+    return(arg_dict)
 
 
-def define_output_files(arg_dict):
+def define_output_files(arg_dict, cpsr = False):
     """
     Define output files
     """
-    logger = getlogger("pcgr-output-files")
+    logger = getlogger("define-output-files")
     # create output folder (if not already exists)
     output_dir = utils.safe_makedir(os.path.abspath(arg_dict['output_dir']))
 
     # Define general output prefix
     output_prefix = os.path.join(
         str(output_dir), f"{arg_dict['sample_id']}.pcgr.{arg_dict['genome_assembly']}")
+    if cpsr:
+        output_prefix = os.path.join(
+            str(output_dir), f"{arg_dict['sample_id']}.cpsr.{arg_dict['genome_assembly']}")
 
     # Append output files to arg_dict
     output_vcf = \
@@ -264,33 +220,35 @@ def define_output_files(arg_dict):
         err_msg = "Output files (e.g. " + str(output_vcf_tsv) + \
             ") already exist - please specify different sample_id or add option --force_overwrite"
         error_message(err_msg, logger)
-        
-    # if annotated output cna segments exist and overwrite not set
-    if os.path.exists(output_cna) and arg_dict["force_overwrite"] is False:
-        err_msg = "Output files (e.g. " + str(output_cna) + \
-            ") already exist - please specify different sample_id or add option --force_overwrite"
-        error_message(err_msg, logger)
-        
-    # if output annotated gene expression exist and overwrite not set
-    if os.path.exists(output_expression) and arg_dict["force_overwrite"] is False:
-        err_msg = "Output files (e.g. " + str(output_expression) + \
-            ") already exist - please specify different sample_id or add option --force_overwrite"
-        error_message(err_msg, logger)
+    
+    if not cpsr:
+        # if annotated output cna segments exist and overwrite not set
+        if os.path.exists(output_cna) and arg_dict["force_overwrite"] is False:
+            err_msg = "Output files (e.g. " + str(output_cna) + \
+                ") already exist - please specify different sample_id or add option --force_overwrite"
+            error_message(err_msg, logger)
+            
+        # if output annotated gene expression exist and overwrite not set
+        if os.path.exists(output_expression) and arg_dict["force_overwrite"] is False:
+            err_msg = "Output files (e.g. " + str(output_expression) + \
+                ") already exist - please specify different sample_id or add option --force_overwrite"
+            error_message(err_msg, logger)
         
     output_data = {}
     output_data['prefix'] = output_prefix
     output_data['dir'] = output_dir
     output_data['vcf'] = output_vcf
     output_data['vcf2tsv'] = output_vcf_tsv
-    output_data['cna'] = output_cna
-    output_data['expression'] = output_expression
+    
+    if not cpsr:
+        output_data['cna'] = output_cna
+        output_data['expression'] = output_expression
 
     return output_data
 
 def verify_input_files(arg_dict):
     """
-    1. Checks existence of input files/dirs (arg_dict)
-    2. Checks that the data bundle is of correct date
+    1. Checks existence of all input files/dirs (arg_dict)
     """
     logger = getlogger("pcgr-check-files")
 
@@ -302,9 +260,6 @@ def verify_input_files(arg_dict):
     pon_vcf_dir = 'NA'
     db_dir = 'NA'
     base_dir = 'NA'
-    #output_vcf = 'NA'
-    #output_cna = 'NA'
-    #output_exp = 'NA'
     pon_vcf_basename = 'NA'
     input_vcf_basename = 'NA'
     input_cna_basename = 'NA'
@@ -314,15 +269,7 @@ def verify_input_files(arg_dict):
     arg_dict['rna_fusion_tumor'] = None
     
     # create output folder (if not already exists)
-    output_dir_full = utils.safe_makedir(os.path.abspath(arg_dict['output_dir']))
-
-    # Append output files to arg_dict
-    #output_vcf = \
-    #    os.path.join(str(output_dir_full), f"{arg_dict['sample_id']}.pcgr.{arg_dict['genome_assembly']}.vcf.gz")
-    #output_cna = \
-    #    os.path.join(str(output_dir_full), f"{arg_dict['sample_id']}.pcgr.{arg_dict['genome_assembly']}.cna_segments.tsv.gz")
-    #output_exp = \
-    #    os.path.join(str(output_dir_full), f"{arg_dict['sample_id']}.pcgr.{arg_dict['genome_assembly']}.expression.tsv.gz")
+    #output_dir_full = utils.safe_makedir(os.path.abspath(arg_dict['output_dir']))
 
     # check that either input vcf or cna segments exist
     if arg_dict['input_vcf'] is None and arg_dict['input_cna'] is None:
@@ -367,11 +314,6 @@ def verify_input_files(arg_dict):
         input_vcf_basename = os.path.basename(str(arg_dict["input_vcf"]))
         input_vcf_dir = os.path.dirname(os.path.abspath(arg_dict["input_vcf"]))
 
-        # if output vcf exist and overwrite not set
-        #if os.path.exists(output_vcf) and arg_dict["force_overwrite"] is False:
-        #    err_msg = f"Output files (e.g. {output_vcf}) already exist - please specify different sample_id or add option --force_overwrite"
-        #    error_message(err_msg, logger)
-
     # check if input cna segments exist
     if not arg_dict["input_cna"] is None:
         check_file_exists(os.path.abspath(arg_dict["input_cna"]), strict = True, logger = logger)
@@ -384,25 +326,19 @@ def verify_input_files(arg_dict):
         input_cna_basename = os.path.basename(str(arg_dict["input_cna"]))
         input_cna_dir = os.path.dirname(os.path.abspath(arg_dict["input_cna"]))
 
-        # if output cna segments exist and overwrite not set
-        #if os.path.exists(output_cna) and arg_dict["force_overwrite"] is False:
-        #    err_msg = "Output files (e.g. " + str(output_cna) + \
-        #        ") already exist - please specify different sample_id or add option --force_overwrite"
-        #    error_message(err_msg, logger)
-
     # check if input rna fusion variants exist
-    if not arg_dict["input_rna_fusion"] is None:
-        check_file_exists(os.path.abspath(arg_dict["input_rna_fusion"]), strict = True, logger = logger)
+    # if not arg_dict["input_rna_fusion"] is None:
+    #     check_file_exists(os.path.abspath(arg_dict["input_rna_fusion"]), strict = True, logger = logger)
        
-        if not (os.path.abspath(arg_dict["input_rna_fusion"]).endswith(".tsv") or 
-                os.path.abspath(arg_dict["input_rna_fusion"]).endswith(".txt")):
-            err_msg = "RNA fusion variants file (" + os.path.abspath(
-                arg_dict["input_rna_fusion"]) + ") does not have the correct file extension (.tsv or .txt)"
-            error_message(err_msg, logger)
-        input_rna_fusion_basename = os.path.basename(
-            str(arg_dict["input_rna_fusion"]))
-        input_rna_fusion_dir = os.path.dirname(
-            os.path.abspath(arg_dict["input_rna_fusion"]))
+    #     if not (os.path.abspath(arg_dict["input_rna_fusion"]).endswith(".tsv") or 
+    #             os.path.abspath(arg_dict["input_rna_fusion"]).endswith(".txt")):
+    #         err_msg = "RNA fusion variants file (" + os.path.abspath(
+    #             arg_dict["input_rna_fusion"]) + ") does not have the correct file extension (.tsv or .txt)"
+    #         error_message(err_msg, logger)
+    #     input_rna_fusion_basename = os.path.basename(
+    #         str(arg_dict["input_rna_fusion"]))
+    #     input_rna_fusion_dir = os.path.dirname(
+    #         os.path.abspath(arg_dict["input_rna_fusion"]))
 
     # check if input rna expression exist
     if not arg_dict["input_rna_exp"] is None:
@@ -418,12 +354,6 @@ def verify_input_files(arg_dict):
         input_rna_expression_dir = os.path.dirname(
             os.path.abspath(arg_dict["input_rna_exp"]))
         
-        # if output annotated gene expression exist and overwrite not set
-        #if os.path.exists(output_exp) and arg_dict["force_overwrite"] is False:
-        #    err_msg = "Output files (e.g. " + str(output_exp) + \
-        #        ") already exist - please specify different sample_id or add option --force_overwrite"
-        #    error_message(err_msg, logger)
-
       # check if input rna fusion variants exist
     if not arg_dict["cpsr_report"] is None:
         if not os.path.exists(os.path.abspath(arg_dict["cpsr_report"])):
@@ -438,63 +368,10 @@ def verify_input_files(arg_dict):
             str(arg_dict["cpsr_report"]))
         input_cpsr_report_dir = os.path.dirname(
             os.path.abspath(arg_dict["cpsr_report"]))
-
-    # check the existence of base folder
-    base_dir = os.path.abspath(arg_dict["refdata_dir"])
-    if not os.path.isdir(base_dir):
-        err_msg = "Base directory (" + str(base_dir) + ") does not exist"
-        error_message(err_msg, logger)
     
-    # check the existence of base folder
-    vep_dir = os.path.abspath(arg_dict["vep_dir"])
-    if not os.path.isdir(vep_dir):
-        err_msg = "VEP directory ('" + str(vep_dir) + "') does not exist"
-        error_message(err_msg, logger)
+    vep_dir = verify_vep_cache(arg_dict, logger)
+    refdata_assembly_dir = verify_refdata(arg_dict, logger, cpsr = True)
     
-    vep_human_dir = os.path.join(os.path.abspath(arg_dict["vep_dir"]), "homo_sapiens")
-    if not os.path.isdir(vep_human_dir):
-        err_msg = "VEP directory ('" + str(vep_human_dir) + "') does not exist"
-        error_message(err_msg, logger)
-    
-    vep_human_version_dir = os.path.join(
-        os.path.abspath(arg_dict["vep_dir"]), "homo_sapiens", 
-        f"{pcgr_vars.VEP_VERSION}_{pcgr_vars.VEP_ASSEMBLY[arg_dict['genome_assembly']]}")
-    if not os.path.isdir(vep_human_version_dir):
-        err_msg = "VEP directory ('" + str(vep_human_version_dir) + "') does not exist"
-        error_message(err_msg, logger)
-
-    # check the existence of data folder within the base folder
-    db_dir = os.path.join(os.path.abspath(arg_dict["refdata_dir"]), "data")
-    if not os.path.isdir(db_dir):
-        err_msg = "Data directory (" + str(db_dir) + ") does not exist"
-        error_message(err_msg, logger)
-
-    # check the existence of specified assembly data folder within the base folder
-    db_assembly_dir = os.path.join(os.path.abspath(
-        arg_dict["refdata_dir"]), "data", arg_dict["genome_assembly"])
-    if not os.path.isdir(db_assembly_dir):
-        err_msg = "Data directory for the specified genome assembly (" + str(
-            db_assembly_dir) + ") does not exist"
-        error_message(err_msg, logger)
-
-    # check the existence of .PCGR_BUNDLE_VERSION (starting from 1.5.0)
-    rel_notes_file = os.path.join(os.path.abspath(
-        arg_dict["refdata_dir"]), "data", arg_dict["genome_assembly"], ".PCGR_BUNDLE_VERSION")
-    if not os.path.exists(rel_notes_file):
-        err_msg = "The PCGR data bundle is outdated - please download the latest data bundle (see github.com/sigven/pcgr for instructions)"
-        error_message(err_msg, logger)
-
-    f_rel_not = open(rel_notes_file, "r")
-    compliant_data_bundle = 0
-    for line in f_rel_not:
-        if pcgr_vars.DB_VERSION in line:
-            compliant_data_bundle = 1
-
-    f_rel_not.close()
-
-    if compliant_data_bundle == 0:
-        err_msg = "The PCGR data bundle is not compliant with the software version - please download the latest software and data bundle (see https://github.com/sigven/pcgr for instructions)"
-        error_message(err_msg, logger)
 
     input_data = {
       "vcf_dir": input_vcf_dir,
@@ -504,13 +381,8 @@ def verify_input_files(arg_dict):
       "cpsr_report_dir": input_cpsr_report_dir,
       "cpsr_report_basename": input_cpsr_report_basename,
       "pon_vcf_dir": pon_vcf_dir,
-      "db_assembly_dir": db_assembly_dir,
-      "refdata_dir": base_dir,
+      "refdata_assembly_dir": refdata_assembly_dir,
       "vep_dir": vep_dir,
-      #"output_dir": output_dir_full,
-      #"output_vcf": output_vcf,
-      #"output_cna": output_cna,
-      #"output_exp": output_exp,
       "pon_vcf_basename": pon_vcf_basename,
       "vcf_basename": input_vcf_basename,
       "cna_basename": input_cna_basename,
@@ -521,34 +393,149 @@ def verify_input_files(arg_dict):
 
     return input_data
 
+
+def verify_refdata(arg_dict: dict, logger = None, cpsr = False):
+    
+    # check the existence of base refdata folder
+    base_dir = os.path.abspath(arg_dict["refdata_dir"])
+    if not os.path.isdir(base_dir):
+        err_msg = "Base directory (" + str(base_dir) + ") does not exist"
+        error_message(err_msg, logger)
+    
+    # check the existence of 'data' folder within the base folder
+    refdata_dir = os.path.join(os.path.abspath(arg_dict["refdata_dir"]), "data")
+    if not os.path.isdir(refdata_dir):
+        err_msg = "Data directory (" + str(refdata_dir) + ") does not exist"
+        error_message(err_msg, logger)
+
+    # check the existence of specified assembly data folder within the base/data folder
+    refdata_assembly_dir = os.path.join(os.path.abspath(
+        arg_dict["refdata_dir"]), "data", arg_dict["genome_assembly"])
+    if not os.path.isdir(refdata_assembly_dir):
+        err_msg = "Data directory for the specified genome assembly (" + str(
+            refdata_assembly_dir) + ") does not exist"
+        error_message(err_msg, logger)
+
+    # check the existence of .PCGR_BUNDLE_VERSION (starting from 1.5.0)
+    rel_notes_file = os.path.join(refdata_assembly_dir, ".PCGR_BUNDLE_VERSION")
+    if not os.path.exists(rel_notes_file):
+        err_msg = "Could not find file ('" + str(rel_notes_file) + "') in the PCGR reference data directory - exiting."
+        error_message(err_msg, logger)
+
+    f_rel_notes = open(rel_notes_file,'r')
+    compliant_data_bundle = 0
+    for line in f_rel_notes:
+        if pcgr_vars.DB_VERSION in line:
+            compliant_data_bundle = 1
+    
+    if compliant_data_bundle == 0:
+        err_msg = (
+            f'The PCGR data bundle is not compliant with the software version - please download the '
+            f'latest software and data bundle (see https://github.com/sigven/cpsr for instructions)')
+        if cpsr is False:
+            err_msg = (
+                f'The PCGR data bundle is outdated - please download the latest data bundle ',
+                f'(see https://sigven.github.io/pcgr for instructions)'
+            )
+        error_message(err_msg,logger)
+
+    f_rel_notes.close()
+    
+    return(refdata_assembly_dir)
+
+def verify_vep_cache(arg_dict: dict, logger = None):
+    
+    # check the existence of base VEP dir
+    vep_dir = os.path.abspath(arg_dict["vep_dir"])
+    if not os.path.isdir(vep_dir):
+        err_msg = "VEP directory ('" + str(vep_dir) + "') does not exist"
+        error_message(err_msg, logger)
+    
+    vep_human_dir = os.path.join(os.path.abspath(arg_dict["vep_dir"]), "homo_sapiens")
+    if not os.path.isdir(vep_human_dir):
+        err_msg = "VEP directory ('" + str(vep_human_dir) + "') does not exist"
+        error_message(err_msg, logger)
+    
+    ## check that the specified VEP version exists
+    vep_human_version_dir = os.path.join(
+        os.path.abspath(arg_dict["vep_dir"]), "homo_sapiens", 
+        f"{pcgr_vars.VEP_VERSION}_{pcgr_vars.VEP_ASSEMBLY[arg_dict['genome_assembly']]}")
+    if not os.path.isdir(vep_human_version_dir):
+        err_msg = "VEP directory ('" + str(vep_human_version_dir) + "') does not exist"
+        error_message(err_msg, logger)
+    
+    return(vep_dir)
+
+def verify_vep_options(arg_dict: dict, logger = None):
+    
+    # VEP options
+    if int(arg_dict['vep_n_forks']) <= int(pcgr_vars.VEP_MIN_FORKS) or \
+        int(arg_dict['vep_n_forks']) > int(pcgr_vars.VEP_MAX_FORKS):
+        err_msg = (
+            f"Number of forks that VEP can use during annotation must be above {str(pcgr_vars.VEP_MIN_FORKS)} and not "
+            f"more than {str(pcgr_vars.VEP_MAX_FORKS)} (recommended is 4), current value is {arg_dict['vep_n_forks']}"
+            )
+        error_message(err_msg, logger)
+
+    if int(arg_dict['vep_buffer_size']) < int(pcgr_vars.VEP_MIN_BUFFER_SIZE) or \
+        int(arg_dict['vep_buffer_size']) > int(pcgr_vars.VEP_MAX_BUFFER_SIZE):
+        err_msg = (
+            f"Internal VEP buffer size, corresponding to the number of variants that are read in to memory simultaneously "
+            f"('--vep_buffer_size' = {arg_dict['vep_buffer_size']}),  "
+            f"must be within [{str(pcgr_vars.VEP_MIN_BUFFER_SIZE)}, {str(pcgr_vars.VEP_MAX_BUFFER_SIZE)}]")
+        error_message(err_msg, logger)
+
+    # Check that VEP pick criteria is formatted correctly
+    if not arg_dict['vep_pick_order'] is None:
+        values = str(arg_dict['vep_pick_order']).split(',')
+        permitted_sources = pcgr_vars.VEP_PICK_CRITERIA
+        num_permitted_sources = 0
+        for v in values:
+            if v in permitted_sources:
+                num_permitted_sources += 1
+
+        if num_permitted_sources != len(pcgr_vars.VEP_PICK_CRITERIA):
+            err_msg = (
+                f"Option '--vep_pick_order' = {str(arg_dict['vep_pick_order'])} is formatted incorrectly, should be " 
+                f"a comma-separated string of the following values: '{' '.join(pcgr_vars.VEP_PICK_CRITERIA)}'"
+            )
+            error_message(err_msg, logger)
+    
+    
+def verify_required_args(arg_dict: dict, logger = None):
+    
+    if arg_dict['refdata_dir'] is None or not os.path.isdir(arg_dict['refdata_dir']):
+        err_msg = f"Required argument '--refdata_dir' does not exist ({arg_dict['refdata_dir']})."
+        error_message(err_msg, logger)
+
+    if arg_dict['genome_assembly'] is None:
+        err_msg = f"Required argument '--genome_assembly' has no/undefined value ({arg_dict['genome_assembly']})."
+        error_message(err_msg, logger)
+
+    if arg_dict['input_vcf'] is None or not os.path.exists(arg_dict['input_vcf']):
+        err_msg = f"Required argument '--input_vcf' does not exist ({arg_dict['input_vcf']})."
+        error_message(err_msg, logger)
+
+    if arg_dict['sample_id'] is None:
+        err_msg = f"Required argument '--sample_id' has no/undefined value ({arg_dict['sample_id']})."
+        error_message(err_msg, logger)
+
+    if len(arg_dict['sample_id']) <= 2 or len(arg_dict['sample_id']) > 35:
+        err_msg = f"Sample name identifier ('--sample_id' = {arg_dict['sample_id']}) must be between 2 and 35 characters long"
+        error_message(err_msg, logger)
+    
+    return(0)
+    
 ##---- CPSR ----##
 
-def check_args_cpsr(arg_dict):
+def verify_args_cpsr(arg_dict):
 
     logger = getlogger('cpsr-validate-input-arguments-a')
     arg_dict['vep_regulatory'] = True
     ## Required arguments
-    ## Check that query VCF is set and exists
-    if arg_dict['input_vcf'] is None or not os.path.exists(arg_dict['input_vcf']):
-        err_msg = f"Required argument '--input_vcf' does not exist ({arg_dict['input_vcf']})."
-        error_message(err_msg,logger)
-    ## Check that PCGR directory (with data bundle) is provided and exists
-    if arg_dict['refdata_dir'] is None or not os.path.isdir(arg_dict['refdata_dir']):
-        err_msg = f"Required argument '--refdata_dir' does not exist ({arg_dict['refdata_dir']})."
-        error_message(err_msg,logger)
-    ## Check that genome assembly is set
-    if arg_dict['genome_assembly'] is None:
-        err_msg = f"Required argument '--genome_assembly' has no/undefined value ({arg_dict['genome_assembly']})."
-        error_message(err_msg,logger)
-    ## Check that sample identifier is set and is of appropriate length (minimum two characters)
-    if arg_dict['sample_id'] is None:
-        err_msg = f"Required argument '--sample_id' has no/undefined value ({arg_dict['sample_id']})."
-        error_message(err_msg,logger)
-
-    if len(arg_dict['sample_id']) <= 2:
-        err_msg = f"Sample name identifier ('--sample_id') requires a name with more than two characters ({arg_dict['sample_id']})."
-        error_message(err_msg,logger)
-
+    
+    verify_required_args(arg_dict, logger)
+    
     ### Optional arguments
     ## Provide virtual_panel_id or a custom list from panel 0
     if arg_dict['virtual_panel_id'] == "-1" and not arg_dict['custom_list']:
@@ -604,36 +591,8 @@ def check_args_cpsr(arg_dict):
         warn_message(warn_msg, logger)
         arg_dict['diagnostic_grade_only'] = False
 
-    ## VEP options
-    if arg_dict['vep_n_forks'] <= pcgr_vars.VEP_MIN_FORKS or arg_dict['vep_n_forks'] > pcgr_vars.VEP_MAX_FORKS:
-        err_msg = (
-            f"Number of forks that VEP can use during annotation must be above 0 and not more "
-            f"than {pcgr_vars.VEP_MAX_FORKS} (recommended is 4), current value is {arg_dict['vep_n_forks']}")
-        error_message(err_msg,logger)
+    verify_vep_options(arg_dict, logger)
 
-    if arg_dict['vep_buffer_size'] < pcgr_vars.VEP_MIN_BUFFER_SIZE or arg_dict['vep_buffer_size'] > pcgr_vars.VEP_MAX_BUFFER_SIZE:
-        err_msg = (
-            f"Internal VEP buffer size, corresponding to the number of variants that are read in to memory simultaneously, "
-            f"must be above {pcgr_vars.VEP_MIN_BUFFER_SIZE} and not more than {pcgr_vars.VEP_MAX_BUFFER_SIZE}, "
-            f"current value is {arg_dict['vep_buffer_size']}"
-        )
-        error_message(err_msg,logger)
-
-    ## Check that VEP pick criteria is formatted correctly
-    if not arg_dict['vep_pick_order'] is None:
-        values = str(arg_dict['vep_pick_order']).split(',')
-        permitted_sources = pcgr_vars.VEP_PICK_CRITERIA
-        num_permitted_sources = 0
-        for v in values:
-            if v in permitted_sources:
-                num_permitted_sources += 1
-
-        if num_permitted_sources != len(pcgr_vars.VEP_PICK_CRITERIA):
-            err_msg = (
-                f"Option '--vep_pick_order' = {str(arg_dict['vep_pick_order'])} is formatted incorrectly, should be " 
-                f"a comma-separated string of the following values: '{' '.join(pcgr_vars.VEP_PICK_CRITERIA)}'"
-            )
-            error_message(err_msg, logger)
     return(arg_dict)
 
 
@@ -684,71 +643,15 @@ def verify_input_files_cpsr(arg_dict):
             err_msg = f"Output files (e.g. {output_vcf}) already exist - please specify different " + \
                 "sample_id or add option --force_overwrite"
             error_message(err_msg,logger)
+            
     
-    # check the existence of base folder
-    base_dir = os.path.abspath(arg_dict["refdata_dir"])
-    if not os.path.isdir(base_dir):
-        err_msg = "Base directory (" + str(base_dir) + ") does not exist"
-        error_message(err_msg, logger)
-    
-    # check the existence of base folder
-    vep_dir = os.path.abspath(arg_dict["vep_dir"])
-    if not os.path.isdir(vep_dir):
-        err_msg = "VEP directory ('" + str(vep_dir) + "') does not exist"
-        error_message(err_msg, logger)
-    
-    vep_human_dir = os.path.join(os.path.abspath(arg_dict["vep_dir"]), "homo_sapiens")
-    if not os.path.isdir(vep_human_dir):
-        err_msg = "VEP directory ('" + str(vep_human_dir) + "') does not exist"
-        error_message(err_msg, logger)
-    
-    vep_human_version_dir = os.path.join(
-        os.path.abspath(arg_dict["vep_dir"]), "homo_sapiens", 
-        f"{pcgr_vars.VEP_VERSION}_{pcgr_vars.VEP_ASSEMBLY[arg_dict['genome_assembly']]}")
-    if not os.path.isdir(vep_human_version_dir):
-        err_msg = "VEP directory ('" + str(vep_human_version_dir) + "') does not exist"
-        error_message(err_msg, logger)
-
-    # check the existence of data folder within the base folder
-    db_dir = os.path.join(os.path.abspath(arg_dict["refdata_dir"]), "data")
-    if not os.path.isdir(db_dir):
-        err_msg = "Data directory (" + str(db_dir) + ") does not exist"
-        error_message(err_msg, logger)
-
-    # check the existence of specified assembly data folder within the base folder
-    db_assembly_dir = os.path.join(os.path.abspath(
-        arg_dict["refdata_dir"]), "data", arg_dict["genome_assembly"])
-    if not os.path.isdir(db_assembly_dir):
-        err_msg = "Data directory for the specified genome assembly (" + str(
-            db_assembly_dir) + ") does not exist"
-        error_message(err_msg, logger)
-
-    # check the existence of .PCGR_BUNDLE_VERSION (starting from 1.5.0)
-    rel_notes_file = os.path.join(os.path.abspath(
-        arg_dict["refdata_dir"]), "data", arg_dict["genome_assembly"], ".PCGR_BUNDLE_VERSION")
-    if not os.path.exists(rel_notes_file):
-        err_msg = "The PCGR data bundle is outdated - please download the latest data bundle (see github.com/sigven/pcgr for instructions)"
-        error_message(err_msg, logger)
-
-    f_rel_not = open(rel_notes_file,'r')
-    compliant_data_bundle = 0
-    for line in f_rel_not:
-        if pcgr_vars.DB_VERSION in line:
-            compliant_data_bundle = 1
-
-    f_rel_not.close()
-
-    if compliant_data_bundle == 0:
-        err_msg = (
-            f'The PCGR data bundle is not compliant with the software version - please download the '
-            f'latest software and data bundle (see https://github.com/sigven/cpsr for instructions)')
-        error_message(err_msg,logger)
+    vep_dir = verify_vep_cache(arg_dict, logger)
+    refdata_assembly_dir = verify_refdata(arg_dict, logger, cpsr = True)
 
     cpsr_paths = {
             "input_vcf_dir": input_vcf_dir,
             "input_customlist_dir": input_customlist_dir,
-            "db_assembly_dir": db_assembly_dir,
-            "refdata_dir": base_dir,
+            "refdata_assembly_dir": refdata_assembly_dir,
             "vep_dir": vep_dir,           
             "output_dir": output_dir_full,
             "output_vcf": output_vcf,
@@ -757,3 +660,4 @@ def verify_input_files_cpsr(arg_dict):
             }
 
     return cpsr_paths
+

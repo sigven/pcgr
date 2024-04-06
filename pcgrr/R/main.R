@@ -54,7 +54,7 @@ generate_report <-
 
     ## Retrieve relevant clinical trials for the tumor type in question
 
-    if (as.logical(settings$conf$clinicaltrials$run) == T) {
+    #if (as.logical(settings$conf$clinicaltrials$run) == T) {
       # pcg_report_trials <-
       #   pcgrr::generate_report_data_trials(
       #     ref_data = ref_data,
@@ -63,7 +63,7 @@ generate_report <-
       # pcg_report <-
       #   pcgrr::update_report(pcg_report, pcg_report_trials,
       #                        a_elem = "clinicaltrials")
-    }
+    #}
 
     if (NROW(callset_snv$variant) > 0) {
 
@@ -514,9 +514,9 @@ write_report <- function(report,
       if (!is.null(report_strip$content$tmb)) {
         report_strip$content$tmb$tcga_tmb <- NULL
       }
-      if (!is.null(report_strip$content$clinicaltrials)) {
-        report_strip$content$clinicaltrials <- NULL
-      }
+      #if (!is.null(report_strip$content$clinicaltrials)) {
+      #  report_strip$content$clinicaltrials <- NULL
+      #}
       if (!is.null(report_strip$content$msi)) {
         if (!is.null(report_strip$content$msi$prediction)) {
           report_strip$content$msi$prediction$tcga_dataset <- NULL
@@ -775,17 +775,11 @@ write_report_quarto_html <- function(report = NULL){
 
   settings <- report[['settings']]
   output_dir <- settings[['output_dir']]
-  sample_name <- settings[['sample_id']]
-  genome_assembly <- settings[['genome_assembly']]
-
-  sample_fname_pattern <-
-    paste(sample_name, 'pcgr_acmg', genome_assembly, sep = ".")
+  output_prefix <- settings[['output_prefix']]
 
   output_format <- "html"
   fnames <- list()
-  fnames[["html"]] <-
-    file.path(output_dir,
-              paste0(sample_fname_pattern, ".html"))
+  fnames[["html"]] <- paste0(output_prefix, ".html")
 
   ## Path to PCGR reporting templates
   pcgr_rep_template_path <-
@@ -836,7 +830,7 @@ write_report_quarto_html <- function(report = NULL){
             replacement = rds_report_path) |>
           stringr::str_replace(
             pattern = "<SAMPLE_NAME>",
-            replacement = sample_name
+            replacement = settings[['sample_id']]
           ) |>
           stringr::str_replace(
             pattern = "<MAIN_REPORT_COLOR>",
@@ -886,7 +880,11 @@ write_report_quarto_html <- function(report = NULL){
 
 }
 
-write_report_excel <- function(){
+#' Function that writes contents of PCGR object to an HTML report (quarto-based)
+#'
+#' @param report List object with all report data, settings etc.
+#' @export
+write_report_excel <- function(report = NULL){
 
   fname_xlsx <- ""
 

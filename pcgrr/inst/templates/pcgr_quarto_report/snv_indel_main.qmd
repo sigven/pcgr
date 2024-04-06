@@ -406,7 +406,9 @@ DT::datatable(
 
 noncoding_variant_set <- 
   pcg_report$content$snv_indel$callset$variant_display |>
-  dplyr::filter(.data$CODING_STATUS == "noncoding") |>
+  dplyr::filter(
+    .data$CODING_STATUS == "noncoding" &
+     .data$CONSEQUENCE != "intergenic_variant") |>
   dplyr::select(
     dplyr::any_of(
       pcgrr::dt_display$snv_indel_tier3
@@ -496,8 +498,7 @@ DT::datatable(
         pcgrr::color_palette$cancer_assoc$breaks,
         pcgrr::color_palette$cancer_assoc$values
       )
-  )
-
+  ) 
 
 ```
 

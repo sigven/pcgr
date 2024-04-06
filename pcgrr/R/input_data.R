@@ -791,3 +791,24 @@ load_dna_variants <- function(
   return(results)
 
 }
+
+load_expression_sim <- function(ref_data = NULL,
+                                settings = NULL){
+
+  ## Load expression similarity results for input sample
+  ## against reference collections
+  expression_sim <- list()
+
+  if(!is.null(settings$conf$gene_expression$similarity_db)){
+    for(db in names(settings$conf$gene_expression$similarity_db)){
+      fname_db <- paste0("fname_expression_sim_",db)
+      if(!is.null(settings$molecular_data[[fname_db]]) &
+        file.exists(settings$molecular_data[[fname_db]])){
+          expression_sim[[db]] <- readr::read_tsv(
+            settings$molecular_data[[fname_db]],
+            show_col_types = F, na = ".")
+      }
+    }
+  }
+  return(expression_sim)
+}

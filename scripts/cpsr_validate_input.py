@@ -20,13 +20,12 @@ from pcgr.annoutils import read_infotag_file,read_vcfanno_tag_file
 def __main__():
 
     parser = argparse.ArgumentParser(description='Verify input data for CPSR')
-    parser.add_argument('refdata_dir',help='Directory containing the reference data files for PCGR/CPSR')
+    parser.add_argument('refdata_assembly_dir',help='Assembly-specific directory containing the reference data files for PCGR/CPSR')
     parser.add_argument('input_vcf', help='VCF input file with query variants (SNVs/InDels)')
     parser.add_argument('validated_vcf',help="Name of VCF file with validated, decomposed query variants that overlap target genes (SNVs/InDels)")
     parser.add_argument('custom_target_tsv',help='Custom text/TSV file indicating user-defined target genes from panel 0 for screening and reporting')
     parser.add_argument('custom_target_bed',help='Name of BED file populated with regions associated with custom target genes defined by user')
     parser.add_argument('retained_info_tags',help='Comma-separated string of VCF INFO tags in query VCF to be retained for output')
-    parser.add_argument('genome_assembly',help='grch37 or grch38')
     parser.add_argument('sample_id',help='CPSR sample_name')
     parser.add_argument('virtual_panel_id',type=str,help='virtual panel identifier(s)')
     parser.add_argument('diagnostic_grade_only', type=int, default=0, choices=[0,1], help="Green virtual panels only (Genomics England PanelApp)")
@@ -36,13 +35,12 @@ def __main__():
     parser.add_argument("--debug", action="store_true", help="Print full commands to log")
     args = parser.parse_args()
 
-    ret = validate_cpsr_input(args.refdata_dir,
+    ret = validate_cpsr_input(args.refdata_assembly_dir,
                               args.input_vcf,
                               args.validated_vcf,
                               args.custom_target_tsv,
                               args.custom_target_bed,
                               args.retained_info_tags,
-                              args.genome_assembly,
                               args.sample_id,
                               args.virtual_panel_id,
                               args.diagnostic_grade_only,
@@ -54,7 +52,7 @@ def __main__():
        sys.exit(1)
 
 
-def get_valid_custom_genelist(genelist_fname, genelist_bed_fname, pcgr_dir, genome_assembly, 
+def get_valid_custom_genelist(genelist_fname, genelist_bed_fname, refdata_assembly_dir,  
                               gwas_findings, secondary_findings, logger, debug):
     """
     Function that checks whether the custom genelist contains valid entries from the complete exploratory track
@@ -64,10 +62,13 @@ def get_valid_custom_genelist(genelist_fname, genelist_bed_fname, pcgr_dir, geno
     
     genelist_reader = csv.DictReader(open(genelist_fname,'r'), delimiter='\n', fieldnames=['ensembl_gene_id'])
     virtualpanel_track_bed = os.path.join(
-        pcgr_dir, "data", genome_assembly, "gene","bed","gene_virtual_panel", "0.bed.gz")
+        refdata_assembly_dir, "gene","bed","gene_virtual_panel", "0.bed.gz")
     virtualpanel_track_tsv = os.path.join(
-        pcgr_dir, "data", genome_assembly, "gene","tsv","gene_virtual_panel", "gene_virtual_panel.tsv.gz")
+        refdata_assembly_dir, "gene","tsv","gene_virtual_panel", "gene_virtual_panel.tsv.gz")
     genelist_bed_fname_unsorted = f'{genelist_bed_fname}.{random_id}.unsorted.bed'
+    
+    check_file_exists(virtualpanel_track_bed, logger)
+    check_file_exists(virtualpanel_track_tsv, logger)
 
     customlist_identifiers = {}
     superpanel_track = []
@@ -135,7 +136,7 @@ def get_valid_custom_genelist(genelist_fname, genelist_bed_fname, pcgr_dir, geno
     return 0
 
 
-def simplify_vcf(input_vcf, validated_vcf, vcf, custom_bed, refdata_directory, genome_assembly, virtual_panel_id, 
+def simplify_vcf(input_vcf, validated_vcf, vcf, custom_bed, refdata_assembly_dir, virtual_panel_id, 
                  sample_id, diagnostic_grade_only, gwas_findings, secondary_findings, output_dir, logger, debug):
 
     """
@@ -225,11 +226,11 @@ def simplify_vcf(input_vcf, validated_vcf, vcf, custom_bed, refdata_directory, g
         for pid in set(panel_ids):
             ge_panel_identifier = "GE_PANEL_" + str(pid)
             target_bed_gz = os.path.join(
-                refdata_directory,'data',genome_assembly, 'gene','bed','gene_virtual_panel', str(pid) + ".bed.gz")
+                refdata_assembly_dir, 'gene','bed','gene_virtual_panel', str(pid) + ".bed.gz")
             if diagnostic_grade_only == 1 and virtual_panel_id != "0":
                 logger.info('Considering diagnostic-grade only genes in panel ' + str(pid) + ' - (GREEN status in Genomics England PanelApp)')
                 target_bed_gz = os.path.join(
-                    refdata_directory, 'data', genome_assembly, 'gene','bed','gene_virtual_panel', str(pid) + ".GREEN.bed.gz")            
+                    refdata_assembly_dir, 'gene','bed','gene_virtual_panel', str(pid) + ".GREEN.bed.gz")            
             check_file_exists(target_bed_gz, logger)
             
             ## awk command to ignore secondary finding records while keeping records that belong to target (and that can potentially
@@ -281,13 +282,12 @@ def simplify_vcf(input_vcf, validated_vcf, vcf, custom_bed, refdata_directory, g
             logger.info('')
             exit(1)
 
-def validate_cpsr_input(refdata_directory, 
+def validate_cpsr_input(refdata_assembly_dir, 
                         input_vcf, 
                         validated_vcf,
                         custom_list_fname, 
                         custom_list_bed_fname,
                         retained_info_tags, 
-                        genome_assembly, 
                         sample_id, 
                         virtual_panel_id, 
                         diagnostic_grade_only, 
@@ -313,23 +313,20 @@ def validate_cpsr_input(refdata_directory,
         custom_target_fname['bed'] = custom_list_bed_fname
         get_valid_custom_genelist(custom_target_fname['tsv'], 
                                   custom_target_fname['bed'], 
-                                  refdata_directory, 
-                                  genome_assembly, 
+                                  refdata_assembly_dir, 
                                   gwas_findings, 
                                   secondary_findings, 
                                   logger, 
                                   debug)
     
-    db_assembly_dir = os.path.join(refdata_directory, 'data', genome_assembly)
-
     if not input_vcf == 'None':
         
         vcf_object = VCF(input_vcf)
         
         ## Check that VCF does not already contain INFO tags that will be appended through CPSR annotation
         ## - First add info tags generated by VEP, and those generated by CPSR
-        populated_infotags_other_fname = os.path.join(db_assembly_dir, 'vcf_infotags_other.tsv')
-        populated_infotags_vep_fname = os.path.join(db_assembly_dir, 'vcf_infotags_vep.tsv')
+        populated_infotags_other_fname = os.path.join(refdata_assembly_dir, 'vcf_infotags_other.tsv')
+        populated_infotags_vep_fname = os.path.join(refdata_assembly_dir, 'vcf_infotags_vep.tsv')
         tags_cpsr = read_infotag_file(populated_infotags_other_fname, scope = "cpsr")
         tags_vep = read_infotag_file(populated_infotags_vep_fname, scope = "vep")
         tags_cpsr.update(tags_vep)
@@ -340,14 +337,14 @@ def validate_cpsr_input(refdata_directory,
         track_file_info['tags_fname'] = {}
         for variant_track in ['clinvar','tcga','gwas','dbmts','dbnsfp','gnomad_non_cancer']:
             track_file_info['tags_fname'][variant_track] = os.path.join(
-                db_assembly_dir,'variant','vcf', variant_track, f'{variant_track}.vcfanno.vcf_info_tags.txt')
+                refdata_assembly_dir,'variant','vcf', variant_track, f'{variant_track}.vcfanno.vcf_info_tags.txt')
 
         for bed_track in ['simplerepeat','winmsk','rmsk','gerp']:
             track_file_info['tags_fname'][bed_track] = os.path.join(
-                db_assembly_dir,'misc','bed', bed_track, f'{bed_track}.vcfanno.vcf_info_tags.txt')
+                refdata_assembly_dir,'misc','bed', bed_track, f'{bed_track}.vcfanno.vcf_info_tags.txt')
 
         track_file_info['tags_fname']['gene_transcript_xref'] = os.path.join(
-            db_assembly_dir,'gene','bed', 'gene_transcript_xref', 'gene_transcript_xref.vcfanno.vcf_info_tags.txt')
+            refdata_assembly_dir,'gene','bed', 'gene_transcript_xref', 'gene_transcript_xref.vcfanno.vcf_info_tags.txt')
     
         for track in track_file_info['tags_fname']:
             infotags_vcfanno = read_vcfanno_tag_file(track_file_info['tags_fname'][track], logger)
@@ -374,8 +371,7 @@ def validate_cpsr_input(refdata_directory,
                      validated_vcf,
                      vcf_object, 
                      custom_target_fname['bed'], 
-                     refdata_directory, 
-                     genome_assembly, 
+                     refdata_assembly_dir, 
                      virtual_panel_id, 
                      sample_id, 
                      diagnostic_grade_only, 

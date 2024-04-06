@@ -90,9 +90,9 @@ init_report <- function(yaml_fname = NULL,
                      "rainfall",
                      "kataegis",
                      "expression",
-                     "predisposition",
+                     "predisposition")){
                      #"report_display_config",
-                     "clinicaltrials")) {
+                     #"clinicaltrials")) {
       report[["content"]][[a_elem]] <- list()
       report[["content"]][[a_elem]][["eval"]] <- FALSE
 

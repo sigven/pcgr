@@ -10,49 +10,11 @@ from pcgr import pcgr_vars
 warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 
 
-# def set_genotype(variant_set: pd.DataFrame, logger) -> pd.DataFrame:
-#     """
-#     Set verbose genotype (homozygous, heterozygous) for each variant
-#     """
-#     variant_set['GENOTYPE'] = '.'    
-#     if {'GT'}.issubset(variant_set.columns):
-#         logger.info("Assignment of genotype (homozygous, heterozygous) for each variant based on 'GT' tag")
-#         heterozygous_states = []
-#         ref_allele_index = 0
-#         while ref_allele_index < 20:
-#             alt_allele_index = ref_allele_index + 1
-#             while alt_allele_index <= 20:
-#                 phased_gt_1 = str(ref_allele_index) + "|" + str(alt_allele_index)
-#                 phased_gt_2 = str(alt_allele_index) + "|" + str(ref_allele_index)
-#                 unphased_gt_1 = str(ref_allele_index) + "/" + str(alt_allele_index)
-#                 unphased_gt_2 = str(alt_allele_index) + "/" + str(ref_allele_index)
-#                 gts = [phased_gt_1, phased_gt_2, unphased_gt_1, unphased_gt_2]
-#                 heterozygous_states.extend(gts)
-                
-#                 alt_allele_index = alt_allele_index + 1
-#             ref_allele_index = ref_allele_index + 1
-            
-#         homozygous_states = []    
-#         hom_allele_index = 1
-#         while hom_allele_index <= 20:
-#             phased_gt = str(hom_allele_index) + "|" + str(hom_allele_index)
-#             unphased_gt = str(hom_allele_index) + "/" + str(hom_allele_index)
-#             homozygous_states.extend([phased_gt, unphased_gt])
-#             hom_allele_index = hom_allele_index + 1
-        
-#         variant_set.loc[variant_set['GT'].isin(homozygous_states), "GENOTYPE"] = "homozygous"
-#         variant_set.loc[variant_set['GT'].isin(heterozygous_states),"GENOTYPE"] = "heterozygous"
-#     else:
-#         variant_set['GENOTYPE'] = "undefined"
+def append_annotations(vcf2tsv_gz_fname: str, refdata_assembly_dir: str, logger):
     
-#     variant_set = variant_set.astype({'GENOTYPE':'string'})  
-#     return(variant_set)
-
-def append_annotations(vcf2tsv_gz_fname: str, db_assembly_dir: str, logger):
-    
-    clinvar_tsv_fname = os.path.join(db_assembly_dir, 'variant','tsv','clinvar', 'clinvar.tsv.gz')
-    protein_domain_tsv_fname = os.path.join(db_assembly_dir, 'misc','tsv','protein_domain', 'protein_domain.tsv.gz') 
-    gene_xref_tsv_fname = os.path.join(db_assembly_dir, 'gene','tsv','gene_transcript_xref', 'gene_transcript_xref.tsv.gz')
+    clinvar_tsv_fname = os.path.join(refdata_assembly_dir, 'variant','tsv','clinvar', 'clinvar.tsv.gz')
+    protein_domain_tsv_fname = os.path.join(refdata_assembly_dir, 'misc','tsv','protein_domain', 'protein_domain.tsv.gz') 
+    gene_xref_tsv_fname = os.path.join(refdata_assembly_dir, 'gene','tsv','gene_transcript_xref', 'gene_transcript_xref.tsv.gz')
     vcf2tsv_df = None
     clinvar_data_df = None
     
