@@ -240,6 +240,12 @@ get_excel_sheets <- function(report = NULL){
     }
   }
 
+  for(e in names(excel_sheets)){
+    if(NROW(excel_sheets[[e]]) == 0){
+      excel_sheets[[e]] <- NULL
+    }
+  }
+
 
   return(excel_sheets)
 

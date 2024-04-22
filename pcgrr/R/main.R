@@ -836,7 +836,7 @@ write_report_tsv <- function(report = NULL, variant_type = 'snv_indel'){
     pcgrr::log4r_info(
       paste0("No data to write to TSV file - '", variant_type,"'"))
   }
-  pcgrr::log4r_info("------")
+  #pcgrr::log4r_info("------")
 
 
 }
@@ -940,7 +940,7 @@ write_report_quarto_html <- function(report = NULL){
         if(!(settings$conf$debug)){
           system(glue::glue("rm -rf {tmp_quarto_dir}"))
         }
-        pcgrr::log4r_info("------")
+        #pcgrr::log4r_info("------")
       }
     }else{
       pcgrr::log4r_warn("------")
@@ -949,7 +949,7 @@ write_report_quarto_html <- function(report = NULL){
                report$content$snv_indel$vstats$n,
                ") for display in HTML report - ",
                "skipping report generation"))
-      pcgrr::log4r_warn("------")
+      #pcgrr::log4r_warn("------")
     }
   }
 
@@ -983,25 +983,29 @@ write_report_excel <- function(report = NULL){
                 'KATAEGIS',
                 'IMMUNE_CONTEXTURE')){
     if(elem %in% names(excel_output)){
-      workbook <- workbook |>
-        openxlsx2::wb_add_worksheet(
-        sheet = elem) |>
-        openxlsx2::wb_add_data_table(
-          x = excel_output[[elem]],
-          start_row = 1,
-          start_col = 1,
-          col_names = TRUE,
-          na.strings = "",
-          table_style =
-            paste0("TableStyleMedium",i)) |>
-        openxlsx2::wb_set_col_widths(
-          sheet = elem,
-          cols = 1:ncol(excel_output[[elem]]),
-          widths = "auto")
-      i <- i + 1
-      if(i == 19){
-        i <- 15
+      if(is.data.frame(excel_output[[elem]]) &
+         NROW(excel_output[[elem]]) > 0 &
+         NCOL(excel_output[[elem]]) >= 1){
+        workbook <- workbook |>
+          openxlsx2::wb_add_worksheet(
+          sheet = elem) |>
+          openxlsx2::wb_add_data_table(
+            x = excel_output[[elem]],
+            start_row = 1,
+            start_col = 1,
+            col_names = TRUE,
+            na.strings = "",
+            table_style =
+              paste0("TableStyleMedium",i)) |>
+          openxlsx2::wb_set_col_widths(
+            sheet = elem,
+            cols = 1:ncol(excel_output[[elem]]),
+            widths = "auto")
       }
+    }
+    i <- i + 1
+    if(i == 19){
+      i <- 15
     }
   }
 
