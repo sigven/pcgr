@@ -2,7 +2,7 @@ Package: pcgrr
 Type: Package
 Title: Personal Cancer Genome ReporteR
 Version: 1.4.1.9001
-Date: 2024-04-05
+Date: 2024-04-21
 Authors@R:
     c(person(given = "Sigve",
              family = "Nakken",
@@ -25,17 +25,17 @@ Description: Functions, tools and utilities for the generation of clinical
 License: MIT + file LICENSE
 biocViews:
 Imports:
+    openxlsx2,
+    quantiseqr,
+    yaml,
     assertable,
     assertthat,
     BiocGenerics,
-    BiocManager,
     Biostrings,
     caret,
-    data.table,
     DT,
     dplyr,
     flexdashboard,
-    GenomicRanges,
     GenomeInfoDb,
     ggplot2,
     ggpubr,
@@ -44,23 +44,20 @@ Imports:
     IRanges,
     jsonlite,
     log4r,
-    methods,
     MutationalPatterns,
     plotly,
     quarto,
     randomForest,
-    RColorBrewer,
     reshape2,
     rlang,
     rmarkdown,
     rrapply,
     S4Vectors,
+    formattable,
     scales,
     stringr,
     tidyr,
-    UpSetR,
-    usethis,
-    VariantAnnotation
+    usethis
 Depends:
     R (>= 4.0)
 Suggests:

@@ -23,11 +23,11 @@ generate_report <-
       yaml_fname = yaml_fname,
       report_mode = "PCGR")
 
-    rep[['content']][['assay_properties']] <-
-      rep[['settings']]$conf$assay_properties
+    #rep[['content']][['assay_properties']] <-
+    #  rep[['settings']]$conf$assay_properties
 
-    rep[['content']][['sample_properties']] <-
-      rep[['settings']]$conf$sample_properties
+    #rep[['content']][['sample_properties']] <-
+    #  rep[['settings']]$conf$sample_properties
 
     settings <- rep$settings
     ref_data <- rep$ref_data
@@ -38,6 +38,19 @@ generate_report <-
         ref_data = ref_data,
         settings = settings
       )
+
+    if(!(callset_snv$retained_info_tags == "None")){
+      rep$settings$conf$other$retained_info_tags <-
+        callset_snv$retained_info_tags
+    }
+
+    if(settings$molecular_data$fname_expression_tsv != "None" &
+       file.exists(settings$molecular_data$fname_expression_tsv)){
+      rep[['content']][['expression']] <-
+        pcgrr::generate_report_data_expression(
+          ref_data = ref_data,
+          settings = settings)
+    }
 
 
 
@@ -554,7 +567,7 @@ write_report <- function(report,
                         "VAF_TUMOR",
                         "DP_CONTROL",
                         "AF_CONTROL",
-                        "TIER")
+                        "ACTIONABILITY_TIER")
 
       if (!is.null(report_strip$content$snv_indel$variant_set)) {
 
@@ -696,76 +709,138 @@ write_report <- function(report,
 #' Function that writes contents of PCGR object to flexdashboard
 #' HTML reports
 #'
-#' @param report List object with all report data, settings etc.
+#' param report List object with all report data, settings etc.
 #'
+#' export
+# write_report_flexdb_html <- function(report = NULL){
+#
+#   settings <- report[['settings']]
+#   output_directory <- settings[['output_dir']]
+#   sample_id <- settings[['sample_id']]
+#   genome_assembly <- settings[['genome_assembly']]
+#
+#   sample_fname_pattern <-
+#     paste(sample_id, "pcgr_acmg", genome_assembly, sep = ".")
+#   fname_html <-
+#       file.path(output_directory,
+#                 paste0(sample_fname_pattern,
+#                        ".flexdb.html"))
+#
+#   pcgrr_tmpl <- system.file("templates", package = "pcgrr")
+#   disclaimer <- file.path(pcgrr_tmpl, "disclaimer.md")
+#   assay_props <-
+#     settings$conf$assay_properties
+#   sequencing_assay <-
+#     assay_props[["type"]]
+#
+#   ## Flexdashboard layout
+#   sequencing_design <- "Tumor-Control"
+#   markdown_input <- file.path(pcgrr_tmpl, "pcgr_flexdb_report.Rmd")
+#   css_fname <- file.path(pcgrr_tmpl, "pcgr_flexdb_tumor_control.css")
+#
+#   ## Tumor-only settings (CSS)
+#   if (as.logical(assay_props[["vcf_tumor_only"]]) == T) {
+#     sequencing_design <- "Tumor-Only"
+#     css_fname <- file.path(
+#       pcgrr_tmpl, "pcgr_flexdb_tumor_only.css")
+#   }
+#
+#   pcgrr::log4r_info("------")
+#   pcgrr::log4r_info(
+#     "Writing HTML file (.html) with report contents - flexdashboard")
+#   navbar_items <- list()
+#   navbar_items[[1]] <-
+#     list("title" = paste0(
+#       "<b>", sample_id, "</b> | <i>",
+#       pcg_report$settings$conf$sample_properties$site,
+#       "</i> | ", sequencing_design, " | ", sequencing_assay),
+#       href = "", target = "_blank", align = "right")
+#   navbar_items[[2]] <-
+#     list("icon" = "fa-github",
+#          href = "https://github.com/sigven/pcgr", target = "_blank",
+#          align = "right")
+#
+#   rmarkdown::render(
+#     markdown_input,
+#     output_format =
+#       flexdashboard::flex_dashboard(
+#         orientation = "rows",
+#         favicon = system.file(
+#           "templates","favicon-16x16.png",
+#           package = "pcgrr"),
+#         theme = "cosmo",
+#         css = css_fname,
+#         navbar = navbar_items),
+#     output_file = fname_html,
+#     output_dir = output_directory,
+#     clean = T,
+#     intermediates_dir = output_directory,
+#     quiet = T)
+#
+#
+# }
+
+
+#' Function that writes contents of PCGR object to a TSV file
+#'
+#' @param report List object with all report data, settings etc.
+#' @param variant_type character indicating variant type for output TSV,
+#' i.e. 'snv_indel' or 'cna_gene'
 #' @export
-write_report_flexdb_html <- function(report = NULL){
+#'
+write_report_tsv <- function(report = NULL, variant_type = 'snv_indel'){
 
-  settings <- report[['settings']]
-  output_directory <- settings[['output_dir']]
-  sample_id <- settings[['sample_id']]
-  genome_assembly <- settings[['genome_assembly']]
+  fname <- paste0(
+    report$settings$output_prefix, ".", variant_type, "_ann.tsv.gz")
 
-  sample_fname_pattern <-
-    paste(sample_id, "pcgr_acmg", genome_assembly, sep = ".")
-  fname_html <-
-      file.path(output_directory,
-                paste0(sample_fname_pattern,
-                       ".flexdb.html"))
+  output_data <- data.frame()
+  pcgrr::log4r_info("------")
+  pcgrr::log4r_info(paste0(
+    "Writing tab-separated output file with PCGR annotations - '",
+    variant_type, "'"))
 
-  pcgrr_tmpl <- system.file("templates", package = "pcgrr")
-  disclaimer <- file.path(pcgrr_tmpl, "disclaimer.md")
-  assay_props <-
-    settings$conf$assay_properties
-  sequencing_assay <-
-    assay_props[["type"]]
+  ## Copy number alterations
+  if(variant_type == 'cna_gene' &
+     !is.null(report$content$cna) &
+     report$content$cna$eval == TRUE){
 
-  ## Flexdashboard layout
-  sequencing_design <- "Tumor-Control"
-  markdown_input <- file.path(pcgrr_tmpl, "pcgr_flexdb_report.Rmd")
-  css_fname <- file.path(pcgrr_tmpl, "pcgr_flexdb_tumor_control.css")
-
-  ## Tumor-only settings (CSS)
-  if (as.logical(assay_props[["vcf_tumor_only"]]) == T) {
-    sequencing_design <- "Tumor-Only"
-    css_fname <- file.path(
-      pcgrr_tmpl, "pcgr_flexdb_tumor_only.css")
+    output_data <- as.data.frame(
+      report$content$cna$callset$variant |>
+        dplyr::select(dplyr::any_of(pcgrr::tsv_cols$cna))
+    )
   }
 
-  pcgrr::log4r_info("------")
-  pcgrr::log4r_info(
-    "Writing HTML file (.html) with report contents - flexdashboard")
-  navbar_items <- list()
-  navbar_items[[1]] <-
-    list("title" = paste0(
-      "<b>", sample_id, "</b> | <i>",
-      pcg_report$settings$conf$sample_properties$site,
-      "</i> | ", sequencing_design, " | ", sequencing_assay),
-      href = "", target = "_blank", align = "right")
-  navbar_items[[2]] <-
-    list("icon" = "fa-github",
-         href = "https://github.com/sigven/pcgr", target = "_blank",
-         align = "right")
+  ## SNVs/InDels
+  if(variant_type == 'snv_indel' &
+     !is.null(report$content$snv_indel) &
+     report$content$snv_indel$eval == TRUE){
 
-  rmarkdown::render(
-    markdown_input,
-    output_format =
-      flexdashboard::flex_dashboard(
-        orientation = "rows",
-        favicon = system.file(
-          "templates","favicon-16x16.png",
-          package = "pcgrr"),
-        theme = "cosmo",
-        css = css_fname,
-        navbar = navbar_items),
-    output_file = fname_html,
-    output_dir = output_directory,
-    clean = T,
-    intermediates_dir = output_directory,
-    quiet = T)
+    snv_indel_cols <- pcgrr::tsv_cols$snv_indel
+    if(report$settings$conf$other$retained_vcf_info_tags != "None"){
+      snv_indel_cols <- c(
+        snv_indel_cols, report$settings$conf$other$retained_vcf_info_tags)
+    }
+
+    output_data <- report$content$snv_indel$callset$variant |>
+      dplyr::select(
+        dplyr::any_of(snv_indel_cols))
+
+
+  }
+
+  if(NROW(output_data) > 0){
+    readr::write_tsv(
+      output_data, file = fname, col_names = TRUE, append = FALSE,
+      na = ".", quote = "none")
+  } else {
+    pcgrr::log4r_info(
+      paste0("No data to write to TSV file - '", variant_type,"'"))
+  }
+  pcgrr::log4r_info("------")
 
 
 }
+
 
 #' Function that writes contents of PCGR object to an HTML report (quarto-based)
 #'
@@ -797,7 +872,7 @@ write_report_quarto_html <- function(report = NULL){
 
 
   if (output_format == "html") {
-    if(report$content$snv_indel$vstats$n < 10000){
+    if(report$content$snv_indel$vstats$n < 500000){
       if(file.exists(quarto_input)){
 
         ## make temporary directory for quarto report rendering
@@ -842,8 +917,8 @@ write_report_quarto_html <- function(report = NULL){
         pcgrr::log4r_info("------")
         pcgrr::log4r_info(
           paste0(
-            "Generating quarto-based interactive HTML report (.html) with variant findings",
-            "- ('",output_format, "')"))
+            "Generating quarto-based interactive HTML ",
+            "report (.html) with variant findings"))
 
         quarto::quarto_render(
           input = quarto_main_template_sample,
@@ -880,88 +955,54 @@ write_report_quarto_html <- function(report = NULL){
 
 }
 
-#' Function that writes contents of PCGR object to an HTML report (quarto-based)
+#' Function that writes key datasets of PCGR object to an Excel workbook
 #'
-#' @param report List object with all report data, settings etc.
+#' @param report List object with all PCGR report data, settings etc.
 #' @export
 write_report_excel <- function(report = NULL){
 
-  fname_xlsx <- ""
+  fname_xlsx <- paste0(report$settings$output_prefix, ".xlsx")
+
+  excel_output <- pcgrr::get_excel_sheets(report = report)
 
   pcgrr::log4r_info("------")
   pcgrr::log4r_info(
     paste0("Generating Excel workbook (.xlsx) with ",
            "variant findings"))
-  workbook <- openxlsx2::wb_workbook() |>
-    openxlsx2::wb_add_worksheet(sheet = "SNV_INDEL") |>
-    openxlsx2::wb_add_worksheet(sheet = "SNV_INDEL_BIOMARKER") |>
-    openxlsx2::wb_add_worksheet(sheet = "CNA") |>
-    openxlsx2::wb_add_worksheet(sheet = "CNA_BIOMARKER") |>
-    openxlsx2::wb_add_worksheet(sheet = "TMB") |>
-    openxlsx2::wb_add_worksheet(sheet = "MSI") |>
-    openxlsx2::wb_add_worksheet(sheet = "MUTATIONAL_SIGNATURE") |>
-    openxlsx2::wb_add_worksheet(sheet = "KATAEGIS") |>
-    openxlsx2::wb_add_data_table(
-      sheet = "CLASSIFICATION",
-      x = dplyr::select(
-        report[["content"]][["snv_indel"]][["variant_set"]][['tsv']],
-        cpsr::col_format_output[['xlsx_classification']]),
-      start_row = 1,
-      start_col = 1,
-      col_names = TRUE,
-      na.strings = "",
-      table_style = "TableStyleMedium15") |>
-    openxlsx2::wb_add_data_table(
-      sheet = "VIRTUAL_PANEL",
-      x = report$settings$conf$gene_panel$panel_genes,
-      start_row = 1,
-      start_col = 1,
-      col_names = TRUE,
-      na.strings = "",
-      table_style = "TableStyleMedium16") |>
-    openxlsx2::wb_set_col_widths(
-      sheet = "CLASSIFICATION",
-      cols = 1:length(cpsr::col_format_output[['xlsx_classification']]),
-      widths = "auto") |>
-    openxlsx2::wb_set_col_widths(
-      sheet = "VIRTUAL_PANEL",
-      cols = 1:ncol(report$settings$conf$gene_panel$panel_genes),
-      widths = "auto")
+  workbook <- openxlsx2::wb_workbook()
 
-  if(NROW(report$content$snv_indel$variant_set$secondary) > 0){
-    workbook <- workbook |>
-      openxlsx2::wb_add_data_table(
-        sheet = "SECONDARY_FINDINGS",
-        x = dplyr::select(
-          report$content$snv_indel$variant_set$secondary,
-          cpsr::col_format_output[['xlsx_secondary']]),
-        start_row = 1,
-        start_col = 1,
-        col_names = TRUE,
-        na.strings = "",
-        table_style = "TableStyleMedium17") |>
-      openxlsx2::wb_set_col_widths(
-        sheet = "SECONDARY_FINDINGS",
-        cols = 1:length(cpsr::col_format_output[['xlsx_secondary']]),
-        widths = "auto")
-  }
-
-  if(NROW(report$content$snv_indel$clin_eitem$all$any) > 0){
-    workbook <- workbook |>
-      openxlsx2::wb_add_data_table(
-        sheet = "BIOMARKER_EVIDENCE",
-        x = dplyr::select(
-          report$content$snv_indel$clin_eitem$all$any,
-          cpsr::col_format_output[['xlsx_biomarker']]),
-        start_row = 1,
-        start_col = 1,
-        col_names = TRUE,
-        na.strings = "",
-        table_style = "TableStyleMedium18") |>
-      openxlsx2::wb_set_col_widths(
-        sheet = "BIOMARKER_EVIDENCE",
-        cols = 1:length(cpsr::col_format_output[['xlsx_biomarker']]),
-        widths = "auto")
+  i <- 15
+  for(elem in c('SAMPLE_ASSAY',
+                'SNV_INDEL',
+                'SNV_INDEL_BIOMARKERS',
+                'CNA',
+                'CNA_BIOMARKERS',
+                'TMB',
+                'MSI',
+                'MUTATIONAL_SIGNATURES',
+                'KATAEGIS',
+                'IMMUNE_CONTEXTURE')){
+    if(elem %in% names(excel_output)){
+      workbook <- workbook |>
+        openxlsx2::wb_add_worksheet(
+        sheet = elem) |>
+        openxlsx2::wb_add_data_table(
+          x = excel_output[[elem]],
+          start_row = 1,
+          start_col = 1,
+          col_names = TRUE,
+          na.strings = "",
+          table_style =
+            paste0("TableStyleMedium",i)) |>
+        openxlsx2::wb_set_col_widths(
+          sheet = elem,
+          cols = 1:ncol(excel_output[[elem]]),
+          widths = "auto")
+      i <- i + 1
+      if(i == 19){
+        i <- 15
+      }
+    }
   }
 
   workbook <- workbook |>
@@ -971,7 +1012,4 @@ write_report_excel <- function(report = NULL){
 
 }
 
-write_report_tsv <- function(type = "snv_indel"){
-
-}
 

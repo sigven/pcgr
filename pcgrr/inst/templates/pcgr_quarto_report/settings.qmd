@@ -1,0 +1,201 @@
+## Settings
+
+```{r on_off_settings}
+#| echo: false
+#| eval: true
+
+signatures_estimation <- 'ON'
+msi_prediction <- 'ON'
+mutational_burden <- 'ON'
+
+conf <- pcg_report$settings$conf
+
+sample_name <- pcg_report[['settings']][['sample_id']]
+assay_type <- conf$assay_properties$type
+tumor_site <- conf$sample_properties$site
+assay_mode <- conf$assay_properties$mode
+tumor_ploidy <- "N/A"
+if(!is.na(conf$sample_properties$ploidy) &
+   conf$sample_properties$ploidy != "NA"){
+  tumor_ploidy <- conf$sample_properties$ploidy
+}
+tumor_purity <- "N/A"
+if(!is.na(conf$sample_properties$purity) &
+   conf$sample_properties$purity != "NA"){
+  tumor_purity <- conf$sample_properties$purity
+}
+
+target_size <- conf$assay_properties$effective_target_size_mb
+report_color <- pcgrr::color_palette$report_color$values[1]
+if(as.logical(conf$assay_properties$vcf_tumor_only) == TRUE){
+  report_color <- pcgrr::color_palette$report_color$values[2]
+}
+
+success_color <- pcgrr::color_palette$success
+
+if(pcg_report$content$msi$eval == F){
+  msi_prediction <- 'OFF'
+}
+if(pcg_report$content$mutational_signatures$eval == F){
+  signatures_estimation <- 'OFF'
+}
+if(pcg_report$content$tmb$eval == F){
+  mutational_burden <- 'OFF'
+}
+
+gencode_metadata <- 
+  pcg_report$settings$reference_data$source_metadata |>
+  dplyr::filter(source_abbreviation == "gencode")
+
+transcript_set_gencode <- paste0("GENCODE - basic set (v", gencode_metadata$source_version, ")")
+if (as.logical(pcg_report[["settings"]][["conf"]][["vep"]][["vep_gencode_basic"]]) == F) {
+  transcript_set_gencode <- paste0("GENCODE - all transcripts (v", gencode_metadata$source_version, ")")
+}
+```
+
+The report is generated with _[pcgr](https://github.com/sigven/pcgr)_ version `r pcg_report[['settings']][['software']][['pcgr_version']]`, using the following key settings:
+
+:::: {.columns}
+
+::: {.column width="47.5%"}
+* Genome assembly: __`r pcg_report[['settings']][['genome_assembly']]`__
+* Minimum sequencing depth (DP) tumor (SNV + InDels): __`r conf[['somatic_snv']][['allelic_support']][['tumor_dp_min']]`__
+* Minimum allelic fraction (AF) tumor (SNV + InDels): __`r conf[['somatic_snv']][['allelic_support']][['tumor_af_min']]`__
+* Minimum sequencing depth (DP) control (SNV + InDels): __`r conf[['somatic_snv']][['allelic_support']][['control_dp_min']]`__
+* Maximum allelic fraction (AF) control (SNV + InDels): __`r conf[['somatic_snv']][['allelic_support']][['control_af_max']]`__
+* Actionability framework: __ACMG/AMP__
+* Oncogenicity framework: __VICC/ClinGen__
+* Show noncoding variants: __`r conf$other$show_noncoding `__
+* MSI prediction: __`r msi_prediction`__
+* Mutational burden estimation: __`r mutational_burden`__
+  * TMB algorithm: __`r paste0('TMB_',conf$somatic_snv[['tmb']][['tmb_display']])`__ 
+:::
+
+::: {.column width="5%"}
+<!-- empty column to create gap -->
+:::
+
+::: {.column width="47.5%"}
+* Mutational signatures estimation: __`r signatures_estimation`__
+  * Minimum number of mutations required: __`r conf$somatic_snv$mutational_signatures[['mutation_limit']]`__
+  * All reference signatures: __`r as.logical(conf$somatic_snv$mutational_signatures[['all_reference_signatures']])`__
+  * Inclusion of artefact signatures: __`r as.logical(conf$somatic_snv$mutational_signatures[['include_artefact_signatures']])`__
+  * Minimum tumor-type prevalence (percent) of reference signatures used for refitting: __`r conf$somatic_snv$mutational_signatures[['prevalence_reference_signatures']]`__
+* Variant Effect Predictor (VEP) settings:
+  * Transcript set: __`r transcript_set_gencode`__
+  * Transcript pick order: __`r stringr::str_replace_all(conf[['vep']][['vep_pick_order']],",", ", ")`__
+  * Regulatory regions annotation: __`r as.logical(conf[['vep']][['vep_regulatory']])`__
+  * Buffer size: __`r conf$vep$vep_buffer_size`__
+  * Number of forks: __`r conf$vep$vep_n_forks`__
+
+:::
+
+::::
+
+<br>
+
+
+```{r sample_assay_properties}
+#| output: asis
+#| echo: false
+#| eval: true
+
+bslib::layout_column_wrap(
+  width = 1/3,
+  height = 85,
+  bslib::value_box(
+    title = "Tumor site",
+    value = tumor_site,
+    showcase = NULL,
+    theme = bslib::value_box_theme(
+      bg = report_color, fg = "#fff")
+  ),
+  bslib::value_box(
+    title = "Tumor purity",
+    value = tumor_purity,
+    showcase = NULL,
+    theme = bslib::value_box_theme(
+      bg = report_color, fg = "#fff")
+  ),
+  bslib::value_box(
+    title = "Tumor ploidy",
+    value = tumor_ploidy,
+    showcase = NULL,
+    theme = bslib::value_box_theme(
+      bg = report_color, fg = "#fff")
+  )
+)
+
+bslib::layout_column_wrap(
+  width = 1/3,
+  height = 85,
+  bslib::value_box(
+    title = "Sequencing assay mode",
+    value = assay_mode,
+    showcase = NULL,
+    theme = bslib::value_box_theme(
+      bg = report_color, fg = "#fff")
+  ),
+  bslib::value_box(
+    title = "Sequencing assay type",
+    value = assay_type,
+    showcase = NULL,
+    theme = bslib::value_box_theme(
+      bg = report_color, fg = "#fff")
+  ),
+  bslib::value_box(
+    title = "Coding target size",
+    value = paste0(target_size, "Mb"),
+    showcase = NULL,
+    theme = bslib::value_box_theme(
+      bg = report_color, fg = "#fff")
+  )
+)
+
+```
+
+```{r input_data}
+#| output: asis
+#| echo: false
+#| eval: false
+
+bslib::layout_column_wrap(
+  width = 1/4,
+  height = 80,
+  bslib::value_box(
+    title = "",
+    value = "DNA - SNVs/InDels",
+    showcase = bsicons::bs_icon("check-square", size = "0.6em"),
+    showcase_layout = "top right",
+    theme = bslib::value_box_theme(
+      bg = pcgrr::color_palette$success, fg = "#fff")
+  ),
+  bslib::value_box(
+    title = "",
+    value = "DNA - CNAs",
+    showcase = bsicons::bs_icon("check-square", size = "0.6em"),
+    showcase_layout = "top right",
+    theme = bslib::value_box_theme(
+      bg = pcgrr::color_palette$success, fg = "#fff")
+  ),
+  bslib::value_box(
+    title = "",
+    value = "RNA - gene fusions",
+    showcase = bsicons::bs_icon("check-square", size = "0.6em"),
+    showcase_layout = "top right",
+    theme = bslib::value_box_theme(
+      bg = pcgrr::color_palette$success, fg = "#fff")
+  ),
+  bslib::value_box(
+    title = "",
+    value = "RNA - gene expression",
+    showcase = bsicons::bs_icon("check-square", size = "0.6em"),
+    showcase_layout = "top right",
+    theme = bslib::value_box_theme(
+      bg = pcgrr::color_palette$success, fg = "#fff")
+  )
+)
+```
+
+
+

@@ -6,6 +6,7 @@ options(warn=-1)
 suppressWarnings(suppressPackageStartupMessages(library(pcgrr)))
 suppressWarnings(suppressPackageStartupMessages(library(log4r)))
 suppressWarnings(suppressPackageStartupMessages(library(argparse)))
+suppressWarnings(suppressPackageStartupMessages(library(CNAqc)))
 
 args <- commandArgs(trailingOnly=TRUE)
 
@@ -23,70 +24,15 @@ log4r_logger <-
 # this gets passed on to all the log4r_* functions inside the pkg
 options("PCGRR_LOG4R_LOGGER" = log4r_logger)
 
-yaml_fname <-
-  paste0("/Users/sigven/project_data/packages/",
-         "package__pcgr/bundle_update_2023/",
-         "pcgr/examples/SAMPLE-T-001.pcgr.grch38.conf.yaml")
-
-
 ## Generate report content
-pcg_report1 <- pcgrr::generate_report(
-  yaml_fname = yaml_fname
-)
-pcg_report1$settings$conf$debug = TRUE
-pcgrr::write_report_quarto_html(report = pcg_report1)
-
-
-yaml_fname <-
-  paste0("/Users/sigven/project_data/packages/",
-         "package__pcgr/bundle_update_2023/",
-         "pcgr/examples/SAMPLE-T_N-001.pcgr.grch38.conf.yaml")
-
-
-## Generate report content
-pcg_report2 <- pcgrr::generate_report(
+pcg_report <- pcgrr::generate_report(
   yaml_fname = yaml_fname
 )
 
-pcg_report2$settings$conf$debug = TRUE
-pcgrr::write_report_quarto_html(report = pcg_report2)
-
-
-pcg_report$content$tmb$eval <- FALSE
-pcgrr::write_report_flexdb_html(report = pcg_report)
-
-# # ## Write report and result files
-# if (!is.null(pcg_report)) {
-
-#   pcgrr::write_report_output(
-#     pcg_report,
-#     pcgr_config,
-#     output_format = 'snv_tsv')
-#   pcgrr::write_report_output(
-#     pcg_report,
-#     pcgr_config,
-#     output_format = 'msigs_tsv')
-#   if (pcgr_config[['assay_props']][['vcf_tumor_only']] == T){
-#     pcgrr::write_report_output(
-#       pcg_report,
-#       pcgr_config,
-#       output_format = 'snv_tsv_unfiltered')
-#   }
-#   pcgrr::write_report_output(
-#     pcg_report,
-#     pcgr_config,
-#     output_format = 'cna_tsv')
-#   pcgrr::write_report_output(
-#     pcg_report,
-#     pcgr_config,
-#     output_format = 'html')
-#   pcgrr::write_report_output(
-#     pcg_report,
-#     pcgr_config,
-#     output_format = 'html',
-#     flexdb = T)
-#   pcgrr::write_report_output(
-#     pcg_report,
-#     pcgr_config,
-#     output_format = 'json')
-# }
+# Write result files (HTML, xlsx, TSV)
+if (!is.null(pcg_report)) {
+  pcgrr::write_report_quarto_html(report = pcg_report)
+  pcgrr::write_report_excel(report = pcg_report)
+  pcgrr::write_report_tsv(report = pcg_report, variant_type = 'snv_indel')
+  pcgrr::write_report_tsv(report = pcg_report, variant_type = 'cna_gene')
+}

@@ -2,7 +2,7 @@
 #' e.g. COSMIC, CLINVAR, REFSEQ etc
 #'
 #' @param var_data_df data frame with variant entries
-#' @param vartype 'snv_indel' or 'cna'
+#' @param vartype 'snv_indel' or 'cna', or 'exp'
 #' @param skip elements to be ignored during annotation
 #'
 #' @export
@@ -37,6 +37,9 @@ append_annotation_links <- function(
                           "TRANSCRIPT_START",
                           "TRANSCRIPT_END")
       }
+      if(vartype == "exp"){
+        group_by_var <- "ENTREZGENE"
+      }
       url_prefix <- pcgrr::variant_db_url[i, ]$url_prefix
       link_key_var <- pcgrr::variant_db_url[i, ]$link_key_var
       link_display_var <- pcgrr::variant_db_url[i, ]$link_display_var
@@ -65,6 +68,14 @@ append_annotation_links <- function(
                        "TRANSCRIPT_START",
                        "TRANSCRIPT_END"))
           }else{
+            if(vartype == "exp"){
+              var_data_df <- var_data_df |>
+                dplyr::left_join(
+                  dplyr::rename(
+                    annotation_links,
+                    !!rlang::sym(name) := link),
+                  by = c("ENTREZGENE"))
+            }
             if(vartype == "snv_indel"){
               var_data_df <- var_data_df |>
                 dplyr::left_join(
@@ -258,7 +269,8 @@ append_tcga_var_link <- function(var_df,
         dplyr::summarise(TCGALINK = unlist(paste(.data$tmp_assoc, collapse = ", ")),
                          .groups = "drop") |>
         dplyr::select(.data$VAR_ID, .data$TCGALINK) |>
-        magrittr::set_colnames(c("VAR_ID", "TCGA_FREQUENCY"))
+        dplyr::rename(TCGA_FREQUENCY = "TCGALINK")
+        #magrittr::set_colnames(c("VAR_ID", "TCGA_FREQUENCY"))
       var_df <- dplyr::rename(var_df, TCGA_FREQUENCY_RAW = .data$TCGA_FREQUENCY)
       var_df <- dplyr::left_join(var_df, var_df_links,
                                  by = c("VAR_ID" = "VAR_ID"))
@@ -508,7 +520,7 @@ append_dbnsfp_var_link <- function(var_df) {
 #'
 #' @param var_df data frame with variants
 #' @param primary_site primary site of tumor sample
-#' @param ref_data PCGR/CPSR reference data list object
+#' @param ref_data PCGR/CPSR reference data object
 #'
 #' @export
 append_targeted_drug_annotations <- function(
@@ -571,7 +583,7 @@ append_targeted_drug_annotations <- function(
 #'
 #' @param var_df data frame with variants
 #' @param primary_site primary tumor sample site
-#' @param ref_data PCGR/CPSR reference data list object
+#' @param ref_data PCGR/CPSR reference data object
 #'
 #' @export
 append_drug_var_link <- function(
@@ -628,17 +640,15 @@ append_drug_var_link <- function(
 #' Function that appends cancer gene evidence links
 #'
 #' @param var_data_df Data frame of sample variants from VCF
-#' @param ref_data PCGR reference data bundle object
+#' @param ref_data PCGR/CPSR reference data object
 #' @param primary_site Primary tumor site
-#' @param pos_var variable reflecting chromosome order (POS/SEGMENT_START)
 #' @return vcf_data_df
 #'
 #' @export
 append_cancer_association_ranks <-
   function(var_data_df = NULL,
            ref_data = NULL,
-           primary_site = 'Any',
-           pos_var = 'POS') {
+           primary_site = 'Any') {
 
     if (any(grepl(paste0("^ENTREZGENE$"), names(var_data_df))) &
         any(grepl(paste0("^ENSEMBL_GENE_ID$"), names(var_data_df)))) {
@@ -709,8 +719,7 @@ append_cancer_association_ranks <-
           as.numeric(0),
           as.numeric(.data$TISSUE_ASSOC_RANK)
         )) |>
-        dplyr::distinct() |>
-        pcgrr::order_variants(pos_var = pos_var)
+        dplyr::distinct()
 
     }
 
@@ -722,15 +731,13 @@ append_cancer_association_ranks <-
 #' Function that appends cancer gene evidence links
 #'
 #' @param var_data_df Data frame of sample variants from VCF
-#' @param ref_data PCGR reference data bundle object
-#' @param pos_var variable reflecting chromosome order (POS/SEGMENT_START)
+#' @param ref_data PCGR/CPSR reference data object
 #' @return var_data_df
 #'
 #' @export
 append_cancer_gene_evidence <-
   function(var_data_df = NULL,
-           ref_data = NULL,
-           pos_var = 'POS') {
+           ref_data = NULL) {
 
     if (any(grepl(paste0("^ENTREZGENE$"), names(var_data_df))) &
         any(grepl(paste0("^ENSEMBL_GENE_ID$"), names(var_data_df)))) {
@@ -785,8 +792,7 @@ append_cancer_gene_evidence <-
           .data$CANCERGENE_EVIDENCE == ".",
           as.character(NA),
           as.character(.data$CANCERGENE_EVIDENCE)
-        )) |>
-        pcgrr::order_variants(pos_var = pos_var)
+        ))
     }
 
     if("CGC_TIER" %in% colnames(var_data_df) &
@@ -904,6 +910,18 @@ generate_annotation_link <- function(
                 .groups = "drop")
           )
         }else{
+          if(vartype == "exp"){
+            df_annotation_links <- as.data.frame(
+              df_annotation_links |>
+                dplyr::group_by(
+                  .data$ENTREZGENE) |>
+                dplyr::summarise(
+                  link = unlist(
+                    paste(
+                      .data$tmp_link, collapse = ", ")),
+                  .groups = "drop")
+            )
+          }
           if(vartype == "snv_indel"){
             df_annotation_links <- as.data.frame(
               df_annotation_links |>

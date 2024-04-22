@@ -1,0 +1,47 @@
+### Immune contexture
+
+The immune contexture of the sample is here assessed using the [quanTIseq](https://icbi.i-med.ac.at/software/quantiseq/doc/index.html) algorithm [@Finotello2019-ko], which estimates the relative proportions of various immune cell types in the RNA sample. 
+<br>
+
+```{r immune_contexture_prep}
+#| eval: !expr as.logical(NROW(pcg_report$content$expression$immune_contexture) > 0) == TRUE
+#| echo: false
+
+cell_fracs <-  
+  plotly::plot_ly(
+    pcg_report$content$expression$immune_contexture, 
+    marker = list(
+      colors = pcgrr::color_palette$tier$values,
+      line = list(
+        color = '#FFFFFF', width = 2))) |>
+  plotly::add_pie(
+    pcg_report$content$expression$immune_contexture, 
+    labels =~ cell_type,
+    values = ~fraction,
+    textinfo = "Fraction",
+    type = 'pie',
+    hole = 0.4) |>
+  plotly::layout(legend = list(orientation = "h", font = t)) 
+
+
+```
+
+
+```{r immune_contexture_pie}
+#| eval: !expr as.logical(NROW(pcg_report$content$expression$immune_contexture) > 0) == TRUE & as.logical(!is.null(cell_fracs)) == TRUE
+#| echo: false
+#| output: asis
+
+bslib::card(
+  full_screen = TRUE,
+  height = "450px",
+  bslib::card_header(
+    class = "bg-dark", 
+    paste0("Immune contexture - ",
+           pcg_report$settings$sample_id)),
+  cell_fracs
+)
+
+```
+
+

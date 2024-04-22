@@ -25,12 +25,14 @@ def append_annotations(vcf2tsv_gz_fname: str, refdata_assembly_dir: str, logger)
             vcf2tsv_gz_fname, skiprows=[0], sep="\t", na_values=".",
             low_memory = False)
         
-        if {'CHROM','POS','REF','ALT','CLINVAR_MSID','PFAM_DOMAIN','ENTREZGENE'}.issubset(vcf2tsv_df.columns):
-            for elem in ['CHROM','POS','REF','ALT','CLINVAR_MSID','PFAM_DOMAIN','ENTREZGENE']:
+        if {'CHROM','POS','REF','ALT','CLINVAR_MSID','PFAM_DOMAIN','ENTREZGENE','EFFECT_PREDICTIONS'}.issubset(vcf2tsv_df.columns):
+            for elem in ['CHROM','POS','REF','ALT','CLINVAR_MSID','PFAM_DOMAIN','EFFECT_PREDICTIONS']:
                 vcf2tsv_df = vcf2tsv_df.astype({elem:'string'})            
             vcf2tsv_df['CLINVAR_MSID'] = vcf2tsv_df['CLINVAR_MSID'].str.replace("\\.[0-9]{1,}$", "", regex = True)
             vcf2tsv_df['PFAM_DOMAIN'] = vcf2tsv_df['PFAM_DOMAIN'].str.replace("\\.[0-9]{1,}$", "", regex = True)
-            vcf2tsv_df['ENTREZGENE'] = vcf2tsv_df['ENTREZGENE'].str.replace("\\.[0-9]{1,}$", "", regex = True)
+            vcf2tsv_df['EFFECT_PREDICTIONS'] = vcf2tsv_df['EFFECT_PREDICTIONS'].str.replace("\\.&|\\.$", "NA&", regex = True)
+            vcf2tsv_df['EFFECT_PREDICTIONS'] = vcf2tsv_df['EFFECT_PREDICTIONS'].str.replace("&$", "", regex = True)
+            vcf2tsv_df['EFFECT_PREDICTIONS'] = vcf2tsv_df['EFFECT_PREDICTIONS'].str.replace("&", ", ", regex = True)
             vcf2tsv_df["VAR_ID"] = vcf2tsv_df["CHROM"].str.cat(
                 vcf2tsv_df["POS"], sep = "_").str.cat(
                     vcf2tsv_df["REF"], sep = "_").str.cat(
@@ -97,15 +99,8 @@ def append_annotations(vcf2tsv_gz_fname: str, refdata_assembly_dir: str, logger)
                         gene_xref_tsv_fname, sep="\t", na_values=".", 
                         usecols=["entrezgene","name"])
                     gene_xref_df = gene_xref_df[gene_xref_df['entrezgene'].notnull()].drop_duplicates()
-                    gene_xref_df = gene_xref_df[gene_xref_df['entrezgene'].notna()].drop_duplicates()
-                    gene_xref_df["entrezgene"] = gene_xref_df["entrezgene"].astype(float).astype(int).astype(str)
-                    
-                    vcf2tsv_df["ENTREZGENE"] = vcf2tsv_df["ENTREZGENE"].astype(str)
-                    vcf2tsv_df.loc[vcf2tsv_df["ENTREZGENE"].isna(), "ENTREZGENE"] = "-1"
                     gene_xref_df.rename(columns = {'entrezgene':'ENTREZGENE', 'name':'GENENAME'}, inplace = True)                
                     vcf2tsv_df = vcf2tsv_df.merge(gene_xref_df, left_on=["ENTREZGENE"], right_on=["ENTREZGENE"], how="left")
-                    vcf2tsv_df["ENTREZGENE"] = vcf2tsv_df['ENTREZGENE'].str.replace("\\.[0-9]{1,}$", "", regex = True)
-                    #vcf2tsv_df = vcf2tsv_df.fillna('.')
                 else:
                     logger.error(f"Could not find {gene_xref_tsv_fname} needed for gene name annotation - exiting")
             else:
@@ -213,13 +208,10 @@ def calculate_tmb(variant_set: pd.DataFrame, tumor_dp_min: int, tumor_af_min: fl
                          'tmb_unit'])
             df.to_csv(tmb_fname, sep="\t", header=True, index=False)
 
-def clean_annotations(variant_set: pd.DataFrame, yaml_data: dict, germline: bool, logger) -> pd.DataFrame:
+def clean_annotations(variant_set: pd.DataFrame, yaml_data: dict, logger) -> pd.DataFrame:
     
     if {'Consequence','EFFECT_PREDICTIONS','CLINVAR_CONFLICTED'}.issubset(variant_set.columns):
         variant_set.rename(columns = {'Consequence':'CONSEQUENCE'}, inplace = True)
-        variant_set['EFFECT_PREDICTIONS'] = variant_set['EFFECT_PREDICTIONS'].str.replace("\\.&|\\.$", "NA&", regex = True)
-        variant_set['EFFECT_PREDICTIONS'] = variant_set['EFFECT_PREDICTIONS'].str.replace("&$", "", regex = True)
-        variant_set['EFFECT_PREDICTIONS'] = variant_set['EFFECT_PREDICTIONS'].str.replace("&", ", ", regex = True)
         variant_set['clinvar_conflicted_bool'] = True
         variant_set.loc[variant_set['CLINVAR_CONFLICTED'] == 1, "clinvar_conflicted_bool"] = True
         variant_set.loc[variant_set['CLINVAR_CONFLICTED'] != 1, "clinvar_conflicted_bool"] = False
@@ -245,7 +237,6 @@ def clean_annotations(variant_set: pd.DataFrame, yaml_data: dict, germline: bool
             if vcf_info_tag in variant_set.columns:
                 variant_set.loc[variant_set[vcf_info_tag].isna(),vcf_info_tag] = -123456789           
                 variant_set[vcf_info_tag] = variant_set[vcf_info_tag].apply(lambda x: str(int(x)) )
-                #variant_set.loc[variant_set[vcf_info_tag] == "-123456789", vcf_info_tag] = "." 
                 variant_set.loc[variant_set[vcf_info_tag] == "-123456789", vcf_info_tag] = np.nan
                 
     ## Make sure that specific tags are formatted as integers (not float) when exported to TSV
@@ -254,6 +245,7 @@ def clean_annotations(variant_set: pd.DataFrame, yaml_data: dict, germline: bool
                          'TSG_RANK',
                          'TCGA_PANCANCER_COUNT',
                          'CGC_TIER',
+                         'ENTREZGENE',
                          'DP_TUMOR',
                          'DP_CONTROL',
                          'DISTANCE',
@@ -270,9 +262,6 @@ def clean_annotations(variant_set: pd.DataFrame, yaml_data: dict, germline: bool
         if vcf_info_tag in variant_set.columns: 
             variant_set.loc[variant_set[vcf_info_tag].isna(),vcf_info_tag] = -123456789           
             variant_set[vcf_info_tag] = variant_set[vcf_info_tag].apply(lambda x: str(int(x)) )
-            #variant_set.loc[variant_set[vcf_info_tag] == "-123456789", vcf_info_tag] = "."              
             variant_set.loc[variant_set[vcf_info_tag] == "-123456789", vcf_info_tag] = np.nan
-    #if germline is True:
-    #    variant_set = set_genotype(variant_set, logger)
     
     return variant_set

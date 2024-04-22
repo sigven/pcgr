@@ -10,7 +10,7 @@ append_annotation_links(var_data_df, vartype = "snv_indel", skip = NULL)
 \arguments{
 \item{var_data_df}{data frame with variant entries}
 
-\item{vartype}{'snv_indel' or 'cna'}
+\item{vartype}{'snv_indel' or 'cna', or 'exp'}
 
 \item{skip}{elements to be ignored during annotation}
 }

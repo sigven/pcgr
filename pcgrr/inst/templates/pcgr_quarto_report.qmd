@@ -2,7 +2,7 @@
 title: "<SAMPLE_NAME>"
 subtitle: " - _cancer genome interpretation report by PCGR_"
 date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
-bibliography: bibliography.bib
+bibliography: pcgr_bibliography.bib
 title-block-banner: "<MAIN_REPORT_COLOR>"
 title-block-banner-color: "white"
 linkcolor: '#0073C2'
@@ -22,21 +22,22 @@ nocite: |
   @Repana2019-dd, @Chalmers2017-cz, @Yin2020-or, 
   @Bailey2018-os, @Fernandez2019-mk,
   @Nakken2018-lb, @Brady2022-hr,
-  @Levatic2022-hk, @Horak2022-uh
+  @Levatic2022-hk, @Horak2022-uh,
+  @Antonello2024-ri
 format: 
   html:
     link-external-newwindow: true
     embed-resources: true
     smooth-scroll: true
     page-layout: full
-    fontsize: 0.93em
+    fontsize: 0.92em
     toc: true
     toc-expand: 3
     toc-depth: 3
     toc-title: Contents
     grid:
       body-width: 940px
-css: pcgr_quarto_tumor_control.css
+css: pcgr_quarto.css
 lightbox: true
 ---
 
@@ -46,10 +47,12 @@ lightbox: true
 
 knitr::opts_chunk$set(echo = F,warning=FALSE, dpi=72, error=F, eval=T)
 
+## load report object generated with pcgrr::generate_report()
 pcg_report <- readRDS(file="<PCGR_REPORT_OBJECT.rds>")
 
 logo_fname_path <- system.file("extdata", "logo.png", package = "pcgrr")
 
+## set report color theme according to tumor-control vs. tumor-only
 report_color <- pcgrr::color_palette$report_color$values[1]
 if(as.logical(pcg_report$settings$conf$assay_properties$vcf_tumor_only) == TRUE){
   report_color <- pcgrr::color_palette$report_color$values[2]
@@ -60,39 +63,45 @@ if(as.logical(pcg_report$settings$conf$assay_properties$vcf_tumor_only) == TRUE)
   <img src="`r logo_fname_path`" title="" alt="" align="right" width="80"/>
 </a>
 
-```{r settings_data_sources}
-#| child: 'pcgr_quarto_report/report_query_settings.qmd'
+```{r pcgr_settings}
+#| child: 'pcgr_quarto_report/settings.qmd'
 #| eval: true
 ```
 
-```{r conditional_snv_indel}
-#| child: 'pcgr_quarto_report/snv_indel_main.qmd'
+```{r pcgr_snv_indel}
+#| child: 'pcgr_quarto_report/snv_indel.qmd'
 #| eval: !expr pcg_report$content$snv_indel$eval == TRUE
 ```
 
+<br>
 
-```{r conditional_cna}
-#| child: 'pcgr_quarto_report/cna_main.qmd'
+```{r pcgr_cna}
+#| child: 'pcgr_quarto_report/cna.qmd'
 #| eval: !expr pcg_report$content$cna$eval == TRUE
 ```
 
 <br>
 
-```{r conditional_signatures}
+```{r pcgr_signatures}
 #| child: 'pcgr_quarto_report/mutational_signature.qmd'
 #| eval: !expr as.logical(pcg_report$settings$conf$somatic_snv$mutational_signatures$run) == TRUE
 ```
 
 <br>
 
-```{r conditional_msi}
+```{r pcgr_msi}
 #| child: 'pcgr_quarto_report/msi.qmd'
-#| eval: !expr pcg_report$settings$conf$somatic_snv$msi$run == 1
+#| eval: !expr as.logical(pcg_report$settings$conf$somatic_snv$msi$run) == TRUE
 ```
 
 ```{r conditional_tmb}
 #| child: 'pcgr_quarto_report/mutational_burden.qmd'
-#| eval: !expr pcg_report$settings$conf$somatic_snv$tmb$run == 1
+#| eval: !expr as.logical(pcg_report$settings$conf$somatic_snv$tmb$run) == TRUE
+```
+
+```{r conditional_expresson}
+#| child: 'pcgr_quarto_report/expression.qmd'
+#| eval: !expr as.logical(pcg_report$content$expression$eval) == TRUE
 ```
 
 

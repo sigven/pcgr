@@ -1,0 +1,71 @@
+#### Signature similarity
+
+Here, we perform a comparison of the sample's raw mutational spectrum to each of the known signatures (SBS) in COSMIC. Input samples with less than 30 SNVs are omitted from this analysis. The cosine similarity is calculated between the mutational spectrum of the sample (i.e. frequency of DNA trinucleotide contexts) and each of the COSMIC signatures. The cosine similarity (*SIMILARITY* column below) ranges from 0 to 1, where 1 indicates a perfect match.
+
+```{r highlight_signatures}
+#| echo: false
+#| eval: !expr as.logical(pcg_report$settings$conf$somatic_snv$mutational_signatures$all_reference_signatures) == FALSE
+#| output: asis
+
+cat('\n::: {.callout-note}\n## Site-specific signatures\n\n',
+    'Signatures that are previously attributed to ',
+    conf$sample_properties$site,
+    ' cancers (prevalence >= ', 
+    as.character(msig_conf$prevalence_reference_signatures),
+    '%) are highlighted. If you see non site-specific signatures ',
+    'with very high similarity to the mutational spectrum of the input sample, a re-run of the fitting procedure using all ',
+    'reference signatures is warranted. \n\n:::\n\n', sep='')
+```
+
+<br>
+
+```{r signature_similarity}
+#| eval: !expr is.null(msig_content$result$signature_similarity) == FALSE
+#| output: asis
+
+similarity_table <- 
+  DT::datatable(
+    msig_content$result$signature_similarity,
+    extensions = "Responsive",
+    options = list(
+      pageLength = 13,
+      dom = 'tp'),
+    escape = F) |>
+  DT::formatStyle(
+    'SIMILARITY',
+    fontWeight = 'bold') |>
+  DT::formatStyle(
+    c('SIGNATURE_ID',
+      'AETIOLOGY_KEYWORD'),
+    'SITE_SPECIFIC',
+    fontWeight = 'bold',
+    color = "white",
+    backgroundColor = DT::styleEqual(
+      c('YES','NO','NOT_DEFINED'), 
+      c(report_color,
+        pcgrr::color_palette$none,
+        pcgrr::color_palette$none)
+    )
+  )
+
+#similarity_table$x$data$SITE_SPECIFIC <- NULL
+
+bslib::card(
+  height = "700px",
+  bslib::card_header(
+    class = "bg-dark",
+    paste0(
+      "Similarity of ",
+      pcg_report$settings$sample_id,
+      " to COSMIC signatures (SBS)")
+  ),
+  bslib::card_body(
+    similarity_table
+  )
+)
+
+
+
+```
+
+<br>

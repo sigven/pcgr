@@ -2,7 +2,7 @@
 #'
 #' @param callset_snv Somatic SNV callset list object - PCGR
 #' @param callset_cna Somatic CNA callset list object - PCGR
-#' @param settings PCGR run configuration settings
+#' @param settings PCGR run/configuration settings
 #'
 #' @export
 make_cnaqc_object <- function(

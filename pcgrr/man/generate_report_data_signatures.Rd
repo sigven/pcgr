@@ -9,7 +9,7 @@ generate_report_data_signatures(
   ref_data = NULL,
   settings = NULL,
   n_bootstrap_iterations = 200,
-  sig_contribution_cutoff = 0.001
+  sig_contribution_cutoff = 0.01
 )
 }
 \arguments{
@@ -17,7 +17,7 @@ generate_report_data_signatures(
 
 \item{ref_data}{PCGR reference data object}
 
-\item{settings}{PCGR configuration settings object}
+\item{settings}{PCGR run/configuration settings}
 
 \item{n_bootstrap_iterations}{Number of bootstrap iterations for signature analysis}
 

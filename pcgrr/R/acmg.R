@@ -27,19 +27,21 @@ assign_acmg_tiers <- function(
   invisible(assertthat::assert_that(
     is.data.frame(biomarker_items),
     msg = paste0("Argument 'biomarker_items' needs be of type data.frame")))
-  assertable::assert_colnames(
-    biomarker_items,
-    c("VAR_ID",
-      "ENTREZGENE",
-      "BM_EVIDENCE_LEVEL",
-      "BM_PRIMARY_SITE"),
-    only_colnames = F, quiet = T)
 
   results_acmg <- list()
   tier_classification <- data.frame()
   biomarker_items_hires <- data.frame()
 
   if (NROW(biomarker_items) > 0) {
+
+    assertable::assert_colnames(
+      biomarker_items,
+      c("VAR_ID",
+        "ENTREZGENE",
+        "BM_EVIDENCE_LEVEL",
+        "BM_PRIMARY_SITE"),
+      only_colnames = F, quiet = T)
+
     biomarker_items_hires <- biomarker_items |>
       dplyr::filter(
         vartype == "cna" |
@@ -111,7 +113,6 @@ assign_acmg_tiers <- function(
         dplyr::left_join(
           tier_classification,
           by = c("VAR_ID","ENTREZGENE","VARIANT_CLASS")) |>
-
         dplyr::mutate(ACMG_TIER2 = dplyr::if_else(
           (!is.na(.data$TUMOR_SUPPRESSOR) &
              .data$TUMOR_SUPPRESSOR == TRUE) |
@@ -172,8 +173,7 @@ assign_acmg_tiers <- function(
 
       }
     }
-  }
-  else{
+  }else{
     if (vartype == 'snv_indel') {
       variants_df <- variants_df |>
         dplyr::mutate(ACMG_AMP_TIER = dplyr::if_else(
@@ -200,22 +200,23 @@ assign_acmg_tiers <- function(
         )) |>
         dplyr::arrange(.data$ACMG_AMP_TIER) |>
         dplyr::distinct()
-    }
-    if (vartype == 'cna') {
+    }else{
+      if (vartype == 'cna') {
 
-      variants_df <- variants_df |>
-        dplyr::mutate(ACMG_AMP_TIER = dplyr::if_else(
-          (!is.na(.data$TUMOR_SUPPRESSOR) &
-             .data$TUMOR_SUPPRESSOR == TRUE &
-             .data$VARIANT_CLASS == "homdel") |
-            (!is.na(.data$ONCOGENE) &
-               .data$ONCOGENE == TRUE &
-               .data$VARIANT_CLASS == "gain"),
-          as.integer(3),
-          as.integer(NA)
-        )) |>
-        dplyr::distinct() |>
-        dplyr::arrange(.data$ACMG_AMP_TIER)
+        variants_df <- variants_df |>
+          dplyr::mutate(ACMG_AMP_TIER = dplyr::if_else(
+            (!is.na(.data$TUMOR_SUPPRESSOR) &
+               .data$TUMOR_SUPPRESSOR == TRUE &
+               .data$VARIANT_CLASS == "homdel") |
+              (!is.na(.data$ONCOGENE) &
+                 .data$ONCOGENE == TRUE &
+                 .data$VARIANT_CLASS == "gain"),
+            as.integer(3),
+            as.integer(NA)
+          )) |>
+          dplyr::distinct() |>
+          dplyr::arrange(.data$ACMG_AMP_TIER)
+      }
     }
   }
 
@@ -264,20 +265,20 @@ assign_acmg_tiers <- function(
   results_acmg[['variant']] <- data.frame()
 
   results_acmg[['variant']] <- variants_df |>
-    dplyr::rename(TIER = .data$ACMG_AMP_TIER) |>
-    dplyr::mutate(TIER_FRAMEWORK = "ACMG_AMP") |>
-    dplyr::mutate(TIER_DESCRIPTION = dplyr::case_when(
-      TIER == 1 ~ "Variants of strong clinical significance",
-      TIER == 2 ~ "Variants of potential clinical significance",
-      TIER == 3 ~ "Variants of uncertain significance",
-      TIER == 4 ~ "Other coding mutation",
-      TIER == 5 ~ "Noncoding mutation",
-      TRUE ~ as.character("Undefined")
-    )) |>
+    dplyr::rename(ACTIONABILITY_TIER = .data$ACMG_AMP_TIER) |>
+    dplyr::mutate(ACTIONABILITY_FRAMEWORK = "ACMG_AMP") |>
+    # dplyr::mutate(TIER_DESCRIPTION = dplyr::case_when(
+    #   TIER == 1 ~ "Variants of strong clinical significance",
+    #   TIER == 2 ~ "Variants of potential clinical significance",
+    #   TIER == 3 ~ "Variants of uncertain significance",
+    #   TIER == 4 ~ "Other coding mutation",
+    #   TIER == 5 ~ "Noncoding mutation",
+    #   TRUE ~ as.character("Undefined")
+    # )) |>
     dplyr::mutate(ACTIONABILITY = dplyr::case_when(
-      TIER == 1 ~ "Strong significance",
-      TIER == 2 ~ "Potential significance",
-      TIER == 3 ~ "Uncertain significance",
+      ACTIONABILITY_TIER == 1 ~ "Strong significance",
+      ACTIONABILITY_TIER == 2 ~ "Potential significance",
+      ACTIONABILITY_TIER == 3 ~ "Uncertain significance",
       TRUE ~ as.character(NA)
     ))
 
@@ -289,20 +290,20 @@ assign_acmg_tiers <- function(
   if(NROW(biomarker_items_hires) > 0){
     results_acmg[['biomarker_evidence']][['items']] <-
       biomarker_items_hires |>
-      dplyr::rename(TIER = .data$ACMG_AMP_TIER) |>
-      dplyr::mutate(TIER_FRAMEWORK = "ACMG_AMP") |>
-      dplyr::mutate(TIER_DESCRIPTION = dplyr::case_when(
-        TIER == 1 ~ "Variants of strong clinical significance",
-        TIER == 2 ~ "Variants of potential clinical significance",
-        TIER == 3 ~ "Variants of uncertain significance",
-        TIER == 4 ~ "Other coding mutation",
-        TIER == 5 ~ "Noncoding mutation",
-        TRUE ~ as.character("Undefined")
-      )) |>
+      dplyr::rename(ACTIONABILITY_TIER = .data$ACMG_AMP_TIER) |>
+      dplyr::mutate(ACTIONABILITY_FRAMEWORK = "ACMG_AMP") |>
+      # dplyr::mutate(TIER_DESCRIPTION = dplyr::case_when(
+      #   TIER == 1 ~ "Variants of strong clinical significance",
+      #   TIER == 2 ~ "Variants of potential clinical significance",
+      #   TIER == 3 ~ "Variants of uncertain significance",
+      #   TIER == 4 ~ "Other coding mutation",
+      #   TIER == 5 ~ "Noncoding mutation",
+      #   TRUE ~ as.character("Undefined")
+      # )) |>
       dplyr::mutate(ACTIONABILITY = dplyr::case_when(
-        TIER == 1 ~ "Strong significance",
-        TIER == 2 ~ "Potential significance",
-        TIER == 3 ~ "Uncertain significance",
+        ACTIONABILITY_TIER == 1 ~ "Strong significance",
+        ACTIONABILITY_TIER == 2 ~ "Potential significance",
+        ACTIONABILITY_TIER == 3 ~ "Uncertain significance",
         TRUE ~ as.character(NA)
       ))
   }
@@ -310,20 +311,20 @@ assign_acmg_tiers <- function(
   if(NROW(tier_classification) > 0){
     results_acmg[['biomarker_evidence']][['tier_classification']] <-
       tier_classification |>
-      dplyr::rename(TIER = .data$ACMG_AMP_TIER) |>
-      dplyr::mutate(TIER_FRAMEWORK = "ACMG_AMP") |>
-      dplyr::mutate(TIER_DESCRIPTION = dplyr::case_when(
-        TIER == 1 ~ "Variants of strong clinical significance",
-        TIER == 2 ~ "Variants of potential clinical significance",
-        TIER == 3 ~ "Variants of uncertain significance",
-        TIER == 4 ~ "Other coding mutation",
-        TIER == 5 ~ "Noncoding mutation",
-        TRUE ~ as.character("Undefined")
-      )) |>
+      dplyr::rename(ACTIONABILITY_TIER = .data$ACMG_AMP_TIER) |>
+      dplyr::mutate(ACTIONABILITY_FRAMEWORK = "ACMG_AMP") |>
+      # dplyr::mutate(TIER_DESCRIPTION = dplyr::case_when(
+      #   TIER == 1 ~ "Variants of strong clinical significance",
+      #   TIER == 2 ~ "Variants of potential clinical significance",
+      #   TIER == 3 ~ "Variants of uncertain significance",
+      #   TIER == 4 ~ "Other coding mutation",
+      #   TIER == 5 ~ "Noncoding mutation",
+      #   TRUE ~ as.character("Undefined")
+      # )) |>
       dplyr::mutate(ACTIONABILITY = dplyr::case_when(
-        TIER == 1 ~ "Strong significance",
-        TIER == 2 ~ "Potential significance",
-        TIER == 3 ~ "Uncertain significance",
+        ACTIONABILITY_TIER == 1 ~ "Strong significance",
+        ACTIONABILITY_TIER == 2 ~ "Potential significance",
+        ACTIONABILITY_TIER == 3 ~ "Uncertain significance",
         TRUE ~ as.character(NA)
       ))
   }

@@ -230,9 +230,11 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
             hotspot_mutated_samples['aa_site']['Any'] = hotspot_mutated_samples['aa_site']['Any'] + ttype_hotspot_samples_site
    
 
+   ## The SOP's for assessment of overlap with mutational hotspots do not specify that occurrences should
+   ## match the tumor type (example in paper ignores tumor-type matching when looking for number of samples overlapping with hotspot)
    ttype = "Any"
-   if tumortype != "Any":
-      ttype = re.sub(r'/', '@', re.sub(r' ','_', tumortype))
+   #if tumortype != "Any":
+   #   ttype = re.sub(r'/', '@', re.sub(r' ','_', tumortype))
 
    if ttype in hotspot_mutated_samples['aa_variant'].keys() and \
       ttype in hotspot_mutated_samples['aa_site'].keys():

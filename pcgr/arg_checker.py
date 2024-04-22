@@ -132,11 +132,11 @@ def verify_args(arg_dict):
 
     if arg_dict['tumor_only'] is True:
         
-        if arg_dict['control_dp_tag'] is not None:
+        if arg_dict['control_dp_tag'] is not None and arg_dict['control_dp_tag'] != "_NA_":
             err_msg = f"Option '--tumor_only' does not allow '--control_dp_tag' option to be set ({arg_dict['control_dp_tag']})"
             error_message(err_msg, logger)
         
-        if arg_dict['control_af_tag'] is not None:
+        if arg_dict['control_af_tag'] is not None and arg_dict['control_af_tag'] != "_NA_":
             err_msg = f"Option '--tumor_only' does not allow '--control_af_tag' option to be set ({arg_dict['control_af_tag']})"
             error_message(err_msg, logger)
         
@@ -209,6 +209,12 @@ def define_output_files(arg_dict, cpsr = False):
         f"{output_prefix}.cna_segments.tsv.gz"
     output_expression = \
         f"{output_prefix}.expression.tsv.gz"
+    output_expression_outliers = \
+        f"{output_prefix}.expression_outliers.tsv.gz"
+    output_expression_similarity = \
+        f"{output_prefix}.expression_similarity.tsv.gz"
+    output_csq_expression = \
+        f"{output_prefix}.csq_expression.tsv.gz"
 
     # if annotated output vcf exist and overwrite not set
     if os.path.exists(output_vcf) and arg_dict["force_overwrite"] is False:
@@ -243,6 +249,9 @@ def define_output_files(arg_dict, cpsr = False):
     if not cpsr:
         output_data['cna'] = output_cna
         output_data['expression'] = output_expression
+        output_data['csq_expression'] = output_csq_expression
+        output_data['expression_outliers'] = output_expression_outliers
+        output_data['expression_similarity'] = output_expression_similarity
 
     return output_data
 
@@ -255,7 +264,7 @@ def verify_input_files(arg_dict):
     input_vcf_dir = 'NA'
     input_cna_dir = 'NA'
     input_rna_fusion_dir = 'NA'
-    input_cpsr_report_dir = 'NA'
+    input_germline_dir = 'NA'
     input_rna_expression_dir = 'NA'
     pon_vcf_dir = 'NA'
     db_dir = 'NA'
@@ -265,7 +274,7 @@ def verify_input_files(arg_dict):
     input_cna_basename = 'NA'
     input_rna_fusion_basename = 'NA'
     input_rna_expression_basename = 'NA'
-    input_cpsr_report_basename = 'NA'
+    input_germline_basename = 'NA'
     arg_dict['rna_fusion_tumor'] = None
     
     # create output folder (if not already exists)
@@ -354,20 +363,20 @@ def verify_input_files(arg_dict):
         input_rna_expression_dir = os.path.dirname(
             os.path.abspath(arg_dict["input_rna_exp"]))
         
-      # check if input rna fusion variants exist
-    if not arg_dict["cpsr_report"] is None:
-        if not os.path.exists(os.path.abspath(arg_dict["cpsr_report"])):
+    # check if input germline calls (CPSR) exist
+    if not arg_dict["input_germline"] is None:
+        if not os.path.exists(os.path.abspath(arg_dict["input_germline"])):
             err_msg = "Input file (" + \
-                str(arg_dict["cpsr_report"]) + ") does not exist"
+                str(arg_dict["input_germline"]) + ") does not exist"
             error_message(err_msg, logger)
-        if not (os.path.abspath(arg_dict["cpsr_report"]).endswith(".json.gz")):
-            err_msg = "CPSR report file (" + os.path.abspath(
-                arg_dict["cpsr_report"]) + ") does not have the correct file extension (.json.gz)"
+        if not (os.path.abspath(arg_dict["input_germline"]).endswith(".tsv.gz")):
+            err_msg = "File with CPSR-classified germline calls  (" + os.path.abspath(
+                arg_dict["input_germline"]) + ") does not have the correct file extension (.json.gz)"
             error_message(err_msg, logger)
-        input_cpsr_report_basename = os.path.basename(
-            str(arg_dict["cpsr_report"]))
-        input_cpsr_report_dir = os.path.dirname(
-            os.path.abspath(arg_dict["cpsr_report"]))
+        input_germline_basename = os.path.basename(
+            str(arg_dict["input_germline"]))
+        input_germline_dir = os.path.dirname(
+            os.path.abspath(arg_dict["input_germline"]))
     
     vep_dir = verify_vep_cache(arg_dict, logger)
     refdata_assembly_dir = verify_refdata(arg_dict, logger, cpsr = True)
@@ -378,8 +387,8 @@ def verify_input_files(arg_dict):
       "cna_dir": input_cna_dir,
       "rna_fusion_dir": input_rna_fusion_dir,
       "rna_expression_dir": input_rna_expression_dir,
-      "cpsr_report_dir": input_cpsr_report_dir,
-      "cpsr_report_basename": input_cpsr_report_basename,
+      "germline_dir": input_germline_dir,
+      "germline_basename": input_germline_basename,
       "pon_vcf_dir": pon_vcf_dir,
       "refdata_assembly_dir": refdata_assembly_dir,
       "vep_dir": vep_dir,

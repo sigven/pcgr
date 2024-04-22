@@ -30,11 +30,6 @@ def create_config(arg_dict, workflow = "PCGR"):
             'vep_gencode_basic': int(arg_dict['vep_gencode_basic'])            
         }
             
-        #conf_options['visual_reporting'] = {
-        #    'visual_theme': str(arg_dict['report_theme']),
-        #    'nonfloating_toc': int(arg_dict['report_nonfloating_toc'])
-        #}
-            
         conf_options['other'] = {
             'vcfanno_n_proc': int(arg_dict['vcfanno_n_proc']),                                          
             'no_reporting': int(arg_dict['no_reporting']),
@@ -82,15 +77,16 @@ def create_config(arg_dict, workflow = "PCGR"):
             'n_copy_gain': int(arg_dict['n_copy_gain'])
         }
         
-        conf_options['gene_expression'] = {}
-        conf_options['gene_expression']['similarity_analysis'] = int(arg_dict['expression_sim'])
-        conf_options['gene_expression']['similarity_db'] = {}
+        conf_options['expression'] = {}
+        conf_options['expression']['run'] = int(not arg_dict['input_rna_exp'] is None)
+        conf_options['expression']['similarity_analysis'] = int(arg_dict['expression_sim'])
+        conf_options['expression']['similarity_db'] = {}
         for db in arg_dict['expression_sim_db'].split(','):
-            conf_options['gene_expression']['similarity_db'][db] = 1
+            conf_options['expression']['similarity_db'][db] = 1
             if db == 'tcga':
-                conf_options['gene_expression']['similarity_db']['tcga'] = {}
-                for cohort in pcgr_vars.TCGA_COHORTS:
-                    conf_options['gene_expression']['similarity_db']['tcga'][cohort] = 1
+                conf_options['expression']['similarity_db']['tcga'] = {}
+                for cohort in pcgr_vars.DISEASE_COHORTS:
+                    conf_options['expression']['similarity_db']['tcga'][cohort] = 1
                     
         conf_options['somatic_snv'] = {}
         conf_options['somatic_snv']['allelic_support'] = {
@@ -139,9 +135,12 @@ def create_config(arg_dict, workflow = "PCGR"):
         
         conf_options['molecular_data']['fname_cna_tsv'] = "None"
         conf_options['molecular_data']['fname_expression_tsv'] = "None"
-        conf_options['molecular_data']['fname_tmb'] = "None"
-        for source in ['tcga','treehouse','depmap']:
-            conf_options['molecular_data']['fname_expression_sim_' + source] = "None"
+        conf_options['molecular_data']['fname_expression_outliers_tsv'] = "None"
+        #conf_options['molecular_data']['fname_expression_csq_tsv'] = "None"
+        conf_options['molecular_data']['fname_expression_similarity_tsv'] = "None"
+        conf_options['molecular_data']['fname_tmb_tsv'] = "None"
+        #for source in ['tcga','treehouse','depmap']:
+        #    conf_options['molecular_data']['fname_expression_sim_' + source] = "None"
 
     
     if workflow == "CPSR":        

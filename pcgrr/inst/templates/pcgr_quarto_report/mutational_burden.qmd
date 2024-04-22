@@ -2,7 +2,7 @@
 
 PCGR estimates TMB in three different ways, depending on the type of variants to include in the calculation (specifically abbreviated as __coding_non_silent__, __coding_and_silent__, and __missense_only__, see details outlined in the [Documentation](#Documentation)). Only results from one of these methods are highlighted here, as configured by the user. 
 
-For TMB calculation, minimum sequencing coverage (__`r pcg_report$settings$conf$somatic_snv$tmb$tmb_dp_min`__) and variant allele frequency (VAF) thresholds are applied to filter out low-quality variants. 
+For TMB calculation, sequencing coverage and variant allele frequency (VAF) thresholds are applied to filter out low-quality variants. 
 
 * Minimum sequencing depth applied for TMB calculation: __`r pcg_report$settings$conf$somatic_snv$tmb$tmb_dp_min`__
 * Minimum VAF applied for TMB calculation: __`r pcg_report$settings$conf$somatic_snv$tmb$tmb_af_min`__

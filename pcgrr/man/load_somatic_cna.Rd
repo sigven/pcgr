@@ -8,11 +8,11 @@ pre-report pipeline}
 load_somatic_cna(fname, ref_data = NULL, settings = NULL)
 }
 \arguments{
-\item{fname}{Path to file name}
+\item{fname}{Path to file with pre-processed CNA segments}
 
-\item{ref_data}{Object with reference data}
+\item{ref_data}{PCGR reference data object}
 
-\item{settings}{Object with PCGR report configuration}
+\item{settings}{PCGR run/configuration settings}
 }
 \description{
 Function that reads and validates a fully annotated CNA file from PCGR

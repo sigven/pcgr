@@ -3,7 +3,7 @@
 from pcgr._version import __version__
 
 PCGR_VERSION = __version__
-DB_VERSION = '20240404'
+DB_VERSION = '20240412'
 
 ## MISCELLANEOUS
 NCBI_BUILD_MAF = 'GRCh38'
@@ -161,13 +161,16 @@ VEP_consequence_rank = {
 }
 
 CSQ_MISSENSE_PATTERN = r"^missense_variant"
-CSQ_CODING_PATTERN = r"(stop_(lost|gained)|start_lost|frameshift_|missense_|splice_(donor|acceptor)|protein_altering|inframe_)"
-CSQ_CODING_SILENT_PATTERN = r"(stop_(lost|gained)|start_lost|frameshift_|missense_|splice_(donor|acceptor)|protein_altering|inframe_|synonymous|(start|stop)_retained)"
-CSQ_NULL_PATTERN = r"(stop_gained|frameshift_)"
+CSQ_CODING_PATTERN = \
+    r"^(stop_(lost|gained)|start_lost|frameshift_|missense_|splice_(donor|acceptor)|protein_altering|inframe_)"
+CSQ_CODING_SILENT_PATTERN = \
+    r"^(stop_(lost|gained)|start_lost|frameshift_|missense_|splice_(donor|acceptor)|protein_altering|inframe_|synonymous|(start|stop)_retained)"
+CSQ_NULL_PATTERN = r"^(stop_gained|frameshift_)"
 CSQ_SPLICE_REGION_PATTERN = r"(splice_|intron_variant)"
-CSQ_SPLICE_DONOR_PATTERN = r"(splice_region_variant|splice_donor_variant|splice_donor_region_variant|splice_donor_5th_base_variant)"
+CSQ_SPLICE_DONOR_PATTERN = \
+    r"(splice_region_variant|splice_donor_variant|splice_donor_region_variant|splice_donor_5th_base_variant)"
 
-TCGA_COHORTS = ['ACC','BLCA','BRCA','CESC',
+DISEASE_COHORTS = ['ACC','BLCA','BRCA','CESC',
                 'CHOL','COAD','DLBC','ESCA',
                 'GBM','HNSC','KICH','KIRC',
                 'KIRP','LAML','LGG','LIHC',
@@ -175,3 +178,31 @@ TCGA_COHORTS = ['ACC','BLCA','BRCA','CESC',
                 'PAAD','PCPG','PRAD','READ',
                 'SARC','SKCM','STAD','TGCT',
                 'THCA','THYM','UCEC','UCS','UVM']
+
+SITE_TO_DISEASE = {
+    'Lung': ['TCGA_LUAD','TCGA_LUSC'],
+    'Breast': ['TCGA_BRCA'],
+    'Prostate': ['TCGA_PRAD'],
+    'Kidney': ['TCGA_KIRC','TCGA_KIRP','TCGA_KICH'],
+    'Colon/Rectum': ['TCGA_COAD','TCGA_READ'],
+    'Pancreas': ['TCGA_PAAD'],
+    'Bladder/Urinary Tract': ['TCGA_BLCA'],
+    'Thyroid': ['TCGA_THCA'],
+    'Esophagus/Stomach': ['TCGA_STAD'],
+    'Cervix': ['TCGA_CESC'],
+    'Ovary/Fallopian Tube': ['TCGA_OV'],
+    'Skin': ['TCGA_SKCM'],
+    'Soft tissue': ['TCGA_SARC'],
+    'Liver': ['TCGA_LIHC'],
+    'CNS/Brain': ['TCGA_GBM','TCGA_LGG'],
+    'Uterus': ['TCGA_UCEC','TCGA_UCS'],
+    'Head/Neck': ['TCGA_HNSC'],
+    'Testis': ['TCGA_TGCT'],
+    'Adrenal Gland': ['TCGA_ACC','TCGA_PCPG'],
+    'Pleura': ['TCGA_MESO'],
+    'Biliary Tract': ['TCGA_CHOL'],
+    'Thymus': ['TCGA_THYM'],
+    'Myeloid': ['TCGA_LAML'],
+    'Lymphoid': ['TCGA_DLBC']
+    
+}

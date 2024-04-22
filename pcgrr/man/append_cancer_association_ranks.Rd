@@ -7,18 +7,15 @@
 append_cancer_association_ranks(
   var_data_df = NULL,
   ref_data = NULL,
-  primary_site = "Any",
-  pos_var = "POS"
+  primary_site = "Any"
 )
 }
 \arguments{
 \item{var_data_df}{Data frame of sample variants from VCF}
 
-\item{ref_data}{PCGR reference data bundle object}
+\item{ref_data}{PCGR/CPSR reference data object}
 
 \item{primary_site}{Primary tumor site}
-
-\item{pos_var}{variable reflecting chromosome order (POS/SEGMENT_START)}
 }
 \value{
 vcf_data_df

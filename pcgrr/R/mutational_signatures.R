@@ -2,7 +2,7 @@
 #'
 #' @param variant_set Somatic callset (SNV)
 #' @param ref_data PCGR reference data object
-#' @param settings PCGR configuration settings object
+#' @param settings PCGR run/configuration settings
 #' @param n_bootstrap_iterations Number of bootstrap iterations for signature analysis
 #' @param sig_contribution_cutoff Minimal signature contribution for reporting
 #'
@@ -12,7 +12,7 @@ generate_report_data_signatures <-
            ref_data = NULL,
            settings = NULL,
            n_bootstrap_iterations = 200,
-           sig_contribution_cutoff = 0.001) {
+           sig_contribution_cutoff = 0.01) {
 
 
   sig_settings <- settings$conf$somatic_snv$mutational_signatures
@@ -124,8 +124,11 @@ generate_report_data_signatures <-
         }
       }
 
+      num_snvs_sig_analysis <- as.character(
+        formattable::comma(length(snv_grl[[1]]), digits = 0))
+
       pcgrr::log4r_info(paste0("Number of SNVs for signature analysis: ",
-                               length(snv_grl[[1]])))
+                               num_snvs_sig_analysis))
 
       pcg_report_signatures[["result"]][["indel_counts"]] <-
         indel_counts
@@ -157,11 +160,11 @@ generate_report_data_signatures <-
 
       # get reference signatures (COSMIC v3.4)
       all_reference_signatures <-
-        pcgrr::cosmic_sbs_signatures_all
+        pcgrr::cosmic_sbs_signatures[['all']]
 
       if(as.logical(sig_settings$include_artefact_signatures) == FALSE){
         all_reference_signatures <-
-          pcgrr::cosmic_sbs_signatures_no_artefacts
+          pcgrr::cosmic_sbs_signatures[['no_artefacts']]
       }
 
       # all_reference_signatures <-
@@ -190,9 +193,10 @@ generate_report_data_signatures <-
             values_to = "SIMILARITY",
             cols = dplyr::everything()) |>
             dplyr::arrange(
-              dplyr::desc(SIMILARITY)) |>
+              dplyr::desc(.data$SIMILARITY)) |>
             dplyr::mutate(
-              SIMILARITY = round(SIMILARITY, digits = 4)) |>
+              SIMILARITY = round(
+                .data$SIMILARITY, digits = 4)) |>
             dplyr::left_join(
               dplyr::select(
                 prevalent_site_signatures$aetiology,
@@ -240,7 +244,8 @@ generate_report_data_signatures <-
               reshape2::melt(fit_ref_bs[["contribution"]]),
               c("SIGNATURE_ID", "sample_id",
                 "contribution_raw"))) |>
-              dplyr::mutate(prop = contribution_raw / sum(contribution_raw)) |>
+              dplyr::mutate(
+                prop = .data$contribution_raw / sum(.data$contribution_raw)) |>
               dplyr::mutate(bootstrap_iteration = i)
             bootstrap_data[['contributions']] <- dplyr::bind_rows(
               bootstrap_data[['contributions']], b)
@@ -248,13 +253,19 @@ generate_report_data_signatures <-
             sim_original_reconstructed <-
               as.data.frame(
                 MutationalPatterns::cos_sim_matrix(
-                  mut_mat_bs, fit_ref_bs[["reconstructed"]])) |>
-              magrittr::set_colnames("cosine_sim") |>
-              magrittr::set_rownames(NULL) |>
+                  mut_mat_bs, fit_ref_bs[["reconstructed"]]))
+            colnames(sim_original_reconstructed) <- c("cosine_sim")
+            rownames(sim_original_reconstructed) <- NULL
+              #magrittr::set_colnames("cosine_sim") |>
+              #magrittr::set_rownames(NULL) |>
+            sim_original_reconstructed <-
+              sim_original_reconstructed |>
               dplyr::mutate(bootstrap_iteration = i,
                             sample_id = settings$sample_id)
-            bootstrap_data[['goodness_of_fit']] <- dplyr::bind_rows(
-              bootstrap_data[['goodness_of_fit']], sim_original_reconstructed)
+            bootstrap_data[['goodness_of_fit']] <-
+              dplyr::bind_rows(
+                bootstrap_data[['goodness_of_fit']],
+                sim_original_reconstructed)
             #i <- n_bootstrap_iterations + 1
           }
           i <- i + 1
@@ -264,8 +275,8 @@ generate_report_data_signatures <-
         sig_prop_data <- data.frame()
         for(sig in unique(bootstrap_data[['contributions']]$SIGNATURE_ID)){
           sdata <- bootstrap_data[['contributions']] |>
-            dplyr::filter(SIGNATURE_ID == sig)
-          ci_data <- t.test(sdata$prop, conf.level = 0.95)
+            dplyr::filter(.data$SIGNATURE_ID == sig)
+          ci_data <- stats::t.test(sdata$prop, conf.level = 0.95)
           prop_ci_lower <- ci_data$conf.int[1]
           prop_ci_upper <- ci_data$conf.int[2]
 
@@ -279,8 +290,9 @@ generate_report_data_signatures <-
 
         }
 
-        ci_data_gof <- t.test(bootstrap_data[['goodness_of_fit']]$cosine_sim,
-                              conf.level = 0.95)
+        ci_data_gof <- stats::t.test(
+          bootstrap_data[['goodness_of_fit']]$cosine_sim,
+          conf.level = 0.95)
         gof <- list()
         gof[['ci_lower']] <- ci_data_gof$conf.int[1]
         gof[['ci_upper']] <- ci_data_gof$conf.int[2]
@@ -314,7 +326,8 @@ generate_report_data_signatures <-
             comments = "COMMENTS") |>
           dplyr::mutate(
             contribution =
-              paste0(round(.data$prop_signature * 100, digits = 2), "%")) |>
+              paste0(
+                round(.data$prop_signature * 100, digits = 2), "%")) |>
           dplyr::distinct()
 
         contributions_per_group <- as.data.frame(
@@ -346,7 +359,7 @@ generate_report_data_signatures <-
 
         cols <- contributions_per_signature |>
           dplyr::arrange(dplyr::desc(.data$prop_signature)) |>
-          dplyr::select(.data$signature_id) |>
+          dplyr::select(c("signature_id")) |>
           dplyr::distinct() |>
           utils::head(25)
 
@@ -373,8 +386,21 @@ generate_report_data_signatures <-
           contributions_per_signature <- contributions_per_signature |>
             dplyr::filter(!is.na(.data$col))
 
-          contributions_per_group <- contributions_per_group |>
-            dplyr::anti_join(missing_signatures, by = "signature_id")
+          contributions_per_group <- as.data.frame(
+            contributions_per_group |>
+            tidyr::separate_rows(
+              .data$signature_id_group, sep = ", ") |>
+            dplyr::anti_join(missing_signatures,
+                             by = c("signature_id_group" = "signature_id")) |>
+            dplyr::group_by(
+              c("group","prop_group")
+            ) |>
+            dplyr::summarise(
+              signature_id_group = paste(
+                sort(.data$signature_id_group), collapse=", "),
+              .groups = "drop"
+            )
+          )
         }
 
 
@@ -399,14 +425,17 @@ generate_report_data_signatures <-
                 reference_collection = "COSMIC_v34",
                 reference_signatures = reference_sigs,
                 fitting_accuracy =
-                  round(gof$estimate * 100, digits = 1))
+                  round(gof$estimate * 100, digits = 1)) |>
+              dplyr::select(c("sample_id"), dplyr::everything())
           }
         }
 
         vr <- grl[[settings$sample_id]]
         GenomeInfoDb::seqlengths(vr) <-
-          GenomeInfoDb::seqlengths(ref_data$assembly$bsg)[GenomeInfoDb::seqlevels(ref_data$assembly$bsg) %in% unique(GenomeInfoDb::seqlevels(vr))]
-        chromosomes <- utils::head(GenomeInfoDb::seqnames(ref_data$assembly$bsg), 24)
+          GenomeInfoDb::seqlengths(
+            ref_data$assembly$bsg)[GenomeInfoDb::seqlevels(ref_data$assembly$bsg) %in% unique(GenomeInfoDb::seqlevels(vr))]
+        chromosomes <- utils::head(
+          GenomeInfoDb::seqnames(ref_data$assembly$bsg), 24)
 
         pcg_report_signatures[["result"]][["vr"]] <- vr
         pcg_report_signatures[["result"]][["chromosomes"]] <- chromosomes
@@ -478,7 +507,7 @@ get_prevalent_site_signatures <-
     }
     pcgrr::log4r_info(paste0(
       "Inclusion of mutational signature artefacts (e.g. sequencing artefacts): ",
-      incl_poss_artifacts))
+      as.logical(incl_poss_artifacts)))
 
     invisible(
       assertthat::assert_that(
@@ -674,7 +703,7 @@ generate_report_data_rainfall <- function(variant_set,
 
   sbs_types <- c("C>T", "A>G", "A>C", "A>T", "C>G", "C>A")
   if (is.null(colors)) {
-    colors <- head(pcgrr::color_palette$tier$values, 6)
+    colors <- utils::head(pcgrr::color_palette$tier$values, 6)
   }else{
     invisible(
       assertthat::assert_that(
@@ -703,11 +732,11 @@ generate_report_data_rainfall <- function(variant_set,
       "VARIANT_CLASS")) |>
     dplyr::filter(.data$VARIANT_CLASS == "SNV")
 
-  if (nrow(dat) < 10 | nrow(dat) > 10000 | length(chromosome_names) < 2) {
+  if (nrow(dat) < 10 | nrow(dat) > 30000 | length(chromosome_names) < 2) {
     pcgrr::log4r_info(
       paste0("Too few variants (< 10) and chromosomes ",
              " represented (< 2) OR too many variants ",
-             "( > 10,000) - skipping rainfall plot"))
+             "( > 30,000) - skipping rainfall plot"))
     pcg_report_rainfall[["eval"]] <- F
   }else{
     dat <- dat |>

@@ -20,7 +20,7 @@ load_dna_variants(
 
 \item{cols}{column type definitions of raw input file}
 
-\item{ref_data}{reference data object}
+\item{ref_data}{PCGR reference data object}
 
 \item{vartype}{type of DNA aberrations ('snv_indel','cna')}
 

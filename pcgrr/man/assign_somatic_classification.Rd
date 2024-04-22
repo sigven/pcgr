@@ -11,7 +11,7 @@ assign_somatic_classification(sample_calls, settings)
 \arguments{
 \item{sample_calls}{data frame with putative somatic variants}
 
-\item{settings}{PCGR configuration settings}
+\item{settings}{PCGR run/configuration settings}
 }
 \value{
 sample_calls

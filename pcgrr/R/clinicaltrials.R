@@ -52,8 +52,12 @@ generate_report_data_trials <- function(pcgr_data, config, sample_name) {
                     keyword = .data$clinical_context,
                     chrom_abnormalities = .data$chromosome_abnormality,
                     metastases_index = .data$metastases) |>
-      dplyr::rename(intervention = .data$intervention2) |>
-      magrittr::set_colnames(toupper(names(.))) |>
+      dplyr::rename(intervention = .data$intervention2)
+
+    colnames(pcg_report_trials[["trials"]]) <-
+      toupper(colnames(pcg_report_trials[["trials"]]))
+    pcg_report_trials[["trials"]] <- pcg_report_trials[["trials"]]
+      #magrittr::set_colnames(toupper(names(.))) |>
       dplyr::arrange(.data$N_PRIMARY_CANCER_SITES,
                      .data$OVERALL_STATUS,
                      dplyr::desc(.data$START_DATE),

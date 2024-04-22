@@ -7,7 +7,7 @@
 init_tmb_content(ref_data = NULL)
 }
 \arguments{
-\item{ref_data}{PCGR reference data list object}
+\item{ref_data}{PCGR reference data object}
 }
 \value{
 rep TMB report element

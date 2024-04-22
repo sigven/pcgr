@@ -16,7 +16,7 @@ append_targeted_drug_annotations(
 
 \item{primary_site}{primary site of tumor sample}
 
-\item{ref_data}{PCGR/CPSR reference data list object}
+\item{ref_data}{PCGR/CPSR reference data object}
 }
 \description{
 Function that adds link to targeted drugs (on and off-label)

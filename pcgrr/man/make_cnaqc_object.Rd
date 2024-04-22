@@ -11,7 +11,7 @@ make_cnaqc_object(callset_snv = NULL, callset_cna = NULL, settings = NULL)
 
 \item{callset_cna}{Somatic CNA callset list object - PCGR}
 
-\item{settings}{PCGR run configuration settings}
+\item{settings}{PCGR run/configuration settings}
 }
 \description{
 Function that prepares somatic copy number and mutation data for CNAqc plot

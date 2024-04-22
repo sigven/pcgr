@@ -7,6 +7,7 @@ import gzip
 from pcgr import annoutils, utils
 from pcgr.annoutils import assign_cds_exon_intron_annotations
 from pcgr import pcgr_vars
+from pcgr.utils import getlogger
 
 
 
@@ -25,8 +26,9 @@ def get_vep_command(file_paths, conf_options, input_vcf, output_vcf, debug = Fal
         'misc','fasta','ancestor',
         f'human_ancestor.fa.gz')
     
-    utils.check_file_exists(fasta_assembly, logger = None)
-    utils.check_file_exists(ancestor_assembly, logger = None)
+    logger = getlogger('check-fasta-files')
+    utils.check_file_exists(fasta_assembly, logger = logger)
+    utils.check_file_exists(ancestor_assembly, logger = logger)
 
     plugins_in_use = "NearestExonJB, LoF"
 

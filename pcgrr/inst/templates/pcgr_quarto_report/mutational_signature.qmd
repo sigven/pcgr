@@ -112,13 +112,32 @@ htmltools::br()
 #| output: asis
 #| eval: !expr missing_data_no_refit == FALSE
 
+num_sbs <- 
+  as.character(formattable::comma(
+      nrow(pcg_report[['content']][['mutational_signatures']][['variant_set']]$all),
+      digits = 0))
+
 cat('A total of <b>n = ',
-    nrow(pcg_report[['content']][['mutational_signatures']][['variant_set']]$all), 
+    num_sbs,
     '</b> SNVs were used for the mutational signature analysis of this tumor.', sep = '')
 
 cat("<br><br>")
 
 ```
+
+```{r signature_suboptimal_fit_warning}
+#| eval: !expr as.logical(msig_content$result$goodness_of_fit$estimate < 0.9) == TRUE
+#| output: asis
+
+cat("\n\n::: {.callout-important}\n\n## Suboptimal fit of mutational profile\n\n ",
+    "\nReconstruction of the input mutational profile with the selected COSMIC reference",
+    " signatures resulted in a sub-optimal fit (cosine similarity < 0.9)",
+    "\n\n:::\n\n", sep="")
+
+
+```
+
+<br>
 
 ```{r signature_contribution_plot}
 #| eval: !expr missing_data_no_refit == FALSE
@@ -196,19 +215,26 @@ t <- list(
     pad = 10
   )
 
+hole_size <- 0.4
+pie_line_width <- 3
+
+ 
 pie_aetiologies <- plotly::plot_ly(
   msig_content$result$contributions$per_group, 
   #margin = m,
   marker = list(
     colors = pcgrr::color_palette$tier$values,
-    line = list(color = '#FFFFFF', width = 3))) |>
+    line = list(
+      color = '#FFFFFF', width = pie_line_width))) |>
   plotly::add_pie(
     msig_content$result$contributions$per_group, 
     labels =~ factor(group),
     values = ~prop_group,
     textinfo = "percent",
-    type = 'pie') |>
-  plotly::layout(legend = list(orientation = "h", font = t)) 
+    type = 'pie',
+    hole = hole_size) |>
+  plotly::layout(
+    legend = list(orientation = "h", font = t)) 
 
 bslib::page_fillable(
   bslib::layout_columns(
@@ -234,12 +260,9 @@ bslib::page_fillable(
             "%"),
           showcase = NULL,
           theme = ifelse(
-            msig_content$result$goodness_of_fit$estimate > 0.9,
+            msig_content$result$goodness_of_fit$estimate >= 0.9,
             "dark",
             "danger"
-            # bslib::value_box_theme(
-            #   bg = pcgrr::color_palette$warning,
-            #   fg = "#fff")
           )
       )
     ),
@@ -316,169 +339,32 @@ bslib::card(
 
 As a background perspective, we here provide various views of the raw mutational spectrum for the sample, i.e. not considering a signature re-fitting analysis.
 
-::: panel-tabset
-#### SBS - mutational contexts
-
-```{r raw_context_plot}
+```{r tabset_mutational_spectra}
+#| eval: true
 #| output: asis
-#| eval: !expr is.null(msig_content$result$mut_mat) == FALSE
-
-catalogue_mat <- 
-  msig_content$result$mut_mat
-
-y_max <- 
-  plyr::round_any(
-    max(catalogue_mat[,1] / sum(catalogue_mat[,1])),
-    0.05, f = ceiling)
-
-# raw_context_plot <- sigminer::show_catalogue(
-#   catalogue_mat, 
-#   mode = "SBS", 
-#   normalize = "row", 
-#   x_lab = "", 
-#   palette = head(pcgrr::color_palette$tier$values, 6),  
-#   y_lab = "Relative contribution",
-#   rm_panel_border = T, 
-#   bar_width = 0.8, 
-#   x_label_angle = 45, 
-#   base_size = 18, 
-#   paint_axis_text = T)
-# 
-# raw_context_plot
-
-plotly::ggplotly(
-  height = 400,
-  MutationalPatterns::plot_96_profile(
-    catalogue_mat,
-    colors = head(pcgrr::color_palette$tier$values, 6),
-    ymax = y_max)
-)
-
-```
-
-#### SBS - type occurrences
-
-```{r sbs_type_occurrences}
-#| eval: !expr is.null(msig_content$result$type_occurrences) == FALSE & as.logical(rowSums(msig_content$result$type_occurrences[1:6]) > 0) == TRUE
-#| output: asis
-
-
-plotly::ggplotly(
-  height = 400,
-  MutationalPatterns::plot_spectrum(
-    msig_content$result$type_occurrences, 
-    CT = TRUE,
-    error_bars = 'none',
-    colors = head(
-      pcgrr::color_palette$tier$values, 7))
-)
-
-```
-
-```{r sbs_types_missing}
-#| eval: !expr is.null(msig_content$result$type_occurrences) == FALSE &as.logical(rowSums(msig_content$result$type_occurrences[1:6]) > 0) == FALSE 
-#| output: asis
-
-cat("\n::: {.callout-note}\n## No SNVs\n\nNo SNVs/single base substitutions", 
-    "were found in this sample\n\n:::\n\n")
-
-```
-
-#### ID - mutational contexts
-
-```{r indel_contexts}
-#| eval: !expr is.null(msig_content$result$indel_counts) == FALSE
-#| column: body-outset
-#| output: asis
-
-plotly::ggplotly(
-  height = 400,
-  width = 1000,
-  MutationalPatterns::plot_indel_contexts(
-    msig_content$result$indel_counts)
-)
-
+#| child: pcgr_quarto_report/mutational_signatures/mutational_spectra.qmd
 ```
 
 <br><br>
 
-```{r indel_contexts_missing}
-#| eval: !expr is.null(msig_content$result$indel_counts) == TRUE
-#| output: asis
-
-cat("\n::: {.callout-note}\n## No InDels\n\nNo insertion/deletions",
-"were found in this sample\n\n:::\n\n")
-
-```
-
-:::
-
-<br>
-
-#### Signature similarity
-
-Here, we perform a comparison of the sample's raw mutational spectrum to the COSMIC known signatures (SBS), for samples with at least 30 SNVs. The cosine similarity is calculated between mutational spectrum of the sample (i.e. frequency of three-mer contexts) and all of the COSMIC signatures. The cosine similarity (*SIMILARITY* column below) ranges from 0 to 1, where 1 indicates a perfect match.
-
-```{r highlight_signatures}
-#| echo: false
-#| eval: !expr as.logical(pcg_report$settings$conf$somatic_snv$mutational_signatures$all_reference_signatures) == FALSE
-#| output: asis
-
-cat('\n::: {.callout-note}\n## Site-specific signatures\n\n',
-    'Signatures that are previously attributed to ',
-    conf$sample_properties$site,
-    ' cancers (prevalence >= ', 
-    as.character(msig_conf$prevalence_reference_signatures),
-    '%) are highlighted.\n\n:::\n\n', sep='')
-```
-
-<br>
-
 ```{r signature_similarity}
 #| eval: !expr is.null(msig_content$result$signature_similarity) == FALSE
+#| child: pcgr_quarto_report/mutational_signatures/signature_similarity.qmd
+#| output: asis
+```
+
+```{r signature_similarity_missing}
+#| eval: !expr is.null(msig_content$result$signature_similarity) == TRUE
 #| output: asis
 
-similarity_table <- 
-  DT::datatable(
-    msig_content$result$signature_similarity,
-    extensions = "Responsive",
-    options = list(
-      pageLength = 13,
-      dom = 'tp'),
-    escape = F) |>
-  DT::formatStyle(
-    'SIMILARITY',
-    fontWeight = 'bold') |>
-  DT::formatStyle(
-    c('SIGNATURE_ID','AETIOLOGY_KEYWORD'),
-    'SITE_SPECIFIC',
-    fontWeight = 'bold',
-    color = "white",
-    backgroundColor = DT::styleEqual(
-      c('YES','NO'), 
-      c(report_color,
-        pcgrr::color_palette$none)
-    )
-  )
-
-#similarity_table$x$data$SITE_SPECIFIC <- NULL
-
-bslib::card(
-  height = "700px",
-  bslib::card_header(
-    class = "bg-dark",
-    paste0(
-      "Similarity of ",
-      pcg_report$settings$sample_id,
-      " to COSMIC signatures (SBS)")
-  ),
-  bslib::card_body(
-    similarity_table
-  )
-)
-
-
+cat("\n#### Signature similarity\n\n")
+htmltools::br()
+cat("\n::: {.callout-warning}\n## Limited variant data - ",
+    "similarity analysis omitted\n\nThere are too few",
+    " somatic variants <b>(N = ",
+    NROW(pcg_report$content$mutational_signatures$variant_set$all),
+    ")</b> in the tumor sample for a similarity",
+    " analysis of mutational signatures (a minimum 30 SNVs are required)\n\n:::\n\n", sep="")
 
 ```
 
-<br>

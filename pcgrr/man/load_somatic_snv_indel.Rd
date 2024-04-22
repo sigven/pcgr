@@ -8,11 +8,11 @@ file from PCGR pre-reporting pipeline}
 load_somatic_snv_indel(fname = NA, ref_data = NULL, settings = NULL)
 }
 \arguments{
-\item{fname}{Path to file name}
+\item{fname}{Path to file with pre-processed somatic SNV/InDel variants}
 
-\item{ref_data}{Object with reference data}
+\item{ref_data}{PCGR reference data object}
 
-\item{settings}{Object with PCGR report configuration}
+\item{settings}{PCGR run/configuration settings}
 }
 \description{
 Function that reads and validates an annotated somatic SNV/InDel

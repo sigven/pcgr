@@ -13,6 +13,46 @@
 #'
 "variant_db_url"
 
+
+#' Fixed data types/categories used for biomarker evidence, e.g. 'types','levels' etc.
+#'
+"biomarker_evidence"
+
+#' List of coltype definitions for input files to pcgrr (e.g. VCF-converted TSV, CNA TVS etc.)
+#'
+"data_coltype_defs"
+
+#' List of COSMIC reference mutational signatures (SBS, v3.4)
+#'
+#' @format A list with two matrix objects ('all' and 'no_artefacts').
+#' One matrix contains the COSMIC reference mutational signatures without signature
+#' artefacts ('no_artefacts', number of columns = 68), while the other contains
+#' all signatures, including artefacts ('all', number of columns = 86). Each
+#' matrix has 96 rows, one for each of the 96 possible trinucleotide contexts.
+#'
+"cosmic_sbs_signatures"
+
+#' Data frame with all TCGA cohorts
+#'
+#' @format A data.frame with 33 rows and 2 columns that indicates TCGA cohorts
+"tcga_cohorts"
+
+
+#' Data frame with immune cell types
+#'
+#' @format A data.frame with 11 rows and 2 columns that indicates immune
+#' cell types used in immune contexture analysis by quanTIseq
+#'
+#'
+"immune_celltypes"
+
+#' Data frame with germline filtering criteria
+#'
+#' @format A character vector listing all germline filtering criteria
+#' applied on input callsets (SNVs/InDels) in tumor-only mode
+#'
+"germline_filter_levels"
+
 #' List of URLs for a range of variant effect prediction algorithms
 #'
 #'

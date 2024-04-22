@@ -297,6 +297,12 @@ predict_msi_status <- function(variant_set,
                            msi_stats$predicted_class))
   pcgrr::log4r_info(paste0("MSI - Indel fraction: ",
                            round(msi_stats$fracNonRepeatIndels, digits = 3)))
+  msi_stats <- msi_stats |>
+    dplyr::rename(sample_id = sample_name) |>
+    dplyr::select(
+      c("sample_id", "predicted_class", "vb"),
+      dplyr::everything())
+
   msi_data <- list("mmr_pol_variants" = mmr_pol_df,
                    "msi_stats" = msi_stats,
                    "tcga_dataset" = msi_prediction_dataset)
@@ -309,7 +315,7 @@ predict_msi_status <- function(variant_set,
 #'
 #' @param variant_set variant calls subject to MSI classification
 #' @param ref_data PCGR reference data object
-#' @param settings PCGR run configuration settings
+#' @param settings PCGR run/configuration settings
 #'
 #' @export
 generate_report_data_msi <- function(
@@ -432,30 +438,32 @@ msi_indel_load_plot <- function(tcga_msi_dataset, indel_load) {
     ggplot2::scale_color_manual(values = color_vec) +
     ggplot2::theme_classic() +
     ggplot2::xlab("InDel load - somatic variants") +
-    ggplot2::theme(plot.title =
-                     ggplot2::element_text(family = "Helvetica",
-                                           size = 16,
-                                           hjust = 0.5, face = "bold"),
-                   axis.text.x =
-                     ggplot2::element_text(family = "Helvetica",
-                                           size = 14, face = "bold"),
-                   axis.title.x =
-                     ggplot2::element_text(family = "Helvetica",
-                                           size = 14),
-                   legend.title =
-                     ggplot2::element_blank(),
-                   legend.text =
-                     ggplot2::element_text(family = "Helvetica",
-                                           size = 14),
-                   axis.text.y =
-                     ggplot2::element_text(family = "Helvetica",
-                                           size = 14),
-                   axis.title.y =
-                     ggplot2::element_text(family = "Helvetica",
-                                           size = 14, vjust = 1.5),
-                   plot.margin = (grid::unit(c(0.5, 0.5, 0.5, 0.5), "cm"))) +
-    ggplot2::geom_vline(xintercept = as.numeric(indel_fraction),
-                        size = 1.1, linetype = "dotted")
+    ggplot2::theme(
+      plot.title =
+        ggplot2::element_text(family = "Helvetica",
+                              size = 16,
+                              hjust = 0.5, face = "bold"),
+      axis.text.x =
+        ggplot2::element_text(family = "Helvetica",
+                              size = 14, face = "bold"),
+      axis.title.x =
+        ggplot2::element_text(family = "Helvetica",
+                              size = 14),
+      legend.title =
+        ggplot2::element_blank(),
+      legend.text =
+        ggplot2::element_text(family = "Helvetica",
+                              size = 14),
+      axis.text.y =
+        ggplot2::element_text(family = "Helvetica",
+                              size = 14),
+      axis.title.y =
+        ggplot2::element_text(family = "Helvetica",
+                              size = 14, vjust = 1.5),
+      plot.margin = (grid::unit(c(0.5, 0.5, 0.5, 0.5), "cm"))) +
+    ggplot2::geom_vline(
+      xintercept = as.numeric(indel_load),
+      size = 1.1, linetype = "dotted")
 
   return(p)
 

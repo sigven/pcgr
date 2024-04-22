@@ -1,0 +1,113 @@
+### Similarity to other tumor samples
+
+Here we show how the gene expression profile of the input RNA sample correlates with samples harvested from other sources. The similarity is calculated using the Spearman's correlation (protein-coding genes only). The table below shows the correlation coefficient for each (external) sample, along with the corresponding diagnosis, tissue/site, sample type, age category etc.
+
+::: {.panel-tabset}
+
+```{r similarity_table_tcga}
+#| output: asis
+#| eval: !expr as.logical("tcga" %in% names(pcg_report[['content']]$expression[['similarity_analysis']])) == TRUE
+
+source_name <- 'The Cancer Genome Atlas (TCGA)'
+cat('\n\n#### ',source_name,'\n\n<br>')
+
+dt_similarity_tcga <- 
+  pcg_report[['content']]$expression[['similarity_analysis']][['tcga']] |>
+  dplyr::mutate(CORR = round(CORR, digits = 5)) |>
+  dplyr::select(-c("EXT_SAMPLE_ID2","PROTEIN_CODING_ONLY")) |>
+  dplyr::select(
+    EXT_SAMPLE_ID,
+    EXT_SAMPLE_NAME,
+    CORR,
+    EXT_PRIMARY_DIAGNOSIS,
+    EXT_PRIMARY_SITE,
+    EXT_SAMPLE_TYPE,
+    EXT_AGE_CATEGORY,
+    EXT_GENDER,
+    dplyr::everything()
+  )
+
+DT::datatable(
+  dt_similarity_tcga,
+  escape = F,
+  options = list(pageLength = 10),
+  extensions=c("Buttons","Responsive"))
+
+
+```
+
+
+```{r similarity_table_depmap}
+#| output: asis
+#| eval: !expr as.logical("depmap" %in% names(pcg_report[['content']]$expression[['similarity_analysis']])) == TRUE
+
+source_name <- 'Cancer Dependency Map - DepMap'
+cat('\n\n#### ',source_name,'\n\n<br>')
+
+dt_similarity_depmap <- 
+  pcg_report[['content']]$expression[['similarity_analysis']][['depmap']] |>
+  
+  dplyr::mutate(CORR = round(CORR, digits = 5)) |>
+  dplyr::select(-c("EXT_SAMPLE_ID2","PROTEIN_CODING_ONLY")) |>
+  dplyr::mutate(
+    EXT_SAMPLE_NAME = 
+      glue::glue(
+        "<a href='https://depmap.org/portal/cell_line/{EXT_SAMPLE_ID}?tab=overview' target='_blank'>{EXT_SAMPLE_NAME}</a>")
+  ) |>
+  dplyr::select(
+    EXT_SAMPLE_ID,
+    EXT_SAMPLE_NAME,
+    CORR,
+    EXT_PRIMARY_DIAGNOSIS,
+    EXT_PRIMARY_SITE,
+    EXT_SAMPLE_TYPE,
+    EXT_AGE_CATEGORY,
+    EXT_GENDER,
+    dplyr::everything()
+  )
+
+DT::datatable(
+  dt_similarity_depmap,
+  escape = F,
+  options = list(pageLength = 10),
+  extensions=c("Buttons","Responsive"))
+
+```
+
+```{r similarity_table_treehouse}
+#| output: asis
+#| eval: !expr as.logical("treehouse" %in% names(pcg_report[['content']]$expression[['similarity_analysis']])) == TRUE
+
+source_name <- 'Treehouse Childhood Cancer Data Initiative'
+cat('\n\n#### ',source_name,'\n\n<br>')
+
+dt_similarity_treehouse <- 
+  pcg_report[['content']]$expression[['similarity_analysis']][['treehouse']] |>
+  dplyr::mutate(CORR = round(CORR, digits = 5)) |>
+  dplyr::select(-c("EXT_SAMPLE_ID2","PROTEIN_CODING_ONLY")) |>
+  dplyr::select(
+    EXT_SAMPLE_ID,
+    EXT_SAMPLE_NAME,
+    CORR,
+    EXT_PRIMARY_DIAGNOSIS,
+    EXT_PRIMARY_SITE,
+    EXT_SAMPLE_TYPE,
+    EXT_AGE_CATEGORY,
+    EXT_GENDER,
+    dplyr::everything()
+  )
+
+DT::datatable(
+  dt_similarity_treehouse,
+  escape = F,
+  options = list(pageLength = 10),
+  extensions=c("Buttons","Responsive"))
+
+```
+
+:::
+
+<br><br>
+
+
+

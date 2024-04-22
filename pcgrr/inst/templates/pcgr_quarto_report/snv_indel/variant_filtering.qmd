@@ -1,0 +1,119 @@
+```{r variant_filtering_prep}
+#| eval: true
+#| output: asis
+
+to_settings <- pcg_report$settings$conf$somatic_snv$tumor_only
+
+if(NROW(pcg_report$content$snv_indel$callset$variant_unfiltered) > 0 &
+   "SOMATIC_CLASSIFICATION" %in% colnames(pcg_report$content$snv_indel$callset$variant_unfiltered)){
+ 
+  filtering_stats <- 
+    plyr::count(
+      pcg_report$content$snv_indel$callset$variant_unfiltered$SOMATIC_CLASSIFICATION
+    ) |>
+    dplyr::arrange(dplyr::desc(freq)) |>
+    dplyr::rename(FILTER = x, FREQUENCY = freq) |>
+    dplyr::mutate(FILTER = stringr::str_replace_all(FILTER, "\\|", ", ")) |>
+    dplyr::mutate(FILTER = dplyr::if_else(
+      !(FILTER %in% pcgrr::germline_filter_levels) & FILTER != "SOMATIC",
+      "MULTIPLE FILTERS",
+      FILTER
+    )) |>
+    dplyr::group_by(FILTER) |>
+    dplyr::reframe(FREQUENCY = sum(FREQUENCY)) |>
+    dplyr::arrange(dplyr::desc(FREQUENCY)) |>
+    dplyr::mutate(FILTER = factor(
+      FILTER, levels = pcgrr::germline_filter_levels)) |>
+    dplyr::mutate(PERCENT = scales::percent(
+      FREQUENCY / sum(FREQUENCY), accuracy = 0.1))
+}
+  
+```
+
+### Variant filtering
+
+In an effort to minimize the presence/impact of germline events from input variants (SNVs/InDels) called through a **tumor-only assay**, we here show the results of germline variant filters applied on the raw input set. The filters provide a classification of variants as somatic or likely germline (catched by various filters), the latter set not included for downstream analysis in this report.
+
+::: {.panel-tabset}
+
+#### Filtering results
+
+```{r variant_filtering_pie}
+#| eval: true
+#| output: asis
+
+t <- list(
+  family = "Helvetica",
+  size = 15)
+
+variant_filter_pie <- 
+  plotly::plot_ly(
+    filtering_stats, 
+    marker = list(
+      colors = pcgrr::color_palette$tier$values,
+      line = list(color = '#FFFFFF', width = 1)
+      )
+    ) |>
+  plotly::add_pie(
+    filtering_stats, 
+    labels =~ FILTER,
+    values = ~FREQUENCY,
+    textinfo = "PERCENT",
+    type = 'pie', hole = 0.5) |>
+  plotly::layout(
+    legend = list(orientation = "h", font = t))
+
+bslib::card(
+    full_screen = TRUE,
+    height = "400px",
+    bslib::card_header(
+      class = "bg-dark", 
+      paste0("Variant filtering statistics - ",
+             pcg_report$settings$sample_id)),
+    variant_filter_pie
+  )
+
+
+```
+
+#### Settings
+
+The variant filtering has been performed based on the following criteria:
+
+:::: {.columns}
+
+::: {.column width="47.5%"}
+
+* Variant filtering aginst gnomAD (filter *GERMLINE_GNOMAD*): __TRUE__ (not configurable)
+* maximum allowed population-specific gnomAD MAF's for somatic events (configurable):
+    * AFR: __`r to_settings$maf_gnomad_afr`__
+    * AMR: __`r to_settings$maf_gnomad_amr`__
+    * ASJ: __`r to_settings$maf_gnomad_asj`__
+    * EAS: __`r to_settings$maf_gnomad_eas`__
+    * FIN: __`r to_settings$maf_gnomad_fin`__
+    * NFE: __`r to_settings$maf_gnomad_nfe`__
+    * OTH: __`r to_settings$maf_gnomad_oth`__
+    * SAS: __`r to_settings$maf_gnomad_sas`__
+* maximum allowed global gnomAD MAF for somatic events: __`r to_settings$maf_gnomad_global`__
+
+:::
+
+::: {.column width="5%"}
+<!-- empty column to create gap -->
+:::
+
+::: {.column width="47.5%"}
+* Variant filtering against ClinVar (filter *GERMLINE_CLINVAR*): __`r as.logical(to_settings$exclude_clinvar_germline)`__
+* Variant filtering against dbSNP (filter *GERMLINE_DBSNP*): __`r as.logical(to_settings$exclude_dbsnp_nonsomatic)`__
+* Variant filtering based on tumor VAF value (likely heterozygous germline event, VAF in 0.4 - 0.6, filter *GERMLINE_HET*): __`r as.logical(to_settings$exclude_likely_het_germline)`__
+* Variant filtering based on tumor VAF value (likely homozygous germline event, VAF = 1, filter *GERMLINE_HOM*): __`r as.logical(to_settings$exclude_likely_hom_germline)`__
+* Variant filtering against panel-of-normals (filter *GERMLINE_PON*: __`r as.logical(to_settings$exclude_pon)`__
+* Variant filtering based on exonic regions: __`r as.logical(to_settings$exclude_nonexonic)`__
+
+:::
+
+::::
+
+:::
+
+<br><br>

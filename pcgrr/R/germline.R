@@ -259,7 +259,7 @@ het_af_germline_status <- function(sample_calls) {
 #' potentially limited by user-defined options
 #'
 #' @param sample_calls data frame with putative somatic variants
-#' @param settings PCGR configuration settings
+#' @param settings PCGR run/configuration settings
 #'
 #' @return sample_calls
 #'
@@ -339,12 +339,13 @@ assign_somatic_classification <- function(sample_calls, settings) {
           "GERMLINE_DBSNP",
           "")) |>
     tidyr::unite("SOMATIC_CLASSIFICATION",
-                 c("GERMLINE_GNOMAD",
-                   "GERMLINE_CLINVAR",
-                   "GERMLINE_PON",
+                 c("GERMLINE_CLINVAR",
+                   "GERMLINE_DBSNP",
+                   "GERMLINE_GNOMAD",
                    "GERMLINE_HET",
                    "GERMLINE_HOM",
-                   "GERMLINE_DBSNP"), sep="|",
+                   "GERMLINE_PON"),
+                 sep="|",
                  remove = TRUE) |>
     dplyr::mutate(
       SOMATIC_CLASSIFICATION = stringr::str_replace_all(
@@ -381,7 +382,7 @@ assign_somatic_classification <- function(sample_calls, settings) {
 #' evidence for somatic/germline status of variants
 #'
 #' @param sample_calls data frame with variants
-#' @param settings PCGR configuration settings
+#' @param settings PCGR run/configuration settings
 #'
 #' @return sample_calls
 #'

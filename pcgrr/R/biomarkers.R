@@ -1062,7 +1062,7 @@ expand_biomarker_items <- function(
 
     ## check col existence callset[['variant]], variant_properties
 
-    for (type in c(pcgrr::evidence_types,
+    for (type in c(pcgrr::biomarker_evidence[['types']],
                    "all")) {
       for (elevel in c("any", "A_B", "C_D_E")) {
         if (NROW(callset[['biomarker_evidence']][[type]][[elevel]]) > 0) {
@@ -1137,11 +1137,14 @@ get_dt_tables <- function(
   }
   var_eitems <-
     report$content[[variant_class]]$callset$variant_display |>
-    dplyr::filter(!is.na(.data$TIER) & .data$TIER == tier) |>
-    dplyr::select(-c("TIER_DESCRIPTION","TIER_FRAMEWORK")) |>
+    dplyr::filter(
+      !is.na(.data$ACTIONABILITY_TIER) &
+        .data$ACTIONABILITY_TIER == tier) |>
+    dplyr::select(-c("ACTIONABILITY_FRAMEWORK")) |>
     dplyr::inner_join(
       report$content[[variant_class]]$callset$biomarker_evidence$items,
-      by = c("VAR_ID","TIER","VARIANT_CLASS","ENTREZGENE")
+      by = c("VAR_ID","ACTIONABILITY_TIER",
+             "VARIANT_CLASS","ENTREZGENE")
     ) |>
     dplyr::distinct()
 
@@ -1212,34 +1215,31 @@ get_dt_tables <- function(
         "BM_PRIMARY_SITE")
     ) |>
     dplyr::distinct() |>
+    dplyr::mutate(BM_PRIMARY_SITE = dplyr::if_else(
+      .data$BM_PRIMARY_SITE == "Any",
+      "Any tumor type",
+      .data$BM_PRIMARY_SITE
+    )) |>
+
     dplyr::group_by(
       .data$VAR_ID,
       .data$VARIANT_CLASS,
       .data$ENTREZGENE,
       .data$BM_EVIDENCE_TYPE,
-      .data$BM_PRIMARY_SITE
+      .data$BM_CLINICAL_SIGNIFICANCE
     ) |>
     dplyr::summarise(
-      BM_CLINICAL_SIGNIFICANCE = paste(
-        sort(.data$BM_CLINICAL_SIGNIFICANCE),
+      BM_PRIMARY_SITE = paste(
+        sort(.data$BM_PRIMARY_SITE),
         collapse = ", "),
       .groups = "drop") |>
-    dplyr::mutate(BM_ASSOC = dplyr::case_when(
-      .data$BM_EVIDENCE_TYPE == "Predictive" ~
-        paste0(
-          " - ",
-          .data$BM_PRIMARY_SITE, ": ",
-          .data$BM_EVIDENCE_TYPE, " | ",
-          .data$BM_CLINICAL_SIGNIFICANCE),
-      .data$BM_EVIDENCE_TYPE == "Prognostic" |
-        .data$BM_EVIDENCE_TYPE == "Diagnostic" ~
-        paste0(
-          " - ",
-          .data$BM_PRIMARY_SITE, ": ",
-          .data$BM_EVIDENCE_TYPE, " | ",
-          .data$BM_CLINICAL_SIGNIFICANCE),
-      TRUE ~ as.character(NA)
-    )) |>
+    dplyr::mutate(BM_ASSOC = paste0(
+      " - ",
+      .data$BM_PRIMARY_SITE, ": ",
+      .data$BM_EVIDENCE_TYPE, " | ",
+      .data$BM_CLINICAL_SIGNIFICANCE)
+      ) |>
+
     dplyr::group_by(
       .data$VAR_ID,
       .data$VARIANT_CLASS,

@@ -123,7 +123,8 @@ af_distribution <- function(var_df, bin_size = 0.05) {
       af_bin_df$Count[af_bin_df$VARIANT_CLASS == vclass])
     if(sum_count == 0){
       af_dist_final <- af_dist_final |>
-        dplyr::filter(VARIANT_CLASS != vclass)
+        dplyr::filter(
+          .data$VARIANT_CLASS != vclass)
     }
   }
 
@@ -145,12 +146,12 @@ tier_af_distribution <- function(tier_df, bin_size = 0.05) {
 
   af_bin_df <- data.frame()
   assertable::assert_colnames(
-    tier_df, c("VAF_TUMOR","TIER"),
+    tier_df, c("VAF_TUMOR","ACTIONABILITY_TIER"),
     only_colnames = F, quiet = T)
   tier_df <- tier_df |>
-    dplyr::select(c("VAF_TUMOR", "TIER")) |>
+    dplyr::select(c("VAF_TUMOR", "ACTIONABILITY_TIER")) |>
     dplyr::mutate(
-      TIER = paste0("TIER ", .data$TIER))
+      TIER = paste0("TIER ", .data$ACTIONABILITY_TIER))
 
   if(NROW(tier_df) > 500){
     bin_size = 0.025
@@ -466,7 +467,7 @@ variant_stats_report <- function(
     }
   }
 
-  if("TIER" %in% colnames(callset$variant)){
+  if("ACTIONABILITY_TIER" %in% colnames(callset$variant)){
 
     for (n in c("n_actionable_tier1",
                 "n_actionable_tier2",
@@ -482,51 +483,54 @@ variant_stats_report <- function(
     ## for SNVs/InDels
 
     if("biomarker_evidence" %in% names(callset)){
-      biomarkers_for_stats <-
-        dplyr::select(
-          callset$biomarker_evidence$items,
-          c("TIER", "BM_RESOLUTION",
-            "VAR_ID","ENTREZGENE")) |>
-        dplyr::filter(!is.na(.data$TIER)) |>
-        dplyr::distinct()
+      biomarkers_for_stats <- data.frame()
+      if(NROW(callset$biomarker_evidence$items) > 0){
+        biomarkers_for_stats <-
+          dplyr::select(
+            callset$biomarker_evidence$items,
+            c("ACTIONABILITY_TIER", "BM_RESOLUTION",
+              "VAR_ID","ENTREZGENE")) |>
+          dplyr::filter(!is.na(.data$ACTIONABILITY_TIER)) |>
+          dplyr::distinct()
 
-      if(NROW(biomarkers_for_stats) > 0){
-        if(vartype == "snv_indel"){
-          biomarkers_for_stats <-
-            biomarkers_for_stats |>
-            dplyr::filter(
-              !is.na(.data$TIER) &
-                .data$BM_RESOLUTION != "gene") |>
-            dplyr::select(c("VAR_ID","TIER","ENTREZGENE")) |>
-            dplyr::distinct()
-        }
         if(NROW(biomarkers_for_stats) > 0){
-          for(i in 1:2){
-            call_stats[[name]][[paste0("n_actionable_tier",i)]] <-
-              callset$variant |>
+          if(vartype == "snv_indel"){
+            biomarkers_for_stats <-
+              biomarkers_for_stats |>
               dplyr::filter(
-                !is.na(.data$TIER) &
-                  .data$TIER == i) |>
-              dplyr::inner_join(
-                biomarkers_for_stats,
-                by = c("TIER","VAR_ID","ENTREZGENE")) |>
-              NROW()
+                !is.na(.data$ACTIONABILITY_TIER) &
+                  .data$BM_RESOLUTION != "gene") |>
+              dplyr::select(c("VAR_ID","ACTIONABILITY_TIER","ENTREZGENE")) |>
+              dplyr::distinct()
+          }
+          if(NROW(biomarkers_for_stats) > 0){
+            for(i in 1:2){
+              call_stats[[name]][[paste0("n_actionable_tier",i)]] <-
+                callset$variant |>
+                dplyr::filter(
+                  !is.na(.data$ACTIONABILITY_TIER) &
+                    .data$ACTIONABILITY_TIER == i) |>
+                dplyr::inner_join(
+                  biomarkers_for_stats,
+                  by = c("ACTIONABILITY_TIER","VAR_ID","ENTREZGENE")) |>
+                NROW()
+            }
           }
         }
       }
       call_stats[[name]][["n_actionable_tier3"]] <-
         callset$variant |>
         dplyr::filter(
-          !is.na(.data$TIER) &
-            .data$TIER == 3) |>
+          !is.na(.data$ACTIONABILITY_TIER) &
+            .data$ACTIONABILITY_TIER == 3) |>
         NROW()
 
       for(i in 4:5){
         call_stats[[name]][[paste0("n_tier",i)]] <-
           callset$variant |>
           dplyr::filter(
-            !is.na(.data$TIER) &
-              .data$TIER == i) |>
+            !is.na(.data$ACTIONABILITY_TIER) &
+              .data$ACTIONABILITY_TIER == i) |>
           NROW()
       }
       if (vartype == "cna"){
@@ -539,8 +543,8 @@ variant_stats_report <- function(
           call_stats[[name]][["n_actionable_tier3_tsg"]] <-
             callset$variant |>
             dplyr::filter(
-              !is.na(.data$TIER) &
-                .data$TIER == 3) |>
+              !is.na(.data$ACTIONABILITY_TIER) &
+                .data$ACTIONABILITY_TIER == 3) |>
             dplyr::filter(
               .data$TUMOR_SUPPRESSOR == TRUE &
                 .data$ONCOGENE == FALSE) |>
@@ -549,8 +553,8 @@ variant_stats_report <- function(
           call_stats[[name]][["n_actionable_tier3_oncogene"]] <-
             callset$variant |>
             dplyr::filter(
-              !is.na(.data$TIER) &
-                .data$TIER == 3) |>
+              !is.na(.data$ACTIONABILITY_TIER) &
+                .data$ACTIONABILITY_TIER == 3) |>
             dplyr::filter(
               .data$TUMOR_SUPPRESSOR == FALSE &
                 .data$ONCOGENE == TRUE) |>
@@ -559,8 +563,8 @@ variant_stats_report <- function(
           call_stats[[name]][["n_actionable_tier3_dualrole"]] <-
             callset$variant |>
             dplyr::filter(
-              !is.na(.data$TIER) &
-                .data$TIER == 3) |>
+              !is.na(.data$ACTIONABILITY_TIER) &
+                .data$ACTIONABILITY_TIER == 3) |>
             dplyr::filter(
               .data$TUMOR_SUPPRESSOR == TRUE &
                 .data$ONCOGENE == TRUE) |>
@@ -587,7 +591,7 @@ variant_stats_report <- function(
 
       if(NROW(callset$biomarker_evidence$items) > 0){
         if("BM_EVIDENCE_TYPE" %in% colnames(callset$biomarker_evidence$items) &
-           "TIER" %in% colnames(callset$biomarker_evidence$items) &
+           "ACTIONABILITY_TIER" %in% colnames(callset$biomarker_evidence$items) &
            "ENTREZGENE" %in% colnames(callset$biomarker_evidence$items) &
            "BM_RESOLUTION" %in% colnames(callset$biomarker_evidence$items)){
 
@@ -600,16 +604,16 @@ variant_stats_report <- function(
                   callset$biomarker_evidence$items |>
                   dplyr::filter(
                     .data$BM_RESOLUTION != "gene" &
-                      !is.na(.data$TIER) &
-                      .data$TIER == tier &
+                      !is.na(.data$ACTIONABILITY_TIER) &
+                      .data$ACTIONABILITY_TIER == tier &
                       .data$BM_EVIDENCE_TYPE == etype) |>
                   NROW()
               }else{
                 call_stats[[name]][[stat]] <-
                   callset$biomarker_evidence$items |>
                   dplyr::filter(
-                      !is.na(.data$TIER) &
-                      .data$TIER == tier &
+                    !is.na(.data$ACTIONABILITY_TIER) &
+                      .data$ACTIONABILITY_TIER == tier &
                       .data$BM_EVIDENCE_TYPE == etype) |>
                   NROW()
               }
@@ -620,7 +624,7 @@ variant_stats_report <- function(
                 callset$biomarker_evidence$items |>
                 dplyr::filter(
                   .data$BM_RESOLUTION != "gene" &
-                    .data$TIER == tier) |>
+                    .data$ACTIONABILITY_TIER == tier) |>
                 dplyr::select(.data$ENTREZGENE) |>
                 dplyr::distinct() |>
                 NROW()
@@ -628,7 +632,7 @@ variant_stats_report <- function(
               call_stats[[name]][[stat]] <-
                 callset$biomarker_evidence$items |>
                 dplyr::filter(
-                    .data$TIER == tier) |>
+                  .data$ACTIONABILITY_TIER == tier) |>
                 dplyr::select(.data$ENTREZGENE) |>
                 dplyr::distinct() |>
                 NROW()
@@ -640,7 +644,7 @@ variant_stats_report <- function(
   }
 
   if(vartype == 'cna' &
-     "TIER" %in% colnames(callset$variant) &
+     "ACTIONABILITY_TIER" %in% colnames(callset$variant) &
      "VAR_ID" %in% colnames(callset$variant) &
      "VARIANT_CLASS" %in% colnames(callset$variant)){
     for (n in c("n_tsg_loss",
@@ -651,15 +655,15 @@ variant_stats_report <- function(
     call_stats[[name]][["n_tsg_loss"]] <-
       callset$variant |>
       dplyr::filter(
-        !is.na(.data$TIER) &
-          .data$TIER == 3 &
+        !is.na(.data$ACTIONABILITY_TIER) &
+          .data$ACTIONABILITY_TIER == 3 &
           .data$VARIANT_CLASS == "homdel") |>
       nrow()
     call_stats[[name]][["n_oncogene_gain"]] <-
       callset$variant |>
       dplyr::filter(
-        !is.na(.data$TIER) &
-          .data$TIER == 3 &
+        !is.na(.data$ACTIONABILITY_TIER) &
+          .data$ACTIONABILITY_TIER == 3 &
           .data$VARIANT_CLASS == "gain") |>
       NROW()
 
@@ -667,7 +671,7 @@ variant_stats_report <- function(
       call_stats[[name]][["n_other_drugtarget_gain"]] <-
         callset$variant |>
         dplyr::filter(
-          is.na(.data$TIER) &
+          is.na(.data$ACTIONABILITY_TIER) &
             .data$VARIANT_CLASS == "gain" &
             !is.na(.data$TARGETED_INHIBITORS_ALL2)) |>
         NROW()
@@ -677,8 +681,8 @@ variant_stats_report <- function(
     call_stats[[name]][["n_genes_tier3"]] <-
       callset$variant |>
       dplyr::filter(
-        is.na(.data$TIER) &
-          .data$TIER == 3) |>
+        is.na(.data$ACTIONABILITY_TIER) &
+          .data$ACTIONABILITY_TIER == 3) |>
       NROW()
 
     call_stats[[name]][["n_segments_gain"]] <-

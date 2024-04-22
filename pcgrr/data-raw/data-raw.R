@@ -4,6 +4,9 @@ for (c in c("pathogenicity",
             "oncogenicity",
             "clinical_evidence",
             "cancer_assoc",
+            "gene_expression",
+            "exp_increase",
+            "exp_decrease",
             "cna_variant_class",
             "tier",
             "report_color",
@@ -37,6 +40,17 @@ for (c in c("pathogenicity",
         "#08306b")
   }
 
+  if (c == "gene_expression") {
+    #rep[["config"]][["disease"]] <- list()
+    color_palette[[c]][["breaks"]] <-
+      c(0.5, 10, 1000)
+    color_palette[[c]][["values"]] <-
+      c("#b8b8ba",
+        "#e8c4e3",
+        "#c37dbd",
+        "#9b3297")
+  }
+
   if (c == "pathogenicity") {
     color_palette[[c]][["levels"]] <-
       c("Pathogenic", "Likely_Pathogenic",
@@ -45,6 +59,7 @@ for (c in c("pathogenicity",
       c("#9E0142", "#D53E4F", "#2c313c",
         "#78C679", "#077009")
   }
+
   if (c == "oncogenicity") {
     color_palette[[c]][["levels"]] <-
       c("Oncogenic", "Likely_Oncogenic",
@@ -91,7 +106,8 @@ for (c in c("pathogenicity",
     color_palette[[c]][["levels"]] <- c("tumor_control", "tumor_only")
     #color_palette[[c]][["values"]] <- c("#2780e3", "#593196")
     #color_palette[[c]][["values"]] <- c("#0073C2", "#593196")
-    color_palette[[c]][["values"]] <- c("#0073C2", "#9B3297")
+    color_palette[[c]][["values"]] <- c("#9B3297", "#0073C2")
+
 
 
   }
@@ -111,19 +127,33 @@ for (c in c("pathogenicity",
   if (c == "success") {
     color_palette[[c]] <- "#00a65a"
   }
+  if (c == 'exp_increase'){
+    color_palette[[c]][["breaks"]] <- c(92, 94, 96, 98)
+    color_palette[[c]][["values"]] <-
+      c("#caead2","#a4d9b3","#7dc995","#52b777","#00a65a")
+  }
+
+  if (c == 'exp_decrease'){
+    color_palette[[c]][["breaks"]] <- c(2, 4, 6, 8)
+    color_palette[[c]][["values"]] <-
+      c("#CD534C","#dd766b","#ea978c","#f6b7ae","#ffd8d2")
+  }
 
 }
 
 usethis::use_data(color_palette, overwrite = T)
 
+biomarker_evidence <- list()
 #-----evidence types---------#
-evidence_types <- c("predictive","prognostic","diagnostic",
-                    "oncogenic","predisposing","functional")
-usethis::use_data(evidence_types, overwrite = T)
+biomarker_evidence[['types']] <-
+  c("predictive","prognostic","diagnostic",
+    "oncogenic","predisposing","functional")
+usethis::use_data(
+  biomarker_evidence, overwrite = T)
 
 #-----evidence levels---------#
-evidence_levels <- c("any","A_B","C_D_E")
-usethis::use_data(evidence_levels, overwrite = T)
+#evidence_levels <- c("any","A_B","C_D_E")
+#usethis::use_data(evidence_levels, overwrite = T)
 
 
 #-----input column names/types-----#
@@ -157,9 +187,9 @@ data_coltype_defs[['cna_somatic_raw']] <- readr::cols_only(
   ONCOGENE_RANK	= readr::col_logical(),
   SEGMENT_LENGTH_MB = readr::col_number(),
   BIOMARKER_MATCH = readr::col_character(),
-  SAMPLE_ID = readr::col_character(),
-  TPM = readr::col_number(),
-  TPM_GENE = readr::col_number())
+  SAMPLE_ID = readr::col_character())
+  #TPM = readr::col_number(),
+  #TPM_GENE = readr::col_number())
 
 data_coltype_defs[['snv_indel_somatic_raw']] <- readr::cols_only(
   CHROM = readr::col_character(),
@@ -224,8 +254,9 @@ data_coltype_defs[['snv_indel_somatic_raw']] <- readr::cols_only(
   CGC_SOMATIC = readr::col_logical(),
   CGC_GERMLINE = readr::col_logical(),
   CGC_TIER = readr::col_character(),
-  TPM = readr::col_number(),
-  TPM_GENE = readr::col_number(),
+  #TPM = readr::col_number(),
+  #TPM_GENE = readr::col_number(),
+  #consTPM = readr::col_number(),
   CLINVAR_TRAITS_ALL = readr::col_character(),
   CLINVAR_MSID = readr::col_character(),
   CLINVAR_CLNSIG = readr::col_character(),
@@ -416,16 +447,41 @@ data_coltype_defs[['snv_indel_germline_raw']] <- readr::cols_only(
 usethis::use_data(data_coltype_defs, overwrite = T)
 
 tsv_cols <- list()
-tsv_cols[['snv_indel']] <-
-  c('GENOMIC_CHANGE',
+tsv_cols[['cna']] <-
+  c('SAMPLE_ID',
     'VAR_ID',
     'GENOME_VERSION',
-    'TIER',
-    'TIER_DESCRIPTION',
-    'TIER_FRAMEWORK',
-    'SAMPLE_ID',
+    'CN_MAJOR',
+    'CN_MINOR',
+    'SEGMENT_LENGTH_MB',
+    'CYTOBAND',
+    'EVENT_TYPE',
     'VARIANT_CLASS',
     'SYMBOL',
+    'ENTREZGENE',
+    'GENENAME',
+    'ENSEMBL_GENE_ID',
+    'GENENAME',
+    'TUMOR_SUPPRESSOR',
+    'TUMOR_SUPPRESSOR_SUPPORT',
+    'ONCOGENE',
+    'ONCOGENE_SUPPORT',
+    'TRANSCRIPT_OVERLAP',
+    'ACTIONABILITY_TIER',
+    'ACTIONABILITY',
+    'ACTIONABILITY_FRAMEWORK',
+    'BIOMARKER_MATCH',
+    'TARGETED_INHIBITORS_ALL2')
+
+
+tsv_cols[['snv_indel']] <-
+  c('SAMPLE_ID',
+    'GENOMIC_CHANGE',
+    'GENOME_VERSION',
+    'VARIANT_CLASS',
+    'SYMBOL',
+    'ENTREZGENE',
+    'ENSEMBL_GENE_ID',
     'GENENAME',
     'PROTEIN_CHANGE',
     'CONSEQUENCE',
@@ -434,14 +490,20 @@ tsv_cols[['snv_indel']] <-
     'CDS_CHANGE',
     'CODING_STATUS',
     'EXONIC_STATUS',
+    'DP_TUMOR',
+    'VAF_TUMOR',
+    'DP_CONTROL',
+    'VAF_CONTROL',
     'MUTATION_HOTSPOT',
     'MUTATION_HOTSPOT_CANCERTYPE',
+    'ACTIONABILITY_TIER',
+    'ACTIONABILITY',
+    'ACTIONABILITY_FRAMEWORK',
     'ONCOGENICITY',
     'ONCOGENICITY_CODE',
     'ONCOGENICITY_SCORE',
     'HGVSc',
     'HGVSp',
-    'ENTREZGENE',
     'CANONICAL',
     'CCDS',
     'UNIPROT_ACC',
@@ -474,11 +536,8 @@ tsv_cols[['snv_indel']] <-
     'CLINVAR_REVIEW_STATUS_STARS',
     'CLINVAR_CONFLICTED',
     'BIOMARKER_MATCH',
-    'CALL_CONFIDENCE',
-    'DP_TUMOR',
-    'VAF_TUMOR',
-    'DP_CONTROL',
-    'VAF_CONTROL')
+    'CALL_CONFIDENCE'
+    )
 
 usethis::use_data(tsv_cols, overwrite = T)
 
@@ -511,11 +570,11 @@ dt_display[['cna_eitem']] <-
     "BM_CANCER_TYPE",
     "BM_EVIDENCE_LEVEL",
     "BM_CONTEXT",
-    "BM_EVIDENCE_TYPE",
+    "BM_MOLECULAR_PROFILE",
     "BM_REFERENCE",
+    "BM_EVIDENCE_TYPE",
     "BM_CLINICAL_SIGNIFICANCE",
     "BM_THERAPEUTIC_CONTEXT",
-    "BM_MOLECULAR_PROFILE_NAME",
     "BM_SOURCE_DB",
     "BM_RATING",
     "BM_EVIDENCE_ID",
@@ -547,6 +606,29 @@ dt_display[['cna_other_oncogenic']] <-
     "TARGETED_INHIBITORS_ALL",
     "GENOME_VERSION")
 
+dt_display[['snv_indel_germline_filtered']] <-
+  c('GENOMIC_CHANGE',
+    'VARIANT_CLASS',
+    'EXCLUSION_CRITERIA',
+    'SYMBOL',
+    'CONSEQUENCE',
+    'gnomADe_AF',
+    'DBSNP_RSID',
+    'COSMIC_ID',
+    'TCGA_FREQUENCY',
+    'VAF_TUMOR',
+    'DP_TUMOR',
+    'VAF_CONTROL',
+    'DP_CONTROL',
+    'gnomADe_AFR_AF',
+    'gnomADe_AMR_AF',
+    'gnomADe_ASJ_AF',
+    'gnomADe_EAS_AF',
+    'gnomADe_FIN_AF',
+    'gnomADe_NFE_AF',
+    'gnomADe_OTH_AF',
+    'gnomADe_SAS_AF')
+
 dt_display[['snv_indel_gene_actionable']] <-
   c('MOLECULAR_ALTERATION',
     'GENENAME',
@@ -564,6 +646,7 @@ dt_display[['snv_indel_gene_actionable']] <-
     'HGVSc',
     'HGVSp',
     'PREDICTED_EFFECT',
+    'LOSS_OF_FUNCTION',
     'ONCOGENICITY',
     'ONCOGENICITY_CODE',
     'ONCOGENICITY_SCORE',
@@ -571,6 +654,7 @@ dt_display[['snv_indel_gene_actionable']] <-
     'DBSNP_RSID',
     'COSMIC_ID',
     'CLINVAR',
+    'ENSEMBL_GENE_ID',
     'ENSEMBL_TRANSCRIPT_ID',
     'REFSEQ_TRANSCRIPT_ID',
     'CANCERGENE_EVIDENCE',
@@ -588,14 +672,14 @@ dt_display[['snv_indel_eitem']] <-
     'BM_CANCER_TYPE',
     'BM_EVIDENCE_LEVEL',
     'BM_CONTEXT',
+    'BM_MOLECULAR_PROFILE',
+    'BM_REFERENCE',
+    'BM_EVIDENCE_DESCRIPTION',
     'BM_CLINICAL_SIGNIFICANCE',
     'BM_EVIDENCE_TYPE',
     'BM_THERAPEUTIC_CONTEXT',
-    'BM_REFERENCE',
-    'BM_MOLECULAR_PROFILE_NAME',
     'BM_RATING',
     'BM_EVIDENCE_DIRECTION',
-    'BM_DESCRIPTION',
     'BM_SOURCE_DB',
     'BM_EVIDENCE_ID',
     'BM_DISEASE_ONTOLOGY_ID',
@@ -659,6 +743,7 @@ dt_display[['tier4']] <-
     'ONCOGENICITY_SCORE',
     'VEP_ALL_CSQ',
     'DBSNP_RSID',
+    'ENSEMBL_GENE_ID',
     'ENSEMBL_TRANSCRIPT_ID',
     'ENSEMBL_PROTEIN_ID',
     'REFSEQ_TRANSCRIPT_ID',
@@ -677,30 +762,30 @@ dt_display[['tier4']] <-
     'GENOMIC_CHANGE',
     'GENOME_VERSION')
 
-dt_display[['tier5']] <-
-  c('SYMBOL',
-    'GENENAME',
-    'CONSEQUENCE',
-    'COSMIC_ID',
-    'TCGA_FREQUENCY',
-    'DBSNP_RSID',
-    'CLINVAR',
-    'ENSEMBL_TRANSCRIPT_ID',
-    'REFSEQ_TRANSCRIPT_ID',
-    'CANCERGENE_EVIDENCE',
-    'CANCER_GENE_CENSUS',
-    'GLOBAL_ASSOC_RANK',
-    'TISSUE_ASSOC_RANK',
-    'REGULATORY_ANNOTATION',
-    'VEP_ALL_CSQ',
-    'CALL_CONFIDENCE',
-    'DP_TUMOR',
-    'VAF_TUMOR',
-    'DP_CONTROL',
-    'VAF_CONTROL',
-    'GENOMIC_CHANGE',
-    'GENOME_VERSION')
-
+# dt_display[['tier5']] <-
+#   c('SYMBOL',
+#     'GENENAME',
+#     'CONSEQUENCE',
+#     'COSMIC_ID',
+#     'TCGA_FREQUENCY',
+#     'DBSNP_RSID',
+#     'CLINVAR',
+#     'ENSEMBL_TRANSCRIPT_ID',
+#     'REFSEQ_TRANSCRIPT_ID',
+#     'CANCERGENE_EVIDENCE',
+#     'CANCER_GENE_CENSUS',
+#     'GLOBAL_ASSOC_RANK',
+#     'TISSUE_ASSOC_RANK',
+#     'REGULATORY_ANNOTATION',
+#     'VEP_ALL_CSQ',
+#     'CALL_CONFIDENCE',
+#     'DP_TUMOR',
+#     'VAF_TUMOR',
+#     'DP_CONTROL',
+#     'VAF_CONTROL',
+#     'GENOMIC_CHANGE',
+#     'GENOME_VERSION')
+#
 
 
 
@@ -814,7 +899,7 @@ tcga_cohorts <- as.data.frame(
 
 usethis::use_data(tcga_cohorts, overwrite = T)
 
-#---- COSMIC reference signatures (SBS v3.4) ----#
+####---- COSMIC signatures (SBS v3.4) ----####
 cosmic_signatures <-
   utils::read.table(file = "data-raw/COSMIC_v3.4_SBS_GRCh38.txt",
              header = T, sep = "\t", quote = "", stringsAsFactors = F)
@@ -866,18 +951,59 @@ for(sig in artefact_signatures){
 cosmic_sbs_signatures_all <- as.matrix(cosmic_signatures)
 cosmic_sbs_signatures_no_artefacts <- as.matrix(cosmic_sbs_signatures_no_artefacts)
 
-usethis::use_data(cosmic_sbs_signatures_all, overwrite = T)
-usethis::use_data(cosmic_sbs_signatures_no_artefacts, overwrite = T)
+cosmic_sbs_signatures <- list()
+cosmic_sbs_signatures[['all']] <- cosmic_sbs_signatures_all
+cosmic_sbs_signatures[['no_artefacts']] <-
+  cosmic_sbs_signatures_no_artefacts
+usethis::use_data(cosmic_sbs_signatures, overwrite = T)
+
+#usethis::use_data(cosmic_sbs_signatures_all, overwrite = T)
+#usethis::use_data(cosmic_sbs_signatures_no_artefacts, overwrite = T)
+
+immune_celltypes <- as.data.frame(
+  immunedeconv::cell_type_map |>
+    dplyr::filter(method_dataset == "quantiseq") |>
+    dplyr::select(method_cell_type, cell_type) |>
+    dplyr::mutate(cell_type = dplyr::if_else(
+      !is.na(cell_type) &
+        cell_type == "uncharacterized cell",
+      "Uncharacterized cell",
+      as.character(cell_type)
+    )) |>
+    dplyr::mutate(cell_type = factor(
+      cell_type, levels = cell_type)) |>
+    dplyr::distinct()
+)
+
+usethis::use_data(immune_celltypes, overwrite = T)
+
+germline_filter_levels <-
+  c("SOMATIC",
+    "GERMLINE_DBSNP",
+    "GERMLINE_CLINVAR",
+    "GERMLINE_GNOMAD",
+    "MULTIPLE FILTERS",
+    "GERMLINE_HET",
+    "GERMLINE_HOM",
+    "GERMLINE_PON"
+    )
+
+usethis::use_data(germline_filter_levels, overwrite = T)
 
 rm(cancer_phenotypes_regex,
    data_coltype_defs,
    effect_prediction_algos,
    tcga_cohorts,
+   immune_celltypes,
+   artefact_signatures,
+   context_order,
    cosmic_signatures,
    cosmic_sbs_signatures_no_artefacts,
    cosmic_sbs_signatures_all,
-   evidence_types,
-   evidence_levels,
+   cosmic_sbs_signatures,
+   germline_filter_levels,
+   sig,
+   biomarker_evidence,
    variant_db_url,
    color_palette,
    dt_display,

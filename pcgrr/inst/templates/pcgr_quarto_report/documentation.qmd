@@ -7,14 +7,14 @@ technologies.
 
 ::: {.panel-tabset}
 
-### Gene/variant annotation resources
+### Gene/variant annotation resources {#sec-resources}
 
 The variant interpretation procedures performed in this cancer genome report are relying upon multiple tools and knowledge resources, as outlined below. 
 
 ::: {.callout-important}
 ## Licensing note
 
-Some resources (highlighted below) demand specific licensing agreements if you plan to utilize their data (and thus this report) in a commercial, non-research setting.
+Some resources (highlighted below) require specific licensing agreements if you plan to utilize their data (and thus this report) in a commercial, non-research setting.
 :::
 
 

@@ -12,7 +12,7 @@ append_drug_var_link(var_df, primary_site = "Breast", ref_data = NULL)
 
 \item{primary_site}{primary tumor sample site}
 
-\item{ref_data}{PCGR/CPSR reference data list object}
+\item{ref_data}{PCGR/CPSR reference data object}
 }
 \description{
 Function that adds link to targeted drugs (on and off-label)

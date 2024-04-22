@@ -81,7 +81,6 @@ init_report <- function(yaml_fname = NULL,
 
     for (a_elem in c("snv_indel",
                      "cna",
-                     "value_box",
                      "sample_properties",
                      "assay_properties",
                      "mutational_signatures",
@@ -91,7 +90,6 @@ init_report <- function(yaml_fname = NULL,
                      "kataegis",
                      "expression",
                      "predisposition")){
-                     #"report_display_config",
                      #"clinicaltrials")) {
       report[["content"]][[a_elem]] <- list()
       report[["content"]][[a_elem]][["eval"]] <- FALSE
@@ -104,14 +102,14 @@ init_report <- function(yaml_fname = NULL,
         report[["content"]][[a_elem]][["events"]] <- data.frame()
       }
 
+      if (a_elem == "expression") {
+        report[["content"]][[a_elem]] <-
+          init_expression_content()
+      }
+
       if (a_elem == "rainfall") {
         report[["content"]][[a_elem]] <-
           init_rainfall_content()
-      }
-
-      if (a_elem == "value_box") {
-        report[["content"]][[a_elem]] <-
-          init_valuebox_content()
       }
 
       if (a_elem == "snv_indel" | a_elem == "cna") {
@@ -153,6 +151,16 @@ init_report <- function(yaml_fname = NULL,
     }
   }
 
+  if(!is.null(report$settings$conf$assay_properties)){
+    report[['content']][['assay_properties']] <-
+      report[['settings']]$conf$assay_properties
+  }
+
+  if(!is.null(report$settings$conf$sample_properties)){
+    report[['content']][['sample_properties']] <-
+      report[['settings']]$conf$sample_properties
+  }
+
   return(report)
 }
 
@@ -181,7 +189,7 @@ update_report <- function(report, report_data,
 
 #' Function that initiates report element with TMB information
 #'
-#' @param ref_data PCGR reference data list object
+#' @param ref_data PCGR reference data object
 #
 #' @return rep TMB report element
 #'
@@ -310,6 +318,29 @@ init_kataegis_content <- function() {
 
 }
 
+#' Function that initiates report element with expression information
+#'
+#' @return rep Report structure initialized for expression data
+#' @export
+init_expression_content <- function() {
+
+  rep <- list()
+  rep[["eval"]] <- FALSE
+  rep[['similarity_analysis']] <- list()
+  for(source in c('tcga','depmap','treehouse')){
+    rep[['similarity_analysis']][[source]] <- data.frame()
+  }
+  rep[['expression']] <- data.frame()
+  rep[['csq_expression']] <- data.frame()
+  rep[['outliers']] <- data.frame()
+  for(cat in c('immune_contexture','drug_targets')){
+    rep[[cat]] <- data.frame()
+  }
+
+  return(rep)
+
+}
+
 #' Function that initiates report element with rainfall information
 #'
 #' @return rep Report structure initialized for rainfall data
@@ -369,38 +400,6 @@ init_tumor_only_content <- function() {
     rep[["vfilter"]][[successive_filter]] <- 0
   }
   return(rep)
-}
-
-#' Function that initiates report element with value box information
-#'
-#' @return rep Report structure initialized for value box data
-#' @export
-init_valuebox_content <- function() {
-  rep <- list()
-
-  rep[["eval"]] <- FALSE
-
-  rep[["tmb"]] <-
-    "Not determined"
-  rep[["msi"]] <-
-    "Not determined"
-  rep[["scna"]] <-
-    "Not determined"
-  rep[["tier1"]] <-
-    "Not determined"
-  rep[["tier2"]] <-
-    "Not determined"
-  rep[["signatures"]] <-
-    "Not determined"
-  rep[["tumor_ploidy"]] <-
-    "Not provided"
-  rep[["tumor_purity"]] <-
-    "Not provided"
-  rep[["kataegis"]] <-
-    "Not determined"
-
-  return(rep)
-
 }
 
 #' Function that initiates report element with variant data

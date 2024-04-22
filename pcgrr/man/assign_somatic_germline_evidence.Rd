@@ -10,7 +10,7 @@ assign_somatic_germline_evidence(sample_calls, settings = NULL)
 \arguments{
 \item{sample_calls}{data frame with variants}
 
-\item{settings}{PCGR configuration settings}
+\item{settings}{PCGR run/configuration settings}
 }
 \value{
 sample_calls

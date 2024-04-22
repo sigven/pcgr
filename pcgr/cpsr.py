@@ -280,7 +280,7 @@ def run_cpsr(conf_options, input_data, output_data):
         variant_set = \
            variant.append_annotations(
               output_pass_vcf2tsv_gz, refdata_assembly_dir = input_data["refdata_assembly_dir"], logger = logger)
-        variant_set = variant.clean_annotations(variant_set, yaml_data, germline = True, logger = logger)
+        variant_set = variant.clean_annotations(variant_set, yaml_data, logger = logger)
         
         ## If no genotypes are available, set conf['sample_properties']['genotypes_available'] = 1
         if {'GENOTYPE'}.issubset(variant_set.columns):

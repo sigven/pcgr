@@ -1,19 +1,19 @@
 #' Function that reads TSV file with TMB estimates from sample
 #'
-#' @param settings PCGR settings configuration object
+#' @param settings PCGR run/configuration settings
 #'
 #' @return tmb_estimate
 #' @export
 generate_report_data_tmb <- function(settings = NULL) {
 
   tmb_data <- data.frame()
-  if(settings[['molecular_data']][['fname_tmb']] != "None" &
+  if(settings[['molecular_data']][['fname_tmb_tsv']] != "None" &
      file.exists(
-       settings[['molecular_data']][['fname_tmb']]
+       settings[['molecular_data']][['fname_tmb_tsv']]
      )){
 
     tmb_data <- readr::read_tsv(
-      settings[['molecular_data']][['fname_tmb']],
+      settings[['molecular_data']][['fname_tmb_tsv']],
       show_col_types = F
     )
 
@@ -63,15 +63,18 @@ plot_tmb_primary_site_tcga <- function(
   )
 
   tmb_estimate <- tmb_estimates |>
-    dplyr::filter(tmb_measure == "TMB_missense_only")
+    dplyr::filter(
+      .data$tmb_measure == "TMB_missense_only")
 
   if(tmb_display_type == "coding_and_silent"){
     tmb_estimate <- tmb_estimates |>
-      dplyr::filter(tmb_measure == "TMB_coding_and_silent")
+      dplyr::filter(
+        .data$tmb_measure == "TMB_coding_and_silent")
   }
   if(tmb_display_type == "coding_non_silent"){
     tmb_estimate <- tmb_estimates |>
-      dplyr::filter(tmb_measure == "TMB_coding_non_silent")
+      dplyr::filter(
+        .data$tmb_measure == "TMB_coding_non_silent")
   }
 
 
@@ -113,10 +116,11 @@ plot_tmb_primary_site_tcga <- function(
   median_tmb <- as.data.frame(tmb_reference |>
     dplyr::group_by(.data$PRIMARY_SITE) |>
     dplyr::summarize(
-      TMB_MEDIAN = median(TMB, na.rm = T),
+      TMB_MEDIAN = stats::median(.data$TMB, na.rm = T),
       .groups = "drop"
     ) |>
-    dplyr::arrange(dplyr::desc(TMB_MEDIAN)))
+    dplyr::arrange(
+      dplyr::desc(.data$TMB_MEDIAN)))
 
   tmb_reference$PRIMARY_SITE <- factor(
     tmb_reference$PRIMARY_SITE,
@@ -125,7 +129,7 @@ plot_tmb_primary_site_tcga <- function(
   tmb_plot_site <-
     ggplot2::ggplot(
       data = tmb_reference, mapping =
-        ggplot2::aes(x = PRIMARY_SITE,
+        ggplot2::aes(x = .data$PRIMARY_SITE,
                      y = .data$TMB,
                      fill = .data$PRIMARY_SITE)) +
     ggplot2::geom_boxplot(width = 0.4) +

@@ -7,7 +7,7 @@
 generate_report_data_tmb(settings = NULL)
 }
 \arguments{
-\item{settings}{PCGR settings configuration object}
+\item{settings}{PCGR run/configuration settings}
 }
 \value{
 tmb_estimate

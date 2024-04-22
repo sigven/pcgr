@@ -1,0 +1,301 @@
+```{r prep_data}
+#| eval: !expr as.logical(pcg_report$content$snv_indel$vstats$n > 0) == TRUE
+
+hole_size <- 0.4
+pie_line_width <- 3
+
+consequence_stats <- 
+  pcg_report$content$snv_indel$callset$variant_display |>
+  dplyr::mutate(CONSEQUENCE = stringr::str_replace_all(
+    CONSEQUENCE, "(, [0-9A-Za-z_]{1,}){1,}$",""
+  )) |>
+  dplyr::group_by(CONSEQUENCE) |>
+  dplyr::summarise(
+    N = dplyr::n(),
+    .groups = "drop"
+  ) |>
+  dplyr::mutate(Pct = N / sum(N) * 100) |>
+  dplyr::mutate(CONSEQUENCE = dplyr::if_else(
+    Pct < 3, "other_consequence", 
+    as.character(CONSEQUENCE)
+  )) |>
+  dplyr::group_by(CONSEQUENCE) |>
+  dplyr::summarise(
+    N = sum(N),
+    Pct = sum(Pct),
+    .groups = "drop"
+  ) |>
+  dplyr::arrange(dplyr::desc(N))
+
+vartype_stats <- 
+  pcg_report$content$snv_indel$callset$variant_display |>
+  dplyr::group_by(VARIANT_CLASS) |>
+  dplyr::summarise(
+    N = dplyr::n(),
+    .groups = "drop"
+  ) |>
+  dplyr::mutate(Pct = N / sum(N) * 100) |>
+  dplyr::arrange(dplyr::desc(Pct))
+
+coding_stats <- 
+  pcg_report$content$snv_indel$callset$variant_display |>
+  dplyr::group_by(CODING_STATUS) |>
+  dplyr::summarise(
+    N = dplyr::n(),
+    .groups = "drop"
+  ) |>
+  dplyr::mutate(Pct = N / sum(N) * 100) |>
+  dplyr::arrange(dplyr::desc(Pct))
+
+#if(min)
+
+t <- list(
+  family = "Helvetica",
+  size = 15)
+
+varstats_plots_plotly <- list()
+varstats_plots_plotly[['coding']] <- 
+  plotly::plot_ly(
+    coding_stats, 
+    marker = list(
+      colors = pcgrr::color_palette$tier$values,
+      line = list(
+        color = '#FFFFFF',
+        width = pie_line_width))) |>
+  plotly::add_pie(
+    coding_stats, 
+    labels =~ factor(CODING_STATUS),
+    values = ~N,
+    textinfo = "Pct",
+    type = 'pie', 
+    hole = hole_size) |>
+  plotly::layout(
+    legend = list(orientation = "h", font = t)) 
+
+varstats_plots_plotly[['consequence']] <- 
+  plotly::plot_ly(
+    consequence_stats, 
+    marker = list(
+      colors = pcgrr::color_palette$tier$values,
+      line = list(
+        color = '#FFFFFF', 
+        width = pie_line_width))) |>
+  plotly::add_pie(
+    consequence_stats, 
+    labels =~ factor(CONSEQUENCE),
+    values = ~N,
+    textinfo = "Pct",
+    type = 'pie',
+    hole = hole_size) |>
+  plotly::layout(
+    legend = list(orientation = "h", font = t)) 
+
+varstats_plots_plotly[['type']] <- 
+  plotly::plot_ly(
+    vartype_stats, 
+    marker = list(
+      colors = pcgrr::color_palette$tier$values,
+      line = list(
+        color = '#FFFFFF', 
+        width = pie_line_width))) |>
+  plotly::add_pie(
+    vartype_stats, 
+    labels =~ factor(VARIANT_CLASS),
+    values = ~N,
+    textinfo = "Pct",
+    type = 'pie', 
+    hole = hole_size) |>
+  plotly::layout(
+    legend = list(orientation = "h", font = t)) 
+
+
+
+```
+
+```{r prep_vboxes}
+#| output: asis
+
+statbox <- function(
+    value = "A value", 
+    title = "A title", 
+    theme = "purple",
+    height = "90px"){
+  return(
+    bslib::value_box(
+      height = height,
+      value = value,
+      title = title,
+      showcase = NULL,
+      theme = theme
+    )
+  )
+  
+}
+
+bslib::page_fillable(
+  bslib::layout_columns(
+    height = "350px",
+    bslib::card(
+      full_screen = TRUE,
+      height = "350px",
+      bslib::card_header(
+        class = "bg-dark", 
+        paste0("Variant statistics | coding effect - ",
+               pcg_report$settings$sample_id)),
+      varstats_plots_plotly[['coding']]
+    ),
+    bslib::card(
+      full_screen = TRUE,
+      height = "350px",
+      bslib::card_header(
+        class = "bg-dark", 
+        paste0("Variant statistics | type - ",
+               pcg_report$settings$sample_id)),
+      varstats_plots_plotly[['type']]
+    )
+  ),
+  bslib::card(
+    full_screen = TRUE,
+    height = "400px",
+    bslib::card_header(
+      class = "bg-dark", 
+      paste0("Variant statistics | consequence type - ",
+             pcg_report$settings$sample_id)),
+    varstats_plots_plotly[['consequence']]
+  )
+)
+
+
+```
+
+```{r prep_plots}
+#| echo: false
+
+### VAF plot
+vaf_dist_tumor <- pcgrr::af_distribution(
+  var_df = pcg_report$content$snv_indel$callset$variant)
+
+vaf_dist_tumor$VARIANT_CLASS <- factor(
+  vaf_dist_tumor$VARIANT_CLASS, 
+  levels = c("SNV","deletion","insertion","indel","substitution"))
+
+vaf_plot <- ggplot2::ggplot(data = vaf_dist_tumor) + 
+  ggplot2::geom_bar(
+    mapping = ggplot2::aes(
+      x = bin_start, 
+      y = Count, 
+      fill = VARIANT_CLASS), 
+    stat = "identity") + 
+  ggplot2::theme_classic() +
+  ggplot2::ylab("Number of variants") +
+  ggplot2::xlab("Variant allelic fraction - tumor") +
+  ggplot2::scale_fill_manual(values = pcgrr::color_palette$tier$values) +  
+  ggplot2::theme(legend.title = ggplot2::element_blank(),
+                 legend.position = "bottom",
+                 #legend.position = "",
+                 #axis.text.x = element_blank(),
+                 axis.text.x = ggplot2::element_text(
+                   family = "Helvetica", size = 12, vjust = -0.1),
+                 axis.title.x = ggplot2::element_text(
+                   family = "Helvetica", size = 12, vjust = -2),
+                 axis.text.y = ggplot2::element_text(
+                   family = "Helvetica", size = 12),
+                 axis.title.y = ggplot2::element_text(
+                   family = "Helvetica", size = 12, vjust = 1.5),
+                 plot.margin = (grid::unit(c(0.5, 0.5, 0.5, 0.5), "cm")),
+                 legend.text = ggplot2::element_text(
+                   family = "Helvetica", size = 12))
+
+vaf_plot_plotly <- plotly::ggplotly(vaf_plot)
+vaf_plot_plotly$x$layout$legend$title$text <- ""
+
+```
+
+<br>
+
+```{r vaf_plot, echo=FALSE}
+bslib::card(
+  height = "330px",
+  bslib::card_header(
+    class = "bg-dark",
+    paste0(
+      "Distribution - variant allelic fraction - ",
+      pcg_report$settings$sample_id)
+  ),
+  vaf_plot_plotly
+)
+
+```
+
+
+```{r prepare_genomic_distribution_plot}
+#| eval: !expr pcg_report$content$rainfall$eval == TRUE  & NROW(pcg_report$content$rainfall$rfdata$data) > 0
+#| echo: false
+
+## retrieve rainfall data
+rfdat <- pcg_report$content$rainfall$rfdata
+
+## set size of text and points in plot
+cex <- 0.8
+cex_text <- 3
+
+# make rainfall plot with rfdat
+
+type_stats <- plyr::count(rfdat$data$type) |>
+  dplyr::arrange(desc(freq))
+
+rfdat$data$type <- factor(
+  rfdat$data$type, levels = type_stats$x)
+
+genomic_dist_plot <- ggplot2::ggplot(
+  rfdat$data, ggplot2::aes(x = location, y = distance)) +
+    ggplot2::geom_point(
+      ggplot2::aes(colour = type), cex = rfdat$cex) +
+    ggplot2::geom_vline(
+      xintercept = as.vector(rfdat$chr_cum), linetype="dotted") +
+    ggplot2::annotate("text", x = rfdat$intercept, 
+                      y = rfdat$ylim, 
+                      label = rfdat$labels, 
+                      cex = rfdat$cex_text) +
+    ggplot2::xlab("Genomic Location") +
+    ggplot2::ylab("Genomic Distance") +
+    ggplot2::scale_y_log10() +
+    ggplot2::scale_colour_manual(values = rfdat$colors) +
+    ggplot2::scale_x_continuous(
+      expand = c(0,0), limits=c(0, max(rfdat$chr_cum))) +
+    ggplot2::theme_bw() +
+    ggplot2::theme(
+      legend.position = "bottom",
+      legend.title = ggplot2::element_blank(),
+      legend.key = ggplot2::element_blank(),
+      panel.grid.minor.x = ggplot2::element_blank(),
+      panel.grid.major.x = ggplot2::element_blank(),
+      axis.ticks.x = ggplot2::element_blank(),
+      axis.text.x = ggplot2::element_blank()) +
+    ggplot2::guides(colour = ggplot2::guide_legend(nrow = 1))
+
+genomic_dist_plot_plotly <- plotly::ggplotly(genomic_dist_plot)
+genomic_dist_plot_plotly$x$layout$legend$title$text <- ""
+
+```
+
+
+```{r genomic_dist_plot}
+#| eval: !expr pcg_report$content$rainfall$eval == TRUE  & NROW(pcg_report$content$rainfall$rfdata$data) > 0
+
+bslib::card(
+  height = "300px",
+  bslib::card_header(
+    class = "bg-dark",
+    paste0(
+      "Distribution - genomic location - ",
+      pcg_report$settings$sample_id)
+  ),
+  genomic_dist_plot_plotly
+)
+
+```
+
+<br>
+<hr>
+<br>

@@ -11,7 +11,7 @@ generate_report_data_msi(variant_set, ref_data = NULL, settings = NULL)
 
 \item{ref_data}{PCGR reference data object}
 
-\item{settings}{PCGR run configuration settings}
+\item{settings}{PCGR run/configuration settings}
 }
 \description{
 Function that generates MSI prediction data for PCGR report

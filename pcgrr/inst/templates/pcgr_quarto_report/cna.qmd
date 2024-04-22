@@ -1,0 +1,447 @@
+## Somatic CNAs
+
+
+```{r }
+#| fig-width: 24
+#| fig-height: 7 
+#| dpi: 300
+#| output: asis
+#| column: body-outset
+
+
+options(CNAqc_cex = 2.5)
+
+m <- pcg_report$content$cna$cnaqc
+m$mutations$is_driver <- F
+
+suppressMessages(CNAqc::plot_segments(
+ m, max_Y_height = max(m$cna$Major)
+))
+
+```
+
+```{r check_expression}
+#| eval: true
+
+# expression_present_cna <- FALSE
+# if("TPM_GENE" %in% colnames(pcg_report$content$cna$callset$variant) &
+#    pcg_report$settings$molecular_data$fname_expression_tsv != "None"){
+#   expression_present_cna <- 
+#     !any(is.na(pcg_report$content$cna$callset$variant$TPM_GENE))
+# }
+```
+
+### Variant classification - actionability
+
+Genes subject to copy number aberrations in the tumor sample have been assessed for
+_clinical actionability_ through an implementation of ACMG/AMP guidelines [@Li2017-ew]. We use CIViC and CGI [@Griffith2017-do;@Tamborero2018-aj] as the underlying sources for actionable variants (versions indicated below).
+
+The tabset below indicates which variants have been classified into two distinct _tiers of clinical significance_ according to ACMG/AMP criteria.
+
+
+::: {.callout-note}
+## Note - biomarker matching
+
+The same somatic mutation may frequently match with multiple evidence items from , pending on e.g. the _disease context_, _therapeutic context_, _biomarker resolution_, or underlying _evidence source_ (i.e. publication)
+:::
+
+::: {.panel-tabset .nav-pills}
+
+#### <b>TIER I</b> - strong clinical significance
+
+<br>
+
+```{r}
+#| echo: false
+#| output: asis
+#| eval: !expr pcg_report$content$cna$vstats$n_actionable_tier1 != 0
+
+
+dt_content_tier1 <- 
+  pcgrr:::get_dt_tables(
+    report = pcg_report, tier = 1, variant_class = "cna")
+
+# if(expression_present_cna == FALSE){
+#   dt_content_tier1[['by_gene']]$TPM_GENE <- NULL
+# }
+
+tier1_gene_dt_cna <- DT::datatable(
+  dt_content_tier1[['by_gene']],
+  escape = F, 
+  options = list(dom = 't'),
+  extensions = c("Responsive")) |>
+  DT::formatStyle(
+    'SYMBOL',
+    color = "white",
+    `text-align` = 'center',
+    fontWeight = 'bold',
+    backgroundColor = pcgrr::color_palette$bg_dark
+  ) |>
+  DT::formatStyle(
+    'BIOMARKER_EVIDENCE',
+    color = "white",
+    backgroundColor = pcgrr::color_palette$bg_dark
+  ) |>
+  DT::formatStyle(
+    'VARIANT_CLASS',
+    color='white',
+    fontWeight = 'bold',
+    backgroundColor = DT::styleEqual(
+      pcgrr::color_palette$cna_variant_class$levels,
+      pcgrr::color_palette$cna_variant_class$values),
+    `text-align` = 'center'
+  )
+
+# if(expression_present_cna == TRUE){
+#   tier1_gene_dt_cna <- tier1_gene_dt_cna |>
+#     DT::formatStyle(
+#      "TPM_GENE",
+#      "TPM_GENE", 
+#      color = "white", 
+#      backgroundColor = 
+#        DT::styleInterval(
+#          pcgrr::color_palette$gene_expression$breaks,
+#          pcgrr::color_palette$gene_expression$values
+#        )
+#    )
+# }
+
+tier1_gene_dt_cna
+
+
+htmltools::br()
+htmltools::hr()
+htmltools::br()
+cat(paste0(
+"<font style='font-size: 110%'>Details with respect to the clinical",
+" evidence items associated with <b>",
+ paste(dt_content_tier1[['by_gene']]$MOLECULAR_ALTERATION, collapse=", "),
+ " </b>can be explored in the data table listed below:</font>\n"))
+htmltools::br()
+htmltools::br()
+
+cna_eitem_tier1_shared <- crosstalk::SharedData$new(
+  dt_content_tier1[['by_eitem']] |>
+    dplyr::rename(SAMPLE_ALTERATION = MOLECULAR_ALTERATION))
+
+crosstalk::bscols(
+  list(
+     crosstalk::filter_select(
+      "SAMPLE_ALTERATION", "Sample alteration", 
+      cna_eitem_tier1_shared, ~SAMPLE_ALTERATION),
+    crosstalk::filter_select(
+      "BM_CANCER_TYPE", "Cancer type", 
+      cna_eitem_tier1_shared, ~BM_CANCER_TYPE),
+    crosstalk::filter_select(
+      "BM_CLINICAL_SIGNIFICANCE", "Clinical significance", 
+      cna_eitem_tier1_shared, ~BM_CLINICAL_SIGNIFICANCE),
+    crosstalk::filter_slider(
+      "BM_RATING", "Rating", cna_eitem_tier1_shared, 
+      ~BM_RATING, min = 0, max = 5, step = 1, ticks = T)
+
+  ),
+  list(
+    crosstalk::filter_select(
+      "BM_EVIDENCE_TYPE", "Evidence type", 
+      cna_eitem_tier1_shared, ~BM_EVIDENCE_TYPE),
+    crosstalk::filter_select(
+      "BM_EVIDENCE_LEVEL", "Evidence level", 
+      cna_eitem_tier1_shared, ~BM_EVIDENCE_LEVEL),
+    crosstalk::filter_select(
+      "BM_EVIDENCE_DIRECTION", "Evidence direction", 
+      cna_eitem_tier1_shared, ~BM_EVIDENCE_DIRECTION),
+    crosstalk::filter_select(
+      "BM_THERAPEUTIC_CONTEXT", "Therapeutic context", 
+      cna_eitem_tier1_shared, ~BM_THERAPEUTIC_CONTEXT)
+  )
+)
+
+htmltools::br()
+
+DT::datatable(
+  cna_eitem_tier1_shared,
+  escape = F, 
+  extensions = c("Buttons","Responsive"), 
+  options = list(
+    buttons = c('csv','excel'), 
+    dom = 'Bfrtip')) |>
+  DT::formatStyle(
+    color = "white", 
+    c("SAMPLE_ALTERATION","BM_CONTEXT"), 
+    fontWeight = 'bold', 
+    `text-align` = 'center',
+    backgroundColor = pcgrr::color_palette$bg_dark) |>
+  DT::formatStyle(
+    'BM_EVIDENCE_LEVEL', 
+    backgroundColor = DT::styleEqual(
+      pcgrr::color_palette$clinical_evidence$levels,
+      pcgrr::color_palette$clinical_evidence$values))
+
+```
+
+
+```{r }
+#| output: asis
+#| echo: false
+#| eval: !expr pcg_report$content$cna$vstats$n_actionable_tier1 == 0
+
+htmltools::br()
+cat('\n*  <i> <font style="font-size: 110%"><b>NO</b> somatic copy-number gene aberrations of strong clinical significance were identified.</font></i>', sep = '\n')
+cat('\n')
+htmltools::br()
+
+```
+
+#### <b>TIER II</b> - potential clinical significance
+
+<br>
+
+```{r}
+#| echo: false
+#| output: asis
+#| eval: !expr pcg_report$content$cna$vstats$n_actionable_tier2 != 0
+
+dt_content_tier2 <- 
+  pcgrr:::get_dt_tables(
+    report = pcg_report, tier = 2, variant_class = "cna")
+
+# if(expression_present_cna == FALSE){
+#   dt_content_tier2[['by_gene']]$TPM_GENE <- NULL
+# }
+
+tier2_gene_dt_cna <- DT::datatable(
+  dt_content_tier2[['by_gene']],
+  escape = F, 
+  options = list(dom = 't'),
+  extensions = c("Responsive")) |>
+  DT::formatStyle(
+    'SYMBOL',
+    color = "white",
+    `text-align` = 'center',
+    fontWeight = 'bold',
+    backgroundColor = pcgrr::color_palette$bg_dark
+  ) |>
+  DT::formatStyle(
+    'BIOMARKER_EVIDENCE',
+    color = "white",
+    backgroundColor = pcgrr::color_palette$bg_dark
+  ) |>
+  DT::formatStyle(
+    'VARIANT_CLASS',
+    color='white',
+    fontWeight = 'bold',
+    backgroundColor = DT::styleEqual(
+      pcgrr::color_palette$cna_variant_class$levels,
+      pcgrr::color_palette$cna_variant_class$values),
+    `text-align` = 'center'
+  )
+
+# if(expression_present_cna == TRUE){
+#   tier2_gene_dt_cna <- tier2_gene_dt_cna |>
+#     DT::formatStyle(
+#      "TPM_GENE",
+#      "TPM_GENE", 
+#      color = "white", 
+#      backgroundColor = 
+#        DT::styleInterval(
+#          pcgrr::color_palette$gene_expression$breaks,
+#          pcgrr::color_palette$gene_expression$values
+#        )
+#    )
+# }
+
+tier2_gene_dt_cna
+
+htmltools::br()
+htmltools::hr()
+htmltools::br()
+cat(paste0(
+"<font style='font-size: 110%'>Details with respect to the clinical",
+" evidence items associated with <b>",
+ paste(dt_content_tier2[['by_gene']]$MOLECULAR_ALTERATION, collapse=", "),
+ " </b>can be explored in the data table listed below:</font>\n"))
+htmltools::br()
+
+cna_eitem_tier2_shared <- crosstalk::SharedData$new(
+  dt_content_tier2[['by_eitem']] |>
+    dplyr::rename(SAMPLE_ALTERATION = MOLECULAR_ALTERATION))
+
+crosstalk::bscols(
+  list(
+     crosstalk::filter_select(
+      "SAMPLE_ALTERATION", "Sample alteration", 
+      cna_eitem_tier2_shared, ~SAMPLE_ALTERATION),
+    crosstalk::filter_select(
+      "BM_CANCER_TYPE", "Cancer type", 
+      cna_eitem_tier2_shared, ~BM_CANCER_TYPE),
+    crosstalk::filter_select(
+      "BM_CLINICAL_SIGNIFICANCE", "Clinical significance", 
+      cna_eitem_tier2_shared, ~BM_CLINICAL_SIGNIFICANCE),
+    crosstalk::filter_slider(
+      "BM_RATING", "Rating", cna_eitem_tier2_shared, 
+      ~BM_RATING, min = 0, max = 5, step = 1, ticks = T)
+
+  ),
+  list(
+    crosstalk::filter_select(
+      "BM_EVIDENCE_TYPE", "Evidence type", 
+      cna_eitem_tier2_shared, ~BM_EVIDENCE_TYPE),
+    crosstalk::filter_select(
+      "BM_EVIDENCE_LEVEL", "Evidence level", 
+      cna_eitem_tier2_shared, ~BM_EVIDENCE_LEVEL),
+    crosstalk::filter_select(
+      "BM_EVIDENCE_DIRECTION", "Evidence direction", 
+      cna_eitem_tier2_shared, ~BM_EVIDENCE_DIRECTION),
+    crosstalk::filter_select(
+      "BM_THERAPEUTIC_CONTEXT", "Therapeutic context", 
+      cna_eitem_tier2_shared, ~BM_THERAPEUTIC_CONTEXT)
+  )
+)
+
+htmltools::br()
+
+DT::datatable(
+  cna_eitem_tier2_shared,
+  escape = F, 
+  extensions = c("Buttons","Responsive"), 
+  options = list(
+    buttons = c('csv','excel'), 
+    dom = 'Bfrtip')) |>
+  DT::formatStyle(
+    color = "white", 
+    c("SAMPLE_ALTERATION","BM_CONTEXT"), 
+    fontWeight = 'bold', 
+    `text-align` = 'center',
+    backgroundColor = pcgrr::color_palette$bg_dark) |>
+  DT::formatStyle(
+    'BM_EVIDENCE_LEVEL', 
+    backgroundColor = DT::styleEqual(
+      pcgrr::color_palette$clinical_evidence$levels,
+      pcgrr::color_palette$clinical_evidence$values))
+
+```
+
+
+```{r }
+#| output: asis
+#| echo: false
+#| eval: !expr pcg_report$content$cna$vstats$n_actionable_tier2 == 0
+
+htmltools::br()
+cat('\n*  <i> <font style="font-size: 110%"><b>NO</b> somatic copy-number gene aberrations of potential clinical significance were identified.</font></i>', sep = '\n')
+cat('\n')
+htmltools::br()
+
+```
+
+:::
+
+<br>
+<hr>
+<br>
+
+### Other oncogenic events
+
+Here we show other genes subject to copy number alteration that may potentially have oncogenic effects. Specifically, we list
+
+ * [Proto-oncogenes]() subject to copy-number gain
+ * [Tumor suppressor]() genes subject to homozygous deletions
+
+Gene symbols are color-coded according to their strength of association to cancer (here, specifically __`r pcg_report$settings$conf$sample_properties$site`__ cancers), from <span style="background-color:`r pcgrr::color_palette$cancer_assoc$values[1]`; padding:2x; color:white"><b>&nbsp; weak associations &nbsp; </b></span>&nbsp; to <span style="background-color:`r pcgrr::color_palette$cancer_assoc$values[length(pcgrr::color_palette$cancer_assoc$values)]`; padding:2x; color:white"><b>&nbsp; strong associations &nbsp; </b></span> [@Ochoa2021-jc;@Nakken2023-ol].
+
+
+<br>
+
+```{r }
+
+oncogene_gain_variants <- 
+  dplyr::filter(
+    pcg_report[["content"]][["cna"]][["callset"]][["variant_display"]],
+    !is.na(.data$ACTIONABILITY_TIER) & 
+    .data$ACTIONABILITY_TIER == 3 & 
+      .data$ONCOGENE == TRUE & 
+      .data$VARIANT_CLASS == "gain") |>
+  dplyr::select(
+    dplyr::any_of(
+      pcgrr::dt_display$cna_other_oncogenic
+    )
+  )
+
+tsgene_loss_variants <- 
+  dplyr::filter(
+    pcg_report[["content"]][["cna"]][["callset"]][["variant_display"]],
+    !is.na(.data$ACTIONABILITY_TIER) & 
+      .data$ACTIONABILITY_TIER == 3 & 
+      .data$TUMOR_SUPPRESSOR == TRUE & 
+      .data$VARIANT_CLASS == "homdel") |>
+  dplyr::select(
+    dplyr::any_of(
+      pcgrr::dt_display$cna_other_oncogenic
+    )
+  )
+
+dt_other_oncogenic <- 
+  dplyr::bind_rows(
+    oncogene_gain_variants,
+    tsgene_loss_variants
+  ) |>
+  dplyr::select(
+    dplyr::any_of(
+      pcgrr::dt_display$cna_other_oncogenic
+    )
+  ) |>
+  dplyr::arrange(
+    dplyr::desc(.data$TISSUE_ASSOC_RANK),
+    dplyr::desc(.data$GLOBAL_ASSOC_RANK),
+  )
+
+# if(expression_present_cna == FALSE){
+#   dt_other_oncogenic$TPM_GENE <- NULL
+# }
+
+dt_other_oncongenic_cna <- DT::datatable(
+  dt_other_oncogenic,
+  escape = F, 
+  extensions = c("Buttons","Responsive"), 
+  options = list(
+    buttons = c('csv','excel'), 
+    dom = 'Bfrtip')) |>
+   DT::formatStyle(
+    'VARIANT_CLASS',
+    color='white',
+    backgroundColor = DT::styleEqual(
+      pcgrr::color_palette$cna_variant_class$levels,
+      pcgrr::color_palette$cna_variant_class$values),
+    `text-align` = 'center'
+  ) |>
+   DT::formatStyle(
+     "SYMBOL",
+     "TISSUE_ASSOC_RANK", 
+     color = "white", 
+     backgroundColor = 
+       DT::styleInterval(
+         pcgrr::color_palette$cancer_assoc$breaks,
+         pcgrr::color_palette$cancer_assoc$values
+       )
+   )
+
+# if(expression_present_cna == TRUE){
+#   dt_other_oncongenic_cna <- dt_other_oncongenic_cna |>
+#     DT::formatStyle(
+#      "TPM_GENE",
+#      "TPM_GENE", 
+#      color = "white", 
+#      backgroundColor = 
+#        DT::styleInterval(
+#          pcgrr::color_palette$gene_expression$breaks,
+#          pcgrr::color_palette$gene_expression$values
+#        )
+#    )
+# }
+
+dt_other_oncongenic_cna
+
+```
+
+
+
