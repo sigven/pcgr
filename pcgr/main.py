@@ -646,7 +646,7 @@ def run_pcgr(input_data, output_data,conf_options):
     outfile.close()
             
     # PCGR|Report - Generation of Excel workbooks and integrative HTML reports for molecular data interpretation 
-    ## SNVs/InDels, CNAs, expression, TMB, MSI, Mutational signatures
+    ## SNVs/InDels, CNAs, expression, TMB, MSI, mutational signatures
     if not conf_options['other']['no_reporting'] and not input_vcf == 'None':
         logger = getlogger('pcgr-writer')
         logger.info('PCGR - STEP 6: Generation of output files - molecular interpretation report for precision cancer medicine')
@@ -658,10 +658,6 @@ def run_pcgr(input_data, output_data,conf_options):
         pcgr_report_command = (
                  f"{rscript} {pcgrr_script} {yaml_fname}")
 
-        print('pcgrr_conda: ' + str(pcgrr_conda))
-        print('pcgr_conda: ' + str(pcgr_conda))
-        print(pcgr_report_command)
-        #exit(0)
         if debug:
             print(pcgr_report_command)
         check_subprocess(logger, pcgr_report_command, debug)

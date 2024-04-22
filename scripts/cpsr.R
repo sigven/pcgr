@@ -8,6 +8,8 @@ args <- commandArgs(trailingOnly=TRUE)
 suppressWarnings(suppressPackageStartupMessages(library(cpsr)))
 suppressWarnings(suppressPackageStartupMessages(library(log4r)))
 
+## YAML file produced by CPSR Python workflow
+## - settings and paths to reference data and annotated input sample files
 yaml_fname <- as.character(args[1])
 
 my_log4r_layout <- function(level, ...) {
@@ -27,7 +29,7 @@ cps_report <- cpsr::generate_cpsr_report(
   yaml_fname = yaml_fname
 )
 
-# ## Write report contents to output files
+## Write report contents to output files (HTML, XLSX, TSV)
 if(!is.null(cps_report)){
   cpsr::write_cpsr_output(
       cps_report,

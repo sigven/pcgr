@@ -10,6 +10,8 @@ suppressWarnings(suppressPackageStartupMessages(library(CNAqc)))
 
 args <- commandArgs(trailingOnly=TRUE)
 
+## YAML file produced by PCGR Python workflow
+## - settings and paths to reference data and annotated input sample files
 yaml_fname <- as.character(args[1])
 
 my_log4r_layout <- function(level, ...) {
@@ -21,7 +23,7 @@ log4r_logger <-
   log4r::logger(
     threshold = "INFO", appenders = log4r::console_appender(my_log4r_layout))
 
-# this gets passed on to all the log4r_* functions inside the pkg
+## this gets passed on to all the log4r_* functions inside the pkg
 options("PCGRR_LOG4R_LOGGER" = log4r_logger)
 
 ## Generate report content
@@ -29,7 +31,9 @@ pcg_report <- pcgrr::generate_report(
   yaml_fname = yaml_fname
 )
 
-# Write result files (HTML, xlsx, TSV)
+#pcg_report$settings$conf$debug <- TRUE
+
+## Write report contents to output files (HTML, XLSX, TSV)
 if (!is.null(pcg_report)) {
   pcgrr::write_report_quarto_html(report = pcg_report)
   pcgrr::write_report_excel(report = pcg_report)

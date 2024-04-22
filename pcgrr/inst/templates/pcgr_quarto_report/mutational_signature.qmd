@@ -1,12 +1,5 @@
 ## Mutational signatures
 
-
-```{r setup1}
-#| echo: false
-
-report_color <- pcgrr::color_palette$report_color$values[2]
-```
-
 Here, we apply the **MutationalPatterns** package [@Blokzijl2018-nc] to estimate the relative contribution of [known mutational signatures](https://cancer.sanger.ac.uk/signatures/) in **`r pcg_report$settings$sample_id`**. Specifically, the package finds the optimal linear combination (and weights) of reference mutational signatures that most closely reconstructs the spectrum of single base substitutions (SBS) seen in the tumor. This procedure is frequently referred to as *signature refitting*. We employ a bootstrapping approach to estimate the uncertainty in the signature weights.
 
 ```{r setup_signature_display}
@@ -20,6 +13,18 @@ if(msig_content$eval == F |
    msig_content$missing_data == T){
   missing_data_no_refit <- T
 }
+
+poor_sig_fit <- FALSE
+if(missing_data_no_refit == FALSE){
+  if(typeof(msig_content$result$goodness_of_fit) == "list"){
+    if("estimate" %in% names(msig_content$result$goodness_of_fit)){
+      if(msig_content$result$goodness_of_fit$estimate < 0.9){
+        poor_sig_fit <- TRUE
+      }
+    }
+  }
+}
+
 conf <- pcg_report$settings$conf
 msig_conf <- conf$somatic_snv$mutational_signatures
 
@@ -126,7 +131,7 @@ cat("<br><br>")
 ```
 
 ```{r signature_suboptimal_fit_warning}
-#| eval: !expr as.logical(msig_content$result$goodness_of_fit$estimate < 0.9) == TRUE
+#| eval: !expr missing_data_no_refit == FALSE & poor_sig_fit == TRUE
 #| output: asis
 
 cat("\n\n::: {.callout-important}\n\n## Suboptimal fit of mutational profile\n\n ",

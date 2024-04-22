@@ -344,8 +344,8 @@ htmltools::br()
 
 Here we show other genes subject to copy number alteration that may potentially have oncogenic effects. Specifically, we list
 
- * [Proto-oncogenes]() subject to copy-number gain
- * [Tumor suppressor]() genes subject to homozygous deletions
+ * [Proto-oncogenes](#documentation) subject to copy-number gain (total copy number >= __`r pcg_report$settings$conf$somatic_cna$n_copy_gain`__)
+ * [Tumor suppressor](#documentation) genes subject to homozygous deletions (total copy number = __0__)
 
 Gene symbols are color-coded according to their strength of association to cancer (here, specifically __`r pcg_report$settings$conf$sample_properties$site`__ cancers), from <span style="background-color:`r pcgrr::color_palette$cancer_assoc$values[1]`; padding:2x; color:white"><b>&nbsp; weak associations &nbsp; </b></span>&nbsp; to <span style="background-color:`r pcgrr::color_palette$cancer_assoc$values[length(pcgrr::color_palette$cancer_assoc$values)]`; padding:2x; color:white"><b>&nbsp; strong associations &nbsp; </b></span> [@Ochoa2021-jc;@Nakken2023-ol].
 

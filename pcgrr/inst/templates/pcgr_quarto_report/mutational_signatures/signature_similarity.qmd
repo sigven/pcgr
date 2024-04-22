@@ -42,7 +42,7 @@ similarity_table <-
     color = "white",
     backgroundColor = DT::styleEqual(
       c('YES','NO','NOT_DEFINED'), 
-      c(report_color,
+      c(pcg_report$settings$conf$report_color,
         pcgrr::color_palette$none,
         pcgrr::color_palette$none)
     )

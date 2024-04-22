@@ -69,6 +69,7 @@ The report is generated with _[pcgr](https://github.com/sigven/pcgr)_ version `r
 * MSI prediction: __`r msi_prediction`__
 * Mutational burden estimation: __`r mutational_burden`__
   * TMB algorithm: __`r paste0('TMB_',conf$somatic_snv[['tmb']][['tmb_display']])`__ 
+* Minimum total copy number for copy number gains: __`r conf$somatic_cna$n_copy_gain`__
 :::
 
 ::: {.column width="5%"}

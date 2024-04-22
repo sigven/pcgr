@@ -192,6 +192,7 @@ htmltools::br()
 
 #### <b>TIER II</b>- potential clinical significance
 
+<br>
 
 ```{r tier2_variants}
 #| echo: false

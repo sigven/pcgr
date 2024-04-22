@@ -968,18 +968,18 @@ write_report_excel <- function(report = NULL){
   pcgrr::log4r_info("------")
   pcgrr::log4r_info(
     paste0("Generating Excel workbook (.xlsx) with ",
-           "variant findings"))
+           "key findings"))
   workbook <- openxlsx2::wb_workbook()
 
   i <- 15
   for(elem in c('SAMPLE_ASSAY',
                 'SNV_INDEL',
-                'SNV_INDEL_BIOMARKERS',
+                'SNV_INDEL_BIOMARKER',
                 'CNA',
-                'CNA_BIOMARKERS',
+                'CNA_BIOMARKER',
                 'TMB',
                 'MSI',
-                'MUTATIONAL_SIGNATURES',
+                'MUTATIONAL_SIGNATURE',
                 'KATAEGIS',
                 'IMMUNE_CONTEXTURE')){
     if(elem %in% names(excel_output)){

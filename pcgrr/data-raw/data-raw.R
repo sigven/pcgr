@@ -683,6 +683,7 @@ dt_display[['snv_indel_eitem']] <-
     'BM_SOURCE_DB',
     'BM_EVIDENCE_ID',
     'BM_DISEASE_ONTOLOGY_ID',
+    'BM_PRIMARY_SITE',
     'BM_RESOLUTION',
     'BM_MATCH')
 
