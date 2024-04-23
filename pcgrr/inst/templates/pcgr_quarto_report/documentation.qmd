@@ -82,7 +82,7 @@ for(i in 1:NROW(ref_datasets)){
 
 #### Oncogenicity classification
 
-Somatic aberrations (SNV/InDels) are evaluated for oncogenicity through an implementation of SOP's proposed by VICC/ClinGen [@Horak2022-uh]. Specifically, the following criteria are applied:
+Somatic aberrations (SNV/InDels) are evaluated for oncogenicity through an implementation of SOP's proposed by VICC/ClinGen [@Horak2022-uh]. Here, various properties of the variants and genes affected are assigned specific scores, which in turn are aggregated towards an overall oncogenicity score. Specifically, the following criteria are applied:
 
 For somatic copy number aberrations, we list **all oncogenes subject to amplifications**, as well as**tumor suppressor genes subject to homozygous deletions**.
 
@@ -98,8 +98,8 @@ Clinical actionability assessment of SNVs/InDels and gene copy number aberration
 	 - Of strong clinical evidence in other tumor types/classes than the one specified by the user, **OR**
 	 - Of weak clinical evidence (early trials, case reports etc. ([CIViC evidence levels C/D/E](https://civic.readthedocs.io/en/latest/model/evidence/level.html)))) in the same tumor type/class as specified by the user
 	 
- - **TIER 3: Variants of uncertain clinical significance** -
-   - For SNVs/InDels, this includes other coding variants found in oncogenes or tumor suppressor genes, yet _not_ linked to any known predictive, prognostic, or diagnostic biomarkers in the [CIViC database](http://civic.genome.wustl.edu) and the [Cancer Biomarkers Database](https://www.cancergenomeinterpreter.org/biomarkers)
+ - **TIER 3: Variants of uncertain clinical significance (SNVs/InDels only)** -
+   - Other coding variants found in oncogenes or tumor suppressor genes, yet _not_ linked to any known predictive, prognostic, or diagnostic biomarkers in the [CIViC database](http://civic.genome.wustl.edu) and the [Cancer Biomarkers Database](https://www.cancergenomeinterpreter.org/biomarkers)
    
 <br>
 

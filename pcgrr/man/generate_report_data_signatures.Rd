@@ -6,6 +6,7 @@
 \usage{
 generate_report_data_signatures(
   variant_set = NULL,
+  vstats = NULL,
   ref_data = NULL,
   settings = NULL,
   n_bootstrap_iterations = 200,
@@ -14,6 +15,8 @@ generate_report_data_signatures(
 }
 \arguments{
 \item{variant_set}{Somatic callset (SNV)}
+
+\item{vstats}{Variant statistics object}
 
 \item{ref_data}{PCGR reference data object}
 

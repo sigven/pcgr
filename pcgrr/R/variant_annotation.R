@@ -29,7 +29,6 @@ append_annotation_links <- function(
     }
 
     if (!name %in% skip) {
-      #pcgrr::log4r_info(paste0("Adding annotation links - ", name))
       group_by_var <- c("VAR_ID","ENTREZGENE")
       if(vartype == "cna"){
         group_by_var <- c("VAR_ID",
@@ -400,10 +399,6 @@ append_dbmts_var_link <-
         dplyr::distinct()
       if (nrow(var_df_unique_slim) > 0) {
 
-        #pcgrr::log4r_info(paste0(
-        #  "Found miRNA target site annotations for ",
-        #  nrow(var_df_unique_slim)," variants"))
-
         var_df_unique_slim_melted <- as.data.frame(
           var_df_unique_slim |>
             tidyr::separate_rows(.data$DBMTS, sep = ",") |>
@@ -528,8 +523,6 @@ append_targeted_drug_annotations <- function(
     primary_site = "Breast",
     ref_data = NULL) {
 
-  #pcgrr::log4r_info("Adding annotation links - targeted antineoplastic inhibitors")
-
   if (any(grepl(paste0("^SYMBOL$"), names(var_df))) &
       any(grepl(paste0("^VAR_ID$"), names(var_df))) &
       !is.null(ref_data)) {
@@ -590,8 +583,6 @@ append_drug_var_link <- function(
     var_df,
     primary_site = "Breast",
     ref_data = NULL) {
-
-  #pcgrr::log4r_info("Adding annotation links - targeted antineoplastic inhibitors")
 
   if (any(grepl(paste0("^SYMBOL$"), names(var_df))) &
       any(grepl(paste0("^VAR_ID$"), names(var_df))) &
@@ -854,8 +845,7 @@ generate_annotation_link <- function(
   df_annotation_links <- data.frame()
   invisible(assertthat::assert_that(
     is.data.frame(var_df),
-    msg = paste0("Object 'var_df' must be of type data.frame")
-  )
+    msg = paste0("Object 'var_df' must be of type data.frame"))
   )
   assertable::assert_colnames(
     var_df, c(group_by_var,

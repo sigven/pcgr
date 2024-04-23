@@ -39,8 +39,9 @@ generate_report <-
         settings = settings
       )
 
-    if(!(callset_snv$retained_info_tags == "None")){
-      rep$settings$conf$other$retained_info_tags <-
+    if(!(callset_snv$retained_info_tags == "None" |
+         callset_snv$retained_info_tags == "")){
+      rep$settings$conf$other$retained_vcf_info_tags <-
         callset_snv$retained_info_tags
     }
 
@@ -97,6 +98,7 @@ generate_report <-
         pcg_report_signatures <-
           pcgrr::generate_report_data_signatures(
             variant_set = callset_snv$variant,
+            vstats = rep$content$snv_indel$vstats,
             settings = settings,
             ref_data = ref_data)
 
@@ -804,10 +806,14 @@ write_report_tsv <- function(report = NULL, variant_type = 'snv_indel'){
      !is.null(report$content$cna) &
      report$content$cna$eval == TRUE){
 
-    output_data <- as.data.frame(
-      report$content$cna$callset$variant |>
-        dplyr::select(dplyr::any_of(pcgrr::tsv_cols$cna))
-    )
+    if(!is.null(report$content$cna$callset)){
+      if(is.data.frame(report$content$cna$callset$variant)){
+        output_data <- as.data.frame(
+          report$content$cna$callset$variant |>
+            dplyr::select(dplyr::any_of(pcgrr::tsv_cols$cna))
+        )
+      }
+    }
   }
 
   ## SNVs/InDels
@@ -821,23 +827,26 @@ write_report_tsv <- function(report = NULL, variant_type = 'snv_indel'){
         snv_indel_cols, report$settings$conf$other$retained_vcf_info_tags)
     }
 
-    output_data <- report$content$snv_indel$callset$variant |>
-      dplyr::select(
-        dplyr::any_of(snv_indel_cols))
-
-
+    if(!is.null(report$content$snv_indel$callset)){
+      if(is.data.frame(report$content$snv_indel$callset$variant)){
+        output_data <- as.data.frame(
+          report$content$snv_indel$callset$variant |>
+            dplyr::select(
+              dplyr::any_of(snv_indel_cols))
+        )
+      }
+    }
   }
 
   if(NROW(output_data) > 0){
     readr::write_tsv(
-      output_data, file = fname, col_names = TRUE, append = FALSE,
+      output_data, file = fname,
+      col_names = TRUE, append = FALSE,
       na = ".", quote = "none")
   } else {
     pcgrr::log4r_info(
       paste0("No data to write to TSV file - '", variant_type,"'"))
   }
-  #pcgrr::log4r_info("------")
-
 
 }
 

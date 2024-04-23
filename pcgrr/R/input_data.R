@@ -57,10 +57,10 @@ load_somatic_cna <- function(
         dplyr::desc(.data$GLOBAL_ASSOC_RANK)) |>
       pcgrr::order_variants(pos_var = 'SEGMENT_START')
 
-    pcgrr::log4r_info("Generating data frame with hyperlinked variant/gene annotations")
+    pcgrr::log4r_info(
+      "Generating data frame with hyperlinked variant/gene annotations")
 
     callset_cna[['variant_display']] <- callset_cna[['variant']] |>
-
       dplyr::mutate(
         SEGMENT = glue::glue(
           "<a href='http://genome.ucsc.edu/cgi-bin/hgTracks?db={hgname}&position=",
@@ -275,7 +275,8 @@ load_somatic_snv_indel <- function(
     ## Make data frame with columns for display
     ## in HTML output
 
-    pcgrr::log4r_info("Generating data frame with hyperlinked variant/gene annotations")
+    pcgrr::log4r_info(
+      "Generating data frame with hyperlinked variant/gene annotations")
 
 
     callset[['variant_display']] <- callset[['variant']] |>
