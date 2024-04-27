@@ -37,7 +37,7 @@ def parse_expression(expression_fname_tsv: str,
     sample_gene_expression.sort_values(by=['ID','TPM'], ascending=[True, False], inplace = True)
     dup_ids = len(sample_gene_expression['ID']) - len(sample_gene_expression['ID'].drop_duplicates())
     if dup_ids > 0: 
-        logger.warn(f"Found N = {dup_ids} duplicate transcript identifiers - resolving duplicates by keeping the highest TPM value")
+        logger.warn(f"Found N = {dup_ids} duplicate identifiers - resolving duplicates by keeping the highest TPM value")
         sample_gene_expression = sample_gene_expression.drop_duplicates(subset = ['ID']) 
     
     ## Read the gene identifier index - maps transcript identifiers (Ensembl/Refseq), 

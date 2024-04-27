@@ -106,7 +106,7 @@ def cli():
     optional_signatures.add_argument("--min_mutations_signatures", type=int, default=200, dest="min_mutations_signatures", help="Minimum number of SNVs required for re-fitting of mutational signatures (SBS) (default: %(default)s, minimum n = 100)")
     optional_signatures.add_argument("--all_reference_signatures", action="store_true", help="Use _all_ reference mutational signatures (SBS) during signature re-fitting rather than only those already attributed to the tumor type (default: %(default)s)")
     optional_signatures.add_argument("--include_artefact_signatures", action="store_true", help="Include sequencing artefacts in the collection of reference signatures (default: %(default)s")
-    optional_signatures.add_argument("--prevalence_reference_signatures", type=int, default=1, choices=[1,2,5,10,15,20], help="Minimum tumor-type prevalence (in percent) of reference signatures to be included in refitting procedure (default: %(default)s)")
+    optional_signatures.add_argument("--prevalence_reference_signatures", type=float, default=0.1, help="Minimum tumor-type prevalence (in percent) of reference signatures to be included in refitting procedure (default: %(default)s)")
 
     optional_cna.add_argument("--input_cna", dest="input_cna", help="Somatic copy number alteration segments (tab-separated values)")   
     optional_cna.add_argument("--n_copy_gain", type=int, default=6, dest="n_copy_gain", help="Minimum number of total copy number for segments considered as gains/amplifications (default: %(default)s)")

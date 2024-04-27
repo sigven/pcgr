@@ -4,15 +4,15 @@ Here, we perform a comparison of the sample's raw mutational spectrum to each of
 
 ```{r highlight_signatures}
 #| echo: false
-#| eval: !expr as.logical(pcg_report$settings$conf$somatic_snv$mutational_signatures$all_reference_signatures) == FALSE
+#| eval: !expr as.logical(pcg_report$settings$conf$somatic_snv$mutational_signatures$all_reference_signatures) == FALSE & as.logical(pcg_report$settings$conf$somatic_snv$mutational_signatures$no_prevalence_data) == FALSE
 #| output: asis
 
 cat('\n::: {.callout-note}\n## Site-specific signatures\n\n',
     'Signatures that are previously attributed to ',
     conf$sample_properties$site,
-    ' cancers (prevalence >= ', 
+    ' cancers (if any available, with prevalence >= ', 
     as.character(msig_conf$prevalence_reference_signatures),
-    '%) are highlighted. If you see non site-specific signatures ',
+    '%) are highlighted. If you see non site-attributed signatures ',
     'with very high similarity to the mutational spectrum of the input sample, a re-run of the fitting procedure using all ',
     'reference signatures is warranted. \n\n:::\n\n', sep='')
 ```

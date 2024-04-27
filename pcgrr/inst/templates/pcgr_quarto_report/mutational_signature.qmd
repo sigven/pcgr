@@ -8,6 +8,9 @@ Here, we apply the **MutationalPatterns** package [@Blokzijl2018-nc] to estimate
 msig_content <- 
   pcg_report$content$mutational_signatures
 
+no_site_prevalence <- 
+  msig_content$result$no_site_prevalence
+
 missing_data_no_refit <- F
 if(msig_content$eval == F | 
    msig_content$missing_data == T){
@@ -45,7 +48,7 @@ cat("\n::: {.callout-warning}\n## Limited variant data - ",
 
 ```{r t1}
 #| output: asis
-#| eval: !expr missing_data_no_refit == FALSE  & as.logical(msig_conf$all_reference_signatures) == FALSE
+#| eval: !expr missing_data_no_refit == FALSE  & as.logical(msig_conf$all_reference_signatures) == FALSE & as.logical(no_site_prevalence) == FALSE
 
 cat('For <b>', conf$sample_properties$site,'</b> cancers, mutational signature identification uses the following reference collection of known signatures for the <i>refitting procedure</i> (i.e. previously attributed to the same type of cancer): <br>',sep="")
 
@@ -107,13 +110,26 @@ if("SIGNATURE_ID" %in% colnames(dat) &
 
 ```{r t3}
 #| output: asis 
-#| eval: !expr missing_data_no_refit == FALSE & as.logical(msig_conf$all_reference_signatures) == TRUE
+#| eval: !expr missing_data_no_refit == FALSE & (as.logical(no_site_prevalence) == FALSE & as.logical(msig_conf$all_reference_signatures) == TRUE)
 cat("For this analysis, '--all_reference_signatures' have been turned on, which means that all reference signatures (n = 67) have been considered during refitting of the mutational profile with reference signatures",sep="\n")
 htmltools::br()
 
 ```
 
 ```{r t4}
+#| output: asis 
+#| eval: !expr missing_data_no_refit == FALSE & (as.logical(no_site_prevalence) == TRUE | as.logical(msig_conf$all_reference_signatures) == FALSE)
+cat(paste0(
+  "The primary site of the input sample, '<b>", 
+  conf$sample_properties$site, 
+  "</b>', is not yet attributed with specific reference signatures, which means that all reference signatures (n = 67) have been considered during refitting of the mutational profile with reference signatures"),sep="\n")
+htmltools::br()
+
+```
+
+
+
+```{r t5}
 #| output: asis
 #| eval: !expr missing_data_no_refit == FALSE
 

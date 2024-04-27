@@ -3,7 +3,7 @@
 from pcgr._version import __version__
 
 PCGR_VERSION = __version__
-DB_VERSION = '20240412'
+DB_VERSION = '20240426'
 
 ## MISCELLANEOUS
 NCBI_BUILD_MAF = 'GRCh38'

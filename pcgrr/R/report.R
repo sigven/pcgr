@@ -277,6 +277,7 @@ init_m_signature_content <- function() {
   rep[["result"]][["vr"]] <- NULL
   rep[["result"]][["mut_mat"]] <- NULL
   rep[["result"]][["chromosomes"]] <- NULL
+  rep[["result"]][["no_site_prevalence"]] <- FALSE
   rep[["result"]][["tsv"]] <- data.frame()
   rep[["result"]][["contributions"]] <- list()
   rep[["result"]][["contributions"]][["per_signature"]] <- data.frame()

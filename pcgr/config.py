@@ -129,7 +129,7 @@ def create_config(arg_dict, workflow = "PCGR"):
             'mutation_limit': int(arg_dict['min_mutations_signatures']),
             'all_reference_signatures': int(arg_dict['all_reference_signatures']),
             'include_artefact_signatures': int(arg_dict['include_artefact_signatures']),
-            'prevalence_reference_signatures': int(arg_dict['prevalence_reference_signatures'])
+            'prevalence_reference_signatures': float(arg_dict['prevalence_reference_signatures'])
         }
         
         
@@ -139,9 +139,7 @@ def create_config(arg_dict, workflow = "PCGR"):
         #conf_options['molecular_data']['fname_expression_csq_tsv'] = "None"
         conf_options['molecular_data']['fname_expression_similarity_tsv'] = "None"
         conf_options['molecular_data']['fname_tmb_tsv'] = "None"
-        #for source in ['tcga','treehouse','depmap']:
-        #    conf_options['molecular_data']['fname_expression_sim_' + source] = "None"
-
+    
     
     if workflow == "CPSR":        
         conf_options['sample_properties']['phenotype'] = 'None'

@@ -21,7 +21,10 @@ generate_report_data_signatures <-
     pcg_report_signatures <-
       pcgrr::init_m_signature_content()
 
-    if(!is.null(variant_set) & !is.null(vstats) & !is.null(ref_data) & !is.null(settings)){
+    if(!is.null(variant_set) &
+       !is.null(vstats) &
+       !is.null(ref_data) &
+       !is.null(settings)){
       pcgrr::log4r_info("------")
       pcgrr::log4r_info("Identifying mutational signatures")
     }else{
@@ -73,21 +76,33 @@ generate_report_data_signatures <-
       vcf_fname = vcf_name_mutsig_analysis,
       snv_only = F)
 
-    #pcg_report_signatures <-
-    #  pcgrr::init_m_signature_content()
-
     fit_signatures_to_ttype <- !as.logical(
       sig_settings$all_reference_signatures
     )
 
     ## Retrieve relevant signatures for the tumor in question
+
+
+    sites_with_sig_prevalence <-
+      unique(ref_data$misc$mutational_signature[["PRIMARY_SITE"]])
+
+    site_has_prevalence_data <- T
+    if(!(settings$conf$sample_properties$site %in%
+         sites_with_sig_prevalence)){
+      site_has_prevalence_data <- F
+      pcgrr::log4r_warn(
+        paste0("No signature prevalence data available for site '",
+               settings$conf$sample_properties$site,
+               "' - considering all signatures for analysis"))
+    }
+
     prevalent_site_signatures <- NULL
-    if (fit_signatures_to_ttype == T) {
+    if (fit_signatures_to_ttype == T & site_has_prevalence_data == T) {
       prevalent_site_signatures <-
         pcgrr::get_prevalent_site_signatures(
           site = settings$conf$sample_properties$site,
           min_prevalence_pct =
-            sig_settings$prevalence_reference_signatures,
+            as.numeric(sig_settings$prevalence_reference_signatures),
           ref_data = ref_data,
           incl_poss_artifacts =
             sig_settings$include_artefact_signatures)
@@ -96,7 +111,7 @@ generate_report_data_signatures <-
         pcgrr::get_prevalent_site_signatures(
           site = "Any",
           min_prevalence_pct =
-            sig_settings$prevalence_reference_signatures,
+            as.numeric(sig_settings$prevalence_reference_signatures),
           ref_data = ref_data,
           incl_poss_artifacts =
             sig_settings$include_artefact_signatures)
@@ -218,14 +233,16 @@ generate_report_data_signatures <-
               ) |>
               #dplyr::mutate(SITE_SPECIFIC = "NOT_DEFINED") |>
               dplyr::mutate(SITE_SPECIFIC = dplyr::if_else(
-                as.logical(fit_signatures_to_ttype) == TRUE,
+                as.logical(fit_signatures_to_ttype) == TRUE &
+                  site_has_prevalence_data == TRUE,
                 "NO",
                 as.character("NOT_DEFINED")
               )) |>
               dplyr::mutate(SITE_SPECIFIC = dplyr::case_when(
                 SIGNATURE_ID %in%
-                  unique(prevalent_site_signatures$aetiology$SIGNATURE_ID)
-                & as.logical(fit_signatures_to_ttype) == TRUE ~ "YES",
+                  unique(prevalent_site_signatures$aetiology$SIGNATURE_ID) &
+                  as.logical(fit_signatures_to_ttype) == TRUE &
+                  as.logical(site_has_prevalence_data) == TRUE ~ "YES",
                 TRUE ~ as.character(SITE_SPECIFIC)))
           }
         }
@@ -454,6 +471,8 @@ generate_report_data_signatures <-
           pcg_report_signatures[["result"]][["chromosomes"]] <- chromosomes
           pcg_report_signatures[["result"]][["contributions"]] <- contributions
           pcg_report_signatures[["result"]][["tsv"]] <- tsv_data
+          pcg_report_signatures[["result"]][["no_site_prevalence"]] <-
+            !site_has_prevalence_data
           pcg_report_signatures[["result"]][["reference_data"]] <-
             prevalent_site_signatures$aetiology
           pcg_report_signatures[["result"]][["scale_fill_values"]] <- color_vec
@@ -498,7 +517,7 @@ get_prevalent_site_signatures <-
   function(site = "Any",
            custom_collection = NULL,
            ref_data = NULL,
-           min_prevalence_pct = 5,
+           min_prevalence_pct = 0.1,
            incl_poss_artifacts = T) {
 
     cosmic_metadata <-
@@ -536,13 +555,9 @@ get_prevalent_site_signatures <-
         msg = "Reference aetiologies must be of type data.frame()"))
     invisible(
       assertthat::assert_that(
-        min_prevalence_pct == 1 |
-          min_prevalence_pct == 2 |
-          min_prevalence_pct == 5 |
-          min_prevalence_pct == 10 |
-          min_prevalence_pct == 15 |
-          min_prevalence_pct == 20,
-        msg = "Argument 'min_prevalence_pct' must be any of '0, 2, 5, 10, 15 or 20'"))
+        min_prevalence_pct >= 0.1 &
+          min_prevalence_pct <= 20,
+        msg = "Argument 'min_prevalence_pct' must be more than 0.1 and less than 20"))
 
     valid_signature_ids <-
       unique(ref_data$misc$mutational_signature$SIGNATURE_ID)
@@ -587,11 +602,9 @@ get_prevalent_site_signatures <-
 
       unique_sites_with_signature_prevalence <-
         unique(ref_data$misc$mutational_signature[["PRIMARY_SITE"]])
+
+      ## No primary site defined - 'Any'
       if (!(site %in% unique_sites_with_signature_prevalence)) {
-        pcgrr::log4r_info(
-          paste0("Primary tumor site '", site, "' ",
-                 "does not have any signatures with significant ",
-                 "prevalence - considering all"))
         signatures_prevalence <-
           ref_data$misc$mutational_signature |>
           dplyr::select(c("SIGNATURE_ID",
@@ -607,49 +620,21 @@ get_prevalent_site_signatures <-
           dplyr::select(.data$SIGNATURE_ID,
                         .data$PRIMARY_SITE,
                         .data$PREVALENCE_PCT,
-                        .data$PREVALENCE_ABOVE_5PCT,
-                        .data$PREVALENCE_ABOVE_10PCT,
-                        .data$PREVALENCE_ABOVE_15PCT,
-                        .data$PREVALENCE_ABOVE_20PCT,
                         .data$AETIOLOGY_KEYWORD,
                         .data$AETIOLOGY,
                         .data$ASSOCIATED_SIGNATURES,
                         .data$COMMENTS) |>
           dplyr::distinct()
 
-        if (min_prevalence_pct > 0) {
-          if (min_prevalence_pct == 5) {
-            signatures_prevalence <- signatures_prevalence |>
-              dplyr::filter(.data$PREVALENCE_ABOVE_5PCT == T |
-                              is.na(.data$PREVALENCE_ABOVE_5PCT))
-          }else if (min_prevalence_pct == 10) {
-            signatures_prevalence <- signatures_prevalence |>
-              dplyr::filter(.data$PREVALENCE_ABOVE_10PCT == T |
-                              is.na(.data$PREVALENCE_ABOVE_10PCT))
-          }
-          else if (min_prevalence_pct == 15) {
-            signatures_prevalence <- signatures_prevalence |>
-              dplyr::filter(.data$PREVALENCE_ABOVE_15PCT == T |
-                              is.na(.data$PREVALENCE_ABOVE_15PCT))
-          }else if (min_prevalence_pct == 20) {
-            signatures_prevalence <- signatures_prevalence |>
-              dplyr::filter(.data$PREVALENCE_ABOVE_20PCT == T |
-                              is.na(.data$PREVALENCE_ABOVE_20PCT))
-          }else if (min_prevalence_pct == 2 | min_prevalence_pct == 1) {
-            signatures_prevalence <- signatures_prevalence |>
-              dplyr::filter(!is.na(.data$PREVALENCE_PCT)) |>
-              dplyr::filter(.data$PREVALENCE_PCT >= min_prevalence_pct)
-          }
+        if (min_prevalence_pct > 0.1) {
+          signatures_prevalence <- signatures_prevalence |>
+            dplyr::filter(!is.na(.data$PREVALENCE_PCT)) |>
+            dplyr::filter(.data$PREVALENCE_PCT >= min_prevalence_pct)
         }
         signatures_prevalence <- signatures_prevalence |>
-          dplyr::select(-c(.data$PRIMARY_SITE,
-                           .data$PREVALENCE_ABOVE_5PCT,
-                           .data$PREVALENCE_ABOVE_10PCT,
-                           .data$PREVALENCE_ABOVE_15PCT,
-                           .data$PREVALENCE_ABOVE_20PCT)) |>
           dplyr::distinct() |>
           dplyr::arrange(dplyr::desc(.data$PREVALENCE_PCT)) |>
-          dplyr::select(-.data$PREVALENCE_PCT)
+          dplyr::select(-c("PREVALENCE_PCT","PRIMARY_SITE"))
       }
     }
 

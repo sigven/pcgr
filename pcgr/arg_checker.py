@@ -125,6 +125,12 @@ def verify_args(arg_dict):
             err_msg = f"Minimum number of mutations required for mutational signature analysis ('--min_mutations_signatures' = {arg_dict['min_mutations_signatures']}) must be >= 100"
             error_message(err_msg, logger)
 
+    if float(arg_dict['prevalence_reference_signatures']) > 20 or float(arg_dict['prevalence_reference_signatures']) < 0:
+        err_msg = (
+            f"Prevalence of reference signatures must be above zero and less than 20 ('--prevalence_reference_signatures' ",
+            f"= {arg_dict['prevalence_reference_signatures']}")
+        error_message(err_msg, logger)
+
     # if MSI status is to be estimated, mutational burden must be turned on
     if arg_dict['estimate_msi'] is True and arg_dict['estimate_tmb'] is False:
         err_msg = "Prediction of MSI status ('--estimate_msi') requires mutational burden analysis ('--estimate_tmb')"
