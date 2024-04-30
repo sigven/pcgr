@@ -62,7 +62,7 @@ append_annotation_links <- function(
               dplyr::left_join(
                 dplyr::rename(
                   annotation_links,
-                  !!rlang::sym(name) := link),
+                  !!rlang::sym(name) := "link"),
                 by = c("VAR_ID","ENTREZGENE",
                        "TRANSCRIPT_START",
                        "TRANSCRIPT_END"))
@@ -72,7 +72,7 @@ append_annotation_links <- function(
                 dplyr::left_join(
                   dplyr::rename(
                     annotation_links,
-                    !!rlang::sym(name) := link),
+                    !!rlang::sym(name) := "link"),
                   by = c("ENTREZGENE"))
             }
             if(vartype == "snv_indel"){
@@ -80,7 +80,7 @@ append_annotation_links <- function(
                 dplyr::left_join(
                   dplyr::rename(
                     annotation_links,
-                    !!rlang::sym(name) := link),
+                    !!rlang::sym(name) := "link"),
                   by = c("VAR_ID","ENTREZGENE"))
             }
           }

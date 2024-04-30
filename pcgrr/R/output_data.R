@@ -148,7 +148,7 @@ get_excel_sheets <- function(report = NULL){
           dplyr::select(-c("BM_CONTEXT")) |>
           dplyr::mutate(SAMPLE_ID = sample_id,
                         ACTIONABILITY_TIER = i) |>
-          dplyr::rename(SAMPLE_ALTERATION = MOLECULAR_ALTERATION) |>
+          dplyr::rename(SAMPLE_ALTERATION = "MOLECULAR_ALTERATION") |>
           dplyr::group_by(dplyr::across(-c("BM_PRIMARY_SITE"))) |>
           dplyr::summarise(
             BM_PRIMARY_SITE = paste(
@@ -212,7 +212,7 @@ get_excel_sheets <- function(report = NULL){
           dplyr::select(-c("BM_CONTEXT")) |>
           dplyr::mutate(SAMPLE_ID = sample_id,
                         ACTIONABILITY_TIER = i) |>
-          dplyr::rename(SAMPLE_ALTERATION = MOLECULAR_ALTERATION) |>
+          dplyr::rename(SAMPLE_ALTERATION = "MOLECULAR_ALTERATION") |>
           dplyr::group_by(dplyr::across(-c("BM_PRIMARY_SITE"))) |>
           dplyr::summarise(
             BM_PRIMARY_SITE = paste(

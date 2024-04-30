@@ -15,7 +15,7 @@ generate_report_data_expression <-
 
   if(as.logical(settings$conf$expression$similarity_analysis) == TRUE){
     pcg_report_expression[["similarity_analysis"]] <-
-      pcgrr:::load_expression_similarity(settings = settings)
+      load_expression_similarity(settings = settings)
   }
 
   if(settings$molecular_data$fname_expression_outliers_tsv != "None" &
