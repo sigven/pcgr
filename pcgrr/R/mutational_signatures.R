@@ -264,7 +264,7 @@ generate_report_data_signatures <-
           bootstrap_data[['goodness_of_fit']] <- data.frame()
           bootstrap_data[['contributions']] <- data.frame()
           while(i <= n_bootstrap_iterations){
-            mut_mat_bs <- MutationalPatterns:::.resample_mut_mat(
+            mut_mat_bs <- mutpat_resample_mut_mat(
               mut_matrix = mut_mat)
             fit_ref_bs <-
               MutationalPatterns::fit_to_signatures(
@@ -814,4 +814,33 @@ generate_report_data_rainfall <- function(variant_set,
            "labels" = labels, "cex" = 0.8, "cex_text" = 3)
   }
   return(pcg_report_rainfall)
+}
+
+#' MutationalPatterns Resample a mutation matrix
+#'
+#' Since this is an unexported function, copied verbatim from
+#' https://github.com/UMCUGenetics/MutationalPatterns/blob/ca9caf/R/fit_to_signatures_bootstrapped.R#L161
+#'
+#' The mutation matrix is resampled per column (sample).
+#' Resampling is done with replacement using the row weights as propabilities.
+#'
+#' @param mut_matrix mutation count matrix (dimensions: x mutation types
+#' X n samples)
+#'
+#' @return A resamples mutation matrix
+#'
+#' @noRd
+#'
+mutpat_resample_mut_mat <- function(mut_matrix) {
+  mut_mat_resampled <- apply(mut_matrix, 2, function(x) {
+    total_muts <- sum(x)
+    sample_weights <- x / total_muts
+    feature_rows <- sample(seq_along(x), total_muts, replace = TRUE, prob = sample_weights)
+    row_counts <- table(feature_rows)
+    index <- as.numeric(names(row_counts))
+    x[index] <- as.vector(row_counts)
+    x[-index] <- 0
+    return(x)
+  })
+  return(mut_mat_resampled)
 }
