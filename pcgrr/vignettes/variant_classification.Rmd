@@ -3,11 +3,23 @@ title: "Variant classification"
 output: rmarkdown::html_document
 ---
 
-## Tier models
+## Oncogenicity classification
 
-PCGR performs variant classification, meaning that variants are organized and prioritized according to clinical impact. Currently, PCGR implements its tier classsification framework along the proposed ACMG guidelines, as detailed below.
+ * CLINGEN_VICC_SBVS1 - Very high MAF (> 0.05 in gnomAD - any five major continental pops)
+ * CLINGEN_VICC_SBS1 - High MAF (> 0.01 in gnomAD - any five major continental pops)
+ * CLINGEN_VICC_SBP1 - Insilico support a benign effect on the gene or gene product (multiple lines of evidence (>= 7 algorithms) from dbNSFP)
+ * CLINGEN_VICC_SBP2 - Silent and intronic changes outside of the consensus splice site (VEP consequence)
+ * CLINGEN_VICC_OVS1 - Null variant - in bona fide tumor suppressor gene (predicted as LoF by LOFTEE, tumor suppressors from CGC/NCG/CancerMine)
+ * CLINGEN_VICC_OS3 - Located in a mutation hotspot, >= 50 samples with a variant at amino acid position, >= 10 samples with same amino acid change (cancerhotspots.org)
+ * CLINGEN_VICC_OM2 - Protein length changes from in-frame dels/ins in known oncogene/tumor suppressor genes or stop-loss variants in a tumor suppressor gene (tumor suppressors/oncogenes from CGC/NCG/CancerMine)
+ * CLINGEN_VICC_OM3 - Located in a mutation hotspot, < 50 samples with a variant at amino acid position, >= 10 samples with same amino acid change (cancerhotspots.org)
+ * CLINGEN_VICC_OP1 - Insilico support a damaging effect on the gene or gene product (multiple lines of evidence (>= 7 algorithms) from dbNSFP)
+ * CLINGEN_VICC_OP3 - Located in a mutation hotspot, < 10 samples with the same amino acid change (cancerhotspots.org)
+ * CLINGEN_VICC_OP4 - Absent from controls (gnomAD) / very low MAF ( < 0.0001 in all five major subpopulations)
+    
+## Clinical actionability classification
 
-### *pcgr_acmg*
+PCGR prioritizes and evaluates variants according to clinical actionability. Currently, PCGR implements its tier classsification framework along the proposed ACMG/AMP guidelines, as detailed below.
 
 This tier model attempts to adopt concensus recommendations by ACMG, as outlined in [Li et al., 2017](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5707196/):
 
@@ -17,10 +29,4 @@ This tier model attempts to adopt concensus recommendations by ACMG, as outlined
  - *Tier 2: Variants of potential clinical significance* - constitutes other variants linked to predictive, prognostic, or diagnostic biomarkers in the [CIViC database](http://civic.genome.wustl.edu) and the [Cancer Biomarkers Database](https://www.cancergenomeinterpreter.org/biomarkers) that are either
 	 - A: of strong clinical evidence in other tumor types/classes than the one specified by the user, OR
 	 - B: of weak clinical evidence (early trials, case reports etc.) in the same tumor type/class as specified by the user
- - *Tier 3: Variants of uncertain clinical significance* - includes other coding variants found in oncogenes or tumor suppressor genes
- - *Tier 4* - includes other coding variants
-
- For **copy number aberrations**, aberrations linked to Tier 1 & 2 are displayed, within following sections in the HTML report:
-
-  * *Copy number aberrations as biomarkers: Aberrations of strong clinical significance* (Tier 1)
-  * *Copy number aberrations as biomarkers: Aberrations of potential clinical significance* (Tier 2)
+ - *Tier 3: Variants of uncertain clinical significance* - includes other coding variants found in oncogenes or tumor suppressor genes (SNVs and indels only)

@@ -11,7 +11,12 @@
     /*height: 500px;*/
 }
 
-
+.quarto-title-banner {
+  /*height: 120px;*/
+  margin-left: -15px;
+  margin-right: -15px;
+  margin-top: -15px;
+}
 
 .value_box {
     width: 250px;

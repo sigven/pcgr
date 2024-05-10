@@ -106,8 +106,12 @@ The tab-separated values file with gene expression estimates __MUST__ contain th
 * `TargetID`
 * `TPM`
 
-The `TPM` column indicates the expression level of a given target, and  must be provided as _Transcripts per million_ (not log-transformed), a relatively common output measure from bluk RNA-seq pipelines. The `TargetID` should list transcript or gene identifiers, preferably at the transcript-level. Permitted identifier types including Ensembl/RefSeq identifiers for transcript-level expression estimates, and gene symbols and Ensembl gene identifiers for gene-level expression estimates.
+The `TPM` column indicates the expression level of a given target, and  must be provided as _Transcripts per million_ (not log-transformed), a relatively common output measure from bulk RNA-seq pipelines. The `TargetID` should list transcript or gene identifiers, preferably at the transcript level. Permitted identifier types including Ensembl/RefSeq identifiers for transcript-level expression estimates, and gene symbols and Ensembl gene identifiers for gene-level expression estimates.
 
-### Germline calls
+### Germline variant findings
 
-One may feed the compressed JSON file that is output from a cancer predisposition analysis with CPSR (https://github.com/sigven/cpsr) into PCGR through the `--cpsr_report` option. This will result in a dedicated germline section of the PCGR report.
+One may feed classified variant calls from a cancer predisposition analysis with CPSR (https://github.com/sigven/cpsr) into PCGR through the `--input_germline` option. Specifically, CPSR
+produces a tab-separated output file (`<sample_id>.cpsr.<assembly>.classification.tsv.gz`) that
+should be used as the value for `--input_germline`. This will generate a dedicated section on
+germline findings in the PCGR report, which in turn will allow the user to interrogate somatic findings
+in the context of potential cancer-predisposing germline variants for the individual analyzed. 

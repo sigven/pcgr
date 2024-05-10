@@ -535,7 +535,7 @@ def verify_required_args(arg_dict: dict, logger = None):
         err_msg = f"Required argument '--sample_id' has no/undefined value ({arg_dict['sample_id']})."
         error_message(err_msg, logger)
 
-    if len(arg_dict['sample_id']) <= 2 or len(arg_dict['sample_id']) > 35:
+    if len(arg_dict['sample_id']) <= 2 or len(arg_dict['sample_id']) > 37:
         err_msg = f"Sample name identifier ('--sample_id' = {arg_dict['sample_id']}) must be between 2 and 35 characters long"
         error_message(err_msg, logger)
     
