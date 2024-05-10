@@ -1,135 +1,135 @@
-#' Function that matches clinical evidence items (CIVIC, CBMDB)
-#' against somatic cancer variants detected in tumor
-#'
-#' @param sample_calls data frame with sample variants
-#' @param annotation_tags list with annotation tags for display in report
-#' @param eitems data frame with clinical evidence items
-#'
-#' @return list
-#' @export
-
-get_clin_assocs_snv_indel <- function(sample_calls,
-                                      annotation_tags = NULL,
-                                      eitems = NULL) {
-
-  invisible(assertthat::assert_that(!is.null(annotation_tags)))
-  invisible(assertthat::assert_that(!is.null(eitems)))
-  invisible(assertthat::assert_that(is.data.frame(sample_calls)))
-  invisible(assertthat::assert_that(is.data.frame(eitems)))
-  invisible(assertthat::assert_that(
-    "all" %in% names(annotation_tags) &
-      "tier_1_2_display" %in% names(annotation_tags)))
-
-  ## Initialize lists that hold clinical evidence items -
-  ## across evidence types (diagnostic/prognostic/predictive)
-  ## and across evidence levels
-  all_var_evidence_items <- data.frame()
-  variant_set <- data.frame()
-  clin_eitems_list <- list()
-  for (type in c("diagnostic", "prognostic", "predictive")) {
-    clin_eitems_list[[type]] <- list()
-    for (elevel in c("any", "A_B", "C_D_E")) {
-      clin_eitems_list[[type]][[elevel]] <- data.frame()
-    }
-  }
-
-  var_eitems <- list()
-  for (m in c("codon", "exon", "gene", "exact")) {
-    var_eitems[[m]] <- data.frame()
-  }
-
-  ## get clinical evidence items that associated with
-  ## query variants (non-regional - exact), civic + cgi
-  for (db in c("civic", "cgi")) {
-    var_eitems_exact <-
-      pcgrr::match_eitems_to_var(
-        sample_calls,
-        db = db,
-        colset = annotation_tags$all,
-        eitems = eitems,
-        region_marker = F)
-
-    var_eitems[["exact"]] <- var_eitems[["exact"]] |>
-      dplyr::bind_rows(var_eitems_exact) |>
-      pcgrr::remove_cols_from_df(
-        cnames = c("EITEM_CONSEQUENCE",
-                   "EITEM_CODON",
-                   "EITEM_EXON"))
-
-  }
-
-  ## get clinical evidence items that associated with
-  ## query variants (regional - codon/exon/gene)
-  var_eitems_regional <-
-    pcgrr::match_eitems_to_var(
-      sample_calls,
-      db = "civic",
-      colset = annotation_tags$all,
-      eitems = eitems,
-      region_marker = T)
-
-  ## for regional biomarkers - perform additional quality checks
-  ## (making sure variants are of correct consequence,
-  ## at the correct amino acid position etc)
-  for (m in c("codon", "exon", "gene")) {
-    if (NROW(var_eitems_regional) > 0) {
-      var_eitems[[m]] <-
-        pcgrr::qc_var_eitems(var_eitems = var_eitems_regional,
-                             marker_type = m)
-    }
-  }
-
-
-  var_eitems <- pcgrr::deduplicate_eitems(var_eitems = var_eitems,
-                                          target_type = "exact",
-                                          target_other =
-                                            c("codon", "exon", "gene"))
-
-  var_eitems <- pcgrr::deduplicate_eitems(var_eitems = var_eitems,
-                                          target_type = "codon",
-                                          target_other =
-                                            c("exon", "gene"))
-
-  ## limit evidence items to exact/codon and exon
-  ## (ignore biomarkers reported with a gene-level resolution)
-  all_var_evidence_items <- all_var_evidence_items |>
-    dplyr::bind_rows(var_eitems[["exact"]]) |>
-    dplyr::bind_rows(var_eitems[["codon"]]) |>
-    dplyr::bind_rows(var_eitems[["exon"]])
-
-  ## log the types and number of clinical
-  ## evidence items found (exact / codon / exon)
-  pcgrr::log_var_eitem_stats(var_eitems = var_eitems, target_type = "exact")
-  pcgrr::log_var_eitem_stats(var_eitems = var_eitems, target_type = "codon")
-  pcgrr::log_var_eitem_stats(var_eitems = var_eitems, target_type = "exon")
-
-  ## Organize all variants in a list object 'clin_items', organized through
-  ## 1) tumor type (query_ttype|any_ttype|other_ttype)
-  ## 2) evidence type (diagnostic|prognostic|predictive)
-  ## 3) clinical significance ('A_B','C_D_E','any')
-
-  clin_eitems <-
-    pcgrr::structure_var_eitems(
-      all_var_evidence_items,
-      annotation_tags = annotation_tags,
-      alteration_type = "MUT")
-
-  variant_set <- data.frame()
-  if (NROW(all_var_evidence_items) > 0) {
-    variant_tags <-
-      annotation_tags[["all"]][!annotation_tags[["all"]]
-                                              %in% c("CIVIC_ID",
-                                                     "CIVIC_ID_SEGMENT",
-                                                     "CGI_ID_SEGMENT",
-                                                     "CGI_ID")]
-    variant_set <-  all_var_evidence_items |>
-      dplyr::select(dplyr::one_of(variant_tags)) |>
-      dplyr::distinct()
-  }
-
-  return(list("clin_eitem" = clin_eitems, "variant_set" = variant_set))
-
-}
+# Function that matches clinical evidence items (CIVIC, CBMDB)
+# against somatic cancer variants detected in tumor
+#
+# @param sample_calls data frame with sample variants
+# @param annotation_tags list with annotation tags for display in report
+# @param eitems data frame with clinical evidence items
+#
+# @return list
+# @export
+#
+#get_clin_assocs_snv_indel <- function(sample_calls,
+#                                      annotation_tags = NULL,
+#                                      eitems = NULL) {
+#
+#  invisible(assertthat::assert_that(!is.null(annotation_tags)))
+#  invisible(assertthat::assert_that(!is.null(eitems)))
+#  invisible(assertthat::assert_that(is.data.frame(sample_calls)))
+#  invisible(assertthat::assert_that(is.data.frame(eitems)))
+#  invisible(assertthat::assert_that(
+#    "all" %in% names(annotation_tags) &
+#      "tier_1_2_display" %in% names(annotation_tags)))
+#
+#  ## Initialize lists that hold clinical evidence items -
+#  ## across evidence types (diagnostic/prognostic/predictive)
+#  ## and across evidence levels
+#  all_var_evidence_items <- data.frame()
+#  variant_set <- data.frame()
+#  clin_eitems_list <- list()
+#  for (type in c("diagnostic", "prognostic", "predictive")) {
+#    clin_eitems_list[[type]] <- list()
+#    for (elevel in c("any", "A_B", "C_D_E")) {
+#      clin_eitems_list[[type]][[elevel]] <- data.frame()
+#    }
+#  }
+#
+#  var_eitems <- list()
+#  for (m in c("codon", "exon", "gene", "exact")) {
+#    var_eitems[[m]] <- data.frame()
+#  }
+#
+#  ## get clinical evidence items that associated with
+#  ## query variants (non-regional - exact), civic + cgi
+#  for (db in c("civic", "cgi")) {
+#    var_eitems_exact <-
+#      pcgrr::match_eitems_to_var(
+#        sample_calls,
+#        db = db,
+#        colset = annotation_tags$all,
+#        eitems = eitems,
+#        region_marker = F)
+#
+#    var_eitems[["exact"]] <- var_eitems[["exact"]] |>
+#      dplyr::bind_rows(var_eitems_exact) |>
+#      pcgrr::remove_cols_from_df(
+#        cnames = c("EITEM_CONSEQUENCE",
+#                   "EITEM_CODON",
+#                   "EITEM_EXON"))
+#
+#  }
+#
+#  ## get clinical evidence items that associated with
+#  ## query variants (regional - codon/exon/gene)
+#  var_eitems_regional <-
+#    pcgrr::match_eitems_to_var(
+#      sample_calls,
+#      db = "civic",
+#      colset = annotation_tags$all,
+#      eitems = eitems,
+#      region_marker = T)
+#
+#  ## for regional biomarkers - perform additional quality checks
+#  ## (making sure variants are of correct consequence,
+#  ## at the correct amino acid position etc)
+#  for (m in c("codon", "exon", "gene")) {
+#    if (NROW(var_eitems_regional) > 0) {
+#      var_eitems[[m]] <-
+#        pcgrr::qc_var_eitems(var_eitems = var_eitems_regional,
+#                             marker_type = m)
+#    }
+#  }
+#
+#
+#  var_eitems <- pcgrr::deduplicate_eitems(var_eitems = var_eitems,
+#                                          target_type = "exact",
+#                                          target_other =
+#                                            c("codon", "exon", "gene"))
+#
+#  var_eitems <- pcgrr::deduplicate_eitems(var_eitems = var_eitems,
+#                                          target_type = "codon",
+#                                          target_other =
+#                                            c("exon", "gene"))
+#
+#  ## limit evidence items to exact/codon and exon
+#  ## (ignore biomarkers reported with a gene-level resolution)
+#  all_var_evidence_items <- all_var_evidence_items |>
+#    dplyr::bind_rows(var_eitems[["exact"]]) |>
+#    dplyr::bind_rows(var_eitems[["codon"]]) |>
+#    dplyr::bind_rows(var_eitems[["exon"]])
+#
+#  ## log the types and number of clinical
+#  ## evidence items found (exact / codon / exon)
+#  pcgrr::log_var_eitem_stats(var_eitems = var_eitems, target_type = "exact")
+#  pcgrr::log_var_eitem_stats(var_eitems = var_eitems, target_type = "codon")
+#  pcgrr::log_var_eitem_stats(var_eitems = var_eitems, target_type = "exon")
+#
+#  ## Organize all variants in a list object 'clin_items', organized through
+#  ## 1) tumor type (query_ttype|any_ttype|other_ttype)
+#  ## 2) evidence type (diagnostic|prognostic|predictive)
+#  ## 3) clinical significance ('A_B','C_D_E','any')
+#
+#  clin_eitems <-
+#    pcgrr::structure_var_eitems(
+#      all_var_evidence_items,
+#      annotation_tags = annotation_tags,
+#      alteration_type = "MUT")
+#
+#  variant_set <- data.frame()
+#  if (NROW(all_var_evidence_items) > 0) {
+#    variant_tags <-
+#      annotation_tags[["all"]][!annotation_tags[["all"]]
+#                                              %in% c("CIVIC_ID",
+#                                                     "CIVIC_ID_SEGMENT",
+#                                                     "CGI_ID_SEGMENT",
+#                                                     "CGI_ID")]
+#    variant_set <-  all_var_evidence_items |>
+#      dplyr::select(dplyr::one_of(variant_tags)) |>
+#      dplyr::distinct()
+#  }
+#
+#  return(list("clin_eitem" = clin_eitems, "variant_set" = variant_set))
+#
+#}
 
 
 #' Function that retrieves clinical evidence items (CIVIC, CBMDB) for

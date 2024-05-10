@@ -139,16 +139,16 @@ get_excel_sheets <- function(report = NULL){
           variant_class = "cna")
       if(NROW(tier_data$by_eitem) > 0){
         edata <- tier_data$by_eitem |>
-          dplyr::mutate(BM_REFERENCE = xfun::strip_html(
+          dplyr::mutate(BM_REFERENCE = strip_html(
             .data$BM_REFERENCE
           )) |>
-          dplyr::mutate(BM_MOLECULAR_PROFILE = xfun::strip_html(
+          dplyr::mutate(BM_MOLECULAR_PROFILE = strip_html(
             .data$BM_MOLECULAR_PROFILE
           )) |>
           dplyr::select(-c("BM_CONTEXT")) |>
           dplyr::mutate(SAMPLE_ID = sample_id,
                         ACTIONABILITY_TIER = i) |>
-          dplyr::rename(SAMPLE_ALTERATION = MOLECULAR_ALTERATION) |>
+          dplyr::rename(SAMPLE_ALTERATION = "MOLECULAR_ALTERATION") |>
           dplyr::group_by(dplyr::across(-c("BM_PRIMARY_SITE"))) |>
           dplyr::summarise(
             BM_PRIMARY_SITE = paste(
@@ -203,16 +203,16 @@ get_excel_sheets <- function(report = NULL){
           variant_class = "snv_indel")
       if(NROW(tier_data$by_eitem) > 0){
         edata <- tier_data$by_eitem |>
-          dplyr::mutate(BM_REFERENCE = xfun::strip_html(
+          dplyr::mutate(BM_REFERENCE = strip_html(
             .data$BM_REFERENCE
           )) |>
-          dplyr::mutate(BM_MOLECULAR_PROFILE = xfun::strip_html(
+          dplyr::mutate(BM_MOLECULAR_PROFILE = strip_html(
             .data$BM_MOLECULAR_PROFILE
           )) |>
           dplyr::select(-c("BM_CONTEXT")) |>
           dplyr::mutate(SAMPLE_ID = sample_id,
                         ACTIONABILITY_TIER = i) |>
-          dplyr::rename(SAMPLE_ALTERATION = MOLECULAR_ALTERATION) |>
+          dplyr::rename(SAMPLE_ALTERATION = "MOLECULAR_ALTERATION") |>
           dplyr::group_by(dplyr::across(-c("BM_PRIMARY_SITE"))) |>
           dplyr::summarise(
             BM_PRIMARY_SITE = paste(

@@ -349,7 +349,7 @@ load_dna_variants <- function(
     names(cols$cols)
 
   raw_col_check <-
-    tibble::has_name(calls_raw, compulsary_cols)
+    rlang::has_name(calls_raw, compulsary_cols)
   if (FALSE %in% raw_col_check) {
     missing_cols <-
       compulsary_cols[!raw_col_check]
