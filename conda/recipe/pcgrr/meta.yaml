@@ -20,6 +20,7 @@ requirements:
     - r-assertable
     - r-assertthat
     - bioconductor-biostrings
+    - r-cpsr
     - r-dplyr
     - r-dt
     - r-flexdashboard
@@ -52,6 +53,7 @@ requirements:
     - r-assertable
     - r-assertthat
     - bioconductor-biostrings
+    - r-cpsr
     - r-dplyr
     - r-dt
     - r-flexdashboard
