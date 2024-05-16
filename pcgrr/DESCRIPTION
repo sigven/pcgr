@@ -28,17 +28,15 @@ Remotes:
     sigven/cpsr,
     caravagnalab/CNAqc
 Imports:
-    openxlsx2,
-    quantiseqr,
-    yaml,
     assertable,
     assertthat,
     Biostrings,
     CNAqc,
     cpsr,
-    DT,
     dplyr,
+    DT,
     flexdashboard,
+    formattable,
     GenomeInfoDb,
     ggplot2,
     glue,
@@ -46,7 +44,9 @@ Imports:
     jsonlite,
     log4r,
     MutationalPatterns,
+    openxlsx2,
     plotly,
+    quantiseqr,
     quarto,
     readr,
     reshape2,
@@ -54,11 +54,11 @@ Imports:
     rmarkdown,
     rrapply,
     S4Vectors,
-    formattable,
     scales,
     stringr,
     stringi,
-    tidyr
+    tidyr,
+    yaml
 Depends:
     R (>= 4.0)
 Suggests:

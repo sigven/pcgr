@@ -19,85 +19,65 @@ requirements:
     - r-base ==4.2.3
     - r-assertable
     - r-assertthat
-    - bioconductor-biocgenerics
-    - r-biocmanager
     - bioconductor-biostrings
-    - r-caret
-    - r-data.table
-    - r-devtools
-    - r-dt
     - r-dplyr
+    - r-dt
     - r-flexdashboard
-    - bioconductor-genomicranges
+    - r-formattable
     - bioconductor-genomeinfodb
     - r-ggplot2
-    - r-ggpubr
     - r-glue
     - r-htmltools
-    - bioconductor-iranges
     - r-jsonlite
     - r-log4r
-    - r-magrittr
     - bioconductor-mutationalpatterns
     - r-plotly
+    - bioconductor-quantiseqr
     - r-quarto
     - quarto
-    - r-randomforest
-    - r-rcolorbrewer
+    - r-readr
     - r-reshape2
     - r-rlang
     - r-rmarkdown
-    - r-roxygen2
     - r-rrapply
     - bioconductor-s4vectors
     - r-scales
     - r-stringr
+    - r-stringi
     - r-tidyr
-    - r-upsetr
-    - r-usethis
-    - bioconductor-variantannotation
+    - r-yaml
 
   run:
     - r-base ==4.2.3
     - r-assertable
     - r-assertthat
-    - bioconductor-biocgenerics
-    - r-biocmanager
     - bioconductor-biostrings
-    - r-caret
-    - r-data.table
-    - r-devtools
-    - r-dt
     - r-dplyr
+    - r-dt
     - r-flexdashboard
-    - bioconductor-genomicranges
+    - r-formattable
     - bioconductor-genomeinfodb
     - r-ggplot2
-    - r-ggpubr
     - r-glue
     - r-htmltools
-    - bioconductor-iranges
     - r-jsonlite
     - r-log4r
-    - r-magrittr
     - bioconductor-mutationalpatterns
     - r-plotly
+    - bioconductor-quantiseqr
     - r-quarto
     - quarto
-    - r-randomforest
-    - r-rcolorbrewer
+    - r-readr
     - r-reshape2
     - r-rlang
     - r-rmarkdown
-    - r-roxygen2
     - r-rrapply
     - bioconductor-s4vectors
     - r-scales
     - r-stringr
+    - r-stringi
     - r-tidyr
-    - r-upsetr
-    - r-usethis
-    - bioconductor-variantannotation
+    - r-yaml
 
 test:
   commands:
