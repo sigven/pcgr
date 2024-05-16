@@ -5,7 +5,7 @@ on:
     branches:
       - master
       - bundle_update_2023
-      - ensembl_v111
+      - conda_deps
 env:
   atoken: ${{ secrets.ANACONDA_UPLOAD_TOKEN }}
   recipe_path: conda/recipe
@@ -30,7 +30,7 @@ jobs:
           environment-file: ${{ env.env_yml_path }}/condabuild.yml
       - name: 🐍 Conda pkg build and upload
         run: |
-          conda mambabuild ${recipe_path}/pcgrr -c conda-forge -c bioconda --token ${atoken} --quiet
+          conda mambabuild ${recipe_path}/pcgrr -c umccr -c conda-forge -c bioconda --token ${atoken}
   build_pcgr_conda_pkg:
     # When merging to one of the branches above and the commit message matches
     if: "startsWith(github.event.head_commit.message, 'Bump version:')"
@@ -131,9 +131,9 @@ jobs:
         with:
           ref: v${{ env.VERSION }}
       - name: 🏰 QEMU setup
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
       - name: 🏯 Buildx setup
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
       - name: DockerHub login
         uses: docker/login-action@v3
         with:
