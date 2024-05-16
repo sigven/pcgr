@@ -25,14 +25,12 @@ Description: Functions, tools and utilities for the generation of clinical
 License: MIT + file LICENSE
 biocViews:
 Remotes:
-    sigven/cpsr,
     caravagnalab/CNAqc
 Imports:
     assertable,
     assertthat,
     Biostrings,
     CNAqc,
-    cpsr,
     dplyr,
     DT,
     flexdashboard,
