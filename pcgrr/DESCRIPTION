@@ -60,6 +60,7 @@ Imports:
 Depends:
     R (>= 4.0)
 Suggests:
+    cpsr,
     testthat,
     devtools,
     BSgenome.Hsapiens.UCSC.hg19,
