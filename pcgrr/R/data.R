@@ -88,3 +88,8 @@
 #'
 "color_palette"
 
+#' TSV columns
+"tsv_cols"
+
+#' DT Display
+"dt_display"
