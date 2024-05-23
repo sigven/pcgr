@@ -5,13 +5,13 @@ on:
     branches:
       - master
       - bundle_update_2023
-      - ensembl_v111
+      - conda_deps
 env:
   atoken: ${{ secrets.ANACONDA_UPLOAD_TOKEN }}
   recipe_path: conda/recipe
   env_yml_path: conda/env/yml
   env_lock_path: conda/env/lock
-  VERSION: '1.4.1.9001' # versioned by bump2version
+  VERSION: '1.4.1.9002' # versioned by bump2version
 jobs:
   build_pcgrr_conda_pkg:
     # When merging to one of the branches above and the commit message matches
@@ -30,7 +30,7 @@ jobs:
           environment-file: ${{ env.env_yml_path }}/condabuild.yml
       - name: 🐍 Conda pkg build and upload
         run: |
-          conda mambabuild ${recipe_path}/pcgrr -c conda-forge -c bioconda --token ${atoken} --quiet
+          conda mambabuild ${recipe_path}/pcgrr -c umccr -c conda-forge -c bioconda --token ${atoken}
   build_pcgr_conda_pkg:
     # When merging to one of the branches above and the commit message matches
     if: "startsWith(github.event.head_commit.message, 'Bump version:')"
@@ -91,7 +91,7 @@ jobs:
           cp pcgrr/DESCRIPTION . # hack for pkgdown to work
           printf "pcgrr version:\n"
           Rscript -e "packageVersion('pcgrr')"
-          Rscript -e "pkgdown::deploy_to_branch(pkg = 'pcgrr', commit_message = paste(pkgdown:::construct_commit_message('.'), '- see https://sigven.github.io/pcgr/'), branch = 'gh-pages', new_process = FALSE)"
+          Rscript -e "pkgdown::deploy_to_branch(pkg = 'pcgrr', commit_message = 'Built PCGR website - see https://sigven.github.io/pcgr/', branch = 'gh-pages', new_process = FALSE)"
 
   docker_deploy:
     name: Build and deploy Docker
@@ -131,9 +131,9 @@ jobs:
         with:
           ref: v${{ env.VERSION }}
       - name: 🏰 QEMU setup
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
       - name: 🏯 Buildx setup
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
       - name: DockerHub login
         uses: docker/login-action@v3
         with:
