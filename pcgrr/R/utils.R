@@ -1023,6 +1023,20 @@ check_file_exists <- function(fname) {
   }
 }
 
+
+#' Create directory
+#'
+#' @param d Directory to create.
+#'
+#' @export
+mkdir <- function(d) {
+  if (!dir.exists(d)) {
+    dir.create(d, recursive = TRUE)
+  }
+  TRUE
+}
+
+
 # from https://github.com/yihui/xfun/blob/ccee265f74eb03b9d40d7167e8933b5c72e5892c/R/string.R#L329
 strip_html <- function(x) {
     x <- gsub("<!--.*?-->", "", x)

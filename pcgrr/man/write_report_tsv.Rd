@@ -2,8 +2,8 @@
 % Please edit documentation in R/main.R
 \name{write_report_tsv}
 \alias{write_report_tsv}
-\title{Function that writes contents of PCGR object to flexdashboard
-HTML reports}
+\title{Function that writes contents of PCGR object to various output formats
+(Rmarkdown/flexdashboard HTML reports, JSON, tab-separated etc)}
 \usage{
 write_report_tsv(report = NULL, variant_type = "snv_indel")
 }
@@ -12,11 +12,15 @@ write_report_tsv(report = NULL, variant_type = "snv_indel")
 
 \item{variant_type}{character indicating variant type for output TSV,
 i.e. 'snv_indel' or 'cna_gene'}
+
+\item{tier_model}{type of tier model}
+
+\item{output_format}{contents/file format of output
+(html/json/tsv/cna_tsv etc)}
+
+\item{flexdb}{logical indicating if HTML output should be dashboard}
 }
 \description{
-param report List object with all report data, settings etc.
-}
-\details{
-export
-Function that writes contents of PCGR object to a TSV file
+Function that writes contents of PCGR object to various output formats
+(Rmarkdown/flexdashboard HTML reports, JSON, tab-separated etc)
 }
