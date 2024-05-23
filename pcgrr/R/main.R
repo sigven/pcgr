@@ -313,13 +313,13 @@ generate_tier_tsv <- function(variant_set,
 #' Function that writes contents of PCGR object to various output formats
 #' (Rmarkdown/flexdashboard HTML reports, JSON, tab-separated etc)
 #'
-#' @param report List object with all report data (PCGR/CPSR), settings etc.
-#' @param tier_model type of tier model
-#' @param output_format contents/file format of output
+#' param report List object with all report data (PCGR/CPSR), settings etc.
+#' param tier_model type of tier model
+#' param output_format contents/file format of output
 #' (html/json/tsv/cna_tsv etc)
-#' @param flexdb logical indicating if HTML output should be dashboard
-
-#' @export
+#' param flexdb logical indicating if HTML output should be dashboard
+#'
+#' export
 # write_report <- function(report,
 #                                 tier_model = "pcgr_acmg",
 #                                 output_format = "html",

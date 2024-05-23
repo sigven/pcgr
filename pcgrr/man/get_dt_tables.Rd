@@ -5,10 +5,10 @@
 \title{Function that gathers data tables on actionable variants
 for display in report (tier 1 + tier 2)}
 \usage{
-get_dt_tables(report = NULL, tier = 1, variant_class = "cna")
+get_dt_tables(rep = NULL, tier = 1, variant_class = "cna")
 }
 \arguments{
-\item{report}{report object}
+\item{rep}{report object}
 
 \item{tier}{tier level}
 

@@ -31,16 +31,13 @@ Imports:
     assertthat,
     Biostrings,
     CNAqc,
-    DT,
     dplyr,
     DT,
-    flexdashboard,
     formattable,
     GenomeInfoDb,
     ggplot2,
     glue,
     htmltools,
-    jsonlite,
     log4r,
     MutationalPatterns,
     openxlsx2,
@@ -50,12 +47,10 @@ Imports:
     readr,
     reshape2,
     rlang,
-    rmarkdown,
     rrapply,
     S4Vectors,
     scales,
     stringr,
-    stringi,
     tidyr,
     yaml
 Depends:
@@ -63,6 +58,7 @@ Depends:
 Suggests:
     testthat,
     devtools,
+    stringi,
     BSgenome.Hsapiens.UCSC.hg19,
     BSgenome.Hsapiens.UCSC.hg38
 Encoding: UTF-8

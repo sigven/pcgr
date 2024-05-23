@@ -1115,25 +1115,25 @@ expand_biomarker_items <- function(
 #' Function that gathers data tables on actionable variants
 #' for display in report (tier 1 + tier 2)
 #'
-#' @param report report object
+#' @param rep report object
 #' @param tier tier level
 #' @param variant_class cna or snv_indel
 #'
 get_dt_tables <- function(
-    report = NULL,
+    rep = NULL,
     tier = 1,
     variant_class = 'cna'){
 
-  if(is.null(report)){
+  if(is.null(rep)){
     stop("report object is NULL")
   }
-  if(!variant_class %in% names(report$content)){
+  if(!variant_class %in% names(rep$content)){
     stop(paste0(
-      "report$content object does not contain '", variant_class,"'"))
+      "rep$content object does not contain '", variant_class,"'"))
   }
 
-  if(!"callset" %in% names(report$content[[variant_class]])){
-    stop("report$content$variant_class object does not contain 'callset'")
+  if(!"callset" %in% names(rep$content[[variant_class]])){
+    stop("rep$content$variant_class object does not contain 'callset'")
   }
 
   biomarker_assoc_summary <- data.frame()
@@ -1141,7 +1141,7 @@ get_dt_tables <- function(
   biomarker_context <- data.frame()
 
   var_eitems <-
-    report$content[[variant_class]]$callset$variant_display |>
+    rep$content[[variant_class]]$callset$variant_display |>
     dplyr::filter(
       !is.na(.data$ACTIONABILITY_TIER) &
         .data$ACTIONABILITY_TIER == tier) |>
@@ -1150,7 +1150,7 @@ get_dt_tables <- function(
   if(NROW(var_eitems) > 0){
     var_eitems <- var_eitems |>
       dplyr::inner_join(
-        report$content[[variant_class]]$callset$biomarker_evidence$items,
+        rep$content[[variant_class]]$callset$biomarker_evidence$items,
         by = c("VAR_ID","ACTIONABILITY_TIER",
                "VARIANT_CLASS","ENTREZGENE")
       ) |>

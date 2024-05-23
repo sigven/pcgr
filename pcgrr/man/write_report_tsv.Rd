@@ -12,15 +12,21 @@ write_report_tsv(report = NULL, variant_type = "snv_indel")
 
 \item{variant_type}{character indicating variant type for output TSV,
 i.e. 'snv_indel' or 'cna_gene'}
-
-\item{tier_model}{type of tier model}
-
-\item{output_format}{contents/file format of output
-(html/json/tsv/cna_tsv etc)}
-
-\item{flexdb}{logical indicating if HTML output should be dashboard}
 }
 \description{
-Function that writes contents of PCGR object to various output formats
-(Rmarkdown/flexdashboard HTML reports, JSON, tab-separated etc)
+param report List object with all report data (PCGR/CPSR), settings etc.
+param tier_model type of tier model
+param output_format contents/file format of output
+(html/json/tsv/cna_tsv etc)
+param flexdb logical indicating if HTML output should be dashboard
+}
+\details{
+export
+Function that writes contents of PCGR object to flexdashboard
+HTML reports
+
+param report List object with all report data, settings etc.
+
+export
+Function that writes contents of PCGR object to a TSV file
 }

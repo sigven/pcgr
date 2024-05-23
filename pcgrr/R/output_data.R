@@ -135,7 +135,8 @@ get_excel_sheets <- function(report = NULL){
     while(i <= 2){
       tier_data <-
         get_dt_tables(
-          report = pcg_report, tier = i,
+          rep = report,
+          tier = i,
           variant_class = "cna")
       if(NROW(tier_data$by_eitem) > 0){
         edata <- tier_data$by_eitem |>
@@ -199,7 +200,8 @@ get_excel_sheets <- function(report = NULL){
     while(i <= 2){
       tier_data <-
         get_dt_tables(
-          report = pcg_report, tier = i,
+          rep = report,
+          tier = i,
           variant_class = "snv_indel")
       if(NROW(tier_data$by_eitem) > 0){
         edata <- tier_data$by_eitem |>
