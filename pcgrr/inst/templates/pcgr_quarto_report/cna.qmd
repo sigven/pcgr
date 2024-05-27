@@ -59,7 +59,7 @@ The same somatic mutation may frequently match with multiple evidence items from
 
 dt_content_tier1 <- 
   pcgrr:::get_dt_tables(
-    report = pcg_report, tier = 1, variant_class = "cna")
+    rep = pcg_report, tier = 1, variant_class = "cna")
 
 # if(expression_present_cna == FALSE){
 #   dt_content_tier1[['by_gene']]$TPM_GENE <- NULL
@@ -203,7 +203,7 @@ htmltools::br()
 
 dt_content_tier2 <- 
   pcgrr:::get_dt_tables(
-    report = pcg_report, tier = 2, variant_class = "cna")
+    rep = pcg_report, tier = 2, variant_class = "cna")
 
 # if(expression_present_cna == FALSE){
 #   dt_content_tier2[['by_gene']]$TPM_GENE <- NULL

@@ -41,7 +41,7 @@ htmltools::br()
 
 dt_snv_content_tier1 <- 
   pcgrr:::get_dt_tables(
-    report = pcg_report, tier = 1, variant_class = "snv_indel")
+    rep = pcg_report, tier = 1, variant_class = "snv_indel")
 
 # if(expression_present_snv == FALSE){
 #   dt_snv_content_tier1[['by_gene']]$consTPM <- NULL
@@ -201,7 +201,7 @@ htmltools::br()
 
 dt_snv_content_tier2 <- 
   pcgrr:::get_dt_tables(
-    report = pcg_report, 
+    rep = pcg_report, 
     tier = 2, 
     variant_class = "snv_indel")
 
