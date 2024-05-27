@@ -296,6 +296,4 @@ bslib::card(
 
 ```
 
-<br>
-<hr>
-<br>
+

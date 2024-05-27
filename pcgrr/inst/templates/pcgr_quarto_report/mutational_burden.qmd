@@ -32,7 +32,7 @@ if(pcg_report$settings$conf$somatic_snv$tmb$tmb_display == "coding_non_silent"){
 bslib::page_fillable(
   bslib::layout_columns(
     col_widths = c(4,4,4),
-    height = "140px",
+    height = "130px",
     bslib::value_box(
       title = "TMB estimate",
       value = paste(
