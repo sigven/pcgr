@@ -1,6 +1,6 @@
 package:
   name: r-pcgrr
-  version: 1.4.1.9002 # versioned by bump2version
+  version: 1.4.1.9003 # versioned by bump2version
 
 source:
   path: ../../../pcgrr
@@ -22,13 +22,11 @@ requirements:
     - bioconductor-biostrings
     - r-dplyr
     - r-dt
-    - r-flexdashboard
     - r-formattable
     - bioconductor-genomeinfodb
     - r-ggplot2
     - r-glue
     - r-htmltools
-    - r-jsonlite
     - r-log4r
     - bioconductor-mutationalpatterns
     - r-plotly
@@ -38,7 +36,6 @@ requirements:
     - r-readr
     - r-reshape2
     - r-rlang
-    - r-rmarkdown
     - r-rrapply
     - bioconductor-s4vectors
     - r-scales
@@ -54,13 +51,11 @@ requirements:
     - bioconductor-biostrings
     - r-dplyr
     - r-dt
-    - r-flexdashboard
     - r-formattable
     - bioconductor-genomeinfodb
     - r-ggplot2
     - r-glue
     - r-htmltools
-    - r-jsonlite
     - r-log4r
     - bioconductor-mutationalpatterns
     - r-plotly
@@ -70,7 +65,6 @@ requirements:
     - r-readr
     - r-reshape2
     - r-rlang
-    - r-rmarkdown
     - r-rrapply
     - bioconductor-s4vectors
     - r-scales
