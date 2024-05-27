@@ -43,48 +43,57 @@ make_cnaqc_object <- function(
     only_colnames = F,
     quiet = T)
 
-  mutations <- callset_snv$variant |>
-    dplyr::mutate(
-      from = .data$POS,
-      to = .data$POS,
-      ref = .data$REF,
-      alt = .data$ALT,
-      chr = paste0('chr', .data$CHROM),
-      FILTER = "PASS",
-      DP = .data$DP_TUMOR,
-      VAF = .data$VAF_TUMOR,
-      NV = as.integer(
-        round(
-          .data$DP_TUMOR *
-            .data$VAF_TUMOR,
-          digits = 0)),
-      GENE = .data$SYMBOL,
-      is_driver = FALSE,
-      driver_label = paste0(
-        .data$SYMBOL," ",
-        .data$HGVSP)
-    ) |>
-    dplyr::mutate(
-      to = dplyr::if_else(
-        .data$VARIANT_CLASS == "insertion",
-        .data$POS + nchar(.data$ALT) - 1,
-        as.integer(.data$to)
-      )
-    ) |>
-    dplyr::mutate(is_driver = dplyr::if_else(
-      stringr::str_detect(
-        .data$ONCOGENICITY, "Oncogenic") &
-        .data$ONCOGENE == TRUE &
-        !stringr::str_detect(
-          .data$CONSEQUENCE, "frameshift"
-        ),
-      as.logical(TRUE),
-      as.logical(.data$is_driver)
-    )) |>
-    dplyr::select(c("chr", "from", "to", "ref",
-                  "alt", "FILTER", "DP", "NV",
-                  "VAF", "CONSEQUENCE", "GENE",
-                  "is_driver", "driver_label"))
+  mutations <- data.frame()
+
+  if(NROW(callset_snv$variant) > 0){
+
+    mutations <- callset_snv$variant |>
+      dplyr::mutate(
+        from = .data$POS,
+        to = .data$POS,
+        ref = .data$REF,
+        alt = .data$ALT,
+        chr = paste0('chr', .data$CHROM),
+        FILTER = "PASS",
+        DP = .data$DP_TUMOR,
+        VAF = .data$VAF_TUMOR,
+        NV = as.integer(
+          round(
+            .data$DP_TUMOR *
+              .data$VAF_TUMOR,
+            digits = 0)),
+        GENE = .data$SYMBOL,
+        is_driver = FALSE,
+        driver_label = paste0(
+          .data$SYMBOL," ",
+          .data$HGVSP)
+      ) |>
+      dplyr::mutate(
+        to = dplyr::if_else(
+          .data$VARIANT_CLASS == "insertion",
+          .data$POS + nchar(.data$ALT) - 1,
+          as.integer(.data$to)
+        )
+      ) |>
+      dplyr::mutate(is_driver = dplyr::if_else(
+        stringr::str_detect(
+          .data$ONCOGENICITY, "Oncogenic") &
+          .data$ONCOGENE == TRUE &
+          !stringr::str_detect(
+            .data$CONSEQUENCE, "frameshift"
+          ),
+        as.logical(TRUE),
+        as.logical(.data$is_driver)
+      )) |>
+      dplyr::select(c("chr", "from", "to", "ref",
+                    "alt", "FILTER", "DP", "NV",
+                    "VAF", "CONSEQUENCE", "GENE",
+                    "is_driver", "driver_label"))
+  }else{
+    ## Make a single dummy mutation if mutations are absent
+    data('example_dataset_CNAqc', package = 'CNAqc')
+    mutations <- example_dataset_CNAqc$mutations[3,]
+  }
 
   cna <- callset_cna$variant |>
     dplyr::mutate(

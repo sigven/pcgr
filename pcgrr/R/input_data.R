@@ -248,6 +248,11 @@ load_somatic_snv_indel <- function(
           n_excluded_calls,
           " variants aftering filtering of putative germline events"))
 
+      if(NROW(callset$variant) == 0){
+        pcgrr::log4r_warn(
+          "NO (n = 0) somatic variants remain after filtering of putative germline events")
+      }
+
       if(as.logical(
         settings$conf$somatic_snv$tumor_only[["exclude_nonexonic"]]) == TRUE &
         NROW(callset[['variant']]) > 0 &
@@ -256,6 +261,11 @@ load_somatic_snv_indel <- function(
         callset[['variant']] <- callset[['variant']] |>
           dplyr::filter(
             .data$EXONIC_STATUS == "exonic")
+
+        if(NROW(callset$variant) == 0){
+          pcgrr::log4r_warn(
+            "NO (n = 0) somatic variants remain after filtering of putative germline events")
+        }
       }
 
     }else{

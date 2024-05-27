@@ -79,18 +79,20 @@ generate_report <-
       #                        a_elem = "clinicaltrials")
     #}
 
+
+
+    rep[['content']][['snv_indel']][['callset']] <-
+      callset_snv
+    rep[['content']][['snv_indel']][['eval']] <-
+      TRUE
+    rep[['content']][['snv_indel']][['vstats']] <-
+      pcgrr::variant_stats_report(
+        callset = callset_snv,
+        vartype = "snv_indel",
+        name = "vstats")[['vstats']]
+
+
     if (NROW(callset_snv$variant) > 0) {
-
-      rep[['content']][['snv_indel']][['callset']] <-
-        callset_snv
-      rep[['content']][['snv_indel']][['eval']] <-
-        TRUE
-      rep[['content']][['snv_indel']][['vstats']] <-
-        pcgrr::variant_stats_report(
-          callset = callset_snv,
-          vartype = "snv_indel",
-          name = "vstats")[['vstats']]
-
       ## Estimate contribution of mutational signatures
       if (conf_somatic_snv[["mutational_signatures"]][["run"]] == T) {
 
