@@ -21,7 +21,7 @@ from argparse import RawTextHelpFormatter
 def cli():
 
     program_description = (f"Personal Cancer Genome Reporter (PCGR) workflow for clinical translation of "
-                           f"tumor omics data (SNVs/InDels, CNA, RNA expression, RNA fusions) - version: {pcgr_vars.PCGR_VERSION}")
+                           f"tumor omics data (SNVs/InDels, CNA, RNA expression) - version: {pcgr_vars.PCGR_VERSION}")
     program_options = "\n\t--input_vcf <INPUT_VCF>\n\t--vep_dir <VEP_DIR>\n\t--refdata_dir <REFDATA_DIR>\n\t" + \
         "--output_dir <OUTPUT_DIR>\n\t--genome_assembly <GENOME_ASSEMBLY>\n\t--sample_id <SAMPLE_ID>"
 
@@ -39,7 +39,7 @@ def cli():
     optional_signatures = parser.add_argument_group("Mutational signature options")
     optional_cna = parser.add_argument_group("Somatic copy number alteration (CNA) data options")
     optional_rna = parser.add_argument_group("Bulk RNA-seq and RNA fusion data options")
-    optional_germline = parser.add_argument_group("Germline variant options")    
+    #optional_germline = parser.add_argument_group("Germline variant options")    
     optional_other = parser.add_argument_group("Other options")
 
 
@@ -53,7 +53,7 @@ def cli():
     optional_assay.add_argument("--assay", dest="assay", default="WES", choices=[ "WGS", "WES","TARGETED"], help="Type of DNA sequencing assay performed for input data (VCF), default: %(default)s")
     optional_assay.add_argument("--effective_target_size_mb", type=float, default=34, dest="effective_target_size_mb", help="Effective target size in Mb (potentially limited by read depth) of sequencing assay (for TMB analysis) (default: %(default)s (WES/WGS))")
     optional_assay.add_argument("--tumor_only", action="store_true", help="Input VCF comes from tumor-only sequencing, calls will be filtered for variants of germline origin, (default: %(default)s)")
-    optional_assay.add_argument("--cell_line", action="store_true", help="Input VCF comes from tumor cell line sequencing (requires --tumor_only), calls will be filtered for variants of germline origin, (default: %(default)s)")
+    #optional_assay.add_argument("--cell_line", action="store_true", help="Input VCF comes from tumor cell line sequencing (requires --tumor_only), calls will be filtered for variants of germline origin, (default: %(default)s)")
     
     optional_sample.add_argument("--tumor_site", dest="tsite", type=int, default=0, help="Optional integer code to specify primary tumor type/site of query sample,\nchoose any of the following identifiers:\n" + str(pcgr_vars.tumor_sites) + "\n(default: %(default)s - any tumor type)")
     optional_sample.add_argument("--tumor_purity", type=float, dest="tumor_purity", help="Estimated tumor purity (between 0 and 1) (default: %(default)s)")
@@ -102,7 +102,7 @@ def cli():
     optional_tmb_msi.add_argument("--tmb_af_min", dest="tmb_af_min", default=0, help="If VCF INFO tag for allelic fraction (tumor) is specified and found, set minimum required allelic fraction for TMB calculation: default: %(default)s")
     optional_tmb_msi.add_argument("--estimate_msi", action="store_true", help="Predict microsatellite instability status from patterns of somatic mutations/indels, default: %(default)s")
 
-    optional_signatures.add_argument("--estimate_signatures", action="store_true", help="Estimate relative contributions of reference mutational signatures in query sample (re-fitting) and detect potential kataegis events, default: %(default)s")
+    optional_signatures.add_argument("--estimate_signatures", action="store_true", help="Estimate relative contributions of reference mutational signatures in query sample (re-fitting), default: %(default)s")
     optional_signatures.add_argument("--min_mutations_signatures", type=int, default=200, dest="min_mutations_signatures", help="Minimum number of SNVs required for re-fitting of mutational signatures (SBS) (default: %(default)s, minimum n = 100)")
     optional_signatures.add_argument("--all_reference_signatures", action="store_true", help="Use _all_ reference mutational signatures (SBS) during signature re-fitting rather than only those already attributed to the tumor type (default: %(default)s)")
     optional_signatures.add_argument("--include_artefact_signatures", action="store_true", help="Include sequencing artefacts in the collection of reference signatures (default: %(default)s")
@@ -120,13 +120,13 @@ def cli():
         "of databases for used in RNA expression similarity analysis, default: %(default)s") 
 
    
-    optional_germline.add_argument("--input_germline", dest="input_germline", help="CPSR-classified germline calls (file '<sample_id>.cpsr.<genome_assembly>.classification.tsv.gz')")
-    optional_germline.add_argument("--sample_id_germline", dest="sample_id_germline", help="Sample identifier for germline calls - used for verification of input_germline file")
+    #optional_germline.add_argument("--input_germline", dest="input_germline", help="CPSR-classified germline calls (file '<sample_id>.cpsr.<genome_assembly>.classification.tsv.gz')")
+    #optional_germline.add_argument("--sample_id_germline", dest="sample_id_germline", help="Sample identifier for germline calls - used for verification of input_germline file")
     
     optional_other.add_argument("--vcf2maf", action="store_true", help="Generate a MAF file for input VCF using https://github.com/mskcc/vcf2maf (default: %(default)s)")
     optional_other.add_argument("--vcfanno_n_proc", default=4, type=int, help="Number of vcfanno processes (option '-p' in vcfanno), default: %(default)s")
     optional_other.add_argument("--ignore_noncoding", action="store_true", help="Ignore non-coding (i.e. non protein-altering) variants in report, default: %(default)s")
-    #optional_other.add_argument("--include_trials", action="store_true", help="(Beta) Include relevant ongoing or future clinical trials, focusing on studies with molecularly targeted interventions")
+    #optional_other.add_argument("--include_trials", action="store_true", help="Include relevant ongoing or future clinical trials, focusing on studies with molecularly targeted interventions")
     optional_other.add_argument("--retained_info_tags", dest="retained_info_tags", default="None", help="Comma-separated string of VCF INFO tags from query VCF that should be kept in PCGR output TSV file")
     optional_other.add_argument("--force_overwrite", action="store_true", help="By default, the script will fail with an error if any output file already exists. You can force the overwrite of existing result files by using this flag, default: %(default)s")
     optional_other.add_argument("--version", action="version", version="%(prog)s " + str(pcgr_vars.PCGR_VERSION))

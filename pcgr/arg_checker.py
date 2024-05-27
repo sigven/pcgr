@@ -34,9 +34,9 @@ def verify_args(arg_dict):
             error_message(err_msg, logger)
 
     # check if input is cancer cell line, requires --tumor_only
-    if arg_dict['cell_line'] and not arg_dict['tumor_only']:
-        err_msg = 'Analysis of cell line (--cell_line) needs option --tumor_only'
-        error_message(err_msg, logger)
+    #if arg_dict['cell_line'] and not arg_dict['tumor_only']:
+    #    err_msg = 'Analysis of cell line (--cell_line) needs option --tumor_only'
+    #    error_message(err_msg, logger)
 
     # check that tumor primary site/type is set correctly (integer between 0 and 30)
     if arg_dict['tsite'] > max(pcgr_vars.tsites.keys()) or arg_dict['tsite'] < 0:
@@ -370,19 +370,19 @@ def verify_input_files(arg_dict):
             os.path.abspath(arg_dict["input_rna_exp"]))
         
     # check if input germline calls (CPSR) exist
-    if not arg_dict["input_germline"] is None:
-        if not os.path.exists(os.path.abspath(arg_dict["input_germline"])):
-            err_msg = "Input file (" + \
-                str(arg_dict["input_germline"]) + ") does not exist"
-            error_message(err_msg, logger)
-        if not (os.path.abspath(arg_dict["input_germline"]).endswith(".tsv.gz")):
-            err_msg = "File with CPSR-classified germline calls  (" + os.path.abspath(
-                arg_dict["input_germline"]) + ") does not have the correct file extension (.json.gz)"
-            error_message(err_msg, logger)
-        input_germline_basename = os.path.basename(
-            str(arg_dict["input_germline"]))
-        input_germline_dir = os.path.dirname(
-            os.path.abspath(arg_dict["input_germline"]))
+    #if not arg_dict["input_germline"] is None:
+    #    if not os.path.exists(os.path.abspath(arg_dict["input_germline"])):
+    #        err_msg = "Input file (" + \
+    #            str(arg_dict["input_germline"]) + ") does not exist"
+    #        error_message(err_msg, logger)
+    #    if not (os.path.abspath(arg_dict["input_germline"]).endswith(".tsv.gz")):
+    #        err_msg = "File with CPSR-classified germline calls  (" + os.path.abspath(
+    #            arg_dict["input_germline"]) + ") does not have the correct file extension (.json.gz)"
+    #        error_message(err_msg, logger)
+    #    input_germline_basename = os.path.basename(
+    #        str(arg_dict["input_germline"]))
+    #    input_germline_dir = os.path.dirname(
+    #        os.path.abspath(arg_dict["input_germline"]))
     
     vep_dir = verify_vep_cache(arg_dict, logger)
     refdata_assembly_dir = verify_refdata(arg_dict, logger, cpsr = True)
