@@ -5,7 +5,7 @@ on:
     branches:
       - master
       - bundle_update_2023
-      - conda_deps
+      - conda_deps2
 env:
   atoken: ${{ secrets.ANACONDA_UPLOAD_TOKEN }}
   recipe_path: conda/recipe
