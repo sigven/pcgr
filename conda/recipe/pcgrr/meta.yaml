@@ -16,7 +16,7 @@ requirements:
   build:
     - git
   host:
-    - r-base ==4.2.3
+    - r-base ==4.3.3
     - r-assertable
     - r-assertthat
     - bioconductor-biostrings
@@ -48,7 +48,7 @@ requirements:
     - r-yaml
 
   run:
-    - r-base ==4.2.3
+    - r-base ==4.3.3
     - r-assertable
     - r-assertthat
     - bioconductor-biostrings
