@@ -4,7 +4,7 @@ channels:
   - bioconda
   - conda-forge
 dependencies:
-  - pcgr::r-pcgrr ==1.4.1.9002 # versioned by bump2version
+  - pcgr::r-pcgrr ==1.4.1.9003 # versioned by bump2version
   - r-pkgdown
   - r-readr
   - pandoc
