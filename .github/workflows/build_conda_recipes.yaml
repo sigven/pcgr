@@ -30,7 +30,7 @@ jobs:
           environment-file: ${{ env.env_yml_path }}/condabuild.yml
       - name: 🐍 Conda pkg build and upload
         run: |
-          conda mambabuild ${recipe_path}/pcgrr -c umccr -c conda-forge -c bioconda --token ${atoken}
+          conda mambabuild ${recipe_path}/pcgrr -c conda-forge -c bioconda --token ${atoken}
   build_pcgr_conda_pkg:
     # When merging to one of the branches above and the commit message matches
     if: "startsWith(github.event.head_commit.message, 'Bump version:')"
