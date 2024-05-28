@@ -52,9 +52,7 @@ def cli():
 
     optional_assay.add_argument("--assay", dest="assay", default="WES", choices=[ "WGS", "WES","TARGETED"], help="Type of DNA sequencing assay performed for input data (VCF), default: %(default)s")
     optional_assay.add_argument("--effective_target_size_mb", type=float, default=34, dest="effective_target_size_mb", help="Effective target size in Mb (potentially limited by read depth) of sequencing assay (for TMB analysis) (default: %(default)s (WES/WGS))")
-    optional_assay.add_argument("--tumor_only", action="store_true", help="Input VCF comes from tumor-only sequencing, calls will be filtered for variants of germline origin, (default: %(default)s)")
-    #optional_assay.add_argument("--cell_line", action="store_true", help="Input VCF comes from tumor cell line sequencing (requires --tumor_only), calls will be filtered for variants of germline origin, (default: %(default)s)")
-    
+    optional_assay.add_argument("--tumor_only", action="store_true", help="Input VCF comes from tumor-only sequencing, calls will be filtered for variants of germline origin, (default: %(default)s)")    
     optional_sample.add_argument("--tumor_site", dest="tsite", type=int, default=0, help="Optional integer code to specify primary tumor type/site of query sample,\nchoose any of the following identifiers:\n" + str(pcgr_vars.tumor_sites) + "\n(default: %(default)s - any tumor type)")
     optional_sample.add_argument("--tumor_purity", type=float, dest="tumor_purity", help="Estimated tumor purity (between 0 and 1) (default: %(default)s)")
     optional_sample.add_argument("--tumor_ploidy", type=float, dest="tumor_ploidy", help="Estimated tumor ploidy (default: %(default)s)")
@@ -170,9 +168,7 @@ def run_pcgr(input_data, output_data,conf_options):
     assay_mode = 'Tumor vs. Control'
     oncogenicity_annotation = 1
     if conf_options['assay_properties']['vcf_tumor_only']:
-        assay_mode = 'Tumor-only'
-        if conf_options['assay_properties']['cell_line']:
-            assay_mode = 'Tumor-only (cell line)'
+        assay_mode = 'Tumor-only'        
             
     NCBI_BUILD_MAF = pcgr_vars.NCBI_BUILD_MAF
     if conf_options['genome_assembly'] == 'grch37':
@@ -201,8 +197,8 @@ def run_pcgr(input_data, output_data,conf_options):
         input_rna_fusion = os.path.join(input_data['rna_fusion_dir'], input_data['rna_fusion_basename'])
     if input_data['rna_expression_basename'] != 'NA':
         input_rna_expression = os.path.join(input_data['rna_expression_dir'], input_data['rna_expression_basename'])
-    if input_data['germline_basename'] != 'NA':
-        input_germline_cpsr = os.path.join(input_data['germline_dir'], input_data['germline_basename'])
+    #if input_data['germline_basename'] != 'NA':
+    #    input_germline_cpsr = os.path.join(input_data['germline_dir'], input_data['germline_basename'])
     if input_data['pon_vcf_basename'] != 'NA':
         pon_vcf = os.path.join(input_data['pon_vcf_dir'], input_data['pon_vcf_basename'])
 

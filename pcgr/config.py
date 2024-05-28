@@ -55,13 +55,10 @@ def create_config(arg_dict, workflow = "PCGR"):
         conf_options['assay_properties']['type'] = str(arg_dict['assay'])
         conf_options['assay_properties']['vcf_tumor_only'] = 0
         conf_options['assay_properties']['mode'] = "Tumor-Control"
-        #conf_options['assay_properties']['cell_line'] = int(arg_dict['cell_line'])
         conf_options['assay_properties']['effective_target_size_mb'] = float(arg_dict['effective_target_size_mb'])
         if int(arg_dict['tumor_only']) == 1:
             conf_options['assay_properties']['vcf_tumor_only'] = 1
             conf_options['assay_properties']['mode'] = "Tumor-Only"
-            if int(arg_dict['cell_line']) == 1:
-                conf_options['assay_properties']['mode'] = "Cell line (Tumor-Only)"
         
         if not arg_dict['tumor_purity'] is None:
             conf_options['sample_properties']['tumor_purity'] = float(arg_dict['tumor_purity'])

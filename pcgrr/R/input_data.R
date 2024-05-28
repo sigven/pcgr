@@ -837,7 +837,7 @@ load_dna_variants <- function(
 
       pcgrr::log4r_info(
         paste0("Assigning variants to tiers of clinical significance",
-               " - ACMG/AMP guidelines"))
+               " - somatic actionability guidelines (ACMG/AMP)"))
       results <- pcgrr::assign_acmg_tiers(
         vartype = vartype,
         variants_df = results$variant,
