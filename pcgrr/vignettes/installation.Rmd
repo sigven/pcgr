@@ -31,7 +31,7 @@ pcgr --version
 
 ### Data
 
-- For downloading the data bundle, see [STEP 1](#step1) further below.
+- For downloading the reference data bundle and VEP cache, see [STEP 1](#step1) further below.
 
 ### Docker
 
@@ -40,7 +40,8 @@ pcgr --version
 
 ## Detailed Installation
 
-PCGR requires a __data bundle__ that contains the reference data,
+PCGR requires a __data bundle__ that contains the reference data, 
+a __cache for VEP__ (Variant Effect Predictor), 
 __sample inputs__ (e.g. somatic variants in a VCF), and an
 __output directory__ to output the results to.
 
@@ -54,21 +55,34 @@ Here's an example scenario that will be used in the following sections:
 
 <a name="step1"></a>
 
-### STEP 1: Download data bundle
+### STEP 1: Download data bundle and VEP cache
 
-Download and unpack the human assembly-specific data bundle:
+A) Download and unpack the assembly-specific reference data bundle needed for PCGR:
 
-- [grch37 data bundle - 20220203](http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch37.20220203.tgz) (approx 20Gb)
-- [grch38 data bundle - 20220203](http://insilico.hpc.uio.no/pcgr/pcgr.databundle.grch38.20220203.tgz) (approx 21Gb)
+- [grch37 data bundle - 20240527](http://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20240527.grch37.tgz) (approx 5.6Gb)
+- [grch38 data bundle - 20240527](http://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20240527.grch38.tgz) (approx 5.6Gb)
 
 - Example:
 
 ```bash
 GENOME="grch38" # or "grch37"
-BUNDLE_VERSION="20220203"
-BUNDLE="pcgr.databundle.${GENOME}.${BUNDLE_VERSION}.tgz"
+BUNDLE_VERSION="20240527"
+BUNDLE="pcgr_ref_data.${BUNDLE_VERSION}.${GENOME}.tgz"
 
 wget http://insilico.hpc.uio.no/pcgr/${BUNDLE}
+gzip -dc ${BUNDLE} | tar xvf -
+```
+
+B) Download and unpack the VEP cache (need for VEP - Variant Effect Predictor):
+
+- Example:
+
+```bash
+GENOME="GRCh38" # or "GRCh37"
+VEP_VERSION="111"
+CACHE="homo_sapiens_vep_${VEP_VERSION}.${GENOME}.tar.gz"
+
+wget https://ftp.ensembl.org/pub/release-111/variation/indexed_vep_cache/${BUNDLE}
 gzip -dc ${BUNDLE} | tar xvf -
 ```
 
@@ -157,7 +171,7 @@ mamba create --prefix ${PCGR_CONDA_ENV_DIR}/pcgrr --file ${PCGR_CONDA_ENV_DIR}/l
 ## See https://github.com/conda-forge/miniforge/issues/165#issuecomment-860233092
 ```
 
-The above process takes 10-15min when installing from scratch. In the end, you
+The above process takes 10-15 minutes when installing from scratch. In the end, you
 can confirm your conda environments have been installed correctly (notice how
 the paths are different to the `base` env installation after using the
 `--prefix` option above):
