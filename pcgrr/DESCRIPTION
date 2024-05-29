@@ -1,7 +1,7 @@
 Package: pcgrr
 Type: Package
 Title: Personal Cancer Genome ReporteR
-Version: 1.4.1.9003
+Version: 1.4.1.9004
 Date: 2024-04-27
 Authors@R:
     c(person(given = "Sigve",
