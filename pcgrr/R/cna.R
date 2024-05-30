@@ -91,8 +91,7 @@ make_cnaqc_object <- function(
                     "is_driver", "driver_label"))
   }else{
     ## Make a single dummy mutation if mutations are absent
-    data('example_dataset_CNAqc', package = 'CNAqc')
-    mutations <- example_dataset_CNAqc$mutations[3,]
+    mutations <- CNAqc::example_dataset_CNAqc$mutations[3,]
   }
 
   cna <- callset_cna$variant |>
