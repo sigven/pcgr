@@ -38,6 +38,10 @@ pcgr --version
 - If you know what [Docker](https://www.docker.com/) is, instead of using the above conda method
   you can jump straight to the [PCGR Docker setup](#dockersetup) section.
 
+<br>
+<hr>
+<br>
+
 ## Detailed Installation
 
 PCGR requires a __data bundle__ that contains the reference data, 
@@ -57,7 +61,7 @@ Here's an example scenario that will be used in the following sections:
 
 ### STEP 1: Download data bundle and VEP cache
 
-A) Download and unpack the assembly-specific reference data bundle needed for PCGR:
+**A)** Download and unpack the assembly-specific reference data bundle needed for PCGR:
 
 - [grch37 data bundle - 20240527](http://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20240527.grch37.tgz) (approx 5.6Gb)
 - [grch38 data bundle - 20240527](http://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20240527.grch38.tgz) (approx 5.6Gb)
@@ -73,7 +77,7 @@ wget http://insilico.hpc.uio.no/pcgr/${BUNDLE}
 gzip -dc ${BUNDLE} | tar xvf -
 ```
 
-B) Download and unpack the VEP cache (need for VEP - Variant Effect Predictor):
+**B)** Download and unpack the VEP cache (need for VEP - Variant Effect Predictor):
 
 - Example:
 
@@ -82,7 +86,7 @@ GENOME="GRCh38" # or "GRCh37"
 VEP_VERSION="111"
 CACHE="homo_sapiens_vep_${VEP_VERSION}.${GENOME}.tar.gz"
 
-wget https://ftp.ensembl.org/pub/release-111/variation/indexed_vep_cache/${BUNDLE}
+wget https://ftp.ensembl.org/pub/release-111/variation/indexed_vep_cache/${CACHE}
 gzip -dc ${BUNDLE} | tar xvf -
 ```
 

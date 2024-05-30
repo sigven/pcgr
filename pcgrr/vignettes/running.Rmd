@@ -17,18 +17,22 @@ By default, PCGR expects that the input VCF comes from whole-exome sequencing. T
 
  If the input VCF comes from a targeted sequencing assay/panel (i.e. `--assay TARGETED`), the target size of the assay/panel should be adjusted accordingly, which is critical for tumor mutational burden estimation. Assay target size, reflecting the _protein-coding portion of the assayed genomic region_ in megabases, can be configured through the following option:
 
- * `--target_size_mb <value>`
+ * `--effective_target_size_mb <value>`
+ 
+Ideally, this should reflect the _callable_ target size of the assay, i.e. the size of the target regions for which coding variants is sufficiently covered (i.e. with a certain sequencing depth) by the sequencing assay. This can be estimated by the user based on the design of the sequencing assay, or by using tools such as [mosdepth]().
 
 ### Tumor-control vs. tumor-only
 
 By default, PCGR expects that the input VCF contains somatic variants identified from a tumor-control sequencing setup. This implies that the VCF contains information with respect to variant allelic depth/support both for the tumor sample and the corresponding control sample.
 
-If the input VCF comes from a __tumor-only__ assay, turn on the `--tumor_only` option. In this mode, PCGR conducts a set of successive filtering steps on the raw input set of variants, aiming to exclude the majority of germline variants from the tumor-only input set. In addition to default filtering applied against variants found in the gnomAD/1000 Genomes Project databases (population-specific allele frequency thresholds can be configured, see below), additional filtering procedures can be explicitly set, i.e.:
+If the input VCF comes from a __tumor-only__ assay, turn on the `--tumor_only` option. In this mode, PCGR conducts a set of successive filtering steps on the raw input set of variants, aiming to exclude the majority of germline variants from the tumor-only input set. In addition to default filtering applied against variants found in the gnomAD database (population-specific allele frequency thresholds can be configured, see below), additional filtering procedures can be explicitly set, i.e.:
 
-* `--exclude_dbsnp_nonsomatic` (recommended)
+* `--exclude_dbsnp_nonsomatic`
 * `--exclude_likely_het_germline`
 * `--exclude_likely_hom_germline`
 * `--exclude_nonexonic`
+
+Users should note that these filters may occasionally remove true somatic variants, and should thus be used with caution.
 
 If the user has provided a [panel-of-normals VCF file](input.html#panel-of-normals-vcf) as input(`--pon_vcf`), one may also opt to remove variants found in that variant collection using a dedicated option:
 
@@ -41,11 +45,18 @@ __IMPORTANT NOTE 2__: If you run PCGR on tumor-only WGS assays, we strongly reco
 
 ### Sample properties
 
-A few properties of the tumor sample can be fed to the report, currently only used for display/reporting:
+A few selected properties of the tumor sample that should be determined prior to PCGR analysis can be provided, currently only used for display/reporting:
 
 * `--tumor_ploidy <value>` - ploidy estimate
 * `--tumor_purity <value>` - purity estimate
-* `--cell_line` - cell line sample
+
+#### Tumor site
+
+The primary tissue/site of the tumor sample that is analyzed can and should be be provided, through the following option:
+
+* `--tumor_site <value>`
+
+This option takes a value between 0 and 30, reflecting the main primary sites/tissues for human cancers. Note that the default value is __0__ (implies __Any__ tissue/site), which essentially prohibits the presence of [tier 1 variants](variant_classification.html) occurring in the report. If you want to check the nature of cancer subtypes attributed to each of the primary tissue/sites, take a look at the [table with phenotype terms and associated primary sites](primary_tumor_sites.html).
 
 ### Allelic support
 
@@ -65,13 +76,12 @@ If these tags are set correctly, one may set thresholds (sequencing depth and/or
 - `--control_dp_min <value>`
 - `--control_af_max <value>`
 
-### Tumor site
+#### Tumor mutational burden (TMB)
 
-The primary tissue/site of the tumor sample that is analyzed can and should be be provided, through the following option:
+If tags for allelic support is provided in the VCF and configured by the user, users can configure the TMB calculation by setting minimum requirements for sequencing coverage and allelic fraction, i.e.:
 
-* `--tumor_site <value>`
-
-This option takes a value between 0 and 30, reflecting the main primary sites/tissues for human cancers. Note that the default value is __0__ (implies __Any__ tissue/site), which essentially prohibits the presence of [tier 1 variants](variant_classification.html) occurring in the report. If you want to check the nature of cancer subtypes attributed to each of the primary tissue/sites, take a look at the [table with phenotype terms and associated primary sites](primary_tumor_sites.html).
+- `--tmb_dp_min <value>`
+- `--tmb_af_min <value>`
 
 ### Large input sets (VCF)
 
@@ -282,7 +292,7 @@ $ (base) conda activate pcgr
 $ (pcgr)
 pcgr \
     --refdata_dir /Users/you/dir2/data \
-    --vep_dir /Users/you/dir3/vep \
+    --vep_dir /Users/you/dir3/vep/.vep \
     --output_dir /Users/you/dir4/pcgr_outputs \
     --sample_id tumor_sample.COAD \
     --genome_assembly grch37 \
@@ -300,16 +310,19 @@ pcgr \
     --force_overwrite
 ```
 
-This command will run the Conda-based PCGR workflow and produce the following files in the _examples_ folder:
+This command will run the Conda-based PCGR workflow and produce the following files in the _/Users/you/dir4/pcgr_outputs_ folder:
 
 | N | File | Description |
 |---|------|-------------|
-| 1 | __<sample_id>.pcgr.grch37.html__ | An interactive HTML report for clinical interpretation (quarto) |
-| 2 | __<sample_id>.pcgr.grch37.flexdb.html__ | An interactive HTML report for clinical interpretation (flexdashboard) |
-| 3 | __<sample_id>.pcgr.grch37.vcf.gz (.tbi)__ | Bgzipped VCF file with rich set of annotations for precision oncology |
-| 4 | __<sample_id>.pcgr.grch37.pass.vcf.gz (.tbi)__ | Bgzipped VCF file with rich set of annotations for precision oncology (PASS variants only) |
-| 5 | __<sample_id>.pcgr.grch37.pass.tsv.gz__ | Compressed vcf2tsv-converted file with rich set of annotations for precision oncology |
-| 6 | __<sample_id>.pcgr.grch37.snvs_indels.tiers.tsv__ | Tab-separated values file with variants organized according to tiers of functional relevance |
-| 7 | __<sample_id>.pcgr.grch37.mutational_signatures.tsv__ | Tab-separated values file with information on contribution of mutational signatures |
-| 9 | __pcgr.grch37.cna_segments.tsv.gz__ | Compressed tab-separated values file with annotations of gene transcripts that overlap with somatic copy number aberrations |
-|10 | __pcgr_config.rds__ | PCGR configuration object (RDS format), mostly for debugging purposes |
+| 1 | __\<sample_id\>.pcgr.grch37.html__ | An interactive HTML report for clinical interpretation (quarto-based) |
+| 2 | __\<sample_id\>.pcgr.grch37.xlsx__ | An excel workbook with multiple sheets of annotations (Assay & sample info/SNVs & InDels/CNAs/Biomarkers/TMB/MSI), amenable for aggregation analysis across multiple samples |
+| 3 | __\<sample_id\>.pcgr.grch37.vcf.gz (.tbi)__ | Bgzipped VCF file with rich set of variant annotations to support interpretation |
+| 4 | __\<sample_id\>.pcgr.grch37.pass.vcf.gz (.tbi)__ | Bgzipped VCF file with rich set of variant annotations to support interpretation (PASS variants only) |
+| 5 | __\<sample_id\>.pcgr.grch37.pass.tsv.gz__ | Compressed vcf2tsv-converted file with rich set of variant annotations to support interpretation |
+| 6 | __\<sample_id\>.pcgr.grch37.conf.yaml__ | PCGR configuration data (YAML), as generated by pre-reporting annotation workflow |
+| 7 | __\<sample_id\>.pcgr.grch37.cna_segments.tsv.gz__ | Tab-separated values file with raw copy number segments, per affected transcript |
+| 8 | __\<sample_id\>.pcgr.grch37.cna_gene_ann.tsv.gz__ | Tab-separated values file with genes subject to copy number alteration, including actionability assessment |
+| 9 | __\<sample_id\>.pcgr.grch37.tmb.tsv__ | Tab-separated values file with information on TMB estimates |
+| 10 | __\<sample_id\>.pcgr.grch37.snv_indel_ann.tsv.gz__ | Tab-separated values file with key SNV/InDel variant annotations, including oncogenicity/actionability assessment |
+
+
