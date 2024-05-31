@@ -29,6 +29,7 @@ requirements:
     - r-htmltools
     - r-log4r
     - bioconductor-mutationalpatterns
+    - r-openxlsx2
     - r-plotly
     - bioconductor-quantiseqr
     - r-quarto
@@ -58,6 +59,7 @@ requirements:
     - r-htmltools
     - r-log4r
     - bioconductor-mutationalpatterns
+    - r-openxlsx2
     - r-plotly
     - bioconductor-quantiseqr
     - r-quarto
