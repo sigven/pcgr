@@ -30,6 +30,7 @@ Imports:
     assertable,
     assertthat,
     Biostrings,
+    caret,
     CNAqc,
     dplyr,
     DT,
