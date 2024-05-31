@@ -25,12 +25,9 @@ navbar:
   type: light
   bg: info
   structure:
-    left:  [home, installation, running, articles, faq, changelog]
-    right: [reference, search, github]
+    left:  [installation, running, articles, faq, changelog]
+    right: [search, reference, github]
   components:
-    home:
-      text: Intro
-      href: index.html
     installation:
       text: Installation
       href: articles/installation.html

@@ -76,26 +76,27 @@ The PoN VCF file needs to contain the following.
 2. Each record in the PoN VCF file needs to contain the `PANEL_OF_NORMALS` flag in the INFO field
 
 
-### Copy number segments
+### Copy number segments - allele-specific
 
-The tab-separated values file with copy number aberrations __MUST__ contain the following four columns:
+The tab-separated values file with allele-specific copy number aberrations __MUST__ contain the following four columns:
 
 * `Chromosome`
 * `Start`
 * `End`
-* `Segment_Mean`
+* `nMajor`
+* `nMinor`
 
-Here, _Chromosome_, _Start_, and _End_ denote the chromosomal segment, and _Segment_Mean_ denotes the log(2) ratio for a particular segment, which is a common output of somatic copy number alteration callers. Note that coordinates must be **one-based** (i.e. chromosomes start at 1, not 0). Below shows the initial part of a copy number segment file that is formatted correctly according to PCGR's requirements:
+Here, _Chromosome_, _Start_, and _End_ denote the chromosomal segment, while _nMajor_ and _nMinor_ denote major and minor copy number for particular segment, a standard output of somatic copy number alteration callers. Note that coordinates must be **one-based** (i.e. chromosomes start at 1, not 0), and that copy numbers should be formatted as whole integers, not floating values. Below shows the initial part of a copy number segment file that is formatted correctly according to PCGR's requirements:
 
-      Chromosome	Start	End	Segment_Mean
-      1 3218329 3550598 0.0024
-      1 3552451 4593614 0.1995
-      1 4593663 6433129 -1.0277
+      Chromosome	Start	End	nMajor nMinor
+      1 3218329 3550598 1 0
+      1 3552451 4593614 1 1
+      1 4593663 6433129 2 1
 
-Importantly, you can configure predefined log(2) thresholds for segments that are considered to be high-level copy-number amplifications and homozygous deletions, through the following options:
+Importantly, you can configure predefined thresholds for segments that are considered to be high-level copy-number amplifications through the following option:
 
-* `--logr_gain`: minimum log(2) value for a segment to be considered an amplification, _default 0.8_
-* `--logr_homdel`: maximum log(2) value for a segment to be considered a homozygous deletion, _default -0.8_
+* `--n_copy_gain`: minimum (total) copy number for a segment to be considered an amplification, _default 6_
+
 
 ### Gene expression
 
@@ -108,10 +109,3 @@ The tab-separated values file with gene expression estimates __MUST__ contain th
 
 The `TPM` column indicates the expression level of a given target, and  must be provided as _Transcripts per million_ (not log-transformed), a relatively common output measure from bulk RNA-seq pipelines. The `TargetID` should list transcript or gene identifiers, preferably at the transcript level. Permitted identifier types including Ensembl/RefSeq identifiers for transcript-level expression estimates, and gene symbols and Ensembl gene identifiers for gene-level expression estimates.
 
-### Germline variant findings
-
-One may feed classified variant calls from a cancer predisposition analysis with CPSR (https://github.com/sigven/cpsr) into PCGR through the `--input_germline` option. Specifically, CPSR
-produces a tab-separated output file (`<sample_id>.cpsr.<assembly>.classification.tsv.gz`) that
-should be used as the value for `--input_germline`. This will generate a dedicated section on
-germline findings in the PCGR report, which in turn will allow the user to interrogate somatic findings
-in the context of potential cancer-predisposing germline variants for the individual analyzed. 

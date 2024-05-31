@@ -401,7 +401,7 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
    likely_benign_upper_limit = -1
    likely_benign_lower_limit = -6
    benign_upper_limit = -7
-   likely_oncogenic_lower_limit = 5
+   likely_oncogenic_lower_limit = 4
    likely_oncogenic_upper_limit = 9
    oncogenic_lower_limit = 10
 

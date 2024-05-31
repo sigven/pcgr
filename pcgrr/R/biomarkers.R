@@ -1119,6 +1119,8 @@ expand_biomarker_items <- function(
 #' @param tier tier level
 #' @param variant_class cna or snv_indel
 #'
+#' @export
+#'
 get_dt_tables <- function(
     rep = NULL,
     tier = 1,

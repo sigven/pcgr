@@ -7,21 +7,29 @@
 
 The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for translation of individual tumor genomes for precision cancer medicine.
 
-PCGR interprets primarily **somatic SNVs/InDels and copy number aberrations**. The software extends basic gene and variant annotations from the [Ensembl's Variant Effect Predictor (VEP)](http://www.ensembl.org/info/docs/tools/vep/index.html) with oncology-relevant, up-to-date annotations retrieved flexibly through [vcfanno](https://github.com/brentp/vcfanno), and produces interactive HTML reports intended for clinical interpretation. PCGR can perform multiple types of analyses, including:
+PCGR interprets primarily somatic SNVs/InDels and copy number aberrations, and has additional support for interpretation of bulk RNA-seq expression data. The software produces interactive HTML reports intended for clinical interpretation. PCGR can perform multiple types of analyses, including:
 
--   Somatic variant classification (ACMG/AMP)
-    -   mapping the therapeutic and prognostic implications of somatic DNA aberrations
+-   Variant classification
+    -   according to *oncogenicity*: evaluating the oncogenic potential of somatic DNA aberrations (VICC/CGC/ClinGen guidelines)
+    -   according to *actionability*: mapping the therapeutic, diagnostic, and prognostic implications of somatic DNA aberrations (ACMG/AMP guidelines)
 -   Tumor mutational burden (TMB) estimation
 -   Tumor-only analysis (variant filtering)
 -   Mutational signature analysis
 -   Kataegis detection
 -   Microsatellite instability (MSI) classification
+-   RNA expression analysis - outlier detection, similarity analysis, and immune contexture profiling
 
 If you want to interrogate germline variants and their relation to cancer predisposition, we recommend trying the accompanying tool [Cancer Predisposition Sequencing Reporter (CPSR)](https://github.com/sigven/cpsr).
 
-![PCGR overview](pcgrr/pkgdown/assets/img/pcgr_dashboard_views.png)
+![PCGR screenshot 1](pcgrr/pkgdown/assets/img/sc2.png)
+![PCGR screenshot 2](pcgrr/pkgdown/assets/img/sc1.png)
+![PCGR screenshot 3](pcgrr/pkgdown/assets/img/sc3.png)
 
 ### News
+
+-   *May 2024*: **2.x.x release**
+    - Massive reference data bundle upgrade, new report layout, oncogenicity classification++
+    - Details at [CHANGELOG](http://sigven.github.io/pcgr/articles/CHANGELOG.html)
 
 -   *February 2023*: **1.3.0 release**
     - Details at [CHANGELOG](http://sigven.github.io/pcgr/articles/CHANGELOG.html)
@@ -80,7 +88,7 @@ If you want to interrogate germline variants and their relation to cancer predis
 
 ### Example reports
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6275299.svg)](https://doi.org/10.5281/zenodo.6275299)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11401431.svg)](https://doi.org/10.5281/zenodo.11401431)
 
 ### Getting started
 
@@ -88,10 +96,10 @@ If you want to interrogate germline variants and their relation to cancer predis
 -   [Run through an example](https://sigven.github.io/pcgr/articles/running.html#example-run)
 -   Learn more about
     -   Details regarding [PCGR input files](https://sigven.github.io/pcgr/articles/input.html), and how they should be formatted
-    -   Configuration of [key settings](https://sigven.github.io/pcgr/articles/running.html#key-settings)
+    -   How to configure [key settings](https://sigven.github.io/pcgr/articles/running.html)
     -   The types and contents of [PCGR output files](https://sigven.github.io/pcgr/articles/output.html)
-    -   The [variant tier system](https://sigven.github.io/pcgr/articles/variant_classification.html) implemented in PCGR
-    -   The list of [gene and variant annotation resources](https://sigven.github.io/pcgr/articles/virtual_panels.html) used in PCGR annotation
+    -   The [variant classifications](https://sigven.github.io/pcgr/articles/variant_classification.html) implemented in PCGR
+    -   The list of [gene and variant annotation resources](https://sigven.github.io/pcgr/articles/annotation_resources.html) used in PCGR annotation
 -   [Frequenty asked questions (FAQ)](https://sigven.github.io/pcgr/articles/faq.html)
 
 ### Citation

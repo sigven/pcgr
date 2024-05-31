@@ -97,7 +97,7 @@ bslib::page_fillable(
                pcg_report$settings$sample_id)
     ),
     bslib::card_body(
-      height = 60 + NROW(msi_content[['mmr_pol_variants']]) * 100,
+      height = 60 + min(500, NROW(msi_content[['mmr_pol_variants']]) * 100),
       if(NROW(msi_content[['mmr_pol_variants']]) > 0){
         DT::datatable(
           msi_content[['mmr_pol_variants']],

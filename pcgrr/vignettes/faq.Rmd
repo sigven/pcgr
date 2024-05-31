@@ -11,21 +11,7 @@ _Answer: VCF variant genotype data (i.e. AD/DP) is something that you as a user 
 
 __2. Is it possible to utilize PCGR for analysis of multiple samples?__
 
-_Answer: As the name of the tool implies, PCGR was developed for the detailed analysis of individual tumor samples. However, if you take advantage of the different outputs from PCGR, it can also be utilized for analysis of multiple samples. First, make sure your input files are organized per sample (i.e. one VCF file per sample, one CNA file per sample), so that they can be fed directly to PCGR. Now, once all samples have been processed with PCGR, note that all the tab-separated output files (i.e. tiers, mutational signatures, cna segments) contain the sample identifier, which enable them to be aggregated and suitable for a downstream multi-sample analysis._
-
-_Also note that the compressed JSON output pr. sample run contains __ALL__ information presented in the report. Explore the JSON contents e.g. with the_ [jsonlite package](https://github.com/jeroen/jsonlite) _in R:_
-
- `report_data <- jsonlite::fromJSON('<sample_id>.pcgr_acmg.grch37.json.gz')`
-
-_E.g. tiered SNV/InDel output_:
-
- `head(report_data$content$snv_indel$variant_set$tsv)`
-
-_Or TMB estimate_:
-
- `report_data$content$tmb$variant_statistic$tmb_estimate`
- 
-_Expanding further upon the example commands shown above, we are planning to offer a cohort analysis module in the pcgrr R package in the near future, which can assist users more easily with the aggregation of findings across individual samples._
+_Answer: As the name of the tool implies, PCGR was developed for the detailed analysis of individual tumor samples. However, if you take advantage of the different outputs from PCGR, it can also be utilized for analysis of multiple samples. First, make sure your input files are organized per sample (i.e. one VCF file per sample, one CNA file per sample), so that they can be fed directly to PCGR. Now, once all samples have been processed with PCGR, note that all the tab-separated output files (i.e. annotated SNVs, gene copy numbers) contain the sample identifier, which enable them to be aggregated and suitable for a downstream multi-sample analysis. Also note the multi-sheet Excel workbook, which contains numerous outputs from PCGR, and can be processed to aggregate findings across samples._
 
 __3. I do not see the expected transcript-specific consequence for a particular variant. In what way is the primary variant consequence established?__
 
@@ -39,17 +25,17 @@ __5. I have a VCF with structural variants detected in my tumor sample, can PCGR
 
 _Answer: This is currently not supported as input for PCGR, but is something we want to incorporate in the future._
 
-__6. I am surprised to see a particular gene being located in TIER 3 for my sample, since I know that this gene is of potential clinical significance in the tumor type I am investigating?__
+__6. Is it possible to see all the invididual cancer subtypes that belong to each of the 30 different tumor sites?__
 
-_Answer: PCGR classifies variants into tiers of significance through an implementation of_  [published guidelines by ACMG/AMP](variant_classification.html). _No manual efforts for individual tumor types are conducted beyond this rule-based scheme. The users need to keep this in mind when interpreting the tier contents of the report._
+_Answer: Yes, see_ [an overview of phenotypes associated with primary tumor sites](primary_tumor_sites.html). See also the related GitHub repository [phenOncoX](https://github.com/sigven/phenOncoX)
 
-__7. Is it possible to see all the invididual cancer subtypes that belong to each of the 30 different tumor sites?__
-
-_Answer: Yes, see_ [an overview of phenotypes associated with primary tumor sites](primary_tumor_sites.html). See also the related GitHub repository [oncoPhenoMap](https://github.com/sigven/oncoPhenoMap)
-
-__8. Is there any plans to incorporate data from__ [OncoKB](https://www.oncokb.org) __in PCGR?__
+__7. Are there any plans to incorporate genomic biomarker evidence from__ [OncoKB](https://www.oncokb.org) __in PCGR?__
 
 _Answer: No. PCGR relies upon publicly available open-source resources, and further that the PCGR data bundle can be distributed freely to the user community. It is our understanding that_ [OncoKB's terms of use](https://www.oncokb.org/terms) _do not fit well with this strategy._
+
+__8. I have RNA fusion data that I want to include in the report. Is this possible?__
+
+_Answer: This is currently not supported as input for PCGR, but is something we are actively pursuing. The focus will be on whether detected RNA fusion events are previously known, and whether these are known as biomarkers for diagnosis or treatment._
 
 __9. Is it possible for the users to update the data bundle to get the most recent versions of all underlying data sources?__
 

@@ -5,140 +5,58 @@ output: rmarkdown::html_document
 
 ## Output files
 
-PCGR generates multiple output files with annotations of molecular aberrations, 
-including an interactive report, an Excel workbook, and pure text-based 
-annotation files.
+PCGR generates multiple output files with annotations of molecular aberrations, including an interactive report, an Excel workbook, and pure text-based annotation files (TSV).
 
 ### HTML report - quarto-based
 
-An interactive and tier-structured HTML report that shows the most relevant 
-findings in the input cancer genome has the following naming convention:
+An interactive and structured HTML report that shows the most relevant 
+findings in the query cancer genome has the following naming convention:
 
 - `<sample_id>.pcgr.<genome_assembly>.html`
   - The __sample_id__ is provided as input by the user, and reflects a unique 
   identifier of the tumor-normal sample pair to be analyzed.
 
 The report is structured in various sections, pending upon the input provided
-by the user. The following sections are included in the report:
+by the user. The following sections may be included in the report:
 
-  1. __Settings__
-	 * Lists key configurations for the analysis, including the genome assembly, type of
-	 sequencing assay (WES/WGS/TARGETED), the cancer type (as provided by the user),
-	 and the tumor purity and ploidy.
+1. __Settings__
+	* Lists key configurations for the analysis, including the genome assembly, type of sequencing assay (WES/WGS/TARGETED), the cancer type (as provided by the user), and the tumor purity and ploidy.
 	 
-	2. __Somatic SNVs/InDels__
-	 * Provides an overview of the somatic SNVs and InDels detected in the tumor sample
-	 * Includes a global distribution of allelic support, vis
+2. __Somatic SNVs/InDels__
+	* Provides an overview of the somatic SNVs and InDels detected in the tumor sample
+	* Includes a global distribution of allelic support, statistics with respect to
+	   variant types and consequences
+	* Variants are classified with respect to _oncogenicity_ (VICC/ClinGen/CGC operating procedures)
+	   - permits exploration of somatic mutations through interactive filtering according to several dimensions (variant sequencing depth/support, variant consequence etc.)
+	* Variants are classified with respect to _actionability_ (ACMG/AMP guidelines)
+	   - individual evidence items linked to actionable variants can be explored, indicating strength of evidence, tumor type and therapeutic context, and clinical significance
 
-  2. __Main results__
-  	 * Nine value boxes that highlight the main properties of the tumor sample:
-	     1. Tumor purity - as provided by the user
-	     2. Tumor ploidy - as provided by the user
-	     3. Mutational signatures - two most prevalent signatures (other than aging)
-	     4. Tier 1 variants (top four)
-	     5. Tier 2 variants (top four)
-	     6. Tumor mutational burden (TMB)
-	     7. Microsatellite instability (MSI) status
-	     8. Somatic copy number aberrations of clinical significance
-	     9. Kataegis events
+3. __Somatic CNAs__
+	* Aberrations are classified with respect to _actionability_ (ACMG/AMP guidelines)
+	 - individual evidence items linked to actionable variants can be explored, indicating strength of evidence, tumor type and therapeutic context, and clinical significance
+	* Other potentially oncogenic aberrations are listed, pProto-oncogenes subject to copy number amplifications, and tumor suppressor genes subject to homozygous deletions
 
-  2. __Somatic SNVs/InDels__
-	 * _Tumor mutational burden (TMB)_
-		 * given a coding target region size specified by the user (ideally the __callable target size__), an estimate of the mutational burden is provided
-		 - The estimated TMB is shown in the context of TMB distributions from different primary sites in TCGA
-	 * _Tier & variant statistics_
-		 - indicate total variant numbers across variant types, coding types and tiers
-      * _Global distribution - allelic support_
-		 - distribution (histogram) of variant allelic support for somatic variants (will only be present in the report if specific fields in input VCF is defined and specified by the user)
-      * _Global variant browser_
-		 - permits exploration of the whole SNV/InDel dataset by filtering along several dimensions (call confidence, variant sequencing depth/support, variant consequence etc.)
-      * _Tier tables_
-	      - Variants are organized into five (tier 1-4 + noncoding) interactive datatables) according to clinical utility
-	      - Contents of the tier tables are outlined below
+4. __MSI status__
+  * Indicates predicted microsatellite stability from the somatic mutation profile and supporting evidence (details of the underlying MSI statistical classifier can be found [here](http://rpubs.com/sigven/msi_classification_v3))
+  * The MSI classifier was trained on TCGA exome samples.
+      
+5. __Tumor mutational burden (TMB)__
+	* given a coding target region size specified by the user (ideally the __callable target size__), an estimate of the mutational burden is provided
+	* The estimated TMB is shown in the context of TMB distributions from different primary sites in TCGA
 
-  4. __Somatic CNAs__
-      * _Segments - amplifications and homozygous deletions_
-         -  Based on user-defined/default log-ratio thresholds of gains/losses, the whole CNA dataset can be navigated further through filters:
-	       - cytoband
-		  - type of CNA event - *focal* (less than 25% of chromosome arm affected) or *broad*
-		  - log ratio
-      * _Proto-oncogenes subject to copy number amplifications_
-         - Datatable listing known proto-oncogenes covered by user-defined/default amplifications and potential targeted therapies
-      * _Tumor suppressor genes subject to homozygous deletions_
-         - Datatable listing known tumor suppressor genes covered by user-defined/default losses and potential targeted therapies
-	 * _Other drug targets subject to copy number aplifications_
-      * _Copy number aberrations as biomarkers for prognosis, diagnosis, and drug response (both of <b>strong</b> significance and <b>potential</b> significance)_
-         - Interactive data table where the user can navigate aberrations acting as biomarkers across therapeutic contexts, tumor subtypes, evidence levels etc
+6. __Mutational signatures__
+  * Estimation of relative contribution of [known mutational signatures](http://cancer.sanger.ac.uk/cosmic/signatures) in tumor sample (using [MutationalPatterns](https://github.com/ToolsVanBox/MutationalPatterns) as the underlying framework)
+  * Datatable with signatures found and proposed underlying etiologies
+  
+7. __RNA expression analysis__
+  * Datatable with expression outliers - as compared to distribution in reference cohorts
+  * Datatable with correlation between gene expression in query sample and other reference cohorts (TCGA, TreeHouse, DepMap)
+  * Immune contexture profiling
 
-  5. __MSI status__
-      * Indicates predicted microsatellite stability from the somatic mutation profile and supporting evidence (details of the underlying MSI statistical classifier can be found [here](http://rpubs.com/sigven/msi_classification_v3))
-      * The MSI classifier was trained on TCGA exome samples.
-
-  6. __Mutational signatures__
-      * Estimation of relative contribution of [67 known mutational signatures](http://cancer.sanger.ac.uk/cosmic/signatures) in tumor sample (using [MutationalPatterns](https://github.com/raerose01/deconstructSigs) as the underlying framework)
-      * Datatable with signatures and proposed underlying etiologies
-
-  9. __Documentation__
-      * Annotation resources - databases with version and licensing information
-	 * Report content
-      * References - supporting scientific literature (key report elements)
-
-#### Interactive datatables
-
-The interactive datatables contain a number of hyperlinked annotations similar to those defined for the annotated VCF file, including the following:
-
-| Annotation | Description                                                   |
-|------------|---------------------------------------------------------------|
-| `SYMBOL` | Gene symbol (Entrez/NCBI) |
-| `PROTEIN_CHANGE` | Amino acid change (VEP) |
-| `CANCER_TYPE` | Biomarker (tier 1/2): associated cancer type |
-| `EVIDENCE_LEVEL` | Biomarker (tier 1/2): evidence level (A,B,C,D,E) |
-| `CLINICAL_SIGNIFICANCE` | Biomarker (tier 1/2): drug sensitivity, poor/better outcome etc |
-| `EVIDENCE_TYPE` | Biomarker (tier 1/2): predictive/diagnostic/therapeutic |
-| `DISEASE_ONTOLOGY_ID` | Biomarker (tier 1/2): associated cancer type (Disease Ontology) |
-| `EVIDENCE_DIRECTION` | Biomarker (tier 1/2): supports/does not support |
-| `DESCRIPTION` | Biomarker (tier 1/2): description |
-| `VARIANT_ORIGIN` | Biomarker (tier 1/2): variant origin (germline/somatic) |
-| `BIOMARKER_MAPPING` | Biomarker (tier 1/2): accuracy of genomic mapping (exact,codon,exon) |
-| `CITATIO` | Biomarker (tier 1/2): supporting literature |
-| `THERAPEUTIC_CONTEXT` | Biomarker (tier 1/2): associated drugs |
-| `RATING` | Biomarker (tier 1/2): trust rating from 1 to 5 (CIVIC) |
-| `GENE_NAME` | gene name description (Entrez/NCBI) |
-| `PROTEIN_DOMAIN` | PFAM protein domain |
-| `PROTEIN_FEATURE` | UniProt feature overlapping variant site |
-| `CDS_CHANGE` | Coding sequence change |
-| `MUTATION_HOTSPOT` | Known cancer mutation hotspot |
-| `MUTATION_HOTSPOT_CANCERTYPE` | Hotspot-associated cancer types |
-| `TCGA_FREQUENCY` | Frequency of variant in TCGA cohorts |
-| `ICGC_PCAWG_OCCURRENCE` | Frequency of variant in ICGC-PCAWG cohorts |
-| `DOCM_LITERATURE` | Literature links - DoCM |
-| `DOCM_DISEASE`  | Associated diseases - DoCM |
-| `OPENTARGETS_RANK` | Strength (max across all phenotypes) of phenotype association according to the Open Targets Platform |
-| `OPENTARGETS_ASSOCIATIONS` | Phenotype associations with the gene retrieved from the Open Targets Platform |
-| `INTOGEN_DRIVER_MUT` | predicted driver mutation - IntOGen |
-| `CONSEQUENCE` | VEP consequence (primary transcript) |
-| `HGVSc` | from VEP |
-| `HGVSp` | from VEP |
-| `NCBI_REFSEQ` | Transcript accession ID(s) (NCBI RefSeq) |
-| `ONCOGENE` | Predicted as proto-oncogene from CancerMine/NCG |
-| `CANCERGENE_SUPPORT` | Links to underlying publications (CancerMine) that support oncogenic/tumor suppressive role of gene |
-| `TUMOR_SUPPRESSOR` | Predicted as tumor suppressor gene from CancerMine/NCG |
-| `PREDICTED_EFFECT` | Effect predictions from dbNSFP | 
-| `VEP_ALL_CSQ` | All VEP transcript block consequences |
-| `DBSNP` | dbSNP rsID | 
-| `COSMIC` | Cosmic mutation IDs |
-| `CLINVAR` | ClinVar variant origin and associated phenotypes |
-| `CANCER_ASSOCIATIONS` | Gene-associated cancer types from DisGenet |
-| `TARGETED_DRUGS` | Targeted drugs from Open Targets Platform /ChEMBL |
-| `KEGG_PATHWAY` | Gene-associated pathways from KEGG |
-| `CALL_CONFIDENCE` | Variant confidence (as set by user in input VCF) |
-| `DP_TUMOR` | Variant sequencing depth in tumor (as set by user in input VCF) |
-| `AF_TUMOR` | Variant allelic fraction in tumor (as set by user in input VCF) |
-| `DP_CONTROL` | Variant sequencing depth in control sample (as set by user in input VCF) |
-| `AF_CONTROL` | Variant allelic fraction in control sample (as set by user in input VCF) |
-| `GENOMIC_CHANGE` | Variant ID |
-| `GENOME_VERSION` | Genome assembly |
-
+8. __Documentation__
+  * Annotation resources - databases with version and licensing information
+	* Report contents - brief description of the main sections in the report
+  * References - supporting scientific literature (key report elements)
 
 #### Example reports
 
@@ -455,3 +373,7 @@ The format of the compressed TSV file is the following:
 | 20. `ACTIONABILITY_FRAMEWORK` | Actionability framework |
 | 21. `BIOMARKER_MATCH` | Biomarker match |
 | 22. `TARGETED_INHIBITORS_ALL2` | Molecularly targeted inhibitors - indicated for any tumor type|
+
+### Excel workbook
+
+The Excel workbook contains multiple sheets with data tables, mostly self-explainable, with annotated datasets pending on the analysis performed (SNVs/InDels, CNAs, biomarker evidence, TMB, MSI, mutational signatures, immune contexture profiling etc). The naming convention of the Excel workbook is as follows: `<sample_id>.pcgr.<genome_assembly>.xlsx`
