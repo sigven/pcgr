@@ -51,6 +51,7 @@ __output directory__ to output the results to.
 
 Here's an example scenario that will be used in the following sections:
 
+- VEP cache is downloaded in `/Users/you/dir0/vep`;
 - data bundle downloaded in `/Users/you/dir1/data`;
 - sample inputs at `/Users/you/dir2/pcgr_inputs`;
 - output goes to `/Users/you/dir3/pcgr_outputs` (make sure this directory
@@ -63,17 +64,17 @@ Here's an example scenario that will be used in the following sections:
 
 **A)** Download and unpack the assembly-specific reference data bundle needed for PCGR:
 
-- [grch37 data bundle - 20240527](http://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20240527.grch37.tgz) (approx 5.6Gb)
-- [grch38 data bundle - 20240527](http://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20240527.grch38.tgz) (approx 5.6Gb)
+- [grch37 data bundle - 20240530](https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20240530.grch37.tgz) (approx 5.6Gb)
+- [grch38 data bundle - 20240530](https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20240530.grch38.tgz) (approx 5.6Gb)
 
 - Example:
 
 ```bash
 GENOME="grch38" # or "grch37"
-BUNDLE_VERSION="20240527"
+BUNDLE_VERSION="20240530"
 BUNDLE="pcgr_ref_data.${BUNDLE_VERSION}.${GENOME}.tgz"
 
-wget http://insilico.hpc.uio.no/pcgr/${BUNDLE}
+wget https://insilico.hpc.uio.no/pcgr/${BUNDLE}
 gzip -dc ${BUNDLE} | tar xvf -
 ```
 
@@ -146,8 +147,8 @@ bash miniconda.sh
 (base) $ conda install -c conda-forge mamba
 
 (base) $ mamba --version
-mamba 0.19.1
-conda 4.11.0
+mamba 1.5.8
+conda 24.5.0
 ```
 
 #### b) Create PCGR conda environments
@@ -250,13 +251,15 @@ Then your command would look something like this:
 
 ```bash
 docker container run -it --rm \
-    -v /Users/you/dir1/data:/root/pcgr_data \
+    -v /Users/you/dir0/vep:/root/vep
+    -v /Users/you/dir1/data:/root/pcgr_refdata \
     -v /Users/you/dir2/pcgr_inputs:/root/pcgr_inputs \
     -v /Users/you/dir3/pcgr_outputs:/root/pcgr_outputs \
     sigven/pcgr:1.4.1.9005 \
     pcgr \
       --input_vcf "/root/pcgr_inputs/tumor_sample.BRCA.vcf.gz" \
-      --pcgr_dir "/root/pcgr_data" \
+      --vep_dir "/root/vep/.vep" \
+      --refdata_dir "/root/pcgr_refdata" \
       --output_dir "/root/pcgr_outputs" \
       --genome_assembly "grch38" \
       --sample_id "SampleB" \

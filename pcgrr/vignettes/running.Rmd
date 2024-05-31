@@ -315,7 +315,7 @@ This command will run the Conda-based PCGR workflow and produce the following fi
 | N | File | Description |
 |---|------|-------------|
 | 1 | __\<sample_id\>.pcgr.grch37.html__ | An interactive HTML report for clinical interpretation (quarto-based) |
-| 2 | __\<sample_id\>.pcgr.grch37.xlsx__ | An excel workbook with multiple sheets of annotations (Assay & sample info/SNVs & InDels/CNAs/Biomarkers/TMB/MSI), amenable for aggregation analysis across multiple samples |
+| 2 | __\<sample_id\>.pcgr.grch37.xlsx__ | An excel workbook with multiple sheets of annotations (Assay & sample info/SNVs & InDels/CNAs/Biomarkers/TMB/MSI), suitable for aggregation analysis across multiple samples |
 | 3 | __\<sample_id\>.pcgr.grch37.vcf.gz (.tbi)__ | Bgzipped VCF file with rich set of variant annotations to support interpretation |
 | 4 | __\<sample_id\>.pcgr.grch37.pass.vcf.gz (.tbi)__ | Bgzipped VCF file with rich set of variant annotations to support interpretation (PASS variants only) |
 | 5 | __\<sample_id\>.pcgr.grch37.pass.tsv.gz__ | Compressed vcf2tsv-converted file with rich set of variant annotations to support interpretation |

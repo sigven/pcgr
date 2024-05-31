@@ -46,6 +46,61 @@ sigven <- user("sigven")
 pdiakumis <- user("pdiakumis")
 ```
 
+## v2.0.0
+
+* Date: **2024-05-xx**
+* Major data updates
+  * ClinVar
+  * NCI Thesaurus
+  * Open Targets Platform
+  * CIViC
+  * GENCODE
+  * Cancer Gene Census
+  * CancerMine
+  * Pfam
+  * Disease Ontology/EFO
+  * UniProt KB
+* Major software updates
+  * VEP
+
+##### Added/changed
+
+- New report generation framework - [quarto](https://quarto.org)
+  - multiple options related to Rmarkdown output are now deprecated
+- Re-organized data bundle structure
+  - Users need to download an assembly-specific VEP cache separately from PCGR/CPSR, and provide its path to the new required argument `--vep_dir` in the `pcgr` command
+- Re-engineered data bundle generation pipeline
+- Improved data bundle documentation
+  - An HTML report with an overview of the contents of the data bundle is shipped with the reference data itself, also available [here (grch38)](https://rpubs.com/sigven/pcgr_refdata).
+- Moved more of the code base to initial Python workflow steps (biomarker matching, CNA segment annotation, RNA expression analysis, oncogenicity classification)
+- Variants are now classified with respect to both oncogenicity and actionability, and the previous global tier classification (tier 1-5) is thus deprecated 
+- New copy number input format - allele-specific (chrom, start, end, n_major, n_minor)
+  - New argument `n_copy_gain` - Minimum number of total copy number for segments considered as gains/amplifications (default: 6)
+- RNA-bulk expression input permitted in the `pcgr` command
+  - `--input_rna_expression` - accepts a TSV file with gene expression values
+  - `--expression_sim` - boolean flag to enable expression similarity analysis
+  - `--expression_sim_db` - Comma-separated string of databases for used in RNA expression similarity analysis, default: tcga,depmap,treehouse
+- TMB calculations can be adjusted using several parameters:
+  - `--tmb_display` - Type of TMB measure to show in report (coding_and_silent, coding_non_silent, missense_only)
+  - `--tmb_dp_min` - Minimum depth for a position to be considered for TMB calculation (default: 0) - requires allelic support information from VCF
+  - `--tmb_af_min` - Minimum allele frequency for a position to be considered for TMB calculation (default: 0) - requires allelic support information from VCF
+- A multi-sheet Excel workbook output with analysis output is provided, suitable e.g. for aggregation of results across samples
+- argument name changes to `pcgr`:
+  - `--pcgr_dir` is now named `--refdata_dir`
+  - `--clinvar_ignore_noncancer` is now named `--clinvar_report_noncancer`, meaning that variants found in ClinVar, yet attributed to _non-cancer related_ phenotypes, are now excluded from reporting by default)
+  - `--vep_gencode_all` is now named `--vep_gencode_basic`, meaning that the gene variant annotation is now using _all_ GENCODE transcripts by default, not only the _basic_ set)
+  - `--preserved_info_tags` is now named `--retained_info_tags`
+  - `--basic` is now named `--no_reporting`
+  - `--target_size_mb` is now named `--effective_target_size_mb`
+
+##### Removed
+
+- Options for configuring Rmarkdown output, i.e. `--report_theme`, `report_nonfloating_toc`
+- `--cpsr_report` and `--include_trials`, which can provide the report with associated pathogenic germline variants (from CPSR) and potential clinical trial oppertunities is currenly on hold for a forthcoming release
+- `--no_vcf_validate` - VCF validation is simplified, not relying on _vcf-validator_ anymore
+- Options to filter tumor-only calls using 1000 Genomes Project database, i.e. `--maf_onekg_eur`, `--maf_onekg_amr`, `--maf_onekg_eas`, `--maf_onekg_afr`, `--maf_onekg_sas`, `--maf_onekg_global`
+- `--cell_line`
+- `--logr_gain`, and `--logr_homdel`
 
 ## v1.5.0rc
 
