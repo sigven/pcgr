@@ -2,13 +2,20 @@
 % Please edit documentation in R/utils.R
 \name{strip_html}
 \alias{strip_html}
-\title{Strip HTML tags from a string}
+\title{Strip HTML tags}
 \usage{
 strip_html(x)
 }
 \arguments{
-\item{x}{string to strip away HTML text.}
+\item{x}{A character vector.}
+}
+\value{
+A character vector with HTML tags and comments stripped off.
 }
 \description{
-Strip HTML tags from a string
+Remove HTML tags and comments from text.
+From https://github.com/yihui/xfun/blob/ccee26/R/string.R#L329.
+}
+\examples{
+strip_html('<a href="#">Hello <!-- comment -->world!</a>')
 }

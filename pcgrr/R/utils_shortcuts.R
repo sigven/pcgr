@@ -15,4 +15,5 @@ dummy1 <- function() {
   DT::datatable
   htmltools::br
   plotly::plot_ly
+  caret::createModel
 }

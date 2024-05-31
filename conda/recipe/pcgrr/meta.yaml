@@ -20,6 +20,7 @@ requirements:
     - r-assertable
     - r-assertthat
     - bioconductor-biostrings
+    - r-caret
     - r-dplyr
     - r-dt
     - r-formattable
@@ -29,6 +30,7 @@ requirements:
     - r-htmltools
     - r-log4r
     - bioconductor-mutationalpatterns
+    - r-openxlsx2
     - r-plotly
     - bioconductor-quantiseqr
     - r-quarto
@@ -49,6 +51,7 @@ requirements:
     - r-assertable
     - r-assertthat
     - bioconductor-biostrings
+    - r-caret
     - r-dplyr
     - r-dt
     - r-formattable
@@ -58,6 +61,7 @@ requirements:
     - r-htmltools
     - r-log4r
     - bioconductor-mutationalpatterns
+    - r-openxlsx2
     - r-plotly
     - bioconductor-quantiseqr
     - r-quarto

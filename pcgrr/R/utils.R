@@ -1037,13 +1037,16 @@ mkdir <- function(d) {
 }
 
 
-# from https://github.com/yihui/xfun/blob/ccee265f74eb03b9d40d7167e8933b5c72e5892c/R/string.R#L329
-#' Strip HTML tags from a string
+#' Strip HTML tags
 #'
-#' @param x string to strip away HTML text.
+#' Remove HTML tags and comments from text.
+#' From https://github.com/yihui/xfun/blob/ccee26/R/string.R#L329.
 #'
+#' @param x A character vector.
+#' @return A character vector with HTML tags and comments stripped off.
 #' @export
-#'
+#' @examples
+#' strip_html('<a href="#">Hello <!-- comment -->world!</a>')
 strip_html <- function(x) {
     x <- gsub("<!--.*?-->", "", x)
     x <- gsub("<[^>]+>", "", x)
