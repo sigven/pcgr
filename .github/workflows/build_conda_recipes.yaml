@@ -5,7 +5,7 @@ on:
     branches:
       - master
       - bundle_update_2023
-      - conda_deps2
+      - apptainer
 env:
   atoken: ${{ secrets.ANACONDA_UPLOAD_TOKEN }}
   recipe_path: conda/recipe
@@ -148,3 +148,13 @@ jobs:
           platforms: linux/amd64
           tags: |
             sigven/pcgr:${{ env.VERSION }}
+
+      - name: Apptainer setup
+        uses: eWaterCycle/setup-apptainer@v2
+
+      - name: Apptainer build
+        run: |
+          docker image ls -a
+          docker save sigven/pcgr:${VERSION} -o pcgr_${VERSION}.tar
+          apptainer build pcgr_${VERSION}.sif docker-archive://pcgr_${VERSION}.tar
+          apptainer push pcgr_${VERSION}.sif oras://ghcr.io/${GITHUB_REPOSITORY}:${VERSION}
