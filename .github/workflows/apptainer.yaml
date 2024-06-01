@@ -15,6 +15,12 @@ jobs:
       run:
         shell: bash -l {0}
     steps:
+      - name: Free Disk Space
+        uses: jlumbroso/free-disk-space@main
+      - name: Check free space
+        run: |
+          echo "Free space:"
+          df -h
       - name: Code checkout
         uses: actions/checkout@v4
         with:
@@ -32,7 +38,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: . # yes, dot
-          push: true
+          push: false
           load: true
           platforms: linux/amd64
           tags: |
