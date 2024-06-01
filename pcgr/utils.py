@@ -92,6 +92,13 @@ def get_pcgr_bin():
     """
     return os.path.dirname(os.path.realpath(sys.executable))
 
+def quarto_evars_path(pcgrr_env):
+    """The quarto env vars are set in the conda activate script,
+    which is under /path/to/envs/pcgrr/etc/conda/activate.d
+    """
+    return(os.path.join(conda_env_path(pcgrr_env), "etc/conda/activate.d/quarto.sh"))
+
+
 def perl_cmd():
     """Retrieve abs path to locally installed conda Perl or first in PATH,
     e.g. conda/env/pcgr/bin/perl

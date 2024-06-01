@@ -648,11 +648,12 @@ def run_pcgr(input_data, output_data,conf_options):
         logger.info('PCGR - STEP 6: Generation of output files - molecular interpretation report for precision cancer medicine')
         # export PATH to R conda env Rscript
         pcgrr_conda = conf_options['pcgrr_conda']
+        quarto_env_vars = utils.quarto_evars_path(pcgrr_conda)
         pcgr_conda = utils.conda_prefix_basename()
         rscript = utils.script_path(pcgrr_conda, 'bin/Rscript')
         pcgrr_script = utils.script_path(pcgr_conda, 'bin/pcgrr.R')
         pcgr_report_command = (
-                 f"{rscript} {pcgrr_script} {yaml_fname}")
+                 f"{rscript} {pcgrr_script} {yaml_fname} {quarto_env_vars}")
 
         if debug:
             print(pcgr_report_command)
