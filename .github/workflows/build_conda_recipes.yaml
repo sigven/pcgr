@@ -5,7 +5,6 @@ on:
     branches:
       - master
       - bundle_update_2023
-      - apptainer
 env:
   atoken: ${{ secrets.ANACONDA_UPLOAD_TOKEN }}
   recipe_path: conda/recipe
@@ -126,6 +125,8 @@ jobs:
               sha: the_sha
             })
 
+      - name: 🗑 Free Disk Space
+        uses: jlumbroso/free-disk-space@main
       # work with tag from above
       - name: Code checkout
         uses: actions/checkout@v4
@@ -145,16 +146,25 @@ jobs:
         with:
           context: . # yes, dot
           push: true
+          load: true
           platforms: linux/amd64
           tags: |
             sigven/pcgr:${{ env.VERSION }}
 
       - name: Apptainer setup
         uses: eWaterCycle/setup-apptainer@v2
-
       - name: Apptainer build
         run: |
           docker image ls -a
           docker save sigven/pcgr:${VERSION} -o pcgr_${VERSION}.tar
-          apptainer build pcgr_${VERSION}.sif docker-archive://pcgr_${VERSION}.tar
-          apptainer push pcgr_${VERSION}.sif oras://ghcr.io/${GITHUB_REPOSITORY}:${VERSION}
+          ls -la
+          df -h
+          echo "Building Apptainer SIF"
+          echo "---------------------------------"
+          apptainer build pcgr_singularity_${VERSION}.sif docker-archive://pcgr_${VERSION}.tar
+          echo "---------------------------------"
+          ls -lSha
+      - name: Upload SIF to GHCR
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | apptainer registry login -u ${{ github.actor }} --password-stdin oras://ghcr.io
+          apptainer push pcgr_singularity_${VERSION}.sif oras://ghcr.io/${GITHUB_REPOSITORY}:${VERSION}.singularity

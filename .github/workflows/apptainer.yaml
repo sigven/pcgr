@@ -61,5 +61,5 @@ jobs:
           df -h
       - name: Upload SIF to GHCR
         run: |
-          echo ${{ secrets.GITHUB_TOKEN }} | apptainer remote login -u ${{ github.actor }} --password-stdin oras://ghcr.io
+          echo ${{ secrets.GITHUB_TOKEN }} | apptainer registry login -u ${{ github.actor }} --password-stdin oras://ghcr.io
           apptainer push pcgr_${VERSION}.sif oras://ghcr.io/${GITHUB_REPOSITORY}:${VERSION}
