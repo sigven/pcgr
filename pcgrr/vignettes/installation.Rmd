@@ -12,7 +12,7 @@ output: rmarkdown::html_document
   software requirements:
 
 ```bash
-PCGR_VERSION="1.4.1.9006"
+PCGR_VERSION="1.4.1.9005"
 PCGR_REPO="https://raw.githubusercontent.com/sigven/pcgr/v${PCGR_VERSION}/conda/env/lock/"
 PLATFORM="linux" # or "osx"
 
@@ -98,7 +98,7 @@ Download and unpack the latest software release from <https://github.com/sigven/
 Alternatively if you have `git` installed, you can do:
 
 ```bash
-PCGR_VERSION="1.4.1.9006"
+PCGR_VERSION="1.4.1.9005"
 OUTPUT_DIRECTORY="PCGR"
 
 git clone \
@@ -255,7 +255,7 @@ docker container run -it --rm \
     -v /Users/you/dir1/data:/root/pcgr_refdata \
     -v /Users/you/dir2/pcgr_inputs:/root/pcgr_inputs \
     -v /Users/you/dir3/pcgr_outputs:/root/pcgr_outputs \
-    sigven/pcgr:1.4.1.9006 \
+    sigven/pcgr:1.4.1.9005 \
     pcgr \
       --input_vcf "/root/pcgr_inputs/tumor_sample.BRCA.vcf.gz" \
       --vep_dir "/root/vep/.vep" \
