@@ -16,4 +16,5 @@ dummy1 <- function() {
   htmltools::br
   plotly::plot_ly
   caret::createModel
+  randomForest::importance
 }
