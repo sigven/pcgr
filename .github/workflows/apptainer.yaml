@@ -53,9 +53,13 @@ jobs:
           docker save sigven/pcgr:${VERSION} -o pcgr_${VERSION}.tar
           ls -la
           df -h
+          echo "Building Apptainer SIF"
+          echo "---------------------------------"
           apptainer build pcgr_${VERSION}.sif docker-archive://pcgr_${VERSION}.tar
-      - name: Upload SIF
-        uses: actions/upload-artifact@v4
-        with:
-          name: pcgr_${{ env.VERSION }} Singularity Image File
-          path: ./pcgr_${{ env.VERSION }}.sif
+          echo "---------------------------------"
+          ls -la
+          df -h
+      - name: Upload SIF to GHCR
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | apptainer remote login -u ${{ github.actor }} --password-stdin oras://ghcr.io
+          apptainer push pcgr_${VERSION}.sif oras://ghcr.io/${GITHUB_REPOSITORY}:${VERSION}
