@@ -166,6 +166,7 @@ https://conda.anaconda.org/conda-forge/osx-64/r-proxy-0.4_27-r43h6dc245f_2.conda
 https://conda.anaconda.org/conda-forge/osx-64/r-ps-1.7.6-r43hb2c329c_0.conda#e95ece9ce0f2976f5df8cbb531b1434b
 https://conda.anaconda.org/conda-forge/osx-64/r-quadprog-1.5_8-r43h06293e5_5.conda#8491c098f84c507ad167ac0716ee1abc
 https://conda.anaconda.org/conda-forge/noarch/r-r6-2.5.1-r43hc72bb7e_2.conda#79f167972554dc6b65aa099cd85c22a1
+https://conda.anaconda.org/conda-forge/osx-64/r-randomforest-4.7_1.1-r43hfe07776_2.conda#4227f26defbe5febc603a45676238052
 https://conda.anaconda.org/conda-forge/osx-64/r-rappdirs-0.3.3-r43h6dc245f_2.conda#2cc5f426b77b9d7ddf9a51b8953c3d73
 https://conda.anaconda.org/conda-forge/noarch/r-rcolorbrewer-1.1_3-r43h785f33e_2.conda#d998f26d6a55b83dab1c25b583e1463a
 https://conda.anaconda.org/conda-forge/osx-64/r-rcpp-1.0.12-r43h29979af_0.conda#b0c054603bb70835c172553154253316
@@ -314,5 +315,5 @@ https://conda.anaconda.org/bioconda/noarch/bioconductor-bsgenome.hsapiens.ucsc.h
 https://conda.anaconda.org/bioconda/noarch/bioconductor-genomicfeatures-1.54.1-r43hdfd78af_0.tar.bz2#445ea419486180673fffc192b5fe8edb
 https://conda.anaconda.org/bioconda/osx-64/bioconductor-variantannotation-1.48.1-r43h4c50009_1.tar.bz2#4bc1f791804daa0570cd35a63ca0a268
 https://conda.anaconda.org/bioconda/noarch/bioconductor-mutationalpatterns-3.12.0-r43hdfd78af_0.tar.bz2#d22030798f7d464ddb092e4651625210
-https://conda.anaconda.org/pcgr/noarch/r-pcgrr-1.4.1.9006-r43_0.tar.bz2#236a1805578478d001064c32ce989659
+https://conda.anaconda.org/pcgr/noarch/r-pcgrr-1.4.1.9006-r43_0.tar.bz2#8566904bf4fba15b6f2ea4085e5a7cde
 https://conda.anaconda.org/pcgr/noarch/r-cpsr-1.0.1.9007-r43_0.tar.bz2#89b649b14b59dbd47b8efa07cd93266c
