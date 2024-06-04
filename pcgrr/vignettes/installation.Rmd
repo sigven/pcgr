@@ -85,10 +85,10 @@ gzip -dc ${BUNDLE} | tar xvf -
 ```bash
 GENOME="GRCh38" # or "GRCh37"
 VEP_VERSION="111"
-CACHE="homo_sapiens_vep_${VEP_VERSION}.${GENOME}.tar.gz"
+CACHE="homo_sapiens_vep_${VEP_VERSION}_${GENOME}.tar.gz"
 
 wget https://ftp.ensembl.org/pub/release-111/variation/indexed_vep_cache/${CACHE}
-gzip -dc ${BUNDLE} | tar xvf -
+gzip -dc ${CACHE} | tar xvf -
 ```
 
 ### STEP 2: Download PCGR GitHub repository
