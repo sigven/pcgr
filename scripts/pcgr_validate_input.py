@@ -178,7 +178,7 @@ def simplify_vcf(input_vcf, validated_vcf, vcf, output_dir, sample_id, keep_unco
     temp_files['vcf_2'] = \
         os.path.join(output_dir, f'{sample_id}.pcgr_validate.bcftools.{random_id}_2.vcf.gz')
     temp_files['vcf_3'] = \
-        os.path.join(output_dir, f'{sample_id}.pcgr_validate.bftools.{random_id}_3.vcf.gz')
+        os.path.join(output_dir, f'{sample_id}.pcgr_validate.bcftools.{random_id}_3.vcf.gz')
     bcftools_simplify_log = \
         os.path.join(output_dir, f'{sample_id}.pcgr_validate.bcftools.{random_id}.log')
     vt_decompose_log = \
