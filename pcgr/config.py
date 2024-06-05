@@ -170,6 +170,8 @@ def create_config(arg_dict, workflow = "PCGR"):
 def populate_config_data(conf_options: dict, refdata_assembly_dir: str, workflow = "PCGR", logger=None):
     
     conf_data = {}
+    
+    ## move/set some parameters to highest level in YAML/conf_data object
     conf_data['sample_id'] = conf_options['sample_id']
     conf_data['output_dir'] = conf_options['output_dir']
     conf_data['output_prefix'] = conf_options['output_prefix']
@@ -180,10 +182,11 @@ def populate_config_data(conf_options: dict, refdata_assembly_dir: str, workflow
     conf_data['software']['cpsr_version'] = pcgr_vars.PCGR_VERSION
     conf_data['molecular_data'] = conf_options['molecular_data']
     
-    del conf_options['sample_id']
-    del conf_options['genome_assembly']
-    del conf_options['output_dir']
-    del conf_options['molecular_data']
+    ## remove the core parameters set above from 'conf_options', 
+    ## (now placed at the highest level in YAML/conf_data object)
+    for e in ['sample_id','genome_assembly','output_dir',
+              'molecular_data','output_prefix']:
+        del conf_options[e]
 
     conf_data['conf'] = conf_options
     
