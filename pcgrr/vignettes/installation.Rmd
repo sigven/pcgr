@@ -9,7 +9,7 @@ output: rmarkdown::html_document
 
 - If you know what [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html)
   is, you only need to run the following commands in order to install the PCGR
-  software requirements into a local directory:
+  _software_ requirements into a local directory:
 
 ```bash
 cd /Users/you/dir4/conda
@@ -42,18 +42,23 @@ pcgr --version
 
 ## Detailed Installation
 
-PCGR requires a __data bundle__ that contains the reference data, 
-a __cache for VEP__ (Variant Effect Predictor), 
-__sample inputs__ (e.g. somatic variants in a VCF), and an
-__output directory__ to write the results to.
+PCGR requires:
 
-Here's an example scenario that will be used in the following sections:
+- a __data bundle__ that contains the reference data;
+- a data __cache for VEP__ (Variant Effect Predictor);
+- __sample inputs__ (e.g. somatic variants in a VCF);
+- and an __output directory__ to write the results to
 
-- VEP cache is downloaded in `/Users/you/dir0/vep`;
+Here's an example scenario that will be used in the following sections
+(where GRCh3x can be GRCh37 or GRCh38):
+
+- VEP cache is downloaded in `/Users/you/dir0/.vep`;
+  - make sure the `.vep` directory contains `.vep/homo_sapiens/xyz_GRCh3x/`
+    for a given `<xyz>` VEP release.
 - data bundle downloaded in `/Users/you/dir1/data`;
+  - make sure you have a `data/grch3x/.PCGR_BUNDLE_VERSION` file
 - sample inputs at `/Users/you/dir2/pcgr_inputs`;
-- output goes to `/Users/you/dir3/pcgr_outputs` (make sure this directory
-  exists);
+- output goes to `/Users/you/dir3/pcgr_outputs`;
 - conda environments installed in `/Users/you/dir4/conda`;
 
 <a name="step1"></a>
@@ -121,6 +126,7 @@ bash miniconda.sh
 ```text
 # exit terminal and open new one - you should now see:
 
+# as of May 2024
 (base) $ conda --version
 conda 24.5.0
 ```
@@ -130,7 +136,7 @@ conda 24.5.0
 The `conda/env/lock` directory in the PCGR codebase contains two `.lock` files which
 can be used to create the required conda environments for the Python component
 (`pcgr`) and the R components (`pcgrr` (and `cpsr`)). We install the conda
-dependencies for these two environments in a local `conda/env` directory in the
+dependencies for these two environments in a local `conda` directory in the
 following example:
 
 ```bash
@@ -141,8 +147,8 @@ PCGR_VERSION="1.4.1.9006"
 PCGR_REPO="https://raw.githubusercontent.com/sigven/pcgr/v${PCGR_VERSION}/conda/env/lock/"
 PLATFORM="linux" # or "osx"
 
-conda create --file ${PCGR_REPO}/pcgr-${PLATFORM}-64.lock --prefix ./pcgr
-conda create --file ${PCGR_REPO}/pcgrr-${PLATFORM}-64.lock --prefix ./pcgrr
+conda create --prefix ./pcgr --file ${PCGR_REPO}/pcgr-${PLATFORM}-64.lock
+conda create --prefix ./pcgrr --file ${PCGR_REPO}/pcgrr-${PLATFORM}-64.lock
 
 ## Alternatively, for installing in your central conda directory, use the following:
 # conda create --name pcgr --file ${PCGR_CONDA_ENV_DIR}/lock/pcgr-${PLATFORM}.lock
@@ -154,9 +160,11 @@ conda create --file ${PCGR_REPO}/pcgrr-${PLATFORM}-64.lock --prefix ./pcgrr
 ```
 
 The above process takes 20-30 minutes when installing from scratch. Most of the time
-is spent on downloading the {BSgenome.Hsapiens.UCSC.hgXX} R packages. In the end, you
-can confirm your conda environments have been installed correctly (notice how
-the paths are different to the `base` env installation after using the
+is spent on downloading the
+{BSgenome.Hsapiens.UCSC.hg19} and {BSgenome.Hsapiens.UCSC.hg38} R packages
+(and yes, for simplicity we download both packages).
+In the end, confirm your conda environments have been installed correctly
+(notice how the paths are different to the `base` env installation after using the
 `--prefix` option above):
 
 ```text
@@ -164,13 +172,13 @@ $ (base) conda env list
 # conda environments:
 #
 base    *  /Users/you/miniconda3
-pcgr       /Users/you/dir4/conda/env/pcgr
-pcgrr      /Users/you/dir4/conda/env/pcgrr
+pcgr       /Users/you/dir4/conda/pcgr
+pcgrr      /Users/you/dir4/conda/pcgrr
 ```
 
 #### c) Activate pcgr conda environment
 
-You need to activate the `PCGR/conda/env/pcgr` conda environment, and test that it works
+You need to activate the `conda/pcgr` conda environment, and test that it works
 correctly with e.g. `pcgr --version`:
 
 ```text
