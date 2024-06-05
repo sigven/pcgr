@@ -83,6 +83,11 @@ def conda_env_path(env):
     env_path = os.path.join(env_dir, env) # /path/to/conda/envs/{env}
     return env_path
 
+def pcgrr_conda_env_export(pcgrr_env):
+    pcgrr_conda_env = conda_env_path(pcgrr_env)
+    cmd = f"export CONDA_PREFIX={pcgrr_conda_env} && export PATH={pcgrr_conda_env}/bin:\"$PATH\""
+    return cmd
+
 def get_loftee_dir():
     pcgr_conda_env = conda_prefix_basename()
     return script_path(pcgr_conda_env, "share/loftee")

@@ -652,8 +652,9 @@ def run_pcgr(input_data, output_data,conf_options):
         pcgr_conda = utils.conda_prefix_basename()
         rscript = utils.script_path(pcgrr_conda, 'bin/Rscript')
         pcgrr_script = utils.script_path(pcgr_conda, 'bin/pcgrr.R')
+        export_pcgrr = utils.pcgrr_conda_env_export(pcgrr_conda)
         pcgr_report_command = (
-                 f"{rscript} {pcgrr_script} {yaml_fname} {quarto_env_vars}")
+                 f"{export_pcgrr} && {rscript} {pcgrr_script} {yaml_fname} {quarto_env_vars}")
 
         if debug:
             print(pcgr_report_command)
