@@ -152,20 +152,20 @@ jobs:
           tags: |
             sigven/pcgr:${{ env.VERSION }}
 
-      #- name: Apptainer setup
-      #  uses: eWaterCycle/setup-apptainer@v2
-      #- name: Apptainer build
-      #  run: |
-      #    docker image ls -a
-      #    docker save sigven/pcgr:${VERSION} -o pcgr_${VERSION}.tar
-      #    ls -la
-      #    df -h
-      #    echo "Building Apptainer SIF"
-      #    echo "---------------------------------"
-      #    apptainer build pcgr_singularity_${VERSION}.sif docker-archive://pcgr_${VERSION}.tar
-      #    echo "---------------------------------"
-      #    ls -lSha
-      #- name: Upload SIF to GHCR
-      #  run: |
-      #    echo ${{ secrets.GITHUB_TOKEN }} | apptainer registry login -u ${{ github.actor }} --password-stdin oras://ghcr.io
-      #    apptainer push pcgr_singularity_${VERSION}.sif oras://ghcr.io/${GITHUB_REPOSITORY}:${VERSION}.singularity
+      - name: Apptainer setup
+        uses: eWaterCycle/setup-apptainer@v2
+      - name: ⚫ Apptainer build
+        run: |
+          docker image ls -a
+          docker save sigven/pcgr:${VERSION} -o pcgr_${VERSION}.tar
+          ls -la
+          df -h
+          echo "Building Apptainer SIF"
+          echo "---------------------------------"
+          apptainer build pcgr_singularity_${VERSION}.sif docker-archive://pcgr_${VERSION}.tar
+          echo "---------------------------------"
+          ls -lSha
+      - name: Upload SIF to GHCR
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | apptainer registry login -u ${{ github.actor }} --password-stdin oras://ghcr.io
+          apptainer push pcgr_singularity_${VERSION}.sif oras://ghcr.io/${GITHUB_REPOSITORY}:${VERSION}.singularity
