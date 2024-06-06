@@ -39,7 +39,7 @@ def cli():
     optional_signatures = parser.add_argument_group("Mutational signature options")
     optional_cna = parser.add_argument_group("Somatic copy number alteration (CNA) data options")
     optional_rna = parser.add_argument_group("Bulk RNA-seq and RNA fusion data options")
-    #optional_germline = parser.add_argument_group("Germline variant options")    
+    #optional_germline = parser.add_argument_group("Germline variant options")
     optional_other = parser.add_argument_group("Other options")
 
 
@@ -52,12 +52,12 @@ def cli():
 
     optional_assay.add_argument("--assay", dest="assay", default="WES", choices=[ "WGS", "WES","TARGETED"], help="Type of DNA sequencing assay performed for input data (VCF), default: %(default)s")
     optional_assay.add_argument("--effective_target_size_mb", type=float, default=34, dest="effective_target_size_mb", help="Effective target size in Mb (potentially limited by read depth) of sequencing assay (for TMB analysis) (default: %(default)s (WES/WGS))")
-    optional_assay.add_argument("--tumor_only", action="store_true", help="Input VCF comes from tumor-only sequencing, calls will be filtered for variants of germline origin, (default: %(default)s)")    
+    optional_assay.add_argument("--tumor_only", action="store_true", help="Input VCF comes from tumor-only sequencing, calls will be filtered for variants of germline origin, (default: %(default)s)")
     optional_sample.add_argument("--tumor_site", dest="tsite", type=int, default=0, help="Optional integer code to specify primary tumor type/site of query sample,\nchoose any of the following identifiers:\n" + str(pcgr_vars.tumor_sites) + "\n(default: %(default)s - any tumor type)")
     optional_sample.add_argument("--tumor_purity", type=float, dest="tumor_purity", help="Estimated tumor purity (between 0 and 1) (default: %(default)s)")
     optional_sample.add_argument("--tumor_ploidy", type=float, dest="tumor_ploidy", help="Estimated tumor ploidy (default: %(default)s)")
 
-    
+
     optional_allelic_support.add_argument("--tumor_dp_tag", dest="tumor_dp_tag", default="_NA_", help="Specify VCF INFO tag for sequencing depth (tumor, must be Type=Integer, default: %(default)s")
     optional_allelic_support.add_argument("--tumor_af_tag", dest="tumor_af_tag", default="_NA_", help="Specify VCF INFO tag for variant allelic fraction (tumor,  must be Type=Float, default: %(default)s")
     optional_allelic_support.add_argument("--control_dp_tag", dest="control_dp_tag", default="_NA_", help="Specify VCF INFO tag for sequencing depth (control, must be Type=Integer, default: %(default)s")
@@ -106,21 +106,20 @@ def cli():
     optional_signatures.add_argument("--include_artefact_signatures", action="store_true", help="Include sequencing artefacts in the collection of reference signatures (default: %(default)s")
     optional_signatures.add_argument("--prevalence_reference_signatures", type=float, default=0.1, help="Minimum tumor-type prevalence (in percent) of reference signatures to be included in refitting procedure (default: %(default)s)")
 
-    optional_cna.add_argument("--input_cna", dest="input_cna", help="Somatic copy number alteration segments (tab-separated values)")   
+    optional_cna.add_argument("--input_cna", dest="input_cna", help="Somatic copy number alteration segments (tab-separated values)")
     optional_cna.add_argument("--n_copy_gain", type=int, default=6, dest="n_copy_gain", help="Minimum number of total copy number for segments considered as gains/amplifications (default: %(default)s)")
     optional_cna.add_argument("--cna_overlap_pct", type=float, default=50, dest="cna_overlap_pct", help="Mean percent overlap between copy number segment and gene transcripts for reporting of gains/losses in tumor suppressor genes/oncogenes, (default: %(default)s)")
-    
-    
+
     #optional_rna.add_argument("--input_rna_fusion", dest = "input_rna_fusion", help = "File with RNA fusion transcripts detected in tumor (tab-separated values)")
     optional_rna.add_argument("--input_rna_expression", dest = "input_rna_exp", help = "File with bulk RNA expression counts (TPM) of transcripts in tumor (tab-separated values)")
     optional_rna.add_argument('--expression_sim', action='store_true', help="Compare expression profile of tumor sample to known expression profiles (default: %(default)s)")
     optional_rna.add_argument("--expression_sim_db", dest = "expression_sim_db", default="tcga,depmap,treehouse", help=f"Comma-separated string " + \
-        "of databases for used in RNA expression similarity analysis, default: %(default)s") 
+        "of databases for used in RNA expression similarity analysis, default: %(default)s")
 
-   
+
     #optional_germline.add_argument("--input_germline", dest="input_germline", help="CPSR-classified germline calls (file '<sample_id>.cpsr.<genome_assembly>.classification.tsv.gz')")
     #optional_germline.add_argument("--sample_id_germline", dest="sample_id_germline", help="Sample identifier for germline calls - used for verification of input_germline file")
-    
+
     optional_other.add_argument("--vcf2maf", action="store_true", help="Generate a MAF file for input VCF using https://github.com/mskcc/vcf2maf (default: %(default)s)")
     optional_other.add_argument("--vcfanno_n_proc", default=4, type=int, help="Number of vcfanno processes (option '-p' in vcfanno), default: %(default)s")
     optional_other.add_argument("--ignore_noncoding", action="store_true", help="Ignore non-coding (i.e. non protein-altering) variants in report, default: %(default)s")
@@ -132,22 +131,17 @@ def cli():
     optional_other.add_argument("--debug", action="store_true", help="Print full commands to log")
     optional_other.add_argument("--pcgrr_conda", default="pcgrr", help="pcgrr conda env name (default: %(default)s)")
 
-    
-    
     # Parse required and optional arguments
     args = parser.parse_args()
     arg_dict = vars(args)
 
     # verify parsed arguments
     arg_dict_verified = arg_checker.verify_args(arg_dict)
-    
     # create config options
     conf_options = create_config(arg_dict_verified, workflow = "PCGR")
-    
     # Verify existence of input files, define and check existence of output files
     input_data = arg_checker.verify_input_files(arg_dict_verified)
     output_data = arg_checker.define_output_files(arg_dict_verified)
-    
     # Run PCGR workflow
     run_pcgr(input_data, output_data, conf_options)
 
@@ -168,8 +162,7 @@ def run_pcgr(input_data, output_data,conf_options):
     assay_mode = 'Tumor vs. Control'
     oncogenicity_annotation = 1
     if conf_options['assay_properties']['vcf_tumor_only']:
-        assay_mode = 'Tumor-only'        
-            
+        assay_mode = 'Tumor-only'
     NCBI_BUILD_MAF = pcgr_vars.NCBI_BUILD_MAF
     if conf_options['genome_assembly'] == 'grch37':
         NCBI_BUILD_MAF = 'GRCh37'
@@ -204,10 +197,10 @@ def run_pcgr(input_data, output_data,conf_options):
 
     if not input_vcf == 'None':
         output_dir = output_data['dir']
-        output_prefix = output_data['prefix']        
-        check_subprocess(logger, f'mkdir -p {output_dir}', debug)
+        output_prefix = output_data['prefix']
+        utils.safe_makedir(output_dir)
 
-        random_id = random_id_generator(15) 
+        random_id = random_id_generator(15)
         # Define temporary output files
         input_vcf_validated =             f'{output_prefix}.{random_id}.ready.vcf.gz'
         input_vcf_validated_uncompr =     f'{output_prefix}.{random_id}.ready.vcf'
@@ -259,7 +252,6 @@ def run_pcgr(input_data, output_data,conf_options):
         check_subprocess(logger, vcf_validate_command, debug)
         logger.info('Finished pcgr-validate-input-arguments')
         print('----')
-        
 
         # PCGR|start - Log key information about sample, options and sequencing assay/design
         logger = getlogger('pcgr-settings')
@@ -292,7 +284,7 @@ def run_pcgr(input_data, output_data,conf_options):
         logger.info(f'Mutational burden estimation: {tmb_estimation_set}')
         logger.info(f'RNA expression similarity analysis: {rnaseq_sim_analysis_set}')
         #logger.info(f'Include molecularly targeted clinical trials (beta): {clinical_trials_set}')
-        
+
         # PCGR|Generate YAML file - containing configuration options and paths to annotated molecular profile datasets
         # - VCF/TSV files (SNVs/InDels)
         # - TSV files (copy number aberrations)
@@ -308,22 +300,22 @@ def run_pcgr(input_data, output_data,conf_options):
         conf_options['molecular_data']['fname_mut_tsv'] = output_pass_tsv_gz
         if conf_options['somatic_snv']['tmb']['run'] == 1:
             conf_options['molecular_data']['fname_tmb_tsv'] = tmb_fname
-        if not input_cna == 'None': 
+        if not input_cna == 'None':
             conf_options['molecular_data']['fname_cna_tsv'] = output_data['cna']
         if not input_rna_expression == 'None':
             conf_options['molecular_data']['fname_expression_tsv'] = output_data['expression']
             conf_options['molecular_data']['fname_expression_outliers_tsv'] = output_data['expression_outliers']
             if conf_options['expression']['similarity_analysis'] == 1:
                 conf_options['molecular_data']['fname_expression_similarity_tsv'] = output_data['expression_similarity']
-                
+
         # make YAML file
-        yaml_data = populate_config_data(conf_options, input_data["refdata_assembly_dir"], 
+        yaml_data = populate_config_data(conf_options, input_data["refdata_assembly_dir"],
                                          workflow = "PCGR", logger = logger)
         genome_assembly = yaml_data['genome_assembly']
-        
-        vep_command = get_vep_command(file_paths = input_data, 
-                                conf_options = yaml_data, 
-                                input_vcf = input_vcf_validated, 
+
+        vep_command = get_vep_command(file_paths = input_data,
+                                conf_options = yaml_data,
+                                input_vcf = input_vcf_validated,
                                 output_vcf = vep_vcf)
 
         # PCGR|VEP - run consequence annotation with Variant Effect Predictor
@@ -350,22 +342,22 @@ def run_pcgr(input_data, output_data,conf_options):
 
         # PCGR|vcf2maf - if option set, convert VCF to MAF with https://github.com/mskcc/vcf2maf
         if run_vcf2maf:
-            
+
             retained_info_tags = \
                 yaml_data["conf"]['somatic_snv']['allelic_support']['control_dp_tag'] + ',' \
                 + yaml_data["conf"]['somatic_snv']['allelic_support']['tumor_dp_tag'] + ',' \
                 + yaml_data["conf"]['somatic_snv']['allelic_support']['control_af_tag'] + ',' \
                 + yaml_data["conf"]['somatic_snv']['allelic_support']['tumor_af_tag']
-        
+
             retained_info_tags = re.sub(r'_NA_(,)?','', retained_info_tags)
             logger = getlogger("pcgr-vcf2maf")
-            
+
             vcf2maf_command_main = "vcf2maf.pl"
             update_allelic_support = False
             if retained_info_tags != "":
                 vcf2maf_command_main = f"vcf2maf.pl --retain-info {retained_info_tags} "
                 update_allelic_support = True
-            
+
             logger.info('Converting VEP-annotated VCF to MAF with https://github.com/mskcc/vcf2maf')
             vcf2maf_command = (
                     f'{vcf2maf_command_main} --inhibit-vep --input-vcf {vep_vcf} '
@@ -374,11 +366,11 @@ def run_pcgr(input_data, output_data,conf_options):
                     f'--ncbi-build {NCBI_BUILD_MAF} > {output_vcf2maf_log} 2>&1'
                     )
             check_subprocess(logger, vcf2maf_command, debug)
-            if not debug:                
+            if not debug:
                 remove_file(output_vcf2maf_log)
-            
-            ## add information on allelic support in MAF file 
-            ## (n_depth, n_ref_count, n_alt_count, t_depth, t_ref_count, t_alt_count)   
+
+            ## add information on allelic support in MAF file
+            ## (n_depth, n_ref_count, n_alt_count, t_depth, t_ref_count, t_alt_count)
             update_maf_allelic_support(
                 maf_tmp_fname = output_tmp_maf,
                 maf_fname = output_maf,
@@ -386,7 +378,6 @@ def run_pcgr(input_data, output_data,conf_options):
                 logger = logger,
                 update_allelic_support = update_allelic_support
             )
-            
             logger.info('Finished pcgr-vep-vcf2maf')
             print('----')
 
@@ -432,7 +423,7 @@ def run_pcgr(input_data, output_data,conf_options):
         logger.info("PCGR - STEP 3: Variant and cancer gene annotations with pcgr-summarise")
         logger.info(summarise_db_src_msg1)
         logger.info(summarise_db_src_msg2)
-        
+
         logger.info('Variant oncogenicity classification according to ClinGen/VICC recommendations (Horak et al., Genet Med, 2022)')
         logger.info('Variant biomarker matching (CIViC, CGI) at multiple resolutions (genes, exons, amino acid positions, hgvsp/hgvsc, genomic)')
         logger.info('Tumor suppressor/oncogene annotations based on multiple sources (NCG, CGC, CancerMine)')
@@ -460,19 +451,19 @@ def run_pcgr(input_data, output_data,conf_options):
 
         # PCGR|vcf2tsvpy - convert VCF to TSV with https://github.com/sigven/vcf2tsvpy
         pcgr_vcf2tsv_command = f'vcf2tsvpy --input_vcf {output_pass_vcf} --out_tsv {output_pass_vcf2tsv} --compress'
-        logger.info("Converting VCF to TSV with https://github.com/sigven/vcf2tsvpy")        
+        logger.info("Converting VCF to TSV with https://github.com/sigven/vcf2tsvpy")
         check_subprocess(logger, pcgr_vcf2tsv_command, debug)
-        
-        ## Append additional (space-containing) annotations not suitable for VCF INFO        
-        logger.info("Appending ClinVar traits, official gene names, and protein domain annotations")        
+
+        ## Append additional (space-containing) annotations not suitable for VCF INFO
+        logger.info("Appending ClinVar traits, official gene names, and protein domain annotations")
         variant_set = \
            append_annotations(
               output_pass_vcf2tsv_gz, refdata_assembly_dir = input_data["refdata_assembly_dir"], logger = logger)
         ## Set allelic support properties (DP_TUMOR, DP_CONTROL, VAF_TUMOR, VAF_CONTROL)
         variant_set = set_allelic_support(variant_set, allelic_support_tags = yaml_data["conf"]['somatic_snv']['allelic_support'])
         ## Clean annotations (formatting etc.)
-        variant_set = clean_annotations(variant_set, yaml_data, logger = logger)        
-        
+        variant_set = clean_annotations(variant_set, yaml_data, logger = logger)
+
         ## Check if AD/DP properties could be detected/pulled from VCFs
         for c in ['DP_TUMOR', 'DP_CONTROL', 'VAF_TUMOR', 'VAF_CONTROL']:
             if c in variant_set.columns:
@@ -480,43 +471,42 @@ def run_pcgr(input_data, output_data,conf_options):
                     var = str(c).lower() + '_detected'
                     if var in yaml_data['conf']['sample_properties'].keys():
                         yaml_data['conf']['sample_properties'][var] = 1
-               
-        # PCGR|expression1 - 
-        ## If gene expression data is provided as input; verify identifiers, annotate, and merge with somatic variant set 
+
+        # PCGR|expression1 -
+        ## If gene expression data is provided as input; verify identifiers, annotate, and merge with somatic variant set
         if input_rna_expression != 'None':
             logger = getlogger('pcgr-gene-expression')
             ## Parse expression data, verify identifiers
             expression_data = parse_expression(
-                input_rna_expression, yaml_data["sample_id"], 
+                input_rna_expression, yaml_data["sample_id"],
                 input_data["refdata_assembly_dir"], logger = logger)
             ## Write transcript-level expression data to TSV
             if 'transcript' in expression_data.keys():
                 if not expression_data['transcript'] is None:
                     expression_data['transcript'].fillna('.').to_csv(
-                        yaml_data['molecular_data']['fname_expression_tsv'], sep = "\t", 
+                        yaml_data['molecular_data']['fname_expression_tsv'], sep = "\t",
                         compression = "gzip", index = False)
-                    
-                    variant_set = aggregate_tpm_per_cons(variant_set, expression_data, logger = logger)        
+
+                    variant_set = aggregate_tpm_per_cons(variant_set, expression_data, logger = logger)
                     #exp_to_cons.fillna('.').to_csv(
-                    #    yaml_data['molecular_data']['fname_csq_expression_tsv'], sep = "\t", 
+                    #    yaml_data['molecular_data']['fname_csq_expression_tsv'], sep = "\t",
                     #    compression = "gzip", index = False)
             else:
                 if 'gene' in expression_data.keys():
                     if not expression_data['gene'] is None:
                         expression_data['gene'].fillna('.').to_csv(
-                            yaml_data['molecular_data']['fname_expression_tsv'], sep = "\t", 
+                            yaml_data['molecular_data']['fname_expression_tsv'], sep = "\t",
                             compression = "gzip", index = False)
-            
+
             ## Merge expression data with somatic SNV/InDel variant set
             variant_set = integrate_variant_expression(
                 variant_set, expression_data, logger = logger)
-            
-            
+
         ## Write somatic SNV/InDel variant set to TSV
         variant_set.fillna('.').to_csv(output_pass_tsv_gz, sep = "\t", compression = "gzip", index = False)
         if not debug:
             remove_file(output_pass_vcf2tsv_gz)
-        
+
         ## Reduce output file for WGS when the number of variants exceeds MAX_VARIANTS_FOR_REPORT
         if yaml_data["conf"]['assay_properties']['type'] == 'WGS' or yaml_data["conf"]['assay_properties']['type'] == 'WES':
             # check that output file exist
@@ -529,7 +519,7 @@ def run_pcgr(input_data, output_data,conf_options):
                                 f'{pcgr_vars.MAX_VARIANTS_FOR_REPORT} - intergenic/intronic variants will be excluded prior to reporting')
 
                     # Exclude intronic and intergenic variants prior to analysis with pcgrr (reporting and further analysis)
-                    var_data_filtered = var_data[~var_data.CONSEQUENCE.str.contains('^intron') & 
+                    var_data_filtered = var_data[~var_data.CONSEQUENCE.str.contains('^intron') &
                                                  ~var_data.CONSEQUENCE.str.contains('^intergenic')]
                     num_variants_excluded1 = num_variants_raw - len(var_data_filtered)
                     logger.info(f'Number of intergenic/intronic variants excluded: {num_variants_excluded1}')
@@ -539,18 +529,18 @@ def run_pcgr(input_data, output_data,conf_options):
                     var_data_filtered_final = var_data_filtered
                     if len(var_data_filtered) > pcgr_vars.MAX_VARIANTS_FOR_REPORT:
                         var_data_filtered_final = \
-                            var_data_filtered[~var_data_filtered.CONSEQUENCE.str.contains('^upstream_gene') & 
+                            var_data_filtered[~var_data_filtered.CONSEQUENCE.str.contains('^upstream_gene') &
                                               ~var_data_filtered.CONSEQUENCE.str.contains('^downstream_gene')]
                         num_variants_excluded2 = len(var_data_filtered) - len(var_data_filtered_final)
                         logger.info(f'Number of upstream_gene/downstream_gene variants excluded: {num_variants_excluded2}')
-                        
+
                     # rename original vcf2tsv (gzipped) to 'raw' filename
                     rename_output_tsv = f'mv {output_pass_tsv_gz} {output_pass_raw_tsv_gz}'
                     check_subprocess(logger, rename_output_tsv, debug)
-                    
+
                     var_data_filtered_final.fillna('.').to_csv(output_pass_tsv_gz, sep = "\t", compression = "gzip", index = False)
                     logger.info(f'Number of variants in final output TSV: {len(var_data_filtered_final)}')
-        
+
         # PCGR|TMB - calculate TMB in multiple ways - potentially also considering subset of variants (depth and allele frequency filtered)
         if yaml_data['conf']['somatic_snv']['tmb']['run'] == 1:
             logger_tmb = getlogger('pcgr-calculate-tmb')
@@ -562,16 +552,16 @@ def run_pcgr(input_data, output_data,conf_options):
                 sample_id = yaml_data['sample_id'],
                 tmb_fname = tmb_fname,
                 logger = logger_tmb)
-        
+
         logger = getlogger('pcgr-summarise')
         logger.info('Finished pcgr-summarise')
         print('----')
-    
+
     # PCGR|Expression2 - Gene expression (bulk RNA-seq) analyses
     if not expression_data is None:
         logger = getlogger("pcgr-expression-analysis")
         logger.info('PCGR - STEP 4: Gene expression analysis')
-         
+
         ## Find expression outliers by comparing with reference datasets
         ## - Preliminary version only compares with TCGA datasets, and only selects specific cohorts (pcgr_vars.SITE_TO_DISEASE)
         logger.info('Identification of expression outliers through comparison with reference datasets')
@@ -587,7 +577,7 @@ def run_pcgr(input_data, output_data,conf_options):
                 sep = "\t", index = False)
         else:
             yaml_data['molecular_data']['fname_expression_outliers_tsv'] = 'None'
-        
+
         ## Correlate sample gene expression profile with reference samples (expression-based similarity)
         if yaml_data['conf']['expression']['similarity_analysis'] == 1:
             exp_similarity_results = correlate_sample_expression(
@@ -596,13 +586,13 @@ def run_pcgr(input_data, output_data,conf_options):
                 input_data["refdata_assembly_dir"],
                 protein_coding_only = True,
                 logger = logger)
-            
+
             ## Aggregate similarity results across sources (TCGA, TreeHouse, Depmap) into single table
             exp_similarity_results_all = pd.DataFrame()
             for source in exp_similarity_results.keys():
                 if not exp_similarity_results[source].empty:
                     exp_similarity_results_all = \
-                        pd.concat([exp_similarity_results_all, 
+                        pd.concat([exp_similarity_results_all,
                                    exp_similarity_results[source]], axis = 0)
             exp_similarity_results_all.fillna('.').to_csv(
                 yaml_data['molecular_data']['fname_expression_similarity_tsv'],
@@ -612,18 +602,18 @@ def run_pcgr(input_data, output_data,conf_options):
         logger = getlogger("pcgr-expression-analysis")
         logger.info('PCGR - STEP 4: Gene expression analysis - OMITTED (no data available)')
         print('----')
-        
+
     # PCGR|CNA - Annotate allele-specific copy number segments with cytobands, overlapping transcripts, and biomarkers
     if not input_cna == 'None':
         logger = getlogger("pcgr-annotate-cna-segments")
         logger.info('PCGR - STEP 5: Annotation of copy number segments - cytobands, overlapping transcripts, and biomarkers')
         cna_annotation = cna.annotate_cna_segments(
-            output_fname = output_data['cna'], 
-            output_dir = output_data['dir'], 
+            output_fname = output_data['cna'],
+            output_dir = output_data['dir'],
             cna_segment_file = input_cna,
             build = yaml_data['genome_assembly'],
             sample_id = yaml_data['sample_id'],
-            refdata_assembly_dir = input_data['refdata_assembly_dir'], 
+            refdata_assembly_dir = input_data['refdata_assembly_dir'],
             n_copy_amplifications = yaml_data["conf"]['somatic_cna']['n_copy_gain'],
             overlap_fraction = 0.5,
             expression_data = expression_data,
@@ -635,24 +625,26 @@ def run_pcgr(input_data, output_data,conf_options):
         logger = getlogger("pcgr-annotate-cna-segments")
         logger.info('PCGR - STEP 5: Annotation of copy number segments - cytobands, overlapping transcripts, and biomarkers - OMITTED (no data available)')
         print('----')
-    
+
     # Write YAML file with configuration options and paths to annotated molecular profile datasets
     with open(yaml_fname, "w") as outfile:
         outfile.write(yaml.dump(yaml_data))
     outfile.close()
-            
-    # PCGR|Report - Generation of Excel workbooks and integrative HTML reports for molecular data interpretation 
+
+    # PCGR|Report - Generation of Excel workbooks and integrative HTML reports for molecular data interpretation
     ## SNVs/InDels, CNAs, expression, TMB, MSI, mutational signatures
     if not conf_options['other']['no_reporting'] and not input_vcf == 'None':
         logger = getlogger('pcgr-writer')
         logger.info('PCGR - STEP 6: Generation of output files - molecular interpretation report for precision cancer medicine')
         # export PATH to R conda env Rscript
         pcgrr_conda = conf_options['pcgrr_conda']
+        quarto_env_vars = utils.quarto_evars_path(pcgrr_conda)
         pcgr_conda = utils.conda_prefix_basename()
         rscript = utils.script_path(pcgrr_conda, 'bin/Rscript')
         pcgrr_script = utils.script_path(pcgr_conda, 'bin/pcgrr.R')
+        export_pcgrr = utils.pcgrr_conda_env_export(pcgrr_conda)
         pcgr_report_command = (
-                 f"{rscript} {pcgrr_script} {yaml_fname}")
+                 f"{export_pcgrr} && {rscript} {pcgrr_script} {yaml_fname} {quarto_env_vars}")
 
         if debug:
             print(pcgr_report_command)

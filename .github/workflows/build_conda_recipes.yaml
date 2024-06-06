@@ -5,12 +5,13 @@ on:
     branches:
       - master
       - bundle_update_2023
+      - quarto
 env:
   atoken: ${{ secrets.ANACONDA_UPLOAD_TOKEN }}
   recipe_path: conda/recipe
   env_yml_path: conda/env/yml
   env_lock_path: conda/env/lock
-  VERSION: '1.4.1.9005' # versioned by bump2version
+  VERSION: '1.4.1.9008' # versioned by bump2version
 jobs:
   build_pcgrr_conda_pkg:
     # When merging to one of the branches above and the commit message matches
@@ -153,7 +154,7 @@ jobs:
 
       - name: Apptainer setup
         uses: eWaterCycle/setup-apptainer@v2
-      - name: Apptainer build
+      - name: ⚫ Apptainer build
         run: |
           docker image ls -a
           docker save sigven/pcgr:${VERSION} -o pcgr_${VERSION}.tar

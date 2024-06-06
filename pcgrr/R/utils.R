@@ -1052,3 +1052,20 @@ strip_html <- function(x) {
     x <- gsub("<[^>]+>", "", x)
     x
 }
+
+#' Export Quarto Environment Variables
+#'
+#' Export quarto environment variables
+#' required when using conda.
+#'
+#' @param x Path to conda/envs/pcgrr/etc/conda/activate.d/quarto.sh
+#' @export
+export_quarto_evars <- function(x) {
+  vars <- readr::read_delim(
+    x, delim = "=", comment = "#", col_names = c("name", "value"), col_types = "cc"
+  ) |>
+    dplyr::mutate(name = sub("(.* )(QUARTO_.*)", "\\2", .data$name)) |>
+    tibble::deframe() |>
+    as.list()
+  do.call(Sys.setenv, vars)
+}

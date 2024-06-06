@@ -83,6 +83,11 @@ def conda_env_path(env):
     env_path = os.path.join(env_dir, env) # /path/to/conda/envs/{env}
     return env_path
 
+def pcgrr_conda_env_export(pcgrr_env):
+    pcgrr_conda_env = conda_env_path(pcgrr_env)
+    cmd = f"export CONDA_PREFIX={pcgrr_conda_env} && export PATH={pcgrr_conda_env}/bin:\"$PATH\""
+    return cmd
+
 def get_loftee_dir():
     pcgr_conda_env = conda_prefix_basename()
     return script_path(pcgr_conda_env, "share/loftee")
@@ -91,6 +96,13 @@ def get_pcgr_bin():
     """Return abs path to e.g. conda/env/pcgr/bin
     """
     return os.path.dirname(os.path.realpath(sys.executable))
+
+def quarto_evars_path(pcgrr_env):
+    """The quarto env vars are set in the conda activate script,
+    which is under /path/to/envs/pcgrr/etc/conda/activate.d
+    """
+    return(os.path.join(conda_env_path(pcgrr_env), "etc/conda/activate.d/quarto.sh"))
+
 
 def perl_cmd():
     """Retrieve abs path to locally installed conda Perl or first in PATH,

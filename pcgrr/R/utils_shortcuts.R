@@ -17,4 +17,7 @@ dummy1 <- function() {
   plotly::plot_ly
   caret::createModel
   randomForest::importance
+  shiny::bootstrapPage
+  bslib::page_fillable
+  crosstalk::filter_select
 }
