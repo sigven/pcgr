@@ -263,7 +263,7 @@ The following variables are included in the TSV file (VCF tags issued by the use
 | 9. `PROTEIN_CHANGE` | Protein change |
 | 10. `CONSEQUENCE` | Variant consequence - from VEP |
 | 11. `PFAM_DOMAIN_NAME` | Pfam domain name |
-| 12. `LOSS_OF_FUNCTION` | Loss of function flag - From LOFTEE (high confidence) |
+| 12. `LOSS_OF_FUNCTION` | Loss of function flag |
 | 13. `CDS_CHANGE` | Coding sequence change |
 | 14. `CODING_STATUS` | Coding status - flag indicating if consequence is protein-altering/affecting splice sites|
 | 15. `EXONIC_STATUS` | Exonic status - flag indicating if consequence is silent/protein-altering/affecting splice sites|

@@ -47,7 +47,7 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
    ## Oncogenic effects of somatic variants
    
    # 6) "CLINGEN_VICC_OVS1"
-   ## Null variant - predicted as LoF by LOFTEE
+   ## Null variant - predicted as LoF
    ## - Nonsense, frameshift, canonical splice sites, initiation codon,
    ##   single-exon/multi-exon deletion
    ## - Tumor suppressor gene
@@ -283,7 +283,7 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
          variant_data["CLINGEN_VICC_OP4"] = True
   
     
-   ## check if variant is a loss-of-function variant (LOFTEE) in a tumor suppressor gene (Cancer Gene Census/CancerMine)
+   ## check if variant is a loss-of-function variant in a tumor suppressor gene (Cancer Gene Census/CancerMine)
    if "TSG" in variant_data.keys() and \
       "ONCOGENE" in variant_data.keys() and \
       "LOSS_OF_FUNCTION" in variant_data.keys() and \
@@ -345,7 +345,7 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
       'High MAF (> 0.01 in gnomAD - any five major continental pops)',
       'Multiple lines (>=6) of computational evidence support a benign effect on the gene or gene product - from dbNSFP',
       'Silent and intronic changes outside of the consensus splice site',
-      'Null variant - predicted as LoF by LOFTEE - in bona fide tumor suppressor gene',
+      'Null variant - predicted as LoF - in bona fide tumor suppressor gene',
       'Located in a mutation hotspot (cancerhotspots.org). >= 50 samples with a  variant at AA position, >= 10 samples with same AA change',
       'Protein length changes from in-frame dels/ins in known oncogene/tumor suppressor genes or stop-loss variants in a tumor suppressor gene',
       'Located in a mutation hotspot (cancerhotspots.org). < 50 samples with a variant at AA position, >= 10 samples with same AA change.',

@@ -17,7 +17,7 @@ The following criteria are currently used for oncogenicity classification in PCG
  * _CLINGEN_VICC_SBS1_ - High MAF (> 0.01 in gnomAD - any five major continental pops)
  * _CLINGEN_VICC_SBP1_ - Insilico support a benign effect on the gene or gene product (multiple lines of evidence (>= 7 algorithms) from dbNSFP)
  * _CLINGEN_VICC_SBP2_ - Silent and intronic changes outside of the consensus splice site (VEP consequence)
- * _CLINGEN_VICC_OVS1_ - Null variant - in bona fide tumor suppressor gene (predicted as LoF by LOFTEE, tumor suppressors from CGC/NCG/CancerMine)
+ * _CLINGEN_VICC_OVS1_ - Null variant - in bona fide tumor suppressor gene (predicted as LoF in tumor suppressors from CGC/NCG/CancerMine)
  * _CLINGEN_VICC_OS3_ - Located in a mutation hotspot, >= 50 samples with a variant at amino acid position, >= 10 samples with same amino acid change (cancerhotspots.org)
  * _CLINGEN_VICC_OM2_ - Protein length changes from in-frame dels/ins in known oncogene/tumor suppressor genes or stop-loss variants in a tumor suppressor gene (tumor suppressors/oncogenes from CGC/NCG/CancerMine)
  * _CLINGEN_VICC_OM3_ - Located in a mutation hotspot, < 50 samples with a variant at amino acid position, >= 10 samples with same amino acid change (cancerhotspots.org)
