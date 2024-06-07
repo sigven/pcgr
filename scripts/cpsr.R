@@ -11,6 +11,8 @@ suppressWarnings(suppressPackageStartupMessages(library(log4r)))
 ## YAML file produced by CPSR Python workflow
 ## - settings and paths to reference data and annotated input sample files
 yaml_fname <- as.character(args[1])
+quarto_evars_path <- as.character(args[2])
+pcgrr::export_quarto_evars(quarto_evars_path)
 
 my_log4r_layout <- function(level, ...) {
   paste0(format(Sys.time()), " - cpsr-report-generation - ",

@@ -1,6 +1,6 @@
 package:
   name: r-pcgrr
-  version: 1.4.1.9005 # versioned by bump2version
+  version: 1.4.1.9008 # versioned by bump2version
 
 source:
   path: ../../../pcgrr
@@ -20,7 +20,9 @@ requirements:
     - r-assertable
     - r-assertthat
     - bioconductor-biostrings
+    - r-bslib
     - r-caret
+    - r-crosstalk
     - r-dplyr
     - r-dt
     - r-formattable
@@ -42,6 +44,7 @@ requirements:
     - r-rrapply
     - bioconductor-s4vectors
     - r-scales
+    - r-shiny
     - r-stringr
     - r-stringi
     - r-tidyr
@@ -52,7 +55,9 @@ requirements:
     - r-assertable
     - r-assertthat
     - bioconductor-biostrings
+    - r-bslib
     - r-caret
+    - r-crosstalk
     - r-dplyr
     - r-dt
     - r-formattable
@@ -74,6 +79,7 @@ requirements:
     - r-rrapply
     - bioconductor-s4vectors
     - r-scales
+    - r-shiny
     - r-stringr
     - r-stringi
     - r-tidyr

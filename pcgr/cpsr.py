@@ -310,13 +310,14 @@ def run_cpsr(conf_options, input_data, output_data):
         
         # export PATH to R conda env Rscript
         pcgrr_conda = conf_options['pcgrr_conda']
+        quarto_env_vars = utils.quarto_evars_path(pcgrr_conda)
         pcgr_conda = utils.conda_prefix_basename()
         rscript = utils.script_path(pcgrr_conda, 'bin/Rscript')
         cpsrr_script = utils.script_path(pcgr_conda, 'bin/cpsr.R')
-        
+        export_pcgrr = utils.pcgrr_conda_env_export(pcgrr_conda)
         ## CPSR|writer - generate HTML report
         cpsr_report_command = (
-                 f"{rscript} {cpsrr_script} {yaml_fname}")
+                 f"{export_pcgrr} && {rscript} {cpsrr_script} {yaml_fname} {quarto_env_vars}")
 
         if debug:
             print(cpsr_report_command)
