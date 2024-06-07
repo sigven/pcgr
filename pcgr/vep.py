@@ -30,7 +30,7 @@ def get_vep_command(file_paths, conf_options, input_vcf, output_vcf, debug = Fal
     utils.check_file_exists(fasta_assembly, logger = logger)
     utils.check_file_exists(ancestor_assembly, logger = logger)
 
-    plugins_in_use = "NearestExonJB, LoF"
+    plugins_in_use = "NearestExonJB"
 
     # List all VEP flags used when calling VEP
     vep_flags = (
@@ -58,9 +58,9 @@ def get_vep_command(file_paths, conf_options, input_vcf, output_vcf, debug = Fal
         gencode_set_in_use = "GENCODE - basic transcript set (--gencode_basic)"
 
     ## LOFTEE plugin - variant loss-of-function annotation        
-    loftee_dir = utils.get_loftee_dir()
-    assert os.path.isdir(loftee_dir), f'LoF VEP plugin is not found in {loftee_dir}. Please make sure you installed pcgr conda package and have corresponding conda environment active.'
-    vep_options += f" --plugin LoF,loftee_path:{loftee_dir},human_ancestor_fa:{ancestor_assembly},use_gerp_end_trunc:0 --dir_plugins {loftee_dir}"
+    #loftee_dir = utils.get_loftee_dir()
+    #assert os.path.isdir(loftee_dir), f'LoF VEP plugin is not found in {loftee_dir}. Please make sure you installed pcgr conda package and have corresponding conda environment active.'
+    #vep_options += f" --plugin LoF,loftee_path:{loftee_dir},human_ancestor_fa:{ancestor_assembly},use_gerp_end_trunc:0 --dir_plugins {loftee_dir}"
 
     
     # Compose full VEP command

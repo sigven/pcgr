@@ -118,7 +118,7 @@ htmltools::br()
 
 ```{r t4}
 #| output: asis 
-#| eval: !expr missing_data_no_refit == FALSE & (as.logical(no_site_prevalence) == TRUE | as.logical(msig_conf$all_reference_signatures) == FALSE)
+#| eval: !expr missing_data_no_refit == FALSE & (as.logical(no_site_prevalence) == TRUE & as.logical(msig_conf$all_reference_signatures) == FALSE)
 cat(paste0(
   "The primary site of the input sample, '<b>", 
   conf$sample_properties$site, 

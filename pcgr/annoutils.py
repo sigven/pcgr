@@ -212,6 +212,7 @@ def assign_cds_exon_intron_annotations(csq_record):
     csq_record['PROTEIN_CHANGE'] = '.'
     csq_record['EXON_AFFECTED'] = '.'
     csq_record['LOSS_OF_FUNCTION'] = False
+    csq_record['GC_TO_GT_DONOR'] = False
 
     if re.search(pcgr_vars.CSQ_CODING_PATTERN, str(csq_record['Consequence'])) is not None:
         csq_record['CODING_STATUS'] = 'coding'
@@ -219,16 +220,19 @@ def assign_cds_exon_intron_annotations(csq_record):
     if re.search(pcgr_vars.CSQ_CODING_SILENT_PATTERN, str(csq_record['Consequence'])) is not None:
         csq_record['EXONIC_STATUS'] = 'exonic'
 
-    if 'LoF' in csq_record:
-        csq_record['LOSS_OF_FUNCTION'] = False        
-        if not csq_record['LoF'] is None:
-            if csq_record['LoF'] == 'HC':
-                csq_record['LOSS_OF_FUNCTION'] = True
+    if re.search(pcgr_vars.CSQ_LOF_PATTERN, str(csq_record['Consequence'])) is not None:
+        csq_record['LOSS_OF_FUNCTION'] = True
+
+    # if 'LoF' in csq_record:
+    #     csq_record['LOSS_OF_FUNCTION'] = False        
+    #     if not csq_record['LoF'] is None:
+    #         if csq_record['LoF'] == 'HC':
+    #             csq_record['LOSS_OF_FUNCTION'] = True
             
-        ## Don't list LoF as True if consequence is assigned as missense
-        if re.search(r'^missense_variant$', csq_record['Consequence']) is not None:
-            if csq_record['LOSS_OF_FUNCTION'] is True:
-                csq_record['LOSS_OF_FUNCTION'] = False
+    #     ## Don't list LoF as True if consequence is assigned as missense
+    #     if re.search(r'^missense_variant$', csq_record['Consequence']) is not None:
+    #         if csq_record['LOSS_OF_FUNCTION'] is True:
+    #             csq_record['LOSS_OF_FUNCTION'] = False
         
 
     if re.search(pcgr_vars.CSQ_NULL_PATTERN, str(csq_record['Consequence'])) is not None:
@@ -249,7 +253,7 @@ def assign_cds_exon_intron_annotations(csq_record):
 
     if 'NearestExonJB' in csq_record.keys():
         if not csq_record['NearestExonJB'] is None:
-            if re.search(r"synonymous_|missense_|stop_|inframe_|start_", str(csq_record['Consequence'])) is not None and str(csq_record['NearestExonJB']) != "":
+            if re.search(r"synonymous_|missense_|stop_|frameshift|inframe_|start_", str(csq_record['Consequence'])) is not None and str(csq_record['NearestExonJB']) != "":
                 exon_pos_info = csq_record['NearestExonJB'].split("+")
                 if len(exon_pos_info) == 4:
                     if utils.is_integer(exon_pos_info[1]) and str(exon_pos_info[2]) == "end":
@@ -265,6 +269,10 @@ def assign_cds_exon_intron_annotations(csq_record):
                 key = str(csq_record['Consequence']) + \
                     ':' + str(csq_record['HGVSc'])
                 csq_record['CDS_CHANGE'] = key
+                
+                if 'splice_donor_variant' in str(csq_record['Consequence']) and csq_record['HGVSc'].endswith('+2C>T'):
+                    csq_record['GC_TO_GT_DONOR'] = True
+                    csq_record['LOSS_OF_FUNCTION'] = False
 
     if csq_record['Amino_acids'] is None or csq_record['Protein_position'] is None or csq_record['Consequence'] is None:
         return(csq_record)

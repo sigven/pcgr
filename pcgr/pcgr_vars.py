@@ -169,6 +169,8 @@ CSQ_NULL_PATTERN = r"^(stop_gained|frameshift_)"
 CSQ_SPLICE_REGION_PATTERN = r"(splice_|intron_variant)"
 CSQ_SPLICE_DONOR_PATTERN = \
     r"(splice_region_variant|splice_donor_variant|splice_donor_region_variant|splice_donor_5th_base_variant)"
+CSQ_LOF_PATTERN = r"(stop_gained|frameshift|splice_acceptor_variant|splice_donor_variant|start_lost)"
+
 
 DISEASE_COHORTS = ['ACC','BLCA','BRCA','CESC',
                 'CHOL','COAD','DLBC','ESCA',
