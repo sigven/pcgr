@@ -10,7 +10,7 @@ dependencies:
   - bedtools
   - bcftools
   - cyvcf2
-  - ensembl-vep ==111.0
+  - ensembl-vep ==112.0
   - htslib
   - pandoc
   - bioconda::perl-bio-bigfile
