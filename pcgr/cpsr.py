@@ -197,7 +197,7 @@ def run_cpsr(conf_options, input_data, output_data):
             outfile.write(yaml.dump(yaml_data))
         outfile.close()
         
-        ## CPSR|VEP - run Variant Effect Predictor on query VCF with LoF and NearestExonJB plugins
+        ## CPSR|VEP - run Variant Effect Predictor on query VCF with NearestExonJB plugins
         vep_command = get_vep_command(file_paths = input_data, 
                                       conf_options = yaml_data, 
                                       input_vcf = input_vcf_validated, 

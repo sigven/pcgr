@@ -88,10 +88,6 @@ def pcgrr_conda_env_export(pcgrr_env):
     cmd = f"export CONDA_PREFIX={pcgrr_conda_env} && export PATH={pcgrr_conda_env}/bin:\"$PATH\""
     return cmd
 
-def get_loftee_dir():
-    pcgr_conda_env = conda_prefix_basename()
-    return script_path(pcgr_conda_env, "share/loftee")
-
 def get_pcgr_bin():
     """Return abs path to e.g. conda/env/pcgr/bin
     """
