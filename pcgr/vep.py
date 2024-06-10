@@ -57,12 +57,6 @@ def get_vep_command(file_paths, conf_options, input_vcf, output_vcf, debug = Fal
         vep_options += ' --gencode_basic'
         gencode_set_in_use = "GENCODE - basic transcript set (--gencode_basic)"
 
-    ## LOFTEE plugin - variant loss-of-function annotation        
-    #loftee_dir = utils.get_loftee_dir()
-    #assert os.path.isdir(loftee_dir), f'LoF VEP plugin is not found in {loftee_dir}. Please make sure you installed pcgr conda package and have corresponding conda environment active.'
-    #vep_options += f" --plugin LoF,loftee_path:{loftee_dir},human_ancestor_fa:{ancestor_assembly},use_gerp_end_trunc:0 --dir_plugins {loftee_dir}"
-
-    
     # Compose full VEP command
     vep_main_command = f'{utils.get_perl_exports()} && vep --input_file {input_vcf} --output_file {output_vcf} {vep_options}'
     vep_bgzip_command = f'bgzip -f -c {output_vcf} > {output_vcf_gz}'
