@@ -200,6 +200,7 @@ def threeToOneAA(aa_change):
 
 
 def assign_cds_exon_intron_annotations(csq_record):
+    
 
     csq_record['CODING_STATUS'] = 'noncoding'
     csq_record['EXONIC_STATUS'] = 'nonexonic'
@@ -211,8 +212,14 @@ def assign_cds_exon_intron_annotations(csq_record):
     csq_record['HGVSp_short'] = '.'
     csq_record['PROTEIN_CHANGE'] = '.'
     csq_record['EXON_AFFECTED'] = '.'
+    csq_record['CDS_RELATIVE_POSITION'] = '.'
     csq_record['LOSS_OF_FUNCTION'] = False
-    csq_record['GC_TO_GT_DONOR'] = False
+    csq_record['LOF_FILTER'] = '.'
+    
+    splice_variant = False
+    
+    if re.search(pcgr_vars.CSQ_SPLICE_REGION_PATTERN, str(csq_record['Consequence'])) is not None:
+        splice_variant = True
 
     if re.search(pcgr_vars.CSQ_CODING_PATTERN, str(csq_record['Consequence'])) is not None:
         csq_record['CODING_STATUS'] = 'coding'
@@ -222,18 +229,6 @@ def assign_cds_exon_intron_annotations(csq_record):
 
     if re.search(pcgr_vars.CSQ_LOF_PATTERN, str(csq_record['Consequence'])) is not None:
         csq_record['LOSS_OF_FUNCTION'] = True
-
-    # if 'LoF' in csq_record:
-    #     csq_record['LOSS_OF_FUNCTION'] = False        
-    #     if not csq_record['LoF'] is None:
-    #         if csq_record['LoF'] == 'HC':
-    #             csq_record['LOSS_OF_FUNCTION'] = True
-            
-    #     ## Don't list LoF as True if consequence is assigned as missense
-    #     if re.search(r'^missense_variant$', csq_record['Consequence']) is not None:
-    #         if csq_record['LOSS_OF_FUNCTION'] is True:
-    #             csq_record['LOSS_OF_FUNCTION'] = False
-        
 
     if re.search(pcgr_vars.CSQ_NULL_PATTERN, str(csq_record['Consequence'])) is not None:
         csq_record['NULL_VARIANT'] = True
@@ -261,6 +256,41 @@ def assign_cds_exon_intron_annotations(csq_record):
                     if utils.is_integer(exon_pos_info[1]) and str(exon_pos_info[2]) == "start":
                         csq_record['EXON_POSITION'] = int(exon_pos_info[1])
 
+    ## filter putative LOF variants if they occur too close to the CDS end (less than 5% of the CDS length remains after the variant)
+    if not csq_record['CDS_position'] is None and csq_record['LOSS_OF_FUNCTION'] is True and splice_variant is False:
+        if csq_record['CDS_position'] != '.':
+            if '/' in csq_record['CDS_position']:
+                cds_length = str(csq_record['CDS_position']).split('/')[1]
+                if cds_length.isdigit():
+                    cds_length = int(cds_length)
+                else:
+                    cds_length = -1
+                
+                cds_pos = -1
+                cds_pos_full = str(csq_record['CDS_position']).split('/')[0]
+                
+                ## Frameshift variants are listed with a range (separated by '-'), choose start position
+                if '-' in cds_pos_full and not '?' in cds_pos_full:
+                    cds_pos = cds_pos_full.split('-')[0]
+                    if cds_pos.isdigit():
+                        cds_pos = int(cds_pos)
+                    else:
+                        print('BALLE1 - ' + str(cds_pos_full) + ' - ' + str(cds_pos))
+                else:
+                    if cds_pos_full.isdigit():
+                        cds_pos = int(cds_pos_full)
+                    else:
+                        print('BALLE2 - ' + str(cds_pos_full) + ' - ' + str(cds_pos))
+                
+                if int(cds_pos) > -1 and int(cds_pos) <= int(cds_length):    
+                    csq_record['CDS_RELATIVE_POSITION'] = float(cds_pos/cds_length)
+                    
+                    ## conservative filter: if putative loss-of-function variant is in the last 5% of the CDS, 
+                    ## it is considered a non-LoF variant
+                    if csq_record['CDS_RELATIVE_POSITION'] >= 0.95:
+                        csq_record['LOSS_OF_FUNCTION'] = False
+                        csq_record['LOF_FILTER'] = "END_TRUNCATION"
+
     if not csq_record['HGVSc'] is None:
         if csq_record['HGVSc'] != '.':
             if 'splice_acceptor_variant' in csq_record['Consequence'] or 'splice_donor_variant' in csq_record['Consequence'] \
@@ -270,8 +300,9 @@ def assign_cds_exon_intron_annotations(csq_record):
                     ':' + str(csq_record['HGVSc'])
                 csq_record['CDS_CHANGE'] = key
                 
+                ## GC to GT donor splice site variants are not considered loss-of-function
                 if 'splice_donor_variant' in str(csq_record['Consequence']) and csq_record['HGVSc'].endswith('+2C>T'):
-                    csq_record['GC_TO_GT_DONOR'] = True
+                    csq_record['LOF_FILTER'] = "GC_TO_GT_DONOR"
                     csq_record['LOSS_OF_FUNCTION'] = False
 
     if csq_record['Amino_acids'] is None or csq_record['Protein_position'] is None or csq_record['Consequence'] is None:
