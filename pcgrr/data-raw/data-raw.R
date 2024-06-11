@@ -207,6 +207,7 @@ data_coltype_defs[['snv_indel_somatic_raw']] <- readr::cols_only(
   CONSEQUENCE = readr::col_character(),
   IMPACT = readr::col_character(),
   LOSS_OF_FUNCTION = readr::col_logical(),
+  LOF_FILTER = readr::col_character(),
   SPLICE_DONOR_RELEVANT = readr::col_logical(),
   NULL_VARIANT = readr::col_logical(),
   CODING_STATUS = readr::col_character(),
@@ -216,6 +217,7 @@ data_coltype_defs[['snv_indel_somatic_raw']] <- readr::cols_only(
   HGVSc = readr::col_character(),
   HGVSp = readr::col_character(),
   CDS_CHANGE = readr::col_character(),
+  CDS_RELATIVE_POSITION = readr::col_character(),
   EXON = readr::col_character(),
   EXON_AFFECTED = readr::col_character(),
   MUTATION_HOTSPOT = readr::col_character(),
@@ -306,6 +308,7 @@ data_coltype_defs[['snv_indel_germline_raw']] <- readr::cols_only(
   CONSEQUENCE = readr::col_character(),
   IMPACT = readr::col_character(),
   LOSS_OF_FUNCTION = readr::col_logical(),
+  LOF_FILTER = readr::col_character(),
   SPLICE_DONOR_RELEVANT = readr::col_logical(),
   NULL_VARIANT = readr::col_logical(),
   CODING_STATUS = readr::col_character(),
@@ -315,6 +318,7 @@ data_coltype_defs[['snv_indel_germline_raw']] <- readr::cols_only(
   HGVSc = readr::col_character(),
   HGVSp = readr::col_character(),
   CDS_CHANGE = readr::col_character(),
+  CDS_RELATIVE_POSITION = readr::col_character(),
   EXON = readr::col_character(),
   EXON_AFFECTED = readr::col_integer(),
   EXON_POSITION = readr::col_integer(),
@@ -487,6 +491,7 @@ tsv_cols[['snv_indel']] <-
     'CONSEQUENCE',
     'PFAM_DOMAIN_NAME',
     'LOSS_OF_FUNCTION',
+    'LOF_FILTER',
     'CDS_CHANGE',
     'CODING_STATUS',
     'EXONIC_STATUS',
@@ -647,6 +652,7 @@ dt_display[['snv_indel_gene_actionable']] <-
     'HGVSp',
     'PREDICTED_EFFECT',
     'LOSS_OF_FUNCTION',
+    'LOF_FILTER',
     'ONCOGENICITY',
     'ONCOGENICITY_CODE',
     'ONCOGENICITY_SCORE',
@@ -701,6 +707,8 @@ dt_display[['snv_indel_tier3']] <-
     'HGVSc',
     'HGVSp',
     'MUTATION_HOTSPOT_CANCERTYPE',
+    'LOSS_OF_FUNCTION',
+    'LOF_FILTER',
     'TCGA_FREQUENCY',
     'PREDICTED_EFFECT',
     'ONCOGENICITY_CODE',
@@ -739,6 +747,8 @@ dt_display[['tier4']] <-
     'HGVSc',
     'HGVSp',
     'PREDICTED_EFFECT',
+    'LOSS_OF_FUNCTION',
+    'LOF_FILTER',
     'REGULATORY_ANNOTATION',
     'ONCOGENICITY_CODE',
     'ONCOGENICITY_SCORE',
@@ -961,22 +971,40 @@ usethis::use_data(cosmic_sbs_signatures, overwrite = T)
 #usethis::use_data(cosmic_sbs_signatures_all, overwrite = T)
 #usethis::use_data(cosmic_sbs_signatures_no_artefacts, overwrite = T)
 
-immune_celltypes <- as.data.frame(
-  immunedeconv::cell_type_map |>
-    dplyr::filter(method_dataset == "quantiseq") |>
-    dplyr::select(method_cell_type, cell_type) |>
-    dplyr::mutate(cell_type = dplyr::if_else(
-      !is.na(cell_type) &
-        cell_type == "uncharacterized cell",
-      "Uncharacterized cell",
-      as.character(cell_type)
-    )) |>
-    dplyr::mutate(cell_type = factor(
-      cell_type, levels = cell_type)) |>
-    dplyr::distinct()
+# immune_celltypes <- as.data.frame(
+#   immunedeconv::cell_type_map |>
+#     dplyr::filter(method_dataset == "quantiseq") |>
+#     dplyr::select(method_cell_type, cell_type) |>
+#     dplyr::mutate(cell_type = dplyr::if_else(
+#       !is.na(cell_type) &
+#         cell_type == "uncharacterized cell",
+#       "Uncharacterized cell",
+#       as.character(cell_type)
+#     )) |>
+#     dplyr::mutate(cell_type = factor(
+#       cell_type, levels = cell_type)) |>
+#     dplyr::distinct()
+# )
+
+immune_celltypes2 <- data.frame(
+  method_cell_type = c("B.cells","Macrophages.M1",
+                       "Macrophages.M2","Monocytes",
+                       "Neutrophils","NK.cells",
+                       "T.cells.CD4","T.cells.CD8",
+                       "Tregs","Dendritic.cells",
+                       "Other"),
+  cell_type = c("B cell","Macrophage M1",
+                "Macrophage M2","Monocyte",
+                "Neutrophil","NK cell",
+                "T cell CD4+ (non-regulatory)",
+                "T cell CD8+",
+                "T cell regulatory (Tregs)",
+                "Myeloid dendritic cell",
+                "Uncharacterized cell")
 )
 
-usethis::use_data(immune_celltypes, overwrite = T)
+
+#usethis::use_data(immune_celltypes, overwrite = T)
 
 germline_filter_levels <-
   c("SOMATIC",

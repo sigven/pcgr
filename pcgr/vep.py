@@ -4,12 +4,9 @@ import os,re
 import csv
 import gzip
 
-from pcgr import annoutils, utils
 from pcgr.annoutils import assign_cds_exon_intron_annotations
 from pcgr import pcgr_vars
-from pcgr.utils import getlogger
-
-
+from pcgr.utils import getlogger, check_file_exists, get_perl_exports
 
 def get_vep_command(file_paths, conf_options, input_vcf, output_vcf, debug = False):
     
@@ -21,14 +18,9 @@ def get_vep_command(file_paths, conf_options, input_vcf, output_vcf, debug = Fal
         file_paths['refdata_assembly_dir'],
         'misc','fasta','assembly',
         f'Homo_sapiens.{pcgr_vars.VEP_ASSEMBLY[genome_assembly]}.dna.primary_assembly.fa.gz')
-    ancestor_assembly = os.path.join(
-        file_paths['refdata_assembly_dir'],
-        'misc','fasta','ancestor',
-        f'human_ancestor.fa.gz')
     
     logger = getlogger('check-fasta-files')
-    utils.check_file_exists(fasta_assembly, logger = logger)
-    utils.check_file_exists(ancestor_assembly, logger = logger)
+    check_file_exists(fasta_assembly, logger = logger)
 
     plugins_in_use = "NearestExonJB"
 
@@ -58,7 +50,7 @@ def get_vep_command(file_paths, conf_options, input_vcf, output_vcf, debug = Fal
         gencode_set_in_use = "GENCODE - basic transcript set (--gencode_basic)"
 
     # Compose full VEP command
-    vep_main_command = f'{utils.get_perl_exports()} && vep --input_file {input_vcf} --output_file {output_vcf} {vep_options}'
+    vep_main_command = f'{get_perl_exports()} && vep --input_file {input_vcf} --output_file {output_vcf} {vep_options}'
     vep_bgzip_command = f'bgzip -f -c {output_vcf} > {output_vcf_gz}'
     vep_tabix_command = f'tabix -f -p vcf {output_vcf_gz}'
     if debug:
@@ -71,7 +63,6 @@ def get_vep_command(file_paths, conf_options, input_vcf, output_vcf, debug = Fal
     vep_cmd['gencode_set_in_use'] = gencode_set_in_use
     vep_cmd['plugins_in_use'] = plugins_in_use
     vep_cmd['fasta_assembly'] = fasta_assembly
-    #vep_cmd['GENCODE_VERSION'] = 'release ' + str(pcgr_vars.GENCODE_VERSION[genome_assembly])
     
     return(vep_cmd)
 
