@@ -117,13 +117,13 @@ def get_valid_custom_genelist(genelist_fname, genelist_bed_fname, refdata_assemb
     logger.info('Creating BED file with custom target genes: ' + str(genelist_bed_fname))
     id_pat = '|'.join([f"{g}" for g in valid_custom_identifiers])
     
-    id_pat_ext = id_pat + '|(\|tag\|)|' + 'ACMG_SF'
+    id_pat_ext = id_pat + '|(\\|tag\\|)|' + 'ACMG_SF'
     awk_command = "awk 'BEGIN{FS=\"\\t\"}{if($4 !~ /ACMG_SF/ || ($4 ~ /ACMG_SF/ && $4 ~ /" + '|'.join(valid_custom_identifiers) + "/))print;}'"
     cmd_target_regions_bed = f"bgzip -dc {virtualpanel_track_bed} | egrep '{id_pat_ext}' > {genelist_bed_fname_unsorted}"
     if gwas_findings == 0 and secondary_findings == 1:
-        cmd_target_regions_bed = f"bgzip -dc {virtualpanel_track_bed} | egrep '{id_pat_ext}' | egrep -v '(\|tag\|)' > {genelist_bed_fname_unsorted}"
+        cmd_target_regions_bed = f"bgzip -dc {virtualpanel_track_bed} | egrep '{id_pat_ext}' | egrep -v '(\\|tag\\|)' > {genelist_bed_fname_unsorted}"
     if gwas_findings == 0 and secondary_findings == 0:
-        cmd_target_regions_bed = f"bgzip -dc {virtualpanel_track_bed} | egrep '{id_pat_ext}' | egrep -v '(\|tag\|)' | {awk_command} > {genelist_bed_fname_unsorted}"
+        cmd_target_regions_bed = f"bgzip -dc {virtualpanel_track_bed} | egrep '{id_pat_ext}' | egrep -v '(\\|tag\\|)' | {awk_command} > {genelist_bed_fname_unsorted}"
     if gwas_findings == 1 and secondary_findings == 0:
         cmd_target_regions_bed = f"bgzip -dc {virtualpanel_track_bed} | egrep '{id_pat_ext}' | {awk_command} > {genelist_bed_fname_unsorted}"
     
@@ -237,9 +237,9 @@ def simplify_vcf(input_vcf, validated_vcf, vcf, custom_bed, refdata_assembly_dir
             ## be part of the secondary findings list)
             awk_command = "awk 'BEGIN{FS=\"\\t\"}{if($4 !~ /ACMG_SF/ || ($4 ~ /ACMG_SF/ && $4 ~ /" + str(ge_panel_identifier) + ":/))print;}'"
             if gwas_findings == 0 and secondary_findings == 1:
-                check_subprocess(logger, f'bgzip -dc {target_bed_gz} | egrep -v "(\|tag\|)" >> {virtual_panels_tmp_bed}', debug)
+                check_subprocess(logger, f'bgzip -dc {target_bed_gz} | egrep -v "(\\|tag\\|)" >> {virtual_panels_tmp_bed}', debug)
             elif gwas_findings == 0 and secondary_findings == 0:
-                check_subprocess(logger, f'bgzip -dc {target_bed_gz} | egrep -v "(\|tag\|)" | {awk_command} >> {virtual_panels_tmp_bed}', debug)
+                check_subprocess(logger, f'bgzip -dc {target_bed_gz} | egrep -v "(\\|tag\\|)" | {awk_command} >> {virtual_panels_tmp_bed}', debug)
             elif gwas_findings == 1 and secondary_findings == 0:
                 check_subprocess(logger, f'bgzip -dc {target_bed_gz} | {awk_command} >> {virtual_panels_tmp_bed}', debug)
             else:                
