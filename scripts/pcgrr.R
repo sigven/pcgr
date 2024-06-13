@@ -39,6 +39,7 @@ pcg_report <- pcgrr::generate_report(
 if (!is.null(pcg_report)) {
   pcgrr::write_report_quarto_html(report = pcg_report)
   pcgrr::write_report_excel(report = pcg_report)
-  pcgrr::write_report_tsv(report = pcg_report, variant_type = 'snv_indel')
-  pcgrr::write_report_tsv(report = pcg_report, variant_type = 'cna_gene')
+  pcgrr::write_report_tsv(report = pcg_report, output_type = 'snv_indel')
+  pcgrr::write_report_tsv(report = pcg_report, output_type = 'cna_gene')
+  pcgrr::write_report_tsv(report = pcg_report, output_type = 'msigs')
 }

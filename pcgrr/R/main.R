@@ -788,23 +788,55 @@ generate_tier_tsv <- function(variant_set,
 #' Function that writes contents of PCGR object to a TSV file
 #'
 #' @param report List object with all report data, settings etc.
-#' @param variant_type character indicating variant type for output TSV,
-#' i.e. 'snv_indel' or 'cna_gene'
+#' @param output_type character indicating output type for TSV,
+#' i.e. 'snv_indel' or 'cna_gene', 'msigs'
 #' @export
 #'
-write_report_tsv <- function(report = NULL, variant_type = 'snv_indel'){
+write_report_tsv <- function(report = NULL, output_type = 'snv_indel'){
 
   fname <- paste0(
-    report$settings$output_prefix, ".", variant_type, "_ann.tsv.gz")
+    report$settings$output_prefix, ".", output_type, "_ann.tsv.gz")
+
+  if(output_type == "msigs"){
+    fname <- paste0(
+      report$settings$output_prefix, ".", output_type, ".tsv.gz")
+  }
 
   output_data <- data.frame()
-  pcgrr::log4r_info("------")
-  pcgrr::log4r_info(paste0(
-    "Writing tab-separated output file with PCGR annotations - '",
-    variant_type, "'"))
+  eval_output <- FALSE
+
+  if(output_type == "msigs" &
+     report$content$mutational_signatures$eval == TRUE){
+    eval_output <- TRUE
+  }
+  if(output_type == "cna" &
+     report$content$cna$eval == TRUE){
+    eval_output <- TRUE
+  }
+  if(output_type == "snv_indel" &
+     report$content$snv_indel$eval == TRUE){
+    eval_output <- TRUE
+  }
+
+
+  ## Mutational signatures
+  if(output_type == 'msigs' &
+     !is.null(report$content$mutational_signatures)){
+
+    if(report$content$mutational_signatures$eval == TRUE &
+       report$content$mutational_signatures$missing_data == FALSE){
+
+      if(!is.null(report$content$mutational_signatures$result$tsv)){
+        if(is.data.frame(report$content$mutational_signatures$result$tsv)){
+          output_data <- as.data.frame(
+            report$content$mutational_signatures$result$tsv)
+        }
+      }
+    }
+  }
 
   ## Copy number alterations
-  if(variant_type == 'cna_gene' &
+  if(output_type == 'cna_gene' &
      !is.null(report$content$cna) &
      report$content$cna$eval == TRUE){
 
@@ -819,7 +851,7 @@ write_report_tsv <- function(report = NULL, variant_type = 'snv_indel'){
   }
 
   ## SNVs/InDels
-  if(variant_type == 'snv_indel' &
+  if(output_type == 'snv_indel' &
      !is.null(report$content$snv_indel) &
      report$content$snv_indel$eval == TRUE){
 
@@ -841,13 +873,19 @@ write_report_tsv <- function(report = NULL, variant_type = 'snv_indel'){
   }
 
   if(NROW(output_data) > 0){
+    pcgrr::log4r_info("------")
+    pcgrr::log4r_info(paste0(
+      "Writing tab-separated output file with PCGR annotations - '",
+      output_type, "'"))
     readr::write_tsv(
       output_data, file = fname,
       col_names = TRUE, append = FALSE,
       na = ".", quote = "none")
   } else {
-    pcgrr::log4r_info(
-      paste0("No data to write to TSV file - '", variant_type,"'"))
+    if(eval_output == TRUE){
+      pcgrr::log4r_info(
+        paste0("No data to write to TSV file - '", output_type,"'"))
+    }
   }
 
 }

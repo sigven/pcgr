@@ -67,14 +67,14 @@ Here's an example scenario that will be used in the following sections
 
 **A)** Download and unpack the assembly-specific reference data bundle needed for PCGR:
 
-- [grch37 data bundle - 20240610](https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20240610.grch37.tgz) (approx 4.8Gb)
-- [grch38 data bundle - 20240610](https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20240610.grch38.tgz) (approx 4.8Gb)
+- [grch37 data bundle - 20240612](https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20240612.grch37.tgz) (approx 4.8Gb)
+- [grch38 data bundle - 20240612](https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20240612.grch38.tgz) (approx 4.8Gb)
 
 - Example:
 
 ```bash
 GENOME="grch38" # or "grch37"
-BUNDLE_VERSION="20240610"
+BUNDLE_VERSION="20240612"
 BUNDLE="pcgr_ref_data.${BUNDLE_VERSION}.${GENOME}.tgz"
 
 wget https://insilico.hpc.uio.no/pcgr/${BUNDLE}

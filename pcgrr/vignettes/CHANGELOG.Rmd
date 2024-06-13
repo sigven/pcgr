@@ -92,7 +92,8 @@ pdiakumis <- user("pdiakumis")
   - `--preserved_info_tags` is now named `--retained_info_tags`
   - `--basic` is now named `--no_reporting`
   - `--target_size_mb` is now named `--effective_target_size_mb`
-- LOFTEE plugin in VEP removed as LOF-annotator (due to low level of maintenance, and outdated dependency requirements). For now, a very simplified LoF-annotation is used as a replacement, simply looking at CSQ types - this will be improved in future releases (considering potentially false positives near the transcript end)
+- LOFTEE plugin in VEP removed as loss-of-function variant classifier (due to low level of maintenance, and outdated dependency requirements). For now, a simplified LoF-annotation is used as a replacement, looking primarily at CSQ types (`stop_gained`, `frameshift_variant`, `splice_acceptor_variant`, `splice_donor_variant`). Furthermore, frameshift/stop-gain variants that are found within the last 5% of the coding sequence length are deemed non-LOF, as are splice donor variants not disrupting the canonical site (GC>GT). An even more advanced LoF-annotation is planned for a future release.
+- Biomarkers are matched much more comprehensively than in previous versions, matching at the genomic level, codon, exon, amino acid and gene level (both principal and non-principal transcript matches)
 
 ##### Removed
 

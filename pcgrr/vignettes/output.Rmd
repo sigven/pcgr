@@ -89,6 +89,7 @@ A VCF file containing annotated, somatic calls (single nucleotide variants and i
 | `Feature` | Ensembl stable ID of feature (picked by VEP's `--flag_pick_allele` option) |
 | `cDNA_position` | Relative position of base pair in cDNA sequence (picked by VEP's `--flag_pick_allele` option) |
 | `CDS_position` | Relative position of base pair in coding sequence (picked by VEP's `--flag_pick_allele` option) |
+| `CDS_RELATIVE_POSITION` | Ratio of variant coding position to length of coding sequence |
 | `CDS_CHANGE` | Coding, transcript-specific sequence annotation (picked by VEP's `--flag_pick_allele` option) |
 | `AMINO_ACID_START` | Protein position indicating absolute start of amino acid altered (fetched from `Protein_position`) |
 | `AMINO_ACID_END` |  Protein position indicating absolute end of amino acid altered (fetched from `Protein_position`) |
@@ -119,6 +120,7 @@ A VCF file containing annotated, somatic calls (single nucleotide variants and i
 | `CCDS` | The CCDS identifier for this transcript, where applicable (picked by VEP's `--flag_pick_allele` option) |
 | `INTRON` | The intron number (out of total number) (picked by VEP's `--flag_pick_allele` option) |
 | `EXON` | The exon number (out of total number) (picked by VEP's `--flag_pick_allele` option) |
+| `EXON_AFFECTED` | The exon affected by the variant (picked by VEP's `--flag_pick_allele` option) |
 | `LAST_EXON` | Logical indicator for last exon of transcript (picked by VEP's `--flag_pick_allele` option) |
 | `LAST_INTRON` | Logical indicator for last intron of transcript (picked by VEP's `--flag_pick_allele` option) |
 | `INTRON_POSITION` | Relative position of intron variant to nearest exon/intron junction (NearestExonJB VEP plugin) |
@@ -132,9 +134,14 @@ A VCF file containing annotated, somatic calls (single nucleotide variants and i
 | `ALLELE_NUM` | Allele number from input; 0 is reference, 1 is first alternate etc - VEP |
 | `REFSEQ_MATCH` | The RefSeq transcript match status; contains a number of flags indicating whether this RefSeq transcript matches the underlying reference sequence and/or an Ensembl transcript (picked by VEP's `--flag_pick_allele` option) |
 | `PICK` | Indicates if this block of consequence data was picked by VEP's `--flag_pick_allele` option |
-| `VEP_ALL_CONSEQUENCE` | All transcript consequences (`Consequence:SYMBOL:Feature_type:Feature:BIOTYPE`) - VEP |
+| `VEP_ALL_CSQ` | All transcript consequences (`Consequence:SYMBOL:Feature_type:Feature:BIOTYPE`) - VEP |
 | `EXONIC_STATUS` | Indicates if variant consequence type is 'exonic' or 'nonexonic'. We here define 'exonic' as any variant with either of the following consequences: `stop_gained / stop_lost`, `start_lost`, `frameshift_variant`, `missense_variant`, `splice_donor_variant`, `splice_acceptor_variant`, `inframe_insertion / inframe_deletion`, `synonymous_variant`, `start_retained`, `stop_retained`, `protein_altering` |
 | `CODING_STATUS` | Indicates if primary variant consequence type is 'coding' or 'noncoding' (wrt. protein-alteration). 'coding' variants are here defined as those with an 'exonic' status, with the exception of synonymous variants |
+| `NULL_VARIANT` | Primary variant consequence type is `frameshift` or `stop_gained`/`stop_lost` |
+| `LOSS_OF_FUNCTION` | Loss-of-function variant |
+| `LOF_FILTER` | Loss-of-function filter |
+| `SPLICE_DONOR_RELEVANT` | Logical indicating if variant is located at a particular location near the splice donor site (`+3A/G`, `+4A` or `+5G`) |
+| `REGULATORY_ANNOTATION` | Comma-separated list of all variant annotations of `Feature_type`, `RegulatoryFeature`, and `MotifFeature`. Format (separated by a `|`): `<Consequence>`, `<Feature_type>`, `<Feature>`, `<BIOTYPE>`, `<MOTIF_NAME>`, `<MOTIF_POS>`, `<HIGH_INF_POS>`, `<MOTIF_SCORE_CHANGE>`, `<TRANSCRIPTION_FACTORS>` |
 
 ##### _Gene information_
 
@@ -238,10 +245,10 @@ A VCF file containing annotated, somatic calls (single nucleotide variants and i
 
 | Tag | Description |
 |-----|-------------|
-| `CHEMBL_COMPOUND_ID` | antineoplastic drugs targeting the encoded protein (from [Open Targets Platform](https://www.targetvalidation.org/), drugs are listed as [ChEMBL](https://www.ebi.ac.uk/chembl/) compound identifiers) |
-| `CIVIC_ID`, `CIVIC_ID_SEGMENT` | Variant/segment (exon, codon) identifiers in the [CIViC database](http://civic.genome.wustl.edu) |
-| `CGI_ID`, `CGI_ID_SEGMENT` | Variant/segment (exon, codon) identifier in the [Cancer Genome Interpreter Cancer Biomarkers Database](https://www.cancergenomeinterpreter.org/biomarkers) |
-
+| `BIOMARKER_MATCH` | Variant matches with biomarker evidence in CIViC/CGI. Format: <db_source>\|<db_variant_id>\|<db_evidence_id>:<tumor_site>:<clinical_significance>:<evidence_level>:<evidence_type><germline_somatic>\|<matching_type>. Multiple evidence items are separated by '&'. Example: civic|174|EID445:Colon/Rectum:Sensitivity/Response:D:Predictive:Somatic&EID446:Colon/Rectum:Sensitivity/Response:D:Predictive:Somatic|by_gene_mut. Matching type can be any of `by_genomic_coord`, `by_hgvsp_principal`, `by_hgvsc_principal`,  `by_hgvsp_nonprincipal`, `by_hgvsc_nonprincipal`, `by_codon_principal`, `by_exon_mut_principal`, `by_gene_mut_lof`, `by_gene_mut`,
+| `ONCOGENICITY` | Oncogenicity annotation - VICC/ClinGen SOP implementation |
+| `ONCOGENICITY_CODE` | Oncogenicity code - VICC/ClinGen SOP implementation |
+| `ONCOGENICITY_SCORE` | Oncogenicity score - VICC/ClinGen SOP
 #### 2. Tab-separated values (TSV)
 
 We provide a tab-separated values file with most important annotations for SNVs/InDels. The file has the following naming convention:
@@ -316,25 +323,51 @@ The following variables are included in the TSV file (VCF tags issued by the use
 | 62. `CALL_CONFIDENCE` | Call confidence |
 
 
-#### 3. Mutational signature contributions
+### Tumor mutational burden (TSV)
 
-We provide a tab-separated values file with information about mutational signatures detected in the tumor sample. The file has the following naming convention:
+We provide a tab-separated values (TSV) file with information about mutational burden detected in the tumor sample. The file has the following naming convention:
 
-- `<sample_id>.pcgr.<genome_assembly>.mutational_signatures.tsv`
+- `<sample_id>.pcgr.<genome_assembly>.tmb.tsv`
 
 The format of the TSV file is the following:
 
 | Variable | Description |
 |----------|-------------|
-| 1. `signature_id` | identifier for signature |
-| 2. `sample_id` | sample identifier |
-| 3. `prop_signature` | relative contribution of mutational signature |
-| 4. `group` | keyword for signature aetiology |
-| 5. `all_reference_signatures` | logical indicating if all reference signatures were used for reconstruction/inference |
-| 6. `tumor_type` | tumor type (used for retrieval of reference signatures) |
-| 7. `reference_collection` | collection used for reference signatures |
-| 8. `reference_signatures` | signatures present in reference collection |
-| 9. `fitting_accuracy` | accuracy of mutational signature fitting |
+| 1. `sample_id` | sample identifier |
+| 2. `n_somatic_variants` | number of somatic variants in total for sample |
+| 3. `tmb_measure` | TMB measure - type of variants included |
+| 4. `tmb_csq_regex` | VEP consequence regex for variants included in TMB calculation |
+| 5. `tmb_target_size_mb` | target size in megabases |
+| 6. `tmb_dp_min` | minimum depth of coverage for variant to be included in TMB calculation |
+| 7. `tmb_af_min` | minimum allele frequency for variant to be included in TMB calculation |
+| 8. `tmb_n_variants` | number of variants included in TMB calculation |
+| 9. `tmb_estimate` | TMB estimate |
+| 10. `tmb_unit` | TMB unit (i.e. mutations/Mb) |
+
+### Mutational signature contributions (TSV)
+
+We provide a tab-separated values (TSV) file with information about mutational signatures detected in the tumor sample. The file has the following naming convention:
+
+- `<sample_id>.pcgr.<genome_assembly>.msigs.tsv.gz`
+
+The format of the TSV file is the following:
+
+| Variable | Description |
+|----------|-------------|
+| 1. `sample_id` | sample identifier |
+| 2. `signature_id` | identifier for signature |
+| 3. `n_bs_iterations` | number of bootstrap iterations |
+| 4. `prop_signature` | relative contribution of mutational signature |
+| 5. `prop_signature_ci_lower` | lower bound of confidence interval for relative contribution of mutational signature |
+| 6. `prop_signature_ci_upper` | upper bound of confidence interval for relative contribution of mutational signature |
+| 7. `aetiology` | underlying atiology of mutational signature |
+| 8. `comments` | additional comments regarding aetiology |
+| 9. `group` | keyword for signature aetiology |
+| 10. `all_reference_signatures` | logical indicating if all reference signatures were used for reconstruction/inference |
+| 11. `tumor_type` | tumor type (used for retrieval of reference signatures) |
+| 12. `reference_collection` | collection used for reference signatures |
+| 13. `reference_signatures` | signatures present in reference collection |
+| 14. `fitting_accuracy` | accuracy of mutational signature fitting |
 
 
 ### Copy number aberrations
@@ -374,6 +407,18 @@ The format of the compressed TSV file is the following:
 | 21. `BIOMARKER_MATCH` | Biomarker match |
 | 22. `TARGETED_INHIBITORS_ALL2` | Molecularly targeted inhibitors - indicated for any tumor type|
 
-### Excel workbook
+### Gene expression data
 
-The Excel workbook contains multiple sheets with data tables, mostly self-explainable, with annotated datasets pending on the analysis performed (SNVs/InDels, CNAs, biomarker evidence, TMB, MSI, mutational signatures, immune contexture profiling etc). The naming convention of the Excel workbook is as follows: `<sample_id>.pcgr.<genome_assembly>.xlsx`
+If users provide bulk RNA-seq expression data as input, PCGR will attach basic gene annotations for the affected transcripts, and perform similarity analysis and outlier detection if configured by the user. The naming convention of the compressed TSV files are as follows:
+
+* `<sample_id>.pcgr.<genome_assembly>.expression.tsv.gz`
+  - __NOTE__: This file is organized according to the _affected transcripts_ (i.e. one line/record per affected transcript). Contains basic annotations of the affected transcripts.
+* `<sample_id>.pcgr.<genome_assembly>.expression_similarity.tsv.gz`
+  - __NOTE__: This file is organized according to the _samples_  of other gene expression cohorts (i.e. similarity level, one line/record per sample).
+* `<sample_id>.pcgr.<genome_assembly>.expression_outliers.tsv.gz`
+  - __NOTE__: This file is organized according to the _affected genes_ which are considered outliers with respect to the distribution found in reference cohorts (one line/record per affected outlier/gene).
+
+
+### Excel workbook (XLSX)
+
+The Excel workbook contains multiple sheets with data tables, mostly self-explainable, with annotated datasets pending on the analysis performed (assay/sample data, SNVs/InDels, CNAs, biomarker evidence, TMB, MSI, mutational signatures, immune contexture profiling etc). The naming convention of the Excel workbook is as follows: `<sample_id>.pcgr.<genome_assembly>.xlsx`

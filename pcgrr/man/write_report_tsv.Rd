@@ -5,13 +5,13 @@
 \title{Function that writes contents of PCGR object to various output formats
 (Rmarkdown/flexdashboard HTML reports, JSON, tab-separated etc)}
 \usage{
-write_report_tsv(report = NULL, variant_type = "snv_indel")
+write_report_tsv(report = NULL, output_type = "snv_indel")
 }
 \arguments{
 \item{report}{List object with all report data, settings etc.}
 
-\item{variant_type}{character indicating variant type for output TSV,
-i.e. 'snv_indel' or 'cna_gene'}
+\item{output_type}{character indicating output type for TSV,
+i.e. 'snv_indel' or 'cna_gene', 'msigs'}
 }
 \description{
 param report List object with all report data (PCGR/CPSR), settings etc.
