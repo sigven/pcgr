@@ -906,8 +906,9 @@ write_report_quarto_html <- function(report = NULL){
   fnames[["html"]] <- paste0(output_prefix, ".html")
 
   ## Path to PCGR reporting templates
+  templates_dir <- "templates"
   pcgr_rep_template_path <-
-    system.file("templates", package = "pcgrr")
+    system.file(templates_dir, package = "pcgrr")
   quarto_input <- file.path(
     pcgr_rep_template_path, "pcgr_quarto_report.qmd")
 
@@ -930,6 +931,11 @@ write_report_quarto_html <- function(report = NULL){
           paste0('quarto_', stringi::stri_rand_strings(1, 15))
         )
         fs::dir_create(tmp_quarto_dir)
+        # files get copied under tmp/templates/
+        fs::dir_copy(pcgr_rep_template_path, tmp_quarto_dir)
+        # so now overwrite the variable
+        tmp_quarto_dir <- file.path(tmp_quarto_dir, templates_dir)
+
         quarto_main_template <-
           file.path(tmp_quarto_dir, "pcgr_quarto_report.qmd")
         quarto_main_template_sample <-
@@ -939,7 +945,6 @@ write_report_quarto_html <- function(report = NULL){
 
         ## Copy all PCGR quarto reporting templates, bibliography, css etc to
         ## the temporary directory for quarto report rendering
-        fs::dir_copy(pcgr_rep_template_path, tmp_quarto_dir)
 
         ## Save sample PCGR report object in temporary quarto rendering directory
         rds_report_path <- file.path(
