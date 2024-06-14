@@ -1023,20 +1023,6 @@ check_file_exists <- function(fname) {
   }
 }
 
-
-#' Create directory
-#'
-#' @param d Directory to create.
-#'
-#' @export
-mkdir <- function(d) {
-  if (!dir.exists(d)) {
-    dir.create(d, recursive = TRUE)
-  }
-  TRUE
-}
-
-
 #' Strip HTML tags
 #'
 #' Remove HTML tags and comments from text.
