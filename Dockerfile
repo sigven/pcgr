@@ -23,6 +23,10 @@ RUN mamba create -n pcgr --file ${PCGR_CONDA_ENV_DIR}/pcgr-linux-64.lock
 RUN mamba create -n pcgrr --file ${PCGR_CONDA_ENV_DIR}/pcgrr-linux-64.lock
 RUN mamba clean --all --force-pkgs-dirs --yes
 
+FROM quay.io/bioconda/base-glibc-busybox-bash:3.1
+
+COPY --from=0 /opt/mambaforge/envs/ /opt/mambaforge/envs/
+
 ARG PCGR_ENV_NAME="pcgr"
 # pcgr env is activated by default
 ENV PATH="/opt/mambaforge/envs/${PCGR_ENV_NAME}/bin:${PATH}"

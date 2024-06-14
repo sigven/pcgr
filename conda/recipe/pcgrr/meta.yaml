@@ -1,6 +1,6 @@
 package:
   name: r-pcgrr
-  version: 1.4.1.9011 # versioned by bump2version
+  version: 1.4.1.9013 # versioned by bump2version
 
 source:
   path: ../../../pcgrr
@@ -26,6 +26,7 @@ requirements:
     - r-dplyr
     - r-dt
     - r-formattable
+    - r-fs
     - bioconductor-genomeinfodb
     - r-ggplot2
     - r-glue
@@ -61,6 +62,7 @@ requirements:
     - r-dplyr
     - r-dt
     - r-formattable
+    - r-fs
     - bioconductor-genomeinfodb
     - r-ggplot2
     - r-glue
