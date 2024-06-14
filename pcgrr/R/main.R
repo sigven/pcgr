@@ -930,7 +930,7 @@ write_report_quarto_html <- function(report = NULL){
           output_dir,
           paste0('quarto_', stringi::stri_rand_strings(1, 15))
         )
-        fs::dir_create(tmp_quarto_dir)
+        fs::dir_create(tmp_quarto_dir, "u=rwx,go=rwx")
         # files get copied under tmp/templates/
         fs::dir_copy(pcgr_rep_template_path, tmp_quarto_dir)
         # so now overwrite the variable
