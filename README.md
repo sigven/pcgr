@@ -13,9 +13,8 @@ PCGR interprets primarily somatic SNVs/InDels and copy number aberrations, and h
     -   according to *oncogenicity*: evaluating the oncogenic potential of somatic DNA aberrations (VICC/CGC/ClinGen guidelines)
     -   according to *actionability*: mapping the therapeutic, diagnostic, and prognostic implications of somatic DNA aberrations (ACMG/AMP guidelines)
 -   Tumor mutational burden (TMB) estimation
--   Tumor-only analysis (variant filtering)
+-   Support for tumor-control and tumor-only variant calling input
 -   Mutational signature analysis
--   Kataegis detection
 -   Microsatellite instability (MSI) classification
 -   RNA expression analysis - outlier detection, similarity analysis, and immune contexture profiling
 
@@ -27,7 +26,7 @@ If you want to interrogate germline variants and their relation to cancer predis
 
 ### News
 
--   *May 2024*: **2.x.x release**
+-   *June 2024*: **2.x.x release**
     - Massive reference data bundle upgrade, new report layout, oncogenicity classification++
     - Details at [CHANGELOG](http://sigven.github.io/pcgr/articles/CHANGELOG.html)
 
