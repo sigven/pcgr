@@ -26,6 +26,7 @@ requirements:
     - r-dplyr
     - r-dt
     - r-formattable
+    - r-fs
     - bioconductor-genomeinfodb
     - r-ggplot2
     - r-glue
@@ -61,6 +62,7 @@ requirements:
     - r-dplyr
     - r-dt
     - r-formattable
+    - r-fs
     - bioconductor-genomeinfodb
     - r-ggplot2
     - r-glue

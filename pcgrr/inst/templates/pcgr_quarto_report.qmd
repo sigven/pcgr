@@ -8,7 +8,7 @@ title-block-banner-color: "white"
 linkcolor: '#0073C2'
 include-in-header:
   - text: |
-      <link rel="shortcut icon" href="https://github.com/sigven/pcgr/raw/master/pcgrr/pkgdown/favicon/favicon-16x16.png" />
+      <link rel="shortcut icon" href="favicon-16x16.png" />
       <style>
       .panel-tabset > .tab-content {
         border: none;
