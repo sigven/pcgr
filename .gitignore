@@ -17,3 +17,5 @@ docs/_build/
 
 .Rhistory
 *.Rproj
+
+tests
