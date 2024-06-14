@@ -36,6 +36,7 @@ Imports:
     dplyr,
     DT,
     formattable,
+    fs,
     GenomeInfoDb,
     ggplot2,
     glue,
