@@ -878,7 +878,7 @@ write_processed_vcf <- function(calls,
   system(paste0("bgzip -f ", vcf_fname))
   system(paste0("tabix -p vcf ", vcf_fname, ".gz"))
 
-  system(paste0("rm -f ", sample_vcf_content_fname))
+  fs::file_delete(sample_vcf_content_fname)
 }
 
 
