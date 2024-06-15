@@ -982,7 +982,7 @@ write_report_quarto_html <- function(report = NULL){
         ## Copy output HTML report from temporary rendering directory
         ## to designated HTML file in output directory
         if(file.exists(quarto_html)){
-          fs::file_copy(quarto_html, fnames[["html"]])
+          fs::file_copy(quarto_html, fnames[["html"]], overwrite = T)
         }else{
           cat("WARNING\n")
         }
