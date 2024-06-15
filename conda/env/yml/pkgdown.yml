@@ -7,4 +7,5 @@ dependencies:
   - pcgr::r-pcgrr ==1.4.1.9014 # versioned by bump2version
   - r-pkgdown
   - r-readr
+  - r-glue
   - pandoc
