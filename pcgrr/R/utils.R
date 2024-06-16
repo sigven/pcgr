@@ -878,7 +878,7 @@ write_processed_vcf <- function(calls,
   system(paste0("bgzip -f ", vcf_fname))
   system(paste0("tabix -p vcf ", vcf_fname, ".gz"))
 
-  fs::file_delete(sample_vcf_content_fname)
+  unlink(sample_vcf_content_fname, force = TRUE)
 }
 
 
@@ -1021,6 +1021,18 @@ check_file_exists <- function(fname) {
       paste0("File ", fname, " does not exist - exiting")
     )
   }
+}
+
+#' Create directory
+#'
+#' @param d Directory to create.
+#'
+#' @export
+mkdir <- function(d) {
+  if (!dir.exists(d)) {
+    dir.create(d, recursive = TRUE)
+  }
+  TRUE
 }
 
 #' Strip HTML tags

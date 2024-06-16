@@ -930,9 +930,9 @@ write_report_quarto_html <- function(report = NULL){
           output_dir,
           paste0('quarto_', stringi::stri_rand_strings(1, 15))
         )
-        fs::dir_create(tmp_quarto_dir, mode = "u=rwx,go=rwx")
+        pcgrr::mkdir(tmp_quarto_dir)
         # files get copied under tmp/templates/
-        fs::dir_copy(pcgr_rep_template_path, tmp_quarto_dir)
+        file.copy(pcgr_rep_template_path, tmp_quarto_dir, recursive = TRUE, overwrite = TRUE)
         # so now overwrite the variable
         tmp_quarto_dir <- file.path(tmp_quarto_dir, templates_dir)
 
@@ -982,14 +982,14 @@ write_report_quarto_html <- function(report = NULL){
         ## Copy output HTML report from temporary rendering directory
         ## to designated HTML file in output directory
         if(file.exists(quarto_html)){
-          fs::file_copy(quarto_html, fnames[["html"]], overwrite = T)
+          file.copy(quarto_html, fnames[["html"]], overwrite = TRUE)
         }else{
           cat("WARNING\n")
         }
 
         ## remove temporary quarto directory (if debugging is switched off)
         if(!(settings$conf$debug)){
-          fs::dir_delete(tmp_quarto_dir)
+          unlink(tmp_quarto_dir, force = TRUE, recursive = TRUE)
         }
         #pcgrr::log4r_info("------")
       }

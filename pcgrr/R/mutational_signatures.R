@@ -494,7 +494,7 @@ generate_report_data_signatures <-
       }
     }
 
-    fs::file_delete(glue::glue("{vcf_name_mutsig_analysis}.gz"))
+    unlink(glue::glue("{vcf_name_mutsig_analysis}*"), force = TRUE)
 
     return(pcg_report_signatures)
   }
