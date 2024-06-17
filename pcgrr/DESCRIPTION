@@ -1,7 +1,7 @@
 Package: pcgrr
 Type: Package
 Title: Personal Cancer Genome ReporteR
-Version: 1.4.1.9014
+Version: 1.4.1.9015
 Authors@R:
     c(person(given = "Sigve",
              family = "Nakken",
@@ -36,7 +36,6 @@ Imports:
     dplyr,
     DT,
     formattable,
-    fs,
     GenomeInfoDb,
     ggplot2,
     glue,
