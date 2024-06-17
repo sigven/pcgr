@@ -416,7 +416,7 @@ If users provide bulk RNA-seq expression data as input, PCGR will attach basic g
 * `<sample_id>.pcgr.<genome_assembly>.expression_similarity.tsv.gz`
   - __NOTE__: This file is organized according to the _samples_  of other gene expression cohorts (i.e. similarity level, one line/record per sample).
 * `<sample_id>.pcgr.<genome_assembly>.expression_outliers.tsv.gz`
-  - __NOTE__: This file is organized according to the _affected genes_ which are considered outliers with respect to the distribution found in reference cohorts (one line/record per affected outlier/gene).
+  - __NOTE__: This file is organized according to the _genes_ which are considered outliers with respect to the distribution of expression levels found in reference cohorts (one line/record per affected outlier/gene).
 
 
 ### Excel workbook (XLSX)
