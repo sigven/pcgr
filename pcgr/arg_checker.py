@@ -206,58 +206,52 @@ def define_output_files(arg_dict, cpsr = False):
         output_prefix = os.path.join(
             str(output_dir), f"{arg_dict['sample_id']}.cpsr.{arg_dict['genome_assembly']}")
 
-    # Append output files to arg_dict
-    output_vcf = \
-        f"{output_prefix}.vcf.gz"
-    output_vcf_tsv = \
-        f"{output_prefix}.pass.tsv.gz"
-    output_cna = \
-        f"{output_prefix}.cna_segments.tsv.gz"
-    output_expression = \
-        f"{output_prefix}.expression.tsv.gz"
-    output_expression_outliers = \
-        f"{output_prefix}.expression_outliers.tsv.gz"
-    output_expression_similarity = \
-        f"{output_prefix}.expression_similarity.tsv.gz"
-    output_csq_expression = \
-        f"{output_prefix}.csq_expression.tsv.gz"
-
-    # if annotated output vcf exist and overwrite not set
-    if os.path.exists(output_vcf) and arg_dict["force_overwrite"] is False:
-        err_msg = f"Output files (e.g. {output_vcf}) already exist - please specify different sample_id or add option --force_overwrite"
-        error_message(err_msg, logger)
-    
-    # if annotated output vcf2tsv exist and overwrite not set
-    if os.path.exists(output_vcf_tsv) and arg_dict["force_overwrite"] is False:
-        err_msg = "Output files (e.g. " + str(output_vcf_tsv) + \
-            ") already exist - please specify different sample_id or add option --force_overwrite"
-        error_message(err_msg, logger)
-    
-    if not cpsr:
-        # if annotated output cna segments exist and overwrite not set
-        if os.path.exists(output_cna) and arg_dict["force_overwrite"] is False:
-            err_msg = "Output files (e.g. " + str(output_cna) + \
-                ") already exist - please specify different sample_id or add option --force_overwrite"
-            error_message(err_msg, logger)
-            
-        # if output annotated gene expression exist and overwrite not set
-        if os.path.exists(output_expression) and arg_dict["force_overwrite"] is False:
-            err_msg = "Output files (e.g. " + str(output_expression) + \
-                ") already exist - please specify different sample_id or add option --force_overwrite"
-            error_message(err_msg, logger)
-        
+    # Define output data files (absolute paths) - PCGR/CPSR   
     output_data = {}
     output_data['prefix'] = output_prefix
-    output_data['dir'] = output_dir
-    output_data['vcf'] = output_vcf
-    output_data['vcf2tsv'] = output_vcf_tsv
+    output_data['dir'] = utils.safe_makedir(os.path.abspath(arg_dict['output_dir']))
+    output_data['vcf'] = f"{output_prefix}.vcf.gz"
+    output_data['vcf_pass'] = f"{output_prefix}.pass.vcf.gz"
+    output_data['vcf2tsv'] = f"{output_prefix}.pass.tsv.gz"
+    output_data['html'] = f"{output_prefix}.html"
+    output_data['xlsx'] = f"{output_prefix}.xlsx"
+    output_data['yaml']= f"{output_prefix}.conf.yaml"
     
     if not cpsr:
-        output_data['cna'] = output_cna
-        output_data['expression'] = output_expression
-        output_data['csq_expression'] = output_csq_expression
-        output_data['expression_outliers'] = output_expression_outliers
-        output_data['expression_similarity'] = output_expression_similarity
+        output_data['cna'] = f"{output_prefix}.cna_segments.tsv.gz"
+        output_data['expression'] = f"{output_prefix}.expression.tsv.gz"
+        output_data['csq_expression'] = f"{output_prefix}.csq_expression.tsv.gz"
+        output_data['expression_outliers'] = f"{output_prefix}.expression_outliers.tsv.gz"
+        output_data['expression_similarity'] = f"{output_prefix}.expression_similarity.tsv.gz"
+        output_data['snv_indel_ann'] = f"{output_prefix}.snv_indel_ann.tsv.gz"
+        output_data['maf'] = f"{output_prefix}.maf"
+        output_data['tmb'] = f"{output_prefix}.tmb.tsv"
+        output_data['msigs'] = f"{output_prefix}.msigs.tsv.gz"
+    else:
+        output_data['classification'] = f"{output_prefix}.classification.tsv.gz"
+    
+    
+    for otype in ['vcf', 'vcf_pass','vcf2tsv', 'html', 'xlsx','yaml']:
+        if os.path.exists(output_data[otype]) and arg_dict["force_overwrite"] is False:
+            err_msg = "Output files (e.g. " + str(output_data[otype]) + \
+                ") already exist - please specify different sample_id or add option --force_overwrite"
+            error_message(err_msg, logger)
+    
+    if not cpsr:
+        for otype in ['cna', 'expression', 'expression_outliers', 'snv_indel_ann',
+                      'expression_similarity','maf','tmb','msigs']:
+            # if annotated output cna segments exist and overwrite not set
+            if os.path.exists(output_data[otype]) and arg_dict["force_overwrite"] is False:
+                err_msg = "Output files (e.g. " + str(output_data[otype]) + \
+                    ") already exist - please specify different sample_id or add option --force_overwrite"
+                error_message(err_msg, logger)
+    else:
+        for otype in ['classification']:
+            # if annotated output cna segments exist and overwrite not set
+            if os.path.exists(output_data[otype]) and arg_dict["force_overwrite"] is False:
+                err_msg = "Output files (e.g. " + str(output_data[otype]) + \
+                    ") already exist - please specify different sample_id or add option --force_overwrite"
+                error_message(err_msg, logger)
 
     return output_data
 
