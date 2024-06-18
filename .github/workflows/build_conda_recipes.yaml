@@ -125,8 +125,8 @@ jobs:
               sha: the_sha
             })
 
-      - name: 🗑 Free Disk Space
-        uses: jlumbroso/free-disk-space@main
+     #- name: 🗑 Free Disk Space
+     #  uses: jlumbroso/free-disk-space@main
       # work with tag from above
       - name: Code checkout
         uses: actions/checkout@v4
@@ -141,23 +141,22 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: 🐳 Docker img build and push to DockerHub
-        uses: docker/build-push-action@v5
+      # use the outputs=docker with dest to directly save to tar for apptainer
+      - name: 🐳 Docker img build, tar and push to Docker Hub
+        uses: docker/build-push-action@v6
         with:
-          context: . # yes, dot
+          context: .
           push: true
-          load: true
           platforms: linux/amd64
           tags: |
             sigven/pcgr:${{ env.VERSION }}
+          outputs: type=docker,dest=pcgr_${{ env.VERSION }}.tar
 
       - name: Apptainer setup
         uses: eWaterCycle/setup-apptainer@v2
       - name: ⚫ Apptainer build
         run: |
-          docker image ls -a
-          docker save sigven/pcgr:${VERSION} -o pcgr_${VERSION}.tar
-          ls -la
+          ls -lSha
           df -h
           echo "Building Apptainer SIF"
           echo "---------------------------------"
