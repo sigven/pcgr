@@ -1,249 +1,198 @@
 ---
 title: "Installation"
 output: rmarkdown::html_document
+
 ---
 
-## Quick Installation
-
-### Conda
-
-- If you know what [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html)
-  is, you only need to run the following commands in order to install the PCGR
-  _software_ requirements into a local directory:
-
-```bash
-cd /Users/you/dir4/conda
-PCGR_VERSION="1.4.1.9015"
-PCGR_REPO="https://raw.githubusercontent.com/sigven/pcgr/v${PCGR_VERSION}/conda/env/lock/"
-PLATFORM="linux" # or "osx"
-
-conda create --file ${PCGR_REPO}/pcgr-${PLATFORM}-64.lock --prefix ./pcgr
-conda create --file ${PCGR_REPO}/pcgrr-${PLATFORM}-64.lock --prefix ./pcgrr
-
-# you need to specify the directory of the conda env when using --prefix
-conda activate ./pcgr
-
-# test that it works
-pcgr --version
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "", collapse = TRUE)
 ```
 
-### Data
 
-- For downloading the reference data bundle and VEP cache, see [STEP 1](#step1) further below.
+```{r load_pkgs, include=FALSE, echo=FALSE, message=FALSE, warning=FALSE}
+require(glue, include.only = "glue")
+```
 
-### Docker
+```{r vars, echo=FALSE}
+Sys.setenv(VEP_VERSION = "112")
+Sys.setenv(PCGR_VERSION = "1.4.1.9014")
+Sys.setenv(BUNDLE_VERSION = "20240612")
+VEP_VERSION <- Sys.getenv("VEP_VERSION")
+PCGR_VERSION <- Sys.getenv("PCGR_VERSION")
+BUNDLE_VERSION <- Sys.getenv("BUNDLE_VERSION")
+```
 
-- If you know what [Docker](https://www.docker.com/) is, instead of using the above conda method
-  you can jump straight to the [PCGR Docker setup](#dockersetup) section.
+```{r funcs, echo=FALSE}
+bundle_link <- function(hg) {
+  v <- BUNDLE_VERSION
+  glue("https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.{v}.{hg}.tgz")
+}
+```
 
-<br>
-<hr>
-<br>
 
-## Detailed Installation
+## Data
 
-PCGR requires:
+PCGR requires the following data:
 
-- a __data bundle__ that contains the reference data;
-- a data __cache for VEP__ (Variant Effect Predictor);
-- __sample inputs__ (e.g. somatic variants in a VCF);
-- and an __output directory__ to write the results to
+- Sample-specific inputs (e.g. somatic variant calls in VCF format)
+- Reference bundle (e.g. CIViC, CGI, TCGA)
+- Ensembl VEP data cache
 
-Here's an example scenario that will be used in the following sections
-(where GRCh3x can be GRCh37 or GRCh38):
+PCGR supports the GRCh37 and GRCh38 human genome assemblies. All the data above
+need to match the chosen assembly.
 
-- VEP cache is downloaded in `/Users/you/dir0/.vep`;
-  - make sure the `.vep` directory contains `.vep/homo_sapiens/xyz_GRCh3x/`
-    for a given `<xyz>` VEP release.
-- data bundle downloaded in `/Users/you/dir1/data`;
-  - make sure you have a `data/grch3x/.PCGR_BUNDLE_VERSION` file
-- sample inputs at `/Users/you/dir2/pcgr_inputs`;
-- output goes to `/Users/you/dir3/pcgr_outputs`;
-- conda environments installed in `/Users/you/dir4/conda`;
+### 1. Reference Bundle
 
-<a name="step1"></a>
+Reference bundles are generated semi-automatically (by the PCGR author) and
+are versioned based on their release date. Keep in mind that the bundles support
+only certain Ensembl VEP versions. The genome-specific bundles
+(**v`r BUNDLE_VERSION`**) can be downloaded directly from below (size: ~5G):
 
-### STEP 1: Download data bundle and VEP cache
+| Assembly | Download Link             |
+|----------|---------------------------|
+| GRCh38   | `r bundle_link("grch38")` |
+| GRCh37   | `r bundle_link("grch37")` |
 
-**A)** Download and unpack the assembly-specific reference data bundle needed for PCGR:
+**Tip**: The `data/grch3x/.PCGR_BUNDLE_VERSION` file within the downloaded bundle
+indicates the bundle version for reporting purposes.
 
-- [grch37 data bundle - 20240612](https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20240612.grch37.tgz) (approx 4.8Gb)
-- [grch38 data bundle - 20240612](https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20240612.grch38.tgz) (approx 4.8Gb)
+#### Bash Example
 
-- Example:
+```{bash echo=FALSE}
+echo "BUNDLE_VERSION=\"${BUNDLE_VERSION}\""
+```
 
 ```bash
 GENOME="grch38" # or "grch37"
-BUNDLE_VERSION="20240612"
 BUNDLE="pcgr_ref_data.${BUNDLE_VERSION}.${GENOME}.tgz"
-
 wget https://insilico.hpc.uio.no/pcgr/${BUNDLE}
 gzip -dc ${BUNDLE} | tar xvf -
+
+mkdir ${BUNDLE_VERSION}
+mv data/ ${BUNDLE_VERSION}
 ```
 
-**B)** Download and unpack the VEP cache (need for VEP - Variant Effect Predictor):
+### 2. VEP Cache
 
-- Example:
+[VEP][vep-web] requires a data cache which is available from the Ensembl
+[FTP site][ensembl-ftp] (search there for files starting with `homo_sapiens_vep_`).
+We currently support Ensembl VEP **v`r VEP_VERSION`**.
+
+**Tip**: PCGR needs to be pointed to the _parent_ directory containing
+the downloaded `homo_sapiens/xyz_GRCh3x/` cache, which is usually called `.vep` if
+you've followed the VEP cache [download instructions][vep-cache].
+
+[vep-web]: https://asia.ensembl.org/info/docs/tools/vep/index.html
+[ensembl-ftp]: https://ftp.ensembl.org/pub/release-112/variation/indexed_vep_cache/
+[vep-cache]: https://asia.ensembl.org/info/docs/tools/vep/script/vep_cache.html#cache
+
+#### Bash Example
+
+```{bash echo=FALSE}
+echo "VEP_VERSION=\"${VEP_VERSION}\""
+```
 
 ```bash
 GENOME="GRCh38" # or "GRCh37"
-VEP_VERSION="112"
 CACHE="homo_sapiens_vep_${VEP_VERSION}_${GENOME}.tar.gz"
 
 wget https://ftp.ensembl.org/pub/release-${VEP_VERSION}/variation/indexed_vep_cache/${CACHE}
 gzip -dc ${CACHE} | tar xvf -
 ```
 
-### STEP 2: Set up Conda or Docker
+-----------------------------
 
-Step 2 depends on if you want to use Conda or Docker:
+## Software
 
-- For Conda, continue reading the [PCGR Conda setup](#condasetup).
-- For Docker, skip to the [PCGR Docker setup](#dockersetup).
+The PCGR workflow can be installed using [Docker][docker-web],
+[Singularity/Apptainer][apptainer-web] or [Conda][conda-web].
 
-<a name="condasetup"></a>
+[conda-web]: https://conda.io/projects/conda/en/latest/user-guide/getting-started.html
+[docker-web]: https://docs.docker.com/
+[apptainer-web]: https://apptainer.org/docs/user/latest/index.html
 
-### Option 1: Conda
+### A. Docker
 
-#### a) Miniconda and conda
+The Docker image is available on [DockerHub](https://hub.docker.com/r/sigven/pcgr/tags).
+Pull the latest **v`r PCGR_VERSION`** image with:
 
-Download and install the Miniconda installer from <https://docs.conda.io/en/latest/miniconda.html>:
-
-- Make sure to download the Linux or MacOSX script according to which platform you're currently on.
-- Run `bash miniconda.sh` and follow the prompts (it should be okay to accept the defaults, unless you want to choose a different
-  installation location than the default `~/miniconda3`).
-- Exit your current terminal session and open a new one. You should now notice something like a `(base)` string as a
-  prefix in your terminal prompt. This means that you're in the `base` conda environment, and you're ready to start
-  installing the conda environments for PCGR.
-
-```bash
-PLATFORM="MacOSX" # or "Linux"
-MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-${PLATFORM}-x86_64.sh"
-wget ${MINICONDA_URL} -O miniconda.sh && chmod +x miniconda.sh
-bash miniconda.sh
+```{r echo=FALSE}
+glue("docker pull sigven/pcgr:{PCGR_VERSION}")
+# might need to specify platform
+# docker pull --platform=amd64 sigven/pcgr:${PCGR_VERSION}
 ```
 
-```text
-# exit terminal and open new one - you should now see:
-
-# as of May 2024
-(base) $ conda --version
-conda 24.5.0
-```
-
-#### b) Create PCGR conda environments
-
-The `conda/env/lock` directory in the PCGR codebase contains two `.lock` files which
-can be used to create the required conda environments for the Python component
-(`pcgr`) and the R components (`pcgrr` (and `cpsr`)). We install the conda
-dependencies for these two environments in a local `conda` directory in the
-following example:
-
-```bash
-cd /Users/you/dir4/conda
-PLATFORM="osx-64" # or "linux-64"
-
-PCGR_VERSION="1.4.1.9015"
-PCGR_REPO="https://raw.githubusercontent.com/sigven/pcgr/v${PCGR_VERSION}/conda/env/lock/"
-PLATFORM="linux" # or "osx"
-
-conda create --prefix ./pcgr --file ${PCGR_REPO}/pcgr-${PLATFORM}-64.lock
-conda create --prefix ./pcgrr --file ${PCGR_REPO}/pcgrr-${PLATFORM}-64.lock
-
-## Alternatively, for installing in your central conda directory, use the following:
-# conda create --name pcgr --file ${PCGR_CONDA_ENV_DIR}/lock/pcgr-${PLATFORM}.lock
-# conda create --name pcgrr --file ${PCGR_CONDA_ENV_DIR}/lock/pcgrr-${PLATFORM}.lock
-
-## For MacOS M1, you need to have 'CONDA_SUBDIR=osx-64' before the conda command, i.e.:
-# CONDA_SUBDIR=osx-64 conda create --prefix [...] --file [...]
-## See https://github.com/conda-forge/miniforge/issues/165#issuecomment-860233092
-```
-
-The above process takes 20-30 minutes when installing from scratch. Most of the time
-is spent on downloading the
-{BSgenome.Hsapiens.UCSC.hg19} and {BSgenome.Hsapiens.UCSC.hg38} R packages
-(and yes, for simplicity we download both packages).
-In the end, confirm your conda environments have been installed correctly
-(notice how the paths are different to the `base` env installation after using the
-`--prefix` option above):
-
-```text
-$ (base) conda env list
-# conda environments:
-#
-base    *  /Users/you/miniconda3
-pcgr       /Users/you/dir4/conda/pcgr
-pcgrr      /Users/you/dir4/conda/pcgrr
-```
-
-#### c) Activate pcgr conda environment
-
-You need to activate the `conda/pcgr` conda environment, and test that it works
-correctly with e.g. `pcgr --version`:
-
-```text
-$ cd /Users/you/dir4/conda
-(base) $ conda activate ./conda/pcgr
-# note how the full path to the locally installed conda environment is now displayed
-
-(/Users/you/dir4/conda) $ which pcgr
-/Users/you/dir4/conda/pcgr/bin/pcgr
-
-(/Users/you/dir4/conda) $ pcgr --version
-pcgr X.X.X
-
-(/Users/you/dir4/conda) $ which pcgrr.R
-/Users/you/dir4/conda/pcgr/bin/pcgrr.R
-```
-
-You should now be all set up to run PCGR! Continue on to [an example run](running.html#example-run).
-
-<a name="dockersetup"></a>
-
-### Option 2: Docker
-
-#### a) Install Docker
-
-For installing Docker, follow the instructions at <https://docs.docker.com/engine/install/>
-for your Linux or MacOSX machine.
-
-#### b) Download PCGR Docker Image
-
-- Pull the [PCGR Docker image](https://hub.docker.com/r/sigven/pcgr/tags) from
-  DockerHub with: `docker pull sigven/pcgr:X.X.X`
-
-#### c) Run PCGR Docker Container
-
-If you are familiar with working with Docker volumes (<https://docs.docker.com/storage/volumes/>)
-you can run PCGR using Docker instead of conda using the `-v <host>:<container>` Docker option.
-You'll need to map your PCGR inputs to Docker container paths.
-
-For example, say you have the input VCF `sampleX.vcf.gz` stored in the
-directory `/Users/you/project1`. You would need to supply Docker with a
-`--volume` (or `-v`) option mapping the directory of that VCF with
-a directory inside the Docker container, e.g. `/home/input_vcf_dir`.
-That would become: `-v /Users/you/project1:/home/input_vcf_dir`
-(note the `:` separating your directory from the container's directory).
-
-Then your command would look something like this:
+#### Example Run
 
 ```bash
 docker container run -it --rm \
-    -v /Users/you/dir0/vep:/root/vep
-    -v /Users/you/dir1/data:/root/pcgr_refdata \
-    -v /Users/you/dir2/pcgr_inputs:/root/pcgr_inputs \
-    -v /Users/you/dir3/pcgr_outputs:/root/pcgr_outputs \
-    sigven/pcgr:1.4.1.9015 \
+    -v /Users/you/projects/.vep:/mnt/.vep
+    -v /Users/you/projects/bundle:/mnt/bundle \
+    -v /Users/you/projects/pcgr_inputs:/mnt/pcgr_inputs \
+    -v /Users/you/projects/pcgr_outputs:/mnt/pcgr_outputs \
+    sigven/pcgr:1.4.1.9014 \
     pcgr \
-      --input_vcf "/root/pcgr_inputs/tumor_sample.BRCA.vcf.gz" \
-      --vep_dir "/root/vep/.vep" \
-      --refdata_dir "/root/pcgr_refdata" \
-      --output_dir "/root/pcgr_outputs" \
+      --input_vcf "/mnt/pcgr_inputs/tumor_sample.BRCA.vcf.gz" \
+      --vep_dir "/mnt/.vep" \
+      --refdata_dir "/mnt/bundle" \
+      --output_dir "/mnt/pcgr_outputs" \
       --genome_assembly "grch38" \
       --sample_id "SampleB" \
       --assay "WGS" \
       --vcf2maf
 ```
 
-- Note the path mappings. You're using the _container_ paths in the
-  command, not the _host_ (your machine's) paths.
+### B. Singularity/Apptainer
+
+```{r echo=FALSE}
+glue("apptainer pull oras://ghcr.io/sigven/pcgr:{PCGR_VERSION}.singularity")
+```
+
+
+
+### C. Conda
+
+There is Conda support for both Linux and macOS machines.
+The following process can take anywhere from 10 up to 40 minutes when installing
+from scratch, mostly depending on the user's and server's internet connection.
+Most of the time is spent on downloading the `{BSgenome.Hsapiens.UCSC.hg19}` and
+`{BSgenome.Hsapiens.UCSC.hg38}` R packages (which happens at the very end of the
+conda environment creation).
+
+#### Linux
+
+```bash
+# set up variables
+PCGR_VERSION="1.4.1.9014"
+PCGR_REPO="https://raw.githubusercontent.com/sigven/pcgr/v${PCGR_VERSION}/conda/env/lock/"
+PLATFORM="linux"
+# create conda envs in local directory
+mkdir pcgr_conda
+conda create --prefix ./pcgr_conda/pcgr --file ${PCGR_REPO}/pcgr-${PLATFORM}-64.lock
+conda create --prefix ./pcgr_conda/pcgrr --file ${PCGR_REPO}/pcgrr-${PLATFORM}-64.lock
+# you need to specify the directory of the conda env when using --prefix
+conda activate ./pcgr_conda/pcgr
+# test that it works
+pcgr --version
+```
+
+#### macOS
+
+For macOS M1 machines, you need to include `CONDA_SUBDIR=osx-64` before the
+`conda create` command - see
+<https://github.com/conda-forge/miniforge/issues/165#issuecomment-860233092>:
+
+```bash
+# set up variables
+PCGR_VERSION="1.4.1.9014"
+PCGR_REPO="https://raw.githubusercontent.com/sigven/pcgr/v${PCGR_VERSION}/conda/env/lock/"
+PLATFORM="osx"
+# create conda envs in local directory
+mkdir pcgr_conda
+CONDA_SUBDIR=osx-64 conda create --prefix ./pcgr_conda/pcgr --file ${PCGR_REPO}/pcgr-${PLATFORM}-64.lock
+CONDA_SUBDIR=osx-64 conda create --prefix ./pcgr_conda/pcgrr --file ${PCGR_REPO}/pcgrr-${PLATFORM}-64.lock
+# you need to specify the directory of the conda env when using --prefix
+conda activate ./pcgr_conda/pcgr
+# test that it works
+pcgr --version
+```
