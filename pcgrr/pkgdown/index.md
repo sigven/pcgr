@@ -11,7 +11,9 @@ editor_options:
 
 The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for functional annotation and translation of individual tumor genomes for precision cancer medicine. It interprets primarily somatic SNVs/InDels and copy number aberrations, and has additional support for interpretation of bulk RNA-seq expression data. The software [classifies variants](articles/variant_classification.html) both with respect to _oncogenicity_, and _actionability_. Interactive HTML output reports allow the user to interrogate the clinical impact of the molecular findings in an individual tumor.
 
-Example screenshots from the quarto-generated cancer genome report by PCGR:
+PCGR supports both of the most recent human genome assemblies (grch37/grch38), and accepts variant calls from both tumor-control and tumor-only sequencing assays. Much of the functionality is intended for whole-exome/whole-genome sequencing assays, but you can also apply PCGR to output from targeted sequencing panels. If you are interested in the interrogation of germline variants and their relation to cancer predisposition, we recommend trying the accompanying tool [Cancer Predisposition Sequencing Reporter (CPSR)](https://github.com/sigven/cpsr).
+
+Example screenshots from the [quarto](https://quarto.org)-based cancer genome report by PCGR:
 
 ![](img/sc2.png)
 ![](img/sc1.png)
@@ -32,7 +34,7 @@ The great complexity of acquired mutations in individual tumor genomes poses a s
 -   provide a structured and concise summary of the most relevant findings
 -   present the results in a format accessible to clinical experts
 
-PCGR integrates a [comprehensive set of knowledge resources](articles/annotation_resources.html) related to tumor biology and therapeutic biomarkers, both at the gene and variant level. The software generates a comprehensive molecular interpretation report that supports the translation of individual cancer genomes towards molecularly guided treatment strategies.
+PCGR integrates a [comprehensive set of knowledge resources](articles/annotation_resources.html) related to tumor biology and therapeutic biomarkers, both at the gene, and at the level of individual variants. The software generates a comprehensive molecular interpretation report that supports the translation of individual cancer genomes towards molecularly guided treatment strategies.
 
 ## Getting started
 

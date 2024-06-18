@@ -2,6 +2,7 @@
 
 [![Conda install ver](https://anaconda.org/pcgr/pcgr/badges/version.svg)](https://anaconda.org/pcgr/pcgr)
 [![Conda install lrd](https://anaconda.org/pcgr/pcgr/badges/latest_release_date.svg)](https://anaconda.org/pcgr/pcgr)
+[<img src="https://img.shields.io/badge/dockerhub-images-important.svg?logo=LOGO">](https://hub.docker.com/repository/docker/sigven/pcgr/)
 
 ### Overview
 
@@ -13,12 +14,11 @@ PCGR interprets primarily somatic SNVs/InDels and copy number aberrations, and h
     -   according to *oncogenicity*: evaluating the oncogenic potential of somatic DNA aberrations (VICC/CGC/ClinGen guidelines)
     -   according to *actionability*: mapping the therapeutic, diagnostic, and prognostic implications of somatic DNA aberrations (ACMG/AMP guidelines)
 -   Tumor mutational burden (TMB) estimation
--   Support for tumor-control and tumor-only variant calling input
 -   Mutational signature analysis
 -   Microsatellite instability (MSI) classification
 -   RNA expression analysis - outlier detection, similarity analysis, and immune contexture profiling
 
-If you want to interrogate germline variants and their relation to cancer predisposition, we recommend trying the accompanying tool [Cancer Predisposition Sequencing Reporter (CPSR)](https://github.com/sigven/cpsr).
+PCGR supports both of the most recent human genome assemblies (grch37/grch38), and accepts variant calls from both tumor-control and tumor-only sequencing assays. Much of the functionality is intended for whole-exome/whole-genome sequencing assays, but you can also apply PCGR to output from targeted sequencing panels. If you are interested in the interrogation of germline variants and their relation to cancer predisposition, we recommend trying the accompanying tool [Cancer Predisposition Sequencing Reporter (CPSR)](https://github.com/sigven/cpsr).
 
 ![PCGR screenshot 1](pcgrr/pkgdown/assets/img/sc2.png)
 ![PCGR screenshot 2](pcgrr/pkgdown/assets/img/sc1.png)

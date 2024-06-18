@@ -15,7 +15,7 @@ require(glue, include.only = "glue")
 
 ```{r vars, echo=FALSE}
 Sys.setenv(VEP_VERSION = "112")
-Sys.setenv(PCGR_VERSION = "1.4.1.9014")
+Sys.setenv(PCGR_VERSION = "1.4.1.9015")
 Sys.setenv(BUNDLE_VERSION = "20240612")
 VEP_VERSION <- Sys.getenv("VEP_VERSION")
 PCGR_VERSION <- Sys.getenv("PCGR_VERSION")
@@ -32,13 +32,13 @@ bundle_link <- function(hg) {
 
 ## Data
 
-PCGR requires the following data:
+PCGR requires the following data to run successfully:
 
-1. PCGR reference bundle (containing data from e.g. CIViC, CGI, TCGA)
-2. Ensembl VEP data cache
-3. User-supplied sample-specific inputs (e.g. somatic variant calls in VCF format)
+1. **Reference bundle** - containing data from multiple knowledge resources, including information on molecular biomarkers, targeted cancer therapies, variant frequencies etc. Key datasets include [CIViC](https://civicdb.org), [CGI](https://www.cancergenomeinterpreter.org/biomarkers), [Open Targets Platform](https://platform.opentargets.org), [TCGA](https://portal.gdc.cancer.gov/), and [ClinVar](https://www.ncbi.nlm.nih.gov/clinvar/).
+2. **Ensembl VEP data cache** - needed for variant annotation with VEP (Variant Effect Predictor)
+3. **User-supplied sample-specific inputs** - e.g. somatic variant calls in VCF format
 
-PCGR supports the GRCh37 and GRCh38 human genome assemblies. All the data above
+PCGR supports both the GRCh37 and GRCh38 human genome assemblies. All the data above
 need to match the chosen assembly.
 
 ### 1. Reference Bundle
@@ -53,8 +53,10 @@ bundles can be downloaded directly from below (size: ~5G):
 | GRCh38   | `r bundle_link("grch38")` |
 | GRCh37   | `r bundle_link("grch37")` |
 
-**Tip**: The `data/grch3x/.PCGR_BUNDLE_VERSION` file within the downloaded bundle
+**Tip 1**: The `data/grch3x/.PCGR_BUNDLE_VERSION` file within the downloaded bundle
 indicates the bundle version for reporting purposes.
+
+**Tip 2**: The `data/grch3x/data_overview.grch3x.html` file provides a report with an overview and statistics of the key resources included in the reference bundle.
 
 #### Bash Example
 
@@ -82,9 +84,9 @@ The latest Ensembl VEP version we support is **v`r VEP_VERSION`**.
 the downloaded `homo_sapiens/xyz_GRCh3x/` cache, which is usually called `.vep` if
 you've followed the VEP cache [download instructions][vep-cache].
 
-[vep-web]: https://asia.ensembl.org/info/docs/tools/vep/index.html
+[vep-web]: https://www.ensembl.org/info/docs/tools/vep/index.html
 [ensembl-ftp]: https://ftp.ensembl.org/pub/release-112/variation/indexed_vep_cache/
-[vep-cache]: https://asia.ensembl.org/info/docs/tools/vep/script/vep_cache.html#cache
+[vep-cache]: https://www.ensembl.org/info/docs/tools/vep/script/vep_cache.html#cache
 
 #### Bash Example
 
@@ -183,10 +185,10 @@ apptainer exec \
   -B /Users/you/dir1/pcgr_outputs:/mnt/pcgr_outputs \
   pcgr_${PCGR_VERSION}.singularity.sif \
   pcgr \
-    --input_vcf "/mnt/pcgr_inputs/tumor_sampleB.BRCA.vcf.gz" \
+    --input_vcf "/mnt/pcgr_inputs/T001-BRCA.grch38.vcf.gz" \
     --vep_dir "/mnt/.vep" \
     --refdata_dir "/mnt/bundle" \
-    --output_dir "/mnt/pcgr_output_sampleB" \
+    --output_dir "/mnt/pcgr_outputs" \
     --genome_assembly "grch38" \
     --sample_id "SAMPLE_B" \
     --assay "WGS" \

@@ -19,13 +19,7 @@ for (c in c("pathogenicity",
   color_palette[[c]][["values"]] <- c()
 
   if (c == "cancer_assoc") {
-    #color_palette[[c]][["breaks"]] <-
-    #  c(0.40, 0.55, 0.70, 0.85)
-    #color_palette[[c]][["values"]] <-
-    #  c("#b8b8ba", "#BDD7E7", "#6BAED6",
-    #    "#3182BD", "#08519C")
 
-    #rep[["config"]][["disease"]] <- list()
     color_palette[[c]][["breaks"]] <-
       c(0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)
     color_palette[[c]][["values"]] <-
@@ -104,12 +98,7 @@ for (c in c("pathogenicity",
   }
   if (c == "report_color") {
     color_palette[[c]][["levels"]] <- c("tumor_control", "tumor_only")
-    #color_palette[[c]][["values"]] <- c("#2780e3", "#593196")
-    #color_palette[[c]][["values"]] <- c("#0073C2", "#593196")
     color_palette[[c]][["values"]] <- c("#9B3297", "#0073C2")
-
-
-
   }
   if (c == "cna_variant_class") {
     color_palette[[c]][["levels"]] <- c("gain", "homdel")
@@ -150,11 +139,6 @@ biomarker_evidence[['types']] <-
     "oncogenic","predisposing","functional")
 usethis::use_data(
   biomarker_evidence, overwrite = T)
-
-#-----evidence levels---------#
-#evidence_levels <- c("any","A_B","C_D_E")
-#usethis::use_data(evidence_levels, overwrite = T)
-
 
 #-----input column names/types-----#
 data_coltype_defs <- list()

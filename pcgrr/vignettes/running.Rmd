@@ -294,13 +294,13 @@ pcgr \
     --refdata_dir /Users/you/dir2/data \
     --vep_dir /Users/you/dir3/vep/.vep \
     --output_dir /Users/you/dir4/pcgr_outputs \
-    --sample_id tumor_sample.COAD \
+    --sample_id T001-COAD \
     --genome_assembly grch37 \
-    --input_vcf /Users/you/pcgr/examples/tumor_sample.COAD.vcf.gz \
+    --input_vcf /Users/you/pcgr/examples/T001-COAD.grch37.vcf.gz \
     --tumor_dp_tag TDP \
     --tumor_af_tag TVAF \
     --tumor_site 9 \
-    --input_cna /Users/you/pcgr/examples/tumor_sample.COAD.cna.tsv \
+    --input_cna /Users/you/pcgr/examples/T001-COAD.cna.tsv \
     --tumor_purity 0.9 \
     --tumor_ploidy 2.0 \
     --assay WES \
