@@ -1,25 +1,5 @@
 ## Somatic CNAs
 
-
-```{r }
-#| fig-width: 24
-#| fig-height: 7 
-#| dpi: 300
-#| output: asis
-#| column: body-outset
-
-
-options(CNAqc_cex = 2.5)
-
-m <- pcg_report$content$cna$cnaqc
-m$mutations$is_driver <- F
-
-suppressMessages(CNAqc::plot_segments(
- m, max_Y_height = max(m$cna$Major)
-))
-
-```
-
 ```{r check_expression}
 #| eval: true
 

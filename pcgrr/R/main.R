@@ -186,26 +186,7 @@ generate_report <-
       rep[["metadata"]][["config"]][["other"]][["list_noncoding"]] <- FALSE
     }
 
-    # if (!is.null(cpsr_report_fname)) {
-    #   pcg_report[["content"]][["cpsr"]][['eval']] <- TRUE
-    #
-    #   pcg_report[['content']][['cpsr']][['report']] <-
-    #     jsonlite::fromJSON(
-    #       gzfile(cpsr_report_fname)
-    #     )
-    #
-    #   ## append report elements in pcg_report[['content']][['cpsr]][['cpsr_json']]
-    # }
-
-
-    #}
-
-    #pcg_report_value_box <- pcgrr::generate_report_data_value_box(
-    #  pcg_report, pcgr_data, sample_name, config)
-    #pcg_report <- pcgrr::update_report(
-    #  pcg_report, pcg_report_value_box,
-    #  a_elem = "value_box")
-
+    ## Load somatic CNA data if available
     callset_cna <- NULL
     if (settings$molecular_data$fname_cna_tsv != "None") {
       callset_cna <-
@@ -222,12 +203,12 @@ generate_report <-
           callset = callset_cna,
           vartype = "cna",
           name = "vstats")[['vstats']]
-      rep[['content']][['cna']][['cnaqc']] <-
-        pcgrr::make_cnaqc_object(
-          callset_cna = callset_cna,
-          callset_snv = callset_snv,
-          settings = settings
-        )
+      #rep[['content']][['cna']][['cnaqc']] <-
+      #  pcgrr::make_cnaqc_object(
+      #    callset_cna = callset_cna,
+      #    callset_snv = callset_snv,
+      #    settings = settings
+      #  )
       rep[['content']][['cna']][['eval']] <-
         TRUE
     }

@@ -35,7 +35,6 @@ load_reference_data <- function(
       genome = genome_grch2hg[genome_assembly])
   pcgr_ref_data[['assembly']][['bsg']] <- bsgenome_obj
 
-
   pcgr_ref_data[['vcf_infotags']] <- data.frame()
   for(t in c('vep','other')) {
     infotag_fname <- file.path(

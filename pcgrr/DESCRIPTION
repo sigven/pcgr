@@ -23,15 +23,12 @@ Description: Functions, tools and utilities for the generation of clinical
     used as a stand-alone package.
 License: MIT + file LICENSE
 biocViews:
-Remotes:
-    caravagnalab/CNAqc
 Imports:
     assertable,
     assertthat,
     Biostrings,
     bslib,
     caret,
-    CNAqc,
     crosstalk,
     dplyr,
     DT,
