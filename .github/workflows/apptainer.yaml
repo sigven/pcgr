@@ -3,10 +3,10 @@ name: apptainer
 on:
   push:
     branches:
-      - patch1
+      - apptainer
 
 env:
-  VERSION: '1.4.1.9015' # versioned by bump2version
+  VERSION: '1.4.1.9006' # versioned by bump2version
 jobs:
   docker2apptainer:
     name: Docker2apptainer
@@ -35,14 +35,14 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: 🐳 Docker img build and push to DockerHub
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v5
         with:
           context: . # yes, dot
           push: false
+          load: true
           platforms: linux/amd64
           tags: |
             sigven/pcgr:${{ env.VERSION }}
-          outputs: type=docker,dest=pcgr_${{ env.VERSION }}.tar
 
       - name: Apptainer setup
         uses: eWaterCycle/setup-apptainer@v2
@@ -50,16 +50,16 @@ jobs:
       - name: Apptainer build
         run: |
           docker image ls -a
-          #docker save sigven/pcgr:${VERSION} -o pcgr_${VERSION}.tar
+          docker save sigven/pcgr:${VERSION} -o pcgr_${VERSION}.tar
           ls -la
           df -h
           echo "Building Apptainer SIF"
           echo "---------------------------------"
-          apptainer build pcgr_singularity_${VERSION}.sif docker-archive://pcgr_${VERSION}.tar
+          apptainer build pcgr_${VERSION}.sif docker-archive://pcgr_${VERSION}.tar
           echo "---------------------------------"
           ls -la
           df -h
-     #- name: Upload SIF to GHCR
-     #  run: |
-     #    echo ${{ secrets.GITHUB_TOKEN }} | apptainer registry login -u ${{ github.actor }} --password-stdin oras://ghcr.io
-     #    apptainer push pcgr_${VERSION}.sif oras://ghcr.io/${GITHUB_REPOSITORY}:${VERSION}
+      - name: Upload SIF to GHCR
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | apptainer registry login -u ${{ github.actor }} --password-stdin oras://ghcr.io
+          apptainer push pcgr_${VERSION}.sif oras://ghcr.io/${GITHUB_REPOSITORY}:${VERSION}
