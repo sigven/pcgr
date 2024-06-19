@@ -379,7 +379,7 @@ def verify_input_files(arg_dict):
     #        os.path.abspath(arg_dict["input_germline"]))
     
     vep_dir = verify_vep_cache(arg_dict, logger)
-    refdata_assembly_dir = verify_refdata(arg_dict, logger, cpsr = True)
+    refdata_assembly_dir = verify_refdata(arg_dict, logger, cpsr = False)
     
 
     input_data = {
@@ -439,12 +439,12 @@ def verify_refdata(arg_dict: dict, logger = None, cpsr = False):
     
     if compliant_data_bundle == 0:
         err_msg = (
-            f'The PCGR data bundle is not compliant with the software version - please download the '
-            f'latest software and data bundle (see https://github.com/sigven/cpsr for instructions)')
+            f'The PCGR/CPSR reference bundle is not compliant with the software version - please download the '
+            f'latest software and reference bundle (see https://sigven.github.io/pcgr/articles/installation.html for instructions)')
         if cpsr is False:
             err_msg = (
-                f'The PCGR data bundle is outdated - please download the latest data bundle ',
-                f'(see https://sigven.github.io/pcgr for instructions)'
+                f'The PCGR reference bundle is is not compliant with the software version - please download the ',
+                f'latest reference bundle - see https://sigven.github.io/pcgr/articles/installation.html for instructions)'
             )
         error_message(err_msg,logger)
 
