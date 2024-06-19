@@ -127,8 +127,8 @@ jobs:
               sha: the_sha
             })
 
-     #- name: 🗑 Free Disk Space
-     #  uses: jlumbroso/free-disk-space@main
+      - name: 🗑 Free Disk Space
+        uses: jlumbroso/free-disk-space@main
       # work with tag from above
       - name: Code checkout
         uses: actions/checkout@v4
@@ -154,9 +154,10 @@ jobs:
             sigven/pcgr:${{ env.VERSION }}
           outputs: type=docker,dest=pcgr_${{ env.VERSION }}.tar
 
+      # Apptainer
       - name: Apptainer setup
         uses: eWaterCycle/setup-apptainer@v2
-      - name: ⚫ Apptainer build
+      - name: 🕹️ Apptainer build
         run: |
           ls -lSha
           df -h
