@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pcgr"
-version = "1.4.1.9016" # versioned by bump2version
+version = "1.4.1.9017" # versioned by bump2version
 description = "Personal Cancer Genome Reporter (PCGR) - variant interpretation for precision cancer medicine"
 authors = [
     {name = "Sigve Nakken", email = "sigven@gmail.com"},
