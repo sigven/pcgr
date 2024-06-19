@@ -36,9 +36,9 @@ def warn_message(message, logger):
     logger.warning("")
     logger.warning(message)
     logger.warning("")
- 
+
 def random_id_generator(size = 10, chars = string.ascii_lowercase + string.digits):
-    return ''.join(random.choice(chars) for _ in range(size))   
+    return ''.join(random.choice(chars) for _ in range(size))
 
 #def random_string(length):
 #    letters = string.ascii_lowercase
@@ -166,7 +166,7 @@ def safe_makedir(dname):
     return dname
 
 def sort_bed(unsorted_bed_fname: str, sorted_bed_fname: str, debug = False, logger = None):
-    
+
     ## Sort regions in target BED
     if os.path.exists(unsorted_bed_fname) and os.stat(unsorted_bed_fname).st_size != 0:
         cmd_sort_custom_bed1 = 'egrep \'^[0-9]\' ' + str(unsorted_bed_fname) + \
@@ -197,7 +197,6 @@ def check_file_exists(fname: str, strict = True, logger = None) -> bool:
             return(False)
         else:
             error_message(msg, logger)
-    
     return(True)
 
 def check_tabix_file(fname: str, logger = None) -> bool:
@@ -210,3 +209,41 @@ def check_tabix_file(fname: str, logger = None) -> bool:
         ## check file size is more than zero
         check_file_exists(tabix_file)
     return(True)
+
+def locale_export():
+    """
+    https://github.com/bcbio/bcbio-nextgen/blob/855c7ae/bcbio/utils.py#L885
+    """
+    locale_to_use = get_locale()
+    return f"export LC_ALL={locale_to_use} && export LANG={locale_to_use} && "
+
+def get_locale():
+    """
+    https://github.com/bcbio/bcbio-nextgen/blob/855c7ae/bcbio/utils.py#L895
+    Looks up available locales on the system to find an appropriate one to pick,
+    defaulting to C.UTF-8 which is globally available on newer systems. Prefers
+    C.UTF-8 and en_US encodings, if available
+    """
+    default_locale = "C.UTF-8"
+    preferred_locales = {"c.utf-8", "c.utf8", "en_us.utf-8", "en_us.utf8"}
+    locale_to_use = None
+    try:
+        locales = subprocess.check_output(["locale", "-a"]).decode(errors="ignore").split("\n")
+    except subprocess.CalledProcessError:
+        locales = []
+    # check for preferred locale
+    for locale in locales:
+        if locale.lower() in preferred_locales:
+            locale_to_use = locale
+            break
+    # if preferred locale not available take first UTF-8 locale
+    if not locale_to_use:
+        for locale in locales:
+            if locale.lower().endswith(("utf-8", "utf8")):
+                locale_to_use = locale
+                break
+    # if locale listing not available, try using the default locale
+    if not locale_to_use:
+        locale_to_use = default_locale
+    return locale_to_use
+
