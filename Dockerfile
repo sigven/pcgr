@@ -30,6 +30,10 @@ FROM quay.io/bioconda/base-glibc-busybox-bash:3.1
 
 COPY --from=0 /opt/mambaforge/envs/ /opt/mambaforge/envs/
 
+ENV LANGUAGE='C.UTF-8'
+ENV LANG='C.UTF-8'
+ENV LC_ALL='C.UTF-8'
+
 ARG PCGR_ENV_NAME="pcgr"
 # pcgr env is activated by default
 ENV PATH="/opt/mambaforge/envs/${PCGR_ENV_NAME}/bin:${PATH}"
