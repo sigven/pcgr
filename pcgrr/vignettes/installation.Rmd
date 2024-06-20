@@ -112,90 +112,16 @@ See the [Inputs](input.html) article.
 
 The PCGR workflow can be installed using:
 
-- A. [Docker][docker-web],
-- B. [Singularity/Apptainer][apptainer-web], or
-- C. [Conda][conda-web].
+- A. [Conda][conda-web].
+- B. [Docker][docker-web],
+- C. [Singularity/Apptainer][apptainer-web], or
 
 [conda-web]: https://conda.io/projects/conda/en/latest/user-guide/getting-started.html
 [docker-web]: https://docs.docker.com/
 [apptainer-web]: https://apptainer.org/docs/user/latest/index.html
 
-### A. Docker
 
-The PCGR Docker image is available on [Docker Hub](https://hub.docker.com/r/sigven/pcgr/tags).
-Pull the latest **v`r PCGR_VERSION`** image with:
-
-```{r echo=FALSE}
-glue("docker pull sigven/pcgr:{PCGR_VERSION}")
-# might need to specify platform
-# docker pull --platform=amd64 sigven/pcgr:${PCGR_VERSION}
-```
-
-#### Example Run
-
-```{bash echo=FALSE}
-echo "PCGR_VERSION=\"${PCGR_VERSION}\""
-```
-
-```bash
-docker container run -it --rm \
-    -v /Users/you/dir1/.vep:/mnt/.vep
-    -v /Users/you/dir1/bundle:/mnt/bundle \
-    -v /Users/you/dir1/pcgr_inputs:/mnt/pcgr_inputs \
-    -v /Users/you/dir1/pcgr_outputs:/mnt/pcgr_outputs \
-    sigven/pcgr:${PCGR_VERSION} \
-    pcgr \
-      --input_vcf "/mnt/pcgr_inputs/tumor_sampleB.BRCA.vcf.gz" \
-      --vep_dir "/mnt/.vep" \
-      --refdata_dir "/mnt/bundle" \
-      --output_dir "/mnt/pcgr_output_sampleB" \
-      --genome_assembly "grch38" \
-      --sample_id "SAMPLE_B" \
-      --assay "WGS" \
-      --vcf2maf
-```
-
-### B. Singularity/Apptainer
-
-The PCGR Singularity/Apptainer image is available on [GitHub Container Registry](https://ghcr.io/sigven/pcgr).
-Pull the latest **v`r PCGR_VERSION`** image with:
-
-```{r}
-glue("apptainer pull oras://ghcr.io/sigven/pcgr:{PCGR_VERSION}.singularity")
-```
-
-This will download a Singularity Image File (SIF) called **`r glue("pcgr_{PCGR_VERSION}.singularity.sif")`**
-that can be run with Singularity or Apptainer.
-
-#### Example Run
-
-```{bash echo=FALSE}
-echo "PCGR_VERSION=\"${PCGR_VERSION}\""
-```
-
-```bash
-# let's assume you have all data sitting in ~/projects/proj1/pcgr_inputs and ~/projects/proj1/
-apptainer exec \
-  --writable-tmpfs \
-  --no-home \
-  --env "XDG_CACHE_HOME=/tmp/quarto_cache_home" \
-  -B /Users/you/dir1/.vep:/mnt/.vep \
-  -B /Users/you/dir1/bundle:/mnt/bundle \
-  -B /Users/you/dir1/pcgr_inputs:/mnt/pcgr_inputs \
-  -B /Users/you/dir1/pcgr_outputs:/mnt/pcgr_outputs \
-  pcgr_${PCGR_VERSION}.singularity.sif \
-  pcgr \
-    --input_vcf "/mnt/pcgr_inputs/T001-BRCA.grch38.vcf.gz" \
-    --vep_dir "/mnt/.vep" \
-    --refdata_dir "/mnt/bundle" \
-    --output_dir "/mnt/pcgr_outputs" \
-    --genome_assembly "grch38" \
-    --sample_id "SAMPLE_B" \
-    --assay "WGS" \
-    --vcf2maf
-```
-
-### C. Conda {.tabset .tabset-pills}
+### A. Conda {.tabset .tabset-pills}
 
 There is Conda support for both Linux and macOS machines.
 The following process can take anywhere from 10 up to 40 minutes when installing
@@ -248,4 +174,80 @@ conda activate ./pcgr_conda/pcgr
 # test that it works
 pcgr --version
 pcgr --help
+```
+
+
+### B. Docker
+
+The PCGR Docker image is available on [Docker Hub](https://hub.docker.com/r/sigven/pcgr/tags).
+Pull the latest **v`r PCGR_VERSION`** image with:
+
+```{r echo=FALSE}
+glue("docker pull sigven/pcgr:{PCGR_VERSION}")
+# might need to specify platform
+# docker pull --platform=amd64 sigven/pcgr:${PCGR_VERSION}
+```
+
+#### Example Run
+
+```{bash echo=FALSE}
+echo "PCGR_VERSION=\"${PCGR_VERSION}\""
+```
+
+```bash
+docker container run -it --rm \
+    -v /Users/you/dir1/.vep:/mnt/.vep
+    -v /Users/you/dir1/bundle:/mnt/bundle \
+    -v /Users/you/dir1/pcgr_inputs:/mnt/pcgr_inputs \
+    -v /Users/you/dir1/pcgr_outputs:/mnt/pcgr_outputs \
+    sigven/pcgr:${PCGR_VERSION} \
+    pcgr \
+      --input_vcf "/mnt/pcgr_inputs/tumor_sampleB.BRCA.vcf.gz" \
+      --vep_dir "/mnt/.vep" \
+      --refdata_dir "/mnt/bundle" \
+      --output_dir "/mnt/pcgr_output_sampleB" \
+      --genome_assembly "grch38" \
+      --sample_id "SAMPLE_B" \
+      --assay "WGS" \
+      --vcf2maf
+```
+
+### C. Singularity/Apptainer
+
+The PCGR Singularity/Apptainer image is available on [GitHub Container Registry](https://ghcr.io/sigven/pcgr).
+Pull the latest **v`r PCGR_VERSION`** image with:
+
+```{r}
+glue("apptainer pull oras://ghcr.io/sigven/pcgr:{PCGR_VERSION}.singularity")
+```
+
+This will download a Singularity Image File (SIF) called **`r glue("pcgr_{PCGR_VERSION}.singularity.sif")`**
+that can be run with Singularity or Apptainer.
+
+#### Example Run
+
+```{bash echo=FALSE}
+echo "PCGR_VERSION=\"${PCGR_VERSION}\""
+```
+
+```bash
+# let's assume you have all data sitting in ~/projects/proj1/pcgr_inputs and ~/projects/proj1/
+apptainer exec \
+  --writable-tmpfs \
+  --no-home \
+  --env "XDG_CACHE_HOME=/tmp/quarto_cache_home" \
+  -B /Users/you/dir1/.vep:/mnt/.vep \
+  -B /Users/you/dir1/bundle:/mnt/bundle \
+  -B /Users/you/dir1/pcgr_inputs:/mnt/pcgr_inputs \
+  -B /Users/you/dir1/pcgr_outputs:/mnt/pcgr_outputs \
+  pcgr_${PCGR_VERSION}.singularity.sif \
+  pcgr \
+    --input_vcf "/mnt/pcgr_inputs/T001-BRCA.grch38.vcf.gz" \
+    --vep_dir "/mnt/.vep" \
+    --refdata_dir "/mnt/bundle" \
+    --output_dir "/mnt/pcgr_outputs" \
+    --genome_assembly "grch38" \
+    --sample_id "SAMPLE_B" \
+    --assay "WGS" \
+    --vcf2maf
 ```

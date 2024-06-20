@@ -42,6 +42,8 @@ assign_acmg_tiers <- function(
         "BM_PRIMARY_SITE"),
       only_colnames = F, quiet = T)
 
+    ## do not consider biomarkers that match variant properties
+    ## associated with non-principal (non-canonical) transcripts
     biomarker_items_hires <- biomarker_items |>
       dplyr::filter(
         vartype == "cna" |
@@ -72,7 +74,10 @@ assign_acmg_tiers <- function(
             .data$BM_EVIDENCE_LEVEL, "^(A|B)"
           ) ~ as.integer(1),
 
-        ## Biomarker site does not match primary site of query tumor - strong evidence
+        ## Biomarker site does not match primary site of query tumor - strong evidence, OR
+        ## If tumor site is not given (primary_site = 'Any'), consider any evidence
+        ## as tier 2 (weak and strong)
+
         # TIER 2
         (.data$BM_PRIMARY_SITE != primary_site &
           #primary_site != "Any" &
@@ -82,6 +87,7 @@ assign_acmg_tiers <- function(
           primary_site == "Any" ~ as.integer(2),
 
         ## Biomarker site matches primary site of query tumor - weak evidence
+
         # TIER 2
         .data$BM_PRIMARY_SITE == primary_site &
           primary_site != "Any" &

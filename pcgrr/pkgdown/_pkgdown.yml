@@ -26,7 +26,7 @@ navbar:
   bg: info
   structure:
     left:  [installation, running, articles, faq, changelog]
-    right: [search, reference, github]
+    right: [search, github]
   components:
     installation:
       text: Installation

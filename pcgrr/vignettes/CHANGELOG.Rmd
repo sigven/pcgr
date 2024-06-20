@@ -54,6 +54,7 @@ pdiakumis <- user("pdiakumis")
   * NCI Thesaurus
   * Open Targets Platform
   * CIViC
+  * Cancer Biomarkers database (CGI)
   * GENCODE
   * Cancer Gene Census
   * CancerMine

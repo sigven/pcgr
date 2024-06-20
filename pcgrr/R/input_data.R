@@ -628,7 +628,8 @@ load_dna_variants <- function(
               dplyr::select(
                 ref_data[['biomarker']][['variant']],
                 c("VARIANT_ID", "ENTREZGENE","BIOMARKER_SOURCE")),
-              by = c("VARIANT_ID","BIOMARKER_SOURCE")) |>
+              by = c("VARIANT_ID","BIOMARKER_SOURCE"),
+              relationship = "many-to-many") |>
             dplyr::rename(BIOMARKER_MATCH = .data$BIOMARKER_MATCHTYPE) |>
             dplyr::mutate(BIOMARKER_RESOLUTION = dplyr::case_when(
               stringr::str_detect(.data$BIOMARKER_MATCH,"by_cna_segment") ~ "gene",

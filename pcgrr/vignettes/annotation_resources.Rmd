@@ -28,10 +28,6 @@ output: rmarkdown::html_document
   * [CancerMine](https://zenodo.org/record/4925789#.YNT8K5MzY7Q) - Literature-mined database of tumor suppressor genes/proto-oncogenes (v50, March 2023)
   * [Open Targets Platform](https://www.targetvalidation.org/) - Database on disease-target associations, molecularly targeted drugs and tractability aggregated from multiple sources (literature, pathways, mutations) (2024.03)
 
-### Pathway databases
-  * [KEGG PATHWAY Database](http://www.genome.jp/kegg/pathway.htm) - December 21st 2021
-  * [Oncogenic Signaling Pathways - TCGA](https://www.ncbi.nlm.nih.gov/pubmed/29625050) - Sanchez-Vega et al., *Cell*, 2018
-
 ### Notes on variant annotation datasets
 
 #### Data quality
