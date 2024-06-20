@@ -130,12 +130,6 @@ def cli():
     optional_other.add_argument("--debug", action="store_true", help="Print full commands to log")
     optional_other.add_argument("--pcgrr_conda", default="pcgrr", help="pcgrr conda env name (default: %(default)s)")
 
-    # Set locale since apptainer on HPC gives warnings
-    #locale_to_use = utils.get_locale()
-    #os.environ["LANGUAGE"] = locale_to_use
-    #os.environ["LANG"] = locale_to_use
-    #os.environ["LC_ALL"] = locale_to_use
-
     # Parse required and optional arguments
     args = parser.parse_args()
     arg_dict = vars(args)
