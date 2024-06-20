@@ -1147,7 +1147,9 @@ get_dt_tables <- function(
     dplyr::filter(
       !is.na(.data$ACTIONABILITY_TIER) &
         .data$ACTIONABILITY_TIER == tier) |>
-    dplyr::select(-c("ACTIONABILITY_FRAMEWORK"))
+    dplyr::select(-c("ACTIONABILITY_FRAMEWORK",
+                     #"ACTIONABILITY_TIER",
+                     "ACTIONABILITY"))
 
   if(NROW(var_eitems) > 0){
     var_eitems <- var_eitems |>

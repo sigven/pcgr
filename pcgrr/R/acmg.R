@@ -120,7 +120,9 @@ assign_acmg_tiers <- function(
         dplyr::left_join(
           tier_classification,
           by = c("VAR_ID","ENTREZGENE","VARIANT_CLASS")) |>
-        dplyr::mutate(ACMG_TIER2 = dplyr::if_else(
+
+        ## Tumor suppressor/oncogene mutations (tier 3)
+        dplyr::mutate(ACMG_TIER_OTHER_VARS = dplyr::if_else(
           (!is.na(.data$TUMOR_SUPPRESSOR) &
              .data$TUMOR_SUPPRESSOR == TRUE) |
             (!is.na(.data$ONCOGENE) &
@@ -129,25 +131,28 @@ assign_acmg_tiers <- function(
           as.integer(3),
           as.integer(NA)
         )) |>
-        dplyr::mutate(ACMG_TIER2 = dplyr::if_else(
-          is.na(.data$ACMG_TIER2) |
-            (!is.na(.data$ACMG_TIER2) &
-               .data$ACMG_TIER2 != 3) &
+
+        ## Other coding mutations (tier 4)
+        dplyr::mutate(ACMG_TIER_OTHER_VARS = dplyr::if_else(
+          is.na(.data$ACMG_TIER_OTHER_VARS) |
+            #(!is.na(.data$ACMG_TIER_OTHER_VARS) &
+            #   .data$ACMG_TIER_OTHER_VARS != 3) &
             .data$CODING_STATUS == "coding",
           as.integer(4),
-          as.integer(.data$ACMG_TIER2)
+          as.integer(.data$ACMG_TIER_OTHER_VARS)
         )) |>
         dplyr::mutate(ACMG_AMP_TIER = dplyr::if_else(
-          .data$CODING_STATUS == "noncoding",
+          is.na(ACMG_AMP_TIER) &
+            .data$CODING_STATUS == "noncoding",
           as.integer(5),
           as.integer(.data$ACMG_AMP_TIER)
         )) |>
         dplyr::mutate(ACMG_AMP_TIER = dplyr::case_when(
           is.na(.data$ACMG_AMP_TIER) &
-            !is.na(.data$ACMG_TIER2) ~ .data$ACMG_TIER2,
+            !is.na(.data$ACMG_TIER_OTHER_VARS) ~ .data$ACMG_TIER_OTHER_VARS,
           TRUE ~ as.integer(.data$ACMG_AMP_TIER)
         )) |>
-        dplyr::select(-c("ACMG_TIER2")) |>
+        dplyr::select(-c("ACMG_TIER_OTHER_VARS")) |>
         dplyr::arrange(.data$ACMG_AMP_TIER)
     }else{
 
@@ -159,7 +164,7 @@ assign_acmg_tiers <- function(
             by = c("VAR_ID",
                    "ENTREZGENE",
                    "VARIANT_CLASS")) |>
-          dplyr::mutate(ACMG_TIER2 = dplyr::if_else(
+          dplyr::mutate(ACMG_TIER_OTHER_VARS = dplyr::if_else(
             (!is.na(.data$TUMOR_SUPPRESSOR) &
                .data$TUMOR_SUPPRESSOR == TRUE &
                .data$VARIANT_CLASS == "homdel") |
@@ -171,10 +176,10 @@ assign_acmg_tiers <- function(
           )) |>
           dplyr::mutate(ACMG_AMP_TIER = dplyr::case_when(
             is.na(.data$ACMG_AMP_TIER) &
-              !is.na(.data$ACMG_TIER2) ~ .data$ACMG_TIER2,
+              !is.na(.data$ACMG_TIER_OTHER_VARS) ~ .data$ACMG_TIER_OTHER_VARS,
             TRUE ~ as.integer(.data$ACMG_AMP_TIER)
           )) |>
-          dplyr::select(-c("ACMG_TIER2")) |>
+          dplyr::select(-c("ACMG_TIER_OTHER_VARS")) |>
           dplyr::arrange(.data$ACMG_AMP_TIER) |>
           dplyr::distinct()
 
@@ -201,7 +206,8 @@ assign_acmg_tiers <- function(
           as.integer(.data$ACMG_AMP_TIER)
         )) |>
         dplyr::mutate(ACMG_AMP_TIER = dplyr::if_else(
-          .data$CODING_STATUS == "noncoding",
+          is.na(.data$ACMG_AMP_TIER) &
+            .data$CODING_STATUS == "noncoding",
           as.integer(5),
           as.integer(.data$ACMG_AMP_TIER)
         )) |>
