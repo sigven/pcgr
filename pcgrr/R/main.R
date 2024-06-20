@@ -907,15 +907,15 @@ write_report_quarto_html <- function(report = NULL){
       if(file.exists(quarto_input)){
 
         ## make temporary directory for quarto report rendering
-        tmp_quarto_dir <- file.path(
+        tmp_quarto_dir1 <- file.path(
           output_dir,
           paste0('quarto_', stringi::stri_rand_strings(1, 15))
         )
-        pcgrr::mkdir(tmp_quarto_dir)
+        pcgrr::mkdir(tmp_quarto_dir1)
         # files get copied under tmp/templates/
-        file.copy(pcgr_rep_template_path, tmp_quarto_dir, recursive = TRUE, overwrite = TRUE)
+        file.copy(pcgr_rep_template_path, tmp_quarto_dir1, recursive = TRUE, overwrite = TRUE)
         # so now overwrite the variable
-        tmp_quarto_dir <- file.path(tmp_quarto_dir, templates_dir)
+        tmp_quarto_dir <- file.path(tmp_quarto_dir1, templates_dir)
 
         quarto_main_template <-
           file.path(tmp_quarto_dir, "pcgr_quarto_report.qmd")
@@ -970,7 +970,7 @@ write_report_quarto_html <- function(report = NULL){
 
         ## remove temporary quarto directory (if debugging is switched off)
         if(!(settings$conf$debug)){
-          unlink(tmp_quarto_dir, force = TRUE, recursive = TRUE)
+          unlink(c(tmp_quarto_dir, tmp_quarto_dir1), force = TRUE, recursive = TRUE)
         }
         #pcgrr::log4r_info("------")
       }

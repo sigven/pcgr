@@ -5,12 +5,13 @@ on:
     branches:
       - master
       - bundle_update_2023
+      - locale
 env:
   atoken: ${{ secrets.ANACONDA_UPLOAD_TOKEN }}
   recipe_path: conda/recipe
   env_yml_path: conda/env/yml
   env_lock_path: conda/env/lock
-  VERSION: '1.4.1.9016' # versioned by bump2version
+  VERSION: '1.4.1.9019' # versioned by bump2version
 jobs:
   build_pcgrr_conda_pkg:
     # When merging to one of the branches above and the commit message matches
@@ -85,6 +86,7 @@ jobs:
           git commit -m "${MSG}"
           git push
       - name: 🌐 Website publish
+        if: github.ref_name == 'master'
         run: |
           micromamba env create -n pkgdownenv -f ${env_yml_path}/pkgdown.yml
           micromamba activate pkgdownenv
@@ -125,8 +127,8 @@ jobs:
               sha: the_sha
             })
 
-     #- name: 🗑 Free Disk Space
-     #  uses: jlumbroso/free-disk-space@main
+      - name: 🗑 Free Disk Space
+        uses: jlumbroso/free-disk-space@main
       # work with tag from above
       - name: Code checkout
         uses: actions/checkout@v4
@@ -152,9 +154,10 @@ jobs:
             sigven/pcgr:${{ env.VERSION }}
           outputs: type=docker,dest=pcgr_${{ env.VERSION }}.tar
 
+      # Apptainer
       - name: Apptainer setup
         uses: eWaterCycle/setup-apptainer@v2
-      - name: ⚫ Apptainer build
+      - name: 🕹️ Apptainer build
         run: |
           ls -lSha
           df -h

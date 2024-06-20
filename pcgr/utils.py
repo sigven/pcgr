@@ -36,9 +36,9 @@ def warn_message(message, logger):
     logger.warning("")
     logger.warning(message)
     logger.warning("")
- 
+
 def random_id_generator(size = 10, chars = string.ascii_lowercase + string.digits):
-    return ''.join(random.choice(chars) for _ in range(size))   
+    return ''.join(random.choice(chars) for _ in range(size))
 
 #def random_string(length):
 #    letters = string.ascii_lowercase
@@ -166,7 +166,7 @@ def safe_makedir(dname):
     return dname
 
 def sort_bed(unsorted_bed_fname: str, sorted_bed_fname: str, debug = False, logger = None):
-    
+
     ## Sort regions in target BED
     if os.path.exists(unsorted_bed_fname) and os.stat(unsorted_bed_fname).st_size != 0:
         cmd_sort_custom_bed1 = 'egrep \'^[0-9]\' ' + str(unsorted_bed_fname) + \
@@ -197,7 +197,6 @@ def check_file_exists(fname: str, strict = True, logger = None) -> bool:
             return(False)
         else:
             error_message(msg, logger)
-    
     return(True)
 
 def check_tabix_file(fname: str, logger = None) -> bool:
@@ -210,3 +209,4 @@ def check_tabix_file(fname: str, logger = None) -> bool:
         ## check file size is more than zero
         check_file_exists(tabix_file)
     return(True)
+
