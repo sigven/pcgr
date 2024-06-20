@@ -11,6 +11,7 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
       "CLINGEN_VICC_SBP1", 
       "CLINGEN_VICC_SBP2",
       "CLINGEN_VICC_OS3", 
+      "CLINGEN_VICC_OM1",
       "CLINGEN_VICC_OM2",
       "CLINGEN_VICC_OM3",  
       "CLINGEN_VICC_OM4", 
@@ -69,7 +70,7 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
    # 10) "CLINGEN_VICC_OM1"
    ## Located in a critical and well-established part of a functional domain
    ## (active site of an enzyme)
-   ## NOTE: Not used since determination/retrieval of critical protein sites are non-trivial to automate
+   ## NOTE: Here we assume that OM1 is applicable if there is overlap with oncogenic/predictive evidence (CIViC/CGI)
 
    # 11) "CLINGEN_VICC_OM2"
    ## Protein length changes as a result of in-frame deletions/insertions in a
@@ -114,6 +115,7 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
       "MUTATION_HOTSPOT",
       "MUTATION_HOTSPOT_CANCERTYPE",
       "SYMBOL",
+      "BIOMARKER_MATCH",
       "ONCOGENE",
       "ONCOGENE_EVIDENCE",
       "TSG",
@@ -229,7 +231,7 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
             hotspot_mutated_samples['aa_variant']['Any'] = hotspot_mutated_samples['aa_variant']['Any'] + ttype_hotspot_samples_aa
             hotspot_mutated_samples['aa_site']['Any'] = hotspot_mutated_samples['aa_site']['Any'] + ttype_hotspot_samples_site
    
-
+   
    ## The SOP's for assessment of overlap with mutational hotspots do not specify that occurrences should
    ## match the tumor type (example in paper ignores tumor-type matching when looking for number of samples overlapping with hotspot)
    ttype = "Any"
@@ -248,6 +250,29 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
          hotspot_mutated_samples['aa_variant'][ttype] > 0:
             variant_data['CLINGEN_VICC_OP3'] = True
    
+
+   ## For the OM1 criterion ("Located in a critical and well-established part of a functional domain"), we presently
+   ## lack the access to a resource swith such information.  As a simplified means to gather some evidence in this regard,
+   ## we rather base our criteria matching based on existing actionability evidence (predictive/oncogenic), for which variants are presumably 
+   ## located in critical sites of functional domains.
+   if not variant_data['BIOMARKER_MATCH'] is None:
+      
+      ## Split all biomarker evidence into a list
+      biomarker_evidence = variant_data['BIOMARKER_MATCH'].split(',')
+   
+      for eitem in biomarker_evidence:
+         ## Example 'eitem' element:
+         ## cgi|659|CGI1077:Pancreas:Sensitivity/Response:C:Predictive:Somatic|by_hgvsp_principal
+         if ('Predictive' in eitem or 'Oncogenic' in eitem) and \
+            'Somatic' in eitem and \
+            ('by_genomic_coord' in eitem or \
+             'by_hgvsc_principal' in eitem or \
+             'by_hgvsp_principal' in eitem or \
+             'by_codon_principal' in eitem or \
+             'by_aa_region_principal' in eitem):               
+               ## only applicable if OS3 is not set
+               if variant_data['CLINGEN_VICC_OS3'] is False:
+                  variant_data['CLINGEN_VICC_OM1'] = True
 
    if "gnomADe_EAS_AF" in variant_data.keys() and \
       "gnomADe_SAS_AF" in variant_data.keys() and \
@@ -319,42 +344,55 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
    og_score_data['code'] = \
       ['CLINGEN_VICC_SBVS1',
        'CLINGEN_VICC_SBS1',
-      'CLINGEN_VICC_SBP1',
-      'CLINGEN_VICC_SBP2',
-      'CLINGEN_VICC_OVS1',
-      'CLINGEN_VICC_OS3',
-      'CLINGEN_VICC_OM2',
-      'CLINGEN_VICC_OM3',
-      'CLINGEN_VICC_OP1',
-      'CLINGEN_VICC_OP3',
-      'CLINGEN_VICC_OP4']
+       'CLINGEN_VICC_OP4',
+       'CLINGEN_VICC_SBP1',
+       'CLINGEN_VICC_SBP2',
+       'CLINGEN_VICC_OVS1',
+       'CLINGEN_VICC_OS3',
+       'CLINGEN_VICC_OM1',
+       'CLINGEN_VICC_OM2',
+       'CLINGEN_VICC_OM3',
+       'CLINGEN_VICC_OP1',
+       'CLINGEN_VICC_OP3'
+      ]
    og_score_data['category'] = \
-      ['clinpop','clinpop',
-      'funccomp','funcvar',
-      'funcvar','funcvar',
-      'funcvar','funcvar',
-      'funccomp','funcvar',
-      'clinpop']
+      ['clinpop',
+       'clinpop', 
+       'clinpop',
+       'funccomp',
+       'funcvar',
+       'funcvar',
+       'funcvar',
+       'funcvar',
+       'funcvar',
+       'funcvar',
+       'funcvar',
+       'funccomp']
    og_score_data['pole'] = \
-      ['B','B','B','B',
-      'P','P','P','P',
-      'P','P','P']
+      ['B','B',
+       'P','B',
+       'B','P',
+       'P','P',
+       'P','P',
+       'P','P']
    
    og_score_data['description'] = \
       ['Very high MAF (> 0.05 in gnomAD - any five major continental pops)',
       'High MAF (> 0.01 in gnomAD - any five major continental pops)',
+      'Absent from controls (gnomAD) / very low MAF ( < 0.0001 in all five major subpopulations)',
       'Multiple lines (>=6) of computational evidence support a benign effect on the gene or gene product - from dbNSFP',
       'Silent and intronic changes outside of the consensus splice site',
       'Null variant - predicted as LoF - in bona fide tumor suppressor gene',
       'Located in a mutation hotspot (cancerhotspots.org). >= 50 samples with a  variant at AA position, >= 10 samples with same AA change',
+      'Presumably critical site of functional domain - based on indirect evidence from overlap with predictive biomarkers',
       'Protein length changes from in-frame dels/ins in known oncogene/tumor suppressor genes or stop-loss variants in a tumor suppressor gene',
       'Located in a mutation hotspot (cancerhotspots.org). < 50 samples with a variant at AA position, >= 10 samples with same AA change.',
       'Multiple lines (>=6) of computational evidence support a damaging effect on the gene or gene product - from dbNSFP',
-      'Located in a mutation hotspot (cancerhotspots.org). < 10 samples with the same amino acid change.',
-      'Absent from controls (gnomAD) / very low MAF ( < 0.0001 in all five major subpopulations)']
+      'Located in a mutation hotspot (cancerhotspots.org). < 10 samples with the same amino acid change.'
+      ]
    
    og_score_data['score'] = \
-      [-8, -4, -1, -1, 8, 4, 2, 2, 1, 1, 1]
+      [-8, -4, 1, -1, -1, 8, 4, 2, 2, 2, 1, 1]
    
    i = 0
    oncogenicity_scores = {}
@@ -402,8 +440,8 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
    likely_benign_lower_limit = -6
    benign_upper_limit = -7
    likely_oncogenic_lower_limit = 4
-   likely_oncogenic_upper_limit = 9
-   oncogenic_lower_limit = 10
+   likely_oncogenic_upper_limit = 8
+   oncogenic_lower_limit = 9
 
    variant_data['ONCOGENICITY_SCORE'] = onc_score_benign + onc_score_pathogenic
    if variant_data['ONCOGENICITY_SCORE'] <= likely_benign_upper_limit and \
