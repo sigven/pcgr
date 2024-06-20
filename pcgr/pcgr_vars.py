@@ -2,19 +2,24 @@
 
 from pcgr._version import __version__
 
+## Version - software and bundle
 PCGR_VERSION = __version__
 DB_VERSION = '20240612'
 
-## MISCELLANEOUS
+## Miscellaneous settings
 NCBI_BUILD_MAF = 'GRCh38'
 MAX_VARIANTS_FOR_REPORT = 500_000
 CODING_EXOME_SIZE_MB = 34.0
-RECOMMENDED_N_MUT_SIGNATURE = 200
 
-## GENCODE
+## Mutational signature settings
+RECOMMENDED_N_MUT_SIGNATURE = 200
+MINIMUM_N_MUT_SIGNATURE = 100
+MAX_SIGNATURE_PREVALENCE = 20
+
+## GENCODE versions
 GENCODE_VERSION = {'grch38': 46,'grch37': 19}
 
-## vcfanno
+## vcfanno settings
 VCFANNO_MAX_PROC = 15
 
 ## VEP settings/versions
@@ -29,6 +34,11 @@ VEP_PICK_CRITERIA = ['mane_select','mane_plus_clinical','canonical','appris','ts
 ## Gene expression comparative analysis resources
 EXPRESSION_DB_SOURCES = ['tcga','depmap','treehouse']
 
+## Sample identifier length (max/min allowed)
+SAMPLE_ID_MAX_LENGTH = 40
+SAMPLE_ID_MIN_LENGTH = 3
+
+## Primary tumor sites - PCGR
 tsites = {
     0: 'Any',
     1: 'Adrenal Gland',
@@ -65,6 +75,7 @@ tsites = {
 
 tumor_sites = '\n'.join([f'{k} = {tsites[k]}' for k in tsites]) # for displaying in help
 
+## Genomics England panels - cancer predisposition (PanelApp)
 GE_panels = {
       0: "CPSR exploratory cancer predisposition panel (PanelApp genes / TCGA's germline study / Cancer Gene Census / Other)",
       1: "Adult solid tumours cancer susceptibility (GEP)",
@@ -160,6 +171,7 @@ VEP_consequence_rank = {
     'sequence_variant': 41
 }
 
+## Regular expressions on the VEP CSQ (consequence) that targets different types of variants
 CSQ_MISSENSE_PATTERN = r"^missense_variant"
 CSQ_CODING_PATTERN = \
     r"^(stop_(lost|gained)|start_lost|frameshift_|missense_|splice_(donor|acceptor)|protein_altering|inframe_)"
@@ -172,6 +184,7 @@ CSQ_SPLICE_DONOR_PATTERN = \
 CSQ_LOF_PATTERN = r"(stop_gained|frameshift|splice_acceptor_variant|splice_donor_variant|start_lost)"
 
 
+## TCGA tumor cohorts
 DISEASE_COHORTS = ['ACC','BLCA','BRCA','CESC',
                 'CHOL','COAD','DLBC','ESCA',
                 'GBM','HNSC','KICH','KIRC',
@@ -181,6 +194,7 @@ DISEASE_COHORTS = ['ACC','BLCA','BRCA','CESC',
                 'SARC','SKCM','STAD','TGCT',
                 'THCA','THYM','UCEC','UCS','UVM']
 
+## Tumor site to TCGA cohort mapping
 SITE_TO_DISEASE = {
     'Lung': ['TCGA_LUAD','TCGA_LUSC'],
     'Breast': ['TCGA_BRCA'],

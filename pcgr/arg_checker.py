@@ -33,11 +33,6 @@ def verify_args(arg_dict):
             )
             error_message(err_msg, logger)
 
-    # check if input is cancer cell line, requires --tumor_only
-    #if arg_dict['cell_line'] and not arg_dict['tumor_only']:
-    #    err_msg = 'Analysis of cell line (--cell_line) needs option --tumor_only'
-    #    error_message(err_msg, logger)
-
     # check that tumor primary site/type is set correctly (integer between 0 and 30)
     if arg_dict['tsite'] > max(pcgr_vars.tsites.keys()) or arg_dict['tsite'] < 0:
         err_msg = f"Tumor type code ('--tumor_site' = {arg_dict['tsite']}) must be within [0, {max(pcgr_vars.tsites.keys())}]"
@@ -78,7 +73,7 @@ def verify_args(arg_dict):
         error_message(err_msg, logger)
         
     if int(arg_dict['tmb_dp_min']) > 0 and (int(arg_dict['tmb_dp_min']) < int(arg_dict['tumor_dp_min'])):
-        err_msg = f"Minimum sequencing depth (tumor) for TMB calculation ('tmb_dp_min' = {str(arg_dict['tmb_dp_min'])}) must be ",
+        err_msg = f"Minimum sequencing depth (tumor) for TMB calculation ('tmb_dp_min' = {str(arg_dict['tmb_dp_min'])}) must be "
         err_msg += f"greater or equal to minimum sequencing depth tumor {str(arg_dict['tumor_dp_min'])} (i.e. filter for variant inclusion in report)"
         error_message(err_msg, logger)
 
@@ -87,18 +82,20 @@ def verify_args(arg_dict):
         error_message(err_msg, logger)
         
     if float(arg_dict['tmb_af_min']) > 0 and (float(arg_dict['tmb_af_min']) < float(arg_dict['tumor_af_min'])):
-        err_msg = f"Minimum AF (tumor) for TMB calculation ('tmb_af_min' = {str(arg_dict['tmb_af_min'])}) must be ",
+        err_msg = f"Minimum AF (tumor) for TMB calculation ('tmb_af_min' = {str(arg_dict['tmb_af_min'])}) must be "
         err_msg += f"greater or equal to minimum AF tumor {str(arg_dict['tumor_dp_min'])} (i.e. filter for variant inclusion in report)"
         error_message(err_msg, logger)
 
     # Check that coding target size region of sequencing assay is set correctly
     if float(arg_dict['effective_target_size_mb']) < 0 or float(arg_dict['effective_target_size_mb']) > float(pcgr_vars.CODING_EXOME_SIZE_MB):
         err_msg = (
-            f"Coding target size region in Mb ('--effective_target_size_mb' = {arg_dict['effective_target_size_mb']}) is not ",
+            f"Coding target size region in Mb ('--effective_target_size_mb' = {arg_dict['effective_target_size_mb']}) is not "
             f"positive or larger than the approximate size of the coding human genome ({float(pcgr_vars.CODING_EXOME_SIZE_MB)} Mb))")
         error_message(err_msg, logger)
     if float(arg_dict['effective_target_size_mb']) < 1:
-        warn_msg = f"Coding target size region in Mb ('--effective_target_size_mb' = {arg_dict['effective_target_size_mb']}) must be greater than 1 Mb for mutational burden estimate to be robust"
+        warn_msg = (
+            f"Coding target size region in Mb ('--effective_target_size_mb' = {arg_dict['effective_target_size_mb']}) must be "
+            "greater than 1 Mb for mutational burden estimate to be robust")
         warn_message(warn_msg, logger)
     if float(arg_dict['effective_target_size_mb']) < float(pcgr_vars.CODING_EXOME_SIZE_MB) and arg_dict['assay'] != 'TARGETED':
         warn_msg = (
@@ -115,20 +112,25 @@ def verify_args(arg_dict):
         warn_message(warn_msg, logger)
         arg_dict['estimate_msi'] = 0
 
-    # minimum number of mutations required for mutational signature reconstruction cannot be less than 100 (somewhat arbitrary lower threshold, recommended value is 200)
+    # minimum number of mutations required for mutational signature re-fitting cannot be less than 100 
+    # somewhat arbitrary min threshold), recommended value is 200)
     if int(arg_dict['min_mutations_signatures']) < int(pcgr_vars.RECOMMENDED_N_MUT_SIGNATURE):
+        if int(arg_dict['min_mutations_signatures']) < int(pcgr_vars.MINIMUM_N_MUT_SIGNATURE):
+            err_msg = (
+                f"Minimum number of mutations required for mutational signature analysis ('--min_mutations_signatures' = "
+                f"{arg_dict['min_mutations_signatures']}) must be >= {pcgr_vars.MINIMUM_N_MUT_SIGNATURE}")
+            error_message(err_msg, logger)
         warn_msg = (
-            f"Minimum number of mutations required for mutational signature analysis ('--min_mutations_signatures' ",
+            f"Minimum number of mutations required for mutational signature analysis ('--min_mutations_signatures' "
             f"= {arg_dict['min_mutations_signatures']}) is less than the recommended number (n = {pcgr_vars.RECOMMENDED_N_MUT_SIGNATURE})")
         warn_message(warn_msg, logger)
-        if int(arg_dict['min_mutations_signatures']) < 100:
-            err_msg = f"Minimum number of mutations required for mutational signature analysis ('--min_mutations_signatures' = {arg_dict['min_mutations_signatures']}) must be >= 100"
-            error_message(err_msg, logger)
+        
 
-    if float(arg_dict['prevalence_reference_signatures']) > 20 or float(arg_dict['prevalence_reference_signatures']) < 0:
+    if float(arg_dict['prevalence_reference_signatures']) > int(pcgr_vars.MAX_SIGNATURE_PREVALENCE) or \
+        float(arg_dict['prevalence_reference_signatures']) < 0:
         err_msg = (
-            f"Prevalence of reference signatures must be above zero and less than 20 ('--prevalence_reference_signatures' ",
-            f"= {arg_dict['prevalence_reference_signatures']}")
+            f"Prevalence of reference signatures (percent) must be above zero and less than {pcgr_vars.MAX_SIGNATURE_PREVALENCE} "
+            f"'--prevalence_reference_signatures' = {arg_dict['prevalence_reference_signatures']}")
         error_message(err_msg, logger)
 
     # if MSI status is to be estimated, mutational burden must be turned on
@@ -529,8 +531,13 @@ def verify_required_args(arg_dict: dict, logger = None):
         err_msg = f"Required argument '--sample_id' has no/undefined value ({arg_dict['sample_id']})."
         error_message(err_msg, logger)
 
-    if len(arg_dict['sample_id']) <= 2 or len(arg_dict['sample_id']) > 37:
-        err_msg = f"Sample name identifier ('--sample_id' = {arg_dict['sample_id']}) must be between 2 and 35 characters long"
+    if len(arg_dict['sample_id']) < pcgr_vars.SAMPLE_ID_MIN_LENGTH or \
+        len(arg_dict['sample_id']) > pcgr_vars.SAMPLE_ID_MAX_LENGTH:
+        err_msg = (
+            f"Sample name identifier ('--sample_id' = {arg_dict['sample_id']}) must be between "
+            f"{pcgr_vars.SAMPLE_ID_MIN_LENGTH} and {pcgr_vars.SAMPLE_ID_MAX_LENGTH} characters long, "
+            f"current length is {len(arg_dict['sample_id'])}"
+        )
         error_message(err_msg, logger)
     
     return(0)
