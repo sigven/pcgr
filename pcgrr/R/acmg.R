@@ -74,11 +74,12 @@ assign_acmg_tiers <- function(
 
         ## Biomarker site does not match primary site of query tumor - strong evidence
         # TIER 2
-        .data$BM_PRIMARY_SITE != primary_site &
+        (.data$BM_PRIMARY_SITE != primary_site &
           #primary_site != "Any" &
           stringr::str_detect(
             .data$BM_EVIDENCE_LEVEL, "^(A|B)"
-          ) ~ as.integer(2),
+          )) |
+          primary_site == "Any" ~ as.integer(2),
 
         ## Biomarker site matches primary site of query tumor - weak evidence
         # TIER 2
