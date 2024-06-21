@@ -123,6 +123,7 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
       "LOSS_OF_FUNCTION",
       "INTRON_POSITION",
       "EXON_POSITION",
+      "CODING_STATUS",
       "gnomADe_EAS_AF",
       "gnomADe_NFE_AF",
       "gnomADe_AFR_AF",
@@ -252,9 +253,9 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
    
 
    ## For the OM1 criterion ("Located in a critical and well-established part of a functional domain"), we presently
-   ## lack the access to a resource swith such information.  As a simplified means to gather some evidence in this regard,
-   ## we rather base our criteria matching based on existing actionability evidence (predictive/oncogenic), for which variants are presumably 
-   ## located in critical sites of functional domains.
+   ## lack the access to a resource with such information. As a simplified means to gather some evidence in this regard,
+   ## we rather base our criteria matching based on existing actionability evidence (predictive/oncogenic), for which 
+   ## variants are presumably located in critical sites of functional domains (in that sense, indirect evidence for OM1)
    if not variant_data['BIOMARKER_MATCH'] is None:
       
       ## Split all biomarker evidence into a list
@@ -270,6 +271,17 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
              'by_hgvsp_principal' in eitem or \
              'by_codon_principal' in eitem or \
              'by_aa_region_principal' in eitem):               
+               ## only applicable if OS3 is not set
+               if variant_data['CLINGEN_VICC_OS3'] is False:
+                  variant_data['CLINGEN_VICC_OM1'] = True
+         
+         ## Catch prognostic/diagnostic non-coding variants (e.g. TERT) - these will rank at the top
+         ## with respect to oncogenicity (altough not classified as oncogenic in the strict sense)
+         if ('Diagnostic' in eitem or 'Prognostic' in eitem or 'Predictive' in eitem or 'Oncogenic' in eitem) and \
+            variant_data['CODING_STATUS'] == 'noncoding' and \
+            'Somatic' in eitem and \
+            ('by_genomic_coord' in eitem or \
+             'by_hgvsc_principal' in eitem):
                ## only applicable if OS3 is not set
                if variant_data['CLINGEN_VICC_OS3'] is False:
                   variant_data['CLINGEN_VICC_OM1'] = True
