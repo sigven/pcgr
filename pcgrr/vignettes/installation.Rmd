@@ -16,7 +16,7 @@ require(glue, include.only = "glue")
 ```{r vars, echo=FALSE}
 Sys.setenv(VEP_VERSION = "112")
 Sys.setenv(PCGR_VERSION = "1.4.1.9019")
-Sys.setenv(BUNDLE_VERSION = "20240612")
+Sys.setenv(BUNDLE_VERSION = "20240621")
 VEP_VERSION <- Sys.getenv("VEP_VERSION")
 PCGR_VERSION <- Sys.getenv("PCGR_VERSION")
 BUNDLE_VERSION <- Sys.getenv("BUNDLE_VERSION")
@@ -202,12 +202,14 @@ docker container run -it --rm \
     -v /Users/you/dir1/pcgr_outputs:/mnt/pcgr_outputs \
     sigven/pcgr:${PCGR_VERSION} \
     pcgr \
-      --input_vcf "/mnt/pcgr_inputs/tumor_sampleB.BRCA.vcf.gz" \
+      --input_vcf "/mnt/pcgr_inputs/T001-BRCA.grch38.vcf.gz" \
       --vep_dir "/mnt/.vep" \
       --refdata_dir "/mnt/bundle" \
-      --output_dir "/mnt/pcgr_output_sampleB" \
+      --output_dir "/mnt/pcgr_outputs" \
       --genome_assembly "grch38" \
       --sample_id "SAMPLE_B" \
+      --tumor_dp_tag "TDP" \
+      --tumor_af_tag "TAF" \
       --assay "WGS" \
       --vcf2maf
 ```
@@ -249,5 +251,7 @@ apptainer exec \
     --genome_assembly "grch38" \
     --sample_id "SAMPLE_B" \
     --assay "WGS" \
+    --tumor_dp_tag "TDP" \
+    --tumor_af_tag "TAF" \
     --vcf2maf
 ```

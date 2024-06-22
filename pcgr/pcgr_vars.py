@@ -4,7 +4,7 @@ from pcgr._version import __version__
 
 ## Version - software and bundle
 PCGR_VERSION = __version__
-DB_VERSION = '20240612'
+DB_VERSION = '20240621'
 
 ## Miscellaneous settings
 NCBI_BUILD_MAF = 'GRCh38'

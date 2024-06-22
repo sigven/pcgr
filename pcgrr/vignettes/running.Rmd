@@ -307,7 +307,7 @@ pcgr \
     --assay WES \
     --vcf2maf \
     --estimate_signatures \
-    --estimate_msi_status \
+    --estimate_msi \
     --estimate_tmb \
     --force_overwrite
 ```
