@@ -167,6 +167,21 @@ def calculate_tmb(variant_set: pd.DataFrame, tumor_dp_min: int, tumor_af_min: fl
             else:
                 logger.info(f"Cannot filter on sequencing depth - 'DP_TUMOR' contains missing values")
         
+        regex_data = {}
+        regex_data['missense_only'] = pcgr_vars.CSQ_MISSENSE_PATTERN
+        regex_data['coding_and_silent'] = pcgr_vars.CSQ_CODING_SILENT_PATTERN
+        regex_data['coding_non_silent'] = pcgr_vars.CSQ_CODING_PATTERN
+        
+        tmb_count_data = {}
+        tmb_count_data['missense_only'] = 0
+        tmb_count_data['coding_and_silent'] = 0
+        tmb_count_data['coding_non_silent'] = 0
+        
+        tmb_estimates = {}
+        tmb_estimates['missense_only'] = 0
+        tmb_estimates['coding_and_silent'] = 0
+        tmb_estimates['coding_non_silent'] = 0
+        
         if tmb_data_set.empty is False:
             counts_missense_only = len(tmb_data_set.loc[tmb_data_set['CONSEQUENCE'].str.match(pcgr_vars.CSQ_MISSENSE_PATTERN),:])
             counts_coding_and_silent = len(tmb_data_set.loc[tmb_data_set['CONSEQUENCE'].str.match(pcgr_vars.CSQ_CODING_SILENT_PATTERN),:])
@@ -177,36 +192,32 @@ def calculate_tmb(variant_set: pd.DataFrame, tumor_dp_min: int, tumor_af_min: fl
             tmb_count_data['coding_and_silent'] = counts_coding_and_silent
             tmb_count_data['coding_non_silent'] = counts_coding_non_silent
             
-            regex_data = {}
-            regex_data['missense_only'] = pcgr_vars.CSQ_MISSENSE_PATTERN
-            regex_data['coding_and_silent'] = pcgr_vars.CSQ_CODING_SILENT_PATTERN
-            regex_data['coding_non_silent'] = pcgr_vars.CSQ_CODING_PATTERN
-            
             tmb_estimates = {}
             tmb_estimates['missense_only'] = round(float(counts_missense_only / target_size_mb), 4)
             tmb_estimates['coding_and_silent'] = round(float(counts_coding_and_silent / target_size_mb), 4)
             tmb_estimates['coding_non_silent'] = round(float(counts_coding_non_silent / target_size_mb), 4)
+        
             
-            tmb_recs = [[sample_id, n_rows_raw, 'TMB_missense_only', regex_data['missense_only'], target_size_mb, 
-                         tumor_dp_min, tumor_af_min, tmb_count_data['missense_only'], tmb_estimates['missense_only'], 'mutations/Mb'],
-                        [sample_id, n_rows_raw, 'TMB_coding_and_silent', regex_data['coding_and_silent'], target_size_mb, 
-                         tumor_dp_min, tumor_af_min, tmb_count_data['coding_and_silent'], tmb_estimates['coding_and_silent'], 'mutations/Mb'],
-                        [sample_id, n_rows_raw, 'TMB_coding_non_silent', regex_data['coding_non_silent'], target_size_mb, 
-                         tumor_dp_min, tumor_af_min, tmb_count_data['coding_non_silent'], tmb_estimates['coding_non_silent'], 'mutations/Mb']]
+        tmb_recs = [[sample_id, n_rows_raw, 'TMB_missense_only', regex_data['missense_only'], target_size_mb, 
+                    tumor_dp_min, tumor_af_min, tmb_count_data['missense_only'], tmb_estimates['missense_only'], 'mutations/Mb'],
+                    [sample_id, n_rows_raw, 'TMB_coding_and_silent', regex_data['coding_and_silent'], target_size_mb, 
+                    tumor_dp_min, tumor_af_min, tmb_count_data['coding_and_silent'], tmb_estimates['coding_and_silent'], 'mutations/Mb'],
+                    [sample_id, n_rows_raw, 'TMB_coding_non_silent', regex_data['coding_non_silent'], target_size_mb, 
+                    tumor_dp_min, tumor_af_min, tmb_count_data['coding_non_silent'], tmb_estimates['coding_non_silent'], 'mutations/Mb']]
             
-            df = pd.DataFrame(
-                tmb_recs, 
-                columns=['sample_id', 
-                         'n_somatic_variants', 
-                         'tmb_measure', 
-                         'tmb_csq_regex',
-                         'tmb_target_size_mb', 
-                         'tmb_dp_min', 
-                         'tmb_af_min',
-                         'tmb_n_variants', 
-                         'tmb_estimate',
-                         'tmb_unit'])
-            df.to_csv(tmb_fname, sep="\t", header=True, index=False)
+        df = pd.DataFrame(
+            tmb_recs, 
+            columns=['sample_id', 
+                    'n_somatic_variants', 
+                    'tmb_measure', 
+                    'tmb_csq_regex',
+                    'tmb_target_size_mb', 
+                    'tmb_dp_min', 
+                    'tmb_af_min',
+                    'tmb_n_variants', 
+                    'tmb_estimate',
+                    'tmb_unit'])
+        df.to_csv(tmb_fname, sep="\t", header=True, index=False)
 
 def clean_annotations(variant_set: pd.DataFrame, yaml_data: dict, logger) -> pd.DataFrame:
     
