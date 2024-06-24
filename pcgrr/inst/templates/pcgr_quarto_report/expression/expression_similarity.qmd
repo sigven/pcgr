@@ -15,24 +15,26 @@ dt_similarity_tcga <- data.frame()
 
 for(cohort in names(pcg_report[['content']]$expression[['similarity_analysis']])){
   if(grepl('tcga', cohort)){
-    tcga_cohort <- 
-      pcg_report[['content']]$expression[['similarity_analysis']][[cohort]] |>
-      dplyr::mutate(CORR = round(CORR, digits = 5)) |>
-      dplyr::select(-c("EXT_SAMPLE_ID2","PROTEIN_CODING_ONLY")) |>
-      dplyr::select(
-        EXT_SAMPLE_ID,
-        EXT_SAMPLE_NAME,
-        CORR,
-        EXT_PRIMARY_DIAGNOSIS,
-        EXT_PRIMARY_SITE,
-        EXT_SAMPLE_TYPE,
-        EXT_AGE_CATEGORY,
-        EXT_GENDER,
-        dplyr::everything()
-      )
-    
-    dt_similarity_tcga <- dt_similarity_tcga |>
-      dplyr::bind_rows(tcga_cohort)
+    if(NROW(pcg_report[['content']]$expression[['similarity_analysis']][[cohort]]) > 0){
+      tcga_cohort <- 
+        pcg_report[['content']]$expression[['similarity_analysis']][[cohort]] |>
+        dplyr::mutate(CORR = round(CORR, digits = 5)) |>
+        dplyr::select(-c("EXT_SAMPLE_ID2","PROTEIN_CODING_ONLY")) |>
+        dplyr::select(
+          EXT_SAMPLE_ID,
+          EXT_SAMPLE_NAME,
+          CORR,
+          EXT_PRIMARY_DIAGNOSIS,
+          EXT_PRIMARY_SITE,
+          EXT_SAMPLE_TYPE,
+          EXT_AGE_CATEGORY,
+          EXT_GENDER,
+          dplyr::everything()
+        )
+      
+      dt_similarity_tcga <- dt_similarity_tcga |>
+        dplyr::bind_rows(tcga_cohort)
+    }
   }
 }
 
