@@ -1,9 +1,9 @@
-pandoc: 2.19.2
-pkgdown: 2.0.7
+pandoc: 3.1.11.1
+pkgdown: 2.0.9
 pkgdown_sha: ~
 articles:
-  CHANGELOG: CHANGELOG.html
   annotation_resources: annotation_resources.html
+  CHANGELOG: CHANGELOG.html
   developers: developers.html
   faq: faq.html
   input: input.html
@@ -12,7 +12,7 @@ articles:
   primary_tumor_sites: primary_tumor_sites.html
   running: running.html
   variant_classification: variant_classification.html
-last_built: 2023-03-14T02:42Z
+last_built: 2024-06-26T15:19Z
 urls:
   reference: https://sigven.github.io/pcgr/reference
   article: https://sigven.github.io/pcgr/articles

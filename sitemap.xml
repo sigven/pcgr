@@ -49,7 +49,16 @@
     <loc>https://sigven.github.io/pcgr/index.html</loc>
   </url>
   <url>
+    <loc>https://sigven.github.io/pcgr/reference/af_distribution.html</loc>
+  </url>
+  <url>
     <loc>https://sigven.github.io/pcgr/reference/append_annotation_links.html</loc>
+  </url>
+  <url>
+    <loc>https://sigven.github.io/pcgr/reference/append_cancer_association_ranks.html</loc>
+  </url>
+  <url>
+    <loc>https://sigven.github.io/pcgr/reference/append_cancer_gene_evidence.html</loc>
   </url>
   <url>
     <loc>https://sigven.github.io/pcgr/reference/append_dbmts_var_link.html</loc>
@@ -64,13 +73,7 @@
     <loc>https://sigven.github.io/pcgr/reference/append_gwas_citation_phenotype.html</loc>
   </url>
   <url>
-    <loc>https://sigven.github.io/pcgr/reference/append_otargets_pheno_link.html</loc>
-  </url>
-  <url>
-    <loc>https://sigven.github.io/pcgr/reference/append_pfeature_descriptions.html</loc>
-  </url>
-  <url>
-    <loc>https://sigven.github.io/pcgr/reference/append_read_support.html</loc>
+    <loc>https://sigven.github.io/pcgr/reference/append_targeted_drug_annotations.html</loc>
   </url>
   <url>
     <loc>https://sigven.github.io/pcgr/reference/append_tcga_var_link.html</loc>
@@ -79,7 +82,7 @@
     <loc>https://sigven.github.io/pcgr/reference/append_tfbs_annotation.html</loc>
   </url>
   <url>
-    <loc>https://sigven.github.io/pcgr/reference/append_ucsc_segment_link.html</loc>
+    <loc>https://sigven.github.io/pcgr/reference/assign_acmg_tiers.html</loc>
   </url>
   <url>
     <loc>https://sigven.github.io/pcgr/reference/assign_germline_popfreq_status.html</loc>
@@ -94,10 +97,7 @@
     <loc>https://sigven.github.io/pcgr/reference/assign_somatic_germline_evidence.html</loc>
   </url>
   <url>
-    <loc>https://sigven.github.io/pcgr/reference/assign_tier1_tier2_acmg.html</loc>
-  </url>
-  <url>
-    <loc>https://sigven.github.io/pcgr/reference/assign_tier1_tier2_acmg_cna.html</loc>
+    <loc>https://sigven.github.io/pcgr/reference/biomarker_evidence.html</loc>
   </url>
   <url>
     <loc>https://sigven.github.io/pcgr/reference/cancer_phenotypes_regex.html</loc>
@@ -106,22 +106,22 @@
     <loc>https://sigven.github.io/pcgr/reference/check_common_colnames.html</loc>
   </url>
   <url>
+    <loc>https://sigven.github.io/pcgr/reference/check_file_exists.html</loc>
+  </url>
+  <url>
     <loc>https://sigven.github.io/pcgr/reference/clinvar_germline_status.html</loc>
   </url>
   <url>
     <loc>https://sigven.github.io/pcgr/reference/color_palette.html</loc>
   </url>
   <url>
+    <loc>https://sigven.github.io/pcgr/reference/cosmic_sbs_signatures.html</loc>
+  </url>
+  <url>
     <loc>https://sigven.github.io/pcgr/reference/cosmic_somatic_status.html</loc>
   </url>
   <url>
-    <loc>https://sigven.github.io/pcgr/reference/cpsr_acmg.html</loc>
-  </url>
-  <url>
-    <loc>https://sigven.github.io/pcgr/reference/custom_bed_genes.html</loc>
-  </url>
-  <url>
-    <loc>https://sigven.github.io/pcgr/reference/data_integrity_check.html</loc>
+    <loc>https://sigven.github.io/pcgr/reference/data_coltype_defs.html</loc>
   </url>
   <url>
     <loc>https://sigven.github.io/pcgr/reference/dbsnp_germline_status.html</loc>
@@ -133,13 +133,19 @@
     <loc>https://sigven.github.io/pcgr/reference/detect_vcf_sample_name.html</loc>
   </url>
   <url>
-    <loc>https://sigven.github.io/pcgr/reference/determine_genotype.html</loc>
-  </url>
-  <url>
     <loc>https://sigven.github.io/pcgr/reference/df_string_replace.html</loc>
   </url>
   <url>
+    <loc>https://sigven.github.io/pcgr/reference/dt_display.html</loc>
+  </url>
+  <url>
     <loc>https://sigven.github.io/pcgr/reference/effect_prediction_algos.html</loc>
+  </url>
+  <url>
+    <loc>https://sigven.github.io/pcgr/reference/expand_biomarker_items.html</loc>
+  </url>
+  <url>
+    <loc>https://sigven.github.io/pcgr/reference/export_quarto_evars.html</loc>
   </url>
   <url>
     <loc>https://sigven.github.io/pcgr/reference/filter_eitems_by_site.html</loc>
@@ -151,10 +157,10 @@
     <loc>https://sigven.github.io/pcgr/reference/generate_annotation_link.html</loc>
   </url>
   <url>
-    <loc>https://sigven.github.io/pcgr/reference/generate_pcgr_report.html</loc>
+    <loc>https://sigven.github.io/pcgr/reference/generate_report.html</loc>
   </url>
   <url>
-    <loc>https://sigven.github.io/pcgr/reference/generate_report_data_cna.html</loc>
+    <loc>https://sigven.github.io/pcgr/reference/generate_report_data_expression.html</loc>
   </url>
   <url>
     <loc>https://sigven.github.io/pcgr/reference/generate_report_data_kataegis.html</loc>
@@ -166,10 +172,7 @@
     <loc>https://sigven.github.io/pcgr/reference/generate_report_data_rainfall.html</loc>
   </url>
   <url>
-    <loc>https://sigven.github.io/pcgr/reference/generate_report_data_signatures_mp.html</loc>
-  </url>
-  <url>
-    <loc>https://sigven.github.io/pcgr/reference/generate_report_data_snv_indel.html</loc>
+    <loc>https://sigven.github.io/pcgr/reference/generate_report_data_signatures.html</loc>
   </url>
   <url>
     <loc>https://sigven.github.io/pcgr/reference/generate_report_data_tmb.html</loc>
@@ -178,49 +181,28 @@
     <loc>https://sigven.github.io/pcgr/reference/generate_report_data_trials.html</loc>
   </url>
   <url>
-    <loc>https://sigven.github.io/pcgr/reference/generate_report_data_tumor_only.html</loc>
-  </url>
-  <url>
-    <loc>https://sigven.github.io/pcgr/reference/generate_report_data_value_box.html</loc>
-  </url>
-  <url>
     <loc>https://sigven.github.io/pcgr/reference/generate_tier_tsv.html</loc>
   </url>
   <url>
-    <loc>https://sigven.github.io/pcgr/reference/get_calls.html</loc>
+    <loc>https://sigven.github.io/pcgr/reference/germline_filter_levels.html</loc>
   </url>
   <url>
     <loc>https://sigven.github.io/pcgr/reference/get_clin_assocs_cna.html</loc>
   </url>
   <url>
-    <loc>https://sigven.github.io/pcgr/reference/get_clin_assocs_snv_indel.html</loc>
+    <loc>https://sigven.github.io/pcgr/reference/get_dt_tables.html</loc>
   </url>
   <url>
-    <loc>https://sigven.github.io/pcgr/reference/get_cna_cytoband.html</loc>
-  </url>
-  <url>
-    <loc>https://sigven.github.io/pcgr/reference/get_cna_overlapping_transcripts.html</loc>
+    <loc>https://sigven.github.io/pcgr/reference/get_excel_sheets.html</loc>
   </url>
   <url>
     <loc>https://sigven.github.io/pcgr/reference/get_genome_obj.html</loc>
   </url>
   <url>
-    <loc>https://sigven.github.io/pcgr/reference/get_oncogene_tsgene_target_sets.html</loc>
-  </url>
-  <url>
     <loc>https://sigven.github.io/pcgr/reference/get_ordinary_chromosomes.html</loc>
   </url>
   <url>
-    <loc>https://sigven.github.io/pcgr/reference/get_population_tag.html</loc>
-  </url>
-  <url>
     <loc>https://sigven.github.io/pcgr/reference/get_prevalent_site_signatures.html</loc>
-  </url>
-  <url>
-    <loc>https://sigven.github.io/pcgr/reference/get_proper_maf_alleles.html</loc>
-  </url>
-  <url>
-    <loc>https://sigven.github.io/pcgr/reference/get_valid_chromosome_segments.html</loc>
   </url>
   <url>
     <loc>https://sigven.github.io/pcgr/reference/get_valid_chromosomes.html</loc>
@@ -229,25 +211,31 @@
     <loc>https://sigven.github.io/pcgr/reference/het_af_germline_status.html</loc>
   </url>
   <url>
-    <loc>https://sigven.github.io/pcgr/reference/heterozygous_states.html</loc>
-  </url>
-  <url>
     <loc>https://sigven.github.io/pcgr/reference/hom_af_status.html</loc>
   </url>
   <url>
-    <loc>https://sigven.github.io/pcgr/reference/homozygous_states.html</loc>
+    <loc>https://sigven.github.io/pcgr/reference/immune_celltypes.html</loc>
   </url>
   <url>
     <loc>https://sigven.github.io/pcgr/reference/index.html</loc>
   </url>
   <url>
-    <loc>https://sigven.github.io/pcgr/reference/init_cna_content.html</loc>
+    <loc>https://sigven.github.io/pcgr/reference/init_cna_vstats.html</loc>
+  </url>
+  <url>
+    <loc>https://sigven.github.io/pcgr/reference/init_expression_content.html</loc>
   </url>
   <url>
     <loc>https://sigven.github.io/pcgr/reference/init_germline_content.html</loc>
   </url>
   <url>
+    <loc>https://sigven.github.io/pcgr/reference/init_kataegis_content.html</loc>
+  </url>
+  <url>
     <loc>https://sigven.github.io/pcgr/reference/init_m_signature_content.html</loc>
+  </url>
+  <url>
+    <loc>https://sigven.github.io/pcgr/reference/init_msi_content.html</loc>
   </url>
   <url>
     <loc>https://sigven.github.io/pcgr/reference/init_rainfall_content.html</loc>
@@ -256,19 +244,13 @@
     <loc>https://sigven.github.io/pcgr/reference/init_report.html</loc>
   </url>
   <url>
-    <loc>https://sigven.github.io/pcgr/reference/init_report_display_content.html</loc>
-  </url>
-  <url>
-    <loc>https://sigven.github.io/pcgr/reference/init_snv_indel_content.html</loc>
+    <loc>https://sigven.github.io/pcgr/reference/init_snv_indel_vstats.html</loc>
   </url>
   <url>
     <loc>https://sigven.github.io/pcgr/reference/init_tmb_content.html</loc>
   </url>
   <url>
     <loc>https://sigven.github.io/pcgr/reference/init_tumor_only_content.html</loc>
-  </url>
-  <url>
-    <loc>https://sigven.github.io/pcgr/reference/init_valuebox_content.html</loc>
   </url>
   <url>
     <loc>https://sigven.github.io/pcgr/reference/init_var_content.html</loc>
@@ -283,10 +265,37 @@
     <loc>https://sigven.github.io/pcgr/reference/load_all_eitems.html</loc>
   </url>
   <url>
+    <loc>https://sigven.github.io/pcgr/reference/load_dna_variants.html</loc>
+  </url>
+  <url>
     <loc>https://sigven.github.io/pcgr/reference/load_eitems.html</loc>
   </url>
   <url>
+    <loc>https://sigven.github.io/pcgr/reference/load_expression_csq.html</loc>
+  </url>
+  <url>
+    <loc>https://sigven.github.io/pcgr/reference/load_expression_outliers.html</loc>
+  </url>
+  <url>
+    <loc>https://sigven.github.io/pcgr/reference/load_expression_similarity.html</loc>
+  </url>
+  <url>
+    <loc>https://sigven.github.io/pcgr/reference/load_reference_data.html</loc>
+  </url>
+  <url>
+    <loc>https://sigven.github.io/pcgr/reference/load_somatic_cna.html</loc>
+  </url>
+  <url>
+    <loc>https://sigven.github.io/pcgr/reference/load_somatic_snv_indel.html</loc>
+  </url>
+  <url>
+    <loc>https://sigven.github.io/pcgr/reference/load_yaml.html</loc>
+  </url>
+  <url>
     <loc>https://sigven.github.io/pcgr/reference/log4r_debug.html</loc>
+  </url>
+  <url>
+    <loc>https://sigven.github.io/pcgr/reference/log4r_fatal.html</loc>
   </url>
   <url>
     <loc>https://sigven.github.io/pcgr/reference/log4r_info.html</loc>
@@ -298,25 +307,19 @@
     <loc>https://sigven.github.io/pcgr/reference/log_var_eitem_stats.html</loc>
   </url>
   <url>
-    <loc>https://sigven.github.io/pcgr/reference/make_upset_plot_data.html</loc>
-  </url>
-  <url>
-    <loc>https://sigven.github.io/pcgr/reference/match_eitems_to_var.html</loc>
-  </url>
-  <url>
     <loc>https://sigven.github.io/pcgr/reference/max_af_gnomad.html</loc>
   </url>
   <url>
-    <loc>https://sigven.github.io/pcgr/reference/max_af_onekg.html</loc>
+    <loc>https://sigven.github.io/pcgr/reference/mkdir.html</loc>
   </url>
   <url>
     <loc>https://sigven.github.io/pcgr/reference/msi_indel_fraction_plot.html</loc>
   </url>
   <url>
-    <loc>https://sigven.github.io/pcgr/reference/order_variants.html</loc>
+    <loc>https://sigven.github.io/pcgr/reference/msi_indel_load_plot.html</loc>
   </url>
   <url>
-    <loc>https://sigven.github.io/pcgr/reference/pipe.html</loc>
+    <loc>https://sigven.github.io/pcgr/reference/order_variants.html</loc>
   </url>
   <url>
     <loc>https://sigven.github.io/pcgr/reference/pkg_exists.html</loc>
@@ -337,25 +340,19 @@
     <loc>https://sigven.github.io/pcgr/reference/qc_var_eitems.html</loc>
   </url>
   <url>
-    <loc>https://sigven.github.io/pcgr/reference/recode_logical_vars.html</loc>
-  </url>
-  <url>
     <loc>https://sigven.github.io/pcgr/reference/remove_cols_from_df.html</loc>
-  </url>
-  <url>
-    <loc>https://sigven.github.io/pcgr/reference/set_report_metadata.html</loc>
   </url>
   <url>
     <loc>https://sigven.github.io/pcgr/reference/sort_chromosomal_segments.html</loc>
   </url>
   <url>
+    <loc>https://sigven.github.io/pcgr/reference/strip_html.html</loc>
+  </url>
+  <url>
     <loc>https://sigven.github.io/pcgr/reference/structure_var_eitems.html</loc>
   </url>
   <url>
-    <loc>https://sigven.github.io/pcgr/reference/targeted_drugs_pr_ttype.html</loc>
-  </url>
-  <url>
-    <loc>https://sigven.github.io/pcgr/reference/targeted_drugs_summarise.html</loc>
+    <loc>https://sigven.github.io/pcgr/reference/tcga_cohorts.html</loc>
   </url>
   <url>
     <loc>https://sigven.github.io/pcgr/reference/tcga_somatic_status.html</loc>
@@ -367,13 +364,10 @@
     <loc>https://sigven.github.io/pcgr/reference/tier_af_distribution.html</loc>
   </url>
   <url>
-    <loc>https://sigven.github.io/pcgr/reference/update_maf_allelic_support.html</loc>
+    <loc>https://sigven.github.io/pcgr/reference/tsv_cols.html</loc>
   </url>
   <url>
     <loc>https://sigven.github.io/pcgr/reference/update_report.html</loc>
-  </url>
-  <url>
-    <loc>https://sigven.github.io/pcgr/reference/upset_plot_tumor_only.html</loc>
   </url>
   <url>
     <loc>https://sigven.github.io/pcgr/reference/variant_db_url.html</loc>
@@ -382,12 +376,15 @@
     <loc>https://sigven.github.io/pcgr/reference/variant_stats_report.html</loc>
   </url>
   <url>
-    <loc>https://sigven.github.io/pcgr/reference/virtual_panel_display_html.html</loc>
-  </url>
-  <url>
     <loc>https://sigven.github.io/pcgr/reference/write_processed_vcf.html</loc>
   </url>
   <url>
-    <loc>https://sigven.github.io/pcgr/reference/write_report_output.html</loc>
+    <loc>https://sigven.github.io/pcgr/reference/write_report_excel.html</loc>
+  </url>
+  <url>
+    <loc>https://sigven.github.io/pcgr/reference/write_report_quarto_html.html</loc>
+  </url>
+  <url>
+    <loc>https://sigven.github.io/pcgr/reference/write_report_tsv.html</loc>
   </url>
 </urlset>
