@@ -48,21 +48,22 @@ pdiakumis <- user("pdiakumis")
 
 ## v2.0.0
 
-* Date: **2024-06-26**
-* Major data updates
-  * ClinVar (2024-06)
-  * NCI Thesaurus `v24.05d`
-  * Open Targets Platform `v2024.06`
-  * CIViC (2024-06-21)
-  * CGI Cancer Biomarkers database (2022/10/17)
-  * GENCODE `v46/v19` (GRCh38/GRCh37)
-  * Cancer Gene Census
-  * CancerMine `v50` (2023-03)
-  * Pfam `v35.0` (November 2021)
-  * Disease Ontology/EFO
-  * UniProt KB `v2024_03`
-* Major software updates
-  * Ensembl VEP `v112`
+- Date: **2024-06-26**
+- Major data updates
+  - ClinVar (2024-06)
+  - NCI Thesaurus `v24.05d`
+  - Open Targets Platform `v2024.06`
+  - CIViC (2024-06-21)
+  - CGI Cancer Biomarkers database (2022/10/17)
+  - GENCODE `v46/v19` (GRCh38/GRCh37)
+  - Cancer Gene Census
+  - CancerMine `v50` (2023-03)
+  - Pfam `v35.0` (November 2021)
+  - Disease Ontology/EFO
+  - UniProt KB `v2024_03`
+- Major software updates
+  - Ensembl VEP `v112`
+- `r diff("2.0.0", "1.4.1")`
 
 ### Added/changed
 
@@ -108,10 +109,10 @@ pdiakumis <- user("pdiakumis")
 
 ---
 
-## v1.5.0rc
+## v1.4.1
 
-- Date: **2023-xx-xx**
-- `r diff("1.5.0", "1.4.0")`
+- Date: **2023-03-14**
+- `r diff("1.4.1", "1.4.0")`
 
 ### Changes
 
