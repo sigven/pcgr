@@ -3,9 +3,8 @@ name: deploy
 on:
   push:
     branches:
-      - master
-      - bundle_update_2023
-      - locale
+      - main
+
 env:
   atoken: ${{ secrets.ANACONDA_UPLOAD_TOKEN }}
   recipe_path: conda/recipe
@@ -86,7 +85,7 @@ jobs:
           git commit -m "${MSG}"
           git push
       - name: 🌐 Website publish
-        if: github.ref_name == 'master'
+        if: github.ref_name == 'main'
         run: |
           micromamba env create -n pkgdownenv -f ${env_yml_path}/pkgdown.yml
           micromamba activate pkgdownenv
