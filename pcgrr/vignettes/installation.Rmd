@@ -110,16 +110,15 @@ See the [Inputs](input.html) article.
 
 ## Software
 
-The PCGR workflow can be installed using:
+The PCGR workflow can be installed with any of the following:
 
-- A. [Conda][conda-web].
-- B. [Docker][docker-web],
-- C. [Singularity/Apptainer][apptainer-web], or
+- A. [Conda][conda-web],
+- B. [Docker][docker-web], or
+- C. [Singularity/Apptainer][apptainer-web].
 
 [conda-web]: https://conda.io/projects/conda/en/latest/user-guide/getting-started.html
 [docker-web]: https://docs.docker.com/
 [apptainer-web]: https://apptainer.org/docs/user/latest/index.html
-
 
 ### A. Conda {.tabset .tabset-pills}
 
@@ -176,7 +175,6 @@ pcgr --version
 pcgr --help
 ```
 
-
 ### B. Docker
 
 The PCGR Docker image is available on [Docker Hub](https://hub.docker.com/r/sigven/pcgr/tags).
@@ -219,7 +217,7 @@ docker container run -it --rm \
 The PCGR Singularity/Apptainer image is available on [GitHub Container Registry](https://ghcr.io/sigven/pcgr).
 Pull the latest **v`r PCGR_VERSION`** image with:
 
-```{r}
+```{r echo=FALSE}
 glue("apptainer pull oras://ghcr.io/sigven/pcgr:{PCGR_VERSION}.singularity")
 ```
 
@@ -233,7 +231,6 @@ echo "PCGR_VERSION=\"${PCGR_VERSION}\""
 ```
 
 ```bash
-# let's assume you have all data sitting in ~/projects/proj1/pcgr_inputs and ~/projects/proj1/
 apptainer exec \
   --writable-tmpfs \
   --no-home \
@@ -256,6 +253,6 @@ apptainer exec \
     --vcf2maf
 ```
 
-If you run into issues or problems related to apptainer/singularity, we appreciate if you can try to
-resolve them directly through the apptainer community. The authors of PCGR/CPSR have limited experience with apptainer, and we thus cannot offer extensive feedback on issues related to such matters.
-
+**Note**: For any Apptainer/Singularity issues not directly related to PCGR, we
+would recommend reaching out to the Apptainer community (e.g. https://github.com/apptainer/apptainer)
+since we have limited experience with Apptainer/Singularity.

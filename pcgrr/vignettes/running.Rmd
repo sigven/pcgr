@@ -19,7 +19,7 @@ By default, PCGR expects that the input VCF comes from whole-exome sequencing. T
 
  * `--effective_target_size_mb <value>`
  
-Ideally, this should reflect the _callable_ target size of the assay, i.e. the size of the target regions for which coding variants is sufficiently covered (i.e. with a certain sequencing depth) by the sequencing assay. This can be estimated by the user based on the design of the sequencing assay, or by using tools such as [mosdepth]().
+Ideally, this should reflect the _callable_ target size of the assay, i.e. the size of the target regions for which coding variants is sufficiently covered (i.e. with a certain sequencing depth) by the sequencing assay. This can be estimated by the user based on the design of the sequencing assay, or by using tools such as [mosdepth](https://github.com/brentp/mosdepth).
 
 ### Tumor-control vs. tumor-only
 
