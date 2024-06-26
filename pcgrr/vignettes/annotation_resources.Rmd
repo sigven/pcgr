@@ -17,7 +17,7 @@ output: rmarkdown::html_document
  
 ### Variant databases of clinical utility
   * [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - database of clinically related variants (June 2024)
-  * [CIViC](http://civic.genome.wustl.edu) - clinical interpretations of variants in cancer (June 21st 2024)
+  * [CIViC](https://civicdb.org) - clinical interpretations of variants in cancer (June 21st 2024)
   * [CGI](http://www.cancergenomeinterpreter.org/biomarkers) - Cancer Genome Interpreter Cancer Biomarkers Database (CGI) (October 18th 2022)
 
 ### Protein domains/functional features

@@ -984,7 +984,7 @@ get_genome_obj <- function(genome) {
     stop(glue::glue(
       "{pkg} is not installed on your system.\n",
       "Please install with:\n'BiocManager::install(\"{pkg}\")'\n",
-      "(or use 'mamba install -c bioconda bioconductor-bsgenome.hsapiens.ucsc.hgXX' ",
+      "(or use 'conda install -c bioconda bioconductor-bsgenome.hsapiens.ucsc.hgXX' ",
       "if inside a conda environment)."
     ))
   }
