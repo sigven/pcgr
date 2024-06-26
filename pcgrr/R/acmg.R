@@ -142,7 +142,7 @@ assign_acmg_tiers <- function(
           as.integer(.data$ACMG_TIER_OTHER_VARS)
         )) |>
         dplyr::mutate(ACMG_AMP_TIER = dplyr::if_else(
-          is.na(ACMG_AMP_TIER) &
+          is.na(.data$ACMG_AMP_TIER) &
             .data$CODING_STATUS == "noncoding",
           as.integer(5),
           as.integer(.data$ACMG_AMP_TIER)

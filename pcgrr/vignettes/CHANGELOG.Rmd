@@ -48,28 +48,29 @@ pdiakumis <- user("pdiakumis")
 
 ## v2.0.0
 
-* Date: **2024-06-26**
-* Major data updates
-  * ClinVar
-  * NCI Thesaurus
-  * Open Targets Platform
-  * CIViC
-  * Cancer Biomarkers database (CGI)
-  * GENCODE
-  * Cancer Gene Census
-  * CancerMine
-  * Pfam
-  * Disease Ontology/EFO
-  * UniProt KB
-* Major software updates
-  * VEP
+- Date: **2024-06-26**
+- Major data updates
+  - ClinVar (2024-06)
+  - NCI Thesaurus `v24.05d`
+  - Open Targets Platform `v2024.06`
+  - CIViC (2024-06-21)
+  - CGI Cancer Biomarkers database (2022/10/17)
+  - GENCODE `v46/v19` (GRCh38/GRCh37)
+  - Cancer Gene Census
+  - CancerMine `v50` (2023-03)
+  - Pfam `v35.0` (November 2021)
+  - Disease Ontology/EFO
+  - UniProt KB `v2024_03`
+- Major software updates
+  - Ensembl VEP `v112`
+- `r diff("2.0.0", "1.4.1")`
 
-##### Added/changed
+### Added/changed
 
 - New report generation framework - [quarto](https://quarto.org)
-  - multiple options related to Rmarkdown output are now deprecated
+  - multiple options related to RMarkdown output are now deprecated
 - Re-organized data bundle structure
-  - Users need to download an assembly-specific VEP cache separately from PCGR/CPSR, and provide its path to the new required argument `--vep_dir` in the `pcgr` command
+  - Users need to download an assembly-specific VEP cache separately from the Ensembl VEP website, and provide its path to the new required argument `--vep_dir` in the `pcgr` command
 - Re-engineered data bundle generation pipeline
 - Improved data bundle documentation
   - An HTML report with an overview of the contents of the data bundle is shipped with the reference data itself, also available [here (grch38)](https://rpubs.com/sigven/pcgr_refdata).
@@ -88,28 +89,30 @@ pdiakumis <- user("pdiakumis")
   - `--tmb_af_min` - Minimum allele frequency for a position to be considered for TMB calculation (default: 0) - requires allelic support information from VCF
 - A multi-sheet Excel workbook output with analysis output is provided, suitable e.g. for aggregation of results across samples
 - argument name changes to `pcgr`:
-  - `--pcgr_dir` is now named `--refdata_dir`
-  - `--clinvar_ignore_noncancer` is now named `--clinvar_report_noncancer`, meaning that variants found in ClinVar, yet attributed to _non-cancer related_ phenotypes, are now excluded from reporting by default)
-  - `--vep_gencode_all` is now named `--vep_gencode_basic`, meaning that the gene variant annotation is now using _all_ GENCODE transcripts by default, not only the _basic_ set)
-  - `--preserved_info_tags` is now named `--retained_info_tags`
-  - `--basic` is now named `--no_reporting`
-  - `--target_size_mb` is now named `--effective_target_size_mb`
+  - `--pcgr_dir` renamed to `--refdata_dir`
+  - `--clinvar_ignore_noncancer` renamed to `--clinvar_report_noncancer`, meaning that variants found in ClinVar, yet attributed to _non-cancer related_ phenotypes, are now excluded from reporting by default
+  - `--vep_gencode_all` renamed to `--vep_gencode_basic`, meaning that the gene variant annotation is now using _all_ GENCODE transcripts by default, not only the _basic_ set
+  - `--preserved_info_tags` renamed to `--retained_info_tags`
+  - `--basic` renamed to `--no_reporting`
+  - `--target_size_mb` renamed to `--effective_target_size_mb`
 - LOFTEE plugin in VEP removed as loss-of-function variant classifier (due to low level of maintenance, and outdated dependency requirements). For now, a simplified LoF-annotation is used as a replacement, looking primarily at CSQ types (`stop_gained`, `frameshift_variant`, `splice_acceptor_variant`, `splice_donor_variant`). Furthermore, frameshift/stop-gain variants that are found within the last 5% of the coding sequence length are deemed non-LOF, as are splice donor variants not disrupting the canonical site (GC>GT). An even more advanced LoF-annotation is planned for a future release.
 - Biomarkers are matched much more comprehensively than in previous versions, matching at the genomic level, codon, exon, amino acid and gene level (both principal and non-principal transcript matches)
 
-##### Removed
+### Removed
 
-- Options for configuring Rmarkdown output, i.e. `--report_theme`, `report_nonfloating_toc`
+- Options for configuring RMarkdown output, i.e. `--report_theme`, `report_nonfloating_toc`
 - `--cpsr_report` and `--include_trials`, which can provide the report with associated pathogenic germline variants (from CPSR) and potential clinical trial oppertunities is currenly on hold for a forthcoming release
 - `--no_vcf_validate` - VCF validation is simplified, not relying on _vcf-validator_ anymore
 - Options to filter tumor-only calls using 1000 Genomes Project database, i.e. `--maf_onekg_eur`, `--maf_onekg_amr`, `--maf_onekg_eas`, `--maf_onekg_afr`, `--maf_onekg_sas`, `--maf_onekg_global`
 - `--cell_line`
 - `--logr_gain`, and `--logr_homdel`
 
-## v1.5.0rc
+---
 
-- Date: **2023-xx-xx**
-- `r diff("1.5.0", "1.4.0")`
+## v1.4.1
+
+- Date: **2023-03-14**
+- `r diff("1.4.1", "1.4.0")`
 
 ### Changes
 
