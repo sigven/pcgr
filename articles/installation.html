@@ -199,12 +199,11 @@ instructions</a>.</p>
 <div class="section level2">
 <h2 id="software">Software<a class="anchor" aria-label="anchor" href="#software"></a>
 </h2>
-<p>The PCGR workflow can be installed using:</p>
+<p>The PCGR workflow can be installed with any of the following:</p>
 <ul>
-<li>A. <a href="https://conda.io/projects/conda/en/latest/user-guide/getting-started.html" class="external-link">Conda</a>.</li>
-<li>B. <a href="https://docs.docker.com/" class="external-link">Docker</a>,</li>
-<li>C. <a href="https://apptainer.org/docs/user/latest/index.html" class="external-link">Singularity/Apptainer</a>,
-or</li>
+<li>A. <a href="https://conda.io/projects/conda/en/latest/user-guide/getting-started.html" class="external-link">Conda</a>,</li>
+<li>B. <a href="https://docs.docker.com/" class="external-link">Docker</a>, or</li>
+<li>C. <a href="https://apptainer.org/docs/user/latest/index.html" class="external-link">Singularity/Apptainer</a>.</li>
 </ul>
 <div class="section level3 tabset tabset-pills">
 <h3 class="tabset tabset-pills" id="a--conda">A. Conda<a class="anchor" aria-label="anchor" href="#a--conda"></a>
@@ -294,8 +293,7 @@ the latest <strong>v2.0.0</strong> image with:</p>
 </h3>
 <p>The PCGR Singularity/Apptainer image is available on <a href="https://ghcr.io/sigven/pcgr" class="external-link">GitHub Container Registry</a>. Pull
 the latest <strong>v2.0.0</strong> image with:</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">glue</span>(<span class="st">"apptainer pull oras://ghcr.io/sigven/pcgr:{PCGR_VERSION}.singularity"</span>)</span>
-<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>apptainer pull oras<span class="sc">:</span><span class="er">//</span>ghcr.io<span class="sc">/</span>sigven<span class="sc">/</span>pcgr<span class="sc">:</span><span class="dv">2</span>.<span class="dv">0</span>.<span class="fl">0.</span>singularity</span></code></pre></div>
+<pre><code>apptainer pull oras://ghcr.io/sigven/pcgr:2.0.0.singularity</code></pre>
 <p>This will download a Singularity Image File (SIF) called
 <strong>pcgr_2.0.0.singularity.sif</strong> that can be run with
 Singularity or Apptainer.</p>
@@ -303,32 +301,30 @@ Singularity or Apptainer.</p>
 <h4 id="example-run-1">Example Run<a class="anchor" aria-label="anchor" href="#example-run-1"></a>
 </h4>
 <pre><code><span><span class="va">PCGR_VERSION</span><span class="op">=</span><span class="st">"2.0.0"</span></span></code></pre>
-<div class="sourceCode" id="cb14"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="co"># let's assume you have all data sitting in ~/projects/proj1/pcgr_inputs and ~/projects/proj1/</span></span>
-<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="ex">apptainer</span> exec <span class="dt">\</span></span>
-<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>  <span class="at">--writable-tmpfs</span> <span class="dt">\</span></span>
-<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>  <span class="at">--no-home</span> <span class="dt">\</span></span>
-<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>  <span class="at">--env</span> <span class="st">"XDG_CACHE_HOME=/tmp/quarto_cache_home"</span> <span class="dt">\</span></span>
-<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>  <span class="at">-B</span> /Users/you/dir1/.vep:/mnt/.vep <span class="dt">\</span></span>
-<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a>  <span class="at">-B</span> /Users/you/dir1/bundle:/mnt/bundle <span class="dt">\</span></span>
-<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a>  <span class="at">-B</span> /Users/you/dir1/pcgr_inputs:/mnt/pcgr_inputs <span class="dt">\</span></span>
-<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a>  <span class="at">-B</span> /Users/you/dir1/pcgr_outputs:/mnt/pcgr_outputs <span class="dt">\</span></span>
-<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a>  pcgr_<span class="va">${PCGR_VERSION}</span>.singularity.sif <span class="dt">\</span></span>
-<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a>  pcgr <span class="dt">\</span></span>
-<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a>    <span class="at">--input_vcf</span> <span class="st">"/mnt/pcgr_inputs/T001-BRCA.grch38.vcf.gz"</span> <span class="dt">\</span></span>
-<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a>    <span class="at">--vep_dir</span> <span class="st">"/mnt/.vep"</span> <span class="dt">\</span></span>
-<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a>    <span class="at">--refdata_dir</span> <span class="st">"/mnt/bundle"</span> <span class="dt">\</span></span>
-<span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a>    <span class="at">--output_dir</span> <span class="st">"/mnt/pcgr_outputs"</span> <span class="dt">\</span></span>
-<span id="cb14-16"><a href="#cb14-16" tabindex="-1"></a>    <span class="at">--genome_assembly</span> <span class="st">"grch38"</span> <span class="dt">\</span></span>
-<span id="cb14-17"><a href="#cb14-17" tabindex="-1"></a>    <span class="at">--sample_id</span> <span class="st">"SAMPLE_B"</span> <span class="dt">\</span></span>
-<span id="cb14-18"><a href="#cb14-18" tabindex="-1"></a>    <span class="at">--assay</span> <span class="st">"WGS"</span> <span class="dt">\</span></span>
-<span id="cb14-19"><a href="#cb14-19" tabindex="-1"></a>    <span class="at">--tumor_dp_tag</span> <span class="st">"TDP"</span> <span class="dt">\</span></span>
-<span id="cb14-20"><a href="#cb14-20" tabindex="-1"></a>    <span class="at">--tumor_af_tag</span> <span class="st">"TAF"</span> <span class="dt">\</span></span>
-<span id="cb14-21"><a href="#cb14-21" tabindex="-1"></a>    <span class="at">--vcf2maf</span></span></code></pre></div>
-<p>If you run into issues or problems related to apptainer/singularity,
-we appreciate if you can try to resolve them directly through the
-apptainer community. The authors of PCGR/CPSR have limited experience
-with apptainer, and we thus cannot offer extensive feedback on issues
-related to such matters.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="ex">apptainer</span> exec <span class="dt">\</span></span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>  <span class="at">--writable-tmpfs</span> <span class="dt">\</span></span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>  <span class="at">--no-home</span> <span class="dt">\</span></span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>  <span class="at">--env</span> <span class="st">"XDG_CACHE_HOME=/tmp/quarto_cache_home"</span> <span class="dt">\</span></span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>  <span class="at">-B</span> /Users/you/dir1/.vep:/mnt/.vep <span class="dt">\</span></span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>  <span class="at">-B</span> /Users/you/dir1/bundle:/mnt/bundle <span class="dt">\</span></span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a>  <span class="at">-B</span> /Users/you/dir1/pcgr_inputs:/mnt/pcgr_inputs <span class="dt">\</span></span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a>  <span class="at">-B</span> /Users/you/dir1/pcgr_outputs:/mnt/pcgr_outputs <span class="dt">\</span></span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a>  pcgr_<span class="va">${PCGR_VERSION}</span>.singularity.sif <span class="dt">\</span></span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a>  pcgr <span class="dt">\</span></span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a>    <span class="at">--input_vcf</span> <span class="st">"/mnt/pcgr_inputs/T001-BRCA.grch38.vcf.gz"</span> <span class="dt">\</span></span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a>    <span class="at">--vep_dir</span> <span class="st">"/mnt/.vep"</span> <span class="dt">\</span></span>
+<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a>    <span class="at">--refdata_dir</span> <span class="st">"/mnt/bundle"</span> <span class="dt">\</span></span>
+<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a>    <span class="at">--output_dir</span> <span class="st">"/mnt/pcgr_outputs"</span> <span class="dt">\</span></span>
+<span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a>    <span class="at">--genome_assembly</span> <span class="st">"grch38"</span> <span class="dt">\</span></span>
+<span id="cb14-16"><a href="#cb14-16" tabindex="-1"></a>    <span class="at">--sample_id</span> <span class="st">"SAMPLE_B"</span> <span class="dt">\</span></span>
+<span id="cb14-17"><a href="#cb14-17" tabindex="-1"></a>    <span class="at">--assay</span> <span class="st">"WGS"</span> <span class="dt">\</span></span>
+<span id="cb14-18"><a href="#cb14-18" tabindex="-1"></a>    <span class="at">--tumor_dp_tag</span> <span class="st">"TDP"</span> <span class="dt">\</span></span>
+<span id="cb14-19"><a href="#cb14-19" tabindex="-1"></a>    <span class="at">--tumor_af_tag</span> <span class="st">"TAF"</span> <span class="dt">\</span></span>
+<span id="cb14-20"><a href="#cb14-20" tabindex="-1"></a>    <span class="at">--vcf2maf</span></span></code></pre></div>
+<p><strong>Note</strong>: For any Apptainer/Singularity issues not
+directly related to PCGR, we would recommend reaching out to the
+Apptainer community (e.g. <a href="https://github.com/apptainer/apptainer" class="external-link uri">https://github.com/apptainer/apptainer</a>) since we have
+limited experience with Apptainer/Singularity.</p>
 </div>
 </div>
 </div>
