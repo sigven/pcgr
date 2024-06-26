@@ -48,7 +48,7 @@ pdiakumis <- user("pdiakumis")
 
 ## v2.0.0
 
-* Date: **2024-06-xx**
+* Date: **2024-06-26**
 * Major data updates
   * ClinVar
   * NCI Thesaurus
@@ -73,6 +73,7 @@ pdiakumis <- user("pdiakumis")
 - Re-engineered data bundle generation pipeline
 - Improved data bundle documentation
   - An HTML report with an overview of the contents of the data bundle is shipped with the reference data itself, also available [here (grch38)](https://rpubs.com/sigven/pcgr_refdata).
+- Singularity/Apptainer support
 - Moved more of the code base to initial Python workflow steps (biomarker matching, CNA segment annotation, RNA expression analysis, oncogenicity classification)
 - Variants are now classified with respect to both oncogenicity and actionability, and the previous global tier classification (tier 1-5) is thus deprecated 
 - New copy number input format - allele-specific (chrom, start, end, n_major, n_minor)

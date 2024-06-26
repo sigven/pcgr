@@ -26,7 +26,7 @@ PCGR supports both of the most recent human genome assemblies (grch37/grch38), a
 
 ### News
 
--   *June 2024*: **2.x.x release**
+-   *June 2024*: **2.0.0 release**
     - Massive reference data bundle upgrade, new report layout, oncogenicity classification++
     - Details at [CHANGELOG](http://sigven.github.io/pcgr/articles/CHANGELOG.html)
 

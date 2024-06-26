@@ -255,3 +255,7 @@ apptainer exec \
     --tumor_af_tag "TAF" \
     --vcf2maf
 ```
+
+If you run into issues or problems related to apptainer/singularity, we appreciate if you can try to
+resolve them directly through the apptainer community. The authors of PCGR/CPSR have limited experience with apptainer, and we thus cannot offer extensive feedback on issues related to such matters.
+
