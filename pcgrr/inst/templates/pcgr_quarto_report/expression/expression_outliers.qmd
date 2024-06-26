@@ -1,0 +1,60 @@
+### Gene expression outliers
+
+Here, we show the gene expression outliers identified in the RNA sample, as compared to the selected reference cohort. Expression outliers are defined as genes with expression levels located at the extreme ends of the distributions observed in the reference cohort, specifically those with:
+
+* A TPM in the top or bottom percentiles (i.e. above 90 or below 10), and either 
+* A TPM that is more than 1.5 * IQR above the third quartile (increased expression) of the distribution seen in the reference cohort
+* A TPM that is less than 1.5 * IQR below the first quartile (decreased expression) of the distribution seen in the reference cohort
+
+__TPM__: Transcripts per Million, 
+__IQR__: Interquartile range
+
+We only consider protein-coding genes, and limit the ones shown to cancer-associated genes (including
+tumor suppressors, oncogenes, drivers etc), as well as targets of approved cancer drugs.
+
+::: {.callout-warning}
+
+## Note - gene expression outlier detection
+
+A comparison of gene expression levels identified in the input sample to those found in reference cohorts is not a straightforward procedure. The results needs to be interpreted with considerable caution, particularly taking into account potential biases in RNA sequencing protocols, including differences with respect to total RNA concentrations [@Zhao2020-ln]. Moreover, one should note that the vast majority of samples in the current reference cohorts for comparisons (TCGA) contain expression profiles for primary tumors, with only a minor contribution for metastatic contexts. The outlier list shown here could thus potentially include false positives, and should primarily be considered as a starting point for further investigation.
+
+:::
+
+<br>
+
+```{r expression_outliers}
+#| eval: !expr as.logical(NROW(pcg_report$content$expression$outliers) > 0) == TRUE
+#| output: asis
+
+DT::datatable(
+  pcg_report$content$expression$outliers,
+  escape = F, 
+  extensions = c("Buttons","Responsive"), 
+  options = list(
+    buttons = c('csv','excel'), 
+    dom = 'Bfrtip')) |>
+  DT::formatStyle(
+    "SYMBOL",
+    "GLOBAL_ASSOC_RANK", 
+    color = "white", 
+    backgroundColor = 
+      DT::styleInterval(
+        pcgrr::color_palette$cancer_assoc$breaks,
+        pcgrr::color_palette$cancer_assoc$values
+      )
+  ) |>
+  DT::formatStyle(
+    "TPM_GENE",
+    "PERCENTILE", 
+    color = "white", 
+    backgroundColor = 
+      DT::styleInterval(
+        pcgrr::color_palette$exp_increase$breaks,
+        pcgrr::color_palette$exp_increase$values
+      )
+  )
+ 
+
+```
+
+

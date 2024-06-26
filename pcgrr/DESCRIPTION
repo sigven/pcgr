@@ -1,8 +1,7 @@
 Package: pcgrr
 Type: Package
 Title: Personal Cancer Genome ReporteR
-Version: 1.4.1
-Date: 2022-03-30
+Version: 1.4.1.9021
 Authors@R:
     c(person(given = "Sigve",
              family = "Nakken",
@@ -18,55 +17,53 @@ Maintainer: Sigve Nakken <sigven@ifi.uio.no>, Peter Diakumis <peterdiakumis@gmai
 URL: https://github.com/sigven/pcgr,
     https://sigven.github.io/pcgr/
 BugReports: https://github.com/sigven/pcgr/issues
-Description: Functions, tools and utilities for the generation of clinical cancer genome reports with PCGR.
-    This R package is an integrated part of the PCGR workflow (https://github.com/sigven/pcgr),
-    it should thus not be used as a stand-alone package.
+Description: Functions, tools and utilities for the generation of clinical 
+    cancer genome reports with PCGR. This R package is an integrated part of 
+    the PCGR workflow (https://github.com/sigven/pcgr), it should thus not be 
+    used as a stand-alone package.
 License: MIT + file LICENSE
 biocViews:
 Imports:
     assertable,
     assertthat,
-    BiocGenerics,
-    BiocManager,
     Biostrings,
+    bslib,
     caret,
-    data.table,
-    DT,
+    crosstalk,
     dplyr,
-    flexdashboard,
-    GenomicRanges,
+    DT,
+    formattable,
     GenomeInfoDb,
     ggplot2,
-    ggpubr,
     glue,
     htmltools,
-    IRanges,
-    jsonlite,
     log4r,
-    magrittr,
-    methods,
     MutationalPatterns,
+    openxlsx2,
     plotly,
+    quantiseqr,
+    quarto,
     randomForest,
-    RColorBrewer,
+    readr,
     reshape2,
     rlang,
-    rmarkdown,
+    rrapply,
     S4Vectors,
     scales,
+    shiny,
     stringr,
+    tibble,
     tidyr,
-    UpSetR,
-    usethis,
-    VariantAnnotation
+    yaml
 Depends:
     R (>= 4.0)
 Suggests:
     testthat,
     devtools,
+    stringi,
     BSgenome.Hsapiens.UCSC.hg19,
     BSgenome.Hsapiens.UCSC.hg38
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.2.2
+RoxygenNote: 7.3.1
 Roxygen: list(markdown = TRUE)

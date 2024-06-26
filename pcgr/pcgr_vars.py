@@ -2,14 +2,43 @@
 
 from pcgr._version import __version__
 
+## Version - software and bundle
 PCGR_VERSION = __version__
-DB_VERSION = '20220203'
-VEP_VERSION = '105'
-GENCODE_VERSION = '39'
-NCBI_BUILD_MAF = 'GRCh38'
-VEP_ASSEMBLY = 'GRCh38'
-MAX_VARIANTS_FOR_REPORT = 500_000
+DB_VERSION = '20240621'
 
+## Miscellaneous settings
+NCBI_BUILD_MAF = 'GRCh38'
+MAX_VARIANTS_FOR_REPORT = 500_000
+CODING_EXOME_SIZE_MB = 34.0
+
+## Mutational signature settings
+RECOMMENDED_N_MUT_SIGNATURE = 200
+MINIMUM_N_MUT_SIGNATURE = 100
+MAX_SIGNATURE_PREVALENCE = 20
+
+## GENCODE versions
+GENCODE_VERSION = {'grch38': 46,'grch37': 19}
+
+## vcfanno settings
+VCFANNO_MAX_PROC = 15
+
+## VEP settings/versions
+VEP_VERSION = '112'
+VEP_ASSEMBLY = {'grch38': 'GRCh38','grch37': 'GRCh37'}
+VEP_MIN_FORKS = 1
+VEP_MAX_FORKS = 8
+VEP_MIN_BUFFER_SIZE = 50
+VEP_MAX_BUFFER_SIZE = 30000
+VEP_PICK_CRITERIA = ['mane_select','mane_plus_clinical','canonical','appris','tsl','biotype','ccds','rank','length']
+
+## Gene expression comparative analysis resources
+EXPRESSION_DB_SOURCES = ['tcga','depmap','treehouse']
+
+## Sample identifier length (max/min allowed)
+SAMPLE_ID_MAX_LENGTH = 40
+SAMPLE_ID_MIN_LENGTH = 3
+
+## Primary tumor sites - PCGR
 tsites = {
     0: 'Any',
     1: 'Adrenal Gland',
@@ -46,8 +75,9 @@ tsites = {
 
 tumor_sites = '\n'.join([f'{k} = {tsites[k]}' for k in tsites]) # for displaying in help
 
+## Genomics England panels - cancer predisposition (PanelApp)
 GE_panels = {
-      0: "CPSR exploratory cancer predisposition panel (n = 433, GEP / TCGA Germline Study / Cancer Gene Census / Other)",
+      0: "CPSR exploratory cancer predisposition panel (PanelApp genes / TCGA's germline study / Cancer Gene Census / Other)",
       1: "Adult solid tumours cancer susceptibility (GEP)",
       2: "Adult solid tumours for rare disease (GEP)",
       3: "Bladder cancer pertinent cancer susceptibility (GEP)",
@@ -70,26 +100,125 @@ GE_panels = {
       20: "Inherited non-medullary thyroid cancer (GEP)",
       21: "Inherited ovarian cancer (without breast cancer) (GEP)",
       22: "Inherited pancreatic cancer (GEP)",
-      23: "Inherited polyposis (GEP)",
+      23: "Inherited polyposis and early onset colorectal cancer (GEP)",
       24: "Inherited predisposition to acute myeloid leukaemia (AML) (GEP)",
-      25: "Inherited predisposition to GIST (GEP)",
-      26: "Inherited renal cancer (GEP)",
-      27: "Inherited phaeochromocytoma and paraganglioma (GEP)",
-      28: "Melanoma pertinent cancer susceptibility (GEP)",
-      29: "Multiple endocrine tumours (GEP)",
-      30: "Multiple monogenic benign skin tumours (GEP)",
-      31: "Neuroendocrine cancer pertinent cancer susceptibility (GEP)",
-      32: "Neurofibromatosis Type 1 (GEP)",
-      33: "Ovarian cancer pertinent cancer susceptibility (GEP)",
-      34: "Parathyroid Cancer (GEP)",
-      35: "Prostate cancer pertinent cancer susceptibility (GEP)",
-      36: "Renal cancer pertinent cancer susceptibility (GEP)",
-      37: "Rhabdoid tumour predisposition (GEP)",
-      38: "Sarcoma cancer susceptibility (GEP)",
-      39: "Sarcoma susceptbility (GEP)",
-      40: "Thyroid cancer pertinent cancer susceptibility (GEP)",
-      41: "Tumour predisposition - childhood onset (GEP)",
-      42: "Upper gastrointestinal cancer pertinent cancer susceptibility (GEP)"
+      25: "Inherited susceptibility to acute lymphoblastoid leukaemia (ALL) (GEP)",
+      26: "Inherited predisposition to GIST (GEP)",
+      27: "Inherited renal cancer (GEP)",
+      28: "Inherited phaeochromocytoma and paraganglioma (GEP)",
+      29: "Melanoma pertinent cancer susceptibility (GEP)",
+      30: "Multiple endocrine tumours (GEP)",
+      31: "Multiple monogenic benign skin tumours (GEP)",
+      32: "Neuroendocrine cancer pertinent cancer susceptibility (GEP)",
+      33: "Neurofibromatosis Type 1 (GEP)",
+      34: "Ovarian cancer pertinent cancer susceptibility (GEP)",
+      35: "Parathyroid Cancer (GEP)",
+      36: "Prostate cancer pertinent cancer susceptibility (GEP)",
+      37: "Renal cancer pertinent cancer susceptibility (GEP)",
+      38: "Rhabdoid tumour predisposition (GEP)",
+      39: "Sarcoma cancer susceptibility (GEP)",
+      40: "Sarcoma susceptibility (GEP)",
+      41: "Thyroid cancer pertinent cancer susceptibility (GEP)",
+      42: "Tumour predisposition - childhood onset (GEP)",
+      43: "Upper gastrointestinal cancer pertinent cancer susceptibility (GEP)",
+      44: "DNA repair genes pertinent cancer susceptibility (GEP)"
 }
 
 panels = '\n'.join([f'{k} = {GE_panels[k]}' for k in GE_panels]) # for displaying in help
+
+## https://www.ensembl.org/info/genome/variation/prediction/predicted_data.html#consequences
+VEP_consequence_rank = {
+    'transcript_ablation': 1,
+    'splice_acceptor_variant': 2,
+    'splice_donor_variant': 3,
+    'stop_gained': 4,
+    'frameshift_variant': 5,
+    'stop_lost': 6,
+    'start_lost' : 7,
+    'transcript_amplification': 8,
+    'feature_elongation': 9,
+    'feature_truncation': 10,
+    'inframe_insertion': 11,
+    'inframe_deletion': 12,
+    'missense_variant': 13,
+    'protein_altering_variant': 14,
+    'splice_donor_5th_base_variant': 15,
+    'splice_region_variant': 16,
+    'splice_donor_region_variant': 17,
+    'splice_polypyrimidine_tract_variant': 18,
+    'incomplete_terminal_codon_variant': 19,
+    'start_retained_variant': 20,
+    'stop_retained_variant': 21,
+    'synonymous_variant': 22,
+    'coding_sequence_variant': 23,
+    'mature_miRNA_variant': 24,
+    '5_prime_UTR_variant': 25,
+    '3_prime_UTR_variant': 26,
+    'non_coding_transcript_exon_variant': 27,
+    'intron_variant': 28,
+    'NMD_transcript_variant': 29,
+    'non_coding_transcript_variant': 30,
+    'coding_transcript_variant': 31,
+    'upstream_gene_variant': 32,
+    'downstream_gene_variant': 33,
+    'TFBS_ablation': 34,
+    'TFBS_amplification': 35,
+    'TF_binding_site_variant': 36,
+    'regulatory_region_ablation': 37,
+    'regulatory_region_amplification': 38,
+    'regulatory_region_variant': 39,
+    'intergenic_variant': 40,
+    'sequence_variant': 41
+}
+
+## Regular expressions on the VEP CSQ (consequence) that targets different types of variants
+CSQ_MISSENSE_PATTERN = r"^missense_variant"
+CSQ_CODING_PATTERN = \
+    r"^(stop_(lost|gained)|start_lost|frameshift_|missense_|splice_(donor|acceptor)|protein_altering|inframe_)"
+CSQ_CODING_SILENT_PATTERN = \
+    r"^(stop_(lost|gained)|start_lost|frameshift_|missense_|splice_(donor|acceptor)|protein_altering|inframe_|synonymous|(start|stop)_retained)"
+CSQ_NULL_PATTERN = r"^(stop_gained|frameshift_)"
+CSQ_SPLICE_REGION_PATTERN = r"(splice_|intron_variant)"
+CSQ_SPLICE_DONOR_PATTERN = \
+    r"(splice_region_variant|splice_donor_variant|splice_donor_region_variant|splice_donor_5th_base_variant)"
+CSQ_LOF_PATTERN = r"(stop_gained|frameshift|splice_acceptor_variant|splice_donor_variant|start_lost)"
+
+
+## TCGA tumor cohorts
+DISEASE_COHORTS = ['ACC','BLCA','BRCA','CESC',
+                'CHOL','COAD','DLBC','ESCA',
+                'GBM','HNSC','KICH','KIRC',
+                'KIRP','LAML','LGG','LIHC',
+                'LUAD','LUSC','MESO','OV',
+                'PAAD','PCPG','PRAD','READ',
+                'SARC','SKCM','STAD','TGCT',
+                'THCA','THYM','UCEC','UCS','UVM']
+
+## Tumor site to TCGA cohort mapping
+SITE_TO_DISEASE = {
+    'Lung': ['TCGA_LUAD','TCGA_LUSC'],
+    'Breast': ['TCGA_BRCA'],
+    'Prostate': ['TCGA_PRAD'],
+    'Kidney': ['TCGA_KIRC','TCGA_KIRP','TCGA_KICH'],
+    'Colon/Rectum': ['TCGA_COAD','TCGA_READ'],
+    'Pancreas': ['TCGA_PAAD'],
+    'Bladder/Urinary Tract': ['TCGA_BLCA'],
+    'Thyroid': ['TCGA_THCA'],
+    'Esophagus/Stomach': ['TCGA_STAD'],
+    'Cervix': ['TCGA_CESC'],
+    'Ovary/Fallopian Tube': ['TCGA_OV'],
+    'Skin': ['TCGA_SKCM'],
+    'Soft tissue': ['TCGA_SARC'],
+    'Liver': ['TCGA_LIHC'],
+    'CNS/Brain': ['TCGA_GBM','TCGA_LGG'],
+    'Uterus': ['TCGA_UCEC','TCGA_UCS'],
+    'Head/Neck': ['TCGA_HNSC'],
+    'Testis': ['TCGA_TGCT'],
+    'Adrenal Gland': ['TCGA_ACC','TCGA_PCPG'],
+    'Pleura': ['TCGA_MESO'],
+    'Biliary Tract': ['TCGA_CHOL'],
+    'Thymus': ['TCGA_THYM'],
+    'Myeloid': ['TCGA_LAML'],
+    'Lymphoid': ['TCGA_DLBC']
+    
+}

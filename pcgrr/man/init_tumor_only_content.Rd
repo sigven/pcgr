@@ -7,7 +7,7 @@
 init_tumor_only_content()
 }
 \value{
-rep Report structure initialized for tumor-only data
+rep Report structure initialized for tumor-only stats
 }
 \description{
 Function that initiates report element with tumor-only information

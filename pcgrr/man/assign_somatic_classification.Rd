@@ -6,12 +6,12 @@
 based on evidence found in variant set,
 potentially limited by user-defined options}
 \usage{
-assign_somatic_classification(sample_calls, config)
+assign_somatic_classification(sample_calls, settings)
 }
 \arguments{
-\item{sample_calls}{data frame with variants}
+\item{sample_calls}{data frame with putative somatic variants}
 
-\item{config}{configuration object}
+\item{settings}{PCGR run/configuration settings}
 }
 \value{
 sample_calls

@@ -1,0 +1,20 @@
+code	subset	db	pop_description
+afr	non-cancer	gnomad	African non-cancer subset
+amr	non-cancer	gnomad	Admixed American non-cancer subset
+nfe	non-cancer	gnomad	Non-Finnish European non-cancer subset
+fin	non-cancer	gnomad	Finnish non-cancer subset
+oth	non-cancer	gnomad	Other non-cancer subset
+asj	non-cancer	gnomad	Ashkenazi Jewish non-cancer subset
+eas	non-cancer	gnomad	East Asian non-cancer subset
+sas	non-cancer	gnomad	South Asian non-cancer subset
+global	non-cancer	gnomad	Global non-cancer subset
+afr	all	gnomad	African all subset
+amr	all	gnomad	Admixed American all subset
+nfe	all	gnomad	Non-Finnish European all subset
+fin	all	gnomad	Finnish all subset
+oth	all	gnomad	Other all subset
+asj	all	gnomad	Ashkenazi Jewish all subset
+eas	all	gnomad	East Asian all subset
+sas	all	gnomad	South Asian all subset
+mid	all	gnomad	Middle Eastern subset
+global	all	gnomad	Global all subset

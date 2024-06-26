@@ -1,420 +1,656 @@
 #' Function that generates mutational signatures data for PCGR report
 #'
-#' @param vcf_fname VCF file processed with PCGR annotation pipeline -
-#' possibly filtered for depth/allelic fraction
-#' @param pcgr_data object with PCGR annotation data
-#' @param sample_name sample identifier
-#' @param pcgr_config Object with PCGR configuration parameters
-#' @param type_specific logical indicating if all reference signatures are to be
-#' included (F) rather than those known to be prevalent in the tumor (T)
+#' @param variant_set Somatic callset (SNV)
+#' @param vstats Variant statistics object
+#' @param ref_data PCGR reference data object
+#' @param settings PCGR run/configuration settings
+#' @param n_bootstrap_iterations Number of bootstrap iterations for signature analysis
+#' @param sig_contribution_cutoff Minimal signature contribution for reporting
 #'
 #' @export
-generate_report_data_signatures_mp <-
-  function(vcf_fname,
-           pcgr_data,
-           sample_name,
-           pcgr_config,
-           type_specific = T) {
+generate_report_data_signatures <-
+  function(variant_set = NULL,
+           vstats = NULL,
+           ref_data = NULL,
+           settings = NULL,
+           n_bootstrap_iterations = 200,
+           sig_contribution_cutoff = 0.01) {
 
-  log4r_info("------")
-  log4r_info(paste0("Identifying weighted contributions of reference ",
-                    "mutational signatures (COSMIC v3.2) using ",
-                    "MutationalPatterns"))
-  assay <- tolower(pcgr_config$assay_props$type)
+    n_snvs_required <- 30
 
+    pcg_report_signatures <-
+      pcgrr::init_m_signature_content()
 
-  pcg_report_signatures <-
-    pcgrr::init_report(config = pcgr_config,
-                       class = "m_signature_mp")
-
-  ## Retrieve relevant signatures for the tumor in question
-  prevalent_site_signatures <- NULL
-  if(type_specific == T){
-    prevalent_site_signatures <-
-      pcgrr::get_prevalent_site_signatures(
-        site = pcgr_config[["t_props"]][["tumor_type"]],
-        min_prevalence_pct = pcgr_config[["msigs"]][["prevalence_reference_signatures"]],
-        pcgr_data = pcgr_data,
-        incl_poss_artifacts =
-          pcgr_config[["msigs"]][["include_artefact_signatures"]])
-  }
-  if(type_specific == F){
-    prevalent_site_signatures <-
-      pcgrr::get_prevalent_site_signatures(
-        site = "Any",
-        min_prevalence_pct = pcgr_config[["msigs"]][["prevalence_reference_signatures"]],
-        pcgr_data = pcgr_data,
-        incl_poss_artifacts =
-          pcgr_config[["msigs"]][["include_artefact_signatures"]])
-  }
-
-  ## read MutationalPattern VCF file
-  if(file.exists(vcf_fname)){
-    vcfs <- suppressMessages(suppressWarnings(
-      MutationalPatterns::read_vcfs_as_granges(
-        vcf_files = vcf_fname,
-        sample_names = sample_name,
-        genome = pcgr_data[["assembly"]][["ref_genome"]],
-        predefined_dbs_mbs = T),
-      )
-    )
-
-    log4r_info(paste0("Number of SNVs for signature analysis: ",
-                             length(vcfs[[1]])))
-
-    pcg_report_signatures[["eval"]] <- TRUE
-
-    if (length(vcfs[[1]]) >= pcgr_config[["msigs"]][["mutation_limit"]]) {
-
-      ## assign variants to variant set
-      pcg_report_signatures[["variant_set"]][["all"]] <-
-        data.frame('VAR_ID' = rownames(S4Vectors::mcols(vcfs[[1]])),
-                        stringsAsFactors = F) %>%
-        tidyr::separate(.data$VAR_ID, c('CHROM', 'pos_ref_alt'),
-                        sep=":", remove = T) %>%
-        tidyr::separate(.data$pos_ref_alt, c("POS","ref_alt"),
-                        sep="_", remove = T) %>%
-        tidyr::separate(.data$ref_alt, c("REF","ALT"),
-                        sep = "/", remove = T) %>%
-        dplyr::mutate(POS = as.integer(.data$POS))
-
-      ## get context matrix
-      mut_mat <-
-        MutationalPatterns::mut_matrix(
-          vcf_list = vcfs,
-          ref_genome = pcgr_data[["assembly"]][["ref_genome"]],
-          extension = 1)
-      mut_mat <- mut_mat + 0.0001
-
-      ## get reference signatures (COSMIC v3.2)
-      all_reference_signatures <-
-        MutationalPatterns::get_known_signatures(
-        muttype = "snv",
-        genome = stringr::str_replace(
-          pcgr_data[["assembly"]][["grch_name"]], "grc", "GRC"
-        ),
-        incl_poss_artifacts =
-          pcgr_config[["msigs"]][["include_artefact_signatures"]]
-      )
-
-      ## select subset of signatures based on those prevalent in tumor type/tissue
-      selected_sigs <- intersect(
-        colnames(all_reference_signatures),
-        unique(prevalent_site_signatures$aetiology$signature_id)
-      )
-      selected_reference_signatures <-
-        all_reference_signatures[, selected_sigs]
-
-      ## reconstruct mutation profile from reference mutational signatures
-      fit_ref <-
-        MutationalPatterns::fit_to_signatures(mut_mat, selected_reference_signatures)
-
-      ## assess how well the mutational profile can be reconstructed with the
-      ## reference mutational signatures (cosine similarity)
-      sim_original_reconstructed <-
-        as.data.frame(
-          MutationalPatterns::cos_sim_matrix(
-            mut_mat, fit_ref[["reconstructed"]])) %>%
-        magrittr::set_colnames("cosine_sim") %>%
-        magrittr::set_rownames(NULL)
-
-      ## assess the relative contribution of each reference mutational signature
-      tot <- as.data.frame(
-        stats::setNames(reshape2::melt(colSums(fit_ref[["contribution"]])),
-                 c("tot"))) %>%
-        dplyr::mutate(sample_id = as.character(rownames(.))) %>%
-        magrittr::set_rownames(NULL)
-
-      ## add information on aetiologies, and aggregate contributions
-      ## pr. aetiology
-      contributions_per_signature <-
-        as.data.frame(stats::setNames(reshape2::melt(fit_ref[["contribution"]]),
-                               c("signature_id", "sample_id",
-                                 "contribution_raw"))) %>%
-        dplyr::mutate(signature_id = as.character(.data$signature_id)) %>%
-        dplyr::mutate(sample_id = as.character(.data$sample_id)) %>%
-        dplyr::left_join(tot, by = "sample_id") %>%
-        dplyr::mutate(prop_signature = round(as.numeric(.data$contribution_raw) / tot,
-                                             digits = 3)) %>%
-        dplyr::select(.data$signature_id, .data$sample_id, .data$prop_signature) %>%
-        dplyr::filter(.data$prop_signature > 0) %>%
-        dplyr::arrange(dplyr::desc(.data$prop_signature)) %>%
-        dplyr::left_join(
-          dplyr::select(pcgr_data[["mutational_signatures"]][["aetiologies"]],
-                        .data$signature_id,
-                        .data$aetiology, .data$comments, .data$aetiology_keyword),
-          by = c("signature_id")) %>%
-        dplyr::rename(group = .data$aetiology_keyword) %>%
-        dplyr::mutate(
-          contribution =
-            paste0(round(.data$prop_signature * 100, digits = 2), "%")) %>%
-        dplyr::distinct()
-
-      contributions_per_group <- as.data.frame(
-        contributions_per_signature %>%
-          dplyr::group_by(.data$group) %>%
-          dplyr::summarise(prop_group = sum(.data$prop_signature),
-                         signature_id_group = paste(.data$signature_id, collapse=", "),
-                         .groups = "drop")
-
-      )
-
-      cols <- contributions_per_group %>%
-        dplyr::arrange(dplyr::desc(.data$prop_group)) %>%
-        dplyr::select(.data$group) %>%
-        dplyr::distinct() %>%
-        utils::head(25)
-
-      color_vec <- utils::head(
-        pcgrr::color_palette[["tier"]][["values"]], min(25, nrow(cols)))
-
-      names(color_vec) <- cols$group
-      color_vec2 <- color_vec
-      names(color_vec2) <- NULL
-
-      cols <- cols %>%
-        dplyr::mutate(col = color_vec2)
-      contributions_per_signature <- contributions_per_signature %>%
-        dplyr::left_join(cols, by = "group")
-
-      ## emit warning if more than 25 different aetiologies are found
-      ## choose only signatures attributed to 25 different aetiologies
-      missing_aetiologies <- contributions_per_signature %>%
-        dplyr::filter(is.na(.data$col))
-      if(nrow(missing_aetiologies) > 0){
-        log4r_warn(paste0("Found contributions from more than 25 aetiologies - ",
-                          "showing signatures from 25 different aetiologies only"))
-        contributions_per_signature <- contributions_per_signature %>%
-          dplyr::filter(!is.na(.data$col))
-
-        contributions_per_group <- contributions_per_group %>%
-          dplyr::anti_join(missing_aetiologies, by = "group")
-      }
-
-
-      contributions <- list()
-      contributions[["per_group"]] <-  contributions_per_group
-      contributions[["per_signature"]] <-  contributions_per_signature
-
-      ## Get output for tab-separated file
-      ## - contribution per signature id and reference signatures used
-      if(!is.null(prevalent_site_signatures$aetiology) &
-         NROW(contributions[["per_signature"]]) > 0){
-        if("signature_id" %in% colnames(prevalent_site_signatures$aetiology)){
-          reference_sigs <- paste(sort(prevalent_site_signatures$aetiology$signature_id),
-                                  collapse=",")
-          tsv_data <- contributions[["per_signature"]] %>%
-            pcgrr::remove_cols_from_df(
-              cnames = c("contribution","col","aetiology","comments")) %>%
-            dplyr::mutate(
-              all_reference_signatures = !type_specific,
-              tumor_type = pcgr_config[["t_props"]][["tumor_type"]],
-              reference_collection = "COSMIC_v32",
-              reference_signatures = reference_sigs,
-              fitting_accuracy =
-                round(sim_original_reconstructed$cosine_sim * 100, digits = 1))
-        }
-      }
-
-      vr <- vcfs[[sample_name]]
-      GenomeInfoDb::seqlengths(vr) <-
-        GenomeInfoDb::seqlengths(pcgr_data[["assembly"]][["bsg"]])[GenomeInfoDb::seqlevels(pcgr_data[["assembly"]][["bsg"]]) %in% unique(GenomeInfoDb::seqlevels(vr))]
-      chromosomes <- utils::head(GenomeInfoDb::seqnames(pcgr_data[["assembly"]][["bsg"]]), 24)
-
-      pcg_report_signatures[["result"]][["vr"]] <- vr
-      pcg_report_signatures[["result"]][["mut_mat"]] <- mut_mat
-      pcg_report_signatures[["result"]][["chromosomes"]] <- chromosomes
-      pcg_report_signatures[["result"]][["contributions"]] <- contributions
-      pcg_report_signatures[["result"]][["tsv"]] <- tsv_data
-      pcg_report_signatures[["result"]][["reference_data"]] <- prevalent_site_signatures$aetiology
-      pcg_report_signatures[["result"]][["scale_fill_values"]] <- color_vec
-      pcg_report_signatures[["result"]][["scale_fill_names"]] <-
-        names(color_vec)
-      pcg_report_signatures[["result"]][["goodness_of_fit"]] <-
-        round(sim_original_reconstructed$cosine_sim * 100, digits = 1)
+    if(!is.null(variant_set) &
+       !is.null(vstats) &
+       !is.null(ref_data) &
+       !is.null(settings)){
+      pcgrr::log4r_info("------")
+      pcgrr::log4r_info("Identifying mutational signatures")
     }else{
-      pcg_report_signatures[["missing_data"]] <- TRUE
-      if (length(vcfs[[1]]) > 0) {
-        pcg_report_signatures[["variant_set"]][["all"]] <-
-          as.data.frame(vcfs[[1]]) %>%
-          dplyr::rename(POS = .data$start, CHROM = .data$seqnames) %>%
-          dplyr::select(.data$CHROM, .data$POS, .data$REF, .data$ALT) %>%
-          magrittr::set_rownames(NULL)
-        log4r_info(
-          paste0("Too few SNVs (n = ",
-                 nrow(pcg_report_signatures[["variant_set"]][["all"]]),
-                 ") for reconstruction of mutational signatures by ",
-                 "MutationalPatterns, limit set to ",
-                 pcgr_config[["msigs"]][["mutation_limit"]]))
+      pcgrr::log4r_warn("Missing input data for mutational signature analysis")
+      return(pcg_report_signatures)
+    }
+
+    if("n_snv" %in% names(vstats)){
+      if(vstats$n_snv < n_snvs_required){
+        pcgrr::log4r_warn(
+          paste0("Too few SNVs detected in sample (n = ",
+                 vstats$n_snv,")",
+                 " - omitting mutational signature analysis"))
+        pcg_report_signatures$missing_data <- TRUE
+        return(pcg_report_signatures)
       }
     }
-  }
 
-  return(pcg_report_signatures)
-}
+    sig_settings <- settings$conf$somatic_snv$mutational_signatures
+
+    cosmic_metadata <-
+      ref_data$metadata |>
+      dplyr::filter(.data$source_abbreviation == "cosmic_mutsigs") |>
+      dplyr::select(c("source_version")) |>
+      dplyr::mutate(
+        source_version = stringr::str_replace_all(
+          .data$source_version, "[\r\n]" , ""))
+
+    pcgrr::log4r_info("------")
+    pcgrr::log4r_info(
+      paste0("Identifying weighted contributions of reference ",
+             "mutational signatures (COSMIC ",
+             cosmic_metadata$source_version,")"))
+    assay <- tolower(settings$conf$assay_properties$type)
+
+    vcf_name_mutsig_analysis <-
+      file.path(settings$output_dir,
+                paste(
+                  settings$sample_id,
+                  stringi::stri_rand_strings(
+                    1, 15, pattern = "[A-Za-z0-9]"),
+                  "mutational_patterns_input.all.vcf",
+                  sep="."))
+
+    pcgrr::write_processed_vcf(
+      calls = variant_set,
+      sample_name = settings$sample_id,
+      output_directory = settings$output_dir,
+      vcf_fname = vcf_name_mutsig_analysis,
+      snv_only = F)
+
+    fit_signatures_to_ttype <- !as.logical(
+      sig_settings$all_reference_signatures
+    )
+
+    ## Retrieve relevant signatures for the tumor in question
+
+
+    sites_with_sig_prevalence <-
+      unique(ref_data$misc$mutational_signature[["PRIMARY_SITE"]])
+
+    site_has_prevalence_data <- T
+    if(!(settings$conf$sample_properties$site %in%
+         sites_with_sig_prevalence)){
+      site_has_prevalence_data <- F
+      pcgrr::log4r_warn(
+        paste0("No signature prevalence data available for site '",
+               settings$conf$sample_properties$site,
+               "' - considering all signatures for analysis"))
+    }
+
+    prevalent_site_signatures <- NULL
+    if (fit_signatures_to_ttype == T & site_has_prevalence_data == T) {
+      prevalent_site_signatures <-
+        pcgrr::get_prevalent_site_signatures(
+          site = settings$conf$sample_properties$site,
+          min_prevalence_pct =
+            as.numeric(sig_settings$prevalence_reference_signatures),
+          ref_data = ref_data,
+          incl_poss_artifacts =
+            sig_settings$include_artefact_signatures)
+    }else{
+      prevalent_site_signatures <-
+        pcgrr::get_prevalent_site_signatures(
+          site = "Any",
+          min_prevalence_pct =
+            as.numeric(sig_settings$prevalence_reference_signatures),
+          ref_data = ref_data,
+          incl_poss_artifacts =
+            sig_settings$include_artefact_signatures)
+    }
+
+    ## read MutationalPattern VCF file
+    if (file.exists(glue::glue("{vcf_name_mutsig_analysis}.gz"))) {
+      grl <- suppressMessages(suppressWarnings(
+        MutationalPatterns::read_vcfs_as_granges(
+          vcf_files = glue::glue("{vcf_name_mutsig_analysis}.gz"),
+          sample_names = settings$sample_id,
+          type = "all",
+          genome = ref_data$assembly$bsg,
+          predefined_dbs_mbs = T)
+      )
+      )
+      if(class(grl)[1] == "CompressedGRangesList"){
+
+        snv_grl <- suppressMessages(
+          MutationalPatterns::get_mut_type(
+            grl, type = "snv", predefined_dbs_mbs = T))
+        indel_grl <- suppressMessages(
+          MutationalPatterns::get_mut_type(
+            grl, type = "indel", predefined_dbs_mbs = T))
+        indel_counts <- NULL
+        if(length(indel_grl[[1]]) > 0){
+          indel_grl <- MutationalPatterns::get_indel_context(
+            indel_grl, ref_genome = ref_data$assembly$bsg)
+          indel_counts <- MutationalPatterns::count_indel_contexts(
+            indel_grl)
+        }
+
+        type_occurrences <- suppressWarnings(
+          MutationalPatterns::mut_type_occurrences(
+            snv_grl, ref_genome = ref_data$assembly$bsg)
+        )
+
+        if(is.data.frame(type_occurrences)){
+          if("T>A" %in% colnames(type_occurrences)){
+            type_occurrences <- type_occurrences |>
+              dplyr::rename("A>T" = "T>A")
+          }
+          if("T>C" %in% colnames(type_occurrences)){
+            type_occurrences <- type_occurrences |>
+              dplyr::rename("A>G" = "T>C")
+          }
+          if("T>G" %in% colnames(type_occurrences)){
+            type_occurrences <- type_occurrences |>
+              dplyr::rename("A>C" = "T>G")
+          }
+        }
+
+        num_snvs_sig_analysis <- as.character(
+          formattable::comma(length(snv_grl[[1]]), digits = 0))
+
+        pcgrr::log4r_info(paste0("Number of SNVs for signature analysis: ",
+                                 num_snvs_sig_analysis))
+
+        pcg_report_signatures[["result"]][["indel_counts"]] <-
+          indel_counts
+        pcg_report_signatures[["result"]][["type_occurrences"]] <-
+          type_occurrences
+        pcg_report_signatures[["eval"]] <- TRUE
+
+
+        ## assign variants to variant set
+        pcg_report_signatures[["variant_set"]][["all"]] <-
+          data.frame('VAR_ID' = rownames(S4Vectors::mcols(snv_grl[[1]])),
+                     stringsAsFactors = F) |>
+          tidyr::separate(.data$VAR_ID, c('CHROM', 'pos_ref_alt'),
+                          sep=":", remove = T) |>
+          tidyr::separate(.data$pos_ref_alt, c("POS","ref_alt"),
+                          sep="_", remove = T) |>
+          tidyr::separate(.data$ref_alt, c("REF","ALT"),
+                          sep = "/", remove = T) |>
+          dplyr::mutate(POS = as.integer(.data$POS))
+
+        ## get context matrix
+        mut_mat <-
+          MutationalPatterns::mut_matrix(
+            vcf_list = snv_grl,
+            ref_genome = ref_data$assembly$bsg,
+            extension = 1)
+        pcg_report_signatures[["result"]][["mut_mat"]] <- mut_mat
+        mut_mat <- mut_mat + 0.0001
+
+        # get reference signatures (COSMIC v3.4)
+        all_reference_signatures <-
+          pcgrr::cosmic_sbs_signatures[['all']]
+
+        if(as.logical(sig_settings$include_artefact_signatures) == FALSE){
+          all_reference_signatures <-
+            pcgrr::cosmic_sbs_signatures[['no_artefacts']]
+        }
+
+        if (length(snv_grl[[1]]) >= n_snvs_required) {
+
+          sig_similarity <-
+            MutationalPatterns::cos_sim_matrix(
+              mut_mat, all_reference_signatures)
+
+          if(length(sig_similarity) >= 67){
+            pcg_report_signatures[["result"]][['signature_similarity']] <-
+              tidyr::pivot_longer(
+                as.data.frame(sig_similarity),
+                names_to = "SIGNATURE_ID",
+                values_to = "SIMILARITY",
+                cols = dplyr::everything()) |>
+              dplyr::arrange(
+                dplyr::desc(.data$SIMILARITY)) |>
+              dplyr::mutate(
+                SIMILARITY = round(
+                  .data$SIMILARITY, digits = 4)) |>
+              dplyr::left_join(
+                dplyr::select(
+                  prevalent_site_signatures$aetiology,
+                  c("SIGNATURE_ID", "AETIOLOGY_KEYWORD")),
+                by = "SIGNATURE_ID"
+              ) |>
+              #dplyr::mutate(SITE_SPECIFIC = "NOT_DEFINED") |>
+              dplyr::mutate(SITE_SPECIFIC = dplyr::if_else(
+                as.logical(fit_signatures_to_ttype) == TRUE &
+                  site_has_prevalence_data == TRUE,
+                "NO",
+                as.character("NOT_DEFINED")
+              )) |>
+              dplyr::mutate(SITE_SPECIFIC = dplyr::case_when(
+                SIGNATURE_ID %in%
+                  unique(prevalent_site_signatures$aetiology$SIGNATURE_ID) &
+                  as.logical(fit_signatures_to_ttype) == TRUE &
+                  as.logical(site_has_prevalence_data) == TRUE ~ "YES",
+                TRUE ~ as.character(SITE_SPECIFIC)))
+          }
+        }
+
+        if (length(snv_grl[[1]]) >= sig_settings[["mutation_limit"]]) {
+          ## select subset of signatures based on those prevalent in tumor type/tissue
+          selected_sigs <- intersect(
+            colnames(all_reference_signatures),
+            unique(prevalent_site_signatures$aetiology$SIGNATURE_ID)
+          )
+          selected_reference_signatures <-
+            all_reference_signatures[, selected_sigs]
+
+          ## reconstruct mutation profile from reference mutational signatures
+          ## using bootstrapping
+          n_bootstrap_iterations <- 200
+          i <- 1
+          bootstrap_data <- list()
+          bootstrap_data[['goodness_of_fit']] <- data.frame()
+          bootstrap_data[['contributions']] <- data.frame()
+          while(i <= n_bootstrap_iterations){
+            mut_mat_bs <- mutpat_resample_mut_mat(
+              mut_matrix = mut_mat)
+            fit_ref_bs <-
+              MutationalPatterns::fit_to_signatures(
+                mut_mat_bs, selected_reference_signatures)
+            if(!is.null(fit_ref_bs)){
+              b <- as.data.frame(stats::setNames(
+                reshape2::melt(fit_ref_bs[["contribution"]]),
+                c("SIGNATURE_ID", "sample_id",
+                  "contribution_raw"))) |>
+                dplyr::mutate(
+                  prop = .data$contribution_raw / sum(.data$contribution_raw)) |>
+                dplyr::mutate(bootstrap_iteration = i)
+              bootstrap_data[['contributions']] <- dplyr::bind_rows(
+                bootstrap_data[['contributions']], b)
+
+              sim_original_reconstructed <-
+                as.data.frame(
+                  MutationalPatterns::cos_sim_matrix(
+                    mut_mat_bs, fit_ref_bs[["reconstructed"]]))
+              colnames(sim_original_reconstructed) <- c("cosine_sim")
+              rownames(sim_original_reconstructed) <- NULL
+              #magrittr::set_colnames("cosine_sim") |>
+              #magrittr::set_rownames(NULL) |>
+              sim_original_reconstructed <-
+                sim_original_reconstructed |>
+                dplyr::mutate(bootstrap_iteration = i,
+                              sample_id = settings$sample_id)
+              bootstrap_data[['goodness_of_fit']] <-
+                dplyr::bind_rows(
+                  bootstrap_data[['goodness_of_fit']],
+                  sim_original_reconstructed)
+              #i <- n_bootstrap_iterations + 1
+            }
+            i <- i + 1
+          }
+
+          ## calculate confidence intervals for each signature
+          sig_prop_data <- data.frame()
+          for(sig in unique(bootstrap_data[['contributions']]$SIGNATURE_ID)){
+            sdata <- bootstrap_data[['contributions']] |>
+              dplyr::filter(.data$SIGNATURE_ID == sig)
+            ci_data <- stats::t.test(sdata$prop, conf.level = 0.95)
+            prop_ci_lower <- ci_data$conf.int[1]
+            prop_ci_upper <- ci_data$conf.int[2]
+
+            sig_prop_data <- dplyr::bind_rows(
+              sig_prop_data,
+              data.frame(SIGNATURE_ID = sig,
+                         prop_signature = mean(sdata$prop),
+                         prop_signature_ci_lower = prop_ci_lower,
+                         prop_signature_ci_upper = prop_ci_upper)
+            )
+
+          }
+
+          ci_data_gof <- stats::t.test(
+            bootstrap_data[['goodness_of_fit']]$cosine_sim,
+            conf.level = 0.95)
+          gof <- list()
+          gof[['ci_lower']] <- ci_data_gof$conf.int[1]
+          gof[['ci_upper']] <- ci_data_gof$conf.int[2]
+          gof[['estimate']] <- mean(bootstrap_data[['goodness_of_fit']]$cosine_sim)
+
+          contributions_per_signature <-
+            sig_prop_data |>
+            dplyr::mutate(SIGNATURE_ID = as.character(.data$SIGNATURE_ID)) |>
+            dplyr::mutate(sample_id = settings$sample_id,
+                          n_bs_iterations = n_bootstrap_iterations) |>
+            dplyr::select(c("SIGNATURE_ID",
+                            "sample_id",
+                            "n_bs_iterations",
+                            "prop_signature",
+                            "prop_signature_ci_lower",
+                            "prop_signature_ci_upper")) |>
+            dplyr::filter(.data$prop_signature > sig_contribution_cutoff) |>
+            dplyr::arrange(dplyr::desc(.data$prop_signature)) |>
+            dplyr::left_join(
+              dplyr::select(
+                ref_data$misc$mutational_signature,
+                c("SIGNATURE_ID",
+                  "AETIOLOGY",
+                  "COMMENTS",
+                  "AETIOLOGY_KEYWORD")),
+              by = c("SIGNATURE_ID")) |>
+            dplyr::rename(
+              group = "AETIOLOGY_KEYWORD",
+              signature_id = "SIGNATURE_ID",
+              aetiology = "AETIOLOGY",
+              comments = "COMMENTS") |>
+            dplyr::mutate(
+              contribution =
+                paste0(
+                  round(.data$prop_signature * 100, digits = 2), "%")) |>
+            dplyr::distinct()
+
+          contributions_per_group <- as.data.frame(
+            contributions_per_signature |>
+              dplyr::group_by(.data$group) |>
+              dplyr::summarise(
+                prop_group = sum(.data$prop_signature),
+                signature_id_group = paste(
+                  sort(.data$signature_id), collapse=", "),
+                .groups = "drop") |>
+              dplyr::arrange(
+                dplyr::desc(.data$prop_group)) |>
+              dplyr::mutate(group = dplyr::if_else(
+                .data$prop_group > 0.05,
+                .data$group,
+                "Other")) |>
+              dplyr::group_by(.data$group) |>
+              dplyr::summarise(
+                prop_group = sum(.data$prop_group),
+                signature_id_group = paste(
+                  sort(.data$signature_id_group), collapse=", "),
+                .groups = "drop") |>
+              dplyr::mutate(prop_group = round(
+                .data$prop_group, digits = 3)) |>
+              dplyr::arrange(
+                dplyr::desc(.data$prop_group))
+
+          )
+
+          cols <- contributions_per_signature |>
+            dplyr::arrange(dplyr::desc(.data$prop_signature)) |>
+            dplyr::select(c("signature_id")) |>
+            dplyr::distinct() |>
+            utils::head(25)
+
+          color_vec <- utils::head(
+            pcgrr::color_palette[["tier"]][["values"]],
+            min(25, nrow(cols)))
+
+          names(color_vec) <- cols$signature_id
+          color_vec2 <- color_vec
+          names(color_vec2) <- NULL
+
+          cols <- cols |>
+            dplyr::mutate(col = color_vec2)
+          contributions_per_signature <- contributions_per_signature |>
+            dplyr::left_join(cols, by = "signature_id")
+
+          ## emit warning if more than 25 different signatures are found
+          ## choose only signatures attributed to 25 different signatures
+          missing_signatures <- contributions_per_signature |>
+            dplyr::filter(is.na(.data$col))
+          if (nrow(missing_signatures) > 0) {
+            log4r_warn(paste0("Found contributions from more than 25 signatures - ",
+                              "showing signatures from 25 different signatures only"))
+            contributions_per_signature <- contributions_per_signature |>
+              dplyr::filter(!is.na(.data$col))
+
+            contributions_per_group <- as.data.frame(
+              contributions_per_group |>
+                tidyr::separate_rows(
+                  .data$signature_id_group, sep = ", ") |>
+                dplyr::anti_join(missing_signatures,
+                                 by = c("signature_id_group" = "signature_id")) |>
+                dplyr::group_by(
+                  c("group","prop_group")
+                ) |>
+                dplyr::summarise(
+                  signature_id_group = paste(
+                    sort(.data$signature_id_group), collapse=", "),
+                  .groups = "drop"
+                )
+            )
+          }
+
+
+          contributions <- list()
+          contributions[["per_group"]] <-  contributions_per_group
+          contributions[["per_signature"]] <-  contributions_per_signature
+          tsv_data <- data.frame()
+
+          ## Get output for tab-separated file
+          ## - contribution per signature id and reference signatures used
+          if (!is.null(prevalent_site_signatures$aetiology) &
+              NROW(contributions[["per_signature"]]) > 0) {
+            if ("SIGNATURE_ID" %in% colnames(prevalent_site_signatures$aetiology)) {
+              reference_sigs <- paste(sort(prevalent_site_signatures$aetiology$SIGNATURE_ID),
+                                      collapse=",")
+              tsv_data <- contributions[["per_signature"]] |>
+                pcgrr::remove_cols_from_df(
+                  cnames = c("contribution","col","AETIOLOGY","COMMENTS")) |>
+                dplyr::mutate(
+                  all_reference_signatures = !fit_signatures_to_ttype,
+                  tumor_type = settings$conf$sample_properties$site,
+                  reference_collection = "COSMIC_v34",
+                  reference_signatures = reference_sigs,
+                  fitting_accuracy =
+                    round(gof$estimate * 100, digits = 1)) |>
+                dplyr::select(c("sample_id"), dplyr::everything())
+            }
+          }
+
+          vr <- grl[[settings$sample_id]]
+          GenomeInfoDb::seqlengths(vr) <-
+            GenomeInfoDb::seqlengths(
+              ref_data$assembly$bsg)[GenomeInfoDb::seqlevels(ref_data$assembly$bsg) %in% unique(GenomeInfoDb::seqlevels(vr))]
+          chromosomes <- utils::head(
+            GenomeInfoDb::seqnames(ref_data$assembly$bsg), 24)
+
+          pcg_report_signatures[["result"]][["vr"]] <- vr
+          pcg_report_signatures[["result"]][["chromosomes"]] <- chromosomes
+          pcg_report_signatures[["result"]][["contributions"]] <- contributions
+          pcg_report_signatures[["result"]][["tsv"]] <- tsv_data
+          pcg_report_signatures[["result"]][["no_site_prevalence"]] <-
+            !site_has_prevalence_data
+          pcg_report_signatures[["result"]][["reference_data"]] <-
+            prevalent_site_signatures$aetiology
+          pcg_report_signatures[["result"]][["scale_fill_values"]] <- color_vec
+          pcg_report_signatures[["result"]][["scale_fill_names"]] <-
+            names(color_vec)
+          pcg_report_signatures[["result"]][["goodness_of_fit"]] <-
+            gof
+        }else{
+          pcg_report_signatures[["missing_data"]] <- TRUE
+          if (length(snv_grl[[1]]) > 0) {
+            pcgrr::log4r_info(
+              paste0("Too few SNVs (n = ",
+                     nrow(pcg_report_signatures[["variant_set"]][["all"]]),
+                     ") for reconstruction of mutational signatures by ",
+                     "MutationalPatterns, limit set to ",
+                     sig_settings$mutation_limit))
+          }
+        }
+      }
+    }
+
+    unlink(glue::glue("{vcf_name_mutsig_analysis}*"), force = TRUE)
+
+    return(pcg_report_signatures)
+  }
 
 
 #' Function that retrieves prevalent signatures for a given tumor type/primary site
-#' Data is collected from COSMIC v3.2.
+#' Data is collected from COSMIC v3.4.
 #'
 #' @param site Primary tumor site
 #' @param custom_collection Custom collection of signatures from COSMIC
-#' @param pcgr_data PCGR data object
-#' @param min_prevalence_pct Minimum prevalence (pct) of signature in cohorts associated with primary site -
+#' @param ref_data PCGR reference data object
+#' @param min_prevalence_pct Minimum prevalence (pct) of signature in
+#' cohorts associated with primary site -
 #' used to select reference signatures for inclusion in signature reconstruction
-#' @param incl_poss_artifacts logical indicating if artefact signatures are to be included
+#' @param incl_poss_artifacts logical indicating if artefact signatures
+#' are to be included
 #'
 #' @export
 get_prevalent_site_signatures <-
   function(site = "Any",
            custom_collection = NULL,
-           pcgr_data = NULL,
-           min_prevalence_pct = 5,
+           ref_data = NULL,
+           min_prevalence_pct = 0.1,
            incl_poss_artifacts = T) {
 
-    if(is.null(custom_collection)){
-      log4r_info(paste0(
+    cosmic_metadata <-
+      ref_data$metadata |>
+      dplyr::filter(
+        .data$source_abbreviation == "cosmic_mutsigs") |>
+      dplyr::select(c("source_version")) |>
+      dplyr::mutate(
+        source_version = stringr::str_replace_all(
+          .data$source_version, "[\r\n]" , ""))
+
+    if (is.null(custom_collection)) {
+      pcgrr::log4r_info(paste0(
         "Retrieving prevalent (prevalence >= ",
         min_prevalence_pct, " percent) reference signatures for ",
-        site, ", using COSMIC v3.2 collection"))
+        site, ", using COSMIC ",
+        cosmic_metadata$source_version,
+        " collection"))
     }
-    log4r_info(paste0(
+    pcgrr::log4r_info(paste0(
       "Inclusion of mutational signature artefacts (e.g. sequencing artefacts): ",
-      incl_poss_artifacts))
+      as.logical(incl_poss_artifacts)))
 
     invisible(
       assertthat::assert_that(
-        !is.null(pcgr_data[["mutational_signatures"]][["aetiologies"]]),
+        !is.null(ref_data$misc$mutational_signature),
         msg =
-          "Cannot load ref. aetiologies (COSMIC v3.2) of mutational signatures"))
+          paste0(
+            "Cannot load ref. aetiologies (COSMIC ",
+            cosmic_metadata$source_version,
+            ") of mutational signatures")))
     invisible(
       assertthat::assert_that(
-        is.data.frame(pcgr_data[["mutational_signatures"]][["aetiologies"]]),
+        is.data.frame(ref_data$misc$mutational_signature),
         msg = "Reference aetiologies must be of type data.frame()"))
     invisible(
       assertthat::assert_that(
-        min_prevalence_pct == 1 |
-          min_prevalence_pct == 2 | min_prevalence_pct == 5 |
-          min_prevalence_pct == 10 | min_prevalence_pct == 15 |
-          min_prevalence_pct == 20,
-        msg = "Argument 'min_prevalence_pct' must be any of '0, 2, 5, 10, 15 or 20'"))
+        min_prevalence_pct >= 0.1 &
+          min_prevalence_pct <= 20,
+        msg = "Argument 'min_prevalence_pct' must be more than 0.1 and less than 20"))
 
     valid_signature_ids <-
-      unique(pcgr_data[["mutational_signatures"]][["aetiologies"]]$signature_id)
+      unique(ref_data$misc$mutational_signature$SIGNATURE_ID)
     signatures_prevalence <- data.frame()
 
-    if(!is.null(custom_collection)){
+    if (!is.null(custom_collection)) {
       invisible(
         assertthat::assert_that(
           is.character(custom_collection),
           msg = "Argument 'custom_collection' must be a character vector"))
 
-      log4r_info(paste0(
-        "Retrieving reference signatures from COSMIC v3.2 collection based on user-defined collection (",
+      pcgrr::log4r_info(paste0(
+        "Retrieving reference signatures from COSMIC ",
+        cosmic_metadata$source_version,
+        " collection based on user-defined collection (",
         paste(unique(custom_collection), collapse=", "), ")")
       )
       i <- 1
-      while(i <= length(custom_collection)){
-        if(!(custom_collection[i] %in% valid_signature_ids)){
-          log4r_warn(paste0("Could not find specified custom signature id  '",
-                                    custom_collection[i], "' in COSMIC v3.2 reference collection",
-                                    " - ignoring"))
+      while(i <= length(custom_collection)) {
+        if (!(custom_collection[i] %in% valid_signature_ids)) {
+          log4r_warn(paste0(
+            "Could not find specified custom signature id  '",
+            custom_collection[i], "' in COSMIC ",
+            cosmic_metadata$source_version,
+            " reference collection",
+            " - ignoring"))
         }
         i <- i + 1
       }
 
       signatures_prevalence <-
-        pcgr_data[["mutational_signatures"]][["aetiologies"]] %>%
-        dplyr::select(.data$signature_id,
-                      .data$aetiology_keyword,
-                      .data$aetiology,
-                      .data$associated_signatures,
-                      .data$comments) %>%
-        dplyr::filter(.data$signature_id %in% custom_collection) %>%
+        ref_data$misc$mutational_signature |>
+        dplyr::select(c("SIGNATURE_ID",
+                      "AETIOLOGY_KEYWORD",
+                      "AETIOLOGY",
+                      "ASSOCIATED_SIGNATURES",
+                      "COMMENTS")) |>
+        dplyr::filter(.data$SIGNATURE_ID %in% custom_collection) |>
         dplyr::distinct()
 
     }else{
 
       unique_sites_with_signature_prevalence <-
-        unique(pcgr_data[["mutational_signatures"]][["aetiologies"]][["primary_site"]])
+        unique(ref_data$misc$mutational_signature[["PRIMARY_SITE"]])
+
+      ## No primary site defined - 'Any'
       if (!(site %in% unique_sites_with_signature_prevalence)) {
-        log4r_info(
-          paste0("Primary tumor site '", site, "' ",
-                 "does not have any signatures with significant ",
-                 "prevalence - considering all"))
         signatures_prevalence <-
-          pcgr_data[["mutational_signatures"]][["aetiologies"]] %>%
-          dplyr::select(.data$signature_id,
-                        .data$aetiology_keyword,
-                        .data$aetiology,
-                        .data$associated_signatures,
-                        .data$comments) %>%
+          ref_data$misc$mutational_signature |>
+          dplyr::select(c("SIGNATURE_ID",
+                          "AETIOLOGY_KEYWORD",
+                          "AETIOLOGY",
+                          "ASSOCIATED_SIGNATURES",
+                          "COMMENTS")) |>
           dplyr::distinct()
       }else{
         signatures_prevalence <-
-          pcgr_data[["mutational_signatures"]][["aetiologies"]] %>%
-          dplyr::filter(.data$primary_site == site) %>%
-          dplyr::select(.data$signature_id,
-                        .data$primary_site,
-                        .data$prevalence_pct,
-                        .data$prevalence_above_5pct,
-                        .data$prevalence_above_10pct,
-                        .data$prevalence_above_15pct,
-                        .data$prevalence_above_20pct,
-                        .data$aetiology_keyword,
-                        .data$aetiology,
-                        .data$associated_signatures,
-                        .data$comments) %>%
+          ref_data$misc$mutational_signature |>
+          dplyr::filter(.data$PRIMARY_SITE == site) |>
+          dplyr::select(.data$SIGNATURE_ID,
+                        .data$PRIMARY_SITE,
+                        .data$PREVALENCE_PCT,
+                        .data$AETIOLOGY_KEYWORD,
+                        .data$AETIOLOGY,
+                        .data$ASSOCIATED_SIGNATURES,
+                        .data$COMMENTS) |>
           dplyr::distinct()
 
-        if (min_prevalence_pct > 0) {
-          if (min_prevalence_pct == 5) {
-            signatures_prevalence <- signatures_prevalence %>%
-              dplyr::filter(.data$prevalence_above_5pct == T |
-                              is.na(.data$prevalence_above_5pct))
-          }else if (min_prevalence_pct == 10) {
-            signatures_prevalence <- signatures_prevalence %>%
-              dplyr::filter(.data$prevalence_above_10pct == T |
-                              is.na(.data$prevalence_above_10pct))
-          }
-          else if (min_prevalence_pct == 15) {
-            signatures_prevalence <- signatures_prevalence %>%
-              dplyr::filter(.data$prevalence_above_15pct == T |
-                              is.na(.data$prevalence_above_15pct))
-          }else if (min_prevalence_pct == 20) {
-            signatures_prevalence <- signatures_prevalence %>%
-              dplyr::filter(.data$prevalence_above_20pct == T |
-                              is.na(.data$prevalence_above_20pct))
-          }else if (min_prevalence_pct == 2 | min_prevalence_pct == 1){
-            signatures_prevalence <- signatures_prevalence %>%
-              dplyr::filter(!is.na(.data$prevalence_pct)) %>%
-              dplyr::filter(.data$prevalence_pct >= min_prevalence_pct)
-          }
+        if (min_prevalence_pct > 0.1) {
+          signatures_prevalence <- signatures_prevalence |>
+            dplyr::filter(!is.na(.data$PREVALENCE_PCT)) |>
+            dplyr::filter(.data$PREVALENCE_PCT >= min_prevalence_pct)
         }
-        signatures_prevalence <- signatures_prevalence %>%
-          dplyr::select(-c(.data$primary_site,
-                           .data$prevalence_above_5pct,
-                           .data$prevalence_above_10pct,
-                           .data$prevalence_above_15pct,
-                           .data$prevalence_above_20pct)) %>%
-          dplyr::distinct() %>%
-          dplyr::arrange(dplyr::desc(.data$prevalence_pct)) %>%
-          dplyr::select(-.data$prevalence_pct)
+        signatures_prevalence <- signatures_prevalence |>
+          dplyr::distinct() |>
+          dplyr::arrange(dplyr::desc(.data$PREVALENCE_PCT)) |>
+          dplyr::select(-c("PREVALENCE_PCT","PRIMARY_SITE"))
       }
     }
 
-    if(incl_poss_artifacts == F){
-      signatures_prevalence <- signatures_prevalence %>%
-        dplyr::filter(!stringr::str_detect(.data$aetiology_keyword,"artefact"))
+    if (incl_poss_artifacts == F) {
+      signatures_prevalence <- signatures_prevalence |>
+        dplyr::filter(!stringr::str_detect(
+          .data$AETIOLOGY_KEYWORD,"artefact"))
     }
-    signatures_prevalence <- signatures_prevalence %>%
+    signatures_prevalence <- signatures_prevalence |>
       dplyr::distinct()
 
     ## Subset signature matrix - keeping only columns (signatures)
     ## to those defined by primary site/custom collection
-    sigs <- unique(signatures_prevalence$signature_id)
-    log4r_info(paste0("Limiting reference collection to signatures: ",
-                              paste(sigs, collapse = ", ")))
+    sigs <- unique(signatures_prevalence$SIGNATURE_ID)
+    #pcgrr::log4r_info(paste0("Limiting reference collection to signatures: ",
+    #                          paste(sigs, collapse = ", ")))
 
     result <- list("aetiology" = signatures_prevalence)
 
@@ -433,11 +669,13 @@ get_prevalent_site_signatures <-
 #' @param build genome assembly (grch37/grch38)
 #'
 #' @export
-generate_report_data_rainfall <- function(variant_set, colors = NULL,
-                                          autosomes = FALSE, build = NULL) {
+generate_report_data_rainfall <- function(variant_set,
+                                          colors = NULL,
+                                          autosomes = FALSE,
+                                          build = NULL) {
 
-  pcg_report_rainfall <- pcgrr::init_report(class = "rainfall")
-  if(NROW(variant_set) == 0){
+  pcg_report_rainfall <- pcgrr::init_rainfall_content()
+  if (NROW(variant_set) == 0) {
     return(pcg_report_rainfall)
   }
 
@@ -457,16 +695,13 @@ generate_report_data_rainfall <- function(variant_set, colors = NULL,
                    "') not allowed, available reference build values are:",
                    "'grch37' or 'grch38'")))
 
-  log4r_info("------")
-  log4r_info(paste0("Calculating data for rainfall plot"))
+  pcgrr::log4r_info("------")
+  pcgrr::log4r_info(paste0("Calculating data for rainfall plot"))
 
 
-  sbs_types <- c("C>A", "C>G", "C>T", "T>A", "T>C", "T>G")
+  sbs_types <- c("C>T", "A>G", "A>C", "A>T", "C>G", "C>A")
   if (is.null(colors)) {
-    colors <- RColorBrewer::brewer.pal(6, "Dark2")
-    # colors <- c(
-    #   "#2EBAED", "#000000", "#DE1C14",
-    #   "#D4D2D2", "#ADCC54", "#F0D0CE")
+    colors <- utils::head(pcgrr::color_palette$tier$values, 6)
   }else{
     invisible(
       assertthat::assert_that(
@@ -482,34 +717,40 @@ generate_report_data_rainfall <- function(variant_set, colors = NULL,
     }
   }
   if (chr_prefix == F) {
-    variant_set <- variant_set %>%
+    variant_set <- variant_set |>
       dplyr::mutate(CHROM = paste0("chr", .data$CHROM))
   }
 
-  dat <- dplyr::select(variant_set, .data$CHROM, .data$POS,
-                       .data$REF, .data$ALT, .data$VARIANT_CLASS) %>%
+  dat <- dplyr::select(
+    variant_set,
+    c("CHROM",
+      "POS",
+      "REF",
+      "ALT",
+      "VARIANT_CLASS")) |>
     dplyr::filter(.data$VARIANT_CLASS == "SNV")
 
-  if (nrow(dat) < 10 | length(chromosome_names) < 2) {
-    log4r_info(
+  if (nrow(dat) < 10 | nrow(dat) > 30000 | length(chromosome_names) < 2) {
+    pcgrr::log4r_info(
       paste0("Too few variants (< 10) and chromosomes ",
-             " represented (< 2) - skipping rainfall plot"))
+             " represented (< 2) OR too many variants ",
+             "( > 30,000) - skipping rainfall plot"))
     pcg_report_rainfall[["eval"]] <- F
   }else{
-    dat <- dat %>%
-      pcgrr::assign_mutation_type() %>%
+    dat <- dat |>
+      pcgrr::assign_mutation_type() |>
       dplyr::mutate(
         MUTATION_TYPE =
-          dplyr::if_else(stringr::str_detect(.data$MUTATION_TYPE, "^C>"),
+          dplyr::if_else(stringr::str_detect(.data$MUTATION_TYPE, "^(C|A)>"),
                          stringr::str_replace(.data$MUTATION_TYPE,
                                               ":[A-Z]>[A-Z]$", ""),
-                         as.character(.data$MUTATION_TYPE))) %>%
-      dplyr::mutate(
-        MUTATION_TYPE =
-          dplyr::if_else(stringr::str_detect(.data$MUTATION_TYPE, "^A>"),
-                         stringr::str_replace(.data$MUTATION_TYPE,
-                                              "^[A-Z]>[A-Z]:", ""),
-                         as.character(.data$MUTATION_TYPE))) %>%
+                         as.character(.data$MUTATION_TYPE))) |>
+      # dplyr::mutate(
+      #   MUTATION_TYPE =
+      #     dplyr::if_else(stringr::str_detect(.data$MUTATION_TYPE, "^A>"),
+      #                    stringr::str_replace(.data$MUTATION_TYPE,
+      #                                         "^[A-Z]>[A-Z]:", ""),
+      #                    as.character(.data$MUTATION_TYPE))) |>
       pcgrr::sort_chromosomal_segments()
 
     bsg <- get_genome_obj(build)
@@ -573,4 +814,33 @@ generate_report_data_rainfall <- function(variant_set, colors = NULL,
            "labels" = labels, "cex" = 0.8, "cex_text" = 3)
   }
   return(pcg_report_rainfall)
+}
+
+#' MutationalPatterns Resample a mutation matrix
+#'
+#' Since this is an unexported function, copied verbatim from
+#' https://github.com/UMCUGenetics/MutationalPatterns/blob/ca9caf/R/fit_to_signatures_bootstrapped.R#L161
+#'
+#' The mutation matrix is resampled per column (sample).
+#' Resampling is done with replacement using the row weights as propabilities.
+#'
+#' @param mut_matrix mutation count matrix (dimensions: x mutation types
+#' X n samples)
+#'
+#' @return A resamples mutation matrix
+#'
+#' @noRd
+#'
+mutpat_resample_mut_mat <- function(mut_matrix) {
+  mut_mat_resampled <- apply(mut_matrix, 2, function(x) {
+    total_muts <- sum(x)
+    sample_weights <- x / total_muts
+    feature_rows <- sample(seq_along(x), total_muts, replace = TRUE, prob = sample_weights)
+    row_counts <- table(feature_rows)
+    index <- as.numeric(names(row_counts))
+    x[index] <- as.vector(row_counts)
+    x[-index] <- 0
+    return(x)
+  })
+  return(mut_mat_resampled)
 }

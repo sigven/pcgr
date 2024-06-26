@@ -1,13 +1,3 @@
-#' Pipe operator
-#'
-#' See \code{magrittr::\link[magrittr]{\%>\%}} for details.
-#'
-#' @name %>%
-#' @rdname pipe
-#' @keywords internal
-#' @importFrom magrittr %>%
-NULL
-
 #' Tidy eval helpers
 #'
 #' <https://cran.r-project.org/web/packages/dplyr/vignettes/programming.html>
@@ -18,3 +8,16 @@ NULL
 NULL
 
 utils::globalVariables(c("."))
+
+#' @noRd
+dummy1 <- function() {
+  # Solves R CMD check: Namespaces in Imports field not imported from
+  DT::datatable
+  htmltools::br
+  plotly::plot_ly
+  caret::createModel
+  randomForest::importance
+  shiny::bootstrapPage
+  bslib::page_fillable
+  crosstalk::filter_select
+}

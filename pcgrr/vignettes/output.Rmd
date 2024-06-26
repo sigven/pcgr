@@ -5,146 +5,58 @@ output: rmarkdown::html_document
 
 ## Output files
 
-PCGR generates multiple output files, including interactive HTML reports and pure variant annotation files (tab-separated values (TSV)).
+PCGR generates multiple output files with annotations of molecular aberrations, including an interactive report, an Excel workbook, and pure text-based annotation files (TSV).
 
-### HTML report - dashboard
+### HTML report - quarto-based
 
-An interactive and tier-structured HTML report (dashboard-like) that shows the most relevant findings in the query cancer genome has the following naming convention:
+An interactive and structured HTML report that shows the most relevant 
+findings in the query cancer genome has the following naming convention:
 
-- `<sample_id>.pcgr_acmg.<genome_assembly>.flexdb.html`
-  - The __sample_id__ is provided as input by the user, and reflects a unique identifier of the tumor-normal sample pair to be analyzed.
+- `<sample_id>.pcgr.<genome_assembly>.html`
+  - The __sample_id__ is provided as input by the user, and reflects a unique 
+  identifier of the tumor-normal sample pair to be analyzed.
 
+The report is structured in various sections, pending upon the input provided
+by the user. The following sections may be included in the report:
 
-### HTML report - rmarkdown
+1. __Settings__
+	* Lists key configurations for the analysis, including the genome assembly, type of sequencing assay (WES/WGS/TARGETED), the cancer type (as provided by the user), and the tumor purity and ploidy.
+	 
+2. __Somatic SNVs/InDels__
+	* Provides an overview of the somatic SNVs and InDels detected in the tumor sample
+	* Includes a global distribution of allelic support, statistics with respect to
+	   variant types and consequences
+	* Variants are classified with respect to _oncogenicity_ (VICC/ClinGen/CGC operating procedures)
+	   - permits exploration of somatic mutations through interactive filtering according to several dimensions (variant sequencing depth/support, variant consequence etc.)
+	* Variants are classified with respect to _actionability_ (ACMG/AMP guidelines)
+	   - individual evidence items linked to actionable variants can be explored, indicating strength of evidence, tumor type and therapeutic context, and clinical significance
 
-An interactive and tier-structured HTML report that shows the most relevant findings in the query cancer genome has the following naming convention:
+3. __Somatic CNAs__
+	* Aberrations are classified with respect to _actionability_ (ACMG/AMP guidelines)
+	 - individual evidence items linked to actionable variants can be explored, indicating strength of evidence, tumor type and therapeutic context, and clinical significance
+	* Other potentially oncogenic aberrations are listed, pProto-oncogenes subject to copy number amplifications, and tumor suppressor genes subject to homozygous deletions
 
-- `<sample_id>.pcgr_acmg.<genome_assembly>.html`
-  - The __sample_id__ is provided as input by the user, and reflects a unique identifier of the tumor-normal sample pair to be analyzed.
+4. __MSI status__
+  * Indicates predicted microsatellite stability from the somatic mutation profile and supporting evidence (details of the underlying MSI statistical classifier can be found [here](http://rpubs.com/sigven/msi_classification_v3))
+  * The MSI classifier was trained on TCGA exome samples.
+      
+5. __Tumor mutational burden (TMB)__
+	* given a coding target region size specified by the user (ideally the __callable target size__), an estimate of the mutational burden is provided
+	* The estimated TMB is shown in the context of TMB distributions from different primary sites in TCGA
 
-The report is structured in seven main sections, described in more detail below:
+6. __Mutational signatures__
+  * Estimation of relative contribution of [known mutational signatures](http://cancer.sanger.ac.uk/cosmic/signatures) in tumor sample (using [MutationalPatterns](https://github.com/ToolsVanBox/MutationalPatterns) as the underlying framework)
+  * Datatable with signatures found and proposed underlying etiologies
+  
+7. __RNA expression analysis__
+  * Datatable with expression outliers - as compared to distribution in reference cohorts
+  * Datatable with correlation between gene expression in query sample and other reference cohorts (TCGA, TreeHouse, DepMap)
+  * Immune contexture profiling
 
-  1. __Report and query settings__
-	 * Lists key configurations provided by user
-
-  2. __Main results__
-  	 * Nine value boxes that highlight the main properties of the tumor sample:
-	     1. Tumor purity - as provided by the user
-	     2. Tumor ploidy - as provided by the user
-	     3. Mutational signatures - two most prevalent signatures (other than aging)
-	     4. Tier 1 variants (top four)
-	     5. Tier 2 variants (top four)
-	     6. Tumor mutational burden (TMB)
-	     7. Microsatellite instability (MSI) status
-	     8. Somatic copy number aberrations of clinical significance
-	     9. Kataegis events
-
-  2. __Somatic SNVs/InDels__
-	 * _Tumor mutational burden (TMB)_
-		 * given a coding target region size specified by the user (ideally the __callable target size__), an estimate of the mutational burden is provided
-		 - The estimated TMB is shown in the context of TMB distributions from different primary sites in TCGA
-	 * _Tier & variant statistics_
-		 - indicate total variant numbers across variant types, coding types and tiers
-      * _Global distribution - allelic support_
-		 - distribution (histogram) of variant allelic support for somatic variants (will only be present in the report if specific fields in input VCF is defined and specified by the user)
-      * _Global variant browser_
-		 - permits exploration of the whole SNV/InDel dataset by filtering along several dimensions (call confidence, variant sequencing depth/support, variant consequence etc.)
-      * _Tier tables_
-	      - Variants are organized into five (tier 1-4 + noncoding) interactive datatables) according to clinical utility
-	      - Contents of the tier tables are outlined below
-
-  4. __Somatic CNAs__
-      * _Segments - amplifications and homozygous deletions_
-         -  Based on user-defined/default log-ratio thresholds of gains/losses, the whole CNA dataset can be navigated further through filters:
-	       - cytoband
-		  - type of CNA event - *focal* (less than 25% of chromosome arm affected) or *broad*
-		  - log ratio
-      * _Proto-oncogenes subject to copy number amplifications_
-         - Datatable listing known proto-oncogenes covered by user-defined/default amplifications and potential targeted therapies
-      * _Tumor suppressor genes subject to homozygous deletions_
-         - Datatable listing known tumor suppressor genes covered by user-defined/default losses and potential targeted therapies
-	 * _Other drug targets subject to copy number aplifications_
-      * _Copy number aberrations as biomarkers for prognosis, diagnosis, and drug response (both of <b>strong</b> significance and <b>potential</b> significance)_
-         - Interactive data table where the user can navigate aberrations acting as biomarkers across therapeutic contexts, tumor subtypes, evidence levels etc
-
-  5. __MSI status__
-      * Indicates predicted microsatellite stability from the somatic mutation profile and supporting evidence (details of the underlying MSI statistical classifier can be found [here](http://rpubs.com/sigven/msi_classification_v3))
-      * The MSI classifier was trained on TCGA exome samples.
-
-  6. __Mutational signatures__
-      * Estimation of relative contribution of [67 known mutational signatures](http://cancer.sanger.ac.uk/cosmic/signatures) in tumor sample (using [MutationalPatterns](https://github.com/raerose01/deconstructSigs) as the underlying framework)
-      * Datatable with signatures and proposed underlying etiologies
-
-  7. __Kataegis events__
-      * Detection of potential kataegis events using the algorithm outlined in the [Kataegis Portal](https://github.com/MeichunCai/KataegisPortal)
-
-  8. __Germline findings__
-      * Main findings from CPSR report
-
-  8. __Clinial trials__
-  	 * Interactive table with annotated, molecularly targeted clinical trials from [clinicaltrials.gov](https//clinicaltrials.gov) in the relevant tumor type
-
-  9. __Documentation__
-      * Annotation resources - software, databases and tools with version information
-	 * Report content
-      * References - supporting scientific literature (key report elements)
-
-#### Interactive datatables
-
-The interactive datatables contain a number of hyperlinked annotations similar to those defined for the annotated VCF file, including the following:
-
-| Annotation | Description                                                   |
-|------------|---------------------------------------------------------------|
-| `SYMBOL` | Gene symbol (Entrez/NCBI) |
-| `PROTEIN_CHANGE` | Amino acid change (VEP) |
-| `CANCER_TYPE` | Biomarker (tier 1/2): associated cancer type |
-| `EVIDENCE_LEVEL` | Biomarker (tier 1/2): evidence level (A,B,C,D,E) |
-| `CLINICAL_SIGNIFICANCE` | Biomarker (tier 1/2): drug sensitivity, poor/better outcome etc |
-| `EVIDENCE_TYPE` | Biomarker (tier 1/2): predictive/diagnostic/therapeutic |
-| `DISEASE_ONTOLOGY_ID` | Biomarker (tier 1/2): associated cancer type (Disease Ontology) |
-| `EVIDENCE_DIRECTION` | Biomarker (tier 1/2): supports/does not support |
-| `DESCRIPTION` | Biomarker (tier 1/2): description |
-| `VARIANT_ORIGIN` | Biomarker (tier 1/2): variant origin (germline/somatic) |
-| `BIOMARKER_MAPPING` | Biomarker (tier 1/2): accuracy of genomic mapping (exact,codon,exon) |
-| `CITATIO` | Biomarker (tier 1/2): supporting literature |
-| `THERAPEUTIC_CONTEXT` | Biomarker (tier 1/2): associated drugs |
-| `RATING` | Biomarker (tier 1/2): trust rating from 1 to 5 (CIVIC) |
-| `GENE_NAME` | gene name description (Entrez/NCBI) |
-| `PROTEIN_DOMAIN` | PFAM protein domain |
-| `PROTEIN_FEATURE` | UniProt feature overlapping variant site |
-| `CDS_CHANGE` | Coding sequence change |
-| `MUTATION_HOTSPOT` | Known cancer mutation hotspot |
-| `MUTATION_HOTSPOT_CANCERTYPE` | Hotspot-associated cancer types |
-| `TCGA_FREQUENCY` | Frequency of variant in TCGA cohorts |
-| `ICGC_PCAWG_OCCURRENCE` | Frequency of variant in ICGC-PCAWG cohorts |
-| `DOCM_LITERATURE` | Literature links - DoCM |
-| `DOCM_DISEASE`  | Associated diseases - DoCM |
-| `OPENTARGETS_RANK` | Strength (max across all phenotypes) of phenotype association according to the Open Targets Platform |
-| `OPENTARGETS_ASSOCIATIONS` | Phenotype associations with the gene retrieved from the Open Targets Platform |
-| `INTOGEN_DRIVER_MUT` | predicted driver mutation - IntOGen |
-| `CONSEQUENCE` | VEP consequence (primary transcript) |
-| `HGVSc` | from VEP |
-| `HGVSp` | from VEP |
-| `NCBI_REFSEQ` | Transcript accession ID(s) (NCBI RefSeq) |
-| `ONCOGENE` | Predicted as proto-oncogene from CancerMine/NCG |
-| `CANCERGENE_SUPPORT` | Links to underlying publications (CancerMine) that support oncogenic/tumor suppressive role of gene |
-| `TUMOR_SUPPRESSOR` | Predicted as tumor suppressor gene from CancerMine/NCG |
-| `PREDICTED_EFFECT` | Effect predictions from dbNSFP | 
-| `VEP_ALL_CSQ` | All VEP transcript block consequences |
-| `DBSNP` | dbSNP rsID | 
-| `COSMIC` | Cosmic mutation IDs |
-| `CLINVAR` | ClinVar variant origin and associated phenotypes |
-| `CANCER_ASSOCIATIONS` | Gene-associated cancer types from DisGenet |
-| `TARGETED_DRUGS` | Targeted drugs from Open Targets Platform /ChEMBL |
-| `KEGG_PATHWAY` | Gene-associated pathways from KEGG |
-| `CALL_CONFIDENCE` | Variant confidence (as set by user in input VCF) |
-| `DP_TUMOR` | Variant sequencing depth in tumor (as set by user in input VCF) |
-| `AF_TUMOR` | Variant allelic fraction in tumor (as set by user in input VCF) |
-| `DP_CONTROL` | Variant sequencing depth in control sample (as set by user in input VCF) |
-| `AF_CONTROL` | Variant allelic fraction in control sample (as set by user in input VCF) |
-| `GENOMIC_CHANGE` | Variant ID |
-| `GENOME_VERSION` | Genome assembly |
-
+8. __Documentation__
+  * Annotation resources - databases with version and licensing information
+	* Report contents - brief description of the main sections in the report
+  * References - supporting scientific literature (key report elements)
 
 #### Example reports
 
@@ -156,11 +68,6 @@ The HTML reports have been tested using the following browsers:
 * Mozilla Firefox (83.0)
 * Google Chrome (Version 90.0.4430.212 (Official Build) (x86\_64))
 
-### JSON
-
-A compressed JSON file that stores all the essential content of the report is provided.
-
-This file will easen the process of extracting particular parts of the report for further analysis or integration with other workflows. The JSON contains two main objects, *metadata* and *content*, where the former contains information about the settings, data versions, and the latter contains the various sections of the report.
 
 ### SNVs/InDels
 
@@ -168,7 +75,7 @@ This file will easen the process of extracting particular parts of the report fo
 
 A VCF file containing annotated, somatic calls (single nucleotide variants and insertion/deletions) is generated with the following naming convention:
 
-- `<sample_id>.pcgr_acmg.<genome_assembly>.vcf.gz`
+- `<sample_id>.pcgr.<genome_assembly>.vcf.gz`
   - The __sample_id__ is provided as input by the user, and reflects a unique identifier of the tumor-normal sample pair to be analyzed. Following common standards, the annotated VCF file is compressed with [bgzip](http://www.htslib.org/doc/bgzip.html) and indexed with [tabix](http://www.htslib.org/doc/tabix.html). Below follows a description of all annotations/tags present in the VCF INFO column after processing with the PCGR annotation pipeline:
 
 ##### _VEP consequence annotations_
@@ -182,6 +89,7 @@ A VCF file containing annotated, somatic calls (single nucleotide variants and i
 | `Feature` | Ensembl stable ID of feature (picked by VEP's `--flag_pick_allele` option) |
 | `cDNA_position` | Relative position of base pair in cDNA sequence (picked by VEP's `--flag_pick_allele` option) |
 | `CDS_position` | Relative position of base pair in coding sequence (picked by VEP's `--flag_pick_allele` option) |
+| `CDS_RELATIVE_POSITION` | Ratio of variant coding position to length of coding sequence |
 | `CDS_CHANGE` | Coding, transcript-specific sequence annotation (picked by VEP's `--flag_pick_allele` option) |
 | `AMINO_ACID_START` | Protein position indicating absolute start of amino acid altered (fetched from `Protein_position`) |
 | `AMINO_ACID_END` |  Protein position indicating absolute end of amino acid altered (fetched from `Protein_position`) |
@@ -191,7 +99,6 @@ A VCF file containing annotated, somatic calls (single nucleotide variants and i
 | `IMPACT` | Impact modifier for the consequence type (picked by VEP's `--flag_pick_allele` option) |
 | `VARIANT_CLASS` | Sequence Ontology variant class (picked by VEP's `--flag_pick_allele` option) |
 | `SYMBOL` | Gene symbol (picked by VEP's `--flag_pick_allele` option) |
-| `SYMBOL_ENTREZ` | Official gene symbol as provided by NCBI's Entrez gene |
 | `SYMBOL_SOURCE` | The source of the gene symbol (picked by VEP's `--flag_pick_allele` option) |
 | `STRAND` | The DNA strand (1 or -1) on which the transcript/feature lies (picked by VEP's `--flag_pick_allele` option) |
 | `ENSP` | The Ensembl protein identifier of the affected transcript (picked by VEP's `--flag_pick_allele` option) |
@@ -213,6 +120,7 @@ A VCF file containing annotated, somatic calls (single nucleotide variants and i
 | `CCDS` | The CCDS identifier for this transcript, where applicable (picked by VEP's `--flag_pick_allele` option) |
 | `INTRON` | The intron number (out of total number) (picked by VEP's `--flag_pick_allele` option) |
 | `EXON` | The exon number (out of total number) (picked by VEP's `--flag_pick_allele` option) |
+| `EXON_AFFECTED` | The exon affected by the variant (picked by VEP's `--flag_pick_allele` option) |
 | `LAST_EXON` | Logical indicator for last exon of transcript (picked by VEP's `--flag_pick_allele` option) |
 | `LAST_INTRON` | Logical indicator for last intron of transcript (picked by VEP's `--flag_pick_allele` option) |
 | `INTRON_POSITION` | Relative position of intron variant to nearest exon/intron junction (NearestExonJB VEP plugin) |
@@ -226,32 +134,36 @@ A VCF file containing annotated, somatic calls (single nucleotide variants and i
 | `ALLELE_NUM` | Allele number from input; 0 is reference, 1 is first alternate etc - VEP |
 | `REFSEQ_MATCH` | The RefSeq transcript match status; contains a number of flags indicating whether this RefSeq transcript matches the underlying reference sequence and/or an Ensembl transcript (picked by VEP's `--flag_pick_allele` option) |
 | `PICK` | Indicates if this block of consequence data was picked by VEP's `--flag_pick_allele` option |
-| `VEP_ALL_CONSEQUENCE` | All transcript consequences (`Consequence:SYMBOL:Feature_type:Feature:BIOTYPE`) - VEP |
-| `EXONIC_STATUS` | Indicates if variant consequence type is 'exonic' or 'nonexonic'. We here define 'exonic' as any variant with either of the following consequences: `stop_gained / stop_lost`, `start_lost`, `frameshift_variant`, `missense_variant`, `splice_donor_variant`, `splice_acceptor_variant`, `inframe_insertion / inframe_deletion`, `synonymous_variant`, `protein_altering` |
+| `VEP_ALL_CSQ` | All transcript consequences (`Consequence:SYMBOL:Feature_type:Feature:BIOTYPE`) - VEP |
+| `EXONIC_STATUS` | Indicates if variant consequence type is 'exonic' or 'nonexonic'. We here define 'exonic' as any variant with either of the following consequences: `stop_gained / stop_lost`, `start_lost`, `frameshift_variant`, `missense_variant`, `splice_donor_variant`, `splice_acceptor_variant`, `inframe_insertion / inframe_deletion`, `synonymous_variant`, `start_retained`, `stop_retained`, `protein_altering` |
 | `CODING_STATUS` | Indicates if primary variant consequence type is 'coding' or 'noncoding' (wrt. protein-alteration). 'coding' variants are here defined as those with an 'exonic' status, with the exception of synonymous variants |
+| `NULL_VARIANT` | Primary variant consequence type is `frameshift` or `stop_gained`/`stop_lost` |
+| `LOSS_OF_FUNCTION` | Loss-of-function variant |
+| `LOF_FILTER` | Loss-of-function filter |
+| `SPLICE_DONOR_RELEVANT` | Logical indicating if variant is located at a particular location near the splice donor site (`+3A/G`, `+4A` or `+5G`) |
+| `REGULATORY_ANNOTATION` | Comma-separated list of all variant annotations of `Feature_type`, `RegulatoryFeature`, and `MotifFeature`. Format (separated by a `|`): `<Consequence>`, `<Feature_type>`, `<Feature>`, `<BIOTYPE>`, `<MOTIF_NAME>`, `<MOTIF_POS>`, `<HIGH_INF_POS>`, `<MOTIF_SCORE_CHANGE>`, `<TRANSCRIPTION_FACTORS>` |
 
 ##### _Gene information_
 
 | Tag | Description |
 |-----|-------------|
-| `ENTREZ_ID` | [Entrez](http://www.ncbi.nlm.nih.gov/gene) gene identifier |
+| `ENTREZGENE` | [Entrez](http://www.ncbi.nlm.nih.gov/gene) gene identifier |
 | `APPRIS` | Principal isoform flags according to the [APPRIS principal isoform database](http://appris.bioinfo.cnio.es/#/downloads) |
 | `MANE_SELECT` | Indicating if the transcript is the MANE Select or MANE Plus Clinical transcript for the gene (picked by VEP's `--flag_pick_allele_gene` option) |
 | `UNIPROT_ID` | [UniProt](http://www.uniprot.org) identifier |
 | `UNIPROT_ACC` | [UniProt](http://www.uniprot.org) accession(s) |
 | `ENSEMBL_GENE_ID` | Ensembl gene identifier for VEP's picked transcript (*ENSGXXXXXXX*) |
 | `ENSEMBL_TRANSCRIPT_ID` | Ensembl transcript identifier for VEP's picked transcript (*ENSTXXXXXX*) |
-| `ENSEMBL_PROTEIN_ID` | Ensembl corresponding protein identifier for VEP's picked transcript |
-| `REFSEQ_MRNA` | Corresponding RefSeq transcript(s) identifier for VEP's picked transcript (*NM_XXXXX*) |
+| `ENSEMBL_PROTEIN_ID` | Ensembl corresponding protein identifier for VEP's picked transcript (*ENSPXXXXXX*) |
+| `REFSEQ_TRANSCRIPT_ID` | Corresponding RefSeq transcript(s) identifier for VEP's picked transcript (*NM_XXXXX*) |
 | `TRANSCRIPT_MANE_SELECT` | MANE select transcript identifer: one high-quality representative transcript per protein-coding gene that is well-supported by experimental data and represents the biology of the gene |
 | `TRANSCRIPT_MANE_PLUS_CLINICAL` | transcripts chosen to supplement MANE Select when needed for clinical variant reporting |
 | `GENCODE_TAG` | tag for gencode transcript (basic etc) |
 | `GENCODE_TRANSCRIPT_TYPE` | type of transcript (protein-coding etc.) |
-| `CORUM_ID` | Associated protein complexes (identifiers) from [CORUM](http://mips.helmholtz-muenchen.de/corum/) |
-| `TUMOR_SUPPRESSOR` | Indicates whether gene is predicted as a tumor suppressor gene, from Network of Cancer Genes (NCG) & the CancerMine text-mining resource |
-| `TUMOR_SUPPRESSOR_EVIDENCE` | Underlying evidence for gene being a tumor suppressor. Format: `NCG:<TRUE|FALSE>&CancerMine:<LC|MC|HC>:num_citations` |
-| `ONCOGENE` | Indicates whether gene is predicted as an oncogene, from Network of Cancer Genes (NCG) & the CancerMine text-mining resource |
-| `ONCOGENE_EVIDENCE` | Underlying evidence for gene being an oncogene. Format: `NCG:<TRUE|FALSE>&CancerMine:<LC|MC|HC>:num_citations` |
+| `TSG` | Flag indicating whether gene is predicted as a tumor suppressor gene, from Cancer Gene Census, Network of Cancer Genes (NCG) & the CancerMine text-mining resource |
+| `TSG_SUPPORT` | Underlying evidence for gene being a tumor suppressor. Format: `CGC_TIER<1/2>&NCG&CancerMine:num_citations ` |
+| `ONCOGENE` | Flag indicating whether gene is predicted as an oncogene, from Cancer Gene Census, Network of Cancer Genes (NCG) & the CancerMine text-mining resource. |
+| `ONCOGENE_SUPPORT` | Underlying evidence for gene being an oncogene. Format: `CGC_TIER<1/2>&NCG&CancerMine:num_citations ` |
 | `INTOGEN_DRIVER` | Gene is predicted as a cancer driver in the [IntoGen Cancer Drivers Database](https://www.intogen.org/downloads) |
 | `TCGA_DRIVER` | Gene is predicted as a cancer driver in the [TCGA pan-cancer analysis of cancer driver genes and mutations](https://www.ncbi.nlm.nih.gov/pubmed/29625053) |
 | `PROB_EXAC_LOF_INTOLERANT` | `dbNSFP_gene`: the probability of being loss-of-function intolerant (intolerant of both heterozygous and homozygous lof variants) based on ExAC r0.3 data |
@@ -274,11 +186,9 @@ A VCF file containing annotated, somatic calls (single nucleotide variants and i
 | `MUTATION_HOTSPOT` | mutation hotspot codon in [cancerhotspots.org](http://cancerhotspots.org/). Format: `gene_symbol | codon | q-value` |
 | `MUTATION_HOTSPOT_TRANSCRIPT` | hotspot-associated transcripts (Ensembl transcript ID) |
 | `MUTATION_HOTSPOT_CANCERTYPE` | hotspot-associated cancer types (from cancerhotspots.org) |
-| `UNIPROT_FEATURE` | Overlapping protein annotations from [UniProt KB](http://www.uniprot.org) |
 | `PFAM_DOMAIN` | Pfam domain identifier (from VEP) |
 | `INTOGEN_DRIVER_MUT` | Indicates if existing variant is predicted as driver mutation from IntoGen Catalog of Driver Mutations |
-| `PUTATIVE_DRIVER_MUTATION` | Variant is predicted as driver mutation in the [TCGA pan-cancer analysis of cancer driver genes and mutations](https://www.ncbi.nlm.nih.gov/pubmed/29625053) |
-| `EFFECT_PREDICTIONS` | All predictions of effect of variant on protein function and pre-mRNA splicing from [database of non-synonymous functional predictions - dbNSFP v4.2](https://sites.google.com/site/jpopgen/dbNSFP). Predicted effects are provided by different sources/algorithms (separated by `&`), `T` = Tolerated, `N` = Neutral, `D` = Damaging: 1.[SIFT](https://sift.bii.a-star.edu.sg/), 2.[MutationTaster](http://www.mutationtaster.org/) (data release Nov 2015), 3.[MutationAssessor](http://mutationassessor.org/) (release 3), 4.[FATHMM](http://fathmm.biocompute.org.uk) (v2.3), 5.[PROVEAN](http://provean.jcvi.org/index.php) (v1.1 Jan 2015), 6.[FATHMM\_MKL](http://fathmm.biocompute.org.uk/fathmmMKL.htm), 7.[PRIMATEAI](https://www.nature.com/articles/s41588-018-0167-z), 8.[DEOGEN2](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5570203/), 9.[DBNSFP\_CONSENSUS\_RNN](https://www.biorxiv.org/content/10.1101/2021.04.09.438706v1) (Ensembl/consensus prediction, based on deep learning), 10.[SPLICE\_SITE\_EFFECT\_ADA](http://nar.oxfordjournals.org/content/42/22/13534) (Ensembl/consensus prediction of splice-altering SNVs, based on adaptive boosting), 11.[SPLICE\_SITE\_EFFECT\_RF](http://nar.oxfordjournals.org/content/42/22/13534) (Ensembl/consensus prediction of splice-altering SNVs, based on random forest), 12.[M-CAP](http://bejerano.stanford.edu/MCAP), 13.[MutPred](http://mutpred.mutdb.org), 14.[GERP](http://mendel.stanford.edu/SidowLab/downloads/gerp/), 15.[BayesDel](https://doi.org/10.1002/humu.23158), 16.[LIST-S2](https://doi.org/10.1093/nar/gkaa288), 17.[ALoFT](https://www.nature.com/articles/s41467-017-00443-5) |
+| `EFFECT_PREDICTIONS` | All predictions of effect of variant on protein function and pre-mRNA splicing from [database of non-synonymous functional predictions - dbNSFP v4.4](https://sites.google.com/site/jpopgen/dbNSFP). Predicted effects are provided by different sources/algorithms (separated by `&`), `T` = Tolerated, `N` = Neutral, `D` = Damaging: 1.[SIFT](https://sift.bii.a-star.edu.sg/), 2.[MutationTaster](http://www.mutationtaster.org/) (data release Nov 2015), 3.[MutationAssessor](http://mutationassessor.org/) (release 3), 4.[FATHMM](http://fathmm.biocompute.org.uk) (v2.3), 5.[PROVEAN](http://provean.jcvi.org/index.php) (v1.1 Jan 2015), 6.[FATHMM\_MKL](http://fathmm.biocompute.org.uk/fathmmMKL.htm), 7.[PRIMATEAI](https://www.nature.com/articles/s41588-018-0167-z), 8.[DEOGEN2](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5570203/), 9.[DBNSFP\_CONSENSUS\_RNN](https://www.biorxiv.org/content/10.1101/2021.04.09.438706v1) (Ensembl/consensus prediction, based on deep learning), 10.[SPLICE\_SITE\_EFFECT\_ADA](http://nar.oxfordjournals.org/content/42/22/13534) (Ensembl/consensus prediction of splice-altering SNVs, based on adaptive boosting), 11.[SPLICE\_SITE\_EFFECT\_RF](http://nar.oxfordjournals.org/content/42/22/13534) (Ensembl/consensus prediction of splice-altering SNVs, based on random forest), 12.[M-CAP](http://bejerano.stanford.edu/MCAP), 13.[MutPred](http://mutpred.mutdb.org), 14.[GERP](http://mendel.stanford.edu/SidowLab/downloads/gerp/), 15.[BayesDel](https://doi.org/10.1002/humu.23158), 16.[LIST-S2](https://doi.org/10.1093/nar/gkaa288), 17.[ALoFT](https://www.nature.com/articles/s41467-017-00443-5) |
 | `DBNSFP_BAYESDEL_ADDAF` | predicted effect from BayesDel (dbNSFP) |
 | `DBNSFP_LIST_S2` | predicted effect from LIST-S2 (dbNSFP) |
 | `DBNSFP_SIFT` | predicted effect from SIFT (dbNSFP) |
@@ -301,27 +211,19 @@ A VCF file containing annotated, somatic calls (single nucleotide variants and i
 
 | Tag | Description |
 |-----|-------------|
-| `AFR_AF_GNOMAD` | African/American germline allele frequency ([gnomAD release 2](http://gnomad.broadinstitute.org/)) |
-| `AMR_AF_GNOMAD` | American germline allele frequency ([gnomAD release 2](http://gnomad.broadinstitute.org/)) |
-| `GLOBAL_AF_GNOMAD` | Adjusted global germline allele frequency ([gnomAD release 2](http://gnomad.broadinstitute.org/)) |
-| `SAS_AF_GNOMAD` | South Asian germline allele frequency ([gnomAD release 2](http://gnomad.broadinstitute.org/)) |
-| `EAS_AF_GNOMAD` | East Asian germline allele frequency ([gnomAD release 2](http://gnomad.broadinstitute.org/)) |
-| `FIN_AF_GNOMAD` | Finnish germline allele frequency ([gnomAD release 2](http://gnomad.broadinstitute.org/)) |
-| `NFE_AF_GNOMAD` | Non-Finnish European germline allele frequency ([gnomAD release 2](http://gnomad.broadinstitute.org/)) |
-| `OTH_AF_GNOMAD` | Other germline allele frequency ([gnomAD release 2](http://gnomad.broadinstitute.org/)) |
-| `ASJ_AF_GNOMAD` | Ashkenazi Jewish allele frequency ([gnomAD release 2](http://gnomad.broadinstitute.org/)) |
-| `AFR_AF_1KG` | [1000G Project - phase 3](http://www.1000genomes.org) germline allele frequency for samples from AFR (African) |
-| `AMR_AF_1KG` | [1000G Project - phase 3](http://www.1000genomes.org) germline allele frequency for samples from AMR (Ad Mixed American) |
-| `EAS_AF_1KG` | [1000G Project - phase 3](http://www.1000genomes.org) germline allele frequency for samples from EAS (East Asian) |
-| `EUR_AF_1KG` | [1000G Project - phase 3](http://www.1000genomes.org) germline allele frequency for samples from EUR (European) |
-| `SAS_AF_1KG` | [1000G Project - phase 3](http://www.1000genomes.org) germline allele frequency for samples from SAS (South Asian) |
-| `GLOBAL_AF_1KG` | [1000G Project - phase 3](http://www.1000genomes.org) germline allele frequency for all 1000G project samples (global) |
-| `DBSNPRSID` | [dbSNP](http://www.ncbi.nlm.nih.gov/SNP/) reference ID, as provided by VEP |
+| `gnomADe_AF` | Adjusted global germline allele frequency ([gnomAD release 2](http://gnomad.broadinstitute.org/)) |
+| `gnomADe_AFR_AF` | African/American germline allele frequency ([gnomAD release 2](http://gnomad.broadinstitute.org/)) |
+| `gnomADe_AMR_AF` | American germline allele frequency ([gnomAD release 2](http://gnomad.broadinstitute.org/)) |
+| `gnomADe_SAS_AF` | South Asian germline allele frequency ([gnomAD release 2](http://gnomad.broadinstitute.org/)) |
+| `gnomADe_EAS_AF` | East Asian germline allele frequency ([gnomAD release 2](http://gnomad.broadinstitute.org/)) |
+| `gnomADe_FIN_AF` | Finnish germline allele frequency ([gnomAD release 2](http://gnomad.broadinstitute.org/)) |
+| `gnomADe_NFE_AF` | Non-Finnish European germline allele frequency ([gnomAD release 2](http://gnomad.broadinstitute.org/)) |
+| `gnomADe_OTH_AF` | Other germline allele frequency ([gnomAD release 2](http://gnomad.broadinstitute.org/)) |
+| `gnomADe_ASJ_AF` | Ashkenazi Jewish allele frequency ([gnomAD release 2](http://gnomad.broadinstitute.org/)) |
+| `DBSNP_RSID` | [dbSNP](http://www.ncbi.nlm.nih.gov/SNP/) reference ID, as provided by VEP |
 | `COSMIC_MUTATION_ID` | Mutation identifier in [Catalog of somatic mutations in cancer](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/) database, as provided by VEP |
 | `TCGA_PANCANCER_COUNT` | Raw variant count across all TCGA tumor types |
 | `TCGA_FREQUENCY` | Frequency of variant across TCGA tumor types. Format: `tumortype| percent affected|affected cases|total cases` |
-| `ICGC_PCAWG_OCCURRENCE` | Mutation occurrence in [ICGC-PCAWG](http://docs.icgc.org/pcawg/). By project: `project_code|tumor_type|affected_donors|tested_donors|frequency` |
-| `ICGC_PCAWG_AFFECTED_DONORS` (**?**) | Number of donors with the current mutation in [ICGC-PCAWG](http://docs.icgc.org/pcawg/) |
 
 ##### _Clinical associations_
 
@@ -338,114 +240,134 @@ A VCF file containing annotated, somatic calls (single nucleotide variants and i
 | `CLINVAR_MEDGEN_CUI_SOMATIC` | Associated [MedGen](https://www.ncbi.nlm.nih.gov/medgen/)  concept identifiers (_CUIs_) - somatic state-of-origin |
 | `CLINVAR_VARIANT_ORIGIN` | Origin of variant (somatic, germline, de novo etc.) for variant in [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar) |
 | `CLINVAR_REVIEW_STATUS_STARS` | Rating of the [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar) variant (0-4 stars) with respect to level of review |
-| `DOCM_PMID` | Associated Pubmed IDs for variant in [Database of Curated Mutations](http://docm.genome.wustl.edu) |
-| `OPENTARGETS_DISEASE_ASSOCS` | Associations between protein targets and disease based on multiple lines of evidence (mutations, affected pathways, GWAS, literature etc). Format: `CUI:EFO_ID:IS_DIRECT:OVERALL_SCORE` |
-| `OPENTARGETS_TRACTABILITY_COMPOUND` | Confidence for the existence of a modulator (small molecule) that interacts with the target to elicit a desired biological effect |
-| `OPENTARGETS_TRACTABILITY_ANTIBODY` | Confidence for the existence of a modulator (antibody) that interacts with the target to elicit a desired biological effect |
 
 ##### _Other_
 
 | Tag | Description |
 |-----|-------------|
-| `CHEMBL_COMPOUND_ID` | antineoplastic drugs targeting the encoded protein (from [Open Targets Platform](https://www.targetvalidation.org/), drugs are listed as [ChEMBL](https://www.ebi.ac.uk/chembl/) compound identifiers) |
-| `CIVIC_ID`, `CIVIC_ID_SEGMENT` | Variant/segment (exon, codon) identifiers in the [CIViC database](http://civic.genome.wustl.edu) |
-| `CGI_ID`, `CGI_ID_SEGMENT` | Variant/segment (exon, codon) identifier in the [Cancer Genome Interpreter Cancer Biomarkers Database](https://www.cancergenomeinterpreter.org/biomarkers) |
-
+| `BIOMARKER_MATCH` | Variant matches with biomarker evidence in CIViC/CGI. Format: <db_source>\|<db_variant_id>\|<db_evidence_id>:<tumor_site>:<clinical_significance>:<evidence_level>:<evidence_type><germline_somatic>\|<matching_type>. Multiple evidence items are separated by '&'. Example: civic|174|EID445:Colon/Rectum:Sensitivity/Response:D:Predictive:Somatic&EID446:Colon/Rectum:Sensitivity/Response:D:Predictive:Somatic|by_gene_mut. Matching type can be any of `by_genomic_coord`, `by_hgvsp_principal`, `by_hgvsc_principal`,  `by_hgvsp_nonprincipal`, `by_hgvsc_nonprincipal`, `by_codon_principal`, `by_exon_mut_principal`, `by_gene_mut_lof`, `by_gene_mut` |
+| `ONCOGENICITY` | Oncogenicity annotation - VICC/ClinGen SOP implementation |
+| `ONCOGENICITY_CODE` | Oncogenicity code - VICC/ClinGen SOP implementation |
+| `ONCOGENICITY_SCORE` | Oncogenicity score - VICC/ClinGen SOP
 #### 2. Tab-separated values (TSV)
 
 We provide a tab-separated values file with most important annotations for SNVs/InDels. The file has the following naming convention:
 
-- `<sample_id>.pcgr_acmg.<genome_assembly>.snvs_indels.tiers.tsv`
+- `<sample_id>.pcgr.<genome_assembly>.snv_indel_ann.tsv.gz`
 
-The SNVs/InDels are organized into different __tiers__ (as defined above for the HTML report)
-
-The following variables are included in the tiered TSV file (VCF tags issued by the user (`--preserved_info_tags`) will be appended at the end):
+The following variables are included in the TSV file (VCF tags issued by the user (`--retained_info_tags`) will be appended at the end):
 
 | Variable | Description |
 |----------|-------------|
-| 1. `CHROM` | Chromosome |
-| 2. `POS` | Position (VCF-based) |
-| 3. `REF` | Reference allele |
-| 4. `ALT` | Alternate allele |
-| 5. `GENOMIC_CHANGE` | Identifier for variant at the genome (VCF) level, e.g. `1:g.152382569A>G`. Format: `<chrom>:g.<position><ref_allele><alt_allele>` |
-| 6. `GENOME_VERSION` | Assembly version, e.g. GRCh37 |
-| 7. `VCF_SAMPLE_ID` | Sample identifier |
-| 8. `VARIANT_CLASS` | Variant type, e.g. SNV/insertion/deletion |
-| 9. `SYMBOL` | Gene symbol |
-| 10. `GENE_NAME` | Gene description |
-| 11. `CCDS` | CCDS identifier |
-| 12. `CANONICAL` | indication of canonical transcript |
-| 13. `ENTREZ_ID` | Entrez gene identifier |
-| 14. `UNIPROT_ID` | UniProt protein identifier |
-| 15. `ENSEMBL_TRANSCRIPT_ID` | Ensembl transcript identifier |
-| 16. `ENSEMBL_GENE_ID` | Ensembl gene identifier |
-| 17. `REFSEQ_MRNA` | RefSeq mRNA identifier |
-| 18. `REFSEQ_PEPTIDE` | RefSeq peptide identifier |
-| 19. `TRANSCRIPT_MANE_SELECT` | MANE select transcript identifier |
-| 20. `ONCOGENE` | Gene is predicted/classified as an oncogene (CancerMine/NCG) |
-| 21. `ONCOGENE_EVIDENCE` | Underlying evidence for oncogene prediction/classification |
-| 22. `TUMOR_SUPPRESSOR` | Gene is predicted/classified as tumor suppressor (CancerMine/NCG) |
-| 23. `TUMOR_SUPPRESSOR_EVIDENCE` | Underlying evidence for tumor suppressor prediction/classification  |
-| 24. `CONSEQUENCE` | Variant consequence (as defined above for VCF output: Consequence) |
-| 25. `PROTEIN_CHANGE` | Protein change (HGVSp without reference accession) |
-| 26. `PROTEIN_DOMAIN` | Protein domain description (Pfam) |
-| 27. `CODING_STATUS` | Coding variant status wrt. protein alteration (`coding` or `noncoding`) |
-| 28. `EXONIC_STATUS` | Exonic variant status (`exonic` or `nonexonic`) |
-| 29. `CDS_CHANGE` | composite VEP-based variable for coding change, format: `Consequence:Feature:cDNA_position:EXON:HGVSp_short`  |
-| 30. `HGVSp` | |
-| 31. `HGVSc` | |
-| 32. `REGULATORY_ANNOTATION` | Regulatory annotations (promoter/enhancer/TF\_binding site overlap etc.) from VEP (optional) |
-| 33. `EFFECT_PREDICTIONS` | as defined above for VCF |
-| 34. `MUTATION_HOTSPOT` | mutation hotspot codon in cancerhotspots.org. Format: `gene_symbol | codon | q-value` |
-| 35. `MUTATION_HOTSPOT_TRANSCRIPT` | hotspot-associated transcripts (Ensembl transcript ID) |
-| 36. `MUTATION_HOTSPOT_CANCERTYPE` | hotspot-associated cancer types (from cancerhotspots.org) |
-| 37. `PUTATIVE_DRIVER_MUTATION` | Indicates if variant is predicted as driver mutation from TCGA's PanCancer study of cancer driver mutation |
-| 38. `CHASMPLUS_DRIVER` | Driver mutation predicted by CHASMplus algorithm |
-| 39. `CHASMPLUS_TTYPE` | Tumor type for which mutation is predicted as driver by CHASMplus |
-| 40. `VEP_ALL_CSQ` | all VEP transcript block consequences | 
-| 41. `DBSNPRSID` | dbSNP reference cluster ID |
-| 42. `COSMIC_MUTATION_ID` | COSMIC mutation ID |
-| 43. `TCGA_PANCANCER_COUNT` | Raw variant count across all TCGA tumor types |
-| 44. `TCGA_FREQUENCY` | Frequency of variant across TCGA tumor types. Format: `tumortype | percent affected | affected cases | total cases`  |
-| 45. `ICGC_PCAWG_OCCURRENCE` | Mutation occurrence in ICGC-PCAWG by project: `project_code | affected_donors | tested_donors | frequency` |
-| 46. `CHEMBL_COMPOUND_ID` | Compounds (as ChEMBL IDs) that are targeted towards the encoded protein (from Open Targets Platform) |
-| 47. `CHEMBL_COMPOUND_TERMS` | Compounds (as drug names) that are targeted towards the encoded protein (from Open Targets Platform) |
-| 48. `SIMPLEREPEATS_HIT` | Variant overlaps UCSC _simpleRepeat_ sequence repeat track |
-| 49. `WINMASKER_HIT` | Variant overlaps UCSC _windowmaskerSdust_ sequence repeat track |
-| 50. `OPENTARGETS_RANK` | OpenTargets association score (between 0 and 1) for gene (maximum across cancer phenotypes) |
-| 51. `CLINVAR` | ClinVar association: variant origin and associated traits |
-| 52. `CLINVAR_CLNSIG` | clinical significance of ClinVar variant |
-| 53. `GLOBAL_AF_GNOMAD` | global germline allele frequency in gnomAD |
-| 54. `GLOBAL_AF_1KG` | 1000G Project - phase 3, germline allele frequency |
-| 55. `NCER_PERCENTILE` | Genome-wide percentile score (10bp bins) from the non-coding Essential Regulation (ncER) algorithm |
-| 56. `CALL_CONFIDENCE` | confidence indicator for somatic variant |
-| 57. `DP_TUMOR` | sequencing depth at variant site (tumor sample) |
-| 58. `AF_TUMOR` | allelic fraction of alternate allele (tumor sample) |
-| 59. `DP_CONTROL` | sequencing depth at variant site (control sample) |
-| 60. `AF_CONTROL` | allelic fraction of alternate allele (control sample) |
-| 61. `TIER` | |
-| 62. `TIER_DESCRIPTION` | |
+| 1. `SAMPLE_ID` | Sample identifier |
+| 2. `GENOMIC_CHANGE` | Identifier for variant at the genome (VCF) level, e.g. `1:g.152382569A>G`. Format: `<chrom>:g.<position><ref_allele><alt_allele>` |
+| 3. `GENOME_VERSION` | Assembly version, e.g. GRCh37 |
+| 4. `VARIANT_CLASS` | Variant type, e.g. SNV/insertion/deletion/indel |
+| 5. `SYMBOL` | Gene symbol |
+| 6. `ENTREZGENE` | Entrez gene identifier |
+| 7. `ENSEMBL_GENE_ID` | Ensembl gene identifier |
+| 8. `GENENAME` | Gene name |
+| 9. `PROTEIN_CHANGE` | Protein change |
+| 10. `CONSEQUENCE` | Variant consequence - from VEP |
+| 11. `PFAM_DOMAIN_NAME` | Pfam domain name |
+| 12. `LOSS_OF_FUNCTION` | Loss of function flag |
+| 13. `CDS_CHANGE` | Coding sequence change |
+| 14. `CODING_STATUS` | Coding status - flag indicating if consequence is protein-altering/affecting splice sites|
+| 15. `EXONIC_STATUS` | Exonic status - flag indicating if consequence is silent/protein-altering/affecting splice sites|
+| 16. `DP_TUMOR` | Depth of coverage at variant position in tumor sample |
+| 17. `VAF_TUMOR` | Variant allele fraction at variant position in tumor sample |
+| 18. `DP_CONTROL` | Depth of coverage at variant position in control sample |
+| 19. `VAF_CONTROL` | Variant allele fraction at variant position in control sample |
+| 20. `MUTATION_HOTSPOT` | Mutation hotspot annotation |
+| 21. `MUTATION_HOTSPOT_CANCERTYPE` | Mutation hotspot-associated cancer types (from cancerhotspots.org) |
+| 22. `ACTIONABILITY_TIER` | Actionability tier - ACMG/AMP implementation |
+| 23. `ACTIONABILITY` | Actionability annotation - ACMG/AMP implementation |
+| 24. `ACTIONABILITY_FRAMEWORK` | Actionability framework - ACMG/AMP implementation |
+| 25. `ONCOGENICITY` | Oncogenicity annotation - VICC/ClinGen SOP implementation |
+| 26. `ONCOGENICITY_CODE` | Oncogenicity code - VICC/ClinGen SOP implementation |
+| 27. `ONCOGENICITY_SCORE` | Oncogenicity score - VICC/ClinGen SOP implementation |
+| 28. `HGVSc` | HGVS coding sequence name |
+| 29. `HGVSp` | HGVS protein sequence name |
+| 30. `CANONICAL` | Flag indicating if transcript is canonical |
+| 31. `CCDS` | CCDS identifier |
+| 32. `UNIPROT_ACC` | UniProt accession |
+| 33. `ENSEMBL_TRANSCRIPT_ID` | Ensembl transcript identifier |
+| 34. `ENSEMBL_PROTEIN_ID` | Ensembl protein identifier |
+| 35. `REFSEQ_TRANSCRIPT_ID` | RefSeq transcript identifier |
+| 36. `REFSEQ_PROTEIN_ID` | RefSeq protein identifier |
+| 37. `TRANSCRIPT_MANE_SELECT` | MANE transcript select |
+| 38. `TRANSCRIPT_MANE_PLUS_CLINICAL` | MANE transcript plus clinical |
+| 39. `CGC_TIER` | Cancer Gene Census tier |
+| 40. `CGC_GERMLINE` | Cancer Gene Census germline annotation |
+| 41. `CGC_SOMATIC` | Cancer Gene Census somatic annotation |
+| 42. `ONCOGENE` | Flag indicating if gene is oncogene (CGC/CancerMine/NCG) |
+| 43. `ONCOGENE_SUPPORT` | Oncogene annotation support (CGC/CancerMine/NCG) |
+| 44. `TUMOR_SUPPRESSOR` | Flag indicating if gene is tumor suppressor (CGC/CancerMine/NCG) |
+| 45. `TUMOR_SUPPRESSOR_SUPPORT` | Tumor suppressor annotation support (CGC/CancerMine/NCG) |
+| 46. `TARGETED_INHIBITORS2` | Targeted inhibitors |
+| 47. `EFFECT_PREDICTIONS` | Variant effect predictions - from dbNSFP |
+| 48. `REGULATORY_ANNOTATION` | Regulatory annotation |
+| 49. `VEP_ALL_CSQ` | VEP consequence - all transcripts |
+| 50. `gnomADe_AF` | gnomAD exomes allele frequency - globally|
+| 51. `DBSNP_RSID` | dbSNP identifier |
+| 52. `COSMIC_ID` | COSMIC identifier |
+| 53. `TCGA_FREQUENCY` | Frequency of variant across TCGA tumor types. Format: `tumortype | percent affected | affected cases | total cases` |
+| 54. `TCGA_PANCANCER_COUNT` | Raw variant count across all TCGA tumor types |
+| 55. `CLINVAR_MSID` | ClinVar MedGen identifier |
+| 56. `CLINVAR_CLASSIFICATION` | ClinVar variant classification |
+| 57. `CLINVAR_VARIANT_ORIGIN` | ClinVar variant origin |
+| 58. `CLINVAR_NUM_SUBMITTERS` | ClinVar number of submitters |
+| 59. `CLINVAR_REVIEW_STATUS_STARS` | ClinVar number of review status stars |
+| 60. `CLINVAR_CONFLICTED` | ClinVar variant classification is conflicted |
+| 61. `BIOMARKER_MATCH` | Biomarker match |
+| 62. `CALL_CONFIDENCE` | Call confidence |
 
 
-#### 3. Mutational signature contributions
+### Tumor mutational burden (TSV)
 
-We provide a tab-separated values file with information about mutational signatures detected in the tumor sample. The file has the following naming convention:
+We provide a tab-separated values (TSV) file with information about mutational burden detected in the tumor sample. The file has the following naming convention:
 
-- `<sample_id>.pcgr_acmg.<genome_assembly>.mutational_signatures.tsv`
+- `<sample_id>.pcgr.<genome_assembly>.tmb.tsv`
 
 The format of the TSV file is the following:
 
 | Variable | Description |
 |----------|-------------|
-| 1. `signature_id` | identifier for signature |
-| 2. `sample_id` | sample identifier |
-| 3. `prop_signature` | relative contribution of mutational signature |
-| 4. `group` | keyword for signature aetiology |
-| 5. `all_reference_signatures` | logical indicating if all reference signatures were used for reconstruction/inference |
-| 6. `tumor_type` | tumor type (used for retrieval of reference signatures) |
-| 7. `reference_collection` | collection used for reference signatures |
-| 8. `reference_signatures` | signatures present in reference collection |
-| 9. `fitting_accuracy` | accuracy of mutational signature fitting |
+| 1. `sample_id` | sample identifier |
+| 2. `n_somatic_variants` | number of somatic variants in total for sample |
+| 3. `tmb_measure` | TMB measure - type of variants included |
+| 4. `tmb_csq_regex` | VEP consequence regex for variants included in TMB calculation |
+| 5. `tmb_target_size_mb` | target size in megabases |
+| 6. `tmb_dp_min` | minimum depth of coverage for variant to be included in TMB calculation |
+| 7. `tmb_af_min` | minimum allele frequency for variant to be included in TMB calculation |
+| 8. `tmb_n_variants` | number of variants included in TMB calculation |
+| 9. `tmb_estimate` | TMB estimate |
+| 10. `tmb_unit` | TMB unit (i.e. mutations/Mb) |
+
+### Mutational signature contributions (TSV)
+
+We provide a tab-separated values (TSV) file with information about mutational signatures detected in the tumor sample. The file has the following naming convention:
+
+- `<sample_id>.pcgr.<genome_assembly>.msigs.tsv.gz`
+
+The format of the TSV file is the following:
+
+| Variable | Description |
+|----------|-------------|
+| 1. `sample_id` | sample identifier |
+| 2. `signature_id` | identifier for signature |
+| 3. `n_bs_iterations` | number of bootstrap iterations |
+| 4. `prop_signature` | relative contribution of mutational signature |
+| 5. `prop_signature_ci_lower` | lower bound of confidence interval for relative contribution of mutational signature |
+| 6. `prop_signature_ci_upper` | upper bound of confidence interval for relative contribution of mutational signature |
+| 7. `aetiology` | underlying atiology of mutational signature |
+| 8. `comments` | additional comments regarding aetiology |
+| 9. `group` | keyword for signature aetiology |
+| 10. `all_reference_signatures` | logical indicating if all reference signatures were used for reconstruction/inference |
+| 11. `tumor_type` | tumor type (used for retrieval of reference signatures) |
+| 12. `reference_collection` | collection used for reference signatures |
+| 13. `reference_signatures` | signatures present in reference collection |
+| 14. `fitting_accuracy` | accuracy of mutational signature fitting |
 
 
 ### Copy number aberrations
@@ -454,33 +376,49 @@ The format of the TSV file is the following:
 
 Copy number segments are intersected with the genomic coordinates of all transcripts from [GENCODE's basic gene annotation](https://www.gencodegenes.org/releases/current.html). In addition, PCGR attaches cancer-relevant annotations for the affected transcripts. The naming convention of the compressed TSV file is as follows:
 
-- `<sample_id>.pcgr_acmg.<genome_assembly>.cna_segments.tsv.gz`
+- `<sample_id>.pcgr.<genome_assembly>.cna_gene_ann.tsv.gz`
   - __NOTE__: This file is organized according to the _affected transcripts_ (i.e. one line/record per affected transcript).
 
 The format of the compressed TSV file is the following:
 
+
 | Variable | Description |
 |----------|-------------|
-| 1. `chrom` | chromosome |
-| 2. `segment_start` | start of copy number segment |
-| 3. `segment_end` | end of copy number segment |
-| 4. `segment_id` | segment identifier |
-| 5. `segment_length_Mb` | length of segment in Mb |
-| 6. `event_type` | focal or broad (covering more than 25% of chromosome arm) |
-| 7. `cytoband(s)` | cytobands covered by segment |
-| 8. `LogR` | Copy log-ratio |
-| 9. `sample_id` | Sample identifier |
-| 10. `ensembl_gene_id ` | Ensembl gene identifier |
-| 11. `symbol` | Gene symbol |
-| 12. `ensembl_transcript_id` | Ensembl transcript identifier |
-| 13. `transcript_start` | chromosomal position of transcript start |
-| 14. `transcript_end` | chromosomal position of transcript end |
-| 15. `transcript_overlap_percent` | percent of transcript length covered by CN segment |
-| 16. `name` | gene name description |
-| 17. `biotype` | type of gene |
-| 18. `tumor_suppressor` | tumor suppressor gene status (CancerMine literature database/Network of Cancer Genes) |
-| 19. `oncogene` | oncogene status (CancerMine literature database/Network of Cancer Genes) |
-| 20. `intogen_drivers` | predicted driver gene status (IntoGen Cancer Drivers Database) |
-| 21. `chembl_compound_id` | anti-cancer drugs that are targeted towards the encoded protein (from Open Targets Platform, drugs are listed as ChEMBL compound identifiers) |
-| 22. `gencode_tag` | |
-| 23. `gencode_release`| |
+| 1. `SAMPLE_ID` | Sample identifier |
+| 2. `VAR_ID` | Variant identifier. Format: `<chromosome>:<segment_start>-<segment_end>:<major_cn>:<minor_cn>` |
+| 3. `CN_MAJOR` | Major copy number |
+| 4. `CN_MINOR` | Minor copy number |
+| 5. `SEGMENT_LENGTH_MB` | Length of segment in Mb |
+| 6. `CYTOBAND` | Associated cytoband |
+| 7. `EVENT_TYPE` | Focal or broad (covering more than 25% of chromosome arm) |
+| 8. `VARIANT_CLASS` | _gain_: total copy number >= user-defined threshold; loss - total copy number equal to zero; _undefined_ other copy number states|
+| 9. `SYMBOL` | Gene symbol |
+| 10. `ENTREZGENE` | Entrez gene identifier |
+| 11. `GENENAME` | Gene name |
+| 12. `ENSEMBL_GENE_ID` | Ensembl gene identifier |
+| 13. `TUMOR_SUPPRESSOR` | Flag indicating if gene is tumor suppressor (CGC/CancerMine/NCG) |
+| 14. `TUMOR_SUPPRESSOR_SUPPORT` | Tumor suppressor annotation support (CGC/CancerMine/NCG) |
+| 15. `ONCOGENE` | Flag indicating if gene is oncogene (CGC/CancerMine/NCG) |
+| 16. `ONCOGENE_SUPPORT` | Oncogene annotation support (CGC/CancerMine/NCG) |
+| 17. `TRANSCRIPT_OVERLAP` | Comma-separated list of associated transcripts, including percentage of transcript overlap |
+| 18. `ACTIONABILITY_TIER` | Actionability tier |
+| 19. `ACTIONABILITY` | Actionability |
+| 20. `ACTIONABILITY_FRAMEWORK` | Actionability framework |
+| 21. `BIOMARKER_MATCH` | Biomarker match |
+| 22. `TARGETED_INHIBITORS_ALL2` | Molecularly targeted inhibitors - indicated for any tumor type|
+
+### Gene expression data
+
+If users provide bulk RNA-seq expression data as input, PCGR will attach basic gene annotations for the affected transcripts, and perform similarity analysis and outlier detection if configured by the user. The naming convention of the compressed TSV files are as follows:
+
+* `<sample_id>.pcgr.<genome_assembly>.expression.tsv.gz`
+  - __NOTE__: This file is organized according to the _affected transcripts_ (i.e. one line/record per affected transcript). Contains basic annotations of the affected transcripts.
+* `<sample_id>.pcgr.<genome_assembly>.expression_similarity.tsv.gz`
+  - __NOTE__: This file is organized according to the _samples_  of other gene expression cohorts (i.e. similarity level, one line/record per sample).
+* `<sample_id>.pcgr.<genome_assembly>.expression_outliers.tsv.gz`
+  - __NOTE__: This file is organized according to the _genes_ which are considered outliers with respect to the distribution of expression levels found in reference cohorts (one line/record per affected outlier/gene).
+
+
+### Excel workbook (XLSX)
+
+The Excel workbook contains multiple sheets with data tables, mostly self-explainable, with annotated datasets pending on the analysis performed (assay/sample data, SNVs/InDels, CNAs, biomarker evidence, TMB, MSI, mutational signatures, immune contexture profiling etc). The naming convention of the Excel workbook is as follows: `<sample_id>.pcgr.<genome_assembly>.xlsx`

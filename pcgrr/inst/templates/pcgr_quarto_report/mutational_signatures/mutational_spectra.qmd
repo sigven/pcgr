@@ -1,0 +1,115 @@
+::: panel-tabset
+
+#### SBS - mutational contexts
+
+<br>
+
+```{r raw_context_plot}
+#| output: asis
+#| eval: !expr is.null(msig_content$result$mut_mat) == FALSE
+
+catalogue_mat <- 
+  msig_content$result$mut_mat
+
+y_max <- 
+  plyr::round_any(
+    max(catalogue_mat[,1] / sum(catalogue_mat[,1])),
+    0.05, f = ceiling)
+
+# raw_context_plot <- sigminer::show_catalogue(
+#   catalogue_mat, 
+#   mode = "SBS", 
+#   normalize = "row", 
+#   x_lab = "", 
+#   palette = head(pcgrr::color_palette$tier$values, 6),  
+#   y_lab = "Relative contribution",
+#   rm_panel_border = T, 
+#   bar_width = 0.8, 
+#   x_label_angle = 45, 
+#   base_size = 18, 
+#   paint_axis_text = T)
+# 
+# raw_context_plot
+
+plotly::ggplotly(
+  height = 400,
+  MutationalPatterns::plot_96_profile(
+    catalogue_mat,
+    colors = head(pcgrr::color_palette$tier$values, 6),
+    ymax = y_max)
+)
+
+```
+
+
+```{r missing_context_plot}
+#| output: asis
+#| eval: !expr is.null(msig_content$result$mut_mat) == TRUE
+
+cat("\n::: {.callout-warning}\n## No SNVs\n\nNo SNVs/single base substitutions", 
+    "were found in this sample\n\n:::\n\n")
+
+```
+
+
+#### SBS - type occurrences
+
+<br>
+
+```{r sbs_type_occurrences}
+#| eval: !expr is.null(msig_content$result$type_occurrences) == FALSE
+#| output: asis
+
+
+if(rowSums(msig_content$result$type_occurrences[1:6]) > 0){
+  plotly::ggplotly(
+    height = 400,
+    MutationalPatterns::plot_spectrum(
+      msig_content$result$type_occurrences, 
+      CT = TRUE,
+      error_bars = 'none',
+      colors = head(
+        pcgrr::color_palette$tier$values, 7))
+  )
+}
+
+```
+
+```{r sbs_types_missing}
+#| eval: !expr (is.null(msig_content$result$type_occurrences) == TRUE) & pcg_report$content$snv_indel$vstats$n_snv == 0
+#| output: asis
+
+cat("\n::: {.callout-warning}\n## No SNVs\n\nNo SNVs/single base substitutions", 
+    "were found in this sample\n\n:::\n\n")
+
+```
+
+#### ID - mutational contexts
+
+<br>
+
+```{r indel_contexts}
+#| eval: !expr is.null(msig_content$result$indel_counts) == FALSE
+#| column: body-outset
+#| output: asis
+
+plotly::ggplotly(
+  height = 400,
+  width = 1000,
+  MutationalPatterns::plot_indel_contexts(
+    msig_content$result$indel_counts)
+)
+
+```
+
+```{r indel_contexts_missing}
+#| eval: !expr is.null(msig_content$result$indel_counts) == TRUE
+#| output: asis
+
+cat(
+  "\n::: {.callout-warning}\n## No/very few InDels\n\nNo/very few insertion/deletions",
+  "were analyzed in this sample\n\n:::\n")
+
+```
+
+:::

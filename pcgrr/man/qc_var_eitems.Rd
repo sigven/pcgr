@@ -2,8 +2,7 @@
 % Please edit documentation in R/biomarkers.R
 \name{qc_var_eitems}
 \alias{qc_var_eitems}
-\title{Function that makes a quality control check of evidence items assigned
-to variants}
+\title{Function that matches variants to evidence items}
 \usage{
 qc_var_eitems(var_eitems = NULL, marker_type = "codon")
 }
@@ -13,6 +12,14 @@ qc_var_eitems(var_eitems = NULL, marker_type = "codon")
 \item{marker_type}{type of biomarker}
 }
 \description{
+param sample_calls data frame with variant calls
+param db database with evidence items ('civic','cgi')
+param colset character vector with column names to pull out from sample_calls
+param eitems raw list of evidence items
+param region_marker logical indication if region biomarkers are to be matched or not
+}
+\details{
+export
 Function that makes a quality control check of evidence items assigned
 to variants
 }

@@ -7,6 +7,8 @@ import os
 import time
 import errno
 import platform
+import string
+import random
 
 
 def getlogger(logger_name):
@@ -31,7 +33,17 @@ def error_message(message, logger):
     sys.exit(1)
 
 def warn_message(message, logger):
+    logger.warning("")
     logger.warning(message)
+    logger.warning("")
+
+def random_id_generator(size = 10, chars = string.ascii_lowercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
+
+#def random_string(length):
+#    letters = string.ascii_lowercase
+#    result_str = ''.join(random.choice(letters) for i in range(length))
+#    return result_str
 
 def check_subprocess(logger, command, debug):
     if debug:
@@ -71,14 +83,22 @@ def conda_env_path(env):
     env_path = os.path.join(env_dir, env) # /path/to/conda/envs/{env}
     return env_path
 
-def get_loftee_dir():
-    pcgr_conda_env = conda_prefix_basename()
-    return script_path(pcgr_conda_env, "share/loftee")
+def pcgrr_conda_env_export(pcgrr_env):
+    pcgrr_conda_env = conda_env_path(pcgrr_env)
+    cmd = f"export CONDA_PREFIX={pcgrr_conda_env} && export PATH={pcgrr_conda_env}/bin:\"$PATH\""
+    return cmd
 
 def get_pcgr_bin():
     """Return abs path to e.g. conda/env/pcgr/bin
     """
     return os.path.dirname(os.path.realpath(sys.executable))
+
+def quarto_evars_path(pcgrr_env):
+    """The quarto env vars are set in the conda activate script,
+    which is under /path/to/envs/pcgrr/etc/conda/activate.d
+    """
+    return(os.path.join(conda_env_path(pcgrr_env), "etc/conda/activate.d/quarto.sh"))
+
 
 def perl_cmd():
     """Retrieve abs path to locally installed conda Perl or first in PATH,
@@ -117,7 +137,7 @@ def get_cpsr_version():
     return subprocess.check_output(v_cmd, shell=True).decode("utf-8")
 
 # https://stackoverflow.com/a/10840586/2169986
-def remove(filename):
+def remove_file(filename):
     try:
         os.remove(filename)
     except OSError as e:
@@ -144,3 +164,49 @@ def safe_makedir(dname):
             num_tries += 1
             time.sleep(2)
     return dname
+
+def sort_bed(unsorted_bed_fname: str, sorted_bed_fname: str, debug = False, logger = None):
+
+    ## Sort regions in target BED
+    if os.path.exists(unsorted_bed_fname) and os.stat(unsorted_bed_fname).st_size != 0:
+        cmd_sort_custom_bed1 = 'egrep \'^[0-9]\' ' + str(unsorted_bed_fname) + \
+            ' | sort -k1,1n -k2,2n -k3,3n > ' + str(sorted_bed_fname)
+        cmd_sort_custom_bed2 = 'egrep -v \'^[0-9]\' ' + str(unsorted_bed_fname) + \
+            ' | egrep \'^[XYM]\' | sort -k1,1 -k2,2n -k3,3n >> ' + str(sorted_bed_fname)
+
+        check_subprocess(logger, cmd_sort_custom_bed1, debug)
+        check_subprocess(logger, cmd_sort_custom_bed2, debug)
+        if not debug:
+            remove_file(str(unsorted_bed_fname))
+    else:
+        err_msg = 'File ' + str(unsorted_bed_fname) + ' does not exist or is empty'
+        error_message(err_msg, logger)
+
+
+def check_file_exists(fname: str, strict = True, logger = None) -> bool:
+    err = 0
+    if not os.path.isfile(fname):
+        err = 1
+    else:
+        if os.stat(fname).st_size == 0:
+            err = 1
+    if err == 1:
+        msg = f"File {fname} does not exist or has zero size"
+        if strict is False:
+            warn_message(msg, logger)
+            return(False)
+        else:
+            error_message(msg, logger)
+    return(True)
+
+def check_tabix_file(fname: str, logger = None) -> bool:
+    tabix_file = os.path.abspath(f'{fname}.tbi')
+    if not os.path.exists(tabix_file):
+        err_msg = f"Tabix file (i.e. '.gz.tbi') is not present for the bgzipped VCF input file ({fname}" + \
+            "). Please make sure your input VCF is properly compressed and indexed (bgzip + tabix)"
+        error_message(err_msg, logger)
+    else:
+        ## check file size is more than zero
+        check_file_exists(tabix_file)
+    return(True)
+

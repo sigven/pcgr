@@ -1,0 +1,140 @@
+## Documentation
+
+This report is intended for interpretation of acquired genomic aberrations  detected in human tumor samples, as detected from high-throughput sequencing
+technologies.
+
+<br><br>
+
+::: {.panel-tabset}
+
+### Gene/variant annotation resources {#sec-resources}
+
+The variant interpretation procedures performed in this cancer genome report are relying upon multiple tools and knowledge resources, as outlined below. 
+
+::: {.callout-important}
+## Licensing note
+
+Some resources (highlighted below) require specific licensing agreements if you plan to utilize their data (and thus this report) in a commercial, non-research setting.
+:::
+
+
+* __PCGR databundle version__
+
+  * __`r pcg_report$settings$reference_data$version`__
+
+* __Databases/datasets__ 
+```{r list_db}
+#| echo: false
+#| output: asis
+
+i <- 1
+ref_datasets <- pcg_report$settings$reference_data$source_metadata
+for(i in 1:NROW(ref_datasets)){
+  source_full <- ref_datasets[i,"source"]
+  source <- ref_datasets[i,"source_abbreviation"]
+  description <- ref_datasets[i,"source_description"]
+  url <- ref_datasets[i,"source_url"]
+  version <- ref_datasets[i,"source_version"]
+  license <- ref_datasets[i, "source_license"]
+  license_url <- ref_datasets[i, "source_license_url"]
+  
+  ## temporary fix for outdated ACMG URL (geneOncoX needs update):
+  if(source == "acmg_sf"){
+    url <- "https://pubmed.ncbi.nlm.nih.gov/37347242/"
+  }
+  wflow <- ref_datasets[i, "wflow"]
+  if(!(stringr::str_detect(
+    wflow,"pcgr"))){
+    next
+  }
+  
+  s <- ""
+  if(is.na(version)){
+    if(!is.na(license_url)){
+      s <- paste0("    * [", source_full, "](", url, ") - ", description, " - [",
+                  license,"](", license_url, ")")
+    }else{
+      s <- paste0("    * [", source_full, "](", url, ") - ", description, " - ",
+                  license)
+    }
+  }else{
+    if(!is.na(license_url)){
+      if(source == "cgc" | source == "gepa"){
+        s <- paste0("    * [", source_full, "](", url, ") - ", description, " (<b>", version, "</b>)",
+                    " - <b>[", license,"](", license_url, ")</b>")
+      }else{
+        s <- paste0("    * [", source_full, "](", url, ") - ", description, " (<b>", version, "</b>)",
+                    " - [", license,"](", license_url, ")")
+      }
+    }else{
+       s <- paste0("    * [", source_full, "](", url, ") - ", description, " (<b>", version, "</b>)",
+                  " - ", license)
+    }
+  }
+  if(s != ""){
+    cat(s, sep = "\n")
+  }
+}
+
+```
+
+### Report content
+
+#### Oncogenicity classification
+
+Somatic aberrations (SNV/InDels) are evaluated for oncogenicity through an implementation of standard operating procedures proposed by VICC/CGC/ClinGen [@Horak2022-uh]. Here, various properties of the variants and genes affected are assigned specific scores according to several criteria, both negative and positive, pending on whether the properties support an oncogenic or benign variant type. These scores are in turn aggregated towards an overall oncogenicity score. 
+
+Note that all properties/criteria provided in the SOP's are _not_ readily implemented in PCGR, specifically the ones requiring manual curation or expert review (i.e. experimental oncogenic variant evidence, requring support from _in vitro_ or _in vivo_ functional studies (criteria _OM1/OS1_)).
+This implies that some variants interrogated by PCGR may not be classified as oncogenic, even though they could be classified as such by manual review. Considering the nature of our current implementation, we have thus also adopted slightly different score thresholds for variant classifications to those proposed originally by [@Horak2022-uh]. We are working to further improve the oncogenicity classification in PCGR, and welcome feedback on this matter.
+
+Note also that for somatic copy number aberrations, we showcase potential oncogenic events as **proto-oncogenes subject to amplifications** (where level of amplification is configurable by the user), as well as **tumor suppressor genes subject to homozygous deletions**.
+
+#### Actionability classificaton
+
+Clinical actionability assessment of SNVs/InDels and gene copy number aberrations found in the tumor sample follows recommendation guidelines by ACMG/AMP [@Li2017-ew]. Specifically, different levels  of actionability are implemented in the following manner:
+
+- **TIER 1: Variants of strong clinical significance** - constitutes aberrations linked to predictive, prognostic, or diagnostic biomarkers in the [CIViC database](http://civic.genome.wustl.edu) and the [Cancer Biomarkers Database](https://www.cancergenomeinterpreter.org/biomarkers) that are
+	 - Found within the same tumor type/class as specified by the user, **AND**
+	 - Of strong clinical evidence (i.e. part of guidelines, validated or discovered in late clinical trials ([CIViC evidence levels A/B](https://civic.readthedocs.io/en/latest/model/evidence/level.html)))
+	 
+ - **TIER 2: Variants of potential clinical significance** - constitutes other aberrations linked to predictive, prognostic, or diagnostic biomarkers in the [CIViC database](http://civic.genome.wustl.edu) and the [Cancer Biomarkers Database](https://www.cancergenomeinterpreter.org/biomarkers) that are either
+	 - Of strong clinical evidence in other tumor types/classes than the one specified by the user, **OR**
+	 - Of weak clinical evidence (early trials, case reports etc. ([CIViC evidence levels C/D/E](https://civic.readthedocs.io/en/latest/model/evidence/level.html)))) in the same tumor type/class as specified by the user
+	 
+ - **TIER 3: Variants of uncertain clinical significance (SNVs/InDels only)** -
+   - Other coding variants found in oncogenes or tumor suppressor genes, yet _not_ linked to any known predictive, prognostic, or diagnostic biomarkers in the [CIViC database](http://civic.genome.wustl.edu) and the [Cancer Biomarkers Database](https://www.cancergenomeinterpreter.org/biomarkers)
+   
+<br>
+
+#### Mutational signatures
+
+The set of somatic mutations observed in a tumor reflects the varied mutational processes that have been active during its life history, providing insights into the routes taken to carcinogenesis. Exogenous mutagens, such as tobacco smoke and ultraviolet light, and endogenous processes, such as APOBEC enzymatic family functional activity or DNA mismatch repair deficiency, result in characteristic patterns of mutation. There is growing evidence that mutational signatures can explain therapeutic response [@Brady2022-hr; @Levatic2022-hk].
+
+In PCGR, we apply the **MutationalPatterns** package [@Blokzijl2018-nc] to identify the contribution of _known mutational signatures_ in a single tumor sample. Specifically, we apply [MutationalPatterns](https://github.com/UMCUGenetics/MutationalPatterns) to optimally reconstruct the observed spectrum of mutations through a [reference collection of known mutational signatures](https://www.ncbi.nlm.nih.gov/pubmed/32025018). By default, we restrict the signatures in the reference collection to those already observed in the tumor type in question (i.e. from large-scale <i>de novo</i> signature extraction on ICGC tumor samples). 
+
+#### Tumor mutational burden (TMB)
+
+Tumor mutational load or mutational burden is a measure of the number of mutations within a tumor genome, defined as the total number of mutations per coding area of a tumour genome. TMB may serve as a proxy for determining the number of neoantigens per tumor, which in turn may have implications for response to immunotherapy. PCGR estimates TMB according to three different schemes (one to be chosen as displayed in the report):
+
+  1) __TMB_coding_silent__: the same approach as was outlined in a large-scale study of TMB ([Chalmers et al., 2017](https://www.ncbi.nlm.nih.gov/pubmed/28420421)), i.e. counting all somatic base substitutions and indels in the protein-coding regions of the sequencing assay, including those at canonical splice sites, and including synonymous alterations. 
+  2) __TMB_coding_non_silent__: counting all somatic base substitutions and indels in the protein-coding regions of the sequencing assay, including those at canonical splice sites, but excluding synonymous alterations.
+  3) __TMB_missense_only__: missense (non-synonymous) variants variants only, i.e. as employed by [Fernandez et al., 2019](https://www.ncbi.nlm.nih.gov/pubmed/31475242)
+
+Numbers obtained with 1), 2) or 3) are next divided by the coding target size of the sequencing assay.
+
+<br>
+
+#### MSI classification
+
+Microsatellite instability (MSI) is the result of impaired DNA mismatch repair and constitutes a cellular phenotype of clinical significance in many cancer types, most prominently colorectal cancers, stomach cancers, endometrial cancers, and ovarian cancers ([Cortes-Ciriano et al., 2017](https://www.ncbi.nlm.nih.gov/pubmed/28585546)). We have built a statistical MSI classifier from somatic mutation profiles that separates _MSI.H_ (MSI-high) from _MSS_ (MS stable) tumors. The MSI classifier was trained using 999 exome-sequenced TCGA tumor samples with known MSI status (i.e. assayed from mononucleotide markers), and obtained a [positive predictive value](https://en.wikipedia.org/wiki/Positive_and_negative_predictive_values#Positive_predictive_value) of 100% and a [negative predictive value](https://en.wikipedia.org/wiki/Positive_and_negative_predictive_values#Negative_predictive_value) of 99.4% on an independent test set of 427 samples. Details of the MSI classification approach can be found <a href="https://rpubs.com/sigven/msi2020_v2" target="_blank">here</a>.
+
+Note that the MSI classifier is applied only for WGS/WES tumor-control sequencing assays.
+
+<br>
+
+#### Expression
+
+If data is provided, PCGR reports may include a section on gene expression, where we provide an analysis of expression outliers with respect to reference cohorts (TCGA). The expression levels are based on bulk RNA-seq data from the tumor sample, and are presented as normalized expression values (TPM). We also perform a correlation analysis of the gene expression profile of the input sample with the profiles seen in other reference collections (The Cancer Genome Atlas, DepMap cell lines, TreeHouse pediactric cancers).
+
+
+:::

@@ -1,0 +1,95 @@
+## Somatic SNVs/InDels
+
+```{r section_variant_filtering}
+#| eval: !expr as.logical(pcg_report$settings$conf$assay_properties$vcf_tumor_only) == TRUE
+#| output: asis
+#| child: pcgr_quarto_report/snv_indel/variant_filtering.qmd 
+
+```
+
+
+```{r section_variant_statistics}
+#| eval: !expr as.logical(pcg_report$content$snv_indel$vstats$n > 0) == TRUE
+#| output: asis
+#| child: pcgr_quarto_report/snv_indel/variant_statistics.qmd 
+
+```
+
+```{r key_snv_indel_numbers}
+#| echo: false
+#| output: asis
+#| eval: true
+
+    
+bslib::page_fillable(
+  bslib::layout_columns(
+    col_widths = c(3,3,3,3),
+    height = "100px",
+    bslib::value_box(
+      title = "Total variants",
+      value = paste0(
+        pcg_report$content$snv_indel$vstats$n),
+      showcase = NULL,
+      theme = dplyr::if_else(
+         pcg_report$content$snv_indel$vstats$n > 0,
+        "dark",
+        "dark"
+      )
+    ),
+     bslib::value_box(
+      title = "Coding variants",
+      value = paste0(
+        pcg_report$content$snv_indel$vstats$n_coding),
+      showcase = NULL,
+      theme = dplyr::if_else(
+         pcg_report$content$snv_indel$vstats$n_coding > 0,
+        "dark",
+        "dark"
+      )
+    ),
+     bslib::value_box(
+      title = "SNVs",
+      value = paste0(
+        pcg_report$content$snv_indel$vstats$n_snv),
+      showcase = NULL,
+      theme = dplyr::if_else(
+         pcg_report$content$snv_indel$vstats$n_snv > 0,
+        "dark",
+        "dark"
+      )
+    ),
+    bslib::value_box(
+      title = "InDels",
+      value = paste0(
+        pcg_report$content$snv_indel$vstats$n_indel),
+      showcase = NULL,
+      theme = dplyr::if_else(
+         pcg_report$content$snv_indel$vstats$n_indel > 0,
+        "dark",
+        "dark"
+      )
+    )
+  )
+)
+
+```
+
+<br>
+<hr>
+<br>
+
+```{r section_oncogenicity}
+#| output: asis
+#| eval: !expr as.logical(pcg_report$content$snv_indel$vstats$n != 0) == TRUE
+#| child: pcgr_quarto_report/snv_indel/oncogenicity.qmd
+
+```
+
+<br>
+
+```{r section_actionability}
+#| output: asis
+#| eval: !expr as.logical(pcg_report$content$snv_indel$vstats$n != 0) == TRUE
+#| child: pcgr_quarto_report/snv_indel/actionability.qmd
+```
+

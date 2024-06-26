@@ -1,0 +1,438 @@
+### Variant classification - actionability
+
+Acquired SNVs and InDels in the tumor sample have been assessed for
+_clinical actionability_ through an implementation of ACMG/AMP guidelines [@Li2017-ew]. We use CIViC and CGI [@Griffith2017-do;@Tamborero2018-aj] as the underlying sources for actionable variants (versions indicated [below](#documentation)). 
+
+The tabset below indicates which variants have been classified into three distinct _tiers of clinical significance_ according to ACMG/AMP criteria.
+
+::: {.callout-note}
+## Note - biomarker matching
+
+The same somatic aberration may frequently match with multiple evidence items listed in biomarker databases , pending on e.g. the _disease context_, _therapeutic context_, _biomarker resolution_, or underlying _evidence source_ (i.e. publication). Duplicated entries in the table below may thus also occur, as the same type of evidence from different sources (publications) have not
+been merged.
+:::
+
+```{r}
+#| echo: false
+#| output: asis
+#| include: !expr as.logical(pcg_report$content$snv_indel$vstats$n_actionable_tier1 != 0) == TRUE | as.logical(pcg_report$content$snv_indel$vstats$n_actionable_tier2 != 0) == TRUE | as.logical(pcg_report$content$snv_indel$vstats$n_actionable_tier3 != 0) == TRUE
+
+cat("\n::: {.callout-note}\n## Note - biomarker resolution\n\n Biomarkers registered in CIViC/CGI are provided at different _resolutions_ (i.e. filter <b>Biomarker resolution</b>). The accuracy of a match between a variant in the sample and a clinical evidence item (biomarker) will vary accordingly (highlighted by sample alterations with different color backgrounds):\n\n")
+
+cat('<ul><li>Biomarker match at the <mark style="background-color:#2c313c; font-weight:bold; color:white">&nbsp; genomic position/amino acid/codon level &nbsp;</mark></li>')
+cat(paste0(
+  '<br><li>Biomarker match at the <mark style="background-color:', 
+  pcgrr::color_palette$warning,
+  '; color:white; font-weight:bold">&nbsp; exon/gene level&nbsp; </mark></li></ul>\n\n:::'))
+htmltools::br()
+
+```
+
+::: {.panel-tabset .nav-pills}
+
+#### <b>TIER I</b> - strong clinical significance
+
+<br>
+
+```{r tier1_variants, echo=FALSE}
+#| echo: false
+#| output: asis
+#| eval: !expr as.logical(pcg_report$content$snv_indel$vstats$n_actionable_tier1 != 0) == TRUE
+
+dt_snv_content_tier1 <- 
+  pcgrr:::get_dt_tables(
+    rep = pcg_report, tier = 1, variant_class = "snv_indel")
+
+# if(expression_present_snv == FALSE){
+#   dt_snv_content_tier1[['by_gene']]$consTPM <- NULL
+# }
+
+tier1_gene_dt <- DT::datatable(
+  dt_snv_content_tier1[['by_gene']],
+  escape = F, 
+  options = list(dom = 't'),
+  extensions = c("Responsive")) |>
+  DT::formatStyle(
+    color="white", 
+    "MOLECULAR_ALTERATION", 
+    "BM_TOP_RESOLUTION", 
+    fontWeight = 'bold', 
+    `text-align` = 'center',
+    backgroundColor = DT::styleEqual(
+      c('high','low'), 
+      c(pcgrr::color_palette$bg_dark,
+        pcgrr::color_palette[['warning']])
+      )
+  ) |>
+  DT::formatStyle(
+    'BIOMARKER_EVIDENCE',
+    'BM_TOP_RESOLUTION',
+    color = "white",
+     backgroundColor = DT::styleEqual(
+      c('high','low'), 
+      c(pcgrr::color_palette$bg_dark,
+        pcgrr::color_palette[['warning']])
+      )
+  )
+
+# if(expression_present_snv == TRUE){
+#   tier1_gene_dt <- tier1_gene_dt |>
+#     DT::formatStyle(
+#      "consTPM",
+#      "consTPM", 
+#      color = "white", 
+#      backgroundColor = 
+#        DT::styleInterval(
+#          pcgrr::color_palette$gene_expression$breaks,
+#          pcgrr::color_palette$gene_expression$values
+#        )
+#    )
+# }
+
+tier1_gene_dt
+
+htmltools::br()
+htmltools::hr()
+htmltools::br()
+
+cat(paste0(
+  "<font style='font-size: 110%'>Details with respect to the clinical",
+  " evidence items associated with <b>",
+  paste(dt_snv_content_tier1[['by_gene']]$MOLECULAR_ALTERATION, collapse=", "),
+  " </b>can be explored in the data table listed below:</font>\n"))
+htmltools::br()
+
+snv_eitem_tier1_shared <- crosstalk::SharedData$new(
+  dt_snv_content_tier1[['by_eitem']] |>
+    dplyr::rename(SAMPLE_ALTERATION = MOLECULAR_ALTERATION))
+
+crosstalk::bscols(
+  list(
+     crosstalk::filter_select(
+      "SAMPLE_ALTERATION", "Sample alteration", 
+      snv_eitem_tier1_shared, ~SAMPLE_ALTERATION),
+    crosstalk::filter_select(
+      "BM_CANCER_TYPE", "Cancer type", 
+      snv_eitem_tier1_shared, ~BM_CANCER_TYPE),
+    crosstalk::filter_select(
+      "BM_CLINICAL_SIGNIFICANCE", "Clinical significance", 
+      snv_eitem_tier1_shared, ~BM_CLINICAL_SIGNIFICANCE),
+    crosstalk::filter_slider(
+      "BM_RATING", "Rating", snv_eitem_tier1_shared, 
+      ~BM_RATING, min = 0, max = 5, step = 1, ticks = T),
+    crosstalk::filter_select(
+      "BM_RESOLUTION", "Biomarker resolution", 
+      snv_eitem_tier1_shared, ~BM_RESOLUTION)
+  ),
+  list(
+    crosstalk::filter_select(
+      "BM_EVIDENCE_TYPE", "Evidence type", 
+      snv_eitem_tier1_shared, ~BM_EVIDENCE_TYPE),
+    crosstalk::filter_select(
+      "BM_EVIDENCE_LEVEL", "Evidence level", 
+      snv_eitem_tier1_shared, ~BM_EVIDENCE_LEVEL),
+    crosstalk::filter_select(
+      "BM_EVIDENCE_DIRECTION", "Evidence direction", 
+      snv_eitem_tier1_shared, ~BM_EVIDENCE_DIRECTION),
+    crosstalk::filter_select(
+      "BM_THERAPEUTIC_CONTEXT", "Therapeutic context", 
+      snv_eitem_tier1_shared, ~BM_THERAPEUTIC_CONTEXT)
+  )
+)
+
+htmltools::br()
+
+DT::datatable(
+  snv_eitem_tier1_shared,
+  escape = F, 
+  extensions = c("Buttons","Responsive"), 
+  options = list(
+    buttons = c('csv','excel'), 
+    dom = 'Bfrtip')) |>
+  DT::formatStyle(
+    color = "white",
+    'BM_EVIDENCE_LEVEL', 
+    backgroundColor = DT::styleEqual(
+      pcgrr::color_palette$clinical_evidence$levels,
+      pcgrr::color_palette$clinical_evidence$values)) |>
+  DT::formatStyle(
+    color = "white", 
+    c("SAMPLE_ALTERATION","BM_CONTEXT"), 
+    "BM_RESOLUTION", 
+    fontWeight = 'bold', 
+    `text-align` = 'center',
+    backgroundColor = DT::styleEqual(
+      c('genomic','hgvsp','codon',
+        'exon','gene_region_mut',
+        'gene_lof','gene_mut'), 
+      c(pcgrr::color_palette$bg_dark,
+        pcgrr::color_palette$bg_dark,
+        pcgrr::color_palette$bg_dark,
+        pcgrr::color_palette[['warning']],
+        pcgrr::color_palette[['warning']],
+        pcgrr::color_palette[['warning']],
+        pcgrr::color_palette[['warning']])
+    )
+  )
+
+```
+
+
+```{r missing_tier1_variants}
+#| output: asis
+#| echo: false
+#| eval: !expr as.logical(pcg_report$content$snv_indel$vstats$n_actionable_tier1 == 0) == TRUE
+
+htmltools::br()
+cat('\n*  <i> <font style="font-size: 110%"><b>No</b> somatic SNVs/InDels of strong clinical significance were found.</font></i>', sep = '\n')
+cat('\n')
+htmltools::br()
+
+```
+
+#### <b>TIER II</b>- potential clinical significance
+
+<br>
+
+```{r tier2_variants}
+#| echo: false
+#| output: asis
+#| eval: !expr as.logical(pcg_report$content$snv_indel$vstats$n_actionable_tier2 != 0) == TRUE
+
+dt_snv_content_tier2 <- 
+  pcgrr:::get_dt_tables(
+    rep = pcg_report, 
+    tier = 2, 
+    variant_class = "snv_indel")
+
+# if(expression_present_snv == FALSE){
+#   dt_snv_content_tier2[['by_gene']]$consTPM <- NULL
+# }
+
+tier2_gene_dt <- DT::datatable(
+  dt_snv_content_tier2[['by_gene']],
+  escape = F, 
+  options = list(dom = 't'),
+  extensions = c("Responsive")) |>
+  DT::formatStyle(
+    color="white", 
+    "MOLECULAR_ALTERATION", 
+    "BM_TOP_RESOLUTION", 
+    fontWeight = 'bold', 
+    `text-align` = 'center',
+    backgroundColor = DT::styleEqual(
+      c('high','low'), 
+      c(pcgrr::color_palette$bg_dark,
+        pcgrr::color_palette[['warning']])
+      )
+  ) |>
+  DT::formatStyle(
+    'BIOMARKER_EVIDENCE',
+    'BM_TOP_RESOLUTION',
+    color = "white",
+     backgroundColor = DT::styleEqual(
+      c('high','low'), 
+      c(pcgrr::color_palette$bg_dark,
+        pcgrr::color_palette[['warning']])
+      )
+  ) 
+
+# if(expression_present_snv == TRUE){
+#   tier2_gene_dt <- tier2_gene_dt |>
+#     DT::formatStyle(
+#      "consTPM",
+#      "consTPM", 
+#      color = "white", 
+#      backgroundColor = 
+#        DT::styleInterval(
+#          pcgrr::color_palette$gene_expression$breaks,
+#          pcgrr::color_palette$gene_expression$values
+#        )
+#    )
+# }
+
+tier2_gene_dt
+
+htmltools::br()
+htmltools::hr()
+htmltools::br()
+cat(paste0(
+  "<font style='font-size: 110%'>Details with respect to the clinical",
+  " evidence items associated with <b>",
+  paste(dt_snv_content_tier2[['by_gene']]$MOLECULAR_ALTERATION, collapse=", "),
+  " </b>can be explored in the data table listed below:</font>\n"))
+htmltools::br()
+htmltools::br()
+
+snv_eitem_tier2_shared <- crosstalk::SharedData$new(
+  dt_snv_content_tier2[['by_eitem']] |>
+    dplyr::rename(SAMPLE_ALTERATION = MOLECULAR_ALTERATION))
+
+crosstalk::bscols(
+  list(
+     crosstalk::filter_select(
+      "SAMPE_ALTERATION", "Sample alteration", 
+      snv_eitem_tier2_shared, ~SAMPLE_ALTERATION),
+    crosstalk::filter_select(
+      "BM_CANCER_TYPE", "Cancer type", 
+      snv_eitem_tier2_shared, ~BM_CANCER_TYPE),
+    crosstalk::filter_select(
+      "BM_CLINICAL_SIGNIFICANCE", "Clinical significance", 
+      snv_eitem_tier2_shared, ~BM_CLINICAL_SIGNIFICANCE),
+    crosstalk::filter_slider(
+      "BM_RATING", "Rating", snv_eitem_tier2_shared, 
+      ~BM_RATING, min = 0, max = 5, step = 1, ticks = T),
+    crosstalk::filter_select(
+      "BM_RESOLUTION", "Biomarker resolution", 
+      snv_eitem_tier2_shared, ~BM_RESOLUTION)
+
+  ),
+  list(
+    crosstalk::filter_select(
+      "BM_EVIDENCE_TYPE", "Evidence type", 
+      snv_eitem_tier2_shared, ~BM_EVIDENCE_TYPE),
+    crosstalk::filter_select(
+      "BM_EVIDENCE_LEVEL", "Evidence level", 
+      snv_eitem_tier2_shared, ~BM_EVIDENCE_LEVEL),
+    crosstalk::filter_select(
+      "BM_EVIDENCE_DIRECTION", "Evidence direction", 
+      snv_eitem_tier2_shared, ~BM_EVIDENCE_DIRECTION),
+    crosstalk::filter_select(
+      "BM_THERAPEUTIC_CONTEXT", "Therapeutic context", 
+      snv_eitem_tier2_shared, ~BM_THERAPEUTIC_CONTEXT)
+  )
+)
+
+htmltools::br()
+
+DT::datatable(
+  snv_eitem_tier2_shared,
+  escape = F, 
+  extensions = c("Buttons","Responsive"), 
+  options = list(
+    buttons = c('csv','excel'), 
+    dom = 'Bfrtip')) |>
+  DT::formatStyle(
+    color = "white",
+    'BM_EVIDENCE_LEVEL', 
+    backgroundColor = DT::styleEqual(
+      pcgrr::color_palette$clinical_evidence$levels,
+      pcgrr::color_palette$clinical_evidence$values)) |>
+  DT::formatStyle(
+    color = "white", 
+    c("SAMPLE_ALTERATION",
+      "BM_CONTEXT"), 
+    "BM_RESOLUTION", 
+    fontWeight = 'bold', 
+    `text-align` = 'center',
+    backgroundColor = DT::styleEqual(
+      c('hgvsp','genomic','codon',
+        'exon','gene_region_mut',
+        'gene_lof','gene_mut'), 
+      c(pcgrr::color_palette$bg_dark,
+        pcgrr::color_palette$bg_dark,
+        pcgrr::color_palette$bg_dark,
+        pcgrr::color_palette[['warning']],
+        pcgrr::color_palette[['warning']],
+        pcgrr::color_palette[['warning']],
+        pcgrr::color_palette[['warning']])
+    )
+  )
+
+```
+
+
+```{r }
+#| output: asis
+#| echo: false
+#| eval: !expr as.logical(pcg_report$content$snv_indel$vstats$n_actionable_tier2 == 0) == TRUE
+
+htmltools::br()
+cat('\n*  <i> <font style="font-size: 110%"><b>No</b> somatic SNVs/InDels of potential clinical significance were found.</font></i>', sep = '\n')
+cat('\n')
+htmltools::br()
+
+```
+
+#### <b>TIER III</b> - uncertain clinical significance
+
+Here, we list protein-altering somatic variants located in proto-oncogenes and tumor suppressors that are currently _not_ linked to any clinical evidence items (as specified in [@Li2017-ew]). These variants are considered to have uncertain clinical significance and are thus not recommended for clinical action.
+
+Variants have been ranked based on their oncogenicity score, and their strength of association to cancer at the gene level (here, specifically __`r pcg_report$settings$conf$sample_properties$site`__ cancers), from <span style="background-color:`r pcgrr::color_palette$cancer_assoc$values[1]`; padding:2x; color:white"><b>&nbsp; weak associations &nbsp; </b></span>&nbsp; to <span style="background-color:`r pcgrr::color_palette$cancer_assoc$values[length(pcgrr::color_palette$cancer_assoc$values)]`; padding:2x; color:white"><b>&nbsp; strong associations &nbsp; </b></span> [@Ochoa2021-jc;@Nakken2023-ol]. 
+<br>
+
+```{r }
+#| output: asis
+#| echo: false
+#| eval: !expr as.logical(pcg_report$content$snv_indel$vstats$n_actionable_tier3 != 0) == TRUE
+
+tier3_variants <- 
+  pcg_report$content[['snv_indel']]$callset$variant_display |>
+  dplyr::filter(.data$ACTIONABILITY_TIER == 3) |>
+  dplyr::select(
+    dplyr::any_of(
+      pcgrr::dt_display$snv_indel_tier3
+    )
+  ) |>
+  dplyr::arrange(
+    dplyr::desc(.data$ONCOGENICITY_SCORE),
+    dplyr::desc(.data$TISSUE_ASSOC_RANK),
+    dplyr::desc(.data$GLOBAL_ASSOC_RANK),
+  )
+
+# if(expression_present_snv == FALSE){
+#   tier3_variants$consTPM <- NULL
+# }
+
+
+tier3_dt <- DT::datatable(
+  tier3_variants,
+  escape = F, 
+  extensions = c("Buttons","Responsive"), 
+  options = list(
+    buttons = c('csv','excel'), 
+    dom = 'Bfrtip')) |>
+   DT::formatStyle(
+     "SYMBOL",
+     "TISSUE_ASSOC_RANK", 
+     color = "white", 
+     backgroundColor = 
+       DT::styleInterval(
+         pcgrr::color_palette$cancer_assoc$breaks,
+         pcgrr::color_palette$cancer_assoc$values
+       )
+   )
+
+# if(expression_present_snv == TRUE){
+#   tier3_dt <- tier3_dt |>
+#     DT::formatStyle(
+#      "consTPM",
+#      "consTPM", 
+#      color = "white", 
+#      backgroundColor = 
+#        DT::styleInterval(
+#          pcgrr::color_palette$gene_expression$breaks,
+#          pcgrr::color_palette$gene_expression$values
+#        )
+#    )
+# }
+
+tier3_dt
+
+
+
+```
+
+```{r }
+#| output: asis
+#| echo: false
+#| eval: !expr as.logical(pcg_report$content$snv_indel$vstats$n_actionable_tier3 == 0) == TRUE
+
+htmltools::br()
+cat('\n*  <i> <font style="font-size: 110%"><b>No</b> somatic SNVs/InDels of uncertain clinical significance were found.</font></i>', sep = '\n')
+cat('\n')
+htmltools::br()
+
+```
+
+:::

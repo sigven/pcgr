@@ -2,17 +2,21 @@
 % Please edit documentation in R/utils.R
 \name{variant_stats_report}
 \alias{variant_stats_report}
-\title{Function that generate snv/indel + coding/noncoding stats for
-a given variant set}
+\title{Function that generate stats for a given variant set, considering
+number of variants/genes affected across tiers, types of variants
+()}
 \usage{
-variant_stats_report(calls, name = "v_stat")
+variant_stats_report(callset = NULL, name = "vstats", vartype = "snv_indel")
 }
 \arguments{
-\item{calls}{data frame with variants in predisposition_genes}
+\item{callset}{list object with callset data (CNA or SNVs/InDels)}
 
-\item{name}{type of variant group}
+\item{name}{type of variant statistic}
+
+\item{vartype}{type of variant ('snv_indel', 'cna')}
 }
 \description{
-Function that generate snv/indel + coding/noncoding stats for
-a given variant set
+Function that generate stats for a given variant set, considering
+number of variants/genes affected across tiers, types of variants
+()
 }

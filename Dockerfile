@@ -1,16 +1,19 @@
 FROM ubuntu:20.04
-LABEL maintainer="https://github.com/pdiakumis"
+LABEL org.opencontainers.image.authors='sigven@ifi.uio.no, peterdiakumis@gmail.com' \
+      org.opencontainers.image.description='Personal Cancer Genome Reporter (PCGR)' \
+      org.opencontainers.image.source='https://github.com/sigven/pcgr' \
+      org.opencontainers.image.url='https://github.com/sigven/pcgr' \
+      org.opencontainers.image.documentation='https://sigven.github.io/pcgr' \
+      org.opencontainers.image.licenses='MIT'
 
-ARG MINI_VERSION=4.11.0-0
+ARG MINI_VERSION=24.3.0-0
 ARG MINI_URL=https://github.com/conda-forge/miniforge/releases/download/${MINI_VERSION}/Mambaforge-${MINI_VERSION}-Linux-x86_64.sh
 
 # install core pkgs, mambaforge
 RUN apt-get update && \
     apt-get install --yes --no-install-recommends \
-    bash bzip2 curl git less vim wget zip ca-certificates && \
+    bash bzip2 curl less wget zip ca-certificates && \
     apt-get clean && \
-    rm -r /var/lib/apt/lists/* && \
-    rm -r /var/cache/apt/* && \
     curl --silent -L "${MINI_URL}" -o "mambaforge.sh" && \
     /bin/bash mambaforge.sh -b -p /opt/mambaforge/ && \
     rm mambaforge.sh
@@ -22,6 +25,10 @@ COPY ./conda/env/lock ${PCGR_CONDA_ENV_DIR}
 RUN mamba create -n pcgr --file ${PCGR_CONDA_ENV_DIR}/pcgr-linux-64.lock
 RUN mamba create -n pcgrr --file ${PCGR_CONDA_ENV_DIR}/pcgrr-linux-64.lock
 RUN mamba clean --all --force-pkgs-dirs --yes
+
+FROM quay.io/bioconda/base-glibc-debian-bash:3.1
+
+COPY --from=0 /opt/mambaforge/envs/ /opt/mambaforge/envs/
 
 ARG PCGR_ENV_NAME="pcgr"
 # pcgr env is activated by default

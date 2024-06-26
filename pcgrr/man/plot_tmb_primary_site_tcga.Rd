@@ -2,26 +2,29 @@
 % Please edit documentation in R/mutational_burden.R
 \name{plot_tmb_primary_site_tcga}
 \alias{plot_tmb_primary_site_tcga}
-\title{Function that makes a plot with TMB boxplots for TCGA cohorts, highlighting
+\title{Function that makes a plot with TMB boxplots for reference cohorts, highlighting
 the TMB estimate for a given sample and the cohort/primary site of interest}
 \usage{
 plot_tmb_primary_site_tcga(
-  tcga_tmb,
+  tmb_reference,
   p_site = "Liver",
-  tmb_estimate = 5,
-  algorithm = "all_coding"
+  tmb_estimates = NULL,
+  tmb_display_type = "missense_only",
+  tumor_only = FALSE
 )
 }
 \arguments{
-\item{tcga_tmb}{data frame with TMB estimates for TCGA samples}
+\item{tmb_reference}{data frame with TMB estimates for reference samples (e.g. TCGA)}
 
 \item{p_site}{primary tumor_site (sample)}
 
-\item{tmb_estimate}{estimate of mutational burden (sample)}
+\item{tmb_estimates}{data frame with estimates of mutational burden (sample)}
 
-\item{algorithm}{type of TMB algorithm}
+\item{tmb_display_type}{TMB estimation used for display (e.g. missense_only)}
+
+\item{tumor_only}{logical, if TRUE color using tumor-only color}
 }
 \description{
-Function that makes a plot with TMB boxplots for TCGA cohorts, highlighting
+Function that makes a plot with TMB boxplots for reference cohorts, highlighting
 the TMB estimate for a given sample and the cohort/primary site of interest
 }

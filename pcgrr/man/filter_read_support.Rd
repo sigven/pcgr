@@ -10,7 +10,7 @@ filter_read_support(vcf_df, config = NULL, precision = 3)
 \arguments{
 \item{vcf_df}{data frame with variants}
 
-\item{config}{list with workflow configuration values}
+\item{config}{list with PCGR configuration settings}
 
 \item{precision}{number of significant digits for allelic fraction estimation}
 }

@@ -1,8 +1,6 @@
-{% set data = load_setup_py_data() %}
-
 package:
   name: pcgr
-  version: {{ data.get('version') }}
+  version: 1.4.1.9021 # versioned by bump2version
 
 source:
   path: ../../..
@@ -16,18 +14,22 @@ requirements:
     - curl
     - unzip
     - tar
-    - python ==3.7.12
+    - python
   run:
-    - python ==3.7.12
+    - python
     - pandas
     - scipy
+    - numpy
     - pip
+    - pybedtools
+    - cyvcf2
+    - pyyaml
 
 test:
   commands:
     - pcgr --version
 
 about:
-  home: {{ data.get('url') }}
-  license: {{ data.get('license') }}
-  summary: {{ data.get('description') }}
+  home: https://github.com/sigven/pcgr
+  license: MIT
+  summary: Personal Cancer Genome Reporter (PCGR) - variant interpretation for precision cancer medicine.

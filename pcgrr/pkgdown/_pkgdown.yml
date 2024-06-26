@@ -4,19 +4,30 @@ toc:
   depth: 3
 template:
   bootstrap: 5
+  bslib:
+    info: "#9B3297"
+    dropdown-link-hover-bg: "#9B3297"
+    dropdown-link-hover-color: "white"
+    dropdown-link-active-color: "white"
+    navbar-light-color: "white"
+    navbar-light-brand-color: "white"
+    navbar-light-brand-hover-color: "white"
+    navbar-link-color: "white"
 authors:
   Sigve Nakken:
     href: "https://github.com/sigven"
   Peter Diakumis:
     href: "https://github.com/pdiakumis"
 navbar:
+  link-color: "white"
+  light-color: "white"
+  light-brand-color: "white"
+  type: light
+  bg: info
   structure:
-    left:  [home, installation, running, articles, faq, changelog]
-    right: [reference, search, github]
+    left:  [installation, running, articles, faq, changelog]
+    right: [search, github]
   components:
-    home:
-      text: Intro
-      href: index.html
     installation:
       text: Installation
       href: articles/installation.html

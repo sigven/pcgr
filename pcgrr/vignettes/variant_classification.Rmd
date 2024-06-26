@@ -3,24 +3,39 @@ title: "Variant classification"
 output: rmarkdown::html_document
 ---
 
-## Tier models
+## Oncogenicity
 
-PCGR performs variant classification, meaning that variants are organized and prioritized according to clinical impact. Currently, PCGR implements its tier classsification framework along the proposed ACMG guidelines, as detailed below.
+PCGR evaluates somatic aberrations (SNV/InDels) for oncogenic potential through an implementation of standard operating procedures proposed by [VICC/CGC/ClinGen](https://pubmed.ncbi.nlm.nih.gov/35101336/). Here, various properties of the variants and genes affected are assigned criteria-specific scores, both negative and positive, pending on whether the properties support an oncogenic or benign variant nature. Criteria-specific scores are in turn aggregated towards an overall oncogenicity score per variant.
 
-### *pcgr_acmg*
+Note that all properties/criteria provided in the SOP's are _not_ readily implemented in PCGR, specifically the ones requiring manual curation or expert review (i.e. experimental oncogenic variant evidence, requring support from _in vitro_ or _in vivo_ functional studies (criteria _OM1/OS1_)). This implies that some variants interrogated by PCGR may not be classified as oncogenic, even though they could be classified as such with more functional evidence available. Considering the nature of our current implementation, we have thus also adopted slightly different score thresholds for variant classifications to those proposed originally by [Horak et al., 2022](https://pubmed.ncbi.nlm.nih.gov/35101336/). We are working to further improve the oncogenicity classification in PCGR, and welcome feedback on this matter.
+
+Note also that for somatic copy number aberrations, we showcase potential oncogenic events as **proto-oncogenes subject to amplifications** (where level of amplification is configurable by the user), as well as**tumor suppressor genes subject to homozygous deletions**.
+
+The following criteria are currently used for oncogenicity classification in PCGR:
+
+ * _CLINGEN_VICC_SBVS1_ - Very high MAF (> 0.05 in gnomAD - any five major continental pops)
+ * _CLINGEN_VICC_SBS1_ - High MAF (> 0.01 in gnomAD - any five major continental pops)
+ * _CLINGEN_VICC_SBP1_ - Insilico support a benign effect on the gene or gene product (multiple lines of evidence (>= 7 algorithms) from dbNSFP)
+ * _CLINGEN_VICC_SBP2_ - Silent and intronic changes outside of the consensus splice site (VEP consequence)
+ * _CLINGEN_VICC_OVS1_ - Null variant - in bona fide tumor suppressor gene (predicted as LoF in tumor suppressors from CGC/NCG/CancerMine)
+ * _CLINGEN_VICC_OS3_ - Located in a mutation hotspot, >= 50 samples with a variant at amino acid position, >= 10 samples with same amino acid change (cancerhotspots.org)
+ * _CLINGEN_VICC_OM1_ - Located in a presumably critical site of functional domain - here, this is implemented through indirect evidence from overlap with known oncogenic and predictive (actionable) biomarkers 
+ * _CLINGEN_VICC_OM2_ - Protein length changes from in-frame dels/ins in known oncogene/tumor suppressor genes or stop-loss variants in a tumor suppressor gene (tumor suppressors/oncogenes from CGC/NCG/CancerMine)
+ * _CLINGEN_VICC_OM3_ - Located in a mutation hotspot, < 50 samples with a variant at amino acid position, >= 10 samples with same amino acid change (cancerhotspots.org)
+ * _CLINGEN_VICC_OP1_ - Insilico support a damaging effect on the gene or gene product (multiple lines of evidence (>= 7 algorithms) from dbNSFP)
+ * _CLINGEN_VICC_OP3_ - Located in a mutation hotspot, < 10 samples with the same amino acid change (cancerhotspots.org)
+ * _CLINGEN_VICC_OP4_ - Absent from controls (gnomAD) / very low MAF ( < 0.0001 in all five major subpopulations)
+    
+## Actionability
+
+PCGR prioritizes and evaluates variants according to clinical actionability. Currently, PCGR implements its tier classification framework along the proposed ACMG/AMP guidelines, as detailed below.
 
 This tier model attempts to adopt concensus recommendations by ACMG, as outlined in [Li et al., 2017](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5707196/):
 
- - *Tier 1: Variants of strong clinical significance* - constitutes variants linked to predictive, prognostic, or diagnostic biomarkers in the [CIViC database](http://civic.genome.wustl.edu) and the [Cancer Biomarkers Database](https://www.cancergenomeinterpreter.org/biomarkers) that are
+ - *Tier 1: Variants of strong clinical significance* - constitutes variants linked to predictive, prognostic, or diagnostic evidence items in the [CIViC database](http://civic.genome.wustl.edu) or the [Cancer Biomarkers Database](https://www.cancergenomeinterpreter.org/biomarkers) that are
 	 - A: found within the same tumor type/class as specified by the user, AND
 	 - B: of strong clinical evidence (i.e. part of guidelines, validated or discovered in late clinical trials)
- - *Tier 2: Variants of potential clinical significance* - constitutes other variants linked to predictive, prognostic, or diagnostic biomarkers in the [CIViC database](http://civic.genome.wustl.edu) and the [Cancer Biomarkers Database](https://www.cancergenomeinterpreter.org/biomarkers) that are either
+ - *Tier 2: Variants of potential clinical significance* - constitutes other variants linked to predictive, prognostic, or diagnostic evidence items in the [CIViC database](http://civic.genome.wustl.edu) or the [Cancer Biomarkers Database](https://www.cancergenomeinterpreter.org/biomarkers) that are either
 	 - A: of strong clinical evidence in other tumor types/classes than the one specified by the user, OR
 	 - B: of weak clinical evidence (early trials, case reports etc.) in the same tumor type/class as specified by the user
- - *Tier 3: Variants of uncertain clinical significance* - includes other coding variants found in oncogenes or tumor suppressor genes
- - *Tier 4* - includes other coding variants
-
- For **copy number aberrations**, aberrations linked to Tier 1 & 2 are displayed, within following sections in the HTML report:
-
-  * *Copy number aberrations as biomarkers: Aberrations of strong clinical significance* (Tier 1)
-  * *Copy number aberrations as biomarkers: Aberrations of potential clinical significance* (Tier 2)
+ - *Tier 3: Variants of uncertain clinical significance* - includes other coding variants found in proto-oncogenes or tumor suppressor genes (SNVs and indels only)

@@ -13,6 +13,46 @@
 #'
 "variant_db_url"
 
+
+#' Fixed data types/categories used for biomarker evidence, e.g. 'types','levels' etc.
+#'
+"biomarker_evidence"
+
+#' List of coltype definitions for input files to pcgrr (e.g. VCF-converted TSV, CNA TVS etc.)
+#'
+"data_coltype_defs"
+
+#' List of COSMIC reference mutational signatures (SBS, v3.4)
+#'
+#' @format A list with two matrix objects ('all' and 'no_artefacts').
+#' One matrix contains the COSMIC reference mutational signatures without signature
+#' artefacts ('no_artefacts', number of columns = 68), while the other contains
+#' all signatures, including artefacts ('all', number of columns = 86). Each
+#' matrix has 96 rows, one for each of the 96 possible trinucleotide contexts.
+#'
+"cosmic_sbs_signatures"
+
+#' Data frame with all TCGA cohorts
+#'
+#' @format A data.frame with 33 rows and 2 columns that indicates TCGA cohorts
+"tcga_cohorts"
+
+
+#' Data frame with immune cell types
+#'
+#' @format A data.frame with 11 rows and 2 columns that indicates immune
+#' cell types used in immune contexture analysis by quanTIseq
+#'
+#'
+"immune_celltypes"
+
+#' Data frame with germline filtering criteria
+#'
+#' @format A character vector listing all germline filtering criteria
+#' applied on input callsets (SNVs/InDels) in tumor-only mode
+#'
+"germline_filter_levels"
+
 #' List of URLs for a range of variant effect prediction algorithms
 #'
 #'
@@ -25,19 +65,6 @@
 #' }
 #'
 "effect_prediction_algos"
-
-#' VCF encodings of heterozygous variant states
-#'
-#' @format A vector of potential VCF encodings of heterozygous variant states
-#'
-"heterozygous_states"
-
-
-#' VCF encodings of homozygous variant states
-#'
-#' @format A vector of potential VCF encodings of homozygous variant states
-#'
-"homozygous_states"
 
 #' Regular expression of terms indicative of cancer-related phenotypes and syndromes
 #'
@@ -61,31 +88,8 @@
 #'
 "color_palette"
 
-#' Scores and documentation of ACMG evidence criteria used for variant classification
-#' in CPSR
-#'
-#' @format A list object with three elements: 'score2tier', 'evidence_codes',
-#' 'pathogenic_range_gnomad'
-#'
-#' @format \bold{score2tier} - A data frame with 5 rows and two columns that indicate
-#' current score thresholds for variant classification in CPSR:
-#' \itemize{
-#'   \item \emph{CPSR_CLASSIFICATION} - variant classification level (P, LP, VUS etc)
-#'   \item \emph{CPSR_PATHOGENICITY_SCORE} - indication of CPSR "score bucket" for a given
-#'   classification (HTML string)
-#' }
-#'
-#' #' @format \bold{evidence_codes} - A data frame with 34 rows and 7 columns that document
-#' all ACMG evidence criteria that are used for variant classification in CPSR:
-#' \itemize{
-#'   \item \emph{cpsr_evidence_code} - code for evidence criterion ('ACMG_BA1_AD' etc)
-#'   \item \emph{category} - type of evidence feature ('clinpop','funcvarpop','funcvar','funccomp')
-#'   \item \emph{pathogenicity_pole} - whether the given evidence support a benign variant character ('B'), or
-#'   pathogenic character ('P')
-#'   \item \emph{category_long} - long version of 'category' column
-#'   \item \emph{description} - Verbose description for the given evidence criterion
-#'   \item \emph{sherloc_code} - Corresponding code identifier in SherLoc (Nykamp et al., GiM, 2017)
-#'   \item \emph{path_score} - Score associated with the given evidence criterion (negative or positive)
-#' }
-#'
-"cpsr_acmg"
+#' TSV columns
+"tsv_cols"
+
+#' DT Display
+"dt_display"

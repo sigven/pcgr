@@ -4,16 +4,14 @@
 \alias{generate_report_data_msi}
 \title{Function that generates MSI prediction data for PCGR report}
 \usage{
-generate_report_data_msi(sample_calls, pcgr_data, sample_name, pcgr_config)
+generate_report_data_msi(variant_set, ref_data = NULL, settings = NULL)
 }
 \arguments{
-\item{sample_calls}{variant calls subject to mutational signature analysis}
+\item{variant_set}{variant calls subject to MSI classification}
 
-\item{pcgr_data}{object with PCGR annotation data}
+\item{ref_data}{PCGR reference data object}
 
-\item{sample_name}{sample identifier}
-
-\item{pcgr_config}{Object with PCGR configuration parameters}
+\item{settings}{PCGR run/configuration settings}
 }
 \description{
 Function that generates MSI prediction data for PCGR report

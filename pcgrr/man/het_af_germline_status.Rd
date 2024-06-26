@@ -3,7 +3,7 @@
 \name{het_af_germline_status}
 \alias{het_af_germline_status}
 \title{Function that assigns a logical (STATUS_LIKELY_GERMLINE_HETEROZYGOUS) reflecting whether
-a variant is likely heterozygous (germline) - based on allelic fraction (AF_TUMOR),
+a variant is likely heterozygous (germline) - based on allelic fraction (VAF_TUMOR),
 presence in gnomAD and dbSNP, and no presence in TCGA and COSMIC}
 \usage{
 het_af_germline_status(sample_calls)
@@ -13,6 +13,6 @@ het_af_germline_status(sample_calls)
 }
 \description{
 Function that assigns a logical (STATUS_LIKELY_GERMLINE_HETEROZYGOUS) reflecting whether
-a variant is likely heterozygous (germline) - based on allelic fraction (AF_TUMOR),
+a variant is likely heterozygous (germline) - based on allelic fraction (VAF_TUMOR),
 presence in gnomAD and dbSNP, and no presence in TCGA and COSMIC
 }

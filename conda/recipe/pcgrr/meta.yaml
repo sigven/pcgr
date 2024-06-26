@@ -1,6 +1,6 @@
 package:
   name: r-pcgrr
-  version: 1.4.1 # versioned by bump2version
+  version: 1.4.1.9021 # versioned by bump2version
 
 source:
   path: ../../../pcgrr
@@ -16,82 +16,74 @@ requirements:
   build:
     - git
   host:
-    - r-base ==4.1.1
+    - r-base ==4.3.3
     - r-assertable
     - r-assertthat
-    - bioconductor-biocgenerics
-    - r-biocmanager
     - bioconductor-biostrings
+    - r-bslib
     - r-caret
-    - r-data.table
-    - r-devtools
-    - r-dt
+    - r-crosstalk
     - r-dplyr
-    - r-flexdashboard
-    - r-crosstalk ==1.1.1
-    - bioconductor-genomicranges
+    - r-dt
+    - r-formattable
     - bioconductor-genomeinfodb
     - r-ggplot2
-    - r-ggpubr
     - r-glue
     - r-htmltools
-    - bioconductor-iranges
-    - r-jsonlite
     - r-log4r
-    - r-magrittr
     - bioconductor-mutationalpatterns
+    - r-openxlsx2
     - r-plotly
+    - bioconductor-quantiseqr
+    - r-quarto
+    - quarto
     - r-randomforest
-    - r-rcolorbrewer
+    - r-readr
     - r-reshape2
     - r-rlang
-    - r-rmarkdown
-    - r-roxygen2
+    - r-rrapply
     - bioconductor-s4vectors
     - r-scales
+    - r-shiny
+    - r-stringr
+    - r-stringi
     - r-tidyr
-    - r-upsetr
-    - r-usethis
-    - bioconductor-variantannotation
+    - r-yaml
 
   run:
-    - r-base ==4.1.1
+    - r-base ==4.3.3
     - r-assertable
     - r-assertthat
-    - bioconductor-biocgenerics
-    - r-biocmanager
     - bioconductor-biostrings
+    - r-bslib
     - r-caret
-    - r-data.table
-    - r-devtools
-    - r-dt
+    - r-crosstalk
     - r-dplyr
-    - r-flexdashboard
-    - r-crosstalk ==1.1.1
-    - bioconductor-genomicranges
+    - r-dt
+    - r-formattable
     - bioconductor-genomeinfodb
     - r-ggplot2
-    - r-ggpubr
     - r-glue
     - r-htmltools
-    - bioconductor-iranges
-    - r-jsonlite
     - r-log4r
-    - r-magrittr
     - bioconductor-mutationalpatterns
+    - r-openxlsx2
     - r-plotly
+    - bioconductor-quantiseqr
+    - r-quarto
+    - quarto
     - r-randomforest
-    - r-rcolorbrewer
+    - r-readr
     - r-reshape2
     - r-rlang
-    - r-rmarkdown
-    - r-roxygen2
+    - r-rrapply
     - bioconductor-s4vectors
     - r-scales
+    - r-shiny
+    - r-stringr
+    - r-stringi
     - r-tidyr
-    - r-upsetr
-    - r-usethis
-    - bioconductor-variantannotation
+    - r-yaml
 
 test:
   commands:

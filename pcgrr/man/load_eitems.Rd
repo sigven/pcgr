@@ -8,7 +8,7 @@ on given parameters (mutation type, variant origin, tumor type etc)}
 load_eitems(
   eitems_raw = NULL,
   ontology = NULL,
-  alteration_type = "MUT",
+  alteration_types = c("MUT"),
   origin = "Somatic",
   tumor_type_specificity = NULL,
   tumor_type = NULL
@@ -19,7 +19,7 @@ load_eitems(
 
 \item{ontology}{phenotype ontology data frame}
 
-\item{alteration_type}{type of alteration ('MUT', 'CNA', 'MUT_LOF')}
+\item{alteration_types}{types of alteration ('MUT', 'CNA', 'MUT_LOF')}
 
 \item{origin}{variant origin ('Somatic','Germline')}
 
