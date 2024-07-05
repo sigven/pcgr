@@ -274,10 +274,12 @@ exclude_non_chrom_variants <- function(vcf_df, chrom_var = "CHROM") {
   vcf_df <- dplyr::semi_join(
     vcf_df, nuc_chromosomes_df, by = chrom_var)
   n_after_exclusion <- nrow(vcf_df)
-  pcgrr::log4r_info(
-    paste0("Excluding n = ",
-           n_before_exclusion - n_after_exclusion,
-           " variant(s) from non-nuclear chromosomes/scaffolds"))
+  if(n_before_exclusion - n_after_exclusion > 0){
+    pcgrr::log4r_info(
+      paste0("Excluding n = ",
+             n_before_exclusion - n_after_exclusion,
+             " variant(s) from non-nuclear chromosomes/scaffolds"))
+  }
   return(vcf_df)
 
 }
