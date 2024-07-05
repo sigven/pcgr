@@ -199,7 +199,7 @@ def threeToOneAA(aa_change):
     return aa_change
 
 
-def assign_cds_exon_intron_annotations(csq_record):
+def assign_cds_exon_intron_annotations(csq_record, logger):
     
 
     csq_record['CODING_STATUS'] = 'noncoding'
@@ -274,13 +274,13 @@ def assign_cds_exon_intron_annotations(csq_record):
                     cds_pos = cds_pos_full.split('-')[0]
                     if cds_pos.isdigit():
                         cds_pos = int(cds_pos)
-                    else:
-                        print('BALLE1 - ' + str(cds_pos_full) + ' - ' + str(cds_pos))
+                    #else:
+                    #    logger.warning(f'Could not determine variant CDS position from VEP annotation - ({csq_record["CDS_position"]})')                        
                 else:
                     if cds_pos_full.isdigit():
                         cds_pos = int(cds_pos_full)
-                    else:
-                        print('BALLE2 - ' + str(cds_pos_full) + ' - ' + str(cds_pos))
+                    #else:
+                    #    logger.warning(f'Could not determine variant CDS position from VEP annotation - ({csq_record["CDS_position"]})')                         
                 
                 if int(cds_pos) > -1 and int(cds_pos) <= int(cds_length):    
                     csq_record['CDS_RELATIVE_POSITION'] = float(cds_pos/cds_length)
