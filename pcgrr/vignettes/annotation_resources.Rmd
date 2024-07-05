@@ -36,11 +36,11 @@ __Genomic biomarkers__
 
 Genomic biomarkers included in PCGR are limited to the following:
 
-* Evidence items for specific markers in CIViC must be *accepted* (*submitted* evidence items are not considered)
-* Markers reported at the gene level (e.g. __BRAF mutation__, __BRCA1 oncogenic mutation__)
-* Markers reported at the variant level (e.g. __BRAF p.V600E__)
+* Evidence items for specific markers in CIViC must be *accepted* (*submitted* evidence items are not considered or shown)
+* Markers reported at the exact variant level (e.g. __BRAF p.V600E__, __MET c.3028+1G>T, __g.7:140753336A>T__)
 * Markers reported at the codon level (e.g. __KRAS p.G12__)
-* Markers reported at the exon/gene level (e.g. __KIT exon 11 mutation__, __BRCA1/2 oncogenic mutations__)
+* Markers reported at the exon level (e.g. __KIT exon 11 mutation__, __EGFR exon 19 deletion__)
+* Markers reported at the gene level (e.g. __BRAF mutation__, __TP53 loss-of-function mutation__, __BRCA1 oncogenic mutation__)
 * Within the [Cancer bioMarkers database (CGI)](https://www.cancergenomeinterpreter.org/biomarkers), only markers collected from FDA/NCCN guidelines, scientific literature, and clinical trials are included (markers collected from conference abstracts etc. are not included)
 * Copy number gains/losses
 
