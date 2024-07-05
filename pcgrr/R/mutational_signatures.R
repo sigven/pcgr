@@ -675,9 +675,7 @@ generate_report_data_rainfall <- function(variant_set,
                                           build = NULL) {
 
   pcg_report_rainfall <- pcgrr::init_rainfall_content()
-  if (NROW(variant_set) == 0) {
-    return(pcg_report_rainfall)
-  }
+
 
   invisible(assertthat::assert_that
             (assertthat::is.flag(autosomes),
@@ -694,6 +692,10 @@ generate_report_data_rainfall <- function(variant_set,
       msg = paste0("Value for argument build ('", build,
                    "') not allowed, available reference build values are:",
                    "'grch37' or 'grch38'")))
+
+  if (NROW(variant_set) == 0) {
+    return(pcg_report_rainfall)
+  }
 
   pcgrr::log4r_info("------")
   pcgrr::log4r_info(paste0("Calculating data for rainfall plot"))

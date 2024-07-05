@@ -300,7 +300,7 @@ order_variants <- function(
     dplyr::mutate(!!rlang::sym(chrom_var) :=
                     factor(!!rlang::sym(chrom_var),
                            ordered = T,
-                           levels = c(as.character(seq(1:22)), "X", "Y"))) |>
+                           levels = c(as.character(seq(1:22)), "X", "Y", "M", "MT"))) |>
     dplyr::arrange(!!rlang::sym(chrom_var), !!rlang::sym(pos_var)) |>
     dplyr::mutate(!!rlang::sym(chrom_var) :=
                     as.character(!!rlang::sym(chrom_var)))
