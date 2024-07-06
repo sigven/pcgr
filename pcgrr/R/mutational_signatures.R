@@ -747,12 +747,6 @@ generate_report_data_rainfall <- function(variant_set,
                          stringr::str_replace(.data$MUTATION_TYPE,
                                               ":[A-Z]>[A-Z]$", ""),
                          as.character(.data$MUTATION_TYPE))) |>
-      # dplyr::mutate(
-      #   MUTATION_TYPE =
-      #     dplyr::if_else(stringr::str_detect(.data$MUTATION_TYPE, "^A>"),
-      #                    stringr::str_replace(.data$MUTATION_TYPE,
-      #                                         "^[A-Z]>[A-Z]:", ""),
-      #                    as.character(.data$MUTATION_TYPE))) |>
       pcgrr::sort_chromosomal_segments()
 
     bsg <- get_genome_obj(build)

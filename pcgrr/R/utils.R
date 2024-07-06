@@ -268,8 +268,9 @@ exclude_non_chrom_variants <- function(vcf_df, chrom_var = "CHROM") {
     dplyr::mutate(
       !!rlang::sym(chrom_var) := as.character(!!rlang::sym(chrom_var)))
   n_before_exclusion <- nrow(vcf_df)
-  nuc_chromosomes_df <- data.frame(c(as.character(seq(1:22)), "X", "Y"),
-                                   stringsAsFactors = F)
+  nuc_chromosomes_df <- data.frame(
+    c(as.character(seq(1:22)), "X", "Y"),
+    stringsAsFactors = F)
   colnames(nuc_chromosomes_df) <- c(chrom_var)
   vcf_df <- dplyr::semi_join(
     vcf_df, nuc_chromosomes_df, by = chrom_var)
@@ -307,7 +308,7 @@ order_variants <- function(
       !!rlang::sym(chrom_var) :=
         factor(!!rlang::sym(chrom_var),
                ordered = T,
-               levels = c(as.character(seq(1:22)), "X", "Y", "M", "MT"))) |>
+               levels = c(as.character(seq(1:22)), "X", "Y"))) |>
     dplyr::arrange(
       !!rlang::sym(chrom_var),
       !!rlang::sym(pos_var)) |>
