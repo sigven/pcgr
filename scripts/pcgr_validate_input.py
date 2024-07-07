@@ -234,6 +234,15 @@ def simplify_vcf(input_vcf, validated_vcf, vcf, output_dir, sample_id, keep_unco
             logger.info('')
             logger.info("Input VCF contains NO valid variants on autosomal/sex chromosomes after VCF cleaning - quitting workflow")
             logger.info('')
+            
+            if not debug:
+                remove_file(temp_files["vcf_1"])
+                remove_file(temp_files["vcf_2"])
+                remove_file(temp_files["vcf_3"])
+                remove_file(temp_files["vcf_2"] + str('.tbi'))
+                remove_file(temp_files["vcf_3"] + str('.tbi'))
+                remove_file(bcftools_simplify_log)
+                remove_file(vt_decompose_log)
             exit(1)
 
     if not debug:

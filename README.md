@@ -28,8 +28,9 @@ PCGR originates from the [Norwegian Cancer Genomics Consortium (NCGC)](http://ca
 
 ### Top News
 
-- *July 2024*: **2.0.1 release**: 
-  - patch with bug fix for mitochondrial input variants
+- *July 2024*: **2.0.1 release** 
+  - patch with bug fix for mitochondrial input variants ([pr245](https://github.com/sigven/pcgr/pull/245))
+  - [CHANGELOG](http://sigven.github.io/pcgr/articles/CHANGELOG.html)
 
 - *June 2024*: **2.0.0 release**
   - Details in [CHANGELOG](http://sigven.github.io/pcgr/articles/CHANGELOG.html)
