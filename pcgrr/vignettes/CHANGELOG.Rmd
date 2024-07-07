@@ -46,6 +46,11 @@ sigven <- user("sigven")
 pdiakumis <- user("pdiakumis")
 ```
 
+## v2.0.1
+
+- Date: **2024-07-07**
+- Fixed bug for chrM variants in input - not properly annotated by VEP, and not correctly processed in `pcgrr`. Any mitochondrial variants found in input VCF are now removed during VCF pre-processing.
+
 ## v2.0.0
 
 - Date: **2024-06-26**

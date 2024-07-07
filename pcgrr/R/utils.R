@@ -258,7 +258,7 @@ get_valid_chromosomes <- function(vcf_data_df,
 #' @return vcf_df data frame with mutations from nuclear chromosomes only
 #'
 #' @export
-get_ordinary_chromosomes <- function(vcf_df, chrom_var = "CHROM") {
+exclude_non_chrom_variants <- function(vcf_df, chrom_var = "CHROM") {
   invisible(assertthat::assert_that(
     is.data.frame(vcf_df),
     msg = "Argument 'vcf_df' must be of type data.frame"))
@@ -268,15 +268,19 @@ get_ordinary_chromosomes <- function(vcf_df, chrom_var = "CHROM") {
     dplyr::mutate(
       !!rlang::sym(chrom_var) := as.character(!!rlang::sym(chrom_var)))
   n_before_exclusion <- nrow(vcf_df)
-  nuc_chromosomes_df <- data.frame(c(as.character(seq(1:22)), "X", "Y"),
-                                   stringsAsFactors = F)
+  nuc_chromosomes_df <- data.frame(
+    c(as.character(seq(1:22)), "X", "Y"),
+    stringsAsFactors = F)
   colnames(nuc_chromosomes_df) <- c(chrom_var)
-  vcf_df <- dplyr::semi_join(vcf_df, nuc_chromosomes_df, by = chrom_var)
+  vcf_df <- dplyr::semi_join(
+    vcf_df, nuc_chromosomes_df, by = chrom_var)
   n_after_exclusion <- nrow(vcf_df)
-  pcgrr::log4r_info(
-    paste0("Excluding ",
-           n_before_exclusion - n_after_exclusion,
-           " variants from non-nuclear chromosomes/scaffolds"))
+  if(n_before_exclusion - n_after_exclusion > 0){
+    pcgrr::log4r_info(
+      paste0("Excluding n = ",
+             n_before_exclusion - n_after_exclusion,
+             " variant(s) from non-nuclear chromosomes/scaffolds"))
+  }
   return(vcf_df)
 
 }
@@ -292,18 +296,27 @@ get_ordinary_chromosomes <- function(vcf_df, chrom_var = "CHROM") {
 #' @export
 order_variants <- function(
     vcf_df, chrom_var = "CHROM", pos_var = "POS") {
+
   stopifnot(is.data.frame(vcf_df) &
               chrom_var %in% colnames(vcf_df) &
               pos_var %in% colnames(vcf_df))
-  if (nrow(vcf_df) == 0)return(vcf_df)
-  vcf_df |>
-    dplyr::mutate(!!rlang::sym(chrom_var) :=
-                    factor(!!rlang::sym(chrom_var),
-                           ordered = T,
-                           levels = c(as.character(seq(1:22)), "X", "Y"))) |>
-    dplyr::arrange(!!rlang::sym(chrom_var), !!rlang::sym(pos_var)) |>
-    dplyr::mutate(!!rlang::sym(chrom_var) :=
-                    as.character(!!rlang::sym(chrom_var)))
+  if (nrow(vcf_df) == 0){
+    return(vcf_df)
+  }
+  vcf_df <- vcf_df |>
+    dplyr::mutate(
+      !!rlang::sym(chrom_var) :=
+        factor(!!rlang::sym(chrom_var),
+               ordered = T,
+               levels = c(as.character(seq(1:22)), "X", "Y"))) |>
+    dplyr::arrange(
+      !!rlang::sym(chrom_var),
+      !!rlang::sym(pos_var)) |>
+    dplyr::mutate(
+      !!rlang::sym(chrom_var) :=
+        as.character(!!rlang::sym(chrom_var)))
+
+  return(vcf_df)
 }
 
 

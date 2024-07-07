@@ -192,13 +192,15 @@ def simplify_vcf(input_vcf, validated_vcf, vcf, output_dir, sample_id, keep_unco
             variant_id = f"{rec.CHROM}:{POS}_{rec.REF}->{alt}"
             multiallelic_list.append(variant_id)
 
-    logger.info('Extracting variants on autosomal/sex/mito chromosomes only (1-22,X,Y, M/MT) with bcftools')
+    logger.info('Extracting variants on autosomal/sex chromosomes only (1-22,X,Y) with bcftools')
     # bgzip + tabix required for sorting
     cmd_vcf1 = f'bcftools view {input_vcf} | bgzip -cf > {temp_files["vcf_2"]} && tabix -p vcf {temp_files["vcf_2"]} && ' + \
         f'bcftools sort --temp-dir {output_dir} -Oz {temp_files["vcf_2"]} > {temp_files["vcf_3"]} 2> {bcftools_simplify_log} && ' + \
         f'tabix -p vcf {temp_files["vcf_3"]}'
-    # Keep only autosomal/sex/mito chrom (handle hg38 and hg19), remove FORMAT metadata lines, keep cols 1-8, sub chr prefix
-    chrom_to_keep = [str(x) for x in [*range(1,23), 'X', 'Y', 'M', 'MT']]
+    # Keep only autosomal/sex chrom, remove FORMAT metadata lines, keep cols 1-8, sub chr prefix
+    # Note: any M/MT variants listed in input are skipped - requires additional cache/handling from VEP, 
+    # see e.g. https://github.com/Ensembl/ensembl-vep/issues/464
+    chrom_to_keep = [str(x) for x in [*range(1,23), 'X', 'Y']]
     chrom_to_keep = ','.join([*['chr' + chrom for chrom in chrom_to_keep], *[chrom for chrom in chrom_to_keep]])
     cmd_vcf2 = f'bcftools view --regions {chrom_to_keep} {temp_files["vcf_3"]} | egrep -v \'^##FORMAT=\' ' + \
         f'| cut -f1-8 | sed \'s/^chr//\' > {temp_files["vcf_1"]}'
@@ -215,7 +217,7 @@ def simplify_vcf(input_vcf, validated_vcf, vcf, output_dir, sample_id, keep_unco
         command_decompose = f'vt decompose -s {temp_files["vcf_1"]} > {validated_vcf} 2> {vt_decompose_log}'
         check_subprocess(logger, command_decompose, debug)
     else:
-        logger.info('All sites seem to be decomposed - skipping decomposition!')
+        logger.info('All sites seem to be decomposed - skipping decomposition of multiallelic sites')
         check_subprocess(logger, f'cp {temp_files["vcf_1"]} {validated_vcf}', debug)
 
     # need to keep uncompressed copy for vcf2maf.pl if selected
@@ -230,8 +232,17 @@ def simplify_vcf(input_vcf, validated_vcf, vcf, output_dir, sample_id, keep_unco
             i = i + 1
         if len(vcf.seqnames) == 0 or i == 0:
             logger.info('')
-            logger.info("Input VCF contains NO valid variants after VCF cleaning - quitting workflow")
+            logger.info("Input VCF contains NO valid variants on autosomal/sex chromosomes after VCF cleaning - quitting workflow")
             logger.info('')
+            
+            if not debug:
+                remove_file(temp_files["vcf_1"])
+                remove_file(temp_files["vcf_2"])
+                remove_file(temp_files["vcf_3"])
+                remove_file(temp_files["vcf_2"] + str('.tbi'))
+                remove_file(temp_files["vcf_3"] + str('.tbi'))
+                remove_file(bcftools_simplify_log)
+                remove_file(vt_decompose_log)
             exit(1)
 
     if not debug:

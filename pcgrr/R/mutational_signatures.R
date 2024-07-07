@@ -675,9 +675,7 @@ generate_report_data_rainfall <- function(variant_set,
                                           build = NULL) {
 
   pcg_report_rainfall <- pcgrr::init_rainfall_content()
-  if (NROW(variant_set) == 0) {
-    return(pcg_report_rainfall)
-  }
+
 
   invisible(assertthat::assert_that
             (assertthat::is.flag(autosomes),
@@ -694,6 +692,10 @@ generate_report_data_rainfall <- function(variant_set,
       msg = paste0("Value for argument build ('", build,
                    "') not allowed, available reference build values are:",
                    "'grch37' or 'grch38'")))
+
+  if (NROW(variant_set) == 0) {
+    return(pcg_report_rainfall)
+  }
 
   pcgrr::log4r_info("------")
   pcgrr::log4r_info(paste0("Calculating data for rainfall plot"))
@@ -745,12 +747,6 @@ generate_report_data_rainfall <- function(variant_set,
                          stringr::str_replace(.data$MUTATION_TYPE,
                                               ":[A-Z]>[A-Z]$", ""),
                          as.character(.data$MUTATION_TYPE))) |>
-      # dplyr::mutate(
-      #   MUTATION_TYPE =
-      #     dplyr::if_else(stringr::str_detect(.data$MUTATION_TYPE, "^A>"),
-      #                    stringr::str_replace(.data$MUTATION_TYPE,
-      #                                         "^[A-Z]>[A-Z]:", ""),
-      #                    as.character(.data$MUTATION_TYPE))) |>
       pcgrr::sort_chromosomal_segments()
 
     bsg <- get_genome_obj(build)

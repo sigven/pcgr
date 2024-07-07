@@ -55,7 +55,8 @@ load_somatic_cna <- function(
         .data$ACTIONABILITY_TIER,
         dplyr::desc(.data$TISSUE_ASSOC_RANK),
         dplyr::desc(.data$GLOBAL_ASSOC_RANK)) |>
-      pcgrr::order_variants(pos_var = 'SEGMENT_START')
+      pcgrr::order_variants(pos_var = 'SEGMENT_START') |>
+      pcgrr::exclude_non_chrom_variants()
 
     pcgrr::log4r_info(
       "Generating data frame with hyperlinked variant/gene annotations")
@@ -193,7 +194,8 @@ load_somatic_snv_indel <- function(
         )
       )) |>
     dplyr::select(-c("tmp_HGVSc","ENST")) |>
-    pcgrr::order_variants(pos_var = 'POS')
+    pcgrr::order_variants(pos_var = 'POS') |>
+    pcgrr::exclude_non_chrom_variants()
 
 
   ## Tumor-only input

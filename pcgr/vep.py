@@ -145,7 +145,7 @@ def get_csq_record_annotations(csq_fields, varkey, logger, vep_csq_fields_map, t
             csq_record['SYMBOL'] = transcript_xref_map[ensembl_transcript_id]['SYMBOL']
     
     # Assign coding status, protein change, coding sequence change, last exon/intron status etc as VCF info tags
-    csq_record = assign_cds_exon_intron_annotations(csq_record)
+    csq_record = assign_cds_exon_intron_annotations(csq_record, logger)
     
     return(csq_record)
 

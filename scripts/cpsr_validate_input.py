@@ -180,9 +180,11 @@ def simplify_vcf(input_vcf, validated_vcf, vcf, custom_bed, refdata_assembly_dir
     cmd_vcf1 = f'bcftools view {input_vcf} | bgzip -cf > {temp_files["vcf_2"]} && tabix -p vcf {temp_files["vcf_2"]} && ' + \
         f'bcftools sort --temp-dir {output_dir} -Oz {temp_files["vcf_2"]} > {temp_files["vcf_3"]} 2> {bcftools_simplify_log}' + \
         f' && tabix -p vcf {temp_files["vcf_3"]}'
-    logger.info('Extracting variants on autosomal/sex/mito chromosomes only (1-22,X,Y, M/MT) with bcftools')
-    # Keep only autosomal/sex/mito chrom (handle hg38 and hg19), sub chr prefix
-    chrom_to_keep = [str(x) for x in [*range(1,23), 'X', 'Y', 'M', 'MT']]
+    logger.info('Extracting variants on autosomal/sex/mito chromosomes only (1-22,X,Y) with bcftools')
+    # Keep only autosomal/sex chromosomes, sub chr prefix
+    # Note: M/MT variants are skipped - requires additional cache/handling from VEP, 
+    # see e.g. https://github.com/Ensembl/ensembl-vep/issues/464
+    chrom_to_keep = [str(x) for x in [*range(1,23), 'X', 'Y',]]
     chrom_to_keep = ','.join([*['chr' + chrom for chrom in chrom_to_keep], *[chrom for chrom in chrom_to_keep]])
     cmd_vcf2 = f'bcftools view --regions {chrom_to_keep} {temp_files["vcf_3"]} | sed \'s/^chr//\' > {temp_files["vcf_1"]}'
 
@@ -198,6 +200,7 @@ def simplify_vcf(input_vcf, validated_vcf, vcf, custom_bed, refdata_assembly_dir
         command_decompose = f'vt decompose -s {temp_files["vcf_1"]} > {temp_files["vcf_4"]} 2> {vt_decompose_log}'
         check_subprocess(logger, command_decompose, debug)
     else:
+        logger.info('All sites seem to be decomposed - skipping decomposition of multiallelic sites')
         command_copy = f'cp {temp_files["vcf_1"]} {temp_files["vcf_4"]}'
         check_subprocess(logger, command_copy, debug)
 
