@@ -142,6 +142,9 @@
     <loc>https://sigven.github.io/pcgr/reference/effect_prediction_algos.html</loc>
   </url>
   <url>
+    <loc>https://sigven.github.io/pcgr/reference/exclude_non_chrom_variants.html</loc>
+  </url>
+  <url>
     <loc>https://sigven.github.io/pcgr/reference/expand_biomarker_items.html</loc>
   </url>
   <url>
@@ -197,9 +200,6 @@
   </url>
   <url>
     <loc>https://sigven.github.io/pcgr/reference/get_genome_obj.html</loc>
-  </url>
-  <url>
-    <loc>https://sigven.github.io/pcgr/reference/get_ordinary_chromosomes.html</loc>
   </url>
   <url>
     <loc>https://sigven.github.io/pcgr/reference/get_prevalent_site_signatures.html</loc>
