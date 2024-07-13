@@ -28,9 +28,9 @@ The following criteria are currently used for oncogenicity classification in PCG
     
 ## Actionability
 
-PCGR prioritizes and evaluates variants according to clinical actionability. Currently, PCGR implements its tier classification framework along the proposed ACMG/AMP guidelines, as detailed below.
+PCGR prioritizes and evaluates variants according to clinical actionability. Currently, PCGR implements its tier classification framework along the proposed AMP/ASCO/CAP guidelines, as detailed below.
 
-This tier model attempts to adopt concensus recommendations by ACMG, as outlined in [Li et al., 2017](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5707196/):
+This tier model attempts to adopt concensus recommendations by AMP/ASCO/CAP, as outlined in [Li et al., 2017](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5707196/):
 
  - *Tier 1: Variants of strong clinical significance* - constitutes variants linked to predictive, prognostic, or diagnostic evidence items in the [CIViC database](http://civic.genome.wustl.edu) or the [Cancer Biomarkers Database](https://www.cancergenomeinterpreter.org/biomarkers) that are
 	 - A: found within the same tumor type/class as specified by the user, AND

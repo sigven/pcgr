@@ -28,11 +28,11 @@ by the user. The following sections may be included in the report:
 	   variant types and consequences
 	* Variants are classified with respect to _oncogenicity_ (VICC/ClinGen/CGC operating procedures)
 	   - permits exploration of somatic mutations through interactive filtering according to several dimensions (variant sequencing depth/support, variant consequence etc.)
-	* Variants are classified with respect to _actionability_ (ACMG/AMP guidelines)
+	* Variants are classified with respect to _actionability_ (AMP/ASCO/CAP guidelines)
 	   - individual evidence items linked to actionable variants can be explored, indicating strength of evidence, tumor type and therapeutic context, and clinical significance
 
 3. __Somatic CNAs__
-	* Aberrations are classified with respect to _actionability_ (ACMG/AMP guidelines)
+	* Aberrations are classified with respect to _actionability_ (AMP/ASCO/CAP guidelines)
 	 - individual evidence items linked to actionable variants can be explored, indicating strength of evidence, tumor type and therapeutic context, and clinical significance
 	* Other potentially oncogenic aberrations are listed, pProto-oncogenes subject to copy number amplifications, and tumor suppressor genes subject to homozygous deletions
 
@@ -280,12 +280,12 @@ The following variables are included in the TSV file (VCF tags issued by the use
 | 19. `VAF_CONTROL` | Variant allele fraction at variant position in control sample |
 | 20. `MUTATION_HOTSPOT` | Mutation hotspot annotation |
 | 21. `MUTATION_HOTSPOT_CANCERTYPE` | Mutation hotspot-associated cancer types (from cancerhotspots.org) |
-| 22. `ACTIONABILITY_TIER` | Actionability tier - ACMG/AMP implementation |
-| 23. `ACTIONABILITY` | Actionability annotation - ACMG/AMP implementation |
-| 24. `ACTIONABILITY_FRAMEWORK` | Actionability framework - ACMG/AMP implementation |
-| 25. `ONCOGENICITY` | Oncogenicity annotation - VICC/ClinGen SOP implementation |
-| 26. `ONCOGENICITY_CODE` | Oncogenicity code - VICC/ClinGen SOP implementation |
-| 27. `ONCOGENICITY_SCORE` | Oncogenicity score - VICC/ClinGen SOP implementation |
+| 22. `ACTIONABILITY_TIER` | Actionability tier - AMP/ASCO/CAP implementation |
+| 23. `ACTIONABILITY` | Actionability annotation - AMP/ASCO/CAP implementation |
+| 24. `ACTIONABILITY_FRAMEWORK` | Actionability framework - AMP/ASCO/CAP implementation |
+| 25. `ONCOGENICITY` | Oncogenicity annotation - VICC/ClinGen/CGC SOP implementation |
+| 26. `ONCOGENICITY_CODE` | Oncogenicity code - VICC/ClinGen/CGC SOP implementation |
+| 27. `ONCOGENICITY_SCORE` | Oncogenicity score - VICC/ClinGen/CGC SOP implementation |
 | 28. `HGVSc` | HGVS coding sequence name |
 | 29. `HGVSp` | HGVS protein sequence name |
 | 30. `CANONICAL` | Flag indicating if transcript is canonical |

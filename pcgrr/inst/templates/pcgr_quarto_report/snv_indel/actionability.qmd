@@ -1,9 +1,9 @@
 ### Variant classification - actionability
 
 Acquired SNVs and InDels in the tumor sample have been assessed for
-_clinical actionability_ through an implementation of ACMG/AMP guidelines [@Li2017-ew]. We use CIViC and CGI [@Griffith2017-do;@Tamborero2018-aj] as the underlying sources for actionable variants (versions indicated [below](#documentation)). 
+_clinical actionability_ through an implementation of AMP/ASCO/CAP guidelines [@Li2017-ew]. We use CIViC and CGI [@Griffith2017-do;@Tamborero2018-aj] as the underlying sources for actionable variants (versions indicated [below](#documentation)). 
 
-The tabset below indicates which variants have been classified into three distinct _tiers of clinical significance_ according to ACMG/AMP criteria.
+The tabset below indicates which variants have been classified into three distinct _tiers of clinical significance_ according to AMP/ASCO/CAP criteria.
 
 ::: {.callout-note}
 ## Note - biomarker matching

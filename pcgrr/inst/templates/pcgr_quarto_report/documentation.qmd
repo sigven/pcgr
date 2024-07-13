@@ -91,7 +91,7 @@ Note also that for somatic copy number aberrations, we showcase potential oncoge
 
 #### Actionability classificaton
 
-Clinical actionability assessment of SNVs/InDels and gene copy number aberrations found in the tumor sample follows recommendation guidelines by ACMG/AMP [@Li2017-ew]. Specifically, different levels  of actionability are implemented in the following manner:
+Clinical actionability assessment of SNVs/InDels and gene copy number aberrations found in the tumor sample follows recommendation guidelines by AMP/ASCO/CAP [@Li2017-ew]. Specifically, different levels  of actionability are implemented in the following manner:
 
 - **TIER 1: Variants of strong clinical significance** - constitutes aberrations linked to predictive, prognostic, or diagnostic biomarkers in the [CIViC database](http://civic.genome.wustl.edu) and the [Cancer Biomarkers Database](https://www.cancergenomeinterpreter.org/biomarkers) that are
 	 - Found within the same tumor type/class as specified by the user, **AND**

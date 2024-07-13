@@ -325,7 +325,7 @@ assign_acmg_tiers <- function(
     results_acmg[['biomarker_evidence']][['tier_classification']] <-
       tier_classification |>
       dplyr::rename(ACTIONABILITY_TIER = .data$ACMG_AMP_TIER) |>
-      dplyr::mutate(ACTIONABILITY_FRAMEWORK = "ACMG_AMP") |>
+      dplyr::mutate(ACTIONABILITY_FRAMEWORK = "AMP_ASCO_CAP") |>
       # dplyr::mutate(TIER_DESCRIPTION = dplyr::case_when(
       #   TIER == 1 ~ "Variants of strong clinical significance",
       #   TIER == 2 ~ "Variants of potential clinical significance",
