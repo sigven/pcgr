@@ -71,7 +71,7 @@ The great complexity of acquired mutations in individual tumor genomes poses a s
 - provide a structured and concise summary of the most relevant findings
 - present the results in a format accessible to clinical experts
 
-PCGR integrates a [comprehensive set of knowledge resources](articles/annotation_resources.html) related to tumor biology and therapeutic biomarkers, both at the gene, and at the level of individual variants. The software generates a comprehensive molecular interpretation report that supports the translation of individual cancer genomes towards molecularly guided treatment strategies.
+PCGR integrates a [comprehensive set of knowledge resources](https://sigven.github.io/pcgr/articles/annotation_resources.html) related to tumor biology and therapeutic biomarkers, both at the gene, and at the level of individual variants. The software generates a comprehensive molecular interpretation report that supports the translation of individual cancer genomes towards molecularly guided treatment strategies.
 
 ### Getting started
 
