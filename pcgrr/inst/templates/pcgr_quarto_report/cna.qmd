@@ -14,15 +14,15 @@
 ### Variant classification - actionability
 
 Genes subject to copy number aberrations in the tumor sample have been assessed for
-_clinical actionability_ through an implementation of ACMG/AMP guidelines [@Li2017-ew]. We use CIViC and CGI [@Griffith2017-do;@Tamborero2018-aj] as the underlying sources for actionable variants (versions indicated below).
+_clinical actionability_ through an implementation of AMP/ASCO/CAP guidelines [@Li2017-ew]. We use CIViC and CGI [@Griffith2017-do;@Tamborero2018-aj] as the underlying sources for actionable variants (versions indicated below).
 
-The tabset below indicates which variants have been classified into two distinct _tiers of clinical significance_ according to ACMG/AMP criteria.
+The tabset below indicates which variants have been classified into two distinct _tiers of clinical significance_ according to AMP/ASCO/CAP criteria.
 
 
 ::: {.callout-note}
 ## Note - biomarker matching
 
-The same somatic mutation may frequently match with multiple evidence items from , pending on e.g. the _disease context_, _therapeutic context_, _biomarker resolution_, or underlying _evidence source_ (i.e. publication)
+The same somatic mutation may frequently match with multiple evidence items listed in biomarker databases, pending on e.g. the _disease/tumor context_, _therapeutic context_, _biomarker resolution_, or underlying _evidence source_ (i.e. publication)
 :::
 
 ::: {.panel-tabset .nav-pills}

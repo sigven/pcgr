@@ -46,6 +46,14 @@ sigven <- user("sigven")
 pdiakumis <- user("pdiakumis")
 ```
 
+## v2.0.2
+
+- Date: **2024-07-16**
+- Ensure correct reference to variant actionability guidelines - AMP/ASCO/CAP (*not* ACMG/AMP), both in code and in docs (thanks to [HomoPolyethylen] for pointing this out)
+- fix bug in missing assignment of tier 3 variants (AMP/ASCO/CAP)
+- ensure non-exonic biomarker variants (e.g. TERT) are written to Excel sheet
+- specify (value boxes, plots) that MSI classification is based on coding variants
+
 ## v2.0.1
 
 - Date: **2024-07-07**

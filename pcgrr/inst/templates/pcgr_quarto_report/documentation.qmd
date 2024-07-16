@@ -93,17 +93,19 @@ Note also that for somatic copy number aberrations, we showcase potential oncoge
 
 Clinical actionability assessment of SNVs/InDels and gene copy number aberrations found in the tumor sample follows recommendation guidelines by AMP/ASCO/CAP [@Li2017-ew]. Specifically, different levels  of actionability are implemented in the following manner:
 
-- **TIER 1: Variants of strong clinical significance** - constitutes aberrations linked to predictive, prognostic, or diagnostic biomarkers in the [CIViC database](http://civic.genome.wustl.edu) and the [Cancer Biomarkers Database](https://www.cancergenomeinterpreter.org/biomarkers) that are
+- **TIER I: Variants of strong clinical significance** - constitutes aberrations linked to predictive, prognostic, or diagnostic biomarkers in the [CIViC database](https://civicdb.org) and the [Cancer Biomarkers Database](https://www.cancergenomeinterpreter.org/biomarkers) that are
 	 - Found within the same tumor type/class as specified by the user, **AND**
 	 - Of strong clinical evidence (i.e. part of guidelines, validated or discovered in late clinical trials ([CIViC evidence levels A/B](https://civic.readthedocs.io/en/latest/model/evidence/level.html)))
 	 
- - **TIER 2: Variants of potential clinical significance** - constitutes other aberrations linked to predictive, prognostic, or diagnostic biomarkers in the [CIViC database](http://civic.genome.wustl.edu) and the [Cancer Biomarkers Database](https://www.cancergenomeinterpreter.org/biomarkers) that are either
+ - **TIER II: Variants of potential clinical significance** - constitutes other aberrations linked to predictive, prognostic, or diagnostic biomarkers in the [CIViC database](https://civicdb.org) and the [Cancer Biomarkers Database](https://www.cancergenomeinterpreter.org/biomarkers) that are either
 	 - Of strong clinical evidence in other tumor types/classes than the one specified by the user, **OR**
 	 - Of weak clinical evidence (early trials, case reports etc. ([CIViC evidence levels C/D/E](https://civic.readthedocs.io/en/latest/model/evidence/level.html)))) in the same tumor type/class as specified by the user
 	 
- - **TIER 3: Variants of uncertain clinical significance (SNVs/InDels only)** -
-   - Other coding variants found in oncogenes or tumor suppressor genes, yet _not_ linked to any known predictive, prognostic, or diagnostic biomarkers in the [CIViC database](http://civic.genome.wustl.edu) and the [Cancer Biomarkers Database](https://www.cancergenomeinterpreter.org/biomarkers)
-   
+ - **TIER III: Variants of uncertain clinical significance (SNVs/InDels only)** -
+   - Other coding variants found in oncogenes or tumor suppressor genes, yet _not_ linked to any known predictive, prognostic, or diagnostic biomarkers in the [CIViC database](https://civicdb.org) and the [Cancer Biomarkers Database](https://www.cancergenomeinterpreter.org/biomarkers)
+
+In PCGR, we skip the classification of variants into the AMP/ASCO/CAP-specified *Tier IV* (benign/likely benign variants), but rather take a more cautious approach. Specifically, for SNVs/indels that do not fall into tier I, II, or III, we classify them into *Tier V: Other coding variants*, which includes other protein-coding variants, as well as *Tier VI: Other non-coding variants*, which includes synonymous variants, intronic variants, and other variants in non-coding regions.
+
 <br>
 
 #### Mutational signatures

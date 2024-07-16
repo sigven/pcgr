@@ -15,7 +15,7 @@ The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for
 - Tumor mutational burden (TMB) estimation
 - Mutational signature analysis
 - Microsatellite instability (MSI) classification
-- RNA expression analysis - outlier detection, similarity analysis, and immune contexture profiling
+- RNA-seq support - gene expression outlier detection, sample similarity analysis, and immune contexture profiling
 
 PCGR supports both of the most recent human genome assemblies (GRCh37/GRCh38), and accepts variant calls from both tumor-control and tumor-only sequencing assays. Much of the functionality is intended for whole-exome/whole-genome sequencing assays, but you can also apply PCGR to output from targeted sequencing panels. If you are interested in the interrogation of germline variants and their relation to cancer predisposition, we recommend trying the accompanying tool [Cancer Predisposition Sequencing Reporter (CPSR)](https://github.com/sigven/cpsr).
 
@@ -29,7 +29,11 @@ PCGR originates from the [Norwegian Cancer Genomics Consortium (NCGC)](http://ca
 
 ### Top News
 
-- *July 2024*: **2.0.1 release**
+- *July 16th 2024*: **2.0.2 release** 
+  - patch to ensure correct reference to actionability guidelines
+  - [CHANGELOG](http://sigven.github.io/pcgr/articles/CHANGELOG.html)
+
+- *July 7th 2024*: **2.0.1 release**
   - patch with bug fix for mitochondrial input variants ([pr245](https://github.com/sigven/pcgr/pull/245))
   - [CHANGELOG](http://sigven.github.io/pcgr/articles/CHANGELOG.html)
 
@@ -57,7 +61,7 @@ PCGR originates from the [Norwegian Cancer Genomics Consortium (NCGC)](http://ca
 
 ## Example reports
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11401431.svg)](https://doi.org/10.5281/zenodo.11401431)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.12734221.svg)](https://doi.org/10.5281/zenodo.12734221)
 
 ## Why use PCGR?
 

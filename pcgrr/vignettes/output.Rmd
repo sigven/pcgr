@@ -248,7 +248,8 @@ A VCF file containing annotated, somatic calls (single nucleotide variants and i
 | `BIOMARKER_MATCH` | Variant matches with biomarker evidence in CIViC/CGI. Format: <db_source>\|<db_variant_id>\|<db_evidence_id>:<tumor_site>:<clinical_significance>:<evidence_level>:<evidence_type><germline_somatic>\|<matching_type>. Multiple evidence items are separated by '&'. Example: civic|174|EID445:Colon/Rectum:Sensitivity/Response:D:Predictive:Somatic&EID446:Colon/Rectum:Sensitivity/Response:D:Predictive:Somatic|by_gene_mut. Matching type can be any of `by_genomic_coord`, `by_hgvsp_principal`, `by_hgvsc_principal`,  `by_hgvsp_nonprincipal`, `by_hgvsc_nonprincipal`, `by_codon_principal`, `by_exon_mut_principal`, `by_gene_mut_lof`, `by_gene_mut` |
 | `ONCOGENICITY` | Oncogenicity annotation - VICC/ClinGen SOP implementation |
 | `ONCOGENICITY_CODE` | Oncogenicity code - VICC/ClinGen SOP implementation |
-| `ONCOGENICITY_SCORE` | Oncogenicity score - VICC/ClinGen SOP
+| `ONCOGENICITY_SCORE` | Oncogenicity score - VICC/ClinGen SOP implementation |
+
 #### 2. Tab-separated values (TSV)
 
 We provide a tab-separated values file with most important annotations for SNVs/InDels. The file has the following naming convention:
@@ -401,9 +402,9 @@ The format of the compressed TSV file is the following:
 | 15. `ONCOGENE` | Flag indicating if gene is oncogene (CGC/CancerMine/NCG) |
 | 16. `ONCOGENE_SUPPORT` | Oncogene annotation support (CGC/CancerMine/NCG) |
 | 17. `TRANSCRIPT_OVERLAP` | Comma-separated list of associated transcripts, including percentage of transcript overlap |
-| 18. `ACTIONABILITY_TIER` | Actionability tier |
-| 19. `ACTIONABILITY` | Actionability |
-| 20. `ACTIONABILITY_FRAMEWORK` | Actionability framework |
+| 18. `ACTIONABILITY_TIER` | Actionability tier - AMP/ASCO/CAP |
+| 19. `ACTIONABILITY` | Actionability - AMP/ASCO/CAP |
+| 20. `ACTIONABILITY_FRAMEWORK` | Actionability framework - AMP/ASCO/CAP |
 | 21. `BIOMARKER_MATCH` | Biomarker match |
 | 22. `TARGETED_INHIBITORS_ALL2` | Molecularly targeted inhibitors - indicated for any tumor type|
 
@@ -421,4 +422,4 @@ If users provide bulk RNA-seq expression data as input, PCGR will attach basic g
 
 ### Excel workbook (XLSX)
 
-The Excel workbook contains multiple sheets with data tables, mostly self-explainable, with annotated datasets pending on the analysis performed (assay/sample data, SNVs/InDels, CNAs, biomarker evidence, TMB, MSI, mutational signatures, immune contexture profiling etc). The naming convention of the Excel workbook is as follows: `<sample_id>.pcgr.<genome_assembly>.xlsx`
+The Excel workbook contains multiple sheets with data tables, mostly self-explainable, with annotated datasets pending on the analysis performed (assay/sample data, SNVs/InDels, CNAs, biomarker evidence, TMB, MSI, mutational signatures, immune contexture profiling etc). The naming convention of the Excel workbook is as follows: `<sample_id>.pcgr.<genome_assembly>.xlsx`. _Note_: To reduce the size of the SNVs/InDel sheets in the Excel workbook, we only include the clinically actionable variants as well as other exonic variants (including splice site variants, silent variants, and protein-altering variants).

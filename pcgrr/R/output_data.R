@@ -193,7 +193,12 @@ get_excel_sheets <- function(report = NULL){
         report$content$snv_indel$callset$variant |>
         dplyr::select(
           dplyr::any_of(snv_indel_cols)) |>
-        dplyr::filter(.data$EXONIC_STATUS == "exonic") |>
+        ## Limit Excel output to exonic variants, as well
+        ## as any actionable variant (TIER I-II)
+        dplyr::filter(.data$EXONIC_STATUS == "exonic" |
+                        (.data$EXONIC_STATUS == "nonexonic" &
+                           !is.na(.data$ACTIONABILITY_TIER) &
+                           .data$ACTIONABILITY_TIER <= 2)) |>
         dplyr::select(
           -dplyr::any_of(c("BIOMARKER_MATCH","VEP_ALL_CSQ")))
 

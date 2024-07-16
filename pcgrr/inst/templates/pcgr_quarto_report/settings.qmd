@@ -63,8 +63,8 @@ The report is generated with _[pcgr](https://github.com/sigven/pcgr)_ version `r
 * Minimum allelic fraction (AF) tumor (SNV + InDels): __`r conf[['somatic_snv']][['allelic_support']][['tumor_af_min']]`__
 * Minimum sequencing depth (DP) control (SNV + InDels): __`r conf[['somatic_snv']][['allelic_support']][['control_dp_min']]`__
 * Maximum allelic fraction (AF) control (SNV + InDels): __`r conf[['somatic_snv']][['allelic_support']][['control_af_max']]`__
-* Actionability framework: __ACMG/AMP__
-* Oncogenicity framework: __VICC/ClinGen__
+* Variant actionability guidelines: __AMP/ASCO/CAP__
+* Variant oncogenicity guidelines: __VICC/ClinGen__
 * Show noncoding variants: __`r conf$other$show_noncoding `__
 * MSI prediction: __`r msi_prediction`__
 * Mutational burden estimation: __`r mutational_burden`__

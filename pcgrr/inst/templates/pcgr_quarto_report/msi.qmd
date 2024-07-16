@@ -59,7 +59,7 @@ bslib::page_fillable(
       theme = "dark"
     ),
     bslib::value_box(
-      title = "Indel mutational burden",
+      title = "Coding indel mutational burden",
       value = paste0(
         round(msi_content$msi_stats$tmb_indel, 
               digits = 2), "/Mb"),
@@ -67,7 +67,7 @@ bslib::page_fillable(
       theme = "dark"
     ),
     bslib::value_box(
-      title = "Indel fraction - somatic variants",
+      title = "Coding indel fraction - somatic variants",
       value = if(!is.null(
         msi_content$msi_stats$fracIndels)){
           paste0(
@@ -85,7 +85,7 @@ bslib::page_fillable(
     height = "350px",
     bslib::card_header(
       class = "bg-dark", 
-      paste0("Fraction of indel variants - ",
+      paste0("Fraction of coding indel variants - ",
              pcg_report$settings$sample_id)),
     indel_fract_plot_plotly
   ),
@@ -93,7 +93,7 @@ bslib::page_fillable(
   bslib::card(
     bslib::card_header(
       class = "bg-dark",
-      paste0("Somatic mutations in MMR genes - ",
+      paste0("Somatic coding mutations in MMR genes - ",
                pcg_report$settings$sample_id)
     ),
     bslib::card_body(
@@ -117,7 +117,7 @@ bslib::page_fillable(
               )
           )
       }else{
-        "No somatic mutations found in MMR genes"
+        "No somatic coding mutations found in MMR genes"
       }
     )
   )

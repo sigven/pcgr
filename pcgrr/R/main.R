@@ -23,12 +23,6 @@ generate_report <-
       yaml_fname = yaml_fname,
       report_mode = "PCGR")
 
-    #rep[['content']][['assay_properties']] <-
-    #  rep[['settings']]$conf$assay_properties
-
-    #rep[['content']][['sample_properties']] <-
-    #  rep[['settings']]$conf$sample_properties
-
     settings <- rep$settings
     ref_data <- rep$ref_data
 

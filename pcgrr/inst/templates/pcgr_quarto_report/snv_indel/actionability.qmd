@@ -8,8 +8,7 @@ The tabset below indicates which variants have been classified into three distin
 ::: {.callout-note}
 ## Note - biomarker matching
 
-The same somatic aberration may frequently match with multiple evidence items listed in biomarker databases , pending on e.g. the _disease context_, _therapeutic context_, _biomarker resolution_, or underlying _evidence source_ (i.e. publication). Duplicated entries in the table below may thus also occur, as the same type of evidence from different sources (publications) have not
-been merged.
+The same somatic aberration may frequently match with multiple evidence items listed in biomarker databases, pending on e.g. the _disease/tumor context_, _therapeutic context_, _biomarker resolution_, or underlying _evidence source_ (i.e. publication). Duplicated entries in the table below may thus also occur, as the same type of evidence from different sources (publications) have not been merged.
 :::
 
 ```{r}
@@ -190,7 +189,7 @@ htmltools::br()
 
 ```
 
-#### <b>TIER II</b>- potential clinical significance
+#### <b>TIER II</b> - potential clinical significance
 
 <br>
 
