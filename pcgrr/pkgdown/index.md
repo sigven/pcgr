@@ -61,7 +61,7 @@ PCGR originates from the [Norwegian Cancer Genomics Consortium (NCGC)](http://ca
 
 ## Example reports
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.12734221.svg)](https://doi.org/10.5281/zenodo.12734221)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.12752833.svg)](https://doi.org/10.5281/zenodo.12752833)
 
 ## Why use PCGR?
 
