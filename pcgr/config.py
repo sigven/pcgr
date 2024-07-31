@@ -44,8 +44,8 @@ def create_config(arg_dict, workflow = "PCGR"):
         
     if workflow == 'PCGR':
         conf_options['assay_properties'] = {}
-        conf_options['sample_properties']['purity'] = 'NA'
-        conf_options['sample_properties']['ploidy'] = 'NA'
+        conf_options['sample_properties']['tumor_purity'] = 'NA'
+        conf_options['sample_properties']['tumor_ploidy'] = 'NA'
         conf_options['sample_properties']['site'] = str(pcgr_vars.tsites[arg_dict['tsite']])
         conf_options['sample_properties']['site2'] = str(pcgr_vars.tsites[arg_dict['tsite']]).replace(" ","_").replace("/","@")
         conf_options['sample_properties']['dp_control_detected'] = 0

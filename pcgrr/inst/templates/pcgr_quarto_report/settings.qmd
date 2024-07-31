@@ -15,14 +15,14 @@ assay_type <- conf$assay_properties$type
 tumor_site <- conf$sample_properties$site
 assay_mode <- conf$assay_properties$mode
 tumor_ploidy <- "N/A"
-if(!is.na(conf$sample_properties$ploidy) &
-   conf$sample_properties$ploidy != "NA"){
-  tumor_ploidy <- conf$sample_properties$ploidy
+if(!is.na(conf$sample_properties$tumor_ploidy) &
+   conf$sample_properties$tumor_ploidy != "NA"){
+  tumor_ploidy <- conf$sample_properties$tumor_ploidy
 }
 tumor_purity <- "N/A"
-if(!is.na(conf$sample_properties$purity) &
-   conf$sample_properties$purity != "NA"){
-  tumor_purity <- conf$sample_properties$purity
+if(!is.na(conf$sample_properties$tumor_purity) &
+   conf$sample_properties$tumor_purity != "NA"){
+  tumor_purity <- conf$sample_properties$tumor_purity
 }
 
 target_size <- conf$assay_properties$effective_target_size_mb
