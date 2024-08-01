@@ -28,6 +28,10 @@ PCGR originates from the [Norwegian Cancer Genomics Consortium (NCGC)](http://ca
 
 ### Top News
 
+- *August 1st 2024*: **2.0.3 release** 
+  - patch to fix purity/ploidy propagation, MAF output for tumor-only runs, and other minor issues
+  - [CHANGELOG](http://sigven.github.io/pcgr/articles/CHANGELOG.html)
+
 - *July 16th 2024*: **2.0.2 release** 
   - patch to ensure correct reference to actionability guidelines
   - [CHANGELOG](http://sigven.github.io/pcgr/articles/CHANGELOG.html)

@@ -46,10 +46,19 @@ sigven <- user("sigven")
 pdiakumis <- user("pdiakumis")
 ```
 
+## v2.0.3
+
+- Date: **2024-08-01**
+- Ensure correct propagation of purity/ploidy in output report
+- Ensure that MAF output is properly filtered for tumor-only runs
+- Ensure properly copying of quarto templates (abandon `file.copy`), 
+both for PCGR and CPSR
+
+
 ## v2.0.2
 
 - Date: **2024-07-16**
-- Ensure correct reference to variant actionability guidelines - AMP/ASCO/CAP (*not* ACMG/AMP), both in code and in docs (thanks to [HomoPolyethylen] for pointing this out)
+- Ensure correct reference to variant actionability guidelines - AMP/ASCO/CAP (*not* ACMG/AMP), both in code and in docs (thanks to [HomoPolyethylen](https://github.com/HomoPolyethylen) for pointing this out)
 - fix bug in missing assignment of tier 3 variants (AMP/ASCO/CAP)
 - ensure non-exonic biomarker variants (e.g. TERT) are written to Excel sheet
 - specify (value boxes, plots) that MSI classification is based on coding variants
