@@ -31,11 +31,11 @@ get_excel_sheets <- function(report = NULL){
       ),
       data.frame(
         SAMPLE_ID = sample_id, CATEGORY = 'SAMPLE',
-        PROPERTY = 'PURITY', VALUE = NA
+        PROPERTY = 'TUMOR_PURITY', VALUE = NA
       ),
       data.frame(
         SAMPLE_ID = sample_id, CATEGORY = 'SAMPLE',
-        PROPERTY = 'PLOIDY', VALUE = NA
+        PROPERTY = 'TUMOR_PLOIDY', VALUE = NA
       ),
       data.frame(
         SAMPLE_ID = sample_id, CATEGORY = 'ASSAY',
@@ -51,7 +51,7 @@ get_excel_sheets <- function(report = NULL){
       ),
     )
 
-  for(elem in c('SITE','PURITY','PLOIDY')){
+  for(elem in c('SITE','TUMOR_PURITY','TUMOR_PLOIDY')){
     if(tolower(elem) %in% names(report$content$sample_properties)){
         init_sample_assay[init_sample_assay$PROPERTY == elem, 'VALUE'] <-
           report$content$sample_properties[[tolower(elem)]]
