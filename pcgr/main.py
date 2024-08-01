@@ -297,6 +297,8 @@ def run_pcgr(input_data, output_data,conf_options):
         conf_options['output_prefix'] = output_prefix
         conf_options['molecular_data']['fname_mut_vcf'] = output_vcf
         conf_options['molecular_data']['fname_mut_tsv'] = output_pass_tsv_gz
+        if conf_options['other']['vcf2maf'] == 1:
+            conf_options['molecular_data']['fname_maf_tsv'] = output_maf
         if conf_options['somatic_snv']['tmb']['run'] == 1:
             conf_options['molecular_data']['fname_tmb_tsv'] = tmb_fname
         if not input_cna == 'None':

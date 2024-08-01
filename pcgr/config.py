@@ -133,6 +133,7 @@ def create_config(arg_dict, workflow = "PCGR"):
         conf_options['molecular_data']['fname_cna_tsv'] = "None"
         conf_options['molecular_data']['fname_expression_tsv'] = "None"
         conf_options['molecular_data']['fname_expression_outliers_tsv'] = "None"
+        conf_options['molecular_data']['fname_maf_tsv'] = "None"
         #conf_options['molecular_data']['fname_expression_csq_tsv'] = "None"
         conf_options['molecular_data']['fname_expression_similarity_tsv'] = "None"
         conf_options['molecular_data']['fname_tmb_tsv'] = "None"

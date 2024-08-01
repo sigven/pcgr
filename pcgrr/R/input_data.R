@@ -221,6 +221,11 @@ load_somatic_snv_indel <- function(
         dplyr::filter(
           .data$SOMATIC_CLASSIFICATION == "SOMATIC")
 
+      ## filter also MAF file if provided
+      pcgrr::filter_maf_file(
+        callset = callset,
+        settings = settings)
+
       ## Issue warning if clinically actionable variants are filtered
       ## with current filtering settings
       n_actionable_filtered <-
