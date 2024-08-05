@@ -125,8 +125,7 @@ generate_report_data_signatures <-
           sample_names = settings$sample_id,
           type = "all",
           genome = ref_data$assembly$bsg,
-          predefined_dbs_mbs = T)
-      )
+          predefined_dbs_mbs = T))
       )
       if(class(grl)[1] == "CompressedGRangesList"){
 
@@ -326,7 +325,8 @@ generate_report_data_signatures <-
           gof <- list()
           gof[['ci_lower']] <- ci_data_gof$conf.int[1]
           gof[['ci_upper']] <- ci_data_gof$conf.int[2]
-          gof[['estimate']] <- mean(bootstrap_data[['goodness_of_fit']]$cosine_sim)
+          gof[['estimate']] <-
+            mean(bootstrap_data[['goodness_of_fit']]$cosine_sim)
 
           contributions_per_signature <-
             sig_prop_data |>
@@ -371,7 +371,7 @@ generate_report_data_signatures <-
               dplyr::arrange(
                 dplyr::desc(.data$prop_group)) |>
               dplyr::mutate(group = dplyr::if_else(
-                .data$prop_group > 0.05,
+                .data$prop_group > 0.03,
                 .data$group,
                 "Other")) |>
               dplyr::group_by(.data$group) |>
@@ -419,11 +419,11 @@ generate_report_data_signatures <-
             contributions_per_group <- as.data.frame(
               contributions_per_group |>
                 tidyr::separate_rows(
-                  .data$signature_id_group, sep = ", ") |>
+                  "signature_id_group", sep = ", ") |>
                 dplyr::anti_join(missing_signatures,
                                  by = c("signature_id_group" = "signature_id")) |>
                 dplyr::group_by(
-                  c("group","prop_group")
+                  group, prop_group
                 ) |>
                 dplyr::summarise(
                   signature_id_group = paste(
