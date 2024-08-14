@@ -56,7 +56,7 @@ filter_maf_file <- function(callset, settings) {
           TRUE ~ "MNP"
         )) |>
         dplyr::mutate(
-          Chromosome = .data$CHROM,
+          Chromosome = as.character(.data$CHROM),
           Start_Position = dplyr::case_when(
             .data$Variant_Type == "DEL" &
               substr(.data$REF, 1, 1) == .data$ALT ~ .data$POS + 1,
@@ -88,6 +88,24 @@ filter_maf_file <- function(callset, settings) {
         show_col_types = F, col_names = T,
         comment = "#", na = ""
       )
+
+      if(NROW(maf_data_unfiltered) == 0) {
+        pcgrr::log4r_warn("MAF file is empty - no filtering will be performed")
+        return(0)
+      }else{
+        maf_data_unfiltered$Chromosome <-
+          as.character(maf_data_unfiltered$Chromosome)
+
+        if(is.logical(maf_data_unfiltered$Tumor_Seq_Allele1)) {
+          maf_data_unfiltered$Tumor_Seq_Allele1 <-
+            as.character("T")
+        }
+        if(is.logical(maf_data_unfiltered$Tumor_Seq_Allele2)) {
+          maf_data_unfiltered$Tumor_Seq_Allele2 <-
+            as.character("T")
+        }
+      }
+
     } else {
       pcgrr::log4r_warn("MAF file is empty - no filtering will be performed")
       return(0)
@@ -109,8 +127,10 @@ filter_maf_file <- function(callset, settings) {
       maf_data_filtered <- maf_data_unfiltered |>
         dplyr::semi_join(
           filtered_vars_maf_like,
-          by = c("Chromosome", "Start_Position",
-                 "Tumor_Seq_Allele1", "Tumor_Seq_Allele2",
+          by = c("Chromosome",
+                 "Start_Position",
+                 "Tumor_Seq_Allele1",
+                 "Tumor_Seq_Allele2",
                  "Variant_Type")
         )
 
