@@ -11,8 +11,6 @@ load_reference_data <- function(
 
   pcgr_ref_data <- list()
 
-
-
   log4r_info(paste0(
     "Loading reference datasets - genome assembly: ", genome_assembly))
 
@@ -34,6 +32,28 @@ load_reference_data <- function(
       seqlengths = GenomeInfoDb::seqlengths(GenomeInfoDb::seqinfo(bsgenome_obj)),
       genome = genome_grch2hg[genome_assembly])
   pcgr_ref_data[['assembly']][['bsg']] <- bsgenome_obj
+
+  chromsizes_fname <- file.path(
+    pcgr_db_assembly_dir,
+    paste0("chromsize.", genome_assembly, ".tsv"))
+  check_file_exists(chromsizes_fname)
+  pcgr_ref_data[['assembly']][['chrom_coordinates']] <-
+    as.data.frame(
+      readr::read_tsv(
+        chromsizes_fname, show_col_types = F,
+        na = c(".")
+      )
+    ) |>
+    dplyr::mutate(
+      genome_end = cumsum(.data$length)) |>
+    dplyr::mutate(
+      genome_start = .data$genome_end - .data$length
+    ) |>
+    dplyr::select(
+      c("chrom", "genome_start", "genome_end",
+      "length"), dplyr::everything())
+
+
 
   pcgr_ref_data[['vcf_infotags']] <- data.frame()
   for(t in c('vep','other')) {
@@ -258,7 +278,9 @@ load_reference_data <- function(
 
   ####--- 2. Variant annotations----####
   pcgr_ref_data[['variant']] <- list()
-  ## ClinVar
+
+  #####--A. Sites of pathogenic variants (ClinVar)--#####
+  # 1. sites (codons) of pathogenic/likely pathogenic variants
   clinvar_sites_tsv_fname <-
     file.path(
       pcgr_db_assembly_dir, "variant", "tsv",
@@ -272,6 +294,32 @@ load_reference_data <- function(
   colnames(pcgr_ref_data[['variant']][['clinvar_sites']]) <-
     toupper(colnames(pcgr_ref_data[['variant']][['clinvar_sites']]))
 
+  #####--B. Oncogenic variants (ClinVar)--#####
+  # known oncogenic variants
+  clinvar_oncogenic_tsv_fname <-
+    file.path(
+      pcgr_db_assembly_dir, "variant", "tsv",
+      "clinvar", "clinvar_oncogenic.tsv.gz"
+    )
+  check_file_exists(clinvar_oncogenic_tsv_fname)
+  pcgr_ref_data[['variant']][['clinvar_oncogenic']] <- as.data.frame(
+    readr::read_tsv(
+      clinvar_oncogenic_tsv_fname, show_col_types = F)) |>
+    dplyr::mutate(entrezgene = as.character(.data$entrezgene)) |>
+    dplyr::mutate(alteration = dplyr::if_else(
+      is.na(.data$hgvsp) & !is.na(.data$hgvs_c),
+      as.character(.data$hgvs_c),
+      .data$hgvsp
+    )) |>
+    dplyr::select(-c("codon","trait","var_id")) |>
+    dplyr::select(c("symbol","alteration","molecular_consequence",
+                    "oncogenicity","review_status_oncogenicity"),
+                  dplyr::everything())
+
+  colnames(pcgr_ref_data[['variant']][['clinvar_oncogenic']]) <-
+    toupper(colnames(pcgr_ref_data[['variant']][['clinvar_oncogenic']]))
+
+  #####--C. Gene-level variant statistics (ClinVar)--#####
   clinvar_gene_varstats_tsv_fname <-
     file.path(
       pcgr_db_assembly_dir, "variant", "tsv",
@@ -285,7 +333,9 @@ load_reference_data <- function(
   colnames(pcgr_ref_data[['variant']][['clinvar_gene_stats']]) <-
     toupper(colnames(pcgr_ref_data[['variant']][['clinvar_gene_stats']]))
 
-  ## GWAS
+
+
+  #####--D. GWAS variants--#####
   gwas_tsv_fname <-
     file.path(
       pcgr_db_assembly_dir, "variant", "tsv", "gwas", "gwas.tsv.gz"

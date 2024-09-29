@@ -152,7 +152,8 @@ cat("<br><br>")
 
 cat("\n\n::: {.callout-important}\n\n## Suboptimal fit of mutational profile\n\n ",
     "\nReconstruction of the input mutational profile with the selected COSMIC reference",
-    " signatures resulted in a sub-optimal fit (cosine similarity < 0.9)",
+    " signatures resulted in a sub-optimal fit (cosine similarity < 0.9). ",
+    "A re-run with all reference signatures included is warranted (option `--all_reference_signatures`)",
     "\n\n:::\n\n", sep="")
 
 
@@ -257,6 +258,7 @@ pie_aetiologies <- plotly::plot_ly(
   plotly::layout(
     legend = list(orientation = "h", font = t)) 
 
+pie_aetiologies$x$layout$margin$b <- 5
 bslib::page_fillable(
   bslib::layout_columns(
     col_widths = c(4,8),
@@ -288,7 +290,7 @@ bslib::page_fillable(
       )
     ),
     bslib::card(
-      height = "340px",
+      height = "380px",
       bslib::card_header(
         class = "bg-dark", 
         paste0("Key underlying aetiologies - ",

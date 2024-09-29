@@ -1,6 +1,8 @@
 ### Variant classification - oncogenicity
 
-Annotations for all short variants detected in the tumor sample can here be interrogated, e.g. with respect to gene, variant consequence, variant allelic fraction/sequencing depth (if provided as input), and also with respect to _predicted oncogenicity_. For the latter, PCGR implements standard operating procedures for oncogenicity evaluation developed by ClinGen/VICC [@Horak2022-uh]. The tabset below provides an overview of coding (protein-altering) versus non-coding variants found in the tumor sample.
+Annotations for short variants (SNVs/InDels) detected in the tumor sample can here be interrogated, e.g. with respect to gene, variant consequence, variant allelic fraction/sequencing depth (if provided as input), and also with respect to _predicted oncogenicity_. For the latter, PCGR implements standard operating procedures for oncogenicity evaluation developed by ClinGen/CGC/VICC [@Horak2022-uh]. 
+
+The tabset below provides an overview of coding (protein-altering) versus non-coding variants found in the tumor sample. In addition to predicted oncogenicity, we also explicitly highlight tumor variants that are registered with a <span style="background-color:#FF8790; line-height:110%; padding:2x; color:white"><b>&nbsp;pathogenic/likely pathogenic classification in ClinVar &nbsp; </b></span>, considering variants of any origin (somatic/germline), and associated with any condition/phenotype. 
 
 ::: {.callout-note}
 
@@ -14,7 +16,7 @@ In order to maintain responsiveness of client-side data interaction, only the to
 
 ## Note - oncogenicity versus actionability
 
-The oncogenicity classification of variants performed in PCGR is based on an implementation of the ClinGen/VICC SOPs for variant oncogenicity evaluation. This classification is based on multiple properties of variants (hotspot occurrence, variant consequence (i.e. loss-of-function), population frequency etc.). Notably, the current implementation may provide classifications that do not always correspond with clinical actionability, e.g. due to the fact the functional variant evidence (frequently requiring manual curation) is limited in the reference data coming with PCGR. This implies that the oncogenic classification is somewhat conservative in its current form, and that variants classified as VUS when it comes to oncogenicity by PCGR (yet still with a relatively high _oncogenicity score_), may still be listed as actionable below. When more functional variant evidence gets integrated in PCGR (e.g. from [multiplexed assays of variant effect (MAVE) efforts](https://mavedb.org/#/)), the concordance between oncogenicity and actionability is likely to improve further.
+The oncogenicity classification of variants performed in PCGR is based on an implementation of the ClinGen/CGC/VICC SOPs for variant oncogenicity evaluation. This classification is based on multiple properties of variants (hotspot occurrence, variant consequence (i.e. loss-of-function), population frequency etc.). Notably, the current implementation may provide classifications that do not always correspond with clinical actionability, e.g. due to the fact the functional variant evidence (frequently requiring manual curation) is limited in the reference data coming with PCGR. This implies that the oncogenic classification is somewhat conservative in its current form, and that variants classified as VUS when it comes to oncogenicity by PCGR (yet still with a relatively high _oncogenicity score_), may still be listed as actionable below. When more functional variant evidence gets integrated in PCGR (e.g. from [multiplexed assays of variant effect (MAVE) efforts](https://mavedb.org/#/)), the concordance between oncogenicity and actionability is likely to improve further.
 
 :::
 
@@ -42,6 +44,33 @@ coding_variant_set <-
     dplyr::desc(.data$GLOBAL_ASSOC_RANK),
   ) |>
   head(1000)
+
+
+if(NROW(coding_variant_set[!is.na(coding_variant_set$ONCOGENICITY) &
+                           coding_variant_set$ONCOGENICITY == "VUS",]) > 0){
+  coding_variant_set <- coding_variant_set |>
+    dplyr::mutate(onc_vus_path_clinvar = dplyr::if_else(
+      !is.na(ONCOGENICITY) &
+        ONCOGENICITY == "VUS" &
+        !is.na(CLINVAR_CLASSIFICATION) &
+        stringr::str_detect(
+          tolower(CLINVAR_CLASSIFICATION),
+          "pathogenic"
+        ),
+      as.integer(1),
+      as.integer(0)
+    ))
+  
+  coding_variant_set[!is.na(coding_variant_set$ONCOGENICITY) &
+                       coding_variant_set$ONCOGENICITY == "VUS",] <- 
+    coding_variant_set[!is.na(coding_variant_set$ONCOGENICITY) &
+                         coding_variant_set$ONCOGENICITY == "VUS",] |>
+    dplyr::arrange(dplyr::desc(onc_vus_path_clinvar),
+                   dplyr::desc(ONCOGENICITY_SCORE))
+  coding_variant_set$onc_vus_path_clinvar <- NULL
+  
+}
+
 
 # if(expression_present_snv == FALSE){
 #   coding_variant_set$consTPM <- NULL
@@ -131,6 +160,16 @@ dt_all_coding <- DT::datatable(
         pcgrr::color_palette$cancer_assoc$breaks,
         pcgrr::color_palette$cancer_assoc$values
       )
+  ) |>
+   DT::formatStyle(
+    color = "black",
+    "ALTERATION",
+    "CLINVAR_CLASSIFICATION",
+    backgroundColor = 
+      DT::styleEqual(
+        c("Pathogenic","Likely_Pathogenic"),
+        c("#FF8790", "#FF8790")
+      )
   )
 
 # if(expression_present_snv == TRUE){
@@ -172,7 +211,8 @@ noncoding_variant_set <-
   dplyr::select(-c("PROTEIN_CHANGE","PROTEIN_DOMAIN",
                    "MUTATION_HOTSPOT",
                    "MUTATION_HOTSPOT_CANCERTYPE",
-                   "HGVSp","PREDICTED_EFFECT",
+                   "HGVSc_RefSeq",
+                   "PREDICTED_EFFECT",
                    "TARGETED_INHIBITORS",
                    "TARGETED_INHIBITORS_ALL")) |>
  dplyr::arrange(
@@ -181,6 +221,72 @@ noncoding_variant_set <-
     dplyr::desc(.data$GLOBAL_ASSOC_RANK),
   ) |>
   head(1000)
+
+
+if(NROW(noncoding_variant_set[!is.na(noncoding_variant_set$ONCOGENICITY) &
+                           noncoding_variant_set$ONCOGENICITY == "VUS",]) > 0){
+  noncoding_variant_set <- noncoding_variant_set |>
+    dplyr::mutate(onc_vus_path_clinvar = dplyr::if_else(
+      !is.na(.data$ONCOGENICITY) &
+        .data$ONCOGENICITY == "VUS" &
+        !is.na(.data$CLINVAR_CLASSIFICATION) &
+        stringr::str_detect(
+          tolower(.data$CLINVAR_CLASSIFICATION),
+          "pathogenic"
+        ),
+      as.integer(1),
+      as.integer(0)
+    ))
+  
+  noncoding_variant_set[!is.na(noncoding_variant_set$ONCOGENICITY) &
+                       noncoding_variant_set$ONCOGENICITY == "VUS",] <- 
+    noncoding_variant_set[!is.na(noncoding_variant_set$ONCOGENICITY) &
+                         noncoding_variant_set$ONCOGENICITY == "VUS",] |>
+    dplyr::arrange(dplyr::desc(onc_vus_path_clinvar),
+                   dplyr::desc(ONCOGENICITY_SCORE))
+  noncoding_variant_set$onc_vus_path_clinvar <- NULL
+  
+}
+
+
+# if(expression_present_snv == FALSE){
+#   coding_variant_set$consTPM <- NULL
+# }
+# 
+# coding_variants_shared <- 
+#   crosstalk::SharedData$new(coding_variant_set)
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# noncoding_variant_set <- 
+#   pcg_report$content$snv_indel$callset$variant_display |>
+#   dplyr::filter(
+#     .data$CODING_STATUS == "noncoding" &
+#      .data$CONSEQUENCE != "intergenic_variant") |>
+#   dplyr::select(
+#     dplyr::any_of(
+#       pcgrr::dt_display$snv_indel_tier3
+#     )
+#   ) |>
+#   dplyr::select(-c("PROTEIN_CHANGE","PROTEIN_DOMAIN",
+#                    "MUTATION_HOTSPOT",
+#                    "MUTATION_HOTSPOT_CANCERTYPE",
+#                    "HGVSc_RefSeq",
+#                    "PREDICTED_EFFECT",
+#                    "TARGETED_INHIBITORS",
+#                    "TARGETED_INHIBITORS_ALL")) |>
+#  dplyr::arrange(
+#     dplyr::desc(.data$ONCOGENICITY_SCORE),
+#     dplyr::desc(.data$TISSUE_ASSOC_RANK),
+#     dplyr::desc(.data$GLOBAL_ASSOC_RANK),
+#   ) |>
+#   head(1000)
 
 # if(expression_present_snv == FALSE){
 #   noncoding_variant_set$consTPM <- NULL
@@ -286,14 +392,39 @@ dt_all_noncoding
 #| eval: !expr as.logical(pcg_report$settings$conf$assay_properties$vcf_tumor_only) == TRUE
 
 cat("\n#### Filtered variants\n\n")
-cat("The table below lists all the variants that have been subject to exclusion/filtering",
-    " from the raw input callset, as an effort to minimize the presence of known\n\n",
-    " germline events and sequencing artifacts. The filtering has been performed based on the", "following criteria:\n\n")
+cat("The table below lists all the variants that have been subject to",
+    " exclusion/filtering (according to filtering settings indicated above)",
+    " from the raw input callset, as an effort to minimize the presence of known",
+    " germline events and sequencing artifacts.\n\n")
 
 
 ```
 
 <br>
+
+```{r num_filtered_variants_shown}
+#| output: asis
+#| eval: !expr as.logical(pcg_report$settings$conf$assay_properties$vcf_tumor_only) == TRUE
+
+if(NROW(pcg_report$content$snv_indel$callset$variant_unfiltered) > 0 &
+   "SOMATIC_CLASSIFICATION" %in% colnames(pcg_report$content$snv_indel$callset$variant_unfiltered)){
+  
+  filtered_calls <- 
+    pcg_report$content$snv_indel$callset$variant_unfiltered |>
+    dplyr::filter(.data$SOMATIC_CLASSIFICATION != "SOMATIC") |>
+    dplyr::rename(EXCLUSION_CRITERIA = "SOMATIC_CLASSIFICATION")
+  
+  if(NROW(filtered_calls) > 2000){
+    cat("\n::: {.callout-warning}\n## Filtered variant set too large for display\n\n",
+        "The number of variants subject to filtering <b>(N = ", NROW(filtered_calls), ")</b> ",
+        "is too large (N > 2,000) to display in an interactive table. See the output TSV file ",
+        "with all filtered (and unfiltered variants) for the full list.\n\n",
+        ":::\n\n", sep="")
+  }
+}
+
+```
+
 
 ```{r filtered_variants_datatable}
 #| output: asis
@@ -307,7 +438,7 @@ if(NROW(pcg_report$content$snv_indel$callset$variant_unfiltered) > 0 &
     dplyr::filter(.data$SOMATIC_CLASSIFICATION != "SOMATIC") |>
     dplyr::rename(EXCLUSION_CRITERIA = "SOMATIC_CLASSIFICATION")
   
-  if(NROW(filtered_calls) > 0){
+  if(NROW(filtered_calls) > 0 & NROW(filtered_calls) <= 2000 ){
     filtered_calls <- filtered_calls |>
       dplyr::select(
         dplyr::any_of(
@@ -327,7 +458,7 @@ if(NROW(pcg_report$content$snv_indel$callset$variant_unfiltered) > 0 &
         color = "white",
         "EXCLUSION_CRITERIA",
         "EXCLUSION_CRITERIA",
-        backgroundColor = pcgrr::color_palette$report_color$values[1]
+        backgroundColor = pcgrr::color_palette$report_color$values[2]
       )
   }
 }
