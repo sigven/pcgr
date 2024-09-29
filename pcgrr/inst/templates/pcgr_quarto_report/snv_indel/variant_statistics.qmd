@@ -1,54 +1,14 @@
 ```{r prep_data}
 #| eval: !expr as.logical(pcg_report$content$snv_indel$vstats$n > 0) == TRUE
 
+
+variant_stats <- pcgrr::get_variant_statistics(
+  var_df = pcg_report$content$snv_indel$callset$variant_display,
+  pct_other_limit = 3.5
+)
+
 hole_size <- 0.4
 pie_line_width <- 3
-
-consequence_stats <- 
-  pcg_report$content$snv_indel$callset$variant_display |>
-  dplyr::mutate(CONSEQUENCE = stringr::str_replace_all(
-    CONSEQUENCE, "(, [0-9A-Za-z_]{1,}){1,}$",""
-  )) |>
-  dplyr::group_by(CONSEQUENCE) |>
-  dplyr::summarise(
-    N = dplyr::n(),
-    .groups = "drop"
-  ) |>
-  dplyr::mutate(Pct = N / sum(N) * 100) |>
-  dplyr::mutate(CONSEQUENCE = dplyr::if_else(
-    Pct < 3, "other_consequence", 
-    as.character(CONSEQUENCE)
-  )) |>
-  dplyr::group_by(CONSEQUENCE) |>
-  dplyr::summarise(
-    N = sum(N),
-    Pct = sum(Pct),
-    .groups = "drop"
-  ) |>
-  dplyr::arrange(dplyr::desc(N))
-
-vartype_stats <- 
-  pcg_report$content$snv_indel$callset$variant_display |>
-  dplyr::group_by(VARIANT_CLASS) |>
-  dplyr::summarise(
-    N = dplyr::n(),
-    .groups = "drop"
-  ) |>
-  dplyr::mutate(Pct = N / sum(N) * 100) |>
-  dplyr::arrange(dplyr::desc(Pct))
-
-coding_stats <- 
-  pcg_report$content$snv_indel$callset$variant_display |>
-  dplyr::group_by(CODING_STATUS) |>
-  dplyr::summarise(
-    N = dplyr::n(),
-    .groups = "drop"
-  ) |>
-  dplyr::mutate(Pct = N / sum(N) * 100) |>
-  dplyr::arrange(dplyr::desc(Pct))
-
-#if(min)
-
 t <- list(
   family = "Helvetica",
   size = 15)
@@ -56,14 +16,14 @@ t <- list(
 varstats_plots_plotly <- list()
 varstats_plots_plotly[['coding']] <- 
   plotly::plot_ly(
-    coding_stats, 
+    variant_stats[['coding']], 
     marker = list(
       colors = pcgrr::color_palette$tier$values,
       line = list(
         color = '#FFFFFF',
         width = pie_line_width))) |>
   plotly::add_pie(
-    coding_stats, 
+    variant_stats[['coding']], 
     labels =~ factor(CODING_STATUS),
     values = ~N,
     textinfo = "Pct",
@@ -74,14 +34,14 @@ varstats_plots_plotly[['coding']] <-
 
 varstats_plots_plotly[['consequence']] <- 
   plotly::plot_ly(
-    consequence_stats, 
+    variant_stats[['consequence']], 
     marker = list(
       colors = pcgrr::color_palette$tier$values,
       line = list(
         color = '#FFFFFF', 
         width = pie_line_width))) |>
   plotly::add_pie(
-    consequence_stats, 
+    variant_stats[['consequence']], 
     labels =~ factor(CONSEQUENCE),
     values = ~N,
     textinfo = "Pct",
@@ -90,16 +50,40 @@ varstats_plots_plotly[['consequence']] <-
   plotly::layout(
     legend = list(orientation = "h", font = t)) 
 
+varstats_plots_plotly[['consequence_coding']] <- NULL
+if(NROW(variant_stats[['consequence_coding']]) > 0) {
+  varstats_plots_plotly[['consequence_coding']] <- 
+    plotly::plot_ly(
+      variant_stats[['consequence_coding']],
+      marker = list(
+        colors = pcgrr::color_palette$tier$values,
+        line = list(
+          color = '#FFFFFF', 
+          width = pie_line_width))) |>
+    plotly::add_pie(
+      variant_stats[['consequence_coding']], 
+      labels =~ factor(CONSEQUENCE),
+      values = ~N,
+      textinfo = "Pct",
+      type = 'pie',
+      hole = hole_size) |>
+    plotly::layout(
+      legend = list(orientation = "h", font = t)) 
+  
+  varstats_plots_plotly[['consequence_coding']]$x$layout$margin$b <- 5
+
+}
+
 varstats_plots_plotly[['type']] <- 
   plotly::plot_ly(
-    vartype_stats, 
+    variant_stats[['variant_class']],
     marker = list(
       colors = pcgrr::color_palette$tier$values,
       line = list(
         color = '#FFFFFF', 
         width = pie_line_width))) |>
   plotly::add_pie(
-    vartype_stats, 
+    variant_stats[['variant_class']],
     labels =~ factor(VARIANT_CLASS),
     values = ~N,
     textinfo = "Pct",
@@ -108,36 +92,24 @@ varstats_plots_plotly[['type']] <-
   plotly::layout(
     legend = list(orientation = "h", font = t)) 
 
+varstats_plots_plotly[['type']]$x$layout$margin$b <- 5
+varstats_plots_plotly[['consequence']]$x$layout$margin$b <- 5
+
 
 
 ```
 
-```{r prep_vboxes}
+```{r display_varstats}
 #| output: asis
-
-statbox <- function(
-    value = "A value", 
-    title = "A title", 
-    theme = "purple",
-    height = "90px"){
-  return(
-    bslib::value_box(
-      height = height,
-      value = value,
-      title = title,
-      showcase = NULL,
-      theme = theme
-    )
-  )
-  
-}
+#| echo: false
+#| eval: true
 
 bslib::page_fillable(
   bslib::layout_columns(
-    height = "350px",
+    height = "365px",
     bslib::card(
       full_screen = TRUE,
-      height = "350px",
+      height = "365px",
       bslib::card_header(
         class = "bg-dark", 
         paste0("Variant statistics | coding effect - ",
@@ -146,7 +118,7 @@ bslib::page_fillable(
     ),
     bslib::card(
       full_screen = TRUE,
-      height = "350px",
+      height = "365px",
       bslib::card_header(
         class = "bg-dark", 
         paste0("Variant statistics | type - ",
@@ -158,8 +130,8 @@ bslib::page_fillable(
     full_screen = TRUE,
     height = "400px",
     bslib::card_header(
-      class = "bg-dark", 
-      paste0("Variant statistics | consequence type - ",
+      class = "bg-dark",
+      paste0("Variant statistics | any consequence type - ",
              pcg_report$settings$sample_id)),
     varstats_plots_plotly[['consequence']]
   )
@@ -168,7 +140,28 @@ bslib::page_fillable(
 
 ```
 
-```{r prep_plots}
+```{r display_coding_cons_varstats}
+#| output: asis
+#| echo: false
+#| eval: !expr as.logical(is.null(varstats_plots_plotly[['consequence_coding']])) == FALSE
+
+bslib::page_fillable(
+  bslib::card(
+    full_screen = TRUE,
+    height = "400px",
+    bslib::card_header(
+      class = "bg-dark",
+      paste0("Variant statistics | coding consequence type - ",
+             pcg_report$settings$sample_id)),
+    varstats_plots_plotly[['consequence_coding']]
+  )
+)
+
+
+```
+
+
+```{r prep_vaf_plot}
 #| echo: false
 #| eval: !expr as.logical(pcg_report$settings$conf$somatic_snv$allelic_support$tumor_af_tag == "_NA_") == FALSE
 
@@ -252,14 +245,15 @@ rfdat$data$type <- factor(
   rfdat$data$type, levels = type_stats$x)
 
 genomic_dist_plot <- ggplot2::ggplot(
-  rfdat$data, ggplot2::aes(x = location, y = distance)) +
+  rfdat$data, ggplot2::aes(x = location, y = dist2prev, z = variant_id)) +
     ggplot2::geom_point(
       ggplot2::aes(colour = type), cex = rfdat$cex) +
     ggplot2::geom_vline(
       xintercept = as.vector(rfdat$chr_cum), linetype="dotted") +
-    ggplot2::annotate("text", x = rfdat$intercept, 
-                      y = rfdat$ylim, 
-                      label = rfdat$labels, 
+    ggplot2::annotate("text", x = rfdat$chrom_midpoints, 
+                      #y = rfdat$ylim,
+                      y = 1e+09,
+                      label = rfdat$chrom_labels, 
                       cex = rfdat$cex_text) +
     ggplot2::xlab("Genomic Location") +
     ggplot2::ylab("Genomic Distance") +
@@ -278,8 +272,15 @@ genomic_dist_plot <- ggplot2::ggplot(
       axis.text.x = ggplot2::element_blank()) +
     ggplot2::guides(colour = ggplot2::guide_legend(nrow = 1))
 
-genomic_dist_plot_plotly <- plotly::ggplotly(genomic_dist_plot)
+genomic_dist_plot_plotly <- plotly::ggplotly(genomic_dist_plot, tooltip = c("y","z"))
 genomic_dist_plot_plotly$x$layout$legend$title$text <- ""
+genomic_dist_plot_plotly <- genomic_dist_plot_plotly |> 
+  plotly::layout(
+    legend = list(
+      orientation = "h", 
+      x = 0.27, 
+      y = -0.30))
+  
 
 ```
 
