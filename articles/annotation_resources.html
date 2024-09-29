@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -101,8 +101,7 @@ reference database (v19 for grch37))</li>
 <ul>
 <li>
 <a href="https://sites.google.com/site/jpopgen/dbNSFP" class="external-link">dBNSFP</a> -
-database of non-synonymous functional predictions (v4.5, November
-2023)</li>
+database of non-synonymous functional predictions (v4.8, June 2024)</li>
 </ul>
 </div>
 <div class="section level3">
@@ -120,8 +119,8 @@ short genetic variants (build 154)</li>
 for statistically significant mutations in cancer (v2, 2017)</li>
 <li>
 <a href="https://portal.gdc.cancer.gov/" class="external-link">TCGA</a> - somatic
-mutations discovered across 33 tumor type cohorts (release 39.0,
-December 2023)</li>
+mutations discovered across 33 tumor type cohorts (release 41.0, August
+2024)</li>
 </ul>
 </div>
 <div class="section level3">
@@ -130,10 +129,10 @@ December 2023)</li>
 <ul>
 <li>
 <a href="http://www.ncbi.nlm.nih.gov/clinvar/" class="external-link">ClinVar</a> -
-database of clinically related variants (June 2024)</li>
+database of clinically related variants (September 2024)</li>
 <li>
 <a href="https://civicdb.org" class="external-link">CIViC</a> - clinical interpretations
-of variants in cancer (June 21st 2024)</li>
+of variants in cancer (September 18th 2024)</li>
 <li>
 <a href="http://www.cancergenomeinterpreter.org/biomarkers" class="external-link">CGI</a>
 - Cancer Genome Interpreter Cancer Biomarkers Database (CGI) (October
@@ -146,10 +145,10 @@ of variants in cancer (June 21st 2024)</li>
 <ul>
 <li>
 <a href="http://www.uniprot.org" class="external-link">UniProt/SwissProt KnowledgeBase</a>
-- resource on protein sequence and functional information (2024_03)</li>
+- resource on protein sequence and functional information (2024_04)</li>
 <li>
 <a href="https://www.ebi.ac.uk/interpro/entry/pfam/#table" class="external-link">Pfam</a>
-- database of protein families and domains (v35.0, November 2021)</li>
+- database of protein families and domains (v37.0)</li>
 </ul>
 </div>
 <div class="section level3">
@@ -174,13 +173,14 @@ targeted drugs and tractability aggregated from multiple sources
 <h4 id="data-quality">Data quality<a class="anchor" aria-label="anchor" href="#data-quality"></a>
 </h4>
 <p><strong>Genomic biomarkers</strong></p>
-<p>Genomic biomarkers included in PCGR are limited to the following:</p>
+<p>Genomic biomarkers utilized in PCGR are currently limited to the
+following:</p>
 <ul>
 <li>Evidence items for specific markers in CIViC must be
 <em>accepted</em> (<em>submitted</em> evidence items are not considered
 or shown)</li>
 <li>Markers reported at the exact variant level (e.g. <strong>BRAF
-p.V600E</strong>, __MET c.3028+1G&gt;T,
+p.V600E</strong>, <strong>MET c.3028+1G&gt;T</strong>,
 <strong>g.7:140753336A&gt;T</strong>)</li>
 <li>Markers reported at the codon level (e.g. <strong>KRAS
 p.G12</strong>)</li>
@@ -190,13 +190,15 @@ mutation</strong>, <strong>EGFR exon 19 deletion</strong>)</li>
 mutation</strong>, <strong>TP53 loss-of-function mutation</strong>,
 <strong>BRCA1 oncogenic mutation</strong>)</li>
 <li>Within the <a href="https://www.cancergenomeinterpreter.org/biomarkers" class="external-link">Cancer
-bioMarkers database (CGI)</a>, only markers collected from FDA/NCCN
+bioMarkers database (CGI)</a>, only biomarkers curated from FDA/NCCN
 guidelines, scientific literature, and clinical trials are included
-(markers collected from conference abstracts etc. are not included)</li>
+(biomarkers collected from conference abstracts etc. are not
+included)</li>
 <li>Copy number gains/losses</li>
+<li>RNA fusion and gene expression biomarkers are included in the PCGR
+reference databundle, but are not currently utilized in the PCGR
+biomarker matching procedure</li>
 </ul>
-<p>See also comment on a <a href="https://github.com/sigven/pcgr/issues/37#issuecomment-391966286" class="external-link">closed
-GitHib issue</a></p>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -210,7 +212,7 @@ GitHib issue</a></p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer>

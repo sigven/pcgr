@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -84,6 +84,67 @@
 
     
     
+<div class="section level2">
+<h2 id="v2-1-0">v2.1.0<a class="anchor" aria-label="anchor" href="#v2-1-0"></a>
+</h2>
+<ul>
+<li>Date: <strong>2024-09-27</strong>
+</li>
+<li>Major data updates
+<ul>
+<li>ClinVar (2024-09)</li>
+<li>dbNSFP (v4.8)</li>
+<li>NCI Thesaurus <code>v24.07e</code>
+</li>
+<li>CIViC (2024-09-18)</li>
+</ul>
+</li>
+<li>Reduction (~15%) in overall data bundle size - removed unused data
+files (e.g. expression counts)</li>
+<li>Fixed bug in MAF output for tumor-only runs
+<a href="https://github.com/sigven/pcgr/issue/250" class="external-link">issue250</a>, also
+ensure that non-exonic variants are excluded if setting
+<code>--exclude_nonexonic</code> is used)</li>
+<li>Fixed bug in annotation of splice site mutation hotspots (e.g. MET
+exon 14 skipping)</li>
+<li>Highlighted variants with known pathogenic/likely pathogenic
+clinical significance in ClinVar (regardless of phenotype and variant
+origin) in the variant oncogenicity section of the HTML report</li>
+<li>Created interactive visualization support for allele-specific copy
+number data (HTML report)</li>
+<li>Slight change to the default transcript consequence pick order in
+VEP based on observations of prioritized transcripts (<em>mane_select
+&gt; mane_plus_clinical &gt; canonical &gt; biotype &gt; ccds &gt; rank
+&gt; tsl &gt; appris &gt;length</em>)</li>
+<li>Pulled in known oncogenic variants from ClinVar (assessed through
+ClinGen/CGC/VICC SOP, oncogenic/likely oncogenic) into the variant
+oncogenicity assessment algorithm</li>
+<li>Added option <code>--no_html</code> to disable HTML report
+generation</li>
+<li>Added option <code>--input_cpsr</code> - re-offering the possibility
+to integrate CPSR-classified germline variants in the PCGR HTML
+report</li>
+<li>Added <code>HGVSc_RefSeq</code> as output column in TSV/HTML - using
+MANE Select RefSeq transcript identifiers (works primarily for
+grch38)</li>
+<li>Pulled in coding sequence start annotation for protein-coding
+transcripts from GENCODE, enabling a more useful annotation of promoter
+variants (e.g. TERT)</li>
+<li>Created new column <code>ALTERATION</code> in variant tables of HTML
+report, a combination of <code>HGVSp</code>, <code>HGVSc</code> (if
+<code>HGVSp</code> not available)</li>
+<li>New output file for tumor-only runs, the complete set of calls,
+filtered and unfiltered, in a TSV file</li>
+<li>Re-processed all RNA-seq reference cohorts (TCGA, DepMap,
+TreeHouse), ensuring that all cohorts are using the same unit
+(<code>log2(TPM+0.001)</code>)</li>
+<li>Separated outlier gene expression results into separate tabs in the
+HTML report, added them to Excel workbook output</li>
+<li>Added section on kataegis events in the HTML report</li>
+<li>Fixed bug in plotting of reference TMB distributions for different
+TMB algorithms (<code>--tmb_display</code> option)</li>
+</ul>
+</div>
 <div class="section level2">
 <h2 id="v2-0-3">v2.0.3<a class="anchor" aria-label="anchor" href="#v2-0-3"></a>
 </h2>
@@ -1606,7 +1667,7 @@ are now fixed from 0 to 1 (0.05 intervals)</li>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer>

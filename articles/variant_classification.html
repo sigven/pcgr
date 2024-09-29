@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -98,7 +98,7 @@ oncogenicity score per variant.</p>
 <p>Note that all properties/criteria provided in the SOP’s are
 <em>not</em> readily implemented in PCGR, specifically the ones
 requiring manual curation or expert review (i.e. experimental oncogenic
-variant evidence, requring support from <em>in vitro</em> or <em>in
+variant evidence, requiring support from <em>in vitro</em> or <em>in
 vivo</em> functional studies (criteria <em>OM1/OS1</em>)). This implies
 that some variants interrogated by PCGR may not be classified as
 oncogenic, even though they could be classified as such with more
@@ -118,21 +118,24 @@ classification in PCGR:</p>
 <ul>
 <li>
 <em>CLINGEN_VICC_SBVS1</em> - Very high MAF (&gt; 0.05 in gnomAD -
-any five major continental pops)</li>
+any five major continental populations)</li>
 <li>
 <em>CLINGEN_VICC_SBS1</em> - High MAF (&gt; 0.01 in gnomAD - any
-five major continental pops)</li>
+five major continental populations)</li>
 <li>
-<em>CLINGEN_VICC_SBP1</em> - Insilico support a benign effect on the
-gene or gene product (multiple lines of evidence (&gt;= 7 algorithms)
-from dbNSFP)</li>
+<em>CLINGEN_VICC_SBP1</em> - <em>Insilico</em> support for a benign
+effect on the gene or gene product (multiple lines of evidence (&gt;= 8
+algorithms) from dbNSFP)</li>
 <li>
 <em>CLINGEN_VICC_SBP2</em> - Silent and intronic changes outside of
 the consensus splice site (VEP consequence)</li>
 <li>
-<em>CLINGEN_VICC_OVS1</em> - Null variant - in bona fide tumor
-suppressor gene (predicted as LoF in tumor suppressors from
+<em>CLINGEN_VICC_OVS1</em> - Null variant - in a <em>bona fide</em>
+tumor suppressor gene (predicted as LoF in tumor suppressors from
 CGC/NCG/CancerMine)</li>
+<li>
+<em>CLINGEN_VICC_OS1</em> - Same amino acid change as previously
+established oncogenic variant (ClinVar)</li>
 <li>
 <em>CLINGEN_VICC_OS3</em> - Located in a mutation hotspot, &gt;= 50
 samples with a variant at amino acid position, &gt;= 10 samples with
@@ -140,8 +143,8 @@ same amino acid change (cancerhotspots.org)</li>
 <li>
 <em>CLINGEN_VICC_OM1</em> - Located in a presumably critical site of
 functional domain - here, this is implemented through indirect evidence
-from overlap with known oncogenic and predictive (actionable)
-biomarkers</li>
+from overlap with known predictive (drug sensitivity/resistance)
+loci</li>
 <li>
 <em>CLINGEN_VICC_OM2</em> - Protein length changes from in-frame
 dels/ins in known oncogene/tumor suppressor genes or stop-loss variants
@@ -152,8 +155,8 @@ CGC/NCG/CancerMine)</li>
 samples with a variant at amino acid position, &gt;= 10 samples with
 same amino acid change (cancerhotspots.org)</li>
 <li>
-<em>CLINGEN_VICC_OP1</em> - Insilico support a damaging effect on
-the gene or gene product (multiple lines of evidence (&gt;= 7
+<em>CLINGEN_VICC_OP1</em> - <em>Insilico</em> support for a damaging
+effect on the gene or gene product (multiple lines of evidence (&gt;= 8
 algorithms) from dbNSFP)</li>
 <li>
 <em>CLINGEN_VICC_OP3</em> - Located in a mutation hotspot, &lt; 10
@@ -168,51 +171,59 @@ MAF ( &lt; 0.0001 in all five major subpopulations)</li>
 </h2>
 <p>PCGR prioritizes and evaluates variants according to clinical
 actionability. Currently, PCGR implements its tier classification
-framework along the proposed AMP/ASCO/CAP guidelines, as detailed
-below.</p>
-<p>This tier model attempts to adopt concensus recommendations by
-AMP/ASCO/CAP, as outlined in <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5707196/" class="external-link">Li et al.,
+framework along the proposed AMP/ASCO/CAP guidelines, as outlined in <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5707196/" class="external-link">Li et al.,
 2017</a>:</p>
 <ul>
 <li>
-<em>Tier I: Variants of strong clinical significance</em> -
-constitutes variants linked to predictive, prognostic, or diagnostic
-evidence items in the <a href="https://civicdb.org" class="external-link">CIViC database</a>
-or the <a href="https://www.cancergenomeinterpreter.org/biomarkers" class="external-link">Cancer
+<strong>Tier I: Variants of strong clinical significance</strong> -
+constitutes aberrations linked to predictive, prognostic, or diagnostic
+biomarkers in the <a href="https://civicdb.org" class="external-link">CIViC database</a> and
+the <a href="https://www.cancergenomeinterpreter.org/biomarkers" class="external-link">Cancer
 Biomarkers Database</a> that are
 <ul>
-<li>A: found within the same tumor type/class as specified by the user,
-AND</li>
-<li>B: of strong clinical evidence (i.e. part of guidelines, validated
-or discovered in late clinical trials)</li>
+<li>Found within the same tumor type/class as specified by the user,
+<strong>AND</strong>
+</li>
+<li>Of strong clinical evidence (i.e. approved therapies, part of
+guidelines, validated or discovered in late clinical trials (<a href="https://civic.readthedocs.io/en/latest/model/evidence/level.html" class="external-link">CIViC
+evidence levels A/B</a>))</li>
 </ul>
 </li>
 <li>
-<em>Tier II: Variants of potential clinical significance</em> -
-constitutes other variants linked to predictive, prognostic, or
-diagnostic evidence items in the <a href="https://civicdb.org" class="external-link">CIViC
-database</a> or the <a href="https://www.cancergenomeinterpreter.org/biomarkers" class="external-link">Cancer
+<strong>Tier II: Variants of potential clinical
+significance</strong> - constitutes other aberrations linked to
+predictive, prognostic, or diagnostic biomarkers in the <a href="https://civicdb.org" class="external-link">CIViC database</a> and the <a href="https://www.cancergenomeinterpreter.org/biomarkers" class="external-link">Cancer
 Biomarkers Database</a> that are either
 <ul>
-<li>A: of strong clinical evidence in other tumor types/classes than the
-one specified by the user, OR</li>
-<li>B: of weak clinical evidence (early trials, case reports etc.) in
-the same tumor type/class as specified by the user</li>
+<li>Of strong clinical evidence in other tumor types/classes than the
+one specified by the user, <strong>OR</strong>
+</li>
+<li>Of weak clinical evidence (early trials, case reports etc. (<a href="https://civic.readthedocs.io/en/latest/model/evidence/level.html" class="external-link">CIViC
+evidence levels C/D/E</a>))) in the same tumor type/class as specified
+by the user</li>
 </ul>
 </li>
 <li>
-<em>Tier III: Variants of uncertain clinical significance</em> -
-includes other coding variants found in proto-oncogenes or tumor
-suppressor genes (SNVs and indels only)</li>
+<strong>Tier III: Variants of uncertain clinical significance
+(SNVs/InDels only)</strong> -
+<ul>
+<li>Other coding variants, not observed at significant allele
+frequencies (gnomAD MAF &lt; 0.001), found in oncogenes or tumor
+suppressor genes, yet <em>not</em> linked to any known predictive,
+prognostic, or diagnostic biomarkers in the <a href="https://civicdb.org" class="external-link">CIViC database</a> and the <a href="https://www.cancergenomeinterpreter.org/biomarkers" class="external-link">Cancer
+Biomarkers Database</a>
+</li>
+</ul>
+</li>
 </ul>
 <p>In PCGR, we skip the classification of variants into the
 AMP/ASCO/CAP-specified <em>Tier IV</em> (benign/likely benign variants),
 but rather take a more cautious approach. Specifically, for SNVs/indels
 that do not fall into tier I, II, or III, we classify them into <em>Tier
-V: Other coding variants</em>, which includes other protein-coding
-variants, as well as <em>Tier VI: Other non-coding variants</em>, which
-includes synonymous variants, intronic variants, and other variants in
-non-coding regions.</p>
+V: Other coding variants</em>, which includes protein-coding variants in
+non-cancer related genes, as well as <em>Tier VI: Other non-coding
+variants</em>, which includes synonymous variants, intronic variants,
+and other variants in non-coding regions.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
@@ -225,7 +236,7 @@ non-coding regions.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer>

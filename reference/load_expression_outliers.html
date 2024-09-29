@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -58,8 +58,9 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">load_expression_outliers</span><span class="op">(</span></span>
 <span>  settings <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  ref_data <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  percentile_cutoff_high <span class="op">=</span> <span class="fl">90</span>,</span>
-<span>  percentile_cutoff_low <span class="op">=</span> <span class="fl">10</span></span>
+<span>  percentile_cutoff_high <span class="op">=</span> <span class="fl">95</span>,</span>
+<span>  percentile_cutoff_low <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  z_score_cutoff <span class="op">=</span> <span class="fl">1.5</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -82,6 +83,10 @@
 <dt id="arg-percentile-cutoff-low">percentile_cutoff_low<a class="anchor" aria-label="anchor" href="#arg-percentile-cutoff-low"></a></dt>
 <dd><p>numeric, percentile cutoff for low expression</p></dd>
 
+
+<dt id="arg-z-score-cutoff">z_score_cutoff<a class="anchor" aria-label="anchor" href="#arg-z-score-cutoff"></a></dt>
+<dd><p>numeric, z-score cutoff for expression outliers</p></dd>
+
 </dl></div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -93,7 +98,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer></div>

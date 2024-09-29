@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -91,8 +91,10 @@
 <ul>
 <li>An unannotated, single-sample <a href="https://github.com/samtools/hts-specs#variant-calling-data-files" class="external-link">VCF
 file</a> (&gt;= v4.2) with called somatic variants (SNVs/InDels)</li>
-<li>An allele-specific copy number segment file</li>
-<li>A file with transcript/gene expression levels</li>
+<li>A file with allele-specific copy number segments (tab-separated
+values - TSV)</li>
+<li>A file with transcript/gene expression levels (tab-separated values
+- TSV)</li>
 </ul>
 <p>The input VCF is a required input file, while the somatic copy number
 file and gene expression file are optional. The following arguments to
@@ -106,8 +108,9 @@ the <code>pcgr</code> command are used for input files:</p>
 </ul>
 <p>In addition to these three main input files, the user can also opt to
 provide a <a href="#panel-of-normals-pon-vcf">panel-of-normals VCF</a>
-file, as well as a <a href="#cpsr-report">CPSR report (JSON)</a>, as
-input.</p>
+file (<code>--pon_vcf</code>) for tumor-only variant filtering, as well
+as an input file with <a href="#germline-variants">CPSR-classified
+germline variants (TSV)</a> (<code>--input_cpsr</code>).</p>
 <div class="section level3">
 <h3 id="vcf">VCF<a class="anchor" aria-label="anchor" href="#vcf"></a>
 </h3>
@@ -127,7 +130,7 @@ analysis in PCGR. For records with undefined values in the FILTER column
 variants.</li>
 </ul>
 <div class="section level4">
-<h4 id="formatting-of-allelic-depthsupport-dpad">Formatting of allelic depth/support (DP/AD)<a class="anchor" aria-label="anchor" href="#formatting-of-allelic-depthsupport-dpad"></a>
+<h4 id="formatting-of-variant-sequencing-depthallelic-support-dpaf">Formatting of variant sequencing depth/allelic support (DP/AF)<a class="anchor" aria-label="anchor" href="#formatting-of-variant-sequencing-depthallelic-support-dpaf"></a>
 </h4>
 <p>The representation of variant genotype data (allelic depth and
 support in tumor vs. control sample) is usually formatted in the
@@ -136,8 +139,8 @@ considering the VCF output for the <a href="https://www.biostars.org/p/19104/" c
 callers</a> that are in use, we have experienced a general lack of
 uniformity for how this information is encoded in the genotype fields.
 In order for PCGR to recognize this type of information robustly, we
-currently require that you encode this unambiguously in the INFO field
-of your VCF file.</p>
+currently require that you as a user encode this unambiguously in the
+INFO field of your VCF file.</p>
 <p>Shown below is how the VCF header for these entries should look like
 in your input VCF, and how the corresponding variant data is encoded per
 record:</p>
@@ -162,16 +165,16 @@ formatting requirements of PCGR. See also <a href="https://github.com/sigven/pcg
 <ul>
 <li>PCGR generates a number of VCF INFO annotation tags that are
 appended to the query VCF. We therefore encourage the users to submit
-query VCF files that have not been subject to annotations by other
-means, but rather a VCF file that comes directly from variant calling.
-If not, there are likely to be INFO tags in the query VCF file that
-coincide with those produced by PCGR.</li>
+query VCF files that <em>have not</em> been subject to annotations by
+other means, but rather a VCF file that comes directly from variant
+calling. If not, there are likely to be INFO tags in the query VCF file
+that coincide with those produced by PCGR.</li>
 <li>Note that you can preserve particular tags in the INFO field towards
 the TSV output of PCGR. Sometimes, it can be convenient to investigate
 particular properties of the variants (encoded in the VCF) against
 functional annotations (as provided by PCGR). To achieve this, use the
-option
-<code>--preserved_info_tags &lt;TAG1&gt;,&lt;TAG2&gt; etc</code>.</li>
+option <code>--retained_info_tags &lt;TAG1&gt;,&lt;TAG2&gt;</code>
+etc.</li>
 </ul>
 </div>
 </div>
@@ -199,7 +202,7 @@ header:</li>
 <div class="section level3">
 <h3 id="copy-number-segments---allele-specific">Copy number segments - allele-specific<a class="anchor" aria-label="anchor" href="#copy-number-segments---allele-specific"></a>
 </h3>
-<p>The tab-separated values file with allele-specific copy number
+<p>A tab-separated values file with allele-specific copy number
 aberrations <strong>MUST</strong> contain the following four
 columns:</p>
 <ul>
@@ -232,13 +235,25 @@ segment to be considered an amplification, <em>default 6</em>
 </ul>
 </div>
 <div class="section level3">
+<h3 id="germline-variants">Germline variants<a class="anchor" aria-label="anchor" href="#germline-variants"></a>
+</h3>
+<p>The user can submit a file with germline variants processed and
+classified with <a href="https://sigven.github.io/cpsr" class="external-link">CPSR</a>, which
+caters for an integration of germline and somatic findings in the output
+report. This file corresponds to output file
+<code>&lt;sample_id&gt;.cpsr.&lt;genome_assembly&gt;.classification.tsv.gz</code>
+from the CPSR pipeline. Make sure the genome assembly is the same as the
+one used for the somatic variant input files.</p>
+</div>
+<div class="section level3">
 <h3 id="gene-expression">Gene expression<a class="anchor" aria-label="anchor" href="#gene-expression"></a>
 </h3>
 <p>The user can submit a file with bulk gene/transcript expression data
 to PCGR, indicating the relative expression levels of genes in the query
-sample. These data will be integrated with the variant calls in the
-output report, and also subject to an RNA expression similarity analysis
-with other tumor samples.</p>
+sample. PCGR may conduct an expression outlier analysis (compared
+against other cohorts of samples), and also perform an RNA expression
+similarity analysis, i.e. correlation of expression profile with other
+tumor samples.</p>
 <p>The tab-separated values file with gene expression estimates
 <strong>MUST</strong> contain the following two columns:</p>
 <ul>
@@ -266,7 +281,7 @@ gene-level expression estimates.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer>

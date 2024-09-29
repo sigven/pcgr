@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -127,7 +127,7 @@ on the <code>--tumor_only</code> option. In this mode, PCGR conducts a
 set of successive filtering steps on the raw input set of variants,
 aiming to exclude the majority of germline variants from the tumor-only
 input set. In addition to default filtering applied against variants
-found in the gnomAD database (population-specific allele frequency
+found in the gnomAD database (population-specific minor allele frequency
 thresholds can be configured, see below), additional filtering
 procedures can be explicitly set, i.e.:</p>
 <ul>
@@ -206,9 +206,10 @@ report, i.e. through:</p>
 <li><code>--control_dp_min &lt;value&gt;</code></li>
 <li><code>--control_af_max &lt;value&gt;</code></li>
 </ul>
-<div class="section level4">
-<h4 id="tumor-mutational-burden-tmb">Tumor mutational burden (TMB)<a class="anchor" aria-label="anchor" href="#tumor-mutational-burden-tmb"></a>
-</h4>
+</div>
+<div class="section level3">
+<h3 id="tumor-mutational-burden-tmb">Tumor mutational burden (TMB)<a class="anchor" aria-label="anchor" href="#tumor-mutational-burden-tmb"></a>
+</h3>
 <p>If tags for allelic support is provided in the VCF and configured by
 the user, users can configure the TMB calculation by setting minimum
 requirements for sequencing coverage and allelic fraction, i.e.:</p>
@@ -216,7 +217,6 @@ requirements for sequencing coverage and allelic fraction, i.e.:</p>
 <li><code>--tmb_dp_min &lt;value&gt;</code></li>
 <li><code>--tmb_af_min &lt;value&gt;</code></li>
 </ul>
-</div>
 </div>
 <div class="section level3">
 <h3 id="large-input-sets-vcf">Large input sets (VCF)<a class="anchor" aria-label="anchor" href="#large-input-sets-vcf"></a>
@@ -232,6 +232,21 @@ during processing with the PCGR R package.</p>
 your compute platform, we also recommend to increase the <a href="https://www.ensembl.org/info/docs/tools/vep/script/vep_options.html#cacheopt" class="external-link">VEP
 buffer size</a> (option <code>--vep_buffer_size</code>), as this will
 speed up the VEP processing significantly.</p>
+</div>
+<div class="section level3">
+<h3 id="configuration-of-output-files">Configuration of output files<a class="anchor" aria-label="anchor" href="#configuration-of-output-files"></a>
+</h3>
+<p>If you only want the Excel/TSV output (with all variant
+classifications and auxiliary analyses (e.g. MSI classifications, TMB
+estimates, mutational signatures predictions) of PCGR, you may turn off
+the HTML output by using the <code>--no_html</code> option. This will
+speed up the analysis, and could be a useful option if you foresee that
+the sample input datasets are too large for the HTML report generation
+to work properly.</p>
+<p>If you only want the annotated VCF (also converted to TSV), use the
+option <code>--no_reporting</code>. This will skip the final steps of
+the PCGR workflow, and only generate the annotated VCF and TSV
+files.</p>
 </div>
 </div>
 <div class="section level2">
@@ -371,7 +386,8 @@ VEP options:
                         - set lower to reduce memory usage, default: 500
   --vep_pick_order VEP_PICK_ORDER
                         Comma-separated string of ordered transcript/variant properties for selection of primary variant consequence
-                        (option '--pick_order' in VEP), default: mane_select,mane_plus_clinical,canonical,appris,tsl,biotype,ccds,rank,length
+                        (option '--pick_order' in VEP), default:
+                        mane_select,mane_plus_clinical,canonical,biotype,ccds,rank,tsl,appris,length
   --vep_no_intergenic   Skip intergenic variants during variant annotation (VEP option '--no_intergenic' in VEP), default: False
   --vep_regulatory      Add VEP regulatory annotations (VEP option '--regulatory') or non-coding interpretation, default: False
   --vep_gencode_basic   Consider basic GENCODE transcript set only with Variant Effect Predictor (VEP) (VEP option '--gencode_basic').
@@ -413,6 +429,13 @@ Bulk RNA-seq and RNA fusion data options:
   --expression_sim_db EXPRESSION_SIM_DB
                         Comma-separated string of databases for used in RNA expression similarity analysis, default: tcga,depmap,treehouse
 
+Germline variant options:
+  --input_cpsr INPUT_CPSR
+                        CPSR-classified germline calls (file '&lt;cpsr_sample_id&gt;.cpsr.&lt;genome_assembly&gt;.classification.tsv.gz')
+  --input_cpsr_yaml INPUT_CPSR_YAML
+                        CPSR YAML configuration file (file '&lt;cpsr_sample_id&gt;.cpsr.&lt;genome_assembly&gt;.conf.yaml')
+  --cpsr_ignore_vus     Do not show variants of uncertain significance (VUS) in the germline section of the HTML report (default: False)
+
 Other options:
   --vcf2maf             Generate a MAF file for input VCF using https://github.com/mskcc/vcf2maf (default: False)
   --vcfanno_n_proc VCFANNO_N_PROC
@@ -423,6 +446,7 @@ Other options:
   --force_overwrite     By default, the script will fail with an error if any output file already exists. You can force the overwrite of existing result files by using this flag, default: False
   --version             show program's version number and exit
   --no_reporting        Run functional variant annotation on VCF through VEP/vcfanno, omit other analyses (i.e. Tier assignment/MSI/TMB/Signatures etc. and report generation (STEP 4), default: False
+  --no_html             Do not generate HTML report (default: False)
   --debug               Print full commands to log
   --pcgrr_conda PCGRR_CONDA
                         pcgrr conda env name (default: pcgrr)</code></pre>
@@ -559,7 +583,7 @@ including oncogenicity and clinical actionability assessment</td>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer>

@@ -36,7 +36,7 @@
 
     <a class="navbar-brand me-2" href="index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -83,7 +83,7 @@
 <ul>
 <li>Variant classification
 <ul>
-<li>according to <em>oncogenicity</em>: evaluating the oncogenic potential of somatic DNA aberrations (<a href="https://pubmed.ncbi.nlm.nih.gov/35101336/" class="external-link">VICC/CGC/ClinGen guidelines</a>)</li>
+<li>according to <em>oncogenicity</em>: evaluating the oncogenic potential of somatic DNA aberrations (<a href="https://pubmed.ncbi.nlm.nih.gov/35101336/" class="external-link">ClinGen/CGC/VICC guidelines</a>)</li>
 <li>according to <em>actionability</em>: mapping the therapeutic, diagnostic, and prognostic implications of somatic DNA aberrations (<a href="https://pubmed.ncbi.nlm.nih.gov/27993330/" class="external-link">AMP/ASCO/CAP guidelines</a>)</li>
 </ul>
 </li>
@@ -95,36 +95,43 @@
 <p>PCGR supports both of the most recent human genome assemblies (GRCh37/GRCh38), and accepts variant calls from both tumor-control and tumor-only sequencing assays. Much of the functionality is intended for whole-exome/whole-genome sequencing assays, but you can also apply PCGR to output from targeted sequencing panels. If you are interested in the interrogation of germline variants and their relation to cancer predisposition, we recommend trying the accompanying tool <a href="https://github.com/sigven/cpsr" class="external-link">Cancer Predisposition Sequencing Reporter (CPSR)</a>.</p>
 <p>Example screenshots from the <a href="https://quarto.org" class="external-link">quarto</a>-based cancer genome report by PCGR:</p>
 <p><img src="img/sc2.png" alt="PCGR screenshot 1"><img src="img/sc1.png" alt="PCGR screenshot 2"><img src="img/sc3.png" alt="PCGR screenshot 3"></p>
-<p>PCGR originates from the <a href="http://cancergenomics.no" class="external-link">Norwegian Cancer Genomics Consortium (NCGC)</a>, at the <a href="http://radium.no" class="external-link">Institute for Cancer Research, Oslo University Hospital, Norway</a>.</p>
+<p>PCGR originates from the <a href="https://cancergenomics.no" class="external-link">Norwegian Cancer Genomics Consortium (NCGC)</a>, at the <a href="https://radium.no" class="external-link">Institute for Cancer Research, Oslo University Hospital, Norway</a>.</p>
 <div class="section level3">
 <h3 id="top-news">Top News<a class="anchor" aria-label="anchor" href="#top-news"></a>
 </h3>
 <ul>
 <li>
+<em>September 29th 2024</em>: <strong>2.1.0 release</strong>
+<ul>
+<li>updated bundle, more oncogenic variants, CNA visualization, improved RNA-seq support, bug fixes, and more</li>
+<li><a href="https://sigven.github.io/pcgr/articles/CHANGELOG.html">CHANGELOG</a></li>
+</ul>
+</li>
+<li>
 <em>August 1st 2024</em>: <strong>2.0.3 release</strong>
 <ul>
 <li>patch to fix purity/ploidy propagation, MAF output for tumor-only runs, and other minor issues</li>
-<li><a href="http://sigven.github.io/pcgr/articles/CHANGELOG.html" class="external-link">CHANGELOG</a></li>
+<li><a href="https://sigven.github.io/pcgr/articles/CHANGELOG.html">CHANGELOG</a></li>
 </ul>
 </li>
 <li>
 <em>July 16th 2024</em>: <strong>2.0.2 release</strong>
 <ul>
 <li>patch to ensure correct reference to actionability guidelines</li>
-<li><a href="http://sigven.github.io/pcgr/articles/CHANGELOG.html" class="external-link">CHANGELOG</a></li>
+<li><a href="https://sigven.github.io/pcgr/articles/CHANGELOG.html">CHANGELOG</a></li>
 </ul>
 </li>
 <li>
 <em>July 7th 2024</em>: <strong>2.0.1 release</strong>
 <ul>
 <li>patch with bug fix for mitochondrial input variants (<a href="https://github.com/sigven/pcgr/pull/245" class="external-link">pr245</a>)</li>
-<li><a href="http://sigven.github.io/pcgr/articles/CHANGELOG.html" class="external-link">CHANGELOG</a></li>
+<li><a href="https://sigven.github.io/pcgr/articles/CHANGELOG.html">CHANGELOG</a></li>
 </ul>
 </li>
 <li>
 <em>June 2024</em>: <strong>2.0.0 release</strong>
 <ul>
-<li>Details in <a href="http://sigven.github.io/pcgr/articles/CHANGELOG.html" class="external-link">CHANGELOG</a>
+<li>Details in <a href="https://sigven.github.io/pcgr/articles/CHANGELOG.html">CHANGELOG</a>
 </li>
 <li>Massive reference data bundle upgrade, new report layout, oncogenicity classification++</li>
 <li>Support for Singularity/Apptainer</li>
@@ -142,30 +149,12 @@
 </li>
 </ul>
 </li>
-<li>
-<em>February 2023</em>: <strong>1.3.0 release</strong>
-<ul>
-<li>Details in <a href="http://sigven.github.io/pcgr/articles/CHANGELOG.html" class="external-link">CHANGELOG</a>
-</li>
-<li>prioritize protein-coding BIOTYPE csq (<a href="https://github.com/sigven/pcgr/pull/201" class="external-link">pr201</a>)</li>
-<li>expose <code>--pcgrr_conda</code> option to flexibly activate pcgrr env via a non-default pcgrr name</li>
-<li>
-<code>cpsr_validate_input.py</code>: refactor for efficient custom gene egrep</li>
-</ul>
-</li>
-<li>
-<em>November 2022</em>: <strong>1.2.0 release</strong>
-<ul>
-<li>Keep only autosomal, X, Y, M/MT chromosomes</li>
-<li>Import bcftools as dependency</li>
-</ul>
-</li>
 </ul>
 </div>
 <div class="section level2">
 <h2 id="example-reports">Example reports<a class="anchor" aria-label="anchor" href="#example-reports"></a>
 </h2>
-<p><a href="https://doi.org/10.5281/zenodo.12752833" class="external-link"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.12752833.svg" alt="DOI"></a></p>
+<p><a href="https://doi.org/10.5281/zenodo.13855988" class="external-link"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.13855988.svg" alt="DOI"></a></p>
 </div>
 <div class="section level2">
 <h2 id="why-use-pcgr">Why use PCGR?<a class="anchor" aria-label="anchor" href="#why-use-pcgr"></a>
@@ -204,8 +193,9 @@
 <div class="section level2">
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
-<p>If you use PCGR, please cite our publication:</p>
+<p>If you use PCGR or CPSR, please cite our publications:</p>
 <p>Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, Ola Myklebost, and Eivind Hovig. <strong>Personal Cancer Genome Reporter: variant interpretation report for precision oncology</strong> (2017). <em>Bioinformatics</em>. 34(10):1778–1780. <a href="https://doi.org/10.1093/bioinformatics/btx817" class="external-link">doi.org/10.1093/bioinformatics/btx817</a></p>
+<p>Sigve Nakken, Vladislav Saveliev, Oliver Hofmann, Pål Møller, Ola Myklebost, and Eivind Hovig. <strong>Cancer Predisposition Sequencing Reporter (CPSR): a flexible variant report engine for high-throughput germline screening in cancer</strong> (2021). <em>Int J Cancer</em>. <a href="https://doi.org/10.1002/ijc.33749" class="external-link">doi:[10.1002/ijc.33749](doi:%5B10.1002/ijc.33749)</a></p>
 </div>
 <div class="section level2">
 <h2 id="contact">Contact<a class="anchor" aria-label="anchor" href="#contact"></a>
@@ -258,7 +248,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer>
