@@ -11,7 +11,7 @@ import yaml
 from pcgr.annoutils import read_infotag_file, make_transcript_xref_map, read_genexref_namemap, map_regulatory_variant_annotations, write_pass_vcf
 from pcgr.vep import parse_vep_csq
 from pcgr.dbnsfp import vep_dbnsfp_meta_vcf, map_variant_effect_predictors
-from pcgr.oncogenicity import assign_oncogenicity_evidence
+from pcgr.oncogenicity import assign_oncogenicity_evidence, load_oncogenic_variants, match_oncogenic_variants
 from pcgr.mutation_hotspot import load_mutation_hotspots, match_csq_mutation_hotspot
 from pcgr.biomarker import load_biomarkers, match_csq_biomarker
 from pcgr.utils import error_message, check_subprocess, getlogger
@@ -27,6 +27,7 @@ def __main__():
     parser.add_argument('regulatory_annotation',default=0,type=int,help='Inclusion of VEP regulatory annotations (0/1)')
     parser.add_argument('oncogenicity_annotation',default=0,type=int,help='Include oncogenicity annotation (0/1)')
     parser.add_argument('tumortype', default='Any', help='Primary tumor type of query VCF')
+    parser.add_argument('build', default='GRCh38', help='Genome build of query VCF')
     parser.add_argument('vep_pick_order', default="mane,canonical,appris,biotype,ccds,rank,tsl,length", 
                         help=f"Comma-separated string of ordered transcript/variant properties for selection of primary variant consequence")
     parser.add_argument('refdata_assembly_dir',help='Assembly-specific reference data directory, e.g. "pcgrdb/data/grch38')
@@ -95,8 +96,11 @@ def extend_vcf_annotations(arg_dict, logger):
 
     gene_transcript_xref_map = read_genexref_namemap(
         os.path.join(arg_dict['refdata_assembly_dir'], 'gene','tsv','gene_transcript_xref', 'gene_transcript_xref_bedmap.tsv.gz'), logger)
+    #print(gene_transcript_xref_map)
     cancer_hotspots = load_mutation_hotspots(
         os.path.join(arg_dict['refdata_assembly_dir'], 'misc','tsv','hotspot', 'hotspot.tsv.gz'), logger)
+    oncogenic_variants = {}
+    oncogenic_variants = load_oncogenic_variants(os.path.join(arg_dict['refdata_assembly_dir'], 'variant','tsv', 'clinvar','clinvar_oncogenic.tsv.gz'), logger)
 
     biomarkers = {}
     for db in ['cgi','civic']:
@@ -183,7 +187,8 @@ def extend_vcf_annotations(arg_dict, logger):
         if arg_dict['cpsr'] is True:
             vep_csq_record_results = \
                 parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, arg_dict['vep_pick_order'], 
-                              logger, pick_only = False, csq_identifier = 'CSQ', 
+                              logger,  pick_only = False, csq_identifier = 'CSQ', 
+                              debug = arg_dict['debug'],
                               targets_entrez_gene = cpsr_target_genes)
             if 'picked_gene_csq' in vep_csq_record_results:
                 rec.INFO['REGULATORY_ANNOTATION'] = map_regulatory_variant_annotations(
@@ -191,7 +196,7 @@ def extend_vcf_annotations(arg_dict, logger):
         else:
             vep_csq_record_results = \
                 parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, arg_dict['vep_pick_order'], 
-                              logger, pick_only = True, csq_identifier = 'CSQ')
+                              logger, pick_only = True, csq_identifier = 'CSQ', debug = arg_dict['debug'])
 
         principal_csq_properties = {}
         principal_csq_properties['hgvsp'] = '.'
@@ -242,7 +247,8 @@ def extend_vcf_annotations(arg_dict, logger):
             map_variant_effect_predictors(rec, dbnsfp_prediction_algorithms)
         
         if arg_dict['oncogenicity_annotation'] == 1:
-            assign_oncogenicity_evidence(rec, tumortype = arg_dict['tumortype'])
+            match_oncogenic_variants(vep_csq_record_results['all_csq'], oncogenic_variants, rec, principal_csq_properties)
+            assign_oncogenicity_evidence(rec, oncogenic_variants, tumortype = arg_dict['tumortype'])
 
         if "GENE_TRANSCRIPT_XREF" in vcf_info_element_types:
             gene_xref_tag = rec.INFO.get('GENE_TRANSCRIPT_XREF')

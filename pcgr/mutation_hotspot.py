@@ -39,12 +39,11 @@ def load_mutation_hotspots(hotspots_fname: str, logger: Logger) -> Dict[str, Dic
 
     with gzip.open(hotspots_fname, mode='rt') as f:
         reader = csv.DictReader(f, delimiter='\t')
-        for row in reader:
+        for row in reader:            
             gene = str(row['entrezgene'])
             hgvsp2 = row['hgvsp2']
             codon = row['codon']
             hgvsc = row['hgvsc']
-
             hotspots['mutation'][gene + '-' + hgvsp2] = row
             hotspots['codon'][gene + '-' + codon] = row
             if hgvsc != '.':
@@ -122,10 +121,12 @@ def match_csq_mutation_hotspot(transcript_csq_elements, cancer_hotspots, rec, pr
                hgvsp_candidate = 'p.' + str(gene_mutation_key.split('|')[3]) + str(gene_mutation_key.split('|')[4])
                if hgvsp_candidate == principal_hgvsp:
                   rec.INFO['MUTATION_HOTSPOT_MATCH'] = 'by_hgvsp_principal'
+
+            ## mutation hotspot at splice site
             else:
                rec.INFO['MUTATION_HOTSPOT_MATCH'] = 'by_hgvsc_nonprincipal'
-               hgvsc_candidate = re.sub(r'>(A|G|C|T){1,}$', '' , str(gene_mutation_key.split('|')[4]))
-               if hgvsc_candidate == principal_hgvsc:
+               hgvsc_candidate = str(hotspot_info.split('|')[4])
+               if hgvsc_candidate == re.sub(r'>(A|G|C|T){1,}$', '' ,principal_hgvsc):                 
                   rec.INFO['MUTATION_HOTSPOT_MATCH'] = 'by_hgvsc_principal'
       else:
          ## multiple hotspot matches for alternative hgvsp keys
@@ -138,10 +139,9 @@ def match_csq_mutation_hotspot(transcript_csq_elements, cancer_hotspots, rec, pr
                   rec.INFO['MUTATION_HOTSPOT'] = hotspot_info
                   rec.INFO['MUTATION_HOTSPOT_CANCERTYPE'] = unique_hotspot_mutations[hotspot_info]
                   rec.INFO['MUTATION_HOTSPOT_MATCH'] = 'by_hgvsp_principal'
-            else:
-               hgvsc_candidate = re.sub(r'>(A|G|C|T){1,}$', '' , str(hotspot_info.split('|')[4]))
-
-               if hgvsc_candidate == principal_hgvsc:
+            else:               
+               hgvsc_candidate = str(hotspot_info.split('|')[4])
+               if hgvsc_candidate == re.sub(r'>(A|G|C|T){1,}$', '' ,principal_hgvsc):
                   rec.INFO['MUTATION_HOTSPOT'] = hotspot_info
                   rec.INFO['MUTATION_HOTSPOT_CANCERTYPE'] = unique_hotspot_mutations[hotspot_info]
                   rec.INFO['MUTATION_HOTSPOT_MATCH'] = 'by_hgvsc_principal'
@@ -152,9 +152,7 @@ def match_csq_mutation_hotspot(transcript_csq_elements, cancer_hotspots, rec, pr
             for gene_codon_key in unique_hotspot_codons.keys():
 
                if '|' in gene_codon_key:
-
                   codon = str(gene_codon_key.split('|')[3])
-
                   if codon == principal_codon:
                      rec.INFO['MUTATION_HOTSPOT'] = gene_codon_key
                      rec.INFO['MUTATION_HOTSPOT_CANCERTYPE'] = unique_hotspot_codons[gene_codon_key]

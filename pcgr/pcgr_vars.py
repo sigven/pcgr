@@ -4,7 +4,7 @@ from pcgr._version import __version__
 
 ## Version - software and bundle
 PCGR_VERSION = __version__
-DB_VERSION = '20240621'
+DB_VERSION = '20240927'
 
 ## Miscellaneous settings
 NCBI_BUILD_MAF = 'GRCh38'
@@ -29,7 +29,7 @@ VEP_MIN_FORKS = 1
 VEP_MAX_FORKS = 8
 VEP_MIN_BUFFER_SIZE = 50
 VEP_MAX_BUFFER_SIZE = 30000
-VEP_PICK_CRITERIA = ['mane_select','mane_plus_clinical','canonical','appris','tsl','biotype','ccds','rank','length']
+VEP_PICK_CRITERIA = ['mane_select','mane_plus_clinical','canonical','biotype','ccds','rank','tsl','appris','length']
 
 ## Gene expression comparative analysis resources
 EXPRESSION_DB_SOURCES = ['tcga','depmap','treehouse']
@@ -37,6 +37,45 @@ EXPRESSION_DB_SOURCES = ['tcga','depmap','treehouse']
 ## Sample identifier length (max/min allowed)
 SAMPLE_ID_MAX_LENGTH = 40
 SAMPLE_ID_MIN_LENGTH = 3
+
+## Classified germline variant input (from CPSR) - required columns
+germline_input_required_cols = [
+    'SAMPLE_ID',
+    'VAR_ID',
+    'GENOMIC_CHANGE',
+    'VARIANT_CLASS',
+    'GENOTYPE',
+    'ALTERATION',
+    'DP_CONTROL',
+    'CPSR_CLASSIFICATION_SOURCE',
+    'GENENAME',
+    'ENTREZGENE',
+    'ENSEMBL_GENE_ID',
+    'ENSEMBL_TRANSCRIPT_ID',
+    'HGVSc',
+    'HGVSc_RefSeq',
+    'HGVSp',
+    'CONSEQUENCE',
+    'CDS_CHANGE',
+    'SYMBOL',
+    'CODING_STATUS',
+    'PFAM_DOMAIN',
+    'PFAM_DOMAIN_NAME',
+    'PROTEIN_CHANGE',
+    'LOSS_OF_FUNCTION',
+    'NULL_VARIANT',
+    'DBSNP_RSID',
+    'CLINVAR_MSID',
+    'CLINVAR_CLASSIFICATION',
+    'CLINVAR_VARIANT_ORIGIN',
+    'CLINVAR_PHENOTYPE',
+    'CLINVAR_CONFLICTED',
+    'CLINVAR_REVIEW_STATUS_STARS',
+    'CPSR_CLASSIFICATION',
+    'CPSR_PATHOGENICITY_SCORE',
+    'CPSR_CLASSIFICATION_CODE',
+    'FINAL_CLASSIFICATION'
+]
 
 ## Primary tumor sites - PCGR
 tsites = {
@@ -177,6 +216,10 @@ CSQ_CODING_PATTERN = \
     r"^(stop_(lost|gained)|start_lost|frameshift_|missense_|splice_(donor|acceptor)|protein_altering|inframe_)"
 CSQ_CODING_SILENT_PATTERN = \
     r"^(stop_(lost|gained)|start_lost|frameshift_|missense_|splice_(donor|acceptor)|protein_altering|inframe_|synonymous|(start|stop)_retained)"
+CSQ_CODING_PATTERN2 = \
+    r"(stop_(lost|gained)|start_lost|frameshift_|missense_|splice_(donor|acceptor)|protein_altering|inframe_)"
+CSQ_CODING_SILENT_PATTERN2 = \
+    r"(stop_(lost|gained)|start_lost|frameshift_|missense_|splice_(donor|acceptor)|protein_altering|inframe_|synonymous|(start|stop)_retained)"
 CSQ_NULL_PATTERN = r"^(stop_gained|frameshift_)"
 CSQ_SPLICE_REGION_PATTERN = r"(splice_|intron_variant)"
 CSQ_SPLICE_DONOR_PATTERN = \
