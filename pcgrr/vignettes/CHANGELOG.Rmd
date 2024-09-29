@@ -46,6 +46,34 @@ sigven <- user("sigven")
 pdiakumis <- user("pdiakumis")
 ```
 
+## v2.1.0
+
+- Date: **2024-09-27**
+- Major data updates
+  - ClinVar (2024-09)
+  - dbNSFP (v4.8)
+  - NCI Thesaurus `v24.07e`
+  - CIViC (2024-09-18)
+- Reduction (~15%) in overall data bundle size - removed unused data files (e.g. expression counts)
+- Fixed bug in MAF output for tumor-only runs `r issue(250)`, also ensure that non-exonic variants are
+excluded if setting `--exclude_nonexonic` is used)
+- Fixed bug in annotation of splice site mutation hotspots (e.g. MET exon 14 skipping)
+- Highlighted variants with known pathogenic/likely pathogenic clinical significance in ClinVar (regardless of phenotype and variant origin) in the variant oncogenicity section of the HTML report
+- Created interactive visualization support for allele-specific copy number data (HTML report)
+- Slight change to the default transcript consequence pick order in VEP based on observations of prioritized transcripts (*mane_select > mane_plus_clinical > canonical > biotype > ccds > rank > tsl > appris >length*)
+- Pulled in known oncogenic variants from ClinVar (assessed through ClinGen/CGC/VICC SOP, oncogenic/likely oncogenic) into the variant oncogenicity assessment algorithm
+- Added option `--no_html` to disable HTML report generation
+- Added option `--input_germline` - re-offering the possibility to integrate CPSR-classified germline variants in the PCGR HTML report
+- Added `HGVSc_RefSeq` as output column in TSV/HTML - using MANE Select RefSeq transcript identifiers (works primarily for grch38)
+- Pulled in coding sequence start annotation for protein-coding transcripts from GENCODE, enabling a more useful annotation of promoter variants (e.g. TERT)
+- Created new column `ALTERATION` in variant tables of HTML report, a combination of `HGVSp`, `HGVSc` (if `HGVSp` not available)
+- New output file for tumor-only runs, the complete set of calls, filtered and unfiltered, in a TSV file
+- Re-processed all RNA-seq reference cohorts (TCGA, DepMap, TreeHouse), ensuring that all cohorts are using the same unit (`log2(TPM+0.001)`)
+- Separated outlier gene expression results into separate tabs in the HTML report,
+added them to Excel workbook output
+- Added section on kataegis events in the HTML report
+- Fixed bug in plotting of reference TMB distributions for different TMB algorithms (`--tmb_display` option)
+
 ## v2.0.3
 
 - Date: **2024-08-01**
