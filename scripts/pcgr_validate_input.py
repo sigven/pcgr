@@ -8,12 +8,14 @@ import logging
 import sys
 import pandas as np
 from cyvcf2 import VCF
+import gzip
 
 from pcgr import vcf, cna
 from pcgr.annoutils import read_infotag_file, read_vcfanno_tag_file
 from pcgr.utils import error_message, check_subprocess, remove_file, random_id_generator, getlogger
 from pcgr.cna import is_valid_cna
 from pcgr.vcf import check_existing_vcf_info_tags, check_retained_vcf_info_tags
+from pcgr import pcgr_vars
 
 
 def __main__():
@@ -25,9 +27,11 @@ def __main__():
     parser.add_argument('input_cna', help='Somatic (tumor) copy number query segments (tab-separated values)')
     parser.add_argument('input_rna_fusion', help='Tumor RNA fusion variants (tab-separated values)')
     parser.add_argument('input_rna_exp', help='Tumor gene expression estimates (tab-separated values)')
+    parser.add_argument('input_cpsr', help='Classified germline calls from CPSR (tab-separated values)')
     parser.add_argument('panel_normal_vcf',help="VCF file with germline calls from panel of normals")
     parser.add_argument('tumor_only',type=int, default=0,choices=[0,1],help="Tumor only sequencing")
     parser.add_argument('sample_id',help='PCGR sample_name')
+    parser.add_argument('build',help='Genome build (grch37/grch38)')
     parser.add_argument('retained_info_tags', help="Comma-separated string of custom VCF INFO tags to be kept in PCGR output")
     parser.add_argument('tumor_dp_tag', help='VCF INFO tag that denotes tumor sequencing depth')
     parser.add_argument('tumor_af_tag', help='VCF INFO tag that denotes tumor variant allelic fraction')
@@ -47,6 +51,7 @@ def __main__():
                               args.input_cna,
                               args.input_rna_fusion,
                               args.input_rna_exp,
+                              args.input_cpsr,
                               args.tumor_dp_tag,
                               args.tumor_af_tag,
                               args.control_dp_tag,
@@ -58,6 +63,7 @@ def __main__():
                               args.retained_info_tags,
                               args.tumor_only,
                               args.sample_id,
+                              args.build,
                               args.keep_uncompressed,
                               args.output_dir,
                               args.debug)
@@ -131,6 +137,30 @@ def is_valid_rna_expression(rna_exp_file, logger):
             return error_message(err_msg, logger)       
 
     logger.info("RNA expression file ('" + str(os.path.basename(rna_exp_file)) + "') adheres to the correct format")
+    return 0
+
+def is_valid_germline(germline_file, build, logger):
+    """
+    Function that checks whether the germline variants file (pre-classified by CPSR) adheres to the correct format
+    """
+    
+    if not os.path.isfile(germline_file):
+        err_msg = "Germline variants file (" + str(germline_file) + ") does not exist"
+        return error_message(err_msg, logger)
+    
+    if not str(germline_file).endswith(f'cpsr.{build}.classification.tsv.gz'):
+        err_msg = "Germline variants file (" + str(germline_file) + ") does not adhere to the correct naming format - wrong build or file type"
+        return error_message(err_msg, logger)
+    
+    with gzip.open(germline_file, 'rt') as f:
+        germline_reader = csv.DictReader(f, delimiter='\t')
+        ## check that required columns are present
+        for col in pcgr_vars.germline_input_required_cols:
+            if col not in germline_reader.fieldnames:
+                err_msg = "Germline variants file (" + str(germline_file) + ") is missing required column: " + str(col)
+                return error_message(err_msg, logger)
+
+    logger.info("Germline variants file ('" + str(os.path.basename(germline_file)) + "') adheres to the correct format")
     return 0
 
 
@@ -260,6 +290,7 @@ def validate_pcgr_input(refdata_assembly_dir,
                         input_cna,
                         input_rna_fusion,
                         input_rna_expression,
+                        input_cpsr,
                         tumor_dp_tag,
                         tumor_af_tag,
                         control_dp_tag,
@@ -271,11 +302,18 @@ def validate_pcgr_input(refdata_assembly_dir,
                         retained_info_tags,
                         tumor_only,
                         sample_id,
+                        build,
                         keep_uncompressed,
                         output_dir,
                         debug):
     """
-    Function that reads the input files to PCGR (VCF file and Tab-separated values file with copy number segments) and performs the following checks:
+    Function that checks the format of input files to PCGR 
+        - VCF file with somatic SNVs/InDels - mandatory
+        - Tab-separated values file with somatic copy number segments - optional
+        - Tab-separated values file with RNA fusion variants - optional
+        - Tab-separated values file with RNA expression values - optional
+        - Tab-separated values file with CPSR-classified germline mutations - optional
+    Function performs the following checks:
     1. No INFO annotation tags in the input VCF coincides with those generated by PCGR
     2. Provided columns for tumor/normal coverage and allelic depths are found in VCF
     3. Provided retained VCF INFO tags are present in VCF file
@@ -285,6 +323,7 @@ def validate_pcgr_input(refdata_assembly_dir,
     7. Check that copy number segment file has required columns and correct data types (and range)
     8. Check that RNA fusion variant file has required columns and correct data types
     9. Check that RNA expression file has required columns and correct data types
+    10. Check that germline mutation file has required columns and correct data types
     """
     logger = getlogger('pcgr-validate-input-arguments')
 
@@ -355,6 +394,12 @@ def validate_pcgr_input(refdata_assembly_dir,
     if not input_cna == 'None':
         valid_cna = is_valid_cna(input_cna, logger)
         if valid_cna == -1:
+            return -1
+    
+    ## Check whether file with classified germline calls is properly formatted
+    if not input_cpsr == 'None':
+        valid_germline = is_valid_germline(input_cpsr, build, logger)
+        if valid_germline == -1:
             return -1
 
     ## Check whether file with RNA fusion variants is properly formatted

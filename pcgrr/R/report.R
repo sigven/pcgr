@@ -86,10 +86,10 @@ init_report <- function(yaml_fname = NULL,
                      "mutational_signatures",
                      "tmb",
                      "msi",
+                     "germline_classified",
                      "rainfall",
                      "kataegis",
-                     "expression",
-                     "predisposition")){
+                     "expression")){
                      #"clinicaltrials")) {
       report[["content"]][[a_elem]] <- list()
       report[["content"]][[a_elem]][["eval"]] <- FALSE
@@ -112,6 +112,12 @@ init_report <- function(yaml_fname = NULL,
           init_rainfall_content()
       }
 
+      if (a_elem == "germline_classified") {
+        report[["content"]][[a_elem]][['callset']] <- list()
+        report[["content"]][[a_elem]][['panel_info']] <- list()
+        report[["content"]][[a_elem]]$sample_id <- "NA"
+      }
+
       if (a_elem == "snv_indel" | a_elem == "cna") {
         report[["content"]][[a_elem]][['callset']] <- list()
 
@@ -122,8 +128,6 @@ init_report <- function(yaml_fname = NULL,
         if (a_elem == "cna") {
           report[["content"]][[a_elem]][['vstats']] <-
             init_cna_vstats()
-          report[["content"]][[a_elem]][['cnaqc']] <-
-            list()
         }
       }
       if (a_elem == "clinicaltrials") {
@@ -548,12 +552,17 @@ load_yaml <- function(yml_fname, report_mode = "CPSR") {
 
   ref_data <- list()
   if (dir.exists(
-    report_settings[['reference_data']][['path']]
-  )) {
+    report_settings[['reference_data']][['path']])) {
     ref_data <- load_reference_data(
       pcgr_db_assembly_dir = report_settings[['reference_data']][['path']],
       genome_assembly = report_settings[['genome_assembly']]
     )
+  }else{
+    log4r_fatal(
+      paste0("Reference data directory ",
+             report_settings[['reference_data']][['path']],
+             " does not exist - exiting"))
+
   }
 
   if (identical(
@@ -686,12 +695,11 @@ load_yaml <- function(yml_fname, report_mode = "CPSR") {
   report_settings$conf$report_color <-
     pcgrr::color_palette[["report_color"]][["values"]][1]
 
-  #report_settings$conf$visual_reporting[["color_palette"]] <-
-  #  pcgrr::color_palette
-  #report_settings$conf$visual_reporting[["color_none"]] <-
-  #  pcgrr::color_palette[["none"]][["values"]][1]
-  #report_settings$conf$visual_reporting[["color_value_box"]] <-
-  #  pcgrr::color_palette[["report_color"]][["values"]][1]
+  if(!is.null(ref_data$assembly$chrom_coordinates)){
+    report_settings$chrom_coordinates <-
+      ref_data$assembly$chrom_coordinates
+  }
+
   if (report_mode == "PCGR" &
     !is.null(report_settings$conf$assay_properties)) {
    if (report_settings$conf$assay_properties$vcf_tumor_only == 1) {

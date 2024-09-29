@@ -47,7 +47,19 @@ generate_report <-
           settings = settings)
     }
 
-
+    ## Load pre-classified germline variants (output from CPSR)
+    if(settings$molecular_data$fname_germline_tsv != "None" &
+       file.exists(settings$molecular_data$fname_germline_tsv)){
+      rep[['content']][['germline_classified']] <-
+        pcgrr::load_cpsr_classified_variants(
+          fname_cpsr_tsv = settings$molecular_data$fname_germline_tsv,
+          fname_cpsr_yaml = settings$molecular_data$fname_germline_yaml,
+          ignore_vus = as.logical(settings$conf$germline$ignore_vus),
+          cols = pcgrr::data_coltype_defs$snv_indel_germline_cpsr,
+          ref_data = ref_data
+        )
+      rep[["content"]][['germline_classified']][["eval"]] <- TRUE
+    }
 
     conf_somatic_snv <-
       settings$conf$somatic_snv
@@ -72,8 +84,6 @@ generate_report <-
       #   pcgrr::update_report(pcg_report, pcg_report_trials,
       #                        a_elem = "clinicaltrials")
     #}
-
-
 
     rep[['content']][['snv_indel']][['callset']] <-
       callset_snv
@@ -182,10 +192,12 @@ generate_report <-
 
     ## Load somatic CNA data if available
     callset_cna <- NULL
-    if (settings$molecular_data$fname_cna_tsv != "None") {
+    if (settings$molecular_data$fname_cna_gene_tsv != "None" &
+        settings$molecular_data$fname_cna_segment_tsv != "None") {
       callset_cna <-
         pcgrr::load_somatic_cna(
-          fname = settings$molecular_data$fname_cna_tsv,
+          fname_cna_segment = settings$molecular_data$fname_cna_segment_tsv,
+          fname_cna_gene = settings$molecular_data$fname_cna_gene_tsv,
           ref_data = ref_data,
           settings = settings
         )
@@ -197,12 +209,6 @@ generate_report <-
           callset = callset_cna,
           vartype = "cna",
           name = "vstats")[['vstats']]
-      #rep[['content']][['cna']][['cnaqc']] <-
-      #  pcgrr::make_cnaqc_object(
-      #    callset_cna = callset_cna,
-      #    callset_snv = callset_snv,
-      #    settings = settings
-      #  )
       rep[['content']][['cna']][['eval']] <-
         TRUE
     }
@@ -764,7 +770,7 @@ generate_tier_tsv <- function(variant_set,
 #'
 #' @param report List object with all report data, settings etc.
 #' @param output_type character indicating output type for TSV,
-#' i.e. 'snv_indel' or 'cna_gene', 'msigs'
+#' i.e. 'snv_indel', 'snv_indel_unfiltered', 'cna_gene', or 'msigs'
 #' @export
 #'
 write_report_tsv <- function(report = NULL, output_type = 'snv_indel'){
@@ -790,6 +796,12 @@ write_report_tsv <- function(report = NULL, output_type = 'snv_indel'){
   }
   if(output_type == "snv_indel" &
      report$content$snv_indel$eval == TRUE){
+    eval_output <- TRUE
+  }
+  if(output_type == "snv_indel_unfiltered" &
+     report$content$snv_indel$eval == TRUE &
+     as.logical(
+       report$settings$conf$assay_properties$vcf_tumor_only) == TRUE){
     eval_output <- TRUE
   }
 
@@ -843,6 +855,45 @@ write_report_tsv <- function(report = NULL, output_type = 'snv_indel'){
             dplyr::select(
               dplyr::any_of(snv_indel_cols))
         )
+      }
+    }
+  }
+
+  ## SNVs/InDels
+  if(output_type == 'snv_indel_unfiltered' &
+     !is.null(report$content$snv_indel) &
+     report$content$snv_indel$eval == TRUE){
+
+    snv_indel_cols <- pcgrr::tsv_cols$snv_indel_unfiltered
+    if(report$settings$conf$other$retained_vcf_info_tags != "None"){
+      snv_indel_cols <- c(
+        snv_indel_cols, report$settings$conf$other$retained_vcf_info_tags)
+    }
+
+    if(!is.null(report$content$snv_indel$callset)){
+      if(is.data.frame(report$content$snv_indel$callset$variant_unfiltered)){
+        output_data <- as.data.frame(
+          report$content$snv_indel$callset$variant_unfiltered |>
+            dplyr::select(
+              dplyr::any_of(snv_indel_cols))
+        )
+        if(NROW(output_data) > 0 &
+           "SOMATIC_CLASSIFICATION" %in% colnames(output_data) &
+           "ACTIONABILITY_TIER" %in% colnames(output_data) &
+           "ONCOGENICITY_SCORE" %in% colnames(output_data)){
+          output_data$somatic_score <- 0
+          output_data <- output_data |>
+            dplyr::mutate(somatic_score = dplyr::case_when(
+              .data$SOMATIC_CLASSIFICATION == "Somatic" ~ 1,
+              TRUE ~ as.numeric(.data$somatic_score)
+            ))
+          output_data <- output_data |>
+            dplyr::arrange(
+              dplyr::desc(.data$somatic_score),
+              .data$ACTIONABILITY_TIER,
+              dplyr::desc(.data$ONCOGENICITY_SCORE)) |>
+            dplyr::select(-c("somatic_score"))
+        }
       }
     }
   }
@@ -925,6 +976,10 @@ write_report_quarto_html <- function(report = NULL){
         ## Save sample PCGR report object in temporary quarto rendering directory
         rds_report_path <- file.path(
           tmp_quarto_dir, "pcgr_report.rds")
+
+        ## Remove ref_data from report object
+        #report$settings$chrom_coordinates <-
+        #  report$ref_data$assembly$chrom_coordinates
         report$ref_data <- NULL
         saveRDS(report, file = rds_report_path)
 
@@ -1000,15 +1055,17 @@ write_report_excel <- function(report = NULL){
 
   i <- 15
   for(elem in c('SAMPLE_ASSAY',
-                'SNV_INDEL',
-                'SNV_INDEL_BIOMARKER',
-                'CNA',
-                'CNA_BIOMARKER',
+                'SOMATIC_SNV_INDEL',
+                'SOMATIC_SNV_INDEL_BIOMARKER',
+                'SOMATIC_CNA',
+                'SOMATIC_CNA_BIOMARKER',
+                'GERMLINE_SNV_INDEL',
                 'TMB',
                 'MSI',
                 'MUTATIONAL_SIGNATURE',
-                'KATAEGIS',
-                'IMMUNE_CONTEXTURE')){
+                'KATAEGIS_EVENTS',
+                'RNA_EXPRESSION_OUTLIERS',
+                'RNA_IMMUNE_CONTEXTURE')){
     if(elem %in% names(excel_output)){
       if(is.data.frame(excel_output[[elem]]) &
          NROW(excel_output[[elem]]) > 0 &
