@@ -1,13 +1,15 @@
-#' Function that reads and validates a fully annotated CNA file from PCGR
-#' pre-report pipeline
+#' Function that reads and validates fully annotated CNA data (segments and genes)
+#' from PCGR pre-reporting pipeline
 #'
-#' @param fname Path to file with pre-processed CNA segments
+#' @param fname_cna_segment Path to file with pre-processed CNA segments
+#' @param fname_cna_gene Path to file with pre-processed CNA gene-level data
 #' @param ref_data PCGR reference data object
 #' @param settings PCGR run/configuration settings
 #'
 #' @export
 load_somatic_cna <- function(
-    fname,
+    fname_cna_segment = NULL,
+    fname_cna_gene = NULL,
     ref_data = NULL,
     settings = NULL) {
 
@@ -23,9 +25,63 @@ load_somatic_cna <- function(
   tumor_site <-
     settings[['conf']][['sample_properties']][['site']]
 
+  ## read segments
+  pcgrr::check_file_exists(fname_cna_segment)
+  pcgrr::check_file_exists(fname_cna_gene)
+  segments_raw <- suppressWarnings(
+    as.data.frame(
+      readr::read_tsv(
+        file = fname_cna_segment,
+        na = c(".","NA"),
+        show_col_types = F,
+        progress = F
+      )
+    )
+  )
+
+  compulsary_cols <-
+    names(pcgrr::data_coltype_defs$cna_somatic_segment_raw$cols)
+
+  raw_col_check <-
+    rlang::has_name(segments_raw, compulsary_cols)
+  if (FALSE %in% raw_col_check) {
+    missing_cols <-
+      compulsary_cols[!raw_col_check]
+    log4r_fatal(
+      paste0("Missing required columns in input file ",
+             fname_cna_segment, " - ",
+             paste(missing_cols, collapse=", ")))
+  }
+
+  segments <- suppressWarnings(
+    as.data.frame(
+      readr::read_tsv(
+        file = fname_cna_segment,
+        col_types =
+          pcgrr::data_coltype_defs$cna_somatic_segment_raw$cols,
+        na = c(".","NA"),
+        progress = F
+      )
+    )) |>
+    tidyr::separate(
+      col = "SEGMENT_NAME",
+      into = c("SEGMENT_ID", "N_MAJOR","N_MINOR","ARM","CYTOBAND","EVENT_TYPE"),
+      sep = "\\|",
+      remove = T
+    ) |>
+    dplyr::mutate(
+      CN_TOTAL = as.integer(
+        as.integer(.data$N_MAJOR) + as.integer(.data$N_MINOR))
+    ) |>
+    dplyr::rename(CN_MINOR = "N_MINOR",
+                  CN_MAJOR = "N_MAJOR") |>
+    dplyr::mutate(CN_MINOR = as.integer(.data$CN_MINOR),
+                  CN_MAJOR = as.integer(.data$CN_MAJOR))
+
+
   callset_cna <- pcgrr::load_dna_variants(
-    fname = fname,
-    cols = pcgrr::data_coltype_defs$cna_somatic_raw,
+    fname = fname_cna_gene,
+    cols = pcgrr::data_coltype_defs$cna_somatic_gene_raw,
     ref_data = ref_data,
     vartype = 'cna',
     primary_site =
@@ -33,6 +89,7 @@ load_somatic_cna <- function(
     retained_info_tags = "None",
     variant_origin = "Somatic")
 
+  callset_cna[['segment']] <- segments
 
   if (NROW(callset_cna$variant) > 0) {
     callset_cna[['variant']] <- callset_cna[['variant']] |>
@@ -162,8 +219,6 @@ load_somatic_snv_indel <- function(
     pcgrr::append_targeted_drug_annotations(
          ref_data = ref_data,
          primary_site = tumor_site) |>
-    tidyr::separate(.data$HGVSc, c("ENST", "tmp_HGVSc"),
-                    sep = ":", remove = F) |>
     dplyr::mutate(
       MOLECULAR_ALTERATION = dplyr::case_when(
         is.na(.data$SYMBOL) &
@@ -173,19 +228,25 @@ load_somatic_snv_indel <- function(
         stringr::str_detect(
           .data$CONSEQUENCE, "^(splice_acceptor|splice_donor)") &
           !is.na(.data$SYMBOL) &
-          !is.na(.data$tmp_HGVSc) ~
+          !is.na(.data$HGVSc) ~
         paste0(.data$SYMBOL," ",
               stringr::str_replace_all(
                 .data$CONSEQUENCE,"&",", "),
               " - ",
-              .data$tmp_HGVSc),
+              .data$HGVSc),
         .data$EXONIC_STATUS == "exonic" &
+          !stringr::str_detect(
+            .data$CONSEQUENCE, "^(splice_acceptor|splice_donor)") &
           !is.na(.data$CONSEQUENCE) &
+          !is.na(.data$HGVSc) &
+          !is.na(.data$SYMBOL) &
           !is.na(.data$HGVSP) ~
           paste0(.data$SYMBOL," ",
                 stringr::str_replace_all(
                   .data$CONSEQUENCE, "&",", "),
                   " - ",
+                .data$HGVSc,
+                " - ",
                 .data$HGVSP),
         TRUE ~ as.character(paste0(
           .data$SYMBOL," ",
@@ -193,7 +254,6 @@ load_somatic_snv_indel <- function(
             .data$CONSEQUENCE,"&",", "))
         )
       )) |>
-    dplyr::select(-c("tmp_HGVSc","ENST")) |>
     pcgrr::order_variants(pos_var = 'POS') |>
     pcgrr::exclude_non_chrom_variants()
 
@@ -220,11 +280,6 @@ load_somatic_snv_indel <- function(
         callset[['variant_unfiltered']] |>
         dplyr::filter(
           .data$SOMATIC_CLASSIFICATION == "SOMATIC")
-
-      ## filter also MAF file if provided
-      pcgrr::filter_maf_file(
-        callset = callset,
-        settings = settings)
 
       ## Issue warning if clinically actionable variants are filtered
       ## with current filtering settings
@@ -275,6 +330,11 @@ load_somatic_snv_indel <- function(
         }
       }
 
+      ## filter also MAF file if provided
+      pcgrr::filter_maf_file(
+        callset = callset,
+        settings = settings)
+
     }else{
       pcgrr::log4r_fatal(
         "Variant data.frame is lacking a 'SOMATIC_CLASSIFICATION' column")
@@ -285,9 +345,10 @@ load_somatic_snv_indel <- function(
     callset[['variant']] <- callset[['variant']] |>
       dplyr::arrange(
         .data$ACTIONABILITY_TIER,
+        dplyr::desc(.data$ONCOGENICITY_SCORE),
         dplyr::desc(.data$GLOBAL_ASSOC_RANK),
-        dplyr::desc(.data$TISSUE_ASSOC_RANK),
-        dplyr::desc(.data$ONCOGENICITY_SCORE))
+        dplyr::desc(.data$TISSUE_ASSOC_RANK))
+
 
     ## Make data frame with columns for display
     ## in HTML output
@@ -322,6 +383,141 @@ load_somatic_snv_indel <- function(
   }
 
   return(callset)
+
+
+}
+
+#' Function that reads CPSR-classified variants from a TSV file
+#'
+#' @param fname_cpsr_tsv Path to raw input file with CPSR-classified SNVs/InDels
+#' @param fname_cpsr_yaml Path to YAML configuration file for CPSR analysis
+#' @param cols column type definitions of raw input file
+#' @param ignore_vus logical indicating if VUS should be ignored in report
+#' @param ref_data PCGR reference data object
+#'
+#' @export
+#'
+load_cpsr_classified_variants <- function(
+    fname_cpsr_tsv = NA,
+    fname_cpsr_yaml = NA,
+    cols = NULL,
+    ignore_vus = FALSE,
+    ref_data = NULL){
+
+  pcgrr::log4r_info("------")
+  pcgrr::log4r_info(paste0(
+    "Reading annotated molecular dataset (DNA) - germline SNV/InDels (CPSR-classified)"))
+
+  pcgrr::check_file_exists(fname_cpsr_tsv)
+  pcgrr::check_file_exists(fname_cpsr_yaml)
+
+  if (!file.exists(fname_cpsr_yaml)) {
+    log4r_fatal(
+      paste0("YAML file '", fname_cpsr_yaml, "' does not exist - exiting"))
+  }
+  cpsr_yaml <- yaml::read_yaml(fname_cpsr_yaml)
+  if("conf" %in% names(cpsr_yaml) == FALSE){
+    pcgrr::log4r_fatal(
+      paste0(
+        "YAML file '", fname_cpsr_yaml,
+        "' does not contain a 'conf' section - exiting"))
+  }
+  if("sample_id" %in% names(cpsr_yaml) == FALSE){
+    pcgrr::log4r_fatal(
+      paste0(
+        "YAML file '", fname_cpsr_yaml,
+        "' does not contain a 'sample_id' variable - exiting"))
+  }
+  if("gene_panel" %in% names(cpsr_yaml$conf) == FALSE){
+    pcgrr::log4r_fatal(
+      paste0(
+        "YAML file '", fname_cpsr_yaml,
+        "' does not contain a 'conf->gene_panel' section - exiting"))
+  }
+  panel_info <- list()
+  panel_info[['description']] <-
+    cpsr_yaml$conf$gene_panel[['description']]
+  panel_info[['description_trait']] <-
+    cpsr_yaml$conf$gene_panel[['description_trait']]
+  panel_info[['url']] <- cpsr_yaml$conf$gene_panel[['url']]
+  panel_info[['panel_id']] <- cpsr_yaml$conf$gene_panel[['panel_id']]
+  sample_id <- cpsr_yaml$sample_id
+
+  callset <- pcgrr::load_dna_variants(
+    fname = fname_cpsr_tsv,
+    cols = cols,
+    ref_data = ref_data,
+    vartype = 'snv_indel',
+    variant_origin = 'Germline')
+
+  callset[['variant_display']] <- callset[['variant']] |>
+    pcgrr::append_cancer_gene_evidence(
+      ref_data = ref_data) |>
+    dplyr::mutate(
+      CLINVAR_TRAITS_ALL = paste(
+        stringr::str_to_title(.data$CLINVAR_VARIANT_ORIGIN),
+        .data$CLINVAR_PHENOTYPE,
+        sep = " - ")) |>
+    pcgrr::append_annotation_links() |>
+    dplyr::select(
+      -dplyr::contains("_RAW")
+    ) |>
+    dplyr::mutate(
+      CONSEQUENCE = stringr::str_replace_all(
+        .data$CONSEQUENCE,"&",", ")) |>
+    dplyr::rename(
+      SOURCE = .data$CPSR_CLASSIFICATION_SOURCE,
+      CLINICAL_SIGNIFICANCE = .data$FINAL_CLASSIFICATION
+    ) |>
+    dplyr::select(
+      -dplyr::any_of(
+        c("CLINVAR_TRAITS_ALL",
+         "CLINVAR_VARIANT_ORIGIN",
+         "CLINVAR_PHENOTYPE",
+         "PFAM_DOMAIN",
+         "CANCERGENE_EVIDENCE",
+         "PFAM_DOMAIN_NAME",
+         "PROTEIN_CHANGE",
+         "CLINVAR_MSID",
+         "VAR_ID",
+         "ENTREZGENE"))) |>
+    dplyr::select(
+      dplyr::any_of(
+        c("SYMBOL","ALTERATION","GENOTYPE","CONSEQUENCE",
+        "CLINICAL_SIGNIFICANCE","SOURCE","PROTEIN_DOMAIN",
+        "HGVSc", "HGVSc_RefSeq", "HGVSp", "CDS_CHANGE",
+        "CODING_STATUS",
+        "LOSS_OF_FUNCTION", "DP_CONTROL",
+        "VARIANT_CLASS","GENENAME",
+        "ONCOGENE","TUMOR_SUPPRESSOR","ENSEMBL_GENE_ID",
+        "ENSEMBL_TRANSCRIPT_ID","REFSEQ_TRANSCRIPT_ID",
+        "DBSNP_RSID",
+        "CLINVAR","CLINVAR_CLASSIFICATION","CLINVAR_CONFLICTED",
+        "CLINVAR_REVIEW_STATUS_STARS",
+        "CPSR_PATHOGENICITY_SCORE",
+        "CPSR_CLASSIFICATION",
+        "CPSR_CLASSIFICATION_CODE")),
+      dplyr::everything()
+    )
+
+  if(NROW(callset[['variant_display']]) > 0){
+    callset[['variant_display']] <- callset[['variant_display']] |>
+      dplyr::filter((.data$CLINICAL_SIGNIFICANCE == "Pathogenic" |
+                      .data$CLINICAL_SIGNIFICANCE == "Likely_Pathogenic" |
+                      .data$CLINICAL_SIGNIFICANCE == "VUS") &
+                      .data$CODING_STATUS == "coding")|>
+      dplyr::distinct()
+    if(ignore_vus == TRUE){
+      callset[['variant_display']] <- callset[['variant_display']] |>
+        dplyr::filter(.data$CLINICAL_SIGNIFICANCE != "VUS") |>
+        dplyr::distinct()
+    }
+  }
+
+  return(list('callset' = callset,
+              'panel_info' = panel_info,
+              'sample_id' = sample_id,
+              eval = TRUE))
 
 
 }
@@ -855,9 +1051,10 @@ load_dna_variants <- function(
       )
     }
 
-  }else{
-    log4r_fatal("Input data does not contain 'BIOMARKER_MATCH' column - fatal")
   }
+  #else{
+    #log4r_fatal("Input data does not contain 'BIOMARKER_MATCH' column - fatal")
+  #}
 
   results[['retained_info_tags']] <- paste(
     retained_cols_renamed, collapse=","
@@ -911,13 +1108,15 @@ load_expression_similarity <- function(settings = NULL){
 #' @param ref_data PCGR reference data object
 #' @param percentile_cutoff_high numeric, percentile cutoff for high expression
 #' @param percentile_cutoff_low numeric, percentile cutoff for low expression
+#' @param z_score_cutoff numeric, z-score cutoff for expression outliers
 #'
 #' @export
 load_expression_outliers <- function(
     settings = NULL,
     ref_data = NULL,
-    percentile_cutoff_high = 90,
-    percentile_cutoff_low = 10){
+    percentile_cutoff_high = 95,
+    percentile_cutoff_low = 5,
+    z_score_cutoff = 1.5){
 
   ## Load expression outlier results for input sample
   ## against reference collections
@@ -994,34 +1193,28 @@ load_expression_outliers <- function(
                      "ENSEMBL_TRANSCRIPT_ID")) |>
           dplyr::select(
             -dplyr::contains("_RAW")) |>
-          dplyr::mutate(kIQR = dplyr::if_else(
-            !is.na(.data$IQR) &
-              .data$IQR > 0 &
-              !is.na(.data$TPM_GENE) &
-              .data$TPM_GENE > 0 &
-              !is.na(.data$Q2),
-            as.numeric(.data$TPM_GENE - .data$Q2) / .data$IQR,
-            0
-          )) |>
           ## define criteria for expression outliers
-          dplyr::mutate(OUTLIER = dplyr::case_when(
+          dplyr::mutate(EXPR_OUTLIER = dplyr::case_when(
             PERCENTILE >= percentile_cutoff_high &
-              TPM_GENE > (Q3 + 1.5 * IQR) ~ TRUE,
+              .data$IQR > 0 &
+              TPM_LOG2_GENE > (.data$Q3 + (1.5 * .data$IQR)) &
+              abs(.data$Z_SCORE) > z_score_cutoff ~ "Increased expression",
             PERCENTILE <= percentile_cutoff_low &
-              TPM_GENE < (Q1 - 1.5 * IQR) ~ TRUE,
-            TRUE ~ FALSE
+              .data$IQR > 0 &
+              TPM_LOG2_GENE < (.data$Q1 - (1.5 * .data$IQR)) &
+              abs(.data$Z_SCORE) > z_score_cutoff ~ "Reduced expression",
+            TRUE ~ as.character(NA)
           )) |>
           dplyr::filter(
-            .data$TPM_GENE > 1 &
-              .data$IQR > 0 &
-              .data$GENE_BIOTYPE == "protein_coding")
+              .data$GENE_BIOTYPE == "protein_coding") |>
+          dplyr::mutate(Z_SCORE = round(.data$Z_SCORE, 1))
 
         if(NROW(expression_outliers) == 0){
           return(expression_outliers)
         }
 
         expression_outliers <- expression_outliers |>
-          dplyr::filter(.data$OUTLIER == TRUE)
+          dplyr::filter(!is.na(.data$EXPR_OUTLIER))
 
         if(NROW(expression_outliers) == 0){
           return(expression_outliers)
@@ -1043,17 +1236,27 @@ load_expression_outliers <- function(
 
         expression_outliers <- expression_outliers |>
           dplyr::arrange(
-            dplyr::desc(.data$kIQR),
+            dplyr::desc(abs(.data$Z_SCORE)),
             dplyr::desc(.data$GLOBAL_ASSOC_RANK),
             dplyr::desc(.data$TISSUE_ASSOC_RANK)) |>
-          dplyr::mutate(TPM_GENE = round(
-            .data$TPM_GENE, digits = 2)) |>
+          dplyr::mutate(EXPR_LEVEL = round(
+            .data$TPM_LOG2_GENE, digits = 3)) |>
+          dplyr::rename(REF_COHORT_IQR = "IQR") |>
+          dplyr::mutate(REF_COHORT_QUARTILES = paste(
+            paste0("Q1: ",.data$Q1),
+            paste0("Q2: ",.data$Q2),
+            paste0("Q3: ",.data$Q3),
+            sep = " | ")) |>
           dplyr::select(
             c("SYMBOL",
               "GENENAME",
-              "TPM_GENE",
+              "EXPR_LEVEL",
+              "EXPR_OUTLIER",
+              "Z_SCORE",
               "REF_COHORT",
               "REF_COHORT_SIZE",
+              "REF_COHORT_IQR",
+              "REF_COHORT_QUARTILES",
               "PERCENTILE",
               "TUMOR_SUPPRESSOR",
               "ONCOGENE",
@@ -1062,8 +1265,7 @@ load_expression_outliers <- function(
               "GENE_BIOTYPE",
               "GLOBAL_ASSOC_RANK",
               "TISSUE_ASSOC_RANK",
-              "CANCERGENE_EVIDENCE",
-              "IQR")) |>
+              "CANCERGENE_EVIDENCE")) |>
           dplyr::mutate(REF_COHORT = toupper(
             stringr::str_replace_all(
               .data$REF_COHORT,"_","-")

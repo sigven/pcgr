@@ -1,6 +1,6 @@
 ### Similarity to other tumor samples
 
-Here we show how the gene expression profile of the input RNA sample correlates with samples harvested from other sources. The similarity is calculated using the Spearman's correlation (protein-coding genes only). The tables below show the correlation coefficient for each (external) sample, along with the corresponding diagnosis, tissue/site, sample type, age category etc. The tables are sorted by the correlation coefficient in descending order, and only the top 500 samples are shown per source.
+Here we show how the gene expression profile of the input RNA sample correlates with samples harvested from other sources. The similarity is calculated using the Spearman's correlation (protein-coding genes only). The tables below show the correlation coefficient for each (external) sample, along with the corresponding diagnosis, tissue/site, sample type, age category etc. The tables are sorted by the correlation coefficient in descending order, and only the top 200 samples are shown per source.
 
 ::: {.panel-tabset}
 
@@ -8,7 +8,7 @@ Here we show how the gene expression profile of the input RNA sample correlates 
 #| output: asis
 #| eval: !expr as.logical(TRUE %in% stringr::str_detect(names(pcg_report[['content']]$expression[['similarity_analysis']]), 'tcga')) == TRUE
 
-source_name <- 'The Cancer Genome Atlas (TCGA)'
+source_name <- 'Primary tumors - TCGA'
 cat('\n\n#### ',source_name,'\n\n<br>')
 
 dt_similarity_tcga <- data.frame()
@@ -20,6 +20,12 @@ for(cohort in names(pcg_report[['content']]$expression[['similarity_analysis']])
         pcg_report[['content']]$expression[['similarity_analysis']][[cohort]] |>
         dplyr::mutate(CORR = round(CORR, digits = 5)) |>
         dplyr::select(-c("EXT_SAMPLE_ID2","PROTEIN_CODING_ONLY")) |>
+        dplyr::mutate(
+          EXT_SAMPLE_NAME = 
+            glue::glue(
+              "<a href='{EXT_LINK}' target='_blank'>{EXT_SAMPLE_NAME}</a>")
+        ) |>
+        dplyr::select(-c("EXT_LINK")) |>
         dplyr::select(
           EXT_SAMPLE_ID,
           EXT_SAMPLE_NAME,
@@ -40,14 +46,27 @@ for(cohort in names(pcg_report[['content']]$expression[['similarity_analysis']])
 
 dt_similarity_tcga <- dt_similarity_tcga |>
   dplyr::arrange(desc(CORR)) |>
-  head(500)
+  head(200)
+
+highlighted_site <- pcg_report$settings$conf$sample_properties$site
+all_sites <- unique(dt_similarity_tcga$EXT_PRIMARY_SITE)
+other_sites <- all_sites[ !all_sites == highlighted_site]
 
 DT::datatable(
   dt_similarity_tcga,
   escape = F,
   options = list(pageLength = 10),
-  extensions=c("Buttons","Responsive"))
-
+  extensions=c("Buttons","Responsive")) |>
+  DT::formatStyle(
+    c('EXT_PRIMARY_SITE'),
+    fontWeight = 'bold',
+    color = "white",
+    backgroundColor = DT::styleEqual(
+      c(highlighted_site, other_sites), 
+      c(pcg_report$settings$conf$report_color,
+        rep(pcgrr::color_palette$none, length(other_sites)))
+    )
+  )
 
 ```
 
@@ -56,7 +75,7 @@ DT::datatable(
 #| output: asis
 #| eval: !expr as.logical("depmap" %in% names(pcg_report[['content']]$expression[['similarity_analysis']])) == TRUE
 
-source_name <- 'Cancer Dependency Map - DepMap'
+source_name <- 'Cell lines - DepMap'
 cat('\n\n#### ',source_name,'\n\n<br>')
 
 dt_similarity_depmap <- 
@@ -66,8 +85,9 @@ dt_similarity_depmap <-
   dplyr::mutate(
     EXT_SAMPLE_NAME = 
       glue::glue(
-        "<a href='https://depmap.org/portal/cell_line/{EXT_SAMPLE_ID}?tab=overview' target='_blank'>{EXT_SAMPLE_NAME}</a>")
+        "<a href='{EXT_LINK}' target='_blank'>{EXT_SAMPLE_NAME}</a>")
   ) |>
+  dplyr::select(-c("EXT_LINK")) |>
   dplyr::select(
     EXT_SAMPLE_ID,
     EXT_SAMPLE_NAME,
@@ -80,13 +100,28 @@ dt_similarity_depmap <-
     dplyr::everything()
   ) |>
   dplyr::arrange(desc(CORR)) |>
-  head(500)
+  head(200)
+
+highlighted_site <- pcg_report$settings$conf$sample_properties$site
+all_sites <- unique(dt_similarity_depmap$EXT_PRIMARY_SITE)
+other_sites <- all_sites[ !all_sites == highlighted_site]
 
 DT::datatable(
   dt_similarity_depmap,
   escape = F,
   options = list(pageLength = 10),
-  extensions=c("Buttons","Responsive"))
+  extensions=c("Buttons","Responsive")) |>
+  DT::formatStyle(
+    c('EXT_PRIMARY_SITE'),
+    fontWeight = 'bold',
+    color = "white",
+    backgroundColor = DT::styleEqual(
+      c(highlighted_site, other_sites), 
+      c(pcg_report$settings$conf$report_color,
+        rep(pcgrr::color_palette$none, length(other_sites)))
+    )
+  )
+
 
 ```
 
@@ -113,13 +148,27 @@ dt_similarity_treehouse <-
     dplyr::everything()
   ) |>
   dplyr::arrange(desc(CORR)) |>
-  head(500)
+  head(200)
+
+highlighted_site <- pcg_report$settings$conf$sample_properties$site
+all_sites <- unique(dt_similarity_treehouse$EXT_PRIMARY_SITE)
+other_sites <- all_sites[ !all_sites == highlighted_site]
 
 DT::datatable(
   dt_similarity_treehouse,
   escape = F,
   options = list(pageLength = 10),
-  extensions=c("Buttons","Responsive"))
+  extensions=c("Buttons","Responsive")) |>
+  DT::formatStyle(
+    c('EXT_PRIMARY_SITE'),
+    fontWeight = 'bold',
+    color = "white",
+    backgroundColor = DT::styleEqual(
+      c(highlighted_site, other_sites), 
+      c(pcg_report$settings$conf$report_color,
+        rep(pcgrr::color_palette$none, length(other_sites)))
+    )
+  )
 
 ```
 

@@ -7,7 +7,7 @@
 
 ```
 
-<br><br>
+<br>
 
 ```{r expression_outliers}
 #| eval: !expr as.logical(NROW(pcg_report$content$expression$outliers) > 0) == TRUE
@@ -16,7 +16,7 @@
 
 ```
 
-<br><br>
+<br>
 
 ```{r expression_immune_contexture}
 #| eval: !expr as.logical(NROW(pcg_report$content$expression$immune_contexture) > 0) == TRUE

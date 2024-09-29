@@ -14,7 +14,8 @@ from pcgr.utils import error_message, warn_message, check_file_exists, remove_fi
 from pcgr.biomarker import load_biomarkers
 from pcgr.expression import integrate_variant_expression
 
-def annotate_cna_segments(output_fname: str, 
+def annotate_cna_segments(output_segment_gene_fname: str, 
+                          output_segment_fname: str,
                           output_dir: str, 
                           cna_segment_file: str, 
                           refdata_assembly_dir: str, 
@@ -27,7 +28,7 @@ def annotate_cna_segments(output_fname: str,
     """
     Annotate copy number aberrations in a given segment file.
     Args:
-        output_fname (str): File name of the annotated output file.
+        output_segment_gene_fname (str): File name of the annotated output file.
         output_dir (str): Directory to save the annotated file.
         cna_segment_file (str): Path to the user-provided copy number aberrations segment file.
         refdata_assembly_dir (str): Path to the build-specific PCGR database directory.
@@ -57,6 +58,10 @@ def annotate_cna_segments(output_fname: str,
     
     cna_query_segment_df = cna_query_segment_df[['Chromosome', 'Start','End','nMajor','nMinor']]
     
+    ## round nMajor and nMinor to integers
+    cna_query_segment_df['nMajor'] = cna_query_segment_df['nMajor'].round(0).astype(int)
+    cna_query_segment_df['nMinor'] = cna_query_segment_df['nMinor'].round(0).astype(int)
+    
     ## Remove 'chr' prefix from chromosome names
     for elem in ['Chromosome','nMajor','nMinor']:
         cna_query_segment_df = cna_query_segment_df.astype({elem:'string'})
@@ -68,7 +73,7 @@ def annotate_cna_segments(output_fname: str,
     if cna_query_segment_df.empty is True:
         warn_msg = f"Could not find any CNA query segments listed on nuclear chromosomes: {nuclear_chromosomes} - returning."
         warn_message(warn_msg, logger)
-        return 0
+        return -1
     
     ## Create segment identifier column
     cna_query_segment_df['segment_id'] = \
@@ -89,7 +94,8 @@ def annotate_cna_segments(output_fname: str,
         os.path.join(refdata_assembly_dir, 'chromsize.' + build + '.tsv')
     
     check_file_exists(chromsizes_fname, logger)
-    chromsizes = pd.read_csv(chromsizes_fname, sep="\t", header=None, names=['Chromosome', 'ChromLength'])
+    chromsizes = pd.read_csv(chromsizes_fname, sep="\t", skiprows=1, names=['Chromosome', 'ChromLength','CentromereStart','CentromereEnd'])
+    chromsizes = chromsizes[['Chromosome','ChromLength']]
     cna_query_segment_df = cna_query_segment_df.merge(
         chromsizes, left_on=["Chromosome"], right_on=["Chromosome"], how="left")
     segments_beyond_chromlength = \
@@ -97,13 +103,17 @@ def annotate_cna_segments(output_fname: str,
     
     ## Issue warning if segments exceed chromosome lengths
     if not segments_beyond_chromlength.empty is True:
-        warn_msg = f"Ignoring n = {len(segments_beyond_chromlength)} copy number segments that " + \
+        warn_msg = f"Ignoring parts of n = {len(segments_beyond_chromlength)} copy number segments that " + \
             f"exceed the chromosomal lengths of {build}"
         warn_message(warn_msg, logger)
+           
+    cna_query_segment_df.loc[cna_query_segment_df['End'] > cna_query_segment_df['ChromLength'],"End"] = \
+        cna_query_segment_df.loc[cna_query_segment_df['End'] > cna_query_segment_df['ChromLength'],'ChromLength']
+        
     cna_query_segment_df = \
-        cna_query_segment_df[cna_query_segment_df['End'] <= cna_query_segment_df['ChromLength']]
+        cna_query_segment_df[cna_query_segment_df['Start'] <= cna_query_segment_df['ChromLength']]
     
-    cna_query_segment_df = cna_query_segment_df[['Chromosome','Start','End','Name']]
+    cna_query_segment_df = cna_query_segment_df[['Chromosome','Start','End','Name']]    
     
     ## transform cna segments to pybedtools object
     cna_query_segment_bed = pybedtools.BedTool.from_dataframe(cna_query_segment_df)
@@ -112,18 +122,31 @@ def annotate_cna_segments(output_fname: str,
     ## annotate segments with cytobands
     cna_query_segment_df = annotate_cytoband(cna_query_segment_bed, output_dir, refdata_assembly_dir, logger)
 
+    
+    cna_query_segment_df['chromosome2'] = cna_query_segment_df['chromosome']
+    cna_query_segment_df.loc[cna_query_segment_df['chromosome2'] == "X","chromosome2"] = 23
+    cna_query_segment_df.loc[cna_query_segment_df['chromosome2'] == "Y","chromosome2"] = 24
+    cna_query_segment_df['chromosome2'] = cna_query_segment_df['chromosome2'].astype(int)
+        
+    cna_query_segment_df = cna_query_segment_df.sort_values(['chromosome2','segment_start'], ascending=True)
+
+    cna_query_segment_df = cna_query_segment_df.drop(columns=['chromosome2'])
+    segments_out = cna_query_segment_df[['chromosome','segment_start','segment_end','segment_name']]
+    segments_out.columns = map(str.upper, segments_out.columns)
+    segments_out.rename(columns = {'CHROMOSOME':'CHROM'}, inplace = True)
+    segments_out.to_csv(output_segment_fname, sep="\t", header=True, index=False)
+    
     ## annotate with protein-coding transcripts
     cna_query_segment_bed = pybedtools.BedTool.from_dataframe(cna_query_segment_df)
     temp_files.append(cna_query_segment_bed.fn)
-    
+
     cna_query_segment_df = annotate_transcripts(
        cna_query_segment_bed, output_dir, refdata_assembly_dir, overlap_fraction=overlap_fraction, logger=logger)
-
+    ## load copy-number biomarker evidence
+   
     cna_query_segment_df['segment_length_mb'] = \
         ((cna_query_segment_df['segment_end'] - cna_query_segment_df['segment_start']) / 1e6).astype(float).round(5)
     
-    ## load copy-number biomarker evidence
-   
     biomarkers = {}
     cna_actionable_dict = {}
     
@@ -192,7 +215,7 @@ def annotate_cna_segments(output_fname: str,
         cna_query_segment_df['TPM'] = '.'
         
     
-    cna_query_segment_df.to_csv(output_fname, sep="\t", header=True, index=False)
+    cna_query_segment_df.to_csv(output_segment_gene_fname, sep="\t", header=True, index=False)
                 
     return 0
 
@@ -245,8 +268,6 @@ def annotate_cytoband(cna_segments_bt: BedTool, output_dir: str, refdata_assembl
     cytoband_last_annotations.columns = ['last_cytoband','last_arm','last_arm_length','last_focal_threshold']
         
     cytoband_all = pd.concat([segments_cytoband, cytoband_first_annotations, cytoband_last_annotations], axis = 1)
-    #cytoband_all = pd.concat([segments_cytoband, cytoband_first_annotations], axis = 1)
-    #print(str(cytoband_all.head(3)))
     
     cytoband_all['segment_start'] = cytoband_all['segment_start'].astype(int)
     cytoband_all['segment_end'] = cytoband_all['segment_end'].astype(int)       
@@ -261,7 +282,6 @@ def annotate_cytoband(cna_segments_bt: BedTool, output_dir: str, refdata_assembl
     cytoband_all['segment_name'] = cytoband_all['segment_name'].str.cat(cytoband_all['first_arm'], sep = "|").str.cat(
         cytoband_all['cytoband'],sep="|").str.cat(cytoband_all['event_type'], sep="|")    
     cytoband_annotated_segments = cytoband_all[['chromosome','segment_start','segment_end','segment_name']]
-    #print(str(cytoband_annotated_segments.head(3)))
     
     ## remove all temporary files
     for fname in temp_files:
@@ -402,9 +422,14 @@ def is_valid_cna(cna_segment_file, logger):
         err_msg = 'Copy number segment file is empty - contains NO segments'
         return error_message(err_msg, logger)
     
-    for elem in ['Start','End','nMajor','nMinor']:
+    for elem in ['Start','End']:
         if not cna_dataframe[elem].dtype.kind in 'i':
             err_msg = 'Copy number segment file contains non-integer values for column: "' + elem + '"'
+            return error_message(err_msg, logger)
+    
+    for elem in ['nMajor','nMinor']:
+        if not cna_dataframe[elem].dtype.kind in 'if':
+            err_msg = 'Copy number segment file contains non-float/integer values for column: "' + elem + '"'
             return error_message(err_msg, logger)
 
     for rec in cna_reader:
