@@ -103,7 +103,7 @@ plot_tmb_primary_site_tcga <- function(
       TMB = dplyr::case_when(
         tmb_display_type == "coding_and_silent" ~
           as.numeric(.data$TMB_CODING_AND_SILENT) + 0.001,
-        tmb_display_type == "coding_non_ssilent" ~
+        tmb_display_type == "coding_non_silent" ~
           as.numeric(.data$TMB_CODING_NON_SILENT) + 0.001,
         tmb_display_type == "missense_only" ~
           as.numeric(.data$TMB_MISSENSE_ONLY) + 0.001,
