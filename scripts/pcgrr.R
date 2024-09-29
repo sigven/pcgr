@@ -32,13 +32,18 @@ pcg_report <- pcgrr::generate_report(
   yaml_fname = yaml_fname
 )
 
-#pcg_report$settings$conf$debug <- TRUE
-
 ## Write report contents to output files (HTML, XLSX, TSV)
 if (!is.null(pcg_report)) {
-  pcgrr::write_report_quarto_html(report = pcg_report)
+  if(pcg_report$settings$conf$other$no_html == FALSE){
+    pcgrr::write_report_quarto_html(report = pcg_report)
+  }
+  else{
+    pcgrr::log4r_info("Skipping HTML report generation (option '--no_html' set to TRUE)")
+  }
+
   pcgrr::write_report_excel(report = pcg_report)
   pcgrr::write_report_tsv(report = pcg_report, output_type = 'snv_indel')
+  pcgrr::write_report_tsv(report = pcg_report, output_type = 'snv_indel_unfiltered')
   pcgrr::write_report_tsv(report = pcg_report, output_type = 'cna_gene')
   pcgrr::write_report_tsv(report = pcg_report, output_type = 'msigs')
 }

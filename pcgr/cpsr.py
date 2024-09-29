@@ -45,6 +45,7 @@ def get_args():
     optional_other.add_argument('--force_overwrite', action = "store_true", help='By default, the script will fail with an error if any output file already exists.\n You can force the overwrite of existing result files by using this flag, default: %(default)s')
     optional_other.add_argument('--version', action='version', version=str(utils.get_cpsr_version()))
     optional_other.add_argument('--no_reporting',action="store_true",help="Run functional variant annotation on VCF through VEP/vcfanno, omit classification/report generation (STEP 4), default: %(default)s")
+    optional_other.add_argument("--no_html", action="store_true", help="Do not generate HTML report (default: %(default)s)")
     optional_other.add_argument('--retained_info_tags', dest ='retained_info_tags', default='None', help='Comma-separated string of VCF INFO tags from query VCF that should be kept in CPSR output TSV')
     optional_other.add_argument('--ignore_noncoding', action='store_true',dest='ignore_noncoding',default=False,help='Ignore non-coding (i.e. non protein-altering) variants in report, default: %(default)s')
     optional_other.add_argument("--debug", action="store_true", help="Print full commands to log")
@@ -63,7 +64,7 @@ def get_args():
     optional_vep.add_argument('--vep_buffer_size', default = 500, type = int, help="Variant buffer size (variants read into memory simultaneously, option '--buffer_size' in VEP) " + \
        "\n- set lower to reduce memory usage, default: %(default)s")
     optional_vep.add_argument("--vep_gencode_basic", action="store_true", help = "Consider basic GENCODE transcript set only with Variant Effect Predictor (VEP) (option '--gencode_basic' in VEP).")
-    optional_vep.add_argument('--vep_pick_order', default = "mane_select,mane_plus_clinical,canonical,appris,tsl,biotype,ccds,rank,length", help="Comma-separated string " + \
+    optional_vep.add_argument('--vep_pick_order', default = "mane_select,mane_plus_clinical,canonical,biotype,ccds,rank,tsl,appris,length", help="Comma-separated string " + \
        "of ordered transcript properties for primary variant pick\n ( option '--pick_order' in VEP), default: %(default)s")
     optional_vep.add_argument('--vep_no_intergenic', action = "store_true", help="Skip intergenic variants during processing (option '--no_intergenic' in VEP), default: %(default)s")
 
@@ -99,10 +100,7 @@ def run_cpsr(conf_options, input_data, output_data):
     """
     
     debug = conf_options['debug']
-    vep_skip_intergenic_set = 'ON' if conf_options['vep']['vep_no_intergenic'] == 1 else 'OFF'
-    #output_vcf = 'None'
-    #output_pass_vcf = 'None'
-    #output_pass_tsv = 'None'
+    vep_skip_intergenic_set = 'ON' if conf_options['vep']['vep_no_intergenic'] == 1 else 'OFF'    
     uid = ''
     genome_assembly = str(conf_options['genome_assembly'])
     input_vcf = 'None'
@@ -245,7 +243,7 @@ def run_cpsr(conf_options, input_data, output_data):
         cpsr_summarise_command = (
                 f'pcgr_summarise.py {vep_vcfanno_vcf}.gz {vep_vcfanno_summarised_vcf} 0 '
                 f'{yaml_data["conf"]["vep"]["vep_regulatory"]} 0 '
-                f'Any {yaml_data["conf"]["vep"]["vep_pick_order"]} '
+                f'Any {yaml_data["genome_assembly"]} {yaml_data["conf"]["vep"]["vep_pick_order"]} '
                 f'{input_data["refdata_assembly_dir"]} --compress_output_vcf '
                 f'--cpsr_yaml {yaml_fname} '
                 f'--cpsr {"--debug" if debug else ""}'
