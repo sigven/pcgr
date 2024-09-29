@@ -63,7 +63,7 @@ excluded if setting `--exclude_nonexonic` is used)
 - Slight change to the default transcript consequence pick order in VEP based on observations of prioritized transcripts (*mane_select > mane_plus_clinical > canonical > biotype > ccds > rank > tsl > appris >length*)
 - Pulled in known oncogenic variants from ClinVar (assessed through ClinGen/CGC/VICC SOP, oncogenic/likely oncogenic) into the variant oncogenicity assessment algorithm
 - Added option `--no_html` to disable HTML report generation
-- Added option `--input_germline` - re-offering the possibility to integrate CPSR-classified germline variants in the PCGR HTML report
+- Added option `--input_cpsr` - re-offering the possibility to integrate CPSR-classified germline variants in the PCGR HTML report
 - Added `HGVSc_RefSeq` as output column in TSV/HTML - using MANE Select RefSeq transcript identifiers (works primarily for grch38)
 - Pulled in coding sequence start annotation for protein-coding transcripts from GENCODE, enabling a more useful annotation of promoter variants (e.g. TERT)
 - Created new column `ALTERATION` in variant tables of HTML report, a combination of `HGVSp`, `HGVSc` (if `HGVSp` not available)

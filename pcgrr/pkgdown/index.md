@@ -25,29 +25,29 @@ Example screenshots from the [quarto](https://quarto.org)-based cancer genome re
 ![PCGR screenshot 2](img/sc1.png)
 ![PCGR screenshot 3](img/sc3.png)
 
-PCGR originates from the [Norwegian Cancer Genomics Consortium (NCGC)](http://cancergenomics.no), at the [Institute for Cancer Research, Oslo University Hospital, Norway](http://radium.no).
+PCGR originates from the [Norwegian Cancer Genomics Consortium (NCGC)](https://cancergenomics.no), at the [Institute for Cancer Research, Oslo University Hospital, Norway](https://radium.no).
 
 ### Top News
 
 - *September 29th 2024*: **2.1.0 release**
   - updated bundle, more oncogenic variants, CNA visualization, 
     improved RNA-seq support, bug fixes, and more
-  - [CHANGELOG](http://sigven.github.io/pcgr/articles/CHANGELOG.html)
+  - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
 
 - *August 1st 2024*: **2.0.3 release** 
   - patch to fix purity/ploidy propagation, MAF output for tumor-only runs, and other minor issues
-  - [CHANGELOG](http://sigven.github.io/pcgr/articles/CHANGELOG.html)
+  - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
   
 - *July 16th 2024*: **2.0.2 release** 
   - patch to ensure correct reference to actionability guidelines
-  - [CHANGELOG](http://sigven.github.io/pcgr/articles/CHANGELOG.html)
+  - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
 
 - *July 7th 2024*: **2.0.1 release**
   - patch with bug fix for mitochondrial input variants ([pr245](https://github.com/sigven/pcgr/pull/245))
-  - [CHANGELOG](http://sigven.github.io/pcgr/articles/CHANGELOG.html)
+  - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
 
 - *June 2024*: **2.0.0 release**
-  - Details in [CHANGELOG](http://sigven.github.io/pcgr/articles/CHANGELOG.html)
+  - Details in [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
   - Massive reference data bundle upgrade, new report layout, oncogenicity classification++
   - Support for Singularity/Apptainer
   - Major data/software updates:

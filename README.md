@@ -24,24 +24,29 @@ Example screenshots from the [quarto](https://quarto.org)-based cancer genome re
 ![PCGR screenshot 2](pcgrr/pkgdown/assets/img/sc1.png)
 ![PCGR screenshot 3](pcgrr/pkgdown/assets/img/sc3.png)
 
-PCGR originates from the [Norwegian Cancer Genomics Consortium (NCGC)](http://cancergenomics.no), at the [Institute for Cancer Research, Oslo University Hospital, Norway](http://radium.no).
+PCGR originates from the [Norwegian Cancer Genomics Consortium (NCGC)](https://cancergenomics.no), at the [Institute for Cancer Research, Oslo University Hospital, Norway](https://radium.no).
 
 ### Top News
 
+- *September 29th 2024*: **2.1.0 release**
+  - updated bundle, more oncogenic variants, CNA visualization, 
+    improved RNA-seq support, bug fixes, and more
+  - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
+
 - *August 1st 2024*: **2.0.3 release** 
   - patch to fix purity/ploidy propagation, MAF output for tumor-only runs, and other minor issues
-  - [CHANGELOG](http://sigven.github.io/pcgr/articles/CHANGELOG.html)
+  - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
 
 - *July 16th 2024*: **2.0.2 release** 
   - patch to ensure correct reference to actionability guidelines
-  - [CHANGELOG](http://sigven.github.io/pcgr/articles/CHANGELOG.html)
+  - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
 
 - *July 7th 2024*: **2.0.1 release** 
   - patch with bug fix for mitochondrial input variants ([pr245](https://github.com/sigven/pcgr/pull/245))
-  - [CHANGELOG](http://sigven.github.io/pcgr/articles/CHANGELOG.html)
+  - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
 
 - *June 2024*: **2.0.0 release**
-  - Details in [CHANGELOG](http://sigven.github.io/pcgr/articles/CHANGELOG.html)
+  - Details in [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
   - Massive reference data bundle upgrade, new report layout, oncogenicity classification++
   - Support for Singularity/Apptainer
   - Major data/software updates:
@@ -52,19 +57,9 @@ PCGR originates from the [Norwegian Cancer Genomics Consortium (NCGC)](http://ca
     - CancerMine `v50` (2023-03)
     - UniProt KB `v2024_03`
 
-- *February 2023*: **1.3.0 release**
-  - Details in [CHANGELOG](http://sigven.github.io/pcgr/articles/CHANGELOG.html)
-  - prioritize protein-coding BIOTYPE csq ([pr201](https://github.com/sigven/pcgr/pull/201))
-  - expose `--pcgrr_conda` option to flexibly activate pcgrr env via a non-default pcgrr name
-  - `cpsr_validate_input.py`: refactor for efficient custom gene egrep
-
-- *November 2022*: **1.2.0 release**
-  -    Keep only autosomal, X, Y, M/MT chromosomes
-  -    Import bcftools as dependency
-
 ### Example reports
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.12752833.svg)](https://doi.org/10.5281/zenodo.12752833)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13855988.svg)](https://doi.org/10.5281/zenodo.13855988)
 
 ### Why use PCGR?
 
@@ -94,9 +89,11 @@ PCGR integrates a [comprehensive set of knowledge resources](https://sigven.gith
 
 ### Citation
 
-If you use PCGR, please cite our publication:
+If you use PCGR or CPSR, please cite our publications:
 
 Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, Ola Myklebost, and Eivind Hovig. **Personal Cancer Genome Reporter: variant interpretation report for precision oncology** (2017). *Bioinformatics*. 34(10):1778--1780. [doi.org/10.1093/bioinformatics/btx817](https://doi.org/10.1093/bioinformatics/btx817)
+
+Sigve Nakken, Vladislav Saveliev, Oliver Hofmann, Pål Møller, Ola Myklebost, and Eivind Hovig. **Cancer Predisposition Sequencing Reporter (CPSR): a flexible variant report engine for high-throughput germline screening in cancer** (2021). *Int J Cancer*. [doi:[10.1002/ijc.33749](doi:%5B10.1002/ijc.33749)](https://doi.org/10.1002/ijc.33749)
 
 ## Contact
 
