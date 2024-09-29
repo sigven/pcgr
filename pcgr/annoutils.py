@@ -10,6 +10,7 @@ import gzip
 from cyvcf2 import VCF, Writer
 from pcgr import utils, pcgr_vars
 from pcgr.utils import check_subprocess, error_message
+from pcgr.variant import reverse_complement_dna
 
 csv.field_size_limit(500 * 1024 * 1024)
 threeLettertoOneLetterAA = {'Ala': 'A', 'Arg': 'R', 'Asn': 'N', 'Asp': 'D', 'Cys': 'C', 'Glu': 'E', 'Gln': 'Q', 'Gly': 'G', 'His': 'H',
@@ -211,20 +212,29 @@ def assign_cds_exon_intron_annotations(csq_record, logger):
     csq_record['CDS_CHANGE'] = '.'
     csq_record['HGVSp_short'] = '.'
     csq_record['PROTEIN_CHANGE'] = '.'
+    csq_record['ALTERATION'] = '.'
     csq_record['EXON_AFFECTED'] = '.'
     csq_record['CDS_RELATIVE_POSITION'] = '.'
     csq_record['LOSS_OF_FUNCTION'] = False
     csq_record['LOF_FILTER'] = '.'
     
     splice_variant = False
-    
+    #print(csq_record.keys())
     if re.search(pcgr_vars.CSQ_SPLICE_REGION_PATTERN, str(csq_record['Consequence'])) is not None:
         splice_variant = True
 
     if re.search(pcgr_vars.CSQ_CODING_PATTERN, str(csq_record['Consequence'])) is not None:
         csq_record['CODING_STATUS'] = 'coding'
+    
+    if re.search(pcgr_vars.CSQ_CODING_PATTERN2, str(csq_record['Consequence'])) is not None and \
+        (csq_record['IMPACT'] == 'HIGH' or csq_record['IMPACT'] == 'MODERATE'):
+        csq_record['CODING_STATUS'] = 'coding'
 
     if re.search(pcgr_vars.CSQ_CODING_SILENT_PATTERN, str(csq_record['Consequence'])) is not None:
+        csq_record['EXONIC_STATUS'] = 'exonic'
+    
+    if re.search(pcgr_vars.CSQ_CODING_SILENT_PATTERN2, str(csq_record['Consequence'])) is not None and \
+        csq_record['IMPACT'] != 'MODIFIER':
         csq_record['EXONIC_STATUS'] = 'exonic'
 
     if re.search(pcgr_vars.CSQ_LOF_PATTERN, str(csq_record['Consequence'])) is not None:
@@ -257,73 +267,119 @@ def assign_cds_exon_intron_annotations(csq_record, logger):
                         csq_record['EXON_POSITION'] = int(exon_pos_info[1])
 
     ## filter putative LOF variants if they occur too close to the CDS end (less than 5% of the CDS length remains after the variant)
-    if not csq_record['CDS_position'] is None and csq_record['LOSS_OF_FUNCTION'] is True and splice_variant is False:
-        if csq_record['CDS_position'] != '.':
-            if '/' in csq_record['CDS_position']:
-                cds_length = str(csq_record['CDS_position']).split('/')[1]
-                if cds_length.isdigit():
-                    cds_length = int(cds_length)
-                else:
-                    cds_length = -1
-                
-                cds_pos = -1
-                cds_pos_full = str(csq_record['CDS_position']).split('/')[0]
-                
-                ## Frameshift variants are listed with a range (separated by '-'), choose start position
-                if '-' in cds_pos_full and not '?' in cds_pos_full:
-                    cds_pos = cds_pos_full.split('-')[0]
-                    if cds_pos.isdigit():
-                        cds_pos = int(cds_pos)
-                    #else:
-                    #    logger.warning(f'Could not determine variant CDS position from VEP annotation - ({csq_record["CDS_position"]})')                        
-                else:
-                    if cds_pos_full.isdigit():
-                        cds_pos = int(cds_pos_full)
-                    #else:
-                    #    logger.warning(f'Could not determine variant CDS position from VEP annotation - ({csq_record["CDS_position"]})')                         
-                
-                if int(cds_pos) > -1 and int(cds_pos) <= int(cds_length):    
-                    csq_record['CDS_RELATIVE_POSITION'] = float(cds_pos/cds_length)
+    if 'CDS_position' in csq_record.keys():
+        if not csq_record['CDS_position'] is None and csq_record['LOSS_OF_FUNCTION'] is True and splice_variant is False:
+            if csq_record['CDS_position'] != '.':
+                if '/' in csq_record['CDS_position']:
+                    cds_length = str(csq_record['CDS_position']).split('/')[1]
+                    if cds_length.isdigit():
+                        cds_length = int(cds_length)
+                    else:
+                        cds_length = -1
                     
-                    ## conservative filter: if putative loss-of-function variant is in the last 5% of the CDS, 
-                    ## it is considered a non-LoF variant
-                    if csq_record['CDS_RELATIVE_POSITION'] >= 0.95:
-                        csq_record['LOSS_OF_FUNCTION'] = False
-                        csq_record['LOF_FILTER'] = "END_TRUNCATION"
-
-    if not csq_record['HGVSc'] is None:
-        if csq_record['HGVSc'] != '.':
-            if 'splice_acceptor_variant' in csq_record['Consequence'] or 'splice_donor_variant' in csq_record['Consequence'] \
-                or 'splice_donor_5th_base_variant' in csq_record['Consequence'] or 'splice_region_variant' in csq_record['Consequence'] \
-                    or 'splice_polypyrimidine_tract_variant' in csq_record['Consequence']:
-                key = str(csq_record['Consequence']) + \
-                    ':' + str(csq_record['HGVSc'])
-                csq_record['CDS_CHANGE'] = key
+                    cds_pos = -1
+                    cds_pos_full = str(csq_record['CDS_position']).split('/')[0]
+                    
+                    ## Frameshift variants are listed with a range (separated by '-'), choose start position
+                    if '-' in cds_pos_full and not '?' in cds_pos_full:
+                        cds_pos = cds_pos_full.split('-')[0]
+                        if cds_pos.isdigit():
+                            cds_pos = int(cds_pos)
+                        #else:
+                        #    logger.warning(f'Could not determine variant CDS position from VEP annotation - ({csq_record["CDS_position"]})')                        
+                    else:
+                        if cds_pos_full.isdigit():
+                            cds_pos = int(cds_pos_full)
+                        #else:
+                        #    logger.warning(f'Could not determine variant CDS position from VEP annotation - ({csq_record["CDS_position"]})')                         
+                    
+                    if int(cds_pos) > -1 and int(cds_pos) <= int(cds_length):    
+                        csq_record['CDS_RELATIVE_POSITION'] = float(cds_pos/cds_length)
+                        
+                        ## conservative filter: if putative loss-of-function variant is in the last 5% of the CDS, 
+                        ## it is considered a non-LoF variant
+                        if csq_record['CDS_RELATIVE_POSITION'] >= 0.95:
+                            csq_record['LOSS_OF_FUNCTION'] = False
+                            csq_record['LOF_FILTER'] = "END_TRUNCATION"
+                            
+    if 'HGVSc' in csq_record.keys() and 'Consequence' in csq_record.keys():
+        if not csq_record['HGVSc'] is None:
+            if csq_record['HGVSc'] != '.':
                 
-                ## GC to GT donor splice site variants are not considered loss-of-function
-                if 'splice_donor_variant' in str(csq_record['Consequence']) and csq_record['HGVSc'].endswith('+2C>T'):
-                    csq_record['LOF_FILTER'] = "GC_TO_GT_DONOR"
-                    csq_record['LOSS_OF_FUNCTION'] = False
-
-    if csq_record['Amino_acids'] is None or csq_record['Protein_position'] is None or csq_record['Consequence'] is None:
-        return(csq_record)
-    
-    if not csq_record['Protein_position'] is None:
-        if csq_record['Protein_position'].startswith('-'):
-            return(csq_record)
+                if len(str(csq_record['HGVSc']).split(':')) == 2:
+                    csq_record['ALTERATION'] = str(csq_record['HGVSc'].split(':')[1])
+                
+                ## Use RefSeq transcript ID (MANE SELECT) for HGVSc if available
+                csq_record['HGVSc_RefSeq'] = '.:.'
+                if not csq_record['MANE_SELECT'] is None:
+                    if ":" in csq_record['HGVSc']:
+                        hgvsc_data = csq_record['HGVSc'].split(':')
+                        if len(hgvsc_data) == 2:              
+                            csq_record['HGVSc_RefSeq'] = str(csq_record['MANE_SELECT']) + ':' + str(hgvsc_data[1])
+                
+                ## GRCh37 - MANE_SELECT not provided by VEP for GRCh37, so use MANE_SELECT2 (customly provided through geneOncoX)
+                else:
+                    if 'MANE_SELECT2' in csq_record.keys():
+                        if not csq_record['MANE_SELECT2'] is None:
+                            if ":" in csq_record['HGVSc']:
+                                hgvsc_data = csq_record['HGVSc'].split(':')
+                                if len(hgvsc_data) == 2:              
+                                    csq_record['HGVSc_RefSeq'] = str(csq_record['MANE_SELECT2']) + ':' + str(hgvsc_data[1])
+                    else:
+                        if 'REFSEQ_SELECT' in csq_record.keys():
+                            if not csq_record['REFSEQ_SELECT'] is None:
+                                csq_record['REFSEQ_SELECT'] = str(csq_record['REFSEQ_SELECT'].split('&')[0])
+                                if ":" in csq_record['HGVSc']:
+                                    hgvsc_data = csq_record['HGVSc'].split(':')
+                                    if len(hgvsc_data) == 2:              
+                                        csq_record['HGVSc_RefSeq'] = str(csq_record['REFSEQ_SELECT']) + ':' + str(hgvsc_data[1])
+                        else:
+                            if 'REFSEQ_TRANSCRIPT_ID' in csq_record.keys():
+                                if not csq_record['REFSEQ_TRANSCRIPT_ID'] is None:
+                                    csq_record['REFSEQ_TRANSCRIPT_ID'] = str(csq_record['REFSEQ_TRANSCRIPT_ID'].split('&')[0])
+                                    if ":" in csq_record['HGVSc']:
+                                        hgvsc_data = csq_record['HGVSc'].split(':')
+                                        if len(hgvsc_data) == 2:              
+                                            csq_record['HGVSc_RefSeq'] = str(csq_record['REFSEQ_TRANSCRIPT_ID']) + ':' + str(hgvsc_data[1])
+                    
+                if 'splice_acceptor_variant' in csq_record['Consequence'] or 'splice_donor_variant' in csq_record['Consequence'] \
+                    or 'splice_donor_5th_base_variant' in csq_record['Consequence'] or 'splice_region_variant' in csq_record['Consequence'] \
+                        or 'splice_polypyrimidine_tract_variant' in csq_record['Consequence']:
+                    key = str(csq_record['Consequence']) + \
+                        ':' + str(csq_record['HGVSc'])
+                    csq_record['CDS_CHANGE'] = key
+                    
+                    ## GC to GT donor splice site variants are not considered loss-of-function
+                    if 'splice_donor_variant' in str(csq_record['Consequence']) and csq_record['HGVSc'].endswith('+2C>T'):
+                        csq_record['LOF_FILTER'] = "GC_TO_GT_DONOR"
+                        csq_record['LOSS_OF_FUNCTION'] = False
 
     protein_change = '.'
-    if '/' in csq_record['Protein_position']:
-        protein_position = str(csq_record['Protein_position'].split('/')[0])
-        if '-' in protein_position:
-            if protein_position.split('-')[0].isdigit():
-                csq_record['AMINO_ACID_START'] = protein_position.split('-')[0]
-            if protein_position.split('-')[1].isdigit():
-                csq_record['AMINO_ACID_END'] = protein_position.split('-')[1]
-        else:
-            if protein_position.isdigit():
-                csq_record['AMINO_ACID_START'] = protein_position
-                csq_record['AMINO_ACID_END'] = protein_position
+    
+    if 'Protein_position' in csq_record.keys():
+        if not csq_record['Protein_position'] is None:
+            if not csq_record['Protein_position'].startswith('-') and csq_record['Protein_position'] != '.':
+                if '/' in csq_record['Protein_position']:
+                    protein_position = str(csq_record['Protein_position'].split('/')[0])
+                    if '-' in protein_position:
+                        if protein_position.split('-')[0].isdigit():
+                            csq_record['AMINO_ACID_START'] = protein_position.split('-')[0]
+                        if protein_position.split('-')[1].isdigit():
+                            csq_record['AMINO_ACID_END'] = protein_position.split('-')[1]
+                    else:
+                        if protein_position.isdigit():
+                            csq_record['AMINO_ACID_START'] = protein_position
+                            csq_record['AMINO_ACID_END'] = protein_position
+                            
+                            if 'synonymous_variant' in csq_record['Consequence'] and 'Amino_acids' in csq_record.keys():
+                                if not csq_record['Amino_acids'] is None:
+                                    protein_change = 'p.' + \
+                                        str(csq_record['Amino_acids']) + \
+                                        str(protein_position) + str(csq_record['Amino_acids'])
+                                    if 'stop_lost' in str(csq_record['Consequence']) and '/' in str(csq_record['Amino_acids']):
+                                        protein_change = 'p.X' + \
+                                            str(protein_position) + \
+                                            str(csq_record['Amino_acids']).split('/')[1]
 
     if not csq_record['HGVSp'] is None:
         if csq_record['HGVSp'] != '.':
@@ -333,15 +389,26 @@ def assign_cds_exon_intron_annotations(csq_record, logger):
                     protein_change_VEP = str(csq_record['HGVSp'].split(':')[1])
                     protein_change = threeToOneAA(protein_change_VEP)
                     csq_record['PROTEIN_CHANGE'] = protein_change_VEP
+                    csq_record['ALTERATION'] = protein_change_VEP
 
-    if 'synonymous_variant' in csq_record['Consequence']:
-        protein_change = 'p.' + \
-            str(csq_record['Amino_acids']) + \
-            str(protein_position) + str(csq_record['Amino_acids'])
-        if 'stop_lost' in str(csq_record['Consequence']) and '/' in str(csq_record['Amino_acids']):
-            protein_change = 'p.X' + \
-                str(protein_position) + \
-                str(csq_record['Amino_acids']).split('/')[1]
+    if 'Consequence' in csq_record.keys():
+        if 'upstream_gene_variant' in csq_record['Consequence'] and \
+            'CDS_START' in csq_record.keys() and \
+                'VARKEY' in csq_record.keys() and \
+                    'STRAND' in csq_record.keys() and \
+                        'ENSEMBL_TRANSCRIPT_ID' in csq_record.keys() and \
+                            'MANE_SELECT' in csq_record.keys():
+            varkey_info = str(csq_record['VARKEY']).split('_')            
+            if not csq_record['CDS_START'] is None:
+                if len(varkey_info) == 4:
+                    csq_record['CDS_DISTANCE'] = abs(int(csq_record['CDS_START']) - int(csq_record['VARKEY'].split('_')[1]))
+                    cds_dna_alteration = str(varkey_info[2]) + '>' + str(varkey_info[3])
+                    if csq_record['STRAND'] == '-1':
+                        cds_dna_alteration = reverse_complement_dna(str(varkey_info[2])) + '>' + reverse_complement_dna(str(varkey_info[3]))
+                    csq_record['ALTERATION'] = str('c.-' + str(csq_record['CDS_DISTANCE']) + str(cds_dna_alteration)) 
+                    csq_record['HGVSc'] = csq_record['ENSEMBL_TRANSCRIPT_ID'] + ':' + csq_record['ALTERATION']
+                    if not csq_record['MANE_SELECT'] is None:
+                        csq_record['HGVSc_RefSeq'] = str(csq_record['MANE_SELECT']) + ':' + str(csq_record['ALTERATION'])
 
     csq_record['HGVSp_short'] = protein_change
     exon_number = 'NA'
@@ -356,19 +423,24 @@ def assign_cds_exon_intron_annotations(csq_record, logger):
                 if exon_number == num_exons:
                     csq_record['LAST_EXON'] = True
 
-    if not csq_record['INTRON'] is None:
-        if csq_record['INTRON'] != '.':
-            if '/' in csq_record['INTRON']:
-                intron_number = str(csq_record['INTRON']).split('/')[0]
-                num_introns = str(csq_record['INTRON']).split('/')[1]
-                if intron_number == num_introns:
-                    csq_record['LAST_INTRON'] = True
+    if 'INTRON' in csq_record.keys():
+        if not csq_record['INTRON'] is None:
+            if csq_record['INTRON'] != '.':
+                if '/' in csq_record['INTRON']:
+                    intron_number = str(csq_record['INTRON']).split('/')[0]
+                    num_introns = str(csq_record['INTRON']).split('/')[1]
+                    if intron_number == num_introns:
+                        csq_record['LAST_INTRON'] = True
 
     if not csq_record['HGVSc'] is None:
         if csq_record['HGVSc'] != '.':
             if protein_change != '.':
-                key = str(csq_record['Consequence']) + ':' + str(csq_record['HGVSc']) + ':exon' + str(exon_number) + ':' + str(protein_change)
+                key = str(csq_record['Consequence']) + ':' + \
+                    str(csq_record['HGVSc']) + \
+                        ':exon' + str(exon_number) + \
+                            ':' + str(protein_change)
                 csq_record['CDS_CHANGE'] = key
+
 
     return(csq_record)
 
