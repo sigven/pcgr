@@ -5,7 +5,7 @@
 \alias{data_coltype_defs}
 \title{List of coltype definitions for input files to pcgrr (e.g. VCF-converted TSV, CNA TVS etc.)}
 \format{
-An object of class \code{list} of length 3.
+An object of class \code{list} of length 5.
 }
 \usage{
 data_coltype_defs

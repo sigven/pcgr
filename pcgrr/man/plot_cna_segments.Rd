@@ -4,12 +4,18 @@
 \alias{plot_cna_segments}
 \title{Plot allele-specific copy number segments}
 \usage{
-plot_cna_segments(chrom_coordinates = NULL, cna_segments = NULL)
+plot_cna_segments(
+  chrom_coordinates = NULL,
+  cna_segment = NULL,
+  cna_gene = NULL
+)
 }
 \arguments{
 \item{chrom_coordinates}{data frame with assembly-specific chromosome coordinate data (length etc)}
 
-\item{cna_segments}{data frame with annotated copy number segments}
+\item{cna_segment}{data frame with annotated copy number segments}
+
+\item{cna_gene}{data frame with gene-level copy number data}
 }
 \description{
 Function that plots allele-specific copy number segments

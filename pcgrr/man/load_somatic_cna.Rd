@@ -2,19 +2,26 @@
 % Please edit documentation in R/input_data.R
 \name{load_somatic_cna}
 \alias{load_somatic_cna}
-\title{Function that reads and validates a fully annotated CNA file from PCGR
-pre-report pipeline}
+\title{Function that reads and validates fully annotated CNA data (segments and genes)
+from PCGR pre-reporting pipeline}
 \usage{
-load_somatic_cna(fname, ref_data = NULL, settings = NULL)
+load_somatic_cna(
+  fname_cna_segment = NULL,
+  fname_cna_gene = NULL,
+  ref_data = NULL,
+  settings = NULL
+)
 }
 \arguments{
-\item{fname}{Path to file with pre-processed CNA segments}
+\item{fname_cna_segment}{Path to file with pre-processed CNA segments}
+
+\item{fname_cna_gene}{Path to file with pre-processed CNA gene-level data}
 
 \item{ref_data}{PCGR reference data object}
 
 \item{settings}{PCGR run/configuration settings}
 }
 \description{
-Function that reads and validates a fully annotated CNA file from PCGR
-pre-report pipeline
+Function that reads and validates fully annotated CNA data (segments and genes)
+from PCGR pre-reporting pipeline
 }
