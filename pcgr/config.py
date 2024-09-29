@@ -33,6 +33,7 @@ def create_config(arg_dict, workflow = "PCGR"):
         conf_options['other'] = {
             'vcfanno_n_proc': int(arg_dict['vcfanno_n_proc']),                                          
             'no_reporting': int(arg_dict['no_reporting']),
+            'no_html': int(arg_dict['no_html']),
             'retained_vcf_info_tags': str(arg_dict['retained_info_tags']),
             'show_noncoding': not int(arg_dict['ignore_noncoding']),
             'force_overwrite': int(arg_dict['force_overwrite'])
@@ -69,11 +70,19 @@ def create_config(arg_dict, workflow = "PCGR"):
         #    'run': int(arg_dict['include_trials'])
         #}
         conf_options['other']['vcf2maf'] = int(arg_dict['vcf2maf'])
+        
         conf_options['somatic_cna'] = {            
             'cna_overlap_pct': float(arg_dict['cna_overlap_pct']),
             'n_copy_gain': int(arg_dict['n_copy_gain'])
         }
         
+        conf_options['germline'] = {
+            'show': 0,
+            'ignore_vus': int(arg_dict['cpsr_ignore_vus'])
+        }
+        if not arg_dict['input_cpsr'] is None:
+            conf_options['germline']['show'] = 1
+            
         conf_options['expression'] = {}
         conf_options['expression']['run'] = int(not arg_dict['input_rna_exp'] is None)
         conf_options['expression']['similarity_analysis'] = int(arg_dict['expression_sim'])
@@ -129,11 +138,13 @@ def create_config(arg_dict, workflow = "PCGR"):
             'prevalence_reference_signatures': float(arg_dict['prevalence_reference_signatures'])
         }
         
-        
-        conf_options['molecular_data']['fname_cna_tsv'] = "None"
+        conf_options['molecular_data']['fname_cna_gene_tsv'] = "None"
+        conf_options['molecular_data']['fname_cna_segment_tsv'] = "None"
         conf_options['molecular_data']['fname_expression_tsv'] = "None"
         conf_options['molecular_data']['fname_expression_outliers_tsv'] = "None"
         conf_options['molecular_data']['fname_maf_tsv'] = "None"
+        conf_options['molecular_data']['fname_germline_tsv'] = "None"
+        conf_options['molecular_data']['fname_germline_yaml'] = "None"
         #conf_options['molecular_data']['fname_expression_csq_tsv'] = "None"
         conf_options['molecular_data']['fname_expression_similarity_tsv'] = "None"
         conf_options['molecular_data']['fname_tmb_tsv'] = "None"
@@ -149,6 +160,8 @@ def create_config(arg_dict, workflow = "PCGR"):
         conf_options['gene_panel'] = {
             'panel_id': str(arg_dict['virtual_panel_id']),
             'description': 'Exploratory virtual gene panel (panel 0)',
+            'description_trait': 'None',
+            'url': 'None',
             'custom_list_tsv': str(arg_dict['custom_list']),
             'custom_list_name': str(arg_dict['custom_list_name']),
             'custom_list_bed': 'None',
@@ -241,9 +254,12 @@ def populate_config_data(conf_options: dict, refdata_assembly_dir: str, workflow
                 
             if conf_data['conf']['gene_panel']['panel_id'] == "-1":
                 conf_data['conf']['gene_panel']['description'] = 'User-defined panel (custom geneset from panel 0)'
+                conf_data['conf']['gene_panel']['description_trait'] = 'User-defined panel (custom geneset from panel 0)'
             else:
                 if ',' in conf_data['conf']['gene_panel']['panel_id']:
                     conf_data['conf']['gene_panel']['description'] = \
+                        'Genomics England PanelApp - multiple panels (' + conf_data['conf']['gene_panel']['panel_id'] + ')'
+                    conf_data['conf']['gene_panel']['description2'] = \
                         'Genomics England PanelApp - multiple panels (' + conf_data['conf']['gene_panel']['panel_id'] + ')'
                 else:
                     if conf_data['conf']['gene_panel']['panel_id'] != "0":
@@ -257,6 +273,13 @@ def populate_config_data(conf_options: dict, refdata_assembly_dir: str, workflow
                 conf_data['conf']['gene_panel']['custom_list_tsv'],
                 bool(conf_data['conf']['variant_classification']['secondary_findings']),
                 logger)
+            
+            if conf_data['conf']['gene_panel']['panel_id'] != "-1":
+                if not ',' in conf_data['conf']['gene_panel']['panel_id']:                     
+                    conf_data['conf']['gene_panel']['url'] = str(conf_data['conf']['gene_panel']['panel_genes'][0]['panel_url'])
+                    conf_data['conf']['gene_panel']['description_trait'] = str(conf_data['conf']['gene_panel']['panel_genes'][0]['panel_name'])
+                    
+                
         
 
     return(conf_data)

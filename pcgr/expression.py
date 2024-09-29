@@ -37,7 +37,7 @@ def parse_expression(expression_fname_tsv: str,
     sample_gene_expression.sort_values(by=['ID','TPM'], ascending=[True, False], inplace = True)
     dup_ids = len(sample_gene_expression['ID']) - len(sample_gene_expression['ID'].drop_duplicates())
     if dup_ids > 0: 
-        logger.warn(f"Found N = {dup_ids} duplicate identifiers - resolving duplicates by keeping the highest TPM value")
+        logger.warning(f"Found N = {dup_ids} duplicate identifiers - resolving duplicates by keeping the highest TPM value")
         sample_gene_expression = sample_gene_expression.drop_duplicates(subset = ['ID']) 
     
     ## Read the gene identifier index - maps transcript identifiers (Ensembl/Refseq), 
@@ -111,9 +111,9 @@ def parse_expression(expression_fname_tsv: str,
             ## Emit warning if more than 5% of gene/transcript identifiers are not properly verified
             sample_identifiers_found = len(exp_map_verified)
             percent_verified = round((len(exp_map_verified) / len(exp_map)) * 100, 2)
-            percent_missing = 100 - percent_verified
+            percent_missing = round(100 - percent_verified, 2)
             if percent_missing > 5:
-                logger.warn("Failed to map " + str(percent_missing) +  \
+                logger.warning("Failed to map " + str(percent_missing) +  \
                     "% of gene/transcript identifiers in input TSV file - use proper ENST/RefSeq identifiers")
             logger.info("Verified N = " + str(sample_identifiers_found) + " (" + str(percent_verified) + \
                 "%) of gene/transcript identifiers in input gene expression file - using " + str(identifiers_used_in_input))
@@ -122,7 +122,7 @@ def parse_expression(expression_fname_tsv: str,
             ## remove them from the analysis (write them to a separate file?)
             n_ambig = len(exp_map_verified[exp_map_verified.AMBIGUOUS_ID == True])
             if n_ambig > 0:
-                logger.warn("Detected N = " + str(n_ambig) + " ambiguous gene/transcript identifiers in input gene expression file")
+                logger.warning("Detected N = " + str(n_ambig) + " ambiguous gene/transcript identifiers in input gene expression file")
             else:
                 logger.info("NO ambiguous gene/transcript identifiers were detected in input gene expression file")
             transcript_expression_map = exp_map_verified[exp_map_verified.AMBIGUOUS_ID == False]
@@ -160,9 +160,10 @@ def parse_expression(expression_fname_tsv: str,
             ## make gene level TPM summary  
             expression_map['gene'] = transcript_expression_map.groupby(
                 ['ENSEMBL_GENE_ID','SYMBOL','ENTREZGENE','GENENAME','BIOTYPE']).agg({'TPM':'sum'}).reset_index()
-            expression_map['gene'].columns = ['ENSEMBL_GENE_ID','SYMBOL','ENTREZGENE','GENENAME','BIOTYPE','TPM_GENE']
-                              
-    
+            ## add log2(TPM + 0.001) for gene-level TPM values (all reference TPM values are in log2(TPM + 0.001))
+            expression_map['gene']['TPM_LOG2_GENE'] = np.log2(expression_map['gene']['TPM'] + 0.001)
+            expression_map['gene'].columns = ['ENSEMBL_GENE_ID','SYMBOL','ENTREZGENE','GENENAME','BIOTYPE','TPM_GENE','TPM_LOG2_GENE']
+            expression_map['gene'] = expression_map['gene'].drop_duplicates().sort_values(by='TPM_GENE', ascending=False)
     return(expression_map)
 
 
@@ -184,7 +185,7 @@ def integrate_variant_expression(variant_set: pd.DataFrame,
                     if s == 'gene':
                         logger.info("Integrating gene-level expression data from tumor into somatic variant set")
                     if expression_data[s].empty:
-                        logger.warn('Expression file does not contain any gene-level expression data')
+                        logger.warning('Expression file does not contain any gene-level expression data')
                     else:
                         v = 'TPM_MIN'
                         if s == 'gene':
@@ -200,7 +201,7 @@ def integrate_variant_expression(variant_set: pd.DataFrame,
             if not expression_data['transcript'] is None:
                 logger.info("Integrating transcript-level expression data from tumor into somatic variant set")
                 if expression_data['transcript'].empty:
-                    logger.warn('Expression file does not contain any transcript-level expression data')
+                    logger.warning('Expression file does not contain any transcript-level expression data')
                     if 'TPM_GENE' in variant_set.columns:
                         variant_set = variant_set.assign(TPM = variant_set['TPM_GENE'])
                 else:
@@ -221,9 +222,9 @@ def integrate_variant_expression(variant_set: pd.DataFrame,
                                 
                         else:
                             variant_set['TPM'] = np.nan
-                            logger.warn('Variant file does not contain any entries with valid transcript identifiers')
+                            logger.warning('Variant file does not contain any entries with valid transcript identifiers')
             else:
-                logger.warn('Expression file does not contain any transcript-level expression data')
+                logger.warning('Expression file does not contain any transcript-level expression data')
                 if 'TPM_GENE' in variant_set.columns:
                     variant_set = variant_set.assign(TPM = variant_set['TPM_GENE'])
     
@@ -242,10 +243,10 @@ def aggregate_tpm_per_cons(variant_set: pd.DataFrame,
     
     if 'transcript' in expression_data.keys():
         if expression_data['transcript'].empty:
-            logger.warn('Expression file does not contain any transcript-level expression data')
+            logger.warning('Expression file does not contain any transcript-level expression data')
             return(cons2exp)
         if variant_set.empty:
-            logger.warn('Variant file does not contain any entries with valid transcript identifiers')
+            logger.warning('Variant file does not contain any entries with valid transcript identifiers')
             return(cons2exp)
         if {'VAR_ID','VEP_ALL_CSQ'}.issubset(variant_set.columns) and \
             {'ENSEMBL_TRANSCRIPT_ID','TPM'}.issubset(expression_data['transcript'].columns):
@@ -259,7 +260,7 @@ def aggregate_tpm_per_cons(variant_set: pd.DataFrame,
                 varset['VEP_ALL_CSQ'].str.split(':', expand=True)
             varset = varset[varset["ENSEMBL_TRANSCRIPT_ID"].str.contains("ENST")]
             if varset.empty:
-                logger.warn('Variant file does not contain any entries with valid transcript identifiers')
+                logger.warning('Variant file does not contain any entries with valid transcript identifiers')
                 return(cons2exp)
             varset = pd.merge(varset, trans_expression, on = 'ENSEMBL_TRANSCRIPT_ID', how = 'left')
             varset = varset.loc[~varset['TPM'].isna(), :]
@@ -296,19 +297,19 @@ def correlate_sample_expression(sample_expression: dict,
     for k in yaml_data['conf']['expression']['similarity_db'].keys():
         exp_sim[k] =  pd.DataFrame()
     sample_id = yaml_data['sample_id']
-    drop_columns = ['SYMBOL','BIOTYPE', 'GENENAME','ENTREZGENE']
+    drop_columns = ['SYMBOL','BIOTYPE', 'GENENAME','ENTREZGENE','TPM_GENE']
     
     exp_data_sample = sample_expression.copy()
     
     if 'gene' in exp_data_sample.keys():
         if not exp_data_sample['gene'] is None:
-            if {'ENSEMBL_GENE_ID','TPM_GENE','BIOTYPE'}.issubset(exp_data_sample['gene'].columns):
+            if {'ENSEMBL_GENE_ID','TPM_LOG2_GENE','BIOTYPE'}.issubset(exp_data_sample['gene'].columns):
                 if protein_coding_only is True:
                     logger.info("Filtering out non-protein coding genes from expression data")
                     exp_data_sample['gene'] = \
                         exp_data_sample['gene'][exp_data_sample['gene']['BIOTYPE'] == 'protein_coding']
                 if len(exp_data_sample['gene']) < 10:
-                    logger.warn(
+                    logger.warning(
                         'Expression file contains limited protein-coding gene expression records (N = ' + \
                             str(len(exp_data_sample['gene'])) + ') - skipping correlation analysis')
                     return(exp_sim)
@@ -317,7 +318,7 @@ def correlate_sample_expression(sample_expression: dict,
                         if col in exp_data_sample['gene'].columns:
                             exp_data_sample['gene'] = exp_data_sample['gene'].drop(col, axis = 1)   
                     exp_data_sample['gene'] = exp_data_sample['gene'].rename(
-                        columns = {'TPM_GENE':sample_id})
+                        columns = {'TPM_LOG2_GENE':sample_id})
                 
                     if 'tcga' in yaml_data['conf']['expression']['similarity_db'].keys():
                         for cohort in yaml_data['conf']['expression']['similarity_db']['tcga'].keys():                            
@@ -393,11 +394,12 @@ def correlate_sample_expression(sample_expression: dict,
 def find_expression_outliers(sample_expression: dict,
                         yaml_data: dict,
                         refdata_assembly_dir: str,
+                        protein_coding_only: bool,
                         logger: logging.Logger) -> pd.DataFrame:
     
     sample_id = yaml_data['sample_id']
     primary_site = yaml_data['conf']['sample_properties']['site']
-    required_cols = ['ENSEMBL_GENE_ID','TPM_GENE']
+    required_cols = ['ENSEMBL_GENE_ID','TPM_LOG2_GENE']
     drop_columns = ['SYMBOL','BIOTYPE', 'GENENAME','ENTREZGENE']
     
     exp_data_sample = sample_expression.copy()
@@ -409,7 +411,7 @@ def find_expression_outliers(sample_expression: dict,
     ## Future - allow user to specify TCGA cohort to compare with
     ##
     if primary_site == "Any":
-        logger.warn("Primary site not specified in configuration file - skipping expression outlier analysis")
+        logger.warning("Primary site not specified in configuration file - skipping expression outlier analysis")
         return(pd.DataFrame())
     else:
         if primary_site in pcgr_vars.SITE_TO_DISEASE.keys():
@@ -419,32 +421,39 @@ def find_expression_outliers(sample_expression: dict,
                 "tcga", str(comparison_disease_cohort).lower() + "_tpm.tsv.gz")
             if check_file_exists(exp_fname, strict = False, logger = logger):
                 exp_data_refcohort = pd.read_csv(exp_fname, sep = "\t", na_values = ".", low_memory = False)
+                
+                ## Filter for protein coding genes when doing outlier analysis
+                if protein_coding_only:
+                    #logger.info("Filtering out non-protein coding genes from expression data")
+                    exp_data_refcohort = \
+                        exp_data_refcohort[exp_data_refcohort['BIOTYPE'] == 'protein_coding']
                 for col in exp_data_refcohort.columns:
                     if col in drop_columns:
                         exp_data_refcohort = exp_data_refcohort.drop(col, axis = 1)
             else:
-                logger.warn(f'{exp_fname} not found - skipping expression outlier analysis')
+                logger.warning(f'{exp_fname} not found - skipping expression outlier analysis')
                 return(pd.DataFrame())
         else:
-            logger.warn("Primary tumor site not specified in configuration file - skipping expression outlier analysis")
+            logger.warning("Primary tumor site not specified in configuration file - skipping expression outlier analysis")
             return(pd.DataFrame())
     
     if 'gene' in exp_data_sample.keys():
         if not exp_data_sample['gene'] is None:
-            if {'ENSEMBL_GENE_ID','TPM_GENE'}.issubset(exp_data_sample['gene'].columns):
+            if {'ENSEMBL_GENE_ID','TPM_LOG2_GENE'}.issubset(exp_data_sample['gene'].columns):
                 for col in exp_data_sample['gene'].columns:
                     if col not in required_cols:
                         exp_data_sample['gene'] = exp_data_sample['gene'].drop(col, axis = 1)
                 exp_data_sample['gene'] = exp_data_sample['gene'].rename(
-                    columns = {'TPM_GENE':sample_id})
+                    columns = {'TPM_LOG2_GENE':sample_id})
                 
                 if 'ENSEMBL_GENE_ID' in exp_data_refcohort.columns and \
                     'ENSEMBL_GENE_ID' in exp_data_sample['gene'].columns:
         
                     ref_sample_mat = exp_data_refcohort.merge(
                         exp_data_sample['gene'], on = 'ENSEMBL_GENE_ID', how = 'left')
+                    
                     ref_sample_mat = ref_sample_mat.set_index('ENSEMBL_GENE_ID')
-                    percentiles = ref_sample_mat.rank(1, pct=True, numeric_only=True).apply(lambda x: round(x * 100))                    
+                    percentiles = ref_sample_mat.rank(1, pct=True, numeric_only=True).apply(lambda x: round(x * 100, 1))                    
                     sample_percentiles = percentiles[[sample_id]].reset_index().rename(columns={sample_id: 'PERCENTILE'})                    
                     quantiles = pd.concat([
                         round(ref_sample_mat[sample_id], ndigits = 5),
@@ -455,10 +464,12 @@ def find_expression_outliers(sample_expression: dict,
                         round(ref_sample_mat.std(1), ndigits = 9),
                         ], axis=1).rename(
                             columns={0.25: 'Q1', 0.5: 'Q2',0.75: 'Q3', 
-                                     sample_id: 'TPM_GENE', 0: 'MEAN', 1: 'STD'}).reset_index()                    
+                                     sample_id: 'TPM_LOG2_GENE', 0: 'MEAN', 1: 'STD'}).reset_index()                    
                     quantiles['IQR'] = round(quantiles.Q3 - quantiles.Q1, ndigits = 5)
                     quantiles['Z_SCORE'] = round(quantiles[quantiles.STD > 0].apply(
-                        lambda row: (row.TPM_GENE - row.MEAN) / row.STD, axis=1), ndigits = 5)
+                        lambda row: (row.TPM_LOG2_GENE - row.MEAN) / row.STD, axis=1), ndigits = 5)
+                    #ref_sample_mat = exp_data_refcohort.merge(
+                    #    exp_data_sample['gene'], on = 'ENSEMBL_GENE_ID', how = 'left')
                     #quantiles['kIQR'] = round(quantiles[quantiles.IQR > 0].apply(
                     #    lambda row: (row.TPM_GENE - row.Q2) / row.IQR, axis=1), ndigits = 5)
                     
@@ -474,11 +485,17 @@ def find_expression_outliers(sample_expression: dict,
                                          'REF_COHORT', 
                                          'REF_COHORT_SIZE', 
                                          'ENSEMBL_GENE_ID', 
-                                         'TPM_GENE', 'MEAN','STD',
-                                         'Z_SCORE','Q1', 'Q2', 
-                                         'Q3', 'IQR', 'PERCENTILE']]
+                                         'TPM_LOG2_GENE', 
+                                         'MEAN',
+                                         'STD',
+                                         'Z_SCORE',
+                                         'Q1', 
+                                         'Q2', 
+                                         'Q3', 
+                                         'IQR', 
+                                         'PERCENTILE']]
                     
-                    mask_valid_ensembl = pd.notna(outlier_metrics['TPM_GENE'])
+                    mask_valid_ensembl = pd.notna(outlier_metrics['TPM_LOG2_GENE'])
                     outlier_metrics_valid = outlier_metrics[mask_valid_ensembl]                                              
     
     
@@ -493,7 +510,7 @@ def correlate_samples(exp_data_sample: dict,
     
     corr_similarity = pd.DataFrame()
     if not 'gene' in exp_data_sample:
-        logger.warn("No 'gene' entry in expression data dictionary for sample " + sample_id + " - skipping correlation analysis")
+        logger.warning("No 'gene' entry in expression data dictionary for sample " + sample_id + " - skipping correlation analysis")
         return(corr_similarity)
     if 'ENSEMBL_GENE_ID' in exp_data_refcohort.columns and \
         'ENSEMBL_GENE_ID' in exp_data_sample['gene'].columns:

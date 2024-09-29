@@ -1,5 +1,32 @@
 ## Somatic CNAs
 
+<br>
+
+```{r plot_cna}
+#| eval: !expr NROW(pcg_report$content$cna$callset$variant) > 0
+#| echo: false
+#| output: asis
+#| fig.width: 15
+#| fig.height: 10
+
+cna_plot <- pcgrr::plot_cna_segments(
+  chrom_coordinates = pcg_report$settings$chrom_coordinates,
+  cna_segment = pcg_report$content$cna$callset$segment,
+  cna_gene = pcg_report$content$cna$callset$variant
+)
+
+p_margin <- 
+  list(l = 50, r = 0, b = 0, t = 0, pad = 0)
+
+plotly::ggplotly(cna_plot, tooltip = c("y","z")) |> 
+  plotly::layout(
+    legend = list(orientation = "h", x = 0.34, y = -0.28),
+    margin = p_margin)
+
+```
+
+<br>
+
 ```{r check_expression}
 #| eval: true
 
@@ -324,7 +351,7 @@ htmltools::br()
 
 Here we show other genes subject to copy number alteration that may potentially have oncogenic effects. Specifically, we list
 
- * [Proto-oncogenes](#documentation) subject to copy-number gain (total copy number >= __`r pcg_report$settings$conf$somatic_cna$n_copy_gain`__)
+ * [Proto-oncogenes](#documentation) subject to copy-number gain (total copy number >= __`r pcg_report$settings$conf$somatic_cna$n_copy_gain`__ (gain threshold, user-configurable))
  * [Tumor suppressor](#documentation) genes subject to homozygous deletions (total copy number = __0__)
 
 Gene symbols are color-coded according to their strength of association to cancer (here, specifically __`r pcg_report$settings$conf$sample_properties$site`__ cancers), from <span style="background-color:`r pcgrr::color_palette$cancer_assoc$values[1]`; padding:2x; color:white"><b>&nbsp; weak associations &nbsp; </b></span>&nbsp; to <span style="background-color:`r pcgrr::color_palette$cancer_assoc$values[length(pcgrr::color_palette$cancer_assoc$values)]`; padding:2x; color:white"><b>&nbsp; strong associations &nbsp; </b></span> [@Ochoa2021-jc;@Nakken2023-ol].

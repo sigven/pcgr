@@ -1,6 +1,6 @@
 ## Kataegis events
 
-Kataegis describes a pattern of localized hypermutations identified in some cancer genomes, in which a large number of highly-patterned basepair mutations occur in a small region of DNA (ref Wikipedia). Kataegis is prevalently seen among breast cancer patients, and it is also exists in lung cancers, cervical, head and neck, and bladder cancers, as shown in the results from tracing APOBEC mutation signatures (ref Wikipedia). PCGR implements the kataegis detection algorithm outlined in the [KataegisPortal R package](https://github.com/MeichunCai/KataegisPortal). 
+Kataegis describes a pattern of localized hypermutations identified in some cancer genomes, in which [a large number of highly-patterned basepair mutations occur in a small region of DNA](https://en.wikipedia.org/wiki/Kataegis). Kataegis is prevalently seen among breast cancer patients, and it is also exists in lung cancers, cervical, head and neck, and bladder cancers, as shown in the results from tracing APOBEC mutation signatures (ref Wikipedia). PCGR implements the kataegis detection algorithm outlined in the [KataegisPortal R package](https://github.com/MeichunCai/KataegisPortal). 
 
 Explanation of key columns in the resulting table of potential kataegis events: 
 
@@ -12,11 +12,21 @@ Explanation of key columns in the resulting table of potential kataegis events:
     - 3 - high confidence with three or more hypermutations with weight.C>X >= 0.8 in a chromosome)
 
 
-```{r mutsigs_kataegis, echo = F, eval = T}
+```{r mutsigs_kataegis}
+#| echo: false
+#| eval: true
 
-df <- data.frame('sample_id' = character(), 'chrom' = character(), 'start' = integer(), 'end' = integer(),
-                 'chrom.arm' = character(), 'length' = integer(), 'number.mut' = integer(), 'weight.C>X' = numeric(),
-                 'confidence' = integer(), stringsAsFactors = F)
+df <- data.frame(
+  'sample_id' = character(), 
+  'chrom' = character(), 
+  'start' = integer(), 
+  'end' = integer(),
+  'chrom.arm' = character(), 
+  'length' = integer(), 
+  'number.mut' = integer(), 
+  'weight.C>X' = numeric(),
+  'confidence' = integer(), 
+  stringsAsFactors = F)
 
 if(is.data.frame(pcg_report$content$kataegis$events)){
   df <- pcg_report$content$kataegis$events

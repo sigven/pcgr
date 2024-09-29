@@ -152,7 +152,8 @@ def get_csq_record_annotations(csq_fields, varkey, logger, vep_csq_fields_map, t
 
 def pick_single_gene_csq(vep_csq_results, 
                          pick_criteria_ordered = "mane_select,mane_plus_clinical,canonical,appris,tsl,biotype,ccds,rank,length", 
-                         logger = None):
+                         logger = None,
+                         debug = 0):
 
     
     csq_candidates = []
@@ -166,7 +167,7 @@ def pick_single_gene_csq(vep_csq_results,
         csq_candidate['mane_select'] = 1
         csq_candidate['mane_plus_clinical'] = 1        
         csq_candidate['canonical'] = 1
-        csq_candidate['appris'] = 8
+        csq_candidate['appris'] = 18
         csq_candidate['biotype'] = 1
         csq_candidate['tsl'] = 6
         csq_candidate['ccds'] = 1
@@ -175,6 +176,7 @@ def pick_single_gene_csq(vep_csq_results,
         ## set to picked as default
         csq_candidate['PICKED'] = True
         csq_candidate['varkey'] = csq_elem['VARKEY']
+        csq_candidate['conskey'] = str(csq_elem['SYMBOL']) + ':' + str(csq_elem['Consequence'])
 
         ## MANE select status - lower value prioritized
         if not csq_elem['MANE_SELECT'] is None:
@@ -185,16 +187,16 @@ def pick_single_gene_csq(vep_csq_results,
             csq_candidate['mane_plus_clinical'] = 0
 
         ## CANONICAL status - lower value prioritized
-        if not csq_elem['CANONICAL'] is None:
-            if csq_elem['CANONICAL'] is True:
+        if not csq_elem['CANONICAL'] is None:            
+            if csq_elem['CANONICAL'] == 'YES':
                 csq_candidate['canonical'] = 0
 
         ## APPRIS level - lower value prioritized
-        if not csq_elem['APPRIS'] is None:
+        if not csq_elem['APPRIS'] is None:            
             if not 'ALTERNATIVE' in csq_elem['APPRIS']:
                 csq_candidate['appris'] = int(re.sub(r'[A-Z]{1,}:?', '', csq_elem['APPRIS']))
             else:
-                csq_candidate['appris'] = int(re.sub(r'ALTERNATIVE:','', csq_elem['APPRIS'])) + 5
+                csq_candidate['appris'] = int(re.sub(r'ALTERNATIVE:','', csq_elem['APPRIS'])) + 10
 
         ## Biotype - lower value prioritized
         if not csq_elem['BIOTYPE'] is None:
@@ -216,11 +218,24 @@ def pick_single_gene_csq(vep_csq_results,
                     logger.warn(warn_msg)                      
 
         ## TSL - lower value prioritized
-        if not csq_elem['TSL'] is None:
+        if not csq_elem['TSL'] is None:            
             csq_candidate['tsl'] = int(csq_elem['TSL'])
 
         csq_candidates.append(csq_candidate)
 
+    # if debug:
+    #     print()
+    #     for c in csq_candidates:
+    #         all_rank_criterions = []
+    #         all_rank_criterions.append('PICKED:' + str(c['PICKED']))
+    #         all_rank_criterions.append(c['varkey'])
+    #         all_rank_criterions.append(c['conskey'])
+    #         for rank_criterion in pick_criteria_ordered.split(','):
+    #             if rank_criterion in c:
+    #                 all_rank_criterions.append(rank_criterion + ':' + str(c[rank_criterion]))            
+    #         rank_str = ' - '.join(map(str, all_rank_criterions))
+    #         print(rank_str)
+    #     print()
 
     ## Go through pick criteria in pre-defined order 
     ## - set 'PICKED' = False for all csq elements with a score above the minimum value for a given criterion
@@ -248,6 +263,20 @@ def pick_single_gene_csq(vep_csq_results,
                 j = j + 1
 
             if num_picked == 1:
+                # if debug:
+                #     print()
+                #     for c in csq_candidates:
+                #         all_rank_criterions = []
+                #         all_rank_criterions.append('PICKED:' + str(c['PICKED']))
+                #         all_rank_criterions.append(c['varkey'])
+                #         all_rank_criterions.append(c['conskey'])
+                #         for rank_criterion in pick_criteria_ordered.split(','):
+                #             if rank_criterion in c:
+                #                 all_rank_criterions.append(rank_criterion + ':' + str(c[rank_criterion]))
+                        
+                #         rank_str = ' - '.join(map(str, all_rank_criterions))
+                #         print(rank_str)
+                #     print()
                 break
 
     return(chosen_csq_index)
@@ -340,6 +369,12 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, vep_pick_order, 
             symbol = str(csq_fields[vep_csq_fields_map['field2index']['SYMBOL']])
         if csq_fields[vep_csq_fields_map['field2index']['HGVSc']] != "":
             hgvsc = str(csq_fields[vep_csq_fields_map['field2index']['HGVSc']].split(':')[1])
+        else:
+            if len(all_csq_pick) == 1:
+                if 'HGVSc' in all_csq_pick[0]:
+                    if not all_csq_pick[0]['HGVSc'] is None:
+                        if ':' in all_csq_pick[0]['HGVSc']:
+                            hgvsc = str(all_csq_pick[0]['HGVSc'].split(':')[1])
         if csq_fields[vep_csq_fields_map['field2index']['HGVSp']] != "":
             hgvsp = str(csq_fields[vep_csq_fields_map['field2index']['HGVSp']].split(':')[1])
         consequence_entry = (str(csq_fields[vep_csq_fields_map['field2index']['Consequence']]) + ":" +  
@@ -378,7 +413,7 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, vep_pick_order, 
     ## If multiple transcript-specific variant consequences highlighted by --pick_allele_gene, 
     ## prioritize/choose block of consequence according to 'vep_pick_order'
     if len(vep_csq_results['picked_gene_csq']) > 1:
-        vep_chosen_csq_idx = pick_single_gene_csq(vep_csq_results, pick_criteria_ordered = vep_pick_order, logger = logger)        
+        vep_chosen_csq_idx = pick_single_gene_csq(vep_csq_results, pick_criteria_ordered = vep_pick_order, logger = logger, debug = debug)        
         vep_csq_results['picked_csq'] = vep_csq_results['picked_gene_csq'][vep_chosen_csq_idx]
     else:
         ## check that size if 1, otherwise prompt error below

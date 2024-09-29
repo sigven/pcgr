@@ -38,13 +38,18 @@ generate_report_data_expression <-
     pcg_report_expression[["expression"]] <- exp_data
 
     if("SYMBOL" %in% colnames(exp_data) == FALSE |
-       "TPM" %in% colnames(exp_data) == FALSE |
+       ("TPM" %in% colnames(exp_data) == FALSE &
+        "TPM_GENE" %in% colnames(exp_data) == FALSE) |
        "BIOTYPE" %in% colnames(exp_data) == FALSE){
       pcgrr::log4r_warn(
-        "Missing a required column in expression file: SYMBOL, TPM, BIOTYPE")
+        "Missing a required column in expression file: SYMBOL, TPM/TPM_GENE, BIOTYPE")
     }else{
 
       n_pc <- sum(exp_data$BIOTYPE == "protein_coding")
+
+      if("TPM_GENE" %in% colnames(exp_data)){
+        exp_data$TPM <- as.numeric(exp_data$TPM_GENE)
+      }
 
       if(n_pc > 0){
         pcgrr::log4r_info(

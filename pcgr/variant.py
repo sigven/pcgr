@@ -56,10 +56,14 @@ def append_annotations(vcf2tsv_gz_fname: str, refdata_assembly_dir: str, logger)
                 if os.path.exists(clinvar_tsv_fname):
                     clinvar_data_df = pd.read_csv(
                         clinvar_tsv_fname, sep="\t", 
-                        usecols=["variation_id","origin_simple","VAR_ID","trait"],
+                        usecols=["variation_id","origin_simple","VAR_ID","trait","classification","conflicted"],
                         low_memory = False)
-                    clinvar_data_df['CLINVAR_TRAITS_ALL'] = clinvar_data_df['origin_simple'].str.capitalize().str.cat(
-                        clinvar_data_df['trait'], sep = " - ")
+                    clinvar_data_df['classification'] = clinvar_data_df['classification'].str.replace("_", " ", regex = True)
+                    clinvar_data_df.loc[(clinvar_data_df['classification'] == "VUS") & (clinvar_data_df['conflicted'] == 1),"classification"] = \
+                        "VUS/Conflicting evidence"
+                    clinvar_data_df['CLINVAR_TRAITS_ALL'] = clinvar_data_df['classification'].str.cat(
+                        clinvar_data_df['origin_simple'].str.capitalize().str.cat(
+                        clinvar_data_df['trait'], sep = " - "), sep = " - ")
                     clinvar_data_df['CLINVAR_MSID'] = clinvar_data_df['variation_id']
                     clinvar_data_df = clinvar_data_df.astype({'CLINVAR_MSID':'string'})
                     clinvar_data_df['CLINVAR_MSID'] = clinvar_data_df['CLINVAR_MSID'].str.replace("\\.[0-9]{1,}$", "", regex = True)
@@ -276,3 +280,23 @@ def clean_annotations(variant_set: pd.DataFrame, yaml_data: dict, logger) -> pd.
             variant_set.loc[variant_set[vcf_info_tag] == "-123456789", vcf_info_tag] = np.nan
     
     return variant_set
+
+def reverse_complement_dna(dna_string = "C"):
+    pairs = {
+        "A":"T",
+        "C":"G",
+        "G":"C",
+        "T":"A",
+    }
+    reverse_complement = ""
+    i = len(dna_string) - 1
+    while i >= 0:
+        base = str(dna_string[i]).upper()
+        if base in pairs:
+            complement = pairs[base]
+        else:
+            complement = base
+        reverse_complement += complement
+        i = i - 1
+    return reverse_complement     
+    

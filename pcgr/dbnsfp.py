@@ -44,7 +44,11 @@ def map_variant_effect_predictors(rec, algorithms):
         'aloft': 'DBNSFP_ALOFTPRED',
         'bayesdel_addaf': 'DBNSFP_BAYESDEL_ADDAF',
         'splice_site_ada': 'DBNSFP_SPLICE_SITE_ADA',
-        'splice_site_rf': 'DBNSFP_SPLICE_SITE_RF'
+        'splice_site_rf': 'DBNSFP_SPLICE_SITE_RF',
+        'esm1b': 'DBNSFP_ESM1B',
+        'alphamissense': 'DBNSFP_ALPHA_MISSENSE',
+        'mutformer': 'DBNSFP_MUTFORMER', 
+        'phactboost': 'DBNSFP_PHACTBOOST'
     }
 
     if dbnsfp_key != '':
@@ -58,6 +62,7 @@ def map_variant_effect_predictors(rec, algorithms):
 def map_dbnsfp_predictions(dbnsfp_tag, algorithms):
 
     effect_predictions = {}
+    
     for v in dbnsfp_tag.split(','):
         dbnsfp_info = v.split('|')
         if len(dbnsfp_info) == 1:
@@ -85,8 +90,8 @@ def map_dbnsfp_predictions(dbnsfp_tag, algorithms):
 
         i = 6
         v = 0
-       
-        if len(algorithms) != len(dbnsfp_info[6:]):
+               
+        if len(algorithms) != len(dbnsfp_info[6:]):            
             return effect_predictions
 
         while i < len(dbnsfp_info):

@@ -19,4 +19,8 @@ gerp_rs	http://mendel.stanford.edu/SidowLab/downloads/gerp/	GERP++ RS score
 list_s2	https://doi.org/10.1093/nar/gkaa288	LIST-S2
 bayesdel_addaf	https://doi.org/10.1002/humu.23158	BayesDel
 aloft	http://aloft.gersteinlab.org/	ALoFT
+esm1b	https://huggingface.co/spaces/ntranoslab/esm_variants/tree/main	ESM1b
+alphamissense	https://console.cloud.google.com/storage/browser/dm_alphamissense	AlphaMissense
+mutformer	https://github.com/WGLab/mutformer	MutFormer
+phactboost	https://github.com/CompGenomeLab/PHACTboost	PHACTboost
 metarnn	http://www.liulab.science/metarnn.html	MetaRNN

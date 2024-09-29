@@ -181,8 +181,8 @@ def verify_args(arg_dict):
         warn_message(warn_msg, logger)
 
     # Check that threshold for gains/amplifications are properly set, and that segment overlap with transcripts are set appropriately
-    if arg_dict['n_copy_gain'] <= 0:
-        err_msg = f"Totaly copy number threshold for gains/amplifications ('--n_copy_gain' = {arg_dict['n_copy_gain']}) should be > 0"
+    if arg_dict['n_copy_gain'] <= 2:
+        err_msg = f"Total copy number threshold for gains/amplifications ('--n_copy_gain' = {arg_dict['n_copy_gain']}) should be > 2"
         error_message(err_msg, logger)
     if arg_dict['cna_overlap_pct'] > 100 or arg_dict['cna_overlap_pct'] <= 0:
         err_msg = f"Minimum percent overlap between copy number segment and gene transcript ('--cna_overlap_pct' = {arg_dict['cna_overlap_pct']}) must be within (0, 100]"
@@ -220,15 +220,11 @@ def define_output_files(arg_dict, cpsr = False):
     output_data['yaml']= f"{output_prefix}.conf.yaml"
     
     if not cpsr:
-        output_data['cna'] = f"{output_prefix}.cna_segments.tsv.gz"
-        output_data['expression'] = f"{output_prefix}.expression.tsv.gz"
-        output_data['csq_expression'] = f"{output_prefix}.csq_expression.tsv.gz"
-        output_data['expression_outliers'] = f"{output_prefix}.expression_outliers.tsv.gz"
-        output_data['expression_similarity'] = f"{output_prefix}.expression_similarity.tsv.gz"
-        output_data['snv_indel_ann'] = f"{output_prefix}.snv_indel_ann.tsv.gz"
+        for otype in ['cna_gene','cna_segment','expression','expression_outliers',
+                      'expression_similarity','snv_indel_ann','msigs']:
+            output_data[otype] = f"{output_prefix}.{otype}.tsv.gz"        
         output_data['maf'] = f"{output_prefix}.maf"
         output_data['tmb'] = f"{output_prefix}.tmb.tsv"
-        output_data['msigs'] = f"{output_prefix}.msigs.tsv.gz"
     else:
         output_data['classification'] = f"{output_prefix}.classification.tsv.gz"
     
@@ -240,7 +236,7 @@ def define_output_files(arg_dict, cpsr = False):
             error_message(err_msg, logger)
     
     if not cpsr:
-        for otype in ['cna', 'expression', 'expression_outliers', 'snv_indel_ann',
+        for otype in ['cna_gene', 'cna_segment','expression', 'expression_outliers', 'snv_indel_ann',
                       'expression_similarity','maf','tmb','msigs']:
             # if annotated output cna segments exist and overwrite not set
             if os.path.exists(output_data[otype]) and arg_dict["force_overwrite"] is False:
@@ -267,6 +263,7 @@ def verify_input_files(arg_dict):
     input_cna_dir = 'NA'
     input_rna_fusion_dir = 'NA'
     input_germline_dir = 'NA'
+    input_germline_yaml_dir = 'NA'
     input_rna_expression_dir = 'NA'
     pon_vcf_dir = 'NA'
     db_dir = 'NA'
@@ -277,6 +274,7 @@ def verify_input_files(arg_dict):
     input_rna_fusion_basename = 'NA'
     input_rna_expression_basename = 'NA'
     input_germline_basename = 'NA'
+    input_germline_yaml_basename = 'NA'
     arg_dict['rna_fusion_tumor'] = None
     
     # create output folder (if not already exists)
@@ -366,19 +364,30 @@ def verify_input_files(arg_dict):
             os.path.abspath(arg_dict["input_rna_exp"]))
         
     # check if input germline calls (CPSR) exist
-    #if not arg_dict["input_germline"] is None:
-    #    if not os.path.exists(os.path.abspath(arg_dict["input_germline"])):
-    #        err_msg = "Input file (" + \
-    #            str(arg_dict["input_germline"]) + ") does not exist"
-    #        error_message(err_msg, logger)
-    #    if not (os.path.abspath(arg_dict["input_germline"]).endswith(".tsv.gz")):
-    #        err_msg = "File with CPSR-classified germline calls  (" + os.path.abspath(
-    #            arg_dict["input_germline"]) + ") does not have the correct file extension (.json.gz)"
-    #        error_message(err_msg, logger)
-    #    input_germline_basename = os.path.basename(
-    #        str(arg_dict["input_germline"]))
-    #    input_germline_dir = os.path.dirname(
-    #        os.path.abspath(arg_dict["input_germline"]))
+    if not arg_dict["input_cpsr"] is None:
+        if not os.path.exists(os.path.abspath(arg_dict["input_cpsr"])):
+            err_msg = "Input file (" + \
+               str(arg_dict["input_cpsr"]) + ") does not exist"
+            error_message(err_msg, logger)
+        if not (os.path.abspath(arg_dict["input_cpsr"]).endswith(".tsv.gz")):
+            err_msg = "File with CPSR-classified germline calls  (" + os.path.abspath(
+               arg_dict["input_cpsr"]) + ") does not have the correct file extension (.tsv.gz)"
+            error_message(err_msg, logger)
+        
+        if arg_dict["input_cpsr_yaml"] is None:
+            err_msg = "Input file with CPSR configuration settings (--input_cpsr_yaml) is missing"
+            error_message(err_msg, logger)
+        else:
+            check_file_exists(os.path.abspath(arg_dict["input_cpsr_yaml"]), strict = True, logger = logger)
+            input_germline_yaml_basename = os.path.basename(
+                str(arg_dict["input_cpsr_yaml"]))
+            input_germline_yaml_dir = os.path.dirname(
+                os.path.abspath(arg_dict["input_cpsr_yaml"]))
+
+        input_germline_basename = os.path.basename(
+            str(arg_dict["input_cpsr"]))
+        input_germline_dir = os.path.dirname(
+            os.path.abspath(arg_dict["input_cpsr"]))   
     
     vep_dir = verify_vep_cache(arg_dict, logger)
     refdata_assembly_dir = verify_refdata(arg_dict, logger, cpsr = False)
@@ -391,6 +400,8 @@ def verify_input_files(arg_dict):
       "rna_expression_dir": input_rna_expression_dir,
       "germline_dir": input_germline_dir,
       "germline_basename": input_germline_basename,
+      "germline_yaml_dir": input_germline_yaml_dir,
+      "germline_yaml_basename": input_germline_yaml_basename,
       "pon_vcf_dir": pon_vcf_dir,
       "refdata_assembly_dir": refdata_assembly_dir,
       "vep_dir": vep_dir,

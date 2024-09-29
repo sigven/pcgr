@@ -423,7 +423,7 @@ generate_report_data_signatures <-
                 dplyr::anti_join(missing_signatures,
                                  by = c("signature_id_group" = "signature_id")) |>
                 dplyr::group_by(
-                  group, prop_group
+                  .data$group, .data$prop_group
                 ) |>
                 dplyr::summarise(
                   signature_id_group = paste(
@@ -764,15 +764,17 @@ generate_report_data_rainfall <- function(variant_set,
     labels <- gsub("chr", "", names(chr_length))
 
     # position of chromosome labels
-    m <- c()
+    chrom_midpoints <- c()
     for (i in 2:length(chr_cum))
-      m <- c(m, (chr_cum[i - 1] + chr_cum[i]) / 2)
+      chrom_midpoints <- c(
+        chrom_midpoints, (chr_cum[i - 1] + chr_cum[i]) / 2)
 
     # mutation characteristics
     type <- c()
     loc <- c()
     dist <- c()
     chrom <- c()
+    variant_id <- c()
 
     # for each chromosome
     #chromosomes <-
@@ -786,28 +788,43 @@ generate_report_data_rainfall <- function(variant_set,
       loc <- c(loc, (chr_subset$POS + chr_cum[i])[-1])
       dist <- c(dist, diff(chr_subset$POS))
       chrom <- c(chrom, rep(chromosomes[i], n - 1))
+      varid <- paste0(chr_subset$CHROM[-1], ":",
+                   chr_subset$POS[-1],":",
+                   chr_subset$REF[-1], ">",
+                   chr_subset$ALT[-1])
+      variant_id <- c(variant_id, varid)
     }
 
-    invisible(assertthat::assert_that(length(type) == length(loc) &
-                            length(loc) == length(dist) &
-                            length(chrom) == length(dist),
-                            msg = "Length of type/loc/dist not identical"))
-    data <- data.frame(type = type,
-                      location = loc,
-                      distance = dist,
-                      chromosome = chrom,
-                      stringsAsFactors = F)
+    invisible(
+      assertthat::assert_that(
+        length(type) == length(loc) &
+          length(loc) == length(dist) &
+          length(chrom) == length(dist),
+        msg = "Length of type/loc/dist not identical"))
+    data <- data.frame(
+      type = type,
+      location = loc,
+      variant_id = variant_id,
+      dist2prev = dist,
+      chromosome = chrom,
+      stringsAsFactors = F)
 
     # Removes colors based on missing mutation types.  This prevents colors from
     # shifting when comparing samples with low mutation counts.
     typesin <- sbs_types %in% sort(unique(data$type))
     colors_selected <- colors[typesin]
-    ylim <- 1e+09
+    #ylim <- 1e+09
+    ylim <- 1e+10
     pcg_report_rainfall[["eval"]] <- T
     pcg_report_rainfall[["rfdata"]] <-
-      list("data" = data, "intercept" = m, "ylim" = ylim,
-           "chr_cum" = chr_cum, "colors" = colors_selected,
-           "labels" = labels, "cex" = 0.8, "cex_text" = 3)
+      list("data" = data,
+           "chrom_midpoints" = chrom_midpoints,
+           "ylim" = ylim,
+           "chr_cum" = chr_cum,
+           "colors" = colors_selected,
+           "chrom_labels" = labels,
+           "cex" = 0.8,
+           "cex_text" = 3)
   }
   return(pcg_report_rainfall)
 }

@@ -2,14 +2,22 @@
 
 import os,re,sys
 from cyvcf2 import VCF, Writer
+import csv
 
-def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
+from typing import Dict
+from logging import Logger
+import gzip
+
+from pcgr.annoutils import threeToOneAA
+
+def assign_oncogenicity_evidence(rec = None, oncogenic_variants = None, tumortype = "Any"):
 
    clingen_vicc_ev_codes = [
       "CLINGEN_VICC_SBVS1", 
       "CLINGEN_VICC_SBS1", 
       "CLINGEN_VICC_SBP1", 
       "CLINGEN_VICC_SBP2",
+      "CLINGEN_VICC_OS1", 
       "CLINGEN_VICC_OS3", 
       "CLINGEN_VICC_OM1",
       "CLINGEN_VICC_OM2",
@@ -114,6 +122,7 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
       "Consequence",
       "MUTATION_HOTSPOT",
       "MUTATION_HOTSPOT_CANCERTYPE",
+      "CLINVAR_KNOWN_ONCOGENIC",
       "SYMBOL",
       "BIOMARKER_MATCH",
       "ONCOGENE",
@@ -161,6 +170,10 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
    
    for code in clingen_vicc_ev_codes:
       variant_data[code] = False
+   
+   if "CLINVAR_KNOWN_ONCOGENIC" in variant_data.keys():
+      if not variant_data['CLINVAR_KNOWN_ONCOGENIC'] is None:         
+         variant_data['CLINGEN_VICC_OS1'] = True
    
    dbnsfp_minimum_majority = 6
    dbnsfp_maximum_minority = 2
@@ -260,8 +273,12 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
       
       ## Split all biomarker evidence into a list
       biomarker_evidence = variant_data['BIOMARKER_MATCH'].split(',')
+     
    
       for eitem in biomarker_evidence:
+         
+         #print(variant_data['SYMBOL'] + '\t' + variant_data['Consequence'] + '\t' + str(eitem))
+         
          ## Example 'eitem' element:
          ## cgi|659|CGI1077:Pancreas:Sensitivity/Response:C:Predictive:Somatic|by_hgvsp_principal
          if ('Predictive' in eitem or 'Oncogenic' in eitem) and \
@@ -272,7 +289,7 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
              'by_codon_principal' in eitem or \
              'by_aa_region_principal' in eitem):               
                ## only applicable if OS3 is not set
-               if variant_data['CLINGEN_VICC_OS3'] is False:
+               if variant_data['CLINGEN_VICC_OS3'] is False and variant_data['CLINGEN_VICC_OS1'] is False:
                   variant_data['CLINGEN_VICC_OM1'] = True
          
          ## Catch prognostic/diagnostic non-coding variants (e.g. TERT) - these will rank at the top
@@ -283,7 +300,7 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
             ('by_genomic_coord' in eitem or \
              'by_hgvsc_principal' in eitem):
                ## only applicable if OS3 is not set
-               if variant_data['CLINGEN_VICC_OS3'] is False:
+               if variant_data['CLINGEN_VICC_OS3'] is False and variant_data['CLINGEN_VICC_OS1'] is False:
                   variant_data['CLINGEN_VICC_OM1'] = True
 
    if "gnomADe_EAS_AF" in variant_data.keys() and \
@@ -319,7 +336,7 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
       if approx_zero_pop_freq == 5:
          variant_data["CLINGEN_VICC_OP4"] = True
   
-    
+   
    ## check if variant is a loss-of-function variant in a tumor suppressor gene (Cancer Gene Census/CancerMine)
    if "TSG" in variant_data.keys() and \
       "ONCOGENE" in variant_data.keys() and \
@@ -360,6 +377,7 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
        'CLINGEN_VICC_SBP1',
        'CLINGEN_VICC_SBP2',
        'CLINGEN_VICC_OVS1',
+       'CLINGEN_VICC_OS1',
        'CLINGEN_VICC_OS3',
        'CLINGEN_VICC_OM1',
        'CLINGEN_VICC_OM2',
@@ -379,6 +397,7 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
        'funcvar',
        'funcvar',
        'funcvar',
+       'funcvar',
        'funccomp']
    og_score_data['pole'] = \
       ['B','B',
@@ -386,7 +405,8 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
        'B','P',
        'P','P',
        'P','P',
-       'P','P']
+       'P','P',
+       'P']
    
    og_score_data['description'] = \
       ['Very high MAF (> 0.05 in gnomAD - any five major continental pops)',
@@ -395,6 +415,7 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
       'Multiple lines (>=6) of computational evidence support a benign effect on the gene or gene product - from dbNSFP',
       'Silent and intronic changes outside of the consensus splice site',
       'Null variant - predicted as LoF - in bona fide tumor suppressor gene',
+      'Same amino acid change as previously established oncogenic variant - regardless of nucleotide change (ClinVar oncogenicity records)',
       'Located in a mutation hotspot (cancerhotspots.org). >= 50 samples with a  variant at AA position, >= 10 samples with same AA change',
       'Presumably critical site of functional domain - based on indirect evidence from overlap with predictive biomarkers',
       'Protein length changes from in-frame dels/ins in known oncogene/tumor suppressor genes or stop-loss variants in a tumor suppressor gene',
@@ -404,7 +425,7 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
       ]
    
    og_score_data['score'] = \
-      [-8, -4, 1, -1, -1, 8, 4, 2, 2, 2, 1, 1]
+      [-8, -4, 1, -1, -1, 8, 4, 4, 2, 2, 2, 1, 1]
    
    i = 0
    oncogenicity_scores = {}
@@ -473,3 +494,95 @@ def assign_oncogenicity_evidence(rec = None, tumortype = "Any"):
       rec.INFO[e] = variant_data[e]
 
    return(rec)
+
+def load_oncogenic_variants(oncogenic_variants_fname: str, logger: Logger):
+   """
+   Load oncogenic variants from a file and create a dictionary of variants.
+   """
+   
+   oncogenic_variants = {}
+   if not os.path.exists(oncogenic_variants_fname):
+      logger.info(f"ERROR: File '{oncogenic_variants_fname}' does not exist - exiting")
+      exit(1)
+
+   with gzip.open(oncogenic_variants_fname, mode='rt') as f:
+      reader = csv.DictReader(f, delimiter='\t')
+      for row in reader:            
+         gene = str(row['entrezgene'])         
+         oncogenic_variants[str(gene) + '-' + str(row['var_id'])] = row
+         if not len(row['hgvsp']) == 0:
+            oncogenic_variants[str(gene) + '-' + str(row['hgvsp'])] = row
+         if not len(row['hgvs_c']) == 0:
+            oncogenic_variants[str(gene) + '-' + str(row['hgvs_c'])] = row
+         
+   return oncogenic_variants
+
+
+def match_oncogenic_variants(transcript_csq_elements, oncogenic_variants, rec, principal_csq_properties):
+
+   """
+   Function that matches consequence entries from VEP (transcript_csq_elements) agains known oncogenic variants from ClinVar,
+   using both genomic coordinate information, HGVSp and HGVSc information.
+   """
+   
+   principal_hgvsp = principal_csq_properties['hgvsp']
+   principal_hgvsc = principal_csq_properties['hgvsc'] 
+   
+   known_oncogenic_matches = {}
+
+   for csq in transcript_csq_elements:
+      (consequence, symbol, entrezgene, hgvsc, hgvsp, exon, feature_type, feature, biotype) = csq.split(':')
+
+      if not bool(re.search(r'^(missense|stop|start|inframe|splice_donor|intron|splice_acceptor|frameshift|upstream)', consequence)) is True:
+         continue
+
+      var_id = str(rec.CHROM) + '_' + str(rec.POS) + '_' + str(rec.REF) + '_' + str(','.join(rec.ALT))
+      oncogenic_varkey = '.'
+      if entrezgene != ".":
+         oncogenic_varkey = str(entrezgene) + '-' + str(var_id)
+         if oncogenic_varkey in oncogenic_variants and 'oncogenicity' in oncogenic_variants[oncogenic_varkey]:
+            oncogenic_info = oncogenic_variants[oncogenic_varkey]['symbol'] + '|' + \
+               str(oncogenic_variants[oncogenic_varkey]['hgvsp']) + '|' + \
+               str(oncogenic_variants[oncogenic_varkey]['hgvs_c']) + '|' + \
+               str(oncogenic_variants[oncogenic_varkey]['oncogenicity'])
+            if not oncogenic_info in known_oncogenic_matches:
+               known_oncogenic_matches[oncogenic_info] = []
+            known_oncogenic_matches[oncogenic_info].append('by_genomic_coord')
+   
+      if entrezgene != "." and hgvsp != ".":
+         hgvsp_short = threeToOneAA(hgvsp)
+         oncogenic_varkey = str(entrezgene) + '-' + str(hgvsp_short)
+         if oncogenic_varkey in oncogenic_variants and 'oncogenicity' in oncogenic_variants[oncogenic_varkey]:
+            oncogenic_info = oncogenic_variants[oncogenic_varkey]['symbol'] + '|' + \
+               str(oncogenic_variants[oncogenic_varkey]['hgvsp']) + '|' + \
+               str(oncogenic_variants[oncogenic_varkey]['hgvs_c']) + '|' + \
+               str(oncogenic_variants[oncogenic_varkey]['oncogenicity'])
+            if not oncogenic_info in known_oncogenic_matches:
+               known_oncogenic_matches[oncogenic_info] = []
+            if hgvsp_short == principal_hgvsp:
+               known_oncogenic_matches[oncogenic_info].append('by_hgvsp_principal')
+            else:
+               known_oncogenic_matches[oncogenic_info].append('by_hgvsp_nonprincipal')
+
+      if entrezgene != "." and hgvsc != ".":
+         oncogenic_varkey = str(entrezgene) + '-' + str(hgvsc)
+         if oncogenic_varkey in oncogenic_variants and 'oncogenicity' in oncogenic_variants[oncogenic_varkey]:
+            oncogenic_info = oncogenic_variants[oncogenic_varkey]['symbol'] + '|' + \
+               str(oncogenic_variants[oncogenic_varkey]['hgvsp']) + '|' + \
+               str(oncogenic_variants[oncogenic_varkey]['hgvs_c']) + '|' + \
+               str(oncogenic_variants[oncogenic_varkey]['oncogenicity'])
+            if not oncogenic_info in known_oncogenic_matches:
+               known_oncogenic_matches[oncogenic_info] = []
+            if hgvsc == principal_hgvsc:
+               known_oncogenic_matches[oncogenic_info].append('by_hgvsc_principal')
+            else:
+               known_oncogenic_matches[oncogenic_info].append('by_hgvsc_nonprincipal')
+      if oncogenic_varkey == ".":
+         continue
+
+   if len(list(known_oncogenic_matches.keys())) == 1:
+      oncogenic_variant_info = list(known_oncogenic_matches.keys())[0]
+      rec.INFO['CLINVAR_KNOWN_ONCOGENIC'] = oncogenic_variant_info + '|' + \
+         '&'.join(sorted(set(known_oncogenic_matches[oncogenic_variant_info])))
+            
+   return

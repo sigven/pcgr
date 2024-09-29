@@ -33,6 +33,10 @@ if(as.logical(conf$assay_properties$vcf_tumor_only) == TRUE){
 
 success_color <- pcgrr::color_palette$success
 
+include_germline_findings <- 'OFF'
+if(pcg_report$content$germline_classified$eval == T){
+  include_germline_findings <- 'ON'
+}
 if(pcg_report$content$msi$eval == F){
   msi_prediction <- 'OFF'
 }
@@ -64,9 +68,10 @@ The report is generated with _[pcgr](https://github.com/sigven/pcgr)_ version `r
 * Minimum sequencing depth (DP) control (SNV + InDels): __`r conf[['somatic_snv']][['allelic_support']][['control_dp_min']]`__
 * Maximum allelic fraction (AF) control (SNV + InDels): __`r conf[['somatic_snv']][['allelic_support']][['control_af_max']]`__
 * Variant actionability guidelines: __AMP/ASCO/CAP__
-* Variant oncogenicity guidelines: __VICC/ClinGen__
+* Variant oncogenicity guidelines: __ClinGen/CGC/VICC__
 * Show noncoding variants: __`r conf$other$show_noncoding `__
 * MSI prediction: __`r msi_prediction`__
+* Include germline findings: __`r include_germline_findings`__
 * Mutational burden estimation: __`r mutational_burden`__
   * TMB algorithm: __`r paste0('TMB_',conf$somatic_snv[['tmb']][['tmb_display']])`__ 
 * Minimum total copy number for copy number gains: __`r conf$somatic_cna$n_copy_gain`__

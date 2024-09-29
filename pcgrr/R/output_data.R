@@ -75,6 +75,7 @@ get_excel_sheets <- function(report = NULL){
       excel_sheets[['TMB']] <- report$content$tmb$sample_estimate
     }
   }
+
   ## Mutational signatures
   if(!is.null(report$content$mutational_signatures)){
     if(report$content$mutational_signatures$missing_data == FALSE){
@@ -89,6 +90,20 @@ get_excel_sheets <- function(report = NULL){
       }
     }
   }
+
+  ## Kataegis events
+  if(!is.null(report$content$kataegis$events)){
+    if(report$content$kataegis$eval == TRUE){
+      if(NROW(report$content$kataegis$events) > 0){
+        colnames(report$content$kataegis$events) <-
+          toupper(colnames(report$content$kataegis$events))
+
+        excel_sheets[['KATAEGIS_EVENTS']] <-
+          report$content$kataegis$events
+      }
+    }
+  }
+
 
   ## MSI
   if(!is.null(report$content$msi)){
@@ -113,8 +128,17 @@ get_excel_sheets <- function(report = NULL){
       colnames(report$content$expression$immune_contexture) <-
         toupper(colnames(report$content$expression$immune_contexture))
 
-      excel_sheets[['IMMUNE_CONTEXTURE']] <-
+      excel_sheets[['RNA_IMMUNE_CONTEXTURE']] <-
         report$content$expression$immune_contexture
+    }
+
+    if("outliers" %in% names(report$content$expression)){
+
+      excel_sheets[['RNA_EXPRESSION_OUTLIERS']] <-
+        report$content$expression$outliers |>
+        dplyr::select(-dplyr::any_of(
+          c("GENENAME","CANCERGENE_EVIDENCE",
+            "TARGETED_INHIBITORS_ALL","ENSEMBL_GENE_ID")))
     }
   }
 
@@ -123,7 +147,7 @@ get_excel_sheets <- function(report = NULL){
      report$content$cna$eval == TRUE){
 
     if(NROW(report$content$cna$callset$variant) > 0){
-      excel_sheets[['CNA']] <- as.data.frame(
+      excel_sheets[['SOMATIC_CNA']] <- as.data.frame(
         report$content$cna$callset$variant |>
           dplyr::select(dplyr::any_of(pcgrr::tsv_cols$cna)) |>
           dplyr::select(-dplyr::any_of("BIOMARKER_MATCH")) |>
@@ -131,7 +155,7 @@ get_excel_sheets <- function(report = NULL){
       )
 
       ## Evidence items - biomarkers
-      excel_sheets[['CNA_BIOMARKER']] <- data.frame()
+      excel_sheets[['SOMATIC_CNA_BIOMARKER']] <- data.frame()
       i <- 1
       while(i <= 2){
         tier_data <-
@@ -160,14 +184,14 @@ get_excel_sheets <- function(report = NULL){
               c("SAMPLE_ID","SAMPLE_ALTERATION", "ACTIONABILITY_TIER"),
               dplyr::everything()
             )
-          excel_sheets[['CNA_BIOMARKER']] <- dplyr::bind_rows(
-            excel_sheets[['CNA_BIOMARKER']], edata)
+          excel_sheets[['SOMATIC_CNA_BIOMARKER']] <- dplyr::bind_rows(
+            excel_sheets[['SOMATIC_CNA_BIOMARKER']], edata)
         }
         i <- i + 1
       }
-      if(NROW(excel_sheets[['CNA_BIOMARKER']]) > 0){
-        excel_sheets[['CNA_BIOMARKER']] <-
-          excel_sheets[['CNA_BIOMARKER']] |>
+      if(NROW(excel_sheets[['SOMATIC_CNA_BIOMARKER']]) > 0){
+        excel_sheets[['SOMATIC_CNA_BIOMARKER']] <-
+          excel_sheets[['SOMATIC_CNA_BIOMARKER']] |>
           dplyr::distinct() |>
           dplyr::arrange(
             .data$SAMPLE_ID,
@@ -189,7 +213,7 @@ get_excel_sheets <- function(report = NULL){
     }
 
     if(NROW(report$content$snv_indel$callset$variant) > 0){
-      excel_sheets[['SNV_INDEL']] <-
+      excel_sheets[['SOMATIC_SNV_INDEL']] <-
         report$content$snv_indel$callset$variant |>
         dplyr::select(
           dplyr::any_of(snv_indel_cols)) |>
@@ -203,7 +227,7 @@ get_excel_sheets <- function(report = NULL){
           -dplyr::any_of(c("BIOMARKER_MATCH","VEP_ALL_CSQ")))
 
       ## Evidence items - biomarkers
-      excel_sheets[['SNV_INDEL_BIOMARKER']] <- data.frame()
+      excel_sheets[['SOMATIC_SNV_INDEL_BIOMARKER']] <- data.frame()
       i <- 1
       while(i <= 2){
         tier_data <-
@@ -233,14 +257,14 @@ get_excel_sheets <- function(report = NULL){
               dplyr::everything()
             )
 
-          excel_sheets[['SNV_INDEL_BIOMARKER']] <- dplyr::bind_rows(
-            excel_sheets[['SNV_INDEL_BIOMARKER']], edata)
+          excel_sheets[['SOMATIC_SNV_INDEL_BIOMARKER']] <- dplyr::bind_rows(
+            excel_sheets[['SOMATIC_SNV_INDEL_BIOMARKER']], edata)
         }
         i <- i + 1
       }
-      if(NROW(excel_sheets[['SNV_INDEL_BIOMARKER']]) > 0){
-        excel_sheets[['SNV_INDEL_BIOMARKER']] <-
-          excel_sheets[['SNV_INDEL_BIOMARKER']] |>
+      if(NROW(excel_sheets[['SOMATIC_SNV_INDEL_BIOMARKER']]) > 0){
+        excel_sheets[['SOMATIC_SNV_INDEL_BIOMARKER']] <-
+          excel_sheets[['SOMATIC_SNV_INDEL_BIOMARKER']] |>
           dplyr::distinct() |>
           dplyr::arrange(
             .data$SAMPLE_ID,

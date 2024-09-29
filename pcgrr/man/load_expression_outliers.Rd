@@ -7,8 +7,9 @@
 load_expression_outliers(
   settings = NULL,
   ref_data = NULL,
-  percentile_cutoff_high = 90,
-  percentile_cutoff_low = 10
+  percentile_cutoff_high = 95,
+  percentile_cutoff_low = 5,
+  z_score_cutoff = 1.5
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ load_expression_outliers(
 \item{percentile_cutoff_high}{numeric, percentile cutoff for high expression}
 
 \item{percentile_cutoff_low}{numeric, percentile cutoff for low expression}
+
+\item{z_score_cutoff}{numeric, z-score cutoff for expression outliers}
 }
 \description{
 Load expression outlier results

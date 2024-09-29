@@ -270,7 +270,8 @@ append_tcga_var_link <- function(var_df,
         dplyr::select(.data$VAR_ID, .data$TCGALINK) |>
         dplyr::rename(TCGA_FREQUENCY = "TCGALINK")
         #magrittr::set_colnames(c("VAR_ID", "TCGA_FREQUENCY"))
-      var_df <- dplyr::rename(var_df, TCGA_FREQUENCY_RAW = .data$TCGA_FREQUENCY)
+      var_df <- dplyr::rename(
+        var_df, TCGA_FREQUENCY_RAW = .data$TCGA_FREQUENCY)
       var_df <- dplyr::left_join(var_df, var_df_links,
                                  by = c("VAR_ID" = "VAR_ID"))
     }else{

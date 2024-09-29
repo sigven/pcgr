@@ -5,7 +5,7 @@
 \alias{tsv_cols}
 \title{TSV columns}
 \format{
-An object of class \code{list} of length 2.
+An object of class \code{list} of length 3.
 }
 \usage{
 tsv_cols

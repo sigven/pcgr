@@ -1,16 +1,26 @@
 ### Gene expression outliers
 
-Here, we show the gene expression outliers identified in the RNA sample, as compared to the selected reference cohort. Expression outliers are defined as genes with expression levels located at the extreme ends of the distributions observed in the reference cohort, specifically those with:
+Here, we show the protein-coding gene expression outliers identified in the RNA input sample, as compared to the selected reference cohort. We consider expression outliers as genes with expression levels (specifically log-transformed TPM values, see below) located at the extreme ends of the distributions observed in the reference cohort, specifically those with:
 
-* A TPM in the top or bottom percentiles (i.e. above 90 or below 10), and either 
-* A TPM that is more than 1.5 * IQR above the third quartile (increased expression) of the distribution seen in the reference cohort
-* A TPM that is less than 1.5 * IQR below the first quartile (decreased expression) of the distribution seen in the reference cohort
+1) An expression level in the top or bottom percentiles (i.e. above 95 or below 5), _and_ 
+2) An expression level that is more than $Q3 + 1.5 \times IQR$ (increased expression) or less than $Q1 - 1.5 \times IQR$ (decreased expression), _and_
+3) An expression level with a Z-score above 2 or below -2 
 
-__TPM__: Transcripts per Million, 
+__TPM__: Transcripts per Million
 __IQR__: Interquartile range
+__Q1__: First quartile
+__Q3__: Third quartile
 
-We only consider protein-coding genes, and limit the ones shown to cancer-associated genes (including
-tumor suppressors, oncogenes, drivers etc), as well as targets of approved cancer drugs.
+Outlier genes shown here are furthermore limited to the ones that have some evidence of being cancer-associated (including, yet not limited to, tumor suppressors, oncogenes, and predicted cancer driver genes), as well as targets of approved cancer drugs. Maximum __N = 1,000__ genes are listed here for each category (increased/reduced expression)
+
+::: {.callout-note}
+
+## Note - gene expression unit
+
+In the table below, column __EXPR_LEVEL__ indicates the expression level of a gene in the input sample as
+_log2(TPM + 0.001)_
+
+:::
 
 ::: {.callout-warning}
 
@@ -22,12 +32,76 @@ A comparison of gene expression levels identified in the input sample to those f
 
 <br>
 
-```{r expression_outliers}
-#| eval: !expr as.logical(NROW(pcg_report$content$expression$outliers) > 0) == TRUE
+```{r check_expression_outliers_data}
+#| eval: true
 #| output: asis
 
+outliers_high_present <- F
+outliers_high <- data.frame()
+outliers_low_present <- F
+outliers_low <- data.frame()
+
+if(!is.null(pcg_report$content$expression$outliers)){
+  if(NROW(pcg_report$content$expression$outliers) > 0){
+    
+    outliers_high <- pcg_report$content$expression$outliers |>
+      dplyr::filter(.data$EXPR_OUTLIER == "Increased expression") |>
+      dplyr::arrange(
+        dplyr::desc(.data$Z_SCORE)
+      ) |>
+      head(1000)
+    
+    if(NROW(outliers_high) > 0){
+      outliers_high_present <- T
+    }
+    
+    outliers_low <- pcg_report$content$expression$outliers |>
+      dplyr::filter(.data$EXPR_OUTLIER == "Reduced expression") |>
+      dplyr::arrange(
+        dplyr::desc(abs(.data$Z_SCORE))
+      ) |>
+      head(1000)
+    
+    if(NROW(outliers_low) > 0){
+      outliers_low_present <- T
+    }
+  }
+    
+}
+
+
+```
+
+
+::: {.panel-tabset}
+
+```{r outliers_high_expression}
+#| output: asis
+#| eval: !expr outliers_high_present == TRUE
+
+source_name <- 'Outliers - increased expression'
+cat('\n\n#### ',source_name,'\n\n<br>')
+
+outliers_high_shared <- 
+  crosstalk::SharedData$new(
+    outliers_high)
+
+
+filter_set1 <- list()
+filter_set2 <- list()
+
+filter_set1[[1]] <- crosstalk::filter_select(
+  "SYMBOL", "Gene", outliers_high_shared, ~SYMBOL)
+filter_set2[[1]] <- crosstalk::filter_slider(
+  "Z_SCORE", "Z-score", outliers_high_shared, ~Z_SCORE)
+
+crosstalk::bscols(
+  filter_set1,
+  filter_set2
+)
+
 DT::datatable(
-  pcg_report$content$expression$outliers,
+  outliers_high_shared,
   escape = F, 
   extensions = c("Buttons","Responsive"), 
   options = list(
@@ -44,17 +118,74 @@ DT::datatable(
       )
   ) |>
   DT::formatStyle(
-    "TPM_GENE",
+    "EXPR_OUTLIER",
     "PERCENTILE", 
     color = "white", 
     backgroundColor = 
       DT::styleInterval(
-        pcgrr::color_palette$exp_increase$breaks,
-        pcgrr::color_palette$exp_increase$values
+        pcgrr::color_palette$expression_outlier_high$breaks,
+        pcgrr::color_palette$expression_outlier_high$values
       )
-  )
+  ) 
  
-
 ```
 
 
+```{r outliers_low_expression}
+#| output: asis
+#| eval: !expr outliers_low_present == TRUE
+
+source_name <- 'Outliers - reduced expression'
+cat('\n\n#### ',source_name,'\n\n<br>')
+
+outliers_low_shared <- 
+  crosstalk::SharedData$new(
+    outliers_low)
+
+
+filter_set1 <- list()
+filter_set2 <- list()
+
+filter_set1[[1]] <- crosstalk::filter_select(
+  "SYMBOL", "Gene", outliers_low_shared, ~SYMBOL)
+filter_set2[[1]] <- crosstalk::filter_slider(
+  "Z_SCORE", "Z-score", outliers_low_shared, ~Z_SCORE)
+
+crosstalk::bscols(
+  filter_set1,
+  filter_set2
+)
+
+DT::datatable(
+  outliers_low_shared,
+  escape = F, 
+  extensions = c("Buttons","Responsive"), 
+  options = list(
+    buttons = c('csv','excel'), 
+    dom = 'Bfrtip')) |>
+  DT::formatStyle(
+    "SYMBOL",
+    "GLOBAL_ASSOC_RANK", 
+    color = "white", 
+    backgroundColor = 
+      DT::styleInterval(
+        pcgrr::color_palette$cancer_assoc$breaks,
+        pcgrr::color_palette$cancer_assoc$values
+      )
+  ) |>
+  DT::formatStyle(
+    "EXPR_OUTLIER",
+    "PERCENTILE", 
+    color = "white", 
+    backgroundColor = 
+      DT::styleInterval(
+        pcgrr::color_palette$expression_outlier_low$breaks,
+        pcgrr::color_palette$expression_outlier_low$values
+      )
+  ) 
+ 
+```
+
+:::
+
+<br><br>

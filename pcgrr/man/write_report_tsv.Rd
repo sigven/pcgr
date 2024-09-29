@@ -11,7 +11,7 @@ write_report_tsv(report = NULL, output_type = "snv_indel")
 \item{report}{List object with all report data, settings etc.}
 
 \item{output_type}{character indicating output type for TSV,
-i.e. 'snv_indel' or 'cna_gene', 'msigs'}
+i.e. 'snv_indel', 'snv_indel_unfiltered', 'cna_gene', or 'msigs'}
 }
 \description{
 param report List object with all report data (PCGR/CPSR), settings etc.

@@ -39,7 +39,14 @@ if(!is.null(cps_report)){
   cpsr::write_cpsr_output(
     cps_report,
     output_format = 'xlsx')
-  cpsr::write_cpsr_output(
-     cps_report,
-     output_format = 'html')
+
+  if(cps_report$settings$conf$other$no_html == FALSE){
+    cpsr::write_cpsr_output(
+      cps_report,
+      output_format = 'html')
+  }
+  else{
+    pcgrr::log4r_info("Skipping HTML report generation (option '--no_html' set to TRUE)")
+  }
+
 }

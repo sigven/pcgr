@@ -184,10 +184,12 @@ def match_csq_biomarker(transcript_csq_elements, variant_biomarkers, rec, princi
    principal_csq_hgvsc = False
    for csq_elem in transcript_csq_elements:
       (consequence, symbol, entrezgene, hgvsc, hgvsp, exon, feature_type, feature, biotype) = csq_elem.split(':')
-      #print(csq_elem)
 
-      if bool(re.search(r'^(missense|stop|start|inframe|splice_donor|protein|splice_acceptor|frameshift)', consequence)) is True:
+      #if bool(re.search(r'^(missense|stop|start|inframe|protein|splice_donor|splice_acceptor|frameshift)', consequence)) is True:
+      #   mut_protein = True
+      if bool(re.search(r'^(missense|stop|start|inframe|protein|frameshift)', consequence)) is True:
          mut_protein = True
+
       
       hgvsp_short = threeToOneAA(hgvsp)
 
@@ -228,12 +230,10 @@ def match_csq_biomarker(transcript_csq_elements, variant_biomarkers, rec, princi
          
          if len(codon_match) > 0:
             biomarker_key_codon = str(entrezgene) + '_' + str(codon_match[0])
-            #print("CODON\t" + str(biomarker_key_codon))
 
             ## match biomarkers annotated as "CODON" only for a given gene
             if biomarker_key_codon in variant_biomarkers['hgvsp']:
                hits_codon = variant_biomarkers['hgvsp'][biomarker_key_codon]
-               #print("CODON\t" + str(hits_codon))
                for chit in hits_codon:
                   if not chit['alteration_type'] == "CODON":
                      continue
@@ -273,8 +273,8 @@ def match_csq_biomarker(transcript_csq_elements, variant_biomarkers, rec, princi
       if entrezgene != "." and not rec.INFO.get('HGVSc') is None:
          hgvsc_elements = str(rec.INFO.get('HGVSc')).split(':')
          if len(hgvsc_elements) == 2:
-            hgvsc_biomarker_key = str(entrezgene) + '_' + str(hgvsc_elements[1])              
-            if hgvsc_biomarker_key in variant_biomarkers['hgvsc'].keys():                  
+            hgvsc_biomarker_key = str(entrezgene) + '_' + str(hgvsc_elements[1]) 
+            if hgvsc_biomarker_key in variant_biomarkers['hgvsc'].keys():
                hits_hgvsc = variant_biomarkers['hgvsc'][hgvsc_biomarker_key]
                for hit_hgvsc in hits_hgvsc:
                   hgvsc_hit = f"{hit_hgvsc['biomarker_source']}|{hit_hgvsc['variant_id']}|{hit_hgvsc['clinical_evidence_items']}"
@@ -289,7 +289,6 @@ def match_csq_biomarker(transcript_csq_elements, variant_biomarkers, rec, princi
       ## Match biomarkers indicated by exon number (and consequence) - "exon level" resolution
       if entrezgene != "." and principal_csq_entrezgene is True and exon != ".":
          exon_biomarker_key = str(entrezgene) + '_' + str(exon)
-         #print("EXON\t" + str(exon_biomarker_key))
          if exon_biomarker_key in variant_biomarkers['exon'].keys():
             hits_exon = variant_biomarkers['exon'][exon_biomarker_key]
 

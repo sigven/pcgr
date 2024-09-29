@@ -16,7 +16,7 @@ require(glue, include.only = "glue")
 ```{r vars, echo=FALSE}
 Sys.setenv(VEP_VERSION = "112")
 Sys.setenv(PCGR_VERSION = "2.0.3")
-Sys.setenv(BUNDLE_VERSION = "20240621")
+Sys.setenv(BUNDLE_VERSION = "20240927")
 VEP_VERSION <- Sys.getenv("VEP_VERSION")
 PCGR_VERSION <- Sys.getenv("PCGR_VERSION")
 BUNDLE_VERSION <- Sys.getenv("BUNDLE_VERSION")
@@ -46,7 +46,7 @@ need to match the chosen assembly.
 Reference bundles are generated semi-automatically (by the PCGR author) and
 are versioned based on their release date. Keep in mind that the bundles support
 only certain Ensembl VEP versions. The latest (**v`r BUNDLE_VERSION`**) genome-specific
-bundles can be downloaded directly from below (size: ~5G):
+bundles can be downloaded directly from below (size: ~4G):
 
 | Assembly | Download Link             |
 |:---------|:--------------------------|
@@ -211,6 +211,11 @@ docker container run -it --rm \
       --assay "WGS" \
       --vcf2maf
 ```
+
+**NOTE**: If you need to run the Docker-based version of PCGR as a non-root user,
+you may need to explicitly add options for quarto to work properly, i.e. 
+`--env "XDG_CACHE_HOME=/tmp/quarto_cache_home"` (same as for Singularity/Apptainer below, see also [issue #246](https://github.com/sigven/pcgr/issues/246)).
+<br><br>
 
 ### C. Singularity/Apptainer
 

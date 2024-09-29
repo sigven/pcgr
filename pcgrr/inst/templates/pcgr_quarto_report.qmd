@@ -87,17 +87,36 @@ if(as.logical(pcg_report$settings$conf$assay_properties$vcf_tumor_only) == TRUE)
 
 <br>
 
+```{r pcgr_kataegis}
+#| child: 'pcgr_quarto_report/kataegis.qmd'
+#| eval: !expr as.logical(pcg_report$content$kataegis$eval) == TRUE
+```
+
+
+<br>
+
 ```{r pcgr_msi}
 #| child: 'pcgr_quarto_report/msi.qmd'
 #| eval: !expr as.logical(pcg_report$content$msi$eval) == TRUE
 ```
+
+<br>
 
 ```{r conditional_tmb}
 #| child: 'pcgr_quarto_report/mutational_burden.qmd'
 #| eval: !expr as.logical(pcg_report$content$tmb$eval) == TRUE
 ```
 
-```{r conditional_expresson}
+<br>
+
+```{r pcgr_germline}
+#| child: 'pcgr_quarto_report/germline.qmd'
+#| eval: !expr as.logical(pcg_report$content$germline_classified$eval) == TRUE
+```
+
+
+
+```{r conditional_expression}
 #| child: 'pcgr_quarto_report/expression.qmd'
 #| eval: !expr as.logical(pcg_report$content$expression$eval) == TRUE
 ```
