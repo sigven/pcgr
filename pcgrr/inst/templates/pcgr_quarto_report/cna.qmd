@@ -361,50 +361,9 @@ Gene symbols are color-coded according to their strength of association to cance
 
 ```{r }
 
-oncogene_gain_variants <- 
-  dplyr::filter(
-    pcg_report[["content"]][["cna"]][["callset"]][["variant_display"]],
-    !is.na(.data$ACTIONABILITY_TIER) & 
-    .data$ACTIONABILITY_TIER == 3 & 
-      .data$ONCOGENE == TRUE & 
-      .data$VARIANT_CLASS == "gain") |>
-  dplyr::select(
-    dplyr::any_of(
-      pcgrr::dt_display$cna_other_oncogenic
-    )
-  )
 
-tsgene_loss_variants <- 
-  dplyr::filter(
-    pcg_report[["content"]][["cna"]][["callset"]][["variant_display"]],
-    !is.na(.data$ACTIONABILITY_TIER) & 
-      .data$ACTIONABILITY_TIER == 3 & 
-      .data$TUMOR_SUPPRESSOR == TRUE & 
-      .data$VARIANT_CLASS == "homdel") |>
-  dplyr::select(
-    dplyr::any_of(
-      pcgrr::dt_display$cna_other_oncogenic
-    )
-  )
-
-dt_other_oncogenic <- 
-  dplyr::bind_rows(
-    oncogene_gain_variants,
-    tsgene_loss_variants
-  ) |>
-  dplyr::select(
-    dplyr::any_of(
-      pcgrr::dt_display$cna_other_oncogenic
-    )
-  ) |>
-  dplyr::arrange(
-    dplyr::desc(.data$TISSUE_ASSOC_RANK),
-    dplyr::desc(.data$GLOBAL_ASSOC_RANK),
-  )
-
-# if(expression_present_cna == FALSE){
-#   dt_other_oncogenic$TPM_GENE <- NULL
-# }
+dt_other_oncogenic <- pcgrr::get_oncogenic_cna_events(
+  cna_df_display = pcg_report[["content"]][["cna"]][["callset"]][["variant_display"]])
 
 dt_other_oncongenic_cna <- DT::datatable(
   dt_other_oncogenic,
@@ -432,19 +391,6 @@ dt_other_oncongenic_cna <- DT::datatable(
        )
    )
 
-# if(expression_present_cna == TRUE){
-#   dt_other_oncongenic_cna <- dt_other_oncongenic_cna |>
-#     DT::formatStyle(
-#      "TPM_GENE",
-#      "TPM_GENE", 
-#      color = "white", 
-#      backgroundColor = 
-#        DT::styleInterval(
-#          pcgrr::color_palette$gene_expression$breaks,
-#          pcgrr::color_palette$gene_expression$values
-#        )
-#    )
-# }
 
 dt_other_oncongenic_cna
 
