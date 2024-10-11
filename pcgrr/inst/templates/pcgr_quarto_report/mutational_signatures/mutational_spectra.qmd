@@ -16,21 +16,6 @@ y_max <-
     max(catalogue_mat[,1] / sum(catalogue_mat[,1])),
     0.05, f = ceiling)
 
-# raw_context_plot <- sigminer::show_catalogue(
-#   catalogue_mat, 
-#   mode = "SBS", 
-#   normalize = "row", 
-#   x_lab = "", 
-#   palette = head(pcgrr::color_palette$tier$values, 6),  
-#   y_lab = "Relative contribution",
-#   rm_panel_border = T, 
-#   bar_width = 0.8, 
-#   x_label_angle = 45, 
-#   base_size = 18, 
-#   paint_axis_text = T)
-# 
-# raw_context_plot
-
 plotly::ggplotly(
   height = 400,
   MutationalPatterns::plot_96_profile(

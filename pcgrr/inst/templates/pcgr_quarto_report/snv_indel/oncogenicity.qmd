@@ -248,46 +248,6 @@ if(NROW(noncoding_variant_set[!is.na(noncoding_variant_set$ONCOGENICITY) &
   
 }
 
-
-# if(expression_present_snv == FALSE){
-#   coding_variant_set$consTPM <- NULL
-# }
-# 
-# coding_variants_shared <- 
-#   crosstalk::SharedData$new(coding_variant_set)
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# noncoding_variant_set <- 
-#   pcg_report$content$snv_indel$callset$variant_display |>
-#   dplyr::filter(
-#     .data$CODING_STATUS == "noncoding" &
-#      .data$CONSEQUENCE != "intergenic_variant") |>
-#   dplyr::select(
-#     dplyr::any_of(
-#       pcgrr::dt_display$snv_indel_tier3
-#     )
-#   ) |>
-#   dplyr::select(-c("PROTEIN_CHANGE","PROTEIN_DOMAIN",
-#                    "MUTATION_HOTSPOT",
-#                    "MUTATION_HOTSPOT_CANCERTYPE",
-#                    "HGVSc_RefSeq",
-#                    "PREDICTED_EFFECT",
-#                    "TARGETED_INHIBITORS",
-#                    "TARGETED_INHIBITORS_ALL")) |>
-#  dplyr::arrange(
-#     dplyr::desc(.data$ONCOGENICITY_SCORE),
-#     dplyr::desc(.data$TISSUE_ASSOC_RANK),
-#     dplyr::desc(.data$GLOBAL_ASSOC_RANK),
-#   ) |>
-#   head(1000)
-
 # if(expression_present_snv == FALSE){
 #   noncoding_variant_set$consTPM <- NULL
 # }

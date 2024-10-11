@@ -25,7 +25,7 @@ if(pcg_report[['content']][['germline_classified']][['panel_info']][['panel_id']
 
 * Based on a germline variant analysis of the query case using the [Cancer Predisposition Sequencing Reporter (CPSR)](https://github.com/sigven/cpsr), we here list the variants of clinical significance in cancer predisposition genes, both novel (not recorded in ClinVar), and those with existing classifications in ClinVar.
     * Virtual panel of cancer predisposition genes screened: `r panel_link`
-    * Variants of uncertain significance shown: __`r !pcg_report$settings$conf$germline$ignore_vus`__
+    * Protein-coding variants of uncertain significance shown: __`r !pcg_report$settings$conf$germline$ignore_vus`__
 
 
 ```{r cpsr_clinvar_findings}

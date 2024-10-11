@@ -65,6 +65,7 @@ plot_cna_segments <- function(chrom_coordinates = NULL,
     quiet = T
   )
 
+  ## Check required column names of cna_genes data frame
   assertable::assert_colnames(
     cna_gene,
     c("CHROM",
@@ -84,7 +85,8 @@ plot_cna_segments <- function(chrom_coordinates = NULL,
   )
 
 
-  ## Identify segments that involve oncogene gain or tumor suppressor loss
+  ## Identify segments that involve oncogene gain or
+  ## tumor suppressor loss
   onc_gain_tsg_loss <- cna_gene |>
     dplyr::select(
       c("CHROM", "SEGMENT_START", "SEGMENT_END",
@@ -100,7 +102,8 @@ plot_cna_segments <- function(chrom_coordinates = NULL,
   tsg_loss <- data.frame()
   onc_gain <- data.frame()
 
-  ## If there are oncogene gains or tumor suppressor losses, prepare data for plotting
+  ## If there are oncogene gains or tumor suppressor losses,
+  ## prepare data for plotting
   if(NROW(onc_gain_tsg_loss) > 0){
     onc_gain <- onc_gain_tsg_loss |>
       dplyr::filter(
@@ -324,7 +327,7 @@ plot_cna_segments <- function(chrom_coordinates = NULL,
 #'
 get_oncogenic_cna_events <- function(cna_df_display = NULL){
 
-  cna_other_oncogenic_events <- data.frame()
+  cna_oncogenic_events <- data.frame()
 
   assertthat::assert_that(
     !is.null(cna_df_display)
@@ -332,7 +335,7 @@ get_oncogenic_cna_events <- function(cna_df_display = NULL){
   assertthat::assert_that(
     is.data.frame(cna_df_display))
   if(NROW(cna_df_display) == 0){
-    return(cna_other_oncogenic_events)
+    return(cna_oncogenic_events)
   }
   assertable::assert_colnames(
     cna_df_display,
@@ -376,7 +379,7 @@ get_oncogenic_cna_events <- function(cna_df_display = NULL){
       )
     )
 
-  dt_other_oncogenic <-
+  cna_oncogenic_events <-
     dplyr::bind_rows(
       oncogene_gain_variants,
       tsgene_loss_variants
@@ -391,7 +394,7 @@ get_oncogenic_cna_events <- function(cna_df_display = NULL){
       dplyr::desc(.data$GLOBAL_ASSOC_RANK),
     )
 
-  return(dt_other_oncogenic)
+  return(cna_oncogenic_events)
 
 
 }
