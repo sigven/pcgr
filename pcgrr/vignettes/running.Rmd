@@ -56,7 +56,47 @@ The primary tissue/site of the tumor sample that is analyzed can and should be b
 
 * `--tumor_site <value>`
 
-This option takes a value between 0 and 30, reflecting the main primary sites/tissues for human cancers. Note that the default value is __0__ (implies __Any__ tissue/site), which essentially prohibits the presence of [tier 1 variants](variant_classification.html) occurring in the report. If you want to check the nature of cancer subtypes attributed to each of the primary tissue/sites, take a look at the [table with phenotype terms and associated primary sites](primary_tumor_sites.html).
+This option takes a value between 0 and 30, reflecting the main primary sites/tissues for human cancers. This
+information is used e.g. to discriminate between on and off-label targeted therapies from the actionable biomarkers detected in the sample. Note that the default value is __0__ (implies __Any__ tissue/site), which essentially prohibits the presence of [tier 1 variants](variant_classification.html) occurring in the report. 
+
+The following lists the possible encodings, and the corresponding primary tissues/sites:
+
+```
+0 = Any
+1 = Adrenal Gland
+2 = Ampulla of Vater
+3 = Biliary Tract
+4 = Bladder/Urinary Tract
+5 = Bone
+6 = Breast
+7 = Cervix
+8 = CNS/Brain
+9 = Colon/Rectum
+10 = Esophagus/Stomach
+11 = Eye
+12 = Head and Neck
+13 = Kidney
+14 = Liver
+15 = Lung
+16 = Lymphoid
+17 = Myeloid
+18 = Ovary/Fallopian Tube
+19 = Pancreas
+20 = Peripheral Nervous System
+21 = Peritoneum
+22 = Pleura
+23 = Prostate
+24 = Skin
+25 = Soft Tissue
+26 = Testis
+27 = Thymus
+28 = Thyroid
+29 = Uterus
+30 = Vulva/Vagina
+(default: 0 - any tumor type)
+```
+
+If you want to check the nature of cancer subtypes attributed to each of the primary tissue/sites, take a look at the [table with phenotype terms and associated primary sites](primary_tumor_sites.html).
 
 ### Allelic support
 

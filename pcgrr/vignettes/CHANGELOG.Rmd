@@ -21,7 +21,7 @@ diff <- function(new, old) {
 
 pr_or_issue <- function(n, type) {
   assert_that(is.numeric(n), n > 0, type %in% c("issue", "pr"))
-  type2 <- dplyr::if_else(type == "pr", "pull", "issue")
+  type2 <- dplyr::if_else(type == "pr", "pull", "issues")
   a(
     href = glue("https://github.com/sigven/pcgr/{type2}/{n}"),
     glue("{type}{n}")
@@ -45,6 +45,13 @@ user <- function(x) {
 sigven <- user("sigven")
 pdiakumis <- user("pdiakumis")
 ```
+
+## v2.1.1
+
+- Date: **2024-10-11**
+
+- Fix bug in parsing of relative CDS position (`r issue(252)`)
+- Move some code in the qmd templates to `pcgrr` functions
 
 ## v2.1.0
 

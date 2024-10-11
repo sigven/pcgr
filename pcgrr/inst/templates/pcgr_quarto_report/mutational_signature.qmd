@@ -166,46 +166,12 @@ cat("\n\n::: {.callout-important}\n\n## Suboptimal fit of mutational profile\n\n
 #| output: asis
 
 
-plot_data <- 
-  msig_content$result$contributions$per_signature |>
-  dplyr::mutate(signature_aetiology = paste0(signature_id, " - ", group)) |>
-  dplyr::mutate(prop_signature = round(prop_signature, digits = 4)) |>
-  dplyr::mutate(prop_signature_ci_lower = round(
-    prop_signature_ci_lower, digits = 4)) |>
-  dplyr::mutate(prop_signature_ci_upper = round(
-    prop_signature_ci_upper, digits = 4)) |>
-  dplyr::mutate(
-    signature_aetiology = factor(
-      signature_aetiology, levels = signature_aetiology))
-
-signature_contribution_plot <- ggplot2::ggplot(
-  head(plot_data, 6), 
-  ggplot2::aes(
-    x = reorder(signature_aetiology, -prop_signature), 
-    y = prop_signature, 
-    fill = signature_aetiology)) +
-    ggplot2::geom_bar(stat = "identity") + 
-  ggplot2::geom_errorbar(
-    ggplot2::aes(ymin = prop_signature_ci_lower, 
-                 ymax = prop_signature_ci_upper), 
-    width = .3)+
-    ggplot2::scale_fill_manual(
-      values = head(pcgrr::color_palette$tier$values, NROW(plot_data))) +
-    ggplot2::theme_classic() +
-    ggplot2::xlab("") +
-    ggplot2::ylab("Relative contribution") +
-  ggplot2::theme(
-    legend.position = "bottom",
-    legend.title = ggplot2::element_blank(),
-    plot.margin = ggplot2::margin(0.5, 0.5, 0.5, 0.5, "cm"), 
-    axis.text.x = ggplot2::element_blank(),
-    axis.title.y = ggplot2::element_text(family = "Helvetica", size = 13),
-    axis.text.y = ggplot2::element_text(family = "Helvetica", size = 13),
-    legend.text = ggplot2::element_text(family = "Helvetica", size = 12))
+signature_contribution_plot <- 
+  pcgrr::plot_signature_contributions(
+    signature_contributions = msig_content$result$contributions
+  )
 
 
-pltly_plot <- plotly::ggplotly(signature_contribution_plot)
-pltly_plot$x$layout$legend$title$text <- ""
 bslib::card(
   height = "400px",
   bslib::card_header(
@@ -215,7 +181,8 @@ bslib::card(
       pcg_report$settings$sample_id)
   ),
   bslib::card_body(
-    pltly_plot
+    signature_contribution_plot[['plotly']]
+    #pltly_plot
   )
 )
 ```

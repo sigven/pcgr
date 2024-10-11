@@ -401,7 +401,7 @@ def assign_cds_exon_intron_annotations(csq_record, logger):
             varkey_info = str(csq_record['VARKEY']).split('_')            
             if not csq_record['CDS_START'] is None:
                 if len(varkey_info) == 4:
-                    csq_record['CDS_DISTANCE'] = abs(int(csq_record['CDS_START']) - int(csq_record['VARKEY'].split('_')[1]))
+                    csq_record['CDS_DISTANCE'] = abs(int(float(csq_record['CDS_START'])) - int(csq_record['VARKEY'].split('_')[1]))
                     cds_dna_alteration = str(varkey_info[2]) + '>' + str(varkey_info[3])
                     if csq_record['STRAND'] == '-1':
                         cds_dna_alteration = reverse_complement_dna(str(varkey_info[2])) + '>' + reverse_complement_dna(str(varkey_info[3]))

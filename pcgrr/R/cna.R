@@ -65,6 +65,7 @@ plot_cna_segments <- function(chrom_coordinates = NULL,
     quiet = T
   )
 
+  ## Check required column names of cna_genes data frame
   assertable::assert_colnames(
     cna_gene,
     c("CHROM",
@@ -84,7 +85,8 @@ plot_cna_segments <- function(chrom_coordinates = NULL,
   )
 
 
-  ## Identify segments that involve oncogene gain or tumor suppressor loss
+  ## Identify segments that involve oncogene gain or
+  ## tumor suppressor loss
   onc_gain_tsg_loss <- cna_gene |>
     dplyr::select(
       c("CHROM", "SEGMENT_START", "SEGMENT_END",
@@ -100,7 +102,8 @@ plot_cna_segments <- function(chrom_coordinates = NULL,
   tsg_loss <- data.frame()
   onc_gain <- data.frame()
 
-  ## If there are oncogene gains or tumor suppressor losses, prepare data for plotting
+  ## If there are oncogene gains or tumor suppressor losses,
+  ## prepare data for plotting
   if(NROW(onc_gain_tsg_loss) > 0){
     onc_gain <- onc_gain_tsg_loss |>
       dplyr::filter(
@@ -307,3 +310,91 @@ plot_cna_segments <- function(chrom_coordinates = NULL,
 
 }
 
+
+#' Get oncogenic copy number events
+#'
+#' Function that extracts oncogenic copy number events from
+#' a data frame of annotated transcripts (within copy number segments),
+#' utilizing oncogene/tumor suppressor status and copy number
+#' variant class (gain/loss). This set is used to highlight
+#' copy-altered transcripts that are presumably oncogenic, yet
+#' not actionable _per se_.
+#'
+#' @param cna_df_display data frame with transcript annotations per
+#' copy number segment
+#'
+#' @export
+#'
+get_oncogenic_cna_events <- function(cna_df_display = NULL){
+
+  cna_oncogenic_events <- data.frame()
+
+  assertthat::assert_that(
+    !is.null(cna_df_display)
+  )
+  assertthat::assert_that(
+    is.data.frame(cna_df_display))
+  if(NROW(cna_df_display) == 0){
+    return(cna_oncogenic_events)
+  }
+  assertable::assert_colnames(
+    cna_df_display,
+    c("ACTIONABILITY_TIER",
+      "ONCOGENE",
+      "TUMOR_SUPPRESSOR",
+      "VARIANT_CLASS"),
+    only_colnames = FALSE,
+    quiet = TRUE)
+
+  assertthat::assert_that(
+    is.numeric(cna_df_display$ACTIONABILITY_TIER),
+    is.logical(cna_df_display$ONCOGENE),
+    is.logical(cna_df_display$TUMOR_SUPPRESSOR),
+    is.character(cna_df_display$VARIANT_CLASS)
+  )
+
+  oncogene_gain_variants <-
+    dplyr::filter(
+      cna_df_display,
+      !is.na(.data$ACTIONABILITY_TIER) &
+        .data$ACTIONABILITY_TIER == 3 &
+        .data$ONCOGENE == TRUE &
+        .data$VARIANT_CLASS == "gain") |>
+    dplyr::select(
+      dplyr::any_of(
+        pcgrr::dt_display$cna_other_oncogenic
+      )
+    )
+
+  tsgene_loss_variants <-
+    dplyr::filter(
+      cna_df_display,
+      !is.na(.data$ACTIONABILITY_TIER) &
+        .data$ACTIONABILITY_TIER == 3 &
+        .data$TUMOR_SUPPRESSOR == TRUE &
+        .data$VARIANT_CLASS == "homdel") |>
+    dplyr::select(
+      dplyr::any_of(
+        pcgrr::dt_display$cna_other_oncogenic
+      )
+    )
+
+  cna_oncogenic_events <-
+    dplyr::bind_rows(
+      oncogene_gain_variants,
+      tsgene_loss_variants
+    ) |>
+    dplyr::select(
+      dplyr::any_of(
+        pcgrr::dt_display$cna_other_oncogenic
+      )
+    ) |>
+    dplyr::arrange(
+      dplyr::desc(.data$TISSUE_ASSOC_RANK),
+      dplyr::desc(.data$GLOBAL_ASSOC_RANK),
+    )
+
+  return(cna_oncogenic_events)
+
+
+}
