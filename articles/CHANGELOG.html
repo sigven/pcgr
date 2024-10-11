@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -85,6 +85,17 @@
     
     
 <div class="section level2">
+<h2 id="v2-1-1">v2.1.1<a class="anchor" aria-label="anchor" href="#v2-1-1"></a>
+</h2>
+<ul>
+<li><p>Date: <strong>2024-10-11</strong></p></li>
+<li><p>Fix bug in parsing of relative CDS position
+(<a href="https://github.com/sigven/pcgr/issues/252" class="external-link">issue252</a>)</p></li>
+<li><p>Move some code in the qmd templates to <code>pcgrr</code>
+functions</p></li>
+</ul>
+</div>
+<div class="section level2">
 <h2 id="v2-1-0">v2.1.0<a class="anchor" aria-label="anchor" href="#v2-1-0"></a>
 </h2>
 <ul>
@@ -102,7 +113,7 @@
 <li>Reduction (~15%) in overall data bundle size - removed unused data
 files (e.g. expression counts)</li>
 <li>Fixed bug in MAF output for tumor-only runs
-<a href="https://github.com/sigven/pcgr/issue/250" class="external-link">issue250</a>, also
+<a href="https://github.com/sigven/pcgr/issues/250" class="external-link">issue250</a>, also
 ensure that non-exonic variants are excluded if setting
 <code>--exclude_nonexonic</code> is used)</li>
 <li>Fixed bug in annotation of splice site mutation hotspots (e.g. MET
@@ -559,7 +570,7 @@ tool does not support compressed VCFs - see <a href="https://github.com/mskcc/vc
 </h5>
 <ul>
 <li>JSON output for CPSR,
-<a href="https://github.com/sigven/pcgr/issue/44" class="external-link">issue44</a>
+<a href="https://github.com/sigven/pcgr/issues/44" class="external-link">issue44</a>
 </li>
 </ul>
 <hr>
@@ -590,7 +601,7 @@ is still above 500,000 after step A)</li>
 </ul>
 </li>
 <li>Bug in signature analysis
-(<a href="https://github.com/sigven/pcgr/issue/187" class="external-link">issue187</a>) for
+(<a href="https://github.com/sigven/pcgr/issues/187" class="external-link">issue187</a>) for
 cases where the input variant set fits to &gt; 18 different
 aetiologies.</li>
 </ul>
