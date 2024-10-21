@@ -223,20 +223,6 @@ def pick_single_gene_csq(vep_csq_results,
 
         csq_candidates.append(csq_candidate)
 
-    # if debug:
-    #     print()
-    #     for c in csq_candidates:
-    #         all_rank_criterions = []
-    #         all_rank_criterions.append('PICKED:' + str(c['PICKED']))
-    #         all_rank_criterions.append(c['varkey'])
-    #         all_rank_criterions.append(c['conskey'])
-    #         for rank_criterion in pick_criteria_ordered.split(','):
-    #             if rank_criterion in c:
-    #                 all_rank_criterions.append(rank_criterion + ':' + str(c[rank_criterion]))            
-    #         rank_str = ' - '.join(map(str, all_rank_criterions))
-    #         print(rank_str)
-    #     print()
-
     ## Go through pick criteria in pre-defined order 
     ## - set 'PICKED' = False for all csq elements with a score above the minimum value for a given criterion
     ## - when there is only one element with 'PICKED' equal to TRUE, break out of the loop, and report the chosen transcript CSQ element
@@ -293,9 +279,11 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, vep_pick_order, 
     - if argument 'pick_only' is TRUE, only elements with 'PICK' == 1' is chosen
     """
     
-    all_csq_pick = []
-    alternative_csq_pick = []
+    all_csq = []
+    primary_csq_pick = []
+    secondary_csq_pick = []
     all_transcript_consequences = []
+    
 
     varkey = str(rec.CHROM) + '_' + str(rec.POS) + '_' + str(rec.REF) + '_' + str(','.join(rec.ALT))
 
@@ -303,18 +291,18 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, vep_pick_order, 
     gwas_hit = False
     if not var_gwas_info is None:
         gwas_hit = True
+        
+    found_in_target = 0
     
     ## Retrieve the INFO element provided by VEP (default 'CSQ') in the VCF object, and 
     ## loop through all transcript-specific consequence blocks provided, e.g. 
     #  CSQ=A|intron_variant|||.., A|splice_region_variant|||, and so on.
     for csq in rec.INFO.get(csq_identifier).split(','):
-        #print(csq)
         csq_fields = csq.split('|')
-
         entrezgene = '.'
 
         ## Entrez gene identifier is not provided by VEP, pull out this from 'transcript_xref_map' for a given 
-        ## vtranscript-specific CSQ block
+        ## transcript-specific CSQ block
         ##  - used for 'consequence_entry' object that are added to 'vep_all_csq' array
         k = 0
         while(k < len(csq_fields)):
@@ -328,36 +316,51 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, vep_pick_order, 
             k = k + 1
         
         
-        ## CPSR - consider all consequences (considering that a variant may overlap other, non-CPSR targets)
+        ## CPSR - consider all picked gene-specific consequences (considering that a variant may occasionally 
+        ## overlap other, non-CPSR targets)
         if pick_only is False: 
-            csq_record = get_csq_record_annotations(csq_fields, varkey, logger, vep_csq_fields_map, transcript_xref_map)                    
-            if 'Feature_type' in csq_record:
-                if csq_record['Feature_type'] == 'RegulatoryFeature':
-                    all_csq_pick.append(csq_record)
-                    alternative_csq_pick.append(csq_record)
-                if csq_record['Feature_type'] == 'Transcript':
-                    if 'ENTREZGENE' in csq_record.keys():
-                        ## Consequence in CPSR target - append to all_csq_pick
-                        if csq_record['ENTREZGENE'] in targets_entrez_gene.keys():
-                            all_csq_pick.append(csq_record)
-                        else:                            
-                            alternative_csq_pick.append(csq_record)
+            csq_record = get_csq_record_annotations(csq_fields, varkey, logger, vep_csq_fields_map, transcript_xref_map)
+            all_csq.append(csq_record)
+            if csq_record['PICK'] == '1':
+                if 'Feature_type' in csq_record:
+                    if csq_record['Feature_type'] == 'RegulatoryFeature':
+                        primary_csq_pick.append(csq_record)
+                        secondary_csq_pick.append(csq_record)
+                    if csq_record['Feature_type'] == 'Transcript':
+                        ## Entrez gene identifier is provided by VEP
+                        if 'ENTREZGENE' in csq_record.keys():
+                            ## Consequence in CPSR target - append to primary_csq_pick
+                            if csq_record['ENTREZGENE'] in targets_entrez_gene.keys():
+                                primary_csq_pick.append(csq_record)
+                                ## Consequence not in CPSR targets, nor with Entrez identifier 
+                                # (pseudogenes etc) - append to secondary_csq_pick
+                            else:                                                     
+                                secondary_csq_pick.append(csq_record)
+                        
+                        ## Entrez gene identifier is not provided by VEP
+                        else:
+                            if entrezgene != "." and entrezgene in targets_entrez_gene.keys():
+                                primary_csq_pick.append(csq_record)
+                            else:
+                                ## Consequence not in CPSR targets, nor with Entrez identifier 
+                                # (pseudogenes etc) - append to secondary_csq_pick
+                                warning = 1
+                                secondary_csq_pick.append(csq_record)                        
                     else:
-                        warning = 1
-                else:
-                    ## intergenic
-                    if csq_record['Feature_type'] is None:
-                        alternative_csq_pick.append(csq_record)
+                        ## intergenic
+                        if csq_record['Feature_type'] is None:
+                            secondary_csq_pick.append(csq_record)
 
-        ## PCGR - consider picked consequence only                
+        ## PCGR - consider picked transcript consequence only                
         else:
             # loop over VEP consequence blocks PICK'ed according to VEP's ranking scheme
             # only consider the primary/picked consequence when expanding with annotation tags
                 
             if csq_fields[vep_csq_fields_map['field2index']['PICK']] == "1":                
-                csq_record = get_csq_record_annotations(csq_fields, varkey, logger, vep_csq_fields_map, transcript_xref_map)                           
-                # Append transcript consequence to all_csq_pick
-                all_csq_pick.append(csq_record)
+                csq_record = get_csq_record_annotations(
+                    csq_fields, varkey, logger, vep_csq_fields_map, transcript_xref_map)                           
+                # Append transcript consequence to primary_csq_pick
+                primary_csq_pick.append(csq_record)
         symbol = "."
         hgvsc = "."
         hgvsp = "."
@@ -370,11 +373,11 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, vep_pick_order, 
         if csq_fields[vep_csq_fields_map['field2index']['HGVSc']] != "":
             hgvsc = str(csq_fields[vep_csq_fields_map['field2index']['HGVSc']].split(':')[1])
         else:
-            if len(all_csq_pick) == 1:
-                if 'HGVSc' in all_csq_pick[0]:
-                    if not all_csq_pick[0]['HGVSc'] is None:
-                        if ':' in all_csq_pick[0]['HGVSc']:
-                            hgvsc = str(all_csq_pick[0]['HGVSc'].split(':')[1])
+            if len(primary_csq_pick) == 1:
+                if 'HGVSc' in primary_csq_pick[0]:
+                    if not primary_csq_pick[0]['HGVSc'] is None:
+                        if ':' in primary_csq_pick[0]['HGVSc']:
+                            hgvsc = str(primary_csq_pick[0]['HGVSc'].split(':')[1])
         if csq_fields[vep_csq_fields_map['field2index']['HGVSp']] != "":
             hgvsp = str(csq_fields[vep_csq_fields_map['field2index']['HGVSp']].split(':')[1])
         consequence_entry = (str(csq_fields[vep_csq_fields_map['field2index']['Consequence']]) + ":" +  
@@ -388,24 +391,28 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, vep_pick_order, 
             str(csq_fields[vep_csq_fields_map['field2index']['BIOTYPE']]))
         all_transcript_consequences.append(consequence_entry)
 
+
     ## CPSR - consider all picked VEP blocks
-    if pick_only is False:
-        if len(all_csq_pick) == 0:
-            if gwas_hit is False:
-                logger.warning(f"Picked VEP block for {varkey} does not match virtual panel target genes - considering alternative consequences")
-            if len(alternative_csq_pick) > 0:
-                all_csq_pick = alternative_csq_pick
+    if pick_only is False: 
+        if len(primary_csq_pick) == 0:            
+            # variant does not overlap virtual panel genes, but found with 
+            # other targeted regions (GWAS hits etc) - choose secondary csq pick (if non-empty)          
+            if len(secondary_csq_pick) > 0:
+                primary_csq_pick = secondary_csq_pick
             else:
-                logger.info(f"NO VEP BLOCK FOUND")
-                exit(1)
+                ## No primary picked VEP block, no secondary picked VEP block - 
+                # consider all VEP blocks (does it ever happen?)
+                primary_csq_pick = all_csq
+                logger.warning(f"NO VEP BLOCK PICKED for {varkey}")
         else:
             ## don't consider regulatory consequence as single chosen consequence
-            if len(all_csq_pick) == 1 and len(alternative_csq_pick) > 0:
-                if all_csq_pick[0]['Feature_type'] == 'RegulatoryFeature':
-                    all_csq_pick = alternative_csq_pick
+            if len(primary_csq_pick) == 1 and len(secondary_csq_pick) > 0:
+                if 'Feature_type' in primary_csq_pick[0]:
+                    if primary_csq_pick[0]['Feature_type'] == 'RegulatoryFeature':
+                        primary_csq_pick = secondary_csq_pick
         
     vep_csq_results = {}
-    vep_csq_results['picked_gene_csq'] = all_csq_pick
+    vep_csq_results['picked_gene_csq'] = primary_csq_pick
     vep_csq_results['all_csq'] = all_transcript_consequences
     vep_csq_results['picked_csq'] = None
     vep_chosen_csq_idx = 0
@@ -413,7 +420,8 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, vep_pick_order, 
     ## If multiple transcript-specific variant consequences highlighted by --pick_allele_gene, 
     ## prioritize/choose block of consequence according to 'vep_pick_order'
     if len(vep_csq_results['picked_gene_csq']) > 1:
-        vep_chosen_csq_idx = pick_single_gene_csq(vep_csq_results, pick_criteria_ordered = vep_pick_order, logger = logger, debug = debug)        
+        vep_chosen_csq_idx = pick_single_gene_csq(
+            vep_csq_results, pick_criteria_ordered = vep_pick_order, logger = logger, debug = debug)        
         vep_csq_results['picked_csq'] = vep_csq_results['picked_gene_csq'][vep_chosen_csq_idx]
     else:
         ## check that size if 1, otherwise prompt error below

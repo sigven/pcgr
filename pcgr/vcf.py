@@ -221,6 +221,5 @@ def check_format_ad_dp_tags(vcf: VCF,
                     f"in INFO column erroneously formatted (non-integer) - remove/fix and re-run if you wish to proceed")
                 )
                 return(-1)
-    ## if filtering turned on for AF-based tumor-only filtering, return error if TVAF not defined
-
+            
     return 0
