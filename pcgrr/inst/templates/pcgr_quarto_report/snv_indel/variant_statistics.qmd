@@ -163,7 +163,7 @@ bslib::page_fillable(
 
 ```{r prep_vaf_plot}
 #| echo: false
-#| eval: !expr as.logical(pcg_report$settings$conf$somatic_snv$allelic_support$tumor_af_tag == "_NA_") == FALSE
+#| eval: !expr as.logical(pcg_report$settings$conf$somatic_snv$allelic_support$tumor_af_tag == "_NA_") == FALSE & as.logical(any(is.na(pcg_report$content$snv_indel$callset$variant$VAF_TUMOR))) == FALSE
 
 ### VAF plot
 vaf_dist_tumor <- pcgrr::af_distribution(
@@ -205,11 +205,10 @@ vaf_plot_plotly$x$layout$legend$title$text <- ""
 
 ```
 
-<br>
 
 ```{r vaf_plot}
 #| echo: false
-#| eval: !expr as.logical(pcg_report$settings$conf$somatic_snv$allelic_support$tumor_af_tag == "_NA_") == FALSE
+#| eval: !expr as.logical(pcg_report$settings$conf$somatic_snv$allelic_support$tumor_af_tag == "_NA_") == FALSE & as.logical(any(is.na(pcg_report$content$snv_indel$callset$variant$VAF_TUMOR))) == FALSE
 
 bslib::card(
   height = "330px",
