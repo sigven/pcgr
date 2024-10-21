@@ -28,6 +28,9 @@ PCGR originates from the [Norwegian Cancer Genomics Consortium (NCGC)](https://c
 
 ### Top News
 
+- *October 21st 2024:* **2.1.2 release**
+  - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
+
 - *October 11th 2024:* **2.1.1 release**
   - patch to fix [bug](https://github.com/sigven/pcgr/issues/252) with parsing of relative CDS start positions
   - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)

@@ -46,6 +46,12 @@ sigven <- user("sigven")
 pdiakumis <- user("pdiakumis")
 ```
 
+## v2.1.2
+
+- Date: **2024-10-21**
+
+- Highlight also VUS variants (ClinVar-classified) in the variant oncogenicity section of the HTML report
+
 ## v2.1.1
 
 - Date: **2024-10-11**
