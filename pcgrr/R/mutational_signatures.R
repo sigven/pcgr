@@ -862,7 +862,7 @@ mutpat_resample_mut_mat <- function(mut_matrix) {
 #' in a given sample (both ggplot and plotly)
 #'
 #'
-#' @param signature_contributions A list with two dataframes: 'per_group' and
+#' @param signature_contributions A list with two data frames: 'per_group' and
 #' 'per_signature'.
 #' @param per_signature Logical. If TRUE, the plot will show the contribution
 #' per signature. If FALSE, the plot will show the contribution per group.
@@ -901,20 +901,23 @@ plot_signature_contributions <- function(
   plot_data_per_signature <-
     signature_contributions[['per_signature']] |>
     dplyr::mutate(signature_aetiology = paste0(
-      signature_id, " - ", group)) |>
-    dplyr::mutate(prop_signature = round(prop_signature, digits = 4)) |>
+      .data$signature_id, " - ", .data$group)) |>
+    dplyr::mutate(prop_signature = round(
+      .data$prop_signature, digits = 4)) |>
     dplyr::mutate(prop_signature_ci_lower = round(
-      prop_signature_ci_lower, digits = 4)) |>
+      .data$prop_signature_ci_lower, digits = 4)) |>
     dplyr::mutate(prop_signature_ci_upper = round(
-      prop_signature_ci_upper, digits = 4)) |>
+      .data$prop_signature_ci_upper, digits = 4)) |>
     dplyr::mutate(
       signature_aetiology = factor(
-        signature_aetiology, levels = signature_aetiology))
+        .data$signature_aetiology,
+        levels = .data$signature_aetiology))
 
   signature_contribution_plot <- ggplot2::ggplot(
-    head(plot_data_per_signature, 6),
+    utils::head(plot_data_per_signature, 6),
     ggplot2::aes(
-      x = reorder(signature_aetiology, -prop_signature),
+      x = stats::reorder(
+        signature_aetiology, -prop_signature),
       y = prop_signature,
       fill = signature_aetiology)) +
     ggplot2::geom_bar(stat = "identity") +

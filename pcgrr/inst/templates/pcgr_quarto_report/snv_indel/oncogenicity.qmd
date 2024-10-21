@@ -2,7 +2,10 @@
 
 Annotations for short variants (SNVs/InDels) detected in the tumor sample can here be interrogated, e.g. with respect to gene, variant consequence, variant allelic fraction/sequencing depth (if provided as input), and also with respect to _predicted oncogenicity_. For the latter, PCGR implements standard operating procedures for oncogenicity evaluation developed by ClinGen/CGC/VICC [@Horak2022-uh]. 
 
-The tabset below provides an overview of coding (protein-altering) versus non-coding variants found in the tumor sample. In addition to predicted oncogenicity, we also explicitly highlight tumor variants that are registered with a <span style="background-color:#FF8790; line-height:110%; padding:2x; color:white"><b>&nbsp;pathogenic/likely pathogenic classification in ClinVar &nbsp; </b></span>, considering variants of any origin (somatic/germline), and associated with any condition/phenotype. 
+The tabset below provides an overview of coding (protein-altering) versus non-coding variants found in the tumor sample. The user should carefully consider oncogenicity predictions alongside existing variant classifications (any origin (somatic/germline), any phenotype), highlighted through different background colors of the _ALTERATION_ column:
+  
+   -  <span style="background-color:#FF8790; line-height:110%; padding:2x; color:white"><b>&nbsp;Variants of pathogenic/likely pathogenic significance (ClinVar) &nbsp; </b></span>
+   - <span style="background-color:black; line-height:110%; padding:2x; color:white"><b>&nbsp;Variants of uncertain significance or with conflicting evidence (ClinVar) &nbsp; </b></span>.
 
 ::: {.callout-note}
 
@@ -162,13 +165,15 @@ dt_all_coding <- DT::datatable(
       )
   ) |>
    DT::formatStyle(
-    color = "black",
+    color = DT::styleEqual(
+      c("Pathogenic","Likely_Pathogenic","VUS"),
+      c("white", "white", "white")),
     "ALTERATION",
     "CLINVAR_CLASSIFICATION",
     backgroundColor = 
       DT::styleEqual(
-        c("Pathogenic","Likely_Pathogenic"),
-        c("#FF8790", "#FF8790")
+        c("Pathogenic","Likely_Pathogenic","VUS"),
+        c("#FF8790", "#FF8790","#000000")
       )
   )
 
@@ -328,7 +333,19 @@ dt_all_noncoding <- DT::datatable(
         pcgrr::color_palette$cancer_assoc$breaks,
         pcgrr::color_palette$cancer_assoc$values
       )
-  ) 
+  ) |>
+  DT::formatStyle(
+    color = DT::styleEqual(
+      c("Pathogenic","Likely_Pathogenic","VUS"),
+      c("white", "white", "white")),
+    "ALTERATION",
+    "CLINVAR_CLASSIFICATION",
+    backgroundColor = 
+      DT::styleEqual(
+        c("Pathogenic","Likely_Pathogenic","VUS"),
+        c("#FF8790", "#FF8790","#000000")
+      )
+  )
 
 # if(expression_present_snv == TRUE){
 #   dt_all_noncoding <- dt_all_noncoding |>

@@ -29,7 +29,7 @@ htmltools::br()
 
 ::: {.panel-tabset .nav-pills}
 
-#### <b>TIER I</b> - strong clinical significance
+#### __TIER I__ - strong clinical significance
 
 <br>
 
@@ -190,7 +190,7 @@ htmltools::br()
 
 ```
 
-#### <b>TIER II</b> - potential clinical significance
+#### __TIER II__ - potential clinical significance
 
 <br>
 
@@ -355,7 +355,7 @@ htmltools::br()
 
 ```
 
-#### <b>TIER III</b> - uncertain clinical significance
+#### __TIER III__ - uncertain clinical significance
 
 Here, we list protein-altering somatic variants located in proto-oncogenes and tumor suppressors that are currently _not_ linked to any clinical evidence items (as specified in [@Li2017-ew]). These variants are considered to have uncertain clinical significance and are thus not recommended for clinical action.
 
@@ -402,7 +402,29 @@ tier3_dt <- DT::datatable(
          pcgrr::color_palette$cancer_assoc$breaks,
          pcgrr::color_palette$cancer_assoc$values
        )
-   )
+   ) |>
+  DT::formatStyle(
+    color = "white",
+    "ONCOGENICITY",
+    "ONCOGENICITY",
+    backgroundColor = 
+      DT::styleEqual(
+        pcgrr::color_palette$oncogenicity$levels,
+        pcgrr::color_palette$oncogenicity$values
+      )
+  ) |>
+   DT::formatStyle(
+    color = DT::styleEqual(
+      c("Pathogenic","Likely_Pathogenic","VUS"),
+      c("white", "white", "white")),
+    "ALTERATION",
+    "CLINVAR_CLASSIFICATION",
+    backgroundColor = 
+      DT::styleEqual(
+        c("Pathogenic","Likely_Pathogenic","VUS"),
+        c("#FF8790", "#FF8790","#000000")
+      )
+  )
 
 # if(expression_present_snv == TRUE){
 #   tier3_dt <- tier3_dt |>
