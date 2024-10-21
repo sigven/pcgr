@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -210,7 +210,7 @@ the very end of the conda environment creation).</p>
 <div class="tab-content">
 <div class="active  tab-pane" id="linux" role="tabpanel" aria-labelledby="linux-tab">
 
-<pre><code><span><span class="va">PCGR_VERSION</span><span class="op">=</span><span class="st">"2.1.1"</span></span></code></pre>
+<pre><code><span><span class="va">PCGR_VERSION</span><span class="op">=</span><span class="st">"2.1.2"</span></span></code></pre>
 <div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="co"># set up variables</span></span>
 <span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="va">PCGR_REPO</span><span class="op">=</span><span class="st">"https://raw.githubusercontent.com/sigven/pcgr/v</span><span class="va">${PCGR_VERSION}</span><span class="st">/conda/env/lock/"</span></span>
 <span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="va">PLATFORM</span><span class="op">=</span><span class="st">"linux"</span></span>
@@ -229,7 +229,7 @@ the very end of the conda environment creation).</p>
 <p>For macOS M1 machines, you need to include
 <code>CONDA_SUBDIR=osx-64</code> before the <code>conda create</code>
 command - see <a href="https://github.com/conda-forge/miniforge/issues/165#issuecomment-860233092" class="external-link uri">https://github.com/conda-forge/miniforge/issues/165#issuecomment-860233092</a>:</p>
-<pre><code><span><span class="va">PCGR_VERSION</span><span class="op">=</span><span class="st">"2.1.1"</span></span></code></pre>
+<pre><code><span><span class="va">PCGR_VERSION</span><span class="op">=</span><span class="st">"2.1.2"</span></span></code></pre>
 <div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># set up variables</span></span>
 <span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="va">PCGR_REPO</span><span class="op">=</span><span class="st">"https://raw.githubusercontent.com/sigven/pcgr/v</span><span class="va">${PCGR_VERSION}</span><span class="st">/conda/env/lock/"</span></span>
 <span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="va">PLATFORM</span><span class="op">=</span><span class="st">"osx"</span></span>
@@ -249,12 +249,12 @@ command - see <a href="https://github.com/conda-forge/miniforge/issues/165#issue
 <h3 id="b--docker">B. Docker<a class="anchor" aria-label="anchor" href="#b--docker"></a>
 </h3>
 <p>The PCGR Docker image is available on <a href="https://hub.docker.com/r/sigven/pcgr/tags" class="external-link">Docker Hub</a>. Pull
-the latest <strong>v2.1.1</strong> image with:</p>
-<pre><code>docker pull sigven/pcgr:2.1.1</code></pre>
+the latest <strong>v2.1.2</strong> image with:</p>
+<pre><code>docker pull sigven/pcgr:2.1.2</code></pre>
 <div class="section level4">
 <h4 id="example-run">Example Run<a class="anchor" aria-label="anchor" href="#example-run"></a>
 </h4>
-<pre><code><span><span class="va">PCGR_VERSION</span><span class="op">=</span><span class="st">"2.1.1"</span></span></code></pre>
+<pre><code><span><span class="va">PCGR_VERSION</span><span class="op">=</span><span class="st">"2.1.2"</span></span></code></pre>
 <div class="sourceCode" id="cb11"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="ex">docker</span> container run <span class="at">-it</span> <span class="at">--rm</span> <span class="dt">\</span></span>
 <span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>    <span class="at">-v</span> /Users/you/dir1/.vep:/mnt/.vep</span>
 <span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>    <span class="ex">-v</span> /Users/you/dir1/bundle:/mnt/bundle <span class="dt">\</span></span>
@@ -284,15 +284,15 @@ Singularity/Apptainer below, see also <a href="https://github.com/sigven/pcgr/is
 <h3 id="c--singularityapptainer">C. Singularity/Apptainer<a class="anchor" aria-label="anchor" href="#c--singularityapptainer"></a>
 </h3>
 <p>The PCGR Singularity/Apptainer image is available on <a href="https://ghcr.io/sigven/pcgr" class="external-link">GitHub Container Registry</a>. Pull
-the latest <strong>v2.1.1</strong> image with:</p>
-<pre><code>apptainer pull oras://ghcr.io/sigven/pcgr:2.1.1.singularity</code></pre>
+the latest <strong>v2.1.2</strong> image with:</p>
+<pre><code>apptainer pull oras://ghcr.io/sigven/pcgr:2.1.2.singularity</code></pre>
 <p>This will download a Singularity Image File (SIF) called
-<strong>pcgr_2.1.1.singularity.sif</strong> that can be run with
+<strong>pcgr_2.1.2.singularity.sif</strong> that can be run with
 Singularity or Apptainer.</p>
 <div class="section level4">
 <h4 id="example-run-1">Example Run<a class="anchor" aria-label="anchor" href="#example-run-1"></a>
 </h4>
-<pre><code><span><span class="va">PCGR_VERSION</span><span class="op">=</span><span class="st">"2.1.1"</span></span></code></pre>
+<pre><code><span><span class="va">PCGR_VERSION</span><span class="op">=</span><span class="st">"2.1.2"</span></span></code></pre>
 <div class="sourceCode" id="cb14"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="ex">apptainer</span> exec <span class="dt">\</span></span>
 <span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>  <span class="at">--writable-tmpfs</span> <span class="dt">\</span></span>
 <span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>  <span class="at">--no-home</span> <span class="dt">\</span></span>
