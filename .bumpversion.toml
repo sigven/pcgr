@@ -1,0 +1,70 @@
+[tool.bumpversion]
+current_version = "2.1.2.9000"
+search = "{current_version}"
+replace = "{new_version}"
+message = "Bump version: {current_version} → {new_version}"
+regex = false
+ignore_missing_version = false
+ignore_missing_files = false
+commit = true
+parse = """(?x)
+    (?P<major>0|[1-9]\\d*)\\.
+    (?P<minor>0|[1-9]\\d*)\\.
+    (?P<patch>0|[1-9]\\d*)
+    (?:\\.(?P<dev>\\d+))?
+"""
+
+serialize = [
+    "{major}.{minor}.{patch}.{dev}",
+    "{major}.{minor}.{patch}",
+]
+
+[[tool.bumpversion.files]]
+filename = "pcgrr/DESCRIPTION"
+search = "Version: {current_version}"
+replace = "Version: {new_version}"
+
+[[tool.bumpversion.files]]
+filename = "pcgrr/vignettes/installation.Rmd"
+search = "{current_version}"
+replace = "{new_version}"
+
+[[tool.bumpversion.files]]
+filename = "pcgr/_version.py"
+search = "__version__ = '{current_version}'"
+replace = "__version__ = '{new_version}'"
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search = 'version = "{current_version}"'
+replace = 'version = "{new_version}"'
+
+[[tool.bumpversion.files]]
+filename = "conda/recipe/pcgr/meta.yaml"
+search = "version: {current_version}"
+replace = "version: {new_version}"
+
+[[tool.bumpversion.files]]
+filename = "conda/recipe/pcgrr/meta.yaml"
+search = "version: {current_version}"
+replace = "version: {new_version}"
+
+[[tool.bumpversion.files]]
+filename = "conda/env/yml/pcgr.yml"
+search = "pcgr =={current_version}"
+replace = "pcgr =={new_version}"
+
+[[tool.bumpversion.files]]
+filename = "conda/env/yml/pcgrr.yml"
+search = "pcgrr =={current_version}"
+replace = "pcgrr =={new_version}"
+
+[[tool.bumpversion.files]]
+filename = "conda/env/yml/pkgdown.yml"
+search = "pcgrr =={current_version}"
+replace = "pcgrr =={new_version}"
+
+[[tool.bumpversion.files]]
+filename = ".github/workflows/build_conda_recipes.yaml"
+search = "VERSION: '{current_version}'"
+replace = "VERSION: '{new_version}'"
