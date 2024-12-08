@@ -3,7 +3,7 @@
 from pcgr import pcgr_vars, arg_checker, utils, cna
 from pcgr.utils import getlogger, check_subprocess, remove_file, random_id_generator
 from pcgr.config import populate_config_data, create_config
-from pcgr.maf import update_maf_allelic_support
+from pcgr.maf import update_maf
 from pcgr.vep import get_vep_command
 from pcgr.expression import parse_expression, integrate_variant_expression, correlate_sample_expression
 from pcgr.expression import find_expression_outliers, aggregate_tpm_per_cons
@@ -382,12 +382,13 @@ def run_pcgr(input_data, output_data, conf_options):
 
             ## add information on allelic support in MAF file
             ## (n_depth, n_ref_count, n_alt_count, t_depth, t_ref_count, t_alt_count)
-            update_maf_allelic_support(
+            update_maf(
                 maf_tmp_fname = output_tmp_maf,
                 maf_fname = output_maf,
                 allelic_support_tags = yaml_data["conf"]['somatic_snv']['allelic_support'],
                 logger = logger,
-                update_allelic_support = update_allelic_support
+                update_allelic_support = update_allelic_support,
+                debug = debug
             )
             logger.info('Finished pcgr-vep-vcf2maf')
             print('----')
