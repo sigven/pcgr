@@ -20,7 +20,7 @@ def update_maf(maf_tmp_fname: str,
     Args:
         maf_tmp_fname (str): File name of the temporary MAF file.
         maf_fname (str): File name of the final MAF file.
-        allelic_support_tags (dict): Dictionary of allelic support tags.
+        allelic_support_tags (dict): Dictionary of allelic support tags (encoded in VCF INFO field and retained in MAF).
         logger: Logger object for logging messages.
         update_allelic_support (bool): Flag indicating whether to update allelic support.
     Returns:
@@ -38,7 +38,6 @@ def update_maf(maf_tmp_fname: str,
     raw_maf_data = pd.read_csv(maf_tmp_fname, sep="\t", header=1, dtype='string',na_values=['.'], low_memory=False)
     if update_allelic_support is False:
         # write to file
-        b = 1
         os.rename(maf_tmp_fname, maf_fname)
     else:
     
