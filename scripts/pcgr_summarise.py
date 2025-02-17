@@ -11,7 +11,7 @@ import yaml
 from pcgr.annoutils import read_infotag_file, make_transcript_xref_map, read_genexref_namemap, map_regulatory_variant_annotations, write_pass_vcf, load_grantham
 from pcgr.vep import parse_vep_csq
 from pcgr.dbnsfp import vep_dbnsfp_meta_vcf, map_variant_effect_predictors
-from pcgr.oncogenicity import assign_oncogenicity_evidence, load_oncogenic_variants, match_oncogenic_variants
+from pcgr.oncogenicity import load_oncogenicity_criteria, assign_oncogenicity_evidence, load_oncogenic_variants, match_oncogenic_variants
 from pcgr.mutation_hotspot import load_mutation_hotspots, match_csq_mutation_hotspot
 from pcgr.biomarker import load_biomarkers, match_csq_biomarker
 from pcgr.utils import error_message, check_subprocess, getlogger
@@ -98,6 +98,8 @@ def extend_vcf_annotations(arg_dict, logger):
         os.path.join(arg_dict['refdata_assembly_dir'], 'gene','tsv','gene_transcript_xref', 'gene_transcript_xref_bedmap.tsv.gz'), logger)
     cancer_hotspots = load_mutation_hotspots(
         os.path.join(arg_dict['refdata_assembly_dir'], 'misc','tsv','hotspot', 'hotspot.tsv.gz'), logger)
+    oncogenicity_criteria = load_oncogenicity_criteria(
+        os.path.join(arg_dict['refdata_assembly_dir'], 'misc','tsv', 'oncogenicity', 'oncogenicity.tsv'), logger)
     oncogenic_variants = load_oncogenic_variants(os.path.join(arg_dict['refdata_assembly_dir'], 'variant','tsv', 'clinvar','clinvar_oncogenic.tsv.gz'), logger)
     grantham_scores = load_grantham(os.path.join(arg_dict['refdata_assembly_dir'], 'misc','tsv', 'grantham', 'grantham.tsv'), logger)
 
@@ -252,7 +254,7 @@ def extend_vcf_annotations(arg_dict, logger):
         
         if arg_dict['oncogenicity_annotation'] == 1:
             match_oncogenic_variants(vep_csq_record_results['all_csq'], oncogenic_variants, rec, principal_csq_properties)
-            assign_oncogenicity_evidence(rec, oncogenic_variants, tumortype = arg_dict['tumortype'])
+            assign_oncogenicity_evidence(rec, oncogenicity_criteria,tumortype = arg_dict['tumortype'])
 
         if "GENE_TRANSCRIPT_XREF" in vcf_info_element_types:
             gene_xref_tag = rec.INFO.get('GENE_TRANSCRIPT_XREF')

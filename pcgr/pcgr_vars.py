@@ -38,6 +38,8 @@ EXPRESSION_DB_SOURCES = ['tcga','depmap','treehouse']
 SAMPLE_ID_MAX_LENGTH = 40
 SAMPLE_ID_MIN_LENGTH = 3
 
+GNOMAD_MAIN_EXON_AF_TAGS = ['gnomADe_SAS_AF','gnomADe_NFE_AF','gnomADe_AFR_AF','gnomADe_AMR_AF','gnomADe_EAS_AF']
+
 ## Classified germline variant input (from CPSR) - required columns
 germline_input_required_cols = [
     'SAMPLE_ID',
@@ -291,4 +293,12 @@ DBNSFP_ALGORITHMS = {
     'alphamissense': 'DBNSFP_ALPHA_MISSENSE',
     'mutformer': 'DBNSFP_MUTFORMER', 
     'phactboost': 'DBNSFP_PHACTBOOST'
+}
+
+ONCOGENICITY = {
+    'gnomAD_extremely_rare_AF': 0.00001,
+    'gnomAD_common_AF': 0.01,
+    'gnomAD_very_common_AF': 0.05,
+    'insilico_pred_min_majority': 8,
+    'insilico_pred_max_minority': 2,
 }

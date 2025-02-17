@@ -9,8 +9,9 @@ from logging import Logger
 import gzip
 
 from pcgr.annoutils import threeToOneAA
+from pcgr import pcgr_vars
 
-def assign_oncogenicity_evidence(rec = None, oncogenic_variants = None, tumortype = "Any"):
+def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumortype = "Any"):
 
    clingen_vicc_ev_codes = [
       "ONCG_SBVS1", 
@@ -177,15 +178,12 @@ def assign_oncogenicity_evidence(rec = None, oncogenic_variants = None, tumortyp
       if not variant_data['KNOWN_ONCOGENIC'] is None:         
          variant_data['ONCG_OS1'] = True
    
-   dbnsfp_minimum_majority = 8
-   dbnsfp_maximum_minority = 2
-   dbnsfp_minimum_algos_called = dbnsfp_minimum_majority
-
-   variant_data['N_INSILICO_CALLED'] = 0
-   variant_data['N_INSILICO_DAMAGING'] = 0
-   variant_data['N_INSILICO_TOLERATED'] = 0
-   variant_data['N_INSILICO_SPLICING_NEUTRAL'] = 0
-   variant_data['N_INSILICO_SPLICING_AFFECTED'] = 0
+   for elem in ['N_INSILICO_CALLED',
+                'N_INSILICO_DAMAGING',
+                'N_INSILICO_TOLERATED',
+                'N_INSILICO_SPLICING_NEUTRAL',
+                'N_INSILICO_SPLICING_AFFECTED']:
+      variant_data[elem] = 0
 
    for algo in ['SIFT',
                 'PROVEAN',
@@ -221,16 +219,18 @@ def assign_oncogenicity_evidence(rec = None, oncogenic_variants = None, tumortyp
             variant_data[col] == 'AS':
             variant_data['N_INSILICO_SPLICING_AFFECTED'] += 1
 
-   if (variant_data['N_INSILICO_CALLED'] > dbnsfp_minimum_algos_called and \
-      variant_data['N_INSILICO_DAMAGING'] >= dbnsfp_minimum_majority and \
-      variant_data['N_INSILICO_TOLERATED'] <= dbnsfp_maximum_minority and \
+   ## majority of insilico predictors predict damaging effect
+   if (variant_data['N_INSILICO_CALLED'] > pcgr_vars.ONCOGENICITY['insilico_pred_min_majority'] and \
+      variant_data['N_INSILICO_DAMAGING'] >= pcgr_vars.ONCOGENICITY['insilico_pred_min_majority'] and \
+      variant_data['N_INSILICO_TOLERATED'] <= pcgr_vars.ONCOGENICITY['insilico_pred_max_minority'] and \
       variant_data['N_INSILICO_SPLICING_NEUTRAL'] <= 1) or \
          variant_data['N_INSILICO_SPLICING_AFFECTED'] == 2:
       variant_data['ONCG_OP1'] = True
    
-   if variant_data['N_INSILICO_CALLED'] > dbnsfp_minimum_algos_called and \
-      variant_data['N_INSILICO_TOLERATED'] >= dbnsfp_minimum_majority and \
-      variant_data['N_INSILICO_DAMAGING'] <= dbnsfp_maximum_minority and \
+   ## majority of insilico predictors predict tolerated effect
+   if variant_data['N_INSILICO_CALLED'] > pcgr_vars.ONCOGENICITY['insilico_pred_min_majority'] and \
+      variant_data['N_INSILICO_TOLERATED'] >= pcgr_vars.ONCOGENICITY['insilico_pred_min_majority'] and \
+      variant_data['N_INSILICO_DAMAGING'] <= pcgr_vars.ONCOGENICITY['insilico_pred_max_minority'] and \
       variant_data['N_INSILICO_SPLICING_AFFECTED'] == 0:
       variant_data['ONCG_SBP1'] = True
 
@@ -298,7 +298,7 @@ def assign_oncogenicity_evidence(rec = None, oncogenic_variants = None, tumortyp
              'by_hgvsp_principal' in eitem or \
              'by_codon_principal' in eitem or \
              'by_aa_region_principal' in eitem):               
-               ## only applicable if OS3 is not set
+               ## only applicable if OS3 and OS1 is not set
                if variant_data['ONCG_OS3'] is False and variant_data['ONCG_OS1'] is False:
                   variant_data['ONCG_OM1'] = True
          
@@ -309,42 +309,38 @@ def assign_oncogenicity_evidence(rec = None, oncogenic_variants = None, tumortyp
             'Somatic' in eitem and \
             ('by_genomic_coord' in eitem or \
              'by_hgvsc_principal' in eitem):
-               ## only applicable if OS3 is not set
+               ## only applicable if OS3 and OS1 is not set
                if variant_data['ONCG_OS3'] is False and variant_data['ONCG_OS1'] is False:
                   variant_data['ONCG_OM1'] = True
 
-   if "gnomADe_EAS_AF" in variant_data.keys() and \
-      "gnomADe_SAS_AF" in variant_data.keys() and \
-      "gnomADe_AMR_AF" in variant_data.keys() and \
-      "gnomADe_AFR_AF" in variant_data.keys() and \
-      "gnomADe_NFE_AF" in variant_data.keys():
+   if all(pop in variant_data.keys() for pop in pcgr_vars.GNOMAD_MAIN_EXON_AF_TAGS):
 
       ## check if variant has MAF > 0.01 (SBVS1) or > 0.05 in any of five major gnomAD subpopulations (exome set)
-      for pop in ['gnomADe_SAS_AF','gnomADe_EAS_AF','gnomADe_AMR_AF','gnomADe_AFR_AF','gnomADe_NFE_AF']:
+      for pop in pcgr_vars.GNOMAD_MAIN_EXON_AF_TAGS:
          if not variant_data[pop] is None:
-            ## MAF for this population >= 0.05
-            if float(variant_data[pop]) >= 0.05:
+            if float(variant_data[pop]) >= pcgr_vars.ONCOGENICITY['gnomAD_very_common_AF']:
                variant_data["ONCG_SBVS1"] = True
-      for pop in ['gnomADe_SAS_AF','gnomADe_EAS_AF','gnomADe_AMR_AF','gnomADe_AFR_AF','gnomADe_NFE_AF']:
+      for pop in pcgr_vars.GNOMAD_MAIN_EXON_AF_TAGS:
          if not variant_data[pop] is None:
-            ## MAF for this population >= 0.01 (< 0.05)
-            if float(variant_data[pop]) >= 0.01 and variant_data["ONCG_SBVS1"] is False:
+            if float(variant_data[pop]) >= pcgr_vars.ONCOGENICITY['gnomAD_common_AF'] and variant_data["ONCG_SBVS1"] is False:
                variant_data["ONCG_SBS1"] = True
 
-      #missing_pop_freq = 0
       approx_zero_pop_freq = 0
-      for pop in ['gnomADe_SAS_AF','gnomADe_EAS_AF','gnomADe_AMR_AF','gnomADe_AFR_AF','gnomADe_NFE_AF']:
+      for pop in pcgr_vars.GNOMAD_MAIN_EXON_AF_TAGS:
          ## no MAF recorded in gnomAD for this population
          if variant_data[pop] is None:
             approx_zero_pop_freq = approx_zero_pop_freq + 1
          else:
-            ## Very low MAF for this population
-            if float(variant_data[pop]) < 0.0001:
+            ## Extremely low MAF for this population
+            if float(variant_data[pop]) < pcgr_vars.ONCOGENICITY['gnomAD_extremely_rare_AF']:
                approx_zero_pop_freq = approx_zero_pop_freq + 1
     
       ## check if variant is missing or with MAF approximately zero in all five major gnomAD subpopulations (exome set)
       if approx_zero_pop_freq == 5:
          variant_data["ONCG_OP4"] = True
+   
+   else:
+      print("ERROR: Missing gnomAD AF tags in VCF INFO field")
   
    
    ## check if variant is a loss-of-function variant in a tumor suppressor gene (Cancer Gene Census/CancerMine)
@@ -385,77 +381,6 @@ def assign_oncogenicity_evidence(rec = None, oncogenic_variants = None, tumortyp
                variant_data['ONCG_OM1'] is False:
             variant_data['ONCG_OM3'] = True
 
-   og_score_data = {}
-   og_score_data['code'] = \
-      ['ONCG_SBVS1',
-       'ONCG_SBS1',
-       'ONCG_OP4',
-       'ONCG_SBP1',
-       'ONCG_SBP2',
-       'ONCG_OVS1',
-       'ONCG_OS1',
-       'ONCG_OS3',
-       'ONCG_OM1',
-       'ONCG_OM2',
-       'ONCG_OM3',
-       'ONCG_OM4',
-       'ONCG_OP1',
-       'ONCG_OP3'
-      ]
-   og_score_data['category'] = \
-      ['clinpop',
-       'clinpop', 
-       'clinpop',
-       'funccomp',
-       'funcvar',
-       'funcvar',
-       'funcvar',
-       'funcvar',
-       'funcvar',
-       'funcvar',
-       'funcvar',
-       'funcvar',
-       'funcvar',
-       'funccomp']
-   og_score_data['pole'] = \
-      ['B','B',
-       'P','B',
-       'B','P',
-       'P','P',
-       'P','P',
-       'P','P',
-       'P','P']
-   
-   og_score_data['description'] = \
-      ['Very high MAF (> 0.05 in gnomAD - any five major continental pops)',
-      'High MAF (> 0.01 in gnomAD - any five major continental pops)',
-      'Absent from controls (gnomAD) / very low MAF ( < 0.0001 in all five major subpopulations)',
-      'Multiple lines (>=8) of computational evidence support a benign variant effect on the gene or gene product - from dbNSFP',
-      'Silent and intronic changes outside of the consensus splice site',
-      'Null variant - predicted as LoF - in bona fide tumor suppressor gene',
-      'Same amino acid change as previously established oncogenic variant - regardless of nucleotide change (ClinVar oncogenicity records)',
-      'Located in a mutation hotspot (cancerhotspots.org). >= 50 samples with a  variant at AA position, >= 10 samples with same AA change',
-      'Presumably critical site of functional domain - based on indirect evidence from overlap with predictive biomarkers',
-      'Protein length changes from in-frame dels/ins in known oncogene/tumor suppressor genes or stop-loss variants in a tumor suppressor gene',
-      'Missense variant at an amino acid residue where a different missense variant determined to be oncogenic (using this standard) has been documented. ',
-      'Located in a mutation hotspot (cancerhotspots.org). < 50 samples with a variant at AA position, >= 10 samples with same AA change.',
-      'Multiple lines (>=8) of computational evidence support of a damaging variant effect on the gene or gene product - from dbNSFP',
-      'Located in a mutation hotspot (cancerhotspots.org). < 10 samples with the same amino acid change.'
-      ]
-   
-   og_score_data['score'] = \
-      [-8, -4, 1, -1, -1, 8, 4, 4, 2, 2, 2, 2, 1, 1]
-   
-   i = 0
-   oncogenicity_scores = {}
-   for code in og_score_data['code']:
-      oncogenicity_scores[code] = {}
-      for e in ['category','pole','description','score']:
-         oncogenicity_scores[code][e] = og_score_data[e][i]
-         if e == 'score':
-            oncogenicity_scores[code][e] = float(og_score_data[e][i])
-      i = i + 1
-
    variant_data['ONCOGENICITY'] = "VUS"
    variant_data["ONCOGENICITY_DOC"] = "."
    variant_data["ONCOGENICITY_CODE"] = "."
@@ -466,27 +391,18 @@ def assign_oncogenicity_evidence(rec = None, oncogenic_variants = None, tumortyp
    for code in clingen_vicc_ev_codes:
 
       if code in variant_data.keys():
-         if variant_data[code] is True:
-            score = oncogenicity_scores[code]['score']
-            pole = oncogenicity_scores[code]['pole']
+         if variant_data[code] is True and code in oncogenicity_criteria.keys():            
+            score = float(oncogenicity_criteria[code]['score'])
+            pole = oncogenicity_criteria[code]['pole']
             if pole == "P":
                onc_score_pathogenic = onc_score_pathogenic + score
-            if pole == "B":
+            else:
                onc_score_benign = onc_score_benign + score
 
-            for e in ['ONCOGENICITY_DOC',
-                      'ONCOGENICITY_CODE']:
-
-               if variant_data[e] == ".":
-                  if e == 'ONCOGENICITY_DOC':
-                     variant_data[e] = oncogenicity_scores[code]['description']
-                  else:
-                     variant_data[e] = code
-               else:
-                  if e == 'ONCOGENICITY_DOC':
-                     variant_data[e] = f'{variant_data[e]}|{oncogenicity_scores[code]["description"]}'
-                  else:
-                     variant_data[e] = f'{variant_data[e]}|{code}'
+            if variant_data['ONCOGENICITY_CODE'] == ".":
+               variant_data['ONCOGENICITY_CODE'] = code
+            else:
+               variant_data['ONCOGENICITY_CODE'] = f'{variant_data["ONCOGENICITY_CODE"]}|{code}'
 
    likely_benign_upper_limit = -1
    likely_benign_lower_limit = -6
@@ -513,6 +429,23 @@ def assign_oncogenicity_evidence(rec = None, oncogenic_variants = None, tumortyp
       rec.INFO[e] = variant_data[e]
 
    return(rec)
+
+def load_oncogenicity_criteria(oncogenic_criteria_fname: str, logger: Logger):
+   """
+   Load oncogenic criteria from a file and create a dictionary of criteria.
+   """
+   
+   oncogenic_criteria = {}
+   if not os.path.exists(oncogenic_criteria_fname):
+      logger.info(f"ERROR: File '{oncogenic_criteria_fname}' does not exist - exiting")
+      exit(1)
+
+   with open(oncogenic_criteria_fname, mode='rt') as f:
+      reader = csv.DictReader(f, delimiter='\t')
+      for row in reader:            
+         oncogenic_criteria[row['code']] = row
+         
+   return oncogenic_criteria
 
 def load_oncogenic_variants(oncogenic_variants_fname: str, logger: Logger):
    """

@@ -280,6 +280,14 @@ def populate_config_data(conf_options: dict, refdata_assembly_dir: str, workflow
                 if not ',' in conf_data['conf']['gene_panel']['panel_id']:                     
                     conf_data['conf']['gene_panel']['url'] = str(conf_data['conf']['gene_panel']['panel_genes'][0]['panel_url'])
                     conf_data['conf']['gene_panel']['description_trait'] = str(conf_data['conf']['gene_panel']['panel_genes'][0]['panel_name'])
+                else:
+                    names = set([str(x['panel_name']) for x in conf_data['conf']['gene_panel']['panel_genes']])
+                    names2 = []
+                    for n in names:
+                        if not 'ACMG' in n and not 'CPIC' in n:
+                            names2.append(n)
+                    conf_data['conf']['gene_panel']['description'] = "Genomics England PanelApp - multiple panels (" + ', '.join(names2) + ")"
+                    
                     
                 
         
