@@ -31,6 +31,7 @@ def __main__():
     parser.add_argument('diagnostic_grade_only', type=int, default=0, choices=[0,1], help="Green virtual panels only (Genomics England PanelApp)")
     parser.add_argument('gwas_findings', type=int, default=0, choices=[0,1], help="Include GWAS findings")
     parser.add_argument('secondary_findings', type=int, default=0, choices=[0,1], help="Include secondary findings")
+    parser.add_argument('pgx_findings', type=int, default=0, choices=[0,1], help="Include classification of variants related to chemotherapy toxicity")
     parser.add_argument('--output_dir', dest='output_dir', help='Output directory')
     parser.add_argument("--debug", action="store_true", help="Print full commands to log")
     args = parser.parse_args()
@@ -46,6 +47,7 @@ def __main__():
                               args.diagnostic_grade_only,
                               args.gwas_findings,
                               args.secondary_findings,
+                              args.pgx_findings,
                               args.output_dir,
                               args.debug)
     if ret != 0:
@@ -53,7 +55,7 @@ def __main__():
 
 
 def get_valid_custom_genelist(genelist_fname, genelist_bed_fname, refdata_assembly_dir,  
-                              gwas_findings, secondary_findings, logger, debug):
+                              gwas_findings, secondary_findings, pgx_findings, logger, debug):
     """
     Function that checks whether the custom genelist contains valid entries from the complete exploratory track
     """
@@ -115,29 +117,39 @@ def get_valid_custom_genelist(genelist_fname, genelist_bed_fname, refdata_assemb
 
     ## Add custom set of genes to target BED
     logger.info('Creating BED file with custom target genes: ' + str(genelist_bed_fname))
-    id_pat = '|'.join([f"{g}" for g in valid_custom_identifiers])
     
-    id_pat_ext = id_pat + '|(\\|tag\\|)|' + 'ACMG_SF'
-    awk_command = "awk 'BEGIN{FS=\"\\t\"}{if($4 !~ /ACMG_SF/ || ($4 ~ /ACMG_SF/ && $4 ~ /" + '|'.join(valid_custom_identifiers) + "/))print;}'"
-    cmd_target_regions_bed = f"bgzip -dc {virtualpanel_track_bed} | egrep '{id_pat_ext}' > {genelist_bed_fname_unsorted}"
-    if gwas_findings == 0 and secondary_findings == 1:
-        cmd_target_regions_bed = f"bgzip -dc {virtualpanel_track_bed} | egrep '{id_pat_ext}' | egrep -v '(\\|tag\\|)' > {genelist_bed_fname_unsorted}"
-    if gwas_findings == 0 and secondary_findings == 0:
-        cmd_target_regions_bed = f"bgzip -dc {virtualpanel_track_bed} | egrep '{id_pat_ext}' | egrep -v '(\\|tag\\|)' | {awk_command} > {genelist_bed_fname_unsorted}"
-    if gwas_findings == 1 and secondary_findings == 0:
-        cmd_target_regions_bed = f"bgzip -dc {virtualpanel_track_bed} | egrep '{id_pat_ext}' | {awk_command} > {genelist_bed_fname_unsorted}"
-    
-    #print(cmd_target_regions_bed)
-    check_subprocess(logger, cmd_target_regions_bed, debug)
+    ## Create BED file with custom target genes, potentially filtering out GWAS tag SNPs, ACMG Secondary Findings, and CPIC PGx Oncology overlaps
+    target_gene_pattern = '|'.join([f"{g}" for g in valid_custom_identifiers])
+    filter_bed_command = get_bed_filtering_command(
+        virtualpanel_track_bed, target_gene_pattern, gwas_findings, secondary_findings, pgx_findings)
+    check_subprocess(logger, f'{filter_bed_command} > {genelist_bed_fname_unsorted}', debug)
     
     ## Sort regions in target BED
     sort_bed(genelist_bed_fname_unsorted, genelist_bed_fname, debug, logger)
 
     return 0
 
+def get_bed_filtering_command(target_bed_gz, target_gene_pattern, gwas_findings, secondary_findings, pgx_findings):
+    
+    ## All targets - genes of interest + GWAS tag SNPS + ACMG Secondary Findings + CPIC PGx Oncology (chemo toxicity, DPYD)
+    all_targets = target_gene_pattern + "|(\\|tag\\|)|ACMG_SF|CPIC_PGX_ONCOLOGY"
+    
+    ## Patterns to filter out GWAS tag SNPs, ACMG Secondary Findings, and CPIC PGx Oncology
+    ignore_acmg_sf_targets = "awk 'BEGIN{FS=\"\\t\"}{if($4 !~ /ACMG_SF/ || ($4 ~ /ACMG_SF/ && $4 ~ /" + str(target_gene_pattern) + "/))print;}'"
+    ignore_gwas_targets = "egrep -v '(\\|tag\\|)'"
+    ignore_pgx_targets = "egrep -v 'CPIC_PGX_ONCOLOGY'"
+    
+    filter_bed_command = f"bgzip -dc {target_bed_gz} | egrep '{all_targets}'"
+    if gwas_findings == 0:
+        filter_bed_command += f' | {ignore_gwas_targets}'
+    if secondary_findings == 0:
+        filter_bed_command += f' | {ignore_acmg_sf_targets}'
+    if pgx_findings == 0:
+        filter_bed_command += f' | {ignore_pgx_targets}'
+    return filter_bed_command
 
 def simplify_vcf(input_vcf, validated_vcf, vcf, custom_bed, refdata_assembly_dir, virtual_panel_id, 
-                 sample_id, diagnostic_grade_only, gwas_findings, secondary_findings, output_dir, logger, debug):
+                 sample_id, diagnostic_grade_only, gwas_findings, secondary_findings, pgx_findings, output_dir, logger, debug):
 
     """
     Function that performs four separate checks/filters on the validated input VCF:
@@ -212,17 +224,8 @@ def simplify_vcf(input_vcf, validated_vcf, vcf, custom_bed, refdata_assembly_dir
                 "bedtools intersect -wa -u -header -a " + str(temp_files['vcf_4']) + \
                 " -b " + str(custom_bed) + " > " + str(validated_vcf)
             check_subprocess(logger, target_variants_intersect_cmd, debug)
-    else:        
-        if gwas_findings == 0 and secondary_findings == 1:
-            logger.info(f"Limiting variant set to cancer predisposition loci (virtual panel id(s): '{str(virtual_panel_id)}' and secondary findings (ACMG)")
-        elif gwas_findings == 0 and secondary_findings == 0:
-            logger.info(f"Limiting variant set to cancer predisposition loci (virtual panel id(s): '{str(virtual_panel_id)}'")                
-        elif gwas_findings == 1 and secondary_findings == 0:
-            logger.info(f"Limiting variant set to cancer predisposition loci (virtual panel id(s): '{str(virtual_panel_id)}' and GWAS hits (NHGRI-EBI Catalog)")
-        else:
-            logger.info((
-                f"Limiting variant set to cancer predisposition loci (virtual panel id(s): '{str(virtual_panel_id)}', "
-                f"secondary findings (ACMG), and GWAS hits (NHGRI-EBI Catalog)"))
+    else:
+        logger.info("Limiting variant set to cancer predisposition loci (virtual panel id(s): '" + str(virtual_panel_id) + "')")      
 
         ## Concatenate all panel BEDs to one big virtual panel BED, sort and make unique
         panel_ids = str(virtual_panel_id).split(',')
@@ -236,17 +239,14 @@ def simplify_vcf(input_vcf, validated_vcf, vcf, custom_bed, refdata_assembly_dir
                     refdata_assembly_dir, 'gene','bed','gene_virtual_panel', str(pid) + ".GREEN.bed.gz")            
             check_file_exists(target_bed_gz, logger)
             
-            ## awk command to ignore secondary finding records while keeping records that belong to target (and that can potentially
-            ## be part of the secondary findings list)
-            awk_command = "awk 'BEGIN{FS=\"\\t\"}{if($4 !~ /ACMG_SF/ || ($4 ~ /ACMG_SF/ && $4 ~ /" + str(ge_panel_identifier) + ":/))print;}'"
-            if gwas_findings == 0 and secondary_findings == 1:
-                check_subprocess(logger, f'bgzip -dc {target_bed_gz} | egrep -v "(\\|tag\\|)" >> {virtual_panels_tmp_bed}', debug)
-            elif gwas_findings == 0 and secondary_findings == 0:
-                check_subprocess(logger, f'bgzip -dc {target_bed_gz} | egrep -v "(\\|tag\\|)" | {awk_command} >> {virtual_panels_tmp_bed}', debug)
-            elif gwas_findings == 1 and secondary_findings == 0:
-                check_subprocess(logger, f'bgzip -dc {target_bed_gz} | {awk_command} >> {virtual_panels_tmp_bed}', debug)
-            else:                
-                check_subprocess(logger, f'bgzip -dc {target_bed_gz} >> {virtual_panels_tmp_bed}', debug)
+            ## Append the virtual panel BED file with specific panel target genes, potentially filtering out GWAS hits, 
+            ## ACMG Secondary Findings, and CPIC PGx Oncology overlapp (i.e. based on user parameters)
+            target_gene_pattern = str(ge_panel_identifier) + ":"
+            if pid == '0':
+                target_gene_pattern = "ENSG[0-9]{1,}"
+            filter_bed_command = get_bed_filtering_command(
+                target_bed_gz, target_gene_pattern, gwas_findings, secondary_findings, pgx_findings)
+            check_subprocess(logger, f'{filter_bed_command} >> {virtual_panels_tmp_bed}', debug)
 
         ## sort the collection of virtual panels
         sort_bed(virtual_panels_tmp_bed, virtual_panels_bed, debug, logger)
@@ -296,7 +296,9 @@ def validate_cpsr_input(refdata_assembly_dir,
                         diagnostic_grade_only, 
                         gwas_findings, 
                         secondary_findings, 
-                        output_dir, debug):
+                        pgx_findings,
+                        output_dir, 
+                        debug):
     """
     Function that reads the input files to CPSR (VCF file + custom gene list) and performs the following checks:
     0. If custom gene list (panel) is provided, checks the validity of this list
@@ -319,6 +321,7 @@ def validate_cpsr_input(refdata_assembly_dir,
                                   refdata_assembly_dir, 
                                   gwas_findings, 
                                   secondary_findings, 
+                                  pgx_findings,
                                   logger, 
                                   debug)
     
@@ -380,6 +383,7 @@ def validate_cpsr_input(refdata_assembly_dir,
                      diagnostic_grade_only, 
                      gwas_findings, 
                      secondary_findings, 
+                     pgx_findings,
                      output_dir, 
                      logger, 
                      debug)
