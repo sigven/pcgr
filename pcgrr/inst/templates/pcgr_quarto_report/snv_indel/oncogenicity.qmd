@@ -177,6 +177,22 @@ dt_all_coding <- DT::datatable(
       )
   )
 
+if(pcg_report$settings$conf$sample_properties$site == "Any"){
+  dt_all_coding <- dt_all_coding |>
+    DT::formatStyle(
+    "SYMBOL",
+    "GLOBAL_ASSOC_RANK", 
+    color = "white", 
+    backgroundColor = 
+      DT::styleInterval(
+        pcgrr::color_palette$cancer_assoc$breaks,
+        pcgrr::color_palette$cancer_assoc$values
+      )
+  )
+  
+}
+
+
 # if(expression_present_snv == TRUE){
 #   dt_all_coding <- dt_all_coding |>
 #     DT::formatStyle(
@@ -346,6 +362,20 @@ dt_all_noncoding <- DT::datatable(
         c("#FF8790", "#FF8790","#000000")
       )
   )
+
+if(pcg_report$settings$conf$sample_properties$site == "Any"){
+  dt_all_noncoding <- dt_all_noncoding |>
+    DT::formatStyle(
+    "SYMBOL",
+    "GLOBAL_ASSOC_RANK", 
+    color = "white", 
+    backgroundColor = 
+      DT::styleInterval(
+        pcgrr::color_palette$cancer_assoc$breaks,
+        pcgrr::color_palette$cancer_assoc$values
+      )
+  )
+}
 
 # if(expression_present_snv == TRUE){
 #   dt_all_noncoding <- dt_all_noncoding |>

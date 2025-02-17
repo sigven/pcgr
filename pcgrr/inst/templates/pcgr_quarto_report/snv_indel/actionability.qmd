@@ -426,6 +426,21 @@ tier3_dt <- DT::datatable(
       )
   )
 
+if(pcg_report$settings$conf$sample_properties$site == "Any"){
+  tier3_dt <- tier3_dt |>
+    DT::formatStyle(
+    "SYMBOL",
+    "GLOBAL_ASSOC_RANK", 
+    color = "white", 
+    backgroundColor = 
+      DT::styleInterval(
+        pcgrr::color_palette$cancer_assoc$breaks,
+        pcgrr::color_palette$cancer_assoc$values
+      )
+  )
+}
+
+
 # if(expression_present_snv == TRUE){
 #   tier3_dt <- tier3_dt |>
 #     DT::formatStyle(
