@@ -472,7 +472,7 @@ def run_pcgr(input_data, output_data, conf_options):
            append_annotations(
               output_pass_vcf2tsv_gz, refdata_assembly_dir = input_data["refdata_assembly_dir"], logger = logger)
         ## Set allelic support properties (DP_TUMOR, DP_CONTROL, VAF_TUMOR, VAF_CONTROL)
-        variant_set = set_allelic_support(variant_set, allelic_support_tags = yaml_data["conf"]['somatic_snv']['allelic_support'])
+        variant_set = set_allelic_support(variant_set, allelic_support_tags = yaml_data["conf"]['somatic_snv']['allelic_support'], logger = logger)
         ## Clean annotations (formatting etc.)
         variant_set = clean_annotations(variant_set, yaml_data, logger = logger)
 
