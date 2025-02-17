@@ -8,7 +8,7 @@ import os
 import sys
 import yaml
 
-from pcgr.annoutils import read_infotag_file, make_transcript_xref_map, read_genexref_namemap, map_regulatory_variant_annotations, write_pass_vcf
+from pcgr.annoutils import read_infotag_file, make_transcript_xref_map, read_genexref_namemap, map_regulatory_variant_annotations, write_pass_vcf, load_grantham
 from pcgr.vep import parse_vep_csq
 from pcgr.dbnsfp import vep_dbnsfp_meta_vcf, map_variant_effect_predictors
 from pcgr.oncogenicity import assign_oncogenicity_evidence, load_oncogenic_variants, match_oncogenic_variants
@@ -96,20 +96,21 @@ def extend_vcf_annotations(arg_dict, logger):
 
     gene_transcript_xref_map = read_genexref_namemap(
         os.path.join(arg_dict['refdata_assembly_dir'], 'gene','tsv','gene_transcript_xref', 'gene_transcript_xref_bedmap.tsv.gz'), logger)
-    #print(gene_transcript_xref_map)
     cancer_hotspots = load_mutation_hotspots(
         os.path.join(arg_dict['refdata_assembly_dir'], 'misc','tsv','hotspot', 'hotspot.tsv.gz'), logger)
-    oncogenic_variants = {}
     oncogenic_variants = load_oncogenic_variants(os.path.join(arg_dict['refdata_assembly_dir'], 'variant','tsv', 'clinvar','clinvar_oncogenic.tsv.gz'), logger)
+    grantham_scores = load_grantham(os.path.join(arg_dict['refdata_assembly_dir'], 'misc','tsv', 'grantham', 'grantham.tsv'), logger)
 
     biomarkers = {}
     for db in ['cgi','civic']:
         variant_fname = os.path.join(arg_dict['refdata_assembly_dir'], 'biomarker','tsv', f"{db}.variant.tsv.gz")
         clinical_fname = os.path.join(arg_dict['refdata_assembly_dir'], 'biomarker','tsv', f"{db}.clinical.tsv.gz")
         if arg_dict['cpsr'] is True:
-            biomarkers[db] = load_biomarkers(logger, variant_fname, clinical_fname, biomarker_vartype = 'MUT', biomarker_variant_origin = 'Both')
+            biomarkers[db] = load_biomarkers(
+                logger, variant_fname, clinical_fname, biomarker_vartype = 'MUT', biomarker_variant_origin = 'Both')
         else:
-            biomarkers[db] = load_biomarkers(logger, variant_fname, clinical_fname, biomarker_vartype = 'MUT', biomarker_variant_origin = 'Somatic')
+            biomarkers[db] = load_biomarkers(
+                logger, variant_fname, clinical_fname, biomarker_vartype = 'MUT', biomarker_variant_origin = 'Somatic')
 
     out_vcf = re.sub(r'(\.gz)$','',arg_dict['vcf_file_out'])
 
@@ -119,18 +120,13 @@ def extend_vcf_annotations(arg_dict, logger):
     
     vcf = cyvcf2.VCF(arg_dict['vcf_file_in'],  gts012=True)
     for tag in sorted(vcf_info_metadata):
-        if arg_dict['pon_annotation'] == 0 and arg_dict['regulatory_annotation'] == 0:
-            if not tag.startswith('PANEL_OF_NORMALS') and not tag.startswith('REGULATORY_'):
-                vcf.add_info_to_header({'ID': tag, 'Description': str(vcf_info_metadata[tag]['description']),'Type':str(vcf_info_metadata[tag]['type']), 'Number': str(vcf_info_metadata[tag]['number'])})
-        elif arg_dict['pon_annotation'] == 1 and arg_dict['regulatory_annotation'] == 0:
-            if not tag.startswith('REGULATORY_'):
-                vcf.add_info_to_header({'ID': tag, 'Description': str(vcf_info_metadata[tag]['description']),'Type':str(vcf_info_metadata[tag]['type']), 'Number': str(vcf_info_metadata[tag]['number'])})
-        elif arg_dict['pon_annotation'] == 0 and arg_dict['regulatory_annotation'] == 1:
-            if not tag.startswith('PANEL_OF_NORMALS'):
-                vcf.add_info_to_header({'ID': tag, 'Description': str(vcf_info_metadata[tag]['description']),'Type':str(vcf_info_metadata[tag]['type']), 'Number': str(vcf_info_metadata[tag]['number'])})
-        else:
-            vcf.add_info_to_header({'ID': tag, 'Description': str(vcf_info_metadata[tag]['description']),'Type':str(vcf_info_metadata[tag]['type']), 'Number': str(vcf_info_metadata[tag]['number'])})
-
+        if arg_dict['pon_annotation'] == 0 and tag.startswith('PANEL_OF_NORMALS'):
+            continue
+        if arg_dict['regulatory_annotation'] == 0 and tag.startswith('REGULATORY_'):
+            continue
+        vcf.add_info_to_header({'ID': tag, 'Description': str(vcf_info_metadata[tag]['description']),
+                                'Type':str(vcf_info_metadata[tag]['type']), 
+                                'Number': str(vcf_info_metadata[tag]['number'])})
     w = cyvcf2.Writer(arg_dict['vcf_file_out'], vcf)
     current_chrom = None
     num_chromosome_records_processed = 0
@@ -186,7 +182,10 @@ def extend_vcf_annotations(arg_dict, logger):
         vep_csq_record_results = {}
         if arg_dict['cpsr'] is True:
             vep_csq_record_results = \
-                parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, arg_dict['vep_pick_order'], 
+                parse_vep_csq(rec, transcript_xref_map, 
+                              vep_csq_fields_map, 
+                              grantham_scores,
+                              arg_dict['vep_pick_order'], 
                               logger,  pick_only = False, csq_identifier = 'CSQ', 
                               debug = arg_dict['debug'],
                               targets_entrez_gene = cpsr_target_genes)
@@ -195,16 +194,12 @@ def extend_vcf_annotations(arg_dict, logger):
                     vep_csq_record_results['picked_gene_csq'])
         else:
             vep_csq_record_results = \
-                parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, arg_dict['vep_pick_order'], 
+                parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, grantham_scores, arg_dict['vep_pick_order'], 
                               logger, pick_only = True, csq_identifier = 'CSQ', debug = arg_dict['debug'])
 
         principal_csq_properties = {}
-        principal_csq_properties['hgvsp'] = '.'
-        principal_csq_properties['hgvsc'] = '.'
-        principal_csq_properties['entrezgene'] = '.'
-        principal_csq_properties['exon'] = '.'
-        principal_csq_properties['codon'] = '.'
-        principal_csq_properties['lof'] = '.'
+        for prop in ['hgvsp','hgvsc','entrezgene','exon','codon','lof']:
+            principal_csq_properties[prop] = '.'
         
         if 'picked_csq' in vep_csq_record_results:
             csq_record = vep_csq_record_results['picked_csq']
@@ -214,6 +209,15 @@ def extend_vcf_annotations(arg_dict, logger):
                         rec.INFO[k] = True
                     else:
                         if not csq_record[k] is None:
+                            
+                            if k == 'DOMAINS':
+                                filtered_domains = []
+                                for dom in csq_record[k].split('&'):
+                                    if not dom.startswith('PDB-'):
+                                        filtered_domains.append(dom)
+                                if(len(filtered_domains) > 0):
+                                    csq_record[k] = '&'.join(filtered_domains)
+                            
                             rec.INFO[k] = csq_record[k]
 
                             if k == 'HGVSp_short':
