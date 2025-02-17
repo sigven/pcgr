@@ -481,7 +481,13 @@ append_dbnsfp_var_link <- function(var_df) {
         .data$PREDICTED_EFFECT, ":SN,", ":SplicingNeutral,"
       )) |>
       dplyr::mutate(PREDICTED_EFFECT = stringr::str_replace_all(
+        .data$PREDICTED_EFFECT, ":SN", ":SplicingNeutral"
+      )) |>
+      dplyr::mutate(PREDICTED_EFFECT = stringr::str_replace_all(
         .data$PREDICTED_EFFECT, ":AS,", ":AffectSplicing,"
+      )) |>
+      dplyr::mutate(PREDICTED_EFFECT = stringr::str_replace_all(
+        .data$PREDICTED_EFFECT, ":AS", ":AffectSplicing"
       )) |>
       dplyr::mutate(PREDICTED_EFFECT = stringr::str_replace_all(
         .data$PREDICTED_EFFECT, ":PD,", ":ProbablyDamaging,"
