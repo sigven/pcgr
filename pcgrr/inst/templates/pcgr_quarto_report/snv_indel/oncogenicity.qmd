@@ -7,7 +7,7 @@ The tabset below provides an overview of coding (protein-altering) versus non-co
    -  <span style="background-color:#FF8790; line-height:110%; padding:2x; color:white"><b>&nbsp;Variants of pathogenic/likely pathogenic significance (ClinVar) &nbsp; </b></span>
    - <span style="background-color:black; line-height:110%; padding:2x; color:white"><b>&nbsp;Variants of uncertain significance or with conflicting evidence (ClinVar) &nbsp; </b></span>.
 
-::: {.callout-note}
+::: {.callout-note collapse="true"}
 
 ## Note - output limitations
 
@@ -15,7 +15,7 @@ In order to maintain responsiveness of client-side data interaction, only the to
 
 :::
 
-::: {.callout-note}
+::: {.callout-note collapse="true"}
 
 ## Note - oncogenicity versus actionability
 

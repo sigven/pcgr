@@ -2,10 +2,22 @@
 
 PCGR estimates TMB in three different ways, depending on the type of variants to include in the calculation (specifically abbreviated as __coding_non_silent__, __coding_and_silent__, and __missense_only__, see details outlined in the [Documentation](#Documentation)). Only results from one of these methods are highlighted here, as configured by the user. 
 
-For TMB calculation, sequencing coverage and variant allele frequency (VAF) thresholds are applied to filter out low-quality variants. 
+```{r tmb_var_filtering}
+#| echo: false
+#| eval: !expr (pcg_report$settings$conf$sample_properties$vaf_tumor_detected | pcg_report$settings$conf$sample_properties$dp_tumor_detected) == TRUE
+#| output: asis
 
-* Minimum sequencing depth applied for TMB calculation: __`r pcg_report$settings$conf$somatic_snv$tmb$tmb_dp_min`__
-* Minimum VAF applied for TMB calculation: __`r pcg_report$settings$conf$somatic_snv$tmb$tmb_af_min`__
+cat("For TMB calculation, requirements for sequencing depth and variant allele frequency (VAF) have been applied to filter out low-quality variants\n\n")
+
+if (pcg_report$settings$conf$sample_properties$dp_tumor_detected){
+  m <- paste0("*    Minimum sequencing depth applied for TMB calculation: <b>", pcg_report$settings$conf$somatic_snv$tmb$tmb_dp_min, "</b>")
+  cat(m,"\n")
+}
+if (pcg_report$settings$conf$sample_properties$vaf_tumor_detected){
+  m <- paste0("*    Minimum VAF applied for TMB calculation: <b>", pcg_report$settings$conf$somatic_snv$tmb$tmb_af_min, "</b>")
+  cat(m,"\n")
+}
+```
 
 <br>
 
@@ -63,7 +75,7 @@ bslib::page_fillable(
 
 The plot below indicates how the mutational burden estimated for the query tumor sample (dotted line) compares with reference distributions of other tumor samples (The Cancer Genome Atlas (TCGA)).
 
-::: {.callout-note}
+::: {.callout-note collapse="true"}
 
 ## Note - TMB reference comparison
 

@@ -30,7 +30,7 @@ format:
     embed-resources: true
     smooth-scroll: true
     page-layout: full
-    fontsize: 0.92em
+    fontsize: 0.93em
     toc: true
     toc-expand: 3
     toc-depth: 3
@@ -58,7 +58,6 @@ if(as.logical(pcg_report$settings$conf$assay_properties$vcf_tumor_only) == TRUE)
   report_color <- pcgrr::color_palette$report_color$values[2]
 }
 ```
-
 <a href="https://sigven.github.io/pcgr">
   <img src="`r logo_fname_path`" title="" alt="" align="right" width="80"/>
 </a>
@@ -126,8 +125,6 @@ if(as.logical(pcg_report$settings$conf$assay_properties$vcf_tumor_only) == TRUE)
 #| child: 'pcgr_quarto_report/documentation.qmd'
 ```
 
-<br>
-
 <font size="-1">
 
 ## References
@@ -141,7 +138,7 @@ if(as.logical(pcg_report$settings$conf$assay_properties$vcf_tumor_only) == TRUE)
 #| eval: true
 #| output: asis
 
-cat('<br><br><br>\n\n::: {.callout-important}\n## Medical Disclaimer\n\n<i>The information contained in this cancer genome report is intended for research purposes only. We make no representations or warranties of any kind, expressed or implied, about the completeness, accuracy, reliability, suitability or availability with respect to the sequencing report or the information, products, services, for interpretation or use in clinical practice, or otherwise contained in the report for any purpose. Any reliance you place on information in the report is therefore strictly at your own risk. In no event will we be liable for any loss or damage including without limitation, indirect or consequential loss or damage, or any loss or damage whatsoever arising from loss of data or profits arising out of, or in connection with, the use of this genome report.</i><br>\n\n:::')
+cat('<br><br>\n\n::: {.callout-important collapse="true"}\n## Medical Disclaimer\n\n<i>The information contained in this cancer genome report is intended for research purposes only. We make no representations or warranties of any kind, expressed or implied, about the completeness, accuracy, reliability, suitability or availability with respect to the sequencing report or the information, products, services, for interpretation or use in clinical practice, or otherwise contained in the report for any purpose. Any reliance you place on information in the report is therefore strictly at your own risk. In no event will we be liable for any loss or damage including without limitation, indirect or consequential loss or damage, or any loss or damage whatsoever arising from loss of data or profits arising out of, or in connection with, the use of this genome report.</i><br>\n\n:::')
 
 ```
 
