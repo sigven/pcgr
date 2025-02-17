@@ -4,7 +4,7 @@ from pcgr._version import __version__
 
 ## Version - software and bundle
 PCGR_VERSION = __version__
-DB_VERSION = '20240927'
+DB_VERSION = '20250217'
 
 ## Miscellaneous settings
 NCBI_BUILD_MAF = 'GRCh38'
@@ -17,13 +17,13 @@ MINIMUM_N_MUT_SIGNATURE = 100
 MAX_SIGNATURE_PREVALENCE = 20
 
 ## GENCODE versions
-GENCODE_VERSION = {'grch38': 46,'grch37': 19}
+GENCODE_VERSION = {'grch38': 47,'grch37': 19}
 
 ## vcfanno settings
 VCFANNO_MAX_PROC = 15
 
 ## VEP settings/versions
-VEP_VERSION = '112'
+VEP_VERSION = '113'
 VEP_ASSEMBLY = {'grch38': 'GRCh38','grch37': 'GRCh37'}
 VEP_MIN_FORKS = 1
 VEP_MAX_FORKS = 8
@@ -263,5 +263,32 @@ SITE_TO_DISEASE = {
     'Thymus': ['TCGA_THYM'],
     'Myeloid': ['TCGA_LAML'],
     'Lymphoid': ['TCGA_DLBC']
-    
+}
+
+DBNSFP_ALGORITHMS = {
+    'polyphen2_hvar': 'DBNSFP_POLYPHEN2_HVAR',
+    'cadd': 'DBNSFP_CADD',
+    'vest4': 'DBNSFP_VEST4',
+    'clinpred': 'DBNSFP_CLINPRED',
+    'revel': 'DBNSFP_REVEL',
+    'sift': 'DBNSFP_SIFT',
+    'provean': 'DBNSFP_PROVEAN',
+    'm-cap': 'DBNSFP_M_CAP',
+    'mutpred': 'DBNSFP_MUTPRED',
+    'metarnn': 'DBNSFP_META_RNN',
+    'fathmm_xf': 'DBNSFP_FATHMM_XF',
+    'mutationassessor': 'DBNSFP_MUTATIONASSESSOR',
+    'mutationtaster': 'DBNSFP_MUTATIONTASTER',
+    'deogen2': 'DBNSFP_DEOGEN2',
+    'primateai': 'DBNSFP_PRIMATEAI', 
+    'list_s2': 'DBNSFP_LIST_S2',
+    'gerp_rs': 'DBNSFP_GERP',       
+    'aloft': 'DBNSFP_ALOFT',
+    'bayesdel_addaf': 'DBNSFP_BAYESDEL_ADDAF',
+    'splice_site_ada': 'DBNSFP_SPLICE_SITE_ADA',
+    'splice_site_rf': 'DBNSFP_SPLICE_SITE_RF',
+    'esm1b': 'DBNSFP_ESM1B',
+    'alphamissense': 'DBNSFP_ALPHA_MISSENSE',
+    'mutformer': 'DBNSFP_MUTFORMER', 
+    'phactboost': 'DBNSFP_PHACTBOOST'
 }

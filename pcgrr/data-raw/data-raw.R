@@ -383,24 +383,26 @@ data_coltype_defs[['snv_indel_germline_raw']] <- readr::cols_only(
   MOTIF_NAME = readr::col_character(),
   RMSK_HIT = readr::col_character(),
   VEP_ALL_CSQ = readr::col_character(),
-  DBNSFP_SIFT = readr::col_character(),
-  DBNSFP_PROVEAN = readr::col_character(),
-  DBNSFP_META_RNN = readr::col_character(),
-  DBNSFP_FATHMM = readr::col_character(),
-  DBNSFP_MUTATIONTASTER = readr::col_character(),
-  DBNSFP_DEOGEN2 = readr::col_character(),
-  DBNSFP_PRIMATEAI = readr::col_character(),
-  DBNSFP_MUTATIONASSESSOR = readr::col_character(),
-  DBNSFP_FATHMM_MKL = readr::col_character(),
-  DBNSFP_M_CAP = readr::col_character(),
-  DBNSFP_LIST_S2 = readr::col_character(),
+  DBNSFP_ALPHA_MISSENSE = readr::col_character(),
   DBNSFP_BAYESDEL_ADDAF = readr::col_character(),
+  DBNSFP_CLINPRED = readr::col_character(),
+  DBNSFP_DEOGEN2 = readr::col_character(),
+  DBNSFP_ESM1B = readr::col_character(),
+  DBNSFP_FATHMM_XF = readr::col_character(),
+  DBNSFP_LIST_S2 = readr::col_character(),
+  DBNSFP_META_RNN = readr::col_character(),
+  DBNSFP_MUTATIONASSESSOR = readr::col_character(),
+  DBNSFP_MUTATIONTASTER = readr::col_character(),
+  DBNSFP_MUTFORMER = readr::col_character(),
+  DBNSFP_MUTPRED = readr::col_character(),
+  DBNSFP_M_CAP = readr::col_character(),
+  DBNSFP_PHACTBOOST = readr::col_character(),
+  DBNSFP_POLYPHEN2_HVAR = readr::col_character(),
+  DBNSFP_PRIMATEAI = readr::col_character(),
+  DBNSFP_PROVEAN = readr::col_character(),
+  DBNSFP_SIFT = readr::col_character(),
   DBNSFP_SPLICE_SITE_ADA = readr::col_character(),
   DBNSFP_SPLICE_SITE_RF = readr::col_character(),
-  DBNSFP_PHACTBOOST = readr::col_character(),
-  DBNSFP_ALPHA_MISSENSE = readr::col_character(),
-  DBNSFP_MUTFORMER = readr::col_character(),
-  DBNSFP_ESM1B = readr::col_character(),
   gnomADe_AF = readr::col_number(),
   gnomADe_AMR_AF = readr::col_number(),
   gnomADe_AFR_AF = readr::col_number(),
@@ -983,9 +985,9 @@ variant_db_url <-
 usethis::use_data(variant_db_url, overwrite = T)
 
 #---- effect_prediction_algos ----#
-effect_prediction_algos <-
-  utils::read.table(file = "data-raw/effect_prediction_algorithms.tsv",
-             header = T, sep = "\t", quote = "", stringsAsFactors = F)
+effect_prediction_algos <- as.data.frame(
+  readr::read_tsv(file = "data-raw/effect_prediction_algorithms.tsv",
+             show_col_types = F))
 usethis::use_data(effect_prediction_algos, overwrite = T)
 
 #---- cancer_phenotypes_regex ----#

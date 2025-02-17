@@ -67,7 +67,7 @@ def get_vep_command(file_paths, conf_options, input_vcf, output_vcf, debug = Fal
     return(vep_cmd)
 
 
-def get_csq_record_annotations(csq_fields, varkey, logger, vep_csq_fields_map, transcript_xref_map):
+def get_csq_record_annotations(csq_fields, varkey, logger, vep_csq_fields_map, transcript_xref_map, grantham_scores = None):
     """
     Generates a dictionary object containing the annotations of a CSQ record.
 
@@ -144,8 +144,8 @@ def get_csq_record_annotations(csq_fields, varkey, logger, vep_csq_fields_map, t
         if ensembl_transcript_id in transcript_xref_map:
             csq_record['SYMBOL'] = transcript_xref_map[ensembl_transcript_id]['SYMBOL']
     
-    # Assign coding status, protein change, coding sequence change, last exon/intron status etc as VCF info tags
-    csq_record = assign_cds_exon_intron_annotations(csq_record, logger)
+    # Assign coding status, protein change, grantham distance, coding sequence change, last exon/intron status etc as VCF info tags
+    csq_record = assign_cds_exon_intron_annotations(csq_record, grantham_scores, logger)
     
     return(csq_record)
 
@@ -267,7 +267,7 @@ def pick_single_gene_csq(vep_csq_results,
 
     return(chosen_csq_index)
 
-def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, vep_pick_order, logger, pick_only=True, 
+def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, grantham_scores, vep_pick_order, logger, pick_only=True, 
                   csq_identifier='CSQ', debug = 0, targets_entrez_gene = None):
 
     """
@@ -319,7 +319,7 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, vep_pick_order, 
         ## CPSR - consider all picked gene-specific consequences (considering that a variant may occasionally 
         ## overlap other, non-CPSR targets)
         if pick_only is False: 
-            csq_record = get_csq_record_annotations(csq_fields, varkey, logger, vep_csq_fields_map, transcript_xref_map)
+            csq_record = get_csq_record_annotations(csq_fields, varkey, logger, vep_csq_fields_map, transcript_xref_map, grantham_scores)
             all_csq.append(csq_record)
             if csq_record['PICK'] == '1':
                 if 'Feature_type' in csq_record:
@@ -358,7 +358,7 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, vep_pick_order, 
                 
             if csq_fields[vep_csq_fields_map['field2index']['PICK']] == "1":                
                 csq_record = get_csq_record_annotations(
-                    csq_fields, varkey, logger, vep_csq_fields_map, transcript_xref_map)                           
+                    csq_fields, varkey, logger, vep_csq_fields_map, transcript_xref_map, grantham_scores)                           
                 # Append transcript consequence to primary_csq_pick
                 primary_csq_pick.append(csq_record)
         symbol = "."

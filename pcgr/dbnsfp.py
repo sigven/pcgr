@@ -5,6 +5,7 @@ import re
 import cyvcf2
 
 from cyvcf2 import VCF
+from pcgr import pcgr_vars
 
 def map_variant_effect_predictors(rec, algorithms):
 
@@ -27,36 +28,12 @@ def map_variant_effect_predictors(rec, algorithms):
     if found_key == 0 and re.search('splice_', consequence):
         dbnsfp_key = gene_id
 
-    algo_mapping = {
-        'sift': 'DBNSFP_SIFT',
-        'provean': 'DBNSFP_PROVEAN',
-        'm-cap': 'DBNSFP_M_CAP',
-        'mutpred': 'DBNSFP_MUTPRED',
-        'metarnn': 'DBNSFP_META_RNN',
-        'fathmm': 'DBNSFP_FATHMM',
-        'fathmm_mkl_coding': 'DBNSFP_FATHMM_MKL',
-        'mutationassessor': 'DBNSFP_MUTATIONASSESSOR',
-        'mutationtaster': 'DBNSFP_MUTATIONTASTER',
-        'deogen2': 'DBNSFP_DEOGEN2',
-        'primateai': 'DBNSFP_PRIMATEAI', 
-        'list_s2': 'DBNSFP_LIST_S2',
-        'gerp_rs': 'DBNSFP_GERP',       
-        'aloft': 'DBNSFP_ALOFTPRED',
-        'bayesdel_addaf': 'DBNSFP_BAYESDEL_ADDAF',
-        'splice_site_ada': 'DBNSFP_SPLICE_SITE_ADA',
-        'splice_site_rf': 'DBNSFP_SPLICE_SITE_RF',
-        'esm1b': 'DBNSFP_ESM1B',
-        'alphamissense': 'DBNSFP_ALPHA_MISSENSE',
-        'mutformer': 'DBNSFP_MUTFORMER', 
-        'phactboost': 'DBNSFP_PHACTBOOST'
-    }
-
     if dbnsfp_key != '':
         if dbnsfp_key in dbnsfp_predictions:
             rec.INFO['EFFECT_PREDICTIONS'] = dbnsfp_predictions[dbnsfp_key]
             for algo_pred in rec.INFO['EFFECT_PREDICTIONS'].split('&'):
-                if algo_pred.split(':')[0] in algo_mapping:
-                    rec.INFO[algo_mapping[algo_pred.split(':')[0]]] = str(algo_pred.split(':')[1])
+                if algo_pred.split(':')[0] in pcgr_vars.DBNSFP_ALGORITHMS:
+                    rec.INFO[pcgr_vars.DBNSFP_ALGORITHMS[algo_pred.split(':')[0]]] = str(algo_pred.split(':')[1])
 
 
 def map_dbnsfp_predictions(dbnsfp_tag, algorithms):
