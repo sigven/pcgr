@@ -171,6 +171,7 @@ def create_config(arg_dict, workflow = "PCGR"):
         conf_options['variant_classification'] = {
             'gwas_findings': int(arg_dict['gwas_findings']),
             'secondary_findings': int(arg_dict['secondary_findings']),
+            'pgx_findings': int(arg_dict['pgx_findings']),
             'pop_gnomad': str(arg_dict['pop_gnomad']),
             'maf_upper_threshold': float(arg_dict['maf_upper_threshold']),
             'classify_all': int(arg_dict['classify_all']),
@@ -215,7 +216,7 @@ def populate_config_data(conf_options: dict, refdata_assembly_dir: str, workflow
     
     ## add metadata information for each data source
     
-    cpsr_sources_regex = r'^(gepa|cpg_other|maxwell2016|acmg_sf|dbmts|woods_dnarepair|gerp|tcga_pancan_2018|gwas_catalog)'
+    cpsr_sources_regex = r'^(gepa|cpg_other|maxwell2016|acmg_sf|dbmts|woods_dnarepair|gerp|tcga_pancan_2018|gwas_catalog|cpic)'
     pcgr_sources_regex = r'^(cytoband|mitelmandb|tcga|nci|intogen|opentargets|depmap|treehouse|dgidb|pubchem|cosmic_mutsigs)'
     sources_skip_regex = r'^(illumina|foundation_one)'
     
@@ -272,6 +273,7 @@ def populate_config_data(conf_options: dict, refdata_assembly_dir: str, workflow
                 conf_data['conf']['gene_panel']['diagnostic_grade_only'], 
                 conf_data['conf']['gene_panel']['custom_list_tsv'],
                 bool(conf_data['conf']['variant_classification']['secondary_findings']),
+                bool(conf_data['conf']['variant_classification']['pgx_findings']),
                 logger)
             
             if conf_data['conf']['gene_panel']['panel_id'] != "-1":
@@ -285,7 +287,7 @@ def populate_config_data(conf_options: dict, refdata_assembly_dir: str, workflow
     return(conf_data)
 
 def set_virtual_target_genes(panel_id: str, refdata_assembly_dir: str, diagnostic_grade_only: bool, 
-                             custom_list_tsv: str, secondary_findings: bool, logger=None):
+                             custom_list_tsv: str, secondary_findings: bool, pgx_findings: bool, logger=None):
     
     all_panels_fname = os.path.join(
         refdata_assembly_dir,
@@ -298,7 +300,7 @@ def set_virtual_target_genes(panel_id: str, refdata_assembly_dir: str, diagnosti
         "gene_cpg.tsv.gz")
         
     all_virtual_panels = pd.DataFrame()
-    all_secondary_finding_targets = pd.DataFrame()
+    all_sf_pgx_targets = pd.DataFrame()
     panel_targets = pd.DataFrame()
     if check_file_exists(all_panels_fname, logger):    
         all_virtual_panels = pd.read_csv(all_panels_fname, sep="\t", na_values=".")
@@ -318,27 +320,34 @@ def set_virtual_target_genes(panel_id: str, refdata_assembly_dir: str, diagnosti
         for f in ['panel_url', 'panel_name','ensembl_gene_id','moi','mod','symbol']:
             all_virtual_panels[f] = all_virtual_panels[f].astype(str)
     
-    if secondary_findings is True:
+    if secondary_findings is True or pgx_findings is True:
         if check_file_exists(all_cpg_fname, logger):
-            all_secondary_finding_targets = pd.read_csv(all_cpg_fname, sep="\t", na_values=".")    
-            all_secondary_finding_targets = \
-                all_secondary_finding_targets[all_secondary_finding_targets.cpg_source.str.match('ACMG_SF')]    
-            all_secondary_finding_targets = \
-                all_secondary_finding_targets.drop(
-                    ['cpg_phenotypes', 'cpg_cancer_cui','cpg_source','cpg_syndrome_cui'], axis=1)
-            all_secondary_finding_targets = \
-                all_secondary_finding_targets.rename(
+            all_sf_pgx_targets = pd.read_csv(all_cpg_fname, sep="\t", na_values=".")
+            regex = r'(ACMG_SF|CPIC_PGX_ONCOLOGY)'
+            if secondary_findings is False:
+                regex = r'(CPIC_PGX_ONCOLOGY)'
+            else:
+                if pgx_findings is False:
+                    regex = r'(ACMG_SF)'
+                
+            all_sf_pgx_targets = \
+                all_sf_pgx_targets[all_sf_pgx_targets.cpg_source.str.match(regex)]    
+            all_sf_pgx_targets = \
+                all_sf_pgx_targets.drop(
+                    ['cpg_phenotypes', 'cpg_cancer_cui','cpg_syndrome_cui'], axis=1)
+            all_sf_pgx_targets = \
+                all_sf_pgx_targets.rename(
                     columns={'cpg_moi': 'moi',
                              'cpg_mod': 'mod'}) 
-            all_secondary_finding_targets['confidence_level'] = -1
-            all_secondary_finding_targets['panel_id'] = float(3.2)
-            all_secondary_finding_targets['panel_url'] = "https://www.ncbi.nlm.nih.gov/clinvar/docs/acmg/"
-            all_secondary_finding_targets['panel_version'] = float(3.2)
-            all_secondary_finding_targets['panel_name'] = "ACMG_SF"
-            all_secondary_finding_targets['primary_target'] = False
-            all_secondary_finding_targets['id'] = str("-2")
+            all_sf_pgx_targets['confidence_level'] = -1
+            all_sf_pgx_targets['panel_id'] = float(3.2)
+            all_sf_pgx_targets['panel_url'] = "https://www.ncbi.nlm.nih.gov/clinvar/docs/acmg/"
+            all_sf_pgx_targets['panel_version'] = float(3.2)
+            all_sf_pgx_targets['panel_name'] = all_sf_pgx_targets['cpg_source']
+            all_sf_pgx_targets['primary_target'] = False
+            all_sf_pgx_targets['id'] = str("-2")
             for f in ['panel_url', 'panel_name','moi','mod','symbol','ensembl_gene_id']:
-                all_secondary_finding_targets[f] = all_secondary_finding_targets[f].astype(str)
+                all_sf_pgx_targets[f] = all_sf_pgx_targets[f].astype(str)
 
 
     if panel_id == "-1":
@@ -380,8 +389,14 @@ def set_virtual_target_genes(panel_id: str, refdata_assembly_dir: str, diagnosti
 
     all_targets = panel_targets
     
-    if len(all_secondary_finding_targets) > 0:        
-        all_targets = pd.concat([panel_targets, all_secondary_finding_targets], axis=0)
+    if len(all_sf_pgx_targets) > 0:
+        df1 = pd.DataFrame(all_sf_pgx_targets['ensembl_gene_id'])
+        df2 = pd.DataFrame(panel_targets['ensembl_gene_id'])
+        outer = df1.merge(df2, on = "ensembl_gene_id", how='outer', indicator=True) ## find genes in SF-PGX that are not in panel
+        df1_only = outer[(outer._merge=='left_only')].drop('_merge', axis=1)
+        all_sf_pgx_targets = all_sf_pgx_targets[all_sf_pgx_targets['ensembl_gene_id'].isin(df1_only['ensembl_gene_id'])]        
+        all_targets = pd.concat([panel_targets, all_sf_pgx_targets], axis=0)
+        
     
     return all_targets.to_dict(orient='records')
     

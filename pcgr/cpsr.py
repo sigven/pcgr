@@ -52,6 +52,7 @@ def get_args():
     optional_other.add_argument("--pcgrr_conda", default="pcgrr", help="pcgrr conda env name (default: %(default)s)")
     
     optional_classification.add_argument('--secondary_findings', action='store_true',dest='secondary_findings',default=False, help='Include variants found in ACMG-recommended list for secondary findings (v3.2), default: %(default)s')
+    optional_classification.add_argument('--pgx_findings', action='store_true',dest='pgx_findings',default=False, help='Report overlap with variants associated with chemotherapy toxicity (PgX findings, CPIC), default: %(default)s')
     optional_classification.add_argument('--gwas_findings', action='store_true',dest='gwas_findings',default=False, help='Report overlap with low to moderate cancer risk variants (tag SNPs) identified from genome-wide association studies, default: %(default)s')    
     optional_classification.add_argument('--pop_gnomad',choices = ['afr','amr','eas','sas','asj','nfe','fin','global'], default='nfe', help='Population source in gnomAD (non-cancer subset) used for variant frequency assessment (ACMG classification), default: %(default)s')
     optional_classification.add_argument('--maf_upper_threshold', type = float, default = 0.9, dest = 'maf_upper_threshold',help='Upper MAF limit (gnomAD global population frequency) for variants to be included in the report, default: %(default)s')
@@ -156,6 +157,7 @@ def run_cpsr(conf_options, input_data, output_data):
                 f'{conf_options["gene_panel"]["diagnostic_grade_only"]} '
                 f'{conf_options["variant_classification"]["gwas_findings"]} '
                 f'{conf_options["variant_classification"]["secondary_findings"]} '
+                f'{conf_options["variant_classification"]["pgx_findings"]} '
                 f'--output_dir {output_dir} {"--debug" if debug else ""}'
                 )
         check_subprocess(logger, vcf_validate_command, debug)
@@ -176,6 +178,8 @@ def run_cpsr(conf_options, input_data, output_data):
                     f"{'ON' if conf_options['variant_classification']['secondary_findings'] else 'OFF'}")
         logger.info(f"Include low to moderate cancer risk variants from genome-wide association studies: " + \
                     f"{'ON' if conf_options['variant_classification']['gwas_findings'] else 'OFF'}")
+        logger.info(f"Include pharmacogenetic findings (PgX - variants related to potential toxicity to chemotherapy): " + \
+                    f"{'ON' if conf_options['variant_classification']['pgx_findings'] else 'OFF'}")
         logger.info(f"Reference population, germline variant frequencies (gnomAD - non-cancer subset): " + \
                     f"{str(conf_options['variant_classification']['pop_gnomad']).upper()}")
         logger.info(f"Genome assembly: {conf_options['genome_assembly']}")
