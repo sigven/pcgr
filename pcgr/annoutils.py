@@ -8,6 +8,8 @@ import cyvcf2
 import gzip
 
 from cyvcf2 import VCF, Writer
+from logging import Logger
+
 from pcgr import utils, pcgr_vars
 from pcgr.utils import check_subprocess, error_message
 from pcgr.variant import reverse_complement_dna
@@ -190,6 +192,22 @@ def map_regulatory_variant_annotations(vep_csq_records):
 
     return (regulatory_annotation)
 
+def load_grantham(grantham_mat_fname: str, logger: Logger):
+    """
+    Load Grantham amino acid distance matrix.
+    """
+    grantham = {}
+    if not os.path.exists(grantham_mat_fname):
+        logger.info(f"ERROR: File '{grantham_mat_fname}' does not exist - exiting")
+        exit(1)
+
+    with open(grantham_mat_fname, mode='rt') as f:
+        reader = csv.DictReader(f, delimiter='\t')
+        for row in reader:
+            grantham[str(row['ref_aa']) + '_' + str(row['alt_aa'])] = int(row['grantham_distance'])
+    f.close()
+    return grantham
+
 def threeToOneAA(aa_change):
 
     for three_letter_aa in threeLettertoOneLetterAA.keys():
@@ -200,7 +218,7 @@ def threeToOneAA(aa_change):
     return aa_change
 
 
-def assign_cds_exon_intron_annotations(csq_record, logger):
+def assign_cds_exon_intron_annotations(csq_record, grantham_scores, logger):
     
 
     csq_record['CODING_STATUS'] = 'noncoding'
@@ -212,6 +230,7 @@ def assign_cds_exon_intron_annotations(csq_record, logger):
     csq_record['CDS_CHANGE'] = '.'
     csq_record['HGVSp_short'] = '.'
     csq_record['PROTEIN_CHANGE'] = '.'
+    csq_record['GRANTHAM_DISTANCE'] = '.'
     csq_record['ALTERATION'] = '.'
     csq_record['EXON_AFFECTED'] = '.'
     csq_record['CDS_RELATIVE_POSITION'] = '.'
@@ -376,10 +395,11 @@ def assign_cds_exon_intron_annotations(csq_record, logger):
                                     protein_change = 'p.' + \
                                         str(csq_record['Amino_acids']) + \
                                         str(protein_position) + str(csq_record['Amino_acids'])
-                                    if 'stop_lost' in str(csq_record['Consequence']) and '/' in str(csq_record['Amino_acids']):
-                                        protein_change = 'p.X' + \
-                                            str(protein_position) + \
-                                            str(csq_record['Amino_acids']).split('/')[1]
+                            if 'stop_lost' in str(csq_record['Consequence']) and 'Amino_acids' in csq_record.keys():
+                                if '/' in str(csq_record['Amino_acids']):
+                                    protein_change = 'p.X' + \
+                                        str(protein_position) + \
+                                        str(csq_record['Amino_acids']).split('/')[1]
 
     if not csq_record['HGVSp'] is None:
         if csq_record['HGVSp'] != '.':
@@ -388,6 +408,17 @@ def assign_cds_exon_intron_annotations(csq_record, logger):
                 if protein_identifier.startswith('ENSP'):
                     protein_change_VEP = str(csq_record['HGVSp'].split(':')[1])
                     protein_change = threeToOneAA(protein_change_VEP)
+                    
+                    if 'missense_variant' in csq_record['Consequence'] and not re.search(r'(del|ins|fs|X)', protein_change):
+                        if 'Amino_acids' in csq_record.keys():
+                            if not csq_record['Amino_acids'] is None:
+                                if '/' in str(csq_record['Amino_acids']):
+                                    key = str(csq_record['Amino_acids']).split('/')[0] + '_' + str(csq_record['Amino_acids']).split('/')[1]
+                                    if key in grantham_scores.keys():
+                                        #print('GRANTHAM\t' + str(key) + ' ' + str(grantham_scores[key]))
+                                        csq_record['GRANTHAM_DISTANCE'] = grantham_scores[key]
+                        
+                    
                     csq_record['PROTEIN_CHANGE'] = protein_change_VEP
                     csq_record['ALTERATION'] = protein_change_VEP
 

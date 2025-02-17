@@ -153,14 +153,12 @@ def match_csq_mutation_hotspot(transcript_csq_elements, cancer_hotspots, rec, pr
 
                if '|' in gene_codon_key:
                   codon = str(gene_codon_key.split('|')[3])
+                  match_type = 'nonprincipal'
                   if codon == principal_codon:
-                     rec.INFO['MUTATION_HOTSPOT'] = gene_codon_key
-                     rec.INFO['MUTATION_HOTSPOT_CANCERTYPE'] = unique_hotspot_codons[gene_codon_key]
-                     rec.INFO['MUTATION_HOTSPOT_MATCH'] = 'by_codon_principal'
-                  else:
-                     rec.INFO['MUTATION_HOTSPOT'] = gene_codon_key
-                     rec.INFO['MUTATION_HOTSPOT_CANCERTYPE'] = unique_hotspot_codons[gene_codon_key]
-                     rec.INFO['MUTATION_HOTSPOT_MATCH'] = 'by_codon_nonprincipal'
+                     match_type = 'principal'
+                  rec.INFO['MUTATION_HOTSPOT'] = gene_codon_key
+                  rec.INFO['MUTATION_HOTSPOT_CANCERTYPE'] = unique_hotspot_codons[gene_codon_key]
+                  rec.INFO['MUTATION_HOTSPOT_MATCH'] = 'by_codon_' + match_type
 
 
    return
