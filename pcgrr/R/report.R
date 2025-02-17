@@ -448,6 +448,7 @@ init_germline_content <- function() {
   rep[['callset']][['biomarker_evidence']] <- list()
   rep[["zero"]] <- FALSE
   for (t in c("all",
+              "pgx",
               "cpg_non_sf",
               "gwas",
               "bm",
@@ -458,8 +459,9 @@ init_germline_content <- function() {
       data.frame()
   }
 
-  for (cl in c("v_stat",
-               "v_stat_cpg",
+  for (cl in c("v_stat_all",
+               "v_stat_pgx",
+               "v_stat_cpg_non_sf",
                "v_stat_sf")) {
     rep[[cl]] <- list()
     for (t in c("n",
@@ -493,18 +495,18 @@ init_germline_content <- function() {
 #' Function that loads YAML data with settings and file paths
 #' to annotated molecular profiles
 #'
-#' @param yml_fname Yaml file with configuration settings and paths
+#' @param yaml_fname Yaml file with configuration settings and paths
 #' to annotated molecular datasets
 #' @param report_mode Type of report ('PCGR' or 'CPSR')
 #'
 #' @export
-load_yaml <- function(yml_fname, report_mode = "CPSR") {
+load_yaml <- function(yaml_fname, report_mode = "CPSR") {
 
-  if (!file.exists(yml_fname)) {
+  if (!file.exists(yaml_fname)) {
     log4r_fatal(
-      paste0("YAML file '",yml_fname,"' does not exist - exiting"))
+      paste0("YAML file '",yaml_fname,"' does not exist - exiting"))
   }
-  report_settings <- yaml::read_yaml(yml_fname)
+  report_settings <- yaml::read_yaml(yaml_fname)
   missing_yaml_info <- F
   for(t in c('sample_id',
              'genome_assembly',
@@ -690,6 +692,43 @@ load_yaml <- function(yml_fname, report_mode = "CPSR") {
         colnames(
           report_settings[['conf']][['gene_panel']][['panel_genes']])
       )
+
+    assertable::assert_colnames(
+      report_settings[['conf']][['gene_panel']][['panel_genes']],
+      c("ID","PANEL_URL","CPG_SOURCE",
+        "PANEL_ID", "PANEL_VERSION","PRIMARY_TARGET",
+        "SYMBOL"), quiet = T, only_colnames = F)
+
+    report_settings[['conf']][['gene_panel']][['panel_genes']] <-
+      report_settings[['conf']][['gene_panel']][['panel_genes']] |>
+      dplyr::mutate(PANEL_URL = dplyr::if_else(
+        .data$CPG_SOURCE == "CPIC_PGX_ONCOLOGY",
+        "https://cpicpgx.org/",
+        as.character(.data$PANEL_URL)
+      )) |>
+      dplyr::mutate(PANEL_VERSION = dplyr::if_else(
+        .data$CPG_SOURCE == "CPIC_PGX_ONCOLOGY",
+        as.numeric(1.0),
+        as.numeric(.data$PANEL_VERSION)
+      )) |>
+      dplyr::mutate(PANEL_ID = dplyr::if_else(
+        .data$CPG_SOURCE == "CPIC_PGX_ONCOLOGY",
+        as.numeric(1.0),
+        as.numeric(.data$PANEL_ID)
+      )) |>
+      dplyr::mutate(PANEL_NAME = dplyr::case_when(
+        .data$PANEL_NAME == "CPIC_PGX_ONCOLOGY" ~
+          "CPIC PGx selected genes (DPYD, TPMT, NUDT15)",
+        stringr::str_detect(
+          .data$PANEL_NAME, "^ACMG_SF") &
+          .data$ID == "-2" ~
+          "ACMG recommendations for reporting of secondary findings",
+        TRUE ~ PANEL_NAME
+      )) |>
+      dplyr::arrange(
+        dplyr::desc(PRIMARY_TARGET), SYMBOL)
+
+
   }
 
   report_settings$conf$report_color <-
