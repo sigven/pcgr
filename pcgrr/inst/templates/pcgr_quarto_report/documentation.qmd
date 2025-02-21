@@ -67,7 +67,7 @@ for(i in 1:NROW(ref_datasets)){
     if(!is.na(license_url)){
       if(source == "cgc" | source == "gepa" | source == "dbnsfp"){
         s <- paste0("    * [", source_full, "](", url, ") - ", description, " (<b>", version, "</b>)",
-                    " - <b>[", license,"](", license_url, ")</b>")
+                    " - [<b>", license,"</b>](", license_url, ")")
       }else{
         s <- paste0("    * [", source_full, "](", url, ") - ", description, " (<b>", version, "</b>)",
                     " - [", license,"](", license_url, ")")

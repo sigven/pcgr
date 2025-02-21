@@ -258,8 +258,8 @@ A VCF file containing annotated, somatic calls (single nucleotide variants and i
 |-----|-------------|
 | `BIOMARKER_MATCH` | Variant matches with biomarker evidence in CIViC/CGI. Format: <db_source>\|<db_variant_id>\|<db_evidence_id>:<tumor_site>:<clinical_significance>:<evidence_level>:<evidence_type><germline_somatic>\|<matching_type>. Multiple evidence items are separated by '&'. Example: civic|174|EID445:Colon/Rectum:Sensitivity/Response:D:Predictive:Somatic&EID446:Colon/Rectum:Sensitivity/Response:D:Predictive:Somatic|by_gene_mut. Matching type can be any of `by_genomic_coord`, `by_hgvsp_principal`, `by_hgvsc_principal`,  `by_hgvsp_nonprincipal`, `by_hgvsc_nonprincipal`, `by_codon_principal`, `by_exon_mut_principal`, `by_gene_mut_lof`, `by_gene_mut` |
 | `ONCOGENICITY` | Oncogenicity annotation - ClinGen/CGC/VICC SOP implementation |
-| `ONCOGENICITY_CODE` | Oncogenicity code(s) - ClinGen/CGC/VICC SOP implementation |
-| `ONCOGENICITY_SCORE` | Oncogenicity score - ClinGen/CGC/VICC SOP implementation |
+| `ONCOGENICITY_CODE` | Variant-matching oncogenicity code(s) - ClinGen/CGC/VICC SOP implementation |
+| `ONCOGENICITY_SCORE` | Variant oncogenicity score - ClinGen/CGC/VICC SOP implementation |
 
 #### 2. Tab-separated values (TSV)
 
@@ -294,12 +294,12 @@ The following variables are included in the TSV file (VCF tags issued by the use
 | 21. `VAF_CONTROL` | Variant allele fraction at variant position in control sample |
 | 22. `MUTATION_HOTSPOT` | Mutation hotspot annotation |
 | 23. `MUTATION_HOTSPOT_CANCERTYPE` | Mutation hotspot-associated cancer types (from cancerhotspots.org) |
-| 24. `ACTIONABILITY_TIER` | Actionability tier - AMP/ASCO/CAP implementation |
-| 25. `ACTIONABILITY` | Actionability annotation - AMP/ASCO/CAP implementation |
-| 26. `ACTIONABILITY_FRAMEWORK` | Actionability framework - AMP/ASCO/CAP implementation |
-| 27. `ONCOGENICITY` | Oncogenicity annotation - ClinGen/CGC/VICC/CGC SOP implementation |
-| 28. `ONCOGENICITY_CODE` | Oncogenicity code - ClinGen/CGC/VICC/CGC SOP implementation |
-| 29. `ONCOGENICITY_SCORE` | Oncogenicity score - ClinGen/CGC/VICC/CGC SOP implementation |
+| 24. `ACTIONABILITY_TIER` | Variant clinical actionability tier - AMP/ASCO/CAP implementation |
+| 25. `ACTIONABILITY` | Variant clinical actionability significance - AMP/ASCO/CAP implementation |
+| 26. `ACTIONABILITY_FRAMEWORK` | Variant clinical actionability framework - AMP/ASCO/CAP implementation |
+| 27. `ONCOGENICITY` | Oncogenicity annotation - ClinGen/CGC/VICC SOP implementation |
+| 28. `ONCOGENICITY_CODE` | Variant-matching oncogenicity code(s) - ClinGen/CGC/VICC SOP implementation |
+| 29. `ONCOGENICITY_SCORE` | Variant oncogenicity score - ClinGen/CGC/VICC SOP implementation |
 | 30. `HGVSc` | HGVS coding sequence name |
 | 31. `HGVSc_RefSeq` | HGVS coding sequence name (RefSeq) |
 | 32. `HGVSp` | HGVS protein sequence name |
@@ -342,8 +342,8 @@ both filtered (i.e. likely germline events) and unfiltered (deemed somatic) vari
 
 - `<sample_id>.pcgr.<genome_assembly>.snv_indel_filtered.ann.tsv.gz`
 
-In this TSV file, an additional column `SOMATIC_CLASSIFICATION` indicates for each variant if it is 
-classified as somatic or germline.
+In this TSV file, an additional column `SOMATIC_CLASSIFICATION` indicates for each 
+variant if it is classified as somatic or germline.
 
 ### Tumor mutational burden (TSV)
 
@@ -424,9 +424,9 @@ The format of the compressed `cna_gene_ann.tsv.gz` is the following:
 | 15. `ONCOGENE` | Flag indicating if gene is oncogene (CGC/CancerMine/NCG) |
 | 16. `ONCOGENE_SUPPORT` | Oncogene annotation support (CGC/CancerMine/NCG) |
 | 17. `TRANSCRIPT_OVERLAP` | Comma-separated list of associated transcripts, including percentage of transcript overlap |
-| 18. `ACTIONABILITY_TIER` | Actionability tier - AMP/ASCO/CAP |
-| 19. `ACTIONABILITY` | Actionability - AMP/ASCO/CAP |
-| 20. `ACTIONABILITY_FRAMEWORK` | Actionability framework - AMP/ASCO/CAP |
+| 18. `ACTIONABILITY_TIER` | Variant actionability tier - AMP/ASCO/CAP |
+| 19. `ACTIONABILITY` | Variant clinical actionability significance - AMP/ASCO/CAP |
+| 20. `ACTIONABILITY_FRAMEWORK` | Variant clinical actionability framework - AMP/ASCO/CAP |
 | 21. `BIOMARKER_MATCH` | Biomarker match |
 | 22. `TARGETED_INHIBITORS_ALL2` | Molecularly targeted inhibitors - indicated for any tumor type|
 

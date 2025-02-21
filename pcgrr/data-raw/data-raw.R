@@ -212,6 +212,7 @@ data_coltype_defs[['snv_indel_somatic_raw']] <- readr::cols_only(
   EXONIC_STATUS = readr::col_character(),
   ALTERATION = readr::col_character(),
   PROTEIN_CHANGE = readr::col_character(),
+  GRANTHAM_DISTANCE = readr::col_integer(),
   HGVSp_short = readr::col_character(),
   HGVSc = readr::col_character(),
   HGVSc_RefSeq = readr::col_character(),
@@ -227,6 +228,8 @@ data_coltype_defs[['snv_indel_somatic_raw']] <- readr::cols_only(
   ONCOGENICITY = readr::col_character(),
   ONCOGENICITY_CODE = readr::col_character(),
   ONCOGENICITY_SCORE = readr::col_integer(),
+  KNOWN_ONCOGENIC = readr::col_character(),
+  KNOWN_ONCOGENIC_SITE = readr::col_character(),
   PFAM_DOMAIN = readr::col_character(),
   PFAM_DOMAIN_NAME = readr::col_character(),
   SYMBOL = readr::col_character(),
@@ -314,6 +317,7 @@ data_coltype_defs[['snv_indel_germline_raw']] <- readr::cols_only(
   CODING_STATUS = readr::col_character(),
   EXONIC_STATUS = readr::col_character(),
   PROTEIN_CHANGE = readr::col_character(),
+  GRANTHAM_DISTANCE = readr::col_character(),
   ALTERATION = readr::col_character(),
   HGVSp_short = readr::col_character(),
   HGVSc = readr::col_character(),
@@ -558,6 +562,7 @@ tsv_cols[['snv_indel']] <-
     'ONCOGENICITY',
     'ONCOGENICITY_CODE',
     'ONCOGENICITY_SCORE',
+    #'ONCOGENICITY_DOC',
     'HGVSc',
     'HGVSc_RefSeq',
     'HGVSp',
@@ -782,6 +787,7 @@ dt_display[['snv_indel_gene_actionable']] <-
     'LOF_FILTER',
     'ONCOGENICITY',
     'ONCOGENICITY_CODE',
+    'ONCOGENICITY_DOC',
     'ONCOGENICITY_SCORE',
     'VEP_ALL_CSQ',
     'DBSNP_RSID',
@@ -842,7 +848,7 @@ dt_display[['snv_indel_tier3']] <-
     'PREDICTED_EFFECT',
     'ONCOGENICITY_CODE',
     'ONCOGENICITY_SCORE',
-    'VEP_ALL_CSQ',
+    'ONCOGENICITY_DOC',
     'DBSNP_RSID',
     'CLINVAR',
     'CLINVAR_CLASSIFICATION',
@@ -884,6 +890,7 @@ dt_display[['tier4']] <-
     'REGULATORY_ANNOTATION',
     'ONCOGENICITY_CODE',
     'ONCOGENICITY_SCORE',
+    'ONCOGENICITY_DOC',
     'VEP_ALL_CSQ',
     'DBSNP_RSID',
     'ENSEMBL_GENE_ID',
@@ -1151,3 +1158,9 @@ rm(cancer_phenotypes_regex,
    dt_display,
    tsv_cols,
    c)
+
+oncogenicity_criteria <- readr::read_tsv(
+  "data-raw/oncogenicity.tsv", show_col_types = F
+)
+usethis::use_data(oncogenicity_criteria, overwrite = T)
+

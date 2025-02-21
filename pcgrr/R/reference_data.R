@@ -426,6 +426,7 @@ load_reference_data <- function(
   for(elem in c('tmb',
                 'mutational_signature',
                 'pathway',
+                'oncogenicity',
                 'hotspot',
                 'protein_domain')) {
 
@@ -433,6 +434,12 @@ load_reference_data <- function(
       pcgr_db_assembly_dir, "misc", "tsv", elem,
       paste0(elem,".tsv.gz")
     )
+    if(elem == "oncogenicity"){
+      fname_misc <- file.path(
+        pcgr_db_assembly_dir, "misc", "tsv", elem,
+        paste0(elem,".tsv")
+      )
+    }
     check_file_exists(fname_misc)
     pcgr_ref_data[['misc']][[elem]] <- as.data.frame(
       readr::read_tsv(

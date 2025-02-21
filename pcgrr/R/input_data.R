@@ -360,6 +360,8 @@ load_somatic_snv_indel <- function(
     callset[['variant_display']] <- callset[['variant']] |>
       pcgrr::append_cancer_gene_evidence(
         ref_data = ref_data) |>
+      pcgrr::append_oncogenicity_docs(
+        ref_data = ref_data) |>
       pcgrr::append_dbmts_var_link() |>
       pcgrr::append_tcga_var_link() |>
       pcgrr::append_annotation_links() |>
@@ -833,7 +835,7 @@ load_dna_variants <- function(
                 c("VARIANT_ID", "ENTREZGENE","BIOMARKER_SOURCE")),
               by = c("VARIANT_ID","BIOMARKER_SOURCE"),
               relationship = "many-to-many") |>
-            dplyr::rename(BIOMARKER_MATCH = BIOMARKER_MATCHTYPE) |>
+            dplyr::rename("BIOMARKER_MATCH" = "BIOMARKER_MATCHTYPE") |>
             dplyr::mutate(BIOMARKER_RESOLUTION = dplyr::case_when(
               stringr::str_detect(.data$BIOMARKER_MATCH,"by_cna_segment") ~ "gene",
               stringr::str_detect(.data$BIOMARKER_MATCH,"by_genomic_coord") ~ "genomic",
@@ -918,26 +920,26 @@ load_dna_variants <- function(
               relationship = "many-to-many"
             ) |>
             dplyr::rename(
-              BM_VARIANT_ID = VARIANT_ID,
-              BM_EVIDENCE_ID = EVIDENCE_ID,
-              BM_SOURCE_DB = BIOMARKER_SOURCE,
-              BM_RESOLUTION = BIOMARKER_RESOLUTION,
-              BM_MATCH = BIOMARKER_MATCH,
-              BM_PRIMARY_SITE = PRIMARY_SITE,
-              BM_EVIDENCE_TYPE = EVIDENCE_TYPE,
-              BM_CANCER_TYPE = CANCER_TYPE,
-              BM_DISEASE_ONTOLOGY_ID = DISEASE_ONTOLOGY_ID,
-              BM_VARIANT_ORIGIN = VARIANT_ORIGIN,
-              BM_EVIDENCE_LEVEL = EVIDENCE_LEVEL,
-              BM_EVIDENCE_DESCRIPTION = EVIDENCE_DESCRIPTION,
-              BM_THERAPEUTIC_CONTEXT = THERAPEUTIC_CONTEXT,
-              BM_CLINICAL_SIGNIFICANCE = CLINICAL_SIGNIFICANCE,
-              BM_CITATION = CITATION,
-              BM_REFERENCE = CITATION_HTML,
-              BM_RATING = RATING,
-              BM_EVIDENCE_DIRECTION = EVIDENCE_DIRECTION,
-              BM_MOLECULAR_PROFILE = MOLECULAR_PROFILE_NAME,
-              BM_MOLECULAR_PROFILE_TYPE = MOLECULAR_PROFILE_TYPE
+              "BM_VARIANT_ID" = "VARIANT_ID",
+              "BM_EVIDENCE_ID" = "EVIDENCE_ID",
+              "BM_SOURCE_DB" = "BIOMARKER_SOURCE",
+              "BM_RESOLUTION" = "BIOMARKER_RESOLUTION",
+              "BM_MATCH" = "BIOMARKER_MATCH",
+              "BM_PRIMARY_SITE" = "PRIMARY_SITE",
+              "BM_EVIDENCE_TYPE" = "EVIDENCE_TYPE",
+              "BM_CANCER_TYPE" = "CANCER_TYPE",
+              "BM_DISEASE_ONTOLOGY_ID" = "DISEASE_ONTOLOGY_ID",
+              "BM_VARIANT_ORIGIN" = "VARIANT_ORIGIN",
+              "BM_EVIDENCE_LEVEL" = "EVIDENCE_LEVEL",
+              "BM_EVIDENCE_DESCRIPTION" = "EVIDENCE_DESCRIPTION",
+              "BM_THERAPEUTIC_CONTEXT" = "THERAPEUTIC_CONTEXT",
+              "BM_CLINICAL_SIGNIFICANCE" = "CLINICAL_SIGNIFICANCE",
+              "BM_CITATION" = "CITATION",
+              "BM_REFERENCE" = "CITATION_HTML",
+              "BM_RATING" = "RATING",
+              "BM_EVIDENCE_DIRECTION" = "EVIDENCE_DIRECTION",
+              "BM_MOLECULAR_PROFILE" = "MOLECULAR_PROFILE_NAME",
+              "BM_MOLECULAR_PROFILE_TYPE" = "MOLECULAR_PROFILE_TYPE"
             ) |>
             dplyr::mutate(
               BM_RATING = dplyr::if_else(

@@ -726,7 +726,8 @@ load_yaml <- function(yaml_fname, report_mode = "CPSR") {
         TRUE ~ PANEL_NAME
       )) |>
       dplyr::arrange(
-        dplyr::desc(PRIMARY_TARGET), SYMBOL)
+        dplyr::desc(.data$PRIMARY_TARGET),
+        .data$SYMBOL)
 
 
   }

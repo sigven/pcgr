@@ -926,7 +926,7 @@ plot_signature_contributions <- function(
                    ymax = prop_signature_ci_upper),
       width = .3)+
     ggplot2::scale_fill_manual(
-      values = head(
+      values = utils::head(
         pcgrr::color_palette$tier$values,
         NROW(plot_data_per_signature))) +
     ggplot2::theme_classic() +

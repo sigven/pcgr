@@ -7,27 +7,23 @@ output: rmarkdown::html_document
 
 PCGR evaluates somatic aberrations (SNV/InDels) for oncogenic potential through an implementation of standard operating procedures proposed by [ClinGen/CGC/VICC](https://pubmed.ncbi.nlm.nih.gov/35101336/). Here, various properties of the variants and genes affected are assigned criteria-specific scores, both negative and positive, pending on whether the properties support an oncogenic or benign variant nature. Criteria-specific scores are in turn aggregated towards an overall oncogenicity score per variant.
 
-Note that all properties/criteria provided in the SOP's are _not_ readily implemented in PCGR, specifically the ones requiring manual curation or expert review (i.e. experimental oncogenic variant evidence, requiring support from _in vitro_ or _in vivo_ functional studies (criteria _OS2_)). Also, the current source for existing oncogenicity classifications (ClinVar), which is needed for implementation of criteria _OS1_, _OM3_, is also considerably limited. Considering the current limitations, some oncogenic variants are likely to be missed and classified with uncertain significance (VUS) by PCGR. We highlight conventional ClinVar classifications (i.e. with respect to pathogenicity) alongside the current oncogenicity classifications, this may add value to the interpretation for uncertain cases. Furthermore, taking into the account the nature of the current implementation, we have adopted slightly different score thresholds for variant classifications to those proposed originally by [Horak et al., 2022](https://pubmed.ncbi.nlm.nih.gov/35101336/). We are working to further improve the oncogenicity classification in PCGR, and welcome feedback on this matter.
+Note that all properties/criteria provided in the SOP's are _not_ readily implemented in PCGR, specifically the ones requiring manual curation or expert review (i.e. experimental oncogenic variant evidence, requiring support from _in vitro_ or _in vivo_ functional studies (criteria _OS2_)). Also, the current source for existing oncogenicity classifications (ClinVar), which is needed for implementation of criteria _OS1_ and _OM3_, is considerably limited. Considering the current limitations, some oncogenic variants are likely to be missed and classified with uncertain significance (VUS) by PCGR. We highlight conventional ClinVar classifications (i.e. with respect to pathogenicity) alongside the current oncogenicity classifications, this may likely add value to the interpretation for uncertain cases. Furthermore, taking into the account the nature of the current implementation, we have adopted slightly different score thresholds for variant classifications to those proposed originally by [Horak et al., 2022](https://pubmed.ncbi.nlm.nih.gov/35101336/). We are working to further improve the oncogenicity classification in PCGR, and welcome feedback on this matter.
 
 Note also that for somatic copy number aberrations, we showcase potential oncogenic events as **proto-oncogenes subject to amplifications** (where level of amplification is configurable by the user), as well as **tumor suppressor genes subject to homozygous deletions**.
 
-The following oncogenicity criteria are currently used for such classification in PCGR:
+The following criteria/codes are currently used for variant oncogenicity classification in PCGR (key resources/tools used for implementation indicated in parentheses):
 
- * _ONCG_SBVS1_ - Very high MAF (> 0.05 in gnomAD - any five major continental populations)
- * _ONCG_SBS1_ - High MAF (> 0.01 in gnomAD - any five major continental populations)
- * _ONCG_SBP1_ - _Insilico_ support for a benign effect on the gene or gene product (multiple lines of evidence (>= 8 algorithms) from dbNSFP)
- * _ONCG_SBP2_ - Silent and intronic changes outside of the consensus splice site (VEP consequence)
- * _ONCG_OVS1_ - Null variant - in a _bona fide_ tumor suppressor gene (predicted as LoF in tumor suppressors from CGC/NCG/CancerMine)
- * _ONCG_OS1_ - Same amino acid change as previously established oncogenic variant (ClinVar as underlying source)
- * _ONCG_OS3_ - Located in a mutation hotspot, >= 50 samples with a variant at amino acid position, >= 10 samples with same amino acid change (cancerhotspots.org)
- * _ONCG_OM1_ - Located in a presumably critical site of functional domain - here, this is implemented through indirect evidence from overlap with known predictive (drug sensitivity/resistance) biomarker loci 
- * _ONCG_OM2_ - Protein length changes from in-frame dels/ins in known oncogene/tumor suppressor genes or stop-loss variants in a tumor suppressor gene (tumor suppressors/oncogenes from CGC/NCG/CancerMine)
- * _ONCG_OM3_ - Missense variant at an amino acid residue where a different missense variant determined to be oncogenic has been documented (ClinVar as underlying source). Grantham distance must be approximately the same as the known oncogenic variant
- * _ONCG_OM4_ - Located in a mutation hotspot, < 50 samples with a variant at amino acid position, >= 10 samples with same amino acid change (cancerhotspots.org)
- * _ONCG_OP1_ - _Insilico_ support for a damaging effect on the gene or gene product (multiple lines of evidence (>= 8 algorithms) from dbNSFP)
- * _ONCG_OP3_ - Located in a mutation hotspot, < 10 samples with the same amino acid change (cancerhotspots.org)
- * _ONCG_OP4_ - Absent from controls (gnomAD) / very low MAF ( < 0.0001 in all five major subpopulations)
-    
+```{r oncogenicity_criteria, echo=F, results='asis'}
+
+i <- 1
+while(i <= NROW(pcgrr::oncogenicity_criteria)){
+  crit <- pcgrr::oncogenicity_criteria[i,]
+  cat(sprintf("  * _%s_ - %s (%s)\n", crit$code, crit$description, crit$resource))
+  i <- i + 1
+}
+
+```
+
 ## Actionability
 
 PCGR prioritizes and evaluates variants according to clinical actionability. Currently, PCGR implements its tier classification framework along the proposed AMP/ASCO/CAP guidelines, as outlined in [Li et al., 2017](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5707196/):

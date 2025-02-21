@@ -221,6 +221,60 @@ append_gwas_citation_phenotype <-
     }
   }
 
+#' Function that adds oncogenicity documentation from codes
+#'
+#' @param var_df Data frame of sample variants from VCF
+#' @param ref_data PCGR/CPSR reference data object
+#'
+#' @return vcf_data_df
+#'
+#' @export
+append_oncogenicity_docs <- function(
+    var_df,
+    ref_data = NULL){
+
+  if (any(grepl(paste0("^ONCOGENICITY_CODE$"), names(var_df))) &
+      any(grepl(paste0("^VAR_ID$"), names(var_df)))) {
+
+    var_df_unique_slim <- dplyr::select(
+      var_df, c("VAR_ID", "ONCOGENICITY_CODE")) |>
+      dplyr::filter(!is.na(.data$ONCOGENICITY_CODE)) |>
+      tidyr::separate_rows(
+        "ONCOGENICITY_CODE", sep = "\\|") |>
+      dplyr::distinct()
+
+    if (nrow(var_df_unique_slim ) > 0) {
+      var_df_unique_slim  <- var_df_unique_slim  |>
+        dplyr::left_join(
+          dplyr::select(
+            ref_data[['misc']][['oncogenicity']],
+            "CODE",
+            "SCORE",
+            "DESCRIPTION"),
+          by = c("ONCOGENICITY_CODE" = "CODE")) |>
+        dplyr::mutate(
+          ONCOGENICITY_DOC = paste(
+            .data$ONCOGENICITY_CODE,
+            paste0(
+              .data$DESCRIPTION, " (<b>",
+              .data$SCORE,"</b>)"),
+            sep=": ")) |>
+        dplyr::arrange(
+          .data$VAR_ID, dplyr::desc(.data$SCORE)) |>
+        dplyr::group_by(.data$VAR_ID) |>
+        dplyr::summarise(
+          ONCOGENICITY_DOC = paste(
+            unique(.data$ONCOGENICITY_DOC), collapse = ", "))
+
+      var_df <- dplyr::left_join(
+        var_df, var_df_unique_slim,
+        by = c("VAR_ID" = "VAR_ID"))
+    }else{
+      var_df$ONCOGENICITY_DOC <- NA
+    }
+  }
+  return(var_df)
+}
 
 #' Function that adds TCGA annotations (cohort, frequency etc.) to variant identifiers
 #'

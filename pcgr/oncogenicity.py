@@ -318,13 +318,11 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
       ## check if variant has MAF > 0.01 (SBVS1) or > 0.05 in any of five major gnomAD subpopulations (exome set)
       for pop in pcgr_vars.GNOMAD_MAIN_EXON_AF_TAGS:
          if not variant_data[pop] is None:
-            if float(variant_data[pop]) >= pcgr_vars.ONCOGENICITY['gnomAD_very_common_AF']:
+            if float(variant_data[pop]) >= float(pcgr_vars.ONCOGENICITY['gnomAD_very_common_AF']):
                variant_data["ONCG_SBVS1"] = True
-      for pop in pcgr_vars.GNOMAD_MAIN_EXON_AF_TAGS:
-         if not variant_data[pop] is None:
-            if float(variant_data[pop]) >= pcgr_vars.ONCOGENICITY['gnomAD_common_AF'] and variant_data["ONCG_SBVS1"] is False:
+            if float(variant_data[pop]) >= float(pcgr_vars.ONCOGENICITY['gnomAD_common_AF']) and variant_data["ONCG_SBVS1"] is False:
                variant_data["ONCG_SBS1"] = True
-
+               
       approx_zero_pop_freq = 0
       for pop in pcgr_vars.GNOMAD_MAIN_EXON_AF_TAGS:
          ## no MAF recorded in gnomAD for this population
@@ -332,7 +330,7 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
             approx_zero_pop_freq = approx_zero_pop_freq + 1
          else:
             ## Extremely low MAF for this population
-            if float(variant_data[pop]) < pcgr_vars.ONCOGENICITY['gnomAD_extremely_rare_AF']:
+            if float(variant_data[pop]) < float(pcgr_vars.ONCOGENICITY['gnomAD_extremely_rare_AF']):
                approx_zero_pop_freq = approx_zero_pop_freq + 1
     
       ## check if variant is missing or with MAF approximately zero in all five major gnomAD subpopulations (exome set)
@@ -384,7 +382,7 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
    variant_data['ONCOGENICITY'] = "VUS"
    variant_data["ONCOGENICITY_DOC"] = "."
    variant_data["ONCOGENICITY_CODE"] = "."
-   variant_data["ONCOGENICITY_SCORE"] = "."
+   variant_data["ONCOGENICITY_SCORE"] = 0
    onc_score_pathogenic = 0
    onc_score_benign = 0
 
@@ -460,7 +458,9 @@ def load_oncogenic_variants(oncogenic_variants_fname: str, logger: Logger):
    with gzip.open(oncogenic_variants_fname, mode='rt') as f:
       reader = csv.DictReader(f, delimiter='\t')
       for row in reader:            
-         gene = str(row['entrezgene'])         
+         gene = str(row['entrezgene'])
+         if not 'oncogenic' in str(row['oncogenicity']).lower():
+            continue         
          oncogenic_variants[str(gene) + '-' + str(row['var_id'])] = row
          if not len(row['hgvsp']) == 0:
             oncogenic_variants[str(gene) + '-' + str(row['hgvsp'])] = row

@@ -14,6 +14,10 @@
 "variant_db_url"
 
 
+#' Oncogenicity criteria (ClinGen/CGC/VICC)
+#'
+"oncogenicity_criteria"
+
 #' Fixed data types/categories used for biomarker evidence, e.g. 'types','levels' etc.
 #'
 "biomarker_evidence"

@@ -303,14 +303,10 @@ def assign_cds_exon_intron_annotations(csq_record, grantham_scores, logger):
                     if '-' in cds_pos_full and not '?' in cds_pos_full:
                         cds_pos = cds_pos_full.split('-')[0]
                         if cds_pos.isdigit():
-                            cds_pos = int(cds_pos)
-                        #else:
-                        #    logger.warning(f'Could not determine variant CDS position from VEP annotation - ({csq_record["CDS_position"]})')                        
+                            cds_pos = int(cds_pos)                   
                     else:
                         if cds_pos_full.isdigit():
-                            cds_pos = int(cds_pos_full)
-                        #else:
-                        #    logger.warning(f'Could not determine variant CDS position from VEP annotation - ({csq_record["CDS_position"]})')                         
+                            cds_pos = int(cds_pos_full)                     
                     
                     if int(cds_pos) > -1 and int(cds_pos) <= int(cds_length):    
                         csq_record['CDS_RELATIVE_POSITION'] = float(cds_pos/cds_length)

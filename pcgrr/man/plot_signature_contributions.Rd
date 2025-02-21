@@ -11,7 +11,7 @@ plot_signature_contributions(
 )
 }
 \arguments{
-\item{signature_contributions}{A list with two dataframes: 'per_group' and
+\item{signature_contributions}{A list with two data frames: 'per_group' and
 'per_signature'.}
 
 \item{per_signature}{Logical. If TRUE, the plot will show the contribution
