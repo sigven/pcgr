@@ -46,6 +46,22 @@ sigven <- user("sigven")
 pdiakumis <- user("pdiakumis")
 ```
 
+
+## v2.1.3
+
+- Date: **2025-02-24**
+- Major data updates
+  - ClinVar (2025-02)
+  - dbNSFP (v5.0)
+  - CIViC (2025-02-08)
+  - GENCODE v47 (VEP v113)
+  - PanelApp (2025-02)
+  - UniProt KB (2025-01)
+  - Cancer Gene Census (v101)
+- Cleaned and improved oncogenicity classification of variants
+- Multiple cosmetic changes to HTML report - e.g. collapsed call-outs
+
+
 ## v2.1.3
 
 - Date: **2024-02-XX**

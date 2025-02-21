@@ -13,23 +13,6 @@ from pcgr import pcgr_vars
 
 def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumortype = "Any"):
 
-   clingen_vicc_ev_codes = [
-      "ONCG_SBVS1", 
-      "ONCG_SBS1", 
-      "ONCG_SBP1", 
-      "ONCG_SBP2",
-      "ONCG_OS1", 
-      "ONCG_OS2",
-      "ONCG_OS3", 
-      "ONCG_OM1",
-      "ONCG_OM2",
-      "ONCG_OM3",  
-      "ONCG_OM4", 
-      "ONCG_OP1", 
-      "ONCG_OP3",
-      "ONCG_OP4",
-      "ONCG_OVS1"]
-
    ### Benign oncogenic effects of somatic variants
    
    #  1) "ONCG_SBVS1"
@@ -159,10 +142,8 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
    variant_data = {}
    for col in required_oncogenicity_vars:
       if rec.INFO.get(col) is None:
-         if col == "TSG" or col == "ONCOGENE":
+         if col == "TSG" or col == "ONCOGENE" or col == "LOSS_OF_FUNCTION":
             variant_data[col] = False
-         elif col == "LOSS_OF_FUNCTION":
-            variant_data['LOSS_OF_FUNCTION'] = False
          else:
             variant_data[col] = None
       else:
@@ -171,7 +152,7 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
          else: 
             variant_data[col] = rec.INFO.get(col)
    
-   for code in clingen_vicc_ev_codes:
+   for code in oncogenicity_criteria.keys():
       variant_data[code] = False
    
    if "KNOWN_ONCOGENIC" in variant_data.keys():
@@ -386,10 +367,10 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
    onc_score_pathogenic = 0
    onc_score_benign = 0
 
-   for code in clingen_vicc_ev_codes:
-
+   #for code in clingen_vicc_ev_codes:
+   for code in oncogenicity_criteria.keys():
       if code in variant_data.keys():
-         if variant_data[code] is True and code in oncogenicity_criteria.keys():            
+         if variant_data[code] is True:            
             score = float(oncogenicity_criteria[code]['score'])
             pole = oncogenicity_criteria[code]['pole']
             if pole == "P":
