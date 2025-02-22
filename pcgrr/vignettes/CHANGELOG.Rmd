@@ -59,8 +59,14 @@ pdiakumis <- user("pdiakumis")
   - UniProt KB (2025-01)
   - Cancer Gene Census (v101)
 - Cleaned and improved oncogenicity classification of variants
+  - Added Grantham distance for amino acid alterations - taken into account
+for oncogenicity classification
 - Multiple cosmetic changes to HTML report - e.g. collapsed call-outs
-
+- Added oncogenicity documentation in variant tables of HTML report (indicates which criteria that was matched for a given variant)
+- Removed `VEP_ALL_CSQ` from variant tables in HTML report to reduce file size - still available in TSV output
+- Added more prediction algorithms from dbNSFP
+- Fixed bug that caused crash for missing values in DP/AF values of input VCF
+- Fixed erroneous re-formatting of MAF integer columns to floats
 
 ## v2.1.3
 
