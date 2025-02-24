@@ -58,10 +58,11 @@ if(as.logical(pcg_report$settings$conf$assay_properties$vcf_tumor_only) == TRUE)
   report_color <- pcgrr::color_palette$report_color$values[2]
 }
 ```
+
 <a href="https://sigven.github.io/pcgr">
   <img src="`r logo_fname_path`" title="" alt="" align="right" width="80"/>
 </a>
-
+  
 ```{r pcgr_settings}
 #| child: 'pcgr_quarto_report/settings.qmd'
 #| eval: true

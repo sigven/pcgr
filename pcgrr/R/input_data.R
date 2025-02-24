@@ -650,6 +650,15 @@ load_dna_variants <- function(
       )
   }
 
+  if ("GERP_SCORE" %in% colnames(results[['variant']])) {
+    results[['variant']] <-
+      results[['variant']] |>
+      dplyr::mutate(
+        GERP_SCORE = round(
+          as.numeric(.data$GERP_SCORE), digits = 3)
+        )
+  }
+
   if ("HGVSp_short" %in% colnames(results[['variant']])) {
     results[['variant']] <-
       results[['variant']] |>

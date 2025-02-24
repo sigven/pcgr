@@ -397,6 +397,11 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
    if variant_data['ONCOGENICITY_SCORE'] >= likely_oncogenic_lower_limit and \
       variant_data['ONCOGENICITY_SCORE'] <= likely_oncogenic_upper_limit:
       variant_data['ONCOGENICITY'] = "Likely_Oncogenic"
+   ## also consider variants with one point below LP thresholds
+   ## - variants with at least 3 matching oncogenic criteria or ONCG_OS1 as likely oncogenic
+   if (variant_data['ONCOGENICITY_SCORE'] == likely_oncogenic_lower_limit - 1) and \
+      (len(variant_data['ONCOGENICITY_CODE'].split("|")) >= 3 or 'ONCG_OS1' in variant_data.keys()):
+         variant_data['ONCOGENICITY'] = "Likely_Oncogenic"
    if variant_data['ONCOGENICITY_SCORE'] <= benign_upper_limit:
       variant_data['ONCOGENICITY'] = "Benign"
    if variant_data['ONCOGENICITY_SCORE'] >= oncogenic_lower_limit:
