@@ -845,7 +845,10 @@ write_report_tsv <- function(report = NULL, output_type = 'snv_indel'){
     snv_indel_cols <- pcgrr::tsv_cols$snv_indel
     if(report$settings$conf$other$retained_vcf_info_tags != "None"){
       snv_indel_cols <- c(
-        snv_indel_cols, report$settings$conf$other$retained_vcf_info_tags)
+        snv_indel_cols,
+        stringr::str_split(
+          report$settings$conf$other$retained_vcf_info_tags, ",")[[1]]
+      )
     }
 
     if(!is.null(report$content$snv_indel$callset)){

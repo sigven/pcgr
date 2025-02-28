@@ -5,7 +5,8 @@ Annotations for short variants (SNVs/InDels) detected in the tumor sample can he
 The tabset below provides an overview of coding (protein-altering) versus non-coding variants found in the tumor sample. The user should carefully consider oncogenicity predictions alongside existing variant classifications (any origin (somatic/germline), any phenotype), highlighted through different background colors of the _ALTERATION_ column:
   
    -  <span style="background-color:#FF8790; line-height:110%; padding:2x; color:white"><b>&nbsp;Variants of pathogenic/likely pathogenic significance (ClinVar) &nbsp; </b></span>
-   - <span style="background-color:black; line-height:110%; padding:2x; color:white"><b>&nbsp;Variants of uncertain significance or with conflicting evidence (ClinVar) &nbsp; </b></span>.
+   - <span style="background-color:black; line-height:110%; padding:2x; color:white"><b>&nbsp;Variants of uncertain significance or with conflicting evidence (ClinVar) &nbsp; </b></span>
+   - <span style="background-color:#65a058; line-height:110%; padding:2x; color:white"><b>&nbsp;Variants of benign/likely benign significance (ClinVar) &nbsp; </b></span>
 
 ::: {.callout-note collapse="true"}
 
@@ -19,7 +20,7 @@ In order to maintain responsiveness of client-side data interaction, a maximum o
 
 ## Note - oncogenicity versus actionability
 
-The oncogenicity classification of variants performed in PCGR is based on an implementation of the ClinGen/CGC/VICC SOPs for variant oncogenicity evaluation. This classification is based on multiple properties of variants (hotspot occurrence, variant consequence (i.e. loss-of-function), population frequency etc.). Notably, the current implementation may provide classifications that do not always correspond with clinical actionability, e.g. due to the fact the functional variant evidence (frequently requiring manual curation) is limited in the reference data coming with PCGR. This implies that the oncogenic classification is somewhat conservative in its current form, and that variants classified as VUS when it comes to oncogenicity by PCGR (yet still with a relatively high _oncogenicity score_), may still be listed as actionable below. When more functional variant evidence gets integrated in PCGR (e.g. from [multiplexed assays of variant effect (MAVE) efforts](https://mavedb.org/#/)), the concordance between oncogenicity and actionability is likely to improve further.
+The oncogenicity classification of variants performed in PCGR is based on an implementation of the ClinGen/CGC/VICC SOPs for variant oncogenicity evaluation. This classification is based on multiple properties of variants (hotspot occurrence, variant consequence (i.e. loss-of-function), population frequency etc.). Notably, the current implementation may provide classifications that do not always correspond with clinical actionability, e.g. due to the fact the functional variant evidence (frequently requiring manual curation) is limited in the reference data coming with PCGR. This implies that the oncogenic classification is somewhat conservative in its current form, and that variants classified as VUS when it comes to oncogenicity by PCGR (yet still with a relatively high _oncogenicity score_), may still be listed as actionable below.
 
 :::
 
@@ -169,14 +170,14 @@ dt_all_coding <- DT::datatable(
   ) |>
    DT::formatStyle(
     color = DT::styleEqual(
-      c("Pathogenic","Likely_Pathogenic","VUS"),
-      c("white", "white", "white")),
+      c("Pathogenic","Likely_Pathogenic","VUS","Likely_Benign","Benign"),
+      c("white", "white", "white","white","white")),
     "ALTERATION",
     "CLINVAR_CLASSIFICATION",
     backgroundColor = 
       DT::styleEqual(
-        c("Pathogenic","Likely_Pathogenic","VUS"),
-        c("#FF8790", "#FF8790","#000000")
+        c("Pathogenic","Likely_Pathogenic","VUS","Likely_Benign","Benign"),
+        c("#FF8790", "#FF8790","#000000","#65a058","#65a058")
       )
   )
 
@@ -359,14 +360,14 @@ dt_all_noncoding <- DT::datatable(
   ) |>
   DT::formatStyle(
     color = DT::styleEqual(
-      c("Pathogenic","Likely_Pathogenic","VUS"),
-      c("white", "white", "white")),
+      c("Pathogenic","Likely_Pathogenic","VUS","Likely_Benign","Benign"),
+      c("white", "white", "white","white","white")),
     "ALTERATION",
     "CLINVAR_CLASSIFICATION",
     backgroundColor = 
       DT::styleEqual(
-        c("Pathogenic","Likely_Pathogenic","VUS"),
-        c("#FF8790", "#FF8790","#000000")
+        c("Pathogenic","Likely_Pathogenic","VUS","Likely_Benign","Benign"),
+        c("#FF8790", "#FF8790","#000000","#65a058","#65a058")
       )
   )
 

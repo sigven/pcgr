@@ -555,7 +555,7 @@ load_yaml <- function(yaml_fname, report_mode = "CPSR") {
   ref_data <- list()
   if (dir.exists(
     report_settings[['reference_data']][['path']])) {
-    ref_data <- load_reference_data(
+    ref_data <- pcgrr::load_reference_data(
       pcgr_db_assembly_dir = report_settings[['reference_data']][['path']],
       genome_assembly = report_settings[['genome_assembly']]
     )

@@ -71,7 +71,6 @@ def append_annotations(vcf2tsv_gz_fname: str, refdata_assembly_dir: str, logger)
                 vcf2tsv_df["POS"], sep = "_").str.cat(
                     vcf2tsv_df["REF"], sep = "_").str.cat(
                         vcf2tsv_df["ALT"], sep = "_")
-
            
             ## check number of variants with ClinVar ID's
             num_recs_with_clinvar_hits = vcf2tsv_df["CLINVAR_MSID"].notna().sum()
@@ -80,7 +79,6 @@ def append_annotations(vcf2tsv_gz_fname: str, refdata_assembly_dir: str, logger)
             ## check number of variants with Ensembl gene ID's
             num_recs_with_entrez_hits = vcf2tsv_df["ENTREZGENE"].notna().sum()
     
-            #print(str(num_recs_with_entrez_hits))
             ## merge variant set with ClinVar trait and variant origin annotations
             if num_recs_with_clinvar_hits > 0:
                 
@@ -102,7 +100,6 @@ def append_annotations(vcf2tsv_gz_fname: str, refdata_assembly_dir: str, logger)
                     clinvar_data_df = clinvar_data_df.astype({'CLINVAR_MSID':'string'})
                     clinvar_data_df['CLINVAR_MSID'] = clinvar_data_df['CLINVAR_MSID'].str.replace("\\.[0-9]{1,}$", "", regex = True)
                     clinvar_data_df = clinvar_data_df[['VAR_ID','CLINVAR_MSID','CLINVAR_TRAITS_ALL']]
-                    
                     vcf2tsv_df = vcf2tsv_df.merge(
                         clinvar_data_df, left_on=["VAR_ID", "CLINVAR_MSID"], right_on=["VAR_ID", "CLINVAR_MSID"], how="left")
                 else:

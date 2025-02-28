@@ -370,6 +370,7 @@ load_somatic_snv_indel <- function(
       dplyr::select(
         -dplyr::contains("_RAW")
       ) |>
+
       dplyr::rename(
         TARGETED_INHIBITORS = "TARGETED_INHIBITORS2",
         TARGETED_INHIBITORS_ALL = "TARGETED_INHIBITORS_ALL2"
@@ -628,6 +629,14 @@ load_dna_variants <- function(
       results[['variant']] |>
       dplyr::rename(
         TUMOR_SUPPRESSOR = "TSG"
+      )
+  }
+
+  if ("SPLICE_EFFECT_MUTSPLICEDB" %in% colnames(results[['variant']])) {
+    results[['variant']] <-
+      results[['variant']] |>
+      dplyr::rename(
+        SPLICE_EFFECT = "SPLICE_EFFECT_MUTSPLICEDB"
       )
   }
 

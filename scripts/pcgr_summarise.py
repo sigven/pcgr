@@ -15,6 +15,7 @@ from pcgr.oncogenicity import load_oncogenicity_criteria, assign_oncogenicity_ev
 from pcgr.mutation_hotspot import load_mutation_hotspots, match_csq_mutation_hotspot
 from pcgr.biomarker import load_biomarkers, match_csq_biomarker
 from pcgr.utils import error_message, check_subprocess, getlogger
+from pcgr.splice import load_splice_effects
 from pcgr.vep import parse_vep_csq
 
 csv.field_size_limit(500 * 1024 * 1024)
@@ -102,6 +103,7 @@ def extend_vcf_annotations(arg_dict, logger):
         os.path.join(arg_dict['refdata_assembly_dir'], 'misc','tsv', 'oncogenicity', 'oncogenicity.tsv'), logger)
     oncogenic_variants = load_oncogenic_variants(os.path.join(arg_dict['refdata_assembly_dir'], 'variant','tsv', 'clinvar','clinvar_oncogenic.tsv.gz'), logger)
     grantham_scores = load_grantham(os.path.join(arg_dict['refdata_assembly_dir'], 'misc','tsv', 'grantham', 'grantham.tsv'), logger)
+    splice_effects = load_splice_effects(os.path.join(arg_dict['refdata_assembly_dir'], 'misc','tsv', 'mutsplicedb', 'mutsplicedb.tsv'), logger)
 
     biomarkers = {}
     for db in ['cgi','civic']:
@@ -174,7 +176,6 @@ def extend_vcf_annotations(arg_dict, logger):
                 current_chrom = str(rec.CHROM)
                 num_chromosome_records_processed = 0
         if rec.INFO.get('CSQ') is None:
-            
             vars_no_csq.append(variant_id)
             continue
 
@@ -188,7 +189,9 @@ def extend_vcf_annotations(arg_dict, logger):
                               vep_csq_fields_map, 
                               grantham_scores,
                               arg_dict['vep_pick_order'], 
-                              logger,  pick_only = False, csq_identifier = 'CSQ', 
+                              logger,  
+                              pick_only = False, 
+                              csq_identifier = 'CSQ', 
                               debug = arg_dict['debug'],
                               targets_entrez_gene = cpsr_target_genes)
             if 'picked_gene_csq' in vep_csq_record_results:
@@ -196,11 +199,18 @@ def extend_vcf_annotations(arg_dict, logger):
                     vep_csq_record_results['picked_gene_csq'])
         else:
             vep_csq_record_results = \
-                parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, grantham_scores, arg_dict['vep_pick_order'], 
-                              logger, pick_only = True, csq_identifier = 'CSQ', debug = arg_dict['debug'])
+                parse_vep_csq(rec, 
+                              transcript_xref_map, 
+                              vep_csq_fields_map, 
+                              grantham_scores, 
+                              arg_dict['vep_pick_order'], 
+                              logger, 
+                              pick_only = True, 
+                              csq_identifier = 'CSQ', 
+                              debug = arg_dict['debug'])
 
         principal_csq_properties = {}
-        for prop in ['hgvsp','hgvsc','entrezgene','exon','codon','lof']:
+        for prop in ['hgvsp','hgvsc','entrezgene','exon','codon','lof','refseq_transcript_id']:
             principal_csq_properties[prop] = '.'
         
         if 'picked_csq' in vep_csq_record_results:
@@ -210,8 +220,7 @@ def extend_vcf_annotations(arg_dict, logger):
                     if vcf_info_element_types[k] == "Flag" and csq_record[k] == "1":
                         rec.INFO[k] = True
                     else:
-                        if not csq_record[k] is None:
-                            
+                        if not csq_record[k] is None:                            
                             if k == 'DOMAINS':
                                 filtered_domains = []
                                 for dom in csq_record[k].split('&'):
@@ -232,6 +241,9 @@ def extend_vcf_annotations(arg_dict, logger):
                             if k == 'HGVSc':
                                 principal_csq_properties['hgvsc'] = csq_record[k].split(':')[1]
                             
+                            if k == 'REFSEQ_TRANSCRIPT_ID':
+                                principal_csq_properties['refseq_transcript_id'] = csq_record[k]
+                            
                             if k == 'ENTREZGENE':
                                 principal_csq_properties['entrezgene'] = csq_record[k]
                             
@@ -241,6 +253,12 @@ def extend_vcf_annotations(arg_dict, logger):
                             if k == 'EXON':
                                 if "/" in csq_record[k]:
                                     principal_csq_properties['exon'] = csq_record[k].split('/')[0]
+        
+        splice_key = f"{principal_csq_properties['entrezgene']}_{principal_csq_properties['refseq_transcript_id']}_{principal_csq_properties['hgvsc']}"
+        if splice_key in splice_effects:
+            if not 'NO_EFFECT' in splice_effects[splice_key]:
+                rec.INFO['SPLICE_EFFECT_MUTSPLICEDB'] = splice_effects[splice_key]
+                rec.INFO['LOSS_OF_FUNCTION'] = True
         
         if 'all_csq' in vep_csq_record_results:
             rec.INFO['VEP_ALL_CSQ'] = ','.join(vep_csq_record_results['all_csq'])
@@ -254,7 +272,7 @@ def extend_vcf_annotations(arg_dict, logger):
         
         if arg_dict['oncogenicity_annotation'] == 1:
             match_oncogenic_variants(vep_csq_record_results['all_csq'], oncogenic_variants, rec, principal_csq_properties)
-            assign_oncogenicity_evidence(rec, oncogenicity_criteria,tumortype = arg_dict['tumortype'])
+            assign_oncogenicity_evidence(rec, oncogenicity_criteria, tumortype = arg_dict['tumortype'])
 
         if "GENE_TRANSCRIPT_XREF" in vcf_info_element_types:
             gene_xref_tag = rec.INFO.get('GENE_TRANSCRIPT_XREF')

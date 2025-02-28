@@ -11,6 +11,7 @@ def map_variant_effect_predictors(rec, algorithms):
 
     dbnsfp_predictions = map_dbnsfp_predictions(
         str(rec.INFO.get('DBNSFP')), algorithms)
+        
     if rec.INFO.get('Gene') is None or rec.INFO.get('Consequence') is None:
         return
     gene_id = str(rec.INFO.get('Gene'))
@@ -34,6 +35,7 @@ def map_variant_effect_predictors(rec, algorithms):
             for algo_pred in rec.INFO['EFFECT_PREDICTIONS'].split('&'):
                 if algo_pred.split(':')[0] in pcgr_vars.DBNSFP_ALGORITHMS:
                     rec.INFO[pcgr_vars.DBNSFP_ALGORITHMS[algo_pred.split(':')[0]]] = str(algo_pred.split(':')[1])
+                
 
 
 def map_dbnsfp_predictions(dbnsfp_tag, algorithms):

@@ -57,7 +57,10 @@ if (as.logical(pcg_report[["settings"]][["conf"]][["vep"]][["vep_gencode_basic"]
 }
 ```
 
+<br>
+
 ::: {.callout-note collapse="true"}
+
 
 ## Run configuration and report settings
 

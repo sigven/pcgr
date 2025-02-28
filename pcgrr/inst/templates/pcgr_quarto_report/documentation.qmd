@@ -97,6 +97,29 @@ Note that all properties/criteria provided in the SOP's are _not_ readily implem
 
 Note also that for somatic copy number aberrations, we showcase potential oncogenic events as **proto-oncogenes subject to amplifications** (where level of amplification is configurable by the user), as well as **tumor suppressor genes subject to homozygous deletions**.
 
+<br>
+
+__A note on variant loss-of-function annotation__
+
+For SNVs and InDels, PCGR considers the following consequence types as candidates for loss-of-function variation:
+
+ * Stop gains - [SO:0001587](http://www.sequenceontology.org/miso/current_svn/term/SO:0001587)
+ * Frameshift variants - [SO:0001589](http://www.sequenceontology.org/miso/current_svn/term/SO:0001589)
+ * Splice-site disruptions (2bp donor/acceptor site) - [SO:0001574](http://www.sequenceontology.org/miso/current_svn/term/SO:0001574),
+ [SO:0001575](http://www.sequenceontology.org/miso/current_svn/term/SO:0001575)
+ * Start losses - [SO:0001574](http://www.sequenceontology.org/miso/current_svn/term/SO:0002012)
+
+If variants of other consequence types (e.g. synonymous variants, or splice site variants beyond the canonical 2bp site) are found to affect splicing, specifically through records in [MutSpliceDB](https://brb.nci.nih.gov/splicing/), these are also marked as loss-of-function candidates.
+ 
+A collection of filters is next applied, which can potentialy remove the loss-of-function property for candidates identified above:
+
+ * Frameshifts/stop gains within the last 5% of the CDS
+ * Splice site variants that are not predicted to affect a donor site (GC -> GT)
+ * Variants where [MaxEntScan](https://pubmed.ncbi.nlm.nih.gov/15285897/) does not predict an effect on splicing
+    - Annotations in MutSpliceDB will have precedence if any conflicting evidence with MaxEntScan output is found
+
+If a variant is filtered as non-LoF through any of these criteria, this will be evident from the `LOF_FILTER` variable (found in the interactive tables of the HTML report as well as the TSV/Excel output).
+
 :::
 
 ::: {.callout-note title="Variant actionability classification" collapse="true"}

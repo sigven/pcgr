@@ -119,6 +119,7 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
       "INTRON_POSITION",
       "EXON_POSITION",
       "CODING_STATUS",
+      "SPLICE_DONOR_RELEVANT",
       "gnomADe_EAS_AF",
       "gnomADe_NFE_AF",
       "gnomADe_AFR_AF",
@@ -127,13 +128,16 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
       "DBNSFP_SIFT",
       "DBNSFP_PROVEAN",
       "DBNSFP_META_RNN",
-      "DBNSFP_FATHMM",
       "DBNSFP_MUTATIONTASTER",
       "DBNSFP_DEOGEN2",
       "DBNSFP_PRIMATEAI",
       "DBNSFP_MUTATIONASSESSOR",
-      "DBNSFP_FATHMM_MKL",
+      "DBNSFP_FATHMM_XF",
       "DBNSFP_M_CAP",
+      "DBNSFP_POLYPHEN2_HVAR",
+      "DBNSFP_ALPHA_MISSENSE",
+      "DBNSFP_PHACTBOOST",
+      "DBNSFP_CLINPRED",
       "DBNSFP_LIST_S2",
       "DBNSFP_BAYESDEL_ADDAF",
       "DBNSFP_SPLICE_SITE_ADA",
@@ -142,7 +146,8 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
    variant_data = {}
    for col in required_oncogenicity_vars:
       if rec.INFO.get(col) is None:
-         if col == "TSG" or col == "ONCOGENE" or col == "LOSS_OF_FUNCTION":
+         if col == "TSG" or col == "ONCOGENE" or \
+            col == "SPLICE_DONOR_RELEVANT" or col == "LOSS_OF_FUNCTION":
             variant_data[col] = False
          else:
             variant_data[col] = None
@@ -170,8 +175,8 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
                 'PROVEAN',
                 'META_RNN',
                 'ALPHA_MISSENSE',
-                'POLYPHEN_HVAR',
-                'PHACTBOOOST',
+                'POLYPHEN2_HVAR',
+                'PHACTBOOST',
                 'CLINPRED',
                 'MUTATIONTASTER',
                 'DEOGEN2',
@@ -191,12 +196,12 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
             variant_data['N_INSILICO_DAMAGING'] += 1
          if variant_data[col] == 'T':
             variant_data['N_INSILICO_TOLERATED'] += 1
-         if (col == 'SPLICE_SITE_RF' or \
-             col == 'SPLICE_SITE_ADA') and \
+         if (col == 'DBNSFP_SPLICE_SITE_RF' or \
+             col == 'DBNSFP_SPLICE_SITE_ADA') and \
             variant_data[col] == 'SN':
             variant_data['N_INSILICO_SPLICING_NEUTRAL'] += 1
-         if (col == 'SPLICE_SITE_RF' or \
-             col == 'SPLICE_SITE_ADA') and \
+         if (col == 'DBNSFP_SPLICE_SITE_RF' or \
+             col == 'DBNSFP_SPLICE_SITE_ADA') and \
             variant_data[col] == 'AS':
             variant_data['N_INSILICO_SPLICING_AFFECTED'] += 1
 
@@ -206,7 +211,12 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
       variant_data['N_INSILICO_TOLERATED'] <= pcgr_vars.ONCOGENICITY['insilico_pred_max_minority'] and \
       variant_data['N_INSILICO_SPLICING_NEUTRAL'] <= 1) or \
          variant_data['N_INSILICO_SPLICING_AFFECTED'] == 2:
-      variant_data['ONCG_OP1'] = True
+         variant_data['ONCG_OP1'] = True
+         
+         ## if variant is a splice donor variant, set loss-of-function flag
+         #if variant_data['N_INSILICO_SPLICING_AFFECTED'] == 2 and variant_data['SPLICE_DONOR_RELEVANT'] is True:
+         #   rec.INFO['LOSS_OF_FUNCTION'] = True
+         #   variant_data['LOSS_OF_FUNCTION'] = True
    
    ## majority of insilico predictors predict tolerated effect
    if variant_data['N_INSILICO_CALLED'] > pcgr_vars.ONCOGENICITY['insilico_pred_min_majority'] and \
@@ -400,7 +410,10 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
    ## also consider variants with one point below LP thresholds
    ## - variants with at least 3 matching oncogenic criteria or ONCG_OS1 as likely oncogenic
    if (variant_data['ONCOGENICITY_SCORE'] == likely_oncogenic_lower_limit - 1) and \
-      (len(variant_data['ONCOGENICITY_CODE'].split("|")) >= 3 or 'ONCG_OS1' in variant_data.keys()):
+      re.search(r'_SB', variant_data['ONCOGENICITY_CODE']) is None and \
+         (('|' in str(variant_data['ONCOGENICITY_CODE']) and \
+         len(str(variant_data['ONCOGENICITY_CODE']).split("|")) >= 3) or \
+       re.search(r'ONCG_OS1', variant_data['ONCOGENICITY_CODE'])):
          variant_data['ONCOGENICITY'] = "Likely_Oncogenic"
    if variant_data['ONCOGENICITY_SCORE'] <= benign_upper_limit:
       variant_data['ONCOGENICITY'] = "Benign"
