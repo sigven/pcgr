@@ -26,13 +26,13 @@ by the user. The following sections may be included in the report:
 	* Provides an overview of the somatic SNVs and InDels detected in the tumor sample
 	* Includes a global distribution of allelic support, statistics with respect to
 	   variant types and consequences
-	* Variants are classified with respect to _oncogenicity_ (ClinGen/CGC/VICC standard operating procedures)
+	* Variants are classified with respect to predicted _oncogenicity_ (ClinGen/CGC/VICC standard operating procedures)
 	   - permits also exploration of somatic mutations through interactive filtering according to several dimensions (variant sequencing depth/support, variant consequence etc.)
-	* Variants are classified with respect to _actionability_ (AMP/ASCO/CAP guidelines)
+	* Variants are classified with respect to clinical _actionability_ (AMP/ASCO/CAP guidelines)
 	   - individual evidence items linked to actionable variants can be explored, indicating strength of evidence, tumor type and therapeutic context, and clinical significance
 
 3. __Somatic CNAs__
-	* Aberrations are classified with respect to _actionability_ (AMP/ASCO/CAP guidelines)
+	* Aberrations are classified with respect to clinical _actionability_ (AMP/ASCO/CAP guidelines)
 	 - individual evidence items linked to actionable variants can be explored, indicating strength of evidence, tumor type and therapeutic context, and clinical significance
 	* Other potentially oncogenic aberrations are listed, pProto-oncogenes subject to copy number amplifications, and tumor suppressor genes subject to homozygous deletions
 
@@ -189,6 +189,7 @@ A VCF file containing annotated, somatic calls (single nucleotide variants and i
 | `PFAM_DOMAIN` | Pfam domain identifier (from VEP) |
 | `INTOGEN_DRIVER_MUT` | Indicates if existing variant is predicted as driver mutation from IntoGen Catalog of Driver Mutations |
 | `EFFECT_PREDICTIONS` | Insilico predictions variant effect on protein function and pre-mRNA splicing from [database of non-synonymous functional predictions - dbNSFP v5.0](https://www.dbnsfp.org/). Predicted effects are provided by different sources/algorithms (separated by `&`), `T` = Tolerated, `N` = Neutral, `D` = Damaging |
+| `SPLICE_EFFECT` | Effect of splicing, from MutSpliceDB. Format: <ENTREZGENE>|<SYMBOL>|<REFSEQ_TRANSCRIPT_ID>|<HGVSc>|<EFFECT><AFFECTED_EXONS>|<SOURCE> |
 | `DBNSFP_BAYESDEL_ADDAF` | predicted effect from BayesDel (dbNSFP) |
 | `DBNSFP_LIST_S2` | predicted effect from LIST-S2 (dbNSFP) |
 | `DBNSFP_SIFT` | predicted effect from SIFT (dbNSFP) |
@@ -220,15 +221,15 @@ A VCF file containing annotated, somatic calls (single nucleotide variants and i
 
 | Tag | Description |
 |-----|-------------|
-| `gnomADe_AF` | Adjusted global germline allele frequency ([gnomAD release 2](http://gnomad.broadinstitute.org/)) |
-| `gnomADe_AFR_AF` | African/American germline allele frequency ([gnomAD release 2](http://gnomad.broadinstitute.org/)) |
-| `gnomADe_AMR_AF` | American germline allele frequency ([gnomAD release 2](http://gnomad.broadinstitute.org/)) |
-| `gnomADe_SAS_AF` | South Asian germline allele frequency ([gnomAD release 2](http://gnomad.broadinstitute.org/)) |
-| `gnomADe_EAS_AF` | East Asian germline allele frequency ([gnomAD release 2](http://gnomad.broadinstitute.org/)) |
-| `gnomADe_FIN_AF` | Finnish germline allele frequency ([gnomAD release 2](http://gnomad.broadinstitute.org/)) |
-| `gnomADe_NFE_AF` | Non-Finnish European germline allele frequency ([gnomAD release 2](http://gnomad.broadinstitute.org/)) |
-| `gnomADe_OTH_AF` | Other germline allele frequency ([gnomAD release 2](http://gnomad.broadinstitute.org/)) |
-| `gnomADe_ASJ_AF` | Ashkenazi Jewish allele frequency ([gnomAD release 2](http://gnomad.broadinstitute.org/)) |
+| `gnomADe_AF` | Adjusted global germline allele frequency ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
+| `gnomADe_AFR_AF` | African/American germline allele frequency ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
+| `gnomADe_AMR_AF` | American germline allele frequency ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
+| `gnomADe_SAS_AF` | South Asian germline allele frequency ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
+| `gnomADe_EAS_AF` | East Asian germline allele frequency ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
+| `gnomADe_FIN_AF` | Finnish germline allele frequency ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
+| `gnomADe_NFE_AF` | Non-Finnish European germline allele frequency ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
+| `gnomADe_OTH_AF` | Other germline allele frequency ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
+| `gnomADe_ASJ_AF` | Ashkenazi Jewish allele frequency ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
 | `DBSNP_RSID` | [dbSNP](http://www.ncbi.nlm.nih.gov/SNP/) reference ID, as provided by VEP |
 | `COSMIC_MUTATION_ID` | Mutation identifier in [Catalog of somatic mutations in cancer](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/) database, as provided by VEP |
 | `TCGA_PANCANCER_COUNT` | Raw variant count across all TCGA tumor types |
@@ -321,21 +322,22 @@ The following variables are included in the TSV file (VCF tags issued by the use
 | 48. `TUMOR_SUPPRESSOR_SUPPORT` | Tumor suppressor annotation support (CGC/CancerMine/NCG) |
 | 49. `TARGETED_INHIBITORS2` | Targeted inhibitors |
 | 50. `EFFECT_PREDICTIONS` | Variant effect predictions - from dbNSFP |
-| 51. `REGULATORY_ANNOTATION` | Regulatory annotation |
-| 52. `VEP_ALL_CSQ` | VEP consequence - all transcripts |
-| 53. `gnomADe_AF` | gnomAD exomes allele frequency - globally|
-| 54. `DBSNP_RSID` | dbSNP identifier |
-| 55. `COSMIC_ID` | COSMIC identifier |
-| 56. `TCGA_FREQUENCY` | Frequency of variant across TCGA tumor types. Format: `tumortype | percent affected | affected cases | total cases` |
-| 57. `TCGA_PANCANCER_COUNT` | Raw variant count across all TCGA tumor types |
-| 58. `CLINVAR_MSID` | ClinVar MedGen identifier |
-| 59. `CLINVAR_CLASSIFICATION` | ClinVar variant classification |
-| 60. `CLINVAR_VARIANT_ORIGIN` | ClinVar variant origin |
-| 61. `CLINVAR_NUM_SUBMITTERS` | ClinVar number of submitters |
-| 62. `CLINVAR_REVIEW_STATUS_STARS` | ClinVar number of review status stars |
-| 63. `CLINVAR_CONFLICTED` | ClinVar variant classification is conflicted |
-| 64. `BIOMARKER_MATCH` | Biomarker match |
-| 65. `CALL_CONFIDENCE` | Call confidence |
+| 51. `SPLICE_EFFECT` | Splice effect annotation from MutSpliceDB |
+| 52. `REGULATORY_ANNOTATION` | Regulatory annotation |
+| 53. `VEP_ALL_CSQ` | VEP consequence - all transcripts |
+| 54. `gnomADe_AF` | gnomAD exomes allele frequency - globally |
+| 55. `DBSNP_RSID` | dbSNP identifier |
+| 56. `COSMIC_ID` | COSMIC identifier |
+| 57. `TCGA_FREQUENCY` | Frequency of variant across TCGA tumor types. Format: `tumortype | percent affected | affected cases | total cases` |
+| 58. `TCGA_PANCANCER_COUNT` | Raw variant count across all TCGA tumor types |
+| 59. `CLINVAR_MSID` | ClinVar measureset identifier |
+| 60. `CLINVAR_CLASSIFICATION` | ClinVar variant classification |
+| 61. `CLINVAR_VARIANT_ORIGIN` | ClinVar variant origin |
+| 62. `CLINVAR_NUM_SUBMITTERS` | ClinVar number of submitters |
+| 63. `CLINVAR_REVIEW_STATUS_STARS` | ClinVar number of review status stars |
+| 64. `CLINVAR_CONFLICTED` | ClinVar variant classification is conflicted |
+| 65. `BIOMARKER_MATCH` | Biomarker match |
+| 66. `CALL_CONFIDENCE` | Call confidence |
 
 For tumor-only runs, we provide a similarly formatted tab-separated values file that include 
 both filtered (i.e. likely germline events) and unfiltered (deemed somatic) variants. The file has the following naming convention:
