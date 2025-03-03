@@ -9,6 +9,7 @@ import errno
 import platform
 import string
 import random
+import glob
 
 
 def getlogger(logger_name):
@@ -92,6 +93,28 @@ def get_pcgr_bin():
     """Return abs path to e.g. conda/env/pcgr/bin
     """
     return os.path.dirname(os.path.realpath(sys.executable))
+
+def get_maxentscan_dir():
+    """
+    Get the path to the maxEntScan directory under the ensembl-vep directory with a flexible version part.
+    """
+    share_dir = os.path.join(conda_prefix(), 'share') # /conda/envs/pcgr/share
+    # Use glob to find directories matching the pattern
+    vep_dirs = glob.glob(os.path.join(share_dir, 'ensembl-vep-*'))
+
+    if not vep_dirs:
+        raise FileNotFoundError("No ensembl-vep directories found in the specified base directory.")
+
+    # Sort the directories to get the latest version
+    vep_dirs.sort()
+    latest_vep_dir = vep_dirs[-1]
+
+    maxentscan_dir = os.path.join(latest_vep_dir, 'maxEntScan')
+
+    if not os.path.exists(maxentscan_dir):
+        raise FileNotFoundError(f"maxEntScan directory not found in {latest_vep_dir}.")
+
+    return maxentscan_dir
 
 def quarto_evars_path(pcgrr_env):
     """The quarto env vars are set in the conda activate script,

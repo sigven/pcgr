@@ -6,7 +6,7 @@ import gzip
 
 from pcgr.annoutils import assign_cds_exon_intron_annotations
 from pcgr import pcgr_vars
-from pcgr.utils import getlogger, check_file_exists, get_perl_exports
+from pcgr.utils import getlogger, check_file_exists, get_perl_exports, get_maxentscan_dir
 from importlib.resources import files
 
 def get_vep_command(file_paths, conf_options, input_vcf, output_vcf, debug = False):
@@ -25,8 +25,6 @@ def get_vep_command(file_paths, conf_options, input_vcf, output_vcf, debug = Fal
 
     # for logging only
     plugins_in_use = "NearestExonJB, MaxEntScan"
-    # maxentscan directory up to fordownload
-    maxentscan_dir = str(files('data').joinpath("MaxEntScan/fordownload"))
 
     # List all VEP flags used when calling VEP
     vep_flags = (
@@ -34,7 +32,7 @@ def get_vep_command(file_paths, conf_options, input_vcf, output_vcf, debug = Fal
         f'--uniprot --appris --biotype --tsl --canonical --format vcf --cache --numbers '
         f'--total_length --allele_number --failed 1 --no_stats --no_escape --xref_refseq --vcf '
         f'--check_ref --dont_skip --flag_pick_allele_gene --plugin NearestExonJB,max_range=50000 '
-        f'--plugin MaxEntScan,{maxentscan_dir} '
+        f'--plugin MaxEntScan,{get_maxentscan_dir()} '
         f'--force_overwrite --species homo_sapiens --offline')
     vep_options = (
         f'--dir {vep_dir} --assembly {pcgr_vars.VEP_ASSEMBLY[genome_assembly]} --cache_version {pcgr_vars.VEP_VERSION} '
