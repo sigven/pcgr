@@ -262,9 +262,25 @@ def assign_cds_exon_intron_annotations(csq_record, grantham_scores, logger):
     if re.search(pcgr_vars.CSQ_NULL_PATTERN, str(csq_record['Consequence'])) is not None:
         csq_record['NULL_VARIANT'] = True
     
-    if re.search(pcgr_vars.CSQ_SPLICE_DONOR_PATTERN, str(csq_record['Consequence'])) is not None \
-        and re.search(r'(\+3(A|G)>|\+4A>|\+5G>)', str(csq_record['HGVSc'])) is not None:
-        csq_record['SPLICE_DONOR_RELEVANT'] = True
+    if re.search(pcgr_vars.CSQ_SPLICE_DONOR_PATTERN, str(csq_record['Consequence'])) is not None:
+        if re.search(r'(\+3(A|G)>|\+4A>|\+5G>)', str(csq_record['HGVSc'])) is not None:
+            csq_record['SPLICE_DONOR_RELEVANT'] = True
+        if not csq_record['MaxEntScan_diff'] is None and re.search('splice_donor_(5th|variant)',str(csq_record['Consequence'])) is not None:
+            if abs(csq_record['MaxEntScan_diff']) >= pcgr_vars.DONOR_DISRUPTION_MES_CUTOFF:
+                csq_record['LOSS_OF_FUNCTION'] = True
+            else:
+                if csq_record['LOSS_OF_FUNCTION'] is True:
+                    csq_record['LOSS_OF_FUNCTION'] = False
+                    csq_record['LOF_FILTER'] = "NON_DONOR_DISRUPTING"
+    
+    if re.search(pcgr_vars.CSQ_SPLICE_ACCEPTOR_PATTERN, str(csq_record['Consequence'])) is not None:
+        if not csq_record['MaxEntScan_diff'] is None and re.search('splice_acceptor', str(csq_record['Consequence'])) is not None:
+            if abs(csq_record['MaxEntScan_diff']) >= pcgr_vars.ACCEPTOR_DISRUPTION_MES_CUTOFF:
+                csq_record['LOSS_OF_FUNCTION'] = True
+            else:
+                if csq_record['LOSS_OF_FUNCTION'] is True:
+                    csq_record['LOSS_OF_FUNCTION'] = False
+                    csq_record['LOF_FILTER'] = "NON_ACCEPTOR_DISRUPTING"
 
     if re.search(pcgr_vars.CSQ_SPLICE_REGION_PATTERN, str(csq_record['Consequence'])) is not None:
         match = re.search(
@@ -277,7 +293,8 @@ def assign_cds_exon_intron_annotations(csq_record, grantham_scores, logger):
 
     if 'NearestExonJB' in csq_record.keys():
         if not csq_record['NearestExonJB'] is None:
-            if re.search(r"synonymous_|missense_|stop_|frameshift|inframe_|start_", str(csq_record['Consequence'])) is not None and str(csq_record['NearestExonJB']) != "":
+            if re.search(r"synonymous_|missense_|stop_|frameshift|inframe_|start_", str(csq_record['Consequence'])) is not None and \
+                str(csq_record['NearestExonJB']) != "":
                 exon_pos_info = csq_record['NearestExonJB'].split("+")
                 if len(exon_pos_info) == 4:
                     if utils.is_integer(exon_pos_info[1]) and str(exon_pos_info[2]) == "end":

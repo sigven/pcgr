@@ -253,12 +253,15 @@ def extend_vcf_annotations(arg_dict, logger):
                             if k == 'EXON':
                                 if "/" in csq_record[k]:
                                     principal_csq_properties['exon'] = csq_record[k].split('/')[0]
+                            
         
         splice_key = f"{principal_csq_properties['entrezgene']}_{principal_csq_properties['refseq_transcript_id']}_{principal_csq_properties['hgvsc']}"
         if splice_key in splice_effects:
             if not 'NO_EFFECT' in splice_effects[splice_key]:
                 rec.INFO['SPLICE_EFFECT_MUTSPLICEDB'] = splice_effects[splice_key]
                 rec.INFO['LOSS_OF_FUNCTION'] = True
+                if not rec.INFO.get('LOF_FILTER') is None:
+                    rec.INFO['LOF_FILTER'] = '.'
         
         if 'all_csq' in vep_csq_record_results:
             rec.INFO['VEP_ALL_CSQ'] = ','.join(vep_csq_record_results['all_csq'])
