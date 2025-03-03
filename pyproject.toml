@@ -41,10 +41,11 @@ Changelog = "https://sigven.github.io/pcgr/articles/CHANGELOG.html"
 pcgr = "pcgr.main:cli"
 cpsr = "pcgr.cpsr:main"
 
+[tool.setuptools.packages.find]
+where = ["data"]
 
-[tool.setuptools.packages]
-find = {}
-
+[tool.setuptools.package-data]
+"MaxEntScan" = ["**"]
 
 [tool.setuptools]
 script-files = [
