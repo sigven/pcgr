@@ -19,3 +19,5 @@ docs/_build/
 *.Rproj
 
 tests
+conda/pcgr
+conda/pcgrr
