@@ -139,6 +139,9 @@ def get_csq_record_annotations(csq_fields, varkey, logger, vep_csq_fields_map, t
                 if vep_csq_fields_map['index2field'][j] == "Consequence":
                     consequence_elements = sorted(str(csq_fields[j]).split('&'))
                     csq_record['Consequence'] = '&'.join(consequence_elements)
+                
+                if vep_csq_fields_map['index2field'][j] == "MaxEntScan_diff":
+                    csq_record['MaxEntScan_diff'] = float(csq_fields[j])
 
             else:
                 csq_record[vep_csq_fields_map['index2field'][j]] = None
