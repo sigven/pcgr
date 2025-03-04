@@ -1,7 +1,7 @@
 Package: pcgrr
 Type: Package
 Title: Personal Cancer Genome ReporteR
-Version: 2.1.2.9002
+Version: 2.1.2.9003
 Authors@R:
     c(person(given = "Sigve",
              family = "Nakken",
