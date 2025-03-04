@@ -239,11 +239,19 @@ noncoding_variant_set <-
          "PROTEIN_DOMAIN",
          "MUTATION_HOTSPOT",
          "MUTATION_HOTSPOT_CANCERTYPE",
-         "HGVSc_RefSeq",
-         "PREDICTED_EFFECT",
          "TARGETED_INHIBITORS",
          "TARGETED_INHIBITORS_ALL",
          "VEP_ALL_CSQ"))) |>
+  dplyr::select(
+    c("SYMBOL",
+      "ALTERATION",
+      "GENENAME",
+      "CONSEQUENCE",
+      "ONCOGENICITY",
+      "COSMIC_ID",
+      "LOSS_OF_FUNCTION"),
+    dplyr::everything()
+  ) |>
  dplyr::arrange(
     dplyr::desc(.data$ONCOGENICITY_SCORE),
     dplyr::desc(.data$TISSUE_ASSOC_RANK),

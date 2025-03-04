@@ -640,6 +640,21 @@ load_dna_variants <- function(
       )
   }
 
+  if ("MAXENTSCAN" %in% colnames(results[['variant']]) &
+      "SPLICE_EFFECT" %in% colnames(results[['variant']])) {
+    results[['variant']] <-
+      results[['variant']] |>
+      dplyr::mutate(
+        SPLICE_EFFECT = paste(
+          SPLICE_EFFECT, MAXENTSCAN, sep = ", "
+      )) |>
+      dplyr::mutate(
+        SPLICE_EFFECT = stringr::str_replace_all(
+          .data$SPLICE_EFFECT, "^(NA, )|^(NA, NA)$", ""
+        )
+      )
+  }
+
   ## Rename annotations for more clarity
   if ("TSG_SUPPORT" %in% colnames(results[['variant']])) {
     results[['variant']] <-

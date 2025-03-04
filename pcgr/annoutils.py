@@ -236,6 +236,7 @@ def assign_cds_exon_intron_annotations(csq_record, grantham_scores, logger):
     csq_record['CDS_RELATIVE_POSITION'] = '.'
     csq_record['LOSS_OF_FUNCTION'] = False
     csq_record['LOF_FILTER'] = '.'
+    csq_record['MAXENTSCAN'] = '.'
     
     splice_variant = False
     #print(csq_record.keys())
@@ -262,25 +263,33 @@ def assign_cds_exon_intron_annotations(csq_record, grantham_scores, logger):
     if re.search(pcgr_vars.CSQ_NULL_PATTERN, str(csq_record['Consequence'])) is not None:
         csq_record['NULL_VARIANT'] = True
     
+    if not csq_record['MaxEntScan_diff'] is None and not csq_record['MaxEntScan_ref'] is None and not csq_record['MaxEntScan_alt'] is None:
+        csq_record['MAXENTSCAN'] = 'MES|' + str(csq_record['MaxEntScan_diff']) + '|' + \
+            str(csq_record['MaxEntScan_ref']) + '|' + str(csq_record['MaxEntScan_alt'])
+    
     if re.search(pcgr_vars.CSQ_SPLICE_DONOR_PATTERN, str(csq_record['Consequence'])) is not None:
         if re.search(r'(\+3(A|G)>|\+4A>|\+5G>)', str(csq_record['HGVSc'])) is not None:
             csq_record['SPLICE_DONOR_RELEVANT'] = True
         if not csq_record['MaxEntScan_diff'] is None and re.search('splice_donor_(5th|variant)',str(csq_record['Consequence'])) is not None:
             if abs(csq_record['MaxEntScan_diff']) >= pcgr_vars.DONOR_DISRUPTION_MES_CUTOFF:
                 csq_record['LOSS_OF_FUNCTION'] = True
+                csq_record['MAXENTSCAN'] = str(csq_record['MAXENTSCAN']) + '|DONOR_DISRUPTING'
             else:
                 if csq_record['LOSS_OF_FUNCTION'] is True:
                     csq_record['LOSS_OF_FUNCTION'] = False
                     csq_record['LOF_FILTER'] = "NON_DONOR_DISRUPTING"
+                csq_record['MAXENTSCAN'] = str(csq_record['MAXENTSCAN']) + '|NON_DONOR_DISRUPTING'
     
     if re.search(pcgr_vars.CSQ_SPLICE_ACCEPTOR_PATTERN, str(csq_record['Consequence'])) is not None:
         if not csq_record['MaxEntScan_diff'] is None and re.search('splice_acceptor', str(csq_record['Consequence'])) is not None:
             if abs(csq_record['MaxEntScan_diff']) >= pcgr_vars.ACCEPTOR_DISRUPTION_MES_CUTOFF:
                 csq_record['LOSS_OF_FUNCTION'] = True
+                csq_record['MAXENTSCAN'] = str(csq_record['MAXENTSCAN']) + '|ACCEPTOR_DISRUPTING'
             else:
                 if csq_record['LOSS_OF_FUNCTION'] is True:
                     csq_record['LOSS_OF_FUNCTION'] = False
                     csq_record['LOF_FILTER'] = "NON_ACCEPTOR_DISRUPTING"
+                csq_record['MAXENTSCAN'] = str(csq_record['MAXENTSCAN']) + '|NON_ACCEPTOR_DISRUPTING'
 
     if re.search(pcgr_vars.CSQ_SPLICE_REGION_PATTERN, str(csq_record['Consequence'])) is not None:
         match = re.search(

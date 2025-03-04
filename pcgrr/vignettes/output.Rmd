@@ -189,7 +189,8 @@ A VCF file containing annotated, somatic calls (single nucleotide variants and i
 | `PFAM_DOMAIN` | Pfam domain identifier (from VEP) |
 | `INTOGEN_DRIVER_MUT` | Indicates if existing variant is predicted as driver mutation from IntoGen Catalog of Driver Mutations |
 | `EFFECT_PREDICTIONS` | Insilico predictions variant effect on protein function and pre-mRNA splicing from [database of non-synonymous functional predictions - dbNSFP v5.0](https://www.dbnsfp.org/). Predicted effects are provided by different sources/algorithms (separated by `&`), `T` = Tolerated, `N` = Neutral, `D` = Damaging |
-| `SPLICE_EFFECT` | Effect of splicing, from MutSpliceDB. Format: <ENTREZGENE>|<SYMBOL>|<REFSEQ_TRANSCRIPT_ID>|<HGVSc>|<EFFECT><AFFECTED_EXONS>|<SOURCE> |
+| `SPLICE_EFFECT` | Effect of splicing, from MutSpliceDB and/or MaxEntScan. Format: <ENTREZGENE>|<SYMBOL>|<REFSEQ_TRANSCRIPT_ID>|<HGVSc>|<EFFECT><AFFECTED_EXONS>|<SOURCE> (MutSpliceDB), 
+MES|<SCORE_DIFF>|SCORE_REF>|<SCORE_ALT>|EFFECT (MaxEntScan). |
 | `DBNSFP_BAYESDEL_ADDAF` | predicted effect from BayesDel (dbNSFP) |
 | `DBNSFP_LIST_S2` | predicted effect from LIST-S2 (dbNSFP) |
 | `DBNSFP_SIFT` | predicted effect from SIFT (dbNSFP) |
@@ -322,7 +323,7 @@ The following variables are included in the TSV file (VCF tags issued by the use
 | 48. `TUMOR_SUPPRESSOR_SUPPORT` | Tumor suppressor annotation support (CGC/CancerMine/NCG) |
 | 49. `TARGETED_INHIBITORS2` | Targeted inhibitors |
 | 50. `EFFECT_PREDICTIONS` | Variant effect predictions - from dbNSFP |
-| 51. `SPLICE_EFFECT` | Splice effect annotation from MutSpliceDB |
+| 51. `SPLICE_EFFECT` | Splice effect annotations from MutSpliceDB and MaxEntScan (see details above) |
 | 52. `REGULATORY_ANNOTATION` | Regulatory annotation |
 | 53. `VEP_ALL_CSQ` | VEP consequence - all transcripts |
 | 54. `gnomADe_AF` | gnomAD exomes allele frequency - globally |

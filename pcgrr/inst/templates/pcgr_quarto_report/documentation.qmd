@@ -107,15 +107,17 @@ For SNVs and InDels, PCGR considers the following consequence types as candidate
  * Frameshift variants - [SO:0001589](http://www.sequenceontology.org/miso/current_svn/term/SO:0001589)
  * Splice-site disruptions (2bp donor/acceptor site) - [SO:0001574](http://www.sequenceontology.org/miso/current_svn/term/SO:0001574),
  [SO:0001575](http://www.sequenceontology.org/miso/current_svn/term/SO:0001575)
- * Start losses - [SO:0001574](http://www.sequenceontology.org/miso/current_svn/term/SO:0002012)
+ * Splice donor 5th base disruptions - [SO:0001787](http://www.sequenceontology.org/miso/current_svn/term/SO:0001787)
+ * Start losses - [SO:0002012](http://www.sequenceontology.org/miso/current_svn/term/SO:0002012)
 
-If variants of other consequence types (e.g. synonymous variants, or splice site variants beyond the canonical 2bp site) are found to affect splicing, specifically through records in [MutSpliceDB](https://brb.nci.nih.gov/splicing/), these are also marked as loss-of-function candidates.
+If variants of other consequence types (e.g. synonymous variants, or splice site variants beyond the canonical 2bp site/5th donor base) are found to affect splicing, specifically through records in [MutSpliceDB](https://brb.nci.nih.gov/splicing/), these are also marked as loss-of-function candidates.
  
 A collection of filters is next applied, which can potentialy remove the loss-of-function property for candidates identified above:
 
  * Frameshifts/stop gains within the last 5% of the CDS
  * Splice site variants that are not predicted to affect a donor site (GC -> GT)
  * Variants where [MaxEntScan](https://pubmed.ncbi.nlm.nih.gov/15285897/) does not predict an effect on splicing
+    - A MaxEntScan score difference (between reference and alternative allele) of at least 6 is considered disruptive for donor sites, while 7 is required for acceptor sites (thresholds adopted from [LOFTEE](https://github.com/konradjk/loftee))
     - Annotations in MutSpliceDB will have precedence if any conflicting evidence with MaxEntScan output is found
 
 If a variant is filtered as non-LoF through any of these criteria, this will be evident from the `LOF_FILTER` variable (found in the interactive tables of the HTML report as well as the TSV/Excel output).
