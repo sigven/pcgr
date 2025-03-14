@@ -132,7 +132,7 @@ def append_annotations(vcf2tsv_gz_fname: str, refdata_assembly_dir: str, logger)
                 if os.path.exists(gene_xref_tsv_fname):
                     gene_xref_df = pd.read_csv(
                         gene_xref_tsv_fname, sep="\t", na_values=".", 
-                        usecols=["entrezgene","name"])
+                        low_memory=False, usecols=["entrezgene","name"])
                     gene_xref_df = gene_xref_df[gene_xref_df['entrezgene'].notnull()].drop_duplicates()
                     gene_xref_df.rename(columns = {'entrezgene':'ENTREZGENE', 'name':'GENENAME'}, inplace = True)                
                     vcf2tsv_df = vcf2tsv_df.merge(gene_xref_df, left_on=["ENTREZGENE"], right_on=["ENTREZGENE"], how="left")

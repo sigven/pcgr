@@ -60,7 +60,7 @@ pdiakumis <- user("pdiakumis")
   - Cancer Gene Census (v101)
 - Cleaned and improved oncogenicity classification of variants
   - Added Grantham distance for amino acid alterations - taken into account
-  - only consider LP variants with an oncogenicity score = 4 if at least three 
+  - only consider LP variant classification when oncogenicity score = 4 and if at least three 
     oncogenic criteria matches _or_ `ONCG_OS1` is matching
 for oncogenicity classification
 - Multiple cosmetic changes to HTML report - e.g. collapsed call-outs
