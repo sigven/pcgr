@@ -16,8 +16,8 @@ output: rmarkdown::html_document
   * [TCGA](https://portal.gdc.cancer.gov/) - somatic mutations discovered across 33 tumor type cohorts (release 41.0, August 2024)
  
 ### Variant databases of clinical utility
-  * [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - database of clinically related variants (February 2025)
-  * [CIViC](https://civicdb.org) - clinical interpretations of variants in cancer (February 27th 2025)
+  * [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - database of clinically related variants (March 2025)
+  * [CIViC](https://civicdb.org) - clinical interpretations of variants in cancer (March 13th 2025)
   * [CGI](http://www.cancergenomeinterpreter.org/biomarkers) - Cancer Genome Interpreter Cancer Biomarkers Database (CGI) (October 18th 2022)
 
 ### Protein domains/functional features

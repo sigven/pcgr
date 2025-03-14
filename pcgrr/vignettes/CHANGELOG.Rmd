@@ -51,9 +51,9 @@ pdiakumis <- user("pdiakumis")
 
 - Date: **2025-03-XX**
 - Major data updates
-  - ClinVar (2025-02)
+  - ClinVar (2025-03)
   - dbNSFP (v5.0)
-  - CIViC (2025-02-27)
+  - CIViC (2025-03-13)
   - GENCODE v47 (VEP v113)
   - PanelApp (2025-02)
   - UniProt KB (2025-01)
