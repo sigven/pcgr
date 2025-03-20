@@ -16,7 +16,7 @@ require(glue, include.only = "glue")
 ```{r vars, echo=FALSE}
 Sys.setenv(VEP_VERSION = "113")
 Sys.setenv(PCGR_VERSION = "2.1.2.9004")
-Sys.setenv(BUNDLE_VERSION = "20250217")
+Sys.setenv(BUNDLE_VERSION = "20250314")
 VEP_VERSION <- Sys.getenv("VEP_VERSION")
 PCGR_VERSION <- Sys.getenv("PCGR_VERSION")
 BUNDLE_VERSION <- Sys.getenv("BUNDLE_VERSION")
@@ -45,8 +45,8 @@ need to match the chosen assembly.
 
 Reference bundles are generated semi-automatically (by the PCGR author) and
 are versioned based on their release date. Keep in mind that the bundles support
-only certain Ensembl VEP versions. The latest (**v`r BUNDLE_VERSION`**) genome-specific
-bundles can be downloaded directly from below (size: ~4G):
+only certain Ensembl VEP versions, and importantly also specific software versions of PCGR. Upgrading the PCGR software without upgrading the bundle specified here is thus _not_ a recommended installation strategy. The latest (**v`r BUNDLE_VERSION`**) genome-specific
+bundles can be downloaded directly from below (size: ~5G):
 
 | Assembly | Download Link             |
 |:---------|:--------------------------|

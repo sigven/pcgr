@@ -71,6 +71,7 @@ for oncogenicity classification
 - Added more prediction algorithms from dbNSFP
 - Fixed bug that caused crash for missing values in DP/AF values of input VCF
 - Fixed erroneous re-formatting of MAF integer columns to floats
+- Fixed cases for which similar Entrez gene identifiers mapped to different gene names
 
 ## v2.1.3
 

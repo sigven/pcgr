@@ -1,4 +1,4 @@
-#---- color_palette ----#
+####---- Color_palette ----####
 color_palette <- list()
 for (c in c("pathogenicity",
             "oncogenicity",
@@ -147,7 +147,7 @@ biomarker_evidence[['types']] <-
 usethis::use_data(
   biomarker_evidence, overwrite = T)
 
-#-----input column names/types-----#
+####----- Data type definitions-----####
 data_coltype_defs <- list()
 data_coltype_defs[['cna_somatic_segment_raw']] <- readr::cols_only(
   CHROM = readr::col_character(),
@@ -480,9 +480,9 @@ data_coltype_defs[['snv_indel_germline_cpsr']] <- readr::cols_only(
   HGVSp = readr::col_character(),
   HGVSc_RefSeq = readr::col_character(),
   CDS_CHANGE = readr::col_character(),
+  EFFECT_PREDICTIONS = readr::col_character(),
+  SPLICE_EFFECT = readr::col_character(),
   PFAM_DOMAIN_NAME = readr::col_character(),
-  ONCOGENE = readr::col_logical(),
-  TUMOR_SUPPRESSOR = readr::col_logical(),
   SYMBOL = readr::col_character(),
   ENTREZGENE = readr::col_character(),
   GENENAME = readr::col_character(),
