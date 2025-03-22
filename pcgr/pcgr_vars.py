@@ -4,7 +4,7 @@ from pcgr._version import __version__
 
 ## Version - software and bundle
 PCGR_VERSION = __version__
-DB_VERSION = '20240927'
+DB_VERSION = '20250314'
 
 ## Miscellaneous settings
 NCBI_BUILD_MAF = 'GRCh38'
@@ -17,13 +17,13 @@ MINIMUM_N_MUT_SIGNATURE = 100
 MAX_SIGNATURE_PREVALENCE = 20
 
 ## GENCODE versions
-GENCODE_VERSION = {'grch38': 46,'grch37': 19}
+GENCODE_VERSION = {'grch38': 47,'grch37': 19}
 
 ## vcfanno settings
 VCFANNO_MAX_PROC = 15
 
 ## VEP settings/versions
-VEP_VERSION = '112'
+VEP_VERSION = '113'
 VEP_ASSEMBLY = {'grch38': 'GRCh38','grch37': 'GRCh37'}
 VEP_MIN_FORKS = 1
 VEP_MAX_FORKS = 8
@@ -37,6 +37,8 @@ EXPRESSION_DB_SOURCES = ['tcga','depmap','treehouse']
 ## Sample identifier length (max/min allowed)
 SAMPLE_ID_MAX_LENGTH = 40
 SAMPLE_ID_MIN_LENGTH = 3
+
+GNOMAD_MAIN_EXON_AF_TAGS = ['gnomADe_SAS_AF','gnomADe_NFE_AF','gnomADe_AFR_AF','gnomADe_AMR_AF','gnomADe_EAS_AF']
 
 ## Classified germline variant input (from CPSR) - required columns
 germline_input_required_cols = [
@@ -220,12 +222,18 @@ CSQ_CODING_PATTERN2 = \
     r"(stop_(lost|gained)|start_lost|frameshift_|missense_|splice_(donor|acceptor)|protein_altering|inframe_)"
 CSQ_CODING_SILENT_PATTERN2 = \
     r"(stop_(lost|gained)|start_lost|frameshift_|missense_|splice_(donor|acceptor)|protein_altering|inframe_|synonymous|(start|stop)_retained)"
-CSQ_NULL_PATTERN = r"^(stop_gained|frameshift_)"
+CSQ_NULL_PATTERN = r"^(stop_gained|frameshift_)|&stop_gained"
 CSQ_SPLICE_REGION_PATTERN = r"(splice_|intron_variant)"
 CSQ_SPLICE_DONOR_PATTERN = \
     r"(splice_region_variant|splice_donor_variant|splice_donor_region_variant|splice_donor_5th_base_variant)"
+CSQ_SPLICE_ACCEPTOR_PATTERN = \
+    r"(splice_polypyrimidine_tract_variant|splice_acceptor_variant)"
 CSQ_LOF_PATTERN = r"(stop_gained|frameshift|splice_acceptor_variant|splice_donor_variant|start_lost)"
 
+
+## MaxEntScan thresholds for splice site disruption (donor/acceptor)
+DONOR_DISRUPTION_MES_CUTOFF = 6
+ACCEPTOR_DISRUPTION_MES_CUTOFF = 7
 
 ## TCGA tumor cohorts
 DISEASE_COHORTS = ['ACC','BLCA','BRCA','CESC',
@@ -263,5 +271,40 @@ SITE_TO_DISEASE = {
     'Thymus': ['TCGA_THYM'],
     'Myeloid': ['TCGA_LAML'],
     'Lymphoid': ['TCGA_DLBC']
-    
+}
+
+DBNSFP_ALGORITHMS = {
+    'polyphen2_hvar': 'DBNSFP_POLYPHEN2_HVAR',
+    'cadd': 'DBNSFP_CADD',
+    'vest4': 'DBNSFP_VEST4',
+    'clinpred': 'DBNSFP_CLINPRED',
+    'revel': 'DBNSFP_REVEL',
+    'sift': 'DBNSFP_SIFT',
+    'provean': 'DBNSFP_PROVEAN',
+    'm-cap': 'DBNSFP_M_CAP',
+    'mutpred': 'DBNSFP_MUTPRED',
+    'metarnn': 'DBNSFP_META_RNN',
+    'fathmm_xf': 'DBNSFP_FATHMM_XF',
+    'mutationassessor': 'DBNSFP_MUTATIONASSESSOR',
+    'mutationtaster': 'DBNSFP_MUTATIONTASTER',
+    'deogen2': 'DBNSFP_DEOGEN2',
+    'primateai': 'DBNSFP_PRIMATEAI', 
+    'list_s2': 'DBNSFP_LIST_S2',
+    'gerp_rs': 'DBNSFP_GERP',       
+    'aloft': 'DBNSFP_ALOFT',
+    'bayesdel_addaf': 'DBNSFP_BAYESDEL_ADDAF',
+    'splice_site_ada': 'DBNSFP_SPLICE_SITE_ADA',
+    'splice_site_rf': 'DBNSFP_SPLICE_SITE_RF',
+    'esm1b': 'DBNSFP_ESM1B',
+    'alphamissense': 'DBNSFP_ALPHA_MISSENSE',
+    'mutformer': 'DBNSFP_MUTFORMER', 
+    'phactboost': 'DBNSFP_PHACTBOOST'
+}
+
+ONCOGENICITY = {
+    'gnomAD_extremely_rare_AF': 0.00001,
+    'gnomAD_common_AF': 0.01,
+    'gnomAD_very_common_AF': 0.05,
+    'insilico_pred_min_majority': 8,
+    'insilico_pred_max_minority': 2,
 }

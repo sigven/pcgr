@@ -8,6 +8,8 @@ import cyvcf2
 import gzip
 
 from cyvcf2 import VCF, Writer
+from logging import Logger
+
 from pcgr import utils, pcgr_vars
 from pcgr.utils import check_subprocess, error_message
 from pcgr.variant import reverse_complement_dna
@@ -190,6 +192,22 @@ def map_regulatory_variant_annotations(vep_csq_records):
 
     return (regulatory_annotation)
 
+def load_grantham(grantham_mat_fname: str, logger: Logger):
+    """
+    Load Grantham amino acid distance matrix.
+    """
+    grantham = {}
+    if not os.path.exists(grantham_mat_fname):
+        logger.info(f"ERROR: File '{grantham_mat_fname}' does not exist - exiting")
+        exit(1)
+
+    with open(grantham_mat_fname, mode='rt') as f:
+        reader = csv.DictReader(f, delimiter='\t')
+        for row in reader:
+            grantham[str(row['ref_aa']) + '_' + str(row['alt_aa'])] = int(row['grantham_distance'])
+    f.close()
+    return grantham
+
 def threeToOneAA(aa_change):
 
     for three_letter_aa in threeLettertoOneLetterAA.keys():
@@ -200,7 +218,7 @@ def threeToOneAA(aa_change):
     return aa_change
 
 
-def assign_cds_exon_intron_annotations(csq_record, logger):
+def assign_cds_exon_intron_annotations(csq_record, grantham_scores, logger):
     
 
     csq_record['CODING_STATUS'] = 'noncoding'
@@ -212,11 +230,13 @@ def assign_cds_exon_intron_annotations(csq_record, logger):
     csq_record['CDS_CHANGE'] = '.'
     csq_record['HGVSp_short'] = '.'
     csq_record['PROTEIN_CHANGE'] = '.'
+    csq_record['GRANTHAM_DISTANCE'] = '.'
     csq_record['ALTERATION'] = '.'
     csq_record['EXON_AFFECTED'] = '.'
     csq_record['CDS_RELATIVE_POSITION'] = '.'
     csq_record['LOSS_OF_FUNCTION'] = False
     csq_record['LOF_FILTER'] = '.'
+    csq_record['MAXENTSCAN'] = '.'
     
     splice_variant = False
     #print(csq_record.keys())
@@ -243,9 +263,33 @@ def assign_cds_exon_intron_annotations(csq_record, logger):
     if re.search(pcgr_vars.CSQ_NULL_PATTERN, str(csq_record['Consequence'])) is not None:
         csq_record['NULL_VARIANT'] = True
     
-    if re.search(pcgr_vars.CSQ_SPLICE_DONOR_PATTERN, str(csq_record['Consequence'])) is not None \
-        and re.search(r'(\+3(A|G)>|\+4A>|\+5G>)', str(csq_record['HGVSc'])) is not None:
-        csq_record['SPLICE_DONOR_RELEVANT'] = True
+    if not csq_record['MaxEntScan_diff'] is None and not csq_record['MaxEntScan_ref'] is None and not csq_record['MaxEntScan_alt'] is None:
+        csq_record['MAXENTSCAN'] = 'MES|' + str(csq_record['MaxEntScan_diff']) + '|' + \
+            str(csq_record['MaxEntScan_ref']) + '|' + str(csq_record['MaxEntScan_alt'])
+    
+    if re.search(pcgr_vars.CSQ_SPLICE_DONOR_PATTERN, str(csq_record['Consequence'])) is not None:
+        if re.search(r'(\+3(A|G)>|\+4A>|\+5G>)', str(csq_record['HGVSc'])) is not None:
+            csq_record['SPLICE_DONOR_RELEVANT'] = True
+        if not csq_record['MaxEntScan_diff'] is None and re.search('splice_donor_(5th|variant)',str(csq_record['Consequence'])) is not None:
+            if abs(csq_record['MaxEntScan_diff']) >= pcgr_vars.DONOR_DISRUPTION_MES_CUTOFF:
+                csq_record['LOSS_OF_FUNCTION'] = True
+                csq_record['MAXENTSCAN'] = str(csq_record['MAXENTSCAN']) + '|DONOR_DISRUPTING'
+            else:
+                if csq_record['LOSS_OF_FUNCTION'] is True:
+                    csq_record['LOSS_OF_FUNCTION'] = False
+                    csq_record['LOF_FILTER'] = "NON_DONOR_DISRUPTING"
+                csq_record['MAXENTSCAN'] = str(csq_record['MAXENTSCAN']) + '|NON_DONOR_DISRUPTING'
+    
+    if re.search(pcgr_vars.CSQ_SPLICE_ACCEPTOR_PATTERN, str(csq_record['Consequence'])) is not None:
+        if not csq_record['MaxEntScan_diff'] is None and re.search('splice_acceptor', str(csq_record['Consequence'])) is not None:
+            if abs(csq_record['MaxEntScan_diff']) >= pcgr_vars.ACCEPTOR_DISRUPTION_MES_CUTOFF:
+                csq_record['LOSS_OF_FUNCTION'] = True
+                csq_record['MAXENTSCAN'] = str(csq_record['MAXENTSCAN']) + '|ACCEPTOR_DISRUPTING'
+            else:
+                if csq_record['LOSS_OF_FUNCTION'] is True:
+                    csq_record['LOSS_OF_FUNCTION'] = False
+                    csq_record['LOF_FILTER'] = "NON_ACCEPTOR_DISRUPTING"
+                csq_record['MAXENTSCAN'] = str(csq_record['MAXENTSCAN']) + '|NON_ACCEPTOR_DISRUPTING'
 
     if re.search(pcgr_vars.CSQ_SPLICE_REGION_PATTERN, str(csq_record['Consequence'])) is not None:
         match = re.search(
@@ -258,7 +302,8 @@ def assign_cds_exon_intron_annotations(csq_record, logger):
 
     if 'NearestExonJB' in csq_record.keys():
         if not csq_record['NearestExonJB'] is None:
-            if re.search(r"synonymous_|missense_|stop_|frameshift|inframe_|start_", str(csq_record['Consequence'])) is not None and str(csq_record['NearestExonJB']) != "":
+            if re.search(r"synonymous_|missense_|stop_|frameshift|inframe_|start_", str(csq_record['Consequence'])) is not None and \
+                str(csq_record['NearestExonJB']) != "":
                 exon_pos_info = csq_record['NearestExonJB'].split("+")
                 if len(exon_pos_info) == 4:
                     if utils.is_integer(exon_pos_info[1]) and str(exon_pos_info[2]) == "end":
@@ -284,14 +329,10 @@ def assign_cds_exon_intron_annotations(csq_record, logger):
                     if '-' in cds_pos_full and not '?' in cds_pos_full:
                         cds_pos = cds_pos_full.split('-')[0]
                         if cds_pos.isdigit():
-                            cds_pos = int(cds_pos)
-                        #else:
-                        #    logger.warning(f'Could not determine variant CDS position from VEP annotation - ({csq_record["CDS_position"]})')                        
+                            cds_pos = int(cds_pos)                   
                     else:
                         if cds_pos_full.isdigit():
-                            cds_pos = int(cds_pos_full)
-                        #else:
-                        #    logger.warning(f'Could not determine variant CDS position from VEP annotation - ({csq_record["CDS_position"]})')                         
+                            cds_pos = int(cds_pos_full)                     
                     
                     if int(cds_pos) > -1 and int(cds_pos) <= int(cds_length):    
                         csq_record['CDS_RELATIVE_POSITION'] = float(cds_pos/cds_length)
@@ -376,10 +417,11 @@ def assign_cds_exon_intron_annotations(csq_record, logger):
                                     protein_change = 'p.' + \
                                         str(csq_record['Amino_acids']) + \
                                         str(protein_position) + str(csq_record['Amino_acids'])
-                                    if 'stop_lost' in str(csq_record['Consequence']) and '/' in str(csq_record['Amino_acids']):
-                                        protein_change = 'p.X' + \
-                                            str(protein_position) + \
-                                            str(csq_record['Amino_acids']).split('/')[1]
+                            if 'stop_lost' in str(csq_record['Consequence']) and 'Amino_acids' in csq_record.keys():
+                                if '/' in str(csq_record['Amino_acids']):
+                                    protein_change = 'p.X' + \
+                                        str(protein_position) + \
+                                        str(csq_record['Amino_acids']).split('/')[1]
 
     if not csq_record['HGVSp'] is None:
         if csq_record['HGVSp'] != '.':
@@ -388,6 +430,17 @@ def assign_cds_exon_intron_annotations(csq_record, logger):
                 if protein_identifier.startswith('ENSP'):
                     protein_change_VEP = str(csq_record['HGVSp'].split(':')[1])
                     protein_change = threeToOneAA(protein_change_VEP)
+                    
+                    if 'missense_variant' in csq_record['Consequence'] and not re.search(r'(del|ins|fs|X)', protein_change):
+                        if 'Amino_acids' in csq_record.keys():
+                            if not csq_record['Amino_acids'] is None:
+                                if '/' in str(csq_record['Amino_acids']):
+                                    key = str(csq_record['Amino_acids']).split('/')[0] + '_' + str(csq_record['Amino_acids']).split('/')[1]
+                                    if key in grantham_scores.keys():
+                                        #print('GRANTHAM\t' + str(key) + ' ' + str(grantham_scores[key]))
+                                        csq_record['GRANTHAM_DISTANCE'] = grantham_scores[key]
+                        
+                    
                     csq_record['PROTEIN_CHANGE'] = protein_change_VEP
                     csq_record['ALTERATION'] = protein_change_VEP
 

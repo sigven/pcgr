@@ -1,4 +1,4 @@
-#---- color_palette ----#
+####---- Color_palette ----####
 color_palette <- list()
 for (c in c("pathogenicity",
             "oncogenicity",
@@ -147,7 +147,7 @@ biomarker_evidence[['types']] <-
 usethis::use_data(
   biomarker_evidence, overwrite = T)
 
-#-----input column names/types-----#
+####----- Data type definitions-----####
 data_coltype_defs <- list()
 data_coltype_defs[['cna_somatic_segment_raw']] <- readr::cols_only(
   CHROM = readr::col_character(),
@@ -206,12 +206,16 @@ data_coltype_defs[['snv_indel_somatic_raw']] <- readr::cols_only(
   IMPACT = readr::col_character(),
   LOSS_OF_FUNCTION = readr::col_logical(),
   LOF_FILTER = readr::col_character(),
+  MAXENTSCAN = readr::col_character(),
+  MaxEntScan_diff = readr::col_number(),
   SPLICE_DONOR_RELEVANT = readr::col_logical(),
+  SPLICE_EFFECT_MUTSPLICEDB = readr::col_character(),
   NULL_VARIANT = readr::col_logical(),
   CODING_STATUS = readr::col_character(),
   EXONIC_STATUS = readr::col_character(),
   ALTERATION = readr::col_character(),
   PROTEIN_CHANGE = readr::col_character(),
+  GRANTHAM_DISTANCE = readr::col_integer(),
   HGVSp_short = readr::col_character(),
   HGVSc = readr::col_character(),
   HGVSc_RefSeq = readr::col_character(),
@@ -227,6 +231,8 @@ data_coltype_defs[['snv_indel_somatic_raw']] <- readr::cols_only(
   ONCOGENICITY = readr::col_character(),
   ONCOGENICITY_CODE = readr::col_character(),
   ONCOGENICITY_SCORE = readr::col_integer(),
+  KNOWN_ONCOGENIC = readr::col_character(),
+  KNOWN_ONCOGENIC_SITE = readr::col_character(),
   PFAM_DOMAIN = readr::col_character(),
   PFAM_DOMAIN_NAME = readr::col_character(),
   SYMBOL = readr::col_character(),
@@ -309,11 +315,15 @@ data_coltype_defs[['snv_indel_germline_raw']] <- readr::cols_only(
   IMPACT = readr::col_character(),
   LOSS_OF_FUNCTION = readr::col_logical(),
   LOF_FILTER = readr::col_character(),
+  MAXENTSCAN = readr::col_character(),
+  MaxEntScan_diff = readr::col_number(),
   SPLICE_DONOR_RELEVANT = readr::col_logical(),
+  SPLICE_EFFECT_MUTSPLICEDB = readr::col_character(),
   NULL_VARIANT = readr::col_logical(),
   CODING_STATUS = readr::col_character(),
   EXONIC_STATUS = readr::col_character(),
   PROTEIN_CHANGE = readr::col_character(),
+  GRANTHAM_DISTANCE = readr::col_character(),
   ALTERATION = readr::col_character(),
   HGVSp_short = readr::col_character(),
   HGVSc = readr::col_character(),
@@ -383,24 +393,26 @@ data_coltype_defs[['snv_indel_germline_raw']] <- readr::cols_only(
   MOTIF_NAME = readr::col_character(),
   RMSK_HIT = readr::col_character(),
   VEP_ALL_CSQ = readr::col_character(),
-  DBNSFP_SIFT = readr::col_character(),
-  DBNSFP_PROVEAN = readr::col_character(),
-  DBNSFP_META_RNN = readr::col_character(),
-  DBNSFP_FATHMM = readr::col_character(),
-  DBNSFP_MUTATIONTASTER = readr::col_character(),
-  DBNSFP_DEOGEN2 = readr::col_character(),
-  DBNSFP_PRIMATEAI = readr::col_character(),
-  DBNSFP_MUTATIONASSESSOR = readr::col_character(),
-  DBNSFP_FATHMM_MKL = readr::col_character(),
-  DBNSFP_M_CAP = readr::col_character(),
-  DBNSFP_LIST_S2 = readr::col_character(),
+  DBNSFP_ALPHA_MISSENSE = readr::col_character(),
   DBNSFP_BAYESDEL_ADDAF = readr::col_character(),
+  DBNSFP_CLINPRED = readr::col_character(),
+  DBNSFP_DEOGEN2 = readr::col_character(),
+  DBNSFP_ESM1B = readr::col_character(),
+  DBNSFP_FATHMM_XF = readr::col_character(),
+  DBNSFP_LIST_S2 = readr::col_character(),
+  DBNSFP_META_RNN = readr::col_character(),
+  DBNSFP_MUTATIONASSESSOR = readr::col_character(),
+  DBNSFP_MUTATIONTASTER = readr::col_character(),
+  DBNSFP_MUTFORMER = readr::col_character(),
+  DBNSFP_MUTPRED = readr::col_character(),
+  DBNSFP_M_CAP = readr::col_character(),
+  DBNSFP_PHACTBOOST = readr::col_character(),
+  DBNSFP_POLYPHEN2_HVAR = readr::col_character(),
+  DBNSFP_PRIMATEAI = readr::col_character(),
+  DBNSFP_PROVEAN = readr::col_character(),
+  DBNSFP_SIFT = readr::col_character(),
   DBNSFP_SPLICE_SITE_ADA = readr::col_character(),
   DBNSFP_SPLICE_SITE_RF = readr::col_character(),
-  DBNSFP_PHACTBOOST = readr::col_character(),
-  DBNSFP_ALPHA_MISSENSE = readr::col_character(),
-  DBNSFP_MUTFORMER = readr::col_character(),
-  DBNSFP_ESM1B = readr::col_character(),
   gnomADe_AF = readr::col_number(),
   gnomADe_AMR_AF = readr::col_number(),
   gnomADe_AFR_AF = readr::col_number(),
@@ -468,9 +480,9 @@ data_coltype_defs[['snv_indel_germline_cpsr']] <- readr::cols_only(
   HGVSp = readr::col_character(),
   HGVSc_RefSeq = readr::col_character(),
   CDS_CHANGE = readr::col_character(),
+  EFFECT_PREDICTIONS = readr::col_character(),
+  SPLICE_EFFECT = readr::col_character(),
   PFAM_DOMAIN_NAME = readr::col_character(),
-  ONCOGENE = readr::col_logical(),
-  TUMOR_SUPPRESSOR = readr::col_logical(),
   SYMBOL = readr::col_character(),
   ENTREZGENE = readr::col_character(),
   GENENAME = readr::col_character(),
@@ -556,6 +568,7 @@ tsv_cols[['snv_indel']] <-
     'ONCOGENICITY',
     'ONCOGENICITY_CODE',
     'ONCOGENICITY_SCORE',
+    #'ONCOGENICITY_DOC',
     'HGVSc',
     'HGVSc_RefSeq',
     'HGVSp',
@@ -577,6 +590,7 @@ tsv_cols[['snv_indel']] <-
     'TUMOR_SUPPRESSOR_SUPPORT',
     'TARGETED_INHIBITORS2',
     'EFFECT_PREDICTIONS',
+    'SPLICE_EFFECT',
     'REGULATORY_ANNOTATION',
     'VEP_ALL_CSQ',
     'gnomADe_AF',
@@ -644,6 +658,7 @@ tsv_cols[['snv_indel_unfiltered']] <-
     'TUMOR_SUPPRESSOR_SUPPORT',
     'TARGETED_INHIBITORS2',
     'EFFECT_PREDICTIONS',
+    'SPLICE_EFFECT',
     'REGULATORY_ANNOTATION',
     'VEP_ALL_CSQ',
     'gnomADe_AF',
@@ -776,10 +791,12 @@ dt_display[['snv_indel_gene_actionable']] <-
     'HGVSc',
     'HGVSc_RefSeq',
     'PREDICTED_EFFECT',
+    'SPLICE_EFFECT',
     'LOSS_OF_FUNCTION',
     'LOF_FILTER',
     'ONCOGENICITY',
     'ONCOGENICITY_CODE',
+    'ONCOGENICITY_DOC',
     'ONCOGENICITY_SCORE',
     'VEP_ALL_CSQ',
     'DBSNP_RSID',
@@ -838,9 +855,10 @@ dt_display[['snv_indel_tier3']] <-
     'LOF_FILTER',
     'TCGA_FREQUENCY',
     'PREDICTED_EFFECT',
+    'SPLICE_EFFECT',
     'ONCOGENICITY_CODE',
     'ONCOGENICITY_SCORE',
-    'VEP_ALL_CSQ',
+    'ONCOGENICITY_DOC',
     'DBSNP_RSID',
     'CLINVAR',
     'CLINVAR_CLASSIFICATION',
@@ -877,11 +895,13 @@ dt_display[['tier4']] <-
     'HGVSc',
     'HGVSc_RefSeq',
     'PREDICTED_EFFECT',
+    'SPLICE_EFFECT',
     'LOSS_OF_FUNCTION',
     'LOF_FILTER',
     'REGULATORY_ANNOTATION',
     'ONCOGENICITY_CODE',
     'ONCOGENICITY_SCORE',
+    'ONCOGENICITY_DOC',
     'VEP_ALL_CSQ',
     'DBSNP_RSID',
     'ENSEMBL_GENE_ID',
@@ -983,9 +1003,9 @@ variant_db_url <-
 usethis::use_data(variant_db_url, overwrite = T)
 
 #---- effect_prediction_algos ----#
-effect_prediction_algos <-
-  utils::read.table(file = "data-raw/effect_prediction_algorithms.tsv",
-             header = T, sep = "\t", quote = "", stringsAsFactors = F)
+effect_prediction_algos <- as.data.frame(
+  readr::read_tsv(file = "data-raw/effect_prediction_algorithms.tsv",
+             show_col_types = F))
 usethis::use_data(effect_prediction_algos, overwrite = T)
 
 #---- cancer_phenotypes_regex ----#
@@ -1149,3 +1169,9 @@ rm(cancer_phenotypes_regex,
    dt_display,
    tsv_cols,
    c)
+
+oncogenicity_criteria <- readr::read_tsv(
+  "data-raw/oncogenicity.tsv", show_col_types = F
+)
+usethis::use_data(oncogenicity_criteria, overwrite = T)
+

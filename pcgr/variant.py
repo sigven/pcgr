@@ -12,6 +12,39 @@ warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 
 def append_annotations(vcf2tsv_gz_fname: str, refdata_assembly_dir: str, logger):
     
+    """
+    Function that appends various variant annotations to a vcf2tsv file
+    It assumes that the VCF2TSV file has the following columns:
+    CHROM, POS, REF, ALT, CLINVAR_MSID, PFAM_DOMAIN, ENTREZGENE, EFFECT_PREDICTIONS
+    
+    The function appends the following columns to the input VCF2TSV file:
+    CLINVAR_TRAITS_ALL, PFAM_DOMAIN_NAME, GENENAME
+    
+    CLINVAR_TRAITS_ALL is a column that concatenates the ClinVar trait names
+    associated with a given variant. PFAM_DOMAIN_NAME is a column that
+    concatenates the PFAM domain names associated with a given variant.
+    GENENAME is a column that provides the gene name associated with the
+    ENTREZGENE ID associated with a given variant.
+    
+    The function requires the following files from the reference data directory:
+    (1) variant/clinvar/clinvar.tsv.gz
+    (2) misc/protein_domain/protein_domain.tsv.gz
+    (3) gene/transcript_xref/gene_transcript_xref.tsv.gz
+    
+    Parameters
+    ----------
+    vcf2tsv_gz_fname : str
+        Name of input VCF2TSV file
+    refdata_assembly_dir : str
+        Name of reference data directory
+    logger : logging.Logger
+        Logger object for logging messages
+    
+    Returns
+    -------
+    pd.DataFrame
+        Input VCF2TSV DataFrame with appended annotations
+    """
     clinvar_tsv_fname = os.path.join(refdata_assembly_dir, 'variant','tsv','clinvar', 'clinvar.tsv.gz')
     protein_domain_tsv_fname = os.path.join(refdata_assembly_dir, 'misc','tsv','protein_domain', 'protein_domain.tsv.gz') 
     gene_xref_tsv_fname = os.path.join(refdata_assembly_dir, 'gene','tsv','gene_transcript_xref', 'gene_transcript_xref.tsv.gz')
@@ -30,14 +63,14 @@ def append_annotations(vcf2tsv_gz_fname: str, refdata_assembly_dir: str, logger)
                 vcf2tsv_df = vcf2tsv_df.astype({elem:'string'})            
             vcf2tsv_df['CLINVAR_MSID'] = vcf2tsv_df['CLINVAR_MSID'].str.replace("\\.[0-9]{1,}$", "", regex = True)
             vcf2tsv_df['PFAM_DOMAIN'] = vcf2tsv_df['PFAM_DOMAIN'].str.replace("\\.[0-9]{1,}$", "", regex = True)
-            vcf2tsv_df['EFFECT_PREDICTIONS'] = vcf2tsv_df['EFFECT_PREDICTIONS'].str.replace("\\.&|\\.$", "NA&", regex = True)
-            vcf2tsv_df['EFFECT_PREDICTIONS'] = vcf2tsv_df['EFFECT_PREDICTIONS'].str.replace("&$", "", regex = True)
-            vcf2tsv_df['EFFECT_PREDICTIONS'] = vcf2tsv_df['EFFECT_PREDICTIONS'].str.replace("&", ", ", regex = True)
+            vcf2tsv_df['EFFECT_PREDICTIONS'] = \
+                vcf2tsv_df['EFFECT_PREDICTIONS'].str.replace(
+                    "\\.&|\\.$", "NA&", regex = True).str.replace(
+                        "&$", "", regex = True).str.replace("&", ", ", regex = True)
             vcf2tsv_df["VAR_ID"] = vcf2tsv_df["CHROM"].str.cat(
                 vcf2tsv_df["POS"], sep = "_").str.cat(
                     vcf2tsv_df["REF"], sep = "_").str.cat(
                         vcf2tsv_df["ALT"], sep = "_")
-
            
             ## check number of variants with ClinVar ID's
             num_recs_with_clinvar_hits = vcf2tsv_df["CLINVAR_MSID"].notna().sum()
@@ -46,7 +79,6 @@ def append_annotations(vcf2tsv_gz_fname: str, refdata_assembly_dir: str, logger)
             ## check number of variants with Ensembl gene ID's
             num_recs_with_entrez_hits = vcf2tsv_df["ENTREZGENE"].notna().sum()
     
-            #print(str(num_recs_with_entrez_hits))
             ## merge variant set with ClinVar trait and variant origin annotations
             if num_recs_with_clinvar_hits > 0:
                 
@@ -68,7 +100,6 @@ def append_annotations(vcf2tsv_gz_fname: str, refdata_assembly_dir: str, logger)
                     clinvar_data_df = clinvar_data_df.astype({'CLINVAR_MSID':'string'})
                     clinvar_data_df['CLINVAR_MSID'] = clinvar_data_df['CLINVAR_MSID'].str.replace("\\.[0-9]{1,}$", "", regex = True)
                     clinvar_data_df = clinvar_data_df[['VAR_ID','CLINVAR_MSID','CLINVAR_TRAITS_ALL']]
-                    
                     vcf2tsv_df = vcf2tsv_df.merge(
                         clinvar_data_df, left_on=["VAR_ID", "CLINVAR_MSID"], right_on=["VAR_ID", "CLINVAR_MSID"], how="left")
                 else:
@@ -101,7 +132,7 @@ def append_annotations(vcf2tsv_gz_fname: str, refdata_assembly_dir: str, logger)
                 if os.path.exists(gene_xref_tsv_fname):
                     gene_xref_df = pd.read_csv(
                         gene_xref_tsv_fname, sep="\t", na_values=".", 
-                        usecols=["entrezgene","name"])
+                        low_memory=False, usecols=["entrezgene","name"])
                     gene_xref_df = gene_xref_df[gene_xref_df['entrezgene'].notnull()].drop_duplicates()
                     gene_xref_df.rename(columns = {'entrezgene':'ENTREZGENE', 'name':'GENENAME'}, inplace = True)                
                     vcf2tsv_df = vcf2tsv_df.merge(gene_xref_df, left_on=["ENTREZGENE"], right_on=["ENTREZGENE"], how="left")
@@ -112,29 +143,29 @@ def append_annotations(vcf2tsv_gz_fname: str, refdata_assembly_dir: str, logger)
                 
     return(vcf2tsv_df)
 
-def set_allelic_support(variant_set: pd.DataFrame, allelic_support_tags: dict) -> pd.DataFrame:
+def set_allelic_support(variant_set: pd.DataFrame, allelic_support_tags: dict, logger: None) -> pd.DataFrame:
     """
     Set allelic support for variants
     """
-    for e in ['DP_CONTROL','DP_TUMOR','VAF_CONTROL','VAF_TUMOR']:
-        if e in variant_set.columns:
-            variant_set[e] = np.nan        
-
-    if allelic_support_tags['control_dp_tag'] != "_NA_":
-        if {allelic_support_tags['control_dp_tag'],'DP_CONTROL'}.issubset(variant_set.columns):
-            variant_set['DP_CONTROL'] = variant_set[allelic_support_tags['control_dp_tag']].astype(int)
+    tag_to_info_val = {'control_dp_tag': 'DP_CONTROL', 'control_af_tag': 'VAF_CONTROL', 'tumor_dp_tag': 'DP_TUMOR', 'tumor_af_tag': 'VAF_TUMOR'}
     
-    if allelic_support_tags['tumor_dp_tag'] != "_NA_":
-        if {allelic_support_tags['tumor_dp_tag'],'DP_TUMOR'}.issubset(variant_set.columns):
-            variant_set['DP_TUMOR'] = variant_set[allelic_support_tags['tumor_dp_tag']].astype(int)
+    for t in tag_to_info_val.keys():
+        if tag_to_info_val[t] in variant_set.columns:
+            variant_set[tag_to_info_val[t]] = np.nan
     
-    if allelic_support_tags['control_af_tag'] != "_NA_":
-        if {allelic_support_tags['control_af_tag'],'VAF_CONTROL'}.issubset(variant_set.columns):
-            variant_set['VAF_CONTROL'] = variant_set[allelic_support_tags['control_af_tag']].astype(float).round(4)
-    
-    if allelic_support_tags['tumor_af_tag'] != "_NA_":
-        if {allelic_support_tags['tumor_af_tag'],'VAF_TUMOR'}.issubset(variant_set.columns):
-            variant_set['VAF_TUMOR'] = variant_set[allelic_support_tags['tumor_af_tag']].astype(float).round(4)
+    for t in tag_to_info_val.keys():
+        if allelic_support_tags[t] != "_NA_":
+            if {allelic_support_tags[t], tag_to_info_val[t]}.issubset(variant_set.columns):
+                if '_af_' in t:
+                    if variant_set[variant_set[allelic_support_tags[t]].isna() == True].empty is True:
+                        variant_set[tag_to_info_val[t]] = variant_set[allelic_support_tags[t]].astype(float).round(4)
+                    else:
+                        logger.warning(f"Unable to set allelic support for '{t}' - missing values deteted")
+                else:
+                    if variant_set[variant_set[allelic_support_tags[t]].isna() == True].empty is True:
+                        variant_set[tag_to_info_val[t]] = variant_set[allelic_support_tags[t]].astype(int)
+                    else:
+                        logger.warning(f"Unable to set read depth support for '{t}' - missing values deteted")
     
     return variant_set
 
@@ -145,10 +176,6 @@ def calculate_tmb(variant_set: pd.DataFrame, tumor_dp_min: int, tumor_af_min: fl
     """
     logger.info(f"Calculating tumor mutational load/TMB from somatic call set - effective coding target size (Mb): {target_size_mb}")
     
-    counts_missense_only = 0
-    counts_coding_and_silent = 0
-    counts_coding_non_silent = 0
-    
     if {'CONSEQUENCE','VAF_TUMOR','DP_TUMOR','VARIANT_CLASS'}.issubset(variant_set.columns):
         tmb_data_set = \
             variant_set[['CONSEQUENCE','DP_TUMOR','VAF_TUMOR','VARIANT_CLASS']]
@@ -158,18 +185,20 @@ def calculate_tmb(variant_set: pd.DataFrame, tumor_dp_min: int, tumor_af_min: fl
             ## filter variant set to those with VAF_TUMOR > tumor_af_min
             if variant_set[variant_set['VAF_TUMOR'].isna() == True].empty is True:
                 tmb_data_set = tmb_data_set.loc[tmb_data_set['VAF_TUMOR'].astype(float) >= float(tumor_af_min),:]
-                n_removed_af = n_rows_raw - len(tmb_data_set)
-                logger.info(f'Removing n = {n_removed_af} variants with allelic fraction (tumor sample) < {tumor_af_min}')
+                #n_removed_af = n_rows_raw - len(tmb_data_set)
+                logger.info(f'Removing n = {n_rows_raw - len(tmb_data_set)} variants with allelic fraction (tumor sample) < {tumor_af_min}')
             else:
-                logger.info(f"Cannot filter on sequencing depth - 'VAF_TUMOR' contains missing values")
+                logger.warning(f"Cannot filter on sequencing depth - 'VAF_TUMOR' contains missing values")
         if int(tumor_dp_min) > 0:
             ## filter variant set to those with DP_TUMOR > tumor_dp_min
             if variant_set[variant_set['DP_TUMOR'].isna() == True].empty is True:
                 tmb_data_set = tmb_data_set.loc[tmb_data_set['DP_TUMOR'].astype(int) >= int(tumor_dp_min),:]
-                n_removed_dp = n_rows_raw - len(tmb_data_set)
-                logger.info(f"Removing n = {n_removed_dp} variants with sequencing depth (tumor sample) < {tumor_dp_min}")
+                #n_removed_dp = n_rows_raw - len(tmb_data_set)
+                logger.info(f"Removing n = {n_rows_raw - len(tmb_data_set)} variants with sequencing depth (tumor sample) < {tumor_dp_min}")
             else:
-                logger.info(f"Cannot filter on sequencing depth - 'DP_TUMOR' contains missing values")
+                logger.warning(f"Cannot filter on sequencing depth - 'DP_TUMOR' contains missing values")
+        
+        tmb_categories = ['missense_only','coding_and_silent','coding_non_silent']
         
         regex_data = {}
         regex_data['missense_only'] = pcgr_vars.CSQ_MISSENSE_PATTERN
@@ -177,51 +206,39 @@ def calculate_tmb(variant_set: pd.DataFrame, tumor_dp_min: int, tumor_af_min: fl
         regex_data['coding_non_silent'] = pcgr_vars.CSQ_CODING_PATTERN
         
         tmb_count_data = {}
-        tmb_count_data['missense_only'] = 0
-        tmb_count_data['coding_and_silent'] = 0
-        tmb_count_data['coding_non_silent'] = 0
-        
         tmb_estimates = {}
-        tmb_estimates['missense_only'] = 0
-        tmb_estimates['coding_and_silent'] = 0
-        tmb_estimates['coding_non_silent'] = 0
+        
+        for cat in tmb_categories:
+            tmb_count_data[cat] = 0
+            tmb_estimates[cat] = 0
         
         if tmb_data_set.empty is False:
-            counts_missense_only = len(tmb_data_set.loc[tmb_data_set['CONSEQUENCE'].str.match(pcgr_vars.CSQ_MISSENSE_PATTERN),:])
-            counts_coding_and_silent = len(tmb_data_set.loc[tmb_data_set['CONSEQUENCE'].str.match(pcgr_vars.CSQ_CODING_SILENT_PATTERN),:])
-            counts_coding_non_silent = len(tmb_data_set.loc[tmb_data_set['CONSEQUENCE'].str.match(pcgr_vars.CSQ_CODING_PATTERN),:])
+            for cat in tmb_categories:
+                tmb_count_data[cat] = len(tmb_data_set.loc[tmb_data_set['CONSEQUENCE'].str.match(regex_data[cat]),:])
+                tmb_estimates[cat] = round(float(tmb_count_data[cat] / target_size_mb), 4)
             
-            tmb_count_data = {}
-            tmb_count_data['missense_only'] = counts_missense_only
-            tmb_count_data['coding_and_silent'] = counts_coding_and_silent
-            tmb_count_data['coding_non_silent'] = counts_coding_non_silent
-            
-            tmb_estimates = {}
-            tmb_estimates['missense_only'] = round(float(counts_missense_only / target_size_mb), 4)
-            tmb_estimates['coding_and_silent'] = round(float(counts_coding_and_silent / target_size_mb), 4)
-            tmb_estimates['coding_non_silent'] = round(float(counts_coding_non_silent / target_size_mb), 4)
-        
-            
-        tmb_recs = [[sample_id, n_rows_raw, 'TMB_missense_only', regex_data['missense_only'], target_size_mb, 
-                    tumor_dp_min, tumor_af_min, tmb_count_data['missense_only'], tmb_estimates['missense_only'], 'mutations/Mb'],
-                    [sample_id, n_rows_raw, 'TMB_coding_and_silent', regex_data['coding_and_silent'], target_size_mb, 
-                    tumor_dp_min, tumor_af_min, tmb_count_data['coding_and_silent'], tmb_estimates['coding_and_silent'], 'mutations/Mb'],
-                    [sample_id, n_rows_raw, 'TMB_coding_non_silent', regex_data['coding_non_silent'], target_size_mb, 
-                    tumor_dp_min, tumor_af_min, tmb_count_data['coding_non_silent'], tmb_estimates['coding_non_silent'], 'mutations/Mb']]
-            
-        df = pd.DataFrame(
-            tmb_recs, 
-            columns=['sample_id', 
-                    'n_somatic_variants', 
-                    'tmb_measure', 
-                    'tmb_csq_regex',
-                    'tmb_target_size_mb', 
-                    'tmb_dp_min', 
-                    'tmb_af_min',
-                    'tmb_n_variants', 
-                    'tmb_estimate',
-                    'tmb_unit'])
-        df.to_csv(tmb_fname, sep="\t", header=True, index=False)
+            tmb_recs = [[sample_id, n_rows_raw, 'TMB_missense_only', regex_data['missense_only'], target_size_mb, 
+                        tumor_dp_min, tumor_af_min, tmb_count_data['missense_only'], tmb_estimates['missense_only'], 'mutations/Mb'],
+                        [sample_id, n_rows_raw, 'TMB_coding_and_silent', regex_data['coding_and_silent'], target_size_mb, 
+                        tumor_dp_min, tumor_af_min, tmb_count_data['coding_and_silent'], tmb_estimates['coding_and_silent'], 'mutations/Mb'],
+                        [sample_id, n_rows_raw, 'TMB_coding_non_silent', regex_data['coding_non_silent'], target_size_mb, 
+                        tumor_dp_min, tumor_af_min, tmb_count_data['coding_non_silent'], tmb_estimates['coding_non_silent'], 'mutations/Mb']]
+                
+            df = pd.DataFrame(
+                tmb_recs, 
+                columns=['sample_id', 
+                        'n_somatic_variants', 
+                        'tmb_measure', 
+                        'tmb_csq_regex',
+                        'tmb_target_size_mb', 
+                        'tmb_dp_min', 
+                        'tmb_af_min',
+                        'tmb_n_variants', 
+                        'tmb_estimate',
+                        'tmb_unit'])
+            df.to_csv(tmb_fname, sep="\t", header=True, index=False)
+        else:
+            logger.warning(f"No somatic variants left after depth/VAF filtering - TMB calculation not possible")
 
 def clean_annotations(variant_set: pd.DataFrame, yaml_data: dict, logger) -> pd.DataFrame:
     

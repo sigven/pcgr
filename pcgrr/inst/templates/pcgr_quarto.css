@@ -37,6 +37,17 @@
     /*zoom: 1*/
 }
 
+h2.title{
+  color: black;
+}
+
+h2 {
+  color: black;
+}
+
+h2, #TOC>ul>li {
+  color: black;
+}
 
 #container {
     /*border: 2px dashed #444;*/
@@ -149,3 +160,4 @@
 .bslib-value-box .value-box-value {
     font-size: clamp(.1em, 8cqw, 4em) !important;
 }
+

@@ -4,29 +4,29 @@ output: rmarkdown::html_document
 ---
 
 ### Basic variant consequence annotation
-  * [VEP](http://www.ensembl.org/info/docs/tools/vep/index.html) - Variant Effect Predictor release 112 ([GENCODE v46](https://www.gencodegenes.org/human/) as gene reference database (v19 for grch37))
+  * [VEP](http://www.ensembl.org/info/docs/tools/vep/index.html) - Variant Effect Predictor release 113 ([GENCODE v47](https://www.gencodegenes.org/human/) as gene reference database (v19 for grch37))
 
 ###  *Insilico* predictions of effect of coding variants
-  * [dBNSFP](https://sites.google.com/site/jpopgen/dbNSFP) - database of non-synonymous functional predictions (v4.8, June 2024)
+  * [dBNSFP](https://sites.google.com/site/jpopgen/dbNSFP) - database of non-synonymous functional predictions (v5.0, January 2025)
 
 ###  Variant frequency databases
-  * [gnomAD](http://exac.broadinstitute.org/) - germline variant frequencies exome-wide (r2.1, October 2018)
-  * [dbSNP](http://www.ncbi.nlm.nih.gov/SNP/) - database of short genetic variants (build 154)
+  * [gnomAD](http://exac.broadinstitute.org/) - germline variant frequencies exome-wide (r4.1, April 2024)
+  * [dbSNP](http://www.ncbi.nlm.nih.gov/SNP/) - database of short genetic variants (build 156)
   * [Cancer Hotspots](http://cancerhotspots.org) - a resource for statistically significant mutations in cancer (v2, 2017)
   * [TCGA](https://portal.gdc.cancer.gov/) - somatic mutations discovered across 33 tumor type cohorts (release 41.0, August 2024)
  
 ### Variant databases of clinical utility
-  * [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - database of clinically related variants (September 2024)
-  * [CIViC](https://civicdb.org) - clinical interpretations of variants in cancer (September 18th 2024)
+  * [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - database of clinically related variants (March 2025)
+  * [CIViC](https://civicdb.org) - clinical interpretations of variants in cancer (March 13th 2025)
   * [CGI](http://www.cancergenomeinterpreter.org/biomarkers) - Cancer Genome Interpreter Cancer Biomarkers Database (CGI) (October 18th 2022)
 
 ### Protein domains/functional features
-  * [UniProt/SwissProt KnowledgeBase](http://www.uniprot.org) - resource on protein sequence and functional information (2024_04)
+  * [UniProt/SwissProt KnowledgeBase](http://www.uniprot.org) - resource on protein sequence and functional information (2025_01)
   * [Pfam](https://www.ebi.ac.uk/interpro/entry/pfam/#table) - database of protein families and domains (v37.0)
 
 ### Knowledge resources on gene and protein targets
   * [CancerMine](https://zenodo.org/records/7689627) - Literature-mined database of tumor suppressor genes/proto-oncogenes (v50, March 2023)
-  * [Open Targets Platform](https://www.targetvalidation.org/) - Database on disease-target associations, molecularly targeted drugs and tractability aggregated from multiple sources (literature, pathways, mutations) (2024.06)
+  * [Open Targets Platform](https://www.targetvalidation.org/) - Database on disease-target associations, molecularly targeted drugs and tractability aggregated from multiple sources (literature, pathways, mutations) (2024.09)
 
 ### Notes on variant annotation datasets
 

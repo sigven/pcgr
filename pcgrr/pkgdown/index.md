@@ -7,7 +7,7 @@ editor_options:
 # Personal Cancer Genome Reporter (PCGR) <a href="https://sigven.github.io/pcgr/"><img src="man/figures/logo.png" align="right" height="90" width="76"/></a>
 
 
-The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for functional annotation and translation of individual tumor genomes for precision cancer medicine. It interprets primarily somatic SNVs/InDels and copy number aberrations, and has additional support for interpretation of bulk RNA-seq expression data. The software classifies variants both with respect to _oncogenicity_, and _actionability_. Interactive HTML output reports allow the user to interrogate the clinical impact of the molecular findings in an individual tumor.
+The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for functional annotation and translation of individual tumor genomes for precision cancer medicine. It interprets primarily somatic SNVs/InDels and copy number aberrations, and has additional support for interpretation of bulk RNA-seq expression data. The software classifies variants with respect to predicted _oncogenicity_, and clinical _actionability_. Interactive HTML output reports allow the user to interrogate the clinical impact of the molecular findings in an individual tumor.
 
 - Variant classification
   - according to *oncogenicity*: evaluating the oncogenic potential of somatic DNA aberrations ([ClinGen/CGC/VICC guidelines](https://pubmed.ncbi.nlm.nih.gov/35101336/))
@@ -29,6 +29,14 @@ PCGR originates from the [Norwegian Cancer Genomics Consortium (NCGC)](https://c
 
 ### Top News
 
+- *March 22nd 2025:* **2.2.0 release**
+  - Data/software updates:
+    - Ensembl VEP `v113` / GENCODE v47
+    - ClinVar (2025-03)
+    - CIViC (2025-03-13)
+    - and more
+  - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
+  
 - *October 21st 2024:* **2.1.2 release**
   - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
 
@@ -67,7 +75,7 @@ PCGR originates from the [Norwegian Cancer Genomics Consortium (NCGC)](https://c
 
 ## Example reports
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13855988.svg)](https://doi.org/10.5281/zenodo.13855988)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15068347.svg)](https://doi.org/10.5281/zenodo.15068347)
 
 ## Why use PCGR?
 

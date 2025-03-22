@@ -360,6 +360,8 @@ load_somatic_snv_indel <- function(
     callset[['variant_display']] <- callset[['variant']] |>
       pcgrr::append_cancer_gene_evidence(
         ref_data = ref_data) |>
+      pcgrr::append_oncogenicity_docs(
+        ref_data = ref_data) |>
       pcgrr::append_dbmts_var_link() |>
       pcgrr::append_tcga_var_link() |>
       pcgrr::append_annotation_links() |>
@@ -368,6 +370,7 @@ load_somatic_snv_indel <- function(
       dplyr::select(
         -dplyr::contains("_RAW")
       ) |>
+
       dplyr::rename(
         TARGETED_INHIBITORS = "TARGETED_INHIBITORS2",
         TARGETED_INHIBITORS_ALL = "TARGETED_INHIBITORS_ALL2"
@@ -486,10 +489,11 @@ load_cpsr_classified_variants <- function(
         c("SYMBOL","ALTERATION","GENOTYPE","CONSEQUENCE",
         "CLINICAL_SIGNIFICANCE","SOURCE","PROTEIN_DOMAIN",
         "HGVSc", "HGVSc_RefSeq", "HGVSp", "CDS_CHANGE",
+        "EFFECT_PREDICTIONS","SPLICE_EFFECT",
         "CODING_STATUS",
         "LOSS_OF_FUNCTION", "DP_CONTROL",
         "VARIANT_CLASS","GENENAME",
-        "ONCOGENE","TUMOR_SUPPRESSOR","ENSEMBL_GENE_ID",
+        "ENSEMBL_GENE_ID",
         "ENSEMBL_TRANSCRIPT_ID","REFSEQ_TRANSCRIPT_ID",
         "DBSNP_RSID",
         "CLINVAR","CLINVAR_CLASSIFICATION","CLINVAR_CONFLICTED",
@@ -629,6 +633,29 @@ load_dna_variants <- function(
       )
   }
 
+  if ("SPLICE_EFFECT_MUTSPLICEDB" %in% colnames(results[['variant']])) {
+    results[['variant']] <-
+      results[['variant']] |>
+      dplyr::rename(
+        SPLICE_EFFECT = "SPLICE_EFFECT_MUTSPLICEDB"
+      )
+  }
+
+  if ("MAXENTSCAN" %in% colnames(results[['variant']]) &
+      "SPLICE_EFFECT" %in% colnames(results[['variant']])) {
+    results[['variant']] <-
+      results[['variant']] |>
+      dplyr::mutate(
+        SPLICE_EFFECT = paste(
+          SPLICE_EFFECT, MAXENTSCAN, sep = ", "
+      )) |>
+      dplyr::mutate(
+        SPLICE_EFFECT = stringr::str_replace_all(
+          .data$SPLICE_EFFECT, "^(NA, )|^(NA, NA)$", ""
+        )
+      )
+  }
+
   ## Rename annotations for more clarity
   if ("TSG_SUPPORT" %in% colnames(results[['variant']])) {
     results[['variant']] <-
@@ -646,6 +673,15 @@ load_dna_variants <- function(
           .data$VEP_ALL_CSQ, ",",", "
         )
       )
+  }
+
+  if ("GERP_SCORE" %in% colnames(results[['variant']])) {
+    results[['variant']] <-
+      results[['variant']] |>
+      dplyr::mutate(
+        GERP_SCORE = round(
+          as.numeric(.data$GERP_SCORE), digits = 3)
+        )
   }
 
   if ("HGVSp_short" %in% colnames(results[['variant']])) {
@@ -833,7 +869,7 @@ load_dna_variants <- function(
                 c("VARIANT_ID", "ENTREZGENE","BIOMARKER_SOURCE")),
               by = c("VARIANT_ID","BIOMARKER_SOURCE"),
               relationship = "many-to-many") |>
-            dplyr::rename(BIOMARKER_MATCH = .data$BIOMARKER_MATCHTYPE) |>
+            dplyr::rename("BIOMARKER_MATCH" = "BIOMARKER_MATCHTYPE") |>
             dplyr::mutate(BIOMARKER_RESOLUTION = dplyr::case_when(
               stringr::str_detect(.data$BIOMARKER_MATCH,"by_cna_segment") ~ "gene",
               stringr::str_detect(.data$BIOMARKER_MATCH,"by_genomic_coord") ~ "genomic",
@@ -918,26 +954,26 @@ load_dna_variants <- function(
               relationship = "many-to-many"
             ) |>
             dplyr::rename(
-              BM_VARIANT_ID = .data$VARIANT_ID,
-              BM_EVIDENCE_ID = .data$EVIDENCE_ID,
-              BM_SOURCE_DB = .data$BIOMARKER_SOURCE,
-              BM_RESOLUTION = .data$BIOMARKER_RESOLUTION,
-              BM_MATCH = .data$BIOMARKER_MATCH,
-              BM_PRIMARY_SITE = .data$PRIMARY_SITE,
-              BM_EVIDENCE_TYPE = .data$EVIDENCE_TYPE,
-              BM_CANCER_TYPE = .data$CANCER_TYPE,
-              BM_DISEASE_ONTOLOGY_ID = .data$DISEASE_ONTOLOGY_ID,
-              BM_VARIANT_ORIGIN = .data$VARIANT_ORIGIN,
-              BM_EVIDENCE_LEVEL = .data$EVIDENCE_LEVEL,
-              BM_EVIDENCE_DESCRIPTION = .data$EVIDENCE_DESCRIPTION,
-              BM_THERAPEUTIC_CONTEXT = .data$THERAPEUTIC_CONTEXT,
-              BM_CLINICAL_SIGNIFICANCE = .data$CLINICAL_SIGNIFICANCE,
-              BM_CITATION = .data$CITATION,
-              BM_REFERENCE = .data$CITATION_HTML,
-              BM_RATING = .data$RATING,
-              BM_EVIDENCE_DIRECTION = .data$EVIDENCE_DIRECTION,
-              BM_MOLECULAR_PROFILE = .data$MOLECULAR_PROFILE_NAME,
-              BM_MOLECULAR_PROFILE_TYPE = .data$MOLECULAR_PROFILE_TYPE
+              "BM_VARIANT_ID" = "VARIANT_ID",
+              "BM_EVIDENCE_ID" = "EVIDENCE_ID",
+              "BM_SOURCE_DB" = "BIOMARKER_SOURCE",
+              "BM_RESOLUTION" = "BIOMARKER_RESOLUTION",
+              "BM_MATCH" = "BIOMARKER_MATCH",
+              "BM_PRIMARY_SITE" = "PRIMARY_SITE",
+              "BM_EVIDENCE_TYPE" = "EVIDENCE_TYPE",
+              "BM_CANCER_TYPE" = "CANCER_TYPE",
+              "BM_DISEASE_ONTOLOGY_ID" = "DISEASE_ONTOLOGY_ID",
+              "BM_VARIANT_ORIGIN" = "VARIANT_ORIGIN",
+              "BM_EVIDENCE_LEVEL" = "EVIDENCE_LEVEL",
+              "BM_EVIDENCE_DESCRIPTION" = "EVIDENCE_DESCRIPTION",
+              "BM_THERAPEUTIC_CONTEXT" = "THERAPEUTIC_CONTEXT",
+              "BM_CLINICAL_SIGNIFICANCE" = "CLINICAL_SIGNIFICANCE",
+              "BM_CITATION" = "CITATION",
+              "BM_REFERENCE" = "CITATION_HTML",
+              "BM_RATING" = "RATING",
+              "BM_EVIDENCE_DIRECTION" = "EVIDENCE_DIRECTION",
+              "BM_MOLECULAR_PROFILE" = "MOLECULAR_PROFILE_NAME",
+              "BM_MOLECULAR_PROFILE_TYPE" = "MOLECULAR_PROFILE_TYPE"
             ) |>
             dplyr::mutate(
               BM_RATING = dplyr::if_else(
@@ -973,7 +1009,7 @@ load_dna_variants <- function(
             ## - Do not consider complex molecular profile types
             dplyr::filter(
                 .data$BM_VARIANT_ORIGIN == variant_origin &
-                  .data$BM_MOLECULAR_PROFILE_TYPE == "Any") |>
+                  .data$BM_MOLECULAR_PROFILE_TYPE == "Single") |>
             dplyr::distinct() |>
             dplyr::mutate(
               BM_MOLECULAR_PROFILE = dplyr::if_else(

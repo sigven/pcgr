@@ -57,6 +57,13 @@ if (as.logical(pcg_report[["settings"]][["conf"]][["vep"]][["vep_gencode_basic"]
 }
 ```
 
+<br>
+
+::: {.callout-note collapse="true"}
+
+
+## Run configuration and report settings
+
 The report is generated with _[pcgr](https://github.com/sigven/pcgr)_ version `r pcg_report[['settings']][['software']][['pcgr_version']]`, using the following key settings:
 
 :::: {.columns}
@@ -97,6 +104,8 @@ The report is generated with _[pcgr](https://github.com/sigven/pcgr)_ version `r
 :::
 
 ::::
+
+:::
 
 <br>
 

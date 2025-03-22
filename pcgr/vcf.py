@@ -5,9 +5,7 @@ import logging
 from pcgr.utils import error_message, warn_message, check_subprocess
 from cyvcf2 import VCF
 from typing import Union
-
-
-
+from copy import copy
 
 def get_vcf_info_tags(vcf_fname):
     vcf = VCF(vcf_fname)
@@ -52,7 +50,6 @@ def check_retained_vcf_info_tags(vcf: VCF, retained_info_tags: str, logger: logg
     tags = str(retained_info_tags).split(',')
     info_elements_query_vcf = []
 
-    #vcf = VCF(input_vcf)
     logger.info('Checking if existing INFO tags of input VCF file matches retained INFO tags set by the user')
     ret = 1
     for e in vcf.header_iter():
@@ -95,7 +92,7 @@ def check_existing_vcf_info_tags(vcf: VCF, populated_infotags: dict, logger) -> 
 
 
 
-def check_format_ad_dp_tags(vcf: VCF,
+def check_format_ad_dp_tags(vcf_fname: str,
                            tumor_dp_tag: str,
                            tumor_af_tag: str,
                            control_dp_tag: str,
@@ -115,6 +112,8 @@ def check_format_ad_dp_tags(vcf: VCF,
     found_naf_tag = 0
     found_ndp_tag = 0
     found_call_conf_tag = 0
+    
+    vcf = VCF(vcf_fname, gts012=True)
 
     detect_reserved_info_tag(tumor_dp_tag,'tumor_dp_tag', logger)
     detect_reserved_info_tag(control_dp_tag,'control_dp_tag', logger)
@@ -188,38 +187,37 @@ def check_format_ad_dp_tags(vcf: VCF,
         logger.warning('BOTH \'control_dp_tag\' AND \'control_af_tag\' need to be specified for use in tumor report (\'control_af_tag\' or \'control_dp_tag\' is missing)')
 
     if found_taf_tag == 1 and found_tdp_tag == 1:
-        for rec in vcf:
-            tvaf_value = rec.INFO.get(tumor_af_tag)
-            var_id = f'{rec.CHROM}_{rec.POS}_{rec.REF}_{rec.ALT[0]}' if len(rec.ALT) == 1 else f'{rec.CHROM}_{rec.POS}_{rec.REF}_{rec.ALT[0]},{rec.ALT[1]}'
-            if tvaf_value is None or not isinstance(tvaf_value, float):
-                logger.error((
-                    f"Found at least one record ({var_id}) with the specified INFO control_af_tag ({tumor_af_tag}) "
-                    f"in INFO column erroneously formatted (non-numeric float) - remove/fix and re-run if you wish to proceed")
-                )
-                return(-1)
-            tdp_value = rec.INFO.get(tumor_dp_tag)
-            if tdp_value is None or not isinstance(tdp_value, int):
-                logger.error((
-                    f"Found at least one record ({var_id}) with the specified INFO control_dp_tag ({tumor_dp_tag}) "
-                    f"in INFO column erroneously formatted (non-integer) - remove/fix and re-run if you wish to proceed")
-                )
-                return(-1)
+        verify_ad_dp_values(vcf_fname, tumor_af_tag, tumor_dp_tag, logger)
     if found_naf_tag == 1 and found_ndp_tag == 1:
-        for rec in vcf:
-            nvaf_value = rec.INFO.get(control_af_tag)
-            var_id = f'{rec.CHROM}_{rec.POS}_{rec.REF}_{rec.ALT[0]}' if len(rec.ALT) == 1 else f'{rec.CHROM}_{rec.POS}_{rec.REF}_{rec.ALT[0]},{rec.ALT[1]}'
-            if nvaf_value is None:
-                logger.error((
-                    f"Found at least one record ({var_id}) with the specified INFO control_af_tag ({control_af_tag})"
-                    f" in INFO column erroneously formatted (non-numeric float) - remove/fix and re-run if you wish to proceed")
-                )
-                return(-1)
-            ndp_value = rec.INFO.get(control_dp_tag)
-            if ndp_value is None:
-                logger.error((
-                    f"Found at least one record ({var_id}) with the specified INFO control_dp_tag ({control_dp_tag}) "
-                    f"in INFO column erroneously formatted (non-integer) - remove/fix and re-run if you wish to proceed")
-                )
-                return(-1)
+        verify_ad_dp_values(vcf_fname, control_af_tag, control_dp_tag, logger)
             
     return 0
+
+def verify_ad_dp_values(vcf_fname: str, 
+                        af_tag: str,
+                        dp_tag: str,
+                        logger: logging.Logger) -> int:
+
+    vcf = VCF(vcf_fname, gts012=True)
+    for rec in vcf:
+        vaf_value = rec.INFO.get(af_tag)
+        var_id = f'{rec.CHROM}_{rec.POS}_{rec.REF}_{rec.ALT[0]}' if len(rec.ALT) == 1 else f'{rec.CHROM}_{rec.POS}_{rec.REF}_{rec.ALT[0]},{rec.ALT[1]}'
+        if vaf_value is None:
+            logger.warning((
+                f"Found at least one record ({var_id}) with an INFO tag ('{af_tag}') "
+                f"with missing value - filtering not possible")
+            )
+            vcf.close()
+            return 0
+        
+        dp_value = rec.INFO.get(dp_tag)
+        if dp_value is None:
+            logger.warning((
+                f"Found at least one record ({var_id}) with an INFO tag ('{dp_tag}') "
+                f"with missing value - filtering not possible")
+            )
+            vcf.close()
+            return 0
+    vcf.close()
+    return 0
+    

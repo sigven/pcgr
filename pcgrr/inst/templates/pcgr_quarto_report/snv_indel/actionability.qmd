@@ -5,10 +5,10 @@ _clinical actionability_ through an implementation of AMP/ASCO/CAP guidelines [@
 
 The tabset below indicates which variants have been classified into three distinct _tiers of clinical significance_ according to AMP/ASCO/CAP criteria.
 
-::: {.callout-note}
+::: {.callout-note collapse="true"}
 ## Note - biomarker matching
 
-The same somatic aberration may frequently match with multiple evidence items listed in biomarker databases, pending on e.g. the _disease/tumor context_, _therapeutic context_, _biomarker resolution_, or underlying _evidence source_ (i.e. publication). Duplicated entries in the table below may thus also occur, as the same type of evidence from different sources (publications) have not been merged.
+The same somatic aberration may frequently match with multiple evidence items listed in biomarker databases, pending on e.g. the _disease/tumor context_, _therapeutic context_, _biomarker resolution_, or underlying _evidence source_ (i.e. publication). Duplicated entries in the table below may thus also occur, as the same types of evidence from different sources (publications) have not been merged.
 :::
 
 ```{r}
@@ -16,7 +16,7 @@ The same somatic aberration may frequently match with multiple evidence items li
 #| output: asis
 #| include: !expr as.logical(pcg_report$content$snv_indel$vstats$n_actionable_tier1 != 0) == TRUE | as.logical(pcg_report$content$snv_indel$vstats$n_actionable_tier2 != 0) == TRUE | as.logical(pcg_report$content$snv_indel$vstats$n_actionable_tier3 != 0) == TRUE
 
-cat("\n::: {.callout-note}\n## Note - biomarker resolution\n\n Biomarkers registered in CIViC/CGI are provided at different _resolutions_ (i.e. filter <b>Biomarker resolution</b>). The accuracy of a match between a variant in the sample and a clinical evidence item (biomarker) will vary accordingly (highlighted by sample alterations with different color backgrounds):\n\n")
+cat("\n::: {.callout-note collapse='true'}\n## Note - biomarker resolution\n\n Biomarkers registered in CIViC/CGI are provided at different _resolutions_ (i.e. filter <b>Biomarker resolution</b>). The accuracy of a match between a variant in the sample and a clinical evidence item (biomarker) will vary accordingly (highlighted by sample alterations with different color backgrounds):\n\n")
 
 cat('<ul><li>Biomarker match at the <mark style="background-color:#2c313c; font-weight:bold; color:white">&nbsp; genomic position/amino acid/codon level &nbsp;</mark></li>')
 cat(paste0(
@@ -425,6 +425,21 @@ tier3_dt <- DT::datatable(
         c("#FF8790", "#FF8790","#000000")
       )
   )
+
+if(pcg_report$settings$conf$sample_properties$site == "Any"){
+  tier3_dt <- tier3_dt |>
+    DT::formatStyle(
+    "SYMBOL",
+    "GLOBAL_ASSOC_RANK", 
+    color = "white", 
+    backgroundColor = 
+      DT::styleInterval(
+        pcgrr::color_palette$cancer_assoc$breaks,
+        pcgrr::color_palette$cancer_assoc$values
+      )
+  )
+}
+
 
 # if(expression_present_snv == TRUE){
 #   tier3_dt <- tier3_dt |>

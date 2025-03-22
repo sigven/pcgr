@@ -135,7 +135,6 @@ load_reference_data <- function(
   pcgr_ref_data[["gene"]][["panel"]] <- data.frame()
   pcgr_ref_data[["gene"]][["cpg"]] <- data.frame()
   pcgr_ref_data[['gene']][['gene_xref']] <- data.frame()
-  #pcgr_ref_data[['gene']][['transcript_xref']] <- data.frame()
   pcgr_ref_data[['gene']][['otp_rank']] <- data.frame()
 
   cpg_tsv_fname <- file.path(
@@ -427,6 +426,7 @@ load_reference_data <- function(
   for(elem in c('tmb',
                 'mutational_signature',
                 'pathway',
+                'oncogenicity',
                 'hotspot',
                 'protein_domain')) {
 
@@ -434,6 +434,12 @@ load_reference_data <- function(
       pcgr_db_assembly_dir, "misc", "tsv", elem,
       paste0(elem,".tsv.gz")
     )
+    if(elem == "oncogenicity"){
+      fname_misc <- file.path(
+        pcgr_db_assembly_dir, "misc", "tsv", elem,
+        paste0(elem,".tsv")
+      )
+    }
     check_file_exists(fname_misc)
     pcgr_ref_data[['misc']][[elem]] <- as.data.frame(
       readr::read_tsv(
@@ -667,19 +673,19 @@ load_reference_data <- function(
     colnames(pcgr_ref_data[['biomarker']][[elem]]) <-
       toupper(colnames(pcgr_ref_data[['biomarker']][[elem]]))
 
-    if(elem == 'variant'){
-      pcgr_ref_data[['biomarker']][[elem]] <-
-        pcgr_ref_data[['biomarker']][[elem]] |>
-        dplyr::mutate(VARIANT_NAME_PRIMARY = stringr::str_replace(
-          .data$VARIANT_NAME_PRIMARY, " FUSION", " Fusion")
-        ) |>
-        dplyr::mutate(VARIANT_NAME_PRIMARY = dplyr::if_else(
-          .data$VARIANT_NAME_PRIMARY == "NA Fusion" &
-            !is.na(.data$GENE),
-          paste0(.data$GENE, " Fusion"),
-          as.character(.data$VARIANT_NAME_PRIMARY)
-        ))
-    }
+    # if(elem == 'variant'){
+    #   pcgr_ref_data[['biomarker']][[elem]] <-
+    #     pcgr_ref_data[['biomarker']][[elem]] |>
+    #     dplyr::mutate(VARIANT_NAME_PRIMARY = stringr::str_replace(
+    #       .data$VARIANT_NAME_PRIMARY, " FUSION", " Fusion")
+    #     ) |>
+    #     dplyr::mutate(VARIANT_NAME_PRIMARY = dplyr::if_else(
+    #       .data$VARIANT_NAME_PRIMARY == "NA Fusion" &
+    #         !is.na(.data$GENE),
+    #       paste0(.data$GENE, " Fusion"),
+    #       as.character(.data$VARIANT_NAME_PRIMARY)
+    #     ))
+    # }
 
   }
 
@@ -702,7 +708,7 @@ load_reference_data <- function(
           .data$source_abbreviation,
           paste0(
             "^(gepa|cpg_other|maxwell2016|acmg_sf|dbmts|",
-            "woods_dnarepair|gerp|tcga_pancan_2018|gwas_catalog)")) ~ "cpsr",
+            "woods_dnarepair|gerp|tcga_pancan_2018|gwas_catalog|cpic)")) ~ "cpsr",
         stringr::str_detect(
           .data$source_abbreviation,
           paste0("^(cytoband|mitelmandb|tcga|nci|intogen|depmap|treehouse",

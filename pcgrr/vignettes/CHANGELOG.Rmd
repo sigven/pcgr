@@ -46,6 +46,39 @@ sigven <- user("sigven")
 pdiakumis <- user("pdiakumis")
 ```
 
+
+## v2.2.0
+
+- Date: **2025-03-22**
+- Major data updates
+  - ClinVar (2025-03)
+  - dbNSFP (v5.0)
+  - CIViC (2025-03-13)
+  - GENCODE v47 (VEP v113)
+  - PanelApp (2025-02)
+  - UniProt KB (2025-01)
+  - Cancer Gene Census (v101)
+- Cleaned and improved oncogenicity classification of variants
+  - Added Grantham distance for amino acid alterations - taken into account
+  - only consider LP variant classification when oncogenicity score = 4 and if at least three 
+    oncogenic criteria matches _or_ `ONCG_OS1` is matching
+for oncogenicity classification
+- Multiple cosmetic changes to HTML report - e.g. collapsed call-outs
+- Added oncogenicity documentation in variant tables of HTML report (indicates which criteria that was matched for a given variant)
+- Removed `VEP_ALL_CSQ` from variant tables in HTML report to reduce file size - still available in TSV output
+- Added MutSpliceDB splice site effects (used e.g. for loss-of-function annotation)
+- Added MaxEntScan plugin in VEP for splice site disruption prediction (used e.g. for loss-of-function annotation)
+- Added more prediction algorithms from dbNSFP
+- Fixed bug that caused crash for missing values in DP/AF values of input VCF
+- Fixed erroneous re-formatting of MAF integer columns to floats
+- Fixed cases for which similar Entrez gene identifiers mapped to different gene names
+
+## v2.1.3
+
+- Date: **2024-02-XX**
+
+- Implemented Grantham distance for amino acid alterations
+
 ## v2.1.2
 
 - Date: **2024-10-21**

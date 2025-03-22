@@ -1,14 +1,11 @@
 algorithm	url	display_name
 primateai	https://github.com/Illumina/PrimateAI	PrimateAI
-metalr	https://www.ncbi.nlm.nih.gov/pubmed/2555246	Ensembl-LogisticRegression
-sift4g	https://sift.bii.a-star.edu.sg/sift4g/AboutSIFT4G.html	SIFT4G
+metalr	https://www.ncbi.nlm.nih.gov/pubmed/25552646	Ensembl-LogisticRegression
 metasvm	https://www.ncbi.nlm.nih.gov/pubmed/25552646	Ensembl-SVM
 deogen2	https://www.ncbi.nlm.nih.gov/pubmed/28498993	DEOGEN2
 mutationassessor	http://mutationassessor.org	MutationAssessor
 mutationtaster	http://www.mutationtaster.org	MutationTaster
-fathmm	http://fathmm.biocompute.org.uk	FATHMM
-fathmm_mkl_coding	http://fathmm.biocompute.org.uk/fathmmMKL.htm	FATHMM-mkl
-sift	http://provean.jcvi.org/index.php	SIFT
+sift	https://sift.bii.a-star.edu.sg/	SIFT
 lrt	http://www.genetics.wustl.edu/jflab/lrt_query.html	LRT
 provean	http://provean.jcvi.org/index.php	PROVEAN
 mutpred	http://mutpred.mutdb.org	MutPred
@@ -24,3 +21,9 @@ alphamissense	https://console.cloud.google.com/storage/browser/dm_alphamissense	
 mutformer	https://github.com/WGLab/mutformer	MutFormer
 phactboost	https://github.com/CompGenomeLab/PHACTboost	PHACTboost
 metarnn	http://www.liulab.science/metarnn.html	MetaRNN
+cadd	https://cadd.gs.washington.edu/	CADD
+vest4	https://www.cravat.us/CRAVAT/help.jsp#vest-4	VEST-4
+fathmm_xf	https://fathmm.biocompute.org.uk/fathmm-xf/	FATHMM-XF
+clinpred	https://sites.google.com/site/clinpred/	ClinPred
+polyphen2_hvar	http://genetics.bwh.harvard.edu/pph2/	PolyPhen2
+revel	https://sites.google.com/site/revelgenomics/	REVEL

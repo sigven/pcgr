@@ -391,6 +391,20 @@ dt_other_oncongenic_cna <- DT::datatable(
        )
    )
 
+if(pcg_report$settings$conf$sample_properties$site == "Any"){
+  dt_other_oncongenic_cna <- dt_other_oncongenic_cna |>
+    DT::formatStyle(
+    "SYMBOL",
+    "GLOBAL_ASSOC_RANK", 
+    color = "white", 
+    backgroundColor = 
+      DT::styleInterval(
+        pcgrr::color_palette$cancer_assoc$breaks,
+        pcgrr::color_palette$cancer_assoc$values
+      )
+  )
+}
+
 
 dt_other_oncongenic_cna
 

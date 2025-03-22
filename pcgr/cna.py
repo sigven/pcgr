@@ -377,7 +377,7 @@ def annotate_transcripts(cna_segments_bt: BedTool,
                 cna_segments_annotated.drop('genename', inplace=True, axis=1)
             
             if os.path.exists(gene_xref_tsv_fname):
-                gene_xref_df = pd.read_csv(gene_xref_tsv_fname, sep="\t", na_values=".", usecols=["entrezgene","name"])
+                gene_xref_df = pd.read_csv(gene_xref_tsv_fname, sep="\t", na_values=".", usecols=["entrezgene","name"], low_memory=False)
                 gene_xref_df = gene_xref_df[gene_xref_df['entrezgene'].notnull()].drop_duplicates()
                 gene_xref_df["entrezgene"] = gene_xref_df["entrezgene"].astype("int64").astype("string")
                 gene_xref_df.rename(columns = {'name':'genename'}, inplace = True)                                        
