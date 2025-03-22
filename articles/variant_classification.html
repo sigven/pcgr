@@ -14,8 +14,8 @@
 <link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Variant classification">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-7HRLE8GQRE"></script><script>
    window.dataLayer = window.dataLayer || [];
@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -89,7 +89,7 @@
 </h2>
 <p>PCGR evaluates somatic aberrations (SNV/InDels) for oncogenic
 potential through an implementation of standard operating procedures
-proposed by <a href="https://pubmed.ncbi.nlm.nih.gov/35101336/" class="external-link">VICC/CGC/ClinGen</a>.
+proposed by <a href="https://pubmed.ncbi.nlm.nih.gov/35101336/" class="external-link">ClinGen/CGC/VICC</a>.
 Here, various properties of the variants and genes affected are assigned
 criteria-specific scores, both negative and positive, pending on whether
 the properties support an oncogenic or benign variant nature.
@@ -99,71 +99,76 @@ oncogenicity score per variant.</p>
 <em>not</em> readily implemented in PCGR, specifically the ones
 requiring manual curation or expert review (i.e. experimental oncogenic
 variant evidence, requiring support from <em>in vitro</em> or <em>in
-vivo</em> functional studies (criteria <em>OM1/OS1</em>)). This implies
-that some variants interrogated by PCGR may not be classified as
-oncogenic, even though they could be classified as such with more
-functional evidence available. Considering the nature of our current
-implementation, we have thus also adopted slightly different score
-thresholds for variant classifications to those proposed originally by
-<a href="https://pubmed.ncbi.nlm.nih.gov/35101336/" class="external-link">Horak et al.,
-2022</a>. We are working to further improve the oncogenicity
+vivo</em> functional studies (criteria <em>OS2</em>)). Also, the current
+source for existing oncogenicity classifications (ClinVar), which is
+needed for implementation of criteria <em>OS1</em> and <em>OM3</em>, is
+considerably limited. Considering the current limitations, some
+oncogenic variants are likely to be missed and classified with uncertain
+significance (VUS) by PCGR. We highlight conventional ClinVar
+classifications (i.e. with respect to pathogenicity) alongside the
+current oncogenicity classifications, this may likely add value to the
+interpretation for uncertain cases. Furthermore, taking into the account
+the nature of the current implementation, we have adopted slightly
+different score thresholds for variant classifications to those proposed
+originally by <a href="https://pubmed.ncbi.nlm.nih.gov/35101336/" class="external-link">Horak
+et al., 2022</a>. We are working to further improve the oncogenicity
 classification in PCGR, and welcome feedback on this matter.</p>
 <p>Note also that for somatic copy number aberrations, we showcase
 potential oncogenic events as <strong>proto-oncogenes subject to
 amplifications</strong> (where level of amplification is configurable by
-the user), as well as<strong>tumor suppressor genes subject to
+the user), as well as <strong>tumor suppressor genes subject to
 homozygous deletions</strong>.</p>
-<p>The following criteria are currently used for oncogenicity
-classification in PCGR:</p>
+<p>The following criteria/codes are currently used for variant
+oncogenicity classification in PCGR (key resources/tools used for
+implementation indicated in parentheses):</p>
 <ul>
 <li>
-<em>CLINGEN_VICC_SBVS1</em> - Very high MAF (&gt; 0.05 in gnomAD -
-any five major continental populations)</li>
+<em>ONCG_OVS1</em> - Null variant - predicted as LoF - in bona fide
+tumor suppressor gene (VEP;CGC;CancerMine)</li>
 <li>
-<em>CLINGEN_VICC_SBS1</em> - High MAF (&gt; 0.01 in gnomAD - any
-five major continental populations)</li>
+<em>ONCG_OS1</em> - Same amino acid change as previously established
+oncogenic variant - regardless of nucleotide change (ClinVar)</li>
 <li>
-<em>CLINGEN_VICC_SBP1</em> - <em>Insilico</em> support for a benign
-effect on the gene or gene product (multiple lines of evidence (&gt;= 8
-algorithms) from dbNSFP)</li>
+<em>ONCG_OS3</em> - Located in a mutation hotspot with &gt;= 50
+samples with variant at AA position, &gt;= 10 samples with same AA
+change (cancerhotspots.org)</li>
 <li>
-<em>CLINGEN_VICC_SBP2</em> - Silent and intronic changes outside of
-the consensus splice site (VEP consequence)</li>
+<em>ONCG_OM1</em> - Presumably critical site of functional domain
+(CIViC)</li>
 <li>
-<em>CLINGEN_VICC_OVS1</em> - Null variant - in a <em>bona fide</em>
-tumor suppressor gene (predicted as LoF in tumor suppressors from
-CGC/NCG/CancerMine)</li>
+<em>ONCG_OM2</em> - Protein length changes from in-frame dels/ins in
+known oncogene/tumor suppressor genes or stop-loss variants in a tumor
+suppressor gene (VEP;CGC;CancerMine)</li>
 <li>
-<em>CLINGEN_VICC_OS1</em> - Same amino acid change as previously
-established oncogenic variant (ClinVar)</li>
+<em>ONCG_OM3</em> - Missense variant at an amino acid residue where
+a different missense variant determined to be oncogenic (using this
+standard) has been documented (ClinVar)</li>
 <li>
-<em>CLINGEN_VICC_OS3</em> - Located in a mutation hotspot, &gt;= 50
-samples with a variant at amino acid position, &gt;= 10 samples with
-same amino acid change (cancerhotspots.org)</li>
+<em>ONCG_OM4</em> - Located in a mutation hotspot with &lt; 50
+samples with variant at AA position, &gt;= 10 samples with same AA
+change (cancerhotspots.org)</li>
 <li>
-<em>CLINGEN_VICC_OM1</em> - Located in a presumably critical site of
-functional domain - here, this is implemented through indirect evidence
-from overlap with known predictive (drug sensitivity/resistance)
-loci</li>
+<em>ONCG_OP1</em> - Multiple lines of computational evidence support
+of a damaging variant effect on the gene or gene product (dbNSFP)</li>
 <li>
-<em>CLINGEN_VICC_OM2</em> - Protein length changes from in-frame
-dels/ins in known oncogene/tumor suppressor genes or stop-loss variants
-in a tumor suppressor gene (tumor suppressors/oncogenes from
-CGC/NCG/CancerMine)</li>
-<li>
-<em>CLINGEN_VICC_OM3</em> - Located in a mutation hotspot, &lt; 50
-samples with a variant at amino acid position, &gt;= 10 samples with
-same amino acid change (cancerhotspots.org)</li>
-<li>
-<em>CLINGEN_VICC_OP1</em> - <em>Insilico</em> support for a damaging
-effect on the gene or gene product (multiple lines of evidence (&gt;= 8
-algorithms) from dbNSFP)</li>
-<li>
-<em>CLINGEN_VICC_OP3</em> - Located in a mutation hotspot, &lt; 10
+<em>ONCG_OP3</em> - Located in a mutation hotspot with &lt; 10
 samples with the same amino acid change (cancerhotspots.org)</li>
 <li>
-<em>CLINGEN_VICC_OP4</em> - Absent from controls (gnomAD) / very low
-MAF ( &lt; 0.0001 in all five major subpopulations)</li>
+<em>ONCG_OP4</em> - Absent from controls (gnomAD) / very low MAF
+(any five major gnomAD subpopulations) (gnomAD)</li>
+<li>
+<em>ONCG_SBVS1</em> - Very high MAF (any five major gnomAD
+subpopulations) (gnomAD)</li>
+<li>
+<em>ONCG_SBS1</em> - High MAF (any five major gnomAD subpopulations)
+(gnomAD)</li>
+<li>
+<em>ONCG_SBP1</em> - Multiple lines of computational evidence
+support a benign variant effect on the gene or gene product
+(dbNSFP)</li>
+<li>
+<em>ONCG_SBP2</em> - Silent and intronic changes outside of the
+consensus splice site (VEP)</li>
 </ul>
 </div>
 <div class="section level2">

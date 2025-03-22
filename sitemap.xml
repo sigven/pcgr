@@ -23,6 +23,7 @@
 <url><loc>https://sigven.github.io/pcgr/reference/append_dbnsfp_var_link.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/reference/append_drug_var_link.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/reference/append_gwas_citation_phenotype.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/reference/append_oncogenicity_docs.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/reference/append_targeted_drug_annotations.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/reference/append_tcga_var_link.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/reference/append_tfbs_annotation.html</loc></url>
@@ -109,6 +110,7 @@
 <url><loc>https://sigven.github.io/pcgr/reference/mkdir.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/reference/msi_indel_fraction_plot.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/reference/msi_indel_load_plot.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/reference/oncogenicity_criteria.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/reference/order_variants.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/reference/pkg_exists.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/reference/plot_cna_segments.html</loc></url>

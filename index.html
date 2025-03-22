@@ -14,8 +14,8 @@
 <link rel="apple-touch-icon" type="image/png" sizes="60x60" href="apple-touch-icon-60x60.png">
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Personal Cancer Genome ReporteR">
 <meta name="description" content="Functions, tools and utilities for the generation of clinical cancer genome reports with PCGR. This R package is an integrated part of the PCGR workflow (https://github.com/sigven/pcgr), it should thus not be used as a stand-alone package.">
 <meta property="og:description" content="Functions, tools and utilities for the generation of clinical cancer genome reports with PCGR. This R package is an integrated part of the PCGR workflow (https://github.com/sigven/pcgr), it should thus not be used as a stand-alone package.">
@@ -36,7 +36,7 @@
 
     <a class="navbar-brand me-2" href="index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -79,7 +79,7 @@
 <a class="anchor" aria-label="anchor" href="#personal-cancer-genome-reporter-pcgr-"></a>
 </h1>
 </div>
-<p>The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for functional annotation and translation of individual tumor genomes for precision cancer medicine. It interprets primarily somatic SNVs/InDels and copy number aberrations, and has additional support for interpretation of bulk RNA-seq expression data. The software classifies variants both with respect to <em>oncogenicity</em>, and <em>actionability</em>. Interactive HTML output reports allow the user to interrogate the clinical impact of the molecular findings in an individual tumor.</p>
+<p>The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for functional annotation and translation of individual tumor genomes for precision cancer medicine. It interprets primarily somatic SNVs/InDels and copy number aberrations, and has additional support for interpretation of bulk RNA-seq expression data. The software classifies variants with respect to predicted <em>oncogenicity</em>, and clinical <em>actionability</em>. Interactive HTML output reports allow the user to interrogate the clinical impact of the molecular findings in an individual tumor.</p>
 <ul>
 <li>Variant classification
 <ul>
@@ -100,6 +100,20 @@
 <h3 id="top-news">Top News<a class="anchor" aria-label="anchor" href="#top-news"></a>
 </h3>
 <ul>
+<li>
+<em>March 22nd 2025:</em> <strong>2.2.0 release</strong>
+<ul>
+<li>Data/software updates:
+<ul>
+<li>Ensembl VEP <code>v113</code> / GENCODE v47</li>
+<li>ClinVar (2025-03)</li>
+<li>CIViC (2025-03-13)</li>
+<li>and more</li>
+</ul>
+</li>
+<li><a href="https://sigven.github.io/pcgr/articles/CHANGELOG.html">CHANGELOG</a></li>
+</ul>
+</li>
 <li>
 <em>October 21st 2024:</em> <strong>2.1.2 release</strong>
 <ul>
@@ -167,7 +181,7 @@
 <div class="section level2">
 <h2 id="example-reports">Example reports<a class="anchor" aria-label="anchor" href="#example-reports"></a>
 </h2>
-<p><a href="https://doi.org/10.5281/zenodo.13855988" class="external-link"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.13855988.svg" alt="DOI"></a></p>
+<p><a href="https://doi.org/10.5281/zenodo.15068347" class="external-link"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.15068347.svg" alt="DOI"></a></p>
 </div>
 <div class="section level2">
 <h2 id="why-use-pcgr">Why use PCGR?<a class="anchor" aria-label="anchor" href="#why-use-pcgr"></a>

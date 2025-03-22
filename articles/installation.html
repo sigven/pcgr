@@ -14,8 +14,8 @@
 <link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Installation">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-7HRLE8GQRE"></script><script>
    window.dataLayer = window.dataLayer || [];
@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -108,9 +108,12 @@ the data above need to match the chosen assembly.</p>
 </h3>
 <p>Reference bundles are generated semi-automatically (by the PCGR
 author) and are versioned based on their release date. Keep in mind that
-the bundles support only certain Ensembl VEP versions. The latest
-(<strong>v20240927</strong>) genome-specific bundles can be downloaded
-directly from below (size: ~4G):</p>
+the bundles support only certain Ensembl VEP versions, and importantly
+also specific software versions of PCGR. Upgrading the PCGR software
+without upgrading the bundle specified here is thus <em>not</em> a
+recommended installation strategy. The latest
+(<strong>v20250314</strong>) genome-specific bundles can be downloaded
+directly from below (size: ~5G):</p>
 <table class="table">
 <colgroup>
 <col width="27%">
@@ -123,11 +126,11 @@ directly from below (size: ~4G):</p>
 <tbody>
 <tr class="odd">
 <td align="left">GRCh38</td>
-<td align="left"><a href="https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20240927.grch38.tgz" class="external-link uri">https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20240927.grch38.tgz</a></td>
+<td align="left"><a href="https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20250314.grch38.tgz" class="external-link uri">https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20250314.grch38.tgz</a></td>
 </tr>
 <tr class="even">
 <td align="left">GRCh37</td>
-<td align="left"><a href="https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20240927.grch37.tgz" class="external-link uri">https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20240927.grch37.tgz</a></td>
+<td align="left"><a href="https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20250314.grch37.tgz" class="external-link uri">https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20250314.grch37.tgz</a></td>
 </tr>
 </tbody>
 </table>
@@ -141,7 +144,7 @@ the reference bundle.</p>
 <div class="section level4">
 <h4 id="bash-example">Bash Example<a class="anchor" aria-label="anchor" href="#bash-example"></a>
 </h4>
-<pre><code><span><span class="va">BUNDLE_VERSION</span><span class="op">=</span><span class="st">"20240927"</span></span></code></pre>
+<pre><code><span><span class="va">BUNDLE_VERSION</span><span class="op">=</span><span class="st">"20250314"</span></span></code></pre>
 <div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="va">GENOME</span><span class="op">=</span><span class="st">"grch38"</span> <span class="co"># or "grch37"</span></span>
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="va">BUNDLE</span><span class="op">=</span><span class="st">"pcgr_ref_data.</span><span class="va">${BUNDLE_VERSION}</span><span class="st">.</span><span class="va">${GENOME}</span><span class="st">.tgz"</span></span>
 <span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="fu">wget</span> https://insilico.hpc.uio.no/pcgr/<span class="va">${BUNDLE}</span></span>
@@ -155,10 +158,10 @@ the reference bundle.</p>
 <h3 id="vep-cache">2. VEP Cache<a class="anchor" aria-label="anchor" href="#vep-cache"></a>
 </h3>
 <p><a href="https://www.ensembl.org/info/docs/tools/vep/index.html" class="external-link">VEP</a>
-requires a data cache which is available from the Ensembl <a href="https://ftp.ensembl.org/pub/release-112/variation/indexed_vep_cache/" class="external-link">FTP
+requires a data cache which is available from the Ensembl <a href="https://ftp.ensembl.org/pub/release-113/variation/indexed_vep_cache/" class="external-link">FTP
 site</a> (search there for files starting with
 <code>homo_sapiens_vep_</code>). The latest Ensembl VEP version we
-support is <strong>v112</strong>.</p>
+support is <strong>v113</strong>.</p>
 <p><strong>Tip</strong>: PCGR needs to be pointed to the <em>parent</em>
 directory containing the downloaded
 <code>homo_sapiens/xyz_GRCh3x/</code> cache, which is usually called
@@ -167,7 +170,7 @@ instructions</a>.</p>
 <div class="section level4">
 <h4 id="bash-example-1">Bash Example<a class="anchor" aria-label="anchor" href="#bash-example-1"></a>
 </h4>
-<pre><code><span><span class="va">VEP_VERSION</span><span class="op">=</span><span class="st">"112"</span></span></code></pre>
+<pre><code><span><span class="va">VEP_VERSION</span><span class="op">=</span><span class="st">"113"</span></span></code></pre>
 <div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="va">GENOME</span><span class="op">=</span><span class="st">"GRCh38"</span> <span class="co"># or "GRCh37"</span></span>
 <span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="va">CACHE</span><span class="op">=</span><span class="st">"homo_sapiens_vep_</span><span class="va">${VEP_VERSION}</span><span class="st">_</span><span class="va">${GENOME}</span><span class="st">.tar.gz"</span></span>
 <span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a></span>
@@ -210,7 +213,7 @@ the very end of the conda environment creation).</p>
 <div class="tab-content">
 <div class="active  tab-pane" id="linux" role="tabpanel" aria-labelledby="linux-tab">
 
-<pre><code><span><span class="va">PCGR_VERSION</span><span class="op">=</span><span class="st">"2.1.2"</span></span></code></pre>
+<pre><code><span><span class="va">PCGR_VERSION</span><span class="op">=</span><span class="st">"2.2.0"</span></span></code></pre>
 <div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="co"># set up variables</span></span>
 <span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="va">PCGR_REPO</span><span class="op">=</span><span class="st">"https://raw.githubusercontent.com/sigven/pcgr/v</span><span class="va">${PCGR_VERSION}</span><span class="st">/conda/env/lock/"</span></span>
 <span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="va">PLATFORM</span><span class="op">=</span><span class="st">"linux"</span></span>
@@ -229,7 +232,7 @@ the very end of the conda environment creation).</p>
 <p>For macOS M1 machines, you need to include
 <code>CONDA_SUBDIR=osx-64</code> before the <code>conda create</code>
 command - see <a href="https://github.com/conda-forge/miniforge/issues/165#issuecomment-860233092" class="external-link uri">https://github.com/conda-forge/miniforge/issues/165#issuecomment-860233092</a>:</p>
-<pre><code><span><span class="va">PCGR_VERSION</span><span class="op">=</span><span class="st">"2.1.2"</span></span></code></pre>
+<pre><code><span><span class="va">PCGR_VERSION</span><span class="op">=</span><span class="st">"2.2.0"</span></span></code></pre>
 <div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># set up variables</span></span>
 <span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="va">PCGR_REPO</span><span class="op">=</span><span class="st">"https://raw.githubusercontent.com/sigven/pcgr/v</span><span class="va">${PCGR_VERSION}</span><span class="st">/conda/env/lock/"</span></span>
 <span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="va">PLATFORM</span><span class="op">=</span><span class="st">"osx"</span></span>
@@ -249,12 +252,12 @@ command - see <a href="https://github.com/conda-forge/miniforge/issues/165#issue
 <h3 id="b--docker">B. Docker<a class="anchor" aria-label="anchor" href="#b--docker"></a>
 </h3>
 <p>The PCGR Docker image is available on <a href="https://hub.docker.com/r/sigven/pcgr/tags" class="external-link">Docker Hub</a>. Pull
-the latest <strong>v2.1.2</strong> image with:</p>
-<pre><code>docker pull sigven/pcgr:2.1.2</code></pre>
+the latest <strong>v2.2.0</strong> image with:</p>
+<pre><code>docker pull sigven/pcgr:2.2.0</code></pre>
 <div class="section level4">
 <h4 id="example-run">Example Run<a class="anchor" aria-label="anchor" href="#example-run"></a>
 </h4>
-<pre><code><span><span class="va">PCGR_VERSION</span><span class="op">=</span><span class="st">"2.1.2"</span></span></code></pre>
+<pre><code><span><span class="va">PCGR_VERSION</span><span class="op">=</span><span class="st">"2.2.0"</span></span></code></pre>
 <div class="sourceCode" id="cb11"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="ex">docker</span> container run <span class="at">-it</span> <span class="at">--rm</span> <span class="dt">\</span></span>
 <span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>    <span class="at">-v</span> /Users/you/dir1/.vep:/mnt/.vep</span>
 <span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>    <span class="ex">-v</span> /Users/you/dir1/bundle:/mnt/bundle <span class="dt">\</span></span>
@@ -274,7 +277,7 @@ the latest <strong>v2.1.2</strong> image with:</p>
 <span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a>      <span class="at">--vcf2maf</span></span></code></pre></div>
 <p><strong>NOTE</strong>: If you need to run the Docker-based version of
 PCGR as a non-root user, you may need to explicitly add options for
-quarto to work properly, i.e. 
+quarto to work properly, i.e.
 <code>--env "XDG_CACHE_HOME=/tmp/quarto_cache_home"</code> (same as for
 Singularity/Apptainer below, see also <a href="https://github.com/sigven/pcgr/issues/246" class="external-link">issue #246</a>).
 <br><br></p>
@@ -284,15 +287,15 @@ Singularity/Apptainer below, see also <a href="https://github.com/sigven/pcgr/is
 <h3 id="c--singularityapptainer">C. Singularity/Apptainer<a class="anchor" aria-label="anchor" href="#c--singularityapptainer"></a>
 </h3>
 <p>The PCGR Singularity/Apptainer image is available on <a href="https://ghcr.io/sigven/pcgr" class="external-link">GitHub Container Registry</a>. Pull
-the latest <strong>v2.1.2</strong> image with:</p>
-<pre><code>apptainer pull oras://ghcr.io/sigven/pcgr:2.1.2.singularity</code></pre>
+the latest <strong>v2.2.0</strong> image with:</p>
+<pre><code>apptainer pull oras://ghcr.io/sigven/pcgr:2.2.0.singularity</code></pre>
 <p>This will download a Singularity Image File (SIF) called
-<strong>pcgr_2.1.2.singularity.sif</strong> that can be run with
+<strong>pcgr_2.2.0.singularity.sif</strong> that can be run with
 Singularity or Apptainer.</p>
 <div class="section level4">
 <h4 id="example-run-1">Example Run<a class="anchor" aria-label="anchor" href="#example-run-1"></a>
 </h4>
-<pre><code><span><span class="va">PCGR_VERSION</span><span class="op">=</span><span class="st">"2.1.2"</span></span></code></pre>
+<pre><code><span><span class="va">PCGR_VERSION</span><span class="op">=</span><span class="st">"2.2.0"</span></span></code></pre>
 <div class="sourceCode" id="cb14"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="ex">apptainer</span> exec <span class="dt">\</span></span>
 <span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>  <span class="at">--writable-tmpfs</span> <span class="dt">\</span></span>
 <span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>  <span class="at">--no-home</span> <span class="dt">\</span></span>
