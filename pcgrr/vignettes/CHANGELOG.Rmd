@@ -49,7 +49,7 @@ pdiakumis <- user("pdiakumis")
 
 ## v2.2.0
 
-- Date: **2025-03-XX**
+- Date: **2025-03-22**
 - Major data updates
   - ClinVar (2025-03)
   - dbNSFP (v5.0)
