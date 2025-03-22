@@ -29,6 +29,14 @@ PCGR originates from the [Norwegian Cancer Genomics Consortium (NCGC)](https://c
 
 ### Top News
 
+- *March 22nd 2025:* **2.2.0 release**
+  - Data/software updates:
+    - Ensembl VEP `v113` / GENCODE v47
+    - ClinVar (2025-03)
+    - CIViC (2025-03-13)
+    - and more
+  - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
+  
 - *October 21st 2024:* **2.1.2 release**
   - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
 
@@ -67,7 +75,7 @@ PCGR originates from the [Norwegian Cancer Genomics Consortium (NCGC)](https://c
 
 ## Example reports
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13855988.svg)](https://doi.org/10.5281/zenodo.13855988)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15068347.svg)](https://doi.org/10.5281/zenodo.15068347)
 
 ## Why use PCGR?
 
