@@ -29,6 +29,9 @@ PCGR originates from the [Norwegian Cancer Genomics Consortium (NCGC)](https://c
 
 ### Top News
 
+- *March 23rd 2025:* **2.2.1 release**
+  - fix bug in CPSR for ClinVar variants with non-standard significance levels
+
 - *March 22nd 2025:* **2.2.0 release**
   - Data/software updates:
     - Ensembl VEP `v113` / GENCODE v47
