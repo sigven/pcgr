@@ -194,7 +194,7 @@ echo "PCGR_VERSION=\"${PCGR_VERSION}\""
 
 ```bash
 docker container run -it --rm \
-    -v /Users/you/dir1/.vep:/mnt/.vep
+    -v /Users/you/dir1/.vep:/mnt/.vep \
     -v /Users/you/dir1/bundle:/mnt/bundle \
     -v /Users/you/dir1/pcgr_inputs:/mnt/pcgr_inputs \
     -v /Users/you/dir1/pcgr_outputs:/mnt/pcgr_outputs \
