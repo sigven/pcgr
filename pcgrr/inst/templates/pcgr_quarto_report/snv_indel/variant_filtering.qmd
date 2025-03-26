@@ -84,7 +84,7 @@ The variant filtering has been performed based on the following criteria:
 
 ::: {.column width="47.5%"}
 
-* Variant filtering aginst gnomAD (filter *GERMLINE_GNOMAD*): __TRUE__ (not configurable)
+* Variant filtering against gnomAD (filter *GERMLINE_GNOMAD*): __TRUE__ (not configurable)
 * maximum allowed population-specific gnomAD MAF's for somatic events (configurable):
     * AFR: __`r to_settings$maf_gnomad_afr`__
     * AMR: __`r to_settings$maf_gnomad_amr`__
