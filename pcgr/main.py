@@ -196,6 +196,7 @@ def run_pcgr(input_data, output_data, conf_options):
     if input_data['pon_vcf_basename'] != 'NA':
         pon_vcf = os.path.join(input_data['pon_vcf_dir'], input_data['pon_vcf_basename'])
 
+    n_vcf_pass_variants = 0
     if not input_vcf == 'None':
         output_dir = output_data['dir']
         output_prefix = output_data['prefix']
@@ -407,7 +408,7 @@ def run_pcgr(input_data, output_data, conf_options):
                 f"dbMTS, TCGA, GWAS catalog"
                 )
         vcfanno_db_src_msg2 = \
-                f"Annotation sources II (vcfanno): RepeatMasker, SimpleRepeats, WindowMaskerSDust, gnomAD non-cancer subset"
+                f"Annotation sources II (vcfanno): RepeatMasker, SimpleRepeats, WindowMaskerSDust"
         logger.info("PCGR - STEP 2: Variant annotation for cancer precision medicine with pcgr-vcfanno")
         logger.info(vcfanno_db_src_msg1)
         logger.info(vcfanno_db_src_msg2)
@@ -525,15 +526,16 @@ def run_pcgr(input_data, output_data, conf_options):
             if os.path.exists(output_pass_tsv_gz):
                 # get number of rows/variants annotated, using pandas
                 var_data = pd.read_csv(output_pass_tsv_gz, sep = '\t', low_memory = False, na_values='.')
-                num_variants_raw = len(var_data)
-                if num_variants_raw > pcgr_vars.MAX_VARIANTS_FOR_REPORT:
-                    logger.info(f'Number of raw variants in input VCF ({num_variants_raw}) exceeds ' + \
+                n_vcf_pass_variants = len(var_data)
+                #print(f'Number of raw PASS variants in input VCF: {n_vcf_pass_variants}')
+                if n_vcf_pass_variants > pcgr_vars.MAX_VARIANTS_FOR_REPORT:
+                    logger.info(f'Number of raw variants in input VCF ({n_vcf_pass_variants}) exceeds ' + \
                                 f'{pcgr_vars.MAX_VARIANTS_FOR_REPORT} - intergenic/intronic variants will be excluded prior to reporting')
 
                     # Exclude intronic and intergenic variants prior to analysis with pcgrr (reporting and further analysis)
                     var_data_filtered = var_data[~var_data.CONSEQUENCE.str.contains('^intron') &
                                                  ~var_data.CONSEQUENCE.str.contains('^intergenic')]
-                    num_variants_excluded1 = num_variants_raw - len(var_data_filtered)
+                    num_variants_excluded1 = n_vcf_pass_variants - len(var_data_filtered)
                     logger.info(f'Number of intergenic/intronic variants excluded: {num_variants_excluded1}')
 
                     # Exclude upstream_gene/downstream_gene variants if size of filtered variant set is still above MAX_VARIANTS_FOR_REPORT
@@ -665,7 +667,10 @@ def run_pcgr(input_data, output_data, conf_options):
 
         if debug:
             print(pcgr_report_command)
-        check_subprocess(logger, pcgr_report_command, debug)
+        if n_vcf_pass_variants == 0:
+            logger.info('There are n = 0 PASS variants in the input VCF - skipping report generation')
+        else:
+            check_subprocess(logger, pcgr_report_command, debug)
         logger.info("Finished PCGR!")
         print('----')
 
