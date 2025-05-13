@@ -122,8 +122,7 @@ def write_pass_vcf(annotated_vcf, logger):
     if num_pass == 0:
         logger.warning(
             'There are zero variants with a \'PASS\' filter in the VCF file')
-        os.system('bgzip -dc ' + str(annotated_vcf) +
-                  ' egrep \'^#\' > ' + str(out_vcf))
+        os.system("bgzip -dc " + str(annotated_vcf) + "| egrep '^#' > " + str(out_vcf))
     # else:
     os.system('bgzip -f ' + str(out_vcf))
     os.system('tabix -f -p vcf ' + str(out_vcf) + '.gz')
