@@ -4,7 +4,7 @@ from pcgr._version import __version__
 
 ## Version - software and bundle
 PCGR_VERSION = __version__
-DB_VERSION = '20250314'
+DB_VERSION = '20250512'
 
 ## Miscellaneous settings
 NCBI_BUILD_MAF = 'GRCh38'
@@ -17,13 +17,13 @@ MINIMUM_N_MUT_SIGNATURE = 100
 MAX_SIGNATURE_PREVALENCE = 20
 
 ## GENCODE versions
-GENCODE_VERSION = {'grch38': 47,'grch37': 19}
+GENCODE_VERSION = {'grch38': 48,'grch37': 19}
 
 ## vcfanno settings
 VCFANNO_MAX_PROC = 15
 
 ## VEP settings/versions
-VEP_VERSION = '113'
+VEP_VERSION = '114'
 VEP_ASSEMBLY = {'grch38': 'GRCh38','grch37': 'GRCh37'}
 VEP_MIN_FORKS = 1
 VEP_MAX_FORKS = 8
@@ -38,7 +38,8 @@ EXPRESSION_DB_SOURCES = ['tcga','depmap','treehouse']
 SAMPLE_ID_MAX_LENGTH = 40
 SAMPLE_ID_MIN_LENGTH = 3
 
-GNOMAD_MAIN_EXON_AF_TAGS = ['gnomADe_SAS_AF','gnomADe_NFE_AF','gnomADe_AFR_AF','gnomADe_AMR_AF','gnomADe_EAS_AF']
+GNOMAD_MAIN_EXOME_AF_TAGS = ['gnomADe_SAS_AF','gnomADe_NFE_AF','gnomADe_AFR_AF','gnomADe_AMR_AF','gnomADe_EAS_AF']
+GNOMAD_MAIN_GENOME_AF_TAGS = ['gnomADg_SAS_AF','gnomADg_NFE_AF','gnomADg_AFR_AF','gnomADg_AMR_AF','gnomADg_EAS_AF']
 
 ## Classified germline variant input (from CPSR) - required columns
 germline_input_required_cols = [

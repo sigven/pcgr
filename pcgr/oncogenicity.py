@@ -304,32 +304,45 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
                if variant_data['ONCG_OS3'] is False and variant_data['ONCG_OS1'] is False:
                   variant_data['ONCG_OM1'] = True
 
-   if all(pop in variant_data.keys() for pop in pcgr_vars.GNOMAD_MAIN_EXON_AF_TAGS):
+   all_gnomad_tags = pcgr_vars.GNOMAD_MAIN_EXOME_AF_TAGS + pcgr_vars.GNOMAD_MAIN_GENOME_AF_TAGS
+   #print(str(all_gnomad_tags))
+   #print(str(variant_data.keys()))
 
-      ## check if variant has MAF > 0.01 (SBVS1) or > 0.05 in any of five major gnomAD subpopulations (exome set)
-      for pop in pcgr_vars.GNOMAD_MAIN_EXON_AF_TAGS:
-         if not variant_data[pop] is None:
-            if float(variant_data[pop]) >= float(pcgr_vars.ONCOGENICITY['gnomAD_very_common_AF']):
-               variant_data["ONCG_SBVS1"] = True
-            if float(variant_data[pop]) >= float(pcgr_vars.ONCOGENICITY['gnomAD_common_AF']) and variant_data["ONCG_SBVS1"] is False:
-               variant_data["ONCG_SBS1"] = True
-               
-      approx_zero_pop_freq = 0
-      for pop in pcgr_vars.GNOMAD_MAIN_EXON_AF_TAGS:
-         ## no MAF recorded in gnomAD for this population
+   #if all(pop in variant_data.keys() for pop in all_gnomad_tags):
+
+      ## check if variant has MAF > 0.01 (SBVS1) or > 0.05 in any of five major gnomAD subpopulations (exome or genome set)
+   for pop in all_gnomad_tags:
+      if not pop in variant_data.keys():
+         continue
+      if not variant_data[pop] is None:
+         if float(variant_data[pop]) >= float(pcgr_vars.ONCOGENICITY['gnomAD_very_common_AF']):
+            variant_data["ONCG_SBVS1"] = True
+         if float(variant_data[pop]) >= float(pcgr_vars.ONCOGENICITY['gnomAD_common_AF']) and variant_data["ONCG_SBVS1"] is False:
+            variant_data["ONCG_SBS1"] = True
+   
+   gnomad_tags = {}
+   approx_zero_pop_freq = {}
+      
+   for assay in ['exome', 'genome']:
+      gnomad_tags[assay] = pcgr_vars.GNOMAD_MAIN_EXOME_AF_TAGS if assay == 'exome' else pcgr_vars.GNOMAD_MAIN_GENOME_AF_TAGS
+      approx_zero_pop_freq[assay] = 0
+         
+      for pop in gnomad_tags[assay]:
+         if not pop in variant_data.keys():
+            continue
+         ## no AF recorded in gnomAD for this population
          if variant_data[pop] is None:
-            approx_zero_pop_freq = approx_zero_pop_freq + 1
+            approx_zero_pop_freq[assay] = approx_zero_pop_freq[assay] + 1
          else:
-            ## Extremely low MAF for this population
+            ## Extremely low AF for this population
             if float(variant_data[pop]) < float(pcgr_vars.ONCOGENICITY['gnomAD_extremely_rare_AF']):
-               approx_zero_pop_freq = approx_zero_pop_freq + 1
-    
-      ## check if variant is missing or with MAF approximately zero in all five major gnomAD subpopulations (exome set)
-      if approx_zero_pop_freq == 5:
+               approx_zero_pop_freq[assay] = approx_zero_pop_freq[assay] + 1
+      ## check if variant is missing or with AF approximately zero in all five major gnomAD subpopulations (exome or genome set)
+      if approx_zero_pop_freq[assay] == 5:
          variant_data["ONCG_OP4"] = True
    
-   else:
-      print("ERROR: Missing gnomAD AF tags in VCF INFO field")
+   #else:
+   #   print("ERROR: Missing gnomAD AF tags in VCF INFO field")
   
    
    ## check if variant is a loss-of-function variant in a tumor suppressor gene (Cancer Gene Census/CancerMine)

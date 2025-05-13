@@ -656,6 +656,68 @@ load_dna_variants <- function(
       )
   }
 
+  for(pop in c('AMR','AFR','EAS','FIN','NFE','SAS','')){
+    gnc_tag <- paste0("gNC_", pop)
+    if(pop == ''){
+      gnc_tag <- "gNC"
+    }
+
+    if (gnc_tag %in% colnames(results[['variant']])) {
+
+      ## expanded tag set
+      tags <- list()
+      tags[['AC']] <- gsub('__','_',paste0("gnomADg_non_cancer_", pop, "_AC"))
+      tags[['AN']] <- gsub('__','_',paste0("gnomADg_non_cancer_", pop, "_AN"))
+      tags[['NHOMALT']] <- gsub('__','_',paste0("gnomADg_non_cancer_", pop, "_NHOMALT"))
+      tags[['AF']] <- gsub('__','_',paste0("gnomADg_non_cancer_", pop, "_AF"))
+
+      ## if the tags are already present in the data, remove them
+      for(tag in names(tags)){
+        if(tags[[tag]] %in% colnames(results[['variant']])) {
+          results[['variant']][[tags[[tag]]]] <- NULL
+        }
+      }
+
+
+      ## if the gnomAD tag is present, split it into
+      ## the expanded tag set
+      results[['variant']] <- results[['variant']] |>
+        tidyr::separate(
+          !!rlang::sym(gnc_tag),
+          into = c(tags[['AC']],
+                   tags[['AN']],
+                   tags[['NHOMALT']]),
+          sep = "\\|",
+          remove = TRUE,
+          fill = "right",
+          extra = "drop"
+        ) |>
+
+        ## convert to numeric
+        dplyr::mutate(
+          !!rlang::sym(tags[['AN']]) := as.integer(
+            !!rlang::sym(tags[['AN']])
+          ),
+          !!rlang::sym(tags[['AC']]) := as.integer(
+            !!rlang::sym(tags[['AC']])
+          ),
+          !!rlang::sym(tags[['NHOMALT']]) := as.integer(
+            !!rlang::sym(tags[['NHOMALT']])
+          ),
+          !!rlang::sym(tags[['AF']]) := as.numeric(
+            as.numeric(!!rlang::sym(tags[['AC']])) /
+              as.integer(!!rlang::sym(tags[['AN']]))),
+          #!!rlang::sym(tags[['AF']]) := ifelse(
+          #  is.na(!!rlang::sym(tags[['AF']])),
+          #  0,
+          #  !!rlang::sym(tags[['AF']])
+          #)
+        ) |>
+        dplyr::distinct()
+    }
+  }
+
+
   ## Rename annotations for more clarity
   if ("TSG_SUPPORT" %in% colnames(results[['variant']])) {
     results[['variant']] <-
