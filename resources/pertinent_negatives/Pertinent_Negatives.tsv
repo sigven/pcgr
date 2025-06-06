@@ -1,0 +1,14 @@
+Type	Tissue	Pertinent Negatives	Notes
+pertinent negative	ANY	KRAS mutation, NRAS mutation, BRAF mutation, PIK3CA mutation, ERBB2 (HER2) copy number gain, NTRK1 rearrangement, NTRK2 rearrangement, NTRK3 rearrangement	
+pertinent negative	LUNG	EGFR mutation, BRAF mutation, KRAS mutation, RAS mutation, ALK rearrangement, ROS1 rearrangement, RET rearrangement, NTRK1 rearrangement, NTRK2 rearrangement, NTRK3 rearrangement, MET mutation, MET copy number variant, MET exon 14 skipping mutation, MET amplification, ERBB2 mutation	
+pertinent negative	COLORECTAL	KRAS mutation, NRAS mutation, BRAF mutation, NTRK1 rearrangement, NTRK2 rearrangement, NTRK3 rearrangement, ERBB2 (HER2) copy number gain	
+pertinent negative	GASTROESOPHAGEAL	ERBB2 (HER2) copy number alteration, ERBB2 (HER2) copy number gain	
+pertinent negative	BREAST	PIK3CA mutation, ESR1 mutation, ERBB2 (HER2) copy number gain, NTRK1 fusion, NTRK2 fusion, NTRK3 fusion	
+pertinent negative	MELANOMA	BRAF mutation, KIT mutation, NRAS mutation, GNAQ mutation, GNA11 mutation, ALK rearrangement, ROS1 rearrangement, NTRK1 rearrangement, NTRK2 rearrangement, NTRK3 rearrangement, KRAS mutation, PIK3CA mutation, ERBB2 (HER2) copy number gain
+pertinent negative	GLIOMA	IDH1 mutation, IDH2 mutation, BRAF mutation, BRAF rearrangement, EGFR mutation, EGFRvIII mutation, EGFR copy number alteration, FGFR1 rearrangement, FGFR2 rearrangement, FGFR3 rearrangement	
+pertinent negative	PAPILLARY THYROID	NRAS mutation, HRAS mutation, BRAF mutation, RET rearrangement, BRAF rearrangement, ALK rearrangement, NTRK1 rearrangement, NTRK2 rearrangement, NTRK3 rearrangement, MET rearrangement, FGFR1 rearrangement, FGFR2 rearrangement, FGFR3 rearrangement, PPARG rearrangement	
+pertinent negative	UROTHELIAL	FGFR mutation, FGFR rearrangement, FGFR copy number gain	
+pertinent negative	MEDULLARY THYROID	RET mutation, KRAS mutation, HRAS mutation, NRAS mutation	
+pertinent negative	PANCREATIC	BRAF mutation, KRAS mutation, ALK rearrangement, ROS1 rearrangement, RET rearrangement, NTRK1 rearrangement, NTRK2 rearrangement, NTRK3 rearrangement, FGFR fusion, HER2 copy number gain	
+pertinent negative	HEAD AND NECK	HRAS mutation, PIK3CA mutation, NTRK1 rearrangement, NTRK2 rearrangement, NTRK3 rearrangement	
+pertinent negative	GIST	KIT mutation*, PDGFRA mutation, BRAF mutation, NTRK1 rearrangement, NTRK2 rearrangement, NTRK3 rearrangement, FGFR1 rearrangement, FGFR2 rearrangement, FGFR3 rearrangement	*Including those associated with acquired resistance to tyrosine kinase inhibitor therapy

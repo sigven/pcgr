@@ -21,3 +21,7 @@ docs/_build/
 tests
 conda/pcgr
 conda/pcgrr
+
+
+resources/reference_files/
+resources/bin/
