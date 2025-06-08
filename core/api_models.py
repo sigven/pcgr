@@ -86,10 +86,31 @@ class ValidationSummary(BaseModel):
     errors: List[ValidationError] = Field(description="List of validation errors")
 
 
+class QCFlags(BaseModel):
+    """Quality control flags for variant analysis."""
+    qns: Optional[bool] = Field(default=None, description="Quantity Not Sufficient")
+    low_read_depth: Optional[bool] = Field(default=None, description="Low read depth detected")
+    failed_to_amplify: Optional[bool] = Field(default=None, description="Failed to amplify")
+    poor_quality: Optional[bool] = Field(default=None, description="Poor sample quality")
+    contamination: Optional[bool] = Field(default=None, description="Sample contamination detected")
+    notes: Optional[str] = Field(default=None, description="Additional QC notes")
+
+
+class AttendingInterpretation(BaseModel):
+    """Attending physician interpretation."""
+    attending_name: str = Field(description="Name of attending physician")
+    interpretation: Optional[str] = Field(default=None, description="Attending's clinical interpretation")
+    submitted_before_tiering: Optional[bool] = Field(default=None, description="Whether interpretation was submitted before seeing tier assignments")
+    confidence_level: Optional[str] = Field(default=None, description="Confidence level: high, medium, low")
+    clinical_significance: Optional[str] = Field(default=None, description="Clinical significance assessment")
+
+
 class ClassificationRequest(BaseModel):
     """Main model for an API classification request."""
     variant: Variant = Field(description="Variant to classify (SNV, CNV, or SV)")
     oncotree_code: str = Field(description="OncoTree disease code")
+    attending_interpretation: Optional[AttendingInterpretation] = Field(default=None, description="Optional attending physician interpretation")
+    qc_flags: Optional[QCFlags] = Field(default=None, description="Optional quality control flags")
 
 
 class ClassificationReport(BaseModel):
@@ -98,3 +119,5 @@ class ClassificationReport(BaseModel):
     tier: str = Field(description="Classification tier (e.g., 'Tier 1')")
     evidence: List[Dict[str, Any]] = Field(description="List of evidence dictionaries with AMP/ASCO/CAP codes")
     final_interpretation: str = Field(description="Final clinical interpretation text")
+    attending_review: Optional[Dict[str, Any]] = Field(default=None, description="Attending physician review and interpretation")
+    qc_summary: Optional[Dict[str, Any]] = Field(default=None, description="Quality control summary and flags")

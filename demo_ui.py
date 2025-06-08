@@ -17,17 +17,40 @@ st.markdown("---")
 API_BASE_URL = "http://localhost:8000"
 CLASSIFY_ENDPOINT = f"{API_BASE_URL}/v1/classify"
 
-def validate_variant_input(variant_text: str, tumor_type: str) -> Dict[str, Any]:
-    """Call the enhanced validation API."""
+def validate_variant_input(variant_text: str, tumor_type: str, attending_name: str = None, attending_interp: str = None, submitted_before: str = None, confidence: str = None, clinical_sig: str = None, qns: bool = False, low_depth: bool = False, failed_amp: bool = False, poor_qual: bool = False, contamination: bool = False, qc_notes: str = None) -> Dict[str, Any]:
+    """Call the enhanced validation API with clinical workflow parameters."""
     variant_lines = [line.strip() for line in variant_text.split('\n') if line.strip()]
+    
+    request_data = {
+        "variant_lines": variant_lines,
+        "oncotree_code": tumor_type
+    }
+    
+    if attending_name and attending_name.strip():
+        attending_interpretation = {
+            "attending_name": attending_name.strip(),
+            "interpretation": attending_interp if attending_interp and attending_interp.strip() else None,
+            "submitted_before_tiering": submitted_before == "Yes" if submitted_before else None,
+            "confidence_level": confidence.lower() if confidence else None,
+            "clinical_significance": clinical_sig if clinical_sig else None
+        }
+        request_data["attending_interpretation"] = attending_interpretation
+    
+    if any([qns, low_depth, failed_amp, poor_qual, contamination]):
+        qc_flags = {
+            "qns": qns,
+            "low_read_depth": low_depth,
+            "failed_to_amplify": failed_amp,
+            "poor_quality": poor_qual,
+            "contamination": contamination,
+            "notes": qc_notes if qc_notes and qc_notes.strip() else None
+        }
+        request_data["qc_flags"] = qc_flags
     
     try:
         response = requests.post(
             f"{API_BASE_URL}/v1/validate_variants",
-            json={
-                "variant_lines": variant_lines,
-                "oncotree_code": tumor_type
-            },
+            json=request_data,
             headers={"Content-Type": "application/json"},
             timeout=30
         )
@@ -174,6 +197,13 @@ def display_classification_results(results: Dict[str, Any]):
         pertinent_negatives = results.get("pertinent_negatives", [])
         st.metric("Pertinent Negatives", len(pertinent_negatives))
     
+    if "clinical_workflow" in results:
+        clinical_info = results["clinical_workflow"]
+        if clinical_info.get("attending_provided"):
+            st.info("👨‍⚕️ Attending physician interpretation included in analysis")
+        if clinical_info.get("qc_flags_provided"):
+            st.warning("⚠️ Quality control flags detected - review sample quality")
+    
     st.markdown("---")
     
     classified_variants = results.get("classified_variants", [])
@@ -261,6 +291,23 @@ tumor_type = st.sidebar.selectbox(
     help="OncoTree tumor type code for classification context"
 )
 
+st.subheader("👨‍⚕️ Clinical Information")
+attending_name = st.text_input("Attending Physician Name", placeholder="Dr. Smith")
+
+with st.expander("🔬 Quality Control Flags (Optional)"):
+    qns = st.checkbox("QNS - Quantity Not Sufficient")
+    low_depth = st.checkbox("Low Read Depth")
+    failed_amp = st.checkbox("Failed to Amplify")
+    poor_qual = st.checkbox("Poor Sample Quality")
+    contamination = st.checkbox("Sample Contamination")
+    qc_notes = st.text_area("QC Notes", placeholder="Additional quality control observations...")
+
+with st.expander("📋 Attending Interpretation (Optional)"):
+    attending_interp = st.text_area("Clinical Interpretation", placeholder="Attending physician's interpretation...")
+    submitted_before = st.selectbox("Submitted before seeing tier assignments?", ["", "Yes", "No"])
+    confidence = st.selectbox("Confidence Level", ["", "High", "Medium", "Low"])
+    clinical_sig = st.selectbox("Clinical Significance", ["", "Pathogenic", "Likely Pathogenic", "VUS", "Likely Benign", "Benign"])
+
 st.subheader("📝 Variant Input")
 st.markdown("Enter variants in one of these formats:")
 st.markdown("- **HGVS Notation:** `NM_004333.4:c.1799T>A` or `NM_004333.4:p.Val600Glu`")
@@ -285,7 +332,21 @@ if submit_button:
         st.error("❌ Please enter at least one variant to classify.")
     else:
         with st.spinner("🔄 Validating variants..."):
-            validation_result = validate_variant_input(variant_input, tumor_type)
+            validation_result = validate_variant_input(
+                variant_input, 
+                tumor_type,
+                attending_name,
+                attending_interp,
+                submitted_before,
+                confidence,
+                clinical_sig,
+                qns,
+                low_depth,
+                failed_amp,
+                poor_qual,
+                contamination,
+                qc_notes
+            )
             
             if validation_result is None:
                 st.stop()
@@ -315,6 +376,22 @@ if submit_button:
                     st.metric("Parsed Successfully", summary.get("parsed", 0))
                 with col3:
                     st.metric("Validation Errors", summary.get("errors", 0))
+                
+                if attending_name and attending_name.strip():
+                    st.info(f"👨‍⚕️ Attending physician: {attending_name}")
+                    if attending_interp and attending_interp.strip():
+                        st.info(f"📋 Clinical interpretation provided")
+                
+                if any([qns, low_depth, failed_amp, poor_qual, contamination]):
+                    active_flags = []
+                    if qns: active_flags.append("QNS")
+                    if low_depth: active_flags.append("Low Read Depth")
+                    if failed_amp: active_flags.append("Failed to Amplify")
+                    if poor_qual: active_flags.append("Poor Quality")
+                    if contamination: active_flags.append("Contamination")
+                    
+                    if active_flags:
+                        st.warning(f"⚠️ QC Flags: {', '.join(active_flags)}")
                 
                 parsed_variants = parse_variant_input(variant_input)
                 results = call_classify_api(parsed_variants, tumor_type)

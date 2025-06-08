@@ -1,7 +1,9 @@
 from typing import List, Dict, Any, Tuple, Optional, Union
 from pydantic import ValidationError as PydanticValidationError
 import re
-from core.api_models import SNVInput, CNVInput, SVInput, FusionInput, TumorMarkerInput, ValidationError, ValidationSummary
+import os
+import pandas as pd
+from core.api_models import SNVInput, CNVInput, SVInput, FusionInput, TumorMarkerInput, ValidationError, ValidationSummary, QCFlags, AttendingInterpretation
 from core.kb_models import OncoTreeMapping
 from sqlmodel import Session, select
 
@@ -13,6 +15,7 @@ class VariantValidator:
         self.db_session = db_session
         self.transcript_lookup = self._build_transcript_lookup()
         self.oncotree_codes = self._load_oncotree_codes()
+        self.qc_flags_config = self._load_qc_flags()
     
     def _build_transcript_lookup(self) -> Dict[str, Dict[str, str]]:
         """Build transcript ID lookup table from knowledge base."""
@@ -54,7 +57,7 @@ class VariantValidator:
             }
             return default_codes
     
-    def validate_batch(self, variant_lines: List[str], oncotree_code: str) -> ValidationSummary:
+    def validate_batch(self, variant_lines: List[str], oncotree_code: str, attending_interpretation: Optional[AttendingInterpretation] = None, qc_flags: Optional[QCFlags] = None) -> ValidationSummary:
         """Validate batch of variant inputs with aggregate error reporting."""
         errors = []
         parsed_variants = []
@@ -65,6 +68,18 @@ class VariantValidator:
                 input=oncotree_code,
                 message=f"Invalid OncoTree code. Supported codes: {sorted(list(self.oncotree_codes))[:10]}..."
             ))
+        
+        if attending_interpretation:
+            if not attending_interpretation.attending_name or len(attending_interpretation.attending_name.strip()) == 0:
+                errors.append(ValidationError(
+                    line=0,
+                    input="attending_interpretation",
+                    message="Attending name is required when providing attending interpretation"
+                ))
+        
+        if qc_flags:
+            qc_errors = self._validate_qc_flags(qc_flags)
+            errors.extend(qc_errors)
         
         for line_num, line in enumerate(variant_lines, 1):
             try:
@@ -260,3 +275,61 @@ class VariantValidator:
             return TumorMarkerInput(expression_data={gene: float(score)})
         else:
             raise ValueError("Invalid tumor marker format; expected 'MSI-H', 'TMB:10.5', 'HRD:42.0', or 'GENE_expression:2.5'")
+    
+    def _load_qc_flags(self) -> Dict[str, Dict[str, str]]:
+        """Load QC flags from resources file."""
+        try:
+            qc_file = os.path.join("resources", "qc_flags", "QC_Flags.tsv")
+            if os.path.exists(qc_file):
+                df = pd.read_csv(qc_file, sep='\t')
+                qc_dict = {}
+                for _, row in df.iterrows():
+                    qc_dict[row['flag_code']] = {
+                        'name': row['flag_name'],
+                        'description': row['description'],
+                        'severity': row['severity'],
+                        'action': row['recommended_action']
+                    }
+                return qc_dict
+            else:
+                return {
+                    'QNS': {'name': 'Quantity Not Sufficient', 'severity': 'HIGH'},
+                    'LOW_DEPTH': {'name': 'Low Read Depth', 'severity': 'MEDIUM'},
+                    'FAIL_AMP': {'name': 'Failed to Amplify', 'severity': 'HIGH'},
+                    'POOR_QUAL': {'name': 'Poor Quality', 'severity': 'MEDIUM'},
+                    'CONTAM': {'name': 'Contamination', 'severity': 'HIGH'}
+                }
+        except Exception as e:
+            print(f"Warning: Could not load QC flags: {e}")
+            return {}
+    
+    def _validate_qc_flags(self, qc_flags: QCFlags) -> List[ValidationError]:
+        """Validate QC flags against known flag types."""
+        errors = []
+        
+        flag_fields = ['qns', 'low_read_depth', 'failed_to_amplify', 'poor_quality', 'contamination']
+        active_flags = []
+        
+        for field in flag_fields:
+            if getattr(qc_flags, field, None) is True:
+                flag_code = field.upper().replace('_', '_')
+                if field == 'low_read_depth':
+                    flag_code = 'LOW_DEPTH'
+                elif field == 'failed_to_amplify':
+                    flag_code = 'FAIL_AMP'
+                elif field == 'poor_quality':
+                    flag_code = 'POOR_QUAL'
+                elif field == 'contamination':
+                    flag_code = 'CONTAM'
+                
+                active_flags.append(flag_code)
+        
+        high_severity_flags = [flag for flag in active_flags if self.qc_flags_config.get(flag, {}).get('severity') == 'HIGH']
+        if high_severity_flags:
+            errors.append(ValidationError(
+                line=0,
+                input="qc_flags",
+                message=f"High severity QC flags detected: {', '.join(high_severity_flags)}. Consider sample reprocessing."
+            ))
+        
+        return errors

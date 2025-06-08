@@ -1,6 +1,6 @@
 import pytest
 from api.validators import VariantValidator
-from core.api_models import ValidationSummary
+from core.api_models import ValidationSummary, QCFlags, AttendingInterpretation
 from api.database import get_session
 
 
@@ -116,5 +116,58 @@ class TestVariantValidator:
             assert result.summary["parsed"] == 2
             assert result.summary["errors"] == 2
             assert len(result.errors) == 2
+        finally:
+            session.close()
+    
+    def test_attending_interpretation_validation(self):
+        """Test attending interpretation validation."""
+        session = next(get_session())
+        try:
+            validator = VariantValidator(session)
+            
+            attending = AttendingInterpretation(
+                attending_name="Dr. Smith",
+                interpretation="Likely pathogenic variant",
+                confidence_level="high"
+            )
+            
+            result = validator.validate_batch(["chr7:140753336A>T"], "MEL", attending_interpretation=attending)
+            assert result.summary["errors"] == 0
+            
+            attending_invalid = AttendingInterpretation(
+                attending_name="",
+                interpretation="Some interpretation",
+                confidence_level="medium"
+            )
+            
+            result = validator.validate_batch(["chr7:140753336A>T"], "MEL", attending_interpretation=attending_invalid)
+            assert result.summary["errors"] == 1
+            assert "Attending name is required" in result.errors[0].message
+        finally:
+            session.close()
+    
+    def test_qc_flags_validation(self):
+        """Test QC flags validation."""
+        session = next(get_session())
+        try:
+            validator = VariantValidator(session)
+            
+            qc_flags = QCFlags(
+                qns=True,
+                failed_to_amplify=True,
+                notes="Sample quality issues"
+            )
+            
+            result = validator.validate_batch(["chr7:140753336A>T"], "MEL", qc_flags=qc_flags)
+            assert result.summary["errors"] == 1
+            assert "High severity QC flags detected" in result.errors[0].message
+            
+            qc_flags_medium = QCFlags(
+                low_read_depth=True,
+                poor_quality=True
+            )
+            
+            result = validator.validate_batch(["chr7:140753336A>T"], "MEL", qc_flags=qc_flags_medium)
+            assert result.summary["errors"] == 0
         finally:
             session.close()

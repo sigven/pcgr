@@ -1,0 +1,9 @@
+flag_code	flag_name	description	severity	recommended_action
+QNS	Quantity Not Sufficient	Insufficient sample quantity for reliable analysis	HIGH	Repeat collection if possible
+LOW_DEPTH	Low Read Depth	Read depth below recommended threshold	MEDIUM	Consider repeat sequencing or report with caveat
+FAIL_AMP	Failed to Amplify	PCR amplification failed for target regions	HIGH	Repeat extraction and amplification
+POOR_QUAL	Poor Quality	Overall sample quality below standards	MEDIUM	Review sample handling and storage
+CONTAM	Contamination	Sample contamination detected	HIGH	Discard sample and repeat collection
+LOW_CONC	Low Concentration	DNA/RNA concentration below optimal range	MEDIUM	Consider concentration or report with limitation
+DEGRADED	Degraded Sample	Sample shows signs of degradation	MEDIUM	Process with caution and note limitations
+MIXED	Mixed Sample	Multiple sample sources detected	HIGH	Verify sample identity and repeat if needed

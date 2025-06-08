@@ -1,10 +1,10 @@
-from typing import List
+from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 from api.models import ClassificationBatchRequest, ClassificationResult
 from api.database import get_session
 from core.engine import assign_tier, ClassifiedVariant
-from core.api_models import Variant, ValidationSummary
+from core.api_models import Variant, ValidationSummary, QCFlags, AttendingInterpretation
 from core.kb_models import GeneGeneralComment, VariantDxInterpretation, PertinentNegative
 from wrappers.vep_wrapper import get_vep_annotation
 from api.validators import VariantValidator
@@ -128,13 +128,20 @@ async def get_gene_interpretations(
 async def validate_variants(
     variant_lines: List[str],
     oncotree_code: str,
+    attending_interpretation: Optional[AttendingInterpretation] = None,
+    qc_flags: Optional[QCFlags] = None,
     db_session: Session = Depends(get_session)
 ) -> ValidationSummary:
     """Validate batch of variant inputs with detailed error reporting."""
     validator = VariantValidator(db_session)
     
     try:
-        validation_result = validator.validate_batch(variant_lines, oncotree_code)
+        validation_result = validator.validate_batch(
+            variant_lines, 
+            oncotree_code, 
+            attending_interpretation, 
+            qc_flags
+        )
         
         if validation_result.errors:
             raise HTTPException(
@@ -157,17 +164,29 @@ async def validate_variants(
 async def classify_variants_enhanced(
     variant_lines: List[str],
     oncotree_code: str,
+    attending_interpretation: Optional[AttendingInterpretation] = None,
+    qc_flags: Optional[QCFlags] = None,
     db_session: Session = Depends(get_session)
 ) -> dict:
     """Enhanced classification with validation plan."""
     validator = VariantValidator(db_session)
     
-    validation_result = validator.validate_batch(variant_lines, oncotree_code)
+    validation_result = validator.validate_batch(
+        variant_lines, 
+        oncotree_code, 
+        attending_interpretation, 
+        qc_flags
+    )
     
     plan = {
         "will_generate": ["variant_interpretation", "boilerplate_text"] if oncotree_code else ["variant_interpretation"],
         "validation_summary": validation_result.dict(),
-        "next_steps": "Submit valid variants for classification" if not validation_result.errors else "Fix validation errors and resubmit"
+        "next_steps": "Submit valid variants for classification" if not validation_result.errors else "Fix validation errors and resubmit",
+        "clinical_workflow": {
+            "attending_provided": attending_interpretation is not None,
+            "qc_flags_provided": qc_flags is not None,
+            "pre_tiering_interpretation": attending_interpretation.submitted_before_tiering if attending_interpretation else None
+        }
     }
     
     return plan
