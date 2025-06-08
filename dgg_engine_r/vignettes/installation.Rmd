@@ -1,0 +1,263 @@
+---
+title: "Installation"
+output: rmarkdown::html_document
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "", collapse = TRUE)
+```
+
+
+```{r load_pkgs, include=FALSE, echo=FALSE, message=FALSE, warning=FALSE}
+require(glue, include.only = "glue")
+```
+
+```{r vars, echo=FALSE}
+Sys.setenv(VEP_VERSION = "113")
+Sys.setenv(PCGR_VERSION = "2.2.1")
+Sys.setenv(BUNDLE_VERSION = "20250314")
+VEP_VERSION <- Sys.getenv("VEP_VERSION")
+PCGR_VERSION <- Sys.getenv("PCGR_VERSION")
+BUNDLE_VERSION <- Sys.getenv("BUNDLE_VERSION")
+```
+
+```{r funcs, echo=FALSE}
+bundle_link <- function(hg) {
+  v <- BUNDLE_VERSION
+  glue("https://insilico.hpc.uio.no/dgg_engine/pcgr_ref_data.{v}.{hg}.tgz")
+}
+```
+
+
+## Data
+
+PCGR requires the following data to run successfully:
+
+1. **Reference bundle** - containing data from multiple knowledge resources, including information on molecular biomarkers, targeted cancer therapies, variant frequencies etc. Key datasets include [CIViC](https://civicdb.org), [CGI](https://www.cancergenomeinterpreter.org/biomarkers), [Open Targets Platform](https://platform.opentargets.org), [TCGA](https://portal.gdc.cancer.gov/), and [ClinVar](https://www.ncbi.nlm.nih.gov/clinvar/).
+2. **Ensembl VEP data cache** - needed for variant annotation with VEP (Variant Effect Predictor)
+3. **User-supplied sample-specific inputs** - e.g. somatic variant calls in VCF format
+
+PCGR supports both the GRCh37 and GRCh38 human genome assemblies. All the data above
+need to match the chosen assembly.
+
+### 1. Reference Bundle
+
+Reference bundles are generated semi-automatically (by the PCGR author) and
+are versioned based on their release date. Keep in mind that the bundles support
+only certain Ensembl VEP versions, and importantly also specific software versions of PCGR. Upgrading the PCGR software without upgrading the bundle specified here is thus _not_ a recommended installation strategy. The latest (**v`r BUNDLE_VERSION`**) genome-specific
+bundles can be downloaded directly from below (size: ~5G):
+
+| Assembly | Download Link             |
+|:---------|:--------------------------|
+| GRCh38   | `r bundle_link("grch38")` |
+| GRCh37   | `r bundle_link("grch37")` |
+
+**Tip 1**: The `data/grch3x/.PCGR_BUNDLE_VERSION` file within the downloaded bundle
+indicates the bundle version for reporting purposes.
+
+**Tip 2**: The `data/grch3x/data_overview.grch3x.html` file provides a report with an overview and statistics of the key resources included in the reference bundle.
+
+#### Bash Example
+
+```{bash echo=FALSE}
+echo "BUNDLE_VERSION=\"${BUNDLE_VERSION}\""
+```
+
+```bash
+GENOME="grch38" # or "grch37"
+BUNDLE="pcgr_ref_data.${BUNDLE_VERSION}.${GENOME}.tgz"
+wget https://insilico.hpc.uio.no/dgg_engine/${BUNDLE}
+gzip -dc ${BUNDLE} | tar xvf -
+
+mkdir ${BUNDLE_VERSION}
+mv data/ ${BUNDLE_VERSION}
+```
+
+### 2. VEP Cache
+
+[VEP][vep-web] requires a data cache which is available from the Ensembl
+[FTP site][ensembl-ftp] (search there for files starting with `homo_sapiens_vep_`).
+The latest Ensembl VEP version we support is **v`r VEP_VERSION`**.
+
+**Tip**: PCGR needs to be pointed to the _parent_ directory containing
+the downloaded `homo_sapiens/xyz_GRCh3x/` cache, which is usually called `.vep` if
+you've followed the VEP cache [download instructions][vep-cache].
+
+[vep-web]: https://www.ensembl.org/info/docs/tools/vep/index.html
+[ensembl-ftp]: https://ftp.ensembl.org/pub/release-113/variation/indexed_vep_cache/
+[vep-cache]: https://www.ensembl.org/info/docs/tools/vep/script/vep_cache.html#cache
+
+#### Bash Example
+
+```{bash echo=FALSE}
+echo "VEP_VERSION=\"${VEP_VERSION}\""
+```
+
+```bash
+GENOME="GRCh38" # or "GRCh37"
+CACHE="homo_sapiens_vep_${VEP_VERSION}_${GENOME}.tar.gz"
+
+wget https://ftp.ensembl.org/pub/release-${VEP_VERSION}/variation/indexed_vep_cache/${CACHE}
+gzip -dc ${CACHE} | tar xvf -
+```
+
+### 3. Sample Inputs
+
+See the [Inputs](input.html) article.
+
+-----------------------------
+
+## Software
+
+The PCGR workflow can be installed with any of the following:
+
+- A. [Conda][conda-web],
+- B. [Docker][docker-web], or
+- C. [Singularity/Apptainer][apptainer-web].
+
+[conda-web]: https://conda.io/projects/conda/en/latest/user-guide/getting-started.html
+[docker-web]: https://docs.docker.com/
+[apptainer-web]: https://apptainer.org/docs/user/latest/index.html
+
+### A. Conda {.tabset .tabset-pills}
+
+There is Conda support for both Linux and macOS machines.
+The following process can take anywhere from 10 up to 40 minutes when installing
+from scratch, mostly depending on the user's and server's internet connection.
+Most of the time is spent on downloading the `{BSgenome.Hsapiens.UCSC.hg19}` and
+`{BSgenome.Hsapiens.UCSC.hg38}` R packages (which happens at the very end of the
+conda environment creation).
+
+#### Linux
+
+```{bash echo=FALSE}
+echo "PCGR_VERSION=\"${PCGR_VERSION}\""
+```
+
+```bash
+# set up variables
+PCGR_REPO="https://raw.githubusercontent.com/LauferVA/dgg_rules_somatic/v${PCGR_VERSION}/conda/env/lock/"
+PLATFORM="linux"
+# create conda envs in local directory
+mkdir pcgr_conda
+conda create --prefix ./pcgr_conda/pcgr --file ${PCGR_REPO}/pcgr-${PLATFORM}-64.lock
+conda create --prefix ./pcgr_conda/pcgrr --file ${PCGR_REPO}/pcgrr-${PLATFORM}-64.lock
+# you need to specify the directory of the conda env when using --prefix
+conda activate ./pcgr_conda/pcgr
+# test that it works
+pcgr --version
+pcgr --help
+```
+
+#### macOS
+
+For macOS M1 machines, you need to include `CONDA_SUBDIR=osx-64` before the
+`conda create` command - see
+<https://github.com/conda-forge/miniforge/issues/165#issuecomment-860233092>:
+
+```{bash echo=FALSE}
+echo "PCGR_VERSION=\"${PCGR_VERSION}\""
+```
+
+```bash
+# set up variables
+PCGR_REPO="https://raw.githubusercontent.com/LauferVA/dgg_rules_somatic/v${PCGR_VERSION}/conda/env/lock/"
+PLATFORM="osx"
+# create conda envs in local directory
+mkdir pcgr_conda
+CONDA_SUBDIR=osx-64 conda create --prefix ./pcgr_conda/pcgr --file ${PCGR_REPO}/pcgr-${PLATFORM}-64.lock
+CONDA_SUBDIR=osx-64 conda create --prefix ./pcgr_conda/pcgrr --file ${PCGR_REPO}/pcgrr-${PLATFORM}-64.lock
+# you need to specify the directory of the conda env when using --prefix
+conda activate ./pcgr_conda/pcgr
+# test that it works
+pcgr --version
+pcgr --help
+```
+
+### B. Docker
+
+The PCGR Docker image is available on [Docker Hub](https://hub.docker.com/r/lauferva/dgg-engine/tags).
+Pull the latest **v`r PCGR_VERSION`** image with:
+
+```{r echo=FALSE}
+glue("docker pull sigven/pcgr:{PCGR_VERSION}")
+# might need to specify platform
+# docker pull --platform=amd64 sigven/pcgr:${PCGR_VERSION}
+```
+
+#### Example Run
+
+```{bash echo=FALSE}
+echo "PCGR_VERSION=\"${PCGR_VERSION}\""
+```
+
+```bash
+docker container run -it --rm \
+    -v /Users/you/dir1/.vep:/mnt/.vep \
+    -v /Users/you/dir1/bundle:/mnt/bundle \
+    -v /Users/you/dir1/pcgr_inputs:/mnt/pcgr_inputs \
+    -v /Users/you/dir1/pcgr_outputs:/mnt/pcgr_outputs \
+    sigven/pcgr:${PCGR_VERSION} \
+    pcgr \
+      --input_vcf "/mnt/pcgr_inputs/T001-BRCA.grch38.vcf.gz" \
+      --vep_dir "/mnt/.vep" \
+      --refdata_dir "/mnt/bundle" \
+      --output_dir "/mnt/pcgr_outputs" \
+      --genome_assembly "grch38" \
+      --sample_id "SAMPLE_B" \
+      --tumor_dp_tag "TDP" \
+      --tumor_af_tag "TAF" \
+      --assay "WGS" \
+      --vcf2maf
+```
+
+**NOTE**: If you need to run the Docker-based version of PCGR as a non-root user,
+you may need to explicitly add options for quarto to work properly, i.e.
+`--env "XDG_CACHE_HOME=/tmp/quarto_cache_home"` (same as for Singularity/Apptainer below, see also [issue #246](https://github.com/LauferVA/dgg_rules_somatic/issues/246)).
+<br><br>
+
+### C. Singularity/Apptainer
+
+The PCGR Singularity/Apptainer image is available on [GitHub Container Registry](https://ghcr.io/sigven/pcgr).
+Pull the latest **v`r PCGR_VERSION`** image with:
+
+```{r echo=FALSE}
+glue("apptainer pull oras://ghcr.io/sigven/pcgr:{PCGR_VERSION}.singularity")
+```
+
+This will download a Singularity Image File (SIF) called **`r glue("pcgr_{PCGR_VERSION}.singularity.sif")`**
+that can be run with Singularity or Apptainer.
+
+#### Example Run
+
+```{bash echo=FALSE}
+echo "PCGR_VERSION=\"${PCGR_VERSION}\""
+```
+
+```bash
+apptainer exec \
+  --writable-tmpfs \
+  --no-home \
+  --env "XDG_CACHE_HOME=/tmp/quarto_cache_home" \
+  -B /Users/you/dir1/.vep:/mnt/.vep \
+  -B /Users/you/dir1/bundle:/mnt/bundle \
+  -B /Users/you/dir1/pcgr_inputs:/mnt/pcgr_inputs \
+  -B /Users/you/dir1/pcgr_outputs:/mnt/pcgr_outputs \
+  pcgr_${PCGR_VERSION}.singularity.sif \
+  pcgr \
+    --input_vcf "/mnt/pcgr_inputs/T001-BRCA.grch38.vcf.gz" \
+    --vep_dir "/mnt/.vep" \
+    --refdata_dir "/mnt/bundle" \
+    --output_dir "/mnt/pcgr_outputs" \
+    --genome_assembly "grch38" \
+    --sample_id "SAMPLE_B" \
+    --assay "WGS" \
+    --tumor_dp_tag "TDP" \
+    --tumor_af_tag "TAF" \
+    --vcf2maf
+```
+
+**Note**: For any Apptainer/Singularity issues not directly related to PCGR, we
+would recommend reaching out to the Apptainer community (e.g. https://github.com/apptainer/apptainer)
+since we have limited experience with Apptainer/Singularity.

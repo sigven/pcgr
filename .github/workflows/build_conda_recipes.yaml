@@ -90,10 +90,10 @@ jobs:
         run: |
           micromamba env create -n pkgdownenv -f ${env_yml_path}/pkgdown.yml
           micromamba activate pkgdownenv
-          cp pcgrr/DESCRIPTION . # hack for pkgdown to work
-          printf "pcgrr version:\n"
-          Rscript -e "packageVersion('pcgrr')"
-          Rscript -e "pkgdown::deploy_to_branch(pkg = 'pcgrr', commit_message = 'Built PCGR website: https://sigven.github.io/pcgr/', branch = 'gh-pages', new_process = FALSE)"
+          cp dgg_engine_r/DESCRIPTION . # hack for pkgdown to work
+          printf "dgg_engine_r version:\n"
+          Rscript -e "packageVersion('dgg_engine_r')"
+          Rscript -e "pkgdown::deploy_to_branch(pkg = 'dgg_engine_r', commit_message = 'Built DGG Engine website: https://github.com/LauferVA/dgg_rules_somatic/', branch = 'gh-pages', new_process = FALSE)"
 
   docker_deploy:
     name: Build and deploy Docker

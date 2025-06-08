@@ -18,7 +18,7 @@ This is the tool you interact with most directly, giving it specific, file-by-fi
 * **Tool:** **GitHub Copilot** (specifically Copilot Chat)
 * **Workflow:** Inside your multi-root workspace, you would direct Copilot to perform the merge, piece by piece. You would have a chat window open and give it instructions like:
     * **Dependency Merging:** "Analyze `dgg_rules_somatic/environment.yml` and `dgg_rules_germline/pyproject.toml`. Create a single, unified `pyproject.toml` in the `unified-cancer-reporter` directory that combines all dependencies and resolves any version conflicts by choosing the latest version."
-    * **Code Refactoring:** "Take the VCF parsing class from `dgg_rules_somatic/src/pcgr/vcf.py`. Copy it into `unified-cancer-reporter/src/core/parser.py` and refactor it to have no dependencies on the rest of the original codebase."
+    * **Code Refactoring:** "Take the VCF parsing class from `dgg_rules_somatic/src/dgg_engine/vcf.py`. Copy it into `unified-cancer-reporter/src/core/parser.py` and refactor it to have no dependencies on the rest of the original codebase."
     * **API Integration:** "Now, find all places in the `dgg_rules_germline` codebase that read VCF files and update them to use the new `core.parser` module in our unified repository."
 
 ### 3. The AI-First Editor (A More Integrated Alternative)

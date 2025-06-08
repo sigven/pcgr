@@ -3,7 +3,7 @@ package:
   version: 2.2.1 # versioned by bump2version
 
 source:
-  path: ../../../pcgrr
+  path: ../../../dgg_engine_r
 
 build:
   number: 0
@@ -90,7 +90,7 @@ test:
     - $R -e "library('pcgrr')"
 
 about:
-  home: https://github.com/sigven/pcgr/pcgrr
+  home: https://github.com/LauferVA/dgg_rules_somatic/dgg_engine_r
   license: MIT
   summary: Personal Cancer Genome ReporteR.
     Functions, tools and utilities for the generation of clinical

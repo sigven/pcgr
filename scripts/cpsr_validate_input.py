@@ -11,16 +11,16 @@ import pandas as pd
 import gzip
 
 from cyvcf2 import VCF
-from pcgr import utils, annoutils, vcf, pcgr_vars
-from pcgr.utils import error_message, check_subprocess, random_id_generator, sort_bed, check_file_exists, remove_file
-from pcgr.vcf import check_existing_vcf_info_tags, check_retained_vcf_info_tags
-from pcgr.annoutils import read_infotag_file,read_vcfanno_tag_file
+from dgg_engine import utils, annoutils, vcf, pcgr_vars
+from dgg_engine.utils import error_message, check_subprocess, random_id_generator, sort_bed, check_file_exists, remove_file
+from dgg_engine.vcf import check_existing_vcf_info_tags, check_retained_vcf_info_tags
+from dgg_engine.annoutils import read_infotag_file,read_vcfanno_tag_file
 
 
 def __main__():
 
     parser = argparse.ArgumentParser(description='Verify input data for CPSR')
-    parser.add_argument('refdata_assembly_dir',help='Assembly-specific directory containing the reference data files for PCGR/CPSR')
+    parser.add_argument('refdata_assembly_dir',help='Assembly-specific directory containing the reference data files for DGG Engine/CPSR')
     parser.add_argument('input_vcf', help='VCF input file with query variants (SNVs/InDels)')
     parser.add_argument('validated_vcf',help="Name of VCF file with validated, decomposed query variants that overlap target genes (SNVs/InDels)")
     parser.add_argument('custom_target_tsv',help='Custom text/TSV file indicating user-defined target genes from panel 0 for screening and reporting')

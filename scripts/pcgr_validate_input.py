@@ -10,18 +10,18 @@ import pandas as np
 from cyvcf2 import VCF
 import gzip
 
-from pcgr import vcf, cna
-from pcgr.annoutils import read_infotag_file, read_vcfanno_tag_file
-from pcgr.utils import error_message, check_subprocess, remove_file, random_id_generator, getlogger
-from pcgr.cna import is_valid_cna
-from pcgr.vcf import check_existing_vcf_info_tags, check_retained_vcf_info_tags
-from pcgr import pcgr_vars
+from dgg_engine import vcf, cna
+from dgg_engine.annoutils import read_infotag_file, read_vcfanno_tag_file
+from dgg_engine.utils import error_message, check_subprocess, remove_file, random_id_generator, getlogger
+from dgg_engine.cna import is_valid_cna
+from dgg_engine.vcf import check_existing_vcf_info_tags, check_retained_vcf_info_tags
+from dgg_engine import pcgr_vars
 
 
 def __main__():
 
     parser = argparse.ArgumentParser(description='Verify input data for PCGR')
-    parser.add_argument('refdata_assembly_dir',help='Assembly-specific directory with reference data for PCGR/CPSR')
+    parser.add_argument('refdata_assembly_dir',help='Assembly-specific directory with reference data for DGG Engine/CPSR')
     parser.add_argument('input_vcf', help='Somatic (tumor) query variants (SNVs/InDels) - VCF format')
     parser.add_argument('validated_vcf', help="Validated VCF file with somatic (tumor) query variants (SNVs/InDels)")
     parser.add_argument('input_cna', help='Somatic (tumor) copy number query segments (tab-separated values)')

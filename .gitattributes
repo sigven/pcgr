@@ -1,2 +1,2 @@
 *.html linguist-documentation
-src/R/pcgrr/inst/templates/*.bib linguist-vendored=true
+src/R/dgg_engine_r/inst/templates/*.bib linguist-vendored=true

@@ -1,0 +1,115 @@
+---
+title: "Input files"
+output: rmarkdown::html_document
+---
+
+## Input files
+
+The PCGR workflow accepts three main input files:
+
+  * An unannotated, single-sample [VCF file](https://github.com/samtools/hts-specs#variant-calling-data-files) (>= v4.2) with called somatic variants (SNVs/InDels)
+  * A file with allele-specific copy number segments (tab-separated values - TSV)
+  * A file with transcript/gene expression levels (tab-separated values - TSV)
+
+The input VCF is a required input file, while the somatic copy number file and gene expression file are optional. The following arguments to the `pcgr` command are used for input files:
+
+* `--input_vcf` (required argument to `pcgr`)
+* `--input_cna`
+* `--input_rna_expression`
+
+In addition to these three main input files, the user can also opt to provide a [panel-of-normals VCF](#panel-of-normals-pon-vcf) file (`--pon_vcf`) for tumor-only variant filtering, as well as an input file with [CPSR-classified germline variants (TSV)](#germline-variants) (`--input_cpsr`).
+
+### VCF
+
+* We __strongly__ recommend that the input VCF is compressed and indexed using [bgzip](http://www.htslib.org/doc/bgzip.html) and [tabix](http://www.htslib.org/doc/tabix.html)
+* If the input VCF contains [multi-allelic sites](https://glow.readthedocs.io/en/latest/etl/variant-splitter.html), these will be subject to [decomposition](http://genome.sph.umich.edu/wiki/Vt#Decompose). Either way, we encourage that users prepare the input VCF _without the presence of multi-allelic sites_.
+* Variants used for reporting should be designated as `PASS` in the VCF FILTER column. Variants denoted with e.g. `Reject` as a FILTER value will not be subject to analysis in PCGR. For records with undefined values in the FILTER column (`'.'`), these will be considered as `PASS` variants.
+
+#### Formatting of variant sequencing depth/allelic support (DP/AF)
+
+The representation of variant genotype data (allelic depth and support in tumor vs. control sample) is usually formatted in the genotype fields of a VCF file, on a per-sample basis. However, considering the VCF output for the [numerous somatic SNV/InDel callers](https://www.biostars.org/p/19104/) that are in use, we have experienced a general lack of uniformity for how this information is encoded in the genotype fields. In order for PCGR to recognize this type of information robustly, we currently require that you as a user encode this unambiguously in the INFO field of your VCF file.
+
+Shown below is how the VCF header for these entries should look like in your input VCF, and how the corresponding variant data is encoded per record:
+
+__VCF header__
+
+```
+##INFO=<ID=TVAF,Number=.,Type=Float,Description="Allelic fraction of alternative allele in tumor">
+##INFO=<ID=TDP,Number=.,Type=Integer,Description="Read depth across variant site in tumor">
+```
+
+__VCF records__
+
+```
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1       23519660        .       G       C       .       PASS    TVAF=0.0980;TDP=51
+```
+
+When you run PCGR, make sure to feed the name of the INFO tags to the tool, i.e. using the `tumor_dp_tag`and `tumor_af_tag` options:
+
+```
+pcgr --tumor_dp_tag TDP --tumor_af_tag TVAF
+```
+
+As an effort to support the users with this procedure, we are hoping to establish a _VCF pre-processing script_, that accepts any VCF (from any caller), and that will ensure that the file adheres to the formatting requirements of PCGR. See also [this issue](https://github.com/sigven/dgg_engine/issues/136).
+
+#### Other notes regarding input VCF
+
+* PCGR generates a number of VCF INFO annotation tags that are appended to the query VCF. We therefore encourage the users to submit query VCF files that _have not_ been subject to annotations by other means, but rather a VCF file that comes directly from variant calling. If not, there are likely to be INFO tags in the query VCF file that coincide with those produced by PCGR.
+* Note that you can preserve particular tags in the INFO field towards the TSV output of PCGR. Sometimes, it can be convenient to investigate particular properties of the variants (encoded in the VCF) against functional annotations (as provided by PCGR). To achieve this, use the option `--retained_info_tags <TAG1>,<TAG2>` etc.
+
+
+### Panel-of-normals VCF
+
+The user can submit a panel-of-normals (PoN) VCF file to PCGR, indicating variants that should be excluded/filtered from the input VCF in a __tumor-only setting__ (i.e. option `--tumor_only`).
+
+* `--pon_vcf <VCF_FILE>`
+
+The PoN VCF file needs to contain the following.
+
+1. The following description needs to be present in the VCF header:
+
+```
+##INFO=<ID=PANEL_OF_NORMALS,Number=0,Type=Flag,Description="Overlap with germline call among panel of normals">
+```
+
+2. Each record in the PoN VCF file needs to contain the `PANEL_OF_NORMALS` flag in the INFO field
+
+
+### Copy number segments - allele-specific
+
+A tab-separated values file with allele-specific copy number aberrations __MUST__ contain the following four columns:
+
+* `Chromosome`
+* `Start`
+* `End`
+* `nMajor`
+* `nMinor`
+
+Here, _Chromosome_, _Start_, and _End_ denote the chromosomal segment, while _nMajor_ and _nMinor_ denote major and minor copy number for particular segment, a standard output of somatic copy number alteration callers. Note that coordinates must be **one-based** (i.e. chromosomes start at 1, not 0), and that copy numbers should be formatted as whole integers, not floating values. Below shows the initial part of a copy number segment file that is formatted correctly according to PCGR's requirements:
+
+      Chromosome	Start	End	nMajor nMinor
+      1 3218329 3550598 1 0
+      1 3552451 4593614 1 1
+      1 4593663 6433129 2 1
+
+Importantly, you can configure predefined thresholds for segments that are considered to be high-level copy-number amplifications through the following option:
+
+* `--n_copy_gain`: minimum (total) copy number for a segment to be considered an amplification, _default 6_
+
+
+### Germline variants
+
+The user can submit a file with germline variants processed and classified with [CPSR](https://sigven.github.io/cpsr), which caters for an integration of germline and somatic findings in the output report. This file corresponds to output file `<sample_id>.cpsr.<genome_assembly>.classification.tsv.gz` from the CPSR pipeline. Make sure the genome assembly is the same as the one used for the somatic variant input files.
+
+### Gene expression
+
+The user can submit a file with bulk gene/transcript expression data to PCGR, indicating the relative expression levels of genes in the query sample. PCGR may conduct an expression outlier analysis (compared against other cohorts of samples), and also perform an RNA expression similarity analysis, i.e. correlation of expression profile with other tumor samples.
+
+The tab-separated values file with gene expression estimates __MUST__ contain the following two columns:
+
+* `TargetID`
+* `TPM`
+
+The `TPM` column indicates the expression level of a given target, and  must be provided as _Transcripts per million_ (not log-transformed), a relatively common output measure from bulk RNA-seq pipelines. The `TargetID` should list transcript or gene identifiers, preferably at the transcript level. Permitted identifier types including Ensembl/RefSeq identifiers for transcript-level expression estimates, and gene symbols and Ensembl gene identifiers for gene-level expression estimates.
+
