@@ -2,7 +2,7 @@ import os
 from sqlmodel import Session, create_engine
 from core.kb_models import SQLModel
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://localhost/dgg_rules")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./dgg_rules_demo.db")
 engine = create_engine(DATABASE_URL)
 
 def create_tables():
