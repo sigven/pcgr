@@ -17,6 +17,39 @@ st.markdown("---")
 API_BASE_URL = "http://localhost:8000"
 CLASSIFY_ENDPOINT = f"{API_BASE_URL}/v1/classify"
 
+def validate_variant_input(variant_text: str, tumor_type: str) -> Dict[str, Any]:
+    """Call the enhanced validation API."""
+    variant_lines = [line.strip() for line in variant_text.split('\n') if line.strip()]
+    
+    try:
+        response = requests.post(
+            f"{API_BASE_URL}/v1/validate_variants",
+            json={
+                "variant_lines": variant_lines,
+                "oncotree_code": tumor_type
+            },
+            headers={"Content-Type": "application/json"},
+            timeout=30
+        )
+        
+        if response.status_code == 400:
+            return response.json()
+        
+        response.raise_for_status()
+        return response.json()
+        
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 400:
+            return e.response.json()
+        raise
+    except requests.exceptions.ConnectionError:
+        st.error("❌ Could not connect to the DGG Engine API. Make sure the FastAPI server is running on localhost:8000")
+        return None
+    except Exception as e:
+        st.error(f"❌ Validation error: {str(e)}")
+        return None
+
+
 def parse_variant_input(variant_text: str) -> List[Dict[str, Any]]:
     """Parse simple variant text input into structured Variant objects.
     
@@ -36,8 +69,8 @@ def parse_variant_input(variant_text: str) -> List[Dict[str, Any]]:
         if aa_match:
             gene_symbol, aa_change = aa_match.groups()
             variant = {
-                "chromosome": "chr1",  # Placeholder - would need gene lookup in real system
-                "position": 100000,    # Placeholder
+                "chromosome": "chr1",
+                "position": 100000,
                 "reference_allele": aa_change[0],
                 "alternate_allele": aa_change[-1]
             }
@@ -230,14 +263,15 @@ tumor_type = st.sidebar.selectbox(
 
 st.subheader("📝 Variant Input")
 st.markdown("Enter variants in one of these formats:")
-st.markdown("- **Gene + Amino Acid Change:** `BRAF V600E` (creates SNV)")
-st.markdown("- **Gene + CNV:** `ERBB2 amplification` (creates CNV)")
-st.markdown("- **Gene Fusion:** `BCR-ABL1 fusion` (creates SV)")
-st.markdown("- **Genomic Coordinate:** `chr7:140753336A>T` (creates SNV)")
+st.markdown("- **HGVS Notation:** `NM_004333.4:c.1799T>A` or `NM_004333.4:p.Val600Glu`")
+st.markdown("- **Genomic Coordinate:** `chr7:140753336A>T`")
+st.markdown("- **CNV:** `chr17:4123-4127:copy_number=3.5`")
+st.markdown("- **Fusion:** `NM_001:exon1-NM_002:exon2`")
+st.markdown("- **Tumor Markers:** `MSI-H`, `TMB:15.2`, `HRD:42.0`, `BRAF_expression:2.5`")
 
 variant_input = st.text_area(
     "Variants (one per line)",
-    value="BRAF V600E\nERBB2 amplification\nBCR-ABL1 fusion\nchr7:140753336A>T",
+    value="NM_004333.4:c.1799T>A\nchr7:140753336A>T\nchr17:4123-4127:copy_number=3.5\nMSI-H",
     height=150,
     help="Enter one variant per line using the supported formats above"
 )
@@ -250,22 +284,43 @@ if submit_button:
     if not variant_input.strip():
         st.error("❌ Please enter at least one variant to classify.")
     else:
-        with st.spinner("🔄 Parsing variants and calling classification API..."):
-            parsed_variants = parse_variant_input(variant_input)
+        with st.spinner("🔄 Validating variants..."):
+            validation_result = validate_variant_input(variant_input, tumor_type)
             
-            if parsed_variants:
-                st.info(f"📊 Parsed {len(parsed_variants)} variant(s)")
+            if validation_result is None:
+                st.stop()
+            
+            if "errors" in validation_result and validation_result["errors"]:
+                st.error("❌ Validation errors found:")
                 
-                with st.expander("🔍 Parsed Variants (click to verify)", expanded=False):
-                    for i, variant in enumerate(parsed_variants, 1):
-                        st.json(variant)
+                for error in validation_result["errors"]:
+                    st.error(f"Line {error['line']}: {error['message']}")
+                    st.code(f"Input: {error['input']}")
                 
+                st.markdown("### 📋 Expected Formats:")
+                st.markdown("- **HGVS:** `NM_004333.4:c.1799T>A`")
+                st.markdown("- **Genomic:** `chr7:140753336A>T`")
+                st.markdown("- **CNV:** `chr17:4123-4127:copy_number=3.5`")
+                st.markdown("- **Fusion:** `NM_001:exon1-NM_002:exon2`")
+                st.markdown("- **Tumor Markers:** `MSI-H`, `TMB:15.2`")
+                
+            else:
+                st.success("✅ All variants validated successfully!")
+                
+                summary = validation_result.get("summary", {})
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.metric("Total Variants", summary.get("total_variants", 0))
+                with col2:
+                    st.metric("Parsed Successfully", summary.get("parsed", 0))
+                with col3:
+                    st.metric("Validation Errors", summary.get("errors", 0))
+                
+                parsed_variants = parse_variant_input(variant_input)
                 results = call_classify_api(parsed_variants, tumor_type)
                 
                 if results:
                     display_classification_results(results)
-            else:
-                st.error("❌ Could not parse any variants from the input.")
 
 st.markdown("---")
 st.markdown("**DGG Variant Interpretation Engine** - Clinical variant classification demo")

@@ -25,23 +25,65 @@ class Variant(BaseModel):
 
 
 class SNVInput(BaseModel):
-    """Model for simple nucleotide variants (SNVs)."""
-    chromosome: str = Field(description="Chromosome (e.g., 'chr1', '1')")
-    position: int = Field(description="Genomic position")
-    reference_allele: str = Field(description="Reference allele")
-    alternate_allele: str = Field(description="Alternate allele")
+    """SNV/Indel with HGVS or genomic coordinate support."""
+    transcript_id: Optional[str] = Field(default=None, description="RefSeq/Ensembl transcript ID (e.g., NM_000059.3)")
+    hgvs_c: Optional[str] = Field(default=None, description="HGVS coding notation (e.g., c.725G>A)")
+    hgvs_p: Optional[str] = Field(default=None, description="HGVS protein notation (e.g., p.Val600Glu)")
+    chromosome: Optional[str] = Field(default=None, description="Chromosome (e.g., 'chr7')")
+    position: Optional[int] = Field(default=None, description="Genomic position")
+    reference: Optional[str] = Field(default=None, description="Reference allele")
+    alternate: Optional[str] = Field(default=None, description="Alternate allele")
+    build: str = Field(default="GRCh38", description="Genome build (GRCh37/GRCh38)")
+    strand: Optional[str] = Field(default=None, description="Strand orientation")
 
 
 class CNVInput(BaseModel):
-    """Model for Copy Number Variations (CNVs)."""
-    gene: str = Field(description="Gene symbol")
-    copy_number_change: str = Field(description="Type of copy number change (e.g., 'amplification', 'loss', 'high-level amplification')")
+    """Copy Number Variation."""
+    chromosome: str = Field(description="Chromosome")
+    start: int = Field(ge=1, description="Start position")
+    end: int = Field(ge=1, description="End position")
+    copy_number: float = Field(ge=0, description="Copy number value")
+    build: str = Field(default="GRCh38", description="Genome build")
 
 
 class SVInput(BaseModel):
-    """Model for Structural Variants (SVs)."""
-    sv_type: str = Field(description="Structural variant type (e.g., 'translocation', 'fusion')")
-    genes: List[str] = Field(description="List of genes involved (e.g., ['BCR', 'ABL1'])")
+    """Structural Variant."""
+    breakends: List[Dict[str, Any]] = Field(description="List of breakend objects with chr, pos, strand, mate_id")
+    svtype: str = Field(description="SV type: DEL, DUP, INV, TRA, COMPLEX")
+    build: str = Field(default="GRCh38", description="Genome build")
+
+
+class FusionInput(BaseModel):
+    """Gene Fusion."""
+    transcript5p: str = Field(description="5' transcript ID")
+    junction5p_exon: str = Field(description="5' junction exon")
+    transcript3p: str = Field(description="3' transcript ID")
+    junction3p_exon: str = Field(description="3' junction exon")
+    strand5p: Optional[str] = Field(default=None, description="5' strand")
+    strand3p: Optional[str] = Field(default=None, description="3' strand")
+    build: str = Field(default="GRCh38", description="Genome build")
+
+
+class TumorMarkerInput(BaseModel):
+    """Tumor markers and scores."""
+    msi_status: Optional[str] = Field(default=None, description="MSI-H, MSI-L, MSS")
+    msi_score: Optional[float] = Field(default=None, description="MSI fraction")
+    tmb_score: Optional[float] = Field(default=None, description="TMB mutations/Mb")
+    hrd_score: Optional[float] = Field(default=None, description="HRD score")
+    expression_data: Optional[Dict[str, float]] = Field(default=None, description="Gene expression values")
+
+
+class ValidationError(BaseModel):
+    """Individual validation error."""
+    line: int = Field(description="Line number in input")
+    input: str = Field(description="Original input text")
+    message: str = Field(description="Error description")
+
+
+class ValidationSummary(BaseModel):
+    """Aggregate validation report."""
+    summary: Dict[str, int] = Field(description="Total, parsed, errors counts")
+    errors: List[ValidationError] = Field(description="List of validation errors")
 
 
 class ClassificationRequest(BaseModel):
