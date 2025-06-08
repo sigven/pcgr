@@ -15,6 +15,9 @@ class VEPAnnotation(BaseModel):
     hgvsc: Optional[str] = Field(default=None, description="Coding sequence notation")
     hgvsp: Optional[str] = Field(default=None, description="Protein sequence notation")
     existing_variation: Optional[List[str]] = Field(default=None, description="Known IDs like from COSMIC or dbSNP")
+    gnomad_af: Optional[float] = Field(default=None, description="gnomAD global allele frequency")
+    cosmic_id: Optional[str] = Field(default=None, description="COSMIC mutation identifier")
+    dbsnp_rsid: Optional[str] = Field(default=None, description="dbSNP reference ID")
 
 
 def variant_to_vcf_line(variant: Variant) -> str:
@@ -57,11 +60,12 @@ def get_vep_annotation(variant: Variant) -> VEPAnnotation:
             '--input_file', temp_input_path,
             '--output_file', temp_output_path,
             '--format', 'vcf',
-            '--json',  # Request JSON output format
+            '--json',
             '--hgvs',
             '--symbol',
             '--protein',
             '--canonical',
+            '--af_gnomad',
             '--cache',
             '--offline',
             '--force_overwrite',
@@ -129,17 +133,33 @@ def parse_vep_json(vep_output: List[dict], original_variant: Variant) -> VEPAnno
     hgvsc = consequence.get('hgvsc')
     hgvsp = consequence.get('hgvsp')
     
+    gnomad_af = None
+    if 'gnomad_af' in consequence:
+        gnomad_af = float(consequence['gnomad_af'])
+    
     existing_variation = None
+    cosmic_id = None
+    dbsnp_rsid = None
+    
     if 'colocated_variants' in variant_result:
         existing_variation = []
         for cv in variant_result['colocated_variants']:
             if 'id' in cv:
-                existing_variation.append(cv['id'])
+                var_id = cv['id']
+                existing_variation.append(var_id)
+                
+                if var_id.startswith('COSV') or var_id.startswith('COSM'):
+                    cosmic_id = var_id
+                elif var_id.startswith('rs'):
+                    dbsnp_rsid = var_id
     
     return VEPAnnotation(
         gene_symbol=gene_symbol,
         consequence=consequence_str,
         hgvsc=hgvsc,
         hgvsp=hgvsp,
-        existing_variation=existing_variation
+        existing_variation=existing_variation,
+        gnomad_af=gnomad_af,
+        cosmic_id=cosmic_id,
+        dbsnp_rsid=dbsnp_rsid
     )
