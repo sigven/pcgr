@@ -1,5 +1,27 @@
-from typing import Union, List, Dict, Any
+from typing import Union, List, Dict, Any, Optional
 from pydantic import BaseModel, Field
+
+
+class Variant(BaseModel):
+    """Unified variant model supporting SNV, CNV, and SV types."""
+    variant_type: str = Field(description="Type of variant: SNV, CNV, or SV")
+    chromosome: str = Field(description="Chromosome (e.g., 'chr1', '1')")
+    
+    position: Optional[int] = Field(default=None, description="Genomic position for SNVs")
+    reference: Optional[str] = Field(default=None, description="Reference allele for SNVs")
+    alternate: Optional[str] = Field(default=None, description="Alternate allele for SNVs")
+    
+    start_position: Optional[int] = Field(default=None, description="Start position for CNVs/SVs")
+    end_position: Optional[int] = Field(default=None, description="End position for CNVs")
+    copy_number: Optional[int] = Field(default=None, description="Copy number for CNVs")
+    
+    sv_type: Optional[str] = Field(default=None, description="Structural variant type (DEL, DUP, INV, etc.)")
+    
+    reference_allele: Optional[str] = Field(default=None, description="Legacy reference allele field")
+    alternate_allele: Optional[str] = Field(default=None, description="Legacy alternate allele field")
+    gene: Optional[str] = Field(default=None, description="Gene symbol for CNVs")
+    copy_number_change: Optional[str] = Field(default=None, description="Legacy CNV change description")
+    genes: Optional[List[str]] = Field(default=None, description="List of genes for SVs")
 
 
 class SNVInput(BaseModel):
@@ -20,9 +42,6 @@ class SVInput(BaseModel):
     """Model for Structural Variants (SVs)."""
     sv_type: str = Field(description="Structural variant type (e.g., 'translocation', 'fusion')")
     genes: List[str] = Field(description="List of genes involved (e.g., ['BCR', 'ABL1'])")
-
-
-Variant = Union[SNVInput, CNVInput, SVInput]
 
 
 class ClassificationRequest(BaseModel):
