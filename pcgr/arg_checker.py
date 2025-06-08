@@ -453,11 +453,11 @@ def verify_refdata(arg_dict: dict, logger = None, cpsr = False):
     if compliant_data_bundle == 0:
         err_msg = (
             f'The PCGR/CPSR reference bundle is not compliant with the software version - please download the '
-            f'latest software and reference bundle (see https://sigven.github.io/pcgr/articles/installation.html for instructions)')
+            f'latest software and reference bundle (see https://github.com/LauferVA/dgg_rules_somatic for instructions)')
         if cpsr is False:
             err_msg = (
                 f'The PCGR reference bundle is is not compliant with the software version - please download the ',
-                f'latest reference bundle - see https://sigven.github.io/pcgr/articles/installation.html for instructions)'
+                f'latest reference bundle - see https://github.com/LauferVA/dgg_rules_somatic for instructions)'
             )
         error_message(err_msg,logger)
 

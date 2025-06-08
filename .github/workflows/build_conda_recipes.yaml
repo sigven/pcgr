@@ -93,7 +93,7 @@ jobs:
           cp pcgrr/DESCRIPTION . # hack for pkgdown to work
           printf "pcgrr version:\n"
           Rscript -e "packageVersion('pcgrr')"
-          Rscript -e "pkgdown::deploy_to_branch(pkg = 'pcgrr', commit_message = 'Built PCGR website: https://sigven.github.io/pcgr/', branch = 'gh-pages', new_process = FALSE)"
+          Rscript -e "pkgdown::deploy_to_branch(pkg = 'pcgrr', commit_message = 'Built DGG Engine website: https://github.com/LauferVA/dgg_rules_somatic/', branch = 'gh-pages', new_process = FALSE)"
 
   docker_deploy:
     name: Build and deploy Docker
@@ -151,7 +151,7 @@ jobs:
           push: true
           platforms: linux/amd64
           tags: |
-            sigven/pcgr:${{ env.VERSION }}
+            lauferva/dgg-engine:${{ env.VERSION }}
           outputs: type=docker,dest=pcgr_${{ env.VERSION }}.tar
 
       # Apptainer

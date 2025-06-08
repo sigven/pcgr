@@ -1,25 +1,19 @@
-Package: pcgrr
+Package: dgg-engine-r
 Type: Package
-Title: Personal Cancer Genome ReporteR
-Version: 2.2.1
+Title: DGG Variant Interpretation Engine R Package
+Version: 0.1.0
 Authors@R:
-    c(person(given = "Sigve",
-             family = "Nakken",
+    c(person(given = "Vincent",
+             family = "Laufer",
              role = c("aut", "cre"),
-             email = "sigven@ifi.uio.no",
-             comment = c(ORCID = "0000-0001-8468-2050")),
-      person(given = "Peter",
-             family = "Diakumis",
-             role = c("aut", "ctb"),
-             email = "peterdiakumis@gmail.com",
-             comment = c(ORCID = "0000-0002-7502-7545")))
-Maintainer: Sigve Nakken <sigven@ifi.uio.no>, Peter Diakumis <peterdiakumis@gmail.com>
-URL: https://github.com/sigven/pcgr,
-    https://sigven.github.io/pcgr/
-BugReports: https://github.com/sigven/pcgr/issues
+             email = "vincent.a.laufer@gmail.com",
+             comment = c(ORCID = "0000-0000-0000-0000")))
+Maintainer: Vincent Laufer <vincent.a.laufer@gmail.com>
+URL: https://github.com/LauferVA/dgg_rules_somatic
+BugReports: https://github.com/LauferVA/dgg_rules_somatic/issues
 Description: Functions, tools and utilities for the generation of clinical 
-    cancer genome reports with PCGR. This R package is an integrated part of 
-    the PCGR workflow (https://github.com/sigven/pcgr), it should thus not be 
+    cancer genome reports with the DGG Variant Interpretation Engine. This R package is an integrated part of 
+    the DGG Engine workflow (https://github.com/LauferVA/dgg_rules_somatic), it should thus not be 
     used as a stand-alone package.
 License: MIT + file LICENSE
 biocViews:

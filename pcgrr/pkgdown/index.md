@@ -4,10 +4,10 @@ editor_options:
     wrap: 72
 ---
 
-# Personal Cancer Genome Reporter (PCGR) <a href="https://sigven.github.io/pcgr/"><img src="man/figures/logo.png" align="right" height="90" width="76"/></a>
+# DGG Variant Interpretation Engine <a href="https://github.com/LauferVA/dgg_rules_somatic"><img src="man/figures/logo.png" align="right" height="90" width="76"/></a>
 
 
-The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for functional annotation and translation of individual tumor genomes for precision cancer medicine. It interprets primarily somatic SNVs/InDels and copy number aberrations, and has additional support for interpretation of bulk RNA-seq expression data. The software classifies variants with respect to predicted _oncogenicity_, and clinical _actionability_. Interactive HTML output reports allow the user to interrogate the clinical impact of the molecular findings in an individual tumor.
+The DGG Variant Interpretation Engine is a stand-alone software package for functional annotation and translation of individual tumor genomes for precision cancer medicine. It interprets primarily somatic SNVs/InDels and copy number aberrations, and has additional support for interpretation of bulk RNA-seq expression data. The software classifies variants with respect to predicted _oncogenicity_, and clinical _actionability_. Interactive HTML output reports allow the user to interrogate the clinical impact of the molecular findings in an individual tumor.
 
 - Variant classification
   - according to *oncogenicity*: evaluating the oncogenic potential of somatic DNA aberrations ([ClinGen/CGC/VICC guidelines](https://pubmed.ncbi.nlm.nih.gov/35101336/))
@@ -25,7 +25,7 @@ Example screenshots from the [quarto](https://quarto.org)-based cancer genome re
 ![PCGR screenshot 2](img/sc1.png)
 ![PCGR screenshot 3](img/sc3.png)
 
-PCGR originates from the [Norwegian Cancer Genomics Consortium (NCGC)](https://cancergenomics.no), at the [Institute for Cancer Research, Oslo University Hospital, Norway](https://radium.no).
+The DGG Variant Interpretation Engine is developed at [Michigan Medicine Division of Genetic Medicine](https://medicine.umich.edu/dept/human-genetics), at the [University of Michigan Medical School](https://medicine.umich.edu/).
 
 ### Top News
 
@@ -38,31 +38,31 @@ PCGR originates from the [Norwegian Cancer Genomics Consortium (NCGC)](https://c
     - ClinVar (2025-03)
     - CIViC (2025-03-13)
     - and more
-  - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
+  - [CHANGELOG](https://github.com/LauferVA/dgg_rules_somatic)
   
 - *October 21st 2024:* **2.1.2 release**
-  - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
+  - [CHANGELOG](https://github.com/LauferVA/dgg_rules_somatic)
 
 - *October 11th 2024:* **2.1.1 release**
   - patch to fix [bug](https://github.com/sigven/pcgr/issues/252) with parsing of relative CDS start positions
-  - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
+  - [CHANGELOG](https://github.com/LauferVA/dgg_rules_somatic)
   
 - *September 29th 2024*: **2.1.0 release**
   - updated bundle, more oncogenic variants, CNA visualization, 
     improved RNA-seq support, bug fixes, and more
-  - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
+  - [CHANGELOG](https://github.com/LauferVA/dgg_rules_somatic)
 
 - *August 1st 2024*: **2.0.3 release** 
   - patch to fix purity/ploidy propagation, MAF output for tumor-only runs, and other minor issues
-  - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
+  - [CHANGELOG](https://github.com/LauferVA/dgg_rules_somatic)
   
 - *July 16th 2024*: **2.0.2 release** 
   - patch to ensure correct reference to actionability guidelines
-  - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
+  - [CHANGELOG](https://github.com/LauferVA/dgg_rules_somatic)
 
 - *July 7th 2024*: **2.0.1 release**
   - patch with bug fix for mitochondrial input variants ([pr245](https://github.com/sigven/pcgr/pull/245))
-  - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
+  - [CHANGELOG](https://github.com/LauferVA/dgg_rules_somatic)
 
 - *June 2024*: **2.0.0 release**
   - Details in [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)

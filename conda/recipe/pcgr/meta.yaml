@@ -1,6 +1,6 @@
 package:
-  name: pcgr
-  version: 2.2.1 # versioned by bump2version
+  name: dgg-engine
+  version: 0.1.0
 
 source:
   path: ../../..
@@ -27,9 +27,9 @@ requirements:
 
 test:
   commands:
-    - pcgr --version
+    - dgg-engine --version
 
 about:
-  home: https://github.com/sigven/pcgr
+  home: https://github.com/LauferVA/dgg_rules_somatic
   license: MIT
-  summary: Personal Cancer Genome Reporter (PCGR) - variant interpretation for precision cancer medicine.
+  summary: DGG Variant Interpretation Engine - automated classification of genomic variants for clinical reporting.
