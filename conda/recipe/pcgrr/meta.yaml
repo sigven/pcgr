@@ -1,6 +1,6 @@
 package:
-  name: r-pcgrr
-  version: 2.2.1 # versioned by bump2version
+  name: r-dgg-engine
+  version: 0.1.0
 
 source:
   path: ../../../dgg_engine_r
@@ -87,13 +87,13 @@ requirements:
 
 test:
   commands:
-    - $R -e "library('pcgrr')"
+    - $R -e "library('dgg.engine.r')"
 
 about:
   home: https://github.com/LauferVA/dgg_rules_somatic/dgg_engine_r
   license: MIT
-  summary: Personal Cancer Genome ReporteR.
+  summary: DGG Variant Interpretation Engine R Package.
     Functions, tools and utilities for the generation of clinical
-    cancer genome reports with PCGR. This R package is an integrated
-    part of the Docker/Conda-based PCGR workflow (https://github.com/sigven/pcgr),
+    cancer genome reports with the DGG Engine. This R package is an integrated
+    part of the Docker/Conda-based DGG Engine workflow (https://github.com/LauferVA/dgg_rules_somatic),
     it should thus not be used as a stand-alone package.

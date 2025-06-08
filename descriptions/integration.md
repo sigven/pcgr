@@ -29,7 +29,7 @@ Execution of this plan must adhere to the following core principles:
 1.  **Initial Codebase Setup & Rebranding:**
     * Fork the legacy PCGR repository.
     * Perform a project-wide search-and-replace to align with **Principle 2**.
-        * Scrub legacy terms: `PCGR`, `Personal Cancer Genome Reporter`, `sigven`.
+        * Scrub legacy terms: `PCGR`, `DGG Variant Interpretation Engine`, `sigven`.
         * Scrub contributor names from code comments and docstrings.
     * Update all file headers to reflect the new authorship (`Vincent`, `Michigan`).
     * Create the `README.md` file and add the external attribution statement as required by **Principle 4**.

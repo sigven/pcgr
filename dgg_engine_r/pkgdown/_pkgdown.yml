@@ -1,5 +1,5 @@
 url: https://github.com/LauferVA/dgg_rules_somatic
-title: PCGR
+title: DGG Engine
 toc:
   depth: 3
 template:
@@ -15,19 +15,17 @@ template:
     navbar-link-color: "white"
   includes:
     in_header: |
-       <script async src="https://www.googletagmanager.com/gtag/js?id=G-7HRLE8GQRE"></script>
-       <script>
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-7HRLE8GQRE"></script>
+      <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
 
-          gtag('config', 'G-7HRLE8GQRE');
-       </script>
+        gtag('config', 'G-7HRLE8GQRE');
+      </script>
 authors:
-  Sigve Nakken:
-    href: "https://github.com/sigven"
-  Peter Diakumis:
-    href: "https://github.com/pdiakumis"
+  Vincent Laufer:
+    href: "https://github.com/LauferVA"
 navbar:
   link-color: "white"
   light-color: "white"
@@ -71,6 +69,6 @@ home:
     components:
       citation:
           title: Citation
-          text: "[Citing PCGR](authors.html#citation)"
+          text: "[Citing DGG Engine](authors.html#citation)"
 news:
   one_page: true

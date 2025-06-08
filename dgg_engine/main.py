@@ -20,7 +20,7 @@ from argparse import RawTextHelpFormatter
 
 def cli():
 
-    program_description = (f"Personal Cancer Genome Reporter (PCGR) workflow for clinical translation of "
+    program_description = (f"DGG Variant Interpretation Engine workflow for clinical translation of "
                            f"tumor omics data (SNVs/InDels, CNA, RNA expression) - version: {pcgr_vars.PCGR_VERSION}")
     program_options = "\n\t--input_vcf <INPUT_VCF>\n\t--vep_dir <VEP_DIR>\n\t--refdata_dir <REFDATA_DIR>\n\t" + \
         "--output_dir <OUTPUT_DIR>\n\t--genome_assembly <GENOME_ASSEMBLY>\n\t--sample_id <SAMPLE_ID>"
