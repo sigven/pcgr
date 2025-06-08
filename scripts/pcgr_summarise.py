@@ -38,7 +38,7 @@ def __main__():
     parser.add_argument("--debug", action="store_true", default=False, help="Print full commands to log, default: %(default)s")
     args = parser.parse_args()
 
-    logger = getlogger('dgg-engine-gene-annotate')
+    logger = getlogger('dgg-rules-somatic-gene-annotate')
     if args.cpsr is True:
         logger = getlogger('cpsr-gene-annotate')
     

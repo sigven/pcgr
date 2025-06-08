@@ -1,4 +1,4 @@
-Package: dgg-engine-r
+Package: dgg-rules-somatic-r
 Type: Package
 Title: DGG Variant Interpretation Engine R Package
 Version: 0.1.0

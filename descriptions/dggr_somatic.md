@@ -26,7 +26,7 @@ The system consists of a REST API, a core tiering engine, a knowledge base, and 
 **Suggested Project Directory Structure:**
 
 ```
-dgg_rules_engine/
+dgg_rules_somatic/
 ├── api/
 │   ├── __init__.py
 │   ├── main.py             # FastAPI application

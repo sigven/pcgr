@@ -1,5 +1,5 @@
 package:
-  name: dgg-engine
+  name: dgg-rules-somatic
   version: 0.1.0
 
 source:
@@ -27,7 +27,7 @@ requirements:
 
 test:
   commands:
-    - dgg-engine --version
+    - dgg-rules-somatic --version
 
 about:
   home: https://github.com/LauferVA/dgg_rules_somatic

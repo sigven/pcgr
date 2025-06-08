@@ -177,7 +177,7 @@ pcgr --help
 
 ### B. Docker
 
-The PCGR Docker image is available on [Docker Hub](https://hub.docker.com/r/lauferva/dgg-engine/tags).
+The PCGR Docker image is available on [Docker Hub](https://hub.docker.com/r/lauferva/dgg-rules-somatic/tags).
 Pull the latest **v`r PCGR_VERSION`** image with:
 
 ```{r echo=FALSE}

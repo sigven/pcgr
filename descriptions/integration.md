@@ -100,5 +100,5 @@ Execution of this plan must adhere to the following core principles:
 
 3.  **Finalize Containerization:**
     * Update the `Dockerfile` and `docker-compose.yml` for the complete application stack (API, PostgreSQL, ANNOVAR).
-    * Build and tag the final Docker images using a new, non-legacy naming scheme (e.g., `dgg-engine/api`).
+    * Build and tag the final Docker images using a new, non-legacy naming scheme (e.g., `dgg-rules-somatic/api`).
     * Document the final, rebranded CLI command for end-users.

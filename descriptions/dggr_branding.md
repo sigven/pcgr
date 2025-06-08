@@ -21,7 +21,7 @@ Proper attribution to the original PCGR work will be maintained externally in th
 *Objective: To systematically scrub the old identity and contributor names from the initial codebase and establish the new project's identity before development begins.*
 
 1.  **Codebase Forking and Renaming:** (No change)
-    * Fork, rename repository to `dgg_rules_engine`, rename executables (`dgg_engine.py`), and rename configuration files (`dgg_config.yaml`).
+    * Fork, rename repository to `dgg_rules_somatic`, rename executables (`dgg_engine.py`), and rename configuration files (`dgg_config.yaml`).
 
 2.  **Automated Code & Asset Scrubbing:** (No change)
     * Project-wide search-and-replace for: `PCGR` -> `DGG Engine`, `DGG Variant Interpretation Engine` -> `DGG Variant Interpretation Engine`, `sigven` -> `michigan_genomics`.
@@ -97,5 +97,5 @@ Proper attribution to the original PCGR work will be maintained externally in th
     * **Action: Add specific tests to validate the sanitization logic.** Create test cases with strings containing both tool attributions and formal citations, and assert that only the tool attributions are changed.
 
 4.  **Finalize Containerization & Deployment:** (No change)
-    * Use new image names (`ghcr.io/your-org/dgg-engine:latest`).
+    * Use new image names (`ghcr.io/your-org/dgg-rules-somatic:latest`).
     * Document and use the fully rebranded CLI command for execution.

@@ -37,18 +37,41 @@ Email: vincent.a.laufer@gmail.com
 - `GET /v1/interpretations/gene/{gene_symbol}`: Retrieve gene-level interpretations
 - `GET /v1/report/{analysis_id}`: Retrieve generated reports
 
-## Development Setup
+## Installation
+
+### Local Development Setup
+
+Use the automated setup script:
 
 ```bash
-# Install Poetry if not already installed
-curl -sSL https://install.python-poetry.org | python3 -
+# Download and run setup script
+curl -sSL https://raw.githubusercontent.com/LauferVA/dgg_rules_somatic/main/local_setup.sh | bash
 
-# Install dependencies
-poetry install
-
-# Activate virtual environment
-poetry shell
+# Or clone and run manually
+git clone https://github.com/LauferVA/dgg_rules_somatic.git
+cd dgg_rules_somatic
+chmod +x local_setup.sh
+./local_setup.sh
 ```
+
+### Docker Deployment
+
+```bash
+# Clone repository
+git clone https://github.com/LauferVA/dgg_rules_somatic.git
+cd dgg_rules_somatic
+
+# Copy environment template
+cp .env.example .env
+# Edit .env with your database credentials
+
+# Start services
+docker-compose up --build
+```
+
+## Metadata Standard
+
+This project uses **PEP 621** format for metadata in `pyproject.toml` with Poetry as the dependency manager. All core project metadata is defined in the `[project]` section following modern Python packaging standards.
 
 ## Acknowledgements
 
