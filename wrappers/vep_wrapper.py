@@ -22,19 +22,26 @@ class VEPAnnotation(BaseModel):
 
 def variant_to_vcf_line(variant: Variant) -> str:
     """Convert a Variant object to VCF format line for VEP input."""
-    if isinstance(variant, SNVInput):
+    if variant.variant_type == "SNV":
         chrom = variant.chromosome.replace('chr', '') if variant.chromosome.startswith('chr') else variant.chromosome
-        return f"{chrom}\t{variant.position}\t.\t{variant.reference_allele}\t{variant.alternate_allele}\t.\t.\t."
+        ref = variant.reference or variant.reference_allele
+        alt = variant.alternate or variant.alternate_allele
+        pos = variant.position
+        return f"{chrom}\t{pos}\t.\t{ref}\t{alt}\t.\t.\t."
     
-    elif isinstance(variant, CNVInput):
-        return f"1\t1000000\t.\tN\t<CNV>\t.\t.\tSVTYPE=CNV;GENE={variant.gene};CN_CHANGE={variant.copy_number_change}"
+    elif variant.variant_type == "CNV":
+        gene = variant.gene or "UNKNOWN"
+        cn_change = variant.copy_number_change or str(variant.copy_number or "UNKNOWN")
+        return f"1\t1000000\t.\tN\t<CNV>\t.\t.\tSVTYPE=CNV;GENE={gene};CN_CHANGE={cn_change}"
     
-    elif isinstance(variant, SVInput):
-        genes_str = ",".join(variant.genes)
-        return f"1\t1000000\t.\tN\t<{variant.sv_type.upper()}>\t.\t.\tSVTYPE={variant.sv_type};GENES={genes_str}"
+    elif variant.variant_type == "SV":
+        genes_list = variant.genes or []
+        genes_str = ",".join(genes_list) if genes_list else "UNKNOWN"
+        sv_type = variant.sv_type or "DEL"
+        return f"1\t1000000\t.\tN\t<{sv_type.upper()}>\t.\t.\tSVTYPE={sv_type};GENES={genes_str}"
     
     else:
-        raise ValueError(f"Unsupported variant type: {type(variant)}")
+        raise ValueError(f"Unsupported variant type: {variant.variant_type}")
 
 
 def get_vep_annotation(variant: Variant) -> VEPAnnotation:
@@ -177,7 +184,7 @@ def parse_vep_json(vep_output: List[dict], original_variant: Variant) -> VEPAnno
 
 def _get_mock_annotation(variant: Variant) -> VEPAnnotation:
     """Return mock VEP annotation for demo purposes when VEP is not available."""
-    if isinstance(variant, SNVInput):
+    if variant.variant_type == "SNV":
         return VEPAnnotation(
             gene_symbol="BRAF",
             consequence="missense_variant",
@@ -188,9 +195,10 @@ def _get_mock_annotation(variant: Variant) -> VEPAnnotation:
             cosmic_id="COSV12345",
             dbsnp_rsid="rs113488022"
         )
-    elif isinstance(variant, CNVInput):
+    elif variant.variant_type == "CNV":
+        gene_name = variant.gene or "UNKNOWN"
         return VEPAnnotation(
-            gene_symbol=variant.gene,
+            gene_symbol=gene_name,
             consequence="copy_number_variation",
             hgvsc=None,
             hgvsp=None,
@@ -199,7 +207,7 @@ def _get_mock_annotation(variant: Variant) -> VEPAnnotation:
             cosmic_id="COSV67890",
             dbsnp_rsid=None
         )
-    elif isinstance(variant, SVInput):
+    elif variant.variant_type == "SV":
         gene_name = variant.genes[0] if variant.genes else "UNKNOWN"
         return VEPAnnotation(
             gene_symbol=gene_name,
