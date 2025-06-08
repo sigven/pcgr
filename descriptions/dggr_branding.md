@@ -24,7 +24,7 @@ Proper attribution to the original PCGR work will be maintained externally in th
     * Fork, rename repository to `dgg_rules_engine`, rename executables (`dgg_engine.py`), and rename configuration files (`dgg_config.yaml`).
 
 2.  **Automated Code & Asset Scrubbing:** (No change)
-    * Project-wide search-and-replace for: `PCGR` -> `DGG Engine`, `Personal Cancer Genome Reporter` -> `DGG Variant Interpretation Engine`, `sigven` -> `michigan_genomics`.
+    * Project-wide search-and-replace for: `PCGR` -> `DGG Engine`, `DGG Variant Interpretation Engine` -> `DGG Variant Interpretation Engine`, `sigven` -> `michigan_genomics`.
 
 3.  **Targeted Contributor Name Scrubbing:**
     * **Action: Compile a list of contributor names.** Review the original PCGR repository's `AUTHORS` file, `README`, commit history, and documentation to create a list of primary author and contributor names (e.g., Nakken, and other relevant European and international names).

@@ -1,8 +1,8 @@
-Of course. Here is a technical specification document for the Personal Cancer Genome Reporter (PCGR), tailored for an LLM agentic system.
+Of course. Here is a technical specification document for the DGG Variant Interpretation Engine (PCGR), tailored for an LLM agentic system.
 
 -----
 
-## **Technical Specification: Personal Cancer Genome Reporter (PCGR)**
+## **Technical Specification: DGG Variant Interpretation Engine (PCGR)**
 
 ### **1.0 Background and Goals**
 

@@ -1,5 +1,20 @@
-citHeader("To cite PCGR in publications use:")
+citHeader("To cite the DGG Variant Interpretation Engine in publications use:")
 
+citEntry(
+  entry = "Software",
+  title = "DGG Variant Interpretation Engine: automated classification of genomic variants for clinical reporting",
+  author = personList(
+    as.person("Vincent Laufer")
+  ),
+  year = "2024",
+  url = "https://github.com/LauferVA/dgg_rules_somatic",
+  textVersion = paste0(
+    "Vincent Laufer. DGG Variant Interpretation Engine: automated classification of genomic variants for clinical reporting (2024). ",
+    "https://github.com/LauferVA/dgg_rules_somatic"
+  )
+)
+
+# Original PCGR citation for acknowledgment
 citEntry(
   entry = "Article",
   title = paste0("Personal Cancer Genome Reporter: variant interpretation ",

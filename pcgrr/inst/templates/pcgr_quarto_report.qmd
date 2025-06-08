@@ -59,7 +59,7 @@ if(as.logical(pcg_report$settings$conf$assay_properties$vcf_tumor_only) == TRUE)
 }
 ```
 
-<a href="https://sigven.github.io/pcgr">
+<a href="https://github.com/LauferVA/dgg_rules_somatic">
   <img src="`r logo_fname_path`" title="" alt="" align="right" width="80"/>
 </a>
   

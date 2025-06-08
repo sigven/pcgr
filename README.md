@@ -52,7 +52,7 @@ poetry shell
 
 ## Acknowledgements
 
-This project builds upon the foundational work of the Personal Cancer Genome Reporter (PCGR) project. We acknowledge and thank the original PCGR development team for their contributions to the field of cancer genomics interpretation.
+This project builds upon the foundational work of the PCGR project. We acknowledge and thank the original PCGR development team for their contributions to the field of cancer genomics interpretation.
 
 Original PCGR Repository: https://github.com/sigven/pcgr
 
