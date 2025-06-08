@@ -51,13 +51,7 @@ create_tables()
 "
 
 echo "📚 Building knowledge base..."
-poetry run python -c "
-import sys
-import os
-sys.path.insert(0, os.getcwd())
-import subprocess
-subprocess.run([sys.executable, 'etl/build_reportable.py'])
-"
+cd "$(pwd)" && PYTHONPATH="$(pwd)" poetry run python etl/build_reportable.py
 
 echo "✅ Setup complete!"
 echo ""
