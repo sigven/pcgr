@@ -3,7 +3,7 @@ package:
   version: 0.1.0
 
 source:
-  path: ../../../pcgrr
+  path: ../../../dgg_engine_r
 
 build:
   number: 0
@@ -90,7 +90,7 @@ test:
     - $R -e "library('dgg.engine.r')"
 
 about:
-  home: https://github.com/LauferVA/dgg_rules_somatic
+  home: https://github.com/LauferVA/dgg_rules_somatic/dgg_engine_r
   license: MIT
   summary: DGG Variant Interpretation Engine R Package.
     Functions, tools and utilities for the generation of clinical

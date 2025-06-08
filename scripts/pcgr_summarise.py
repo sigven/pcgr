@@ -8,20 +8,20 @@ import os
 import sys
 import yaml
 
-from pcgr.annoutils import read_infotag_file, make_transcript_xref_map, read_genexref_namemap, map_regulatory_variant_annotations, write_pass_vcf, load_grantham
-from pcgr.vep import parse_vep_csq
-from pcgr.dbnsfp import vep_dbnsfp_meta_vcf, map_variant_effect_predictors
-from pcgr.oncogenicity import load_oncogenicity_criteria, assign_oncogenicity_evidence, load_oncogenic_variants, match_oncogenic_variants
-from pcgr.mutation_hotspot import load_mutation_hotspots, match_csq_mutation_hotspot
-from pcgr.biomarker import load_biomarkers, match_csq_biomarker
-from pcgr.utils import error_message, check_subprocess, getlogger
-from pcgr.splice import load_splice_effects
-from pcgr.vep import parse_vep_csq
+from dgg_engine.annoutils import read_infotag_file, make_transcript_xref_map, read_genexref_namemap, map_regulatory_variant_annotations, write_pass_vcf, load_grantham
+from dgg_engine.vep import parse_vep_csq
+from dgg_engine.dbnsfp import vep_dbnsfp_meta_vcf, map_variant_effect_predictors
+from dgg_engine.oncogenicity import load_oncogenicity_criteria, assign_oncogenicity_evidence, load_oncogenic_variants, match_oncogenic_variants
+from dgg_engine.mutation_hotspot import load_mutation_hotspots, match_csq_mutation_hotspot
+from dgg_engine.biomarker import load_biomarkers, match_csq_biomarker
+from dgg_engine.utils import error_message, check_subprocess, getlogger
+from dgg_engine.splice import load_splice_effects
+from dgg_engine.vep import parse_vep_csq
 
 csv.field_size_limit(500 * 1024 * 1024)
 
 def __main__():
-    parser = argparse.ArgumentParser(description='Summarise VEP annotations (gene/variant) from PCGR/CPSR pipeline (SNVs/InDels)')
+    parser = argparse.ArgumentParser(description='Summarise VEP annotations (gene/variant) from DGG Engine/CPSR pipeline (SNVs/InDels)')
     parser.add_argument('vcf_file_in', help='Bgzipped VCF file with VEP-annotated query variants (SNVs/InDels)')
     parser.add_argument('vcf_file_out', help='Bgzipped VCF file with extended VEP-annotated query variants (SNVs/InDels)')
     parser.add_argument('pon_annotation',default=0,type=int,help='Include Panel of Normals annotation (0/1)')
@@ -31,14 +31,14 @@ def __main__():
     parser.add_argument('build', default='GRCh38', help='Genome build of query VCF')
     parser.add_argument('vep_pick_order', default="mane,canonical,appris,biotype,ccds,rank,tsl,length", 
                         help=f"Comma-separated string of ordered transcript/variant properties for selection of primary variant consequence")
-    parser.add_argument('refdata_assembly_dir',help='Assembly-specific reference data directory, e.g. "pcgrdb/data/grch38')
+    parser.add_argument('refdata_assembly_dir',help='Assembly-specific reference data directory, e.g. "dgg_engine_db/data/grch38')
     parser.add_argument('--compress_output_vcf', action="store_true", default=False, help="Compress output VCF file")
     parser.add_argument('--cpsr',action="store_true",help="Aggregate cancer gene annotations for Cancer Predisposition Sequencing Reporter (CPSR)")
     parser.add_argument('--cpsr_yaml',dest="cpsr_yaml", default=None, help='YAML file with list of targeted genes by CPSR (custom, or panel-defined)')
     parser.add_argument("--debug", action="store_true", default=False, help="Print full commands to log, default: %(default)s")
     args = parser.parse_args()
 
-    logger = getlogger('pcgr-gene-annotate')
+    logger = getlogger('dgg-engine-gene-annotate')
     if args.cpsr is True:
         logger = getlogger('cpsr-gene-annotate')
     
@@ -69,7 +69,7 @@ def extend_vcf_annotations(arg_dict, logger):
     
     vcf_infotags = {}
     
-    vcf_infotags['other'] = read_infotag_file(os.path.join(arg_dict['refdata_assembly_dir'], 'vcf_infotags_other.tsv'), scope = "pcgr")
+    vcf_infotags['other'] = read_infotag_file(os.path.join(arg_dict['refdata_assembly_dir'], 'vcf_infotags_other.tsv'), scope = "dgg_engine")
     if arg_dict['cpsr'] is True:
         vcf_infotags['other'] = read_infotag_file(os.path.join(arg_dict['refdata_assembly_dir'], 'vcf_infotags_other.tsv'), scope = "cpsr")
     vcf_infotags['vep'] = read_infotag_file(os.path.join(arg_dict['refdata_assembly_dir'], 'vcf_infotags_vep.tsv'), scope = "vep")

@@ -157,3 +157,7 @@ data/builds/
 logs/
 reports/
 temp/
+
+
+/resources/reference_files
+resources/bin

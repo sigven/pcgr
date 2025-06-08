@@ -1,0 +1,63 @@
+Package: dgg-engine-r
+Type: Package
+Title: DGG Variant Interpretation Engine R Package
+Version: 0.1.0
+Authors@R:
+    c(person(given = "Vincent",
+             family = "Laufer",
+             role = c("aut", "cre"),
+             email = "vincent.a.laufer@gmail.com",
+             comment = c(ORCID = "0000-0000-0000-0000")))
+Maintainer: Vincent Laufer <vincent.a.laufer@gmail.com>
+URL: https://github.com/LauferVA/dgg_rules_somatic
+BugReports: https://github.com/LauferVA/dgg_rules_somatic/issues
+Description: Functions, tools and utilities for the generation of clinical 
+    cancer genome reports with the DGG Variant Interpretation Engine. This R package is an integrated part of 
+    the DGG Engine workflow (https://github.com/LauferVA/dgg_rules_somatic), it should thus not be 
+    used as a stand-alone package.
+License: MIT + file LICENSE
+biocViews:
+Imports:
+    assertable,
+    assertthat,
+    Biostrings,
+    bslib,
+    caret,
+    crosstalk,
+    dplyr,
+    DT,
+    formattable,
+    GenomeInfoDb,
+    ggplot2,
+    glue,
+    htmltools,
+    log4r,
+    MutationalPatterns,
+    openxlsx2,
+    plotly,
+    quantiseqr,
+    quarto,
+    randomForest,
+    readr,
+    reshape2,
+    rlang,
+    rrapply,
+    S4Vectors,
+    scales,
+    shiny,
+    stringr,
+    tibble,
+    tidyr,
+    yaml
+Depends:
+    R (>= 4.0)
+Suggests:
+    testthat,
+    devtools,
+    stringi,
+    BSgenome.Hsapiens.UCSC.hg19,
+    BSgenome.Hsapiens.UCSC.hg38
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.3.2
+Roxygen: list(markdown = TRUE)

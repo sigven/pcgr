@@ -5,9 +5,9 @@ import random
 import re, os
 import glob
 
-from pcgr.vcf import get_vcf_info_tags, print_vcf_header
-from pcgr.utils import check_subprocess, random_id_generator, getlogger, remove_file
-from pcgr.annoutils import read_vcfanno_tag_file
+from dgg_engine.vcf import get_vcf_info_tags, print_vcf_header
+from dgg_engine.utils import check_subprocess, random_id_generator, getlogger, remove_file
+from dgg_engine.annoutils import read_vcfanno_tag_file
 
 
 def __main__():
