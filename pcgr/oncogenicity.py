@@ -304,9 +304,7 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
                if variant_data['ONCG_OS3'] is False and variant_data['ONCG_OS1'] is False:
                   variant_data['ONCG_OM1'] = True
 
-   all_gnomad_tags = pcgr_vars.GNOMAD_MAIN_EXOME_AF_TAGS + pcgr_vars.GNOMAD_MAIN_GENOME_AF_TAGS
-   #print(str(all_gnomad_tags))
-   #print(str(variant_data.keys()))
+   all_gnomad_tags = pcgr_vars.GNOMAD_MAIN_EXOME_AF_TAGS + pcgr_vars.GNOMAD_MAIN_GENOME_AF_TAGS  
 
    #if all(pop in variant_data.keys() for pop in all_gnomad_tags):
 

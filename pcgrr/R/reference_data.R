@@ -134,6 +134,7 @@ load_reference_data <- function(
   pcgr_ref_data[["gene"]] <- list()
   pcgr_ref_data[["gene"]][["panel"]] <- data.frame()
   pcgr_ref_data[["gene"]][["cpg"]] <- data.frame()
+  pcgr_ref_data[["gene"]][["cpg_pathogenic_range"]] <- data.frame()
   pcgr_ref_data[['gene']][['gene_xref']] <- data.frame()
   pcgr_ref_data[['gene']][['otp_rank']] <- data.frame()
 
@@ -152,6 +153,26 @@ load_reference_data <- function(
     )
   colnames(pcgr_ref_data[['gene']][['cpg']]) <-
     toupper(colnames(pcgr_ref_data[['gene']][['cpg']]))
+
+
+  ## CPG pathogenic AF range
+  cpg_pathogenic_range_tsv_fname <- file.path(
+    pcgr_db_assembly_dir, "gene", "tsv",
+    "gene_cpg",
+    "gene_cpg_pathogenic_range.tsv.gz"
+  )
+  check_file_exists(cpg_pathogenic_range_tsv_fname)
+  pcgr_ref_data[['gene']][['cpg_pathogenic_range']] <- as.data.frame(
+    readr::read_tsv(
+      cpg_pathogenic_range_tsv_fname,
+      show_col_types = F,
+      comment = "", na = c(".",""))
+  ) |>
+    dplyr::mutate(
+      entrezgene = as.character(.data$entrezgene)
+    )
+  colnames(pcgr_ref_data[['gene']][['cpg_pathogenic_range']]) <-
+    toupper(colnames(pcgr_ref_data[['gene']][['cpg_pathogenic_range']]))
 
 
   panels_tsv_fname <- file.path(

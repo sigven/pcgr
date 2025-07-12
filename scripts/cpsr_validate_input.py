@@ -176,9 +176,9 @@ def simplify_vcf(input_vcf, validated_vcf, vcf, custom_bed, refdata_assembly_dir
     vt_decompose_log = \
         os.path.join(output_dir, f'{sample_id}.cpsr_validate.vt_decompose.{random_str}.log')
     virtual_panels_tmp_bed = \
-        os.path.join(output_dir, f'{sample_id}.virtual_panels_all.{random_str}.tmp.bed')
+        os.path.join(output_dir, f'{sample_id}.cpsr_virtual_panels_all.{random_str}.tmp.bed')
     virtual_panels_bed = \
-        os.path.join(output_dir, f'{sample_id}.virtual_panels_all.{random_str}.bed')
+        os.path.join(output_dir, f'{sample_id}.cpsr_virtual_panels_all.{random_str}.bed')
 
     multiallelic_list = list()
     for rec in vcf:
