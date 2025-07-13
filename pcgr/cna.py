@@ -145,7 +145,7 @@ def annotate_cna_segments(output_segment_gene_fname: str,
     ## load copy-number biomarker evidence
    
     cna_query_segment_df['segment_length_mb'] = \
-        ((cna_query_segment_df['segment_end'] - cna_query_segment_df['segment_start']) / 1e6).astype(float).round(5)
+        ((cna_query_segment_df['segment_end'] - cna_query_segment_df['segment_start']) / 1e6).astype(float).round(4)
     
     biomarkers = {}
     cna_actionable_dict = {}

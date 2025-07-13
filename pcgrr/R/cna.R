@@ -445,6 +445,12 @@ get_oncogenic_cna_events <- function(cna_df_display = NULL){
       dplyr::desc(.data$GLOBAL_ASSOC_RANK),
     )
 
+  if("SEGMENT_LENGTH_MB" %in% colnames(cna_oncogenic_events)){
+    cna_oncogenic_events <- cna_oncogenic_events |>
+      dplyr::mutate(SEGMENT_LENGTH_MB = round(
+        .data$SEGMENT_LENGTH_MB, digits = 2))
+  }
+
   return(cna_oncogenic_events)
 
 
