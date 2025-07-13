@@ -230,7 +230,7 @@ def assign_cds_exon_intron_annotations(csq_record, grantham_scores, logger):
     csq_record['CDS_CHANGE'] = '.'
     csq_record['HGVSp_short'] = '.'
     csq_record['PROTEIN_CHANGE'] = '.'
-    csq_record['GRANTHAM_DISTANCE'] = '.'
+    csq_record['GRANTHAM_DISTANCE'] = -1
     csq_record['ALTERATION'] = '.'
     csq_record['EXON_AFFECTED'] = '.'
     csq_record['CDS_RELATIVE_POSITION'] = '.'
@@ -264,8 +264,14 @@ def assign_cds_exon_intron_annotations(csq_record, grantham_scores, logger):
         csq_record['NULL_VARIANT'] = True
     
     if not csq_record['MaxEntScan_diff'] is None and not csq_record['MaxEntScan_ref'] is None and not csq_record['MaxEntScan_alt'] is None:
+        fraction_drop = 0.0
+        #if float(csq_record['MaxEntScan_ref']) > 0:
+        #    fraction_drop = float(csq_record['MaxEntScan_diff']) / float(csq_record['MaxEntScan_ref']).round(4)
+        #else:
+        #    fraction_drop = 0.0
         csq_record['MAXENTSCAN'] = 'MES|' + str(csq_record['MaxEntScan_diff']) + '|' + \
-            str(csq_record['MaxEntScan_ref']) + '|' + str(csq_record['MaxEntScan_alt'])
+            str(csq_record['MaxEntScan_ref']) + '|' + str(csq_record['MaxEntScan_alt']) #+ \
+            #'|' + str(fraction_drop)
     
     if re.search(pcgr_vars.CSQ_SPLICE_DONOR_PATTERN, str(csq_record['Consequence'])) is not None:
         if re.search(r'(\+3(A|G)>|\+4A>|\+5G>)', str(csq_record['HGVSc'])) is not None:
@@ -435,10 +441,14 @@ def assign_cds_exon_intron_annotations(csq_record, grantham_scores, logger):
                         if 'Amino_acids' in csq_record.keys():
                             if not csq_record['Amino_acids'] is None:
                                 if '/' in str(csq_record['Amino_acids']):
-                                    key = str(csq_record['Amino_acids']).split('/')[0] + '_' + str(csq_record['Amino_acids']).split('/')[1]
-                                    if key in grantham_scores.keys():
-                                        #print('GRANTHAM\t' + str(key) + ' ' + str(grantham_scores[key]))
-                                        csq_record['GRANTHAM_DISTANCE'] = grantham_scores[key]
+                                    aaref = str(csq_record['Amino_acids']).split('/')[0]
+                                    aalt = str(csq_record['Amino_acids']).split('/')[1]
+                                    key = str(aaref) + '_' + str(aalt)
+                                    ## check cases for double aminio acid changes in 'Amino_acids', e.g. GQ/GY - only consider the second amino acid change
+                                    if len(aaref) == 2 and len(aalt) == 2 and aaref[0] == aalt[0]:                                        
+                                        key = aaref[1] + '_' + aalt[1]
+                                    if key in grantham_scores.keys():                                        
+                                        csq_record['GRANTHAM_DISTANCE'] = grantham_scores[key]                                   
                         
                     
                     csq_record['PROTEIN_CHANGE'] = protein_change_VEP
