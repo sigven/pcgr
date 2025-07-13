@@ -170,29 +170,32 @@ def annotate_cna_segments(output_segment_gene_fname: str,
     
     ## Mark copy number amplifications (threshold defined by user) in input
     cna_query_segment_df['aberration_key'] = 'nan'
-    cna_query_segment_df['amp_cond'] = True
-    cna_query_segment_df.loc[cna_query_segment_df['n_major'] + cna_query_segment_df['n_minor'] < n_copy_amplifications,"amp_cond"] = False
+    cna_query_segment_df['amp_cond'] = False
     cna_query_segment_df.loc[cna_query_segment_df['n_major'] + cna_query_segment_df['n_minor'] >= n_copy_amplifications,"amp_cond"] = True
     
     cna_query_segment_df.loc[cna_query_segment_df.amp_cond, 'aberration_key'] =  \
         cna_query_segment_df.loc[cna_query_segment_df.amp_cond, 'entrezgene'].astype(str) + '_amplification'
     
     ## Mark homozygous deletions in input
-    cna_query_segment_df['loss_cond'] = True
-    cna_query_segment_df.loc[cna_query_segment_df['n_major'] + cna_query_segment_df['n_minor'] > 0,"loss_cond"] = False
-    cna_query_segment_df.loc[cna_query_segment_df['n_major'] + cna_query_segment_df['n_minor'] == 0,"loss_cond"] = True
+    cna_query_segment_df['homloss_cond'] = False
+    cna_query_segment_df.loc[cna_query_segment_df['n_major'] + cna_query_segment_df['n_minor'] == 0,"homloss_cond"] = True
+    
+    ## Mark heterozygous deletions in input
+    cna_query_segment_df['hetloss_cond'] = False
+    cna_query_segment_df.loc[cna_query_segment_df['n_major'] + cna_query_segment_df['n_minor'] == 1,"hetloss_cond"] = True
     
     cna_query_segment_df['variant_class'] = 'undefined'
     cna_query_segment_df.loc[cna_query_segment_df.amp_cond, 'variant_class'] = 'gain'
-    cna_query_segment_df.loc[cna_query_segment_df.loss_cond, 'variant_class'] = 'homdel'
+    cna_query_segment_df.loc[cna_query_segment_df.homloss_cond, 'variant_class'] = 'homdel'
+    cna_query_segment_df.loc[cna_query_segment_df.hetloss_cond, 'variant_class'] = 'hetdel'    
     
-    cna_query_segment_df.loc[cna_query_segment_df.loss_cond, 'aberration_key'] =  \
-        cna_query_segment_df.loc[cna_query_segment_df.loss_cond, 'entrezgene'].astype(str) + '_ablation'
+    cna_query_segment_df.loc[cna_query_segment_df.homloss_cond, 'aberration_key'] =  \
+        cna_query_segment_df.loc[cna_query_segment_df.homloss_cond, 'entrezgene'].astype(str) + '_ablation'
 
     ## Append actionability evidence to input amplifications (column 'biomarker_match')
     cna_query_segment_df = cna_query_segment_df.merge(
         cna_actionable_df, left_on=["aberration_key"], right_on=["aberration_key"], how="left")
-    cna_query_segment_df.drop(['amp_cond', 'loss_cond', 'aberration_key'], axis=1, inplace=True)    
+    cna_query_segment_df.drop(['amp_cond', 'hetloss_cond', 'homloss_cond','aberration_key'], axis=1, inplace=True)    
     cna_query_segment_df.loc[cna_query_segment_df['biomarker_match'].isnull(),"biomarker_match"] = '.'
     
     ## remove all temporary files

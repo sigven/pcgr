@@ -661,6 +661,7 @@ variant_stats_report <- function(
      "VAR_ID" %in% colnames(callset$variant) &
      "VARIANT_CLASS" %in% colnames(callset$variant)){
     for (n in c("n_tsg_loss",
+                "n_tsg_hetloss",
                 "n_oncogene_gain",
                 "n_other_drugtarget_gain")) {
       call_stats[[name]][[n]] <- 0
@@ -671,6 +672,13 @@ variant_stats_report <- function(
         !is.na(.data$ACTIONABILITY_TIER) &
           .data$ACTIONABILITY_TIER == 3 &
           .data$VARIANT_CLASS == "homdel") |>
+      nrow()
+    call_stats[[name]][["n_tsg_hetloss"]] <-
+      callset$variant |>
+      dplyr::filter(
+        !is.na(.data$ACTIONABILITY_TIER) &
+          .data$ACTIONABILITY_TIER == 3 &
+          .data$VARIANT_CLASS == "hetdel") |>
       nrow()
     call_stats[[name]][["n_oncogene_gain"]] <-
       callset$variant |>
@@ -708,6 +716,13 @@ variant_stats_report <- function(
     call_stats[[name]][["n_segments_loss"]] <-
       callset$variant |>
       dplyr::filter(.data$VARIANT_CLASS == "homdel") |>
+      dplyr::select(.data$VAR_ID) |>
+      dplyr::distinct() |>
+      NROW()
+
+    call_stats[[name]][["n_segments_hetloss"]] <-
+      callset$variant |>
+      dplyr::filter(.data$VARIANT_CLASS == "hetdel") |>
       dplyr::select(.data$VAR_ID) |>
       dplyr::distinct() |>
       NROW()
