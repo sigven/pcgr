@@ -49,8 +49,9 @@ dt_snv_content_tier1 <-
 tier1_gene_dt <- DT::datatable(
   dt_snv_content_tier1[['by_gene']],
   escape = F, 
-  options = list(dom = 't'),
-  extensions = c("Responsive")) |>
+  options = list(dom = 'Bfrtip',
+                 buttons = c('csv','excel')),
+  extensions = c("Responsive","Buttons")) |>
   DT::formatStyle(
     color="white", 
     "MOLECULAR_ALTERATION", 
@@ -212,8 +213,9 @@ dt_snv_content_tier2 <-
 tier2_gene_dt <- DT::datatable(
   dt_snv_content_tier2[['by_gene']],
   escape = F, 
-  options = list(dom = 't'),
-  extensions = c("Responsive")) |>
+  options = list(dom = 'Bfrtip',
+                 buttons = c('csv','excel')),
+  extensions = c("Responsive","Buttons")) |>
   DT::formatStyle(
     color="white", 
     "MOLECULAR_ALTERATION", 
