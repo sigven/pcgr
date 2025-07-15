@@ -49,8 +49,9 @@ dt_snv_content_tier1 <-
 tier1_gene_dt <- DT::datatable(
   dt_snv_content_tier1[['by_gene']],
   escape = F, 
-  options = list(dom = 't'),
-  extensions = c("Responsive")) |>
+  options = list(dom = 'Bfrtip',
+                 buttons = c('csv','excel')),
+  extensions = c("Responsive","Buttons")) |>
   DT::formatStyle(
     color="white", 
     "MOLECULAR_ALTERATION", 
@@ -212,8 +213,9 @@ dt_snv_content_tier2 <-
 tier2_gene_dt <- DT::datatable(
   dt_snv_content_tier2[['by_gene']],
   escape = F, 
-  options = list(dom = 't'),
-  extensions = c("Responsive")) |>
+  options = list(dom = 'Bfrtip',
+                 buttons = c('csv','excel')),
+  extensions = c("Responsive","Buttons")) |>
   DT::formatStyle(
     color="white", 
     "MOLECULAR_ALTERATION", 
@@ -360,7 +362,7 @@ htmltools::br()
 Here, we list protein-altering somatic variants located in proto-oncogenes and tumor suppressors that are currently _not_ linked to any clinical evidence items (as specified in [@Li2017-ew]). These variants are considered to have uncertain clinical significance and are thus not recommended for clinical action.
 
 Variants have been ranked based on their oncogenicity score, and their strength of association to cancer at the gene level (here, specifically __`r pcg_report$settings$conf$sample_properties$site`__ cancers), from <span style="background-color:`r pcgrr::color_palette$cancer_assoc$values[1]`; padding:2x; color:white"><b>&nbsp; weak associations &nbsp; </b></span>&nbsp; to <span style="background-color:`r pcgrr::color_palette$cancer_assoc$values[length(pcgrr::color_palette$cancer_assoc$values)]`; padding:2x; color:white"><b>&nbsp; strong associations &nbsp; </b></span> [@Ochoa2021-jc;@Nakken2023-ol]. 
-<br>
+<br><br>
 
 ```{r }
 #| output: asis

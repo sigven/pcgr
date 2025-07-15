@@ -46,6 +46,14 @@ sigven <- user("sigven")
 pdiakumis <- user("pdiakumis")
 ```
 
+## v2.2.2
+
+- Date: **2025-07-15**
+  - fix bug in Grantham distance score evaluation (`r issue(271)`)
+  - add support for heterozygous deletions in CNA interpretation - variant classes
+    are now _homdel_, _hetdel_, and _gain_
+  - fix missing pagination of some data tables with actionable markers
+
 ## v2.2.1
 
 - Date: **2025-03-23**

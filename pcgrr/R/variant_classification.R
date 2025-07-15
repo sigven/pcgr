@@ -173,7 +173,8 @@ assign_amp_asco_tiers <- function(
           dplyr::mutate(AMP_ASCO_TIER_OTHER_VARS = dplyr::if_else(
             (!is.na(.data$TUMOR_SUPPRESSOR) &
                .data$TUMOR_SUPPRESSOR == TRUE &
-               .data$VARIANT_CLASS == "homdel") |
+               (.data$VARIANT_CLASS == "homdel" |
+                  .data$VARIANT_CLASS == "hetdel")) |
               (!is.na(.data$ONCOGENE) &
                  .data$ONCOGENE == TRUE &
                  .data$VARIANT_CLASS == "gain"),
@@ -226,7 +227,8 @@ assign_amp_asco_tiers <- function(
           dplyr::mutate(AMP_ASCO_TIER = dplyr::if_else(
             (!is.na(.data$TUMOR_SUPPRESSOR) &
                .data$TUMOR_SUPPRESSOR == TRUE &
-               .data$VARIANT_CLASS == "homdel") |
+               (.data$VARIANT_CLASS == "homdel" |
+                  .data$VARIANT_CLASS == "hetdel")) |
               (!is.na(.data$ONCOGENE) &
                  .data$ONCOGENE == TRUE &
                  .data$VARIANT_CLASS == "gain"),

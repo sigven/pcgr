@@ -65,7 +65,9 @@ load_somatic_cna <- function(
     )) |>
     tidyr::separate(
       col = "SEGMENT_NAME",
-      into = c("SEGMENT_ID", "N_MAJOR","N_MINOR","ARM","CYTOBAND","EVENT_TYPE"),
+      into = c("SEGMENT_ID", "N_MAJOR",
+               "N_MINOR","ARM",
+               "CYTOBAND","EVENT_TYPE"),
       sep = "\\|",
       remove = T
     ) |>
@@ -90,7 +92,6 @@ load_somatic_cna <- function(
     variant_origin = "Somatic")
 
   callset_cna[['segment']] <- segments
-
   if (NROW(callset_cna$variant) > 0) {
     callset_cna[['variant']] <- callset_cna[['variant']] |>
       dplyr::mutate(CN_TOTAL =

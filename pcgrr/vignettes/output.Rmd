@@ -417,7 +417,7 @@ The format of the compressed `cna_gene_ann.tsv.gz` is the following:
 | 5. `SEGMENT_LENGTH_MB` | Length of segment in Mb |
 | 6. `CYTOBAND` | Associated cytoband |
 | 7. `EVENT_TYPE` | Focal or broad (covering more than 25% of chromosome arm) |
-| 8. `VARIANT_CLASS` | _gain_: total copy number >= user-defined threshold; loss - total copy number equal to zero; _undefined_ other copy number states|
+| 8. `VARIANT_CLASS` | _gain_: total copy number >= user-defined threshold; _homdel_ - total copy number equal to zero; _hetdel_ - total copy number equal to one; _undefined_ other copy number states|
 | 9. `SYMBOL` | Gene symbol |
 | 10. `ENTREZGENE` | Entrez gene identifier |
 | 11. `GENENAME` | Gene name |
