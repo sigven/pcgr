@@ -188,14 +188,24 @@ glue("docker pull sigven/pcgr:{PCGR_VERSION}")
 
 #### Example Run
 
+In the example below, we assume that you have the following directory structure:
+
+- `/Users/you/dir1` - the directory you are working in
+- `/Users/you/dir1/VEP_cache` - the directory where you have downloaded the VEP cache (*Note*: this should contain the `homo_sapiens` directory as its child directory)
+- `r paste0("/Users/you/dir1/", BUNDLE_VERSION)` - the directory where you have downloaded the PCGR reference bundle (*Note*: this should contain a directory named `data` as its child directory)
+- `/Users/you/dir1/pcgr_inputs` - the directory where you have your input files (e.g. VCF files)
+- `/Users/you/dir1/pcgr_outputs` - the directory where you want to store the PCGR outputs
+
+
 ```{bash echo=FALSE}
 echo "PCGR_VERSION=\"${PCGR_VERSION}\""
+echo "BUNDLE_VERSION=\"${BUNDLE_VERSION}\""
 ```
 
 ```bash
 docker container run -it --rm \
-    -v /Users/you/dir1/.vep:/mnt/.vep \
-    -v /Users/you/dir1/bundle:/mnt/bundle \
+    -v /Users/you/dir1/VEP_cache:/mnt/.vep \
+    -v /Users/you/dir1/${BUNDLE_VERSION}:/mnt/bundle \
     -v /Users/you/dir1/pcgr_inputs:/mnt/pcgr_inputs \
     -v /Users/you/dir1/pcgr_outputs:/mnt/pcgr_outputs \
     sigven/pcgr:${PCGR_VERSION} \
@@ -233,6 +243,7 @@ that can be run with Singularity or Apptainer.
 
 ```{bash echo=FALSE}
 echo "PCGR_VERSION=\"${PCGR_VERSION}\""
+echo "BUNDLE_VERSION=\"${BUNDLE_VERSION}\""
 ```
 
 ```bash
@@ -240,8 +251,8 @@ apptainer exec \
   --writable-tmpfs \
   --no-home \
   --env "XDG_CACHE_HOME=/tmp/quarto_cache_home" \
-  -B /Users/you/dir1/.vep:/mnt/.vep \
-  -B /Users/you/dir1/bundle:/mnt/bundle \
+  -B /Users/you/dir1/VEP_cache:/mnt/.vep \
+  -B /Users/you/dir1/${BUNDLE_VERSION}:/mnt/bundle \
   -B /Users/you/dir1/pcgr_inputs:/mnt/pcgr_inputs \
   -B /Users/you/dir1/pcgr_outputs:/mnt/pcgr_outputs \
   pcgr_${PCGR_VERSION}.singularity.sif \
