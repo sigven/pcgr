@@ -220,9 +220,11 @@ init_cna_vstats <- function() {
 
   vstats <- list()
   for (t in c("n_tsg_loss",
+              "n_tsg_hetloss",
               "n_oncogene_gain",
               "n_other_drugtarget_gain",
               "n_segments_loss",
+              "n_segments_hetloss",
               "n_segments_gain",
               "n_actionable_tier1",
               "n_actionable_tier2")) {

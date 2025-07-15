@@ -86,7 +86,7 @@ plot_cna_segments <- function(chrom_coordinates = NULL,
 
 
   ## Identify segments that involve oncogene gain or
-  ## tumor suppressor loss
+  ## tumor suppressor loss (homozygous or heterozygous)
   onc_gain_tsg_loss <- cna_gene |>
     dplyr::select(
       c("CHROM", "SEGMENT_START", "SEGMENT_END",
@@ -97,9 +97,11 @@ plot_cna_segments <- function(chrom_coordinates = NULL,
       (.data$ONCOGENE == TRUE &
          .data$VARIANT_CLASS == "gain") |
         (.data$TUMOR_SUPPRESSOR == TRUE &
-           .data$VARIANT_CLASS == "homdel"))
+           (.data$VARIANT_CLASS == "homdel" |
+              .data$VARIANT_CLASS == "hetdel")))
 
   tsg_loss <- data.frame()
+  tsg_het_loss <- data.frame()
   onc_gain <- data.frame()
 
   ## If there are oncogene gains or tumor suppressor losses,
@@ -142,6 +144,27 @@ plot_cna_segments <- function(chrom_coordinates = NULL,
           .data$SEGMENT_END) |>
         dplyr::summarise(
           TSG_LOSS = paste(
+            utils::head(.data$SYMBOL, 3), collapse = ", "),
+          .groups = "drop")
+    }
+
+    tsg_het_loss <- onc_gain_tsg_loss |>
+      dplyr::filter(
+        .data$TUMOR_SUPPRESSOR == TRUE &
+          .data$VARIANT_CLASS == "hetdel")
+
+    ## For now, if multiple TSGs are involved in a lost segment, we will only
+    ## show the top three in the plot (hover)
+    if(NROW(tsg_het_loss) > 0){
+      tsg_het_loss <- tsg_het_loss |>
+        dplyr::arrange(
+          dplyr::desc(.data$TUMOR_SUPPRESSOR_RANK)) |>
+        dplyr::group_by(
+          .data$CHROM,
+          .data$SEGMENT_START,
+          .data$SEGMENT_END) |>
+        dplyr::summarise(
+          TSG_HET_LOSS = paste(
             utils::head(.data$SYMBOL, 3), collapse = ", "),
           .groups = "drop")
     }
@@ -199,11 +222,27 @@ plot_cna_segments <- function(chrom_coordinates = NULL,
         !is.na(.data$TSG_LOSS),
         paste0(
           .data$SegmentInfo,
-          "<br> - Tumor suppressor loss: ",
+          "<br> - Tumor suppressor loss (homozygous del): ",
           .data$TSG_LOSS),
         .data$SegmentInfo))
   }else{
     cna_segments_global$TSG_LOSS <- as.character(NA)
+  }
+
+  if(NROW(tsg_het_loss) > 0){
+    cna_segments_global <- cna_segments_global |>
+      dplyr::left_join(
+        tsg_het_loss,
+        by = c("CHROM", "SEGMENT_START", "SEGMENT_END")
+      ) |>
+      dplyr::mutate(SegmentInfo = dplyr::if_else(
+        !is.na(.data$TSG_HET_LOSS),
+        paste0(.data$SegmentInfo,
+               "<br> - Tumor suppressor loss (heterozygous del): ",
+               .data$TSG_HET_LOSS),
+        .data$SegmentInfo))
+  }else{
+    cna_segments_global$TSG_HET_LOSS <- as.character(NA)
   }
 
   if(NROW(onc_gain) > 0){
@@ -379,10 +418,22 @@ get_oncogenic_cna_events <- function(cna_df_display = NULL){
       )
     )
 
+  tsgene_hetloss_variants <-
+    dplyr::filter(
+      cna_df_display,
+        .data$TUMOR_SUPPRESSOR == TRUE &
+        .data$VARIANT_CLASS == "hetdel") |>
+    dplyr::select(
+      dplyr::any_of(
+        pcgrr::dt_display$cna_other_oncogenic
+      )
+    )
+
   cna_oncogenic_events <-
     dplyr::bind_rows(
       oncogene_gain_variants,
-      tsgene_loss_variants
+      tsgene_loss_variants,
+      tsgene_hetloss_variants
     ) |>
     dplyr::select(
       dplyr::any_of(
@@ -393,6 +444,12 @@ get_oncogenic_cna_events <- function(cna_df_display = NULL){
       dplyr::desc(.data$TISSUE_ASSOC_RANK),
       dplyr::desc(.data$GLOBAL_ASSOC_RANK),
     )
+
+  if("SEGMENT_LENGTH_MB" %in% colnames(cna_oncogenic_events)){
+    cna_oncogenic_events <- cna_oncogenic_events |>
+      dplyr::mutate(SEGMENT_LENGTH_MB = round(
+        .data$SEGMENT_LENGTH_MB, digits = 2))
+  }
 
   return(cna_oncogenic_events)
 

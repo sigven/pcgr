@@ -460,7 +460,12 @@ def load_oncogenic_variants(oncogenic_variants_fname: str, logger: Logger):
          gene = str(row['entrezgene'])
          if not 'oncogenic' in str(row['oncogenicity']).lower():
             continue         
-         oncogenic_variants[str(gene) + '-' + str(row['var_id'])] = row
+         oncogenic_variants[str(gene) + '-' + str(row['var_id'])] = row         
+         if 'grantham_distance' in row.keys():
+            if row['grantham_distance'] == '':
+               row['grantham_distance'] = -1
+            else:
+               row['grantham_distance'] = float(row['grantham_distance'])
          if not len(row['hgvsp']) == 0:
             oncogenic_variants[str(gene) + '-' + str(row['hgvsp'])] = row
          if not len(row['hgvs_c']) == 0:
@@ -530,10 +535,11 @@ def match_oncogenic_variants(transcript_csq_elements, oncogenic_variants, rec, p
             if oncogenic_varkeys[oncogenic_varkey].startswith('by_codon'):
                grantham_distance = rec.INFO.get('GRANTHAM_DISTANCE')
                if not grantham_distance is None:
-                  if float(grantham_distance / float(oncogenic_variants[oncogenic_varkey]['grantham_distance'])) > 0.8:                  
-                     if not oncogenic_info in known_oncogenic_sites:
-                        known_oncogenic_sites[oncogenic_info] = []
-                     known_oncogenic_sites[oncogenic_info].append(oncogenic_varkeys[oncogenic_varkey])
+                  if grantham_distance > 0 and oncogenic_variants[oncogenic_varkey]['grantham_distance'] > 0:                     
+                     if float(grantham_distance / float(oncogenic_variants[oncogenic_varkey]['grantham_distance'])) >= 0.8:                  
+                        if not oncogenic_info in known_oncogenic_sites:
+                           known_oncogenic_sites[oncogenic_info] = []
+                        known_oncogenic_sites[oncogenic_info].append(oncogenic_varkeys[oncogenic_varkey])
             else:
                if not oncogenic_info in known_oncogenic_matches:
                   known_oncogenic_matches[oncogenic_info] = []

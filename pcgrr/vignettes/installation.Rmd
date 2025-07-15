@@ -80,10 +80,6 @@ mv data/ ${BUNDLE_VERSION}
 [FTP site][ensembl-ftp] (search there for files starting with `homo_sapiens_vep_`).
 The latest Ensembl VEP version we support is **v`r VEP_VERSION`**.
 
-**Tip**: PCGR needs to be pointed to the _parent_ directory containing
-the downloaded `homo_sapiens/xyz_GRCh3x/` cache, which is usually called `.vep` if
-you've followed the VEP cache [download instructions][vep-cache].
-
 [vep-web]: https://www.ensembl.org/info/docs/tools/vep/index.html
 [ensembl-ftp]: https://ftp.ensembl.org/pub/release-113/variation/indexed_vep_cache/
 [vep-cache]: https://www.ensembl.org/info/docs/tools/vep/script/vep_cache.html#cache
@@ -101,6 +97,11 @@ CACHE="homo_sapiens_vep_${VEP_VERSION}_${GENOME}.tar.gz"
 wget https://ftp.ensembl.org/pub/release-${VEP_VERSION}/variation/indexed_vep_cache/${CACHE}
 gzip -dc ${CACHE} | tar xvf -
 ```
+
+**Important**: PCGR needs to be pointed to the _parent_ directory containing
+the downloaded ``r glue::glue("homo_sapiens/{VEP_VERSION}_GRCh3x/")`` cache. 
+Historically, this parent directory has been named `.vep`, but the name of this 
+directory can be arbitrarily set.
 
 ### 3. Sample Inputs
 
@@ -188,14 +189,24 @@ glue("docker pull sigven/pcgr:{PCGR_VERSION}")
 
 #### Example Run
 
+In the example below, we assume that you have the following directory structure:
+
+- `/Users/you/dir1` - the directory you are working in
+- `/Users/you/dir1/VEP_cache` - the directory where you have downloaded the [VEP cache](#vep-cache) (**Note**: this directory should contain the `homo_sapiens` directory as its child directory
+- ``r glue::glue("/Users/you/dir1/{BUNDLE_VERSION}")`` - the directory where you have downloaded the PCGR reference bundle (**Note**: this directory should contain a directory named `data` as its child directory)
+- `/Users/you/dir1/pcgr_inputs` - the directory where you have your input files (e.g. VCF files)
+- `/Users/you/dir1/pcgr_outputs` - the directory where you want to store the PCGR outputs
+
+
 ```{bash echo=FALSE}
 echo "PCGR_VERSION=\"${PCGR_VERSION}\""
+echo "BUNDLE_VERSION=\"${BUNDLE_VERSION}\""
 ```
 
 ```bash
 docker container run -it --rm \
-    -v /Users/you/dir1/.vep:/mnt/.vep \
-    -v /Users/you/dir1/bundle:/mnt/bundle \
+    -v /Users/you/dir1/VEP_cache:/mnt/.vep \
+    -v /Users/you/dir1/${BUNDLE_VERSION}:/mnt/bundle \
     -v /Users/you/dir1/pcgr_inputs:/mnt/pcgr_inputs \
     -v /Users/you/dir1/pcgr_outputs:/mnt/pcgr_outputs \
     sigven/pcgr:${PCGR_VERSION} \
@@ -233,6 +244,7 @@ that can be run with Singularity or Apptainer.
 
 ```{bash echo=FALSE}
 echo "PCGR_VERSION=\"${PCGR_VERSION}\""
+echo "BUNDLE_VERSION=\"${BUNDLE_VERSION}\""
 ```
 
 ```bash
@@ -240,8 +252,8 @@ apptainer exec \
   --writable-tmpfs \
   --no-home \
   --env "XDG_CACHE_HOME=/tmp/quarto_cache_home" \
-  -B /Users/you/dir1/.vep:/mnt/.vep \
-  -B /Users/you/dir1/bundle:/mnt/bundle \
+  -B /Users/you/dir1/VEP_cache:/mnt/.vep \
+  -B /Users/you/dir1/${BUNDLE_VERSION}:/mnt/bundle \
   -B /Users/you/dir1/pcgr_inputs:/mnt/pcgr_inputs \
   -B /Users/you/dir1/pcgr_outputs:/mnt/pcgr_outputs \
   pcgr_${PCGR_VERSION}.singularity.sif \

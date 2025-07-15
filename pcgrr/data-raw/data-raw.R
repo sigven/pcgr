@@ -101,8 +101,8 @@ for (c in c("pathogenicity",
     color_palette[[c]][["values"]] <- c("#9B3297", "#0073C2")
   }
   if (c == "cna_variant_class") {
-    color_palette[[c]][["levels"]] <- c("gain", "homdel")
-    color_palette[[c]][["values"]] <- c("#00a65a", "#CD534C")
+    color_palette[[c]][["levels"]] <- c("gain", "hetdel", "homdel")
+    color_palette[[c]][["values"]] <- c("#00a65a", "#E58B85", "#CD534C")
   }
   if (c == "warning") {
     color_palette[[c]] <- "#ff7518"
