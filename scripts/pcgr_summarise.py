@@ -75,8 +75,7 @@ def extend_vcf_annotations(arg_dict, logger):
     vcf_infotags['vep'] = read_infotag_file(os.path.join(arg_dict['refdata_assembly_dir'], 'vcf_infotags_vep.tsv'), scope = "vep")
     vcf_infotags['other'].update(vcf_infotags['vep'])
     vcf_info_metadata = vcf_infotags['other']
-    
-    
+        
     ## load CPSR target genes from YAML file
     cpsr_target_genes = {}
     if arg_dict['cpsr'] is True:
@@ -121,7 +120,7 @@ def extend_vcf_annotations(arg_dict, logger):
     meta_vep_dbnsfp_info = vep_dbnsfp_meta_vcf(arg_dict['vcf_file_in'], vcf_info_metadata)
     dbnsfp_prediction_algorithms = meta_vep_dbnsfp_info['dbnsfp_prediction_algorithms']
     vep_csq_fields_map = meta_vep_dbnsfp_info['vep_csq_fieldmap']
-    
+        
     vcf = cyvcf2.VCF(arg_dict['vcf_file_in'],  gts012=True)
     for tag in sorted(vcf_info_metadata):
         if arg_dict['pon_annotation'] == 0 and tag.startswith('PANEL_OF_NORMALS'):

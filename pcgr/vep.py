@@ -28,7 +28,7 @@ def get_vep_command(file_paths, conf_options, input_vcf, output_vcf, debug = Fal
 
     # List all VEP flags used when calling VEP
     vep_flags = (
-        f'--hgvs --af_gnomad --variant_class --domains --symbol --protein --ccds --mane '
+        f'--hgvs --af_gnomad --af_gnomadg --variant_class --domains --symbol --protein --ccds --mane '
         f'--uniprot --appris --biotype --tsl --canonical --format vcf --cache --numbers '
         f'--total_length --allele_number --failed 1 --no_stats --no_escape --xref_refseq --vcf '
         f'--check_ref --dont_skip --flag_pick_allele_gene --plugin NearestExonJB,max_range=50000 '

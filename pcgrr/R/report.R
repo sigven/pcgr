@@ -44,27 +44,39 @@ init_report <- function(yaml_fname = NULL,
       if (report[["settings"]][["conf"]][["variant_classification"]][["pop_gnomad"]] != "") {
         population <-
           report[["settings"]][["conf"]][["variant_classification"]][["pop_gnomad"]]
-        vcf_tag_AF <- "gnomADe_non_cancer_AF"
-        vcf_tag_AN <- "gnomADe_non_cancer_AN"
-        vcf_tag_AC <- "gnomADe_non_cancer_AC"
-        vcf_tag_NHOMALT <- "gnomADe_non_cancer_NHOMALT"
+        vcf_tag_AF <- "gnomADg_non_cancer_AF"
+        vcf_tag_AN <- "gnomADg_non_cancer_AN"
+        vcf_tag_AC <- "gnomADg_non_cancer_AC"
+        vcf_tag_AF_all <- "gnomADg_AF"
+        vcf_tag_NHOMALT <- "gnomADg_non_cancer_NHOMALT"
         if (population != "global") {
           vcf_tag_AF <-
-            paste0("gnomADe_non_cancer_",toupper(population),"_AF")
+            paste0("gnomADg_non_cancer_",toupper(population),"_AF")
+          #vcf_tag_AF_all <-
+            #paste0("gnomADe_",toupper(population),"_AF")
           vcf_tag_AN <-
-            paste0("gnomADe_non_cancer_",toupper(population),"_AN")
+            paste0("gnomADg_non_cancer_",toupper(population),"_AN")
           vcf_tag_AC <-
-            paste0("gnomADe_non_cancer_",toupper(population),"_AC")
+            paste0("gnomADg_non_cancer_",toupper(population),"_AC")
           vcf_tag_NHOMALT <-
-            paste0("gnomADe_non_cancer_",toupper(population),"_NHOMALT")
+            paste0("gnomADg_non_cancer_",toupper(population),"_NHOMALT")
+        }
+        gnomad_info_tag <- paste0('gNC_', toupper(population))
+        if(population == "global"){
+          gnomad_info_tag <- "gNC"
         }
         pop_desc_df <-
           report$ref_data$vcf_infotags[
-            report$ref_data$vcf_infotags$tag == vcf_tag_AF,]
+            report$ref_data$vcf_infotags$tag == gnomad_info_tag,]
         if (NROW(pop_desc_df) == 1) {
-          population_description <- pop_desc_df$description
+          population_description <-
+            stringr::str_replace(
+              pop_desc_df$description,
+              ", format: AC\\|AN\\|NHOMALT","")
           report[["settings"]][["conf"]][["variant_classification"]][["vcftag_gnomad_AF"]] <-
             vcf_tag_AF
+          report[["settings"]][["conf"]][["variant_classification"]][["vcftag_gnomad_AF_all"]] <-
+            vcf_tag_AF_all
           report[["settings"]][["conf"]][["variant_classification"]][["vcftag_gnomad_AN"]] <-
             vcf_tag_AN
           report[["settings"]][["conf"]][["variant_classification"]][["vcftag_gnomad_AC"]] <-
