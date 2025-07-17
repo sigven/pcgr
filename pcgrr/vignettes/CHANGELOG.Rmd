@@ -46,6 +46,11 @@ sigven <- user("sigven")
 pdiakumis <- user("pdiakumis")
 ```
 
+## v2.2.3
+
+- Date: **2025-07-18**
+  - update Ensembl VEP `v113.4` (see [bioconda issue](https://github.com/bioconda/bioconda-recipes/pull/54330))
+
 ## v2.2.2
 
 - Date: **2025-07-15**
