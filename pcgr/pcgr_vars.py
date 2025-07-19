@@ -4,7 +4,7 @@ from pcgr._version import __version__
 
 ## Version - software and bundle
 PCGR_VERSION = __version__
-DB_VERSION = '20250707'
+DB_VERSION = '20250716'
 
 ## Miscellaneous settings
 NCBI_BUILD_MAF = 'GRCh38'
@@ -248,58 +248,60 @@ DISEASE_COHORTS = ['ACC','BLCA','BRCA','CESC',
 
 ## Tumor site to TCGA cohort mapping
 SITE_TO_DISEASE = {
-    'Lung': ['TCGA_LUAD','TCGA_LUSC'],
-    'Breast': ['TCGA_BRCA'],
-    'Prostate': ['TCGA_PRAD'],
-    'Kidney': ['TCGA_KIRC','TCGA_KIRP','TCGA_KICH'],
-    'Colon/Rectum': ['TCGA_COAD','TCGA_READ'],
-    'Pancreas': ['TCGA_PAAD'],
-    'Bladder/Urinary Tract': ['TCGA_BLCA'],
-    'Thyroid': ['TCGA_THCA'],
-    'Esophagus/Stomach': ['TCGA_STAD'],
-    'Cervix': ['TCGA_CESC'],
-    'Ovary/Fallopian Tube': ['TCGA_OV'],
-    'Skin': ['TCGA_SKCM'],
-    'Soft tissue': ['TCGA_SARC'],
-    'Liver': ['TCGA_LIHC'],
-    'CNS/Brain': ['TCGA_GBM','TCGA_LGG'],
-    'Uterus': ['TCGA_UCEC','TCGA_UCS'],
-    'Head/Neck': ['TCGA_HNSC'],
-    'Testis': ['TCGA_TGCT'],
     'Adrenal Gland': ['TCGA_ACC','TCGA_PCPG'],
-    'Pleura': ['TCGA_MESO'],
     'Biliary Tract': ['TCGA_CHOL'],
-    'Thymus': ['TCGA_THYM'],
+    'Bladder/Urinary Tract': ['TCGA_BLCA'],
+    'Breast': ['TCGA_BRCA'],
+    'Cervix': ['TCGA_CESC'],
+    'CNS/Brain': ['TCGA_GBM','TCGA_LGG'],
+    'Colon/Rectum': ['TCGA_COAD','TCGA_READ'],
+    'Esophagus/Stomach': ['TCGA_STAD'],
+    'Eye': ['TCGA_UVM'],
+    'Head and Neck': ['TCGA_HNSC'],
+    'Kidney': ['TCGA_KICH','TCGA_KIRC','TCGA_KIRP'],
+    'Liver': ['TCGA_LIHC'],
+    'Lung': ['TCGA_LUAD','TCGA_LUSC'],
+    'Lymphoid': ['TCGA_DLBC'],
     'Myeloid': ['TCGA_LAML'],
-    'Lymphoid': ['TCGA_DLBC']
+    'Ovary/Fallopian Tube': ['TCGA_OV'],
+    'Pancreas': ['TCGA_PAAD'],
+    'Peripheral Nervous System': ['TCGA_PCPG'],
+    'Pleura': ['TCGA_MESO'],
+    'Prostate': ['TCGA_PRAD'],
+    'Skin': ['TCGA_SKCM'],
+    'Soft Tissue': ['TCGA_SARC'],
+    'Testis': ['TCGA_TGCT'],
+    'Thymus': ['TCGA_THYM'],
+    'Thyroid': ['TCGA_THCA'],
+    'Uterus': ['TCGA_UCEC','TCGA_UCS']
 }
 
 DBNSFP_ALGORITHMS = {
-    'polyphen2_hvar': 'DBNSFP_POLYPHEN2_HVAR',
+    'aloft': 'DBNSFP_ALOFT',
+    'alphamissense': 'DBNSFP_ALPHA_MISSENSE',
+    'bayesdel_addaf': 'DBNSFP_BAYESDEL_ADDAF',
     'cadd': 'DBNSFP_CADD',
-    'vest4': 'DBNSFP_VEST4',
     'clinpred': 'DBNSFP_CLINPRED',
-    'revel': 'DBNSFP_REVEL',
-    'sift': 'DBNSFP_SIFT',
-    'provean': 'DBNSFP_PROVEAN',
-    'm-cap': 'DBNSFP_M_CAP',
-    'mutpred': 'DBNSFP_MUTPRED',
-    'metarnn': 'DBNSFP_META_RNN',
+    'deogen2': 'DBNSFP_DEOGEN2',
+    'esm1b': 'DBNSFP_ESM1B',
     'fathmm_xf': 'DBNSFP_FATHMM_XF',
+    'gerp_rs': 'DBNSFP_GERP',       
+    'list_s2': 'DBNSFP_LIST_S2',
+    'metarnn': 'DBNSFP_META_RNN',
     'mutationassessor': 'DBNSFP_MUTATIONASSESSOR',
     'mutationtaster': 'DBNSFP_MUTATIONTASTER',
-    'deogen2': 'DBNSFP_DEOGEN2',
+    'mutformer': 'DBNSFP_MUTFORMER', 
+    'mutpred': 'DBNSFP_MUTPRED',
+    'm-cap': 'DBNSFP_M_CAP',
+    'polyphen2_hvar': 'DBNSFP_POLYPHEN2_HVAR',
+    'phactboost': 'DBNSFP_PHACTBOOST',
     'primateai': 'DBNSFP_PRIMATEAI', 
-    'list_s2': 'DBNSFP_LIST_S2',
-    'gerp_rs': 'DBNSFP_GERP',       
-    'aloft': 'DBNSFP_ALOFT',
-    'bayesdel_addaf': 'DBNSFP_BAYESDEL_ADDAF',
+    'provean': 'DBNSFP_PROVEAN',
+    'revel': 'DBNSFP_REVEL',
+    'sift': 'DBNSFP_SIFT',
     'splice_site_ada': 'DBNSFP_SPLICE_SITE_ADA',
     'splice_site_rf': 'DBNSFP_SPLICE_SITE_RF',
-    'esm1b': 'DBNSFP_ESM1B',
-    'alphamissense': 'DBNSFP_ALPHA_MISSENSE',
-    'mutformer': 'DBNSFP_MUTFORMER', 
-    'phactboost': 'DBNSFP_PHACTBOOST'
+    'vest4': 'DBNSFP_VEST4'
 }
 
 ONCOGENICITY = {
