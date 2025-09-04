@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 
-import os,re,sys
-from cyvcf2 import VCF, Writer
+import os
+import re
 import csv
 
-from typing import Dict
 from logging import Logger
 import gzip
 
@@ -161,7 +160,7 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
       variant_data[code] = False
    
    if "KNOWN_ONCOGENIC" in variant_data.keys():
-      if not variant_data['KNOWN_ONCOGENIC'] is None:         
+      if variant_data['KNOWN_ONCOGENIC'] is not None:         
          variant_data['ONCG_OS1'] = True
    
    for elem in ['N_INSILICO_CALLED',
@@ -231,7 +230,7 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
    hotspot_mutated_samples['aa_variant']['Any'] = 0
    hotspot_mutated_samples['aa_site']['Any'] = 0
 
-   if not variant_data['MUTATION_HOTSPOT_CANCERTYPE'] is None:
+   if variant_data['MUTATION_HOTSPOT_CANCERTYPE'] is not None:
       ttype_samples_in_hotspots = variant_data['MUTATION_HOTSPOT_CANCERTYPE'].split(',')
       for ttype in ttype_samples_in_hotspots:
          ttype_stats = ttype.split('|')
@@ -273,7 +272,7 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
    ## lack the access to a resource with such information. As a simplified means to gather some evidence in this regard,
    ## we rather base our criteria matching based on existing actionability evidence (predictive/oncogenic), for which 
    ## variants are presumably located in critical sites of functional domains (in that sense, indirect evidence for OM1)
-   if not variant_data['BIOMARKER_MATCH'] is None:
+   if variant_data['BIOMARKER_MATCH'] is not None:
       
       ## Split all biomarker evidence into a list
       biomarker_evidence = variant_data['BIOMARKER_MATCH'].split(',')
@@ -310,9 +309,9 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
 
       ## check if variant has MAF > 0.01 (SBVS1) or > 0.05 in any of five major gnomAD subpopulations (exome or genome set)
    for pop in all_gnomad_tags:
-      if not pop in variant_data.keys():
+      if pop not in variant_data.keys():
          continue
-      if not variant_data[pop] is None:
+      if variant_data[pop] is not None:
          if float(variant_data[pop]) >= float(pcgr_vars.ONCOGENICITY['gnomAD_very_common_AF']):
             variant_data["ONCG_SBVS1"] = True
          if float(variant_data[pop]) >= float(pcgr_vars.ONCOGENICITY['gnomAD_common_AF']) and variant_data["ONCG_SBVS1"] is False:
@@ -326,7 +325,7 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
       approx_zero_pop_freq[assay] = 0
          
       for pop in gnomad_tags[assay]:
-         if not pop in variant_data.keys():
+         if pop not in variant_data.keys():
             continue
          ## no AF recorded in gnomAD for this population
          if variant_data[pop] is None:
@@ -375,7 +374,7 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
             variant_data['ONCG_SBP2'] = True
    
    if "KNOWN_ONCOGENIC_SITE" in variant_data.keys():
-      if not variant_data['KNOWN_ONCOGENIC_SITE'] is None:         
+      if variant_data['KNOWN_ONCOGENIC_SITE'] is not None:         
          if variant_data['ONCG_OS1'] is False and \
             variant_data['ONCG_OS3'] is False and \
                variant_data['ONCG_OM1'] is False:
@@ -469,7 +468,7 @@ def load_oncogenic_variants(oncogenic_variants_fname: str, logger: Logger):
       reader = csv.DictReader(f, delimiter='\t')
       for row in reader:            
          gene = str(row['entrezgene'])
-         if not 'oncogenic' in str(row['oncogenicity']).lower():
+         if 'oncogenic' not in str(row['oncogenicity']).lower():
             continue         
          oncogenic_variants[str(gene) + '-' + str(row['var_id'])] = row         
          if 'grantham_distance' in row.keys():
@@ -508,7 +507,7 @@ def match_oncogenic_variants(transcript_csq_elements, oncogenic_variants, rec, p
    for csq in transcript_csq_elements:
       (consequence, symbol, entrezgene, hgvsc, hgvsp, exon, feature_type, feature, biotype) = csq.split(':')
 
-      if not bool(re.search(r'^(missense|stop|start|inframe|splice_donor|intron|splice_acceptor|frameshift|upstream)', consequence)) is True:
+      if bool(re.search(r'^(missense|stop|start|inframe|splice_donor|intron|splice_acceptor|frameshift|upstream)', consequence)) is False:
          continue
 
       hgvsc_match = 'by_hgvsc_nonprincipal'
@@ -545,14 +544,14 @@ def match_oncogenic_variants(transcript_csq_elements, oncogenic_variants, rec, p
 
             if oncogenic_varkeys[oncogenic_varkey].startswith('by_codon'):
                grantham_distance = rec.INFO.get('GRANTHAM_DISTANCE')
-               if not grantham_distance is None:
+               if grantham_distance is not None:
                   if grantham_distance > 0 and oncogenic_variants[oncogenic_varkey]['grantham_distance'] > 0:                     
                      if float(grantham_distance / float(oncogenic_variants[oncogenic_varkey]['grantham_distance'])) >= 0.8:                  
-                        if not oncogenic_info in known_oncogenic_sites:
+                        if oncogenic_info not in known_oncogenic_sites:
                            known_oncogenic_sites[oncogenic_info] = []
                         known_oncogenic_sites[oncogenic_info].append(oncogenic_varkeys[oncogenic_varkey])
             else:
-               if not oncogenic_info in known_oncogenic_matches:
+               if oncogenic_info not in known_oncogenic_matches:
                   known_oncogenic_matches[oncogenic_info] = []
                known_oncogenic_matches[oncogenic_info].append(oncogenic_varkeys[oncogenic_varkey])
 

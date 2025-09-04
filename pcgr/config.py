@@ -5,9 +5,7 @@ from pcgr.utils import check_file_exists, error_message
 
 import pandas as pd
 import os
-import gzip
 import csv
-import re
 
 def create_config(arg_dict, workflow = "PCGR"):
     
@@ -61,9 +59,9 @@ def create_config(arg_dict, workflow = "PCGR"):
             conf_options['assay_properties']['vcf_tumor_only'] = 1
             conf_options['assay_properties']['mode'] = "Tumor-Only"
         
-        if not arg_dict['tumor_purity'] is None:
+        if arg_dict['tumor_purity'] is not None:
             conf_options['sample_properties']['tumor_purity'] = float(arg_dict['tumor_purity'])
-        if not arg_dict['tumor_ploidy'] is None:
+        if arg_dict['tumor_ploidy'] is not None:
             conf_options['sample_properties']['tumor_ploidy'] = float(arg_dict['tumor_ploidy'])
             
         #conf_options['clinicaltrials'] = {
@@ -80,11 +78,11 @@ def create_config(arg_dict, workflow = "PCGR"):
             'show': 0,
             'ignore_vus': int(arg_dict['cpsr_ignore_vus'])
         }
-        if not arg_dict['input_cpsr'] is None:
+        if arg_dict['input_cpsr'] is not None:
             conf_options['germline']['show'] = 1
             
         conf_options['expression'] = {}
-        conf_options['expression']['run'] = int(not arg_dict['input_rna_exp'] is None)
+        conf_options['expression']['run'] = int(arg_dict['input_rna_exp'] is not None)
         conf_options['expression']['similarity_analysis'] = int(arg_dict['expression_sim'])
         conf_options['expression']['similarity_db'] = {}
         for db in arg_dict['expression_sim_db'].split(','):
@@ -113,7 +111,8 @@ def create_config(arg_dict, workflow = "PCGR"):
             'exclude_likely_het_germline': int(arg_dict['exclude_likely_het_germline']),
             'exclude_clinvar_germline': int(arg_dict['exclude_clinvar_germline']),
             'exclude_dbsnp_nonsomatic': int(arg_dict['exclude_dbsnp_nonsomatic']),
-            'exclude_nonexonic': int(arg_dict['exclude_nonexonic'])
+            'exclude_nonexonic': int(arg_dict['exclude_nonexonic']),
+            'gnomad_popmax_af_tolerated': float(arg_dict['gnomad_popmax_af_tolerated'])
         }
         conf_options['somatic_snv']['msi'] = {
             'run': int(arg_dict['estimate_msi'])
@@ -125,10 +124,11 @@ def create_config(arg_dict, workflow = "PCGR"):
             'tmb_af_min': arg_dict['tmb_af_min']
         }
 
-        for pop in ['nfe', 'fin', 'amr', 'eas', 'sas', 'asj', 'oth', 'afr', 'global']:
-            tag = 'maf_gnomad_' + str(pop)
-            if arg_dict[tag]:
-                conf_options['somatic_snv']['tumor_only'][tag] = float(arg_dict[tag])
+        #conf_options['somatic_snv']['tumor_only']['popmax_af_gnomad'] = float(arg_dict['popmax_af_gnomad'])
+        # for pop in ['nfe', 'fin', 'amr', 'eas', 'sas', 'asj', 'oth', 'afr', 'global']:
+        #     tag = 'maf_gnomad_' + str(pop)
+        #     if arg_dict[tag]:
+        #         conf_options['somatic_snv']['tumor_only'][tag] = float(arg_dict[tag])
         
         conf_options['somatic_snv']['mutational_signatures'] = {
             'run': int(arg_dict['estimate_signatures']),
@@ -172,8 +172,9 @@ def create_config(arg_dict, workflow = "PCGR"):
             'gwas_findings': int(arg_dict['gwas_findings']),
             'secondary_findings': int(arg_dict['secondary_findings']),
             'pgx_findings': int(arg_dict['pgx_findings']),
-            'pop_gnomad': str(arg_dict['pop_gnomad']),
-            'maf_upper_threshold': float(arg_dict['maf_upper_threshold']),
+            #'pop_gnomad': str(arg_dict['pop_gnomad']),
+            'max_af_gnomad': float(arg_dict['max_af_gnomad']),
+            #'maf_upper_threshold': float(arg_dict['maf_upper_threshold']),
             'classify_all': int(arg_dict['classify_all']),
             'clinvar_report_noncancer': int(arg_dict['clinvar_report_noncancer'])
         }
@@ -277,14 +278,14 @@ def populate_config_data(conf_options: dict, refdata_assembly_dir: str, workflow
                 logger)
             
             if conf_data['conf']['gene_panel']['panel_id'] != "-1":
-                if not ',' in conf_data['conf']['gene_panel']['panel_id']:                     
+                if conf_data['conf']['gene_panel']['panel_id'] not in ',':                     
                     conf_data['conf']['gene_panel']['url'] = str(conf_data['conf']['gene_panel']['panel_genes'][0]['panel_url'])
                     conf_data['conf']['gene_panel']['description_trait'] = str(conf_data['conf']['gene_panel']['panel_genes'][0]['panel_name'])
                 else:
                     names = set([str(x['panel_name']) for x in conf_data['conf']['gene_panel']['panel_genes']])
                     names2 = []
                     for n in names:
-                        if not 'ACMG' in n and not 'CPIC' in n:
+                        if 'ACMG' not in n and 'CPIC' not in n:
                             names2.append(n)
                     conf_data['conf']['gene_panel']['description'] = "Genomics England PanelApp - multiple panels (" + ', '.join(names2) + ")"
                     

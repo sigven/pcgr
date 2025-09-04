@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
-import os
 import re
-import cyvcf2
 
 from cyvcf2 import VCF
 from pcgr import pcgr_vars
@@ -20,7 +18,7 @@ def map_variant_effect_predictors(rec, algorithms):
     dbnsfp_key = ''
 
     found_key = 0
-    if not rec.INFO.get('HGVSp_short') is None and not rec.INFO.get('HGVSp_short') == '.':
+    if rec.INFO.get('HGVSp_short') is not None and not rec.INFO.get('HGVSp_short') == '.':
         aa_change = str(rec.INFO.get('HGVSp_short'))
         dbnsfp_key = gene_id + ':' + str(aa_change)
         if dbnsfp_key in dbnsfp_predictions:
@@ -81,14 +79,14 @@ def map_dbnsfp_predictions(dbnsfp_tag, algorithms):
         dbnsfp_predictions = {}
 
         for k in isoform_aa_keys:
-            if not k in dbnsfp_predictions:
+            if k not in dbnsfp_predictions:
                 dbnsfp_predictions[k] = {}
             all_preds = []
             for algo in algorithm_raw_predictions.keys():
                 unique_algo_predictions = {}
                 for pred in algorithm_raw_predictions[algo]:
                     if pred != '':
-                        if not pred in unique_algo_predictions:
+                        if pred not in unique_algo_predictions:
                             unique_algo_predictions[pred] = 1
                     else:
                         unique_algo_predictions['.'] = 1
