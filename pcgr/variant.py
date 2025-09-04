@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import os
-import re
 import pandas as pd
 import numpy as np
 import warnings
@@ -110,19 +109,29 @@ def append_annotations(vcf2tsv_gz_fname: str, refdata_assembly_dir: str, logger)
             
             ## merge variant set with PFAM domain annotations
             if num_recs_with_pfam_hits > 0:
-                
-                if {'PFAM_DOMAIN_NAME'}.issubset(vcf2tsv_df.columns):
-                    vcf2tsv_df.drop('PFAM_DOMAIN_NAME', inplace=True, axis=1)
-                
+                vcf2tsv_df.drop(['PFAM_DOMAIN_NAME', 'PFAM_ENTRY_LOCATIONS'], axis=1, errors='ignore', inplace=True)
                 if os.path.exists(protein_domain_tsv_fname):
-                    prot_domains_data_df = pd.read_csv(
-                        protein_domain_tsv_fname, sep="\t", usecols=["pfam_id","pfam_name"]).drop_duplicates()
-                    prot_domains_data_df.rename(columns = {'pfam_id':'PFAM_DOMAIN', 'pfam_name':'PFAM_DOMAIN_NAME'}, inplace = True)                                        
-                    vcf2tsv_df = vcf2tsv_df.merge(prot_domains_data_df, left_on=["PFAM_DOMAIN"], right_on=["PFAM_DOMAIN"], how="left")
+                    pfam_data_df = pd.read_csv(
+                        protein_domain_tsv_fname, sep="\t",
+                        usecols=["pfam_id", "pfam_name", "pfam_entry_locations", "entrezgene"]
+                    ).drop_duplicates()
+                    pfam_data_df.rename(
+                        columns={
+                            'pfam_id': 'PFAM_DOMAIN',
+                            'pfam_name': 'PFAM_DOMAIN_NAME',
+                            'pfam_entry_locations': 'PFAM_ENTRY_LOCATIONS',
+                            'entrezgene': 'ENTREZGENE'
+                        }, inplace=True)
+                    vcf2tsv_df = vcf2tsv_df.merge(
+                        pfam_data_df,
+                        on=["PFAM_DOMAIN", "ENTREZGENE"],
+                        how="left"
+                    )
                 else:
                     logger.error(f"Could not find {protein_domain_tsv_fname} needed for PFAM domain annotation - exiting")
             else:
                 vcf2tsv_df['PFAM_DOMAIN_NAME'] = '.'
+                vcf2tsv_df['PFAM_ENTRY_LOCATIONS'] = '.'
             
             if num_recs_with_entrez_hits > 0:
                 
@@ -157,12 +166,12 @@ def set_allelic_support(variant_set: pd.DataFrame, allelic_support_tags: dict, l
         if allelic_support_tags[t] != "_NA_":
             if {allelic_support_tags[t], tag_to_info_val[t]}.issubset(variant_set.columns):
                 if '_af_' in t:
-                    if variant_set[variant_set[allelic_support_tags[t]].isna() == True].empty is True:
+                    if variant_set[variant_set[allelic_support_tags[t]].isna()].empty:
                         variant_set[tag_to_info_val[t]] = variant_set[allelic_support_tags[t]].astype(float).round(4)
                     else:
                         logger.warning(f"Unable to set allelic support for '{t}' - missing values deteted")
                 else:
-                    if variant_set[variant_set[allelic_support_tags[t]].isna() == True].empty is True:
+                    if variant_set[variant_set[allelic_support_tags[t]].isna()].empty:
                         variant_set[tag_to_info_val[t]] = variant_set[allelic_support_tags[t]].astype(int)
                     else:
                         logger.warning(f"Unable to set read depth support for '{t}' - missing values deteted")
@@ -183,20 +192,20 @@ def calculate_tmb(variant_set: pd.DataFrame, tumor_dp_min: int, tumor_af_min: fl
         n_rows_raw = len(tmb_data_set)
         if float(tumor_af_min) > 0:
             ## filter variant set to those with VAF_TUMOR > tumor_af_min
-            if variant_set[variant_set['VAF_TUMOR'].isna() == True].empty is True:
+            if variant_set[variant_set['VAF_TUMOR'].isna()].empty:
                 tmb_data_set = tmb_data_set.loc[tmb_data_set['VAF_TUMOR'].astype(float) >= float(tumor_af_min),:]
                 #n_removed_af = n_rows_raw - len(tmb_data_set)
                 logger.info(f'Removing n = {n_rows_raw - len(tmb_data_set)} variants with allelic fraction (tumor sample) < {tumor_af_min}')
             else:
-                logger.warning(f"Cannot filter on sequencing depth - 'VAF_TUMOR' contains missing values")
+                logger.warning("Cannot filter on sequencing depth - 'VAF_TUMOR' contains missing values")
         if int(tumor_dp_min) > 0:
             ## filter variant set to those with DP_TUMOR > tumor_dp_min
-            if variant_set[variant_set['DP_TUMOR'].isna() == True].empty is True:
+            if variant_set[variant_set['DP_TUMOR'].isna()].empty:
                 tmb_data_set = tmb_data_set.loc[tmb_data_set['DP_TUMOR'].astype(int) >= int(tumor_dp_min),:]
                 #n_removed_dp = n_rows_raw - len(tmb_data_set)
                 logger.info(f"Removing n = {n_rows_raw - len(tmb_data_set)} variants with sequencing depth (tumor sample) < {tumor_dp_min}")
             else:
-                logger.warning(f"Cannot filter on sequencing depth - 'DP_TUMOR' contains missing values")
+                logger.warning("Cannot filter on sequencing depth - 'DP_TUMOR' contains missing values")
         
         tmb_categories = ['missense_only','coding_and_silent','coding_non_silent']
         
@@ -238,7 +247,7 @@ def calculate_tmb(variant_set: pd.DataFrame, tumor_dp_min: int, tumor_af_min: fl
                         'tmb_unit'])
             df.to_csv(tmb_fname, sep="\t", header=True, index=False)
         else:
-            logger.warning(f"No somatic variants left after depth/VAF filtering - TMB calculation not possible")
+            logger.warning("No somatic variants left after depth/VAF filtering - TMB calculation not possible")
 
 def clean_annotations(variant_set: pd.DataFrame, yaml_data: dict, logger) -> pd.DataFrame:
     
