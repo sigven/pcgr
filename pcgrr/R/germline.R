@@ -1,42 +1,121 @@
-
-#' Function that assigns a maximum value to a variable (MAX_AF_GNOMAD) reflecting
-#' the maximum allele frequency for a given variant across gnomAD populations
+#' Function that assigns a maximum value to a variable
+#' (gnomAD_NC_FAF_GRPMAX) reflecting the filter allele frequency
+#' (GrpMAX) for a given variant in the non-cancer
+#' gnomAD subset (v3.1)
 #'
 #' @param sample_calls data frame with sample variant calls
 #'
 #' @export
-max_af_gnomad <- function(sample_calls) {
+grpmax_faf_nc_gnomad <- function(sample_calls) {
   invisible(
     assertthat::assert_that(is.data.frame(sample_calls),
                             msg = paste0("Argument 'sample_calls' must be of ",
                                          "type data.frame"))
   )
-  ## set maximum AF from gnomAD (all populations)
-  gnomad_cols <- c("gnomADe_AF",
-                   "gnomADe_NFE_AF",
-                   "gnomADe_AMR_AF",
-                   "gnomADe_AFR_AF",
-                   "gnomADe_SAS_AF",
-                   "gnomADe_EAS_AF",
-                   "gnomADe_ASJ_AF",
-                   "gnomADe_FIN_AF",
-                   "gnomADe_OTH_AF")
-  sample_calls$MAX_AF_GNOMAD <- 0
-  for (c in gnomad_cols) {
-    if (c %in% colnames(sample_calls)) {
-      if (NROW(
-        sample_calls[!is.na(sample_calls[, c]) &
-                     sample_calls[, c] > sample_calls$MAX_AF_GNOMAD, ]) > 0) {
-        sample_calls[!is.na(sample_calls[, c]) &
-                       sample_calls[, c] > sample_calls$MAX_AF_GNOMAD,
-                     "MAX_AF_GNOMAD"] <-
-          sample_calls[!is.na(sample_calls[, c]) &
-                         sample_calls[, c] > sample_calls$MAX_AF_GNOMAD, c]
-      }
+
+  if ("gnomAD_NC_FAF_GRPMAX" %in% colnames(sample_calls)) {
+    sample_calls$gnomAD_NC_FAF_GRPMAX <- NULL
+  }
+
+  # Identify exome and genome AF columns
+  af_cols <-
+    grep("^tmp_gNC_FAF_(AFR|AMR|NFE|SAS|EAS|GLOBAL)$",
+         names(sample_calls), value = TRUE)
+
+  # Function to compute max AF per row
+  get_max_allele_freq_nc <- function(row) {
+    af_nc_vals <- as.numeric(row[af_cols])
+    af_max <- 0
+    if (all(is.na(af_nc_vals))) {
+      return(0)
+    } else {
+      af_max <- max(af_nc_vals, na.rm = TRUE)
     }
 
+    return(af_max)
+
   }
+
+  # Apply to each row
+  sample_calls$gnomAD_NC_FAF_GRPMAX <-
+    apply(sample_calls, 1, get_max_allele_freq_nc)
   return(sample_calls)
+
+}
+
+
+
+#' Function that assigns a maximum value to a variable
+#' (gnomAD_AF_POPMAX) reflecting the maximum allele frequency
+#' for a given variant across gnomAD populations
+#'
+#' @param sample_calls data frame with sample variant calls
+#'
+#' @export
+popmax_af_gnomad <- function(sample_calls) {
+  invisible(
+    assertthat::assert_that(is.data.frame(sample_calls),
+                            msg = paste0("Argument 'sample_calls' must be of ",
+                                         "type data.frame"))
+  )
+
+  if ("gnomAD_AF_POPMAX" %in% colnames(sample_calls)) {
+    sample_calls$gnomAD_AF_POPMAX <- NULL
+  }
+
+  # Identify exome and genome AF columns
+  exome_cols <-
+    grep("^gnomADe_((NFE|AFR|AMR|SAS|EAS|FIN)_)?AF",
+         names(sample_calls), value = TRUE)
+  genome_cols <-
+    grep("^gnomADg_((NFE|AFR|AMR|SAS|EAS|FIN)_)?AF",
+         names(sample_calls), value = TRUE)
+
+  # Function to compute max AF per row
+  get_max_allele_freq <- function(row) {
+    exome_vals <- as.numeric(row[exome_cols])
+    genome_vals <- as.numeric(row[genome_cols])
+
+    retmax <- 0
+    genome_max <- 0
+    exome_max <- 0
+    exome_all_nas <- FALSE
+
+    ## prefer exome AF values over genome AF values (if both are present)
+    ## reason: 1) larger sample size in exome AF values
+    ## if all exome AF values are NA (or zero and genome non-zero),
+    ## then use genome AF values
+    if (all(is.na(exome_vals))) {
+      if (all(is.na(genome_vals))) {
+        #return(NA_real_)
+        return(0)
+      } else {
+        exome_all_nas <- TRUE
+        genome_max <- max(genome_vals, na.rm = TRUE)
+        #if (genome_max > 0) {
+        retmax <- genome_max
+        #}
+      }
+    } else {
+      exome_max <- max(exome_vals, na.rm = TRUE)
+      if (!all(is.na(genome_vals))) {
+        genome_max <- max(genome_vals, na.rm = TRUE)
+      }
+      retmax <- exome_max
+    }
+
+    if(exome_all_nas == TRUE | (exome_max == 0 & genome_max > 0)){
+      retmax <- genome_max
+    }
+    return(retmax)
+
+  }
+
+  # Apply to each row
+  sample_calls$gnomAD_AF_POPMAX <-
+    apply(sample_calls, 1, get_max_allele_freq)
+  return(sample_calls)
+
 }
 
 
@@ -236,14 +315,14 @@ het_af_germline_status <- function(sample_calls) {
   ## iii) in gnomAD
   ## and iv) not present in COSMIC/TCGA
   if ("VAF_TUMOR" %in% colnames(sample_calls) &
-      "MAX_AF_GNOMAD" %in% colnames(sample_calls) &
+      "POPMAX_AF_GNOMAD" %in% colnames(sample_calls) &
       "STATUS_COSMIC" %in% colnames(sample_calls) &
       "STATUS_TCGA" %in% colnames(sample_calls)) {
     sample_calls <- sample_calls |>
       dplyr::mutate(
         STATUS_GERMLINE_HET =
           dplyr::if_else(
-            !is.na(.data$MAX_AF_GNOMAD) &
+            !is.na(.data$POPMAX_AF_GNOMAD) &
               .data$STATUS_DBSNP == TRUE &
               !is.na(.data$VAF_TUMOR) &
               .data$VAF_TUMOR >= 0.40 & .data$VAF_TUMOR <= 0.60 &
@@ -272,7 +351,7 @@ assign_somatic_classification <- function(sample_calls, settings) {
 
   ## Assign non-somatic classification based on various evidence criteria
   ## 1) Frequency of minor allele in any of the gnomAD populations is
-  ##    greater than the defined thresholds by the user (by default)
+  ##    greater than the defined threshold by the user
   ##
   ## User-defined filtering options:
   ##
@@ -294,7 +373,7 @@ assign_somatic_classification <- function(sample_calls, settings) {
     dplyr::mutate(
       GERMLINE_GNOMAD =
         dplyr::if_else(
-          .data$gnomADe_AF_ABOVE_TOLERATED == TRUE,
+          .data$gnomAD_AF_ABOVE_TOLERATED == TRUE,
           "GERMLINE_GNOMAD",
           "")) |>
     dplyr::mutate(
@@ -372,7 +451,7 @@ assign_somatic_classification <- function(sample_calls, settings) {
         "STATUS_GERMLINE_HET",
         "STATUS_GERMLINE_HOM",
         "STATUS_PON",
-        "gnomADe_AF_ABOVE_TOLERATED",
+        "gnomAD_AF_ABOVE_TOLERATED",
         "STATUS_CLINVAR_GERMLINE"))
 
   return(sample_calls)
@@ -402,17 +481,24 @@ assign_somatic_germline_evidence <- function(
   tumor_only_settings <-
     settings$conf$somatic_snv$tumor_only
 
+  sample_calls <-
+    pcgrr::assign_germline_popfreq_status(
+      sample_calls,
+      max_af =
+        tumor_only_settings[["gnomad_popmax_af_tolerated"]])
+        #tumor_only_settings[[paste0("maf_gnomad_", tolower(pop))]])
+
   ## assign STATUS_POPFREQ_GNOMAD_ABOVE_TOLERATED
-  for (pop in c("GLOBAL", "NFE", "AMR", "AFR",
-                "SAS", "EAS", "ASJ", "FIN", "OTH")) {
-    sample_calls <-
-      pcgrr::assign_germline_popfreq_status(
-        sample_calls,
-        pop = pop,
-        dbquery = "gnomADe",
-        max_tolerated_af =
-          tumor_only_settings[[paste0("maf_gnomad_", tolower(pop))]])
-  }
+  # for (pop in c("GLOBAL", "NFE", "AMR", "AFR",
+  #               "SAS", "EAS", "ASJ", "FIN", "REMAINING")) {
+  #   sample_calls <-
+  #     pcgrr::assign_germline_popfreq_status(
+  #       sample_calls,
+  #       pop = pop,
+  #       dbquery = "gnomADe",
+  #       max_tolerated_af =
+  #         tumor_only_settings[[paste0("maf_gnomad_", tolower(pop))]])
+  # }
 
   sample_calls <- sample_calls |>
     max_af_gnomad() |>
@@ -427,46 +513,75 @@ assign_somatic_germline_evidence <- function(
   return(sample_calls)
 }
 
-#' Function that sets STATUS_POPFREQ_1KG_ABOVE_TOLERATED/
-#' STATUS_POPFREQ_GNOMAD_ABOVE_TOLERATED to TRUE for variants
-#' if any population frequency exceeds max_tolerated_af
+#' Function that sets gnomAD_AF_ABOVE_TOLERATED to TRUE for variants
+#' if any gnomAD population frequency exceeds max_tolerated_af
 #'
 #' @param sample_calls data frame with variants
-#' @param pop population code (1000 Genomes/gnomAD)
-#' @param dbquery gnomADe
-#' @param max_tolerated_af max tolerated germline allele frequency
+#' @param max_af max tolerated germline allele frequency
 #'
 #' @return sample_calls
 #'
 #' @export
 assign_germline_popfreq_status <- function(sample_calls,
-                                           pop = "NFE",
-                                           dbquery = "gnomADe",
-                                           max_tolerated_af = 0.01) {
+                                           max_af = 0.01) {
+
+  if (!("gnomAD_AF_ABOVE_TOLERATED" %in% colnames(sample_calls))) {
+      sample_calls$gnomAD_AF_ABOVE_TOLERATED <- FALSE
+  }
+
+  # Identify exome and genome AF columns
+  exome_cols <-
+    grep("^gnomADe_((NFE|AFR|AMR|SAS|EAS|FIN)_)?AF",
+         names(sample_calls), value = TRUE)
+  genome_cols <-
+    grep("^gnomADg_((NFE|AFR|AMR|SAS|EAS|FIN)_)?AF",
+         names(sample_calls), value = TRUE)
 
 
-  if (dbquery == "gnomADe") {
-    if (!("gnomADe_AF_ABOVE_TOLERATED" %in% colnames(sample_calls))) {
-      sample_calls$gnomADe_AF_ABOVE_TOLERATED <- FALSE
-    }
-    col <- paste0(dbquery,"_",pop, "_AF")
-    if (any(grepl(paste0("^", col, "$"), names(sample_calls)))) {
+  # Function to check max_tolerated_af per row
+  af_exceeds_threshold <- function(row) {
+    exome_vals <- as.numeric(row[exome_cols])
+    genome_vals <- as.numeric(row[genome_cols])
 
-      sample_calls$max_tolerated_af <- max_tolerated_af
-
-      if (NROW(
-        sample_calls[!is.na(sample_calls[, col]) &
-                     sample_calls[, col] > sample_calls$max_tolerated_af, ]) > 0) {
-        sample_calls[!is.na(sample_calls[, col]) &
-                       sample_calls[, col] > sample_calls$max_tolerated_af,
-                     "gnomADe_AF_ABOVE_TOLERATED"] <- TRUE
-      }
-      sample_calls$max_tolerated_af <- NULL
+    ## prefer exome AF values over genome AF values (if both are present)
+    ## reason: larger sample size in exome AF values
+    if (!all(is.na(exome_vals))) {
+      return(any(exome_vals > max_tolerated_af, na.rm = TRUE))
+    } else if (!all(is.na(genome_vals))) {
+      return(any(genome_vals > max_tolerated_af, na.rm = TRUE))
+    } else {
+      return(FALSE)  # No AF data available
     }
   }
 
+  # Apply to each row
+  sample_calls$gnomAD_AF_ABOVE_TOLERATED <-
+    apply(sample_calls, 1, af_exceeds_threshold)
   return(sample_calls)
 }
+
+  # if (dbquery == "gnomADe") {
+  #   if (!("gnomADe_AF_ABOVE_TOLERATED" %in% colnames(sample_calls))) {
+  #     sample_calls$gnomADe_AF_ABOVE_TOLERATED <- FALSE
+  #   }
+  #   col <- paste0(dbquery,"_",pop, "_AF")
+  #   if (any(grepl(paste0("^", col, "$"), names(sample_calls)))) {
+  #
+  #     sample_calls$max_tolerated_af <- max_tolerated_af
+  #
+  #     if (NROW(
+  #       sample_calls[!is.na(sample_calls[, col]) &
+  #                    sample_calls[, col] > sample_calls$max_tolerated_af, ]) > 0) {
+  #       sample_calls[!is.na(sample_calls[, col]) &
+  #                      sample_calls[, col] > sample_calls$max_tolerated_af,
+  #                    "gnomADe_AF_ABOVE_TOLERATED"] <- TRUE
+  #     }
+  #     sample_calls$max_tolerated_af <- NULL
+  #   }
+  # }
+
+  #return(sample_calls)
+#}
 
 
 #' Function that makes input data for an UpSet plot
