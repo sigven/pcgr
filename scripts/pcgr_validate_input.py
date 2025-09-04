@@ -1,16 +1,14 @@
 #!/usr/bin/env python
 
 import csv
-import re
 import argparse
 import os
-import logging
 import sys
 import pandas as np
 from cyvcf2 import VCF
 import gzip
 
-from pcgr import vcf, cna
+from pcgr import vcf
 from pcgr.annoutils import read_infotag_file, read_vcfanno_tag_file
 from pcgr.utils import error_message, check_subprocess, remove_file, random_id_generator, getlogger
 from pcgr.cna import is_valid_cna
@@ -84,13 +82,13 @@ def is_valid_rna_fusion(rna_fusion_file, logger):
     if rna_fusion_dataframe.empty is True:
         err_msg = 'RNA fusion file is empty - contains NO fusions'
         return error_message(err_msg, logger)
-    if not rna_fusion_dataframe['Gene1'].dtype.kind in 'O': ## check that 'Gene1' is of type object
+    if rna_fusion_dataframe['Gene1'].dtype.kind not in 'O': ## check that 'Gene1' is of type object
         err_msg = "'Gene1' column of RNA fusion file cannot not be of type '" + str(rna_fusion_dataframe['Gene1'].dtype) + "'"
         return error_message(err_msg, logger)
-    if not rna_fusion_dataframe['Gene2'].dtype.kind in 'O': ## check that 'Gene2' is of type object
+    if rna_fusion_dataframe['Gene2'].dtype.kind not in 'O': ## check that 'Gene2' is of type object
         err_msg = "'Gene2' column of RNA fusion file cannot not be of type '" + str(rna_fusion_dataframe['Gene2'].dtype) + "'"
         return error_message(err_msg, logger)
-    if not rna_fusion_dataframe['Confidence'].dtype.kind in 'O': ## check that 'Confidence' is of type object
+    if rna_fusion_dataframe['Confidence'].dtype.kind not in 'O': ## check that 'Confidence' is of type object
         err_msg = "'Confidence' column of RNA fusion file cannot not be of type '" + str(rna_fusion_dataframe['Confidence'].dtype) + "'"
         return error_message(err_msg, logger)
 
@@ -124,10 +122,10 @@ def is_valid_rna_expression(rna_exp_file, logger):
     if rna_exp_dataframe.empty is True:
         err_msg = 'RNA gene expression file is empty - contains NO gene expression estimates'
         return error_message(err_msg, logger)
-    if not rna_exp_dataframe['TargetID'].dtype.kind in 'O': ## check that 'Gene' is of type object
+    if rna_exp_dataframe['TargetID'].dtype.kind not in 'O': ## check that 'Gene' is of type object
         err_msg = "'TargetID' column of RNA expression file cannot not be of type '" + str(rna_exp_dataframe['TargetID'].dtype) + "'"
         return error_message(err_msg, logger)
-    if not rna_exp_dataframe['TPM'].dtype.kind in 'if': ## check that 'TPM' is of type object
+    if rna_exp_dataframe['TPM'].dtype.kind not in 'if': ## check that 'TPM' is of type object
         err_msg = "'TPM' column of RNA expression file cannot not be of type '" + str(rna_exp_dataframe['TPM'].dtype) + "'"
         return error_message(err_msg, logger)
 

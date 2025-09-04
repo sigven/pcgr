@@ -4,15 +4,12 @@ import csv
 import re
 import argparse
 import os
-import subprocess
-import logging
 import sys
-import pandas as pd
+#import pandas as pd
 import gzip
 
 from cyvcf2 import VCF
-from pcgr import utils, annoutils, vcf, pcgr_vars
-from pcgr.utils import error_message, check_subprocess, random_id_generator, sort_bed, check_file_exists, remove_file
+from pcgr.utils import error_message, check_subprocess, getlogger, random_id_generator, sort_bed, check_file_exists, remove_file
 from pcgr.vcf import check_existing_vcf_info_tags, check_retained_vcf_info_tags
 from pcgr.annoutils import read_infotag_file,read_vcfanno_tag_file
 
@@ -307,7 +304,7 @@ def validate_cpsr_input(refdata_assembly_dir,
     3. Check that if VCF have variants with multiple alternative alleles (e.g. 'A,T') run vt decompose
     4. The resulting VCF file is sorted and indexed (bgzip + tabix)
     """
-    logger = utils.getlogger('cpsr-validate-input-arguments')
+    logger = getlogger('cpsr-validate-input-arguments')
 
     custom_target_fname = {}
     custom_target_fname['tsv'] = custom_list_fname
