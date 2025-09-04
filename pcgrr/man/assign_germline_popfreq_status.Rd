@@ -2,31 +2,20 @@
 % Please edit documentation in R/germline.R
 \name{assign_germline_popfreq_status}
 \alias{assign_germline_popfreq_status}
-\title{Function that sets STATUS_POPFREQ_1KG_ABOVE_TOLERATED/
-STATUS_POPFREQ_GNOMAD_ABOVE_TOLERATED to TRUE for variants
-if any population frequency exceeds max_tolerated_af}
+\title{Function that sets gnomAD_AF_ABOVE_TOLERATED to TRUE for variants
+if any gnomAD population frequency exceeds max_tolerated_af}
 \usage{
-assign_germline_popfreq_status(
-  sample_calls,
-  pop = "NFE",
-  dbquery = "gnomADe",
-  max_tolerated_af = 0.01
-)
+assign_germline_popfreq_status(sample_calls, max_af = 0.01)
 }
 \arguments{
 \item{sample_calls}{data frame with variants}
 
-\item{pop}{population code (1000 Genomes/gnomAD)}
-
-\item{dbquery}{gnomADe}
-
-\item{max_tolerated_af}{max tolerated germline allele frequency}
+\item{max_af}{max tolerated germline allele frequency}
 }
 \value{
 sample_calls
 }
 \description{
-Function that sets STATUS_POPFREQ_1KG_ABOVE_TOLERATED/
-STATUS_POPFREQ_GNOMAD_ABOVE_TOLERATED to TRUE for variants
-if any population frequency exceeds max_tolerated_af
+Function that sets gnomAD_AF_ABOVE_TOLERATED to TRUE for variants
+if any gnomAD population frequency exceeds max_tolerated_af
 }
