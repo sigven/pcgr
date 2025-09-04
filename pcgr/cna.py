@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 
-import os,re
+import os
 import csv
-import gzip
 import pybedtools
 import pandas as pd
 import logging
 
-from pcgr import utils
+#from pcgr import utils
 from pybedtools import BedTool
 from pcgr.annoutils import nuclear_chromosomes
 from pcgr.utils import error_message, warn_message, check_file_exists, remove_file
@@ -102,7 +101,7 @@ def annotate_cna_segments(output_segment_gene_fname: str,
         cna_query_segment_df[cna_query_segment_df['End'] > cna_query_segment_df['ChromLength']]
     
     ## Issue warning if segments exceed chromosome lengths
-    if not segments_beyond_chromlength.empty is True:
+    if segments_beyond_chromlength.empty is not True:
         warn_msg = f"Ignoring parts of n = {len(segments_beyond_chromlength)} copy number segments that " + \
             f"exceed the chromosomal lengths of {build}"
         warn_message(warn_msg, logger)
@@ -121,7 +120,6 @@ def annotate_cna_segments(output_segment_gene_fname: str,
     
     ## annotate segments with cytobands
     cna_query_segment_df = annotate_cytoband(cna_query_segment_bed, output_dir, refdata_assembly_dir, logger)
-
     
     cna_query_segment_df['chromosome2'] = cna_query_segment_df['chromosome']
     cna_query_segment_df.loc[cna_query_segment_df['chromosome2'] == "X","chromosome2"] = 23
@@ -142,6 +140,12 @@ def annotate_cna_segments(output_segment_gene_fname: str,
 
     cna_query_segment_df = annotate_transcripts(
        cna_query_segment_bed, output_dir, refdata_assembly_dir, overlap_fraction=overlap_fraction, logger=logger)
+
+    if cna_query_segment_df.empty is True:
+        warn_msg = "Could not find any protein-coding gene annotations for input CNA segments - returning."
+        warn_message(warn_msg, logger)
+        return -1
+    
     ## load copy-number biomarker evidence
    
     cna_query_segment_df['segment_length_mb'] = \
@@ -161,7 +165,7 @@ def annotate_cna_segments(output_segment_gene_fname: str,
             biomarker_data = biomarkers[db]['other_gene'][key]
             biomarker_item = str(db) + '|' + str(biomarker_data[0]['variant_id']) + \
                     '|' + str(biomarker_data[0]['clinical_evidence_items']) + '|by_cna_segment'
-            if not key in cna_actionable_dict:               
+            if key not in cna_actionable_dict:               
                 cna_actionable_dict[key] = biomarker_item
             else:
                 cna_actionable_dict[key] = cna_actionable_dict[key] + ',' + biomarker_item
@@ -210,7 +214,7 @@ def annotate_cna_segments(output_segment_gene_fname: str,
                 cna_query_segment_df['N_MINOR'].astype(str), sep=":")
     
     cna_query_segment_df['SAMPLE_ID'] = sample_id
-    if not expression_data is None:
+    if expression_data is not None:
         cna_query_segment_df = integrate_variant_expression(cna_query_segment_df, expression_data, logger)
     else:
         logger.info("No expression data provided. Skipping CNA-expression integration")
@@ -341,6 +345,11 @@ def annotate_transcripts(cna_segments_bt: BedTool,
             cna_transcript_annotations = \
                 cna_transcript_annotations[cna_transcript_annotations['segment_start'] != -1]
             
+            if cna_transcript_annotations.empty is True:
+                #warn_msg = f"Could not find any protein-coding gene annotations for input CNA segments - returning."
+                #warn_message(warn_msg, logger)
+                return cna_segments_annotated
+        
             ## calculate fraction of overlap between segments and transcripts
             cna_transcript_annotations['transcript_overlap_percent'] = \
                 cna_transcript_annotations['transcript_end'] - cna_transcript_annotations['transcript_start']
@@ -402,7 +411,7 @@ def annotate_transcripts(cna_segments_bt: BedTool,
     for fname in temp_files:
         remove_file(fname)
     
-    return(cna_segments_annotated)
+    return cna_segments_annotated
 
 
 def is_valid_cna(cna_segment_file, logger):
@@ -426,12 +435,12 @@ def is_valid_cna(cna_segment_file, logger):
         return error_message(err_msg, logger)
     
     for elem in ['Start','End']:
-        if not cna_dataframe[elem].dtype.kind in 'i':
+        if cna_dataframe[elem].dtype.kind not in 'i':
             err_msg = 'Copy number segment file contains non-integer values for column: "' + elem + '"'
             return error_message(err_msg, logger)
     
     for elem in ['nMajor','nMinor']:
-        if not cna_dataframe[elem].dtype.kind in 'if':
+        if cna_dataframe[elem].dtype.kind not in 'if':
             err_msg = 'Copy number segment file contains non-float/integer values for column: "' + elem + '"'
             return error_message(err_msg, logger)
 
