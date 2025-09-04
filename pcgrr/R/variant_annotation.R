@@ -632,6 +632,138 @@ append_targeted_drug_annotations <- function(
   return(var_df)
 }
 
+#' Function that adds protein domain annotations (PFAM)
+#' for a list of variants and associated targeted
+#'
+#' @param var_df data frame with variants
+#' @param ref_data PCGR/CPSR reference data object
+#' @return var_df
+#' @export
+#'
+#'
+append_protein_domains <- function(
+    var_df,
+    ref_data = NULL){
+
+  var_non_aa <- data.frame()
+  var_aa <- data.frame()
+
+  if(NROW(var_df) > 0 &
+     "ENTREZGENE" %in% colnames(var_df) &
+     "VAR_ID" %in% colnames(var_df) &
+     "PFAM_DOMAIN" %in% colnames(var_df) &
+     "PFAM_DOMAIN_NAME" %in% colnames(var_df) &
+     "PFAM_ENTRY_LOCATIONS" %in% colnames(var_df) &
+     "AMINO_ACID_START" %in% colnames(var_df) &
+     "AMINO_ACID_END" %in% colnames(var_df) &
+     !is.null(ref_data) &
+     !is.null(ref_data$misc$protein_domain) &
+     is.data.frame(ref_data$misc$protein_domain)){
+
+    var_non_aa <- var_df |>
+      dplyr::filter(is.na(AMINO_ACID_START) |
+                      is.na(AMINO_ACID_END))
+
+    if(NROW(var_non_aa) > 0){
+      var_non_aa <- var_non_aa |>
+        dplyr::select(
+          c("VAR_ID",
+            "PFAM_DOMAIN",
+            "PFAM_DOMAIN_NAME",
+            "PFAM_ENTRY_LOCATIONS")
+        )
+    }else{
+      var_non_aa <- data.frame()
+    }
+
+    var_aa <- var_df |>
+      dplyr::select(
+        c("ENTREZGENE","VAR_ID","PFAM_DOMAIN",
+          "PFAM_DOMAIN_NAME","PFAM_ENTRY_LOCATIONS",
+          "AMINO_ACID_START","AMINO_ACID_END")) |>
+      dplyr::filter(!is.na(AMINO_ACID_START) &
+                      !is.na(AMINO_ACID_END))
+
+    if(NROW(var_aa) > 0){
+
+      protein_domains <- ref_data[['misc']][['protein_domain']] |>
+        dplyr::select(PFAM_ID, PFAM_NAME,
+                      ENTREZGENE, PFAM_ENTRY_LOCATIONS) |>
+        dplyr::rename(PFAM_DOMAIN2 = PFAM_ID,
+                      PFAM_ENTRY_LOCATIONS2 = PFAM_ENTRY_LOCATIONS,
+                      PFAM_DOMAIN_NAME2 = PFAM_NAME) |>
+        tidyr::separate_rows("PFAM_ENTRY_LOCATIONS2",sep=",") |>
+        tidyr::separate(PFAM_ENTRY_LOCATIONS2,
+                        c("PFAM_DOMAIN_TYPE",
+                          "PFAM_AA_START",
+                          "PFAM_AA_END"),
+                        sep=":", remove = F)
+
+      pfam_fixed <- var_aa |>
+        dplyr::left_join(
+          protein_domains, by = "ENTREZGENE",
+          relationship = "many-to-many") |>
+        dplyr::mutate(PFAM_AA_START = as.integer(PFAM_AA_START),
+                      PFAM_AA_END = as.integer(PFAM_AA_END)) |>
+        dplyr::filter(!(AMINO_ACID_END < PFAM_AA_START) &
+                        !(AMINO_ACID_START > PFAM_AA_END))
+
+      if(NROW(pfam_fixed) > 0){
+        var_aa <- pfam_fixed |>
+          dplyr::select(
+            c("VAR_ID",
+              "PFAM_DOMAIN" = "PFAM_DOMAIN2",
+              "PFAM_DOMAIN_NAME" = "PFAM_DOMAIN_NAME2",
+              "PFAM_ENTRY_LOCATIONS" = "PFAM_ENTRY_LOCATIONS2")
+          ) |>
+          dplyr::group_by(.data$VAR_ID) |>
+          ## For now, just take first entry (in the rare case that
+          ## a variant partially overlaps two or more domains)
+          dplyr::summarise(
+            PFAM_DOMAIN = head(.data$PFAM_DOMAIN,1),
+            PFAM_DOMAIN_NAME = head(.data$PFAM_DOMAIN_NAME,1),
+            PFAM_ENTRY_LOCATIONS = head(.data$PFAM_ENTRY_LOCATIONS,1),
+            .groups = "drop"
+          ) |>
+          dplyr::select(
+            c("VAR_ID",
+              "PFAM_DOMAIN",
+              "PFAM_DOMAIN_NAME",
+              "PFAM_ENTRY_LOCATIONS")
+          ) |>
+          dplyr::distinct()
+
+      }else{
+        var_aa <- var_aa |>
+          dplyr::select(
+            c("VAR_ID","PFAM_DOMAIN",
+              "PFAM_DOMAIN_NAME",
+              "PFAM_ENTRY_LOCATIONS"))
+      }
+    }else{
+      var_aa <- data.frame()
+    }
+  }
+
+  fixed_domain_info <-
+    dplyr::bind_rows(var_non_aa, var_aa)
+
+  if(NROW(fixed_domain_info) > 0){
+    var_df <- dplyr::select(
+      var_df, -c("PFAM_DOMAIN",
+                 "PFAM_DOMAIN_NAME",
+                 "PFAM_ENTRY_LOCATIONS"))
+    var_df <- dplyr::left_join(
+      var_df, fixed_domain_info,
+      by = c("VAR_ID" = "VAR_ID"))
+  }
+
+  return(var_df)
+
+}
+
+
+
 #' Function that adds link to targeted drugs (on and off-label)
 #' for a list of variants and associated targeted
 #'
