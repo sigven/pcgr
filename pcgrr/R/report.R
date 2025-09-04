@@ -44,22 +44,22 @@ init_report <- function(yaml_fname = NULL,
       if (report[["settings"]][["conf"]][["variant_classification"]][["pop_gnomad"]] != "") {
         population <-
           report[["settings"]][["conf"]][["variant_classification"]][["pop_gnomad"]]
-        vcf_tag_AF <- "gnomADg_non_cancer_AF"
-        vcf_tag_AN <- "gnomADg_non_cancer_AN"
-        vcf_tag_AC <- "gnomADg_non_cancer_AC"
+        vcf_tag_AF <- "gnomAD_non_cancer_AF"
+        vcf_tag_AN <- "gnomAD_non_cancer_AN"
+        vcf_tag_AC <- "gnomAD_non_cancer_AC"
         vcf_tag_AF_all <- "gnomADg_AF"
-        vcf_tag_NHOMALT <- "gnomADg_non_cancer_NHOMALT"
+        vcf_tag_NHOMALT <- "gnomAD_non_cancer_NHOMALT"
         if (population != "global") {
           vcf_tag_AF <-
-            paste0("gnomADg_non_cancer_",toupper(population),"_AF")
+            paste0("gnomAD_non_cancer_",toupper(population),"_AF")
           #vcf_tag_AF_all <-
             #paste0("gnomADe_",toupper(population),"_AF")
           vcf_tag_AN <-
-            paste0("gnomADg_non_cancer_",toupper(population),"_AN")
+            paste0("gnomAD_non_cancer_",toupper(population),"_AN")
           vcf_tag_AC <-
-            paste0("gnomADg_non_cancer_",toupper(population),"_AC")
+            paste0("gnomAD_non_cancer_",toupper(population),"_AC")
           vcf_tag_NHOMALT <-
-            paste0("gnomADg_non_cancer_",toupper(population),"_NHOMALT")
+            paste0("gnomAD_non_cancer_",toupper(population),"_NHOMALT")
         }
         gnomad_info_tag <- paste0('gNC_', toupper(population))
         if(population == "global"){

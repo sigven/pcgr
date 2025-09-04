@@ -2,10 +2,10 @@
 
 import logging
 
-from pcgr.utils import error_message, warn_message, check_subprocess
+from pcgr.utils import error_message, check_subprocess
 from cyvcf2 import VCF
 from typing import Union
-from copy import copy
+#from copy import copy
 
 def get_vcf_info_tags(vcf_fname):
     vcf = VCF(vcf_fname)
@@ -20,7 +20,7 @@ def get_vcf_info_tags(vcf_fname):
 
 
 def print_vcf_header(vcf_fname, vcfheader_file, logger, chromline_only=False):
-    if chromline_only == True:
+    if chromline_only is True:
         check_subprocess(
             logger, f'bgzip -dc {vcf_fname} | egrep \'^#\' | egrep \'^#CHROM\' >> {vcfheader_file}', debug=False)
     else:
@@ -59,7 +59,7 @@ def check_retained_vcf_info_tags(vcf: VCF, retained_info_tags: str, logger: logg
                 info_elements_query_vcf.append(header_element['ID'])
 
     for t in tags:
-        if not t in info_elements_query_vcf:
+        if t not in info_elements_query_vcf:
             err_msg = "Retained INFO tag '" + str(t) + "' not found among INFO tags in input VCF - make sure retained VCF INFO tags are set correctly"
             error_message(err_msg, logger)
         else:

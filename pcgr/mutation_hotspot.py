@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
-import os,re
+import os
+import re
 import csv
 import gzip
-from pcgr import annoutils
+#from pcgr import annoutils
 from pcgr.annoutils import threeToOneAA
 
 from typing import Dict
@@ -63,7 +64,7 @@ def match_csq_mutation_hotspot(transcript_csq_elements, cancer_hotspots, rec, pr
 
    principal_hgvsp = principal_csq_properties['hgvsp']
    principal_hgvsc = principal_csq_properties['hgvsc']
-   principal_entrezgene = principal_csq_properties['entrezgene']
+   #principal_entrezgene = principal_csq_properties['entrezgene']
    principal_codon = principal_csq_properties['codon']   
    
    ## loop through all transcript-specific consequences ('csq_elements') for a given variant, check for the presence of
@@ -75,7 +76,7 @@ def match_csq_mutation_hotspot(transcript_csq_elements, cancer_hotspots, rec, pr
    for csq in transcript_csq_elements:
       (consequence, symbol, entrezgene, hgvsc, hgvsp, exon, feature_type, feature, biotype) = csq.split(':')
 
-      if not bool(re.search(r'^(missense|stop|start|inframe|splice_donor|splice_acceptor|frameshift)', consequence)) is True:
+      if bool(re.search(r'^(missense|stop|start|inframe|splice_donor|splice_acceptor|frameshift)', consequence)) is not True:
          continue
 
       hgvsp_short = threeToOneAA(hgvsp)
