@@ -2,7 +2,8 @@
 
 import argparse
 import random
-import re, os
+import re
+import os
 import glob
 
 from pcgr.vcf import get_vcf_info_tags, print_vcf_header
