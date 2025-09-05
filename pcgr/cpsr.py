@@ -172,15 +172,15 @@ def run_cpsr(conf_options, input_data, output_data):
         if not input_customlist == 'None':
             logger.info(f"Virtual gene panel: custom-made list from panel 0: {input_customlist}")
         else:
-            logger.info(f"Diagnostic-grade genes in virtual panels (GE PanelApp): " + \
+            logger.info("Diagnostic-grade genes in virtual panels (GE PanelApp): " + \
                         f"{'ON' if conf_options['gene_panel']['diagnostic_grade_only'] else 'OFF'}")
-        logger.info(f"Include incidental findings (ACMG recommended list v3.2): " + \
+        logger.info("Include incidental findings (ACMG recommended list v3.2): " + \
                     f"{'ON' if conf_options['variant_classification']['secondary_findings'] else 'OFF'}")
-        logger.info(f"Include low to moderate cancer risk variants from genome-wide association studies: " + \
+        logger.info("Include low to moderate cancer risk variants from genome-wide association studies: " + \
                     f"{'ON' if conf_options['variant_classification']['gwas_findings'] else 'OFF'}")
-        logger.info(f"Include pharmacogenetic findings (PgX - variants related to potential toxicity to chemotherapy): " + \
+        logger.info("Include pharmacogenetic findings (PgX - variants related to potential toxicity to chemotherapy): " + \
                     f"{'ON' if conf_options['variant_classification']['pgx_findings'] else 'OFF'}")
-        logger.info(f"Reference population, germline variant frequencies (gnomAD - non-cancer subset): " + \
+        logger.info("Reference population, germline variant frequencies (gnomAD - non-cancer subset): " + \
                     f"{str(conf_options['variant_classification']['pop_gnomad']).upper()}")
         logger.info(f"Genome assembly: {conf_options['genome_assembly']}")
         print('----')
@@ -210,12 +210,12 @@ def run_cpsr(conf_options, input_data, output_data):
         logger.info((
             f"CPSR - STEP 1: Basic variant annotation with Variant Effect Predictor (version {pcgr_vars.VEP_VERSION}, "
             f"GENCODE release {pcgr_vars.GENCODE_VERSION[genome_assembly]}, genome assembly {yaml_data['genome_assembly']})"))
-        logger.info(f"VEP configuration - one primary consequence block pr. alternative allele (--flag_pick_allele_gene)")
+        logger.info("VEP configuration - one primary consequence block pr. alternative allele (--flag_pick_allele_gene)")
         logger.info(f"VEP configuration - transcript pick order: {yaml_data['conf']['vep']['vep_pick_order']}")
-        logger.info(f"VEP configuration - transcript pick order: See more at https://www.ensembl.org/info/docs/tools/vep/script/vep_other.html#pick_options")
+        logger.info("VEP configuration - transcript pick order: See more at https://www.ensembl.org/info/docs/tools/vep/script/vep_other.html#pick_options")
         logger.info(f"VEP configuration - GENCODE set: {vep_command['gencode_set_in_use']}")
         logger.info(f'VEP configuration - skip intergenic variants: {vep_skip_intergenic_set}')
-        logger.info(f"VEP configuration - look for overlap with regulatory regions: ON")
+        logger.info("VEP configuration - look for overlap with regulatory regions: ON")
         logger.info(f"VEP configuration - plugins in use: {vep_command['plugins_in_use']}")
         logger.info((
             f"VEP configuration - buffer size/number of forks: "

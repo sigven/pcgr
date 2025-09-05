@@ -113,7 +113,7 @@ def run_vcfanno(num_processes, query_vcf, vcfanno_tracks, query_info_tags, vcfhe
     
     for track in track_file_info['tags_fname']:
 
-        if not vcfanno_tracks[track] is True:
+        if vcfanno_tracks[track] is False:
             continue
 
         infotags_vcfanno = read_vcfanno_tag_file(track_file_info['tags_fname'][track], logger)
@@ -132,7 +132,7 @@ def run_vcfanno(num_processes, query_vcf, vcfanno_tracks, query_info_tags, vcfhe
     
     panel_normal_tags = ["PANEL_OF_NORMALS"]
    
-    if not pon_vcf is None:
+    if pon_vcf is not None:
         if "PANEL_OF_NORMALS" in query_info_tags:
             logger.warning(
                 "Query VCF has INFO tag \"PANEL_OF_NORMALS\" - this is also present in the panel of normal VCF file. This tag will be overwritten if not renamed in the query VCF")

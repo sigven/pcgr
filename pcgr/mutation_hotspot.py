@@ -75,7 +75,7 @@ def match_csq_mutation_hotspot(transcript_csq_elements, cancer_hotspots, rec, pr
    for csq in transcript_csq_elements:
       (consequence, symbol, entrezgene, hgvsc, hgvsp, exon, feature_type, feature, biotype) = csq.split(':')
 
-      if not bool(re.search(r'^(missense|stop|start|inframe|splice_donor|splice_acceptor|frameshift)', consequence)) is True:
+      if bool(re.search(r'^(missense|stop|start|inframe|splice_donor|splice_acceptor|frameshift)', consequence)) is False:
          continue
 
       hgvsp_short = threeToOneAA(hgvsp)

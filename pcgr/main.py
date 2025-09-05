@@ -52,6 +52,7 @@ def cli():
     optional_assay.add_argument("--assay", dest="assay", default="WES", choices=[ "WGS", "WES","TARGETED"], help="Type of DNA sequencing assay performed for input data (VCF), default: %(default)s")
     optional_assay.add_argument("--effective_target_size_mb", type=float, default=34, dest="effective_target_size_mb", help="Effective target size in Mb (potentially limited by read depth) of sequencing assay (for TMB analysis) (default: %(default)s (WES/WGS))")
     optional_assay.add_argument("--tumor_only", action="store_true", help="Input VCF comes from tumor-only sequencing, calls will be filtered for variants of germline origin, (default: %(default)s)")
+    optional_sample.add_argument("--sex", dest="sex", choices=["FEMALE", "MALE", "UNKNOWN"], default="UNKNOWN",help="Sex of patient (default: %(default)s)")
     optional_sample.add_argument("--tumor_site", dest="tsite", type=int, default=0, help="Optional integer code to specify primary tumor type/site of query sample,\nchoose any of the following identifiers:\n" + str(pcgr_vars.tumor_sites) + "\n(default: %(default)s - any tumor type)")
     optional_sample.add_argument("--tumor_purity", type=float, dest="tumor_purity", help="Estimated tumor purity (between 0 and 1) (default: %(default)s)")
     optional_sample.add_argument("--tumor_ploidy", type=float, dest="tumor_ploidy", help="Estimated tumor ploidy (default: %(default)s)")
@@ -85,8 +86,8 @@ def cli():
     optional_tumor_only.add_argument("--exclude_nonexonic", action="store_true", help="Exclude non-exonic variants, default: %(default)s)")
 
     optional_vep.add_argument("--vep_n_forks", default=4, type=int, help="Number of forks (VEP option '--fork'), default: %(default)s")
-    optional_vep.add_argument("--vep_buffer_size", default=500, type=int, help=f"Variant buffer size (variants read into memory simultaneously, VEP option '--buffer_size')\n- set lower to reduce memory usage, default: %(default)s")
-    optional_vep.add_argument("--vep_pick_order", default="mane_select,mane_plus_clinical,canonical,biotype,ccds,rank,tsl,appris,length", help=f"Comma-separated string " + \
+    optional_vep.add_argument("--vep_buffer_size", default=500, type=int, help="Variant buffer size (variants read into memory simultaneously, VEP option '--buffer_size')\n- set lower to reduce memory usage, default: %(default)s")
+    optional_vep.add_argument("--vep_pick_order", default="mane_select,mane_plus_clinical,canonical,biotype,ccds,rank,tsl,appris,length", help="Comma-separated string " + \
         "of ordered transcript/variant properties for selection of primary variant consequence\n(option '--pick_order' in VEP), default: %(default)s")
     optional_vep.add_argument("--vep_no_intergenic", action="store_true", help="Skip intergenic variants during variant annotation (VEP option '--no_intergenic' in VEP), default: %(default)s")
     optional_vep.add_argument("--vep_regulatory", action="store_true", help="Add VEP regulatory annotations (VEP option '--regulatory') or non-coding interpretation, default: %(default)s")
@@ -334,9 +335,9 @@ def run_pcgr(input_data, output_data, conf_options):
         logger = getlogger('pcgr-vep')
         logger.info(f'PCGR - STEP 1: Basic variant annotation with Variant Effect Predictor {pcgr_vars.VEP_VERSION}' + \
                     f', GENCODE release {pcgr_vars.GENCODE_VERSION[genome_assembly]}, genome assembly {yaml_data["genome_assembly"]}')
-        logger.info(f'VEP configuration - one primary consequence block pr. alternative gene allele (--flag_pick_allele_gene)')
+        logger.info('VEP configuration - one primary consequence block pr. alternative gene allele (--flag_pick_allele_gene)')
         logger.info(f'VEP configuration - transcript pick order: {yaml_data["conf"]["vep"]["vep_pick_order"]}')
-        logger.info(f'VEP configuration - transcript pick order: See more at https://www.ensembl.org/info/docs/tools/vep/script/vep_other.html#pick_options')
+        logger.info('VEP configuration - transcript pick order: See more at https://www.ensembl.org/info/docs/tools/vep/script/vep_other.html#pick_options')
         logger.info(f'VEP configuration - GENCODE set: {vep_command["gencode_set_in_use"]}')
         logger.info(f'VEP configuration - skip intergenic variants: {"ON" if yaml_data["conf"]["vep"]["vep_no_intergenic"] == 1 else "OFF"}')
         logger.info(f'VEP configuration - regulatory variant annotation: {"ON" if yaml_data["conf"]["vep"]["vep_regulatory"] == 1 else "OFF"}')
@@ -494,7 +495,7 @@ def run_pcgr(input_data, output_data, conf_options):
                 input_data["refdata_assembly_dir"], logger = logger)
             ## Write transcript-level expression data to TSV
             if 'transcript' in expression_data.keys():
-                if not expression_data['transcript'] is None:                    
+                if expression_data['transcript'] is not None:                    
                     expression_data['transcript'].fillna('.').to_csv(
                         yaml_data['molecular_data']['fname_expression_tsv'], sep = "\t",
                         compression = "gzip", index = False)
@@ -505,7 +506,7 @@ def run_pcgr(input_data, output_data, conf_options):
                     #    compression = "gzip", index = False)
                 else:                    
                     if 'gene' in expression_data.keys():
-                        if not expression_data['gene'] is None:
+                        if expression_data['gene'] is not None:
                             expression_data['gene'].fillna('.').to_csv(
                                 yaml_data['molecular_data']['fname_expression_tsv'], sep = "\t",
                                 compression = "gzip", index = False)
@@ -570,7 +571,7 @@ def run_pcgr(input_data, output_data, conf_options):
         print('----')
 
     # PCGR|Expression2 - Gene expression (bulk RNA-seq) analyses
-    if not expression_data is None:
+    if expression_data is not None:
         logger = getlogger("pcgr-expression-analysis")
         logger.info('PCGR - STEP 4: Gene expression analysis')
 
@@ -627,6 +628,7 @@ def run_pcgr(input_data, output_data, conf_options):
             cna_segment_file = input_cna,
             build = yaml_data['genome_assembly'],
             sample_id = yaml_data['sample_id'],
+            sex = yaml_data['conf']['sample_properties']['sex'],
             refdata_assembly_dir = input_data['refdata_assembly_dir'],
             n_copy_amplifications = yaml_data["conf"]['somatic_cna']['n_copy_gain'],
             overlap_fraction = 0.5,
