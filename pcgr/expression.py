@@ -1,15 +1,12 @@
 #!/usr/bin/env python
 
-import os,re
-import csv
-import gzip
+import os
 import pandas as pd
 import logging
 import numpy as np
 
-from pcgr import utils
 from pcgr import pcgr_vars
-from pcgr.utils import error_message, warn_message, check_file_exists, remove_file
+from pcgr.utils import error_message, check_file_exists
 
 def parse_expression(expression_fname_tsv: str,
                      sample_id: str,
@@ -120,12 +117,12 @@ def parse_expression(expression_fname_tsv: str,
             
             ## Emit warning if ambiguous gene/transcript identifiers are detected - 
             ## remove them from the analysis (write them to a separate file?)
-            n_ambig = len(exp_map_verified[exp_map_verified.AMBIGUOUS_ID == True])
+            n_ambig = len(exp_map_verified[exp_map_verified.AMBIGUOUS_ID])
             if n_ambig > 0:
                 logger.warning("Detected N = " + str(n_ambig) + " ambiguous gene/transcript identifiers in input gene expression file")
             else:
                 logger.info("NO ambiguous gene/transcript identifiers were detected in input gene expression file")
-            transcript_expression_map = exp_map_verified[exp_map_verified.AMBIGUOUS_ID == False]
+            transcript_expression_map = exp_map_verified[~exp_map_verified.AMBIGUOUS_ID]
             exp_map_verified_nonzero = transcript_expression_map[transcript_expression_map.TPM > 0]
             
             ## inform the user about the statistics with respect to biotypes (TPM > 0)
@@ -178,10 +175,10 @@ def integrate_variant_expression(variant_set: pd.DataFrame,
         expression_data (dict): Dictionary with expression data (transcript and gene-level TPM values)
         logger (logging.Logger, optional): Logger. Defaults to None.
     """    
-    if not expression_data is None:
+    if expression_data is not None:
         for s in ['gene','gene_min_tpm']:
             if s in expression_data.keys():
-                if not expression_data[s] is None:
+                if expression_data[s] is not None:
                     if s == 'gene':
                         logger.info("Integrating gene-level expression data from tumor into somatic variant set")
                     if expression_data[s].empty:
@@ -198,7 +195,7 @@ def integrate_variant_expression(variant_set: pd.DataFrame,
                                 variant_set = variant_set.merge(exp_gene, on = 'ENSEMBL_GENE_ID', how = 'left')
                     
         if 'transcript' in expression_data.keys():
-            if not expression_data['transcript'] is None:
+            if expression_data['transcript'] is not None:
                 logger.info("Integrating transcript-level expression data from tumor into somatic variant set")
                 if expression_data['transcript'].empty:
                     logger.warning('Expression file does not contain any transcript-level expression data')
@@ -302,7 +299,7 @@ def correlate_sample_expression(sample_expression: dict,
     exp_data_sample = sample_expression.copy()
     
     if 'gene' in exp_data_sample.keys():
-        if not exp_data_sample['gene'] is None:
+        if exp_data_sample['gene'] is not None:
             if {'ENSEMBL_GENE_ID','TPM_LOG2_GENE','BIOTYPE'}.issubset(exp_data_sample['gene'].columns):
                 if protein_coding_only is True:
                     logger.info("Filtering out non-protein coding genes from expression data")
@@ -438,7 +435,7 @@ def find_expression_outliers(sample_expression: dict,
             return(pd.DataFrame())
     
     if 'gene' in exp_data_sample.keys():
-        if not exp_data_sample['gene'] is None:
+        if exp_data_sample['gene'] is not None:
             if {'ENSEMBL_GENE_ID','TPM_LOG2_GENE'}.issubset(exp_data_sample['gene'].columns):
                 for col in exp_data_sample['gene'].columns:
                     if col not in required_cols:
@@ -509,7 +506,7 @@ def correlate_samples(exp_data_sample: dict,
                       logger: logging.Logger) -> pd.DataFrame:
     
     corr_similarity = pd.DataFrame()
-    if not 'gene' in exp_data_sample:
+    if 'gene' not in exp_data_sample:
         logger.warning("No 'gene' entry in expression data dictionary for sample " + sample_id + " - skipping correlation analysis")
         return(corr_similarity)
     if 'ENSEMBL_GENE_ID' in exp_data_refcohort.columns and \

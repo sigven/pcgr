@@ -4,7 +4,7 @@ from pcgr._version import __version__
 
 ## Version - software and bundle
 PCGR_VERSION = __version__
-DB_VERSION = '20250716'
+DB_VERSION = '20250903'  # database build version (date-based)
 
 ## Miscellaneous settings
 NCBI_BUILD_MAF = 'GRCh38'
@@ -34,10 +34,11 @@ VEP_PICK_CRITERIA = ['mane_select','mane_plus_clinical','canonical','biotype','c
 ## Gene expression comparative analysis resources
 EXPRESSION_DB_SOURCES = ['tcga','depmap','treehouse']
 
-## Sample identifier length (max/min allowed)
+## Sample identifier character length (max/min allowed)
 SAMPLE_ID_MAX_LENGTH = 40
 SAMPLE_ID_MIN_LENGTH = 3
 
+## GnomAD subpopulation allele frequency tags (exomes/genomes)
 GNOMAD_MAIN_EXOME_AF_TAGS = ['gnomADe_SAS_AF','gnomADe_NFE_AF','gnomADe_AFR_AF','gnomADe_AMR_AF','gnomADe_EAS_AF']
 GNOMAD_MAIN_GENOME_AF_TAGS = ['gnomADg_SAS_AF','gnomADg_NFE_AF','gnomADg_AFR_AF','gnomADg_AMR_AF','gnomADg_EAS_AF']
 
@@ -216,12 +217,8 @@ VEP_consequence_rank = {
 ## Regular expressions on the VEP CSQ (consequence) that targets different types of variants
 CSQ_MISSENSE_PATTERN = r"^missense_variant"
 CSQ_CODING_PATTERN = \
-    r"^(stop_(lost|gained)|start_lost|frameshift_|missense_|splice_(donor|acceptor)|protein_altering|inframe_)"
-CSQ_CODING_SILENT_PATTERN = \
-    r"^(stop_(lost|gained)|start_lost|frameshift_|missense_|splice_(donor|acceptor)|protein_altering|inframe_|synonymous|(start|stop)_retained)"
-CSQ_CODING_PATTERN2 = \
     r"(stop_(lost|gained)|start_lost|frameshift_|missense_|splice_(donor|acceptor)|protein_altering|inframe_)"
-CSQ_CODING_SILENT_PATTERN2 = \
+CSQ_CODING_SILENT_PATTERN = \
     r"(stop_(lost|gained)|start_lost|frameshift_|missense_|splice_(donor|acceptor)|protein_altering|inframe_|synonymous|(start|stop)_retained)"
 CSQ_NULL_PATTERN = r"^(stop_gained|frameshift_)|&stop_gained"
 CSQ_SPLICE_REGION_PATTERN = r"(splice_|intron_variant)"
@@ -232,9 +229,11 @@ CSQ_SPLICE_ACCEPTOR_PATTERN = \
 CSQ_LOF_PATTERN = r"(stop_gained|frameshift|splice_acceptor_variant|splice_donor_variant|start_lost)"
 
 
-## MaxEntScan thresholds for splice site disruption (donor/acceptor)
-DONOR_DISRUPTION_MES_CUTOFF = 6
-ACCEPTOR_DISRUPTION_MES_CUTOFF = 7
+## MaxEntScan thresholds for splice site disruption (donor/acceptor) - percent drop(gain)
+DONOR_REF_MIN_SCORE = 6
+ACCEPTOR_REF_MIN_SCORE = 7
+DONOR_DISRUPTION_MES_DROP_CUTOFF = -60
+ACCEPTOR_DISRUPTION_MES_DROP_CUTOFF = -60
 
 ## TCGA tumor cohorts
 DISEASE_COHORTS = ['ACC','BLCA','BRCA','CESC',
