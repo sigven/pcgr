@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 
-import os,re
-import csv
-import gzip
+import os
+import re
 
 from pcgr.annoutils import assign_cds_exon_intron_annotations
 from pcgr import pcgr_vars
 from pcgr.utils import getlogger, check_file_exists, get_perl_exports, get_maxentscan_dir
-from importlib.resources import files
 
 def get_vep_command(file_paths, conf_options, input_vcf, output_vcf, debug = False):
 
@@ -19,20 +17,31 @@ def get_vep_command(file_paths, conf_options, input_vcf, output_vcf, debug = Fal
         file_paths['refdata_assembly_dir'],
         'misc','fasta','assembly',
         f'Homo_sapiens.{pcgr_vars.VEP_ASSEMBLY[genome_assembly]}.dna.primary_assembly.fa.gz')
+    
+    splice_vault_tsv = os.path.join(
+        file_paths['refdata_assembly_dir'],
+        'variant','tsv','splicevault',
+        f'splicevault.{genome_assembly}.tsv.gz'
+    )
 
     logger = getlogger('check-fasta-files')
     check_file_exists(fasta_assembly, logger = logger)
 
     # for logging only
-    plugins_in_use = "NearestExonJB, MaxEntScan"
+    plugins_in_use = "NearestExonJB, MaxEntScan, SpliceVault, NMD"
 
     # List all VEP flags used when calling VEP
     vep_flags = (
-        f'--hgvs --af_gnomad --af_gnomadg --variant_class --domains --symbol --protein --ccds --mane '
+        f'--hgvs --af_gnomad --af_gnomadg --max_af --variant_class --domains --symbol --protein --ccds --mane '
         f'--uniprot --appris --biotype --tsl --canonical --format vcf --cache --numbers '
         f'--total_length --allele_number --failed 1 --no_stats --no_escape --xref_refseq --vcf '
-        f'--check_ref --dont_skip --flag_pick_allele_gene --plugin NearestExonJB,max_range=50000 '
+        f'--check_ref --dont_skip --flag_pick_allele_gene '
+        ## plugins
+        f'--plugin NearestExonJB,max_range=50000 '
         f'--plugin MaxEntScan,{get_maxentscan_dir()} '
+        f'--plugin NMD '
+        f'--plugin SpliceVault,file={splice_vault_tsv} '
+
         f'--force_overwrite --species homo_sapiens --offline')
     vep_options = (
         f'--dir {vep_dir} --assembly {pcgr_vars.VEP_ASSEMBLY[genome_assembly]} --cache_version {pcgr_vars.VEP_VERSION} '
@@ -113,12 +122,20 @@ def get_csq_record_annotations(csq_fields, varkey, logger, vep_csq_fields_map, t
                                 'Could not find transcript xrefs for ' + str(ensembl_transcript_id))
 
                 # Specifically assign PFAM protein domain as a csq_record key
+                # Strip off PDB identifiers from VEP DOMAINS field
                 if vep_csq_fields_map['index2field'][j] == 'DOMAINS':
                     domain_identifiers = str(csq_fields[j]).split('&')
+                    other_domains = []
                     for v in domain_identifiers:
                         if v.startswith('Pfam'):
                             csq_record['PFAM_DOMAIN'] = str(re.sub(r'\.[0-9]{1,}$', '', re.sub(r'Pfam:', '', v)))
+                        if not v.startswith('PDB-'):
+                            other_domains.append(v)
+                    
+                    if len(other_domains) > 0:
+                        csq_record['DOMAINS'] = '&'.join(other_domains)
 
+               
                 # Assign COSMIC/DBSNP mutation ID's as individual key,value pairs in the csq_record object
                 if vep_csq_fields_map['index2field'][j] == 'Existing_variation':
                     var_identifiers = str(csq_fields[j]).split('&')
@@ -185,46 +202,46 @@ def pick_single_gene_csq(vep_csq_results,
         csq_candidate['conskey'] = str(csq_elem['SYMBOL']) + ':' + str(csq_elem['Consequence'])
 
         ## MANE select status - lower value prioritized
-        if not csq_elem['MANE_SELECT'] is None:
+        if csq_elem['MANE_SELECT'] is not None or 'MANE_SELECT2' in csq_elem.keys():
             csq_candidate['mane_select'] = 0
 
-        ## MANE PLUS clnical status - lower value prioritized
-        if not csq_elem['MANE_PLUS_CLINICAL'] is None:
+        ## MANE PLUS clinical status - lower value prioritized
+        if csq_elem['MANE_PLUS_CLINICAL'] is not None or 'MANE_PLUS_CLINICAL2' in csq_elem.keys():
             csq_candidate['mane_plus_clinical'] = 0
 
         ## CANONICAL status - lower value prioritized
-        if not csq_elem['CANONICAL'] is None:
+        if csq_elem['CANONICAL'] is not None:
             if csq_elem['CANONICAL'] == 'YES':
                 csq_candidate['canonical'] = 0
 
         ## APPRIS level - lower value prioritized
-        if not csq_elem['APPRIS'] is None:
-            if not 'ALTERNATIVE' in csq_elem['APPRIS']:
+        if csq_elem['APPRIS'] is not None:
+            if 'ALTERNATIVE' not in csq_elem['APPRIS']:
                 csq_candidate['appris'] = int(re.sub(r'[A-Z]{1,}:?', '', csq_elem['APPRIS']))
             else:
                 csq_candidate['appris'] = int(re.sub(r'ALTERNATIVE:','', csq_elem['APPRIS'])) + 10
 
         ## Biotype - lower value prioritized
-        if not csq_elem['BIOTYPE'] is None:
+        if csq_elem['BIOTYPE'] is not None:
             if csq_elem['BIOTYPE'] == 'protein_coding':
                 csq_candidate['biotype'] = 0
 
         ## CCDS - lower value prioritized
-        if not csq_elem['CCDS'] is None:
+        if csq_elem['CCDS'] is not None:
             csq_candidate['ccds'] = 0
 
         ## Consequence rank - lower value prioritized
-        if not csq_elem['Consequence'] is None:
+        if csq_elem['Consequence'] is not None:
             main_cons = csq_elem['Consequence'].split('&')[0]
             if main_cons in pcgr_vars.VEP_consequence_rank:
                 csq_candidate['rank'] = int(pcgr_vars.VEP_consequence_rank[main_cons])
             else:
                 warn_msg = f"Missing Consequence in pcgr_vars.VEP_consequence_rank: {csq_elem['Consequence']} -  '{main_cons}'"
-                if not logger is None:
+                if logger is not None:
                     logger.warn(warn_msg)
 
         ## TSL - lower value prioritized
-        if not csq_elem['TSL'] is None:
+        if csq_elem['TSL'] is not None:
             csq_candidate['tsl'] = int(csq_elem['TSL'])
 
         csq_candidates.append(csq_candidate)
@@ -293,13 +310,13 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, grantham_scores,
 
     varkey = str(rec.CHROM) + '_' + str(rec.POS) + '_' + str(rec.REF) + '_' + str(','.join(rec.ALT))
 
-    var_gwas_info = rec.INFO.get('GWAS_HIT')
-    gwas_hit = False
-    if not var_gwas_info is None:
-        gwas_hit = True
+    #var_gwas_info = rec.INFO.get('GWAS_HIT')
+    #gwas_hit = False
+    #if var_gwas_info is not None:
+    #    gwas_hit = True
 
-    found_in_target = 0
-
+    #found_in_target = 0
+    #index = 1
     ## Retrieve the INFO element provided by VEP (default 'CSQ') in the VCF object, and
     ## loop through all transcript-specific consequence blocks provided, e.g.
     #  CSQ=A|intron_variant|||.., A|splice_region_variant|||, and so on.
@@ -325,9 +342,19 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, grantham_scores,
         ## CPSR - consider all picked gene-specific consequences (considering that a variant may occasionally
         ## overlap other, non-CPSR targets)
         if pick_only is False:
-            csq_record = get_csq_record_annotations(csq_fields, varkey, logger, vep_csq_fields_map, transcript_xref_map, grantham_scores)
+            csq_record = get_csq_record_annotations(
+                csq_fields, varkey, logger, vep_csq_fields_map, transcript_xref_map, grantham_scores)
             all_csq.append(csq_record)
-            if csq_record['PICK'] == '1':
+            
+            ## For GRCh37 primarily, MANE Select is not provided as a VEP annotation, thus the
+            ## primary consequence may unintentionally NOT be dictated by MANE transcript status
+            ## - as a workaround, we here utilize PCGR/CPSR's in-house MANE select/MANE Plus 
+            ## Clinical annotations (MANE_SELECT2 / MANE_PLUS_CLINICAL2)
+            if csq_record['PICK'] == '1' or \
+                csq_record['MANE_SELECT'] is not None or \
+                csq_record['MANE_PLUS_CLINICAL'] is not None or \
+                'MANE_SELECT2' in csq_record.keys() or \
+                'MANE_PLUS_CLINICAL2' in csq_record.keys():
                 if 'Feature_type' in csq_record:
                     if csq_record['Feature_type'] == 'RegulatoryFeature':
                         primary_csq_pick.append(csq_record)
@@ -350,7 +377,6 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, grantham_scores,
                             else:
                                 ## Consequence not in CPSR targets, nor with Entrez identifier
                                 # (pseudogenes etc) - append to secondary_csq_pick
-                                warning = 1
                                 secondary_csq_pick.append(csq_record)
                     else:
                         ## intergenic
@@ -381,7 +407,7 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, grantham_scores,
         else:
             if len(primary_csq_pick) == 1:
                 if 'HGVSc' in primary_csq_pick[0]:
-                    if not primary_csq_pick[0]['HGVSc'] is None:
+                    if primary_csq_pick[0]['HGVSc'] is not None:
                         if ':' in primary_csq_pick[0]['HGVSc']:
                             hgvsc = str(primary_csq_pick[0]['HGVSc'].split(':')[1])
         if csq_fields[vep_csq_fields_map['field2index']['HGVSp']] != "":
@@ -425,7 +451,7 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, grantham_scores,
 
     ## If multiple transcript-specific variant consequences highlighted by --pick_allele_gene,
     ## prioritize/choose block of consequence according to 'vep_pick_order'
-    if len(vep_csq_results['picked_gene_csq']) > 1:
+    if len(vep_csq_results['picked_gene_csq']) > 1:       
         vep_chosen_csq_idx = pick_single_gene_csq(
             vep_csq_results, pick_criteria_ordered = vep_pick_order, logger = logger, debug = debug)
         vep_csq_results['picked_csq'] = vep_csq_results['picked_gene_csq'][vep_chosen_csq_idx]
@@ -436,8 +462,6 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, grantham_scores,
             vep_csq_results['picked_csq'] = vep_csq_results['picked_gene_csq'][vep_chosen_csq_idx]
         else:
             logger.error('ERROR: No VEP block chosen by --pick_allele_gene')
-
-
 
     return (vep_csq_results)
 
