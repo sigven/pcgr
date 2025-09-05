@@ -299,20 +299,37 @@ load_reference_data <- function(
   ####--- 2. Variant annotations----####
   pcgr_ref_data[['variant']] <- list()
 
-  #####--A. Sites of pathogenic variants (ClinVar)--#####
-  # 1. sites (codons) of pathogenic/likely pathogenic variants
+  #####--A. Sites of pathogenic/benign variants (ClinVar)--#####
+  # 1. sites (codons/amino acids) of pathogenic/likely pathogenic variants
   clinvar_sites_tsv_fname <-
     file.path(
       pcgr_db_assembly_dir, "variant", "tsv",
-      "clinvar", "clinvar_sites.tsv.gz"
+      "clinvar", "clinvar_aa_sites.tsv.gz"
     )
   check_file_exists(clinvar_sites_tsv_fname)
-  pcgr_ref_data[['variant']][['clinvar_sites']] <- as.data.frame(
+  pcgr_ref_data[['variant']][['clinvar_aa_sites']] <- as.data.frame(
     readr::read_tsv(
       clinvar_sites_tsv_fname, show_col_types = F)) |>
     dplyr::mutate(entrezgene = as.character(.data$entrezgene))
-  colnames(pcgr_ref_data[['variant']][['clinvar_sites']]) <-
-    toupper(colnames(pcgr_ref_data[['variant']][['clinvar_sites']]))
+  colnames(pcgr_ref_data[['variant']][['clinvar_aa_sites']]) <-
+    toupper(colnames(pcgr_ref_data[['variant']][['clinvar_aa_sites']]))
+
+  #####--B. Nucleotides of pathogenic/benign (ClinVar)--#####
+  # 1. non-AA sites (splice sites, intronic sites etc.)
+  clinvar_nucleotides_tsv_fname <-
+    file.path(
+      pcgr_db_assembly_dir, "variant", "tsv",
+      "clinvar", "clinvar_nucleotide_sites.tsv.gz"
+    )
+  check_file_exists(clinvar_nucleotides_tsv_fname)
+  pcgr_ref_data[['variant']][['clinvar_nuc_sites']] <- as.data.frame(
+    readr::read_tsv(
+      clinvar_nucleotides_tsv_fname, show_col_types = F)) |>
+    dplyr::mutate(entrezgene = as.character(.data$entrezgene)) |>
+    dplyr::filter(stringr::str_detect(
+      tolower(classification), "pathogenic"))
+  colnames(pcgr_ref_data[['variant']][['clinvar_nuc_sites']]) <-
+    toupper(colnames(pcgr_ref_data[['variant']][['clinvar_nuc_sites']]))
 
   #####--B. Oncogenic variants (ClinVar)--#####
   # known oncogenic variants
