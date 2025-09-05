@@ -128,15 +128,20 @@ def load_biomarkers(logger, biomarker_variant_fname, biomarker_clinical_fname, b
                               variant_biomarkers[entry_alias_type][varkey].append(row)
                               aa_index = aa_index + 1
             else:
-               if biomarker_vartype == 'CNA' and (row['alteration_type'].startswith('CNA')):
+               if biomarker_vartype == 'CNA' and \
+                  ((row['alteration_type'].startswith('CNA')) or \
+                     bool(re.search(r'^Loss$', row['variant_alias'])) is True):
+               #if biomarker_vartype == 'CNA' and (row['alteration_type'].startswith('CNA')):
                   row['clinical_evidence_items'] = '.'
                   if row['variant_id'] in variant_to_clinical_evidence.keys():
                      row['clinical_evidence_items'] = variant_to_clinical_evidence[row['variant_id']]                                 
                   
                   if row['alias_type'] == "other_gene":
-                     if bool(re.search(r'^(Amplification|Deletion)$', row['variant_alias'])) is True:
+                     if bool(re.search(r'^(Amplification|Deletion|Loss)$', row['variant_alias'])) is True:
                         varkey = str(row['entrezgene']) + "_" + \
                            re.sub(r"transcript_","",str(row['variant_consequence']))
+                        if bool(re.search(r'^Loss$', row['variant_alias'])) is True: ## currently annotated with "loss_of_function_variant" as variant consequence
+                           varkey = str(row['entrezgene']) + '_ablation'
                         if varkey not in variant_biomarkers['other_gene']:
                            variant_biomarkers['other_gene'][varkey] = []
                         del row['variant_exon']

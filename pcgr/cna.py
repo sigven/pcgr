@@ -221,6 +221,8 @@ def annotate_cna_segments(output_segment_gene_fname: str,
     
     cna_query_segment_df.loc[cna_query_segment_df.homloss_cond, 'aberration_key'] =  \
         cna_query_segment_df.loc[cna_query_segment_df.homloss_cond, 'entrezgene'].astype(str) + '_ablation'
+    cna_query_segment_df.loc[cna_query_segment_df.hemloss_cond, 'aberration_key'] =  \
+        cna_query_segment_df.loc[cna_query_segment_df.hemloss_cond, 'entrezgene'].astype(str) + '_ablation'
 
     ## Append actionability evidence to input amplifications (column 'biomarker_match')
     cna_query_segment_df = cna_query_segment_df.merge(
