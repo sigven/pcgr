@@ -214,6 +214,8 @@ load_somatic_snv_indel <- function(
   #pcgrr::log4r_info("Adding hyperlinks to variant/gene annotations")
 
   callset[['variant']] <- callset[['variant']] |>
+    pcgrr::append_protein_domains(
+      ref_data = ref_data) |>
     pcgrr::append_cancer_association_ranks(
       ref_data = ref_data,
       primary_site = tumor_site) |>
@@ -487,9 +489,12 @@ load_cpsr_classified_variants <- function(
          "ENTREZGENE"))) |>
     dplyr::select(
       dplyr::any_of(
-        c("SYMBOL","ALTERATION","GENOTYPE","CONSEQUENCE",
-        "CLINICAL_SIGNIFICANCE","SOURCE","PROTEIN_DOMAIN",
-        "HGVSc", "HGVSc_RefSeq", "HGVSp", "CDS_CHANGE",
+        c("SYMBOL","ALTERATION",
+          "GENOTYPE","CONSEQUENCE",
+        "CLINICAL_SIGNIFICANCE","SOURCE",
+        "PROTEIN_DOMAIN",
+        "HGVSc", "HGVSc_RefSeq",
+        "HGVSp", "CDS_CHANGE",
         "EFFECT_PREDICTIONS","SPLICE_EFFECT",
         "CODING_STATUS",
         "LOSS_OF_FUNCTION", "DP_CONTROL",
@@ -579,6 +584,7 @@ load_dna_variants <- function(
 
   cols_including_retained <- cols
   retained_cols <- NULL
+  calls <- calls_raw
   if (retained_info_tags != "None") {
     retained_cols <- stringr::str_split(
       retained_info_tags, pattern = ",")[[1]]
@@ -591,6 +597,7 @@ load_dna_variants <- function(
           c(cols_including_retained$cols, col_retain$cols)
       }
     }
+
   }
 
   calls <- suppressWarnings(
@@ -634,6 +641,39 @@ load_dna_variants <- function(
       )
   }
 
+  if("MAXENTSCAN" %in% colnames(results[['variant']])) {
+    results[['variant']]$MES_PERCENT_CHANGE <- NULL
+    results[['variant']] <-
+      results[['variant']] |>
+      tidyr::separate(
+        "MAXENTSCAN",
+        c("tmp_MES","tmp_MES_DIFF","tmp_MES_REF",
+          "tmp_MES_ALT","MES_PERCENT_CHANGE"),
+        sep="\\|", remove = F
+      ) |>
+      dplyr::mutate(
+        MES_PERCENT_CHANGE = as.numeric(.data$MES_PERCENT_CHANGE)) |>
+      dplyr::select(
+        -c("tmp_MES","tmp_MES_DIFF","tmp_MES_REF","tmp_MES_ALT")
+      )
+  }
+
+  if ("TSG_RANK" %in% colnames(results[['variant']])) {
+    results[['variant']] <-
+      results[['variant']] |>
+      dplyr::rename(
+        TUMOR_SUPPRESSOR_RANK = "TSG_RANK"
+      )
+  }
+
+  if ("TSG_SUPPORT" %in% colnames(results[['variant']])) {
+    results[['variant']] <-
+      results[['variant']] |>
+      dplyr::rename(
+        TUMOR_SUPPRESSOR_SUPPORT = "TSG_SUPPORT"
+      )
+  }
+
   if ("SPLICE_EFFECT_MUTSPLICEDB" %in% colnames(results[['variant']])) {
     results[['variant']] <-
       results[['variant']] |>
@@ -657,6 +697,160 @@ load_dna_variants <- function(
       )
   }
 
+  ## gnomAD full allele frequency (v4.1) - predisposition targets
+  if("gALL_GRPMAX" %in% colnames(results[['variant']])) {
+
+    new_cols <-
+      c("gnomADj_AC_GRPMAX",
+        "gnomADj_AN_GRPMAX",
+        "gnomADj_NHOMALT_GRPMAX",
+        "gnomADj_POP_GRPMAX",
+        "gnomADj_FAF95_GRPMAX",
+        "gnomADj_FAF95_POP_GRPMAX")
+
+    gnomad_full_cols <-
+      c("tmp_gALL_AC_joint",
+        "tmp_gALL_AN_joint",
+        "tmp_gALL_AC_GRPMAX_joint",
+        "tmp_gALL_AN_GRPMAX_joint",
+        "tmp_gALL_NHOMALT_GRPMAX_joint",
+        "tmp_gALL_POP_GRPMAX_joint",
+        "tmp_gALL_FAF95_GRPMAX_joint",
+        "tmp_gALL_FAF95_POP_GRPMAX_joint",
+        "tmp_gALL_AC_exomes",
+        "tmp_gALL_AN_exomes",
+        "tmp_gALL_AC_GRPMAX_exomes",
+        "tmp_gALL_AN_GRPMAX_exomes",
+        "tmp_gALL_NHOMALT_GRPMAX_exomes",
+        "tmp_gALL_POP_GRPMAX_exomes",
+        "tmp_gALL_FAF95_GRPMAX_exomes",
+        "tmp_gALL_FAF95_POP_GRPMAX_exomes",
+        "tmp_gALL_AC_genomes",
+        "tmp_gALL_AN_genomes",
+        "tmp_gALL_AC_GRPMAX_genomes",
+        "tmp_gALL_AN_GRPMAX_genomes",
+        "tmp_gALL_NHOMALT_GRPMAX_genomes",
+        "tmp_gALL_POP_GRPMAX_genomes",
+        "tmp_gALL_FAF95_GRPMAX_genomes",
+        "tmp_gALL_FAF95_POP_GRPMAX_genomes",
+        "tmp_gALL_not_called_in_genomes",
+        "tmp_gALL_not_called_in_exomes",
+        "tmp_gALL_exomes_filters",
+        "tmp_gALL_genomes_filters")
+
+    for(col in gnomad_full_cols) {
+      if(col %in% colnames(results[['variant']])) {
+        results[['variant']][[col]] <- NULL
+      }
+    }
+
+    for(c in new_cols) {
+      if(c %in% colnames(results[['variant']])) {
+        results[['variant']][[c]] <- NULL
+      }
+    }
+
+    results[['variant']] <-
+      results[['variant']] |>
+      tidyr::separate(
+        col = "gALL_GRPMAX",
+        into = gnomad_full_cols,
+        sep = "\\|",
+        remove = TRUE,
+        fill = "right",
+        extra = "drop"
+      ) |>
+      dplyr::mutate(
+        gnomADj_AC_GRPMAX =
+          as.integer(.data$tmp_gALL_AC_GRPMAX_joint),
+        gnomADj_AN_GRPMAX =
+          as.integer(.data$tmp_gALL_AN_GRPMAX_joint),
+        gnomADj_NHOMALT_GRPMAX =
+          as.integer(.data$tmp_gALL_NHOMALT_GRPMAX_joint),
+        gnomADj_POP_GRPMAX = as.character(
+          .data$tmp_gALL_POP_GRPMAX_joint),
+        gnomADj_FAF_GRPMAX = as.numeric(
+          .data$tmp_gALL_FAF95_GRPMAX_joint),
+        gnomADj_FAF_POP_GRPMAX = as.character(
+          .data$tmp_gALL_FAF95_POP_GRPMAX_joint)
+      )
+
+    for(c in gnomad_full_cols) {
+      if(c %in% colnames(results[['variant']])) {
+        results[['variant']][[c]] <- NULL
+      }
+    }
+  }
+
+  # check if gnomAD non-cancer filter allele frequency is available
+  if("gNC_FAF" %in% colnames(results[['variant']])) {
+    for(pop in c("GRPMAX","AFR","AMR","NFE","EAS","SAS","GLOBAL")){
+      tag <- paste0("tmp_gNC_FAF_", pop)
+      if(tag %in% colnames(results[['variant']])) {
+          results[['variant']][[tag]] <- NULL
+      }
+    }
+    results[['variant']] <-
+      results[['variant']] |>
+        tidyr::separate(
+          col = "gNC_FAF",
+          into = c("tmp_gNC_FAF_GRPMAX",
+                   "tmp_gNC_FAF_GLOBAL",
+                   "tmp_gNC_FAF_AFR",
+                   "tmp_gNC_FAF_AMR",
+                   "tmp_gNC_FAF_EAS",
+                   "tmp_gNC_FAF_FIN",
+                   "tmp_gNC_FAF_NFE",
+                   "tmp_gNC_FAF_SAS",
+                   "tmp_gNC_VAR_FILTER"),
+          sep = "\\|",
+          remove = T,
+          fill = "right",
+          extra = "drop"
+        )
+
+    ## convert to numeric
+    for(pop in c("GRPMAX","AFR","AMR","EAS","FIN","NFE","SAS","GLOBAL")){
+      tag <- paste0("tmp_gNC_FAF_", pop)
+      if(tag %in% colnames(results[['variant']])) {
+        results[['variant']] <-
+          results[['variant']] |>
+          dplyr::mutate(
+            !!rlang::sym(tag) := as.numeric(
+              !!rlang::sym(tag)
+            )
+          )
+      }
+    }
+
+    results[['variant']] <-
+      results[['variant']] |>
+      pcgrr::grpmax_faf_nc_gnomad()
+
+    results[['variant']][['gnomAD_NC_VAR_FILTER']] <-
+      results[['variant']][['tmp_gNC_VAR_FILTER']]
+    results[['variant']][['tmp_gNC_VAR_FILTER']] <- NULL
+    for(pop in c("AFR","AMR","EAS","FIN","NFE","SAS","GLOBAL","GRPMAX")){
+      tag <- paste0("tmp_gNC_FAF_", pop)
+      if(tag %in% colnames(results[['variant']])) {
+        results[['variant']][[tag]] <- NULL
+      }
+    }
+
+  }
+
+
+  ## check if gnomAD non-cancer allele count/allele number is available
+  ## - make popmax and global allele frequency variables
+  ## - only consider populations with AN >= 4000
+
+  results[['variant']][["gnomAD_NC_AF_POPMAX"]] <- -1000
+  results[['variant']][["gnomAD_NC_AC_POPMAX"]] <- -1000
+  results[['variant']][["gnomAD_NC_POP_POPMAX"]] <- NA
+  results[['variant']][["gnomAD_NC_AF_GLOBAL"]] <- -1000
+  results[['variant']][["gnomAD_NC_AN_GLOBAL"]] <- -1000
+
+
   for(pop in c('AMR','AFR','EAS','FIN','NFE','SAS','')){
     gnc_tag <- paste0("gNC_", pop)
     if(pop == ''){
@@ -665,20 +859,15 @@ load_dna_variants <- function(
 
     if (gnc_tag %in% colnames(results[['variant']])) {
 
-      ## expanded tag set
       tags <- list()
-      tags[['AC']] <- gsub('__','_',paste0("gnomADg_non_cancer_", pop, "_AC"))
-      tags[['AN']] <- gsub('__','_',paste0("gnomADg_non_cancer_", pop, "_AN"))
-      tags[['NHOMALT']] <- gsub('__','_',paste0("gnomADg_non_cancer_", pop, "_NHOMALT"))
-      tags[['AF']] <- gsub('__','_',paste0("gnomADg_non_cancer_", pop, "_AF"))
-
-      ## if the tags are already present in the data, remove them
-      for(tag in names(tags)){
-        if(tags[[tag]] %in% colnames(results[['variant']])) {
-          results[['variant']][[tags[[tag]]]] <- NULL
-        }
-      }
-
+      tags[['AC']] <-
+        gsub('__','_',paste0("tmp_gnomAD_non_cancer_", pop, "_AC"))
+      tags[['AN']] <-
+        gsub('__','_',paste0("tmp_gnomAD_non_cancer_", pop, "_AN"))
+      tags[['NHOMALT']] <-
+        gsub('__','_',paste0("tmp_gnomAD_non_cancer_", pop, "_NHOMALT"))
+      tags[['AF']] <-
+        gsub('__','_',paste0("tmp_gnomAD_non_cancer_", pop, "_AF"))
 
       ## if the gnomAD tag is present, split it into
       ## the expanded tag set
@@ -693,8 +882,6 @@ load_dna_variants <- function(
           fill = "right",
           extra = "drop"
         ) |>
-
-        ## convert to numeric
         dplyr::mutate(
           !!rlang::sym(tags[['AN']]) := as.integer(
             !!rlang::sym(tags[['AN']])
@@ -707,27 +894,81 @@ load_dna_variants <- function(
           ),
           !!rlang::sym(tags[['AF']]) := as.numeric(
             as.numeric(!!rlang::sym(tags[['AC']])) /
-              as.integer(!!rlang::sym(tags[['AN']]))),
-          #!!rlang::sym(tags[['AF']]) := ifelse(
-          #  is.na(!!rlang::sym(tags[['AF']])),
-          #  0,
-          #  !!rlang::sym(tags[['AF']])
-          #)
-        ) |>
-        dplyr::distinct()
+              as.integer(!!rlang::sym(tags[['AN']])))
+
+        )
+
+      pop2 <- pop
+      if(pop == ""){
+        pop2 <- "GLOBAL"
+        results[['variant']][["gnomAD_NC_AF_GLOBAL"]] <-
+          results[['variant']][[tags[['AF']]]]
+        results[['variant']][["gnomAD_NC_AN_GLOBAL"]] <-
+          results[['variant']][[tags[['AN']]]]
+      }
+      results[['variant']][!is.na(results[['variant']][[tags[['AF']]]]) &
+                              !is.na(results[['variant']][[tags[['AN']]]]) &
+                              results[['variant']][[tags[['AF']]]] >=
+                              results[['variant']]$gnomAD_NC_AF_POPMAX &
+                              results[['variant']][[tags[['AN']]]] >= 4000, "gnomAD_NC_POP_POPMAX"] <-
+        tolower(as.character(pop2))
+
+      results[['variant']][!is.na(results[['variant']][[tags[['AF']]]]) &
+                              !is.na(results[['variant']][[tags[['AN']]]]) &
+                              results[['variant']][[tags[['AF']]]] >=
+                              results[['variant']]$gnomAD_NC_AF_POPMAX &
+                              results[['variant']][[tags[['AN']]]] >= 4000, "gnomAD_NC_AF_POPMAX"] <- as.numeric(
+        results[['variant']][!is.na(results[['variant']][[tags[['AF']]]]) &
+                                !is.na(results[['variant']][[tags[['AN']]]]) &
+                                results[['variant']][[tags[['AF']]]] >=
+                                results[['variant']]$gnomAD_NC_AF_POPMAX &
+                                results[['variant']][[tags[['AN']]]] >= 4000, tags[['AF']]])
+
+      results[['variant']][!is.na(results[['variant']][[tags[['AF']]]]) &
+                             !is.na(results[['variant']][[tags[['AN']]]]) &
+                             results[['variant']][[tags[['AF']]]] >=
+                             results[['variant']]$gnomAD_NC_AF_POPMAX &
+                             results[['variant']][[tags[['AN']]]] >= 4000, "gnomAD_NC_AC_POPMAX"] <- as.integer(
+        results[['variant']][!is.na(results[['variant']][[tags[['AF']]]]) &
+                               !is.na(results[['variant']][[tags[['AN']]]]) &
+                               results[['variant']][[tags[['AF']]]] >=
+                               results[['variant']]$gnomAD_NC_AF_POPMAX &
+                               results[['variant']][[tags[['AN']]]] >= 4000, tags[['AC']]])
+
+      results[['variant']][[tags[['AN']]]] <- NULL
+      results[['variant']][[tags[['AC']]]] <- NULL
+      results[['variant']][[tags[['NHOMALT']]]] <- NULL
+      results[['variant']][[tags[['AF']]]] <- NULL
+
     }
   }
 
-
-  ## Rename annotations for more clarity
-  if ("TSG_SUPPORT" %in% colnames(results[['variant']])) {
-    results[['variant']] <-
-      results[['variant']] |>
-      dplyr::rename(
-        TUMOR_SUPPRESSOR_SUPPORT = "TSG_SUPPORT"
+  results[['variant']] <- results[['variant']] |>
+    dplyr::mutate(
+      gnomAD_NC_AF_POPMAX = dplyr::case_when(
+        .data$gnomAD_NC_AF_POPMAX == -1000 ~ as.numeric(NA),
+      TRUE ~ .data$gnomAD_NC_AF_POPMAX
+    )) |>
+    dplyr::mutate(
+      gnomAD_NC_AC_POPMAX = dplyr::case_when(
+        .data$gnomAD_NC_AC_POPMAX == -1000 ~ as.integer(NA),
+        TRUE ~ .data$gnomAD_NC_AC_POPMAX
+      )) |>
+    dplyr::mutate(
+      gnomAD_NC_AN_GLOBAL = dplyr::case_when(
+        .data$gnomAD_NC_AN_GLOBAL == -1000 ~ as.integer(NA),
+        TRUE ~ .data$gnomAD_NC_AN_GLOBAL
       )
-  }
+    ) |>
+    dplyr::mutate(
+      gnomAD_NC_AF_GLOBAL = dplyr::case_when(
+        .data$gnomAD_NC_AF_GLOBAL == -1000 ~ as.numeric(NA),
+        TRUE ~ .data$gnomAD_NC_AF_GLOBAL
+      )
+    )
 
+
+  ## Re-format annotations
   if ("VEP_ALL_CSQ" %in% colnames(results[['variant']])) {
     results[['variant']] <-
       results[['variant']] |>
@@ -752,14 +993,6 @@ load_dna_variants <- function(
       results[['variant']] |>
       dplyr::rename(
         HGVSP = "HGVSp_short"
-      )
-  }
-
-  if ("TSG_RANK" %in% colnames(results[['variant']])) {
-    results[['variant']] <-
-      results[['variant']] |>
-      dplyr::rename(
-        TUMOR_SUPPRESSOR_RANK = "TSG_RANK"
       )
   }
 
@@ -944,7 +1177,7 @@ load_dna_variants <- function(
               !stringr::str_detect(.data$BIOMARKER_MATCH,"by_genomic_coord") &
                 !stringr::str_detect(.data$BIOMARKER_MATCH,"by_hgvsp_principal") &
                 !stringr::str_detect(.data$BIOMARKER_MATCH,"by_codon_principal") &
-                stringr::str_detect(.data$BIOMARKER_MATCH,"by_hgvsp_nonprincipal")~ "hgvsp_nonprincipal",
+                stringr::str_detect(.data$BIOMARKER_MATCH,"by_hgvsp_nonprincipal") ~ "hgvsp_nonprincipal",
               !stringr::str_detect(.data$BIOMARKER_MATCH,"by_genomic_coord") &
                 !stringr::str_detect(.data$BIOMARKER_MATCH,"by_hgvsp_principal") &
                 !stringr::str_detect(.data$BIOMARKER_MATCH,"by_codon_principal") &
