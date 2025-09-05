@@ -52,7 +52,7 @@ def cli():
     optional_assay.add_argument("--assay", dest="assay", default="WES", choices=[ "WGS", "WES","TARGETED"], help="Type of DNA sequencing assay performed for input data (VCF), default: %(default)s")
     optional_assay.add_argument("--effective_target_size_mb", type=float, default=34, dest="effective_target_size_mb", help="Effective target size in Mb (potentially limited by read depth) of sequencing assay (for TMB analysis) (default: %(default)s (WES/WGS))")
     optional_assay.add_argument("--tumor_only", action="store_true", help="Input VCF comes from tumor-only sequencing, calls will be filtered for variants of germline origin, (default: %(default)s)")
-    optional_sample.add_argument("--sex", dest="sex", choices=["FEMALE", "MALE", "UNKNOWN"], default="UNKNOWN",help="Sex of patient (default: %(default)s)")
+    optional_sample.add_argument("--sex", dest="sex", choices=["FEMALE", "MALE", "UNKNOWN"], default="UNKNOWN",help="Sex of cancer case/sample (default: %(default)s)")
     optional_sample.add_argument("--tumor_site", dest="tsite", type=int, default=0, help="Optional integer code to specify primary tumor type/site of query sample,\nchoose any of the following identifiers:\n" + str(pcgr_vars.tumor_sites) + "\n(default: %(default)s - any tumor type)")
     optional_sample.add_argument("--tumor_purity", type=float, dest="tumor_purity", help="Estimated tumor purity (between 0 and 1) (default: %(default)s)")
     optional_sample.add_argument("--tumor_ploidy", type=float, dest="tumor_ploidy", help="Estimated tumor ploidy (default: %(default)s)")
@@ -111,7 +111,7 @@ def cli():
     #optional_rna.add_argument("--input_rna_fusion", dest = "input_rna_fusion", help = "File with RNA fusion transcripts detected in tumor (tab-separated values)")
     optional_rna.add_argument("--input_rna_expression", dest = "input_rna_exp", help = "File with bulk RNA expression counts (TPM) of transcripts in tumor (tab-separated values)")
     optional_rna.add_argument('--expression_sim', action='store_true', help="Compare expression profile of tumor sample to expression profiles of other tumor samples (default: %(default)s)")
-    optional_rna.add_argument("--expression_sim_db", dest = "expression_sim_db", default="tcga,depmap,treehouse", help=f"Comma-separated string " + \
+    optional_rna.add_argument("--expression_sim_db", dest = "expression_sim_db", default="tcga,depmap,treehouse", help="Comma-separated string " + \
         "of databases for used in RNA expression similarity analysis, default: %(default)s")
 
     optional_germline.add_argument("--input_cpsr", dest="input_cpsr", help="CPSR-classified germline calls (file '<cpsr_sample_id>.cpsr.<genome_assembly>.classification.tsv.gz')")
@@ -408,7 +408,7 @@ def run_pcgr(input_data, output_data, conf_options):
                 f"dbMTS, TCGA, GWAS catalog"
                 )
         vcfanno_db_src_msg2 = \
-                f"Annotation sources II (vcfanno): RepeatMasker, SimpleRepeats, WindowMaskerSDust, gnomAD non-cancer subset"
+                "Annotation sources II (vcfanno): RepeatMasker, SimpleRepeats, WindowMaskerSDust, gnomAD non-cancer subset"
         logger.info("PCGR - STEP 2: Variant annotation for cancer precision medicine with pcgr-vcfanno")
         logger.info(vcfanno_db_src_msg1)
         logger.info(vcfanno_db_src_msg2)
@@ -429,9 +429,9 @@ def run_pcgr(input_data, output_data, conf_options):
                 f'{"--debug" if debug else ""}'
                 )
         summarise_db_src_msg1 = \
-                f"Annotation sources: cancerhotspots.org, CIViC, Cancer Biomarkers database (CGI), Cancer Gene Census (CGC)"
+                "Annotation sources: cancerhotspots.org, CIViC, Cancer Biomarkers database (CGI), Cancer Gene Census (CGC)"
         summarise_db_src_msg2 = \
-                f"Annotation sources: Network of Cancer Genes (NCG), CancerMine, IntOGen, TCGA driver genes"
+                "Annotation sources: Network of Cancer Genes (NCG), CancerMine, IntOGen, TCGA driver genes"
 
         logger.info("PCGR - STEP 3: Variant and cancer gene annotations with pcgr-summarise")
         logger.info(summarise_db_src_msg1)

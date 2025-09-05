@@ -34,6 +34,10 @@ VEP_PICK_CRITERIA = ['mane_select','mane_plus_clinical','canonical','biotype','c
 ## Gene expression comparative analysis resources
 EXPRESSION_DB_SOURCES = ['tcga','depmap','treehouse']
 
+## Autosomes, sex chromosomes and mitochondrial chromosome
+AUTOSOMES = [str(x) for x in range(1,22)]
+SEX_CHROMOSOMES = ['X','Y']
+
 ## Sample identifier length (max/min allowed)
 SAMPLE_ID_MAX_LENGTH = 40
 SAMPLE_ID_MIN_LENGTH = 3

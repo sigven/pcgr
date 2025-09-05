@@ -5,9 +5,7 @@ from pcgr.utils import check_file_exists, error_message
 
 import pandas as pd
 import os
-import gzip
 import csv
-import re
 
 def create_config(arg_dict, workflow = "PCGR"):
     
@@ -47,6 +45,7 @@ def create_config(arg_dict, workflow = "PCGR"):
         conf_options['assay_properties'] = {}
         conf_options['sample_properties']['tumor_purity'] = 'NA'
         conf_options['sample_properties']['tumor_ploidy'] = 'NA'
+        conf_options['sample_properties']['sex'] = 'UNKNOWN'
         conf_options['sample_properties']['site'] = str(pcgr_vars.tsites[arg_dict['tsite']])
         conf_options['sample_properties']['site2'] = str(pcgr_vars.tsites[arg_dict['tsite']]).replace(" ","_").replace("/","@")
         conf_options['sample_properties']['dp_control_detected'] = 0
@@ -61,10 +60,12 @@ def create_config(arg_dict, workflow = "PCGR"):
             conf_options['assay_properties']['vcf_tumor_only'] = 1
             conf_options['assay_properties']['mode'] = "Tumor-Only"
         
-        if not arg_dict['tumor_purity'] is None:
+        if arg_dict['tumor_purity'] is not None:
             conf_options['sample_properties']['tumor_purity'] = float(arg_dict['tumor_purity'])
-        if not arg_dict['tumor_ploidy'] is None:
+        if arg_dict['tumor_ploidy'] is not None:
             conf_options['sample_properties']['tumor_ploidy'] = float(arg_dict['tumor_ploidy'])
+        if arg_dict['sex'] is not None:
+            conf_options['sample_properties']['sex'] = str(arg_dict['sex'])
             
         #conf_options['clinicaltrials'] = {
         #    'run': int(arg_dict['include_trials'])
@@ -80,11 +81,11 @@ def create_config(arg_dict, workflow = "PCGR"):
             'show': 0,
             'ignore_vus': int(arg_dict['cpsr_ignore_vus'])
         }
-        if not arg_dict['input_cpsr'] is None:
+        if arg_dict['input_cpsr'] is not None:
             conf_options['germline']['show'] = 1
             
         conf_options['expression'] = {}
-        conf_options['expression']['run'] = int(not arg_dict['input_rna_exp'] is None)
+        conf_options['expression']['run'] = int(arg_dict['input_rna_exp'] is not None)
         conf_options['expression']['similarity_analysis'] = int(arg_dict['expression_sim'])
         conf_options['expression']['similarity_db'] = {}
         for db in arg_dict['expression_sim_db'].split(','):
@@ -277,14 +278,14 @@ def populate_config_data(conf_options: dict, refdata_assembly_dir: str, workflow
                 logger)
             
             if conf_data['conf']['gene_panel']['panel_id'] != "-1":
-                if not ',' in conf_data['conf']['gene_panel']['panel_id']:                     
+                if ',' not in conf_data['conf']['gene_panel']['panel_id']:                     
                     conf_data['conf']['gene_panel']['url'] = str(conf_data['conf']['gene_panel']['panel_genes'][0]['panel_url'])
                     conf_data['conf']['gene_panel']['description_trait'] = str(conf_data['conf']['gene_panel']['panel_genes'][0]['panel_name'])
                 else:
                     names = set([str(x['panel_name']) for x in conf_data['conf']['gene_panel']['panel_genes']])
                     names2 = []
                     for n in names:
-                        if not 'ACMG' in n and not 'CPIC' in n:
+                        if 'ACMG' not in n and 'CPIC' not in n:
                             names2.append(n)
                     conf_data['conf']['gene_panel']['description'] = "Genomics England PanelApp - multiple panels (" + ', '.join(names2) + ")"
                     
