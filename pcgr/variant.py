@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import os
-import re
 import pandas as pd
 import numpy as np
 import warnings
@@ -157,12 +156,12 @@ def set_allelic_support(variant_set: pd.DataFrame, allelic_support_tags: dict, l
         if allelic_support_tags[t] != "_NA_":
             if {allelic_support_tags[t], tag_to_info_val[t]}.issubset(variant_set.columns):
                 if '_af_' in t:
-                    if variant_set[variant_set[allelic_support_tags[t]].isna() == True].empty is True:
+                    if variant_set[variant_set[allelic_support_tags[t]].isna()].empty is True:
                         variant_set[tag_to_info_val[t]] = variant_set[allelic_support_tags[t]].astype(float).round(4)
                     else:
                         logger.warning(f"Unable to set allelic support for '{t}' - missing values deteted")
                 else:
-                    if variant_set[variant_set[allelic_support_tags[t]].isna() == True].empty is True:
+                    if variant_set[variant_set[allelic_support_tags[t]].isna()].empty is True:
                         variant_set[tag_to_info_val[t]] = variant_set[allelic_support_tags[t]].astype(int)
                     else:
                         logger.warning(f"Unable to set read depth support for '{t}' - missing values deteted")
@@ -183,20 +182,20 @@ def calculate_tmb(variant_set: pd.DataFrame, tumor_dp_min: int, tumor_af_min: fl
         n_rows_raw = len(tmb_data_set)
         if float(tumor_af_min) > 0:
             ## filter variant set to those with VAF_TUMOR > tumor_af_min
-            if variant_set[variant_set['VAF_TUMOR'].isna() == True].empty is True:
+            if variant_set[variant_set['VAF_TUMOR'].isna()].empty is True:
                 tmb_data_set = tmb_data_set.loc[tmb_data_set['VAF_TUMOR'].astype(float) >= float(tumor_af_min),:]
                 #n_removed_af = n_rows_raw - len(tmb_data_set)
                 logger.info(f'Removing n = {n_rows_raw - len(tmb_data_set)} variants with allelic fraction (tumor sample) < {tumor_af_min}')
             else:
-                logger.warning(f"Cannot filter on sequencing depth - 'VAF_TUMOR' contains missing values")
+                logger.warning("Cannot filter on sequencing depth - 'VAF_TUMOR' contains missing values")
         if int(tumor_dp_min) > 0:
             ## filter variant set to those with DP_TUMOR > tumor_dp_min
-            if variant_set[variant_set['DP_TUMOR'].isna() == True].empty is True:
+            if variant_set[variant_set['DP_TUMOR'].isna()].empty is True:
                 tmb_data_set = tmb_data_set.loc[tmb_data_set['DP_TUMOR'].astype(int) >= int(tumor_dp_min),:]
                 #n_removed_dp = n_rows_raw - len(tmb_data_set)
                 logger.info(f"Removing n = {n_rows_raw - len(tmb_data_set)} variants with sequencing depth (tumor sample) < {tumor_dp_min}")
             else:
-                logger.warning(f"Cannot filter on sequencing depth - 'DP_TUMOR' contains missing values")
+                logger.warning("Cannot filter on sequencing depth - 'DP_TUMOR' contains missing values")
         
         tmb_categories = ['missense_only','coding_and_silent','coding_non_silent']
         
@@ -238,7 +237,7 @@ def calculate_tmb(variant_set: pd.DataFrame, tumor_dp_min: int, tumor_af_min: fl
                         'tmb_unit'])
             df.to_csv(tmb_fname, sep="\t", header=True, index=False)
         else:
-            logger.warning(f"No somatic variants left after depth/VAF filtering - TMB calculation not possible")
+            logger.warning("No somatic variants left after depth/VAF filtering - TMB calculation not possible")
 
 def clean_annotations(variant_set: pd.DataFrame, yaml_data: dict, logger) -> pd.DataFrame:
     

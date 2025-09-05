@@ -5,7 +5,6 @@ import re
 from cyvcf2 import VCF, Writer
 import csv
 
-from typing import Dict
 from logging import Logger
 import gzip
 

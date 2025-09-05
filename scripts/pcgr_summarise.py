@@ -5,7 +5,6 @@ import re
 import argparse
 import cyvcf2
 import os
-import sys
 import yaml
 
 from pcgr.annoutils import read_infotag_file, make_transcript_xref_map, read_genexref_namemap, map_regulatory_variant_annotations, write_pass_vcf, load_grantham
@@ -16,7 +15,6 @@ from pcgr.mutation_hotspot import load_mutation_hotspots, match_csq_mutation_hot
 from pcgr.biomarker import load_biomarkers, match_csq_biomarker
 from pcgr.utils import error_message, check_subprocess, getlogger
 from pcgr.splice import load_splice_effects
-from pcgr.vep import parse_vep_csq
 
 csv.field_size_limit(500 * 1024 * 1024)
 

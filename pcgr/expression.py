@@ -1,15 +1,12 @@
 #!/usr/bin/env python
 
-import os,re
-import csv
-import gzip
+import os
 import pandas as pd
 import logging
 import numpy as np
 
-from pcgr import utils
 from pcgr import pcgr_vars
-from pcgr.utils import error_message, warn_message, check_file_exists, remove_file
+from pcgr.utils import error_message, check_file_exists
 
 def parse_expression(expression_fname_tsv: str,
                      sample_id: str,

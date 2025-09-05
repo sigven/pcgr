@@ -1,16 +1,14 @@
 #!/usr/bin/env python
 
 import csv
-import re
 import argparse
 import os
-import logging
 import sys
 import pandas as np
 from cyvcf2 import VCF
 import gzip
 
-from pcgr import vcf, cna
+from pcgr import vcf
 from pcgr.annoutils import read_infotag_file, read_vcfanno_tag_file
 from pcgr.utils import error_message, check_subprocess, remove_file, random_id_generator, getlogger
 from pcgr.cna import is_valid_cna

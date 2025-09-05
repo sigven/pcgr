@@ -1,21 +1,14 @@
 #!/usr/bin/env python
 
-import csv
 import re
 import argparse
 import os
-import subprocess
-import logging
-import sys
-import getpass
-import platform
-import json
 import yaml
 
 from glob import glob
 from argparse import RawTextHelpFormatter
 from pcgr import pcgr_vars, arg_checker, utils, config, variant
-from pcgr.utils import check_subprocess, getlogger, error_message, warn_message, remove_file, random_id_generator
+from pcgr.utils import check_subprocess, getlogger, warn_message, remove_file, random_id_generator
 from pcgr.config import populate_config_data
 from pcgr.vep import get_vep_command
 

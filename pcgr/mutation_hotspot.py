@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-import os,re
+import os
+import re
 import csv
 import gzip
-from pcgr import annoutils
 from pcgr.annoutils import threeToOneAA
 
 from typing import Dict

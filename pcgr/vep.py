@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 
-import os,re
-import csv
-import gzip
+import os
+import re
+
 
 from pcgr.annoutils import assign_cds_exon_intron_annotations
 from pcgr import pcgr_vars
 from pcgr.utils import getlogger, check_file_exists, get_perl_exports, get_maxentscan_dir
-from importlib.resources import files
 
 def get_vep_command(file_paths, conf_options, input_vcf, output_vcf, debug = False):
 
