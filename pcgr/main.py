@@ -67,16 +67,17 @@ def cli():
     optional_allelic_support.add_argument("--control_af_max", type=float, default=1, dest="control_af_max", help="If VCF INFO tag for variant allelic fraction (control) is specified and found, set maximum tolerated AF for inclusion in report (default: %(default)s)")
 
     optional_tumor_only.add_argument("--pon_vcf", dest="pon_vcf", help="VCF file with germline calls from Panel of Normals (PON) - i.e. blacklisted variants, (default: %(default)s)")
-    maf_help_msg = "Exclude variants in tumor (SNVs/InDels, tumor-only mode) with MAF > pct"
-    optional_tumor_only.add_argument("--maf_gnomad_nfe", dest="maf_gnomad_nfe", type=float, default=0.002, help=f"{maf_help_msg}, (gnomAD - European (non-Finnish), default: %(default)s)")
-    optional_tumor_only.add_argument("--maf_gnomad_asj", dest="maf_gnomad_asj", type=float, default=0.002, help=f"{maf_help_msg}, (gnomAD - Ashkenazi Jewish, default: %(default)s)")
-    optional_tumor_only.add_argument("--maf_gnomad_fin", dest="maf_gnomad_fin", type=float, default=0.002, help=f"{maf_help_msg}, (gnomAD - European (Finnish), default: %(default)s)")
-    optional_tumor_only.add_argument("--maf_gnomad_oth", dest="maf_gnomad_oth", type=float, default=0.002, help=f"{maf_help_msg}, (gnomAD - Other, default: %(default)s)")
-    optional_tumor_only.add_argument("--maf_gnomad_amr", dest="maf_gnomad_amr", type=float, default=0.002, help=f"{maf_help_msg}, (gnomAD - Latino/Admixed American, default: %(default)s)")
-    optional_tumor_only.add_argument("--maf_gnomad_afr", dest="maf_gnomad_afr", type=float, default=0.002, help=f"{maf_help_msg}, (gnomAD - African/African-American, default: %(default)s)")
-    optional_tumor_only.add_argument("--maf_gnomad_eas", dest="maf_gnomad_eas", type=float, default=0.002, help=f"{maf_help_msg}, (gnomAD - East Asian, default: %(default)s)")
-    optional_tumor_only.add_argument("--maf_gnomad_sas", dest="maf_gnomad_sas", type=float, default=0.002, help=f"{maf_help_msg}, (gnomAD - South Asian, default: %(default)s)")
-    optional_tumor_only.add_argument("--maf_gnomad_global", dest="maf_gnomad_global", type=float, default=0.002, help=f"{maf_help_msg}, (gnomAD - global population, default: %(default)s)")
+    maf_help_msg = "Exclude variants in tumor (SNVs/InDels, tumor-only mode) with popmax MAF greater than this value"
+    optional_tumor_only.add_argument("--gnomad_popmax_af_tolerated", dest="gnomad_popmax_af_tolerated", type=float, default=0.001, help=f"{maf_help_msg}, default: %(default)s)")
+    #optional_tumor_only.add_argument("--maf_gnomad_nfe", dest="maf_gnomad_nfe", type=float, default=0.002, help=f"{maf_help_msg}, (gnomAD - European (non-Finnish), default: %(default)s)")
+    #optional_tumor_only.add_argument("--maf_gnomad_asj", dest="maf_gnomad_asj", type=float, default=0.002, help=f"{maf_help_msg}, (gnomAD - Ashkenazi Jewish, default: %(default)s)")
+    #optional_tumor_only.add_argument("--maf_gnomad_fin", dest="maf_gnomad_fin", type=float, default=0.002, help=f"{maf_help_msg}, (gnomAD - European (Finnish), default: %(default)s)")
+    #optional_tumor_only.add_argument("--maf_gnomad_oth", dest="maf_gnomad_oth", type=float, default=0.002, help=f"{maf_help_msg}, (gnomAD - Other, default: %(default)s)")
+    #optional_tumor_only.add_argument("--maf_gnomad_amr", dest="maf_gnomad_amr", type=float, default=0.002, help=f"{maf_help_msg}, (gnomAD - Latino/Admixed American, default: %(default)s)")
+    #optional_tumor_only.add_argument("--maf_gnomad_afr", dest="maf_gnomad_afr", type=float, default=0.002, help=f"{maf_help_msg}, (gnomAD - African/African-American, default: %(default)s)")
+    #optional_tumor_only.add_argument("--maf_gnomad_eas", dest="maf_gnomad_eas", type=float, default=0.002, help=f"{maf_help_msg}, (gnomAD - East Asian, default: %(default)s)")
+    #optional_tumor_only.add_argument("--maf_gnomad_sas", dest="maf_gnomad_sas", type=float, default=0.002, help=f"{maf_help_msg}, (gnomAD - South Asian, default: %(default)s)")
+    #optional_tumor_only.add_argument("--maf_gnomad_global", dest="maf_gnomad_global", type=float, default=0.002, help=f"{maf_help_msg}, (gnomAD - global population, default: %(default)s)")
     optional_tumor_only.add_argument("--exclude_pon", action="store_true", help="Exclude variants occurring in PoN (Panel of Normals, if provided as VCF (--pon_vcf), default: %(default)s)")
     optional_tumor_only.add_argument("--exclude_likely_hom_germline", action="store_true", help="Exclude likely homozygous germline variants (allelic fraction of 1.0 for alternate allele in tumor - very unlikely somatic event), default: %(default)s)")
     optional_tumor_only.add_argument("--exclude_likely_het_germline", action="store_true", help="Exclude likely heterozygous germline variants (0.4-0.6 allelic fraction, AND presence in dbSNP + gnomAD, AND not existing as somatic record in COSMIC OR TCGA, default: %(default)s)")
@@ -85,8 +86,8 @@ def cli():
     optional_tumor_only.add_argument("--exclude_nonexonic", action="store_true", help="Exclude non-exonic variants, default: %(default)s)")
 
     optional_vep.add_argument("--vep_n_forks", default=4, type=int, help="Number of forks (VEP option '--fork'), default: %(default)s")
-    optional_vep.add_argument("--vep_buffer_size", default=500, type=int, help=f"Variant buffer size (variants read into memory simultaneously, VEP option '--buffer_size')\n- set lower to reduce memory usage, default: %(default)s")
-    optional_vep.add_argument("--vep_pick_order", default="mane_select,mane_plus_clinical,canonical,biotype,ccds,rank,tsl,appris,length", help=f"Comma-separated string " + \
+    optional_vep.add_argument("--vep_buffer_size", default=500, type=int, help="Variant buffer size (variants read into memory simultaneously, VEP option '--buffer_size')\n- set lower to reduce memory usage, default: %(default)s")
+    optional_vep.add_argument("--vep_pick_order", default="mane_select,mane_plus_clinical,canonical,biotype,ccds,rank,tsl,appris,length", help="Comma-separated string " + \
         "of ordered transcript/variant properties for selection of primary variant consequence\n(option '--pick_order' in VEP), default: %(default)s")
     optional_vep.add_argument("--vep_no_intergenic", action="store_true", help="Skip intergenic variants during variant annotation (VEP option '--no_intergenic' in VEP), default: %(default)s")
     optional_vep.add_argument("--vep_regulatory", action="store_true", help="Add VEP regulatory annotations (VEP option '--regulatory') or non-coding interpretation, default: %(default)s")
@@ -110,7 +111,7 @@ def cli():
     #optional_rna.add_argument("--input_rna_fusion", dest = "input_rna_fusion", help = "File with RNA fusion transcripts detected in tumor (tab-separated values)")
     optional_rna.add_argument("--input_rna_expression", dest = "input_rna_exp", help = "File with bulk RNA expression counts (TPM) of transcripts in tumor (tab-separated values)")
     optional_rna.add_argument('--expression_sim', action='store_true', help="Compare expression profile of tumor sample to expression profiles of other tumor samples (default: %(default)s)")
-    optional_rna.add_argument("--expression_sim_db", dest = "expression_sim_db", default="tcga,depmap,treehouse", help=f"Comma-separated string " + \
+    optional_rna.add_argument("--expression_sim_db", dest = "expression_sim_db", default="tcga,depmap,treehouse", help="Comma-separated string " + \
         "of databases for used in RNA expression similarity analysis, default: %(default)s")
 
     optional_germline.add_argument("--input_cpsr", dest="input_cpsr", help="CPSR-classified germline calls (file '<cpsr_sample_id>.cpsr.<genome_assembly>.classification.tsv.gz')")
@@ -331,13 +332,13 @@ def run_pcgr(input_data, output_data, conf_options):
                                 output_vcf = vep_vcf)
 
         # PCGR|VEP - run consequence annotation with Variant Effect Predictor
-        print('----')
+        print('----')       
         logger = getlogger('pcgr-vep')
         logger.info(f'PCGR - STEP 1: Basic variant annotation with Variant Effect Predictor {pcgr_vars.VEP_VERSION}' + \
                     f', GENCODE release {pcgr_vars.GENCODE_VERSION[genome_assembly]}, genome assembly {yaml_data["genome_assembly"]}')
-        logger.info(f'VEP configuration - one primary consequence block pr. alternative gene allele (--flag_pick_allele_gene)')
+        logger.info('VEP configuration - one primary consequence block pr. alternative gene allele (--flag_pick_allele_gene)')
         logger.info(f'VEP configuration - transcript pick order: {yaml_data["conf"]["vep"]["vep_pick_order"]}')
-        logger.info(f'VEP configuration - transcript pick order: See more at https://www.ensembl.org/info/docs/tools/vep/script/vep_other.html#pick_options')
+        logger.info('VEP configuration - transcript pick order: See more at https://www.ensembl.org/info/docs/tools/vep/script/vep_other.html#pick_options')
         logger.info(f'VEP configuration - GENCODE set: {vep_command["gencode_set_in_use"]}')
         logger.info(f'VEP configuration - skip intergenic variants: {"ON" if yaml_data["conf"]["vep"]["vep_no_intergenic"] == 1 else "OFF"}')
         logger.info(f'VEP configuration - regulatory variant annotation: {"ON" if yaml_data["conf"]["vep"]["vep_regulatory"] == 1 else "OFF"}')
@@ -408,7 +409,7 @@ def run_pcgr(input_data, output_data, conf_options):
                 f"dbMTS, TCGA, GWAS catalog"
                 )
         vcfanno_db_src_msg2 = \
-                f"Annotation sources II (vcfanno): RepeatMasker, SimpleRepeats, WindowMaskerSDust"
+                "Annotation sources II (vcfanno): RepeatMasker, SimpleRepeats, WindowMaskerSDust"
         logger.info("PCGR - STEP 2: Variant annotation for cancer precision medicine with pcgr-vcfanno")
         logger.info(vcfanno_db_src_msg1)
         logger.info(vcfanno_db_src_msg2)
@@ -429,9 +430,9 @@ def run_pcgr(input_data, output_data, conf_options):
                 f'{"--debug" if debug else ""}'
                 )
         summarise_db_src_msg1 = \
-                f"Annotation sources: cancerhotspots.org, CIViC, Cancer Biomarkers database (CGI), Cancer Gene Census (CGC)"
+                "Annotation sources: cancerhotspots.org, CIViC, Cancer Biomarkers database (CGI), Cancer Gene Census (CGC)"
         summarise_db_src_msg2 = \
-                f"Annotation sources: Network of Cancer Genes (NCG), CancerMine, IntOGen, TCGA driver genes"
+                "Annotation sources: Network of Cancer Genes (NCG), CancerMine, IntOGen, TCGA driver genes"
 
         logger.info("PCGR - STEP 3: Variant and cancer gene annotations with pcgr-summarise")
         logger.info(summarise_db_src_msg1)
@@ -495,7 +496,7 @@ def run_pcgr(input_data, output_data, conf_options):
                 input_data["refdata_assembly_dir"], logger = logger)
             ## Write transcript-level expression data to TSV
             if 'transcript' in expression_data.keys():
-                if not expression_data['transcript'] is None:                    
+                if expression_data['transcript'] is not None:                    
                     expression_data['transcript'].fillna('.').to_csv(
                         yaml_data['molecular_data']['fname_expression_tsv'], sep = "\t",
                         compression = "gzip", index = False)
@@ -506,7 +507,7 @@ def run_pcgr(input_data, output_data, conf_options):
                     #    compression = "gzip", index = False)
                 else:                    
                     if 'gene' in expression_data.keys():
-                        if not expression_data['gene'] is None:
+                        if expression_data['gene'] is not None:
                             expression_data['gene'].fillna('.').to_csv(
                                 yaml_data['molecular_data']['fname_expression_tsv'], sep = "\t",
                                 compression = "gzip", index = False)
@@ -572,7 +573,7 @@ def run_pcgr(input_data, output_data, conf_options):
         print('----')
 
     # PCGR|Expression2 - Gene expression (bulk RNA-seq) analyses
-    if not expression_data is None:
+    if expression_data is not None:
         logger = getlogger("pcgr-expression-analysis")
         logger.info('PCGR - STEP 4: Gene expression analysis')
 
