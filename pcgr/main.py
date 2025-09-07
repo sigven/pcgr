@@ -81,8 +81,8 @@ def cli():
     optional_tumor_only.add_argument("--exclude_pon", action="store_true", help="Exclude variants occurring in PoN (Panel of Normals, if provided as VCF (--pon_vcf), default: %(default)s)")
     optional_tumor_only.add_argument("--exclude_likely_hom_germline", action="store_true", help="Exclude likely homozygous germline variants (allelic fraction of 1.0 for alternate allele in tumor - very unlikely somatic event), default: %(default)s)")
     optional_tumor_only.add_argument("--exclude_likely_het_germline", action="store_true", help="Exclude likely heterozygous germline variants (0.4-0.6 allelic fraction, AND presence in dbSNP + gnomAD, AND not existing as somatic record in COSMIC OR TCGA, default: %(default)s)")
-    optional_tumor_only.add_argument("--exclude_clinvar_germline", action="store_true", help="Exclude variants found in ClinVar (germline variant origin), defult: %(default)s)")
-    optional_tumor_only.add_argument("--exclude_dbsnp_nonsomatic", action="store_true", help="Exclude variants found in dbSNP (except for those present in ClinVar (somatic origin) OR TCGA OR COSMIC), defult: %(default)s)")
+    optional_tumor_only.add_argument("--exclude_clinvar_germline", action="store_true", help="Exclude variants found in ClinVar (of germline origin only), defult: %(default)s)")
+    optional_tumor_only.add_argument("--exclude_dbsnp_nonsomatic", action="store_true", help="Exclude variants found in dbSNP (except for those present in ClinVar (somatic origin), or found in TCGA, or overlapping with COSMIC entries), defult: %(default)s)")
     optional_tumor_only.add_argument("--exclude_nonexonic", action="store_true", help="Exclude non-exonic variants, default: %(default)s)")
 
     optional_vep.add_argument("--vep_n_forks", default=4, type=int, help="Number of forks (VEP option '--fork'), default: %(default)s")

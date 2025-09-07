@@ -30,6 +30,7 @@ If the input VCF comes from a __tumor-only__ assay, turn on the `--tumor_only` o
 * `--exclude_dbsnp_nonsomatic`
 * `--exclude_likely_het_germline`
 * `--exclude_likely_hom_germline`
+* `--exclude_clinvar_germline`
 * `--exclude_nonexonic`
 
 Users should note that these filters may occasionally remove true somatic variants, and should thus be used with caution.
@@ -173,6 +174,8 @@ Sequencing assay options:
 
 
 Tumor sample options:
+  --sex {FEMALE,MALE,UNKNOWN}
+                        Sex of cancer case/sample (default: UNKNOWN)
   --tumor_site TSITE    Optional integer code to specify primary tumor type/site of query sample,
                         choose any of the following identifiers:
                         0 = Any
@@ -258,9 +261,9 @@ Tumor-only filtering options:
   --exclude_likely_het_germline
                         Exclude likely heterozygous germline variants (0.4-0.6 allelic fraction, AND presence in dbSNP + gnomAD, AND not existing as somatic record in COSMIC OR TCGA, default: False)
   --exclude_clinvar_germline
-                        Exclude variants found in ClinVar (germline variant origin), defult: False)
+                        Exclude variants found in ClinVar (of germline origin only), defult: False)
   --exclude_dbsnp_nonsomatic
-                        Exclude variants found in dbSNP (except for those present in ClinVar (somatic origin) OR TCGA OR COSMIC), defult: False)
+                        Exclude variants found in dbSNP (except for those present in ClinVar (somatic origin) or found in TCGA or overlapping with COSMIC), defult: False)
   --exclude_nonexonic   Exclude non-exonic variants, default: False)
 
 VEP options:

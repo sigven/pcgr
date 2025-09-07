@@ -6,7 +6,6 @@ import pybedtools
 import pandas as pd
 import logging
 
-from pcgr import utils
 from pybedtools import BedTool
 from pcgr import pcgr_vars
 from pcgr.annoutils import nuclear_chromosomes
@@ -196,8 +195,8 @@ def annotate_cna_segments(output_segment_gene_fname: str,
         cna_query_segment_df['chromosome'].isin(pcgr_vars.AUTOSOMES),"hetloss_cond"] = True
 
     ## Sex chromosome specific annotations for losses
+    cna_query_segment_df['hemloss_cond'] = False
     if sex != "UNKNOWN":
-        cna_query_segment_df['hemloss_cond'] = False
         ## Mark hemizygous deletions for male samples
         if sex == 'MALE':
             cna_query_segment_df.loc[
@@ -211,6 +210,9 @@ def annotate_cna_segments(output_segment_gene_fname: str,
             cna_query_segment_df.loc[
                 (cna_query_segment_df['n_major'] + cna_query_segment_df['n_minor'] == 1) & \
                 cna_query_segment_df['chromosome'].isin(pcgr_vars.SEX_CHROMOSOMES),"hetloss_cond"] = True
+    else:
+        warn_msg = "Argument --sex is 'UNKNOWN' - skipping copy number loss annotations on sex chromosomes"
+        warn_message(warn_msg, logger)
 
     
     cna_query_segment_df['variant_class'] = 'undefined'
