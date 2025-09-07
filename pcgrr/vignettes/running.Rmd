@@ -359,6 +359,7 @@ pcgr \
     --tumor_af_tag TVAF \
     --tumor_site 9 \
     --input_cna /Users/you/pcgr/examples/T001-COAD.cna.tsv \
+    --sex MALE \
     --tumor_purity 0.9 \
     --tumor_ploidy 2.0 \
     --assay WES \
