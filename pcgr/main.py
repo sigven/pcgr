@@ -495,8 +495,14 @@ def run_pcgr(input_data, output_data, conf_options):
                 input_data["refdata_assembly_dir"], logger = logger)
             ## Write transcript-level expression data to TSV
             if 'transcript' in expression_data.keys():
-                if expression_data['transcript'] is not None:                    
-                    expression_data['transcript'].fillna('.').to_csv(
+                if expression_data['transcript'] is not None:
+                    ## Convert object columns to string and replace NaN with '.'
+                    df = expression_data['transcript']
+                    obj_cols = df.select_dtypes(include='object').columns
+                    for col in obj_cols:
+                        df[col] = df[col].apply(lambda x: '.' if pd.isna(x) else x)                    
+                    expression_data['transcript'] = df
+                    expression_data['transcript'].to_csv(
                         yaml_data['molecular_data']['fname_expression_tsv'], sep = "\t",
                         compression = "gzip", index = False)
 
@@ -507,7 +513,14 @@ def run_pcgr(input_data, output_data, conf_options):
                 else:                    
                     if 'gene' in expression_data.keys():
                         if expression_data['gene'] is not None:
-                            expression_data['gene'].fillna('.').to_csv(
+                            ## Write gene-level expression data to TSV
+                            ## Convert object columns to string and replace NaN with '.'
+                            df = expression_data['transcript']
+                            obj_cols = df.select_dtypes(include='object').columns
+                            for col in obj_cols:
+                                df[col] = df[col].apply(lambda x: '.' if pd.isna(x) else x)
+                            expression_data['gene'] = df 
+                            expression_data['gene'].to_csv(
                                 yaml_data['molecular_data']['fname_expression_tsv'], sep = "\t",
                                 compression = "gzip", index = False)
 

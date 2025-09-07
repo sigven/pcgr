@@ -111,7 +111,7 @@ def parse_expression(expression_fname_tsv: str,
             percent_missing = round(100 - percent_verified, 2)
             if percent_missing > 5:
                 logger.warning("Failed to map " + str(percent_missing) +  \
-                    "% of gene/transcript identifiers in input TSV file - use proper ENST/RefSeq identifiers")
+                    "% of gene/transcript identifiers in input TSV file - might come from more recent Ensembl/GENCODE release than assembly-specific reference data used here")
             logger.info("Verified N = " + str(sample_identifiers_found) + " (" + str(percent_verified) + \
                 "%) of gene/transcript identifiers in input gene expression file - using " + str(identifiers_used_in_input))
             
@@ -122,8 +122,9 @@ def parse_expression(expression_fname_tsv: str,
                 logger.warning("Detected N = " + str(n_ambig) + " ambiguous gene/transcript identifiers in input gene expression file")
             else:
                 logger.info("NO ambiguous gene/transcript identifiers were detected in input gene expression file")
-            transcript_expression_map = exp_map_verified[~exp_map_verified.AMBIGUOUS_ID]
-            exp_map_verified_nonzero = transcript_expression_map[transcript_expression_map.TPM > 0]
+            
+            transcript_expression_map = exp_map_verified[~exp_map_verified['AMBIGUOUS_ID'].astype(bool)]
+            exp_map_verified_nonzero = transcript_expression_map[transcript_expression_map['TPM'] > 0]
             
             ## inform the user about the statistics with respect to biotypes (TPM > 0)
             biotype_stats = exp_map_verified_nonzero['BIOTYPE'].value_counts().reset_index().set_axis(['key','count'], axis=1)
