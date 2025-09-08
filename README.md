@@ -28,7 +28,7 @@ PCGR originates from the [Norwegian Cancer Genomics Consortium (NCGC)](https://c
 
 ### Top News
 
-- *September 9th 2025:* **2.2.4 release**
+- *September 8th 2025:* **2.2.4 release**
   - various minor bug fixes, addition of `--sex` option for sex-adjusted CNA annotation
   - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
 
