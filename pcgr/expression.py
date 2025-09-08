@@ -111,7 +111,7 @@ def parse_expression(expression_fname_tsv: str,
             percent_missing = round(100 - percent_verified, 2)
             if percent_missing > 5:
                 logger.warning("Failed to map " + str(percent_missing) +  \
-                    "% of gene/transcript identifiers in input TSV file - might come from more recent Ensembl/GENCODE release than assembly-specific reference data used here")
+                    "% of gene/transcript identifiers in input TSV file")
             logger.info("Verified N = " + str(sample_identifiers_found) + " (" + str(percent_verified) + \
                 "%) of gene/transcript identifiers in input gene expression file - using " + str(identifiers_used_in_input))
             
