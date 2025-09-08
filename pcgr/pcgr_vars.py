@@ -34,6 +34,10 @@ VEP_PICK_CRITERIA = ['mane_select','mane_plus_clinical','canonical','biotype','c
 ## Gene expression comparative analysis resources
 EXPRESSION_DB_SOURCES = ['tcga','depmap','treehouse']
 
+## Autosomes, sex chromosomes and mitochondrial chromosome
+AUTOSOMES = [str(x) for x in range(1,22)]
+SEX_CHROMOSOMES = ['X','Y']
+
 ## Sample identifier length (max/min allowed)
 SAMPLE_ID_MAX_LENGTH = 40
 SAMPLE_ID_MIN_LENGTH = 3
@@ -259,11 +263,11 @@ SITE_TO_DISEASE = {
     'Cervix': ['TCGA_CESC'],
     'Ovary/Fallopian Tube': ['TCGA_OV'],
     'Skin': ['TCGA_SKCM'],
-    'Soft tissue': ['TCGA_SARC'],
+    'Soft Tissue': ['TCGA_SARC'],
     'Liver': ['TCGA_LIHC'],
     'CNS/Brain': ['TCGA_GBM','TCGA_LGG'],
     'Uterus': ['TCGA_UCEC','TCGA_UCS'],
-    'Head/Neck': ['TCGA_HNSC'],
+    'Head and Neck': ['TCGA_HNSC'],
     'Testis': ['TCGA_TGCT'],
     'Adrenal Gland': ['TCGA_ACC','TCGA_PCPG'],
     'Pleura': ['TCGA_MESO'],

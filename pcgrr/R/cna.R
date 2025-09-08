@@ -98,6 +98,7 @@ plot_cna_segments <- function(chrom_coordinates = NULL,
          .data$VARIANT_CLASS == "gain") |
         (.data$TUMOR_SUPPRESSOR == TRUE &
            (.data$VARIANT_CLASS == "homdel" |
+              .data$VARIANT_CLASS == "hemdel" |
               .data$VARIANT_CLASS == "hetdel")))
 
   tsg_loss <- data.frame()
@@ -130,7 +131,8 @@ plot_cna_segments <- function(chrom_coordinates = NULL,
     tsg_loss <- onc_gain_tsg_loss |>
       dplyr::filter(
         .data$TUMOR_SUPPRESSOR == TRUE &
-          .data$VARIANT_CLASS == "homdel")
+          (.data$VARIANT_CLASS == "hemdel" |
+          .data$VARIANT_CLASS == "homdel"))
 
     ## For now, if multiple TSGs are involved in a lost segment, we will only
     ## show the top three in the plot (hover)
@@ -411,7 +413,8 @@ get_oncogenic_cna_events <- function(cna_df_display = NULL){
       !is.na(.data$ACTIONABILITY_TIER) &
         .data$ACTIONABILITY_TIER == 3 &
         .data$TUMOR_SUPPRESSOR == TRUE &
-        .data$VARIANT_CLASS == "homdel") |>
+        (.data$VARIANT_CLASS == "hemdel" |
+        .data$VARIANT_CLASS == "homdel")) |>
     dplyr::select(
       dplyr::any_of(
         pcgrr::dt_display$cna_other_oncogenic

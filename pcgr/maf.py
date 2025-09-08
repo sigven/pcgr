@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
-import os,re
-import csv
-import gzip
+import os
 import pandas as pd
 
 from pcgr.utils import check_file_exists, remove_file
@@ -44,13 +42,13 @@ def update_maf(maf_tmp_fname: str,
         if 'tumor_dp_tag' in allelic_support_tags:
             if allelic_support_tags['tumor_dp_tag'] != "_NA_":                               
                 if {allelic_support_tags['tumor_dp_tag']}.issubset(raw_maf_data.columns):
-                    if raw_maf_data[raw_maf_data[allelic_support_tags['tumor_dp_tag']].isna() == True].empty is True:
+                    if raw_maf_data[raw_maf_data[allelic_support_tags['tumor_dp_tag']].isna()].empty is True:
                         raw_maf_data.loc[:,"t_depth"] = raw_maf_data.loc[:,allelic_support_tags['tumor_dp_tag']]
                         
                         if 'tumor_af_tag' in allelic_support_tags: 
                             if allelic_support_tags['tumor_af_tag'] != "_NA_":    
                                 if {allelic_support_tags['tumor_af_tag']}.issubset(raw_maf_data.columns):                                   
-                                    if raw_maf_data[raw_maf_data[allelic_support_tags['tumor_af_tag']].isna() == True].empty is True:
+                                    if raw_maf_data[raw_maf_data[allelic_support_tags['tumor_af_tag']].isna()].empty is True:
                                         raw_maf_data['t_alt_count'] = None
                                         raw_maf_data.loc[:,"t_alt_count"] = \
                                             raw_maf_data.loc[:,allelic_support_tags['tumor_af_tag']].astype(float) * raw_maf_data.loc[:,"t_depth"].astype(int)
@@ -63,13 +61,13 @@ def update_maf(maf_tmp_fname: str,
         if 'control_dp_tag' in allelic_support_tags:
             if allelic_support_tags['control_dp_tag'] != "_NA_":                    
                 if {allelic_support_tags['control_dp_tag']}.issubset(raw_maf_data.columns):
-                    if raw_maf_data[raw_maf_data[allelic_support_tags['control_dp_tag']].isna() == True].empty is True:
+                    if raw_maf_data[raw_maf_data[allelic_support_tags['control_dp_tag']].isna()].empty is True:
                         raw_maf_data.loc[:,"n_depth"] = raw_maf_data.loc[:,allelic_support_tags['control_dp_tag']]
                         
                         if 'control_af_tag' in allelic_support_tags: 
                             if allelic_support_tags['control_af_tag'] != "_NA_":    
                                 if {allelic_support_tags['control_af_tag']}.issubset(raw_maf_data.columns):
-                                    if raw_maf_data[raw_maf_data[allelic_support_tags['control_af_tag']].isna() == True].empty is True:
+                                    if raw_maf_data[raw_maf_data[allelic_support_tags['control_af_tag']].isna()].empty is True:
                                         raw_maf_data['n_alt_count'] = None
                                         raw_maf_data.loc[:,"n_alt_count"] = \
                                             raw_maf_data.loc[:,allelic_support_tags['control_af_tag']].astype(float) * raw_maf_data.loc[:,"n_depth"].astype(int)

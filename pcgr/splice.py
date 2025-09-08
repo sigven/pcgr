@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os,re,sys
+import os
 import csv
 from logging import Logger
 

@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 
-import os,re
-import csv
-import gzip
+import os
+import re
+
 
 from pcgr.annoutils import assign_cds_exon_intron_annotations
 from pcgr import pcgr_vars
 from pcgr.utils import getlogger, check_file_exists, get_perl_exports, get_maxentscan_dir
-from importlib.resources import files
 
 def get_vep_command(file_paths, conf_options, input_vcf, output_vcf, debug = False):
 
@@ -185,46 +184,46 @@ def pick_single_gene_csq(vep_csq_results,
         csq_candidate['conskey'] = str(csq_elem['SYMBOL']) + ':' + str(csq_elem['Consequence'])
 
         ## MANE select status - lower value prioritized
-        if not csq_elem['MANE_SELECT'] is None:
+        if csq_elem['MANE_SELECT'] is not None:
             csq_candidate['mane_select'] = 0
 
         ## MANE PLUS clnical status - lower value prioritized
-        if not csq_elem['MANE_PLUS_CLINICAL'] is None:
+        if csq_elem['MANE_PLUS_CLINICAL'] is not None:
             csq_candidate['mane_plus_clinical'] = 0
 
         ## CANONICAL status - lower value prioritized
-        if not csq_elem['CANONICAL'] is None:
+        if csq_elem['CANONICAL'] is not None:
             if csq_elem['CANONICAL'] == 'YES':
                 csq_candidate['canonical'] = 0
 
         ## APPRIS level - lower value prioritized
-        if not csq_elem['APPRIS'] is None:
-            if not 'ALTERNATIVE' in csq_elem['APPRIS']:
+        if csq_elem['APPRIS'] is not None:
+            if 'ALTERNATIVE' not in csq_elem['APPRIS']:
                 csq_candidate['appris'] = int(re.sub(r'[A-Z]{1,}:?', '', csq_elem['APPRIS']))
             else:
                 csq_candidate['appris'] = int(re.sub(r'ALTERNATIVE:','', csq_elem['APPRIS'])) + 10
 
         ## Biotype - lower value prioritized
-        if not csq_elem['BIOTYPE'] is None:
+        if csq_elem['BIOTYPE'] is not None:
             if csq_elem['BIOTYPE'] == 'protein_coding':
                 csq_candidate['biotype'] = 0
 
         ## CCDS - lower value prioritized
-        if not csq_elem['CCDS'] is None:
+        if csq_elem['CCDS'] is not None:
             csq_candidate['ccds'] = 0
 
         ## Consequence rank - lower value prioritized
-        if not csq_elem['Consequence'] is None:
+        if csq_elem['Consequence'] is not None:
             main_cons = csq_elem['Consequence'].split('&')[0]
             if main_cons in pcgr_vars.VEP_consequence_rank:
                 csq_candidate['rank'] = int(pcgr_vars.VEP_consequence_rank[main_cons])
             else:
                 warn_msg = f"Missing Consequence in pcgr_vars.VEP_consequence_rank: {csq_elem['Consequence']} -  '{main_cons}'"
-                if not logger is None:
+                if logger is not None:
                     logger.warn(warn_msg)
 
         ## TSL - lower value prioritized
-        if not csq_elem['TSL'] is None:
+        if csq_elem['TSL'] is not None:
             csq_candidate['tsl'] = int(csq_elem['TSL'])
 
         csq_candidates.append(csq_candidate)
@@ -293,12 +292,12 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, grantham_scores,
 
     varkey = str(rec.CHROM) + '_' + str(rec.POS) + '_' + str(rec.REF) + '_' + str(','.join(rec.ALT))
 
-    var_gwas_info = rec.INFO.get('GWAS_HIT')
-    gwas_hit = False
-    if not var_gwas_info is None:
-        gwas_hit = True
+    #var_gwas_info = rec.INFO.get('GWAS_HIT')
+    #gwas_hit = False
+    #if var_gwas_info is not None:
+    #    gwas_hit = True
 
-    found_in_target = 0
+    #found_in_target = 0
 
     ## Retrieve the INFO element provided by VEP (default 'CSQ') in the VCF object, and
     ## loop through all transcript-specific consequence blocks provided, e.g.
@@ -381,7 +380,7 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, grantham_scores,
         else:
             if len(primary_csq_pick) == 1:
                 if 'HGVSc' in primary_csq_pick[0]:
-                    if not primary_csq_pick[0]['HGVSc'] is None:
+                    if primary_csq_pick[0]['HGVSc'] is not None:
                         if ':' in primary_csq_pick[0]['HGVSc']:
                             hgvsc = str(primary_csq_pick[0]['HGVSc'].split(':')[1])
         if csq_fields[vep_csq_fields_map['field2index']['HGVSp']] != "":

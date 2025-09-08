@@ -13,12 +13,12 @@ def verify_args(arg_dict):
     verify_required_args(arg_dict, logger)
 
     # Optional arguments
-    if arg_dict['expression_sim'] == True and arg_dict['input_rna_exp'] is None:
+    if arg_dict['expression_sim'] and arg_dict['input_rna_exp'] is None:
         warn_msg = f"RNA expression similarity analysis can only be performed if --input_rna_exp is set (--input_rna_exp = {arg_dict['input_rna_exp']})."
         warn_message(warn_msg, logger)
         arg_dict['expression_sim'] = False
     
-    if not arg_dict['expression_sim_db'] is None:
+    if arg_dict['expression_sim_db'] is not None:
         expression_sim_db_sources = str(arg_dict['expression_sim_db']).split(',')
         permitted_exp_sources = pcgr_vars.EXPRESSION_DB_SOURCES
         num_permitted_sources = 0
@@ -39,12 +39,12 @@ def verify_args(arg_dict):
         error_message(err_msg, logger)
 
     # check that tumor purity and tumor ploidy is set correctly
-    if not arg_dict['tumor_purity'] is None:
+    if arg_dict['tumor_purity'] is not None:
         if not (arg_dict['tumor_purity'] > 0 and arg_dict['tumor_purity'] <= 1):
             err_msg = f"Tumor purity value ('--tumor_purity' = {arg_dict['tumor_purity']}) must be within (0, 1]"
             error_message(err_msg, logger)
 
-    if not arg_dict['tumor_ploidy'] is None:
+    if arg_dict['tumor_ploidy'] is not None:
         if not arg_dict['tumor_ploidy'] > 0:
             err_msg = f"Tumor ploidy value ('--tumor_ploidy' = {arg_dict['tumor_ploidy']}) must be > 0"
             error_message(err_msg, logger)
@@ -266,8 +266,6 @@ def verify_input_files(arg_dict):
     input_germline_yaml_dir = 'NA'
     input_rna_expression_dir = 'NA'
     pon_vcf_dir = 'NA'
-    db_dir = 'NA'
-    base_dir = 'NA'
     pon_vcf_basename = 'NA'
     input_vcf_basename = 'NA'
     input_cna_basename = 'NA'
@@ -286,7 +284,7 @@ def verify_input_files(arg_dict):
         error_message(err_msg, logger)
 
     # check if panel of normal VCF exist
-    if not arg_dict["pon_vcf"] is None:
+    if arg_dict["pon_vcf"] is not None:
         check_file_exists(os.path.abspath(arg_dict["pon_vcf"]), strict = True, logger = logger)
 
         if not (os.path.abspath(arg_dict["pon_vcf"]).endswith(".vcf.gz")):
@@ -308,7 +306,7 @@ def verify_input_files(arg_dict):
                 os.path.abspath(arg_dict["pon_vcf"]))
 
     # check if input vcf exists
-    if not arg_dict["input_vcf"] is None:
+    if arg_dict["input_vcf"] is not None:
         check_file_exists(os.path.abspath(arg_dict["input_vcf"]), strict = True, logger = logger)
 
         if not (os.path.abspath(arg_dict["input_vcf"]).endswith(".vcf") or 
@@ -324,7 +322,7 @@ def verify_input_files(arg_dict):
         input_vcf_dir = os.path.dirname(os.path.abspath(arg_dict["input_vcf"]))
 
     # check if input cna segments exist
-    if not arg_dict["input_cna"] is None:
+    if arg_dict["input_cna"] is not None:
         check_file_exists(os.path.abspath(arg_dict["input_cna"]), strict = True, logger = logger)
         
         if not (os.path.abspath(arg_dict["input_cna"]).endswith(".tsv") or 
@@ -350,7 +348,7 @@ def verify_input_files(arg_dict):
     #         os.path.abspath(arg_dict["input_rna_fusion"]))
 
     # check if input rna expression exist
-    if not arg_dict["input_rna_exp"] is None:
+    if arg_dict["input_rna_exp"] is not None:
         check_file_exists(os.path.abspath(arg_dict["input_rna_exp"]), strict = True, logger = logger)
        
         if not (os.path.abspath(arg_dict["input_rna_exp"]).endswith(".tsv") or 
@@ -364,7 +362,7 @@ def verify_input_files(arg_dict):
             os.path.abspath(arg_dict["input_rna_exp"]))
         
     # check if input germline calls (CPSR) exist
-    if not arg_dict["input_cpsr"] is None:
+    if arg_dict["input_cpsr"] is not None:
         if not os.path.exists(os.path.abspath(arg_dict["input_cpsr"])):
             err_msg = "Input file (" + \
                str(arg_dict["input_cpsr"]) + ") does not exist"
@@ -452,12 +450,12 @@ def verify_refdata(arg_dict: dict, logger = None, cpsr = False):
     
     if compliant_data_bundle == 0:
         err_msg = (
-            f'The PCGR/CPSR reference bundle is not compliant with the software version - please download the '
-            f'latest software and reference bundle (see https://sigven.github.io/pcgr/articles/installation.html for instructions)')
+            'The PCGR/CPSR reference bundle is not compliant with the software version - please download the '
+            'latest software and reference bundle (see https://sigven.github.io/pcgr/articles/installation.html for instructions)')
         if cpsr is False:
             err_msg = (
-                f'The PCGR reference bundle is is not compliant with the software version - please download the ',
-                f'latest reference bundle - see https://sigven.github.io/pcgr/articles/installation.html for instructions)'
+                'The PCGR reference bundle is is not compliant with the software version - please download the ',
+                'latest reference bundle - see https://sigven.github.io/pcgr/articles/installation.html for instructions)'
             )
         error_message(err_msg,logger)
 
@@ -508,7 +506,7 @@ def verify_vep_options(arg_dict: dict, logger = None):
         error_message(err_msg, logger)
 
     # Check that VEP pick criteria is formatted correctly
-    if not arg_dict['vep_pick_order'] is None:
+    if arg_dict['vep_pick_order'] is not None:
         values = str(arg_dict['vep_pick_order']).split(',')
         permitted_sources = pcgr_vars.VEP_PICK_CRITERIA
         num_permitted_sources = 0
@@ -567,8 +565,8 @@ def verify_args_cpsr(arg_dict):
     ## Provide virtual_panel_id or a custom list from panel 0
     if arg_dict['virtual_panel_id'] == "-1" and not arg_dict['custom_list']:
         err_msg = (
-            f"Provide valid virtual panel identifier(s) through '--panel_id' or provide custom list of panel 0 "
-            f"genes (single column text file) through '--custom_list'")
+            "Provide valid virtual panel identifier(s) through '--panel_id' or provide custom list of panel 0 "
+            "genes (single column text file) through '--custom_list'")
         error_message(err_msg,logger)
     if arg_dict['custom_list'] and arg_dict['virtual_panel_id'] != "-1":
         err_msg =  "Option --panel_id cannot be used in conjunction with --custom_list"
@@ -584,7 +582,7 @@ def verify_args_cpsr(arg_dict):
 
     ## Check that panel identifier(s) are set appropriately
     if arg_dict['virtual_panel_id'] != "-1" and not arg_dict['custom_list']:
-        if not ',' in arg_dict['virtual_panel_id']:
+        if ',' not in arg_dict['virtual_panel_id']:
             if str(arg_dict['virtual_panel_id']).isdigit():
                 panel_id = int(arg_dict['virtual_panel_id'])
                 if not (panel_id >= 0 and panel_id <= len(pcgr_vars.GE_panels) - 1):
@@ -627,8 +625,6 @@ def verify_input_files_cpsr(arg_dict):
 
     logger = getlogger('cpsr-validate-input-arguments-b')
     input_vcf_dir = "NA"
-    db_dir = "NA"
-    base_dir = "NA"
     input_vcf_basename = "NA"
     input_customlist_basename = "NA"
     input_customlist_dir = "NA"
@@ -637,14 +633,14 @@ def verify_input_files_cpsr(arg_dict):
     output_dir_full = utils.safe_makedir(os.path.abspath(arg_dict['output_dir']))
 
     ## check if input BED exist
-    if not arg_dict['custom_list'] is None:
+    if arg_dict['custom_list'] is not None:
         check_file_exists(os.path.abspath(arg_dict['custom_list']), strict = True, logger = logger)  
 
         input_customlist_basename = os.path.basename(str(arg_dict['custom_list']))
         input_customlist_dir = os.path.dirname(os.path.abspath(arg_dict['custom_list']))
 
     ## check if input vcf exist
-    if not arg_dict['input_vcf'] is None:
+    if arg_dict['input_vcf'] is not None:
         check_file_exists(os.path.abspath(arg_dict['input_vcf']), strict = True, logger = logger)        
 
         if not (os.path.abspath(arg_dict['input_vcf']).endswith('.vcf') or os.path.abspath(arg_dict['input_vcf']).endswith('.vcf.gz')):

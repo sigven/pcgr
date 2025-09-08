@@ -340,13 +340,16 @@ The following variables are included in the TSV file (VCF tags issued by the use
 | 65. `BIOMARKER_MATCH` | Biomarker match |
 | 66. `CALL_CONFIDENCE` | Call confidence |
 
+##### Tumor-only runs
+
 For tumor-only runs, we provide a similarly formatted tab-separated values file that include 
 both filtered (i.e. likely germline events) and unfiltered (deemed somatic) variants. The file has the following naming convention:
 
-- `<sample_id>.pcgr.<genome_assembly>.snv_indel_filtered.ann.tsv.gz`
+- `<sample_id>.pcgr.<genome_assembly>.snv_indel_unfiltered.ann.tsv.gz`
 
 In this TSV file, an additional column `SOMATIC_CLASSIFICATION` indicates for each 
-variant if it is classified as somatic or germline.
+variant if it is classified as somatic or germline. Specifically, the value of `SOMATIC_CLASSIFICATION` can be either *SOMATIC* (not catched by any filter), or containing one or more of the following tags pending on which sources that classified the variant as likely germline (and whether these filters were activated by the user):
+*GERMLINE_GNOMAD* (always turned on), *GERMLINE_CLINVAR*, *GERMLINE_DBSNP*, *GERMLINE_HET*, *GERMLINE_HOM*, *GERMLINE_PON*
 
 ### Tumor mutational burden (TSV)
 

@@ -5,7 +5,6 @@ import re
 import argparse
 import cyvcf2
 import os
-import sys
 import yaml
 
 from pcgr.annoutils import read_infotag_file, make_transcript_xref_map, read_genexref_namemap, map_regulatory_variant_annotations, write_pass_vcf, load_grantham
@@ -16,7 +15,6 @@ from pcgr.mutation_hotspot import load_mutation_hotspots, match_csq_mutation_hot
 from pcgr.biomarker import load_biomarkers, match_csq_biomarker
 from pcgr.utils import error_message, check_subprocess, getlogger
 from pcgr.splice import load_splice_effects
-from pcgr.vep import parse_vep_csq
 
 csv.field_size_limit(500 * 1024 * 1024)
 
@@ -30,7 +28,7 @@ def __main__():
     parser.add_argument('tumortype', default='Any', help='Primary tumor type of query VCF')
     parser.add_argument('build', default='GRCh38', help='Genome build of query VCF')
     parser.add_argument('vep_pick_order', default="mane,canonical,appris,biotype,ccds,rank,tsl,length", 
-                        help=f"Comma-separated string of ordered transcript/variant properties for selection of primary variant consequence")
+                        help="Comma-separated string of ordered transcript/variant properties for selection of primary variant consequence")
     parser.add_argument('refdata_assembly_dir',help='Assembly-specific reference data directory, e.g. "pcgrdb/data/grch38')
     parser.add_argument('--compress_output_vcf', action="store_true", default=False, help="Compress output VCF file")
     parser.add_argument('--cpsr',action="store_true",help="Aggregate cancer gene annotations for Cancer Predisposition Sequencing Reporter (CPSR)")
@@ -80,7 +78,7 @@ def extend_vcf_annotations(arg_dict, logger):
     ## load CPSR target genes from YAML file
     cpsr_target_genes = {}
     if arg_dict['cpsr'] is True:
-        if not arg_dict['cpsr_yaml'] is None:
+        if arg_dict['cpsr_yaml'] is not None:
             if os.path.exists(arg_dict['cpsr_yaml']):
                 with open(arg_dict['cpsr_yaml'], 'r') as f:
                     yaml_data = yaml.safe_load(f)
@@ -152,11 +150,11 @@ def extend_vcf_annotations(arg_dict, logger):
         ## For germline-called VCFs (single-sample), pull out sequencing depth and genotype using cyvcf2 API
         if arg_dict['cpsr'] is True:
             rec.INFO['DP_CONTROL'] = "-1"
-            if not rec.gt_depths is None:
+            if rec.gt_depths is not None:
                 if len(rec.gt_depths) == 1:
                     rec.INFO['DP_CONTROL'] = str(rec.gt_depths[0])
             rec.INFO['GENOTYPE'] = 'undefined'
-            if not rec.gt_types is None:
+            if rec.gt_types is not None:
                 if len(rec.gt_types) == 1:
                     if int(rec.gt_types[0]) == 0:
                         rec.INFO['GENOTYPE'] = 'hom_ref'
@@ -171,7 +169,7 @@ def extend_vcf_annotations(arg_dict, logger):
             num_chromosome_records_processed = 0
         else:
             if str(rec.CHROM) != current_chrom:
-                if not current_chrom is None:
+                if current_chrom is not None:
                     logger.info(f"Completed summary of functional annotations for {num_chromosome_records_processed} variants on chr{current_chrom}")
                 current_chrom = str(rec.CHROM)
                 num_chromosome_records_processed = 0
@@ -220,7 +218,7 @@ def extend_vcf_annotations(arg_dict, logger):
                     if vcf_info_element_types[k] == "Flag" and csq_record[k] == "1":
                         rec.INFO[k] = True
                     else:
-                        if not csq_record[k] is None:                            
+                        if csq_record[k] is not None:                            
                             if k == 'DOMAINS':
                                 filtered_domains = []
                                 for dom in csq_record[k].split('&'):
@@ -257,10 +255,10 @@ def extend_vcf_annotations(arg_dict, logger):
         
         splice_key = f"{principal_csq_properties['entrezgene']}_{principal_csq_properties['refseq_transcript_id']}_{principal_csq_properties['hgvsc']}"
         if splice_key in splice_effects:
-            if not 'NO_EFFECT' in splice_effects[splice_key]:
+            if 'NO_EFFECT' not in splice_effects[splice_key]:
                 rec.INFO['SPLICE_EFFECT_MUTSPLICEDB'] = splice_effects[splice_key]
                 rec.INFO['LOSS_OF_FUNCTION'] = True
-                if not rec.INFO.get('LOF_FILTER') is None:
+                if rec.INFO.get('LOF_FILTER') is not None:
                     rec.INFO['LOF_FILTER'] = '.'
         
         if 'all_csq' in vep_csq_record_results:
@@ -270,7 +268,7 @@ def extend_vcf_annotations(arg_dict, logger):
             for db in ['civic','cgi']:                
                 match_csq_biomarker(vep_csq_record_results['all_csq'], biomarkers[db], rec, principal_csq_properties)
 
-        if not rec.INFO.get('DBNSFP') is None:
+        if rec.INFO.get('DBNSFP') is not None:
             map_variant_effect_predictors(rec, dbnsfp_prediction_algorithms)
         
         if arg_dict['oncogenicity_annotation'] == 1:
@@ -279,7 +277,7 @@ def extend_vcf_annotations(arg_dict, logger):
 
         if "GENE_TRANSCRIPT_XREF" in vcf_info_element_types:
             gene_xref_tag = rec.INFO.get('GENE_TRANSCRIPT_XREF')
-            if not gene_xref_tag is None:
+            if gene_xref_tag is not None:
                 del rec.INFO['GENE_TRANSCRIPT_XREF']                
         w.write_record(rec)
     if vars_no_csq:

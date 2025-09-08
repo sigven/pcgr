@@ -6,7 +6,6 @@ import logging
 import os
 import time
 import errno
-import platform
 import string
 import random
 import glob

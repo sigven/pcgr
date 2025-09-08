@@ -46,6 +46,13 @@ sigven <- user("sigven")
 pdiakumis <- user("pdiakumis")
 ```
 
+## v2.2.4
+- Date: **2025-09-08**
+  - fixed bug in site to TCGA cohort matching (`r issue(275)`)
+  - fixed bug in copy number segment annotations with no protein-coding overlap (`r issue(278)`)
+  - added gene `loss` biomarkers (loss-of-function) as records to match for CNA homozygous deletions (`r issue(277)`)
+  - added new option `--sex` to enable sex-adjusted annotation of CNA segments (i.e. hemizygous deletions for males on chrX)
+
 ## v2.2.3
 
 - Date: **2025-07-18**
