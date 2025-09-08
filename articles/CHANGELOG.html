@@ -32,7 +32,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -83,6 +83,27 @@
 
     
     
+<div class="section level2">
+<h2 id="v2-2-4">v2.2.4<a class="anchor" aria-label="anchor" href="#v2-2-4"></a>
+</h2>
+<ul>
+<li>Date: <strong>2025-09-08</strong>
+<ul>
+<li>fixed bug in site to TCGA cohort matching
+(<a href="https://github.com/sigven/pcgr/issues/275" class="external-link">issue275</a>)</li>
+<li>fixed bug in copy number segment annotations with no protein-coding
+overlap
+(<a href="https://github.com/sigven/pcgr/issues/278" class="external-link">issue278</a>)</li>
+<li>added gene <code>loss</code> biomarkers (loss-of-function) as
+records to match for CNA homozygous deletions
+(<a href="https://github.com/sigven/pcgr/issues/277" class="external-link">issue277</a>)</li>
+<li>added new option <code>--sex</code> to enable sex-adjusted
+annotation of CNA segments (i.e. hemizygous deletions for males on
+chrX)</li>
+</ul>
+</li>
+</ul>
+</div>
 <div class="section level2">
 <h2 id="v2-2-3">v2.2.3<a class="anchor" aria-label="anchor" href="#v2-2-3"></a>
 </h2>

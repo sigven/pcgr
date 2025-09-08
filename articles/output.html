@@ -32,7 +32,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -1586,16 +1586,27 @@ details above)</td>
 </tr>
 </tbody>
 </table>
+<div class="section level5">
+<h5 id="tumor-only-runs">Tumor-only runs<a class="anchor" aria-label="anchor" href="#tumor-only-runs"></a>
+</h5>
 <p>For tumor-only runs, we provide a similarly formatted tab-separated
 values file that include both filtered (i.e. likely germline events) and
 unfiltered (deemed somatic) variants. The file has the following naming
 convention:</p>
 <ul>
-<li><code>&lt;sample_id&gt;.pcgr.&lt;genome_assembly&gt;.snv_indel_filtered.ann.tsv.gz</code></li>
+<li><code>&lt;sample_id&gt;.pcgr.&lt;genome_assembly&gt;.snv_indel_unfiltered.ann.tsv.gz</code></li>
 </ul>
 <p>In this TSV file, an additional column
 <code>SOMATIC_CLASSIFICATION</code> indicates for each variant if it is
-classified as somatic or germline.</p>
+classified as somatic or germline. Specifically, the value of
+<code>SOMATIC_CLASSIFICATION</code> can be either <em>SOMATIC</em> (not
+catched by any filter), or containing one or more of the following tags
+pending on which sources that classified the variant as likely germline
+(and whether these filters were activated by the user):
+<em>GERMLINE_GNOMAD</em> (always turned on), <em>GERMLINE_CLINVAR</em>,
+<em>GERMLINE_DBSNP</em>, <em>GERMLINE_HET</em>, <em>GERMLINE_HOM</em>,
+<em>GERMLINE_PON</em></p>
+</div>
 </div>
 </div>
 <div class="section level3">

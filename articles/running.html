@@ -32,7 +32,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -133,6 +133,7 @@ procedures can be explicitly set, i.e.:</p>
 <li><code>--exclude_dbsnp_nonsomatic</code></li>
 <li><code>--exclude_likely_het_germline</code></li>
 <li><code>--exclude_likely_hom_germline</code></li>
+<li><code>--exclude_clinvar_germline</code></li>
 <li><code>--exclude_nonexonic</code></li>
 </ul>
 <p>Users should note that these filters may occasionally remove true
@@ -324,6 +325,8 @@ Sequencing assay options:
 
 
 Tumor sample options:
+  --sex {FEMALE,MALE,UNKNOWN}
+                        Sex of cancer case/sample (default: UNKNOWN)
   --tumor_site TSITE    Optional integer code to specify primary tumor type/site of query sample,
                         choose any of the following identifiers:
                         0 = Any
@@ -409,9 +412,9 @@ Tumor-only filtering options:
   --exclude_likely_het_germline
                         Exclude likely heterozygous germline variants (0.4-0.6 allelic fraction, AND presence in dbSNP + gnomAD, AND not existing as somatic record in COSMIC OR TCGA, default: False)
   --exclude_clinvar_germline
-                        Exclude variants found in ClinVar (germline variant origin), defult: False)
+                        Exclude variants found in ClinVar (of germline origin only), defult: False)
   --exclude_dbsnp_nonsomatic
-                        Exclude variants found in dbSNP (except for those present in ClinVar (somatic origin) OR TCGA OR COSMIC), defult: False)
+                        Exclude variants found in dbSNP (except for those present in ClinVar (somatic origin) or found in TCGA or overlapping with COSMIC), defult: False)
   --exclude_nonexonic   Exclude non-exonic variants, default: False)
 
 VEP options:
@@ -509,14 +512,15 @@ files, VEP cache, see <a href="installation.html">Installation</a>):</p>
 <span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>    <span class="at">--tumor_af_tag</span> TVAF <span class="dt">\</span></span>
 <span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>    <span class="at">--tumor_site</span> 9 <span class="dt">\</span></span>
 <span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>    <span class="at">--input_cna</span> /Users/you/pcgr/examples/T001-COAD.cna.tsv <span class="dt">\</span></span>
-<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>    <span class="at">--tumor_purity</span> 0.9 <span class="dt">\</span></span>
-<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>    <span class="at">--tumor_ploidy</span> 2.0 <span class="dt">\</span></span>
-<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>    <span class="at">--assay</span> WES <span class="dt">\</span></span>
-<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>    <span class="at">--vcf2maf</span> <span class="dt">\</span></span>
-<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a>    <span class="at">--estimate_signatures</span> <span class="dt">\</span></span>
-<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a>    <span class="at">--estimate_msi</span> <span class="dt">\</span></span>
-<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a>    <span class="at">--estimate_tmb</span> <span class="dt">\</span></span>
-<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a>    <span class="at">--force_overwrite</span></span></code></pre></div>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>    <span class="at">--sex</span> MALE <span class="dt">\</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>    <span class="at">--tumor_purity</span> 0.9 <span class="dt">\</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>    <span class="at">--tumor_ploidy</span> 2.0 <span class="dt">\</span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>    <span class="at">--assay</span> WES <span class="dt">\</span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a>    <span class="at">--vcf2maf</span> <span class="dt">\</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a>    <span class="at">--estimate_signatures</span> <span class="dt">\</span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a>    <span class="at">--estimate_msi</span> <span class="dt">\</span></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a>    <span class="at">--estimate_tmb</span> <span class="dt">\</span></span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a>    <span class="at">--force_overwrite</span></span></code></pre></div>
 <p>This command will run the Conda-based PCGR workflow and produce the
 following files in the <em>/Users/you/dir4/pcgr_outputs</em> folder:</p>
 <table class="table">
