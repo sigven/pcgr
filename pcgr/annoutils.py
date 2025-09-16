@@ -100,6 +100,7 @@ def write_pass_vcf(annotated_vcf, logger):
     """
     #out_vcf = re.sub(r'\.annotated\.vcf\.gz$','.annotated.pass.vcf',annotated_vcf)
     out_vcf = re.sub(r'\.vcf\.gz$', '.pass.vcf', annotated_vcf)
+
     vcf = VCF(annotated_vcf)
     w = Writer(out_vcf, vcf)
 
@@ -118,16 +119,21 @@ def write_pass_vcf(annotated_vcf, logger):
     logger.info('Number of non-PASS/REJECTED variant calls: ' +
                 str(num_rejected))
     logger.info('Number of PASSed variant calls: ' + str(num_pass))
+
+    
+    vcf_no_pass_variants = False
     if num_pass == 0:
+        vcf_no_pass_variants = True
         logger.warning(
             'There are zero variants with a \'PASS\' filter in the VCF file')
-        os.system('bgzip -dc ' + str(annotated_vcf) +
-                  ' egrep \'^#\' > ' + str(out_vcf))
+        os.system(f"bgzip -dc {annotated_vcf} | egrep '^#' >  {out_vcf}")
     # else:
-    os.system('bgzip -f ' + str(out_vcf))
-    os.system('tabix -f -p vcf ' + str(out_vcf) + '.gz')
+    os.system(f'bgzip -f {out_vcf}')
+    os.system(f'tabix -f -p vcf {out_vcf}.gz')
 
-    return
+    #exit(-1)
+
+    return(vcf_no_pass_variants)
 
 
 def map_regulatory_variant_annotations(vep_csq_records):

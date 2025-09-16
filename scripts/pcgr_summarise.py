@@ -6,14 +6,16 @@ import argparse
 import cyvcf2
 import os
 import yaml
+import glob
 
+from glob import glob
 from pcgr.annoutils import read_infotag_file, make_transcript_xref_map, read_genexref_namemap, map_regulatory_variant_annotations, write_pass_vcf, load_grantham
 from pcgr.vep import parse_vep_csq
 from pcgr.dbnsfp import vep_dbnsfp_meta_vcf, map_variant_effect_predictors
 from pcgr.oncogenicity import load_oncogenicity_criteria, assign_oncogenicity_evidence, load_oncogenic_variants, match_oncogenic_variants
 from pcgr.mutation_hotspot import load_mutation_hotspots, match_csq_mutation_hotspot
 from pcgr.biomarker import load_biomarkers, match_csq_biomarker
-from pcgr.utils import error_message, check_subprocess, getlogger
+from pcgr.utils import error_message, check_subprocess, getlogger, remove_file
 from pcgr.splice import load_splice_effects
 
 csv.field_size_limit(500 * 1024 * 1024)
@@ -282,13 +284,17 @@ def extend_vcf_annotations(arg_dict, logger):
         w.write_record(rec)
     if vars_no_csq:
         logger.warning(f"There were {len(vars_no_csq)} records with no CSQ tag from VEP (was --vep_no_intergenic flag set?). Skipping them and showing (up to) the first 100:")
-        print('----')
-        print(', '.join(vars_no_csq[:100]))
-        print('----')
+        logger.info('----')
+        logger.info(', '.join(vars_no_csq[:100]))
+        logger.info('----')
     w.close()
     if current_chrom is not None:
         logger.info(f"Completed summary of functional annotations for {num_chromosome_records_processed} variants on chr{current_chrom}")
     vcf.close()
+
+    ## get list of all intermediate vcf files
+    vcf_prefix = re.sub(r'(\.vep\.vcfanno\.vcf\.gz)$','',arg_dict['vcf_file_in'])
+    vcf_prefix_all_files = glob(f'{vcf_prefix}*')
 
     if os.path.exists(arg_dict['vcf_file_out']):
         if os.path.getsize(arg_dict['vcf_file_out']) > 0:
@@ -296,11 +302,26 @@ def extend_vcf_annotations(arg_dict, logger):
                 check_subprocess(logger, f'bgzip -f {out_vcf}', debug=arg_dict['debug'])
                 check_subprocess(logger, f'tabix -f -p vcf {out_vcf}.gz', debug=arg_dict['debug'])
                 summarized_vcf = f'{arg_dict["vcf_file_out"]}.gz'
-                write_pass_vcf(summarized_vcf, logger)
+                vcf_no_pass_variants = write_pass_vcf(summarized_vcf, logger)
+                vcf_prefix_all_files = glob(f'{vcf_prefix}*')               
+                if bool(vcf_no_pass_variants):
+                    logger.info('Cleaning up all intermediate files from STEP 1/2/3')
+                    if not arg_dict['debug'] and len(vcf_prefix_all_files) == 13:
+                        for f in vcf_prefix_all_files:
+                            remove_file(f)
+                    error_message('No remaining PASS variants found in query VCF - exiting STEP 3', logger)
         else:
-            error_message('No remaining PASS variants found in query VCF - exiting and skipping STEP 4', logger)
+            if not arg_dict['debug'] and len(vcf_prefix_all_files) == 10:
+                logger.info('Cleaning up all intermediate files from STEP 1/2/3')
+                for f in vcf_prefix_all_files:
+                    remove_file(f)
+            error_message('No remaining PASS variants found in query VCF - exiting STEP 3', logger)
     else:
-        error_message('No remaining PASS variants found in query VCF - exiting and skipping STEP 4', logger)
+        if not arg_dict['debug'] and len(vcf_prefix_all_files) == 10:
+            logger.info('Cleaning up all intermediate files from STEP 1/2/3')
+            for f in vcf_prefix_all_files:
+                remove_file(f)
+        error_message('No remaining PASS variants found in query VCF - exiting STEP 3', logger)
 
 if __name__=="__main__":
     __main__()
