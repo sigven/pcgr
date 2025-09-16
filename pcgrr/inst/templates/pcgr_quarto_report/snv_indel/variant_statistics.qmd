@@ -1,4 +1,4 @@
-```{r prep_data}
+```{r prep_varstats_data}
 #| eval: !expr as.logical(pcg_report$content$snv_indel$vstats$n > 0) == TRUE
 
 
@@ -14,87 +14,33 @@ t <- list(
   size = 15)
 
 varstats_plots_plotly <- list()
-varstats_plots_plotly[['coding']] <- 
-  plotly::plot_ly(
-    variant_stats[['coding']], 
-    marker = list(
-      colors = pcgrr::color_palette$tier$values,
-      line = list(
-        color = '#FFFFFF',
-        width = pie_line_width))) |>
-  plotly::add_pie(
-    variant_stats[['coding']], 
-    labels =~ factor(CODING_STATUS),
-    values = ~N,
-    textinfo = "Pct",
-    type = 'pie', 
-    hole = hole_size) |>
-  plotly::layout(
-    legend = list(orientation = "h", font = t)) 
+varstats_plots_plotly[['coding']] <-
+  pcgrr::plotly_pie_chart(
+    df_variant_stats = variant_stats[['coding']],
+    category = 'CODING_STATUS'
+  )
 
 varstats_plots_plotly[['consequence']] <- 
-  plotly::plot_ly(
-    variant_stats[['consequence']], 
-    marker = list(
-      colors = pcgrr::color_palette$tier$values,
-      line = list(
-        color = '#FFFFFF', 
-        width = pie_line_width))) |>
-  plotly::add_pie(
-    variant_stats[['consequence']], 
-    labels =~ factor(CONSEQUENCE),
-    values = ~N,
-    textinfo = "Pct",
-    type = 'pie',
-    hole = hole_size) |>
-  plotly::layout(
-    legend = list(orientation = "h", font = t)) 
+  pcgrr::plotly_pie_chart(
+    df_variant_stats = variant_stats[['consequence']],
+    category = 'CONSEQUENCE'
+  )
 
 varstats_plots_plotly[['consequence_coding']] <- NULL
 if(NROW(variant_stats[['consequence_coding']]) > 0) {
-  varstats_plots_plotly[['consequence_coding']] <- 
-    plotly::plot_ly(
-      variant_stats[['consequence_coding']],
-      marker = list(
-        colors = pcgrr::color_palette$tier$values,
-        line = list(
-          color = '#FFFFFF', 
-          width = pie_line_width))) |>
-    plotly::add_pie(
-      variant_stats[['consequence_coding']], 
-      labels =~ factor(CONSEQUENCE),
-      values = ~N,
-      textinfo = "Pct",
-      type = 'pie',
-      hole = hole_size) |>
-    plotly::layout(
-      legend = list(orientation = "h", font = t)) 
   
-  varstats_plots_plotly[['consequence_coding']]$x$layout$margin$b <- 5
-
+  varstats_plots_plotly[['consequence_coding']] <- 
+    pcgrr::plotly_pie_chart(
+      df_variant_stats = variant_stats[['consequence_coding']],
+      category = 'CONSEQUENCE'
+    )
 }
 
-varstats_plots_plotly[['type']] <- 
-  plotly::plot_ly(
-    variant_stats[['variant_class']],
-    marker = list(
-      colors = pcgrr::color_palette$tier$values,
-      line = list(
-        color = '#FFFFFF', 
-        width = pie_line_width))) |>
-  plotly::add_pie(
-    variant_stats[['variant_class']],
-    labels =~ factor(VARIANT_CLASS),
-    values = ~N,
-    textinfo = "Pct",
-    type = 'pie', 
-    hole = hole_size) |>
-  plotly::layout(
-    legend = list(orientation = "h", font = t)) 
-
-varstats_plots_plotly[['type']]$x$layout$margin$b <- 5
-varstats_plots_plotly[['consequence']]$x$layout$margin$b <- 5
-
+varstats_plots_plotly[['variant_class']] <- 
+  pcgrr::plotly_pie_chart(
+      df_variant_stats = variant_stats[['variant_class']],
+      category = 'VARIANT_CLASS'
+    )
 
 
 ```
@@ -123,7 +69,7 @@ bslib::page_fillable(
         class = "bg-dark", 
         paste0("Variant statistics | type - ",
                pcg_report$settings$sample_id)),
-      varstats_plots_plotly[['type']]
+      varstats_plots_plotly[['variant_class']]
     )
   ),
   bslib::card(
@@ -161,51 +107,6 @@ bslib::page_fillable(
 ```
 
 
-```{r prep_vaf_plot}
-#| echo: false
-#| eval: !expr as.logical(pcg_report$settings$conf$somatic_snv$allelic_support$tumor_af_tag == "_NA_") == FALSE & as.logical(any(is.na(pcg_report$content$snv_indel$callset$variant$VAF_TUMOR))) == FALSE
-
-### VAF plot
-vaf_dist_tumor <- pcgrr::af_distribution(
-  var_df = pcg_report$content$snv_indel$callset$variant)
-
-vaf_dist_tumor$VARIANT_CLASS <- factor(
-  vaf_dist_tumor$VARIANT_CLASS, 
-  levels = c("SNV","deletion","insertion","indel","substitution"))
-
-vaf_plot <- ggplot2::ggplot(data = vaf_dist_tumor) + 
-  ggplot2::geom_bar(
-    mapping = ggplot2::aes(
-      x = bin_start, 
-      y = Count, 
-      fill = VARIANT_CLASS), 
-    stat = "identity") + 
-  ggplot2::theme_classic() +
-  ggplot2::ylab("Number of variants") +
-  ggplot2::xlab("Variant allelic fraction - tumor") +
-  ggplot2::scale_fill_manual(values = pcgrr::color_palette$tier$values) +  
-  ggplot2::theme(legend.title = ggplot2::element_blank(),
-                 legend.position = "bottom",
-                 #legend.position = "",
-                 #axis.text.x = element_blank(),
-                 axis.text.x = ggplot2::element_text(
-                   family = "Helvetica", size = 12, vjust = -0.1),
-                 axis.title.x = ggplot2::element_text(
-                   family = "Helvetica", size = 12, vjust = -2),
-                 axis.text.y = ggplot2::element_text(
-                   family = "Helvetica", size = 12),
-                 axis.title.y = ggplot2::element_text(
-                   family = "Helvetica", size = 12, vjust = 1.5),
-                 plot.margin = (grid::unit(c(0.5, 0.5, 0.5, 0.5), "cm")),
-                 legend.text = ggplot2::element_text(
-                   family = "Helvetica", size = 12))
-
-vaf_plot_plotly <- plotly::ggplotly(vaf_plot)
-vaf_plot_plotly$x$layout$legend$title$text <- ""
-
-```
-
-
 ```{r vaf_plot}
 #| echo: false
 #| eval: !expr as.logical(pcg_report$settings$conf$somatic_snv$allelic_support$tumor_af_tag == "_NA_") == FALSE & as.logical(any(is.na(pcg_report$content$snv_indel$callset$variant$VAF_TUMOR))) == FALSE
@@ -218,7 +119,8 @@ bslib::card(
       "Distribution - variant allelic fraction - ",
       pcg_report$settings$sample_id)
   ),
-  vaf_plot_plotly
+  pcgrr::vaf_plot(report = pcg_report)
+  #vaf_plot_plotly
 )
 
 ```

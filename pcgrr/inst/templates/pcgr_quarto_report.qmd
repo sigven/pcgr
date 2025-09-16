@@ -68,10 +68,14 @@ if(as.logical(pcg_report$settings$conf$assay_properties$vcf_tumor_only) == TRUE)
 #| eval: true
 ```
 
+<br>
+
 ```{r pcgr_snv_indel}
 #| child: 'pcgr_quarto_report/snv_indel.qmd'
 #| eval: !expr pcg_report$content$snv_indel$eval == TRUE
 ```
+
+<br>
 
 ```{r pcgr_cna}
 #| child: 'pcgr_quarto_report/cna.qmd'
@@ -91,7 +95,6 @@ if(as.logical(pcg_report$settings$conf$assay_properties$vcf_tumor_only) == TRUE)
 #| child: 'pcgr_quarto_report/kataegis.qmd'
 #| eval: !expr as.logical(pcg_report$content$kataegis$eval) == TRUE
 ```
-
 
 <br>
 
@@ -142,5 +145,3 @@ if(as.logical(pcg_report$settings$conf$assay_properties$vcf_tumor_only) == TRUE)
 cat('<br><br>\n\n::: {.callout-important collapse="true"}\n## Medical Disclaimer\n\n<i>The information contained in this cancer genome report is intended for research purposes only. We make no representations or warranties of any kind, expressed or implied, about the completeness, accuracy, reliability, suitability or availability with respect to the sequencing report or the information, products, services, for interpretation or use in clinical practice, or otherwise contained in the report for any purpose. Any reliance you place on information in the report is therefore strictly at your own risk. In no event will we be liable for any loss or damage including without limitation, indirect or consequential loss or damage, or any loss or damage whatsoever arising from loss of data or profits arising out of, or in connection with, the use of this genome report.</i><br>\n\n:::')
 
 ```
-
-

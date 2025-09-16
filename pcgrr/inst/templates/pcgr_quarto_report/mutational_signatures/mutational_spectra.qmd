@@ -1,8 +1,20 @@
-::: panel-tabset
+### Raw mutational spectrum
+
+As a background perspective, we here provide various views of the raw mutational spectrum for the sample, i.e. not considering a signature re-fitting analysis.
+
+::: {.panel-tabset .nav-pills}
 
 #### SBS - mutational contexts
 
 <br>
+
+```{r setup_spectra_data}
+#| echo: false
+#| eval: true
+
+msig_content <- 
+  pcg_report$content$mutational_signatures
+```
 
 ```{r raw_context_plot}
 #| output: asis
@@ -54,8 +66,15 @@ if(rowSums(msig_content$result$type_occurrences[1:6]) > 0){
       CT = TRUE,
       error_bars = 'none',
       colors = head(
-        pcgrr::color_palette$tier$values, 7))
-  )
+        pcgrr::color_palette$tier$values, 7))) |>
+    plotly::layout(
+      legend = list(
+        orientation = "h",         # horizontal legend
+        x = 0.5,                   # center it
+        xanchor = "center",        # anchor it at the center
+        y = -0.2                   # place it below the plot
+      )
+    )
 }
 
 ```
@@ -69,21 +88,22 @@ cat("\n::: {.callout-warning}\n## No SNVs\n\nNo SNVs/single base substitutions",
 
 ```
 
+
 #### ID - mutational contexts
 
 <br>
 
 ```{r indel_contexts}
 #| eval: !expr is.null(msig_content$result$indel_counts) == FALSE
-#| column: body-outset
-#| output: asis
+#| fig-width: 14
+#| fig-height: 7
 
-plotly::ggplotly(
-  height = 400,
-  width = 1000,
-  MutationalPatterns::plot_indel_contexts(
-    msig_content$result$indel_counts)
-)
+MutationalPatterns::plot_indel_contexts(
+  counts = msig_content$result$indel_counts, 
+  condensed = T) + 
+  ggplot2::theme(legend.position = "bottom") + 
+  ggplot2::theme(text = ggplot2::element_text(size = 14))
+
 
 ```
 

@@ -223,9 +223,20 @@ pie_aetiologies <- plotly::plot_ly(
     type = 'pie',
     hole = hole_size) |>
   plotly::layout(
-    legend = list(orientation = "h", font = t)) 
+    ## legend at the bottom
+    legend = list(
+      orientation = "h",
+      font = t),
+      #y = -0.2,
+      #yanchor = "bottom",
+      #x = 0.5),
+    margin = list(
+      l = 20,  # left margin
+      r = 20,  # right margin
+      b = 20,  # bottom margin
+      t = 30   # top margin
+    ))
 
-pie_aetiologies$x$layout$margin$b <- 5
 bslib::page_fillable(
   bslib::layout_columns(
     col_widths = c(4,8),
@@ -323,31 +334,26 @@ bslib::card(
 )
 ```
 
+
 <br>
-
-### Raw mutational spectrum
-
-As a background perspective, we here provide various views of the raw mutational spectrum for the sample, i.e. not considering a signature re-fitting analysis.
 
 ```{r tabset_mutational_spectra}
 #| eval: true
-#| output: asis
 #| child: pcgr_quarto_report/mutational_signatures/mutational_spectra.qmd
 ```
 
-<br><br>
+<br>
 
 ```{r signature_similarity}
 #| eval: !expr is.null(msig_content$result$signature_similarity) == FALSE
 #| child: pcgr_quarto_report/mutational_signatures/signature_similarity.qmd
-#| output: asis
 ```
 
 ```{r signature_similarity_missing}
 #| eval: !expr is.null(msig_content$result$signature_similarity) == TRUE
 #| output: asis
 
-cat("\n#### Signature similarity\n\n")
+cat("\n### Signature similarity\n\n")
 htmltools::br()
 cat("\n::: {.callout-warning}\n## Limited variant data - ",
     "similarity analysis omitted\n\nThere are too few",
@@ -357,4 +363,3 @@ cat("\n::: {.callout-warning}\n## Limited variant data - ",
     " analysis of mutational signatures (a minimum 30 SNVs are required)\n\n:::\n\n", sep="")
 
 ```
-

@@ -1,4 +1,4 @@
-#### Signature similarity
+### Signature similarity
 
 Here, we perform a comparison of the sample's raw mutational spectrum to each of the known signatures (SBS) in COSMIC. Input samples with less than 30 SNVs are omitted from this analysis. The cosine similarity is calculated between the mutational spectrum of the sample (i.e. frequency of DNA trinucleotide contexts) and each of the COSMIC signatures. The cosine similarity (*SIMILARITY* column below) ranges from 0 to 1, where 1 indicates a perfect match.
 

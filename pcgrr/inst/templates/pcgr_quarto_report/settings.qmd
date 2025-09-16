@@ -13,7 +13,9 @@ conf <- pcg_report$settings$conf
 sample_name <- pcg_report[['settings']][['sample_id']]
 assay_type <- conf$assay_properties$type
 tumor_site <- conf$sample_properties$site
+sex <- conf$sample_properties$sex
 assay_mode <- conf$assay_properties$mode
+genome_assembly <- pcg_report[['settings']][['genome_assembly']]
 tumor_ploidy <- "N/A"
 if(!is.na(conf$sample_properties$tumor_ploidy) &
    conf$sample_properties$tumor_ploidy != "NA"){
@@ -32,6 +34,10 @@ if(as.logical(conf$assay_properties$vcf_tumor_only) == TRUE){
 }
 
 success_color <- pcgrr::color_palette$success
+rna_expression_similarity <- 'OFF'
+if(as.logical(conf$expression$similarity_analysis) == TRUE){
+  rna_expression_similarity <- 'ON'
+}
 
 include_germline_findings <- 'OFF'
 if(pcg_report$content$germline_classified$eval == T){
@@ -46,6 +52,17 @@ if(pcg_report$content$mutational_signatures$eval == F){
 if(pcg_report$content$tmb$eval == F){
   mutational_burden <- 'OFF'
 }
+
+tumor_dp_tag <- conf[['somatic_snv']][['allelic_support']][['tumor_dp_tag']]
+tumor_af_tag <- conf[['somatic_snv']][['allelic_support']][['tumor_af_tag']]
+control_dp_tag <- conf[['somatic_snv']][['allelic_support']][['control_dp_tag']]
+control_af_tag <- conf[['somatic_snv']][['allelic_support']][['control_af_tag']]
+tumor_dp_min <- conf[['somatic_snv']][['allelic_support']][['tumor_dp_min']]
+tumor_af_min <- conf[['somatic_snv']][['allelic_support']][['tumor_af_min']]
+tumor_ad_min <- conf[['somatic_snv']][['allelic_support']][['tumor_ad_min']]
+control_dp_min <- conf[['somatic_snv']][['allelic_support']][['control_dp_min']]
+control_af_max <- conf[['somatic_snv']][['allelic_support']][['control_af_max']]
+control_ad_max <- conf[['somatic_snv']][['allelic_support']][['control_ad_max']]
 
 gencode_metadata <- 
   pcg_report$settings$reference_data$source_metadata |>
@@ -69,19 +86,21 @@ The report is generated with _[pcgr](https://github.com/sigven/pcgr)_ version `r
 :::: {.columns}
 
 ::: {.column width="47.5%"}
-* Genome assembly: __`r pcg_report[['settings']][['genome_assembly']]`__
-* Minimum sequencing depth (DP) tumor (SNV + InDels): __`r conf[['somatic_snv']][['allelic_support']][['tumor_dp_min']]`__
-* Minimum allelic fraction (AF) tumor (SNV + InDels): __`r conf[['somatic_snv']][['allelic_support']][['tumor_af_min']]`__
-* Minimum sequencing depth (DP) control (SNV + InDels): __`r conf[['somatic_snv']][['allelic_support']][['control_dp_min']]`__
-* Maximum allelic fraction (AF) control (SNV + InDels): __`r conf[['somatic_snv']][['allelic_support']][['control_af_max']]`__
+* Genome assembly: __`r genome_assembly`__
 * Variant actionability guidelines: __AMP/ASCO/CAP__
 * Variant oncogenicity guidelines: __ClinGen/CGC/VICC__
 * Show noncoding variants: __`r conf$other$show_noncoding `__
 * MSI prediction: __`r msi_prediction`__
 * Include germline findings: __`r include_germline_findings`__
-* Mutational burden estimation: __`r mutational_burden`__
-  * TMB algorithm: __`r paste0('TMB_',conf$somatic_snv[['tmb']][['tmb_display']])`__ 
-* Minimum total copy number for copy number gains: __`r conf$somatic_cna$n_copy_gain`__
+* RNA expression similarity analysis: __`r rna_expression_similarity`__
+* CNA amplification threshold: __`r conf$somatic_cna$n_copy_gain`__
+* Variant Effect Predictor (VEP) settings
+  * Transcript set: __`r transcript_set_gencode`__
+  * Transcript pick order: __`r stringr::str_replace_all(conf[['vep']][['vep_pick_order']],",", ", ")`__
+  * Regulatory regions annotation: __`r as.logical(conf[['vep']][['vep_regulatory']])`__
+  * Buffer size: __`r conf$vep$vep_buffer_size`__
+  * Number of forks: __`r conf$vep$vep_n_forks`__
+
 :::
 
 ::: {.column width="5%"}
@@ -89,17 +108,58 @@ The report is generated with _[pcgr](https://github.com/sigven/pcgr)_ version `r
 :::
 
 ::: {.column width="47.5%"}
+* Mutational burden estimation: __`r mutational_burden`__
+  * TMB algorithm: __`r paste0('TMB_',conf$somatic_snv[['tmb']][['tmb_display']])`__ 
 * Mutational signatures estimation: __`r signatures_estimation`__
   * Minimum number of mutations required: __`r conf$somatic_snv$mutational_signatures[['mutation_limit']]`__
   * All reference signatures: __`r as.logical(conf$somatic_snv$mutational_signatures[['all_reference_signatures']])`__
   * Inclusion of artefact signatures: __`r as.logical(conf$somatic_snv$mutational_signatures[['include_artefact_signatures']])`__
   * Minimum tumor-type prevalence (percent) of reference signatures used for refitting: __`r conf$somatic_snv$mutational_signatures[['prevalence_reference_signatures']]`__
-* Variant Effect Predictor (VEP) settings:
-  * Transcript set: __`r transcript_set_gencode`__
-  * Transcript pick order: __`r stringr::str_replace_all(conf[['vep']][['vep_pick_order']],",", ", ")`__
-  * Regulatory regions annotation: __`r as.logical(conf[['vep']][['vep_regulatory']])`__
-  * Buffer size: __`r conf$vep$vep_buffer_size`__
-  * Number of forks: __`r conf$vep$vep_n_forks`__
+
+```{r allelic_support_settings}
+#| output: asis
+#| echo: false
+#| eval: true
+cat("* Allelic support filtering settings", "\n")
+if(tumor_dp_tag != "_NA_" &
+   !is.null(tumor_dp_min)){
+  cat(glue::glue(
+    "  * Minimum sequencing depth (DP) tumor (SNV + InDels): __{tumor_dp_min}__"),
+    "\n")
+}
+if(tumor_af_tag != "_NA_" &
+   !is.null(tumor_af_min)){
+  cat(glue::glue(
+    "  * Minimum allelic fraction (AF) tumor (SNV + InDels): __{tumor_af_min}__"),
+    "\n")
+}
+if(tumor_dp_tag != "_NA_" &
+   tumor_af_tag != "_NA_" &
+   !is.null(tumor_ad_min)){
+  cat(glue::glue(
+    "  * Minimum allelic depth (AD) tumor (SNV + InDels): __{tumor_ad_min}__"),
+    "\n")
+}
+if(control_dp_tag != "_NA_" &
+   !is.null(control_dp_min)){
+  cat(glue::glue(
+    "  * Minimum sequencing depth (DP) control (SNV + InDels): __{control_dp_min}__"),
+    "\n")
+}
+if(control_af_tag != "_NA_" &
+   !is.null(control_af_max)){
+  cat(glue::glue(
+    "  * Maximum allelic fraction (AF) control (SNV + InDels): __{control_af_max}__"),
+    "\n")
+}
+if(control_dp_tag != "_NA_" &
+   control_af_tag != "_NA_" &
+   !is.null(control_ad_max)){
+  cat(glue::glue(
+    "  * Maximum allelic depth (AD) control (SNV + InDels): __{control_ad_max}__"),
+    "\n")
+}
+```
 
 :::
 
@@ -116,8 +176,8 @@ The report is generated with _[pcgr](https://github.com/sigven/pcgr)_ version `r
 #| eval: true
 
 bslib::layout_column_wrap(
-  width = 1/3,
-  height = 85,
+  width = 1/4,
+  height = 90,
   bslib::value_box(
     title = "Tumor site",
     value = tumor_site,
@@ -138,12 +198,20 @@ bslib::layout_column_wrap(
     showcase = NULL,
     theme = bslib::value_box_theme(
       bg = report_color, fg = "#fff")
+  ),
+  bslib::value_box(
+    title = "Sex",
+    value = sex,
+    showcase = NULL,
+    theme = bslib::value_box_theme(
+      bg = report_color, fg = "#fff")
   )
+  
 )
 
 bslib::layout_column_wrap(
-  width = 1/3,
-  height = 85,
+  width = 1/4,
+  height = 90,
   bslib::value_box(
     title = "Sequencing assay mode",
     value = assay_mode,
@@ -161,6 +229,13 @@ bslib::layout_column_wrap(
   bslib::value_box(
     title = "Coding target size",
     value = paste0(target_size, "Mb"),
+    showcase = NULL,
+    theme = bslib::value_box_theme(
+      bg = report_color, fg = "#fff")
+  ),
+  bslib::value_box(
+    title = "Genome assembly",
+    value = genome_assembly,
     showcase = NULL,
     theme = bslib::value_box_theme(
       bg = report_color, fg = "#fff")

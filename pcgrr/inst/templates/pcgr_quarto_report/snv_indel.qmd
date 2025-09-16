@@ -1,19 +1,6 @@
 ## Somatic SNVs/InDels
 
-```{r section_variant_filtering}
-#| eval: !expr as.logical(pcg_report$settings$conf$assay_properties$vcf_tumor_only) == TRUE
-#| output: asis
-#| child: pcgr_quarto_report/snv_indel/variant_filtering.qmd 
-
-```
-
-
-```{r section_variant_statistics}
-#| eval: !expr as.logical(pcg_report$content$snv_indel$vstats$n > 0) == TRUE
-#| output: asis
-#| child: pcgr_quarto_report/snv_indel/variant_statistics.qmd 
-
-```
+<br>
 
 ```{r key_snv_indel_numbers}
 #| echo: false
@@ -73,6 +60,23 @@ bslib::page_fillable(
 )
 
 ```
+
+
+```{r section_variant_filtering}
+#| eval: !expr as.logical(pcg_report$settings$conf$assay_properties$vcf_tumor_only) == TRUE
+#| output: asis
+#| child: pcgr_quarto_report/snv_indel/variant_filtering.qmd 
+
+```
+
+
+```{r section_variant_statistics}
+#| eval: !expr as.logical(pcg_report$content$snv_indel$vstats$n > 0) == TRUE
+#| output: asis
+#| child: pcgr_quarto_report/snv_indel/variant_statistics.qmd 
+
+```
+
 
 <br>
 <hr>
