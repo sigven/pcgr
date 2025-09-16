@@ -9,7 +9,7 @@ if any population frequency exceeds max_tolerated_af}
 assign_germline_popfreq_status(
   sample_calls,
   pop = "NFE",
-  dbquery = "gnomADe",
+  dbquery = c("gnomADe", "gnomADg"),
   max_tolerated_af = 0.01
 )
 }
@@ -18,7 +18,8 @@ assign_germline_popfreq_status(
 
 \item{pop}{population code (1000 Genomes/gnomAD)}
 
-\item{dbquery}{gnomADe}
+\item{dbquery}{character vector with germline db sources,
+e.g. c("gnomADe","gnomADg")}
 
 \item{max_tolerated_af}{max tolerated germline allele frequency}
 }

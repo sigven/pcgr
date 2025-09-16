@@ -110,12 +110,17 @@ Several options are used to inform PCGR about tags in the VCF INFO field that en
 - `--control_dp_tag <value>`
 - `--control_af_tag <value>`
 
-If these tags are set correctly, one may set thresholds (sequencing depth and/or allelic fraction) on the variants to be included in the report, i.e. through:
+If these tags are set correctly, one may set thresholds (sequencing depth and/or allelic depth/fraction) on the variants to be included in the report, i.e. through:
 
 - `--tumor_dp_min <value>`
 - `--tumor_af_min <value>`
+- `--tumor_ad_min <value>`
 - `--control_dp_min <value>`
 - `--control_af_max <value>`
+- `--control_ad_max <value>`
+
+The _allelic depths tresholds_ refer to the minimum
+number of reads supporting the variant allele in the tumor sample (`--tumor_ad_min`), and the maximum number of reads supporting the variant allele in the control sample (`--control_ad_max`).
 
 ### Tumor mutational burden (TMB)
 
@@ -227,13 +232,17 @@ Allelic support options:
   --call_conf_tag CALL_CONF_TAG
                         Specify VCF INFO tag for somatic variant call confidence (must be categorical, e.g. Type=String, default: _NA_
   --tumor_dp_min TUMOR_DP_MIN
-                        If VCF INFO tag for sequencing depth (tumor) is specified and found, set minimum required depth for inclusion in report (default: 0)
+                        If VCF INFO tag for sequencing depth (tumor) is specified and found, set minimum required depth for inclusion in report (default: None)
+  --tumor_ad_min TUMOR_AD_MIN
+                        If VCF INFO tag for sequencing depth (tumor) and variant allelic fraction (tumor) are specified and found, set minimum required allelic depth (tumor, i.e. number of reads supporting alternate allele) for inclusion in report (default: None)
   --tumor_af_min TUMOR_AF_MIN
-                        If VCF INFO tag for variant allelic fraction (tumor) is specified and found, set minimum required AF for inclusion in report (default: 0)
+                        If VCF INFO tag for variant allelic fraction (tumor) is specified and found, set minimum required AF for inclusion in report (default: None)
   --control_dp_min CONTROL_DP_MIN
-                        If VCF INFO tag for sequencing depth (control) is specified and found, set minimum required depth for inclusion in report (default: 0)
+                        If VCF INFO tag for sequencing depth (control) is specified and found, set minimum required depth for inclusion in report (default: None)
+  --control_ad_max CONTROL_AD_MAX
+                        If VCF INFO tag for sequencing depth (control) and variant allelic fraction (control) are specified and found, set maximum allowed allelic depth (control, i.e. number of reads supporting alternate allele) for inclusion in report (default: None)
   --control_af_max CONTROL_AF_MAX
-                        If VCF INFO tag for variant allelic fraction (control) is specified and found, set maximum tolerated AF for inclusion in report (default: 1)
+                        If VCF INFO tag for variant allelic fraction (control) is specified and found, set maximum allowed AF for inclusion in report (default: None)
 
 Tumor-only filtering options:
   --pon_vcf PON_VCF     VCF file with germline calls from Panel of Normals (PON) - i.e. blacklisted variants, (default: None)
@@ -285,9 +294,11 @@ Tumor mutational burden (TMB) and MSI options:
   --tmb_display {coding_and_silent,coding_non_silent,missense_only}
                         Type of TMB measure to show in report, default: coding_and_silent
   --tmb_dp_min TMB_DP_MIN
-                        If VCF INFO tag for sequencing depth (tumor) is specified and found, set minimum required sequencing depth for TMB calculation: default: 0
+                        If VCF INFO tag for sequencing depth (tumor) is specified and found, set minimum required sequencing depth for TMB calculation: default: None
   --tmb_af_min TMB_AF_MIN
-                        If VCF INFO tag for allelic fraction (tumor) is specified and found, set minimum required allelic fraction for TMB calculation: default: 0
+                        If VCF INFO tag for allelic fraction (tumor) is specified and found, set minimum required allelic fraction for TMB calculation: default: None
+  --tmb_ad_min TMB_AD_MIN
+                        If VCF INFO tag for sequencing depth (tumor) and allelic fraction (tumor) are specified and found, set minimum required allelic depth (tumor, i.e. number of reads supporting alternate allele) for TMB calculation: default: None
   --estimate_msi        Predict microsatellite instability status from patterns of somatic mutations/indels, default: False
 
 Mutational signature options:
