@@ -156,6 +156,7 @@ data_coltype_defs[['cna_somatic_segment_raw']] <- readr::cols_only(
   SEGMENT_NAME = readr::col_character()
 )
 
+####----CNA somatic gene-level columns ----####
 data_coltype_defs[['cna_somatic_gene_raw']] <- readr::cols_only(
   CHROM = readr::col_character(),
   SEGMENT_START = readr::col_double(),
@@ -189,6 +190,7 @@ data_coltype_defs[['cna_somatic_gene_raw']] <- readr::cols_only(
   #TPM = readr::col_number(),
   #TPM_GENE = readr::col_number())
 
+####----SNV/Indel somatic columns ----####
 data_coltype_defs[['snv_indel_somatic_raw']] <- readr::cols_only(
   CHROM = readr::col_character(),
   POS = readr::col_double(),
@@ -196,8 +198,10 @@ data_coltype_defs[['snv_indel_somatic_raw']] <- readr::cols_only(
   ALT = readr::col_character(),
   DP_TUMOR = readr::col_integer(),
   VAF_TUMOR = readr::col_number(),
+  AD_TUMOR = readr::col_integer(),
   DP_CONTROL = readr::col_integer(),
   VAF_CONTROL = readr::col_number(),
+  AD_CONTROL = readr::col_integer(),
   CALL_CONFIDENCE = readr::col_character(),
   GENOMIC_CHANGE = readr::col_character(),
   VAR_ID = readr::col_character(),
@@ -286,6 +290,15 @@ data_coltype_defs[['snv_indel_somatic_raw']] <- readr::cols_only(
   SIMPLEREPEATS_HIT = readr::col_logical(),
   WINMASKER_HIT = readr::col_logical(),
   VEP_ALL_CSQ = readr::col_character(),
+  gnomADg_AF = readr::col_number(),
+  gnomADg_AFR_AF = readr::col_number(),
+  gnomADg_AMR_AF = readr::col_number(),
+  gnomADg_ASJ_AF = readr::col_number(),
+  gnomADg_EAS_AF = readr::col_number(),
+  gnomADg_FIN_AF = readr::col_number(),
+  gnomADg_NFE_AF = readr::col_number(),
+  gnomADg_OTH_AF = readr::col_number(),
+  gnomADg_SAS_AF = readr::col_number(),
   gnomADe_AF = readr::col_number(),
   gnomADe_AMR_AF = readr::col_number(),
   gnomADe_AFR_AF = readr::col_number(),
@@ -301,6 +314,7 @@ data_coltype_defs[['snv_indel_somatic_raw']] <- readr::cols_only(
   GENOME_VERSION = readr::col_character()
 )
 
+####----SNV/Indel germline columns ----####
 data_coltype_defs[['snv_indel_germline_raw']] <- readr::cols_only(
   CHROM = readr::col_character(),
   POS = readr::col_double(),
@@ -413,6 +427,15 @@ data_coltype_defs[['snv_indel_germline_raw']] <- readr::cols_only(
   DBNSFP_SIFT = readr::col_character(),
   DBNSFP_SPLICE_SITE_ADA = readr::col_character(),
   DBNSFP_SPLICE_SITE_RF = readr::col_character(),
+  gnomADg_AF = readr::col_number(),
+  gnomADg_AFR_AF = readr::col_number(),
+  gnomADg_AMR_AF = readr::col_number(),
+  gnomADg_ASJ_AF = readr::col_number(),
+  gnomADg_EAS_AF = readr::col_number(),
+  gnomADg_FIN_AF = readr::col_number(),
+  gnomADg_NFE_AF = readr::col_number(),
+  gnomADg_OTH_AF = readr::col_number(),
+  gnomADg_SAS_AF = readr::col_number(),
   gnomADe_AF = readr::col_number(),
   gnomADe_AMR_AF = readr::col_number(),
   gnomADe_AFR_AF = readr::col_number(),
@@ -465,6 +488,7 @@ data_coltype_defs[['snv_indel_germline_raw']] <- readr::cols_only(
   GENOME_VERSION = readr::col_character()
 )
 
+####----SNV/Indel germline CPSR columns ----####
 data_coltype_defs[['snv_indel_germline_cpsr']] <- readr::cols_only(
   GENOMIC_CHANGE = readr::col_character(),
   GENOTYPE = readr::col_character(),
@@ -510,6 +534,9 @@ data_coltype_defs[['snv_indel_germline_cpsr']] <- readr::cols_only(
 
 usethis::use_data(data_coltype_defs, overwrite = T)
 
+####----Output TSVs ----####
+
+####----CNA-----#####
 tsv_cols <- list()
 tsv_cols[['cna']] <-
   c('SAMPLE_ID',
@@ -537,7 +564,7 @@ tsv_cols[['cna']] <-
     'BIOMARKER_MATCH',
     'TARGETED_INHIBITORS_ALL2')
 
-
+####----SNV/Indel-----#####
 tsv_cols[['snv_indel']] <-
   c('SAMPLE_ID',
     'GENOMIC_CHANGE',
@@ -558,8 +585,10 @@ tsv_cols[['snv_indel']] <-
     'EXONIC_STATUS',
     'DP_TUMOR',
     'VAF_TUMOR',
+    'AD_TUMOR',
     'DP_CONTROL',
     'VAF_CONTROL',
+    'AD_CONTROL',
     'MUTATION_HOTSPOT',
     'MUTATION_HOTSPOT_CANCERTYPE',
     'ACTIONABILITY_TIER',
@@ -568,7 +597,6 @@ tsv_cols[['snv_indel']] <-
     'ONCOGENICITY',
     'ONCOGENICITY_CODE',
     'ONCOGENICITY_SCORE',
-    #'ONCOGENICITY_DOC',
     'HGVSc',
     'HGVSc_RefSeq',
     'HGVSp',
@@ -594,6 +622,7 @@ tsv_cols[['snv_indel']] <-
     'REGULATORY_ANNOTATION',
     'VEP_ALL_CSQ',
     'gnomADe_AF',
+    'gnomADg_AF',
     'DBSNP_RSID',
     'COSMIC_ID',
     'TCGA_FREQUENCY',
@@ -608,6 +637,7 @@ tsv_cols[['snv_indel']] <-
     'CALL_CONFIDENCE'
     )
 
+####----SNV/Indel unfiltered-----#####
 tsv_cols[['snv_indel_unfiltered']] <-
   c('SAMPLE_ID',
     'GENOMIC_CHANGE',
@@ -629,6 +659,7 @@ tsv_cols[['snv_indel_unfiltered']] <-
     'EXONIC_STATUS',
     'DP_TUMOR',
     'VAF_TUMOR',
+    'AD_TUMOR',
     'MUTATION_HOTSPOT',
     'MUTATION_HOTSPOT_CANCERTYPE',
     'ACTIONABILITY_TIER',
@@ -661,6 +692,15 @@ tsv_cols[['snv_indel_unfiltered']] <-
     'SPLICE_EFFECT',
     'REGULATORY_ANNOTATION',
     'VEP_ALL_CSQ',
+    'gnomADg_AF',
+    'gnomADg_AFR_AF',
+    'gnomADg_AMR_AF',
+    'gnomADg_ASJ_AF',
+    'gnomADg_EAS_AF',
+    'gnomADg_FIN_AF',
+    'gnomADg_NFE_AF',
+    'gnomADg_OTH_AF',
+    'gnomADg_SAS_AF',
     'gnomADe_AF',
     'gnomADe_AFR_AF',
     'gnomADe_AMR_AF',
@@ -684,7 +724,9 @@ tsv_cols[['snv_indel_unfiltered']] <-
     'CALL_CONFIDENCE'
   )
 usethis::use_data(tsv_cols, overwrite = T)
+####----Data tables display columns ----####
 
+####----CNA actionable-----#####
 dt_display <- list()
 dt_display[['cna_gene_actionable']] <-
   c("SYMBOL",
@@ -708,6 +750,7 @@ dt_display[['cna_gene_actionable']] <-
     "TARGETED_INHIBITORS_ALL",
     "GENOME_VERSION")
 
+####----CNA evidence item-----#####
 dt_display[['cna_eitem']] <-
   c("MOLECULAR_ALTERATION",
     "CN_TOTAL",
@@ -729,6 +772,7 @@ dt_display[['cna_eitem']] <-
     "BM_RESOLUTION"
   )
 
+####----CNA other oncogenic-----#####
 dt_display[['cna_other_oncogenic']] <-
   c("SYMBOL",
     "GENENAME",
@@ -750,6 +794,7 @@ dt_display[['cna_other_oncogenic']] <-
     "TARGETED_INHIBITORS_ALL",
     "GENOME_VERSION")
 
+####----SNV/Indel germline filtered-----#####
 dt_display[['snv_indel_germline_filtered']] <-
   c('GENOMIC_CHANGE',
     'VARIANT_CLASS',
@@ -764,6 +809,7 @@ dt_display[['snv_indel_germline_filtered']] <-
     'CLINVAR_CLASSIFICATION',
     'VAF_TUMOR',
     'DP_TUMOR',
+    'gnomADg_AF',
     'gnomADe_AF',
     'gnomADe_AFR_AF',
     'gnomADe_AMR_AF',
@@ -774,6 +820,7 @@ dt_display[['snv_indel_germline_filtered']] <-
     'gnomADe_OTH_AF',
     'gnomADe_SAS_AF')
 
+####----SNV/Indel somatic actionable-----#####
 dt_display[['snv_indel_gene_actionable']] <-
   c('MOLECULAR_ALTERATION',
     'GENENAME',
@@ -816,6 +863,7 @@ dt_display[['snv_indel_gene_actionable']] <-
     'GENOMIC_CHANGE',
     'GENOME_VERSION')
 
+####----SNV/Indel somatic evidence item-----#####
 dt_display[['snv_indel_eitem']] <-
   c('MOLECULAR_ALTERATION',
     'BM_CANCER_TYPE',
@@ -836,7 +884,7 @@ dt_display[['snv_indel_eitem']] <-
     'BM_RESOLUTION',
     'BM_MATCH')
 
-
+####----SNV/Indel somatic tier 3-----#####
 dt_display[['snv_indel_tier3']] <-
   c('SYMBOL',
     'ALTERATION',
@@ -881,6 +929,7 @@ dt_display[['snv_indel_tier3']] <-
     'GENOMIC_CHANGE',
     'GENOME_VERSION')
 
+####----SNV/Indel somatic tier 4-----#####
 dt_display[['tier4']] <-
   c('SYMBOL',
     'ALTERATION',
@@ -1148,7 +1197,12 @@ germline_filter_levels <-
     "GERMLINE_PON"
     )
 
+exonic_filter_levels <-
+  c("SOMATIC - EXONIC",
+    "SOMATIC - NONEXONIC")
+
 usethis::use_data(germline_filter_levels, overwrite = T)
+usethis::use_data(exonic_filter_levels, overwrite = T)
 
 rm(cancer_phenotypes_regex,
    effect_prediction_algos,
