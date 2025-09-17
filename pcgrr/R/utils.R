@@ -845,51 +845,73 @@ filter_read_support <- function(vcf_df, config = NULL) {
   if("DP_TUMOR" %in% colnames(vcf_df)){
     if (!any(is.na(vcf_df$DP_TUMOR)) &
         !is.null(config$somatic_snv$allelic_support$tumor_dp_min)) {
+      #cat("DP_TUMOR - Number of rows before filtering - ", nrow(vcf_df), "\n")
+      #cat("DP_TUMOR - Filtering criteria used: ", config$somatic_snv$allelic_support$tumor_dp_min, "\n")
       vcf_df <- dplyr::filter(
         vcf_df,
         .data$DP_TUMOR >= config$somatic_snv$allelic_support$tumor_dp_min)
+      #cat("DP_TUMOR - Number of rows after filtering: ", nrow(vcf_df), "\n")
     }
   }
   if("VAF_TUMOR" %in% colnames(vcf_df)){
     if (!any(is.na(vcf_df$VAF_TUMOR)) &
         !is.null(config$somatic_snv$allelic_support$tumor_af_min)) {
+      #cat("VAF_TUMOR - Number of rows before filtering - ", nrow(vcf_df), "\n")
+      #cat("VAF_TUMOR - Filtering criteria used: ", config$somatic_snv$allelic_support$tumor_af_min, "\n")
       vcf_df <- dplyr::filter(
         vcf_df,
         .data$VAF_TUMOR >= config$somatic_snv$allelic_support$tumor_af_min)
+      #cat("VAF_TUMOR - Number of rows after filtering: ", nrow(vcf_df), "\n")
     }
   }
   if("AD_TUMOR" %in% colnames(vcf_df)){
+
     if (!any(is.na(vcf_df$AD_TUMOR)) &
         !is.null(config$somatic_snv$allelic_support$tumor_ad_min)) {
+      #cat("AD_TUMOR - Number of rows before filtering - ", nrow(vcf_df), "\n")
+      #cat("AD_TUMOR - Filtering criteria used: ", config$somatic_snv$allelic_support$tumor_ad_min, "\n")
       vcf_df <- dplyr::filter(
         vcf_df,
         .data$AD_TUMOR >= config$somatic_snv$allelic_support$tumor_ad_min)
+      #cat("AD_TUMOR - Number of rows after filtering: ", nrow(vcf_df), "\n")
     }
+
   }
 
   if("VAF_CONTROL" %in% colnames(vcf_df)){
+
     if (!any(is.na(vcf_df$VAF_CONTROL)) &
         !is.null(config$somatic_snv$allelic_support$control_af_max)) {
+      #cat("VAF_CONTROL - Number of rows before filtering - ", nrow(vcf_df), "\n")
+      #cat("VAF_CONTROL - Filtering criteria used: ", config$somatic_snv$allelic_support$control_af_max, "\n")
       vcf_df <- dplyr::filter(
         vcf_df,
         .data$VAF_CONTROL <= config$somatic_snv$allelic_support$control_af_max)
+      #cat("VAF_CONTROL - Number of rows after filtering: ", nrow(vcf_df), "\n")
     }
+
   }
   if("DP_CONTROL" %in% colnames(vcf_df)){
     if (!any(is.na(vcf_df$DP_CONTROL)) &
         !is.null(config$somatic_snv$allelic_support$control_dp_min)) {
+      #cat("Number of rows before filtering - ", nrow(vcf_df), "\n")
+      #cat("DP_CONTROL - Filtering criteria used: ", config$somatic_snv$allelic_support$control_dp_min, "\n")
       vcf_df <- dplyr::filter(
         vcf_df,
         .data$DP_CONTROL >= config$somatic_snv$allelic_support$control_dp_min)
+      #cat("DP_CONTROL - Number of rows after filtering: ", nrow(vcf_df), "\n")
     }
   }
 
   if("AD_CONTROL" %in% colnames(vcf_df)){
     if (!any(is.na(vcf_df$AD_CONTROL)) &
         !is.null(config$somatic_snv$allelic_support$control_ad_max)) {
+      #cat("AD_CONTROL - Number of rows before filtering - ", nrow(vcf_df), "\n")
+      #cat("AD_CONTROL - Filtering criteria used: ", config$somatic_snv$allelic_support$control_ad_max, "\n")
       vcf_df <- dplyr::filter(
         vcf_df,
         .data$AD_CONTROL <= config$somatic_snv$allelic_support$control_ad_max)
+      #cat("AD_CONTROL - Number of rows after filtering: ", nrow(vcf_df), "\n")
     }
   }
 

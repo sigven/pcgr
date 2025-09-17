@@ -47,14 +47,14 @@ pdiakumis <- user("pdiakumis")
 ```
 
 ## v2.2.5
-- Date: **2025-09-15**
+- Date: **2025-09-17**
   - fixed bug in filtering variants wrt depth/allelic support (`r issue(268)`)
     - added new options `--tumor_ad_min` and `--control_ad_max` to set minimum
       number of reads supporting alt allele in tumor (maximum allowed in control samples)
       for a variant to be considered (also `--tmb_ad_min` for TMB calculation)
     - options for allelic support/depth now defaults to `None` if not provided by user
   - omit processing when zero PASS variants found in input VCF (`r issue(256)`)
-  - added gnomAD population frequencies from genome-sequenced samples to VEP annotation (for use with CPSR, option `--af_gnomadg` in VEP)
+  - added gnomAD population frequencies from genome-sequenced samples to VEP annotation (primarily for use with CPSR, option `--af_gnomadg` in VEP)
   - populated patient/sample sex status in HTML report
   - avoid showing allelic support settings that are not actively used/set by the user
     - similarly for TMB-dedicated filters

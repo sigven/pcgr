@@ -28,6 +28,12 @@ PCGR originates from the [Norwegian Cancer Genomics Consortium (NCGC)](https://c
 
 ### Top News
 
+- *September 17th 2025:* **2.2.5 release**
+  - fixing missing support for dp/af filtering, adding ad filtering
+  - skip processing when no PASS variants detected in input VCF
+  - more streamlined plotting functions in quarto report templates
+  - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
+
 - *September 8th 2025:* **2.2.4 release**
   - various minor bug fixes, addition of `--sex` option for sex-adjusted CNA annotation
   - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
@@ -87,7 +93,7 @@ PCGR originates from the [Norwegian Cancer Genomics Consortium (NCGC)](https://c
 
 ### Example reports
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15068347.svg)](https://doi.org/10.5281/zenodo.15068347)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17140659.svg)](https://doi.org/10.5281/zenodo.17140659)
 
 ### Why use PCGR?
 
