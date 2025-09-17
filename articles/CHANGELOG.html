@@ -32,7 +32,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -83,6 +83,47 @@
 
     
     
+<div class="section level2">
+<h2 id="v2-2-5">v2.2.5<a class="anchor" aria-label="anchor" href="#v2-2-5"></a>
+</h2>
+<ul>
+<li>Date: <strong>2025-09-17</strong>
+<ul>
+<li>fixed bug in filtering variants wrt depth/allelic support
+(<a href="https://github.com/sigven/pcgr/issues/268" class="external-link">issue268</a>)
+<ul>
+<li>added new options <code>--tumor_ad_min</code> and
+<code>--control_ad_max</code> to set minimum number of reads supporting
+alt allele in tumor (maximum allowed in control samples) for a variant
+to be considered (also <code>--tmb_ad_min</code> for TMB
+calculation)</li>
+<li>options for allelic support/depth now defaults to <code>None</code>
+if not provided by user</li>
+</ul>
+</li>
+<li>omit processing when zero PASS variants found in input VCF
+(<a href="https://github.com/sigven/pcgr/issues/256" class="external-link">issue256</a>)</li>
+<li>added gnomAD population frequencies from genome-sequenced samples to
+VEP annotation (primarily for use with CPSR, option
+<code>--af_gnomadg</code> in VEP)</li>
+<li>populated patient/sample sex status in HTML report</li>
+<li>avoid showing allelic support settings that are not actively
+used/set by the user
+<ul>
+<li>similarly for TMB-dedicated filters</li>
+</ul>
+</li>
+<li>fixed mutational spectra plot (indels) causing quarto overflow</li>
+<li>cleaned up plotting code (variant statistics, mutational signatures)
+<ul>
+<li>reduce opacity for pie chart categories that are being filtered
+(tumor-only runs)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
 <div class="section level2">
 <h2 id="v2-2-4">v2.2.4<a class="anchor" aria-label="anchor" href="#v2-2-4"></a>
 </h2>

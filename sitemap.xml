@@ -70,9 +70,11 @@
 <url><loc>https://sigven.github.io/pcgr/reference/get_genome_obj.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/reference/get_oncogenic_cna_events.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/reference/get_prevalent_site_signatures.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/reference/get_tumor_only_filtering_criteria.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/reference/get_valid_chromosomes.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/reference/get_variant_statistics.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/reference/het_af_germline_status.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/reference/hex_to_rgba.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/reference/hom_af_status.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/reference/immune_celltypes.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/reference/index.html</loc></url>
@@ -114,9 +116,12 @@
 <url><loc>https://sigven.github.io/pcgr/reference/order_variants.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/reference/pkg_exists.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/reference/plot_cna_segments.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/reference/plot_filtering_stats_exonic.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/reference/plot_filtering_stats_germline.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/reference/plot_signature_contributions.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/reference/plot_tmb_primary_site_tcga.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/reference/plot_value_boxes.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/reference/plotly_pie_chart.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/reference/pon_status.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/reference/predict_msi_status.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/reference/qc_var_eitems.html</loc></url>
@@ -130,6 +135,7 @@
 <url><loc>https://sigven.github.io/pcgr/reference/tier_af_distribution.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/reference/tsv_cols.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/reference/update_report.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/reference/vaf_plot.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/reference/variant_db_url.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/reference/variant_stats_report.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/reference/write_processed_vcf.html</loc></url>

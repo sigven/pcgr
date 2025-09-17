@@ -17,7 +17,7 @@ if any population frequency exceeds max_tolerated_af"><meta property="og:image" 
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -64,7 +64,7 @@ if any population frequency exceeds max_tolerated_af</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">assign_germline_popfreq_status</span><span class="op">(</span></span>
 <span>  <span class="va">sample_calls</span>,</span>
 <span>  pop <span class="op">=</span> <span class="st">"NFE"</span>,</span>
-<span>  dbquery <span class="op">=</span> <span class="st">"gnomADe"</span>,</span>
+<span>  dbquery <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gnomADe"</span>, <span class="st">"gnomADg"</span><span class="op">)</span>,</span>
 <span>  max_tolerated_af <span class="op">=</span> <span class="fl">0.01</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -82,7 +82,8 @@ if any population frequency exceeds max_tolerated_af</p>
 
 
 <dt id="arg-dbquery">dbquery<a class="anchor" aria-label="anchor" href="#arg-dbquery"></a></dt>
-<dd><p>gnomADe</p></dd>
+<dd><p>character vector with germline db sources,
+e.g. c("gnomADe","gnomADg")</p></dd>
 
 
 <dt id="arg-max-tolerated-af">max_tolerated_af<a class="anchor" aria-label="anchor" href="#arg-max-tolerated-af"></a></dt>

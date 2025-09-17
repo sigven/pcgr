@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -285,7 +285,7 @@
           <code><a href="filter_read_support.html">filter_read_support()</a></code>
 
         </dt>
-        <dd>Function that filters variant set on (depth, allelic fraction) for tumor and normal and filters according to settings</dd>
+        <dd>Function that filters variant set on depth and allelic fraction according to settings provided by user (tumor and control)</dd>
       </dl><dl><dt>
 
           <code><a href="generate_annotation_link.html">generate_annotation_link()</a></code>
@@ -390,6 +390,12 @@
         <dd>Function that retrieves prevalent signatures for a given tumor type/primary site Data is collected from COSMIC v3.4.</dd>
       </dl><dl><dt>
 
+          <code><a href="get_tumor_only_filtering_criteria.html">get_tumor_only_filtering_criteria()</a></code>
+
+        </dt>
+        <dd>Function that generates a string with filtering criteria for callsets coming from tumor-only sequencing</dd>
+      </dl><dl><dt>
+
           <code><a href="get_valid_chromosomes.html">get_valid_chromosomes()</a></code>
 
         </dt>
@@ -406,6 +412,12 @@
 
         </dt>
         <dd>Function that assigns a logical (STATUS_LIKELY_GERMLINE_HETEROZYGOUS) reflecting whether a variant is likely heterozygous (germline) - based on allelic fraction (VAF_TUMOR), presence in gnomAD and dbSNP, and no presence in TCGA and COSMIC</dd>
+      </dl><dl><dt>
+
+          <code><a href="hex_to_rgba.html">hex_to_rgba()</a></code>
+
+        </dt>
+        <dd>Convert Hex Color to RGBA</dd>
       </dl><dl><dt>
 
           <code><a href="hom_af_status.html">hom_af_status()</a></code>
@@ -648,6 +660,18 @@
         <dd>Plot allele-specific copy number segments</dd>
       </dl><dl><dt>
 
+          <code><a href="plot_filtering_stats_exonic.html">plot_filtering_stats_exonic()</a></code>
+
+        </dt>
+        <dd>Function that generates a pie chart for exonic/non-exonic variant statistics (for callsets coming from tumor-only sequencing)</dd>
+      </dl><dl><dt>
+
+          <code><a href="plot_filtering_stats_germline.html">plot_filtering_stats_germline()</a></code>
+
+        </dt>
+        <dd>Function that makes input data for an UpSet plot (filtering/intersection results) for the somatic-germline classification procedure</dd>
+      </dl><dl><dt>
+
           <code><a href="plot_signature_contributions.html">plot_signature_contributions()</a></code>
 
         </dt>
@@ -664,6 +688,12 @@
 
         </dt>
         <dd>Function that plots four value boxes with the most important findings in the cancer genome</dd>
+      </dl><dl><dt>
+
+          <code><a href="plotly_pie_chart.html">plotly_pie_chart()</a></code>
+
+        </dt>
+        <dd>Plotly Pie Chart - variant statistics</dd>
       </dl><dl><dt>
 
           <code><a href="pon_status.html">pon_status()</a></code>
@@ -736,6 +766,12 @@
 
         </dt>
         <dd>Function that updates a PCGR/CPSR report object structure</dd>
+      </dl><dl><dt>
+
+          <code><a href="vaf_plot.html">vaf_plot()</a></code>
+
+        </dt>
+        <dd>Function that generates a VAF distribution plot for a given PCGR report object</dd>
       </dl><dl><dt>
 
           <code><a href="variant_db_url.html">variant_db_url</a></code>
