@@ -1,6 +1,6 @@
 package:
   name: pcgr
-  version: 2.2.4 # versioned by bump2version
+  version: 2.2.5 # versioned by bump2version
 
 source:
   path: ../../..
