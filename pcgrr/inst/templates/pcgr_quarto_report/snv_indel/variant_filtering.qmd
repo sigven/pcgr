@@ -1,32 +1,27 @@
 ```{r variant_filtering_prep}
 #| eval: true
 #| output: asis
+#| echo: false
+
+#pcg_report <- readRDS(
+#  file = "/Users/sigven/project_data/packages/package__pcgr/pcgr/pcgrr/pcg_report.rds")
 
 to_settings <- pcg_report$settings$conf$somatic_snv$tumor_only
 
-if(NROW(pcg_report$content$snv_indel$callset$variant_unfiltered) > 0 &
-   "SOMATIC_CLASSIFICATION" %in% colnames(pcg_report$content$snv_indel$callset$variant_unfiltered)){
- 
-  filtering_stats <- 
-    plyr::count(
-      pcg_report$content$snv_indel$callset$variant_unfiltered$SOMATIC_CLASSIFICATION
-    ) |>
-    dplyr::arrange(dplyr::desc(freq)) |>
-    dplyr::rename(FILTER = x, FREQUENCY = freq) |>
-    dplyr::mutate(FILTER = stringr::str_replace_all(FILTER, "\\|", ", ")) |>
-    dplyr::mutate(FILTER = dplyr::if_else(
-      !(FILTER %in% pcgrr::germline_filter_levels) & FILTER != "SOMATIC",
-      "MULTIPLE FILTERS",
-      FILTER
-    )) |>
-    dplyr::group_by(FILTER) |>
-    dplyr::reframe(FREQUENCY = sum(FREQUENCY)) |>
-    dplyr::arrange(dplyr::desc(FREQUENCY)) |>
-    dplyr::mutate(FILTER = factor(
-      FILTER, levels = pcgrr::germline_filter_levels)) |>
-    dplyr::mutate(PERCENT = scales::percent(
-      FREQUENCY / sum(FREQUENCY), accuracy = 0.1))
+filtering_stats <- list()
+
+filtering_stats[['germline']] <- pcgrr::plot_filtering_stats_germline(
+    report = pcg_report)
+
+
+if(pcg_report$settings$conf$somatic_snv$tumor_only$exclude_nonexonic == TRUE){
+  
+  filtering_stats[['exonic']] <- pcgrr::plot_filtering_stats_exonic(
+    report = pcg_report,
+    plot_margin_bottom = 100)
 }
+
+
   
 ```
 
@@ -41,37 +36,39 @@ In an effort to minimize the presence/impact of germline events from input varia
 ```{r variant_filtering_pie}
 #| eval: true
 #| output: asis
+#| echo: false
 
-t <- list(
-  family = "Helvetica",
-  size = 15)
 
-variant_filter_pie <- 
-  plotly::plot_ly(
-    filtering_stats, 
-    marker = list(
-      colors = pcgrr::color_palette$tier$values,
-      line = list(color = '#FFFFFF', width = 1)
-      )
-    ) |>
-  plotly::add_pie(
-    filtering_stats, 
-    labels =~ FILTER,
-    values = ~FREQUENCY,
-    textinfo = "PERCENT",
-    type = 'pie', hole = 0.5) |>
-  plotly::layout(
-    legend = list(orientation = "h", font = t))
-
-bslib::card(
+if(pcg_report$settings$conf$somatic_snv$tumor_only$exclude_nonexonic == TRUE){
+  
+  bslib::card(
     full_screen = TRUE,
-    height = "400px",
+    height = "365px",
     bslib::card_header(
       class = "bg-dark", 
       paste0("Variant filtering statistics - ",
              pcg_report$settings$sample_id)),
-    variant_filter_pie
+    bslib::card_body(
+      bslib::layout_columns(
+        widths = c(6,6),
+        filtering_stats[['germline']]$plot,
+        filtering_stats[['exonic']]$plot
+      )
+    )
   )
+  
+}else{
+  bslib::card(
+    full_screen = TRUE,
+    height = "365px",
+    bslib::card_header(
+      class = "bg-dark", 
+      paste0("Variant filtering statistics - ",
+             pcg_report$settings$sample_id)),
+    bslib::card_body(
+      filtering_stats[['germline']]$plot)
+  )
+}
 
 
 ```

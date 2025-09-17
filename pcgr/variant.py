@@ -146,12 +146,18 @@ def set_allelic_support(variant_set: pd.DataFrame, allelic_support_tags: dict, l
     """
     Set allelic support for variants
     """
-    tag_to_info_val = {'control_dp_tag': 'DP_CONTROL', 'control_af_tag': 'VAF_CONTROL', 'tumor_dp_tag': 'DP_TUMOR', 'tumor_af_tag': 'VAF_TUMOR'}
+    tag_to_info_val = {'control_dp_tag': 'DP_CONTROL', 
+                        'control_af_tag': 'VAF_CONTROL', 
+                        'tumor_dp_tag': 'DP_TUMOR', 
+                        'tumor_af_tag': 'VAF_TUMOR'}
     
     for t in tag_to_info_val.keys():
         if tag_to_info_val[t] in variant_set.columns:
             variant_set[tag_to_info_val[t]] = np.nan
     
+    variant_set['AD_TUMOR'] = np.nan
+    variant_set['AD_CONTROL'] = np.nan
+
     for t in tag_to_info_val.keys():
         if allelic_support_tags[t] != "_NA_":
             if {allelic_support_tags[t], tag_to_info_val[t]}.issubset(variant_set.columns):
@@ -166,38 +172,57 @@ def set_allelic_support(variant_set: pd.DataFrame, allelic_support_tags: dict, l
                     else:
                         logger.warning(f"Unable to set read depth support for '{t}' - missing values deteted")
     
+    if variant_set[variant_set['DP_TUMOR'].isna()].empty and variant_set[variant_set['VAF_TUMOR'].isna()].empty:
+        # Calculate AD_TUMOR (floor of DP * VAF)
+        variant_set["AD_TUMOR"]   = np.floor(variant_set["DP_TUMOR"] * variant_set["VAF_TUMOR"]).astype(int)
+    
+    if variant_set[variant_set['DP_CONTROL'].isna()].empty and variant_set[variant_set['VAF_CONTROL'].isna()].empty:        
+        # Calculate AD_CONTROL (floor of DP * VAF)
+        variant_set["AD_CONTROL"] = np.floor(variant_set["DP_CONTROL"] * variant_set["VAF_CONTROL"]).astype(int)       
+
     return variant_set
 
-def calculate_tmb(variant_set: pd.DataFrame, tumor_dp_min: int, tumor_af_min: float, 
+def calculate_tmb(variant_set: pd.DataFrame, tumor_dp_min: int, tumor_af_min: float, tumor_ad_min: int,
                   target_size_mb: float, sample_id: str, tmb_fname: str, logger) -> int:
     """
     Calculate TMB for somatic variant set
     """
     logger.info(f"Calculating tumor mutational load/TMB from somatic call set - effective coding target size (Mb): {target_size_mb}")
     
-    if {'CONSEQUENCE','VAF_TUMOR','DP_TUMOR','VARIANT_CLASS'}.issubset(variant_set.columns):
+    if {'CONSEQUENCE','VAF_TUMOR','DP_TUMOR','AD_TUMOR','VARIANT_CLASS'}.issubset(variant_set.columns):
         tmb_data_set = \
-            variant_set[['CONSEQUENCE','DP_TUMOR','VAF_TUMOR','VARIANT_CLASS']]
+            variant_set[['CONSEQUENCE','DP_TUMOR','AD_TUMOR','VAF_TUMOR','VARIANT_CLASS']]
         
         n_rows_raw = len(tmb_data_set)
+        active_filters = {}
         if float(tumor_af_min) > 0:
+            active_filters['tumor_af'] = f'AF < {tumor_af_min}'
             ## filter variant set to those with VAF_TUMOR > tumor_af_min
-            if variant_set[variant_set['VAF_TUMOR'].isna()].empty is True:
-                tmb_data_set = tmb_data_set.loc[tmb_data_set['VAF_TUMOR'].astype(float) >= float(tumor_af_min),:]
-                #n_removed_af = n_rows_raw - len(tmb_data_set)
-                logger.info(f'Removing n = {n_rows_raw - len(tmb_data_set)} variants with allelic fraction (tumor sample) < {tumor_af_min}')
+            if variant_set[variant_set['VAF_TUMOR'].isna()].empty is True and len(tmb_data_set) > 0:
+                tmb_data_set = tmb_data_set.loc[tmb_data_set['VAF_TUMOR'].astype(float) >= float(tumor_af_min),:]              
             else:
                 logger.warning("Cannot filter on sequencing depth - 'VAF_TUMOR' contains missing values")
         if int(tumor_dp_min) > 0:
+            active_filters['tumor_dp'] = f'DP < {tumor_dp_min}'
             ## filter variant set to those with DP_TUMOR > tumor_dp_min
-            if variant_set[variant_set['DP_TUMOR'].isna()].empty is True:
+            if variant_set[variant_set['DP_TUMOR'].isna()].empty is True and len(tmb_data_set) > 0:
                 tmb_data_set = tmb_data_set.loc[tmb_data_set['DP_TUMOR'].astype(int) >= int(tumor_dp_min),:]
-                #n_removed_dp = n_rows_raw - len(tmb_data_set)
-                logger.info(f"Removing n = {n_rows_raw - len(tmb_data_set)} variants with sequencing depth (tumor sample) < {tumor_dp_min}")
             else:
                 logger.warning("Cannot filter on sequencing depth - 'DP_TUMOR' contains missing values")
+        if int(tumor_ad_min) > 0:
+            active_filters['tumor_ad'] = f'AD < {tumor_ad_min}'
+            ## filter variant set to those with AD_TUMOR > tumor_ad_min
+            if variant_set[variant_set['AD_TUMOR'].isna()].empty is True and len(tmb_data_set) > 0:
+                tmb_data_set = tmb_data_set.loc[tmb_data_set['AD_TUMOR'].astype(int) >= int(tumor_ad_min),:]                
+            else:
+                logger.warning("Cannot filter on allelic depth - 'AD_TUMOR' contains missing values")
+        
         
         tmb_categories = ['missense_only','coding_and_silent','coding_non_silent']
+        pct_tmb_filtered = round(float((n_rows_raw - len(tmb_data_set)) / n_rows_raw * 100),2)
+        if len(active_filters.keys()) > 0:
+            logger.info(f'Excluded n = {n_rows_raw - len(tmb_data_set)} ({pct_tmb_filtered}% of all) tumor '
+                        f'variants with {", ".join(active_filters.values())} for TMB calculation')
         
         regex_data = {}
         regex_data['missense_only'] = pcgr_vars.CSQ_MISSENSE_PATTERN

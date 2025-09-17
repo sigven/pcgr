@@ -60,7 +60,7 @@ by the user. The following sections may be included in the report:
 
 #### Example reports
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15068347.svg)](https://doi.org/10.5281/zenodo.15068347)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17140659.svg)](https://doi.org/10.5281/zenodo.17140659)
 
 
 ### SNVs/InDels
@@ -222,15 +222,25 @@ MES|<SCORE_DIFF>|SCORE_REF>|<SCORE_ALT>|EFFECT (MaxEntScan). |
 
 | Tag | Description |
 |-----|-------------|
-| `gnomADe_AF` | Adjusted global germline allele frequency ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
-| `gnomADe_AFR_AF` | African/American germline allele frequency ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
-| `gnomADe_AMR_AF` | American germline allele frequency ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
-| `gnomADe_SAS_AF` | South Asian germline allele frequency ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
-| `gnomADe_EAS_AF` | East Asian germline allele frequency ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
-| `gnomADe_FIN_AF` | Finnish germline allele frequency ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
-| `gnomADe_NFE_AF` | Non-Finnish European germline allele frequency ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
-| `gnomADe_OTH_AF` | Other germline allele frequency ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
-| `gnomADe_ASJ_AF` | Ashkenazi Jewish allele frequency ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
+| `gnomADe_AFR_AF` | African/American germline allele frequency - exome set ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
+| `gnomADe_AMR_AF` | Latino/Admixed American germline allele frequency - exome set ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
+| `gnomADe_AF` | Adjusted global germline allele frequency - exome set ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
+| `gnomADe_SAS_AF` | South Asian germline allele frequency - exome set ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
+| `gnomADe_EAS_AF` | East Asian germline allele frequency - exome set ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
+| `gnomADe_FIN_AF` | Finnish germline allele frequency - exome set ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
+| `gnomADe_NFE_AF` | Non-Finnish European germline allele frequency - exome set ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
+| `gnomADe_OTH_AF` | Other germline allele frequency - exome set ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
+| `gnomADe_ASJ_AF` | Ashkenazi Jewish allele frequency - exome set ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
+| `gnomADg_AFR_AF` | African/American germline allele frequency - genome set ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
+| `gnomADg_AMR_AF` | Latino/Admixed American germline allele frequency - genome set ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
+| `gnomADg_AF` | Adjusted global germline allele frequency - genome set ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
+| `gnomADg_SAS_AF` | South Asian germline allele frequency - genome set ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
+| `gnomADg_EAS_AF` | East Asian germline allele frequency - genome set ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
+| `gnomADg_FIN_AF` | Finnish germline allele frequency - genome set ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
+| `gnomADg_NFE_AF` | Non-Finnish European germline allele frequency - genome set ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
+| `gnomADg_MID_AF` | Middle Eastern germline allele frequency - genome set ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
+| `gnomADg_OTH_AF` | Other germline allele frequency - genome set ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
+| `gnomADg_ASJ_AF` | Ashkenazi Jewish allele frequency - genome set ([gnomAD release 4.1](http://gnomad.broadinstitute.org/)) |
 | `DBSNP_RSID` | [dbSNP](http://www.ncbi.nlm.nih.gov/SNP/) reference ID, as provided by VEP |
 | `COSMIC_MUTATION_ID` | Mutation identifier in [Catalog of somatic mutations in cancer](http://cancer.sanger.ac.uk/cancergenome/projects/cosmic/) database, as provided by VEP |
 | `TCGA_PANCANCER_COUNT` | Raw variant count across all TCGA tumor types |
@@ -292,53 +302,56 @@ The following variables are included in the TSV file (VCF tags issued by the use
 | 17. `EXONIC_STATUS` | Exonic status - flag indicating if consequence is silent/protein-altering/affecting splice sites|
 | 18. `DP_TUMOR` | Depth of coverage at variant position in tumor sample |
 | 19. `VAF_TUMOR` | Variant allele fraction at variant position in tumor sample |
-| 20. `DP_CONTROL` | Depth of coverage at variant position in control sample |
-| 21. `VAF_CONTROL` | Variant allele fraction at variant position in control sample |
-| 22. `MUTATION_HOTSPOT` | Mutation hotspot annotation |
-| 23. `MUTATION_HOTSPOT_CANCERTYPE` | Mutation hotspot-associated cancer types (from cancerhotspots.org) |
-| 24. `ACTIONABILITY_TIER` | Variant clinical actionability tier - AMP/ASCO/CAP implementation |
-| 25. `ACTIONABILITY` | Variant clinical actionability significance - AMP/ASCO/CAP implementation |
-| 26. `ACTIONABILITY_FRAMEWORK` | Variant clinical actionability framework - AMP/ASCO/CAP implementation |
-| 27. `ONCOGENICITY` | Oncogenicity annotation - ClinGen/CGC/VICC SOP implementation |
-| 28. `ONCOGENICITY_CODE` | Variant-matching oncogenicity code(s) - ClinGen/CGC/VICC SOP implementation |
-| 29. `ONCOGENICITY_SCORE` | Variant oncogenicity score - ClinGen/CGC/VICC SOP implementation |
-| 30. `HGVSc` | HGVS coding sequence name |
-| 31. `HGVSc_RefSeq` | HGVS coding sequence name (RefSeq) |
-| 32. `HGVSp` | HGVS protein sequence name |
-| 33. `CANONICAL` | Flag indicating if transcript is canonical |
-| 34. `CCDS` | CCDS identifier |
-| 35. `UNIPROT_ACC` | UniProt accession |
-| 36. `ENSEMBL_TRANSCRIPT_ID` | Ensembl transcript identifier |
-| 37. `ENSEMBL_PROTEIN_ID` | Ensembl protein identifier |
-| 38. `REFSEQ_TRANSCRIPT_ID` | RefSeq transcript identifier |
-| 39. `REFSEQ_PROTEIN_ID` | RefSeq protein identifier |
-| 40. `MANE_SELECT` | MANE transcript select |
-| 41. `MANE_PLUS_CLINICAL` | MANE transcript plus clinical |
-| 42. `CGC_TIER` | Cancer Gene Census tier |
-| 43. `CGC_GERMLINE` | Cancer Gene Census germline annotation |
-| 44. `CGC_SOMATIC` | Cancer Gene Census somatic annotation |
-| 45. `ONCOGENE` | Flag indicating if gene is oncogene (CGC/CancerMine/NCG) |
-| 46. `ONCOGENE_SUPPORT` | Oncogene annotation support (CGC/CancerMine/NCG) |
-| 47. `TUMOR_SUPPRESSOR` | Flag indicating if gene is tumor suppressor (CGC/CancerMine/NCG) |
-| 48. `TUMOR_SUPPRESSOR_SUPPORT` | Tumor suppressor annotation support (CGC/CancerMine/NCG) |
-| 49. `TARGETED_INHIBITORS2` | Targeted inhibitors |
-| 50. `EFFECT_PREDICTIONS` | Variant effect predictions - from dbNSFP |
-| 51. `SPLICE_EFFECT` | Splice effect annotations from MutSpliceDB and MaxEntScan (see details above) |
-| 52. `REGULATORY_ANNOTATION` | Regulatory annotation |
-| 53. `VEP_ALL_CSQ` | VEP consequence - all transcripts |
-| 54. `gnomADe_AF` | gnomAD exomes allele frequency - globally |
-| 55. `DBSNP_RSID` | dbSNP identifier |
-| 56. `COSMIC_ID` | COSMIC identifier |
-| 57. `TCGA_FREQUENCY` | Frequency of variant across TCGA tumor types. Format: `tumortype | percent affected | affected cases | total cases` |
-| 58. `TCGA_PANCANCER_COUNT` | Raw variant count across all TCGA tumor types |
-| 59. `CLINVAR_MSID` | ClinVar measureset identifier |
-| 60. `CLINVAR_CLASSIFICATION` | ClinVar variant classification |
-| 61. `CLINVAR_VARIANT_ORIGIN` | ClinVar variant origin |
-| 62. `CLINVAR_NUM_SUBMITTERS` | ClinVar number of submitters |
-| 63. `CLINVAR_REVIEW_STATUS_STARS` | ClinVar number of review status stars |
-| 64. `CLINVAR_CONFLICTED` | ClinVar variant classification is conflicted |
-| 65. `BIOMARKER_MATCH` | Biomarker match |
-| 66. `CALL_CONFIDENCE` | Call confidence |
+| 20. `AD_TUMOR` | Allelic depth (number of reads supporting alt allele) in tumor sample |
+| 21. `DP_CONTROL` | Depth of coverage at variant position in control sample |
+| 22. `VAF_CONTROL` | Variant allele fraction at variant position in control sample |
+| 23. `AD_CONTROL` | Allelic depth (number of reads supporting alt allele) in control sample |
+| 24. `MUTATION_HOTSPOT` | Mutation hotspot annotation |
+| 25. `MUTATION_HOTSPOT_CANCERTYPE` | Mutation hotspot-associated cancer types (from cancerhotspots.org) |
+| 26. `ACTIONABILITY_TIER` | Variant clinical actionability tier - AMP/ASCO/CAP implementation |
+| 27. `ACTIONABILITY` | Variant clinical actionability significance - AMP/ASCO/CAP implementation |
+| 28. `ACTIONABILITY_FRAMEWORK` | Variant clinical actionability framework - AMP/ASCO/CAP implementation |
+| 29. `ONCOGENICITY` | Oncogenicity annotation - ClinGen/CGC/VICC SOP implementation |
+| 30. `ONCOGENICITY_CODE` | Variant-matching oncogenicity code(s) - ClinGen/CGC/VICC SOP implementation |
+| 31. `ONCOGENICITY_SCORE` | Variant oncogenicity score - ClinGen/CGC/VICC SOP implementation |
+| 32. `HGVSc` | HGVS coding sequence name |
+| 33. `HGVSc_RefSeq` | HGVS coding sequence name (RefSeq) |
+| 34. `HGVSp` | HGVS protein sequence name |
+| 35. `CANONICAL` | Flag indicating if transcript is canonical |
+| 36. `CCDS` | CCDS identifier |
+| 37. `UNIPROT_ACC` | UniProt accession |
+| 38. `ENSEMBL_TRANSCRIPT_ID` | Ensembl transcript identifier |
+| 39. `ENSEMBL_PROTEIN_ID` | Ensembl protein identifier |
+| 40. `REFSEQ_TRANSCRIPT_ID` | RefSeq transcript identifier |
+| 41. `REFSEQ_PROTEIN_ID` | RefSeq protein identifier |
+| 42. `MANE_SELECT` | MANE transcript select |
+| 43. `MANE_PLUS_CLINICAL` | MANE transcript plus clinical |
+| 44. `CGC_TIER` | Cancer Gene Census tier |
+| 45. `CGC_GERMLINE` | Cancer Gene Census germline annotation |
+| 46. `CGC_SOMATIC` | Cancer Gene Census somatic annotation |
+| 47. `ONCOGENE` | Flag indicating if gene is oncogene (CGC/CancerMine/NCG) |
+| 48. `ONCOGENE_SUPPORT` | Oncogene annotation support (CGC/CancerMine/NCG) |
+| 49. `TUMOR_SUPPRESSOR` | Flag indicating if gene is tumor suppressor (CGC/CancerMine/NCG) |
+| 50. `TUMOR_SUPPRESSOR_SUPPORT` | Tumor suppressor annotation support (CGC/CancerMine/NCG) |
+| 51. `TARGETED_INHIBITORS2` | Targeted inhibitors |
+| 52. `EFFECT_PREDICTIONS` | Variant effect predictions - from dbNSFP |
+| 53. `SPLICE_EFFECT` | Splice effect annotations from MutSpliceDB and MaxEntScan (see details above) |
+| 54. `REGULATORY_ANNOTATION` | Regulatory annotation |
+| 55. `VEP_ALL_CSQ` | VEP consequence - all transcripts |
+| 56. `gnomADe_AF` | gnomAD exomes allele frequency - globally |
+| 57. `gnomADg_AF` | gnomAD genomes allele frequency - globally |
+| 58. `DBSNP_RSID` | dbSNP identifier |
+| 59. `COSMIC_ID` | COSMIC identifier |
+| 60. `TCGA_FREQUENCY` | Frequency of variant across TCGA tumor types. Format: `tumortype | percent affected | affected cases | total cases` |
+| 61. `TCGA_PANCANCER_COUNT` | Raw variant count across all TCGA tumor types |
+| 62. `CLINVAR_MSID` | ClinVar measureset identifier |
+| 63. `CLINVAR_CLASSIFICATION` | ClinVar variant classification |
+| 64. `CLINVAR_VARIANT_ORIGIN` | ClinVar variant origin |
+| 65. `CLINVAR_NUM_SUBMITTERS` | ClinVar number of submitters |
+| 66. `CLINVAR_REVIEW_STATUS_STARS` | ClinVar number of review status stars |
+| 67. `CLINVAR_CONFLICTED` | ClinVar variant classification is conflicted |
+| 68. `BIOMARKER_MATCH` | Biomarker match |
+| 69. `CALL_CONFIDENCE` | Call confidence |
 
 ##### Tumor-only runs
 

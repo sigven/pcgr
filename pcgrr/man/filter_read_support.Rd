@@ -2,22 +2,20 @@
 % Please edit documentation in R/utils.R
 \name{filter_read_support}
 \alias{filter_read_support}
-\title{Function that filters variant set on (depth, allelic fraction)
-for tumor and normal and filters according to settings}
+\title{Function that filters variant set on depth and allelic fraction
+according to settings provided by user (tumor and control)}
 \usage{
-filter_read_support(vcf_df, config = NULL, precision = 3)
+filter_read_support(vcf_df, config = NULL)
 }
 \arguments{
 \item{vcf_df}{data frame with variants}
 
 \item{config}{list with PCGR configuration settings}
-
-\item{precision}{number of significant digits for allelic fraction estimation}
 }
 \value{
 vcf_df
 }
 \description{
-Function that filters variant set on (depth, allelic fraction)
-for tumor and normal and filters according to settings
+Function that filters variant set on depth and allelic fraction
+according to settings provided by user (tumor and control)
 }

@@ -365,7 +365,8 @@ Gene symbols are color-coded according to their strength of association to cance
 
 
 dt_other_oncogenic <- pcgrr::get_oncogenic_cna_events(
-  cna_df_display = pcg_report[["content"]][["cna"]][["callset"]][["variant_display"]])
+  cna_df_display = 
+    pcg_report[["content"]][["cna"]][["callset"]][["variant_display"]])
 
 dt_other_oncongenic_cna <- DT::datatable(
   dt_other_oncogenic,

@@ -775,61 +775,244 @@ variant_stats_report <- function(
 }
 
 
-#' Function that filters variant set on (depth, allelic fraction)
-#' for tumor and normal and filters according to settings
+#' Function that filters variant set on depth and allelic fraction
+#' according to settings provided by user (tumor and control)
 #'
 #' @param vcf_df data frame with variants
 #' @param config list with PCGR configuration settings
-#' @param precision number of significant digits for allelic fraction estimation
 #'
 #' @return vcf_df
 #'
 #' @export
-filter_read_support <- function(vcf_df, config = NULL, precision = 3) {
-
-  pcgrr::log4r_info(paste0(
-    paste0("Filtering tumor variants based on allelic depth/fraction (min_dp_tumor=",
-           config$allelic_support$tumor_dp_min,
-           ", min_af_tumor=",
-           config$somatic_snv$allelic_support$tumor_af_min, ")"))
-  )
-
-  pcgrr::log4r_info(paste0(
-    "Filtering tumor variants based on allelic depth/fraction (min_dp_control=",
-    config$somatic_snv$allelic_support$control_dp_min,
-    ", max_af_control=",
-    config$allelic_support$control_af_max, ")"))
+filter_read_support <- function(vcf_df, config = NULL) {
 
   n_before_dp_af_filtering <- nrow(vcf_df)
-  if (!any(is.na(vcf_df$DP_TUMOR))) {
-    vcf_df <- dplyr::filter(
-      vcf_df,
-      .data$DP_TUMOR >= config$somatic_snv$allelic_support$tumor_dp_min)
+  actionable_or_hotspot_vars <- data.frame()
+
+  if("ACTIONABILITY_TIER" %in% colnames(vcf_df) &
+     "MUTATION_HOTSPOT" %in% colnames(vcf_df) &
+     "VAR_ID" %in% colnames(vcf_df) &
+     "SYMBOL" %in% colnames(vcf_df) &
+     "CONSEQUENCE" %in% colnames(vcf_df) &
+     "HGVSP" %in% colnames(vcf_df)){
+    actionable_or_hotspot_vars <-
+      vcf_df |>
+      dplyr::filter(
+        (!is.na(.data$ACTIONABILITY_TIER) &
+           .data$ACTIONABILITY_TIER <= 2) |
+          (!is.na(MUTATION_HOTSPOT))) |>
+      dplyr::select(c("VAR_ID","SYMBOL","CONSEQUENCE","HGVSP")) |>
+      dplyr::distinct()
   }
-  if (!any(is.na(vcf_df$VAF_TUMOR))) {
-    vcf_df <- dplyr::filter(
-      vcf_df,
-      .data$VAF_TUMOR >= config$somatic_snv$allelic_support$tumor_af_min)
+
+  warns_tumor <- 0
+  tumor_filtering_set <- FALSE
+  for(col in c("DP_TUMOR","VAF_TUMOR","AD_TUMOR")){
+    if(col %in% colnames(vcf_df)){
+      if(!is.null(config$somatic_snv$allelic_support$tumor_dp_min) |
+         !is.null(config$somatic_snv$allelic_support$tumor_af_min) |
+         !is.null(config$somatic_snv$allelic_support$tumor_ad_min)){
+        tumor_filtering_set <- TRUE
+        if (any(is.na(vcf_df[, col]))) {
+          pcgrr::log4r_warn(
+            paste0("Column '", col,
+                   "' contains <NA> values - unable to perform filtering on depth/allelic support"))
+          warns_tumor <- warns_tumor + 1
+        }
+      }
+    }
   }
-  if (!any(is.na(vcf_df$AF_CONTROL))) {
-    vcf_df <- dplyr::filter(
-      vcf_df,
-      .data$AF_CONTROL <= config$somatic_snv$allelic_support$control_af_max)
+
+  warns_control <- 0
+  control_filtering_set <- FALSE
+  for(col in c("DP_CONTROL","VAF_CONTROL","AD_CONTROL")){
+    if(col %in% colnames(vcf_df)){
+      if(!is.null(config$somatic_snv$allelic_support$control_dp_min) |
+         !is.null(config$somatic_snv$allelic_support$control_af_max) |
+         !is.null(config$somatic_snv$allelic_support$control_ad_max)){
+        control_filtering_set <- TRUE
+        if (any(is.na(vcf_df[, col]))) {
+          pcgrr::log4r_warn(
+            paste0("Column '", col,
+                   "' contains <NA> values - unable to perform filtering on depth/allelic support"))
+          warns_control <- warns_control + 1
+        }
+      }
+    }
   }
-  if (!any(is.na(vcf_df$DP_CONTROL))) {
-    vcf_df <- dplyr::filter(
-      vcf_df,
-      .data$DP_CONTROL >= config$somatic_snv$allelic_support$control_dp_min)
+
+
+  if("DP_TUMOR" %in% colnames(vcf_df)){
+    if (!any(is.na(vcf_df$DP_TUMOR)) &
+        !is.null(config$somatic_snv$allelic_support$tumor_dp_min)) {
+      #cat("DP_TUMOR - Number of rows before filtering - ", nrow(vcf_df), "\n")
+      #cat("DP_TUMOR - Filtering criteria used: ", config$somatic_snv$allelic_support$tumor_dp_min, "\n")
+      vcf_df <- dplyr::filter(
+        vcf_df,
+        .data$DP_TUMOR >= config$somatic_snv$allelic_support$tumor_dp_min)
+      #cat("DP_TUMOR - Number of rows after filtering: ", nrow(vcf_df), "\n")
+    }
   }
+  if("VAF_TUMOR" %in% colnames(vcf_df)){
+    if (!any(is.na(vcf_df$VAF_TUMOR)) &
+        !is.null(config$somatic_snv$allelic_support$tumor_af_min)) {
+      #cat("VAF_TUMOR - Number of rows before filtering - ", nrow(vcf_df), "\n")
+      #cat("VAF_TUMOR - Filtering criteria used: ", config$somatic_snv$allelic_support$tumor_af_min, "\n")
+      vcf_df <- dplyr::filter(
+        vcf_df,
+        .data$VAF_TUMOR >= config$somatic_snv$allelic_support$tumor_af_min)
+      #cat("VAF_TUMOR - Number of rows after filtering: ", nrow(vcf_df), "\n")
+    }
+  }
+  if("AD_TUMOR" %in% colnames(vcf_df)){
+
+    if (!any(is.na(vcf_df$AD_TUMOR)) &
+        !is.null(config$somatic_snv$allelic_support$tumor_ad_min)) {
+      #cat("AD_TUMOR - Number of rows before filtering - ", nrow(vcf_df), "\n")
+      #cat("AD_TUMOR - Filtering criteria used: ", config$somatic_snv$allelic_support$tumor_ad_min, "\n")
+      vcf_df <- dplyr::filter(
+        vcf_df,
+        .data$AD_TUMOR >= config$somatic_snv$allelic_support$tumor_ad_min)
+      #cat("AD_TUMOR - Number of rows after filtering: ", nrow(vcf_df), "\n")
+    }
+
+  }
+
+  if("VAF_CONTROL" %in% colnames(vcf_df)){
+
+    if (!any(is.na(vcf_df$VAF_CONTROL)) &
+        !is.null(config$somatic_snv$allelic_support$control_af_max)) {
+      #cat("VAF_CONTROL - Number of rows before filtering - ", nrow(vcf_df), "\n")
+      #cat("VAF_CONTROL - Filtering criteria used: ", config$somatic_snv$allelic_support$control_af_max, "\n")
+      vcf_df <- dplyr::filter(
+        vcf_df,
+        .data$VAF_CONTROL <= config$somatic_snv$allelic_support$control_af_max)
+      #cat("VAF_CONTROL - Number of rows after filtering: ", nrow(vcf_df), "\n")
+    }
+
+  }
+  if("DP_CONTROL" %in% colnames(vcf_df)){
+    if (!any(is.na(vcf_df$DP_CONTROL)) &
+        !is.null(config$somatic_snv$allelic_support$control_dp_min)) {
+      #cat("Number of rows before filtering - ", nrow(vcf_df), "\n")
+      #cat("DP_CONTROL - Filtering criteria used: ", config$somatic_snv$allelic_support$control_dp_min, "\n")
+      vcf_df <- dplyr::filter(
+        vcf_df,
+        .data$DP_CONTROL >= config$somatic_snv$allelic_support$control_dp_min)
+      #cat("DP_CONTROL - Number of rows after filtering: ", nrow(vcf_df), "\n")
+    }
+  }
+
+  if("AD_CONTROL" %in% colnames(vcf_df)){
+    if (!any(is.na(vcf_df$AD_CONTROL)) &
+        !is.null(config$somatic_snv$allelic_support$control_ad_max)) {
+      #cat("AD_CONTROL - Number of rows before filtering - ", nrow(vcf_df), "\n")
+      #cat("AD_CONTROL - Filtering criteria used: ", config$somatic_snv$allelic_support$control_ad_max, "\n")
+      vcf_df <- dplyr::filter(
+        vcf_df,
+        .data$AD_CONTROL <= config$somatic_snv$allelic_support$control_ad_max)
+      #cat("AD_CONTROL - Number of rows after filtering: ", nrow(vcf_df), "\n")
+    }
+  }
+
+  if(warns_tumor == 0 & tumor_filtering_set == TRUE){
+
+    filtering_criteria_used_tumor <- c()
+    if(!is.null(config$somatic_snv$allelic_support$tumor_dp_min)){
+      filtering_criteria_used_tumor <-
+        c(filtering_criteria_used_tumor,
+          paste0("min_dp_tumor = ",
+                 config$somatic_snv$allelic_support$tumor_dp_min))
+    }
+    if(!is.null(config$somatic_snv$allelic_support$tumor_af_min)){
+      filtering_criteria_used_tumor <-
+        c(filtering_criteria_used_tumor,
+          paste0("min_af_tumor = ",
+                 config$somatic_snv$allelic_support$tumor_af_min))
+    }
+    if(!is.null(config$somatic_snv$allelic_support$tumor_ad_min)){
+      filtering_criteria_used_tumor <-
+        c(filtering_criteria_used_tumor,
+          paste0("min_ad_tumor = ",
+                 config$somatic_snv$allelic_support$tumor_ad_min))
+    }
+
+
+    pcgrr::log4r_info(paste0(
+      "Tumor variant filtering based on allelic depth/fraction: ",
+      paste(filtering_criteria_used_tumor, collapse = ", ")
+    ))
+  }
+
+  if(warns_control == 0 & control_filtering_set == TRUE){
+
+    filtering_criteria_used_control <- c()
+    if(!is.null(config$somatic_snv$allelic_support$control_dp_min)){
+      filtering_criteria_used_control <-
+        c(filtering_criteria_used_control,
+          paste0("min_dp_control = ",
+                 config$somatic_snv$allelic_support$control_dp_min))
+    }
+    if(!is.null(config$somatic_snv$allelic_support$control_af_max)){
+      filtering_criteria_used_control <-
+        c(filtering_criteria_used_control,
+          paste0("max_af_control = ",
+                 config$somatic_snv$allelic_support$control_af_max))
+    }
+    if(!is.null(config$somatic_snv$allelic_support$control_ad_max)){
+      filtering_criteria_used_control <-
+        c(filtering_criteria_used_control,
+          paste0("max_ad_control = ",
+                 config$somatic_snv$allelic_support$control_ad_max))
+    }
+
+    pcgrr::log4r_info(paste0(
+      "Tumor variant filtering based on allelic depth/fraction: ",
+      paste(filtering_criteria_used_control, collapse = ", ")
+    ))
+  }
+
+
   n_removed <- n_before_dp_af_filtering - nrow(vcf_df)
   percentage <- round(as.numeric((n_removed / n_before_dp_af_filtering) * 100),
                       digits = 2)
   pcgrr::log4r_info(
-    paste0("Removed ", n_removed,
+    paste0("Excluded n = ", n_removed,
            " tumor variants (", percentage,
-           "%) based on thresholds for allelic depth/fraction"
+           "% of total) based on thresholds for AF/AD/DP support"
     )
   )
+
+  ## Issue warning if no variants are left after filtering
+  if(NROW(vcf_df) == 0){
+    pcgrr::log4r_warn(
+      paste0("NO tumor variants left after filtering on AF/AD/DP support - ",
+             "check input VCF and/or filtering settings"))
+  }
+
+  if(NROW(actionable_or_hotspot_vars) > 0){
+
+    missed_actionable_vars <-
+      actionable_or_hotspot_vars |>
+      dplyr::anti_join(
+        vcf_df, by = c("VAR_ID")) |>
+      dplyr::distinct()
+
+    if(NROW(missed_actionable_vars) > 0){
+      pcgrr::log4r_warn(
+        paste0("N = ", NROW(missed_actionable_vars),
+               " actionable variants/mutation hotspots excluded after filtering on AF/AD/DP support - ",
+               "check input VCF and/or filtering settings"))
+      pcgrr::log4r_warn(
+        paste0("Missed actionable variants/mutation hotspots: ",
+               paste0(missed_actionable_vars$SYMBOL,
+                      " (",missed_actionable_vars$CONSEQUENCE,
+                      ":",missed_actionable_vars$HGVSP,")",
+                      collapse = ", "))
+      )
+
+    }
+  }
 
   return(vcf_df)
 }
@@ -1094,4 +1277,100 @@ export_quarto_evars <- function(x) {
     tibble::deframe() |>
     as.list()
   do.call(Sys.setenv, vars)
+}
+
+#' Convert Hex Color to RGBA
+#'
+#' @param hex Hex color code (e.g. "#FF5733").
+#' @param alpha Alpha transparency value (0 to 1).
+#'
+#' @return RGBA color string (e.g. "rgba(255,87,51,0.5)").
+#' @export
+#'
+#'
+hex_to_rgba <- function(hex, alpha = 1) {
+  rgb <- col2rgb(hex)
+  sprintf(
+    "rgba(%d,%d,%d,%.2f)", rgb[1],
+    rgb[2], rgb[3], alpha)
+}
+
+
+#' Plotly Pie Chart - variant statistics
+#'
+#' Function that generates a pie chart using plotly
+#' for a given category in a data frame
+#'
+#' @param df_variant_stats Data frame with variant statistics
+#' @param category Category for pie chart (e.g. CODING_STATUS)
+#' @param plot_margin_top Top margin
+#' @param plot_margin_bottom Bottom margin
+#' @param plot_margin_left Left margin
+#' @param plot_margin_right Right margin
+#' @param font_family Font family
+#' @param font_size Font size
+#' @param pie_line_width Line width for pie chart segments
+#' @param opacity_filtered_categories Opacity for filtered categories
+#' @param hole_size_pie Hole size for pie chart (0 to 1)
+#' @return Plotly pie chart object
+#'
+#' @export
+#'
+plotly_pie_chart <- function(
+    df_variant_stats = NULL,
+    category = "CODING_STATUS",
+    plot_margin_top = 50,
+    plot_margin_bottom = 20,
+    plot_margin_left = 20,
+    plot_margin_right = 20,
+    font_family = "Helvetica",
+    font_size = 15,
+    pie_line_width = 3,
+    opacity_filtered_categories = 0.4,
+    hole_size_pie = 0.4){
+
+  invisible(assertthat::assert_that(
+    !is.null(df_variant_stats) &
+      is.data.frame(df_variant_stats) &
+      "N" %in% colnames(df_variant_stats) &
+      "Pct" %in% colnames(df_variant_stats) &
+      !is.null(category) &
+      is.character(category) &
+      category %in% colnames(df_variant_stats)
+  ))
+
+  data <- df_variant_stats
+  data$LABELS <-
+    as.character(data[[category]])  # force to character
+
+  p <- plotly::plot_ly(
+    data,
+    marker = list(
+      colors =
+        pcgrr::color_palette$tier$values,
+      line = list(
+        color = "#FFFFFF",
+        width = pie_line_width))) |>
+    plotly::add_pie(
+      labels = ~LABELS,   # safe because already character
+      values = ~N,
+      textinfo = "Pct",
+      hole = hole_size
+    ) |>
+    plotly::layout(
+      ## legend at the bottom
+      legend = list(
+        orientation = "h",
+        font = t,
+        xanchor = "center",
+        x = 0.5),
+      margin = list(
+        l = plot_margin_left,  # left margin
+        r = plot_margin_right,  # right margin
+        b = plot_margin_bottom,  # bottom margin
+        t = plot_margin_top   # top margin
+      ))
+
+  return(p)
+
 }

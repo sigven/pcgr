@@ -57,24 +57,25 @@ for(i in 1:NROW(ref_datasets)){
   s <- ""
   if(is.na(version)){
     if(!is.na(license_url)){
-      s <- paste0("    * [", source_full, "](", url, ") - ", description, " - [",
-                  license,"](", license_url, ")")
+      s <- glue::glue(
+        "    * [{source_full}]({url}) - {description} - [{license}]({license_url})")
     }else{
-      s <- paste0("    * [", source_full, "](", url, ") - ", description, " - ",
-                  license)
+      s <- glue::glue(
+        "    * [{source_full}]({url}) - {description} - {license}")
     }
   }else{
     if(!is.na(license_url)){
       if(source == "cgc" | source == "gepa" | source == "dbnsfp"){
-        s <- paste0("    * [", source_full, "](", url, ") - ", description, " (<b>", version, "</b>)",
-                    " - [<b>", license,"</b>](", license_url, ")")
+        s <- glue::glue(
+          "    * [{source_full}]({url}) - {description} (<b>{version}</b>) - [<b>{license}</b>]({license_url})")
       }else{
-        s <- paste0("    * [", source_full, "](", url, ") - ", description, " (<b>", version, "</b>)",
-                    " - [", license,"](", license_url, ")")
+        s <- glue::glue(
+          "    * [{source_full}]({url}) - {description} (<b>{version}</b>) - [{license}]({license_url})")
       }
     }else{
-       s <- paste0("    * [", source_full, "](", url, ") - ", description, " (<b>", version, "</b>)",
-                  " - ", license)
+      s <- glue::glue(
+        "    * [{source_full}]({url}) - {description} (<b>{version}</b>) - {license}"
+      )
     }
   }
   if(s != ""){

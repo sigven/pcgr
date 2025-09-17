@@ -62,10 +62,14 @@ def cli():
     optional_allelic_support.add_argument("--control_dp_tag", dest="control_dp_tag", default="_NA_", help="Specify VCF INFO tag for sequencing depth (control, must be Type=Integer, default: %(default)s")
     optional_allelic_support.add_argument("--control_af_tag", dest="control_af_tag", default="_NA_", help="Specify VCF INFO tag for variant allelic fraction (control, must be Type=Float, default: %(default)s")
     optional_allelic_support.add_argument("--call_conf_tag", dest="call_conf_tag", default="_NA_", help="Specify VCF INFO tag for somatic variant call confidence (must be categorical, e.g. Type=String, default: %(default)s")
-    optional_allelic_support.add_argument("--tumor_dp_min", type=int, default=0, dest="tumor_dp_min", help="If VCF INFO tag for sequencing depth (tumor) is specified and found, set minimum required depth for inclusion in report (default: %(default)s)")
-    optional_allelic_support.add_argument("--tumor_af_min", type=float, default=0, dest="tumor_af_min", help="If VCF INFO tag for variant allelic fraction (tumor) is specified and found, set minimum required AF for inclusion in report (default: %(default)s)")
-    optional_allelic_support.add_argument("--control_dp_min", type=int, default=0, dest="control_dp_min", help="If VCF INFO tag for sequencing depth (control) is specified and found, set minimum required depth for inclusion in report (default: %(default)s)")
-    optional_allelic_support.add_argument("--control_af_max", type=float, default=1, dest="control_af_max", help="If VCF INFO tag for variant allelic fraction (control) is specified and found, set maximum tolerated AF for inclusion in report (default: %(default)s)")
+    optional_allelic_support.add_argument("--tumor_dp_min", type=int, default=None, dest="tumor_dp_min", help="If VCF INFO tag for sequencing depth (tumor) is specified and found, set minimum required depth for inclusion in report (default: %(default)s)")
+    optional_allelic_support.add_argument("--tumor_ad_min", type=int, default=None, dest="tumor_ad_min", 
+    help="If VCF INFO tag for sequencing depth (tumor) and variant allelic fraction (tumor) are specified and found, set minimum required allelic depth (tumor, i.e. number of reads supporting alternate allele) for inclusion in report (default: %(default)s)")
+    optional_allelic_support.add_argument("--tumor_af_min", type=float, default=None, dest="tumor_af_min", help="If VCF INFO tag for variant allelic fraction (tumor) is specified and found, set minimum required AF for inclusion in report (default: %(default)s)")
+    optional_allelic_support.add_argument("--control_dp_min", type=int, default=None, dest="control_dp_min", help="If VCF INFO tag for sequencing depth (control) is specified and found, set minimum required depth for inclusion in report (default: %(default)s)")
+    optional_allelic_support.add_argument("--control_ad_max", type=int, default=None, dest="control_ad_max", 
+    help="If VCF INFO tag for sequencing depth (control) and variant allelic fraction (control) are specified and found, set maximum allowed allelic depth (control, i.e. number of reads supporting alternate allele) for inclusion in report (default: %(default)s)")
+    optional_allelic_support.add_argument("--control_af_max", type=float, default=None, dest="control_af_max", help="If VCF INFO tag for variant allelic fraction (control) is specified and found, set maximum tolerated AF for inclusion in report (default: %(default)s)")
 
     optional_tumor_only.add_argument("--pon_vcf", dest="pon_vcf", help="VCF file with germline calls from Panel of Normals (PON) - i.e. blacklisted variants, (default: %(default)s)")
     maf_help_msg = "Exclude variants in tumor (SNVs/InDels, tumor-only mode) with MAF > pct"
@@ -95,8 +99,9 @@ def cli():
 
     optional_tmb_msi.add_argument("--estimate_tmb", action="store_true", help="Estimate tumor mutational burden from the total number of somatic mutations and target region size, default: %(default)s")
     optional_tmb_msi.add_argument("--tmb_display", dest="tmb_display", default="coding_and_silent", choices=["coding_and_silent", "coding_non_silent", "missense_only"], help="Type of TMB measure to show in report, default: %(default)s")
-    optional_tmb_msi.add_argument("--tmb_dp_min", dest="tmb_dp_min", default=0, help="If VCF INFO tag for sequencing depth (tumor) is specified and found, set minimum required sequencing depth for TMB calculation: default: %(default)s")
-    optional_tmb_msi.add_argument("--tmb_af_min", dest="tmb_af_min", default=0, help="If VCF INFO tag for allelic fraction (tumor) is specified and found, set minimum required allelic fraction for TMB calculation: default: %(default)s")
+    optional_tmb_msi.add_argument("--tmb_dp_min", dest="tmb_dp_min", default=None, help="If VCF INFO tag for sequencing depth (tumor) is specified and found, set minimum required sequencing depth for TMB calculation: default: %(default)s")
+    optional_tmb_msi.add_argument("--tmb_af_min", dest="tmb_af_min", default=None, help="If VCF INFO tag for allelic fraction (tumor) is specified and found, set minimum required allelic fraction for TMB calculation: default: %(default)s")
+    optional_tmb_msi.add_argument("--tmb_ad_min", dest="tmb_ad_min", default=None, help="If VCF INFO tag for sequencing depth (tumor) and allelic fraction (tumor) are specified and found, set minimum required allelic depth (tumor, i.e. number of reads supporting alternate allele) for TMB calculation: default: %(default)s")
     optional_tmb_msi.add_argument("--estimate_msi", action="store_true", help="Predict microsatellite instability status from patterns of somatic mutations/indels, default: %(default)s")
 
     optional_signatures.add_argument("--estimate_signatures", action="store_true", help="Estimate relative contributions of reference mutational signatures in query sample (re-fitting), default: %(default)s")
@@ -137,7 +142,8 @@ def cli():
     # verify parsed arguments
     arg_dict_verified = arg_checker.verify_args(arg_dict)
     # create config options
-    conf_options = create_config(arg_dict_verified, workflow = "PCGR")
+    logger = getlogger('pcgr-create-config')
+    conf_options = create_config(arg_dict_verified, workflow = "PCGR", logger = logger)
     # Verify existence of input files, define and check existence of output files
     input_data = arg_checker.verify_input_files(arg_dict_verified)
     output_data = arg_checker.define_output_files(arg_dict_verified)
@@ -270,18 +276,28 @@ def run_pcgr(input_data, output_data, conf_options):
         logger.info((
             f'Sequencing assay - effective (coding) target size: '
             f'{conf_options["assay_properties"]["effective_target_size_mb"]}Mb'))
-        logger.info((
-            f'Variant filtering settings - minimum sequencing depth tumor: '
-            f'{conf_options["somatic_snv"]["allelic_support"]["tumor_dp_min"]}'))
-        logger.info((
-            f'Variant filtering settings - minimum allelic fraction tumor: '
-            f'{conf_options["somatic_snv"]["allelic_support"]["tumor_af_min"]}'))
-        logger.info((
-            f'Variant filtering settings - minimum sequencing depth control: '
-            f'{conf_options["somatic_snv"]["allelic_support"]["control_dp_min"]}'))
-        logger.info((
-            f'Variant filtering settings - maximum allelic fraction control: '
-            f'{conf_options["somatic_snv"]["allelic_support"]["control_af_max"]}'))
+        if conf_options['somatic_snv']['allelic_support']['tumor_dp_tag'] != '_NA_':
+            logger.info((
+                f'Variant filtering settings - minimum sequencing depth tumor: '
+                f'{conf_options["somatic_snv"]["allelic_support"]["tumor_dp_min"]}'))
+        if conf_options['somatic_snv']['allelic_support']['tumor_af_tag'] != '_NA_':
+            logger.info((
+                f'Variant filtering settings - minimum allelic fraction tumor: '
+                f'{conf_options["somatic_snv"]["allelic_support"]["tumor_af_min"]}'))
+            logger.info((
+                f'Variant filtering settings - minimum allelic depth tumor: '
+                f'{conf_options["somatic_snv"]["allelic_support"]["tumor_ad_min"]}'))
+        if conf_options['somatic_snv']['allelic_support']['control_dp_tag'] != '_NA_':
+            logger.info((
+                f'Variant filtering settings - minimum sequencing depth control: '
+                f'{conf_options["somatic_snv"]["allelic_support"]["control_dp_min"]}'))
+        if conf_options['somatic_snv']['allelic_support']['control_af_tag'] != '_NA_':
+            logger.info((
+                f'Variant filtering settings - maximum allelic fraction control: '
+                f'{conf_options["somatic_snv"]["allelic_support"]["control_af_max"]}'))
+            logger.info((
+                f'Variant filtering settings - maximum allelic depth control: '
+                f'{conf_options["somatic_snv"]["allelic_support"]["control_ad_max"]}'))
         logger.info(f'Genome assembly: {conf_options["genome_assembly"]}')
         logger.info(f'Mutational signature estimation: {msig_estimation_set}')
         logger.info(f'MSI classification: {msi_prediction_set}')
@@ -515,7 +531,7 @@ def run_pcgr(input_data, output_data, conf_options):
                         if expression_data['gene'] is not None:
                             ## Write gene-level expression data to TSV
                             ## Convert object columns to string and replace NaN with '.'
-                            df = expression_data['transcript']
+                            df = expression_data['gene']
                             obj_cols = df.select_dtypes(include='object').columns
                             for col in obj_cols:
                                 df[col] = df[col].apply(lambda x: '.' if pd.isna(x) else x)
@@ -574,6 +590,7 @@ def run_pcgr(input_data, output_data, conf_options):
                 variant_set = variant_set,
                 tumor_dp_min = int(yaml_data['conf']['somatic_snv']['tmb']['tmb_dp_min']),
                 tumor_af_min = float(yaml_data['conf']['somatic_snv']['tmb']['tmb_af_min']),
+                tumor_ad_min = int(yaml_data['conf']['somatic_snv']['tmb']['tmb_ad_min']),
                 target_size_mb = float(yaml_data['conf']['assay_properties']['effective_target_size_mb']),
                 sample_id = yaml_data['sample_id'],
                 tmb_fname = tmb_fname,

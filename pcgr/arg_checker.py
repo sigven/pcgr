@@ -40,51 +40,118 @@ def verify_args(arg_dict):
 
     # check that tumor purity and tumor ploidy is set correctly
     if arg_dict['tumor_purity'] is not None:
-        if not (arg_dict['tumor_purity'] > 0 and arg_dict['tumor_purity'] <= 1):
+        if not (float(arg_dict['tumor_purity']) > 0 and float(arg_dict['tumor_purity']) <= 1):
             err_msg = f"Tumor purity value ('--tumor_purity' = {arg_dict['tumor_purity']}) must be within (0, 1]"
             error_message(err_msg, logger)
 
     if arg_dict['tumor_ploidy'] is not None:
-        if not arg_dict['tumor_ploidy'] > 0:
+        if not float(arg_dict['tumor_ploidy']) > 0:
             err_msg = f"Tumor ploidy value ('--tumor_ploidy' = {arg_dict['tumor_ploidy']}) must be > 0"
             error_message(err_msg, logger)
 
+    ## check that allelic support tags are set correctly when minimum/maximum depth/allelic fractions are set
+    if arg_dict['tumor_dp_tag'] == "_NA_" and arg_dict['tumor_dp_min'] is not None:
+        err_msg = f"Minimum sequencing depth tumor ('tumor_dp_min' = {arg_dict['tumor_dp_min']}) requires '--tumor_dp_tag' to be set"
+        error_message(err_msg, logger)
+    
+    if arg_dict['tumor_af_tag'] == "_NA_" and (arg_dict['tumor_af_min'] is not None or arg_dict['tumor_ad_min'] is not None):
+        err_msg = f"Minimum AF/AD tumor ('tumor_af_min' = {arg_dict['tumor_af_min']}, 'tumor_ad_min' = {arg_dict['tumor_ad_min']}) requires '--tumor_af_tag' to be set"
+        error_message(err_msg, logger)
+    
+    if arg_dict['control_dp_tag'] == "_NA_" and arg_dict['control_dp_min'] is not None:
+        err_msg = f"Minimum sequencing depth control ('control_dp_min' = {arg_dict['control_dp_min']}) requires '--control_dp_tag' to be set"
+        error_message(err_msg, logger)
+    
+    if arg_dict['control_af_tag'] == "_NA_" and (arg_dict['control_af_max'] is not None or arg_dict['control_ad_max'] is not None):
+        err_msg = f"Maximum AF/AD control ('control_af_max' = {arg_dict['control_af_max']}, 'control_ad_max' = {arg_dict['control_ad_max']}) requires '--control_af_tag' to be set"
+        error_message(err_msg, logger)
+
     # check that minimum/maximum depth/allelic fractions are set correctly
-    if int(arg_dict['tumor_dp_min']) < 0:
-        err_msg = f"Minimum sequencing depth tumor ('tumor_dp_min' = {arg_dict['tumor_dp_min']}) must be >= 0"
-        error_message(err_msg, logger)
+    dp_tumor_set = False
+    if arg_dict['tumor_dp_min'] is not None:
+        dp_tumor_set = True
+        if int(arg_dict['tumor_dp_min']) <= 0:
+            err_msg = f"Minimum sequencing depth tumor ('tumor_dp_min' = {arg_dict['tumor_dp_min']}) must be > 0"
+            error_message(err_msg, logger)
 
-    if float(arg_dict['tumor_af_min']) < 0 or float(arg_dict['tumor_af_min']) > 1:
-        err_msg = f"Minimum AF tumor ('tumor_af_min' = {arg_dict['tumor_af_min']}) must be within [0, 1]"
-        error_message(err_msg, logger)
+    if arg_dict['tumor_af_min'] is not None:
+        if (float(arg_dict['tumor_af_min']) > 1 or float(arg_dict['tumor_af_min']) < 0):
+            err_msg = f"Minimum AF tumor ('tumor_af_min' = {arg_dict['tumor_af_min']}) must be within [0, 1]"
+            error_message(err_msg, logger)
 
-    if int(arg_dict['control_dp_min']) < 0:
-        err_msg = f"Minimum sequencing depth control ('control_dp_min' = {arg_dict['control_dp_min']}) must be >= 0"
-        error_message(err_msg, logger)
+    dp_control_set = False
+    if arg_dict['control_dp_min'] is not None:
+        dp_control_set = True
+        if int(arg_dict['control_dp_min']) <= 0:            
+            err_msg = f"Minimum sequencing depth control ('control_dp_min' = {arg_dict['control_dp_min']}) must be > 0"
+            error_message(err_msg, logger)
 
-    if float(arg_dict['control_af_max']) < 0 or float(arg_dict['control_af_max']) > 1:
-        err_msg = f"Maximum AF control ('control_af_max' = {arg_dict['control_af_max']}) must be within [0, 1]"
-        error_message(err_msg, logger)
+    if arg_dict['tumor_ad_min'] is not None:
+        err = 0
+        if int(arg_dict['tumor_ad_min']) <= 0:
+            err = 1
+        if dp_tumor_set is True and int(arg_dict['tumor_ad_min']) > int(arg_dict['tumor_dp_min']):
+            err = 1
+        if err == 1:            
+            err_msg = (
+                f"Minimum allelic depth tumor - ('tumor_ad_min' = {arg_dict['tumor_ad_min']}) must be > 0 "
+                f"and less than or equal to minimum sequencing depth tumor ('tumor_dp_min' = {arg_dict['tumor_dp_min']})"
+            )
+            error_message(err_msg, logger)
+
+    if arg_dict['control_af_max'] is not None:
+        if float(arg_dict['control_af_max']) < 0 or float(arg_dict['control_af_max']) > 1:
+            err_msg = f"Maximum AF control ('control_af_max' = {arg_dict['control_af_max']}) must be within [0, 1]"
+            error_message(err_msg, logger)
     
+    if arg_dict['control_ad_max'] is not None:
+        err = 0
+        if int(arg_dict['control_ad_max']) < 0:
+            err = 1
+        if dp_control_set is True and int(arg_dict['control_ad_max']) > int(arg_dict['control_dp_min']):
+            err = 1
+        if err == 1:
+            err_msg = (
+                f"Maximum allelic depth control - ('control_ad_max' = {arg_dict['control_ad_max']}) must be >= 0 "
+                f"and less than or equal to minimum sequencing depth control ('control_dp_min' = {arg_dict['control_dp_min']})"
+            )
+            error_message(err_msg, logger)
     
-     # TMB: check that minimum/maximum depth/allelic fractions are set correctly
-    if int(arg_dict['tmb_dp_min']) < 0:
-        err_msg = f"Minimum sequencing depth tumor - TMB calculation ('tmb_dp_min' = {arg_dict['tmb_dp_min']}) must be >= 0"
-        error_message(err_msg, logger)
-        
-    if int(arg_dict['tmb_dp_min']) > 0 and (int(arg_dict['tmb_dp_min']) < int(arg_dict['tumor_dp_min'])):
-        err_msg = f"Minimum sequencing depth (tumor) for TMB calculation ('tmb_dp_min' = {str(arg_dict['tmb_dp_min'])}) must be "
-        err_msg += f"greater or equal to minimum sequencing depth tumor {str(arg_dict['tumor_dp_min'])} (i.e. filter for variant inclusion in report)"
-        error_message(err_msg, logger)
+    # TMB: check that minimum/maximum depth/allelic fractions are set correctly
+    if arg_dict['tmb_dp_min'] is not None:
+        if int(arg_dict['tmb_dp_min']) <= 0:
+            err_msg = f"Minimum sequencing depth tumor - TMB calculation ('tmb_dp_min' = {arg_dict['tmb_dp_min']}) must be > 0"
+            error_message(err_msg, logger)
+        if dp_tumor_set is True and (int(arg_dict['tmb_dp_min']) < int(arg_dict['tumor_dp_min'])):
+            err_msg = f"Minimum sequencing depth (tumor) for TMB calculation ('tmb_dp_min' = {str(arg_dict['tmb_dp_min'])}) must be "
+            err_msg += f"greater or equal to minimum sequencing depth tumor {str(arg_dict['tumor_dp_min'])} (i.e. global filter for variant inclusion in report)"
+            error_message(err_msg, logger)
+    
+    if arg_dict['tmb_ad_min'] is not None:
+        if int(arg_dict['tmb_ad_min']) <= 0:
+            err_msg = f"Minimum allelic depth tumor - TMB calculation ('tmb_ad_min' = {arg_dict['tmb_ad_min']}) must be > 0"
+            error_message(err_msg, logger)
+        if arg_dict['tumor_ad_min'] is not None:
+            if int(arg_dict['tmb_ad_min']) > 0 and int(arg_dict['tumor_ad_min']) > 0:
+                if int(arg_dict['tmb_ad_min']) < int(arg_dict['tumor_ad_min']):
+                    err_msg = f"Minimum allelic depth (tumor) for TMB calculation ('tmb_ad_min' = {str(arg_dict['tmb_ad_min'])}) must be "
+                    err_msg += f"greater or equal to minimum allelic depth tumor {str(arg_dict['tumor_ad_min'])} (i.e. global filter for variant inclusion in report)"
+                    error_message(err_msg, logger)
+                if dp_tumor_set is True and (int(arg_dict['tmb_ad_min']) > int(arg_dict['tmb_dp_min']) and int(arg_dict['tmb_dp_min']) > 0):
+                    err_msg = f"Minimum allelic depth (tumor) for TMB calculation ('tmb_ad_min' = {str(arg_dict['tmb_ad_min'])}) must be "
+                    err_msg += f"less than or equal to minimum sequencing depth (tumor) for TMB calculation ('tmb_dp_min' = {str(arg_dict['tmb_dp_min'])})"
+                    error_message(err_msg, logger)
 
-    if float(arg_dict['tmb_af_min']) < 0 or float(arg_dict['tmb_af_min']) > 1:
-        err_msg = f"Minimum AF (tumor) for TMB calculation ('tmb_af_min' = {arg_dict['tmb_af_min']}) must be within [0, 1]"
-        error_message(err_msg, logger)
+    if arg_dict['tmb_af_min'] is not None:
+        if float(arg_dict['tmb_af_min']) < 0 or float(arg_dict['tmb_af_min']) > 1:
+            err_msg = f"Minimum AF (tumor) for TMB calculation ('tmb_af_min' = {arg_dict['tmb_af_min']}) must be within [0, 1]"
+            error_message(err_msg, logger)
         
-    if float(arg_dict['tmb_af_min']) > 0 and (float(arg_dict['tmb_af_min']) < float(arg_dict['tumor_af_min'])):
-        err_msg = f"Minimum AF (tumor) for TMB calculation ('tmb_af_min' = {str(arg_dict['tmb_af_min'])}) must be "
-        err_msg += f"greater or equal to minimum AF tumor {str(arg_dict['tumor_dp_min'])} (i.e. filter for variant inclusion in report)"
-        error_message(err_msg, logger)
+        if arg_dict['tumor_af_min'] is not None:
+            if float(arg_dict['tmb_af_min']) > 0 and (float(arg_dict['tmb_af_min']) < float(arg_dict['tumor_af_min'])):
+                err_msg = f"Minimum AF (tumor) for TMB calculation ('tmb_af_min' = {str(arg_dict['tmb_af_min'])}) must be "
+                err_msg += f"greater or equal to minimum AF tumor ({str(arg_dict['tumor_af_min'])}, i.e. global filter for variant inclusion in report)"
+                error_message(err_msg, logger)
 
     # Check that coding target size region of sequencing assay is set correctly
     if float(arg_dict['effective_target_size_mb']) < 0 or float(arg_dict['effective_target_size_mb']) > float(pcgr_vars.CODING_EXOME_SIZE_MB):

@@ -256,89 +256,116 @@ load_somatic_snv_indel <- function(
         )
       )) |>
     pcgrr::order_variants(pos_var = 'POS') |>
-    pcgrr::exclude_non_chrom_variants()
+    pcgrr::exclude_non_chrom_variants() |>
+    pcgrr::filter_read_support(config = settings$conf)
 
 
   ## Tumor-only input
   if (as.logical(settings$conf$assay_properties$vcf_tumor_only) == TRUE) {
-    callset[['variant_unfiltered']] <-
-      callset[['variant']] |>
-      ## assign evidence tags for germline/somatic state of variants,
-      ## partially based on user-defined options
-      ## (population allele frequency thresholds)
-        pcgrr::assign_somatic_germline_evidence(
-          settings = settings) |>
+    if(NROW(callset[['variant']]) > 0){
 
-      ## assign somatic variant classification/status based on accumulation
-      ## of evidence tags and user-defined options
-        pcgrr::assign_somatic_classification(
-          settings = settings)
+      callset[['variant_unfiltered']] <-
+        callset[['variant']] |>
+        ## assign evidence tags for germline/somatic state of variants,
+        ## partially based on user-defined options
+        ## (population allele frequency thresholds)
+          pcgrr::assign_somatic_germline_evidence(
+            settings = settings) |>
 
-    ## Assign calls to filtered callset (SOMATIC_CLASSIFICATION = SOMATIC)
-    if("SOMATIC_CLASSIFICATION" %in%
-       colnames(callset[['variant_unfiltered']])){
-      callset[['variant']] <-
-        callset[['variant_unfiltered']] |>
-        dplyr::filter(
-          .data$SOMATIC_CLASSIFICATION == "SOMATIC")
+        ## assign somatic variant classification/status based on accumulation
+        ## of evidence tags and user-defined options
+          pcgrr::assign_somatic_classification(
+            settings = settings)
 
-      ## Issue warning if clinically actionable variants are filtered
-      ## with current filtering settings
-      n_actionable_filtered <-
-        callset[['variant_unfiltered']] |>
-        dplyr::filter(
-          !is.na(.data$ACTIONABILITY_TIER) &
-            .data$ACTIONABILITY_TIER <= 2 &
-            .data$SOMATIC_CLASSIFICATION != "SOMATIC") |>
-        NROW()
-
-      if(n_actionable_filtered > 0){
-        pcgrr::log4r_warn(
-          paste0(
-            "A total of n = ", n_actionable_filtered,
-            " clinically actionable ",
-            "variants were filtered as likely germline events"))
-      }
-
-      n_excluded_calls <- as.character(
-        formattable::comma(
-          (NROW(callset$variant_unfiltered) - NROW(callset$variant)),
-          digits = 0))
-
-      pcgrr::log4r_info(
-        paste0(
-          "Excluded n = ",
-          n_excluded_calls,
-          " variants aftering filtering of putative germline events"))
-
-      if(NROW(callset$variant) == 0){
-        pcgrr::log4r_warn(
-          "NO (n = 0) somatic variants remain after filtering of putative germline events")
-      }
-
-      if(as.logical(
-        settings$conf$somatic_snv$tumor_only[["exclude_nonexonic"]]) == TRUE &
-        NROW(callset[['variant']]) > 0 &
-        "EXONIC_STATUS" %in% colnames(callset[['variant']])){
-
-        callset[['variant']] <- callset[['variant']] |>
+      ## Assign calls to filtered callset (SOMATIC_CLASSIFICATION = SOMATIC)
+      if("SOMATIC_CLASSIFICATION" %in%
+         colnames(callset[['variant_unfiltered']])){
+        callset[['variant']] <-
+          callset[['variant_unfiltered']] |>
           dplyr::filter(
-            .data$EXONIC_STATUS == "exonic")
+            .data$SOMATIC_CLASSIFICATION == "SOMATIC")
+
+        ## Issue warning if clinically actionable variants are filtered
+        ## with current filtering settings
+        n_actionable_filtered <-
+          callset[['variant_unfiltered']] |>
+          dplyr::filter(
+            !is.na(.data$ACTIONABILITY_TIER) &
+              .data$ACTIONABILITY_TIER <= 2 &
+              .data$SOMATIC_CLASSIFICATION != "SOMATIC") |>
+          NROW()
+
+        if(n_actionable_filtered > 0){
+          pcgrr::log4r_warn(
+            paste0(
+              "A total of n = ", n_actionable_filtered,
+              " clinically actionable ",
+              "variants were filtered as likely germline events"))
+        }
+
+        n_excluded_calls_germline <- as.character(
+          formattable::comma(
+            (NROW(callset$variant_unfiltered) - NROW(callset$variant)),
+            digits = 0))
+
+        pcgrr::log4r_info(paste0(
+          "Tumor-only variant filtering based on multiple criteria - ",
+          pcgrr::get_tumor_only_filtering_criteria(
+            conf = settings$conf))
+        )
+
+        pcgrr::log4r_info(
+          paste0(
+            "Excluded n = ",
+            n_excluded_calls_germline,
+            " putative germline variants after applying the criteria above"))
 
         if(NROW(callset$variant) == 0){
           pcgrr::log4r_warn(
             "NO (n = 0) somatic variants remain after filtering of putative germline events")
         }
+
+        ## Option to exclude non-exonic variants
+        if(as.logical(
+          settings$conf$somatic_snv$tumor_only[["exclude_nonexonic"]]) == TRUE &
+          NROW(callset[['variant']]) > 0 &
+          "EXONIC_STATUS" %in% colnames(callset[['variant']])){
+
+          n_exonic_nonexonic <- NROW(callset[['variant']])
+          pcgrr::log4r_info(paste0(
+            "Tumor-only variant filtering based on exonic status only"
+          ))
+
+          callset[['variant']] <- callset[['variant']] |>
+            dplyr::filter(
+              .data$EXONIC_STATUS == "exonic")
+
+          n_excluded_calls_nonexonic <- as.character(
+            formattable::comma(
+              (n_exonic_nonexonic - NROW(callset$variant)),
+              digits = 0))
+
+          pcgrr::log4r_info(
+            paste0(
+              "Excluded n = ",
+              n_excluded_calls_nonexonic,
+              " variants aftering filtering of non-exonic variants"))
+
+          if(NROW(callset$variant) == 0){
+            pcgrr::log4r_warn(
+              "NO (n = 0) somatic variants remain after filtering of non-exonic variants")
+          }
+        }
+
+        ## filter also MAF file if provided
+        pcgrr::filter_maf_file(
+          callset = callset,
+          settings = settings)
+
+      }else{
+        pcgrr::log4r_fatal(
+          "Variant data.frame is lacking a 'SOMATIC_CLASSIFICATION' column")
       }
-
-      ## filter also MAF file if provided
-      pcgrr::filter_maf_file(
-        callset = callset,
-        settings = settings)
-
-    }else{
-      pcgrr::log4r_fatal(
-        "Variant data.frame is lacking a 'SOMATIC_CLASSIFICATION' column")
     }
   }
 
