@@ -32,7 +32,7 @@ def get_vep_command(file_paths, conf_options, input_vcf, output_vcf, debug = Fal
 
     # List all VEP flags used when calling VEP
     vep_flags = (
-        f'--hgvs --af_gnomad --af_gnomadg --max_af --variant_class --domains --symbol --protein --ccds --mane '
+        f'--hgvs --af_gnomade --af_gnomadg --max_af --variant_class --domains --symbol --protein --ccds --mane '
         f'--uniprot --appris --biotype --tsl --canonical --format vcf --cache --numbers '
         f'--total_length --allele_number --failed 1 --no_stats --no_escape --xref_refseq --vcf '
         f'--check_ref --dont_skip --flag_pick_allele_gene '
@@ -314,7 +314,6 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, grantham_scores,
     #gwas_hit = False
     #if var_gwas_info is not None:
     #    gwas_hit = True
-
     #found_in_target = 0
     #index = 1
     ## Retrieve the INFO element provided by VEP (default 'CSQ') in the VCF object, and

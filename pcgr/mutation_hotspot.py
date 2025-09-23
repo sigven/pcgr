@@ -4,7 +4,7 @@ import os
 import re
 import csv
 import gzip
-#from pcgr import annoutils
+
 from pcgr.annoutils import threeToOneAA
 
 from typing import Dict
@@ -75,8 +75,7 @@ def match_csq_mutation_hotspot(transcript_csq_elements, cancer_hotspots, rec, pr
 
    for csq in transcript_csq_elements:
       (consequence, symbol, entrezgene, hgvsc, hgvsp, exon, feature_type, feature, biotype) = csq.split(':')
-
-      if bool(re.search(r'^(missense|stop|start|inframe|splice_donor|splice_acceptor|frameshift)', consequence)) is not True:
+      if bool(re.search(r'^(missense|stop|start|inframe|splice_donor|splice_acceptor|frameshift)', consequence)) is False:
          continue
 
       hgvsp_short = threeToOneAA(hgvsp)

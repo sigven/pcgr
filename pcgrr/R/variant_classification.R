@@ -174,6 +174,7 @@ assign_amp_asco_tiers <- function(
             (!is.na(.data$TUMOR_SUPPRESSOR) &
                .data$TUMOR_SUPPRESSOR == TRUE &
                (.data$VARIANT_CLASS == "homdel" |
+                  .data$VARIANT_CLASS == "hemdel" |
                   .data$VARIANT_CLASS == "hetdel")) |
               (!is.na(.data$ONCOGENE) &
                  .data$ONCOGENE == TRUE &
@@ -228,6 +229,7 @@ assign_amp_asco_tiers <- function(
             (!is.na(.data$TUMOR_SUPPRESSOR) &
                .data$TUMOR_SUPPRESSOR == TRUE &
                (.data$VARIANT_CLASS == "homdel" |
+                  .data$VARIANT_CLASS == "hemdel" |
                   .data$VARIANT_CLASS == "hetdel")) |
               (!is.na(.data$ONCOGENE) &
                  .data$ONCOGENE == TRUE &

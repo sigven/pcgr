@@ -1,7 +1,9 @@
 
 ### Tumor-only filtering statistics
 
-```{r tumor_only, echo=F, results='asis'}
+```{r tumor_only}
+#| echo: false
+#| output: asis
 
 cat('Germline variant filter settings:\n')
 htmltools::br()
@@ -80,14 +82,21 @@ cat('</ol>')
 ```
 <br>
 
-```{r tumor_only_upset_title, echo = F, results='asis', eval=pcg_report[['content']][['tumor_only']][['upset_plot_valid']]}
+```{r tumor_only_upset_title}
+#| output: asis
+#| echo: false
+#| eval: !expr pcg_report[['content']][['tumor_only']][['upset_plot_valid']] == TRUE
 cat('<h4>Intersection of query with germline indicators - UpSet plot</h4>',sep="\n\n")
 cat('The plot below indicates, through an <a href=\'http://gehlenborglab.org/research/projects/upsetr\' target=\'_blank\'>UpSet plot</a>, the prevalence of the most prominent intersections for different sources of germline indicators in the query sample:')
 ```
 
 
 <br><br>
-```{r tumor_only_upset, echo = F, fig.width=10, fig.height=8, eval=pcg_report[['content']][['tumor_only']][['upset_plot_valid']]}
+```{r tumor_only_upset}
+#| echo: false
+#| fig-width: 10
+#| fig-height: 8
+#| eval: !expr pcg_report[['content']][['tumor_only']][['upset_plot_valid']] == TRUE
 upset_plot <- pcgrr::upset_plot_tumor_only(pcg_report[['content']][['tumor_only']][['upset_data']])
 upset_plot
 htmltools::br()
@@ -95,7 +104,11 @@ htmltools::br()
 
 <br>
 
-```{r tumor_only_NOTE, echo = F, results='asis', eval=T}
+```{r tumor_only_NOTE}
+#| echo: false
+#| output: asis
+#| eval: true
+
 htmltools::br()
 cat('<h4>IMPORTANT NOTE: All SNV/InDel analyses below are considering the filtered callset only, n =',pcg_report[['content']][['tumor_only']][['v_stat']][['nonexonic_n_remain']],'</h4>')
 htmltools::br()

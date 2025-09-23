@@ -43,6 +43,7 @@ def update_maf(maf_tmp_fname: str,
             if allelic_support_tags['tumor_dp_tag'] != "_NA_":                               
                 if {allelic_support_tags['tumor_dp_tag']}.issubset(raw_maf_data.columns):
                     if raw_maf_data[raw_maf_data[allelic_support_tags['tumor_dp_tag']].isna()].empty:
+
                         raw_maf_data.loc[:,"t_depth"] = raw_maf_data.loc[:,allelic_support_tags['tumor_dp_tag']]
                         
                         if 'tumor_af_tag' in allelic_support_tags: 
@@ -63,7 +64,6 @@ def update_maf(maf_tmp_fname: str,
                 if {allelic_support_tags['control_dp_tag']}.issubset(raw_maf_data.columns):
                     if raw_maf_data[raw_maf_data[allelic_support_tags['control_dp_tag']].isna()].empty:
                         raw_maf_data.loc[:,"n_depth"] = raw_maf_data.loc[:,allelic_support_tags['control_dp_tag']]
-                        
                         if 'control_af_tag' in allelic_support_tags: 
                             if allelic_support_tags['control_af_tag'] != "_NA_":    
                                 if {allelic_support_tags['control_af_tag']}.issubset(raw_maf_data.columns):

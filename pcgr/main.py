@@ -52,6 +52,7 @@ def cli():
     optional_assay.add_argument("--assay", dest="assay", default="WES", choices=[ "WGS", "WES","TARGETED"], help="Type of DNA sequencing assay performed for input data (VCF), default: %(default)s")
     optional_assay.add_argument("--effective_target_size_mb", type=float, default=34, dest="effective_target_size_mb", help="Effective target size in Mb (potentially limited by read depth) of sequencing assay (for TMB analysis) (default: %(default)s (WES/WGS))")
     optional_assay.add_argument("--tumor_only", action="store_true", help="Input VCF comes from tumor-only sequencing, calls will be filtered for variants of germline origin, (default: %(default)s)")
+    optional_sample.add_argument("--sex", dest="sex", choices=["FEMALE", "MALE", "UNKNOWN"], default="UNKNOWN",help="Sex of cancer case/sample (default: %(default)s)")
     optional_sample.add_argument("--tumor_site", dest="tsite", type=int, default=0, help="Optional integer code to specify primary tumor type/site of query sample,\nchoose any of the following identifiers:\n" + str(pcgr_vars.tumor_sites) + "\n(default: %(default)s - any tumor type)")
     optional_sample.add_argument("--tumor_purity", type=float, dest="tumor_purity", help="Estimated tumor purity (between 0 and 1) (default: %(default)s)")
     optional_sample.add_argument("--tumor_ploidy", type=float, dest="tumor_ploidy", help="Estimated tumor ploidy (default: %(default)s)")
@@ -61,10 +62,14 @@ def cli():
     optional_allelic_support.add_argument("--control_dp_tag", dest="control_dp_tag", default="_NA_", help="Specify VCF INFO tag for sequencing depth (control, must be Type=Integer, default: %(default)s")
     optional_allelic_support.add_argument("--control_af_tag", dest="control_af_tag", default="_NA_", help="Specify VCF INFO tag for variant allelic fraction (control, must be Type=Float, default: %(default)s")
     optional_allelic_support.add_argument("--call_conf_tag", dest="call_conf_tag", default="_NA_", help="Specify VCF INFO tag for somatic variant call confidence (must be categorical, e.g. Type=String, default: %(default)s")
-    optional_allelic_support.add_argument("--tumor_dp_min", type=int, default=0, dest="tumor_dp_min", help="If VCF INFO tag for sequencing depth (tumor) is specified and found, set minimum required depth for inclusion in report (default: %(default)s)")
-    optional_allelic_support.add_argument("--tumor_af_min", type=float, default=0, dest="tumor_af_min", help="If VCF INFO tag for variant allelic fraction (tumor) is specified and found, set minimum required AF for inclusion in report (default: %(default)s)")
-    optional_allelic_support.add_argument("--control_dp_min", type=int, default=0, dest="control_dp_min", help="If VCF INFO tag for sequencing depth (control) is specified and found, set minimum required depth for inclusion in report (default: %(default)s)")
-    optional_allelic_support.add_argument("--control_af_max", type=float, default=1, dest="control_af_max", help="If VCF INFO tag for variant allelic fraction (control) is specified and found, set maximum tolerated AF for inclusion in report (default: %(default)s)")
+    optional_allelic_support.add_argument("--tumor_dp_min", type=int, default=None, dest="tumor_dp_min", help="If VCF INFO tag for sequencing depth (tumor) is specified and found, set minimum required depth for inclusion in report (default: %(default)s)")
+    optional_allelic_support.add_argument("--tumor_ad_min", type=int, default=None, dest="tumor_ad_min", 
+    help="If VCF INFO tag for sequencing depth (tumor) and variant allelic fraction (tumor) are specified and found, set minimum required allelic depth (tumor, i.e. number of reads supporting alternate allele) for inclusion in report (default: %(default)s)")
+    optional_allelic_support.add_argument("--tumor_af_min", type=float, default=None, dest="tumor_af_min", help="If VCF INFO tag for variant allelic fraction (tumor) is specified and found, set minimum required AF for inclusion in report (default: %(default)s)")
+    optional_allelic_support.add_argument("--control_dp_min", type=int, default=None, dest="control_dp_min", help="If VCF INFO tag for sequencing depth (control) is specified and found, set minimum required depth for inclusion in report (default: %(default)s)")
+    optional_allelic_support.add_argument("--control_ad_max", type=int, default=None, dest="control_ad_max", 
+    help="If VCF INFO tag for sequencing depth (control) and variant allelic fraction (control) are specified and found, set maximum allowed allelic depth (control, i.e. number of reads supporting alternate allele) for inclusion in report (default: %(default)s)")
+    optional_allelic_support.add_argument("--control_af_max", type=float, default=None, dest="control_af_max", help="If VCF INFO tag for variant allelic fraction (control) is specified and found, set maximum tolerated AF for inclusion in report (default: %(default)s)")
 
     optional_tumor_only.add_argument("--pon_vcf", dest="pon_vcf", help="VCF file with germline calls from Panel of Normals (PON) - i.e. blacklisted variants, (default: %(default)s)")
     maf_help_msg = "Exclude variants in tumor (SNVs/InDels, tumor-only mode) with popmax MAF greater than this value"
@@ -81,8 +86,8 @@ def cli():
     optional_tumor_only.add_argument("--exclude_pon", action="store_true", help="Exclude variants occurring in PoN (Panel of Normals, if provided as VCF (--pon_vcf), default: %(default)s)")
     optional_tumor_only.add_argument("--exclude_likely_hom_germline", action="store_true", help="Exclude likely homozygous germline variants (allelic fraction of 1.0 for alternate allele in tumor - very unlikely somatic event), default: %(default)s)")
     optional_tumor_only.add_argument("--exclude_likely_het_germline", action="store_true", help="Exclude likely heterozygous germline variants (0.4-0.6 allelic fraction, AND presence in dbSNP + gnomAD, AND not existing as somatic record in COSMIC OR TCGA, default: %(default)s)")
-    optional_tumor_only.add_argument("--exclude_clinvar_germline", action="store_true", help="Exclude variants found in ClinVar (germline variant origin), defult: %(default)s)")
-    optional_tumor_only.add_argument("--exclude_dbsnp_nonsomatic", action="store_true", help="Exclude variants found in dbSNP (except for those present in ClinVar (somatic origin) OR TCGA OR COSMIC), defult: %(default)s)")
+    optional_tumor_only.add_argument("--exclude_clinvar_germline", action="store_true", help="Exclude variants found in ClinVar (of germline origin only), defult: %(default)s)")
+    optional_tumor_only.add_argument("--exclude_dbsnp_nonsomatic", action="store_true", help="Exclude variants found in dbSNP (except for those present in ClinVar (somatic origin), or found in TCGA, or overlapping with COSMIC entries), defult: %(default)s)")
     optional_tumor_only.add_argument("--exclude_nonexonic", action="store_true", help="Exclude non-exonic variants, default: %(default)s)")
 
     optional_vep.add_argument("--vep_n_forks", default=4, type=int, help="Number of forks (VEP option '--fork'), default: %(default)s")
@@ -95,8 +100,9 @@ def cli():
 
     optional_tmb_msi.add_argument("--estimate_tmb", action="store_true", help="Estimate tumor mutational burden from the total number of somatic mutations and target region size, default: %(default)s")
     optional_tmb_msi.add_argument("--tmb_display", dest="tmb_display", default="coding_and_silent", choices=["coding_and_silent", "coding_non_silent", "missense_only"], help="Type of TMB measure to show in report, default: %(default)s")
-    optional_tmb_msi.add_argument("--tmb_dp_min", dest="tmb_dp_min", default=0, help="If VCF INFO tag for sequencing depth (tumor) is specified and found, set minimum required sequencing depth for TMB calculation: default: %(default)s")
-    optional_tmb_msi.add_argument("--tmb_af_min", dest="tmb_af_min", default=0, help="If VCF INFO tag for allelic fraction (tumor) is specified and found, set minimum required allelic fraction for TMB calculation: default: %(default)s")
+    optional_tmb_msi.add_argument("--tmb_dp_min", dest="tmb_dp_min", default=None, help="If VCF INFO tag for sequencing depth (tumor) is specified and found, set minimum required sequencing depth for TMB calculation: default: %(default)s")
+    optional_tmb_msi.add_argument("--tmb_af_min", dest="tmb_af_min", default=None, help="If VCF INFO tag for allelic fraction (tumor) is specified and found, set minimum required allelic fraction for TMB calculation: default: %(default)s")
+    optional_tmb_msi.add_argument("--tmb_ad_min", dest="tmb_ad_min", default=None, help="If VCF INFO tag for sequencing depth (tumor) and allelic fraction (tumor) are specified and found, set minimum required allelic depth (tumor, i.e. number of reads supporting alternate allele) for TMB calculation: default: %(default)s")
     optional_tmb_msi.add_argument("--estimate_msi", action="store_true", help="Predict microsatellite instability status from patterns of somatic mutations/indels, default: %(default)s")
 
     optional_signatures.add_argument("--estimate_signatures", action="store_true", help="Estimate relative contributions of reference mutational signatures in query sample (re-fitting), default: %(default)s")
@@ -137,7 +143,8 @@ def cli():
     # verify parsed arguments
     arg_dict_verified = arg_checker.verify_args(arg_dict)
     # create config options
-    conf_options = create_config(arg_dict_verified, workflow = "PCGR")
+    logger = getlogger('pcgr-create-config')
+    conf_options = create_config(arg_dict_verified, workflow = "PCGR", logger = logger)
     # Verify existence of input files, define and check existence of output files
     input_data = arg_checker.verify_input_files(arg_dict_verified)
     output_data = arg_checker.define_output_files(arg_dict_verified)
@@ -271,18 +278,28 @@ def run_pcgr(input_data, output_data, conf_options):
         logger.info((
             f'Sequencing assay - effective (coding) target size: '
             f'{conf_options["assay_properties"]["effective_target_size_mb"]}Mb'))
-        logger.info((
-            f'Variant filtering settings - minimum sequencing depth tumor: '
-            f'{conf_options["somatic_snv"]["allelic_support"]["tumor_dp_min"]}'))
-        logger.info((
-            f'Variant filtering settings - minimum allelic fraction tumor: '
-            f'{conf_options["somatic_snv"]["allelic_support"]["tumor_af_min"]}'))
-        logger.info((
-            f'Variant filtering settings - minimum sequencing depth control: '
-            f'{conf_options["somatic_snv"]["allelic_support"]["control_dp_min"]}'))
-        logger.info((
-            f'Variant filtering settings - maximum allelic fraction control: '
-            f'{conf_options["somatic_snv"]["allelic_support"]["control_af_max"]}'))
+        if conf_options['somatic_snv']['allelic_support']['tumor_dp_tag'] != '_NA_':
+            logger.info((
+                f'Variant filtering settings - minimum sequencing depth tumor: '
+                f'{conf_options["somatic_snv"]["allelic_support"]["tumor_dp_min"]}'))
+        if conf_options['somatic_snv']['allelic_support']['tumor_af_tag'] != '_NA_':
+            logger.info((
+                f'Variant filtering settings - minimum allelic fraction tumor: '
+                f'{conf_options["somatic_snv"]["allelic_support"]["tumor_af_min"]}'))
+            logger.info((
+                f'Variant filtering settings - minimum allelic depth tumor: '
+                f'{conf_options["somatic_snv"]["allelic_support"]["tumor_ad_min"]}'))
+        if conf_options['somatic_snv']['allelic_support']['control_dp_tag'] != '_NA_':
+            logger.info((
+                f'Variant filtering settings - minimum sequencing depth control: '
+                f'{conf_options["somatic_snv"]["allelic_support"]["control_dp_min"]}'))
+        if conf_options['somatic_snv']['allelic_support']['control_af_tag'] != '_NA_':
+            logger.info((
+                f'Variant filtering settings - maximum allelic fraction control: '
+                f'{conf_options["somatic_snv"]["allelic_support"]["control_af_max"]}'))
+            logger.info((
+                f'Variant filtering settings - maximum allelic depth control: '
+                f'{conf_options["somatic_snv"]["allelic_support"]["control_ad_max"]}'))
         logger.info(f'Genome assembly: {conf_options["genome_assembly"]}')
         logger.info(f'Mutational signature estimation: {msig_estimation_set}')
         logger.info(f'MSI classification: {msi_prediction_set}')
@@ -410,6 +427,7 @@ def run_pcgr(input_data, output_data, conf_options):
                 )
         vcfanno_db_src_msg2 = \
                 "Annotation sources II (vcfanno): RepeatMasker, SimpleRepeats, WindowMaskerSDust"
+
         logger.info("PCGR - STEP 2: Variant annotation for cancer precision medicine with pcgr-vcfanno")
         logger.info(vcfanno_db_src_msg1)
         logger.info(vcfanno_db_src_msg2)
@@ -496,8 +514,14 @@ def run_pcgr(input_data, output_data, conf_options):
                 input_data["refdata_assembly_dir"], logger = logger)
             ## Write transcript-level expression data to TSV
             if 'transcript' in expression_data.keys():
-                if expression_data['transcript'] is not None:                    
-                    expression_data['transcript'].fillna('.').to_csv(
+                if expression_data['transcript'] is not None:
+                    ## Convert object columns to string and replace NaN with '.'
+                    df = expression_data['transcript']
+                    obj_cols = df.select_dtypes(include='object').columns
+                    for col in obj_cols:
+                        df[col] = df[col].apply(lambda x: '.' if pd.isna(x) else x)                    
+                    expression_data['transcript'] = df
+                    expression_data['transcript'].to_csv(
                         yaml_data['molecular_data']['fname_expression_tsv'], sep = "\t",
                         compression = "gzip", index = False)
 
@@ -508,7 +532,14 @@ def run_pcgr(input_data, output_data, conf_options):
                 else:                    
                     if 'gene' in expression_data.keys():
                         if expression_data['gene'] is not None:
-                            expression_data['gene'].fillna('.').to_csv(
+                            ## Write gene-level expression data to TSV
+                            ## Convert object columns to string and replace NaN with '.'
+                            df = expression_data['gene']
+                            obj_cols = df.select_dtypes(include='object').columns
+                            for col in obj_cols:
+                                df[col] = df[col].apply(lambda x: '.' if pd.isna(x) else x)
+                            expression_data['gene'] = df 
+                            expression_data['gene'].to_csv(
                                 yaml_data['molecular_data']['fname_expression_tsv'], sep = "\t",
                                 compression = "gzip", index = False)
 
@@ -563,6 +594,7 @@ def run_pcgr(input_data, output_data, conf_options):
                 variant_set = variant_set,
                 tumor_dp_min = int(yaml_data['conf']['somatic_snv']['tmb']['tmb_dp_min']),
                 tumor_af_min = float(yaml_data['conf']['somatic_snv']['tmb']['tmb_af_min']),
+                tumor_ad_min = int(yaml_data['conf']['somatic_snv']['tmb']['tmb_ad_min']),
                 target_size_mb = float(yaml_data['conf']['assay_properties']['effective_target_size_mb']),
                 sample_id = yaml_data['sample_id'],
                 tmb_fname = tmb_fname,
@@ -630,6 +662,7 @@ def run_pcgr(input_data, output_data, conf_options):
             cna_segment_file = input_cna,
             build = yaml_data['genome_assembly'],
             sample_id = yaml_data['sample_id'],
+            sex = yaml_data['conf']['sample_properties']['sex'],
             refdata_assembly_dir = input_data['refdata_assembly_dir'],
             n_copy_amplifications = yaml_data["conf"]['somatic_cna']['n_copy_gain'],
             overlap_fraction = 0.5,

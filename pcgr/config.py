@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
 from pcgr import pcgr_vars
-from pcgr.utils import check_file_exists, error_message
+from pcgr.utils import check_file_exists, error_message, warn_message
 
 import pandas as pd
 import os
 import csv
 
-def create_config(arg_dict, workflow = "PCGR"):
+def create_config(arg_dict, workflow = "PCGR", logger=None):
     
     conf_options = {}
     if workflow == "PCGR" or workflow == "CPSR":
@@ -45,6 +45,7 @@ def create_config(arg_dict, workflow = "PCGR"):
         conf_options['assay_properties'] = {}
         conf_options['sample_properties']['tumor_purity'] = 'NA'
         conf_options['sample_properties']['tumor_ploidy'] = 'NA'
+        conf_options['sample_properties']['sex'] = 'UNKNOWN'
         conf_options['sample_properties']['site'] = str(pcgr_vars.tsites[arg_dict['tsite']])
         conf_options['sample_properties']['site2'] = str(pcgr_vars.tsites[arg_dict['tsite']]).replace(" ","_").replace("/","@")
         conf_options['sample_properties']['dp_control_detected'] = 0
@@ -63,6 +64,22 @@ def create_config(arg_dict, workflow = "PCGR"):
             conf_options['sample_properties']['tumor_purity'] = float(arg_dict['tumor_purity'])
         if arg_dict['tumor_ploidy'] is not None:
             conf_options['sample_properties']['tumor_ploidy'] = float(arg_dict['tumor_ploidy'])
+        if arg_dict['sex'] is not None:
+            sex = str(arg_dict['sex'])
+            ## Breast, Ovary/Fallopian Tube, Uterus, Vulva/Vagina
+            if arg_dict['tsite'] == 6 or arg_dict['tsite'] == 18 or arg_dict['tsite'] == 29 or arg_dict['tsite'] == 30:
+                if sex == 'MALE':
+                    if arg_dict['tsite'] == 6:
+                        warn_message(f"Tumor site '{conf_options['sample_properties']['site']}' is typically observed in females - ensure '--sex' option is correctly set", logger)
+                    else:
+                        error_message(f"Tumor site '{conf_options['sample_properties']['site']}' is not observed in males - please check the '--sex' option", logger)
+            ## Prostate, Testis
+            if arg_dict['tsite'] == 23 or arg_dict['tsite'] == 26:
+                if sex == 'FEMALE':
+                    error_message(f"Tumor site '{conf_options['sample_properties']['site']}' is not observed in females - please check the '--sex' option", logger)
+
+            conf_options['sample_properties']['sex'] = str(arg_dict['sex'])
+
             
         #conf_options['clinicaltrials'] = {
         #    'run': int(arg_dict['include_trials'])
@@ -94,10 +111,12 @@ def create_config(arg_dict, workflow = "PCGR"):
                     
         conf_options['somatic_snv'] = {}
         conf_options['somatic_snv']['allelic_support'] = {
-            'tumor_dp_min': int(arg_dict['tumor_dp_min']),
-            'control_dp_min': int(arg_dict['control_dp_min']),
-            'tumor_af_min': float(arg_dict['tumor_af_min']),
-            'control_af_max': float(arg_dict['control_af_max']),
+            'tumor_dp_min': arg_dict['tumor_dp_min'],
+            'control_dp_min': arg_dict['control_dp_min'],
+            'tumor_af_min': arg_dict['tumor_af_min'],
+            'control_af_max': arg_dict['control_af_max'],
+            'tumor_ad_min': arg_dict['tumor_ad_min'],
+            'control_ad_max': arg_dict['control_ad_max'],
             'control_dp_tag': str(arg_dict['control_dp_tag']),
             'control_af_tag': str(arg_dict['control_af_tag']),
             'tumor_dp_tag': str(arg_dict['tumor_dp_tag']),
@@ -117,11 +136,16 @@ def create_config(arg_dict, workflow = "PCGR"):
         conf_options['somatic_snv']['msi'] = {
             'run': int(arg_dict['estimate_msi'])
         }
+
+        tmb_dp_min = 0 if arg_dict['tmb_dp_min'] is None else int(arg_dict['tmb_dp_min'])
+        tmb_af_min = 0.0 if arg_dict['tmb_af_min'] is None else float(arg_dict['tmb_af_min'])
+        tmb_ad_min = 0 if arg_dict['tmb_ad_min'] is None else int(arg_dict['tmb_ad_min'])
         conf_options['somatic_snv']['tmb'] = {
             'run': int(arg_dict['estimate_tmb']), 
             'tmb_display': arg_dict['tmb_display'],           
-            'tmb_dp_min': arg_dict['tmb_dp_min'],
-            'tmb_af_min': arg_dict['tmb_af_min']
+            'tmb_dp_min': tmb_dp_min,
+            'tmb_af_min': tmb_af_min,
+            'tmb_ad_min': tmb_ad_min
         }
 
         #conf_options['somatic_snv']['tumor_only']['popmax_af_gnomad'] = float(arg_dict['popmax_af_gnomad'])
@@ -278,7 +302,8 @@ def populate_config_data(conf_options: dict, refdata_assembly_dir: str, workflow
                 logger)
             
             if conf_data['conf']['gene_panel']['panel_id'] != "-1":
-                if conf_data['conf']['gene_panel']['panel_id'] not in ',':                     
+
+                if ',' not in conf_data['conf']['gene_panel']['panel_id']:
                     conf_data['conf']['gene_panel']['url'] = str(conf_data['conf']['gene_panel']['panel_genes'][0]['panel_url'])
                     conf_data['conf']['gene_panel']['description_trait'] = str(conf_data['conf']['gene_panel']['panel_genes'][0]['panel_name'])
                 else:
@@ -290,9 +315,6 @@ def populate_config_data(conf_options: dict, refdata_assembly_dir: str, workflow
                     conf_data['conf']['gene_panel']['description'] = "Genomics England PanelApp - multiple panels (" + ', '.join(names2) + ")"
                     
                     
-                
-        
-
     return(conf_data)
 
 def set_virtual_target_genes(panel_id: str, refdata_assembly_dir: str, diagnostic_grade_only: bool, 

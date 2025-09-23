@@ -5,11 +5,10 @@ import re
 import argparse
 import os
 import sys
-#import pandas as pd
 import gzip
 
 from cyvcf2 import VCF
-from pcgr.utils import error_message, check_subprocess, getlogger, random_id_generator, sort_bed, check_file_exists, remove_file
+from pcgr.utils import getlogger, error_message, check_subprocess, random_id_generator, sort_bed, check_file_exists, remove_file
 from pcgr.vcf import check_existing_vcf_info_tags, check_retained_vcf_info_tags
 from pcgr.annoutils import read_infotag_file,read_vcfanno_tag_file
 

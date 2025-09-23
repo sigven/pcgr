@@ -174,8 +174,10 @@ def run_cpsr(conf_options, input_data, output_data):
                     f"{'ON' if conf_options['variant_classification']['gwas_findings'] else 'OFF'}")
         logger.info("Include pharmacogenetic findings (PgX - variants related to potential toxicity to chemotherapy): " + \
                     f"{'ON' if conf_options['variant_classification']['pgx_findings'] else 'OFF'}")
+
         #logger.info(f"Reference population, germline variant frequencies (gnomAD - non-cancer subset): " + \
         #            f"{str(conf_options['variant_classification']['pop_gnomad']).upper()}")
+
         logger.info(f"Genome assembly: {conf_options['genome_assembly']}")
         print('----')
         

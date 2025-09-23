@@ -7,13 +7,22 @@ PCGR estimates TMB in three different ways, depending on the type of variants to
 #| eval: !expr (pcg_report$settings$conf$sample_properties$vaf_tumor_detected | pcg_report$settings$conf$sample_properties$dp_tumor_detected) == TRUE
 #| output: asis
 
-cat("For TMB calculation, requirements for sequencing depth and variant allele frequency (VAF) have been applied to filter out low-quality variants\n\n")
+if((pcg_report$settings$conf$sample_properties$dp_tumor_detected &
+    pcg_report$settings$conf$somatic_snv$tmb$tmb_dp_min > 0) |
+   (pcg_report$settings$conf$sample_properties$vaf_tumor_detected &
+    pcg_report$settings$conf$somatic_snv$tmb$tmb_af_min > 0)){
+  cat("For TMB calculation, requirements for sequencing depth and/or variant allele frequency (VAF) have been applied to filter out low-quality variants\n\n")
+}else{
+  cat("No dedicated filtering of variants based on sequencing depth or variant allele frequency (VAF) has been applied for TMB calculation\n\n")
+}
 
-if (pcg_report$settings$conf$sample_properties$dp_tumor_detected){
+if (pcg_report$settings$conf$sample_properties$dp_tumor_detected &
+    pcg_report$settings$conf$somatic_snv$tmb$tmb_dp_min > 0){
   m <- paste0("*    Minimum sequencing depth applied for TMB calculation: <b>", pcg_report$settings$conf$somatic_snv$tmb$tmb_dp_min, "</b>")
   cat(m,"\n")
 }
-if (pcg_report$settings$conf$sample_properties$vaf_tumor_detected){
+if (pcg_report$settings$conf$sample_properties$vaf_tumor_detected & 
+    pcg_report$settings$conf$somatic_snv$tmb$tmb_af_min > 0){
   m <- paste0("*    Minimum VAF applied for TMB calculation: <b>", pcg_report$settings$conf$somatic_snv$tmb$tmb_af_min, "</b>")
   cat(m,"\n")
 }

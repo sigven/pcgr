@@ -33,7 +33,7 @@ htmltools::br()
 
 <br>
 
-```{r tier1_variants, echo=FALSE}
+```{r tier1_variants}
 #| echo: false
 #| output: asis
 #| eval: !expr as.logical(pcg_report$content$snv_indel$vstats$n_actionable_tier1 != 0) == TRUE

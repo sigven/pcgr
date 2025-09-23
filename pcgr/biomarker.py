@@ -3,6 +3,7 @@
 import re
 import csv
 import gzip
+from pcgr import annoutils
 from pcgr.annoutils import threeToOneAA
 from pcgr.utils import check_file_exists
 
@@ -102,7 +103,7 @@ def load_biomarkers(logger, biomarker_variant_fname, biomarker_clinical_fname, b
 
                if entry_alias_type == 'exon':
                   exons = row['variant_exon']
-                  if bool(re.search(r'&|-', exons)) is not True:
+                  if bool(re.search(r'&|-', exons)) is False:
                      for exon in str(exons).split('|'):
                         varkey = str(row['entrezgene']) + '_' + str(exon)
                         if varkey not in variant_biomarkers['exon']:
@@ -138,6 +139,8 @@ def load_biomarkers(logger, biomarker_variant_fname, biomarker_clinical_fname, b
                      if bool(re.search(r'^(Amplification|Deletion|Loss)$', row['variant_alias'])) is True:
                         varkey = str(row['entrezgene']) + "_" + \
                            re.sub(r"transcript_","",str(row['variant_consequence']))
+                        if bool(re.search(r'^Loss$', row['variant_alias'])) is True: ## currently annotated with "loss_of_function_variant" as variant consequence
+                           varkey = str(row['entrezgene']) + '_ablation'
                         if varkey not in variant_biomarkers['other_gene']:
                            variant_biomarkers['other_gene'][varkey] = []
                         del row['variant_exon']

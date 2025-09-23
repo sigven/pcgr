@@ -23,11 +23,17 @@ get_excel_sheets <- function(report = NULL){
   if(!((base::typeof(report$content$sample_properties) == "list") == TRUE)){
     stop("report$content$sample_properties must be a list")
   }
-  init_sample_assay <-
+
+  ## initialize sample and assay information
+  sample_assay <-
     dplyr::bind_rows(
       data.frame(
         SAMPLE_ID = sample_id, CATEGORY = 'SAMPLE',
         PROPERTY = 'SITE', VALUE = NA
+      ),
+      data.frame(
+        SAMPLE_ID = sample_id, CATEGORY = 'SAMPLE',
+        PROPERTY = 'SEX', VALUE = NA
       ),
       data.frame(
         SAMPLE_ID = sample_id, CATEGORY = 'SAMPLE',
@@ -51,21 +57,21 @@ get_excel_sheets <- function(report = NULL){
       ),
     )
 
-  for(elem in c('SITE','TUMOR_PURITY','TUMOR_PLOIDY')){
+  for(elem in c('SITE','SEX','TUMOR_PURITY','TUMOR_PLOIDY')){
     if(tolower(elem) %in% names(report$content$sample_properties)){
-        init_sample_assay[init_sample_assay$PROPERTY == elem, 'VALUE'] <-
+        sample_assay[sample_assay$PROPERTY == elem, 'VALUE'] <-
           report$content$sample_properties[[tolower(elem)]]
       }
     }
 
   for(elem in c('TYPE','MODE','EFFECTIVE_TARGET_SIZE_MB')){
     if(tolower(elem) %in% names(report$content$assay_properties)){
-      init_sample_assay[init_sample_assay$PROPERTY == elem, 'VALUE'] <-
+      sample_assay[sample_assay$PROPERTY == elem, 'VALUE'] <-
         report$content$assay_properties[[tolower(elem)]]
     }
   }
 
-  excel_sheets[['SAMPLE_ASSAY']] <- init_sample_assay
+  excel_sheets[['SAMPLE_ASSAY']] <- sample_assay
 
   ## TMB
   if(!is.null(report$content$tmb)){

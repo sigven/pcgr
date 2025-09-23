@@ -99,6 +99,7 @@ def write_pass_vcf(annotated_vcf, logger):
     """
     #out_vcf = re.sub(r'\.annotated\.vcf\.gz$','.annotated.pass.vcf',annotated_vcf)
     out_vcf = re.sub(r'\.vcf\.gz$', '.pass.vcf', annotated_vcf)
+
     vcf = VCF(annotated_vcf)
     w = Writer(out_vcf, vcf)
 
@@ -117,15 +118,18 @@ def write_pass_vcf(annotated_vcf, logger):
     logger.info('Number of non-PASS/REJECTED variant calls: ' +
                 str(num_rejected))
     logger.info('Number of PASSed variant calls: ' + str(num_pass))
+
+    
+    vcf_no_pass_variants = False
     if num_pass == 0:
+        vcf_no_pass_variants = True
         logger.warning(
             'There are zero variants with a \'PASS\' filter in the VCF file')
-        os.system("bgzip -dc " + str(annotated_vcf) + "| egrep '^#' > " + str(out_vcf))
-    # else:
-    os.system('bgzip -f ' + str(out_vcf))
-    os.system('tabix -f -p vcf ' + str(out_vcf) + '.gz')
+        os.system(f"bgzip -dc {annotated_vcf} | egrep '^#' >  {out_vcf}")
+    os.system(f'bgzip -f {out_vcf}')
+    os.system(f'tabix -f -p vcf {out_vcf}.gz')
 
-    return
+    return(vcf_no_pass_variants)
 
 
 def map_regulatory_variant_annotations(vep_csq_records):
@@ -319,6 +323,7 @@ def assign_cds_exon_intron_annotations(csq_record, grantham_scores, logger):
                     csq_record['LOSS_OF_FUNCTION'] = False
                     csq_record['LOF_FILTER'] = "NON_ACCEPTOR_DISRUPTING"
 
+    ## intron position
     if re.search(pcgr_vars.CSQ_SPLICE_REGION_PATTERN, str(csq_record['Consequence'])) is not None:
         match = re.search(
             r"((-|\+)[0-9]{1,}(dup|del|inv|((ins|del|dup|inv|delins)(A|G|C|T){1,})|(A|C|T|G){1,}>(A|G|C|T){1,}))$", str(csq_record['HGVSc']))

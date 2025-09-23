@@ -34,7 +34,11 @@ VEP_PICK_CRITERIA = ['mane_select','mane_plus_clinical','canonical','biotype','c
 ## Gene expression comparative analysis resources
 EXPRESSION_DB_SOURCES = ['tcga','depmap','treehouse']
 
-## Sample identifier character length (max/min allowed)
+## Autosomes, sex chromosomes and mitochondrial chromosome
+AUTOSOMES = [str(x) for x in range(1,22)]
+SEX_CHROMOSOMES = ['X','Y']
+
+## Sample identifier length (max/min allowed)
 SAMPLE_ID_MAX_LENGTH = 40
 SAMPLE_ID_MIN_LENGTH = 3
 
@@ -275,6 +279,7 @@ SITE_TO_DISEASE = {
     'Uterus': ['TCGA_UCEC','TCGA_UCS']
 }
 
+## DBNSFP algorithm score to PCGR field name mapping
 DBNSFP_ALGORITHMS = {
     'aloft': 'DBNSFP_ALOFT',
     'alphamissense': 'DBNSFP_ALPHA_MISSENSE',

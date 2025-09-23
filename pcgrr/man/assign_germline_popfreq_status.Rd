@@ -5,12 +5,30 @@
 \title{Function that sets gnomAD_AF_ABOVE_TOLERATED to TRUE for variants
 if any gnomAD population frequency exceeds max_tolerated_af}
 \usage{
+<<<<<<< HEAD
 assign_germline_popfreq_status(sample_calls, max_af = 0.01)
+=======
+assign_germline_popfreq_status(
+  sample_calls,
+  pop = "NFE",
+  dbquery = c("gnomADe", "gnomADg"),
+  max_tolerated_af = 0.01
+)
+>>>>>>> main
 }
 \arguments{
 \item{sample_calls}{data frame with variants}
 
+<<<<<<< HEAD
 \item{max_af}{max tolerated germline allele frequency}
+=======
+\item{pop}{population code (1000 Genomes/gnomAD)}
+
+\item{dbquery}{character vector with germline db sources,
+e.g. c("gnomADe","gnomADg")}
+
+\item{max_tolerated_af}{max tolerated germline allele frequency}
+>>>>>>> main
 }
 \value{
 sample_calls

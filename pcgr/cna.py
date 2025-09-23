@@ -6,8 +6,8 @@ import pybedtools
 import pandas as pd
 import logging
 
-#from pcgr import utils
 from pybedtools import BedTool
+from pcgr import pcgr_vars
 from pcgr.annoutils import nuclear_chromosomes
 from pcgr.utils import error_message, warn_message, check_file_exists, remove_file
 from pcgr.biomarker import load_biomarkers
@@ -20,6 +20,7 @@ def annotate_cna_segments(output_segment_gene_fname: str,
                           refdata_assembly_dir: str, 
                           build: str, 
                           sample_id: str,
+                          sex: str,
                           n_copy_amplifications: int = 5,
                           overlap_fraction: float = 0.5,
                           expression_data: dict = None,
@@ -101,7 +102,7 @@ def annotate_cna_segments(output_segment_gene_fname: str,
         cna_query_segment_df[cna_query_segment_df['End'] > cna_query_segment_df['ChromLength']]
     
     ## Issue warning if segments exceed chromosome lengths
-    if segments_beyond_chromlength.empty is not True:
+    if segments_beyond_chromlength.empty is False:
         warn_msg = f"Ignoring parts of n = {len(segments_beyond_chromlength)} copy number segments that " + \
             f"exceed the chromosomal lengths of {build}"
         warn_message(warn_msg, logger)
@@ -140,17 +141,15 @@ def annotate_cna_segments(output_segment_gene_fname: str,
 
     cna_query_segment_df = annotate_transcripts(
        cna_query_segment_bed, output_dir, refdata_assembly_dir, overlap_fraction=overlap_fraction, logger=logger)
-
+    
     if cna_query_segment_df.empty is True:
-        warn_msg = "Could not find any protein-coding gene annotations for input CNA segments - returning."
+        warn_msg = "Could not find any protein-coding gene annotations for input CNA segments - omitting gene-level annotations"
         warn_message(warn_msg, logger)
         return -1
-    
-    ## load copy-number biomarker evidence
-   
     cna_query_segment_df['segment_length_mb'] = \
         ((cna_query_segment_df['segment_end'] - cna_query_segment_df['segment_start']) / 1e6).astype(float).round(4)
     
+    ## load copy-number biomarker evidence
     biomarkers = {}
     cna_actionable_dict = {}
     
@@ -172,34 +171,63 @@ def annotate_cna_segments(output_segment_gene_fname: str,
             
     cna_actionable_df = pd.DataFrame(cna_actionable_dict.items(), columns=['aberration_key', 'biomarker_match'])
     
-    ## Mark copy number amplifications (threshold defined by user) in input
+    ## Mark copy number amplifications (threshold defined by user) in input - AUTOSOMES
     cna_query_segment_df['aberration_key'] = 'nan'
     cna_query_segment_df['amp_cond'] = False
-    cna_query_segment_df.loc[cna_query_segment_df['n_major'] + cna_query_segment_df['n_minor'] >= n_copy_amplifications,"amp_cond"] = True
+    cna_query_segment_df.loc[
+        (cna_query_segment_df['n_major'] + cna_query_segment_df['n_minor']) >= n_copy_amplifications,"amp_cond"] = True
     
     cna_query_segment_df.loc[cna_query_segment_df.amp_cond, 'aberration_key'] =  \
         cna_query_segment_df.loc[cna_query_segment_df.amp_cond, 'entrezgene'].astype(str) + '_amplification'
     
-    ## Mark homozygous deletions in input
+    ## Mark homozygous deletions in input - autosomes
     cna_query_segment_df['homloss_cond'] = False
-    cna_query_segment_df.loc[cna_query_segment_df['n_major'] + cna_query_segment_df['n_minor'] == 0,"homloss_cond"] = True
+    cna_query_segment_df.loc[
+        (cna_query_segment_df['n_major'] + cna_query_segment_df['n_minor'] == 0) & \
+        cna_query_segment_df['chromosome'].isin(pcgr_vars.AUTOSOMES),"homloss_cond"] = True
     
-    ## Mark heterozygous deletions in input
+    ## Mark heterozygous deletions in input - autosomes
     cna_query_segment_df['hetloss_cond'] = False
-    cna_query_segment_df.loc[cna_query_segment_df['n_major'] + cna_query_segment_df['n_minor'] == 1,"hetloss_cond"] = True
+    cna_query_segment_df.loc[
+        (cna_query_segment_df['n_major'] + cna_query_segment_df['n_minor'] == 1) & \
+        cna_query_segment_df['chromosome'].isin(pcgr_vars.AUTOSOMES),"hetloss_cond"] = True
+
+    ## Sex chromosome specific annotations for losses
+    cna_query_segment_df['hemloss_cond'] = False
+    if sex != "UNKNOWN":
+        ## Mark hemizygous deletions for male samples
+        if sex == 'MALE':
+            cna_query_segment_df.loc[
+                (cna_query_segment_df['n_major'] + cna_query_segment_df['n_minor'] == 0) & \
+                cna_query_segment_df['chromosome'].isin(pcgr_vars.SEX_CHROMOSOMES),"hemloss_cond"] = True
+        else:
+            ## For females, XX is considered, so mark homozygous/heterozygous deletions
+            cna_query_segment_df.loc[
+                (cna_query_segment_df['n_major'] + cna_query_segment_df['n_minor'] == 0) & \
+                cna_query_segment_df['chromosome'].isin(pcgr_vars.SEX_CHROMOSOMES),"homloss_cond"] = True
+            cna_query_segment_df.loc[
+                (cna_query_segment_df['n_major'] + cna_query_segment_df['n_minor'] == 1) & \
+                cna_query_segment_df['chromosome'].isin(pcgr_vars.SEX_CHROMOSOMES),"hetloss_cond"] = True
+    else:
+        warn_msg = "Argument --sex is 'UNKNOWN' - skipping copy number loss annotations on sex chromosomes"
+        warn_message(warn_msg, logger)
+
     
     cna_query_segment_df['variant_class'] = 'undefined'
     cna_query_segment_df.loc[cna_query_segment_df.amp_cond, 'variant_class'] = 'gain'
     cna_query_segment_df.loc[cna_query_segment_df.homloss_cond, 'variant_class'] = 'homdel'
-    cna_query_segment_df.loc[cna_query_segment_df.hetloss_cond, 'variant_class'] = 'hetdel'    
+    cna_query_segment_df.loc[cna_query_segment_df.hetloss_cond, 'variant_class'] = 'hetdel'
+    cna_query_segment_df.loc[cna_query_segment_df.hemloss_cond, 'variant_class'] = 'hemdel'
     
     cna_query_segment_df.loc[cna_query_segment_df.homloss_cond, 'aberration_key'] =  \
         cna_query_segment_df.loc[cna_query_segment_df.homloss_cond, 'entrezgene'].astype(str) + '_ablation'
+    cna_query_segment_df.loc[cna_query_segment_df.hemloss_cond, 'aberration_key'] =  \
+        cna_query_segment_df.loc[cna_query_segment_df.hemloss_cond, 'entrezgene'].astype(str) + '_ablation'
 
     ## Append actionability evidence to input amplifications (column 'biomarker_match')
     cna_query_segment_df = cna_query_segment_df.merge(
         cna_actionable_df, left_on=["aberration_key"], right_on=["aberration_key"], how="left")
-    cna_query_segment_df.drop(['amp_cond', 'hetloss_cond', 'homloss_cond','aberration_key'], axis=1, inplace=True)    
+    cna_query_segment_df.drop(['amp_cond', 'hetloss_cond', 'homloss_cond','hemloss_cond','aberration_key'], axis=1, inplace=True)    
     cna_query_segment_df.loc[cna_query_segment_df['biomarker_match'].isnull(),"biomarker_match"] = '.'
     
     ## remove all temporary files
@@ -344,6 +372,9 @@ def annotate_transcripts(cna_segments_bt: BedTool,
             ## ignore transcripts that do not overlap with any copy number segment
             cna_transcript_annotations = \
                 cna_transcript_annotations[cna_transcript_annotations['segment_start'] != -1]
+
+            if cna_transcript_annotations.empty is True:                
+                return cna_segments_annotated
             
             if cna_transcript_annotations.empty is True:
                 #warn_msg = f"Could not find any protein-coding gene annotations for input CNA segments - returning."

@@ -305,9 +305,7 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
 
    all_gnomad_tags = pcgr_vars.GNOMAD_MAIN_EXOME_AF_TAGS + pcgr_vars.GNOMAD_MAIN_GENOME_AF_TAGS  
 
-   #if all(pop in variant_data.keys() for pop in all_gnomad_tags):
-
-      ## check if variant has MAF > 0.01 (SBVS1) or > 0.05 in any of five major gnomAD subpopulations (exome or genome set)
+   ## check if variant has MAF > 0.01 (SBVS1) or > 0.05 in any of five major gnomAD subpopulations (exome or genome set)
    for pop in all_gnomad_tags:
       if pop not in variant_data.keys():
          continue
@@ -337,10 +335,6 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
       ## check if variant is missing or with AF approximately zero in all five major gnomAD subpopulations (exome or genome set)
       if approx_zero_pop_freq[assay] == 5:
          variant_data["ONCG_OP4"] = True
-   
-   #else:
-   #   print("ERROR: Missing gnomAD AF tags in VCF INFO field")
-  
    
    ## check if variant is a loss-of-function variant in a tumor suppressor gene (Cancer Gene Census/CancerMine)
    if "TSG" in variant_data.keys() and \
