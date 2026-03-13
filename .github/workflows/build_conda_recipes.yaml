@@ -6,10 +6,11 @@ on:
       - main
 
 env:
-  atoken: ${{ secrets.ANACONDA_UPLOAD_TOKEN }}
-  recipe_path: conda/recipe
-  env_yml_path: conda/env/yml
-  env_lock_path: conda/env/lock
+  conda_token: ${{ secrets.ANACONDA_UPLOAD_TOKEN }}
+  conda_recipe: conda/recipe
+  conda_env_yml: conda/env/yml
+  conda_env_lock: conda/env/lock
+  conda_org: pcgr
   VERSION: '2.2.5' # versioned by bump2version
 jobs:
   build_pcgrr_conda_pkg:
@@ -21,15 +22,36 @@ jobs:
       run:
         shell: bash -l {0}
     steps:
-      - name: Code checkout
+      - name: 🚚 Code checkout
         uses: actions/checkout@v6
-      - name: Micromamba setup
-        uses: mamba-org/setup-micromamba@v2
+      - name: 👾 Miniforge setup
+        uses: conda-incubator/setup-miniconda@v3
         with:
-          environment-file: ${{ env.env_yml_path }}/condabuild.yml
-      - name: 🐍 Conda pkg build and upload
+          auto-update-conda: true
+          environment-file: ${{ env.conda_env_yml }}/condabuild.yml
+          activate-environment: condabuild_env
+          miniforge-version: latest
+      - name: 🐍🔧 Conda pkg build
         run: |
-          conda mambabuild ${recipe_path}/pcgrr -c conda-forge -c bioconda --token ${atoken}
+          EXTRA_CHANNEL=""
+          [[ "${{ github.ref }}" == "refs/heads/dev" ]] && EXTRA_CHANNEL="--channel ${{ env.conda_org }}/label/dev"
+          rattler-build build \
+            ${EXTRA_CHANNEL} \
+            --channel ${{ env.conda_org }} \
+            --channel bioconda \
+            --channel conda-forge \
+            --recipe ${conda_recipe}/pcgrr/recipe.yaml \
+            --output-dir ${RUNNER_TEMP}/out_pcgrr
+      - name: 🐍🪁 Conda pkg upload
+        run: |
+          pkg_path=$(find ${RUNNER_TEMP}/out_pcgrr -type f -name "*.conda")
+          LABEL_ARG=""
+          [[ "${{ github.ref }}" == "refs/heads/dev" ]] && LABEL_ARG="--channel dev"
+          rattler-build upload anaconda \
+            --owner ${{ env.conda_org }} \
+            --api-key ${conda_token} \
+            ${LABEL_ARG} \
+            ${pkg_path}
 
   build_pcgr_conda_pkg:
     # When merging to one of the branches above and the commit message matches
@@ -40,17 +62,50 @@ jobs:
       run:
         shell: bash -l {0}
     steps:
-      - name: Code checkout
+      - name: 🚚 Code checkout
         uses: actions/checkout@v6
-      - name: Micromamba setup
-        uses: mamba-org/setup-micromamba@v2
+      - name: 👾 Miniforge setup
+        uses: conda-incubator/setup-miniconda@v3
         with:
-          environment-file: ${{ env.env_yml_path }}/condabuild.yml
-      - name: 🐍 Conda pkg build and upload
+          auto-update-conda: true
+          environment-file: ${{ env.conda_env_yml }}/condabuild.yml
+          activate-environment: condabuild_env
+          miniforge-version: latest
+      - name: 🐍🔧 Conda pkg build
         run: |
-          conda mambabuild ${recipe_path}/pcgr -c conda-forge -c bioconda --token ${atoken} --quiet
+          EXTRA_CHANNEL=""
+          [[ "${{ github.ref }}" == "refs/heads/dev" ]] && EXTRA_CHANNEL="--channel ${{ env.conda_org }}/label/dev"
+          rattler-build build \
+            ${EXTRA_CHANNEL} \
+            --channel ${{ env.conda_org }} \
+            --channel bioconda \
+            --channel conda-forge \
+            --recipe ${conda_recipe}/pcgr/recipe.yaml \
+            --output-dir ${RUNNER_TEMP}/out_pcgr
+      - name: 🐍🪁 Conda pkg upload
+        run: |
+          pkg_path=$(find ${RUNNER_TEMP}/out_pcgr -type f -name "*.conda")
+          LABEL_ARG=""
+          [[ "${{ github.ref }}" == "refs/heads/dev" ]] && LABEL_ARG="--channel dev"
+          rattler-build upload anaconda \
+            --owner ${{ env.conda_org }} \
+            --api-key ${conda_token} \
+            ${LABEL_ARG} \
+            ${pkg_path}
+      - name: 🔒 Conda lock
+        run: |
+          CHANNEL_ARGS="--channel ${{ env.conda_org }} --channel conda-forge"
+          [[ "${{ github.ref }}" == "refs/heads/dev" ]] && CHANNEL_ARGS="--channel ${{ env.conda_org }}/label/dev ${CHANNEL_ARGS}"
+          conda-lock lock \
+            --file ${conda_env_yaml}/${pkg_name}.yaml \
+            ${CHANNEL_ARGS} \
+            -p linux-64
+          conda-lock render \
+            -p linux-64 \
+            conda-lock.yml \
+          && rm conda-lock.yml \
+          && mv conda-linux-64.lock ${conda_env_lock}/
 
-  # spin up fresh instance since conda-lock takes ages when run on previous one
   conda_lock:
     name: Conda lock
     runs-on: ubuntu-latest
@@ -59,22 +114,22 @@ jobs:
       run:
         shell: bash -l {0}
     steps:
-      - name: Code checkout
+      - name: 🚚 Code checkout
         uses: actions/checkout@v6
       - name: Micromamba setup
         uses: mamba-org/setup-micromamba@v2
         with:
-          environment-file: ${{ env.env_yml_path }}/condabuild.yml
+          environment-file: ${{ env.conda_env_yml }}/condabuild.yml
       - name: 🔒 Conda lock
         run: |
           # 1. generate a combined lock file
           # 2. render platform-specific locks
-          conda-lock lock --file ${env_yml_path}/pcgr.yml -p osx-64 -p linux-64
+          conda-lock lock --file ${conda_env_yml}/pcgr.yml -p osx-64 -p linux-64
           conda-lock render --kind explicit -p osx-64 -p linux-64 conda-lock.yml --filename-template 'pcgr-{platform}.lock' && rm conda-lock.yml
-          conda-lock lock --file ${env_yml_path}/pcgrr.yml -p osx-64 -p linux-64
+          conda-lock lock --file ${conda_env_yml}/pcgrr.yml -p osx-64 -p linux-64
           conda-lock render --kind explicit -p osx-64 -p linux-64 conda-lock.yml --filename-template 'pcgrr-{platform}.lock' && rm conda-lock.yml
-          mv pcgrr-*.lock ${env_lock_path}
-          mv pcgr-*.lock ${env_lock_path}
+          mv pcgrr-*.lock ${conda_env_lock}
+          mv pcgr-*.lock ${conda_env_lock}
       - name: Commit changes
         run: |
           git status
@@ -87,7 +142,7 @@ jobs:
       - name: 🌐 Website publish
         if: github.ref_name == 'main'
         run: |
-          micromamba env create -n pkgdownenv -f ${env_yml_path}/pkgdown.yml
+          micromamba env create -n pkgdownenv -f ${conda_env_yml}/pkgdown.yml
           micromamba activate pkgdownenv
           cp pcgrr/DESCRIPTION . # hack for pkgdown to work
           printf "pcgrr version:\n"
@@ -102,7 +157,7 @@ jobs:
       run:
         shell: bash -l {0}
     steps:
-      - name: Code checkout
+      - name: 🚚 Code checkout
         uses: actions/checkout@v6
       - id: pull_lock_commit
         name: 📥 Pull lock commit
@@ -129,7 +184,7 @@ jobs:
       - name: 🗑 Free Disk Space
         uses: jlumbroso/free-disk-space@main
       # work with tag from above
-      - name: Code checkout
+      - name: 🚚 Code checkout
         uses: actions/checkout@v6
         with:
           ref: v${{ env.VERSION }}
