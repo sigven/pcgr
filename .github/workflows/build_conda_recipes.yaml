@@ -13,11 +13,14 @@ env:
   conda_org: pcgr
   VERSION: '2.2.5' # versioned by bump2version
 jobs:
-  build_pcgrr_conda_pkg:
+  build_conda_pkg:
     # When merging to one of the branches above and the commit message matches
     if: "startsWith(github.event.head_commit.message, 'Bump version:')"
-    name: Build pcgrr conda pkg
+    name: Build ${{ matrix.pkg }} conda pkg
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        pkg: [pcgr, pcgrr]
     defaults:
       run:
         shell: bash -l {0}
@@ -36,55 +39,15 @@ jobs:
           DEV_CHANNEL=""
           [[ "${{ github.ref }}" == "refs/heads/dev" ]] && DEV_CHANNEL="--channel ${{ env.conda_org }}/label/dev"
           rattler-build build \
-            --recipe-dir ${conda_recipe}/pcgrr \
+            --recipe-dir ${conda_recipe}/${{ matrix.pkg }} \
             ${DEV_CHANNEL} \
             --channel ${{ env.conda_org }} \
             --channel bioconda \
             --channel conda-forge \
-            --output-dir ${RUNNER_TEMP}/out_pcgrr
+            --output-dir ${RUNNER_TEMP}/out_${{ matrix.pkg }}
       - name: 🐍🪁 Conda pkg upload
         run: |
-          pkg_path=$(find ${RUNNER_TEMP}/out_pcgrr -type f -name "*.conda")
-          LABEL_ARG=""
-          [[ "${{ github.ref }}" == "refs/heads/dev" ]] && LABEL_ARG="--channel dev"
-          rattler-build upload anaconda \
-            --owner ${{ env.conda_org }} \
-            --api-key ${conda_token} \
-            ${LABEL_ARG} \
-            ${pkg_path}
-
-  build_pcgr_conda_pkg:
-    # When merging to one of the branches above and the commit message matches
-    if: "startsWith(github.event.head_commit.message, 'Bump version:')"
-    name: Build pcgr conda pkg
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash -l {0}
-    steps:
-      - name: 🚚 Code checkout
-        uses: actions/checkout@v6
-      - name: 👾 Miniforge setup
-        uses: conda-incubator/setup-miniconda@v3
-        with:
-          environment-file: ${{ env.conda_env_yaml }}/condabuild.yaml
-          activate-environment: condabuild_env
-          auto-update-conda: true
-          miniforge-version: latest
-      - name: 🐍🔧 Conda pkg build
-        run: |
-          DEV_CHANNEL=""
-          [[ "${{ github.ref }}" == "refs/heads/dev" ]] && DEV_CHANNEL="--channel ${{ env.conda_org }}/label/dev"
-          rattler-build build \
-            --recipe-dir ${conda_recipe}/pcgr \
-            ${DEV_CHANNEL} \
-            --channel ${{ env.conda_org }} \
-            --channel bioconda \
-            --channel conda-forge \
-            --output-dir ${RUNNER_TEMP}/out_pcgr
-      - name: 🐍🪁 Conda pkg upload
-        run: |
-          pkg_path=$(find ${RUNNER_TEMP}/out_pcgr -type f -name "*.conda")
+          pkg_path=$(find ${RUNNER_TEMP}/out_${{ matrix.pkg }} -type f -name "*.conda")
           LABEL_ARG=""
           [[ "${{ github.ref }}" == "refs/heads/dev" ]] && LABEL_ARG="--channel dev"
           rattler-build upload anaconda \
@@ -96,7 +59,7 @@ jobs:
   conda_lock:
     name: 🔒 Conda lock
     runs-on: ubuntu-latest
-    needs: [build_pcgr_conda_pkg, build_pcgrr_conda_pkg]
+    needs: [build_conda_pkg]
     defaults:
       run:
         shell: bash -l {0}
