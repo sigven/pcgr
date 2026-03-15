@@ -8,7 +8,7 @@ on:
 env:
   conda_token: ${{ secrets.ANACONDA_UPLOAD_TOKEN }}
   conda_recipe: conda/recipe
-  conda_env_yml: conda/env/yml
+  conda_env_yaml: conda/env/yaml
   conda_env_lock: conda/env/lock
   conda_org: pcgr
   VERSION: '2.2.5' # versioned by bump2version
@@ -28,19 +28,19 @@ jobs:
         uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
-          environment-file: ${{ env.conda_env_yml }}/condabuild.yml
+          environment-file: ${{ env.conda_env_yaml }}/condabuild.yaml
           activate-environment: condabuild_env
           miniforge-version: latest
       - name: 🐍🔧 Conda pkg build
         run: |
-          EXTRA_CHANNEL=""
-          [[ "${{ github.ref }}" == "refs/heads/dev" ]] && EXTRA_CHANNEL="--channel ${{ env.conda_org }}/label/dev"
+          DEV_CHANNEL=""
+          [[ "${{ github.ref }}" == "refs/heads/dev" ]] && DEV_CHANNEL="--channel ${{ env.conda_org }}/label/dev"
           rattler-build build \
-            ${EXTRA_CHANNEL} \
+            --recipe-dir ${conda_recipe}/recipe.yaml \
+            ${DEV_CHANNEL} \
             --channel ${{ env.conda_org }} \
             --channel bioconda \
             --channel conda-forge \
-            --recipe ${conda_recipe}/pcgrr/recipe.yaml \
             --output-dir ${RUNNER_TEMP}/out_pcgrr
       - name: 🐍🪁 Conda pkg upload
         run: |
@@ -67,20 +67,20 @@ jobs:
       - name: 👾 Miniforge setup
         uses: conda-incubator/setup-miniconda@v3
         with:
-          auto-update-conda: true
-          environment-file: ${{ env.conda_env_yml }}/condabuild.yml
+          environment-file: ${{ env.conda_env_yaml }}/condabuild.yaml
           activate-environment: condabuild_env
+          auto-update-conda: true
           miniforge-version: latest
       - name: 🐍🔧 Conda pkg build
         run: |
-          EXTRA_CHANNEL=""
-          [[ "${{ github.ref }}" == "refs/heads/dev" ]] && EXTRA_CHANNEL="--channel ${{ env.conda_org }}/label/dev"
+          DEV_CHANNEL=""
+          [[ "${{ github.ref }}" == "refs/heads/dev" ]] && DEV_CHANNEL="--channel ${{ env.conda_org }}/label/dev"
           rattler-build build \
-            ${EXTRA_CHANNEL} \
+            --recipe-dir ${conda_recipe}/recipe.yaml \
+            ${DEV_CHANNEL} \
             --channel ${{ env.conda_org }} \
             --channel bioconda \
             --channel conda-forge \
-            --recipe ${conda_recipe}/pcgr/recipe.yaml \
             --output-dir ${RUNNER_TEMP}/out_pcgr
       - name: 🐍🪁 Conda pkg upload
         run: |
@@ -92,22 +92,9 @@ jobs:
             --api-key ${conda_token} \
             ${LABEL_ARG} \
             ${pkg_path}
-      - name: 🔒 Conda lock
-        run: |
-          CHANNEL_ARGS="--channel ${{ env.conda_org }} --channel conda-forge"
-          [[ "${{ github.ref }}" == "refs/heads/dev" ]] && CHANNEL_ARGS="--channel ${{ env.conda_org }}/label/dev ${CHANNEL_ARGS}"
-          conda-lock lock \
-            --file ${conda_env_yaml}/${pkg_name}.yaml \
-            ${CHANNEL_ARGS} \
-            -p linux-64
-          conda-lock render \
-            -p linux-64 \
-            conda-lock.yml \
-          && rm conda-lock.yml \
-          && mv conda-linux-64.lock ${conda_env_lock}/
 
   conda_lock:
-    name: Conda lock
+    name: 🔒 Conda lock
     runs-on: ubuntu-latest
     needs: [build_pcgr_conda_pkg, build_pcgrr_conda_pkg]
     defaults:
@@ -116,21 +103,24 @@ jobs:
     steps:
       - name: 🚚 Code checkout
         uses: actions/checkout@v6
-      - name: Micromamba setup
-        uses: mamba-org/setup-micromamba@v2
+      - name: 👾 Miniforge setup
+        uses: conda-incubator/setup-miniconda@v3
         with:
-          environment-file: ${{ env.conda_env_yml }}/condabuild.yml
+          environment-file: ${{ env.conda_env_yaml }}/condabuild.yaml
+          activate-environment: condabuild_env
+          auto-update-conda: true
+          miniforge-version: latest
       - name: 🔒 Conda lock
         run: |
-          # 1. generate a combined lock file
-          # 2. render platform-specific locks
-          conda-lock lock --file ${conda_env_yml}/pcgr.yml -p osx-64 -p linux-64
-          conda-lock render --kind explicit -p osx-64 -p linux-64 conda-lock.yml --filename-template 'pcgr-{platform}.lock' && rm conda-lock.yml
-          conda-lock lock --file ${conda_env_yml}/pcgrr.yml -p osx-64 -p linux-64
-          conda-lock render --kind explicit -p osx-64 -p linux-64 conda-lock.yml --filename-template 'pcgrr-{platform}.lock' && rm conda-lock.yml
-          mv pcgrr-*.lock ${conda_env_lock}
-          mv pcgr-*.lock ${conda_env_lock}
-      - name: Commit changes
+          # handle dev branch with dev label channel
+          CHANNEL_ARGS="--channel ${{ env.conda_org }} --channel bioconda --channel conda-forge"
+          [[ "${{ github.ref }}" == "refs/heads/dev" ]] && CHANNEL_ARGS="--channel ${{ env.conda_org }}/label/dev ${CHANNEL_ARGS}"
+          conda-lock lock -f ${conda_env_yaml}/pcgr.yaml --lockfile lock-pcgr.yaml ${CHANNEL_ARGS} -p linux-64
+          conda-lock lock -f ${conda_env_yaml}/pcgrr.yaml --lockfile lock-pcgrr.yaml ${CHANNEL_ARGS} -p linux-64
+          conda-lock render -p linux-64 lock-pcgr.yaml --filename-template 'pcgr-{platform}.lock' && rm lock-pcgr.yaml && mv pcgr-linux-64.lock ${conda_env_lock}/
+          conda-lock render -p linux-64 lock-pcgrr.yaml --filename-template 'pcgrr-{platform}.lock' && rm lock-pcgrr.yaml && mv pcgrr-linux-64.lock ${conda_env_lock}/
+
+      - name: 💾 Commit lockfiles
         run: |
           git status
           git config --local user.email "actions@github.com"
@@ -139,11 +129,15 @@ jobs:
           git add .
           git commit -m "${MSG}"
           git push
+      - name: 👾 Miniforge setup
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-update-conda: true
+          environment-file: ${{ env.conda_env_yaml }}/pkgdown.yaml
+          activate-environment: pkgdown_env
+          miniforge-version: latest
       - name: 🌐 Website publish
-        if: github.ref_name == 'main'
         run: |
-          micromamba env create -n pkgdownenv -f ${conda_env_yml}/pkgdown.yml
-          micromamba activate pkgdownenv
           cp pcgrr/DESCRIPTION . # hack for pkgdown to work
           printf "pcgrr version:\n"
           Rscript -e "packageVersion('pcgrr')"
@@ -192,21 +186,21 @@ jobs:
         uses: docker/setup-qemu-action@v4
       - name: 🏯 Buildx setup
         uses: docker/setup-buildx-action@v4
-      - name: DockerHub login
+      - name: 🐙 GitHub CR login
         uses: docker/login-action@v4
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       # use the outputs=docker with dest to directly save to tar for apptainer
       - name: 🐳 Docker img build, tar and push to Docker Hub
         uses: docker/build-push-action@v7
         with:
+          tags: ghcr.io/${{ github.repository }}:${{ env.VERSION }}
+          outputs: type=docker,dest=pcgr_${{ env.VERSION }}.tar
           context: .
           push: true
           platforms: linux/amd64
-          tags: |
-            sigven/pcgr:${{ env.VERSION }}
-          outputs: type=docker,dest=pcgr_${{ env.VERSION }}.tar
 
       # Apptainer
       - name: Apptainer setup
