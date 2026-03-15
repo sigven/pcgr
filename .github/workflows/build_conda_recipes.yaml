@@ -36,7 +36,7 @@ jobs:
           DEV_CHANNEL=""
           [[ "${{ github.ref }}" == "refs/heads/dev" ]] && DEV_CHANNEL="--channel ${{ env.conda_org }}/label/dev"
           rattler-build build \
-            --recipe-dir ${conda_recipe}/recipe.yaml \
+            --recipe-dir ${conda_recipe}/pcgrr \
             ${DEV_CHANNEL} \
             --channel ${{ env.conda_org }} \
             --channel bioconda \
@@ -76,7 +76,7 @@ jobs:
           DEV_CHANNEL=""
           [[ "${{ github.ref }}" == "refs/heads/dev" ]] && DEV_CHANNEL="--channel ${{ env.conda_org }}/label/dev"
           rattler-build build \
-            --recipe-dir ${conda_recipe}/recipe.yaml \
+            --recipe-dir ${conda_recipe}/pcgr \
             ${DEV_CHANNEL} \
             --channel ${{ env.conda_org }} \
             --channel bioconda \

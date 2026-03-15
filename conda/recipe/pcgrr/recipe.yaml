@@ -1,6 +1,10 @@
-package:
+context:
   name: r-pcgrr
-  version: 2.2.5 # versioned by bump2version
+  version: 2.2.5 # bump
+
+package:
+  name: ${{ name|lower }}
+  version: ${{ version }}
 
 source:
   path: ../../../pcgrr
@@ -8,15 +12,10 @@ source:
 build:
   number: 0
   noarch: generic
-  rpaths:
-    - lib/R/lib/
-    - lib/
 
 requirements:
-  build:
-    - git
   host:
-    - r-base ==4.3.3
+    - r-base >=4.5,<4.6
     - r-assertable
     - r-assertthat
     - bioconductor-biostrings
@@ -51,7 +50,7 @@ requirements:
     - r-yaml
 
   run:
-    - r-base ==4.3.3
+    - r-base >=4.5,<4.6
     - r-assertable
     - r-assertthat
     - bioconductor-biostrings
@@ -85,15 +84,20 @@ requirements:
     - r-tidyr
     - r-yaml
 
-test:
-  commands:
-    - $R -e "library('pcgrr')"
-
+tests:
+  - r:
+      libraries:
+        - pcgrr
 about:
-  home: https://github.com/sigven/pcgr/pcgrr
-  license: MIT
+  homepage: https://sigven.github.io/pcgr
   summary: Personal Cancer Genome ReporteR.
     Functions, tools and utilities for the generation of clinical
-    cancer genome reports with PCGR. This R package is an integrated
-    part of the Docker/Conda-based PCGR workflow (https://github.com/sigven/pcgr),
-    it should thus not be used as a stand-alone package.
+    cancer genome reports with PCGR.
+  license: MIT
+  license_file: LICENSE
+  repository: https://github.com/sigven/pcgr/tree/main/pcgrr
+  documentation: https://sigven.github.io/pcgr
+
+extra:
+  recipe-maintainers:
+    - pdiakumis
