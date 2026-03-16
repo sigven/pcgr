@@ -6,7 +6,7 @@ channels:
   - conda-forge
 
 dependencies:
-  - pcgr ==2.2.5 # versioned by bump2version
+  - pcgr ==2.2.5 # bump
   - bedtools
   - bcftools
   - cyvcf2
