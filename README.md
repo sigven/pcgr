@@ -2,7 +2,7 @@
 
 [![Conda install ver](https://anaconda.org/pcgr/pcgr/badges/version.svg)](https://anaconda.org/pcgr/pcgr)
 [![Conda install lrd](https://anaconda.org/pcgr/pcgr/badges/latest_release_date.svg)](https://anaconda.org/pcgr/pcgr)
-[<img src="https://img.shields.io/badge/dockerhub-images-important.svg?logo=LOGO">](https://hub.docker.com/r/sigven/pcgr)
+[![ghcr-docker-latest2](https://ghcr-badge.egpl.dev/sigven/pcgr/tags?color=%2344cc11&ignore=latest&n=2&label=images&trim=)](https://github.com/sigven/pcgr/pkgs/container/pcgr)
 
 ### Overview
 

@@ -113,7 +113,7 @@ See the [Inputs](input.html) article.
 
 The PCGR workflow can be installed with any of the following:
 
-- A. [Conda][conda-web],
+- A. [Conda][conda-web] (Linux only),
 - B. [Docker][docker-web], or
 - C. [Singularity/Apptainer][apptainer-web].
 
@@ -121,16 +121,14 @@ The PCGR workflow can be installed with any of the following:
 [docker-web]: https://docs.docker.com/
 [apptainer-web]: https://apptainer.org/docs/user/latest/index.html
 
-### A. Conda {.tabset .tabset-pills}
+### A. Conda
 
-There is Conda support for both Linux and macOS machines.
+There is Conda support for Linux machines.
 The following process can take anywhere from 10 up to 40 minutes when installing
 from scratch, mostly depending on the user's and server's internet connection.
 Most of the time is spent on downloading the `{BSgenome.Hsapiens.UCSC.hg19}` and
 `{BSgenome.Hsapiens.UCSC.hg38}` R packages (which happens at the very end of the
 conda environment creation).
-
-#### Linux
 
 ```{bash echo=FALSE}
 echo "PCGR_VERSION=\"${PCGR_VERSION}\""
@@ -151,40 +149,16 @@ pcgr --version
 pcgr --help
 ```
 
-#### macOS
-
-For macOS M1 machines, you need to include `CONDA_SUBDIR=osx-64` before the
-`conda create` command - see
-<https://github.com/conda-forge/miniforge/issues/165#issuecomment-860233092>:
-
-```{bash echo=FALSE}
-echo "PCGR_VERSION=\"${PCGR_VERSION}\""
-```
-
-```bash
-# set up variables
-PCGR_REPO="https://raw.githubusercontent.com/sigven/pcgr/v${PCGR_VERSION}/conda/env/lock/"
-PLATFORM="osx"
-# create conda envs in local directory
-mkdir pcgr_conda
-CONDA_SUBDIR=osx-64 conda create --prefix ./pcgr_conda/pcgr --file ${PCGR_REPO}/pcgr-${PLATFORM}-64.lock
-CONDA_SUBDIR=osx-64 conda create --prefix ./pcgr_conda/pcgrr --file ${PCGR_REPO}/pcgrr-${PLATFORM}-64.lock
-# you need to specify the directory of the conda env when using --prefix
-conda activate ./pcgr_conda/pcgr
-# test that it works
-pcgr --version
-pcgr --help
-```
-
 ### B. Docker
 
-The PCGR Docker image is available on [Docker Hub](https://hub.docker.com/r/sigven/pcgr/tags).
+The PCGR Docker image is available from the GitHub Container Registry at
+<https://github.com/sigven/pcgr/pkgs/container/pcgr>.
 Pull the latest **v`r PCGR_VERSION`** image with:
 
 ```{r echo=FALSE}
-glue("docker pull sigven/pcgr:{PCGR_VERSION}")
+glue("docker pull ghcr.io/sigven/pcgr:{PCGR_VERSION}")
 # might need to specify platform
-# docker pull --platform=amd64 sigven/pcgr:${PCGR_VERSION}
+# docker pull --platform=amd64 ghcr.io/sigven/pcgr:${PCGR_VERSION}
 ```
 
 #### Example Run
@@ -209,7 +183,7 @@ docker container run -it --rm \
     -v /Users/you/dir1/${BUNDLE_VERSION}:/mnt/bundle \
     -v /Users/you/dir1/pcgr_inputs:/mnt/pcgr_inputs \
     -v /Users/you/dir1/pcgr_outputs:/mnt/pcgr_outputs \
-    sigven/pcgr:${PCGR_VERSION} \
+    ghcr.io/sigven/pcgr:${PCGR_VERSION} \
     pcgr \
       --input_vcf "/mnt/pcgr_inputs/T001-BRCA.grch38.vcf.gz" \
       --vep_dir "/mnt/.vep" \
