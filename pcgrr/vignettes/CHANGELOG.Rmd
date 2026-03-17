@@ -46,51 +46,82 @@ sigven <- user("sigven")
 pdiakumis <- user("pdiakumis")
 ```
 
-## v2.2.5
-- Date: **2025-09-17**
-  - fixed bug in filtering variants wrt depth/allelic support (`r issue(268)`)
-    - added new options `--tumor_ad_min` and `--control_ad_max` to set minimum
-      number of reads supporting alt allele in tumor (maximum allowed in control samples)
-      for a variant to be considered (also `--tmb_ad_min` for TMB calculation)
-    - options for allelic support/depth now defaults to `None` if not provided by user
-  - omit processing when zero PASS variants found in input VCF (`r issue(256)`)
-  - added gnomAD population frequencies from genome-sequenced samples to VEP annotation (primarily for use with CPSR, option `--af_gnomadg` in VEP)
-  - populated patient/sample sex status in HTML report
-  - avoid showing allelic support settings that are not actively used/set by the user
-    - similarly for TMB-dedicated filters
-  - fixed mutational spectra plot (indels) causing quarto overflow
-  - cleaned up plotting code (variant statistics, mutational signatures)
-    - reduce opacity for pie chart categories that are being filtered (tumor-only runs)
+## dev
 
+- Date: **2026-03-XX**
+
+- major refactor of GitHub Actions workflow (`r pr(291)`, `r issue(247)`, `r issue(248)`, `r issue(262)`)
+  - moving to gitflow development mode, with `main` branch for stable releases, and `dev` branch for development
+  - switch to rattler-build from conda mambabuild
+    - also requires moving to the required rattler format for the conda recipes
+  - switch to conda-incubator/setup-miniconda from mamba-org/setup-micromamba
+  - drop osx support from conda lock, which will make it simpler to merge the pcgr/pcgrr pkgs into a single conda environment
+  - pkgdown's auto development mode allows us to keep a dev website with documentation for the latest development version of pcgrr, which is now available at https://sigven.github.io/pcgrr/dev/ (previously only stable versions were available on the website)
+
+- `r diff("2.2.5", "X.X.X")`
+
+## v2.2.5
+
+- Date: **2025-09-17**
+
+- fixed bug in filtering variants wrt depth/allelic support (`r issue(268)`)
+  - added new options `--tumor_ad_min` and `--control_ad_max` to set minimum
+    number of reads supporting alt allele in tumor (maximum allowed in control samples)
+    for a variant to be considered (also `--tmb_ad_min` for TMB calculation)
+  - options for allelic support/depth now defaults to `None` if not provided by user
+- omit processing when zero PASS variants found in input VCF (`r issue(256)`)
+- added gnomAD population frequencies from genome-sequenced samples to VEP annotation (primarily for use with CPSR, option `--af_gnomadg` in VEP)
+- populated patient/sample sex status in HTML report
+- avoid showing allelic support settings that are not actively used/set by the user
+  - similarly for TMB-dedicated filters
+- fixed mutational spectra plot (indels) causing quarto overflow
+- cleaned up plotting code (variant statistics, mutational signatures)
+  - reduce opacity for pie chart categories that are being filtered (tumor-only runs)
+
+- `r diff("2.2.5", "2.2.4")`
 
 ## v2.2.4
+
 - Date: **2025-09-08**
-  - fixed bug in site to TCGA cohort matching (`r issue(275)`)
-  - fixed bug in copy number segment annotations with no protein-coding overlap (`r issue(278)`)
-  - added gene `loss` biomarkers (loss-of-function) as records to match for CNA homozygous deletions (`r issue(277)`)
-  - added new option `--sex` to enable sex-adjusted annotation of CNA segments (i.e. hemizygous deletions for males on chrX)
+
+- fixed bug in site to TCGA cohort matching (`r issue(275)`)
+- fixed bug in copy number segment annotations with no protein-coding overlap (`r issue(278)`)
+- added gene `loss` biomarkers (loss-of-function) as records to match for CNA homozygous deletions (`r issue(277)`)
+- added new option `--sex` to enable sex-adjusted annotation of CNA segments (i.e. hemizygous deletions for males on chrX)
+
+- `r diff("2.2.4", "2.2.3")`
 
 ## v2.2.3
 
 - Date: **2025-07-18**
-  - update Ensembl VEP `v113.4` (see [bioconda issue](https://github.com/bioconda/bioconda-recipes/pull/54330))
+
+- update Ensembl VEP `v113.4` (see [bioconda issue](https://github.com/bioconda/bioconda-recipes/pull/54330))
+
+- `r diff("2.2.3", "2.2.2")`
 
 ## v2.2.2
 
 - Date: **2025-07-15**
-  - fix bug in Grantham distance score evaluation (`r issue(271)`)
-  - add support for heterozygous deletions in CNA interpretation - variant classes
-    are now _homdel_, _hetdel_, and _gain_
-  - fix missing pagination of some data tables with actionable markers
+
+- fix bug in Grantham distance score evaluation (`r issue(271)`)
+- add support for heterozygous deletions in CNA interpretation - variant classes
+  are now _homdel_, _hetdel_, and _gain_
+- fix missing pagination of some data tables with actionable markers
+
+- `r diff("2.2.2", "2.2.1")`
 
 ## v2.2.1
 
 - Date: **2025-03-23**
-  - fix bug in CPSR for ClinVar variants with non-standard significance levels
+
+- fix bug in CPSR for ClinVar variants with non-standard significance levels
+
+- `r diff("2.2.1", "2.2.0")`
 
 ## v2.2.0
 
 - Date: **2025-03-22**
+
 - Major data updates
   - ClinVar (2025-03)
   - dbNSFP (v5.0)
@@ -114,11 +145,15 @@ for oncogenicity classification
 - Fixed erroneous re-formatting of MAF integer columns to floats
 - Fixed cases for which similar Entrez gene identifiers mapped to different gene names
 
+- `r diff("2.2.0", "2.1.2")`
+
 ## v2.1.2
 
 - Date: **2024-10-21**
 
 - Highlight also VUS variants (ClinVar-classified) in the variant oncogenicity section of the HTML report
+
+- `r diff("2.1.2", "2.1.1")`
 
 ## v2.1.1
 
@@ -127,9 +162,12 @@ for oncogenicity classification
 - Fix bug in parsing of relative CDS position (`r issue(252)`)
 - Move some code in the qmd templates to `pcgrr` functions
 
+- `r diff("2.1.1", "2.1.0")`
+
 ## v2.1.0
 
 - Date: **2024-09-27**
+
 - Major data updates
   - ClinVar (2024-09)
   - dbNSFP (v4.8)
@@ -155,31 +193,42 @@ added them to Excel workbook output
 - Added section on kataegis events in the HTML report
 - Fixed bug in plotting of reference TMB distributions for different TMB algorithms (`--tmb_display` option)
 
+- `r diff("2.1.0", "2.0.3")`
+
 ## v2.0.3
 
 - Date: **2024-08-01**
+
 - Ensure correct propagation of purity/ploidy in output report
 - Ensure that MAF output is properly filtered for tumor-only runs
 - Ensure properly copying of quarto templates (abandon `file.copy`), 
 both for PCGR and CPSR
 
+- `r diff("2.0.3", "2.0.2")`
 
 ## v2.0.2
 
 - Date: **2024-07-16**
+
 - Ensure correct reference to variant actionability guidelines - AMP/ASCO/CAP (*not* ACMG/AMP), both in code and in docs (thanks to [HomoPolyethylen](https://github.com/HomoPolyethylen) for pointing this out)
 - fix bug in missing assignment of tier 3 variants (AMP/ASCO/CAP)
 - ensure non-exonic biomarker variants (e.g. TERT) are written to Excel sheet
 - specify (value boxes, plots) that MSI classification is based on coding variants
 
+- `r diff("2.0.2", "2.0.1")`
+
 ## v2.0.1
 
 - Date: **2024-07-07**
+
 - Fixed bug for chrM variants in input - not properly annotated by VEP, and not correctly processed in `pcgrr`. Any mitochondrial variants found in input VCF are now removed during VCF pre-processing.
+
+- `r diff("2.0.1", "2.0.0")`
 
 ## v2.0.0
 
 - Date: **2024-06-26**
+
 - Major data updates
   - ClinVar (2024-06)
   - NCI Thesaurus `v24.05d`
@@ -194,6 +243,7 @@ both for PCGR and CPSR
   - UniProt KB `v2024_03`
 - Major software updates
   - Ensembl VEP `v112`
+
 - `r diff("2.0.0", "1.4.1")`
 
 ### Added/changed
@@ -243,6 +293,7 @@ both for PCGR and CPSR
 ## v1.4.1
 
 - Date: **2023-03-14**
+
 - `r diff("1.4.1", "1.4.0")`
 
 ### Changes

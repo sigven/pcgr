@@ -40,7 +40,7 @@ jobs:
           DEV_CHANNEL=""
           [[ "${{ github.ref }}" == "refs/heads/dev" ]] && DEV_CHANNEL="--channel ${{ env.conda_org }}/label/dev"
           rattler-build build \
-            --recipe-dir ${conda_recipe}/${{ matrix.pkg }} \
+            --recipe-dir ${{ env.conda_recipe }}/${{ matrix.pkg }} \
             ${DEV_CHANNEL} \
             --channel ${{ env.conda_org }} \
             --channel bioconda \
@@ -53,7 +53,7 @@ jobs:
           [[ "${{ github.ref }}" == "refs/heads/dev" ]] && LABEL_ARG="--channel dev"
           rattler-build upload anaconda \
             --owner ${{ env.conda_org }} \
-            --api-key ${conda_token} \
+            --api-key ${{ env.conda_token }} \
             ${LABEL_ARG} \
             ${pkg_path}
 
@@ -79,17 +79,17 @@ jobs:
           # handle dev branch with dev label channel
           CHANNEL_ARGS="--channel ${{ env.conda_org }} --channel bioconda --channel conda-forge"
           [[ "${{ github.ref }}" == "refs/heads/dev" ]] && CHANNEL_ARGS="--channel ${{ env.conda_org }}/label/dev ${CHANNEL_ARGS}"
-          conda-lock lock -f ${conda_env_yaml}/pcgr.yaml --lockfile lock-pcgr.yaml ${CHANNEL_ARGS} -p linux-64
-          conda-lock lock -f ${conda_env_yaml}/pcgrr.yaml --lockfile lock-pcgrr.yaml ${CHANNEL_ARGS} -p linux-64
-          conda-lock render -p linux-64 lock-pcgr.yaml --filename-template 'pcgr-{platform}.lock' && rm lock-pcgr.yaml && mv pcgr-linux-64.lock ${conda_env_lock}/
-          conda-lock render -p linux-64 lock-pcgrr.yaml --filename-template 'pcgrr-{platform}.lock' && rm lock-pcgrr.yaml && mv pcgrr-linux-64.lock ${conda_env_lock}/
+          conda-lock lock -f ${{ env.conda_env_yaml }}/pcgr.yaml --lockfile lock-pcgr.yaml ${CHANNEL_ARGS} -p linux-64
+          conda-lock lock -f ${{ env.conda_env_yaml }}/pcgrr.yaml --lockfile lock-pcgrr.yaml ${CHANNEL_ARGS} -p linux-64
+          conda-lock render -p linux-64 lock-pcgr.yaml --filename-template 'pcgr-{platform}.lock' && rm lock-pcgr.yaml && mv pcgr-linux-64.lock ${{ env.conda_env_lock }}/
+          conda-lock render -p linux-64 lock-pcgrr.yaml --filename-template 'pcgrr-{platform}.lock' && rm lock-pcgrr.yaml && mv pcgrr-linux-64.lock ${{ env.conda_env_lock }}/
 
       - name: 💾 Commit lockfiles
         run: |
           git status
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
-          MSG="[bot] Updating conda-lock files (v${VERSION})"
+          MSG="[bot] Updating conda-lock files (v${{ env.VERSION }})"
           git add .
           git commit -m "${MSG}"
           git push
@@ -140,7 +140,7 @@ jobs:
             })
 
       - name: 🗑 Free Disk Space
-        uses: jlumbroso/free-disk-space@main
+        uses: jlumbroso/free-disk-space@v1
       # work with tag from above
       - name: 🚚 Code checkout
         uses: actions/checkout@v6
@@ -157,7 +157,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       # use the outputs=docker with dest to directly save to tar for apptainer
-      - name: 🐳 Docker img build, tar and push to Docker Hub
+      - name: 🐳 Docker img build, tar and push to GHCR
         uses: docker/build-push-action@v7
         with:
           tags: ghcr.io/${{ github.repository }}:${{ env.VERSION }}
@@ -175,10 +175,10 @@ jobs:
           df -h
           echo "Building Apptainer SIF"
           echo "---------------------------------"
-          apptainer build pcgr_singularity_${VERSION}.sif docker-archive://pcgr_${VERSION}.tar
+          apptainer build pcgr_singularity_${{ env.VERSION }}.sif docker-archive://pcgr_${{ env.VERSION }}.tar
           echo "---------------------------------"
           ls -lSha
       - name: Upload SIF to GHCR
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | apptainer registry login -u ${{ github.actor }} --password-stdin oras://ghcr.io
-          apptainer push pcgr_singularity_${VERSION}.sif oras://ghcr.io/${GITHUB_REPOSITORY}:${VERSION}.singularity
+          apptainer push pcgr_singularity_${{ env.VERSION }}.sif oras://ghcr.io/${GITHUB_REPOSITORY}:${{ env.VERSION }}.singularity
