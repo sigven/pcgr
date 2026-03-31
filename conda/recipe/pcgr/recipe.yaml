@@ -16,14 +16,11 @@ build:
 
 requirements:
   host:
-    - python >=3.12,<3.13
+    - python >=3.12
     - pip
-    - curl
-    - unzip
-    - tar
     - setuptools
   run:
-    - python >=3.12,<3.13
+    - python >=3.12
     - pandas
     - scipy
     - numpy
