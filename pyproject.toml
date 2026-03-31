@@ -15,10 +15,10 @@ maintainers = [
     {name = "Peter Diakumis", email = "peterdiakumis@gmail.com"},
     ]
 readme = "README.md"
-license = {file = "LICENSE"}
+license = "MIT"
+license-files = ["LICENSE"]
 keywords = ["cancer", "genomics", "pcgr"]
 classifiers = [
-    "License :: OSI Approved :: MIT License",
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Science/Research",
     "Operating System :: MacOS :: MacOS X",
