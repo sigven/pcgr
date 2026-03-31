@@ -6,7 +6,7 @@ channels:
   - conda-forge
 
 dependencies:
-  - pcgr::pcgr ==2.2.5 # versioned by bump2version
+  - pcgr ==2.2.5 # bump
   - bedtools
   - bcftools
   - cyvcf2
@@ -18,6 +18,6 @@ dependencies:
   - pybedtools
   - vcfanno
   - vt
-  - bioconda::vcf2maf-umccr ==1.6.21.20230511
+  - bioconda::vcf2maf
   - bioconda::vcf2tsvpy ==0.6.1
   - yaml

@@ -1,0 +1,6 @@
+name: condabuild_env
+channels:
+  - conda-forge
+dependencies:
+  - rattler-build
+  - conda-lock
