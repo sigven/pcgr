@@ -38,6 +38,11 @@ tests:
       run:
         - python >=3.12,<3.13
         - pybedtools
+        - cyvcf2
+        - pandas
+        - scipy
+        - numpy
+        - pyyaml
 
 about:
   homepage: https://sigven.github.io/pcgr
