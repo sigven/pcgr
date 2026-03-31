@@ -25,9 +25,11 @@ requirements:
     - scipy
     - numpy
     - pip
-    - pybedtools
-    - cyvcf2
-    - pyyaml
+    - bioconda::pybedtools
+    - bioconda::cyvcf2
+    - bioconda::htslib
+    - conda-forge::pyyaml
+    - conda-forge::libdeflate
 
 tests:
   - script:

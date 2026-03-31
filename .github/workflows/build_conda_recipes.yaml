@@ -45,7 +45,6 @@ jobs:
             --channel ${{ env.conda_org }} \
             --channel bioconda \
             --channel conda-forge \
-            --channel-priority flexible \
             --output-dir ${RUNNER_TEMP}/out_${{ matrix.pkg }}
       - name: 🐍🪁 Conda pkg upload
         run: |
