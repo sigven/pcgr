@@ -58,7 +58,7 @@ pdiakumis <- user("pdiakumis")
   - drop osx support from conda lock, which will make it simpler to merge the pcgr/pcgrr pkgs into a single conda environment
   - pkgdown's auto development mode allows us to keep a dev website with documentation for the latest development version of pcgrr, which is now available at https://sigven.github.io/pcgrr/dev/ (previously only stable versions were available on the website)
 
-- `r diff("2.2.5", "X.X.X")`
+- `r diff("2.2.6", "2.2.5")`
 
 ## v2.2.5
 

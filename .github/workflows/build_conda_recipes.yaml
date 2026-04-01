@@ -76,6 +76,7 @@ jobs:
           miniforge-version: latest
       - name: 🔒 Conda lock
         run: |
+          conda config --set channel_priority flexible
           # handle dev branch with dev label channel
           CHANNEL_ARGS="--channel ${{ env.conda_org }} --channel conda-forge --channel bioconda"
           [[ "${{ github.ref }}" == "refs/heads/dev" ]] && CHANNEL_ARGS="--channel ${{ env.conda_org }}/label/dev ${CHANNEL_ARGS}"
