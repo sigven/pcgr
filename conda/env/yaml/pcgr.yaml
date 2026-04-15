@@ -6,7 +6,7 @@ channels:
   - conda-forge
 
 dependencies:
-  - pcgr ==2.2.5.9009 # bump
+  - pcgr ==2.2.5.9010 # bump
   - bedtools
   - bcftools
   - ensembl-vep ==113.4
