@@ -1,0 +1,96 @@
+# FAQ
+
+Frequently asked questions regarding PCGR usage and functionality:
+
+**1. I do not see any data related to allelic depth/support in my
+report. I thought that PCGR can grab this information automatically from
+my VCF?**
+
+*Answer: VCF variant genotype data (i.e. AD/DP) is something that you as
+a user need to specify explicitly when running PCGR. In our experience,
+there is currently no uniform way that variant callers format these
+types of data (allelic fraction/depth, tumor/normal) in the VCF, and
+this makes it very challenging for PCGR to automatically grab this
+information from any VCF. Please take a careful look at the example VCF
+files (`examples` folder) that comes with PCGR for how PCGR expects this
+information to be formatted, and make sure your VCF is formatted
+accordingly. There is also an in-depth explanation on the matter
+[described
+here](https://sigven.github.io/pcgr/dev/articles/input.html#formatting-of-allelic-depthsupport-dpad)*
+
+**2. Is it possible to utilize PCGR for analysis of multiple samples?**
+
+*Answer: As the name of the tool implies, PCGR was developed for the
+detailed analysis of individual tumor samples. However, if you take
+advantage of the different outputs from PCGR, it can also be utilized
+for analysis of multiple samples. First, make sure your input files are
+organized per sample (i.e. one VCF file per sample, one CNA file per
+sample), so that they can be fed directly to PCGR. Now, once all samples
+have been processed with PCGR, note that all the tab-separated output
+files (i.e. annotated SNVs, gene copy numbers) contain the sample
+identifier, which enable them to be aggregated and suitable for a
+downstream multi-sample analysis. Also note the multi-sheet Excel
+workbook, which contains numerous outputs from PCGR, and can be
+processed to aggregate findings across samples.*
+
+**3. I do not see the expected transcript-specific consequence for a
+particular variant. In what way is the primary variant consequence
+established?**
+
+*Answer: PCGR relies upon*
+[VEP](https://www.ensembl.org/info/docs/tools/vep/index.html) *for
+consequence prioritization, in which a specific transcript-specific
+consequence is chosen as the primary variant consequence. In the PCGR
+configuration file, you may customise how this is chosen by changing the
+order of criteria applied when choosing a primary consequence block -
+parameter*
+[vep_pick_order](https://www.ensembl.org/info/docs/tools/vep/script/vep_other.html#pick_options)
+
+**4. Is it possible to use RefSeq as the underlying gene transcript
+model in PCGR?**
+
+*Answer: PCGR uses GENCODE as the primary gene transcript model, but we
+provide cross-references to corresponding RefSeq transcripts when this
+is available.*
+
+**5. I have a VCF with structural variants detected in my tumor sample,
+can PCGR process those as well?**
+
+*Answer: This is currently not supported as input for PCGR, but is
+something we want to incorporate in the future.*
+
+**6. Is it possible to see all the invididual cancer subtypes that
+belong to each of the 30 different tumor sites?**
+
+*Answer: Yes, see* [an overview of phenotypes associated with primary
+tumor
+sites](https://sigven.github.io/pcgr/dev/articles/primary_tumor_sites.md).
+See also the related GitHub repository
+[phenOncoX](https://github.com/sigven/phenOncoX)
+
+**7. Are there any plans to incorporate genomic biomarker evidence
+from** [OncoKB](https://www.oncokb.org) **in PCGR?**
+
+*Answer: No. PCGR relies upon publicly available, open-source resources,
+and further that the PCGR reference bundle can be distributed freely to
+the user community. It is our understanding that* [OncoKB’s terms of
+use](https://www.oncokb.org/terms) *do not fit well with this strategy.*
+
+**8. I have RNA fusion data that I want to analyse and include in the
+report. Is this possible with PCGR?**
+
+*Answer: This is currently not supported as input for PCGR, but is
+something we are actively working on. The focus will be on whether
+detected RNA fusion events are previously known (i.e. seen in other
+tumor samples, e.g. from the Mitelman database), and whether some of
+them are presently in use as biomarkers for diagnosis or treatment.*
+
+**9. Is it possible for the users to update the data bundle to get the
+most recent versions of all underlying data sources?**
+
+*Answer: As of now, the data bundle is updated only with each release of
+PCGR. The data harmonization pipeline of knowledge databases in PCGR
+contain numerous and complex procedures, with several cleaning, quality
+control, and re-formatting steps, and is semi-automated in its present
+form. The versions of all databases and key software elements are
+outlined in each PCGR report.*

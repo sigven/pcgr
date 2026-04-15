@@ -1,0 +1,78 @@
+# Annotation resources
+
+### Basic variant consequence annotation
+
+- [VEP](http://www.ensembl.org/info/docs/tools/vep/index.md) - Variant
+  Effect Predictor release 113 ([GENCODE
+  v47](https://www.gencodegenes.org/human/) as gene reference database
+  (v19 for grch37))
+
+### *Insilico* predictions of effect of coding variants
+
+- [dBNSFP](https://sites.google.com/site/jpopgen/dbNSFP) - database of
+  non-synonymous functional predictions (v5.0, January 2025)
+
+### Variant frequency databases
+
+- [gnomAD](http://exac.broadinstitute.org/) - germline variant
+  frequencies exome-wide (r4.1, April 2024)
+- [dbSNP](http://www.ncbi.nlm.nih.gov/SNP/) - database of short genetic
+  variants (build 156)
+- [Cancer Hotspots](http://cancerhotspots.org) - a resource for
+  statistically significant mutations in cancer (v2, 2017)
+- [TCGA](https://portal.gdc.cancer.gov/) - somatic mutations discovered
+  across 33 tumor type cohorts (release 41.0, August 2024)
+
+### Variant databases of clinical utility
+
+- [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - database of
+  clinically related variants (March 2025)
+- [CIViC](https://civicdb.org) - clinical interpretations of variants in
+  cancer (March 13th 2025)
+- [CGI](http://www.cancergenomeinterpreter.org/biomarkers) - Cancer
+  Genome Interpreter Cancer Biomarkers Database (CGI) (October 18th
+  2022)
+
+### Protein domains/functional features
+
+- [UniProt/SwissProt KnowledgeBase](http://www.uniprot.org) - resource
+  on protein sequence and functional information (2025_01)
+- [Pfam](https://www.ebi.ac.uk/interpro/entry/pfam/#table) - database of
+  protein families and domains (v37.0)
+
+### Knowledge resources on gene and protein targets
+
+- [CancerMine](https://zenodo.org/records/7689627) - Literature-mined
+  database of tumor suppressor genes/proto-oncogenes (v50, March 2023)
+- [Open Targets Platform](https://www.targetvalidation.org/) - Database
+  on disease-target associations, molecularly targeted drugs and
+  tractability aggregated from multiple sources (literature, pathways,
+  mutations) (2024.09)
+
+### Notes on variant annotation datasets
+
+#### Data quality
+
+**Genomic biomarkers**
+
+Genomic biomarkers utilized in PCGR are currently limited to the
+following:
+
+- Evidence items for specific markers in CIViC must be *accepted*
+  (*submitted* evidence items are not considered or shown)
+- Markers reported at the exact variant level (e.g. **BRAF p.V600E**,
+  **MET c.3028+1G\>T**, **g.7:140753336A\>T**)
+- Markers reported at the codon level (e.g. **KRAS p.G12**)
+- Markers reported at the exon level (e.g. **KIT exon 11 mutation**,
+  **EGFR exon 19 deletion**)
+- Markers reported at the gene level (e.g. **BRAF mutation**, **TP53
+  loss-of-function mutation**, **BRCA1 oncogenic mutation**)
+- Within the [Cancer bioMarkers database
+  (CGI)](https://www.cancergenomeinterpreter.org/biomarkers), only
+  biomarkers curated from FDA/NCCN guidelines, scientific literature,
+  and clinical trials are included (biomarkers collected from conference
+  abstracts etc. are not included)
+- Copy number gains/losses
+- RNA fusion and gene expression biomarkers are included in the PCGR
+  reference databundle, but are not currently utilized in the PCGR
+  biomarker matching procedure

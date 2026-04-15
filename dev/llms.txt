@@ -1,0 +1,541 @@
+# Personal Cancer Genome Reporter (PCGR)
+
+The Personal Cancer Genome Reporter (PCGR) is a stand-alone software
+package for functional annotation and translation of individual tumor
+genomes for precision cancer medicine. It interprets primarily somatic
+SNVs/InDels and copy number aberrations, and has additional support for
+interpretation of bulk RNA-seq expression data. The software classifies
+variants with respect to predicted *oncogenicity*, and clinical
+*actionability*. Interactive HTML output reports allow the user to
+interrogate the clinical impact of the molecular findings in an
+individual tumor.
+
+- Variant classification
+  - according to *oncogenicity*: evaluating the oncogenic potential of
+    somatic DNA aberrations ([ClinGen/CGC/VICC
+    guidelines](https://pubmed.ncbi.nlm.nih.gov/35101336/))
+  - according to *actionability*: mapping the therapeutic, diagnostic,
+    and prognostic implications of somatic DNA aberrations
+    ([AMP/ASCO/CAP
+    guidelines](https://pubmed.ncbi.nlm.nih.gov/27993330/))
+- Tumor mutational burden (TMB) estimation
+- Mutational signature analysis
+- Microsatellite instability (MSI) classification
+- RNA-seq support - gene expression outlier detection, sample similarity
+  analysis, and immune contexture profiling
+
+PCGR supports both of the most recent human genome assemblies
+(GRCh37/GRCh38), and accepts variant calls from both tumor-control and
+tumor-only sequencing assays. Much of the functionality is intended for
+whole-exome/whole-genome sequencing assays, but you can also apply PCGR
+to output from targeted sequencing panels. If you are interested in the
+interrogation of germline variants and their relation to cancer
+predisposition, we recommend trying the accompanying tool [Cancer
+Predisposition Sequencing Reporter
+(CPSR)](https://github.com/sigven/cpsr).
+
+Example screenshots from the [quarto](https://quarto.org)-based cancer
+genome report by PCGR:
+
+![PCGR screenshot 1](img/sc2.png)![PCGR screenshot 2](img/sc1.png)![PCGR
+screenshot 3](img/sc3.png)
+
+PCGR originates from the [Norwegian Cancer Genomics Consortium
+(NCGC)](https://cancergenomics.no), at the [Institute for Cancer
+Research, Oslo University Hospital, Norway](https://radium.no).
+
+### Top News
+
+- *September 17th 2025:* **2.2.5 release**
+  - fixed failing support for AD/AF filtering, adding AD filtering
+  - skip processing when no PASS variants detected in input VCF
+  - more streamlined plotting functions in quarto report templates
+  - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
+- *September 8th 2025:* **2.2.4 release**
+  - various minor bug fixes, addition of `--sex` option for sex-adjusted
+    CNA annotation
+  - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
+- *July 18th 2025:* **2.2.3 release**
+  - Ensembl VEP `v113.4`
+- *July 15th 2025:* **2.2.2 release**
+  - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
+- *March 23rd 2025:* **2.2.1 release**
+  - fix bug in CPSR for ClinVar variants with non-standard significance
+    levels
+- *March 22nd 2025:* **2.2.0 release**
+  - Data/software updates:
+    - Ensembl VEP `v113` / GENCODE v47
+    - ClinVar (2025-03)
+    - CIViC (2025-03-13)
+    - and more
+  - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
+- *October 21st 2024:* **2.1.2 release**
+  - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
+- *October 11th 2024:* **2.1.1 release**
+  - patch to fix [bug](https://github.com/sigven/pcgr/issues/252) with
+    parsing of relative CDS start positions
+  - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
+- *September 29th 2024*: **2.1.0 release**
+  - updated bundle, more oncogenic variants, CNA visualization, improved
+    RNA-seq support, bug fixes, and more
+  - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
+- *August 1st 2024*: **2.0.3 release**
+  - patch to fix purity/ploidy propagation, MAF output for tumor-only
+    runs, and other minor issues
+  - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
+- *July 16th 2024*: **2.0.2 release**
+  - patch to ensure correct reference to actionability guidelines
+  - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
+- *July 7th 2024*: **2.0.1 release**
+  - patch with bug fix for mitochondrial input variants
+    ([pr245](https://github.com/sigven/pcgr/pull/245))
+  - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
+- *June 2024*: **2.0.0 release**
+  - Details in
+    [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
+  - Massive reference data bundle upgrade, new report layout,
+    oncogenicity classification++
+  - Support for Singularity/Apptainer
+  - Major data/software updates:
+    - Ensembl VEP `v112`
+    - ClinVar (2024-06)
+    - CIViC (2024-06-21)
+    - GENCODE `v46/v19` (GRCh38/GRCh37)
+    - CancerMine `v50` (2023-03)
+    - UniProt KB `v2024_03`
+
+## Example reports
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17140659.svg)](https://doi.org/10.5281/zenodo.17140659)
+
+## Why use PCGR?
+
+The great complexity of acquired mutations in individual tumor genomes
+poses a severe challenge for clinical interpretation. PCGR aims to be a
+comprehensive reporting platform that can
+
+- systematically interrogate tumor-specific variants in the context of
+  known therapeutic, diagnostic, and prognostic biomarkers
+- highlight genomic aberrations with likely oncogenic potential
+- provide a structured and concise summary of the most relevant findings
+- present the results in a format accessible to clinical experts
+
+PCGR integrates a [comprehensive set of knowledge
+resources](https://sigven.github.io/pcgr/dev/articles/annotation_resources.md)
+related to tumor biology and therapeutic biomarkers, both at the gene,
+and at the level of individual variants. The software generates a
+comprehensive molecular interpretation report that supports the
+translation of individual cancer genomes towards molecularly guided
+treatment strategies.
+
+## Getting started
+
+- [Installation
+  instructions](https://sigven.github.io/pcgr/dev/articles/installation.md)
+
+- [Run through an
+  example](https://sigven.github.io/pcgr/dev/articles/running.html#example-run)
+
+- Learn more about:
+
+  1.  Details regarding [PCGR input
+      files](https://sigven.github.io/pcgr/dev/articles/input.md), and
+      how they should be formatted
+  2.  Configuration of [key
+      settings](https://sigven.github.io/pcgr/dev/articles/running.md)
+  3.  The types and contents of [PCGR output
+      files](https://sigven.github.io/pcgr/dev/articles/output.md)
+  4.  [Variant classifications implemented in
+      PCGR](https://sigven.github.io/pcgr/dev/articles/variant_classification.md)
+  5.  [Primary tumor sites used in
+      PCGR](https://sigven.github.io/pcgr/dev/articles/primary_tumor_sites.md)
+  6.  The list of [gene and variant annotation
+      resources](https://sigven.github.io/pcgr/dev/articles/annotation_resources.md)
+      used in PCGR annotation
+
+- [Frequently asked questions
+  (FAQ)](https://sigven.github.io/pcgr/dev/articles/faq.md)
+
+## Citation
+
+If you use PCGR or CPSR, please cite our publications:
+
+Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, Ola
+Myklebost, and Eivind Hovig. **Personal Cancer Genome Reporter: variant
+interpretation report for precision oncology** (2017). *Bioinformatics*.
+34(10):1778–1780.
+[doi.org/10.1093/bioinformatics/btx817](https://doi.org/10.1093/bioinformatics/btx817)
+
+Sigve Nakken, Vladislav Saveliev, Oliver Hofmann, Pål Møller, Ola
+Myklebost, and Eivind Hovig. **Cancer Predisposition Sequencing Reporter
+(CPSR): a flexible variant report engine for high-throughput germline
+screening in cancer** (2021). *Int J Cancer*.
+[doi:\[10.1002/ijc.33749\](doi:%5B10.1002/ijc.33749)](https://doi.org/10.1002/ijc.33749)
+
+## Contact
+
+sigven AT ifi.uio.no
+
+# Package index
+
+## All functions
+
+- [`af_distribution()`](https://sigven.github.io/pcgr/dev/reference/af_distribution.md)
+  : Function that plots a histogram of the the variant allelic support
+  (tumor)
+- [`append_annotation_links()`](https://sigven.github.io/pcgr/dev/reference/append_annotation_links.md)
+  : Function that appends multiple HTML annotation links to variant
+  identifiers e.g. COSMIC, CLINVAR, REFSEQ etc
+- [`append_cancer_association_ranks()`](https://sigven.github.io/pcgr/dev/reference/append_cancer_association_ranks.md)
+  : Function that appends cancer gene evidence links
+- [`append_cancer_gene_evidence()`](https://sigven.github.io/pcgr/dev/reference/append_cancer_gene_evidence.md)
+  : Function that appends cancer gene evidence links
+- [`append_dbmts_var_link()`](https://sigven.github.io/pcgr/dev/reference/append_dbmts_var_link.md)
+  : Function that adds miRNA target annotations (dbMTS) to genetic
+  variant identifiers
+- [`append_dbnsfp_var_link()`](https://sigven.github.io/pcgr/dev/reference/append_dbnsfp_var_link.md)
+  : Function that assigns HTML links to dbNSFP prediction entries
+- [`append_drug_var_link()`](https://sigven.github.io/pcgr/dev/reference/append_drug_var_link.md)
+  : Function that adds link to targeted drugs (on and off-label) for a
+  list of variants and associated targeted
+- [`append_gwas_citation_phenotype()`](https://sigven.github.io/pcgr/dev/reference/append_gwas_citation_phenotype.md)
+  : Function that adds GWAS citation/phenotype to GWAS hit found through
+  PCGR annotation
+- [`append_oncogenicity_docs()`](https://sigven.github.io/pcgr/dev/reference/append_oncogenicity_docs.md)
+  : Function that adds oncogenicity documentation from codes
+- [`append_targeted_drug_annotations()`](https://sigven.github.io/pcgr/dev/reference/append_targeted_drug_annotations.md)
+  : Function that adds link to targeted drugs (on and off-label) for a
+  list of variants and associated targeted
+- [`append_tcga_var_link()`](https://sigven.github.io/pcgr/dev/reference/append_tcga_var_link.md)
+  : Function that adds TCGA annotations (cohort, frequency etc.) to
+  variant identifiers
+- [`append_tfbs_annotation()`](https://sigven.github.io/pcgr/dev/reference/append_tfbs_annotation.md)
+  : Function that adds TFBS annotations (dbMTS) to genetic variant
+  identifiers
+- [`assign_amp_asco_tiers()`](https://sigven.github.io/pcgr/dev/reference/assign_amp_asco_tiers.md)
+  : Function that assigns tier classifications to somatic CNA segments
+  and SNVs/InDels, based on the presence of biomarker evidence found in
+  the variant set
+- [`assign_germline_popfreq_status()`](https://sigven.github.io/pcgr/dev/reference/assign_germline_popfreq_status.md)
+  : Function that sets STATUS_POPFREQ_1KG_ABOVE_TOLERATED/
+  STATUS_POPFREQ_GNOMAD_ABOVE_TOLERATED to TRUE for variants if any
+  population frequency exceeds max_tolerated_af
+- [`assign_mutation_type()`](https://sigven.github.io/pcgr/dev/reference/assign_mutation_type.md)
+  : Function that assigns one of six mutation types to a list of
+  mutations
+- [`assign_somatic_classification()`](https://sigven.github.io/pcgr/dev/reference/assign_somatic_classification.md)
+  : Function that assigns a SOMATIC_CLASSIFICATION to variants based on
+  evidence found in variant set, potentially limited by user-defined
+  options
+- [`assign_somatic_germline_evidence()`](https://sigven.github.io/pcgr/dev/reference/assign_somatic_germline_evidence.md)
+  : Function that appends several tags denoting evidence for
+  somatic/germline status of variants
+- [`biomarker_evidence`](https://sigven.github.io/pcgr/dev/reference/biomarker_evidence.md)
+  : Fixed data types/categories used for biomarker evidence, e.g.
+  'types','levels' etc.
+- [`cancer_phenotypes_regex`](https://sigven.github.io/pcgr/dev/reference/cancer_phenotypes_regex.md)
+  : Regular expression of terms indicative of cancer-related phenotypes
+  and syndromes
+- [`check_common_colnames()`](https://sigven.github.io/pcgr/dev/reference/check_common_colnames.md)
+  : Function that checks whether a set of column names are present in
+  two different data frames
+- [`check_file_exists()`](https://sigven.github.io/pcgr/dev/reference/check_file_exists.md)
+  : Function that checks the existence of a file
+- [`clinvar_germline_status()`](https://sigven.github.io/pcgr/dev/reference/clinvar_germline_status.md)
+  : Function that assigns a logical to STATUS_CLINVAR_GERMLINE based on
+  whether a ClinVar entry of germline origin is found for a given
+  variant (for entries in a data frame)
+- [`color_palette`](https://sigven.github.io/pcgr/dev/reference/color_palette.md)
+  : Color encodings for report elements of PCGR/CPSR
+- [`cosmic_sbs_signatures`](https://sigven.github.io/pcgr/dev/reference/cosmic_sbs_signatures.md)
+  : List of COSMIC reference mutational signatures (SBS, v3.4)
+- [`cosmic_somatic_status()`](https://sigven.github.io/pcgr/dev/reference/cosmic_somatic_status.md)
+  : Function that assigns a logical (STATUS_COSMIC) reflecting whether a
+  variant co-incides with an entry in COSMIC (germline)
+- [`data_coltype_defs`](https://sigven.github.io/pcgr/dev/reference/data_coltype_defs.md)
+  : List of coltype definitions for input files to pcgrr (e.g.
+  VCF-converted TSV, CNA TVS etc.)
+- [`dbsnp_germline_status()`](https://sigven.github.io/pcgr/dev/reference/dbsnp_germline_status.md)
+  : Function that assigns a logical (STATUS_DBSNP) reflecting whether a
+  variant co-incides with an entry in dbSNP (germline)
+- [`deduplicate_eitems()`](https://sigven.github.io/pcgr/dev/reference/deduplicate_eitems.md)
+  : Function that removes redundancy in variant evidence items (i.e. if
+  a variant is assicated with evidence at the codon level, evidence at
+  the exon/gene level is ignored)
+- [`detect_vcf_sample_name()`](https://sigven.github.io/pcgr/dev/reference/detect_vcf_sample_name.md)
+  : A function that detects whether the sample name in variant data
+  frame is unique (as present in column name VCF_SAMPLE_ID), throws an
+  error if multiple sample names are present for the CPSR workflow
+- [`df_string_replace()`](https://sigven.github.io/pcgr/dev/reference/df_string_replace.md)
+  : Function that performs stringr::str_replace on strings of multiple
+  string columns of a dataframe
+- [`dt_display`](https://sigven.github.io/pcgr/dev/reference/dt_display.md)
+  : DT Display
+- [`effect_prediction_algos`](https://sigven.github.io/pcgr/dev/reference/effect_prediction_algos.md)
+  : List of URLs for a range of variant effect prediction algorithms
+- [`exclude_non_chrom_variants()`](https://sigven.github.io/pcgr/dev/reference/exclude_non_chrom_variants.md)
+  : Function that excludes genomic aberrations from non-nuclear
+  chromosomes
+- [`expand_biomarker_items()`](https://sigven.github.io/pcgr/dev/reference/expand_biomarker_items.md)
+  : Function that expands biomarker evidence items with variant
+  annotations
+- [`export_quarto_evars()`](https://sigven.github.io/pcgr/dev/reference/export_quarto_evars.md)
+  : Export Quarto Environment Variables
+- [`filter_eitems_by_site()`](https://sigven.github.io/pcgr/dev/reference/filter_eitems_by_site.md)
+  : Function that filters clinical evidence items by tumor type/primary
+  site
+- [`filter_maf_file()`](https://sigven.github.io/pcgr/dev/reference/filter_maf_file.md)
+  : Function that takes a MAF file generated with vcf2maf and filters
+  out variants that are presumably germline (tumor-only run)
+- [`filter_read_support()`](https://sigven.github.io/pcgr/dev/reference/filter_read_support.md)
+  : Function that filters variant set on depth and allelic fraction
+  according to settings provided by user (tumor and control)
+- [`generate_annotation_link()`](https://sigven.github.io/pcgr/dev/reference/generate_annotation_link.md)
+  : A function that generates a HTML link for selected identifiers
+  (DBSNP, COSMIC, CLINVAR, ENTREZ)
+- [`generate_report()`](https://sigven.github.io/pcgr/dev/reference/generate_report.md)
+  : Function that generates all contents of the cancer genome report
+  (PCGR)
+- [`generate_report_data_expression()`](https://sigven.github.io/pcgr/dev/reference/generate_report_data_expression.md)
+  : Function that generates expression data for PCGR report
+- [`generate_report_data_kataegis()`](https://sigven.github.io/pcgr/dev/reference/generate_report_data_kataegis.md)
+  : Function that generates data frame with potential kataegis events
+- [`generate_report_data_msi()`](https://sigven.github.io/pcgr/dev/reference/generate_report_data_msi.md)
+  : Function that generates MSI prediction data for PCGR report
+- [`generate_report_data_rainfall()`](https://sigven.github.io/pcgr/dev/reference/generate_report_data_rainfall.md)
+  : Function that generates data for rainfall plot (mutation density
+  along genome, considering SNVs only)
+- [`generate_report_data_signatures()`](https://sigven.github.io/pcgr/dev/reference/generate_report_data_signatures.md)
+  : Function that generates mutational signatures data for PCGR report
+- [`generate_report_data_tmb()`](https://sigven.github.io/pcgr/dev/reference/generate_report_data_tmb.md)
+  : Function that reads TSV file with TMB estimates from sample
+- [`generate_report_data_trials()`](https://sigven.github.io/pcgr/dev/reference/generate_report_data_trials.md)
+  : Function that retrieves relevant (interventional based on molecular
+  target) clinical trials for a given tumor type
+- [`generate_tier_tsv()`](https://sigven.github.io/pcgr/dev/reference/generate_tier_tsv.md)
+  : Function that generates dense and tiered annotated variant datasets
+- [`germline_filter_levels`](https://sigven.github.io/pcgr/dev/reference/germline_filter_levels.md)
+  : Data frame with germline filtering criteria
+- [`get_clin_assocs_cna()`](https://sigven.github.io/pcgr/dev/reference/get_clin_assocs_cna.md)
+  : Function that retrieves clinical evidence items (CIVIC, CBMDB) for
+  CNA aberrations
+- [`get_dt_tables()`](https://sigven.github.io/pcgr/dev/reference/get_dt_tables.md)
+  : Function that gathers data tables on actionable variants for display
+  in report (tier 1 + tier 2)
+- [`get_excel_sheets()`](https://sigven.github.io/pcgr/dev/reference/get_excel_sheets.md)
+  : Function that produces the contents of sheets for an Excel report of
+  PCGR output
+- [`get_genome_obj()`](https://sigven.github.io/pcgr/dev/reference/get_genome_obj.md)
+  : Get BSgenome Object
+- [`get_oncogenic_cna_events()`](https://sigven.github.io/pcgr/dev/reference/get_oncogenic_cna_events.md)
+  : Get oncogenic copy number events
+- [`get_prevalent_site_signatures()`](https://sigven.github.io/pcgr/dev/reference/get_prevalent_site_signatures.md)
+  : Function that retrieves prevalent signatures for a given tumor
+  type/primary site Data is collected from COSMIC v3.4.
+- [`get_tumor_only_filtering_criteria()`](https://sigven.github.io/pcgr/dev/reference/get_tumor_only_filtering_criteria.md)
+  : Function that generates a string with filtering criteria for
+  callsets coming from tumor-only sequencing
+- [`get_valid_chromosomes()`](https://sigven.github.io/pcgr/dev/reference/get_valid_chromosomes.md)
+  : Checks for valid chromosome names in data frame of variants
+- [`get_variant_statistics()`](https://sigven.github.io/pcgr/dev/reference/get_variant_statistics.md)
+  : Function that computes various variant statistics from a data frame
+  with variant records
+- [`het_af_germline_status()`](https://sigven.github.io/pcgr/dev/reference/het_af_germline_status.md)
+  : Function that assigns a logical
+  (STATUS_LIKELY_GERMLINE_HETEROZYGOUS) reflecting whether a variant is
+  likely heterozygous (germline) - based on allelic fraction
+  (VAF_TUMOR), presence in gnomAD and dbSNP, and no presence in TCGA and
+  COSMIC
+- [`hex_to_rgba()`](https://sigven.github.io/pcgr/dev/reference/hex_to_rgba.md)
+  : Convert Hex Color to RGBA
+- [`hom_af_status()`](https://sigven.github.io/pcgr/dev/reference/hom_af_status.md)
+  : Function that assigns a logical (STATUS_LIKELY_GERMLINE_HOMOZYGOUS)
+  reflecting whether a variant is likely homozygous (germline) - based
+  on allelic fraction (VAF_TUMOR)
+- [`immune_celltypes`](https://sigven.github.io/pcgr/dev/reference/immune_celltypes.md)
+  : Data frame with immune cell types
+- [`init_cna_vstats()`](https://sigven.github.io/pcgr/dev/reference/init_cna_vstats.md)
+  : Function that initiates report element with CNA information
+- [`init_expression_content()`](https://sigven.github.io/pcgr/dev/reference/init_expression_content.md)
+  : Function that initiates report element with expression information
+- [`init_germline_content()`](https://sigven.github.io/pcgr/dev/reference/init_germline_content.md)
+  : Function that initiates report element with germline variant
+  information (CPSR)
+- [`init_kataegis_content()`](https://sigven.github.io/pcgr/dev/reference/init_kataegis_content.md)
+  : Function that initiates report element with kataegis information
+- [`init_m_signature_content()`](https://sigven.github.io/pcgr/dev/reference/init_m_signature_content.md)
+  : Function that initiates report element with mutational signatures
+  information
+- [`init_msi_content()`](https://sigven.github.io/pcgr/dev/reference/init_msi_content.md)
+  : Function that initiates report element with MSI classification
+- [`init_rainfall_content()`](https://sigven.github.io/pcgr/dev/reference/init_rainfall_content.md)
+  : Function that initiates report element with rainfall information
+- [`init_report()`](https://sigven.github.io/pcgr/dev/reference/init_report.md)
+  : Function that initiates PCGR/CPSR report object
+- [`init_snv_indel_vstats()`](https://sigven.github.io/pcgr/dev/reference/init_snv_indel_vstats.md)
+  : Function that initiates report element with SNV/InDel statistics
+  information
+- [`init_tmb_content()`](https://sigven.github.io/pcgr/dev/reference/init_tmb_content.md)
+  : Function that initiates report element with TMB information
+- [`init_tumor_only_content()`](https://sigven.github.io/pcgr/dev/reference/init_tumor_only_content.md)
+  : Function that initiates report element with tumor-only information
+- [`init_var_content()`](https://sigven.github.io/pcgr/dev/reference/init_var_content.md)
+  : Function that initiates report element with variant data
+- [`kataegis_detect()`](https://sigven.github.io/pcgr/dev/reference/kataegis_detect.md)
+  : Function that detects kataegis events from a data frame with genomic
+  cooordinates of mutations
+- [`kataegis_input()`](https://sigven.github.io/pcgr/dev/reference/kataegis_input.md)
+  : Function that detects kataegis events from a data frame with genomic
+  cooordinates of mutations
+- [`load_all_eitems()`](https://sigven.github.io/pcgr/dev/reference/load_all_eitems.md)
+  : Function that loads all evidence items from CIViC and CGI, and
+  combines them in a unified data.frame
+- [`load_cpsr_classified_variants()`](https://sigven.github.io/pcgr/dev/reference/load_cpsr_classified_variants.md)
+  : Function that reads CPSR-classified variants from a TSV file
+- [`load_dna_variants()`](https://sigven.github.io/pcgr/dev/reference/load_dna_variants.md)
+  : Function that reads and validates CNA or SNV/InDel TSV files file
+  from PCGR/CPSR pre-report (Python) pipeline
+- [`load_eitems()`](https://sigven.github.io/pcgr/dev/reference/load_eitems.md)
+  : Function that loads specific set of clinical variant evidence items
+  (CIViC + CGI) based on given parameters (mutation type, variant
+  origin, tumor type etc)
+- [`load_expression_csq()`](https://sigven.github.io/pcgr/dev/reference/load_expression_csq.md)
+  : Load expression consequence settings
+- [`load_expression_outliers()`](https://sigven.github.io/pcgr/dev/reference/load_expression_outliers.md)
+  : Load expression outlier results
+- [`load_expression_similarity()`](https://sigven.github.io/pcgr/dev/reference/load_expression_similarity.md)
+  : Load expression similarity results
+- [`load_reference_data()`](https://sigven.github.io/pcgr/dev/reference/load_reference_data.md)
+  : Function that parses and loads reference data from files in the
+  assembly-specific PCGR bundle directory
+- [`load_somatic_cna()`](https://sigven.github.io/pcgr/dev/reference/load_somatic_cna.md)
+  : Function that reads and validates fully annotated CNA data (segments
+  and genes) from PCGR pre-reporting pipeline
+- [`load_somatic_snv_indel()`](https://sigven.github.io/pcgr/dev/reference/load_somatic_snv_indel.md)
+  : Function that reads and validates an annotated somatic SNV/InDel
+  file from PCGR pre-reporting pipeline
+- [`load_yaml()`](https://sigven.github.io/pcgr/dev/reference/load_yaml.md)
+  : Function that loads YAML data with settings and file paths to
+  annotated molecular profiles
+- [`log4r_debug()`](https://sigven.github.io/pcgr/dev/reference/log4r_debug.md)
+  : Write messages to logs at a given priority level
+- [`log4r_fatal()`](https://sigven.github.io/pcgr/dev/reference/log4r_fatal.md)
+  : Write messages to logs at a given priority level
+- [`log4r_info()`](https://sigven.github.io/pcgr/dev/reference/log4r_info.md)
+  : Write messages to logs at a given priority level
+- [`log4r_warn()`](https://sigven.github.io/pcgr/dev/reference/log4r_warn.md)
+  : Write messages to logs at a given priority level
+- [`log_var_eitem_stats()`](https://sigven.github.io/pcgr/dev/reference/log_var_eitem_stats.md)
+  : Function that logs the number of evidence items found, for different
+  levels of resolution
+- [`max_af_gnomad()`](https://sigven.github.io/pcgr/dev/reference/max_af_gnomad.md)
+  : Function that assigns a maximum value to a variable (MAX_AF_GNOMAD)
+  reflecting the maximum allele frequency for a given variant across
+  gnomAD populations
+- [`mkdir()`](https://sigven.github.io/pcgr/dev/reference/mkdir.md) :
+  Create directory
+- [`msi_indel_fraction_plot()`](https://sigven.github.io/pcgr/dev/reference/msi_indel_fraction_plot.md)
+  : Function that plots the indel fraction for a given sample and
+  contrasts this with the distribution for MSI-H/MSS samples from TCGA
+- [`msi_indel_load_plot()`](https://sigven.github.io/pcgr/dev/reference/msi_indel_load_plot.md)
+  : Function that plots the indel load for a given sample and contrasts
+  this with the distribution for MSI-H/MSS samples from TCGA
+- [`oncogenicity_criteria`](https://sigven.github.io/pcgr/dev/reference/oncogenicity_criteria.md)
+  : Oncogenicity criteria (ClinGen/CGC/VICC)
+- [`order_variants()`](https://sigven.github.io/pcgr/dev/reference/order_variants.md)
+  : Function that orders genomic aberrations according to order of
+  chromosomes and chromosomal position
+- [`pkg_exists()`](https://sigven.github.io/pcgr/dev/reference/pkg_exists.md)
+  : Does R Package Exist
+- [`plot_cna_segments()`](https://sigven.github.io/pcgr/dev/reference/plot_cna_segments.md)
+  : Plot allele-specific copy number segments
+- [`plot_filtering_stats_exonic()`](https://sigven.github.io/pcgr/dev/reference/plot_filtering_stats_exonic.md)
+  : Function that generates a pie chart for exonic/non-exonic variant
+  statistics (for callsets coming from tumor-only sequencing)
+- [`plot_filtering_stats_germline()`](https://sigven.github.io/pcgr/dev/reference/plot_filtering_stats_germline.md)
+  : Function that makes input data for an UpSet plot
+  (filtering/intersection results) for the somatic-germline
+  classification procedure
+- [`plot_signature_contributions()`](https://sigven.github.io/pcgr/dev/reference/plot_signature_contributions.md)
+  : Function that makes plots of mutational signature contributions in a
+  given sample (both ggplot and plotly)
+- [`plot_tmb_primary_site_tcga()`](https://sigven.github.io/pcgr/dev/reference/plot_tmb_primary_site_tcga.md)
+  : Function that makes a plot with TMB boxplots for reference cohorts,
+  highlighting the TMB estimate for a given sample and the
+  cohort/primary site of interest
+- [`plot_value_boxes()`](https://sigven.github.io/pcgr/dev/reference/plot_value_boxes.md)
+  : Function that plots four value boxes with the most important
+  findings in the cancer genome
+- [`plotly_pie_chart()`](https://sigven.github.io/pcgr/dev/reference/plotly_pie_chart.md)
+  : Plotly Pie Chart - variant statistics
+- [`pon_status()`](https://sigven.github.io/pcgr/dev/reference/pon_status.md)
+  : Function that assigns a logical (STATUS_PON) reflecting whether a
+  variant is co-inciding with a variant present in a panel-of-normals
+  database (PANEL_OF_NORMALS column is TRUE)
+- [`predict_msi_status()`](https://sigven.github.io/pcgr/dev/reference/predict_msi_status.md)
+  : Function that predicts MSI status based on fraction of indels among
+  calls
+- [`qc_var_eitems()`](https://sigven.github.io/pcgr/dev/reference/qc_var_eitems.md)
+  : Function that matches variants to evidence items
+- [`remove_cols_from_df()`](https://sigven.github.io/pcgr/dev/reference/remove_cols_from_df.md)
+  : Function that removes column(s) from data frame
+- [`sort_chromosomal_segments()`](https://sigven.github.io/pcgr/dev/reference/sort_chromosomal_segments.md)
+  : Function that sorts chromosomal segments according to chromosome and
+  chromosomal start/end position
+- [`strip_html()`](https://sigven.github.io/pcgr/dev/reference/strip_html.md)
+  : Strip HTML tags
+- [`structure_var_eitems()`](https://sigven.github.io/pcgr/dev/reference/structure_var_eitems.md)
+  : Function that structures variant evidence items according to
+  strength of evidence
+- [`tcga_cohorts`](https://sigven.github.io/pcgr/dev/reference/tcga_cohorts.md)
+  : Data frame with all TCGA cohorts
+- [`tcga_somatic_status()`](https://sigven.github.io/pcgr/dev/reference/tcga_somatic_status.md)
+  : Function that assigns a logical (STATUS_TCGA_SOMATIC) reflecting
+  whether a variant co-incides with an entry in TCGA (somatic)
+- [`tier_af_distribution()`](https://sigven.github.io/pcgr/dev/reference/tier_af_distribution.md)
+  : Function that plots a histogram of the the variant allelic support
+  (tumor) - grouped by tiers
+- [`tsv_cols`](https://sigven.github.io/pcgr/dev/reference/tsv_cols.md)
+  : TSV columns
+- [`update_report()`](https://sigven.github.io/pcgr/dev/reference/update_report.md)
+  : Function that updates a PCGR/CPSR report object structure
+- [`vaf_plot()`](https://sigven.github.io/pcgr/dev/reference/vaf_plot.md)
+  : Function that generates a VAF distribution plot for a given PCGR
+  report object
+- [`variant_db_url`](https://sigven.github.io/pcgr/dev/reference/variant_db_url.md)
+  : List of URLS and variant identifiers for variant/gene/protein domain
+  databases
+- [`variant_stats_report()`](https://sigven.github.io/pcgr/dev/reference/variant_stats_report.md)
+  : Function that generate stats for a given variant set, considering
+  number of variants/genes affected across tiers, types of variants ()
+- [`write_processed_vcf()`](https://sigven.github.io/pcgr/dev/reference/write_processed_vcf.md)
+  : Function that writes a VCF intended for mutational signature
+  analysis
+- [`write_report_excel()`](https://sigven.github.io/pcgr/dev/reference/write_report_excel.md)
+  : Function that writes key datasets of PCGR object to an Excel
+  workbook
+- [`write_report_quarto_html()`](https://sigven.github.io/pcgr/dev/reference/write_report_quarto_html.md)
+  : Function that writes contents of PCGR object to an HTML report
+  (quarto-based)
+- [`write_report_tsv()`](https://sigven.github.io/pcgr/dev/reference/write_report_tsv.md)
+  : Function that writes contents of PCGR object to various output
+  formats (Rmarkdown/flexdashboard HTML reports, JSON, tab-separated
+  etc)
+
+# Articles
+
+### All vignettes
+
+- [Annotation
+  resources](https://sigven.github.io/pcgr/dev/articles/annotation_resources.md):
+- [Changelog](https://sigven.github.io/pcgr/dev/articles/CHANGELOG.md):
+- [Developers](https://sigven.github.io/pcgr/dev/articles/developers.md):
+- [FAQ](https://sigven.github.io/pcgr/dev/articles/faq.md):
+- [Input files](https://sigven.github.io/pcgr/dev/articles/input.md):
+- [Installation](https://sigven.github.io/pcgr/dev/articles/installation.md):
+- [Output files](https://sigven.github.io/pcgr/dev/articles/output.md):
+- [Primary Tumor
+  Sites](https://sigven.github.io/pcgr/dev/articles/primary_tumor_sites.md):
+- [Running](https://sigven.github.io/pcgr/dev/articles/running.md):
+- [Variant
+  classification](https://sigven.github.io/pcgr/dev/articles/variant_classification.md):
