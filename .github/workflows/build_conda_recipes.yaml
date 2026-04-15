@@ -127,7 +127,7 @@ jobs:
         shell: bash -l {0}
     steps:
       - name: 🗑 Free Disk Space
-        uses: jlumbroso/free-disk-space@v1
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
       # work with tag from above
       - name: 🚚 Code checkout
         uses: actions/checkout@v6
