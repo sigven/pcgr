@@ -83,7 +83,7 @@ requirements:
     - r-stringr
     - r-stringi
     - r-tidyr
-    - r-yaml
+    - conda-forge::r-yaml
 
 tests:
   - r:

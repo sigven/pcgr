@@ -25,10 +25,9 @@ requirements:
     - scipy
     - numpy
     - pip
-    - bioconda::pybedtools
-    - bioconda::cyvcf2
-    - bioconda::htslib
-    - conda-forge::pyyaml
+    - pybedtools
+    - cyvcf2
+    - pyyaml
     - conda-forge::libdeflate
 
 tests:
@@ -37,11 +36,11 @@ tests:
     requirements:
       run:
         - python >=3.12,<3.13
-        - pybedtools
-        - cyvcf2
         - pandas
         - scipy
         - numpy
+        - pybedtools
+        - cyvcf2
         - pyyaml
 
 about:

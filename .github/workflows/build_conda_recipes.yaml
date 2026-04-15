@@ -113,6 +113,10 @@ jobs:
           git add ${{ env.conda_env_lock }}/
           git commit -m "${MSG}"
           git push
+      - name: 🔖 Tag creation
+        run: |
+          git tag v${{ env.VERSION }}
+          git push origin v${{ env.VERSION }}
 
   docker_deploy:
     name: Build and deploy Docker
@@ -122,30 +126,6 @@ jobs:
       run:
         shell: bash -l {0}
     steps:
-      - name: 🚚 Code checkout
-        uses: actions/checkout@v6
-      - id: pull_lock_commit
-        name: 📥 Pull lock commit
-        run: |
-            git pull --no-rebase # for pulling in the changed locks
-            git --no-pager log --decorate=short --pretty=oneline -n3
-            LATEST_COMMIT_HASH="$(git --no-pager log -1 --format='%H')"
-            echo "latest_commit_hash=${LATEST_COMMIT_HASH}" >> $GITHUB_OUTPUT
-      - name: 🔖 Tag creation
-        uses: actions/github-script@v8
-        env:
-          LATEST_COMMIT_HASH: ${{ steps.pull_lock_commit.outputs.latest_commit_hash }}
-        with:
-          script: |
-            const the_tag_name = 'refs/tags/v' + process.env.VERSION
-            const the_sha = process.env.LATEST_COMMIT_HASH
-            github.rest.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: the_tag_name,
-              sha: the_sha
-            })
-
       - name: 🗑 Free Disk Space
         uses: jlumbroso/free-disk-space@v1
       # work with tag from above
@@ -219,6 +199,8 @@ jobs:
           channels: ${{ env.PKGDOWN_CHANNELS }}
       - name: 🌐 Website publish
         run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
           cp pcgrr/DESCRIPTION . # hack for pkgdown to work
           printf "pcgrr version:\n"
           Rscript -e "packageVersion('pcgrr')"
