@@ -5,9 +5,204 @@ from pcgr.utils import getlogger, error_message, warn_message, check_file_exists
 import os
 
 
-def verify_args(arg_dict):
+def validate_cna_thresholds(arg_dict, logger):
+    """
+    Validate CNA amplification, gain, and deletion threshold parameters.
 
-    logger = getlogger("pcgr-validate-arguments-input-a")
+    Supports three threshold modes for each tier (amp, gain, del):
+    - 'absolute': Uses fixed copy number threshold
+    - 'relative': Uses ploidy-based threshold (fold-change over tumor ploidy)
+    - 'combined': Requires BOTH absolute AND relative criteria
+
+    Args:
+        arg_dict: Dictionary of command-line arguments
+        logger: Logger instance
+
+    Returns:
+        None (modifies arg_dict in place, raises errors/warnings as needed)
+    """
+
+    threshold_mode = arg_dict.get('cna_threshold_mode', 'absolute')
+    amp_threshold_absolute = arg_dict.get('cna_amp_threshold_absolute', 5)
+    amp_threshold_relative = arg_dict.get('cna_amp_threshold_relative', 2.5)
+    tumor_ploidy = arg_dict.get('tumor_ploidy', None)
+    gain_threshold_absolute = arg_dict.get('cna_gain_threshold_absolute', 3)
+    gain_threshold_relative = arg_dict.get('cna_gain_threshold_relative', 1.5)
+    del_threshold_absolute = arg_dict.get('cna_del_threshold_absolute', 1)
+    del_threshold_relative = arg_dict.get('cna_del_threshold_relative', 0.5)
+
+    # Validate the single shared threshold mode
+    if threshold_mode not in ['absolute', 'relative', 'combined']:
+        err_msg = (
+            f"CNA thresholding mode ('--cna_threshold_mode' = '{threshold_mode}') "
+            f"must be 'absolute', 'relative', or 'combined'"
+        )
+        error_message(err_msg, logger)
+
+    # Validate absolute threshold bounds
+    if amp_threshold_absolute < 3:
+        warn_msg = (
+            f"Absolute amplification threshold ('--cna_amp_threshold_absolute' = {amp_threshold_absolute}) "
+            f"is < 3 - setting to minimum value of 3"
+        )
+        warn_message(warn_msg, logger)
+        arg_dict['cna_amp_threshold_absolute'] = 3
+        amp_threshold_absolute = 3
+
+    if amp_threshold_absolute > 20:
+        warn_msg = (
+            f"Absolute amplification threshold ('--cna_amp_threshold_absolute' = {amp_threshold_absolute}) "
+            f"is > 20 - setting to maximum value of 20"
+        )
+        warn_message(warn_msg, logger)
+        arg_dict['cna_amp_threshold_absolute'] = 20
+        amp_threshold_absolute = 20
+
+    # Validate relative threshold bounds (if provided)
+    if amp_threshold_relative is not None:
+        if amp_threshold_relative < 1.5:
+            warn_msg = (
+                f"Relative amplification threshold ('--cna_amp_threshold_relative' = {amp_threshold_relative}) "
+                f"is < 1.5 (50% above ploidy) - setting to minimum value of 1.5"
+            )
+            warn_message(warn_msg, logger)
+            arg_dict['cna_amp_threshold_relative'] = 1.5
+            amp_threshold_relative = 1.5
+
+        if amp_threshold_relative > 5.0:
+            warn_msg = (
+                f"Relative amplification threshold ('--cna_amp_threshold_relative' = {amp_threshold_relative}) "
+                f"is > 5.0 (5× ploidy) - setting to maximum value of 5.0"
+            )
+            warn_message(warn_msg, logger)
+            arg_dict['cna_amp_threshold_relative'] = 5.0
+            amp_threshold_relative = 5.0
+
+    # Validate tumor_ploidy if provided
+    if tumor_ploidy is not None:
+        if tumor_ploidy < 1.0:
+            warn_msg = (
+                f"Tumor ploidy ('--tumor_ploidy' = {tumor_ploidy}) is < 1.0 - "
+                f"setting to minimum value of 1.0"
+            )
+            warn_message(warn_msg, logger)
+            arg_dict['tumor_ploidy'] = 1.0
+            tumor_ploidy = 1.0
+
+        if tumor_ploidy > 8.0:
+            warn_msg = (
+                f"Tumor ploidy ('--tumor_ploidy' = {tumor_ploidy}) is > 8.0 - "
+                f"setting to maximum value of 8.0"
+            )
+            warn_message(warn_msg, logger)
+            arg_dict['tumor_ploidy'] = 8.0
+            tumor_ploidy = 8.0
+
+    # Mode-specific validations
+    if threshold_mode == 'relative':
+        if amp_threshold_relative is None:
+            err_msg = (
+                "CNA threshold mode is 'relative' but '--cna_amp_threshold_relative' is not specified"
+            )
+            error_message(err_msg, logger)
+
+        if tumor_ploidy is None:
+            logger.info(
+                "CNA threshold mode is 'relative' without '--tumor_ploidy' specified - "
+                "tumor ploidy will be auto-estimated from CNA segments"
+            )
+
+    elif threshold_mode == 'combined':
+        if amp_threshold_relative is None:
+            err_msg = (
+                "CNA threshold mode is 'combined' but '--cna_amp_threshold_relative' is not specified"
+            )
+            error_message(err_msg, logger)
+
+        if tumor_ploidy is None:
+            logger.info(
+                "CNA threshold mode is 'combined' without '--tumor_ploidy' specified - "
+                "tumor ploidy will be auto-estimated from CNA segments"
+            )
+        else:
+            # Check threshold compatibility for combined mode
+            effective_threshold_at_ploidy = tumor_ploidy * amp_threshold_relative
+            threshold_difference = abs(effective_threshold_at_ploidy - amp_threshold_absolute)
+
+            if threshold_difference > 5:
+                warn_msg = (
+                    f"Combined mode: thresholds may diverge significantly. "
+                    f"Absolute threshold = {amp_threshold_absolute}, "
+                    f"Relative threshold at ploidy {tumor_ploidy} = {effective_threshold_at_ploidy:.1f}. "
+                    f"Consider adjusting values for better alignment across ploidy ranges."
+                )
+                warn_message(warn_msg, logger)
+
+    # ---- Gain threshold validation ----
+    if gain_threshold_absolute < 1:
+        warn_msg = (
+            f"Absolute gain threshold ('--cna_gain_threshold_absolute' = {gain_threshold_absolute}) "
+            f"is < 1 - setting to minimum value of 1"
+        )
+        warn_message(warn_msg, logger)
+        arg_dict['cna_gain_threshold_absolute'] = 1
+        gain_threshold_absolute = 1
+
+    if gain_threshold_absolute >= amp_threshold_absolute:
+        warn_msg = (
+            f"Absolute gain threshold ('--cna_gain_threshold_absolute' = {gain_threshold_absolute}) "
+            f"is >= absolute amplification threshold ({amp_threshold_absolute}) - "
+            f"the gain tier will be empty in absolute/combined mode"
+        )
+        warn_message(warn_msg, logger)
+
+    if gain_threshold_relative < 1.0:
+        warn_msg = (
+            f"Relative gain threshold ('--cna_gain_threshold_relative' = {gain_threshold_relative}) "
+            f"is < 1.0 (at or below ploidy) - setting to minimum value of 1.0"
+        )
+        warn_message(warn_msg, logger)
+        arg_dict['cna_gain_threshold_relative'] = 1.0
+        gain_threshold_relative = 1.0
+
+    if gain_threshold_relative >= amp_threshold_relative:
+        warn_msg = (
+            f"Relative gain threshold ('--cna_gain_threshold_relative' = {gain_threshold_relative}) "
+            f"is >= relative amplification threshold ({amp_threshold_relative}) - "
+            f"the gain tier will be empty in relative/combined mode"
+        )
+        warn_message(warn_msg, logger)
+
+    # ---- Deletion threshold validation ----
+    if del_threshold_absolute < 1:
+        warn_msg = (
+            f"Absolute deletion threshold ('--cna_del_threshold_absolute' = {del_threshold_absolute}) "
+            f"is < 1 - setting to minimum value of 1"
+        )
+        warn_message(warn_msg, logger)
+        arg_dict['cna_del_threshold_absolute'] = 1
+        del_threshold_absolute = 1
+
+    if del_threshold_absolute > 10:
+        warn_msg = (
+            f"Absolute deletion threshold ('--cna_del_threshold_absolute' = {del_threshold_absolute}) "
+            f"is > 10 - setting to maximum value of 10"
+        )
+        warn_message(warn_msg, logger)
+        arg_dict['cna_del_threshold_absolute'] = 10
+
+    if del_threshold_relative <= 0.0 or del_threshold_relative >= 1.0:
+        err_msg = (
+            f"Relative deletion threshold ('--cna_del_threshold_relative' = {del_threshold_relative}) "
+            f"must be in the range (0, 1) exclusive"
+        )
+        error_message(err_msg, logger)
+
+
+def verify_args(arg_dict, logger = None):
+
+    if logger is None:
+        logger = getlogger("pcgr-verify-args")
     
     # Check the existence of required arguments    
     verify_required_args(arg_dict, logger)
@@ -34,6 +229,35 @@ def verify_args(arg_dict):
             )
             error_message(err_msg, logger)
 
+    # OncoKB: warn if token is provided but vcf2maf is not enabled (MAF is needed for SNV/InDel annotation)
+    if arg_dict.get('oncokb_api_token') is not None and \
+        arg_dict.get('vcf2maf') is not True and \
+            arg_dict['input_vcf'] is not None:
+        warn_msg = (
+            "OncoKB token is provided ('--oncokb_api_token') but '--vcf2maf' is not enabled - "
+            "OncoKB annotation of SNVs/InDels will be skipped since it requires a MAF file generated by vcf2maf"
+        )
+        warn_message(warn_msg, logger)
+
+    # OncoKB: validate token format (UUID v4 pattern)
+    if arg_dict.get('oncokb_api_token') is not None:
+        import re
+        uuid_pattern = r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+        if not re.match(uuid_pattern, str(arg_dict['oncokb_api_token']), re.IGNORECASE):
+            err_msg = (
+                f"OncoKB API token ('--oncokb_api_token') does not match the expected UUID format "
+                f"(e.g. 'c3f8a1d2-7b4e-49c0-85f1-2e6d0a9b3c7e')"
+            )
+            error_message(err_msg, logger)
+
+    # OncoKB: error if --oncokb_exclusive is set without a token
+    if arg_dict.get('oncokb_exclusive') is True and arg_dict.get('oncokb_api_token') is None:
+        err_msg = (
+            "'--oncokb_exclusive' is set but no OncoKB API token was provided - "
+            "please supply '--oncokb_api_token' to use OncoKB-exclusive biomarker matching"
+        )
+        error_message(err_msg, logger)
+
     # check that tumor primary site/type is set correctly (integer between 0 and 30)
     if arg_dict['tsite'] > max(pcgr_vars.tsites.keys()) or arg_dict['tsite'] < 0:
         err_msg = f"Tumor type code ('--tumor_site' = {arg_dict['tsite']}) must be within [0, {max(pcgr_vars.tsites.keys())}]"
@@ -50,213 +274,221 @@ def verify_args(arg_dict):
             err_msg = f"Tumor ploidy value ('--tumor_ploidy' = {arg_dict['tumor_ploidy']}) must be > 0"
             error_message(err_msg, logger)
 
-    ## check that allelic support tags are set correctly when minimum/maximum depth/allelic fractions are set
-    if arg_dict['tumor_dp_tag'] == "_NA_" and arg_dict['tumor_dp_min'] is not None:
-        err_msg = f"Minimum sequencing depth tumor ('tumor_dp_min' = {arg_dict['tumor_dp_min']}) requires '--tumor_dp_tag' to be set"
-        error_message(err_msg, logger)
-    
-    if arg_dict['tumor_af_tag'] == "_NA_" and (arg_dict['tumor_af_min'] is not None or arg_dict['tumor_ad_min'] is not None):
-        err_msg = f"Minimum AF/AD tumor ('tumor_af_min' = {arg_dict['tumor_af_min']}, 'tumor_ad_min' = {arg_dict['tumor_ad_min']}) requires '--tumor_af_tag' to be set"
-        error_message(err_msg, logger)
-    
-    if arg_dict['control_dp_tag'] == "_NA_" and arg_dict['control_dp_min'] is not None:
-        err_msg = f"Minimum sequencing depth control ('control_dp_min' = {arg_dict['control_dp_min']}) requires '--control_dp_tag' to be set"
-        error_message(err_msg, logger)
-    
-    if arg_dict['control_af_tag'] == "_NA_" and (arg_dict['control_af_max'] is not None or arg_dict['control_ad_max'] is not None):
-        err_msg = f"Maximum AF/AD control ('control_af_max' = {arg_dict['control_af_max']}, 'control_ad_max' = {arg_dict['control_ad_max']}) requires '--control_af_tag' to be set"
-        error_message(err_msg, logger)
+    ## VCF-dependent validations - only check when input VCF is provided
+    if arg_dict['input_vcf'] is not None:
 
-    # check that minimum/maximum depth/allelic fractions are set correctly
-    dp_tumor_set = False
-    if arg_dict['tumor_dp_min'] is not None:
-        dp_tumor_set = True
-        if int(arg_dict['tumor_dp_min']) <= 0:
-            err_msg = f"Minimum sequencing depth tumor ('tumor_dp_min' = {arg_dict['tumor_dp_min']}) must be > 0"
+        ## check that allelic support tags are set correctly when minimum/maximum depth/allelic fractions are set
+        if arg_dict['tumor_dp_tag'] == "_NA_" and arg_dict['tumor_dp_min'] is not None:
+            err_msg = f"Minimum sequencing depth tumor ('tumor_dp_min' = {arg_dict['tumor_dp_min']}) requires '--tumor_dp_tag' to be set"
             error_message(err_msg, logger)
 
-    if arg_dict['tumor_af_min'] is not None:
-        if (float(arg_dict['tumor_af_min']) > 1 or float(arg_dict['tumor_af_min']) < 0):
-            err_msg = f"Minimum AF tumor ('tumor_af_min' = {arg_dict['tumor_af_min']}) must be within [0, 1]"
+        if arg_dict['tumor_af_tag'] == "_NA_" and (arg_dict['tumor_af_min'] is not None or arg_dict['tumor_ad_min'] is not None):
+            err_msg = f"Minimum AF/AD tumor ('tumor_af_min' = {arg_dict['tumor_af_min']}, 'tumor_ad_min' = {arg_dict['tumor_ad_min']}) requires '--tumor_af_tag' to be set"
             error_message(err_msg, logger)
 
-    dp_control_set = False
-    if arg_dict['control_dp_min'] is not None:
-        dp_control_set = True
-        if int(arg_dict['control_dp_min']) <= 0:            
-            err_msg = f"Minimum sequencing depth control ('control_dp_min' = {arg_dict['control_dp_min']}) must be > 0"
+        if arg_dict['control_dp_tag'] == "_NA_" and arg_dict['control_dp_min'] is not None:
+            err_msg = f"Minimum sequencing depth control ('control_dp_min' = {arg_dict['control_dp_min']}) requires '--control_dp_tag' to be set"
             error_message(err_msg, logger)
 
-    if arg_dict['tumor_ad_min'] is not None:
-        err = 0
-        if int(arg_dict['tumor_ad_min']) <= 0:
-            err = 1
-        if dp_tumor_set is True and int(arg_dict['tumor_ad_min']) > int(arg_dict['tumor_dp_min']):
-            err = 1
-        if err == 1:            
-            err_msg = (
-                f"Minimum allelic depth tumor - ('tumor_ad_min' = {arg_dict['tumor_ad_min']}) must be > 0 "
-                f"and less than or equal to minimum sequencing depth tumor ('tumor_dp_min' = {arg_dict['tumor_dp_min']})"
-            )
+        if arg_dict['control_af_tag'] == "_NA_" and (arg_dict['control_af_max'] is not None or arg_dict['control_ad_max'] is not None):
+            err_msg = f"Maximum AF/AD control ('control_af_max' = {arg_dict['control_af_max']}, 'control_ad_max' = {arg_dict['control_ad_max']}) requires '--control_af_tag' to be set"
             error_message(err_msg, logger)
 
-    if arg_dict['control_af_max'] is not None:
-        if float(arg_dict['control_af_max']) < 0 or float(arg_dict['control_af_max']) > 1:
-            err_msg = f"Maximum AF control ('control_af_max' = {arg_dict['control_af_max']}) must be within [0, 1]"
-            error_message(err_msg, logger)
-    
-    if arg_dict['control_ad_max'] is not None:
-        err = 0
-        if int(arg_dict['control_ad_max']) < 0:
-            err = 1
-        if dp_control_set is True and int(arg_dict['control_ad_max']) > int(arg_dict['control_dp_min']):
-            err = 1
-        if err == 1:
-            err_msg = (
-                f"Maximum allelic depth control - ('control_ad_max' = {arg_dict['control_ad_max']}) must be >= 0 "
-                f"and less than or equal to minimum sequencing depth control ('control_dp_min' = {arg_dict['control_dp_min']})"
-            )
-            error_message(err_msg, logger)
-    
-    # TMB: check that minimum/maximum depth/allelic fractions are set correctly
-    if arg_dict['tmb_dp_min'] is not None:
-        if int(arg_dict['tmb_dp_min']) <= 0:
-            err_msg = f"Minimum sequencing depth tumor - TMB calculation ('tmb_dp_min' = {arg_dict['tmb_dp_min']}) must be > 0"
-            error_message(err_msg, logger)
-        if dp_tumor_set is True and (int(arg_dict['tmb_dp_min']) < int(arg_dict['tumor_dp_min'])):
-            err_msg = f"Minimum sequencing depth (tumor) for TMB calculation ('tmb_dp_min' = {str(arg_dict['tmb_dp_min'])}) must be "
-            err_msg += f"greater or equal to minimum sequencing depth tumor {str(arg_dict['tumor_dp_min'])} (i.e. global filter for variant inclusion in report)"
-            error_message(err_msg, logger)
-    
-    if arg_dict['tmb_ad_min'] is not None:
-        if int(arg_dict['tmb_ad_min']) <= 0:
-            err_msg = f"Minimum allelic depth tumor - TMB calculation ('tmb_ad_min' = {arg_dict['tmb_ad_min']}) must be > 0"
-            error_message(err_msg, logger)
-        if arg_dict['tumor_ad_min'] is not None:
-            if int(arg_dict['tmb_ad_min']) > 0 and int(arg_dict['tumor_ad_min']) > 0:
-                if int(arg_dict['tmb_ad_min']) < int(arg_dict['tumor_ad_min']):
-                    err_msg = f"Minimum allelic depth (tumor) for TMB calculation ('tmb_ad_min' = {str(arg_dict['tmb_ad_min'])}) must be "
-                    err_msg += f"greater or equal to minimum allelic depth tumor {str(arg_dict['tumor_ad_min'])} (i.e. global filter for variant inclusion in report)"
-                    error_message(err_msg, logger)
-                if dp_tumor_set is True and (int(arg_dict['tmb_ad_min']) > int(arg_dict['tmb_dp_min']) and int(arg_dict['tmb_dp_min']) > 0):
-                    err_msg = f"Minimum allelic depth (tumor) for TMB calculation ('tmb_ad_min' = {str(arg_dict['tmb_ad_min'])}) must be "
-                    err_msg += f"less than or equal to minimum sequencing depth (tumor) for TMB calculation ('tmb_dp_min' = {str(arg_dict['tmb_dp_min'])})"
-                    error_message(err_msg, logger)
-
-    if arg_dict['tmb_af_min'] is not None:
-        if float(arg_dict['tmb_af_min']) < 0 or float(arg_dict['tmb_af_min']) > 1:
-            err_msg = f"Minimum AF (tumor) for TMB calculation ('tmb_af_min' = {arg_dict['tmb_af_min']}) must be within [0, 1]"
-            error_message(err_msg, logger)
-        
-        if arg_dict['tumor_af_min'] is not None:
-            if float(arg_dict['tmb_af_min']) > 0 and (float(arg_dict['tmb_af_min']) < float(arg_dict['tumor_af_min'])):
-                err_msg = f"Minimum AF (tumor) for TMB calculation ('tmb_af_min' = {str(arg_dict['tmb_af_min'])}) must be "
-                err_msg += f"greater or equal to minimum AF tumor ({str(arg_dict['tumor_af_min'])}, i.e. global filter for variant inclusion in report)"
+        # check that minimum/maximum depth/allelic fractions are set correctly
+        dp_tumor_set = False
+        if arg_dict['tumor_dp_min'] is not None:
+            dp_tumor_set = True
+            if int(arg_dict['tumor_dp_min']) <= 0:
+                err_msg = f"Minimum sequencing depth tumor ('tumor_dp_min' = {arg_dict['tumor_dp_min']}) must be > 0"
                 error_message(err_msg, logger)
 
-    # Check that coding target size region of sequencing assay is set correctly
-    if float(arg_dict['effective_target_size_mb']) < 0 or float(arg_dict['effective_target_size_mb']) > float(pcgr_vars.CODING_EXOME_SIZE_MB):
-        err_msg = (
-            f"Coding target size region in Mb ('--effective_target_size_mb' = {arg_dict['effective_target_size_mb']}) is not "
-            f"positive or larger than the approximate size of the coding human genome ({float(pcgr_vars.CODING_EXOME_SIZE_MB)} Mb))")
-        error_message(err_msg, logger)
-    if float(arg_dict['effective_target_size_mb']) < 1:
-        warn_msg = (
-            f"Coding target size region in Mb ('--effective_target_size_mb' = {arg_dict['effective_target_size_mb']}) must be "
-            "greater than 1 Mb for mutational burden estimate to be robust")
-        warn_message(warn_msg, logger)
-    if float(arg_dict['effective_target_size_mb']) < float(pcgr_vars.CODING_EXOME_SIZE_MB) and arg_dict['assay'] != 'TARGETED':
-        warn_msg = (
-            f"Coding target size region in Mb ('--effective_target_size_mb' = {arg_dict['effective_target_size_mb']}) is less than ",
-            f"the default for WES/WGS ({float(pcgr_vars.CODING_EXOME_SIZE_MB)} Mb), assay must be set to 'TARGETED'")
-        warn_message(warn_msg, logger)
+        if arg_dict['tumor_af_min'] is not None:
+            if (float(arg_dict['tumor_af_min']) > 1 or float(arg_dict['tumor_af_min']) < 0):
+                err_msg = f"Minimum AF tumor ('tumor_af_min' = {arg_dict['tumor_af_min']}) must be within [0, 1]"
+                error_message(err_msg, logger)
 
-    # if assay is targeted or mode is Tumor-Only, MSI prediction will not be performed/switched off
-    assay_type = 'Tumor-Control'
-    if arg_dict['estimate_msi'] is True and (arg_dict['assay'] == 'TARGETED' or arg_dict['tumor_only'] is True):
-        if arg_dict['tumor_only'] is True:
-            assay_type = 'Tumor-Only'
-        warn_msg = f"MSI status prediction can be applied for WGS/WES tumor-control assays only (query type: {arg_dict['assay']}|{assay_type}) - analysis will be omitted"
-        warn_message(warn_msg, logger)
-        arg_dict['estimate_msi'] = 0
+        dp_control_set = False
+        if arg_dict['control_dp_min'] is not None:
+            dp_control_set = True
+            if int(arg_dict['control_dp_min']) <= 0:
+                err_msg = f"Minimum sequencing depth control ('control_dp_min' = {arg_dict['control_dp_min']}) must be > 0"
+                error_message(err_msg, logger)
 
-    # minimum number of mutations required for mutational signature re-fitting cannot be less than 100 
-    # somewhat arbitrary min threshold), recommended value is 200)
-    if int(arg_dict['min_mutations_signatures']) < int(pcgr_vars.RECOMMENDED_N_MUT_SIGNATURE):
-        if int(arg_dict['min_mutations_signatures']) < int(pcgr_vars.MINIMUM_N_MUT_SIGNATURE):
+        if arg_dict['tumor_ad_min'] is not None:
+            err = 0
+            if int(arg_dict['tumor_ad_min']) <= 0:
+                err = 1
+            if dp_tumor_set is True and int(arg_dict['tumor_ad_min']) > int(arg_dict['tumor_dp_min']):
+                err = 1
+            if err == 1:
+                err_msg = (
+                    f"Minimum allelic depth tumor - ('tumor_ad_min' = {arg_dict['tumor_ad_min']}) must be > 0 "
+                    f"and less than or equal to minimum sequencing depth tumor ('tumor_dp_min' = {arg_dict['tumor_dp_min']})"
+                )
+                error_message(err_msg, logger)
+
+        if arg_dict['control_af_max'] is not None:
+            if float(arg_dict['control_af_max']) < 0 or float(arg_dict['control_af_max']) > 1:
+                err_msg = f"Maximum AF control ('control_af_max' = {arg_dict['control_af_max']}) must be within [0, 1]"
+                error_message(err_msg, logger)
+
+        if arg_dict['control_ad_max'] is not None:
+            err = 0
+            if int(arg_dict['control_ad_max']) < 0:
+                err = 1
+            if dp_control_set is True and int(arg_dict['control_ad_max']) > int(arg_dict['control_dp_min']):
+                err = 1
+            if err == 1:
+                err_msg = (
+                    f"Maximum allelic depth control - ('control_ad_max' = {arg_dict['control_ad_max']}) must be >= 0 "
+                    f"and less than or equal to minimum sequencing depth control ('control_dp_min' = {arg_dict['control_dp_min']})"
+                )
+                error_message(err_msg, logger)
+
+        # TMB: check that minimum/maximum depth/allelic fractions are set correctly
+        if arg_dict['tmb_dp_min'] is not None:
+            if int(arg_dict['tmb_dp_min']) <= 0:
+                err_msg = f"Minimum sequencing depth tumor - TMB calculation ('tmb_dp_min' = {arg_dict['tmb_dp_min']}) must be > 0"
+                error_message(err_msg, logger)
+            if dp_tumor_set is True and (int(arg_dict['tmb_dp_min']) < int(arg_dict['tumor_dp_min'])):
+                err_msg = f"Minimum sequencing depth (tumor) for TMB calculation ('tmb_dp_min' = {str(arg_dict['tmb_dp_min'])}) must be "
+                err_msg += f"greater or equal to minimum sequencing depth tumor {str(arg_dict['tumor_dp_min'])} (i.e. global filter for variant inclusion in report)"
+                error_message(err_msg, logger)
+
+        if arg_dict['tmb_ad_min'] is not None:
+            if int(arg_dict['tmb_ad_min']) <= 0:
+                err_msg = f"Minimum allelic depth tumor - TMB calculation ('tmb_ad_min' = {arg_dict['tmb_ad_min']}) must be > 0"
+                error_message(err_msg, logger)
+            if arg_dict['tumor_ad_min'] is not None:
+                if int(arg_dict['tmb_ad_min']) > 0 and int(arg_dict['tumor_ad_min']) > 0:
+                    if int(arg_dict['tmb_ad_min']) < int(arg_dict['tumor_ad_min']):
+                        err_msg = f"Minimum allelic depth (tumor) for TMB calculation ('tmb_ad_min' = {str(arg_dict['tmb_ad_min'])}) must be "
+                        err_msg += f"greater or equal to minimum allelic depth tumor {str(arg_dict['tumor_ad_min'])} (i.e. global filter for variant inclusion in report)"
+                        error_message(err_msg, logger)
+                    if dp_tumor_set is True and (int(arg_dict['tmb_ad_min']) > int(arg_dict['tmb_dp_min']) and int(arg_dict['tmb_dp_min']) > 0):
+                        err_msg = f"Minimum allelic depth (tumor) for TMB calculation ('tmb_ad_min' = {str(arg_dict['tmb_ad_min'])}) must be "
+                        err_msg += f"less than or equal to minimum sequencing depth (tumor) for TMB calculation ('tmb_dp_min' = {str(arg_dict['tmb_dp_min'])})"
+                        error_message(err_msg, logger)
+
+        if arg_dict['tmb_af_min'] is not None:
+            if float(arg_dict['tmb_af_min']) < 0 or float(arg_dict['tmb_af_min']) > 1:
+                err_msg = f"Minimum AF (tumor) for TMB calculation ('tmb_af_min' = {arg_dict['tmb_af_min']}) must be within [0, 1]"
+                error_message(err_msg, logger)
+
+            if arg_dict['tumor_af_min'] is not None:
+                if float(arg_dict['tmb_af_min']) > 0 and (float(arg_dict['tmb_af_min']) < float(arg_dict['tumor_af_min'])):
+                    err_msg = f"Minimum AF (tumor) for TMB calculation ('tmb_af_min' = {str(arg_dict['tmb_af_min'])}) must be "
+                    err_msg += f"greater or equal to minimum AF tumor ({str(arg_dict['tumor_af_min'])}, i.e. global filter for variant inclusion in report)"
+                    error_message(err_msg, logger)
+
+        # Check that coding target size region of sequencing assay is set correctly
+        if float(arg_dict['effective_target_size_mb']) < 0 or float(arg_dict['effective_target_size_mb']) > float(pcgr_vars.CODING_EXOME_SIZE_MB):
             err_msg = (
-                f"Minimum number of mutations required for mutational signature analysis ('--min_mutations_signatures' = "
-                f"{arg_dict['min_mutations_signatures']}) must be >= {pcgr_vars.MINIMUM_N_MUT_SIGNATURE}")
+                f"Coding target size region in Mb ('--effective_target_size_mb' = {arg_dict['effective_target_size_mb']}) is not "
+                f"positive or larger than the approximate size of the coding human genome ({float(pcgr_vars.CODING_EXOME_SIZE_MB)} Mb))")
             error_message(err_msg, logger)
+        if float(arg_dict['effective_target_size_mb']) < 1:
+            warn_msg = (
+                f"Coding target size region in Mb ('--effective_target_size_mb' = {arg_dict['effective_target_size_mb']}) must be "
+                "greater than 1 Mb for mutational burden estimate to be robust")
+            warn_message(warn_msg, logger)
+        if float(arg_dict['effective_target_size_mb']) < float(pcgr_vars.CODING_EXOME_SIZE_MB) and arg_dict['assay'] != 'TARGETED':
+            warn_msg = (
+                f"Coding target size region in Mb ('--effective_target_size_mb' = {arg_dict['effective_target_size_mb']}) is less than ",
+                f"the default for WES/WGS ({float(pcgr_vars.CODING_EXOME_SIZE_MB)} Mb), assay must be set to 'TARGETED'")
+            warn_message(warn_msg, logger)
+
+        # if assay is targeted or mode is Tumor-Only, MSI prediction will not be performed/switched off
+        assay_type = 'Tumor-Control'
+        if arg_dict['estimate_msi'] is True and (arg_dict['assay'] == 'TARGETED' or arg_dict['tumor_only'] is True):
+            if arg_dict['tumor_only'] is True:
+                assay_type = 'Tumor-Only'
+            warn_msg = f"MSI status prediction can be applied for WGS/WES tumor-control assays only (query type: {arg_dict['assay']}|{assay_type}) - analysis will be omitted"
+            warn_message(warn_msg, logger)
+            arg_dict['estimate_msi'] = 0
+
+        # minimum number of mutations required for mutational signature re-fitting cannot be less than 100
+        # somewhat arbitrary min threshold), recommended value is 200)
+        if int(arg_dict['min_mutations_signatures']) < int(pcgr_vars.RECOMMENDED_N_MUT_SIGNATURE):
+            if int(arg_dict['min_mutations_signatures']) < int(pcgr_vars.MINIMUM_N_MUT_SIGNATURE):
+                err_msg = (
+                    f"Minimum number of mutations required for mutational signature analysis ('--min_mutations_signatures' = "
+                    f"{arg_dict['min_mutations_signatures']}) must be >= {pcgr_vars.MINIMUM_N_MUT_SIGNATURE}")
+                error_message(err_msg, logger)
+            warn_msg = (
+                f"Minimum number of mutations required for mutational signature analysis ('--min_mutations_signatures' "
+                f"= {arg_dict['min_mutations_signatures']}) is less than the recommended number (n = {pcgr_vars.RECOMMENDED_N_MUT_SIGNATURE})")
+            warn_message(warn_msg, logger)
+
+        if float(arg_dict['prevalence_reference_signatures']) > int(pcgr_vars.MAX_SIGNATURE_PREVALENCE) or \
+            float(arg_dict['prevalence_reference_signatures']) < 0:
+            err_msg = (
+                f"Prevalence of reference signatures (percent) must be above zero and less than {pcgr_vars.MAX_SIGNATURE_PREVALENCE} "
+                f"'--prevalence_reference_signatures' = {arg_dict['prevalence_reference_signatures']}")
+            error_message(err_msg, logger)
+
+        # if MSI status is to be estimated, mutational burden must be turned on
+        if arg_dict['estimate_msi'] is True and arg_dict['estimate_tmb'] is False:
+            err_msg = "Prediction of MSI status ('--estimate_msi') requires mutational burden analysis ('--estimate_tmb')"
+            error_message(err_msg, logger)
+
+        if arg_dict['tumor_only'] is True:
+
+            if arg_dict['control_dp_tag'] is not None and arg_dict['control_dp_tag'] != "_NA_":
+                err_msg = f"Option '--tumor_only' does not allow '--control_dp_tag' option to be set ({arg_dict['control_dp_tag']})"
+                error_message(err_msg, logger)
+
+            if arg_dict['control_af_tag'] is not None and arg_dict['control_af_tag'] != "_NA_":
+                err_msg = f"Option '--tumor_only' does not allow '--control_af_tag' option to be set ({arg_dict['control_af_tag']})"
+                error_message(err_msg, logger)
+
+            for t in ['exclude_likely_het_germline', 'exclude_likely_hom_germline']:
+                if arg_dict[t]:
+                    if arg_dict['tumor_af_tag'] == "_NA_":
+                        err_msg = f"Option '--{t}' requires '--tumor_af_tag' option to be set"
+                        error_message(err_msg, logger)
+
+            # Emit warning if panel-of-normals VCF is not present and exclude_pon is set
+            if arg_dict['pon_vcf'] is None and arg_dict['exclude_pon'] is True:
+                warn_msg = "Panel-of-normals VCF is NOT provided ('--pon_vcf') - exclusion of calls found in panel-of-normals ('--exclude_pon') will be ignored"
+                warn_message(warn_msg, logger)
+                arg_dict['exclude_pon'] = False
+
+            # Emit warnings that mutational burden and mutational signatures are less accurate for assays with tumor-only data
+            if arg_dict['estimate_tmb'] is True:
+                warn_msg = "Estimation of mutational burden in tumor-only mode is suboptimal - results must be interpreted with caution"
+                warn_message(warn_msg, logger)
+            if arg_dict['estimate_signatures'] is True:
+                warn_msg = "Estimation of mutational signatures in tumor-only mode is suboptimal - results must be interpreted with caution"
+                warn_message(warn_msg, logger)
+
+            if arg_dict['gnomad_popmax_af_tolerated'] is not None:
+                 if float(arg_dict['gnomad_popmax_af_tolerated']) < 0 or float(arg_dict['gnomad_popmax_af_tolerated']) > 1:
+                    err_msg = f"MAF threshold (tumor-only germline filter) for gnomAD popmax allele frequency ('--gnomad_popmax_af_tolerated' = {arg_dict['gnomad_popmax_af_tolerated']}) must be within the [0, 1] range"
+                    error_message(err_msg, logger)
+
+        # Emit warning that mutational signature estimation is (likely) not optimal for small/targeted sequencing assays
+        if arg_dict['estimate_signatures'] is True and arg_dict['assay'] == 'TARGETED':
+            warn_msg = "Estimation of mutational signatures ('--estimate_signatures') is not optimal for TARGETED sequencing assays - results must be interpreted with caution"
+            warn_message(warn_msg, logger)
+
+        verify_vep_options(arg_dict, logger)
+
+    # Check that minimum split reads for fusion filtering is at least 2
+    if int(arg_dict['fusion_min_split_reads']) < 2:
         warn_msg = (
-            f"Minimum number of mutations required for mutational signature analysis ('--min_mutations_signatures' "
-            f"= {arg_dict['min_mutations_signatures']}) is less than the recommended number (n = {pcgr_vars.RECOMMENDED_N_MUT_SIGNATURE})")
+            f"Minimum split reads for fusion filtering ('--fusion_min_split_reads' = {arg_dict['fusion_min_split_reads']}) "
+            f"is < 2 - setting to minimum value of 2"
+        )
         warn_message(warn_msg, logger)
-        
-
-    if float(arg_dict['prevalence_reference_signatures']) > int(pcgr_vars.MAX_SIGNATURE_PREVALENCE) or \
-        float(arg_dict['prevalence_reference_signatures']) < 0:
-        err_msg = (
-            f"Prevalence of reference signatures (percent) must be above zero and less than {pcgr_vars.MAX_SIGNATURE_PREVALENCE} "
-            f"'--prevalence_reference_signatures' = {arg_dict['prevalence_reference_signatures']}")
-        error_message(err_msg, logger)
-
-    # if MSI status is to be estimated, mutational burden must be turned on
-    if arg_dict['estimate_msi'] is True and arg_dict['estimate_tmb'] is False:
-        err_msg = "Prediction of MSI status ('--estimate_msi') requires mutational burden analysis ('--estimate_tmb')"
-        error_message(err_msg, logger)
-
-    if arg_dict['tumor_only'] is True:
-        
-        if arg_dict['control_dp_tag'] is not None and arg_dict['control_dp_tag'] != "_NA_":
-            err_msg = f"Option '--tumor_only' does not allow '--control_dp_tag' option to be set ({arg_dict['control_dp_tag']})"
-            error_message(err_msg, logger)
-        
-        if arg_dict['control_af_tag'] is not None and arg_dict['control_af_tag'] != "_NA_":
-            err_msg = f"Option '--tumor_only' does not allow '--control_af_tag' option to be set ({arg_dict['control_af_tag']})"
-            error_message(err_msg, logger)
-        
-        for t in ['exclude_likely_het_germline', 'exclude_likely_hom_germline']:
-            if arg_dict[t]:
-                if arg_dict['tumor_af_tag'] == "_NA_":
-                    err_msg = f"Option '--{t}' requires '--tumor_af_tag' option to be set"
-                    error_message(err_msg, logger)
-
-        # Emit warning if panel-of-normals VCF is not present and exclude_pon is set
-        if arg_dict['pon_vcf'] is None and arg_dict['exclude_pon'] is True:
-            warn_msg = "Panel-of-normals VCF is NOT provided ('--pon_vcf') - exclusion of calls found in panel-of-normals ('--exclude_pon') will be ignored"
-            warn_message(warn_msg, logger)
-            arg_dict['exclude_pon'] = False
-
-        # Emit warnings that mutational burden and mutational signatures are less accurate for assays with tumor-only data
-        if arg_dict['estimate_tmb'] is True:
-            warn_msg = "Estimation of mutational burden in tumor-only mode is suboptimal - results must be interpreted with caution"
-            warn_message(warn_msg, logger)
-        if arg_dict['estimate_signatures'] is True:
-            warn_msg = "Estimation of mutational signatures in tumor-only mode is suboptimal - results must be interpreted with caution"
-            warn_message(warn_msg, logger)
-
-        for pop in ['nfe', 'fin', 'amr', 'eas', 'sas', 'asj', 'oth', 'afr', 'global']:
-            tag = f'maf_gnomad_{pop}'
-            if arg_dict[tag]:
-                if float(arg_dict[tag]) < 0 or float(arg_dict[tag]) > 1:
-                    err_msg = f"MAF threshold (tumor-only germline filter) for gnomAD (pop '{pop.upper()}') must be within the [0, 1] range, current value is {arg_dict[tag]}"
-                    error_message(err_msg, logger)
-
-    # Emit warning that mutational signature estimation is (likely) not optimal for small/targeted sequencing assays
-    if arg_dict['estimate_signatures'] is True and arg_dict['assay'] == 'TARGETED':
-        warn_msg = "Estimation of mutational signatures ('--estimate_signatures') is not optimal for TARGETED sequencing assays - results must be interpreted with caution"
-        warn_message(warn_msg, logger)
+        arg_dict['fusion_min_split_reads'] = 2
 
     # Check that threshold for gains/amplifications are properly set, and that segment overlap with transcripts are set appropriately
-    if arg_dict['n_copy_gain'] <= 2:
-        err_msg = f"Total copy number threshold for gains/amplifications ('--n_copy_gain' = {arg_dict['n_copy_gain']}) should be > 2"
-        error_message(err_msg, logger)
-    if arg_dict['cna_overlap_pct'] > 100 or arg_dict['cna_overlap_pct'] <= 0:
-        err_msg = f"Minimum percent overlap between copy number segment and gene transcript ('--cna_overlap_pct' = {arg_dict['cna_overlap_pct']}) must be within (0, 100]"
-        error_message(err_msg, logger)
+    validate_cna_thresholds(arg_dict, logger)
 
-    verify_vep_options(arg_dict, logger)
+    if arg_dict['cna_transcript_overlap_pct'] > 100 or arg_dict['cna_transcript_overlap_pct'] <= 0:
+        err_msg = f"Minimum percent overlap between copy number segment and gene transcript ('--cna_transcript_overlap_pct' = {arg_dict['cna_transcript_overlap_pct']}) must be within (0, 100]"
+        error_message(err_msg, logger)
 
     return(arg_dict)
 
@@ -289,7 +521,7 @@ def define_output_files(arg_dict, cpsr = False):
     
     if not cpsr:
         for otype in ['cna_gene','cna_segment','expression','expression_outliers',
-                      'expression_similarity','snv_indel_ann','msigs']:
+                      'expression_similarity','snv_indel_ann','msigs', 'rna_fusion']:
             output_data[otype] = f"{output_prefix}.{otype}.tsv.gz"        
         output_data['maf'] = f"{output_prefix}.maf"
         output_data['tmb'] = f"{output_prefix}.tmb.tsv"
@@ -305,7 +537,7 @@ def define_output_files(arg_dict, cpsr = False):
     
     if not cpsr:
         for otype in ['cna_gene', 'cna_segment','expression', 'expression_outliers', 'snv_indel_ann',
-                      'expression_similarity','maf','tmb','msigs']:
+                      'expression_similarity', 'maf', 'tmb', 'msigs', 'rna_fusion']:
             # if annotated output cna segments exist and overwrite not set
             if os.path.exists(output_data[otype]) and arg_dict["force_overwrite"] is False:
                 err_msg = "Output files (e.g. " + str(output_data[otype]) + \
@@ -346,9 +578,13 @@ def verify_input_files(arg_dict):
     # create output folder (if not already exists)
     #output_dir_full = utils.safe_makedir(os.path.abspath(arg_dict['output_dir']))
 
-    # check that either input vcf or cna segments exist
-    if arg_dict['input_vcf'] is None and arg_dict['input_cna'] is None:
-        err_msg = 'Please specifiy either a VCF input file (--input_vcf) or a copy number segment file (--input_cna)'
+    # check that at least one molecular input is provided
+    if (arg_dict['input_vcf'] is None and arg_dict['input_cna'] is None and
+        arg_dict.get('input_rna_fusion') is None and arg_dict.get('input_rna_exp') is None):
+        err_msg = (
+            'Please specify at least one molecular input file: '
+            '--input_vcf, --input_cna, --input_rna_fusion, or --input_rna_expression'
+        )
         error_message(err_msg, logger)
 
     # check if panel of normal VCF exist
@@ -402,18 +638,17 @@ def verify_input_files(arg_dict):
         input_cna_dir = os.path.dirname(os.path.abspath(arg_dict["input_cna"]))
 
     # check if input rna fusion variants exist
-    # if not arg_dict["input_rna_fusion"] is None:
-    #     check_file_exists(os.path.abspath(arg_dict["input_rna_fusion"]), strict = True, logger = logger)
-       
-    #     if not (os.path.abspath(arg_dict["input_rna_fusion"]).endswith(".tsv") or 
-    #             os.path.abspath(arg_dict["input_rna_fusion"]).endswith(".txt")):
-    #         err_msg = "RNA fusion variants file (" + os.path.abspath(
-    #             arg_dict["input_rna_fusion"]) + ") does not have the correct file extension (.tsv or .txt)"
-    #         error_message(err_msg, logger)
-    #     input_rna_fusion_basename = os.path.basename(
-    #         str(arg_dict["input_rna_fusion"]))
-    #     input_rna_fusion_dir = os.path.dirname(
-    #         os.path.abspath(arg_dict["input_rna_fusion"]))
+    if arg_dict["input_rna_fusion"] is not None:
+        check_file_exists(os.path.abspath(arg_dict["input_rna_fusion"]), strict = True, logger = logger)
+        if not (os.path.abspath(arg_dict["input_rna_fusion"]).endswith(".tsv") or 
+                os.path.abspath(arg_dict["input_rna_fusion"]).endswith(".txt")):
+            err_msg = "RNA fusion variants file (" + os.path.abspath(
+                arg_dict["input_rna_fusion"]) + ") does not have the correct file extension (.tsv or .txt)"
+            error_message(err_msg, logger)
+        input_rna_fusion_basename = os.path.basename(
+            str(arg_dict["input_rna_fusion"]))
+        input_rna_fusion_dir = os.path.dirname(
+            os.path.abspath(arg_dict["input_rna_fusion"]))
 
     # check if input rna expression exist
     if arg_dict["input_rna_exp"] is not None:
@@ -455,9 +690,11 @@ def verify_input_files(arg_dict):
         input_germline_dir = os.path.dirname(
             os.path.abspath(arg_dict["input_cpsr"]))   
     
-    vep_dir = verify_vep_cache(arg_dict, logger)
+    vep_dir = None
+    if arg_dict['input_vcf'] is not None:
+        vep_dir = verify_vep_cache(arg_dict, logger)
     refdata_assembly_dir = verify_refdata(arg_dict, logger, cpsr = False)
-    
+
 
     input_data = {
       "vcf_dir": input_vcf_dir,
@@ -476,7 +713,7 @@ def verify_input_files(arg_dict):
       "cna_basename": input_cna_basename,
       "rna_fusion_basename": input_rna_fusion_basename,
       "rna_expression_basename": input_rna_expression_basename
-      
+
     }
 
     return input_data
@@ -557,10 +794,10 @@ def verify_vep_cache(arg_dict: dict, logger = None):
 def verify_vep_options(arg_dict: dict, logger = None):
     
     # VEP options
-    if int(arg_dict['vep_n_forks']) <= int(pcgr_vars.VEP_MIN_FORKS) or \
+    if int(arg_dict['vep_n_forks']) < int(pcgr_vars.VEP_MIN_FORKS) or \
         int(arg_dict['vep_n_forks']) > int(pcgr_vars.VEP_MAX_FORKS):
         err_msg = (
-            f"Number of forks that VEP can use during annotation must be above {str(pcgr_vars.VEP_MIN_FORKS)} and not "
+            f"Number of forks that VEP can use during annotation must be at least {str(pcgr_vars.VEP_MIN_FORKS)} and not "
             f"more than {str(pcgr_vars.VEP_MAX_FORKS)} (recommended is 4), current value is {arg_dict['vep_n_forks']}"
             )
         error_message(err_msg, logger)
@@ -600,8 +837,25 @@ def verify_required_args(arg_dict: dict, logger = None):
         err_msg = f"Required argument '--genome_assembly' has no/undefined value ({arg_dict['genome_assembly']})."
         error_message(err_msg, logger)
 
-    if arg_dict['input_vcf'] is None or not os.path.exists(arg_dict['input_vcf']):
-        err_msg = f"Required argument '--input_vcf' does not exist ({arg_dict['input_vcf']})."
+    # At least one molecular input must be provided
+    has_vcf = arg_dict['input_vcf'] is not None
+    has_cna = arg_dict.get('input_cna') is not None
+    has_fusion = arg_dict.get('input_rna_fusion') is not None
+    has_expression = arg_dict.get('input_rna_exp') is not None
+
+    if not any([has_vcf, has_cna, has_fusion, has_expression]):
+        err_msg = (
+            "At least one molecular input file must be provided: "
+            "'--input_vcf', '--input_cna', '--input_rna_fusion', or '--input_rna_expression'"
+        )
+        error_message(err_msg, logger)
+
+    if has_vcf and not os.path.exists(arg_dict['input_vcf']):
+        err_msg = f"Input VCF file ('--input_vcf' = {arg_dict['input_vcf']}) does not exist."
+        error_message(err_msg, logger)
+
+    if has_vcf and arg_dict.get('vep_dir') is None:
+        err_msg = "Argument '--vep_dir' is required when '--input_vcf' is provided (VEP is used for variant annotation)."
         error_message(err_msg, logger)
 
     if arg_dict['sample_id'] is None:
@@ -697,8 +951,11 @@ def verify_input_files_cpsr(arg_dict):
     logger = getlogger('cpsr-validate-input-arguments-b')
     input_vcf_dir = "NA"
     input_vcf_basename = "NA"
+    input_sv_vcf_dir = "NA"
+    input_sv_vcf_basename = "NA"
     input_customlist_basename = "NA"
     input_customlist_dir = "NA"
+    output_vcf = None
     
     # create output folder (if not already exists)
     output_dir_full = utils.safe_makedir(os.path.abspath(arg_dict['output_dir']))
@@ -736,7 +993,28 @@ def verify_input_files_cpsr(arg_dict):
         if os.path.exists(output_vcf) and arg_dict['force_overwrite'] is False:
             err_msg = f"Output files (e.g. {output_vcf}) already exist - please specify different " + \
                 "sample_id or add option --force_overwrite"
-            error_message(err_msg,logger)
+            error_message(err_msg, logger)
+
+    ## check if input SV VCF exists
+    if arg_dict.get('input_sv_vcf') is not None:
+        check_file_exists(os.path.abspath(arg_dict['input_sv_vcf']), strict=True, logger=logger)
+
+        if not (os.path.abspath(arg_dict['input_sv_vcf']).endswith('.vcf') or
+                os.path.abspath(arg_dict['input_sv_vcf']).endswith('.vcf.gz')):
+            err_msg = (f"SV VCF input file ({os.path.abspath(arg_dict['input_sv_vcf'])}) "
+                       f"does not have the correct file extension (.vcf or .vcf.gz)")
+            error_message(err_msg, logger)
+
+        if os.path.abspath(arg_dict['input_sv_vcf']).endswith('.vcf.gz'):
+            tabix_file = arg_dict['input_sv_vcf'] + '.tbi'
+            if not os.path.exists(os.path.abspath(tabix_file)):
+                err_msg = (f"Tabix file (i.e. '.gz.tbi') is not present for the bgzipped SV VCF input file "
+                           f"({os.path.abspath(arg_dict['input_sv_vcf'])}). Please make sure your input SV VCF "
+                           f"is properly compressed and indexed (bgzip + tabix)")
+                error_message(err_msg, logger)
+
+        input_sv_vcf_basename = os.path.basename(str(arg_dict['input_sv_vcf']))
+        input_sv_vcf_dir = os.path.dirname(os.path.abspath(arg_dict['input_sv_vcf']))
             
     
     vep_dir = verify_vep_cache(arg_dict, logger)
@@ -744,12 +1022,14 @@ def verify_input_files_cpsr(arg_dict):
 
     cpsr_paths = {
             "input_vcf_dir": input_vcf_dir,
+            "input_sv_vcf_dir": input_sv_vcf_dir,
             "input_customlist_dir": input_customlist_dir,
             "refdata_assembly_dir": refdata_assembly_dir,
-            "vep_dir": vep_dir,           
+            "vep_dir": vep_dir,
             "output_dir": output_dir_full,
             "output_vcf": output_vcf,
             "input_vcf_basename": input_vcf_basename,
+            "input_sv_vcf_basename": input_sv_vcf_basename,
             "input_customlist_basename": input_customlist_basename,
             }
 
