@@ -7,7 +7,7 @@ from pcgr.annoutils import assign_cds_exon_intron_annotations
 from pcgr import pcgr_vars
 from pcgr.utils import getlogger, check_file_exists, get_perl_exports, get_maxentscan_dir
 
-def get_vep_command(file_paths, conf_options, input_vcf, output_vcf, debug = False):
+def get_vep_command(file_paths, conf_options, input_vcf, output_vcf, debug = False, sv = False):
 
     output_vcf_gz = f'{output_vcf}.gz'
     genome_assembly = conf_options['genome_assembly']
@@ -17,7 +17,7 @@ def get_vep_command(file_paths, conf_options, input_vcf, output_vcf, debug = Fal
         file_paths['refdata_assembly_dir'],
         'misc','fasta','assembly',
         f'Homo_sapiens.{pcgr_vars.VEP_ASSEMBLY[genome_assembly]}.dna.primary_assembly.fa.gz')
-    
+
     splice_vault_tsv = os.path.join(
         file_paths['refdata_assembly_dir'],
         'variant','tsv','splicevault',
@@ -27,22 +27,32 @@ def get_vep_command(file_paths, conf_options, input_vcf, output_vcf, debug = Fal
     logger = getlogger('check-fasta-files')
     check_file_exists(fasta_assembly, logger = logger)
 
-    # for logging only
-    plugins_in_use = "NearestExonJB, MaxEntScan, SpliceVault, NMD"
+    if sv:
+        # SV mode: no HGVS, no gnomAD SNV frequencies, no splice/NMD plugins,
+        # no check_ref (symbolic alleles have no nucleotide REF to validate)
+        plugins_in_use = "None"
+        vep_flags = (
+            f'--variant_class --domains --symbol --protein --ccds --mane '
+            f'--uniprot --appris --biotype --tsl --canonical --format vcf --cache --numbers '
+            f'--total_length --allele_number --failed 1 --no_stats --no_escape --vcf '
+            f'--dont_skip --flag_pick_allele_gene '
+            f'--force_overwrite --species homo_sapiens --offline')
+    else:
+        # SNV/indel mode (default)
+        #plugins_in_use = "NearestExonJB, MaxEntScan, SpliceVault, NMD"
+        plugins_in_use = "NearestExonJB, MaxEntScan, NMD"
+        vep_flags = (
+            f'--hgvs --af_gnomade --af_gnomadg --max_af --variant_class --domains --symbol --protein --ccds --mane '
+            f'--uniprot --appris --biotype --tsl --canonical --format vcf --cache --numbers '
+            f'--total_length --allele_number --failed 1 --no_stats --no_escape --xref_refseq --vcf '
+            f'--check_ref --dont_skip --flag_pick_allele_gene '
+            ## plugins
+            f'--plugin NearestExonJB,max_range=50000 '
+            f'--plugin MaxEntScan,{get_maxentscan_dir()} '
+            f'--plugin NMD '
+            f'--plugin SpliceVault,file={splice_vault_tsv} '
+            f'--force_overwrite --species homo_sapiens --offline')
 
-    # List all VEP flags used when calling VEP
-    vep_flags = (
-        f'--hgvs --af_gnomade --af_gnomadg --max_af --variant_class --domains --symbol --protein --ccds --mane '
-        f'--uniprot --appris --biotype --tsl --canonical --format vcf --cache --numbers '
-        f'--total_length --allele_number --failed 1 --no_stats --no_escape --xref_refseq --vcf '
-        f'--check_ref --dont_skip --flag_pick_allele_gene '
-        ## plugins
-        f'--plugin NearestExonJB,max_range=50000 '
-        f'--plugin MaxEntScan,{get_maxentscan_dir()} '
-        f'--plugin NMD '
-        f'--plugin SpliceVault,file={splice_vault_tsv} '
-
-        f'--force_overwrite --species homo_sapiens --offline')
     vep_options = (
         f'--dir {vep_dir} --assembly {pcgr_vars.VEP_ASSEMBLY[genome_assembly]} --cache_version {pcgr_vars.VEP_VERSION} '
         f'--fasta {fasta_assembly} '
@@ -363,10 +373,10 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, grantham_scores,
                         if 'ENTREZGENE' in csq_record.keys():
                             ## Consequence in CPSR target - append to primary_csq_pick
                             if csq_record['ENTREZGENE'] in targets_entrez_gene.keys():
-                                primary_csq_pick.append(csq_record)
+                                primary_csq_pick.append(csq_record)                                
+                            else:
                                 ## Consequence not in CPSR targets, nor with Entrez identifier
                                 # (pseudogenes etc) - append to secondary_csq_pick
-                            else:
                                 secondary_csq_pick.append(csq_record)
 
                         ## Entrez gene identifier is not provided by VEP
