@@ -7,11 +7,17 @@
 \format{
 A character vector listing all germline filtering criteria
 applied on input callsets (SNVs/InDels) in tumor-only mode
+
+An object of class \code{character} of length 8.
 }
 \usage{
+germline_filter_levels
+
 germline_filter_levels
 }
 \description{
 Data frame with germline filtering criteria
+
+Germline filter levels
 }
 \keyword{datasets}
