@@ -1,8 +1,8 @@
 # Changelog
 
-## dev
+## v2.2.6
 
-- Date: **2026-03-XX**
+- Date: **2026-04-16**
 
 - major refactor of GitHub Actions workflow
   ([pr291](https://github.com/sigven/pcgr/pull/291),
@@ -17,8 +17,6 @@
       recipes
   - switch to conda-incubator/setup-miniconda from
     mamba-org/setup-micromamba
-  - drop osx support from conda lock, which will make it simpler to
-    merge the pcgr/pcgrr pkgs into a single conda environment
   - pkgdown’s auto development mode allows us to keep a dev website with
     documentation for the latest development version of pcgrr, which is
     now available at <https://sigven.github.io/pcgrr/dev/> (previously
