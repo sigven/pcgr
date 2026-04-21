@@ -6,6 +6,34 @@ from pcgr.utils import check_file_exists, error_message, warn_message
 import pandas as pd
 import os
 import csv
+import requests
+
+def fetch_oncokb_info(api_token: str, logger=None) -> dict:
+    """Fetch OncoKB data version, release date, and API version from the OncoKB info endpoint."""
+    result = {
+        'data_version': None,
+        'data_release_date': None,
+        'api_version': None
+    }
+    try:
+        response = requests.get(
+            "https://www.oncokb.org/api/v1/info",
+            headers={"Authorization": f"Bearer {api_token}"},
+            timeout=10
+        )
+        if response.status_code == 200:
+            info = response.json()
+            result['data_version'] = info.get('dataVersion', {}).get('version')
+            result['data_release_date'] = info.get('dataVersion', {}).get('date')
+            result['api_version'] = info.get('apiVersion', {}).get('version')
+        else:
+            warn_message(
+                f"OncoKB info endpoint returned HTTP {response.status_code} - "
+                "data_version/api_version will not be recorded", logger)
+    except Exception as e:
+        warn_message(f"Could not retrieve OncoKB version info: {e}", logger)
+    return result
+
 
 def create_config(arg_dict, workflow = "PCGR", logger=None):
     
@@ -43,15 +71,16 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
         
     if workflow == 'PCGR':
         conf_options['assay_properties'] = {}
-        conf_options['sample_properties']['tumor_purity'] = 'NA'
-        conf_options['sample_properties']['tumor_ploidy'] = 'NA'
+        conf_options['sample_properties']['tumor_purity'] = 'NA' if \
+            arg_dict['tumor_purity'] is None else float(arg_dict['tumor_purity'])
+        conf_options['sample_properties']['tumor_ploidy'] = 'NA' if \
+            arg_dict['tumor_ploidy'] is None else float(arg_dict['tumor_ploidy'])
+        conf_options['sample_properties']['tumor_ploidy_source'] = 'NA'
         conf_options['sample_properties']['sex'] = 'UNKNOWN'
         conf_options['sample_properties']['site'] = str(pcgr_vars.tsites[arg_dict['tsite']])
         conf_options['sample_properties']['site2'] = str(pcgr_vars.tsites[arg_dict['tsite']]).replace(" ","_").replace("/","@")
-        conf_options['sample_properties']['dp_control_detected'] = 0
-        conf_options['sample_properties']['vaf_control_detected'] = 0
-        conf_options['sample_properties']['dp_tumor_detected'] = 0
-        conf_options['sample_properties']['vaf_tumor_detected'] = 0
+        for prop in ['dp_control_detected', 'vaf_control_detected', 'dp_tumor_detected', 'vaf_tumor_detected']:
+            conf_options['sample_properties'][prop] = 0
         conf_options['assay_properties']['type'] = str(arg_dict['assay'])
         conf_options['assay_properties']['vcf_tumor_only'] = 0
         conf_options['assay_properties']['mode'] = "Tumor-Control"
@@ -59,11 +88,7 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
         if int(arg_dict['tumor_only']) == 1:
             conf_options['assay_properties']['vcf_tumor_only'] = 1
             conf_options['assay_properties']['mode'] = "Tumor-Only"
-        
-        if arg_dict['tumor_purity'] is not None:
-            conf_options['sample_properties']['tumor_purity'] = float(arg_dict['tumor_purity'])
-        if arg_dict['tumor_ploidy'] is not None:
-            conf_options['sample_properties']['tumor_ploidy'] = float(arg_dict['tumor_ploidy'])
+                
         if arg_dict['sex'] is not None:
             sex = str(arg_dict['sex'])
             ## Breast, Ovary/Fallopian Tube, Uterus, Vulva/Vagina
@@ -85,10 +110,32 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
         #    'run': int(arg_dict['include_trials'])
         #}
         conf_options['other']['vcf2maf'] = int(arg_dict['vcf2maf'])
-        
+
+        conf_options['oncokb'] = {
+            'api_token': str(arg_dict['oncokb_api_token']) if arg_dict['oncokb_api_token'] is not None else None,
+            'oncotree_code': str(arg_dict['oncokb_oncotree_code']) if arg_dict['oncokb_oncotree_code'] is not None else None,
+            'exclusive': int(arg_dict['oncokb_exclusive']),
+            'data_version': None,
+            'data_release_date': None,
+            'api_version': None
+        }
+        if conf_options['oncokb']['api_token'] is not None:
+            oncokb_info = fetch_oncokb_info(conf_options['oncokb']['api_token'], logger)
+            conf_options['oncokb'].update(oncokb_info)
+            conf_options['oncokb']['run'] = 1        
+
         conf_options['somatic_cna'] = {            
-            'cna_overlap_pct': float(arg_dict['cna_overlap_pct']),
-            'n_copy_gain': int(arg_dict['n_copy_gain'])
+            'cna_transcript_overlap_pct': float(arg_dict['cna_transcript_overlap_pct']),
+            'threshold_mode': str(arg_dict['cna_threshold_mode']),
+            'amp_threshold_absolute': int(arg_dict['cna_amp_threshold_absolute']),
+            'amp_threshold_relative': float(arg_dict['cna_amp_threshold_relative']),
+            'amp_threshold_effective': float(arg_dict['cna_amp_threshold_absolute']) if \
+                arg_dict['cna_threshold_mode'] == 'absolute' else \
+                    float(arg_dict['cna_amp_threshold_relative']) * 2,
+            'gain_threshold_absolute': int(arg_dict['cna_gain_threshold_absolute']),
+            'gain_threshold_relative': float(arg_dict['cna_gain_threshold_relative']),
+            'del_threshold_absolute': int(arg_dict['cna_del_threshold_absolute']),
+            'del_threshold_relative': float(arg_dict['cna_del_threshold_relative']),
         }
         
         conf_options['germline'] = {
@@ -109,6 +156,10 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
                 for cohort in pcgr_vars.DISEASE_COHORTS:
                     conf_options['expression']['similarity_db']['tcga'][cohort] = 1
                     
+        conf_options['rna_fusion'] = {
+            'min_split_reads': int(arg_dict['fusion_min_split_reads'])
+        }
+
         conf_options['somatic_snv'] = {}
         conf_options['somatic_snv']['allelic_support'] = {
             'tumor_dp_min': arg_dict['tumor_dp_min'],
@@ -162,16 +213,12 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
             'prevalence_reference_signatures': float(arg_dict['prevalence_reference_signatures'])
         }
         
-        conf_options['molecular_data']['fname_cna_gene_tsv'] = "None"
-        conf_options['molecular_data']['fname_cna_segment_tsv'] = "None"
-        conf_options['molecular_data']['fname_expression_tsv'] = "None"
-        conf_options['molecular_data']['fname_expression_outliers_tsv'] = "None"
-        conf_options['molecular_data']['fname_maf_tsv'] = "None"
-        conf_options['molecular_data']['fname_germline_tsv'] = "None"
-        conf_options['molecular_data']['fname_germline_yaml'] = "None"
-        #conf_options['molecular_data']['fname_expression_csq_tsv'] = "None"
-        conf_options['molecular_data']['fname_expression_similarity_tsv'] = "None"
-        conf_options['molecular_data']['fname_tmb_tsv'] = "None"
+        for fname in ['fname_cna_gene_tsv', 'fname_cna_segment_tsv', 
+                      'fname_expression_tsv', 'fname_expression_outliers_tsv', 
+                      'fname_rna_fusion_tsv', 'fname_maf_tsv', 
+                      'fname_germline_tsv', 'fname_germline_yaml', 
+                      'fname_expression_similarity_tsv', 'fname_tmb_tsv']:
+            conf_options['molecular_data'][fname] = "None"
     
     
     if workflow == "CPSR":        
@@ -430,4 +477,53 @@ def set_virtual_target_genes(panel_id: str, refdata_assembly_dir: str, diagnosti
         
     
     return all_targets.to_dict(orient='records')
-    
+
+
+def verify_oncotree_code(oncotree_code, tumor_site, refdata_assembly_dir, logger=None):
+    """Verify that a user-provided OncoTree code is valid and matches the
+    selected PCGR tumor site. Returns the validated oncotree_code on success,
+    or None if validation fails."""
+
+    oncotree_fname = os.path.join(
+        refdata_assembly_dir, "phenotype", "tsv", "phenotype_oncotree.tsv.gz")
+
+    if not check_file_exists(oncotree_fname, logger):
+        warn_message(
+            f"OncoTree annotation file not found: {oncotree_fname} "
+            "- skipping OncoTree code validation", logger)
+        return oncotree_code
+
+    oncotree_df = pd.read_csv(oncotree_fname, sep="\t", na_values=".")
+
+    if 'ot_code' not in oncotree_df.columns or 'primary_site' not in oncotree_df.columns:
+        warn_message(
+            "OncoTree annotation file missing required columns "
+            "('ot_code', 'primary_site') - skipping validation", logger)
+        return oncotree_code
+
+    valid_codes = oncotree_df['ot_code'].dropna().unique()
+    if oncotree_code not in valid_codes:
+        warn_message(
+            f"User-provided OncoTree code '{oncotree_code}' is not a recognized "
+            f"code in {oncotree_fname} - ignoring oncotree code for OncoKB annotation", logger)
+        return None
+
+    code_rows = oncotree_df.loc[oncotree_df['ot_code'] == oncotree_code]
+    code_primary_sites = code_rows['primary_site'].dropna().unique()
+
+    if len(code_primary_sites) == 0:
+        warn_message(
+            f"OncoTree code '{oncotree_code}' has no associated primary_site "
+            "- proceeding with the provided code", logger)
+        return oncotree_code
+
+    if tumor_site not in code_primary_sites:
+        warn_message(
+            f"OncoTree code '{oncotree_code}' maps to primary site(s) "
+            f"'{', '.join(code_primary_sites)}', which does not match the "
+            f"selected PCGR tumor site '{tumor_site}' - ignoring oncotree code "
+            "for OncoKB annotation", logger)
+        return None
+
+    return oncotree_code
+

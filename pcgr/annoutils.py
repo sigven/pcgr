@@ -10,8 +10,7 @@ from cyvcf2 import VCF, Writer
 from logging import Logger
 
 from pcgr import utils, pcgr_vars
-from pcgr.utils import error_message
-from pcgr.variant import reverse_complement_dna
+from pcgr.utils import error_message, reverse_complement_dna
 
 csv.field_size_limit(500 * 1024 * 1024)
 threeLettertoOneLetterAA = {'Ala': 'A', 'Arg': 'R', 'Asn': 'N', 'Asp': 'D', 'Cys': 'C', 'Glu': 'E', 'Gln': 'Q', 'Gly': 'G', 'His': 'H',
@@ -41,6 +40,35 @@ def read_infotag_file(vcf_info_tags_tsv, scope = "vep"):
                 info_tag_xref[row['tag']] = row
 
     return info_tag_xref
+
+def get_vcfanno_tracks(db_assembly_dir, bedtracks = None, vcftracks = None):
+    """
+    Function that returns a dictionary with vcfanno tracks to be used for annotation
+    """
+    if bedtracks is None:
+        bedtracks = ['rmsk','simplerepeat','winmsk','gerp','gene_transcript_xref']
+    if vcftracks is None:
+        vcftracks = ['clinvar','tcga','gwas','dbmts','dbnsfp','gnomad_non_cancer']
+
+    track_file_info = {}
+    ## INFO tags used for vcfanno annotation
+    track_file_info['tags_fname'] = {}
+    ## Source file (VCF/BED) used for vcfanno annotation
+    track_file_info['track_fname'] = {}
+
+    for variant_track in vcftracks:
+        track_file_info['tags_fname'][variant_track] = os.path.join(db_assembly_dir,'variant','vcf', variant_track, f'{variant_track}.vcfanno.vcf_info_tags.txt')
+        track_file_info['track_fname'][variant_track] = os.path.join(db_assembly_dir,'variant','vcf', variant_track, f'{variant_track}.vcf.gz')
+
+    for bed_track in ['simplerepeat','winmsk','rmsk','gerp']:
+        track_file_info['tags_fname'][bed_track] = os.path.join(db_assembly_dir,'misc','bed', bed_track, f'{bed_track}.vcfanno.vcf_info_tags.txt')
+        track_file_info['track_fname'][bed_track] = os.path.join(db_assembly_dir,'misc','bed', bed_track, f'{bed_track}.bed.gz')
+
+    track_file_info['tags_fname']['gene_transcript_xref'] = os.path.join(db_assembly_dir,'gene','bed', 'gene_transcript_xref', 'gene_transcript_xref.vcfanno.vcf_info_tags.txt')
+    track_file_info['track_fname']['gene_transcript_xref'] = os.path.join(db_assembly_dir,'gene','bed', 'gene_transcript_xref', 'gene_transcript_xref.bed.gz')
+
+    return track_file_info
+
 
 def read_vcfanno_tag_file(vcfanno_tag_file, logger):
 
@@ -221,17 +249,22 @@ def threeToOneAA(aa_change):
 
 def assign_cds_exon_intron_annotations(csq_record, grantham_scores, logger):
     
+    """
+    Assigns multiple protein-coding annotations to a CSQ record, that is not
+    readily available from VEP.
+    """
     csq_record['CODING_STATUS'] = 'noncoding'
     csq_record['EXONIC_STATUS'] = 'nonexonic'
     csq_record['SPLICE_DONOR_RELEVANT'] = False
     csq_record['NULL_VARIANT'] = False
     csq_record['INTRON_POSITION'] = 0
     csq_record['EXON_POSITION'] = 0
+    csq_record['EXON_INTRON_JUNCTION_SPAN'] = False
     csq_record['CDS_CHANGE'] = '.'
     csq_record['HGVSp_short'] = '.'
     csq_record['CODON'] = '.'
     csq_record['PROTEIN_CHANGE'] = '.'
-    csq_record['GRANTHAM_DISTANCE'] = -1
+    csq_record['GRANTHAM_DISTANCE'] = pcgr_vars.NA_INTEGER
     csq_record['ALTERATION'] = '.'
     csq_record['EXON_AFFECTED'] = '.'
     csq_record['CDS_RELATIVE_POSITION'] = '.'
@@ -246,8 +279,8 @@ def assign_cds_exon_intron_annotations(csq_record, grantham_scores, logger):
     csq_record['CDS_DISTANCE'] = '.'
     csq_record['MAXENTSCAN_REF'] = '.'
     csq_record['MAXENTSCAN_ALT'] = '.'
-    csq_record['MAXENTSCAN_DIFF'] = 0
-    csq_record['MAXENTSCAN_PCT_CHANGE'] = '.'
+    csq_record['MAXENTSCAN_DIFF'] = pcgr_vars.NA_INTEGER
+    csq_record['MAXENTSCAN_PCT_CHANGE'] = pcgr_vars.NA_FLOAT
 
     splice_variant = False
     if re.search(pcgr_vars.CSQ_SPLICE_REGION_PATTERN, str(csq_record['Consequence'])) is not None:
@@ -302,36 +335,62 @@ def assign_cds_exon_intron_annotations(csq_record, grantham_scores, logger):
     if re.search(pcgr_vars.CSQ_SPLICE_DONOR_PATTERN, str(csq_record['Consequence'])) is not None:
         if re.search(r'(\+3(A|G)>|\+4A>|\+5G>)', str(csq_record['HGVSc'])) is not None:
             csq_record['SPLICE_DONOR_RELEVANT'] = True
-        if csq_record['MAXENTSCAN_DIFF'] != 0 and \
-            re.search('splice_donor_(5th|variant)',str(csq_record['Consequence'])) is not None:
+        if csq_record['MAXENTSCAN_DIFF'] != 0 and csq_record['MAXENTSCAN_DIFF'] != pcgr_vars.NA_INTEGER and \
+            csq_record['MAXENTSCAN_PCT_CHANGE'] != pcgr_vars.NA_FLOAT and \
+            csq_record['SPLICE_DONOR_RELEVANT'] is True and \
+            re.search('splice_region|splice_donor_(5th|variant)',str(csq_record['Consequence'])) is not None:
             if abs(csq_record['MAXENTSCAN_PCT_CHANGE']) >= pcgr_vars.DONOR_DISRUPTION_MES_DROP_CUTOFF and \
                 float(csq_record['MAXENTSCAN_REF']) >= pcgr_vars.DONOR_REF_MIN_SCORE:
                 csq_record['LOSS_OF_FUNCTION'] = True
             else:
-                if csq_record['LOSS_OF_FUNCTION'] is True:
+                if csq_record['LOSS_OF_FUNCTION'] is True and csq_record['SPLICE_DONOR_RELEVANT'] is True: 
                     csq_record['LOSS_OF_FUNCTION'] = False
                     csq_record['LOF_FILTER'] = "NON_DONOR_DISRUPTING"
     
     if re.search(pcgr_vars.CSQ_SPLICE_ACCEPTOR_PATTERN, str(csq_record['Consequence'])) is not None:
-        if csq_record['MAXENTSCAN_DIFF'] != 0 and \
-            re.search('splice_acceptor', str(csq_record['Consequence'])) is not None:
+        if csq_record['MAXENTSCAN_DIFF'] != 0 and csq_record['MAXENTSCAN_DIFF'] != pcgr_vars.NA_INTEGER and \
+            csq_record['MAXENTSCAN_PCT_CHANGE'] != pcgr_vars.NA_FLOAT and \
+            re.search('splice_polypyrimidine_tract_variant',str(csq_record['Consequence'])) is not None:
+            #re.search('splice_acceptor', str(csq_record['Consequence'])) is not None:
             if abs(csq_record['MAXENTSCAN_PCT_CHANGE']) >= pcgr_vars.ACCEPTOR_DISRUPTION_MES_DROP_CUTOFF and \
                 float(csq_record['MAXENTSCAN_REF']) >= pcgr_vars.ACCEPTOR_REF_MIN_SCORE:
                 csq_record['LOSS_OF_FUNCTION'] = True
             else:
-                if csq_record['LOSS_OF_FUNCTION'] is True:
+                if csq_record['LOSS_OF_FUNCTION'] is True and \
+                    re.search('splice_polypyrimidine_tract_variant',str(csq_record['Consequence'])) is not None:
                     csq_record['LOSS_OF_FUNCTION'] = False
                     csq_record['LOF_FILTER'] = "NON_ACCEPTOR_DISRUPTING"
 
     ## intron position
-    if re.search(pcgr_vars.CSQ_SPLICE_REGION_PATTERN, str(csq_record['Consequence'])) is not None:
-        match = re.search(
-            r"((-|\+)[0-9]{1,}(dup|del|inv|((ins|del|dup|inv|delins)(A|G|C|T){1,})|(A|C|T|G){1,}>(A|G|C|T){1,}))$", str(csq_record['HGVSc']))
-        if match is not None:
-            pos = re.sub(
-                r"(\+|dup|del|delins|ins|inv|(A|G|C|T){1,}|>)", "", match.group(0))
-            if utils.is_integer(pos):
-                csq_record['INTRON_POSITION'] = int(pos)
+    ## Extract all intronic offset tokens ([+-]N) from HGVSc and keep the one
+    ## with the smallest absolute value (i.e. closest to any exon boundary).
+    ## Using findall over a $-anchored search avoids capturing the wrong end of
+    ## range variants such as c.100+3_100+8del (old code gave +8; correct is +3).
+    if re.search(pcgr_vars.CSQ_SPLICE_REGION_PATTERN, str(csq_record['Consequence'])) is not None and \
+        str(csq_record['HGVSc']) is not None:
+        raw_positions = re.findall(r'([+-]\d+)', str(csq_record['HGVSc']))
+        int_positions = []
+        for p in raw_positions:
+            try:
+                int_positions.append(int(p))
+            except ValueError:
+                pass
+        if int_positions:
+            csq_record['INTRON_POSITION'] = min(int_positions, key=abs)
+
+    ## exon/intron junction span
+    ## True when a del/delins/dup/ins variant has one coordinate in an exon
+    ## (no +/- offset) and one in an intron (+/- offset), i.e. it crosses a
+    ## splice-site boundary.
+    hgvsc_str = str(csq_record['HGVSc'])
+    if hgvsc_str not in ('.', 'None'):
+        is_indel_type = bool(re.search(r'(del|delins|dup|ins)', hgvsc_str))
+        spans_exon_to_intron = bool(re.search(
+            r'c\.[^_]*[0-9]+_[^ ]*[+-][0-9]+', hgvsc_str))
+        spans_intron_to_exon = bool(re.search(
+            r'c\.[^_]*[+-][0-9]+_[^ ]*[0-9]+', hgvsc_str))
+        if is_indel_type and (spans_exon_to_intron or spans_intron_to_exon):
+            csq_record['EXON_INTRON_JUNCTION_SPAN'] = True
 
     if 'NearestExonJB' in csq_record.keys():
         if csq_record['NearestExonJB'] is not None:
@@ -497,7 +556,7 @@ def assign_cds_exon_intron_annotations(csq_record, grantham_scores, logger):
                         
                     
                     csq_record['PROTEIN_CHANGE'] = protein_change_VEP
-                    csq_record['ALTERATION'] = protein_change_VEP
+                    csq_record['ALTERATION'] = protein_change
 
     if 'Consequence' in csq_record.keys():
         if 'upstream_gene_variant' in csq_record['Consequence'] and \
@@ -520,7 +579,7 @@ def assign_cds_exon_intron_annotations(csq_record, grantham_scores, logger):
 
     csq_record['HGVSp_short'] = protein_change
     if csq_record['HGVSp_short'] != '.' and 'missense_variant' in csq_record['Consequence']:
-        csq_record['CODON'] = re.sub('[A-Z]$','',str(csq_record['HGVSp_short']))
+        csq_record['CODON'] = re.sub(r'_[A-Za-z0-9]{1,}$','',re.sub('[A-Z]$','',str(csq_record['HGVSp_short'])))
         
     exon_number = 'NA'
     if csq_record['EXON'] is not None:

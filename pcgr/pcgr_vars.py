@@ -4,11 +4,12 @@ from pcgr._version import __version__
 
 ## Version - software and bundle
 PCGR_VERSION = __version__
-DB_VERSION = '20250903'  # database build version (date-based)
+DB_VERSION = '20260417'  # database build version (date-based)
 
 ## Miscellaneous settings
 NCBI_BUILD_MAF = 'GRCh38'
 MAX_VARIANTS_FOR_REPORT = 500_000
+#MAX_VARIANTS_FOR_REPORT = 80_000
 CODING_EXOME_SIZE_MB = 34.0
 
 ## Mutational signature settings
@@ -17,13 +18,17 @@ MINIMUM_N_MUT_SIGNATURE = 100
 MAX_SIGNATURE_PREVALENCE = 20
 
 ## GENCODE versions
-GENCODE_VERSION = {'grch38': 48,'grch37': 19}
+GENCODE_VERSION = {'grch38': 49,'grch37': 19}
 
 ## vcfanno settings
 VCFANNO_MAX_PROC = 15
 
+## Default value for integer annotations when NA
+NA_INTEGER = -99999
+NA_FLOAT = -99999.99
+
 ## VEP settings/versions
-VEP_VERSION = '114'
+VEP_VERSION = '115'
 VEP_ASSEMBLY = {'grch38': 'GRCh38','grch37': 'GRCh37'}
 VEP_MIN_FORKS = 1
 VEP_MAX_FORKS = 8
@@ -81,7 +86,7 @@ germline_input_required_cols = [
     'CLINVAR_REVIEW_STATUS_STARS',
     'CPSR_CLASSIFICATION',
     'CPSR_PATHOGENICITY_SCORE',
-    'CPSR_CLASSIFICATION_CODE',
+    'CPSR_ACMG_CODE',
     'FINAL_CLASSIFICATION'
 ]
 
@@ -233,9 +238,10 @@ CSQ_SPLICE_ACCEPTOR_PATTERN = \
 CSQ_LOF_PATTERN = r"(stop_gained|frameshift|splice_acceptor_variant|splice_donor_variant|start_lost)"
 
 
-## MaxEntScan thresholds for splice site disruption (donor/acceptor) - percent drop(gain)
-DONOR_REF_MIN_SCORE = 6
-ACCEPTOR_REF_MIN_SCORE = 7
+## MaxEntScan thresholds (relaxed) for splice site disruption (donor/acceptor) - 
+## percent drop(gain)
+DONOR_REF_MIN_SCORE = 4
+ACCEPTOR_REF_MIN_SCORE = 5
 DONOR_DISRUPTION_MES_DROP_CUTOFF = -60
 ACCEPTOR_DISRUPTION_MES_DROP_CUTOFF = -60
 
@@ -250,7 +256,7 @@ DISEASE_COHORTS = ['ACC','BLCA','BRCA','CESC',
                 'THCA','THYM','UCEC','UCS','UVM']
 
 ## Tumor site to TCGA cohort mapping
-SITE_TO_DISEASE = {
+SITE_TO_TCGA_COHORT = {
     'Adrenal Gland': ['TCGA_ACC','TCGA_PCPG'],
     'Biliary Tract': ['TCGA_CHOL'],
     'Bladder/Urinary Tract': ['TCGA_BLCA'],
@@ -277,6 +283,43 @@ SITE_TO_DISEASE = {
     'Thymus': ['TCGA_THYM'],
     'Thyroid': ['TCGA_THCA'],
     'Uterus': ['TCGA_UCEC','TCGA_UCS']
+}
+
+# Tumor site to OncoTree cancer-type code mapping (fallback when no code is user-provided).
+# Uses specific cancer-type codes rather than tissue/organ-level codes so that OncoKB
+# biomarker queries return meaningful hits. Each code represents the most prevalent and
+# best-annotated malignancy for that site.
+SITE_TO_ONCOTREE = {
+    'Adrenal Gland': 'ADRENAL_GLAND',           # Adrenocortical Carcinoma
+    'Ampulla of Vater': 'AMPULLA_OF_VATER',      # Ampullary Carcinoma
+    'Biliary Tract': 'BILIARY_TRACT',          
+    'Bladder/Urinary Tract': 'BLADDER',  # Bladder Urothelial Carcinoma
+    'Bone': 'BONE',                     
+    'Breast': 'BREAST',                  
+    'Cervix': 'CERVIX',                 
+    'CNS/Brain': 'BRAIN',               
+    'Colon/Rectum': 'COADREAD',       # Colorectal Adenocarcinoma
+    'Esophagus/Stomach': 'STOMACH',      # Stomach Adenocarcinoma
+    'Eye': 'EYE',                     
+    'Head and Neck': 'HEAD_NECK',         
+    'Kidney': 'KIDNEY',                
+    'Liver': 'LIVER',                   # Hepatocellular Carcinoma
+    'Lung': 'LUNG',                   # Lung Adenocarcinoma
+    'Lymphoid': 'LYMPH',              
+    'Myeloid': 'MYELOID',                 
+    'Ovary/Fallopian Tube': 'OVARY',  
+    'Pancreas': 'PANCREAS',               # Pancreatic Ductal Adenocarcinoma
+    'Peripheral Nervous System': 'PNS',  # Pheochromocytoma
+    'Peritoneum': 'PERITONEUM',             # Primary Serous Peritoneal Carcinoma
+    'Pleura': 'PLEURA',                 # Mesothelioma
+    'Prostate': 'PROSTATE',               # Prostate Adenocarcinoma
+    'Skin': 'SKIN',                    # Melanoma
+    'Soft Tissue': 'SOFT_TISSUE',            # Sarcoma NOS
+    'Testis': 'TESTIS',                 # Testicular Germ Cell Tumor
+    'Thymus': 'THYMUS',                 # Thymoma
+    'Thyroid': 'THYROID',                # Papillary Thyroid Carcinoma
+    'Uterus': 'UTERUS',                 # Uterine Endometrioid Carcinoma
+    'Vulva/Vagina': 'VULVA_VAGINA',           # Vulvar Squamous Cell Carcinoma
 }
 
 ## DBNSFP algorithm score to PCGR field name mapping
@@ -314,4 +357,67 @@ ONCOGENICITY = {
     'gnomAD_very_common_AF': 0.05,
     'insilico_pred_min_majority': 8,
     'insilico_pred_max_minority': 2,
+}
+
+## VICC/ClinGen oncogenicity scoring thresholds
+ONCOGENICITY_THRESHOLDS = {
+    'likely_benign_upper':    -1,
+    'likely_benign_lower':    -6,
+    'benign_upper':           -7,
+    'likely_oncogenic_lower':  5,
+    'likely_oncogenic_upper':  8,
+    'oncogenic_lower':         9,
+}
+
+## Canonical display order for ONCOGENICITY_CODE — matches the oncogenicity.tsv row order.
+## Any code not listed here sorts to the end (future-proofing).
+ONCOGENICITY_CODE_ORDER = [
+    'ONCG_OVS1',  'ONCG_OVS1_A', 'ONCG_OVS1_B',
+    'ONCG_OS1',   'ONCG_OS2_A',  'ONCG_OS2_B',  'ONCG_OS3',
+    'ONCG_OM1',   'ONCG_OM2',    'ONCG_OM3',    'ONCG_OM4',
+    'ONCG_OP1',   'ONCG_OP3',    'ONCG_OP4',
+    'ONCG_SBVS1', 'ONCG_SBS1',   'ONCG_SBS2_A', 'ONCG_SBS2_B',
+    'ONCG_SBP1',  'ONCG_SBP2',
+]
+
+## OncoKB-derived oncogenicity criteria — injected in the post-hoc refinement pass.
+## Scores follow VICC/ClinGen evidence weighting (very strong=8, strong=±4, moderate=±2).
+OKB_ONCOGENICITY_CRITERIA = {
+    'ONCG_OS2_A':  {'score':  4.0, 'pole': 'P'},  # ONCOGENICITY_OKB == "Oncogenic"
+    'ONCG_OS2_B':  {'score':  2.0, 'pole': 'P'},  # ONCOGENICITY_OKB == "Likely Oncogenic"
+    'ONCG_OVS1_A': {'score':  8.0, 'pole': 'P'},  # MUTATION_EFFECT_OKB == "Loss-of-function" in TSG
+    'ONCG_OVS1_B': {'score':  4.0, 'pole': 'P'},  # MUTATION_EFFECT_OKB == "Likely Loss-of-function" in TSG
+    'ONCG_SBS2_A': {'score': -4.0, 'pole': 'B'},  # ONCOGENICITY_OKB == "Neutral"
+    'ONCG_SBS2_B': {'score': -2.0, 'pole': 'B'},  # ONCOGENICITY_OKB == "Likely Neutral"
+}
+
+# https://github.com/oncokb/oncokb-annotator/tree/master/data
+ONCOKB_MAF_REQUIRED_COLS = {
+    "VAR_ID",
+    "Hugo_Symbol", "NCBI_Build",
+    "Chromosome", "Start_Position", "End_Position",
+    "Variant_Classification", "HGVSp", "HGVSp_Short",
+    "HGVSg","Reference_Allele",
+    "Tumor_Seq_Allele1", "Tumor_Seq_Allele2",
+    "Tumor_Sample_Barcode"
+}
+
+ONCOKB_FUSION_REQUIRED_COLS = {"Tumor_Sample_Barcode", "Fusion"}
+ONCOKB_CNA_REQUIRED_COLS = {"Tumor_Sample_Barcode", "Hugo_Symbol", "Copy_Number_Alteration"}
+
+## OncoKB annotation columns: source name → renamed column in output TSV
+## Same mapping applies for SNV/InDel, fusion and CNA annotator outputs.
+ONCOKB_COLS = {
+    'MUTATION_EFFECT':             'MUTATION_EFFECT_OKB',
+    'MUTATION_EFFECT_CITATIONS':   'MUTATION_EFFECT_CITATIONS_OKB',
+    'ONCOGENIC':                   'ONCOGENICITY_OKB',
+    'MUTATION_EFFECT_DESCRIPTION': 'MUTATION_EFFECT_DESCRIPTION_OKB',
+}
+
+## Mapping from PCGR VARIANT_CLASS to OncoKB Copy_Number_Alteration values
+VARIANT_CLASS_TO_OKB_CNA = {
+    'amplification': 'Amplification',
+    'homdel':        'Deletion',
+    'hetdel':        'Loss',
+    'hemdel':        'Loss',
 }

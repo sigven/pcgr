@@ -4,8 +4,11 @@ import os
 import pandas as pd
 import numpy as np
 import warnings
+from pandas.api.types import is_float_dtype, is_integer_dtype
+
 
 from pcgr import pcgr_vars
+from pcgr.annoutils import read_infotag_file, get_vcfanno_tracks, read_vcfanno_tag_file
 warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 
 
@@ -90,21 +93,26 @@ def append_annotations(vcf2tsv_gz_fname: str, refdata_assembly_dir: str, logger)
                         usecols=["variation_id","origin_simple","VAR_ID","trait","classification","conflicted"],
                         low_memory = False)
                     clinvar_data_df['classification'] = clinvar_data_df['classification'].str.replace("_", " ", regex = True)
-                    clinvar_data_df.loc[(clinvar_data_df['classification'] == "VUS") & (clinvar_data_df['conflicted'] == 1),"classification"] = \
-                        "VUS/Conflicting evidence"
+                    clinvar_data_df.loc[(clinvar_data_df['classification'] == "CPP Unknown") & (clinvar_data_df['conflicted'] == 1),"classification"] = \
+                        "Conflicting classifications of pathogenicity"
+                    clinvar_data_df.loc[(clinvar_data_df['classification'] == "CPP Unknown") & (clinvar_data_df['conflicted'] == 0),"classification"] = \
+                        "No classification"
                     clinvar_data_df['CLINVAR_TRAITS_ALL'] = clinvar_data_df['classification'].str.cat(
                         clinvar_data_df['origin_simple'].str.capitalize().str.cat(
                         clinvar_data_df['trait'], sep = " - "), sep = " - ")
                     clinvar_data_df['CLINVAR_MSID'] = clinvar_data_df['variation_id']
+                    clinvar_data_df['CLINVAR_TRAITS'] = clinvar_data_df['trait']
                     clinvar_data_df = clinvar_data_df.astype({'CLINVAR_MSID':'string'})
                     clinvar_data_df['CLINVAR_MSID'] = clinvar_data_df['CLINVAR_MSID'].str.replace("\\.[0-9]{1,}$", "", regex = True)
-                    clinvar_data_df = clinvar_data_df[['VAR_ID','CLINVAR_MSID','CLINVAR_TRAITS_ALL']]
+                    clinvar_data_df = clinvar_data_df[['VAR_ID','CLINVAR_MSID','CLINVAR_TRAITS','CLINVAR_TRAITS_ALL']]
                     vcf2tsv_df = vcf2tsv_df.merge(
                         clinvar_data_df, left_on=["VAR_ID", "CLINVAR_MSID"], right_on=["VAR_ID", "CLINVAR_MSID"], how="left")
                 else:
                     logger.error(f"Could not find {clinvar_tsv_fname} needed for ClinVar variant annotation - exiting")
             else:
                 vcf2tsv_df['CLINVAR_TRAITS_ALL'] = '.'
+                vcf2tsv_df['CLINVAR_MSID'] = '.'
+                vcf2tsv_df['CLINVAR_TRAITS'] = '.'
                 
             
             ## merge variant set with PFAM domain annotations
@@ -211,8 +219,7 @@ def calculate_tmb(variant_set: pd.DataFrame, tumor_dp_min: int, tumor_af_min: fl
             ## filter variant set to those with VAF_TUMOR > tumor_af_min
             if variant_set[variant_set['VAF_TUMOR'].isna()].empty:
                 tmb_data_set = tmb_data_set.loc[tmb_data_set['VAF_TUMOR'].astype(float) >= float(tumor_af_min),:]
-                #n_removed_af = n_rows_raw - len(tmb_data_set)
-                logger.info(f'Removing n = {n_rows_raw - len(tmb_data_set)} variants with allelic fraction (tumor sample) < {tumor_af_min}')
+                #logger.info(f'Removing n = {n_rows_raw - len(tmb_data_set)} variants with allelic fraction (tumor sample) < {tumor_af_min}')
             else:
                 logger.warning("Cannot filter on sequencing depth - 'VAF_TUMOR' contains missing values")
         if int(tumor_dp_min) > 0:
@@ -279,6 +286,8 @@ def calculate_tmb(variant_set: pd.DataFrame, tumor_dp_min: int, tumor_af_min: fl
 
 def clean_annotations(variant_set: pd.DataFrame, yaml_data: dict, logger) -> pd.DataFrame:
     
+    refdata_assembly_dir = yaml_data["reference_data"]["path"]    
+            
     if {'Consequence','EFFECT_PREDICTIONS','CLINVAR_CONFLICTED'}.issubset(variant_set.columns):
         variant_set.rename(columns = {'Consequence':'CONSEQUENCE'}, inplace = True)
         variant_set['clinvar_conflicted_bool'] = True
@@ -297,60 +306,92 @@ def clean_annotations(variant_set: pd.DataFrame, yaml_data: dict, logger) -> pd.
             variant_set['REF'].astype(str) + ">" + variant_set['ALT'].astype(str)
     if not {'PANEL_OF_NORMALS'}.issubset(variant_set.columns):
         variant_set['PANEL_OF_NORMALS'] = False
-    
-    for pop in ['AFR','AMR','ASJ','FIN','EAS','NFE','SAS','OTH','']:
-        for tag in ['AN','AC','NHOMALT']:
-            vcf_info_tag = 'gnomADe_non_cancer_' + str(pop) + '_' + str(tag)
-            if pop == '':
-                vcf_info_tag = 'gnomADe_non_cancer_' + str(tag)
-            if vcf_info_tag in variant_set.columns:
+
+
+    ## Read VCF INFO tag definitions - find all tags that are defined as Integer and ensure that they are formatted as such
+    vcf_infotags = {}
+    vcf_infotags['other'] = read_infotag_file(os.path.join(refdata_assembly_dir, 'vcf_infotags_other.tsv'), scope = yaml_data['workflow'].lower())
+    vcf_infotags['vep'] = read_infotag_file(os.path.join(refdata_assembly_dir, 'vcf_infotags_vep.tsv'), scope = "vep")
+    vcf_infotags['other'].update(vcf_infotags['vep'])
+
+    vcf_tags_integer = []
+    vcfanno_tracks = get_vcfanno_tracks(refdata_assembly_dir)
+    for track in vcfanno_tracks['tags_fname'].keys():
+        infotags_vcfanno = read_vcfanno_tag_file(vcfanno_tracks['tags_fname'][track], logger)
+        for k in infotags_vcfanno.keys():
+            if infotags_vcfanno[k]['type'] == 'Integer' and infotags_vcfanno[k]['number'] == '1':
+                vcf_tags_integer.append(infotags_vcfanno[k]['tag'])
+
+    for k in vcf_infotags['other'].keys():
+        if vcf_infotags['other'][k]['type'] == 'Integer':
+            vcf_tags_integer.append(vcf_infotags['other'][k]['tag'])            
+
+    for vcf_info_tag in sorted(vcf_tags_integer):
+        if vcf_info_tag in variant_set.columns:
+            if is_float_dtype(variant_set[vcf_info_tag]) or is_integer_dtype(variant_set[vcf_info_tag]):
                 variant_set.loc[variant_set[vcf_info_tag].isna(),vcf_info_tag] = -123456789           
                 variant_set[vcf_info_tag] = variant_set[vcf_info_tag].apply(lambda x: str(int(x)) )
                 variant_set.loc[variant_set[vcf_info_tag] == "-123456789", vcf_info_tag] = np.nan
-                
-    ## Make sure that specific tags are formatted as integers (not float) when exported to TSV
-    ## Trick - convert to str and then back to int
-    for vcf_info_tag in ['ONCOGENE_RANK',
-                         'TSG_RANK',
-                         'TCGA_PANCANCER_COUNT',
-                         'CGC_TIER',
-                         'ENTREZGENE',
-                         'DP_TUMOR',
-                         'DP_CONTROL',
-                         'DISTANCE',
-                         'EXON_AFFECTED',
-                         'INTRON_POSITION',
-                         'EXON_POSITION',
-                         'AMINO_ACID_END',
-                         'AMINO_ACID_START',
-                         'ONCOGENICITY_SCORE',
-                         'CLINVAR_NUM_SUBMITTERS',
-                         'CLINVAR_ALLELE_ID',
-                         'CLINVAR_ENTREZGENE',
-                         'CLINVAR_REVIEW_STATUS_STARS']:
-        if vcf_info_tag in variant_set.columns: 
-            variant_set.loc[variant_set[vcf_info_tag].isna(),vcf_info_tag] = -123456789           
-            variant_set[vcf_info_tag] = variant_set[vcf_info_tag].apply(lambda x: str(int(x)) )
-            variant_set.loc[variant_set[vcf_info_tag] == "-123456789", vcf_info_tag] = np.nan
+        
     
     return variant_set
 
-def reverse_complement_dna(dna_string = "C"):
-    pairs = {
-        "A":"T",
-        "C":"G",
-        "G":"C",
-        "T":"A",
-    }
-    reverse_complement = ""
-    i = len(dna_string) - 1
-    while i >= 0:
-        base = str(dna_string[i]).upper()
-        if base in pairs:
-            complement = pairs[base]
-        else:
-            complement = base
-        reverse_complement += complement
-        i = i - 1
-    return reverse_complement     
-    
+
+def reduce_variants_for_report(
+        output_pass_tsv_gz: str,
+        output_pass_raw_tsv_gz: str,
+        yaml_data: dict,
+        debug: bool,
+        logger) -> None:
+    """
+    When the annotated variant count exceeds MAX_VARIANTS_FOR_REPORT, progressively
+    strip low-impact consequence classes so the reporting step stays tractable:
+
+      1. Remove intergenic and intronic variants.
+      2. If still above the limit, also remove upstream_gene / downstream_gene variants.
+
+    The original gzipped TSV is renamed to *output_pass_raw_tsv_gz* before the
+    filtered version is written to *output_pass_tsv_gz*.  Does nothing when the
+    variant count is within the limit.
+    """
+    from pcgr.utils import check_subprocess, pd_to_csv
+
+    if not os.path.exists(output_pass_tsv_gz):
+        return
+
+    var_data = pd.read_csv(output_pass_tsv_gz, sep='\t', low_memory=False, na_values='.')
+    n_total = len(var_data)
+
+    if n_total <= pcgr_vars.MAX_VARIANTS_FOR_REPORT:
+        return
+
+    logger.info(
+        f'Number of raw variants in input VCF ({n_total}) exceeds '
+        f'{pcgr_vars.MAX_VARIANTS_FOR_REPORT} - '
+        f'intergenic/intronic variants will be excluded prior to reporting'
+    )
+
+    # Step 1: drop intergenic and intronic
+    var_filtered = var_data[
+        ~var_data['CONSEQUENCE'].str.contains('^intron', na=False) &
+        ~var_data['CONSEQUENCE'].str.contains('^intergenic', na=False)
+    ]
+    logger.info(f'Number of intergenic/intronic variants excluded: {n_total - len(var_filtered)}')
+
+    # Step 2: drop upstream/downstream if still above limit
+    if len(var_filtered) > pcgr_vars.MAX_VARIANTS_FOR_REPORT:
+        var_filtered_prev = var_filtered
+        var_filtered = var_filtered_prev[
+            ~var_filtered_prev['CONSEQUENCE'].str.contains('^upstream_gene', na=False) &
+            ~var_filtered_prev['CONSEQUENCE'].str.contains('^downstream_gene', na=False)
+        ]
+        logger.info(
+            f'Number of upstream_gene/downstream_gene variants excluded: '
+            f'{len(var_filtered_prev) - len(var_filtered)}'
+        )
+
+    # Rename original file and write the filtered set
+    check_subprocess(logger, f'mv {output_pass_tsv_gz} {output_pass_raw_tsv_gz}', debug)
+    var_filtered = clean_annotations(var_filtered, yaml_data, logger=logger)
+    pd_to_csv(df=var_filtered, fname=output_pass_tsv_gz, col_sep='\t')
+    logger.info(f'Number of variants in final output TSV: {len(var_filtered)}')
