@@ -153,7 +153,7 @@ popmax_af_gnomad <- function(sample_calls) {
       retmax <- exome_max
     }
 
-    if(exome_all_nas == TRUE | (exome_max == 0 & genome_max > 0)){
+    if (exome_all_nas == TRUE | (exome_max == 0 & genome_max > 0)) {
       retmax <- genome_max
     }
     return(retmax)
@@ -537,7 +537,7 @@ assign_somatic_germline_evidence <- function(
   sample_calls <-
     pcgrr::assign_germline_popfreq_status(
       sample_calls,
-      max_af =
+      max_tolerated_af =
         tumor_only_settings[["gnomad_popmax_af_tolerated"]])
 
   # for (pop in c("GLOBAL", "NFE", "AMR", "AFR",
@@ -583,11 +583,11 @@ assign_germline_popfreq_status_old <- function(sample_calls,
                                            dbquery = c("gnomADe","gnomADg"),
                                            max_tolerated_af = 0.01) {
 
-  if(pop == "GLOBAL"){
+  if (pop == "GLOBAL") {
     pop = ""
   }
 
-  for(db in dbquery){
+  for (db in dbquery) {
     if (db == "gnomADe") {
       if (!("gnomADe_AF_ABOVE_TOLERATED" %in% colnames(sample_calls))) {
         sample_calls$gnomADe_AF_ABOVE_TOLERATED <- FALSE
@@ -643,13 +643,13 @@ assign_germline_popfreq_status_old <- function(sample_calls,
 #' if any gnomAD population frequency exceeds max_tolerated_af
 #'
 #' @param sample_calls data frame with variants
-#' @param max_af max tolerated germline allele frequency
+#' @param max_tolerated_af max tolerated germline allele frequency
 #'
 #' @return sample_calls
 #'
 #' @export
 assign_germline_popfreq_status <- function(sample_calls,
-                                           max_af = 0.01) {
+                                           max_tolerated_af = 0.01) {
 
   if (!("gnomAD_AF_ABOVE_TOLERATED" %in% colnames(sample_calls))) {
       sample_calls$gnomAD_AF_ABOVE_TOLERATED <- FALSE
@@ -760,45 +760,46 @@ plot_filtering_stats_germline <- function(
   filtering_stats[['df']] <- data.frame()
   filtering_stats[['plot']] <- NULL
 
-  if(NROW(df) > 0){
+  if (NROW(df) > 0) {
 
     filtering_stats[['df']] <-
       plyr::count(
         df$SOMATIC_CLASSIFICATION
       ) |>
-      dplyr::arrange(dplyr::desc(freq)) |>
-      dplyr::rename(FILTER = x, FREQUENCY = freq) |>
+      dplyr::arrange(dplyr::desc(.data$freq)) |>
+      dplyr::rename(FILTER = .data$x, FREQUENCY = .data$freq) |>
       dplyr::mutate(FILTER = stringr::str_replace_all(
-        FILTER, "\\|", ", ")) |>
+        .data$FILTER, "\\|", ", ")) |>
       dplyr::mutate(FILTER = dplyr::if_else(
-        !(FILTER %in% pcgrr::germline_filter_levels) & FILTER != "SOMATIC",
+        !(.data$FILTER %in% pcgrr::germline_filter_levels) &
+          .data$FILTER != "SOMATIC",
         "MULTIPLE FILTERS",
-        FILTER
+        .data$FILTER
       )) |>
-      dplyr::group_by(FILTER) |>
-      dplyr::reframe(FREQUENCY = sum(FREQUENCY)) |>
-      dplyr::arrange(dplyr::desc(FREQUENCY)) |>
+      dplyr::group_by(.data$FILTER) |>
+      dplyr::reframe(FREQUENCY = sum(.data$FREQUENCY)) |>
+      dplyr::arrange(dplyr::desc(.data$FREQUENCY)) |>
       dplyr::mutate(FILTER = factor(
-        FILTER, levels = pcgrr::germline_filter_levels)) |>
+        .data$FILTER, levels = pcgrr::germline_filter_levels)) |>
       dplyr::mutate(PERCENT = scales::percent(
-        FREQUENCY / sum(FREQUENCY), accuracy = 0.1))
+        .data$FREQUENCY / sum(.data$FREQUENCY), accuracy = 0.1))
 
     germline_filters <- unique(filtering_stats[['df']]$FILTER)
     germline_filters <- c("SOMATIC", setdiff(germline_filters, "SOMATIC"))
-    hex_colors_germline <- head(
-      pcgrr::color_palette$tier$values,
+    hex_colors_germline <- utils::head(
+      pcgrr::color_palette$multi$values,
       length(germline_filters))
 
-    if(length(germline_filters) == 2){
+    if (length(germline_filters) == 2) {
       plot_margin_bottom <- 100
     }
 
     rgba_colors <- c()
     i <- 1
-    while(i <= length(germline_filters)){
+    while(i <= length(germline_filters)) {
       alpha <- opacity_filtered_categories
       ## full opacity for 'SOMATIC' category
-      if(i == 1){
+      if (i == 1) {
         alpha <- 1
       }
       rgba_colors <- c(
@@ -926,23 +927,25 @@ plot_filtering_stats_exonic <- function(
   filtering_stats[['df']] <- data.frame()
   filtering_stats[['plot']] <- NULL
 
-  if(NROW(df) > 0){
+  if (NROW(df) > 0) {
 
     filtering_stats[['df']] <-
       ## Exonic status can be either of 'exonic' or 'nonexonic'
       plyr::count(
         df$EXONIC_STATUS) |>
-      dplyr::arrange(dplyr::desc(freq)) |>
-      dplyr::rename(FILTER = x, FREQUENCY = freq) |>
-      dplyr::mutate(FILTER = toupper(paste0("SOMATIC - ", FILTER))) |>
-      dplyr::group_by(FILTER) |>
-      dplyr::reframe(FREQUENCY = sum(FREQUENCY)) |>
-      dplyr::arrange(dplyr::desc(FREQUENCY)) |>
+      dplyr::arrange(dplyr::desc(.data$freq)) |>
+      dplyr::rename(FILTER = .data$x,
+                    FREQUENCY = .data$freq) |>
+      dplyr::mutate(FILTER = toupper(
+        paste0("SOMATIC - ", .data$FILTER))) |>
+      dplyr::group_by(.data$FILTER) |>
+      dplyr::reframe(FREQUENCY = sum(.data$FREQUENCY)) |>
+      dplyr::arrange(dplyr::desc(.data$FREQUENCY)) |>
       dplyr::mutate(PERCENT = scales::percent(
-        FREQUENCY / sum(FREQUENCY), accuracy = 0.1))
+        .data$FREQUENCY / sum(.data$FREQUENCY), accuracy = 0.1))
 
     ## if either category is zero, add a row with zero frequency
-    if(!("SOMATIC - EXONIC" %in% filtering_stats[['df']]$FILTER)){
+    if (!("SOMATIC - EXONIC" %in% filtering_stats[['df']]$FILTER)) {
       filtering_stats[['df']] <- dplyr::bind_rows(
         filtering_stats[['df']],
         data.frame(
@@ -950,7 +953,7 @@ plot_filtering_stats_exonic <- function(
           FREQUENCY = 0,
           PERCENT = "0.0%"))
     }
-    if(!("SOMATIC - NONEXONIC" %in% filtering_stats[['df']]$FILTER)){
+    if (!("SOMATIC - NONEXONIC" %in% filtering_stats[['df']]$FILTER)) {
       filtering_stats[['df']] <- dplyr::bind_rows(
         filtering_stats[['df']],
         data.frame(
@@ -964,9 +967,10 @@ plot_filtering_stats_exonic <- function(
       levels = pcgrr::exonic_filter_levels)
 
     rgba_colors <- c(
-      pcgrr::hex_to_rgba(pcgrr::color_palette$tier$values[1], alpha = 1),
       pcgrr::hex_to_rgba(
-        pcgrr::color_palette$tier$values[2],
+        pcgrr::color_palette$multi$values[1], alpha = 1),
+      pcgrr::hex_to_rgba(
+        pcgrr::color_palette$multi$values[2],
         alpha = opacity_filtered_categories
       ))
 
@@ -1020,7 +1024,7 @@ plot_filtering_stats_exonic <- function(
 #'
 #' @export
 #'
-get_tumor_only_filtering_criteria <- function(conf){
+get_tumor_only_filtering_criteria <- function(conf) {
 
   invisible(
     assertthat::assert_that(
@@ -1040,24 +1044,24 @@ get_tumor_only_filtering_criteria <- function(conf){
   )
 
   criteria <- c("gnomAD")
-  if(as.logical(
-    conf$somatic_snv$tumor_only$exclude_clinvar_germline) == TRUE){
+  if (as.logical(
+    conf$somatic_snv$tumor_only$exclude_clinvar_germline) == TRUE) {
     criteria <- c(criteria, "ClinVar (germline)")
   }
-  if(as.logical(
-    conf$somatic_snv$tumor_only$exclude_pon) == TRUE){
+  if (as.logical(
+    conf$somatic_snv$tumor_only$exclude_pon) == TRUE) {
     criteria <- c(criteria, "Panel of Normals")
   }
-  if(as.logical(
-    conf$somatic_snv$tumor_only$exclude_likely_hom_germline) == TRUE){
+  if (as.logical(
+    conf$somatic_snv$tumor_only$exclude_likely_hom_germline) == TRUE) {
     criteria <- c(criteria, "Likely germline (Homozygous AF)")
   }
-  if(as.logical(
-    conf$somatic_snv$tumor_only$exclude_likely_het_germline) == TRUE){
+  if (as.logical(
+    conf$somatic_snv$tumor_only$exclude_likely_het_germline) == TRUE) {
     criteria <- c(criteria, "Likely germline (Heterozygous AF)")
   }
-  if(as.logical(
-    conf$somatic_snv$tumor_only$exclude_dbsnp_nonsomatic) == TRUE){
+  if (as.logical(
+    conf$somatic_snv$tumor_only$exclude_dbsnp_nonsomatic) == TRUE) {
     criteria <- c(criteria, "dbSNP (non-somatic)")
   }
 

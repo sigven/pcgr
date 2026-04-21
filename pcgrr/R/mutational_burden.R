@@ -7,10 +7,10 @@
 generate_report_data_tmb <- function(settings = NULL) {
 
   tmb_data <- data.frame()
-  if(settings[['molecular_data']][['fname_tmb_tsv']] != "None" &
+  if (settings[['molecular_data']][['fname_tmb_tsv']] != "None" &
      file.exists(
        settings[['molecular_data']][['fname_tmb_tsv']]
-     )){
+     )) {
 
     tmb_data <- readr::read_tsv(
       settings[['molecular_data']][['fname_tmb_tsv']],
@@ -46,7 +46,7 @@ plot_tmb_primary_site_tcga <- function(
 
 
   report_color <- pcgrr::color_palette$report_color$values[1]
-  if(tumor_only == TRUE){
+  if (tumor_only == TRUE) {
     report_color <- pcgrr::color_palette$report_color$values[2]
   }
 
@@ -66,12 +66,12 @@ plot_tmb_primary_site_tcga <- function(
     dplyr::filter(
       .data$tmb_measure == "TMB_missense_only")
 
-  if(tmb_display_type == "coding_and_silent"){
+  if (tmb_display_type == "coding_and_silent") {
     tmb_estimate <- tmb_estimates |>
       dplyr::filter(
         .data$tmb_measure == "TMB_coding_and_silent")
   }
-  if(tmb_display_type == "coding_non_silent"){
+  if (tmb_display_type == "coding_non_silent") {
     tmb_estimate <- tmb_estimates |>
       dplyr::filter(
         .data$tmb_measure == "TMB_coding_non_silent")
