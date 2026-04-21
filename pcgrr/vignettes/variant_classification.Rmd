@@ -28,13 +28,13 @@ while(i <= NROW(pcgrr::oncogenicity_criteria)){
 
 PCGR prioritizes and evaluates variants according to clinical actionability. Currently, PCGR implements its tier classification framework along the proposed AMP/ASCO/CAP guidelines, as outlined in [Li et al., 2017](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5707196/):
 
-- **Tier I: Variants of strong clinical significance** - constitutes aberrations linked to predictive, prognostic, or diagnostic biomarkers in the [CIViC database](https://civicdb.org) and the [Cancer Biomarkers Database](https://www.cancergenomeinterpreter.org/biomarkers) that are
-	 - Found within the same tumor type/class as specified by the user, **AND**
-	 - Of strong clinical evidence (i.e. approved therapies, part of guidelines, validated or discovered in late clinical trials ([CIViC evidence levels A/B](https://civic.readthedocs.io/en/latest/model/evidence/level.html)))
+- **Tier I: Variants of strong clinical significance** - constitutes aberrations linked to therapeutic (drug sensitivity/response) biomarkers in [OncoKB](https://www.oncokb.org/), [CIViC ](https://civicdb.org), or the [Cancer Biomarkers Database](https://www.cancergenomeinterpreter.org/biomarkers). These biomarkers are further
+	 - reported within the same tumor type/class as the tumor in question (query tumor sample), **AND**
+	 - Of strong clinical evidence (i.e. FDA-approved/standard-of-care therapies, part of guidelines, validated or discovered in late clinical trials ([OncoKB evidence levels 1/2/3A](https://www.oncokb.org/therapeutic-levels), [CIViC evidence levels A/B](https://civic.readthedocs.io/en/latest/model/evidence/level.html)))
 	 
- - **Tier II: Variants of potential clinical significance** - constitutes other aberrations linked to predictive, prognostic, or diagnostic biomarkers in the [CIViC database](https://civicdb.org) and the [Cancer Biomarkers Database](https://www.cancergenomeinterpreter.org/biomarkers) that are either
-	 - Of strong clinical evidence in other tumor types/classes than the one specified by the user, **OR**
-	 - Of weak clinical evidence (early trials, case reports etc. ([CIViC evidence levels C/D/E](https://civic.readthedocs.io/en/latest/model/evidence/level.html)))) in the same tumor type/class as specified by the user
+ - **Tier II: Variants of potential clinical significance** - constitutes other aberrations linked to therapeutic (drug sensitivity/response) biomarkers in [OncoKB](https://www.oncokb.org/), [CIViC](https://civicdb.org), or [Cancer Biomarkers Database](https://www.cancergenomeinterpreter.org/biomarkers) that are either
+	 - Of strong clinical evidence in other tumor types/classes than the one specified by the user (i.e. ([OncoKB evidence level 3B](https://www.oncokb.org/therapeutic-levels)), **OR**
+	 - Of weak clinical evidence (early trials, case reports etc. ([CIViC evidence levels C/D/E](https://civic.readthedocs.io/en/latest/model/evidence/level.html)), [OncoKB evidence level 4](https://www.oncokb.org/therapeutic-levels)) in the same tumor type/class as specified by the user
 	 
  - **Tier III: Variants of uncertain clinical significance (SNVs/InDels only)** -
    - Other coding variants, not observed at significant allele frequencies (gnomAD MAF < 0.001), found in oncogenes or tumor suppressor genes, yet _not_ linked to any known predictive, prognostic, or diagnostic biomarkers in the [CIViC database](https://civicdb.org) and the [Cancer Biomarkers Database](https://www.cancergenomeinterpreter.org/biomarkers)
