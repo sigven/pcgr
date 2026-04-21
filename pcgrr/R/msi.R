@@ -21,6 +21,7 @@ predict_msi_status <- function(variant_set,
     variant_set,
     chromosome_column = "CHROM",
     bsg = ref_data[["assembly"]][["bsg"]])
+
   mutations_valid <- mutations_valid |>
     dplyr::select(
       dplyr::any_of(
@@ -334,7 +335,7 @@ generate_report_data_msi <- function(
     paste0("n = ",
            nrow(msi_sample_calls),
            " exonic variants used for MSI prediction"))
-  if (nrow(msi_sample_calls) >= 1) {
+  if (nrow(msi_sample_calls) >= 200) {
     pcg_report_msi[["prediction"]] <-
       pcgrr::predict_msi_status(
         variant_set = msi_sample_calls,
@@ -348,7 +349,7 @@ generate_report_data_msi <- function(
     pcg_report_msi[["eval"]] <- TRUE
   }
   else{
-    pcgrr::log4r_info("Missing variants for MSI prediction")
+    pcgrr::log4r_info("Too few variants for MSI prediction (n < 200)")
     pcg_report_msi[["missing_data"]] <- TRUE
   }
 
@@ -368,7 +369,7 @@ generate_report_data_msi <- function(
 msi_indel_fraction_plot <- function(tcga_msi_dataset, indel_fraction) {
 
   color_vec <- utils::head(
-    pcgrr::color_palette[["tier"]][["values"]], 2)
+    pcgrr::color_palette[["multi"]][["values"]], 2)
   names(color_vec) <- c("MSS", "MSI.H")
 
   p <- ggplot2::ggplot(data = tcga_msi_dataset) +
@@ -424,7 +425,7 @@ msi_indel_fraction_plot <- function(tcga_msi_dataset, indel_fraction) {
 msi_indel_load_plot <- function(tcga_msi_dataset, indel_load) {
 
   color_vec <- utils::head(
-    pcgrr::color_palette[["tier"]][["values"]], 2)
+    pcgrr::color_palette[["multi"]][["values"]], 2)
   names(color_vec) <- c("MSS", "MSI.H")
 
   p <- ggplot2::ggplot(data = tcga_msi_dataset) +
