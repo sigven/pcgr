@@ -8,7 +8,7 @@ import yaml
 from glob import glob
 from argparse import RawTextHelpFormatter
 from pcgr import pcgr_vars, arg_checker, utils, config, variant
-from pcgr.utils import check_subprocess, getlogger, warn_message, remove_file, random_id_generator
+from pcgr.utils import check_subprocess, getlogger, warn_message, remove_file, random_id_generator, pd_to_csv
 from pcgr.config import populate_config_data
 from pcgr.vep import get_vep_command
 
@@ -63,7 +63,8 @@ def get_args():
        "of ordered transcript properties for primary variant pick\n ( option '--pick_order' in VEP), default: %(default)s")
     optional_vep.add_argument('--vep_no_intergenic', action = "store_true", help="Skip intergenic variants during processing (option '--no_intergenic' in VEP), default: %(default)s")
 
-    required.add_argument('--input_vcf', help='VCF input file with germline query variants (SNVs/InDels).', required = True)
+    required.add_argument('--input_vcf', help='VCF input file with small germline DNA variants (SNVs/InDels).', required = True)
+    optional_other.add_argument('--input_sv_vcf', help='VCF input file with structural germline DNA variants (SVs) - optional.', default=None)
     required.add_argument("--vep_dir", dest="vep_dir", help="Directory of VEP cache, e.g.  $HOME/.vep", required=True)
     required.add_argument('--refdata_dir',help=f"Directory that contains the PCGR/CPSR reference data, e.g. ~/pcgr-data-{pcgr_vars.PCGR_VERSION}", required = True)
     required.add_argument('--output_dir',help='Output directory', required = True)
@@ -99,6 +100,7 @@ def run_cpsr(conf_options, input_data, output_data):
     #uid = ''
     genome_assembly = str(conf_options['genome_assembly'])
     input_vcf = 'None'
+    input_sv_vcf = 'None'
     input_customlist = 'None'
     output_custom_bed = 'None'
     output_dir = output_data['dir']
@@ -109,6 +111,8 @@ def run_cpsr(conf_options, input_data, output_data):
 
     if input_data['input_vcf_basename'] != 'NA':
         input_vcf = os.path.join(input_data['input_vcf_dir'], input_data['input_vcf_basename'])
+    if input_data['input_sv_vcf_basename'] != 'NA':
+        input_sv_vcf = os.path.join(input_data['input_sv_vcf_dir'], input_data['input_sv_vcf_basename'])
     if input_data['input_customlist_basename'] != 'NA' and input_data['input_customlist_dir'] != 'NA':
         input_customlist = os.path.join(
             input_data['input_customlist_dir'], input_data['input_customlist_basename'])
@@ -125,6 +129,9 @@ def run_cpsr(conf_options, input_data, output_data):
         # Define temporary output files
         input_vcf_validated =             f'{output_prefix}.{random_id}.ready.vcf.gz'
         input_vcf_validated_uncompr =     f'{output_prefix}.{random_id}.ready.vcf'
+        input_sv_vcf_validated =          f'{output_prefix}.{random_id}.sv.ready.vcf.gz'
+        input_sv_vcf_validated_uncompr =  f'{output_prefix}.{random_id}.sv.ready.vcf'
+        vep_sv_vcf =                      f'{output_prefix}.{random_id}.sv.vep.vcf'
         vep_vcf =                         f'{output_prefix}.{random_id}.vep.vcf'
         vep_vcfanno_vcf =                 f'{output_prefix}.{random_id}.vep.vcfanno.vcf'
         vep_vcfanno_summarised_vcf =      f'{output_prefix}.{random_id}.vep.vcfanno.summarised.vcf'
@@ -139,10 +146,12 @@ def run_cpsr(conf_options, input_data, output_data):
 
         ## CPSR|Validate input VCF - check formatting, non-overlap with CPSR INFO tags, and whether sample contains any variants in cancer predisposition loci
         vcf_validate_command = (
-                f'cpsr_validate_input.py '
+                f'validate_input_cpsr.py '
                 f'{input_data["refdata_assembly_dir"]} '
                 f'{input_vcf} '
                 f'{input_vcf_validated_uncompr} '
+                f'{input_sv_vcf} '
+                f'{input_sv_vcf_validated_uncompr} '
                 f'{input_customlist} '
                 f'{output_custom_bed} '
                 f'{conf_options["other"]["retained_vcf_info_tags"]} '
@@ -222,6 +231,25 @@ def run_cpsr(conf_options, input_data, output_data):
         logger.info("Finished cpsr-vep")
         print('----')
 
+        ## CPSR|VEP (SV) - run VEP on germline SV VCF if provided
+        if not input_sv_vcf == 'None':
+            vep_sv_command = get_vep_command(file_paths = input_data,
+                                             conf_options = yaml_data,
+                                             input_vcf = input_sv_vcf_validated,
+                                             output_vcf = vep_sv_vcf,
+                                             sv = True)
+            logger = getlogger('cpsr-vep-sv')
+            logger.info((
+                f"CPSR - STEP 1b: VEP annotation of germline structural variants "
+                f"(version {pcgr_vars.VEP_VERSION}, genome assembly {yaml_data['genome_assembly']})"))
+            logger.info("VEP SV configuration - splice/NMD plugins and gnomAD SNV frequencies omitted")
+            logger.info(f"VEP SV configuration - GENCODE set: {vep_sv_command['gencode_set_in_use']}")
+            check_subprocess(logger, vep_sv_command["main"], debug)
+            check_subprocess(logger, vep_sv_command["bgzip"], debug)
+            check_subprocess(logger, vep_sv_command["tabix"], debug)
+            logger.info("Finished cpsr-vep-sv")
+            print('----')
+
         ## CPSR|vcfanno - run vcfanno on query VCF with a number of relevant annotated VCFs
         logger = getlogger('cpsr-vcfanno')
         logger.info("CPSR - STEP 2: Annotation against BED/VCF tracks with cpsr-vcfanno")
@@ -293,7 +321,11 @@ def run_cpsr(conf_options, input_data, output_data):
             outfile.write(yaml.dump(yaml_data))
         outfile.close()
         
-        variant_set.fillna('.').to_csv(output_pass_tsv_gz, sep="\t", compression="gzip", index=False)
+        pd_to_csv(
+            df = variant_set, 
+            fname = output_pass_tsv_gz, 
+            col_sep = "\t")
+        #variant_set.fillna('.').to_csv(output_pass_tsv_gz, sep="\t", compression="gzip", index=False)
         if not debug:
             remove_file(output_pass_vcf2tsv_gz)
                 
