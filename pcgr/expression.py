@@ -5,24 +5,29 @@ import os
 import pandas as pd
 import logging
 import numpy as np
+from typing import Optional
 
 from pcgr import pcgr_vars
 from pcgr.utils import error_message, check_file_exists
-
 def parse_expression(expression_fname_tsv: str,
-                     sample_id: str,
-                     refdata_assembly_dir: str,                                                                    
-                     logger: logging.Logger = None):
+                     yaml_data: dict,                                                                    
+                     logger: Optional[logging.Logger] = None) -> dict:
     """
-    Parse the expression data from the user-provided file and verify record identifiers with 
+    Parse the expression data from the user-provided file and match transcript identifiers with 
     reference data. Aggregate transcript-level TPM values to generate gene-level TPM values.
     Args:
         expression_fname_tsv (str): Path to the user-provided gene expression file.
-        refdata_assembly_dir (str): Path to the build-specific PCGR reference data directory.
+        yaml_data (dict): PCGR configuration data.
         logger (logging.Logger, optional): Logger. Defaults to None.
-    """    
+    """
+
+    sample_id = yaml_data['sample_id']
+    refdata_assembly_dir = yaml_data['reference_data']['path']
+    if logger is None:
+        logger = logging.getLogger("pcgr-gene-expression")
+
     ## Check that the expression file exists
-    check_file_exists(expression_fname_tsv, logger)
+    check_file_exists(expression_fname_tsv, logger = logger)
     ## Read the expression file
     sample_gene_expression = pd.read_csv(expression_fname_tsv, sep = "\t", na_values = ".")
     if not {'TargetID','TPM'}.issubset(sample_gene_expression.columns):
@@ -45,7 +50,7 @@ def parse_expression(expression_fname_tsv: str,
         os.path.join(refdata_assembly_dir, "gene", "tsv", "gene_transcript_xref", "gene_index.tsv.gz")
     trans_index_fname_tsv =  \
         os.path.join(refdata_assembly_dir, "gene", "tsv", "gene_transcript_xref", "gene_transcript_xref.tsv.gz")
-    check_file_exists(gene_index_fname_tsv, logger)
+    check_file_exists(gene_index_fname_tsv, logger = logger)
     gene_index = pd.read_csv(gene_index_fname_tsv, sep = "\t", na_values = ".",  low_memory = False)
     
     sample_identifiers_found = 0
@@ -84,7 +89,7 @@ def parse_expression(expression_fname_tsv: str,
                 transcript_identifier = 'RefSeq'
                 
                  ## Create mapping between Refseq transcript identifiers and Ensembl transcript identifiers
-                check_file_exists(trans_index_fname_tsv, logger)
+                check_file_exists(trans_index_fname_tsv, logger = logger)
                 refseq2ensembl = pd.read_csv(trans_index_fname_tsv, sep = "\t", na_values = ".",  low_memory = False)
                 if {'ensembl_transcript_id','refseq_transcript_id'}.issubset(refseq2ensembl.columns):
                     refseq2ensembl = refseq2ensembl[['ensembl_transcript_id','refseq_transcript_id']].drop_duplicates().rename(columns=str.upper)
@@ -168,7 +173,7 @@ def parse_expression(expression_fname_tsv: str,
 
 def integrate_variant_expression(variant_set: pd.DataFrame, 
                                  expression_data: dict,
-                                 logger: logging.Logger = None) -> pd.DataFrame:
+                                 logger: Optional[logging.Logger] = None) -> pd.DataFrame:
     """
     Integrates annotated variant calls (in variant_set dataframe) with expression data (in expression_data dictionary)
     Both transcript-level TPM values and gene-level TPM values are integrated into the variant set.
@@ -176,7 +181,9 @@ def integrate_variant_expression(variant_set: pd.DataFrame,
         variant_set (pd.DataFrame): Pandas dataframe with annotated variants
         expression_data (dict): Dictionary with expression data (transcript and gene-level TPM values)
         logger (logging.Logger, optional): Logger. Defaults to None.
-    """    
+    """ 
+    if logger is None:
+        logger = logging.getLogger("pcgr-integrate-variant-expression")
     if expression_data is not None:
         for s in ['gene','gene_min_tpm']:
             if s in expression_data.keys():
@@ -288,7 +295,6 @@ def aggregate_tpm_per_cons(variant_set: pd.DataFrame,
 
 def correlate_sample_expression(sample_expression: dict, 
                                 yaml_data: dict, 
-                                refdata_assembly_dir: str,
                                 protein_coding_only: bool = True,
                                 logger: logging.Logger = None) -> pd.DataFrame:
     
@@ -298,6 +304,8 @@ def correlate_sample_expression(sample_expression: dict,
     sample_id = yaml_data['sample_id']
     drop_columns = ['SYMBOL','BIOTYPE', 'GENENAME','ENTREZGENE','TPM_GENE']
     
+    refdata_assembly_dir = yaml_data['reference_data']['path']
+
     exp_data_sample = sample_expression.copy()
     
     if 'gene' in exp_data_sample.keys():
@@ -392,7 +400,6 @@ def correlate_sample_expression(sample_expression: dict,
 
 def find_expression_outliers(sample_expression: dict,
                         yaml_data: dict,
-                        refdata_assembly_dir: str,
                         protein_coding_only: bool,
                         logger: logging.Logger) -> pd.DataFrame:
     
@@ -405,7 +412,8 @@ def find_expression_outliers(sample_expression: dict,
     exp_data_refcohort = pd.DataFrame()
     outlier_metrics_valid = pd.DataFrame()
     
-    
+    refdata_assembly_dir = yaml_data['reference_data']['path']
+
     ## As of now (April 2024) - match primary site of input sample to TCGA cohorts
     ## Future - allow user to specify TCGA cohort to compare with
     ##
@@ -413,8 +421,8 @@ def find_expression_outliers(sample_expression: dict,
         logger.warning("Primary site not specified in configuration file - skipping expression outlier analysis")
         return(pd.DataFrame())
     else:
-        if primary_site in pcgr_vars.SITE_TO_DISEASE.keys():
-            comparison_disease_cohort = str(pcgr_vars.SITE_TO_DISEASE[primary_site][0]).lower()
+        if primary_site in pcgr_vars.SITE_TO_TCGA_COHORT.keys():
+            comparison_disease_cohort = str(pcgr_vars.SITE_TO_TCGA_COHORT[primary_site][0]).lower()
             exp_fname = os.path.join(
                 refdata_assembly_dir, "expression", "tsv", 
                 "tcga", str(comparison_disease_cohort).lower() + "_tpm.tsv.gz")
