@@ -8,7 +8,7 @@ channels:
   - bioconda
 
 dependencies:
-  - pcgr ==2.2.5.9010 # bump
+  - pcgr ==2.2.5.9011 # bump
   - anaconda::perl
   - umccr::openspliceai
   - anaconda::pytorch
