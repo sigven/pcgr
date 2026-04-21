@@ -56,7 +56,7 @@ load_reference_data <- function(
 
 
   pcgr_ref_data[['vcf_infotags']] <- data.frame()
-  for(t in c('vep','other')) {
+  for (t in c('vep','other')) {
     infotag_fname <- file.path(
       pcgr_db_assembly_dir,
       paste0("vcf_infotags_", t, ".tsv"))
@@ -72,14 +72,14 @@ load_reference_data <- function(
         )
     )
   }
-  for(cat in c('tcga','clinvar','gwas','gnomad_non_cancer',
+  for (cat in c('tcga','clinvar','gwas','gnomad_non_cancer',
                'dbmts','dbnsfp','panel_of_normals')) {
     vcfanno_fname <- file.path(
       pcgr_db_assembly_dir,"variant","vcf",cat,
       paste0(cat,".vcfanno.vcf_info_tags.txt"))
 
     raw_lines <- readLines(vcfanno_fname)
-    for(l in raw_lines) {
+    for (l in raw_lines) {
       if (startsWith(l,"##INFO")) {
         tag <- stringr::str_replace(
           stringr::str_match(l,"ID=[A-Za-z|_]{1,}")[,1],
@@ -201,13 +201,18 @@ load_reference_data <- function(
 
   pcgr_ref_data[['gene']][['transcript_biotype']] <- as.data.frame(
     readr::read_tsv(
-      gene_xref_tsv_fname, show_col_types = F)) |>
+      gene_xref_tsv_fname,
+      show_col_types = F,
+      na = c(".",""), guess_max = 1000000)) |>
     dplyr::select(
       c("chrom",
         "ensembl_gene_id",
         "ensembl_transcript_id",
         "gencode_transcript_biotype",
-        "gene_biotype"
+        "gene_biotype",
+        "mane_select2",
+        "transcript_start",
+        "transcript_end"
       )
     ) |>
     dplyr::distinct()
@@ -299,7 +304,7 @@ load_reference_data <- function(
   ####--- 2. Variant annotations----####
   pcgr_ref_data[['variant']] <- list()
 
-  #####--A. Sites of pathogenic/benign variants (ClinVar)--#####
+  #####--A. AA sites of pathogenic/benign variants (ClinVar)--#####
   # 1. sites (codons/amino acids) of pathogenic/likely pathogenic variants
   clinvar_sites_tsv_fname <-
     file.path(
@@ -309,12 +314,14 @@ load_reference_data <- function(
   check_file_exists(clinvar_sites_tsv_fname)
   pcgr_ref_data[['variant']][['clinvar_aa_sites']] <- as.data.frame(
     readr::read_tsv(
-      clinvar_sites_tsv_fname, show_col_types = F)) |>
+      clinvar_sites_tsv_fname,
+      show_col_types = F,
+      guess_max = 100000)) |>
     dplyr::mutate(entrezgene = as.character(.data$entrezgene))
   colnames(pcgr_ref_data[['variant']][['clinvar_aa_sites']]) <-
     toupper(colnames(pcgr_ref_data[['variant']][['clinvar_aa_sites']]))
 
-  #####--B. Nucleotides of pathogenic/benign (ClinVar)--#####
+  #####--B. Genomic sites of pathogenic/benign (ClinVar)--#####
   # 1. non-AA sites (splice sites, intronic sites etc.)
   clinvar_nucleotides_tsv_fname <-
     file.path(
@@ -324,14 +331,16 @@ load_reference_data <- function(
   check_file_exists(clinvar_nucleotides_tsv_fname)
   pcgr_ref_data[['variant']][['clinvar_nuc_sites']] <- as.data.frame(
     readr::read_tsv(
-      clinvar_nucleotides_tsv_fname, show_col_types = F)) |>
+      clinvar_nucleotides_tsv_fname,
+      show_col_types = F,
+      guess_max = 100000)) |>
     dplyr::mutate(entrezgene = as.character(.data$entrezgene)) |>
     dplyr::filter(stringr::str_detect(
-      tolower(classification), "pathogenic"))
+      tolower(.data$classification), "pathogenic"))
   colnames(pcgr_ref_data[['variant']][['clinvar_nuc_sites']]) <-
     toupper(colnames(pcgr_ref_data[['variant']][['clinvar_nuc_sites']]))
 
-  #####--B. Oncogenic variants (ClinVar)--#####
+  #####--C. Oncogenic variants (ClinVar)--#####
   # known oncogenic variants
   clinvar_oncogenic_tsv_fname <-
     file.path(
@@ -348,15 +357,17 @@ load_reference_data <- function(
       as.character(.data$hgvs_c),
       .data$hgvsp
     )) |>
-    dplyr::select(-c("codon","trait","var_id")) |>
-    dplyr::select(c("symbol","alteration","molecular_consequence",
-                    "oncogenicity","review_status_oncogenicity"),
-                  dplyr::everything())
+    dplyr::select(
+      -c("codon","trait","var_id")) |>
+    dplyr::select(
+      c("symbol","alteration","molecular_consequence",
+        "oncogenicity","review_status_oncogenicity"),
+      dplyr::everything())
 
   colnames(pcgr_ref_data[['variant']][['clinvar_oncogenic']]) <-
     toupper(colnames(pcgr_ref_data[['variant']][['clinvar_oncogenic']]))
 
-  #####--C. Gene-level variant statistics (ClinVar)--#####
+  #####--D. Gene-level variant statistics (ClinVar)--#####
   clinvar_gene_varstats_tsv_fname <-
     file.path(
       pcgr_db_assembly_dir, "variant", "tsv",
@@ -370,9 +381,7 @@ load_reference_data <- function(
   colnames(pcgr_ref_data[['variant']][['clinvar_gene_stats']]) <-
     toupper(colnames(pcgr_ref_data[['variant']][['clinvar_gene_stats']]))
 
-
-
-  #####--D. GWAS variants--#####
+  #####--E. GWAS variants--#####
   gwas_tsv_fname <-
     file.path(
       pcgr_db_assembly_dir, "variant", "tsv", "gwas", "gwas.tsv.gz"
@@ -391,7 +400,7 @@ load_reference_data <- function(
 
   pcgr_ref_data[['variant']][['varstats']] <- list()
   ## Get variant statistics
-  for(vardb in c('clinvar','gwas','tcga',
+  for (vardb in c('clinvar','gwas','tcga',
                  'gnomad_non_cancer','dbmts',
                  'dbnsfp')) {
     varstats_fname <-
@@ -408,8 +417,6 @@ load_reference_data <- function(
     }
 
   }
-
-
 
   ####---- 3. Phenotype ontologies ----####
   pcgr_ref_data[['phenotype']] <- list()
@@ -461,7 +468,7 @@ load_reference_data <- function(
 
   pcgr_ref_data[['misc']] <- list()
   ####--- 5. Miscellaneous----####
-  for(elem in c('tmb',
+  for (elem in c('tmb',
                 'mutational_signature',
                 'pathway',
                 'oncogenicity',
@@ -472,7 +479,7 @@ load_reference_data <- function(
       pcgr_db_assembly_dir, "misc", "tsv", elem,
       paste0(elem,".tsv.gz")
     )
-    if(elem == "oncogenicity"){
+    if (elem == "oncogenicity") {
       fname_misc <- file.path(
         pcgr_db_assembly_dir, "misc", "tsv", elem,
         paste0(elem,".tsv")
@@ -489,7 +496,14 @@ load_reference_data <- function(
 
   }
 
-  tmp = pcgr_ref_data[['misc']][['pathway']]
+  pcgr_ref_data[['misc']][['protein_domain']] <-
+    pcgr_ref_data[['misc']][['protein_domain']] |>
+    dplyr::mutate(
+      PFAM_ENTRY_LOCATIONS2 = stringr::str_replace(
+        .data$PFAM_ENTRY_LOCATIONS, ",", ", ")
+    )
+
+  tmp <- pcgr_ref_data[['misc']][['pathway']]
   pcgr_ref_data[['misc']][['pathway']] <- list()
   pcgr_ref_data[['misc']][['pathway']][['long']] <- tmp
   pcgr_ref_data[['misc']][['pathway']][['wide']] <- as.data.frame(
@@ -500,182 +514,29 @@ load_reference_data <- function(
 
   ####--- 6. Drugs ----####
   pcgr_ref_data[['drug']] <- list()
-  drug_tsv_fname <-
-    file.path(
-      pcgr_db_assembly_dir, "drug",
-      "tsv", "drug_targeted.tsv.gz"
+  for (elem in c('targeted',
+                'all',
+                'targeted_inhibition_any_label',
+                'targeted_inhibition_on_label')) {
+    drug_tsv_fname <-
+      file.path(
+        pcgr_db_assembly_dir, "drug",
+        "tsv", paste0("drug_",elem,".tsv.gz")
+      )
+    check_file_exists(drug_tsv_fname)
+    pcgr_ref_data[['drug']][[elem]] <- as.data.frame(
+      readr::read_tsv(drug_tsv_fname, show_col_types = F, na = ".")
     )
-  check_file_exists(drug_tsv_fname)
-  pcgr_ref_data[['drug']][['targeted']] <- as.data.frame(
-    readr::read_tsv(drug_tsv_fname, show_col_types = F, na = ".")
-  )
-  colnames(pcgr_ref_data[['drug']][['targeted']]) <-
-    toupper(colnames(pcgr_ref_data[['drug']][['targeted']]))
-
-  drug_all_tsv_fname <-
-    file.path(
-      pcgr_db_assembly_dir, "drug",
-      "tsv", "drug_all.tsv.gz"
-    )
-  check_file_exists(drug_all_tsv_fname)
-  pcgr_ref_data[['drug']][['all']] <- as.data.frame(
-    readr::read_tsv(drug_all_tsv_fname, show_col_types = F, na = ".")
-  )
-  colnames(pcgr_ref_data[['drug']][['all']]) <-
-    toupper(colnames(pcgr_ref_data[['drug']][['all']]))
-
-
-
-  inhibitors_all <-
-    dplyr::select(
-      pcgr_ref_data[['drug']][['targeted']],
-      c("SYMBOL",
-        "QUERY_SITE",
-        "DRUG_PRIMARY_SITE",
-        "ATC_TREATMENT_CATEGORY",
-        "ATC_LEVEL3",
-        "DRUG_NAME",
-        "DRUG_TYPE",
-        "DRUG_MAX_PHASE_INDICATION",
-        "DRUG_YEAR_FIRST_APPROVAL",
-        "DRUG_ACTION_TYPE",
-        "DRUG_LINK")) |>
-    dplyr::rename(
-      DRUG_CLASS = "ATC_LEVEL3") |>
-    dplyr::filter(
-        .data$ATC_TREATMENT_CATEGORY != "cancer_unclassified" &
-        .data$DRUG_TYPE != "Unknown") |>
-    dplyr::distinct() |>
-    dplyr::mutate(
-      DRUG_ACTION_TYPE = stringr::str_to_title(
-        .data$DRUG_ACTION_TYPE
-      )) |>
-    dplyr::filter(
-      .data$DRUG_ACTION_TYPE != "Other") |>
-    dplyr::arrange(
-      .data$SYMBOL,
-      dplyr::desc(.data$DRUG_MAX_PHASE_INDICATION),
-      dplyr::desc(.data$DRUG_YEAR_FIRST_APPROVAL)) |>
-    dplyr::select(-c("DRUG_YEAR_FIRST_APPROVAL",
-                     "ATC_TREATMENT_CATEGORY",
-                     "DRUG_TYPE")) |>
-    dplyr::distinct()
-
-  pcgr_ref_data[['drug']][['inhibitors_on_label']] <-
-    inhibitors_all |>
-    dplyr::filter(
-       .data$DRUG_MAX_PHASE_INDICATION > 2) |>
-    dplyr::filter(
-      .data$QUERY_SITE == .data$DRUG_PRIMARY_SITE &
-      .data$QUERY_SITE != "Any" &
-        .data$QUERY_SITE != "Other/Unknown") |>
-    dplyr::group_by(
-      .data$SYMBOL,
-      .data$QUERY_SITE,
-      .data$DRUG_CLASS) |>
-    dplyr::summarise(
-      DRUG_NAME = paste(.data$DRUG_NAME, collapse = "|"),
-      DRUG_LINK = paste(.data$DRUG_LINK, collapse = ", "),
-      n = dplyr::n(),
-      .groups = "drop"
-    ) |>
-    dplyr::ungroup() |>
-    dplyr::arrange(
-      .data$SYMBOL,
-      dplyr::desc(.data$n)
-    ) |>
-    dplyr::mutate(
-      DRUG_NAME = paste(
-        .data$DRUG_CLASS, .data$DRUG_NAME, sep = ":"),
-      DRUG_LINK = paste0(
-        "<b>",.data$DRUG_CLASS,": </b>", .data$DRUG_LINK),
-    ) |>
-    ## ignore proteasome/tubulin/CYP targets -
-    dplyr::filter(
-      !stringr::str_detect(
-        .data$SYMBOL, "^(CYP|PSM|TUB)")
-    ) |>
-    dplyr::group_by(
-      .data$SYMBOL,
-      .data$QUERY_SITE
-    ) |>
-    dplyr::summarise(
-      TARGETED_INHIBITORS2 = paste(.data$DRUG_NAME, collapse=", "),
-      TARGETED_INHIBITORS = paste(.data$DRUG_LINK, collapse=", "),
-      .groups = "drop"
-    )
-
-  pcgr_ref_data[['drug']][['inhibitors_any_label']] <-
-    as.data.frame(
-    inhibitors_all |>
-    dplyr::filter(
-      .data$DRUG_MAX_PHASE_INDICATION > 2) |>
-    dplyr::filter(
-        .data$QUERY_SITE != "Any") |>
-    dplyr::group_by(
-      .data$SYMBOL,
-      .data$DRUG_NAME,
-      .data$DRUG_LINK,
-      .data$DRUG_CLASS) |>
-    dplyr::summarise(
-      DRUG_PRIMARY_SITE = paste(
-        sort(unique(.data$DRUG_PRIMARY_SITE)), collapse=","),
-      .groups = "drop"
-    ) |>
-    dplyr::ungroup() |>
-    dplyr::mutate(
-      DRUG_LINK = paste0(
-        .data$DRUG_LINK, " (", .data$DRUG_PRIMARY_SITE, ")"),
-      DRUG_NAME = paste0(
-        .data$DRUG_NAME, " (", .data$DRUG_PRIMARY_SITE, ")")
-    ) |>
-    dplyr::group_by(
-      .data$SYMBOL,
-      .data$DRUG_CLASS) |>
-    dplyr::summarise(
-      DRUG_NAME = paste(.data$DRUG_NAME, collapse="|"),
-      DRUG_LINK = paste(.data$DRUG_LINK, collapse=", "),
-      n = dplyr::n(),
-      .groups = "drop"
-    ) |>
-    dplyr::arrange(
-      .data$SYMBOL,
-      dplyr::desc(.data$n)
-    ) |>
-    dplyr::mutate(
-      DRUG_NAME = paste(
-        .data$DRUG_CLASS,
-        .data$DRUG_NAME,
-        sep = ":"),
-      DRUG_LINK = paste0(
-        "<b>",
-        .data$DRUG_CLASS,
-        ": </b>",
-        .data$DRUG_LINK),
-    ) |>
-    ## ignore proteasome/tubulin/CYP targets -
-    dplyr::filter(
-      !stringr::str_detect(
-        .data$SYMBOL, "^(CYP|PSM|TUB)")
-    ) |>
-    dplyr::group_by(
-      .data$SYMBOL,
-    ) |>
-    dplyr::summarise(
-      TARGETED_INHIBITORS_ALL2 = paste(
-        .data$DRUG_NAME, collapse=", "),
-      TARGETED_INHIBITORS_ALL = paste(
-        .data$DRUG_LINK, collapse=", "),
-      .groups = "drop"
-    )
-  )
+    colnames(pcgr_ref_data[['drug']][[elem]]) <-
+      toupper(colnames(pcgr_ref_data[['drug']][[elem]]))
+  }
 
 
   ####--- 7. Biomarkers ----####
   pcgr_ref_data[['biomarker']] <- list()
-  for(elem in c('clinical','variant','literature')) {
+  for (elem in c('clinical','variant','literature')) {
     pcgr_ref_data[['biomarker']][[elem]] <- data.frame()
-    for(db in c('cgi','civic')) {
+    for (db in c('cgi','civic')) {
       fname <-
         file.path(
           pcgr_db_assembly_dir, "biomarker", "tsv",
@@ -686,21 +547,13 @@ load_reference_data <- function(
         readr::read_tsv(
           fname, show_col_types = F,
           na = ".", guess_max = 10000))
-      if ("source_id" %in% colnames(bm_data)) {
-        bm_data <- bm_data |>
-          dplyr::mutate(
-            source_id = as.character(.data$source_id))
-      }
 
-      if ('entrezgene' %in% colnames(bm_data)) {
-        bm_data <- bm_data |>
-          dplyr::mutate(
-            entrezgene = as.character(.data$entrezgene))
-      }
-      if ('variant_id' %in% colnames(bm_data)) {
-        bm_data <- bm_data |>
-          dplyr::mutate(
-            variant_id = as.character(.data$variant_id))
+      for (col in c('source_id','entrezgene','variant_id')) {
+        if (col %in% colnames(bm_data)) {
+          bm_data <- bm_data |>
+            dplyr::mutate(
+              !!col := as.character(.data[[col]]))
+        }
       }
 
       pcgr_ref_data[['biomarker']][[elem]] <- dplyr::bind_rows(
@@ -711,25 +564,31 @@ load_reference_data <- function(
     colnames(pcgr_ref_data[['biomarker']][[elem]]) <-
       toupper(colnames(pcgr_ref_data[['biomarker']][[elem]]))
 
-    # if(elem == 'variant'){
-    #   pcgr_ref_data[['biomarker']][[elem]] <-
-    #     pcgr_ref_data[['biomarker']][[elem]] |>
-    #     dplyr::mutate(VARIANT_NAME_PRIMARY = stringr::str_replace(
-    #       .data$VARIANT_NAME_PRIMARY, " FUSION", " Fusion")
-    #     ) |>
-    #     dplyr::mutate(VARIANT_NAME_PRIMARY = dplyr::if_else(
-    #       .data$VARIANT_NAME_PRIMARY == "NA Fusion" &
-    #         !is.na(.data$GENE),
-    #       paste0(.data$GENE, " Fusion"),
-    #       as.character(.data$VARIANT_NAME_PRIMARY)
-    #     ))
-    # }
-
   }
 
-  ####-- 8. Metadata ####
+  ####--- 8. Fusions/translocations ----####
+  pcgr_ref_data[['fusion']] <- list()
+  for (elem in c('recurrent','variant')) {
+  #for (elem in c('clinical','variant','literature')) {
+    pcgr_ref_data[['fusion']][[elem]] <- data.frame()
+    fname <-
+      file.path(
+        pcgr_db_assembly_dir, "fusion", "tsv",
+        paste0("mitelmandb.", elem,".tsv.gz")
+      )
+    check_file_exists(fname)
+    pcgr_ref_data[['fusion']][[elem]] <- as.data.frame(
+      readr::read_tsv(
+        fname, show_col_types = F,
+        na = ".", guess_max = 10000))
+
+    colnames(pcgr_ref_data[['fusion']][[elem]]) <-
+      toupper(colnames(pcgr_ref_data[['fusion']][[elem]]))
+  }
+
+  ####-- 9. Metadata ####
   pcgr_ref_data[['metadata']] <- data.frame()
-  for(dtype in c('gene','gwas','hotspot','other',
+  for (dtype in c('gene','gwas','hotspot','other',
                  'phenotype','biomarker','drug')) {
 
     fname <- file.path(
@@ -766,12 +625,12 @@ load_reference_data <- function(
   pcgr_ref_data[['expression']] <- list()
   exp_sources <- list.dirs(file.path(
     pcgr_db_assembly_dir, "expression", "tsv"), full.names = F)
-  for(source in exp_sources){
-    if(source != "" & source != "tcga"){
+  for (source in exp_sources) {
+    if (source != "" & source != "tcga") {
       metadata_fname <- file.path(
         pcgr_db_assembly_dir, "expression", "tsv",
         source, paste0(source, "_sample_metadata.tsv.gz"))
-      if(file.exists(metadata_fname)){
+      if (file.exists(metadata_fname)) {
         pcgr_ref_data[['expression']][[source]] <-
           suppressWarnings(readr::read_tsv(
             metadata_fname, show_col_types = F,
@@ -783,14 +642,14 @@ load_reference_data <- function(
           )
       }
     }else{
-      if(source == "tcga"){
+      if (source == "tcga") {
         pcgr_ref_data[['expression']][[source]] <- data.frame()
         metadata_fnames <- list.files(
           file.path(
             pcgr_db_assembly_dir, "expression", "tsv", source),
           pattern = "_sample_metadata.tsv.gz$", full.names = T)
-        for(metadata_fname in metadata_fnames){
-          if(file.exists(metadata_fname)){
+        for (metadata_fname in metadata_fnames) {
+          if (file.exists(metadata_fname)) {
             cohort_metadata <- suppressWarnings(
               readr::read_tsv(
                 metadata_fname, show_col_types = F,
