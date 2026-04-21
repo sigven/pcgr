@@ -23,46 +23,68 @@ cat('\n::: {.callout-note}\n## Site-specific signatures\n\n',
 #| eval: !expr is.null(msig_content$result$signature_similarity) == FALSE
 #| output: asis
 
-similarity_table <- 
-  DT::datatable(
-    msig_content$result$signature_similarity,
-    extensions = "Responsive",
-    options = list(
-      pageLength = 13,
-      dom = 'tp'),
-    escape = F) |>
-  DT::formatStyle(
-    'SIMILARITY',
-    fontWeight = 'bold') |>
-  DT::formatStyle(
-    c('SIGNATURE_ID',
-      'AETIOLOGY_KEYWORD'),
-    'SITE_SPECIFIC',
-    fontWeight = 'bold',
-    color = "white",
-    backgroundColor = DT::styleEqual(
-      c('YES','NO','NOT_DEFINED'), 
-      c(pcg_report$settings$conf$report_color,
-        pcgrr::color_palette$none,
-        pcgrr::color_palette$none)
-    )
-  )
+sim_data    <- msig_content$result$signature_similarity
 
-#similarity_table$x$data$SITE_SPECIFIC <- NULL
+## format similarity to 2 decimal places
+sim_data <- sim_data |>
+  dplyr::mutate(SIMILARITY = sprintf("%.2f", SIMILARITY))
 
-bslib::card(
-  height = "700px",
-  bslib::card_header(
-    class = "bg-dark",
-    paste0(
-      "Similarity of ",
-      pcg_report$settings$sample_id,
-      " to COSMIC signatures (SBS)")
+report_color <- pcg_report$settings$conf$report_color
+none_color   <- pcgrr::color_palette$none
+
+site_specific_style <- function(data) {
+  function(value, index) {
+    ss <- data$SITE_SPECIFIC[index]
+    bg <- if (isTRUE(ss == "YES")) report_color else none_color
+    list(background = bg, color = "white", fontWeight = "bold", padding = "4px 8px")
+  }
+}
+
+col_defs <- list(
+  SIGNATURE_ID = reactable::colDef(
+    name     = "Signature",
+    style    = site_specific_style(sim_data),
+    minWidth = 110
   ),
-  bslib::card_body(
-    similarity_table
-  )
+  SIMILARITY = reactable::colDef(
+    name     = "Similarity",
+    minWidth = 100,
+    align    = "center",
+    style    = list(fontWeight = "bold")
+  ),
+  AETIOLOGY_KEYWORD = reactable::colDef(
+    name     = "Aetiology",
+    style    = site_specific_style(sim_data),
+    minWidth = 150
+  ),
+  SITE_SPECIFIC = reactable::colDef(
+    name     = "Site-specific signature")
 )
+
+reactable::reactable(
+  sim_data,
+  columns         = col_defs,
+  filterable      = FALSE,
+  searchable      = TRUE,
+  highlight       = TRUE,
+  compact         = TRUE,
+  wrap            = TRUE,
+  defaultPageSize = 10,
+  theme           = pcgrr::rt_theme())
+# 
+# bslib::card(
+#   height = "700px",
+#   bslib::card_header(
+#     class = "bg-dark",
+#     paste0(
+#       "Similarity of ",
+#       pcg_report$settings$sample_id,
+#       " to COSMIC signatures (SBS)")
+#   ),
+#   bslib::card_body(
+#     similarity_table
+#   )
+# )
 
 
 

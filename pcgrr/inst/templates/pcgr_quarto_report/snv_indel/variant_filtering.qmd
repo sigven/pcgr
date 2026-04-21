@@ -14,7 +14,7 @@ filtering_stats[['germline']] <- pcgrr::plot_filtering_stats_germline(
     report = pcg_report)
 
 
-if(pcg_report$settings$conf$somatic_snv$tumor_only$exclude_nonexonic == TRUE){
+if (pcg_report$settings$conf$somatic_snv$tumor_only$exclude_nonexonic == TRUE) {
   
   filtering_stats[['exonic']] <- pcgrr::plot_filtering_stats_exonic(
     report = pcg_report,
@@ -39,7 +39,7 @@ In an effort to minimize the presence/impact of germline events from input varia
 #| echo: false
 
 
-if(pcg_report$settings$conf$somatic_snv$tumor_only$exclude_nonexonic == TRUE){
+if (pcg_report$settings$conf$somatic_snv$tumor_only$exclude_nonexonic == TRUE) {
   
   bslib::card(
     full_screen = TRUE,

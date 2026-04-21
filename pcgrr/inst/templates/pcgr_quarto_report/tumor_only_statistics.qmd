@@ -47,34 +47,34 @@ cat('<li>Exclusion of additional variants found in the Genome Aggregation Databa
 cat('<li>Exclusion of additional variants found in ClinVar (germline variant-of-origin)): <b>',pcg_report[['content']][['tumor_only']][['v_stat']][['clinvar_n_remain']],'</b> 
     (',pcg_report[['content']][['tumor_only']][['v_stat']][['clinvar_frac_remain']],' % of unfiltered calls)</li>\n')
 
-if(pcg_report$metadata$config$tumor_only$exclude_pon == TRUE){
+if (pcg_report$metadata$config$tumor_only$exclude_pon == TRUE) {
   cat('<li>Exclusion of additional variants found in panel of normals (PON): <b>',pcg_report[['content']][['tumor_only']][['v_stat']][['pon_n_remain']],'</b> (',pcg_report[['content']][['tumor_only']][['v_stat']][['pon_frac_remain']],' % of unfiltered calls)</li>\n')
 }
 
-if(pcg_report$metadata$config$tumor_only$exclude_likely_hom_germline == TRUE){
+if (pcg_report$metadata$config$tumor_only$exclude_likely_hom_germline == TRUE) {
   cat('<li>Exclusion of additional likely homozygous germline variants - based on allelic fraction (FILTER = ON): <b>',pcg_report[['content']][['tumor_only']][['v_stat']][['hom_n_remain']],'</b> (',pcg_report[['content']][['tumor_only']][['v_stat']][['hom_frac_remain']],' % of unfiltered calls)</li>\n')
 }
-if(pcg_report$metadata$config$tumor_only$exclude_likely_hom_germline == FALSE){
+if (pcg_report$metadata$config$tumor_only$exclude_likely_hom_germline == FALSE) {
   cat('<li>Exclusion of additional likely homozygous germline variants - based on allelic fraction  (FILTER = OFF): <b>',pcg_report[['content']][['tumor_only']][['v_stat']][['hom_n_remain']],'</b> (',pcg_report[['content']][['tumor_only']][['v_stat']][['hom_frac_remain']],' % of unfiltered calls)</li>\n')
 }
 
-if(pcg_report$metadata$config$tumor_only$exclude_likely_het_germline == TRUE){
+if (pcg_report$metadata$config$tumor_only$exclude_likely_het_germline == TRUE) {
   cat('<li>Exclusion of additional likely heterozygous germline variants - based on allelic fraction ++ (FILTER = ON): <b>',pcg_report[['content']][['tumor_only']][['v_stat']][['het_n_remain']],'</b> (',pcg_report[['content']][['tumor_only']][['v_stat']][['het_frac_remain']],' % of unfiltered calls)</li>\n')
 }
-if(pcg_report$metadata$config$tumor_only$exclude_likely_het_germline == FALSE){
+if (pcg_report$metadata$config$tumor_only$exclude_likely_het_germline == FALSE) {
   cat('<li>Exclusion of additional likely heterozygous germline variants - based on allelic fraction ++ (FILTER = OFF): <b>',pcg_report[['content']][['tumor_only']][['v_stat']][['het_n_remain']],'</b> (',pcg_report[['content']][['tumor_only']][['v_stat']][['het_frac_remain']],' % of unfiltered calls)</li>\n')
 }
 
-if(pcg_report$metadata$config$tumor_only$exclude_dbsnp_nonsomatic == TRUE){
+if (pcg_report$metadata$config$tumor_only$exclude_dbsnp_nonsomatic == TRUE) {
   cat('<li>Exclusion of additional non-somatically associated dbSNP variants (FILTER = ON): <b>',pcg_report[['content']][['tumor_only']][['v_stat']][['dbsnp_n_remain']],'</b> (',pcg_report[['content']][['tumor_only']][['v_stat']][['dbsnp_frac_remain']],' % of unfiltered calls)</li>\n')
 }
-if(pcg_report$metadata$config$tumor_only$exclude_dbsnp_nonsomatic == FALSE){
+if (pcg_report$metadata$config$tumor_only$exclude_dbsnp_nonsomatic == FALSE) {
   cat('<li>Exclusion of additional non-somatically associated dbSNP variants (FILTER = OFF): <b>',pcg_report[['content']][['tumor_only']][['v_stat']][['dbsnp_n_remain']],'</b> (',pcg_report[['content']][['tumor_only']][['v_stat']][['dbsnp_frac_remain']],' % of unfiltered calls)</li>\n')
 }
-if(pcg_report$metadata$config$tumor_only$exclude_nonexonic == TRUE){
+if (pcg_report$metadata$config$tumor_only$exclude_nonexonic == TRUE) {
   cat('<li>Exclusion of non-exonic variants (FILTER = ON): <b>',pcg_report[['content']][['tumor_only']][['v_stat']][['nonexonic_n_remain']], '</b> (',pcg_report[['content']][['tumor_only']][['v_stat']][['nonexonic_frac_remain']],' % of unfiltered calls)</li>\n')
 }
-if(pcg_report$metadata$config$tumor_only$exclude_nonexonic == FALSE){
+if (pcg_report$metadata$config$tumor_only$exclude_nonexonic == FALSE) {
   cat('<li>Exclusion of non-exonic variants (FILTER = OFF): <b>',pcg_report[['content']][['tumor_only']][['v_stat']][['nonexonic_n_remain']], '</b> (',pcg_report[['content']][['tumor_only']][['v_stat']][['nonexonic_frac_remain']],' % of unfiltered calls)</li>\n')
 }
 

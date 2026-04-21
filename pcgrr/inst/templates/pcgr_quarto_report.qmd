@@ -26,6 +26,7 @@ nocite: |
   @Antonello2024-ri
 format: 
   html:
+    theme: cosmos
     link-external-newwindow: true
     embed-resources: true
     smooth-scroll: true
@@ -66,62 +67,63 @@ if(as.logical(pcg_report$settings$conf$assay_properties$vcf_tumor_only) == TRUE)
 ```{r pcgr_settings}
 #| child: 'pcgr_quarto_report/settings.qmd'
 #| eval: true
-```
+#| output: asis
 
-<br>
+```
 
 ```{r pcgr_snv_indel}
 #| child: 'pcgr_quarto_report/snv_indel.qmd'
-#| eval: !expr pcg_report$content$snv_indel$eval == TRUE
+#| eval: !expr isTRUE(pcg_report$content$snv_indel$eval)
+
 ```
 
-<br>
 
 ```{r pcgr_cna}
 #| child: 'pcgr_quarto_report/cna.qmd'
-#| eval: !expr pcg_report$content$cna$eval == TRUE
+#| eval: !expr isTRUE(pcg_report$content$cna$eval)
+
 ```
 
-<br>
+```{r pcgr_rna_fusion}
+#| child: 'pcgr_quarto_report/rna_fusion.qmd'
+#| eval: !expr isTRUE(pcg_report$content$fusion$eval)
+
+```
 
 ```{r pcgr_signatures}
 #| child: 'pcgr_quarto_report/mutational_signature.qmd'
-#| eval: !expr as.logical(pcg_report$content$mutational_signatures$eval) == TRUE
-```
+#| eval: !expr isTRUE(pcg_report$content$mutational_signatures$eval)
 
-<br>
+```
 
 ```{r pcgr_kataegis}
 #| child: 'pcgr_quarto_report/kataegis.qmd'
-#| eval: !expr as.logical(pcg_report$content$kataegis$eval) == TRUE
-```
+#| eval: !expr isTRUE(pcg_report$content$kataegis$eval)
 
-<br>
+```
 
 ```{r pcgr_msi}
 #| child: 'pcgr_quarto_report/msi.qmd'
-#| eval: !expr as.logical(pcg_report$content$msi$eval) == TRUE
+#| eval: !expr isTRUE(pcg_report$content$msi$eval)
+
 ```
 
-<br>
-
-```{r conditional_tmb}
+```{r pcgr_tmb}
 #| child: 'pcgr_quarto_report/mutational_burden.qmd'
-#| eval: !expr as.logical(pcg_report$content$tmb$eval) == TRUE
-```
+#| eval: !expr isTRUE(pcg_report$content$tmb$eval)
 
-<br>
+```
 
 ```{r pcgr_germline}
 #| child: 'pcgr_quarto_report/germline.qmd'
-#| eval: !expr as.logical(pcg_report$content$germline_classified$eval) == TRUE
+#| eval: !expr isTRUE(pcg_report$content$germline_classified$eval)
+
 ```
 
-
-
-```{r conditional_expression}
+```{r pcgr_expression}
 #| child: 'pcgr_quarto_report/expression.qmd'
-#| eval: !expr as.logical(pcg_report$content$expression$eval) == TRUE
+#| eval: !expr isTRUE(pcg_report$content$expression$eval)
+
 ```
 
 

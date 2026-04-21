@@ -13,9 +13,9 @@ cat('\n\n#### ',source_name,'\n\n<br>')
 
 dt_similarity_tcga <- data.frame()
 
-for(cohort in names(pcg_report[['content']]$expression[['similarity_analysis']])){
-  if(grepl('tcga', cohort)){
-    if(NROW(pcg_report[['content']]$expression[['similarity_analysis']][[cohort]]) > 0){
+for(cohort in names(pcg_report[['content']]$expression[['similarity_analysis']])) {
+  if (grepl('tcga', cohort)) {
+    if (NROW(pcg_report[['content']]$expression[['similarity_analysis']][[cohort]]) > 0) {
       tcga_cohort <- 
         pcg_report[['content']]$expression[['similarity_analysis']][[cohort]] |>
         dplyr::mutate(CORR = round(CORR, digits = 5)) |>

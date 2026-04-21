@@ -2,7 +2,7 @@
 
 Microsatellite instability (MSI) is the result of impaired DNA mismatch repair and constitutes a cellular phenotype of clinical significance in many cancer types, most prominently colorectal cancers, stomach cancers, endometrial cancers, and ovarian cancers ([Cortes-Ciriano et al., 2017](https://www.ncbi.nlm.nih.gov/pubmed/28585546)). We have built a statistical MSI classifier that only considers features of the somatic mutation profile (e.g. _fraction of indels_, _load of indels_, _mutations in MMR genes_ etc.) in order to separate _MSI.H_ (MSI-high) from _MSS_ (MS stable) tumors. 
 
-The MSI classifier was trained using __N = 1,065__ exome-sequenced TCGA tumor samples with known MSI status (i.e. assayed from mononucleotide markers), and obtained a [positive predictive value](https://en.wikipedia.org/wiki/Positive_and_negative_predictive_values#Positive_predictive_value) of 97.9% and a [negative predictive value](https://en.wikipedia.org/wiki/Positive_and_negative_predictive_values#Negative_predictive_value) of 99.4% on an independent test set of __N = 435 samples__. Details of the MSI classification approach can be found <a href="https://rpubs.com/sigven/msi_classifier" target="_blank">here</a>.
+The MSI classifier was trained using __N = 1,066__ exome-sequenced TCGA tumor samples with known MSI status (i.e. assayed from mononucleotide markers), and obtained a [positive predictive value](https://en.wikipedia.org/wiki/Positive_and_negative_predictive_values#Positive_predictive_value) of 100% and a [negative predictive value](https://en.wikipedia.org/wiki/Positive_and_negative_predictive_values#Negative_predictive_value) of 98.4% on an independent test set of __N = 455 samples__. Details of the MSI classification approach can be found <a href="https://rpubs.com/sigven/msi_classifier_2025" target="_blank">here</a>.
 
 <br>
 
@@ -18,7 +18,7 @@ coding_variant_set <-
   dplyr::filter(.data$CODING_STATUS == "coding") |>
   dplyr::select(
     dplyr::any_of(
-      pcgrr::dt_display$snv_indel_tier3
+      pcgrr::table_display_cols$snv_indel
     )
   ) |>
  dplyr::arrange(
@@ -27,10 +27,10 @@ coding_variant_set <-
     dplyr::desc(.data$GLOBAL_ASSOC_RANK),
   )
 
-if(NROW(msi_content[['mmr_pol_variants']]) > 0 & 
-   NROW(coding_variant_set) > 0){
-  if("GENOMIC_CHANGE" %in% colnames(msi_content[['mmr_pol_variants']]) &
-     "GENOMIC_CHANGE" %in% colnames(coding_variant_set)){
+if (NROW(msi_content[['mmr_pol_variants']]) > 0 & 
+   NROW(coding_variant_set) > 0) {
+  if ("GENOMIC_CHANGE" %in% colnames(msi_content[['mmr_pol_variants']]) &
+     "GENOMIC_CHANGE" %in% colnames(coding_variant_set)) {
     msi_content[['mmr_pol_variants']] <- 
       msi_content[['mmr_pol_variants']] |>
       dplyr::select("GENOMIC_CHANGE") |>
@@ -68,8 +68,8 @@ bslib::page_fillable(
     ),
     bslib::value_box(
       title = "Coding indel fraction - somatic variants",
-      value = if(!is.null(
-        msi_content$msi_stats$fracIndels)){
+      value = if (!is.null(
+        msi_content$msi_stats$fracIndels)) {
           paste0(
           round(msi_content$msi_stats$fracIndels, 
                 digits = 2))
@@ -98,7 +98,7 @@ bslib::page_fillable(
     ),
     bslib::card_body(
       height = 60 + min(500, NROW(msi_content[['mmr_pol_variants']]) * 100),
-      if(NROW(msi_content[['mmr_pol_variants']]) > 0){
+      if (NROW(msi_content[['mmr_pol_variants']]) > 0) {
         DT::datatable(
           msi_content[['mmr_pol_variants']],
           extensions = "Responsive",

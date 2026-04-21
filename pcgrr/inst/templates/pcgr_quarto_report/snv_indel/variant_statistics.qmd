@@ -2,7 +2,7 @@
 #| eval: !expr as.logical(pcg_report$content$snv_indel$vstats$n > 0) == TRUE
 
 
-variant_stats <- pcgrr::get_variant_statistics(
+variant_stats <- pcgrr::stats_type_snv_indel(
   var_df = pcg_report$content$snv_indel$callset$variant_display,
   pct_other_limit = 3.5
 )
@@ -27,7 +27,7 @@ varstats_plots_plotly[['consequence']] <-
   )
 
 varstats_plots_plotly[['consequence_coding']] <- NULL
-if(NROW(variant_stats[['consequence_coding']]) > 0) {
+if (NROW(variant_stats[['consequence_coding']]) > 0) {
   
   varstats_plots_plotly[['consequence_coding']] <- 
     pcgrr::plotly_pie_chart(
@@ -112,7 +112,7 @@ bslib::page_fillable(
 #| eval: !expr as.logical(pcg_report$settings$conf$somatic_snv$allelic_support$tumor_af_tag == "_NA_") == FALSE & as.logical(any(is.na(pcg_report$content$snv_indel$callset$variant$VAF_TUMOR))) == FALSE
 
 bslib::card(
-  height = "330px",
+  height = "450px",
   bslib::card_header(
     class = "bg-dark",
     paste0(
