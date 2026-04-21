@@ -811,7 +811,7 @@ usethis::use_data(data_coltype_defs, overwrite = T)
 
 ####----Output TSVs ----####
 
-####----CNA-----#####
+###----CNA-----####
 tsv_cols <- list()
 tsv_cols[['cna']] <-
   c('SAMPLE_ID',
@@ -1007,55 +1007,10 @@ tsv_cols[['snv_indel_unfiltered']] <-
 usethis::use_data(tsv_cols, overwrite = T)
 ####----Data tables display columns ----####
 
-# CNA actionable
-dt_display <- list()
-# dt_display[['cna_gene_actionable']] <-
-#   c("SYMBOL",
-#     "GENENAME",
-#     "VARIANT_CLASS",
-#     "BIOMARKER_EVIDENCE",
-#     "EVENT_TYPE",
-#     "CN_TOTAL",
-#     "CYTOBAND",
-#     "ENSEMBL_GENE_ID",
-#     "CANCERGENE_EVIDENCE",
-#     "SAMPLE_ALTERATION",
-#     "ONCOGENE",
-#     "TUMOR_SUPPRESSOR",
-#     "TRANSCRIPT_OVERLAP",
-#     "TRANSCRIPT_OVERLAP_PERCENT",
-#     "TISSUE_ASSOC_RANK",
-#     "SEGMENT",
-#     "SEGMENT_LENGTH_MB",
-#     "CN_MAJOR",
-#     "CN_MINOR",
-#     "TARGETED_INHIBITORS_ALL",
-#     "GENOME_VERSION")
-
-# ----CNA evidence item
-# dt_display[['cna_eitem']] <-
-#   c("SAMPLE_ALTERATION",
-#     "CN_TOTAL",
-#     "BM_CANCER_TYPE",
-#     "BM_EVIDENCE_LEVEL",
-#     "BM_CONTEXT",
-#     "BM_MOLECULAR_PROFILE",
-#     "BM_REFERENCE",
-#     "BM_EVIDENCE_TYPE",
-#     "BM_CLINICAL_SIGNIFICANCE",
-#     "BM_THERAPEUTIC_CONTEXT",
-#     "BM_SOURCE_DB",
-#     "BM_RATING",
-#     "BM_EVIDENCE_ID",
-#     "BM_EVIDENCE_DESCRIPTION",
-#     "BM_EVIDENCE_DIRECTION",
-#     "BM_DISEASE_ONTOLOGY_ID",
-#     "BM_PRIMARY_SITE",
-#     "BM_RESOLUTION"
-#   )
+table_display_cols <- list()
 
 ####----CNA other oncogenic-----#####
-dt_display[['cna_other_oncogenic']] <-
+table_display_cols[['cna_other_oncogenic']] <-
   c("SYMBOL",
     "GENENAME",
     "VARIANT_CLASS",
@@ -1080,7 +1035,7 @@ dt_display[['cna_other_oncogenic']] <-
     "GENOME_VERSION")
 
 ####----SNV/Indel germline filtered-----#####
-dt_display[['snv_indel_germline_filtered']] <-
+table_display_cols[['snv_indel_germline_filtered']] <-
   c('GENOMIC_CHANGE',
     'VARIANT_CLASS',
     'EXCLUSION_CRITERIA',
@@ -1103,73 +1058,8 @@ dt_display[['snv_indel_germline_filtered']] <-
     'gnomADe_NFE_AF',
     'gnomADe_SAS_AF')
 
-#----SNV/Indel somatic actionable
-#' dt_display[['snv_indel_gene_actionable']] <-
-#'   c('SAMPLE_ALTERATION',
-#'     'GENENAME',
-#'     'VAF_TUMOR',
-#'     'BIOMARKER_EVIDENCE',
-#'     'PROTEIN_DOMAIN',
-#'     'CDS_CHANGE',
-#'     'BM_TOP_RESOLUTION',
-#'     'MUTATION_HOTSPOT',
-#'     'MUTATION_HOTSPOT_CANCERTYPE',
-#'     'TCGA_FREQUENCY',
-#'     'CONSEQUENCE',
-#'     'VARIANT_CLASS',
-#'     'SYMBOL',
-#'     'HGVSc',
-#'     'HGVSc_RefSeq',
-#'     'PREDICTED_EFFECT',
-#'     'SPLICE_EFFECT',
-#'     'LOSS_OF_FUNCTION',
-#'     'LOF_FILTER',
-#'     'ONCOGENICITY',
-#'     'ONCOGENICITY_CODE',
-#'     'ONCOGENICITY_DOC',
-#'     'ONCOGENICITY_SCORE',
-#'     #'VEP_ALL_CSQ',
-#'     'DBSNP_RSID',
-#'     'COSMIC_ID',
-#'     'CLINVAR',
-#'     'ENSEMBL_GENE_ID',
-#'     'ENSEMBL_TRANSCRIPT_ID',
-#'     'REFSEQ_TRANSCRIPT_ID',
-#'     'MANE_SELECT',
-#'     'CANCERGENE_EVIDENCE',
-#'     'TARGETED_INHIBITORS',
-#'     'TARGETED_INHIBITORS_ALL',
-#'     'CALL_CONFIDENCE',
-#'     'DP_TUMOR',
-#'     'DP_CONTROL',
-#'     'VAF_CONTROL',
-#'     'GENOMIC_CHANGE',
-#'     'GENOME_VERSION')
-#'
-#' ---SNV/Indel somatic evidence item-----
-#' dt_display[['snv_indel_eitem']] <-
-#'   c('SAMPLE_ALTERATION',
-#'     'BM_CANCER_TYPE',
-#'     'BM_EVIDENCE_LEVEL',
-#'     'BM_CONTEXT',
-#'     'BM_MOLECULAR_PROFILE',
-#'     'BM_REFERENCE',
-#'     'BM_EVIDENCE_DESCRIPTION',
-#'     'BM_CLINICAL_SIGNIFICANCE',
-#'     'BM_EVIDENCE_TYPE',
-#'     'BM_THERAPEUTIC_CONTEXT',
-#'     'BM_RATING',
-#'     'BM_EVIDENCE_DIRECTION',
-#'     'BM_SOURCE_DB',
-#'     'BM_EVIDENCE_ID',
-#'     'BM_DISEASE_ONTOLOGY_ID',
-#'     'BM_PRIMARY_SITE',
-#'     "BM_MAPPING_CONFIDENCE",
-#'     'BM_RESOLUTION',
-#'     'BM_MATCH')
-
 ####----SNV/Indel somatic tier 3-----#####
-dt_display[['snv_indel_tier3']] <-
+table_display_cols[['snv_indel']] <-
   c('SYMBOL',
     'ALTERATION',
     'GENENAME',
@@ -1215,51 +1105,7 @@ dt_display[['snv_indel_tier3']] <-
     'GENOMIC_CHANGE',
     'GENOME_VERSION')
 
-####----SNV/Indel somatic tier 4
-#' dt_display[['tier4']] <-
-#'   c('SYMBOL',
-#'     'ALTERATION',
-#'     'GENENAME',
-#'     'CONSEQUENCE',
-#'     'ONCOGENICITY',
-#'     'PROTEIN_DOMAIN',
-#'     'COSMIC_ID',
-#'     'PROTEIN_CHANGE',
-#'     'CDS_CHANGE',
-#'     'TCGA_FREQUENCY',
-#'     'HGVSc',
-#'     'HGVSc_RefSeq',
-#'     'PREDICTED_EFFECT',
-#'     'SPLICE_EFFECT',
-#'     'LOSS_OF_FUNCTION',
-#'     'LOF_FILTER',
-#'     'REGULATORY_ANNOTATION',
-#'     'ONCOGENICITY_CODE',
-#'     'ONCOGENICITY_SCORE',
-#'     'ONCOGENICITY_DOC',
-#'     #'VEP_ALL_CSQ',
-#'     'DBSNP_RSID',
-#'     'ENSEMBL_GENE_ID',
-#'     'ENSEMBL_TRANSCRIPT_ID',
-#'     'ENSEMBL_PROTEIN_ID',
-#'     'REFSEQ_TRANSCRIPT_ID',
-#'     'MANE_SELECT',
-#'     'CANCERGENE_EVIDENCE',
-#'     'CANCER_GENE_CENSUS',
-#'     'GLOBAL_ASSOC_RANK',
-#'     'TISSUE_ASSOC_RANK',
-#'     'CLINVAR',
-#'     'TARGETED_INHIBITORS',
-#'     'TARGETED_INHIBITORS_ALL',
-#'     'CALL_CONFIDENCE',
-#'     'DP_TUMOR',
-#'     'VAF_TUMOR',
-#'     'DP_CONTROL',
-#'     'VAF_CONTROL',
-#'     'GENOMIC_CHANGE',
-#'     'GENOME_VERSION')
-
-usethis::use_data(dt_display, overwrite = T)
+usethis::use_data(table_display_cols, overwrite = T)
 
 #---- variant_db_url ----#
 variant_db_url <-
@@ -1521,7 +1367,7 @@ rm(cancer_phenotypes_regex,
    color_palette,
    data_coltype_defs,
    bm_evidence,
-   dt_display,
+   table_display_cols,
    tsv_cols,
    c)
 
