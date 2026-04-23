@@ -117,7 +117,8 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
             'exclusive': int(arg_dict['oncokb_exclusive']),
             'data_version': None,
             'data_release_date': None,
-            'api_version': None
+            'api_version': None,
+            'run': 0
         }
         if conf_options['oncokb']['api_token'] is not None:
             oncokb_info = fetch_oncokb_info(conf_options['oncokb']['api_token'], logger)
