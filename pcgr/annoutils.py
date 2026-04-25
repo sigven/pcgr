@@ -247,6 +247,60 @@ def threeToOneAA(aa_change):
     return aa_change
 
 
+def _classify_mes(dl, mes_ref, stratum):
+    """
+    Classify the functional impact of a MaxEntScan delta-loss score for an
+    extended splice position, following the per-stratum calibration in MES_STRATA.
+
+    Returns one of: 'uninformative' | 'no_call' | 'supporting' | 'moderate' | 'strong'
+    Only 'strong' grants LOSS_OF_FUNCTION = True in the caller.
+    """
+    if mes_ref < stratum['ref_floor']:
+        return 'Uninformative'
+    if dl < stratum['dl_moderate']:
+        return 'No_Call'
+    dl_hc = stratum['dl_high_conf']
+    score_tier = 'Strong' if (dl_hc is not None and dl >= dl_hc) else 'Moderate'
+    ppv_ceiling = stratum['position_ppv_ceiling']
+    if ppv_ceiling == 'low':
+        return 'Supporting'
+    return score_tier  # 'medium' and 'high' are both uncapped
+
+
+def _apply_mes_stratum_lof(csq_record, side):
+    """
+    Look up the MES stratum for the variant's INTRON_POSITION, run classify_mes,
+    and store the result in MAXENTSCAN_STRATUM / MAXENTSCAN_EVIDENCE_TIER.
+    Sets LOSS_OF_FUNCTION = True only when classify_mes returns 'strong'.
+
+    side: 'donor' (positive INTRON_POSITION) or 'acceptor' (negative INTRON_POSITION).
+    Canonical ±1/±2 positions have no matching stratum and are skipped.
+    """
+    intron_pos = csq_record.get('INTRON_POSITION', 0)
+    if intron_pos == 0:
+        return
+
+    dl = csq_record.get('MAXENTSCAN_DL', pcgr_vars.NA_FLOAT)
+    if dl == pcgr_vars.NA_FLOAT:
+        return
+
+    mes_ref_raw = csq_record.get('MAXENTSCAN_REF', '.')
+    mes_ref = float(mes_ref_raw) if mes_ref_raw != '.' else 0.0
+
+    stratum = next(
+        (s for s in pcgr_vars.MES_STRATA
+         if s['side'] == side and s['pos_min'] <= intron_pos <= s['pos_max']),
+        None)
+    if stratum is None:
+        return
+
+    csq_record['MAXENTSCAN_STRATUM'] = stratum['stratum']
+    mes_call = _classify_mes(dl, mes_ref, stratum)
+    csq_record['MAXENTSCAN_EVIDENCE_TIER'] = mes_call
+    if mes_call == 'Strong':
+        csq_record['LOSS_OF_FUNCTION'] = True
+
+
 def assign_cds_exon_intron_annotations(csq_record, grantham_scores, logger):
     
     """
@@ -256,6 +310,7 @@ def assign_cds_exon_intron_annotations(csq_record, grantham_scores, logger):
     csq_record['CODING_STATUS'] = 'noncoding'
     csq_record['EXONIC_STATUS'] = 'nonexonic'
     csq_record['SPLICE_DONOR_RELEVANT'] = False
+    csq_record['SPLICE_CANONICAL_SITE'] = False
     csq_record['NULL_VARIANT'] = False
     csq_record['INTRON_POSITION'] = 0
     csq_record['EXON_POSITION'] = 0
@@ -270,17 +325,21 @@ def assign_cds_exon_intron_annotations(csq_record, grantham_scores, logger):
     csq_record['CDS_RELATIVE_POSITION'] = '.'
     csq_record['LOSS_OF_FUNCTION'] = False
     csq_record['LOF_FILTER'] = '.'
-    csq_record['MAXENTSCAN'] = '.'
     csq_record['PROTEIN_RELATIVE_POSITION'] = '.'
     csq_record['LAST_EXON'] = False
     csq_record['LAST_INTRON'] = False
     csq_record['AMINO_ACID_START'] = '.'
     csq_record['AMINO_ACID_END'] = '.'
     csq_record['CDS_DISTANCE'] = '.'
+    csq_record['MAXENTSCAN2'] = '.'
     csq_record['MAXENTSCAN_REF'] = '.'
     csq_record['MAXENTSCAN_ALT'] = '.'
     csq_record['MAXENTSCAN_DIFF'] = pcgr_vars.NA_INTEGER
     csq_record['MAXENTSCAN_PCT_CHANGE'] = pcgr_vars.NA_FLOAT
+    csq_record['MAXENTSCAN_DL'] = pcgr_vars.NA_FLOAT
+    csq_record['MAXENTSCAN_DG'] = pcgr_vars.NA_FLOAT
+    csq_record['MAXENTSCAN_STRATUM'] = '.'
+    csq_record['MAXENTSCAN_EVIDENCE_TIER'] = '.'
 
     splice_variant = False
     if re.search(pcgr_vars.CSQ_SPLICE_REGION_PATTERN, str(csq_record['Consequence'])) is not None:
@@ -298,69 +357,6 @@ def assign_cds_exon_intron_annotations(csq_record, grantham_scores, logger):
         csq_record['IMPACT'] != 'MODIFIER':
         csq_record['EXONIC_STATUS'] = 'exonic'
 
-    ## Variant loss-of-function status ('loss-of-function')
-    ## - frameshift, stop-gain variants + canonical splice site variants (splice donor/aceptor 2bp)
-    if re.search(pcgr_vars.CSQ_LOF_PATTERN, str(csq_record['Consequence'])) is not None:
-        csq_record['LOSS_OF_FUNCTION'] = True
-
-    ## Null variants - truncating frameshift and stop-gain variants only
-    if re.search(pcgr_vars.CSQ_NULL_PATTERN, str(csq_record['Consequence'])) is not None:
-        csq_record['NULL_VARIANT'] = True
-    
-    ## MaxEntScan splice site impact
-    if csq_record['MaxEntScan_diff'] is not None and \
-        csq_record['MaxEntScan_ref'] is not None and \
-            csq_record['MaxEntScan_alt'] is not None:
-        csq_record['MAXENTSCAN_PCT_CHANGE'] = 0
-        if float(csq_record['MaxEntScan_ref']) > 0:
-            if float(csq_record['MaxEntScan_diff']) < 0:          
-                csq_record['MAXENTSCAN_PCT_CHANGE'] = \
-                    min(round(abs(float(csq_record['MaxEntScan_diff'])) / 
-                        float(csq_record['MaxEntScan_ref']) * 100, 1), 100)
-            else:
-                csq_record['MAXENTSCAN_PCT_CHANGE'] = \
-                    min(round(float(csq_record['MaxEntScan_diff']) / 
-                        float(csq_record['MaxEntScan_ref']) * 100, 1), 100)
-                if csq_record['MAXENTSCAN_PCT_CHANGE'] > 0:
-                    csq_record['MAXENTSCAN_PCT_CHANGE'] = -float(csq_record['MAXENTSCAN_PCT_CHANGE'])
-      
-        csq_record['MAXENTSCAN'] = 'MES|' + str(csq_record['MaxEntScan_diff']) + '|' + \
-            str(csq_record['MaxEntScan_ref']) + '|' + str(csq_record['MaxEntScan_alt']) + \
-            '|' + str(csq_record['MAXENTSCAN_PCT_CHANGE']) #+ '|'
-        
-        for k in ['MaxEntScan_ref','MaxEntScan_alt','MaxEntScan_diff']:
-            csq_record[k.upper()] = csq_record[k]
-            del csq_record[k]
-    
-    if re.search(pcgr_vars.CSQ_SPLICE_DONOR_PATTERN, str(csq_record['Consequence'])) is not None:
-        if re.search(r'(\+3(A|G)>|\+4A>|\+5G>)', str(csq_record['HGVSc'])) is not None:
-            csq_record['SPLICE_DONOR_RELEVANT'] = True
-        if csq_record['MAXENTSCAN_DIFF'] != 0 and csq_record['MAXENTSCAN_DIFF'] != pcgr_vars.NA_INTEGER and \
-            csq_record['MAXENTSCAN_PCT_CHANGE'] != pcgr_vars.NA_FLOAT and \
-            csq_record['SPLICE_DONOR_RELEVANT'] is True and \
-            re.search('splice_region|splice_donor_(5th|variant)',str(csq_record['Consequence'])) is not None:
-            if abs(csq_record['MAXENTSCAN_PCT_CHANGE']) >= pcgr_vars.DONOR_DISRUPTION_MES_DROP_CUTOFF and \
-                float(csq_record['MAXENTSCAN_REF']) >= pcgr_vars.DONOR_REF_MIN_SCORE:
-                csq_record['LOSS_OF_FUNCTION'] = True
-            else:
-                if csq_record['LOSS_OF_FUNCTION'] is True and csq_record['SPLICE_DONOR_RELEVANT'] is True: 
-                    csq_record['LOSS_OF_FUNCTION'] = False
-                    csq_record['LOF_FILTER'] = "NON_DONOR_DISRUPTING"
-    
-    if re.search(pcgr_vars.CSQ_SPLICE_ACCEPTOR_PATTERN, str(csq_record['Consequence'])) is not None:
-        if csq_record['MAXENTSCAN_DIFF'] != 0 and csq_record['MAXENTSCAN_DIFF'] != pcgr_vars.NA_INTEGER and \
-            csq_record['MAXENTSCAN_PCT_CHANGE'] != pcgr_vars.NA_FLOAT and \
-            re.search('splice_polypyrimidine_tract_variant',str(csq_record['Consequence'])) is not None:
-            #re.search('splice_acceptor', str(csq_record['Consequence'])) is not None:
-            if abs(csq_record['MAXENTSCAN_PCT_CHANGE']) >= pcgr_vars.ACCEPTOR_DISRUPTION_MES_DROP_CUTOFF and \
-                float(csq_record['MAXENTSCAN_REF']) >= pcgr_vars.ACCEPTOR_REF_MIN_SCORE:
-                csq_record['LOSS_OF_FUNCTION'] = True
-            else:
-                if csq_record['LOSS_OF_FUNCTION'] is True and \
-                    re.search('splice_polypyrimidine_tract_variant',str(csq_record['Consequence'])) is not None:
-                    csq_record['LOSS_OF_FUNCTION'] = False
-                    csq_record['LOF_FILTER'] = "NON_ACCEPTOR_DISRUPTING"
-
     ## intron position
     ## Extract all intronic offset tokens ([+-]N) from HGVSc and keep the one
     ## with the smallest absolute value (i.e. closest to any exon boundary).
@@ -377,6 +373,72 @@ def assign_cds_exon_intron_annotations(csq_record, grantham_scores, logger):
                 pass
         if int_positions:
             csq_record['INTRON_POSITION'] = min(int_positions, key=abs)
+
+    ## Variant loss-of-function status ('loss-of-function')
+    ## - frameshift, stop-gain variants + canonical splice site variants (splice donor/acceptor +/-2bp)
+    if re.search(pcgr_vars.CSQ_LOF_PATTERN, str(csq_record['Consequence'])) is not None:
+        csq_record['LOSS_OF_FUNCTION'] = True
+        ## ensure only canonical splice site variants are considered loss-of-function
+        if re.search(r'splice_donor|splice_acceptor', str(csq_record['Consequence'])):
+            if (csq_record['INTRON_POSITION'] > 2 or csq_record['INTRON_POSITION'] < -2) and \
+                csq_record['INTRON_POSITION'] != 0:
+                csq_record['LOSS_OF_FUNCTION'] = False
+            else:
+                csq_record['SPLICE_CANONICAL_SITE'] = True
+            
+
+    ## Null variants - truncating frameshift and stop-gain variants only
+    if re.search(pcgr_vars.CSQ_NULL_PATTERN, str(csq_record['Consequence'])) is not None:
+        csq_record['NULL_VARIANT'] = True
+    
+    ## MaxEntScan splice site impact (beyond +/-2bp canonical splice sites)
+    if csq_record['MaxEntScan_diff'] is not None and \
+        csq_record['MaxEntScan_ref'] is not None and \
+            csq_record['MaxEntScan_alt'] is not None:
+        csq_record['MAXENTSCAN_PCT_CHANGE'] = 0
+        if float(csq_record['MaxEntScan_ref']) > 0:
+            if float(csq_record['MaxEntScan_diff']) < 0:          
+                csq_record['MAXENTSCAN_PCT_CHANGE'] = \
+                    min(round(abs(float(csq_record['MaxEntScan_diff'])) / 
+                        float(csq_record['MaxEntScan_ref']) * 100, 1), 100)
+            else:
+                csq_record['MAXENTSCAN_PCT_CHANGE'] = \
+                    min(round(float(csq_record['MaxEntScan_diff']) / 
+                        float(csq_record['MaxEntScan_ref']) * 100, 1), 100)
+                if csq_record['MAXENTSCAN_PCT_CHANGE'] > 0:
+                    csq_record['MAXENTSCAN_PCT_CHANGE'] = -float(csq_record['MAXENTSCAN_PCT_CHANGE'])
+      
+        mes_ref = float(csq_record['MaxEntScan_ref'])
+        mes_alt = float(csq_record['MaxEntScan_alt'])
+        csq_record['MAXENTSCAN_DL'] = round(max(0.0, mes_ref - mes_alt), 3)
+        csq_record['MAXENTSCAN_DG'] = round(max(0.0, mes_alt - mes_ref), 3)
+
+        csq_record['MAXENTSCAN2'] = 'MaxEntScan' + '|' + \
+            str(csq_record['MaxEntScan_ref']) + '|' + str(csq_record['MaxEntScan_alt']) + \
+            '|' + str(csq_record['MAXENTSCAN_DL']) + '|' + str(csq_record['MAXENTSCAN_DG']) + \
+            '|' + str(csq_record['MAXENTSCAN_PCT_CHANGE'])
+        
+        for k in ['MaxEntScan_ref','MaxEntScan_alt','MaxEntScan_diff']:
+            csq_record[k.upper()] = csq_record[k]
+            del csq_record[k]
+    
+    if re.search(pcgr_vars.CSQ_SPLICE_DONOR_PATTERN, str(csq_record['Consequence'])) is not None:
+        if re.search(r'(\+3(A|G)>|\+4A>|\+5G>)', str(csq_record['HGVSc'])) is not None:
+            csq_record['SPLICE_DONOR_RELEVANT'] = True
+        if csq_record['INTRON_POSITION'] is not None and csq_record['INTRON_POSITION'] > 0 and csq_record['INTRON_POSITION'] <= 6:
+            _apply_mes_stratum_lof(csq_record, 'donor')
+
+    if re.search(pcgr_vars.CSQ_SPLICE_ACCEPTOR_PATTERN, str(csq_record['Consequence'])) is not None:
+        if csq_record['INTRON_POSITION'] is not None and csq_record['INTRON_POSITION'] < 0 and csq_record['INTRON_POSITION'] >= -20:
+            _apply_mes_stratum_lof(csq_record, 'acceptor')
+    
+    if csq_record['MAXENTSCAN2'] is not None and csq_record['MAXENTSCAN2'] != '.' and csq_record['INTRON_POSITION'] != 0:
+        csq_record['MAXENTSCAN'] = 'MaxEntScan|' + \
+            csq_record['MAXENTSCAN_STRATUM'] + '|' + csq_record['MAXENTSCAN_EVIDENCE_TIER']
+        if csq_record['MAXENTSCAN_EVIDENCE_TIER'] == '.' and csq_record['LOSS_OF_FUNCTION'] is True and \
+            csq_record['SPLICE_CANONICAL_SITE'] is True:
+            csq_record['MAXENTSCAN'] = 'MaxEntScan|Canonical_Site|.'
+       
 
     ## exon/intron junction span
     ## True when a del/delins/dup/ins variant has one coordinate in an exon

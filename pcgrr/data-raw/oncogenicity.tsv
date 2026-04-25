@@ -1,6 +1,10 @@
 code	score	category	pole	description	resource
 ONCG_OVS1	8	funcvar	P	Null variant - predicted as LoF - in bona fide tumor suppressor gene	VEP;CGC;CancerMine
+ONCG_OVS1_A	8	funcvar	P	Null variant - annotated by OncoKB as Loss-of-function - in bona fide tumor suppressor gene	OncoKB
+ONCG_OVS1_B	4	funcvar	P	Null variant - annotated by OncoKB as Likely Loss-of-function - in bona fide tumor suppressor gene	OncoKB
 ONCG_OS1	4	funcvar	P	Same amino acid change as previously established oncogenic variant - regardless of nucleotide change	ClinVar
+ONCG_OS2_A	4	funcvar	P	Well established in vitro/in vivo functional studies (OncoKB-curated) show oncogenic effect of variant	OncoKB
+ONCG_OS2_B	2	funcvar	P	Well established in vitro/in vivo functional studies (OncoKB-curated) show likely oncogenic effect of variant	OncoKB
 ONCG_OS3	4	funcvar	P	Located in a mutation hotspot with >= 50 samples with variant at AA position, >= 10 samples with same AA change	cancerhotspots.org
 ONCG_OM1	2	funcvar	P	Presumably critical site of functional domain	CIViC
 ONCG_OM2	2	funcvar	P	Protein length changes from in-frame dels/ins in known oncogene/tumor suppressor genes or stop-loss variants in a tumor suppressor gene	VEP;CGC;CancerMine
@@ -11,5 +15,7 @@ ONCG_OP3	1	funcvar	P	Located in a mutation hotspot with < 10 samples with the sa
 ONCG_OP4	1	clinpop	P	Absent from controls (gnomAD) / very low MAF (any five major gnomAD subpopulations)	gnomAD
 ONCG_SBVS1	-8	clinpop	B	Very high MAF (any five major gnomAD subpopulations)	gnomAD
 ONCG_SBS1	-4	clinpop	B	High MAF (any five major gnomAD subpopulations)	gnomAD
+ONCG_SBS2_A	-4	funcvar	B	Well established in vitro/in vivo functional studies (OncoKB-curated) show neutral effect of variant	OncoKB
+ONCG_SBS2_B	-2	funcvar	B	Well established in vitro/in vivo functional studies (OncoKB-curated) show likely neutral effect of variant	OncoKB
 ONCG_SBP1	-1	funccomp	B	Multiple lines of computational evidence support a benign variant effect on the gene or gene product	dbNSFP
 ONCG_SBP2	-1	funcvar	B	Silent and intronic changes outside of the consensus splice site	VEP

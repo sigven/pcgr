@@ -238,12 +238,33 @@ CSQ_SPLICE_ACCEPTOR_PATTERN = \
 CSQ_LOF_PATTERN = r"(stop_gained|frameshift|splice_acceptor_variant|splice_donor_variant|start_lost)"
 
 
-## MaxEntScan thresholds (relaxed) for splice site disruption (donor/acceptor) - 
-## percent drop(gain)
-DONOR_REF_MIN_SCORE = 4
-ACCEPTOR_REF_MIN_SCORE = 5
-DONOR_DISRUPTION_MES_DROP_CUTOFF = -60
-ACCEPTOR_DISRUPTION_MES_DROP_CUTOFF = -60
+## Per-stratum MaxEntScan (MES) thresholds for extended splice site positions.
+##
+## Fields:
+##   stratum              - identifier used in MAXENTSCAN_STRATUM output column
+##   side                 - 'donor' (positive intron offset) or 'acceptor' (negative offset)
+##   pos_min/max          - inclusive range of INTRON_POSITION values for this stratum
+##   dl_moderate          - MAXENTSCAN_DL threshold (~5% FPR)
+##   dl_high_conf         - MAXENTSCAN_DL threshold (~1% FPR); None if not applicable
+##   ref_floor            - minimum reference MES score required (credibility filter)
+##   position_ppv_ceiling - 'high' | 'medium' | 'low'
+##
+## position_ppv_ceiling semantics:
+##   high   - uncapped; classify_mes can return 'Moderate' or 'Strong'
+##   medium - uncapped; classify_mes can return 'Moderate' or 'Strong'
+##   low    - PPT positions; capped at 'Supporting' regardless of DL score
+##
+## Only a classify_mes result of 'Strong' grants LOSS_OF_FUNCTION = True.
+MES_STRATA = [
+    {"stratum": "Acceptor_PPT_Distant",  "side": "acceptor", "pos_min": -20, "pos_max":  -9, "dl_moderate": 1.6, "dl_high_conf": 2.3,  "ref_floor": 0, "position_ppv_ceiling": "low"},
+    {"stratum": "Acceptor_PPT_Close", "side": "acceptor", "pos_min":  -8, "pos_max":  -4, "dl_moderate": 2.0, "dl_high_conf": 3.1,  "ref_floor": 0, "position_ppv_ceiling": "low"},
+    {"stratum": "Acceptor_-3",       "side": "acceptor", "pos_min":  -3, "pos_max":  -3, "dl_moderate": 3.5, "dl_high_conf": None, "ref_floor": 0, "position_ppv_ceiling": "high"},
+    {"stratum": "Donor_+3",          "side": "donor",    "pos_min":   3, "pos_max":   3, "dl_moderate": 3.9, "dl_high_conf": 5.7,  "ref_floor": 0, "position_ppv_ceiling": "high"},
+    {"stratum": "Donor_+4",          "side": "donor",    "pos_min":   4, "pos_max":   4, "dl_moderate": 3.3, "dl_high_conf": 5.4,  "ref_floor": 4, "position_ppv_ceiling": "high"},
+    {"stratum": "Donor_+5",          "side": "donor",    "pos_min":   5, "pos_max":   5, "dl_moderate": 4.7, "dl_high_conf": 6.7,  "ref_floor": 0, "position_ppv_ceiling": "high"},
+    {"stratum": "Donor_+6",          "side": "donor",    "pos_min":   6, "pos_max":   6, "dl_moderate": 2.0, "dl_high_conf": 3.8,  "ref_floor": 4, "position_ppv_ceiling": "medium"},
+]
+
 
 ## TCGA tumor cohorts
 DISEASE_COHORTS = ['ACC','BLCA','BRCA','CESC',

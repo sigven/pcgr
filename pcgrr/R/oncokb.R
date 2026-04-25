@@ -239,7 +239,10 @@ extract_therapeutic_evidence <-
           BM_MAPPING_CONFIDENCE = "high",
           BM_EVIDENCE_TYPE = "Predictive",
           BM_EVIDENCE_DIRECTION = "Supports",
-          BM_MOLECULAR_PROFILE = extract_value(tx$alterations),
+          BM_MOLECULAR_PROFILE = ifelse(
+            is.null(tx$alterations) || length(tx$alterations) == 0,
+            NA_character_,
+            paste(tx$alterations, collapse = ", ")),
           BM_MOLECULAR_PROFILE_TYPE = "Single",
           BM_RATING = 5,
           BM_CLINICAL_SIGNIFICANCE = "Sensitivity/Response",

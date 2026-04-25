@@ -188,17 +188,17 @@ def cli():
                                     "ploidy ('relative'), or a combination of both ('combined') "
                                     "(default: %(default)s)"))
     optional_cna.add_argument("--cna_amp_threshold_absolute", type=int, default=5, dest="cna_amp_threshold_absolute",
-                              help = "Absolute total copy number threshold for segments considered as amplifications (default: %(default)s)")
+                              help = "Absolute total copy number threshold for amplification calls (default: %(default)s)")
     optional_cna.add_argument("--cna_amp_threshold_relative", type=float, default=2.5, dest="cna_amp_threshold_relative",
-                              help = "Relative fold-change over tumor ploidy for segments considered as amplifications (default: %(default)s)")
+                              help = "Fold-change over tumor ploidy threshold for amplification calls (default: %(default)s)")
     optional_cna.add_argument("--cna_gain_threshold_absolute", type=int, default=3, dest="cna_gain_threshold_absolute",
-                              help = "Absolute total copy number threshold for segments considered as gains (default: %(default)s)")
+                              help = "Absolute total copy number threshold for gain calls (default: %(default)s)")
     optional_cna.add_argument("--cna_gain_threshold_relative", type=float, default=1.5, dest="cna_gain_threshold_relative",
-                              help = "Relative fold-change over tumor ploidy for segments considered as gains (default: %(default)s)")
+                              help = "Fold-change over tumor ploidy threshold for gain calls (default: %(default)s)")
     optional_cna.add_argument("--cna_del_threshold_absolute", type=int, default=1, dest="cna_del_threshold_absolute",
-                              help = "Absolute total copy number at or below which (but above zero) a segment is considered a heterozygous deletion (default: %(default)s)")
+                              help = "Absolute total copy number threshold for heterozygous deletion calls (default: %(default)s)")
     optional_cna.add_argument("--cna_del_threshold_relative", type=float, default=0.5, dest="cna_del_threshold_relative",
-                              help = "Relative fold-change below tumor ploidy at or below which a segment is considered a heterozygous deletion (default: %(default)s)")
+                              help = "Fold-change below tumor ploidy threshold for heterozygous deletion calls (default: %(default)s)")
     optional_cna.add_argument("--cna_transcript_overlap_pct", type = float, default = 50, dest="cna_transcript_overlap_pct",
                               help = "Mean percent overlap between copy number segment and gene transcripts for reporting of gains/losses in tumor suppressor genes/oncogenes, (default: %(default)s)")
 

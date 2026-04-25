@@ -134,6 +134,11 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
       "gnomADe_AFR_AF",
       "gnomADe_AMR_AF",
       "gnomADe_SAS_AF",
+      "gnomADg_EAS_AF",
+      "gnomADg_NFE_AF",
+      "gnomADg_AFR_AF",
+      "gnomADg_AMR_AF",
+      "gnomADg_SAS_AF",
       "DBNSFP_SIFT",
       "DBNSFP_PROVEAN",
       "DBNSFP_META_RNN",
@@ -201,7 +206,7 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
                 'SPLICE_SITE_ADA']:
       col = 'DBNSFP_' + str(algo)
       if col in variant_data.keys():
-         if variant_data[col] != '.':
+         if variant_data[col] is not None and variant_data[col] != '.':
             variant_data['N_INSILICO_CALLED'] += 1
          if variant_data[col] == 'D' or variant_data[col] == 'PD':
             variant_data['N_INSILICO_DAMAGING'] += 1
@@ -274,8 +279,10 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
 
    if ttype in hotspot_mutated_samples['aa_variant'].keys() and \
       ttype in hotspot_mutated_samples['aa_site'].keys():
+      ## OS3 is not applicable if OS1 applies (Horak et al. SOP)
       if hotspot_mutated_samples['aa_variant'][ttype] >= 10 and \
-         hotspot_mutated_samples['aa_site'][ttype] >= 50:
+         hotspot_mutated_samples['aa_site'][ttype] >= 50 and \
+         variant_data['ONCG_OS1'] is False:
             variant_data['ONCG_OS3'] = True
       if hotspot_mutated_samples['aa_variant'][ttype] >= 10 and \
          hotspot_mutated_samples['aa_site'][ttype] < 50:
@@ -331,36 +338,31 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
 
    all_gnomad_tags = pcgr_vars.GNOMAD_MAIN_EXOME_AF_TAGS + pcgr_vars.GNOMAD_MAIN_GENOME_AF_TAGS  
 
-   ## check if variant has MAF > 0.01 (SBVS1) or > 0.05 in any of five major gnomAD subpopulations (exome or genome set)
+   ## check if variant has MAF > 0.05 (SBVS1) or > 0.01 (SBS1) in any five major gnomAD subpopulations.
+   ## SBVS1 and SBS1 are mutually exclusive: SBVS1 supersedes SBS1 whenever it fires.
    for pop in all_gnomad_tags:
       if pop not in variant_data.keys():
          continue
       if variant_data[pop] is not None:
          if float(variant_data[pop]) >= float(pcgr_vars.ONCOGENICITY['gnomAD_very_common_AF']):
             variant_data["ONCG_SBVS1"] = True
-         if float(variant_data[pop]) >= float(pcgr_vars.ONCOGENICITY['gnomAD_common_AF']) and variant_data["ONCG_SBVS1"] is False:
+            variant_data["ONCG_SBS1"] = False  # clear any SBS1 set by an earlier population
+         elif float(variant_data[pop]) >= float(pcgr_vars.ONCOGENICITY['gnomAD_common_AF']) and \
+              variant_data["ONCG_SBVS1"] is False:
             variant_data["ONCG_SBS1"] = True
    
-   gnomad_tags = {}
-   approx_zero_pop_freq = {}
-      
-   for assay in ['exome', 'genome']:
-      gnomad_tags[assay] = pcgr_vars.GNOMAD_MAIN_EXOME_AF_TAGS if assay == 'exome' else pcgr_vars.GNOMAD_MAIN_GENOME_AF_TAGS
-      approx_zero_pop_freq[assay] = 0
-         
-      for pop in gnomad_tags[assay]:
+   ## OP4: absent from controls — assume True, revoke if any gnomAD population (exome or genome)
+   ## has AF above the extremely-rare threshold. Missing populations (None) are treated as absent.
+   variant_data["ONCG_OP4"] = True
+   for assay_tags in [pcgr_vars.GNOMAD_MAIN_EXOME_AF_TAGS, pcgr_vars.GNOMAD_MAIN_GENOME_AF_TAGS]:
+      for pop in assay_tags:
          if pop not in variant_data.keys():
             continue
-         ## no AF recorded in gnomAD for this population
          if variant_data[pop] is None:
-            approx_zero_pop_freq[assay] = approx_zero_pop_freq[assay] + 1
-         else:
-            ## Extremely low AF for this population
-            if float(variant_data[pop]) < float(pcgr_vars.ONCOGENICITY['gnomAD_extremely_rare_AF']):
-               approx_zero_pop_freq[assay] = approx_zero_pop_freq[assay] + 1
-      ## check if variant is missing or with AF approximately zero in all five major gnomAD subpopulations (exome or genome set)
-      if approx_zero_pop_freq[assay] == 5:
-         variant_data["ONCG_OP4"] = True
+            continue
+         if float(variant_data[pop]) > float(pcgr_vars.ONCOGENICITY['gnomAD_extremely_rare_AF']):
+            variant_data["ONCG_OP4"] = False
+     
    
    ## check if variant is a loss-of-function variant in a tumor suppressor gene (Cancer Gene Census/CancerMine)
    if "TSG" in variant_data.keys() and \
@@ -394,11 +396,18 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
             variant_data['ONCG_SBP2'] = True
    
    if "KNOWN_ONCOGENIC_SITE" in variant_data.keys():
-      if variant_data['KNOWN_ONCOGENIC_SITE'] is not None:         
+      if variant_data['KNOWN_ONCOGENIC_SITE'] is not None:
          if variant_data['ONCG_OS1'] is False and \
             variant_data['ONCG_OS3'] is False and \
                variant_data['ONCG_OM1'] is False:
             variant_data['ONCG_OM3'] = True
+
+   ## OM4 and OP3 are not applicable if OM1 or OM3 applies (Horak et al. SOP).
+   ## OM1/OM3 are evaluated after the hotspot block so the exclusion is enforced
+   ## retroactively here, once all criteria have been assigned.
+   if variant_data['ONCG_OM1'] is True or variant_data['ONCG_OM3'] is True:
+      variant_data['ONCG_OM4'] = False
+      variant_data['ONCG_OP3'] = False
 
    variant_data['ONCOGENICITY'] = "VUS"
    variant_data["ONCOGENICITY_DOC"] = "."
@@ -626,13 +635,18 @@ def refine_oncogenicity_with_oncokb(
    Three groups of OKB-derived criteria are injected where not already captured
    by the primary VICC/ClinGen classification:
 
-   Oncogenic evidence (positive score) — from ONCOGENICITY_OKB:
-     ONCG_OS2_A  (+4) — "Oncogenic"        (strong positive)
-     ONCG_OS2_B  (+2) — "Likely Oncogenic" (moderate positive)
-
    LoF evidence in TSGs (positive score) — from MUTATION_EFFECT_OKB:
      ONCG_OVS1_A (+8) — "Loss-of-function"        in TSG (very strong; only if ONCG_OVS1 not set)
      ONCG_OVS1_B (+4) — "Likely Loss-of-function" in TSG (strong;      only if ONCG_OVS1 not set)
+
+   Oncogenic evidence (positive score) — from ONCOGENICITY_OKB:
+     ONCG_OS2_A  (+4) — "Oncogenic"        (strong positive)
+     ONCG_OS2_B  (+2) — "Likely Oncogenic" (moderate positive)
+     NOTE: OS2_A/B are mutually exclusive with OVS1_A/B. When OncoKB annotates a
+     TSG variant as both LOF and Oncogenic, the "Oncogenic" call is derived from
+     the same LOF-in-TSG evidence — applying both would double-count. OVS1_A/B
+     takes priority; OS2_A/B only fires when the oncogenicity signal is independent
+     (e.g. non-TSG context, or gain-of-function / dominant-negative mechanism).
 
    Benign / neutral evidence (negative score) — from ONCOGENICITY_OKB:
      ONCG_SBS2_A  (−4) — "Neutral"        (strong benign)
@@ -678,22 +692,51 @@ def refine_oncogenicity_with_oncokb(
       new_codes = []
       score_delta = 0.0
 
-      # --- Oncogenic evidence (ONCOGENICITY_OKB) ---
-      # OS2_A: "Oncogenic" — strong. Skip if OS1 or either OS2 already present.
-      if oncogenicity_okb == 'Oncogenic' and \
-         'ONCG_OS1'   not in active_codes and \
-         'ONCG_OS2_A' not in active_codes and \
-         'ONCG_OS2_B' not in active_codes:
-         new_codes.append('ONCG_OS2_A')
-         score_delta += OKB_ONCOGENICITY_CRITERIA['ONCG_OS2_A']['score']
+      # --- LoF evidence in TSGs (MUTATION_EFFECT_OKB) — evaluated first ---
+      # OVS1 is higher-specificity than OS2: for a TSG with an OKB-curated LOF effect,
+      # the "Oncogenic" oncogenicity call is derived from the same underlying evidence
+      # (LOF in TSG), so applying both OS2 and OVS1 from OncoKB would double-count.
+      # OVS1_A/B therefore takes priority and blocks OS2_A/B for the same variant.
+      # Only applied when PCGR's internal OVS1 was not already set.
+      ovs1_from_okb = False
+      if is_tsg and 'ONCG_OVS1' not in active_codes and \
+         'ONCG_OVS1_A' not in active_codes and \
+         'ONCG_OVS1_B' not in active_codes:
 
-      # OS2_B: "Likely Oncogenic" — moderate. Skipped if stronger evidence already present.
-      elif oncogenicity_okb == 'Likely Oncogenic' and \
-           'ONCG_OS1'   not in active_codes and \
-           'ONCG_OS2_A' not in active_codes and \
-           'ONCG_OS2_B' not in active_codes:
-         new_codes.append('ONCG_OS2_B')
-         score_delta += OKB_ONCOGENICITY_CRITERIA['ONCG_OS2_B']['score']
+         # OVS1_A: "Loss-of-function" — very strong (OVS1-equivalent).
+         if mutation_effect_okb == 'Loss-of-function':
+            new_codes.append('ONCG_OVS1_A')
+            score_delta += OKB_ONCOGENICITY_CRITERIA['ONCG_OVS1_A']['score']
+            ovs1_from_okb = True
+
+         # OVS1_B: "Likely Loss-of-function" — strong (OS-equivalent).
+         elif mutation_effect_okb == 'Likely Loss-of-function':
+            new_codes.append('ONCG_OVS1_B')
+            score_delta += OKB_ONCOGENICITY_CRITERIA['ONCG_OVS1_B']['score']
+            ovs1_from_okb = True
+
+      # --- Oncogenic evidence (ONCOGENICITY_OKB) ---
+      # Skipped when OVS1_A/B was just applied above: in that case, OncoKB's "Oncogenic"
+      # classification is derived from the same LOF-in-TSG evidence and adds no
+      # independent signal. OS2 is only independent when the oncogenicity call
+      # reflects a non-LOF mechanism (e.g. gain-of-function, dominant-negative)
+      # or when the gene is not a TSG.
+      if not ovs1_from_okb:
+         # OS2_A: "Oncogenic" — strong. Skip if OS1 or either OS2 already present.
+         if oncogenicity_okb == 'Oncogenic' and \
+            'ONCG_OS1'   not in active_codes and \
+            'ONCG_OS2_A' not in active_codes and \
+            'ONCG_OS2_B' not in active_codes:
+            new_codes.append('ONCG_OS2_A')
+            score_delta += OKB_ONCOGENICITY_CRITERIA['ONCG_OS2_A']['score']
+
+         # OS2_B: "Likely Oncogenic" — moderate. Skipped if stronger evidence already present.
+         elif oncogenicity_okb == 'Likely Oncogenic' and \
+              'ONCG_OS1'   not in active_codes and \
+              'ONCG_OS2_A' not in active_codes and \
+              'ONCG_OS2_B' not in active_codes:
+            new_codes.append('ONCG_OS2_B')
+            score_delta += OKB_ONCOGENICITY_CRITERIA['ONCG_OS2_B']['score']
 
       # --- Benign / neutral evidence (ONCOGENICITY_OKB) ---
       # SBS2_A: "Neutral" — strong benign.
@@ -709,24 +752,6 @@ def refine_oncogenicity_with_oncokb(
            'ONCG_SBS2_B' not in active_codes:
          new_codes.append('ONCG_SBS2_B')
          score_delta += OKB_ONCOGENICITY_CRITERIA['ONCG_SBS2_B']['score']
-
-      # --- LoF evidence in TSGs (MUTATION_EFFECT_OKB) ---
-      # Only applied when the gene is a TSG and PCGR's internal OVS1 was not set,
-      # covering cases where the internal LoF predictor missed a functionally
-      # characterised variant that OncoKB has curated.
-      if is_tsg and 'ONCG_OVS1' not in active_codes and \
-         'ONCG_OVS1_A' not in active_codes and \
-         'ONCG_OVS1_B' not in active_codes:
-
-         # OVS1_A: "Loss-of-function" — very strong (OVS1-equivalent).
-         if mutation_effect_okb == 'Loss-of-function':
-            new_codes.append('ONCG_OVS1_A')
-            score_delta += OKB_ONCOGENICITY_CRITERIA['ONCG_OVS1_A']['score']
-
-         # OVS1_B: "Likely Loss-of-function" — strong (OS-equivalent).
-         elif mutation_effect_okb == 'Likely Loss-of-function':
-            new_codes.append('ONCG_OVS1_B')
-            score_delta += OKB_ONCOGENICITY_CRITERIA['ONCG_OVS1_B']['score']
 
       if not new_codes:
          continue
