@@ -202,7 +202,7 @@ load_somatic_snv_indel <- function(
     fname = NA,
     ref_data = NULL,
     settings = NULL,
-    simulate_vaf_dp = FALSE) {
+    simulate_vaf_dp = TRUE) {
 
   pcgrr::log4r_info("------")
   pcgrr::log4r_info(paste0(

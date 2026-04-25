@@ -395,10 +395,10 @@ usethis::use_data(
 
 
 
-####----- Data type definitions-----####
+####-----::Data type definitions::-----####
 data_coltype_defs <- list()
 
-####----RNA fusion columns ----####
+####----RNA fusions ----####
 data_coltype_defs[['rna_fusion_raw']] <- readr::cols_only(
   SAMPLE_ID = readr::col_character(),
   VAR_ID = readr::col_character(),
@@ -415,6 +415,7 @@ data_coltype_defs[['rna_fusion_raw']] <- readr::cols_only(
 )
 
 
+####---- CNA segments----#####
 data_coltype_defs[['cna_somatic_segment_raw']] <- readr::cols_only(
   CHROM = readr::col_character(),
   SEGMENT_START = readr::col_double(),
@@ -422,7 +423,7 @@ data_coltype_defs[['cna_somatic_segment_raw']] <- readr::cols_only(
   SEGMENT_NAME = readr::col_character()
 )
 
-####----CNA somatic gene-level columns ----####
+####----CNA genes ----####
 data_coltype_defs[['cna_somatic_gene_raw']] <- readr::cols_only(
   CHROM = readr::col_character(),
   SEGMENT_START = readr::col_double(),
@@ -467,7 +468,7 @@ data_coltype_defs[['cna_somatic_gene_raw']] <- readr::cols_only(
   #TPM = readr::col_number(),
   #TPM_GENE = readr::col_number())
 
-####----SNV/Indel somatic columns ----####
+####----SNV/Indel ----####
 data_coltype_defs[['snv_indel_somatic_raw']] <- readr::cols_only(
   CHROM = readr::col_character(),
   POS = readr::col_double(),
@@ -488,8 +489,11 @@ data_coltype_defs[['snv_indel_somatic_raw']] <- readr::cols_only(
   LOSS_OF_FUNCTION = readr::col_logical(),
   LOF_FILTER = readr::col_character(),
   MAXENTSCAN = readr::col_character(),
+  MAXENTSCAN2 = readr::col_character(),
   MAXENTSCAN_REF = readr::col_number(),
   MAXENTSCAN_ALT = readr::col_number(),
+  MAXENTSCAN_DG = readr::col_number(), #delta gain
+  MAXENTSCAN_DL = readr::col_number(), #delta loss
   MAXENTSCAN_DIFF = readr::col_number(),
   MAXENTSCAN_PCT_CHANGE = readr::col_number(),
   NMD = readr::col_character(),
@@ -604,7 +608,7 @@ data_coltype_defs[['snv_indel_somatic_raw']] <- readr::cols_only(
   GENOME_VERSION = readr::col_character()
 )
 
-####----SNV/Indel germline columns ----####
+####----SNV/Indel germline ----####
 data_coltype_defs[['snv_indel_germline_raw']] <- readr::cols_only(
   CHROM = readr::col_character(),
   POS = readr::col_double(),
@@ -622,9 +626,11 @@ data_coltype_defs[['snv_indel_germline_raw']] <- readr::cols_only(
   LOSS_OF_FUNCTION = readr::col_logical(),
   LOF_FILTER = readr::col_character(),
   MAXENTSCAN = readr::col_character(),
-  MAXENTSCAN = readr::col_character(),
+  MAXENTSCAN2 = readr::col_character(),
   MAXENTSCAN_REF = readr::col_number(),
   MAXENTSCAN_ALT = readr::col_number(),
+  MAXENTSCAN_DG = readr::col_number(), #delta gain
+  MAXENTSCAN_DL = readr::col_number(), #delta loss
   MAXENTSCAN_DIFF = readr::col_number(),
   MAXENTSCAN_PCT_CHANGE = readr::col_number(),
   NMD = readr::col_character(),
@@ -763,7 +769,7 @@ data_coltype_defs[['snv_indel_germline_raw']] <- readr::cols_only(
   GENOME_VERSION = readr::col_character()
 )
 
-####----SNV/Indel germline CPSR columns ----####
+####----SNV/Indel - CPSR ----####
 data_coltype_defs[['snv_indel_germline_cpsr']] <- readr::cols_only(
   GENOMIC_CHANGE = readr::col_character(),
   GENOTYPE = readr::col_character(),
@@ -809,7 +815,7 @@ data_coltype_defs[['snv_indel_germline_cpsr']] <- readr::cols_only(
 
 usethis::use_data(data_coltype_defs, overwrite = T)
 
-####----Output TSVs ----####
+####----::Output TSVs:: ----####
 
 ###----CNA-----####
 tsv_cols <- list()
@@ -884,6 +890,7 @@ tsv_cols[['snv_indel']] <-
     'ONCOGENICITY_CODE',
     'ONCOGENICITY_SCORE',
     "MUTATION_EFFECT_OKB",
+    "MUTATION_EFFECT_DESCRIPTION_OKB",
     "ONCOGENICITY_OKB",
     'HGVSc',
     'HGVSc_RefSeq',
@@ -1005,11 +1012,11 @@ tsv_cols[['snv_indel_unfiltered']] <-
     'CALL_CONFIDENCE'
   )
 usethis::use_data(tsv_cols, overwrite = T)
-####----Data tables display columns ----####
+####----::Data tables display columns:: ----####
 
 table_display_cols <- list()
 
-####----CNA other oncogenic-----#####
+####----CNA -----#####
 table_display_cols[['cna_other_oncogenic']] <-
   c("SYMBOL",
     "GENENAME",
@@ -1034,7 +1041,7 @@ table_display_cols[['cna_other_oncogenic']] <-
     "TARGETED_INHIBITORS_ALL",
     "GENOME_VERSION")
 
-####----SNV/Indel germline filtered-----#####
+####----SNV/Indel - germline filtered-----#####
 table_display_cols[['snv_indel_germline_filtered']] <-
   c('GENOMIC_CHANGE',
     'VARIANT_CLASS',
@@ -1058,7 +1065,7 @@ table_display_cols[['snv_indel_germline_filtered']] <-
     'gnomADe_NFE_AF',
     'gnomADe_SAS_AF')
 
-####----SNV/Indel somatic tier 3-----#####
+####----SNV/Indel-----#####
 table_display_cols[['snv_indel']] <-
   c('SYMBOL',
     'ALTERATION',
@@ -1102,6 +1109,8 @@ table_display_cols[['snv_indel']] <-
     'VAF_TUMOR',
     'DP_CONTROL',
     'VAF_CONTROL',
+    'gnomADg_AF',
+    'gnomADe_AF',
     'GENOMIC_CHANGE',
     'GENOME_VERSION')
 

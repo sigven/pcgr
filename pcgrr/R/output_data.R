@@ -29,7 +29,18 @@ get_excel_sheets <- function(report = NULL) {
   callsets[['cna']] <- report$content$cna$callset
   callsets[['fusion']] <- report$content$fusion$callset
 
-  sample_alteration <- list()
+  .empty_alt <- data.frame(
+    VAR_ID = character(),
+    ENTREZGENE = integer(),
+    VARIANT_CLASS = character(),
+    SAMPLE_ALTERATION = character(),
+    stringsAsFactors = FALSE)
+
+  sample_alteration <- list(
+    snv_indel = .empty_alt,
+    cna       = .empty_alt,
+    fusion    = .empty_alt)
+
   for(t in c('snv_indel','cna','fusion')) {
     if (!is.null(callsets[[t]])) {
       if (NROW(callsets[[t]]$variant) > 0) {
@@ -309,7 +320,7 @@ get_excel_sheets <- function(report = NULL) {
                 )) |>
                 dplyr::mutate(SAMPLE_ID = sample_id) |>
                 dplyr::left_join(
-                  sample_alteration[['cna']],
+                  sample_alteration[['fusion']],
                   by = c("VAR_ID",
                          "ENTREZGENE",
                          "VARIANT_CLASS")
@@ -418,7 +429,7 @@ get_excel_sheets <- function(report = NULL) {
                 )) |>
                 dplyr::mutate(SAMPLE_ID = sample_id) |>
                 dplyr::left_join(
-                  sample_alteration[['cna']],
+                  sample_alteration[['snv_indel']],
                   by = c("VAR_ID","ENTREZGENE","VARIANT_CLASS")
                 ) |>
                 dplyr::select(

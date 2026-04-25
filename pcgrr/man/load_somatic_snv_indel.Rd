@@ -9,7 +9,7 @@ load_somatic_snv_indel(
   fname = NA,
   ref_data = NULL,
   settings = NULL,
-  simulate_vaf_dp = FALSE
+  simulate_vaf_dp = TRUE
 )
 }
 \arguments{
