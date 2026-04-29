@@ -47,10 +47,14 @@ def get_args():
     optional_classification.add_argument('--secondary_findings', action='store_true',dest='secondary_findings',default=False, help='Include variants found in ACMG-recommended list for secondary findings (v3.2), default: %(default)s')
     optional_classification.add_argument('--pgx_findings', action='store_true',dest='pgx_findings',default=False, help='Report overlap with variants associated with chemotherapy toxicity (PgX findings, CPIC), default: %(default)s')
     optional_classification.add_argument('--gwas_findings', action='store_true',dest='gwas_findings',default=False, help='Report overlap with low to moderate cancer risk variants (tag SNPs) identified from genome-wide association studies, default: %(default)s')    
-    #optional_classification.add_argument('--pop_gnomad',choices = ['afr','amr','eas','sas','nfe','fin','global'], default='nfe', help='Population source in gnomAD (non-cancer subset) used for variant frequency assessment (ACMG classification), default: %(default)s')
-    #optional_classification.add_argument('--maf_upper_threshold', type = float, default = 0.9, dest = 'maf_upper_threshold',help='Upper MAF limit (gnomAD global population frequency) for variants to be included in the report, default: %(default)s')
     optional_classification.add_argument('--max_af_gnomad', type = float, default = 0.9, dest = 'max_af_gnomad', help='Ignore reporting novel variants with gnomAD maximum allele frequency (AF) across populations greater than this value, default: %(default)s')
-    optional_classification.add_argument('--classify_all', action='store_true',dest='classify_all',help='Provide CPSR variant classifications (TIER 1-5) also for variants with existing ClinVar classifications in output TSV, default: %(default)s')
+    optional_classification.add_argument('--clinvar_trust_level', type=int, choices=[0,1,2,3,4], default=0, dest='clinvar_trust_level',
+        help='Level of trust/authority assigned to CPSR-based variant classification relative to existing ClinVar records: ' +
+             '0 = ClinVar trusted (override conflicted records only), ' +
+             '1 = Override zero gold star ClinVar records, ' +
+             '2 = Override zero- and single gold star ClinVar records, ' +
+             '3 = Override low-star and non-cancer-phenotype ClinVar records, ' +
+             '4 = CPSR always classifies (default: %(default)s)')
     optional_classification.add_argument('--clinvar_report_noncancer', action='store_true', help='Report also ClinVar-classified variants attributed to phenotypes/conditions NOT directly related to tumor development, default: %(default)s')
     
     optional_vcfanno.add_argument('--vcfanno_n_proc', default = 4, type = int, help="Number of vcfanno processes (option '-p' in vcfanno), default: %(default)s")
@@ -177,7 +181,7 @@ def run_cpsr(conf_options, input_data, output_data):
         else:
             logger.info("Diagnostic-grade genes in virtual panels (GE PanelApp): " + \
                         f"{'ON' if conf_options['gene_panel']['diagnostic_grade_only'] else 'OFF'}")
-        logger.info("Include incidental findings (ACMG recommended list v3.2): " + \
+        logger.info("Include incidental/secondary findings (ACMG recommended list v3.3): " + \
                     f"{'ON' if conf_options['variant_classification']['secondary_findings'] else 'OFF'}")
         logger.info("Include low to moderate cancer risk variants from genome-wide association studies: " + \
                     f"{'ON' if conf_options['variant_classification']['gwas_findings'] else 'OFF'}")

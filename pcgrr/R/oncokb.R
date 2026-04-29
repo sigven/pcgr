@@ -967,8 +967,8 @@ process_oncokb_maf <-
 
       maf_annotated_hgvsp <- maf_annotated_hgvsp |>
         dplyr::rename(
-          SYMBOL = Hugo_Symbol,
-          SAMPLE_ID = Tumor_Sample_Barcode
+          SYMBOL = "Hugo_Symbol",
+          SAMPLE_ID = "Tumor_Sample_Barcode"
         ) |>
         dplyr::select(
           -dplyr::any_of(

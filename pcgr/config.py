@@ -244,10 +244,15 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
             'gwas_findings': int(arg_dict['gwas_findings']),
             'secondary_findings': int(arg_dict['secondary_findings']),
             'pgx_findings': int(arg_dict['pgx_findings']),
-            #'pop_gnomad': str(arg_dict['pop_gnomad']),
             'max_af_gnomad': float(arg_dict['max_af_gnomad']),
-            #'maf_upper_threshold': float(arg_dict['maf_upper_threshold']),
-            'classify_all': int(arg_dict['classify_all']),
+            'clinvar_trust_level': int(arg_dict['clinvar_trust_level']),
+            'clinvar_trust_level_desc': {
+                0: 'ClinVar trusted (override conflicted records only)',
+                1: 'Override zero-star ClinVar records',
+                2: 'Override zero- and single-star ClinVar records',
+                3: 'Override low-star and non-cancer-phenotype records',
+                4: 'CPSR always classifies'
+            }[int(arg_dict['clinvar_trust_level'])],
             'clinvar_report_noncancer': int(arg_dict['clinvar_report_noncancer'])
         }
             

@@ -601,9 +601,9 @@ def run_pcgr(input_data, output_data, conf_options):
                 f'{"--debug" if debug else ""}'
                 )
         summarise_db_src_msg1 = \
-                "Annotation sources: cancerhotspots.org, CIViC, Cancer Biomarkers database (CGI), Cancer Gene Census (CGC)"
+                "Annotation sources: cancerhotspots.org, CIViC, Cancer Biomarkers database (CGI), Network of Cancer Genes (NCG)"
         summarise_db_src_msg2 = \
-                "Annotation sources: Network of Cancer Genes (NCG), CancerMine, IntOGen, TCGA driver genes"
+                "Annotation sources: CancerMine, IntOGen, TCGA driver genes"
 
         logger.info("PCGR - SNV/INDEL ANALYSIS SECTION - SUMMARY: Variant and cancer gene annotations with pcgr-summarise")
         logger.info(summarise_db_src_msg1)

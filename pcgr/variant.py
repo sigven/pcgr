@@ -270,16 +270,16 @@ def calculate_tmb(variant_set: pd.DataFrame, tumor_dp_min: int, tumor_af_min: fl
                 
             df = pd.DataFrame(
                 tmb_recs, 
-                columns=['sample_id', 
-                        'n_somatic_variants', 
-                        'tmb_measure', 
-                        'tmb_csq_regex',
-                        'tmb_target_size_mb', 
-                        'tmb_dp_min', 
-                        'tmb_af_min',
-                        'tmb_n_variants', 
-                        'tmb_estimate',
-                        'tmb_unit'])
+                columns=['SAMPLE_ID',
+                        'N_SOMATIC_VARIANTS',
+                        'TMB_MEASURE',
+                        'TMB_CSQ_REGEX',
+                        'TMB_TARGET_SIZE_MB',
+                        'TMB_DP_MIN',
+                        'TMB_AF_MIN',
+                        'TMB_N_VARIANTS',
+                        'TMB_ESTIMATE',
+                        'TMB_UNIT'])
             df.to_csv(tmb_fname, sep="\t", header=True, index=False)
         else:
             logger.warning("No somatic variants left after depth/VAF filtering - TMB calculation not possible")

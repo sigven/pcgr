@@ -694,18 +694,21 @@ load_dna_variants <- function(
     }
   }
 
-  ## Combine splice effect predictions from dbscSNV and MaxEntScan
+  ## Combine splice effect predictions
+  ## from MutSpliceDB and MaxEntScan
   if ("MAXENTSCAN" %in% colnames(results[['variant']]) &
       "SPLICE_EFFECT" %in% colnames(results[['variant']])) {
     results[['variant']] <-
       results[['variant']] |>
       dplyr::mutate(
         SPLICE_EFFECT = paste(
-          .data$SPLICE_EFFECT, .data$MAXENTSCAN, sep = ", "
+          .data$SPLICE_EFFECT,
+          .data$MAXENTSCAN, sep = ", "
       )) |>
       dplyr::mutate(
         SPLICE_EFFECT = stringr::str_replace_all(
-          .data$SPLICE_EFFECT, "(^, )|^(NA, )|^(NA, NA)$", ""
+          .data$SPLICE_EFFECT,
+          "(^, )|^(NA, )|^(NA, NA)$", ""
         )
       ) |>
       dplyr::mutate(

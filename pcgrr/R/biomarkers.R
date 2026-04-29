@@ -104,7 +104,7 @@ prep_actble_display_tbl <- function(
   if (NROW(vars) == 0) {
     pcgrr::log4r_info(
       paste0("No tier ", paste(tier, collapse = "/"), " variants found."))
-    return(list(by_eitem = data.frame(), by_gene = data.frame()))
+    return(list(main = data.frame(), nested = data.frame()))
   }
 
   ## abundance column varies by variant category

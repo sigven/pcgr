@@ -331,6 +331,7 @@ def assign_cds_exon_intron_annotations(csq_record, grantham_scores, logger):
     csq_record['AMINO_ACID_START'] = '.'
     csq_record['AMINO_ACID_END'] = '.'
     csq_record['CDS_DISTANCE'] = '.'
+    csq_record['MAXENTSCAN'] = '.'
     csq_record['MAXENTSCAN2'] = '.'
     csq_record['MAXENTSCAN_REF'] = '.'
     csq_record['MAXENTSCAN_ALT'] = '.'
@@ -451,9 +452,30 @@ def assign_cds_exon_intron_annotations(csq_record, grantham_scores, logger):
             r'c\.[^_]*[0-9]+_[^ ]*[+-][0-9]+', hgvsc_str))
         spans_intron_to_exon = bool(re.search(
             r'c\.[^_]*[+-][0-9]+_[^ ]*[0-9]+', hgvsc_str))
-        if is_indel_type and (spans_exon_to_intron or spans_intron_to_exon):
+        
+        # VEP sometimes encodes boundary-spanning indels with
+        #  purely exonic HGVSc (e.g. c.944del) while still calling
+        # splice_acceptor/donor_variant in the consequence.
+        # Trust the consequence when the HGVSc doesn't capture
+        # the intronic extent.
+        has_splice_csq = bool(re.search(
+            r'splice_(acceptor|donor)_variant', str(csq_record['Consequence'])))
+        inferred_junction_span = (
+            is_indel_type and
+            has_splice_csq and
+            not spans_exon_to_intron and
+            not spans_intron_to_exon
+        )
+    
+        if is_indel_type and (
+            spans_exon_to_intron or
+            spans_intron_to_exon or
+            inferred_junction_span):
             csq_record['EXON_INTRON_JUNCTION_SPAN'] = True
-
+            ## rescue loss-of-function annotation for indels that span exon-intron junctions 
+            ## but are not annotated with an intronic offset in HGVSc
+            csq_record['LOSS_OF_FUNCTION'] = True
+            
     if 'NearestExonJB' in csq_record.keys():
         if csq_record['NearestExonJB'] is not None:
             if re.search(r"synonymous_|missense_|stop_|frameshift|inframe_|start_", str(csq_record['Consequence'])) is not None and \
@@ -470,7 +492,8 @@ def assign_cds_exon_intron_annotations(csq_record, grantham_scores, logger):
     if 'CDS_position' in csq_record.keys():
         if csq_record['CDS_position'] is not None and \
             csq_record['LOSS_OF_FUNCTION'] is True and \
-                splice_variant is False:
+                splice_variant is False and \
+                csq_record['EXON_INTRON_JUNCTION_SPAN'] is False:
             if csq_record['CDS_position'] != '.':
                 if '/' in csq_record['CDS_position']:
                     cds_length = str(csq_record['CDS_position']).split('/')[1]
@@ -483,10 +506,13 @@ def assign_cds_exon_intron_annotations(csq_record, grantham_scores, logger):
                     cds_pos_full = str(csq_record['CDS_position']).split('/')[0]
                     
                     ## Frameshift variants are listed with a range (separated by '-'), choose start position
+                    ## Negative CDS positions (upstream of start codon) also contain '-' and yield '' after split
                     if '-' in cds_pos_full and '?' not in cds_pos_full:
                         cds_pos = cds_pos_full.split('-')[0]
                         if cds_pos.isdigit():
-                            cds_pos = int(cds_pos)                   
+                            cds_pos = int(cds_pos)
+                        else:
+                            cds_pos = -1  # negative or malformed position — skip END_TRUNCATION check
                     else:
                         if cds_pos_full.isdigit():
                             cds_pos = int(cds_pos_full)                     

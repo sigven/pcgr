@@ -906,80 +906,86 @@ stats_report_fusion <- function(
 #' including number of variants and number of variants with
 #' evidence items for each BM evidence type
 #'
-#' @param callset list object with germline callset data (SNVs/InDels)
+#' @param var_df data.frame with germline variant data (SNVs/InDels)
 #' @param vartype type of variant ('snv_indel')
 #'
 #' @export
 stats_report_germline <- function(
-    callset = NULL,
-    #name = "vstats",
+    var_df = NULL,
     vartype = "snv_indel") {
 
   call_stats <- list()
-  #call_stats[[name]] <- list()
+
+  invisible(
+    assertthat::assert_that(
+      !is.null(var_df) &
+        is.data.frame(var_df),
+      msg = "Argument 'var_df' must be a data.frame()"
+    )
+  )
 
   if (vartype == 'snv_indel' &
-     "FINAL_CLASSIFICATION" %in% colnames(callset$variant)) {
-    if ("BM_EVIDENCE_TYPE" %in% colnames(callset$variant)) {
+     "CLASSIFICATION" %in% colnames(var_df)) {
+    if ("BM_EVIDENCE_TYPE" %in% colnames(var_df)) {
 
-      call_stats[['n_eitems_predictive']] <- callset$variant |>
+      call_stats[['n_eitems_predictive']] <- var_df |>
         dplyr::filter(.data$BM_EVIDENCE_TYPE == "Predictive") |>
         NROW()
-      call_stats[['n_eitems_prognostic']] <- callset$variant |>
+      call_stats[['n_eitems_prognostic']] <- var_df |>
         dplyr::filter(.data$BM_EVIDENCE_TYPE == "Prognostic") |>
         NROW()
-      call_stats[['n_eitems_diagnostic']] <- callset$variant |>
+      call_stats[['n_eitems_diagnostic']] <- var_df |>
         dplyr::filter(.data$BM_EVIDENCE_TYPE == "Diagnostic") |>
         NROW()
-      call_stats[['n_eitems_predisposing']] <- callset$variant |>
+      call_stats[['n_eitems_predisposing']] <- var_df |>
         dplyr::filter(.data$BM_EVIDENCE_TYPE == "Predisposing") |>
         NROW()
 
-      call_stats[['n_var_eitems']] <- callset$variant |>
+      call_stats[['n_var_eitems']] <- var_df |>
         dplyr::filter(!is.na(.data$BM_EVIDENCE_TYPE)) |>
         dplyr::select("GENOMIC_CHANGE") |>
         dplyr::distinct() |>
         NROW()
     }
 
-    if ( "VARIANT_CLASS" %in% colnames(callset$variant) &
-         "CODING_STATUS" %in% colnames(callset$variant) &
-         "GENOMIC_CHANGE" %in% colnames(callset$variant)){
-      call_stats[['n']] <- callset$variant |>
+    if ( "VARIANT_CLASS" %in% colnames(var_df) &
+         "CODING_STATUS" %in% colnames(var_df) &
+         "GENOMIC_CHANGE" %in% colnames(var_df)){
+      call_stats[['n']] <- var_df |>
         NROW()
 
-      call_stats[['n_snv']] <- callset$variant |>
+      call_stats[['n_snv']] <- var_df |>
         dplyr::filter(.data$VARIANT_CLASS == "SNV") |>
         NROW()
 
-      call_stats[['n_indel']] <- callset$variant |>
+      call_stats[['n_indel']] <- var_df |>
         dplyr::filter(.data$VARIANT_CLASS == "insertion" |
                         .data$VARIANT_CLASS == "deletion" |
                         .data$VARIANT_CLASS == "indel") |>
         NROW()
 
-      call_stats[['n_coding']] <- callset$variant |>
+      call_stats[['n_coding']] <- var_df |>
         dplyr::filter(.data$CODING_STATUS == "coding") |>
         NROW()
 
-      call_stats[['n_noncoding']] <- callset$variant |>
+      call_stats[['n_noncoding']] <- var_df |>
         dplyr::filter(.data$CODING_STATUS == "noncoding") |>
         NROW()
 
-      call_stats[['n_p']] <- callset$variant |>
-        dplyr::filter(.data$FINAL_CLASSIFICATION == "Pathogenic") |>
+      call_stats[['n_p']] <- var_df |>
+        dplyr::filter(.data$CLASSIFICATION == "Pathogenic") |>
         NROW()
-      call_stats[['n_lp']] <- callset$variant |>
-        dplyr::filter(.data$FINAL_CLASSIFICATION == "Likely Pathogenic") |>
+      call_stats[['n_lp']] <- var_df |>
+        dplyr::filter(.data$CLASSIFICATION == "Likely Pathogenic") |>
         NROW()
-      call_stats[['n_vus']] <- callset$variant |>
-        dplyr::filter(.data$FINAL_CLASSIFICATION == "VUS") |>
+      call_stats[['n_vus']] <- var_df |>
+        dplyr::filter(.data$CLASSIFICATION == "VUS") |>
         NROW()
-      call_stats[['n_lb']] <- callset$variant |>
-        dplyr::filter(.data$FINAL_CLASSIFICATION == "Likely Benign") |>
+      call_stats[['n_lb']] <- var_df |>
+        dplyr::filter(.data$CLASSIFICATION == "Likely Benign") |>
         NROW()
-      call_stats[['n_b']] <- callset$variant |>
-        dplyr::filter(.data$FINAL_CLASSIFICATION == "Benign") |>
+      call_stats[['n_b']] <- var_df |>
+        dplyr::filter(.data$CLASSIFICATION == "Benign") |>
         NROW()
     }
 

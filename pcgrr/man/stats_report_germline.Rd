@@ -6,10 +6,10 @@
 including number of variants and number of variants with
 evidence items for each BM evidence type}
 \usage{
-stats_report_germline(callset = NULL, vartype = "snv_indel")
+stats_report_germline(var_df = NULL, vartype = "snv_indel")
 }
 \arguments{
-\item{callset}{list object with germline callset data (SNVs/InDels)}
+\item{var_df}{data.frame with germline variant data (SNVs/InDels)}
 
 \item{vartype}{type of variant ('snv_indel')}
 }

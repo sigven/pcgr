@@ -828,6 +828,8 @@ write_report_tsv <- function(report = NULL, output_type = 'snv_indel') {
 
       if (!is.null(report$content$mutational_signatures$result$tsv)) {
         if (is.data.frame(report$content$mutational_signatures$result$tsv)) {
+          colnames(report$content$mutational_signatures$result$tsv) <-
+            toupper(colnames(report$content$mutational_signatures$result$tsv))
           output_data <- as.data.frame(
             report$content$mutational_signatures$result$tsv)
         }
