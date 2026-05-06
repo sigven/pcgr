@@ -934,11 +934,31 @@ prep_diagn_display_tbl <- function(
           -c("BM_MAPPING_CONFIDENCE")) |>
         dplyr::distinct()
 
+      ## across all evidence items, get the unique sources
+      ## supporting actionability for each variant
+      biomarker_source_support <-
+        biomarker_var_eitems |>
+        dplyr::group_by(
+          VAR_ID, ENTREZGENE,
+          ACTIONABILITY_TIER
+        ) |>
+        dplyr::summarise(
+          BM_SOURCES = paste(
+            unique(sort(.data$BM_SOURCE_DB)),
+            collapse = "|"),
+          .groups = "drop") |>
+        dplyr::distinct()
+
       rctbl_recs[['main']] <-
         biomarker_var_eitems |>
         dplyr::left_join(
           biomarker_top_resolution,
           by = c("VAR_ID","ENTREZGENE")
+        ) |>
+        dplyr::left_join(
+          biomarker_source_support,
+          by = c("VAR_ID","ENTREZGENE",
+                 "ACTIONABILITY_TIER")
         ) |>
         dplyr::arrange(
           .data$BM_TOP_MAPPING_CONFIDENCE,
@@ -949,6 +969,7 @@ prep_diagn_display_tbl <- function(
             "ENTREZGENE",
             "ACTIONABILITY_TIER",
             "SAMPLE_ALTERATION",
+            "BM_SOURCES",
             dplyr::any_of(oncogenicity_col),
             dplyr::any_of(abundance_col),
             dplyr::any_of(hotspot_col),
@@ -975,8 +996,7 @@ prep_diagn_display_tbl <- function(
 
         dplyr::mutate(DIAGNOSTIC_EVIDENCE = paste0(
           "<b>",
-          .data$BM_EVIDENCE_TYPE, " ",
-          .data$CLINICAL_SIGNIFICANCE, "</b> (",
+          .data$BM_CLINICAL_SIGNIFICANCE, "</b> (",
           .data$BM_PRIMARY_SITE, ")")) |>
 
         dplyr::group_by(
@@ -985,6 +1005,7 @@ prep_diagn_display_tbl <- function(
               "ENTREZGENE",
               "ACTIONABILITY_TIER",
               "SAMPLE_ALTERATION",
+              "BM_SOURCES",
               oncogenicity_col,
               abundance_col,
               hotspot_col,

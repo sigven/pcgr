@@ -542,6 +542,12 @@ load_yaml <- function(yaml_fname, report_mode = "CPSR") {
   if (missing_yaml_info == F) {
     log4r_info(paste0(
       "Successfully parsed YAML configuration file - reporting mode: ", report_mode))
+    ## log the sample identifier
+    log4r_info(paste0(
+      "Sample identifier: ", report_settings[['sample_id']]))
+
+
+
   }else{
     log4r_fatal(paste0(
       "YAML configuration lacks necessary properties - reporting mode: ", report_mode))

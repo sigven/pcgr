@@ -64,17 +64,17 @@ plot_tmb_primary_site_tcga <- function(
 
   tmb_estimate <- tmb_estimates |>
     dplyr::filter(
-      .data$tmb_measure == "TMB_missense_only")
+      .data$TMB_MEASURE == "TMB_missense_only")
 
   if (tmb_display_type == "coding_and_silent") {
     tmb_estimate <- tmb_estimates |>
       dplyr::filter(
-        .data$tmb_measure == "TMB_coding_and_silent")
+        .data$TMB_MEASURE == "TMB_coding_and_silent")
   }
   if (tmb_display_type == "coding_non_silent") {
     tmb_estimate <- tmb_estimates |>
       dplyr::filter(
-        .data$tmb_measure == "TMB_coding_non_silent")
+        .data$TMB_MEASURE == "TMB_coding_non_silent")
   }
 
 
@@ -163,7 +163,7 @@ plot_tmb_primary_site_tcga <- function(
   if (NROW(tmb_estimate) == 1) {
     tmb_plot_site <- tmb_plot_site +
       ggplot2::geom_hline(
-        yintercept = as.numeric(tmb_estimate$tmb_estimate),
+        yintercept = as.numeric(tmb_estimate$TMB_ESTIMATE),
         linewidth = 0.6,
         linetype = "dashed",
         colour = report_color)

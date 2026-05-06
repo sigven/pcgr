@@ -1903,7 +1903,7 @@ load_rna_fusions <- function(
       dplyr::left_join(
         recurrency_data[['variant']],
         by = c("SAMPLE_ID","VAR_ID","FUSION_GENE2"),
-        relationship = "one-to-one"
+        relationship = "many-to-one"
       ) |>
       dplyr::mutate(
         MITDB_NUM_EVIDENCE = dplyr::if_else(
@@ -2046,7 +2046,7 @@ load_rna_fusions <- function(
       dplyr::left_join(
         recurrency_data[['variant_display']],
         by = c("SAMPLE_ID","VAR_ID","FUSION_GENE2"),
-        relationship = "one-to-one"
+        relationship = "many-to-one"
       ) |>
       pcgrr::get_druggable_fusion_partner(
         partner = "5P",

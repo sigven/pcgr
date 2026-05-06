@@ -853,18 +853,20 @@ assign_variant_top_tiers_ttagnostic <- function(
         .data$BM_PRIMARY_SITE == 'Any' &
           tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
           stringr::str_detect(
-            .data$BM_EVIDENCE_LEVEL, pcgrr::bm_evidence$strong_regex
+            .data$BM_EVIDENCE_LEVEL,
+            pcgrr::bm_evidence$strong_regex
           ) ~ as.integer(1),
 
         ## A) Biomarker site is _NOT_ pan-cancer ('Any')
         ## B) strong evidence - evidence levels A/B
         ## --> TIER 2
 
-        .data$BM_PRIMARY_SITE != "Any") &
+        .data$BM_PRIMARY_SITE != "Any" &
           tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
           stringr::str_detect(
-            .data$BM_EVIDENCE_LEVEL, pcgrr::bm_evidence$strong_regex
-          ) ~ as.integer(2), #|
+            .data$BM_EVIDENCE_LEVEL,
+            pcgrr::bm_evidence$strong_regex
+          ) ~ as.integer(2),
 
         ## A) weak evidence - evidence levels (C/D/E)
         ## B) Pan-cancer biomarker or tumor-type specific biomarker
@@ -872,11 +874,12 @@ assign_variant_top_tiers_ttagnostic <- function(
         ##     regardless of tumor-type specificity)
         tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
           stringr::str_detect(
-            .data$BM_EVIDENCE_LEVEL, pcgrr::bm_evidence$weak_regex
+            .data$BM_EVIDENCE_LEVEL,
+            pcgrr::bm_evidence$weak_regex
           ) ~ as.integer(3),
         TRUE ~ as.integer(100)
 
-      ) |>
+      )) |>
 
       ## Get top tier level for any given variant
       dplyr::group_by(

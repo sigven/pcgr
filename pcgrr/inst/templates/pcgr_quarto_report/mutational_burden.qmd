@@ -37,7 +37,7 @@ if (pcg_report$settings$conf$sample_properties$vaf_tumor_detected &
 tmb_estimate <-
   pcg_report$content$tmb$sample_estimate |>
   dplyr::filter(
-    tmb_measure == paste0(
+    TMB_MEASURE == paste0(
       "TMB_",
       pcg_report$settings$conf$somatic_snv$tmb$tmb_display))
 
@@ -57,8 +57,8 @@ bslib::page_fillable(
     bslib::value_box(
       title = "TMB estimate",
       value = paste(
-        round(tmb_estimate$tmb_estimate, 
-              digits = 2), tmb_estimate$tmb_unit),
+        round(tmb_estimate$TMB_ESTIMATE, 
+              digits = 2), tmb_estimate$TMB_UNIT),
       showcase = NULL,
       theme = "dark"
     ),

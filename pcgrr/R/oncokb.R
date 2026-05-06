@@ -298,6 +298,9 @@ extract_diagnostic_evidence <- function(
     oncotree_code = NA,
     variant_id = NA) {
 
+  alteration2 <- stringr::str_replace(alteration, "p\\.", "")
+  profile_name <- paste(gene, alteration, sep = " - ")
+
   diagnostic_df <- data.frame()
   if (is.null(oncokb_annotation$diagnosticImplications) ||
       length(oncokb_annotation$diagnosticImplications) == 0) {
@@ -369,6 +372,9 @@ extract_prognostic_evidence <- function(
     vartype = NA,
     oncotree_code = NA,
     variant_id = NA) {
+
+  alteration2 <- stringr::str_replace(alteration, "p\\.", "")
+  profile_name <- paste(gene, alteration, sep = " - ")
 
   prognostic_df <- data.frame()
   if (is.null(oncokb_annotation$prognosticImplications) ||
@@ -1225,11 +1231,6 @@ process_oncokb_fusion <-
         "OncoKB token is required. Obtain from https://www.oncokb.org/account/settings")
     }
 
-    if (is.null(oncotree_code) || oncotree_code == "") {
-      pcgrr::log4r_fatal(
-        "OncoTree code is required for fetching OncoKB annotations")
-    }
-
     # Read OncoKB-annotated fusion file
     fusion_data <- readr::read_tsv(
       fusion_file, show_col_types = FALSE)
@@ -1389,10 +1390,6 @@ process_oncokb_cna <-
         "OncoKB token is required. Obtain from https://www.oncokb.org/account/settings")
     }
 
-    if (is.null(oncotree_code) || oncotree_code == "") {
-      pcgrr::log4r_fatal(
-        "OncoTree code is required for fetching OncoKB annotations")
-    }
     # Read CNA file
     cna_data <- readr::read_tsv(
       cna_file, show_col_types = FALSE)

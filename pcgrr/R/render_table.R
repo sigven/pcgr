@@ -1270,7 +1270,7 @@ render_diagn_bm_table <- function(
   tier_colors <-
     list(
       t1 = pcgrr::color_palette$diagnosis,
-      t2 = pcgrr::color_palette$diagnosis,
+      t2 = pcgrr::color_palette$diagnosis
     )
 
   tier_letter <- "D"

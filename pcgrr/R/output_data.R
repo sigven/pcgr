@@ -227,11 +227,11 @@ get_excel_sheets <- function(report = NULL) {
                   )
                 ) |>
                 dplyr::select(
-                  -c("BM_VARIANT_ID",
+                  -dplyr::any_of(c("BM_VARIANT_ID",
                      "ACTIONABILITY_TIER",
                      "BM_REFERENCE",
-                     "ACTIONABILITY_TIER",
-                     "BM_EVIDENCE_DIRECTION")
+                     "BM_EVIDENCE_LEVEL_FULL",
+                     "BM_EVIDENCE_DIRECTION"))
                 ) |>
                 dplyr::mutate(BM_MOLECULAR_PROFILE = strip_html(
                   .data$BM_MOLECULAR_PROFILE
@@ -309,11 +309,11 @@ get_excel_sheets <- function(report = NULL) {
                   )
                 ) |>
                 dplyr::select(
-                  -c("BM_VARIANT_ID",
+                  -dplyr::any_of(c("BM_VARIANT_ID",
                      "ACTIONABILITY_TIER",
                      "BM_REFERENCE",
-                     "ACTIONABILITY_TIER",
-                     "BM_EVIDENCE_DIRECTION")
+                     "BM_EVIDENCE_LEVEL_FULL",
+                     "BM_EVIDENCE_DIRECTION"))
                 ) |>
                 dplyr::mutate(BM_MOLECULAR_PROFILE = strip_html(
                   .data$BM_MOLECULAR_PROFILE
@@ -417,12 +417,11 @@ get_excel_sheets <- function(report = NULL) {
                   )
                 ) |>
                 dplyr::select(
-                  -c("BM_VARIANT_ID",
+                  -dplyr::any_of(c("BM_VARIANT_ID",
                      "ACTIONABILITY_TIER",
                      "BM_REFERENCE",
-                     "BM_MOLECULAR_PROFILE_ORIGINAL",
-                     "ACTIONABILITY_TIER",
-                     "BM_EVIDENCE_DIRECTION")
+                     "BM_EVIDENCE_LEVEL_FULL",
+                     "BM_EVIDENCE_DIRECTION"))
                 ) |>
                 dplyr::mutate(BM_MOLECULAR_PROFILE = strip_html(
                   .data$BM_MOLECULAR_PROFILE
