@@ -1577,7 +1577,7 @@ map_biomarker_data <- function(
             variant_origin == "Germline" &
             "BM_RESOLUTION" %in% colnames(biomarker_evidence_items) &
             "BM_MAPPING_CONFIDENCE" %in% colnames(biomarker_evidence_items) &
-            "FINAL_CLASSIFICATION" %in% colnames(biomarker_evidence_items)){
+            "CLASSIFICATION" %in% colnames(biomarker_evidence_items)){
           biomarker_evidence_items <- biomarker_evidence_items |>
             dplyr::mutate(
               BM_MAPPING_CONFIDENCE = dplyr::case_when(
@@ -1590,7 +1590,7 @@ map_biomarker_data <- function(
                    .data$BM_RESOLUTION == "exon" |
                    .data$BM_RESOLUTION == "gene_region_mut") &
                   (stringr::str_detect(
-                    tolower(.data$FINAL_CLASSIFICATION),
+                    tolower(.data$CLASSIFICATION),
                     "pathogenic"))) ~ "medium",
                 TRUE ~ "low"
               )

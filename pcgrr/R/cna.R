@@ -1203,7 +1203,7 @@ build_twohit_display_data <- function(
   if (has_germline) {
     germ_cols <- intersect(
       c("VAR_ID", "ALTERATION",
-        "GENOTYPE", "FINAL_CLASSIFICATION"),
+        "GENOTYPE", "CLASSIFICATION"),
       colnames(snv_germline))
     snv_germ_sub <- snv_germline |>
       dplyr::select(dplyr::all_of(germ_cols)) |>
@@ -1227,12 +1227,12 @@ build_twohit_display_data <- function(
 
     germline_rows$VAF_GENOTYPE <- if ("GENOTYPE" %in% colnames(germline_rows))
       germline_rows$GENOTYPE else NA_character_
-    if ("FINAL_CLASSIFICATION" %in% colnames(germline_rows)) {
-      germline_rows <- dplyr::rename(germline_rows,
-                                     CLASSIFICATION = .data$FINAL_CLASSIFICATION)
-    } else {
-      germline_rows$CLASSIFICATION <- NA_character_
-    }
+    #if ("FINAL_CLASSIFICATION" %in% colnames(germline_rows)) {
+    #  germline_rows <- dplyr::rename(germline_rows,
+    #                                 CLASSIFICATION = .data$FINAL_CLASSIFICATION)
+    #} else {
+    #  germline_rows$CLASSIFICATION <- NA_character_
+    #}
     all_nested <- c(all_nested, list(germline_rows))
   }
 

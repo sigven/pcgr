@@ -72,7 +72,8 @@ generate_report <-
           fname_cpsr_yaml = settings$molecular_data$fname_germline_yaml,
           ignore_vus = as.logical(settings$conf$germline$ignore_vus),
           cols = pcgrr::data_coltype_defs$snv_indel_germline_cpsr,
-          ref_data = ref_data
+          ref_data = ref_data,
+          settings = settings
         )
       rep[["content"]][['germline_classified']][["eval"]] <- TRUE
     }

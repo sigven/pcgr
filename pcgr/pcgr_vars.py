@@ -4,7 +4,7 @@ from pcgr._version import __version__
 
 ## Version - software and bundle
 PCGR_VERSION = __version__
-DB_VERSION = '20260426'  # database build version (date-based)
+DB_VERSION = '20260508'  # database build version (date-based)
 
 ## Miscellaneous settings
 NCBI_BUILD_MAF = 'GRCh38'
@@ -60,7 +60,8 @@ germline_input_required_cols = [
     'GENOTYPE',
     'ALTERATION',
     'DP_CONTROL',
-    'CPSR_CLASSIFICATION_SOURCE',
+    'ASSERTION_AUTHORITY',
+    'ASSERTION_RATIONALE',
     'GENENAME',
     'ENTREZGENE',
     'ENSEMBL_GENE_ID',
@@ -83,11 +84,11 @@ germline_input_required_cols = [
     'CLINVAR_VARIANT_ORIGIN',
     'CLINVAR_PHENOTYPE',
     'CLINVAR_CONFLICTED',
-    'CLINVAR_REVIEW_STATUS_STARS',
+    'CLINVAR_GOLD_STARS',
     'CPSR_CLASSIFICATION',
     'CPSR_PATHOGENICITY_SCORE',
-    'CPSR_ACMG_CODE',
-    'FINAL_CLASSIFICATION'
+    'ACMG_CODE',
+    'CLASSIFICATION'
 ]
 
 ## Primary tumor sites - PCGR

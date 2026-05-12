@@ -448,10 +448,14 @@ def assign_cds_exon_intron_annotations(csq_record, grantham_scores, logger):
     hgvsc_str = str(csq_record['HGVSc'])
     if hgvsc_str not in ('.', 'None'):
         is_indel_type = bool(re.search(r'(del|delins|dup|ins)', hgvsc_str))
+        # First coord is bare exon position (c.<optional_minus><digits>_),
+        # no [+-] offset between the digits and the underscore separator.
         spans_exon_to_intron = bool(re.search(
-            r'c\.[^_]*[0-9]+_[^ ]*[+-][0-9]+', hgvsc_str))
+            r'c\.-?[0-9]+_[^_]*[+-][0-9]+', hgvsc_str))
+        # Second coord is bare exon position: digits not followed by another
+        # digit or [+-], so deep-intronic offsets like 746-259838 don't match.
         spans_intron_to_exon = bool(re.search(
-            r'c\.[^_]*[+-][0-9]+_[^ ]*[0-9]+', hgvsc_str))
+            r'c\.[^_]*[+-][0-9]+_-?[0-9]+(?![0-9+-])', hgvsc_str))
         
         # VEP sometimes encodes boundary-spanning indels with
         #  purely exonic HGVSc (e.g. c.944del) while still calling

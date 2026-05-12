@@ -453,7 +453,7 @@ def append_twohit_candidates(cna_df: pd.DataFrame,
     segment interval). Segment coordinates are 0-based BED-style, VCF POS is 1-based,
     so the overlap condition is: POS > seg_start AND POS <= seg_end.
 
-    Germline matching is by SYMBOL only, filtered to FINAL_CLASSIFICATION in
+    Germline matching is by SYMBOL only, filtered to CLASSIFICATION in
     ['Pathogenic', 'Likely_Pathogenic'] and LOSS_OF_FUNCTION == True.
 
     Args:
@@ -461,7 +461,7 @@ def append_twohit_candidates(cna_df: pd.DataFrame,
                 SYMBOL, TSG, LOH)
         snv_df_somatic: Somatic SNV/InDel dataframe with CHROM, POS, SYMBOL, LOSS_OF_FUNCTION,
                 VAR_ID, CONSEQUENCE, MUTATION_EFFECT_OKB columns
-        snv_df_germline: Germline SNV/InDel dataframe (from CPSR) with SYMBOL, FINAL_CLASSIFICATION,
+        snv_df_germline: Germline SNV/InDel dataframe (from CPSR) with SYMBOL, CLASSIFICATION,
                 LOSS_OF_FUNCTION, VAR_ID, CONSEQUENCE
         logger: Logger instance
 
@@ -547,7 +547,7 @@ def append_twohit_candidates(cna_df: pd.DataFrame,
 
     # --- Germline two-hit candidates ---
     if snv_df_germline is not None and isinstance(snv_df_germline, pd.DataFrame) and not snv_df_germline.empty:
-        required_germ_cols = {'SYMBOL', 'FINAL_CLASSIFICATION', 
+        required_germ_cols = {'SYMBOL', 'CLASSIFICATION', 
                               'LOSS_OF_FUNCTION', 'VAR_ID', 
                               'CONSEQUENCE'}
         missing_germ = required_germ_cols - set(snv_df_germline.columns)
@@ -556,7 +556,7 @@ def append_twohit_candidates(cna_df: pd.DataFrame,
         else:
             #logger.debug(f"Two-hit candidates - germline LOSS_OF_FUNCTION unique values: {sorted(snv_df_germline['LOSS_OF_FUNCTION'].dropna().astype(str).unique().tolist())}")
             pathogenic_lof_germline = snv_df_germline[
-                snv_df_germline['FINAL_CLASSIFICATION'].isin(['Pathogenic', 'Likely_Pathogenic']) &
+                snv_df_germline['CLASSIFICATION'].isin(['Pathogenic', 'Likely_Pathogenic']) &
                 snv_df_germline['LOSS_OF_FUNCTION'].isin(_truthy)
             ].copy()
 

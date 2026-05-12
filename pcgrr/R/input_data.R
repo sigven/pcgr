@@ -428,6 +428,7 @@ load_somatic_snv_indel <- function(
 #' @param cols column type definitions of raw input file
 #' @param ignore_vus logical indicating if VUS should be ignored in report
 #' @param ref_data PCGR reference data object
+#' @param settings PCGR run/configuration settings
 #'
 #' @export
 #'
@@ -436,7 +437,8 @@ load_cpsr_classified_variants <- function(
     fname_cpsr_yaml = NA,
     cols = NULL,
     ignore_vus = FALSE,
-    ref_data = NULL) {
+    ref_data = NULL,
+    settings = NULL) {
 
   pcgrr::log4r_info("------")
   pcgrr::log4r_info(paste0(
@@ -481,6 +483,7 @@ load_cpsr_classified_variants <- function(
     fname = fname_cpsr_tsv,
     cols = cols,
     ref_data = ref_data,
+    settings = settings,
     vartype = 'snv_indel',
     variant_origin = 'Germline')
 
@@ -500,8 +503,8 @@ load_cpsr_classified_variants <- function(
       CONSEQUENCE = stringr::str_replace_all(
         .data$CONSEQUENCE,"&",", ")) |>
     dplyr::rename(
-      SOURCE = .data$CPSR_CLASSIFICATION_SOURCE,
-      CLINICAL_SIGNIFICANCE = .data$FINAL_CLASSIFICATION
+      #SOURCE = .data$CPSR_CLASSIFICATION_SOURCE,
+      CLINICAL_SIGNIFICANCE = .data$CLASSIFICATION
     ) |>
     dplyr::select(
       -dplyr::any_of(
@@ -518,24 +521,28 @@ load_cpsr_classified_variants <- function(
       dplyr::any_of(
         c("SYMBOL","ALTERATION",
           "GENOTYPE","CONSEQUENCE",
-        "CLINICAL_SIGNIFICANCE","SOURCE",
+        "CLINICAL_SIGNIFICANCE",
+        "ASSERTION_AUTHORITY",
         "PROTEIN_DOMAIN",
         "HGVSc", "HGVSc_RefSeq",
         "HGVSp", "CDS_CHANGE",
         "EFFECT_PREDICTIONS","SPLICE_EFFECT",
         "CODING_STATUS",
-        "LOSS_OF_FUNCTION", "DP_CONTROL",
+        "LOSS_OF_FUNCTION", 
+        "DP_CONTROL",
         "VARIANT_CLASS","GENENAME",
         "ENSEMBL_GENE_ID",
-        "ENSEMBL_TRANSCRIPT_ID","REFSEQ_TRANSCRIPT_ID",
+        "ENSEMBL_TRANSCRIPT_ID",
+        "REFSEQ_TRANSCRIPT_ID",
         "DBSNP_RSID",
         "CLINVAR",
         "CLINVAR_CLASSIFICATION",
         "CLINVAR_CONFLICTED",
-        "CLINVAR_REVIEW_STATUS_STARS",
+        "CLINVAR_GOLD_STARS",
+        "ASSERTION_RATIONALE",
         "CPSR_PATHOGENICITY_SCORE",
         "CPSR_CLASSIFICATION",
-        "CPSR_CLASSIFICATION_CODE")),
+        "ACMG_CODE")),
       dplyr::everything()
     )
 
