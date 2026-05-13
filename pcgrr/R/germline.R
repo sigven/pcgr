@@ -417,14 +417,30 @@ assign_somatic_classification <- function(sample_calls, settings) {
   ##    iii) Variant is neither in COSMIC nor TCGA
   ## 6) Variant is recorded in dbSNP (non-somatic ClinVar/COSMIC/TCGA)
 
+  ## Ensure all STATUS columns used below exist — each is only created
+  ## conditionally upstream (when the prerequisite source column is present)
+  status_cols <- c(
+    "gnomAD_AF_ABOVE_TOLERATED",
+    "STATUS_CLINVAR_GERMLINE",
+    "STATUS_PON",
+    "STATUS_GERMLINE_HOM",
+    "STATUS_GERMLINE_HET",
+    "STATUS_DBSNP",
+    "STATUS_TCGA",
+    "STATUS_COSMIC"
+  )
+  for (col in status_cols) {
+    if (!(col %in% colnames(sample_calls))) {
+      sample_calls[[col]] <- FALSE
+    }
+  }
+
   pcgrr::log4r_info("Applying variant filters on tumor-only calls - assigning somatic classification")
   sample_calls <- sample_calls |>
     dplyr::mutate(
       GERMLINE_GNOMAD =
         dplyr::if_else(
-          .data$gnomAD_AF_ABOVE_TOLERATED == TRUE |
-          .data$gnomADe_AF_ABOVE_TOLERATED == TRUE |
-            .data$gnomADg_AF_ABOVE_TOLERATED == TRUE,
+          .data$gnomAD_AF_ABOVE_TOLERATED == TRUE,
           "GERMLINE_GNOMAD",
           "")) |>
     dplyr::mutate(
@@ -503,8 +519,6 @@ assign_somatic_classification <- function(sample_calls, settings) {
         "STATUS_GERMLINE_HOM",
         "STATUS_PON",
         "gnomAD_AF_ABOVE_TOLERATED",
-        "gnomADe_AF_ABOVE_TOLERATED",
-        "gnomADg_AF_ABOVE_TOLERATED",
         "STATUS_CLINVAR_GERMLINE")))
 
   return(sample_calls)
