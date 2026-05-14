@@ -41,6 +41,8 @@ clean_oncokb_evidence <- function(
     c("BM_EVIDENCE_LEVEL_FULL",
       "BM_RESOLUTION",
       "BM_REFERENCE",
+      "BM_VARIANT_ORIGIN",
+      "BM_CANCER_TYPE",
       "BM_MAPPING_CONFIDENCE",
       "BM_CLINICAL_SIGNIFICANCE",
       "BM_MOLECULAR_PROFILE"),
@@ -94,11 +96,21 @@ clean_oncokb_evidence <- function(
     ) |>
     dplyr::mutate(
       BM_MOLECULAR_PROFILE = dplyr::case_when(
-        vartype != "fusion" ~ paste0(
+        vartype != "fusion" &
+          .data$BM_VARIANT_ORIGIN == "Somatic" ~ paste0(
           "<a href='https://www.oncokb.org/gene/",gene,
           "/somatic/", alteration, "/",
           oncotree_code, "' target='_blank'>",
           .data$BM_MOLECULAR_PROFILE, "</a>"),
+        vartype == "snv_indel" &
+          .data$BM_VARIANT_ORIGIN == "Germline" ~ paste0(
+            "<a href='https://www.oncokb.org/gene/",
+            oncokb_root_gene,"/germline/Pathogenic%20Variants/",
+            stringr::str_replace_all(
+              stringr::str_replace_all(
+              .data$BM_CANCER_TYPE, " ", "%20"), "/", "%2F"),
+              "' target='_blank'>",
+            .data$BM_MOLECULAR_PROFILE, "</a>"),
         vartype == "fusion" & length(gene_partners) == 2 ~ paste0(
           "<a href='https://www.oncokb.org/gene/",oncokb_root_gene,
           "/somatic/", profile_name_url, "/",
@@ -135,6 +147,7 @@ clean_oncokb_evidence <- function(
 #' @param vartype Variant type (e.g., "snv_indel", "fusion", "cna")
 #' @param oncotree_code OncoTree code for tumor type (e.g., "BRCA" for breast cancer)
 #' @param variant_id Variant identifier for tracking
+#' @param match_by Matching strategy for SNVs/InDels (e.g., "hgvsp", "genomic")
 #' @return Tibble with one row per treatment-cancer type combination
 #'
 #' @export
@@ -145,7 +158,8 @@ extract_therapeutic_evidence <-
            alteration = NA,
            vartype = NA,
            oncotree_code = NA,
-           variant_id = NA) {
+           variant_id = NA,
+           match_by = "hgvsp") {
 
 
     alteration2 <- stringr::str_replace(
@@ -154,7 +168,7 @@ extract_therapeutic_evidence <-
 
     bmresolution = switch(
       vartype,
-      "snv_indel" = "hgvsp",
+      "snv_indel" = match_by,
       "fusion" = "fusion",
       "cna" = "gene"
     )
@@ -163,6 +177,11 @@ extract_therapeutic_evidence <-
     if (is.null(oncokb_annotation$treatments) ||
         length(oncokb_annotation$treatments) == 0) {
       return(therapeutic_df)
+    }
+
+    variant_origin <- "Somatic"
+    if("pathogenic" %in% names(oncokb_annotation)){
+      variant_origin <- "Germline"
     }
 
     # Helper function to extract first element from list/vector or return as-is
@@ -234,7 +253,7 @@ extract_therapeutic_evidence <-
         tibble::tibble(
           VAR_ID = variant_id,
           BM_SOURCE_DB = "oncokb",
-          BM_VARIANT_ORIGIN = "Somatic",
+          BM_VARIANT_ORIGIN = variant_origin,
           BM_RESOLUTION = bmresolution,
           BM_MAPPING_CONFIDENCE = "high",
           BM_EVIDENCE_TYPE = "Predictive",
@@ -288,6 +307,7 @@ extract_therapeutic_evidence <-
 #' @param oncotree_code OncoTree code for tumor type
 #' (e.g., "BRCA" for breast cancer)
 #' @param variant_id Variant identifier
+#' @param match_by Matching strategy for SNVs/InDels (e.g., "hgvsp", "genomic")
 #' @return Tibble with diagnostic evidence items
 #' @export
 extract_diagnostic_evidence <- function(
@@ -296,7 +316,8 @@ extract_diagnostic_evidence <- function(
     alteration = NA,
     vartype = NA,
     oncotree_code = NA,
-    variant_id = NA) {
+    variant_id = NA,
+    match_by = "hgvsp") {
 
   alteration2 <- stringr::str_replace(alteration, "p\\.", "")
   profile_name <- paste(gene, alteration, sep = " - ")
@@ -307,9 +328,14 @@ extract_diagnostic_evidence <- function(
     return(diagnostic_df)
   }
 
+  variant_origin <- "Somatic"
+  if("pathogenic" %in% names(oncokb_annotation)){
+    variant_origin <- "Germline"
+  }
+
   bmresolution = switch(
     vartype,
-    "snv_indel" = "hgvsp",
+    "snv_indel" = match_by,
     "fusion" = "fusion",
     "cna" = "gene"
   )
@@ -319,7 +345,7 @@ extract_diagnostic_evidence <- function(
       tibble::tibble(
         VAR_ID = variant_id,
         BM_SOURCE_DB = "oncokb",
-        BM_VARIANT_ORIGIN = "Somatic",
+        BM_VARIANT_ORIGIN = variant_origin,
         BM_RESOLUTION = bmresolution,
         BM_MAPPING_CONFIDENCE = "high",
         BM_EVIDENCE_TYPE = "Diagnostic",
@@ -363,6 +389,7 @@ extract_diagnostic_evidence <- function(
 #' @param oncotree_code OncoTree code for tumor type
 #' (e.g., "BRCA" for breast cancer)
 #' @param variant_id Variant identifier
+#' @param match_by Matching strategy for SNVs/InDels (e.g., "hgvsp", "genomic")
 #' @return Tibble with prognostic evidence items
 #' @export
 extract_prognostic_evidence <- function(
@@ -371,7 +398,8 @@ extract_prognostic_evidence <- function(
     alteration = NA,
     vartype = NA,
     oncotree_code = NA,
-    variant_id = NA) {
+    variant_id = NA,
+    match_by = "hgvsp") {
 
   alteration2 <- stringr::str_replace(alteration, "p\\.", "")
   profile_name <- paste(gene, alteration, sep = " - ")
@@ -382,9 +410,14 @@ extract_prognostic_evidence <- function(
     return(prognostic_df)
   }
 
+  variant_origin <- "Somatic"
+  if("pathogenic" %in% names(oncokb_annotation)){
+    variant_origin <- "Germline"
+  }
+
   bmresolution = switch(
     vartype,
-    "snv_indel" = "hgvsp",
+    "snv_indel" = match_by,
     "fusion" = "fusion",
     "cna" = "gene"
   )
@@ -396,7 +429,7 @@ extract_prognostic_evidence <- function(
       BM_SOURCE_DB = "oncokb",
       BM_RESOLUTION = bmresolution,
       BM_MAPPING_CONFIDENCE = "high",
-      BM_VARIANT_ORIGIN = "Somatic",
+      BM_VARIANT_ORIGIN = variant_origin,
       BM_EVIDENCE_DIRECTION = "Supports",
       BM_EVIDENCE_TYPE = "Prognostic",
       BM_EVIDENCE_LEVEL_FULL = px$level,
@@ -536,6 +569,7 @@ extract_prognostic_evidence <- function(
 #' @param vartype variant type (e.g., "snv_indel", "fusion", "cna")
 #' @param oncotree_code OncoTree code for tumor type
 #' @param variant_id Variant identifier
+#' @param match_by Matching strategy for SNVs/InDels (e.g., "hgvsp", "genomic")
 #' @return Named list with all extracted components
 #' @export
 extract_complete_annotation <- function(
@@ -544,18 +578,19 @@ extract_complete_annotation <- function(
     alteration = NA,
     vartype = NA,
     oncotree_code = NA,
-    variant_id = NA) {
+    variant_id = NA,
+    match_by = "hgvsp") {
 
   dplyr::bind_rows(
     pcgrr::extract_therapeutic_evidence(
       oncokb_annotation, gene, alteration,
-      vartype, oncotree_code, variant_id),
+      vartype, oncotree_code, variant_id, match_by),
     pcgrr::extract_diagnostic_evidence(
       oncokb_annotation, gene, alteration,
-      vartype, oncotree_code, variant_id),
+      vartype, oncotree_code, variant_id, match_by),
     pcgrr::extract_prognostic_evidence(
       oncokb_annotation, gene, alteration,
-      vartype, oncotree_code, variant_id))
+      vartype, oncotree_code, variant_id, match_by))
 
 }
 
@@ -602,6 +637,14 @@ fetch_oncokb_hgvsp_annotation <-
       tumorType = oncotree_code,
       referenceGenome = reference_genome
     )
+
+    if(is.null(oncotree_code) || length(oncotree_code) == 0 || is.na(oncotree_code)){
+      query_params <- list(
+        hugoSymbol = hugo_symbol,
+        alteration = protein_change,
+        referenceGenome = reference_genome
+      )
+    }
 
     # Make API request
     response <- tryCatch({
@@ -651,6 +694,7 @@ fetch_oncokb_hgvsp_annotation <-
 #'
 #' @param hgvsg Genomic change in HGVSg format (e.g., "7:g.140753336A>T")
 #' @param oncotree_code Tumor type name
+#' @param variant_origin somatic/germline
 #' @param oncokb_token OncoKB API token
 #' @param base_api_url Optional base URL for OncoKB API (default: pcgrr::oncokb_base_api_url)
 #' @param reference_genome Genome build, either "GRCh37" or "GRCh38" (default: "GRCh38")
@@ -661,7 +705,8 @@ fetch_oncokb_hgvsp_annotation <-
 fetch_oncokb_genomic_annotation <-
   function(
     hgvsg = "7:g.140753336A>T",
-    oncotree_code = "THYROID",
+    oncotree_code = NULL,
+    variant_origin = "somatic",
     oncokb_token = NULL,
     base_api_url = NULL,
     reference_genome = "GRCh38") {
@@ -673,9 +718,18 @@ fetch_oncokb_genomic_annotation <-
     stop("OncoKB token is required. Obtain from https://www.oncokb.org/account/settings")
   }
 
+  # check that variant_origin is either germline or somatic
+  if (!variant_origin %in% c("somatic", "germline")) {
+    stop("variant_origin must be either 'somatic' or 'germline'")
+  }
+
   # API endpoint
   base_url <-
     glue::glue("{pcgrr::oncokb_base_api_url}mutations/byHGVSg")
+  if(variant_origin == "germline"){
+    base_url <-
+      glue::glue("{pcgrr::oncokb_base_api_url}germline/mutations/byHGVSg")
+  }
   if (!is.null(base_api_url)) {
     base_url <- glue::glue("{base_api_url}mutations/byHGVSg")
   }
@@ -686,6 +740,15 @@ fetch_oncokb_genomic_annotation <-
     referenceGenome = reference_genome,
     tumorType = oncotree_code
   )
+
+  if (is.null(oncotree_code) ||
+      length(oncotree_code) == 0 ||
+      is.na(oncotree_code)) {
+    query_params <- list(
+      hgvsg = hgvsg,
+      referenceGenome = reference_genome
+    )
+  }
 
   # Make API request
   response <- tryCatch({
@@ -775,6 +838,17 @@ fetch_oncokb_fusion_annotation <-
       tumorType = oncotree_code
     )
 
+    if (is.null(oncotree_code) ||
+          length(oncotree_code) == 0 ||
+          is.na(oncotree_code)) {
+      query_params <- list(
+        hugoSymbolA = hugo_symbol_a,
+        hugoSymbolB = hugo_symbol_b,
+        structuralVariantType = structural_variant_type,
+        isFunctionalFusion = tolower(as.character(is_functional_fusion))
+      )
+    }
+
     # Make API request
     response <- tryCatch({
       httr::GET(
@@ -861,6 +935,15 @@ fetch_oncokb_cna_annotation <- function(
     copyNameAlterationType = cna_type_map[cna_type],
     tumorType = oncotree_code
   )
+
+   if (is.null(oncotree_code) ||
+       length(oncotree_code) == 0 ||
+       is.na(oncotree_code)) {
+     query_params <- list(
+       hugoSymbol = hugo_symbol,
+       copyNameAlterationType = cna_type_map[cna_type]
+     )
+   }
 
   # Make API request
   response <- tryCatch({
@@ -1137,15 +1220,16 @@ process_oncokb_maf <-
 
           ## log the symbol and hgvsp
           pcgrr::log4r_debug(
-            sprintf("Fetching annotation %d: %s %s",
+            sprintf("OncoKB web API retrieval - fetching annotation %d: %s %s",
                           length(variant_keys) + 1,
                           var$SYMBOL,
                           var$HGVSg))
 
-          # Fetch annotation via protein change
+          # Fetch annotation via genomic change
           annotation <- pcgrr::fetch_oncokb_genomic_annotation(
             hgvsg = var$HGVSg,
             oncotree_code = oncotree_code,
+            variant_origin = "somatic",
             oncokb_token = oncokb_token,
             reference_genome = "GRCh38"
           )
@@ -1155,8 +1239,11 @@ process_oncokb_maf <-
             evidence_df <- pcgrr::extract_complete_annotation(
               oncokb_annotation = annotation,
               gene = var$SYMBOL,
+              oncotree_code = oncotree_code,
               alteration = var$ALTERATION,
-              variant_id = var$VAR_ID)
+              vartype = "snv_indel",
+              variant_id = var$VAR_ID,
+              match_by = "genomic")
 
             if(NROW(evidence_df) > 0){
 

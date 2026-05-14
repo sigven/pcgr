@@ -6,7 +6,8 @@
 \usage{
 fetch_oncokb_genomic_annotation(
   hgvsg = "7:g.140753336A>T",
-  oncotree_code = "THYROID",
+  oncotree_code = NULL,
+  variant_origin = "somatic",
   oncokb_token = NULL,
   base_api_url = NULL,
   reference_genome = "GRCh38"
@@ -16,6 +17,8 @@ fetch_oncokb_genomic_annotation(
 \item{hgvsg}{Genomic change in HGVSg format (e.g., "7:g.140753336A>T")}
 
 \item{oncotree_code}{Tumor type name}
+
+\item{variant_origin}{somatic/germline}
 
 \item{oncokb_token}{OncoKB API token}
 

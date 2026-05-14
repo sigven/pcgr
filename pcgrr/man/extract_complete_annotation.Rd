@@ -10,7 +10,8 @@ extract_complete_annotation(
   alteration = NA,
   vartype = NA,
   oncotree_code = NA,
-  variant_id = NA
+  variant_id = NA,
+  match_by = "hgvsp"
 )
 }
 \arguments{
@@ -26,6 +27,8 @@ extract_complete_annotation(
 \item{oncotree_code}{OncoTree code for tumor type}
 
 \item{variant_id}{Variant identifier}
+
+\item{match_by}{Matching strategy for SNVs/InDels (e.g., "hgvsp", "genomic")}
 }
 \value{
 Named list with all extracted components

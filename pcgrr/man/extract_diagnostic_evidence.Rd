@@ -10,7 +10,8 @@ extract_diagnostic_evidence(
   alteration = NA,
   vartype = NA,
   oncotree_code = NA,
-  variant_id = NA
+  variant_id = NA,
+  match_by = "hgvsp"
 )
 }
 \arguments{
@@ -27,6 +28,8 @@ extract_diagnostic_evidence(
 (e.g., "BRCA" for breast cancer)}
 
 \item{variant_id}{Variant identifier}
+
+\item{match_by}{Matching strategy for SNVs/InDels (e.g., "hgvsp", "genomic")}
 }
 \value{
 Tibble with diagnostic evidence items

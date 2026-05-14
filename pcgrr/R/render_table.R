@@ -1491,6 +1491,10 @@ render_diagn_bm_table <- function(
         reactable::reactable(
           nested[, display_cols],
           columns = list(
+            BM_CLINICAL_SIGNIFICANCE = reactable::colDef(
+              name = "Diagnostic Evidence",
+              align = "center",
+              minWidth = 140),
             BM_MOLECULAR_PROFILE = reactable::colDef(
               name = "Molecular Profile",
               html = TRUE,
