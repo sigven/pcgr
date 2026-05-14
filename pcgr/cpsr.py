@@ -30,7 +30,7 @@ def get_args():
     optional_vcfanno = parser.add_argument_group('vcfanno options')
     optional_other = parser.add_argument_group('Other options')
 
-    optional_panel.add_argument('--panel_id',dest = "virtual_panel_id",type = str, default = "-1", help="Comma-separated string with identifier(s) of predefined virtual cancer predisposition gene panels,\nchoose any combination of the following identifiers (GEP = Genomics England PanelApp):\n" + str(pcgr_vars.panels))
+    optional_panel.add_argument('--panel_id',dest = "virtual_panel_id",type = str, default = "-1", help="Comma-separated string with identifier(s) of predefined virtual cancer predisposition gene panels,\nchoose any combination of the following identifiers (GEP = Genomics England PanelApp):\n" + str(pcgr_vars.panels_help_display))
     optional_panel.add_argument('--custom_list',dest = "custom_list",help="Provide custom list of genes from virtual panel 0 (single-column .txt/.tsv file with Ensembl gene identifiers),\n alternative to predefined panels provided with --panel_id)")
     optional_panel.add_argument('--custom_list_name',dest = "custom_list_name", default="None", help="Set name for custom made panel/list (single word - no whitespace), will be displayed in the report")
     optional_panel.add_argument('--diagnostic_grade_only', action="store_true",help="For panel_id's 1-44 (Genomics England PanelApp) - consider genes with a GREEN status only, default: %(default)s")
@@ -48,13 +48,7 @@ def get_args():
     optional_classification.add_argument('--pgx_findings', action='store_true',dest='pgx_findings',default=False, help='Report overlap with variants associated with chemotherapy toxicity (PgX findings, CPIC), default: %(default)s')
     optional_classification.add_argument('--gwas_findings', action='store_true',dest='gwas_findings',default=False, help='Report overlap with low to moderate cancer risk variants (tag SNPs) identified from genome-wide association studies, default: %(default)s')    
     optional_classification.add_argument('--max_af_gnomad', type = float, default = 0.9, dest = 'max_af_gnomad', help='Ignore reporting novel variants with gnomAD maximum allele frequency (AF) across populations greater than this value, default: %(default)s')
-    optional_classification.add_argument('--clinvar_trust_level', type=int, choices=[0,1,2,3,4], default=0, dest='clinvar_trust_level',
-        help='Level of trust/authority assigned to CPSR-based variant classification relative to existing ClinVar records: ' +
-             '0 = ClinVar trusted (override conflicted records only), ' +
-             '1 = Override zero gold star ClinVar records, ' +
-             '2 = Override zero- and single gold star ClinVar records, ' +
-             '3 = Override low-star and non-cancer-phenotype ClinVar records, ' +
-             '4 = CPSR always classifies (default: %(default)s)')
+    optional_classification.add_argument('--clinvar_trust_level', type=int, choices=[0,1,2,3,4], default=0, dest='clinvar_trust_level',help='Level of trust/authority assigned to CPSR-based variant classification relative to existing ClinVar records: \n' + pcgr_vars.clinvar_trust_levels_help_display + '\n(default: %(default)s)')
     optional_classification.add_argument('--clinvar_report_noncancer', action='store_true', help='Report also ClinVar-classified variants attributed to phenotypes/conditions NOT directly related to tumor development, default: %(default)s')
     
     optional_vcfanno.add_argument('--vcfanno_n_proc', default = 4, type = int, help="Number of vcfanno processes (option '-p' in vcfanno), default: %(default)s")
@@ -68,7 +62,7 @@ def get_args():
     optional_vep.add_argument('--vep_no_intergenic', action = "store_true", help="Skip intergenic variants during processing (option '--no_intergenic' in VEP), default: %(default)s")
 
     required.add_argument('--input_vcf', help='VCF input file with small germline DNA variants (SNVs/InDels).', required = True)
-    optional_other.add_argument('--input_sv_vcf', help='VCF input file with structural germline DNA variants (SVs) - optional.', default=None)
+    #optional_other.add_argument('--input_sv_vcf', help='VCF input file with structural germline DNA variants (SVs) - optional.', default=None)
     required.add_argument("--vep_dir", dest="vep_dir", help="Directory of VEP cache, e.g.  $HOME/.vep", required=True)
     required.add_argument('--refdata_dir',help=f"Directory that contains the PCGR/CPSR reference data, e.g. ~/pcgr-data-{pcgr_vars.PCGR_VERSION}", required = True)
     required.add_argument('--output_dir',help='Output directory', required = True)

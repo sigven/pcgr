@@ -177,7 +177,22 @@ GE_panels = {
       44: "DNA repair genes pertinent cancer susceptibility (GEP)"
 }
 
-panels = '\n'.join([f'{k} = {GE_panels[k]}' for k in GE_panels]) # for displaying in help
+# '0 = ClinVar trusted (override conflicted records only), ' +
+#             '1 = Override zero gold star ClinVar records, ' +
+#             '2 = Override zero- and single gold star ClinVar records, ' +
+#             '3 = Override low-star and non-cancer-phenotype ClinVar records, ' +
+#             '4 = CPSR always classifies
+clinvar_trust_levels = {
+    0: "ClinVar trusted (override conflicted records only)",
+    1: "Override zero gold star ClinVar records",
+    2: "Override zero- and single gold star ClinVar records",
+    3: "Override low-star and non-cancer-phenotype ClinVar records",
+    4: "CPSR always classifies"
+}
+
+clinvar_trust_levels_help_display = '\n'.join([f'{k} = {clinvar_trust_levels[k]}' for k in clinvar_trust_levels]) # for displaying in help
+panels_help_display = '\n'.join([f'{k} = {GE_panels[k]}' for k in GE_panels]) # for displaying in help
+
 
 ## https://www.ensembl.org/info/genome/variation/prediction/predicted_data.html#consequences
 VEP_consequence_rank = {
