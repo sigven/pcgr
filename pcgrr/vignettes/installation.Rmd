@@ -14,9 +14,9 @@ require(glue, include.only = "glue")
 ```
 
 ```{r vars, echo=FALSE}
-Sys.setenv(VEP_VERSION = "113")
-Sys.setenv(PCGR_VERSION = "2.2.5")
-Sys.setenv(BUNDLE_VERSION = "20250314")
+Sys.setenv(VEP_VERSION = "115")
+Sys.setenv(PCGR_VERSION = "2.3.0")
+Sys.setenv(BUNDLE_VERSION = "20260508")
 VEP_VERSION <- Sys.getenv("VEP_VERSION")
 PCGR_VERSION <- Sys.getenv("PCGR_VERSION")
 BUNDLE_VERSION <- Sys.getenv("BUNDLE_VERSION")
@@ -81,7 +81,7 @@ mv data/ ${BUNDLE_VERSION}
 The latest Ensembl VEP version we support is **v`r VEP_VERSION`**.
 
 [vep-web]: https://www.ensembl.org/info/docs/tools/vep/index.html
-[ensembl-ftp]: https://ftp.ensembl.org/pub/release-113/variation/indexed_vep_cache/
+[ensembl-ftp]: https://ftp.ensembl.org/pub/release-115/variation/indexed_vep_cache/
 [vep-cache]: https://www.ensembl.org/info/docs/tools/vep/script/vep_cache.html#cache
 
 #### Bash Example
