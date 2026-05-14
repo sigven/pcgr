@@ -12,11 +12,11 @@ output: rmarkdown::html_document
 ###  Variant frequency databases
   * [gnomAD](http://exac.broadinstitute.org/) - germline variant frequencies exome-wide (r4.1, April 2024)
   * [dbSNP](http://www.ncbi.nlm.nih.gov/SNP/) - database of short genetic variants (build 156)
-  * [Cancer Hotspots](http://cancerhotspots.org) - a resource for statistically significant mutations in cancer (v2, 2017)
-  * [TCGA](https://portal.gdc.cancer.gov/) - somatic mutations discovered across 33 tumor type cohorts (release 43.0, May 2025)
+  * [Cancer Hotspots](http://cancerhotspots.org) - a resource for statistically significant mutations in cancer (v2/v3, 2017/2026)
+  * [TCGA](https://portal.gdc.cancer.gov/) - somatic mutations discovered across 33 tumor type cohorts (release 45.0, December 2025)
  
 ### Variant databases of clinical utility
-  * [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - database of clinically related variants (April 2026)
+  * [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - database of clinically related variants (May 2026)
   * [CIViC](https://civicdb.org) - clinical interpretations of variants in cancer (March 20th 2026)
   * [CGI](http://www.cancergenomeinterpreter.org/biomarkers) - Cancer Genome Interpreter Cancer Biomarkers Database (CGI) (October 18th 2022)
 

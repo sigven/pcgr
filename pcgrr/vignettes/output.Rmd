@@ -457,22 +457,22 @@ The format of the compressed `cna_gene_ann.tsv.gz` is the following:
 | 11. `TUMOR_PLOIDY_SOURCE` | Source of tumor ploidy estimate |
 | 12. `TUMOR_PURITY` | Tumor purity estimate |
 | 13. `SEGMENT_LENGTH_MB` | Length of segment in Mb |
-| 14. `TRANSCRIPT_OVERLAP_PERCENT` | Percentage overlap between copy number segment and transcript |
-| 15. `CYTOBAND` | Associated cytoband |
-| 16. `EVENT_TYPE` | Focal or broad (covering more than 25% of chromosome arm) |
-| 17. `VARIANT_CLASS` | _amplification_: total copy number >= user-defined threshold; _homdel_: total copy number equal to zero; _hetdel_: total copy number equal to one; _gain_: copy number gain below amplification threshold; _undefined_: other copy number states |
-| 18. `VARIANT_CLASS_DISPLAY` | Display label for variant class |
-| 19. `SYMBOL` | Gene symbol |
-| 20. `ENTREZGENE` | Entrez gene identifier |
-| 21. `GENENAME` | Gene name |
-| 22. `ENSEMBL_GENE_ID` | Ensembl gene identifier |
-| 23. `TUMOR_SUPPRESSOR` | Flag indicating if gene is tumor suppressor (CancerMine/NCG) |
-| 24. `TUMOR_SUPPRESSOR_SUPPORT` | Tumor suppressor annotation support (CancerMine/NCG) |
-| 25. `ONCOGENE` | Flag indicating if gene is oncogene (CancerMine/NCG) |
-| 26. `ONCOGENE_SUPPORT` | Oncogene annotation support (CancerMine/NCG) |
-| 27. `MUTATION_EFFECT_OKB` | OncoKB mutation effect annotation (e.g. Loss-of-function, Gain-of-function) |
-| 28. `ONCOGENICITY_OKB` | OncoKB oncogenicity annotation (e.g. Oncogenic, Likely Oncogenic) |
-| 29. `TRANSCRIPT_OVERLAP` | Comma-separated list of associated transcripts, including percentage of transcript overlap |
+| 14. `CYTOBAND` | Associated cytoband |
+| 15. `EVENT_TYPE` | Focal or broad (covering more than 25% of chromosome arm) |
+| 16. `VARIANT_CLASS` | _amplification_: total copy number >= user-defined threshold; _homdel_: total copy number equal to zero; _hetdel_: total copy number equal to one; _gain_: copy number gain below amplification threshold; _undefined_: other copy number states |
+| 17. `VARIANT_CLASS_DISPLAY` | Display label for variant class |
+| 18. `SYMBOL` | Gene symbol |
+| 19. `ENTREZGENE` | Entrez gene identifier |
+| 20. `GENENAME` | Gene name |
+| 21. `ENSEMBL_GENE_ID` | Ensembl gene identifier |
+| 22. `TUMOR_SUPPRESSOR` | Flag indicating if gene is tumor suppressor (CancerMine/NCG) |
+| 23. `TUMOR_SUPPRESSOR_SUPPORT` | Tumor suppressor annotation support (CancerMine/NCG) |
+| 24. `ONCOGENE` | Flag indicating if gene is oncogene (CancerMine/NCG) |
+| 25. `ONCOGENE_SUPPORT` | Oncogene annotation support (CancerMine/NCG) |
+| 26. `MUTATION_EFFECT_OKB` | OncoKB mutation effect annotation (e.g. Loss-of-function, Gain-of-function) |
+| 27. `ONCOGENICITY_OKB` | OncoKB oncogenicity annotation (e.g. Oncogenic, Likely Oncogenic) |
+| 28. `TRANSCRIPT_OVERLAP` | Comma-separated list of associated transcripts, including percentage of transcript overlap |
+| 29. `TRANSCRIPT_OVERLAP_PERCENT` | Percentage overlap between copy number segment and transcript |
 | 30. `ACTIONABILITY_TIER` | Variant actionability tier - AMP/ASCO/CAP |
 | 31. `ACTIONABILITY` | Variant clinical actionability significance - AMP/ASCO/CAP |
 | 32. `BIOMARKER_MATCH` | Biomarker match |
