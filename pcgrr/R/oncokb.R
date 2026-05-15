@@ -1035,11 +1035,15 @@ process_oncokb_maf <-
       maf_hgvsp <- readr::read_tsv(
         maf_file_hgvsp, show_col_types = FALSE)
 
-      # Filter for annotated variants
+      # Filter for variants in OncoKB genes regardless of ANNOTATED flag:
+      # the MAF annotator batch endpoint misses variants covered only by gene-level
+      # catchall entries (e.g. "Truncating Mutations"), while the individual API
+      # endpoint correctly matches them — so we gate on GENE_IN_ONCOKB only and let
+      # the API determine whether evidence exists
       maf_annotated_hgvsp <- maf_hgvsp |>
         dplyr::filter(
-          .data$ANNOTATED == TRUE,
-          .data$GENE_IN_ONCOKB == TRUE)
+          .data$GENE_IN_ONCOKB == TRUE &
+            .data$MUTATION_EFFECT != "Unknown")
 
       assertable::assert_colnames(
         maf_annotated_hgvsp,
@@ -1161,11 +1165,11 @@ process_oncokb_maf <-
       maf_hgvsg <- readr::read_tsv(
         maf_file_hgvsg, show_col_types = FALSE)
 
-      # Filter for annotated variants
+      # Filter for variants in OncoKB genes without a protein change (HGVSg path),
+      # regardless of ANNOTATED flag — same reasoning as HGVSp path above
       maf_annotated_hgvsg <- maf_hgvsg |>
         dplyr::filter(
           is.na(HGVSp_Short) | HGVSp_Short == "",
-          .data$ANNOTATED == TRUE,
           .data$GENE_IN_ONCOKB == TRUE)
 
       assertable::assert_colnames(

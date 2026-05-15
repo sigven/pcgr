@@ -498,18 +498,16 @@ def validate_oncokb_input_file(path, required_columns):
 def filter_oncokb_output(output_path, logger=None):
    """
    Filter OncoKB annotator output to retain only rows where
-   GENE_IN_ONCOKB and VARIANT_IN_ONCOKB are both True.
-   Overwrites the file in place.
+   GENE_IN_ONCOKB is True. Overwrites the file in place.
    """
    logger.info(f"Filtering OncoKB output: {os.path.basename(output_path)}")
    if not os.path.isfile(output_path):
       return
    df = pd.read_csv(output_path, sep="\t", low_memory=False)
    cols = df.columns.tolist()
-   if "GENE_IN_ONCOKB" in cols and "VARIANT_IN_ONCOKB" in cols:
+   if "GENE_IN_ONCOKB" in cols:
       df = df[
-         (df["GENE_IN_ONCOKB"].astype(str).str.strip().str.lower() == "true") &
-         (df["VARIANT_IN_ONCOKB"].astype(str).str.strip().str.lower() == "true")
+         (df["GENE_IN_ONCOKB"].astype(str).str.strip().str.lower() == "true")
       ]
       df.to_csv(output_path, sep="\t", index=False)
 
