@@ -356,6 +356,7 @@ extract_diagnostic_evidence <- function(
         BM_MOLECULAR_PROFILE_TYPE = "Single",
         BM_RATING = 5,
         BM_EVIDENCE_LEVEL_FULL = dx$level,
+        BM_CANCER_TYPE = NA_character_,
         BM_EVIDENCE_DESCRIPTION = ifelse(
           is.null(dx$description), NA, dx$description),
         BM_REFERENCE = ifelse(
@@ -438,6 +439,7 @@ extract_prognostic_evidence <- function(
         is.null(px$alterations), NA, paste(px$alterations, collapse = ", ")),
       BM_MOLECULAR_PROFILE_TYPE = "Single",
       BM_RATING = 5,
+      BM_CANCER_TYPE = NA_character_,
       BM_EVIDENCE_DESCRIPTION = ifelse(
         is.null(px$description), NA, px$description),
       BM_REFERENCE = ifelse(
