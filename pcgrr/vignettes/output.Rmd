@@ -331,35 +331,37 @@ The following variables are included in the TSV file (VCF tags issued by the use
 | 38. `ONCOGENICITY_SCORE` | Variant oncogenicity score - ClinGen/CGC/VICC SOP implementation |
 | 39. `MUTATION_EFFECT_OKB` | OncoKB mutation effect annotation (e.g. Loss-of-function, Gain-of-function) |
 | 40. `MUTATION_EFFECT_DESCRIPTION_OKB` | OncoKB mutation effect description |
-| 41. `ONCOGENICITY_OKB` | OncoKB oncogenicity annotation (e.g. Oncogenic, Likely Oncogenic) |
-| 42. `CANONICAL` | Flag indicating if transcript is canonical |
-| 43. `CCDS` | CCDS identifier |
-| 44. `UNIPROT_ACC` | UniProt accession |
-| 45. `ENSEMBL_TRANSCRIPT_ID` | Ensembl transcript identifier |
-| 46. `ENSEMBL_PROTEIN_ID` | Ensembl protein identifier |
-| 47. `REFSEQ_TRANSCRIPT_ID` | RefSeq transcript identifier |
-| 48. `REFSEQ_PROTEIN_ID` | RefSeq protein identifier |
-| 49. `MANE_SELECT` | MANE transcript select |
-| 50. `MANE_PLUS_CLINICAL` | MANE transcript plus clinical |
-| 51. `ONCOGENE` | Flag indicating if gene is oncogene (CancerMine/NCG) |
-| 52. `ONCOGENE_SUPPORT` | Oncogene annotation support (CancerMine/NCG) |
-| 53. `TUMOR_SUPPRESSOR` | Flag indicating if gene is tumor suppressor (CancerMine/NCG) |
-| 54. `TUMOR_SUPPRESSOR_SUPPORT` | Tumor suppressor annotation support (CancerMine/NCG) |
-| 55. `TARGETED_INHIBITORS2` | Targeted inhibitors |
-| 56. `REGULATORY_ANNOTATION` | Regulatory annotation |
-| 57. `VEP_ALL_CSQ` | VEP consequence - all transcripts |
-| 58. `gnomADe_AF` | gnomAD exomes allele frequency - globally |
-| 59. `gnomADg_AF` | gnomAD genomes allele frequency - globally |
-| 60. `DBSNP_RSID` | dbSNP identifier |
-| 61. `COSMIC_ID` | COSMIC identifier |
-| 62. `TCGA_FREQUENCY` | Frequency of variant across TCGA tumor types. Format: `tumortype | percent affected | affected cases | total cases` |
-| 63. `TCGA_PANCANCER_COUNT` | Raw variant count across all TCGA tumor types |
-| 64. `CLINVAR_MSID` | ClinVar measureset identifier |
-| 65. `CLINVAR_CLASSIFICATION` | ClinVar variant classification |
-| 66. `CLINVAR_VARIANT_ORIGIN` | ClinVar variant origin |
-| 67. `CLINVAR_NUM_SUBMITTERS` | ClinVar number of submitters |
-| 68. `CLINVAR_GOLD_STARS` | ClinVar review status gold stars (0-4) |
-| 69. `CLINVAR_CONFLICTED` | ClinVar variant classification is conflicted |
+| 41. `ONCOGENICITY_OKB` | OncoKB oncogenicity annotation (e.g. Oncogenic, Likely Oncogenic, Likely Neutral etc.) |
+| 42. `VARIANT_SUMMARY_OKB` | OncoKB variant summary |
+| 43. `TUMOR_TYPE_SUMMARY_OKB` | OncoKB tumor type summary |
+| 44. `CANONICAL` | Flag indicating if transcript is canonical |
+| 45. `CCDS` | CCDS identifier |
+| 46. `UNIPROT_ACC` | UniProt accession |
+| 47. `ENSEMBL_TRANSCRIPT_ID` | Ensembl transcript identifier |
+| 48. `ENSEMBL_PROTEIN_ID` | Ensembl protein identifier |
+| 49. `REFSEQ_TRANSCRIPT_ID` | RefSeq transcript identifier |
+| 50. `REFSEQ_PROTEIN_ID` | RefSeq protein identifier |
+| 51. `MANE_SELECT` | MANE transcript select |
+| 52. `MANE_PLUS_CLINICAL` | MANE transcript plus clinical |
+| 53. `ONCOGENE` | Flag indicating if gene is oncogene (CancerMine/NCG) |
+| 54. `ONCOGENE_SUPPORT` | Oncogene annotation support (CancerMine/NCG) |
+| 55. `TUMOR_SUPPRESSOR` | Flag indicating if gene is tumor suppressor (CancerMine/NCG) |
+| 56. `TUMOR_SUPPRESSOR_SUPPORT` | Tumor suppressor annotation support (CancerMine/NCG) |
+| 57. `TARGETED_INHIBITORS2` | Targeted inhibitors |
+| 58. `REGULATORY_ANNOTATION` | Regulatory annotation |
+| 59. `VEP_ALL_CSQ` | VEP consequence - all transcripts |
+| 60. `gnomADe_AF` | gnomAD exomes allele frequency - globally |
+| 61. `gnomADg_AF` | gnomAD genomes allele frequency - globally |
+| 62. `DBSNP_RSID` | dbSNP identifier |
+| 63. `COSMIC_ID` | COSMIC identifier |
+| 64. `TCGA_FREQUENCY` | Frequency of variant across TCGA tumor types. Format: `tumortype | percent affected | affected cases | total cases` |
+| 65. `TCGA_PANCANCER_COUNT` | Raw variant count across all TCGA tumor types |
+| 66. `CLINVAR_MSID` | ClinVar measureset identifier |
+| 67. `CLINVAR_CLASSIFICATION` | ClinVar variant classification |
+| 68. `CLINVAR_VARIANT_ORIGIN` | ClinVar variant origin |
+| 69. `CLINVAR_NUM_SUBMITTERS` | ClinVar number of submitters |
+| 70. `CLINVAR_GOLD_STARS` | ClinVar review status gold stars (0-4) |
+| 71. `CLINVAR_CONFLICTED` | ClinVar variant classification is conflicted |
 
 ##### Tumor-only runs
 
@@ -471,12 +473,14 @@ The format of the compressed `cna_gene_ann.tsv.gz` is the following:
 | 25. `ONCOGENE_SUPPORT` | Oncogene annotation support (CancerMine/NCG) |
 | 26. `MUTATION_EFFECT_OKB` | OncoKB mutation effect annotation (e.g. Loss-of-function, Gain-of-function) |
 | 27. `ONCOGENICITY_OKB` | OncoKB oncogenicity annotation (e.g. Oncogenic, Likely Oncogenic) |
-| 28. `TRANSCRIPT_OVERLAP` | Comma-separated list of associated transcripts, including percentage of transcript overlap |
-| 29. `TRANSCRIPT_OVERLAP_PERCENT` | Percentage overlap between copy number segment and transcript |
-| 30. `ACTIONABILITY_TIER` | Variant actionability tier - AMP/ASCO/CAP |
-| 31. `ACTIONABILITY` | Variant clinical actionability significance - AMP/ASCO/CAP |
-| 32. `BIOMARKER_MATCH` | Biomarker match |
-| 33. `TARGETED_INHIBITORS_ALL2` | Molecularly targeted inhibitors - indicated for any tumor type |
+| 28. `VARIANT_SUMMARY_OKB` | OncoKB variant summary |
+| 29. `TUMOR_TYPE_SUMMARY_OKB` | OncoKB tumor type summary |
+| 30. `TRANSCRIPT_OVERLAP` | Comma-separated list of associated transcripts, including percentage of transcript overlap |
+| 31. `TRANSCRIPT_OVERLAP_PERCENT` | Percentage overlap between copy number segment and transcript |
+| 32. `ACTIONABILITY_TIER` | Variant actionability tier - AMP/ASCO/CAP |
+| 33. `ACTIONABILITY` | Variant clinical actionability significance - AMP/ASCO/CAP |
+| 34. `BIOMARKER_MATCH` | Biomarker match |
+| 35. `TARGETED_INHIBITORS_ALL2` | Molecularly targeted inhibitors - indicated for any tumor type |
 
 ### Gene expression data
 

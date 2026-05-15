@@ -445,6 +445,8 @@ ONCOKB_CNA_REQUIRED_COLS = {"Tumor_Sample_Barcode", "Hugo_Symbol", "Copy_Number_
 ## OncoKB annotation columns: source name → renamed column in output TSV
 ## Same mapping applies for SNV/InDel, fusion and CNA annotator outputs.
 ONCOKB_COLS = {
+    'VARIANT_SUMMARY':             'VARIANT_SUMMARY_OKB',
+    'TUMOR_TYPE_SUMMARY':          'TUMOR_TYPE_SUMMARY_OKB',
     'MUTATION_EFFECT':             'MUTATION_EFFECT_OKB',
     'MUTATION_EFFECT_CITATIONS':   'MUTATION_EFFECT_CITATIONS_OKB',
     'ONCOGENIC':                   'ONCOGENICITY_OKB',
