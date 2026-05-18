@@ -69,6 +69,9 @@ jobs:
     defaults:
       run:
         shell: bash -l {0}
+    permissions:
+      packages: write
+      contents: write
     steps:
       - name: 🚚 Code checkout
         uses: actions/checkout@v6
@@ -125,6 +128,8 @@ jobs:
     defaults:
       run:
         shell: bash -l {0}
+    permissions:
+      packages: write
     steps:
       - name: 🗑 Free Disk Space
         uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
@@ -177,6 +182,8 @@ jobs:
     defaults:
       run:
         shell: bash -l {0}
+    permissions:
+      contents: write
     steps:
       - name: 🚚 Checkout tag
         uses: actions/checkout@v6

@@ -56,13 +56,13 @@ replace = "pcgr =={new_version}"
 
 [[tool.bumpversion.files]]
 filename = "conda/env/yaml/pcgrr.yaml"
-search = "pcgrr =={current_version}"
-replace = "pcgrr =={new_version}"
+search = "r-pcgrr =={current_version}"
+replace = "r-pcgrr =={new_version}"
 
 [[tool.bumpversion.files]]
 filename = "conda/env/yaml/pkgdown.yaml"
-search = "pcgrr =={current_version}"
-replace = "pcgrr =={new_version}"
+search = "r-pcgrr =={current_version}"
+replace = "r-pcgrr =={new_version}"
 
 [[tool.bumpversion.files]]
 filename = ".github/workflows/build_conda_recipes.yaml"
