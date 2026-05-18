@@ -1,0 +1,24 @@
+name: pcgr
+
+channels:
+  - pcgr
+  - conda-forge
+  - bioconda
+
+dependencies:
+  - pcgr ==2.2.5.9012 # bump
+  - bioconda::bedtools
+  - bioconda::bcftools
+  - bioconda::ensembl-vep ==115.1
+  - conda-forge::pandoc
+  - bioconda::perl-bio-bigfile
+  - conda-forge::perl-compress-raw-zlib
+  - bioconda::vcfanno
+  - bioconda::vt
+  - bioconda::vcf2maf
+  - bioconda::vcf2tsvpy ==0.6.1
+  - conda-forge::yaml
+  - pcgr::oncokb-annotator
+  - conda-forge::urllib3 # oncokb-annotator
+  - conda-forge::requests # oncokb-annotator
+  - conda-forge::kiwisolver # oncokb-annotator

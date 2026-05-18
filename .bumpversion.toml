@@ -1,5 +1,5 @@
 [tool.bumpversion]
-current_version = "2.2.5"
+current_version = "2.2.5.9012"
 search = "{current_version}"
 replace = "{new_version}"
 message = "Bump version: {current_version} → {new_version}"
@@ -40,29 +40,29 @@ search = 'version = "{current_version}"'
 replace = 'version = "{new_version}"'
 
 [[tool.bumpversion.files]]
-filename = "conda/recipe/pcgr/meta.yaml"
+filename = "conda/recipe/pcgr/recipe.yaml"
 search = "version: {current_version}"
 replace = "version: {new_version}"
 
 [[tool.bumpversion.files]]
-filename = "conda/recipe/pcgrr/meta.yaml"
+filename = "conda/recipe/pcgrr/recipe.yaml"
 search = "version: {current_version}"
 replace = "version: {new_version}"
 
 [[tool.bumpversion.files]]
-filename = "conda/env/yml/pcgr.yml"
+filename = "conda/env/yaml/pcgr.yaml"
 search = "pcgr =={current_version}"
 replace = "pcgr =={new_version}"
 
 [[tool.bumpversion.files]]
-filename = "conda/env/yml/pcgrr.yml"
-search = "pcgrr =={current_version}"
-replace = "pcgrr =={new_version}"
+filename = "conda/env/yaml/pcgrr.yaml"
+search = "r-pcgrr =={current_version}"
+replace = "r-pcgrr =={new_version}"
 
 [[tool.bumpversion.files]]
-filename = "conda/env/yml/pkgdown.yml"
-search = "pcgrr =={current_version}"
-replace = "pcgrr =={new_version}"
+filename = "conda/env/yaml/pkgdown.yaml"
+search = "r-pcgrr =={current_version}"
+replace = "r-pcgrr =={new_version}"
 
 [[tool.bumpversion.files]]
 filename = ".github/workflows/build_conda_recipes.yaml"

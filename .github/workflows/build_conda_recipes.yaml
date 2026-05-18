@@ -4,96 +4,122 @@ on:
   push:
     branches:
       - main
-      - vep114
+      - dev
 
 env:
-  atoken: ${{ secrets.ANACONDA_UPLOAD_TOKEN }}
-  recipe_path: conda/recipe
-  env_yml_path: conda/env/yml
-  env_lock_path: conda/env/lock
-  VERSION: '2.2.5' # versioned by bump2version
+  conda_token: ${{ secrets.ANACONDA_UPLOAD_TOKEN }}
+  conda_recipe: conda/recipe
+  conda_env_yaml: conda/env/yaml
+  conda_env_lock: conda/env/lock
+  conda_org: pcgr
+  VERSION: '2.2.5.9012' # bump
 jobs:
-  build_pcgrr_conda_pkg:
+  conda_build:
     # When merging to one of the branches above and the commit message matches
     if: "startsWith(github.event.head_commit.message, 'Bump version:')"
-    name: Build pcgrr conda pkg
+    name: 🔧 Build ${{ matrix.pkg }} conda pkg
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        pkg: [pcgr, pcgrr]
     defaults:
       run:
         shell: bash -l {0}
     steps:
-      - name: Code checkout
-        uses: actions/checkout@v4
-      - name: Micromamba setup
-        uses: mamba-org/setup-micromamba@v1
-        with:
-          environment-file: ${{ env.env_yml_path }}/condabuild.yml
-      - name: 🐍 Conda pkg build and upload
+      - name: 🚚 Code checkout
+        uses: actions/checkout@v6
+      - name: Set branch env vars
         run: |
-          conda mambabuild ${recipe_path}/pcgrr -c conda-forge -c bioconda --token ${atoken}
-
-  build_pcgr_conda_pkg:
-    # When merging to one of the branches above and the commit message matches
-    if: "startsWith(github.event.head_commit.message, 'Bump version:')"
-    name: Build pcgr conda pkg
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash -l {0}
-    steps:
-      - name: Code checkout
-        uses: actions/checkout@v4
-      - name: Micromamba setup
-        uses: mamba-org/setup-micromamba@v1
+          if [[ "${{ github.ref }}" == "refs/heads/dev" ]]; then
+            echo "DEV_CONDA_CHANNEL=--channel ${{ env.conda_org }}/label/dev" >> $GITHUB_ENV
+            echo "DEV_UPLOAD_LABEL=--channel dev" >> $GITHUB_ENV
+          else
+            echo "DEV_CONDA_CHANNEL=" >> $GITHUB_ENV
+            echo "DEV_UPLOAD_LABEL=" >> $GITHUB_ENV
+          fi
+      - name: 👾 Miniforge setup
+        uses: conda-incubator/setup-miniconda@v3
         with:
-          environment-file: ${{ env.env_yml_path }}/condabuild.yml
-      - name: 🐍 Conda pkg build and upload
+          auto-update-conda: true
+          environment-file: ${{ env.conda_env_yaml }}/condabuild.yaml
+          activate-environment: condabuild_env
+          miniforge-version: 26.1.0-0 # need to use mamba < 2.6.0 - see conda/conda-lock#906
+      - name: 🐍🔧 Conda pkg build
         run: |
-          conda mambabuild ${recipe_path}/pcgr -c conda-forge -c bioconda --token ${atoken} --quiet
+          rattler-build build \
+            --recipe-dir ${{ env.conda_recipe }}/${{ matrix.pkg }} \
+            ${{ env.DEV_CONDA_CHANNEL }} \
+            --channel ${{ env.conda_org }} \
+            --channel conda-forge \
+            --channel bioconda \
+            --output-dir ${RUNNER_TEMP}/out_${{ matrix.pkg }}
+      - name: 🐍🪁 Conda pkg upload
+        run: |
+          pkg_path=$(find ${RUNNER_TEMP}/out_${{ matrix.pkg }} -type f -name "*.conda")
+          rattler-build upload anaconda \
+            --owner ${{ env.conda_org }} \
+            --api-key ${{ env.conda_token }} \
+            ${{ env.DEV_UPLOAD_LABEL }} \
+            ${pkg_path}
 
-  # spin up fresh instance since conda-lock takes ages when run on previous one
   conda_lock:
-    name: Conda lock
+    name: 🔒 Conda lock
     runs-on: ubuntu-latest
-    needs: [build_pcgr_conda_pkg, build_pcgrr_conda_pkg]
+    needs: [conda_build]
     defaults:
       run:
         shell: bash -l {0}
+    permissions:
+      packages: write
+      contents: write
     steps:
-      - name: Code checkout
-        uses: actions/checkout@v4
-      - name: Micromamba setup
-        uses: mamba-org/setup-micromamba@v1
+      - name: 🚚 Code checkout
+        uses: actions/checkout@v6
+      - name: Set branch env vars
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/dev" ]]; then
+            echo "DEV_CONDA_CHANNEL=--channel ${{ env.conda_org }}/label/dev" >> $GITHUB_ENV
+          else
+            echo "DEV_CONDA_CHANNEL=" >> $GITHUB_ENV
+          fi
+      - name: 👾 Miniforge setup
+        uses: conda-incubator/setup-miniconda@v3
         with:
-          environment-file: ${{ env.env_yml_path }}/condabuild.yml
+          environment-file: ${{ env.conda_env_yaml }}/condabuild.yaml
+          activate-environment: condabuild_env
+          auto-update-conda: true
+          miniforge-version: 26.1.0-0 # need to use mamba < 2.6.0 - see conda/conda-lock#906
       - name: 🔒 Conda lock
         run: |
-          # 1. generate a combined lock file
-          # 2. render platform-specific locks
-          conda-lock lock --file ${env_yml_path}/pcgr.yml -p osx-64 -p linux-64
-          conda-lock render --kind explicit -p osx-64 -p linux-64 conda-lock.yml --filename-template 'pcgr-{platform}.lock' && rm conda-lock.yml
-          conda-lock lock --file ${env_yml_path}/pcgrr.yml -p osx-64 -p linux-64
-          conda-lock render --kind explicit -p osx-64 -p linux-64 conda-lock.yml --filename-template 'pcgrr-{platform}.lock' && rm conda-lock.yml
-          mv pcgrr-*.lock ${env_lock_path}
-          mv pcgr-*.lock ${env_lock_path}
-      - name: Commit changes
+          conda config --set channel_priority flexible
+          for pkg in pcgr pcgrr; do
+            conda-lock lock \
+              -p linux-64 -p osx-64 \
+              -f ${{ env.conda_env_yaml }}/${pkg}.yaml \
+              --lockfile lock-${pkg}.yaml \
+              ${{ env.DEV_CONDA_CHANNEL }} \
+              -c ${{ env.conda_org }} -c conda-forge -c bioconda
+            conda-lock render \
+              -p linux-64 -p osx-64 \
+              --filename-template "${pkg}-{platform}.lock" \
+              lock-${pkg}.yaml \
+              && rm lock-${pkg}.yaml \
+              && mv ${pkg}-*.lock ${{ env.conda_env_lock }}/
+          done
+
+      - name: 💾 Commit lockfiles
         run: |
           git status
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
-          MSG="[bot] Updating conda-lock files (v${VERSION})"
-          git add .
+          MSG="[bot] Updating conda-lock files (v${{ env.VERSION }})"
+          git add ${{ env.conda_env_lock }}/
           git commit -m "${MSG}"
           git push
-      - name: 🌐 Website publish
-        if: github.ref_name == 'main'
+      - name: 🔖 Tag creation
         run: |
-          micromamba env create -n pkgdownenv -f ${env_yml_path}/pkgdown.yml
-          micromamba activate pkgdownenv
-          cp pcgrr/DESCRIPTION . # hack for pkgdown to work
-          printf "pcgrr version:\n"
-          Rscript -e "packageVersion('pcgrr')"
-          Rscript -e "pkgdown::deploy_to_branch(pkg = 'pcgrr', commit_message = 'Built PCGR website: https://sigven.github.io/pcgr/', branch = 'gh-pages', new_process = FALSE)"
+          git tag v${{ env.VERSION }}
+          git push origin v${{ env.VERSION }}
 
   docker_deploy:
     name: Build and deploy Docker
@@ -102,57 +128,35 @@ jobs:
     defaults:
       run:
         shell: bash -l {0}
+    permissions:
+      packages: write
     steps:
-      - name: Code checkout
-        uses: actions/checkout@v4
-      - id: pull_lock_commit
-        name: 📥 Pull lock commit
-        run: |
-            git pull --no-rebase # for pulling in the changed locks
-            git --no-pager log --decorate=short --pretty=oneline -n3
-            LATEST_COMMIT_HASH="$(git --no-pager log -1 --format='%H')"
-            echo "latest_commit_hash=${LATEST_COMMIT_HASH}" >> $GITHUB_OUTPUT
-      - name: 🔖 Tag creation
-        uses: actions/github-script@v7
-        env:
-          LATEST_COMMIT_HASH: ${{ steps.pull_lock_commit.outputs.latest_commit_hash }}
-        with:
-          script: |
-            const the_tag_name = 'refs/tags/v' + process.env.VERSION
-            const the_sha = process.env.LATEST_COMMIT_HASH
-            github.rest.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: the_tag_name,
-              sha: the_sha
-            })
-
       - name: 🗑 Free Disk Space
-        uses: jlumbroso/free-disk-space@main
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
       # work with tag from above
-      - name: Code checkout
-        uses: actions/checkout@v4
+      - name: 🚚 Code checkout
+        uses: actions/checkout@v6
         with:
           ref: v${{ env.VERSION }}
       - name: 🏰 QEMU setup
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4
       - name: 🏯 Buildx setup
-        uses: docker/setup-buildx-action@v3
-      - name: DockerHub login
-        uses: docker/login-action@v3
+        uses: docker/setup-buildx-action@v4
+      - name: 🐙 GitHub CR login
+        uses: docker/login-action@v4
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       # use the outputs=docker with dest to directly save to tar for apptainer
-      - name: 🐳 Docker img build, tar and push to Docker Hub
-        uses: docker/build-push-action@v6
+      - name: 🐳 Docker img build, tar and push to GHCR
+        uses: docker/build-push-action@v7
         with:
+          tags: ghcr.io/${{ github.repository }}:${{ env.VERSION }}
+          outputs: type=docker,dest=pcgr_${{ env.VERSION }}.tar
           context: .
           push: true
           platforms: linux/amd64
-          tags: |
-            sigven/pcgr:${{ env.VERSION }}
-          outputs: type=docker,dest=pcgr_${{ env.VERSION }}.tar
 
       # Apptainer
       - name: Apptainer setup
@@ -163,10 +167,48 @@ jobs:
           df -h
           echo "Building Apptainer SIF"
           echo "---------------------------------"
-          apptainer build pcgr_singularity_${VERSION}.sif docker-archive://pcgr_${VERSION}.tar
+          apptainer build pcgr_singularity_${{ env.VERSION }}.sif docker-archive://pcgr_${{ env.VERSION }}.tar
           echo "---------------------------------"
           ls -lSha
       - name: Upload SIF to GHCR
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | apptainer registry login -u ${{ github.actor }} --password-stdin oras://ghcr.io
-          apptainer push pcgr_singularity_${VERSION}.sif oras://ghcr.io/${GITHUB_REPOSITORY}:${VERSION}.singularity
+          apptainer push pcgr_singularity_${{ env.VERSION }}.sif oras://ghcr.io/${GITHUB_REPOSITORY}:${{ env.VERSION }}.singularity
+
+  publish_website:
+    needs: docker_deploy
+    name: Publish pkgdown website
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+    permissions:
+      contents: write
+    steps:
+      - name: 🚚 Checkout tag
+        uses: actions/checkout@v6
+        with:
+          ref: v${{ env.VERSION }}
+      - name: Set pkgdown channels
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/dev" ]]; then
+            echo "PKGDOWN_CHANNELS=${{ env.conda_org }}/label/dev,pcgr,conda-forge,bioconda" >> $GITHUB_ENV
+          else
+            echo "PKGDOWN_CHANNELS=pcgr,conda-forge,bioconda" >> $GITHUB_ENV
+          fi
+      - name: 👾 Miniforge setup (pkgdown)
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-update-conda: true
+          environment-file: ${{ env.conda_env_yaml }}/pkgdown.yaml
+          activate-environment: pkgdown_env
+          miniforge-version: 26.1.0-0 # need to use mamba < 2.6.0 - see conda/conda-lock#906
+          channels: ${{ env.PKGDOWN_CHANNELS }}
+      - name: 🌐 Website publish
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+          cp pcgrr/DESCRIPTION . # hack for pkgdown to work
+          printf "pcgrr version:\n"
+          Rscript -e "packageVersion('pcgrr')"
+          Rscript -e "pkgdown::deploy_to_branch(pkg = 'pcgrr', commit_message = 'Built PCGR website: https://sigven.github.io/pcgr/', branch = 'gh-pages', new_process = FALSE)"
