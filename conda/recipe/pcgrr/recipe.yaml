@@ -38,6 +38,7 @@ requirements:
     - r-quarto
     - quarto
     - r-randomforest
+    - r-reactable
     - r-readr
     - r-reshape2
     - r-rlang
@@ -73,6 +74,7 @@ requirements:
     - r-quarto
     - quarto
     - r-randomforest
+    - r-reactable
     - r-readr
     - r-reshape2
     - r-rlang

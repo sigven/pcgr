@@ -44,6 +44,7 @@ Imports:
     quantiseqr,
     quarto,
     randomForest,
+    reactable,
     readr,
     reshape2,
     rlang,
