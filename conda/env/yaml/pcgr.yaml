@@ -2,26 +2,19 @@ name: pcgr
 
 channels:
   - pcgr
-  - umccr
-  - anaconda
   - conda-forge
   - bioconda
 
 dependencies:
   - pcgr ==2.2.5.9011 # bump
-  - anaconda::perl
-  - umccr::openspliceai
-  - anaconda::pytorch
-  - anaconda::torchaudio
-  - anaconda::torchvision
-  - bedtools
-  - bcftools
-  - ensembl-vep ==115.1
-  - pandoc
+  - bioconda::bedtools
+  - bioconda::bcftools
+  - bioconda::ensembl-vep ==115.1
+  - conda-forge::pandoc
   - bioconda::perl-bio-bigfile
   - conda-forge::perl-compress-raw-zlib
-  - vcfanno
-  - vt
+  - bioconda::vcfanno
+  - bioconda::vt
   - bioconda::vcf2maf
   - bioconda::vcf2tsvpy ==0.6.1
-  - yaml
+  - conda-forge::yaml
