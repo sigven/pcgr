@@ -1,6 +1,6 @@
 context:
   name: pcgr
-  version: 2.2.5.9011 # bump
+  version: 2.2.5.9012 # bump
 
 package:
   name: ${{ name|lower }}
