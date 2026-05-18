@@ -43,7 +43,7 @@ jobs:
           auto-update-conda: true
           environment-file: ${{ env.conda_env_yaml }}/condabuild.yaml
           activate-environment: condabuild_env
-          miniforge-version: latest
+          miniforge-version: 26.1.0-0 # need to use mamba < 2.6.0 - see conda/conda-lock#906
       - name: 🐍🔧 Conda pkg build
         run: |
           rattler-build build \
@@ -85,7 +85,7 @@ jobs:
           environment-file: ${{ env.conda_env_yaml }}/condabuild.yaml
           activate-environment: condabuild_env
           auto-update-conda: true
-          miniforge-version: latest
+          miniforge-version: 26.1.0-0 # need to use mamba < 2.6.0 - see conda/conda-lock#906
       - name: 🔒 Conda lock
         run: |
           conda config --set channel_priority flexible
@@ -195,7 +195,7 @@ jobs:
           auto-update-conda: true
           environment-file: ${{ env.conda_env_yaml }}/pkgdown.yaml
           activate-environment: pkgdown_env
-          miniforge-version: latest
+          miniforge-version: 26.1.0-0 # need to use mamba < 2.6.0 - see conda/conda-lock#906
           channels: ${{ env.PKGDOWN_CHANNELS }}
       - name: 🌐 Website publish
         run: |
