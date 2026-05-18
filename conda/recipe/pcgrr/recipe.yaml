@@ -38,6 +38,7 @@ requirements:
     - r-quarto
     - quarto
     - r-randomforest
+    - r-reactable
     - r-readr
     - r-reshape2
     - r-rlang
@@ -73,6 +74,7 @@ requirements:
     - r-quarto
     - quarto
     - r-randomforest
+    - r-reactable
     - r-readr
     - r-reshape2
     - r-rlang
@@ -91,9 +93,9 @@ tests:
         - pcgrr
 about:
   homepage: https://sigven.github.io/pcgr
-  summary: Personal Cancer Genome ReporteR.
-    Functions, tools and utilities for the generation of clinical
-    cancer genome reports with PCGR.
+  summary:
+    Personal Cancer Genome ReporteR. Functions, tools and utilities for the
+    generation of clinical cancer genome reports with PCGR.
   license: MIT
   license_file: LICENSE
   repository: https://github.com/sigven/pcgr/tree/main/pcgrr

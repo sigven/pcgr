@@ -7,22 +7,22 @@ PCGR estimates TMB in three different ways, depending on the type of variants to
 #| eval: !expr (pcg_report$settings$conf$sample_properties$vaf_tumor_detected | pcg_report$settings$conf$sample_properties$dp_tumor_detected) == TRUE
 #| output: asis
 
-if((pcg_report$settings$conf$sample_properties$dp_tumor_detected &
+if ((pcg_report$settings$conf$sample_properties$dp_tumor_detected &
     pcg_report$settings$conf$somatic_snv$tmb$tmb_dp_min > 0) |
    (pcg_report$settings$conf$sample_properties$vaf_tumor_detected &
-    pcg_report$settings$conf$somatic_snv$tmb$tmb_af_min > 0)){
+    pcg_report$settings$conf$somatic_snv$tmb$tmb_af_min > 0)) {
   cat("For TMB calculation, requirements for sequencing depth and/or variant allele frequency (VAF) have been applied to filter out low-quality variants\n\n")
 }else{
   cat("No dedicated filtering of variants based on sequencing depth or variant allele frequency (VAF) has been applied for TMB calculation\n\n")
 }
 
 if (pcg_report$settings$conf$sample_properties$dp_tumor_detected &
-    pcg_report$settings$conf$somatic_snv$tmb$tmb_dp_min > 0){
+    pcg_report$settings$conf$somatic_snv$tmb$tmb_dp_min > 0) {
   m <- paste0("*    Minimum sequencing depth applied for TMB calculation: <b>", pcg_report$settings$conf$somatic_snv$tmb$tmb_dp_min, "</b>")
   cat(m,"\n")
 }
 if (pcg_report$settings$conf$sample_properties$vaf_tumor_detected & 
-    pcg_report$settings$conf$somatic_snv$tmb$tmb_af_min > 0){
+    pcg_report$settings$conf$somatic_snv$tmb$tmb_af_min > 0) {
   m <- paste0("*    Minimum VAF applied for TMB calculation: <b>", pcg_report$settings$conf$somatic_snv$tmb$tmb_af_min, "</b>")
   cat(m,"\n")
 }
@@ -37,15 +37,15 @@ if (pcg_report$settings$conf$sample_properties$vaf_tumor_detected &
 tmb_estimate <-
   pcg_report$content$tmb$sample_estimate |>
   dplyr::filter(
-    tmb_measure == paste0(
+    TMB_MEASURE == paste0(
       "TMB_",
       pcg_report$settings$conf$somatic_snv$tmb$tmb_display))
 
 algo <- "Missense only"
-if(pcg_report$settings$conf$somatic_snv$tmb$tmb_display == "coding_and_silent"){
+if (pcg_report$settings$conf$somatic_snv$tmb$tmb_display == "coding_and_silent") {
   algo <- "Coding and silent"
 }
-if(pcg_report$settings$conf$somatic_snv$tmb$tmb_display == "coding_non_silent"){
+if (pcg_report$settings$conf$somatic_snv$tmb$tmb_display == "coding_non_silent") {
   algo <- "Coding non-silent"
 }
 
@@ -57,8 +57,8 @@ bslib::page_fillable(
     bslib::value_box(
       title = "TMB estimate",
       value = paste(
-        round(tmb_estimate$tmb_estimate, 
-              digits = 2), tmb_estimate$tmb_unit),
+        round(tmb_estimate$TMB_ESTIMATE, 
+              digits = 2), tmb_estimate$TMB_UNIT),
       showcase = NULL,
       theme = "dark"
     ),
@@ -93,6 +93,7 @@ Be aware of the nature of the _reference dataset_ (TCGA), which must be taken in
 * The TCGA tumor samples are sequenced with a mean coverage of approximately 100X
 * The TCGA somatic mutation calls are based on a consensus among variant callers (each variant is supported by a minimum of two variant calling algorithms)
 * The TCGA somatic mutation calls are based on paired tumor-control sequencing (tumor-only sequencing frequently produce higher numbers due to more noise)
+* The TCGA somatic mutation calls used for TMB calculation have been filtered for sequencing depth (minimum DP=30), and variant allele frequency (minimum VAF=0.05)
 
 :::
 

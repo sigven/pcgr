@@ -12,16 +12,16 @@ no_site_prevalence <-
   msig_content$result$no_site_prevalence
 
 missing_data_no_refit <- F
-if(msig_content$eval == F | 
-   msig_content$missing_data == T){
+if (msig_content$eval == F | 
+   msig_content$missing_data == T) {
   missing_data_no_refit <- T
 }
 
 poor_sig_fit <- FALSE
-if(missing_data_no_refit == FALSE){
-  if(typeof(msig_content$result$goodness_of_fit) == "list"){
-    if("estimate" %in% names(msig_content$result$goodness_of_fit)){
-      if(msig_content$result$goodness_of_fit$estimate < 0.9){
+if (missing_data_no_refit == FALSE) {
+  if (typeof(msig_content$result$goodness_of_fit) == "list") {
+    if ("estimate" %in% names(msig_content$result$goodness_of_fit)) {
+      if (msig_content$result$goodness_of_fit$estimate < 0.9) {
         poor_sig_fit <- TRUE
       }
     }
@@ -53,8 +53,8 @@ cat("\n::: {.callout-warning}\n## Limited variant data - ",
 cat('For <b>', conf$sample_properties$site,'</b> cancers, mutational signature identification uses the following reference collection of known signatures for the <i>refitting procedure</i> (i.e. previously attributed to the same type of cancer): <br>',sep="")
 
 dat <- msig_content$result$reference_data
-if("SIGNATURE_ID" %in% colnames(dat) & 
-   "AETIOLOGY_KEYWORD" %in% colnames(dat)){
+if ("SIGNATURE_ID" %in% colnames(dat) & 
+   "AETIOLOGY_KEYWORD" %in% colnames(dat)) {
   
   i <- 1
   
@@ -82,7 +82,7 @@ if("SIGNATURE_ID" %in% colnames(dat) &
   cat('::: {.column width=\"35%\"}\n\n')
   
   cat('<ul>')
-  while(i <= half_collection){
+  while(i <= half_collection) {
     cat(paste0("<li><b>",
                refsig_collection_site[i,]$SIGNATURE_ID, "</b> - ", 
                refsig_collection_site[i,]$AETIOLOGY_KEYWORD),'</li>\n')
@@ -95,7 +95,7 @@ if("SIGNATURE_ID" %in% colnames(dat) &
 
   cat('::: {.column width="35%"}\n\n')
   cat('<ul>')
-  while(i <= NROW(refsig_collection_site)){
+  while(i <= NROW(refsig_collection_site)) {
     cat(paste0("<li><b>",
                refsig_collection_site[i,]$SIGNATURE_ID, "</b> - ", 
                refsig_collection_site[i,]$AETIOLOGY_KEYWORD),'</li>\n')
@@ -147,7 +147,7 @@ cat("<br><br>")
 ```
 
 ```{r signature_suboptimal_fit_warning}
-#| eval: !expr missing_data_no_refit == FALSE & poor_sig_fit == TRUE
+#| eval: !expr isFALSE(missing_data_no_refit) & isTRUE(poor_sig_fit)
 #| output: asis
 
 cat("\n\n::: {.callout-important}\n\n## Suboptimal fit of mutational profile\n\n ",
@@ -162,7 +162,7 @@ cat("\n\n::: {.callout-important}\n\n## Suboptimal fit of mutational profile\n\n
 <br>
 
 ```{r signature_contribution_plot}
-#| eval: !expr missing_data_no_refit == FALSE
+#| eval: !expr isFALSE(missing_data_no_refit)
 #| output: asis
 
 
@@ -190,7 +190,7 @@ bslib::card(
 ```{r main_signature_findings}
 #| output: asis
 #| echo: false
-#| eval: !expr missing_data_no_refit == FALSE
+#| eval: !expr isFALSE(missing_data_no_refit)
 
 t <- list(
   family = "Helvetica",
@@ -212,7 +212,7 @@ pie_aetiologies <- plotly::plot_ly(
   msig_content$result$contributions$per_group, 
   #margin = m,
   marker = list(
-    colors = pcgrr::color_palette$tier$values,
+    colors = pcgrr::color_palette$multi$values,
     line = list(
       color = '#FFFFFF', width = pie_line_width))) |>
   plotly::add_pie(
@@ -270,17 +270,17 @@ bslib::page_fillable(
     bslib::card(
       height = "380px",
       bslib::card_header(
-        class = "bg-dark", 
+        class = "bg-dark",
         paste0("Key underlying aetiologies - ",
                pcg_report$settings$sample_id)),
-    pie_aetiologies
+      bslib::card_body(padding = "4px", pie_aetiologies)
     )
   )
 )
 ```
 
 ```{r signature_contribution_table}
-#| eval: !expr missing_data_no_refit == FALSE
+#| eval: !expr isFALSE(missing_data_no_refit)
 #| output: asis
 
 signature_ids <- 
@@ -345,12 +345,12 @@ bslib::card(
 <br>
 
 ```{r signature_similarity}
-#| eval: !expr is.null(msig_content$result$signature_similarity) == FALSE
+#| eval: !expr isFALSE(is.null(msig_content$result$signature_similarity))
 #| child: pcgr_quarto_report/mutational_signatures/signature_similarity.qmd
 ```
 
 ```{r signature_similarity_missing}
-#| eval: !expr is.null(msig_content$result$signature_similarity) == TRUE
+#| eval: !expr isTRUE(is.null(msig_content$result$signature_similarity))
 #| output: asis
 
 cat("\n### Signature similarity\n\n")

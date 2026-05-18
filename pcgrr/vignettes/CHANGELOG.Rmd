@@ -46,21 +46,101 @@ sigven <- user("sigven")
 pdiakumis <- user("pdiakumis")
 ```
 
-## v2.2.6
+## v2.3.0
 
-- Date: **2026-04-16**
+- Date: **2026-05-19**
+- Major data updates
+  - ClinVar (2026-05)
+  - dbNSFP (v5.3, October 2025)
+  - Cancer Hotspots (v3, 2026)
+  - TCGA (release 45.0, December 2025)
+  - CIViC (2026-03-23)
+  - GENCODE v49 (VEP v115)
 
-- major refactor of GitHub Actions workflow (`r pr(291)`, `r issue(247)`, `r issue(248)`, `r issue(262)`)
+### Added
+
+- **OncoKB clinical evidence integration**
+  - Real-time retrieval of therapeutic, diagnostic, and prognostic evidence from the
+    [OncoKB MAF annotator + web API](https://www.oncokb.org) for somatic variants - requires a valid API
+	token (see new CLI argument `--oncokb_api_token`)
+  - Evidence is retrieved for SNV/InDels (via HGVSp protein change and HGVSg genomic
+    change), gene fusions, and copy number alterations
+  - Tumor type context is passed to OncoKB via OncoTree codes, enabling tumor-specific
+    evidence retrieval for both exact and any-tumor-type matches
+  - OncoKB annotation includes mutation effect (e.g. Gain-of-function), oncogenicity
+    (e.g. Oncogenic, Likely Oncogenic), and clinical evidence items
+    (treatment sensitivity/resistance, diagnostic and prognostic implications)
+  - New CLI arguments:
+    - `--oncokb_api_token` — a valid [OncoKB API token](https://www.oncokb.org/account/settings)
+      is required to enable this feature
+    - `--oncokb_oncotree_code` — override the tumor-type OncoTree code used for OncoKB
+      queries (default: derived from `--tumor_site`); useful when the desired OncoTree
+      code is more specific than the site-level mapping
+    - `--oncokb_exclusive` — restrict biomarker reporting to OncoKB only, skipping CIViC
+      and CGI sources; intended for workflows where a single curated source is preferred
+- **Copy number classification — flexible thresholding modes**
+  - New CLI argument `--cna_threshold_mode` controls how amplification, gain, and
+    heterozygous deletion tiers are called; three modes are supported:
+    - `absolute` _(default)_: thresholds are applied to the total copy number directly
+    - `relative`: thresholds are expressed as fold-change over tumor ploidy
+    - `combined`: both absolute and relative thresholds must be satisfied
+  - Per-tier, per-mode thresholds are individually configurable:
+    - Amplification: `--cna_amp_threshold_absolute` (default: 5),
+      `--cna_amp_threshold_relative` (default: 2.5×)
+    - Gain: `--cna_gain_threshold_absolute` (default: 3),
+      `--cna_gain_threshold_relative` (default: 1.5×)
+    - Heterozygous deletion: `--cna_del_threshold_absolute` (default: 1),
+      `--cna_del_threshold_relative` (default: 0.5×)
+  - Allele-specific copy numbers (major + minor) are used for correct handling of
+    loss of heterozygosity (LOH) and sex-chromosome dosage
+  - If tumor ploidy is not provided by the user, PCGR estimates it from the
+    allele-specific copy number distribution as a fallback (used by `relative` and
+    `combined` modes)
+  - Two-hit candidate annotation: segments overlapping a known tumor suppressor gene
+    are flagged when both a somatic loss-of-function SNV/InDel _and_ a CNA deletion
+    event are present (requiring CPSR input for germline hit detection)
+- **RNA gene fusion input**
+  - New CLI argument `--input_rna_fusion` accepts a TSV file with RNA fusion calls
+    (e.g. from STAR-Fusion, Arriba, or similar callers)
+  - Fusions are displayed in a dedicated section of the HTML report, annotated with
+    gene-level oncogenicity and actionability
+  - If an OncoKB API token is provided, fusions are queried against the OncoKB API for
+    clinical evidence (therapeutic, diagnostic, prognostic) and mutation effect
+- **Reactable-based interactive tables throughout HTML report**
+  - All interactive variant and biomarker evidence tables now use
+    [reactable](https://glin.github.io/reactable/) in place of the previous DT/DataTables
+    implementation
+  - Tables support column-level filtering, global search, and compact nested detail rows
+    (expandable per-variant evidence panels) — providing a more responsive and
+    feature-rich browsing experience
+  - A hidden `SEARCH_INDEX` column concatenates key fields (gene, alteration, consequence,
+    oncogenicity) to enable full-text search across the most clinically relevant columns
+
+### Changed
+
+- Loss-of-function annotation from MaxEntScan is now stratum-aware: canonical splice
+  site positions (±2 bp of exon–intron boundary) always set `LOSS_OF_FUNCTION = TRUE`;
+  for non-canonical positions, only variants with a _Strong_ MaxEntScan evidence tier
+  (donor positions +3 to +6; acceptor positions -3 to -20) additionally set
+  `LOSS_OF_FUNCTION = TRUE` — _Moderate_ and _Supporting_ tiers at these positions are
+  informational only
+- Tumor-only germline filtering now uses a unified per-variant gnomAD allele frequency
+  flag (`gnomAD_AF_ABOVE_TOLERATED`) that considers all available population frequencies
+  from both exome and genome gnomAD datasets, preferring exome values when available
+
+### Infrastructure
+
+- Major refactor of GitHub Actions workflow (`r pr(291)`, `r issue(247)`, `r issue(248)`, `r issue(262)`)
   - moving to gitflow development mode, with `main` branch for stable releases, and `dev` branch for development
   - switch to rattler-build from conda mambabuild
     - also requires moving to the required rattler format for the conda recipes
   - switch to conda-incubator/setup-miniconda from mamba-org/setup-micromamba
   - pkgdown's auto development mode allows us to keep a dev website with documentation for the latest development version of pcgrr, which is now available at https://sigven.github.io/pcgrr/dev/ (previously only stable versions were available on the website)
-- add oncokb-annotator conda dependency (https://github.com/oncokb/oncokb-annotator) - https://anaconda.org/channels/pcgr/packages/oncokb-annotator/files
-- updated vcf2maf to 1.6.22 (see https://github.com/mskcc/vcf2maf/releases/tag/v1.6.22 for bug fixes)
+- Add oncokb-annotator conda dependency (https://github.com/oncokb/oncokb-annotator) - https://anaconda.org/channels/pcgr/packages/oncokb-annotator/files
+- Updated vcf2maf to 1.6.22 (see https://github.com/mskcc/vcf2maf/releases/tag/v1.6.22 for bug fixes)
     - also switching to official vcf2maf, not umccr fork
 
-- `r diff("2.2.6", "2.2.5")`
+- `r diff("2.3.0", "2.2.5")`
 
 ## v2.2.5
 
@@ -134,7 +214,7 @@ pdiakumis <- user("pdiakumis")
   - Cancer Gene Census (v101)
 - Cleaned and improved oncogenicity classification of variants
   - Added Grantham distance for amino acid alterations - taken into account
-  - only consider LP variant classification when oncogenicity score = 4 and if at least three 
+  - only consider LP variant classification when oncogenicity score = 4 and if at least three
     oncogenic criteria matches _or_ `ONCG_OS1` is matching
 for oncogenicity classification
 - Multiple cosmetic changes to HTML report - e.g. collapsed call-outs
@@ -203,7 +283,7 @@ added them to Excel workbook output
 
 - Ensure correct propagation of purity/ploidy in output report
 - Ensure that MAF output is properly filtered for tumor-only runs
-- Ensure properly copying of quarto templates (abandon `file.copy`), 
+- Ensure properly copying of quarto templates (abandon `file.copy`),
 both for PCGR and CPSR
 
 - `r diff("2.0.3", "2.0.2")`
@@ -259,7 +339,7 @@ both for PCGR and CPSR
   - An HTML report with an overview of the contents of the data bundle is shipped with the reference data itself, also available [here (grch38)](https://rpubs.com/sigven/pcgr_refdata).
 - Singularity/Apptainer support
 - Moved more of the code base to initial Python workflow steps (biomarker matching, CNA segment annotation, RNA expression analysis, oncogenicity classification)
-- Variants are now classified with respect to both oncogenicity and actionability, and the previous global tier classification (tier 1-5) is thus deprecated 
+- Variants are now classified with respect to both oncogenicity and actionability, and the previous global tier classification (tier 1-5) is thus deprecated
 - New copy number input format - allele-specific (chrom, start, end, n_major, n_minor)
   - New argument `n_copy_gain` - Minimum number of total copy number for segments considered as gains/amplifications (default: 6)
 - RNA-bulk expression input permitted in the `pcgr` command

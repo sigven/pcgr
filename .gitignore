@@ -21,3 +21,4 @@ docs/_build/
 tests
 conda/pcgr
 conda/pcgrr
+.positai

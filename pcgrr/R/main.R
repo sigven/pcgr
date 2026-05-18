@@ -26,37 +26,54 @@ generate_report <-
     settings <- rep$settings
     ref_data <- rep$ref_data
 
-    callset_snv <-
-      pcgrr::load_somatic_snv_indel(
-        fname = settings$molecular_data$fname_mut_tsv,
-        ref_data = ref_data,
-        settings = settings
-      )
+    ## Load somatic SNV/InDel data if available
+    callset_snv <- NULL
+    if (settings$molecular_data$fname_mut_tsv != "None" &
+       file.exists(settings$molecular_data$fname_mut_tsv)) {
+      callset_snv <-
+        pcgrr::load_somatic_snv_indel(
+          fname = settings$molecular_data$fname_mut_tsv,
+          ref_data = ref_data,
+          settings = settings
+        )
 
-    if(!(callset_snv$retained_info_tags == "None" |
-         callset_snv$retained_info_tags == "")){
-      rep$settings$conf$other$retained_vcf_info_tags <-
-        callset_snv$retained_info_tags
+      if (!(callset_snv$retained_info_tags == "None" |
+           callset_snv$retained_info_tags == "")) {
+        rep$settings$conf$other$retained_vcf_info_tags <-
+          callset_snv$retained_info_tags
+      }
     }
 
-    if(settings$molecular_data$fname_expression_tsv != "None" &
-       file.exists(settings$molecular_data$fname_expression_tsv)){
+    if (settings$molecular_data$fname_expression_tsv != "None" &
+       file.exists(settings$molecular_data$fname_expression_tsv)) {
       rep[['content']][['expression']] <-
         pcgrr::generate_report_data_expression(
           ref_data = ref_data,
           settings = settings)
     }
 
+    if (settings$molecular_data$fname_rna_fusion_tsv != "None" &
+       file.exists(settings$molecular_data$fname_rna_fusion_tsv)) {
+      rep[['content']][['fusion']] <-
+        pcgrr::generate_report_data_fusion(
+          ref_data = ref_data,
+          settings = settings)
+      rep[['content']][['fusion']][['vstats']] <-
+        pcgrr::stats_report_fusion(
+          callset = rep$content$fusion$callset)
+    }
+
     ## Load pre-classified germline variants (output from CPSR)
-    if(settings$molecular_data$fname_germline_tsv != "None" &
-       file.exists(settings$molecular_data$fname_germline_tsv)){
+    if (settings$molecular_data$fname_germline_tsv != "None" &
+       file.exists(settings$molecular_data$fname_germline_tsv)) {
       rep[['content']][['germline_classified']] <-
         pcgrr::load_cpsr_classified_variants(
           fname_cpsr_tsv = settings$molecular_data$fname_germline_tsv,
           fname_cpsr_yaml = settings$molecular_data$fname_germline_yaml,
           ignore_vus = as.logical(settings$conf$germline$ignore_vus),
           cols = pcgrr::data_coltype_defs$snv_indel_germline_cpsr,
-          ref_data = ref_data
+          ref_data = ref_data,
+          settings = settings
         )
       rep[["content"]][['germline_classified']][["eval"]] <- TRUE
     }
@@ -85,18 +102,17 @@ generate_report <-
       #                        a_elem = "clinicaltrials")
     #}
 
-    rep[['content']][['snv_indel']][['callset']] <-
-      callset_snv
-    rep[['content']][['snv_indel']][['eval']] <-
-      TRUE
-    rep[['content']][['snv_indel']][['vstats']] <-
-      pcgrr::variant_stats_report(
-        callset = callset_snv,
-        vartype = "snv_indel",
-        name = "vstats")[['vstats']]
+    if (!is.null(callset_snv)) {
+      rep[['content']][['snv_indel']][['callset']] <-
+        callset_snv
+      rep[['content']][['snv_indel']][['eval']] <-
+        TRUE
+      rep[['content']][['snv_indel']][['vstats']] <-
+       pcgrr::stats_report_snv_indel(
+         callset = callset_snv)
+    }
 
-
-    if (NROW(callset_snv$variant) > 0) {
+    if (!is.null(callset_snv) && NROW(callset_snv$variant) > 0) {
       ## Estimate contribution of mutational signatures
       if (conf_somatic_snv[["mutational_signatures"]][["run"]] == T) {
 
@@ -185,7 +201,7 @@ generate_report <-
           pcg_report_tmb[["sample_estimate"]]
 
       }
-    }else{
+    }else if (!is.null(callset_snv)) {
       rep[["content"]][["snv_indel"]][["zero"]] <- TRUE
       rep[["metadata"]][["config"]][["other"]][["list_noncoding"]] <- FALSE
     }
@@ -205,10 +221,8 @@ generate_report <-
       rep[['content']][['cna']][['callset']] <-
         callset_cna
       rep[['content']][['cna']][['vstats']] <-
-        pcgrr::variant_stats_report(
-          callset = callset_cna,
-          vartype = "cna",
-          name = "vstats")[['vstats']]
+       pcgrr::stats_report_cna(
+         callset = callset_cna)
       rep[['content']][['cna']][['eval']] <-
         TRUE
     }
@@ -556,7 +570,7 @@ generate_tier_tsv <- function(variant_set,
 #
 #       if (!is.null(report_strip$content$snv_indel$variant_set)) {
 #
-#         for(o in c('tsv')) {
+#         for (o in c('tsv')) {
 #
 #           if (!is.null(report_strip$content$snv_indel$variant_set[[o]])) {
 #
@@ -697,7 +711,7 @@ generate_tier_tsv <- function(variant_set,
 #' param report List object with all report data, settings etc.
 #'
 #' export
-# write_report_flexdb_html <- function(report = NULL){
+# write_report_flexdb_html <- function(report = NULL) {
 #
 #   settings <- report[['settings']]
 #   output_directory <- settings[['output_dir']]
@@ -773,12 +787,12 @@ generate_tier_tsv <- function(variant_set,
 #' i.e. 'snv_indel', 'snv_indel_unfiltered', 'cna_gene', or 'msigs'
 #' @export
 #'
-write_report_tsv <- function(report = NULL, output_type = 'snv_indel'){
+write_report_tsv <- function(report = NULL, output_type = 'snv_indel') {
 
   fname <- paste0(
     report$settings$output_prefix, ".", output_type, "_ann.tsv.gz")
 
-  if(output_type == "msigs"){
+  if (output_type == "msigs") {
     fname <- paste0(
       report$settings$output_prefix, ".", output_type, ".tsv.gz")
   }
@@ -786,35 +800,37 @@ write_report_tsv <- function(report = NULL, output_type = 'snv_indel'){
   output_data <- data.frame()
   eval_output <- FALSE
 
-  if(output_type == "msigs" &
-     report$content$mutational_signatures$eval == TRUE){
+  if (output_type == "msigs" &
+     report$content$mutational_signatures$eval == TRUE) {
     eval_output <- TRUE
   }
-  if(output_type == "cna" &
-     report$content$cna$eval == TRUE){
+  if (output_type == "cna" &
+     report$content$cna$eval == TRUE) {
     eval_output <- TRUE
   }
-  if(output_type == "snv_indel" &
-     report$content$snv_indel$eval == TRUE){
+  if (output_type == "snv_indel" &
+     report$content$snv_indel$eval == TRUE) {
     eval_output <- TRUE
   }
-  if(output_type == "snv_indel_unfiltered" &
+  if (output_type == "snv_indel_unfiltered" &
      report$content$snv_indel$eval == TRUE &
      as.logical(
-       report$settings$conf$assay_properties$vcf_tumor_only) == TRUE){
+       report$settings$conf$assay_properties$vcf_tumor_only) == TRUE) {
     eval_output <- TRUE
   }
 
 
   ## Mutational signatures
-  if(output_type == 'msigs' &
-     !is.null(report$content$mutational_signatures)){
+  if (output_type == 'msigs' &
+     !is.null(report$content$mutational_signatures)) {
 
-    if(report$content$mutational_signatures$eval == TRUE &
-       report$content$mutational_signatures$missing_data == FALSE){
+    if (report$content$mutational_signatures$eval == TRUE &
+       report$content$mutational_signatures$missing_data == FALSE) {
 
-      if(!is.null(report$content$mutational_signatures$result$tsv)){
-        if(is.data.frame(report$content$mutational_signatures$result$tsv)){
+      if (!is.null(report$content$mutational_signatures$result$tsv)) {
+        if (is.data.frame(report$content$mutational_signatures$result$tsv)) {
+          colnames(report$content$mutational_signatures$result$tsv) <-
+            toupper(colnames(report$content$mutational_signatures$result$tsv))
           output_data <- as.data.frame(
             report$content$mutational_signatures$result$tsv)
         }
@@ -823,12 +839,12 @@ write_report_tsv <- function(report = NULL, output_type = 'snv_indel'){
   }
 
   ## Copy number alterations
-  if(output_type == 'cna_gene' &
+  if (output_type == 'cna_gene' &
      !is.null(report$content$cna) &
-     report$content$cna$eval == TRUE){
+     report$content$cna$eval == TRUE) {
 
-    if(!is.null(report$content$cna$callset)){
-      if(is.data.frame(report$content$cna$callset$variant)){
+    if (!is.null(report$content$cna$callset)) {
+      if (is.data.frame(report$content$cna$callset$variant)) {
         output_data <- as.data.frame(
           report$content$cna$callset$variant |>
             dplyr::select(dplyr::any_of(pcgrr::tsv_cols$cna))
@@ -838,12 +854,12 @@ write_report_tsv <- function(report = NULL, output_type = 'snv_indel'){
   }
 
   ## SNVs/InDels
-  if(output_type == 'snv_indel' &
+  if (output_type == 'snv_indel' &
      !is.null(report$content$snv_indel) &
-     report$content$snv_indel$eval == TRUE){
+     report$content$snv_indel$eval == TRUE) {
 
     snv_indel_cols <- pcgrr::tsv_cols$snv_indel
-    if(report$settings$conf$other$retained_vcf_info_tags != "None"){
+    if (report$settings$conf$other$retained_vcf_info_tags != "None") {
       snv_indel_cols <- c(
         snv_indel_cols,
         stringr::str_split(
@@ -851,8 +867,8 @@ write_report_tsv <- function(report = NULL, output_type = 'snv_indel'){
       )
     }
 
-    if(!is.null(report$content$snv_indel$callset)){
-      if(is.data.frame(report$content$snv_indel$callset$variant)){
+    if (!is.null(report$content$snv_indel$callset)) {
+      if (is.data.frame(report$content$snv_indel$callset$variant)) {
         output_data <- as.data.frame(
           report$content$snv_indel$callset$variant |>
             dplyr::select(
@@ -863,27 +879,27 @@ write_report_tsv <- function(report = NULL, output_type = 'snv_indel'){
   }
 
   ## SNVs/InDels
-  if(output_type == 'snv_indel_unfiltered' &
+  if (output_type == 'snv_indel_unfiltered' &
      !is.null(report$content$snv_indel) &
-     report$content$snv_indel$eval == TRUE){
+     report$content$snv_indel$eval == TRUE) {
 
     snv_indel_cols <- pcgrr::tsv_cols$snv_indel_unfiltered
-    if(report$settings$conf$other$retained_vcf_info_tags != "None"){
+    if (report$settings$conf$other$retained_vcf_info_tags != "None") {
       snv_indel_cols <- c(
         snv_indel_cols, report$settings$conf$other$retained_vcf_info_tags)
     }
 
-    if(!is.null(report$content$snv_indel$callset)){
-      if(is.data.frame(report$content$snv_indel$callset$variant_unfiltered)){
+    if (!is.null(report$content$snv_indel$callset)) {
+      if (is.data.frame(report$content$snv_indel$callset$variant_unfiltered)) {
         output_data <- as.data.frame(
           report$content$snv_indel$callset$variant_unfiltered |>
             dplyr::select(
               dplyr::any_of(snv_indel_cols))
         )
-        if(NROW(output_data) > 0 &
+        if (NROW(output_data) > 0 &
            "SOMATIC_CLASSIFICATION" %in% colnames(output_data) &
            "ACTIONABILITY_TIER" %in% colnames(output_data) &
-           "ONCOGENICITY_SCORE" %in% colnames(output_data)){
+           "ONCOGENICITY_SCORE" %in% colnames(output_data)) {
           output_data$somatic_score <- 0
           output_data <- output_data |>
             dplyr::mutate(somatic_score = dplyr::case_when(
@@ -901,7 +917,7 @@ write_report_tsv <- function(report = NULL, output_type = 'snv_indel'){
     }
   }
 
-  if(NROW(output_data) > 0){
+  if (NROW(output_data) > 0) {
     pcgrr::log4r_info("------")
     pcgrr::log4r_info(paste0(
       "Writing tab-separated output file with PCGR annotations - '",
@@ -911,7 +927,7 @@ write_report_tsv <- function(report = NULL, output_type = 'snv_indel'){
       col_names = TRUE, append = FALSE,
       na = ".", quote = "none")
   } else {
-    if(eval_output == TRUE){
+    if (eval_output == TRUE) {
       pcgrr::log4r_info(
         paste0("No data to write to TSV file - '", output_type,"'"))
     }
@@ -924,7 +940,7 @@ write_report_tsv <- function(report = NULL, output_type = 'snv_indel'){
 #'
 #' @param report List object with all report data, settings etc.
 #' @export
-write_report_quarto_html <- function(report = NULL){
+write_report_quarto_html <- function(report = NULL) {
 
   settings <- report[['settings']]
   output_dir <- settings[['output_dir']]
@@ -944,15 +960,18 @@ write_report_quarto_html <- function(report = NULL){
   main_report_color <-
     pcgrr::color_palette$report_color$values[1]
 
-  if(as.logical(settings$conf$assay_properties$vcf_tumor_only) == 1){
+  if (as.logical(settings$conf$assay_properties$vcf_tumor_only) == 1) {
     main_report_color <-
       pcgrr::color_palette$report_color$values[2]
   }
 
 
   if (output_format == "html") {
-    if(report$content$snv_indel$vstats$n < 500000){
-      if(file.exists(quarto_input)){
+    n_snv_indel <- ifelse(
+      is.null(report$content$snv_indel$vstats$n), 0,
+      report$content$snv_indel$vstats$n)
+    if (n_snv_indel < pcgrr:::MAX_VARS_ALLOWED_HTML) {
+      if (file.exists(quarto_input)) {
 
         ## make temporary directory for quarto report rendering
         tmp_quarto_dir1 <- file.path(
@@ -1015,14 +1034,14 @@ write_report_quarto_html <- function(report = NULL){
 
         ## Copy output HTML report from temporary rendering directory
         ## to designated HTML file in output directory
-        if(file.exists(quarto_html)){
+        if (file.exists(quarto_html)) {
           file.copy(quarto_html, fnames[["html"]], overwrite = TRUE)
         }else{
           cat("WARNING\n")
         }
 
         ## remove temporary quarto directory (if debugging is switched off)
-        if(!(settings$conf$debug)){
+        if (!(settings$conf$debug)) {
           unlink(c(tmp_quarto_dir, tmp_quarto_dir1), force = TRUE, recursive = TRUE)
         }
         #pcgrr::log4r_info("------")
@@ -1044,7 +1063,7 @@ write_report_quarto_html <- function(report = NULL){
 #'
 #' @param report List object with all PCGR report data, settings etc.
 #' @export
-write_report_excel <- function(report = NULL){
+write_report_excel <- function(report = NULL) {
 
   fname_xlsx <- paste0(report$settings$output_prefix, ".xlsx")
 
@@ -1057,7 +1076,7 @@ write_report_excel <- function(report = NULL){
   workbook <- openxlsx2::wb_workbook()
 
   i <- 15
-  for(elem in c('SAMPLE_ASSAY',
+  for (elem in c('SAMPLE_ASSAY',
                 'SOMATIC_SNV_INDEL',
                 'SOMATIC_SNV_INDEL_BIOMARKER',
                 'SOMATIC_CNA',
@@ -1068,11 +1087,11 @@ write_report_excel <- function(report = NULL){
                 'MUTATIONAL_SIGNATURE',
                 'KATAEGIS_EVENTS',
                 'RNA_EXPRESSION_OUTLIERS',
-                'RNA_IMMUNE_CONTEXTURE')){
-    if(elem %in% names(excel_output)){
-      if(is.data.frame(excel_output[[elem]]) &
+                'RNA_IMMUNE_CONTEXTURE')) {
+    if (elem %in% names(excel_output)) {
+      if (is.data.frame(excel_output[[elem]]) &
          NROW(excel_output[[elem]]) > 0 &
-         NCOL(excel_output[[elem]]) >= 1){
+         NCOL(excel_output[[elem]]) >= 1) {
         workbook <- workbook |>
           openxlsx2::wb_add_worksheet(
           sheet = elem) |>
@@ -1091,7 +1110,7 @@ write_report_excel <- function(report = NULL){
       }
     }
     i <- i + 1
-    if(i == 19){
+    if (i == 19) {
       i <- 15
     }
   }

@@ -11,7 +11,7 @@ cell_fracs <-
   plotly::plot_ly(
     pcg_report$content$expression$immune_contexture, 
     marker = list(
-      colors = pcgrr::color_palette$tier$values,
+      colors = pcgrr::color_palette$multi$values,
       line = list(
         color = '#FFFFFF', width = 2))) |>
   plotly::add_pie(

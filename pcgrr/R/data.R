@@ -1,8 +1,9 @@
 #' List of URLS and variant identifiers for variant/gene/protein domain databases
 #'
 #'
-#' @format A data.frame with 6 rows and 5 columns that indicates URL's for various variant/gene databases
-#' and how to use PCGR annotation columns to generate variant links
+#' @format A data.frame with 6 rows and 5 columns that indicates URL's
+#' for various variant/gene databases and how to use PCGR annotation
+#' columns to generate variant links
 #' \itemize{
 #'   \item \emph{name} - Name encoding for variant/gene database
 #'   \item \emph{group_by_var} - Which column should be used for grouping
@@ -20,9 +21,10 @@
 
 #' Fixed data types/categories used for biomarker evidence, e.g. 'types','levels' etc.
 #'
-"biomarker_evidence"
+"bm_evidence"
 
-#' List of coltype definitions for input files to pcgrr (e.g. VCF-converted TSV, CNA TVS etc.)
+#' List of coltype definitions for input files to pcgrr
+#' (e.g. VCF-converted TSV, CNA TVS etc.)
 #'
 "data_coltype_defs"
 
@@ -46,7 +48,6 @@
 #'
 #' @format A data.frame with 11 rows and 2 columns that indicates immune
 #' cell types used in immune contexture analysis by quanTIseq
-#'
 #'
 "immune_celltypes"
 
@@ -95,5 +96,14 @@
 #' TSV columns
 "tsv_cols"
 
-#' DT Display
-"dt_display"
+#' HTML Table display columns
+"table_display_cols"
+
+#' Exonic filter levels
+"exonic_filter_levels"
+
+#' Germline filter levels
+"germline_filter_levels"
+
+#' OncoKB base API URL
+"oncokb_base_api_url"

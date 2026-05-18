@@ -2,14 +2,21 @@
 
 import os
 import re
-from cyvcf2 import VCF, Writer
 import csv
+import logging
 
 from logging import Logger
 import gzip
+import pandas as pd
 
 from pcgr.annoutils import threeToOneAA
 from pcgr import pcgr_vars
+from pcgr.pcgr_vars import (
+    ONCOGENICITY_THRESHOLDS,
+    ONCOGENICITY_CODE_ORDER,
+    OKB_ONCOGENICITY_CRITERIA,
+)
+
 
 def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumortype = "Any"):
 
@@ -52,7 +59,7 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
 
    # 8) "ONCG_OS2"
    ## Well established in invitro/in vivo functional studies show
-   ## oncogenic effect of the variant - CIViC/CGI
+   ## oncogenic effect of the variant
 
    # 9) "ONCG_OS3"
    ## Located in a mutation hotspot
@@ -62,7 +69,8 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
    # 10) "ONCG_OM1"
    ## Located in a critical and well-established part of a functional domain
    ## (active site of an enzyme)
-   ## NOTE: Here we assume that OM1 is applicable if there is overlap with oncogenic/predictive evidence (CIViC/CGI)
+   ## NOTE: Here we assume that OM1 is applicable if there is overlap with 
+   ## oncogenic/predictive evidence (CIViC/CGI)
 
    # 11) "ONCG_OM2"
    ## Protein length changes as a result of in-frame deletions/insertions in a
@@ -113,6 +121,7 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
       "BIOMARKER_MATCH",
       "ONCOGENE",
       "ONCOGENE_EVIDENCE",
+      "EFFECT_PREDICTIONS",
       "TSG",
       "TSG_EVIDENCE",
       "LOSS_OF_FUNCTION",
@@ -125,6 +134,11 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
       "gnomADe_AFR_AF",
       "gnomADe_AMR_AF",
       "gnomADe_SAS_AF",
+      "gnomADg_EAS_AF",
+      "gnomADg_NFE_AF",
+      "gnomADg_AFR_AF",
+      "gnomADg_AMR_AF",
+      "gnomADg_SAS_AF",
       "DBNSFP_SIFT",
       "DBNSFP_PROVEAN",
       "DBNSFP_META_RNN",
@@ -144,19 +158,21 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
       "DBNSFP_SPLICE_SITE_RF"]
 
    variant_data = {}
+   vcf_record_info = getattr(rec, "INFO", None)
    for col in required_oncogenicity_vars:
-      if rec.INFO.get(col) is None:
+      if vcf_record_info is None or vcf_record_info.get(col) is None:        
          if col == "TSG" or col == "ONCOGENE" or \
             col == "SPLICE_DONOR_RELEVANT" or col == "LOSS_OF_FUNCTION":
             variant_data[col] = False
          else:
             variant_data[col] = None
       else:
-         if rec.INFO.get(col) == '':
+         if vcf_record_info.get(col) == '':
             variant_data[col] = True
          else: 
-            variant_data[col] = rec.INFO.get(col)
+            variant_data[col] = vcf_record_info.get(col)
    
+   oncogenicity_criteria = oncogenicity_criteria or {}
    for code in oncogenicity_criteria.keys():
       variant_data[code] = False
    
@@ -190,7 +206,7 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
                 'SPLICE_SITE_ADA']:
       col = 'DBNSFP_' + str(algo)
       if col in variant_data.keys():
-         if variant_data[col] != '.':
+         if variant_data[col] is not None and variant_data[col] != '.':
             variant_data['N_INSILICO_CALLED'] += 1
          if variant_data[col] == 'D' or variant_data[col] == 'PD':
             variant_data['N_INSILICO_DAMAGING'] += 1
@@ -210,20 +226,25 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
       variant_data['N_INSILICO_DAMAGING'] >= pcgr_vars.ONCOGENICITY['insilico_pred_min_majority'] and \
       variant_data['N_INSILICO_TOLERATED'] <= pcgr_vars.ONCOGENICITY['insilico_pred_max_minority'] and \
       variant_data['N_INSILICO_SPLICING_NEUTRAL'] <= 1) or \
+         (variant_data['N_INSILICO_CALLED'] > pcgr_vars.ONCOGENICITY['insilico_pred_min_majority'] and \
+      variant_data['N_INSILICO_DAMAGING'] >= pcgr_vars.ONCOGENICITY['insilico_pred_min_majority'] and \
+      variant_data['N_INSILICO_TOLERATED'] <= pcgr_vars.ONCOGENICITY['insilico_pred_max_minority'] + 1 and \
+      "alphamissense:D" in variant_data['EFFECT_PREDICTIONS'] and \
+      variant_data['N_INSILICO_SPLICING_NEUTRAL'] <= 1) or \
          variant_data['N_INSILICO_SPLICING_AFFECTED'] == 2:
          variant_data['ONCG_OP1'] = True
-         
-         ## if variant is a splice donor variant, set loss-of-function flag
-         #if variant_data['N_INSILICO_SPLICING_AFFECTED'] == 2 and variant_data['SPLICE_DONOR_RELEVANT'] is True:
-         #   rec.INFO['LOSS_OF_FUNCTION'] = True
-         #   variant_data['LOSS_OF_FUNCTION'] = True
    
    ## majority of insilico predictors predict tolerated effect
-   if variant_data['N_INSILICO_CALLED'] > pcgr_vars.ONCOGENICITY['insilico_pred_min_majority'] and \
+   if (variant_data['N_INSILICO_CALLED'] > pcgr_vars.ONCOGENICITY['insilico_pred_min_majority'] and \
       variant_data['N_INSILICO_TOLERATED'] >= pcgr_vars.ONCOGENICITY['insilico_pred_min_majority'] and \
       variant_data['N_INSILICO_DAMAGING'] <= pcgr_vars.ONCOGENICITY['insilico_pred_max_minority'] and \
-      variant_data['N_INSILICO_SPLICING_AFFECTED'] == 0:
-      variant_data['ONCG_SBP1'] = True
+      variant_data['N_INSILICO_SPLICING_AFFECTED'] == 0) or \
+         (variant_data['N_INSILICO_CALLED'] > pcgr_vars.ONCOGENICITY['insilico_pred_min_majority'] and \
+      variant_data['N_INSILICO_TOLERATED'] >= pcgr_vars.ONCOGENICITY['insilico_pred_min_majority'] and \
+      variant_data['N_INSILICO_DAMAGING'] <= pcgr_vars.ONCOGENICITY['insilico_pred_max_minority'] + 1 and \
+      "alphamissense:T" in variant_data['EFFECT_PREDICTIONS'] and \
+      variant_data['N_INSILICO_SPLICING_AFFECTED'] == 0):
+         variant_data['ONCG_SBP1'] = True
 
    hotspot_mutated_samples = {}
    hotspot_mutated_samples['aa_variant'] = {}
@@ -258,8 +279,10 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
 
    if ttype in hotspot_mutated_samples['aa_variant'].keys() and \
       ttype in hotspot_mutated_samples['aa_site'].keys():
+      ## OS3 is not applicable if OS1 applies (Horak et al. SOP)
       if hotspot_mutated_samples['aa_variant'][ttype] >= 10 and \
-         hotspot_mutated_samples['aa_site'][ttype] >= 50:
+         hotspot_mutated_samples['aa_site'][ttype] >= 50 and \
+         variant_data['ONCG_OS1'] is False:
             variant_data['ONCG_OS3'] = True
       if hotspot_mutated_samples['aa_variant'][ttype] >= 10 and \
          hotspot_mutated_samples['aa_site'][ttype] < 50:
@@ -271,7 +294,7 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
 
    ## For the OM1 criterion ("Located in a critical and well-established part of a functional domain"), we presently
    ## lack the access to a resource with such information. As a simplified means to gather some evidence in this regard,
-   ## we rather base our criteria matching based on existing actionability evidence (predictive/oncogenic), for which 
+   ## we rather base our criteria matching based on existing oncogenicity/prognostic/diagnostic evidence, for which 
    ## variants are presumably located in critical sites of functional domains (in that sense, indirect evidence for OM1)
    if variant_data['BIOMARKER_MATCH'] is not None:
       
@@ -282,7 +305,12 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
                   
          ## Example 'eitem' element:
          ## cgi|659|CGI1077:Pancreas:Sensitivity/Response:C:Predictive:Somatic|by_hgvsp_principal
-         if ('Predictive' in eitem or 'Oncogenic' in eitem) and \
+         ## EID510:Myeloid:Poor_Outcome:B:Prognostic:Somatic|by_gene_mut
+         if ('Oncogenic' in eitem or \
+            'Poor_Outcome:B:Prognostic' in eitem or \
+            'Positive:B:Diagnostic' in eitem or \
+            'Positive:A:Diagnostic' in eitem or \
+            'Poor_Outcome:A:Prognostic' in eitem) and \
             'Somatic' in eitem and \
             ('by_genomic_coord' in eitem or \
              'by_hgvsc_principal' in eitem or \
@@ -293,9 +321,13 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
                if variant_data['ONCG_OS3'] is False and variant_data['ONCG_OS1'] is False:
                   variant_data['ONCG_OM1'] = True
          
-         ## Catch prognostic/diagnostic non-coding variants (e.g. TERT) - these will rank at the top
+         ## Catch prognostic/diagnostic/oncogenic non-coding variants (e.g. TERT) - these will rank at the top
          ## with respect to oncogenicity (altough not classified as oncogenic in the strict sense)
-         if ('Diagnostic' in eitem or 'Prognostic' in eitem or 'Predictive' in eitem or 'Oncogenic' in eitem) and \
+         if ('Oncogenic' in eitem or \
+            'Positive:B:Diagnostic' in eitem or \
+            'Positive:A:Diagnostic' in eitem or \
+            'Poor_Outcome:B:Prognostic' in eitem or \
+            'Poor_Outcome:A:Prognostic' in eitem) and \
             variant_data['CODING_STATUS'] == 'noncoding' and \
             'Somatic' in eitem and \
             ('by_genomic_coord' in eitem or \
@@ -304,33 +336,33 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
                if variant_data['ONCG_OS3'] is False and variant_data['ONCG_OS1'] is False:
                   variant_data['ONCG_OM1'] = True
 
-   if all(pop in variant_data.keys() for pop in pcgr_vars.GNOMAD_MAIN_EXON_AF_TAGS):
+   all_gnomad_tags = pcgr_vars.GNOMAD_MAIN_EXOME_AF_TAGS + pcgr_vars.GNOMAD_MAIN_GENOME_AF_TAGS  
 
-      ## check if variant has MAF > 0.01 (SBVS1) or > 0.05 in any of five major gnomAD subpopulations (exome set)
-      for pop in pcgr_vars.GNOMAD_MAIN_EXON_AF_TAGS:
-         if variant_data[pop] is not None:
-            if float(variant_data[pop]) >= float(pcgr_vars.ONCOGENICITY['gnomAD_very_common_AF']):
-               variant_data["ONCG_SBVS1"] = True
-            if float(variant_data[pop]) >= float(pcgr_vars.ONCOGENICITY['gnomAD_common_AF']) and variant_data["ONCG_SBVS1"] is False:
-               variant_data["ONCG_SBS1"] = True
-               
-      approx_zero_pop_freq = 0
-      for pop in pcgr_vars.GNOMAD_MAIN_EXON_AF_TAGS:
-         ## no MAF recorded in gnomAD for this population
-         if variant_data[pop] is None:
-            approx_zero_pop_freq = approx_zero_pop_freq + 1
-         else:
-            ## Extremely low MAF for this population
-            if float(variant_data[pop]) < float(pcgr_vars.ONCOGENICITY['gnomAD_extremely_rare_AF']):
-               approx_zero_pop_freq = approx_zero_pop_freq + 1
-    
-      ## check if variant is missing or with MAF approximately zero in all five major gnomAD subpopulations (exome set)
-      if approx_zero_pop_freq == 5:
-         variant_data["ONCG_OP4"] = True
+   ## check if variant has MAF > 0.05 (SBVS1) or > 0.01 (SBS1) in any five major gnomAD subpopulations.
+   ## SBVS1 and SBS1 are mutually exclusive: SBVS1 supersedes SBS1 whenever it fires.
+   for pop in all_gnomad_tags:
+      if pop not in variant_data.keys():
+         continue
+      if variant_data[pop] is not None:
+         if float(variant_data[pop]) >= float(pcgr_vars.ONCOGENICITY['gnomAD_very_common_AF']):
+            variant_data["ONCG_SBVS1"] = True
+            variant_data["ONCG_SBS1"] = False  # clear any SBS1 set by an earlier population
+         elif float(variant_data[pop]) >= float(pcgr_vars.ONCOGENICITY['gnomAD_common_AF']) and \
+              variant_data["ONCG_SBVS1"] is False:
+            variant_data["ONCG_SBS1"] = True
    
-   else:
-      print("ERROR: Missing gnomAD AF tags in VCF INFO field")
-  
+   ## OP4: absent from controls — assume True, revoke if any gnomAD population (exome or genome)
+   ## has AF above the extremely-rare threshold. Missing populations (None) are treated as absent.
+   variant_data["ONCG_OP4"] = True
+   for assay_tags in [pcgr_vars.GNOMAD_MAIN_EXOME_AF_TAGS, pcgr_vars.GNOMAD_MAIN_GENOME_AF_TAGS]:
+      for pop in assay_tags:
+         if pop not in variant_data.keys():
+            continue
+         if variant_data[pop] is None:
+            continue
+         if float(variant_data[pop]) > float(pcgr_vars.ONCOGENICITY['gnomAD_extremely_rare_AF']):
+            variant_data["ONCG_OP4"] = False
+     
    
    ## check if variant is a loss-of-function variant in a tumor suppressor gene (Cancer Gene Census/CancerMine)
    if "TSG" in variant_data.keys() and \
@@ -364,11 +396,18 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
             variant_data['ONCG_SBP2'] = True
    
    if "KNOWN_ONCOGENIC_SITE" in variant_data.keys():
-      if variant_data['KNOWN_ONCOGENIC_SITE'] is not None:         
+      if variant_data['KNOWN_ONCOGENIC_SITE'] is not None:
          if variant_data['ONCG_OS1'] is False and \
             variant_data['ONCG_OS3'] is False and \
                variant_data['ONCG_OM1'] is False:
             variant_data['ONCG_OM3'] = True
+
+   ## OM4 and OP3 are not applicable if OM1 or OM3 applies (Horak et al. SOP).
+   ## OM1/OM3 are evaluated after the hotspot block so the exclusion is enforced
+   ## retroactively here, once all criteria have been assigned.
+   if variant_data['ONCG_OM1'] is True or variant_data['ONCG_OM3'] is True:
+      variant_data['ONCG_OM4'] = False
+      variant_data['ONCG_OP3'] = False
 
    variant_data['ONCOGENICITY'] = "VUS"
    variant_data["ONCOGENICITY_DOC"] = "."
@@ -393,37 +432,19 @@ def assign_oncogenicity_evidence(rec = None, oncogenicity_criteria = None, tumor
             else:
                variant_data['ONCOGENICITY_CODE'] = f'{variant_data["ONCOGENICITY_CODE"]}|{code}'
 
-   likely_benign_upper_limit = -1
-   likely_benign_lower_limit = -6
-   benign_upper_limit = -7
-   likely_oncogenic_lower_limit = 5
-   likely_oncogenic_upper_limit = 8
-   oncogenic_lower_limit = 9
-
    variant_data['ONCOGENICITY_SCORE'] = onc_score_benign + onc_score_pathogenic
-   if variant_data['ONCOGENICITY_SCORE'] <= likely_benign_upper_limit and \
-      variant_data['ONCOGENICITY_SCORE'] >= likely_benign_lower_limit:
-      variant_data['ONCOGENICITY'] = "Likely_Benign"
-   if variant_data['ONCOGENICITY_SCORE'] >= likely_oncogenic_lower_limit and \
-      variant_data['ONCOGENICITY_SCORE'] <= likely_oncogenic_upper_limit:
-      variant_data['ONCOGENICITY'] = "Likely_Oncogenic"
-   ## also consider variants with one point below LP thresholds
-   ## - variants with at least 3 matching oncogenic criteria or ONCG_OS1 as likely oncogenic
-   if (variant_data['ONCOGENICITY_SCORE'] == likely_oncogenic_lower_limit - 1) and \
-      re.search(r'_SB', variant_data['ONCOGENICITY_CODE']) is None and \
-         (('|' in str(variant_data['ONCOGENICITY_CODE']) and \
-         len(str(variant_data['ONCOGENICITY_CODE']).split("|")) >= 3) or \
-       re.search(r'ONCG_OS1', variant_data['ONCOGENICITY_CODE'])):
-         variant_data['ONCOGENICITY'] = "Likely_Oncogenic"
-   if variant_data['ONCOGENICITY_SCORE'] <= benign_upper_limit:
-      variant_data['ONCOGENICITY'] = "Benign"
-   if variant_data['ONCOGENICITY_SCORE'] >= oncogenic_lower_limit:
-      variant_data['ONCOGENICITY'] = "Oncogenic"
+   variant_data['ONCOGENICITY_CODE'] = _sort_oncogenicity_codes(
+      str(variant_data['ONCOGENICITY_CODE']))
+   variant_data['ONCOGENICITY'] = _classify_oncogenicity_score(
+      variant_data['ONCOGENICITY_SCORE'],
+      str(variant_data['ONCOGENICITY_CODE'])
+   )
    
    for e in ['ONCOGENICITY_SCORE',
              'ONCOGENICITY',
              'ONCOGENICITY_CODE']:
-      rec.INFO[e] = variant_data[e]
+      if vcf_record_info is not None:
+         vcf_record_info[e] = variant_data[e]
 
    return(rec)
 
@@ -462,7 +483,8 @@ def load_oncogenic_variants(oncogenic_variants_fname: str, logger: Logger):
             continue         
          oncogenic_variants[str(gene) + '-' + str(row['var_id'])] = row         
          if 'grantham_distance' in row.keys():
-            if row['grantham_distance'] == '':
+            if row['grantham_distance'] in ('NA', '', None):
+            #if row['grantham_distance'] == '' or row['grantham_distance'] is None:
                row['grantham_distance'] = -1
             else:
                row['grantham_distance'] = float(row['grantham_distance'])
@@ -559,5 +581,196 @@ def match_oncogenic_variants(transcript_csq_elements, oncogenic_variants, rec, p
          all_matches.append(oncogenic_info + '|' + \
             '&'.join(sorted(set(known_oncogenic_sites[oncogenic_info]))))
       rec.INFO['KNOWN_ONCOGENIC_SITE'] = ','.join(all_matches)
-            
+
    return
+
+
+def _sort_oncogenicity_codes(code_str: str) -> str:
+   """Return the pipe-separated ONCOGENICITY_CODE string in canonical order.
+   Codes absent from ONCOGENICITY_CODE_ORDER are appended at the end."""
+   if code_str == '.':
+      return code_str
+   _order_index = {c: i for i, c in enumerate(ONCOGENICITY_CODE_ORDER)}
+   codes = [c for c in code_str.split('|') if c]
+   codes.sort(key=lambda c: _order_index.get(c, len(ONCOGENICITY_CODE_ORDER)))
+   return '|'.join(codes)
+
+
+def _classify_oncogenicity_score(score: float, code_str: str) -> str:
+   """
+   Map a numeric oncogenicity score + evidence code string to a classification
+   label using the VICC/ClinGen thresholds defined in ONCOGENICITY_THRESHOLDS.
+   Mirrors the logic in assign_oncogenicity_evidence, including the edge-case
+   for variants one point below the Likely_Oncogenic threshold.
+   """
+   t = ONCOGENICITY_THRESHOLDS
+   classification = "VUS"
+
+   if t['likely_benign_lower'] <= score <= t['likely_benign_upper']:
+      classification = "Likely_Benign"
+   if t['likely_oncogenic_lower'] <= score <= t['likely_oncogenic_upper']:
+      classification = "Likely_Oncogenic"
+   # Edge case: one point below LP threshold — still LP when ≥3 positive criteria
+   # present (without any benign criteria) or when ONCG_OS1 is in the code string
+   if score == t['likely_oncogenic_lower'] - 1 and \
+      re.search(r'_SB', code_str) is None and \
+      (('|' in code_str and len(code_str.split('|')) >= 3) or
+       re.search(r'ONCG_OS1', code_str)):
+      classification = "Likely_Oncogenic"
+   if score <= t['benign_upper']:
+      classification = "Benign"
+   if score >= t['oncogenic_lower']:
+      classification = "Oncogenic"
+
+   return classification
+
+
+def refine_oncogenicity_with_oncokb(
+      tsv_gz_fname: str,
+      logger: logging.Logger = None) -> None:
+   """
+   Second-pass oncogenicity refinement using OncoKB annotations already
+   present as *_OKB columns in the final variant TSV.
+
+   Three groups of OKB-derived criteria are injected where not already captured
+   by the primary VICC/ClinGen classification:
+
+   LoF evidence in TSGs (positive score) — from MUTATION_EFFECT_OKB:
+     ONCG_OVS1_A (+8) — "Loss-of-function"        in TSG (very strong; only if ONCG_OVS1 not set)
+     ONCG_OVS1_B (+4) — "Likely Loss-of-function" in TSG (strong;      only if ONCG_OVS1 not set)
+
+   Oncogenic evidence (positive score) — from ONCOGENICITY_OKB:
+     ONCG_OS2_A  (+4) — "Oncogenic"        (strong positive)
+     ONCG_OS2_B  (+2) — "Likely Oncogenic" (moderate positive)
+     NOTE: OS2_A/B are mutually exclusive with OVS1_A/B. When OncoKB annotates a
+     TSG variant as both LOF and Oncogenic, the "Oncogenic" call is derived from
+     the same LOF-in-TSG evidence — applying both would double-count. OVS1_A/B
+     takes priority; OS2_A/B only fires when the oncogenicity signal is independent
+     (e.g. non-TSG context, or gain-of-function / dominant-negative mechanism).
+
+   Benign / neutral evidence (negative score) — from ONCOGENICITY_OKB:
+     ONCG_SBS2_A  (−4) — "Neutral"        (strong benign)
+     ONCG_SBS2_B  (−2) — "Likely Neutral" (moderate benign)
+
+   After injection the score and classification label are recomputed.
+   The TSV is overwritten in place.
+
+   Args:
+      tsv_gz_fname: Path to the gzipped variant TSV (read + overwritten)
+      logger:       Logger instance
+   """
+   if logger is None:
+      logger = logging.getLogger("pcgr-oncogenicity-refine-okb")
+
+   if not os.path.exists(tsv_gz_fname):
+      logger.warning(f"Variant TSV not found: {tsv_gz_fname} - skipping OncoKB oncogenicity refinement")
+      return
+
+   tsv_df = pd.read_csv(tsv_gz_fname, sep="\t", low_memory=False)
+
+   required = {'ONCOGENICITY', 'ONCOGENICITY_CODE', 'ONCOGENICITY_SCORE',
+               'ONCOGENICITY_OKB', 'MUTATION_EFFECT_OKB', 'TSG', 'VAR_ID'}
+   missing = required - set(tsv_df.columns)
+   if missing:
+      logger.warning(f"Missing columns for OncoKB oncogenicity refinement: {missing} - skipping")
+      return
+
+   n_refined = 0
+
+   for idx, row in tsv_df.iterrows():
+      existing_code   = str(row['ONCOGENICITY_CODE'])   if pd.notna(row['ONCOGENICITY_CODE'])   else '.'
+      existing_score  = float(row['ONCOGENICITY_SCORE']) if pd.notna(row['ONCOGENICITY_SCORE']) else 0.0
+      oncogenicity_okb    = str(row['ONCOGENICITY_OKB'])    if pd.notna(row['ONCOGENICITY_OKB'])    else None
+      mutation_effect_okb = str(row['MUTATION_EFFECT_OKB'])  if pd.notna(row['MUTATION_EFFECT_OKB'])  else None
+      is_tsg = row['TSG'] is True or str(row['TSG']).lower() == 'true'
+      var_id = str(row['VAR_ID']) if pd.notna(row['VAR_ID']) else None
+
+      if oncogenicity_okb is None and mutation_effect_okb is None:
+         continue
+
+      active_codes = set(existing_code.split('|')) if existing_code != '.' else set()
+      new_codes = []
+      score_delta = 0.0
+
+      # --- LoF evidence in TSGs (MUTATION_EFFECT_OKB) — evaluated first ---
+      # OVS1 is higher-specificity than OS2: for a TSG with an OKB-curated LOF effect,
+      # the "Oncogenic" oncogenicity call is derived from the same underlying evidence
+      # (LOF in TSG), so applying both OS2 and OVS1 from OncoKB would double-count.
+      # OVS1_A/B therefore takes priority and blocks OS2_A/B for the same variant.
+      # Only applied when PCGR's internal OVS1 was not already set.
+      ovs1_from_okb = False
+      if is_tsg and 'ONCG_OVS1' not in active_codes and \
+         'ONCG_OVS1_A' not in active_codes and \
+         'ONCG_OVS1_B' not in active_codes:
+
+         # OVS1_A: "Loss-of-function" — very strong (OVS1-equivalent).
+         if mutation_effect_okb == 'Loss-of-function':
+            new_codes.append('ONCG_OVS1_A')
+            score_delta += OKB_ONCOGENICITY_CRITERIA['ONCG_OVS1_A']['score']
+            ovs1_from_okb = True
+
+         # OVS1_B: "Likely Loss-of-function" — strong (OS-equivalent).
+         elif mutation_effect_okb == 'Likely Loss-of-function':
+            new_codes.append('ONCG_OVS1_B')
+            score_delta += OKB_ONCOGENICITY_CRITERIA['ONCG_OVS1_B']['score']
+            ovs1_from_okb = True
+
+      # --- Oncogenic evidence (ONCOGENICITY_OKB) ---
+      # Skipped when OVS1_A/B was just applied above: in that case, OncoKB's "Oncogenic"
+      # classification is derived from the same LOF-in-TSG evidence and adds no
+      # independent signal. OS2 is only independent when the oncogenicity call
+      # reflects a non-LOF mechanism (e.g. gain-of-function, dominant-negative)
+      # or when the gene is not a TSG.
+      if not ovs1_from_okb:
+         # OS2_A: "Oncogenic" — strong. Skip if OS1 or either OS2 already present.
+         if oncogenicity_okb == 'Oncogenic' and \
+            'ONCG_OS1'   not in active_codes and \
+            'ONCG_OS2_A' not in active_codes and \
+            'ONCG_OS2_B' not in active_codes:
+            new_codes.append('ONCG_OS2_A')
+            score_delta += OKB_ONCOGENICITY_CRITERIA['ONCG_OS2_A']['score']
+
+         # OS2_B: "Likely Oncogenic" — moderate. Skipped if stronger evidence already present.
+         elif oncogenicity_okb == 'Likely Oncogenic' and \
+              'ONCG_OS1'   not in active_codes and \
+              'ONCG_OS2_A' not in active_codes and \
+              'ONCG_OS2_B' not in active_codes:
+            new_codes.append('ONCG_OS2_B')
+            score_delta += OKB_ONCOGENICITY_CRITERIA['ONCG_OS2_B']['score']
+
+      # --- Benign / neutral evidence (ONCOGENICITY_OKB) ---
+      # SBS2_A: "Neutral" — strong benign.
+      if oncogenicity_okb == 'Neutral' and \
+         'ONCG_SBS2_A' not in active_codes and \
+         'ONCG_SBS2_B' not in active_codes:
+         new_codes.append('ONCG_SBS2_A')
+         score_delta += OKB_ONCOGENICITY_CRITERIA['ONCG_SBS2_A']['score']
+
+      # SBS2_B: "Likely Neutral" — moderate benign. Skipped if stronger evidence present.
+      elif oncogenicity_okb == 'Likely Neutral' and \
+           'ONCG_SBS2_A' not in active_codes and \
+           'ONCG_SBS2_B' not in active_codes:
+         new_codes.append('ONCG_SBS2_B')
+         score_delta += OKB_ONCOGENICITY_CRITERIA['ONCG_SBS2_B']['score']
+
+      if not new_codes:
+         continue
+
+      ## log the update for traceability
+      #logger.info(f"Refining oncogenicity for variant (TSG = {is_tsg}) at index {var_id} with new "
+      #             f"evidence codes {new_codes} (existing {existing_code}) and score delta {score_delta:.1f}")
+      
+
+      updated_code  = existing_code + '|' + '|'.join(new_codes) if existing_code != '.' \
+                      else '|'.join(new_codes)
+      updated_code  = _sort_oncogenicity_codes(updated_code)
+      updated_score = existing_score + score_delta
+      updated_class = _classify_oncogenicity_score(updated_score, updated_code)
+
+      tsv_df.at[idx, 'ONCOGENICITY_CODE']  = updated_code
+      tsv_df.at[idx, 'ONCOGENICITY_SCORE'] = updated_score
+      tsv_df.at[idx, 'ONCOGENICITY']       = updated_class
+      n_refined += 1
+
+   tsv_df.to_csv(tsv_gz_fname, sep="\t", compression="gzip", index=False)
+   logger.info(f"OncoKB oncogenicity refinement complete: {n_refined} / {len(tsv_df)} variants updated")

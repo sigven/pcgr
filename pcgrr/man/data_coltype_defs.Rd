@@ -3,14 +3,16 @@
 \docType{data}
 \name{data_coltype_defs}
 \alias{data_coltype_defs}
-\title{List of coltype definitions for input files to pcgrr (e.g. VCF-converted TSV, CNA TVS etc.)}
+\title{List of coltype definitions for input files to pcgrr
+(e.g. VCF-converted TSV, CNA TVS etc.)}
 \format{
-An object of class \code{list} of length 5.
+An object of class \code{list} of length 6.
 }
 \usage{
 data_coltype_defs
 }
 \description{
-List of coltype definitions for input files to pcgrr (e.g. VCF-converted TSV, CNA TVS etc.)
+List of coltype definitions for input files to pcgrr
+(e.g. VCF-converted TSV, CNA TVS etc.)
 }
 \keyword{datasets}

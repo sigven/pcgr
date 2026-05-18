@@ -1,0 +1,324 @@
+## Somatic RNA fusions
+
+```{r setup_fusion}
+#| output: asis
+#| echo: false
+#| eval: true
+
+vstats <- pcg_report$content$fusion$vstats
+callset <- pcg_report$content$fusion$callset
+tumor_site <- pcg_report$settings$conf$sample_properties$site
+cs <- pcgrr::color_palette$bm_callout
+
+```
+
+
+The table below lists somatic RNA fusion events detected in the input sample. 
+Fusion events are annotated with respect to known cancer gene partners and 
+presence in public fusion databases (i.e. Mitelman Database).
+
+::: {.callout-important title="Quality control of fusion events" collapse="true"}
+
+The user need to perform quality control of fusion events upstream of PCGR analysis - the 
+focus here is strictly on functional annotation and potential clinical impact. 
+We recommend to carefully check e.g. the number of supporting reads for each 
+fusion event, and to visually inspect fusion events in a genome browser 
+(e.g. IGV) or other third-party tools (e.g. [FusViz](https://github.com/senzhaocode/FuSViz)) 
+to conduct frame inference, investigate domain retention, and rule out potential false positives.
+:::
+
+::: {.callout-note title="Recurrence of fusion events in Mitelman Database" collapse="true"}
+
+Fusion events reported here are annotated with respect to recurrence in the 
+[Mitelman Database of chromosome aberrations and gene fusions in cancer](https://mitelmandatabase.isb-cgc.org/). 
+This annotation is notably done at the level of fusion partners, and _not_ 
+at the level of exact genomic breakpoints. The absence of a fusion 
+event in this database does not rule out biological relevance, 
+particularly if it involves known oncogenic driver genes.
+:::
+
+<br>
+
+```{r all_fusion_events}
+#| eval: !expr isTRUE(NROW(callset$variant_display) > 0)
+#| output: asis
+#| echo: false
+
+fusion_events <- callset$variant_display |>
+  dplyr::mutate(
+    PRIMARY_SITE_MATCH = dplyr::if_else(
+      stringr::str_detect(
+        .data$MITDB_EVIDENCE, 
+        glue::glue("<b>{pcg_report$settings$conf$sample_properties$site}</b>")),
+      TRUE,FALSE,FALSE
+    )
+  ) |>
+  dplyr::arrange(
+    dplyr::desc(PRIMARY_SITE_MATCH),
+    dplyr::desc(ONCOGENE_5P),
+    dplyr::desc(ONCOGENE_3P),
+    dplyr::desc(MITDB_NUM_EVIDENCE)) |>
+  dplyr::select(-dplyr::any_of(
+     c("VAR_ID","ENTREZGENE","VARIANT_CLASS",
+       "SAMPLE_ALTERATION",
+       "GLOBAL_ASSOC_RANK","ACTIONABILITY_TIER",
+       "ACTIONABILITY",
+       "PRIMARY_SITE_MATCH")))
+
+fusion_events_shared <- crosstalk::SharedData$new(
+  fusion_events)
+
+crosstalk::bscols(
+  list(
+    crosstalk::filter_checkbox(
+      id = "ONCOGENE_5P", inline = TRUE, label = "Oncogenic fusion partner - 5'", 
+      sharedData = fusion_events_shared, group = ~ONCOGENE_5P),
+     crosstalk::filter_checkbox(
+      id = "ONCOGENE_3P", inline = TRUE, label = "Oncogenic fusion partner - 3'", 
+      sharedData = fusion_events_shared, group = ~ONCOGENE_3P)
+  ),
+  list(
+    crosstalk::filter_slider(
+      "MITDB_NUM_EVIDENCE","Recurrence in MitelmanDB", 
+      fusion_events_shared, ~MITDB_NUM_EVIDENCE)
+  )
+)
+
+# htmltools::br()
+# 
+# DT::datatable(
+#   fusion_events_shared,
+#   escape = F, 
+#   extensions = c("Buttons","Responsive"), 
+#   options = list(
+#     buttons = c('csv','excel'), 
+#     dom = 'Bfrtip')) |>
+#   DT::formatStyle(
+#     color = "white", 
+#     c("FUSION_GENE"), 
+#     fontWeight = 'bold', 
+#     `text-align` = 'center',
+#     backgroundColor = pcgrr::color_palette$bg_dark)
+# 
+# 
+
+primary_cols <- c(
+  "FUSION_GENE2", "SPLIT_READS","FUSION_GENE_5P",            
+ "FUSION_GENE_3P","BREAKPOINT_5P","BREAKPOINT_3P")
+
+#vc_levels <- pcgrr::color_palette$cna_variant_class$levels
+#vc_colors <- pcgrr::color_palette$cna_variant_class$values
+
+col_defs <- list(
+  FUSION_GENE2 = reactable::colDef(
+    name = "Fusion gene",
+    #style = pcgrr::render_symbol_assoc_style(
+    #  dt_other_oncogenic, rank_col = symbol_rank_col),
+    minWidth = 130
+  ),
+  SPLIT_READS = reactable::colDef(name = "Split Reads", minWidth = 90),
+  FUSION_GENE_3P = reactable::colDef(name = "3' partner", minWidth = 120),
+  FUSION_GENE_5P = reactable::colDef(name = "5' partner", minWidth = 120),
+  BREAKPOINT_5P = reactable::colDef(name = "5' breakpoint", minWidth = 120),
+  BREAKPOINT_3P = reactable::colDef(name = "3' breakpoint", minWidth = 120)
+)
+
+## Hide all remaining non-primary columns from main view (available in row details)
+for (col in colnames(fusion_events)) {
+  if (!col %in% names(col_defs)) {
+    col_defs[[col]] <- reactable::colDef(show = FALSE)
+  }
+}
+
+#dt_other_oncogenic <- dt_other_oncogenic |>
+#  dplyr::mutate(dplyr::across(where(is.numeric), \(x) round(x, 3)))
+
+reactable::reactable(
+  fusion_events_shared,
+  columns = col_defs,
+  defaultColDef = reactable::colDef(html = TRUE),
+  details = pcgrr::build_rt_row_details(
+    primary_cols = primary_cols),
+  searchable = TRUE,
+  filterable = TRUE,
+  striped = TRUE,
+  highlight = TRUE,
+  compact = TRUE,
+  wrap = TRUE,
+  defaultPageSize = 10,
+  theme = pcgrr::rt_theme())
+
+
+```
+
+<br>
+
+### Clinical actionability classification
+
+RNA fusions reported in the tumor sample have been assessed for
+_clinical actionability_ through an implementation of AMP/ASCO/CAP guidelines [@Li2017-ew]. We use `r bm_db_label` `r bm_db_citation` as the underlying sources for actionable variants (versions indicated below).
+
+The table below indicates which variants have been classified into _tiers of clinical significance_ according to AMP/ASCO/CAP criteria.
+
+
+::: {.panel-tabset}
+
+
+#### Therapeutic biomarkers
+
+```{r tier1_2_3_sensitivity_variants_fusion}
+#| echo: false
+#| output: asis
+#| eval: !expr isTRUE(vstats$therapeutic_sensitivity$tier1$n_fusion > 0) || isTRUE(vstats$therapeutic_sensitivity$tier2$n_fusion > 0) || isTRUE(vstats$therapeutic_sensitivity$tier3$n_fusion > 0)
+
+rctbl_recs <- pcgrr::prep_actble_display_tbl(
+  rep = pcg_report, 
+  tier = c(1,2,3),
+  etype_for_tiering = c("predictive"),
+  variant_category = 'fusion')
+
+result_table <- 
+  pcgrr::render_actble_bm_table(
+    rctbl_recs = rctbl_recs,
+    variant_category = 'fusion',
+    clnsig = "therapeutic_sensitivity"
+  )
+
+result_table
+
+```
+
+
+```{r}
+#| echo: false
+#| output: asis
+#| eval: !expr isTRUE(vstats$therapeutic_sensitivity$tier1$n_fusion == 0) && isTRUE(vstats$therapeutic_sensitivity$tier2$n_fusion == 0) && isTRUE(vstats$therapeutic_sensitivity$tier3$n_fusion == 0)
+cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$therapeutic_sensitivity$border, "; background:", cs$therapeutic_sensitivity$bg, "; border-radius:0 4px 4px 0; color:", cs$therapeutic_sensitivity$text, "; font-size:0.92em;'>Based on available data in ", bm_db_label, ", no therapeutic sensitivity biomarkers (Tier 1&ndash;3) were identified among RNA fusions in this tumor sample.</div>"))
+```
+
+<br>
+
+```{r tier1_2_3_resistance_variants_fusion}
+#| echo: false
+#| output: asis
+#| eval: !expr isTRUE(vstats$therapeutic_resistance$tier1$n_fusion > 0) || isTRUE(vstats$therapeutic_resistance$tier2$n_fusion > 0) || isTRUE(vstats$therapeutic_resistance$tier3$n_fusion > 0)
+
+rctbl_recs <- pcgrr::prep_actble_display_tbl(
+  rep = pcg_report, 
+  tier = c(1,2,3),
+  clnsig = "therapeutic_resistance",
+  variant_category = 'fusion')
+
+result_table <- 
+  pcgrr::render_actble_bm_table(
+    rctbl_recs = rctbl_recs,
+    variant_category = 'fusion',
+    clnsig = "therapeutic_resistance"
+  )
+
+result_table
+
+```
+
+```{r}
+#| echo: false
+#| output: asis
+#| eval: !expr isTRUE(vstats$therapeutic_resistance$tier1$n_fusion == 0) && isTRUE(vstats$therapeutic_resistance$tier2$n_fusion == 0) && isTRUE(vstats$therapeutic_resistance$tier3$n_fusion == 0)
+cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$therapeutic_resistance$border, "; background:", cs$therapeutic_resistance$bg, "; border-radius:0 4px 4px 0; color:", cs$therapeutic_resistance$text, "; font-size:0.92em;'>Based on available data in ", bm_db_label, ", no therapeutic resistance biomarkers (Tier 1&ndash;3) were identified among RNA fusions in this tumor sample.</div>"))
+```
+
+#### Prognostic biomarkers
+
+```{r tier1_2_poor_prognosis_variants_fusion}
+#| echo: false
+#| output: asis
+#| eval: !expr isTRUE(vstats$prognostic_poor$tier1$n_fusion > 0) || isTRUE(vstats$prognostic_poor$tier2$n_fusion > 0)
+
+rctbl_recs <- pcgrr::prep_progn_display_tbl(
+  rep = pcg_report,
+  etype_for_tiering = c("prognostic"),
+  variant_category = 'fusion',
+  clnsig = "prognostic_poor")
+
+result_table <-
+  pcgrr::render_progn_bm_table(
+    rctbl_recs = rctbl_recs,
+    variant_category = 'fusion',
+    clnsig = "prognostic_poor"
+  )
+
+result_table
+
+```
+
+```{r}
+#| echo: false
+#| output: asis
+#| eval: !expr isTRUE(vstats$prognostic_poor$tier1$n_fusion == 0) && isTRUE(vstats$prognostic_poor$tier2$n_fusion == 0)
+cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$prognostic_poor$border, "; background:", cs$prognostic_poor$bg, "; border-radius:0 4px 4px 0; color:", cs$prognostic_poor$text, "; font-size:0.92em;'>Based on available data in ", bm_db_label, ", no poor outcome biomarkers for ", tumor_site, " cancers were identified among RNA fusions in this tumor sample.</div>"))
+```
+
+<br>
+
+```{r tier1_2_better_prognosis_variants_fusion}
+#| echo: false
+#| output: asis
+#| eval: !expr isTRUE(vstats$prognostic_better$tier1$n_fusion > 0) || isTRUE(vstats$prognostic_better$tier2$n_fusion > 0)
+
+rctbl_recs <- pcgrr::prep_progn_display_tbl(
+  rep = pcg_report,
+  etype_for_tiering = c("prognostic"),
+  variant_category = 'fusion',
+  clnsig = "prognostic_better")
+
+result_table <-
+  pcgrr::render_progn_bm_table(
+    rctbl_recs = rctbl_recs,
+    variant_category = 'fusion',
+    clnsig = "prognostic_better"
+  )
+
+result_table
+
+```
+
+```{r}
+#| echo: false
+#| output: asis
+#| eval: !expr isTRUE(vstats$prognostic_better$tier1$n_fusion == 0) && isTRUE(vstats$prognostic_better$tier2$n_fusion == 0)
+cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$prognostic_better$border, "; background:", cs$prognostic_better$bg, "; border-radius:0 4px 4px 0; color:", cs$prognostic_better$text, "; font-size:0.92em;'>Based on available data in ", bm_db_label, ", no better outcome biomarkers for ", tumor_site, " cancers were identified among RNA fusions in this tumor sample.</div>"))
+```
+
+#### Diagnostic biomarkers
+
+```{r tier1_2_diagnostic_fusions}
+#| echo: false
+#| output: asis
+#| eval: !expr isTRUE(vstats$diagnostic_positive$tier1$n_fusion > 0) || isTRUE(vstats$diagnostic_positive$tier2$n_fusion > 0)
+
+rctbl_recs <- pcgrr::prep_diagn_display_tbl(
+  rep = pcg_report,
+  etype_for_tiering = c("diagnostic"),
+  variant_category = "fusion",
+  clnsig = "diagnostic_positive")
+
+result_table <-
+  pcgrr::render_diagn_bm_table(
+    rctbl_recs = rctbl_recs,
+    variant_category = 'fusion',
+    clnsig = "diagnostic_positive"
+  )
+
+result_table
+
+```
+
+```{r}
+#| echo: false
+#| output: asis
+#| eval: !expr isTRUE(vstats$diagnostic_positive$tier1$n_fusion == 0) && isTRUE(vstats$diagnostic_positive$tier2$n_fusion == 0)
+cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$diagnostic_positive$border, "; background:", cs$diagnostic_positive$bg, "; border-radius:0 4px 4px 0; color:", cs$diagnostic_positive$text, "; font-size:0.92em;'>Based on available data in ", bm_db_label, ", no positive diagnostic biomarkers for ", tumor_site, " cancers were identified among RNA fusions in this tumor sample.</div>"))
+```
+
+:::
+

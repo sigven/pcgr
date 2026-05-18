@@ -44,27 +44,39 @@ init_report <- function(yaml_fname = NULL,
       if (report[["settings"]][["conf"]][["variant_classification"]][["pop_gnomad"]] != "") {
         population <-
           report[["settings"]][["conf"]][["variant_classification"]][["pop_gnomad"]]
-        vcf_tag_AF <- "gnomADe_non_cancer_AF"
-        vcf_tag_AN <- "gnomADe_non_cancer_AN"
-        vcf_tag_AC <- "gnomADe_non_cancer_AC"
-        vcf_tag_NHOMALT <- "gnomADe_non_cancer_NHOMALT"
+        vcf_tag_AF <- "gnomAD_non_cancer_AF"
+        vcf_tag_AN <- "gnomAD_non_cancer_AN"
+        vcf_tag_AC <- "gnomAD_non_cancer_AC"
+        vcf_tag_AF_all <- "gnomADg_AF"
+        vcf_tag_NHOMALT <- "gnomAD_non_cancer_NHOMALT"
         if (population != "global") {
           vcf_tag_AF <-
-            paste0("gnomADe_non_cancer_",toupper(population),"_AF")
+            paste0("gnomAD_non_cancer_",toupper(population),"_AF")
+          #vcf_tag_AF_all <-
+            #paste0("gnomADe_",toupper(population),"_AF")
           vcf_tag_AN <-
-            paste0("gnomADe_non_cancer_",toupper(population),"_AN")
+            paste0("gnomAD_non_cancer_",toupper(population),"_AN")
           vcf_tag_AC <-
-            paste0("gnomADe_non_cancer_",toupper(population),"_AC")
+            paste0("gnomAD_non_cancer_",toupper(population),"_AC")
           vcf_tag_NHOMALT <-
-            paste0("gnomADe_non_cancer_",toupper(population),"_NHOMALT")
+            paste0("gnomAD_non_cancer_",toupper(population),"_NHOMALT")
+        }
+        gnomad_info_tag <- paste0('gNC_', toupper(population))
+        if (population == "global") {
+          gnomad_info_tag <- "gNC"
         }
         pop_desc_df <-
           report$ref_data$vcf_infotags[
-            report$ref_data$vcf_infotags$tag == vcf_tag_AF,]
+            report$ref_data$vcf_infotags$tag == gnomad_info_tag,]
         if (NROW(pop_desc_df) == 1) {
-          population_description <- pop_desc_df$description
+          population_description <-
+            stringr::str_replace(
+              pop_desc_df$description,
+              ", format: AC\\|AN\\|NHOMALT","")
           report[["settings"]][["conf"]][["variant_classification"]][["vcftag_gnomad_AF"]] <-
             vcf_tag_AF
+          report[["settings"]][["conf"]][["variant_classification"]][["vcftag_gnomad_AF_all"]] <-
+            vcf_tag_AF_all
           report[["settings"]][["conf"]][["variant_classification"]][["vcftag_gnomad_AN"]] <-
             vcf_tag_AN
           report[["settings"]][["conf"]][["variant_classification"]][["vcftag_gnomad_AC"]] <-
@@ -89,7 +101,8 @@ init_report <- function(yaml_fname = NULL,
                      "germline_classified",
                      "rainfall",
                      "kataegis",
-                     "expression")){
+                     "fusion",
+                     "expression")) {
                      #"clinicaltrials")) {
       report[["content"]][[a_elem]] <- list()
       report[["content"]][[a_elem]][["eval"]] <- FALSE
@@ -112,6 +125,11 @@ init_report <- function(yaml_fname = NULL,
           init_rainfall_content()
       }
 
+      if (a_elem == "fusion") {
+        report[["content"]][[a_elem]] <-
+          init_fusion_content()
+      }
+
       if (a_elem == "germline_classified") {
         report[["content"]][[a_elem]][['callset']] <- list()
         report[["content"]][[a_elem]][['panel_info']] <- list()
@@ -120,14 +138,21 @@ init_report <- function(yaml_fname = NULL,
 
       if (a_elem == "snv_indel" | a_elem == "cna") {
         report[["content"]][[a_elem]][['callset']] <- list()
+        for (c in c("variant",
+                   "variant_display")) {
+          report[["content"]][[a_elem]][['callset']][[c]] <- data.frame()
+        }
+        report[["content"]][[a_elem]][['callset']][['bm_evidence']] <-
+          init_biomarker_content()
+
 
         if (a_elem == "snv_indel") {
           report[["content"]][[a_elem]][['vstats']] <-
-            init_snv_indel_vstats()
+            init_vstats_snv_indel()
         }
         if (a_elem == "cna") {
           report[["content"]][[a_elem]][['vstats']] <-
-            init_cna_vstats()
+            init_vstats_cna()
         }
       }
       if (a_elem == "clinicaltrials") {
@@ -137,7 +162,7 @@ init_report <- function(yaml_fname = NULL,
 
       if (a_elem == "mutational_signatures") {
         report[["content"]][[a_elem]] <-
-          init_m_signature_content()
+          init_mutsignature_content()
       }
       if (a_elem == "tmb") {
         report[["content"]][[a_elem]] <-
@@ -155,12 +180,12 @@ init_report <- function(yaml_fname = NULL,
     }
   }
 
-  if(!is.null(report$settings$conf$assay_properties)){
+  if (!is.null(report$settings$conf$assay_properties)) {
     report[['content']][['assay_properties']] <-
       report[['settings']]$conf$assay_properties
   }
 
-  if(!is.null(report$settings$conf$sample_properties)){
+  if (!is.null(report$settings$conf$sample_properties)) {
     report[['content']][['sample_properties']] <-
       report[['settings']]$conf$sample_properties
   }
@@ -213,65 +238,12 @@ init_tmb_content <- function(ref_data = NULL) {
   return(rep)
 }
 
-#' Function that initiates report element with CNA information
-#'
-#' @export
-init_cna_vstats <- function() {
-
-  vstats <- list()
-  for (t in c("n_tsg_loss",
-              "n_tsg_hetloss",
-              "n_oncogene_gain",
-              "n_other_drugtarget_gain",
-              "n_segments_loss",
-              "n_segments_hetloss",
-              "n_segments_gain",
-              "n_actionable_tier1",
-              "n_actionable_tier2")) {
-    vstats[[t]] <- 0
-  }
-  return(vstats)
-}
-
-#' Function that initiates report element with SNV/InDel statistics information
-#'
-#' @export
-init_snv_indel_vstats <- function() {
-
-  vstats <- list()
-  for (t in c("n",
-              "n_snv",
-              "n_indel",
-              "n_sub",
-              "n_coding",
-              "n_noncoding",
-              "n_actionable_tier1",
-              "n_actionable_tier2",
-              "n_actionable_tier3",
-              "n_actionable_tier3_tsg",
-              "n_actionable_tier3_oncogene",
-              "n_actionable_tier3_dualrole",
-              "n_tier4",
-              "n_tier5",
-              "n_eitems_diagnostic_tier1",
-              "n_eitems_predictive_tier1",
-              "n_eitems_prognostic_tier1",
-              "n_eitems_diagnostic_tier2",
-              "n_eitems_predictive_tier2",
-              "n_eitems_prognostic_tier2",
-              "n_genes_tier1",
-              "n_genes_tier2",
-              "n_genes_tier3")) {
-    vstats[[t]] <- 0
-  }
-  return(vstats)
-}
 
 #' Function that initiates report element with mutational signatures information
 #'
 #' @return rep Report structure initialized for signature data
 #' @export
-init_m_signature_content <- function() {
+init_mutsignature_content <- function() {
 
   rep <- list()
   rep[["eval"]] <- FALSE
@@ -325,6 +297,27 @@ init_kataegis_content <- function() {
 
 }
 
+#' Function that initiates report element with fusion information
+#' @return rep Report structure initialized for fusion data
+#'
+#' @export
+init_fusion_content <- function() {
+  rep <- list()
+  rep[["eval"]] <- FALSE
+  rep[["callset"]] <- list()
+  for (e in c('variant','variant_display')) {
+    rep[['callset']][[e]] <- data.frame()
+  }
+  rep[['callset']][['bm_evidence']] <-
+    init_biomarker_content()
+
+  rep[['vstats']] <-
+    init_vstats_fusion()
+
+  return(rep)
+
+}
+
 #' Function that initiates report element with expression information
 #'
 #' @return rep Report structure initialized for expression data
@@ -334,13 +327,13 @@ init_expression_content <- function() {
   rep <- list()
   rep[["eval"]] <- FALSE
   rep[['similarity_analysis']] <- list()
-  for(source in c('tcga','depmap','treehouse')){
+  for (source in c('tcga','depmap','treehouse')) {
     rep[['similarity_analysis']][[source]] <- data.frame()
   }
   rep[['expression']] <- data.frame()
   rep[['csq_expression']] <- data.frame()
   rep[['outliers']] <- data.frame()
-  for(cat in c('immune_contexture','drug_targets')){
+  for (cat in c('immune_contexture','drug_targets')) {
     rep[[cat]] <- data.frame()
   }
 
@@ -416,22 +409,10 @@ init_tumor_only_content <- function() {
 init_var_content <- function() {
 
   rep <- list()
+  rep[['variant']] <- data.frame()
+  rep[['variant_display']] <- data.frame()
+  rep[['bm_evidence']] <- pcgrr::init_biomarker_content()
 
-  rep[["eval"]] <- FALSE
-  rep[["clin_eitem"]] <- list()
-  rep[["disp"]] <- list()
-  rep[["variant_set"]] <- list()
-  rep[["v_stat"]] <- list()
-  rep[["zero"]] <- FALSE
-  for (tumorclass in c("any_ttype", "other_ttype", "query_ttype")) {
-    rep[["clin_eitem"]][[tumorclass]] <- list()
-    for (e_type in c("prognostic", "diagnostic", "predictive")) {
-      for (e_level in c("A_B", "C_D_E", "any")) {
-        rep[["clin_eitem"]][[tumorclass]][[e_type]][[e_level]] <-
-          data.frame()
-      }
-    }
-  }
   return(rep)
 }
 
@@ -447,13 +428,14 @@ init_germline_content <- function() {
   rep[["eval"]] <- FALSE
   rep[['callset']][["variant"]] <- list()
   rep[['callset']][["variant_display"]] <- list()
-  rep[['callset']][['biomarker_evidence']] <- list()
+  rep[['callset']][['bm_evidence']] <-
+    pcgrr::init_biomarker_content()
   rep[["zero"]] <- FALSE
   for (t in c("all",
               "pgx",
               "cpg_non_sf",
               "gwas",
-              "bm",
+              "biomarker",
               "sf")) {
     rep[["callset"]][["variant"]][[t]] <-
       data.frame()
@@ -480,19 +462,42 @@ init_germline_content <- function() {
     }
   }
 
-  rep[['v_stat_bm']] <- list()
+  rep[['v_stat_biomarker']] <- list()
   for (cl in c("n_var_eitems",
                "n_eitems_predictive",
                "n_eitems_prognostic",
                "n_eitems_diagnostic",
                "n_eitems_predisposing")) {
-    rep[['v_stat_bm']][[cl]] <- 0
+    rep[['v_stat_biomarker']][[cl]] <- 0
   }
 
 
   return(rep)
 
 }
+
+
+#' Function that initiates report element with biomarker evidence information
+#'
+#' @return bm_evidence Report structure initialized for biomarker evidence data
+#'
+#' @export
+#'
+init_biomarker_content <- function() {
+
+  bm_evidence <- list()
+  bm_evidence[['eitems']] <- data.frame()
+  bm_evidence[['classification']] <- data.frame()
+  for (cat in names(pcgrr::bm_categories)) {
+    bm_evidence[[cat]] <- list()
+    for (e in c('classification','eitems')) {
+      bm_evidence[[cat]][[e]] <- data.frame()
+    }
+  }
+
+  return(bm_evidence)
+}
+
 
 #' Function that loads YAML data with settings and file paths
 #' to annotated molecular profiles
@@ -510,7 +515,7 @@ load_yaml <- function(yaml_fname, report_mode = "CPSR") {
   }
   report_settings <- yaml::read_yaml(yaml_fname)
   missing_yaml_info <- F
-  for(t in c('sample_id',
+  for (t in c('sample_id',
              'genome_assembly',
              'workflow',
              'output_dir')) {
@@ -522,7 +527,7 @@ load_yaml <- function(yaml_fname, report_mode = "CPSR") {
       }
     }
   }
-  for(t in c('conf',
+  for (t in c('conf',
              'molecular_data',
              'reference_data',
              'software')) {
@@ -537,6 +542,12 @@ load_yaml <- function(yaml_fname, report_mode = "CPSR") {
   if (missing_yaml_info == F) {
     log4r_info(paste0(
       "Successfully parsed YAML configuration file - reporting mode: ", report_mode))
+    ## log the sample identifier
+    log4r_info(paste0(
+      "Sample identifier: ", report_settings[['sample_id']]))
+
+
+
   }else{
     log4r_fatal(paste0(
       "YAML configuration lacks necessary properties - reporting mode: ", report_mode))
@@ -588,13 +599,18 @@ load_yaml <- function(yaml_fname, report_mode = "CPSR") {
         report_settings[['conf']][['sample_properties']][['phenotype']]),
       "list")) {
       report_settings[['conf']][['sample_properties']][['phenotype']] <-
-        as.data.frame(
-          rrapply::rrapply(
-            report_settings[['conf']][['sample_properties']][['phenotype']],
-            how = "bind"))
+        list_of_list_to_df(
+          report_settings[['conf']][['sample_properties']][['phenotype']])
+
+      report_settings[['conf']][['sample_properties']][['phenotype']]$ot_level <-
+        as.numeric(report_settings[['conf']][['sample_properties']][['phenotype']]$ot_level)
+      report_settings[['conf']][['sample_properties']][['phenotype']]$minor_type <-
+        as.logical(report_settings[['conf']][['sample_properties']][['phenotype']]$minor_type)
+      report_settings[['conf']][['sample_properties']][['phenotype']]$do_cancer_slim <-
+        as.logical(report_settings[['conf']][['sample_properties']][['phenotype']]$do_cancer_slim)
     }
 
-    for(col in c('do_id','do_name','efo_id','efo_name',
+    for (col in c('do_id','do_name','efo_id','efo_name',
                  'icd10_code','ot_name','ot_primary_site',
                  'primary_site','ot_code','ot_code_path')) {
 
@@ -613,23 +629,21 @@ load_yaml <- function(yaml_fname, report_mode = "CPSR") {
       }
     }
 
-    for(col in c('do_cancer_slim','ot_level')) {
+    for (col in c('do_cancer_slim','ot_level')) {
       if (NROW(report_settings[['conf']][['sample_properties']][['phenotype']][
         is.nan(report_settings[['conf']][['sample_properties']][['phenotype']][[col]]),]) > 0) {
         report_settings[['conf']][['sample_properties']][['phenotype']][
           is.nan(report_settings[['conf']][['sample_properties']][['phenotype']][[col]]),col] <-
-          as.numeric(NA)
+          as.logical(NA)
       }
     }
   }
 
   report_settings[['reference_data']][['source_metadata']] <-
-    as.data.frame(
-      rrapply::rrapply(
-        report_settings$reference_data$source_metadata,
-        how = "bind"))
+    list_of_list_to_df(
+      report_settings$reference_data$source_metadata)
 
-  for(col in c('source_version',
+  for (col in c('source_version',
                'source_license',
                'source_license_url',
                'source_url',
@@ -644,8 +658,8 @@ load_yaml <- function(yaml_fname, report_mode = "CPSR") {
   }
 
   ## temporary ACMG url fix
-  for(i in 1:NROW(report_settings[['reference_data']][['source_metadata']])){
-    if(report_settings[['reference_data']][['source_metadata']][i,"source_abbreviation"] == "acmg_sf"){
+  for (i in 1:NROW(report_settings[['reference_data']][['source_metadata']])) {
+    if (report_settings[['reference_data']][['source_metadata']][i,"source_abbreviation"] == "acmg_sf") {
       report_settings[['reference_data']][['source_metadata']][i,"source_url"] <-
         "https://pubmed.ncbi.nlm.nih.gov/37347242/"
     }
@@ -653,23 +667,21 @@ load_yaml <- function(yaml_fname, report_mode = "CPSR") {
 
   if (report_mode == "CPSR") {
     report_settings[['conf']][['gene_panel']][['panel_genes']] <-
-      as.data.frame(
-        rrapply::rrapply(
-          report_settings$conf$gene_panel$panel_genes,
-          how = "bind"))
+      list_of_list_to_df(
+        report_settings$conf$gene_panel$panel_genes)
 
     if (NROW(report_settings[['conf']][['gene_panel']][['panel_genes']]) == 1) {
-      for(e in c('panel_id','panel_url','panel_version')) {
+      for (e in c('panel_id','panel_url','panel_version')) {
         report_settings[['conf']][['gene_panel']][['panel_genes']][,e] <- NA
       }
-      for(e in c('mod','moi')) {
+      for (e in c('mod','moi')) {
         if (is.nan(report_settings$conf$gene_panel$panel_genes[,e])) {
           report_settings[['conf']][['gene_panel']][['panel_genes']][,e] <- NA
         }
       }
     }else{
 
-      for(col in c('panel_id','panel_version')) {
+      for (col in c('panel_id','panel_version')) {
 
         if (NROW(report_settings[['conf']][['gene_panel']][['panel_genes']][
           is.nan(report_settings[['conf']][['gene_panel']][['panel_genes']][[col]]),]) > 0) {
@@ -678,7 +690,7 @@ load_yaml <- function(yaml_fname, report_mode = "CPSR") {
             as.numeric(NA)
         }
       }
-      for(col in c('mod','moi')) {
+      for (col in c('mod','moi')) {
 
         if (NROW(report_settings[['conf']][['gene_panel']][['panel_genes']][
           is.nan(report_settings[['conf']][['gene_panel']][['panel_genes']][[col]]),]) > 0) {
@@ -737,7 +749,7 @@ load_yaml <- function(yaml_fname, report_mode = "CPSR") {
   report_settings$conf$report_color <-
     pcgrr::color_palette[["report_color"]][["values"]][1]
 
-  if(!is.null(ref_data$assembly$chrom_coordinates)){
+  if (!is.null(ref_data$assembly$chrom_coordinates)) {
     report_settings$chrom_coordinates <-
       ref_data$assembly$chrom_coordinates
   }
@@ -754,3 +766,12 @@ load_yaml <- function(yaml_fname, report_mode = "CPSR") {
               'ref_data' = ref_data))
 
 }
+
+#' Helper function to convert list of lists to data.frame
+#' @param lst List of lists
+list_of_list_to_df <- function(lst) {
+  lst <- purrr::map(lst, ~ purrr::map(.x, as.character))
+  # convert every element in each list to character
+  as.data.frame(dplyr::bind_rows(lst))
+}
+

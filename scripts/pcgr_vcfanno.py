@@ -8,7 +8,7 @@ import glob
 
 from pcgr.vcf import get_vcf_info_tags, print_vcf_header
 from pcgr.utils import check_subprocess, random_id_generator, getlogger, remove_file
-from pcgr.annoutils import read_vcfanno_tag_file
+from pcgr.annoutils import read_vcfanno_tag_file, get_vcfanno_tracks
 
 
 def __main__():
@@ -93,31 +93,13 @@ def run_vcfanno(num_processes, query_vcf, vcfanno_tracks, query_info_tags, vcfhe
     metadata_vcf_infotags = {}
     infotags = {}
 
-    track_file_info = {}
+    vcfanno_track_info = get_vcfanno_tracks(db_assembly_dir)
 
-    ## INFO tags used for vcfanno annotation
-    track_file_info['tags_fname'] = {}
-
-    ## Source file (VCF/BED) used for vcfanno annotation
-    track_file_info['track_fname'] = {}
-    
-    for variant_track in ['clinvar','tcga','gwas','dbmts','dbnsfp','gnomad_non_cancer']:
-        track_file_info['tags_fname'][variant_track] = os.path.join(db_assembly_dir,'variant','vcf', variant_track, f'{variant_track}.vcfanno.vcf_info_tags.txt')
-        track_file_info['track_fname'][variant_track] = os.path.join(db_assembly_dir,'variant','vcf', variant_track, f'{variant_track}.vcf.gz')
-
-    for bed_track in ['simplerepeat','winmsk','rmsk','gerp']:
-        track_file_info['tags_fname'][bed_track] = os.path.join(db_assembly_dir,'misc','bed', bed_track, f'{bed_track}.vcfanno.vcf_info_tags.txt')
-        track_file_info['track_fname'][bed_track] = os.path.join(db_assembly_dir,'misc','bed', bed_track, f'{bed_track}.bed.gz')
-
-    track_file_info['tags_fname']['gene_transcript_xref'] = os.path.join(db_assembly_dir,'gene','bed', 'gene_transcript_xref', 'gene_transcript_xref.vcfanno.vcf_info_tags.txt')
-    track_file_info['track_fname']['gene_transcript_xref'] = os.path.join(db_assembly_dir,'gene','bed', 'gene_transcript_xref', 'gene_transcript_xref.bed.gz')
-    
-    for track in track_file_info['tags_fname']:
-
+    for track in vcfanno_track_info['tags_fname']:
         if vcfanno_tracks[track] is False:
             continue
 
-        infotags_vcfanno = read_vcfanno_tag_file(track_file_info['tags_fname'][track], logger)
+        infotags_vcfanno = read_vcfanno_tag_file(vcfanno_track_info['tags_fname'][track], logger)
         infotags[track] = infotags_vcfanno.keys()
         for tag in infotags_vcfanno:
             if tag in query_info_tags:
@@ -126,10 +108,10 @@ def run_vcfanno(num_processes, query_vcf, vcfanno_tracks, query_info_tags, vcfhe
             metadata_vcf_infotags[tag] = infotags_vcfanno[tag]
         
         ## append track to vcfanno configuration file
-        append_to_conf_file(track, infotags[track], track_file_info['track_fname'][track], conf_fname)
+        append_to_conf_file(track, infotags[track], vcfanno_track_info['track_fname'][track], conf_fname)
 
         ## Append VCF INFO tags to VCF header file
-        check_subprocess(logger, f'cat {track_file_info["tags_fname"][track]} >> {vcfheader_file}', debug=False)
+        check_subprocess(logger, f'cat {vcfanno_track_info["tags_fname"][track]} >> {vcfheader_file}', debug=False)
     
     panel_normal_tags = ["PANEL_OF_NORMALS"]
    
@@ -208,6 +190,8 @@ def append_to_conf_file(datasource, datasource_info_tags, datasource_track_fname
         fh.write(ops_string + '\n\n')
     fh.close()
     return
+
+
 
 
 

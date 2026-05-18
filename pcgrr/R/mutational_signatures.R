@@ -19,12 +19,12 @@ generate_report_data_signatures <-
     n_snvs_required <- 30
 
     pcg_report_signatures <-
-      pcgrr::init_m_signature_content()
+      pcgrr::init_mutsignature_content()
 
-    if(!is.null(variant_set) &
+    if (!is.null(variant_set) &
        !is.null(vstats) &
        !is.null(ref_data) &
-       !is.null(settings)){
+       !is.null(settings)) {
       pcgrr::log4r_info("------")
       pcgrr::log4r_info("Identifying mutational signatures")
     }else{
@@ -32,8 +32,8 @@ generate_report_data_signatures <-
       return(pcg_report_signatures)
     }
 
-    if("n_snv" %in% names(vstats)){
-      if(vstats$n_snv < n_snvs_required){
+    if ("n_snv" %in% names(vstats)) {
+      if (vstats$n_snv < n_snvs_required) {
         pcgrr::log4r_warn(
           paste0("Too few SNVs detected in sample (n = ",
                  vstats$n_snv,")",
@@ -87,8 +87,8 @@ generate_report_data_signatures <-
       unique(ref_data$misc$mutational_signature[["PRIMARY_SITE"]])
 
     site_has_prevalence_data <- T
-    if(!(settings$conf$sample_properties$site %in%
-         sites_with_sig_prevalence)){
+    if (!(settings$conf$sample_properties$site %in%
+         sites_with_sig_prevalence)) {
       site_has_prevalence_data <- F
       pcgrr::log4r_warn(
         paste0("No signature prevalence data available for site '",
@@ -127,7 +127,7 @@ generate_report_data_signatures <-
           genome = ref_data$assembly$bsg,
           predefined_dbs_mbs = T))
       )
-      if(class(grl)[1] == "CompressedGRangesList"){
+      if (class(grl)[1] == "CompressedGRangesList") {
 
         snv_grl <- suppressMessages(
           MutationalPatterns::get_mut_type(
@@ -136,7 +136,7 @@ generate_report_data_signatures <-
           MutationalPatterns::get_mut_type(
             grl, type = "indel", predefined_dbs_mbs = T))
         indel_counts <- NULL
-        if(length(indel_grl[[1]]) > 0){
+        if (length(indel_grl[[1]]) > 0) {
           indel_grl <- MutationalPatterns::get_indel_context(
             indel_grl, ref_genome = ref_data$assembly$bsg)
           indel_counts <- MutationalPatterns::count_indel_contexts(
@@ -148,16 +148,16 @@ generate_report_data_signatures <-
             snv_grl, ref_genome = ref_data$assembly$bsg)
         )
 
-        if(is.data.frame(type_occurrences)){
-          if("T>A" %in% colnames(type_occurrences)){
+        if (is.data.frame(type_occurrences)) {
+          if ("T>A" %in% colnames(type_occurrences)) {
             type_occurrences <- type_occurrences |>
               dplyr::rename("A>T" = "T>A")
           }
-          if("T>C" %in% colnames(type_occurrences)){
+          if ("T>C" %in% colnames(type_occurrences)) {
             type_occurrences <- type_occurrences |>
               dplyr::rename("A>G" = "T>C")
           }
-          if("T>G" %in% colnames(type_occurrences)){
+          if ("T>G" %in% colnames(type_occurrences)) {
             type_occurrences <- type_occurrences |>
               dplyr::rename("A>C" = "T>G")
           }
@@ -201,7 +201,7 @@ generate_report_data_signatures <-
         all_reference_signatures <-
           pcgrr::cosmic_sbs_signatures[['all']]
 
-        if(as.logical(sig_settings$include_artefact_signatures) == FALSE){
+        if (as.logical(sig_settings$include_artefact_signatures) == FALSE) {
           all_reference_signatures <-
             pcgrr::cosmic_sbs_signatures[['no_artefacts']]
         }
@@ -212,7 +212,7 @@ generate_report_data_signatures <-
             MutationalPatterns::cos_sim_matrix(
               mut_mat, all_reference_signatures)
 
-          if(length(sig_similarity) >= 67){
+          if (length(sig_similarity) >= 67) {
             pcg_report_signatures[["result"]][['signature_similarity']] <-
               tidyr::pivot_longer(
                 as.data.frame(sig_similarity),
@@ -262,13 +262,13 @@ generate_report_data_signatures <-
           bootstrap_data <- list()
           bootstrap_data[['goodness_of_fit']] <- data.frame()
           bootstrap_data[['contributions']] <- data.frame()
-          while(i <= n_bootstrap_iterations){
+          while(i <= n_bootstrap_iterations) {
             mut_mat_bs <- mutpat_resample_mut_mat(
               mut_matrix = mut_mat)
             fit_ref_bs <-
               MutationalPatterns::fit_to_signatures(
                 mut_mat_bs, selected_reference_signatures)
-            if(!is.null(fit_ref_bs)){
+            if (!is.null(fit_ref_bs)) {
               b <- as.data.frame(stats::setNames(
                 reshape2::melt(fit_ref_bs[["contribution"]]),
                 c("SIGNATURE_ID", "sample_id",
@@ -302,12 +302,20 @@ generate_report_data_signatures <-
 
           ## calculate confidence intervals for each signature
           sig_prop_data <- data.frame()
-          for(sig in unique(bootstrap_data[['contributions']]$SIGNATURE_ID)){
+          for (sig in unique(bootstrap_data[['contributions']]$SIGNATURE_ID)) {
             sdata <- bootstrap_data[['contributions']] |>
               dplyr::filter(.data$SIGNATURE_ID == sig)
-            ci_data <- stats::t.test(sdata$prop, conf.level = 0.95)
-            prop_ci_lower <- ci_data$conf.int[1]
-            prop_ci_upper <- ci_data$conf.int[2]
+
+            # Check if data has variation before calling t.test
+            if (length(unique(sdata$prop)) > 1 && stats::var(sdata$prop) > 0) {
+              ci_data <- stats::t.test(sdata$prop, conf.level = 0.95)
+              prop_ci_lower <- ci_data$conf.int[1]
+              prop_ci_upper <- ci_data$conf.int[2]
+            } else {
+              # Data is constant - set CI to the constant value
+              prop_ci_lower <- mean(sdata$prop)
+              prop_ci_upper <- mean(sdata$prop)
+            }
 
             sig_prop_data <- dplyr::bind_rows(
               sig_prop_data,
@@ -319,14 +327,21 @@ generate_report_data_signatures <-
 
           }
 
-          ci_data_gof <- stats::t.test(
-            bootstrap_data[['goodness_of_fit']]$cosine_sim,
-            conf.level = 0.95)
+          # Check if goodness of fit data has variation before calling t.test
+          gof_data <- bootstrap_data[['goodness_of_fit']]$cosine_sim
+          if (length(unique(gof_data)) > 1 && stats::var(gof_data) > 0) {
+            ci_data_gof <- stats::t.test(gof_data, conf.level = 0.95)
+            gof_ci_lower <- ci_data_gof$conf.int[1]
+            gof_ci_upper <- ci_data_gof$conf.int[2]
+          } else {
+            # Data is constant - set CI to the constant value
+            gof_ci_lower <- mean(gof_data)
+            gof_ci_upper <- mean(gof_data)
+          }
           gof <- list()
-          gof[['ci_lower']] <- ci_data_gof$conf.int[1]
-          gof[['ci_upper']] <- ci_data_gof$conf.int[2]
-          gof[['estimate']] <-
-            mean(bootstrap_data[['goodness_of_fit']]$cosine_sim)
+          gof[['ci_lower']] <- gof_ci_lower
+          gof[['ci_upper']] <- gof_ci_upper
+          gof[['estimate']] <- mean(gof_data)
 
           contributions_per_signature <-
             sig_prop_data |>
@@ -394,7 +409,7 @@ generate_report_data_signatures <-
             utils::head(25)
 
           color_vec <- utils::head(
-            pcgrr::color_palette[["tier"]][["values"]],
+            pcgrr::color_palette[["multi"]][["values"]],
             min(25, nrow(cols)))
 
           names(color_vec) <- cols$signature_id
@@ -703,7 +718,7 @@ generate_report_data_rainfall <- function(variant_set,
 
   sbs_types <- c("C>T", "A>G", "A>C", "A>T", "C>G", "C>A")
   if (is.null(colors)) {
-    colors <- utils::head(pcgrr::color_palette$tier$values, 6)
+    colors <- utils::head(pcgrr::color_palette$multi$values, 6)
   }else{
     invisible(
       assertthat::assert_that(
@@ -871,7 +886,7 @@ mutpat_resample_mut_mat <- function(mut_matrix) {
 #'
 plot_signature_contributions <- function(
     signature_contributions = NULL,
-    per_signature = TRUE){
+    per_signature = TRUE) {
 
   assertthat::assert_that(
     is.list(signature_contributions),
@@ -917,17 +932,17 @@ plot_signature_contributions <- function(
     utils::head(plot_data_per_signature, 6),
     ggplot2::aes(
       x = stats::reorder(
-        signature_aetiology, -prop_signature),
-      y = prop_signature,
-      fill = signature_aetiology)) +
+        .data$signature_aetiology, -.data$prop_signature),
+      y = .data$prop_signature,
+      fill = .data$signature_aetiology)) +
     ggplot2::geom_bar(stat = "identity") +
     ggplot2::geom_errorbar(
-      ggplot2::aes(ymin = prop_signature_ci_lower,
-                   ymax = prop_signature_ci_upper),
+      ggplot2::aes(ymin = .data$prop_signature_ci_lower,
+                   ymax = .data$prop_signature_ci_upper),
       width = .3)+
     ggplot2::scale_fill_manual(
       values = utils::head(
-        pcgrr::color_palette$tier$values,
+        pcgrr::color_palette$multi$values,
         NROW(plot_data_per_signature))) +
     ggplot2::theme_classic() +
     ggplot2::xlab("") +

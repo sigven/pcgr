@@ -5,7 +5,12 @@
 \title{Function that reads and validates an annotated somatic SNV/InDel
 file from PCGR pre-reporting pipeline}
 \usage{
-load_somatic_snv_indel(fname = NA, ref_data = NULL, settings = NULL)
+load_somatic_snv_indel(
+  fname = NA,
+  ref_data = NULL,
+  settings = NULL,
+  simulate_vaf_dp = TRUE
+)
 }
 \arguments{
 \item{fname}{Path to file with pre-processed somatic SNV/InDel variants}
@@ -13,6 +18,10 @@ load_somatic_snv_indel(fname = NA, ref_data = NULL, settings = NULL)
 \item{ref_data}{PCGR reference data object}
 
 \item{settings}{PCGR run/configuration settings}
+
+\item{simulate_vaf}{Internal/test use only. If TRUE and VAF_TUMOR is
+entirely missing, replace it with random values drawn from
+Uniform(0.01, 0.99). Never set this in production runs.}
 }
 \description{
 Function that reads and validates an annotated somatic SNV/InDel

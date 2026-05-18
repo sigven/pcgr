@@ -21,22 +21,22 @@ append_annotation_links <- function(
     rename <-
       pcgrr::variant_db_url[i, ]$rename
 
-    if(rename == T &
+    if (rename == T &
        name %in% colnames(var_data_df) &
-       !(link_display_var %in% colnames(var_data_df))){
+       !(link_display_var %in% colnames(var_data_df))) {
       names(var_data_df)[names(var_data_df) == name] <-
         link_display_var
     }
 
     if (!name %in% skip) {
       group_by_var <- c("VAR_ID","ENTREZGENE")
-      if(vartype == "cna"){
+      if (vartype == "cna") {
         group_by_var <- c("VAR_ID",
                           "ENTREZGENE",
                           "TRANSCRIPT_START",
                           "TRANSCRIPT_END")
       }
-      if(vartype == "exp"){
+      if (vartype == "exp") {
         group_by_var <- "ENTREZGENE"
       }
       url_prefix <- pcgrr::variant_db_url[i, ]$url_prefix
@@ -57,7 +57,7 @@ append_annotation_links <- function(
             link_display_var = link_display_var
           )
         if (nrow(annotation_links) > 0) {
-          if(vartype == "cna"){
+          if (vartype == "cna") {
             var_data_df <- var_data_df |>
               dplyr::left_join(
                 dplyr::rename(
@@ -67,7 +67,7 @@ append_annotation_links <- function(
                        "TRANSCRIPT_START",
                        "TRANSCRIPT_END"))
           }else{
-            if(vartype == "exp"){
+            if (vartype == "exp") {
               var_data_df <- var_data_df |>
                 dplyr::left_join(
                   dplyr::rename(
@@ -75,7 +75,7 @@ append_annotation_links <- function(
                     !!rlang::sym(name) := "link"),
                   by = c("ENTREZGENE"))
             }
-            if(vartype == "snv_indel"){
+            if (vartype == "snv_indel") {
               var_data_df <- var_data_df |>
                 dplyr::left_join(
                   dplyr::rename(
@@ -105,7 +105,7 @@ append_annotation_links <- function(
 #' @export
 append_gwas_citation_phenotype <-
   function(vcf_data_df = NULL,
-           ref_data = NULL){
+           ref_data = NULL) {
 
 
     invisible(assertthat::assert_that(
@@ -231,7 +231,7 @@ append_gwas_citation_phenotype <-
 #' @export
 append_oncogenicity_docs <- function(
     var_df,
-    ref_data = NULL){
+    ref_data = NULL) {
 
   if (any(grepl(paste0("^ONCOGENICITY_CODE$"), names(var_df))) &
       any(grepl(paste0("^VAR_ID$"), names(var_df)))) {
@@ -382,39 +382,49 @@ append_tfbs_annotation <-
                   "TF_binding_site_variant\\|MotifFeature\\|ENSM0[0-9]{1,}\\|",
                   "")
               ) |>
-              tidyr::separate(.data$REGULATORY_ANNOTATION,
-                              into = c('cons','matrix','motif_pos',
-                                       'high_inf_pos','motif_score_change',
-                                       'transcription_factors'),
-                              sep = "\\|",
-                              remove = T) |>
+              tidyr::separate(
+                .data$REGULATORY_ANNOTATION,
+                into = c('cons','matrix','motif_pos',
+                         'high_inf_pos','motif_score_change',
+                         'transcription_factors'),
+                sep = "\\|",
+                remove = T) |>
 
-              tidyr::separate_rows(.data$transcription_factors) |>
+              tidyr::separate_rows(
+                .data$transcription_factors) |>
               dplyr::mutate(
                 TF_BINDING_SITE_VARIANT = dplyr::case_when(
-                  .data$high_inf_pos == "N" ~ "Overlap: non-critical motif position",
-                  .data$high_inf_pos == "Y" ~ "Overlap: critical motif position",
+                  .data$high_inf_pos ==
+                    "N" ~ "Overlap: non-critical motif position",
+                  .data$high_inf_pos ==
+                    "Y" ~ "Overlap: critical motif position",
                   TRUE ~ as.character(NA)
                 )
               ) |>
               dplyr::mutate(
                 TF_BINDING_SITE_VARIANT_INFO =
-                  paste(.data$transcription_factors, .data$matrix,
-                        .data$motif_pos, .data$motif_score_change,
-                        .data$high_inf_pos, sep="|")
+                  paste(
+                    .data$transcription_factors,
+                    .data$matrix,
+                    .data$motif_pos,
+                    .data$motif_score_change,
+                    .data$high_inf_pos, sep="|")
               )
           )
 
-          var_df_links <- dplyr::group_by(var_df_unique_slim_melted, .data$VAR_ID) |>
+          var_df_links <- dplyr::group_by(
+            var_df_unique_slim_melted, .data$VAR_ID) |>
             dplyr::summarise(
-              TF_BINDING_SITE_VARIANT = paste(unique(sort(.data$TF_BINDING_SITE_VARIANT)),
-                                              collapse = ", "),
+              TF_BINDING_SITE_VARIANT = paste(
+                unique(sort(.data$TF_BINDING_SITE_VARIANT)),
+                collapse = ", "),
               TF_BINDING_SITE_VARIANT_INFO = paste(unique(
                 .data$TF_BINDING_SITE_VARIANT_INFO),
                 collapse = ", "),
               .groups = "drop") |>
-            dplyr::select(.data$VAR_ID, .data$TF_BINDING_SITE_VARIANT,
-                          .data$TF_BINDING_SITE_VARIANT_INFO)
+            dplyr::select(
+              .data$VAR_ID, .data$TF_BINDING_SITE_VARIANT,
+              .data$TF_BINDING_SITE_VARIANT_INFO)
 
           var_df <- dplyr::left_join(var_df, var_df_links,
                                      by = c("VAR_ID" = "VAR_ID"))
@@ -594,11 +604,11 @@ append_targeted_drug_annotations <- function(
     if (nrow(var_drug_df) > 0) {
       var_drug_df <- var_drug_df |>
         dplyr::left_join(
-          ref_data[['drug']][['inhibitors_any_label']],
+          ref_data[['drug']][['targeted_inhibition_any_label']],
           by = c("SYMBOL")) |>
         dplyr::left_join(
           dplyr::filter(
-            ref_data[['drug']][['inhibitors_on_label']],
+            ref_data[['drug']][['targeted_inhibition_on_label']],
             .data$QUERY_SITE == primary_site),
           by = c("SYMBOL")) |>
         dplyr::select(-c("QUERY_SITE")) |>
@@ -632,6 +642,143 @@ append_targeted_drug_annotations <- function(
   return(var_df)
 }
 
+#' Function that adds protein domain annotations (PFAM)
+#' for a list of variants and associated targeted
+#'
+#' @param var_df data frame with variants
+#' @param ref_data PCGR/CPSR reference data object
+#' @return var_df
+#' @export
+#'
+#'
+append_protein_domains <- function(
+    var_df,
+    ref_data = NULL) {
+
+  var_non_aa <- data.frame()
+  var_aa <- data.frame()
+
+  if (NROW(var_df) > 0 &
+     "ENTREZGENE" %in% colnames(var_df) &
+     "VAR_ID" %in% colnames(var_df) &
+     "PFAM_DOMAIN" %in% colnames(var_df) &
+     "PFAM_DOMAIN_NAME" %in% colnames(var_df) &
+     "PFAM_ENTRY_LOCATIONS" %in% colnames(var_df) &
+     "AMINO_ACID_START" %in% colnames(var_df) &
+     "AMINO_ACID_END" %in% colnames(var_df) &
+     !is.null(ref_data) &
+     !is.null(ref_data$misc$protein_domain) &
+     is.data.frame(ref_data$misc$protein_domain)) {
+
+    var_non_aa <- var_df |>
+      dplyr::filter(is.na(.data$AMINO_ACID_START) |
+                      is.na(.data$AMINO_ACID_END))
+
+    if (NROW(var_non_aa) > 0) {
+      var_non_aa <- var_non_aa |>
+        dplyr::select(
+          c("VAR_ID",
+            "PFAM_DOMAIN",
+            "PFAM_DOMAIN_NAME",
+            "PFAM_ENTRY_LOCATIONS")
+        )
+    }else{
+      var_non_aa <- data.frame()
+    }
+
+    var_aa <- var_df |>
+      dplyr::select(
+        c("ENTREZGENE","VAR_ID","PFAM_DOMAIN",
+          "PFAM_DOMAIN_NAME","PFAM_ENTRY_LOCATIONS",
+          "AMINO_ACID_START","AMINO_ACID_END")) |>
+      dplyr::filter(!is.na(.data$AMINO_ACID_START) &
+                      !is.na(.data$AMINO_ACID_END))
+
+    if (NROW(var_aa) > 0) {
+
+      protein_domains <- ref_data[['misc']][['protein_domain']] |>
+        dplyr::select(
+          c("PFAM_ID", "PFAM_NAME",
+            "ENTREZGENE", "PFAM_ENTRY_LOCATIONS")) |>
+        dplyr::rename(
+          PFAM_DOMAIN2 = .data$PFAM_ID,
+          PFAM_ENTRY_LOCATIONS2 = .data$PFAM_ENTRY_LOCATIONS,
+          PFAM_DOMAIN_NAME2 = .data$PFAM_NAME) |>
+        tidyr::separate_rows(
+          .data$PFAM_ENTRY_LOCATIONS2,sep=",") |>
+        tidyr::separate(.data$PFAM_ENTRY_LOCATIONS2,
+                        c("PFAM_DOMAIN_TYPE",
+                          "PFAM_AA_START",
+                          "PFAM_AA_END"),
+                        sep=":", remove = F)
+
+      pfam_fixed <- var_aa |>
+        dplyr::left_join(
+          protein_domains, by = "ENTREZGENE",
+          relationship = "many-to-many") |>
+        dplyr::mutate(
+          PFAM_AA_START = as.integer(.data$PFAM_AA_START),
+          PFAM_AA_END = as.integer(.data$PFAM_AA_END)) |>
+        dplyr::filter(
+          !(.data$AMINO_ACID_END < .data$PFAM_AA_START) &
+            !(.data$AMINO_ACID_START > .data$PFAM_AA_END))
+
+      if (NROW(pfam_fixed) > 0) {
+        var_aa <- pfam_fixed |>
+          dplyr::select(
+            c("VAR_ID",
+              "PFAM_DOMAIN" = "PFAM_DOMAIN2",
+              "PFAM_DOMAIN_NAME" = "PFAM_DOMAIN_NAME2",
+              "PFAM_ENTRY_LOCATIONS" = "PFAM_ENTRY_LOCATIONS2")
+          ) |>
+          dplyr::group_by(.data$VAR_ID) |>
+          ## For now, just take first entry (in the rare case that
+          ## a variant partially overlaps two or more domains)
+          dplyr::summarise(
+            PFAM_DOMAIN = utils::head(.data$PFAM_DOMAIN,1),
+            PFAM_DOMAIN_NAME = utils::head(.data$PFAM_DOMAIN_NAME,1),
+            PFAM_ENTRY_LOCATIONS = utils::head(.data$PFAM_ENTRY_LOCATIONS,1),
+            .groups = "drop"
+          ) |>
+          dplyr::select(
+            c("VAR_ID",
+              "PFAM_DOMAIN",
+              "PFAM_DOMAIN_NAME",
+              "PFAM_ENTRY_LOCATIONS")
+          ) |>
+          dplyr::distinct()
+
+      }else{
+        var_aa <- var_aa |>
+          dplyr::select(
+            c("VAR_ID","PFAM_DOMAIN",
+              "PFAM_DOMAIN_NAME",
+              "PFAM_ENTRY_LOCATIONS"))
+      }
+    }else{
+      var_aa <- data.frame()
+    }
+  }
+
+  fixed_domain_info <-
+    dplyr::bind_rows(var_non_aa, var_aa)
+
+  if (NROW(fixed_domain_info) > 0) {
+    var_df <- dplyr::select(
+      var_df, -c("PFAM_DOMAIN",
+                 "PFAM_DOMAIN_NAME",
+                 "PFAM_ENTRY_LOCATIONS"))
+    var_df <- dplyr::left_join(
+      var_df, fixed_domain_info,
+      by = c("VAR_ID" = "VAR_ID"))
+  }
+
+  return(var_df)
+
+}
+
+
+
 #' Function that adds link to targeted drugs (on and off-label)
 #' for a list of variants and associated targeted
 #'
@@ -655,11 +802,11 @@ append_drug_var_link <- function(
     if (nrow(var_drug_df) > 0) {
       var_drug_df <- var_drug_df |>
         dplyr::left_join(
-            ref_data[['drug']][['inhibitors_any_label']],
+            ref_data[['drug']][['targeted_inhibition_any_label']],
           by = c("SYMBOL")) |>
         dplyr::left_join(
           dplyr::filter(
-            ref_data[['drug']][['inhibitors_on_label']],
+            ref_data[['drug']][['targeted_inhibition_on_label']],
             .data$QUERY_SITE == primary_site),
           by = c("SYMBOL")) |>
         dplyr::select(-c("QUERY_SITE")) |>
@@ -780,6 +927,151 @@ append_cancer_association_ranks <-
   }
 
 
+#' Function that appends informative alteration names to
+#' sample variants based on gene symbol, consequence and
+#' HGVS annotations
+#'
+#' @param var_data_df Data frame of sample variants from VCF
+#' @return var_data_df
+#'
+#' @export
+#'
+append_alteration_name <- function(
+    var_data_df = NULL){
+
+  ## check that var_data_df is non-null and data.frame
+  invisible(
+    assertthat::assert_that(
+      !is.null(var_data_df) &
+        is.data.frame(var_data_df),
+      msg = "var_data_df must be a non-null data frame"
+    )
+  )
+
+  assertable::assert_colnames(
+    var_data_df,
+    c("SYMBOL",
+      "CONSEQUENCE",
+      "ALTERATION",
+      "HGVSc",
+      "HGVSp",
+      "HGVSP",
+      "EXONIC_STATUS"),
+    only_colnames = FALSE,
+    quiet = TRUE
+  )
+
+  if("SAMPLE_ALTERATION" %in% colnames(var_data_df)) {
+    var_data_df$SAMPLE_ALTERATION <- NULL
+  }
+
+  var_data_df <- var_data_df |>
+
+    dplyr::mutate(
+      SAMPLE_ALTERATION = dplyr::case_when(
+        is.na(.data$SYMBOL) &
+          !is.na(.data$CONSEQUENCE) ~
+          as.character(.data$CONSEQUENCE),
+        !is.na(.data$CONSEQUENCE) &
+          stringr::str_detect(
+            .data$CONSEQUENCE,
+            "^(splice_acceptor|splice_donor)") &
+          !is.na(.data$SYMBOL) &
+          !is.na(.data$HGVSc) ~
+          #":" %in% .data$HGVSc ~
+          paste0(
+            .data$SYMBOL,
+            " - ",
+            stringr::str_split_fixed(
+              .data$HGVSc,":",2)[,2],
+            " (", stringr::str_replace(
+              stringr::str_replace_all(
+                .data$CONSEQUENCE,"&",", "),
+              "_variant",""),")"
+          ),
+        !is.na(.data$CONSEQUENCE) &
+          stringr::str_detect(
+            .data$CONSEQUENCE,
+            "^(upstream_gene_variant)") &
+          !is.na(.data$SYMBOL) &
+          !is.na(.data$ALTERATION) ~
+          paste0(
+            .data$SYMBOL,
+            " - ",
+            .data$ALTERATION,
+            " (promoter)"),
+        .data$EXONIC_STATUS == "exonic" &
+          !stringr::str_detect(
+            .data$CONSEQUENCE, "^(splice_acceptor|splice_donor)") &
+          !is.na(.data$CONSEQUENCE) &
+          !is.na(.data$HGVSc) &
+          !is.na(.data$SYMBOL) &
+          !is.na(.data$HGVSP) ~
+          paste0(.data$SYMBOL,
+                 " - ",
+                 .data$HGVSP),
+        TRUE ~ as.character(paste0(
+          .data$SYMBOL," - ",
+          stringr::str_replace_all(
+            .data$CONSEQUENCE,"&",", "))
+        )
+      ))
+
+  return(var_data_df)
+
+}
+
+
+#' Function that styles CNA variant classes (amplification,
+#' gain, hetdel, homdel/hemdel) with more informative names
+#' for display in PCGR reports and other outputs
+#'
+#' @param var_data_df Data frame of CNA calls
+#' @param colname Name of column to be styled and appended to var_data_df
+#' @return var_data_df
+#'
+#' @export
+#'
+append_styled_cna_vclass <- function(
+    var_data_df = NULL,
+    colname = "VARIANT_CLASS_STYLED"){
+
+  ## check that var_data_df is non-null and data.frame
+  invisible(
+    assertthat::assert_that(
+      !is.null(var_data_df) &
+        is.data.frame(var_data_df),
+      msg = "var_data_df must be a non-null data frame"
+    )
+  )
+
+  assertable::assert_colnames(
+    var_data_df,
+    c("VARIANT_CLASS"),
+    only_colnames = FALSE,
+    quiet = TRUE
+  )
+
+  if(colname %in% colnames(var_data_df)) {
+    var_data_df[[colname]] <- NULL
+  }
+
+  var_data_df <- var_data_df |>
+    dplyr::mutate(
+      !!rlang::sym(colname) := dplyr::case_when(
+        .data$VARIANT_CLASS == "amplification"          ~ "Amplification",
+        .data$VARIANT_CLASS == "gain"                   ~ "Gain",
+        .data$VARIANT_CLASS == "hetdel"                 ~ "Shallow deletion",
+        .data$VARIANT_CLASS %in% c("homdel", "hemdel") ~ "Deep deletion",
+        TRUE ~ "No aberration/neutral")
+    )
+
+  return(var_data_df)
+
+}
+
+
+
 #' Function that appends cancer gene evidence links
 #'
 #' @param var_data_df Data frame of sample variants from VCF
@@ -847,9 +1139,9 @@ append_cancer_gene_evidence <-
         ))
     }
 
-    if("CGC_TIER" %in% colnames(var_data_df) &
+    if ("CGC_TIER" %in% colnames(var_data_df) &
        "CGC_GERMLINE" %in% colnames(var_data_df) &
-       "CGC_SOMATIC" %in% colnames(var_data_df)){
+       "CGC_SOMATIC" %in% colnames(var_data_df)) {
 
       var_data_df$CANCER_GENE_CENSUS <- ""
       var_data_df <- var_data_df |>
@@ -946,7 +1238,7 @@ generate_annotation_link <- function(
       )
 
       if (nrow(df_annotation_links) > 0) {
-        if(vartype == "cna"){
+        if (vartype == "cna") {
           df_annotation_links <- as.data.frame(
             df_annotation_links |>
               dplyr::group_by(
@@ -961,7 +1253,7 @@ generate_annotation_link <- function(
                 .groups = "drop")
           )
         }else{
-          if(vartype == "exp"){
+          if (vartype == "exp") {
             df_annotation_links <- as.data.frame(
               df_annotation_links |>
                 dplyr::group_by(
@@ -973,7 +1265,7 @@ generate_annotation_link <- function(
                   .groups = "drop")
             )
           }
-          if(vartype == "snv_indel"){
+          if (vartype == "snv_indel") {
             df_annotation_links <- as.data.frame(
               df_annotation_links |>
                 dplyr::group_by(

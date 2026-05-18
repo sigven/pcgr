@@ -13,21 +13,21 @@ generate_report_data_expression <-
 
   pcg_report_expression[["eval"]] <- TRUE
 
-  if(as.logical(settings$conf$expression$similarity_analysis) == TRUE){
+  if (as.logical(settings$conf$expression$similarity_analysis) == TRUE) {
     pcg_report_expression[["similarity_analysis"]] <-
       load_expression_similarity(settings = settings)
   }
 
-  if(settings$molecular_data$fname_expression_outliers_tsv != "None" &
-     file.exists(settings$molecular_data$fname_expression_outliers_tsv)){
+  if (settings$molecular_data$fname_expression_outliers_tsv != "None" &
+     file.exists(settings$molecular_data$fname_expression_outliers_tsv)) {
 
     pcg_report_expression[["outliers"]] <-
      pcgrr::load_expression_outliers(settings = settings,
                                  ref_data = ref_data)
   }
 
-  if(settings$molecular_data$fname_expression_tsv != "None" &
-     file.exists(settings$molecular_data$fname_expression_tsv)){
+  if (settings$molecular_data$fname_expression_tsv != "None" &
+     file.exists(settings$molecular_data$fname_expression_tsv)) {
 
     exp_data <-
       readr::read_tsv(
@@ -37,21 +37,21 @@ generate_report_data_expression <-
 
     pcg_report_expression[["expression"]] <- exp_data
 
-    if("SYMBOL" %in% colnames(exp_data) == FALSE |
+    if ("SYMBOL" %in% colnames(exp_data) == FALSE |
        ("TPM" %in% colnames(exp_data) == FALSE &
         "TPM_GENE" %in% colnames(exp_data) == FALSE) |
-       "BIOTYPE" %in% colnames(exp_data) == FALSE){
+       "BIOTYPE" %in% colnames(exp_data) == FALSE) {
       pcgrr::log4r_warn(
         "Missing a required column in expression file: SYMBOL, TPM/TPM_GENE, BIOTYPE")
     }else{
 
       n_pc <- sum(exp_data$BIOTYPE == "protein_coding")
 
-      if("TPM_GENE" %in% colnames(exp_data)){
+      if ("TPM_GENE" %in% colnames(exp_data)) {
         exp_data$TPM <- as.numeric(exp_data$TPM_GENE)
       }
 
-      if(n_pc > 0){
+      if (n_pc > 0) {
         pcgrr::log4r_info(
           "Estimating immune contexture of tumor sample from RNA-seq data")
         exp_protein_coding <- exp_data |>
@@ -61,7 +61,7 @@ generate_report_data_expression <-
           dplyr::select(c("SYMBOL", "TPM")) |>
           dplyr::distinct()
 
-        if(NROW(exp_protein_coding) > 0){
+        if (NROW(exp_protein_coding) > 0) {
           rown <- exp_protein_coding$SYMBOL
           mat <- as.matrix(exp_protein_coding$TPM)
           rownames(mat) <- rown
@@ -73,8 +73,8 @@ generate_report_data_expression <-
               is_tumordata = TRUE,
             ))
 
-          if(is.data.frame(pcg_report_expression[["immune_contexture"]]) &
-             "Sample" %in% colnames(pcg_report_expression[["immune_contexture"]])){
+          if (is.data.frame(pcg_report_expression[["immune_contexture"]]) &
+             "Sample" %in% colnames(pcg_report_expression[["immune_contexture"]])) {
             pcg_report_expression[["immune_contexture"]] <-
               pcg_report_expression[["immune_contexture"]] |>
               dplyr::rename(sample_id = "Sample") |>

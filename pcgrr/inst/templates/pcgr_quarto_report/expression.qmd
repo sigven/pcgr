@@ -1,7 +1,7 @@
 ## Gene expression analysis
 
 ```{r expression_similarity}
-#| eval: !expr as.logical(pcg_report$settings$conf$expression$similarity_analysis) == TRUE
+#| eval: !expr isTRUE(as.logical(pcg_report$settings$conf$expression$similarity_analysis))
 #| output: asis
 #| child: pcgr_quarto_report/expression/expression_similarity.qmd 
 
@@ -10,7 +10,7 @@
 <br>
 
 ```{r expression_outliers}
-#| eval: !expr as.logical(NROW(pcg_report$content$expression$outliers) > 0) == TRUE
+#| eval: !expr isTRUE(NROW(pcg_report$content$expression$outliers) > 0)
 #| output: asis
 #| child: pcgr_quarto_report/expression/expression_outliers.qmd
 
@@ -19,7 +19,7 @@
 <br>
 
 ```{r expression_immune_contexture}
-#| eval: !expr as.logical(NROW(pcg_report$content$expression$immune_contexture) > 0) == TRUE
+#| eval: !expr isTRUE(NROW(pcg_report$content$expression$immune_contexture) > 0)
 #| output: asis
 #| child: pcgr_quarto_report/expression/immune_contexture.qmd
 

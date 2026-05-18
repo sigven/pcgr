@@ -7,6 +7,8 @@
 #| output: asis
 #| eval: true
 
+vstats <- pcg_report$content$snv_indel$vstats
+assay_properties <- pcg_report$settings$conf$assay_properties
     
 bslib::page_fillable(
   bslib::layout_columns(
@@ -15,10 +17,10 @@ bslib::page_fillable(
     bslib::value_box(
       title = "Total variants",
       value = paste0(
-        pcg_report$content$snv_indel$vstats$n),
+        vstats$n_var),
       showcase = NULL,
       theme = dplyr::if_else(
-         pcg_report$content$snv_indel$vstats$n > 0,
+         vstats$n_var > 0,
         "dark",
         "dark"
       )
@@ -26,10 +28,10 @@ bslib::page_fillable(
      bslib::value_box(
       title = "Coding variants",
       value = paste0(
-        pcg_report$content$snv_indel$vstats$n_coding),
+        vstats$n_var_coding),
       showcase = NULL,
       theme = dplyr::if_else(
-         pcg_report$content$snv_indel$vstats$n_coding > 0,
+         vstats$n_var_coding > 0,
         "dark",
         "dark"
       )
@@ -37,10 +39,10 @@ bslib::page_fillable(
      bslib::value_box(
       title = "SNVs",
       value = paste0(
-        pcg_report$content$snv_indel$vstats$n_snv),
+        vstats$n_var_snv),
       showcase = NULL,
       theme = dplyr::if_else(
-         pcg_report$content$snv_indel$vstats$n_snv > 0,
+         vstats$n_var_snv > 0,
         "dark",
         "dark"
       )
@@ -48,10 +50,10 @@ bslib::page_fillable(
     bslib::value_box(
       title = "InDels",
       value = paste0(
-        pcg_report$content$snv_indel$vstats$n_indel),
+        vstats$n_var_indel),
       showcase = NULL,
       theme = dplyr::if_else(
-         pcg_report$content$snv_indel$vstats$n_indel > 0,
+         vstats$n_var_indel > 0,
         "dark",
         "dark"
       )
@@ -63,7 +65,7 @@ bslib::page_fillable(
 
 
 ```{r section_variant_filtering}
-#| eval: !expr as.logical(pcg_report$settings$conf$assay_properties$vcf_tumor_only) == TRUE
+#| eval: !expr isTRUE(assay_properties$vcf_tumor_only)
 #| output: asis
 #| child: pcgr_quarto_report/snv_indel/variant_filtering.qmd 
 
@@ -71,7 +73,7 @@ bslib::page_fillable(
 
 
 ```{r section_variant_statistics}
-#| eval: !expr as.logical(pcg_report$content$snv_indel$vstats$n > 0) == TRUE
+#| eval: !expr isTRUE(vstats$n_var > 0)
 #| output: asis
 #| child: pcgr_quarto_report/snv_indel/variant_statistics.qmd 
 
@@ -84,7 +86,7 @@ bslib::page_fillable(
 
 ```{r section_oncogenicity}
 #| output: asis
-#| eval: !expr as.logical(pcg_report$content$snv_indel$vstats$n != 0) == TRUE
+#| eval: !expr isTRUE(vstats$n_var != 0)
 #| child: pcgr_quarto_report/snv_indel/oncogenicity.qmd
 
 ```
@@ -93,7 +95,7 @@ bslib::page_fillable(
 
 ```{r section_actionability}
 #| output: asis
-#| eval: !expr as.logical(pcg_report$content$snv_indel$vstats$n != 0) == TRUE
+#| eval: !expr as.logical(vstats$n_var != 0) == TRUE
 #| child: pcgr_quarto_report/snv_indel/actionability.qmd
 ```
 

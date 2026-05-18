@@ -9,12 +9,13 @@ import yaml
 import glob
 
 from glob import glob
+from pcgr import pcgr_vars
 from pcgr.annoutils import read_infotag_file, make_transcript_xref_map, read_genexref_namemap, map_regulatory_variant_annotations, write_pass_vcf, load_grantham
 from pcgr.vep import parse_vep_csq
 from pcgr.dbnsfp import vep_dbnsfp_meta_vcf, map_variant_effect_predictors
 from pcgr.oncogenicity import load_oncogenicity_criteria, assign_oncogenicity_evidence, load_oncogenic_variants, match_oncogenic_variants
 from pcgr.mutation_hotspot import load_mutation_hotspots, match_csq_mutation_hotspot
-from pcgr.biomarker import load_biomarkers, match_csq_biomarker
+from pcgr.biomarker import load_all_biomarkers, match_csq_biomarker
 from pcgr.utils import error_message, check_subprocess, getlogger, remove_file
 from pcgr.splice import load_splice_effects
 
@@ -75,8 +76,7 @@ def extend_vcf_annotations(arg_dict, logger):
     vcf_infotags['vep'] = read_infotag_file(os.path.join(arg_dict['refdata_assembly_dir'], 'vcf_infotags_vep.tsv'), scope = "vep")
     vcf_infotags['other'].update(vcf_infotags['vep'])
     vcf_info_metadata = vcf_infotags['other']
-    
-    
+        
     ## load CPSR target genes from YAML file
     cpsr_target_genes = {}
     if arg_dict['cpsr'] is True:
@@ -105,23 +105,17 @@ def extend_vcf_annotations(arg_dict, logger):
     grantham_scores = load_grantham(os.path.join(arg_dict['refdata_assembly_dir'], 'misc','tsv', 'grantham', 'grantham.tsv'), logger)
     splice_effects = load_splice_effects(os.path.join(arg_dict['refdata_assembly_dir'], 'misc','tsv', 'mutsplicedb', 'mutsplicedb.tsv'), logger)
 
-    biomarkers = {}
-    for db in ['cgi','civic']:
-        variant_fname = os.path.join(arg_dict['refdata_assembly_dir'], 'biomarker','tsv', f"{db}.variant.tsv.gz")
-        clinical_fname = os.path.join(arg_dict['refdata_assembly_dir'], 'biomarker','tsv', f"{db}.clinical.tsv.gz")
-        if arg_dict['cpsr'] is True:
-            biomarkers[db] = load_biomarkers(
-                logger, variant_fname, clinical_fname, biomarker_vartype = 'MUT', biomarker_variant_origin = 'Both')
-        else:
-            biomarkers[db] = load_biomarkers(
-                logger, variant_fname, clinical_fname, biomarker_vartype = 'MUT', biomarker_variant_origin = 'Somatic')
-
+    biomarker_variant_origin = 'Somatic'
+    if arg_dict['cpsr'] is True:
+        biomarker_variant_origin = 'Both'
+    biomarkers = load_all_biomarkers(
+        logger, arg_dict['refdata_assembly_dir'], biomarker_vartype = 'MUT', biomarker_variant_origin = biomarker_variant_origin)
     out_vcf = re.sub(r'(\.gz)$','',arg_dict['vcf_file_out'])
 
     meta_vep_dbnsfp_info = vep_dbnsfp_meta_vcf(arg_dict['vcf_file_in'], vcf_info_metadata)
     dbnsfp_prediction_algorithms = meta_vep_dbnsfp_info['dbnsfp_prediction_algorithms']
     vep_csq_fields_map = meta_vep_dbnsfp_info['vep_csq_fieldmap']
-    
+        
     vcf = cyvcf2.VCF(arg_dict['vcf_file_in'],  gts012=True)
     for tag in sorted(vcf_info_metadata):
         if arg_dict['pon_annotation'] == 0 and tag.startswith('PANEL_OF_NORMALS'):
@@ -216,43 +210,39 @@ def extend_vcf_annotations(arg_dict, logger):
         if 'picked_csq' in vep_csq_record_results:
             csq_record = vep_csq_record_results['picked_csq']
             for k in csq_record:
+                ## assign value of each key in the csq_record to the VCF INFO field, if the key is defined in the vcf_info_element_types
                 if k in vcf_info_element_types:
                     if vcf_info_element_types[k] == "Flag" and csq_record[k] == "1":
                         rec.INFO[k] = True
                     else:
-                        if csq_record[k] is not None:                            
-                            if k == 'DOMAINS':
-                                filtered_domains = []
-                                for dom in csq_record[k].split('&'):
-                                    if not dom.startswith('PDB-'):
-                                        filtered_domains.append(dom)
-                                if(len(filtered_domains) > 0):
-                                    csq_record[k] = '&'.join(filtered_domains)
-                            
-                            rec.INFO[k] = csq_record[k]
-
-                            if k == 'HGVSp_short':
-                                principal_csq_properties['hgvsp'] = csq_record[k]
-                                if re.match(r'^(p.[A-Z]{1}[0-9]{1,}[A-Za-z]{1,})', principal_csq_properties['hgvsp']):
-                                    codon_match = re.findall(r'[A-Z][0-9]{1,}', principal_csq_properties['hgvsp'])
-                                    if len(codon_match) == 1:
-                                        principal_csq_properties['codon'] = 'p.' + codon_match[0]
-                     
-                            if k == 'HGVSc':
-                                principal_csq_properties['hgvsc'] = csq_record[k].split(':')[1]
-                            
-                            if k == 'REFSEQ_TRANSCRIPT_ID':
-                                principal_csq_properties['refseq_transcript_id'] = csq_record[k]
-                            
-                            if k == 'ENTREZGENE':
-                                principal_csq_properties['entrezgene'] = csq_record[k]
-                            
-                            if k == 'LOSS_OF_FUNCTION':
-                                principal_csq_properties['lof'] = csq_record[k]
-                            
-                            if k == 'EXON':
-                                if "/" in csq_record[k]:
-                                    principal_csq_properties['exon'] = csq_record[k].split('/')[0]
+                        if csq_record[k] is not None:
+                            if csq_record[k] != "" and \
+                                csq_record[k] != "." and \
+                                    csq_record[k] != pcgr_vars.NA_INTEGER and \
+                                        csq_record[k] != pcgr_vars.NA_FLOAT:                                                                                                               
+                                rec.INFO[k] = csq_record[k]
+                                if k == 'HGVSp_short':
+                                    principal_csq_properties['hgvsp'] = csq_record[k]
+                                    if re.match(r'^(p.[A-Z]{1}[0-9]{1,}[A-Za-z]{1,})', principal_csq_properties['hgvsp']):
+                                        codon_match = re.findall(r'[A-Z][0-9]{1,}', principal_csq_properties['hgvsp'])
+                                        if len(codon_match) == 1:
+                                            principal_csq_properties['codon'] = 'p.' + codon_match[0]
+                        
+                                if k == 'HGVSc':
+                                    principal_csq_properties['hgvsc'] = csq_record[k].split(':')[1]
+                                
+                                if k == 'REFSEQ_TRANSCRIPT_ID':
+                                    principal_csq_properties['refseq_transcript_id'] = csq_record[k]
+                                
+                                if k == 'ENTREZGENE':
+                                    principal_csq_properties['entrezgene'] = csq_record[k]
+                                
+                                if k == 'LOSS_OF_FUNCTION':
+                                    principal_csq_properties['lof'] = csq_record[k]
+                                
+                                if k == 'EXON':
+                                    if "/" in csq_record[k]:
+                                        principal_csq_properties['exon'] = csq_record[k].split('/')[0]
                             
         
         splice_key = f"{principal_csq_properties['entrezgene']}_{principal_csq_properties['refseq_transcript_id']}_{principal_csq_properties['hgvsc']}"
@@ -261,7 +251,8 @@ def extend_vcf_annotations(arg_dict, logger):
                 rec.INFO['SPLICE_EFFECT_MUTSPLICEDB'] = splice_effects[splice_key]
                 rec.INFO['LOSS_OF_FUNCTION'] = True
                 if rec.INFO.get('LOF_FILTER') is not None:
-                    rec.INFO['LOF_FILTER'] = '.'
+                    rec.INFO['LOF_FILTER'] = False
+                    #rec.INFO['LOF_FILTER'] = '.'
         
         if 'all_csq' in vep_csq_record_results:
             rec.INFO['VEP_ALL_CSQ'] = ','.join(vep_csq_record_results['all_csq'])

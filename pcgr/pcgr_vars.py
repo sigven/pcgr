@@ -4,11 +4,12 @@ from pcgr._version import __version__
 
 ## Version - software and bundle
 PCGR_VERSION = __version__
-DB_VERSION = '20250314'
+DB_VERSION = '20260508'  # database build version (date-based)
 
 ## Miscellaneous settings
 NCBI_BUILD_MAF = 'GRCh38'
 MAX_VARIANTS_FOR_REPORT = 500_000
+#MAX_VARIANTS_FOR_REPORT = 80_000
 CODING_EXOME_SIZE_MB = 34.0
 
 ## Mutational signature settings
@@ -17,13 +18,17 @@ MINIMUM_N_MUT_SIGNATURE = 100
 MAX_SIGNATURE_PREVALENCE = 20
 
 ## GENCODE versions
-GENCODE_VERSION = {'grch38': 47,'grch37': 19}
+GENCODE_VERSION = {'grch38': 49,'grch37': 19}
 
 ## vcfanno settings
 VCFANNO_MAX_PROC = 15
 
+## Default value for integer annotations when NA
+NA_INTEGER = -99999
+NA_FLOAT = -99999.99
+
 ## VEP settings/versions
-VEP_VERSION = '113'
+VEP_VERSION = '115'
 VEP_ASSEMBLY = {'grch38': 'GRCh38','grch37': 'GRCh37'}
 VEP_MIN_FORKS = 1
 VEP_MAX_FORKS = 8
@@ -42,7 +47,9 @@ SEX_CHROMOSOMES = ['X','Y']
 SAMPLE_ID_MAX_LENGTH = 40
 SAMPLE_ID_MIN_LENGTH = 3
 
-GNOMAD_MAIN_EXON_AF_TAGS = ['gnomADe_SAS_AF','gnomADe_NFE_AF','gnomADe_AFR_AF','gnomADe_AMR_AF','gnomADe_EAS_AF']
+## GnomAD subpopulation allele frequency tags (exomes/genomes)
+GNOMAD_MAIN_EXOME_AF_TAGS = ['gnomADe_SAS_AF','gnomADe_NFE_AF','gnomADe_AFR_AF','gnomADe_AMR_AF','gnomADe_EAS_AF']
+GNOMAD_MAIN_GENOME_AF_TAGS = ['gnomADg_SAS_AF','gnomADg_NFE_AF','gnomADg_AFR_AF','gnomADg_AMR_AF','gnomADg_EAS_AF']
 
 ## Classified germline variant input (from CPSR) - required columns
 germline_input_required_cols = [
@@ -53,7 +60,8 @@ germline_input_required_cols = [
     'GENOTYPE',
     'ALTERATION',
     'DP_CONTROL',
-    'CPSR_CLASSIFICATION_SOURCE',
+    'ASSERTION_AUTHORITY',
+    'ASSERTION_RATIONALE',
     'GENENAME',
     'ENTREZGENE',
     'ENSEMBL_GENE_ID',
@@ -76,11 +84,11 @@ germline_input_required_cols = [
     'CLINVAR_VARIANT_ORIGIN',
     'CLINVAR_PHENOTYPE',
     'CLINVAR_CONFLICTED',
-    'CLINVAR_REVIEW_STATUS_STARS',
+    'CLINVAR_GOLD_STARS',
     'CPSR_CLASSIFICATION',
     'CPSR_PATHOGENICITY_SCORE',
-    'CPSR_CLASSIFICATION_CODE',
-    'FINAL_CLASSIFICATION'
+    'ACMG_CODE',
+    'CLASSIFICATION'
 ]
 
 ## Primary tumor sites - PCGR
@@ -169,7 +177,22 @@ GE_panels = {
       44: "DNA repair genes pertinent cancer susceptibility (GEP)"
 }
 
-panels = '\n'.join([f'{k} = {GE_panels[k]}' for k in GE_panels]) # for displaying in help
+# '0 = ClinVar trusted (override conflicted records only), ' +
+#             '1 = Override zero gold star ClinVar records, ' +
+#             '2 = Override zero- and single gold star ClinVar records, ' +
+#             '3 = Override low-star and non-cancer-phenotype ClinVar records, ' +
+#             '4 = CPSR always classifies
+clinvar_trust_levels = {
+    0: "ClinVar trusted (override conflicted records only)",
+    1: "Override zero gold star ClinVar records",
+    2: "Override zero- and single gold star ClinVar records",
+    3: "Override low-star and non-cancer-phenotype ClinVar records",
+    4: "CPSR always classifies"
+}
+
+clinvar_trust_levels_help_display = '\n'.join([f'{k} = {clinvar_trust_levels[k]}' for k in clinvar_trust_levels]) # for displaying in help
+panels_help_display = '\n'.join([f'{k} = {GE_panels[k]}' for k in GE_panels]) # for displaying in help
+
 
 ## https://www.ensembl.org/info/genome/variation/prediction/predicted_data.html#consequences
 VEP_consequence_rank = {
@@ -219,12 +242,8 @@ VEP_consequence_rank = {
 ## Regular expressions on the VEP CSQ (consequence) that targets different types of variants
 CSQ_MISSENSE_PATTERN = r"^missense_variant"
 CSQ_CODING_PATTERN = \
-    r"^(stop_(lost|gained)|start_lost|frameshift_|missense_|splice_(donor|acceptor)|protein_altering|inframe_)"
-CSQ_CODING_SILENT_PATTERN = \
-    r"^(stop_(lost|gained)|start_lost|frameshift_|missense_|splice_(donor|acceptor)|protein_altering|inframe_|synonymous|(start|stop)_retained)"
-CSQ_CODING_PATTERN2 = \
     r"(stop_(lost|gained)|start_lost|frameshift_|missense_|splice_(donor|acceptor)|protein_altering|inframe_)"
-CSQ_CODING_SILENT_PATTERN2 = \
+CSQ_CODING_SILENT_PATTERN = \
     r"(stop_(lost|gained)|start_lost|frameshift_|missense_|splice_(donor|acceptor)|protein_altering|inframe_|synonymous|(start|stop)_retained)"
 CSQ_NULL_PATTERN = r"^(stop_gained|frameshift_)|&stop_gained"
 CSQ_SPLICE_REGION_PATTERN = r"(splice_|intron_variant)"
@@ -235,9 +254,33 @@ CSQ_SPLICE_ACCEPTOR_PATTERN = \
 CSQ_LOF_PATTERN = r"(stop_gained|frameshift|splice_acceptor_variant|splice_donor_variant|start_lost)"
 
 
-## MaxEntScan thresholds for splice site disruption (donor/acceptor)
-DONOR_DISRUPTION_MES_CUTOFF = 6
-ACCEPTOR_DISRUPTION_MES_CUTOFF = 7
+## Per-stratum MaxEntScan (MES) thresholds for extended splice site positions.
+##
+## Fields:
+##   stratum              - identifier used in MAXENTSCAN_STRATUM output column
+##   side                 - 'donor' (positive intron offset) or 'acceptor' (negative offset)
+##   pos_min/max          - inclusive range of INTRON_POSITION values for this stratum
+##   dl_moderate          - MAXENTSCAN_DL threshold (~5% FPR)
+##   dl_high_conf         - MAXENTSCAN_DL threshold (~1% FPR); None if not applicable
+##   ref_floor            - minimum reference MES score required (credibility filter)
+##   position_ppv_ceiling - 'high' | 'medium' | 'low'
+##
+## position_ppv_ceiling semantics:
+##   high   - uncapped; classify_mes can return 'Moderate' or 'Strong'
+##   medium - uncapped; classify_mes can return 'Moderate' or 'Strong'
+##   low    - PPT positions; capped at 'Supporting' regardless of DL score
+##
+## Only a classify_mes result of 'Strong' grants LOSS_OF_FUNCTION = True.
+MES_STRATA = [
+    {"stratum": "Acceptor_PPT_Distant",  "side": "acceptor", "pos_min": -20, "pos_max":  -9, "dl_moderate": 1.6, "dl_high_conf": 2.3,  "ref_floor": 0, "position_ppv_ceiling": "low"},
+    {"stratum": "Acceptor_PPT_Close", "side": "acceptor", "pos_min":  -8, "pos_max":  -4, "dl_moderate": 2.0, "dl_high_conf": 3.1,  "ref_floor": 0, "position_ppv_ceiling": "low"},
+    {"stratum": "Acceptor_-3",       "side": "acceptor", "pos_min":  -3, "pos_max":  -3, "dl_moderate": 3.5, "dl_high_conf": None, "ref_floor": 0, "position_ppv_ceiling": "high"},
+    {"stratum": "Donor_+3",          "side": "donor",    "pos_min":   3, "pos_max":   3, "dl_moderate": 3.9, "dl_high_conf": 5.7,  "ref_floor": 0, "position_ppv_ceiling": "high"},
+    {"stratum": "Donor_+4",          "side": "donor",    "pos_min":   4, "pos_max":   4, "dl_moderate": 3.3, "dl_high_conf": 5.4,  "ref_floor": 4, "position_ppv_ceiling": "high"},
+    {"stratum": "Donor_+5",          "side": "donor",    "pos_min":   5, "pos_max":   5, "dl_moderate": 4.7, "dl_high_conf": 6.7,  "ref_floor": 0, "position_ppv_ceiling": "high"},
+    {"stratum": "Donor_+6",          "side": "donor",    "pos_min":   6, "pos_max":   6, "dl_moderate": 2.0, "dl_high_conf": 3.8,  "ref_floor": 4, "position_ppv_ceiling": "medium"},
+]
+
 
 ## TCGA tumor cohorts
 DISEASE_COHORTS = ['ACC','BLCA','BRCA','CESC',
@@ -250,59 +293,99 @@ DISEASE_COHORTS = ['ACC','BLCA','BRCA','CESC',
                 'THCA','THYM','UCEC','UCS','UVM']
 
 ## Tumor site to TCGA cohort mapping
-SITE_TO_DISEASE = {
-    'Lung': ['TCGA_LUAD','TCGA_LUSC'],
-    'Breast': ['TCGA_BRCA'],
-    'Prostate': ['TCGA_PRAD'],
-    'Kidney': ['TCGA_KIRC','TCGA_KIRP','TCGA_KICH'],
-    'Colon/Rectum': ['TCGA_COAD','TCGA_READ'],
-    'Pancreas': ['TCGA_PAAD'],
+SITE_TO_TCGA_COHORT = {
+    'Adrenal Gland': ['TCGA_ACC','TCGA_PCPG'],
+    'Biliary Tract': ['TCGA_CHOL'],
     'Bladder/Urinary Tract': ['TCGA_BLCA'],
-    'Thyroid': ['TCGA_THCA'],
-    'Esophagus/Stomach': ['TCGA_STAD'],
+    'Breast': ['TCGA_BRCA'],
     'Cervix': ['TCGA_CESC'],
+    'CNS/Brain': ['TCGA_GBM','TCGA_LGG'],
+    'Colon/Rectum': ['TCGA_COAD','TCGA_READ'],
+    'Esophagus/Stomach': ['TCGA_STAD'],
+    'Eye': ['TCGA_UVM'],
+    'Head and Neck': ['TCGA_HNSC'],
+    'Kidney': ['TCGA_KICH','TCGA_KIRC','TCGA_KIRP'],
+    'Liver': ['TCGA_LIHC'],
+    'Lung': ['TCGA_LUAD','TCGA_LUSC'],
+    'Lymphoid': ['TCGA_DLBC'],
+    'Myeloid': ['TCGA_LAML'],
     'Ovary/Fallopian Tube': ['TCGA_OV'],
+    'Pancreas': ['TCGA_PAAD'],
+    'Peripheral Nervous System': ['TCGA_PCPG'],
+    'Pleura': ['TCGA_MESO'],
+    'Prostate': ['TCGA_PRAD'],
     'Skin': ['TCGA_SKCM'],
     'Soft Tissue': ['TCGA_SARC'],
-    'Liver': ['TCGA_LIHC'],
-    'CNS/Brain': ['TCGA_GBM','TCGA_LGG'],
-    'Uterus': ['TCGA_UCEC','TCGA_UCS'],
-    'Head and Neck': ['TCGA_HNSC'],
     'Testis': ['TCGA_TGCT'],
-    'Adrenal Gland': ['TCGA_ACC','TCGA_PCPG'],
-    'Pleura': ['TCGA_MESO'],
-    'Biliary Tract': ['TCGA_CHOL'],
     'Thymus': ['TCGA_THYM'],
-    'Myeloid': ['TCGA_LAML'],
-    'Lymphoid': ['TCGA_DLBC']
+    'Thyroid': ['TCGA_THCA'],
+    'Uterus': ['TCGA_UCEC','TCGA_UCS']
 }
 
+# Tumor site to OncoTree cancer-type code mapping (fallback when no code is user-provided).
+# Uses specific cancer-type codes rather than tissue/organ-level codes so that OncoKB
+# biomarker queries return meaningful hits. Each code represents the most prevalent and
+# best-annotated malignancy for that site.
+SITE_TO_ONCOTREE = {
+    'Adrenal Gland': 'ADRENAL_GLAND',           # Adrenocortical Carcinoma
+    'Ampulla of Vater': 'AMPULLA_OF_VATER',      # Ampullary Carcinoma
+    'Biliary Tract': 'BILIARY_TRACT',          
+    'Bladder/Urinary Tract': 'BLADDER',  # Bladder Urothelial Carcinoma
+    'Bone': 'BONE',                     
+    'Breast': 'BREAST',                  
+    'Cervix': 'CERVIX',                 
+    'CNS/Brain': 'BRAIN',               
+    'Colon/Rectum': 'COADREAD',       # Colorectal Adenocarcinoma
+    'Esophagus/Stomach': 'STOMACH',      # Stomach Adenocarcinoma
+    'Eye': 'EYE',                     
+    'Head and Neck': 'HEAD_NECK',         
+    'Kidney': 'KIDNEY',                
+    'Liver': 'LIVER',                   # Hepatocellular Carcinoma
+    'Lung': 'LUNG',                   # Lung Adenocarcinoma
+    'Lymphoid': 'LYMPH',              
+    'Myeloid': 'MYELOID',                 
+    'Ovary/Fallopian Tube': 'OVARY',  
+    'Pancreas': 'PANCREAS',               # Pancreatic Ductal Adenocarcinoma
+    'Peripheral Nervous System': 'PNS',  # Pheochromocytoma
+    'Peritoneum': 'PERITONEUM',             # Primary Serous Peritoneal Carcinoma
+    'Pleura': 'PLEURA',                 # Mesothelioma
+    'Prostate': 'PROSTATE',               # Prostate Adenocarcinoma
+    'Skin': 'SKIN',                    # Melanoma
+    'Soft Tissue': 'SOFT_TISSUE',            # Sarcoma NOS
+    'Testis': 'TESTIS',                 # Testicular Germ Cell Tumor
+    'Thymus': 'THYMUS',                 # Thymoma
+    'Thyroid': 'THYROID',                # Papillary Thyroid Carcinoma
+    'Uterus': 'UTERUS',                 # Uterine Endometrioid Carcinoma
+    'Vulva/Vagina': 'VULVA_VAGINA',           # Vulvar Squamous Cell Carcinoma
+}
+
+## DBNSFP algorithm score to PCGR field name mapping
 DBNSFP_ALGORITHMS = {
-    'polyphen2_hvar': 'DBNSFP_POLYPHEN2_HVAR',
+    'aloft': 'DBNSFP_ALOFT',
+    'alphamissense': 'DBNSFP_ALPHA_MISSENSE',
+    'bayesdel_addaf': 'DBNSFP_BAYESDEL_ADDAF',
     'cadd': 'DBNSFP_CADD',
-    'vest4': 'DBNSFP_VEST4',
     'clinpred': 'DBNSFP_CLINPRED',
-    'revel': 'DBNSFP_REVEL',
-    'sift': 'DBNSFP_SIFT',
-    'provean': 'DBNSFP_PROVEAN',
-    'm-cap': 'DBNSFP_M_CAP',
-    'mutpred': 'DBNSFP_MUTPRED',
-    'metarnn': 'DBNSFP_META_RNN',
+    'deogen2': 'DBNSFP_DEOGEN2',
+    'esm1b': 'DBNSFP_ESM1B',
     'fathmm_xf': 'DBNSFP_FATHMM_XF',
+    'gerp_rs': 'DBNSFP_GERP',       
+    'list_s2': 'DBNSFP_LIST_S2',
+    'metarnn': 'DBNSFP_META_RNN',
     'mutationassessor': 'DBNSFP_MUTATIONASSESSOR',
     'mutationtaster': 'DBNSFP_MUTATIONTASTER',
-    'deogen2': 'DBNSFP_DEOGEN2',
+    'mutformer': 'DBNSFP_MUTFORMER', 
+    'mutpred': 'DBNSFP_MUTPRED',
+    'm-cap': 'DBNSFP_M_CAP',
+    'polyphen2_hvar': 'DBNSFP_POLYPHEN2_HVAR',
+    'phactboost': 'DBNSFP_PHACTBOOST',
     'primateai': 'DBNSFP_PRIMATEAI', 
-    'list_s2': 'DBNSFP_LIST_S2',
-    'gerp_rs': 'DBNSFP_GERP',       
-    'aloft': 'DBNSFP_ALOFT',
-    'bayesdel_addaf': 'DBNSFP_BAYESDEL_ADDAF',
+    'provean': 'DBNSFP_PROVEAN',
+    'revel': 'DBNSFP_REVEL',
+    'sift': 'DBNSFP_SIFT',
     'splice_site_ada': 'DBNSFP_SPLICE_SITE_ADA',
     'splice_site_rf': 'DBNSFP_SPLICE_SITE_RF',
-    'esm1b': 'DBNSFP_ESM1B',
-    'alphamissense': 'DBNSFP_ALPHA_MISSENSE',
-    'mutformer': 'DBNSFP_MUTFORMER', 
-    'phactboost': 'DBNSFP_PHACTBOOST'
+    'vest4': 'DBNSFP_VEST4'
 }
 
 ONCOGENICITY = {
@@ -311,4 +394,69 @@ ONCOGENICITY = {
     'gnomAD_very_common_AF': 0.05,
     'insilico_pred_min_majority': 8,
     'insilico_pred_max_minority': 2,
+}
+
+## VICC/ClinGen oncogenicity scoring thresholds
+ONCOGENICITY_THRESHOLDS = {
+    'likely_benign_upper':    -1,
+    'likely_benign_lower':    -6,
+    'benign_upper':           -7,
+    'likely_oncogenic_lower':  5,
+    'likely_oncogenic_upper':  8,
+    'oncogenic_lower':         9,
+}
+
+## Canonical display order for ONCOGENICITY_CODE — matches the oncogenicity.tsv row order.
+## Any code not listed here sorts to the end (future-proofing).
+ONCOGENICITY_CODE_ORDER = [
+    'ONCG_OVS1',  'ONCG_OVS1_A', 'ONCG_OVS1_B',
+    'ONCG_OS1',   'ONCG_OS2_A',  'ONCG_OS2_B',  'ONCG_OS3',
+    'ONCG_OM1',   'ONCG_OM2',    'ONCG_OM3',    'ONCG_OM4',
+    'ONCG_OP1',   'ONCG_OP3',    'ONCG_OP4',
+    'ONCG_SBVS1', 'ONCG_SBS1',   'ONCG_SBS2_A', 'ONCG_SBS2_B',
+    'ONCG_SBP1',  'ONCG_SBP2',
+]
+
+## OncoKB-derived oncogenicity criteria — injected in the post-hoc refinement pass.
+## Scores follow VICC/ClinGen evidence weighting (very strong=8, strong=±4, moderate=±2).
+OKB_ONCOGENICITY_CRITERIA = {
+    'ONCG_OS2_A':  {'score':  4.0, 'pole': 'P'},  # ONCOGENICITY_OKB == "Oncogenic"
+    'ONCG_OS2_B':  {'score':  2.0, 'pole': 'P'},  # ONCOGENICITY_OKB == "Likely Oncogenic"
+    'ONCG_OVS1_A': {'score':  8.0, 'pole': 'P'},  # MUTATION_EFFECT_OKB == "Loss-of-function" in TSG
+    'ONCG_OVS1_B': {'score':  4.0, 'pole': 'P'},  # MUTATION_EFFECT_OKB == "Likely Loss-of-function" in TSG
+    'ONCG_SBS2_A': {'score': -4.0, 'pole': 'B'},  # ONCOGENICITY_OKB == "Neutral"
+    'ONCG_SBS2_B': {'score': -2.0, 'pole': 'B'},  # ONCOGENICITY_OKB == "Likely Neutral"
+}
+
+# https://github.com/oncokb/oncokb-annotator/tree/master/data
+ONCOKB_MAF_REQUIRED_COLS = {
+    "VAR_ID",
+    "Hugo_Symbol", "NCBI_Build",
+    "Chromosome", "Start_Position", "End_Position",
+    "Variant_Classification", "HGVSp", "HGVSp_Short",
+    "HGVSg","Reference_Allele",
+    "Tumor_Seq_Allele1", "Tumor_Seq_Allele2",
+    "Tumor_Sample_Barcode"
+}
+
+ONCOKB_FUSION_REQUIRED_COLS = {"Tumor_Sample_Barcode", "Fusion"}
+ONCOKB_CNA_REQUIRED_COLS = {"Tumor_Sample_Barcode", "Hugo_Symbol", "Copy_Number_Alteration"}
+
+## OncoKB annotation columns: source name → renamed column in output TSV
+## Same mapping applies for SNV/InDel, fusion and CNA annotator outputs.
+ONCOKB_COLS = {
+    'VARIANT_SUMMARY':             'VARIANT_SUMMARY_OKB',
+    'TUMOR_TYPE_SUMMARY':          'TUMOR_TYPE_SUMMARY_OKB',
+    'MUTATION_EFFECT':             'MUTATION_EFFECT_OKB',
+    'MUTATION_EFFECT_CITATIONS':   'MUTATION_EFFECT_CITATIONS_OKB',
+    'ONCOGENIC':                   'ONCOGENICITY_OKB',
+    'MUTATION_EFFECT_DESCRIPTION': 'MUTATION_EFFECT_DESCRIPTION_OKB',
+}
+
+## Mapping from PCGR VARIANT_CLASS to OncoKB Copy_Number_Alteration values
+VARIANT_CLASS_TO_OKB_CNA = {
+    'amplification': 'Amplification',
+    'homdel':        'Deletion',
+    'hetdel':        'Loss',
+    'hemdel':        'Loss',
 }

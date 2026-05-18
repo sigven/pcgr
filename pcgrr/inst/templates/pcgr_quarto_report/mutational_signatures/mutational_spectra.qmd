@@ -32,7 +32,7 @@ plotly::ggplotly(
   height = 400,
   MutationalPatterns::plot_96_profile(
     catalogue_mat,
-    colors = head(pcgrr::color_palette$tier$values, 6),
+    colors = head(pcgrr::color_palette$multi$values, 6),
     ymax = y_max)
 )
 
@@ -58,7 +58,7 @@ cat("\n::: {.callout-warning}\n## No SNVs\n\nNo SNVs/single base substitutions",
 #| output: asis
 
 
-if(rowSums(msig_content$result$type_occurrences[1:6]) > 0){
+if (rowSums(msig_content$result$type_occurrences[1:6]) > 0) {
   plotly::ggplotly(
     height = 400,
     MutationalPatterns::plot_spectrum(
@@ -66,7 +66,7 @@ if(rowSums(msig_content$result$type_occurrences[1:6]) > 0){
       CT = TRUE,
       error_bars = 'none',
       colors = head(
-        pcgrr::color_palette$tier$values, 7))) |>
+        pcgrr::color_palette$multi$values, 7))) |>
     plotly::layout(
       legend = list(
         orientation = "h",         # horizontal legend
