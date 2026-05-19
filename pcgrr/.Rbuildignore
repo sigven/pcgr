@@ -12,3 +12,4 @@
 ^vignettes$
 ^\.positai$
 ^\.claude$
+^Makefile$
