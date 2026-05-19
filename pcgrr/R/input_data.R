@@ -81,9 +81,9 @@ load_somatic_cna <- function(
       CN_MINOR = as.integer(.data$CN_MINOR),
       CN_TOTAL = as.integer(.data$CN_MAJOR + .data$CN_MINOR),
       LOH = dplyr::if_else(
-        nchar(LOH) == 0,
-        as.character(NA),
-        as.character(LOH)
+        nchar(.data$LOH) == 0,
+        NA_character_,
+        as.character(.data$LOH)
       )
     )
 
@@ -231,7 +231,7 @@ load_somatic_snv_indel <- function(
       NROW(callset[['variant']]) > 0) {
     set.seed(42L)
     callset[['variant']]$VAF_TUMOR <-
-      round(runif(NROW(callset[['variant']]), min = 0.01, max = 0.99), 3)
+      round(stats::runif(NROW(callset[['variant']]), min = 0.01, max = 0.99), 3)
     log4r_info(
       "VAF_TUMOR simulated with uniform (0.01, 0.99) values [TEST MODE ONLY]")
   }

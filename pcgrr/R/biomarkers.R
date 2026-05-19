@@ -241,8 +241,8 @@ prep_actble_display_tbl <- function(
       biomarker_source_support <-
         biomarker_var_eitems |>
         dplyr::group_by(
-          VAR_ID, ENTREZGENE,
-          ACTIONABILITY_TIER
+          .data$VAR_ID, .data$ENTREZGENE,
+          .data$ACTIONABILITY_TIER
         ) |>
         dplyr::summarise(
           BM_SOURCES = paste(
@@ -592,8 +592,8 @@ prep_progn_display_tbl <- function(
       biomarker_source_support <-
         biomarker_var_eitems |>
         dplyr::group_by(
-          VAR_ID, ENTREZGENE,
-          ACTIONABILITY_TIER
+          .data$VAR_ID, .data$ENTREZGENE,
+          .data$ACTIONABILITY_TIER
         ) |>
         dplyr::summarise(
           BM_SOURCES = paste(
@@ -939,8 +939,8 @@ prep_diagn_display_tbl <- function(
       biomarker_source_support <-
         biomarker_var_eitems |>
         dplyr::group_by(
-          VAR_ID, ENTREZGENE,
-          ACTIONABILITY_TIER
+          .data$VAR_ID, .data$ENTREZGENE,
+          .data$ACTIONABILITY_TIER
         ) |>
         dplyr::summarise(
           BM_SOURCES = paste(
@@ -1471,7 +1471,7 @@ map_biomarker_data <- function(
           BM_MAPPING_CONFIDENCE = "low"
         ) |>
         dplyr::rename(
-          BM_EVIDENCE_LEVEL_FULL = BM_EVIDENCE_LEVEL
+          BM_EVIDENCE_LEVEL_FULL = "BM_EVIDENCE_LEVEL"
         ) |>
         dplyr::mutate(
           BM_EVIDENCE_LEVEL = dplyr::case_when(

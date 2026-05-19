@@ -349,7 +349,7 @@ plot_cna_segments_absolute <- function(
   }
 
   ## CNA class colours from palette
-  cna_colors_abs <- setNames(
+  cna_colors_abs <- stats::setNames(
     color_palette$cna_variant_class$values,
     color_palette$cna_variant_class$levels_display)
   amp_color_abs    <- unname(cna_colors_abs["Amplification"])
@@ -379,9 +379,9 @@ plot_cna_segments_absolute <- function(
     "Shallow deletion"               = hetdel_color_abs,
     "Deep deletion"                  = homdel_color_abs,
     "Minor copy number"              = "#276419",
-    setNames("gray40",         neutral_line_label_abs),
-    setNames(gain_color_abs,   gain_line_label_abs),
-    setNames(hetdel_color_abs, del_line_label_abs))
+    stats::setNames("gray40",         neutral_line_label_abs),
+    stats::setNames(gain_color_abs,   gain_line_label_abs),
+    stats::setNames(hetdel_color_abs, del_line_label_abs))
   leg_breaks_abs <- c(
     "Amplification",
     "Gain",
@@ -395,7 +395,7 @@ plot_cna_segments_absolute <- function(
   if (show_amp_line_abs) {
     leg_colors_abs <- c(
       leg_colors_abs,
-      setNames(amp_color_abs, amp_line_label_abs))
+      stats::setNames(amp_color_abs, amp_line_label_abs))
     leg_breaks_abs <- c(leg_breaks_abs, amp_line_label_abs)
   }
 
@@ -828,7 +828,7 @@ plot_cna_segments_relative <-
       "Neutral baseline (Ploidy = ", round(tumor_ploidy, 2), ")")
 
 
-    cna_colors <- setNames(
+    cna_colors <- stats::setNames(
       color_palette$cna_variant_class$values,
       color_palette$cna_variant_class$levels
     )
@@ -849,9 +849,9 @@ plot_cna_segments_relative <-
       "Shallow deletion"               = hetdel_color,
       "Deep deletion"                  = homdel_color,
       "No aberration/neutral"          = "#808080",
-      setNames("gray40",       neutral_line_label),
-      setNames(gain_color,     gain_line_label_rel),
-      setNames(hetdel_color,   del_line_label_rel)
+      stats::setNames("gray40",       neutral_line_label),
+      stats::setNames(gain_color,     gain_line_label_rel),
+      stats::setNames(hetdel_color,   del_line_label_rel)
     )
     leg_breaks <- c(
       "Amplification",
@@ -870,7 +870,7 @@ plot_cna_segments_relative <-
         amp_threshold_effective, ")")
       leg_colors <- c(
         leg_colors,
-        setNames(amp_color, amp_line_label))
+        stats::setNames(amp_color, amp_line_label))
       leg_breaks <- c(
         leg_breaks,
         amp_line_label)

@@ -23,7 +23,7 @@ fetch_oncokb_fusion_annotation(
 
 \item{oncokb_token}{OncoKB API token}
 
-\item{base_api_url}{Optional base URL for OncoKB API (default: pcgrr::oncokb_base_api_url)}
+\item{base_api_url}{Optional base URL for OncoKB API (default: oncokb_base_api_url)}
 
 \item{structural_variant_type}{Type of structural variant (default: "FUSION")}
 

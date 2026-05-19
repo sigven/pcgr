@@ -17,7 +17,7 @@ value used to determine cell background color (default: "TISSUE_ASSOC_RANK")}
 A function that can be used as a reactable cell renderer
 for the SAMPLE_ALTERATION column, which checks the TISSUE_ASSOC_RANK
 column in the same row to determine background color based on predefined
-breaks and colors in pcgrr::color_palette$cancer_assoc.
+breaks and colors in color_palette$cancer_assoc.
 }
 \description{
 Style alteration cell background based on cancer association rank

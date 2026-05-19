@@ -25,7 +25,7 @@ process_oncokb_maf(
 
 \item{oncokb_token}{OncoKB API token}
 
-\item{oncokb_base_api_url}{Optional base URL for OncoKB API (default: pcgrr::oncokb_base_api_url)}
+\item{oncokb_base_api_url}{Optional base URL for OncoKB API (default: oncokb_base_api_url)}
 
 \item{rate_limiting_delay}{Delay in seconds between API calls to respect rate limits
 (default: 1 second)}

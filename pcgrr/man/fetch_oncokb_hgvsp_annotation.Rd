@@ -22,7 +22,7 @@ fetch_oncokb_hgvsp_annotation(
 
 \item{oncokb_token}{OncoKB API token}
 
-\item{base_api_url}{Optional base URL for OncoKB API (default: pcgrr::oncokb_base_api_url)}
+\item{base_api_url}{Optional base URL for OncoKB API (default: oncokb_base_api_url)}
 
 \item{reference_genome}{Genome build, either "GRCh37" or "GRCh38" (default: "GRCh38")}
 }

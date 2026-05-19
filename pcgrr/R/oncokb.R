@@ -53,7 +53,7 @@ clean_oncokb_evidence <- function(
   evidence_df <- evidence_df |>
     dplyr::mutate(
       BM_MOLECULAR_PROFILE_ORIGINAL =
-        BM_MOLECULAR_PROFILE
+        .data$BM_MOLECULAR_PROFILE
     ) |>
     tidyr::separate_rows(.data$BM_REFERENCE, sep=";") |>
     dplyr::mutate(
@@ -975,7 +975,7 @@ fetch_oncokb_cna_annotation <- function(
       httr::status_code(response),
       hugo_symbol,
       cna_type,
-      tumor_type,
+      oncotree_code,
       httr::content(response, "text", encoding = "UTF-8")
     ))
     return(NULL)
@@ -1077,18 +1077,18 @@ process_oncokb_maf <-
         ) |>
         dplyr::distinct() |>
         dplyr::filter(
-          !is.na(HGVSp_Short) & HGVSp_Short != "") |>
+          !is.na(.data$HGVSp_Short) & .data$HGVSp_Short != "") |>
         dplyr::select(
-          SYMBOL, SAMPLE_ID, VAR_ID,
+          "SYMBOL", "SAMPLE_ID", "VAR_ID",
           dplyr::everything()
         ) |>
         dplyr::left_join(
           var_calls |>
             dplyr::select(
-              VAR_ID,
-              VARIANT_CLASS,
-              ENTREZGENE,
-              ALTERATION),
+              "VAR_ID",
+              "VARIANT_CLASS",
+              "ENTREZGENE",
+              "ALTERATION"),
           by = "VAR_ID"
         )
 
@@ -1141,10 +1141,10 @@ process_oncokb_maf <-
                   BM_MATCH = "by_hgvsp_principal",
                 ) |>
                 dplyr::select(
-                  VAR_ID,
-                  VARIANT_CLASS,
-                  ENTREZGENE,
-                  BM_SOURCE_DB,
+                  "VAR_ID",
+                  "VARIANT_CLASS",
+                  "ENTREZGENE",
+                  "BM_SOURCE_DB",
                   dplyr::everything()
                 )
 
@@ -1171,7 +1171,7 @@ process_oncokb_maf <-
       # regardless of ANNOTATED flag — same reasoning as HGVSp path above
       maf_annotated_hgvsg <- maf_hgvsg |>
         dplyr::filter(
-          is.na(HGVSp_Short) | HGVSp_Short == "",
+          is.na(.data$HGVSp_Short) | .data$HGVSp_Short == "",
           .data$GENE_IN_ONCOKB == TRUE)
 
       assertable::assert_colnames(
@@ -1183,8 +1183,8 @@ process_oncokb_maf <-
 
       maf_annotated_hgvsg <- maf_annotated_hgvsg |>
         dplyr::rename(
-          SYMBOL = Hugo_Symbol,
-          SAMPLE_ID = Tumor_Sample_Barcode
+          SYMBOL = "Hugo_Symbol",
+          SAMPLE_ID = "Tumor_Sample_Barcode"
         ) |>
         dplyr::select(
           -dplyr::any_of(
@@ -1198,16 +1198,16 @@ process_oncokb_maf <-
         ) |>
         dplyr::distinct() |>
         dplyr::select(
-          SYMBOL, SAMPLE_ID, VAR_ID,
+          "SYMBOL", "SAMPLE_ID", "VAR_ID",
           dplyr::everything()
         ) |>
         dplyr::left_join(
           var_calls |>
             dplyr::select(
-              VAR_ID,
-              VARIANT_CLASS,
-              ENTREZGENE,
-              ALTERATION),
+              "VAR_ID",
+              "VARIANT_CLASS",
+              "ENTREZGENE",
+              "ALTERATION"),
           by = "VAR_ID"
         )
 
@@ -1260,10 +1260,10 @@ process_oncokb_maf <-
                   BM_MATCH = "by_genomic_coord"
                 ) |>
                 dplyr::select(
-                  VAR_ID,
-                  VARIANT_CLASS,
-                  ENTREZGENE,
-                  BM_SOURCE_DB,
+                  "VAR_ID",
+                  "VARIANT_CLASS",
+                  "ENTREZGENE",
+                  "BM_SOURCE_DB",
                   dplyr::everything()
                 )
 
@@ -1352,16 +1352,16 @@ process_oncokb_fusion <-
 
     annotated_fusions <- annotated_fusions |>
       dplyr::rename(
-        SAMPLE_ID = Tumor_Sample_Barcode) |>
+        SAMPLE_ID = "Tumor_Sample_Barcode") |>
 
       ## Join with var_calls to get VARIANT_CLASS and
       ## ENTREZGENE for each fusion
       dplyr::left_join(
         var_calls |>
           dplyr::select(
-            VAR_ID,
-            VARIANT_CLASS,
-            ENTREZGENE),
+            "VAR_ID",
+            "VARIANT_CLASS",
+            "ENTREZGENE"),
         by = "VAR_ID"
       )
 
@@ -1423,10 +1423,10 @@ process_oncokb_fusion <-
               BM_MATCH = "by_gene",
             ) |>
             dplyr::select(
-              VAR_ID,
-              VARIANT_CLASS,
-              ENTREZGENE,
-              BM_SOURCE_DB,
+              "VAR_ID",
+              "VARIANT_CLASS",
+              "ENTREZGENE",
+              "BM_SOURCE_DB",
               dplyr::everything()
             )
 
@@ -1516,17 +1516,17 @@ process_oncokb_cna <-
     # Fetch annotations for each CNA
     annotated_cnas <- annotated_cnas |>
       dplyr::rename(
-        SAMPLE_ID = Tumor_Sample_Barcode) |>
+        SAMPLE_ID = "Tumor_Sample_Barcode") |>
 
       ## Join with var_calls to get VARIANT_CLASS and
       ## ENTREZGENE for each fusion
       dplyr::left_join(
         var_calls |>
           dplyr::select(
-            VAR_ID,
-            VARIANT_CLASS,
-            SYMBOL,
-            ENTREZGENE),
+            "VAR_ID",
+            "VARIANT_CLASS",
+            "SYMBOL",
+            "ENTREZGENE"),
         by = c("VAR_ID" = "VAR_ID",
                "Hugo_Symbol" = "SYMBOL")
       )
@@ -1579,10 +1579,10 @@ process_oncokb_cna <-
               BM_MATCH = "by_gene",
             ) |>
             dplyr::select(
-              VAR_ID,
-              VARIANT_CLASS,
-              ENTREZGENE,
-              BM_SOURCE_DB,
+              "VAR_ID",
+              "VARIANT_CLASS",
+              "ENTREZGENE",
+              "BM_SOURCE_DB",
               dplyr::everything()
             )
 

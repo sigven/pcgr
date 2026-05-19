@@ -47,10 +47,10 @@ get_excel_sheets <- function(report = NULL) {
         sample_alteration[[t]] <-
           callsets[[t]]$variant |>
           dplyr::select(
-            VAR_ID,
-            ENTREZGENE,
-            VARIANT_CLASS,
-            SAMPLE_ALTERATION) |>
+            "VAR_ID",
+            "ENTREZGENE",
+            "VARIANT_CLASS",
+            "SAMPLE_ALTERATION") |>
           dplyr::distinct()
       }
     }
@@ -223,7 +223,7 @@ get_excel_sheets <- function(report = NULL) {
                     prognostic_poor = paste0("PP", .data$ACTIONABILITY_TIER),
                     prognostic_better = paste0("PB", .data$ACTIONABILITY_TIER),
                     diagnostic_positive = paste0("D", .data$ACTIONABILITY_TIER),
-                    ACTIONABILITY_TIER
+                    as.character(.data$ACTIONABILITY_TIER)
                   )
                 ) |>
                 dplyr::select(
@@ -305,7 +305,7 @@ get_excel_sheets <- function(report = NULL) {
                     prognostic_poor = paste0("PP", .data$ACTIONABILITY_TIER),
                     prognostic_better = paste0("PB", .data$ACTIONABILITY_TIER),
                     diagnostic_positive = paste0("D", .data$ACTIONABILITY_TIER),
-                    ACTIONABILITY_TIER
+                    as.character(.data$ACTIONABILITY_TIER)
                   )
                 ) |>
                 dplyr::select(
@@ -413,7 +413,7 @@ get_excel_sheets <- function(report = NULL) {
                     prognostic_poor = paste0("PP", .data$ACTIONABILITY_TIER),
                     prognostic_better = paste0("PB", .data$ACTIONABILITY_TIER),
                     diagnostic_positive = paste0("D", .data$ACTIONABILITY_TIER),
-                    ACTIONABILITY_TIER
+                    as.character(.data$ACTIONABILITY_TIER)
                   )
                 ) |>
                 dplyr::select(
