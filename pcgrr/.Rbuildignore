@@ -1,3 +1,4 @@
+^air\.toml$
 ^renv$
 ^renv\.lock$
 ^.*\.Rproj$
