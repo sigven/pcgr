@@ -20,5 +20,4 @@ dependencies:
   - conda-forge::yaml
   - pcgr::oncokb-annotator
   - conda-forge::urllib3 # oncokb-annotator
-  - conda-forge::requests # oncokb-annotator
   - conda-forge::kiwisolver # oncokb-annotator

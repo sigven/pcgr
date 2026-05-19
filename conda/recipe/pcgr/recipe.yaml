@@ -29,6 +29,7 @@ requirements:
     - cyvcf2
     - pyyaml
     - conda-forge::libdeflate
+    - conda-forge::requests # oncokb
 
 tests:
   - script:
