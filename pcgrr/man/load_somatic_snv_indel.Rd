@@ -19,7 +19,7 @@ load_somatic_snv_indel(
 
 \item{settings}{PCGR run/configuration settings}
 
-\item{simulate_vaf}{Internal/test use only. If TRUE and VAF_TUMOR is
+\item{simulate_vaf_dp}{Internal/test use only. If TRUE and VAF_TUMOR is
 entirely missing, replace it with random values drawn from
 Uniform(0.01, 0.99). Never set this in production runs.}
 }

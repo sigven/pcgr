@@ -7,9 +7,6 @@
 \usage{
 render_evidence_level_cell()
 }
-\arguments{
-\item{value}{Evidence level value (A, B, C, D, E)}
-}
 \value{
 An HTML div element styled as a badge with background
 and text color

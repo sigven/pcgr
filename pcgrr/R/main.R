@@ -970,7 +970,7 @@ write_report_quarto_html <- function(report = NULL) {
     n_snv_indel <- ifelse(
       is.null(report$content$snv_indel$vstats$n), 0,
       report$content$snv_indel$vstats$n)
-    if (n_snv_indel < pcgrr:::MAX_VARS_ALLOWED_HTML) {
+    if (n_snv_indel < MAX_VARS_ALLOWED_HTML) {
       if (file.exists(quarto_input)) {
 
         ## make temporary directory for quarto report rendering

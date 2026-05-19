@@ -9,6 +9,9 @@ render_symbol_assoc_style(data, rank_col = "TISSUE_ASSOC_RANK")
 }
 \arguments{
 \item{data}{The main data frame (passed via closure)}
+
+\item{rank_col}{Name of the column containing the cancer association rank
+value used to determine cell background color (default: "TISSUE_ASSOC_RANK")}
 }
 \value{
 A function that can be used as a reactable cell renderer

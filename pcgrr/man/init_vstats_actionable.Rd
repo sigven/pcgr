@@ -7,6 +7,10 @@ variant statistics information}
 \usage{
 init_vstats_actionable(vartype = "snv_indel")
 }
+\arguments{
+\item{vartype}{Variant type to initialise statistics for; one of
+"snv_indel" (default) or "cna"}
+}
 \description{
 Function that initiates report element with actionable
 variant statistics information

@@ -193,7 +193,7 @@ load_somatic_cna <- function(
 #' @param fname Path to file with pre-processed somatic SNV/InDel variants
 #' @param ref_data PCGR reference data object
 #' @param settings PCGR run/configuration settings
-#' @param simulate_vaf Internal/test use only. If TRUE and VAF_TUMOR is
+#' @param simulate_vaf_dp Internal/test use only. If TRUE and VAF_TUMOR is
 #'   entirely missing, replace it with random values drawn from
 #'   Uniform(0.01, 0.99). Never set this in production runs.
 #'

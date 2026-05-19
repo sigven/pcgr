@@ -107,3 +107,32 @@
 
 #' OncoKB base API URL
 "oncokb_base_api_url"
+
+#' Fixed data types and levels for biomarker evidence items
+#'
+#' @format A named list with three character vectors:
+#' \itemize{
+#'   \item \emph{types} - Biomarker evidence types (e.g. "predictive", "prognostic")
+#'   \item \emph{levels} - Evidence strength levels (e.g. "A: Validated", "B: Clinical evidence")
+#'   \item \emph{clinical_significance} - Clinical significance categories (e.g. "Sensitivity/Response")
+#' }
+#'
+"biomarker_evidence"
+
+#' Named list of biomarker categories used for variant classification
+#'
+#' @format A named list with six elements, each representing a biomarker category
+#' (e.g. "therapeutic_sensitivity", "prognostic_poor"). Each element contains:
+#' \itemize{
+#'   \item \emph{etype} - Evidence type (e.g. "predictive", "prognostic", "diagnostic")
+#'   \item \emph{clnsig} - Clinical significance label(s) for the category
+#' }
+#'
+"bm_categories"
+
+#' Character vector of tumor site names used in PCGR/CPSR reports
+#'
+#' @format A character vector of 31 tumor site names (e.g. "Any", "Adrenal Gland",
+#' "Biliary Tract"). Used to constrain tumor site selection in configuration.
+#'
+"tumor_sites"

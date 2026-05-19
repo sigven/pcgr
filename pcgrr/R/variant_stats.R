@@ -997,6 +997,9 @@ stats_report_germline <- function(
 #' Function that initiates report element with actionable
 #' variant statistics information
 #'
+#' @param vartype Variant type to initialise statistics for; one of
+#'   "snv_indel" (default) or "cna"
+#'
 #' @export
 init_vstats_actionable <- function(vartype = "snv_indel") {
   vstats <- list()
