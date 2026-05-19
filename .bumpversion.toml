@@ -14,6 +14,9 @@ parse = """(?x)
     (?:\\.(?P<dev>\\d+))?
 """
 
+[tool.bumpversion.parts.dev]
+first_value = "9000"
+
 serialize = [
     "{major}.{minor}.{patch}.{dev}",
     "{major}.{minor}.{patch}",
