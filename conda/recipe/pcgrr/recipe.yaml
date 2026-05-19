@@ -23,6 +23,7 @@ requirements:
     - r-bslib
     - r-caret
     - r-crosstalk
+    - r-data.table
     - r-dplyr
     - r-dt
     - r-formattable
@@ -30,10 +31,14 @@ requirements:
     - r-ggplot2
     - r-glue
     - r-htmltools
+    - r-httr
+    - r-jsonlite
     - r-log4r
     - bioconductor-mutationalpatterns
     - r-openxlsx2
     - r-plotly
+    - r-plyr
+    - r-purrr
     - bioconductor-quantiseqr
     - r-quarto
     - quarto
@@ -59,6 +64,7 @@ requirements:
     - r-bslib
     - r-caret
     - r-crosstalk
+    - r-data.table
     - r-dplyr
     - r-dt
     - r-formattable
@@ -66,10 +72,14 @@ requirements:
     - r-ggplot2
     - r-glue
     - r-htmltools
+    - r-httr
+    - r-jsonlite
     - r-log4r
     - bioconductor-mutationalpatterns
     - r-openxlsx2
     - r-plotly
+    - r-plyr
+    - r-purrr
     - bioconductor-quantiseqr
     - r-quarto
     - quarto
