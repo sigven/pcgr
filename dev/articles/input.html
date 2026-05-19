@@ -32,7 +32,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9012</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9014</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -86,26 +86,29 @@
 <div class="section level2">
 <h2 id="input-files">Input files<a class="anchor" aria-label="anchor" href="#input-files"></a>
 </h2>
-<p>The PCGR workflow accepts three main input files:</p>
+<p>The PCGR workflow accepts the following main input files:</p>
 <ul>
 <li>An unannotated, single-sample <a href="https://github.com/samtools/hts-specs#variant-calling-data-files" class="external-link">VCF
 file</a> (&gt;= v4.2) with called somatic variants (SNVs/InDels)</li>
 <li>A file with allele-specific copy number segments (tab-separated
 values - TSV)</li>
+<li>A file with RNA fusion transcripts detected in the tumor
+(tab-separated values - TSV)</li>
 <li>A file with transcript/gene expression levels (tab-separated values
 - TSV)</li>
 </ul>
-<p>The input VCF is a required input file, while the somatic copy number
-file and gene expression file are optional. The following arguments to
-the <code>pcgr</code> command are used for input files:</p>
+<p>The input VCF is a required input file, while the copy number, RNA
+fusion, and gene expression files are optional. The following arguments
+to the <code>pcgr</code> command are used for input files:</p>
 <ul>
 <li>
 <code>--input_vcf</code> (required argument to
 <code>pcgr</code>)</li>
 <li><code>--input_cna</code></li>
+<li><code>--input_rna_fusion</code></li>
 <li><code>--input_rna_expression</code></li>
 </ul>
-<p>In addition to these three main input files, the user can also opt to
+<p>In addition to these main input files, the user can also opt to
 provide a <a href="#panel-of-normals-pon-vcf">panel-of-normals VCF</a>
 file (<code>--pon_vcf</code>) for tumor-only variant filtering, as well
 as an input file with <a href="#germline-variants">CPSR-classified
@@ -243,6 +246,81 @@ report. This file corresponds to output file
 <code>&lt;sample_id&gt;.cpsr.&lt;genome_assembly&gt;.classification.tsv.gz</code>
 from the CPSR pipeline. Make sure the genome assembly is the same as the
 one used for the somatic variant input files.</p>
+</div>
+<div class="section level3">
+<h3 id="rna-fusions">RNA fusions<a class="anchor" aria-label="anchor" href="#rna-fusions"></a>
+</h3>
+<p>The user can submit a file with RNA fusion transcripts detected in
+the tumor sample. PCGR will cross-reference detected fusions against
+curated cancer gene databases and known fusion events, and incorporate
+them into the output report.</p>
+<p>The tab-separated values file with RNA fusion calls
+<strong>MUST</strong> contain the following four columns:</p>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code>FusionGene</code></td>
+<td>string</td>
+<td>Fusion gene pair, two gene symbols separated by <code>--</code> or
+<code>::</code> (e.g. <code>EML4--ALK</code> or
+<code>TMPRSS2::ERG</code>)</td>
+</tr>
+<tr class="even">
+<td><code>LeftBreakpoint</code></td>
+<td>string</td>
+<td>Genomic position of the left/5’ breakpoint, formatted as
+<code>chrom:position</code> (e.g. <code>2:42522694</code>)</td>
+</tr>
+<tr class="odd">
+<td><code>RightBreakpoint</code></td>
+<td>string</td>
+<td>Genomic position of the right/3’ breakpoint, formatted as
+<code>chrom:position</code> (e.g. <code>2:29446394</code>)</td>
+</tr>
+<tr class="even">
+<td><code>SplitReads</code></td>
+<td>integer</td>
+<td>Number of split reads supporting the fusion (non-negative
+integer)</td>
+</tr>
+</tbody>
+</table>
+<p>An optional column <code>Score</code> (float) may also be included,
+representing a caller-specific confidence score for the fusion
+event.</p>
+<div class="section level4">
+<h4 id="formatting-notes">Formatting notes<a class="anchor" aria-label="anchor" href="#formatting-notes"></a>
+</h4>
+<ul>
+<li>The chromosome field in breakpoints must be one of
+<code>1</code>–<code>22</code>, <code>X</code>, <code>Y</code>, or
+<code>MT</code> — without a <code>chr</code> prefix</li>
+<li>Each gene symbol in <code>FusionGene</code> must be a valid
+alphanumeric identifier (letters, digits, <code>.</code>,
+<code>-</code>, <code>_</code> allowed); purely numeric gene names are
+not accepted</li>
+<li>Fusions with an empty or missing partner (e.g. intragenic or
+read-through events) are allowed but will generate a warning during
+validation</li>
+</ul>
+<p>Below shows the first few records of a correctly formatted RNA fusion
+file:</p>
+<pre><code>FusionGene       LeftBreakpoint    RightBreakpoint   SplitReads
+EML4--ALK        2:42522694        2:29446394        100
+BCR--ABL1        22:23582899       9:13358994        50
+EWSR1--FLI1      22:29683136       11:128675244      75
+TMPRSS2--ERG     21:42836478       21:39737961       60</code></pre>
+</div>
 </div>
 <div class="section level3">
 <h3 id="gene-expression">Gene expression<a class="anchor" aria-label="anchor" href="#gene-expression"></a>

@@ -32,7 +32,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9012</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9014</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -125,8 +125,21 @@ implementation indicated in parentheses):</p>
 <em>ONCG_OVS1</em> - Null variant - predicted as LoF - in bona fide
 tumor suppressor gene (VEP;CGC;CancerMine)</li>
 <li>
+<em>ONCG_OVS1_A</em> - Null variant - annotated by OncoKB as
+Loss-of-function - in bona fide tumor suppressor gene (OncoKB)</li>
+<li>
+<em>ONCG_OVS1_B</em> - Null variant - annotated by OncoKB as Likely
+Loss-of-function - in bona fide tumor suppressor gene (OncoKB)</li>
+<li>
 <em>ONCG_OS1</em> - Same amino acid change as previously established
 oncogenic variant - regardless of nucleotide change (ClinVar)</li>
+<li>
+<em>ONCG_OS2_A</em> - Well established in vitro/in vivo functional
+studies (OncoKB-curated) show oncogenic effect of variant (OncoKB)</li>
+<li>
+<em>ONCG_OS2_B</em> - Well established in vitro/in vivo functional
+studies (OncoKB-curated) show likely oncogenic effect of variant
+(OncoKB)</li>
 <li>
 <em>ONCG_OS3</em> - Located in a mutation hotspot with &gt;= 50
 samples with variant at AA position, &gt;= 10 samples with same AA
@@ -162,6 +175,13 @@ subpopulations) (gnomAD)</li>
 <em>ONCG_SBS1</em> - High MAF (any five major gnomAD subpopulations)
 (gnomAD)</li>
 <li>
+<em>ONCG_SBS2_A</em> - Well established in vitro/in vivo functional
+studies (OncoKB-curated) show neutral effect of variant (OncoKB)</li>
+<li>
+<em>ONCG_SBS2_B</em> - Well established in vitro/in vivo functional
+studies (OncoKB-curated) show likely neutral effect of variant
+(OncoKB)</li>
+<li>
 <em>ONCG_SBP1</em> - Multiple lines of computational evidence
 support a benign variant effect on the gene or gene product
 (dbNSFP)</li>
@@ -180,31 +200,33 @@ framework along the proposed AMP/ASCO/CAP guidelines, as outlined in <a href="ht
 <ul>
 <li>
 <strong>Tier I: Variants of strong clinical significance</strong> -
-constitutes aberrations linked to predictive, prognostic, or diagnostic
-biomarkers in the <a href="https://civicdb.org" class="external-link">CIViC database</a> and
-the <a href="https://www.cancergenomeinterpreter.org/biomarkers" class="external-link">Cancer
-Biomarkers Database</a> that are
+constitutes aberrations linked to therapeutic (drug
+sensitivity/response) biomarkers in <a href="https://www.oncokb.org/" class="external-link">OncoKB</a>, <a href="https://civicdb.org" class="external-link">CIViC</a>, or the <a href="https://www.cancergenomeinterpreter.org/biomarkers" class="external-link">Cancer
+Biomarkers Database</a>. These biomarkers are further
 <ul>
-<li>Found within the same tumor type/class as specified by the user,
-<strong>AND</strong>
+<li>reported within the same tumor type/class as the tumor in question
+(query tumor sample), <strong>AND</strong>
 </li>
-<li>Of strong clinical evidence (i.e. approved therapies, part of
-guidelines, validated or discovered in late clinical trials (<a href="https://civic.readthedocs.io/en/latest/model/evidence/level.html" class="external-link">CIViC
+<li>Of strong clinical evidence (i.e. FDA-approved/standard-of-care
+therapies, part of guidelines, validated or discovered in late clinical
+trials (<a href="https://www.oncokb.org/therapeutic-levels" class="external-link">OncoKB
+evidence levels 1/2/3A</a>, <a href="https://civic.readthedocs.io/en/latest/model/evidence/level.html" class="external-link">CIViC
 evidence levels A/B</a>))</li>
 </ul>
 </li>
 <li>
 <strong>Tier II: Variants of potential clinical
 significance</strong> - constitutes other aberrations linked to
-predictive, prognostic, or diagnostic biomarkers in the <a href="https://civicdb.org" class="external-link">CIViC database</a> and the <a href="https://www.cancergenomeinterpreter.org/biomarkers" class="external-link">Cancer
+therapeutic (drug sensitivity/response) biomarkers in <a href="https://www.oncokb.org/" class="external-link">OncoKB</a>, <a href="https://civicdb.org" class="external-link">CIViC</a>, or <a href="https://www.cancergenomeinterpreter.org/biomarkers" class="external-link">Cancer
 Biomarkers Database</a> that are either
 <ul>
 <li>Of strong clinical evidence in other tumor types/classes than the
-one specified by the user, <strong>OR</strong>
+one specified by the user (i.e. (<a href="https://www.oncokb.org/therapeutic-levels" class="external-link">OncoKB evidence level
+3B</a>), <strong>OR</strong>
 </li>
 <li>Of weak clinical evidence (early trials, case reports etc. (<a href="https://civic.readthedocs.io/en/latest/model/evidence/level.html" class="external-link">CIViC
-evidence levels C/D/E</a>))) in the same tumor type/class as specified
-by the user</li>
+evidence levels C/D/E</a>), <a href="https://www.oncokb.org/therapeutic-levels" class="external-link">OncoKB evidence level
+4</a>) in the same tumor type/class as specified by the user</li>
 </ul>
 </li>
 <li>

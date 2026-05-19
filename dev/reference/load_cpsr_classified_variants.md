@@ -10,7 +10,8 @@ load_cpsr_classified_variants(
   fname_cpsr_yaml = NA,
   cols = NULL,
   ignore_vus = FALSE,
-  ref_data = NULL
+  ref_data = NULL,
+  settings = NULL
 )
 ```
 
@@ -35,3 +36,7 @@ load_cpsr_classified_variants(
 - ref_data:
 
   PCGR reference data object
+
+- settings:
+
+  PCGR run/configuration settings

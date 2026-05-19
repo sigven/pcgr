@@ -11,4 +11,4 @@ oncogenicity_criteria
 ## Format
 
 An object of class `spec_tbl_df` (inherits from `tbl_df`, `tbl`,
-`data.frame`) with 14 rows and 6 columns.
+`data.frame`) with 20 rows and 6 columns.

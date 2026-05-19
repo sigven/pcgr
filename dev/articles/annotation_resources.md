@@ -3,14 +3,14 @@
 ### Basic variant consequence annotation
 
 - [VEP](http://www.ensembl.org/info/docs/tools/vep/index.md) - Variant
-  Effect Predictor release 113 ([GENCODE
-  v47](https://www.gencodegenes.org/human/) as gene reference database
+  Effect Predictor release 115 ([GENCODE
+  v49](https://www.gencodegenes.org/human/) as gene reference database
   (v19 for grch37))
 
 ### *Insilico* predictions of effect of coding variants
 
 - [dBNSFP](https://sites.google.com/site/jpopgen/dbNSFP) - database of
-  non-synonymous functional predictions (v5.0, January 2025)
+  non-synonymous functional predictions (v5.3, October 2025)
 
 ### Variant frequency databases
 
@@ -19,16 +19,16 @@
 - [dbSNP](http://www.ncbi.nlm.nih.gov/SNP/) - database of short genetic
   variants (build 156)
 - [Cancer Hotspots](http://cancerhotspots.org) - a resource for
-  statistically significant mutations in cancer (v2, 2017)
+  statistically significant mutations in cancer (v2/v3, 2017/2026)
 - [TCGA](https://portal.gdc.cancer.gov/) - somatic mutations discovered
-  across 33 tumor type cohorts (release 41.0, August 2024)
+  across 33 tumor type cohorts (release 45.0, December 2025)
 
 ### Variant databases of clinical utility
 
 - [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - database of
-  clinically related variants (March 2025)
+  clinically related variants (May 2026)
 - [CIViC](https://civicdb.org) - clinical interpretations of variants in
-  cancer (March 13th 2025)
+  cancer (March 20th 2026)
 - [CGI](http://www.cancergenomeinterpreter.org/biomarkers) - Cancer
   Genome Interpreter Cancer Biomarkers Database (CGI) (October 18th
   2022)
@@ -36,18 +36,18 @@
 ### Protein domains/functional features
 
 - [UniProt/SwissProt KnowledgeBase](http://www.uniprot.org) - resource
-  on protein sequence and functional information (2025_01)
+  on protein sequence and functional information (2025_03)
 - [Pfam](https://www.ebi.ac.uk/interpro/entry/pfam/#table) - database of
   protein families and domains (v37.0)
 
 ### Knowledge resources on gene and protein targets
 
-- [CancerMine](https://zenodo.org/records/7689627) - Literature-mined
-  database of tumor suppressor genes/proto-oncogenes (v50, March 2023)
+- [CancerMine](https://zenodo.org/records/16849846) - Literature-mined
+  database of tumor suppressor genes/proto-oncogenes (v51, August 2025)
 - [Open Targets Platform](https://www.targetvalidation.org/) - Database
   on disease-target associations, molecularly targeted drugs and
   tractability aggregated from multiple sources (literature, pathways,
-  mutations) (2024.09)
+  mutations) (2025.12)
 
 ### Notes on variant annotation datasets
 
@@ -72,7 +72,7 @@ following:
   biomarkers curated from FDA/NCCN guidelines, scientific literature,
   and clinical trials are included (biomarkers collected from conference
   abstracts etc. are not included)
-- Copy number gains/losses
+- Copy number amplifications/deep deletions
 - RNA fusion and gene expression biomarkers are included in the PCGR
   reference databundle, but are not currently utilized in the PCGR
   biomarker matching procedure

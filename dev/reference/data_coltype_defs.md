@@ -11,4 +11,4 @@ data_coltype_defs
 
 ## Format
 
-An object of class `list` of length 5.
+An object of class `list` of length 6.

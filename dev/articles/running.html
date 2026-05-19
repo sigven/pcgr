@@ -32,7 +32,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9012</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9014</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -278,6 +278,131 @@ buffer size</a> (option <code>--vep_buffer_size</code>), as this will
 speed up the VEP processing significantly.</p>
 </div>
 <div class="section level3">
+<h3 id="somatic-copy-number-variant-class-thresholds">Somatic copy number variant class thresholds<a class="anchor" aria-label="anchor" href="#somatic-copy-number-variant-class-thresholds"></a>
+</h3>
+<p>When copy number segments are provided (<code>--input_cna</code>),
+PCGR classifies each segment as an amplification, gain, heterozygous
+deletion, or homozygous deletion based on configurable thresholds. The
+thresholding strategy is controlled by:</p>
+<ul>
+<li>
+<code>--cna_threshold_mode &lt;absolute|relative|combined&gt;</code>
+(default: <code>absolute</code>)</li>
+</ul>
+<p>Three modes are supported:</p>
+<ul>
+<li>
+<strong>absolute</strong> — thresholds are expressed as total copy
+numbers (integer values). A segment is classified based on its total
+copy number (<code>nMajor + nMinor</code>), irrespective of tumor
+ploidy.</li>
+<li>
+<strong>relative</strong> — thresholds are expressed as fold-change
+over the estimated tumor ploidy. This mode requires that
+<code>--tumor_ploidy</code> is provided; if not, PCGR will fall back to
+<code>absolute</code> mode.</li>
+<li>
+<strong>combined</strong> — a segment must satisfy <em>both</em> the
+absolute and relative threshold criteria to be assigned a given class.
+This is the most conservative mode.</li>
+</ul>
+<p>The per-class thresholds that can be configured are:</p>
+<table class="table">
+<colgroup>
+<col width="20%">
+<col width="20%">
+<col width="20%">
+<col width="20%">
+<col width="20%">
+</colgroup>
+<thead><tr class="header">
+<th>Class</th>
+<th>Absolute option</th>
+<th>Default</th>
+<th>Relative option</th>
+<th>Default</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Amplification</td>
+<td><code>--cna_amp_threshold_absolute</code></td>
+<td>5</td>
+<td><code>--cna_amp_threshold_relative</code></td>
+<td>2.5× ploidy</td>
+</tr>
+<tr class="even">
+<td>Gain</td>
+<td><code>--cna_gain_threshold_absolute</code></td>
+<td>3</td>
+<td><code>--cna_gain_threshold_relative</code></td>
+<td>1.5× ploidy</td>
+</tr>
+<tr class="odd">
+<td>Heterozygous deletion</td>
+<td><code>--cna_del_threshold_absolute</code></td>
+<td>1</td>
+<td><code>--cna_del_threshold_relative</code></td>
+<td>0.5× ploidy</td>
+</tr>
+</tbody>
+</table>
+<p>Segments with total copy number of zero are always classified as
+homozygous deletions, regardless of the threshold mode.</p>
+<p>An additional option controls which genes are considered affected by
+a CNA event:</p>
+<ul>
+<li>
+<code>--cna_transcript_overlap_pct &lt;value&gt;</code> — minimum
+mean percent overlap between the copy number segment and gene
+transcripts required to report a gene as affected (default: 50)</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="oncokb-biomarker-integration">OncoKB biomarker integration<a class="anchor" aria-label="anchor" href="#oncokb-biomarker-integration"></a>
+</h3>
+<p>PCGR can optionally query the <a href="https://www.oncokb.org" class="external-link">OncoKB</a> precision oncology knowledge
+base to annotate variants and copy number alterations with clinical
+actionability evidence. To enable this, provide a valid OncoKB API
+token:</p>
+<ul>
+<li><code>--oncokb_api_token &lt;TOKEN&gt;</code></li>
+</ul>
+<p>An environment variable can be used to pass the token value at
+runtime, e.g.:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="ex">pcgr</span> <span class="at">--oncokb_api_token</span> <span class="va">$ONCOKB_TOKEN</span> ...</span></code></pre></div>
+<p>To specify the tumor type for OncoKB queries, provide the relevant <a href="https://oncotree.mskcc.org" class="external-link">OncoTree</a> code:</p>
+<ul>
+<li>
+<code>--oncokb_oncotree_code &lt;CODE&gt;</code>
+(e.g. <code>COAD</code> for colon adenocarcinoma)</li>
+</ul>
+<p>By default, PCGR integrates biomarker evidence from multiple sources
+(CIViC, CGI, OncoKB). If you want to limit biomarker reporting to OncoKB
+only and skip CIViC and CGI, use:</p>
+<ul>
+<li><code>--oncokb_exclusive</code></li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="rna-fusions">RNA fusions<a class="anchor" aria-label="anchor" href="#rna-fusions"></a>
+</h3>
+<p>If RNA fusion data is available for the tumor sample, it can be
+provided via:</p>
+<ul>
+<li><code>--input_rna_fusion &lt;FILE&gt;</code></li>
+</ul>
+<p>PCGR will cross-reference the detected fusions against curated cancer
+gene databases and known fusion events. A minimum split-read support
+threshold can be configured to filter low-confidence fusions:</p>
+<ul>
+<li>
+<code>--fusion_min_split_reads &lt;value&gt;</code> (default: 3,
+minimum: 2)</li>
+</ul>
+<p>See the <a href="input.html#rna-fusions">input section</a> for
+details on the required file format.</p>
+</div>
+<div class="section level3">
 <h3 id="configuration-of-output-files">Configuration of output files<a class="anchor" aria-label="anchor" href="#configuration-of-output-files"></a>
 </h3>
 <p>If you only want the Excel/TSV output (with all variant
@@ -299,21 +424,17 @@ files.</p>
 <p>A tumor sample report is generated by running the
 <strong>pcgr</strong> command, which takes the following arguments and
 options:</p>
-<pre class="text"><code>usage: 
-    pcgr -h [options] 
-    --input_vcf &lt;INPUT_VCF&gt;
-    --vep_dir &lt;VEP_DIR&gt;
-    --refdata_dir &lt;REFDATA_DIR&gt;
-    --output_dir &lt;OUTPUT_DIR&gt;
-    --genome_assembly &lt;GENOME_ASSEMBLY&gt;
-    --sample_id &lt;SAMPLE_ID&gt; 
+<pre class="text"><code>usage:
+  pcgr -h [options]
+  --refdata_dir &lt;REFDATA_DIR&gt;
+  --output_dir &lt;OUTPUT_DIR&gt;
+  --genome_assembly &lt;GENOME_ASSEMBLY&gt;
+  --sample_id &lt;SAMPLE_ID&gt;
 
-Personal Cancer Genome Reporter (PCGR) workflow for clinical translation of tumor omics data (SNVs/InDels, CNA, RNA expression)
+Personal Cancer Genome Reporter (PCGR) workflow for clinical translation of tumor omics data
+(SNVs/InDels, CNA, RNA expression, RNA fusions)
 
 Required arguments:
-  --input_vcf INPUT_VCF
-                        VCF input file with somatic variants in tumor sample, SNVs/InDels
-  --vep_dir VEP_DIR     Directory of VEP cache, e.g.  $HOME/.vep
   --refdata_dir REFDATA_DIR
                         Directory where PCGR reference data bundle was downloaded and unpacked
   --output_dir OUTPUT_DIR
@@ -323,13 +444,45 @@ Required arguments:
   --sample_id SAMPLE_ID
                         Tumor sample/cancer genome identifier - prefix for output files
 
-Sequencing assay options:
+Input file options:
+  --input_vcf INPUT_VCF
+                        VCF input file with somatic variants in tumor sample, SNVs/InDels
+  --input_cna INPUT_CNA
+                        Somatic copy number alteration segments (tab-separated values)
+  --input_rna_fusion INPUT_RNA_FUSION
+                        File with RNA fusion transcripts detected in tumor (tab-separated values)
+  --input_rna_expression INPUT_RNA_EXP
+                        File with bulk RNA expression counts (TPM) of transcripts in tumor (tab-separated values)
+
+SNV/InDel analysis options:
+  --vep_dir VEP_DIR     Directory of VEP cache, e.g. $HOME/.vep (required when --input_vcf is provided)
   --assay {WGS,WES,TARGETED}
                         Type of DNA sequencing assay performed for input data (VCF), default: WES
   --effective_target_size_mb EFFECTIVE_TARGET_SIZE_MB
-                        Effective target size in Mb (potentially limited by read depth) of sequencing assay (for TMB analysis) (default: 34 (WES/WGS))
-  --tumor_only          Input VCF comes from tumor-only sequencing, calls will be filtered for variants of germline origin, (default: False)
-
+                        Effective target size in Mb (potentially limited by read depth) of sequencing
+                        assay (for TMB analysis) (default: 34 (WES/WGS))
+  --tumor_only          Input VCF comes from tumor-only sequencing, calls will be filtered for variants
+                        of germline origin (default: False)
+  --vcf2maf             Generate a MAF file for input VCF using https://github.com/mskcc/vcf2maf
+                        (default: False)
+  --vcfanno_n_proc VCFANNO_N_PROC
+                        Number of vcfanno processes (option '-p' in vcfanno), default: 4
+  --retained_info_tags RETAINED_INFO_TAGS
+                        Comma-separated string of VCF INFO tags from query VCF to keep in PCGR output TSV
+  --ignore_noncoding    Ignore non-coding (i.e. non protein-altering) variants in report, default: False
+  --vep_n_forks VEP_N_FORKS
+                        Number of forks (VEP option '--fork'), default: 4
+  --vep_buffer_size VEP_BUFFER_SIZE
+                        Variant buffer size (variants read into memory simultaneously, VEP option
+                        '--buffer_size') - set lower to reduce memory usage, default: 500
+  --vep_pick_order VEP_PICK_ORDER
+                        Comma-separated string of ordered transcript/variant properties for selection of
+                        primary variant consequence (option '--pick_order' in VEP), default:
+                        mane_select,mane_plus_clinical,canonical,biotype,ccds,rank,tsl,appris,length
+  --vep_no_intergenic   Skip intergenic variants during variant annotation (VEP option '--no_intergenic'),
+                        default: False
+  --vep_regulatory      Add VEP regulatory annotations (VEP option '--regulatory'), default: False
+  --vep_gencode_basic   Consider basic GENCODE transcript set only (VEP option '--gencode_basic')
 
 Tumor sample options:
   --sex {FEMALE,MALE,UNKNOWN}
@@ -375,133 +528,147 @@ Tumor sample options:
 
 Allelic support options:
   --tumor_dp_tag TUMOR_DP_TAG
-                        Specify VCF INFO tag for sequencing depth (tumor, must be Type=Integer, default: _NA_
+                        Specify VCF INFO tag for sequencing depth (tumor, must be Type=Integer,
+                        default: _NA_)
   --tumor_af_tag TUMOR_AF_TAG
-                        Specify VCF INFO tag for variant allelic fraction (tumor,  must be Type=Float, default: _NA_
+                        Specify VCF INFO tag for variant allelic fraction (tumor, must be Type=Float,
+                        default: _NA_)
   --control_dp_tag CONTROL_DP_TAG
-                        Specify VCF INFO tag for sequencing depth (control, must be Type=Integer, default: _NA_
+                        Specify VCF INFO tag for sequencing depth (control, must be Type=Integer,
+                        default: _NA_)
   --control_af_tag CONTROL_AF_TAG
-                        Specify VCF INFO tag for variant allelic fraction (control, must be Type=Float, default: _NA_
+                        Specify VCF INFO tag for variant allelic fraction (control, must be Type=Float,
+                        default: _NA_)
   --call_conf_tag CALL_CONF_TAG
-                        Specify VCF INFO tag for somatic variant call confidence (must be categorical, e.g. Type=String, default: _NA_
+                        Specify VCF INFO tag for somatic variant call confidence (must be categorical,
+                        e.g. Type=String, default: _NA_)
   --tumor_dp_min TUMOR_DP_MIN
-                        If VCF INFO tag for sequencing depth (tumor) is specified and found, set minimum required depth for inclusion in report (default: None)
+                        Minimum sequencing depth (tumor) for inclusion in report (default: None)
   --tumor_ad_min TUMOR_AD_MIN
-                        If VCF INFO tag for sequencing depth (tumor) and variant allelic fraction (tumor) are specified and found, set minimum required allelic depth (tumor, i.e. number of reads supporting alternate allele) for inclusion in report (default: None)
+                        Minimum allelic depth (tumor, reads supporting alternate allele) for inclusion
+                        in report (default: None)
   --tumor_af_min TUMOR_AF_MIN
-                        If VCF INFO tag for variant allelic fraction (tumor) is specified and found, set minimum required AF for inclusion in report (default: None)
+                        Minimum allelic fraction (tumor) for inclusion in report (default: None)
   --control_dp_min CONTROL_DP_MIN
-                        If VCF INFO tag for sequencing depth (control) is specified and found, set minimum required depth for inclusion in report (default: None)
+                        Minimum sequencing depth (control) for inclusion in report (default: None)
   --control_ad_max CONTROL_AD_MAX
-                        If VCF INFO tag for sequencing depth (control) and variant allelic fraction (control) are specified and found, set maximum allowed allelic depth (control, i.e. number of reads supporting alternate allele) for inclusion in report (default: None)
+                        Maximum allelic depth (control, reads supporting alternate allele) for inclusion
+                        in report (default: None)
   --control_af_max CONTROL_AF_MAX
-                        If VCF INFO tag for variant allelic fraction (control) is specified and found, set maximum allowed AF for inclusion in report (default: None)
+                        Maximum allelic fraction (control) for inclusion in report (default: None)
 
 Tumor-only filtering options:
-  --pon_vcf PON_VCF     VCF file with germline calls from Panel of Normals (PON) - i.e. blacklisted variants, (default: None)
-  --maf_gnomad_nfe MAF_GNOMAD_NFE
-                        Exclude variants in tumor (SNVs/InDels, tumor-only mode) with MAF &gt; pct, (gnomAD - European (non-Finnish), default: 0.002)
-  --maf_gnomad_asj MAF_GNOMAD_ASJ
-                        Exclude variants in tumor (SNVs/InDels, tumor-only mode) with MAF &gt; pct, (gnomAD - Ashkenazi Jewish, default: 0.002)
-  --maf_gnomad_fin MAF_GNOMAD_FIN
-                        Exclude variants in tumor (SNVs/InDels, tumor-only mode) with MAF &gt; pct, (gnomAD - European (Finnish), default: 0.002)
-  --maf_gnomad_oth MAF_GNOMAD_OTH
-                        Exclude variants in tumor (SNVs/InDels, tumor-only mode) with MAF &gt; pct, (gnomAD - Other, default: 0.002)
-  --maf_gnomad_amr MAF_GNOMAD_AMR
-                        Exclude variants in tumor (SNVs/InDels, tumor-only mode) with MAF &gt; pct, (gnomAD - Latino/Admixed American, default: 0.002)
-  --maf_gnomad_afr MAF_GNOMAD_AFR
-                        Exclude variants in tumor (SNVs/InDels, tumor-only mode) with MAF &gt; pct, (gnomAD - African/African-American, default: 0.002)
-  --maf_gnomad_eas MAF_GNOMAD_EAS
-                        Exclude variants in tumor (SNVs/InDels, tumor-only mode) with MAF &gt; pct, (gnomAD - East Asian, default: 0.002)
-  --maf_gnomad_sas MAF_GNOMAD_SAS
-                        Exclude variants in tumor (SNVs/InDels, tumor-only mode) with MAF &gt; pct, (gnomAD - South Asian, default: 0.002)
-  --maf_gnomad_global MAF_GNOMAD_GLOBAL
-                        Exclude variants in tumor (SNVs/InDels, tumor-only mode) with MAF &gt; pct, (gnomAD - global population, default: 0.002)
-  --exclude_pon         Exclude variants occurring in PoN (Panel of Normals, if provided as VCF (--pon_vcf), default: False)
+  --pon_vcf PON_VCF     VCF file with germline calls from Panel of Normals (PON) - blacklisted variants
+                        (default: None)
+  --gnomad_popmax_af_tolerated GNOMAD_POPMAX_AF_TOLERATED
+                        Exclude variants in tumor (SNVs/InDels, tumor-only mode) with gnomAD popmax
+                        MAF greater than this value (default: 0.001)
+  --exclude_pon         Exclude variants occurring in PoN (if --pon_vcf provided), default: False
   --exclude_likely_hom_germline
-                        Exclude likely homozygous germline variants (allelic fraction of 1.0 for alternate allele in tumor - very unlikely somatic event), default: False)
+                        Exclude likely homozygous germline variants (allelic fraction of 1.0 for
+                        alternate allele in tumor), default: False
   --exclude_likely_het_germline
-                        Exclude likely heterozygous germline variants (0.4-0.6 allelic fraction, AND presence in dbSNP + gnomAD, AND not existing as somatic record in COSMIC OR TCGA, default: False)
+                        Exclude likely heterozygous germline variants (0.4-0.6 allelic fraction, AND
+                        presence in dbSNP + gnomAD, AND not in COSMIC/TCGA), default: False
   --exclude_clinvar_germline
-                        Exclude variants found in ClinVar (of germline origin only), defult: False)
+                        Exclude variants found in ClinVar (germline origin only), default: False
   --exclude_dbsnp_nonsomatic
-                        Exclude variants found in dbSNP (except for those present in ClinVar (somatic origin) or found in TCGA or overlapping with COSMIC), defult: False)
-  --exclude_nonexonic   Exclude non-exonic variants, default: False)
-
-VEP options:
-  --vep_n_forks VEP_N_FORKS
-                        Number of forks (VEP option '--fork'), default: 4
-  --vep_buffer_size VEP_BUFFER_SIZE
-                        Variant buffer size (variants read into memory simultaneously, VEP option '--buffer_size')
-                        - set lower to reduce memory usage, default: 500
-  --vep_pick_order VEP_PICK_ORDER
-                        Comma-separated string of ordered transcript/variant properties for selection of primary variant consequence
-                        (option '--pick_order' in VEP), default:
-                        mane_select,mane_plus_clinical,canonical,biotype,ccds,rank,tsl,appris,length
-  --vep_no_intergenic   Skip intergenic variants during variant annotation (VEP option '--no_intergenic' in VEP), default: False
-  --vep_regulatory      Add VEP regulatory annotations (VEP option '--regulatory') or non-coding interpretation, default: False
-  --vep_gencode_basic   Consider basic GENCODE transcript set only with Variant Effect Predictor (VEP) (VEP option '--gencode_basic').
+                        Exclude variants found in dbSNP (except those in ClinVar (somatic), TCGA, or
+                        COSMIC), default: False
+  --exclude_nonexonic   Exclude non-exonic variants, default: False
 
 Tumor mutational burden (TMB) and MSI options:
-  --estimate_tmb        Estimate tumor mutational burden from the total number of somatic mutations and target region size, default: False
+  --estimate_tmb        Estimate tumor mutational burden from total somatic mutations and target region
+                        size, default: False
   --tmb_display {coding_and_silent,coding_non_silent,missense_only}
                         Type of TMB measure to show in report, default: coding_and_silent
   --tmb_dp_min TMB_DP_MIN
-                        If VCF INFO tag for sequencing depth (tumor) is specified and found, set minimum required sequencing depth for TMB calculation: default: None
+                        Minimum sequencing depth (tumor) for TMB calculation (default: None)
   --tmb_af_min TMB_AF_MIN
-                        If VCF INFO tag for allelic fraction (tumor) is specified and found, set minimum required allelic fraction for TMB calculation: default: None
+                        Minimum allelic fraction (tumor) for TMB calculation (default: None)
   --tmb_ad_min TMB_AD_MIN
-                        If VCF INFO tag for sequencing depth (tumor) and allelic fraction (tumor) are specified and found, set minimum required allelic depth (tumor, i.e. number of reads supporting alternate allele) for TMB calculation: default: None
-  --estimate_msi        Predict microsatellite instability status from patterns of somatic mutations/indels, default: False
+                        Minimum allelic depth (tumor) for TMB calculation (default: None)
+  --estimate_msi        Predict microsatellite instability status from somatic mutation patterns,
+                        default: False
 
 Mutational signature options:
   --estimate_signatures
-                        Estimate relative contributions of reference mutational signatures in query sample (re-fitting), default: False
+                        Estimate relative contributions of reference mutational signatures (re-fitting),
+                        default: False
   --min_mutations_signatures MIN_MUTATIONS_SIGNATURES
-                        Minimum number of SNVs required for re-fitting of mutational signatures (SBS) (default: 200, minimum n = 100)
+                        Minimum number of SNVs required for signature re-fitting (SBS)
+                        (default: 200, minimum n = 100)
   --all_reference_signatures
-                        Use _all_ reference mutational signatures (SBS) during signature re-fitting rather than only those already attributed to the tumor type (default: False)
+                        Use all reference mutational signatures (SBS) during re-fitting rather than
+                        only those attributed to the tumor type (default: False)
   --include_artefact_signatures
-                        Include sequencing artefacts in the collection of reference signatures (default: False
+                        Include sequencing artefacts in the reference signature collection
+                        (default: False)
   --prevalence_reference_signatures PREVALENCE_REFERENCE_SIGNATURES
-                        Minimum tumor-type prevalence (in percent) of reference signatures to be included in refitting procedure (default: 0.1)
+                        Minimum tumor-type prevalence (in percent) of reference signatures to be
+                        included in refitting (default: 0.1)
 
-Somatic copy number alteration (CNA) data options:
-  --input_cna INPUT_CNA
-                        Somatic copy number alteration segments (tab-separated values)
-  --n_copy_gain N_COPY_GAIN
-                        Minimum number of total copy number for segments considered as gains/amplifications (default: 6)
-  --cna_overlap_pct CNA_OVERLAP_PCT
-                        Mean percent overlap between copy number segment and gene transcripts for reporting of gains/losses in tumor suppressor genes/oncogenes, (default: 50)
+Somatic CNA analysis options:
+  --cna_threshold_mode {absolute,relative,combined}
+                        Thresholding mode for CNA tier assignment: 'absolute' (total copy number),
+                        'relative' (fold-change over tumor ploidy), or 'combined' (both criteria must
+                        be met) (default: absolute)
+  --cna_amp_threshold_absolute CNA_AMP_THRESHOLD_ABSOLUTE
+                        Absolute total copy number threshold for amplifications (default: 5)
+  --cna_amp_threshold_relative CNA_AMP_THRESHOLD_RELATIVE
+                        Relative fold-change over tumor ploidy for amplifications (default: 2.5)
+  --cna_gain_threshold_absolute CNA_GAIN_THRESHOLD_ABSOLUTE
+                        Absolute total copy number threshold for gains (default: 3)
+  --cna_gain_threshold_relative CNA_GAIN_THRESHOLD_RELATIVE
+                        Relative fold-change over tumor ploidy for gains (default: 1.5)
+  --cna_del_threshold_absolute CNA_DEL_THRESHOLD_ABSOLUTE
+                        Absolute total copy number at or below which (but above zero) a segment is
+                        considered a heterozygous deletion (default: 1)
+  --cna_del_threshold_relative CNA_DEL_THRESHOLD_RELATIVE
+                        Relative fold-change below tumor ploidy for heterozygous deletions
+                        (default: 0.5)
+  --cna_transcript_overlap_pct CNA_TRANSCRIPT_OVERLAP_PCT
+                        Minimum mean percent overlap between copy number segment and gene transcripts
+                        for reporting of gains/losses in oncogenes/tumor suppressors (default: 50)
 
-Bulk RNA-seq and RNA fusion data options:
-  --input_rna_expression INPUT_RNA_EXP
-                        File with bulk RNA expression counts (TPM) of transcripts in tumor (tab-separated values)
-  --expression_sim      Compare expression profile of tumor sample to known expression profiles (default: False)
+RNA expression and fusion options:
+  --fusion_min_split_reads FUSION_MIN_SPLIT_READS
+                        Minimum number of split reads supporting a fusion event
+                        (default: 3, minimum: 2)
+  --expression_sim      Compare expression profile of tumor sample to known expression profiles
+                        (default: False)
   --expression_sim_db EXPRESSION_SIM_DB
-                        Comma-separated string of databases for used in RNA expression similarity analysis, default: tcga,depmap,treehouse
+                        Comma-separated string of databases for RNA expression similarity analysis,
+                        default: tcga,depmap,treehouse
 
 Germline variant options:
   --input_cpsr INPUT_CPSR
-                        CPSR-classified germline calls (file '&lt;cpsr_sample_id&gt;.cpsr.&lt;genome_assembly&gt;.classification.tsv.gz')
+                        CPSR-classified germline calls
+                        (file '&lt;cpsr_sample_id&gt;.cpsr.&lt;genome_assembly&gt;.classification.tsv.gz')
   --input_cpsr_yaml INPUT_CPSR_YAML
-                        CPSR YAML configuration file (file '&lt;cpsr_sample_id&gt;.cpsr.&lt;genome_assembly&gt;.conf.yaml')
-  --cpsr_ignore_vus     Do not show variants of uncertain significance (VUS) in the germline section of the HTML report (default: False)
+                        CPSR YAML configuration file
+                        (file '&lt;cpsr_sample_id&gt;.cpsr.&lt;genome_assembly&gt;.conf.yaml')
+  --cpsr_ignore_vus     Do not show variants of uncertain significance (VUS) in the germline section
+                        of the HTML report (default: False)
+
+Biomarker and tiering options:
+  --oncokb_api_token ONCOKB_API_TOKEN
+                        OncoKB API token for querying the OncoKB precision oncology knowledge base
+                        (default: None)
+  --oncokb_oncotree_code ONCOKB_ONCOTREE_CODE
+                        OncoTree code specifying the tumor type for OncoKB queries (default: None)
+  --oncokb_exclusive    Limit biomarker reporting to OncoKB only - skip CIViC and CGI sources
+                        (default: False)
 
 Other options:
-  --vcf2maf             Generate a MAF file for input VCF using https://github.com/mskcc/vcf2maf (default: False)
-  --vcfanno_n_proc VCFANNO_N_PROC
-                        Number of vcfanno processes (option '-p' in vcfanno), default: 4
-  --ignore_noncoding    Ignore non-coding (i.e. non protein-altering) variants in report, default: False
-  --retained_info_tags RETAINED_INFO_TAGS
-                        Comma-separated string of VCF INFO tags from query VCF that should be kept in PCGR output TSV file
-  --force_overwrite     By default, the script will fail with an error if any output file already exists. You can force the overwrite of existing result files by using this flag, default: False
-  --version             show program's version number and exit
-  --no_reporting        Run functional variant annotation on VCF through VEP/vcfanno, omit other analyses (i.e. Tier assignment/MSI/TMB/Signatures etc. and report generation (STEP 4), default: False
+  --force_overwrite     Force overwrite of existing result files (default: False)
+  --version             Show program's version number and exit
+  --no_reporting        Run VEP/vcfanno annotation only; skip tier assignment, MSI, TMB, signatures,
+                        and report generation (default: False)
   --no_html             Do not generate HTML report (default: False)
   --debug               Print full commands to log
   --pcgrr_conda PCGRR_CONDA
-                        pcgrr conda env name (default: pcgrr)</code></pre>
+                        pcgrr conda environment name (default: pcgrr)</code></pre>
 </div>
 <div class="section level2">
 <h2 id="example-run">Example run<a class="anchor" aria-label="anchor" href="#example-run"></a>
@@ -512,28 +679,29 @@ colorectal tumor sample can be generated by running the following
 command in your terminal window (this assumes you have installed PCGR
 through Conda, and that you have downloaded the necessary reference data
 files, VEP cache, see <a href="installation.html">Installation</a>):</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="ex">$</span> <span class="er">(</span><span class="ex">base</span><span class="kw">)</span> <span class="ex">conda</span> activate pcgr</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="ex">$</span> <span class="er">(</span><span class="ex">pcgr</span><span class="kw">)</span></span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="ex">pcgr</span> <span class="dt">\</span></span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>    <span class="at">--refdata_dir</span> /Users/you/dir2/data <span class="dt">\</span></span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>    <span class="at">--vep_dir</span> /Users/you/dir3/vep/.vep <span class="dt">\</span></span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>    <span class="at">--output_dir</span> /Users/you/dir4/pcgr_outputs <span class="dt">\</span></span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>    <span class="at">--sample_id</span> T001-COAD <span class="dt">\</span></span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>    <span class="at">--genome_assembly</span> grch37 <span class="dt">\</span></span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>    <span class="at">--input_vcf</span> /Users/you/pcgr/examples/T001-COAD.grch37.vcf.gz <span class="dt">\</span></span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>    <span class="at">--tumor_dp_tag</span> TDP <span class="dt">\</span></span>
-<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>    <span class="at">--tumor_af_tag</span> TVAF <span class="dt">\</span></span>
-<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>    <span class="at">--tumor_site</span> 9 <span class="dt">\</span></span>
-<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>    <span class="at">--input_cna</span> /Users/you/pcgr/examples/T001-COAD.cna.tsv <span class="dt">\</span></span>
-<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>    <span class="at">--sex</span> MALE <span class="dt">\</span></span>
-<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>    <span class="at">--tumor_purity</span> 0.9 <span class="dt">\</span></span>
-<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>    <span class="at">--tumor_ploidy</span> 2.0 <span class="dt">\</span></span>
-<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>    <span class="at">--assay</span> WES <span class="dt">\</span></span>
-<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a>    <span class="at">--vcf2maf</span> <span class="dt">\</span></span>
-<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a>    <span class="at">--estimate_signatures</span> <span class="dt">\</span></span>
-<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a>    <span class="at">--estimate_msi</span> <span class="dt">\</span></span>
-<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a>    <span class="at">--estimate_tmb</span> <span class="dt">\</span></span>
-<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a>    <span class="at">--force_overwrite</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="ex">$</span> <span class="er">(</span><span class="ex">base</span><span class="kw">)</span> <span class="ex">conda</span> activate pcgr</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="ex">$</span> <span class="er">(</span><span class="ex">pcgr</span><span class="kw">)</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="ex">pcgr</span> <span class="dt">\</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>    <span class="at">--refdata_dir</span> /Users/you/dir2/data <span class="dt">\</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>    <span class="at">--vep_dir</span> /Users/you/dir3/vep/.vep <span class="dt">\</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>    <span class="at">--output_dir</span> /Users/you/dir4/pcgr_outputs <span class="dt">\</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>    <span class="at">--sample_id</span> T001-COAD <span class="dt">\</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>    <span class="at">--genome_assembly</span> grch37 <span class="dt">\</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>    <span class="at">--input_vcf</span> /Users/you/pcgr/examples/T001-COAD.grch37.vcf.gz <span class="dt">\</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>    <span class="at">--tumor_dp_tag</span> TDP <span class="dt">\</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>    <span class="at">--tumor_af_tag</span> TVAF <span class="dt">\</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>    <span class="at">--tumor_site</span> 9 <span class="dt">\</span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>    <span class="at">--input_cna</span> /Users/you/pcgr/examples/T001-COAD.cna.tsv <span class="dt">\</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>    <span class="at">--input_rna_fusion</span> /Users/you/pcgr/examples/T001-COAD.rna_fusions.tsv <span class="dt">\</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a>    <span class="at">--sex</span> MALE <span class="dt">\</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>    <span class="at">--tumor_purity</span> 0.9 <span class="dt">\</span></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>    <span class="at">--tumor_ploidy</span> 2.0 <span class="dt">\</span></span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>    <span class="at">--assay</span> WES <span class="dt">\</span></span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>    <span class="at">--vcf2maf</span> <span class="dt">\</span></span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a>    <span class="at">--estimate_signatures</span> <span class="dt">\</span></span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a>    <span class="at">--estimate_msi</span> <span class="dt">\</span></span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a>    <span class="at">--estimate_tmb</span> <span class="dt">\</span></span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a>    <span class="at">--force_overwrite</span></span></code></pre></div>
 <p>This command will run the Conda-based PCGR workflow and produce the
 following files in the <em>/Users/you/dir4/pcgr_outputs</em> folder:</p>
 <table class="table">

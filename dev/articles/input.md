@@ -2,28 +2,31 @@
 
 ## Input files
 
-The PCGR workflow accepts three main input files:
+The PCGR workflow accepts the following main input files:
 
 - An unannotated, single-sample [VCF
   file](https://github.com/samtools/hts-specs#variant-calling-data-files)
   (\>= v4.2) with called somatic variants (SNVs/InDels)
 - A file with allele-specific copy number segments (tab-separated
   values - TSV)
+- A file with RNA fusion transcripts detected in the tumor
+  (tab-separated values - TSV)
 - A file with transcript/gene expression levels (tab-separated values -
   TSV)
 
-The input VCF is a required input file, while the somatic copy number
-file and gene expression file are optional. The following arguments to
-the `pcgr` command are used for input files:
+The input VCF is a required input file, while the copy number, RNA
+fusion, and gene expression files are optional. The following arguments
+to the `pcgr` command are used for input files:
 
 - `--input_vcf` (required argument to `pcgr`)
 - `--input_cna`
+- `--input_rna_fusion`
 - `--input_rna_expression`
 
-In addition to these three main input files, the user can also opt to
-provide a [panel-of-normals VCF](#panel-of-normals-pon-vcf) file
-(`--pon_vcf`) for tumor-only variant filtering, as well as an input file
-with [CPSR-classified germline variants (TSV)](#germline-variants)
+In addition to these main input files, the user can also opt to provide
+a [panel-of-normals VCF](#panel-of-normals-pon-vcf) file (`--pon_vcf`)
+for tumor-only variant filtering, as well as an input file with
+[CPSR-classified germline variants (TSV)](#germline-variants)
 (`--input_cpsr`).
 
 ### VCF
@@ -154,6 +157,46 @@ This file corresponds to output file
 `<sample_id>.cpsr.<genome_assembly>.classification.tsv.gz` from the CPSR
 pipeline. Make sure the genome assembly is the same as the one used for
 the somatic variant input files.
+
+### RNA fusions
+
+The user can submit a file with RNA fusion transcripts detected in the
+tumor sample. PCGR will cross-reference detected fusions against curated
+cancer gene databases and known fusion events, and incorporate them into
+the output report.
+
+The tab-separated values file with RNA fusion calls **MUST** contain the
+following four columns:
+
+| Column | Type | Description |
+|----|----|----|
+| `FusionGene` | string | Fusion gene pair, two gene symbols separated by `--` or `::` (e.g. `EML4--ALK` or `TMPRSS2::ERG`) |
+| `LeftBreakpoint` | string | Genomic position of the left/5’ breakpoint, formatted as `chrom:position` (e.g. `2:42522694`) |
+| `RightBreakpoint` | string | Genomic position of the right/3’ breakpoint, formatted as `chrom:position` (e.g. `2:29446394`) |
+| `SplitReads` | integer | Number of split reads supporting the fusion (non-negative integer) |
+
+An optional column `Score` (float) may also be included, representing a
+caller-specific confidence score for the fusion event.
+
+#### Formatting notes
+
+- The chromosome field in breakpoints must be one of `1`–`22`, `X`, `Y`,
+  or `MT` — without a `chr` prefix
+- Each gene symbol in `FusionGene` must be a valid alphanumeric
+  identifier (letters, digits, `.`, `-`, `_` allowed); purely numeric
+  gene names are not accepted
+- Fusions with an empty or missing partner (e.g. intragenic or
+  read-through events) are allowed but will generate a warning during
+  validation
+
+Below shows the first few records of a correctly formatted RNA fusion
+file:
+
+    FusionGene       LeftBreakpoint    RightBreakpoint   SplitReads
+    EML4--ALK        2:42522694        2:29446394        100
+    BCR--ABL1        22:23582899       9:13358994        50
+    EWSR1--FLI1      22:29683136       11:128675244      75
+    TMPRSS2--ERG     21:42836478       21:39737961       60
 
 ### Gene expression
 

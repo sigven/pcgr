@@ -6,7 +6,12 @@ from PCGR pre-reporting pipeline
 ## Usage
 
 ``` r
-load_somatic_snv_indel(fname = NA, ref_data = NULL, settings = NULL)
+load_somatic_snv_indel(
+  fname = NA,
+  ref_data = NULL,
+  settings = NULL,
+  simulate_vaf_dp = TRUE
+)
 ```
 
 ## Arguments
@@ -22,3 +27,9 @@ load_somatic_snv_indel(fname = NA, ref_data = NULL, settings = NULL)
 - settings:
 
   PCGR run/configuration settings
+
+- simulate_vaf:
+
+  Internal/test use only. If TRUE and VAF_TUMOR is entirely missing,
+  replace it with random values drawn from Uniform(0.01, 0.99). Never
+  set this in production runs.

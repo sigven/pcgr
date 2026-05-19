@@ -42,8 +42,16 @@ indicated in parentheses):
 
 - *ONCG_OVS1* - Null variant - predicted as LoF - in bona fide tumor
   suppressor gene (VEP;CGC;CancerMine)
+- *ONCG_OVS1_A* - Null variant - annotated by OncoKB as
+  Loss-of-function - in bona fide tumor suppressor gene (OncoKB)
+- *ONCG_OVS1_B* - Null variant - annotated by OncoKB as Likely
+  Loss-of-function - in bona fide tumor suppressor gene (OncoKB)
 - *ONCG_OS1* - Same amino acid change as previously established
   oncogenic variant - regardless of nucleotide change (ClinVar)
+- *ONCG_OS2_A* - Well established in vitro/in vivo functional studies
+  (OncoKB-curated) show oncogenic effect of variant (OncoKB)
+- *ONCG_OS2_B* - Well established in vitro/in vivo functional studies
+  (OncoKB-curated) show likely oncogenic effect of variant (OncoKB)
 - *ONCG_OS3* - Located in a mutation hotspot with \>= 50 samples with
   variant at AA position, \>= 10 samples with same AA change
   (cancerhotspots.org)
@@ -66,6 +74,10 @@ indicated in parentheses):
 - *ONCG_SBVS1* - Very high MAF (any five major gnomAD subpopulations)
   (gnomAD)
 - *ONCG_SBS1* - High MAF (any five major gnomAD subpopulations) (gnomAD)
+- *ONCG_SBS2_A* - Well established in vitro/in vivo functional studies
+  (OncoKB-curated) show neutral effect of variant (OncoKB)
+- *ONCG_SBS2_B* - Well established in vitro/in vivo functional studies
+  (OncoKB-curated) show likely neutral effect of variant (OncoKB)
 - *ONCG_SBP1* - Multiple lines of computational evidence support a
   benign variant effect on the gene or gene product (dbNSFP)
 - *ONCG_SBP2* - Silent and intronic changes outside of the consensus
@@ -79,28 +91,34 @@ framework along the proposed AMP/ASCO/CAP guidelines, as outlined in [Li
 et al., 2017](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5707196/):
 
 - **Tier I: Variants of strong clinical significance** - constitutes
-  aberrations linked to predictive, prognostic, or diagnostic biomarkers
-  in the [CIViC database](https://civicdb.org) and the [Cancer
-  Biomarkers
-  Database](https://www.cancergenomeinterpreter.org/biomarkers) that are
-  - Found within the same tumor type/class as specified by the user,
-    **AND**
-  - Of strong clinical evidence (i.e. approved therapies, part of
-    guidelines, validated or discovered in late clinical trials ([CIViC
-    evidence levels
+  aberrations linked to therapeutic (drug sensitivity/response)
+  biomarkers in [OncoKB](https://www.oncokb.org/),
+  [CIViC](https://civicdb.org), or the [Cancer Biomarkers
+  Database](https://www.cancergenomeinterpreter.org/biomarkers). These
+  biomarkers are further
+  - reported within the same tumor type/class as the tumor in question
+    (query tumor sample), **AND**
+  - Of strong clinical evidence (i.e. FDA-approved/standard-of-care
+    therapies, part of guidelines, validated or discovered in late
+    clinical trials ([OncoKB evidence levels
+    1/2/3A](https://www.oncokb.org/therapeutic-levels), [CIViC evidence
+    levels
     A/B](https://civic.readthedocs.io/en/latest/model/evidence/level.html)))
 - **Tier II: Variants of potential clinical significance** - constitutes
-  other aberrations linked to predictive, prognostic, or diagnostic
-  biomarkers in the [CIViC database](https://civicdb.org) and the
-  [Cancer Biomarkers
+  other aberrations linked to therapeutic (drug sensitivity/response)
+  biomarkers in [OncoKB](https://www.oncokb.org/),
+  [CIViC](https://civicdb.org), or [Cancer Biomarkers
   Database](https://www.cancergenomeinterpreter.org/biomarkers) that are
   either
   - Of strong clinical evidence in other tumor types/classes than the
-    one specified by the user, **OR**
+    one specified by the user (i.e. ([OncoKB evidence level
+    3B](https://www.oncokb.org/therapeutic-levels)), **OR**
   - Of weak clinical evidence (early trials, case reports etc. ([CIViC
     evidence levels
-    C/D/E](https://civic.readthedocs.io/en/latest/model/evidence/level.html))))
-    in the same tumor type/class as specified by the user
+    C/D/E](https://civic.readthedocs.io/en/latest/model/evidence/level.html)),
+    [OncoKB evidence level
+    4](https://www.oncokb.org/therapeutic-levels)) in the same tumor
+    type/class as specified by the user
 - **Tier III: Variants of uncertain clinical significance (SNVs/InDels
   only)** -
   - Other coding variants, not observed at significant allele

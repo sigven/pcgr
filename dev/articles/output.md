@@ -41,12 +41,20 @@ report:
 3.  **Somatic CNAs**
     - Aberrations are classified with respect to clinical
       *actionability* (AMP/ASCO/CAP guidelines)
-    - individual evidence items linked to actionable variants can be
-      explored, indicating strength of evidence, tumor type and
-      therapeutic context, and clinical significance
-    - Other potentially oncogenic aberrations are listed,
-      pProto-oncogenes subject to copy number amplifications, and tumor
+      - individual evidence items linked to actionable variants can be
+        explored, indicating strength of evidence, tumor type and
+        therapeutic context, and clinical significance
+    - Other potentially oncogenic aberrations are listed:
+      proto-oncogenes subject to copy number amplifications, and tumor
       suppressor genes subject to homozygous deletions
+    - *Two-hit events*: tumor suppressor genes may be subject to
+      biallelic inactivation through a combination of:
+      - Loss of heterozygosity (LOH) — a copy number segment affecting
+        one allele of the gene
+      - A somatic loss-of-function variant (e.g. frameshift, nonsense,
+        splice-site) in the tumor
+      - A germline loss-of-function variant (as classified by CPSR, if
+        provided as input)
 4.  **MSI status**
 
 - Indicates predicted microsatellite stability from the somatic mutation
@@ -70,7 +78,14 @@ report:
   as the underlying framework)
 - Datatable with signatures found and proposed underlying etiologies
 
-7.  **RNA expression analysis**
+7.  **RNA fusions**
+
+- Fusion partners are annotated with respect to oncogene status and
+  overlap in the Mitelman database of chromosomal aberrations in cancer
+- Clinical actionability evidence linked to fusion events is shown where
+  available (AMP/ASCO/CAP guidelines)
+
+8.  **RNA expression analysis**
 
 - Datatable with expression outliers - as compared to distribution in
   reference cohorts
@@ -78,7 +93,7 @@ report:
   other reference cohorts (TCGA, TreeHouse, DepMap)
 - Immune contexture profiling
 
-8.  **Documentation**
+9.  **Documentation**
 
 - Annotation resources - databases with version and licensing
   information
@@ -196,9 +211,9 @@ convention:
 | `GENCODE_TAG` | tag for gencode transcript (basic etc) |
 | `GENCODE_TRANSCRIPT_TYPE` | type of transcript (protein-coding etc.) |
 | `TSG` | Flag indicating whether gene is predicted as a tumor suppressor gene, from Cancer Gene Census, Network of Cancer Genes (NCG) & the CancerMine text-mining resource |
-| `TSG_SUPPORT` | Underlying evidence for gene being a tumor suppressor. Format: `CGC_TIER<1/2>&NCG&CancerMine:num_citations` |
+| `TSG_SUPPORT` | Underlying evidence for gene being a tumor suppressor. Format: `NCG&CancerMine:num_citations` |
 | `ONCOGENE` | Flag indicating whether gene is predicted as an oncogene, from Cancer Gene Census, Network of Cancer Genes (NCG) & the CancerMine text-mining resource. |
-| `ONCOGENE_SUPPORT` | Underlying evidence for gene being an oncogene. Format: `CGC_TIER<1/2>&NCG&CancerMine:num_citations` |
+| `ONCOGENE_SUPPORT` | Underlying evidence for gene being an oncogene. Format: `NCG&CancerMine:num_citations` |
 | `INTOGEN_DRIVER` | Gene is predicted as a cancer driver in the [IntoGen Cancer Drivers Database](https://www.intogen.org/downloads) |
 | `TCGA_DRIVER` | Gene is predicted as a cancer driver in the [TCGA pan-cancer analysis of cancer driver genes and mutations](https://www.ncbi.nlm.nih.gov/pubmed/29625053) |
 | `PROB_EXAC_LOF_INTOLERANT` | `dbNSFP_gene`: the probability of being loss-of-function intolerant (intolerant of both heterozygous and homozygous lof variants) based on ExAC r0.3 data |
@@ -321,73 +336,75 @@ the user (`--retained_info_tags`) will be appended at the end):
 |----|----|
 | 1\. `SAMPLE_ID` | Sample identifier |
 | 2\. `GENOMIC_CHANGE` | Identifier for variant at the genome (VCF) level, e.g. `1:g.152382569A>G`. Format: `<chrom>:g.<position><ref_allele><alt_allele>` |
-| 3\. `GENOME_VERSION` | Assembly version, e.g. GRCh37 |
+| 3\. `GENOME_VERSION` | Assembly version, e.g. GRCh38 |
 | 4\. `VARIANT_CLASS` | Variant type, e.g. SNV/insertion/deletion/indel |
 | 5\. `SYMBOL` | Gene symbol |
 | 6\. `ENTREZGENE` | Entrez gene identifier |
 | 7\. `ENSEMBL_GENE_ID` | Ensembl gene identifier |
 | 8\. `GENENAME` | Gene name |
 | 9\. `ALTERATION` | Combined HGVSp/HGVSc annotation |
-| 10\. `PROTEIN_CHANGE` | Protein change |
-| 11\. `CONSEQUENCE` | Variant consequence - from VEP |
-| 12\. `PFAM_DOMAIN_NAME` | Pfam domain name |
-| 13\. `LOSS_OF_FUNCTION` | Loss of function flag |
-| 14\. `LOF_FILTER` | Loss of function filter |
-| 15\. `CDS_CHANGE` | Coding sequence change |
-| 16\. `CODING_STATUS` | Coding status - flag indicating if consequence is protein-altering/affecting splice sites |
-| 17\. `EXONIC_STATUS` | Exonic status - flag indicating if consequence is silent/protein-altering/affecting splice sites |
-| 18\. `DP_TUMOR` | Depth of coverage at variant position in tumor sample |
-| 19\. `VAF_TUMOR` | Variant allele fraction at variant position in tumor sample |
-| 20\. `AD_TUMOR` | Allelic depth (number of reads supporting alt allele) in tumor sample |
-| 21\. `DP_CONTROL` | Depth of coverage at variant position in control sample |
-| 22\. `VAF_CONTROL` | Variant allele fraction at variant position in control sample |
-| 23\. `AD_CONTROL` | Allelic depth (number of reads supporting alt allele) in control sample |
-| 24\. `MUTATION_HOTSPOT` | Mutation hotspot annotation |
-| 25\. `MUTATION_HOTSPOT_CANCERTYPE` | Mutation hotspot-associated cancer types (from cancerhotspots.org) |
-| 26\. `ACTIONABILITY_TIER` | Variant clinical actionability tier - AMP/ASCO/CAP implementation |
-| 27\. `ACTIONABILITY` | Variant clinical actionability significance - AMP/ASCO/CAP implementation |
-| 28\. `ACTIONABILITY_FRAMEWORK` | Variant clinical actionability framework - AMP/ASCO/CAP implementation |
-| 29\. `ONCOGENICITY` | Oncogenicity annotation - ClinGen/CGC/VICC SOP implementation |
-| 30\. `ONCOGENICITY_CODE` | Variant-matching oncogenicity code(s) - ClinGen/CGC/VICC SOP implementation |
-| 31\. `ONCOGENICITY_SCORE` | Variant oncogenicity score - ClinGen/CGC/VICC SOP implementation |
-| 32\. `HGVSc` | HGVS coding sequence name |
-| 33\. `HGVSc_RefSeq` | HGVS coding sequence name (RefSeq) |
-| 34\. `HGVSp` | HGVS protein sequence name |
-| 35\. `CANONICAL` | Flag indicating if transcript is canonical |
-| 36\. `CCDS` | CCDS identifier |
-| 37\. `UNIPROT_ACC` | UniProt accession |
-| 38\. `ENSEMBL_TRANSCRIPT_ID` | Ensembl transcript identifier |
-| 39\. `ENSEMBL_PROTEIN_ID` | Ensembl protein identifier |
-| 40\. `REFSEQ_TRANSCRIPT_ID` | RefSeq transcript identifier |
-| 41\. `REFSEQ_PROTEIN_ID` | RefSeq protein identifier |
-| 42\. `MANE_SELECT` | MANE transcript select |
-| 43\. `MANE_PLUS_CLINICAL` | MANE transcript plus clinical |
-| 44\. `CGC_TIER` | Cancer Gene Census tier |
-| 45\. `CGC_GERMLINE` | Cancer Gene Census germline annotation |
-| 46\. `CGC_SOMATIC` | Cancer Gene Census somatic annotation |
-| 47\. `ONCOGENE` | Flag indicating if gene is oncogene (CGC/CancerMine/NCG) |
-| 48\. `ONCOGENE_SUPPORT` | Oncogene annotation support (CGC/CancerMine/NCG) |
-| 49\. `TUMOR_SUPPRESSOR` | Flag indicating if gene is tumor suppressor (CGC/CancerMine/NCG) |
-| 50\. `TUMOR_SUPPRESSOR_SUPPORT` | Tumor suppressor annotation support (CGC/CancerMine/NCG) |
-| 51\. `TARGETED_INHIBITORS2` | Targeted inhibitors |
-| 52\. `EFFECT_PREDICTIONS` | Variant effect predictions - from dbNSFP |
-| 53\. `SPLICE_EFFECT` | Splice effect annotations from MutSpliceDB and MaxEntScan (see details above) |
-| 54\. `REGULATORY_ANNOTATION` | Regulatory annotation |
-| 55\. `VEP_ALL_CSQ` | VEP consequence - all transcripts |
-| 56\. `gnomADe_AF` | gnomAD exomes allele frequency - globally |
-| 57\. `gnomADg_AF` | gnomAD genomes allele frequency - globally |
-| 58\. `DBSNP_RSID` | dbSNP identifier |
-| 59\. `COSMIC_ID` | COSMIC identifier |
-| 60\. `TCGA_FREQUENCY` | Frequency of variant across TCGA tumor types. Format: `tumortype | percent affected | affected cases | total cases` |
-| 61\. `TCGA_PANCANCER_COUNT` | Raw variant count across all TCGA tumor types |
-| 62\. `CLINVAR_MSID` | ClinVar measureset identifier |
-| 63\. `CLINVAR_CLASSIFICATION` | ClinVar variant classification |
-| 64\. `CLINVAR_VARIANT_ORIGIN` | ClinVar variant origin |
-| 65\. `CLINVAR_NUM_SUBMITTERS` | ClinVar number of submitters |
-| 66\. `CLINVAR_REVIEW_STATUS_STARS` | ClinVar number of review status stars |
-| 67\. `CLINVAR_CONFLICTED` | ClinVar variant classification is conflicted |
-| 68\. `BIOMARKER_MATCH` | Biomarker match |
-| 69\. `CALL_CONFIDENCE` | Call confidence |
+| 10\. `CDS_CHANGE` | Coding sequence change |
+| 11\. `HGVSc` | HGVS coding sequence name |
+| 12\. `HGVSc_RefSeq` | HGVS coding sequence name (RefSeq/MANE select) |
+| 13\. `HGVSp` | HGVS protein sequence name |
+| 14\. `HGVSP` | Protein change in one-letter amino-acid HGVS notation (HGVSp_short) |
+| 15\. `SPLICE_EFFECT` | Splice effect annotations from MutSpliceDB and MaxEntScan (see details above) |
+| 16\. `MAXENTSCAN` | MaxEntScan splice site impact summary. Format: `MaxEntScan|<stratum>|<evidence_tier>` |
+| 17\. `EFFECT_PREDICTIONS` | Variant effect predictions - from dbNSFP |
+| 18\. `EXON` | Exon number (out of total number of exons) |
+| 19\. `CONSEQUENCE` | Variant consequence - from VEP |
+| 20\. `PFAM_DOMAIN_NAME` | Pfam domain name |
+| 21\. `LOSS_OF_FUNCTION` | Loss of function flag |
+| 22\. `LOF_FILTER` | Loss of function filter |
+| 23\. `CODING_STATUS` | Coding status - flag indicating if consequence is protein-altering/affecting splice sites |
+| 24\. `EXONIC_STATUS` | Exonic status - flag indicating if consequence is silent/protein-altering/affecting splice sites |
+| 25\. `DP_TUMOR` | Depth of coverage at variant position in tumor sample |
+| 26\. `VAF_TUMOR` | Variant allele fraction at variant position in tumor sample |
+| 27\. `AD_TUMOR` | Allelic depth (number of reads supporting alt allele) in tumor sample |
+| 28\. `CALL_CONFIDENCE` | Call confidence |
+| 29\. `DP_CONTROL` | Depth of coverage at variant position in control sample |
+| 30\. `VAF_CONTROL` | Variant allele fraction at variant position in control sample |
+| 31\. `AD_CONTROL` | Allelic depth (number of reads supporting alt allele) in control sample |
+| 32\. `MUTATION_HOTSPOT` | Mutation hotspot annotation |
+| 33\. `MUTATION_HOTSPOT_CANCERTYPE` | Mutation hotspot-associated cancer types (from cancerhotspots.org) |
+| 34\. `ACTIONABILITY_TIER` | Variant clinical actionability tier - AMP/ASCO/CAP implementation |
+| 35\. `ACTIONABILITY` | Variant clinical actionability significance - AMP/ASCO/CAP implementation |
+| 36\. `ONCOGENICITY` | Oncogenicity annotation - ClinGen/CGC/VICC SOP implementation |
+| 37\. `ONCOGENICITY_CODE` | Variant-matching oncogenicity code(s) - ClinGen/CGC/VICC SOP implementation |
+| 38\. `ONCOGENICITY_SCORE` | Variant oncogenicity score - ClinGen/CGC/VICC SOP implementation |
+| 39\. `MUTATION_EFFECT_OKB` | OncoKB mutation effect annotation (e.g. Loss-of-function, Gain-of-function) |
+| 40\. `MUTATION_EFFECT_DESCRIPTION_OKB` | OncoKB mutation effect description |
+| 41\. `ONCOGENICITY_OKB` | OncoKB oncogenicity annotation (e.g. Oncogenic, Likely Oncogenic, Likely Neutral etc.) |
+| 42\. `VARIANT_SUMMARY_OKB` | OncoKB variant summary |
+| 43\. `TUMOR_TYPE_SUMMARY_OKB` | OncoKB tumor type summary |
+| 44\. `CANONICAL` | Flag indicating if transcript is canonical |
+| 45\. `CCDS` | CCDS identifier |
+| 46\. `UNIPROT_ACC` | UniProt accession |
+| 47\. `ENSEMBL_TRANSCRIPT_ID` | Ensembl transcript identifier |
+| 48\. `ENSEMBL_PROTEIN_ID` | Ensembl protein identifier |
+| 49\. `REFSEQ_TRANSCRIPT_ID` | RefSeq transcript identifier |
+| 50\. `REFSEQ_PROTEIN_ID` | RefSeq protein identifier |
+| 51\. `MANE_SELECT` | MANE transcript select |
+| 52\. `MANE_PLUS_CLINICAL` | MANE transcript plus clinical |
+| 53\. `ONCOGENE` | Flag indicating if gene is oncogene (CancerMine/NCG) |
+| 54\. `ONCOGENE_SUPPORT` | Oncogene annotation support (CancerMine/NCG) |
+| 55\. `TUMOR_SUPPRESSOR` | Flag indicating if gene is tumor suppressor (CancerMine/NCG) |
+| 56\. `TUMOR_SUPPRESSOR_SUPPORT` | Tumor suppressor annotation support (CancerMine/NCG) |
+| 57\. `TARGETED_INHIBITORS2` | Targeted inhibitors |
+| 58\. `REGULATORY_ANNOTATION` | Regulatory annotation |
+| 59\. `VEP_ALL_CSQ` | VEP consequence - all transcripts |
+| 60\. `gnomADe_AF` | gnomAD exomes allele frequency - globally |
+| 61\. `gnomADg_AF` | gnomAD genomes allele frequency - globally |
+| 62\. `DBSNP_RSID` | dbSNP identifier |
+| 63\. `COSMIC_ID` | COSMIC identifier |
+| 64\. `TCGA_FREQUENCY` | Frequency of variant across TCGA tumor types. Format: `tumortype | percent affected | affected cases | total cases` |
+| 65\. `TCGA_PANCANCER_COUNT` | Raw variant count across all TCGA tumor types |
+| 66\. `CLINVAR_MSID` | ClinVar measureset identifier |
+| 67\. `CLINVAR_CLASSIFICATION` | ClinVar variant classification |
+| 68\. `CLINVAR_VARIANT_ORIGIN` | ClinVar variant origin |
+| 69\. `CLINVAR_NUM_SUBMITTERS` | ClinVar number of submitters |
+| 70\. `CLINVAR_GOLD_STARS` | ClinVar review status gold stars (0-4) |
+| 71\. `CLINVAR_CONFLICTED` | ClinVar variant classification is conflicted |
 
 ##### Tumor-only runs
 
@@ -398,14 +415,22 @@ convention:
 
 - `<sample_id>.pcgr.<genome_assembly>.snv_indel_unfiltered.ann.tsv.gz`
 
-In this TSV file, an additional column `SOMATIC_CLASSIFICATION`
-indicates for each variant if it is classified as somatic or germline.
-Specifically, the value of `SOMATIC_CLASSIFICATION` can be either
-*SOMATIC* (not catched by any filter), or containing one or more of the
-following tags pending on which sources that classified the variant as
-likely germline (and whether these filters were activated by the user):
-*GERMLINE_GNOMAD* (always turned on), *GERMLINE_CLINVAR*,
-*GERMLINE_DBSNP*, *GERMLINE_HET*, *GERMLINE_HOM*, *GERMLINE_PON*
+This file shares most columns with the standard/filtered TSV above, with
+the following differences:
+
+- **Added** `SOMATIC_CLASSIFICATION` (column 5, after `VARIANT_CLASS`):
+  indicates whether a variant is classified as somatic or germline.
+  Value is *SOMATIC* (not caught by any filter), or one or more of the
+  following germline tags: *GERMLINE_GNOMAD* (always on),
+  *GERMLINE_CLINVAR*, *GERMLINE_DBSNP*, *GERMLINE_HET*, *GERMLINE_HOM*,
+  *GERMLINE_PON*.
+- **Added** per-population gnomAD columns: `gnomADg_AFR_AF`,
+  `gnomADg_AMR_AF`, `gnomADg_ASJ_AF`, `gnomADg_EAS_AF`,
+  `gnomADg_FIN_AF`, `gnomADg_NFE_AF`, `gnomADg_OTH_AF`, `gnomADg_SAS_AF`
+  (genome set) and `gnomADe_AFR_AF`, `gnomADe_AMR_AF`, `gnomADe_EAS_AF`,
+  `gnomADe_FIN_AF`, `gnomADe_NFE_AF`, `gnomADe_SAS_AF` (exome set).
+- **Omitted** compared to the filtered TSV: `DP_CONTROL`, `VAF_CONTROL`,
+  `AD_CONTROL` (not applicable in tumor-only runs)
 
 ### Tumor mutational burden (TSV)
 
@@ -419,16 +444,16 @@ The format of the TSV file is the following:
 
 | Variable | Description |
 |----|----|
-| 1\. `sample_id` | sample identifier |
-| 2\. `n_somatic_variants` | number of somatic variants in total for sample |
-| 3\. `tmb_measure` | TMB measure - type of variants included |
-| 4\. `tmb_csq_regex` | VEP consequence regex for variants included in TMB calculation |
-| 5\. `tmb_target_size_mb` | target size in megabases |
-| 6\. `tmb_dp_min` | minimum depth of coverage for variant to be included in TMB calculation |
-| 7\. `tmb_af_min` | minimum allele frequency for variant to be included in TMB calculation |
-| 8\. `tmb_n_variants` | number of variants included in TMB calculation |
-| 9\. `tmb_estimate` | TMB estimate |
-| 10\. `tmb_unit` | TMB unit (i.e. mutations/Mb) |
+| 1\. `SAMPLE_ID` | sample identifier |
+| 2\. `N_SOMATIC_VARIANTS` | number of somatic variants in total for sample |
+| 3\. `TMB_MEASURE` | TMB measure - type of variants included |
+| 4\. `TMB_CSQ_REGEX` | VEP consequence regex for variants included in TMB calculation |
+| 5\. `TMB_TARGET_SIZE_MB` | target size in megabases |
+| 6\. `TMB_DP_MIN` | minimum depth of coverage for variant to be included in TMB calculation |
+| 7\. `TMB_AF_MIN` | minimum allele frequency for variant to be included in TMB calculation |
+| 8\. `TMB_N_VARIANTS` | number of variants included in TMB calculation |
+| 9\. `TMB_ESTIMATE` | TMB estimate |
+| 10\. `TMB_UNIT` | TMB unit (i.e. mutations/Mb) |
 
 ### Mutational signature contributions (TSV)
 
@@ -442,20 +467,20 @@ The format of the TSV file is the following:
 
 | Variable | Description |
 |----|----|
-| 1\. `sample_id` | sample identifier |
-| 2\. `signature_id` | identifier for signature |
-| 3\. `n_bs_iterations` | number of bootstrap iterations |
-| 4\. `prop_signature` | relative contribution of mutational signature |
-| 5\. `prop_signature_ci_lower` | lower bound of confidence interval for relative contribution of mutational signature |
-| 6\. `prop_signature_ci_upper` | upper bound of confidence interval for relative contribution of mutational signature |
-| 7\. `aetiology` | underlying atiology of mutational signature |
-| 8\. `comments` | additional comments regarding aetiology |
-| 9\. `group` | keyword for signature aetiology |
-| 10\. `all_reference_signatures` | logical indicating if all reference signatures were used for reconstruction/inference |
-| 11\. `tumor_type` | tumor type (used for retrieval of reference signatures) |
-| 12\. `reference_collection` | collection used for reference signatures |
-| 13\. `reference_signatures` | signatures present in reference collection |
-| 14\. `fitting_accuracy` | accuracy of mutational signature fitting |
+| 1\. `SAMPLE_ID` | sample identifier |
+| 2\. `SIGNATURE_ID` | identifier for signature |
+| 3\. `N_BS_ITERATIONS` | number of bootstrap iterations |
+| 4\. `PROP_SIGNATURE` | relative contribution of mutational signature |
+| 5\. `PROP_SIGNATURE_CI_LOWER` | lower bound of confidence interval for relative contribution of mutational signature |
+| 6\. `PROP_SIGNATURE_CI_UPPER` | upper bound of confidence interval for relative contribution of mutational signature |
+| 7\. `AETIOLOGY` | underlying aetiology of mutational signature |
+| 8\. `COMMENTS` | additional comments regarding aetiology |
+| 9\. `GROUP` | keyword for signature aetiology |
+| 10\. `ALL_REFERENCE_SIGNATURES` | logical indicating if all reference signatures were used for reconstruction/inference |
+| 11\. `TUMOR_TYPE` | tumor type (used for retrieval of reference signatures) |
+| 12\. `REFERENCE_COLLECTION` | collection used for reference signatures |
+| 13\. `REFERENCE_SIGNATURES` | signatures present in reference collection |
+| 14\. `FITTING_ACCURACY` | accuracy of mutational signature fitting |
 
 ### Copy number aberrations
 
@@ -482,26 +507,39 @@ The format of the compressed `cna_gene_ann.tsv.gz` is the following:
 |----|----|
 | 1\. `SAMPLE_ID` | Sample identifier |
 | 2\. `VAR_ID` | Variant identifier. Format: `<chromosome>:<segment_start>-<segment_end>:<major_cn>:<minor_cn>` |
-| 3\. `CN_MAJOR` | Major copy number |
-| 4\. `CN_MINOR` | Minor copy number |
-| 5\. `SEGMENT_LENGTH_MB` | Length of segment in Mb |
-| 6\. `CYTOBAND` | Associated cytoband |
-| 7\. `EVENT_TYPE` | Focal or broad (covering more than 25% of chromosome arm) |
-| 8\. `VARIANT_CLASS` | *gain*: total copy number \>= user-defined threshold; *homdel* - total copy number equal to zero; *hetdel* - total copy number equal to one; *undefined* other copy number states |
-| 9\. `SYMBOL` | Gene symbol |
-| 10\. `ENTREZGENE` | Entrez gene identifier |
-| 11\. `GENENAME` | Gene name |
-| 12\. `ENSEMBL_GENE_ID` | Ensembl gene identifier |
-| 13\. `TUMOR_SUPPRESSOR` | Flag indicating if gene is tumor suppressor (CGC/CancerMine/NCG) |
-| 14\. `TUMOR_SUPPRESSOR_SUPPORT` | Tumor suppressor annotation support (CGC/CancerMine/NCG) |
-| 15\. `ONCOGENE` | Flag indicating if gene is oncogene (CGC/CancerMine/NCG) |
-| 16\. `ONCOGENE_SUPPORT` | Oncogene annotation support (CGC/CancerMine/NCG) |
-| 17\. `TRANSCRIPT_OVERLAP` | Comma-separated list of associated transcripts, including percentage of transcript overlap |
-| 18\. `ACTIONABILITY_TIER` | Variant actionability tier - AMP/ASCO/CAP |
-| 19\. `ACTIONABILITY` | Variant clinical actionability significance - AMP/ASCO/CAP |
-| 20\. `ACTIONABILITY_FRAMEWORK` | Variant clinical actionability framework - AMP/ASCO/CAP |
-| 21\. `BIOMARKER_MATCH` | Biomarker match |
-| 22\. `TARGETED_INHIBITORS_ALL2` | Molecularly targeted inhibitors - indicated for any tumor type |
+| 3\. `GENOME_VERSION` | Assembly version, e.g. GRCh38 |
+| 4\. `CN_MAJOR` | Major copy number |
+| 5\. `CN_MINOR` | Minor copy number |
+| 6\. `LOH` | Loss of heterozygosity flag |
+| 7\. `TWOHIT_CANDIDATE_SOMATIC` | Two-hit candidate: somatic loss-of-function variant overlapping segment |
+| 8\. `TWOHIT_CANDIDATE_GERMLINE` | Two-hit candidate: germline loss-of-function variant overlapping segment (requires CPSR input) |
+| 9\. `FOLD_CHANGE` | Fold change of segment copy number relative to tumor ploidy |
+| 10\. `TUMOR_PLOIDY` | Tumor ploidy estimate |
+| 11\. `TUMOR_PLOIDY_SOURCE` | Source of tumor ploidy estimate |
+| 12\. `TUMOR_PURITY` | Tumor purity estimate |
+| 13\. `SEGMENT_LENGTH_MB` | Length of segment in Mb |
+| 14\. `CYTOBAND` | Associated cytoband |
+| 15\. `EVENT_TYPE` | Focal or broad (covering more than 25% of chromosome arm) |
+| 16\. `VARIANT_CLASS` | *amplification*: total copy number \>= user-defined threshold; *homdel*: total copy number equal to zero; *hetdel*: total copy number equal to one; *gain*: copy number gain below amplification threshold; *undefined*: other copy number states |
+| 17\. `VARIANT_CLASS_DISPLAY` | Display label for variant class |
+| 18\. `SYMBOL` | Gene symbol |
+| 19\. `ENTREZGENE` | Entrez gene identifier |
+| 20\. `GENENAME` | Gene name |
+| 21\. `ENSEMBL_GENE_ID` | Ensembl gene identifier |
+| 22\. `TUMOR_SUPPRESSOR` | Flag indicating if gene is tumor suppressor (CancerMine/NCG) |
+| 23\. `TUMOR_SUPPRESSOR_SUPPORT` | Tumor suppressor annotation support (CancerMine/NCG) |
+| 24\. `ONCOGENE` | Flag indicating if gene is oncogene (CancerMine/NCG) |
+| 25\. `ONCOGENE_SUPPORT` | Oncogene annotation support (CancerMine/NCG) |
+| 26\. `MUTATION_EFFECT_OKB` | OncoKB mutation effect annotation (e.g. Loss-of-function, Gain-of-function) |
+| 27\. `ONCOGENICITY_OKB` | OncoKB oncogenicity annotation (e.g. Oncogenic, Likely Oncogenic) |
+| 28\. `VARIANT_SUMMARY_OKB` | OncoKB variant summary |
+| 29\. `TUMOR_TYPE_SUMMARY_OKB` | OncoKB tumor type summary |
+| 30\. `TRANSCRIPT_OVERLAP` | Comma-separated list of associated transcripts, including percentage of transcript overlap |
+| 31\. `TRANSCRIPT_OVERLAP_PERCENT` | Percentage overlap between copy number segment and transcript |
+| 32\. `ACTIONABILITY_TIER` | Variant actionability tier - AMP/ASCO/CAP |
+| 33\. `ACTIONABILITY` | Variant clinical actionability significance - AMP/ASCO/CAP |
+| 34\. `BIOMARKER_MATCH` | Biomarker match |
+| 35\. `TARGETED_INHIBITORS_ALL2` | Molecularly targeted inhibitors - indicated for any tumor type |
 
 ### Gene expression data
 

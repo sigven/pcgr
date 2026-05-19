@@ -32,7 +32,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9012</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9014</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -84,16 +84,156 @@
     
     
 <div class="section level2">
-<h2 id="v2-2-6">v2.2.6<a class="anchor" aria-label="anchor" href="#v2-2-6"></a>
+<h2 id="v2-3-0">v2.3.0<a class="anchor" aria-label="anchor" href="#v2-3-0"></a>
 </h2>
 <ul>
-<li><p>Date: <strong>2026-04-16</strong></p></li>
+<li>Date: <strong>2026-05-19</strong>
+</li>
+<li>Major data updates
+<ul>
+<li>ClinVar (2026-05)</li>
+<li>dbNSFP (v5.3, October 2025)</li>
+<li>Cancer Hotspots (v3, 2026)</li>
+<li>TCGA (release 45.0, December 2025)</li>
+<li>CIViC (2026-03-23)</li>
+<li>GENCODE v49 (VEP v115)</li>
+</ul>
+</li>
+</ul>
+<div class="section level3">
+<h3 id="added">Added<a class="anchor" aria-label="anchor" href="#added"></a>
+</h3>
+<ul>
 <li>
-<p>major refactor of GitHub Actions workflow
+<strong>OncoKB clinical evidence integration</strong>
+<ul>
+<li>Real-time retrieval of therapeutic, diagnostic, and prognostic
+evidence from the <a href="https://www.oncokb.org" class="external-link">OncoKB MAF annotator
++ web API</a> for somatic variants - requires a valid API token (see new
+CLI argument <code>--oncokb_api_token</code>)</li>
+<li>Evidence is retrieved for SNV/InDels (via HGVSp protein change and
+HGVSg genomic change), gene fusions, and copy number alterations</li>
+<li>Tumor type context is passed to OncoKB via OncoTree codes, enabling
+tumor-specific evidence retrieval for both exact and any-tumor-type
+matches</li>
+<li>OncoKB annotation includes mutation effect (e.g. Gain-of-function),
+oncogenicity (e.g. Oncogenic, Likely Oncogenic), and clinical evidence
+items (treatment sensitivity/resistance, diagnostic and prognostic
+implications)</li>
+<li>New CLI arguments:
+<ul>
+<li>
+<code>--oncokb_api_token</code> — a valid <a href="https://www.oncokb.org/account/settings" class="external-link">OncoKB API token</a> is
+required to enable this feature</li>
+<li>
+<code>--oncokb_oncotree_code</code> — override the tumor-type
+OncoTree code used for OncoKB queries (default: derived from
+<code>--tumor_site</code>); useful when the desired OncoTree code is
+more specific than the site-level mapping</li>
+<li>
+<code>--oncokb_exclusive</code> — restrict biomarker reporting to
+OncoKB only, skipping CIViC and CGI sources; intended for workflows
+where a single curated source is preferred</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<strong>Copy number classification — flexible thresholding
+modes</strong>
+<ul>
+<li>New CLI argument <code>--cna_threshold_mode</code> controls how
+amplification, gain, and heterozygous deletion tiers are called; three
+modes are supported:
+<ul>
+<li>
+<code>absolute</code> <em>(default)</em>: thresholds are applied to
+the total copy number directly</li>
+<li>
+<code>relative</code>: thresholds are expressed as fold-change over
+tumor ploidy</li>
+<li>
+<code>combined</code>: both absolute and relative thresholds must be
+satisfied</li>
+</ul>
+</li>
+<li>Per-tier, per-mode thresholds are individually configurable:
+<ul>
+<li>Amplification: <code>--cna_amp_threshold_absolute</code> (default:
+5), <code>--cna_amp_threshold_relative</code> (default: 2.5×)</li>
+<li>Gain: <code>--cna_gain_threshold_absolute</code> (default: 3),
+<code>--cna_gain_threshold_relative</code> (default: 1.5×)</li>
+<li>Heterozygous deletion: <code>--cna_del_threshold_absolute</code>
+(default: 1), <code>--cna_del_threshold_relative</code> (default:
+0.5×)</li>
+</ul>
+</li>
+<li>Allele-specific copy numbers (major + minor) are used for correct
+handling of loss of heterozygosity (LOH) and sex-chromosome dosage</li>
+<li>If tumor ploidy is not provided by the user, PCGR estimates it from
+the allele-specific copy number distribution as a fallback (used by
+<code>relative</code> and <code>combined</code> modes)</li>
+<li>Two-hit candidate annotation: segments overlapping a known tumor
+suppressor gene are flagged when both a somatic loss-of-function
+SNV/InDel <em>and</em> a CNA deletion event are present (requiring CPSR
+input for germline hit detection)</li>
+</ul>
+</li>
+<li>
+<strong>RNA gene fusion input</strong>
+<ul>
+<li>New CLI argument <code>--input_rna_fusion</code> accepts a TSV file
+with RNA fusion calls (e.g. from STAR-Fusion, Arriba, or similar
+callers)</li>
+<li>Fusions are displayed in a dedicated section of the HTML report,
+annotated with gene-level oncogenicity and actionability</li>
+<li>If an OncoKB API token is provided, fusions are queried against the
+OncoKB API for clinical evidence (therapeutic, diagnostic, prognostic)
+and mutation effect</li>
+</ul>
+</li>
+<li>
+<strong>Reactable-based interactive tables throughout HTML
+report</strong>
+<ul>
+<li>All interactive variant and biomarker evidence tables now use <a href="https://glin.github.io/reactable/" class="external-link">reactable</a> in place of the
+previous DT/DataTables implementation</li>
+<li>Tables support column-level filtering, global search, and compact
+nested detail rows (expandable per-variant evidence panels) — providing
+a more responsive and feature-rich browsing experience</li>
+<li>A hidden <code>SEARCH_INDEX</code> column concatenates key fields
+(gene, alteration, consequence, oncogenicity) to enable full-text search
+across the most clinically relevant columns</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="changed">Changed<a class="anchor" aria-label="anchor" href="#changed"></a>
+</h3>
+<ul>
+<li>Loss-of-function annotation from MaxEntScan is now stratum-aware:
+canonical splice site positions (±2 bp of exon–intron boundary) always
+set <code>LOSS_OF_FUNCTION = TRUE</code>; for non-canonical positions,
+only variants with a <em>Strong</em> MaxEntScan evidence tier (donor
+positions +3 to +6; acceptor positions -3 to -20) additionally set
+<code>LOSS_OF_FUNCTION = TRUE</code> — <em>Moderate</em> and
+<em>Supporting</em> tiers at these positions are informational only</li>
+<li>Tumor-only germline filtering now uses a unified per-variant gnomAD
+allele frequency flag (<code>gnomAD_AF_ABOVE_TOLERATED</code>) that
+considers all available population frequencies from both exome and
+genome gnomAD datasets, preferring exome values when available</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="infrastructure">Infrastructure<a class="anchor" aria-label="anchor" href="#infrastructure"></a>
+</h3>
+<ul>
+<li>Major refactor of GitHub Actions workflow
 (<a href="https://github.com/sigven/pcgr/pull/291" class="external-link">pr291</a>,
 <a href="https://github.com/sigven/pcgr/issues/247" class="external-link">issue247</a>,
 <a href="https://github.com/sigven/pcgr/issues/248" class="external-link">issue248</a>,
-<a href="https://github.com/sigven/pcgr/issues/262" class="external-link">issue262</a>)</p>
+<a href="https://github.com/sigven/pcgr/issues/262" class="external-link">issue262</a>)
 <ul>
 <li>moving to gitflow development mode, with <code>main</code> branch
 for stable releases, and <code>dev</code> branch for development</li>
@@ -111,8 +251,17 @@ available at <a href="https://sigven.github.io/pcgrr/dev/" class="uri">https://s
 stable versions were available on the website)</li>
 </ul>
 </li>
-<li><p><a href="https://github.com/sigven/pcgr/compare/v2.2.5...v2.2.6" class="external-link">Diff between v2.2.6 and v2.2.5</a></p></li>
+<li>Add oncokb-annotator conda dependency (<a href="https://github.com/oncokb/oncokb-annotator" class="external-link uri">https://github.com/oncokb/oncokb-annotator</a>) - <a href="https://anaconda.org/channels/pcgr/packages/oncokb-annotator/files" class="external-link uri">https://anaconda.org/channels/pcgr/packages/oncokb-annotator/files</a>
+</li>
+<li>Updated vcf2maf to 1.6.22 (see <a href="https://github.com/mskcc/vcf2maf/releases/tag/v1.6.22" class="external-link uri">https://github.com/mskcc/vcf2maf/releases/tag/v1.6.22</a>
+for bug fixes)
+<ul>
+<li>also switching to official vcf2maf, not umccr fork</li>
 </ul>
+</li>
+<li><a href="https://github.com/sigven/pcgr/compare/v2.2.5...v2.3.0" class="external-link">Diff between v2.3.0 and v2.2.5</a></li>
+</ul>
+</div>
 </div>
 <div class="section level2">
 <h2 id="v2-2-5">v2.2.5<a class="anchor" aria-label="anchor" href="#v2-2-5"></a>
@@ -807,7 +956,7 @@ KEGG, ChEMBL, Open Targets Platform, Disease Ontology, Experimental
 Factor Ontology</p></li>
 </ul>
 <div class="section level5">
-<h5 id="added">Added<a class="anchor" aria-label="anchor" href="#added"></a>
+<h5 id="added-1">Added<a class="anchor" aria-label="anchor" href="#added-1"></a>
 </h5>
 <ul>
 <li>Command-line options
@@ -828,7 +977,7 @@ refitting procedure for a given tumor type</li>
 </ul>
 </div>
 <div class="section level5">
-<h5 id="changed">Changed<a class="anchor" aria-label="anchor" href="#changed"></a>
+<h5 id="changed-1">Changed<a class="anchor" aria-label="anchor" href="#changed-1"></a>
 </h5>
 <ul>
 <li>Complete restructure of Python and R components.Installation now
@@ -862,7 +1011,7 @@ GENCODE</p></li>
 ++</p></li>
 </ul>
 <div class="section level5">
-<h5 id="changed-1">Changed<a class="anchor" aria-label="anchor" href="#changed-1"></a>
+<h5 id="changed-2">Changed<a class="anchor" aria-label="anchor" href="#changed-2"></a>
 </h5>
 <ul>
 <li>TOML-based configuration for PCGR is abandoned, all options to PCGR
@@ -880,7 +1029,7 @@ include <code>--exclude_dbsnp_nonsomatic</code> and
 </ul>
 </div>
 <div class="section level5">
-<h5 id="added-1">Added<a class="anchor" aria-label="anchor" href="#added-1"></a>
+<h5 id="added-2">Added<a class="anchor" aria-label="anchor" href="#added-2"></a>
 </h5>
 <ul>
 <li>Command-line options
@@ -1008,7 +1157,7 @@ rmarkdown (issue <a href="https://github.com/sigven/pcgr/issues/122" class="exte
 </li>
 </ul>
 <div class="section level5">
-<h5 id="added-2">Added<a class="anchor" aria-label="anchor" href="#added-2"></a>
+<h5 id="added-3">Added<a class="anchor" aria-label="anchor" href="#added-3"></a>
 </h5>
 <ul>
 <li>added possibility to configure algorithm for TMB calculation,
@@ -1022,7 +1171,7 @@ pinning of all package dependencies</li>
 </ul>
 </div>
 <div class="section level5">
-<h5 id="changed-2">Changed<a class="anchor" aria-label="anchor" href="#changed-2"></a>
+<h5 id="changed-3">Changed<a class="anchor" aria-label="anchor" href="#changed-3"></a>
 </h5>
 <ul>
 <li>Removed DisGeNET annotations from output (associations from Open
@@ -1063,7 +1212,7 @@ variants, issue <a href="https://github.com/sigven/pcgr/issues/96" class="extern
 </ul>
 </div>
 <div class="section level5">
-<h5 id="changed-3">Changed<a class="anchor" aria-label="anchor" href="#changed-3"></a>
+<h5 id="changed-4">Changed<a class="anchor" aria-label="anchor" href="#changed-4"></a>
 </h5>
 <ul>
 <li>All arguments to <code>pcgr.py</code> is now non-positional</li>
@@ -1121,7 +1270,7 @@ three:
 </ul>
 </div>
 <div class="section level5">
-<h5 id="added-3">Added<a class="anchor" aria-label="anchor" href="#added-3"></a>
+<h5 id="added-4">Added<a class="anchor" aria-label="anchor" href="#added-4"></a>
 </h5>
 <ul>
 <li>Optional argument <code>--include_trials</code> in
@@ -1181,7 +1330,7 @@ accessions (using also RefSeq accessions where available)</li>
 </ul>
 </div>
 <div class="section level5">
-<h5 id="added-4">Added<a class="anchor" aria-label="anchor" href="#added-4"></a>
+<h5 id="added-5">Added<a class="anchor" aria-label="anchor" href="#added-5"></a>
 </h5>
 <ul>
 <li>Possibility to filter evidence items by RATING in interactive data
@@ -1189,7 +1338,7 @@ tables</li>
 </ul>
 </div>
 <div class="section level5">
-<h5 id="changed-4">Changed<a class="anchor" aria-label="anchor" href="#changed-4"></a>
+<h5 id="changed-5">Changed<a class="anchor" aria-label="anchor" href="#changed-5"></a>
 </h5>
 <ul>
 <li>Option <em>target_size_mb</em> in pcgr.py replaces
@@ -1227,7 +1376,7 @@ intersecting sets</li>
 </ul>
 </div>
 <div class="section level5">
-<h5 id="added-5">Added<a class="anchor" aria-label="anchor" href="#added-5"></a>
+<h5 id="added-6">Added<a class="anchor" aria-label="anchor" href="#added-6"></a>
 </h5>
 <ul>
 <li>New field <a href="https://www.ensembl.org/info/genome/genebuild/mane.html" class="external-link">‘mane’</a>
@@ -1250,7 +1399,7 @@ of configuration</li>
 </li>
 </ul>
 <div class="section level5">
-<h5 id="added-6">Added<a class="anchor" aria-label="anchor" href="#added-6"></a>
+<h5 id="added-7">Added<a class="anchor" aria-label="anchor" href="#added-7"></a>
 </h5>
 <ul>
 <li>
@@ -1275,7 +1424,7 @@ types</li>
 </ul>
 </div>
 <div class="section level5">
-<h5 id="added-7">Added<a class="anchor" aria-label="anchor" href="#added-7"></a>
+<h5 id="added-8">Added<a class="anchor" aria-label="anchor" href="#added-8"></a>
 </h5>
 <ul>
 <li>Upgraded VEP to v96
@@ -1425,7 +1574,7 @@ review</li>
 </ul>
 </div>
 <div class="section level5">
-<h5 id="changed-5">Changed<a class="anchor" aria-label="anchor" href="#changed-5"></a>
+<h5 id="changed-6">Changed<a class="anchor" aria-label="anchor" href="#changed-6"></a>
 </h5>
 <ul>
 <li>Moved from <a href="https://www.intogen.org/" class="external-link">IntoGen’s driver
@@ -1484,7 +1633,7 @@ these should now be retrieved correctly</li>
 </ul>
 </div>
 <div class="section level5">
-<h5 id="added-8">Added<a class="anchor" aria-label="anchor" href="#added-8"></a>
+<h5 id="added-9">Added<a class="anchor" aria-label="anchor" href="#added-9"></a>
 </h5>
 <ul>
 <li>Possibility to run PCGR in a non-Docker environment (e.g. using the
@@ -1527,7 +1676,7 @@ TSV/JSON</li>
 </ul>
 </div>
 <div class="section level5">
-<h5 id="changed-6">Changed<a class="anchor" aria-label="anchor" href="#changed-6"></a>
+<h5 id="changed-7">Changed<a class="anchor" aria-label="anchor" href="#changed-7"></a>
 </h5>
 <ul>
 <li>Changed CANCER_MUTATION_HOTSPOT to MUTATION_HOTSPOT</li>
@@ -1586,7 +1735,7 @@ measures)</li>
 </ul>
 </div>
 <div class="section level5">
-<h5 id="added-9">Added<a class="anchor" aria-label="anchor" href="#added-9"></a>
+<h5 id="added-10">Added<a class="anchor" aria-label="anchor" href="#added-10"></a>
 </h5>
 <ul>
 <li>Genome assembly is appended to every output file</li>
@@ -1628,7 +1777,7 @@ variants with biomarker role)</li>
 </li>
 </ul>
 <div class="section level5">
-<h5 id="added-10">Added<a class="anchor" aria-label="anchor" href="#added-10"></a>
+<h5 id="added-11">Added<a class="anchor" aria-label="anchor" href="#added-11"></a>
 </h5>
 <ul>
 <li>New argument in pcgr.py
@@ -1838,7 +1987,7 @@ the next release</li>
 </ul>
 </div>
 <div class="section level5">
-<h5 id="changed-7">Changed<a class="anchor" aria-label="anchor" href="#changed-7"></a>
+<h5 id="changed-8">Changed<a class="anchor" aria-label="anchor" href="#changed-8"></a>
 </h5>
 <ul>
 <li>HTML report sections

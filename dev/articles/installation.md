@@ -27,13 +27,13 @@ and are versioned based on their release date. Keep in mind that the
 bundles support only certain Ensembl VEP versions, and importantly also
 specific software versions of PCGR. Upgrading the PCGR software without
 upgrading the bundle specified here is thus *not* a recommended
-installation strategy. The latest (**v20250314**) genome-specific
+installation strategy. The latest (**v20260508**) genome-specific
 bundles can be downloaded directly from below (size: ~5G):
 
 | Assembly | Download Link |
 |:---|:---|
-| GRCh38 | <https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20250314.grch38.tgz> |
-| GRCh37 | <https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20250314.grch37.tgz> |
+| GRCh38 | <https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20260508.grch38.tgz> |
+| GRCh37 | <https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20260508.grch37.tgz> |
 
 **Tip 1**: The `data/grch3x/.PCGR_BUNDLE_VERSION` file within the
 downloaded bundle indicates the bundle version for reporting purposes.
@@ -44,7 +44,7 @@ the reference bundle.
 
 #### Bash Example
 
-    BUNDLE_VERSION="20250314"
+    BUNDLE_VERSION="20260508"
 
 ``` bash
 GENOME="grch38" # or "grch37"
@@ -60,13 +60,13 @@ mv data/ ${BUNDLE_VERSION}
 
 [VEP](https://www.ensembl.org/info/docs/tools/vep/index.html) requires a
 data cache which is available from the Ensembl [FTP
-site](https://ftp.ensembl.org/pub/release-113/variation/indexed_vep_cache/)
+site](https://ftp.ensembl.org/pub/release-115/variation/indexed_vep_cache/)
 (search there for files starting with `homo_sapiens_vep_`). The latest
-Ensembl VEP version we support is **v113**.
+Ensembl VEP version we support is **v115**.
 
 #### Bash Example
 
-    VEP_VERSION="113"
+    VEP_VERSION="115"
 
 ``` bash
 GENOME="GRCh38" # or "GRCh37"
@@ -77,7 +77,7 @@ gzip -dc ${CACHE} | tar xvf -
 ```
 
 **Important**: PCGR needs to be pointed to the *parent* directory
-containing the downloaded `homo_sapiens/113_GRCh3x/` cache.
+containing the downloaded `homo_sapiens/115_GRCh3x/` cache.
 Historically, this parent directory has been named `.vep`, but the name
 of this directory can be arbitrarily set.
 
@@ -108,7 +108,7 @@ the time is spent on downloading the `{BSgenome.Hsapiens.UCSC.hg19}` and
 `{BSgenome.Hsapiens.UCSC.hg38}` R packages (which happens at the very
 end of the conda environment creation).
 
-    PCGR_VERSION="2.2.5.9012"
+    PCGR_VERSION="2.2.5.9014"
 
 ``` bash
 # set up variables
@@ -129,9 +129,9 @@ pcgr --help
 
 The PCGR Docker image is available from the GitHub Container Registry at
 <https://github.com/sigven/pcgr/pkgs/container/pcgr>. Pull the latest
-**v2.2.5.9012** image with:
+**v2.2.5.9014** image with:
 
-    docker pull ghcr.io/sigven/pcgr:2.2.5.9012
+    docker pull ghcr.io/sigven/pcgr:2.2.5.9014
 
 #### Example Run
 
@@ -142,7 +142,7 @@ structure:
 - `/Users/you/dir1/VEP_cache` - the directory where you have downloaded
   the [VEP cache](#vep-cache) (**Note**: this directory should contain
   the `homo_sapiens` directory as its child directory
-- `/Users/you/dir1/20250314` - the directory where you have downloaded
+- `/Users/you/dir1/20260508` - the directory where you have downloaded
   the PCGR reference bundle (**Note**: this directory should contain a
   directory named `data` as its child directory)
 - `/Users/you/dir1/pcgr_inputs` - the directory where you have your
@@ -152,8 +152,8 @@ structure:
 
 &nbsp;
 
-    PCGR_VERSION="2.2.5.9012"
-    BUNDLE_VERSION="20250314"
+    PCGR_VERSION="2.2.5.9014"
+    BUNDLE_VERSION="20260508"
 
 ``` bash
 docker container run -it --rm \
@@ -185,19 +185,19 @@ for Singularity/Apptainer below, see also [issue
 ### C. Singularity/Apptainer
 
 The PCGR Singularity/Apptainer image is available on [GitHub Container
-Registry](https://ghcr.io/sigven/pcgr). Pull the latest **v2.2.5.9012**
+Registry](https://ghcr.io/sigven/pcgr). Pull the latest **v2.2.5.9014**
 image with:
 
-    apptainer pull oras://ghcr.io/sigven/pcgr:2.2.5.9012.singularity
+    apptainer pull oras://ghcr.io/sigven/pcgr:2.2.5.9014.singularity
 
 This will download a Singularity Image File (SIF) called
-**pcgr_2.2.5.9012.singularity.sif** that can be run with Singularity or
+**pcgr_2.2.5.9014.singularity.sif** that can be run with Singularity or
 Apptainer.
 
 #### Example Run
 
-    PCGR_VERSION="2.2.5.9012"
-    BUNDLE_VERSION="20250314"
+    PCGR_VERSION="2.2.5.9014"
+    BUNDLE_VERSION="20260508"
 
 ``` bash
 apptainer exec \

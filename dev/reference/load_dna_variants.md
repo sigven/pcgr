@@ -10,6 +10,7 @@ load_dna_variants(
   fname = NA,
   cols = NULL,
   ref_data = NULL,
+  settings = NULL,
   vartype = "snv_indel",
   primary_site = "Any",
   retained_info_tags = "None",
@@ -30,6 +31,10 @@ load_dna_variants(
 - ref_data:
 
   PCGR reference data object
+
+- settings:
+
+  PCGR run/configuration settings
 
 - vartype:
 
