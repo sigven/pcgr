@@ -12,14 +12,14 @@ append_annotation_links <- function(
     skip = NULL) {
 
   i <- 1
-  while (i <= nrow(pcgrr::variant_db_url)) {
+  while (i <= nrow(variant_db_url)) {
 
     name <-
-      pcgrr::variant_db_url[i, ]$name
+      variant_db_url[i, ]$name
     link_display_var <-
-      pcgrr::variant_db_url[i, ]$link_display_var
+      variant_db_url[i, ]$link_display_var
     rename <-
-      pcgrr::variant_db_url[i, ]$rename
+      variant_db_url[i, ]$rename
 
     if (rename == T &
        name %in% colnames(var_data_df) &
@@ -39,15 +39,15 @@ append_annotation_links <- function(
       if (vartype == "exp") {
         group_by_var <- "ENTREZGENE"
       }
-      url_prefix <- pcgrr::variant_db_url[i, ]$url_prefix
-      link_key_var <- pcgrr::variant_db_url[i, ]$link_key_var
-      link_display_var <- pcgrr::variant_db_url[i, ]$link_display_var
+      url_prefix <- variant_db_url[i, ]$url_prefix
+      link_key_var <- variant_db_url[i, ]$link_key_var
+      link_display_var <- variant_db_url[i, ]$link_display_var
       if (!(name %in% colnames(var_data_df)) &
           link_key_var %in% colnames(var_data_df) &
           link_display_var %in% colnames(var_data_df) &
           length(unique(group_by_var %in% colnames(var_data_df))) == 1) {
         annotation_links <-
-          pcgrr::generate_annotation_link(
+          generate_annotation_link(
             var_df = var_data_df,
             vardb = name,
             vartype = vartype,
@@ -138,7 +138,7 @@ append_gwas_citation_phenotype <-
     if ("GWAS_HIT" %in% colnames(vcf_data_df) &
         "VAR_ID" %in% colnames(vcf_data_df)) {
 
-      pcgrr::log4r_info(paste0("Adding citations/phenotypes underlying ",
+      log4r_info(paste0("Adding citations/phenotypes underlying ",
                                "GWAS hits (NHGRI-EBI GWAS Catalog)"))
       feature_df <- dplyr::select(
         vcf_data_df,
@@ -206,7 +206,7 @@ append_gwas_citation_phenotype <-
       )
       if (nrow(feature_df) > 0) {
 
-        pcgrr::log4r_info(paste0(
+        log4r_info(paste0(
           "Found n = ",
           nrow(feature_df),
           " variants associated with genome-wide association studies"))
@@ -304,7 +304,7 @@ append_tcga_var_link <- function(var_df,
             "affected", "cohort_size"),
           sep = "\\|", convert = T) |>
         dplyr::left_join(
-          pcgrr::tcga_cohorts, by = "tcga_cancer_code") |>
+          tcga_cohorts, by = "tcga_cancer_code") |>
         dplyr::arrange(
           .data$VAR_ID,
           dplyr::desc(.data$percentage))
@@ -370,7 +370,7 @@ append_tfbs_annotation <-
 
         if (nrow(var_df_unique_slim_melted) > 0) {
 
-          pcgrr::log4r_info(paste0(
+          log4r_info(paste0(
             "Found TF binding site annotations for ",
             nrow(var_df_unique_slim)," variants"))
 
@@ -557,15 +557,15 @@ append_dbnsfp_var_link <- function(var_df) {
         .data$PREDICTED_EFFECT, ":PD,", ":ProbablyDamaging,"
       ))
     i <- 1
-    while (i <= nrow(pcgrr::effect_prediction_algos)) {
+    while (i <= nrow(effect_prediction_algos)) {
       str_to_replace <-
-        paste0(pcgrr::effect_prediction_algos[i, "algorithm"], ":")
+        paste0(effect_prediction_algos[i, "algorithm"], ":")
       replacement_str <-
         paste0("<a href='",
-               pcgrr::effect_prediction_algos[i, "url"], "' target='_blank'>",
-               pcgrr::effect_prediction_algos[i, "display_name"], "</a>:")
+               effect_prediction_algos[i, "url"], "' target='_blank'>",
+               effect_prediction_algos[i, "display_name"], "</a>:")
       algorithm_display <-
-        paste0(pcgrr::effect_prediction_algos[i, "display_name"], ":")
+        paste0(effect_prediction_algos[i, "display_name"], ":")
       var_df <- var_df |>
         dplyr::mutate(
           PREDICTED_EFFECT =

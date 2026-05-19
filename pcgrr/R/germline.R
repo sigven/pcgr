@@ -435,7 +435,7 @@ assign_somatic_classification <- function(sample_calls, settings) {
     }
   }
 
-  pcgrr::log4r_info("Applying variant filters on tumor-only calls - assigning somatic classification")
+  log4r_info("Applying variant filters on tumor-only calls - assigning somatic classification")
   sample_calls <- sample_calls |>
     dplyr::mutate(
       GERMLINE_GNOMAD =
@@ -549,7 +549,7 @@ assign_somatic_germline_evidence <- function(
     settings$conf$somatic_snv$tumor_only
 
   sample_calls <-
-    pcgrr::assign_germline_popfreq_status(
+    assign_germline_popfreq_status(
       sample_calls,
       max_tolerated_af =
         tumor_only_settings[["gnomad_popmax_af_tolerated"]])
@@ -557,7 +557,7 @@ assign_somatic_germline_evidence <- function(
   # for (pop in c("GLOBAL", "NFE", "AMR", "AFR",
   #               "SAS", "EAS", "ASJ", "FIN", "OTH")) {
   #   sample_calls <-
-  #     pcgrr::assign_germline_popfreq_status_old(
+  #     assign_germline_popfreq_status_old(
   #       sample_calls,
   #       pop = pop,
   #       dbquery = c("gnomADe","gnomADg"),
@@ -785,7 +785,7 @@ plot_filtering_stats_germline <- function(
       dplyr::mutate(FILTER = stringr::str_replace_all(
         .data$FILTER, "\\|", ", ")) |>
       dplyr::mutate(FILTER = dplyr::if_else(
-        !(.data$FILTER %in% pcgrr::germline_filter_levels) &
+        !(.data$FILTER %in% germline_filter_levels) &
           .data$FILTER != "SOMATIC",
         "MULTIPLE FILTERS",
         .data$FILTER
@@ -794,14 +794,14 @@ plot_filtering_stats_germline <- function(
       dplyr::reframe(FREQUENCY = sum(.data$FREQUENCY)) |>
       dplyr::arrange(dplyr::desc(.data$FREQUENCY)) |>
       dplyr::mutate(FILTER = factor(
-        .data$FILTER, levels = pcgrr::germline_filter_levels)) |>
+        .data$FILTER, levels = germline_filter_levels)) |>
       dplyr::mutate(PERCENT = scales::percent(
         .data$FREQUENCY / sum(.data$FREQUENCY), accuracy = 0.1))
 
     germline_filters <- unique(filtering_stats[['df']]$FILTER)
     germline_filters <- c("SOMATIC", setdiff(germline_filters, "SOMATIC"))
     hex_colors_germline <- utils::head(
-      pcgrr::color_palette$multi$values,
+      color_palette$multi$values,
       length(germline_filters))
 
     if (length(germline_filters) == 2) {
@@ -818,7 +818,7 @@ plot_filtering_stats_germline <- function(
       }
       rgba_colors <- c(
         rgba_colors,
-        pcgrr::hex_to_rgba(
+        hex_to_rgba(
           hex_colors_germline[i],
           alpha = alpha))
       i <- i + 1
@@ -978,13 +978,13 @@ plot_filtering_stats_exonic <- function(
 
     filtering_stats$df$FILTER <- factor(
       filtering_stats$df$FILTER,
-      levels = pcgrr::exonic_filter_levels)
+      levels = exonic_filter_levels)
 
     rgba_colors <- c(
-      pcgrr::hex_to_rgba(
-        pcgrr::color_palette$multi$values[1], alpha = 1),
-      pcgrr::hex_to_rgba(
-        pcgrr::color_palette$multi$values[2],
+      hex_to_rgba(
+        color_palette$multi$values[1], alpha = 1),
+      hex_to_rgba(
+        color_palette$multi$values[2],
         alpha = opacity_filtered_categories
       ))
 

@@ -19,7 +19,7 @@ filter_maf_file <- function(callset, settings) {
       return(0)
     }
 
-    pcgrr::log4r_info(paste0(
+    log4r_info(paste0(
       "Updating MAF file with filtered somatic SNV/InDels"))
 
     if (all(c("CHROM",
@@ -90,7 +90,7 @@ filter_maf_file <- function(callset, settings) {
       )
 
       if (NROW(maf_data_unfiltered) == 0) {
-        pcgrr::log4r_warn("MAF file is empty - no filtering will be performed")
+        log4r_warn("MAF file is empty - no filtering will be performed")
         return(0)
       }else{
         maf_data_unfiltered$Chromosome <-
@@ -107,7 +107,7 @@ filter_maf_file <- function(callset, settings) {
       }
 
     } else {
-      pcgrr::log4r_warn("MAF file is empty - no filtering will be performed")
+      log4r_warn("MAF file is empty - no filtering will be performed")
       return(0)
     }
   }

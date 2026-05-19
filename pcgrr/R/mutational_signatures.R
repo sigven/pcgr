@@ -19,22 +19,22 @@ generate_report_data_signatures <-
     n_snvs_required <- 30
 
     pcg_report_signatures <-
-      pcgrr::init_mutsignature_content()
+      init_mutsignature_content()
 
     if (!is.null(variant_set) &
        !is.null(vstats) &
        !is.null(ref_data) &
        !is.null(settings)) {
-      pcgrr::log4r_info("------")
-      pcgrr::log4r_info("Identifying mutational signatures")
+      log4r_info("------")
+      log4r_info("Identifying mutational signatures")
     }else{
-      pcgrr::log4r_warn("Missing input data for mutational signature analysis")
+      log4r_warn("Missing input data for mutational signature analysis")
       return(pcg_report_signatures)
     }
 
     if ("n_snv" %in% names(vstats)) {
       if (vstats$n_snv < n_snvs_required) {
-        pcgrr::log4r_warn(
+        log4r_warn(
           paste0("Too few SNVs detected in sample (n = ",
                  vstats$n_snv,")",
                  " - omitting mutational signature analysis"))
@@ -53,8 +53,8 @@ generate_report_data_signatures <-
         source_version = stringr::str_replace_all(
           .data$source_version, "[\r\n]" , ""))
 
-    pcgrr::log4r_info("------")
-    pcgrr::log4r_info(
+    log4r_info("------")
+    log4r_info(
       paste0("Identifying weighted contributions of reference ",
              "mutational signatures (COSMIC ",
              cosmic_metadata$source_version,")"))
@@ -69,7 +69,7 @@ generate_report_data_signatures <-
                   "mutational_patterns_input.all.vcf",
                   sep="."))
 
-    pcgrr::write_processed_vcf(
+    write_processed_vcf(
       calls = variant_set,
       sample_name = settings$sample_id,
       output_directory = settings$output_dir,
@@ -90,7 +90,7 @@ generate_report_data_signatures <-
     if (!(settings$conf$sample_properties$site %in%
          sites_with_sig_prevalence)) {
       site_has_prevalence_data <- F
-      pcgrr::log4r_warn(
+      log4r_warn(
         paste0("No signature prevalence data available for site '",
                settings$conf$sample_properties$site,
                "' - considering all signatures for analysis"))
@@ -99,7 +99,7 @@ generate_report_data_signatures <-
     prevalent_site_signatures <- NULL
     if (fit_signatures_to_ttype == T & site_has_prevalence_data == T) {
       prevalent_site_signatures <-
-        pcgrr::get_prevalent_site_signatures(
+        get_prevalent_site_signatures(
           site = settings$conf$sample_properties$site,
           min_prevalence_pct =
             as.numeric(sig_settings$prevalence_reference_signatures),
@@ -108,7 +108,7 @@ generate_report_data_signatures <-
             sig_settings$include_artefact_signatures)
     }else{
       prevalent_site_signatures <-
-        pcgrr::get_prevalent_site_signatures(
+        get_prevalent_site_signatures(
           site = "Any",
           min_prevalence_pct =
             as.numeric(sig_settings$prevalence_reference_signatures),
@@ -166,7 +166,7 @@ generate_report_data_signatures <-
         num_snvs_sig_analysis <- as.character(
           formattable::comma(length(snv_grl[[1]]), digits = 0))
 
-        pcgrr::log4r_info(paste0("Number of SNVs for signature analysis: ",
+        log4r_info(paste0("Number of SNVs for signature analysis: ",
                                  num_snvs_sig_analysis))
 
         pcg_report_signatures[["result"]][["indel_counts"]] <-
@@ -199,11 +199,11 @@ generate_report_data_signatures <-
 
         # get reference signatures (COSMIC v3.4)
         all_reference_signatures <-
-          pcgrr::cosmic_sbs_signatures[['all']]
+          cosmic_sbs_signatures[['all']]
 
         if (as.logical(sig_settings$include_artefact_signatures) == FALSE) {
           all_reference_signatures <-
-            pcgrr::cosmic_sbs_signatures[['no_artefacts']]
+            cosmic_sbs_signatures[['no_artefacts']]
         }
 
         if (length(snv_grl[[1]]) >= n_snvs_required) {
@@ -409,7 +409,7 @@ generate_report_data_signatures <-
             utils::head(25)
 
           color_vec <- utils::head(
-            pcgrr::color_palette[["multi"]][["values"]],
+            color_palette[["multi"]][["values"]],
             min(25, nrow(cols)))
 
           names(color_vec) <- cols$signature_id
@@ -462,7 +462,7 @@ generate_report_data_signatures <-
               reference_sigs <- paste(sort(prevalent_site_signatures$aetiology$SIGNATURE_ID),
                                       collapse=",")
               tsv_data <- contributions[["per_signature"]] |>
-                pcgrr::remove_cols_from_df(
+                remove_cols_from_df(
                   cnames = c("contribution","col","AETIOLOGY","COMMENTS")) |>
                 dplyr::mutate(
                   all_reference_signatures = !fit_signatures_to_ttype,
@@ -498,7 +498,7 @@ generate_report_data_signatures <-
         }else{
           pcg_report_signatures[["missing_data"]] <- TRUE
           if (length(snv_grl[[1]]) > 0) {
-            pcgrr::log4r_info(
+            log4r_info(
               paste0("Too few SNVs (n = ",
                      nrow(pcg_report_signatures[["variant_set"]][["all"]]),
                      ") for reconstruction of mutational signatures by ",
@@ -545,14 +545,14 @@ get_prevalent_site_signatures <-
           .data$source_version, "[\r\n]" , ""))
 
     if (is.null(custom_collection)) {
-      pcgrr::log4r_info(paste0(
+      log4r_info(paste0(
         "Retrieving prevalent (prevalence >= ",
         min_prevalence_pct, " percent) reference signatures for ",
         site, ", using COSMIC ",
         cosmic_metadata$source_version,
         " collection"))
     }
-    pcgrr::log4r_info(paste0(
+    log4r_info(paste0(
       "Inclusion of mutational signature artefacts (e.g. sequencing artefacts): ",
       as.logical(incl_poss_artifacts)))
 
@@ -584,7 +584,7 @@ get_prevalent_site_signatures <-
           is.character(custom_collection),
           msg = "Argument 'custom_collection' must be a character vector"))
 
-      pcgrr::log4r_info(paste0(
+      log4r_info(paste0(
         "Retrieving reference signatures from COSMIC ",
         cosmic_metadata$source_version,
         " collection based on user-defined collection (",
@@ -664,7 +664,7 @@ get_prevalent_site_signatures <-
     ## Subset signature matrix - keeping only columns (signatures)
     ## to those defined by primary site/custom collection
     sigs <- unique(signatures_prevalence$SIGNATURE_ID)
-    #pcgrr::log4r_info(paste0("Limiting reference collection to signatures: ",
+    #log4r_info(paste0("Limiting reference collection to signatures: ",
     #                          paste(sigs, collapse = ", ")))
 
     result <- list("aetiology" = signatures_prevalence)
@@ -689,7 +689,7 @@ generate_report_data_rainfall <- function(variant_set,
                                           autosomes = FALSE,
                                           build = NULL) {
 
-  pcg_report_rainfall <- pcgrr::init_rainfall_content()
+  pcg_report_rainfall <- init_rainfall_content()
 
 
   invisible(assertthat::assert_that
@@ -712,13 +712,13 @@ generate_report_data_rainfall <- function(variant_set,
     return(pcg_report_rainfall)
   }
 
-  pcgrr::log4r_info("------")
-  pcgrr::log4r_info(paste0("Calculating data for rainfall plot"))
+  log4r_info("------")
+  log4r_info(paste0("Calculating data for rainfall plot"))
 
 
   sbs_types <- c("C>T", "A>G", "A>C", "A>T", "C>G", "C>A")
   if (is.null(colors)) {
-    colors <- utils::head(pcgrr::color_palette$multi$values, 6)
+    colors <- utils::head(color_palette$multi$values, 6)
   }else{
     invisible(
       assertthat::assert_that(
@@ -748,21 +748,21 @@ generate_report_data_rainfall <- function(variant_set,
     dplyr::filter(.data$VARIANT_CLASS == "SNV")
 
   if (nrow(dat) < 10 | nrow(dat) > 30000 | length(chromosome_names) < 2) {
-    pcgrr::log4r_info(
+    log4r_info(
       paste0("Too few variants (< 10) and chromosomes ",
              " represented (< 2) OR too many variants ",
              "( > 30,000) - skipping rainfall plot"))
     pcg_report_rainfall[["eval"]] <- F
   }else{
     dat <- dat |>
-      pcgrr::assign_mutation_type() |>
+      assign_mutation_type() |>
       dplyr::mutate(
         MUTATION_TYPE =
           dplyr::if_else(stringr::str_detect(.data$MUTATION_TYPE, "^(C|A)>"),
                          stringr::str_replace(.data$MUTATION_TYPE,
                                               ":[A-Z]>[A-Z]$", ""),
                          as.character(.data$MUTATION_TYPE))) |>
-      pcgrr::sort_chromosomal_segments()
+      sort_chromosomal_segments()
 
     bsg <- get_genome_obj(build)
     chr_length <- utils::head(GenomeInfoDb::seqlengths(bsg), 24)
@@ -942,7 +942,7 @@ plot_signature_contributions <- function(
       width = .3)+
     ggplot2::scale_fill_manual(
       values = utils::head(
-        pcgrr::color_palette$multi$values,
+        color_palette$multi$values,
         NROW(plot_data_per_signature))) +
     ggplot2::theme_classic() +
     ggplot2::xlab("") +

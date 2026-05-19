@@ -152,7 +152,7 @@ stats_report_snv_indel <- function(
     only_colnames = F, quiet = T
   )
 
-  vstats <- pcgrr::init_vstats_snv_indel()
+  vstats <- init_vstats_snv_indel()
 
   vstats[["n_var"]] <-
     callset$variant |>
@@ -194,7 +194,7 @@ stats_report_snv_indel <- function(
   }
 
   if ("bm_evidence" %in% names(callset)) {
-    for (class in names(pcgrr::bm_categories)) {
+    for (class in names(bm_categories)) {
       if (class %in% names(callset$bm_evidence)) {
 
         if("classification" %in% names(callset$bm_evidence[[class]]) &
@@ -206,14 +206,14 @@ stats_report_snv_indel <- function(
 
           if(NROW(var_classification) == 0 |
              NROW(eitems) == 0){
-            pcgrr::log4r_debug(
+            log4r_debug(
               paste0("No classification or evidence items for class '",
                      class,"' - skipping statistics for this class"))
             next
           }
 
           ## print debug message
-          pcgrr::log4r_debug(
+          log4r_debug(
             paste0("Processing biomarker evidence for class '",
                    class,"' with ",
                    NROW(var_classification),
@@ -402,7 +402,7 @@ stats_report_cna <- function(
     only_colnames = F, quiet = T
   )
 
-  vstats <- pcgrr::init_vstats_cna()
+  vstats <- init_vstats_cna()
 
   for (cat in c("tsg","oncogene","drugtarget")) {
 
@@ -507,7 +507,7 @@ stats_report_cna <- function(
   }
 
   if ("bm_evidence" %in% names(callset)) {
-    for (class in names(pcgrr::bm_categories)) {
+    for (class in names(bm_categories)) {
       if (class %in% names(callset$bm_evidence)) {
 
         if("classification" %in% names(callset$bm_evidence[[class]]) &
@@ -519,7 +519,7 @@ stats_report_cna <- function(
 
           if(NROW(var_classification) == 0 |
              NROW(eitems) == 0){
-            pcgrr::log4r_debug(
+            log4r_debug(
               paste0("No classification or evidence items for class '",
                      class,"' - skipping statistics for this class"))
             next
@@ -719,7 +719,7 @@ stats_report_cna <- function(
 stats_report_fusion <- function(
     callset = NULL) {
 
-  vstats <- pcgrr::init_vstats_fusion()
+  vstats <- init_vstats_fusion()
 
   invisible(assertthat::assert_that(
     !is.null(callset),
@@ -774,7 +774,7 @@ stats_report_fusion <- function(
   }
 
   if ("bm_evidence" %in% names(callset)) {
-    for (class in names(pcgrr::bm_categories)) {
+    for (class in names(bm_categories)) {
       if (class %in% names(callset$bm_evidence)) {
 
         if("classification" %in% names(callset$bm_evidence[[class]]) &
@@ -790,7 +790,7 @@ stats_report_fusion <- function(
           }
 
           ## print debug message
-          pcgrr::log4r_debug(
+          log4r_debug(
             paste0("Processing biomarker evidence for class '",
                    class,"' with ",
                    NROW(var_classification),
@@ -1003,7 +1003,7 @@ stats_report_germline <- function(
 #' @export
 init_vstats_actionable <- function(vartype = "snv_indel") {
   vstats <- list()
-  for (cat in names(pcgrr::bm_categories)) {
+  for (cat in names(bm_categories)) {
     vstats[[cat]] <- list()
     for (i in 1:6) {
       if(i > 3 & vartype != "snv_indel"){

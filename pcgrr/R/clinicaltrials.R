@@ -18,7 +18,7 @@ generate_report_data_trials <- function(pcgr_data, config, sample_name) {
     NROW(pcgr_data$clinicaltrials$trials) > 0))
 
 
-  pcg_report_trials <- pcgrr::init_report(config = config,
+  pcg_report_trials <- init_report(config = config,
                                           class = "clinicaltrials")
   pcg_report_trials[["eval"]] <- T
 

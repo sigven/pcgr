@@ -69,7 +69,7 @@ vaf_plot <- function(
     !is.null(report$content$snv_indel$callset$variant),
     msg = "Argument 'report' must contain a valid callset"))
 
-  vaf_dist_tumor <- pcgrr::af_distribution(
+  vaf_dist_tumor <- af_distribution(
     var_df = report$content$snv_indel$callset$variant)
 
   assertable::assert_colnames(
@@ -94,7 +94,7 @@ vaf_plot <- function(
     ggplot2::ylab("Number of variants") +
     ggplot2::xlab("Variant allelic fraction - tumor") +
     ggplot2::scale_fill_manual(
-      values = pcgrr::color_palette$multi$values) +
+      values = color_palette$multi$values) +
     ggplot2::theme(
       legend.title = ggplot2::element_blank(),
       legend.position = "bottom",
@@ -281,7 +281,7 @@ clean_gnomad_annotations <- function(
 
     var_df <-
       var_df |>
-      pcgrr::grpmax_faf_nc_gnomad()
+      grpmax_faf_nc_gnomad()
 
     var_df[['gnomAD_NC_VAR_FILTER']] <-
       var_df[['tmp_gNC_VAR_FILTER']]

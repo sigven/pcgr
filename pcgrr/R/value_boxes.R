@@ -31,10 +31,10 @@ plot_value_boxes <- function(pcg_report) {
     pcg_report[["metadata"]][["config"]][["assay_props"]]
 
   ## color - tumor-control
-  color <- rep(pcgrr::color_palette[["tier"]][["values"]][1], 9)
+  color <- rep(color_palette[["tier"]][["values"]][1], 9)
   if (assay_props[["vcf_tumor_only"]] == T) {
     ## color - tumor-only
-    color <- rep(pcgrr::color_palette[["report_color"]][["values"]][2], 9)
+    color <- rep(color_palette[["report_color"]][["values"]][2], 9)
   }
 
   p <- ggplot2::ggplot(df, ggplot2::aes(.data$x, .data$y, height = .data$h, width = .data$w,

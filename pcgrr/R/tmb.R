@@ -45,9 +45,9 @@ plot_tmb_primary_site_tcga <- function(
     tumor_only = FALSE) {
 
 
-  report_color <- pcgrr::color_palette$report_color$values[1]
+  report_color <- color_palette$report_color$values[1]
   if (tumor_only == TRUE) {
-    report_color <- pcgrr::color_palette$report_color$values[2]
+    report_color <- color_palette$report_color$values[2]
   }
 
   assertable::assert_colnames(

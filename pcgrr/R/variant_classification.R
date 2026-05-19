@@ -52,22 +52,22 @@ assign_amp_asco_cap_tiers <- function(
   )
 
   invisible(assertthat::assert_that(
-    clinical_significance %in% names(pcgrr::bm_categories),
+    clinical_significance %in% names(bm_categories),
     msg = paste0("Argument 'clinical_significance' needs to be one of: ",
-                 paste0(names(pcgrr::bm_categories), collapse = ", '")))
+                 paste0(names(bm_categories), collapse = ", '")))
   )
 
   etype_for_tiering <-
-    pcgrr::bm_categories[[clinical_significance]]$etype
+    bm_categories[[clinical_significance]]$etype
 
   invisible(assertthat::assert_that(
-    primary_site %in% pcgrr::tumor_sites,
+    primary_site %in% tumor_sites,
     msg = paste0("Argument 'primary_site' needs to be one of: ",
-                 paste0(pcgrr::tumor_sites, collapse = ", ")))
+                 paste0(tumor_sites, collapse = ", ")))
   )
 
   clnsig_categories_for_tiering <-
-    pcgrr::bm_categories[[clinical_significance]]$clnsig
+    bm_categories[[clinical_significance]]$clnsig
 
   if (!is.null(biomarker_items)) {
 
@@ -132,7 +132,7 @@ assign_amp_asco_cap_tiers <- function(
   }
 
   if (NROW(biomarker_items) == 0) {
-    pcgrr::log4r_debug(
+    log4r_debug(
       paste0("No biomarker evidence items with specified confidence ",
       "level found for tier classification"))
   }
@@ -140,7 +140,7 @@ assign_amp_asco_cap_tiers <- function(
 
   if (vartype == "snv_indel") {
 
-    variants_tier_classified <- pcgrr::assign_variant_tiers_snv_indel(
+    variants_tier_classified <- assign_variant_tiers_snv_indel(
       biomarker_items = biomarker_items,
       biomarker_mapping_confidence = biomarker_mapping_confidence,
       var_df = var_df,
@@ -149,7 +149,7 @@ assign_amp_asco_cap_tiers <- function(
     )
   }else{
     if (vartype == "cna") {
-      variants_tier_classified <- pcgrr::assign_variant_tiers_cna(
+      variants_tier_classified <- assign_variant_tiers_cna(
         biomarker_items = biomarker_items,
         biomarker_mapping_confidence = biomarker_mapping_confidence,
         var_df = var_df,
@@ -158,7 +158,7 @@ assign_amp_asco_cap_tiers <- function(
       )
     }else{
       if (vartype == "fusion") {
-        variants_tier_classified <- pcgrr::assign_variant_tiers_fusion(
+        variants_tier_classified <- assign_variant_tiers_fusion(
           biomarker_items = biomarker_items,
           biomarker_mapping_confidence = biomarker_mapping_confidence,
           var_df = var_df,
@@ -173,15 +173,15 @@ assign_amp_asco_cap_tiers <- function(
   ## and the number of variants per unique tier in 'ACTIONABILITY_TIER'
 
   ## first log clinical_significance and variant type for context
-  pcgrr::log4r_debug(paste0(
+  log4r_debug(paste0(
     "assign_amp_asco_cap_tiers - clinical_significance: ",
     clinical_significance,
     "; vartype: ", vartype
   ))
-  pcgrr::log4r_debug(paste0(
+  log4r_debug(paste0(
     "assign_amp_asco_cap_tiers - number of variants in variants_tier_classified: ",
     NROW(variants_tier_classified)))
-   pcgrr::log4r_debug(paste0(
+   log4r_debug(paste0(
      "assign_amp_asco_cap_tiers - number of variants per ACTIONABILITY_TIER: ",
      paste0(
        variants_tier_classified |>
@@ -194,7 +194,7 @@ assign_amp_asco_cap_tiers <- function(
 
 
   if (primary_site != "Any") {
-    biomarker_items <- pcgrr::assign_bm_tier_support_ttspecific(
+    biomarker_items <- assign_bm_tier_support_ttspecific(
       variants_tier_classified = variants_tier_classified,
       biomarker_items = biomarker_items,
       vartype = vartype,
@@ -202,7 +202,7 @@ assign_amp_asco_cap_tiers <- function(
       etype_for_tiering = etype_for_tiering
     )
   }else{
-    biomarker_items <- pcgrr::assign_bm_tier_support_ttagnostic(
+    biomarker_items <- assign_bm_tier_support_ttagnostic(
       variants_tier_classified = variants_tier_classified,
       biomarker_items = biomarker_items,
       vartype = vartype,
@@ -237,13 +237,13 @@ assign_amp_asco_cap_tiers <- function(
       dplyr::filter(.data$BM_PRIMARY_SITE == primary_site)
 
     ## log how many biomarker items / clinical significance items for the particular site
-    # pcgrr::log4r_info(paste0(
+    # log4r_info(paste0(
     #   "assign_amp_asco_cap_tiers - ", clinical_significance,
     #   " - number of biomarker items with primary site match: ",
     #   NROW(biomarker_items)))
     #
     # ## log how many biomarker items / clinical significance items for the particular site
-    # pcgrr::log4r_info(paste0(
+    # log4r_info(paste0(
     #   "assign_amp_asco_cap_tiers - ", clinical_significance,
     #   " - number of variants tier classified: ",
     #   NROW(variants_tier_classified)))
@@ -258,7 +258,7 @@ assign_amp_asco_cap_tiers <- function(
         )
 
       ## log remaining rows in variants_tier_classified after filtering for primary site match
-      # pcgrr::log4r_info(paste0(
+      # log4r_info(paste0(
       #   "assign_amp_asco_cap_tiers - ", clinical_significance,
       #   " - number of variants in variants_tier_classified after filtering for primary site match: ",
       #   NROW(variants_tier_classified)))
@@ -327,24 +327,24 @@ assign_variant_tiers_cna <- function(
     only_colnames = F, quiet = T))
 
   invisible(assertthat::assert_that(
-    primary_site %in% pcgrr::tumor_sites,
+    primary_site %in% tumor_sites,
     msg = paste0(
       "Argument 'primary_site' needs to be one of: ",
-      paste0(pcgrr::tumor_sites, collapse = ", ")))
+      paste0(tumor_sites, collapse = ", ")))
   )
 
   invisible(assertthat::assert_that(
     !is.null(biomarker_items) & is.data.frame(biomarker_items),
     msg = paste0("Argument 'biomarker_items' needs be of type data.frame")))
 
-  pcgrr::log4r_debug(paste0(
+  log4r_debug(paste0(
     "assign_variant_tiers_cna - etype_for_tiering: ",
     paste(etype_for_tiering, collapse = ", ")))
 
   variants_tier_classified <- data.frame()
 
   if (primary_site != "Any") {
-    variants_tier_classified <- pcgrr::assign_variant_top_tiers_ttspecific(
+    variants_tier_classified <- assign_variant_top_tiers_ttspecific(
       biomarker_items = biomarker_items,
       biomarker_mapping_confidence = biomarker_mapping_confidence,
       var_df = var_df,
@@ -352,7 +352,7 @@ assign_variant_tiers_cna <- function(
       primary_site = primary_site
     )
   }else{
-    variants_tier_classified <- pcgrr::assign_variant_top_tiers_ttagnostic(
+    variants_tier_classified <- assign_variant_top_tiers_ttagnostic(
       biomarker_items = biomarker_items,
       biomarker_mapping_confidence = biomarker_mapping_confidence,
       var_df = var_df,
@@ -361,7 +361,7 @@ assign_variant_tiers_cna <- function(
   }
 
   ## log length gene variant records (VAR_ID, ENTREZGENE, VARIANT_CLASS)
-  pcgrr::log4r_debug(paste0(
+  log4r_debug(paste0(
     "assign_variant_tiers_cna - number of variants for tier classification: ",
     NROW(variants_tier_classified)))
 
@@ -473,23 +473,23 @@ assign_variant_tiers_fusion <- function(
     only_colnames = F, quiet = T))
 
   invisible(assertthat::assert_that(
-    primary_site %in% pcgrr::tumor_sites,
+    primary_site %in% tumor_sites,
     msg = paste0("Argument 'primary_site' needs to be one of: ",
-                 paste0(pcgrr::tumor_sites, collapse = ", ")))
+                 paste0(tumor_sites, collapse = ", ")))
   )
 
   invisible(assertthat::assert_that(
     !is.null(biomarker_items) & is.data.frame(biomarker_items),
     msg = paste0("Argument 'biomarker_items' needs be of type data.frame")))
 
-  pcgrr::log4r_debug(paste0(
+  log4r_debug(paste0(
     "assign_variant_tiers_fusion - etype_for_tiering: ",
     paste(etype_for_tiering, collapse = ", ")))
 
   variants_tier_classified <- data.frame()
 
   if (primary_site != "Any") {
-    variants_tier_classified <- pcgrr::assign_variant_top_tiers_ttspecific(
+    variants_tier_classified <- assign_variant_top_tiers_ttspecific(
       biomarker_items = biomarker_items,
       biomarker_mapping_confidence = biomarker_mapping_confidence,
       var_df = var_df,
@@ -497,7 +497,7 @@ assign_variant_tiers_fusion <- function(
       primary_site = primary_site
     )
   }else{
-    variants_tier_classified <- pcgrr::assign_variant_top_tiers_ttagnostic(
+    variants_tier_classified <- assign_variant_top_tiers_ttagnostic(
       biomarker_items = biomarker_items,
       biomarker_mapping_confidence = biomarker_mapping_confidence,
       var_df = var_df,
@@ -506,7 +506,7 @@ assign_variant_tiers_fusion <- function(
   }
 
   ## log length gene variant records (VAR_ID, ENTREZGENE, VARIANT_CLASS)
-  pcgrr::log4r_debug(paste0(
+  log4r_debug(paste0(
     "assign_variant_tiers_fusion - number of variants for tier classification: ",
     NROW(variants_tier_classified)))
 
@@ -618,28 +618,28 @@ assign_variant_tiers_snv_indel <- function(
     only_colnames = F, quiet = T))
 
   invisible(assertthat::assert_that(
-    primary_site %in% pcgrr::tumor_sites,
+    primary_site %in% tumor_sites,
     msg = paste0("Argument 'primary_site' needs to be one of: ",
-                 paste0(pcgrr::tumor_sites, collapse = ", ")))
+                 paste0(tumor_sites, collapse = ", ")))
   )
 
   invisible(assertthat::assert_that(
     is.data.frame(biomarker_items),
     msg = paste0("Argument 'biomarker_items' needs be of type data.frame")))
 
-  pcgrr::log4r_debug(paste0(
+  log4r_debug(paste0(
     "assign_variant_tiers_snv_indel - etype_for_tiering: ",
     paste(etype_for_tiering, collapse = ", ")))
 
   ## log length gene variant records (VAR_ID, ENTREZGENE, VARIANT_CLASS)
-  pcgrr::log4r_debug(paste0(
+  log4r_debug(paste0(
     "assign_variant_tiers_snv_indel - number of variants for tier classification: ",
     NROW(var_df)))
 
   variants_tier_classified <- data.frame()
 
   if (primary_site != "Any") {
-    variants_tier_classified <- pcgrr::assign_variant_top_tiers_ttspecific(
+    variants_tier_classified <- assign_variant_top_tiers_ttspecific(
       biomarker_items = biomarker_items,
       biomarker_mapping_confidence = biomarker_mapping_confidence,
       var_df = var_df,
@@ -647,7 +647,7 @@ assign_variant_tiers_snv_indel <- function(
       primary_site = primary_site
     )
   }else{
-    variants_tier_classified <- pcgrr::assign_variant_top_tiers_ttagnostic(
+    variants_tier_classified <- assign_variant_top_tiers_ttagnostic(
       biomarker_items = biomarker_items,
       biomarker_mapping_confidence = biomarker_mapping_confidence,
       var_df = var_df,
@@ -656,7 +656,7 @@ assign_variant_tiers_snv_indel <- function(
   }
 
   ## log length gene variant records (VAR_ID, ENTREZGENE, VARIANT_CLASS)
-  pcgrr::log4r_debug(paste0(
+  log4r_debug(paste0(
     "assign_variant_tiers_snv_indel - number of variants for tier classification: ",
     NROW(variants_tier_classified)))
 
@@ -771,8 +771,8 @@ assign_variant_top_tiers_ttagnostic <- function(
     etype_for_tiering = c("predictive")) {
 
   valid_etypes <-
-    pcgrr::bm_evidence$types[
-      !pcgrr::bm_evidence$types %in% c("oncogenic","functional")]
+    bm_evidence$types[
+      !bm_evidence$types %in% c("oncogenic","functional")]
 
   invisible(assertthat::assert_that(
     is.character(etype_for_tiering),
@@ -811,11 +811,11 @@ assign_variant_top_tiers_ttagnostic <- function(
     only_colnames = F, quiet = T))
 
   ## log length gene variant records (VAR_ID, ENTREZGENE, VARIANT_CLASS)
-  pcgrr::log4r_debug(paste0(
+  log4r_debug(paste0(
     "assign_variant_top_tiers_ttagnostic - number of variants for tier classification: ",
     NROW(var_df)))
 
-  pcgrr::log4r_debug(paste0(
+  log4r_debug(paste0(
     "assign_variant_top_tiers_ttagnostic - etype_for_tiering: ",
     paste(etype_for_tiering, collapse = ", ")))
 
@@ -854,7 +854,7 @@ assign_variant_top_tiers_ttagnostic <- function(
           tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
           stringr::str_detect(
             .data$BM_EVIDENCE_LEVEL,
-            pcgrr::bm_evidence$strong_regex
+            bm_evidence$strong_regex
           ) ~ as.integer(1),
 
         ## A) Biomarker site is _NOT_ pan-cancer ('Any')
@@ -865,7 +865,7 @@ assign_variant_top_tiers_ttagnostic <- function(
           tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
           stringr::str_detect(
             .data$BM_EVIDENCE_LEVEL,
-            pcgrr::bm_evidence$strong_regex
+            bm_evidence$strong_regex
           ) ~ as.integer(2),
 
         ## A) weak evidence - evidence levels (C/D/E)
@@ -875,7 +875,7 @@ assign_variant_top_tiers_ttagnostic <- function(
         tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
           stringr::str_detect(
             .data$BM_EVIDENCE_LEVEL,
-            pcgrr::bm_evidence$weak_regex
+            bm_evidence$weak_regex
           ) ~ as.integer(3),
         TRUE ~ as.integer(100)
 
@@ -925,7 +925,7 @@ assign_variant_top_tiers_ttagnostic <- function(
   }else{
     ## if no biomarker evidence items with specified confidence level are
     ## available, assign NA tier status to all variants
-    pcgrr::log4r_debug(
+    log4r_debug(
       paste0("No biomarker evidence items with specified confidence ",
              "level found for tier classification"))
 
@@ -971,9 +971,9 @@ assign_variant_top_tiers_ttspecific <- function(
     primary_site = "Lung") {
 
   invisible(assertthat::assert_that(
-    primary_site %in% pcgrr::tumor_sites,
+    primary_site %in% tumor_sites,
     msg = paste0("Argument 'primary_site' needs to be one of: ",
-                 paste0(pcgrr::tumor_sites, collapse = ", ")))
+                 paste0(tumor_sites, collapse = ", ")))
   )
 
   ## check that primary_site is not 'Any' for tumor-specific tiering function
@@ -984,8 +984,8 @@ assign_variant_top_tiers_ttspecific <- function(
 
 
   valid_etypes <-
-    pcgrr::bm_evidence$types[
-      !pcgrr::bm_evidence$types %in% c("oncogenic","functional")]
+    bm_evidence$types[
+      !bm_evidence$types %in% c("oncogenic","functional")]
 
   invisible(assertthat::assert_that(
     is.character(etype_for_tiering),
@@ -1023,11 +1023,11 @@ assign_variant_top_tiers_ttspecific <- function(
     only_colnames = F, quiet = T))
 
   ## log length gene variant records (VAR_ID, ENTREZGENE, VARIANT_CLASS)
-  # pcgrr::log4r_debug(paste0(
+  # log4r_debug(paste0(
   #   "assign_variant_top_tiers_ttspecific - number of variants for tier classification: ",
   #   NROW(var_df)))
   #
-  # pcgrr::log4r_debug(paste0(
+  # log4r_debug(paste0(
   #   "assign_variant_top_tiers_ttspecific - etype_for_tiering: ",
   #   paste(etype_for_tiering, collapse = ", ")))
 
@@ -1067,7 +1067,7 @@ assign_variant_top_tiers_ttspecific <- function(
            .data$BM_PRIMARY_SITE == 'Any') &
           tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
           stringr::str_detect(
-            .data$BM_EVIDENCE_LEVEL, pcgrr::bm_evidence$strong_regex
+            .data$BM_EVIDENCE_LEVEL, bm_evidence$strong_regex
           ) ~ as.integer(1),
 
         ## A) Biomarker site _does not_ match primary site of query tumor
@@ -1078,7 +1078,7 @@ assign_variant_top_tiers_ttspecific <- function(
            .data$BM_PRIMARY_SITE != "Any") &
            tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
            stringr::str_detect(
-             .data$BM_EVIDENCE_LEVEL, pcgrr::bm_evidence$strong_regex
+             .data$BM_EVIDENCE_LEVEL, bm_evidence$strong_regex
            ) ~ as.integer(2),
 
         ## A) Biomarker site _matches_ primary site of query tumor
@@ -1087,7 +1087,7 @@ assign_variant_top_tiers_ttspecific <- function(
         .data$BM_PRIMARY_SITE == primary_site &
           tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
           stringr::str_detect(
-            .data$BM_EVIDENCE_LEVEL, pcgrr::bm_evidence$weak_regex
+            .data$BM_EVIDENCE_LEVEL, bm_evidence$weak_regex
           ) ~ as.integer(2),
 
         ## A) Biomarker site _does not_ match primary site of query tumor
@@ -1097,7 +1097,7 @@ assign_variant_top_tiers_ttspecific <- function(
            .data$BM_PRIMARY_SITE != "Any" &
           tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
           stringr::str_detect(
-            .data$BM_EVIDENCE_LEVEL, pcgrr::bm_evidence$weak_regex
+            .data$BM_EVIDENCE_LEVEL, bm_evidence$weak_regex
           ) ~ as.integer(3),
         TRUE ~ as.integer(100)
 
@@ -1122,7 +1122,7 @@ assign_variant_top_tiers_ttspecific <- function(
        NROW(var_df) > 0) {
 
       ## log Number of rows in var_df
-      pcgrr::log4r_debug(paste0(
+      log4r_debug(paste0(
         "assign_variant_top_tiers_ttspecific - number of variants in var_df: ",
         NROW(var_df)))
 
@@ -1135,7 +1135,7 @@ assign_variant_top_tiers_ttspecific <- function(
         dplyr::distinct()
 
       ## log numbr of rows in tmp
-      # pcgrr::log4r_debug(paste0(
+      # log4r_debug(paste0(
       #   "assign_variant_top_tiers_ttspecific - number of unique variants in var_df: ",
       #   NROW(tmp)))
 
@@ -1166,7 +1166,7 @@ assign_variant_top_tiers_ttspecific <- function(
   }else{
     ## if no biomarker evidence items with specified confidence level are
     ## available, assign NA tier status to all variants
-    pcgrr::log4r_debug(
+    log4r_debug(
       paste0("No biomarker evidence items with specified confidence ",
              "level found for tier classification"))
 
@@ -1227,9 +1227,9 @@ assign_bm_tier_support_ttspecific <- function(
   )
 
   invisible(assertthat::assert_that(
-    primary_site %in% pcgrr::tumor_sites,
+    primary_site %in% tumor_sites,
     msg = paste0("Argument 'primary_site' needs to be one of: ",
-                 paste0(pcgrr::tumor_sites, collapse = ", ")))
+                 paste0(tumor_sites, collapse = ", ")))
   )
 
   ## check that primary_site is not 'Any' for tumor-specific tiering function
@@ -1251,7 +1251,7 @@ assign_bm_tier_support_ttspecific <- function(
       "ACTIONABILITY_TIER"),
     only_colnames = F, quiet = T)
 
-  pcgrr::log4r_debug(paste0(
+  log4r_debug(paste0(
     "assign_bm_tier_support_ttspecific - etype_for_tiering: ",
     paste(etype_for_tiering, collapse = ", ")))
 
@@ -1304,7 +1304,7 @@ assign_bm_tier_support_ttspecific <- function(
               (.data$BM_PRIMARY_SITE == primary_site |
                  .data$BM_PRIMARY_SITE == "Any") &
               stringr::str_detect(
-                .data$BM_EVIDENCE_LEVEL, pcgrr::bm_evidence$strong_regex) ~ "tier-defining",
+                .data$BM_EVIDENCE_LEVEL, bm_evidence$strong_regex) ~ "tier-defining",
 
             ## A) Biomarker site _matches_ primary site of query tumor
             ## B) weak evidence - evidence levels C/D/E
@@ -1314,7 +1314,7 @@ assign_bm_tier_support_ttspecific <- function(
               (.data$BM_PRIMARY_SITE == primary_site |
                  .data$BM_PRIMARY_SITE == "Any") &
               stringr::str_detect(
-                .data$BM_EVIDENCE_LEVEL, pcgrr::bm_evidence$weak_regex) ~ "additional",
+                .data$BM_EVIDENCE_LEVEL, bm_evidence$weak_regex) ~ "additional",
 
 
             ## A) Biomarker site does not _match_ primary site of query tumor
@@ -1325,7 +1325,7 @@ assign_bm_tier_support_ttspecific <- function(
               (.data$BM_PRIMARY_SITE != primary_site &
                  .data$BM_PRIMARY_SITE != "Any") &
               stringr::str_detect(
-                .data$BM_EVIDENCE_LEVEL, pcgrr::bm_evidence$strong_regex) ~ "additional",
+                .data$BM_EVIDENCE_LEVEL, bm_evidence$strong_regex) ~ "additional",
 
 
             ## A) Biomarker site does not _match_ primary site of query tumor
@@ -1336,7 +1336,7 @@ assign_bm_tier_support_ttspecific <- function(
               (.data$BM_PRIMARY_SITE != primary_site &
                  .data$BM_PRIMARY_SITE != "Any") &
               stringr::str_detect(
-                .data$BM_EVIDENCE_LEVEL, pcgrr::bm_evidence$weak_regex) ~ "additional-weak",
+                .data$BM_EVIDENCE_LEVEL, bm_evidence$weak_regex) ~ "additional-weak",
 
             ## 1) Variants with a tier of 2 (potential clinical significance)
 
@@ -1349,7 +1349,7 @@ assign_bm_tier_support_ttspecific <- function(
               (.data$BM_PRIMARY_SITE != primary_site |
                  .data$BM_PRIMARY_SITE == "Any") &
               stringr::str_detect(
-                .data$BM_EVIDENCE_LEVEL, pcgrr::bm_evidence$strong_regex) ~ "tier-defining",
+                .data$BM_EVIDENCE_LEVEL, bm_evidence$strong_regex) ~ "tier-defining",
 
             ## A) Biomarker site _matches_ primary site of query tumor
             ## B) weak evidence - evidence levels C/D/E
@@ -1359,7 +1359,7 @@ assign_bm_tier_support_ttspecific <- function(
               (.data$BM_PRIMARY_SITE == primary_site &
                  .data$BM_PRIMARY_SITE != "Any") &
               stringr::str_detect(
-                .data$BM_EVIDENCE_LEVEL, pcgrr::bm_evidence$weak_regex) ~ "tier-defining",
+                .data$BM_EVIDENCE_LEVEL, bm_evidence$weak_regex) ~ "tier-defining",
 
 
             ## A) Biomarker site does not _match_ primary site of query tumor
@@ -1370,7 +1370,7 @@ assign_bm_tier_support_ttspecific <- function(
               (.data$BM_PRIMARY_SITE != primary_site &
                  .data$BM_PRIMARY_SITE != "Any") &
               stringr::str_detect(
-                .data$BM_EVIDENCE_LEVEL, pcgrr::bm_evidence$weak_regex) ~ "additional",
+                .data$BM_EVIDENCE_LEVEL, bm_evidence$weak_regex) ~ "additional",
 
             ## any evidence that matches tier 3 is tier-defining
             .data$ACTIONABILITY_TIER == 3 &
@@ -1447,7 +1447,7 @@ assign_bm_tier_support_ttagnostic <- function(
       "ACTIONABILITY_TIER"),
     only_colnames = F, quiet = T)
 
-  pcgrr::log4r_debug(paste0(
+  log4r_debug(paste0(
     "assign_bm_tier_support_ttagnostic - etype_for_tiering: ",
     paste(etype_for_tiering, collapse = ", ")))
 

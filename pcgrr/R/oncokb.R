@@ -282,7 +282,7 @@ extract_therapeutic_evidence <-
       })
 
     therapeutic_df <-
-      pcgrr::clean_oncokb_evidence(
+      clean_oncokb_evidence(
         evidence_df = therapeutic_df,
         oncokb_root_gene =
           oncokb_annotation$query$hugoSymbol,
@@ -365,7 +365,7 @@ extract_diagnostic_evidence <- function(
     })
 
   diagnostic_df <-
-    pcgrr::clean_oncokb_evidence(
+    clean_oncokb_evidence(
       evidence_df = diagnostic_df,
       gene = gene,
       oncokb_root_gene =
@@ -448,7 +448,7 @@ extract_prognostic_evidence <- function(
   })
 
   prognostic_df <-
-    pcgrr::clean_oncokb_evidence(
+    clean_oncokb_evidence(
       evidence_df = prognostic_df,
       gene = gene,
       oncokb_root_gene =
@@ -584,13 +584,13 @@ extract_complete_annotation <- function(
     match_by = "hgvsp") {
 
   dplyr::bind_rows(
-    pcgrr::extract_therapeutic_evidence(
+    extract_therapeutic_evidence(
       oncokb_annotation, gene, alteration,
       vartype, oncotree_code, variant_id, match_by),
-    pcgrr::extract_diagnostic_evidence(
+    extract_diagnostic_evidence(
       oncokb_annotation, gene, alteration,
       vartype, oncotree_code, variant_id, match_by),
-    pcgrr::extract_prognostic_evidence(
+    extract_prognostic_evidence(
       oncokb_annotation, gene, alteration,
       vartype, oncotree_code, variant_id, match_by))
 
@@ -603,7 +603,7 @@ extract_complete_annotation <- function(
 #' @param protein_change Protein change in short format (e.g., "V600E")
 #' @param oncotree_code OncoTree code/name (e.g., "SKIN", "BREAST")
 #' @param oncokb_token OncoKB API token
-#' @param base_api_url Optional base URL for OncoKB API (default: pcgrr::oncokb_base_api_url)
+#' @param base_api_url Optional base URL for OncoKB API (default: oncokb_base_api_url)
 #' @param reference_genome Genome build, either "GRCh37" or "GRCh38" (default: "GRCh38")
 #' @return List containing the complete JSON response from OncoKB API
 #'
@@ -627,7 +627,7 @@ fetch_oncokb_hgvsp_annotation <-
 
     # API endpoint
     base_url <- if (is.null(base_api_url)) {
-      glue::glue("{pcgrr::oncokb_base_api_url}mutations/byProteinChange")
+      glue::glue("{oncokb_base_api_url}mutations/byProteinChange")
     } else {
       glue::glue("{base_api_url}mutations/byProteinChange")
     }
@@ -698,7 +698,7 @@ fetch_oncokb_hgvsp_annotation <-
 #' @param oncotree_code Tumor type name
 #' @param variant_origin somatic/germline
 #' @param oncokb_token OncoKB API token
-#' @param base_api_url Optional base URL for OncoKB API (default: pcgrr::oncokb_base_api_url)
+#' @param base_api_url Optional base URL for OncoKB API (default: oncokb_base_api_url)
 #' @param reference_genome Genome build, either "GRCh37" or "GRCh38" (default: "GRCh38")
 #' @return List containing the complete JSON response from OncoKB API
 #'
@@ -727,10 +727,10 @@ fetch_oncokb_genomic_annotation <-
 
   # API endpoint
   base_url <-
-    glue::glue("{pcgrr::oncokb_base_api_url}mutations/byHGVSg")
+    glue::glue("{oncokb_base_api_url}mutations/byHGVSg")
   if(variant_origin == "germline"){
     base_url <-
-      glue::glue("{pcgrr::oncokb_base_api_url}germline/mutations/byHGVSg")
+      glue::glue("{oncokb_base_api_url}germline/mutations/byHGVSg")
   }
   if (!is.null(base_api_url)) {
     base_url <- glue::glue("{base_api_url}mutations/byHGVSg")
@@ -801,7 +801,7 @@ fetch_oncokb_genomic_annotation <-
 #' @param hugo_symbol_b Second gene in fusion (3' partner)
 #' @param oncotree_code OncoTree code/name (e.g., "SKIN", "BREAST")
 #' @param oncokb_token OncoKB API token
-#' @param base_api_url Optional base URL for OncoKB API (default: pcgrr::oncokb_base_api_url)
+#' @param base_api_url Optional base URL for OncoKB API (default: oncokb_base_api_url)
 #' @param structural_variant_type Type of structural variant (default: "FUSION")
 #' @param is_functional_fusion Whether fusion is functional (default: TRUE)
 #' @return List containing the complete JSON response from OncoKB API
@@ -825,7 +825,7 @@ fetch_oncokb_fusion_annotation <-
 
     # API endpoint
     base_url <- glue::glue(
-      "{pcgrr::oncokb_base_api_url}structuralVariants")
+      "{oncokb_base_api_url}structuralVariants")
     if (!is.null(base_api_url)) {
       base_url <- glue::glue("{base_api_url}structuralVariants")
     }
@@ -911,7 +911,7 @@ fetch_oncokb_cna_annotation <- function(
 
   # Validate inputs
   if (missing(oncokb_token) || is.null(oncokb_token) || oncokb_token == "") {
-    pcgrr::log4r_fatal("OncoKB token is required")
+    log4r_fatal("OncoKB token is required")
   }
 
   # Map CNA type to OncoKB copyNameAlterationType
@@ -921,7 +921,7 @@ fetch_oncokb_cna_annotation <- function(
   )
 
   if (!cna_type %in% names(cna_type_map)) {
-    pcgrr::log4r_fatal(
+    log4r_fatal(
       sprintf(
         paste0("Invalid CNA type: %s. Must be 'Amplification'",
                "or 'Deletion'", cna_type)))
@@ -929,7 +929,7 @@ fetch_oncokb_cna_annotation <- function(
 
   # API endpoint
   base_url <- glue::glue(
-    "{pcgrr::oncokb_base_api_url}copyNumberAlterations")
+    "{oncokb_base_api_url}copyNumberAlterations")
 
   # Build query parameters
   query_params <- list(
@@ -996,7 +996,7 @@ fetch_oncokb_cna_annotation <- function(
 #' @param var_calls Data frame with variant calls (used for mapping of variant alteration)
 #' @param oncotree_code OncoTree code used for OncoKB annotation
 #' @param oncokb_token OncoKB API token
-#' @param oncokb_base_api_url Optional base URL for OncoKB API (default: pcgrr::oncokb_base_api_url)
+#' @param oncokb_base_api_url Optional base URL for OncoKB API (default: oncokb_base_api_url)
 #' @param rate_limiting_delay Delay in seconds between API calls to respect rate limits
 #' (default: 1 second)
 #' @return Data frame with variant information and corresponding JSON annotations
@@ -1013,7 +1013,7 @@ process_oncokb_maf <-
 
     # Validate that at least one MAF file is provided
     if (is.null(maf_file_hgvsp) && is.null(maf_file_hgvsg)) {
-      pcgrr::log4r_fatal(
+      log4r_fatal(
         "At least one MAF file (HGVSp or HGVSg) must be provided")
     }
 
@@ -1023,7 +1023,7 @@ process_oncokb_maf <-
         nrow(var_calls) == 0 ||
         !all(c("VAR_ID", "ALTERATION","ENTREZGENE") %in%
              colnames(var_calls))) {
-      pcgrr::log4r_fatal(
+      log4r_fatal(
         paste0("var_calls must be a non-null data frame with ",
                "'VAR_ID','ENTREZGENE' and 'ALTERATION' columns"))
     }
@@ -1107,14 +1107,14 @@ process_oncokb_maf <-
           )
 
           ## log the symbol and hgvsp
-          pcgrr::log4r_debug(
+          log4r_debug(
             sprintf("OncoKB web API retrieval - fetching annotation %d: %s %s",
                     length(variant_keys) + 1,
                     var$SYMBOL,
                     var$HGVSp_Short))
 
           # Fetch annotation via protein change
-          annotation <- pcgrr::fetch_oncokb_hgvsp_annotation(
+          annotation <- fetch_oncokb_hgvsp_annotation(
             hugo_symbol = var$SYMBOL,
             protein_change = var$HGVSp_Short,
             oncotree_code = oncotree_code,
@@ -1124,7 +1124,7 @@ process_oncokb_maf <-
 
           if (!is.null(annotation)) {
 
-            evidence_df <- pcgrr::extract_complete_annotation(
+            evidence_df <- extract_complete_annotation(
               oncokb_annotation = annotation,
               gene = var$SYMBOL,
               oncotree_code = oncotree_code,
@@ -1225,14 +1225,14 @@ process_oncokb_maf <-
           )
 
           ## log the symbol and hgvsp
-          pcgrr::log4r_debug(
+          log4r_debug(
             sprintf("OncoKB web API retrieval - fetching annotation %d: %s %s",
                           length(variant_keys) + 1,
                           var$SYMBOL,
                           var$HGVSg))
 
           # Fetch annotation via genomic change
-          annotation <- pcgrr::fetch_oncokb_genomic_annotation(
+          annotation <- fetch_oncokb_genomic_annotation(
             hgvsg = var$HGVSg,
             oncotree_code = oncotree_code,
             variant_origin = "somatic",
@@ -1242,7 +1242,7 @@ process_oncokb_maf <-
 
           if (!is.null(annotation)) {
 
-            evidence_df <- pcgrr::extract_complete_annotation(
+            evidence_df <- extract_complete_annotation(
               oncokb_annotation = annotation,
               gene = var$SYMBOL,
               oncotree_code = oncotree_code,
@@ -1320,7 +1320,7 @@ process_oncokb_fusion <-
     )
 
     if (is.null(oncokb_token) || oncokb_token == "") {
-      pcgrr::log4r_fatal(
+      log4r_fatal(
         "OncoKB token is required. Obtain from https://www.oncokb.org/account/settings")
     }
 
@@ -1374,7 +1374,7 @@ process_oncokb_fusion <-
       # Parse fusion partners
       fusion_partners <- strsplit(fusion$Fusion, "-")[[1]]
       if (length(fusion_partners) != 2) {
-        pcgrr::log4r_warn(
+        log4r_warn(
           sprintf("Cannot parse fusion: %s", fusion$Fusion))
         next
       }
@@ -1387,13 +1387,13 @@ process_oncokb_fusion <-
       gene_a <- fusion_partners[1]
       gene_b <- fusion_partners[2]
 
-      pcgrr::log4r_debug(
+      log4r_debug(
         sprintf("Fetching annotation %d/%d: %s-%s",
                 i, nrow(annotated_fusions),
                 gene_a, gene_b))
 
       # Fetch annotation
-      annotation <- pcgrr::fetch_oncokb_fusion_annotation(
+      annotation <- fetch_oncokb_fusion_annotation(
         hugo_symbol_a = gene_a,
         hugo_symbol_b = gene_b,
         oncotree_code = oncotree_code,
@@ -1406,7 +1406,7 @@ process_oncokb_fusion <-
         ## add each complex annotation object to the results object
         results[[i]] <- annotation
 
-        evidence_df <- pcgrr::extract_complete_annotation(
+        evidence_df <- extract_complete_annotation(
           oncokb_annotation = annotation,
           gene = fusion$Fusion,
           oncotree_code = oncotree_code,
@@ -1479,7 +1479,7 @@ process_oncokb_cna <-
     )
 
     if (is.null(oncokb_token) || oncokb_token == "") {
-      pcgrr::log4r_fatal(
+      log4r_fatal(
         "OncoKB token is required. Obtain from https://www.oncokb.org/account/settings")
     }
 
@@ -1537,14 +1537,14 @@ process_oncokb_cna <-
     for (i in 1:nrow(annotated_cnas)) {
       cna <- annotated_cnas[i, ]
 
-      pcgrr::log4r_debug(
+      log4r_debug(
         sprintf("Fetching annotation %d/%d: %s %s",
                 i, nrow(annotated_cnas),
                 cna$Hugo_Symbol,
                 cna$Copy_Number_Alteration))
 
       # Fetch annotation
-      annotation <- pcgrr::fetch_oncokb_cna_annotation(
+      annotation <- fetch_oncokb_cna_annotation(
         hugo_symbol = cna$Hugo_Symbol,
         cna_type = cna$Copy_Number_Alteration,
         oncotree_code = oncotree_code,
@@ -1561,7 +1561,7 @@ process_oncokb_cna <-
 
       if (!is.null(annotation)) {
 
-        evidence_df <- pcgrr::extract_complete_annotation(
+        evidence_df <- extract_complete_annotation(
           oncokb_annotation = annotation,
           gene = cna$Hugo_Symbol,
           oncotree_code = oncotree_code,

@@ -17,7 +17,7 @@ predict_msi_status <- function(variant_set,
                                target_size_mb,
                                sample_name = "Test") {
 
-  mutations_valid <- pcgrr::get_valid_chromosomes(
+  mutations_valid <- get_valid_chromosomes(
     variant_set,
     chromosome_column = "CHROM",
     bsg = ref_data[["assembly"]][["bsg"]])
@@ -294,9 +294,9 @@ predict_msi_status <- function(variant_set,
     msi_stats$predicted_class <- "MSI.H (Microsatellite instability - high)"
     msi_stats$vb <- "MSI - High"
   }
-  pcgrr::log4r_info(paste0("Predicted MSI status: ",
+  log4r_info(paste0("Predicted MSI status: ",
                            msi_stats$predicted_class))
-  pcgrr::log4r_info(paste0("MSI - Indel fraction: ",
+  log4r_info(paste0("MSI - Indel fraction: ",
                            round(msi_stats$fracNonRepeatIndels, digits = 3)))
   msi_stats <- msi_stats |>
     dplyr::rename(sample_id = sample_name) |>
@@ -324,20 +324,20 @@ generate_report_data_msi <- function(
     ref_data = NULL,
     settings = NULL) {
 
-  pcg_report_msi <- pcgrr::init_msi_content()
+  pcg_report_msi <- init_msi_content()
 
-  pcgrr::log4r_info("------")
-  pcgrr::log4r_info("Predicting microsatellite instability status")
+  log4r_info("------")
+  log4r_info("Predicting microsatellite instability status")
 
   msi_sample_calls <- variant_set |>
     dplyr::filter(.data$EXONIC_STATUS == "exonic")
-  pcgrr::log4r_info(
+  log4r_info(
     paste0("n = ",
            nrow(msi_sample_calls),
            " exonic variants used for MSI prediction"))
   if (nrow(msi_sample_calls) >= 200) {
     pcg_report_msi[["prediction"]] <-
-      pcgrr::predict_msi_status(
+      predict_msi_status(
         variant_set = msi_sample_calls,
         ref_data,
         msi_prediction_model = ref_data[["msi"]][["model"]],
@@ -349,7 +349,7 @@ generate_report_data_msi <- function(
     pcg_report_msi[["eval"]] <- TRUE
   }
   else{
-    pcgrr::log4r_info("Too few variants for MSI prediction (n < 200)")
+    log4r_info("Too few variants for MSI prediction (n < 200)")
     pcg_report_msi[["missing_data"]] <- TRUE
   }
 
@@ -369,7 +369,7 @@ generate_report_data_msi <- function(
 msi_indel_fraction_plot <- function(tcga_msi_dataset, indel_fraction) {
 
   color_vec <- utils::head(
-    pcgrr::color_palette[["multi"]][["values"]], 2)
+    color_palette[["multi"]][["values"]], 2)
   names(color_vec) <- c("MSS", "MSI.H")
 
   p <- ggplot2::ggplot(data = tcga_msi_dataset) +
@@ -425,7 +425,7 @@ msi_indel_fraction_plot <- function(tcga_msi_dataset, indel_fraction) {
 msi_indel_load_plot <- function(tcga_msi_dataset, indel_load) {
 
   color_vec <- utils::head(
-    pcgrr::color_palette[["multi"]][["values"]], 2)
+    color_palette[["multi"]][["values"]], 2)
   names(color_vec) <- c("MSS", "MSI.H")
 
   p <- ggplot2::ggplot(data = tcga_msi_dataset) +

@@ -31,14 +31,14 @@ build_oncogenicity_col_defs <- function(
   col_defs <- list(
     SYMBOL = reactable::colDef(
       name = "Gene",
-      style = pcgrr::render_symbol_assoc_style(
+      style = render_symbol_assoc_style(
         data, rank_col = symbol_rank_col
       ),
       minWidth = 90
     ),
     ALTERATION = reactable::colDef(
       name = "Alteration",
-      style = pcgrr::render_alteration_clinvar_style(data),
+      style = render_alteration_clinvar_style(data),
       minWidth = 140
     ),
     CONSEQUENCE = reactable::colDef(
@@ -47,13 +47,13 @@ build_oncogenicity_col_defs <- function(
     ),
     ONCOGENICITY = reactable::colDef(
       name = "Oncogenicity",
-      cell = pcgrr::render_oncogenicity_cell(data),
+      cell = render_oncogenicity_cell(data),
       align = "center",
       minWidth = 140
     ),
     VAF_TUMOR = reactable::colDef(
       name = "Allelic Fraction",
-      cell = pcgrr::render_bar_cell(fill_color = "#5D5165"),
+      cell = render_bar_cell(fill_color = "#5D5165"),
       minWidth = 120,
       maxWidth = 170
     ),
@@ -208,7 +208,7 @@ render_bar_cell <- function(
 #'
 #' @return An HTML span element with background color corresponding
 #' to the oncogenicity category, using colors defined in
-#' pcgrr::color_palette$oncogenicity.
+#' color_palette$oncogenicity.
 #'
 #' @export
 #'
@@ -216,8 +216,8 @@ render_oncogenicity_cell <- function(data) {
   function(value, index) {
     if (is.na(value)) return(value)
 
-    levels <- pcgrr::color_palette$oncogenicity$levels
-    colors <- pcgrr::color_palette$oncogenicity$values
+    levels <- color_palette$oncogenicity$levels
+    colors <- color_palette$oncogenicity$values
     bg <- colors[match(value, levels)]
     if (is.na(bg)) bg <- "transparent"
 
@@ -263,8 +263,8 @@ render_oncogenicity_cell <- function(data) {
 render_alteration_clinvar_style <- function(data) {
   function(value, index) {
     clinvar <- data$CLINVAR_CLASSIFICATION[index]
-    levels <- pcgrr::color_palette$pathogenicity_onc$levels
-    colors <- pcgrr::color_palette$pathogenicity_onc$values
+    levels <- color_palette$pathogenicity_onc$levels
+    colors <- color_palette$pathogenicity_onc$values
     bg <- if (!is.na(clinvar)) {
       matched <- colors[match(clinvar, levels)]
       if (!is.na(matched)) matched else "transparent"
@@ -291,13 +291,13 @@ render_alteration_clinvar_style <- function(data) {
 #' @return A function that can be used as a reactable cell renderer
 #' for the SAMPLE_ALTERATION column, which checks the TISSUE_ASSOC_RANK
 #' column in the same row to determine background color based on predefined
-#' breaks and colors in pcgrr::color_palette$cancer_assoc.
+#' breaks and colors in color_palette$cancer_assoc.
 #'
 #' @export
 #'
 render_symbol_assoc_style <- function(data, rank_col = "TISSUE_ASSOC_RANK") {
-  breaks <- pcgrr::color_palette$cancer_assoc$breaks
-  colors <- pcgrr::color_palette$cancer_assoc$values
+  breaks <- color_palette$cancer_assoc$breaks
+  colors <- color_palette$cancer_assoc$values
   function(value, index) {
     rank_val <- data[[rank_col]][index]
     if (is.na(rank_val)) {
@@ -359,10 +359,10 @@ render_alteration_cell <- function(data) {
 render_evidence_level_cell <- function(){
   function(value) {
     if (is.na(value) ||
-        !value %in% names(pcgrr::color_palette$elevel)) {
+        !value %in% names(color_palette$elevel)) {
       return(value)
     }
-    colors <- pcgrr::color_palette$elevel[[value]]
+    colors <- color_palette$elevel[[value]]
     htmltools::span(
       class = "rt-badge",
       style = paste0("background-color:", colors$bg, "; color:", colors$fg, ";"),
@@ -559,7 +559,7 @@ rt_theme <- function(){
     reactable::reactableTheme(
       style = list(fontFamily = "inherit"),
       headerStyle = list(
-        background = pcgrr::color_palette$bg_dark,
+        background = color_palette$bg_dark,
         color = "white",
         fontWeight = "bold",
         fontSize = "0.97em",
@@ -572,7 +572,7 @@ rt_theme <- function(){
         borderRight = "1px solid #e8e8e8"
       ),
       searchInputStyle = list(
-        borderColor = pcgrr::color_palette$bg_dark
+        borderColor = color_palette$bg_dark
       )
   )
   return(theme)
@@ -600,18 +600,18 @@ render_actble_bm_table <- function(
 
   tier_colors <-
     list(
-      t1 = pcgrr::color_palette$tier_sensitivity$values[1],
-      t2 = pcgrr::color_palette$tier_sensitivity$values[2],
-      t3 = pcgrr::color_palette$tier_sensitivity$values[3]
+      t1 = color_palette$tier_sensitivity$values[1],
+      t2 = color_palette$tier_sensitivity$values[2],
+      t3 = color_palette$tier_sensitivity$values[3]
     )
 
   tier_letter <- "T"
   if(clnsig == "therapeutic_resistance"){
     tier_letter <- "R"
     tier_colors <- list(
-      t1 = pcgrr::color_palette$tier_resistance$values[1],
-      t2 = pcgrr::color_palette$tier_resistance$values[2],
-      t3 = pcgrr::color_palette$tier_resistance$values[3]
+      t1 = color_palette$tier_resistance$values[1],
+      t2 = color_palette$tier_resistance$values[2],
+      t3 = color_palette$tier_resistance$values[3]
     )
   }
 
@@ -626,7 +626,7 @@ render_actble_bm_table <- function(
       !all(c("main", "nested") %in% names(rctbl_recs)) ||
       !is.data.frame(rctbl_recs$main) ||
       !is.data.frame(rctbl_recs$nested)) {
-    pcgrr::log4r_fatal(
+    log4r_fatal(
       "rctbl_recs must be a list with 'main' and 'nested' data frames")
   }
 
@@ -656,7 +656,7 @@ render_actble_bm_table <- function(
         "ACTIONABILITY_TIER",
         "BM_TOP_MAPPING_CONFIDENCE")
   } else {
-    pcgrr::log4r_fatal(
+    log4r_fatal(
       paste0("Invalid variant_category: ", variant_category,
              ". Must be one of 'snv_indel', 'cna', or 'fusion'."))
   }
@@ -699,13 +699,13 @@ render_actble_bm_table <- function(
     main_cols <-  list(
       SAMPLE_ALTERATION = reactable::colDef(
         name = "Alteration",
-        cell = pcgrr::render_alteration_cell(
+        cell = render_alteration_cell(
           rctbl_recs$main),
         minWidth = 100
       ),
       BM_SOURCES = reactable::colDef(
         name = "Source",
-        cell = pcgrr::render_source_logos(),
+        cell = render_source_logos(),
         align = "center",
         minWidth = 70
       ),
@@ -719,7 +719,7 @@ render_actble_bm_table <- function(
           "Therapy Match"
         ),
         html = TRUE,
-        style = pcgrr::render_therapy_style(
+        style = render_therapy_style(
           rctbl_recs$main, tier_colors)
       ),
       VAR_ID = reactable::colDef(show = FALSE),
@@ -733,14 +733,14 @@ render_actble_bm_table <- function(
     main_cols = list(
       SAMPLE_ALTERATION = reactable::colDef(
         name = "Alteration",
-        cell = pcgrr::render_alteration_cell(
+        cell = render_alteration_cell(
           rctbl_recs$main),
         minWidth = 140,       # icon + monospace text like "BCR::ABL1 fusion"
         maxWidth = 200
       ),
       BM_SOURCES = reactable::colDef(
         name = "Source",
-        cell = pcgrr::render_source_logos(),
+        cell = render_source_logos(),
         align = "center",
         minWidth = 70
       ),
@@ -752,7 +752,7 @@ render_actble_bm_table <- function(
       ),
       VAF_TUMOR = reactable::colDef(
         name = "Allelic Fraction",
-        cell = pcgrr::render_bar_cell(
+        cell = render_bar_cell(
           fill_color = "#5D5165"),
         minWidth = 100,
         maxWidth = 140
@@ -768,7 +768,7 @@ render_actble_bm_table <- function(
         ),
         html = TRUE,
         minWidth = 200,
-        style = pcgrr::render_therapy_style(
+        style = render_therapy_style(
           rctbl_recs$main,
           tier_colors)
       ),
@@ -785,13 +785,13 @@ render_actble_bm_table <- function(
     main_cols = list(
       SAMPLE_ALTERATION = reactable::colDef(
         name = "Alteration",
-        cell = pcgrr::render_alteration_cell(
+        cell = render_alteration_cell(
           rctbl_recs$main),
         minWidth = 140
       ),
       BM_SOURCES = reactable::colDef(
         name = "Source",
-        cell = pcgrr::render_source_logos(),
+        cell = render_source_logos(),
         align = "center",
         minWidth = 70
         #maxWidth = 105
@@ -812,7 +812,7 @@ render_actble_bm_table <- function(
         ),
         html = TRUE,
         minWidth = 200,
-        style = pcgrr::render_therapy_style(
+        style = render_therapy_style(
           rctbl_recs$main, tier_colors)
       ),
       VAR_ID = reactable::colDef(show = FALSE),
@@ -873,7 +873,7 @@ render_actble_bm_table <- function(
               ACTIONABILITY_TIER = reactable::colDef(
                 name = "Tier",
                 align = "center",
-                cell = pcgrr::render_tier_cell(
+                cell = render_tier_cell(
                   tier_letter = tier_letter,
                   tier_colors = tier_colors
                 ),
@@ -887,13 +887,13 @@ render_actble_bm_table <- function(
               ),
               BM_EVIDENCE_LEVEL = reactable::colDef(
                 name = "Evidence level",
-                cell = pcgrr::render_evidence_level_cell(),
+                cell = render_evidence_level_cell(),
                 align = "center",
                 minWidth = 100
               ),
               BM_EVIDENCE_DESCRIPTION = reactable::colDef(
                 name = "Evidence Description",
-                cell = pcgrr::render_evidence_desc_cell(),
+                cell = render_evidence_desc_cell(),
                 minWidth = 350
               )
             )
@@ -953,16 +953,16 @@ render_progn_bm_table <- function(
 
   tier_colors <-
     list(
-      t1 = pcgrr::color_palette$prognosis$values[2],
-      t2 = pcgrr::color_palette$prognosis$values[2]
+      t1 = color_palette$prognosis$values[2],
+      t2 = color_palette$prognosis$values[2]
     )
 
   tier_letter <- "PP"
   if(clnsig == "prognostic_better"){
     tier_letter <- "PB"
     tier_colors <- list(
-      t1 = pcgrr::color_palette$prognosis$values[1],
-      t2 = pcgrr::color_palette$prognosis$values[1]
+      t1 = color_palette$prognosis$values[1],
+      t2 = color_palette$prognosis$values[1]
     )
   }
 
@@ -977,7 +977,7 @@ render_progn_bm_table <- function(
       !all(c("main", "nested") %in% names(rctbl_recs)) ||
       !is.data.frame(rctbl_recs$main) ||
       !is.data.frame(rctbl_recs$nested)) {
-    pcgrr::log4r_fatal(
+    log4r_fatal(
       "rctbl_recs must be a list with 'main' and 'nested' data frames")
   }
 
@@ -1010,7 +1010,7 @@ render_progn_bm_table <- function(
         "PROGNOSTIC_OUTCOME",
         "BM_TOP_MAPPING_CONFIDENCE")
   } else {
-    pcgrr::log4r_fatal(
+    log4r_fatal(
       paste0("Invalid variant_category: ", variant_category,
              ". Must be one of 'snv_indel', 'cna', or 'fusion'."))
   }
@@ -1052,20 +1052,20 @@ render_progn_bm_table <- function(
     main_cols <-  list(
       SAMPLE_ALTERATION = reactable::colDef(
         name = "Alteration",
-        cell = pcgrr::render_alteration_cell(
+        cell = render_alteration_cell(
           rctbl_recs$main),
         minWidth = 100
       ),
       BM_SOURCES = reactable::colDef(
         name = "Source",
-        cell = pcgrr::render_source_logos(),
+        cell = render_source_logos(),
         align = "center",
         minWidth = 70
       ),
       PROGNOSTIC_OUTCOME = reactable::colDef(
         name = "Prognostic Outcome",
         html = TRUE,
-        style = pcgrr::render_prognostic_outcome(
+        style = render_prognostic_outcome(
           rctbl_recs$main, tier_colors)
       ),
       VAR_ID = reactable::colDef(show = FALSE),
@@ -1079,14 +1079,14 @@ render_progn_bm_table <- function(
     main_cols = list(
       SAMPLE_ALTERATION = reactable::colDef(
         name = "Alteration",
-        cell = pcgrr::render_alteration_cell(
+        cell = render_alteration_cell(
           rctbl_recs$main),
         minWidth = 140,   # icon + monospace text like "BCR::ABL1 fusion"
         maxWidth = 200
       ),
       BM_SOURCES = reactable::colDef(
         name = "Source",
-        cell = pcgrr::render_source_logos(),
+        cell = render_source_logos(),
         align = "center",
         minWidth = 70
       ),
@@ -1098,7 +1098,7 @@ render_progn_bm_table <- function(
       ),
       VAF_TUMOR = reactable::colDef(
         name = "Allelic Fraction",
-        cell = pcgrr::render_bar_cell(
+        cell = render_bar_cell(
           fill_color = "#5D5165"),
         minWidth = 100,
         maxWidth = 140
@@ -1106,7 +1106,7 @@ render_progn_bm_table <- function(
       PROGNOSTIC_OUTCOME = reactable::colDef(
         name = "Prognostic Outcome",
         html = TRUE,
-        style = pcgrr::render_prognostic_outcome(
+        style = render_prognostic_outcome(
           rctbl_recs$main, tier_colors)
       ),
       VAR_ID = reactable::colDef(show = FALSE),
@@ -1121,13 +1121,13 @@ render_progn_bm_table <- function(
     main_cols = list(
       SAMPLE_ALTERATION = reactable::colDef(
         name = "Alteration",
-        cell = pcgrr::render_alteration_cell(
+        cell = render_alteration_cell(
           rctbl_recs$main),
         minWidth = 140
       ),
       BM_SOURCES = reactable::colDef(
         name = "Source",
-        cell = pcgrr::render_source_logos(),
+        cell = render_source_logos(),
         align = "center",
         minWidth = 70
         #maxWidth = 105
@@ -1140,7 +1140,7 @@ render_progn_bm_table <- function(
       PROGNOSTIC_OUTCOME = reactable::colDef(
         name = "Prognostic Outcome",
         html = TRUE,
-        style = pcgrr::render_prognostic_outcome(
+        style = render_prognostic_outcome(
           rctbl_recs$main, tier_colors)
       ),
       VAR_ID = reactable::colDef(show = FALSE),
@@ -1196,13 +1196,13 @@ render_progn_bm_table <- function(
             ),
             BM_EVIDENCE_LEVEL = reactable::colDef(
               name = "Evidence level",
-              cell = pcgrr::render_evidence_level_cell(),
+              cell = render_evidence_level_cell(),
               align = "center",
               minWidth = 100
             ),
             BM_EVIDENCE_DESCRIPTION = reactable::colDef(
               name = "Evidence Description",
-              cell = pcgrr::render_evidence_desc_cell(),
+              cell = render_evidence_desc_cell(),
               minWidth = 350
             ),
             BM_CLINICAL_SIGNIFICANCE = reactable::colDef(
@@ -1265,16 +1265,16 @@ render_diagn_bm_table <- function(
 
   tier_colors <-
     list(
-      t1 = pcgrr::color_palette$diagnosis,
-      t2 = pcgrr::color_palette$diagnosis
+      t1 = color_palette$diagnosis,
+      t2 = color_palette$diagnosis
     )
 
   tier_letter <- "D"
   # if(clnsig == "prognostic_better"){
   #   tier_letter <- "PB"
   #   tier_colors <- list(
-  #     t1 = pcgrr::color_palette$prognosis$values[1],
-  #     t2 = pcgrr::color_palette$prognosis$values[1]
+  #     t1 = color_palette$prognosis$values[1],
+  #     t2 = color_palette$prognosis$values[1]
   #   )
   # }
 
@@ -1289,7 +1289,7 @@ render_diagn_bm_table <- function(
       !all(c("main", "nested") %in% names(rctbl_recs)) ||
       !is.data.frame(rctbl_recs$main) ||
       !is.data.frame(rctbl_recs$nested)) {
-    pcgrr::log4r_fatal(
+    log4r_fatal(
       "rctbl_recs must be a list with 'main' and 'nested' data frames")
   }
 
@@ -1322,7 +1322,7 @@ render_diagn_bm_table <- function(
         "DIAGNOSTIC_EVIDENCE",
         "BM_TOP_MAPPING_CONFIDENCE")
   } else {
-    pcgrr::log4r_fatal(
+    log4r_fatal(
       paste0("Invalid variant_category: ", variant_category,
              ". Must be one of 'snv_indel', 'cna', or 'fusion'."))
   }
@@ -1364,20 +1364,20 @@ render_diagn_bm_table <- function(
     main_cols <-  list(
       SAMPLE_ALTERATION = reactable::colDef(
         name = "Alteration",
-        cell = pcgrr::render_alteration_cell(
+        cell = render_alteration_cell(
           rctbl_recs$main),
         minWidth = 100
       ),
       BM_SOURCES = reactable::colDef(
         name = "Source",
-        cell = pcgrr::render_source_logos(),
+        cell = render_source_logos(),
         align = "center",
         minWidth = 70
       ),
       DIAGNOSTIC_EVIDENCE = reactable::colDef(
         name = "Diagnostic Evidence",
         html = TRUE,
-        style = pcgrr::render_diagnosis(
+        style = render_diagnosis(
           rctbl_recs$main, tier_colors)
       ),
       VAR_ID = reactable::colDef(show = FALSE),
@@ -1391,14 +1391,14 @@ render_diagn_bm_table <- function(
     main_cols = list(
       SAMPLE_ALTERATION = reactable::colDef(
         name = "Alteration",
-        cell = pcgrr::render_alteration_cell(
+        cell = render_alteration_cell(
           rctbl_recs$main),
         minWidth = 140,   # icon + monospace text like "BCR::ABL1 fusion"
         maxWidth = 200
       ),
       BM_SOURCES = reactable::colDef(
         name = "Source",
-        cell = pcgrr::render_source_logos(),
+        cell = render_source_logos(),
         align = "center",
         minWidth = 70
       ),
@@ -1409,7 +1409,7 @@ render_diagn_bm_table <- function(
       ),
       VAF_TUMOR = reactable::colDef(
         name = "Allelic Fraction",
-        cell = pcgrr::render_bar_cell(
+        cell = render_bar_cell(
           fill_color = "#5D5165"),
         minWidth = 100,
         maxWidth = 140
@@ -1417,7 +1417,7 @@ render_diagn_bm_table <- function(
       DIAGNOSTIC_EVIDENCE = reactable::colDef(
         name = "Diagnostic Evidence",
         html = TRUE,
-        style = pcgrr::render_diagnosis(
+        style = render_diagnosis(
           rctbl_recs$main, tier_colors)
       ),
       VAR_ID = reactable::colDef(show = FALSE),
@@ -1432,13 +1432,13 @@ render_diagn_bm_table <- function(
     main_cols = list(
       SAMPLE_ALTERATION = reactable::colDef(
         name = "Alteration",
-        cell = pcgrr::render_alteration_cell(
+        cell = render_alteration_cell(
           rctbl_recs$main),
         minWidth = 140
       ),
       BM_SOURCES = reactable::colDef(
         name = "Source",
-        cell = pcgrr::render_source_logos(),
+        cell = render_source_logos(),
         align = "center",
         minWidth = 70
         #maxWidth = 105
@@ -1451,7 +1451,7 @@ render_diagn_bm_table <- function(
       DIAGNOSTIC_EVIDENCE = reactable::colDef(
         name = "Diagnostic Evidence",
         html = TRUE,
-        style = pcgrr::render_diagnosis(
+        style = render_diagnosis(
           rctbl_recs$main, tier_colors)
       ),
       VAR_ID = reactable::colDef(show = FALSE),
@@ -1511,13 +1511,13 @@ render_diagn_bm_table <- function(
             ),
             BM_EVIDENCE_LEVEL = reactable::colDef(
               name = "Evidence level",
-              cell = pcgrr::render_evidence_level_cell(),
+              cell = render_evidence_level_cell(),
               align = "center",
               minWidth = 100
             ),
             BM_EVIDENCE_DESCRIPTION = reactable::colDef(
               name = "Evidence Description",
-              cell = pcgrr::render_evidence_desc_cell(),
+              cell = render_evidence_desc_cell(),
               minWidth = 350
             )
           ),
