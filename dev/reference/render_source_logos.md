@@ -9,13 +9,6 @@ by Claude Opus 4.6 with some manual tweaks)
 render_source_logos()
 ```
 
-## Arguments
-
-- value:
-
-  A string with source database names separated by "\|" (e.g.
-  "civic\|oncokb"), or NA/empty string for no sources.
-
 ## Value
 
 An HTML div element containing the corresponding logos, or an empty

@@ -43,6 +43,8 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/assign_variant_tiers_snv_indel.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/assign_variant_top_tiers_ttagnostic.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/assign_variant_top_tiers_ttspecific.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/biomarker_evidence.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/bm_categories.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/bm_evidence.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/bp_junction_transcript_overlap.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/build_oncogenicity_col_defs.html</loc></url>
@@ -85,7 +87,6 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/generate_report_data_rainfall.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/generate_report_data_signatures.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/generate_report_data_tmb.html</loc></url>
-<url><loc>https://sigven.github.io/pcgr/dev/reference/generate_report_data_trials.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/generate_tier_tsv.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/germline_filter_levels.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/get_druggable_fusion_partner.html</loc></url>
@@ -196,6 +197,7 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/tier_af_distribution.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/tmb_doc_note.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/tsv_cols.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/tumor_sites.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/update_report.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/vaf_plot.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/variant_db_url.html</loc></url>

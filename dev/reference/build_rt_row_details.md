@@ -30,6 +30,11 @@ build_rt_row_details(
   "CLINVAR_CLASSIFICATION", "TISSUE_ASSOC_RANK", etc.) to exclude from
   details
 
+- font_size:
+
+  CSS font-size string applied to the detail card values (default:
+  "0.94em")
+
 ## Value
 
 A JavaScript function as a string that can be passed to reactable's

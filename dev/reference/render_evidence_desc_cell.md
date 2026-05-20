@@ -9,12 +9,6 @@ Claude Opus 4.6 with some manual tweaks)
 render_evidence_desc_cell()
 ```
 
-## Arguments
-
-- value:
-
-  Evidence description text
-
 ## Value
 
 An HTML div element that shows the first 200 characters of the

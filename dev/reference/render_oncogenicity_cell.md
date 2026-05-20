@@ -11,12 +11,12 @@ render_oncogenicity_cell(data)
 
 ## Arguments
 
-- value:
+- data:
 
-  Oncogenicity category (e.g. "Oncogenic", "Likely Oncogenic", etc.)
+  The main data frame (passed via closure)
 
 ## Value
 
 An HTML span element with background color corresponding to the
 oncogenicity category, using colors defined in
-pcgrr::color_palette\$oncogenicity.
+color_palette\$oncogenicity.

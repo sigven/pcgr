@@ -9,12 +9,6 @@ manual tweaks)
 render_evidence_level_cell()
 ```
 
-## Arguments
-
-- value:
-
-  Evidence level value (A, B, C, D, E)
-
 ## Value
 
 An HTML div element styled as a badge with background and text color

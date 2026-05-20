@@ -43,7 +43,7 @@ process_oncokb_maf(
 
 - oncokb_base_api_url:
 
-  Optional base URL for OncoKB API (default: pcgrr::oncokb_base_api_url)
+  Optional base URL for OncoKB API (default: oncokb_base_api_url)
 
 - rate_limiting_delay:
 

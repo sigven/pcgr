@@ -35,7 +35,7 @@ fetch_oncokb_hgvsp_annotation(
 
 - base_api_url:
 
-  Optional base URL for OncoKB API (default: pcgrr::oncokb_base_api_url)
+  Optional base URL for OncoKB API (default: oncokb_base_api_url)
 
 - reference_genome:
 

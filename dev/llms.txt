@@ -269,6 +269,10 @@ sigven AT ifi.uio.no
   : Assign top tiers of clinical significance (AMP/ASCO/CAP framework)
   to variants based on data from biomarker evidence items (tumor
   type-specific query)
+- [`biomarker_evidence`](https://sigven.github.io/pcgr/dev/reference/biomarker_evidence.md)
+  : Fixed data types and levels for biomarker evidence items
+- [`bm_categories`](https://sigven.github.io/pcgr/dev/reference/bm_categories.md)
+  : Named list of biomarker categories used for variant classification
 - [`bm_evidence`](https://sigven.github.io/pcgr/dev/reference/bm_evidence.md)
   : Fixed data types/categories used for biomarker evidence, e.g.
   'types','levels' etc.
@@ -373,9 +377,6 @@ sigven AT ifi.uio.no
   : Function that generates mutational signatures data for PCGR report
 - [`generate_report_data_tmb()`](https://sigven.github.io/pcgr/dev/reference/generate_report_data_tmb.md)
   : Function that reads TSV file with TMB estimates from sample
-- [`generate_report_data_trials()`](https://sigven.github.io/pcgr/dev/reference/generate_report_data_trials.md)
-  : Function that retrieves relevant (interventional based on molecular
-  target) clinical trials for a given tumor type
 - [`generate_tier_tsv()`](https://sigven.github.io/pcgr/dev/reference/generate_tier_tsv.md)
   : Function that generates dense and tiered annotated variant datasets
 - [`germline_filter_levels`](https://sigven.github.io/pcgr/dev/reference/germline_filter_levels.md)
@@ -667,6 +668,8 @@ sigven AT ifi.uio.no
   annotation
 - [`tsv_cols`](https://sigven.github.io/pcgr/dev/reference/tsv_cols.md)
   : TSV columns
+- [`tumor_sites`](https://sigven.github.io/pcgr/dev/reference/tumor_sites.md)
+  : Character vector of tumor site names used in PCGR/CPSR reports
 - [`update_report()`](https://sigven.github.io/pcgr/dev/reference/update_report.md)
   : Function that updates a PCGR/CPSR report object structure
 - [`vaf_plot()`](https://sigven.github.io/pcgr/dev/reference/vaf_plot.md)
