@@ -12,6 +12,7 @@ utils::globalVariables(c(
   "exonic_filter_levels",
   "germline_filter_levels",
   "immune_celltypes",
+  "oncokb_base_api_url",
   "table_display_cols",
   "tcga_cohorts",
   "tsv_cols",

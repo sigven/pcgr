@@ -28,7 +28,7 @@ prep_actble_display_tbl <- function(
     log4r_fatal("report object is NULL")
   }
   if (!is.numeric(tier) || !all(tier %in% c(1, 2, 3)) || length(tier) == 0) {
-    log4r_fatal("tier must be a non-empty integer vector with values in {1, 2}")
+    log4r_fatal("tier must be a non-empty integer vector with values in {1, 2, 3}")
   }
   tier <- as.integer(unique(tier))
   if (!variant_category %in% names(rep$content)) {
