@@ -29,7 +29,8 @@ plot_cna_segments_absolute <- function(
     amp_threshold_effective = 5,
     threshold_mode = "absolute",
     gain_threshold_effective = 3,
-    del_threshold_effective = 1) {
+    del_threshold_effective = 1,
+    color_palette = pcgrr::color_palette) {
 
   ## Validate input
   invisible(assertthat::assert_that(
@@ -542,7 +543,8 @@ plot_cna_segments_relative <-
            amp_threshold_effective = 5,
            threshold_mode = "absolute",
            gain_threshold_effective = 3,
-           del_threshold_effective = 1) {
+           del_threshold_effective = 1,
+           color_palette = pcgrr::color_palette) {
 
     ## Validate input
     invisible(assertthat::assert_that(
@@ -990,7 +992,7 @@ plot_cna_segments_relative <-
 #'
 #' @export
 #'
-get_oncogenic_cna_events <- function(cna_df_display = NULL) {
+get_oncogenic_cna_events <- function(cna_df_display = NULL, table_display_cols = pcgrr::table_display_cols) {
 
   cna_oncogenic_events <- data.frame()
 

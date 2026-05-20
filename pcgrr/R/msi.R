@@ -366,7 +366,7 @@ generate_report_data_msi <- function(
 #'
 #' @export
 
-msi_indel_fraction_plot <- function(tcga_msi_dataset, indel_fraction) {
+msi_indel_fraction_plot <- function(tcga_msi_dataset, indel_fraction, color_palette = pcgrr::color_palette) {
 
   color_vec <- utils::head(
     color_palette[["multi"]][["values"]], 2)
@@ -422,7 +422,7 @@ msi_indel_fraction_plot <- function(tcga_msi_dataset, indel_fraction) {
 #'
 #' @export
 
-msi_indel_load_plot <- function(tcga_msi_dataset, indel_load) {
+msi_indel_load_plot <- function(tcga_msi_dataset, indel_load, color_palette = pcgrr::color_palette) {
 
   color_vec <- utils::head(
     color_palette[["multi"]][["values"]], 2)

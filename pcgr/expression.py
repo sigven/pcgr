@@ -61,7 +61,7 @@ def parse_expression(expression_fname_tsv: str,
     
     if {'ID','ID_TYPE','ENTREZGENE','ENSEMBL_GENE_ID','SYMBOL','BIOTYPE','AMBIGUOUS_ID'}.issubset(gene_index.columns):
         exp_map = pd.merge(sample_gene_expression, gene_index, how="left", on=["ID"])
-        exp_map.loc[:,'ENSEMBL_GENE_ID'] = exp_map.loc[:,'ENSEMBL_GENE_ID'].str.split('|')
+        exp_map['ENSEMBL_GENE_ID'] = exp_map['ENSEMBL_GENE_ID'].astype(object).str.split('|')
         exp_map = exp_map.explode('ENSEMBL_GENE_ID').drop_duplicates().reset_index(drop = True)
         
         if {'ID_TYPE'}.issubset(exp_map.columns):

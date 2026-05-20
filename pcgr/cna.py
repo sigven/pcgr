@@ -974,7 +974,7 @@ def annotate_cna_segments(input_cna_segment_fname: str,
     ## annotate segments with cytobands
     cna_query_segment_df = annotate_cytoband(cna_query_segment_bed, output_dir, refdata_assembly_dir, logger)
     
-    cna_query_segment_df['chromosome2'] = cna_query_segment_df['chromosome']
+    cna_query_segment_df['chromosome2'] = cna_query_segment_df['chromosome'].astype(object)
     cna_query_segment_df.loc[cna_query_segment_df['chromosome2'] == "X","chromosome2"] = 23
     cna_query_segment_df.loc[cna_query_segment_df['chromosome2'] == "Y","chromosome2"] = 24
     cna_query_segment_df['chromosome2'] = cna_query_segment_df['chromosome2'].astype(int)

@@ -940,7 +940,7 @@ write_report_tsv <- function(report = NULL, output_type = 'snv_indel') {
 #'
 #' @param report List object with all report data, settings etc.
 #' @export
-write_report_quarto_html <- function(report = NULL) {
+write_report_quarto_html <- function(report = NULL, color_palette = pcgrr::color_palette) {
 
   settings <- report[['settings']]
   output_dir <- settings[['output_dir']]

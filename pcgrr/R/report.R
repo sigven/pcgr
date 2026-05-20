@@ -507,7 +507,7 @@ init_biomarker_content <- function() {
 #' @param report_mode Type of report ('PCGR' or 'CPSR')
 #'
 #' @export
-load_yaml <- function(yaml_fname, report_mode = "CPSR") {
+load_yaml <- function(yaml_fname, report_mode = "CPSR", color_palette = pcgrr::color_palette) {
 
   if (!file.exists(yaml_fname)) {
     log4r_fatal(

@@ -7,7 +7,7 @@
 #'
 #' @export
 
-plot_value_boxes <- function(pcg_report) {
+plot_value_boxes <- function(pcg_report, color_palette = pcgrr::color_palette) {
   df <- data.frame(
     x = rep(seq(0, 16, 8), 3),
     y = c(rep(1, 3), rep(4.5, 3), rep(8, 3)),

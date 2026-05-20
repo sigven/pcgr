@@ -968,6 +968,7 @@ hex_to_rgba <- function(hex, alpha = 1) {
 plotly_pie_chart <- function(
     df_variant_stats = NULL,
     category = "CODING_STATUS",
+    color_palette = pcgrr::color_palette,
     plot_margin_top = 50,
     plot_margin_bottom = 20,
     plot_margin_left = 20,

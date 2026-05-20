@@ -57,7 +57,8 @@ assign_mutation_type <- function(var_df) {
 vaf_plot <- function(
     report = NULL,
     font_size = 12,
-    font_family = "Helvetica") {
+    font_family = "Helvetica",
+    color_palette = pcgrr::color_palette) {
 
   invisible(assertthat::assert_that(
     !is.null(report),

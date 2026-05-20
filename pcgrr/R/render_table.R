@@ -212,7 +212,7 @@ render_bar_cell <- function(
 #'
 #' @export
 #'
-render_oncogenicity_cell <- function(data) {
+render_oncogenicity_cell <- function(data, color_palette = pcgrr::color_palette) {
   function(value, index) {
     if (is.na(value)) return(value)
 
@@ -260,7 +260,7 @@ render_oncogenicity_cell <- function(data) {
 #'
 #' @export
 #'
-render_alteration_clinvar_style <- function(data) {
+render_alteration_clinvar_style <- function(data, color_palette = pcgrr::color_palette) {
   function(value, index) {
     clinvar <- data$CLINVAR_CLASSIFICATION[index]
     levels <- color_palette$pathogenicity_onc$levels
@@ -295,7 +295,7 @@ render_alteration_clinvar_style <- function(data) {
 #'
 #' @export
 #'
-render_symbol_assoc_style <- function(data, rank_col = "TISSUE_ASSOC_RANK") {
+render_symbol_assoc_style <- function(data, rank_col = "TISSUE_ASSOC_RANK", color_palette = pcgrr::color_palette) {
   breaks <- color_palette$cancer_assoc$breaks
   colors <- color_palette$cancer_assoc$values
   function(value, index) {
@@ -356,7 +356,7 @@ render_alteration_cell <- function(data) {
 #'
 #' @export
 #'
-render_evidence_level_cell <- function(){
+render_evidence_level_cell <- function(color_palette){
   function(value) {
     if (is.na(value) ||
         !value %in% names(color_palette$elevel)) {
@@ -554,7 +554,7 @@ build_rt_row_details <- function(
 #'
 #' @export
 #'
-rt_theme <- function(){
+rt_theme <- function(color_palette = pcgrr::color_palette){
   theme <-
     reactable::reactableTheme(
       style = list(fontFamily = "inherit"),
@@ -596,7 +596,8 @@ rt_theme <- function(){
 render_actble_bm_table <- function(
     rctbl_recs = NULL,
     variant_category = "snv_indel",
-    clnsig = "therapeutic_sensitivity") {
+    clnsig = "therapeutic_sensitivity",
+    color_palette = pcgrr::color_palette) {
 
   tier_colors <-
     list(
@@ -887,7 +888,7 @@ render_actble_bm_table <- function(
               ),
               BM_EVIDENCE_LEVEL = reactable::colDef(
                 name = "Evidence level",
-                cell = render_evidence_level_cell(),
+                cell = render_evidence_level_cell(color_palette),
                 align = "center",
                 minWidth = 100
               ),
@@ -949,7 +950,8 @@ render_actble_bm_table <- function(
 render_progn_bm_table <- function(
     rctbl_recs = NULL,
     variant_category = "snv_indel",
-    clnsig = "prognostic_poor") {
+    clnsig = "prognostic_poor",
+    color_palette = pcgrr::color_palette) {
 
   tier_colors <-
     list(
@@ -1196,7 +1198,7 @@ render_progn_bm_table <- function(
             ),
             BM_EVIDENCE_LEVEL = reactable::colDef(
               name = "Evidence level",
-              cell = render_evidence_level_cell(),
+              cell = render_evidence_level_cell(color_palette),
               align = "center",
               minWidth = 100
             ),
@@ -1261,7 +1263,8 @@ render_progn_bm_table <- function(
 render_diagn_bm_table <- function(
     rctbl_recs = NULL,
     variant_category = "snv_indel",
-    clnsig = "diagnostic_positive") {
+    clnsig = "diagnostic_positive",
+    color_palette = pcgrr::color_palette) {
 
   tier_colors <-
     list(
@@ -1511,7 +1514,7 @@ render_diagn_bm_table <- function(
             ),
             BM_EVIDENCE_LEVEL = reactable::colDef(
               name = "Evidence level",
-              cell = render_evidence_level_cell(),
+              cell = render_evidence_level_cell(color_palette),
               align = "center",
               minWidth = 100
             ),

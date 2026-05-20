@@ -14,7 +14,8 @@ generate_report_data_signatures <-
            ref_data = NULL,
            settings = NULL,
            n_bootstrap_iterations = 200,
-           sig_contribution_cutoff = 0.01) {
+           sig_contribution_cutoff = 0.01,
+           color_palette = pcgrr::color_palette) {
 
     n_snvs_required <- 30
 
@@ -687,7 +688,8 @@ get_prevalent_site_signatures <-
 generate_report_data_rainfall <- function(variant_set,
                                           colors = NULL,
                                           autosomes = FALSE,
-                                          build = NULL) {
+                                          build = NULL,
+                                          color_palette = pcgrr::color_palette) {
 
   pcg_report_rainfall <- init_rainfall_content()
 
@@ -886,7 +888,8 @@ mutpat_resample_mut_mat <- function(mut_matrix) {
 #'
 plot_signature_contributions <- function(
     signature_contributions = NULL,
-    per_signature = TRUE) {
+    per_signature = TRUE,
+    color_palette = pcgrr::color_palette) {
 
   assertthat::assert_that(
     is.list(signature_contributions),

@@ -309,7 +309,7 @@ def populate_config_data(conf_options: dict, refdata_assembly_dir: str, workflow
             metadata_df.loc[metadata_df['source_abbreviation'].str.match(cpsr_sources_regex), 'wflow'] = 'cpsr' 
             metadata_df.loc[metadata_df['source_abbreviation'].str.match(pcgr_sources_regex), 'wflow'] = 'pcgr'
             metadata_df.loc[metadata_df['source_abbreviation'].str.match(sources_skip_regex), 'wflow'] = 'skip'
-            metadata_pd = metadata_pd._append(metadata_df, ignore_index=True)
+            metadata_pd = pd.concat([metadata_pd, metadata_df], ignore_index=True)
     
     conf_data['reference_data']['source_metadata'] = metadata_pd.to_dict(orient='records')
 

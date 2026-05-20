@@ -730,7 +730,8 @@ plot_filtering_stats_germline <- function(
     font_size = 15,
     pie_line_width = 3,
     opacity_filtered_categories = 0.4,
-    hole_size_pie = 0.4) {
+    hole_size_pie = 0.4,
+    color_palette = pcgrr::color_palette) {
 
   invisible(assertthat::assert_that(
     !is.null(report),
@@ -895,7 +896,8 @@ plot_filtering_stats_exonic <- function(
     font_size = 15,
     pie_line_width = 3,
     opacity_filtered_categories = 0.4,
-    hole_size_pie = 0.4) {
+    hole_size_pie = 0.4,
+    color_palette = pcgrr::color_palette) {
 
   invisible(assertthat::assert_that(
     !is.null(report),
