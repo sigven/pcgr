@@ -19,6 +19,9 @@ exclude from details}
 \item{styling_cols}{Character vector of column names used for
 styling (e.g. "CLINVAR_CLASSIFICATION", "TISSUE_ASSOC_RANK", etc.)
 to exclude from details}
+
+\item{font_size}{CSS font-size string applied to the detail card values
+(default: "0.94em")}
 }
 \value{
 A JavaScript function as a string that can be passed to reactable's

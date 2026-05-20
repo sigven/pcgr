@@ -47,10 +47,10 @@ get_excel_sheets <- function(report = NULL) {
         sample_alteration[[t]] <-
           callsets[[t]]$variant |>
           dplyr::select(
-            VAR_ID,
-            ENTREZGENE,
-            VARIANT_CLASS,
-            SAMPLE_ALTERATION) |>
+            "VAR_ID",
+            "ENTREZGENE",
+            "VARIANT_CLASS",
+            "SAMPLE_ALTERATION") |>
           dplyr::distinct()
       }
     }
@@ -174,7 +174,7 @@ get_excel_sheets <- function(report = NULL) {
 
       excel_sheets[['RNA_EXPRESSION_OUTLIERS']] <-
         report$content$expression$outliers |>
-        pcgrr::remove_cols_from_df(
+        remove_cols_from_df(
           cnames = c("GENENAME",
                      "CANCERGENE_EVIDENCE",
                      "TARGETED_INHIBITORS_ALL",
@@ -195,7 +195,7 @@ get_excel_sheets <- function(report = NULL) {
     if (NROW(callsets[['cna']]$variant) > 0) {
       excel_sheets[['SOMATIC_CNA']] <- as.data.frame(
         callsets[['cna']]$variant |>
-          dplyr::select(dplyr::any_of(pcgrr::tsv_cols$cna)) |>
+          dplyr::select(dplyr::any_of(tsv_cols$cna)) |>
           dplyr::select(-dplyr::any_of("BIOMARKER_MATCH")) |>
           dplyr::filter(!is.na(.data$ACTIONABILITY_TIER)) |>
           dplyr::arrange(
@@ -206,7 +206,7 @@ get_excel_sheets <- function(report = NULL) {
       ## Evidence items - biomarkers
       excel_sheets[['SOMATIC_CNA_BIOMARKER']] <- data.frame()
 
-      for (clnsig in names(pcgrr::bm_categories)) {
+      for (clnsig in names(bm_categories)) {
         if(clnsig == "diagnostic_negative") {
           next
         }
@@ -223,7 +223,7 @@ get_excel_sheets <- function(report = NULL) {
                     prognostic_poor = paste0("PP", .data$ACTIONABILITY_TIER),
                     prognostic_better = paste0("PB", .data$ACTIONABILITY_TIER),
                     diagnostic_positive = paste0("D", .data$ACTIONABILITY_TIER),
-                    ACTIONABILITY_TIER
+                    as.character(.data$ACTIONABILITY_TIER)
                   )
                 ) |>
                 dplyr::select(
@@ -277,7 +277,7 @@ get_excel_sheets <- function(report = NULL) {
     if (NROW(callsets[['fusion']]$variant) > 0) {
       # excel_sheets[['SOMATIC_RNA_FUSION']] <- as.data.frame(
       #   callset_cna$fusion |>
-      #     dplyr::select(dplyr::any_of(pcgrr::tsv_cols$fusion)) |>
+      #     dplyr::select(dplyr::any_of(tsv_cols$fusion)) |>
       #     dplyr::select(-dplyr::any_of("BIOMARKER_MATCH")) |>
       #     dplyr::filter(!is.na(.data$ACTIONABILITY_TIER)) |>
       #     dplyr::arrange(
@@ -288,7 +288,7 @@ get_excel_sheets <- function(report = NULL) {
       ## Evidence items - biomarkers
       excel_sheets[['SOMATIC_RNA_FUSION_BIOMARKER']] <- data.frame()
 
-      for (clnsig in names(pcgrr::bm_categories)) {
+      for (clnsig in names(bm_categories)) {
         if(clnsig == "diagnostic_negative") {
           next
         }
@@ -305,7 +305,7 @@ get_excel_sheets <- function(report = NULL) {
                     prognostic_poor = paste0("PP", .data$ACTIONABILITY_TIER),
                     prognostic_better = paste0("PB", .data$ACTIONABILITY_TIER),
                     diagnostic_positive = paste0("D", .data$ACTIONABILITY_TIER),
-                    ACTIONABILITY_TIER
+                    as.character(.data$ACTIONABILITY_TIER)
                   )
                 ) |>
                 dplyr::select(
@@ -356,7 +356,7 @@ get_excel_sheets <- function(report = NULL) {
       !is.null(callsets$snv_indel) &&
      isTRUE(report$content$snv_indel$eval)) {
 
-    snv_indel_cols <- pcgrr::tsv_cols$snv_indel
+    snv_indel_cols <- tsv_cols$snv_indel
     if (report$settings$conf$other$retained_vcf_info_tags != "None") {
       snv_indel_cols <- c(
         snv_indel_cols,
@@ -396,7 +396,7 @@ get_excel_sheets <- function(report = NULL) {
       ## Evidence items - biomarkers
       excel_sheets[['SOMATIC_SNV_INDEL_BIOMARKER']] <- data.frame()
 
-      for (clnsig in names(pcgrr::bm_categories)) {
+      for (clnsig in names(bm_categories)) {
         if(clnsig == "diagnostic_negative") {
           next
         }
@@ -413,7 +413,7 @@ get_excel_sheets <- function(report = NULL) {
                     prognostic_poor = paste0("PP", .data$ACTIONABILITY_TIER),
                     prognostic_better = paste0("PB", .data$ACTIONABILITY_TIER),
                     diagnostic_positive = paste0("D", .data$ACTIONABILITY_TIER),
-                    ACTIONABILITY_TIER
+                    as.character(.data$ACTIONABILITY_TIER)
                   )
                 ) |>
                 dplyr::select(
@@ -460,7 +460,7 @@ get_excel_sheets <- function(report = NULL) {
     }
 
     if (NROW(excel_sheets[[e]]) > 30000) {
-      pcgrr::log4r_warn(paste0(
+      log4r_warn(paste0(
         "Excel sheet '", e, "' has more than 30,000 rows - ",
         "only first 30,000 rows will be written to Excel workbook - consider TSV for full data"))
       excel_sheets[[e]] <- utils::head(

@@ -13,8 +13,8 @@ load_somatic_cna <- function(
     ref_data = NULL,
     settings = NULL) {
 
-  pcgrr::log4r_info("------")
-  pcgrr::log4r_info(paste0(
+  log4r_info("------")
+  log4r_info(paste0(
     "Reading annotated molecular dataset (DNA) - somatic copy number aberrations"))
 
   hgname <- "hg38"
@@ -26,8 +26,8 @@ load_somatic_cna <- function(
     settings[['conf']][['sample_properties']][['site']]
 
   ## read segments
-  pcgrr::check_file_exists(fname_cna_segment)
-  pcgrr::check_file_exists(fname_cna_gene)
+  check_file_exists(fname_cna_segment)
+  check_file_exists(fname_cna_gene)
   segments_raw <- suppressWarnings(
     as.data.frame(
       readr::read_tsv(
@@ -40,7 +40,7 @@ load_somatic_cna <- function(
   )
 
   compulsary_cols <-
-    names(pcgrr::data_coltype_defs$cna_somatic_segment_raw$cols)
+    names(data_coltype_defs$cna_somatic_segment_raw$cols)
 
   raw_col_check <-
     rlang::has_name(segments_raw, compulsary_cols)
@@ -58,7 +58,7 @@ load_somatic_cna <- function(
       readr::read_tsv(
         file = fname_cna_segment,
         col_types =
-          pcgrr::data_coltype_defs$cna_somatic_segment_raw$cols,
+          data_coltype_defs$cna_somatic_segment_raw$cols,
         na = c(".","NA"),
         progress = F
       )
@@ -81,16 +81,16 @@ load_somatic_cna <- function(
       CN_MINOR = as.integer(.data$CN_MINOR),
       CN_TOTAL = as.integer(.data$CN_MAJOR + .data$CN_MINOR),
       LOH = dplyr::if_else(
-        nchar(LOH) == 0,
-        as.character(NA),
-        as.character(LOH)
+        nchar(.data$LOH) == 0,
+        NA_character_,
+        as.character(.data$LOH)
       )
     )
 
 
-  callset_cna <- pcgrr::load_dna_variants(
+  callset_cna <- load_dna_variants(
     fname = fname_cna_gene,
-    cols = pcgrr::data_coltype_defs$cna_somatic_gene_raw,
+    cols = data_coltype_defs$cna_somatic_gene_raw,
     ref_data = ref_data,
     settings = settings,
     vartype = 'cna',
@@ -109,22 +109,22 @@ load_somatic_cna <- function(
       dplyr::mutate(CYTOBAND = paste0(
         "chr", .data$CHROM,":" ,.data$CYTOBAND
       )) |>
-      pcgrr::append_cancer_association_ranks(
+      append_cancer_association_ranks(
         ref_data = ref_data,
         primary_site = tumor_site) |>
-      pcgrr::append_styled_cna_vclass(
+      append_styled_cna_vclass(
         colname = "VARIANT_CLASS_STYLED") |>
-      pcgrr::append_targeted_drug_annotations(
+      append_targeted_drug_annotations(
         ref_data = ref_data,
         primary_site = tumor_site) |>
       dplyr::arrange(
         .data$ACTIONABILITY_TIER,
         dplyr::desc(.data$TISSUE_ASSOC_RANK),
         dplyr::desc(.data$GLOBAL_ASSOC_RANK)) |>
-      pcgrr::order_variants(pos_var = 'SEGMENT_START') |>
-      pcgrr::exclude_non_chrom_variants()
+      order_variants(pos_var = 'SEGMENT_START') |>
+      exclude_non_chrom_variants()
 
-    pcgrr::log4r_info(
+    log4r_info(
       "Generating data frame with hyperlinked variant/gene annotations")
 
     callset_cna[['variant_display']] <- callset_cna[['variant']] |>
@@ -135,7 +135,7 @@ load_somatic_cna <- function(
           "chr{CHROM}:{SEGMENT_START}-{SEGMENT_END}</a>"
         )
       ) |>
-      pcgrr::append_cancer_gene_evidence(
+      append_cancer_gene_evidence(
         ref_data = ref_data
       ) |>
       tidyr::separate_rows(
@@ -151,7 +151,7 @@ load_somatic_cna <- function(
           "TRANSCRIPT_OVERLAP_PERCENT"),
         sep = "\\|", remove = T
         ) |>
-      pcgrr::append_annotation_links(
+      append_annotation_links(
         vartype = "cna"
       ) |>
       tidyr::unite(
@@ -161,7 +161,7 @@ load_somatic_cna <- function(
           "TRANSCRIPT_OVERLAP_PERCENT"),
         sep="|", remove = T
       ) |>
-      pcgrr::order_variants(pos_var = 'SEGMENT_START') |>
+      order_variants(pos_var = 'SEGMENT_START') |>
       dplyr::select(
         -dplyr::ends_with(c("_RAW","_END","_START"))
       ) |>
@@ -193,7 +193,7 @@ load_somatic_cna <- function(
 #' @param fname Path to file with pre-processed somatic SNV/InDel variants
 #' @param ref_data PCGR reference data object
 #' @param settings PCGR run/configuration settings
-#' @param simulate_vaf Internal/test use only. If TRUE and VAF_TUMOR is
+#' @param simulate_vaf_dp Internal/test use only. If TRUE and VAF_TUMOR is
 #'   entirely missing, replace it with random values drawn from
 #'   Uniform(0.01, 0.99). Never set this in production runs.
 #'
@@ -204,16 +204,16 @@ load_somatic_snv_indel <- function(
     settings = NULL,
     simulate_vaf_dp = TRUE) {
 
-  pcgrr::log4r_info("------")
-  pcgrr::log4r_info(paste0(
+  log4r_info("------")
+  log4r_info(paste0(
     "Reading annotated molecular dataset (DNA) - somatic SNV/InDels"))
 
   tumor_site <-
     settings[['conf']][['sample_properties']][['site']]
 
-  callset <- pcgrr::load_dna_variants(
+  callset <- load_dna_variants(
     fname = fname,
-    cols = pcgrr::data_coltype_defs$snv_indel_somatic_raw,
+    cols = data_coltype_defs$snv_indel_somatic_raw,
     ref_data = ref_data,
     settings = settings,
     vartype = 'snv_indel',
@@ -231,8 +231,8 @@ load_somatic_snv_indel <- function(
       NROW(callset[['variant']]) > 0) {
     set.seed(42L)
     callset[['variant']]$VAF_TUMOR <-
-      round(runif(NROW(callset[['variant']]), min = 0.01, max = 0.99), 3)
-    pcgrr::log4r_info(
+      round(stats::runif(NROW(callset[['variant']]), min = 0.01, max = 0.99), 3)
+    log4r_info(
       "VAF_TUMOR simulated with uniform (0.01, 0.99) values [TEST MODE ONLY]")
   }
 
@@ -245,23 +245,23 @@ load_somatic_snv_indel <- function(
     set.seed(42L)
     callset[['variant']]$DP_TUMOR <-
       sample(15:150, NROW(callset[['variant']]), replace = TRUE)
-    pcgrr::log4r_info(
+    log4r_info(
       "DP_TUMOR simulated with random integer values from 15 to 150 [TEST MODE ONLY]")
   }
 
   callset[['variant']] <- callset[['variant']] |>
-    pcgrr::append_protein_domains(
+    append_protein_domains(
       ref_data = ref_data) |>
-    pcgrr::append_cancer_association_ranks(
+    append_cancer_association_ranks(
       ref_data = ref_data,
       primary_site = tumor_site) |>
-    pcgrr::append_targeted_drug_annotations(
+    append_targeted_drug_annotations(
       ref_data = ref_data,
       primary_site = tumor_site) |>
-    pcgrr::append_alteration_name() |>
-    pcgrr::order_variants(pos_var = 'POS') |>
-    pcgrr::exclude_non_chrom_variants() |>
-    pcgrr::filter_read_support(config = settings$conf)
+    append_alteration_name() |>
+    order_variants(pos_var = 'POS') |>
+    exclude_non_chrom_variants() |>
+    filter_read_support(config = settings$conf)
 
 
   ## Tumor-only input
@@ -273,12 +273,12 @@ load_somatic_snv_indel <- function(
         ## assign evidence tags for germline/somatic state of variants,
         ## partially based on user-defined options
         ## (population allele frequency thresholds)
-          pcgrr::assign_somatic_germline_evidence(
+          assign_somatic_germline_evidence(
             settings = settings) |>
 
         ## assign somatic variant classification/status based on accumulation
         ## of evidence tags and user-defined options
-          pcgrr::assign_somatic_classification(
+          assign_somatic_classification(
             settings = settings)
 
       ## Assign calls to filtered callset (SOMATIC_CLASSIFICATION = SOMATIC)
@@ -299,7 +299,7 @@ load_somatic_snv_indel <- function(
               .data$SOMATIC_CLASSIFICATION != "SOMATIC")
 
         if (NROW(actionable_filtered) > 0) {
-          pcgrr::log4r_warn(
+          log4r_warn(
             paste0(
               "A total of n = ", NROW(actionable_filtered),
               " clinically actionable ",
@@ -311,20 +311,20 @@ load_somatic_snv_indel <- function(
             (NROW(callset$variant_unfiltered) - NROW(callset$variant)),
             digits = 0))
 
-        pcgrr::log4r_info(paste0(
+        log4r_info(paste0(
           "Tumor-only variant filtering based on multiple criteria - ",
-          pcgrr::get_tumor_only_filtering_criteria(
+          get_tumor_only_filtering_criteria(
             conf = settings$conf))
         )
 
-        pcgrr::log4r_info(
+        log4r_info(
           paste0(
             "Excluded n = ",
             n_excluded_calls_germline,
             " putative germline variants after applying the criteria above"))
 
         if (NROW(callset$variant) == 0) {
-          pcgrr::log4r_warn(
+          log4r_warn(
             "NO (n = 0) somatic variants remain after filtering of putative germline events")
         }
 
@@ -335,7 +335,7 @@ load_somatic_snv_indel <- function(
           "EXONIC_STATUS" %in% colnames(callset[['variant']])) {
 
           n_exonic_nonexonic <- NROW(callset[['variant']])
-          pcgrr::log4r_info(paste0(
+          log4r_info(paste0(
             "Tumor-only variant filtering based on exonic status only"
           ))
 
@@ -348,25 +348,25 @@ load_somatic_snv_indel <- function(
               (n_exonic_nonexonic - NROW(callset$variant)),
               digits = 0))
 
-          pcgrr::log4r_info(
+          log4r_info(
             paste0(
               "Excluded n = ",
               n_excluded_calls_nonexonic,
               " variants aftering filtering of non-exonic variants"))
 
           if (NROW(callset$variant) == 0) {
-            pcgrr::log4r_warn(
+            log4r_warn(
               "NO (n = 0) somatic variants remain after filtering of non-exonic variants")
           }
         }
 
         ## filter also MAF file if provided
-        pcgrr::filter_maf_file(
+        filter_maf_file(
           callset = callset,
           settings = settings)
 
       }else{
-        pcgrr::log4r_fatal(
+        log4r_fatal(
           "Variant data.frame is lacking a 'SOMATIC_CLASSIFICATION' column")
       }
     }
@@ -384,20 +384,20 @@ load_somatic_snv_indel <- function(
     ## Make data frame with columns for display
     ## in HTML output
 
-    pcgrr::log4r_info(
+    log4r_info(
       "Generating data frame with hyperlinked variant/gene annotations")
 
 
     callset[['variant_display']] <- callset[['variant']] |>
-      pcgrr::append_cancer_gene_evidence(
+      append_cancer_gene_evidence(
         ref_data = ref_data) |>
-      pcgrr::append_oncogenicity_docs(
+      append_oncogenicity_docs(
         ref_data = ref_data) |>
-      pcgrr::append_dbmts_var_link() |>
-      pcgrr::append_tcga_var_link() |>
-      pcgrr::append_annotation_links() |>
-      pcgrr::append_dbnsfp_var_link() |>
-      pcgrr::append_tfbs_annotation() |>
+      append_dbmts_var_link() |>
+      append_tcga_var_link() |>
+      append_annotation_links() |>
+      append_dbnsfp_var_link() |>
+      append_tfbs_annotation() |>
       dplyr::select(
         -dplyr::contains("_RAW")
       ) |>
@@ -412,7 +412,7 @@ load_somatic_snv_indel <- function(
       dplyr::mutate(
         MUTATION_HOTSPOT_CANCERTYPE = stringr::str_replace_all(
           .data$MUTATION_HOTSPOT_CANCERTYPE,",",", ")) |>
-      pcgrr::order_variants(pos_var = 'POS')
+      order_variants(pos_var = 'POS')
 
   }
 
@@ -440,12 +440,12 @@ load_cpsr_classified_variants <- function(
     ref_data = NULL,
     settings = NULL) {
 
-  pcgrr::log4r_info("------")
-  pcgrr::log4r_info(paste0(
+  log4r_info("------")
+  log4r_info(paste0(
     "Reading annotated molecular dataset (DNA) - germline SNV/InDels (CPSR-classified)"))
 
-  pcgrr::check_file_exists(fname_cpsr_tsv)
-  pcgrr::check_file_exists(fname_cpsr_yaml)
+  check_file_exists(fname_cpsr_tsv)
+  check_file_exists(fname_cpsr_yaml)
 
   if (!file.exists(fname_cpsr_yaml)) {
     log4r_fatal(
@@ -453,19 +453,19 @@ load_cpsr_classified_variants <- function(
   }
   cpsr_yaml <- yaml::read_yaml(fname_cpsr_yaml)
   if ("conf" %in% names(cpsr_yaml) == FALSE) {
-    pcgrr::log4r_fatal(
+    log4r_fatal(
       paste0(
         "YAML file '", fname_cpsr_yaml,
         "' does not contain a 'conf' section - exiting"))
   }
   if ("sample_id" %in% names(cpsr_yaml) == FALSE) {
-    pcgrr::log4r_fatal(
+    log4r_fatal(
       paste0(
         "YAML file '", fname_cpsr_yaml,
         "' does not contain a 'sample_id' variable - exiting"))
   }
   if ("gene_panel" %in% names(cpsr_yaml$conf) == FALSE) {
-    pcgrr::log4r_fatal(
+    log4r_fatal(
       paste0(
         "YAML file '", fname_cpsr_yaml,
         "' does not contain a 'conf->gene_panel' section - exiting"))
@@ -479,7 +479,7 @@ load_cpsr_classified_variants <- function(
   panel_info[['panel_id']] <- cpsr_yaml$conf$gene_panel[['panel_id']]
   sample_id <- cpsr_yaml$sample_id
 
-  callset <- pcgrr::load_dna_variants(
+  callset <- load_dna_variants(
     fname = fname_cpsr_tsv,
     cols = cols,
     ref_data = ref_data,
@@ -488,14 +488,14 @@ load_cpsr_classified_variants <- function(
     variant_origin = 'Germline')
 
   callset[['variant_display']] <- callset[['variant']] |>
-    pcgrr::append_cancer_gene_evidence(
+    append_cancer_gene_evidence(
       ref_data = ref_data) |>
     dplyr::mutate(
       CLINVAR_TRAITS_ALL = paste(
         stringr::str_to_title(.data$CLINVAR_VARIANT_ORIGIN),
         .data$CLINVAR_PHENOTYPE,
         sep = " - ")) |>
-    pcgrr::append_annotation_links() |>
+    append_annotation_links() |>
     dplyr::select(
       -dplyr::contains("_RAW")
     ) |>
@@ -595,20 +595,20 @@ load_dna_variants <- function(
   ## assert that ref_data is non-null, settings is non-null
   ## and that "molecular_data" is an element of the settings list
   if (is.null(ref_data)) {
-    pcgrr::log4r_fatal(
+    log4r_fatal(
       "Reference data object is NULL - cannot proceed with loading of DNA variants")
   }
   if (is.null(settings)) {
-    pcgrr::log4r_fatal(
+    log4r_fatal(
       "Settings object is NULL - cannot proceed with loading of DNA variants")
   }
   if ("molecular_data" %in% names(settings) == FALSE) {
-    pcgrr::log4r_fatal(
+    log4r_fatal(
       "Settings object is lacking a 'molecular_data' section - cannot proceed with loading of
       DNA variants")
   }
 
-  pcgrr::check_file_exists(fname)
+  check_file_exists(fname)
   calls_raw <- suppressWarnings(
     as.data.frame(
       readr::read_tsv(
@@ -680,7 +680,7 @@ load_dna_variants <- function(
     }
   }
 
-  results <- pcgrr::init_var_content()
+  results <- init_var_content()
   results[['variant']] <- calls
 
   ## Rename specific columns/annotations for more clarity
@@ -729,7 +729,7 @@ load_dna_variants <- function(
   }
 
   if (vartype == "snv_indel") {
-    results[['variant']] <- pcgrr::clean_gnomad_annotations(
+    results[['variant']] <- clean_gnomad_annotations(
       var_df = results[['variant']]
     )
   }
@@ -856,7 +856,7 @@ load_dna_variants <- function(
   ## Germline - CPSR, use CIViC for now
   if(variant_origin == "Germline"){
     results[['bm_evidence']][['eitems']] <-
-      pcgrr::map_biomarker_data(
+      map_biomarker_data(
         varcalls = results[['variant']],
         ref_data = ref_data,
         variant_origin = variant_origin,
@@ -876,7 +876,7 @@ load_dna_variants <- function(
         (settings$conf$oncokb$run == 1 &
          settings$conf$oncokb$exclusive == 0))){
       results[['bm_evidence']][['eitems']] <-
-        pcgrr::map_biomarker_data(
+        map_biomarker_data(
           varcalls = results[['variant']],
           ref_data = ref_data,
           variant_origin = variant_origin,
@@ -890,11 +890,11 @@ load_dna_variants <- function(
       if(!is.null(settings$molecular_data$fname_oncokb_output_maf_hgvsp) &
          file.exists(settings$molecular_data$fname_oncokb_output_maf_hgvsp)){
 
-        pcgrr::log4r_info(
+        log4r_info(
           "Querying OncoKB web API with OncoKB-annotated HGVSp/HGVSg MAF files")
 
         oncokb_results <-
-          pcgrr::process_oncokb_maf(
+          process_oncokb_maf(
             maf_file_hgvsp =
               settings$molecular_data$fname_oncokb_output_maf_hgvsp,
             maf_file_hgvsg =
@@ -918,11 +918,11 @@ load_dna_variants <- function(
       if(!is.null(settings$molecular_data$fname_oncokb_output_cna) &
          file.exists(settings$molecular_data$fname_oncokb_output_cna)){
 
-        pcgrr::log4r_info(
+        log4r_info(
           "Querying OncoKB web API with OncoKB-annotated CNA file")
 
         oncokb_results <-
-          pcgrr::process_oncokb_cna(
+          process_oncokb_cna(
             cna_file =
               settings$molecular_data$fname_oncokb_output_cna,
             oncokb_token =
@@ -946,14 +946,14 @@ load_dna_variants <- function(
   if (variant_origin == "Somatic") {
 
     if (vartype != "fusion") {
-      pcgrr::log4r_info(
+      log4r_info(
         paste0("Variant tier classification",
                " - somatic actionability guidelines (AMP/ASCO/CAP)"))
 
       amp_asco_cap_classified_variant <- list()
-      for (clnsig in names(pcgrr::bm_categories)) {
+      for (clnsig in names(bm_categories)) {
         amp_asco_cap_classified_variant[[clnsig]] <-
-          pcgrr::assign_amp_asco_cap_tiers(
+          assign_amp_asco_cap_tiers(
             vartype = vartype,
             var_df = results$variant,
             primary_site = primary_site,
@@ -964,7 +964,7 @@ load_dna_variants <- function(
           )
       }
 
-      for (clnsig in names(pcgrr::bm_categories)) {
+      for (clnsig in names(bm_categories)) {
         for (elem in c("classification",
                        "eitems")) {
           results$bm_evidence[[clnsig]][[elem]] <-
@@ -979,7 +979,7 @@ load_dna_variants <- function(
           }
           ## issue warning if no variants are classified
           if (NROW(amp_asco_cap_classified_variant[[clnsig]][['variant']]) == 0) {
-            pcgrr::log4r_warn(
+            log4r_warn(
               paste0(
                 "No variants were classified with AMP/ASCO/CAP tiers of clinical",
                 "significance for therapeutic sensitivity"))
@@ -1015,7 +1015,7 @@ load_expression_similarity <- function(settings = NULL) {
 
   if (file.exists(
     settings$molecular_data$fname_expression_similarity_tsv)) {
-    pcgrr::log4r_info(
+    log4r_info(
       paste0("Loading expression similarity results for sample ",
              settings$sample_id))
 
@@ -1059,7 +1059,7 @@ load_expression_outliers <- function(
   expression_outliers <- data.frame()
   if (file.exists(
     settings$molecular_data$fname_expression_outliers_tsv)) {
-    pcgrr::log4r_info(
+    log4r_info(
       paste0("Loading expression outlier results for sample ",
              settings$sample_id))
 
@@ -1108,16 +1108,16 @@ load_expression_outliers <- function(
 
         ## Add links for display in datatable of HTML report
         expression_outliers <- outlier_data |>
-          pcgrr::append_cancer_gene_evidence(
+          append_cancer_gene_evidence(
             ref_data = ref_data) |>
-          pcgrr::append_cancer_association_ranks(
+          append_cancer_association_ranks(
             ref_data = ref_data,
             primary_site = tumor_site) |>
           dplyr::mutate(VAR_ID = dplyr::row_number()) |> ## add unique ID
-          pcgrr::append_drug_var_link(
+          append_drug_var_link(
             primary_site = tumor_site,
             ref_data = ref_data) |>
-          pcgrr::append_annotation_links(
+          append_annotation_links(
             vartype = "exp",
             skip = c("DBSNP_RSID",
                      "CLINVAR",
@@ -1250,8 +1250,8 @@ load_rna_fusions <- function(
     ref_data = NULL) {
 
 
-  pcgrr::log4r_info("------")
-  pcgrr::log4r_info(paste0(
+  log4r_info("------")
+  log4r_info(paste0(
     "Reading annotated molecular dataset (DNA) - somatic RNA fusions"))
 
   primary_site <-
@@ -1279,7 +1279,7 @@ load_rna_fusions <- function(
   rna_fusion_raw_fname <-
     settings$molecular_data$fname_rna_fusion_tsv
 
-  pcgrr::check_file_exists(rna_fusion_raw_fname)
+  check_file_exists(rna_fusion_raw_fname)
   rna_fusion_calls_raw <- suppressWarnings(
     as.data.frame(
       readr::read_tsv(
@@ -1295,7 +1295,7 @@ load_rna_fusions <- function(
   ## check that all columns are present among columns
   ## read from file
   compulsary_cols <-
-    names(pcgrr::data_coltype_defs$rna_fusion_raw$cols)
+    names(data_coltype_defs$rna_fusion_raw$cols)
 
   raw_col_check <-
     rlang::has_name(rna_fusion_calls_raw, compulsary_cols)
@@ -1308,7 +1308,7 @@ load_rna_fusions <- function(
              paste(missing_cols, collapse=", ")))
   }
 
-  cols_including_optional <- pcgrr::data_coltype_defs$rna_fusion_raw
+  cols_including_optional <- data_coltype_defs$rna_fusion_raw
   if ("FUSION_SCORE" %in% colnames(rna_fusion_calls_raw)) {
     score_col <- readr::cols_only(
       FUSION_SCORE = readr::col_number())
@@ -1317,7 +1317,7 @@ load_rna_fusions <- function(
   }
 
 
-  callset_fusions <- pcgrr::load_dna_variants(
+  callset_fusions <- load_dna_variants(
     fname = rna_fusion_raw_fname,
     cols = cols_including_optional,
     ref_data = ref_data,
@@ -1335,13 +1335,13 @@ load_rna_fusions <- function(
   rna_fusion_calls <- callset_fusions$variant
 
   if (NROW(rna_fusion_calls) == 0) {
-    pcgrr::log4r_info(
+    log4r_info(
       paste0("No RNA fusion calls found in input file ",
              rna_fusion_raw_fname))
     return(rna_fusions)
   }
 
-  pcgrr::log4r_info(
+  log4r_info(
     paste0("Loading RNA fusion data for sample ",
            settings$sample_id))
 
@@ -1399,7 +1399,7 @@ load_rna_fusions <- function(
                     BP_POSITION = dplyr::all_of(bp_cols[2])) |>
       dplyr::filter(!is.na(.data$BP_CHROM) & !is.na(.data$BP_POSITION))
 
-    pcgrr::bp_junction_transcript_overlap(bp_junctions, ref_data) |>
+    bp_junction_transcript_overlap(bp_junctions, ref_data) |>
       dplyr::rename_with(~ paste0(.x, "_", prefix))
   }
 
@@ -1550,10 +1550,10 @@ load_rna_fusions <- function(
              "' (and ", n_genes_5p - 3, " more)")
     }
 
-    pcgrr::log4r_warn(
+    log4r_warn(
       paste0("Breakpoints of 5' fusion partner genes do not intersect ",
              "database transcript annotations"))
-    pcgrr::log4r_warn(
+    log4r_warn(
       paste0(gene_display_5p,
              " - check gene symbols or breakpoint coordinates."))
 
@@ -1593,7 +1593,7 @@ load_rna_fusions <- function(
         !is.na(.data$ENTREZGENE_5P))
 
     # if (NROW(transcript_non_matches[['5P']]) == 0) {
-    #   pcgrr::log4r_warn(
+    #   log4r_warn(
     #     paste0(
     #       "No 5' fusion partner genes could be mapped to official gene symbols ",
     #       "in reference database - check gene symbols or breakpoint coordinates."))
@@ -1672,10 +1672,10 @@ load_rna_fusions <- function(
              "' (and ", n_genes_3p - 3, " more)")
     }
 
-    pcgrr::log4r_warn(
+    log4r_warn(
       paste0("Breakpoints of 3' fusion partner genes do not intersect ",
              "database transcript annotations"))
-    pcgrr::log4r_warn(
+    log4r_warn(
       paste0(gene_display_3p,
              " - check gene symbols or breakpoint coordinates."))
 
@@ -1715,7 +1715,7 @@ load_rna_fusions <- function(
         !is.na(.data$ENTREZGENE_3P))
 
     # if (NROW(transcript_non_matches[['3P']]) == 0) {
-    #   pcgrr::log4r_warn(
+    #   log4r_warn(
     #     paste0("No 3' fusion partner genes could be mapped to official gene symbols ",
     #            "in reference database - check gene symbols or breakpoint coordinates."))
     #   transcript_non_matches[['3P']] <-
@@ -1802,7 +1802,7 @@ load_rna_fusions <- function(
 
 
     if (NROW(results[['variant']]) == 0) {
-      pcgrr::log4r_info(
+      log4r_info(
         paste0("No RNA fusion calls with gene/transcript overlap found"))
       return(results)
     }
@@ -1836,7 +1836,7 @@ load_rna_fusions <- function(
             .data$SPLIT_READS >= min_split_reads)
         n_filtered <- n_before - NROW(results[['variant']])
         if (n_filtered > 0) {
-          pcgrr::log4r_info(
+          log4r_info(
             paste0("Filtered out ", n_filtered,
                    " fusion event(s) with fewer than ",
                    min_split_reads, " split reads"))
@@ -1845,7 +1845,7 @@ load_rna_fusions <- function(
     }
 
     results[['variant_recurrence']] <-
-      pcgrr::rna_fusion_recurrence_mitdb(
+      rna_fusion_recurrence_mitdb(
         query_fusions = results[['variant']],
         ref_data = ref_data
       ) |>
@@ -1930,12 +1930,12 @@ load_rna_fusions <- function(
             ".", .data$ENTREZGENE_3P, sep = "::"),
         TRUE ~ NA_character_
       )) |>
-      pcgrr::get_druggable_fusion_partner(
+      get_druggable_fusion_partner(
         partner = "5P",
         ref_data = ref_data,
         variant_display = FALSE,
         primary_site = primary_site) |>
-      pcgrr::get_druggable_fusion_partner(
+      get_druggable_fusion_partner(
         partner = "3P",
         ref_data = ref_data,
         variant_display = FALSE,
@@ -1966,11 +1966,11 @@ load_rna_fusions <- function(
          file.exists(settings$molecular_data$fname_oncokb_output_fusions)){
 
 
-        pcgrr::log4r_info(
+        log4r_info(
           "Querying OncoKB web API with OncoKB-annotated fusion file")
 
         oncokb_results <-
-          pcgrr::process_oncokb_fusion(
+          process_oncokb_fusion(
             fusion_file =
               settings$molecular_data$fname_oncokb_output_fusions,
             oncokb_token =
@@ -1991,15 +1991,15 @@ load_rna_fusions <- function(
     ## assign fusion events to tiers of significance (AMP/ASCO/CAP)
     etype_for_tiering <- c("predictive")
 
-    pcgrr::log4r_info(
+    log4r_info(
       paste0("Variant tier classification",
              " - somatic actionability guidelines (AMP/ASCO/CAP)"))
 
     amp_asco_cap_classified_variant <- list()
-    for (clnsig in names(pcgrr::bm_categories)) {
-      etype_for_tiering <- pcgrr::bm_categories[[clnsig]]$etype
+    for (clnsig in names(bm_categories)) {
+      etype_for_tiering <- bm_categories[[clnsig]]$etype
       amp_asco_cap_classified_variant[[clnsig]] <-
-        pcgrr::assign_amp_asco_cap_tiers(
+        assign_amp_asco_cap_tiers(
           vartype = "fusion",
           var_df = results$variant,
           primary_site = primary_site,
@@ -2010,7 +2010,7 @@ load_rna_fusions <- function(
         )
     }
 
-    for (clnsig in names(pcgrr::bm_categories)) {
+    for (clnsig in names(bm_categories)) {
       for (elem in c("classification",
                     "eitems")) {
         results$bm_evidence[[clnsig]][[elem]] <-
@@ -2025,7 +2025,7 @@ load_rna_fusions <- function(
         }
         ## issue warning if no variants are classified
         if (NROW(amp_asco_cap_classified_variant[[clnsig]][['variant']]) == 0) {
-          pcgrr::log4r_warn(
+          log4r_warn(
             paste0(
               "No variants were classified with AMP/ASCO/CAP tiers of clinical",
               "significance for therapeutic sensitivity"))
@@ -2033,11 +2033,11 @@ load_rna_fusions <- function(
       }
     }
 
-    OTP_GENE_URL <- pcgrr::variant_db_url[
-      which(pcgrr::variant_db_url[,"name"] == "GENENAME"),"url_prefix"]
+    OTP_GENE_URL <- variant_db_url[
+      which(variant_db_url[,"name"] == "GENENAME"),"url_prefix"]
 
-    ENSEMBL_GENE_URL <- pcgrr::variant_db_url[
-      which(pcgrr::variant_db_url[,"name"] == "ENSEMBL_GENE_ID"),"url_prefix"]
+    ENSEMBL_GENE_URL <- variant_db_url[
+      which(variant_db_url[,"name"] == "ENSEMBL_GENE_ID"),"url_prefix"]
 
     results[['variant_display']] <- results[['variant']] |>
       dplyr::select(
@@ -2055,12 +2055,12 @@ load_rna_fusions <- function(
         by = c("SAMPLE_ID","VAR_ID","FUSION_GENE2"),
         relationship = "many-to-one"
       ) |>
-      pcgrr::get_druggable_fusion_partner(
+      get_druggable_fusion_partner(
         partner = "5P",
         ref_data = ref_data,
         variant_display = TRUE,
         primary_site = primary_site) |>
-      pcgrr::get_druggable_fusion_partner(
+      get_druggable_fusion_partner(
         partner = "3P",
         ref_data = ref_data,
         variant_display = TRUE,
@@ -2135,7 +2135,7 @@ load_rna_fusions <- function(
 
 
   }else{
-    pcgrr::log4r_info(
+    log4r_info(
       paste0("No RNA fusion calls with gene/transcript overlap found"))
     return(results)
   }

@@ -25,7 +25,7 @@ init_report <- function(yaml_fname = NULL,
   yaml_data <- list()
   ref_data <- list()
   if (!is.null(yaml_fname)) {
-    yaml_data <- pcgrr::load_yaml(
+    yaml_data <- load_yaml(
       yaml_fname,
       report_mode = report_mode
     )
@@ -411,7 +411,7 @@ init_var_content <- function() {
   rep <- list()
   rep[['variant']] <- data.frame()
   rep[['variant_display']] <- data.frame()
-  rep[['bm_evidence']] <- pcgrr::init_biomarker_content()
+  rep[['bm_evidence']] <- init_biomarker_content()
 
   return(rep)
 }
@@ -429,7 +429,7 @@ init_germline_content <- function() {
   rep[['callset']][["variant"]] <- list()
   rep[['callset']][["variant_display"]] <- list()
   rep[['callset']][['bm_evidence']] <-
-    pcgrr::init_biomarker_content()
+    init_biomarker_content()
   rep[["zero"]] <- FALSE
   for (t in c("all",
               "pgx",
@@ -488,7 +488,7 @@ init_biomarker_content <- function() {
   bm_evidence <- list()
   bm_evidence[['eitems']] <- data.frame()
   bm_evidence[['classification']] <- data.frame()
-  for (cat in names(pcgrr::bm_categories)) {
+  for (cat in names(bm_categories)) {
     bm_evidence[[cat]] <- list()
     for (e in c('classification','eitems')) {
       bm_evidence[[cat]][[e]] <- data.frame()
@@ -568,7 +568,7 @@ load_yaml <- function(yaml_fname, report_mode = "CPSR") {
   ref_data <- list()
   if (dir.exists(
     report_settings[['reference_data']][['path']])) {
-    ref_data <- pcgrr::load_reference_data(
+    ref_data <- load_reference_data(
       pcgr_db_assembly_dir = report_settings[['reference_data']][['path']],
       genome_assembly = report_settings[['genome_assembly']]
     )
@@ -747,7 +747,7 @@ load_yaml <- function(yaml_fname, report_mode = "CPSR") {
   }
 
   report_settings$conf$report_color <-
-    pcgrr::color_palette[["report_color"]][["values"]][1]
+    color_palette[["report_color"]][["values"]][1]
 
   if (!is.null(ref_data$assembly$chrom_coordinates)) {
     report_settings$chrom_coordinates <-
@@ -758,7 +758,7 @@ load_yaml <- function(yaml_fname, report_mode = "CPSR") {
     !is.null(report_settings$conf$assay_properties)) {
    if (report_settings$conf$assay_properties$vcf_tumor_only == 1) {
      report_settings$conf$report_color <-
-       pcgrr::color_palette[["report_color"]][["values"]][2]
+       color_palette[["report_color"]][["values"]][2]
    }
   }
 

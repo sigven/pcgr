@@ -9,7 +9,7 @@ generate_report_data_expression <-
            settings = NULL) {
 
   pcg_report_expression <-
-    pcgrr::init_expression_content()
+    init_expression_content()
 
   pcg_report_expression[["eval"]] <- TRUE
 
@@ -22,7 +22,7 @@ generate_report_data_expression <-
      file.exists(settings$molecular_data$fname_expression_outliers_tsv)) {
 
     pcg_report_expression[["outliers"]] <-
-     pcgrr::load_expression_outliers(settings = settings,
+     load_expression_outliers(settings = settings,
                                  ref_data = ref_data)
   }
 
@@ -41,7 +41,7 @@ generate_report_data_expression <-
        ("TPM" %in% colnames(exp_data) == FALSE &
         "TPM_GENE" %in% colnames(exp_data) == FALSE) |
        "BIOTYPE" %in% colnames(exp_data) == FALSE) {
-      pcgrr::log4r_warn(
+      log4r_warn(
         "Missing a required column in expression file: SYMBOL, TPM/TPM_GENE, BIOTYPE")
     }else{
 
@@ -52,7 +52,7 @@ generate_report_data_expression <-
       }
 
       if (n_pc > 0) {
-        pcgrr::log4r_info(
+        log4r_info(
           "Estimating immune contexture of tumor sample from RNA-seq data")
         exp_protein_coding <- exp_data |>
           dplyr::filter(.data$BIOTYPE == "protein_coding") |>
@@ -89,7 +89,7 @@ generate_report_data_expression <-
               dplyr::mutate(fraction = round(
                 .data$fraction, digits = 3)) |>
               dplyr::left_join(
-                pcgrr::immune_celltypes, by = "method_cell_type") |>
+                immune_celltypes, by = "method_cell_type") |>
               dplyr::distinct()
 
           }

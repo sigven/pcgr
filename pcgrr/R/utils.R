@@ -276,7 +276,7 @@ exclude_non_chrom_variants <- function(vcf_df, chrom_var = "CHROM") {
     vcf_df, nuc_chromosomes_df, by = chrom_var)
   n_after_exclusion <- nrow(vcf_df)
   if (n_before_exclusion - n_after_exclusion > 0) {
-    pcgrr::log4r_info(
+    log4r_info(
       paste0("Excluding n = ",
              n_before_exclusion - n_after_exclusion,
              " variant(s) from non-nuclear chromosomes/scaffolds"))
@@ -459,7 +459,7 @@ filter_read_support <- function(vcf_df, config = NULL) {
          !is.null(config$somatic_snv$allelic_support$tumor_ad_min)) {
         tumor_filtering_set <- TRUE
         if (any(is.na(vcf_df[, col]))) {
-          pcgrr::log4r_warn(
+          log4r_warn(
             paste0("Column '", col,
                    "' contains <NA> values - unable to perform filtering on depth/allelic support"))
           warns_tumor <- warns_tumor + 1
@@ -477,7 +477,7 @@ filter_read_support <- function(vcf_df, config = NULL) {
          !is.null(config$somatic_snv$allelic_support$control_ad_max)) {
         control_filtering_set <- TRUE
         if (any(is.na(vcf_df[, col]))) {
-          pcgrr::log4r_warn(
+          log4r_warn(
             paste0("Column '", col,
                    "' contains <NA> values - unable to perform filtering on depth/allelic support"))
           warns_control <- warns_control + 1
@@ -583,7 +583,7 @@ filter_read_support <- function(vcf_df, config = NULL) {
     }
 
 
-    pcgrr::log4r_info(paste0(
+    log4r_info(paste0(
       "Tumor variant filtering based on allelic depth/fraction: ",
       paste(filtering_criteria_used_tumor, collapse = ", ")
     ))
@@ -611,7 +611,7 @@ filter_read_support <- function(vcf_df, config = NULL) {
                  config$somatic_snv$allelic_support$control_ad_max))
     }
 
-    pcgrr::log4r_info(paste0(
+    log4r_info(paste0(
       "Tumor variant filtering based on allelic depth/fraction: ",
       paste(filtering_criteria_used_control, collapse = ", ")
     ))
@@ -621,7 +621,7 @@ filter_read_support <- function(vcf_df, config = NULL) {
   n_removed <- n_before_dp_af_filtering - nrow(vcf_df)
   percentage <- round(as.numeric((n_removed / n_before_dp_af_filtering) * 100),
                       digits = 2)
-  pcgrr::log4r_info(
+  log4r_info(
     paste0("Excluded n = ", n_removed,
            " tumor variants (", percentage,
            "% of total) based on thresholds for AF/AD/DP support"
@@ -630,7 +630,7 @@ filter_read_support <- function(vcf_df, config = NULL) {
 
   ## Issue warning if no variants are left after filtering
   if (NROW(vcf_df) == 0) {
-    pcgrr::log4r_warn(
+    log4r_warn(
       paste0("NO tumor variants left after filtering on AF/AD/DP support - ",
              "check input VCF and/or filtering settings"))
   }
@@ -644,11 +644,11 @@ filter_read_support <- function(vcf_df, config = NULL) {
       dplyr::distinct()
 
     if (NROW(missed_actionable_vars) > 0) {
-      pcgrr::log4r_warn(
+      log4r_warn(
         paste0("N = ", NROW(missed_actionable_vars),
                " actionable variants/mutation hotspots excluded after filtering on AF/AD/DP support - ",
                "check input VCF and/or filtering settings"))
-      pcgrr::log4r_warn(
+      log4r_warn(
         paste0("Missed actionable variants/mutation hotspots: ",
                paste0(missed_actionable_vars$SYMBOL,
                       " (",missed_actionable_vars$CONSEQUENCE,
@@ -678,7 +678,7 @@ write_processed_vcf <- function(calls,
                                 vcf_fname = NULL,
                                 snv_only = TRUE) {
 
-  pcgrr::log4r_info("Writing VCF file with input calls for signature analysis")
+  log4r_info("Writing VCF file with input calls for signature analysis")
 
   header_lines <-
     c("##fileformat=VCFv4.2",
@@ -752,11 +752,11 @@ detect_vcf_sample_name <- function(df, sample_name = NULL, cpsr = FALSE) {
   stopifnot(is.data.frame(df) & !is.null(sample_name))
   if ("VCF_SAMPLE_ID" %in% colnames(df)) {
     unique_sample_names <- unique(df$VCF_SAMPLE_ID)
-    pcgrr::log4r_info(paste0("Found the following VCF sample names: ",
+    log4r_info(paste0("Found the following VCF sample names: ",
                              paste(unique_sample_names, collapse = ", ")))
 
     if (length(unique_sample_names) > 1 & cpsr == T) {
-      pcgrr::log4r_info(paste0("Found more than one sample name - VCF with somatic ",
+      log4r_info(paste0("Found more than one sample name - VCF with somatic ",
                      "calls? Expecting single sample germline VCF for CPSR"))
       stop()
     }
@@ -996,7 +996,7 @@ plotly_pie_chart <- function(
     data,
     marker = list(
       colors =
-        pcgrr::color_palette$multi$values,
+        color_palette$multi$values,
       line = list(
         color = "#FFFFFF",
         width = pie_line_width))) |>

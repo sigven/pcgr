@@ -124,14 +124,14 @@ generate_report_data_fusion <-
            settings = NULL) {
 
     pcg_report_fusion <-
-      pcgrr::init_fusion_content()
+      init_fusion_content()
     pcg_report_fusion[["eval"]] <- TRUE
 
     if (settings$molecular_data$fname_rna_fusion_tsv != "None" &
        file.exists(settings$molecular_data$fname_rna_fusion_tsv)) {
 
       pcg_report_fusion[["callset"]] <-
-        pcgrr::load_rna_fusions(
+        load_rna_fusions(
           settings = settings,
           ref_data = ref_data)
     }
@@ -333,13 +333,13 @@ get_druggable_fusion_partner <- function(
   df <- df |>
     dplyr::rename(SYMBOL = dplyr::all_of(gene_col))
 
-  targeted_drugs <- pcgrr::append_targeted_drug_annotations(
+  targeted_drugs <- append_targeted_drug_annotations(
     var_df = df,
     primary_site = primary_site,
     ref_data = ref_data)
 
   targeted_drugs_display <-
-    pcgrr::append_drug_var_link(
+    append_drug_var_link(
       var_df = df,
       primary_site = primary_site,
       ref_data = ref_data

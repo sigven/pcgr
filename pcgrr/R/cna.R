@@ -243,7 +243,7 @@ plot_cna_segments_absolute <- function(
       paste0(round(.data$segsize, digits = 1), "Mb"),
       paste0(.data$segsize * 1000, "Kb"))) |>
 
-    pcgrr::append_styled_cna_vclass(
+    append_styled_cna_vclass(
       colname = "SegmentClass") |>
     dplyr::mutate(
       # SegmentClass = dplyr::case_when(
@@ -349,9 +349,9 @@ plot_cna_segments_absolute <- function(
   }
 
   ## CNA class colours from palette
-  cna_colors_abs <- setNames(
-    pcgrr::color_palette$cna_variant_class$values,
-    pcgrr::color_palette$cna_variant_class$levels_display)
+  cna_colors_abs <- stats::setNames(
+    color_palette$cna_variant_class$values,
+    color_palette$cna_variant_class$levels_display)
   amp_color_abs    <- unname(cna_colors_abs["Amplification"])
   gain_color_abs   <- unname(cna_colors_abs["Gain"])
   hetdel_color_abs <- unname(cna_colors_abs["Shallow deletion"])
@@ -379,9 +379,9 @@ plot_cna_segments_absolute <- function(
     "Shallow deletion"               = hetdel_color_abs,
     "Deep deletion"                  = homdel_color_abs,
     "Minor copy number"              = "#276419",
-    setNames("gray40",         neutral_line_label_abs),
-    setNames(gain_color_abs,   gain_line_label_abs),
-    setNames(hetdel_color_abs, del_line_label_abs))
+    stats::setNames("gray40",         neutral_line_label_abs),
+    stats::setNames(gain_color_abs,   gain_line_label_abs),
+    stats::setNames(hetdel_color_abs, del_line_label_abs))
   leg_breaks_abs <- c(
     "Amplification",
     "Gain",
@@ -395,7 +395,7 @@ plot_cna_segments_absolute <- function(
   if (show_amp_line_abs) {
     leg_colors_abs <- c(
       leg_colors_abs,
-      setNames(amp_color_abs, amp_line_label_abs))
+      stats::setNames(amp_color_abs, amp_line_label_abs))
     leg_breaks_abs <- c(leg_breaks_abs, amp_line_label_abs)
   }
 
@@ -717,7 +717,7 @@ plot_cna_segments_relative <-
         Log2FC = round(log2(
           pmax(.data$CN_TOTAL, 0.1) / tumor_ploidy), digits = 2)
       ) |>
-      pcgrr::append_styled_cna_vclass(
+      append_styled_cna_vclass(
         colname = "SegmentClass") |>
       #   SegmentClass = dplyr::case_when(
       #     .data$VARIANT_CLASS == "amplification"          ~ "Amplification",
@@ -828,9 +828,9 @@ plot_cna_segments_relative <-
       "Neutral baseline (Ploidy = ", round(tumor_ploidy, 2), ")")
 
 
-    cna_colors <- setNames(
-      pcgrr::color_palette$cna_variant_class$values,
-      pcgrr::color_palette$cna_variant_class$levels
+    cna_colors <- stats::setNames(
+      color_palette$cna_variant_class$values,
+      color_palette$cna_variant_class$levels
     )
     amp_color    <- unname(cna_colors["amplification"])
     gain_color   <- unname(cna_colors["gain"])
@@ -849,9 +849,9 @@ plot_cna_segments_relative <-
       "Shallow deletion"               = hetdel_color,
       "Deep deletion"                  = homdel_color,
       "No aberration/neutral"          = "#808080",
-      setNames("gray40",       neutral_line_label),
-      setNames(gain_color,     gain_line_label_rel),
-      setNames(hetdel_color,   del_line_label_rel)
+      stats::setNames("gray40",       neutral_line_label),
+      stats::setNames(gain_color,     gain_line_label_rel),
+      stats::setNames(hetdel_color,   del_line_label_rel)
     )
     leg_breaks <- c(
       "Amplification",
@@ -870,7 +870,7 @@ plot_cna_segments_relative <-
         amp_threshold_effective, ")")
       leg_colors <- c(
         leg_colors,
-        setNames(amp_color, amp_line_label))
+        stats::setNames(amp_color, amp_line_label))
       leg_breaks <- c(
         leg_breaks,
         amp_line_label)
@@ -1045,10 +1045,10 @@ get_oncogenic_cna_events <- function(cna_df_display = NULL) {
     ) |>
     dplyr::select(
       dplyr::any_of(
-        pcgrr::table_display_cols$cna_other_oncogenic
+        table_display_cols$cna_other_oncogenic
       )
     ) |>
-    pcgrr::append_styled_cna_vclass(
+    append_styled_cna_vclass(
       colname = "VARIANT_CLASS_DISPLAY"
     ) |>
     dplyr::arrange(
@@ -1123,7 +1123,7 @@ build_twohit_display_data <- function(
   ## Filter CNA rows that carry at least one two-hit candidate;
   ## sort so deletion LOH events appear before copy_neutral
   cna_twohit <- cna_variant |>
-    pcgrr::append_styled_cna_vclass(
+    append_styled_cna_vclass(
       colname = "VARIANT_CLASS_DISPLAY") |>
     dplyr::filter(
       (!is.na(.data$TWOHIT_CANDIDATE_SOMATIC) &

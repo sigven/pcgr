@@ -7,9 +7,6 @@
 \usage{
 render_evidence_desc_cell()
 }
-\arguments{
-\item{value}{Evidence description text}
-}
 \value{
 An HTML div element that shows the first 200
 characters of the description,

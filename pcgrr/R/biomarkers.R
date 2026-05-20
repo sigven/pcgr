@@ -25,25 +25,25 @@ prep_actble_display_tbl <- function(
     variant_category = 'snv_indel') {
 
   if (is.null(rep)) {
-    pcgrr::log4r_fatal("report object is NULL")
+    log4r_fatal("report object is NULL")
   }
   if (!is.numeric(tier) || !all(tier %in% c(1, 2, 3)) || length(tier) == 0) {
-    pcgrr::log4r_fatal("tier must be a non-empty integer vector with values in {1, 2}")
+    log4r_fatal("tier must be a non-empty integer vector with values in {1, 2, 3}")
   }
   tier <- as.integer(unique(tier))
   if (!variant_category %in% names(rep$content)) {
-    pcgrr::log4r_fatal(paste0(
+    log4r_fatal(paste0(
       "rep$content object does not contain '", variant_category,"'"))
   }
 
   ## check variant_category is valid
   if (!variant_category %in% c("snv_indel", "cna", "fusion")) {
-    pcgrr::log4r_fatal(
+    log4r_fatal(
       "variant_category must be one of 'snv_indel', 'cna', or 'fusion'")
   }
 
   if (!"callset" %in% names(rep$content[[variant_category]])) {
-    pcgrr::log4r_fatal("rep$content$variant_category object does not contain 'callset'")
+    log4r_fatal("rep$content$variant_category object does not contain 'callset'")
   }
 
   callset <- rep$content[[variant_category]]$callset
@@ -53,7 +53,7 @@ prep_actble_display_tbl <- function(
   ## in turn should be a member of the "callset" list object for the variant class
   ## of interest (e.g. snv_indel, cna)
   if (!clnsig %in% c("therapeutic_sensitivity", "therapeutic_resistance")) {
-    pcgrr::log4r_fatal(
+    log4r_fatal(
       paste0("clnsig must be one of ",
       "'therapeutic_resistance', 'therapeutic_sensitivity'"))
   }
@@ -102,7 +102,7 @@ prep_actble_display_tbl <- function(
   }
 
   if (NROW(vars) == 0) {
-    pcgrr::log4r_info(
+    log4r_info(
       paste0("No tier ", paste(tier, collapse = "/"), " variants found."))
     return(list(main = data.frame(), nested = data.frame()))
   }
@@ -135,7 +135,7 @@ prep_actble_display_tbl <- function(
   if (NROW(vars) > 0 & NROW(eitems) > 0) {
     ## debug: print colnames of vars and eitems
 
-    pcgrr::log4r_debug(paste0(
+    log4r_debug(paste0(
       "Variant category: ", variant_category,
       " - colnames of vars: ", paste(colnames(vars), collapse = ", ")))
 
@@ -241,8 +241,8 @@ prep_actble_display_tbl <- function(
       biomarker_source_support <-
         biomarker_var_eitems |>
         dplyr::group_by(
-          VAR_ID, ENTREZGENE,
-          ACTIONABILITY_TIER
+          .data$VAR_ID, .data$ENTREZGENE,
+          .data$ACTIONABILITY_TIER
         ) |>
         dplyr::summarise(
           BM_SOURCES = paste(
@@ -395,25 +395,25 @@ prep_progn_display_tbl <- function(
     variant_category = 'snv_indel') {
 
   if (is.null(rep)) {
-    pcgrr::log4r_fatal("report object is NULL")
+    log4r_fatal("report object is NULL")
   }
   if (!is.numeric(tier) || !all(tier %in% c(1, 2)) || length(tier) == 0) {
-    pcgrr::log4r_fatal("tier must be a non-empty integer vector with values in {1, 2}")
+    log4r_fatal("tier must be a non-empty integer vector with values in {1, 2}")
   }
   tier <- as.integer(unique(tier))
   if (!variant_category %in% names(rep$content)) {
-    pcgrr::log4r_fatal(paste0(
+    log4r_fatal(paste0(
       "rep$content object does not contain '", variant_category,"'"))
   }
 
   ## check variant_category is valid
   if (!variant_category %in% c("snv_indel", "cna", "fusion")) {
-    pcgrr::log4r_fatal(
+    log4r_fatal(
       "variant_category must be one of 'snv_indel', 'cna', or 'fusion'")
   }
 
   if (!"callset" %in% names(rep$content[[variant_category]])) {
-    pcgrr::log4r_fatal("rep$content$variant_category object does not contain 'callset'")
+    log4r_fatal("rep$content$variant_category object does not contain 'callset'")
   }
 
   callset <- rep$content[[variant_category]]$callset
@@ -423,7 +423,7 @@ prep_progn_display_tbl <- function(
   ## in turn should be a member of the "callset" list object for the variant class
   ## of interest (e.g. snv_indel, cna)
   if (!clnsig %in% c("prognostic_better", "prognostic_poor")) {
-    pcgrr::log4r_fatal(
+    log4r_fatal(
       paste0("clnsig must be one of ",
              "'prognostic_better', 'prognostic_poor'"))
   }
@@ -460,7 +460,7 @@ prep_progn_display_tbl <- function(
 
 
   if (NROW(vars) == 0) {
-    pcgrr::log4r_info(
+    log4r_info(
       paste0("No tier ", paste(tier, collapse = "/"), " variants found."))
     return(list(main = data.frame(), nested = data.frame()))
   }
@@ -592,8 +592,8 @@ prep_progn_display_tbl <- function(
       biomarker_source_support <-
         biomarker_var_eitems |>
         dplyr::group_by(
-          VAR_ID, ENTREZGENE,
-          ACTIONABILITY_TIER
+          .data$VAR_ID, .data$ENTREZGENE,
+          .data$ACTIONABILITY_TIER
         ) |>
         dplyr::summarise(
           BM_SOURCES = paste(
@@ -735,25 +735,25 @@ prep_diagn_display_tbl <- function(
     variant_category = 'snv_indel') {
 
   if (is.null(rep)) {
-    pcgrr::log4r_fatal("report object is NULL")
+    log4r_fatal("report object is NULL")
   }
   if (!is.numeric(tier) || !all(tier %in% c(1, 2)) || length(tier) == 0) {
-    pcgrr::log4r_fatal("tier must be a non-empty integer vector with values in {1, 2}")
+    log4r_fatal("tier must be a non-empty integer vector with values in {1, 2}")
   }
   tier <- as.integer(unique(tier))
   if (!variant_category %in% names(rep$content)) {
-    pcgrr::log4r_fatal(paste0(
+    log4r_fatal(paste0(
       "rep$content object does not contain '", variant_category,"'"))
   }
 
   ## check variant_category is valid
   if (!variant_category %in% c("snv_indel", "cna", "fusion")) {
-    pcgrr::log4r_fatal(
+    log4r_fatal(
       "variant_category must be one of 'snv_indel', 'cna', or 'fusion'")
   }
 
   if (!"callset" %in% names(rep$content[[variant_category]])) {
-    pcgrr::log4r_fatal("rep$content$variant_category object does not contain 'callset'")
+    log4r_fatal("rep$content$variant_category object does not contain 'callset'")
   }
 
   callset <- rep$content[[variant_category]]$callset
@@ -764,7 +764,7 @@ prep_diagn_display_tbl <- function(
   ## of interest (e.g. snv_indel, cna)
   if (!clnsig %in% c("diagnostic_positive",
                      "diagnostic_negative")) {
-    pcgrr::log4r_fatal(
+    log4r_fatal(
       paste0("clnsig must be one of ",
              "'diagnostic_positive', 'diagnostic_negative'"))
   }
@@ -787,7 +787,7 @@ prep_diagn_display_tbl <- function(
 
   if (NROW(eitems) == 0 |
       NROW(var_classification) == 0) {
-    pcgrr::log4r_info(
+    log4r_info(
       paste0("No tier ", paste(tier, collapse = "/"), " variants found."))
     return(list(main = data.frame(), nested = data.frame()))
   }
@@ -808,7 +808,7 @@ prep_diagn_display_tbl <- function(
 
 
   if (NROW(vars) == 0) {
-    pcgrr::log4r_info(
+    log4r_info(
       paste0("No tier ", paste(tier, collapse = "/"), " variants found."))
     return(list(main = data.frame(), nested = data.frame()))
   }
@@ -939,8 +939,8 @@ prep_diagn_display_tbl <- function(
       biomarker_source_support <-
         biomarker_var_eitems |>
         dplyr::group_by(
-          VAR_ID, ENTREZGENE,
-          ACTIONABILITY_TIER
+          .data$VAR_ID, .data$ENTREZGENE,
+          .data$ACTIONABILITY_TIER
         ) |>
         dplyr::summarise(
           BM_SOURCES = paste(
@@ -1471,7 +1471,7 @@ map_biomarker_data <- function(
           BM_MAPPING_CONFIDENCE = "low"
         ) |>
         dplyr::rename(
-          BM_EVIDENCE_LEVEL_FULL = BM_EVIDENCE_LEVEL
+          BM_EVIDENCE_LEVEL_FULL = "BM_EVIDENCE_LEVEL"
         ) |>
         dplyr::mutate(
           BM_EVIDENCE_LEVEL = dplyr::case_when(

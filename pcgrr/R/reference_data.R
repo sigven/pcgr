@@ -24,7 +24,7 @@ load_reference_data <- function(
     pcgr_ref_data[["assembly"]][["ref_genome"]] <- "BSgenome.Hsapiens.UCSC.hg38"
   }
 
-  bsgenome_obj <- pcgrr::get_genome_obj(genome_assembly)
+  bsgenome_obj <- get_genome_obj(genome_assembly)
   genome_grch2hg <- c("grch38" = "hg38", "grch37" = "hg19")
   pcgr_ref_data[['assembly']][['seqinfo']] <-
     GenomeInfoDb::Seqinfo(

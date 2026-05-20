@@ -9,12 +9,15 @@ render_symbol_assoc_style(data, rank_col = "TISSUE_ASSOC_RANK")
 }
 \arguments{
 \item{data}{The main data frame (passed via closure)}
+
+\item{rank_col}{Name of the column containing the cancer association rank
+value used to determine cell background color (default: "TISSUE_ASSOC_RANK")}
 }
 \value{
 A function that can be used as a reactable cell renderer
 for the SAMPLE_ALTERATION column, which checks the TISSUE_ASSOC_RANK
 column in the same row to determine background color based on predefined
-breaks and colors in pcgrr::color_palette$cancer_assoc.
+breaks and colors in color_palette$cancer_assoc.
 }
 \description{
 Style alteration cell background based on cancer association rank

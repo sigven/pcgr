@@ -8,13 +8,12 @@
 render_oncogenicity_cell(data)
 }
 \arguments{
-\item{value}{Oncogenicity category (e.g. "Oncogenic",
-"Likely Oncogenic", etc.)}
+\item{data}{The main data frame (passed via closure)}
 }
 \value{
 An HTML span element with background color corresponding
 to the oncogenicity category, using colors defined in
-pcgrr::color_palette$oncogenicity.
+color_palette$oncogenicity.
 }
 \description{
 Style oncogenicity cell background based on value

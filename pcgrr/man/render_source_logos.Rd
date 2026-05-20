@@ -7,10 +7,6 @@
 \usage{
 render_source_logos()
 }
-\arguments{
-\item{value}{A string with source database names separated by "|"
-(e.g. "civic|oncokb"), or NA/empty string for no sources.}
-}
 \value{
 An HTML div element containing the corresponding logos,
 or an empty string if no valid sources.
