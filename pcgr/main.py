@@ -52,7 +52,9 @@ def cli():
     optional_signatures = parser.add_argument_group(
         "Mutational signature options (SNV/InDel)",
         "Only applicable when --input_vcf is provided")
-    optional_cna = parser.add_argument_group("Somatic CNA analysis options")
+    optional_cna = parser.add_argument_group(
+        "Somatic CNA analysis options",
+        "Only applicable when --input_cna is provided")
     optional_rna = parser.add_argument_group("RNA expression and fusion options")
     optional_germline = parser.add_argument_group("Germline variant options")
     optional_biomarker = parser.add_argument_group("Biomarker and tiering options")

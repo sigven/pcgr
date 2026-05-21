@@ -483,12 +483,14 @@ def verify_args(arg_dict, logger = None):
         warn_message(warn_msg, logger)
         arg_dict['fusion_min_split_reads'] = 2
 
-    # Check that threshold for gains/amplifications are properly set, and that segment overlap with transcripts are set appropriately
-    validate_cna_thresholds(arg_dict, logger)
+    ## CNA-dependent validations - only check when input CNA is provided
+    if arg_dict['input_cna'] is not None:
+        # Check that threshold for gains/amplifications are properly set, and that segment overlap with transcripts are set appropriately
+        validate_cna_thresholds(arg_dict, logger)
 
-    if arg_dict['cna_transcript_overlap_pct'] > 100 or arg_dict['cna_transcript_overlap_pct'] <= 0:
-        err_msg = f"Minimum percent overlap between copy number segment and gene transcript ('--cna_transcript_overlap_pct' = {arg_dict['cna_transcript_overlap_pct']}) must be within (0, 100]"
-        error_message(err_msg, logger)
+        if arg_dict['cna_transcript_overlap_pct'] > 100 or arg_dict['cna_transcript_overlap_pct'] <= 0:
+            err_msg = f"Minimum percent overlap between copy number segment and gene transcript ('--cna_transcript_overlap_pct' = {arg_dict['cna_transcript_overlap_pct']}) must be within (0, 100]"
+            error_message(err_msg, logger)
 
     return(arg_dict)
 
