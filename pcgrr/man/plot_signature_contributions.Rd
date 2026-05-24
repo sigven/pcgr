@@ -7,7 +7,8 @@ in a given sample (both ggplot and plotly)}
 \usage{
 plot_signature_contributions(
   signature_contributions = NULL,
-  per_signature = TRUE
+  per_signature = TRUE,
+  color_palette = pcgrr::color_palette
 )
 }
 \arguments{

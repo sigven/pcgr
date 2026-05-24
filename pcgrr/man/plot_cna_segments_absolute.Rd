@@ -12,7 +12,8 @@ plot_cna_segments_absolute(
   amp_threshold_effective = 5,
   threshold_mode = "absolute",
   gain_threshold_effective = 3,
-  del_threshold_effective = 1
+  del_threshold_effective = 1,
+  color_palette = pcgrr::color_palette
 )
 }
 \arguments{

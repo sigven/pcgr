@@ -4,7 +4,10 @@
 \alias{get_oncogenic_cna_events}
 \title{Get oncogenic copy number events}
 \usage{
-get_oncogenic_cna_events(cna_df_display = NULL)
+get_oncogenic_cna_events(
+  cna_df_display = NULL,
+  table_display_cols = pcgrr::table_display_cols
+)
 }
 \arguments{
 \item{cna_df_display}{data frame with transcript annotations per

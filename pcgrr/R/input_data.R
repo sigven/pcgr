@@ -528,7 +528,7 @@ load_cpsr_classified_variants <- function(
         "HGVSp", "CDS_CHANGE",
         "EFFECT_PREDICTIONS","SPLICE_EFFECT",
         "CODING_STATUS",
-        "LOSS_OF_FUNCTION", 
+        "LOSS_OF_FUNCTION",
         "DP_CONTROL",
         "VARIANT_CLASS","GENENAME",
         "ENSEMBL_GENE_ID",
@@ -910,6 +910,21 @@ load_dna_variants <- function(
             results$bm_evidence$eitems,
             oncokb_results$eitems)
         }
+
+        if(NROW(oncokb_results$variants) > 0 &
+           "HOTSPOT_OKB" %in% colnames(oncokb_results$variants) &
+           "VUS_OKB" %in% colnames(oncokb_results$variants) &
+           "VAR_ID" %in% colnames(oncokb_results$variants)) {
+          results[['variant']] <- results[['variant']] |>
+            dplyr::left_join(
+              dplyr::select(
+                oncokb_results$variants,
+                c("VAR_ID", "HOTSPOT_OKB","VUS_OKB")
+              ),
+              by = c("VAR_ID" = "VAR_ID")
+            )
+        }
+
       }
     }
 
@@ -1327,6 +1342,24 @@ load_rna_fusions <- function(
       primary_site,
     retained_info_tags = "None",
     variant_origin = "Somatic")
+
+
+  okb_annotations_fusions <- NULL
+  if("variant" %in% names(callset_fusions)){
+    ## check for presence of necessary columns
+    if (all(c("VAR_ID", "VARIANT_CLASS") %in%
+            colnames(callset_fusions$variant))) {
+
+      okb_annotations_fusions <- dplyr::select(
+        callset_fusions$variant,
+        "VAR_ID",
+        "VARIANT_CLASS",
+        dplyr::any_of(
+          oncokb_annotations
+        )
+      )
+    }
+  }
 
   results$variant <- callset_fusions$variant
   results$bm_evidence <-
@@ -2102,42 +2135,27 @@ load_rna_fusions <- function(
         )) |>
       dplyr::select(
         dplyr::any_of(
-          c("VAR_ID",
-            "VARIANT_CLASS",
-            "ENTREZGENE",
-            "FUSION_GENE",
-            "FUSION_GENE2",
-            "SPLIT_READS",
-            "SCORE",
-            "FUSION_GENE_5P",
-            "FUSION_GENE_3P",
-            "BREAKPOINT_5P",
-            "BREAKPOINT_3P",
-            "GENENAME_5P",
-            "ONCOGENE_5P",
-            "ENSEMBL_TRANSCRIPT_ID_5P",
-            "TARGETED_INHIBITORS_5P",
-            "TARGETED_INHIBITORS_ALL_5P",
-            "GENENAME_3P",
-            "ONCOGENE_3P",
-            "ENSEMBL_TRANSCRIPT_ID_3P",
-            "TARGETED_INHIBITORS_3P",
-            "TARGETED_INHIBITORS_ALL_3P",
-            "SAMPLE_ALTERATION",
-            "MITDB_NUM_EVIDENCE",
-            "MITDB_EVIDENCE",
-            "ACTIONABILITY_TIER",
-            "ACTIONABILITY"
-          )
-        )
-      ) |>
+          tsv_cols$fusion)) |>
       dplyr::distinct()
-
 
   }else{
     log4r_info(
       paste0("No RNA fusion calls with gene/transcript overlap found"))
     return(results)
+  }
+
+  if(!is.null(okb_annotations_fusions)){
+    for(m in c("variant","variant_display")){
+      if(!is.null(results[[m]]) & NROW(results[[m]]) > 0){
+        results[[m]] <- results[[m]] |>
+          dplyr::left_join(
+            okb_annotations_fusions,
+            by = c("VAR_ID",
+                   "VARIANT_CLASS"),
+            relationship = "one-to-one"
+          )
+      }
+    }
   }
 
   return(results)

@@ -15,7 +15,8 @@ plot_filtering_stats_exonic(
   font_size = 15,
   pie_line_width = 3,
   opacity_filtered_categories = 0.4,
-  hole_size_pie = 0.4
+  hole_size_pie = 0.4,
+  color_palette = pcgrr::color_palette
 )
 }
 \arguments{

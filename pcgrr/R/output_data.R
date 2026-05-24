@@ -275,27 +275,26 @@ get_excel_sheets <- function(report = NULL) {
       isTRUE(report$content$fusion$eval)) {
 
     if (NROW(callsets[['fusion']]$variant) > 0) {
-      # excel_sheets[['SOMATIC_RNA_FUSION']] <- as.data.frame(
-      #   callset_cna$fusion |>
-      #     dplyr::select(dplyr::any_of(tsv_cols$fusion)) |>
-      #     dplyr::select(-dplyr::any_of("BIOMARKER_MATCH")) |>
-      #     dplyr::filter(!is.na(.data$ACTIONABILITY_TIER)) |>
-      #     dplyr::arrange(
-      #       .data$ACTIONABILITY_TIER,
-      #       .data$TARGETED_INHIBITORS_ALL2)
-      # )
+      excel_sheets[['RNA_FUSION']] <- as.data.frame(
+        callsets[['fusion']]$variant |>
+          dplyr::select(dplyr::any_of(tsv_cols$fusion)) |>
+          dplyr::select(-dplyr::any_of("BIOMARKER_MATCH")) |>
+          dplyr::filter(!is.na(.data$ACTIONABILITY_TIER)) |>
+          dplyr::arrange(
+            .data$ACTIONABILITY_TIER)
+      )
 
       ## Evidence items - biomarkers
-      excel_sheets[['SOMATIC_RNA_FUSION_BIOMARKER']] <- data.frame()
+      excel_sheets[['RNA_FUSION_BIOMARKER']] <- data.frame()
 
       for (clnsig in names(bm_categories)) {
         if(clnsig == "diagnostic_negative") {
           next
         }
         if(NROW(callsets[['fusion']]$bm_evidence[[clnsig]]$eitems) > 0){
-          excel_sheets[['SOMATIC_RNA_FUSION_BIOMARKER']] <-
+          excel_sheets[['RNA_FUSION_BIOMARKER']] <-
             dplyr::bind_rows(
-              excel_sheets[['SOMATIC_RNA_FUSION_BIOMARKER']],
+              excel_sheets[['RNA_FUSION_BIOMARKER']],
               callsets[['fusion']]$bm_evidence[[clnsig]]$eitems |>
                 dplyr::mutate(
                   TIER = switch(
@@ -309,7 +308,8 @@ get_excel_sheets <- function(report = NULL) {
                   )
                 ) |>
                 dplyr::select(
-                  -dplyr::any_of(c("BM_VARIANT_ID",
+                  -dplyr::any_of(
+                    c("BM_VARIANT_ID",
                      "ACTIONABILITY_TIER",
                      "BM_REFERENCE",
                      "BM_EVIDENCE_LEVEL_FULL",
@@ -336,9 +336,9 @@ get_excel_sheets <- function(report = NULL) {
       }
 
 
-      if (NROW(excel_sheets[['SOMATIC_RNA_FUSION_BIOMARKER']]) > 0) {
-        excel_sheets[['SOMATIC_RNA_FUSION_BIOMARKER']] <-
-          excel_sheets[['SOMATIC_RNA_FUSION_BIOMARKER']] |>
+      if (NROW(excel_sheets[['RNA_FUSION_BIOMARKER']]) > 0) {
+        excel_sheets[['RNA_FUSION_BIOMARKER']] <-
+          excel_sheets[['RNA_FUSION_BIOMARKER']] |>
           dplyr::distinct() |>
           dplyr::arrange(
             .data$SAMPLE_ID,

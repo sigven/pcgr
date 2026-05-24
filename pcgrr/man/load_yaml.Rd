@@ -5,7 +5,11 @@
 \title{Function that loads YAML data with settings and file paths
 to annotated molecular profiles}
 \usage{
-load_yaml(yaml_fname, report_mode = "CPSR")
+load_yaml(
+  yaml_fname,
+  report_mode = "CPSR",
+  color_palette = pcgrr::color_palette
+)
 }
 \arguments{
 \item{yaml_fname}{Yaml file with configuration settings and paths

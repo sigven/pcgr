@@ -10,7 +10,8 @@ plot_tmb_primary_site_tcga(
   p_site = "Liver",
   tmb_estimates = NULL,
   tmb_display_type = "missense_only",
-  tumor_only = FALSE
+  tumor_only = FALSE,
+  color_palette = pcgrr::color_palette
 )
 }
 \arguments{

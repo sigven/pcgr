@@ -181,6 +181,10 @@ By default, PCGR integrates biomarker evidence from multiple sources (CIViC, CGI
 
 * `--oncokb_exclusive`
 
+<div style="border-left: 4px solid #e69f00; background-color: #fff8e6; padding: 0.75em 1em; margin: 1em 0;">
+**Licensing notice — OncoKB terms of use:** OncoKB is freely accessible for non-commercial research use. However, use of OncoKB data for **commercial purposes or for patient care in a hospital or clinical setting** — including the generation of PCGR reports used to inform diagnostic or therapeutic decisions — requires a separate commercial license from Memorial Sloan Kettering Cancer Center. Users are solely responsible for ensuring that their use of OncoKB through PCGR complies with the [OncoKB Terms of Use](https://www.oncokb.org/terms). If in doubt, contact the OncoKB team at [contact@oncokb.org](mailto:contact@oncokb.org) before use.
+</div>
+
 ### RNA fusions
 
 If RNA fusion data is available for the tumor sample, it can be provided via:

@@ -58,7 +58,7 @@ by the user. The following sections may be included in the report:
 
 8. __RNA expression analysis__
   * Datatable with expression outliers - as compared to distribution in reference cohorts
-  * Datatable with correlation between gene expression in query sample and other reference cohorts (TCGA, TreeHouse, DepMap)
+  * Datatable with correlation between gene expression in query sample and samples in other reference cohorts (TCGA, Treehouse Childhood Cancer Initiative, DepMap)
   * Immune contexture profiling
 
 9. __Documentation__
@@ -207,7 +207,6 @@ MES|<SCORE_DIFF>|SCORE_REF>|<SCORE_ALT>|EFFECT (MaxEntScan). |
 | `DBNSFP_MUTATIONTASTER` | predicted effect from MUTATIONTASTER (dbNSFP) |
 | `DBNSFP_MUTATIONASSESSOR` | predicted effect from MUTATIONASSESSOR (dbNSFP) |
 | `DBNSFP_M_CAP` | predicted effect from M-CAP (dbNSFP) |
-| `DBNSFP_ALOFT` | predicted effect from ALoFT (dbNSFP) |
 | `DBNSFP_MUTPRED` | score from MUTPRED (dbNSFP) |
 | `DBNSFP_CLINPRED` | predicted effect from ClinPred (dbNSFP) |
 | `DBNSFP_FATHMM` | predicted effect from FATHMM-XF (dbNSFP) |
@@ -287,7 +286,7 @@ We provide a tab-separated values file with most important annotations for SNVs/
 
 - `<sample_id>.pcgr.<genome_assembly>.snv_indel_ann.tsv.gz`
 
-The following variables are included in the TSV file (VCF tags issued by the user (`--retained_info_tags`) will be appended at the end):
+The following variables are included in the TSV file (VCF tags issued by the user (`--retained_info_tags`) will be appended at the end). Columns suffixed with `_OKB` are only present when OncoKB annotation is enabled via `--oncokb_api_token`.
 
 | Variable | Description |
 |----------|-------------|
@@ -329,39 +328,42 @@ The following variables are included in the TSV file (VCF tags issued by the use
 | 36. `ONCOGENICITY` | Oncogenicity annotation - ClinGen/CGC/VICC SOP implementation |
 | 37. `ONCOGENICITY_CODE` | Variant-matching oncogenicity code(s) - ClinGen/CGC/VICC SOP implementation |
 | 38. `ONCOGENICITY_SCORE` | Variant oncogenicity score - ClinGen/CGC/VICC SOP implementation |
-| 39. `MUTATION_EFFECT_OKB` | OncoKB mutation effect annotation (e.g. Loss-of-function, Gain-of-function) |
-| 40. `MUTATION_EFFECT_DESCRIPTION_OKB` | OncoKB mutation effect description |
-| 41. `ONCOGENICITY_OKB` | OncoKB oncogenicity annotation (e.g. Oncogenic, Likely Oncogenic, Likely Neutral etc.) |
-| 42. `VARIANT_SUMMARY_OKB` | OncoKB variant summary |
-| 43. `TUMOR_TYPE_SUMMARY_OKB` | OncoKB tumor type summary |
-| 44. `CANONICAL` | Flag indicating if transcript is canonical |
-| 45. `CCDS` | CCDS identifier |
-| 46. `UNIPROT_ACC` | UniProt accession |
-| 47. `ENSEMBL_TRANSCRIPT_ID` | Ensembl transcript identifier |
-| 48. `ENSEMBL_PROTEIN_ID` | Ensembl protein identifier |
-| 49. `REFSEQ_TRANSCRIPT_ID` | RefSeq transcript identifier |
-| 50. `REFSEQ_PROTEIN_ID` | RefSeq protein identifier |
-| 51. `MANE_SELECT` | MANE transcript select |
-| 52. `MANE_PLUS_CLINICAL` | MANE transcript plus clinical |
-| 53. `ONCOGENE` | Flag indicating if gene is oncogene (CancerMine/NCG) |
-| 54. `ONCOGENE_SUPPORT` | Oncogene annotation support (CancerMine/NCG) |
-| 55. `TUMOR_SUPPRESSOR` | Flag indicating if gene is tumor suppressor (CancerMine/NCG) |
-| 56. `TUMOR_SUPPRESSOR_SUPPORT` | Tumor suppressor annotation support (CancerMine/NCG) |
-| 57. `TARGETED_INHIBITORS2` | Targeted inhibitors |
-| 58. `REGULATORY_ANNOTATION` | Regulatory annotation |
-| 59. `VEP_ALL_CSQ` | VEP consequence - all transcripts |
-| 60. `gnomADe_AF` | gnomAD exomes allele frequency - globally |
-| 61. `gnomADg_AF` | gnomAD genomes allele frequency - globally |
-| 62. `DBSNP_RSID` | dbSNP identifier |
-| 63. `COSMIC_ID` | COSMIC identifier |
-| 64. `TCGA_FREQUENCY` | Frequency of variant across TCGA tumor types. Format: `tumortype | percent affected | affected cases | total cases` |
-| 65. `TCGA_PANCANCER_COUNT` | Raw variant count across all TCGA tumor types |
-| 66. `CLINVAR_MSID` | ClinVar measureset identifier |
-| 67. `CLINVAR_CLASSIFICATION` | ClinVar variant classification |
-| 68. `CLINVAR_VARIANT_ORIGIN` | ClinVar variant origin |
-| 69. `CLINVAR_NUM_SUBMITTERS` | ClinVar number of submitters |
-| 70. `CLINVAR_GOLD_STARS` | ClinVar review status gold stars (0-4) |
-| 71. `CLINVAR_CONFLICTED` | ClinVar variant classification is conflicted |
+| 39. `MUTATION_EFFECT_OKB` | _(OncoKB only)_ OncoKB mutation effect annotation (e.g. Loss-of-function, Gain-of-function) |
+| 40. `MUTATION_EFFECT_CITATIONS_OKB` | _(OncoKB only)_ OncoKB mutation effect citations |
+| 41. `MUTATION_EFFECT_DESCRIPTION_OKB` | _(OncoKB only)_ OncoKB mutation effect description |
+| 42. `ONCOGENICITY_OKB` | _(OncoKB only)_ OncoKB oncogenicity annotation (e.g. Oncogenic, Likely Oncogenic, Likely Neutral etc.) |
+| 43. `TUMOR_TYPE_SUMMARY_OKB` | _(OncoKB only)_ OncoKB tumor type summary |
+| 44. `VARIANT_SUMMARY_OKB` | _(OncoKB only)_ OncoKB variant summary |
+| 45. `HOTSPOT_OKB` | _(OncoKB only)_ OncoKB hotspot flag - indicates if variant overlaps a known OncoKB hotspot |
+| 46. `VUS_OKB` | _(OncoKB only)_ OncoKB variant of uncertain significance flag |
+| 47. `CANONICAL` | Flag indicating if transcript is canonical |
+| 48. `CCDS` | CCDS identifier |
+| 49. `UNIPROT_ACC` | UniProt accession |
+| 50. `ENSEMBL_TRANSCRIPT_ID` | Ensembl transcript identifier |
+| 51. `ENSEMBL_PROTEIN_ID` | Ensembl protein identifier |
+| 52. `REFSEQ_TRANSCRIPT_ID` | RefSeq transcript identifier |
+| 53. `REFSEQ_PROTEIN_ID` | RefSeq protein identifier |
+| 54. `MANE_SELECT` | MANE transcript select |
+| 55. `MANE_PLUS_CLINICAL` | MANE transcript plus clinical |
+| 56. `ONCOGENE` | Flag indicating if gene is oncogene (CancerMine/NCG) |
+| 57. `ONCOGENE_SUPPORT` | Oncogene annotation support (CancerMine/NCG) |
+| 58. `TUMOR_SUPPRESSOR` | Flag indicating if gene is tumor suppressor (CancerMine/NCG) |
+| 59. `TUMOR_SUPPRESSOR_SUPPORT` | Tumor suppressor annotation support (CancerMine/NCG) |
+| 60. `TARGETED_INHIBITORS2` | Targeted inhibitors |
+| 61. `REGULATORY_ANNOTATION` | Regulatory annotation |
+| 62. `VEP_ALL_CSQ` | VEP consequence - all transcripts |
+| 63. `gnomADe_AF` | gnomAD exomes allele frequency - globally |
+| 64. `gnomADg_AF` | gnomAD genomes allele frequency - globally |
+| 65. `DBSNP_RSID` | dbSNP identifier |
+| 66. `COSMIC_ID` | COSMIC identifier |
+| 67. `TCGA_FREQUENCY` | Frequency of variant across TCGA tumor types. Format: `tumortype | percent affected | affected cases | total cases` |
+| 68. `TCGA_PANCANCER_COUNT` | Raw variant count across all TCGA tumor types |
+| 69. `CLINVAR_MSID` | ClinVar measureset identifier |
+| 70. `CLINVAR_CLASSIFICATION` | ClinVar variant classification |
+| 71. `CLINVAR_VARIANT_ORIGIN` | ClinVar variant origin |
+| 72. `CLINVAR_NUM_SUBMITTERS` | ClinVar number of submitters |
+| 73. `CLINVAR_GOLD_STARS` | ClinVar review status gold stars (0-4) |
+| 74. `CLINVAR_CONFLICTED` | ClinVar variant classification is conflicted |
 
 ##### Tumor-only runs
 
@@ -442,7 +444,7 @@ Copy number segments are intersected with the genomic coordinates of all transcr
 - `<sample_id>.pcgr.<genome_assembly>.cna_gene_ann.tsv.gz`
   - This file is organized according to the _affected transcripts_ (i.e. one line/record per affected transcript, segments not overlapping with any transcripts will thus not be included in this files).
 
-The format of the compressed `cna_gene_ann.tsv.gz` is the following:
+The format of the compressed `cna_gene_ann.tsv.gz` is the following. Columns suffixed with `_OKB` are only present when OncoKB annotation is enabled via `--oncokb_api_token`. Note that `HOTSPOT_OKB` and `VUS_OKB` are not included for CNA output.
 
 | Variable | Description |
 |----------|-------------|
@@ -471,16 +473,63 @@ The format of the compressed `cna_gene_ann.tsv.gz` is the following:
 | 23. `TUMOR_SUPPRESSOR_SUPPORT` | Tumor suppressor annotation support (CancerMine/NCG) |
 | 24. `ONCOGENE` | Flag indicating if gene is oncogene (CancerMine/NCG) |
 | 25. `ONCOGENE_SUPPORT` | Oncogene annotation support (CancerMine/NCG) |
-| 26. `MUTATION_EFFECT_OKB` | OncoKB mutation effect annotation (e.g. Loss-of-function, Gain-of-function) |
-| 27. `ONCOGENICITY_OKB` | OncoKB oncogenicity annotation (e.g. Oncogenic, Likely Oncogenic) |
-| 28. `VARIANT_SUMMARY_OKB` | OncoKB variant summary |
-| 29. `TUMOR_TYPE_SUMMARY_OKB` | OncoKB tumor type summary |
-| 30. `TRANSCRIPT_OVERLAP` | Comma-separated list of associated transcripts, including percentage of transcript overlap |
-| 31. `TRANSCRIPT_OVERLAP_PERCENT` | Percentage overlap between copy number segment and transcript |
-| 32. `ACTIONABILITY_TIER` | Variant actionability tier - AMP/ASCO/CAP |
-| 33. `ACTIONABILITY` | Variant clinical actionability significance - AMP/ASCO/CAP |
-| 34. `BIOMARKER_MATCH` | Biomarker match |
-| 35. `TARGETED_INHIBITORS_ALL2` | Molecularly targeted inhibitors - indicated for any tumor type |
+| 26. `MUTATION_EFFECT_OKB` | _(OncoKB only)_ OncoKB mutation effect annotation (e.g. Loss-of-function, Gain-of-function) |
+| 27. `MUTATION_EFFECT_CITATIONS_OKB` | _(OncoKB only)_ OncoKB mutation effect citations |
+| 28. `MUTATION_EFFECT_DESCRIPTION_OKB` | _(OncoKB only)_ OncoKB mutation effect description |
+| 29. `ONCOGENICITY_OKB` | _(OncoKB only)_ OncoKB oncogenicity annotation (e.g. Oncogenic, Likely Oncogenic) |
+| 30. `TUMOR_TYPE_SUMMARY_OKB` | _(OncoKB only)_ OncoKB tumor type summary |
+| 31. `VARIANT_SUMMARY_OKB` | _(OncoKB only)_ OncoKB variant summary |
+| 32. `TRANSCRIPT_OVERLAP` | Comma-separated list of associated transcripts, including percentage of transcript overlap |
+| 33. `TRANSCRIPT_OVERLAP_PERCENT` | Percentage overlap between copy number segment and transcript |
+| 34. `ACTIONABILITY_TIER` | Variant actionability tier - AMP/ASCO/CAP |
+| 35. `ACTIONABILITY` | Variant clinical actionability significance - AMP/ASCO/CAP |
+| 36. `BIOMARKER_MATCH` | Biomarker match |
+| 37. `TARGETED_INHIBITORS_ALL2` | Molecularly targeted inhibitors - indicated for any tumor type |
+
+### RNA fusions
+
+#### Tab-separated values (TSV)
+
+Detected RNA fusions are annotated with gene-level cancer relevance, Mitelman database evidence, and clinical actionability. The output file has the following naming convention:
+
+- `<sample_id>.pcgr.<genome_assembly>.rna_fusion.tsv.gz`
+
+Columns suffixed with `_OKB` are only present when OncoKB annotation is enabled via `--oncokb_api_token`. Note that `HOTSPOT_OKB` and `VUS_OKB` are not included for fusion output.
+
+| Variable | Description |
+|----------|-------------|
+| 1. `VAR_ID` | Variant identifier. Format: `<gene1>--<gene2>:<breakpoint_5P>:<breakpoint_3P>` |
+| 2. `VARIANT_CLASS` | Variant type: `fusion` |
+| 3. `ENTREZGENE` | Entrez gene identifiers for both fusion partners. Format: `<entrezgene_5P>::<entrezgene_3P>` |
+| 4. `FUSION_GENE` | Fusion gene name. Format: `<gene1>--<gene2>` |
+| 5. `FUSION_GENE2` | Alternative fusion gene notation used for Mitelman database variant matching |
+| 6. `SPLIT_READS` | Number of split reads supporting the fusion |
+| 7. `SCORE` | Fusion score reported by the caller (if provided in input) |
+| 8. `FUSION_GENE_5P` | Gene symbol of the 5' fusion partner |
+| 9. `FUSION_GENE_3P` | Gene symbol of the 3' fusion partner |
+| 10. `BREAKPOINT_5P` | Chromosomal breakpoint position of the 5' partner |
+| 11. `BREAKPOINT_3P` | Chromosomal breakpoint position of the 3' partner |
+| 12. `GENENAME_5P` | Full gene name of the 5' partner |
+| 13. `ONCOGENE_5P` | Flag indicating if the 5' partner gene is an oncogene (CancerMine/NCG) |
+| 14. `ENSEMBL_TRANSCRIPT_ID_5P` | Ensembl transcript identifier covering the 5' breakpoint |
+| 15. `TARGETED_INHIBITORS_5P` | Molecularly targeted inhibitors for the 5' partner gene - tumor type-specific |
+| 16. `TARGETED_INHIBITORS_ALL_5P` | Molecularly targeted inhibitors for the 5' partner gene - all tumor types |
+| 17. `GENENAME_3P` | Full gene name of the 3' partner |
+| 18. `ONCOGENE_3P` | Flag indicating if the 3' partner gene is an oncogene (CancerMine/NCG) |
+| 19. `ENSEMBL_TRANSCRIPT_ID_3P` | Ensembl transcript identifier covering the 3' breakpoint |
+| 20. `TARGETED_INHIBITORS_3P` | Molecularly targeted inhibitors for the 3' partner gene - tumor type-specific |
+| 21. `TARGETED_INHIBITORS_ALL_3P` | Molecularly targeted inhibitors for the 3' partner gene - all tumor types |
+| 22. `SAMPLE_ALTERATION` | Alteration description for the sample. Format: `<FUSION_GENE> fusion` |
+| 23. `MITDB_NUM_EVIDENCE` | Number of evidence records matching the fusion in the [Mitelman Database of Chromosome Aberrations and Gene Fusions in Cancer](https://mitelmandatabase.isb-cgc.org/) |
+| 24. `MITDB_EVIDENCE` | Evidence records for the fusion from the Mitelman database (cancer type associations) |
+| 25. `ACTIONABILITY_TIER` | Variant clinical actionability tier - AMP/ASCO/CAP implementation |
+| 26. `ACTIONABILITY` | Variant clinical actionability significance - AMP/ASCO/CAP implementation |
+| 27. `MUTATION_EFFECT_OKB` | _(OncoKB only)_ OncoKB mutation effect annotation (e.g. Loss-of-function, Gain-of-function) |
+| 28. `MUTATION_EFFECT_CITATIONS_OKB` | _(OncoKB only)_ OncoKB mutation effect citations |
+| 29. `MUTATION_EFFECT_DESCRIPTION_OKB` | _(OncoKB only)_ OncoKB mutation effect description |
+| 30. `ONCOGENICITY_OKB` | _(OncoKB only)_ OncoKB oncogenicity annotation (e.g. Oncogenic, Likely Oncogenic) |
+| 31. `TUMOR_TYPE_SUMMARY_OKB` | _(OncoKB only)_ OncoKB tumor type summary |
+| 32. `VARIANT_SUMMARY_OKB` | _(OncoKB only)_ OncoKB variant summary |
 
 ### Gene expression data
 
@@ -496,4 +545,68 @@ If users provide bulk RNA-seq expression data as input, PCGR will attach basic g
 
 ### Excel workbook (XLSX)
 
-The Excel workbook contains multiple sheets with data tables, mostly self-explainable, with annotated datasets pending on the analysis performed (assay/sample data, SNVs/InDels, CNAs, biomarker evidence, TMB, MSI, mutational signatures, immune contexture profiling etc). The naming convention of the Excel workbook is as follows: `<sample_id>.pcgr.<genome_assembly>.xlsx`. _Note_: To reduce the size of the SNVs/InDel sheets in the Excel workbook, we only include the clinically actionable variants as well as other exonic variants (including splice site variants, silent variants, and protein-altering variants).
+The Excel workbook has the following naming convention:
+
+- `<sample_id>.pcgr.<genome_assembly>.xlsx`
+
+It contains up to 14 sheets, each populated conditionally on the type of input data provided and the analysis performed. Sheets with no data are omitted entirely. Any sheet exceeding 30,000 rows is truncated to the first 30,000 rows (a warning is emitted in that case; the full data is always available in the corresponding TSV file).
+
+The table below describes each sheet, when it is included, and any filtering or content restrictions applied to keep the workbook manageable.
+
+| Sheet | Included when | Content and filtering |
+|-------|---------------|-----------------------|
+| `SAMPLE_ASSAY` | Always | Sample and assay properties: tumor site, sex, purity, ploidy, assay type (WGS/WES/TARGETED), tumor-normal/tumor-only mode, and effective target size |
+| `SOMATIC_SNV_INDEL` | `--input_vcf` provided | Somatic SNV/InDel annotations using the same columns as the TSV output, minus `BIOMARKER_MATCH` and `VEP_ALL_CSQ`. **Filtered** to exonic variants (`EXONIC_STATUS == "exonic"`) plus any non-exonic variant with an actionability tier ≤ 3. User-retained VCF INFO tags (`--retained_info_tags`) are appended as additional columns. `HGVSP` is renamed to `HGVSp_short` to avoid column name conflicts |
+| `SOMATIC_SNV_INDEL_BIOMARKER` | `--input_vcf` provided and biomarker hits exist | One row per biomarker evidence item matched to a somatic SNV/InDel. A `TIER` column encodes evidence category and actionability tier (e.g. `T1`/`T2`/`T3` = therapeutic sensitivity, `R1`/`R2`/`R3` = therapeutic resistance, `PP1`–`PP3` = poor prognosis, `PB1`–`PB3` = better prognosis, `D1`–`D3` = diagnostic positive). Diagnostic-negative evidence is excluded. Sorted by `TIER`, evidence level, primary site, and rating |
+| `SOMATIC_CNA` | `--input_cna` provided | CNA gene-level annotations using the same columns as the TSV output, minus `BIOMARKER_MATCH`. **Filtered** to genes with a non-missing `ACTIONABILITY_TIER` (i.e. only clinically actionable CNA events). Sorted by `ACTIONABILITY_TIER` and `TARGETED_INHIBITORS_ALL2` |
+| `SOMATIC_CNA_BIOMARKER` | `--input_cna` provided and biomarker hits exist | One row per biomarker evidence item matched to a somatic CNA, using the same `TIER` encoding and sorting as `SOMATIC_SNV_INDEL_BIOMARKER` |
+| `RNA_FUSION` | `--input_rna_fusion` provided | RNA fusion annotations using the same columns as the TSV output, minus `BIOMARKER_MATCH`. **Filtered** to fusions with a non-missing `ACTIONABILITY_TIER` (i.e. only clinically actionable fusions). Sorted by `ACTIONABILITY_TIER` |
+| `RNA_FUSION_BIOMARKER` | `--input_rna_fusion` provided and biomarker hits exist | One row per biomarker evidence item matched to an RNA fusion, using the same `TIER` encoding and sorting as `SOMATIC_SNV_INDEL_BIOMARKER` |
+| `TMB` | `--input_vcf` provided | Tumor mutational burden estimates (same content as the `.tmb.tsv` file) |
+| `MSI` | `--input_vcf` provided and MSI estimation enabled | MSI classifier statistics and predicted stability status |
+| `MUTATIONAL_SIGNATURE` | `--input_vcf` provided and signature estimation enabled | Mutational signature contributions (same content as the `.msigs.tsv.gz` file) |
+| `KATAEGIS_EVENTS` | `--input_vcf` provided and kataegis events detected | Kataegis loci identified from the somatic mutation profile |
+| `RNA_EXPRESSION_OUTLIERS` | `--input_rna_expression` provided and outlier detection enabled | Expression outlier genes/transcripts compared to reference cohorts. A subset of display-only columns (`GENENAME`, `CANCERGENE_EVIDENCE`, `TARGETED_INHIBITORS_ALL`, `ENSEMBL_GENE_ID`) are removed to reduce width |
+| `RNA_IMMUNE_CONTEXTURE` | `--input_rna_expression` provided | Immune cell type deconvolution results from bulk RNA-seq (quanTIseq) |
+
+#### Biomarker evidence in the HTML report vs. the Excel workbook
+
+The `_BIOMARKER` sheets are more comprehensive than what is displayed in the HTML report. The HTML report shows only the **tier-defining** evidence items — those that directly determined the variant's actionability tier assignment. The Excel `_BIOMARKER` sheets include **all** matched evidence items, each annotated with a `BM_ACTIONABILITY_SUPPORT` column that records its relationship to the tier assignment.
+
+The four possible values of `BM_ACTIONABILITY_SUPPORT` are:
+
+- **`tier-defining`** — the evidence item was the primary basis for the variant's actionability tier. Only these items appear in the HTML report.
+- **`additional`** — the evidence item is relevant (correct evidence type, overlapping molecular profile) but was not sufficient on its own to define the tier, either because the tumor type does not match the query or the evidence is weaker than what the tier requires.
+- **`additional-weak`** — the evidence item is from a different tumor type **and** carries only weak evidence (CIViC levels C/D/E or OncoKB level 4). Present only in tumor-type-specific analyses.
+- **`other`** — the evidence item is of an evidence type not used for tiering in this biomarker category (e.g., a prognostic item retrieved in a predictive context).
+
+What counts as _strong_ vs. _weak_ evidence follows the AMP/ASCO/CAP classification: strong = CIViC levels A, B (and OncoKB levels 1, 2, 3A, 3B, R1, R2); weak = CIViC levels C, D, E (and OncoKB level 4).
+
+The exact tier-support assignment depends on whether the user specified a tumor type (`--tumor_site`) or ran in tumor-type-agnostic mode (`--tumor_site 0`):
+
+**Tumor-type-specific** (a specific `--tumor_site` was provided):
+
+| Variant tier | Biomarker tumor type vs. query | Evidence strength (CIViC/OncoKB) | `BM_ACTIONABILITY_SUPPORT` |
+|:---:|---|:---:|---|
+| 1 | Same tumor type or pan-cancer | Strong (CIViC A/B, OncoKB 1/2/3A/3B/R1/R2) | `tier-defining` |
+| 1 | Same tumor type or pan-cancer | Weak (CIViC C/D/E, OncoKB 4) | `additional` |
+| 1 | Different tumor type | Strong (CIViC A/B, OncoKB 1/2/3A/3B/R1/R2) | `additional` |
+| 1 | Different tumor type | Weak (CIViC C/D/E, OncoKB 4) | `additional-weak` |
+| 2 | Different tumor type or pan-cancer | Strong (CIViC A/B, OncoKB 1/2/3A/3B/R1/R2) | `tier-defining` |
+| 2 | Same tumor type | Weak (CIViC C/D/E, OncoKB 4) | `tier-defining` |
+| 2 | Different tumor type | Weak (CIViC C/D/E, OncoKB 4) | `additional` |
+| 3 | Any | Any | `tier-defining` |
+
+The rationale: a Tier 1 variant has strong evidence in the query tumor type — so only that combination is tier-defining. A Tier 2 variant is assigned because the strongest available evidence is either from a different tumor type with strong backing, or from the same type but only weakly supported — both of those are tier-defining for Tier 2. Tier 3 captures oncogenic variants with no specific matched biomarker, so any matched item is considered tier-defining.
+
+**Tumor-type-agnostic** (`--tumor_site 0`; no specific primary site):
+
+| Condition | `BM_ACTIONABILITY_SUPPORT` |
+|---|---|
+| Pan-cancer biomarker + strong evidence (CIViC A/B, OncoKB 1/2/3A/3B/R1/R2) + Tier 1 variant | `tier-defining` |
+| Tumor-specific biomarker + strong evidence (CIViC A/B, OncoKB 1/2/3A/3B/R1/R2) + Tier 2 variant | `tier-defining` |
+| Any biomarker + weak evidence (CIViC C/D/E, OncoKB 4) + Tier 3 variant | `tier-defining` |
+| Evidence type not used for tiering in this category | `other` |
+| All other matching evidence | `additional` |
+
+In tumor-type-agnostic mode the `additional-weak` level is not used, since no tumor-type mismatch penalty applies.

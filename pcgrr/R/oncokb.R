@@ -1101,10 +1101,8 @@ process_oncokb_maf <-
             next
           }
 
-          all_variant_annotations <- dplyr::bind_rows(
-            all_variant_annotations,
-            var
-          )
+          var$HOTSPOT_OKB <- NA
+          var$VUS_OKB <- NA
 
           ## log the symbol and hgvsp
           log4r_debug(
@@ -1122,7 +1120,20 @@ process_oncokb_maf <-
             reference_genome = "GRCh38"
           )
 
+
           if (!is.null(annotation)) {
+
+            if("hotspot" %in% names(annotation)){
+              var$HOTSPOT_OKB <- as.logical(annotation$hotspot)
+            }
+            if("vus" %in% names(annotation)){
+              var$VUS_OKB <- as.logical(annotation$vus)
+            }
+
+            all_variant_annotations <- dplyr::bind_rows(
+              all_variant_annotations,
+              var
+            )
 
             evidence_df <- extract_complete_annotation(
               oncokb_annotation = annotation,
@@ -1155,6 +1166,12 @@ process_oncokb_maf <-
             }
             annotation <- NULL  # Clear annotation to save memory
             variant_keys <- c(variant_keys, var$VAR_ID)
+          }else{
+
+            all_variant_annotations <- dplyr::bind_rows(
+              all_variant_annotations,
+              var
+            )
           }
           # Rate limiting
           Sys.sleep(rate_limiting_delay)
@@ -1219,10 +1236,8 @@ process_oncokb_maf <-
             next
           }
 
-          all_variant_annotations <- dplyr::bind_rows(
-            all_variant_annotations,
-            var
-          )
+          var$HOTSPOT_OKB <- NA
+          var$VUS_OKB <- NA
 
           ## log the symbol and hgvsp
           log4r_debug(
@@ -1241,6 +1256,18 @@ process_oncokb_maf <-
           )
 
           if (!is.null(annotation)) {
+
+            if("hotspot" %in% names(annotation)){
+              var$HOTSPOT_OKB <- as.logical(annotation$hotspot)
+            }
+            if("vus" %in% names(annotation)){
+              var$VUS_OKB <- as.logical(annotation$vus)
+            }
+
+            all_variant_annotations <- dplyr::bind_rows(
+              all_variant_annotations,
+              var
+            )
 
             evidence_df <- extract_complete_annotation(
               oncokb_annotation = annotation,
@@ -1274,6 +1301,11 @@ process_oncokb_maf <-
             }
             annotation <- NULL  # Clear annotation to save memory
             variant_keys <- c(variant_keys, var$VAR_ID)
+          }else{
+            all_variant_annotations <- dplyr::bind_rows(
+              all_variant_annotations,
+              var
+            )
           }
           # Rate limiting
           Sys.sleep(rate_limiting_delay)
@@ -1420,7 +1452,7 @@ process_oncokb_fusion <-
             dplyr::mutate(
               VARIANT_CLASS = fusion$VARIANT_CLASS,
               ENTREZGENE = fusion$ENTREZGENE,
-              BM_MATCH = "by_gene",
+              BM_MATCH = "by_fusion",
             ) |>
             dplyr::select(
               "VAR_ID",

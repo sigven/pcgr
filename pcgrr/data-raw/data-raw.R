@@ -407,6 +407,8 @@ data_coltype_defs[['rna_fusion_raw']] <- readr::cols_only(
   BREAKPOINT_5P = readr::col_character(),
   BREAKPOINT_3P = readr::col_character(),
   SPLIT_READS = readr::col_integer(),
+  VARIANT_SUMMARY_OKB = readr::col_character(),
+  TUMOR_TYPE_SUMMARY_OKB = readr::col_character(),
   MUTATION_EFFECT_OKB = readr::col_character(),
   MUTATION_EFFECT_DESCRIPTION_OKB = readr::col_character(),
   MUTATION_EFFECT_CITATIONS_OKB = readr::col_character(),
@@ -464,6 +466,8 @@ data_coltype_defs[['cna_somatic_gene_raw']] <- readr::cols_only(
   MUTATION_EFFECT_DESCRIPTION_OKB = readr::col_character(),
   MUTATION_EFFECT_CITATIONS_OKB = readr::col_character(),
   ONCOGENICITY_OKB = readr::col_character(),
+  TUMOR_TYPE_SUMMARY_OKB = readr::col_character(),
+  VARIANT_SUMMARY_OKB = readr::col_character(),
   SAMPLE_ID = readr::col_character())
   #TPM = readr::col_number(),
   #TPM_GENE = readr::col_number())
@@ -527,12 +531,12 @@ data_coltype_defs[['snv_indel_somatic_raw']] <- readr::cols_only(
   ONCOGENICITY_SCORE = readr::col_integer(),
   KNOWN_ONCOGENIC = readr::col_character(),
   KNOWN_ONCOGENIC_SITE = readr::col_character(),
-  VARIANT_SUMMARY_OKB = readr::col_character(),
-  TUMOR_TYPE_SUMMARY_OKB = readr::col_character(),
   MUTATION_EFFECT_OKB = readr::col_character(),
   MUTATION_EFFECT_DESCRIPTION_OKB = readr::col_character(),
   MUTATION_EFFECT_CITATIONS_OKB = readr::col_character(),
   ONCOGENICITY_OKB = readr::col_character(),
+  TUMOR_TYPE_SUMMARY_OKB = readr::col_character(),
+  VARIANT_SUMMARY_OKB = readr::col_character(),
   PFAM_DOMAIN = readr::col_character(),
   PFAM_DOMAIN_NAME = readr::col_character(),
   PFAM_ENTRY_LOCATIONS = readr::col_character(),
@@ -822,6 +826,20 @@ usethis::use_data(data_coltype_defs, overwrite = T)
 
 ###----CNA-----####
 tsv_cols <- list()
+
+oncokb_annotations <-
+  c('MUTATION_EFFECT_OKB',
+    'MUTATION_EFFECT_CITATIONS_OKB',
+    'MUTATION_EFFECT_DESCRIPTION_OKB',
+    'ONCOGENICITY_OKB',
+    'TUMOR_TYPE_SUMMARY_OKB',
+    'VARIANT_SUMMARY_OKB',
+    'HOTSPOT_OKB',
+    'VUS_OKB'
+  )
+
+usethis::use_data(oncokb_annotations, overwrite = T)
+
 tsv_cols[['cna']] <-
   c('SAMPLE_ID',
     'VAR_ID',
@@ -848,16 +866,45 @@ tsv_cols[['cna']] <-
     'TUMOR_SUPPRESSOR_SUPPORT',
     'ONCOGENE',
     'ONCOGENE_SUPPORT',
-    'MUTATION_EFFECT_OKB',
-    'ONCOGENICITY_OKB',
-    'VARIANT_SUMMARY_OKB',
-    'TUMOR_TYPE_SUMMARY_OKB',
+    oncokb_annotations,
     'TRANSCRIPT_OVERLAP',
     'TRANSCRIPT_OVERLAP_PERCENT',
     'ACTIONABILITY_TIER',
     'ACTIONABILITY',
     'BIOMARKER_MATCH',
     'TARGETED_INHIBITORS_ALL2')
+
+####----RNA fusions-----#####
+tsv_cols[['fusion']] <-
+  c("VAR_ID",
+    "VARIANT_CLASS",
+    "ENTREZGENE",
+    "FUSION_GENE",
+    "FUSION_GENE2",
+    "SPLIT_READS",
+    "SCORE",
+    "FUSION_GENE_5P",
+    "FUSION_GENE_3P",
+    "BREAKPOINT_5P",
+    "BREAKPOINT_3P",
+    "GENENAME_5P",
+    "ONCOGENE_5P",
+    "ENSEMBL_TRANSCRIPT_ID_5P",
+    "TARGETED_INHIBITORS_5P",
+    "TARGETED_INHIBITORS_ALL_5P",
+    "GENENAME_3P",
+    "ONCOGENE_3P",
+    "ENSEMBL_TRANSCRIPT_ID_3P",
+    "TARGETED_INHIBITORS_3P",
+    "TARGETED_INHIBITORS_ALL_3P",
+    "SAMPLE_ALTERATION",
+    "MITDB_NUM_EVIDENCE",
+    "MITDB_EVIDENCE",
+    "ACTIONABILITY_TIER",
+    "ACTIONABILITY",
+    oncokb_annotations
+  )
+
 
 ####----SNV/Indel-----#####
 tsv_cols[['snv_indel']] <-
@@ -899,11 +946,7 @@ tsv_cols[['snv_indel']] <-
     'ONCOGENICITY',
     'ONCOGENICITY_CODE',
     'ONCOGENICITY_SCORE',
-    "MUTATION_EFFECT_OKB",
-    "MUTATION_EFFECT_DESCRIPTION_OKB",
-    "ONCOGENICITY_OKB",
-    'VARIANT_SUMMARY_OKB',
-    'TUMOR_TYPE_SUMMARY_OKB',
+    oncokb_annotations,
     'CANONICAL',
     'CCDS',
     'UNIPROT_ACC',
@@ -972,11 +1015,7 @@ tsv_cols[['snv_indel_unfiltered']] <-
     'ONCOGENICITY',
     'ONCOGENICITY_CODE',
     'ONCOGENICITY_SCORE',
-    'MUTATION_EFFECT_OKB',
-    'MUTATION_EFFECT_DESCRIPTION_OKB',
-    'ONCOGENICITY_OKB',
-    'VARIANT_SUMMARY_OKB',
-    'TUMOR_TYPE_SUMMARY_OKB',
+    oncokb_annotations,
     'CANONICAL',
     'CCDS',
     'UNIPROT_ACC',
@@ -1102,6 +1141,7 @@ table_display_cols[['snv_indel']] <-
     "ONCOGENICITY_OKB",
     'VARIANT_SUMMARY_OKB',
     'TUMOR_TYPE_SUMMARY_OKB',
+    'VUS_OKB',
     'DBSNP_RSID',
     'CLINVAR',
     'CLINVAR_CLASSIFICATION',

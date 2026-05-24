@@ -10,7 +10,8 @@ reflects the row's tier (1 or 2).}
 render_progn_bm_table(
   rctbl_recs = NULL,
   variant_category = "snv_indel",
-  clnsig = "prognostic_poor"
+  clnsig = "prognostic_poor",
+  color_palette = pcgrr::color_palette
 )
 }
 \arguments{

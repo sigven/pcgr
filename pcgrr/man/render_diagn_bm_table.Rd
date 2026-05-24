@@ -10,7 +10,8 @@ reflects the row's tier (1 or 2).}
 render_diagn_bm_table(
   rctbl_recs = NULL,
   variant_category = "snv_indel",
-  clnsig = "diagnostic_positive"
+  clnsig = "diagnostic_positive",
+  color_palette = pcgrr::color_palette
 )
 }
 \arguments{

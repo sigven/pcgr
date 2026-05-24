@@ -784,7 +784,8 @@ generate_tier_tsv <- function(variant_set,
 #'
 #' @param report List object with all report data, settings etc.
 #' @param output_type character indicating output type for TSV,
-#' i.e. 'snv_indel', 'snv_indel_unfiltered', 'cna_gene', or 'msigs'
+#' i.e. 'snv_indel', 'snv_indel_unfiltered', 'cna_gene', 'fusion',
+#' or 'msigs'
 #' @export
 #'
 write_report_tsv <- function(report = NULL, output_type = 'snv_indel') {
@@ -812,6 +813,12 @@ write_report_tsv <- function(report = NULL, output_type = 'snv_indel') {
      report$content$snv_indel$eval == TRUE) {
     eval_output <- TRUE
   }
+
+  if (output_type == "fusion" &
+     report$content$fusion$eval == TRUE) {
+    eval_output <- TRUE
+  }
+
   if (output_type == "snv_indel_unfiltered" &
      report$content$snv_indel$eval == TRUE &
      as.logical(
@@ -852,6 +859,21 @@ write_report_tsv <- function(report = NULL, output_type = 'snv_indel') {
       }
     }
   }
+
+  ## RNA fusions
+  if (output_type == 'fusion' &
+     !is.null(report$content$fusion) &
+     report$content$fusion$eval == TRUE) {
+    if (!is.null(report$content$fusion$callset)) {
+      if (is.data.frame(report$content$fusion$callset$variant)) {
+        output_data <- as.data.frame(
+          report$content$fusion$callset$variant |>
+            dplyr::select(dplyr::any_of(tsv_cols$fusion))
+        )
+      }
+    }
+  }
+
 
   ## SNVs/InDels
   if (output_type == 'snv_indel' &
@@ -936,11 +958,13 @@ write_report_tsv <- function(report = NULL, output_type = 'snv_indel') {
 }
 
 
-#' Function that writes contents of PCGR object to an HTML report (quarto-based)
+#' Function that writes contents of PCGR object to an HTML report
+#' (quarto-based)
 #'
 #' @param report List object with all report data, settings etc.
 #' @export
-write_report_quarto_html <- function(report = NULL, color_palette = pcgrr::color_palette) {
+write_report_html <- function(
+    report = NULL, color_palette = pcgrr::color_palette) {
 
   settings <- report[['settings']]
   output_dir <- settings[['output_dir']]
@@ -1081,6 +1105,8 @@ write_report_excel <- function(report = NULL) {
                 'SOMATIC_SNV_INDEL_BIOMARKER',
                 'SOMATIC_CNA',
                 'SOMATIC_CNA_BIOMARKER',
+                'RNA_FUSION',
+                'RNA_FUSION_BIOMARKER',
                 'GERMLINE_SNV_INDEL',
                 'TMB',
                 'MSI',

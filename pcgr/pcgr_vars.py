@@ -361,7 +361,6 @@ SITE_TO_ONCOTREE = {
 
 ## DBNSFP algorithm score to PCGR field name mapping
 DBNSFP_ALGORITHMS = {
-    'aloft': 'DBNSFP_ALOFT',
     'alphamissense': 'DBNSFP_ALPHA_MISSENSE',
     'bayesdel_addaf': 'DBNSFP_BAYESDEL_ADDAF',
     'cadd': 'DBNSFP_CADD',

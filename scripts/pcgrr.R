@@ -43,14 +43,19 @@ if (!is.null(pcg_report)) {
       report = pcg_report, output_type = 'snv_indel_unfiltered')
     pcgrr::write_report_tsv(
       report = pcg_report, output_type = 'msigs')
+
   }
   if(!is.null(pcg_report$content$cna$eval) &&
      pcg_report$content$cna$eval == TRUE){
     pcgrr::write_report_tsv(report = pcg_report, output_type = 'cna_gene')
   }
+  if(!is.null(pcg_report$content$fusion$eval) &&
+     pcg_report$content$fusion$eval == TRUE){
+    pcgrr::write_report_tsv(report = pcg_report, output_type = 'fusion')
+  }
   pcgrr::write_report_excel(report = pcg_report)
   if(pcg_report$settings$conf$other$no_html == FALSE){
-    pcgrr::write_report_quarto_html(report = pcg_report)
+    pcgrr::write_report_html(report = pcg_report)
   }
   else{
     pcgrr::log4r_info(

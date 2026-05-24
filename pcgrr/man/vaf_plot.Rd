@@ -4,7 +4,12 @@
 \alias{vaf_plot}
 \title{Function that generates a VAF distribution plot for a given PCGR report object}
 \usage{
-vaf_plot(report = NULL, font_size = 12, font_family = "Helvetica")
+vaf_plot(
+  report = NULL,
+  font_size = 12,
+  font_family = "Helvetica",
+  color_palette = pcgrr::color_palette
+)
 }
 \arguments{
 \item{report}{PCGR report object}
