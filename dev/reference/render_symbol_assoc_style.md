@@ -6,7 +6,11 @@ Style alteration cell background based on cancer association rank
 ## Usage
 
 ``` r
-render_symbol_assoc_style(data, rank_col = "TISSUE_ASSOC_RANK")
+render_symbol_assoc_style(
+  data,
+  rank_col = "TISSUE_ASSOC_RANK",
+  color_palette = pcgrr::color_palette
+)
 ```
 
 ## Arguments

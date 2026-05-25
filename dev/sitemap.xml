@@ -145,6 +145,7 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/mutational_signatures_doc_note.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/oncogenicity_criteria.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/oncogenicity_doc_note.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/oncokb_annotations.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/oncokb_base_api_url.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/order_variants.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/pkg_exists.html</loc></url>
@@ -203,7 +204,7 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/variant_db_url.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/write_processed_vcf.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/write_report_excel.html</loc></url>
-<url><loc>https://sigven.github.io/pcgr/dev/reference/write_report_quarto_html.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/write_report_html.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/write_report_tsv.html</loc></url>
 </urlset>
 

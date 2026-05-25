@@ -6,7 +6,7 @@ Opus 4.6 with some manual tweaks)
 ## Usage
 
 ``` r
-render_oncogenicity_cell(data)
+render_oncogenicity_cell(data, color_palette = pcgrr::color_palette)
 ```
 
 ## Arguments

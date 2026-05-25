@@ -264,6 +264,16 @@ only and skip CIViC and CGI, use:
 
 - `--oncokb_exclusive`
 
+**Licensing notice — OncoKB terms of use:** OncoKB is freely accessible
+for non-commercial research use. However, use of OncoKB data for
+**commercial purposes or for patient care in a hospital or clinical
+setting** — including the generation of PCGR reports used to inform
+diagnostic or therapeutic decisions — requires a separate commercial
+license from Memorial Sloan Kettering Cancer Center. Users are solely
+responsible for ensuring that their use of OncoKB through PCGR complies
+with the [OncoKB Terms of Use](https://www.oncokb.org/terms). If in
+doubt, contact the OncoKB team at <contact@oncokb.org> before use.
+
 ### RNA fusions
 
 If RNA fusion data is available for the tumor sample, it can be provided

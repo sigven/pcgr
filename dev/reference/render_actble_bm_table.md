@@ -10,7 +10,8 @@ cell background reflects the row's tier (1 or 2).
 render_actble_bm_table(
   rctbl_recs = NULL,
   variant_category = "snv_indel",
-  clnsig = "therapeutic_sensitivity"
+  clnsig = "therapeutic_sensitivity",
+  color_palette = pcgrr::color_palette
 )
 ```
 

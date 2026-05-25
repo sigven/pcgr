@@ -32,7 +32,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9016</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9017</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -215,7 +215,8 @@ where available (AMP/ASCO/CAP guidelines)</li>
 <li>Datatable with expression outliers - as compared to distribution in
 reference cohorts</li>
 <li>Datatable with correlation between gene expression in query sample
-and other reference cohorts (TCGA, TreeHouse, DepMap)</li>
+and samples in other reference cohorts (TCGA, Treehouse Childhood Cancer
+Initiative, DepMap)</li>
 <li>Immune contexture profiling</li>
 </ul>
 <ol start="9" style="list-style-type: decimal">
@@ -967,72 +968,68 @@ Neutral, <code>D</code> = Damaging</td>
 <td>predicted effect from M-CAP (dbNSFP)</td>
 </tr>
 <tr class="odd">
-<td><code>DBNSFP_ALOFT</code></td>
-<td>predicted effect from ALoFT (dbNSFP)</td>
-</tr>
-<tr class="even">
 <td><code>DBNSFP_MUTPRED</code></td>
 <td>score from MUTPRED (dbNSFP)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>DBNSFP_CLINPRED</code></td>
 <td>predicted effect from ClinPred (dbNSFP)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>DBNSFP_FATHMM</code></td>
 <td>predicted effect from FATHMM-XF (dbNSFP)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>DBNSFP_PRIMATEAI</code></td>
 <td>predicted effect from PRIMATEAI (dbNSFP)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>DBNSFP_DEOGEN2</code></td>
 <td>predicted effect from DEOGEN2 (dbNSFP)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>DBNSFP_PHACTBOOST</code></td>
 <td>predicted effect from PHACTboost (dbNSFP)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>DBNSFP_ALPHA_MISSENSE</code></td>
 <td>predicted effect from AlphaMissense (dbNSFP)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>DBNSFP_MUTFORMER</code></td>
 <td>predicted effect from MutFormer (dbNSFP)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>DBNSFP_ESM1B</code></td>
 <td>predicted effect from ESM1b (dbNSFP)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>DBNSFP_GERP</code></td>
 <td>evolutionary constraint measure from GERP (dbNSFP)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>DBNSFP_CADD</code></td>
 <td>Combined Annotation Dependent Depletion (CADD) score (dbNSFP)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>DBNSFP_VEST4</code></td>
 <td>VEST4 score (dbNSFP)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>DBNSFP_FATHMM_XF</code></td>
 <td>predicted effect from FATHMM-XF (dbNSFP)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>DBNSFP_META_RNN</code></td>
 <td>predicted effect from ensemble prediction (deep learning -
 dbNSFP)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>DBNSFP_SPLICE_SITE_RF</code></td>
 <td>predicted effect of splice site disruption, using random forest
 (dbscSNV)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>DBNSFP_SPLICE_SITE_ADA</code></td>
 <td>predicted effect of splice site disruption, using boosting
 (dbscSNV)</td>
@@ -1293,7 +1290,8 @@ convention:</p>
 </ul>
 <p>The following variables are included in the TSV file (VCF tags issued
 by the user (<code>--retained_info_tags</code>) will be appended at the
-end):</p>
+end). Columns suffixed with <code>_OKB</code> are only present when
+OncoKB annotation is enabled via <code>--oncokb_api_token</code>.</p>
 <table class="table">
 <colgroup>
 <col width="43%">
@@ -1513,169 +1511,194 @@ implementation</td>
 <tr class="odd">
 <td>39. <code>MUTATION_EFFECT_OKB</code>
 </td>
-<td>OncoKB mutation effect annotation (e.g. Loss-of-function,
-Gain-of-function)</td>
+<td>
+<em>(OncoKB only)</em> OncoKB mutation effect annotation
+(e.g. Loss-of-function, Gain-of-function)</td>
 </tr>
 <tr class="even">
-<td>40. <code>MUTATION_EFFECT_DESCRIPTION_OKB</code>
+<td>40. <code>MUTATION_EFFECT_CITATIONS_OKB</code>
 </td>
-<td>OncoKB mutation effect description</td>
+<td>
+<em>(OncoKB only)</em> OncoKB mutation effect citations</td>
 </tr>
 <tr class="odd">
-<td>41. <code>ONCOGENICITY_OKB</code>
+<td>41. <code>MUTATION_EFFECT_DESCRIPTION_OKB</code>
 </td>
-<td>OncoKB oncogenicity annotation (e.g. Oncogenic, Likely Oncogenic,
-Likely Neutral etc.)</td>
+<td>
+<em>(OncoKB only)</em> OncoKB mutation effect description</td>
 </tr>
 <tr class="even">
-<td>42. <code>VARIANT_SUMMARY_OKB</code>
+<td>42. <code>ONCOGENICITY_OKB</code>
 </td>
-<td>OncoKB variant summary</td>
+<td>
+<em>(OncoKB only)</em> OncoKB oncogenicity annotation
+(e.g. Oncogenic, Likely Oncogenic, Likely Neutral etc.)</td>
 </tr>
 <tr class="odd">
 <td>43. <code>TUMOR_TYPE_SUMMARY_OKB</code>
 </td>
-<td>OncoKB tumor type summary</td>
+<td>
+<em>(OncoKB only)</em> OncoKB tumor type summary</td>
 </tr>
 <tr class="even">
-<td>44. <code>CANONICAL</code>
+<td>44. <code>VARIANT_SUMMARY_OKB</code>
+</td>
+<td>
+<em>(OncoKB only)</em> OncoKB variant summary</td>
+</tr>
+<tr class="odd">
+<td>45. <code>HOTSPOT_OKB</code>
+</td>
+<td>
+<em>(OncoKB only)</em> OncoKB hotspot flag - indicates if variant
+overlaps a known OncoKB hotspot</td>
+</tr>
+<tr class="even">
+<td>46. <code>VUS_OKB</code>
+</td>
+<td>
+<em>(OncoKB only)</em> OncoKB variant of uncertain significance
+flag</td>
+</tr>
+<tr class="odd">
+<td>47. <code>CANONICAL</code>
 </td>
 <td>Flag indicating if transcript is canonical</td>
 </tr>
-<tr class="odd">
-<td>45. <code>CCDS</code>
+<tr class="even">
+<td>48. <code>CCDS</code>
 </td>
 <td>CCDS identifier</td>
 </tr>
-<tr class="even">
-<td>46. <code>UNIPROT_ACC</code>
+<tr class="odd">
+<td>49. <code>UNIPROT_ACC</code>
 </td>
 <td>UniProt accession</td>
 </tr>
-<tr class="odd">
-<td>47. <code>ENSEMBL_TRANSCRIPT_ID</code>
+<tr class="even">
+<td>50. <code>ENSEMBL_TRANSCRIPT_ID</code>
 </td>
 <td>Ensembl transcript identifier</td>
 </tr>
-<tr class="even">
-<td>48. <code>ENSEMBL_PROTEIN_ID</code>
+<tr class="odd">
+<td>51. <code>ENSEMBL_PROTEIN_ID</code>
 </td>
 <td>Ensembl protein identifier</td>
 </tr>
-<tr class="odd">
-<td>49. <code>REFSEQ_TRANSCRIPT_ID</code>
+<tr class="even">
+<td>52. <code>REFSEQ_TRANSCRIPT_ID</code>
 </td>
 <td>RefSeq transcript identifier</td>
 </tr>
-<tr class="even">
-<td>50. <code>REFSEQ_PROTEIN_ID</code>
+<tr class="odd">
+<td>53. <code>REFSEQ_PROTEIN_ID</code>
 </td>
 <td>RefSeq protein identifier</td>
 </tr>
-<tr class="odd">
-<td>51. <code>MANE_SELECT</code>
+<tr class="even">
+<td>54. <code>MANE_SELECT</code>
 </td>
 <td>MANE transcript select</td>
 </tr>
-<tr class="even">
-<td>52. <code>MANE_PLUS_CLINICAL</code>
+<tr class="odd">
+<td>55. <code>MANE_PLUS_CLINICAL</code>
 </td>
 <td>MANE transcript plus clinical</td>
 </tr>
-<tr class="odd">
-<td>53. <code>ONCOGENE</code>
+<tr class="even">
+<td>56. <code>ONCOGENE</code>
 </td>
 <td>Flag indicating if gene is oncogene (CancerMine/NCG)</td>
 </tr>
-<tr class="even">
-<td>54. <code>ONCOGENE_SUPPORT</code>
+<tr class="odd">
+<td>57. <code>ONCOGENE_SUPPORT</code>
 </td>
 <td>Oncogene annotation support (CancerMine/NCG)</td>
 </tr>
-<tr class="odd">
-<td>55. <code>TUMOR_SUPPRESSOR</code>
+<tr class="even">
+<td>58. <code>TUMOR_SUPPRESSOR</code>
 </td>
 <td>Flag indicating if gene is tumor suppressor (CancerMine/NCG)</td>
 </tr>
-<tr class="even">
-<td>56. <code>TUMOR_SUPPRESSOR_SUPPORT</code>
+<tr class="odd">
+<td>59. <code>TUMOR_SUPPRESSOR_SUPPORT</code>
 </td>
 <td>Tumor suppressor annotation support (CancerMine/NCG)</td>
 </tr>
-<tr class="odd">
-<td>57. <code>TARGETED_INHIBITORS2</code>
+<tr class="even">
+<td>60. <code>TARGETED_INHIBITORS2</code>
 </td>
 <td>Targeted inhibitors</td>
 </tr>
-<tr class="even">
-<td>58. <code>REGULATORY_ANNOTATION</code>
+<tr class="odd">
+<td>61. <code>REGULATORY_ANNOTATION</code>
 </td>
 <td>Regulatory annotation</td>
 </tr>
-<tr class="odd">
-<td>59. <code>VEP_ALL_CSQ</code>
+<tr class="even">
+<td>62. <code>VEP_ALL_CSQ</code>
 </td>
 <td>VEP consequence - all transcripts</td>
 </tr>
-<tr class="even">
-<td>60. <code>gnomADe_AF</code>
+<tr class="odd">
+<td>63. <code>gnomADe_AF</code>
 </td>
 <td>gnomAD exomes allele frequency - globally</td>
 </tr>
-<tr class="odd">
-<td>61. <code>gnomADg_AF</code>
+<tr class="even">
+<td>64. <code>gnomADg_AF</code>
 </td>
 <td>gnomAD genomes allele frequency - globally</td>
 </tr>
-<tr class="even">
-<td>62. <code>DBSNP_RSID</code>
+<tr class="odd">
+<td>65. <code>DBSNP_RSID</code>
 </td>
 <td>dbSNP identifier</td>
 </tr>
-<tr class="odd">
-<td>63. <code>COSMIC_ID</code>
+<tr class="even">
+<td>66. <code>COSMIC_ID</code>
 </td>
 <td>COSMIC identifier</td>
 </tr>
-<tr class="even">
-<td>64. <code>TCGA_FREQUENCY</code>
+<tr class="odd">
+<td>67. <code>TCGA_FREQUENCY</code>
 </td>
 <td>Frequency of variant across TCGA tumor types. Format:
 <code>tumortype | percent affected | affected cases | total cases</code>
 </td>
 </tr>
-<tr class="odd">
-<td>65. <code>TCGA_PANCANCER_COUNT</code>
+<tr class="even">
+<td>68. <code>TCGA_PANCANCER_COUNT</code>
 </td>
 <td>Raw variant count across all TCGA tumor types</td>
 </tr>
-<tr class="even">
-<td>66. <code>CLINVAR_MSID</code>
+<tr class="odd">
+<td>69. <code>CLINVAR_MSID</code>
 </td>
 <td>ClinVar measureset identifier</td>
 </tr>
-<tr class="odd">
-<td>67. <code>CLINVAR_CLASSIFICATION</code>
+<tr class="even">
+<td>70. <code>CLINVAR_CLASSIFICATION</code>
 </td>
 <td>ClinVar variant classification</td>
 </tr>
-<tr class="even">
-<td>68. <code>CLINVAR_VARIANT_ORIGIN</code>
+<tr class="odd">
+<td>71. <code>CLINVAR_VARIANT_ORIGIN</code>
 </td>
 <td>ClinVar variant origin</td>
 </tr>
-<tr class="odd">
-<td>69. <code>CLINVAR_NUM_SUBMITTERS</code>
+<tr class="even">
+<td>72. <code>CLINVAR_NUM_SUBMITTERS</code>
 </td>
 <td>ClinVar number of submitters</td>
 </tr>
-<tr class="even">
-<td>70. <code>CLINVAR_GOLD_STARS</code>
+<tr class="odd">
+<td>73. <code>CLINVAR_GOLD_STARS</code>
 </td>
 <td>ClinVar review status gold stars (0-4)</td>
 </tr>
-<tr class="odd">
-<td>71. <code>CLINVAR_CONFLICTED</code>
+<tr class="even">
+<td>74. <code>CLINVAR_CONFLICTED</code>
 </td>
 <td>ClinVar variant classification is conflicted</td>
 </tr>
@@ -1920,7 +1943,10 @@ files).</li>
 </li>
 </ul>
 <p>The format of the compressed <code>cna_gene_ann.tsv.gz</code> is the
-following:</p>
+following. Columns suffixed with <code>_OKB</code> are only present when
+OncoKB annotation is enabled via <code>--oncokb_api_token</code>. Note
+that <code>HOTSPOT_OKB</code> and <code>VUS_OKB</code> are not included
+for CNA output.</p>
 <table class="table">
 <colgroup>
 <col width="43%">
@@ -2068,55 +2094,290 @@ copy number states</td>
 <tr class="even">
 <td>26. <code>MUTATION_EFFECT_OKB</code>
 </td>
-<td>OncoKB mutation effect annotation (e.g. Loss-of-function,
-Gain-of-function)</td>
+<td>
+<em>(OncoKB only)</em> OncoKB mutation effect annotation
+(e.g. Loss-of-function, Gain-of-function)</td>
 </tr>
 <tr class="odd">
-<td>27. <code>ONCOGENICITY_OKB</code>
+<td>27. <code>MUTATION_EFFECT_CITATIONS_OKB</code>
 </td>
-<td>OncoKB oncogenicity annotation (e.g. Oncogenic, Likely
-Oncogenic)</td>
+<td>
+<em>(OncoKB only)</em> OncoKB mutation effect citations</td>
 </tr>
 <tr class="even">
-<td>28. <code>VARIANT_SUMMARY_OKB</code>
+<td>28. <code>MUTATION_EFFECT_DESCRIPTION_OKB</code>
 </td>
-<td>OncoKB variant summary</td>
+<td>
+<em>(OncoKB only)</em> OncoKB mutation effect description</td>
 </tr>
 <tr class="odd">
-<td>29. <code>TUMOR_TYPE_SUMMARY_OKB</code>
+<td>29. <code>ONCOGENICITY_OKB</code>
 </td>
-<td>OncoKB tumor type summary</td>
+<td>
+<em>(OncoKB only)</em> OncoKB oncogenicity annotation
+(e.g. Oncogenic, Likely Oncogenic)</td>
 </tr>
 <tr class="even">
-<td>30. <code>TRANSCRIPT_OVERLAP</code>
+<td>30. <code>TUMOR_TYPE_SUMMARY_OKB</code>
+</td>
+<td>
+<em>(OncoKB only)</em> OncoKB tumor type summary</td>
+</tr>
+<tr class="odd">
+<td>31. <code>VARIANT_SUMMARY_OKB</code>
+</td>
+<td>
+<em>(OncoKB only)</em> OncoKB variant summary</td>
+</tr>
+<tr class="even">
+<td>32. <code>TRANSCRIPT_OVERLAP</code>
 </td>
 <td>Comma-separated list of associated transcripts, including percentage
 of transcript overlap</td>
 </tr>
 <tr class="odd">
-<td>31. <code>TRANSCRIPT_OVERLAP_PERCENT</code>
+<td>33. <code>TRANSCRIPT_OVERLAP_PERCENT</code>
 </td>
 <td>Percentage overlap between copy number segment and transcript</td>
 </tr>
 <tr class="even">
-<td>32. <code>ACTIONABILITY_TIER</code>
+<td>34. <code>ACTIONABILITY_TIER</code>
 </td>
 <td>Variant actionability tier - AMP/ASCO/CAP</td>
 </tr>
 <tr class="odd">
-<td>33. <code>ACTIONABILITY</code>
+<td>35. <code>ACTIONABILITY</code>
 </td>
 <td>Variant clinical actionability significance - AMP/ASCO/CAP</td>
 </tr>
 <tr class="even">
-<td>34. <code>BIOMARKER_MATCH</code>
+<td>36. <code>BIOMARKER_MATCH</code>
 </td>
 <td>Biomarker match</td>
 </tr>
 <tr class="odd">
-<td>35. <code>TARGETED_INHIBITORS_ALL2</code>
+<td>37. <code>TARGETED_INHIBITORS_ALL2</code>
 </td>
 <td>Molecularly targeted inhibitors - indicated for any tumor type</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section level3">
+<h3 id="rna-fusions">RNA fusions<a class="anchor" aria-label="anchor" href="#rna-fusions"></a>
+</h3>
+<div class="section level4">
+<h4 id="tab-separated-values-tsv-2">Tab-separated values (TSV)<a class="anchor" aria-label="anchor" href="#tab-separated-values-tsv-2"></a>
+</h4>
+<p>Detected RNA fusions are annotated with gene-level cancer relevance,
+Mitelman database evidence, and clinical actionability. The output file
+has the following naming convention:</p>
+<ul>
+<li><code>&lt;sample_id&gt;.pcgr.&lt;genome_assembly&gt;.rna_fusion.tsv.gz</code></li>
+</ul>
+<p>Columns suffixed with <code>_OKB</code> are only present when OncoKB
+annotation is enabled via <code>--oncokb_api_token</code>. Note that
+<code>HOTSPOT_OKB</code> and <code>VUS_OKB</code> are not included for
+fusion output.</p>
+<table class="table">
+<colgroup>
+<col width="43%">
+<col width="56%">
+</colgroup>
+<thead><tr class="header">
+<th>Variable</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>1. <code>VAR_ID</code>
+</td>
+<td>Variant identifier. Format:
+<code>&lt;gene1&gt;--&lt;gene2&gt;:&lt;breakpoint_5P&gt;:&lt;breakpoint_3P&gt;</code>
+</td>
+</tr>
+<tr class="even">
+<td>2. <code>VARIANT_CLASS</code>
+</td>
+<td>Variant type: <code>fusion</code>
+</td>
+</tr>
+<tr class="odd">
+<td>3. <code>ENTREZGENE</code>
+</td>
+<td>Entrez gene identifiers for both fusion partners. Format:
+<code>&lt;entrezgene_5P&gt;::&lt;entrezgene_3P&gt;</code>
+</td>
+</tr>
+<tr class="even">
+<td>4. <code>FUSION_GENE</code>
+</td>
+<td>Fusion gene name. Format:
+<code>&lt;gene1&gt;--&lt;gene2&gt;</code>
+</td>
+</tr>
+<tr class="odd">
+<td>5. <code>FUSION_GENE2</code>
+</td>
+<td>Alternative fusion gene notation used for Mitelman database variant
+matching</td>
+</tr>
+<tr class="even">
+<td>6. <code>SPLIT_READS</code>
+</td>
+<td>Number of split reads supporting the fusion</td>
+</tr>
+<tr class="odd">
+<td>7. <code>SCORE</code>
+</td>
+<td>Fusion score reported by the caller (if provided in input)</td>
+</tr>
+<tr class="even">
+<td>8. <code>FUSION_GENE_5P</code>
+</td>
+<td>Gene symbol of the 5’ fusion partner</td>
+</tr>
+<tr class="odd">
+<td>9. <code>FUSION_GENE_3P</code>
+</td>
+<td>Gene symbol of the 3’ fusion partner</td>
+</tr>
+<tr class="even">
+<td>10. <code>BREAKPOINT_5P</code>
+</td>
+<td>Chromosomal breakpoint position of the 5’ partner</td>
+</tr>
+<tr class="odd">
+<td>11. <code>BREAKPOINT_3P</code>
+</td>
+<td>Chromosomal breakpoint position of the 3’ partner</td>
+</tr>
+<tr class="even">
+<td>12. <code>GENENAME_5P</code>
+</td>
+<td>Full gene name of the 5’ partner</td>
+</tr>
+<tr class="odd">
+<td>13. <code>ONCOGENE_5P</code>
+</td>
+<td>Flag indicating if the 5’ partner gene is an oncogene
+(CancerMine/NCG)</td>
+</tr>
+<tr class="even">
+<td>14. <code>ENSEMBL_TRANSCRIPT_ID_5P</code>
+</td>
+<td>Ensembl transcript identifier covering the 5’ breakpoint</td>
+</tr>
+<tr class="odd">
+<td>15. <code>TARGETED_INHIBITORS_5P</code>
+</td>
+<td>Molecularly targeted inhibitors for the 5’ partner gene - tumor
+type-specific</td>
+</tr>
+<tr class="even">
+<td>16. <code>TARGETED_INHIBITORS_ALL_5P</code>
+</td>
+<td>Molecularly targeted inhibitors for the 5’ partner gene - all tumor
+types</td>
+</tr>
+<tr class="odd">
+<td>17. <code>GENENAME_3P</code>
+</td>
+<td>Full gene name of the 3’ partner</td>
+</tr>
+<tr class="even">
+<td>18. <code>ONCOGENE_3P</code>
+</td>
+<td>Flag indicating if the 3’ partner gene is an oncogene
+(CancerMine/NCG)</td>
+</tr>
+<tr class="odd">
+<td>19. <code>ENSEMBL_TRANSCRIPT_ID_3P</code>
+</td>
+<td>Ensembl transcript identifier covering the 3’ breakpoint</td>
+</tr>
+<tr class="even">
+<td>20. <code>TARGETED_INHIBITORS_3P</code>
+</td>
+<td>Molecularly targeted inhibitors for the 3’ partner gene - tumor
+type-specific</td>
+</tr>
+<tr class="odd">
+<td>21. <code>TARGETED_INHIBITORS_ALL_3P</code>
+</td>
+<td>Molecularly targeted inhibitors for the 3’ partner gene - all tumor
+types</td>
+</tr>
+<tr class="even">
+<td>22. <code>SAMPLE_ALTERATION</code>
+</td>
+<td>Alteration description for the sample. Format:
+<code>&lt;FUSION_GENE&gt; fusion</code>
+</td>
+</tr>
+<tr class="odd">
+<td>23. <code>MITDB_NUM_EVIDENCE</code>
+</td>
+<td>Number of evidence records matching the fusion in the <a href="https://mitelmandatabase.isb-cgc.org/" class="external-link">Mitelman Database of
+Chromosome Aberrations and Gene Fusions in Cancer</a>
+</td>
+</tr>
+<tr class="even">
+<td>24. <code>MITDB_EVIDENCE</code>
+</td>
+<td>Evidence records for the fusion from the Mitelman database (cancer
+type associations)</td>
+</tr>
+<tr class="odd">
+<td>25. <code>ACTIONABILITY_TIER</code>
+</td>
+<td>Variant clinical actionability tier - AMP/ASCO/CAP
+implementation</td>
+</tr>
+<tr class="even">
+<td>26. <code>ACTIONABILITY</code>
+</td>
+<td>Variant clinical actionability significance - AMP/ASCO/CAP
+implementation</td>
+</tr>
+<tr class="odd">
+<td>27. <code>MUTATION_EFFECT_OKB</code>
+</td>
+<td>
+<em>(OncoKB only)</em> OncoKB mutation effect annotation
+(e.g. Loss-of-function, Gain-of-function)</td>
+</tr>
+<tr class="even">
+<td>28. <code>MUTATION_EFFECT_CITATIONS_OKB</code>
+</td>
+<td>
+<em>(OncoKB only)</em> OncoKB mutation effect citations</td>
+</tr>
+<tr class="odd">
+<td>29. <code>MUTATION_EFFECT_DESCRIPTION_OKB</code>
+</td>
+<td>
+<em>(OncoKB only)</em> OncoKB mutation effect description</td>
+</tr>
+<tr class="even">
+<td>30. <code>ONCOGENICITY_OKB</code>
+</td>
+<td>
+<em>(OncoKB only)</em> OncoKB oncogenicity annotation
+(e.g. Oncogenic, Likely Oncogenic)</td>
+</tr>
+<tr class="odd">
+<td>31. <code>TUMOR_TYPE_SUMMARY_OKB</code>
+</td>
+<td>
+<em>(OncoKB only)</em> OncoKB tumor type summary</td>
+</tr>
+<tr class="even">
+<td>32. <code>VARIANT_SUMMARY_OKB</code>
+</td>
+<td>
+<em>(OncoKB only)</em> OncoKB variant summary</td>
 </tr>
 </tbody>
 </table>
@@ -2165,16 +2426,304 @@ Q3, percentile etc), enabling the detection of expression outliers.</li>
 <div class="section level3">
 <h3 id="excel-workbook-xlsx">Excel workbook (XLSX)<a class="anchor" aria-label="anchor" href="#excel-workbook-xlsx"></a>
 </h3>
-<p>The Excel workbook contains multiple sheets with data tables, mostly
-self-explainable, with annotated datasets pending on the analysis
-performed (assay/sample data, SNVs/InDels, CNAs, biomarker evidence,
-TMB, MSI, mutational signatures, immune contexture profiling etc). The
-naming convention of the Excel workbook is as follows:
-<code>&lt;sample_id&gt;.pcgr.&lt;genome_assembly&gt;.xlsx</code>.
-<em>Note</em>: To reduce the size of the SNVs/InDel sheets in the Excel
-workbook, we only include the clinically actionable variants as well as
-other exonic variants (including splice site variants, silent variants,
-and protein-altering variants).</p>
+<p>The Excel workbook has the following naming convention:</p>
+<ul>
+<li><code>&lt;sample_id&gt;.pcgr.&lt;genome_assembly&gt;.xlsx</code></li>
+</ul>
+<p>It contains up to 14 sheets, each populated conditionally on the type
+of input data provided and the analysis performed. Sheets with no data
+are omitted entirely. Any sheet exceeding 30,000 rows is truncated to
+the first 30,000 rows (a warning is emitted in that case; the full data
+is always available in the corresponding TSV file).</p>
+<p>The table below describes each sheet, when it is included, and any
+filtering or content restrictions applied to keep the workbook
+manageable.</p>
+<table class="table">
+<colgroup>
+<col width="15%">
+<col width="33%">
+<col width="51%">
+</colgroup>
+<thead><tr class="header">
+<th>Sheet</th>
+<th>Included when</th>
+<th>Content and filtering</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code>SAMPLE_ASSAY</code></td>
+<td>Always</td>
+<td>Sample and assay properties: tumor site, sex, purity, ploidy, assay
+type (WGS/WES/TARGETED), tumor-normal/tumor-only mode, and effective
+target size</td>
+</tr>
+<tr class="even">
+<td><code>SOMATIC_SNV_INDEL</code></td>
+<td>
+<code>--input_vcf</code> provided</td>
+<td>Somatic SNV/InDel annotations using the same columns as the TSV
+output, minus <code>BIOMARKER_MATCH</code> and <code>VEP_ALL_CSQ</code>.
+<strong>Filtered</strong> to exonic variants
+(<code>EXONIC_STATUS == "exonic"</code>) plus any non-exonic variant
+with an actionability tier ≤ 3. User-retained VCF INFO tags
+(<code>--retained_info_tags</code>) are appended as additional columns.
+<code>HGVSP</code> is renamed to <code>HGVSp_short</code> to avoid
+column name conflicts</td>
+</tr>
+<tr class="odd">
+<td><code>SOMATIC_SNV_INDEL_BIOMARKER</code></td>
+<td>
+<code>--input_vcf</code> provided and biomarker hits exist</td>
+<td>One row per biomarker evidence item matched to a somatic SNV/InDel.
+A <code>TIER</code> column encodes evidence category and actionability
+tier (e.g. <code>T1</code>/<code>T2</code>/<code>T3</code> = therapeutic
+sensitivity, <code>R1</code>/<code>R2</code>/<code>R3</code> =
+therapeutic resistance, <code>PP1</code>–<code>PP3</code> = poor
+prognosis, <code>PB1</code>–<code>PB3</code> = better prognosis,
+<code>D1</code>–<code>D3</code> = diagnostic positive).
+Diagnostic-negative evidence is excluded. Sorted by <code>TIER</code>,
+evidence level, primary site, and rating</td>
+</tr>
+<tr class="even">
+<td><code>SOMATIC_CNA</code></td>
+<td>
+<code>--input_cna</code> provided</td>
+<td>CNA gene-level annotations using the same columns as the TSV output,
+minus <code>BIOMARKER_MATCH</code>. <strong>Filtered</strong> to genes
+with a non-missing <code>ACTIONABILITY_TIER</code> (i.e. only clinically
+actionable CNA events). Sorted by <code>ACTIONABILITY_TIER</code> and
+<code>TARGETED_INHIBITORS_ALL2</code>
+</td>
+</tr>
+<tr class="odd">
+<td><code>SOMATIC_CNA_BIOMARKER</code></td>
+<td>
+<code>--input_cna</code> provided and biomarker hits exist</td>
+<td>One row per biomarker evidence item matched to a somatic CNA, using
+the same <code>TIER</code> encoding and sorting as
+<code>SOMATIC_SNV_INDEL_BIOMARKER</code>
+</td>
+</tr>
+<tr class="even">
+<td><code>RNA_FUSION</code></td>
+<td>
+<code>--input_rna_fusion</code> provided</td>
+<td>RNA fusion annotations using the same columns as the TSV output,
+minus <code>BIOMARKER_MATCH</code>. <strong>Filtered</strong> to fusions
+with a non-missing <code>ACTIONABILITY_TIER</code> (i.e. only clinically
+actionable fusions). Sorted by <code>ACTIONABILITY_TIER</code>
+</td>
+</tr>
+<tr class="odd">
+<td><code>RNA_FUSION_BIOMARKER</code></td>
+<td>
+<code>--input_rna_fusion</code> provided and biomarker hits
+exist</td>
+<td>One row per biomarker evidence item matched to an RNA fusion, using
+the same <code>TIER</code> encoding and sorting as
+<code>SOMATIC_SNV_INDEL_BIOMARKER</code>
+</td>
+</tr>
+<tr class="even">
+<td><code>TMB</code></td>
+<td>
+<code>--input_vcf</code> provided</td>
+<td>Tumor mutational burden estimates (same content as the
+<code>.tmb.tsv</code> file)</td>
+</tr>
+<tr class="odd">
+<td><code>MSI</code></td>
+<td>
+<code>--input_vcf</code> provided and MSI estimation enabled</td>
+<td>MSI classifier statistics and predicted stability status</td>
+</tr>
+<tr class="even">
+<td><code>MUTATIONAL_SIGNATURE</code></td>
+<td>
+<code>--input_vcf</code> provided and signature estimation
+enabled</td>
+<td>Mutational signature contributions (same content as the
+<code>.msigs.tsv.gz</code> file)</td>
+</tr>
+<tr class="odd">
+<td><code>KATAEGIS_EVENTS</code></td>
+<td>
+<code>--input_vcf</code> provided and kataegis events detected</td>
+<td>Kataegis loci identified from the somatic mutation profile</td>
+</tr>
+<tr class="even">
+<td><code>RNA_EXPRESSION_OUTLIERS</code></td>
+<td>
+<code>--input_rna_expression</code> provided and outlier detection
+enabled</td>
+<td>Expression outlier genes/transcripts compared to reference cohorts.
+A subset of display-only columns (<code>GENENAME</code>,
+<code>CANCERGENE_EVIDENCE</code>, <code>TARGETED_INHIBITORS_ALL</code>,
+<code>ENSEMBL_GENE_ID</code>) are removed to reduce width</td>
+</tr>
+<tr class="odd">
+<td><code>RNA_IMMUNE_CONTEXTURE</code></td>
+<td>
+<code>--input_rna_expression</code> provided</td>
+<td>Immune cell type deconvolution results from bulk RNA-seq
+(quanTIseq)</td>
+</tr>
+</tbody>
+</table>
+<div class="section level4">
+<h4 id="biomarker-evidence-in-the-html-report-vs--the-excel-workbook">Biomarker evidence in the HTML report vs. the Excel workbook<a class="anchor" aria-label="anchor" href="#biomarker-evidence-in-the-html-report-vs--the-excel-workbook"></a>
+</h4>
+<p>The <code>_BIOMARKER</code> sheets are more comprehensive than what
+is displayed in the HTML report. The HTML report shows only the
+<strong>tier-defining</strong> evidence items — those that directly
+determined the variant’s actionability tier assignment. The Excel
+<code>_BIOMARKER</code> sheets include <strong>all</strong> matched
+evidence items, each annotated with a
+<code>BM_ACTIONABILITY_SUPPORT</code> column that records its
+relationship to the tier assignment.</p>
+<p>The four possible values of <code>BM_ACTIONABILITY_SUPPORT</code>
+are:</p>
+<ul>
+<li>
+<strong><code>tier-defining</code></strong> — the evidence item was
+the primary basis for the variant’s actionability tier. Only these items
+appear in the HTML report.</li>
+<li>
+<strong><code>additional</code></strong> — the evidence item is
+relevant (correct evidence type, overlapping molecular profile) but was
+not sufficient on its own to define the tier, either because the tumor
+type does not match the query or the evidence is weaker than what the
+tier requires.</li>
+<li>
+<strong><code>additional-weak</code></strong> — the evidence item is
+from a different tumor type <strong>and</strong> carries only weak
+evidence (CIViC levels C/D/E or OncoKB level 4). Present only in
+tumor-type-specific analyses.</li>
+<li>
+<strong><code>other</code></strong> — the evidence item is of an
+evidence type not used for tiering in this biomarker category (e.g., a
+prognostic item retrieved in a predictive context).</li>
+</ul>
+<p>What counts as <em>strong</em> vs. <em>weak</em> evidence follows the
+AMP/ASCO/CAP classification: strong = CIViC levels A, B (and OncoKB
+levels 1, 2, 3A, 3B, R1, R2); weak = CIViC levels C, D, E (and OncoKB
+level 4).</p>
+<p>The exact tier-support assignment depends on whether the user
+specified a tumor type (<code>--tumor_site</code>) or ran in
+tumor-type-agnostic mode (<code>--tumor_site 0</code>):</p>
+<p><strong>Tumor-type-specific</strong> (a specific
+<code>--tumor_site</code> was provided):</p>
+<table class="table">
+<colgroup>
+<col width="31%">
+<col width="18%">
+<col width="31%">
+<col width="18%">
+</colgroup>
+<thead><tr class="header">
+<th align="center">Variant tier</th>
+<th>Biomarker tumor type vs. query</th>
+<th align="center">Evidence strength (CIViC/OncoKB)</th>
+<th><code>BM_ACTIONABILITY_SUPPORT</code></th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="center">1</td>
+<td>Same tumor type or pan-cancer</td>
+<td align="center">Strong (CIViC A/B, OncoKB 1/2/3A/3B/R1/R2)</td>
+<td><code>tier-defining</code></td>
+</tr>
+<tr class="even">
+<td align="center">1</td>
+<td>Same tumor type or pan-cancer</td>
+<td align="center">Weak (CIViC C/D/E, OncoKB 4)</td>
+<td><code>additional</code></td>
+</tr>
+<tr class="odd">
+<td align="center">1</td>
+<td>Different tumor type</td>
+<td align="center">Strong (CIViC A/B, OncoKB 1/2/3A/3B/R1/R2)</td>
+<td><code>additional</code></td>
+</tr>
+<tr class="even">
+<td align="center">1</td>
+<td>Different tumor type</td>
+<td align="center">Weak (CIViC C/D/E, OncoKB 4)</td>
+<td><code>additional-weak</code></td>
+</tr>
+<tr class="odd">
+<td align="center">2</td>
+<td>Different tumor type or pan-cancer</td>
+<td align="center">Strong (CIViC A/B, OncoKB 1/2/3A/3B/R1/R2)</td>
+<td><code>tier-defining</code></td>
+</tr>
+<tr class="even">
+<td align="center">2</td>
+<td>Same tumor type</td>
+<td align="center">Weak (CIViC C/D/E, OncoKB 4)</td>
+<td><code>tier-defining</code></td>
+</tr>
+<tr class="odd">
+<td align="center">2</td>
+<td>Different tumor type</td>
+<td align="center">Weak (CIViC C/D/E, OncoKB 4)</td>
+<td><code>additional</code></td>
+</tr>
+<tr class="even">
+<td align="center">3</td>
+<td>Any</td>
+<td align="center">Any</td>
+<td><code>tier-defining</code></td>
+</tr>
+</tbody>
+</table>
+<p>The rationale: a Tier 1 variant has strong evidence in the query
+tumor type — so only that combination is tier-defining. A Tier 2 variant
+is assigned because the strongest available evidence is either from a
+different tumor type with strong backing, or from the same type but only
+weakly supported — both of those are tier-defining for Tier 2. Tier 3
+captures oncogenic variants with no specific matched biomarker, so any
+matched item is considered tier-defining.</p>
+<p><strong>Tumor-type-agnostic</strong> (<code>--tumor_site 0</code>; no
+specific primary site):</p>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr class="header">
+<th>Condition</th>
+<th><code>BM_ACTIONABILITY_SUPPORT</code></th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Pan-cancer biomarker + strong evidence (CIViC A/B, OncoKB
+1/2/3A/3B/R1/R2) + Tier 1 variant</td>
+<td><code>tier-defining</code></td>
+</tr>
+<tr class="even">
+<td>Tumor-specific biomarker + strong evidence (CIViC A/B, OncoKB
+1/2/3A/3B/R1/R2) + Tier 2 variant</td>
+<td><code>tier-defining</code></td>
+</tr>
+<tr class="odd">
+<td>Any biomarker + weak evidence (CIViC C/D/E, OncoKB 4) + Tier 3
+variant</td>
+<td><code>tier-defining</code></td>
+</tr>
+<tr class="even">
+<td>Evidence type not used for tiering in this category</td>
+<td><code>other</code></td>
+</tr>
+<tr class="odd">
+<td>All other matching evidence</td>
+<td><code>additional</code></td>
+</tr>
+</tbody>
+</table>
+<p>In tumor-type-agnostic mode the <code>additional-weak</code> level is
+not used, since no tumor-type mismatch penalty applies.</p>
+</div>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

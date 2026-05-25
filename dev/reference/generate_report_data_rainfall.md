@@ -10,7 +10,8 @@ generate_report_data_rainfall(
   variant_set,
   colors = NULL,
   autosomes = FALSE,
-  build = NULL
+  build = NULL,
+  color_palette = pcgrr::color_palette
 )
 ```
 

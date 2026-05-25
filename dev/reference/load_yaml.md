@@ -6,7 +6,11 @@ molecular profiles
 ## Usage
 
 ``` r
-load_yaml(yaml_fname, report_mode = "CPSR")
+load_yaml(
+  yaml_fname,
+  report_mode = "CPSR",
+  color_palette = pcgrr::color_palette
+)
 ```
 
 ## Arguments

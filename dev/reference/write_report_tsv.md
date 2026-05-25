@@ -20,7 +20,7 @@ write_report_tsv(report = NULL, output_type = "snv_indel")
 - output_type:
 
   character indicating output type for TSV, i.e. 'snv_indel',
-  'snv_indel_unfiltered', 'cna_gene', or 'msigs'
+  'snv_indel_unfiltered', 'cna_gene', 'fusion', or 'msigs'
 
 ## Details
 

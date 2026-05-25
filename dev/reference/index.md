@@ -341,6 +341,11 @@
   : Oncogenicity criteria (ClinGen/CGC/VICC)
 - [`oncogenicity_doc_note()`](https://sigven.github.io/pcgr/dev/reference/oncogenicity_doc_note.md)
   : Get documentation string for oncogenicity annotation
+- [`oncokb_annotations`](https://sigven.github.io/pcgr/dev/reference/oncokb_annotations.md)
+  : Character vector with OncoKB annotations coming from the
+  MafAnnotator / FusionAnnotator / CnaAnnnotator tools in the PCGR
+  Python workflow. These annotations are used for variant classification
+  and reporting in PCGR.
 - [`oncokb_base_api_url`](https://sigven.github.io/pcgr/dev/reference/oncokb_base_api_url.md)
   : OncoKB base API URL
 - [`order_variants()`](https://sigven.github.io/pcgr/dev/reference/order_variants.md)
@@ -506,7 +511,7 @@
 - [`write_report_excel()`](https://sigven.github.io/pcgr/dev/reference/write_report_excel.md)
   : Function that writes key datasets of PCGR object to an Excel
   workbook
-- [`write_report_quarto_html()`](https://sigven.github.io/pcgr/dev/reference/write_report_quarto_html.md)
+- [`write_report_html()`](https://sigven.github.io/pcgr/dev/reference/write_report_html.md)
   : Function that writes contents of PCGR object to an HTML report
   (quarto-based)
 - [`write_report_tsv()`](https://sigven.github.io/pcgr/dev/reference/write_report_tsv.md)

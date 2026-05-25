@@ -9,5 +9,5 @@ for a cohesive appearance.
 ## Usage
 
 ``` r
-rt_theme()
+rt_theme(color_palette = pcgrr::color_palette)
 ```

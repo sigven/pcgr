@@ -10,7 +10,10 @@ tumor suppressor deletions)
 ## Usage
 
 ``` r
-get_oncogenic_cna_events(cna_df_display = NULL)
+get_oncogenic_cna_events(
+  cna_df_display = NULL,
+  table_display_cols = pcgrr::table_display_cols
+)
 ```
 
 ## Arguments

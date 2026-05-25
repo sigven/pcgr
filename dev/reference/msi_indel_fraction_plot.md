@@ -6,7 +6,11 @@ this with the distribution for MSI-H/MSS samples from TCGA
 ## Usage
 
 ``` r
-msi_indel_fraction_plot(tcga_msi_dataset, indel_fraction)
+msi_indel_fraction_plot(
+  tcga_msi_dataset,
+  indel_fraction,
+  color_palette = pcgrr::color_palette
+)
 ```
 
 ## Arguments

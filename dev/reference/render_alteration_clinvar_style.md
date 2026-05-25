@@ -6,7 +6,7 @@ Style alteration cell background based on ClinVar classification
 ## Usage
 
 ``` r
-render_alteration_clinvar_style(data)
+render_alteration_clinvar_style(data, color_palette = pcgrr::color_palette)
 ```
 
 ## Arguments

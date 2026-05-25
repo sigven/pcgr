@@ -6,7 +6,7 @@ Function that writes contents of PCGR object to an HTML report
 ## Usage
 
 ``` r
-write_report_quarto_html(report = NULL)
+write_report_html(report = NULL, color_palette = pcgrr::color_palette)
 ```
 
 ## Arguments

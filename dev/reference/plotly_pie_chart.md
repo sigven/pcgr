@@ -9,6 +9,7 @@ a data frame
 plotly_pie_chart(
   df_variant_stats = NULL,
   category = "CODING_STATUS",
+  color_palette = pcgrr::color_palette,
   plot_margin_top = 50,
   plot_margin_bottom = 20,
   plot_margin_left = 20,

@@ -6,7 +6,11 @@ with the distribution for MSI-H/MSS samples from TCGA
 ## Usage
 
 ``` r
-msi_indel_load_plot(tcga_msi_dataset, indel_load)
+msi_indel_load_plot(
+  tcga_msi_dataset,
+  indel_load,
+  color_palette = pcgrr::color_palette
+)
 ```
 
 ## Arguments

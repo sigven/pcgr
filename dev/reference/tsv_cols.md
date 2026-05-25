@@ -10,4 +10,4 @@ tsv_cols
 
 ## Format
 
-An object of class `list` of length 3.
+An object of class `list` of length 4.

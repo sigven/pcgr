@@ -108,7 +108,7 @@ the time is spent on downloading the `{BSgenome.Hsapiens.UCSC.hg19}` and
 `{BSgenome.Hsapiens.UCSC.hg38}` R packages (which happens at the very
 end of the conda environment creation).
 
-    PCGR_VERSION="2.2.5.9016"
+    PCGR_VERSION="2.2.5.9017"
 
 ``` bash
 # set up variables
@@ -129,9 +129,9 @@ pcgr --help
 
 The PCGR Docker image is available from the GitHub Container Registry at
 <https://github.com/sigven/pcgr/pkgs/container/pcgr>. Pull the latest
-**v2.2.5.9016** image with:
+**v2.2.5.9017** image with:
 
-    docker pull ghcr.io/sigven/pcgr:2.2.5.9016
+    docker pull ghcr.io/sigven/pcgr:2.2.5.9017
 
 #### Example Run
 
@@ -152,7 +152,7 @@ structure:
 
 &nbsp;
 
-    PCGR_VERSION="2.2.5.9016"
+    PCGR_VERSION="2.2.5.9017"
     BUNDLE_VERSION="20260508"
 
 ``` bash
@@ -185,18 +185,18 @@ for Singularity/Apptainer below, see also [issue
 ### C. Singularity/Apptainer
 
 The PCGR Singularity/Apptainer image is available on [GitHub Container
-Registry](https://ghcr.io/sigven/pcgr). Pull the latest **v2.2.5.9016**
+Registry](https://ghcr.io/sigven/pcgr). Pull the latest **v2.2.5.9017**
 image with:
 
-    apptainer pull oras://ghcr.io/sigven/pcgr:2.2.5.9016.singularity
+    apptainer pull oras://ghcr.io/sigven/pcgr:2.2.5.9017.singularity
 
 This will download a Singularity Image File (SIF) called
-**pcgr_2.2.5.9016.singularity.sif** that can be run with Singularity or
+**pcgr_2.2.5.9017.singularity.sif** that can be run with Singularity or
 Apptainer.
 
 #### Example Run
 
-    PCGR_VERSION="2.2.5.9016"
+    PCGR_VERSION="2.2.5.9017"
     BUNDLE_VERSION="20260508"
 
 ``` bash

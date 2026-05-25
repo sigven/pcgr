@@ -6,7 +6,7 @@ manual tweaks)
 ## Usage
 
 ``` r
-render_evidence_level_cell()
+render_evidence_level_cell(color_palette)
 ```
 
 ## Value

@@ -6,7 +6,12 @@ object
 ## Usage
 
 ``` r
-vaf_plot(report = NULL, font_size = 12, font_family = "Helvetica")
+vaf_plot(
+  report = NULL,
+  font_size = 12,
+  font_family = "Helvetica",
+  color_palette = pcgrr::color_palette
+)
 ```
 
 ## Arguments

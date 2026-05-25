@@ -6,7 +6,7 @@ the cancer genome
 ## Usage
 
 ``` r
-plot_value_boxes(pcg_report)
+plot_value_boxes(pcg_report, color_palette = pcgrr::color_palette)
 ```
 
 ## Arguments

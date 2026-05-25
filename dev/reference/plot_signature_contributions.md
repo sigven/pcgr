@@ -8,7 +8,8 @@ given sample (both ggplot and plotly)
 ``` r
 plot_signature_contributions(
   signature_contributions = NULL,
-  per_signature = TRUE
+  per_signature = TRUE,
+  color_palette = pcgrr::color_palette
 )
 ```
 
