@@ -115,6 +115,7 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
             'api_token': str(arg_dict['oncokb_api_token']) if arg_dict['oncokb_api_token'] is not None else None,
             'oncotree_code': str(arg_dict['oncokb_oncotree_code']) if arg_dict['oncokb_oncotree_code'] is not None else None,
             'exclusive': int(arg_dict['oncokb_exclusive']),
+            'maf_query_all': int(arg_dict['oncokb_maf_query_all']),
             'data_version': None,
             'data_release_date': None,
             'api_version': None,

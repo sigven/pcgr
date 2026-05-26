@@ -224,6 +224,10 @@ def cli():
                                     help = "OncoKB oncotree code (default: %(default)s)")
     optional_biomarker.add_argument("--oncokb_exclusive", action="store_true",
                                     help = "Limit biomarker reporting to OncoKB only - skip CIViC and CGI sources (default: %(default)s)")
+    optional_biomarker.add_argument("--oncokb_maf_query_all", action="store_true",
+                                    help = "Query OncoKB for all variant classes, including non-coding variants (IGR, Intron, UTR, flanking regions). "
+                                           "By default, non-coding variants are filtered out before OncoKB annotation to reduce processing time. "
+                                           "Intended for TARGETED/WES assays only - enabling for WGS may result in very long MafAnnotator.py runtimes (default: %(default)s)")
     optional_other.add_argument("--force_overwrite", action="store_true", 
                                 help = "By default, the script will fail with an error if any output file already exists.\nYou can force the overwrite of existing result files by using this flag, default: %(default)s")
     optional_other.add_argument("--no_reporting", action="store_true", 
@@ -558,6 +562,7 @@ def run_pcgr(input_data, output_data, conf_options):
             generate_oncokb_maf_input(
                 maf_fname = output_maf,
                 output_fname = oncokb_input_maf,
+                oncokb_maf_query_all = bool(conf_options['oncokb']['maf_query_all']),
                 logger = logger
             )
 

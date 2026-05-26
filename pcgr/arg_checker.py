@@ -258,6 +258,15 @@ def verify_args(arg_dict, logger = None):
         )
         error_message(err_msg, logger)
 
+    # OncoKB: warn if --oncokb_maf_query_all is enabled for WGS (intended for TARGETED/WES only)
+    if arg_dict.get('oncokb_maf_query_all') is True and arg_dict.get('assay') == 'WGS':
+        warn_msg = (
+            "'--oncokb_maf_query_all' is enabled for a WGS assay - this will submit all variant classes "
+            "(including non-coding IGR, Intron, UTR, and flanking variants) to MafAnnotator.py and may "
+            "result in very long OncoKB annotation runtimes. This option is intended for TARGETED/WES assays only."
+        )
+        warn_message(warn_msg, logger)
+
     # check that tumor primary site/type is set correctly (integer between 0 and 30)
     if arg_dict['tsite'] > max(pcgr_vars.tsites.keys()) or arg_dict['tsite'] < 0:
         err_msg = f"Tumor type code ('--tumor_site' = {arg_dict['tsite']}) must be within [0, {max(pcgr_vars.tsites.keys())}]"
