@@ -4,7 +4,7 @@ channels:
   - bioconda
   - conda-forge
 dependencies:
-  - r-pcgrr ==2.2.5.9018 # bump
+  - r-pcgrr ==2.2.5.9019 # bump
   - r-pkgdown
   - r-readr
   - r-glue
