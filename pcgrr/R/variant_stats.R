@@ -736,6 +736,13 @@ stats_report_fusion <- function(
     msg = "Argument 'callset' must contain a data frame member named 'variant'"
   ))
 
+  ## When no fusions passed transcript-overlap matching the dataframe is
+  ## empty and only carries raw pre-processing columns, so skip the column
+  ## assertion and return zero-filled stats immediately.
+  if (NROW(callset$variant) == 0) {
+    return(vstats)
+  }
+
   assertable::assert_colnames(
     callset$variant,
     c("VARIANT_CLASS",

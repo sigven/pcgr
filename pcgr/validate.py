@@ -227,7 +227,8 @@ def is_valid_rna_fusion(rna_fusion_file, logger):
             return error_message(f"Optional 'Score' column cannot be of type '{rna_fusion_dataframe['Score'].dtype}'", logger)
 
     gene_pattern = re.compile(r'^[A-Za-z0-9][A-Za-z0-9._-]*$')
-    bp_pattern   = re.compile(r'^([1-9]|1[0-9]|2[0-2]|X|Y|MT):\d+$')
+    # Accept both bare (2:42264731) and chr-prefixed (chr2:42264731) formats
+    bp_pattern   = re.compile(r'^(chr)?([1-9]|1[0-9]|2[0-2]|X|Y|MT):\d+$')
     empty_partner_fusions = []
 
     for _, rec in rna_fusion_dataframe.iterrows():
@@ -256,10 +257,12 @@ def is_valid_rna_fusion(rna_fusion_file, logger):
 
         if not bp_pattern.match(str(left_bp)):
             return error_message(
-                f"Invalid LeftBreakpoint: '{left_bp}' - expected format chrom:position", logger)
+                f"Invalid LeftBreakpoint: '{left_bp}' - expected format <chrom>:<position> "
+                f"(e.g. '2:42264731' or 'chr2:42264731')", logger)
         if not bp_pattern.match(str(right_bp)):
             return error_message(
-                f"Invalid RightBreakpoint: '{right_bp}' - expected format chrom:position", logger)
+                f"Invalid RightBreakpoint: '{right_bp}' - expected format <chrom>:<position> "
+                f"(e.g. '2:29223528' or 'chr2:29223528')", logger)
         if int(split_reads) < 0:
             return error_message(f"SplitReads cannot be negative - found '{split_reads}'", logger)
 

@@ -1397,6 +1397,11 @@ load_rna_fusions <- function(
       remove = FALSE
     ) |>
     dplyr::mutate(
+      ## Normalise chromosome names to strip the 'chr' prefix when present,
+      ## so they match the reference transcript_biotype table (bare numbers:
+      ## "2", "12", "X" — no "chr" prefix).
+      BP_CHROM_5P = stringr::str_remove(.data$BP_CHROM_5P, "^chr"),
+      BP_CHROM_3P = stringr::str_remove(.data$BP_CHROM_3P, "^chr"),
       BP_POSITION_5P =
         as.integer(.data$BP_POSITION_5P),
       BP_POSITION_3P =
@@ -1406,7 +1411,7 @@ load_rna_fusions <- function(
       "FUSION_GENE",
       into = c("FUSION_GENE_5P",
                "FUSION_GENE_3P"),
-      sep = "--",
+      sep = "--|::",
       remove = FALSE
     )
 
@@ -1432,8 +1437,11 @@ load_rna_fusions <- function(
                     BP_POSITION = dplyr::all_of(bp_cols[2])) |>
       dplyr::filter(!is.na(.data$BP_CHROM) & !is.na(.data$BP_POSITION))
 
-    bp_junction_transcript_overlap(bp_junctions, ref_data) |>
-      dplyr::rename_with(~ paste0(.x, "_", prefix))
+    result <- bp_junction_transcript_overlap(bp_junctions, ref_data)
+    if (NROW(result) == 0 && ncol(result) == 0) {
+      return(result)
+    }
+    dplyr::rename_with(result, ~ paste0(.x, "_", prefix))
   }
 
   # refgene table

@@ -992,7 +992,8 @@ def run_pcgr(input_data, output_data, conf_options):
 
     if conf_options.get('oncokb', {}).get('api_token'):
         logger.info('Finished OncoKB annotation and integration')
-        print('----')
+    print('----')
+    
 
     # Write YAML file with configuration options and paths to annotated molecular profile datasets
     with open(yaml_fname, "w") as outfile:
