@@ -175,6 +175,7 @@ rctbl_recs <- pcgrr::prep_actble_display_tbl(
   rep = pcg_report, 
   tier = c(1,2,3),
   etype_for_tiering = c("predictive"),
+  clnsig = "therapeutic_sensitivity",
   variant_category = 'fusion')
 
 result_table <- 

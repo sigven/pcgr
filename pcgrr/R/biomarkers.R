@@ -52,7 +52,8 @@ prep_actble_display_tbl <- function(
   ## and make sure this is an element in the "bm_evidence" list object, which
   ## in turn should be a member of the "callset" list object for the variant class
   ## of interest (e.g. snv_indel, cna)
-  if (!clnsig %in% c("therapeutic_sensitivity", "therapeutic_resistance")) {
+  if (!clnsig %in% c("therapeutic_sensitivity",
+                     "therapeutic_resistance")) {
     log4r_fatal(
       paste0("clnsig must be one of ",
       "'therapeutic_resistance', 'therapeutic_sensitivity'"))

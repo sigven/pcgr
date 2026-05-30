@@ -1491,30 +1491,33 @@ assign_bm_tier_support_ttagnostic <- function(
           BM_ACTIONABILITY_SUPPORT = dplyr::case_when(
 
             ## A) Biomarker site is pan-cancer (tumor-agnostic)
-            ## B) strong evidence - evidence levels A/B
+            ## B) Strong evidence (CIViC A/B or OncoKB equivalents)
             ## C) Variant has a max tier of 1 (strong clinical significance)
             ## --> evidence item is tier-defining
             .data$BM_PRIMARY_SITE == "Any" &
               tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
               .data$ACTIONABILITY_TIER == 1 &
               stringr::str_detect(
-                .data$BM_EVIDENCE_LEVEL, "^(A|B)") ~ "tier-defining",
+                .data$BM_EVIDENCE_LEVEL,
+                pcgrr::bm_evidence$strong_regex) ~ "tier-defining",
 
             ## A) Biomarker site is tumor-specific
-            ## B) Strong evidence - evidence levels A/B
+            ## B) Strong evidence (CIViC A/B or OncoKB equivalents)
             ## C) Variant has a max tier of 2 (potential clinical significance)
             ## --> evidence item is tier-defining
             .data$BM_PRIMARY_SITE != "Any" &
               tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
               .data$ACTIONABILITY_TIER == 2 &
               stringr::str_detect(
-                .data$BM_EVIDENCE_LEVEL, "^(A|B)") ~ "tier-defining",
+                .data$BM_EVIDENCE_LEVEL,
+                pcgrr::bm_evidence$strong_regex) ~ "tier-defining",
 
-            ## A) Biomarker has weak evidence - evidence levels C/D/E
-            ## C) Variant has a max tier of 3 (uncertain clinical significance)
+            ## A) Weak evidence (CIViC C/D/E or OncoKB equivalents)
+            ## B) Variant has a max tier of 3 (uncertain clinical significance)
             ## --> evidence item is tier-defining
             stringr::str_detect(
-              .data$BM_EVIDENCE_LEVEL, "^(C|D|E)") &
+              .data$BM_EVIDENCE_LEVEL,
+              pcgrr::bm_evidence$weak_regex) &
               tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
               .data$ACTIONABILITY_TIER == 3 ~ "tier-defining",
 

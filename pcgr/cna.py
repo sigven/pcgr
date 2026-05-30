@@ -409,6 +409,14 @@ def annotate_fusions(input_fusion_fname: str,
         "SplitReads": "SPLIT_READS",
         "biomarker_match": "BIOMARKER_MATCH"
     })
+    # Normalise breakpoint chromosome prefix: strip any leading 'chr' so that
+    # downstream R code and display URLs always work with bare chromosome names
+    # (e.g. "2:42264731" not "chr2:42264731"). The R display layer adds 'chr'
+    # back when building UCSC browser links.
+    for bp_col in ("BREAKPOINT_5P", "BREAKPOINT_3P"):
+        if bp_col in fusion_df.columns:
+            fusion_df[bp_col] = fusion_df[bp_col].str.replace(
+                r'^chr', '', regex=True)
     if("Score" in fusion_df.columns):
         fusion_df = fusion_df.rename(columns={"Score": "FUSION_SCORE"})
     fusion_df['SAMPLE_ID'] = sample_id
