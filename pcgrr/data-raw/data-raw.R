@@ -385,10 +385,17 @@ bm_evidence[['clinical_significance']] <-
     "Negative",
     "Toxicity",
     "Uncertain Significance")
+## CIViC strong: A, B; OncoKB therapeutic: 1, 2, 3A, 3B, R1, R2;
+## OncoKB diagnostic/prognostic: Dx1, Px1 (highest confidence)
 bm_evidence[['strong_regex']] <-
-  "^(A|B|(R)?(1|2|(3(A|B))))"
+  "^(A|B|(R)?(1|2|(3(A|B)))|(Dx|Px)1)"
+## CIViC weak: C, D, E; OncoKB therapeutic: 4;
+## OncoKB diagnostic: Dx2, Dx3 (also matched via leading D from CIViC pattern);
+## OncoKB prognostic: Px2, Px3 (not covered by CIViC letters, added explicitly)
+## Note: Dx1/Px1 also match D/Px here but strong_regex is checked first in
+## case_when so they are correctly assigned the strong tier.
 bm_evidence[['weak_regex']] <-
-  "^(C|D|E|4)"
+  "^(C|D|E|4|Px[23])"
 
 usethis::use_data(
   bm_evidence, overwrite = T)

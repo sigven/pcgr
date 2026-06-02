@@ -1,3 +1,23 @@
+#' Extract a scalar value from a list or vector returned by the OncoKB API
+#'
+#' Safely coerces whatever the OncoKB JSON parser returns for a single field
+#' (NULL, a length-1 list/vector, or a multi-element list/vector) into a
+#' single character scalar suitable for storing in a data frame column.
+#'
+#' @param x Object returned by the OncoKB API for a single field.
+#' @return A length-1 character scalar, or \code{NA} when \code{x} is NULL.
+#'
+#' @keywords internal
+oncokb_extract_field <- function(x) {
+  if (is.null(x)) return(NA)
+  if (is.list(x) && length(x) == 1) return(x[[1]])
+  if (is.vector(x) && length(x) == 1) return(x[1])
+  if (is.vector(x) && length(x) > 1) return(paste(x, collapse = ","))
+  if (is.list(x) && length(x) > 1) return(paste(sapply(x, as.character), collapse = ","))
+  return(x)
+}
+
+
 #' Clean extracted evidence data from OncoKB
 #'
 #' @param evidence_df data.frame with OncoKB evidence
@@ -184,16 +204,6 @@ extract_therapeutic_evidence <-
       variant_origin <- "Germline"
     }
 
-    # Helper function to extract first element from list/vector or return as-is
-    extract_value <- function(x) {
-      if (is.null(x)) return(NA)
-      if (is.list(x) && length(x) == 1) return(x[[1]])
-      if (is.vector(x) && length(x) == 1) return(x[1])
-      if (is.vector(x) && length(x) > 1) return(paste(x, collapse = ","))
-      if (is.list(x) && length(x) > 1) return(paste(sapply(x, as.character), collapse = ","))
-      return(x)
-    }
-
     # Extract each treatment as a row
     therapeutic_df <-
       purrr::map_df(oncokb_annotation$treatments, function(tx) {
@@ -215,14 +225,14 @@ extract_therapeutic_evidence <-
 
         if (!is.null(tx$levelAssociatedCancerType)) {
           cancer_type <-
-            extract_value(tx$levelAssociatedCancerType$name)
+            oncokb_extract_field(tx$levelAssociatedCancerType$name)
           cancer_type_code <-
-            extract_value(tx$levelAssociatedCancerType$code)
+            oncokb_extract_field(tx$levelAssociatedCancerType$code)
 
           # If name is empty or NA, use mainType.name as fallback
           if (is.na(cancer_type) || cancer_type == "") {
             if (!is.null(tx$levelAssociatedCancerType$mainType)) {
-              cancer_type <- extract_value(
+              cancer_type <- oncokb_extract_field(
                 tx$levelAssociatedCancerType$mainType$name)
             }
           }
@@ -230,13 +240,13 @@ extract_therapeutic_evidence <-
           # Store mainType separately for reference
           if (!is.null(tx$levelAssociatedCancerType$mainType)) {
             cancer_type_main <-
-              extract_value(
+              oncokb_extract_field(
                 tx$levelAssociatedCancerType$mainType$name)
           }
 
           if (!is.null(tx$levelAssociatedCancerTyp$tissue)){
             primary_site <-
-              extract_value(
+              oncokb_extract_field(
                 tx$levelAssociatedCancerType$tissue)
             if(primary_site == ""){
               primary_site <- "Any"
@@ -265,16 +275,16 @@ extract_therapeutic_evidence <-
           BM_MOLECULAR_PROFILE_TYPE = "Single",
           BM_RATING = 5,
           BM_CLINICAL_SIGNIFICANCE = "Sensitivity/Response",
-          BM_EVIDENCE_LEVEL_FULL = extract_value(tx$level),
-          BM_FDA_LEVEL = extract_value(tx$fdaLevel),
+          BM_EVIDENCE_LEVEL_FULL = oncokb_extract_field(tx$level),
+          BM_FDA_LEVEL = oncokb_extract_field(tx$fdaLevel),
           BM_THERAPEUTIC_CONTEXT = paste(drugs, collapse = ","),
           #BM_DRUG_CODE = paste(
             #drug_ncit_codes[!is.na(drug_ncit_codes)], collapse = ", "),
           BM_CANCER_TYPE = cancer_type,
           BM_PRIMARY_SITE = primary_site,
-          BM_EVIDENCE_DESCRIPTION = extract_value(tx$description),
+          BM_EVIDENCE_DESCRIPTION = oncokb_extract_field(tx$description),
           BM_REFERENCE = if (!is.null(tx$pmids) && length(tx$pmids) > 0) {
-            paste(sapply(tx$pmids, extract_value), collapse = ";")
+            paste(sapply(tx$pmids, oncokb_extract_field), collapse = ";")
           } else {
             NA
           },
@@ -342,6 +352,48 @@ extract_diagnostic_evidence <- function(
 
   diagnostic_df <-
     purrr::map_df(oncokb_annotation$diagnosticImplications, function(dx) {
+
+      # Extract cancer type - prioritize levelAssociatedCancerType
+      cancer_type <- NA
+      cancer_type_code <- NA
+      cancer_type_main <- NA
+      primary_site <- NA
+
+      if (!is.null(dx$tumorType)) {
+        cancer_type <-
+          oncokb_extract_field(dx$tumorType$name)
+        cancer_type_code <-
+          oncokb_extract_field(dx$tumorType$code)
+
+        # If name is empty or NA, use mainType.name as fallback
+        if (is.na(cancer_type) || cancer_type == "") {
+          if (!is.null(dx$tumorType$mainType)) {
+            cancer_type <- oncokb_extract_field(
+              dx$tumorType$mainType$name)
+          }
+        }
+
+        # Store mainType separately for reference
+        if (!is.null(dx$tumorType$mainType)) {
+          cancer_type_main <-
+            oncokb_extract_field(
+              dx$tumorType$mainType$name)
+        }
+
+        if (!is.null(dx$tumorType$tissue)){
+          primary_site <-
+            oncokb_extract_field(
+              dx$tumorType$tissue)
+          if(primary_site == ""){
+            primary_site <- "Any"
+          }
+          if(primary_site == "Bowel"){
+            primary_site <- "Colon/Rectum"
+          }
+        }
+
+      }
+
       tibble::tibble(
         VAR_ID = variant_id,
         BM_SOURCE_DB = "oncokb",
@@ -356,7 +408,8 @@ extract_diagnostic_evidence <- function(
         BM_MOLECULAR_PROFILE_TYPE = "Single",
         BM_RATING = 5,
         BM_EVIDENCE_LEVEL_FULL = dx$level,
-        BM_CANCER_TYPE = NA_character_,
+        BM_CANCER_TYPE = cancer_type,
+        BM_PRIMARY_SITE = primary_site,
         BM_EVIDENCE_DESCRIPTION = ifelse(
           is.null(dx$description), NA, dx$description),
         BM_REFERENCE = ifelse(
@@ -425,7 +478,49 @@ extract_prognostic_evidence <- function(
 
   prognostic_df <-
     purrr::map_df(oncokb_annotation$prognosticImplications, function(px) {
-    tibble::tibble(
+
+      # Extract cancer type - prioritize levelAssociatedCancerType
+      cancer_type <- NA
+      cancer_type_code <- NA
+      cancer_type_main <- NA
+      primary_site <- NA
+
+      if (!is.null(px$tumorType)) {
+        cancer_type <-
+          oncokb_extract_field(px$tumorType$name)
+        cancer_type_code <-
+          oncokb_extract_field(px$tumorType$code)
+
+        # If name is empty or NA, use mainType.name as fallback
+        if (is.na(cancer_type) || cancer_type == "") {
+          if (!is.null(px$tumorType$mainType)) {
+            cancer_type <- oncokb_extract_field(
+              px$tumorType$mainType$name)
+          }
+        }
+
+        # Store mainType separately for reference
+        if (!is.null(px$tumorType$mainType)) {
+          cancer_type_main <-
+            oncokb_extract_field(
+              px$tumorType$mainType$name)
+        }
+
+        if (!is.null(px$tumorType$tissue)){
+          primary_site <-
+            oncokb_extract_field(
+              px$tumorType$tissue)
+          if(primary_site == ""){
+            primary_site <- "Any"
+          }
+          if(primary_site == "Bowel"){
+            primary_site <- "Colon/Rectum"
+          }
+        }
+
+      }
+
+      tibble::tibble(
       VAR_ID = variant_id,
       BM_SOURCE_DB = "oncokb",
       BM_RESOLUTION = bmresolution,
@@ -439,7 +534,8 @@ extract_prognostic_evidence <- function(
         is.null(px$alterations), NA, paste(px$alterations, collapse = ", ")),
       BM_MOLECULAR_PROFILE_TYPE = "Single",
       BM_RATING = 5,
-      BM_CANCER_TYPE = NA_character_,
+      BM_CANCER_TYPE = cancer_type,
+      BM_PRIMARY_SITE = primary_site,
       BM_EVIDENCE_DESCRIPTION = ifelse(
         is.null(px$description), NA, px$description),
       BM_REFERENCE = ifelse(

@@ -701,7 +701,8 @@ prep_progn_display_tbl <- function(
         ) |>
         dplyr::arrange(
           .data$BM_EVIDENCE_LEVEL
-        )
+        ) |>
+        dplyr::distinct()
     }
   }
 
@@ -1042,7 +1043,8 @@ prep_diagn_display_tbl <- function(
         ) |>
         dplyr::arrange(
           .data$BM_EVIDENCE_LEVEL
-        )
+        ) |>
+        dplyr::distinct()
     }
   }
 
