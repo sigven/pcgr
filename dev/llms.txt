@@ -1,14 +1,13 @@
 # Personal Cancer Genome Reporter (PCGR)
 
 The Personal Cancer Genome Reporter (PCGR) is a stand-alone software
-package for functional annotation and translation of individual tumor
-genomes for precision cancer medicine. It interprets primarily somatic
-SNVs/InDels and copy number aberrations, and has additional support for
-interpretation of bulk RNA-seq expression data. The software classifies
-variants with respect to predicted *oncogenicity*, and clinical
-*actionability*. Interactive HTML output reports allow the user to
-interrogate the clinical impact of the molecular findings in an
-individual tumor.
+workflow for functional annotation and translation of individual tumor
+genomes for precision cancer medicine. It interprets somatic SNVs/InDels
+and copy number aberrations, RNA fusions, and bulk RNA-seq expression
+data. The software classifies variants with respect to predicted
+*oncogenicity*, and clinical *actionability*. Interactive HTML output
+reports allow the user to interrogate the clinical impact of the
+molecular findings in an individual tumor.
 
 - Variant classification
   - according to *oncogenicity*: evaluating the oncogenic potential of
@@ -34,11 +33,29 @@ predisposition, we recommend trying the accompanying tool [Cancer
 Predisposition Sequencing Reporter
 (CPSR)](https://github.com/sigven/cpsr).
 
-Example screenshots from the [quarto](https://quarto.org)-based cancer
-genome report by PCGR:
+Seven snapshots of sections in the [quarto](https://quarto.org)-based
+cancer genome report by PCGR (artificial sample, with more findings than
+usual):
 
-![PCGR screenshot 1](img/sc2.png)![PCGR screenshot 2](img/sc1.png)![PCGR
-screenshot 3](img/sc3.png)
+  
+  
+
+![Variant classification - oncogenicity](img/pcgr_oncogenicity.png)
+
+![Clinical actionability classification](img/pcgr_actionability.png)
+
+![Somatic CNAs](img/pcgr_cna.png)
+
+![Tumor mutational burden](img/pcgr_tmb.png)
+
+![Gene expression outliers](img/pcgr_expression_outliers.png)
+
+![Variant statistics](img/pcgr_variant_stats.png)
+
+![Somatic RNA fusions](img/pcgr_rna_fusions.png)
+
+  
+  
 
 PCGR originates from the [Norwegian Cancer Genomics Consortium
 (NCGC)](https://cancergenomics.no), at the [Institute for Cancer

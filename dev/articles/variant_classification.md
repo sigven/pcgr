@@ -2,14 +2,13 @@
 
 ## Oncogenicity
 
-PCGR evaluates somatic aberrations (SNV/InDels) for oncogenic potential
-through an implementation of standard operating procedures proposed by
-[ClinGen/CGC/VICC](https://pubmed.ncbi.nlm.nih.gov/35101336/). Here,
-various properties of the variants and genes affected are assigned
-criteria-specific scores, both negative and positive, pending on whether
-the properties support an oncogenic or benign variant nature.
-Criteria-specific scores are in turn aggregated towards an overall
-oncogenicity score per variant.
+Somatic aberrations (SNV/InDels) are evaluated for oncogenicity through
+an implementation of standard operating procedures proposed by
+ClinGen/CGC/VICC \[@Horak2022-uh\]. Here, various properties of the
+variants and genes affected are assigned specific scores according to
+several criteria, both negative and positive, pending on whether the
+properties support an oncogenic or benign variant type. These scores are
+in turn aggregated towards an overall oncogenicity score.
 
 Note that all properties/criteria provided in the SOP’s are *not*
 readily implemented in PCGR, specifically the ones requiring manual
@@ -17,18 +16,17 @@ curation or expert review (i.e. experimental oncogenic variant evidence,
 requiring support from *in vitro* or *in vivo* functional studies
 (criteria *OS2*)). Also, the current source for existing oncogenicity
 classifications (ClinVar), which is needed for implementation of
-criteria *OS1* and *OM3*, is considerably limited. Considering the
+criteria *OS1*, *OM3*, is also considerably limited. Considering the
 current limitations, some oncogenic variants are likely to be missed and
 classified with uncertain significance (VUS) by PCGR. We highlight
 conventional ClinVar classifications (i.e. with respect to
 pathogenicity) alongside the current oncogenicity classifications, this
-may likely add value to the interpretation for uncertain cases.
-Furthermore, taking into the account the nature of the current
-implementation, we have adopted slightly different score thresholds for
-variant classifications to those proposed originally by [Horak et al.,
-2022](https://pubmed.ncbi.nlm.nih.gov/35101336/). We are working to
-further improve the oncogenicity classification in PCGR, and welcome
-feedback on this matter.
+may add value to the interpretation for uncertain cases. Furthermore,
+taking into the account the nature of the current implementation, we
+have adopted slightly different score thresholds for variant
+classifications to those proposed originally by \[@Horak2022-uh\]. We
+are working to further improve the oncogenicity classification in PCGR,
+and welcome feedback on this matter.
 
 Note also that for somatic copy number aberrations, we showcase
 potential oncogenic events as **proto-oncogenes subject to
@@ -85,48 +83,48 @@ indicated in parentheses):
 
 ## Actionability
 
-PCGR prioritizes and evaluates variants according to clinical
-actionability. Currently, PCGR implements its tier classification
-framework along the proposed AMP/ASCO/CAP guidelines, as outlined in [Li
-et al., 2017](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5707196/):
+Clinical actionability assessment of somatic SNVs/InDels, gene copy
+number aberrations, and RNA fusions found in the tumor sample implements
+recommendation guidelines by AMP/ASCO/CAP \[@Li2017-ew\]. Specifically,
+different levels of actionability are implemented in the following
+manner:
 
 - **Tier I: Variants of strong clinical significance** - constitutes
-  aberrations linked to therapeutic (drug sensitivity/response)
-  biomarkers in [OncoKB](https://www.oncokb.org/),
-  [CIViC](https://civicdb.org), or the [Cancer Biomarkers
-  Database](https://www.cancergenomeinterpreter.org/biomarkers). These
-  biomarkers are further
-  - reported within the same tumor type/class as the tumor in question
-    (query tumor sample), **AND**
-  - Of strong clinical evidence (i.e. FDA-approved/standard-of-care
-    therapies, part of guidelines, validated or discovered in late
-    clinical trials ([OncoKB evidence levels
-    1/2/3A](https://www.oncokb.org/therapeutic-levels), [CIViC evidence
-    levels
-    A/B](https://civic.readthedocs.io/en/latest/model/evidence/level.html)))
+  aberrations linked to predictive, prognostic, or diagnostic biomarkers
+  in the [CIViC database](https://civicdb.org) and the [Cancer
+  Biomarkers
+  Database](https://www.cancergenomeinterpreter.org/biomarkers) (and
+  optionally [OncoKB](https://www.oncokb.org)) that are
+  - Found within the same tumor type/class as specified by the user,
+    **AND**
+  - Of strong clinical evidence (i.e. approved therapies, part of
+    guidelines, validated or discovered in late clinical trials ([CIViC
+    evidence levels
+    A/B](https://civic.readthedocs.io/en/latest/model/evidence/level.html);
+    OncoKB therapeutic levels 1, 2, 3A, 3B, R1, R2; OncoKB
+    diagnostic/prognostic level Dx1/Px1))
 - **Tier II: Variants of potential clinical significance** - constitutes
-  other aberrations linked to therapeutic (drug sensitivity/response)
-  biomarkers in [OncoKB](https://www.oncokb.org/),
-  [CIViC](https://civicdb.org), or [Cancer Biomarkers
-  Database](https://www.cancergenomeinterpreter.org/biomarkers) that are
-  either
+  other aberrations linked to predictive, prognostic, or diagnostic
+  biomarkers in the [CIViC database](https://civicdb.org) and the
+  [Cancer Biomarkers
+  Database](https://www.cancergenomeinterpreter.org/biomarkers) (and
+  optionally [OncoKB](https://www.oncokb.org)) that are either
   - Of strong clinical evidence in other tumor types/classes than the
-    one specified by the user (i.e. ([OncoKB evidence level
-    3B](https://www.oncokb.org/therapeutic-levels)), **OR**
+    one specified by the user, **OR**
   - Of weak clinical evidence (early trials, case reports etc. ([CIViC
     evidence levels
-    C/D/E](https://civic.readthedocs.io/en/latest/model/evidence/level.html)),
-    [OncoKB evidence level
-    4](https://www.oncokb.org/therapeutic-levels)) in the same tumor
-    type/class as specified by the user
+    C/D/E](https://civic.readthedocs.io/en/latest/model/evidence/level.html);
+    OncoKB therapeutic level 4) in the same tumor type/class as
+    specified by the user
 - **Tier III: Variants of uncertain clinical significance (SNVs/InDels
-  only)** -
+  only)**
   - Other coding variants, not observed at significant allele
     frequencies (gnomAD MAF \< 0.001), found in oncogenes or tumor
     suppressor genes, yet *not* linked to any known predictive,
     prognostic, or diagnostic biomarkers in the [CIViC
-    database](https://civicdb.org) and the [Cancer Biomarkers
-    Database](https://www.cancergenomeinterpreter.org/biomarkers)
+    database](https://civicdb.org), the [Cancer Biomarkers
+    Database](https://www.cancergenomeinterpreter.org/biomarkers), or
+    [OncoKB](https://www.oncokb.org) (if OncoKB integration is enabled)
 
 In PCGR, we skip the classification of variants into the
 AMP/ASCO/CAP-specified *Tier IV* (benign/likely benign variants), but

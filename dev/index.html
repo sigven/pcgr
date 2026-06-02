@@ -14,7 +14,8 @@
 <link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Personal Cancer Genome ReporteR">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><link href="extra.css" rel="stylesheet">
+<meta property="og:title" content="Personal Cancer Genome ReporteR">
 <meta name="description" content="Functions, tools and utilities for the generation of clinical cancer genome reports with PCGR. This R package is an integrated part of the PCGR workflow (https://github.com/sigven/pcgr), it should thus not be used as a stand-alone package.">
 <meta property="og:description" content="Functions, tools and utilities for the generation of clinical cancer genome reports with PCGR. This R package is an integrated part of the PCGR workflow (https://github.com/sigven/pcgr), it should thus not be used as a stand-alone package.">
 <meta property="og:image" content="https://sigven.github.io/pcgr/logo.png">
@@ -35,7 +36,7 @@
 
     <a class="navbar-brand me-2" href="index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9019</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9020</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -78,7 +79,7 @@
 <a class="anchor" aria-label="anchor" href="#personal-cancer-genome-reporter-pcgr-"></a>
 </h1>
 </div>
-<p>The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for functional annotation and translation of individual tumor genomes for precision cancer medicine. It interprets primarily somatic SNVs/InDels and copy number aberrations, and has additional support for interpretation of bulk RNA-seq expression data. The software classifies variants with respect to predicted <em>oncogenicity</em>, and clinical <em>actionability</em>. Interactive HTML output reports allow the user to interrogate the clinical impact of the molecular findings in an individual tumor.</p>
+<p>The Personal Cancer Genome Reporter (PCGR) is a stand-alone software workflow for functional annotation and translation of individual tumor genomes for precision cancer medicine. It interprets somatic SNVs/InDels and copy number aberrations, RNA fusions, and bulk RNA-seq expression data. The software classifies variants with respect to predicted <em>oncogenicity</em>, and clinical <em>actionability</em>. Interactive HTML output reports allow the user to interrogate the clinical impact of the molecular findings in an individual tumor.</p>
 <ul>
 <li>Variant classification
 <ul>
@@ -92,8 +93,54 @@
 <li>RNA-seq support - gene expression outlier detection, sample similarity analysis, and immune contexture profiling</li>
 </ul>
 <p>PCGR supports both of the most recent human genome assemblies (GRCh37/GRCh38), and accepts variant calls from both tumor-control and tumor-only sequencing assays. Much of the functionality is intended for whole-exome/whole-genome sequencing assays, but you can also apply PCGR to output from targeted sequencing panels. If you are interested in the interrogation of germline variants and their relation to cancer predisposition, we recommend trying the accompanying tool <a href="https://github.com/sigven/cpsr" class="external-link">Cancer Predisposition Sequencing Reporter (CPSR)</a>.</p>
-<p>Example screenshots from the <a href="https://quarto.org" class="external-link">quarto</a>-based cancer genome report by PCGR:</p>
-<p><img src="img/sc2.png" alt="PCGR screenshot 1"><img src="img/sc1.png" alt="PCGR screenshot 2"><img src="img/sc3.png" alt="PCGR screenshot 3"></p>
+<p>Seven snapshots of sections in the <a href="https://quarto.org" class="external-link">quarto</a>-based cancer genome report by PCGR (artificial sample, with more findings than usual):</p>
+<p><br><br></p>
+<div id="pcgrCarousel" class="carousel slide" data-bs-interval="false">
+<div class="carousel-inner">
+<div class="carousel-item active">
+<img src="img/pcgr_oncogenicity.png" class="d-block w-100" alt="Variant classification - oncogenicity">
+</div>
+<div class="carousel-item">
+<img src="img/pcgr_actionability.png" class="d-block w-100" alt="Clinical actionability classification">
+</div>
+<div class="carousel-item">
+<img src="img/pcgr_cna.png" class="d-block w-100" alt="Somatic CNAs">
+</div>
+<div class="carousel-item">
+<img src="img/pcgr_tmb.png" class="d-block w-100" alt="Tumor mutational burden">
+</div>
+<div class="carousel-item">
+<img src="img/pcgr_expression_outliers.png" class="d-block w-100" alt="Gene expression outliers">
+</div>
+<div class="carousel-item">
+<img src="img/pcgr_variant_stats.png" class="d-block w-100" alt="Variant statistics">
+</div>
+<div class="carousel-item">
+<img src="img/pcgr_rna_fusions.png" class="d-block w-100" alt="Somatic RNA fusions">
+</div>
+</div>
+<div class="carousel-indicators">
+<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Variant classification - oncogenicity">
+</button>
+<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="1" aria-label="Clinical actionability classification">
+</button>
+<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="2" aria-label="Somatic CNAs">
+</button>
+<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="3" aria-label="Tumor mutational burden">
+</button>
+<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="4" aria-label="Gene expression outliers">
+</button>
+<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="5" aria-label="Variant statistics">
+</button>
+<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="6" aria-label="Somatic RNA fusions">
+</button>
+</div>
+</div>
+<script>
+document.getElementById('pcgrCarousel').querySelector('.carousel-inner').addEventListener('click', function() {
+bootstrap.Carousel.getOrCreateInstance(document.getElementById('pcgrCarousel')).next();
+});
+</script><p><br><br></p>
 <p>PCGR originates from the <a href="https://cancergenomics.no" class="external-link">Norwegian Cancer Genomics Consortium (NCGC)</a>, at the <a href="https://radium.no" class="external-link">Institute for Cancer Research, Oslo University Hospital, Norway</a>.</p>
 <div class="section level3">
 <h3 id="top-news">Top News<a class="anchor" aria-label="anchor" href="#top-news"></a>

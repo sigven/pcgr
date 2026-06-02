@@ -213,8 +213,9 @@ Three modes are supported:
   values). A segment is classified based on its total copy number
   (`nMajor + nMinor`), irrespective of tumor ploidy.
 - **relative** — thresholds are expressed as fold-change over the
-  estimated tumor ploidy. This mode requires that `--tumor_ploidy` is
-  provided; if not, PCGR will fall back to `absolute` mode.
+  estimated tumor ploidy. If `--tumor_ploidy` is not provided explicitly
+  by the user, PCGR will auto-estimate the ploidy from the copy number
+  segments using a genome-wide weighted median approach.
 - **combined** — a segment must satisfy *both* the absolute and relative
   threshold criteria to be assigned a given class. This is the most
   conservative mode.
@@ -223,9 +224,9 @@ The per-class thresholds that can be configured are:
 
 | Class | Absolute option | Default | Relative option | Default |
 |----|----|----|----|----|
-| Amplification | `--cna_amp_threshold_absolute` | 5 | `--cna_amp_threshold_relative` | 2.5× ploidy |
-| Gain | `--cna_gain_threshold_absolute` | 3 | `--cna_gain_threshold_relative` | 1.5× ploidy |
-| Heterozygous deletion | `--cna_del_threshold_absolute` | 1 | `--cna_del_threshold_relative` | 0.5× ploidy |
+| Amplification | `--cna_amp_threshold_absolute` | Total CN ≥ 5 | `--cna_amp_threshold_relative` | ≥ 2.5× ploidy |
+| Gain | `--cna_gain_threshold_absolute` | Total CN ≥ 3 | `--cna_gain_threshold_relative` | ≥ 1.5× ploidy |
+| Heterozygous deletion | `--cna_del_threshold_absolute` | Total CN ≤ 1 | `--cna_del_threshold_relative` | ≤ 0.5× ploidy |
 
 Segments with total copy number of zero are always classified as
 homozygous deletions, regardless of the threshold mode.
@@ -240,27 +241,25 @@ CNA event:
 ### OncoKB biomarker integration
 
 PCGR can optionally query the [OncoKB](https://www.oncokb.org) precision
-oncology knowledge base to annotate variants and copy number alterations
-with clinical actionability evidence. To enable this, provide a valid
-OncoKB API token:
+oncology knowledge base to annotate SNVs/InDels, copy number alterations
+and fusions with functional annotations and clinical actionability
+evidence. To enable this, provide a valid OncoKB API token:
 
-- `--oncokb_api_token <TOKEN>`
-
-An environment variable can be used to pass the token value at runtime,
-e.g.:
-
-``` bash
-pcgr --oncokb_api_token $ONCOKB_TOKEN ...
-```
+- `--oncokb_api_token <ONCOKB_API_TOKEN>`
 
 To specify the tumor type for OncoKB queries, provide the relevant
 [OncoTree](https://oncotree.mskcc.org) code:
 
 - `--oncokb_oncotree_code <CODE>` (e.g. `COAD` for colon adenocarcinoma)
 
-By default, PCGR integrates biomarker evidence from multiple sources
-(CIViC, CGI, OncoKB). If you want to limit biomarker reporting to OncoKB
-only and skip CIViC and CGI, use:
+If no OncoTree code is provided, PCGR will map the primary tumor site to
+its corresponding OncoTree code based on a predefined mapping. If the
+tumor site is set to “Any” (code 0), OncoKB queries will be performed
+without specifying a tumor type.
+
+By default, PCGR integrates biomarker evidence from multiple knowledge
+sources (CIViC, CGI, OncoKB). If you want to limit biomarker reporting
+to OncoKB only and skip CIViC and CGI, use:
 
 - `--oncokb_exclusive`
 
@@ -312,6 +311,11 @@ which takes the following arguments and options:
 ``` text
 usage:
   pcgr -h [options]
+  [--input_vcf <INPUT_VCF>]
+  [--input_cna <INPUT_CNA>]
+  [--input_rna_fusion <INPUT_RNA_FUSION>]
+  [--input_rna_expression <INPUT_RNA_EXPRESSION>]
+  [--vep_dir <VEP_DIR>]
   --refdata_dir <REFDATA_DIR>
   --output_dir <OUTPUT_DIR>
   --genome_assembly <GENOME_ASSEMBLY>
@@ -545,6 +549,12 @@ Biomarker and tiering options:
                         OncoTree code specifying the tumor type for OncoKB queries (default: None)
   --oncokb_exclusive    Limit biomarker reporting to OncoKB only - skip CIViC and CGI sources
                         (default: False)
+  --oncokb_maf_query_all
+                        Query OncoKB for all variant classes, including non-coding variants
+                        (IGR, Intron, UTR, flanking regions). By default, non-coding variants
+                        are filtered out before OncoKB annotation to reduce processing time.
+                        Intended for TARGETED/WES assays only - enabling for WGS may result in
+                        very long MafAnnotator.py runtimes (default: False)
 
 Other options:
   --force_overwrite     Force overwrite of existing result files (default: False)

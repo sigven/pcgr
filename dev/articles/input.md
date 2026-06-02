@@ -180,8 +180,8 @@ caller-specific confidence score for the fusion event.
 
 #### Formatting notes
 
-- The chromosome field in breakpoints must be one of `1`–`22`, `X`, `Y`,
-  or `MT` — without a `chr` prefix
+- The chromosome field in breakpoints must be one of `1`–`22`, `X`, or
+  `Y` — with or without a `chr` prefix
 - Each gene symbol in `FusionGene` must be a valid alphanumeric
   identifier (letters, digits, `.`, `-`, `_` allowed); purely numeric
   gene names are not accepted

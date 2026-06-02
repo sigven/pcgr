@@ -14,7 +14,8 @@
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Variant classification">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
+<meta property="og:title" content="Variant classification">
 <meta name="robots" content="noindex">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-7HRLE8GQRE"></script><script>
    window.dataLayer = window.dataLayer || [];
@@ -32,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9019</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9020</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -86,32 +87,32 @@
 <div class="section level2">
 <h2 id="oncogenicity">Oncogenicity<a class="anchor" aria-label="anchor" href="#oncogenicity"></a>
 </h2>
-<p>PCGR evaluates somatic aberrations (SNV/InDels) for oncogenic
-potential through an implementation of standard operating procedures
-proposed by <a href="https://pubmed.ncbi.nlm.nih.gov/35101336/" class="external-link">ClinGen/CGC/VICC</a>.
-Here, various properties of the variants and genes affected are assigned
-criteria-specific scores, both negative and positive, pending on whether
-the properties support an oncogenic or benign variant nature.
-Criteria-specific scores are in turn aggregated towards an overall
-oncogenicity score per variant.</p>
+<p>Somatic aberrations (SNV/InDels) are evaluated for oncogenicity
+through an implementation of standard operating procedures proposed by
+ClinGen/CGC/VICC <span class="citation">[@Horak2022-uh]</span>. Here,
+various properties of the variants and genes affected are assigned
+specific scores according to several criteria, both negative and
+positive, pending on whether the properties support an oncogenic or
+benign variant type. These scores are in turn aggregated towards an
+overall oncogenicity score.</p>
 <p>Note that all properties/criteria provided in the SOP’s are
 <em>not</em> readily implemented in PCGR, specifically the ones
 requiring manual curation or expert review (i.e. experimental oncogenic
 variant evidence, requiring support from <em>in vitro</em> or <em>in
 vivo</em> functional studies (criteria <em>OS2</em>)). Also, the current
 source for existing oncogenicity classifications (ClinVar), which is
-needed for implementation of criteria <em>OS1</em> and <em>OM3</em>, is
-considerably limited. Considering the current limitations, some
+needed for implementation of criteria <em>OS1</em>, <em>OM3</em>, is
+also considerably limited. Considering the current limitations, some
 oncogenic variants are likely to be missed and classified with uncertain
 significance (VUS) by PCGR. We highlight conventional ClinVar
 classifications (i.e. with respect to pathogenicity) alongside the
-current oncogenicity classifications, this may likely add value to the
+current oncogenicity classifications, this may add value to the
 interpretation for uncertain cases. Furthermore, taking into the account
 the nature of the current implementation, we have adopted slightly
 different score thresholds for variant classifications to those proposed
-originally by <a href="https://pubmed.ncbi.nlm.nih.gov/35101336/" class="external-link">Horak
-et al., 2022</a>. We are working to further improve the oncogenicity
-classification in PCGR, and welcome feedback on this matter.</p>
+originally by <span class="citation">[@Horak2022-uh]</span>. We are
+working to further improve the oncogenicity classification in PCGR, and
+welcome feedback on this matter.</p>
 <p>Note also that for somatic copy number aberrations, we showcase
 potential oncogenic events as <strong>proto-oncogenes subject to
 amplifications</strong> (where level of amplification is configurable by
@@ -193,52 +194,51 @@ consensus splice site (VEP)</li>
 <div class="section level2">
 <h2 id="actionability">Actionability<a class="anchor" aria-label="anchor" href="#actionability"></a>
 </h2>
-<p>PCGR prioritizes and evaluates variants according to clinical
-actionability. Currently, PCGR implements its tier classification
-framework along the proposed AMP/ASCO/CAP guidelines, as outlined in <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5707196/" class="external-link">Li et al.,
-2017</a>:</p>
+<p>Clinical actionability assessment of somatic SNVs/InDels, gene copy
+number aberrations, and RNA fusions found in the tumor sample implements
+recommendation guidelines by AMP/ASCO/CAP <span class="citation">[@Li2017-ew]</span>. Specifically, different levels of
+actionability are implemented in the following manner:</p>
 <ul>
 <li>
 <strong>Tier I: Variants of strong clinical significance</strong> -
-constitutes aberrations linked to therapeutic (drug
-sensitivity/response) biomarkers in <a href="https://www.oncokb.org/" class="external-link">OncoKB</a>, <a href="https://civicdb.org" class="external-link">CIViC</a>, or the <a href="https://www.cancergenomeinterpreter.org/biomarkers" class="external-link">Cancer
-Biomarkers Database</a>. These biomarkers are further
+constitutes aberrations linked to predictive, prognostic, or diagnostic
+biomarkers in the <a href="https://civicdb.org" class="external-link">CIViC database</a> and
+the <a href="https://www.cancergenomeinterpreter.org/biomarkers" class="external-link">Cancer
+Biomarkers Database</a> (and optionally <a href="https://www.oncokb.org" class="external-link">OncoKB</a>) that are
 <ul>
-<li>reported within the same tumor type/class as the tumor in question
-(query tumor sample), <strong>AND</strong>
+<li>Found within the same tumor type/class as specified by the user,
+<strong>AND</strong>
 </li>
-<li>Of strong clinical evidence (i.e. FDA-approved/standard-of-care
-therapies, part of guidelines, validated or discovered in late clinical
-trials (<a href="https://www.oncokb.org/therapeutic-levels" class="external-link">OncoKB
-evidence levels 1/2/3A</a>, <a href="https://civic.readthedocs.io/en/latest/model/evidence/level.html" class="external-link">CIViC
-evidence levels A/B</a>))</li>
+<li>Of strong clinical evidence (i.e. approved therapies, part of
+guidelines, validated or discovered in late clinical trials (<a href="https://civic.readthedocs.io/en/latest/model/evidence/level.html" class="external-link">CIViC
+evidence levels A/B</a>; OncoKB therapeutic levels 1, 2, 3A, 3B, R1, R2;
+OncoKB diagnostic/prognostic level Dx1/Px1))</li>
 </ul>
 </li>
 <li>
 <strong>Tier II: Variants of potential clinical
 significance</strong> - constitutes other aberrations linked to
-therapeutic (drug sensitivity/response) biomarkers in <a href="https://www.oncokb.org/" class="external-link">OncoKB</a>, <a href="https://civicdb.org" class="external-link">CIViC</a>, or <a href="https://www.cancergenomeinterpreter.org/biomarkers" class="external-link">Cancer
-Biomarkers Database</a> that are either
+predictive, prognostic, or diagnostic biomarkers in the <a href="https://civicdb.org" class="external-link">CIViC database</a> and the <a href="https://www.cancergenomeinterpreter.org/biomarkers" class="external-link">Cancer
+Biomarkers Database</a> (and optionally <a href="https://www.oncokb.org" class="external-link">OncoKB</a>) that are either
 <ul>
 <li>Of strong clinical evidence in other tumor types/classes than the
-one specified by the user (i.e. (<a href="https://www.oncokb.org/therapeutic-levels" class="external-link">OncoKB evidence level
-3B</a>), <strong>OR</strong>
+one specified by the user, <strong>OR</strong>
 </li>
 <li>Of weak clinical evidence (early trials, case reports etc. (<a href="https://civic.readthedocs.io/en/latest/model/evidence/level.html" class="external-link">CIViC
-evidence levels C/D/E</a>), <a href="https://www.oncokb.org/therapeutic-levels" class="external-link">OncoKB evidence level
-4</a>) in the same tumor type/class as specified by the user</li>
+evidence levels C/D/E</a>; OncoKB therapeutic level 4) in the same tumor
+type/class as specified by the user</li>
 </ul>
 </li>
 <li>
 <strong>Tier III: Variants of uncertain clinical significance
-(SNVs/InDels only)</strong> -
+(SNVs/InDels only)</strong>
 <ul>
 <li>Other coding variants, not observed at significant allele
 frequencies (gnomAD MAF &lt; 0.001), found in oncogenes or tumor
 suppressor genes, yet <em>not</em> linked to any known predictive,
-prognostic, or diagnostic biomarkers in the <a href="https://civicdb.org" class="external-link">CIViC database</a> and the <a href="https://www.cancergenomeinterpreter.org/biomarkers" class="external-link">Cancer
-Biomarkers Database</a>
-</li>
+prognostic, or diagnostic biomarkers in the <a href="https://civicdb.org" class="external-link">CIViC database</a>, the <a href="https://www.cancergenomeinterpreter.org/biomarkers" class="external-link">Cancer
+Biomarkers Database</a>, or <a href="https://www.oncokb.org" class="external-link">OncoKB</a>
+(if OncoKB integration is enabled)</li>
 </ul>
 </li>
 </ul>
