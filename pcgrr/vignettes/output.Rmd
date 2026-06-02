@@ -3,7 +3,7 @@ title: "Output files"
 output: rmarkdown::html_document
 ---
 
-## Output files
+## Output files {#pcgr-output-files}
 
 PCGR generates multiple output files with annotations of molecular aberrations, including an interactive report, an Excel workbook, and pure text-based annotation files (TSV).
 

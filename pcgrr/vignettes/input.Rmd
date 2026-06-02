@@ -3,7 +3,7 @@ title: "Input files"
 output: rmarkdown::html_document
 ---
 
-## Input files
+## Input files {#pcgr-input-files}
 
 The PCGR workflow accepts the following main input files:
 
