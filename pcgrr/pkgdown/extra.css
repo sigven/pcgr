@@ -1,0 +1,14 @@
+/* Override pkgdown default styles */
+
+.navbar .nav-text,
+.navbar .nav-text[class*="text-"] {
+  color: #FFFFFF !important;
+}
+
+/* PCGR feature carousel */
+#pcgrCarousel { border: 1px solid #ccc; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+#pcgrCarousel .carousel-item { background: #fff; }
+#pcgrCarousel .carousel-item img { width: 100%; height: auto; display: block; cursor: pointer; }
+#pcgrCarousel .carousel-indicators { position: static; margin: .5rem 0 .6rem; }
+#pcgrCarousel .carousel-indicators [data-bs-target] { width: 11px; height: 11px; border-radius: 50%; border: 0; background: #666; opacity: .4; }
+#pcgrCarousel .carousel-indicators .active { opacity: 1; background: #222; }

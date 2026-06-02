@@ -26,6 +26,7 @@ actionability_doc_note <- function() {
   cgi_url <- "https://www.cancergenomeinterpreter.org/biomarkers"
   civic_url <- "https://civicdb.org"
   civic_docs_url <- "https://civic.readthedocs.io/en/latest/"
+  oncokb_url <- "https://www.oncokb.org"
 
   doc_md_file <- system.file(
     "templates", "doc_notes_md", "actionability.md", package = "pcgrr")
@@ -36,7 +37,8 @@ actionability_doc_note <- function() {
       actionability_template,
       civic_url = civic_url,
       cgi_url = cgi_url,
-      civic_docs_url = civic_docs_url
+      civic_docs_url = civic_docs_url,
+      oncokb_url = oncokb_url
     )
   )
 
