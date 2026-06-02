@@ -12,7 +12,7 @@ env:
   conda_env_yaml: conda/env/yaml
   conda_env_lock: conda/env/lock
   conda_org: pcgr
-  VERSION: '2.2.5.9019' # bump
+  VERSION: '2.2.5.9020' # bump
 jobs:
   conda_build:
     # When merging to one of the branches above and the commit message matches
