@@ -331,7 +331,7 @@ pon_status <- function(sample_calls) {
                                          "type data.frame"))
   )
   ## assign STATUS_PON to all calls overlapping the
-  ## user-defined panel-of-normals VCF ("PANEL_OF_NORMALS" == T)
+  ## user-defined panel-of-normals VCF ("PANEL_OF_NORMALS" == TRUE)
   if ("PANEL_OF_NORMALS" %in% colnames(sample_calls)) {
     sample_calls <- sample_calls |>
       dplyr::mutate(
@@ -767,7 +767,7 @@ plot_filtering_stats_germline <- function(
 
   invisible(assertable::assert_colnames(
     report$content$snv_indel$callset$variant_unfiltered,
-    c("SOMATIC_CLASSIFICATION"), only_colnames = F, quiet = T))
+    c("SOMATIC_CLASSIFICATION"), only_colnames = FALSE, quiet = TRUE))
 
   df <- report$content$snv_indel$callset$variant_unfiltered
 
@@ -934,7 +934,7 @@ plot_filtering_stats_exonic <- function(
   assertable::assert_colnames(
     report$content$snv_indel$callset$variant_unfiltered,
     c("EXONIC_STATUS","SOMATIC_CLASSIFICATION"),
-    only_colnames = F, quiet = T)
+    only_colnames = FALSE, quiet = TRUE)
 
   df <- report$content$snv_indel$callset$variant_unfiltered |>
     dplyr::filter(.data$SOMATIC_CLASSIFICATION == "SOMATIC")

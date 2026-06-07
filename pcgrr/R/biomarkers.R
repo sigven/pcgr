@@ -1125,7 +1125,7 @@ map_biomarker_data <- function(
     c("VARIANT_ID",
       "ENTREZGENE",
       "BIOMARKER_SOURCE"),
-    only_colnames = F, quiet = T
+    only_colnames = FALSE, quiet = T
   )
 
   assertable::assert_colnames(
@@ -1142,7 +1142,7 @@ map_biomarker_data <- function(
       "MOLECULAR_PROFILE_TYPE",
       "RATING",
       "EVIDENCE_DIRECTION"),
-    only_colnames = F, quiet = T
+    only_colnames = FALSE, quiet = T
   )
 
   assertable::assert_colnames(
@@ -1151,7 +1151,7 @@ map_biomarker_data <- function(
       "SOURCE_ID",
       "LINK",
       "NAME"),
-    only_colnames = F, quiet = T
+    only_colnames = FALSE, quiet = T
   )
 
   biomarker_evidence_items <- data.frame()
@@ -1452,7 +1452,7 @@ map_biomarker_data <- function(
           BM_MOLECULAR_PROFILE = dplyr::if_else(
             .data$BM_SOURCE_DB == "cgi",
             paste0(
-              "<a href='https://www.cancergenomeinterpreter.org/biomarkers'",
+              "<a href='https://www.cancergenomeinterpreter.org/2021/biomarkers'",
               " target='_blank'>",
               stringr::str_replace_all(
                 .data$BM_MOLECULAR_PROFILE,

@@ -126,14 +126,14 @@ append_gwas_citation_phenotype <-
         "Argument 'ref_data$variant$gwas' must be of type 'data.frame'"))
     assertable::assert_colnames(
       vcf_data_df, c("GWAS_HIT", "VAR_ID"),
-      only_colnames = F, quiet = T)
+      only_colnames = FALSE, quiet = TRUE)
     assertable::assert_colnames(
       ref_data$variant$gwas,
       c("GWAS_HIT",
         "CITATION",
         "GWAS_CITATION_EXP",
         "GWAS_PHENOTYPE"),
-      only_colnames = F, quiet = T)
+      only_colnames = FALSE, quiet = TRUE)
 
     if ("GWAS_HIT" %in% colnames(vcf_data_df) &
         "VAR_ID" %in% colnames(vcf_data_df)) {
@@ -302,7 +302,7 @@ append_tcga_var_link <- function(var_df,
           .data$TCGA_FREQUENCY,
           c("tcga_cancer_code", "percentage",
             "affected", "cohort_size"),
-          sep = "\\|", convert = T) |>
+          sep = "\\|", convert = TRUE) |>
         dplyr::left_join(
           tcga_cohorts, by = "tcga_cancer_code") |>
         dplyr::arrange(
@@ -388,7 +388,7 @@ append_tfbs_annotation <-
                          'high_inf_pos','motif_score_change',
                          'transcription_factors'),
                 sep = "\\|",
-                remove = T) |>
+                remove = TRUE) |>
 
               tidyr::separate_rows(
                 .data$transcription_factors) |>
@@ -470,7 +470,7 @@ append_dbmts_var_link <-
             tidyr::separate(.data$DBMTS, c("ens_trans_id", "mirna_id",
                                            "algorithms", "algorithms_call",
                                            "consensus_call"),
-                            sep = "\\|", convert = T) |>
+                            sep = "\\|", convert = TRUE) |>
             dplyr::filter(.data$ens_trans_id == .data$ENSEMBL_TRANSCRIPT_ID)
         )
         if (nrow(var_df_unique_slim_melted) > 0) {
@@ -710,7 +710,7 @@ append_protein_domains <- function(
                         c("PFAM_DOMAIN_TYPE",
                           "PFAM_AA_START",
                           "PFAM_AA_END"),
-                        sep=":", remove = F)
+                        sep=":", remove = FALSE)
 
       pfam_fixed <- var_aa |>
         dplyr::left_join(
@@ -1204,7 +1204,7 @@ generate_annotation_link <- function(
     var_df, c(group_by_var,
               link_key_var,
               link_display_var),
-    only_colnames = F, quiet = T)
+    only_colnames = FALSE, quiet = TRUE)
 
   if (length(
     unique(

@@ -75,7 +75,7 @@ generate_report_data_signatures <-
       sample_name = settings$sample_id,
       output_directory = settings$output_dir,
       vcf_fname = vcf_name_mutsig_analysis,
-      snv_only = F)
+      snv_only = FALSE)
 
     fit_signatures_to_ttype <- !as.logical(
       sig_settings$all_reference_signatures
@@ -98,7 +98,7 @@ generate_report_data_signatures <-
     }
 
     prevalent_site_signatures <- NULL
-    if (fit_signatures_to_ttype == T & site_has_prevalence_data == T) {
+    if (fit_signatures_to_ttype == T & site_has_prevalence_data == TRUE) {
       prevalent_site_signatures <-
         get_prevalent_site_signatures(
           site = settings$conf$sample_properties$site,
@@ -126,16 +126,16 @@ generate_report_data_signatures <-
           sample_names = settings$sample_id,
           type = "all",
           genome = ref_data$assembly$bsg,
-          predefined_dbs_mbs = T))
+          predefined_dbs_mbs = TRUE))
       )
       if (class(grl)[1] == "CompressedGRangesList") {
 
         snv_grl <- suppressMessages(
           MutationalPatterns::get_mut_type(
-            grl, type = "snv", predefined_dbs_mbs = T))
+            grl, type = "snv", predefined_dbs_mbs = TRUE))
         indel_grl <- suppressMessages(
           MutationalPatterns::get_mut_type(
-            grl, type = "indel", predefined_dbs_mbs = T))
+            grl, type = "indel", predefined_dbs_mbs = TRUE))
         indel_counts <- NULL
         if (length(indel_grl[[1]]) > 0) {
           indel_grl <- MutationalPatterns::get_indel_context(
@@ -180,13 +180,13 @@ generate_report_data_signatures <-
         ## assign variants to variant set
         pcg_report_signatures[["variant_set"]][["all"]] <-
           data.frame('VAR_ID' = rownames(S4Vectors::mcols(snv_grl[[1]])),
-                     stringsAsFactors = F) |>
+                     stringsAsFactors = FALSE) |>
           tidyr::separate(.data$VAR_ID, c('CHROM', 'pos_ref_alt'),
-                          sep=":", remove = T) |>
+                          sep=":", remove = TRUE) |>
           tidyr::separate(.data$pos_ref_alt, c("POS","ref_alt"),
-                          sep="_", remove = T) |>
+                          sep="_", remove = TRUE) |>
           tidyr::separate(.data$ref_alt, c("REF","ALT"),
-                          sep = "/", remove = T) |>
+                          sep = "/", remove = TRUE) |>
           dplyr::mutate(POS = as.integer(.data$POS))
 
         ## get context matrix
@@ -534,7 +534,7 @@ get_prevalent_site_signatures <-
            custom_collection = NULL,
            ref_data = NULL,
            min_prevalence_pct = 0.1,
-           incl_poss_artifacts = T) {
+           incl_poss_artifacts = TRUE) {
 
     cosmic_metadata <-
       ref_data$metadata |>
@@ -654,7 +654,7 @@ get_prevalent_site_signatures <-
       }
     }
 
-    if (incl_poss_artifacts == F) {
+    if (incl_poss_artifacts == FALSE) {
       signatures_prevalence <- signatures_prevalence |>
         dplyr::filter(!stringr::str_detect(
           .data$AETIOLOGY_KEYWORD,"artefact"))
@@ -702,7 +702,7 @@ generate_report_data_rainfall <- function(variant_set,
     msg = paste0("Argument variant_set needs be of type data.frame")))
   assertable::assert_colnames(
     variant_set, c("CHROM", "REF", "ALT",
-                   "POS", "VARIANT_CLASS"), only_colnames = F, quiet = T)
+                   "POS", "VARIANT_CLASS"), only_colnames = FALSE, quiet = TRUE)
   invisible(
     assertthat::assert_that(
       build == "grch37" | build == "grch38",
@@ -735,7 +735,7 @@ generate_report_data_rainfall <- function(variant_set,
       chr_prefix <- TRUE
     }
   }
-  if (chr_prefix == F) {
+  if (chr_prefix == FALSE) {
     variant_set <- variant_set |>
       dplyr::mutate(CHROM = paste0("chr", .data$CHROM))
   }
@@ -824,7 +824,7 @@ generate_report_data_rainfall <- function(variant_set,
       variant_id = variant_id,
       dist2prev = dist,
       chromosome = chrom,
-      stringsAsFactors = F)
+      stringsAsFactors = FALSE)
 
     # Removes colors based on missing mutation types.  This prevents colors from
     # shifting when comparing samples with low mutation counts.
@@ -908,13 +908,13 @@ plot_signature_contributions <- function(
   assertable::assert_colnames(
     signature_contributions[['per_group']],
     c("group", "prop_group", "signature_id_group"),
-    only_colnames = T, quiet = T)
+    only_colnames = TRUE, quiet = TRUE)
 
   assertable::assert_colnames(
     signature_contributions[['per_signature']],
     c("signature_id", "sample_id", "prop_signature","group",
       "prop_signature_ci_lower", "prop_signature_ci_upper"),
-    only_colnames = F, quiet = T)
+    only_colnames = FALSE, quiet = TRUE)
 
   plot_data_per_signature <-
     signature_contributions[['per_signature']] |>

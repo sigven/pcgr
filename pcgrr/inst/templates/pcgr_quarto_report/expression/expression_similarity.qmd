@@ -54,7 +54,7 @@ other_sites <- all_sites[ !all_sites == highlighted_site]
 
 DT::datatable(
   dt_similarity_tcga,
-  escape = F,
+  escape = FALSE,
   options = list(pageLength = 10),
   extensions=c("Buttons","Responsive")) |>
   DT::formatStyle(
@@ -108,7 +108,7 @@ other_sites <- all_sites[ !all_sites == highlighted_site]
 
 DT::datatable(
   dt_similarity_depmap,
-  escape = F,
+  escape = FALSE,
   options = list(pageLength = 10),
   extensions=c("Buttons","Responsive")) |>
   DT::formatStyle(
@@ -156,7 +156,7 @@ other_sites <- all_sites[ !all_sites == highlighted_site]
 
 DT::datatable(
   dt_similarity_treehouse,
-  escape = F,
+  escape = FALSE,
   options = list(pageLength = 10),
   extensions=c("Buttons","Responsive")) |>
   DT::formatStyle(

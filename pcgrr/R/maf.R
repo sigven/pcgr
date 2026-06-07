@@ -85,7 +85,7 @@ filter_maf_file <- function(callset, settings) {
 
       maf_data_unfiltered <- readr::read_tsv(
         settings[['molecular_data']][['fname_maf_tsv']],
-        show_col_types = F, col_names = T,
+        show_col_types = FALSE, col_names = TRUE,
         comment = "#", na = ""
       )
 
@@ -143,7 +143,7 @@ filter_maf_file <- function(callset, settings) {
         readr::write_tsv(
           maf_data_filtered,
           settings[['molecular_data']][['fname_maf_tsv']],
-          append = TRUE, col_names = T, quote = "none", na = "")
+          append = TRUE, col_names = TRUE, quote = "none", na = "")
       }
     }
   }

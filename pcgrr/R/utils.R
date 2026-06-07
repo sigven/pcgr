@@ -21,7 +21,7 @@ check_common_colnames <- function(df1 = NULL, df2 = NULL, cnames = NULL) {
   colnames_in_df2 <- unique(cnames %in% colnames(df2))
 
   if (length(colnames_in_df1) == 1 & length(colnames_in_df2) == 1) {
-    if (colnames_in_df1 == T & colnames_in_df2 == T) {
+    if (colnames_in_df1 == T & colnames_in_df2 == TRUE) {
       existing_common_columns <- T
     }
   }
@@ -68,7 +68,7 @@ af_distribution <- function(var_df, bin_size = 0.05) {
   af_bin_df <- data.frame()
   assertable::assert_colnames(
     var_df, c("VAF_TUMOR","VARIANT_CLASS"),
-    only_colnames = F, quiet = T)
+    only_colnames = FALSE, quiet = TRUE)
   var_df <- var_df |>
     dplyr::select(c("VAF_TUMOR", "VARIANT_CLASS"))
 
@@ -90,7 +90,7 @@ af_distribution <- function(var_df, bin_size = 0.05) {
                        bin_start = bin_start,
                        bin_end = bin_end,
                        bin = as.integer(i),
-                       VARIANT_CLASS = e, stringsAsFactors = F)
+                       VARIANT_CLASS = e, stringsAsFactors = FALSE)
       af_bin_df <- dplyr::bind_rows(
         af_bin_df, df)
     }
@@ -102,7 +102,7 @@ af_distribution <- function(var_df, bin_size = 0.05) {
     dplyr::mutate(
       bin = cut(.data$VAF_TUMOR,
                 breaks = seq(0,1,bin_size),
-                right = F, include.lowest = T, labels = F))
+                right = FALSE, include.lowest = TRUE, labels = FALSE))
 
   var_df_trans_bin <- as.data.frame(
     dplyr::group_by(
@@ -147,7 +147,7 @@ tier_af_distribution <- function(tier_df, bin_size = 0.05) {
   af_bin_df <- data.frame()
   assertable::assert_colnames(
     tier_df, c("VAF_TUMOR","ACTIONABILITY_TIER"),
-    only_colnames = F, quiet = T)
+    only_colnames = FALSE, quiet = TRUE)
   tier_df <- tier_df |>
     dplyr::select(c("VAF_TUMOR", "ACTIONABILITY_TIER")) |>
     dplyr::mutate(
@@ -170,7 +170,7 @@ tier_af_distribution <- function(tier_df, bin_size = 0.05) {
                        bin_start = bin_start,
                        bin_end = bin_end,
                        bin = as.integer(i),
-                       TIER = TIER, stringsAsFactors = F)
+                       TIER = TIER, stringsAsFactors = FALSE)
       af_bin_df <- rbind(af_bin_df, df)
       j <- j + 1
     }
@@ -182,7 +182,7 @@ tier_af_distribution <- function(tier_df, bin_size = 0.05) {
     dplyr::mutate(
       bin = cut(.data$VAF_TUMOR,
                 breaks = seq(0,1,bin_size),
-                right = F, include.lowest = T, labels = F))
+                right = FALSE, include.lowest = TRUE, labels = FALSE))
 
   tier_df_trans_bin <- as.data.frame(
     dplyr::group_by(
@@ -263,14 +263,14 @@ exclude_non_chrom_variants <- function(vcf_df, chrom_var = "CHROM") {
     is.data.frame(vcf_df),
     msg = "Argument 'vcf_df' must be of type data.frame"))
   assertable::assert_colnames(
-    vcf_df, chrom_var, only_colnames = F, quiet = T)
+    vcf_df, chrom_var, only_colnames = FALSE, quiet = TRUE)
   vcf_df <- vcf_df |>
     dplyr::mutate(
       !!rlang::sym(chrom_var) := as.character(!!rlang::sym(chrom_var)))
   n_before_exclusion <- nrow(vcf_df)
   nuc_chromosomes_df <- data.frame(
     c(as.character(seq(1:22)), "X", "Y"),
-    stringsAsFactors = F)
+    stringsAsFactors = FALSE)
   colnames(nuc_chromosomes_df) <- c(chrom_var)
   vcf_df <- dplyr::semi_join(
     vcf_df, nuc_chromosomes_df, by = chrom_var)
@@ -307,7 +307,7 @@ order_variants <- function(
     dplyr::mutate(
       !!rlang::sym(chrom_var) :=
         factor(!!rlang::sym(chrom_var),
-               ordered = T,
+               ordered = TRUE,
                levels = c(as.character(seq(1:22)), "X", "Y"))) |>
     dplyr::arrange(
       !!rlang::sym(chrom_var),
@@ -344,7 +344,7 @@ sort_chromosomal_segments <- function(df,
     msg = paste0("Argument 'df' must be of type data.frame, not ", class(df))))
   assertable::assert_colnames(
     df, c(chromosome_column, start_segment, end_segment),
-    only_colnames = F, quiet = T)
+    only_colnames = FALSE, quiet = TRUE)
   if (nrow(df) == 0) {
     return(df)
   }
@@ -399,11 +399,11 @@ sort_chromosomal_segments <- function(df,
 #'
 #' @export
 df_string_replace <- function(df, strings, pattern,
-                              replacement, replace_all = F) {
+                              replacement, replace_all = FALSE) {
   stopifnot(is.data.frame(df))
   for (column_name in strings) {
     if (column_name %in% colnames(df)) {
-      if (replace_all == F) {
+      if (replace_all == FALSE) {
         df[, column_name] <-
           stringr::str_replace(df[, column_name],
                                pattern = pattern,
@@ -720,8 +720,8 @@ write_processed_vcf <- function(calls,
   options(scipen = 999)
   utils::write.table(sample_vcf, file =
                 sample_vcf_content_fname,
-              sep = "\t", col.names = F,
-              quote = F, row.names = F)
+              sep = "\t", col.names = FALSE,
+              quote = FALSE, row.names = FALSE)
 
 
   system(paste0("cat ", sample_vcf_content_fname,
@@ -755,7 +755,7 @@ detect_vcf_sample_name <- function(df, sample_name = NULL, cpsr = FALSE) {
     log4r_info(paste0("Found the following VCF sample names: ",
                              paste(unique_sample_names, collapse = ", ")))
 
-    if (length(unique_sample_names) > 1 & cpsr == T) {
+    if (length(unique_sample_names) > 1 & cpsr == TRUE) {
       log4r_info(paste0("Found more than one sample name - VCF with somatic ",
                      "calls? Expecting single sample germline VCF for CPSR"))
       stop()

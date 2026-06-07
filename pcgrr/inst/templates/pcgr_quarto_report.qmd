@@ -46,7 +46,7 @@ lightbox: true
 #| include: false
 #| eval: true
 
-knitr::opts_chunk$set(echo = F,warning=FALSE, dpi=72, error=F, eval=T)
+knitr::opts_chunk$set(echo = FALSE,warning=FALSE, dpi=72, error=F, eval=T)
 
 ## load report object generated with pcgrr::generate_report()
 pcg_report <- readRDS(file="<PCGR_REPORT_OBJECT.rds>")

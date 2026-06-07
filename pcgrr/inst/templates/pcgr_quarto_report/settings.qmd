@@ -60,16 +60,16 @@ if (as.logical(conf$expression$similarity_analysis) == TRUE) {
 }
 
 include_germline_findings <- 'OFF'
-if (pcg_report$content$germline_classified$eval == T) {
+if (pcg_report$content$germline_classified$eval == TRUE) {
   include_germline_findings <- 'ON'
 }
-if (pcg_report$content$msi$eval == F) {
+if (pcg_report$content$msi$eval == FALSE) {
   msi_prediction <- 'OFF'
 }
-if (pcg_report$content$mutational_signatures$eval == F) {
+if (pcg_report$content$mutational_signatures$eval == FALSE) {
   signatures_estimation <- 'OFF'
 }
-if (pcg_report$content$tmb$eval == F) {
+if (pcg_report$content$tmb$eval == FALSE) {
   mutational_burden <- 'OFF'
 }
 
@@ -94,7 +94,7 @@ gencode_metadata <-
   dplyr::filter(source_abbreviation == "gencode")
 
 transcript_set_gencode <- paste0("GENCODE - basic set (v", gencode_metadata$source_version, ")")
-if (as.logical(pcg_report[["settings"]][["conf"]][["vep"]][["vep_gencode_basic"]]) == F) {
+if (as.logical(pcg_report[["settings"]][["conf"]][["vep"]][["vep_gencode_basic"]]) == FALSE) {
   transcript_set_gencode <- paste0("GENCODE - all transcripts (v", gencode_metadata$source_version, ")")
 }
 ```

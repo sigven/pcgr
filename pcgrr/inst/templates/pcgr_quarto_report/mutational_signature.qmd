@@ -13,7 +13,7 @@ no_site_prevalence <-
 
 missing_data_no_refit <- F
 if (msig_content$eval == F | 
-   msig_content$missing_data == T) {
+   msig_content$missing_data == TRUE) {
   missing_data_no_refit <- T
 }
 
@@ -291,7 +291,7 @@ signature_colors <-
 myOptions <- list(
   buttons = c('csv','excel'),
   dom = 'Bfrtip', 
-  scrollCollapse = T)
+  scrollCollapse = TRUE)
 
 dat <- dplyr::select(
   msig_content$result$contributions$per_signature, 
@@ -321,7 +321,7 @@ bslib::card(
       options = list(
         pageLength = 6,
         dom = 'tp'),
-      escape = F) |>
+      escape = FALSE) |>
       DT::formatStyle(
         'contribution',fontWeight = 'bold') |>
       DT::formatStyle(

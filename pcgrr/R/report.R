@@ -507,7 +507,10 @@ init_biomarker_content <- function() {
 #' @param report_mode Type of report ('PCGR' or 'CPSR')
 #'
 #' @export
-load_yaml <- function(yaml_fname, report_mode = "CPSR", color_palette = pcgrr::color_palette) {
+load_yaml <- function(
+    yaml_fname,
+    report_mode = "CPSR",
+    color_palette = pcgrr::color_palette) {
 
   if (!file.exists(yaml_fname)) {
     log4r_fatal(
@@ -522,7 +525,7 @@ load_yaml <- function(yaml_fname, report_mode = "CPSR", color_palette = pcgrr::c
     if (is.null(report_settings[[t]])) {
       missing_yaml_info <- T
     }else{
-      if (identical(typeof(report_settings[[t]]),"character") == F) {
+      if (identical(typeof(report_settings[[t]]),"character") == FALSE) {
         missing_yaml_info <- T
       }
     }
@@ -534,12 +537,12 @@ load_yaml <- function(yaml_fname, report_mode = "CPSR", color_palette = pcgrr::c
     if (is.null(report_settings[[t]])) {
       missing_yaml_info <- T
     }else{
-      if (identical(typeof(report_settings[[t]]),"list") == F) {
+      if (identical(typeof(report_settings[[t]]),"list") == FALSE) {
         missing_yaml_info <- T
       }
     }
   }
-  if (missing_yaml_info == F) {
+  if (missing_yaml_info == FALSE) {
     log4r_info(paste0(
       "Successfully parsed YAML configuration file - reporting mode: ", report_mode))
     ## log the sample identifier
@@ -599,13 +602,13 @@ load_yaml <- function(yaml_fname, report_mode = "CPSR", color_palette = pcgrr::c
         report_settings[['conf']][['sample_properties']][['phenotype']]),
       "list")) {
       report_settings[['conf']][['sample_properties']][['phenotype']] <-
-        list_of_list_to_df(
+        pcgrr:::list_of_list_to_df(
           report_settings[['conf']][['sample_properties']][['phenotype']])
 
       report_settings[['conf']][['sample_properties']][['phenotype']]$ot_level <-
         as.numeric(report_settings[['conf']][['sample_properties']][['phenotype']]$ot_level)
-      report_settings[['conf']][['sample_properties']][['phenotype']]$minor_type <-
-        as.logical(report_settings[['conf']][['sample_properties']][['phenotype']]$minor_type)
+      report_settings[['conf']][['sample_properties']][['phenotype']]$ot_minor_type <-
+        as.logical(report_settings[['conf']][['sample_properties']][['phenotype']]$ot_minor_type)
       report_settings[['conf']][['sample_properties']][['phenotype']]$do_cancer_slim <-
         as.logical(report_settings[['conf']][['sample_properties']][['phenotype']]$do_cancer_slim)
     }
@@ -640,7 +643,7 @@ load_yaml <- function(yaml_fname, report_mode = "CPSR", color_palette = pcgrr::c
   }
 
   report_settings[['reference_data']][['source_metadata']] <-
-    list_of_list_to_df(
+    pcgrr:::list_of_list_to_df(
       report_settings$reference_data$source_metadata)
 
   for (col in c('source_version',
@@ -667,7 +670,7 @@ load_yaml <- function(yaml_fname, report_mode = "CPSR", color_palette = pcgrr::c
 
   if (report_mode == "CPSR") {
     report_settings[['conf']][['gene_panel']][['panel_genes']] <-
-      list_of_list_to_df(
+      pcgrr:::list_of_list_to_df(
         report_settings$conf$gene_panel$panel_genes)
 
     if (NROW(report_settings[['conf']][['gene_panel']][['panel_genes']]) == 1) {
@@ -711,7 +714,7 @@ load_yaml <- function(yaml_fname, report_mode = "CPSR", color_palette = pcgrr::c
       report_settings[['conf']][['gene_panel']][['panel_genes']],
       c("ID","PANEL_URL","CPG_SOURCE",
         "PANEL_ID", "PANEL_VERSION","PRIMARY_TARGET",
-        "SYMBOL"), quiet = T, only_colnames = F)
+        "SYMBOL"), quiet = TRUE, only_colnames = FALSE)
 
     report_settings[['conf']][['gene_panel']][['panel_genes']] <-
       report_settings[['conf']][['gene_panel']][['panel_genes']] |>

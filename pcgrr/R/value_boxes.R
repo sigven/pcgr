@@ -32,7 +32,7 @@ plot_value_boxes <- function(pcg_report, color_palette = pcgrr::color_palette) {
 
   ## color - tumor-control
   color <- rep(color_palette[["tier"]][["values"]][1], 9)
-  if (assay_props[["vcf_tumor_only"]] == T) {
+  if (assay_props[["vcf_tumor_only"]] == TRUE) {
     ## color - tumor-only
     color <- rep(color_palette[["report_color"]][["values"]][2], 9)
   }
@@ -44,7 +44,7 @@ plot_value_boxes <- function(pcg_report, color_palette = pcgrr::color_palette) {
     ggplot2::coord_fixed() +
     ggplot2::scale_fill_manual(values = rep(color, 9)) +
     ggplot2::theme_void() +
-    ggplot2::guides(fill = F)
+    ggplot2::guides(fill = FALSE)
 
   return(p)
 }

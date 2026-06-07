@@ -22,7 +22,7 @@ kataegis_detect <- function(data, sample_id = "sample_id",
                     "(APOBEC enzyme family) and C>T/G ",
                     "(TLS DNA polymerase) mutations"))
   assertable::assert_colnames(
-    data, c(chr, pos), only_colnames = F, quiet = T)
+    data, c(chr, pos), only_colnames = FALSE, quiet = TRUE)
   invisible(
     assertthat::assert_that(
       build == "grch37" | build == "grch38",
@@ -147,7 +147,7 @@ kataegis_input <- function(variant_set, chr = "chr", pos = "pos", ref = "ref",
                  "') not allowed, allowed reference builds are: 'grch37' or 'grch38'")))
   assertable::assert_colnames(variant_set,
                               c(chr, pos, ref, alt),
-                              only_colnames = F, quiet = T)
+                              only_colnames = FALSE, quiet = TRUE)
 
   mut_data <- variant_set[, c(chr, pos, ref, alt)]
   names(mut_data) <- c("chr", "pos", "ref", "alt")
@@ -220,7 +220,7 @@ generate_report_data_kataegis <- function(variant_set,
     is.data.frame(variant_set),
     msg = paste0("Argument 'variant_set' needs be of type data.frame")))
   assertable::assert_colnames(
-    variant_set, c("CHROM", "REF", "ALT", "POS"), only_colnames = F, quiet = T)
+    variant_set, c("CHROM", "REF", "ALT", "POS"), only_colnames = FALSE, quiet = TRUE)
   invisible(assertthat::assert_that(
     build == "grch37" | build == "grch38",
     msg =
@@ -234,7 +234,7 @@ generate_report_data_kataegis <- function(variant_set,
       chr_prefix <- TRUE
     }
   }
-  if (chr_prefix == F) {
+  if (chr_prefix == FALSE) {
     variant_set <- variant_set |>
       dplyr::mutate(CHROM = paste0("chr", .data$CHROM))
   }

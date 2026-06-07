@@ -100,7 +100,7 @@ cat("\n::: {.callout-warning}\n## No SNVs\n\nNo SNVs/single base substitutions",
 
 MutationalPatterns::plot_indel_contexts(
   counts = msig_content$result$indel_counts, 
-  condensed = T) + 
+  condensed = TRUE) + 
   ggplot2::theme(legend.position = "bottom") + 
   ggplot2::theme(text = ggplot2::element_text(size = 14))
 

@@ -91,7 +91,7 @@ generate_report <-
 
     ## Retrieve relevant clinical trials for the tumor type in question
 
-    #if (as.logical(settings$conf$clinicaltrials$run) == T) {
+    #if (as.logical(settings$conf$clinicaltrials$run) == TRUE) {
       # pcg_report_trials <-
       #   generate_report_data_trials(
       #     ref_data = ref_data,
@@ -114,7 +114,7 @@ generate_report <-
 
     if (!is.null(callset_snv) && NROW(callset_snv$variant) > 0) {
       ## Estimate contribution of mutational signatures
-      if (conf_somatic_snv[["mutational_signatures"]][["run"]] == T) {
+      if (conf_somatic_snv[["mutational_signatures"]][["run"]] == TRUE) {
 
         ## Generate report data for mutational signatures assessment
         pcg_report_signatures <-
@@ -188,7 +188,7 @@ generate_report <-
 
       ## Generate report contents for analysis of
       ## mutational burden (TMB)
-      if (as.logical(conf_somatic_snv[['tmb']][['run']]) == T) {
+      if (as.logical(conf_somatic_snv[['tmb']][['run']]) == TRUE) {
 
         pcg_report_tmb <-
           generate_report_data_tmb(
@@ -357,7 +357,7 @@ generate_tier_tsv <- function(variant_set,
 #   fnames[["html"]] <-
 #     file.path(project_directory,
 #               paste0(sample_fname_pattern, ".html"))
-#   if (flexdb == T) {
+#   if (flexdb == TRUE) {
 #     fnames[["html"]] <-
 #       file.path(project_directory,
 #                 paste0(sample_fname_pattern,
@@ -397,7 +397,7 @@ generate_tier_tsv <- function(variant_set,
 #     }
 #
 #     ## Tumor-only settings (CSS)
-#     if (assay_props[["vcf_tumor_only"]] == T) {
+#     if (assay_props[["vcf_tumor_only"]] == TRUE) {
 #       sequencing_design <- "Tumor-Only"
 #       css_fname <- file.path(pcgrr_tmpl, "pcgr_flexdb_tumor_only.css")
 #
@@ -438,9 +438,9 @@ generate_tier_tsv <- function(variant_set,
 #             navbar = navbar_items),
 #         output_file = fnames[["html"]],
 #         output_dir = project_directory,
-#         clean = T,
+#         clean = TRUE,
 #         intermediates_dir = project_directory,
-#         quiet = T)
+#         quiet = TRUE)
 #     }else{
 #
 #       toc_float <-
@@ -460,7 +460,7 @@ generate_tier_tsv <- function(variant_set,
 #       ## If nonfloating TOC is chosen (PCGR/CPSR), set toc_float to FALSE
 #       nonfloating_toc <-
 #         as.logical(settings[["conf"]][["visual_reporting"]][["nonfloating_toc"]])
-#       if (nonfloating_toc == T) {
+#       if (nonfloating_toc == TRUE) {
 #         toc_float <- F
 #       }
 #
@@ -491,10 +491,10 @@ generate_tier_tsv <- function(variant_set,
 #             theme = report_theme,
 #             fig_width = 5,
 #             fig_height = 4,
-#             toc = T,
+#             toc = TRUE,
 #             toc_depth = toc_depth,
 #             toc_float = toc_float,
-#             number_sections = F,
+#             number_sections = FALSE,
 #             css = css_fname,
 #             includes =
 #               rmarkdown::includes(
@@ -502,9 +502,9 @@ generate_tier_tsv <- function(variant_set,
 #                 after_body = disclaimer)),
 #         output_file = fnames[["html"]],
 #         output_dir = project_directory,
-#         clean = T,
+#         clean = TRUE,
 #         intermediates_dir = project_directory,
-#         quiet = T)
+#         quiet = TRUE)
 #     }
 #   }
 #   if (output_format == "json") {
@@ -580,7 +580,7 @@ generate_tier_tsv <- function(variant_set,
 #             assertable::assert_colnames(
 #               report_strip$content$snv_indel$variant_set[[o]],
 #               colnames = key_tsv_cols,
-#               only_colnames = F,
+#               only_colnames = FALSE,
 #               quiet = T
 #             )
 #
@@ -607,11 +607,11 @@ generate_tier_tsv <- function(variant_set,
 #     if (utils::object.size(report_strip) < 750000000) {
 #
 #       pcgr_json <- jsonlite::toJSON(
-#         report_strip, pretty = T, na = "string",
-#         null = "null", force = T)
+#         report_strip, pretty = TRUE, na = "string",
+#         null = "null", force = TRUE)
 #       write(pcgr_json, fnames[["json"]])
 #       gzip_command <- paste0("gzip -f ", fnames[["json"]])
-#       system(gzip_command, intern = F)
+#       system(gzip_command, intern = FALSE)
 #     }else{
 #       log4r_info("JSON output not possible - report contents too large (> 750Mb)")
 #
@@ -639,8 +639,8 @@ generate_tier_tsv <- function(variant_set,
 #       }
 #       utils::write.table(
 #         report[["content"]][["snv_indel"]][["variant_set"]][[output_format_slim]],
-#         file = fnames[[output_format]], sep = "\t", col.names = T,
-#         row.names = F, quote = F)
+#         file = fnames[[output_format]], sep = "\t", col.names = TRUE,
+#         row.names = FALSE, quote = FALSE)
 #
 #       # if (tier_model == "pcgr_acmg") {
 #       #   log4r_info(
@@ -685,8 +685,8 @@ generate_tier_tsv <- function(variant_set,
 #         "of contributing mutational signatures - ('tsv')"))
 #       utils::write.table(
 #         report[["content"]][["mutational_signatures"]][["result"]][["tsv"]],
-#         file = fnames[[output_format]], sep = "\t", col.names = T,
-#         row.names = F, quote = F)
+#         file = fnames[[output_format]], sep = "\t", col.names = TRUE,
+#         row.names = FALSE, quote = FALSE)
 #     }
 #   }
 #
@@ -696,10 +696,10 @@ generate_tier_tsv <- function(variant_set,
 #       log4r_info(
 #         "Writing CNA tab-separated output file with PCGR annotations (.tsv.gz)")
 #       utils::write.table(report[["content"]][["cna"]][["variant_set"]][["tsv"]],
-#                   file = fnames[["cna_tsv"]], sep = "\t", col.names = T,
-#                   row.names = F, quote = F)
+#                   file = fnames[["cna_tsv"]], sep = "\t", col.names = TRUE,
+#                   row.names = FALSE, quote = FALSE)
 #       gzip_command <- paste0("gzip -f ", fnames[["cna_tsv"]])
-#       system(gzip_command, intern = F)
+#       system(gzip_command, intern = FALSE)
 #     }
 #   }
 #
@@ -738,7 +738,7 @@ generate_tier_tsv <- function(variant_set,
 #   css_fname <- file.path(pcgrr_tmpl, "pcgr_flexdb_tumor_control.css")
 #
 #   ## Tumor-only settings (CSS)
-#   if (as.logical(assay_props[["vcf_tumor_only"]]) == T) {
+#   if (as.logical(assay_props[["vcf_tumor_only"]]) == TRUE) {
 #     sequencing_design <- "Tumor-Only"
 #     css_fname <- file.path(
 #       pcgrr_tmpl, "pcgr_flexdb_tumor_only.css")
@@ -772,9 +772,9 @@ generate_tier_tsv <- function(variant_set,
 #         navbar = navbar_items),
 #     output_file = fname_html,
 #     output_dir = output_directory,
-#     clean = T,
+#     clean = TRUE,
 #     intermediates_dir = output_directory,
-#     quiet = T)
+#     quiet = TRUE)
 #
 #
 # }

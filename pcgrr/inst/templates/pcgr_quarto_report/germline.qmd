@@ -47,11 +47,11 @@ if (NROW(germline_calls$variant_display) > 100) {
 
 germline_dt <- DT::datatable(
   germline_calls$variant_display, 
-  escape = F,
+  escape = FALSE,
   extensions = c("Buttons","Responsive"),
   options = list(
     pageLength = 10,
-    scrollCollapse = T,
+    scrollCollapse = TRUE,
     buttons = c('csv','excel'),
     dom = 'Bfrtip'
   )) |>

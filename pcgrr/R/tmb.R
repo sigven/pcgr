@@ -59,7 +59,7 @@ plot_tmb_primary_site_tcga <- function(
       "TMB_MISSENSE_ONLY",
       "PRIMARY_SITE",
       "PRIMARY_DIAGNOSIS_VERY_SIMPLIFIED"),
-    only_colnames = F,
+    only_colnames = FALSE,
     quiet = T
   )
 
@@ -82,7 +82,7 @@ plot_tmb_primary_site_tcga <- function(
   tmb_site_colors <- data.frame(
     PRIMARY_SITE =
       unique(tmb_reference$PRIMARY_SITE),
-    stringsAsFactors = F) |>
+    stringsAsFactors = FALSE) |>
     dplyr::filter(!is.na(.data$PRIMARY_SITE))
   tmb_site_colors$color <- "#BABABA"
   tmb_site_colors <-
@@ -117,7 +117,7 @@ plot_tmb_primary_site_tcga <- function(
   median_tmb <- as.data.frame(tmb_reference |>
     dplyr::group_by(.data$PRIMARY_SITE) |>
     dplyr::summarize(
-      TMB_MEDIAN = stats::median(.data$TMB, na.rm = T),
+      TMB_MEDIAN = stats::median(.data$TMB, na.rm = TRUE),
       .groups = "drop"
     ) |>
     dplyr::arrange(

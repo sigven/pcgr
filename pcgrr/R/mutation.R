@@ -12,7 +12,7 @@ assign_mutation_type <- function(var_df) {
       is.data.frame(var_df),
       msg = "Argument 'var_df' must be a valid data.frame"))
   assertable::assert_colnames(var_df, c("VARIANT_CLASS", "REF", "ALT"),
-                              only_colnames = F, quiet = T)
+                              only_colnames = FALSE, quiet = TRUE)
   var_df <- var_df |>
     dplyr::mutate(
       MUTATION_TYPE =
@@ -76,7 +76,7 @@ vaf_plot <- function(
   assertable::assert_colnames(
     vaf_dist_tumor,
     c("bin_start","bin_end","Count","VARIANT_CLASS"),
-    only_colnames = F,
+    only_colnames = FALSE,
     quiet = T
   )
 
@@ -263,7 +263,7 @@ clean_gnomad_annotations <- function(
                  "tmp_gNC_FAF_SAS",
                  "tmp_gNC_VAR_FILTER"),
         sep = "\\|",
-        remove = T,
+        remove = TRUE,
         fill = "right",
         extra = "drop"
       )

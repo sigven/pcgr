@@ -40,7 +40,7 @@ load_reference_data <- function(
   pcgr_ref_data[['assembly']][['chrom_coordinates']] <-
     as.data.frame(
       readr::read_tsv(
-        chromsizes_fname, show_col_types = F,
+        chromsizes_fname, show_col_types = FALSE,
         na = c(".")
       )
     ) |>
@@ -66,7 +66,7 @@ load_reference_data <- function(
       dplyr::bind_rows(
         as.data.frame(
           readr::read_tsv(
-            infotag_fname, show_col_types = F,
+            infotag_fname, show_col_types = FALSE,
             na = c(".")
           )
         )
@@ -145,7 +145,7 @@ load_reference_data <- function(
   )
   check_file_exists(cpg_tsv_fname)
   pcgr_ref_data[['gene']][['cpg']] <- as.data.frame(
-    readr::read_tsv(cpg_tsv_fname, show_col_types = F,
+    readr::read_tsv(cpg_tsv_fname, show_col_types = FALSE,
                     comment = "", na = c(".",""))
   ) |>
     dplyr::mutate(
@@ -165,7 +165,7 @@ load_reference_data <- function(
   pcgr_ref_data[['gene']][['cpg_pathogenic_range']] <- as.data.frame(
     readr::read_tsv(
       cpg_pathogenic_range_tsv_fname,
-      show_col_types = F,
+      show_col_types = FALSE,
       comment = "", na = c(".",""))
   ) |>
     dplyr::mutate(
@@ -182,7 +182,7 @@ load_reference_data <- function(
   )
   check_file_exists(panels_tsv_fname)
   pcgr_ref_data[['gene']][['panel']] <- as.data.frame(
-    readr::read_tsv(panels_tsv_fname, show_col_types = F,
+    readr::read_tsv(panels_tsv_fname, show_col_types = FALSE,
                     comment = "", na = c("","."))
   ) |>
     dplyr::mutate(
@@ -202,7 +202,7 @@ load_reference_data <- function(
   pcgr_ref_data[['gene']][['transcript_biotype']] <- as.data.frame(
     readr::read_tsv(
       gene_xref_tsv_fname,
-      show_col_types = F,
+      show_col_types = FALSE,
       na = c(".",""), guess_max = 1000000)) |>
     dplyr::select(
       c("chrom",
@@ -229,7 +229,7 @@ load_reference_data <- function(
 
   pcgr_ref_data[['gene']][['index']] <- as.data.frame(
     readr::read_tsv(
-      gene_index_tsv_fname, show_col_types = F))
+      gene_index_tsv_fname, show_col_types = FALSE))
 
   otp_rank_tsv_fname <- file.path(
     pcgr_db_assembly_dir, "gene", "tsv",
@@ -240,7 +240,7 @@ load_reference_data <- function(
 
   pcgr_ref_data[['gene']][['otp_rank']] <- as.data.frame(
     readr::read_tsv(
-      otp_rank_tsv_fname, show_col_types = F,
+      otp_rank_tsv_fname, show_col_types = FALSE,
       na = c('.'))) |>
     dplyr::filter(!is.na(.data$entrezgene)) |>
     dplyr::mutate(entrezgene = as.character(.data$entrezgene)) |>
@@ -252,7 +252,7 @@ load_reference_data <- function(
   pcgr_ref_data[['gene']][['gene_xref']] <- as.data.frame(
     readr::read_tsv(
       gene_xref_tsv_fname, na = c("."),
-      show_col_types = F, guess_max = 200000)) |>
+      show_col_types = FALSE, guess_max = 200000)) |>
     dplyr::select(
       c("ensembl_gene_id",
       "gene_biotype",
@@ -315,7 +315,7 @@ load_reference_data <- function(
   pcgr_ref_data[['variant']][['clinvar_aa_sites']] <- as.data.frame(
     readr::read_tsv(
       clinvar_sites_tsv_fname,
-      show_col_types = F,
+      show_col_types = FALSE,
       guess_max = 100000)) |>
     dplyr::mutate(entrezgene = as.character(.data$entrezgene))
   colnames(pcgr_ref_data[['variant']][['clinvar_aa_sites']]) <-
@@ -332,7 +332,7 @@ load_reference_data <- function(
   pcgr_ref_data[['variant']][['clinvar_nuc_sites']] <- as.data.frame(
     readr::read_tsv(
       clinvar_nucleotides_tsv_fname,
-      show_col_types = F,
+      show_col_types = FALSE,
       guess_max = 100000)) |>
     dplyr::mutate(entrezgene = as.character(.data$entrezgene)) |>
     dplyr::filter(stringr::str_detect(
@@ -350,7 +350,7 @@ load_reference_data <- function(
   check_file_exists(clinvar_oncogenic_tsv_fname)
   pcgr_ref_data[['variant']][['clinvar_oncogenic']] <- as.data.frame(
     readr::read_tsv(
-      clinvar_oncogenic_tsv_fname, show_col_types = F)) |>
+      clinvar_oncogenic_tsv_fname, show_col_types = FALSE)) |>
     dplyr::mutate(entrezgene = as.character(.data$entrezgene)) |>
     dplyr::mutate(alteration = dplyr::if_else(
       is.na(.data$hgvsp) & !is.na(.data$hgvs_c),
@@ -376,7 +376,7 @@ load_reference_data <- function(
   check_file_exists(clinvar_gene_varstats_tsv_fname)
   pcgr_ref_data[['variant']][['clinvar_gene_stats']] <- as.data.frame(
     readr::read_tsv(
-      clinvar_gene_varstats_tsv_fname, show_col_types = F)) |>
+      clinvar_gene_varstats_tsv_fname, show_col_types = FALSE)) |>
     dplyr::mutate(entrezgene = as.character(.data$entrezgene))
   colnames(pcgr_ref_data[['variant']][['clinvar_gene_stats']]) <-
     toupper(colnames(pcgr_ref_data[['variant']][['clinvar_gene_stats']]))
@@ -391,7 +391,7 @@ load_reference_data <- function(
     readr::read_tsv(
       gwas_tsv_fname,
       na = c("."),
-      show_col_types = F)) |>
+      show_col_types = FALSE)) |>
     dplyr::filter(!is.na(.data$primary_site))
 
   colnames(pcgr_ref_data[['variant']][['gwas']]) <-
@@ -413,7 +413,7 @@ load_reference_data <- function(
       pcgr_ref_data[['variant']][['varstats']][[vardb]] <-
         as.data.frame(
           readr::read_tsv(
-            varstats_fname, show_col_types = F))
+            varstats_fname, show_col_types = FALSE))
     }
 
   }
@@ -428,7 +428,7 @@ load_reference_data <- function(
   check_file_exists(phenOncoX_tsv_fname)
   pcgr_ref_data[['phenotype']][['oncotree']] <- as.data.frame(
     readr::read_tsv(
-      phenOncoX_tsv_fname, show_col_types = F,
+      phenOncoX_tsv_fname, show_col_types = FALSE,
       na = c(".","NA"))
   )
   pcgr_ref_data[['phenotype']][['cancer_groups']] <-
@@ -448,7 +448,7 @@ load_reference_data <- function(
   check_file_exists(umls_tsv_fname)
   pcgr_ref_data[['phenotype']][['umls']] <- as.data.frame(
     readr::read_tsv(
-      umls_tsv_fname, show_col_types = F,
+      umls_tsv_fname, show_col_types = FALSE,
       na = ".")
   )
   colnames(pcgr_ref_data[['phenotype']][['umls']]) <-
@@ -459,7 +459,7 @@ load_reference_data <- function(
     file.path(
       pcgr_db_assembly_dir, "misc", "other",
       "msi_classification",
-      "tcga_msi_classifier.rds"
+      "tcga_msi_runtime_data.rds"
     )
   check_file_exists(msi_model_rds)
   pcgr_ref_data[['msi']] <-
@@ -488,7 +488,7 @@ load_reference_data <- function(
     check_file_exists(fname_misc)
     pcgr_ref_data[['misc']][[elem]] <- as.data.frame(
       readr::read_tsv(
-        fname_misc, show_col_types = F,
+        fname_misc, show_col_types = FALSE,
         na = ".", guess_max = 11000)
     )
     colnames(pcgr_ref_data[['misc']][[elem]]) <-
@@ -525,7 +525,7 @@ load_reference_data <- function(
       )
     check_file_exists(drug_tsv_fname)
     pcgr_ref_data[['drug']][[elem]] <- as.data.frame(
-      readr::read_tsv(drug_tsv_fname, show_col_types = F, na = ".")
+      readr::read_tsv(drug_tsv_fname, show_col_types = FALSE, na = ".")
     )
     colnames(pcgr_ref_data[['drug']][[elem]]) <-
       toupper(colnames(pcgr_ref_data[['drug']][[elem]]))
@@ -545,7 +545,7 @@ load_reference_data <- function(
       check_file_exists(fname)
       bm_data <- as.data.frame(
         readr::read_tsv(
-          fname, show_col_types = F,
+          fname, show_col_types = FALSE,
           na = ".", guess_max = 10000))
 
       for (col in c('source_id','entrezgene','variant_id')) {
@@ -579,7 +579,7 @@ load_reference_data <- function(
     check_file_exists(fname)
     pcgr_ref_data[['fusion']][[elem]] <- as.data.frame(
       readr::read_tsv(
-        fname, show_col_types = F,
+        fname, show_col_types = FALSE,
         na = ".", guess_max = 10000))
 
     colnames(pcgr_ref_data[['fusion']][[elem]]) <-
@@ -597,7 +597,7 @@ load_reference_data <- function(
     )
     check_file_exists(fname)
     metadata_dtype <- as.data.frame(
-      readr::read_tsv(fname, show_col_types = F,
+      readr::read_tsv(fname, show_col_types = FALSE,
                       guess_max = 100000)) |>
       dplyr::mutate(datatype = dtype) |>
       dplyr::mutate(wflow = dplyr::case_when(
@@ -624,7 +624,7 @@ load_reference_data <- function(
 
   pcgr_ref_data[['expression']] <- list()
   exp_sources <- list.dirs(file.path(
-    pcgr_db_assembly_dir, "expression", "tsv"), full.names = F)
+    pcgr_db_assembly_dir, "expression", "tsv"), full.names = FALSE)
   for (source in exp_sources) {
     if (source != "" & source != "tcga") {
       metadata_fname <- file.path(
@@ -633,7 +633,7 @@ load_reference_data <- function(
       if (file.exists(metadata_fname)) {
         pcgr_ref_data[['expression']][[source]] <-
           suppressWarnings(readr::read_tsv(
-            metadata_fname, show_col_types = F,
+            metadata_fname, show_col_types = FALSE,
             guess_max = 10000, na = ".") |>
               dplyr::mutate(
                 EXT_SOURCE = source) |>
@@ -647,12 +647,12 @@ load_reference_data <- function(
         metadata_fnames <- list.files(
           file.path(
             pcgr_db_assembly_dir, "expression", "tsv", source),
-          pattern = "_sample_metadata.tsv.gz$", full.names = T)
+          pattern = "_sample_metadata.tsv.gz$", full.names = TRUE)
         for (metadata_fname in metadata_fnames) {
           if (file.exists(metadata_fname)) {
             cohort_metadata <- suppressWarnings(
               readr::read_tsv(
-                metadata_fname, show_col_types = F,
+                metadata_fname, show_col_types = FALSE,
                 guess_max = 10000, na = ".") |>
                 dplyr::mutate(
                   EXT_SOURCE = source) |>

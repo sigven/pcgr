@@ -18,7 +18,7 @@ stats_type_snv_indel <- function(
 
   assertable::assert_colnames(
     var_df, c("VARIANT_CLASS", "CONSEQUENCE","CODING_STATUS"),
-    only_colnames = F, quiet = T
+    only_colnames = FALSE, quiet = T
   )
 
   consequence_stats <-
@@ -149,7 +149,7 @@ stats_report_snv_indel <- function(
       "ONCOGENE",
       "gnomADe_AF",
       "TARGETED_INHIBITORS_ALL2"),
-    only_colnames = F, quiet = T
+    only_colnames = FALSE, quiet = T
   )
 
   vstats <- init_vstats_snv_indel()
@@ -235,7 +235,7 @@ stats_report_snv_indel <- function(
               "VARIANT_CLASS",
               "ACTIONABILITY_TIER",
               "ENTREZGENE"),
-            only_colnames = F, quiet = T
+            only_colnames = FALSE, quiet = T
           ))
 
           invisible(assertable::assert_colnames(
@@ -243,7 +243,7 @@ stats_report_snv_indel <- function(
             c("VAR_ID",
               "BM_ACTIONABILITY_SUPPORT",
               "ENTREZGENE"),
-            only_colnames = F, quiet = T
+            only_colnames = FALSE, quiet = T
           ))
 
           if (NROW(var_classification) > 0) {
@@ -399,7 +399,7 @@ stats_report_cna <- function(
       "TUMOR_SUPPRESSOR",
       "ONCOGENE",
       "TARGETED_INHIBITORS_ALL2"),
-    only_colnames = F, quiet = T
+    only_colnames = FALSE, quiet = T
   )
 
   vstats <- init_vstats_cna()
@@ -538,7 +538,7 @@ stats_report_cna <- function(
               "VARIANT_CLASS",
               "ACTIONABILITY_TIER",
               "ENTREZGENE"),
-            only_colnames = F, quiet = T
+            only_colnames = FALSE, quiet = T
           ))
 
           invisible(assertable::assert_colnames(
@@ -546,7 +546,7 @@ stats_report_cna <- function(
             c("VAR_ID",
               "BM_ACTIONABILITY_SUPPORT",
               "ENTREZGENE"),
-            only_colnames = F, quiet = T
+            only_colnames = FALSE, quiet = T
           ))
 
           if (NROW(var_classification) > 0) {
@@ -752,7 +752,7 @@ stats_report_fusion <- function(
       "ONCOGENE_3P",
       "TARGETED_INHIBITORS_ALL2_5P",
       "TARGETED_INHIBITORS_ALL2_3P"),
-    only_colnames = F, quiet = T
+    only_colnames = FALSE, quiet = T
   )
 
   vstats[["n_fusion"]] <-
@@ -819,7 +819,7 @@ stats_report_fusion <- function(
               "VARIANT_CLASS",
               "ACTIONABILITY_TIER",
               "ENTREZGENE"),
-            only_colnames = F, quiet = T
+            only_colnames = FALSE, quiet = T
           ))
 
           invisible(assertable::assert_colnames(
@@ -827,7 +827,7 @@ stats_report_fusion <- function(
             c("VAR_ID",
               "BM_ACTIONABILITY_SUPPORT",
               "ENTREZGENE"),
-            only_colnames = F, quiet = T
+            only_colnames = FALSE, quiet = T
           ))
 
           if (NROW(var_classification) > 0) {

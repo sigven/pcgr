@@ -32,7 +32,7 @@ generate_report_data_expression <-
     exp_data <-
       readr::read_tsv(
         settings$molecular_data$fname_expression_tsv,
-        show_col_types = F, na = "."
+        show_col_types = FALSE, na = "."
       )
 
     pcg_report_expression[["expression"]] <- exp_data

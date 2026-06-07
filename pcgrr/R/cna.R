@@ -54,7 +54,7 @@ plot_cna_segments_absolute <- function(
       "length",
       "centromere_left",
       "centromere_right"),
-    only_colnames = F,
+    only_colnames = FALSE,
     quiet = T
   )
 
@@ -81,7 +81,7 @@ plot_cna_segments_absolute <- function(
       "CN_TOTAL",
       "VARIANT_CLASS",
       "EVENT_TYPE"),
-    only_colnames = F,
+    only_colnames = FALSE,
     quiet = T
   )
 
@@ -100,7 +100,7 @@ plot_cna_segments_absolute <- function(
       "TUMOR_SUPPRESSOR_RANK",
       "SYMBOL",
       "VARIANT_CLASS"),
-    only_colnames = F,
+    only_colnames = FALSE,
     quiet = T
   )
 
@@ -571,14 +571,14 @@ plot_cna_segments_relative <-
       chrom_coordinates,
       c("chrom", "genome_start", "genome_end", "length",
         "centromere_left", "centromere_right"),
-      only_colnames = F, quiet = T
+      only_colnames = FALSE, quiet = T
     )
 
     assertable::assert_colnames(
       cna_segment,
       c("CHROM", "SEGMENT_START", "SEGMENT_END",
         "CN_TOTAL", "CYTOBAND", "EVENT_TYPE"),
-      only_colnames = F, quiet = T
+      only_colnames = FALSE, quiet = T
     )
 
     assertable::assert_colnames(
@@ -587,7 +587,7 @@ plot_cna_segments_relative <-
         "ONCOGENE", "ONCOGENE_RANK",
         "TUMOR_SUPPRESSOR", "TUMOR_SUPPRESSOR_RANK",
         "SYMBOL", "VARIANT_CLASS"),
-      only_colnames = F, quiet = T
+      only_colnames = FALSE, quiet = T
     )
 
     ## Add centromere and midpoint coordinates

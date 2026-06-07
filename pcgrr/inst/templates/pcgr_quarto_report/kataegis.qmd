@@ -27,7 +27,7 @@ df <- data.frame(
   'number.mut' = integer(), 
   'weight.C>X' = numeric(),
   'confidence' = integer(), 
-  stringsAsFactors = F)
+  stringsAsFactors = FALSE)
 
 hgname <- "hg38"
 if (pcg_report$settings$genome_assembly == "grch37") {
