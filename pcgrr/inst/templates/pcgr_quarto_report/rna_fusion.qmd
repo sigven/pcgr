@@ -1,4 +1,4 @@
-## Somatic RNA fusions
+## RNA fusions
 
 ```{r setup_fusion}
 #| output: asis
@@ -13,7 +13,7 @@ cs <- pcgrr::color_palette$bm_callout
 ```
 
 
-The table below lists somatic RNA fusion events detected in the input sample. 
+The table below lists RNA fusion events detected in the input sample. 
 Fusion events are annotated with respect to known cancer gene partners and 
 presence in public fusion databases (i.e. Mitelman Database).
 
@@ -24,7 +24,8 @@ focus here is strictly on functional annotation and potential clinical impact.
 We recommend to carefully check e.g. the number of supporting reads for each 
 fusion event, and to visually inspect fusion events in a genome browser 
 (e.g. IGV) or other third-party tools (e.g. [FusViz](https://github.com/senzhaocode/FuSViz)) 
-to conduct frame inference, investigate domain retention, and rule out potential false positives.
+to conduct frame inference, investigate domain retention, and rule out potential false positives. Importantly, while most RNA fusion detection tools will attempt to filter out known
+normal/artefactual events, PCGR makes no attempt to further filter fusion events based on e.g. presence in normal tissue databases, and thus relies on the user to perform this step upstream of PCGR analysis.
 :::
 
 ::: {.callout-note title="Recurrence of fusion events in Mitelman Database" collapse="true"}
@@ -88,7 +89,7 @@ crosstalk::bscols(
 # 
 # DT::datatable(
 #   fusion_events_shared,
-#   escape = F, 
+#   escape = FALSE, 
 #   extensions = c("Buttons","Responsive"), 
 #   options = list(
 #     buttons = c('csv','excel'), 
@@ -160,6 +161,14 @@ _clinical actionability_ through an implementation of AMP/ASCO/CAP guidelines [@
 
 The table below indicates which variants have been classified into _tiers of clinical significance_ according to AMP/ASCO/CAP criteria.
 
+::: {.callout-note collapse="false"}
+## Note — biomarker types and report scope
+
+Tier classification is driven by **therapeutic sensitivity** biomarkers (i.e. those related to treatment response). Evidence items where variants match **resistance**, **prognostic**, or **diagnostic** biomarkers are also shown — all restricted to biomarkers matching the tumor type of the query sample.
+
+The report does not display the complete set of **Tier III** RNA fusions (uncertain/unknown clinical significance). The full list is available in the TSV and Excel workbook outputs.
+
+:::
 
 ::: {.panel-tabset}
 

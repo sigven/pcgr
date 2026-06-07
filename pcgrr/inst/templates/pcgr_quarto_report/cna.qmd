@@ -394,11 +394,13 @@ _clinical actionability_ through an implementation of AMP/ASCO/CAP guidelines [@
 The table below indicates which variants have been classified into _tiers of clinical significance_ according to AMP/ASCO/CAP criteria.
 
 
-::: {.callout-note}
+::: {.callout-note collapse="false"}
+## Note — biomarker types and report scope
 
-## Note - biomarker matching
+Tier classification is driven by **therapeutic sensitivity** biomarkers (i.e. those related to treatment response). Evidence items where variants match **resistance**, **prognostic**, or **diagnostic** biomarkers are also shown — all restricted to biomarkers matching the tumor type of the query sample.
 
-The same somatic aberration may frequently match with multiple evidence items listed in biomarker databases, pending on e.g. the _disease/tumor context_, _therapeutic context_, _biomarker resolution_, or underlying _evidence source_ (i.e. publication)
+The report does not display the complete set of **Tier III** copy number aberrations (uncertain/unknown clinical significance). The full list is available in the TSV and Excel workbook outputs.
+
 :::
 
 

@@ -5,22 +5,20 @@
 #| echo: false
 #| eval: true
 
-#pcg_report <- readRDS(file="/Users/sigven/project_data/packages/package__pcgr/pcgr/pcgrr/pcg_report.rds")
 vstats <- pcg_report$content$snv_indel$vstats
 tumor_site <- pcg_report$settings$conf$sample_properties$site
 cs <- pcgrr::color_palette$bm_callout
 ```
 
-Acquired SNVs and InDels in the tumor sample have been assessed for
-_clinical actionability_ through an implementation of AMP/ASCO/CAP guidelines [@Li2017-ew]. We use `r bm_db_label` `r bm_db_citation` as the underlying sources for actionable variants (versions indicated [below](#documentation)).
-
-The tabset below indicates which variants have been classified into three distinct _tiers of clinical significance_ according to AMP/ASCO/CAP criteria.
+Acquired SNVs and InDels in the tumor sample have been classified into tiers of _clinical actionability_ - adopting the AMP/ASCO/CAP guidelines [@Li2017-ew]. We use `r bm_db_label` `r bm_db_citation` as the underlying sources for actionable variants (versions indicated [below](#documentation)).
 
 
-::: {.callout-note collapse="true"}
-## Note - biomarker matching
+::: {.callout-note collapse="false"}
+## Note — biomarker types and report scope
 
-The same somatic aberration may frequently match with multiple evidence items listed in biomarker databases, pending on e.g. the _disease/tumor context_, _therapeutic context_, _biomarker resolution_, or underlying _evidence source_ (i.e. publication).
+Tier classification is driven by **therapeutic sensitivity** biomarkers (i.e. those related to treatment response). Evidence items where variants match **resistance**, **prognostic**, or **diagnostic** biomarkers are also shown — all restricted to biomarkers matching the tumor type of the query sample.
+
+Note that the _complete_ set of **Tier III** variants (uncertain/unknown clinical significance) are only available in the TSV and Excel workbook outputs.
 
 :::
 
@@ -32,8 +30,8 @@ The same somatic aberration may frequently match with multiple evidence items li
 #| include: !expr isTRUE(vstats$therapeutic_sensitivity$tier1$n_var > 0) || isTRUE(vstats$therapeutic_sensitivity$tier2$n_var > 0) || isTRUE(vstats$therapeutic_sensitivity$tier3$n_var > 0) || isTRUE(vstats$therapeutic_resistance$tier1$n_var > 0) || isTRUE(vstats$therapeutic_resistance$tier2$n_var > 0) || isTRUE(vstats$therapeutic_resistance$tier3$n_var > 0)
 
 cat(paste0(
-  "\n::: {.callout-important collapse='false'}\n## Note - biomarker resolution\n\n",
-  "Biomarkers registered in CIViC/CGI are provided at different _resolutions_.",
+  "\n::: {.callout-important collapse='false'}\n## Note - biomarker resolution and matching against query variants\n\n",
+  "A somatic aberration in the tumor sample may frequently match with multiple evidence items listed in biomarker databases (CIViC/CGI/OncoKB), pending on e.g. the _disease/tumor context_, _therapeutic context_, or underlying _evidence source_ (i.e. publication). Biomarkers are furthermore recorded at different _resolutions_.",
   " The accuracy of a match between a variant ",
   "in the tumor sample and a clinical evidence item (biomarker) will vary accordingly, ",
   "as indicated by the styling of the <b>Alteration</b> column below:\n\n",
@@ -76,11 +74,6 @@ cat(paste0(
   "<div style='margin-bottom:4px;'><span style='display:inline-block; padding:2px 10px; border-radius:4px; font-size:0.90em; font-weight:600; background-color:#1565C0; color:white; margin-right:6px;'>T1</span>Tier 1 - variants of strong clinical significance</div>",
   "<div style='margin-bottom:4px;'><span style='display:inline-block; padding:2px 10px; border-radius:4px; font-size:0.90em; font-weight:600; background-color:#42A5F5; color:white; margin-right:6px;'>T2</span>Tier 2 - variants of potential clinical significance</div>",
   "<div style='margin-bottom:4px;'><span style='display:inline-block; padding:2px 10px; border-radius:4px; font-size:0.90em; font-weight:600; background-color:#868686; color:white; margin-right:6px;'>T3</span>Tier 3 - variants of uncertain significance</div>",
-  #"<span style='margin-left:4px;'><span style='display:inline-block; padding:2px 10px; border-radius:4px; font-size:0.90em; font-weight:600; background-color:#C62828; color:white; margin-right:4px;'>R1</span>Resistance tier 1</span>",
-  #"<span><span style='display:inline-block; padding:2px 10px; border-radius:4px; font-size:0.90em; font-weight:600; background-color:#E57373; color:white; margin-right:4px;'>R2</span>Resistance tier 2</span>",
-  #"<span><span style='display:inline-block; padding:2px 10px; border-radius:4px; font-size:0.90em; font-weight:600; background-color:#868686; color:white; margin-right:4px;'>R3</span>Resistance tier 3</span>",
-  #"<span style='margin-left:4px;'><span style='display:inline-block; padding:2px 10px; border-radius:4px; font-size:0.90em; font-weight:600; background-color:#E65100; color:white; margin-right:4px;'>PP</span>Poor prognosis</span>",
-  #"<span><span style='display:inline-block; padding:2px 10px; border-radius:4px; font-size:0.90em; font-weight:600; background-color:#2E7D32; color:white; margin-right:4px;'>PB</span>Better prognosis</span>",
   "</div></div>\n"
 ))
 htmltools::br()

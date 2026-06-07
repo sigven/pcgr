@@ -3,7 +3,7 @@
 \name{assign_variant_tiers_fusion}
 \alias{assign_variant_tiers_fusion}
 \title{Assign tiers of clinical significance (AMP/ASCO/CAP framework) to
-somatic RNA fusions}
+RNA fusions}
 \usage{
 assign_variant_tiers_fusion(
   primary_site = "Any",
@@ -33,7 +33,7 @@ based on biomarker evidence items and variant properties
 }
 \description{
 Function that assigns tiers of clinical significance (AMP/ASCO/CAP
-framework) to somatic RNA fusions based on biomarker evidence items.
+framework) to RNA fusions based on biomarker evidence items.
 The function considers the strength of evidence (evidence levels)
 and the match between biomarker site and primary site of query tumor.
 The function also considers oncogene properties of fusion partners to

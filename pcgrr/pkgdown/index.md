@@ -4,7 +4,7 @@ editor_options:
     wrap: 72
 ---
 
-# Personal Cancer Genome Reporter (PCGR) <a href="https://sigven.github.io/pcgr/"><img src="man/figures/logo.png" align="right" height="90" width="76"/></a>
+# Personal Cancer Genome Reporter <a href="https://sigven.github.io/pcgr/"><img src="man/figures/logo.png" align="right" height="90" width="76"/></a>
 
 
 The Personal Cancer Genome Reporter (PCGR) is a stand-alone software workflow for functional annotation and translation of individual tumor genomes for precision cancer medicine. It interprets somatic SNVs/InDels and copy number aberrations, RNA fusions, and bulk RNA-seq expression data. The software classifies variants with respect to predicted _oncogenicity_, and clinical _actionability_. Interactive HTML output reports allow the user to interrogate the clinical impact of the molecular findings in an individual tumor.
