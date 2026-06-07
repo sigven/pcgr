@@ -245,6 +245,8 @@ get_excel_sheets <- function(report = NULL) {
                 ) |>
                 dplyr::select(
                   c("SAMPLE_ID",
+                    "VARIANT_CLASS",
+                    "VAR_ID",
                     "SAMPLE_ALTERATION",
                     "TIER"),
                   dplyr::everything()
@@ -327,6 +329,8 @@ get_excel_sheets <- function(report = NULL) {
                 ) |>
                 dplyr::select(
                   c("SAMPLE_ID",
+                    "VARIANT_CLASS",
+                    "VAR_ID",
                     "SAMPLE_ALTERATION",
                     "TIER"),
                   dplyr::everything()
@@ -432,7 +436,11 @@ get_excel_sheets <- function(report = NULL) {
                   by = c("VAR_ID","ENTREZGENE","VARIANT_CLASS")
                 ) |>
                 dplyr::select(
-                  c("SAMPLE_ID","SAMPLE_ALTERATION", "TIER"),
+                  c("SAMPLE_ID",
+                    "VARIANT_CLASS",
+                    "VAR_ID",
+                    "SAMPLE_ALTERATION",
+                    "TIER"),
                   dplyr::everything()
                 )
             )

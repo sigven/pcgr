@@ -33,7 +33,7 @@ load_somatic_cna <- function(
       readr::read_tsv(
         file = fname_cna_segment,
         na = c(".","NA"),
-        show_col_types = F,
+        show_col_types = FALSE,
         progress = F
       )
     )
@@ -614,7 +614,7 @@ load_dna_variants <- function(
       readr::read_tsv(
         file = fname,
         na = c(".","NA"),
-        show_col_types = F,
+        show_col_types = FALSE,
         progress = F
       )
     )
@@ -834,7 +834,7 @@ load_dna_variants <- function(
           .data$TRANSCRIPT_OVERLAP, collapse=", "),
         MAX_TRANSCRIPT_OVERLAP_PERCENT =
           max(.data$TRANSCRIPT_OVERLAP_PERCENT,
-              na.rm = T),
+              na.rm = TRUE),
         .groups = "drop"
       ) |>
       dplyr::distinct()
@@ -982,9 +982,19 @@ load_dna_variants <- function(
       for (clnsig in names(bm_categories)) {
         for (elem in c("classification",
                        "eitems")) {
-          results$bm_evidence[[clnsig]][[elem]] <-
-            amp_asco_cap_classified_variant[[clnsig]]$bm_evidence[[elem]]
+          if(!is.null(amp_asco_cap_classified_variant[[clnsig]]$bm_evidence[[elem]])){
+            results$bm_evidence[[clnsig]][[elem]] <-
+              amp_asco_cap_classified_variant[[clnsig]]$bm_evidence[[elem]]
+          }
         }
+
+        ## Use classified variants for therapeutic sensitivity to populate the
+        ## 'variant' element of the results list, which is used for display in
+        ## the HTML report and for filtering of actionable variants in the report -
+        ## this ensures that only variants with AMP/ASCO/CAP tiers of clinical
+        ## significance for therapeutic sensitivity are included in the report
+        ## and considered actionable
+        ##
         if (clnsig == "therapeutic_sensitivity") {
           if (NROW(amp_asco_cap_classified_variant[[clnsig]][['variant']]) > 0) {
             results[['variant']] <-
@@ -1036,7 +1046,7 @@ load_expression_similarity <- function(settings = NULL) {
 
     expression_similarity <- suppressWarnings(readr::read_tsv(
       settings$molecular_data$fname_expression_similarity_tsv,
-      show_col_types = F,
+      show_col_types = FALSE,
       na = ".", guess_max = 100000))
 
     for (source in unique(expression_similarity$EXT_DB)) {
@@ -1081,7 +1091,7 @@ load_expression_outliers <- function(
     ## Read raw expression outlier data from Python step of PCGR
     outlier_data <- suppressWarnings(readr::read_tsv(
       settings$molecular_data$fname_expression_outliers_tsv,
-      show_col_types = F,
+      show_col_types = FALSE,
       na = ".", guess_max = 100000))
 
     if (!is.null(ref_data) &
@@ -1246,7 +1256,7 @@ load_expression_csq <- function(settings = NULL) {
        file.exists(settings$molecular_data[['fname_csq_expression_tsv']])) {
       expression_csq <- readr::read_tsv(
         settings$molecular_data[['fname_csq_expression_tsv']],
-        show_col_types = F, na = ".")
+        show_col_types = FALSE, na = ".")
     }
   }
 
@@ -1267,7 +1277,7 @@ load_rna_fusions <- function(
 
   log4r_info("------")
   log4r_info(paste0(
-    "Reading annotated molecular dataset (DNA) - somatic RNA fusions"))
+    "Reading annotated molecular dataset (DNA) - RNA fusions"))
 
   primary_site <-
     settings$conf$sample_properties$site
@@ -1301,7 +1311,7 @@ load_rna_fusions <- function(
         file = rna_fusion_raw_fname,
         guess_max = 0,
         na = c(".","NA"),
-        show_col_types = F,
+        show_col_types = FALSE,
         progress = F
       )
     )
@@ -1950,7 +1960,9 @@ load_rna_fusions <- function(
       ) |>
       dplyr::left_join(
         recurrency_data[['variant']],
-        by = c("SAMPLE_ID","VAR_ID","FUSION_GENE2"),
+        by = c("SAMPLE_ID",
+               "VAR_ID",
+               "FUSION_GENE2"),
         relationship = "many-to-one"
       ) |>
       dplyr::mutate(
@@ -1984,8 +1996,8 @@ load_rna_fusions <- function(
       dplyr::select(
         dplyr::any_of(
           c("SAMPLE_ID",
-            "VAR_ID",
             "VARIANT_CLASS",
+            "VAR_ID",
             "SAMPLE_ALTERATION",
             "ENTREZGENE",
             "FUSION_GENE",

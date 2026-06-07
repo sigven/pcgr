@@ -83,7 +83,7 @@ assign_amp_asco_cap_tiers <- function(
           "BM_EVIDENCE_DIRECTION",
           "BM_EVIDENCE_TYPE",
           "BM_MAPPING_CONFIDENCE"),
-        only_colnames = F, quiet = T
+        only_colnames = FALSE, quiet = T
       ))
 
       ## only consider biomarker evidence items with specified
@@ -324,7 +324,7 @@ assign_variant_tiers_cna <- function(
               "ENTREZGENE",
               "TUMOR_SUPPRESSOR",
               "ONCOGENE"),
-    only_colnames = F, quiet = T))
+    only_colnames = FALSE, quiet = TRUE))
 
   invisible(assertthat::assert_that(
     primary_site %in% tumor_sites,
@@ -381,7 +381,7 @@ assign_variant_tiers_cna <- function(
       "VARIANT_CLASS",
       "ENTREZGENE",
       "ACTIONABILITY_TIER"),
-    only_colnames = F, quiet = T))
+    only_colnames = TRUE, quiet = TRUE))
 
   ## Assign low tier status to variants with uncertain clinical significance
   ## based on gene properties
@@ -410,13 +410,6 @@ assign_variant_tiers_cna <- function(
         as.integer(.data$ACTIONABILITY_TIER))) |>
     dplyr::arrange(.data$ACTIONABILITY_TIER) |>
     dplyr::distinct() |>
-    dplyr::select(
-      -c("TUMOR_SUPPRESSOR",
-         "ONCOGENE")
-    ) |>
-    dplyr::arrange(
-      .data$ACTIONABILITY_TIER
-    ) |>
     dplyr::mutate(
       ACTIONABILITY = dplyr::case_when(
         ACTIONABILITY_TIER == 1 ~ "Strong significance",
@@ -424,6 +417,13 @@ assign_variant_tiers_cna <- function(
         ACTIONABILITY_TIER == 3 ~ "Uncertain significance",
         TRUE ~ as.character(NA)
       )
+    ) |>
+    dplyr::select(
+      c("VAR_ID",
+        "VARIANT_CLASS",
+        "ENTREZGENE",
+        "ACTIONABILITY_TIER",
+        "ACTIONABILITY")
     )
 
   return(variants_tier_classified)
@@ -431,10 +431,10 @@ assign_variant_tiers_cna <- function(
 }
 
 #' Assign tiers of clinical significance (AMP/ASCO/CAP framework) to
-#' somatic RNA fusions
+#' RNA fusions
 #'
 #' Function that assigns tiers of clinical significance (AMP/ASCO/CAP
-#' framework) to somatic RNA fusions based on biomarker evidence items.
+#' framework) to RNA fusions based on biomarker evidence items.
 #' The function considers the strength of evidence (evidence levels)
 #' and the match between biomarker site and primary site of query tumor.
 #' The function also considers oncogene properties of fusion partners to
@@ -470,7 +470,7 @@ assign_variant_tiers_fusion <- function(
               "ENTREZGENE",
               "ONCOGENE_3P",
               "ONCOGENE_5P"),
-    only_colnames = F, quiet = T))
+    only_colnames = FALSE, quiet = TRUE))
 
   invisible(assertthat::assert_that(
     primary_site %in% tumor_sites,
@@ -515,6 +515,7 @@ assign_variant_tiers_fusion <- function(
       c("VAR_ID",
         "VARIANT_CLASS",
         "ENTREZGENE",
+        "MITDB_NUM_EVIDENCE",
         "ONCOGENE_3P",
         "ONCOGENE_5P")
         )
@@ -525,7 +526,7 @@ assign_variant_tiers_fusion <- function(
       "VARIANT_CLASS",
       "ENTREZGENE",
       "ACTIONABILITY_TIER"),
-    only_colnames = F, quiet = T))
+    only_colnames = TRUE, quiet = TRUE))
 
   ## Assign low tier status to variants with uncertain clinical significance
   ## based oncogene status of fusion partners
@@ -541,7 +542,9 @@ assign_variant_tiers_fusion <- function(
         ((!is.na(.data$ONCOGENE_3P) &
             .data$ONCOGENE_3P == TRUE) |
            (!is.na(.data$ONCOGENE_5P) &
-              .data$ONCOGENE_5P == TRUE)
+              .data$ONCOGENE_5P == TRUE) &
+           (!is.na(MITDB_NUM_EVIDENCE) &
+              .data$MITDB_NUM_EVIDENCE > 0)
         ),
       as.integer(3),
       as.integer(.data$ACTIONABILITY_TIER)
@@ -552,13 +555,6 @@ assign_variant_tiers_fusion <- function(
       as.integer(.data$ACTIONABILITY_TIER))) |>
     dplyr::arrange(.data$ACTIONABILITY_TIER) |>
     dplyr::distinct() |>
-    dplyr::select(
-      -c("ONCOGENE_3P",
-         "ONCOGENE_5P")
-    ) |>
-    dplyr::arrange(
-      .data$ACTIONABILITY_TIER
-    ) |>
     dplyr::mutate(
       ACTIONABILITY = dplyr::case_when(
         ACTIONABILITY_TIER == 1 ~ "Strong significance",
@@ -566,6 +562,13 @@ assign_variant_tiers_fusion <- function(
         ACTIONABILITY_TIER == 3 ~ "Uncertain significance",
         TRUE ~ as.character(NA)
       )
+    ) |>
+    dplyr::select(
+      c("VAR_ID",
+        "VARIANT_CLASS",
+        "ENTREZGENE",
+        "ACTIONABILITY_TIER",
+        "ACTIONABILITY")
     )
 
   return(variants_tier_classified)
@@ -613,9 +616,10 @@ assign_variant_tiers_snv_indel <- function(
               "VARIANT_CLASS",
               "ENTREZGENE",
               "ONCOGENE",
+              "ONCOGENICITY",
               "gnomADe_AF",
               "CODING_STATUS"),
-    only_colnames = F, quiet = T))
+    only_colnames = FALSE, quiet = TRUE))
 
   invisible(assertthat::assert_that(
     primary_site %in% tumor_sites,
@@ -667,6 +671,7 @@ assign_variant_tiers_snv_indel <- function(
         "ENTREZGENE",
         "TUMOR_SUPPRESSOR",
         "ONCOGENE",
+        "ONCOGENICITY",
         "gnomADe_AF",
         "CODING_STATUS")
     )
@@ -677,7 +682,7 @@ assign_variant_tiers_snv_indel <- function(
       "VARIANT_CLASS",
       "ENTREZGENE",
       "ACTIONABILITY_TIER"),
-    only_colnames = F, quiet = T))
+    only_colnames = TRUE, quiet = TRUE))
 
   ## Assign low tier status to variants with uncertain clinical significance
   ## based on variant properties associated with oncogenes and tumor
@@ -701,6 +706,8 @@ assign_variant_tiers_snv_indel <- function(
         (is.na(.data$gnomADe_AF) |
            .data$gnomADe_AF < 0.001) &
         .data$CODING_STATUS == "coding" &
+        (.data$ONCOGENICITY != "Benign" |
+           .data$ONCOGENICITY != "Likely Benign") &
         is.na(.data$ACTIONABILITY_TIER),
       as.integer(3),
       as.integer(.data$ACTIONABILITY_TIER)
@@ -726,11 +733,6 @@ assign_variant_tiers_snv_indel <- function(
     )) |>
     dplyr::arrange(.data$ACTIONABILITY_TIER) |>
     dplyr::distinct() |>
-    dplyr::select(
-      -c("TUMOR_SUPPRESSOR",
-         "ONCOGENE",
-         "gnomADe_AF",
-         "CODING_STATUS")) |>
     dplyr::arrange(
       .data$ACTIONABILITY_TIER
     ) |>
@@ -741,6 +743,13 @@ assign_variant_tiers_snv_indel <- function(
         ACTIONABILITY_TIER == 3 ~ "Uncertain significance",
         TRUE ~ as.character(NA)
       )
+    ) |>
+    dplyr::select(
+      c("VAR_ID",
+        "VARIANT_CLASS",
+        "ENTREZGENE",
+        "ACTIONABILITY_TIER",
+        "ACTIONABILITY")
     )
 
   return(variants_tier_classified)
@@ -808,7 +817,7 @@ assign_variant_top_tiers_ttagnostic <- function(
     var_df, c("VAR_ID",
               "ENTREZGENE",
               "VARIANT_CLASS"),
-    only_colnames = F, quiet = T))
+    only_colnames = FALSE, quiet = TRUE))
 
   ## log length gene variant records (VAR_ID, ENTREZGENE, VARIANT_CLASS)
   log4r_debug(paste0(
@@ -833,7 +842,7 @@ assign_variant_top_tiers_ttagnostic <- function(
         "BM_EVIDENCE_LEVEL",
         "BM_EVIDENCE_TYPE",
         "BM_PRIMARY_SITE"),
-      only_colnames = F, quiet = T))
+      only_colnames = FALSE, quiet = TRUE))
 
     biomarkers_tier_classified <-
       biomarker_items |>
@@ -888,7 +897,7 @@ assign_variant_top_tiers_ttagnostic <- function(
         .data$ENTREZGENE) |>
       dplyr::summarise(
         ACTIONABILITY_TIER = min(
-          .data$ACTIONABILITY_TIER, na.rm = T),
+          .data$ACTIONABILITY_TIER, na.rm = TRUE),
         .groups = "drop") |>
       dplyr::mutate(ACTIONABILITY_TIER = dplyr::if_else(
         .data$ACTIONABILITY_TIER == 100,
@@ -1020,7 +1029,7 @@ assign_variant_top_tiers_ttspecific <- function(
     var_df, c("VAR_ID",
               "ENTREZGENE",
               "VARIANT_CLASS"),
-    only_colnames = F, quiet = T))
+    only_colnames = FALSE, quiet = TRUE))
 
   ## log length gene variant records (VAR_ID, ENTREZGENE, VARIANT_CLASS)
   # log4r_debug(paste0(
@@ -1045,7 +1054,7 @@ assign_variant_top_tiers_ttspecific <- function(
         "BM_EVIDENCE_LEVEL",
         "BM_EVIDENCE_TYPE",
         "BM_PRIMARY_SITE"),
-      only_colnames = F, quiet = T))
+      only_colnames = FALSE, quiet = TRUE))
 
     biomarkers_tier_classified <-
       biomarker_items |>
@@ -1091,7 +1100,8 @@ assign_variant_top_tiers_ttspecific <- function(
           ) ~ as.integer(2),
 
         ## A) Biomarker site _does not_ match primary site of query tumor
-        ## B) weak evidence - evidence levels (C/D/E)
+        ## B) Biomarker site is not pan-cancer ('Any')
+        ## C) weak evidence - evidence levels (C/D/E)
         ## --> TIER 3
         .data$BM_PRIMARY_SITE != primary_site &
            .data$BM_PRIMARY_SITE != "Any" &
@@ -1099,6 +1109,17 @@ assign_variant_top_tiers_ttspecific <- function(
           stringr::str_detect(
             .data$BM_EVIDENCE_LEVEL, bm_evidence$weak_regex
           ) ~ as.integer(3),
+
+        ## A) Pan-cancer biomarker (BM_PRIMARY_SITE = 'Any')
+        ## B) Weak evidence - evidence levels (C/D/E)
+        ## --> TIER 3 (pan-cancer weak is relevant signal, but at the
+        ##     lowest tier — consistent with non-matching weak evidence)
+        .data$BM_PRIMARY_SITE == "Any" &
+          tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
+          stringr::str_detect(
+            .data$BM_EVIDENCE_LEVEL, bm_evidence$weak_regex
+          ) ~ as.integer(3),
+
         TRUE ~ as.integer(100)
 
       )) |>
@@ -1110,7 +1131,7 @@ assign_variant_top_tiers_ttspecific <- function(
         .data$ENTREZGENE) |>
       dplyr::summarise(
         ACTIONABILITY_TIER = min(
-          .data$ACTIONABILITY_TIER, na.rm = T),
+          .data$ACTIONABILITY_TIER, na.rm = TRUE),
         .groups = "drop") |>
       dplyr::mutate(ACTIONABILITY_TIER = dplyr::if_else(
         .data$ACTIONABILITY_TIER == 100,
@@ -1249,7 +1270,7 @@ assign_bm_tier_support_ttspecific <- function(
       "VARIANT_CLASS",
       "ACTIONABILITY",
       "ACTIONABILITY_TIER"),
-    only_colnames = F, quiet = T)
+    only_colnames = FALSE, quiet = TRUE)
 
   log4r_debug(paste0(
     "assign_bm_tier_support_ttspecific - etype_for_tiering: ",
@@ -1263,7 +1284,7 @@ assign_bm_tier_support_ttspecific <- function(
         "ENTREZGENE",
         "BM_EVIDENCE_LEVEL",
         "BM_PRIMARY_SITE"),
-      only_colnames = F, quiet = T)
+      only_colnames = FALSE, quiet = TRUE)
 
     biomarker_items <- as.data.frame(
       biomarker_items |>
@@ -1293,11 +1314,22 @@ assign_bm_tier_support_ttspecific <- function(
         ## of evidence and tumor type match
         dplyr::mutate(
           BM_ACTIONABILITY_SUPPORT = dplyr::case_when(
-            ## 1) Variants with a tier of 1 (strong clinical significance)
 
-            ## A) Biomarker site _matches_ primary site of query tumor
+            ## Pan-cancer weak evidence on tier-1/2 variants: the tier was
+            ## set by stronger evidence — pan-cancer weak is additional context
+            ## only. On tier-3 variants it falls through to the tier-3 rule
+            ## below where it is correctly labelled tier-defining.
+            .data$BM_PRIMARY_SITE == "Any" &
+              .data$ACTIONABILITY_TIER %in% c(1L, 2L) &
+              tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
+              stringr::str_detect(
+                .data$BM_EVIDENCE_LEVEL, bm_evidence$weak_regex) ~ "additional",
+
+            ## --- Tier 1 variants (strong clinical significance) ---
+
+            ## A) Biomarker site _matches_ primary site of query tumor,
             ##    or pan-cancer biomarker (BM_PRIMARY_SITE = 'Any')
-            ## B) strong evidence - evidence levels A/B
+            ## B) Strong evidence - evidence levels A/B
             ## --> evidence item is tier-defining
             .data$ACTIONABILITY_TIER == 1 &
               tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
@@ -1307,19 +1339,19 @@ assign_bm_tier_support_ttspecific <- function(
                 .data$BM_EVIDENCE_LEVEL, bm_evidence$strong_regex) ~ "tier-defining",
 
             ## A) Biomarker site _matches_ primary site of query tumor
-            ## B) weak evidence - evidence levels C/D/E
+            ## B) Weak evidence - evidence levels C/D/E
             ## --> evidence item is providing additional support
             .data$ACTIONABILITY_TIER == 1 &
               tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
-              (.data$BM_PRIMARY_SITE == primary_site |
-                 .data$BM_PRIMARY_SITE == "Any") &
+              .data$BM_PRIMARY_SITE == primary_site &
               stringr::str_detect(
                 .data$BM_EVIDENCE_LEVEL, bm_evidence$weak_regex) ~ "additional",
 
-
             ## A) Biomarker site does not _match_ primary site of query tumor
-            ## B) strong evidence - evidence levels A/B
+            ##    and non pan-cancer biomarker (BM_PRIMARY_SITE != 'Any')
+            ## B) Strong evidence - evidence levels A/B
             ## --> evidence item is providing additional support
+            ##    (tier-1 was defined by a matching-site or pan-cancer strong item)
             .data$ACTIONABILITY_TIER == 1 &
               tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
               (.data$BM_PRIMARY_SITE != primary_site &
@@ -1327,43 +1359,42 @@ assign_bm_tier_support_ttspecific <- function(
               stringr::str_detect(
                 .data$BM_EVIDENCE_LEVEL, bm_evidence$strong_regex) ~ "additional",
 
-
             ## A) Biomarker site does not _match_ primary site of query tumor
-            ## B) weak evidence - evidence levels (C/D/E
+            ##    and non pan-cancer biomarker (BM_PRIMARY_SITE != 'Any')
+            ## B) Weak evidence - evidence levels C/D/E
             ## --> evidence item is providing additional support
             .data$ACTIONABILITY_TIER == 1 &
               tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
               (.data$BM_PRIMARY_SITE != primary_site &
                  .data$BM_PRIMARY_SITE != "Any") &
               stringr::str_detect(
-                .data$BM_EVIDENCE_LEVEL, bm_evidence$weak_regex) ~ "additional-weak",
+                .data$BM_EVIDENCE_LEVEL, bm_evidence$weak_regex) ~ "additional",
 
-            ## 1) Variants with a tier of 2 (potential clinical significance)
+            ## --- Tier 2 variants (potential clinical significance) ---
 
             ## A) Biomarker site does not _match_ primary site of query tumor
             ##    and non pan-cancer biomarker (BM_PRIMARY_SITE != 'Any')
-            ## B) strong evidence - evidence levels A/B
+            ## B) Strong evidence - evidence levels A/B
             ## --> evidence item is tier-defining
             .data$ACTIONABILITY_TIER == 2 &
               tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
-              (.data$BM_PRIMARY_SITE != primary_site |
-                 .data$BM_PRIMARY_SITE == "Any") &
+              (.data$BM_PRIMARY_SITE != primary_site &
+                 .data$BM_PRIMARY_SITE != "Any") &
               stringr::str_detect(
                 .data$BM_EVIDENCE_LEVEL, bm_evidence$strong_regex) ~ "tier-defining",
 
             ## A) Biomarker site _matches_ primary site of query tumor
-            ## B) weak evidence - evidence levels C/D/E
-            ## --> evidence item is providing additional support
+            ## B) Weak evidence - evidence levels C/D/E
+            ## --> evidence item is tier-defining
             .data$ACTIONABILITY_TIER == 2 &
               tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
-              (.data$BM_PRIMARY_SITE == primary_site &
-                 .data$BM_PRIMARY_SITE != "Any") &
+              .data$BM_PRIMARY_SITE == primary_site &
               stringr::str_detect(
                 .data$BM_EVIDENCE_LEVEL, bm_evidence$weak_regex) ~ "tier-defining",
 
-
             ## A) Biomarker site does not _match_ primary site of query tumor
-            ## B) weak evidence - evidence levels (C/D/E)
+            ##    and non pan-cancer biomarker (BM_PRIMARY_SITE != 'Any')
+            ## B) Weak evidence - evidence levels C/D/E
             ## --> evidence item is providing additional support
             .data$ACTIONABILITY_TIER == 2 &
               tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering &
@@ -1372,7 +1403,12 @@ assign_bm_tier_support_ttspecific <- function(
               stringr::str_detect(
                 .data$BM_EVIDENCE_LEVEL, bm_evidence$weak_regex) ~ "additional",
 
-            ## any evidence that matches tier 3 is tier-defining
+            ## --- Tier 3 variants (uncertain clinical significance) ---
+
+            ## All weak evidence on tier-3 variants is tier-defining,
+            ## regardless of pan-cancer or tumor-specific site — consistent
+            ## with assign_bm_tier_support_ttagnostic, and correct now that
+            ## pan-cancer weak contributes to tier-3 assignment
             .data$ACTIONABILITY_TIER == 3 &
               tolower(.data$BM_EVIDENCE_TYPE) %in% etype_for_tiering ~ "tier-defining",
 
@@ -1445,7 +1481,7 @@ assign_bm_tier_support_ttagnostic <- function(
       "VARIANT_CLASS",
       "ACTIONABILITY",
       "ACTIONABILITY_TIER"),
-    only_colnames = F, quiet = T)
+    only_colnames = FALSE, quiet = TRUE)
 
   log4r_debug(paste0(
     "assign_bm_tier_support_ttagnostic - etype_for_tiering: ",
@@ -1459,7 +1495,7 @@ assign_bm_tier_support_ttagnostic <- function(
         "ENTREZGENE",
         "BM_EVIDENCE_LEVEL",
         "BM_PRIMARY_SITE"),
-      only_colnames = F, quiet = T)
+      only_colnames = FALSE, quiet = TRUE)
 
     biomarker_items <- as.data.frame(
       biomarker_items |>

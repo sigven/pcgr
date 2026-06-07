@@ -849,6 +849,7 @@ usethis::use_data(oncokb_annotations, overwrite = T)
 
 tsv_cols[['cna']] <-
   c('SAMPLE_ID',
+    'VARIANT_CLASS',
     'VAR_ID',
     'GENOME_VERSION',
     'CN_MAJOR',
@@ -863,7 +864,6 @@ tsv_cols[['cna']] <-
     'SEGMENT_LENGTH_MB',
     'CYTOBAND',
     'EVENT_TYPE',
-    'VARIANT_CLASS',
     'VARIANT_CLASS_DISPLAY',
     'SYMBOL',
     'ENTREZGENE',
@@ -883,8 +883,9 @@ tsv_cols[['cna']] <-
 
 ####----RNA fusions-----#####
 tsv_cols[['fusion']] <-
-  c("VAR_ID",
+  c("SAMPLE_ID",
     "VARIANT_CLASS",
+    "VAR_ID",
     "ENTREZGENE",
     "FUSION_GENE",
     "FUSION_GENE2",
@@ -916,6 +917,8 @@ tsv_cols[['fusion']] <-
 ####----SNV/Indel-----#####
 tsv_cols[['snv_indel']] <-
   c('SAMPLE_ID',
+    'VARIANT_CLASS',
+    'VAR_ID',
     'GENOMIC_CHANGE',
     'GENOME_VERSION',
     'VARIANT_CLASS',
@@ -987,9 +990,10 @@ tsv_cols[['snv_indel']] <-
 ####----SNV/Indel unfiltered-----#####
 tsv_cols[['snv_indel_unfiltered']] <-
   c('SAMPLE_ID',
+    'VARIANT_CLASS',
+    'VAR_ID',
     'GENOMIC_CHANGE',
     'GENOME_VERSION',
-    'VARIANT_CLASS',
     'SOMATIC_CLASSIFICATION',
     'SYMBOL',
     'ENTREZGENE',
