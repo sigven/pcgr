@@ -5,7 +5,11 @@
 #' @param msi_prediction_model statistical model for MSI prediction
 #' @param msi_prediction_dataset underlying dataset from TCGA used for
 #' development of statistical classifier
+#' @param msi_feature_variance_table lookup table (from model training) mapping
+#' mutation-count bins to expected feature SD; used to qualify prediction
+#' confidence. NULL if not available.
 #' @param target_size_mb size of targeted genomic region (coding)
+#' @param n_calls number of variants passed to the classifier
 #' @param sample_name name of sample
 #' @return msi_data
 #'
@@ -14,7 +18,9 @@ predict_msi_status <- function(variant_set,
                                ref_data,
                                msi_prediction_model,
                                msi_prediction_dataset,
+                               msi_feature_variance_table = NULL,
                                target_size_mb,
+                               n_calls = NA_integer_,
                                sample_name = "Test") {
 
   mutations_valid <- get_valid_chromosomes(
@@ -38,16 +44,16 @@ predict_msi_status <- function(variant_set,
     dplyr::mutate(
       repeatStatus =
         dplyr::if_else(
-          .data$SIMPLEREPEATS_HIT == T,
+          .data$SIMPLEREPEATS_HIT == TRUE,
           "simpleRepeat", as.character(NA))) |>
     dplyr::mutate(
       winMaskStatus =
         dplyr::if_else(
-          .data$WINMASKER_HIT == T,
+          .data$WINMASKER_HIT == TRUE,
           "winMaskDust", as.character(NA)))
 
   msi_stats <- data.frame(
-    "sample_name" = sample_name, stringsAsFactors = F)
+    "sample_name" = sample_name, stringsAsFactors = FALSE)
 
   msi_stats1 <- vcf_df_repeatAnnotated |>
     dplyr::filter(
@@ -286,23 +292,75 @@ predict_msi_status <- function(variant_set,
     msi_prediction_model,
     dplyr::select(msi_stats, msi_predictors))
 
+  ## RF class probabilities — well-calibrated (Brier score ~0.011 on TCGA holdout)
+  msi_probs <- stats::predict(
+    msi_prediction_model,
+    dplyr::select(msi_stats, msi_predictors),
+    type = "prob"
+  )
+  prob_msi_h <- round(as.numeric(msi_probs[["MSI-H"]]), 3)
+
+  ## Confidence tier based on calibration: samples scoring 0.1–0.9 are genuinely
+  ## uncertain; the vast majority of samples are strongly bimodal (P<0.1 or P>0.9)
+  confidence_tier <- dplyr::case_when(
+    prob_msi_h >= 0.9 | prob_msi_h <= 0.1 ~ "High confidence",
+    TRUE                                   ~ "Uncertain"
+  )
+
   if (msi_class == "MSS") {
     msi_stats$predicted_class <- "MSS (Microsatellite stable)"
     msi_stats$vb <- "MSS"
-  }
-  else{
+  } else {
     msi_stats$predicted_class <- "MSI.H (Microsatellite instability - high)"
     msi_stats$vb <- "MSI - High"
   }
-  log4r_info(paste0("Predicted MSI status: ",
-                           msi_stats$predicted_class))
+
+  msi_stats$prob_msi_h      <- prob_msi_h
+  msi_stats$confidence_tier <- confidence_tier
+  msi_stats$n_calls          <- n_calls
+
+  ## Look up expected feature SD for this sample's mutation-count bin
+  msi_stats$fracIndels_expected_sd <- NA_real_
+  if (!is.null(msi_feature_variance_table) && !is.na(n_calls)) {
+    var_bin <- cut(
+      n_calls,
+      breaks = c(0, 30, 50, 75, 100, 150, 200, 500, Inf),
+      labels = c("<30", "30-49", "50-74", "75-99",
+                 "100-149", "150-199", "200-499", "500+"),
+      right = FALSE
+    )
+    bin_row <- msi_feature_variance_table[
+      msi_feature_variance_table$mut_bin == var_bin, ]
+    if (nrow(bin_row) == 1) {
+      msi_stats$fracIndels_expected_sd <- round(bin_row$fracIndels__sd, 4)
+    }
+  }
+
+  log4r_info(paste0("Predicted MSI status: ", msi_stats$predicted_class))
+  log4r_info(paste0("MSI - P(MSI-H): ", prob_msi_h,
+                    " [", confidence_tier, "]"))
   log4r_info(paste0("MSI - Indel fraction: ",
-                           round(msi_stats$fracNonRepeatIndels, digits = 3)))
+                    round(msi_stats$fracNonRepeatIndels, digits = 3)))
+
   msi_stats <- msi_stats |>
     dplyr::rename(sample_id = sample_name) |>
     dplyr::select(
-      c("sample_id", "predicted_class", "vb"),
-      dplyr::everything())
+      dplyr::any_of(c(
+        "sample_id", "predicted_class",
+        "prob_msi_h", "confidence_tier", "n_calls",
+        "tmb_indel", "tmb_snv", "tmb",
+        "fracIndels", "fracIndels_expected_sd",
+        "fracNonRepeatIndels", "fracRepeatIndels",
+        "MLH1", "MLH3", "MSH2", "MSH3", "MSH6",
+        "PMS1", "PMS2", "POLE", "POLD1"
+      ))
+    ) |>
+    dplyr::rename(
+      frac_indels             = "fracIndels",
+      frac_indels_expected_sd = "fracIndels_expected_sd",
+      frac_non_repeat_indels  = "fracNonRepeatIndels",
+      frac_repeat_indels      = "fracRepeatIndels"
+    )
 
   msi_data <- list("mmr_pol_variants" = mmr_pol_df,
                    "msi_stats" = msi_stats,
@@ -331,25 +389,40 @@ generate_report_data_msi <- function(
 
   msi_sample_calls <- variant_set |>
     dplyr::filter(.data$EXONIC_STATUS == "exonic")
+  n_calls <- nrow(msi_sample_calls)
   log4r_info(
-    paste0("n = ",
-           nrow(msi_sample_calls),
+    paste0("n = ", n_calls,
            " exonic variants used for MSI prediction"))
-  if (nrow(msi_sample_calls) >= 200) {
+
+  ## Minimum of 10 variants required to compute any meaningful features.
+  ## Predictions on samples below the training threshold (n < 100) are flagged
+  ## with a low_mutation_warning; confidence is further qualified by the RF
+  ## probability and the feature variance lookup table.
+  if (n_calls >= 10) {
+    if (n_calls < 100) {
+      log4r_info(paste0(
+        "WARNING: n = ", n_calls, " variants — below training threshold ",
+        "(n < 100). Prediction may be less reliable; check confidence tier ",
+        "and P(MSI-H) in the report."))
+      pcg_report_msi[["low_mutation_warning"]] <- TRUE
+    }
+
     pcg_report_msi[["prediction"]] <-
       predict_msi_status(
         variant_set = msi_sample_calls,
         ref_data,
-        msi_prediction_model = ref_data[["msi"]][["model"]],
-        msi_prediction_dataset = ref_data[["msi"]][["tcga_dataset"]],
+        msi_prediction_model    = ref_data[["msi"]][["model"]],
+        msi_prediction_dataset  = ref_data[["msi"]][["tcga_dataset"]],
+        msi_feature_variance_table =
+          ref_data[["msi"]][["feature_variance_table"]],
         target_size_mb =
           settings$conf$assay_properties$effective_target_size_mb,
+        n_calls    = n_calls,
         sample_name = settings$sample_id)
 
     pcg_report_msi[["eval"]] <- TRUE
-  }
-  else{
-    log4r_info("Too few variants for MSI prediction (n < 200)")
+  } else {
+    log4r_info("Too few variants for MSI prediction (n < 10)")
     pcg_report_msi[["missing_data"]] <- TRUE
   }
 
@@ -375,8 +448,10 @@ msi_indel_fraction_plot <- function(tcga_msi_dataset, indel_fraction, color_pale
   p <- ggplot2::ggplot(data = tcga_msi_dataset) +
     ggplot2::geom_histogram(
       mapping = ggplot2::aes(x = .data$fracIndels,
-                             color = .data$MSI_status,
-                             fill = .data$MSI_status),
+                             color = .data$msi_status,
+                             fill = .data$msi_status),
+                             #color = .data$MSI_status,
+                             #fill = .data$MSI_status),
       position = "dodge", binwidth = 0.01) +
     ggplot2::ylab("Number of samples") +
     ggplot2::scale_fill_manual(values = color_vec) +

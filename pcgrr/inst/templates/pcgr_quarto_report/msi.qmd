@@ -2,7 +2,7 @@
 
 Microsatellite instability (MSI) is the result of impaired DNA mismatch repair and constitutes a cellular phenotype of clinical significance in many cancer types, most prominently colorectal cancers, stomach cancers, endometrial cancers, and ovarian cancers ([Cortes-Ciriano et al., 2017](https://www.ncbi.nlm.nih.gov/pubmed/28585546)). We have built a statistical MSI classifier that only considers features of the somatic mutation profile (e.g. _fraction of indels_, _load of indels_, _mutations in MMR genes_ etc.) in order to separate _MSI.H_ (MSI-high) from _MSS_ (MS stable) tumors. 
 
-The MSI classifier was trained using __N = 1,066__ exome-sequenced TCGA tumor samples with known MSI status (i.e. assayed from mononucleotide markers), and obtained a [positive predictive value](https://en.wikipedia.org/wiki/Positive_and_negative_predictive_values#Positive_predictive_value) of 100% and a [negative predictive value](https://en.wikipedia.org/wiki/Positive_and_negative_predictive_values#Negative_predictive_value) of 98.4% on an independent test set of __N = 455 samples__. Details of the MSI classification approach can be found <a href="https://rpubs.com/sigven/msi_classifier_2025" target="_blank">here</a>.
+The MSI classifier was trained using __N = 575__ exome-sequenced TCGA tumor samples with known MSI status (i.e. assayed from mononucleotide markers), and obtained a [positive predictive value](https://en.wikipedia.org/wiki/Positive_and_negative_predictive_values#Positive_predictive_value) of 97.9% and a [negative predictive value](https://en.wikipedia.org/wiki/Positive_and_negative_predictive_values#Negative_predictive_value) of 99.3% on an independent test set of __N = 245 samples__. Details of the MSI classification approach can be found <a href="https://rpubs.com/sigven/msi_classifier_2025" target="_blank">here</a>.
 
 <br>
 
@@ -12,8 +12,9 @@ The MSI classifier was trained using __N = 1,066__ exome-sequenced TCGA tumor sa
 #| output: asis
 
 msi_content <- pcg_report[['content']][['msi']][['prediction']]
+msi_stats    <- msi_content[['msi_stats']]
 
-coding_variant_set <- 
+coding_variant_set <-
   pcg_report$content$snv_indel$callset$variant_display |>
   dplyr::filter(.data$CODING_STATUS == "coding") |>
   dplyr::select(
@@ -27,11 +28,11 @@ coding_variant_set <-
     dplyr::desc(.data$GLOBAL_ASSOC_RANK),
   )
 
-if (NROW(msi_content[['mmr_pol_variants']]) > 0 & 
+if (NROW(msi_content[['mmr_pol_variants']]) > 0 &
    NROW(coding_variant_set) > 0) {
   if ("GENOMIC_CHANGE" %in% colnames(msi_content[['mmr_pol_variants']]) &
      "GENOMIC_CHANGE" %in% colnames(coding_variant_set)) {
-    msi_content[['mmr_pol_variants']] <- 
+    msi_content[['mmr_pol_variants']] <-
       msi_content[['mmr_pol_variants']] |>
       dplyr::select("GENOMIC_CHANGE") |>
       dplyr::inner_join(
@@ -40,42 +41,66 @@ if (NROW(msi_content[['mmr_pol_variants']]) > 0 &
   }
 }
 
-
-
 indel_frac_plot <- pcgrr::msi_indel_fraction_plot(
-  msi_content[['tcga_dataset']], msi_content[['msi_stats']][['fracIndels']])
+  msi_content[['tcga_dataset']], msi_stats[['fracIndels']])
 
 indel_fract_plot_plotly <- plotly::ggplotly(indel_frac_plot)
 indel_fract_plot_plotly$x$layout$legend$title$text <- ""
 
+## Derive display values
+n_calls          <- msi_stats[['n_calls']]
+prob_msi_h       <- msi_stats[['prob_msi_h']]
+confidence_tier  <- msi_stats[['confidence_tier']]
+low_mut_warning  <- isTRUE(pcg_report[['content']][['msi']][['low_mutation_warning']])
+uncertain        <- !is.null(confidence_tier) && confidence_tier == "Uncertain"
+
+status_box_theme <- if (uncertain) "warning" else "dark"
+
+frac_indels_sd   <- msi_stats[['frac_indels_expected_sd']]
+sd_note <- if (!is.na(frac_indels_sd)) paste0(" (expected ±", frac_indels_sd, " at this mutation count)") else ""
+
+## Warning callout — shown when n < 100 or prediction is uncertain
+if (low_mut_warning || uncertain) {
+  warning_lines <- c()
+  if (low_mut_warning) {
+    warning_lines <- c(warning_lines, paste0(
+      "This sample has only **n = ", n_calls,
+      "** exonic variants after quality filtering, below the classifier ",
+      "training threshold of n = 100. Feature estimates may be ",
+      "unstable", sd_note, "."))
+  }
+  if (uncertain) {
+    warning_lines <- c(warning_lines, paste0(
+      "The predicted probability P(MSI‑H) = ", prob_msi_h,
+      " falls in the uncertain range (0.10– 0.90). ",
+      "Consider orthogonal MSI assay confirmation."))
+  }
+  cat("::: {.callout-warning}\n")
+  cat("**Low-confidence MSI prediction**\n\n")
+  cat(paste(warning_lines, collapse = "\n\n"))
+  cat("\n:::\n\n")
+}
+
 bslib::page_fillable(
   bslib::layout_columns(
-    col_widths = c(4,4,4),
+    col_widths = c(4, 4, 4),
     height = "140px",
     bslib::value_box(
       title = "MSI status",
-      value = msi_content[['msi_stats']][['predicted_class']],
+      value = msi_stats[['predicted_class']],
       showcase = NULL,
-      theme = "dark"
+      theme = status_box_theme
+    ),
+    bslib::value_box(
+      title = "Prediction probability P(MSI-H)",
+      value = paste0(prob_msi_h, " — ", confidence_tier),
+      showcase = NULL,
+      theme = status_box_theme
     ),
     bslib::value_box(
       title = "Coding indel mutational burden",
       value = paste0(
-        round(msi_content$msi_stats$tmb_indel, 
-              digits = 2), "/Mb"),
-      showcase = NULL,
-      theme = "dark"
-    ),
-    bslib::value_box(
-      title = "Coding indel fraction - somatic variants",
-      value = if (!is.null(
-        msi_content$msi_stats$fracIndels)) {
-          paste0(
-          round(msi_content$msi_stats$fracIndels, 
-                digits = 2))
-      }else{
-        "0"
-      },
+        round(msi_stats$tmb_indel, digits = 2), "/Mb"),
       showcase = NULL,
       theme = "dark"
     )
@@ -84,12 +109,12 @@ bslib::page_fillable(
     full_screen = TRUE,
     height = "350px",
     bslib::card_header(
-      class = "bg-dark", 
+      class = "bg-dark",
       paste0("Fraction of coding indel variants - ",
              pcg_report$settings$sample_id)),
     indel_fract_plot_plotly
   ),
-  
+
   bslib::card(
     bslib::card_header(
       class = "bg-dark",
@@ -105,12 +130,12 @@ bslib::page_fillable(
           options = list(
             pageLength = 8,
             dom = 'tp'),
-          escape = F) |>
+          escape = FALSE) |>
           DT::formatStyle(
             color = "white",
             "ONCOGENICITY",
             "ONCOGENICITY",
-            backgroundColor = 
+            backgroundColor =
               DT::styleEqual(
                 pcgrr::color_palette$oncogenicity$levels,
                 pcgrr::color_palette$oncogenicity$values
@@ -122,9 +147,6 @@ bslib::page_fillable(
     )
   )
 )
-
-
-
 ```
 
 <br><br>
