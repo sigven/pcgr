@@ -54,10 +54,28 @@ confidence_tier  <- msi_stats[['confidence_tier']]
 low_mut_warning  <- isTRUE(pcg_report[['content']][['msi']][['low_mutation_warning']])
 uncertain        <- !is.null(confidence_tier) && confidence_tier == "Uncertain"
 
-status_box_theme <- if (uncertain) "warning" else "dark"
+status_box_theme <- if (uncertain)
+  bslib::value_box_theme(bg = pcgrr::color_palette$warning, fg = "#000000")
+else
+  "dark"
 
-frac_indels_sd   <- msi_stats[['frac_indels_expected_sd']]
-sd_note <- if (!is.na(frac_indels_sd)) paste0(" (expected ±", frac_indels_sd, " at this mutation count)") else ""
+frac_indels_sd   <- msi_stats[['fracIndels_expected_sd']]
+sd_note <- if (!is.na(frac_indels_sd))
+  paste0(" (expected ±", frac_indels_sd, " at this mutation count)")
+else ""
+
+## Display probability in the direction of the predicted class so the value
+## box always supports rather than contradicts the stated conclusion:
+##   MSS prediction   -> show P(MSS) = 1 - P(MSI-H)
+##   MSI-H prediction -> show P(MSI-H)
+is_msi_h <- msi_stats[['vb']] != "MSS"
+if (is_msi_h) {
+  prob_display       <- prob_msi_h
+  prob_display_label <- "Prediction probability P(MSI-H)"
+} else {
+  prob_display       <- round(1 - prob_msi_h, 3)
+  prob_display_label <- "Prediction probability P(MSS)"
+}
 
 ## Warning callout — shown when n < 100 or prediction is uncertain
 if (low_mut_warning || uncertain) {
@@ -92,8 +110,8 @@ bslib::page_fillable(
       theme = status_box_theme
     ),
     bslib::value_box(
-      title = "Prediction probability P(MSI-H)",
-      value = paste0(prob_msi_h, " — ", confidence_tier),
+      title = prob_display_label,
+      value = paste0(prob_display, " — ", confidence_tier),
       showcase = NULL,
       theme = status_box_theme
     ),
