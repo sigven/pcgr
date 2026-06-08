@@ -4,7 +4,7 @@ from pcgr._version import __version__
 
 ## Version - software and bundle
 PCGR_VERSION = __version__
-DB_VERSION = '20260508'  # database build version (date-based)
+DB_VERSION = '20260606'  # database build version (date-based)
 
 ## Miscellaneous settings
 NCBI_BUILD_MAF = 'GRCh38'
@@ -168,13 +168,12 @@ GE_panels = {
       35: "Parathyroid Cancer (GEP)",
       36: "Prostate cancer pertinent cancer susceptibility (GEP)",
       37: "Renal cancer pertinent cancer susceptibility (GEP)",
-      38: "Rhabdoid tumour predisposition (GEP)",
-      39: "Sarcoma cancer susceptibility (GEP)",
-      40: "Sarcoma susceptibility (GEP)",
-      41: "Thyroid cancer pertinent cancer susceptibility (GEP)",
-      42: "Tumour predisposition - childhood onset (GEP)",
-      43: "Upper gastrointestinal cancer pertinent cancer susceptibility (GEP)",
-      44: "DNA repair genes pertinent cancer susceptibility (GEP)"
+      38: "Sarcoma cancer susceptibility (GEP)",
+      39: "Sarcoma susceptibility (GEP)",
+      40: "Thyroid cancer pertinent cancer susceptibility (GEP)",
+      41: "Tumour predisposition - childhood onset (GEP)",
+      42: "Upper gastrointestinal cancer pertinent cancer susceptibility (GEP)",
+      43: "DNA repair genes pertinent cancer susceptibility (GEP)"
 }
 
 # '0 = ClinVar trusted (override conflicted records only), ' +

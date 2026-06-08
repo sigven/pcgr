@@ -110,7 +110,7 @@ def load_biomarkers(
          primary_site = re.sub(r'\s+', '_', row['primary_site'])
          cancer_type = row['cancer_type']
          if primary_site == ".":
-            if cancer_type == "Cancer" or cancer_type == "Solid Tumor":
+            if cancer_type == "Cancer" or cancer_type == "Solid Tumor" or cancer_type == "Solid tumors":
                primary_site = "Any"
             else:
                primary_site = "Undefined"
@@ -614,7 +614,7 @@ def run_oncokb_annotator(
       clinical_content = (
          "SAMPLE_ID\tONCOTREE_CODE\n"
          f"{sample_name}\t{oncotree_code}\n")
-      clinical_file = os.path.join(output_dir, f"{sample_name}_pcgr_oncokb_clinical.txt")
+      clinical_file = os.path.join(output_dir, f"{sample_name}.pcgr.{str(build).lower()}.oncokb_clinical.txt")
       with open(clinical_file, "w") as f:
          f.write(clinical_content)
    else:
