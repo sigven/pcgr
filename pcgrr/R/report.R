@@ -278,6 +278,7 @@ init_msi_content <- function() {
 
   rep[["eval"]] <- FALSE
   rep[["missing_data"]] <- FALSE
+  rep[["low_mutation_warning"]] <- FALSE
   rep[["prediction"]] <- list()
 
   return(rep)

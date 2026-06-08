@@ -42,7 +42,7 @@ if (NROW(msi_content[['mmr_pol_variants']]) > 0 &
 }
 
 indel_frac_plot <- pcgrr::msi_indel_fraction_plot(
-  msi_content[['tcga_dataset']], msi_stats[['fracIndels']])
+  msi_content[['tcga_dataset']], msi_stats[['frac_indels']])
 
 indel_fract_plot_plotly <- plotly::ggplotly(indel_frac_plot)
 indel_fract_plot_plotly$x$layout$legend$title$text <- ""
@@ -51,28 +51,33 @@ indel_fract_plot_plotly$x$layout$legend$title$text <- ""
 n_calls          <- msi_stats[['n_calls']]
 prob_msi_h       <- msi_stats[['prob_msi_h']]
 confidence_tier  <- msi_stats[['confidence_tier']]
-low_mut_warning  <- isTRUE(pcg_report[['content']][['msi']][['low_mutation_warning']])
-uncertain        <- !is.null(confidence_tier) && confidence_tier == "Uncertain"
+low_mut_warning  <- 
+  isTRUE(pcg_report[['content']][['msi']][['low_mutation_warning']])
+uncertain <- !is.null(confidence_tier) && 
+  confidence_tier == "Uncertain"
 
-status_box_theme <- if (uncertain)
-  bslib::value_box_theme(bg = pcgrr::color_palette$warning, fg = "#000000")
-else
-  "dark"
+status_box_theme <- "dark"
+if(uncertain == TRUE){
+  status_box_theme <-  
+    bslib::value_box_theme(bg = pcgrr::color_palette$warning, fg = "#000000")
+}
 
-frac_indels_sd   <- msi_stats[['fracIndels_expected_sd']]
-sd_note <- if (!is.na(frac_indels_sd))
-  paste0(" (expected ±", frac_indels_sd, " at this mutation count)")
-else ""
+frac_indels_sd <- msi_stats[['frac_indels_expected_sd']]
+sd_note <- ""
+if (!is.na(frac_indels_sd)){
+  sd_note <- paste0(" (expected ±", frac_indels_sd, " at this mutation count)")
+}
 
 ## Display probability in the direction of the predicted class so the value
 ## box always supports rather than contradicts the stated conclusion:
 ##   MSS prediction   -> show P(MSS) = 1 - P(MSI-H)
 ##   MSI-H prediction -> show P(MSI-H)
-is_msi_h <- msi_stats[['vb']] != "MSS"
-if (is_msi_h) {
-  prob_display       <- prob_msi_h
-  prob_display_label <- "Prediction probability P(MSI-H)"
-} else {
+is_msi_h <- 
+  msi_stats[['predicted_class']] != "MSS (Microsatellite stable)"
+prob_display       <- prob_msi_h
+prob_display_label <- "Prediction probability P(MSI-H)"
+
+if(is_msi_h == FALSE){
   prob_display       <- round(1 - prob_msi_h, 3)
   prob_display_label <- "Prediction probability P(MSS)"
 }
