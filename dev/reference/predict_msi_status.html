@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9020</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9021</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,7 +60,9 @@
 <span>  <span class="va">ref_data</span>,</span>
 <span>  <span class="va">msi_prediction_model</span>,</span>
 <span>  <span class="va">msi_prediction_dataset</span>,</span>
+<span>  msi_feature_variance_table <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">target_size_mb</span>,</span>
+<span>  n_calls <span class="op">=</span> <span class="cn">NA_integer_</span>,</span>
 <span>  sample_name <span class="op">=</span> <span class="st">"Test"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -86,8 +88,18 @@
 development of statistical classifier</p></dd>
 
 
+<dt id="arg-msi-feature-variance-table">msi_feature_variance_table<a class="anchor" aria-label="anchor" href="#arg-msi-feature-variance-table"></a></dt>
+<dd><p>lookup table (from model training) mapping
+mutation-count bins to expected feature SD; used to qualify prediction
+confidence. NULL if not available.</p></dd>
+
+
 <dt id="arg-target-size-mb">target_size_mb<a class="anchor" aria-label="anchor" href="#arg-target-size-mb"></a></dt>
 <dd><p>size of targeted genomic region (coding)</p></dd>
+
+
+<dt id="arg-n-calls">n_calls<a class="anchor" aria-label="anchor" href="#arg-n-calls"></a></dt>
+<dd><p>number of variants passed to the classifier</p></dd>
 
 
 <dt id="arg-sample-name">sample_name<a class="anchor" aria-label="anchor" href="#arg-sample-name"></a></dt>

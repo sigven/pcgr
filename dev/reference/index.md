@@ -79,7 +79,7 @@
   somatic CNAs
 - [`assign_variant_tiers_fusion()`](https://sigven.github.io/pcgr/dev/reference/assign_variant_tiers_fusion.md)
   : Assign tiers of clinical significance (AMP/ASCO/CAP framework) to
-  somatic RNA fusions
+  RNA fusions
 - [`assign_variant_tiers_snv_indel()`](https://sigven.github.io/pcgr/dev/reference/assign_variant_tiers_snv_indel.md)
   : Assign tiers of clinical significance (AMP/ASCO/CAP framework) to
   somatic SNVs/InDels

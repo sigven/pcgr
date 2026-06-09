@@ -1,4 +1,4 @@
-# Personal Cancer Genome Reporter (PCGR)
+# Personal Cancer Genome Reporter
 
 The Personal Cancer Genome Reporter (PCGR) is a stand-alone software
 workflow for functional annotation and translation of individual tumor

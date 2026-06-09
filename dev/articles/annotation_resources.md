@@ -26,9 +26,9 @@
 ### Variant databases of clinical utility
 
 - [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - database of
-  clinically related variants (May 2026)
+  clinically related variants (June 2026)
 - [CIViC](https://civicdb.org) - clinical interpretations of variants in
-  cancer (March 20th 2026)
+  cancer (June 6th 2026)
 - [CGI](http://www.cancergenomeinterpreter.org/biomarkers) - Cancer
   Genome Interpreter Cancer Biomarkers Database (CGI) (October 18th
   2022)
@@ -36,7 +36,7 @@
 ### Protein domains/functional features
 
 - [UniProt/SwissProt KnowledgeBase](http://www.uniprot.org) - resource
-  on protein sequence and functional information (2025_03)
+  on protein sequence and functional information (2026_01)
 - [Pfam](https://www.ebi.ac.uk/interpro/entry/pfam/#table) - database of
   protein families and domains (v37.0)
 
@@ -47,7 +47,7 @@
 - [Open Targets Platform](https://www.targetvalidation.org/) - Database
   on disease-target associations, molecularly targeted drugs and
   tractability aggregated from multiple sources (literature, pathways,
-  mutations) (2025.12)
+  mutations) (2026.03)
 
 ### Notes on variant annotation datasets
 

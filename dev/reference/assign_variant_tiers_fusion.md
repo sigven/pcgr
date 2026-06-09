@@ -1,7 +1,7 @@
-# Assign tiers of clinical significance (AMP/ASCO/CAP framework) to somatic RNA fusions
+# Assign tiers of clinical significance (AMP/ASCO/CAP framework) to RNA fusions
 
 Function that assigns tiers of clinical significance (AMP/ASCO/CAP
-framework) to somatic RNA fusions based on biomarker evidence items. The
+framework) to RNA fusions based on biomarker evidence items. The
 function considers the strength of evidence (evidence levels) and the
 match between biomarker site and primary site of query tumor. The
 function also considers oncogene properties of fusion partners to assign

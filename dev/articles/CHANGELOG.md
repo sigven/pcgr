@@ -2,13 +2,13 @@
 
 ## v2.3.0
 
-- Date: **2026-05-19**
+- Date: **2026-06-10**
 - Major data updates
-  - ClinVar (2026-05)
+  - ClinVar (2026-06)
   - dbNSFP (v5.3, October 2025)
   - Cancer Hotspots (v3, 2026)
   - TCGA (release 45.0, December 2025)
-  - CIViC (2026-03-23)
+  - CIViC (2026-06-06)
   - GENCODE v49 (VEP v115)
 
 ### Added

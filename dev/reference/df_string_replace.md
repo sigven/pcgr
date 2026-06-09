@@ -6,7 +6,7 @@ string columns of a dataframe
 ## Usage
 
 ``` r
-df_string_replace(df, strings, pattern, replacement, replace_all = F)
+df_string_replace(df, strings, pattern, replacement, replace_all = FALSE)
 ```
 
 ## Arguments
