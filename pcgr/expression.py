@@ -260,7 +260,10 @@ def aggregate_tpm_per_cons(variant_set: pd.DataFrame,
             
             ## Get all transcript-specific consequences provided by VEP - aggregate expression per gene consequence type
             trans_expression = expression_data['transcript'][['ENSEMBL_TRANSCRIPT_ID','TPM']]
-            varset.loc[:,'VEP_ALL_CSQ'] = varset.loc[:,'VEP_ALL_CSQ'].str.split(',')
+            ## Convert to object dtype before assigning a list-valued Series;
+            ## pandas StringDtype rejects list values written back via .loc.
+            varset = varset.copy()
+            varset['VEP_ALL_CSQ'] = varset['VEP_ALL_CSQ'].astype(object).str.split(',')
             varset = varset.explode('VEP_ALL_CSQ').drop_duplicates().reset_index(drop = True)
             varset[['consequence', 'SYMBOL','ENTREZGENE','HGVSC','HGVSP','EXON','FEATURE_TYPE','ENSEMBL_TRANSCRIPT_ID','BIOTYPE']] = \
                 varset['VEP_ALL_CSQ'].str.split(':', expand=True)

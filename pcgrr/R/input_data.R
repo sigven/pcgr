@@ -2189,8 +2189,9 @@ load_rna_fusions <- function(
             okb_annotations_fusions,
             by = c("VAR_ID",
                    "VARIANT_CLASS"),
-            relationship = "one-to-one"
-          )
+            relationship = "many-to-many"
+          ) |>
+          dplyr::distinct()
       }
     }
   }

@@ -244,7 +244,7 @@ extract_therapeutic_evidence <-
                 tx$levelAssociatedCancerType$mainType$name)
           }
 
-          if (!is.null(tx$levelAssociatedCancerTyp$tissue)){
+          if (!is.null(tx$levelAssociatedCancerType$tissue)){
             primary_site <-
               oncokb_extract_field(
                 tx$levelAssociatedCancerType$tissue)

@@ -529,10 +529,22 @@ def run_pcgr(input_data, output_data, conf_options):
             logger = getlogger("pcgr-vcf2maf")
             logger.info("PCGR - SNV/INDEL ANALYSIS SECTION - VCF2MAF: vcf2maf conversion of VEP-annotated VCF")
 
-            # Stamp VAR_ID (CHROM_POS_REF_ALT, VCF-format) onto the VEP VCF before
-            # vcf2maf strips anchor bases from indel alleles
-            add_var_id_to_vcf(vep_vcf, vep_vcf_with_varid, logger)
-            vcf2maf_input = vep_vcf_with_varid if os.path.exists(vep_vcf_with_varid) else vep_vcf
+            # VEP writes ##contig header lines with chr-prefixed IDs (from the GRCh38
+            # reference cache) even though variant records use bare chromosome names
+            # (the chr prefix was stripped during input normalisation). htslib/cyvcf2
+            # emits "[W::vcf_parse] Contig '1' is not defined in the header" warnings
+            # the moment the file is opened. Fix the header BEFORE any tool touches
+            # the file by stripping chr from ##contig IDs.
+            vep_vcf_reheadered = vep_vcf.replace('.vcf', '.reheadered.vcf')
+            check_subprocess(
+                logger,
+                f"sed 's/^##contig=<ID=chr/##contig=<ID=/' {vep_vcf} > {vep_vcf_reheadered}",
+                debug)
+
+            # Stamp VAR_ID (CHROM_POS_REF_ALT, VCF-format) onto the reheadered VEP VCF
+            # before vcf2maf strips anchor bases from indel alleles
+            add_var_id_to_vcf(vep_vcf_reheadered, vep_vcf_with_varid, logger)
+            vcf2maf_input = vep_vcf_with_varid if os.path.exists(vep_vcf_with_varid) else vep_vcf_reheadered
 
             update_allelic_support = True
             logger.info('Converting VEP-annotated VCF to MAF with https://github.com/mskcc/vcf2maf')
@@ -567,6 +579,7 @@ def run_pcgr(input_data, output_data, conf_options):
             )
 
             if not debug:
+                remove_file(vep_vcf_reheadered)
                 remove_file(vep_vcf_with_varid)
 
             logger.info('Finished pcgr-vep-vcf2maf')

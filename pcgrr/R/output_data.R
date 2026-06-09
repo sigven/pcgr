@@ -260,12 +260,28 @@ get_excel_sheets <- function(report = NULL) {
         excel_sheets[['SOMATIC_CNA_BIOMARKER']] <-
           excel_sheets[['SOMATIC_CNA_BIOMARKER']] |>
           dplyr::distinct() |>
+          dplyr::mutate(
+            .tier_order = dplyr::case_when(
+              startsWith(.data$TIER, "T") ~ 1L,
+              startsWith(.data$TIER, "R") ~ 2L,
+              startsWith(.data$TIER, "D") ~ 3L,
+              startsWith(.data$TIER, "P") ~ 4L,
+              TRUE ~ 5L),
+            BM_ACTIONABILITY_SUPPORT = factor(
+              .data$BM_ACTIONABILITY_SUPPORT,
+              levels = c("tier-defining", "additional"))) |>
           dplyr::arrange(
             .data$SAMPLE_ID,
+            .data$.tier_order,
             .data$TIER,
+            .data$VAR_ID,
+            .data$SAMPLE_ALTERATION,
+            .data$BM_ACTIONABILITY_SUPPORT,
             .data$BM_EVIDENCE_LEVEL,
-            .data$BM_PRIMARY_SITE,
-            dplyr::desc(.data$BM_RATING))
+            dplyr::desc(.data$BM_RATING)) |>
+          dplyr::mutate(BM_ACTIONABILITY_SUPPORT = as.character(
+            .data$BM_ACTIONABILITY_SUPPORT)) |>
+          dplyr::select(-.data$.tier_order)
       }
     }
   }
@@ -322,9 +338,17 @@ get_excel_sheets <- function(report = NULL) {
                 )) |>
                 dplyr::mutate(SAMPLE_ID = sample_id) |>
                 dplyr::left_join(
-                  sample_alteration[['fusion']],
+                  ## Fusion biomarker items carry a single-gene ENTREZGENE
+                  ## (e.g. "238" for ALK) while the variant table stores the
+                  ## resolved pair (e.g. "238::238"). Joining on ENTREZGENE
+                  ## fails for single-gene fusion biomarkers and leaves
+                  ## SAMPLE_ALTERATION empty. Join on (VAR_ID, VARIANT_CLASS)
+                  ## only; drop ENTREZGENE from the right side to avoid
+                  ## ENTREZGENE.x / ENTREZGENE.y column collisions.
+                  dplyr::select(
+                    sample_alteration[['fusion']],
+                    -dplyr::any_of("ENTREZGENE")),
                   by = c("VAR_ID",
-                         "ENTREZGENE",
                          "VARIANT_CLASS")
                 ) |>
                 dplyr::select(
@@ -344,12 +368,28 @@ get_excel_sheets <- function(report = NULL) {
         excel_sheets[['RNA_FUSION_BIOMARKER']] <-
           excel_sheets[['RNA_FUSION_BIOMARKER']] |>
           dplyr::distinct() |>
+          dplyr::mutate(
+            .tier_order = dplyr::case_when(
+              startsWith(.data$TIER, "T") ~ 1L,
+              startsWith(.data$TIER, "R") ~ 2L,
+              startsWith(.data$TIER, "D") ~ 3L,
+              startsWith(.data$TIER, "P") ~ 4L,
+              TRUE ~ 5L),
+            BM_ACTIONABILITY_SUPPORT = factor(
+              .data$BM_ACTIONABILITY_SUPPORT,
+              levels = c("tier-defining", "additional"))) |>
           dplyr::arrange(
             .data$SAMPLE_ID,
+            .data$.tier_order,
             .data$TIER,
+            .data$VAR_ID,
+            .data$SAMPLE_ALTERATION,
+            .data$BM_ACTIONABILITY_SUPPORT,
             .data$BM_EVIDENCE_LEVEL,
-            .data$BM_PRIMARY_SITE,
-            dplyr::desc(.data$BM_RATING))
+            dplyr::desc(.data$BM_RATING)) |>
+          dplyr::mutate(BM_ACTIONABILITY_SUPPORT = as.character(
+            .data$BM_ACTIONABILITY_SUPPORT)) |>
+          dplyr::select(-.data$.tier_order)
       }
     }
   }
@@ -452,12 +492,28 @@ get_excel_sheets <- function(report = NULL) {
         excel_sheets[['SOMATIC_SNV_INDEL_BIOMARKER']] <-
           excel_sheets[['SOMATIC_SNV_INDEL_BIOMARKER']] |>
           dplyr::distinct() |>
+          dplyr::mutate(
+            .tier_order = dplyr::case_when(
+              startsWith(.data$TIER, "T") ~ 1L,
+              startsWith(.data$TIER, "R") ~ 2L,
+              startsWith(.data$TIER, "D") ~ 3L,
+              startsWith(.data$TIER, "P") ~ 4L,
+              TRUE ~ 5L),
+            BM_ACTIONABILITY_SUPPORT = factor(
+              .data$BM_ACTIONABILITY_SUPPORT,
+              levels = c("tier-defining", "additional"))) |>
           dplyr::arrange(
             .data$SAMPLE_ID,
+            .data$.tier_order,
             .data$TIER,
+            .data$VAR_ID,
+            .data$SAMPLE_ALTERATION,
+            .data$BM_ACTIONABILITY_SUPPORT,
             .data$BM_EVIDENCE_LEVEL,
-            .data$BM_PRIMARY_SITE,
-            dplyr::desc(.data$BM_RATING))
+            dplyr::desc(.data$BM_RATING)) |>
+          dplyr::mutate(BM_ACTIONABILITY_SUPPORT = as.character(
+            .data$BM_ACTIONABILITY_SUPPORT)) |>
+          dplyr::select(-.data$.tier_order)
       }
     }
   }
