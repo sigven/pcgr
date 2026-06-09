@@ -1954,8 +1954,25 @@ load_rna_fusions <- function(
 
     results[['variant']] <- results[['variant']] |>
       dplyr::mutate(
-        SAMPLE_ALTERATION = paste0(
-          .data$FUSION_GENE, " fusion"
+        ## Build SAMPLE_ALTERATION from what the user actually specified, not
+        ## from computationally resolved partners. For partial fusions the user
+        ## only named one gene (e.g. "::ALK" or "FGFR2::"), which matches a
+        ## coarse-grained biomarker like "ALK fusions" — showing a resolved
+        ## partner ("EML4::ALK fusion") would falsely imply partner-specific
+        ## matching. Strip the bare "::" and label only the known gene instead.
+        ## For complete fusions both genes were user-supplied; normalise the
+        ## separator to "::" (FUSION_GENE2) so the label is consistent.
+        SAMPLE_ALTERATION = dplyr::case_when(
+          ## 3' partner only: "::ALK" → "ALK fusion"
+          stringr::str_starts(.data$FUSION_GENE, "::") ~
+            paste0(stringr::str_remove(.data$FUSION_GENE, "^::"), " fusion"),
+          ## 5' partner only: "FGFR2::" → "FGFR2 fusion"
+          stringr::str_ends(.data$FUSION_GENE, "::") ~
+            paste0(stringr::str_remove(.data$FUSION_GENE, "::$"), " fusion"),
+          ## Both partners present: normalise -- → :: via FUSION_GENE2
+          !is.na(.data$FUSION_GENE2) ~
+            paste0(.data$FUSION_GENE2, " fusion"),
+          TRUE ~ paste0(.data$FUSION_GENE, " fusion")
         )
       ) |>
       dplyr::left_join(

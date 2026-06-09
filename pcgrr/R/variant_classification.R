@@ -844,6 +844,19 @@ assign_variant_top_tiers_ttagnostic <- function(
         "BM_PRIMARY_SITE"),
       only_colnames = FALSE, quiet = TRUE))
 
+    ## For fusions, the ENTREZGENE in biomarker_items is the single-gene DB
+    ## value (e.g. "238" for ALK fusions) while var_df carries the resolved
+    ## pair (e.g. "238::238"). Grouping and joining on ENTREZGENE silently
+    ## fails for single-gene fusion biomarkers, leaving every fusion with NA
+    ## tier. VAR_ID uniquely identifies each fusion event in the sample, so
+    ## use (VAR_ID, VARIANT_CLASS) only as the grouping/join key for fusions.
+    is_fusion <- isTRUE("fusion" %in% unique(var_df$VARIANT_CLASS))
+    tier_group_cols <- if (is_fusion) {
+      c("VAR_ID", "VARIANT_CLASS")
+    } else {
+      c("VAR_ID", "VARIANT_CLASS", "ENTREZGENE")
+    }
+
     biomarkers_tier_classified <-
       biomarker_items |>
       dplyr::select(
@@ -890,11 +903,9 @@ assign_variant_top_tiers_ttagnostic <- function(
 
       )) |>
 
-      ## Get top tier level for any given variant
-      dplyr::group_by(
-        .data$VAR_ID,
-        .data$VARIANT_CLASS,
-        .data$ENTREZGENE) |>
+      ## Get top tier level for any given variant.
+      ## For fusions group on (VAR_ID, VARIANT_CLASS) only — see note above.
+      dplyr::group_by(dplyr::across(dplyr::all_of(tier_group_cols))) |>
       dplyr::summarise(
         ACTIONABILITY_TIER = min(
           .data$ACTIONABILITY_TIER, na.rm = TRUE),
@@ -917,14 +928,9 @@ assign_variant_top_tiers_ttagnostic <- function(
         dplyr::left_join(
           dplyr::select(
             biomarkers_tier_classified,
-            c("VAR_ID",
-              "VARIANT_CLASS",
-              "ENTREZGENE",
-              "ACTIONABILITY_TIER")
+            dplyr::all_of(c(tier_group_cols, "ACTIONABILITY_TIER"))
           ),
-          by = c("VAR_ID",
-                 "VARIANT_CLASS",
-                 "ENTREZGENE")) |>
+          by = tier_group_cols) |>
         dplyr::distinct()|>
         dplyr::arrange(
           .data$ACTIONABILITY_TIER
@@ -1056,6 +1062,21 @@ assign_variant_top_tiers_ttspecific <- function(
         "BM_PRIMARY_SITE"),
       only_colnames = FALSE, quiet = TRUE))
 
+    ## For fusions, the ENTREZGENE in biomarker_items is the single-gene DB
+    ## value (e.g. "4916" for "NTRK3 fusions") while var_df carries the
+    ## resolved pair (e.g. "123624::4916"). Grouping and joining on ENTREZGENE
+    ## silently fails for single-gene fusion biomarkers, leaving every fusion
+    ## with NA tier and falling through to the oncogene-partner Tier 3 fallback.
+    ## VAR_ID uniquely identifies each fusion event, so use (VAR_ID, VARIANT_CLASS)
+    ## only as the grouping/join key for fusions.
+    is_fusion <- isTRUE(
+      "fusion" %in% unique(var_df$VARIANT_CLASS))
+    tier_group_cols <- if (is_fusion) {
+      c("VAR_ID", "VARIANT_CLASS")
+    } else {
+      c("VAR_ID", "VARIANT_CLASS", "ENTREZGENE")
+    }
+
     biomarkers_tier_classified <-
       biomarker_items |>
       dplyr::select(
@@ -1124,11 +1145,9 @@ assign_variant_top_tiers_ttspecific <- function(
 
       )) |>
 
-      ## Get top tier level for any given variant
-      dplyr::group_by(
-        .data$VAR_ID,
-        .data$VARIANT_CLASS,
-        .data$ENTREZGENE) |>
+      ## Get top tier level for any given variant.
+      ## For fusions group on (VAR_ID, VARIANT_CLASS) only — see note above.
+      dplyr::group_by(dplyr::across(dplyr::all_of(tier_group_cols))) |>
       dplyr::summarise(
         ACTIONABILITY_TIER = min(
           .data$ACTIONABILITY_TIER, na.rm = TRUE),
@@ -1147,20 +1166,6 @@ assign_variant_top_tiers_ttspecific <- function(
         "assign_variant_top_tiers_ttspecific - number of variants in var_df: ",
         NROW(var_df)))
 
-      tmp <- var_df |>
-        dplyr::select(
-          c("VAR_ID",
-            "VARIANT_CLASS",
-            "ENTREZGENE")
-        ) |>
-        dplyr::distinct()
-
-      ## log numbr of rows in tmp
-      # log4r_debug(paste0(
-      #   "assign_variant_top_tiers_ttspecific - number of unique variants in var_df: ",
-      #   NROW(tmp)))
-
-
       variants_tier_classified <- var_df |>
         dplyr::select(
           c("VAR_ID",
@@ -1170,14 +1175,9 @@ assign_variant_top_tiers_ttspecific <- function(
         dplyr::left_join(
           dplyr::select(
             biomarkers_tier_classified,
-            c("VAR_ID",
-              "VARIANT_CLASS",
-              "ENTREZGENE",
-              "ACTIONABILITY_TIER")
+            dplyr::all_of(c(tier_group_cols, "ACTIONABILITY_TIER"))
           ),
-          by = c("VAR_ID",
-                 "VARIANT_CLASS",
-                 "ENTREZGENE")) |>
+          by = tier_group_cols) |>
         dplyr::distinct()|>
         dplyr::arrange(
           .data$ACTIONABILITY_TIER
@@ -1286,20 +1286,28 @@ assign_bm_tier_support_ttspecific <- function(
         "BM_PRIMARY_SITE"),
       only_colnames = FALSE, quiet = TRUE)
 
+    ## For fusions, the ENTREZGENE in biomarker_items reflects the biomarker
+    ## DB entry (e.g. "4916" for "NTRK3 fusions") while variants_tier_classified
+    ## carries the resolved gene pair (e.g. "123624::4916"). Joining on ENTREZGENE
+    ## would always fail for single-gene fusion biomarkers, leaving ACTIONABILITY_TIER
+    ## as NA and producing "TNA" in the TIER column. VAR_ID already uniquely
+    ## identifies each fusion event in the sample, so join on (VAR_ID, VARIANT_CLASS)
+    ## only for fusions.
+    tier_join_cols <- if (vartype == "fusion") {
+      c("VAR_ID", "VARIANT_CLASS")
+    } else {
+      c("VAR_ID", "VARIANT_CLASS", "ENTREZGENE")
+    }
+    tier_lookup_cols <- c(tier_join_cols, "ACTIONABILITY_TIER")
+
     biomarker_items <- as.data.frame(
       biomarker_items |>
         dplyr::left_join(
           dplyr::select(
             variants_tier_classified,
-            c("VAR_ID",
-              "VARIANT_CLASS",
-              "ENTREZGENE",
-              "ACTIONABILITY_TIER")
+            dplyr::all_of(tier_lookup_cols)
           ),
-          by =
-            c("VAR_ID",
-              "VARIANT_CLASS",
-              "ENTREZGENE")) |>
+          by = tier_join_cols) |>
         dplyr::distinct() |>
         dplyr::select(
           c("VAR_ID",
@@ -1497,20 +1505,24 @@ assign_bm_tier_support_ttagnostic <- function(
         "BM_PRIMARY_SITE"),
       only_colnames = FALSE, quiet = TRUE)
 
+    ## Same fusion-specific join as in assign_bm_tier_support_ttspecific:
+    ## use (VAR_ID, VARIANT_CLASS) only for fusions to avoid ENTREZGENE
+    ## mismatches between single-gene DB entries and resolved pair values.
+    tier_join_cols <- if (vartype == "fusion") {
+      c("VAR_ID", "VARIANT_CLASS")
+    } else {
+      c("VAR_ID", "VARIANT_CLASS", "ENTREZGENE")
+    }
+    tier_lookup_cols <- c(tier_join_cols, "ACTIONABILITY_TIER")
+
     biomarker_items <- as.data.frame(
       biomarker_items |>
         dplyr::left_join(
           dplyr::select(
             variants_tier_classified,
-            c("VAR_ID",
-              "VARIANT_CLASS",
-              "ENTREZGENE",
-              "ACTIONABILITY_TIER")
+            dplyr::all_of(tier_lookup_cols)
           ),
-          by =
-            c("VAR_ID",
-              "VARIANT_CLASS",
-              "ENTREZGENE")) |>
+          by = tier_join_cols) |>
         dplyr::distinct() |>
         dplyr::select(
           c("VAR_ID",

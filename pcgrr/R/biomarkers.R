@@ -75,6 +75,20 @@ prep_actble_display_tbl <- function(
   var_classification <-
     callset$bm_evidence[[clnsig]]$classification
 
+  ## For fusions the ENTREZGENE in biomarker evidence items (eitems) holds the
+  ## single-gene DB value (e.g. "238" for ALK), whereas variant_display carries
+  ## the resolved gene-pair (e.g. "238::238"). Joining on ENTREZGENE silently
+  ## drops all fusion rows. Use (VAR_ID, VARIANT_CLASS) only for fusions;
+  ## include ENTREZGENE for SNVs/InDels and CNAs as before.
+  is_fusion_category <- isTRUE(variant_category == "fusion")
+  display_join_cols <- if (is_fusion_category) {
+    c("VAR_ID", "VARIANT_CLASS")
+  } else {
+    c("VAR_ID", "VARIANT_CLASS", "ENTREZGENE")
+  }
+  eitem_join_cols <- c("VAR_ID", "ACTIONABILITY_TIER", "VARIANT_CLASS",
+                       if (!is_fusion_category) "ENTREZGENE")
+
   vars <- data.frame()
 
   if(clnsig == "therapeutic_sensitivity"){
@@ -87,6 +101,11 @@ prep_actble_display_tbl <- function(
         !is.na(.data$ACTIONABILITY_TIER) &
           .data$ACTIONABILITY_TIER %in% tier)
   }else{
+    ## For fusions, drop ENTREZGENE from variant_display before joining so
+    ## that dplyr does not produce ENTREZGENE.x / ENTREZGENE.y suffixes
+    ## (var_classification carries the canonical ENTREZGENE we want to keep).
+    display_cols_to_drop <- c("ACTIONABILITY_TIER",
+                              if (is_fusion_category) "ENTREZGENE")
     vars <-
       var_classification |>
       dplyr::filter(
@@ -95,10 +114,8 @@ prep_actble_display_tbl <- function(
       dplyr::inner_join(
         dplyr::select(
           callset$variant_display,
-          -c("ACTIONABILITY_TIER")),
-        by = c("VAR_ID",
-               "VARIANT_CLASS",
-               "ENTREZGENE")
+          -dplyr::any_of(display_cols_to_drop)),
+        by = display_join_cols
       )
   }
 
@@ -140,13 +157,20 @@ prep_actble_display_tbl <- function(
       "Variant category: ", variant_category,
       " - colnames of vars: ", paste(colnames(vars), collapse = ", ")))
 
+    ## When joining without ENTREZGENE (fusions), both sides carry an
+    ## ENTREZGENE column. Drop it from vars so dplyr does not produce
+    ## ENTREZGENE.x / ENTREZGENE.y suffixed columns; the single-gene
+    ## ENTREZGENE from eitems is the one we want to keep downstream.
+    vars_for_join <- if (is_fusion_category) {
+      dplyr::select(vars, -dplyr::any_of("ENTREZGENE"))
+    } else {
+      vars
+    }
+
     biomarker_var_eitems <- eitems |>
       dplyr::inner_join(
-        vars,
-        by = c("VAR_ID",
-               "ACTIONABILITY_TIER",
-               "VARIANT_CLASS",
-               "ENTREZGENE")
+        vars_for_join,
+        by = eitem_join_cols
       ) |>
       dplyr::distinct() |>
       dplyr::select(
