@@ -15,7 +15,7 @@ require(glue, include.only = "glue")
 
 ```{r vars, echo=FALSE}
 Sys.setenv(VEP_VERSION = "115")
-Sys.setenv(PCGR_VERSION = "2.2.5.9020")
+Sys.setenv(PCGR_VERSION = "2.2.5.9021")
 Sys.setenv(BUNDLE_VERSION = "20260508")
 VEP_VERSION <- Sys.getenv("VEP_VERSION")
 PCGR_VERSION <- Sys.getenv("PCGR_VERSION")
