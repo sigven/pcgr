@@ -6,6 +6,7 @@ import gzip
 import json
 import os
 import urllib.request
+import uuid
 import pandas as pd
 import subprocess
 import logging
@@ -608,26 +609,38 @@ def run_oncokb_annotator(
          else:
             cna_df.to_csv(valid_inputs["CNA"], sep="\t", index=False)
 
-   # 4) Create clinical file (only when oncotree_code is provided)
+   # 4) Replace the real sample ID with a random UUID in all input files and
+   #    the clinical file before sending anything to the OncoKB API, so that
+   #    the user's sample identifier is never transmitted.
+   anon_id = str(uuid.uuid4())
+   logger.info(f"OncoKB annotation: using anonymised sample ID (real ID withheld from API)")
+
+   for label, path in list(valid_inputs.items()):
+      df = pd.read_csv(path, sep="\t")
+      if "Tumor_Sample_Barcode" in df.columns:
+         df["Tumor_Sample_Barcode"] = anon_id
+         df.to_csv(path, sep="\t", index=False)
+
+   # 5) Create clinical file (only when oncotree_code is provided)
    clinical_file = None
    if oncotree_code is not None:
       clinical_content = (
          "SAMPLE_ID\tONCOTREE_CODE\n"
-         f"{sample_name}\t{oncotree_code}\n")
+         f"{anon_id}\t{oncotree_code}\n")
       clinical_file = os.path.join(output_dir, f"{sample_name}.pcgr.{str(build).lower()}.oncokb_clinical.txt")
       with open(clinical_file, "w") as f:
          f.write(clinical_content)
    else:
       logger.info("No OncoTree code specified - running OncoKB annotation without tumor type")
 
-   # 5) Annotator script paths
+   # 6) Annotator script paths
    scripts = {
       "MAF": "MafAnnotator.py",
       "FUSION": "FusionAnnotator.py",
       "CNA": "CnaAnnotator.py"
    }
 
-   # 6) Run annotators for valid inputs
+   # 7) Run annotators for valid inputs
    outputs = {}
 
    for label, input_path in valid_inputs.items():
@@ -712,7 +725,23 @@ def run_oncokb_annotator(
 
          outputs[label] = output_path
 
-   # 7) Return summary of outputs
+   # 8) Restore the real sample ID in both input and output files so that
+   #    all files on disk are consistent and manually inspectable.
+   all_output_paths = []
+   for label, value in outputs.items():
+      if isinstance(value, dict):           # MAF has {HGVSp: path, HGVSg: path}
+         all_output_paths.extend(value.values())
+      else:
+         all_output_paths.append(value)
+
+   for path in list(valid_inputs.values()) + all_output_paths:
+      if path and os.path.isfile(path):
+         df = pd.read_csv(path, sep="\t")
+         if "Tumor_Sample_Barcode" in df.columns:
+            df["Tumor_Sample_Barcode"] = sample_name
+            df.to_csv(path, sep="\t", index=False)
+
+   # 9) Return summary of outputs
    return {
       "clinical_file": clinical_file,
       "outputs": outputs
