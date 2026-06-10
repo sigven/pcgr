@@ -40,6 +40,23 @@ particularly if it involves known oncogenic driver genes.
 
 <br>
 
+```{r fusion_filter_note}
+#| output: asis
+#| echo: false
+#| eval: !expr isTRUE(callset$n_filtered_split_reads > 0)
+n_filt <- callset$n_filtered_split_reads
+min_sr  <- pcg_report$settings$conf$rna_fusion$min_split_reads
+cat(paste0(
+  "<div style='padding:6px 14px; border-left:4px solid #b0b0b0; background:#f5f5f5; ",
+  "border-radius:0 4px 4px 0; font-size:0.91em; margin-bottom:8px;'>",
+  "<strong>Note:</strong> ", n_filt, " fusion event",
+  if (n_filt == 1) "" else "s",
+  " with fewer than ", min_sr, " split reads ",
+  if (n_filt == 1) "was" else "were",
+  " excluded from this report.</div>"
+))
+```
+
 ```{r all_fusion_events}
 #| eval: !expr isTRUE(NROW(callset$variant_display) > 0)
 #| output: asis

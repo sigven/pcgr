@@ -1291,6 +1291,7 @@ load_rna_fusions <- function(
   results[['variant']] <- data.frame()
   results[['variant_recurrence']] <- data.frame()
   results[['variant_display']] <- data.frame()
+  results[['n_filtered_split_reads']] <- 0L
   results[['bm_evidence']] <- list()
   results[['bm_evidence']][['eitems']] <-
     data.frame()
@@ -1886,6 +1887,7 @@ load_rna_fusions <- function(
           dplyr::filter(
             .data$SPLIT_READS >= min_split_reads)
         n_filtered <- n_before - NROW(results[['variant']])
+        results[['n_filtered_split_reads']] <- n_filtered
         if (n_filtered > 0) {
           log4r_info(
             paste0("Filtered out ", n_filtered,

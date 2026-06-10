@@ -288,6 +288,14 @@ cat("\n**Expression settings**\n\n")
 cat(glue::glue("* RNA expression similarity analysis: __{rna_expression_similarity}__"), "\n")
 ```
 
+```{r fusion_settings}
+#| output: asis
+#| echo: false
+#| eval: !expr pcg_report$content$fusion$eval == TRUE
+cat("\n**RNA fusion settings**\n\n")
+cat(glue::glue("* Minimum split reads required: __{conf$rna_fusion$min_split_reads}__"), "\n")
+```
+
 :::
 
 ::::

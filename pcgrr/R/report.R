@@ -311,6 +311,7 @@ init_fusion_content <- function() {
   }
   rep[['callset']][['bm_evidence']] <-
     init_biomarker_content()
+  rep[['callset']][['n_filtered_split_reads']] <- 0L
 
   rep[['vstats']] <-
     init_vstats_fusion()
