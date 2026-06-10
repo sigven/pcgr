@@ -21,10 +21,10 @@ presence in public fusion databases (i.e. Mitelman Database).
 
 The user need to perform quality control of fusion events upstream of PCGR analysis - the 
 focus here is strictly on functional annotation and potential clinical impact. 
-We recommend to carefully check e.g. the number of supporting reads for each 
+  *  We recommend to carefully check e.g. the number of supporting reads for each 
 fusion event, and to visually inspect fusion events in a genome browser 
 (e.g. IGV) or other third-party tools (e.g. [FusViz](https://github.com/senzhaocode/FuSViz)) 
-to conduct frame inference, investigate domain retention, and rule out potential false positives. Importantly, while most RNA fusion detection tools will attempt to filter out known
+to conduct frame inference, investigate domain retention, and rule out potential false positives.    * Importantly, while most RNA fusion detection tools will attempt to filter out known
 normal/artefactual events, PCGR makes no attempt to further filter fusion events based on e.g. presence in normal tissue databases, and thus relies on the user to perform this step upstream of PCGR analysis.
 :::
 
@@ -102,30 +102,11 @@ crosstalk::bscols(
   )
 )
 
-# htmltools::br()
-# 
-# DT::datatable(
-#   fusion_events_shared,
-#   escape = FALSE, 
-#   extensions = c("Buttons","Responsive"), 
-#   options = list(
-#     buttons = c('csv','excel'), 
-#     dom = 'Bfrtip')) |>
-#   DT::formatStyle(
-#     color = "white", 
-#     c("FUSION_GENE"), 
-#     fontWeight = 'bold', 
-#     `text-align` = 'center',
-#     backgroundColor = pcgrr::color_palette$bg_dark)
-# 
-# 
 
 primary_cols <- c(
   "FUSION_GENE2", "SPLIT_READS","FUSION_GENE_5P",            
  "FUSION_GENE_3P","BREAKPOINT_5P","BREAKPOINT_3P")
 
-#vc_levels <- pcgrr::color_palette$cna_variant_class$levels
-#vc_colors <- pcgrr::color_palette$cna_variant_class$values
 
 col_defs <- list(
   FUSION_GENE2 = reactable::colDef(
@@ -147,9 +128,6 @@ for (col in colnames(fusion_events)) {
     col_defs[[col]] <- reactable::colDef(show = FALSE)
   }
 }
-
-#dt_other_oncogenic <- dt_other_oncogenic |>
-#  dplyr::mutate(dplyr::across(where(is.numeric), \(x) round(x, 3)))
 
 reactable::reactable(
   fusion_events_shared,
@@ -236,14 +214,18 @@ rctbl_recs <- pcgrr::prep_actble_display_tbl(
   clnsig = "therapeutic_resistance",
   variant_category = 'fusion')
 
-result_table <- 
+result_table <-
   pcgrr::render_actble_bm_table(
     rctbl_recs = rctbl_recs,
     variant_category = 'fusion',
     clnsig = "therapeutic_resistance"
   )
 
-result_table
+if (is.null(result_table)) {
+  cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$therapeutic_resistance$border, "; background:", cs$therapeutic_resistance$bg, "; border-radius:0 4px 4px 0; color:", cs$therapeutic_resistance$text, "; font-size:0.92em;'>Based on available data in ", bm_db_label, ", no therapeutic resistance biomarkers for ", tumor_site, " cancers were identified among RNA fusions in this tumor sample.</div>"))
+} else {
+  result_table
+}
 
 ```
 

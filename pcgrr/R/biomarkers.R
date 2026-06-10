@@ -210,7 +210,8 @@ prep_actble_display_tbl <- function(
 
     if ("BM_ACTIONABILITY_SUPPORT" %in% colnames(biomarker_var_eitems) &
         NROW(biomarker_var_eitems) > 0 &
-        tier_defining_eitems_only == TRUE) {
+        tier_defining_eitems_only == TRUE &
+        clnsig == "therapeutic_sensitivity") {
       biomarker_var_eitems <-
         biomarker_var_eitems |>
         dplyr::filter(
@@ -559,7 +560,8 @@ prep_progn_display_tbl <- function(
 
     if ("BM_ACTIONABILITY_SUPPORT" %in% colnames(biomarker_var_eitems) &
         NROW(biomarker_var_eitems) > 0 &
-        tier_defining_eitems_only == TRUE) {
+        tier_defining_eitems_only == TRUE &
+        clnsig == "therapeutic_sensitivity") {
       biomarker_var_eitems <-
         biomarker_var_eitems |>
         dplyr::filter(
@@ -907,7 +909,8 @@ prep_diagn_display_tbl <- function(
 
     if ("BM_ACTIONABILITY_SUPPORT" %in% colnames(biomarker_var_eitems) &
         NROW(biomarker_var_eitems) > 0 &
-        tier_defining_eitems_only == TRUE) {
+        tier_defining_eitems_only == TRUE &
+        clnsig == "therapeutic_sensitivity") {
       biomarker_var_eitems <-
         biomarker_var_eitems |>
         dplyr::filter(

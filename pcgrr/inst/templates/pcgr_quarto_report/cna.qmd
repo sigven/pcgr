@@ -373,19 +373,6 @@ htmltools::div(
 
 <br>
 
-
-
-```{r check_expression}
-#| eval: true
-
-# expression_present_cna <- FALSE
-# if ("TPM_GENE" %in% colnames(pcg_report$content$cna$callset$variant) &
-#    pcg_report$settings$molecular_data$fname_expression_tsv != "None") {
-#   expression_present_cna <-
-#     !any(is.na(pcg_report$content$cna$callset$variant$TPM_GENE))
-# }
-```
-
 ### Clinical actionability classification
 
 Genes subject to copy number aberrations in the tumor sample have been assessed for
@@ -456,14 +443,18 @@ rctbl_recs <- pcgrr::prep_actble_display_tbl(
   clnsig = "therapeutic_resistance",
   variant_category = 'cna')
 
-result_table <- 
+result_table <-
   pcgrr::render_actble_bm_table(
     rctbl_recs = rctbl_recs,
     variant_category = 'cna',
     clnsig = "therapeutic_resistance"
   )
 
-result_table
+if (is.null(result_table)) {
+  cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$therapeutic_resistance$border, "; background:", cs$therapeutic_resistance$bg, "; border-radius:0 4px 4px 0; color:", cs$therapeutic_resistance$text, "; font-size:0.92em;'>Based on available data in ", bm_db_label, ", no therapeutic resistance biomarkers for ", tumor_site, " cancers were identified among CNAs in this tumor sample.</div>"))
+} else {
+  result_table
+}
 
 ```
 

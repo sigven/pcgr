@@ -662,6 +662,10 @@ render_actble_bm_table <- function(
              ". Must be one of 'snv_indel', 'cna', or 'fusion'."))
   }
 
+  if (NROW(rctbl_recs$main) == 0) {
+    return(invisible(NULL))
+  }
+
   assertable::assert_colnames(
     rctbl_recs$main,
     required_cols,
