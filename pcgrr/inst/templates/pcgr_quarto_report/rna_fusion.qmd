@@ -38,8 +38,6 @@ event in this database does not rule out biological relevance,
 particularly if it involves known oncogenic driver genes.
 :::
 
-<br>
-
 ```{r fusion_filter_note}
 #| output: asis
 #| echo: false
@@ -51,11 +49,13 @@ cat(paste0(
   "border-radius:0 4px 4px 0; font-size:0.91em; margin-bottom:8px;'>",
   "<strong>Note:</strong> ", n_filt, " fusion event",
   if (n_filt == 1) "" else "s",
-  " with fewer than ", min_sr, " split reads ",
+  " with fewer than ", min_sr, " supporting split reads ",
   if (n_filt == 1) "was" else "were",
   " excluded from this report.</div>"
 ))
 ```
+
+<br>
 
 ```{r all_fusion_events}
 #| eval: !expr isTRUE(NROW(callset$variant_display) > 0)

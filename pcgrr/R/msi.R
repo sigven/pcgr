@@ -336,8 +336,11 @@ predict_msi_status <- function(variant_set,
     }
   }
 
+  prob_predicted_class <- if (msi_class == "MSS") round(1 - prob_msi_h, 3) else prob_msi_h
+  prob_label           <- if (msi_class == "MSS") "P(MSS)" else "P(MSI-H)"
+
   log4r_info(paste0("Predicted MSI status: ", msi_stats$predicted_class))
-  log4r_info(paste0("MSI - P(MSI-H): ", prob_msi_h,
+  log4r_info(paste0("MSI - ", prob_label, ": ", prob_predicted_class,
                     " [", confidence_tier, "]"))
   log4r_info(paste0("MSI - Indel fraction: ",
                     round(msi_stats$fracNonRepeatIndels, digits = 3)))
@@ -399,13 +402,6 @@ generate_report_data_msi <- function(
   ## with a low_mutation_warning; confidence is further qualified by the RF
   ## probability and the feature variance lookup table.
   if (n_calls >= 10) {
-    if (n_calls < 100) {
-      log4r_info(paste0(
-        "WARNING: n = ", n_calls, " variants — below training threshold ",
-        "(n < 100). Prediction may be less reliable; check confidence tier ",
-        "and P(MSI-H) in the report."))
-      pcg_report_msi[["low_mutation_warning"]] <- TRUE
-    }
 
     pcg_report_msi[["prediction"]] <-
       predict_msi_status(
@@ -419,6 +415,22 @@ generate_report_data_msi <- function(
           settings$conf$assay_properties$effective_target_size_mb,
         n_calls    = n_calls,
         sample_name = settings$sample_id)
+
+    if (n_calls < 100) {
+      pcg_report_msi[["low_mutation_warning"]] <- TRUE
+      conf_tier <- pcg_report_msi[["prediction"]]$confidence_tier
+      if (!is.null(conf_tier) && conf_tier == "High confidence") {
+        log4r_info(paste0(
+          "NOTE: n = ", n_calls, " variants — below training threshold ",
+          "(n < 100), but P(MSI-H) is far from the decision boundary: ",
+          "prediction is still high confidence."))
+      } else {
+        log4r_info(paste0(
+          "WARNING: n = ", n_calls, " variants — below training threshold ",
+          "(n < 100). Prediction may be less reliable; check confidence tier ",
+          "and P(MSI-H) in the report."))
+      }
+    }
 
     pcg_report_msi[["eval"]] <- TRUE
   } else {
