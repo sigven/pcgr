@@ -143,6 +143,12 @@ __A note on variant loss-of-function annotation__
 
 :::
 
+::: {.callout-note title="RNA fusion analysis" collapse="true"}
+
+`r pcgrr::fusion_doc_note()`
+
+:::
+
 ::: {.callout-note title="Gene expression analysis" collapse="true"}
 
 `r pcgrr::expression_doc_note()`

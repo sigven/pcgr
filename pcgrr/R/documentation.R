@@ -156,3 +156,32 @@ expression_doc_note <- function() {
 
 }
 
+
+#' Get documentation string for RNA fusion analysis
+#'
+#' @return A documentation string
+#'
+#' @export
+#'
+fusion_doc_note <- function() {
+
+  doc_md_file <- system.file(
+    "templates", "doc_notes_md", "fusion.md", package = "pcgrr")
+  fusion_template <- paste0(readLines(doc_md_file, warn = FALSE), collapse = "\n")
+
+  cgi_url <- "https://www.cancergenomeinterpreter.org/2021/biomarkers"
+  civic_url <- "https://civicdb.org"
+  oncokb_url <- "https://oncokb.org"
+  mitelman_url <- "https://mitelmandatabase.isb-cgc.org/"
+
+  return(
+    glue::glue(
+      fusion_template,
+      civic_url = civic_url,
+      cgi_url = cgi_url,
+      oncokb_url = oncokb_url,
+      mitelman_url = mitelman_url
+    )
+  )
+
+}

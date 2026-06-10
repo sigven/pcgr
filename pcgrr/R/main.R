@@ -1100,7 +1100,9 @@ write_report_excel <- function(report = NULL) {
   workbook <- openxlsx2::wb_workbook()
 
   i <- 15
-  for (elem in c('SAMPLE_ASSAY',
+  for (elem in c('SETTINGS',
+                'DATA_VERSIONS',
+                'SAMPLE_ASSAY',
                 'SOMATIC_SNV_INDEL',
                 'SOMATIC_SNV_INDEL_BIOMARKER',
                 'SOMATIC_CNA',

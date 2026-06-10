@@ -549,18 +549,20 @@ The Excel workbook has the following naming convention:
 
 - `<sample_id>.pcgr.<genome_assembly>.xlsx`
 
-It contains up to 14 sheets, each populated conditionally on the type of input data provided and the analysis performed. Sheets with no data are omitted entirely. Any sheet exceeding 30,000 rows is truncated to the first 30,000 rows (a warning is emitted in that case; the full data is always available in the corresponding TSV file).
+It contains up to 16 sheets, each populated conditionally on the type of input data provided and the analysis performed. Sheets with no data are omitted entirely. Any sheet exceeding 30,000 rows is truncated to the first 30,000 rows (a warning is emitted in that case; the full data is always available in the corresponding TSV file).
 
 The table below describes each sheet, when it is included, and any filtering or content restrictions applied to keep the workbook manageable.
 
 | Sheet | Included when | Content and filtering |
 |-------|---------------|-----------------------|
+| `SETTINGS` | Always | Key parameters used for the analysis, including filtering thresholds |
+| `DATA_VERSIONS` | Always | Version information for all databases used in the annotation and analysis |
 | `SAMPLE_ASSAY` | Always | Sample and assay properties: tumor site, sex, purity, ploidy, assay type (WGS/WES/TARGETED), tumor-normal/tumor-only mode, and effective target size |
 | `SOMATIC_SNV_INDEL` | `--input_vcf` provided | Somatic SNV/InDel annotations using the same columns as the TSV output, minus `BIOMARKER_MATCH` and `VEP_ALL_CSQ`. **Filtered** to exonic variants (`EXONIC_STATUS == "exonic"`) plus any non-exonic variant with an actionability tier ≤ 3. User-retained VCF INFO tags (`--retained_info_tags`) are appended as additional columns. `HGVSP` is renamed to `HGVSp_short` to avoid column name conflicts |
-| `SOMATIC_SNV_INDEL_BIOMARKER` | `--input_vcf` provided and biomarker hits exist | One row per biomarker evidence item matched to a somatic SNV/InDel. A `TIER` column encodes evidence category and actionability tier (e.g. `T1`/`T2`/`T3` = therapeutic sensitivity, `R1`/`R2`/`R3` = therapeutic resistance, `PP1`–`PP3` = poor prognosis, `PB1`–`PB3` = better prognosis, `D1`–`D3` = diagnostic positive). Diagnostic-negative evidence is excluded. Sorted by `TIER`, evidence level, primary site, and rating |
-| `SOMATIC_CNA` | `--input_cna` provided | CNA gene-level annotations using the same columns as the TSV output, minus `BIOMARKER_MATCH`. **Filtered** to genes with a non-missing `ACTIONABILITY_TIER` (i.e. only clinically actionable CNA events). Sorted by `ACTIONABILITY_TIER` and `TARGETED_INHIBITORS_ALL2` |
+| `SOMATIC_SNV_INDEL_BIOMARKER` | `--input_vcf` provided and biomarker hits exist | One row per biomarker evidence item matched to a somatic SNV/InDel. A `TIER` column encodes evidence category and actionability tier (e.g. `T1`/`T2`/`T3` = therapeutic sensitivity, `R1`/`R2`/`R3` = therapeutic resistance, `PP1`–`PP2` = poor prognosis, `PB1`–`PB2` = better prognosis, `D1`–`D2` = diagnostic positive). Diagnostic-negative evidence is excluded |
+| `SOMATIC_CNA` | `--input_cna` provided | CNA gene-level annotations using the same columns as the TSV output, minus `BIOMARKER_MATCH`. **Filtered** to genes with a non-missing `ACTIONABILITY_TIER` |
 | `SOMATIC_CNA_BIOMARKER` | `--input_cna` provided and biomarker hits exist | One row per biomarker evidence item matched to a somatic CNA, using the same `TIER` encoding and sorting as `SOMATIC_SNV_INDEL_BIOMARKER` |
-| `RNA_FUSION` | `--input_rna_fusion` provided | RNA fusion annotations using the same columns as the TSV output, minus `BIOMARKER_MATCH`. **Filtered** to fusions with a non-missing `ACTIONABILITY_TIER` (i.e. only clinically actionable fusions). Sorted by `ACTIONABILITY_TIER` |
+| `RNA_FUSION` | `--input_rna_fusion` provided | RNA fusion annotations using the same columns as the TSV output, minus `BIOMARKER_MATCH`. **Filtered** to fusions with a non-missing `ACTIONABILITY_TIER` |
 | `RNA_FUSION_BIOMARKER` | `--input_rna_fusion` provided and biomarker hits exist | One row per biomarker evidence item matched to an RNA fusion, using the same `TIER` encoding and sorting as `SOMATIC_SNV_INDEL_BIOMARKER` |
 | `TMB` | `--input_vcf` provided | Tumor mutational burden estimates (same content as the `.tmb.tsv` file) |
 | `MSI` | `--input_vcf` provided and MSI estimation enabled | MSI classifier statistics and predicted stability status |
@@ -573,40 +575,7 @@ The table below describes each sheet, when it is included, and any filtering or 
 
 The `_BIOMARKER` sheets are more comprehensive than what is displayed in the HTML report. The HTML report shows only the **tier-defining** evidence items — those that directly determined the variant's actionability tier assignment. The Excel `_BIOMARKER` sheets include **all** matched evidence items, each annotated with a `BM_ACTIONABILITY_SUPPORT` column that records its relationship to the tier assignment.
 
-The four possible values of `BM_ACTIONABILITY_SUPPORT` are:
+The possible values of `BM_ACTIONABILITY_SUPPORT` are:
 
 - **`tier-defining`** — the evidence item was the primary basis for the variant's actionability tier. Only these items appear in the HTML report.
 - **`additional`** — the evidence item is relevant (correct evidence type, overlapping molecular profile) but was not sufficient on its own to define the tier, either because the tumor type does not match the query or the evidence is weaker than what the tier requires.
-- **`additional-weak`** — the evidence item is from a different tumor type **and** carries only weak evidence (CIViC levels C/D/E or OncoKB level 4). Present only in tumor-type-specific analyses.
-- **`other`** — the evidence item is of an evidence type not used for tiering in this biomarker category (e.g., a prognostic item retrieved in a predictive context).
-
-What counts as _strong_ vs. _weak_ evidence follows the AMP/ASCO/CAP classification: strong = CIViC levels A, B (and OncoKB levels 1, 2, 3A, 3B, R1, R2); weak = CIViC levels C, D, E (and OncoKB level 4).
-
-The exact tier-support assignment depends on whether the user specified a tumor type (`--tumor_site`) or ran in tumor-type-agnostic mode (`--tumor_site 0`):
-
-**Tumor-type-specific** (a specific `--tumor_site` was provided):
-
-| Variant tier | Biomarker tumor type vs. query | Evidence strength (CIViC/OncoKB) | `BM_ACTIONABILITY_SUPPORT` |
-|:---:|---|:---:|---|
-| 1 | Same tumor type or pan-cancer | Strong (CIViC A/B, OncoKB 1/2/3A/3B/R1/R2) | `tier-defining` |
-| 1 | Same tumor type or pan-cancer | Weak (CIViC C/D/E, OncoKB 4) | `additional` |
-| 1 | Different tumor type | Strong (CIViC A/B, OncoKB 1/2/3A/3B/R1/R2) | `additional` |
-| 1 | Different tumor type | Weak (CIViC C/D/E, OncoKB 4) | `additional-weak` |
-| 2 | Different tumor type or pan-cancer | Strong (CIViC A/B, OncoKB 1/2/3A/3B/R1/R2) | `tier-defining` |
-| 2 | Same tumor type | Weak (CIViC C/D/E, OncoKB 4) | `tier-defining` |
-| 2 | Different tumor type | Weak (CIViC C/D/E, OncoKB 4) | `additional` |
-| 3 | Any | Any | `tier-defining` |
-
-The rationale: a Tier 1 variant has strong evidence in the query tumor type — so only that combination is tier-defining. A Tier 2 variant is assigned because the strongest available evidence is either from a different tumor type with strong backing, or from the same type but only weakly supported — both of those are tier-defining for Tier 2. Tier 3 captures oncogenic variants with no specific matched biomarker, so any matched item is considered tier-defining.
-
-**Tumor-type-agnostic** (`--tumor_site 0`; no specific primary site):
-
-| Condition | `BM_ACTIONABILITY_SUPPORT` |
-|---|---|
-| Pan-cancer biomarker + strong evidence (CIViC A/B, OncoKB 1/2/3A/3B/R1/R2) + Tier 1 variant | `tier-defining` |
-| Tumor-specific biomarker + strong evidence (CIViC A/B, OncoKB 1/2/3A/3B/R1/R2) + Tier 2 variant | `tier-defining` |
-| Any biomarker + weak evidence (CIViC C/D/E, OncoKB 4) + Tier 3 variant | `tier-defining` |
-| Evidence type not used for tiering in this category | `other` |
-| All other matching evidence | `additional` |
-
-In tumor-type-agnostic mode the `additional-weak` level is not used, since no tumor-type mismatch penalty applies.

@@ -23,20 +23,12 @@ _Answer: PCGR uses GENCODE as the primary gene transcript model, but we provide 
 
 __5. I have a VCF with structural variants detected in my tumor sample, can PCGR process those as well?__
 
-_Answer: This is currently not supported as input for PCGR, but is something we want to incorporate in the future._
+_Answer: This is currently not supported as input for PCGR, but is something we want to incorporate in the future. We have a skeleton of SV support working for CPSR, focusing to support large, multi-exon deletions_
 
 __6. Is it possible to see all the invididual cancer subtypes that belong to each of the 30 different tumor sites?__
 
 _Answer: Yes, see_ [an overview of phenotypes associated with primary tumor sites](primary_tumor_sites.html). See also the related GitHub repository [phenOncoX](https://github.com/sigven/phenOncoX)
 
-__7. Are there any plans to incorporate genomic biomarker evidence from__ [OncoKB](https://www.oncokb.org) __in PCGR?__
-
-_Answer: No. PCGR relies upon publicly available, open-source resources, and further that the PCGR reference bundle can be distributed freely to the user community. It is our understanding that_ [OncoKB's terms of use](https://www.oncokb.org/terms) _do not fit well with this strategy._ 
-
-__8. I have RNA fusion data that I want to analyse and include in the report. Is this possible with PCGR?__
-
-_Answer: This is currently not supported as input for PCGR, but is something we are actively working on. The focus will be on whether detected RNA fusion events are previously known (i.e. seen in other tumor samples, e.g. from the Mitelman database), and whether some of them are presently in use as biomarkers for diagnosis or treatment._
-
-__9. Is it possible for the users to update the data bundle to get the most recent versions of all underlying data sources?__
+__7. Is it possible for the users to update the data bundle to get the most recent versions of all underlying data sources?__
 
 _Answer: As of now, the data bundle is updated only with each release of PCGR. The data harmonization pipeline of knowledge databases in PCGR contain numerous and complex procedures, with several cleaning, quality control, and re-formatting steps, and is semi-automated in its present form. The versions of all databases and key software elements are outlined in each PCGR report._

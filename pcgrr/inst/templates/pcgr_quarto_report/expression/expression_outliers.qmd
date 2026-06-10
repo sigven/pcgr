@@ -82,10 +82,10 @@ if (!is.null(pcg_report$content$expression$outliers)) {
             .data$SYMBOL,
             .data$GENENAME,
             dplyr::if_else(
-              isTRUE(.data$TUMOR_SUPPRESSOR),
-              "tumor_suppressor", ""),
+              .data$TUMOR_SUPPRESSOR == TRUE,
+              "tumor suppressor", ""),
             dplyr::if_else(
-              isTRUE(.data$ONCOGENE),
+              .data$ONCOGENE == TRUE,
               "oncogene", ""),
             sep = " "
           ),
