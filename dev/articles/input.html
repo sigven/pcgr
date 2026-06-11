@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9021</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9022</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -321,6 +321,28 @@ EML4--ALK        2:42522694        2:29446394        100
 BCR--ABL1        22:23582899       9:13358994        50
 EWSR1--FLI1      22:29683136       11:128675244      75
 TMPRSS2--ERG     21:42836478       21:39737961       60</code></pre>
+<div style="border-left: 4px solid #e69f00; background-color: #fff8e6; padding: 0.75em 1em; margin: 1em 0;">
+<strong>Quality control of RNA fusion events</strong>: We strongly
+advice users to to perform quality control of fusion events upstream of
+PCGR analysis - the focus in PCGR is strictly on functional annotation
+and potential clinical impact.
+<ul>
+<li>
+We recommend to carefully check e.g. the number of supporting reads for
+each fusion event, and to visually inspect fusion events in a genome
+browser (e.g. IGV) or other third-party tools (e.g. <a href="https://github.com/senzhaocode/FuSViz" class="external-link">FusViz</a>) to conduct
+frame inference, investigate domain retention, and rule out potential
+false positives.
+</li>
+<li>
+Importantly, while most RNA fusion detection tools will attempt to
+filter out known normal/artefactual events, PCGR makes no attempt to
+further filter fusion events based on e.g. presence in normal tissue
+databases, and thus relies on the user to perform this step upstream of
+PCGR analysis.
+</li>
+</ul>
+</div>
 </div>
 </div>
 <div class="section level3">

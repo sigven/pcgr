@@ -373,6 +373,8 @@ sigven AT ifi.uio.no
 - [`filter_read_support()`](https://sigven.github.io/pcgr/dev/reference/filter_read_support.md)
   : Function that filters variant set on depth and allelic fraction
   according to settings provided by user (tumor and control)
+- [`fusion_doc_note()`](https://sigven.github.io/pcgr/dev/reference/fusion_doc_note.md)
+  : Get documentation string for RNA fusion analysis
 - [`generate_annotation_link()`](https://sigven.github.io/pcgr/dev/reference/generate_annotation_link.md)
   : A function that generates a HTML link for selected identifiers
   (DBSNP, COSMIC, CLINVAR, ENTREZ)
@@ -398,6 +400,8 @@ sigven AT ifi.uio.no
   : Function that generates dense and tiered annotated variant datasets
 - [`germline_filter_levels`](https://sigven.github.io/pcgr/dev/reference/germline_filter_levels.md)
   : Data frame with germline filtering criteria
+- [`get_data_versions_sheet()`](https://sigven.github.io/pcgr/dev/reference/get_data_versions_sheet.md)
+  : Build the DATA_VERSIONS sheet for the Excel workbook
 - [`get_druggable_fusion_partner()`](https://sigven.github.io/pcgr/dev/reference/get_druggable_fusion_partner.md)
   : Identify druggable fusion partners
 - [`get_excel_sheets()`](https://sigven.github.io/pcgr/dev/reference/get_excel_sheets.md)
@@ -410,6 +414,8 @@ sigven AT ifi.uio.no
 - [`get_prevalent_site_signatures()`](https://sigven.github.io/pcgr/dev/reference/get_prevalent_site_signatures.md)
   : Function that retrieves prevalent signatures for a given tumor
   type/primary site Data is collected from COSMIC v3.4.
+- [`get_settings_sheet()`](https://sigven.github.io/pcgr/dev/reference/get_settings_sheet.md)
+  : Build the SETTINGS sheet for the Excel workbook
 - [`get_tumor_only_filtering_criteria()`](https://sigven.github.io/pcgr/dev/reference/get_tumor_only_filtering_criteria.md)
   : Function that generates a string with filtering criteria for
   callsets coming from tumor-only sequencing

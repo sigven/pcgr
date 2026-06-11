@@ -198,6 +198,23 @@ file:
     EWSR1--FLI1      22:29683136       11:128675244      75
     TMPRSS2--ERG     21:42836478       21:39737961       60
 
+**Quality control of RNA fusion events**: We strongly advice users to to
+perform quality control of fusion events upstream of PCGR analysis - the
+focus in PCGR is strictly on functional annotation and potential
+clinical impact.
+
+- We recommend to carefully check e.g. the number of supporting reads
+  for each fusion event, and to visually inspect fusion events in a
+  genome browser (e.g. IGV) or other third-party tools
+  (e.g. [FusViz](https://github.com/senzhaocode/FuSViz)) to conduct
+  frame inference, investigate domain retention, and rule out potential
+  false positives.
+- Importantly, while most RNA fusion detection tools will attempt to
+  filter out known normal/artefactual events, PCGR makes no attempt to
+  further filter fusion events based on e.g. presence in normal tissue
+  databases, and thus relies on the user to perform this step upstream
+  of PCGR analysis.
+
 ### Gene expression
 
 The user can submit a file with bulk gene/transcript expression data to

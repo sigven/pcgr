@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9021</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9022</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -131,28 +131,15 @@ this is available.</em></p>
 <p><strong>5. I have a VCF with structural variants detected in my tumor
 sample, can PCGR process those as well?</strong></p>
 <p><em>Answer: This is currently not supported as input for PCGR, but is
-something we want to incorporate in the future.</em></p>
+something we want to incorporate in the future. We have a skeleton of SV
+support working for CPSR, focusing to support large, multi-exon
+deletions</em></p>
 <p><strong>6. Is it possible to see all the invididual cancer subtypes
 that belong to each of the 30 different tumor sites?</strong></p>
 <p><em>Answer: Yes, see</em> <a href="primary_tumor_sites.html">an
 overview of phenotypes associated with primary tumor sites</a>. See also
 the related GitHub repository <a href="https://github.com/sigven/phenOncoX" class="external-link">phenOncoX</a></p>
-<p><strong>7. Are there any plans to incorporate genomic biomarker
-evidence from</strong> <a href="https://www.oncokb.org" class="external-link">OncoKB</a>
-<strong>in PCGR?</strong></p>
-<p><em>Answer: No. PCGR relies upon publicly available, open-source
-resources, and further that the PCGR reference bundle can be distributed
-freely to the user community. It is our understanding that</em> <a href="https://www.oncokb.org/terms" class="external-link">OncoKB’s terms of use</a> <em>do not
-fit well with this strategy.</em></p>
-<p><strong>8. I have RNA fusion data that I want to analyse and include
-in the report. Is this possible with PCGR?</strong></p>
-<p><em>Answer: This is currently not supported as input for PCGR, but is
-something we are actively working on. The focus will be on whether
-detected RNA fusion events are previously known (i.e. seen in other
-tumor samples, e.g. from the Mitelman database), and whether some of
-them are presently in use as biomarkers for diagnosis or
-treatment.</em></p>
-<p><strong>9. Is it possible for the users to update the data bundle to
+<p><strong>7. Is it possible for the users to update the data bundle to
 get the most recent versions of all underlying data
 sources?</strong></p>
 <p><em>Answer: As of now, the data bundle is updated only with each

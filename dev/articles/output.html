@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9021</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9022</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -2431,7 +2431,7 @@ Q3, percentile etc), enabling the detection of expression outliers.</li>
 <ul>
 <li><code>&lt;sample_id&gt;.pcgr.&lt;genome_assembly&gt;.xlsx</code></li>
 </ul>
-<p>It contains up to 14 sheets, each populated conditionally on the type
+<p>It contains up to 16 sheets, each populated conditionally on the type
 of input data provided and the analysis performed. Sheets with no data
 are omitted entirely. Any sheet exceeding 30,000 rows is truncated to
 the first 30,000 rows (a warning is emitted in that case; the full data
@@ -2451,6 +2451,18 @@ manageable.</p>
 <th>Content and filtering</th>
 </tr></thead>
 <tbody>
+<tr class="odd">
+<td><code>SETTINGS</code></td>
+<td>Always</td>
+<td>Key parameters used for the analysis, including filtering
+thresholds</td>
+</tr>
+<tr class="even">
+<td><code>DATA_VERSIONS</code></td>
+<td>Always</td>
+<td>Version information for all databases used in the annotation and
+analysis</td>
+</tr>
 <tr class="odd">
 <td><code>SAMPLE_ASSAY</code></td>
 <td>Always</td>
@@ -2479,11 +2491,10 @@ column name conflicts</td>
 A <code>TIER</code> column encodes evidence category and actionability
 tier (e.g. <code>T1</code>/<code>T2</code>/<code>T3</code> = therapeutic
 sensitivity, <code>R1</code>/<code>R2</code>/<code>R3</code> =
-therapeutic resistance, <code>PP1</code>–<code>PP3</code> = poor
-prognosis, <code>PB1</code>–<code>PB3</code> = better prognosis,
-<code>D1</code>–<code>D3</code> = diagnostic positive).
-Diagnostic-negative evidence is excluded. Sorted by <code>TIER</code>,
-evidence level, primary site, and rating</td>
+therapeutic resistance, <code>PP1</code>–<code>PP2</code> = poor
+prognosis, <code>PB1</code>–<code>PB2</code> = better prognosis,
+<code>D1</code>–<code>D2</code> = diagnostic positive).
+Diagnostic-negative evidence is excluded</td>
 </tr>
 <tr class="even">
 <td><code>SOMATIC_CNA</code></td>
@@ -2491,9 +2502,7 @@ evidence level, primary site, and rating</td>
 <code>--input_cna</code> provided</td>
 <td>CNA gene-level annotations using the same columns as the TSV output,
 minus <code>BIOMARKER_MATCH</code>. <strong>Filtered</strong> to genes
-with a non-missing <code>ACTIONABILITY_TIER</code> (i.e. only clinically
-actionable CNA events). Sorted by <code>ACTIONABILITY_TIER</code> and
-<code>TARGETED_INHIBITORS_ALL2</code>
+with a non-missing <code>ACTIONABILITY_TIER</code>
 </td>
 </tr>
 <tr class="odd">
@@ -2511,8 +2520,7 @@ the same <code>TIER</code> encoding and sorting as
 <code>--input_rna_fusion</code> provided</td>
 <td>RNA fusion annotations using the same columns as the TSV output,
 minus <code>BIOMARKER_MATCH</code>. <strong>Filtered</strong> to fusions
-with a non-missing <code>ACTIONABILITY_TIER</code> (i.e. only clinically
-actionable fusions). Sorted by <code>ACTIONABILITY_TIER</code>
+with a non-missing <code>ACTIONABILITY_TIER</code>
 </td>
 </tr>
 <tr class="odd">
@@ -2582,8 +2590,7 @@ determined the variant’s actionability tier assignment. The Excel
 evidence items, each annotated with a
 <code>BM_ACTIONABILITY_SUPPORT</code> column that records its
 relationship to the tier assignment.</p>
-<p>The four possible values of <code>BM_ACTIONABILITY_SUPPORT</code>
-are:</p>
+<p>The possible values of <code>BM_ACTIONABILITY_SUPPORT</code> are:</p>
 <ul>
 <li>
 <strong><code>tier-defining</code></strong> — the evidence item was
@@ -2595,135 +2602,7 @@ relevant (correct evidence type, overlapping molecular profile) but was
 not sufficient on its own to define the tier, either because the tumor
 type does not match the query or the evidence is weaker than what the
 tier requires.</li>
-<li>
-<strong><code>additional-weak</code></strong> — the evidence item is
-from a different tumor type <strong>and</strong> carries only weak
-evidence (CIViC levels C/D/E or OncoKB level 4). Present only in
-tumor-type-specific analyses.</li>
-<li>
-<strong><code>other</code></strong> — the evidence item is of an
-evidence type not used for tiering in this biomarker category (e.g., a
-prognostic item retrieved in a predictive context).</li>
 </ul>
-<p>What counts as <em>strong</em> vs. <em>weak</em> evidence follows the
-AMP/ASCO/CAP classification: strong = CIViC levels A, B (and OncoKB
-levels 1, 2, 3A, 3B, R1, R2); weak = CIViC levels C, D, E (and OncoKB
-level 4).</p>
-<p>The exact tier-support assignment depends on whether the user
-specified a tumor type (<code>--tumor_site</code>) or ran in
-tumor-type-agnostic mode (<code>--tumor_site 0</code>):</p>
-<p><strong>Tumor-type-specific</strong> (a specific
-<code>--tumor_site</code> was provided):</p>
-<table class="table">
-<colgroup>
-<col width="31%">
-<col width="18%">
-<col width="31%">
-<col width="18%">
-</colgroup>
-<thead><tr class="header">
-<th align="center">Variant tier</th>
-<th>Biomarker tumor type vs. query</th>
-<th align="center">Evidence strength (CIViC/OncoKB)</th>
-<th><code>BM_ACTIONABILITY_SUPPORT</code></th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="center">1</td>
-<td>Same tumor type or pan-cancer</td>
-<td align="center">Strong (CIViC A/B, OncoKB 1/2/3A/3B/R1/R2)</td>
-<td><code>tier-defining</code></td>
-</tr>
-<tr class="even">
-<td align="center">1</td>
-<td>Same tumor type or pan-cancer</td>
-<td align="center">Weak (CIViC C/D/E, OncoKB 4)</td>
-<td><code>additional</code></td>
-</tr>
-<tr class="odd">
-<td align="center">1</td>
-<td>Different tumor type</td>
-<td align="center">Strong (CIViC A/B, OncoKB 1/2/3A/3B/R1/R2)</td>
-<td><code>additional</code></td>
-</tr>
-<tr class="even">
-<td align="center">1</td>
-<td>Different tumor type</td>
-<td align="center">Weak (CIViC C/D/E, OncoKB 4)</td>
-<td><code>additional-weak</code></td>
-</tr>
-<tr class="odd">
-<td align="center">2</td>
-<td>Different tumor type or pan-cancer</td>
-<td align="center">Strong (CIViC A/B, OncoKB 1/2/3A/3B/R1/R2)</td>
-<td><code>tier-defining</code></td>
-</tr>
-<tr class="even">
-<td align="center">2</td>
-<td>Same tumor type</td>
-<td align="center">Weak (CIViC C/D/E, OncoKB 4)</td>
-<td><code>tier-defining</code></td>
-</tr>
-<tr class="odd">
-<td align="center">2</td>
-<td>Different tumor type</td>
-<td align="center">Weak (CIViC C/D/E, OncoKB 4)</td>
-<td><code>additional</code></td>
-</tr>
-<tr class="even">
-<td align="center">3</td>
-<td>Any</td>
-<td align="center">Any</td>
-<td><code>tier-defining</code></td>
-</tr>
-</tbody>
-</table>
-<p>The rationale: a Tier 1 variant has strong evidence in the query
-tumor type — so only that combination is tier-defining. A Tier 2 variant
-is assigned because the strongest available evidence is either from a
-different tumor type with strong backing, or from the same type but only
-weakly supported — both of those are tier-defining for Tier 2. Tier 3
-captures oncogenic variants with no specific matched biomarker, so any
-matched item is considered tier-defining.</p>
-<p><strong>Tumor-type-agnostic</strong> (<code>--tumor_site 0</code>; no
-specific primary site):</p>
-<table class="table">
-<colgroup>
-<col width="50%">
-<col width="50%">
-</colgroup>
-<thead><tr class="header">
-<th>Condition</th>
-<th><code>BM_ACTIONABILITY_SUPPORT</code></th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td>Pan-cancer biomarker + strong evidence (CIViC A/B, OncoKB
-1/2/3A/3B/R1/R2) + Tier 1 variant</td>
-<td><code>tier-defining</code></td>
-</tr>
-<tr class="even">
-<td>Tumor-specific biomarker + strong evidence (CIViC A/B, OncoKB
-1/2/3A/3B/R1/R2) + Tier 2 variant</td>
-<td><code>tier-defining</code></td>
-</tr>
-<tr class="odd">
-<td>Any biomarker + weak evidence (CIViC C/D/E, OncoKB 4) + Tier 3
-variant</td>
-<td><code>tier-defining</code></td>
-</tr>
-<tr class="even">
-<td>Evidence type not used for tiering in this category</td>
-<td><code>other</code></td>
-</tr>
-<tr class="odd">
-<td>All other matching evidence</td>
-<td><code>additional</code></td>
-</tr>
-</tbody>
-</table>
-<p>In tumor-type-agnostic mode the <code>additional-weak</code> level is
-not used, since no tumor-type mismatch penalty applies.</p>
 </div>
 </div>
 </div>

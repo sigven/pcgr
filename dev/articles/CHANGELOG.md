@@ -2,7 +2,7 @@
 
 ## v2.3.0
 
-- Date: **2026-06-10**
+- Date: **2026-06-12**
 - Major data updates
   - ClinVar (2026-06)
   - dbNSFP (v5.3, October 2025)
@@ -82,9 +82,36 @@
   - A hidden `SEARCH_INDEX` column concatenates key fields (gene,
     alteration, consequence, oncogenicity) to enable full-text search
     across the most clinically relevant columns
+- **Excel workbook — SETTINGS and DATA_VERSIONS sheets**
+  - Two new sheets are prepended to the Excel workbook output (`.xlsx`),
+    before `SAMPLE_ASSAY`:
+    - `SETTINGS` — key run parameters in a three-column
+      `SECTION / PARAMETER / VALUE` layout, covering: general settings
+      (PCGR version, genome assembly, biomarker sources, guidelines),
+      SNV/InDel settings (noncoding display, germline findings, MSI, TMB
+      algorithm, mutational signature sub-settings), VEP settings
+      (transcript set, pick order, regulatory annotation, buffer size,
+      forks), allelic support filters (only rows for filters that are
+      actively configured), CNA thresholding settings (all
+      absolute/relative thresholds for amplification, gain, and
+      heterozygous deletion), RNA fusion settings (min split reads), and
+      expression settings (similarity analysis)
+    - `DATA_VERSIONS` — one row per reference dataset used in the run,
+      with columns `DATABASE / VERSION / DESCRIPTION / URL / LICENSE`;
+      mirrors the “Dataset versions” callout in the HTML Documentation
+      section
 
 ### Changed
 
+- Variant tier classification with respect to actionability is now
+  driven by treatment sensitivity evidence only. While treatment
+  resistance, diagnostic and prognostic evidence linked to query
+  variants are shown, they do not contribute to tier assignment - this
+  to align most correctly with the AMP/ASCO/CAP guidelines for variant
+  actionability assessment.
+- Fix to implementation of oncogenicity classification: OS3 does not
+  fire when OS1 is already firing (known oncogenic/likely oncogenic
+  variant)
 - Loss-of-function annotation from MaxEntScan is now stratum-aware:
   canonical splice site positions (±2 bp of exon–intron boundary) always
   set `LOSS_OF_FUNCTION = TRUE`; for non-canonical positions, only

@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9021</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9022</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -88,7 +88,7 @@
 <h2 id="v2-3-0">v2.3.0<a class="anchor" aria-label="anchor" href="#v2-3-0"></a>
 </h2>
 <ul>
-<li>Date: <strong>2026-06-10</strong>
+<li>Date: <strong>2026-06-12</strong>
 </li>
 <li>Major data updates
 <ul>
@@ -207,12 +207,47 @@ a more responsive and feature-rich browsing experience</li>
 across the most clinically relevant columns</li>
 </ul>
 </li>
+<li>
+<strong>Excel workbook — SETTINGS and DATA_VERSIONS sheets</strong>
+<ul>
+<li>Two new sheets are prepended to the Excel workbook output
+(<code>.xlsx</code>), before <code>SAMPLE_ASSAY</code>:
+<ul>
+<li>
+<code>SETTINGS</code> — key run parameters in a three-column
+<code>SECTION / PARAMETER / VALUE</code> layout, covering: general
+settings (PCGR version, genome assembly, biomarker sources, guidelines),
+SNV/InDel settings (noncoding display, germline findings, MSI, TMB
+algorithm, mutational signature sub-settings), VEP settings (transcript
+set, pick order, regulatory annotation, buffer size, forks), allelic
+support filters (only rows for filters that are actively configured),
+CNA thresholding settings (all absolute/relative thresholds for
+amplification, gain, and heterozygous deletion), RNA fusion settings
+(min split reads), and expression settings (similarity analysis)</li>
+<li>
+<code>DATA_VERSIONS</code> — one row per reference dataset used in
+the run, with columns
+<code>DATABASE / VERSION / DESCRIPTION / URL / LICENSE</code>; mirrors
+the “Dataset versions” callout in the HTML Documentation section</li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </div>
 <div class="section level3">
 <h3 id="changed">Changed<a class="anchor" aria-label="anchor" href="#changed"></a>
 </h3>
 <ul>
+<li>Variant tier classification with respect to actionability is now
+driven by treatment sensitivity evidence only. While treatment
+resistance, diagnostic and prognostic evidence linked to query variants
+are shown, they do not contribute to tier assignment - this to align
+most correctly with the AMP/ASCO/CAP guidelines for variant
+actionability assessment.</li>
+<li>Fix to implementation of oncogenicity classification: OS3 does not
+fire when OS1 is already firing (known oncogenic/likely oncogenic
+variant)</li>
 <li>Loss-of-function annotation from MaxEntScan is now stratum-aware:
 canonical splice site positions (±2 bp of exon–intron boundary) always
 set <code>LOSS_OF_FUNCTION = TRUE</code>; for non-canonical positions,

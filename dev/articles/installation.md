@@ -8,8 +8,8 @@ PCGR requires the following data to run successfully:
     resources, including information on molecular biomarkers, targeted
     cancer therapies, variant frequencies etc. Key datasets include
     [CIViC](https://civicdb.org),
-    [CGI](https://www.cancergenomeinterpreter.org/biomarkers), [Open
-    Targets Platform](https://platform.opentargets.org),
+    [CGI](https://www.cancergenomeinterpreter.org/2021/biomarkers),
+    [Open Targets Platform](https://platform.opentargets.org),
     [TCGA](https://portal.gdc.cancer.gov/), and
     [ClinVar](https://www.ncbi.nlm.nih.gov/clinvar/).
 2.  **Ensembl VEP data cache** - needed for variant annotation with VEP
@@ -27,13 +27,13 @@ and are versioned based on their release date. Keep in mind that the
 bundles support only certain Ensembl VEP versions, and importantly also
 specific software versions of PCGR. Upgrading the PCGR software without
 upgrading the bundle specified here is thus *not* a recommended
-installation strategy. The latest (**v20260508**) genome-specific
+installation strategy. The latest (**v20260606**) genome-specific
 bundles can be downloaded directly from below (size: ~5G):
 
 | Assembly | Download Link |
 |:---|:---|
-| GRCh38 | <https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20260508.grch38.tgz> |
-| GRCh37 | <https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20260508.grch37.tgz> |
+| GRCh38 | <https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20260606.grch38.tgz> |
+| GRCh37 | <https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20260606.grch37.tgz> |
 
 **Tip 1**: The `data/grch3x/.PCGR_BUNDLE_VERSION` file within the
 downloaded bundle indicates the bundle version for reporting purposes.
@@ -44,7 +44,7 @@ the reference bundle.
 
 #### Bash Example
 
-    BUNDLE_VERSION="20260508"
+    BUNDLE_VERSION="20260606"
 
 ``` bash
 GENOME="grch38" # or "grch37"
@@ -108,7 +108,7 @@ the time is spent on downloading the `{BSgenome.Hsapiens.UCSC.hg19}` and
 `{BSgenome.Hsapiens.UCSC.hg38}` R packages (which happens at the very
 end of the conda environment creation).
 
-    PCGR_VERSION="2.2.5.9021"
+    PCGR_VERSION="2.2.5.9022"
 
 ``` bash
 # set up variables
@@ -129,9 +129,9 @@ pcgr --help
 
 The PCGR Docker image is available from the GitHub Container Registry at
 <https://github.com/sigven/pcgr/pkgs/container/pcgr>. Pull the latest
-**v2.2.5.9021** image with:
+**v2.2.5.9022** image with:
 
-    docker pull ghcr.io/sigven/pcgr:2.2.5.9021
+    docker pull ghcr.io/sigven/pcgr:2.2.5.9022
 
 #### Example Run
 
@@ -142,7 +142,7 @@ structure:
 - `/Users/you/dir1/VEP_cache` - the directory where you have downloaded
   the [VEP cache](#vep-cache) (**Note**: this directory should contain
   the `homo_sapiens` directory as its child directory
-- `/Users/you/dir1/20260508` - the directory where you have downloaded
+- `/Users/you/dir1/20260606` - the directory where you have downloaded
   the PCGR reference bundle (**Note**: this directory should contain a
   directory named `data` as its child directory)
 - `/Users/you/dir1/pcgr_inputs` - the directory where you have your
@@ -152,8 +152,8 @@ structure:
 
 &nbsp;
 
-    PCGR_VERSION="2.2.5.9021"
-    BUNDLE_VERSION="20260508"
+    PCGR_VERSION="2.2.5.9022"
+    BUNDLE_VERSION="20260606"
 
 ``` bash
 docker container run -it --rm \
@@ -185,19 +185,19 @@ for Singularity/Apptainer below, see also [issue
 ### C. Singularity/Apptainer
 
 The PCGR Singularity/Apptainer image is available on [GitHub Container
-Registry](https://ghcr.io/sigven/pcgr). Pull the latest **v2.2.5.9021**
+Registry](https://ghcr.io/sigven/pcgr). Pull the latest **v2.2.5.9022**
 image with:
 
-    apptainer pull oras://ghcr.io/sigven/pcgr:2.2.5.9021.singularity
+    apptainer pull oras://ghcr.io/sigven/pcgr:2.2.5.9022.singularity
 
 This will download a Singularity Image File (SIF) called
-**pcgr_2.2.5.9021.singularity.sif** that can be run with Singularity or
+**pcgr_2.2.5.9022.singularity.sif** that can be run with Singularity or
 Apptainer.
 
 #### Example Run
 
-    PCGR_VERSION="2.2.5.9021"
-    BUNDLE_VERSION="20260508"
+    PCGR_VERSION="2.2.5.9022"
+    BUNDLE_VERSION="20260606"
 
 ``` bash
 apptainer exec \

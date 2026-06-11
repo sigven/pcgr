@@ -78,6 +78,7 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/fetch_oncokb_hgvsp_annotation.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/filter_maf_file.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/filter_read_support.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/fusion_doc_note.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/generate_annotation_link.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/generate_report.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/generate_report_data_expression.html</loc></url>
@@ -89,11 +90,13 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/generate_report_data_tmb.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/generate_tier_tsv.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/germline_filter_levels.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/get_data_versions_sheet.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/get_druggable_fusion_partner.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/get_excel_sheets.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/get_genome_obj.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/get_oncogenic_cna_events.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/get_prevalent_site_signatures.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/get_settings_sheet.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/get_tumor_only_filtering_criteria.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/get_valid_chromosomes.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/grpmax_faf_nc_gnomad.html</loc></url>

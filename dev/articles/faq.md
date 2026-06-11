@@ -57,7 +57,9 @@ is available.*
 can PCGR process those as well?**
 
 *Answer: This is currently not supported as input for PCGR, but is
-something we want to incorporate in the future.*
+something we want to incorporate in the future. We have a skeleton of SV
+support working for CPSR, focusing to support large, multi-exon
+deletions*
 
 **6. Is it possible to see all the invididual cancer subtypes that
 belong to each of the 30 different tumor sites?**
@@ -68,24 +70,7 @@ sites](https://sigven.github.io/pcgr/dev/articles/primary_tumor_sites.md).
 See also the related GitHub repository
 [phenOncoX](https://github.com/sigven/phenOncoX)
 
-**7. Are there any plans to incorporate genomic biomarker evidence
-from** [OncoKB](https://www.oncokb.org) **in PCGR?**
-
-*Answer: No. PCGR relies upon publicly available, open-source resources,
-and further that the PCGR reference bundle can be distributed freely to
-the user community. It is our understanding that* [OncoKB’s terms of
-use](https://www.oncokb.org/terms) *do not fit well with this strategy.*
-
-**8. I have RNA fusion data that I want to analyse and include in the
-report. Is this possible with PCGR?**
-
-*Answer: This is currently not supported as input for PCGR, but is
-something we are actively working on. The focus will be on whether
-detected RNA fusion events are previously known (i.e. seen in other
-tumor samples, e.g. from the Mitelman database), and whether some of
-them are presently in use as biomarkers for diagnosis or treatment.*
-
-**9. Is it possible for the users to update the data bundle to get the
+**7. Is it possible for the users to update the data bundle to get the
 most recent versions of all underlying data sources?**
 
 *Answer: As of now, the data bundle is updated only with each release of

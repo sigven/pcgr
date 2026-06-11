@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9021</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9022</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -146,26 +146,33 @@ in that variant collection using a dedicated option:</p>
 <li><code>--exclude_pon</code></li>
 </ul>
 <hr>
-<p><strong>IMPORTANT NOTE 1</strong>: A number of the analyses available
+<div style="border-left: 4px solid #e69f00; background-color: #fff8e6; padding: 0.75em 1em; margin: 1em 0;">
+<p><strong>IMPORTANT NOTE 1:</strong> A number of the analyses available
 in PCGR are not particularly well-suited for tumor-only input,
-e.g. mutational signature analysis and MSI status prediction.
-<strong>IMPORTANT NOTE 2</strong>: If you run PCGR on tumor-only WGS
+e.g. mutational signature analysis and MSI status prediction.</p>
+</div>
+<div style="border-left: 4px solid #e69f00; background-color: #fff8e6; padding: 0.75em 1em; margin: 1em 0;">
+<p><strong>IMPORTANT NOTE 2:</strong> If you run PCGR on tumor-only WGS
 assays, we strongly recommend that you pre-filter your VCF against the
 exome, since we have frequently encountered that the large unfiltered
 variant set from such assays will cause a crash in PCGR. See also <a href="https://github.com/sigven/pcgr/issues/178" class="external-link">this issue</a>.</p>
+</div>
 </div>
 <div class="section level3">
 <h3 id="sample-properties">Sample properties<a class="anchor" aria-label="anchor" href="#sample-properties"></a>
 </h3>
 <p>A few selected properties of the tumor sample that should be
-determined prior to PCGR analysis can be provided, currently only used
-for display/reporting:</p>
+determined prior to PCGR analysis can be provided</p>
 <ul>
 <li>
 <code>--tumor_ploidy &lt;value&gt;</code> - ploidy estimate</li>
 <li>
 <code>--tumor_purity &lt;value&gt;</code> - purity estimate</li>
 </ul>
+<p>If not provided, PCGR will attempt to estimate ploidy from the copy
+number segments (if provided) using a weighted median approach. If copy
+number segments are not provided, these properties will be set to
+<code>NA</code> in the report.</p>
 <div class="section level4">
 <h4 id="tumor-site">Tumor site<a class="anchor" aria-label="anchor" href="#tumor-site"></a>
 </h4>
@@ -178,9 +185,10 @@ should be be provided, through the following option:</p>
 primary sites/tissues for human cancers. This information is used
 e.g. to discriminate between on and off-label targeted therapies from
 the actionable biomarkers detected in the sample. Note that the default
-value is <strong>0</strong> (implies <strong>Any</strong> tissue/site),
-which essentially prohibits the presence of <a href="variant_classification.html">tier 1 variants</a> occurring in the
-report.</p>
+value is <strong>0</strong> (implies <strong>Any</strong> tissue/site) -
+only pan-cancer biomarkers will be considered for Tier I assignment, and
+all tumor-specific biomarkers will be considered as non-matching site
+evidence for Tier II/III assignment.</p>
 <p>The following lists the possible encodings, and the corresponding
 primary tissues/sites:</p>
 <pre><code>0 = Any
@@ -716,8 +724,8 @@ files, VEP cache, see <a href="installation.html">Installation</a>):</p>
 <span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>    <span class="at">--tumor_dp_tag</span> TDP <span class="dt">\</span></span>
 <span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>    <span class="at">--tumor_af_tag</span> TVAF <span class="dt">\</span></span>
 <span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>    <span class="at">--tumor_site</span> 9 <span class="dt">\</span></span>
-<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>    <span class="at">--input_cna</span> /Users/you/pcgr/examples/T001-COAD.cna.tsv <span class="dt">\</span></span>
-<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>    <span class="at">--input_rna_fusion</span> /Users/you/pcgr/examples/T001-COAD.rna_fusions.tsv <span class="dt">\</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>    <span class="at">--input_cna</span> /Users/you/pcgr/examples/T001-COAD.grch37.cna.tsv <span class="dt">\</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>    <span class="at">--input_rna_fusion</span> /Users/you/pcgr/examples/T001-COAD.grch37.fusions.tsv <span class="dt">\</span></span>
 <span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>    <span class="at">--sex</span> MALE <span class="dt">\</span></span>
 <span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>    <span class="at">--tumor_purity</span> 0.9 <span class="dt">\</span></span>
 <span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>    <span class="at">--tumor_ploidy</span> 2.0 <span class="dt">\</span></span>

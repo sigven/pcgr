@@ -66,22 +66,28 @@ variant collection using a dedicated option:
 
 ------------------------------------------------------------------------
 
-**IMPORTANT NOTE 1**: A number of the analyses available in PCGR are not
+**IMPORTANT NOTE 1:** A number of the analyses available in PCGR are not
 particularly well-suited for tumor-only input, e.g. mutational signature
-analysis and MSI status prediction. **IMPORTANT NOTE 2**: If you run
-PCGR on tumor-only WGS assays, we strongly recommend that you pre-filter
-your VCF against the exome, since we have frequently encountered that
-the large unfiltered variant set from such assays will cause a crash in
-PCGR. See also [this issue](https://github.com/sigven/pcgr/issues/178).
+analysis and MSI status prediction.
+
+**IMPORTANT NOTE 2:** If you run PCGR on tumor-only WGS assays, we
+strongly recommend that you pre-filter your VCF against the exome, since
+we have frequently encountered that the large unfiltered variant set
+from such assays will cause a crash in PCGR. See also [this
+issue](https://github.com/sigven/pcgr/issues/178).
 
 ### Sample properties
 
 A few selected properties of the tumor sample that should be determined
-prior to PCGR analysis can be provided, currently only used for
-display/reporting:
+prior to PCGR analysis can be provided
 
 - `--tumor_ploidy <value>` - ploidy estimate
 - `--tumor_purity <value>` - purity estimate
+
+If not provided, PCGR will attempt to estimate ploidy from the copy
+number segments (if provided) using a weighted median approach. If copy
+number segments are not provided, these properties will be set to `NA`
+in the report.
 
 #### Tumor site
 
@@ -94,10 +100,10 @@ This option takes a value between 0 and 30, reflecting the main primary
 sites/tissues for human cancers. This information is used e.g. to
 discriminate between on and off-label targeted therapies from the
 actionable biomarkers detected in the sample. Note that the default
-value is **0** (implies **Any** tissue/site), which essentially
-prohibits the presence of [tier 1
-variants](https://sigven.github.io/pcgr/dev/articles/variant_classification.md)
-occurring in the report.
+value is **0** (implies **Any** tissue/site) - only pan-cancer
+biomarkers will be considered for Tier I assignment, and all
+tumor-specific biomarkers will be considered as non-matching site
+evidence for Tier II/III assignment.
 
 The following lists the possible encodings, and the corresponding
 primary tissues/sites:
@@ -590,8 +596,8 @@ pcgr \
     --tumor_dp_tag TDP \
     --tumor_af_tag TVAF \
     --tumor_site 9 \
-    --input_cna /Users/you/pcgr/examples/T001-COAD.cna.tsv \
-    --input_rna_fusion /Users/you/pcgr/examples/T001-COAD.rna_fusions.tsv \
+    --input_cna /Users/you/pcgr/examples/T001-COAD.grch37.cna.tsv \
+    --input_rna_fusion /Users/you/pcgr/examples/T001-COAD.grch37.fusions.tsv \
     --sex MALE \
     --tumor_purity 0.9 \
     --tumor_ploidy 2.0 \
