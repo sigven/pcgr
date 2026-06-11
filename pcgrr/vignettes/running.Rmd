@@ -487,8 +487,8 @@ pcgr \
     --tumor_dp_tag TDP \
     --tumor_af_tag TVAF \
     --tumor_site 9 \
-    --input_cna /Users/you/pcgr/examples/T001-COAD.cna.tsv \
-    --input_rna_fusion /Users/you/pcgr/examples/T001-COAD.rna_fusions.tsv \
+    --input_cna /Users/you/pcgr/examples/T001-COAD.grch37.cna.tsv \
+    --input_rna_fusion /Users/you/pcgr/examples/T001-COAD.grch37.fusions.tsv \
     --sex MALE \
     --tumor_purity 0.9 \
     --tumor_ploidy 2.0 \
