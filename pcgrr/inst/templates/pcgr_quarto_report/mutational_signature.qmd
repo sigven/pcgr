@@ -226,14 +226,15 @@ pie_aetiologies <- plotly::plot_ly(
     ## legend at the bottom
     legend = list(
       orientation = "h",
-      font = t),
-      #y = -0.2,
-      #yanchor = "bottom",
-      #x = 0.5),
+      font = t,
+      x = 0.5,
+      xanchor = "center",
+      y = -0.05,
+      yanchor = "top"),
     margin = list(
       l = 20,  # left margin
       r = 20,  # right margin
-      b = 20,  # bottom margin
+      b = 5,   # bottom margin
       t = 30   # top margin
     ))
 

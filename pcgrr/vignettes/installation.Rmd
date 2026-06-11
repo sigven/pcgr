@@ -34,7 +34,7 @@ bundle_link <- function(hg) {
 
 PCGR requires the following data to run successfully:
 
-1. **Reference bundle** - containing data from multiple knowledge resources, including information on molecular biomarkers, targeted cancer therapies, variant frequencies etc. Key datasets include [CIViC](https://civicdb.org), [CGI](https://www.cancergenomeinterpreter.org/biomarkers), [Open Targets Platform](https://platform.opentargets.org), [TCGA](https://portal.gdc.cancer.gov/), and [ClinVar](https://www.ncbi.nlm.nih.gov/clinvar/).
+1. **Reference bundle** - containing data from multiple knowledge resources, including information on molecular biomarkers, targeted cancer therapies, variant frequencies etc. Key datasets include [CIViC](https://civicdb.org), [CGI](https://www.cancergenomeinterpreter.org/2021/biomarkers), [Open Targets Platform](https://platform.opentargets.org), [TCGA](https://portal.gdc.cancer.gov/), and [ClinVar](https://www.ncbi.nlm.nih.gov/clinvar/).
 2. **Ensembl VEP data cache** - needed for variant annotation with VEP (Variant Effect Predictor)
 3. **User-supplied sample-specific inputs** - e.g. somatic variant calls in VCF format
 

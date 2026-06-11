@@ -48,7 +48,7 @@ pdiakumis <- user("pdiakumis")
 
 ## v2.3.0
 
-- Date: **2026-06-10**
+- Date: **2026-06-12**
 - Major data updates
   - ClinVar (2026-06)
   - dbNSFP (v5.3, October 2025)
@@ -133,6 +133,13 @@ pdiakumis <- user("pdiakumis")
 
 ### Changed
 
+
+- Variant tier classification with respect to actionability is now driven by treatment
+  sensitivity evidence only. While treatment resistance, diagnostic and prognostic evidence 
+  linked to query variants are shown, they do not contribute to tier assignment - this to align
+  most correctly with the AMP/ASCO/CAP guidelines for variant actionability assessment.
+- Fix to implementation of oncogenicity classification: OS3 does not fire when OS1 is already
+  firing (known oncogenic/likely oncogenic variant)
 - Loss-of-function annotation from MaxEntScan is now stratum-aware: canonical splice
   site positions (±2 bp of exon–intron boundary) always set `LOSS_OF_FUNCTION = TRUE`;
   for non-canonical positions, only variants with a _Strong_ MaxEntScan evidence tier
