@@ -16,7 +16,7 @@ dependencies:
   - bioconda::vcfanno
   - bioconda::vt
   - bioconda::vcf2maf
-  - bioconda::vcf2tsvpy ==0.6.1
+  - bioconda::vcf2tsvpy ==0.6.2
   - conda-forge::yaml
   - pcgr::oncokb-annotator
   - conda-forge::urllib3 # oncokb-annotator
