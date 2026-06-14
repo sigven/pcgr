@@ -155,4 +155,10 @@ __A note on variant loss-of-function annotation__
 
 :::
 
+::: {.callout-note title="Two-hit detection" collapse="true"}
+
+`r pcgrr::twohit_doc_note()`
+
+:::
+
 :::

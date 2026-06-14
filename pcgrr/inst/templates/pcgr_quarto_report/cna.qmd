@@ -268,7 +268,7 @@ htmltools::br()
 
 ### Potential two-hit events
 
-For tumor suppressor genes (TSGs) subject to loss-of-heterozygosity (LOH) – either a deletion or copy-neutral LOH event – we show any co-occurring somatic or germline loss-of-function SNV/InDels that may constitute a _two-hit_ inactivation of the gene. <!--Somatic candidates are matched by genomic position within the CNA segment; germline candidates (classified as Pathogenic/Likely Pathogenic by CPSR) are matched by gene symbol.-->
+For tumor suppressor genes (TSGs) subject to loss-of-heterozygosity (LOH) – either a deletion or copy-neutral LOH event – we show any co-occurring somatic or germline loss-of-function SNV/InDels that may constitute a _two-hit_ inactivation of the gene. 
 
 <br>
 
@@ -281,6 +281,40 @@ annotation strategy. Specifically, evidence from curated sources (e.g. OncoKB) m
 
 :::
 
+::: {.callout-note collapse="true"}
+
+## Note - VAF consistency assessment
+
+For somatic candidates, the **VAF consistency** column indicates whether the observed tumor VAF is consistent with the variant residing on the _retained_ (major) allele of the LOH segment. The expected VAF of a clonal mutation is derived from the purity-adjusted mixture model ([Carter et al., Nat Biotechnol 2012](https://doi.org/10.1038/nbt.2203)):
+
+$$\text{VAF}_{\text{expected}} = \frac{p \times n_{\text{mut}}}{p \times n_{\text{total}} + 2 \times (1 - p)}$$
+
+where $p$ is tumor purity, $n_{\text{mut}}$ is the number of mutant allele copies on the retained allele (1 for deletion LOH; lower-bound of 1 for copy-neutral LOH), and $n_{\text{total}}$ is the total copy number of the segment. A variant is considered consistent if the observed tumor VAF falls within a tolerance of ±0.15 of the expected VAF.
+
+- **VAF_CONSISTENT**: observed VAF ≥ expected − tolerance → variant likely on the retained allele
+- **VAF_LOW**: observed VAF below expectation → variant may reside on the _deleted_ allele, or be subclonal relative to the LOH event; interpret with caution
+- **–**: tumor purity not provided; VAF consistency cannot be assessed
+
+:::
+
+
+```{r twohit_purity_warn}
+#| echo: false
+#| output: asis
+
+twohit_purity_missing <- is.null(pcg_report$settings$conf$sample_properties$tumor_purity) ||
+  is.na(pcg_report$settings$conf$sample_properties$tumor_purity) ||
+  pcg_report$settings$conf$sample_properties$tumor_purity == "NA"
+
+if (isTRUE(twohit_purity_missing)) {
+  cat("::: {.callout-warning}\n\n")
+  cat("## Tumor purity not provided\n\n")
+  cat("VAF consistency assessment for somatic two-hit candidates requires tumor purity. ")
+  cat("The VAF consistency column will show `–` for all somatic candidates. ")
+  cat("Consider re-running PCGR with `--tumor_purity` to enable purity-adjusted VAF interpretation.\n\n")
+  cat(":::\n\n")
+}
+```
 
 <br>
 
@@ -332,7 +366,25 @@ reactable::reactable(
     CN_TOTAL = reactable::colDef(
       name = "Total CN", align = "center", maxWidth = 85),
     LOH = reactable::colDef(
-      name = "LOH type", align = "center", maxWidth = 120)
+      name = "LOH type", align = "center", maxWidth = 120),
+    VAF_FLAG_SUMMARY = reactable::colDef(
+      name = "VAF consistency",
+      align = "center",
+      maxWidth = 130,
+      cell = function(value) {
+        if (is.na(value)) return(htmltools::span("–", style = "color:#bdbdbd;"))
+        col <- switch(value,
+          VAF_CONSISTENT = "#2e7d32",
+          VAF_LOW        = "#b71c1c",
+          VAF_UNKNOWN    = "#757575",
+          "#757575")
+        htmltools::span(
+          value,
+          style = paste0(
+            "background:", col, ";color:#fff;font-size:0.82em;",
+            "font-weight:600;padding:2px 7px;border-radius:10px;",
+            "white-space:nowrap;"))
+      })
   ),
   defaultColDef = reactable::colDef(html = TRUE),
   details = reactable::JS(

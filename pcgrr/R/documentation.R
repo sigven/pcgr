@@ -185,3 +185,19 @@ fusion_doc_note <- function() {
   )
 
 }
+
+#' Get documentation string for two-hit detection &
+#' VAF consistency assessment
+#'
+#' @return A documentation string
+#'
+#' @export
+twohit_doc_note <- function() {
+
+  doc_md_file <- system.file(
+    "templates", "doc_notes_md", "twohit_vaf.md", package = "pcgrr")
+  twohit_vaf_template <- paste0(readLines(doc_md_file, warn = FALSE), collapse = "\n")
+
+  return(twohit_vaf_template)
+
+}

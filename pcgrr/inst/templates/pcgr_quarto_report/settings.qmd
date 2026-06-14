@@ -35,9 +35,16 @@ sex <- conf$sample_properties$sex
 assay_mode <- conf$assay_properties$mode
 genome_assembly <- pcg_report[['settings']][['genome_assembly']]
 tumor_ploidy <- "N/A"
+tumor_ploidy_source <- NULL
 if (!is.na(conf$sample_properties$tumor_ploidy) &
    conf$sample_properties$tumor_ploidy != "NA") {
   tumor_ploidy <- conf$sample_properties$tumor_ploidy
+  if (!is.null(conf$sample_properties$tumor_ploidy_source) &
+      !is.na(conf$sample_properties$tumor_ploidy_source) &
+      conf$sample_properties$tumor_ploidy_source != "NA") {
+    tumor_ploidy_source <- conf$sample_properties$tumor_ploidy_source
+    tumor_ploidy <- paste0(tumor_ploidy, " (", tumor_ploidy_source, ")")
+  }
 }
 tumor_purity <- "N/A"
 if (!is.na(conf$sample_properties$tumor_purity) &
@@ -278,6 +285,8 @@ cat(glue::glue("* Gain threshold (absolute): __{conf$somatic_cna$gain_threshold_
 cat(glue::glue("* Gain threshold (relative): __{conf$somatic_cna$gain_threshold_relative}__"), "\n")
 cat(glue::glue("* Heterozygous deletion threshold (absolute): __{conf$somatic_cna$del_threshold_absolute}__"), "\n")
 cat(glue::glue("* Heterozygous deletion threshold (relative): __{conf$somatic_cna$del_threshold_relative}__"), "\n")
+cat(glue::glue("* Tumor ploidy: __{tumor_ploidy}__"), "\n")
+cat(glue::glue("* Tumor purity: __{tumor_purity}__"), "\n")
 ```
 
 ```{r expression_settings}

@@ -75,7 +75,8 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
             arg_dict['tumor_purity'] is None else float(arg_dict['tumor_purity'])
         conf_options['sample_properties']['tumor_ploidy'] = 'NA' if \
             arg_dict['tumor_ploidy'] is None else float(arg_dict['tumor_ploidy'])
-        conf_options['sample_properties']['tumor_ploidy_source'] = 'NA'
+        conf_options['sample_properties']['tumor_ploidy_source'] = 'NA' if \
+            arg_dict['tumor_ploidy'] is None else 'provided'
         conf_options['sample_properties']['sex'] = 'UNKNOWN'
         conf_options['sample_properties']['site'] = str(pcgr_vars.tsites[arg_dict['tsite']])
         conf_options['sample_properties']['site2'] = str(pcgr_vars.tsites[arg_dict['tsite']]).replace(" ","_").replace("/","@")

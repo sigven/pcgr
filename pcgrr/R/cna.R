@@ -1171,7 +1171,7 @@ build_twohit_display_data <- function(
       tidyr::separate_rows("TWOHIT_CANDIDATE_SOMATIC", sep = ",") |>
       tidyr::separate(
         "TWOHIT_CANDIDATE_SOMATIC",
-        into = c("VAR_ID", "CONSEQUENCE"),
+        into = c("VAR_ID", "CONSEQUENCE", "VAF_FLAG"),
         sep = ";",
         fill = "right") |>
       dplyr::mutate(
@@ -1179,14 +1179,14 @@ build_twohit_display_data <- function(
         ORIGIN = "Somatic") |>
       dplyr::left_join(snv_som_sub, by = "VAR_ID")
 
+    somatic_rows$VAF_GENOTYPE <- NA_character_
     if ("VAF_TUMOR" %in% colnames(somatic_rows)) {
       somatic_rows <- somatic_rows |>
         dplyr::mutate(VAF_GENOTYPE = dplyr::if_else(
           !is.na(.data$VAF_TUMOR),
-          paste0(round(.data$VAF_TUMOR * 100, 1), "%"),
+          paste0(
+            round(.data$VAF_TUMOR * 100, 1), "%"),
           NA_character_))
-    } else {
-      somatic_rows$VAF_GENOTYPE <- NA_character_
     }
     if ("ONCOGENICITY" %in% colnames(somatic_rows)) {
       somatic_rows <- dplyr::rename(somatic_rows, CLASSIFICATION = .data$ONCOGENICITY)
@@ -1227,14 +1227,10 @@ build_twohit_display_data <- function(
         ORIGIN = "Germline") |>
       dplyr::left_join(snv_germ_sub, by = "VAR_ID")
 
-    germline_rows$VAF_GENOTYPE <- if ("GENOTYPE" %in% colnames(germline_rows))
-      germline_rows$GENOTYPE else NA_character_
-    #if ("FINAL_CLASSIFICATION" %in% colnames(germline_rows)) {
-    #  germline_rows <- dplyr::rename(germline_rows,
-    #                                 CLASSIFICATION = .data$FINAL_CLASSIFICATION)
-    #} else {
-    #  germline_rows$CLASSIFICATION <- NA_character_
-    #}
+    germline_rows$VAF_GENOTYPE <- NA_character_
+    if ("GENOTYPE" %in% colnames(germline_rows)){
+      germline_rows$VAF_GENOTYPE <- germline_rows$GENOTYPE
+    }
     all_nested <- c(all_nested, list(germline_rows))
   }
 
@@ -1249,6 +1245,7 @@ build_twohit_display_data <- function(
         "ALTERATION",
         "CONSEQUENCE",
         "VAF_GENOTYPE",
+        "VAF_FLAG",
         "CLASSIFICATION")))
 
   ## Build pre-rendered HTML for each main row (used by JS details renderer)
@@ -1279,12 +1276,27 @@ build_twohit_display_data <- function(
       "</td>")
   }
 
+  .vaf_flag_badge <- function(flag) {
+    if (is.na(flag) || flag == "." || !nzchar(flag)) return("&ndash;")
+    col <- switch(flag,
+      VAF_CONSISTENT = "#2e7d32",
+      VAF_LOW        = "#b71c1c",
+      VAF_UNKNOWN    = "#757575",
+      "#757575")
+    paste0(
+      '<span style="background:', col,
+      ';color:#fff;font-size:0.82em;',
+      'font-weight:600;padding:2px 7px;border-radius:10px;',
+      'white-space:nowrap;">', flag, "</span>")
+  }
+
   header_row <- paste0(
     "<tr>",
     .th("Origin", "center", "90px"),
     .th("Alteration"),
     .th("Consequence"),
     .th("VAF / Genotype", "center", "100px"),
+    .th("VAF consistency", "center", "110px"),
     .th("Classification"),
     "</tr>")
 
@@ -1298,6 +1310,11 @@ build_twohit_display_data <- function(
           .td(r[["ALTERATION"]], mono = TRUE),
           .td(r[["CONSEQUENCE"]]),
           .td(r[["VAF_GENOTYPE"]], align = "center"),
+          .td(if ("VAF_FLAG" %in% names(r) && r[["ORIGIN"]] == "Somatic")
+                .vaf_flag_badge(r[["VAF_FLAG"]])
+              else
+                '<span style="color:#bdbdbd;">&#8211;</span>',
+              align = "center"),
           .td(r[["CLASSIFICATION"]]),
           "</tr>")
       })
@@ -1309,6 +1326,24 @@ build_twohit_display_data <- function(
         "</table></div>")
     })
 
+  ## Summarise VAF_FLAG per gene row: worst flag across somatic candidates
+  ## Priority: VAF_LOW > VAF_UNKNOWN > VAF_CONSISTENT > NA (germline-only)
+  vaf_flag_order <- c(VAF_LOW = 1L, VAF_UNKNOWN = 2L, VAF_CONSISTENT = 3L)
+  if ("VAF_FLAG" %in% colnames(nested_df)) {
+    vaf_summary <- nested_df |>
+      dplyr::filter(.data$ORIGIN == "Somatic", !is.na(.data$VAF_FLAG)) |>
+      dplyr::group_by(.data$.row_id) |>
+      dplyr::summarise(
+        VAF_FLAG_SUMMARY = {
+          flags <- .data$VAF_FLAG
+          ranks <- vaf_flag_order[flags]
+          flags[which.min(ranks)]
+        },
+        .groups = "drop")
+  } else {
+    vaf_summary <- data.frame(.row_id = integer(0), VAF_FLAG_SUMMARY = character(0))
+  }
+
   main_df <- cna_twohit |>
     dplyr::select(dplyr::any_of(
       c(".row_id",
@@ -1317,6 +1352,7 @@ build_twohit_display_data <- function(
         "VARIANT_CLASS_DISPLAY",
         "CN_TOTAL",
         "LOH"))) |>
+    dplyr::left_join(vaf_summary, by = ".row_id") |>
     dplyr::mutate(
       NESTED_HTML = vapply(
         as.character(.data$.row_id),

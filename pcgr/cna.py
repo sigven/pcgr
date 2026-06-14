@@ -446,12 +446,67 @@ def annotate_fusions(input_fusion_fname: str,
 
     return 0
 
+def _twohit_vaf_flag(
+    vaf_tumor,
+    n_major: int,
+    n_minor: int,
+    loh_type: str,
+    tumor_purity,
+    tolerance: float = 0.15) -> str:
+    """
+    Assess whether a somatic variant's observed VAF is consistent with it
+    sitting on the retained (major) allele of a LOH segment.
+
+    Expected VAF formula (clonal variant on retained allele):
+        VAF_expected = (p * n_mut) / (p * n_total + 2 * (1 - p))
+
+    For deletion LOH (nMajor=1, nMinor=0): n_mut=1, n_total=1
+        → VAF_expected = p / (2 - p)
+    For copy-neutral LOH (nMajor=2, nMinor=0): n_mut ambiguous (1 or 2).
+        Lower bound uses n_mut=1 → VAF_expected = p / 2.
+    For homdel (nMajor=0, nMinor=0): no retained allele → VAF_UNKNOWN.
+
+    Returns one of: 'VAF_CONSISTENT', 'VAF_LOW', 'VAF_UNKNOWN'
+    """
+    try:
+        purity = float(tumor_purity)
+    except (TypeError, ValueError):
+        return 'VAF_UNKNOWN'
+    if pd.isna(purity) or purity <= 0 or purity > 1:
+        return 'VAF_UNKNOWN'
+
+    try:
+        vaf = float(vaf_tumor)
+    except (TypeError, ValueError):
+        return 'VAF_UNKNOWN'
+
+    n_total = int(n_major) + int(n_minor)
+    if n_total == 0:
+        return 'VAF_UNKNOWN'
+
+    denominator = purity * n_total + 2.0 * (1.0 - purity)
+    if denominator <= 0:
+        return 'VAF_UNKNOWN'
+
+    if loh_type == 'copy-neutral':
+        # Use lower bound: n_mut=1 (single copy of mutant on major allele)
+        vaf_expected_low = purity / denominator
+        consistent = vaf >= (vaf_expected_low - tolerance)
+    else:
+        # deletion LOH or other: n_mut=1
+        vaf_expected = purity / denominator
+        consistent = vaf >= (vaf_expected - tolerance)
+
+    return 'VAF_CONSISTENT' if consistent else 'VAF_LOW'
+
+
 def append_twohit_candidates(cna_df: pd.DataFrame,
                               snv_df_somatic: Optional[pd.DataFrame] = None,
                               snv_df_germline: Optional[pd.DataFrame] = None,
                               logger: Optional[logging.Logger] = None) -> pd.DataFrame:
     """
-    For each gene-level CNA record annotated as TSG (TSG == TRUE) with LOH (deletion/copy_neutral), find:
+    For each gene-level CNA record annotated as TSG (TSG == TRUE) with allele-specific LOH
+    (deletion or copy-neutral: nMinor=0, nMajor>0), find:
     1. Overlapping somatic LOF SNV/InDels (LOSS_OF_FUNCTION == True) recorded in
        TWOHIT_CANDIDATE_SOMATIC.
     2. Germline pathogenic/likely-pathogenic LOF variants matching by SYMBOL, recorded
@@ -474,8 +529,10 @@ def append_twohit_candidates(cna_df: pd.DataFrame,
         logger: Logger instance
 
     Returns:
-        cna_df with TWOHIT_CANDIDATE_SOMATIC and TWOHIT_CANDIDATE_GERMLINE columns added
-        (each: comma-separated VAR_ID:CONSEQUENCE:HGVSp:HGVSc)
+        cna_df with TWOHIT_CANDIDATE_SOMATIC and TWOHIT_CANDIDATE_GERMLINE columns added.
+        Somatic: comma-separated VAR_ID;CONSEQUENCE;VAF_FLAG
+          where VAF_FLAG is one of VAF_CONSISTENT, VAF_LOW, VAF_UNKNOWN
+        Germline: comma-separated VAR_ID;CONSEQUENCE
     """
     if logger is None:
         logger = logging.getLogger("pcgr-twohit-candidates")
@@ -493,9 +550,8 @@ def append_twohit_candidates(cna_df: pd.DataFrame,
     #logger.debug(f"Two-hit candidates - CNA LOH unique values: {sorted(cna_df['LOH'].dropna().astype(str).unique().tolist())}")
 
     _truthy = {True, 'TRUE', 'true', 1, '1'}
-    ## limit to TSG with LOH, as these are the most likely to represent 
-    ## two-hit events (and to reduce runtime) - consider only deletion and copy-neutral LOH events
-    tsg_loh_mask = cna_df['TSG'].isin(_truthy) & (cna_df['LOH'].isin({'deletion', 'copy_neutral'}))
+    ## TSG with allele-specific LOH (deletion or copy-neutral subtypes: nMinor=0, nMajor>0)
+    tsg_loh_mask = cna_df['TSG'].isin(_truthy) & (cna_df['LOH'].isin({'deletion', 'copy-neutral'}))
     tsg_loh_cna = cna_df[tsg_loh_mask]
 
     if tsg_loh_cna.empty:
@@ -520,13 +576,14 @@ def append_twohit_candidates(cna_df: pd.DataFrame,
             if lof_somatic.empty:
                 logger.info("Two-hit candidates (somatic): no LOF somatic SNV/InDels found")
             else:
-                lof_somatic['var_string'] = (
+                lof_somatic['_var_base'] = (
                     lof_somatic['VAR_ID'].fillna('.').astype(str) + ';' +
-                    lof_somatic['CONSEQUENCE'].fillna('.').astype(str)                   
+                    lof_somatic['CONSEQUENCE'].fillna('.').astype(str)
                 )
                 lof_somatic['_chrom'] = lof_somatic['CHROM'].astype(str)
                 lof_somatic['_symbol'] = lof_somatic['SYMBOL'].astype(str)
                 lof_somatic['_pos'] = pd.to_numeric(lof_somatic['POS'], errors='coerce')
+                _has_vaf = 'VAF_TUMOR' in lof_somatic.columns
 
                 n_matched_somatic = 0
                 for idx, cna_row in tsg_loh_cna.iterrows():
@@ -534,6 +591,10 @@ def append_twohit_candidates(cna_df: pd.DataFrame,
                     symbol = str(cna_row['SYMBOL'])
                     seg_start = int(cna_row['SEGMENT_START'])  # 0-based BED
                     seg_end = int(cna_row['SEGMENT_END'])       # 0-based BED, exclusive end
+                    loh_type = str(cna_row.get('LOH', '.'))
+                    n_major = cna_row.get('CN_MAJOR', cna_row.get('N_MAJOR', 0))
+                    n_minor = cna_row.get('CN_MINOR', cna_row.get('N_MINOR', 0))
+                    tumor_purity = cna_row.get('TUMOR_PURITY', None)
 
                     # VCF POS (1-based) overlaps BED interval [seg_start, seg_end) when:
                     # POS > seg_start AND POS <= seg_end
@@ -542,9 +603,16 @@ def append_twohit_candidates(cna_df: pd.DataFrame,
                         (lof_somatic['_symbol'] == symbol) &
                         (lof_somatic['_pos'] > seg_start) &
                         (lof_somatic['_pos'] <= seg_end)
-                    ]
+                    ].copy()
 
                     if not overlapping.empty:
+                        if _has_vaf:
+                            overlapping['_vaf_flag'] = overlapping['VAF_TUMOR'].apply(
+                                lambda v: _twohit_vaf_flag(v, n_major, n_minor, loh_type, tumor_purity)
+                            )
+                        else:
+                            overlapping['_vaf_flag'] = 'VAF_UNKNOWN'
+                        overlapping['var_string'] = overlapping['_var_base'] + ';' + overlapping['_vaf_flag']
                         cna_df.at[idx, 'TWOHIT_CANDIDATE_SOMATIC'] = ','.join(overlapping['var_string'].tolist())
                         n_matched_somatic += 1
 
@@ -563,9 +631,15 @@ def append_twohit_candidates(cna_df: pd.DataFrame,
             logger.warning(f"Germline SNV dataframe missing columns for two-hit candidate annotation: {missing_germ} - skipping germline")
         else:
             #logger.debug(f"Two-hit candidates - germline LOSS_OF_FUNCTION unique values: {sorted(snv_df_germline['LOSS_OF_FUNCTION'].dropna().astype(str).unique().tolist())}")
+            het_mask = (
+                snv_df_germline['GENOTYPE'].str.lower() == 'het'
+                if 'GENOTYPE' in snv_df_germline.columns
+                else pd.Series(True, index=snv_df_germline.index)
+            )
             pathogenic_lof_germline = snv_df_germline[
                 snv_df_germline['CLASSIFICATION'].isin(['Pathogenic', 'Likely_Pathogenic']) &
-                snv_df_germline['LOSS_OF_FUNCTION'].isin(_truthy)
+                snv_df_germline['LOSS_OF_FUNCTION'].isin(_truthy) &
+                het_mask
             ].copy()
 
             if pathogenic_lof_germline.empty:

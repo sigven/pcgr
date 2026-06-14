@@ -21,7 +21,7 @@ from one or more reference collections:
 The top-correlated reference samples are reported along with their metadata (tumor type,
 tissue of origin), providing an independent check on the sample's transcriptomic identity.
 
-#### Immune cell fraction estimation
+__Immune cell fraction estimation__
 
 Immune cell deconvolution is performed on the TPM profile to estimate the relative fractions
 of immune cell types infiltrating the tumor microenvironment.

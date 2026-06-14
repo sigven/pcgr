@@ -454,8 +454,8 @@ The format of the compressed `cna_gene_ann.tsv.gz` is the following. Columns suf
 | 4. `CN_MAJOR` | Major copy number |
 | 5. `CN_MINOR` | Minor copy number |
 | 6. `LOH` | Loss of heterozygosity flag |
-| 7. `TWOHIT_CANDIDATE_SOMATIC` | Two-hit candidate: somatic loss-of-function variant overlapping segment |
-| 8. `TWOHIT_CANDIDATE_GERMLINE` | Two-hit candidate: germline loss-of-function variant overlapping segment (requires CPSR input) |
+| 7. `TWOHIT_CANDIDATE_SOMATIC` | Comma-separated somatic loss-of-function variants overlapping the segment (TSG with allele-specific LOH: deletion or copy-neutral). Each entry has the format `VAR_ID;CONSEQUENCE;VAF_FLAG`, where `VAF_FLAG` is one of: `VAF_CONSISTENT` (observed VAF consistent with variant on retained allele given tumor purity), `VAF_LOW` (VAF below purity-adjusted expectation — variant may reside on the deleted allele or be subclonal to the LOH event), or `VAF_UNKNOWN` (tumor purity not provided). |
+| 8. `TWOHIT_CANDIDATE_GERMLINE` | Comma-separated germline pathogenic/likely-pathogenic loss-of-function variants matching by gene symbol (TSG with allele-specific LOH: deletion or copy-neutral; requires CPSR input). Each entry has the format `VAR_ID;CONSEQUENCE`. |
 | 9. `FOLD_CHANGE` | Fold change of segment copy number relative to tumor ploidy |
 | 10. `TUMOR_PLOIDY` | Tumor ploidy estimate |
 | 11. `TUMOR_PLOIDY_SOURCE` | Source of tumor ploidy estimate |
