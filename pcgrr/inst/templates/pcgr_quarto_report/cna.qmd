@@ -293,7 +293,7 @@ where $p$ is tumor purity, $n_{\text{mut}}$ is the number of mutant allele copie
 
 - **VAF_CONSISTENT**: observed VAF ≥ expected − tolerance → variant likely on the retained allele
 - **VAF_LOW**: observed VAF below expectation → variant may reside on the _deleted_ allele, or be subclonal relative to the LOH event; interpret with caution
-- **–**: tumor purity not provided; VAF consistency cannot be assessed
+- **VAF_UNKNOWN**: tumor purity not provided, or VAF not available for the variant; VAF consistency cannot be assessed
 
 :::
 
@@ -310,7 +310,7 @@ if (isTRUE(twohit_purity_missing)) {
   cat("::: {.callout-warning}\n\n")
   cat("## Tumor purity not provided\n\n")
   cat("VAF consistency assessment for somatic two-hit candidates requires tumor purity. ")
-  cat("The VAF consistency column will show `–` for all somatic candidates. ")
+  cat("The **VAF consistency** column will show `VAF_UNKNOWN` for all somatic candidates. ")
   cat("Consider re-running PCGR with `--tumor_purity` to enable purity-adjusted VAF interpretation.\n\n")
   cat(":::\n\n")
 }
@@ -331,7 +331,8 @@ if (!is.null(pcg_report$content$germline_classified)) {
 twohit <- pcgrr::build_twohit_display_data(
   cna_variant  = pcg_report$content$cna$callset$variant,
   snv_somatic  = snv_somatic_twohit,
-  snv_germline = snv_germline_twohit
+  snv_germline = snv_germline_twohit,
+  settings     = pcg_report$settings
 )
 
 twohit_present <- NROW(twohit$main) > 0

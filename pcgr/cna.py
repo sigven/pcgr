@@ -479,6 +479,8 @@ def _twohit_vaf_flag(
         vaf = float(vaf_tumor)
     except (TypeError, ValueError):
         return 'VAF_UNKNOWN'
+    if pd.isna(vaf):
+        return 'VAF_UNKNOWN'
 
     n_total = int(n_major) + int(n_minor)
     if n_total == 0:
@@ -559,23 +561,33 @@ def append_twohit_candidates(cna_df: pd.DataFrame,
 
     # --- Somatic two-hit candidates ---
     if snv_df_somatic is not None and isinstance(snv_df_somatic, pd.DataFrame) and not snv_df_somatic.empty:
-        required_som_cols = {'CHROM', 'POS', 'SYMBOL', 
+        # MUTATION_EFFECT_OKB is always present (append_oncokb_snv_annotations
+        # runs unconditionally and fills NA when OncoKB is not active).
+        # VAF_TUMOR and DP_TUMOR are required: without them the VAF consistency
+        # check is uninformative and R cannot apply depth/AF filters.
+        required_som_cols = {'CHROM', 'POS', 'SYMBOL',
                              'LOSS_OF_FUNCTION', 
                              'MUTATION_EFFECT_OKB',
-                             'VAR_ID', 'CONSEQUENCE'}
+                             'VAR_ID', 'CONSEQUENCE',
+                             'VAF_TUMOR', 'DP_TUMOR'}
         missing_som = required_som_cols - set(snv_df_somatic.columns)
         if missing_som:
             logger.warning(f"Somatic SNV dataframe missing columns for two-hit candidate annotation: {missing_som} - skipping somatic")
         else:
-            lof_mask = snv_df_somatic['LOSS_OF_FUNCTION'].isin(_truthy)
-            if 'MUTATION_EFFECT_OKB' in snv_df_somatic.columns:
-                okb_lof_mask = snv_df_somatic['MUTATION_EFFECT_OKB'].isin(
+            lof_mask = (
+                snv_df_somatic['LOSS_OF_FUNCTION'].isin(_truthy) |
+                snv_df_somatic['MUTATION_EFFECT_OKB'].isin(
                     {'Loss-of-function', 'Likely Loss-of-function'})
-                lof_mask = lof_mask | okb_lof_mask
+            )
             lof_somatic = snv_df_somatic[lof_mask].copy()
             if lof_somatic.empty:
                 logger.info("Two-hit candidates (somatic): no LOF somatic SNV/InDels found")
             else:
+                # ALTERATION and ONCOGENICITY are always present in pass.tsv
+                # but guard defensively in case the schema changes.
+                _has_alteration   = 'ALTERATION'   in lof_somatic.columns
+                _has_oncogenicity = 'ONCOGENICITY' in lof_somatic.columns
+
                 lof_somatic['_var_base'] = (
                     lof_somatic['VAR_ID'].fillna('.').astype(str) + ';' +
                     lof_somatic['CONSEQUENCE'].fillna('.').astype(str)
@@ -583,7 +595,6 @@ def append_twohit_candidates(cna_df: pd.DataFrame,
                 lof_somatic['_chrom'] = lof_somatic['CHROM'].astype(str)
                 lof_somatic['_symbol'] = lof_somatic['SYMBOL'].astype(str)
                 lof_somatic['_pos'] = pd.to_numeric(lof_somatic['POS'], errors='coerce')
-                _has_vaf = 'VAF_TUMOR' in lof_somatic.columns
 
                 n_matched_somatic = 0
                 for idx, cna_row in tsg_loh_cna.iterrows():
@@ -606,13 +617,33 @@ def append_twohit_candidates(cna_df: pd.DataFrame,
                     ].copy()
 
                     if not overlapping.empty:
-                        if _has_vaf:
-                            overlapping['_vaf_flag'] = overlapping['VAF_TUMOR'].apply(
-                                lambda v: _twohit_vaf_flag(v, n_major, n_minor, loh_type, tumor_purity)
-                            )
-                        else:
-                            overlapping['_vaf_flag'] = 'VAF_UNKNOWN'
-                        overlapping['var_string'] = overlapping['_var_base'] + ';' + overlapping['_vaf_flag']
+                        # VAF_TUMOR and DP_TUMOR are guaranteed by required_som_cols
+                        overlapping['_vaf_flag'] = overlapping['VAF_TUMOR'].apply(
+                            lambda v: _twohit_vaf_flag(v, n_major, n_minor, loh_type, tumor_purity)
+                        )
+                        # Embed display/filter fields so R can apply DP/VAF thresholds
+                        # without joining the depth-filtered callset.
+                        # Format: VAR_ID;CONSEQUENCE;VAF_FLAG;ALTERATION;VAF_TUMOR;DP_TUMOR;ONCOGENICITY
+                        overlapping['_alteration'] = (
+                            overlapping['ALTERATION'].fillna('.').astype(str)
+                            if _has_alteration else '.'
+                        )
+                        overlapping['_vaf_tumor'] = overlapping['VAF_TUMOR'].apply(
+                            lambda v: str(round(float(v), 4)) if pd.notna(v) else '.')
+                        overlapping['_dp_tumor'] = overlapping['DP_TUMOR'].apply(
+                            lambda v: str(int(v)) if pd.notna(v) else '.')
+                        overlapping['_oncogenicity'] = (
+                            overlapping['ONCOGENICITY'].fillna('.').astype(str)
+                            if _has_oncogenicity else '.'
+                        )
+                        overlapping['var_string'] = (
+                            overlapping['_var_base'] + ';' +
+                            overlapping['_vaf_flag'] + ';' +
+                            overlapping['_alteration'] + ';' +
+                            overlapping['_vaf_tumor'] + ';' +
+                            overlapping['_dp_tumor'] + ';' +
+                            overlapping['_oncogenicity']
+                        )
                         cna_df.at[idx, 'TWOHIT_CANDIDATE_SOMATIC'] = ','.join(overlapping['var_string'].tolist())
                         n_matched_somatic += 1
 

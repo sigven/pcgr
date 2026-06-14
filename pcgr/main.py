@@ -1039,13 +1039,13 @@ def run_pcgr(input_data, output_data, conf_options):
 
     # Redact OncoKB API token from the YAML config file to avoid credential exposure 
     # in shared output files
-    # if os.path.exists(yaml_fname):
-    #     with open(yaml_fname) as fh:
-    #         yaml_data_redact = yaml.safe_load(fh)
-    #     if isinstance(yaml_data_redact.get('conf', {}).get('oncokb'), dict):
-    #         yaml_data_redact['conf']['oncokb']['api_token'] = None
-    #     with open(yaml_fname, "w") as fh:
-    #         fh.write(yaml.dump(yaml_data_redact))
+    if os.path.exists(yaml_fname):
+        with open(yaml_fname) as fh:
+            yaml_data_redact = yaml.safe_load(fh)
+        if isinstance(yaml_data_redact.get('conf', {}).get('oncokb'), dict):
+            yaml_data_redact['conf']['oncokb']['api_token'] = None
+        with open(yaml_fname, "w") as fh:
+            fh.write(yaml.dump(yaml_data_redact))
 
     print()
 

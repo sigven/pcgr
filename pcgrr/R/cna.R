@@ -1075,25 +1075,31 @@ get_oncogenic_cna_events <- function(cna_df_display = NULL, table_display_cols =
 #'
 #' For CNA records flagged with somatic and/or germline loss-of-function
 #' SNV/InDel candidates, this function parses the comma-separated
-#' \code{TWOHIT_CANDIDATE_SOMATIC} / \code{TWOHIT_CANDIDATE_GERMLINE} columns
-#' (format: \code{VAR_ID;CONSEQUENCE} per entry) and joins them against the
-#' somatic and germline variant callsets to produce two data frames suitable
-#' for a nested reactable:
+#' \code{TWOHIT_CANDIDATE_SOMATIC} / \code{TWOHIT_CANDIDATE_GERMLINE} columns.
+#'
+#' Somatic entry format (semicolon-separated):
+#' \code{VAR_ID;CONSEQUENCE;VAF_FLAG;ALTERATION;VAF_TUMOR_PCT;ONCOGENICITY}
+#'
+#' Display fields for somatic variants are embedded by the Python pipeline from
+#' the unfiltered somatic callset, so variants below the depth filter still
+#' render correctly without a secondary join.
 #'
 #' \describe{
 #'   \item{\code{main}}{One row per two-hit CNA gene: SYMBOL, GENENAME,
 #'     VARIANT_CLASS, CN_TOTAL, LOH, and a hidden \code{.row_id} key.}
 #'   \item{\code{nested}}{One row per overlapping LoF variant: \code{.row_id}
 #'     (FK), ORIGIN (Somatic / Germline), ALTERATION,
-#'     CONSEQUENCE, VAF_TUMOR (somatic only), CLASSIFICATION.}
+#'     CONSEQUENCE, VAF_GENOTYPE, VAF_FLAG, CLASSIFICATION.}
 #' }
 #'
 #' @param cna_variant data frame - gene-level CNA callset
 #'   (\code{pcg_report$content$cna$callset$variant})
-#' @param snv_somatic data frame - somatic SNV/InDel callset
-#'   (\code{pcg_report$content$snv_indel$callset$variant})
+#' @param snv_somatic data frame - somatic SNV/InDel callset (retained for
+#'   backward compatibility; no longer used for the somatic join)
 #' @param snv_germline data frame - germline classified callset
 #'   (\code{pcg_report$content$germline_classified$callset$variant})
+#' @param settings PCGR settings list (\code{pcg_report$settings}); used to
+#'   apply \code{tumor_dp_min} and \code{tumor_af_min} thresholds
 #'
 #' @return Named list with elements \code{main} and \code{nested} (both
 #'   data frames, empty if no two-hit candidates found).
@@ -1103,7 +1109,8 @@ get_oncogenic_cna_events <- function(cna_df_display = NULL, table_display_cols =
 build_twohit_display_data <- function(
     cna_variant = NULL,
     snv_somatic = NULL,
-    snv_germline = NULL) {
+    snv_germline = NULL,
+    settings = NULL) {
 
   result <- list(main = data.frame(), nested = data.frame())
 
@@ -1149,19 +1156,19 @@ build_twohit_display_data <- function(
   all_nested <- list()
 
   ## ---- Somatic two-hit candidates ----
-  has_somatic <- !is.null(snv_somatic) &&
-    is.data.frame(snv_somatic) &&
-    NROW(snv_somatic) > 0 &&
-    "VAR_ID" %in% colnames(snv_somatic)
+  ## TWOHIT_CANDIDATE_SOMATIC format (semicolon-separated per entry):
+  ##   VAR_ID;CONSEQUENCE;VAF_FLAG;ALTERATION;VAF_TUMOR;DP_TUMOR;ONCOGENICITY
+  ## All fields are embedded by Python from the unfiltered pass.tsv.
+  ## DP/VAF filtering is applied here using the same config thresholds as the
+  ## main SNV callset, keeping the Python pipeline fully unfiltered.
+  has_somatic_candidates <- any(
+    !is.na(cna_twohit$TWOHIT_CANDIDATE_SOMATIC) &
+      cna_twohit$TWOHIT_CANDIDATE_SOMATIC != ".")
 
-  if (has_somatic) {
-    som_cols <- intersect(
-      c("VAR_ID", "ALTERATION",
-        "VAF_TUMOR", "ONCOGENICITY"),
-      colnames(snv_somatic))
-    snv_som_sub <- snv_somatic |>
-      dplyr::select(dplyr::all_of(som_cols)) |>
-      dplyr::mutate(VAR_ID = as.character(.data$VAR_ID))
+  if (has_somatic_candidates) {
+    dp_min  <- settings$conf$somatic_snv$allelic_support$tumor_dp_min
+    vaf_min <- settings$conf$somatic_snv$allelic_support$tumor_af_min
+    ad_min  <- settings$conf$somatic_snv$allelic_support$tumor_ad_min
 
     somatic_rows <- cna_twohit |>
       dplyr::filter(
@@ -1171,28 +1178,36 @@ build_twohit_display_data <- function(
       tidyr::separate_rows("TWOHIT_CANDIDATE_SOMATIC", sep = ",") |>
       tidyr::separate(
         "TWOHIT_CANDIDATE_SOMATIC",
-        into = c("VAR_ID", "CONSEQUENCE", "VAF_FLAG"),
+        into = c("VAR_ID", "CONSEQUENCE", "VAF_FLAG",
+                 "ALTERATION", "VAF_TUMOR", "DP_TUMOR", "CLASSIFICATION"),
         sep = ";",
         fill = "right") |>
       dplyr::mutate(
-        VAR_ID = trimws(.data$VAR_ID),
-        ORIGIN = "Somatic") |>
-      dplyr::left_join(snv_som_sub, by = "VAR_ID")
+        VAR_ID         = trimws(.data$VAR_ID),
+        ALTERATION     = dplyr::na_if(trimws(.data$ALTERATION),    "."),
+        CLASSIFICATION = dplyr::na_if(trimws(.data$CLASSIFICATION), "."),
+        VAF_TUMOR      = suppressWarnings(as.numeric(.data$VAF_TUMOR)),
+        DP_TUMOR       = suppressWarnings(as.integer(.data$DP_TUMOR)),
+        ORIGIN         = "Somatic")
 
-    somatic_rows$VAF_GENOTYPE <- NA_character_
-    if ("VAF_TUMOR" %in% colnames(somatic_rows)) {
+    ## Apply same DP/VAF thresholds as the main SNV callset
+    if (!is.null(dp_min) && "DP_TUMOR" %in% colnames(somatic_rows)) {
       somatic_rows <- somatic_rows |>
-        dplyr::mutate(VAF_GENOTYPE = dplyr::if_else(
+        dplyr::filter(is.na(.data$DP_TUMOR) | .data$DP_TUMOR >= dp_min)
+    }
+    if (!is.null(vaf_min) && "VAF_TUMOR" %in% colnames(somatic_rows)) {
+      somatic_rows <- somatic_rows |>
+        dplyr::filter(is.na(.data$VAF_TUMOR) | .data$VAF_TUMOR >= vaf_min)
+    }
+
+    somatic_rows <- somatic_rows |>
+      dplyr::mutate(
+        VAF_GENOTYPE = dplyr::if_else(
           !is.na(.data$VAF_TUMOR),
-          paste0(
-            round(.data$VAF_TUMOR * 100, 1), "%"),
-          NA_character_))
-    }
-    if ("ONCOGENICITY" %in% colnames(somatic_rows)) {
-      somatic_rows <- dplyr::rename(somatic_rows, CLASSIFICATION = .data$ONCOGENICITY)
-    } else {
-      somatic_rows$CLASSIFICATION <- NA_character_
-    }
+          paste0(round(.data$VAF_TUMOR * 100, 1), "%"),
+          NA_character_)) |>
+      dplyr::select(-"VAF_TUMOR", -"DP_TUMOR")
+
     all_nested <- c(all_nested, list(somatic_rows))
   }
 
@@ -1326,8 +1341,9 @@ build_twohit_display_data <- function(
         "</table></div>")
     })
 
-  ## Summarise VAF_FLAG per gene row: worst flag across somatic candidates
-  ## Priority: VAF_LOW > VAF_UNKNOWN > VAF_CONSISTENT > NA (germline-only)
+  ## Summarise VAF_FLAG per gene row: best flag across somatic candidates.
+  ## If any variant is VAF_CONSISTENT, the gene reflects that (one good hit suffices).
+  ## Priority (highest = best): VAF_CONSISTENT > VAF_UNKNOWN > VAF_LOW
   vaf_flag_order <- c(VAF_LOW = 1L, VAF_UNKNOWN = 2L, VAF_CONSISTENT = 3L)
   if ("VAF_FLAG" %in% colnames(nested_df)) {
     vaf_summary <- nested_df |>
@@ -1337,14 +1353,17 @@ build_twohit_display_data <- function(
         VAF_FLAG_SUMMARY = {
           flags <- .data$VAF_FLAG
           ranks <- vaf_flag_order[flags]
-          flags[which.min(ranks)]
+          flags[which.max(ranks)]
         },
         .groups = "drop")
   } else {
     vaf_summary <- data.frame(.row_id = integer(0), VAF_FLAG_SUMMARY = character(0))
   }
 
+  rows_with_nested <- as.integer(names(nested_html_per_row))
+
   main_df <- cna_twohit |>
+    dplyr::filter(.data$.row_id %in% rows_with_nested) |>
     dplyr::select(dplyr::any_of(
       c(".row_id",
         "SYMBOL",
@@ -1356,7 +1375,7 @@ build_twohit_display_data <- function(
     dplyr::mutate(
       NESTED_HTML = vapply(
         as.character(.data$.row_id),
-        function(id) nested_html_per_row[[id]],
+        function(id) nested_html_per_row[[id]] %||% "",
         character(1)))
 
   result$main   <- main_df

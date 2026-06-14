@@ -202,7 +202,7 @@ load_somatic_snv_indel <- function(
     fname = NA,
     ref_data = NULL,
     settings = NULL,
-    simulate_vaf_dp = TRUE) {
+    simulate_vaf_dp = FALSE) {
 
   log4r_info("------")
   log4r_info(paste0(
