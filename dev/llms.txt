@@ -698,6 +698,9 @@ sigven AT ifi.uio.no
   : TSV columns
 - [`tumor_sites`](https://sigven.github.io/pcgr/dev/reference/tumor_sites.md)
   : Character vector of tumor site names used in PCGR/CPSR reports
+- [`twohit_doc_note()`](https://sigven.github.io/pcgr/dev/reference/twohit_doc_note.md)
+  : Get documentation string for two-hit detection & VAF consistency
+  assessment
 - [`update_report()`](https://sigven.github.io/pcgr/dev/reference/update_report.md)
   : Function that updates a PCGR/CPSR report object structure
 - [`vaf_plot()`](https://sigven.github.io/pcgr/dev/reference/vaf_plot.md)

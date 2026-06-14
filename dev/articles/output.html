@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9023</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9024</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -1993,14 +1993,22 @@ for CNA output.</p>
 <tr class="odd">
 <td>7. <code>TWOHIT_CANDIDATE_SOMATIC</code>
 </td>
-<td>Two-hit candidate: somatic loss-of-function variant overlapping
-segment</td>
+<td>Comma-separated somatic loss-of-function variants overlapping the
+segment (TSG with allele-specific LOH: deletion or copy-neutral). Each
+entry has the format <code>VAR_ID;CONSEQUENCE;VAF_FLAG</code>, where
+<code>VAF_FLAG</code> is one of: <code>VAF_CONSISTENT</code> (observed
+VAF consistent with variant on retained allele given tumor purity),
+<code>VAF_LOW</code> (VAF below purity-adjusted expectation — variant
+may reside on the deleted allele or be subclonal to the LOH event), or
+<code>VAF_UNKNOWN</code> (tumor purity not provided).</td>
 </tr>
 <tr class="even">
 <td>8. <code>TWOHIT_CANDIDATE_GERMLINE</code>
 </td>
-<td>Two-hit candidate: germline loss-of-function variant overlapping
-segment (requires CPSR input)</td>
+<td>Comma-separated germline pathogenic/likely-pathogenic
+loss-of-function variants matching by gene symbol (TSG with
+allele-specific LOH: deletion or copy-neutral; requires CPSR input).
+Each entry has the format <code>VAR_ID;CONSEQUENCE</code>.</td>
 </tr>
 <tr class="odd">
 <td>9. <code>FOLD_CHANGE</code>
