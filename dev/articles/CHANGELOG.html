@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9024</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9025</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -88,7 +88,7 @@
 <h2 id="v2-3-0">v2.3.0<a class="anchor" aria-label="anchor" href="#v2-3-0"></a>
 </h2>
 <ul>
-<li>Date: <strong>2026-06-12</strong>
+<li>Date: <strong>2026-06-16</strong>
 </li>
 <li>Major data updates
 <ul>
@@ -229,6 +229,33 @@ amplification, gain, and heterozygous deletion), RNA fusion settings
 the run, with columns
 <code>DATABASE / VERSION / DESCRIPTION / URL / LICENSE</code>; mirrors
 the “Dataset versions” callout in the HTML Documentation section</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<strong>MSI prediction confidence</strong>
+<ul>
+<li>The MSI random forest classifier now exposes calibrated class
+probabilities (P(MSI-H) from
+<code>randomForest::predict(..., type = "prob")</code>) alongside the
+hard MSI-H / MSS call</li>
+<li>A confidence tier is derived directly from the predicted
+probability: samples with P(MSI-H) ≥ 0.9 or ≤ 0.1 are labelled
+<strong>High confidence</strong>; those in the 0.1–0.9 range are
+labelled <strong>Uncertain</strong> — reflecting the well-calibrated,
+strongly bimodal score distribution observed on the TCGA
+training/holdout set (Brier score ~0.011)</li>
+<li>Both values are surfaced in:
+<ul>
+<li>
+<strong>HTML report</strong> — the MSI value box shows the predicted
+probability and confidence tier alongside the classification label
+(e.g. “0.97 — High confidence”)</li>
+<li>
+<strong>Excel workbook</strong> — the <code>MSI</code> sheet
+includes <code>PROB_MSI_H</code> and <code>CONFIDENCE_TIER</code>
+columns</li>
 </ul>
 </li>
 </ul>

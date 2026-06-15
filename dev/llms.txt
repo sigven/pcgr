@@ -9,6 +9,7 @@ data. The software classifies variants with respect to predicted
 reports allow the user to interrogate the clinical impact of the
 molecular findings in an individual tumor.
 
+- Multi-omic interpretation
 - Variant classification
   - according to *oncogenicity*: evaluating the oncogenic potential of
     somatic DNA aberrations ([ClinGen/CGC/VICC
@@ -134,6 +135,8 @@ comprehensive reporting platform that can
 - systematically interrogate tumor-specific variants in the context of
   known therapeutic, diagnostic, and prognostic biomarkers
 - highlight genomic aberrations with likely oncogenic potential
+- evaluate complex biomarker readouts (MSI, TMB, mutational signatures,
+  gene expression outliers)
 - provide a structured and concise summary of the most relevant findings
 - present the results in a format accessible to clinical experts
 

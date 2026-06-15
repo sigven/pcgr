@@ -10,7 +10,7 @@ load_somatic_snv_indel(
   fname = NA,
   ref_data = NULL,
   settings = NULL,
-  simulate_vaf_dp = TRUE
+  simulate_vaf_dp = FALSE
 )
 ```
 

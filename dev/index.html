@@ -36,7 +36,7 @@
 
     <a class="navbar-brand me-2" href="index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9024</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9025</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -81,6 +81,7 @@
 </div>
 <p>The Personal Cancer Genome Reporter (PCGR) is a stand-alone software workflow for functional annotation and translation of individual tumor genomes for precision cancer medicine. It interprets somatic SNVs/InDels and copy number aberrations, RNA fusions, and bulk RNA-seq expression data. The software classifies variants with respect to predicted <em>oncogenicity</em>, and clinical <em>actionability</em>. Interactive HTML output reports allow the user to interrogate the clinical impact of the molecular findings in an individual tumor.</p>
 <ul>
+<li>Multi-omic interpretation</li>
 <li>Variant classification
 <ul>
 <li>according to <em>oncogenicity</em>: evaluating the oncogenic potential of somatic DNA aberrations (<a href="https://pubmed.ncbi.nlm.nih.gov/35101336/" class="external-link">ClinGen/CGC/VICC guidelines</a>)</li>
@@ -271,6 +272,7 @@ bootstrap.Carousel.getOrCreateInstance(document.getElementById('pcgrCarousel')).
 <ul>
 <li>systematically interrogate tumor-specific variants in the context of known therapeutic, diagnostic, and prognostic biomarkers</li>
 <li>highlight genomic aberrations with likely oncogenic potential</li>
+<li>evaluate complex biomarker readouts (MSI, TMB, mutational signatures, gene expression outliers)</li>
 <li>provide a structured and concise summary of the most relevant findings</li>
 <li>present the results in a format accessible to clinical experts</li>
 </ul>

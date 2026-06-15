@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9024</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9025</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -1995,12 +1995,18 @@ for CNA output.</p>
 </td>
 <td>Comma-separated somatic loss-of-function variants overlapping the
 segment (TSG with allele-specific LOH: deletion or copy-neutral). Each
-entry has the format <code>VAR_ID;CONSEQUENCE;VAF_FLAG</code>, where
-<code>VAF_FLAG</code> is one of: <code>VAF_CONSISTENT</code> (observed
-VAF consistent with variant on retained allele given tumor purity),
-<code>VAF_LOW</code> (VAF below purity-adjusted expectation — variant
-may reside on the deleted allele or be subclonal to the LOH event), or
-<code>VAF_UNKNOWN</code> (tumor purity not provided).</td>
+entry has the format
+<code>VAR_ID;CONSEQUENCE;VAF_FLAG;ALTERATION;VAF_TUMOR;DP_TUMOR;ONCOGENICITY</code>,
+where <code>VAF_FLAG</code> is one of: <code>VAF_CONSISTENT</code>
+(observed VAF consistent with variant on retained allele given tumor
+purity), <code>VAF_LOW</code> (VAF below purity-adjusted expectation —
+variant may reside on the deleted allele or be subclonal to the LOH
+event), or <code>VAF_UNKNOWN</code> (tumor purity not provided);
+<code>ALTERATION</code> is the protein-level consequence (or
+<code>.</code> if absent); <code>VAF_TUMOR</code> is the allele fraction
+in the tumor; <code>DP_TUMOR</code> is the read depth; and
+<code>ONCOGENICITY</code> is the OncoKB classification (or
+<code>.</code> if OncoKB is not enabled).</td>
 </tr>
 <tr class="even">
 <td>8. <code>TWOHIT_CANDIDATE_GERMLINE</code>

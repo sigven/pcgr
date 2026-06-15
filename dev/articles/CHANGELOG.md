@@ -2,7 +2,7 @@
 
 ## v2.3.0
 
-- Date: **2026-06-12**
+- Date: **2026-06-16**
 - Major data updates
   - ClinVar (2026-06)
   - dbNSFP (v5.3, October 2025)
@@ -100,6 +100,23 @@
       with columns `DATABASE / VERSION / DESCRIPTION / URL / LICENSE`;
       mirrors the “Dataset versions” callout in the HTML Documentation
       section
+- **MSI prediction confidence**
+  - The MSI random forest classifier now exposes calibrated class
+    probabilities (P(MSI-H) from
+    `randomForest::predict(..., type = "prob")`) alongside the hard
+    MSI-H / MSS call
+  - A confidence tier is derived directly from the predicted
+    probability: samples with P(MSI-H) ≥ 0.9 or ≤ 0.1 are labelled
+    **High confidence**; those in the 0.1–0.9 range are labelled
+    **Uncertain** — reflecting the well-calibrated, strongly bimodal
+    score distribution observed on the TCGA training/holdout set (Brier
+    score ~0.011)
+  - Both values are surfaced in:
+    - **HTML report** — the MSI value box shows the predicted
+      probability and confidence tier alongside the classification label
+      (e.g. “0.97 — High confidence”)
+    - **Excel workbook** — the `MSI` sheet includes `PROB_MSI_H` and
+      `CONFIDENCE_TIER` columns
 
 ### Changed
 
