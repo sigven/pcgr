@@ -1030,6 +1030,19 @@ write_report_html <- function(
         saveRDS(report, file = rds_report_path)
 
         ## Substitute rds object in main quarto template with path to sample rds
+        genome_assembly_display <- dplyr::case_when(
+          tolower(settings$genome_assembly) == "grch38" ~ "GRCh38",
+          tolower(settings$genome_assembly) == "grch37" ~ "GRCh37",
+          .default = settings$genome_assembly
+        )
+
+        assay_build_badges <- paste0(
+          "<span class='pcgr-assay-badge'>",
+          settings$conf$assay_properties$type,
+          "</span><span class='pcgr-assay-badge'>",
+          genome_assembly_display,
+          "</span>")
+
         readLines(quarto_main_template) |>
           stringr::str_replace(
             pattern = "<PCGR_REPORT_OBJECT.rds>",
@@ -1041,6 +1054,10 @@ write_report_html <- function(
           stringr::str_replace(
             pattern = "<MAIN_REPORT_COLOR>",
             replacement = main_report_color
+          ) |>
+          stringr::str_replace(
+            pattern = "<ASSAY_BUILD_BADGES>",
+            replacement = assay_build_badges
           ) |>
           writeLines(con = quarto_main_template_sample)
 

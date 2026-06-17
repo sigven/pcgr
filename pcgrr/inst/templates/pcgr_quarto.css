@@ -18,6 +18,21 @@
   margin-top: -15px;
 }
 
+.pcgr-assay-badge {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 500;
+  font-style: normal;
+  padding: 2px 9px;
+  border-radius: 999px;
+  margin-left: 8px;
+  vertical-align: middle;
+  background: rgba(255,255,255,0.18);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.38);
+  letter-spacing: 0.03em;
+}
+
 .value_box {
     width: 250px;
     height: 150px;

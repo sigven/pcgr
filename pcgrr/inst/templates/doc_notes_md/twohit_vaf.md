@@ -20,7 +20,7 @@ retained allele, and $n_{\text{total}}$ is the total segment copy number. A vari
 |---|---|
 | **VAF_CONSISTENT** | Observed VAF ≥ expected − tolerance. The variant is likely on the retained allele — counter-evidence for the mutation residing on the deleted allele. |
 | **VAF_LOW** | Observed VAF below purity-adjusted expectation. The variant may reside on the _deleted_ allele (in which case there may be cells retaining a functioning copy), or may be subclonal relative to the LOH event (mutation and LOH in different clonal lineages). Interpret with caution. |
-| **–** | Tumor purity not provided; VAF consistency cannot be assessed. Re-run PCGR with `--tumor_purity` to enable this column. |
+| **VAF_UNKNOWN** | Tumor purity not provided; or VAF not available for the variant - VAF consistency cannot be assessed. |
 
 __Interpretation notes__
 

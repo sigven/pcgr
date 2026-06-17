@@ -1,6 +1,6 @@
 ---
 title: "<SAMPLE_NAME>"
-subtitle: " - _cancer genome interpretation report by PCGR_"
+subtitle: " - _cancer genome interpretation report by PCGR_ <ASSAY_BUILD_BADGES>"
 date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
 bibliography: pcgr_bibliography.bib
 title-block-banner: "<MAIN_REPORT_COLOR>"
