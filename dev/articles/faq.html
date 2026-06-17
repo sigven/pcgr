@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9025</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9026</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -109,8 +109,8 @@ for analysis of multiple samples. First, make sure your input files are
 organized per sample (i.e. one VCF file per sample, one CNA file per
 sample), so that they can be fed directly to PCGR. Now, once all samples
 have been processed with PCGR, note that all the tab-separated output
-files (i.e. annotated SNVs, gene copy numbers) contain the sample
-identifier, which enable them to be aggregated and suitable for a
+files (i.e. annotated SNVs, gene copy numbers, fusions) contain the
+sample identifier, which enable them to be aggregated and suitable for a
 downstream multi-sample analysis. Also note the multi-sheet Excel
 workbook, which contains numerous outputs from PCGR, and can be
 processed to aggregate findings across samples.</em></p>
@@ -128,8 +128,8 @@ transcript model in PCGR?</strong></p>
 <p><em>Answer: PCGR uses GENCODE as the primary gene transcript model,
 but we provide cross-references to corresponding RefSeq transcripts when
 this is available.</em></p>
-<p><strong>5. I have a VCF with structural variants detected in my tumor
-sample, can PCGR process those as well?</strong></p>
+<p><strong>5. I have a VCF with structural variants (SVs) detected in my
+tumor sample, can PCGR process those as well?</strong></p>
 <p><em>Answer: This is currently not supported as input for PCGR, but is
 something we want to incorporate in the future. We have a skeleton of SV
 support working for CPSR, focusing to support large, multi-exon
@@ -148,6 +148,85 @@ in PCGR contain numerous and complex procedures, with several cleaning,
 quality control, and re-formatting steps, and is semi-automated in its
 present form. The versions of all databases and key software elements
 are outlined in each PCGR report.</em></p>
+<p><strong>8. When OncoKB is enabled, I sometimes see variants where
+PCGR’s internal <code>LOSS_OF_FUNCTION</code> flag disagrees with
+OncoKB’s mutation effect (e.g. OncoKB says “Likely Loss-of-function” but
+<code>LOSS_OF_FUNCTION</code> is FALSE, or vice versa).
+Why?</strong></p>
+<p><em>Answer: The two annotations are derived from independent evidence
+sources and should be interpreted as complementary rather than
+contradictory. PCGR’s internal <code>LOSS_OF_FUNCTION</code> flag is
+rule-based: it fires on variant consequence types that are
+mechanistically expected to disrupt gene function (stop-gained,
+frameshift, splice site disruption assessed by MaxEntScan, etc.),
+irrespective of any curated knowledge about the specific variant.
+OncoKB’s mutation effect annotation, by contrast, is manually curated
+and may draw on functional assay data, structural evidence, or
+recurrence in cancer cohorts — and therefore can assign loss-of-function
+status to variants (e.g. certain missense changes) that PCGR’s
+consequence-based logic would not flag, or conversely may lack an entry
+for a variant that PCGR’s rules would classify as LoF. When OncoKB is
+active and provides a mutation effect, that annotation takes precedence
+in the two-hit candidate detection logic alongside the internal flag
+(either source can qualify a variant as a LoF hit). For detailed
+interpretation, cross-check both columns in the SNV/InDel
+table.</em></p>
+<p><strong>9. When running PCGR with OncoKB enabled but without
+specifying <code>--oncokb_oncotree_code</code>, I see a variant assigned
+OncoKB level 3B (e.g. for Bladder Cancer). If I re-run with a more
+specific OncoTree code (e.g. Urethral Urothelial Carcinoma), the same
+variant is assigned level 1. Why does a less specific tumor type yield a
+lower evidence level?</strong></p>
+<p><em>Answer: OncoKB evidence levels are tied to the specific tumor
+type context in which a biomarker–drug association has been validated.
+When PCGR derives the OncoTree code from <code>--tumor_site</code> alone
+(without <code>--oncokb_oncotree_code</code>), it maps to a broad,
+site-level code (e.g. <code>BLCA</code> for Bladder Cancer). If the
+highest-confidence evidence in OncoKB is annotated under a more specific
+subtype (e.g. Urethral Urothelial Carcinoma), the broad code will not
+match that entry and OncoKB instead returns a lower level reflecting the
+closest match it can find. Providing a more specific OncoTree code via
+<code>--oncokb_oncotree_code</code> allows OncoKB to resolve the exact
+subtype match and return the correct, higher evidence level. For tumor
+types where subtype granularity matters clinically, we therefore
+recommend explicitly setting <code>--oncokb_oncotree_code</code> rather
+than relying on the site-level default. A full list of OncoTree codes is
+available at <a href="https://oncotree.mskcc.org" class="external-link">oncotree.mskcc.org</a>.</em></p>
+<p><strong>10. Does PCGR support the ESMO Scale for Clinical
+Actionability of molecular Targets (ESCAT)?</strong></p>
+<p><em>Answer: ESCAT is not currently implemented in PCGR, primarily
+since an automated implementation is considerably non-trivial. The ESCAT
+guidelines have relatively low specificity in certain areas - often
+leaving room for subjective judgements (e.g. “clinically meaningful
+improvement of a survival endpoint in prospective, randomised clinical
+trials”). This is reflected in a relatively low inter-rater
+institutional agreement of ESCAT-based variant rankings (see <a href="https://pubmed.ncbi.nlm.nih.gov/39368036/" class="external-link">Lebedeva et al., Ann
+Oncol 2024</a>). We continue to monitor developments in this space
+(e.g. <a href="https://www.medrxiv.org/content/10.64898/2026.05.16.26353390v1.full-text" class="external-link">Kordes
+et al., medRxiv 2026</a> and may revisit ESCAT support in future
+releases.</em></p>
+<p><strong>11. In the Excel workbook, the biomarker sheets contain a
+<code>BM_ACTIONABILITY_SUPPORT</code> column with values such as
+<code>tier-defining</code> or <code>additional</code>. Does this mean
+that prognostic, diagnostic, and resistance markers also influence
+variant tiering?</strong></p>
+<p><em>Answer: No. Variant tiering in PCGR is (as of v2.3.0) driven
+exclusively by <strong>treatment sensitivity</strong> evidence — the
+<code>TIER</code> column values <code>T1</code>, <code>T2</code>,
+<code>T3</code>, and <code>T4</code> reflect only drug sensitivity
+biomarkers. The <code>BM_ACTIONABILITY_SUPPORT</code> column
+(<code>tier-defining</code> / <code>additional</code>) describes the
+role of a given biomarker <strong>within its own evidence
+category</strong>: for example, a prognostic biomarker may be the
+strongest (<code>tier-defining</code>) or a corroborating
+(<code>additional</code>) piece of evidence for that category.
+Prognostic (PP1/PB1), diagnostic (D1/D2), and resistance (R1/R2) markers
+are listed in the biomarker sheets for completeness and transparency,
+but they do not contribute to the <code>T1</code>–<code>T4</code>
+variant rank. To identify which biomarkers actually drove the tier
+assignment of a given variant, focus on rows where <code>TIER</code> is
+<code>T1</code>–<code>T3</code> and the evidence type is treatment
+sensitivity.</em></p>
   </main>
 </div>
 

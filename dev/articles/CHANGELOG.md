@@ -2,7 +2,7 @@
 
 ## v2.3.0
 
-- Date: **2026-06-16**
+- Date: **2026-06-17**
 - Major data updates
   - ClinVar (2026-06)
   - dbNSFP (v5.3, October 2025)

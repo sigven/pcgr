@@ -214,6 +214,15 @@ clinical impact.
   further filter fusion events based on e.g. presence in normal tissue
   databases, and thus relies on the user to perform this step upstream
   of PCGR analysis.
+- If multiple input entries share the same gene pair
+  (e.g. *GENE_A–GENE_B*) but differ only in their exact breakpoint
+  coordinates, each will appear as a separate entry in the PCGR report.
+  This can make the fusion section appear repetitive. PCGR does not
+  attempt to collapse these, as there is no principled way to select a
+  canonical breakpoint without the full caller context. We therefore
+  recommend that users deduplicate fusion calls to one entry per gene
+  pair — retaining the call with the highest read support or confidence
+  score — before submitting to PCGR.
 
 ### Gene expression
 

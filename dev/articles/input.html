@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9025</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9026</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -340,6 +340,17 @@ filter out known normal/artefactual events, PCGR makes no attempt to
 further filter fusion events based on e.g. presence in normal tissue
 databases, and thus relies on the user to perform this step upstream of
 PCGR analysis.
+</li>
+<li>
+If multiple input entries share the same gene pair
+(e.g. <em>GENE_A–GENE_B</em>) but differ only in their exact breakpoint
+coordinates, each will appear as a separate entry in the PCGR report.
+This can make the fusion section appear repetitive. PCGR does not
+attempt to collapse these, as there is no principled way to select a
+canonical breakpoint without the full caller context. We therefore
+recommend that users deduplicate fusion calls to one entry per gene pair
+— retaining the call with the highest read support or confidence score —
+before submitting to PCGR.
 </li>
 </ul>
 </div>
