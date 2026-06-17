@@ -1572,7 +1572,7 @@ callout_biomarker_scope <- function(variant_label = "variants") {
   cat(paste0(
     "::: {.callout-note collapse=\"false\"}\n",
     "## Note — biomarker types and report scope\n\n",
-    "Tier classification is driven by **therapeutic sensitivity** biomarkers ",
+    "The ultimate _variant tier classification_ in PCGR is driven by **therapeutic sensitivity** biomarkers ",
     "(i.e. those related to treatment response). Evidence items where variants match ",
     "**resistance**, **prognostic**, or **diagnostic** biomarkers are also shown — ",
     "all restricted to biomarkers matching the tumor type of the query sample.\n\n",
