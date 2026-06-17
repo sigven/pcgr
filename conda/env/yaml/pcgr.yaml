@@ -6,7 +6,7 @@ channels:
   - bioconda
 
 dependencies:
-  - pcgr ==2.2.5.9025 # bump
+  - pcgr ==2.2.5.9026 # bump
   - bioconda::bedtools
   - bioconda::bcftools
   - bioconda::ensembl-vep ==115.1
