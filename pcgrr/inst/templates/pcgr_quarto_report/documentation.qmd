@@ -162,3 +162,11 @@ __A note on variant loss-of-function annotation__
 :::
 
 :::
+
+::: {.callout-note collapse="false"}
+## References
+
+::: {#refs}
+:::
+
+:::

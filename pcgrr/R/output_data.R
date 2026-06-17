@@ -307,19 +307,23 @@ get_excel_sheets <- function(report = NULL) {
         SAMPLE_ID = sample_id, CATEGORY = 'SAMPLE',
         PROPERTY = 'TUMOR_PLOIDY_SOURCE', VALUE = NA
       ),
-      data.frame(
-        SAMPLE_ID = sample_id, CATEGORY = 'ASSAY',
-        PROPERTY = 'TYPE', VALUE = NA
-      ),
-      data.frame(
-        SAMPLE_ID = sample_id, CATEGORY = 'ASSAY',
-        PROPERTY = 'MODE', VALUE = NA
-      ),
-      data.frame(
-        SAMPLE_ID = sample_id, CATEGORY = 'ASSAY',
-        PROPERTY = 'EFFECTIVE_TARGET_SIZE_MB', VALUE = NA
-      ),
     )
+
+  dna_data_present <-
+    isTRUE(report$content$snv_indel$eval) ||
+    isTRUE(report$content$cna$eval)
+
+  if (dna_data_present) {
+    sample_assay <- dplyr::bind_rows(
+      sample_assay,
+      data.frame(SAMPLE_ID = sample_id, CATEGORY = 'ASSAY',
+                 PROPERTY = 'TYPE', VALUE = NA),
+      data.frame(SAMPLE_ID = sample_id, CATEGORY = 'ASSAY',
+                 PROPERTY = 'MODE', VALUE = NA),
+      data.frame(SAMPLE_ID = sample_id, CATEGORY = 'ASSAY',
+                 PROPERTY = 'EFFECTIVE_TARGET_SIZE_MB', VALUE = NA),
+    )
+  }
 
   for (elem in c('SITE','SEX','TUMOR_PURITY','TUMOR_PLOIDY','TUMOR_PLOIDY_SOURCE')) {
     if (tolower(elem) %in% names(report$content$sample_properties)) {
@@ -328,10 +332,12 @@ get_excel_sheets <- function(report = NULL) {
       }
     }
 
-  for (elem in c('TYPE','MODE','EFFECTIVE_TARGET_SIZE_MB')) {
-    if (tolower(elem) %in% names(report$content$assay_properties)) {
-      sample_assay[sample_assay$PROPERTY == elem, 'VALUE'] <-
-        report$content$assay_properties[[tolower(elem)]]
+  if (dna_data_present) {
+    for (elem in c('TYPE','MODE','EFFECTIVE_TARGET_SIZE_MB')) {
+      if (tolower(elem) %in% names(report$content$assay_properties)) {
+        sample_assay[sample_assay$PROPERTY == elem, 'VALUE'] <-
+          report$content$assay_properties[[tolower(elem)]]
+      }
     }
   }
 

@@ -248,6 +248,8 @@ if (length(allelic_filter_items) > 0) {
   cat("* Allelic support filtering settings", "\n")
   for(item in allelic_filter_items) cat(item, "\n")
 }
+cat(glue::glue("* Mutational burden estimation: __{mutational_burden}__"), "\n")
+cat(glue::glue("  * TMB algorithm: __TMB_{conf$somatic_snv[['tmb']][['tmb_display']]}__"), "\n")
 ```
 
 :::
@@ -263,8 +265,6 @@ if (length(allelic_filter_items) > 0) {
 #| echo: false
 #| eval: !expr pcg_report$content$snv_indel$eval == TRUE
 cat("**SNV/InDel settings (continued)**\n\n")
-cat(glue::glue("* Mutational burden estimation: __{mutational_burden}__"), "\n")
-cat(glue::glue("  * TMB algorithm: __TMB_{conf$somatic_snv[['tmb']][['tmb_display']]}__"), "\n")
 cat(glue::glue("* Mutational signatures estimation: __{signatures_estimation}__"), "\n")
 cat(glue::glue("  * Minimum number of mutations required: __{conf$somatic_snv$mutational_signatures[['mutation_limit']]}__"), "\n")
 cat(glue::glue("  * All reference signatures: __{as.logical(conf$somatic_snv$mutational_signatures[['all_reference_signatures']])}__"), "\n")

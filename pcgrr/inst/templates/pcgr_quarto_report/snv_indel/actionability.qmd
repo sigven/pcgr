@@ -13,14 +13,11 @@ cs <- pcgrr::color_palette$bm_callout
 Acquired SNVs and InDels in the tumor sample have been classified into tiers of _clinical actionability_ - adopting the AMP/ASCO/CAP guidelines [@Li2017-ew]. We use `r bm_db_label` `r bm_db_citation` as the underlying sources for actionable variants (versions indicated [below](#documentation)).
 
 
-::: {.callout-note collapse="false"}
-## Note — biomarker types and report scope
-
-Tier classification is driven by **therapeutic sensitivity** biomarkers (i.e. those related to treatment response). Evidence items where variants match **resistance**, **prognostic**, or **diagnostic** biomarkers are also shown — all restricted to biomarkers matching the tumor type of the query sample.
-
-Note that the _complete_ set of **Tier III** variants (uncertain/unknown clinical significance) are only available in the TSV and Excel workbook outputs.
-
-:::
+```{r}
+#| echo: false
+#| output: asis
+pcgrr::callout_biomarker_scope("SNV/InDel variants")
+```
 
 
 

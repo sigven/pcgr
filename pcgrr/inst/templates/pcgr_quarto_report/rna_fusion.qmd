@@ -157,14 +157,11 @@ _clinical actionability_ through an implementation of AMP/ASCO/CAP guidelines [@
 
 The table below indicates which variants have been classified into _tiers of clinical significance_ according to AMP/ASCO/CAP criteria.
 
-::: {.callout-note collapse="false"}
-## Note — biomarker types and report scope
-
-Tier classification is driven by **therapeutic sensitivity** biomarkers (i.e. those related to treatment response). Evidence items where variants match **resistance**, **prognostic**, or **diagnostic** biomarkers are also shown — all restricted to biomarkers matching the tumor type of the query sample.
-
-The report does not display the complete set of **Tier III** RNA fusions (uncertain/unknown clinical significance). The full list is available in the TSV and Excel workbook outputs.
-
-:::
+```{r}
+#| echo: false
+#| output: asis
+pcgrr::callout_biomarker_scope("RNA fusions")
+```
 
 ::: {.panel-tabset}
 

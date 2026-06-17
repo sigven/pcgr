@@ -1562,3 +1562,22 @@ render_diagn_bm_table <- function(
   return(result_table)
 }
 
+
+#' Emit the shared "biomarker types and report scope" callout note
+#'
+#' @param variant_label Variant-type phrase for the Tier III sentence,
+#'   e.g. "SNV/InDel variants", "copy number aberrations", "RNA fusions".
+#' @export
+callout_biomarker_scope <- function(variant_label = "variants") {
+  cat(paste0(
+    "::: {.callout-note collapse=\"false\"}\n",
+    "## Note — biomarker types and report scope\n\n",
+    "Tier classification is driven by **therapeutic sensitivity** biomarkers ",
+    "(i.e. those related to treatment response). Evidence items where variants match ",
+    "**resistance**, **prognostic**, or **diagnostic** biomarkers are also shown — ",
+    "all restricted to biomarkers matching the tumor type of the query sample.\n\n",
+    "The complete set of **Tier III** ", variant_label,
+    " (uncertain/unknown clinical significance) is only available in the TSV and Excel workbook outputs.\n\n",
+    ":::\n"
+  ))
+}

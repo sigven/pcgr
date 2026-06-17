@@ -1036,12 +1036,23 @@ write_report_html <- function(
           .default = settings$genome_assembly
         )
 
-        assay_build_badges <- paste0(
-          "<span class='pcgr-assay-badge'>",
-          settings$conf$assay_properties$type,
-          "</span><span class='pcgr-assay-badge'>",
-          genome_assembly_display,
-          "</span>")
+        dna_data_present <-
+          isTRUE(report$content$snv_indel$eval) ||
+          isTRUE(report$content$cna$eval)
+
+        assay_build_badges <- if (dna_data_present) {
+          paste0(
+            "<span class='pcgr-assay-badge'>",
+            settings$conf$assay_properties$type,
+            "</span><span class='pcgr-assay-badge'>",
+            genome_assembly_display,
+            "</span>")
+        } else {
+          paste0(
+            "<span class='pcgr-assay-badge'>",
+            genome_assembly_display,
+            "</span>")
+        }
 
         readLines(quarto_main_template) |>
           stringr::str_replace(
