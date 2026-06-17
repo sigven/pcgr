@@ -1897,6 +1897,12 @@ load_rna_fusions <- function(
       }
     }
 
+    if (NROW(results[['variant']]) == 0) {
+      log4r_warn(
+        "No fusion events remain after filtering - skipping recurrence annotation")
+      return(results)
+    }
+
     results[['variant_recurrence']] <-
       rna_fusion_recurrence_mitdb(
         query_fusions = results[['variant']],
