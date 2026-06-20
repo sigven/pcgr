@@ -55,7 +55,9 @@ logo_fname_path <- system.file("extdata", "logo.png", package = "pcgrr")
 
 ## set report color theme according to tumor-control vs. tumor-only
 report_color <- pcgrr::color_palette$report_color$values[1]
-if(as.logical(pcg_report$settings$conf$assay_properties$vcf_tumor_only) == TRUE){
+is_tumor_only <- as.logical(pcg_report$settings$conf$assay_properties$vcf_tumor_only)
+
+if(is_tumor_only == TRUE){
   report_color <- pcgrr::color_palette$report_color$values[2]
 }
 ```

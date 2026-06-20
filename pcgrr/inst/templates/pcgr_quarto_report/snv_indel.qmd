@@ -65,7 +65,7 @@ bslib::page_fillable(
 
 
 ```{r section_variant_filtering}
-#| eval: !expr isTRUE(assay_properties$vcf_tumor_only)
+#| eval: !expr isTRUE(as.logical(assay_properties$vcf_tumor_only))
 #| output: asis
 #| child: pcgr_quarto_report/snv_indel/variant_filtering.qmd 
 
@@ -86,7 +86,7 @@ bslib::page_fillable(
 
 ```{r section_oncogenicity}
 #| output: asis
-#| eval: !expr isTRUE(vstats$n_var != 0)
+#| eval: !expr isTRUE(vstats$n_var > 0)
 #| child: pcgr_quarto_report/snv_indel/oncogenicity.qmd
 
 ```
@@ -95,7 +95,7 @@ bslib::page_fillable(
 
 ```{r section_actionability}
 #| output: asis
-#| eval: !expr as.logical(vstats$n_var != 0) == TRUE
+#| eval: !expr isTRUE(vstats$n_var > 0)
 #| child: pcgr_quarto_report/snv_indel/actionability.qmd
 ```
 

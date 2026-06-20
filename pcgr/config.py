@@ -106,11 +106,7 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
 
             conf_options['sample_properties']['sex'] = str(arg_dict['sex'])
 
-            
-        #conf_options['clinicaltrials'] = {
-        #    'run': int(arg_dict['include_trials'])
-        #}
-        conf_options['other']['vcf2maf'] = int(arg_dict['vcf2maf'])
+        conf_options['other']['vcf2maf'] = 1
 
         conf_options['oncokb'] = {
             'api_token': str(arg_dict['oncokb_api_token']) if arg_dict['oncokb_api_token'] is not None else None,

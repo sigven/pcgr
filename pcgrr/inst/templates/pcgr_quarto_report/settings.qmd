@@ -18,7 +18,7 @@ bm_db_label <- if (oncokb_active && isTRUE(as.logical(conf$oncokb$exclusive))) {
 } else if (oncokb_active) {
   "CIViC, CGI, and OncoKB"
 } else {
-  "CIViC/CGI"
+  "CIViC and CGI"
 }
 bm_db_citation <- if (oncokb_active && isTRUE(as.logical(conf$oncokb$exclusive))) {
   "[@Chakravarty2017-rd]"
@@ -206,7 +206,7 @@ The report is generated with _[pcgr](https://github.com/sigven/pcgr)_ version `r
 * Genome assembly: __`r genome_assembly`__
 * Variant actionability guidelines: __AMP/ASCO/CAP__
 * Variant oncogenicity guidelines: __ClinGen/CGC/VICC__
-* Biomarker sources: __`r if (as.logical(conf$oncokb$exclusive)) 'OncoKB only' else 'OncoKB + CIViC + CGI'`__
+* Biomarker sources: __`r bm_db_label`__
 
 ```{r snv_indel_settings}
 #| output: asis

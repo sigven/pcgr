@@ -3,9 +3,6 @@
 #| output: asis
 #| echo: false
 
-#pcg_report <- readRDS(
-#  file = "/Users/sigven/project_data/packages/package__pcgr/pcgr/pcgrr/pcg_report.rds")
-
 to_settings <- pcg_report$settings$conf$somatic_snv$tumor_only
 
 filtering_stats <- list()
@@ -15,83 +12,30 @@ filtering_stats[['germline']] <- pcgrr::plot_filtering_stats_germline(
 
 
 if (pcg_report$settings$conf$somatic_snv$tumor_only$exclude_nonexonic == TRUE) {
-  
+
   filtering_stats[['exonic']] <- pcgrr::plot_filtering_stats_exonic(
     report = pcg_report,
     plot_margin_bottom = 100)
 }
 
 
-  
-```
-
-### Variant filtering
-
-In an effort to minimize the presence/impact of germline events from input variants (SNVs/InDels) called through a **tumor-only assay**, we here show the results of germline variant filters applied on the raw input set. The filters provide a classification of variants as somatic or likely germline (i.e. catched by various filters), where the latter set are removed/excluded, and not used for any analysis shown in this report.
-
-::: {.panel-tabset}
-
-#### Filtering results
-
-```{r variant_filtering_pie}
-#| eval: true
-#| output: asis
-#| echo: false
-
-
-if (pcg_report$settings$conf$somatic_snv$tumor_only$exclude_nonexonic == TRUE) {
-  
-  bslib::card(
-    full_screen = TRUE,
-    height = "365px",
-    bslib::card_header(
-      class = "bg-dark", 
-      paste0("Variant filtering statistics - ",
-             pcg_report$settings$sample_id)),
-    bslib::card_body(
-      bslib::layout_columns(
-        widths = c(6,6),
-        filtering_stats[['germline']]$plot,
-        filtering_stats[['exonic']]$plot
-      )
-    )
-  )
-  
-}else{
-  bslib::card(
-    full_screen = TRUE,
-    height = "365px",
-    bslib::card_header(
-      class = "bg-dark", 
-      paste0("Variant filtering statistics - ",
-             pcg_report$settings$sample_id)),
-    bslib::card_body(
-      filtering_stats[['germline']]$plot)
-  )
-}
-
 
 ```
 
-#### Settings
+::: {.callout-note title="Tumor-only filtering settings - SNVs/InDels" collapse="true"}
 
-The variant filtering has been performed based on the following criteria:
+The SNV/InDel variant filtering has been performed based on the following criteria:
 
 :::: {.columns}
 
 ::: {.column width="47.5%"}
 
 * Variant filtering aginst gnomAD (filter *GERMLINE_GNOMAD*): __TRUE__ (not configurable)
-* maximum allowed population-specific gnomAD MAF's for somatic events (configurable):
-    * AFR: __`r to_settings$maf_gnomad_afr`__
-    * AMR: __`r to_settings$maf_gnomad_amr`__
-    * ASJ: __`r to_settings$maf_gnomad_asj`__
-    * EAS: __`r to_settings$maf_gnomad_eas`__
-    * FIN: __`r to_settings$maf_gnomad_fin`__
-    * NFE: __`r to_settings$maf_gnomad_nfe`__
-    * OTH: __`r to_settings$maf_gnomad_oth`__
-    * SAS: __`r to_settings$maf_gnomad_sas`__
-* maximum allowed global gnomAD MAF for somatic events: __`r to_settings$maf_gnomad_global`__
+* Maximum allowed gnomAD MAF's for somatic events (configurable) across all populations:
+    * __`r to_settings$gnomad_popmax_af_tolerated`__
+* Variant filtering against ClinVar (filter *GERMLINE_CLINVAR*): __`r as.logical(to_settings$exclude_clinvar_germline)`__
+* Variant filtering against dbSNP (filter *GERMLINE_DBSNP*): __`r as.logical(to_settings$exclude_dbsnp_nonsomatic)`__
+* Variant filtering based on tumor VAF value (likely heterozygous germline event, VAF in 0.4 - 0.6, filter *GERMLINE_HET*): __`r as.logical(to_settings$exclude_likely_het_germline)`__
 
 :::
 
@@ -100,9 +44,7 @@ The variant filtering has been performed based on the following criteria:
 :::
 
 ::: {.column width="47.5%"}
-* Variant filtering against ClinVar (filter *GERMLINE_CLINVAR*): __`r as.logical(to_settings$exclude_clinvar_germline)`__
-* Variant filtering against dbSNP (filter *GERMLINE_DBSNP*): __`r as.logical(to_settings$exclude_dbsnp_nonsomatic)`__
-* Variant filtering based on tumor VAF value (likely heterozygous germline event, VAF in 0.4 - 0.6, filter *GERMLINE_HET*): __`r as.logical(to_settings$exclude_likely_het_germline)`__
+
 * Variant filtering based on tumor VAF value (likely homozygous germline event, VAF = 1, filter *GERMLINE_HOM*): __`r as.logical(to_settings$exclude_likely_hom_germline)`__
 * Variant filtering against panel-of-normals (filter *GERMLINE_PON*: __`r as.logical(to_settings$exclude_pon)`__
 * Variant filtering based on exonic regions: __`r as.logical(to_settings$exclude_nonexonic)`__
@@ -113,4 +55,43 @@ The variant filtering has been performed based on the following criteria:
 
 :::
 
-<br>
+```{r variant_filtering_pie}
+#| eval: true
+#| output: asis
+#| echo: false
+
+
+if (pcg_report$settings$conf$somatic_snv$tumor_only$exclude_nonexonic == TRUE) {
+
+  bslib::card(
+    full_screen = TRUE,
+    height = "365px",
+    bslib::card_header(
+      class = "bg-dark",
+      paste0("Variant filtering statistics - ",
+             pcg_report$settings$sample_id)),
+    bslib::card_body(
+      bslib::layout_columns(
+        widths = c(6,6),
+        filtering_stats[['germline']]$plot,
+        filtering_stats[['exonic']]$plot
+      )
+    )
+  )
+
+}else{
+  bslib::card(
+    full_screen = TRUE,
+    height = "365px",
+    bslib::card_header(
+      class = "bg-dark",
+      paste0("Variant filtering statistics - ",
+             pcg_report$settings$sample_id)),
+    bslib::card_body(
+      filtering_stats[['germline']]$plot)
+  )
+}
+
+
+```
+

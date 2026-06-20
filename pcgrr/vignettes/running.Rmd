@@ -255,8 +255,6 @@ SNV/InDel analysis options:
                         assay (for TMB analysis) (default: 34 (WES/WGS))
   --tumor_only          Input VCF comes from tumor-only sequencing, calls will be filtered for variants
                         of germline origin (default: False)
-  --vcf2maf             Generate a MAF file for input VCF using https://github.com/mskcc/vcf2maf
-                        (default: False)
   --vcfanno_n_proc VCFANNO_N_PROC
                         Number of vcfanno processes (option '-p' in vcfanno), default: 4
   --retained_info_tags RETAINED_INFO_TAGS
@@ -493,7 +491,6 @@ pcgr \
     --tumor_purity 0.9 \
     --tumor_ploidy 2.0 \
     --assay WES \
-    --vcf2maf \
     --estimate_signatures \
     --estimate_msi \
     --estimate_tmb \

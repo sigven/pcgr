@@ -30,6 +30,12 @@ def validate_cna_thresholds(arg_dict, logger):
     gain_threshold_relative = arg_dict.get('cna_gain_threshold_relative', 1.5)
     del_threshold_absolute = arg_dict.get('cna_del_threshold_absolute', 1)
     del_threshold_relative = arg_dict.get('cna_del_threshold_relative', 0.5)
+    
+    max_tumor_ploidy = 8.0
+    max_amp_threshold_absolute = 20
+    max_amp_threshold_relative = 5.0
+    min_ploidy = 1.0
+    
 
     # Validate the single shared threshold mode
     if threshold_mode not in ['absolute', 'relative', 'combined']:
@@ -39,157 +45,122 @@ def validate_cna_thresholds(arg_dict, logger):
         )
         error_message(err_msg, logger)
 
-    # Validate absolute threshold bounds
+    # Validate absolute amplification threshold bounds
     if amp_threshold_absolute < 3:
-        warn_msg = (
+        err_msg = (
             f"Absolute amplification threshold ('--cna_amp_threshold_absolute' = {amp_threshold_absolute}) "
-            f"is < 3 - setting to minimum value of 3"
+            f"must be >= 3"
         )
-        warn_message(warn_msg, logger)
-        arg_dict['cna_amp_threshold_absolute'] = 3
-        amp_threshold_absolute = 3
+        error_message(err_msg, logger)
 
-    if amp_threshold_absolute > 20:
-        warn_msg = (
+    if amp_threshold_absolute > max_amp_threshold_absolute:
+        err_msg = (
             f"Absolute amplification threshold ('--cna_amp_threshold_absolute' = {amp_threshold_absolute}) "
-            f"is > 20 - setting to maximum value of 20"
+            f"must be <= {max_amp_threshold_absolute}"
         )
-        warn_message(warn_msg, logger)
-        arg_dict['cna_amp_threshold_absolute'] = 20
-        amp_threshold_absolute = 20
+        error_message(err_msg, logger)
 
-    # Validate relative threshold bounds (if provided)
+    if tumor_ploidy is not None and amp_threshold_absolute <= tumor_ploidy:
+        err_msg = (
+            f"Absolute amplification threshold ('--cna_amp_threshold_absolute' = {amp_threshold_absolute}) "
+            f"must exceed tumor ploidy ({tumor_ploidy}) - amplifications must be above normal copy number"
+        )
+        error_message(err_msg, logger)
+
+    # Validate relative amplification threshold bounds (if provided)
     if amp_threshold_relative is not None:
         if amp_threshold_relative < 1.5:
-            warn_msg = (
+            err_msg = (
                 f"Relative amplification threshold ('--cna_amp_threshold_relative' = {amp_threshold_relative}) "
-                f"is < 1.5 (50% above ploidy) - setting to minimum value of 1.5"
+                f"must be >= 1.5 (at least 50% above ploidy)"
             )
-            warn_message(warn_msg, logger)
-            arg_dict['cna_amp_threshold_relative'] = 1.5
-            amp_threshold_relative = 1.5
+            error_message(err_msg, logger)
 
-        if amp_threshold_relative > 5.0:
-            warn_msg = (
+        if amp_threshold_relative > max_amp_threshold_relative:
+            err_msg = (
                 f"Relative amplification threshold ('--cna_amp_threshold_relative' = {amp_threshold_relative}) "
-                f"is > 5.0 (5× ploidy) - setting to maximum value of 5.0"
+                f"must be <= {max_amp_threshold_relative} (5× ploidy)"
             )
-            warn_message(warn_msg, logger)
-            arg_dict['cna_amp_threshold_relative'] = 5.0
-            amp_threshold_relative = 5.0
+            error_message(err_msg, logger)
 
     # Validate tumor_ploidy if provided
     if tumor_ploidy is not None:
-        if tumor_ploidy < 1.0:
-            warn_msg = (
-                f"Tumor ploidy ('--tumor_ploidy' = {tumor_ploidy}) is < 1.0 - "
-                f"setting to minimum value of 1.0"
+        if tumor_ploidy < min_ploidy:
+            err_msg = (
+                f"Tumor ploidy ('--tumor_ploidy' = {tumor_ploidy}) must be >= {min_ploidy} (haploid is the biological minimum)"
             )
-            warn_message(warn_msg, logger)
-            arg_dict['tumor_ploidy'] = 1.0
-            tumor_ploidy = 1.0
+            error_message(err_msg, logger)
 
-        if tumor_ploidy > 8.0:
-            warn_msg = (
-                f"Tumor ploidy ('--tumor_ploidy' = {tumor_ploidy}) is > 8.0 - "
-                f"setting to maximum value of 8.0"
+        if tumor_ploidy > max_tumor_ploidy:
+            err_msg = (
+                f"Tumor ploidy ('--tumor_ploidy' = {tumor_ploidy}) must be <= {max_tumor_ploidy}"
             )
-            warn_message(warn_msg, logger)
-            arg_dict['tumor_ploidy'] = 8.0
-            tumor_ploidy = 8.0
+            error_message(err_msg, logger)
 
     # Mode-specific validations
-    if threshold_mode == 'relative':
+    if threshold_mode in ('relative', 'combined'):
         if amp_threshold_relative is None:
             err_msg = (
-                "CNA threshold mode is 'relative' but '--cna_amp_threshold_relative' is not specified"
+                f"CNA threshold mode is '{threshold_mode}' but '--cna_amp_threshold_relative' is not specified"
             )
             error_message(err_msg, logger)
 
         if tumor_ploidy is None:
             logger.info(
-                "CNA threshold mode is 'relative' without '--tumor_ploidy' specified - "
+                f"CNA threshold mode is '{threshold_mode}' without '--tumor_ploidy' specified - "
                 "tumor ploidy will be auto-estimated from CNA segments"
             )
-
-    elif threshold_mode == 'combined':
-        if amp_threshold_relative is None:
-            err_msg = (
-                "CNA threshold mode is 'combined' but '--cna_amp_threshold_relative' is not specified"
-            )
-            error_message(err_msg, logger)
-
-        if tumor_ploidy is None:
-            logger.info(
-                "CNA threshold mode is 'combined' without '--tumor_ploidy' specified - "
-                "tumor ploidy will be auto-estimated from CNA segments"
-            )
-        else:
-            # Check threshold compatibility for combined mode
-            effective_threshold_at_ploidy = tumor_ploidy * amp_threshold_relative
-            threshold_difference = abs(effective_threshold_at_ploidy - amp_threshold_absolute)
-
-            if threshold_difference > 5:
-                warn_msg = (
-                    f"Combined mode: thresholds may diverge significantly. "
-                    f"Absolute threshold = {amp_threshold_absolute}, "
-                    f"Relative threshold at ploidy {tumor_ploidy} = {effective_threshold_at_ploidy:.1f}. "
-                    f"Consider adjusting values for better alignment across ploidy ranges."
-                )
-                warn_message(warn_msg, logger)
 
     # ---- Gain threshold validation ----
     if gain_threshold_absolute < 1:
-        warn_msg = (
+        err_msg = (
             f"Absolute gain threshold ('--cna_gain_threshold_absolute' = {gain_threshold_absolute}) "
-            f"is < 1 - setting to minimum value of 1"
+            f"must be >= 1"
         )
-        warn_message(warn_msg, logger)
-        arg_dict['cna_gain_threshold_absolute'] = 1
-        gain_threshold_absolute = 1
+        error_message(err_msg, logger)
+
+    if tumor_ploidy is not None and gain_threshold_absolute <= tumor_ploidy:
+        err_msg = (
+            f"Absolute gain threshold ('--cna_gain_threshold_absolute' = {gain_threshold_absolute}) "
+            f"must exceed tumor ploidy ({tumor_ploidy}) - gains must be above normal copy number"
+        )
+        error_message(err_msg, logger)
 
     if gain_threshold_absolute >= amp_threshold_absolute:
-        warn_msg = (
+        err_msg = (
             f"Absolute gain threshold ('--cna_gain_threshold_absolute' = {gain_threshold_absolute}) "
-            f"is >= absolute amplification threshold ({amp_threshold_absolute}) - "
-            f"the gain tier will be empty in absolute/combined mode"
+            f"must be less than the absolute amplification threshold ({amp_threshold_absolute})"
         )
-        warn_message(warn_msg, logger)
+        error_message(err_msg, logger)
 
-    if gain_threshold_relative < 1.0:
-        warn_msg = (
+    if gain_threshold_relative < min_ploidy:
+        err_msg = (
             f"Relative gain threshold ('--cna_gain_threshold_relative' = {gain_threshold_relative}) "
-            f"is < 1.0 (at or below ploidy) - setting to minimum value of 1.0"
+            f"must be >= {min_ploidy} (gains must exceed tumor ploidy)"
         )
-        warn_message(warn_msg, logger)
-        arg_dict['cna_gain_threshold_relative'] = 1.0
-        gain_threshold_relative = 1.0
+        error_message(err_msg, logger)
 
     if gain_threshold_relative >= amp_threshold_relative:
-        warn_msg = (
+        err_msg = (
             f"Relative gain threshold ('--cna_gain_threshold_relative' = {gain_threshold_relative}) "
-            f"is >= relative amplification threshold ({amp_threshold_relative}) - "
-            f"the gain tier will be empty in relative/combined mode"
+            f"must be less than the relative amplification threshold ({amp_threshold_relative})"
         )
-        warn_message(warn_msg, logger)
+        error_message(err_msg, logger)
 
     # ---- Deletion threshold validation ----
-    if del_threshold_absolute < 1:
-        warn_msg = (
+    if del_threshold_absolute < min_ploidy:
+        err_msg = (
             f"Absolute deletion threshold ('--cna_del_threshold_absolute' = {del_threshold_absolute}) "
-            f"is < 1 - setting to minimum value of 1"
+            f"must be >= {min_ploidy} (haploid is the biological minimum)"
         )
-        warn_message(warn_msg, logger)
-        arg_dict['cna_del_threshold_absolute'] = 1
-        del_threshold_absolute = 1
+        error_message(err_msg, logger)
 
-    if del_threshold_absolute > 10:
-        warn_msg = (
+    if del_threshold_absolute >= gain_threshold_absolute:
+        err_msg = (
             f"Absolute deletion threshold ('--cna_del_threshold_absolute' = {del_threshold_absolute}) "
-            f"is > 10 - setting to maximum value of 10"
+            f"must be less than the absolute gain threshold ({gain_threshold_absolute})"
         )
-        warn_message(warn_msg, logger)
-        arg_dict['cna_del_threshold_absolute'] = 10
+        error_message(err_msg, logger)
 
     if del_threshold_relative <= 0.0 or del_threshold_relative >= 1.0:
         err_msg = (
@@ -228,16 +199,6 @@ def verify_args(arg_dict, logger = None):
                 f"a comma-separated string of the following values: '{' '.join(pcgr_vars.EXPRESSION_DB_SOURCES)}'"
             )
             error_message(err_msg, logger)
-
-    # OncoKB: warn if token is provided but vcf2maf is not enabled (MAF is needed for SNV/InDel annotation)
-    if arg_dict.get('oncokb_api_token') is not None and \
-        arg_dict.get('vcf2maf') is not True and \
-            arg_dict['input_vcf'] is not None:
-        warn_msg = (
-            "OncoKB token is provided ('--oncokb_api_token') but '--vcf2maf' is not enabled - "
-            "OncoKB annotation of SNVs/InDels will be skipped since it requires a MAF file generated by vcf2maf"
-        )
-        warn_message(warn_msg, logger)
 
     # OncoKB: validate token format (UUID v4 pattern)
     if arg_dict.get('oncokb_api_token') is not None:

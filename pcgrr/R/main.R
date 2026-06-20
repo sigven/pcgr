@@ -89,19 +89,6 @@ generate_report <-
     sample_properties <-
       settings$conf$sample_properties
 
-    ## Retrieve relevant clinical trials for the tumor type in question
-
-    #if (as.logical(settings$conf$clinicaltrials$run) == TRUE) {
-      # pcg_report_trials <-
-      #   generate_report_data_trials(
-      #     ref_data = ref_data,
-      #     settings = settings)
-      # ## Update genome report with trial data
-      # pcg_report <-
-      #   update_report(pcg_report, pcg_report_trials,
-      #                        a_elem = "clinicaltrials")
-    #}
-
     if (!is.null(callset_snv)) {
       rep[['content']][['snv_indel']][['callset']] <-
         callset_snv

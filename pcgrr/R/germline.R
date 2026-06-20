@@ -786,7 +786,7 @@ plot_filtering_stats_germline <- function(
       dplyr::mutate(FILTER = stringr::str_replace_all(
         .data$FILTER, "\\|", ", ")) |>
       dplyr::mutate(FILTER = dplyr::if_else(
-        !(.data$FILTER %in% germline_filter_levels) &
+        !(.data$FILTER %in% pcgrr::germline_filter_levels) &
           .data$FILTER != "SOMATIC",
         "MULTIPLE FILTERS",
         .data$FILTER
@@ -795,7 +795,7 @@ plot_filtering_stats_germline <- function(
       dplyr::reframe(FREQUENCY = sum(.data$FREQUENCY)) |>
       dplyr::arrange(dplyr::desc(.data$FREQUENCY)) |>
       dplyr::mutate(FILTER = factor(
-        .data$FILTER, levels = germline_filter_levels)) |>
+        .data$FILTER, levels = pcgrr::germline_filter_levels)) |>
       dplyr::mutate(PERCENT = scales::percent(
         .data$FREQUENCY / sum(.data$FREQUENCY), accuracy = 0.1))
 
@@ -980,7 +980,7 @@ plot_filtering_stats_exonic <- function(
 
     filtering_stats$df$FILTER <- factor(
       filtering_stats$df$FILTER,
-      levels = exonic_filter_levels)
+      levels = pcgrr::exonic_filter_levels)
 
     rgba_colors <- c(
       hex_to_rgba(

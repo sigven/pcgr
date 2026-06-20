@@ -1128,6 +1128,22 @@ def annotate_cna_segments(input_cna_segment_fname: str,
     else:
         logger.info(f"Using user-specified tumor ploidy: {tumor_ploidy}")
 
+    # Validate absolute thresholds against finalised ploidy (catches auto-estimated cases;
+    # explicitly-provided ploidy is already checked in arg_checker before reaching here)
+    if threshold_mode in ('absolute', 'combined'):
+        if amp_threshold_absolute <= tumor_ploidy:
+            error_message(
+                f"Absolute amplification threshold ({amp_threshold_absolute}) does not exceed "
+                f"tumor ploidy ({tumor_ploidy}, source: {tumor_ploidy_source}) - "
+                f"raise '--cna_amp_threshold_absolute' or use '--cna_threshold_mode relative'",
+                logger)
+        if gain_threshold_absolute <= tumor_ploidy:
+            error_message(
+                f"Absolute gain threshold ({gain_threshold_absolute}) does not exceed "
+                f"tumor ploidy ({tumor_ploidy}, source: {tumor_ploidy_source}) - "
+                f"raise '--cna_gain_threshold_absolute' or use '--cna_threshold_mode relative'",
+                logger)
+
     cna_query_segment_df, effective_amplification_threshold = _annotate_amplifications(
         cna_query_segment_df, tumor_ploidy,
         amp_threshold_absolute, amp_threshold_relative, threshold_mode, logger)

@@ -95,8 +95,6 @@ def cli():
                                     help = "Effective target size in Mb (potentially limited by read depth) of sequencing assay (for TMB analysis) (default: %(default)s (WES/WGS))")
     optional_snv_indel.add_argument("--tumor_only", action="store_true", 
                                     help = "Input VCF comes from tumor-only sequencing, calls will be filtered for variants of germline origin, (default: %(default)s)")
-    optional_snv_indel.add_argument("--vcf2maf", action="store_true", 
-                                    help = "Generate a MAF file for input VCF using https://github.com/mskcc/vcf2maf (default: %(default)s)")
     optional_snv_indel.add_argument("--vcfanno_n_proc", default=4, type=int, 
                                     help = "Number of vcfanno processes (option '-p' in vcfanno), default: %(default)s")
     optional_snv_indel.add_argument("--retained_info_tags", dest="retained_info_tags", default="None", 
