@@ -1143,6 +1143,13 @@ def annotate_cna_segments(input_cna_segment_fname: str,
                 f"tumor ploidy ({tumor_ploidy}, source: {tumor_ploidy_source}) - "
                 f"raise '--cna_gain_threshold_absolute' or use '--cna_threshold_mode relative'",
                 logger)
+        if del_threshold_absolute > tumor_ploidy:
+            error_message(
+                f"Absolute deletion threshold ({del_threshold_absolute}) exceeds "
+                f"tumor ploidy ({tumor_ploidy}, source: {tumor_ploidy_source}) - "
+                f"normal-copy segments would be misclassified as deletions; "
+                f"lower '--cna_del_threshold_absolute' or use '--cna_threshold_mode relative'",
+                logger)
 
     cna_query_segment_df, effective_amplification_threshold = _annotate_amplifications(
         cna_query_segment_df, tumor_ploidy,

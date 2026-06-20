@@ -162,6 +162,13 @@ def validate_cna_thresholds(arg_dict, logger):
         )
         error_message(err_msg, logger)
 
+    if tumor_ploidy is not None and del_threshold_absolute > tumor_ploidy:
+        err_msg = (
+            f"Absolute deletion threshold ('--cna_del_threshold_absolute' = {del_threshold_absolute}) "
+            f"exceeds tumor ploidy ({tumor_ploidy}) - normal-copy segments would be misclassified as deletions"
+        )
+        error_message(err_msg, logger)
+
     if del_threshold_relative <= 0.0 or del_threshold_relative >= 1.0:
         err_msg = (
             f"Relative deletion threshold ('--cna_del_threshold_relative' = {del_threshold_relative}) "
