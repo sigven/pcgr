@@ -25,7 +25,7 @@ __5. I have a VCF with structural variants (SVs) detected in my tumor sample, ca
 
 _Answer: This is currently not supported as input for PCGR, but is something we want to incorporate in the future. We have a skeleton of SV support working for CPSR, focusing to support large, multi-exon deletions_
 
-__6. Is it possible to see all the invididual cancer subtypes that belong to each of the 30 different tumor sites?__
+__6. Is it possible to see all the individual cancer subtypes that belong to each of the 30 different tumor sites?__
 
 _Answer: Yes, see_ [an overview of phenotypes associated with primary tumor sites](primary_tumor_sites.html). See also the related GitHub repository [phenOncoX](https://github.com/sigven/phenOncoX)
 
@@ -41,9 +41,9 @@ __9. When running PCGR with OncoKB enabled but without specifying `--oncokb_onco
 
 _Answer: OncoKB evidence levels are tied to the specific tumor type context in which a biomarker–drug association has been validated. When PCGR derives the OncoTree code from `--tumor_site` alone (without `--oncokb_oncotree_code`), it maps to a broad, site-level code (e.g. `BLCA` for Bladder Cancer). If the highest-confidence evidence in OncoKB is annotated under a more specific subtype (e.g. Urethral Urothelial Carcinoma), the broad code will not match that entry and OncoKB instead returns a lower level reflecting the closest match it can find. Providing a more specific OncoTree code via `--oncokb_oncotree_code` allows OncoKB to resolve the exact subtype match and return the correct, higher evidence level. For tumor types where subtype granularity matters clinically, we therefore recommend explicitly setting `--oncokb_oncotree_code` rather than relying on the site-level default. A full list of OncoTree codes is available at [oncotree.mskcc.org](https://oncotree.mskcc.org)._
 
-__10. Does PCGR support the ESMO Scale for Clinical Actionability of molecular Targets (ESCAT)?__
+__10. Does PCGR support the ESMO Scale for Clinical Actionability of Molecular Targets (ESCAT)?__
 
-_Answer: ESCAT is not currently implemented in PCGR, primarily since an automated implementation is considerably non-trivial. The ESCAT guidelines have relatively low specificity in certain areas - often leaving room for subjective judgements (e.g. "clinically meaningful improvement of a survival endpoint in prospective, randomised clinical trials"). This is reflected in a relatively low inter-rater institutional agreement of ESCAT-based variant rankings (see [Lebedeva et al., Ann Oncol 2024](https://pubmed.ncbi.nlm.nih.gov/39368036/)). We continue to monitor developments in this space (e.g. [Kordes et al., medRxiv 2026](https://www.medrxiv.org/content/10.64898/2026.05.16.26353390v1.full-text) and may revisit ESCAT support in future releases._
+_Answer: ESCAT is not currently implemented in PCGR, primarily since an automated implementation is considerably non-trivial. The ESCAT guidelines have relatively low specificity in certain areas - often leaving room for subjective judgements (e.g. "clinically meaningful improvement of a survival endpoint in prospective, randomised clinical trials"). This observation is reflected in a relatively low inter-rater institutional agreement of ESCAT-based variant rankings (see [Lebedeva et al., Ann Oncol 2024](https://pubmed.ncbi.nlm.nih.gov/39368036/)). We continue to monitor developments in this space (e.g. [Kordes et al., medRxiv 2026](https://www.medrxiv.org/content/10.64898/2026.05.16.26353390v1.full-text)) and hope to offer ESCAT support in forthcoming releases._
 
 __11. In the Excel workbook, the biomarker sheets contain a `BM_ACTIONABILITY_SUPPORT` column with values such as `tier-defining` or `additional`. Does this mean that prognostic, diagnostic, and resistance markers also influence variant tiering?__
 

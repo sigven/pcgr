@@ -48,13 +48,13 @@ pdiakumis <- user("pdiakumis")
 
 ## v2.3.0
 
-- Date: **2026-06-17**
+- Date: **2026-06-20**
 - Major data updates
   - ClinVar (2026-06)
   - dbNSFP (v5.3, October 2025)
   - Cancer Hotspots (v3, 2026)
   - TCGA (release 45.0, December 2025)
-  - CIViC (2026-06-06)
+  - CIViC (2026-06-20)
   - GENCODE v49 (VEP v115)
 
 ### Added
@@ -163,6 +163,7 @@ pdiakumis <- user("pdiakumis")
 - Tumor-only germline filtering now uses a unified per-variant gnomAD allele frequency
   flag (`gnomAD_AF_ABOVE_TOLERATED`) that considers all available population frequencies
   from both exome and genome gnomAD datasets, preferring exome values when available
+- CLI option `--vcf2maf` is no longer an argument to PCGR - vcf to MAF conversion will   run automatically as part of the workflow when a VCF input is provided.
 
 ### Infrastructure
 

@@ -23,6 +23,23 @@ Ideally, this should reflect the _callable_ target size of the assay, i.e. the s
 
 ### Tumor-control vs. tumor-only
 
+The sequencing mode determines the **theme color** used throughout the HTML report — in the top banner and all value boxes:
+
+<table style="border-collapse:collapse; margin-bottom:0.8em;">
+<tr>
+<td style="padding:0.4em 1em 0.4em 0; white-space:nowrap;">
+<span style="display:inline-block; background-color:#9B3297; color:#fff; padding:0.3em 0.9em; border-radius:4px; font-weight:bold;">Tumor-control</span>
+</td>
+<td style="padding:0.4em 0; color:#555;">Default mode — matched tumor/normal sequencing (<code>#9B3297</code>)</td>
+</tr>
+<tr>
+<td style="padding:0.4em 1em 0.4em 0; white-space:nowrap;">
+<span style="display:inline-block; background-color:#0073C2; color:#fff; padding:0.3em 0.9em; border-radius:4px; font-weight:bold;">Tumor-only</span>
+</td>
+<td style="padding:0.4em 0; color:#555;">Enabled with <code>--tumor_only</code> (<code>#0073C2</code>)</td>
+</tr>
+</table>
+
 By default, PCGR expects that the input VCF contains somatic variants identified from a tumor-control sequencing setup. This implies that the VCF contains information with respect to variant allelic depth/support both for the tumor sample and the corresponding control sample.
 
 If the input VCF comes from a __tumor-only__ assay, turn on the `--tumor_only` option. In this mode, PCGR conducts a set of successive filtering steps on the raw input set of variants, aiming to exclude the majority of germline variants from the tumor-only input set. In addition to default filtering applied against variants found in the gnomAD database (population-specific minor allele frequency thresholds can be configured, see below), additional filtering procedures can be explicitly set, i.e.:
@@ -46,17 +63,19 @@ If the user has provided a [panel-of-normals VCF file](input.html#panel-of-norma
 </div>
 
 <div style="border-left: 4px solid #e69f00; background-color: #fff8e6; padding: 0.75em 1em; margin: 1em 0;">
-**IMPORTANT NOTE 2:** If you run PCGR on tumor-only WGS assays, we strongly recommend that you pre-filter your VCF against the exome, since we have frequently encountered that the large unfiltered variant set from such assays will cause a crash in PCGR. See also [this issue](https://github.com/sigven/pcgr/issues/178).
+**IMPORTANT NOTE 2:** If you run PCGR on tumor-only WGS assays, we strongly recommend that you pre-filter/reduce the size of your input VCF somewhat, since we have encountered that a huge unfiltered variant set from such assays may slow down PCGR considerably and potentially make it crash. See also [this issue](https://github.com/sigven/pcgr/issues/178).
 </div>
+
+
 
 ### Sample properties
 
 A few selected properties of the tumor sample that should be determined prior to PCGR analysis can be provided
 
-* `--tumor_ploidy <value>` - ploidy estimate
-* `--tumor_purity <value>` - purity estimate
+* `--tumor_ploidy <value>` 
+* `--tumor_purity <value>`
 
-If not provided, PCGR will attempt to estimate ploidy from the copy number segments (if provided) using a weighted median approach. If copy number segments are not provided, these properties will be set to `NA` in the report.
+If not user-provided, PCGR will attempt to estimate ploidy from the copy number segments (if provided) using a weighted median approach. If copy number segments are not provided, these properties will be set to `NA` in the report.
 
 #### Tumor site
 
@@ -125,8 +144,8 @@ If these tags are set correctly, one may set thresholds (sequencing depth and/or
 - `--control_af_max <value>`
 - `--control_ad_max <value>`
 
-The _allelic depths tresholds_ refer to the minimum
-number of reads supporting the variant allele in the tumor sample (`--tumor_ad_min`), and the maximum number of reads supporting the variant allele in the control sample (`--control_ad_max`).
+The _allelic depth thresholds_ refer to the minimum
+number of reads supporting the alternate allele in the tumor sample (`--tumor_ad_min`), and the maximum number of reads supporting the alternate allele in the control sample (`--control_ad_max`).
 
 ### Tumor mutational burden (TMB)
 
