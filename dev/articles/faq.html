@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9026</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9027</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -134,7 +134,7 @@ tumor sample, can PCGR process those as well?</strong></p>
 something we want to incorporate in the future. We have a skeleton of SV
 support working for CPSR, focusing to support large, multi-exon
 deletions</em></p>
-<p><strong>6. Is it possible to see all the invididual cancer subtypes
+<p><strong>6. Is it possible to see all the individual cancer subtypes
 that belong to each of the 30 different tumor sites?</strong></p>
 <p><em>Answer: Yes, see</em> <a href="primary_tumor_sites.html">an
 overview of phenotypes associated with primary tumor sites</a>. See also
@@ -193,17 +193,17 @@ recommend explicitly setting <code>--oncokb_oncotree_code</code> rather
 than relying on the site-level default. A full list of OncoTree codes is
 available at <a href="https://oncotree.mskcc.org" class="external-link">oncotree.mskcc.org</a>.</em></p>
 <p><strong>10. Does PCGR support the ESMO Scale for Clinical
-Actionability of molecular Targets (ESCAT)?</strong></p>
+Actionability of Molecular Targets (ESCAT)?</strong></p>
 <p><em>Answer: ESCAT is not currently implemented in PCGR, primarily
 since an automated implementation is considerably non-trivial. The ESCAT
 guidelines have relatively low specificity in certain areas - often
 leaving room for subjective judgements (e.g. “clinically meaningful
 improvement of a survival endpoint in prospective, randomised clinical
-trials”). This is reflected in a relatively low inter-rater
+trials”). This observation is reflected in a relatively low inter-rater
 institutional agreement of ESCAT-based variant rankings (see <a href="https://pubmed.ncbi.nlm.nih.gov/39368036/" class="external-link">Lebedeva et al., Ann
 Oncol 2024</a>). We continue to monitor developments in this space
 (e.g. <a href="https://www.medrxiv.org/content/10.64898/2026.05.16.26353390v1.full-text" class="external-link">Kordes
-et al., medRxiv 2026</a> and may revisit ESCAT support in future
+et al., medRxiv 2026</a>) and hope to offer ESCAT support in forthcoming
 releases.</em></p>
 <p><strong>11. In the Excel workbook, the biomarker sheets contain a
 <code>BM_ACTIONABILITY_SUPPORT</code> column with values such as

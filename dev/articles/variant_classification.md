@@ -207,8 +207,7 @@ properties:
 |----|----|
 | SNVs/InDels | Coding variant in an oncogene or tumor suppressor gene and population allele frequency \< 0.001 (gnomAD) |
 | Copy number aberrations | Amplified oncogene, or deleted (homozygous, hemizygous, or heterozygous) tumor suppressor gene |
-| RNA fusions | At least one fusion partner gene (5’ or 3’) is an oncogene and at least one record |
-| for the fusion event in the Mitelman database |  |
+| RNA fusions | At least one fusion partner gene (5’ or 3’) is an oncogene and at least one record for the fusion event in the Mitelman database |
 
 ### Evidence items: tier-defining vs. additional
 

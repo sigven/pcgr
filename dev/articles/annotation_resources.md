@@ -7,7 +7,7 @@
   v49](https://www.gencodegenes.org/human/) as gene reference database
   (v19 for grch37))
 
-### *Insilico* predictions of effect of coding variants
+### *In silico* predictions of effect of coding variants
 
 - [dBNSFP](https://sites.google.com/site/jpopgen/dbNSFP) - database of
   non-synonymous functional predictions (v5.3, October 2025)
@@ -28,7 +28,7 @@
 - [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - database of
   clinically related variants (June 2026)
 - [CIViC](https://civicdb.org) - clinical interpretations of variants in
-  cancer (June 6th 2026)
+  cancer (June 20th 2026)
 - [CGI](http://www.cancergenomeinterpreter.org/biomarkers) - Cancer
   Genome Interpreter Cancer Biomarkers Database (CGI) (October 18th
   2022)

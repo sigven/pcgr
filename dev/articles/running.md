@@ -34,6 +34,14 @@ of the sequencing assay, or by using tools such as
 
 ### Tumor-control vs. tumor-only
 
+The sequencing mode determines the **theme color** used throughout the
+HTML report — in the top banner and all value boxes:
+
+|               |                                                            |
+|---------------|------------------------------------------------------------|
+| Tumor-control | Default mode — matched tumor/normal sequencing (`#9B3297`) |
+| Tumor-only    | Enabled with `–tumor_only` (`#0073C2`)                     |
+
 By default, PCGR expects that the input VCF contains somatic variants
 identified from a tumor-control sequencing setup. This implies that the
 VCF contains information with respect to variant allelic depth/support
@@ -71,20 +79,20 @@ particularly well-suited for tumor-only input, e.g. mutational signature
 analysis and MSI status prediction.
 
 **IMPORTANT NOTE 2:** If you run PCGR on tumor-only WGS assays, we
-strongly recommend that you pre-filter your VCF against the exome, since
-we have frequently encountered that the large unfiltered variant set
-from such assays will cause a crash in PCGR. See also [this
-issue](https://github.com/sigven/pcgr/issues/178).
+strongly recommend that you pre-filter/reduce the size of your input VCF
+somewhat, since we have encountered that a huge unfiltered variant set
+from such assays may slow down PCGR considerably and potentially make it
+crash. See also [this issue](https://github.com/sigven/pcgr/issues/178).
 
 ### Sample properties
 
 A few selected properties of the tumor sample that should be determined
 prior to PCGR analysis can be provided
 
-- `--tumor_ploidy <value>` - ploidy estimate
-- `--tumor_purity <value>` - purity estimate
+- `--tumor_ploidy <value>`
+- `--tumor_purity <value>`
 
-If not provided, PCGR will attempt to estimate ploidy from the copy
+If not user-provided, PCGR will attempt to estimate ploidy from the copy
 number segments (if provided) using a weighted median approach. If copy
 number segments are not provided, these properties will be set to `NA`
 in the report.
@@ -173,9 +181,9 @@ the report, i.e. through:
 - `--control_af_max <value>`
 - `--control_ad_max <value>`
 
-The *allelic depths tresholds* refer to the minimum number of reads
-supporting the variant allele in the tumor sample (`--tumor_ad_min`),
-and the maximum number of reads supporting the variant allele in the
+The *allelic depth thresholds* refer to the minimum number of reads
+supporting the alternate allele in the tumor sample (`--tumor_ad_min`),
+and the maximum number of reads supporting the alternate allele in the
 control sample (`--control_ad_max`).
 
 ### Tumor mutational burden (TMB)
@@ -359,8 +367,6 @@ SNV/InDel analysis options:
                         assay (for TMB analysis) (default: 34 (WES/WGS))
   --tumor_only          Input VCF comes from tumor-only sequencing, calls will be filtered for variants
                         of germline origin (default: False)
-  --vcf2maf             Generate a MAF file for input VCF using https://github.com/mskcc/vcf2maf
-                        (default: False)
   --vcfanno_n_proc VCFANNO_N_PROC
                         Number of vcfanno processes (option '-p' in vcfanno), default: 4
   --retained_info_tags RETAINED_INFO_TAGS
@@ -602,7 +608,6 @@ pcgr \
     --tumor_purity 0.9 \
     --tumor_ploidy 2.0 \
     --assay WES \
-    --vcf2maf \
     --estimate_signatures \
     --estimate_msi \
     --estimate_tmb \

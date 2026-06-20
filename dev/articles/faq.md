@@ -61,7 +61,7 @@ something we want to incorporate in the future. We have a skeleton of SV
 support working for CPSR, focusing to support large, multi-exon
 deletions*
 
-**6. Is it possible to see all the invididual cancer subtypes that
+**6. Is it possible to see all the individual cancer subtypes that
 belong to each of the 30 different tumor sites?**
 
 *Answer: Yes, see* [an overview of phenotypes associated with primary
@@ -127,20 +127,20 @@ site-level default. A full list of OncoTree codes is available at
 [oncotree.mskcc.org](https://oncotree.mskcc.org).*
 
 **10. Does PCGR support the ESMO Scale for Clinical Actionability of
-molecular Targets (ESCAT)?**
+Molecular Targets (ESCAT)?**
 
 *Answer: ESCAT is not currently implemented in PCGR, primarily since an
 automated implementation is considerably non-trivial. The ESCAT
 guidelines have relatively low specificity in certain areas - often
 leaving room for subjective judgements (e.g. “clinically meaningful
 improvement of a survival endpoint in prospective, randomised clinical
-trials”). This is reflected in a relatively low inter-rater
+trials”). This observation is reflected in a relatively low inter-rater
 institutional agreement of ESCAT-based variant rankings (see [Lebedeva
 et al., Ann Oncol 2024](https://pubmed.ncbi.nlm.nih.gov/39368036/)). We
 continue to monitor developments in this space (e.g. [Kordes et al.,
 medRxiv
-2026](https://www.medrxiv.org/content/10.64898/2026.05.16.26353390v1.full-text)
-and may revisit ESCAT support in future releases.*
+2026](https://www.medrxiv.org/content/10.64898/2026.05.16.26353390v1.full-text))
+and hope to offer ESCAT support in forthcoming releases.*
 
 **11. In the Excel workbook, the biomarker sheets contain a
 `BM_ACTIONABILITY_SUPPORT` column with values such as `tier-defining` or

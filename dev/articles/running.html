@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9026</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9027</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -118,6 +118,26 @@ of the sequencing assay, or by using tools such as <a href="https://github.com/b
 <div class="section level3">
 <h3 id="tumor-control-vs--tumor-only">Tumor-control vs. tumor-only<a class="anchor" aria-label="anchor" href="#tumor-control-vs--tumor-only"></a>
 </h3>
+<p>The sequencing mode determines the <strong>theme color</strong> used
+throughout the HTML report — in the top banner and all value boxes:</p>
+<table style="border-collapse:collapse; margin-bottom:0.8em;" class="table">
+<tr>
+<td style="padding:0.4em 1em 0.4em 0; white-space:nowrap;">
+<span style="display:inline-block; background-color:#9B3297; color:#fff; padding:0.3em 0.9em; border-radius:4px; font-weight:bold;">Tumor-control</span>
+</td>
+<td style="padding:0.4em 0; color:#555;">
+Default mode — matched tumor/normal sequencing (<code>#9B3297</code>)
+</td>
+</tr>
+<tr>
+<td style="padding:0.4em 1em 0.4em 0; white-space:nowrap;">
+<span style="display:inline-block; background-color:#0073C2; color:#fff; padding:0.3em 0.9em; border-radius:4px; font-weight:bold;">Tumor-only</span>
+</td>
+<td style="padding:0.4em 0; color:#555;">
+Enabled with <code>–tumor_only</code> (<code>#0073C2</code>)
+</td>
+</tr>
+</table>
 <p>By default, PCGR expects that the input VCF contains somatic variants
 identified from a tumor-control sequencing setup. This implies that the
 VCF contains information with respect to variant allelic depth/support
@@ -153,9 +173,10 @@ e.g. mutational signature analysis and MSI status prediction.</p>
 </div>
 <div style="border-left: 4px solid #e69f00; background-color: #fff8e6; padding: 0.75em 1em; margin: 1em 0;">
 <p><strong>IMPORTANT NOTE 2:</strong> If you run PCGR on tumor-only WGS
-assays, we strongly recommend that you pre-filter your VCF against the
-exome, since we have frequently encountered that the large unfiltered
-variant set from such assays will cause a crash in PCGR. See also <a href="https://github.com/sigven/pcgr/issues/178" class="external-link">this issue</a>.</p>
+assays, we strongly recommend that you pre-filter/reduce the size of
+your input VCF somewhat, since we have encountered that a huge
+unfiltered variant set from such assays may slow down PCGR considerably
+and potentially make it crash. See also <a href="https://github.com/sigven/pcgr/issues/178" class="external-link">this issue</a>.</p>
 </div>
 </div>
 <div class="section level3">
@@ -164,14 +185,12 @@ variant set from such assays will cause a crash in PCGR. See also <a href="https
 <p>A few selected properties of the tumor sample that should be
 determined prior to PCGR analysis can be provided</p>
 <ul>
-<li>
-<code>--tumor_ploidy &lt;value&gt;</code> - ploidy estimate</li>
-<li>
-<code>--tumor_purity &lt;value&gt;</code> - purity estimate</li>
+<li><code>--tumor_ploidy &lt;value&gt;</code></li>
+<li><code>--tumor_purity &lt;value&gt;</code></li>
 </ul>
-<p>If not provided, PCGR will attempt to estimate ploidy from the copy
-number segments (if provided) using a weighted median approach. If copy
-number segments are not provided, these properties will be set to
+<p>If not user-provided, PCGR will attempt to estimate ploidy from the
+copy number segments (if provided) using a weighted median approach. If
+copy number segments are not provided, these properties will be set to
 <code>NA</code> in the report.</p>
 <div class="section level4">
 <h4 id="tumor-site">Tumor site<a class="anchor" aria-label="anchor" href="#tumor-site"></a>
@@ -254,10 +273,10 @@ the report, i.e. through:</p>
 <li><code>--control_af_max &lt;value&gt;</code></li>
 <li><code>--control_ad_max &lt;value&gt;</code></li>
 </ul>
-<p>The <em>allelic depths tresholds</em> refer to the minimum number of
-reads supporting the variant allele in the tumor sample
+<p>The <em>allelic depth thresholds</em> refer to the minimum number of
+reads supporting the alternate allele in the tumor sample
 (<code>--tumor_ad_min</code>), and the maximum number of reads
-supporting the variant allele in the control sample
+supporting the alternate allele in the control sample
 (<code>--control_ad_max</code>).</p>
 </div>
 <div class="section level3">
@@ -490,8 +509,6 @@ SNV/InDel analysis options:
                         assay (for TMB analysis) (default: 34 (WES/WGS))
   --tumor_only          Input VCF comes from tumor-only sequencing, calls will be filtered for variants
                         of germline origin (default: False)
-  --vcf2maf             Generate a MAF file for input VCF using https://github.com/mskcc/vcf2maf
-                        (default: False)
   --vcfanno_n_proc VCFANNO_N_PROC
                         Number of vcfanno processes (option '-p' in vcfanno), default: 4
   --retained_info_tags RETAINED_INFO_TAGS
@@ -730,11 +747,10 @@ files, VEP cache, see <a href="installation.html">Installation</a>):</p>
 <span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>    <span class="at">--tumor_purity</span> 0.9 <span class="dt">\</span></span>
 <span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>    <span class="at">--tumor_ploidy</span> 2.0 <span class="dt">\</span></span>
 <span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a>    <span class="at">--assay</span> WES <span class="dt">\</span></span>
-<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a>    <span class="at">--vcf2maf</span> <span class="dt">\</span></span>
-<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a>    <span class="at">--estimate_signatures</span> <span class="dt">\</span></span>
-<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a>    <span class="at">--estimate_msi</span> <span class="dt">\</span></span>
-<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a>    <span class="at">--estimate_tmb</span> <span class="dt">\</span></span>
-<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a>    <span class="at">--force_overwrite</span></span></code></pre></div>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a>    <span class="at">--estimate_signatures</span> <span class="dt">\</span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a>    <span class="at">--estimate_msi</span> <span class="dt">\</span></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a>    <span class="at">--estimate_tmb</span> <span class="dt">\</span></span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a>    <span class="at">--force_overwrite</span></span></code></pre></div>
 <p>This command will run the Conda-based PCGR workflow and produce the
 following files in the <em>/Users/you/dir4/pcgr_outputs</em> folder:</p>
 <table class="table">

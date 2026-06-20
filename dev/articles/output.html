@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9026</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9027</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -553,7 +553,7 @@ VEP’s <code>--flag_pick_allele</code> option)</td>
 <tr class="odd">
 <td><code>TSL</code></td>
 <td>Transcript support level (picked by VEP’s
-<code>--flag_pick_allele</code> option)&gt;</td>
+<code>--flag_pick_allele</code> option)</td>
 </tr>
 <tr class="even">
 <td><code>PUBMED</code></td>
@@ -919,8 +919,8 @@ IntoGen Catalog of Driver Mutations</td>
 </tr>
 <tr class="even">
 <td><code>EFFECT_PREDICTIONS</code></td>
-<td>Insilico predictions variant effect on protein function and pre-mRNA
-splicing from <a href="https://www.dbnsfp.org/" class="external-link">database of
+<td>In silico predictions of variant effect on protein function and
+pre-mRNA splicing from <a href="https://www.dbnsfp.org/" class="external-link">database of
 non-synonymous functional predictions - dbNSFP v5.0</a>. Predicted
 effects are provided by different sources/algorithms (separated by
 <code>&amp;</code>), <code>T</code> = Tolerated, <code>N</code> =
@@ -1309,7 +1309,19 @@ OncoKB annotation is enabled via <code>--oncokb_api_token</code>.</p>
 <td>Sample identifier</td>
 </tr>
 <tr class="even">
-<td>2. <code>GENOMIC_CHANGE</code>
+<td>2. <code>VARIANT_CLASS</code>
+</td>
+<td>Variant type, e.g. SNV/insertion/deletion/indel</td>
+</tr>
+<tr class="odd">
+<td>3. <code>VAR_ID</code>
+</td>
+<td>Variant identifier. Format:
+<code>&lt;chrom&gt;_&lt;position&gt;_&lt;ref_allele&gt;_&lt;alt_allele&gt;</code>
+</td>
+</tr>
+<tr class="even">
+<td>4. <code>GENOMIC_CHANGE</code>
 </td>
 <td>Identifier for variant at the genome (VCF) level,
 e.g. <code>1:g.152382569A&gt;G</code>. Format:
@@ -1317,389 +1329,384 @@ e.g. <code>1:g.152382569A&gt;G</code>. Format:
 </td>
 </tr>
 <tr class="odd">
-<td>3. <code>GENOME_VERSION</code>
+<td>5. <code>GENOME_VERSION</code>
 </td>
 <td>Assembly version, e.g. GRCh38</td>
 </tr>
 <tr class="even">
-<td>4. <code>VARIANT_CLASS</code>
-</td>
-<td>Variant type, e.g. SNV/insertion/deletion/indel</td>
-</tr>
-<tr class="odd">
-<td>5. <code>SYMBOL</code>
+<td>6. <code>SYMBOL</code>
 </td>
 <td>Gene symbol</td>
 </tr>
-<tr class="even">
-<td>6. <code>ENTREZGENE</code>
+<tr class="odd">
+<td>7. <code>ENTREZGENE</code>
 </td>
 <td>Entrez gene identifier</td>
 </tr>
-<tr class="odd">
-<td>7. <code>ENSEMBL_GENE_ID</code>
+<tr class="even">
+<td>8. <code>ENSEMBL_GENE_ID</code>
 </td>
 <td>Ensembl gene identifier</td>
 </tr>
-<tr class="even">
-<td>8. <code>GENENAME</code>
+<tr class="odd">
+<td>9. <code>GENENAME</code>
 </td>
 <td>Gene name</td>
 </tr>
-<tr class="odd">
-<td>9. <code>ALTERATION</code>
+<tr class="even">
+<td>10. <code>ALTERATION</code>
 </td>
 <td>Combined HGVSp/HGVSc annotation</td>
 </tr>
-<tr class="even">
-<td>10. <code>CDS_CHANGE</code>
+<tr class="odd">
+<td>11. <code>CDS_CHANGE</code>
 </td>
 <td>Coding sequence change</td>
 </tr>
-<tr class="odd">
-<td>11. <code>HGVSc</code>
+<tr class="even">
+<td>12. <code>HGVSc</code>
 </td>
 <td>HGVS coding sequence name</td>
 </tr>
-<tr class="even">
-<td>12. <code>HGVSc_RefSeq</code>
+<tr class="odd">
+<td>13. <code>HGVSc_RefSeq</code>
 </td>
 <td>HGVS coding sequence name (RefSeq/MANE select)</td>
 </tr>
-<tr class="odd">
-<td>13. <code>HGVSp</code>
+<tr class="even">
+<td>14. <code>HGVSp</code>
 </td>
 <td>HGVS protein sequence name</td>
 </tr>
-<tr class="even">
-<td>14. <code>HGVSP</code>
+<tr class="odd">
+<td>15. <code>HGVSP</code>
 </td>
 <td>Protein change in one-letter amino-acid HGVS notation
 (HGVSp_short)</td>
 </tr>
-<tr class="odd">
-<td>15. <code>SPLICE_EFFECT</code>
+<tr class="even">
+<td>16. <code>SPLICE_EFFECT</code>
 </td>
 <td>Splice effect annotations from MutSpliceDB and MaxEntScan (see
 details above)</td>
 </tr>
-<tr class="even">
-<td>16. <code>MAXENTSCAN</code>
+<tr class="odd">
+<td>17. <code>MAXENTSCAN</code>
 </td>
 <td>MaxEntScan splice site impact summary. Format:
 <code>MaxEntScan|&lt;stratum&gt;|&lt;evidence_tier&gt;</code>
 </td>
 </tr>
-<tr class="odd">
-<td>17. <code>EFFECT_PREDICTIONS</code>
+<tr class="even">
+<td>18. <code>EFFECT_PREDICTIONS</code>
 </td>
 <td>Variant effect predictions - from dbNSFP</td>
 </tr>
-<tr class="even">
-<td>18. <code>EXON</code>
+<tr class="odd">
+<td>19. <code>EXON</code>
 </td>
 <td>Exon number (out of total number of exons)</td>
 </tr>
-<tr class="odd">
-<td>19. <code>CONSEQUENCE</code>
+<tr class="even">
+<td>20. <code>CONSEQUENCE</code>
 </td>
 <td>Variant consequence - from VEP</td>
 </tr>
-<tr class="even">
-<td>20. <code>PFAM_DOMAIN_NAME</code>
+<tr class="odd">
+<td>21. <code>PFAM_DOMAIN_NAME</code>
 </td>
 <td>Pfam domain name</td>
 </tr>
-<tr class="odd">
-<td>21. <code>LOSS_OF_FUNCTION</code>
+<tr class="even">
+<td>22. <code>LOSS_OF_FUNCTION</code>
 </td>
 <td>Loss of function flag</td>
 </tr>
-<tr class="even">
-<td>22. <code>LOF_FILTER</code>
+<tr class="odd">
+<td>23. <code>LOF_FILTER</code>
 </td>
 <td>Loss of function filter</td>
 </tr>
-<tr class="odd">
-<td>23. <code>CODING_STATUS</code>
+<tr class="even">
+<td>24. <code>CODING_STATUS</code>
 </td>
 <td>Coding status - flag indicating if consequence is
 protein-altering/affecting splice sites</td>
 </tr>
-<tr class="even">
-<td>24. <code>EXONIC_STATUS</code>
+<tr class="odd">
+<td>25. <code>EXONIC_STATUS</code>
 </td>
 <td>Exonic status - flag indicating if consequence is
 silent/protein-altering/affecting splice sites</td>
 </tr>
-<tr class="odd">
-<td>25. <code>DP_TUMOR</code>
+<tr class="even">
+<td>26. <code>DP_TUMOR</code>
 </td>
 <td>Depth of coverage at variant position in tumor sample</td>
 </tr>
-<tr class="even">
-<td>26. <code>VAF_TUMOR</code>
+<tr class="odd">
+<td>27. <code>VAF_TUMOR</code>
 </td>
 <td>Variant allele fraction at variant position in tumor sample</td>
 </tr>
-<tr class="odd">
-<td>27. <code>AD_TUMOR</code>
+<tr class="even">
+<td>28. <code>AD_TUMOR</code>
 </td>
 <td>Allelic depth (number of reads supporting alt allele) in tumor
 sample</td>
 </tr>
-<tr class="even">
-<td>28. <code>CALL_CONFIDENCE</code>
+<tr class="odd">
+<td>29. <code>CALL_CONFIDENCE</code>
 </td>
 <td>Call confidence</td>
 </tr>
-<tr class="odd">
-<td>29. <code>DP_CONTROL</code>
+<tr class="even">
+<td>30. <code>DP_CONTROL</code>
 </td>
 <td>Depth of coverage at variant position in control sample</td>
 </tr>
-<tr class="even">
-<td>30. <code>VAF_CONTROL</code>
+<tr class="odd">
+<td>31. <code>VAF_CONTROL</code>
 </td>
 <td>Variant allele fraction at variant position in control sample</td>
 </tr>
-<tr class="odd">
-<td>31. <code>AD_CONTROL</code>
+<tr class="even">
+<td>32. <code>AD_CONTROL</code>
 </td>
 <td>Allelic depth (number of reads supporting alt allele) in control
 sample</td>
 </tr>
-<tr class="even">
-<td>32. <code>MUTATION_HOTSPOT</code>
+<tr class="odd">
+<td>33. <code>MUTATION_HOTSPOT</code>
 </td>
 <td>Mutation hotspot annotation</td>
 </tr>
-<tr class="odd">
-<td>33. <code>MUTATION_HOTSPOT_CANCERTYPE</code>
+<tr class="even">
+<td>34. <code>MUTATION_HOTSPOT_CANCERTYPE</code>
 </td>
 <td>Mutation hotspot-associated cancer types (from
 cancerhotspots.org)</td>
 </tr>
-<tr class="even">
-<td>34. <code>ACTIONABILITY_TIER</code>
+<tr class="odd">
+<td>35. <code>ACTIONABILITY_TIER</code>
 </td>
 <td>Variant clinical actionability tier - AMP/ASCO/CAP
 implementation</td>
 </tr>
-<tr class="odd">
-<td>35. <code>ACTIONABILITY</code>
+<tr class="even">
+<td>36. <code>ACTIONABILITY</code>
 </td>
 <td>Variant clinical actionability significance - AMP/ASCO/CAP
 implementation</td>
 </tr>
-<tr class="even">
-<td>36. <code>ONCOGENICITY</code>
+<tr class="odd">
+<td>37. <code>ONCOGENICITY</code>
 </td>
 <td>Oncogenicity annotation - ClinGen/CGC/VICC SOP implementation</td>
 </tr>
-<tr class="odd">
-<td>37. <code>ONCOGENICITY_CODE</code>
+<tr class="even">
+<td>38. <code>ONCOGENICITY_CODE</code>
 </td>
 <td>Variant-matching oncogenicity code(s) - ClinGen/CGC/VICC SOP
 implementation</td>
 </tr>
-<tr class="even">
-<td>38. <code>ONCOGENICITY_SCORE</code>
+<tr class="odd">
+<td>39. <code>ONCOGENICITY_SCORE</code>
 </td>
 <td>Variant oncogenicity score - ClinGen/CGC/VICC SOP
 implementation</td>
 </tr>
-<tr class="odd">
-<td>39. <code>MUTATION_EFFECT_OKB</code>
+<tr class="even">
+<td>40. <code>MUTATION_EFFECT_OKB</code>
 </td>
 <td>
 <em>(OncoKB only)</em> OncoKB mutation effect annotation
 (e.g. Loss-of-function, Gain-of-function)</td>
 </tr>
-<tr class="even">
-<td>40. <code>MUTATION_EFFECT_CITATIONS_OKB</code>
+<tr class="odd">
+<td>41. <code>MUTATION_EFFECT_CITATIONS_OKB</code>
 </td>
 <td>
 <em>(OncoKB only)</em> OncoKB mutation effect citations</td>
 </tr>
-<tr class="odd">
-<td>41. <code>MUTATION_EFFECT_DESCRIPTION_OKB</code>
+<tr class="even">
+<td>42. <code>MUTATION_EFFECT_DESCRIPTION_OKB</code>
 </td>
 <td>
 <em>(OncoKB only)</em> OncoKB mutation effect description</td>
 </tr>
-<tr class="even">
-<td>42. <code>ONCOGENICITY_OKB</code>
+<tr class="odd">
+<td>43. <code>ONCOGENICITY_OKB</code>
 </td>
 <td>
 <em>(OncoKB only)</em> OncoKB oncogenicity annotation
 (e.g. Oncogenic, Likely Oncogenic, Likely Neutral etc.)</td>
 </tr>
-<tr class="odd">
-<td>43. <code>TUMOR_TYPE_SUMMARY_OKB</code>
+<tr class="even">
+<td>44. <code>TUMOR_TYPE_SUMMARY_OKB</code>
 </td>
 <td>
 <em>(OncoKB only)</em> OncoKB tumor type summary</td>
 </tr>
-<tr class="even">
-<td>44. <code>VARIANT_SUMMARY_OKB</code>
+<tr class="odd">
+<td>45. <code>VARIANT_SUMMARY_OKB</code>
 </td>
 <td>
 <em>(OncoKB only)</em> OncoKB variant summary</td>
 </tr>
-<tr class="odd">
-<td>45. <code>HOTSPOT_OKB</code>
+<tr class="even">
+<td>46. <code>HOTSPOT_OKB</code>
 </td>
 <td>
 <em>(OncoKB only)</em> OncoKB hotspot flag - indicates if variant
 overlaps a known OncoKB hotspot</td>
 </tr>
-<tr class="even">
-<td>46. <code>VUS_OKB</code>
+<tr class="odd">
+<td>47. <code>VUS_OKB</code>
 </td>
 <td>
 <em>(OncoKB only)</em> OncoKB variant of uncertain significance
 flag</td>
 </tr>
-<tr class="odd">
-<td>47. <code>CANONICAL</code>
+<tr class="even">
+<td>48. <code>CANONICAL</code>
 </td>
 <td>Flag indicating if transcript is canonical</td>
 </tr>
-<tr class="even">
-<td>48. <code>CCDS</code>
+<tr class="odd">
+<td>49. <code>CCDS</code>
 </td>
 <td>CCDS identifier</td>
 </tr>
-<tr class="odd">
-<td>49. <code>UNIPROT_ACC</code>
+<tr class="even">
+<td>50. <code>UNIPROT_ACC</code>
 </td>
 <td>UniProt accession</td>
 </tr>
-<tr class="even">
-<td>50. <code>ENSEMBL_TRANSCRIPT_ID</code>
+<tr class="odd">
+<td>51. <code>ENSEMBL_TRANSCRIPT_ID</code>
 </td>
 <td>Ensembl transcript identifier</td>
 </tr>
-<tr class="odd">
-<td>51. <code>ENSEMBL_PROTEIN_ID</code>
+<tr class="even">
+<td>52. <code>ENSEMBL_PROTEIN_ID</code>
 </td>
 <td>Ensembl protein identifier</td>
 </tr>
-<tr class="even">
-<td>52. <code>REFSEQ_TRANSCRIPT_ID</code>
+<tr class="odd">
+<td>53. <code>REFSEQ_TRANSCRIPT_ID</code>
 </td>
 <td>RefSeq transcript identifier</td>
 </tr>
-<tr class="odd">
-<td>53. <code>REFSEQ_PROTEIN_ID</code>
+<tr class="even">
+<td>54. <code>REFSEQ_PROTEIN_ID</code>
 </td>
 <td>RefSeq protein identifier</td>
 </tr>
-<tr class="even">
-<td>54. <code>MANE_SELECT</code>
+<tr class="odd">
+<td>55. <code>MANE_SELECT</code>
 </td>
 <td>MANE transcript select</td>
 </tr>
-<tr class="odd">
-<td>55. <code>MANE_PLUS_CLINICAL</code>
+<tr class="even">
+<td>56. <code>MANE_PLUS_CLINICAL</code>
 </td>
 <td>MANE transcript plus clinical</td>
 </tr>
-<tr class="even">
-<td>56. <code>ONCOGENE</code>
+<tr class="odd">
+<td>57. <code>ONCOGENE</code>
 </td>
 <td>Flag indicating if gene is oncogene (CancerMine/NCG)</td>
 </tr>
-<tr class="odd">
-<td>57. <code>ONCOGENE_SUPPORT</code>
+<tr class="even">
+<td>58. <code>ONCOGENE_SUPPORT</code>
 </td>
 <td>Oncogene annotation support (CancerMine/NCG)</td>
 </tr>
-<tr class="even">
-<td>58. <code>TUMOR_SUPPRESSOR</code>
+<tr class="odd">
+<td>59. <code>TUMOR_SUPPRESSOR</code>
 </td>
 <td>Flag indicating if gene is tumor suppressor (CancerMine/NCG)</td>
 </tr>
-<tr class="odd">
-<td>59. <code>TUMOR_SUPPRESSOR_SUPPORT</code>
+<tr class="even">
+<td>60. <code>TUMOR_SUPPRESSOR_SUPPORT</code>
 </td>
 <td>Tumor suppressor annotation support (CancerMine/NCG)</td>
 </tr>
-<tr class="even">
-<td>60. <code>TARGETED_INHIBITORS2</code>
+<tr class="odd">
+<td>61. <code>TARGETED_INHIBITORS2</code>
 </td>
 <td>Targeted inhibitors</td>
 </tr>
-<tr class="odd">
-<td>61. <code>REGULATORY_ANNOTATION</code>
+<tr class="even">
+<td>62. <code>REGULATORY_ANNOTATION</code>
 </td>
 <td>Regulatory annotation</td>
 </tr>
-<tr class="even">
-<td>62. <code>VEP_ALL_CSQ</code>
+<tr class="odd">
+<td>63. <code>VEP_ALL_CSQ</code>
 </td>
 <td>VEP consequence - all transcripts</td>
 </tr>
-<tr class="odd">
-<td>63. <code>gnomADe_AF</code>
+<tr class="even">
+<td>64. <code>gnomADe_AF</code>
 </td>
 <td>gnomAD exomes allele frequency - globally</td>
 </tr>
-<tr class="even">
-<td>64. <code>gnomADg_AF</code>
+<tr class="odd">
+<td>65. <code>gnomADg_AF</code>
 </td>
 <td>gnomAD genomes allele frequency - globally</td>
 </tr>
-<tr class="odd">
-<td>65. <code>DBSNP_RSID</code>
+<tr class="even">
+<td>66. <code>DBSNP_RSID</code>
 </td>
 <td>dbSNP identifier</td>
 </tr>
-<tr class="even">
-<td>66. <code>COSMIC_ID</code>
+<tr class="odd">
+<td>67. <code>COSMIC_ID</code>
 </td>
 <td>COSMIC identifier</td>
 </tr>
-<tr class="odd">
-<td>67. <code>TCGA_FREQUENCY</code>
+<tr class="even">
+<td>68. <code>TCGA_FREQUENCY</code>
 </td>
 <td>Frequency of variant across TCGA tumor types. Format:
 <code>tumortype | percent affected | affected cases | total cases</code>
 </td>
 </tr>
-<tr class="even">
-<td>68. <code>TCGA_PANCANCER_COUNT</code>
+<tr class="odd">
+<td>69. <code>TCGA_PANCANCER_COUNT</code>
 </td>
 <td>Raw variant count across all TCGA tumor types</td>
 </tr>
-<tr class="odd">
-<td>69. <code>CLINVAR_MSID</code>
+<tr class="even">
+<td>70. <code>CLINVAR_MSID</code>
 </td>
 <td>ClinVar measureset identifier</td>
 </tr>
-<tr class="even">
-<td>70. <code>CLINVAR_CLASSIFICATION</code>
+<tr class="odd">
+<td>71. <code>CLINVAR_CLASSIFICATION</code>
 </td>
 <td>ClinVar variant classification</td>
 </tr>
-<tr class="odd">
-<td>71. <code>CLINVAR_VARIANT_ORIGIN</code>
+<tr class="even">
+<td>72. <code>CLINVAR_VARIANT_ORIGIN</code>
 </td>
 <td>ClinVar variant origin</td>
 </tr>
-<tr class="even">
-<td>72. <code>CLINVAR_NUM_SUBMITTERS</code>
+<tr class="odd">
+<td>73. <code>CLINVAR_NUM_SUBMITTERS</code>
 </td>
 <td>ClinVar number of submitters</td>
 </tr>
-<tr class="odd">
-<td>73. <code>CLINVAR_GOLD_STARS</code>
+<tr class="even">
+<td>74. <code>CLINVAR_GOLD_STARS</code>
 </td>
 <td>ClinVar review status gold stars (0-4)</td>
 </tr>
-<tr class="even">
-<td>74. <code>CLINVAR_CONFLICTED</code>
+<tr class="odd">
+<td>75. <code>CLINVAR_CONFLICTED</code>
 </td>
 <td>ClinVar variant classification is conflicted</td>
 </tr>
@@ -2189,7 +2196,7 @@ of transcript overlap</td>
 Mitelman database evidence, and clinical actionability. The output file
 has the following naming convention:</p>
 <ul>
-<li><code>&lt;sample_id&gt;.pcgr.&lt;genome_assembly&gt;.rna_fusion.tsv.gz</code></li>
+<li><code>&lt;sample_id&gt;.pcgr.&lt;genome_assembly&gt;.fusion_ann.tsv.gz</code></li>
 </ul>
 <p>Columns suffixed with <code>_OKB</code> are only present when OncoKB
 annotation is enabled via <code>--oncokb_api_token</code>. Note that
@@ -2206,11 +2213,9 @@ fusion output.</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td>1. <code>VAR_ID</code>
+<td>1. <code>SAMPLE_ID</code>
 </td>
-<td>Variant identifier. Format:
-<code>&lt;gene1&gt;--&lt;gene2&gt;:&lt;breakpoint_5P&gt;:&lt;breakpoint_3P&gt;</code>
-</td>
+<td>Sample identifier</td>
 </tr>
 <tr class="even">
 <td>2. <code>VARIANT_CLASS</code>
@@ -2219,34 +2224,36 @@ fusion output.</p>
 </td>
 </tr>
 <tr class="odd">
-<td>3. <code>ENTREZGENE</code>
+<td>3. <code>VAR_ID</code>
+</td>
+<td>Variant identifier. Format:
+<code>&lt;gene1&gt;--&lt;gene2&gt;:&lt;breakpoint_5P&gt;:&lt;breakpoint_3P&gt;</code>
+</td>
+</tr>
+<tr class="even">
+<td>4. <code>ENTREZGENE</code>
 </td>
 <td>Entrez gene identifiers for both fusion partners. Format:
 <code>&lt;entrezgene_5P&gt;::&lt;entrezgene_3P&gt;</code>
 </td>
 </tr>
-<tr class="even">
-<td>4. <code>FUSION_GENE</code>
+<tr class="odd">
+<td>5. <code>FUSION_GENE</code>
 </td>
 <td>Fusion gene name. Format:
 <code>&lt;gene1&gt;--&lt;gene2&gt;</code>
 </td>
 </tr>
-<tr class="odd">
-<td>5. <code>FUSION_GENE2</code>
+<tr class="even">
+<td>6. <code>FUSION_GENE2</code>
 </td>
 <td>Alternative fusion gene notation used for Mitelman database variant
 matching</td>
 </tr>
-<tr class="even">
-<td>6. <code>SPLIT_READS</code>
+<tr class="odd">
+<td>7. <code>SPLIT_READS</code>
 </td>
 <td>Number of split reads supporting the fusion</td>
-</tr>
-<tr class="odd">
-<td>7. <code>SCORE</code>
-</td>
-<td>Fusion score reported by the caller (if provided in input)</td>
 </tr>
 <tr class="even">
 <td>8. <code>FUSION_GENE_5P</code>
@@ -2285,111 +2292,87 @@ matching</td>
 <td>Ensembl transcript identifier covering the 5’ breakpoint</td>
 </tr>
 <tr class="odd">
-<td>15. <code>TARGETED_INHIBITORS_5P</code>
-</td>
-<td>Molecularly targeted inhibitors for the 5’ partner gene - tumor
-type-specific</td>
-</tr>
-<tr class="even">
-<td>16. <code>TARGETED_INHIBITORS_ALL_5P</code>
-</td>
-<td>Molecularly targeted inhibitors for the 5’ partner gene - all tumor
-types</td>
-</tr>
-<tr class="odd">
-<td>17. <code>GENENAME_3P</code>
+<td>15. <code>GENENAME_3P</code>
 </td>
 <td>Full gene name of the 3’ partner</td>
 </tr>
 <tr class="even">
-<td>18. <code>ONCOGENE_3P</code>
+<td>16. <code>ONCOGENE_3P</code>
 </td>
 <td>Flag indicating if the 3’ partner gene is an oncogene
 (CancerMine/NCG)</td>
 </tr>
 <tr class="odd">
-<td>19. <code>ENSEMBL_TRANSCRIPT_ID_3P</code>
+<td>17. <code>ENSEMBL_TRANSCRIPT_ID_3P</code>
 </td>
 <td>Ensembl transcript identifier covering the 3’ breakpoint</td>
 </tr>
 <tr class="even">
-<td>20. <code>TARGETED_INHIBITORS_3P</code>
-</td>
-<td>Molecularly targeted inhibitors for the 3’ partner gene - tumor
-type-specific</td>
-</tr>
-<tr class="odd">
-<td>21. <code>TARGETED_INHIBITORS_ALL_3P</code>
-</td>
-<td>Molecularly targeted inhibitors for the 3’ partner gene - all tumor
-types</td>
-</tr>
-<tr class="even">
-<td>22. <code>SAMPLE_ALTERATION</code>
+<td>18. <code>SAMPLE_ALTERATION</code>
 </td>
 <td>Alteration description for the sample. Format:
 <code>&lt;FUSION_GENE&gt; fusion</code>
 </td>
 </tr>
 <tr class="odd">
-<td>23. <code>MITDB_NUM_EVIDENCE</code>
+<td>19. <code>MITDB_NUM_EVIDENCE</code>
 </td>
 <td>Number of evidence records matching the fusion in the <a href="https://mitelmandatabase.isb-cgc.org/" class="external-link">Mitelman Database of
 Chromosome Aberrations and Gene Fusions in Cancer</a>
 </td>
 </tr>
 <tr class="even">
-<td>24. <code>MITDB_EVIDENCE</code>
+<td>20. <code>MITDB_EVIDENCE</code>
 </td>
 <td>Evidence records for the fusion from the Mitelman database (cancer
 type associations)</td>
 </tr>
 <tr class="odd">
-<td>25. <code>ACTIONABILITY_TIER</code>
+<td>21. <code>ACTIONABILITY_TIER</code>
 </td>
 <td>Variant clinical actionability tier - AMP/ASCO/CAP
 implementation</td>
 </tr>
 <tr class="even">
-<td>26. <code>ACTIONABILITY</code>
+<td>22. <code>ACTIONABILITY</code>
 </td>
 <td>Variant clinical actionability significance - AMP/ASCO/CAP
 implementation</td>
 </tr>
 <tr class="odd">
-<td>27. <code>MUTATION_EFFECT_OKB</code>
+<td>23. <code>MUTATION_EFFECT_OKB</code>
 </td>
 <td>
 <em>(OncoKB only)</em> OncoKB mutation effect annotation
 (e.g. Loss-of-function, Gain-of-function)</td>
 </tr>
 <tr class="even">
-<td>28. <code>MUTATION_EFFECT_CITATIONS_OKB</code>
+<td>24. <code>MUTATION_EFFECT_CITATIONS_OKB</code>
 </td>
 <td>
 <em>(OncoKB only)</em> OncoKB mutation effect citations</td>
 </tr>
 <tr class="odd">
-<td>29. <code>MUTATION_EFFECT_DESCRIPTION_OKB</code>
+<td>25. <code>MUTATION_EFFECT_DESCRIPTION_OKB</code>
 </td>
 <td>
 <em>(OncoKB only)</em> OncoKB mutation effect description</td>
 </tr>
 <tr class="even">
-<td>30. <code>ONCOGENICITY_OKB</code>
+<td>26. <code>ONCOGENICITY_OKB</code>
 </td>
 <td>
 <em>(OncoKB only)</em> OncoKB oncogenicity annotation
 (e.g. Oncogenic, Likely Oncogenic)</td>
 </tr>
 <tr class="odd">
-<td>31. <code>TUMOR_TYPE_SUMMARY_OKB</code>
+<td>27. <code>TUMOR_TYPE_SUMMARY_OKB</code>
 </td>
 <td>
 <em>(OncoKB only)</em> OncoKB tumor type summary</td>
 </tr>
 <tr class="even">
-<td>32. <code>VARIANT_SUMMARY_OKB</code>
+<td>28. <code>VARIANT_SUMMARY_OKB</code>
 </td>
 <td>
 <em>(OncoKB only)</em> OncoKB variant summary</td>

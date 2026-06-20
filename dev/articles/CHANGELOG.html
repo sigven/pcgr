@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9026</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9027</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -88,7 +88,7 @@
 <h2 id="v2-3-0">v2.3.0<a class="anchor" aria-label="anchor" href="#v2-3-0"></a>
 </h2>
 <ul>
-<li>Date: <strong>2026-06-17</strong>
+<li>Date: <strong>2026-06-20</strong>
 </li>
 <li>Major data updates
 <ul>
@@ -96,7 +96,7 @@
 <li>dbNSFP (v5.3, October 2025)</li>
 <li>Cancer Hotspots (v3, 2026)</li>
 <li>TCGA (release 45.0, December 2025)</li>
-<li>CIViC (2026-06-06)</li>
+<li>CIViC (2026-06-20)</li>
 <li>GENCODE v49 (VEP v115)</li>
 </ul>
 </li>
@@ -286,6 +286,9 @@ positions +3 to +6; acceptor positions -3 to -20) additionally set
 allele frequency flag (<code>gnomAD_AF_ABOVE_TOLERATED</code>) that
 considers all available population frequencies from both exome and
 genome gnomAD datasets, preferring exome values when available</li>
+<li>CLI option <code>--vcf2maf</code> is no longer an argument to PCGR -
+vcf to MAF conversion will run automatically as part of the workflow
+when a VCF input is provided.</li>
 </ul>
 </div>
 <div class="section level3">

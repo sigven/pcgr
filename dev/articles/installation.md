@@ -27,13 +27,13 @@ and are versioned based on their release date. Keep in mind that the
 bundles support only certain Ensembl VEP versions, and importantly also
 specific software versions of PCGR. Upgrading the PCGR software without
 upgrading the bundle specified here is thus *not* a recommended
-installation strategy. The latest (**v20260606**) genome-specific
-bundles can be downloaded directly from below (size: ~5G):
+installation strategy. The latest (**v20260620**) genome-specific
+bundles can be downloaded directly from below (size: ~7.1Gb per bundle):
 
 | Assembly | Download Link |
 |:---|:---|
-| GRCh38 | <https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20260606.grch38.tgz> |
-| GRCh37 | <https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20260606.grch37.tgz> |
+| GRCh38 | <https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20260620.grch38.tgz> |
+| GRCh37 | <https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20260620.grch37.tgz> |
 
 **Tip 1**: The `data/grch3x/.PCGR_BUNDLE_VERSION` file within the
 downloaded bundle indicates the bundle version for reporting purposes.
@@ -44,7 +44,7 @@ the reference bundle.
 
 #### Bash Example
 
-    BUNDLE_VERSION="20260606"
+    BUNDLE_VERSION="20260620"
 
 ``` bash
 GENOME="grch38" # or "grch37"
@@ -108,7 +108,7 @@ the time is spent on downloading the `{BSgenome.Hsapiens.UCSC.hg19}` and
 `{BSgenome.Hsapiens.UCSC.hg38}` R packages (which happens at the very
 end of the conda environment creation).
 
-    PCGR_VERSION="2.2.5.9026"
+    PCGR_VERSION="2.2.5.9027"
 
 ``` bash
 # set up variables
@@ -129,9 +129,9 @@ pcgr --help
 
 The PCGR Docker image is available from the GitHub Container Registry at
 <https://github.com/sigven/pcgr/pkgs/container/pcgr>. Pull the latest
-**v2.2.5.9026** image with:
+**v2.2.5.9027** image with:
 
-    docker pull ghcr.io/sigven/pcgr:2.2.5.9026
+    docker pull ghcr.io/sigven/pcgr:2.2.5.9027
 
 #### Example Run
 
@@ -142,7 +142,7 @@ structure:
 - `/Users/you/dir1/VEP_cache` - the directory where you have downloaded
   the [VEP cache](#vep-cache) (**Note**: this directory should contain
   the `homo_sapiens` directory as its child directory
-- `/Users/you/dir1/20260606` - the directory where you have downloaded
+- `/Users/you/dir1/20260620` - the directory where you have downloaded
   the PCGR reference bundle (**Note**: this directory should contain a
   directory named `data` as its child directory)
 - `/Users/you/dir1/pcgr_inputs` - the directory where you have your
@@ -152,8 +152,8 @@ structure:
 
 &nbsp;
 
-    PCGR_VERSION="2.2.5.9026"
-    BUNDLE_VERSION="20260606"
+    PCGR_VERSION="2.2.5.9027"
+    BUNDLE_VERSION="20260620"
 
 ``` bash
 docker container run -it --rm \
@@ -171,8 +171,7 @@ docker container run -it --rm \
       --sample_id "SAMPLE_B" \
       --tumor_dp_tag "TDP" \
       --tumor_af_tag "TAF" \
-      --assay "WGS" \
-      --vcf2maf
+      --assay "WGS"
 ```
 
 **NOTE**: If you need to run the Docker-based version of PCGR as a
@@ -185,19 +184,19 @@ for Singularity/Apptainer below, see also [issue
 ### C. Singularity/Apptainer
 
 The PCGR Singularity/Apptainer image is available on [GitHub Container
-Registry](https://ghcr.io/sigven/pcgr). Pull the latest **v2.2.5.9026**
+Registry](https://ghcr.io/sigven/pcgr). Pull the latest **v2.2.5.9027**
 image with:
 
-    apptainer pull oras://ghcr.io/sigven/pcgr:2.2.5.9026.singularity
+    apptainer pull oras://ghcr.io/sigven/pcgr:2.2.5.9027.singularity
 
 This will download a Singularity Image File (SIF) called
-**pcgr_2.2.5.9026.singularity.sif** that can be run with Singularity or
+**pcgr_2.2.5.9027.singularity.sif** that can be run with Singularity or
 Apptainer.
 
 #### Example Run
 
-    PCGR_VERSION="2.2.5.9026"
-    BUNDLE_VERSION="20260606"
+    PCGR_VERSION="2.2.5.9027"
+    BUNDLE_VERSION="20260620"
 
 ``` bash
 apptainer exec \
@@ -218,8 +217,7 @@ apptainer exec \
     --sample_id "SAMPLE_B" \
     --assay "WGS" \
     --tumor_dp_tag "TDP" \
-    --tumor_af_tag "TAF" \
-    --vcf2maf
+    --tumor_af_tag "TAF"
 ```
 
 **Note**: For any Apptainer/Singularity issues not directly related to

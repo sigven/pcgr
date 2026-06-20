@@ -175,7 +175,7 @@ convention:
 | `EXON_POSITION` | Relative position of exon variant to nearest intron/exon junction (NearestExonJB VEP plugin) |
 | `DISTANCE` | Shortest distance from variant to transcript (picked by VEP’s `--flag_pick_allele` option) |
 | `BIOTYPE` | Biotype of transcript or regulatory feature (picked by VEP’s `--flag_pick_allele` option) |
-| `TSL` | Transcript support level (picked by VEP’s `--flag_pick_allele` option)\> |
+| `TSL` | Transcript support level (picked by VEP’s `--flag_pick_allele` option) |
 | `PUBMED` | PubMed ID(s) of publications that cite existing variant - VEP |
 | `PHENO` | Indicates if existing variant is associated with a phenotype, disease or trait - VEP |
 | `GENE_PHENO` | Indicates if overlapped gene is associated with a phenotype, disease or trait - VEP |
@@ -239,7 +239,7 @@ convention:
 | `MUTATION_HOTSPOT_CANCERTYPE` | hotspot-associated cancer types (from cancerhotspots.org) |
 | `PFAM_DOMAIN` | Pfam domain identifier (from VEP) |
 | `INTOGEN_DRIVER_MUT` | Indicates if existing variant is predicted as driver mutation from IntoGen Catalog of Driver Mutations |
-| `EFFECT_PREDICTIONS` | Insilico predictions variant effect on protein function and pre-mRNA splicing from [database of non-synonymous functional predictions - dbNSFP v5.0](https://www.dbnsfp.org/). Predicted effects are provided by different sources/algorithms (separated by `&`), `T` = Tolerated, `N` = Neutral, `D` = Damaging |
+| `EFFECT_PREDICTIONS` | In silico predictions of variant effect on protein function and pre-mRNA splicing from [database of non-synonymous functional predictions - dbNSFP v5.0](https://www.dbnsfp.org/). Predicted effects are provided by different sources/algorithms (separated by `&`), `T` = Tolerated, `N` = Neutral, `D` = Damaging |
 | `SPLICE_EFFECT` | Effect of splicing, from MutSpliceDB and/or MaxEntScan. Format: |
 | MES |  |
 | `DBNSFP_BAYESDEL_ADDAF` | predicted effect from BayesDel (dbNSFP) |
@@ -337,79 +337,80 @@ via `--oncokb_api_token`.
 | Variable | Description |
 |----|----|
 | 1\. `SAMPLE_ID` | Sample identifier |
-| 2\. `GENOMIC_CHANGE` | Identifier for variant at the genome (VCF) level, e.g. `1:g.152382569A>G`. Format: `<chrom>:g.<position><ref_allele><alt_allele>` |
-| 3\. `GENOME_VERSION` | Assembly version, e.g. GRCh38 |
-| 4\. `VARIANT_CLASS` | Variant type, e.g. SNV/insertion/deletion/indel |
-| 5\. `SYMBOL` | Gene symbol |
-| 6\. `ENTREZGENE` | Entrez gene identifier |
-| 7\. `ENSEMBL_GENE_ID` | Ensembl gene identifier |
-| 8\. `GENENAME` | Gene name |
-| 9\. `ALTERATION` | Combined HGVSp/HGVSc annotation |
-| 10\. `CDS_CHANGE` | Coding sequence change |
-| 11\. `HGVSc` | HGVS coding sequence name |
-| 12\. `HGVSc_RefSeq` | HGVS coding sequence name (RefSeq/MANE select) |
-| 13\. `HGVSp` | HGVS protein sequence name |
-| 14\. `HGVSP` | Protein change in one-letter amino-acid HGVS notation (HGVSp_short) |
-| 15\. `SPLICE_EFFECT` | Splice effect annotations from MutSpliceDB and MaxEntScan (see details above) |
-| 16\. `MAXENTSCAN` | MaxEntScan splice site impact summary. Format: `MaxEntScan|<stratum>|<evidence_tier>` |
-| 17\. `EFFECT_PREDICTIONS` | Variant effect predictions - from dbNSFP |
-| 18\. `EXON` | Exon number (out of total number of exons) |
-| 19\. `CONSEQUENCE` | Variant consequence - from VEP |
-| 20\. `PFAM_DOMAIN_NAME` | Pfam domain name |
-| 21\. `LOSS_OF_FUNCTION` | Loss of function flag |
-| 22\. `LOF_FILTER` | Loss of function filter |
-| 23\. `CODING_STATUS` | Coding status - flag indicating if consequence is protein-altering/affecting splice sites |
-| 24\. `EXONIC_STATUS` | Exonic status - flag indicating if consequence is silent/protein-altering/affecting splice sites |
-| 25\. `DP_TUMOR` | Depth of coverage at variant position in tumor sample |
-| 26\. `VAF_TUMOR` | Variant allele fraction at variant position in tumor sample |
-| 27\. `AD_TUMOR` | Allelic depth (number of reads supporting alt allele) in tumor sample |
-| 28\. `CALL_CONFIDENCE` | Call confidence |
-| 29\. `DP_CONTROL` | Depth of coverage at variant position in control sample |
-| 30\. `VAF_CONTROL` | Variant allele fraction at variant position in control sample |
-| 31\. `AD_CONTROL` | Allelic depth (number of reads supporting alt allele) in control sample |
-| 32\. `MUTATION_HOTSPOT` | Mutation hotspot annotation |
-| 33\. `MUTATION_HOTSPOT_CANCERTYPE` | Mutation hotspot-associated cancer types (from cancerhotspots.org) |
-| 34\. `ACTIONABILITY_TIER` | Variant clinical actionability tier - AMP/ASCO/CAP implementation |
-| 35\. `ACTIONABILITY` | Variant clinical actionability significance - AMP/ASCO/CAP implementation |
-| 36\. `ONCOGENICITY` | Oncogenicity annotation - ClinGen/CGC/VICC SOP implementation |
-| 37\. `ONCOGENICITY_CODE` | Variant-matching oncogenicity code(s) - ClinGen/CGC/VICC SOP implementation |
-| 38\. `ONCOGENICITY_SCORE` | Variant oncogenicity score - ClinGen/CGC/VICC SOP implementation |
-| 39\. `MUTATION_EFFECT_OKB` | *(OncoKB only)* OncoKB mutation effect annotation (e.g. Loss-of-function, Gain-of-function) |
-| 40\. `MUTATION_EFFECT_CITATIONS_OKB` | *(OncoKB only)* OncoKB mutation effect citations |
-| 41\. `MUTATION_EFFECT_DESCRIPTION_OKB` | *(OncoKB only)* OncoKB mutation effect description |
-| 42\. `ONCOGENICITY_OKB` | *(OncoKB only)* OncoKB oncogenicity annotation (e.g. Oncogenic, Likely Oncogenic, Likely Neutral etc.) |
-| 43\. `TUMOR_TYPE_SUMMARY_OKB` | *(OncoKB only)* OncoKB tumor type summary |
-| 44\. `VARIANT_SUMMARY_OKB` | *(OncoKB only)* OncoKB variant summary |
-| 45\. `HOTSPOT_OKB` | *(OncoKB only)* OncoKB hotspot flag - indicates if variant overlaps a known OncoKB hotspot |
-| 46\. `VUS_OKB` | *(OncoKB only)* OncoKB variant of uncertain significance flag |
-| 47\. `CANONICAL` | Flag indicating if transcript is canonical |
-| 48\. `CCDS` | CCDS identifier |
-| 49\. `UNIPROT_ACC` | UniProt accession |
-| 50\. `ENSEMBL_TRANSCRIPT_ID` | Ensembl transcript identifier |
-| 51\. `ENSEMBL_PROTEIN_ID` | Ensembl protein identifier |
-| 52\. `REFSEQ_TRANSCRIPT_ID` | RefSeq transcript identifier |
-| 53\. `REFSEQ_PROTEIN_ID` | RefSeq protein identifier |
-| 54\. `MANE_SELECT` | MANE transcript select |
-| 55\. `MANE_PLUS_CLINICAL` | MANE transcript plus clinical |
-| 56\. `ONCOGENE` | Flag indicating if gene is oncogene (CancerMine/NCG) |
-| 57\. `ONCOGENE_SUPPORT` | Oncogene annotation support (CancerMine/NCG) |
-| 58\. `TUMOR_SUPPRESSOR` | Flag indicating if gene is tumor suppressor (CancerMine/NCG) |
-| 59\. `TUMOR_SUPPRESSOR_SUPPORT` | Tumor suppressor annotation support (CancerMine/NCG) |
-| 60\. `TARGETED_INHIBITORS2` | Targeted inhibitors |
-| 61\. `REGULATORY_ANNOTATION` | Regulatory annotation |
-| 62\. `VEP_ALL_CSQ` | VEP consequence - all transcripts |
-| 63\. `gnomADe_AF` | gnomAD exomes allele frequency - globally |
-| 64\. `gnomADg_AF` | gnomAD genomes allele frequency - globally |
-| 65\. `DBSNP_RSID` | dbSNP identifier |
-| 66\. `COSMIC_ID` | COSMIC identifier |
-| 67\. `TCGA_FREQUENCY` | Frequency of variant across TCGA tumor types. Format: `tumortype | percent affected | affected cases | total cases` |
-| 68\. `TCGA_PANCANCER_COUNT` | Raw variant count across all TCGA tumor types |
-| 69\. `CLINVAR_MSID` | ClinVar measureset identifier |
-| 70\. `CLINVAR_CLASSIFICATION` | ClinVar variant classification |
-| 71\. `CLINVAR_VARIANT_ORIGIN` | ClinVar variant origin |
-| 72\. `CLINVAR_NUM_SUBMITTERS` | ClinVar number of submitters |
-| 73\. `CLINVAR_GOLD_STARS` | ClinVar review status gold stars (0-4) |
-| 74\. `CLINVAR_CONFLICTED` | ClinVar variant classification is conflicted |
+| 2\. `VARIANT_CLASS` | Variant type, e.g. SNV/insertion/deletion/indel |
+| 3\. `VAR_ID` | Variant identifier. Format: `<chrom>_<position>_<ref_allele>_<alt_allele>` |
+| 4\. `GENOMIC_CHANGE` | Identifier for variant at the genome (VCF) level, e.g. `1:g.152382569A>G`. Format: `<chrom>:g.<position><ref_allele><alt_allele>` |
+| 5\. `GENOME_VERSION` | Assembly version, e.g. GRCh38 |
+| 6\. `SYMBOL` | Gene symbol |
+| 7\. `ENTREZGENE` | Entrez gene identifier |
+| 8\. `ENSEMBL_GENE_ID` | Ensembl gene identifier |
+| 9\. `GENENAME` | Gene name |
+| 10\. `ALTERATION` | Combined HGVSp/HGVSc annotation |
+| 11\. `CDS_CHANGE` | Coding sequence change |
+| 12\. `HGVSc` | HGVS coding sequence name |
+| 13\. `HGVSc_RefSeq` | HGVS coding sequence name (RefSeq/MANE select) |
+| 14\. `HGVSp` | HGVS protein sequence name |
+| 15\. `HGVSP` | Protein change in one-letter amino-acid HGVS notation (HGVSp_short) |
+| 16\. `SPLICE_EFFECT` | Splice effect annotations from MutSpliceDB and MaxEntScan (see details above) |
+| 17\. `MAXENTSCAN` | MaxEntScan splice site impact summary. Format: `MaxEntScan|<stratum>|<evidence_tier>` |
+| 18\. `EFFECT_PREDICTIONS` | Variant effect predictions - from dbNSFP |
+| 19\. `EXON` | Exon number (out of total number of exons) |
+| 20\. `CONSEQUENCE` | Variant consequence - from VEP |
+| 21\. `PFAM_DOMAIN_NAME` | Pfam domain name |
+| 22\. `LOSS_OF_FUNCTION` | Loss of function flag |
+| 23\. `LOF_FILTER` | Loss of function filter |
+| 24\. `CODING_STATUS` | Coding status - flag indicating if consequence is protein-altering/affecting splice sites |
+| 25\. `EXONIC_STATUS` | Exonic status - flag indicating if consequence is silent/protein-altering/affecting splice sites |
+| 26\. `DP_TUMOR` | Depth of coverage at variant position in tumor sample |
+| 27\. `VAF_TUMOR` | Variant allele fraction at variant position in tumor sample |
+| 28\. `AD_TUMOR` | Allelic depth (number of reads supporting alt allele) in tumor sample |
+| 29\. `CALL_CONFIDENCE` | Call confidence |
+| 30\. `DP_CONTROL` | Depth of coverage at variant position in control sample |
+| 31\. `VAF_CONTROL` | Variant allele fraction at variant position in control sample |
+| 32\. `AD_CONTROL` | Allelic depth (number of reads supporting alt allele) in control sample |
+| 33\. `MUTATION_HOTSPOT` | Mutation hotspot annotation |
+| 34\. `MUTATION_HOTSPOT_CANCERTYPE` | Mutation hotspot-associated cancer types (from cancerhotspots.org) |
+| 35\. `ACTIONABILITY_TIER` | Variant clinical actionability tier - AMP/ASCO/CAP implementation |
+| 36\. `ACTIONABILITY` | Variant clinical actionability significance - AMP/ASCO/CAP implementation |
+| 37\. `ONCOGENICITY` | Oncogenicity annotation - ClinGen/CGC/VICC SOP implementation |
+| 38\. `ONCOGENICITY_CODE` | Variant-matching oncogenicity code(s) - ClinGen/CGC/VICC SOP implementation |
+| 39\. `ONCOGENICITY_SCORE` | Variant oncogenicity score - ClinGen/CGC/VICC SOP implementation |
+| 40\. `MUTATION_EFFECT_OKB` | *(OncoKB only)* OncoKB mutation effect annotation (e.g. Loss-of-function, Gain-of-function) |
+| 41\. `MUTATION_EFFECT_CITATIONS_OKB` | *(OncoKB only)* OncoKB mutation effect citations |
+| 42\. `MUTATION_EFFECT_DESCRIPTION_OKB` | *(OncoKB only)* OncoKB mutation effect description |
+| 43\. `ONCOGENICITY_OKB` | *(OncoKB only)* OncoKB oncogenicity annotation (e.g. Oncogenic, Likely Oncogenic, Likely Neutral etc.) |
+| 44\. `TUMOR_TYPE_SUMMARY_OKB` | *(OncoKB only)* OncoKB tumor type summary |
+| 45\. `VARIANT_SUMMARY_OKB` | *(OncoKB only)* OncoKB variant summary |
+| 46\. `HOTSPOT_OKB` | *(OncoKB only)* OncoKB hotspot flag - indicates if variant overlaps a known OncoKB hotspot |
+| 47\. `VUS_OKB` | *(OncoKB only)* OncoKB variant of uncertain significance flag |
+| 48\. `CANONICAL` | Flag indicating if transcript is canonical |
+| 49\. `CCDS` | CCDS identifier |
+| 50\. `UNIPROT_ACC` | UniProt accession |
+| 51\. `ENSEMBL_TRANSCRIPT_ID` | Ensembl transcript identifier |
+| 52\. `ENSEMBL_PROTEIN_ID` | Ensembl protein identifier |
+| 53\. `REFSEQ_TRANSCRIPT_ID` | RefSeq transcript identifier |
+| 54\. `REFSEQ_PROTEIN_ID` | RefSeq protein identifier |
+| 55\. `MANE_SELECT` | MANE transcript select |
+| 56\. `MANE_PLUS_CLINICAL` | MANE transcript plus clinical |
+| 57\. `ONCOGENE` | Flag indicating if gene is oncogene (CancerMine/NCG) |
+| 58\. `ONCOGENE_SUPPORT` | Oncogene annotation support (CancerMine/NCG) |
+| 59\. `TUMOR_SUPPRESSOR` | Flag indicating if gene is tumor suppressor (CancerMine/NCG) |
+| 60\. `TUMOR_SUPPRESSOR_SUPPORT` | Tumor suppressor annotation support (CancerMine/NCG) |
+| 61\. `TARGETED_INHIBITORS2` | Targeted inhibitors |
+| 62\. `REGULATORY_ANNOTATION` | Regulatory annotation |
+| 63\. `VEP_ALL_CSQ` | VEP consequence - all transcripts |
+| 64\. `gnomADe_AF` | gnomAD exomes allele frequency - globally |
+| 65\. `gnomADg_AF` | gnomAD genomes allele frequency - globally |
+| 66\. `DBSNP_RSID` | dbSNP identifier |
+| 67\. `COSMIC_ID` | COSMIC identifier |
+| 68\. `TCGA_FREQUENCY` | Frequency of variant across TCGA tumor types. Format: `tumortype | percent affected | affected cases | total cases` |
+| 69\. `TCGA_PANCANCER_COUNT` | Raw variant count across all TCGA tumor types |
+| 70\. `CLINVAR_MSID` | ClinVar measureset identifier |
+| 71\. `CLINVAR_CLASSIFICATION` | ClinVar variant classification |
+| 72\. `CLINVAR_VARIANT_ORIGIN` | ClinVar variant origin |
+| 73\. `CLINVAR_NUM_SUBMITTERS` | ClinVar number of submitters |
+| 74\. `CLINVAR_GOLD_STARS` | ClinVar review status gold stars (0-4) |
+| 75\. `CLINVAR_CONFLICTED` | ClinVar variant classification is conflicted |
 
 ##### Tumor-only runs
 
@@ -559,7 +560,7 @@ Detected RNA fusions are annotated with gene-level cancer relevance,
 Mitelman database evidence, and clinical actionability. The output file
 has the following naming convention:
 
-- `<sample_id>.pcgr.<genome_assembly>.rna_fusion.tsv.gz`
+- `<sample_id>.pcgr.<genome_assembly>.fusion_ann.tsv.gz`
 
 Columns suffixed with `_OKB` are only present when OncoKB annotation is
 enabled via `--oncokb_api_token`. Note that `HOTSPOT_OKB` and `VUS_OKB`
@@ -567,13 +568,13 @@ are not included for fusion output.
 
 | Variable | Description |
 |----|----|
-| 1\. `VAR_ID` | Variant identifier. Format: `<gene1>--<gene2>:<breakpoint_5P>:<breakpoint_3P>` |
+| 1\. `SAMPLE_ID` | Sample identifier |
 | 2\. `VARIANT_CLASS` | Variant type: `fusion` |
-| 3\. `ENTREZGENE` | Entrez gene identifiers for both fusion partners. Format: `<entrezgene_5P>::<entrezgene_3P>` |
-| 4\. `FUSION_GENE` | Fusion gene name. Format: `<gene1>--<gene2>` |
-| 5\. `FUSION_GENE2` | Alternative fusion gene notation used for Mitelman database variant matching |
-| 6\. `SPLIT_READS` | Number of split reads supporting the fusion |
-| 7\. `SCORE` | Fusion score reported by the caller (if provided in input) |
+| 3\. `VAR_ID` | Variant identifier. Format: `<gene1>--<gene2>:<breakpoint_5P>:<breakpoint_3P>` |
+| 4\. `ENTREZGENE` | Entrez gene identifiers for both fusion partners. Format: `<entrezgene_5P>::<entrezgene_3P>` |
+| 5\. `FUSION_GENE` | Fusion gene name. Format: `<gene1>--<gene2>` |
+| 6\. `FUSION_GENE2` | Alternative fusion gene notation used for Mitelman database variant matching |
+| 7\. `SPLIT_READS` | Number of split reads supporting the fusion |
 | 8\. `FUSION_GENE_5P` | Gene symbol of the 5’ fusion partner |
 | 9\. `FUSION_GENE_3P` | Gene symbol of the 3’ fusion partner |
 | 10\. `BREAKPOINT_5P` | Chromosomal breakpoint position of the 5’ partner |
@@ -581,24 +582,20 @@ are not included for fusion output.
 | 12\. `GENENAME_5P` | Full gene name of the 5’ partner |
 | 13\. `ONCOGENE_5P` | Flag indicating if the 5’ partner gene is an oncogene (CancerMine/NCG) |
 | 14\. `ENSEMBL_TRANSCRIPT_ID_5P` | Ensembl transcript identifier covering the 5’ breakpoint |
-| 15\. `TARGETED_INHIBITORS_5P` | Molecularly targeted inhibitors for the 5’ partner gene - tumor type-specific |
-| 16\. `TARGETED_INHIBITORS_ALL_5P` | Molecularly targeted inhibitors for the 5’ partner gene - all tumor types |
-| 17\. `GENENAME_3P` | Full gene name of the 3’ partner |
-| 18\. `ONCOGENE_3P` | Flag indicating if the 3’ partner gene is an oncogene (CancerMine/NCG) |
-| 19\. `ENSEMBL_TRANSCRIPT_ID_3P` | Ensembl transcript identifier covering the 3’ breakpoint |
-| 20\. `TARGETED_INHIBITORS_3P` | Molecularly targeted inhibitors for the 3’ partner gene - tumor type-specific |
-| 21\. `TARGETED_INHIBITORS_ALL_3P` | Molecularly targeted inhibitors for the 3’ partner gene - all tumor types |
-| 22\. `SAMPLE_ALTERATION` | Alteration description for the sample. Format: `<FUSION_GENE> fusion` |
-| 23\. `MITDB_NUM_EVIDENCE` | Number of evidence records matching the fusion in the [Mitelman Database of Chromosome Aberrations and Gene Fusions in Cancer](https://mitelmandatabase.isb-cgc.org/) |
-| 24\. `MITDB_EVIDENCE` | Evidence records for the fusion from the Mitelman database (cancer type associations) |
-| 25\. `ACTIONABILITY_TIER` | Variant clinical actionability tier - AMP/ASCO/CAP implementation |
-| 26\. `ACTIONABILITY` | Variant clinical actionability significance - AMP/ASCO/CAP implementation |
-| 27\. `MUTATION_EFFECT_OKB` | *(OncoKB only)* OncoKB mutation effect annotation (e.g. Loss-of-function, Gain-of-function) |
-| 28\. `MUTATION_EFFECT_CITATIONS_OKB` | *(OncoKB only)* OncoKB mutation effect citations |
-| 29\. `MUTATION_EFFECT_DESCRIPTION_OKB` | *(OncoKB only)* OncoKB mutation effect description |
-| 30\. `ONCOGENICITY_OKB` | *(OncoKB only)* OncoKB oncogenicity annotation (e.g. Oncogenic, Likely Oncogenic) |
-| 31\. `TUMOR_TYPE_SUMMARY_OKB` | *(OncoKB only)* OncoKB tumor type summary |
-| 32\. `VARIANT_SUMMARY_OKB` | *(OncoKB only)* OncoKB variant summary |
+| 15\. `GENENAME_3P` | Full gene name of the 3’ partner |
+| 16\. `ONCOGENE_3P` | Flag indicating if the 3’ partner gene is an oncogene (CancerMine/NCG) |
+| 17\. `ENSEMBL_TRANSCRIPT_ID_3P` | Ensembl transcript identifier covering the 3’ breakpoint |
+| 18\. `SAMPLE_ALTERATION` | Alteration description for the sample. Format: `<FUSION_GENE> fusion` |
+| 19\. `MITDB_NUM_EVIDENCE` | Number of evidence records matching the fusion in the [Mitelman Database of Chromosome Aberrations and Gene Fusions in Cancer](https://mitelmandatabase.isb-cgc.org/) |
+| 20\. `MITDB_EVIDENCE` | Evidence records for the fusion from the Mitelman database (cancer type associations) |
+| 21\. `ACTIONABILITY_TIER` | Variant clinical actionability tier - AMP/ASCO/CAP implementation |
+| 22\. `ACTIONABILITY` | Variant clinical actionability significance - AMP/ASCO/CAP implementation |
+| 23\. `MUTATION_EFFECT_OKB` | *(OncoKB only)* OncoKB mutation effect annotation (e.g. Loss-of-function, Gain-of-function) |
+| 24\. `MUTATION_EFFECT_CITATIONS_OKB` | *(OncoKB only)* OncoKB mutation effect citations |
+| 25\. `MUTATION_EFFECT_DESCRIPTION_OKB` | *(OncoKB only)* OncoKB mutation effect description |
+| 26\. `ONCOGENICITY_OKB` | *(OncoKB only)* OncoKB oncogenicity annotation (e.g. Oncogenic, Likely Oncogenic) |
+| 27\. `TUMOR_TYPE_SUMMARY_OKB` | *(OncoKB only)* OncoKB tumor type summary |
+| 28\. `VARIANT_SUMMARY_OKB` | *(OncoKB only)* OncoKB variant summary |
 
 ### Gene expression data
 
