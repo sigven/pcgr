@@ -414,7 +414,8 @@ def find_expression_outliers(sample_expression: dict,
     exp_data_sample = sample_expression.copy()
     exp_data_refcohort = pd.DataFrame()
     outlier_metrics_valid = pd.DataFrame()
-    
+    comparison_disease_cohort = None
+
     refdata_assembly_dir = yaml_data['reference_data']['path']
 
     ## As of now (April 2024) - match primary site of input sample to TCGA cohorts
@@ -456,7 +457,9 @@ def find_expression_outliers(sample_expression: dict,
                 exp_data_sample['gene'] = exp_data_sample['gene'].rename(
                     columns = {'TPM_LOG2_GENE':sample_id})
                 
-                if 'ENSEMBL_GENE_ID' in exp_data_refcohort.columns and \
+                if comparison_disease_cohort is not None and \
+                    not exp_data_refcohort.empty and \
+                    'ENSEMBL_GENE_ID' in exp_data_refcohort.columns and \
                     'ENSEMBL_GENE_ID' in exp_data_sample['gene'].columns:
         
                     ref_sample_mat = exp_data_refcohort.merge(
@@ -488,7 +491,7 @@ def find_expression_outliers(sample_expression: dict,
                             sample_percentiles, 
                             on = 'ENSEMBL_GENE_ID', how = 'left')
                     outlier_metrics['SAMPLE_ID'] = sample_id
-                    outlier_metrics['REF_COHORT'] = comparison_disease_cohort
+                    outlier_metrics['REF_COHORT'] = str(comparison_disease_cohort).upper() if comparison_disease_cohort is not None else 'NA'
                     outlier_metrics['REF_COHORT_SIZE'] = exp_data_refcohort.shape[1] - 1
                     outlier_metrics = \
                         outlier_metrics[['SAMPLE_ID', 
@@ -506,8 +509,17 @@ def find_expression_outliers(sample_expression: dict,
                                          'PERCENTILE']]
                     
                     mask_valid_ensembl = pd.notna(outlier_metrics['TPM_LOG2_GENE'])
-                    outlier_metrics_valid = outlier_metrics[mask_valid_ensembl]                                              
-    
+                    outlier_metrics_valid = outlier_metrics[mask_valid_ensembl]
+                else:
+                    logger.warning("Expression outlier analysis could not be performed due to missing reference cohort or missing gene identifiers in sample expression data")
+                    return(pd.DataFrame())
+            else:
+                logger.warning("Expression outlier analysis could not be performed due to missing required columns in sample expression data")
+                return(pd.DataFrame())
+        else:
+            logger.warning("Expression outlier analysis could not be performed due to missing gene expression data in sample expression data")
+            return(pd.DataFrame())
+
     
     return(outlier_metrics_valid)
 
