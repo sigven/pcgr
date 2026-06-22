@@ -148,6 +148,31 @@ def get_bed_filtering_command(target_bed_gz, target_gene_pattern, gwas_findings,
         filter_bed_command += f' | {ignore_pgx_targets}'
     return filter_bed_command
 
+def filter_hom_ref_variants(input_vcf, output_vcf, logger, debug):
+    """
+    Remove homozygous-reference (0/0) records from a VCF using bcftools.
+    Returns the number of records removed.
+    """
+    import subprocess
+
+    def _count_records(vcf_path):
+        result = subprocess.run(
+            f'bcftools view -H {vcf_path} 2>/dev/null | wc -l',
+            shell=True, capture_output=True, text=True)
+        return int(result.stdout.strip())
+
+    n_total = _count_records(input_vcf)
+    # GT="ref" matches only hom-ref (0/0); 2>/dev/null suppresses ##contig header warnings
+    check_subprocess(logger, f'bcftools view -e \'GT="ref"\' {input_vcf} 2>/dev/null > {output_vcf}', debug)
+    n_after = _count_records(output_vcf)
+    n_removed = n_total - n_after
+    if n_removed > 0:
+        logger.warning(
+            f"Filtered out {n_removed} of {n_total} variant(s) with a homozygous-reference genotype (0/0) "
+        )
+    return n_removed
+
+
 def simplify_vcf(input_vcf, validated_vcf, vcf_obj, custom_bed, refdata_assembly_dir, virtual_panel_id,
                  sample_id, diagnostic_grade_only, gwas_findings, secondary_findings, pgx_findings, output_dir, logger, debug):
 
@@ -157,13 +182,15 @@ def simplify_vcf(input_vcf, validated_vcf, vcf_obj, custom_bed, refdata_assembly
     2. If VCF have variants with multiple alternative alleles ("multiallelic", e.g. 'A,T'),
         these are decomposed into variants with a single alternative allele
     3. Filters against predisposition loci (virtual panel id or custom target) - includes secondary finding targets/GWAS-loci if set by user
-    4. Final VCF file is sorted and indexed (bgzip + tabix)
+    4. Homozygous-reference (0/0) variants are removed
+    5. Final VCF file is sorted and indexed (bgzip + tabix)
     """
 
     random_str = random_id_generator(10)
 
     vcf_filtered         = os.path.join(output_dir, f'{sample_id}.cpsr_validate.filtered.{random_str}.vcf')
     vcf_decomposed       = os.path.join(output_dir, f'{sample_id}.cpsr_validate.decomp.{random_str}.vcf')
+    vcf_hom_ref_filtered = os.path.join(output_dir, f'{sample_id}.cpsr_validate.hom_ref_filtered.{random_str}.vcf')
     vt_decompose_log     = os.path.join(output_dir, f'{sample_id}.cpsr_validate.vt_decompose.{random_str}.log')
     virtual_panels_tmp_bed = os.path.join(output_dir, f'{sample_id}.cpsr_virtual_panels_all.{random_str}.tmp.bed')
     virtual_panels_bed   = os.path.join(output_dir, f'{sample_id}.cpsr_virtual_panels_all.{random_str}.bed')
@@ -224,22 +251,42 @@ def simplify_vcf(input_vcf, validated_vcf, vcf_obj, custom_bed, refdata_assembly
                 f'-b {virtual_panels_bed} > {validated_vcf}')
             check_subprocess(logger, target_variants_intersect_cmd, debug)
 
+    ## Filter out homozygous-reference (0/0) records — not informative for germline classification
+    if len(vcf_obj.samples) > 0:
+        filter_hom_ref_variants(validated_vcf, vcf_hom_ref_filtered, logger, debug)
+        check_subprocess(logger, f'mv {vcf_hom_ref_filtered} {validated_vcf}', debug)
+
     check_subprocess(logger, f'bgzip -cf {validated_vcf} > {validated_vcf}.gz', debug)
     check_subprocess(logger, f'tabix -p vcf {validated_vcf}.gz', debug)
     if not debug:
-        for fn in [virtual_panels_bed, vcf_filtered, vcf_decomposed, vt_decompose_log]:
+        for fn in [virtual_panels_bed, vcf_filtered, vcf_decomposed, vt_decompose_log, vcf_hom_ref_filtered]:
             remove_file(fn)
 
     if check_file_exists(f'{validated_vcf}.gz'):
         vcf = VCF(validated_vcf + '.gz')
         i = 0
+        n_hom_ref = 0
+        has_gt = len(vcf.samples) > 0
         for rec in vcf:
-            i = i + 1
+            i += 1
+            if has_gt:
+                gt = rec.genotypes
+                if gt and len(gt) > 0:
+                    alleles = gt[0][:2]
+                    if alleles == [0, 0]:
+                        n_hom_ref += 1
         if len(vcf.seqnames) == 0 or i == 0:
             logger.info('')
             logger.info("Query VCF contains NO variants within the selected cancer predisposition geneset (or "\
                 "GWAS loci/secondary findings) - quitting workflow")
             logger.info('')
+            exit(1)
+        if has_gt and n_hom_ref == i and i > 0:
+            logger.error('')
+            logger.error(f"All {i} variant(s) in the query VCF have a homozygous-reference genotype (i.e. '0/0'). "
+                         "CPSR expects germline variants with heterozygous/homozygous genotypes ('0/1' or '1/1'). "                          
+                         "Please verify your input VCF - exiting.")
+            logger.error('')
             exit(1)
 
 def validate_cpsr_sv_input(input_sv_vcf, validated_sv_vcf, sample_id, output_dir, logger, debug):
