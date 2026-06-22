@@ -1567,6 +1567,28 @@ load_rna_fusions <- function(
           collapse = "; "),
         .groups = "drop"
       ) |>
+      ## A gene symbol may map to multiple Ensembl gene IDs (e.g. pseudogenes),
+      ## producing one row per gene ID. Keep the gene ID with the most
+      ## supporting transcripts; take scalar annotations from that same row.
+      dplyr::group_by(
+        .data$SAMPLE_ID, .data$VAR_ID, .data$VARIANT_CLASS,
+        .data$FUSION_GENE, .data$FUSION_GENE2,
+        .data$BREAKPOINT_5P, .data$BREAKPOINT_3P,
+        .data$FUSION_GENE_5P
+      ) |>
+      dplyr::summarise(
+        dplyr::across(
+          c("ENSEMBL_GENE_ID_5P",
+            "ENSEMBL_TRANSCRIPT_ID_5P",
+            "ENTREZGENE_5P",
+            "GENENAME_5P",
+            "ONCOGENE_5P",
+            "TSG_5P"),
+          ~ .x[which.max(
+            stringr::str_count(.data$ENSEMBL_TRANSCRIPT_ID_5P, ";") + 1L)]
+        ),
+        .groups = "drop"
+      ) |>
       dplyr::distinct()
   }
 
@@ -1689,6 +1711,28 @@ load_rna_fusions <- function(
         ENSEMBL_TRANSCRIPT_ID_3P = paste(
           unique(.data$ENSEMBL_TRANSCRIPT_ID_3P),
           collapse = "; "),
+        .groups = "drop"
+      ) |>
+      ## A gene symbol may map to multiple Ensembl gene IDs (e.g. pseudogenes),
+      ## producing one row per gene ID. Keep the gene ID with the most
+      ## supporting transcripts; take scalar annotations from that same row.
+      dplyr::group_by(
+        .data$SAMPLE_ID, .data$VAR_ID, .data$VARIANT_CLASS,
+        .data$FUSION_GENE, .data$FUSION_GENE2,
+        .data$BREAKPOINT_5P, .data$BREAKPOINT_3P,
+        .data$FUSION_GENE_3P
+      ) |>
+      dplyr::summarise(
+        dplyr::across(
+          c("ENSEMBL_GENE_ID_3P",
+            "ENSEMBL_TRANSCRIPT_ID_3P",
+            "ENTREZGENE_3P",
+            "GENENAME_3P",
+            "ONCOGENE_3P",
+            "TSG_3P"),
+          ~ .x[which.max(
+            stringr::str_count(.data$ENSEMBL_TRANSCRIPT_ID_3P, ";") + 1L)]
+        ),
         .groups = "drop"
       ) |>
       dplyr::distinct()
@@ -2145,28 +2189,18 @@ load_rna_fusions <- function(
         primary_site = primary_site) |>
       dplyr::mutate(
         FUSION_GENE_5P = dplyr::case_when(
-          !is.na(.data$ENTREZGENE_5P) ~ glue::glue(
-            "<a href='{OTP_GENE_URL}{ENTREZGENE_5P}'",
+          !is.na(.data$ENSEMBL_GENE_ID_5P) ~ glue::glue(
+            "<a href='{OTP_GENE_URL}{ENSEMBL_GENE_ID_5P}'",
             " target='_blank'>{FUSION_GENE_5P}</a>"
           ),
-          is.na(.data$ENTREZGENE_5P) &
-            !is.na(.data$ENSEMBL_GENE_ID_5P) ~ glue::glue(
-              "<a href='{ENSEMBL_GENE_URL}{ENSEMBL_GENE_ID_5P}'",
-              " target='_blank'>{FUSION_GENE_5P}</a>"
-            ),
           TRUE ~ as.character(FUSION_GENE_5P)
         )) |>
       dplyr::mutate(
         FUSION_GENE_3P = dplyr::case_when(
-          !is.na(.data$ENTREZGENE_3P) ~ glue::glue(
-            "<a href='{OTP_GENE_URL}{ENTREZGENE_3P}'",
+          !is.na(.data$ENSEMBL_GENE_ID_3P) ~ glue::glue(
+            "<a href='{OTP_GENE_URL}{ENSEMBL_GENE_ID_3P}'",
             " target='_blank'>{FUSION_GENE_3P}</a>"
           ),
-          is.na(.data$ENTREZGENE_3P) &
-            !is.na(.data$ENSEMBL_GENE_ID_3P) ~ glue::glue(
-              "<a href='{ENSEMBL_GENE_URL}{ENSEMBL_GENE_ID_3P}'",
-              " target='_blank'>{FUSION_GENE_3P}</a>"
-            ),
           TRUE ~ as.character(FUSION_GENE_3P)
         )) |>
       dplyr::mutate(
