@@ -295,6 +295,7 @@ where $p$ is tumor purity, $n_{\text{mut}}$ is the number of mutant allele copie
 - **VAF_LOW**: observed VAF below expectation → variant may reside on the _deleted_ allele, or be subclonal relative to the LOH event; interpret with caution
 - **VAF_UNKNOWN**: tumor purity not provided, or VAF not available for the variant; VAF consistency cannot be assessed
 
+
 :::
 
 

@@ -192,12 +192,13 @@ PCGR can optionally query the [OncoKB](https://www.oncokb.org) precision oncolog
 
 * `--oncokb_api_token <ONCOKB_API_TOKEN>`
 
+OncoKB annotation requires that you run PCGR in an open environment -  with access to the internet.
+
 To specify the tumor type for OncoKB queries, provide the relevant [OncoTree](https://oncotree.mskcc.org) code:
 
 * `--oncokb_oncotree_code <CODE>` (e.g. `COAD` for colon adenocarcinoma)
 
-If no OncoTree code is provided, PCGR will map the primary tumor site to its
-corresponding OncoTree code based on a predefined mapping. If the tumor site is set to "Any" (code 0), OncoKB queries will be performed without specifying a tumor type.
+If no OncoTree code is provided, PCGR will map the primary tumor site to its corresponding OncoTree code based on a predefined mapping. If the tumor site is set to "Any" (code 0), OncoKB queries will be performed without specifying a tumor type.
 
 By default, PCGR integrates biomarker evidence from multiple knowledge sources (CIViC, CGI, OncoKB). If you want to limit biomarker reporting to OncoKB only and skip CIViC and CGI, use:
 
