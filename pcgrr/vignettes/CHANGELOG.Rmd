@@ -48,7 +48,7 @@ pdiakumis <- user("pdiakumis")
 
 ## v2.3.0
 
-- Date: **2026-06-20**
+- Date: **2026-06-22**
 - Major data updates
   - ClinVar (2026-06)
   - dbNSFP (v5.3, October 2025)
@@ -84,7 +84,7 @@ pdiakumis <- user("pdiakumis")
   - New CLI argument `--cna_threshold_mode` controls how amplification, gain, and
     heterozygous deletion tiers are called; three modes are supported:
     - `absolute` _(default)_: thresholds are applied to the total copy number directly
-    - `relative`: thresholds are expressed as fold-change over tumor ploidy
+    - `relative`: thresholds are expressed as fold-change relative to tumor ploidy
     - `combined`: both absolute and relative thresholds must be satisfied
   - Per-tier, per-mode thresholds are individually configurable:
     - Amplification: `--cna_amp_threshold_absolute` (default: 5),

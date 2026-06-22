@@ -51,17 +51,20 @@ by the user. The following sections may be included in the report:
 6. __Mutational signatures__
   * Estimation of relative contribution of [known mutational signatures](http://cancer.sanger.ac.uk/cosmic/signatures) in tumor sample (using [MutationalPatterns](https://github.com/ToolsVanBox/MutationalPatterns) as the underlying framework)
   * Datatable with signatures found and proposed underlying etiologies
+  
+7. __Kataegis events__
+  * Kataegis events are clusters of particular SNV types. The report includes a datatable with all detected kataegis events.
 
-7. __RNA fusions__
+8. __RNA fusions__
   * Fusion partners are annotated with respect to oncogene status and overlap in the Mitelman database of chromosomal aberrations in cancer
   * Clinical actionability evidence linked to fusion events is shown where available (AMP/ASCO/CAP guidelines)
 
-8. __RNA expression analysis__
+9. __RNA expression analysis__
   * Datatable with expression outliers - as compared to distribution in reference cohorts
   * Datatable with correlation between gene expression in query sample and samples in other reference cohorts (TCGA, Treehouse Childhood Cancer Initiative, DepMap)
   * Immune contexture profiling
 
-9. __Documentation__
+10. __Documentation__
   * Annotation resources - databases with version and licensing information
 	* Report contents - brief description of the main sections in the report
   * References - supporting scientific literature (key report elements)
