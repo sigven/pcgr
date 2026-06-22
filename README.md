@@ -21,9 +21,16 @@ PCGR supports both of the most recent human genome assemblies (GRCh37/GRCh38), a
 
 Example screenshots from the [quarto](https://quarto.org)-based cancer genome report by PCGR:
 
-![PCGR screenshot 1](pcgrr/pkgdown/assets/img/sc2.png)
-![PCGR screenshot 2](pcgrr/pkgdown/assets/img/sc1.png)
-![PCGR screenshot 3](pcgrr/pkgdown/assets/img/sc3.png)
+<table>
+  <tr>
+    <td style="padding:16px"><a href="https://github.com/sigven/pcgr/raw/main/pcgrr/pkgdown/assets/img/pcgr_variant_stats.png"><img src="pcgrr/pkgdown/assets/img/pcgr_variant_stats.png" width="380" style="border:1px solid #000;"/></a></td>
+    <td style="padding:16px"><a href="https://github.com/sigven/pcgr/raw/main/pcgrr/pkgdown/assets/img/pcgr_actionability.png"><img src="pcgrr/pkgdown/assets/img/pcgr_actionability.png" width="380" style="border:1px solid #000;"/></a></td>
+  </tr>
+  <tr>
+    <td style="padding:16px"><a href="https://github.com/sigven/pcgr/raw/main/pcgrr/pkgdown/assets/img/pcgr_oncogenicity.png"><img src="pcgrr/pkgdown/assets/img/pcgr_oncogenicity.png" width="380" style="border:1px solid #000;"/></a></td>
+    <td style="padding:16px"><a href="https://github.com/sigven/pcgr/raw/main/pcgrr/pkgdown/assets/img/pcgr_cna.png"><img src="pcgrr/pkgdown/assets/img/pcgr_cna.png" width="380" style="border:1px solid #000;"/></a></td>
+  </tr>
+</table>
 
 PCGR originates from the [Norwegian Cancer Genomics Consortium (NCGC)](https://cancergenomics.no), at the [Institute for Cancer Research, Oslo University Hospital, Norway](https://radium.no).
 
@@ -95,6 +102,7 @@ PCGR originates from the [Norwegian Cancer Genomics Consortium (NCGC)](https://c
 ### Example reports
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20795653.svg)](https://doi.org/10.5281/zenodo.20795653)
+
 ### Why use PCGR?
 
 The great complexity of acquired mutations in individual tumor genomes poses a severe challenge for clinical interpretation. PCGR aims to be a comprehensive reporting platform that can
