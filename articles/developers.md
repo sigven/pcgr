@@ -1,0 +1,34 @@
+# Developers
+
+## Development notes
+
+### R package dev
+
+| Command | Comment |
+|----|----|
+| `devtools::check()` | build and check the pkg |
+| `devtools::load_all()` | load the pkg |
+| `R CMD INSTALL --no-multiarch --with-keep.source pcgr.git/pcgrr` | install the pkg into the first library of [`.libPaths()`](https://rdrr.io/r/base/libPaths.html) |
+
+### Python package dev
+
+| Command | Comment |
+|----|----|
+| `pip install -e .` | install Python pkg in [editable mode](https://stackoverflow.com/a/35064498/2169986) (think of it like loading the dev version) |
+
+### conda
+
+| Command | Comment |
+|----|----|
+| `mamba install foo -c bar` | install pkg `foo` from channel `bar` |
+| `mamba create --file env.yml --prefix ./pcgr` | install conda pkgs listed in `env.yml` into the `./pcgr` directory |
+| `conda info -e` | list conda environments installed on this machine |
+| `conda-lock --mamba -f env.yml -p osx-64 -p linux-64` | build conda lock files from given `env.yml` for both osx and linux |
+| `conda mambabuild recipe_folder/ -c conda-forge -c bioconda` | build conda pkg from given recipe (folder with `meta.yaml`, `build.sh`) |
+
+### pkgdown
+
+| Command | Comment |
+|----|----|
+| [`pkgdown::build_site()`](https://pkgdown.r-lib.org/reference/build_site.html) | builds entire site |
+| [`pkgdown::build_articles()`](https://pkgdown.r-lib.org/reference/build_articles.html) | builds vignettes only |
