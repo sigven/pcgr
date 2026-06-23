@@ -78,14 +78,19 @@ report:
   as the underlying framework)
 - Datatable with signatures found and proposed underlying etiologies
 
-7.  **RNA fusions**
+7.  **Kataegis events**
+
+- Kataegis events are clusters of particular SNV types. The report
+  includes a datatable with all detected kataegis events.
+
+8.  **RNA fusions**
 
 - Fusion partners are annotated with respect to oncogene status and
   overlap in the Mitelman database of chromosomal aberrations in cancer
 - Clinical actionability evidence linked to fusion events is shown where
   available (AMP/ASCO/CAP guidelines)
 
-8.  **RNA expression analysis**
+9.  **RNA expression analysis**
 
 - Datatable with expression outliers - as compared to distribution in
   reference cohorts
@@ -94,7 +99,7 @@ report:
   Initiative, DepMap)
 - Immune contexture profiling
 
-9.  **Documentation**
+10. **Documentation**
 
 - Annotation resources - databases with version and licensing
   information
@@ -104,7 +109,7 @@ report:
 
 #### Example reports
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17140659.svg)](https://doi.org/10.5281/zenodo.17140659)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20795653.svg)](https://doi.org/10.5281/zenodo.20795653)
 
 ### SNVs/InDels
 
@@ -604,20 +609,76 @@ basic gene annotations for the affected transcripts, and perform
 similarity analysis and outlier detection if configured by the user. The
 naming convention of the compressed TSV files are as follows:
 
-- `<sample_id>.pcgr.<genome_assembly>.expression.tsv.gz`
-  - **NOTE**: This file is organized according to the *affected
-    transcripts* (i.e. one line/record per affected transcript).
-    Contains basic annotations of the affected transcripts.
-- `<sample_id>.pcgr.<genome_assembly>.expression_similarity.tsv.gz`
-  - **NOTE**: This file is organized according to the *samples* of other
-    gene expression cohorts (i.e. similarity level, one line/record per
-    sample).
-- `<sample_id>.pcgr.<genome_assembly>.expression_outliers.tsv.gz`
-  - **NOTE**: This file is organized according to how the expression
-    levels of *genes/transcripts* compare to the distribution of
-    expression levels found in reference cohorts. This files contain
-    various statistics in this respect (e.g. z-scores, IQR, Q1, Q2, Q3,
-    percentile etc), enabling the detection of expression outliers.
+#### Expression data - basic
+
+- Filename: `<sample_id>.pcgr.<genome_assembly>.expression.tsv.gz`
+
+One row per affected transcript. Contains TPM expression values with
+basic gene/transcript annotations.
+
+| Variable | Description |
+|----|----|
+| 1\. `SAMPLE_ID` | Sample identifier |
+| 2\. `ID` | Input transcript/gene identifier as provided by the user |
+| 3\. `ID_TYPE` | Type of identifier (e.g. `ensembl_transcript_id`) |
+| 4\. `AMBIGUOUS_ID` | Flag indicating whether the identifier maps to multiple genes |
+| 5\. `TPM` | Expression level in transcripts per million (TPM) |
+| 6\. `ENSEMBL_TRANSCRIPT_ID` | Ensembl transcript identifier |
+| 7\. `ENSEMBL_GENE_ID` | Ensembl gene identifier |
+| 8\. `SYMBOL` | Gene symbol |
+| 9\. `ENTREZGENE` | Entrez gene identifier |
+| 10\. `GENENAME` | Full gene name |
+| 11\. `BIOTYPE` | Transcript biotype (e.g. `protein_coding`, `lncRNA`) |
+
+#### Expression outliers
+
+- Filename:
+  `<sample_id>.pcgr.<genome_assembly>.expression_outliers.tsv.gz`
+
+One row per gene. Contains outlier statistics comparing the sample’s
+gene-level expression against a tumor-type-matched reference cohort.
+
+| Variable | Description |
+|----|----|
+| 1\. `SAMPLE_ID` | Sample identifier |
+| 2\. `REF_COHORT` | Reference cohort used for comparison (e.g. `tcga_skcm`) |
+| 3\. `REF_COHORT_SIZE` | Number of samples in the reference cohort |
+| 4\. `ENSEMBL_GENE_ID` | Ensembl gene identifier |
+| 5\. `TPM_LOG2_GENE` | Log2-transformed gene-level TPM for the query sample |
+| 6\. `MEAN` | Mean log2 TPM across the reference cohort |
+| 7\. `STD` | Standard deviation of log2 TPM across the reference cohort |
+| 8\. `Z_SCORE` | Z-score of the query sample relative to the reference cohort |
+| 9\. `Q1` | First quartile (25th percentile) of log2 TPM in the reference cohort |
+| 10\. `Q2` | Median (50th percentile) of log2 TPM in the reference cohort |
+| 11\. `Q3` | Third quartile (75th percentile) of log2 TPM in the reference cohort |
+| 12\. `IQR` | Interquartile range (Q3 − Q1) in the reference cohort |
+| 13\. `PERCENTILE` | Percentile rank of the query sample within the reference cohort |
+
+#### Sample similarity analysis
+
+- Filename:
+  `<sample_id>.pcgr.<genome_assembly>.expression_similarity.tsv.gz`
+
+One row per external reference sample. Contains transcriptome-wide
+(protein-coding only) correlation scores between the query sample and
+samples from reference expression cohorts.
+
+| Variable | Description |
+|----|----|
+| 1\. `SAMPLE_ID` | Sample identifier |
+| 2\. `EXT_SAMPLE_ID` | Identifier of the external reference sample |
+| 3\. `EXT_DB` | Source database of the external reference sample (e.g. `tcga`) |
+| 4\. `CORR` | Pearson correlation coefficient between the query sample and the external reference sample |
+| 5\. `PROTEIN_CODING_ONLY` | Flag indicating whether the correlation was computed using protein-coding genes only |
+| 6\. `EXT_SAMPLE_ID2` | Secondary identifier for the external reference sample |
+| 7\. `EXT_SAMPLE_NAME` | Display name of the external reference sample |
+| 8\. `EXT_SAMPLE_TYPE` | Sample type of the external reference sample (e.g. tumor subtype) |
+| 9\. `EXT_AGE_AT_DX` | Age at diagnosis of the external reference sample donor |
+| 10\. `EXT_AGE_CATEGORY` | Age category of the external reference sample donor |
+| 11\. `EXT_GENDER` | Gender of the external reference sample donor |
+| 12\. `EXT_LINK` | URL link to the external reference sample record |
+| 13\. `EXT_PRIMARY_DIAGNOSIS` | Primary diagnosis of the external reference sample |
+| 14\. `EXT_PRIMARY_SITE` | Primary tumor site of the external reference sample |
 
 ### Excel workbook (XLSX)
 

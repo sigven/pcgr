@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9027</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9028</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -98,13 +98,12 @@ values - TSV)</li>
 <li>A file with transcript/gene expression levels (tab-separated values
 - TSV)</li>
 </ul>
-<p>The input VCF is a required input file, while the copy number, RNA
-fusion, and gene expression files are optional. The following arguments
-to the <code>pcgr</code> command are used for input files:</p>
+<p>At least one of these input files is required. PCGR can be run with
+any combination of the above, and will only produce output sections
+relevant to the data provided. The following arguments to the
+<code>pcgr</code> command are used for input files:</p>
 <ul>
-<li>
-<code>--input_vcf</code> (required argument to
-<code>pcgr</code>)</li>
+<li><code>--input_vcf</code></li>
 <li><code>--input_cna</code></li>
 <li><code>--input_rna_fusion</code></li>
 <li><code>--input_rna_expression</code></li>

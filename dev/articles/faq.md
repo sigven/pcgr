@@ -142,7 +142,31 @@ medRxiv
 2026](https://www.medrxiv.org/content/10.64898/2026.05.16.26353390v1.full-text))
 and hope to offer ESCAT support in forthcoming releases.*
 
-**11. In the Excel workbook, the biomarker sheets contain a
+**11. I notice that PCGR’s internal oncogenicity classification
+sometimes assigns a variant “Likely Oncogenic” while OncoKB labels the
+same variant “Oncogenic”. Why does this discrepancy occur, given that
+PCGR uses OncoKB data as one of its inputs?**
+
+*Answer: PCGR’s internal oncogenicity classification implements the
+joint VICC/CGC/ClinGen guidelines, which combine evidence from multiple
+sources, and weigh each source according to a defined rule-based scoring
+framework. Crucially, when available, OncoKB data feeds into that
+framework among several other sources (e.g. hotspot status, functional
+impact, population frequency), and the resulting score may not reach the
+threshold required for a definitive “Oncogenic” call even when OncoKB
+itself has curated the variant as such. OncoKB’s own classifications, on
+the other hand, are based on manual expert curation that can integrate
+functional assay results, structural biology evidence, and broader
+literature context in ways that the rule-based VICC/CGC/ClinGen
+algorithm cannot fully capture algorithmically. PCGR’s classification
+thus tends to be more conservative: a variant that a curator has
+confidently labelled “Oncogenic” in OncoKB may accumulate evidence to
+reach only “Likely Oncogenic” under the VICC/CGC/ClinGen scoring scheme.
+Both annotations are reported in PCGR (columns `ONCOGENICITY` for the
+internal call and `ONCOGENICITY_OKB` when OncoKB is enabled), and users
+are encouraged to treat them as complementary.*
+
+**12. In the Excel workbook, the biomarker sheets contain a
 `BM_ACTIONABILITY_SUPPORT` column with values such as `tier-defining` or
 `additional`. Does this mean that prognostic, diagnostic, and resistance
 markers also influence variant tiering?**

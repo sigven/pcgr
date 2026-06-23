@@ -2,7 +2,7 @@
 
 ## v2.3.0
 
-- Date: **2026-06-20**
+- Date: **2026-06-22**
 - Major data updates
   - ClinVar (2026-06)
   - dbNSFP (v5.3, October 2025)
@@ -38,14 +38,17 @@
     - `--oncokb_exclusive` — restrict biomarker reporting to OncoKB
       only, skipping CIViC and CGI sources; intended for workflows where
       a single curated source is preferred
+    - `--oncokb_maf_query_all` - query OncoKB with all variant types in
+      MAF (no filtering of non-coding variants (IGR, Intron, UTR), which
+      is the default)
 - **Copy number classification — flexible thresholding modes**
   - New CLI argument `--cna_threshold_mode` controls how amplification,
     gain, and heterozygous deletion tiers are called; three modes are
     supported:
     - `absolute` *(default)*: thresholds are applied to the total copy
       number directly
-    - `relative`: thresholds are expressed as fold-change over tumor
-      ploidy
+    - `relative`: thresholds are expressed as fold-change relative to
+      tumor ploidy
     - `combined`: both absolute and relative thresholds must be
       satisfied
   - Per-tier, per-mode thresholds are individually configurable:

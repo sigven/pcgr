@@ -14,11 +14,12 @@ The PCGR workflow accepts the following main input files:
 - A file with transcript/gene expression levels (tab-separated values -
   TSV)
 
-The input VCF is a required input file, while the copy number, RNA
-fusion, and gene expression files are optional. The following arguments
-to the `pcgr` command are used for input files:
+At least one of these input files is required. PCGR can be run with any
+combination of the above, and will only produce output sections relevant
+to the data provided. The following arguments to the `pcgr` command are
+used for input files:
 
-- `--input_vcf` (required argument to `pcgr`)
+- `--input_vcf`
 - `--input_cna`
 - `--input_rna_fusion`
 - `--input_rna_expression`

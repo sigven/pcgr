@@ -261,6 +261,9 @@ evidence. To enable this, provide a valid OncoKB API token:
 
 - `--oncokb_api_token <ONCOKB_API_TOKEN>`
 
+OncoKB annotation requires that you run PCGR in an open environment -
+with access to the internet.
+
 To specify the tumor type for OncoKB queries, provide the relevant
 [OncoTree](https://oncotree.mskcc.org) code:
 

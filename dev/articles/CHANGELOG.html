@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9027</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9028</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -88,7 +88,7 @@
 <h2 id="v2-3-0">v2.3.0<a class="anchor" aria-label="anchor" href="#v2-3-0"></a>
 </h2>
 <ul>
-<li>Date: <strong>2026-06-20</strong>
+<li>Date: <strong>2026-06-22</strong>
 </li>
 <li>Major data updates
 <ul>
@@ -135,6 +135,10 @@ more specific than the site-level mapping</li>
 <code>--oncokb_exclusive</code> — restrict biomarker reporting to
 OncoKB only, skipping CIViC and CGI sources; intended for workflows
 where a single curated source is preferred</li>
+<li>
+<code>--oncokb_maf_query_all</code> - query OncoKB with all variant
+types in MAF (no filtering of non-coding variants (IGR, Intron, UTR),
+which is the default)</li>
 </ul>
 </li>
 </ul>
@@ -151,8 +155,8 @@ modes are supported:
 <code>absolute</code> <em>(default)</em>: thresholds are applied to
 the total copy number directly</li>
 <li>
-<code>relative</code>: thresholds are expressed as fold-change over
-tumor ploidy</li>
+<code>relative</code>: thresholds are expressed as fold-change
+relative to tumor ploidy</li>
 <li>
 <code>combined</code>: both absolute and relative thresholds must be
 satisfied</li>

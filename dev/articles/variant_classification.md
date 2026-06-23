@@ -228,7 +228,7 @@ for the Classification of Pathogenicity of Somatic Variants in Cancer
 (Oncogenicity): Joint Recommendations of Clinical Genome Resource
 (ClinGen), Cancer Genomics Consortium (CGC), and Variant Interpretation
 for Cancer Consortium (VICC).” *Genet. Med.*, January.
-<http://dx.doi.org/10.1016/j.gim.2022.01.001>.
+<https://dx.doi.org/10.1016/j.gim.2022.01.001>.
 
 Li, Marilyn M, Michael Datto, Eric J Duncavage, et al. 2017. “Standards
 and Guidelines for the Interpretation and Reporting of Sequence Variants

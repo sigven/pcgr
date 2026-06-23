@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9027</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.2.5.9028</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -200,6 +200,13 @@ as the underlying framework)</li>
 etiologies</li>
 </ul>
 <ol start="7" style="list-style-type: decimal">
+<li><strong>Kataegis events</strong></li>
+</ol>
+<ul>
+<li>Kataegis events are clusters of particular SNV types. The report
+includes a datatable with all detected kataegis events.</li>
+</ul>
+<ol start="8" style="list-style-type: decimal">
 <li><strong>RNA fusions</strong></li>
 </ol>
 <ul>
@@ -209,7 +216,7 @@ cancer</li>
 <li>Clinical actionability evidence linked to fusion events is shown
 where available (AMP/ASCO/CAP guidelines)</li>
 </ul>
-<ol start="8" style="list-style-type: decimal">
+<ol start="9" style="list-style-type: decimal">
 <li><strong>RNA expression analysis</strong></li>
 </ol>
 <ul>
@@ -220,7 +227,7 @@ and samples in other reference cohorts (TCGA, Treehouse Childhood Cancer
 Initiative, DepMap)</li>
 <li>Immune contexture profiling</li>
 </ul>
-<ol start="9" style="list-style-type: decimal">
+<ol start="10" style="list-style-type: decimal">
 <li><strong>Documentation</strong></li>
 </ol>
 <ul>
@@ -237,7 +244,7 @@ elements)</li>
 <div class="section level4">
 <h4 id="example-reports">Example reports<a class="anchor" aria-label="anchor" href="#example-reports"></a>
 </h4>
-<p><a href="https://doi.org/10.5281/zenodo.17140659" class="external-link"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.17140659.svg" alt="DOI"></a></p>
+<p><a href="https://doi.org/10.5281/zenodo.20795653" class="external-link"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.20795653.svg" alt="DOI"></a></p>
 </div>
 </div>
 <div class="section level3">
@@ -2388,38 +2395,274 @@ implementation</td>
 attach basic gene annotations for the affected transcripts, and perform
 similarity analysis and outlier detection if configured by the user. The
 naming convention of the compressed TSV files are as follows:</p>
+<div class="section level4">
+<h4 id="expression-data---basic">Expression data - basic<a class="anchor" aria-label="anchor" href="#expression-data---basic"></a>
+</h4>
 <ul>
-<li>
+<li>Filename:
 <code>&lt;sample_id&gt;.pcgr.&lt;genome_assembly&gt;.expression.tsv.gz</code>
-<ul>
-<li>
-<strong>NOTE</strong>: This file is organized according to the
-<em>affected transcripts</em> (i.e. one line/record per affected
-transcript). Contains basic annotations of the affected
-transcripts.</li>
-</ul>
 </li>
-<li>
-<code>&lt;sample_id&gt;.pcgr.&lt;genome_assembly&gt;.expression_similarity.tsv.gz</code>
-<ul>
-<li>
-<strong>NOTE</strong>: This file is organized according to the
-<em>samples</em> of other gene expression cohorts (i.e. similarity
-level, one line/record per sample).</li>
 </ul>
-</li>
-<li>
+<p>One row per affected transcript. Contains TPM expression values with
+basic gene/transcript annotations.</p>
+<table class="table">
+<colgroup>
+<col width="43%">
+<col width="56%">
+</colgroup>
+<thead><tr class="header">
+<th>Variable</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>1. <code>SAMPLE_ID</code>
+</td>
+<td>Sample identifier</td>
+</tr>
+<tr class="even">
+<td>2. <code>ID</code>
+</td>
+<td>Input transcript/gene identifier as provided by the user</td>
+</tr>
+<tr class="odd">
+<td>3. <code>ID_TYPE</code>
+</td>
+<td>Type of identifier (e.g. <code>ensembl_transcript_id</code>)</td>
+</tr>
+<tr class="even">
+<td>4. <code>AMBIGUOUS_ID</code>
+</td>
+<td>Flag indicating whether the identifier maps to multiple genes</td>
+</tr>
+<tr class="odd">
+<td>5. <code>TPM</code>
+</td>
+<td>Expression level in transcripts per million (TPM)</td>
+</tr>
+<tr class="even">
+<td>6. <code>ENSEMBL_TRANSCRIPT_ID</code>
+</td>
+<td>Ensembl transcript identifier</td>
+</tr>
+<tr class="odd">
+<td>7. <code>ENSEMBL_GENE_ID</code>
+</td>
+<td>Ensembl gene identifier</td>
+</tr>
+<tr class="even">
+<td>8. <code>SYMBOL</code>
+</td>
+<td>Gene symbol</td>
+</tr>
+<tr class="odd">
+<td>9. <code>ENTREZGENE</code>
+</td>
+<td>Entrez gene identifier</td>
+</tr>
+<tr class="even">
+<td>10. <code>GENENAME</code>
+</td>
+<td>Full gene name</td>
+</tr>
+<tr class="odd">
+<td>11. <code>BIOTYPE</code>
+</td>
+<td>Transcript biotype (e.g. <code>protein_coding</code>,
+<code>lncRNA</code>)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level4">
+<h4 id="expression-outliers">Expression outliers<a class="anchor" aria-label="anchor" href="#expression-outliers"></a>
+</h4>
+<ul>
+<li>Filename:
 <code>&lt;sample_id&gt;.pcgr.&lt;genome_assembly&gt;.expression_outliers.tsv.gz</code>
-<ul>
-<li>
-<strong>NOTE</strong>: This file is organized according to how the
-expression levels of <em>genes/transcripts</em> compare to the
-distribution of expression levels found in reference cohorts. This files
-contain various statistics in this respect (e.g. z-scores, IQR, Q1, Q2,
-Q3, percentile etc), enabling the detection of expression outliers.</li>
-</ul>
 </li>
 </ul>
+<p>One row per gene. Contains outlier statistics comparing the sample’s
+gene-level expression against a tumor-type-matched reference cohort.</p>
+<table class="table">
+<colgroup>
+<col width="43%">
+<col width="56%">
+</colgroup>
+<thead><tr class="header">
+<th>Variable</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>1. <code>SAMPLE_ID</code>
+</td>
+<td>Sample identifier</td>
+</tr>
+<tr class="even">
+<td>2. <code>REF_COHORT</code>
+</td>
+<td>Reference cohort used for comparison
+(e.g. <code>tcga_skcm</code>)</td>
+</tr>
+<tr class="odd">
+<td>3. <code>REF_COHORT_SIZE</code>
+</td>
+<td>Number of samples in the reference cohort</td>
+</tr>
+<tr class="even">
+<td>4. <code>ENSEMBL_GENE_ID</code>
+</td>
+<td>Ensembl gene identifier</td>
+</tr>
+<tr class="odd">
+<td>5. <code>TPM_LOG2_GENE</code>
+</td>
+<td>Log2-transformed gene-level TPM for the query sample</td>
+</tr>
+<tr class="even">
+<td>6. <code>MEAN</code>
+</td>
+<td>Mean log2 TPM across the reference cohort</td>
+</tr>
+<tr class="odd">
+<td>7. <code>STD</code>
+</td>
+<td>Standard deviation of log2 TPM across the reference cohort</td>
+</tr>
+<tr class="even">
+<td>8. <code>Z_SCORE</code>
+</td>
+<td>Z-score of the query sample relative to the reference cohort</td>
+</tr>
+<tr class="odd">
+<td>9. <code>Q1</code>
+</td>
+<td>First quartile (25th percentile) of log2 TPM in the reference
+cohort</td>
+</tr>
+<tr class="even">
+<td>10. <code>Q2</code>
+</td>
+<td>Median (50th percentile) of log2 TPM in the reference cohort</td>
+</tr>
+<tr class="odd">
+<td>11. <code>Q3</code>
+</td>
+<td>Third quartile (75th percentile) of log2 TPM in the reference
+cohort</td>
+</tr>
+<tr class="even">
+<td>12. <code>IQR</code>
+</td>
+<td>Interquartile range (Q3 − Q1) in the reference cohort</td>
+</tr>
+<tr class="odd">
+<td>13. <code>PERCENTILE</code>
+</td>
+<td>Percentile rank of the query sample within the reference cohort</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level4">
+<h4 id="sample-similarity-analysis">Sample similarity analysis<a class="anchor" aria-label="anchor" href="#sample-similarity-analysis"></a>
+</h4>
+<ul>
+<li>Filename:
+<code>&lt;sample_id&gt;.pcgr.&lt;genome_assembly&gt;.expression_similarity.tsv.gz</code>
+</li>
+</ul>
+<p>One row per external reference sample. Contains transcriptome-wide
+(protein-coding only) correlation scores between the query sample and
+samples from reference expression cohorts.</p>
+<table class="table">
+<colgroup>
+<col width="43%">
+<col width="56%">
+</colgroup>
+<thead><tr class="header">
+<th>Variable</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>1. <code>SAMPLE_ID</code>
+</td>
+<td>Sample identifier</td>
+</tr>
+<tr class="even">
+<td>2. <code>EXT_SAMPLE_ID</code>
+</td>
+<td>Identifier of the external reference sample</td>
+</tr>
+<tr class="odd">
+<td>3. <code>EXT_DB</code>
+</td>
+<td>Source database of the external reference sample
+(e.g. <code>tcga</code>)</td>
+</tr>
+<tr class="even">
+<td>4. <code>CORR</code>
+</td>
+<td>Pearson correlation coefficient between the query sample and the
+external reference sample</td>
+</tr>
+<tr class="odd">
+<td>5. <code>PROTEIN_CODING_ONLY</code>
+</td>
+<td>Flag indicating whether the correlation was computed using
+protein-coding genes only</td>
+</tr>
+<tr class="even">
+<td>6. <code>EXT_SAMPLE_ID2</code>
+</td>
+<td>Secondary identifier for the external reference sample</td>
+</tr>
+<tr class="odd">
+<td>7. <code>EXT_SAMPLE_NAME</code>
+</td>
+<td>Display name of the external reference sample</td>
+</tr>
+<tr class="even">
+<td>8. <code>EXT_SAMPLE_TYPE</code>
+</td>
+<td>Sample type of the external reference sample (e.g. tumor
+subtype)</td>
+</tr>
+<tr class="odd">
+<td>9. <code>EXT_AGE_AT_DX</code>
+</td>
+<td>Age at diagnosis of the external reference sample donor</td>
+</tr>
+<tr class="even">
+<td>10. <code>EXT_AGE_CATEGORY</code>
+</td>
+<td>Age category of the external reference sample donor</td>
+</tr>
+<tr class="odd">
+<td>11. <code>EXT_GENDER</code>
+</td>
+<td>Gender of the external reference sample donor</td>
+</tr>
+<tr class="even">
+<td>12. <code>EXT_LINK</code>
+</td>
+<td>URL link to the external reference sample record</td>
+</tr>
+<tr class="odd">
+<td>13. <code>EXT_PRIMARY_DIAGNOSIS</code>
+</td>
+<td>Primary diagnosis of the external reference sample</td>
+</tr>
+<tr class="even">
+<td>14. <code>EXT_PRIMARY_SITE</code>
+</td>
+<td>Primary tumor site of the external reference sample</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 <div class="section level3">
 <h3 id="excel-workbook-xlsx">Excel workbook (XLSX)<a class="anchor" aria-label="anchor" href="#excel-workbook-xlsx"></a>
