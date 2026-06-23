@@ -27,7 +27,7 @@ jobs:
         shell: bash -l {0}
     steps:
       - name: 🚚 Code checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Set branch env vars
         run: |
           if [[ "${{ github.ref }}" == "refs/heads/dev" ]]; then
@@ -38,7 +38,7 @@ jobs:
             echo "DEV_UPLOAD_LABEL=" >> $GITHUB_ENV
           fi
       - name: 👾 Miniforge setup
-        uses: conda-incubator/setup-miniconda@v3
+        uses: conda-incubator/setup-miniconda@v4
         with:
           auto-update-conda: true
           environment-file: ${{ env.conda_env_yaml }}/condabuild.yaml
@@ -74,7 +74,7 @@ jobs:
       contents: write
     steps:
       - name: 🚚 Code checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Set branch env vars
         run: |
           if [[ "${{ github.ref }}" == "refs/heads/dev" ]]; then
@@ -83,7 +83,7 @@ jobs:
             echo "DEV_CONDA_CHANNEL=" >> $GITHUB_ENV
           fi
       - name: 👾 Miniforge setup
-        uses: conda-incubator/setup-miniconda@v3
+        uses: conda-incubator/setup-miniconda@v4
         with:
           environment-file: ${{ env.conda_env_yaml }}/condabuild.yaml
           activate-environment: condabuild_env
@@ -135,7 +135,7 @@ jobs:
         uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
       # work with tag from above
       - name: 🚚 Code checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: v${{ env.VERSION }}
       - name: 🏰 QEMU setup
@@ -186,7 +186,7 @@ jobs:
       contents: write
     steps:
       - name: 🚚 Checkout tag
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: v${{ env.VERSION }}
       - name: Set pkgdown channels
@@ -197,7 +197,7 @@ jobs:
             echo "PKGDOWN_CHANNELS=pcgr,conda-forge,bioconda" >> $GITHUB_ENV
           fi
       - name: 👾 Miniforge setup (pkgdown)
-        uses: conda-incubator/setup-miniconda@v3
+        uses: conda-incubator/setup-miniconda@v4
         with:
           auto-update-conda: true
           environment-file: ${{ env.conda_env_yaml }}/pkgdown.yaml
