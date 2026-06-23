@@ -7,7 +7,7 @@
 #'
 #' @export
 
-plot_value_boxes <- function(pcg_report) {
+plot_value_boxes <- function(pcg_report, color_palette = pcgrr::color_palette) {
   df <- data.frame(
     x = rep(seq(0, 16, 8), 3),
     y = c(rep(1, 3), rep(4.5, 3), rep(8, 3)),
@@ -31,10 +31,10 @@ plot_value_boxes <- function(pcg_report) {
     pcg_report[["metadata"]][["config"]][["assay_props"]]
 
   ## color - tumor-control
-  color <- rep(pcgrr::color_palette[["tier"]][["values"]][1], 9)
-  if (assay_props[["vcf_tumor_only"]] == T) {
+  color <- rep(color_palette[["tier"]][["values"]][1], 9)
+  if (assay_props[["vcf_tumor_only"]] == TRUE) {
     ## color - tumor-only
-    color <- rep(pcgrr::color_palette[["report_color"]][["values"]][2], 9)
+    color <- rep(color_palette[["report_color"]][["values"]][2], 9)
   }
 
   p <- ggplot2::ggplot(df, ggplot2::aes(.data$x, .data$y, height = .data$h, width = .data$w,
@@ -44,7 +44,7 @@ plot_value_boxes <- function(pcg_report) {
     ggplot2::coord_fixed() +
     ggplot2::scale_fill_manual(values = rep(color, 9)) +
     ggplot2::theme_void() +
-    ggplot2::guides(fill = F)
+    ggplot2::guides(fill = FALSE)
 
   return(p)
 }

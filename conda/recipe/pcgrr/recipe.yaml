@@ -1,0 +1,116 @@
+context:
+  name: r-pcgrr
+  version: 2.2.5.9028 # bump
+
+package:
+  name: ${{ name|lower }}
+  version: ${{ version }}
+
+source:
+  path: ../../../pcgrr
+
+build:
+  number: 0
+  noarch: generic
+  script: R CMD INSTALL --build .
+
+requirements:
+  host:
+    - r-base >=4.3,<4.6
+    - r-assertable
+    - r-assertthat
+    - bioconductor-biostrings
+    - r-bslib
+    - r-caret
+    - r-crosstalk
+    - r-data.table
+    - r-dplyr
+    - r-dt
+    - r-formattable
+    - bioconductor-genomeinfodb
+    - r-ggplot2
+    - r-glue
+    - r-htmltools
+    - r-httr
+    - r-jsonlite
+    - r-log4r
+    - bioconductor-mutationalpatterns
+    - r-openxlsx2
+    - r-plotly
+    - r-plyr
+    - r-purrr
+    - bioconductor-quantiseqr
+    - r-quarto
+    - quarto
+    - r-randomforest
+    - r-reactable
+    - r-readr
+    - r-reshape2
+    - r-rlang
+    - r-rrapply
+    - bioconductor-s4vectors
+    - r-scales
+    - r-shiny
+    - r-stringr
+    - r-stringi
+    - r-tidyr
+    - conda-forge::r-yaml
+
+  run:
+    - r-base >=4.3,<4.6
+    - r-assertable
+    - r-assertthat
+    - bioconductor-biostrings
+    - r-bslib
+    - r-caret
+    - r-crosstalk
+    - r-data.table
+    - r-dplyr
+    - r-dt
+    - r-formattable
+    - bioconductor-genomeinfodb
+    - r-ggplot2
+    - r-glue
+    - r-htmltools
+    - r-httr
+    - r-jsonlite
+    - r-log4r
+    - bioconductor-mutationalpatterns
+    - r-openxlsx2
+    - r-plotly
+    - r-plyr
+    - r-purrr
+    - bioconductor-quantiseqr
+    - r-quarto
+    - quarto
+    - r-randomforest
+    - r-reactable
+    - r-readr
+    - r-reshape2
+    - r-rlang
+    - r-rrapply
+    - bioconductor-s4vectors
+    - r-scales
+    - r-shiny
+    - r-stringr
+    - r-stringi
+    - r-tidyr
+    - conda-forge::r-yaml
+
+tests:
+  - r:
+      libraries:
+        - pcgrr
+about:
+  homepage: https://sigven.github.io/pcgr
+  summary:
+    Personal Cancer Genome ReporteR. Functions, tools and utilities for the
+    generation of clinical cancer genome reports with PCGR.
+  license: MIT
+  license_file: LICENSE
+  repository: https://github.com/sigven/pcgr/tree/main/pcgrr
+  documentation: https://sigven.github.io/pcgr
+
+extra:
+  recipe-maintainers:
+    - pdiakumis

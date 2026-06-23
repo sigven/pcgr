@@ -3,14 +3,19 @@
 \docType{data}
 \name{biomarker_evidence}
 \alias{biomarker_evidence}
-\title{Fixed data types/categories used for biomarker evidence, e.g. 'types','levels' etc.}
+\title{Fixed data types and levels for biomarker evidence items}
 \format{
-An object of class \code{list} of length 1.
+A named list with three character vectors:
+\itemize{
+\item \emph{types} - Biomarker evidence types (e.g. "predictive", "prognostic")
+\item \emph{levels} - Evidence strength levels (e.g. "A: Validated", "B: Clinical evidence")
+\item \emph{clinical_significance} - Clinical significance categories (e.g. "Sensitivity/Response")
+}
 }
 \usage{
 biomarker_evidence
 }
 \description{
-Fixed data types/categories used for biomarker evidence, e.g. 'types','levels' etc.
+Fixed data types and levels for biomarker evidence items
 }
 \keyword{datasets}

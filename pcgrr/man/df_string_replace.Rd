@@ -5,7 +5,7 @@
 \title{Function that performs stringr::str_replace on strings of multiple
 string columns of a dataframe}
 \usage{
-df_string_replace(df, strings, pattern, replacement, replace_all = F)
+df_string_replace(df, strings, pattern, replacement, replace_all = FALSE)
 }
 \arguments{
 \item{df}{data frame}

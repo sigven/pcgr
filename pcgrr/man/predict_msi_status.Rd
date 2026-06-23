@@ -9,7 +9,9 @@ predict_msi_status(
   ref_data,
   msi_prediction_model,
   msi_prediction_dataset,
+  msi_feature_variance_table = NULL,
   target_size_mb,
+  n_calls = NA_integer_,
   sample_name = "Test"
 )
 }
@@ -23,7 +25,13 @@ predict_msi_status(
 \item{msi_prediction_dataset}{underlying dataset from TCGA used for
 development of statistical classifier}
 
+\item{msi_feature_variance_table}{lookup table (from model training) mapping
+mutation-count bins to expected feature SD; used to qualify prediction
+confidence. NULL if not available.}
+
 \item{target_size_mb}{size of targeted genomic region (coding)}
+
+\item{n_calls}{number of variants passed to the classifier}
 
 \item{sample_name}{name of sample}
 }

@@ -9,21 +9,23 @@ import errno
 import string
 import random
 import glob
+import pandas as pd
 
 
 def getlogger(logger_name):
     logger = logging.getLogger(logger_name)
-    logger.setLevel(logging.DEBUG)
-    # create console handler and set level to debug
-    ch = logging.StreamHandler(sys.stdout)
-    ch.setLevel(logging.DEBUG)
-    # add ch to logger
-    logger.addHandler(ch)
-    # create formatter
-    formatter = logging.Formatter(
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s", "20%y-%m-%d %H:%M:%S")
-    # add formatter to ch
-    ch.setFormatter(formatter)
+    if not logger.handlers:
+        logger.setLevel(logging.DEBUG)
+        # create console handler and set level to debug
+        ch = logging.StreamHandler(sys.stdout)
+        ch.setLevel(logging.DEBUG)
+        # create formatter
+        formatter = logging.Formatter(
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s", "20%y-%m-%d %H:%M:%S")
+        # add formatter to ch
+        ch.setFormatter(formatter)
+        # add ch to logger
+        logger.addHandler(ch)
     return logger
 
 def error_message(message, logger):
@@ -44,6 +46,25 @@ def random_id_generator(size = 10, chars = string.ascii_lowercase + string.digit
 #    letters = string.ascii_lowercase
 #    result_str = ''.join(random.choice(letters) for i in range(length))
 #    return result_str
+
+def pd_to_csv(df, fname, index = False, col_sep = "\t", compression = "gzip"):
+
+    # Make a copy to avoid modifying the original dataframe
+    df = df.copy()
+
+    # Opt-in to future pandas behavior to suppress FutureWarning on fillna
+    with pd.option_context('future.no_silent_downcasting', True):
+        ## Replace NaN with '.' and handle empty strings for each column
+        for col in df.columns:
+            if df[col].dtype == 'object' or pd.api.types.is_string_dtype(df[col]):
+                # For string/object columns, replace NaN and empty strings with '.'
+                df[col] = df[col].fillna('.')
+                df[col] = df[col].apply(lambda x: '.' if (isinstance(x, str) and x.strip() == '') else x)
+            else:
+                # For numeric columns, replace NaN with '.' and convert to string
+                df[col] = df[col].fillna('.').astype(str)
+
+    df.to_csv(fname, sep = col_sep, compression = compression, index = index)
 
 def check_subprocess(logger, command, debug):
     if debug:
@@ -231,4 +252,23 @@ def check_tabix_file(fname: str, logger = None) -> bool:
         ## check file size is more than zero
         check_file_exists(tabix_file)
     return(True)
+
+def reverse_complement_dna(dna_string = "C"):
+    pairs = {
+        "A":"T",
+        "C":"G",
+        "G":"C",
+        "T":"A",
+    }
+    reverse_complement = ""
+    i = len(dna_string) - 1
+    while i >= 0:
+        base = str(dna_string[i]).upper()
+        if base in pairs:
+            complement = pairs[base]
+        else:
+            complement = base
+        reverse_complement += complement
+        i = i - 1
+    return reverse_complement     
 

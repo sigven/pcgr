@@ -3,21 +3,23 @@ title: "Input files"
 output: rmarkdown::html_document
 ---
 
-## Input files
+## Input files {#pcgr-input-files}
 
-The PCGR workflow accepts three main input files:
+The PCGR workflow accepts the following main input files:
 
   * An unannotated, single-sample [VCF file](https://github.com/samtools/hts-specs#variant-calling-data-files) (>= v4.2) with called somatic variants (SNVs/InDels)
   * A file with allele-specific copy number segments (tab-separated values - TSV)
+  * A file with RNA fusion transcripts detected in the tumor (tab-separated values - TSV)
   * A file with transcript/gene expression levels (tab-separated values - TSV)
 
-The input VCF is a required input file, while the somatic copy number file and gene expression file are optional. The following arguments to the `pcgr` command are used for input files:
+At least one of these input files is required. PCGR can be run with any combination of the above, and will only produce output sections relevant to the data provided. The following arguments to the `pcgr` command are used for input files:
 
-* `--input_vcf` (required argument to `pcgr`)
+* `--input_vcf`
 * `--input_cna`
+* `--input_rna_fusion`
 * `--input_rna_expression`
 
-In addition to these three main input files, the user can also opt to provide a [panel-of-normals VCF](#panel-of-normals-pon-vcf) file (`--pon_vcf`) for tumor-only variant filtering, as well as an input file with [CPSR-classified germline variants (TSV)](#germline-variants) (`--input_cpsr`).
+In addition to these main input files, the user can also opt to provide a [panel-of-normals VCF](#panel-of-normals-pon-vcf) file (`--pon_vcf`) for tumor-only variant filtering, as well as an input file with [CPSR-classified germline variants (TSV)](#germline-variants) (`--input_cpsr`).
 
 ### VCF
 
@@ -101,6 +103,48 @@ Importantly, you can configure predefined thresholds for segments that are consi
 ### Germline variants
 
 The user can submit a file with germline variants processed and classified with [CPSR](https://sigven.github.io/cpsr), which caters for an integration of germline and somatic findings in the output report. This file corresponds to output file `<sample_id>.cpsr.<genome_assembly>.classification.tsv.gz` from the CPSR pipeline. Make sure the genome assembly is the same as the one used for the somatic variant input files.
+
+### RNA fusions
+
+The user can submit a file with RNA fusion transcripts detected in the tumor sample. PCGR will cross-reference detected fusions against curated cancer gene databases and known fusion events, and incorporate them into the output report.
+
+The tab-separated values file with RNA fusion calls __MUST__ contain the following four columns:
+
+| Column | Type | Description |
+|---|---|---|
+| `FusionGene` | string | Fusion gene pair, two gene symbols separated by `--` or `::` (e.g. `EML4--ALK` or `TMPRSS2::ERG`) |
+| `LeftBreakpoint` | string | Genomic position of the left/5' breakpoint, formatted as `chrom:position` (e.g. `2:42522694`) |
+| `RightBreakpoint` | string | Genomic position of the right/3' breakpoint, formatted as `chrom:position` (e.g. `2:29446394`) |
+| `SplitReads` | integer | Number of split reads supporting the fusion (non-negative integer) |
+
+An optional column `Score` (float) may also be included, representing a caller-specific confidence score for the fusion event.
+
+#### Formatting notes
+
+* The chromosome field in breakpoints must be one of `1`–`22`, `X`, or `Y` — with or without a `chr` prefix
+* Each gene symbol in `FusionGene` must be a valid alphanumeric identifier (letters, digits, `.`, `-`, `_` allowed); purely numeric gene names are not accepted
+* Fusions with an empty or missing partner (e.g. intragenic or read-through events) are allowed but will generate a warning during validation
+
+Below shows the first few records of a correctly formatted RNA fusion file:
+
+```
+FusionGene       LeftBreakpoint    RightBreakpoint   SplitReads
+EML4--ALK        2:42522694        2:29446394        100
+BCR--ABL1        22:23582899       9:13358994        50
+EWSR1--FLI1      22:29683136       11:128675244      75
+TMPRSS2--ERG     21:42836478       21:39737961       60
+```
+
+<div style="border-left: 4px solid #e69f00; background-color: #fff8e6; padding: 0.75em 1em; margin: 1em 0;">
+**Quality control of RNA fusion events**: We strongly advice users to to perform quality control of fusion events upstream of PCGR analysis - the focus in PCGR is strictly on functional annotation and potential clinical impact. 
+<ul><li>We recommend to carefully check e.g. the number of supporting reads for each 
+fusion event, and to visually inspect fusion events in a genome browser 
+(e.g. IGV) or other third-party tools (e.g. [FusViz](https://github.com/senzhaocode/FuSViz)) 
+to conduct frame inference, investigate domain retention, and rule out potential false positives.</li>   
+<li>Importantly, while most RNA fusion detection tools will attempt to filter out known
+normal/artefactual events, PCGR makes no attempt to further filter fusion events based on e.g. presence in normal tissue databases, and thus relies on the user to perform this step upstream of PCGR analysis.</li>
+<li>If multiple input entries share the same gene pair (e.g. <em>GENE_A--GENE_B</em>) but differ only in their exact breakpoint coordinates, each will appear as a separate entry in the PCGR report. This can make the fusion section appear repetitive. PCGR does not attempt to collapse these, as there is no principled way to select a canonical breakpoint without the full caller context. We therefore recommend that users deduplicate fusion calls to one entry per gene pair — retaining the call with the highest read support or confidence score — before submitting to PCGR.</li></ul>
+</div>
 
 ### Gene expression
 

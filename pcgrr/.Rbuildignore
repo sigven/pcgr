@@ -1,3 +1,4 @@
+^air\.toml$
 ^renv$
 ^renv\.lock$
 ^.*\.Rproj$
@@ -10,3 +11,6 @@
 ^pkgdown$
 ^\.github$
 ^vignettes$
+^\.positai$
+^\.claude$
+^Makefile$

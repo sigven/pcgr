@@ -1,0 +1,57 @@
+context:
+  name: pcgr
+  version: 2.2.5.9028 # bump
+
+package:
+  name: ${{ name|lower }}
+  version: ${{ version }}
+
+source:
+  path: ../../..
+
+build:
+  number: 0
+  noarch: python
+  script: pip install . --no-deps -v
+
+requirements:
+  host:
+    - python >=3.12,<3.13
+    - pip
+    - setuptools
+  run:
+    - python >=3.12,<3.13
+    - pandas
+    - scipy
+    - numpy
+    - pip
+    - pybedtools
+    - cyvcf2
+    - pyyaml
+    - conda-forge::libdeflate
+    - conda-forge::requests # oncokb
+
+tests:
+  - script:
+    - pcgr --version
+    requirements:
+      run:
+        - python >=3.12,<3.13
+        - pandas
+        - scipy
+        - numpy
+        - pybedtools
+        - cyvcf2
+        - pyyaml
+
+about:
+  homepage: https://sigven.github.io/pcgr
+  summary: Personal Cancer Genome Reporter (PCGR). Variant interpretation for precision cancer medicine.
+  license: MIT
+  license_file: LICENSE
+  repository: https://github.com/sigven/pcgr
+  documentation: https://sigven.github.io/pcgr
+
+extra:
+  recipe-maintainers:
+    - pdiakumis

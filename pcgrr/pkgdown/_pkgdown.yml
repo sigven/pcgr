@@ -1,4 +1,6 @@
 url: https://sigven.github.io/pcgr/
+development:
+  mode: auto
 title: PCGR
 toc:
   depth: 3

@@ -1,8 +1,9 @@
 #' List of URLS and variant identifiers for variant/gene/protein domain databases
 #'
 #'
-#' @format A data.frame with 6 rows and 5 columns that indicates URL's for various variant/gene databases
-#' and how to use PCGR annotation columns to generate variant links
+#' @format A data.frame with 6 rows and 5 columns that indicates URL's
+#' for various variant/gene databases and how to use PCGR annotation
+#' columns to generate variant links
 #' \itemize{
 #'   \item \emph{name} - Name encoding for variant/gene database
 #'   \item \emph{group_by_var} - Which column should be used for grouping
@@ -20,9 +21,10 @@
 
 #' Fixed data types/categories used for biomarker evidence, e.g. 'types','levels' etc.
 #'
-"biomarker_evidence"
+"bm_evidence"
 
-#' List of coltype definitions for input files to pcgrr (e.g. VCF-converted TSV, CNA TVS etc.)
+#' List of coltype definitions for input files to pcgrr
+#' (e.g. VCF-converted TSV, CNA TVS etc.)
 #'
 "data_coltype_defs"
 
@@ -46,7 +48,6 @@
 #'
 #' @format A data.frame with 11 rows and 2 columns that indicates immune
 #' cell types used in immune contexture analysis by quanTIseq
-#'
 #'
 "immune_celltypes"
 
@@ -95,5 +96,53 @@
 #' TSV columns
 "tsv_cols"
 
-#' DT Display
-"dt_display"
+#' HTML Table display columns
+"table_display_cols"
+
+#' Exonic filter levels
+"exonic_filter_levels"
+
+#' Germline filter levels
+"germline_filter_levels"
+
+#' OncoKB base API URL
+"oncokb_base_api_url"
+
+#' Fixed data types and levels for biomarker evidence items
+#'
+#' @format A named list with three character vectors:
+#' \itemize{
+#'   \item \emph{types} - Biomarker evidence types (e.g. "predictive", "prognostic")
+#'   \item \emph{levels} - Evidence strength levels (e.g. "A: Validated", "B: Clinical evidence")
+#'   \item \emph{clinical_significance} - Clinical significance categories (e.g. "Sensitivity/Response")
+#' }
+#'
+"biomarker_evidence"
+
+#' Named list of biomarker categories used for variant classification
+#'
+#' @format A named list with six elements, each representing a biomarker category
+#' (e.g. "therapeutic_sensitivity", "prognostic_poor"). Each element contains:
+#' \itemize{
+#'   \item \emph{etype} - Evidence type (e.g. "predictive", "prognostic", "diagnostic")
+#'   \item \emph{clnsig} - Clinical significance label(s) for the category
+#' }
+#'
+"bm_categories"
+
+#' Character vector of tumor site names used in PCGR/CPSR reports
+#'
+#' @format A character vector of 31 tumor site names (e.g. "Any", "Adrenal Gland",
+#' "Biliary Tract"). Used to constrain tumor site selection in configuration.
+#'
+"tumor_sites"
+
+
+#' Character vector with OncoKB annotations coming from the
+#' MafAnnotator / FusionAnnotator / CnaAnnnotator tools in the PCGR Python workflow.
+#' These annotations are used for variant classification and reporting in PCGR.
+#'
+#' @format A character vector with 8 different OncoKB annotations, including:
+#' "ONCOGENICITY_OKB", "MUTATION_EFFECT_OKB" etc
+#'
+"oncokb_annotations"

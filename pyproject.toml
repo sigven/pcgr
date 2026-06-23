@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pcgr"
-version = "2.2.5" # versioned by bump2version
+version = "2.2.5.9028" # bump
 description = "Personal Cancer Genome Reporter (PCGR) - variant interpretation for precision cancer medicine"
 authors = [
     {name = "Sigve Nakken", email = "sigven@gmail.com"},
@@ -15,10 +15,10 @@ maintainers = [
     {name = "Peter Diakumis", email = "peterdiakumis@gmail.com"},
     ]
 readme = "README.md"
-license = {file = "LICENSE"}
+license = "MIT"
+license-files = ["LICENSE"]
 keywords = ["cancer", "genomics", "pcgr"]
 classifiers = [
-    "License :: OSI Approved :: MIT License",
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Science/Research",
     "Operating System :: MacOS :: MacOS X",
@@ -46,9 +46,9 @@ find = {}
 
 [tool.setuptools]
 script-files = [
-    "scripts/cpsr_validate_input.py",
+    "scripts/validate_input_cpsr.py",
     "scripts/pcgr_summarise.py",
-    "scripts/pcgr_validate_input.py",
+    "scripts/validate_input_pcgr.py",
     "scripts/pcgr_vcfanno.py",
     "scripts/pcgrr.R",
     "scripts/cpsr.R",

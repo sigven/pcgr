@@ -1,6 +1,6 @@
 ---
 title: "<SAMPLE_NAME>"
-subtitle: " - _cancer genome interpretation report by PCGR_"
+subtitle: " - _cancer genome interpretation report by PCGR_ <ASSAY_BUILD_BADGES>"
 date: '`r strftime(Sys.time(), format = "%B %d, %Y")`'
 bibliography: pcgr_bibliography.bib
 title-block-banner: "<MAIN_REPORT_COLOR>"
@@ -26,6 +26,7 @@ nocite: |
   @Antonello2024-ri
 format: 
   html:
+    theme: cosmos
     link-external-newwindow: true
     embed-resources: true
     smooth-scroll: true
@@ -45,7 +46,7 @@ lightbox: true
 #| include: false
 #| eval: true
 
-knitr::opts_chunk$set(echo = F,warning=FALSE, dpi=72, error=F, eval=T)
+knitr::opts_chunk$set(echo = FALSE,warning=FALSE, dpi=72, error=F, eval=T)
 
 ## load report object generated with pcgrr::generate_report()
 pcg_report <- readRDS(file="<PCGR_REPORT_OBJECT.rds>")
@@ -54,7 +55,9 @@ logo_fname_path <- system.file("extdata", "logo.png", package = "pcgrr")
 
 ## set report color theme according to tumor-control vs. tumor-only
 report_color <- pcgrr::color_palette$report_color$values[1]
-if(as.logical(pcg_report$settings$conf$assay_properties$vcf_tumor_only) == TRUE){
+is_tumor_only <- as.logical(pcg_report$settings$conf$assay_properties$vcf_tumor_only)
+
+if(is_tumor_only == TRUE){
   report_color <- pcgrr::color_palette$report_color$values[2]
 }
 ```
@@ -66,62 +69,63 @@ if(as.logical(pcg_report$settings$conf$assay_properties$vcf_tumor_only) == TRUE)
 ```{r pcgr_settings}
 #| child: 'pcgr_quarto_report/settings.qmd'
 #| eval: true
-```
+#| output: asis
 
-<br>
+```
 
 ```{r pcgr_snv_indel}
 #| child: 'pcgr_quarto_report/snv_indel.qmd'
-#| eval: !expr pcg_report$content$snv_indel$eval == TRUE
+#| eval: !expr isTRUE(pcg_report$content$snv_indel$eval)
+
 ```
 
-<br>
 
 ```{r pcgr_cna}
 #| child: 'pcgr_quarto_report/cna.qmd'
-#| eval: !expr pcg_report$content$cna$eval == TRUE
+#| eval: !expr isTRUE(pcg_report$content$cna$eval)
+
 ```
 
-<br>
+```{r pcgr_rna_fusion}
+#| child: 'pcgr_quarto_report/rna_fusion.qmd'
+#| eval: !expr isTRUE(pcg_report$content$fusion$eval)
+
+```
 
 ```{r pcgr_signatures}
 #| child: 'pcgr_quarto_report/mutational_signature.qmd'
-#| eval: !expr as.logical(pcg_report$content$mutational_signatures$eval) == TRUE
-```
+#| eval: !expr isTRUE(pcg_report$content$mutational_signatures$eval)
 
-<br>
+```
 
 ```{r pcgr_kataegis}
 #| child: 'pcgr_quarto_report/kataegis.qmd'
-#| eval: !expr as.logical(pcg_report$content$kataegis$eval) == TRUE
-```
+#| eval: !expr isTRUE(pcg_report$content$kataegis$eval)
 
-<br>
+```
 
 ```{r pcgr_msi}
 #| child: 'pcgr_quarto_report/msi.qmd'
-#| eval: !expr as.logical(pcg_report$content$msi$eval) == TRUE
+#| eval: !expr isTRUE(pcg_report$content$msi$eval)
+
 ```
 
-<br>
-
-```{r conditional_tmb}
+```{r pcgr_tmb}
 #| child: 'pcgr_quarto_report/mutational_burden.qmd'
-#| eval: !expr as.logical(pcg_report$content$tmb$eval) == TRUE
-```
+#| eval: !expr isTRUE(pcg_report$content$tmb$eval)
 
-<br>
+```
 
 ```{r pcgr_germline}
 #| child: 'pcgr_quarto_report/germline.qmd'
-#| eval: !expr as.logical(pcg_report$content$germline_classified$eval) == TRUE
+#| eval: !expr isTRUE(pcg_report$content$germline_classified$eval)
+
 ```
 
-
-
-```{r conditional_expression}
+```{r pcgr_expression}
 #| child: 'pcgr_quarto_report/expression.qmd'
-#| eval: !expr as.logical(pcg_report$content$expression$eval) == TRUE
+#| eval: !expr isTRUE(pcg_report$content$expression$eval)
+
 ```
 
 
@@ -129,19 +133,11 @@ if(as.logical(pcg_report$settings$conf$assay_properties$vcf_tumor_only) == TRUE)
 #| child: 'pcgr_quarto_report/documentation.qmd'
 ```
 
-<font size="-1">
-
-## References
-
-::: {#refs}
-:::
-
-</font>
 
 ```{r pcgr_disclaimer}
 #| eval: true
 #| output: asis
 
-cat('<br><br>\n\n::: {.callout-important collapse="true"}\n## Medical Disclaimer\n\n<i>The information contained in this cancer genome report is intended for research purposes only. We make no representations or warranties of any kind, expressed or implied, about the completeness, accuracy, reliability, suitability or availability with respect to the sequencing report or the information, products, services, for interpretation or use in clinical practice, or otherwise contained in the report for any purpose. Any reliance you place on information in the report is therefore strictly at your own risk. In no event will we be liable for any loss or damage including without limitation, indirect or consequential loss or damage, or any loss or damage whatsoever arising from loss of data or profits arising out of, or in connection with, the use of this genome report.</i><br>\n\n:::')
+cat('<br>\n\n::: {.callout-important collapse="true"}\n## Medical Disclaimer\n\n<i>The information contained in this cancer genome report is intended for research purposes only. We make no representations or warranties of any kind, expressed or implied, about the completeness, accuracy, reliability, suitability or availability with respect to the sequencing report or the information, products, services, for interpretation or use in clinical practice, or otherwise contained in the report for any purpose. Any reliance you place on information in the report is therefore strictly at your own risk. In no event will we be liable for any loss or damage including without limitation, indirect or consequential loss or damage, or any loss or damage whatsoever arising from loss of data or profits arising out of, or in connection with, the use of this genome report.</i><br>\n\n:::')
 
 ```

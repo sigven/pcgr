@@ -9,6 +9,7 @@ load_dna_variants(
   fname = NA,
   cols = NULL,
   ref_data = NULL,
+  settings = NULL,
   vartype = "snv_indel",
   primary_site = "Any",
   retained_info_tags = "None",
@@ -21,6 +22,8 @@ load_dna_variants(
 \item{cols}{column type definitions of raw input file}
 
 \item{ref_data}{PCGR reference data object}
+
+\item{settings}{PCGR run/configuration settings}
 
 \item{vartype}{type of DNA aberrations ('snv_indel','cna')}
 

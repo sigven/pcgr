@@ -4,7 +4,10 @@
 \alias{get_oncogenic_cna_events}
 \title{Get oncogenic copy number events}
 \usage{
-get_oncogenic_cna_events(cna_df_display = NULL)
+get_oncogenic_cna_events(
+  cna_df_display = NULL,
+  table_display_cols = pcgrr::table_display_cols
+)
 }
 \arguments{
 \item{cna_df_display}{data frame with transcript annotations per
@@ -15,6 +18,6 @@ Function that extracts oncogenic copy number events from
 a data frame of annotated transcripts (within copy number segments),
 utilizing oncogene/tumor suppressor status and copy number
 variant class (gain/loss). This set is used to highlight
-copy-altered transcripts that are presumably oncogenic, yet
-not actionable \emph{per se}.
+any copy-number altered transcripts that are presumably
+oncogenic (e.g. oncogene amplifications, tumor suppressor deletions)
 }

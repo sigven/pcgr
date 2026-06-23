@@ -4,37 +4,73 @@ Kataegis describes a pattern of localized hypermutations identified in some canc
 
 Explanation of key columns in the resulting table of potential kataegis events: 
 
-* __weight.C>X__: proportion of C>X mutations
-* __confidence__: confidence degree of potential kataegis events (range: 0 to 3)
-    - 0 - a hypermutation with weight.C>X < 0.8; 
-    - 1 - one hypermutation with weight.C>X >= 0.8 in a chromosome; 
-    - 2 - two hypermutations with weight.C>X >= 0.8 in a chromosome; 
-    - 3 - high confidence with three or more hypermutations with weight.C>X >= 0.8 in a chromosome)
+* __Weight C>X__: proportion of C>X mutations
+* __Confidence__: confidence degree of potential kataegis events (range: 0 to 3)
+    - **0** - a hypermutation with weight.C>X < 0.8; 
+    - **1** - one hypermutation with weight.C>X >= 0.8 in a chromosome; 
+    - **2** - two hypermutations with weight.C>X >= 0.8 in a chromosome; 
+    - **3** - high confidence with three or more hypermutations with weight.C>X >= 0.8 in a chromosome)
 
+<br>
 
 ```{r mutsigs_kataegis}
 #| echo: false
 #| eval: true
 
 df <- data.frame(
-  'sample_id' = character(), 
-  'chrom' = character(), 
-  'start' = integer(), 
-  'end' = integer(),
+  #'sample_id' = character(), 
+  'region' = character(), 
+  #'start' = integer(), 
+  #'end' = integer(),
   'chrom.arm' = character(), 
   'length' = integer(), 
   'number.mut' = integer(), 
   'weight.C>X' = numeric(),
   'confidence' = integer(), 
-  stringsAsFactors = F)
+  stringsAsFactors = FALSE)
 
-if(is.data.frame(pcg_report$content$kataegis$events)){
-  df <- pcg_report$content$kataegis$events
+hgname <- "hg38"
+if (pcg_report$settings$genome_assembly == "grch37") {
+  hgname <- "hg19"
 }
-## data frame with potential kataegis events present in tumor sample
-myOptions <- list(paging = F,pageLength=5, searching=F,caching=F,
-                  buttons = c('csv','excel'),dom = 'Bfrtip')
-DT::datatable(df ,options = myOptions,extensions=c("Buttons","Responsive"))
+
+if (is.data.frame(pcg_report$content$kataegis$events) &
+    "start" %in% colnames(pcg_report$content$kataegis$events) &
+    "end" %in% colnames(pcg_report$content$kataegis$events) &
+    "chrom" %in% colnames(pcg_report$content$kataegis$events)) {
+  df <- pcg_report$content$kataegis$events |>
+    dplyr::mutate(
+      region = glue::glue(
+        "<a href='http://genome.ucsc.edu/cgi-bin/hgTracks?db={hgname}&position=",
+        "{chrom}:{start}-{end}' target='_blank'>",
+        "{chrom}:{start}-{end}</a>"
+      )
+    ) |>
+    dplyr::select(
+      -dplyr::any_of(c("sample_id", "chrom", "start", "end"))
+    ) |>
+    dplyr::select(region, dplyr::everything())
+}
+reactable::reactable(
+  df,
+  columns = list(
+    region        = reactable::colDef(name = "Region",         minWidth = 130, align = "left"),
+    chrom.arm  = reactable::colDef(name = "Chromosome arm",         minWidth = 120,  align = "center"),
+    length     = reactable::colDef(name = "Length",      maxWidth = 90,  align = "right",
+                   format = reactable::colFormat(separators = TRUE)),
+    number.mut = reactable::colDef(name = "# Mutations", minWidth = 100, align = "center"),
+    weight.C.X = reactable::colDef(name = "Weight (C>X)",  minWidth = 100, align = "center",
+                   format = reactable::colFormat(digits = 3)),
+    confidence = reactable::colDef(name = "Confidence",  minWidth = 100,  align = "center")
+  ),
+  defaultColDef  = reactable::colDef(html = TRUE),
+  striped        = TRUE,
+  highlight      = TRUE,
+  compact        = TRUE,
+  searchable     = FALSE,
+  defaultPageSize = 5,
+  theme          = pcgrr::rt_theme()
+)
 
 ``` 
    

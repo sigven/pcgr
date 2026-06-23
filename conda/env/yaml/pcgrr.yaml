@@ -1,0 +1,14 @@
+name: pcgrr
+
+channels:
+  - pcgr
+  - bioconda
+  - conda-forge
+
+dependencies:
+  - python
+  - r-pcgrr ==2.2.5.9028 # bump
+  - r-cpsr
+  - r-argparse
+  - bioconductor-bsgenome.hsapiens.ucsc.hg38
+  - bioconductor-bsgenome.hsapiens.ucsc.hg19

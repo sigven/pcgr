@@ -18,11 +18,11 @@ kataegis_detect <- function(data, sample_id = "sample_id",
                             max.dis = 1000,
                             chr = "chr", pos = "pos",
                             txdb = NULL) {
-  pcgrr::log4r_info(paste0("Detecting possible kataegis events (clusters of C>T ",
+  log4r_info(paste0("Detecting possible kataegis events (clusters of C>T ",
                     "(APOBEC enzyme family) and C>T/G ",
                     "(TLS DNA polymerase) mutations"))
   assertable::assert_colnames(
-    data, c(chr, pos), only_colnames = F, quiet = T)
+    data, c(chr, pos), only_colnames = FALSE, quiet = TRUE)
   invisible(
     assertthat::assert_that(
       build == "grch37" | build == "grch38",
@@ -117,7 +117,7 @@ kataegis_detect <- function(data, sample_id = "sample_id",
     #   kataegis_df$geneID <- peakAnno@anno$geneId
     # }
   }
-  pcgrr::log4r_info(paste(dim(kataegis_df)[1],
+  log4r_info(paste(dim(kataegis_df)[1],
                           "potential kataegis events identified",
                 sep = " "))
   return(kataegis_df)
@@ -147,7 +147,7 @@ kataegis_input <- function(variant_set, chr = "chr", pos = "pos", ref = "ref",
                  "') not allowed, allowed reference builds are: 'grch37' or 'grch38'")))
   assertable::assert_colnames(variant_set,
                               c(chr, pos, ref, alt),
-                              only_colnames = F, quiet = T)
+                              only_colnames = FALSE, quiet = TRUE)
 
   mut_data <- variant_set[, c(chr, pos, ref, alt)]
   names(mut_data) <- c("chr", "pos", "ref", "alt")
@@ -206,13 +206,13 @@ generate_report_data_kataegis <- function(variant_set,
                                           build = "grch37") {
 
   pcg_report_kataegis <-
-    pcgrr::init_kataegis_content()
+    init_kataegis_content()
   if (NROW(variant_set) == 0) {
     return(pcg_report_kataegis)
   }
 
-  pcgrr::log4r_info("------")
-  pcgrr::log4r_info(
+  log4r_info("------")
+  log4r_info(
     paste0("Kataegis detection from genomic distribution of SNVs"))
 
 
@@ -220,7 +220,7 @@ generate_report_data_kataegis <- function(variant_set,
     is.data.frame(variant_set),
     msg = paste0("Argument 'variant_set' needs be of type data.frame")))
   assertable::assert_colnames(
-    variant_set, c("CHROM", "REF", "ALT", "POS"), only_colnames = F, quiet = T)
+    variant_set, c("CHROM", "REF", "ALT", "POS"), only_colnames = FALSE, quiet = TRUE)
   invisible(assertthat::assert_that(
     build == "grch37" | build == "grch38",
     msg =
@@ -234,12 +234,12 @@ generate_report_data_kataegis <- function(variant_set,
       chr_prefix <- TRUE
     }
   }
-  if (chr_prefix == F) {
+  if (chr_prefix == FALSE) {
     variant_set <- variant_set |>
       dplyr::mutate(CHROM = paste0("chr", .data$CHROM))
   }
 
-  kataegis_data <- pcgrr::kataegis_input(variant_set, chr = "CHROM",
+  kataegis_data <- kataegis_input(variant_set, chr = "CHROM",
                                          pos = "POS", ref = "REF",
                                          alt = "ALT",
                                          build = build)
@@ -249,12 +249,12 @@ generate_report_data_kataegis <- function(variant_set,
       pcg_report_kataegis[["eval"]] <- TRUE
 
       pcg_report_kataegis[["events"]] <-
-        pcgrr::kataegis_detect(kataegis_data,
+        kataegis_detect(kataegis_data,
                                sample_id = sample_name,
                                build = build)
     }
   }else{
-    pcgrr::log4r_info(
+    log4r_info(
       paste0(
         "No or too few SNVs (< 100) found in input - skipping kataegis detection"))
     #pcg_report_kataegis[["eval"]] <- FALSE

@@ -10,6 +10,24 @@ mutational_burden <- 'ON'
 
 conf <- pcg_report$settings$conf
 
+oncokb_active <- !is.null(conf$oncokb$api_token) &&
+  !is.na(conf$oncokb$api_token) &&
+  conf$oncokb$api_token != "None"
+bm_db_label <- if (oncokb_active && isTRUE(as.logical(conf$oncokb$exclusive))) {
+  "OncoKB"
+} else if (oncokb_active) {
+  "CIViC, CGI, and OncoKB"
+} else {
+  "CIViC and CGI"
+}
+bm_db_citation <- if (oncokb_active && isTRUE(as.logical(conf$oncokb$exclusive))) {
+  "[@Chakravarty2017-rd]"
+} else if (oncokb_active) {
+  "[@Griffith2017-do;@Tamborero2018-aj;@Chakravarty2017-rd]"
+} else {
+  "[@Griffith2017-do;@Tamborero2018-aj]"
+}
+
 sample_name <- pcg_report[['settings']][['sample_id']]
 assay_type <- conf$assay_properties$type
 tumor_site <- conf$sample_properties$site
@@ -17,41 +35,55 @@ sex <- conf$sample_properties$sex
 assay_mode <- conf$assay_properties$mode
 genome_assembly <- pcg_report[['settings']][['genome_assembly']]
 tumor_ploidy <- "N/A"
-if(!is.na(conf$sample_properties$tumor_ploidy) &
-   conf$sample_properties$tumor_ploidy != "NA"){
+tumor_ploidy_source <- NULL
+if (!is.na(conf$sample_properties$tumor_ploidy) &
+   conf$sample_properties$tumor_ploidy != "NA") {
   tumor_ploidy <- conf$sample_properties$tumor_ploidy
+  if (!is.null(conf$sample_properties$tumor_ploidy_source) &
+      !is.na(conf$sample_properties$tumor_ploidy_source) &
+      conf$sample_properties$tumor_ploidy_source != "NA") {
+    tumor_ploidy_source <- conf$sample_properties$tumor_ploidy_source
+    tumor_ploidy <- paste0(tumor_ploidy, " (", tumor_ploidy_source, ")")
+  }
 }
 tumor_purity <- "N/A"
-if(!is.na(conf$sample_properties$tumor_purity) &
-   conf$sample_properties$tumor_purity != "NA"){
+if (!is.na(conf$sample_properties$tumor_purity) &
+   conf$sample_properties$tumor_purity != "NA") {
   tumor_purity <- conf$sample_properties$tumor_purity
 }
 
 target_size <- conf$assay_properties$effective_target_size_mb
 report_color <- pcgrr::color_palette$report_color$values[1]
-if(as.logical(conf$assay_properties$vcf_tumor_only) == TRUE){
+if (as.logical(conf$assay_properties$vcf_tumor_only) == TRUE) {
   report_color <- pcgrr::color_palette$report_color$values[2]
 }
 
 success_color <- pcgrr::color_palette$success
+none_color <- pcgrr::color_palette$none
+
 rna_expression_similarity <- 'OFF'
-if(as.logical(conf$expression$similarity_analysis) == TRUE){
+if (as.logical(conf$expression$similarity_analysis) == TRUE) {
   rna_expression_similarity <- 'ON'
 }
 
 include_germline_findings <- 'OFF'
-if(pcg_report$content$germline_classified$eval == T){
+if (pcg_report$content$germline_classified$eval == TRUE) {
   include_germline_findings <- 'ON'
 }
-if(pcg_report$content$msi$eval == F){
+if (pcg_report$content$msi$eval == FALSE) {
   msi_prediction <- 'OFF'
 }
-if(pcg_report$content$mutational_signatures$eval == F){
+if (pcg_report$content$mutational_signatures$eval == FALSE) {
   signatures_estimation <- 'OFF'
 }
-if(pcg_report$content$tmb$eval == F){
+if (pcg_report$content$tmb$eval == FALSE) {
   mutational_burden <- 'OFF'
 }
+
+snv_indel_eval <- pcg_report$content$snv_indel$eval
+cna_eval <- pcg_report$content$cna$eval
+fusion_eval <- pcg_report$content$fusion$eval
+expression_eval <- pcg_report$content$expression$eval
 
 tumor_dp_tag <- conf[['somatic_snv']][['allelic_support']][['tumor_dp_tag']]
 tumor_af_tag <- conf[['somatic_snv']][['allelic_support']][['tumor_af_tag']]
@@ -64,113 +96,62 @@ control_dp_min <- conf[['somatic_snv']][['allelic_support']][['control_dp_min']]
 control_af_max <- conf[['somatic_snv']][['allelic_support']][['control_af_max']]
 control_ad_max <- conf[['somatic_snv']][['allelic_support']][['control_ad_max']]
 
-gencode_metadata <- 
+gencode_metadata <-
   pcg_report$settings$reference_data$source_metadata |>
   dplyr::filter(source_abbreviation == "gencode")
 
 transcript_set_gencode <- paste0("GENCODE - basic set (v", gencode_metadata$source_version, ")")
-if (as.logical(pcg_report[["settings"]][["conf"]][["vep"]][["vep_gencode_basic"]]) == F) {
+if (as.logical(pcg_report[["settings"]][["conf"]][["vep"]][["vep_gencode_basic"]]) == FALSE) {
   transcript_set_gencode <- paste0("GENCODE - all transcripts (v", gencode_metadata$source_version, ")")
 }
 ```
 
-<br>
+<br><br>
 
-::: {.callout-note collapse="true"}
-
-
-## Run configuration and report settings
-
-The report is generated with _[pcgr](https://github.com/sigven/pcgr)_ version `r pcg_report[['settings']][['software']][['pcgr_version']]`, using the following key settings:
-
-:::: {.columns}
-
-::: {.column width="47.5%"}
-* Genome assembly: __`r genome_assembly`__
-* Variant actionability guidelines: __AMP/ASCO/CAP__
-* Variant oncogenicity guidelines: __ClinGen/CGC/VICC__
-* Show noncoding variants: __`r conf$other$show_noncoding `__
-* MSI prediction: __`r msi_prediction`__
-* Include germline findings: __`r include_germline_findings`__
-* RNA expression similarity analysis: __`r rna_expression_similarity`__
-* CNA amplification threshold: __`r conf$somatic_cna$n_copy_gain`__
-* Variant Effect Predictor (VEP) settings
-  * Transcript set: __`r transcript_set_gencode`__
-  * Transcript pick order: __`r stringr::str_replace_all(conf[['vep']][['vep_pick_order']],",", ", ")`__
-  * Regulatory regions annotation: __`r as.logical(conf[['vep']][['vep_regulatory']])`__
-  * Buffer size: __`r conf$vep$vep_buffer_size`__
-  * Number of forks: __`r conf$vep$vep_n_forks`__
-
-:::
-
-::: {.column width="5%"}
-<!-- empty column to create gap -->
-:::
-
-::: {.column width="47.5%"}
-* Mutational burden estimation: __`r mutational_burden`__
-  * TMB algorithm: __`r paste0('TMB_',conf$somatic_snv[['tmb']][['tmb_display']])`__ 
-* Mutational signatures estimation: __`r signatures_estimation`__
-  * Minimum number of mutations required: __`r conf$somatic_snv$mutational_signatures[['mutation_limit']]`__
-  * All reference signatures: __`r as.logical(conf$somatic_snv$mutational_signatures[['all_reference_signatures']])`__
-  * Inclusion of artefact signatures: __`r as.logical(conf$somatic_snv$mutational_signatures[['include_artefact_signatures']])`__
-  * Minimum tumor-type prevalence (percent) of reference signatures used for refitting: __`r conf$somatic_snv$mutational_signatures[['prevalence_reference_signatures']]`__
-
-```{r allelic_support_settings}
+```{r input_data_indicators}
 #| output: asis
 #| echo: false
 #| eval: true
-cat("* Allelic support filtering settings", "\n")
-if(tumor_dp_tag != "_NA_" &
-   !is.null(tumor_dp_min)){
-  cat(glue::glue(
-    "  * Minimum sequencing depth (DP) tumor (SNV + InDels): __{tumor_dp_min}__"),
-    "\n")
-}
-if(tumor_af_tag != "_NA_" &
-   !is.null(tumor_af_min)){
-  cat(glue::glue(
-    "  * Minimum allelic fraction (AF) tumor (SNV + InDels): __{tumor_af_min}__"),
-    "\n")
-}
-if(tumor_dp_tag != "_NA_" &
-   tumor_af_tag != "_NA_" &
-   !is.null(tumor_ad_min)){
-  cat(glue::glue(
-    "  * Minimum allelic depth (AD) tumor (SNV + InDels): __{tumor_ad_min}__"),
-    "\n")
-}
-if(control_dp_tag != "_NA_" &
-   !is.null(control_dp_min)){
-  cat(glue::glue(
-    "  * Minimum sequencing depth (DP) control (SNV + InDels): __{control_dp_min}__"),
-    "\n")
-}
-if(control_af_tag != "_NA_" &
-   !is.null(control_af_max)){
-  cat(glue::glue(
-    "  * Maximum allelic fraction (AF) control (SNV + InDels): __{control_af_max}__"),
-    "\n")
-}
-if(control_dp_tag != "_NA_" &
-   control_af_tag != "_NA_" &
-   !is.null(control_ad_max)){
-  cat(glue::glue(
-    "  * Maximum allelic depth (AD) control (SNV + InDels): __{control_ad_max}__"),
-    "\n")
-}
+
+bslib::layout_column_wrap(
+  width = 1/4,
+  height = 90,
+  bslib::value_box(
+    title = "Data input",
+    value = "Somatic SNVs/InDels",
+    showcase = NULL,
+    #showcase = bsicons::bs_icon(
+    #  if (snv_indel_eval) "check-square" else "x-square", size = "0.4em"),
+    #showcase_layout = "top right",
+    theme = bslib::value_box_theme(
+      bg = if (snv_indel_eval) success_color else none_color, fg = "#fff")
+  ),
+  bslib::value_box(
+    title = "Data input",
+    value = "Somatic CNAs",
+    showcase = NULL,
+    theme = bslib::value_box_theme(
+      bg = if (cna_eval) success_color else none_color, fg = "#fff")
+  ),
+  bslib::value_box(
+    title = "Data input",
+    value = "RNA fusions",
+    showcase = NULL,
+    theme = bslib::value_box_theme(
+      bg = if (fusion_eval) success_color else none_color, fg = "#fff")
+  ),
+  bslib::value_box(
+    title = "Data input",
+    value = "Gene expression",
+    showcase = NULL,
+    theme = bslib::value_box_theme(
+      bg = if (expression_eval) success_color else none_color, fg = "#fff")
+  )
+)
 ```
 
-:::
 
-::::
-
-:::
-
-<br>
-
-
-```{r sample_assay_properties}
+```{r sample_properties}
 #| output: asis
 #| echo: false
 #| eval: true
@@ -181,6 +162,13 @@ bslib::layout_column_wrap(
   bslib::value_box(
     title = "Tumor site",
     value = tumor_site,
+    showcase = NULL,
+    theme = bslib::value_box_theme(
+      bg = report_color, fg = "#fff")
+  ),
+  bslib::value_box(
+    title = "Sex",
+    value = sex,
     showcase = NULL,
     theme = bslib::value_box_theme(
       bg = report_color, fg = "#fff")
@@ -198,94 +186,129 @@ bslib::layout_column_wrap(
     showcase = NULL,
     theme = bslib::value_box_theme(
       bg = report_color, fg = "#fff")
-  ),
-  bslib::value_box(
-    title = "Sex",
-    value = sex,
-    showcase = NULL,
-    theme = bslib::value_box_theme(
-      bg = report_color, fg = "#fff")
-  )
-  
-)
-
-bslib::layout_column_wrap(
-  width = 1/4,
-  height = 90,
-  bslib::value_box(
-    title = "Sequencing assay mode",
-    value = assay_mode,
-    showcase = NULL,
-    theme = bslib::value_box_theme(
-      bg = report_color, fg = "#fff")
-  ),
-  bslib::value_box(
-    title = "Sequencing assay type",
-    value = assay_type,
-    showcase = NULL,
-    theme = bslib::value_box_theme(
-      bg = report_color, fg = "#fff")
-  ),
-  bslib::value_box(
-    title = "Coding target size",
-    value = paste0(target_size, "Mb"),
-    showcase = NULL,
-    theme = bslib::value_box_theme(
-      bg = report_color, fg = "#fff")
-  ),
-  bslib::value_box(
-    title = "Genome assembly",
-    value = genome_assembly,
-    showcase = NULL,
-    theme = bslib::value_box_theme(
-      bg = report_color, fg = "#fff")
   )
 )
-
 ```
 
-```{r input_data}
+
+::: {.callout-note collapse="true"}
+
+## Run configuration and report settings
+
+The report is generated with _[pcgr](https://github.com/sigven/pcgr)_ version `r pcg_report[['settings']][['software']][['pcgr_version']]`, using the following key settings:
+
+:::: {.columns}
+
+::: {.column width="47.5%"}
+
+**General**
+
+* Genome assembly: __`r genome_assembly`__
+* Variant actionability guidelines: __AMP/ASCO/CAP__
+* Variant oncogenicity guidelines: __ClinGen/CGC/VICC__
+* Biomarker sources: __`r bm_db_label`__
+
+```{r snv_indel_settings}
 #| output: asis
 #| echo: false
-#| eval: false
-
-bslib::layout_column_wrap(
-  width = 1/4,
-  height = 80,
-  bslib::value_box(
-    title = "",
-    value = "DNA - SNVs/InDels",
-    showcase = bsicons::bs_icon("check-square", size = "0.6em"),
-    showcase_layout = "top right",
-    theme = bslib::value_box_theme(
-      bg = pcgrr::color_palette$success, fg = "#fff")
-  ),
-  bslib::value_box(
-    title = "",
-    value = "DNA - CNAs",
-    showcase = bsicons::bs_icon("check-square", size = "0.6em"),
-    showcase_layout = "top right",
-    theme = bslib::value_box_theme(
-      bg = pcgrr::color_palette$success, fg = "#fff")
-  ),
-  bslib::value_box(
-    title = "",
-    value = "RNA - gene fusions",
-    showcase = bsicons::bs_icon("check-square", size = "0.6em"),
-    showcase_layout = "top right",
-    theme = bslib::value_box_theme(
-      bg = pcgrr::color_palette$success, fg = "#fff")
-  ),
-  bslib::value_box(
-    title = "",
-    value = "RNA - gene expression",
-    showcase = bsicons::bs_icon("check-square", size = "0.6em"),
-    showcase_layout = "top right",
-    theme = bslib::value_box_theme(
-      bg = pcgrr::color_palette$success, fg = "#fff")
-  )
-)
+#| eval: !expr pcg_report$content$snv_indel$eval == TRUE
+cat("\n**SNV/InDel settings**\n\n")
+cat(glue::glue("* Sequencing assay mode: __{assay_mode}__"), "\n")
+cat(glue::glue("* Sequencing assay type: __{assay_type}__"), "\n")
+cat(glue::glue("* Coding target size: __{target_size}Mb__"), "\n")
+cat(glue::glue("* Show noncoding variants: __{conf$other$show_noncoding}__"), "\n")
+cat(glue::glue("* MSI prediction: __{msi_prediction}__"), "\n")
+cat(glue::glue("* Include germline findings: __{include_germline_findings}__"), "\n")
+cat(glue::glue("* Variant Effect Predictor (VEP) settings"), "\n")
+cat(glue::glue("  * Transcript set: __{transcript_set_gencode}__"), "\n")
+cat(glue::glue("  * Transcript pick order: __{stringr::str_replace_all(conf[['vep']][['vep_pick_order']], ',', ', ')}__"), "\n")
+cat(glue::glue("  * Regulatory regions annotation: __{as.logical(conf[['vep']][['vep_regulatory']])}__"), "\n")
+cat(glue::glue("  * Buffer size: __{conf$vep$vep_buffer_size}__"), "\n")
+cat(glue::glue("  * Number of forks: __{conf$vep$vep_n_forks}__"), "\n")
+allelic_filter_items <- character(0)
+if (tumor_dp_tag != "_NA_" & !is.null(tumor_dp_min))
+  allelic_filter_items <- c(allelic_filter_items,
+    glue::glue("  * Minimum sequencing depth (DP) tumor (SNV + InDels): __{tumor_dp_min}__"))
+if (tumor_af_tag != "_NA_" & !is.null(tumor_af_min))
+  allelic_filter_items <- c(allelic_filter_items,
+    glue::glue("  * Minimum allelic fraction (AF) tumor (SNV + InDels): __{tumor_af_min}__"))
+if (tumor_dp_tag != "_NA_" & tumor_af_tag != "_NA_" & !is.null(tumor_ad_min))
+  allelic_filter_items <- c(allelic_filter_items,
+    glue::glue("  * Minimum allelic depth (AD) tumor (SNV + InDels): __{tumor_ad_min}__"))
+if (control_dp_tag != "_NA_" & !is.null(control_dp_min))
+  allelic_filter_items <- c(allelic_filter_items,
+    glue::glue("  * Minimum sequencing depth (DP) control (SNV + InDels): __{control_dp_min}__"))
+if (control_af_tag != "_NA_" & !is.null(control_af_max))
+  allelic_filter_items <- c(allelic_filter_items,
+    glue::glue("  * Maximum allelic fraction (AF) control (SNV + InDels): __{control_af_max}__"))
+if (control_dp_tag != "_NA_" & control_af_tag != "_NA_" & !is.null(control_ad_max))
+  allelic_filter_items <- c(allelic_filter_items,
+    glue::glue("  * Maximum allelic depth (AD) control (SNV + InDels): __{control_ad_max}__"))
+if (length(allelic_filter_items) > 0) {
+  cat("* Allelic support filtering settings", "\n")
+  for(item in allelic_filter_items) cat(item, "\n")
+}
+cat(glue::glue("* Mutational burden estimation: __{mutational_burden}__"), "\n")
+cat(glue::glue("  * TMB algorithm: __TMB_{conf$somatic_snv[['tmb']][['tmb_display']]}__"), "\n")
 ```
 
+:::
 
+::: {.column width="5%"}
+<!-- empty column to create gap -->
+:::
 
+::: {.column width="47.5%"}
+
+```{r snv_indel_settings_right}
+#| output: asis
+#| echo: false
+#| eval: !expr pcg_report$content$snv_indel$eval == TRUE
+cat("**SNV/InDel settings (continued)**\n\n")
+cat(glue::glue("* Mutational signatures estimation: __{signatures_estimation}__"), "\n")
+cat(glue::glue("  * Minimum number of mutations required: __{conf$somatic_snv$mutational_signatures[['mutation_limit']]}__"), "\n")
+cat(glue::glue("  * All reference signatures: __{as.logical(conf$somatic_snv$mutational_signatures[['all_reference_signatures']])}__"), "\n")
+cat(glue::glue("  * Inclusion of artefact signatures: __{as.logical(conf$somatic_snv$mutational_signatures[['include_artefact_signatures']])}__"), "\n")
+cat(glue::glue("  * Minimum tumor-type prevalence (percent) of reference signatures used for refitting: __{conf$somatic_snv$mutational_signatures[['prevalence_reference_signatures']]}__"), "\n")
+```
+
+```{r cna_settings}
+#| output: asis
+#| echo: false
+#| eval: !expr pcg_report$content$cna$eval == TRUE
+cat("\n**CNA settings**\n\n")
+cat(glue::glue("* Amplification threshold (absolute): __{conf$somatic_cna$amp_threshold_absolute}__"), "\n")
+cat(glue::glue("* Amplification threshold (relative): __{conf$somatic_cna$amp_threshold_relative}__"), "\n")
+cat(glue::glue("* CNA thresholding mode: __{conf$somatic_cna$threshold_mode}__"), "\n")
+cat(glue::glue("* Effective amplification threshold: __{conf$somatic_cna$amp_threshold_effective}__"), "\n")
+cat(glue::glue("* Gain threshold (absolute): __{conf$somatic_cna$gain_threshold_absolute}__"), "\n")
+cat(glue::glue("* Gain threshold (relative): __{conf$somatic_cna$gain_threshold_relative}__"), "\n")
+cat(glue::glue("* Heterozygous deletion threshold (absolute): __{conf$somatic_cna$del_threshold_absolute}__"), "\n")
+cat(glue::glue("* Heterozygous deletion threshold (relative): __{conf$somatic_cna$del_threshold_relative}__"), "\n")
+cat(glue::glue("* Tumor ploidy: __{tumor_ploidy}__"), "\n")
+cat(glue::glue("* Tumor purity: __{tumor_purity}__"), "\n")
+```
+
+```{r expression_settings}
+#| output: asis
+#| echo: false
+#| eval: !expr as.logical(pcg_report$content$expression$eval) == TRUE
+cat("\n**Expression settings**\n\n")
+cat(glue::glue("* RNA expression similarity analysis: __{rna_expression_similarity}__"), "\n")
+```
+
+```{r fusion_settings}
+#| output: asis
+#| echo: false
+#| eval: !expr pcg_report$content$fusion$eval == TRUE
+cat("\n**RNA fusion settings**\n\n")
+cat(glue::glue("* Minimum split reads required: __{conf$rna_fusion$min_split_reads}__"), "\n")
+```
+
+:::
+
+::::
+
+:::
+
+<br>

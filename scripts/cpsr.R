@@ -5,6 +5,7 @@ options(warn=-1)
 
 args <- commandArgs(trailingOnly=TRUE)
 
+suppressWarnings(suppressPackageStartupMessages(library(pcgrr)))
 suppressWarnings(suppressPackageStartupMessages(library(cpsr)))
 suppressWarnings(suppressPackageStartupMessages(library(log4r)))
 

@@ -5,7 +5,7 @@
 \alias{oncogenicity_criteria}
 \title{Oncogenicity criteria (ClinGen/CGC/VICC)}
 \format{
-An object of class \code{spec_tbl_df} (inherits from \code{tbl_df}, \code{tbl}, \code{data.frame}) with 14 rows and 6 columns.
+An object of class \code{spec_tbl_df} (inherits from \code{tbl_df}, \code{tbl}, \code{data.frame}) with 20 rows and 6 columns.
 }
 \usage{
 oncogenicity_criteria

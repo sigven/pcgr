@@ -19,6 +19,7 @@ def get_vcf_info_tags(vcf_fname):
 
 
 def print_vcf_header(vcf_fname, vcfheader_file, logger, chromline_only=False):
+
     if chromline_only:
         check_subprocess(
             logger, f'bgzip -dc {vcf_fname} | egrep \'^#\' | egrep \'^#CHROM\' >> {vcfheader_file}', debug=False)

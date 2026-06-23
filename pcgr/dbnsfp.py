@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
-import os
 import re
-import cyvcf2
 
 from cyvcf2 import VCF
 from pcgr import pcgr_vars

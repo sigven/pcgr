@@ -10,7 +10,7 @@ get_prevalent_site_signatures(
   custom_collection = NULL,
   ref_data = NULL,
   min_prevalence_pct = 0.1,
-  incl_poss_artifacts = T
+  incl_poss_artifacts = TRUE
 )
 }
 \arguments{

@@ -5,8 +5,9 @@
 \alias{variant_db_url}
 \title{List of URLS and variant identifiers for variant/gene/protein domain databases}
 \format{
-A data.frame with 6 rows and 5 columns that indicates URL's for various variant/gene databases
-and how to use PCGR annotation columns to generate variant links
+A data.frame with 6 rows and 5 columns that indicates URL's
+for various variant/gene databases and how to use PCGR annotation
+columns to generate variant links
 \itemize{
 \item \emph{name} - Name encoding for variant/gene database
 \item \emph{group_by_var} - Which column should be used for grouping

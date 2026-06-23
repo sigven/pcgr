@@ -4,11 +4,12 @@ editor_options:
     wrap: 72
 ---
 
-# Personal Cancer Genome Reporter (PCGR) <a href="https://sigven.github.io/pcgr/"><img src="man/figures/logo.png" align="right" height="90" width="76"/></a>
+# Personal Cancer Genome Reporter <a href="https://sigven.github.io/pcgr/"><img src="man/figures/logo.png" align="right" height="90" width="76"/></a>
 
 
-The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for functional annotation and translation of individual tumor genomes for precision cancer medicine. It interprets primarily somatic SNVs/InDels and copy number aberrations, and has additional support for interpretation of bulk RNA-seq expression data. The software classifies variants with respect to predicted _oncogenicity_, and clinical _actionability_. Interactive HTML output reports allow the user to interrogate the clinical impact of the molecular findings in an individual tumor.
+The Personal Cancer Genome Reporter (PCGR) is a stand-alone software workflow for functional annotation and translation of individual tumor genomes for precision cancer medicine. It interprets somatic SNVs/InDels and copy number aberrations, RNA fusions, and bulk RNA-seq expression data. The software classifies variants with respect to predicted _oncogenicity_, and clinical _actionability_. Interactive HTML output reports allow the user to interrogate the clinical impact of the molecular findings in an individual tumor.
 
+- Multi-omic interpretation
 - Variant classification
   - according to *oncogenicity*: evaluating the oncogenic potential of somatic DNA aberrations ([ClinGen/CGC/VICC guidelines](https://pubmed.ncbi.nlm.nih.gov/35101336/))
   - according to *actionability*: mapping the therapeutic, diagnostic, and prognostic implications of somatic DNA aberrations ([AMP/ASCO/CAP guidelines](https://pubmed.ncbi.nlm.nih.gov/27993330/))
@@ -19,15 +20,49 @@ The Personal Cancer Genome Reporter (PCGR) is a stand-alone software package for
 
 PCGR supports both of the most recent human genome assemblies (GRCh37/GRCh38), and accepts variant calls from both tumor-control and tumor-only sequencing assays. Much of the functionality is intended for whole-exome/whole-genome sequencing assays, but you can also apply PCGR to output from targeted sequencing panels. If you are interested in the interrogation of germline variants and their relation to cancer predisposition, we recommend trying the accompanying tool [Cancer Predisposition Sequencing Reporter (CPSR)](https://github.com/sigven/cpsr).
 
-Example screenshots from the [quarto](https://quarto.org)-based cancer genome report by PCGR:
+Seven snapshots of sections in the [quarto](https://quarto.org)-based cancer genome report by PCGR (artificial sample, with more findings than usual):
 
-![PCGR screenshot 1](img/sc2.png)
-![PCGR screenshot 2](img/sc1.png)
-![PCGR screenshot 3](img/sc3.png)
+<br><br>
+
+<div id="pcgrCarousel" class="carousel slide" data-bs-interval="false">
+<div class="carousel-inner">
+<div class="carousel-item active"><img src="img/pcgr_oncogenicity.png" class="d-block w-100" alt="Variant classification - oncogenicity"></div>
+<div class="carousel-item"><img src="img/pcgr_actionability.png" class="d-block w-100" alt="Clinical actionability classification"></div>
+<div class="carousel-item"><img src="img/pcgr_cna.png" class="d-block w-100" alt="Somatic CNAs"></div>
+<div class="carousel-item"><img src="img/pcgr_tmb.png" class="d-block w-100" alt="Tumor mutational burden"></div>
+<div class="carousel-item"><img src="img/pcgr_expression_outliers.png" class="d-block w-100" alt="Gene expression outliers"></div>
+<div class="carousel-item"><img src="img/pcgr_variant_stats.png" class="d-block w-100" alt="Variant statistics"></div>
+<div class="carousel-item"><img src="img/pcgr_rna_fusions.png" class="d-block w-100" alt="Somatic RNA fusions"></div>
+</div>
+<div class="carousel-indicators">
+<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Variant classification - oncogenicity"></button>
+<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="1" aria-label="Clinical actionability classification"></button>
+<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="2" aria-label="Somatic CNAs"></button>
+<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="3" aria-label="Tumor mutational burden"></button>
+<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="4" aria-label="Gene expression outliers"></button>
+<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="5" aria-label="Variant statistics"></button>
+<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="6" aria-label="Somatic RNA fusions"></button>
+</div>
+</div>
+<script>
+document.getElementById('pcgrCarousel').querySelector('.carousel-inner').addEventListener('click', function() {
+bootstrap.Carousel.getOrCreateInstance(document.getElementById('pcgrCarousel')).next();
+});
+</script>
+
+<br><br>
 
 PCGR originates from the [Norwegian Cancer Genomics Consortium (NCGC)](https://cancergenomics.no), at the [Institute for Cancer Research, Oslo University Hospital, Norway](https://radium.no).
 
 ### Top News
+
+- *June 23rd 2026*: **2.3.0 release**
+  - Data/software updates:
+    - Ensembl VEP `v115` / GENCODE v49
+    - ClinVar (2026-06)
+    - CIViC (2026-06-20)
+    - and more
+  - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
 
 - *September 17th 2025:* **2.2.5 release**
   - fixed failing support for AD/AF filtering, adding AD filtering
@@ -94,7 +129,7 @@ PCGR originates from the [Norwegian Cancer Genomics Consortium (NCGC)](https://c
 
 ## Example reports
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17140659.svg)](https://doi.org/10.5281/zenodo.17140659)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20795653.svg)](https://doi.org/10.5281/zenodo.20795653)
 
 ## Why use PCGR?
 
@@ -102,6 +137,7 @@ The great complexity of acquired mutations in individual tumor genomes poses a s
 
 - systematically interrogate tumor-specific variants in the context of known therapeutic, diagnostic, and prognostic biomarkers
 - highlight genomic aberrations with likely oncogenic potential
+- evaluate complex biomarker readouts (MSI, TMB, mutational signatures, gene expression outliers)
 - provide a structured and concise summary of the most relevant findings
 - present the results in a format accessible to clinical experts
 

@@ -3,12 +3,11 @@
 import os
 import re
 
-
 from pcgr.annoutils import assign_cds_exon_intron_annotations
 from pcgr import pcgr_vars
 from pcgr.utils import getlogger, check_file_exists, get_perl_exports, get_maxentscan_dir
 
-def get_vep_command(file_paths, conf_options, input_vcf, output_vcf, debug = False):
+def get_vep_command(file_paths, conf_options, input_vcf, output_vcf, debug = False, sv = False):
 
     output_vcf_gz = f'{output_vcf}.gz'
     genome_assembly = conf_options['genome_assembly']
@@ -19,20 +18,41 @@ def get_vep_command(file_paths, conf_options, input_vcf, output_vcf, debug = Fal
         'misc','fasta','assembly',
         f'Homo_sapiens.{pcgr_vars.VEP_ASSEMBLY[genome_assembly]}.dna.primary_assembly.fa.gz')
 
+    splice_vault_tsv = os.path.join(
+        file_paths['refdata_assembly_dir'],
+        'variant','tsv','splicevault',
+        f'splicevault.{genome_assembly}.tsv.gz'
+    )
+
     logger = getlogger('check-fasta-files')
     check_file_exists(fasta_assembly, logger = logger)
 
-    # for logging only
-    plugins_in_use = "NearestExonJB, MaxEntScan"
+    if sv:
+        # SV mode: no HGVS, no gnomAD SNV frequencies, no splice/NMD plugins,
+        # no check_ref (symbolic alleles have no nucleotide REF to validate)
+        plugins_in_use = "None"
+        vep_flags = (
+            f'--variant_class --domains --symbol --protein --ccds --mane '
+            f'--uniprot --appris --biotype --tsl --canonical --format vcf --cache --numbers '
+            f'--total_length --allele_number --failed 1 --no_stats --no_escape --vcf '
+            f'--dont_skip --flag_pick_allele_gene '
+            f'--force_overwrite --species homo_sapiens --offline')
+    else:
+        # SNV/indel mode (default)
+        #plugins_in_use = "NearestExonJB, MaxEntScan, SpliceVault, NMD"
+        plugins_in_use = "NearestExonJB, MaxEntScan, NMD"
+        vep_flags = (
+            f'--hgvs --af_gnomade --af_gnomadg --max_af --variant_class --domains --symbol --protein --ccds --mane '
+            f'--uniprot --appris --biotype --tsl --canonical --format vcf --cache --numbers '
+            f'--total_length --allele_number --failed 1 --no_stats --no_escape --xref_refseq --vcf '
+            f'--check_ref --dont_skip --flag_pick_allele_gene '
+            ## plugins
+            f'--plugin NearestExonJB,max_range=50000 '
+            f'--plugin MaxEntScan,{get_maxentscan_dir()} '
+            f'--plugin NMD '
+            f'--plugin SpliceVault,file={splice_vault_tsv} '
+            f'--force_overwrite --species homo_sapiens --offline')
 
-    # List all VEP flags used when calling VEP
-    vep_flags = (
-        f'--hgvs --af_gnomade --af_gnomadg --variant_class --domains --symbol --protein --ccds --mane '
-        f'--uniprot --appris --biotype --tsl --canonical --format vcf --cache --numbers '
-        f'--total_length --allele_number --failed 1 --no_stats --no_escape --xref_refseq --vcf '
-        f'--check_ref --dont_skip --flag_pick_allele_gene --plugin NearestExonJB,max_range=50000 '
-        f'--plugin MaxEntScan,{get_maxentscan_dir()} '
-        f'--force_overwrite --species homo_sapiens --offline')
     vep_options = (
         f'--dir {vep_dir} --assembly {pcgr_vars.VEP_ASSEMBLY[genome_assembly]} --cache_version {pcgr_vars.VEP_VERSION} '
         f'--fasta {fasta_assembly} '
@@ -112,12 +132,20 @@ def get_csq_record_annotations(csq_fields, varkey, logger, vep_csq_fields_map, t
                                 'Could not find transcript xrefs for ' + str(ensembl_transcript_id))
 
                 # Specifically assign PFAM protein domain as a csq_record key
+                # Strip off PDB identifiers from VEP DOMAINS field
                 if vep_csq_fields_map['index2field'][j] == 'DOMAINS':
                     domain_identifiers = str(csq_fields[j]).split('&')
+                    other_domains = []
                     for v in domain_identifiers:
                         if v.startswith('Pfam'):
                             csq_record['PFAM_DOMAIN'] = str(re.sub(r'\.[0-9]{1,}$', '', re.sub(r'Pfam:', '', v)))
+                        if not v.startswith('PDB-'):
+                            other_domains.append(v)
+                    
+                    if len(other_domains) > 0:
+                        csq_record['DOMAINS'] = '&'.join(other_domains)
 
+               
                 # Assign COSMIC/DBSNP mutation ID's as individual key,value pairs in the csq_record object
                 if vep_csq_fields_map['index2field'][j] == 'Existing_variation':
                     var_identifiers = str(csq_fields[j]).split('&')
@@ -184,11 +212,11 @@ def pick_single_gene_csq(vep_csq_results,
         csq_candidate['conskey'] = str(csq_elem['SYMBOL']) + ':' + str(csq_elem['Consequence'])
 
         ## MANE select status - lower value prioritized
-        if csq_elem['MANE_SELECT'] is not None:
+        if csq_elem['MANE_SELECT'] is not None or 'MANE_SELECT2' in csq_elem.keys():
             csq_candidate['mane_select'] = 0
 
-        ## MANE PLUS clnical status - lower value prioritized
-        if csq_elem['MANE_PLUS_CLINICAL'] is not None:
+        ## MANE PLUS clinical status - lower value prioritized
+        if csq_elem['MANE_PLUS_CLINICAL'] is not None or 'MANE_PLUS_CLINICAL2' in csq_elem.keys():
             csq_candidate['mane_plus_clinical'] = 0
 
         ## CANONICAL status - lower value prioritized
@@ -296,9 +324,8 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, grantham_scores,
     #gwas_hit = False
     #if var_gwas_info is not None:
     #    gwas_hit = True
-
     #found_in_target = 0
-
+    #index = 1
     ## Retrieve the INFO element provided by VEP (default 'CSQ') in the VCF object, and
     ## loop through all transcript-specific consequence blocks provided, e.g.
     #  CSQ=A|intron_variant|||.., A|splice_region_variant|||, and so on.
@@ -324,9 +351,19 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, grantham_scores,
         ## CPSR - consider all picked gene-specific consequences (considering that a variant may occasionally
         ## overlap other, non-CPSR targets)
         if pick_only is False:
-            csq_record = get_csq_record_annotations(csq_fields, varkey, logger, vep_csq_fields_map, transcript_xref_map, grantham_scores)
+            csq_record = get_csq_record_annotations(
+                csq_fields, varkey, logger, vep_csq_fields_map, transcript_xref_map, grantham_scores)
             all_csq.append(csq_record)
-            if csq_record['PICK'] == '1':
+            
+            ## For GRCh37 primarily, MANE Select is not provided as a VEP annotation, thus the
+            ## primary consequence may unintentionally NOT be dictated by MANE transcript status
+            ## - as a workaround, we here utilize PCGR/CPSR's in-house MANE select/MANE Plus 
+            ## Clinical annotations (MANE_SELECT2 / MANE_PLUS_CLINICAL2)
+            if csq_record['PICK'] == '1' or \
+                csq_record['MANE_SELECT'] is not None or \
+                csq_record['MANE_PLUS_CLINICAL'] is not None or \
+                'MANE_SELECT2' in csq_record.keys() or \
+                'MANE_PLUS_CLINICAL2' in csq_record.keys():
                 if 'Feature_type' in csq_record:
                     if csq_record['Feature_type'] == 'RegulatoryFeature':
                         primary_csq_pick.append(csq_record)
@@ -336,10 +373,10 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, grantham_scores,
                         if 'ENTREZGENE' in csq_record.keys():
                             ## Consequence in CPSR target - append to primary_csq_pick
                             if csq_record['ENTREZGENE'] in targets_entrez_gene.keys():
-                                primary_csq_pick.append(csq_record)
+                                primary_csq_pick.append(csq_record)                                
+                            else:
                                 ## Consequence not in CPSR targets, nor with Entrez identifier
                                 # (pseudogenes etc) - append to secondary_csq_pick
-                            else:
                                 secondary_csq_pick.append(csq_record)
 
                         ## Entrez gene identifier is not provided by VEP
@@ -349,7 +386,6 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, grantham_scores,
                             else:
                                 ## Consequence not in CPSR targets, nor with Entrez identifier
                                 # (pseudogenes etc) - append to secondary_csq_pick
-                                warning = 1
                                 secondary_csq_pick.append(csq_record)
                     else:
                         ## intergenic
@@ -424,7 +460,7 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, grantham_scores,
 
     ## If multiple transcript-specific variant consequences highlighted by --pick_allele_gene,
     ## prioritize/choose block of consequence according to 'vep_pick_order'
-    if len(vep_csq_results['picked_gene_csq']) > 1:
+    if len(vep_csq_results['picked_gene_csq']) > 1:       
         vep_chosen_csq_idx = pick_single_gene_csq(
             vep_csq_results, pick_criteria_ordered = vep_pick_order, logger = logger, debug = debug)
         vep_csq_results['picked_csq'] = vep_csq_results['picked_gene_csq'][vep_chosen_csq_idx]
@@ -435,8 +471,6 @@ def parse_vep_csq(rec, transcript_xref_map, vep_csq_fields_map, grantham_scores,
             vep_csq_results['picked_csq'] = vep_csq_results['picked_gene_csq'][vep_chosen_csq_idx]
         else:
             logger.error('ERROR: No VEP block chosen by --pick_allele_gene')
-
-
 
     return (vep_csq_results)
 

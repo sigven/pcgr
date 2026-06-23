@@ -14,15 +14,15 @@ filter_maf_file <- function(callset, settings) {
 
   filtered_vars_maf_like <- data.frame()
 
-  if("variant" %in% names(callset)) {
-    if(NROW(callset[['variant']]) == 0) {
+  if ("variant" %in% names(callset)) {
+    if (NROW(callset[['variant']]) == 0) {
       return(0)
     }
 
-    pcgrr::log4r_info(paste0(
+    log4r_info(paste0(
       "Updating MAF file with filtered somatic SNV/InDels"))
 
-    if(all(c("CHROM",
+    if (all(c("CHROM",
              "POS",
              "REF",
              "ALT") %in% colnames(callset[['variant']]))) {
@@ -79,42 +79,42 @@ filter_maf_file <- function(callset, settings) {
 
   ## check if unfiltered MAF file exists and read it - if not, return 0
   if (file.exists(settings[['molecular_data']][['fname_maf_tsv']])) {
-    if(!(file.size(settings[['molecular_data']][['fname_maf_tsv']]) == 0)) {
+    if (!(file.size(settings[['molecular_data']][['fname_maf_tsv']]) == 0)) {
       maf_data_header <- readLines(
         settings[['molecular_data']][['fname_maf_tsv']], n = 1)
 
       maf_data_unfiltered <- readr::read_tsv(
         settings[['molecular_data']][['fname_maf_tsv']],
-        show_col_types = F, col_names = T,
+        show_col_types = FALSE, col_names = TRUE,
         comment = "#", na = ""
       )
 
-      if(NROW(maf_data_unfiltered) == 0) {
-        pcgrr::log4r_warn("MAF file is empty - no filtering will be performed")
+      if (NROW(maf_data_unfiltered) == 0) {
+        log4r_warn("MAF file is empty - no filtering will be performed")
         return(0)
       }else{
         maf_data_unfiltered$Chromosome <-
           as.character(maf_data_unfiltered$Chromosome)
 
-        if(is.logical(maf_data_unfiltered$Tumor_Seq_Allele1)) {
+        if (is.logical(maf_data_unfiltered$Tumor_Seq_Allele1)) {
           maf_data_unfiltered$Tumor_Seq_Allele1 <-
             as.character("T")
         }
-        if(is.logical(maf_data_unfiltered$Tumor_Seq_Allele2)) {
+        if (is.logical(maf_data_unfiltered$Tumor_Seq_Allele2)) {
           maf_data_unfiltered$Tumor_Seq_Allele2 <-
             as.character("T")
         }
       }
 
     } else {
-      pcgrr::log4r_warn("MAF file is empty - no filtering will be performed")
+      log4r_warn("MAF file is empty - no filtering will be performed")
       return(0)
     }
   }
 
-  if(NROW(maf_data_unfiltered) > 0 &
+  if (NROW(maf_data_unfiltered) > 0 &
      NROW(filtered_vars_maf_like) > 0) {
-    if(all(c("Chromosome",
+    if (all(c("Chromosome",
              "Start_Position",
              "Tumor_Seq_Allele1",
              "Tumor_Seq_Allele2",
@@ -134,7 +134,7 @@ filter_maf_file <- function(callset, settings) {
                  "Variant_Type")
         )
 
-      if(!is.null(maf_data_header) &
+      if (!is.null(maf_data_header) &
          NROW(maf_data_filtered) > 0) {
         file.remove(settings[['molecular_data']][['fname_maf_tsv']])
         writeLines(maf_data_header,
@@ -143,7 +143,7 @@ filter_maf_file <- function(callset, settings) {
         readr::write_tsv(
           maf_data_filtered,
           settings[['molecular_data']][['fname_maf_tsv']],
-          append = TRUE, col_names = T, quote = "none", na = "")
+          append = TRUE, col_names = TRUE, quote = "none", na = "")
       }
     }
   }

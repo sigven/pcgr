@@ -1,4 +1,3 @@
-
 #' Function that assigns a maximum value to a variable (MAX_AF_GNOMAD) reflecting
 #' the maximum allele frequency for a given variant across gnomAD populations
 #'
@@ -46,6 +45,126 @@ max_af_gnomad <- function(sample_calls) {
 
   }
   return(sample_calls)
+}
+
+
+
+#' Function that assigns a maximum value to a variable
+#' (gnomAD_NC_FAF_GRPMAX) reflecting the filter allele frequency
+#' (GrpMAX) for a given variant in the non-cancer
+#' gnomAD subset (v3.1)
+#'
+#' @param sample_calls data frame with sample variant calls
+#'
+#' @export
+grpmax_faf_nc_gnomad <- function(sample_calls) {
+  invisible(
+    assertthat::assert_that(is.data.frame(sample_calls),
+                            msg = paste0("Argument 'sample_calls' must be of ",
+                                         "type data.frame"))
+  )
+
+  if ("gnomAD_NC_FAF_GRPMAX" %in% colnames(sample_calls)) {
+    sample_calls$gnomAD_NC_FAF_GRPMAX <- NULL
+  }
+
+  # Identify exome and genome AF columns
+  af_cols <-
+    grep("^tmp_gNC_FAF_(AFR|AMR|NFE|SAS|EAS|GLOBAL)$",
+         names(sample_calls), value = TRUE)
+
+  # Function to compute max AF per row
+  get_max_allele_freq_nc <- function(row) {
+    af_nc_vals <- as.numeric(row[af_cols])
+    af_max <- 0
+    if (all(is.na(af_nc_vals))) {
+      return(0)
+    } else {
+      af_max <- max(af_nc_vals, na.rm = TRUE)
+    }
+
+    return(af_max)
+
+  }
+
+  # Apply to each row
+  sample_calls$gnomAD_NC_FAF_GRPMAX <-
+    apply(sample_calls, 1, get_max_allele_freq_nc)
+  return(sample_calls)
+
+}
+
+#' Function that assigns a maximum value to a variable
+#' (gnomAD_AF_POPMAX) reflecting the maximum allele frequency
+#' for a given variant across gnomAD populations
+#'
+#' @param sample_calls data frame with sample variant calls
+#'
+#' @export
+popmax_af_gnomad <- function(sample_calls) {
+  invisible(
+    assertthat::assert_that(is.data.frame(sample_calls),
+                            msg = paste0("Argument 'sample_calls' must be of ",
+                                         "type data.frame"))
+  )
+
+  if ("gnomAD_AF_POPMAX" %in% colnames(sample_calls)) {
+    sample_calls$gnomAD_AF_POPMAX <- NULL
+  }
+
+  # Identify exome and genome AF columns
+  exome_cols <-
+    grep("^gnomADe_((NFE|AFR|AMR|SAS|EAS|FIN)_)?AF",
+         names(sample_calls), value = TRUE)
+  genome_cols <-
+    grep("^gnomADg_((NFE|AFR|AMR|SAS|EAS|FIN)_)?AF",
+         names(sample_calls), value = TRUE)
+
+  # Function to compute max AF per row
+  get_max_allele_freq <- function(row) {
+    exome_vals <- as.numeric(row[exome_cols])
+    genome_vals <- as.numeric(row[genome_cols])
+
+    retmax <- 0
+    genome_max <- 0
+    exome_max <- 0
+    exome_all_nas <- FALSE
+
+    ## prefer exome AF values over genome AF values (if both are present)
+    ## reason: 1) larger sample size in exome AF values
+    ## if all exome AF values are NA (or zero and genome non-zero),
+    ## then use genome AF values
+    if (all(is.na(exome_vals))) {
+      if (all(is.na(genome_vals))) {
+        #return(NA_real_)
+        return(0)
+      } else {
+        exome_all_nas <- TRUE
+        genome_max <- max(genome_vals, na.rm = TRUE)
+        #if (genome_max > 0) {
+        retmax <- genome_max
+        #}
+      }
+    } else {
+      exome_max <- max(exome_vals, na.rm = TRUE)
+      if (!all(is.na(genome_vals))) {
+        genome_max <- max(genome_vals, na.rm = TRUE)
+      }
+      retmax <- exome_max
+    }
+
+    if (exome_all_nas == TRUE | (exome_max == 0 & genome_max > 0)) {
+      retmax <- genome_max
+    }
+    return(retmax)
+
+  }
+
+  # Apply to each row
+  sample_calls$gnomAD_AF_POPMAX <-
+    apply(sample_calls, 1, get_max_allele_freq)
+  return(sample_calls)
+
 }
 
 
@@ -212,7 +331,7 @@ pon_status <- function(sample_calls) {
                                          "type data.frame"))
   )
   ## assign STATUS_PON to all calls overlapping the
-  ## user-defined panel-of-normals VCF ("PANEL_OF_NORMALS" == T)
+  ## user-defined panel-of-normals VCF ("PANEL_OF_NORMALS" == TRUE)
   if ("PANEL_OF_NORMALS" %in% colnames(sample_calls)) {
     sample_calls <- sample_calls |>
       dplyr::mutate(
@@ -245,14 +364,14 @@ het_af_germline_status <- function(sample_calls) {
   ## iii) in gnomAD
   ## and iv) not present in COSMIC/TCGA
   if ("VAF_TUMOR" %in% colnames(sample_calls) &
-      "MAX_AF_GNOMAD" %in% colnames(sample_calls) &
+      "POPMAX_AF_GNOMAD" %in% colnames(sample_calls) &
       "STATUS_COSMIC" %in% colnames(sample_calls) &
       "STATUS_TCGA" %in% colnames(sample_calls)) {
     sample_calls <- sample_calls |>
       dplyr::mutate(
         STATUS_GERMLINE_HET =
           dplyr::if_else(
-            !is.na(.data$MAX_AF_GNOMAD) &
+            !is.na(.data$POPMAX_AF_GNOMAD) &
               .data$STATUS_DBSNP == TRUE &
               !is.na(.data$VAF_TUMOR) &
               .data$VAF_TUMOR >= 0.40 & .data$VAF_TUMOR <= 0.60 &
@@ -281,7 +400,7 @@ assign_somatic_classification <- function(sample_calls, settings) {
 
   ## Assign non-somatic classification based on various evidence criteria
   ## 1) Frequency of minor allele in any of the gnomAD populations is
-  ##    greater than the defined thresholds by the user (by default)
+  ##    greater than the defined threshold by the user
   ##
   ## User-defined filtering options:
   ##
@@ -298,13 +417,30 @@ assign_somatic_classification <- function(sample_calls, settings) {
   ##    iii) Variant is neither in COSMIC nor TCGA
   ## 6) Variant is recorded in dbSNP (non-somatic ClinVar/COSMIC/TCGA)
 
-  pcgrr::log4r_info("Applying variant filters on tumor-only calls - assigning somatic classification")
+  ## Ensure all STATUS columns used below exist — each is only created
+  ## conditionally upstream (when the prerequisite source column is present)
+  status_cols <- c(
+    "gnomAD_AF_ABOVE_TOLERATED",
+    "STATUS_CLINVAR_GERMLINE",
+    "STATUS_PON",
+    "STATUS_GERMLINE_HOM",
+    "STATUS_GERMLINE_HET",
+    "STATUS_DBSNP",
+    "STATUS_TCGA",
+    "STATUS_COSMIC"
+  )
+  for (col in status_cols) {
+    if (!(col %in% colnames(sample_calls))) {
+      sample_calls[[col]] <- FALSE
+    }
+  }
+
+  log4r_info("Applying variant filters on tumor-only calls - assigning somatic classification")
   sample_calls <- sample_calls |>
     dplyr::mutate(
       GERMLINE_GNOMAD =
         dplyr::if_else(
-          .data$gnomADe_AF_ABOVE_TOLERATED == TRUE |
-            .data$gnomADg_AF_ABOVE_TOLERATED == TRUE,
+          .data$gnomAD_AF_ABOVE_TOLERATED == TRUE,
           "GERMLINE_GNOMAD",
           "")) |>
     dplyr::mutate(
@@ -375,16 +511,15 @@ assign_somatic_classification <- function(sample_calls, settings) {
       )
     ) |>
     dplyr::select(
-      -c(
+      -dplyr::any_of(c(
         "STATUS_TCGA",
         "STATUS_COSMIC",
         "STATUS_DBSNP",
         "STATUS_GERMLINE_HET",
         "STATUS_GERMLINE_HOM",
         "STATUS_PON",
-        "gnomADe_AF_ABOVE_TOLERATED",
-        "gnomADg_AF_ABOVE_TOLERATED",
-        "STATUS_CLINVAR_GERMLINE"))
+        "gnomAD_AF_ABOVE_TOLERATED",
+        "STATUS_CLINVAR_GERMLINE")))
 
   return(sample_calls)
 }
@@ -413,17 +548,22 @@ assign_somatic_germline_evidence <- function(
   tumor_only_settings <-
     settings$conf$somatic_snv$tumor_only
 
-  ## assign STATUS_POPFREQ_GNOMAD_ABOVE_TOLERATED
-  for (pop in c("GLOBAL", "NFE", "AMR", "AFR",
-                "SAS", "EAS", "ASJ", "FIN", "OTH")) {
-    sample_calls <-
-      pcgrr::assign_germline_popfreq_status(
-        sample_calls,
-        pop = pop,
-        dbquery = c("gnomADe","gnomADg"),
-        max_tolerated_af =
-          tumor_only_settings[[paste0("maf_gnomad_", tolower(pop))]])
-  }
+  sample_calls <-
+    assign_germline_popfreq_status(
+      sample_calls,
+      max_tolerated_af =
+        tumor_only_settings[["gnomad_popmax_af_tolerated"]])
+
+  # for (pop in c("GLOBAL", "NFE", "AMR", "AFR",
+  #               "SAS", "EAS", "ASJ", "FIN", "OTH")) {
+  #   sample_calls <-
+  #     assign_germline_popfreq_status_old(
+  #       sample_calls,
+  #       pop = pop,
+  #       dbquery = c("gnomADe","gnomADg"),
+  #       max_tolerated_af =
+  #         tumor_only_settings[[paste0("maf_gnomad_", tolower(pop))]])
+  # }
 
   sample_calls <- sample_calls |>
     max_af_gnomad() |>
@@ -438,6 +578,7 @@ assign_somatic_germline_evidence <- function(
   return(sample_calls)
 }
 
+
 #' Function that sets STATUS_POPFREQ_1KG_ABOVE_TOLERATED/
 #' STATUS_POPFREQ_GNOMAD_ABOVE_TOLERATED to TRUE for variants
 #' if any population frequency exceeds max_tolerated_af
@@ -451,16 +592,16 @@ assign_somatic_germline_evidence <- function(
 #' @return sample_calls
 #'
 #' @export
-assign_germline_popfreq_status <- function(sample_calls,
+assign_germline_popfreq_status_old <- function(sample_calls,
                                            pop = "NFE",
                                            dbquery = c("gnomADe","gnomADg"),
                                            max_tolerated_af = 0.01) {
 
-  if(pop == "GLOBAL"){
+  if (pop == "GLOBAL") {
     pop = ""
   }
 
-  for(db in dbquery){
+  for (db in dbquery) {
     if (db == "gnomADe") {
       if (!("gnomADe_AF_ABOVE_TOLERATED" %in% colnames(sample_calls))) {
         sample_calls$gnomADe_AF_ABOVE_TOLERATED <- FALSE
@@ -510,247 +651,55 @@ assign_germline_popfreq_status <- function(sample_calls,
 }
 
 
-#' Function that makes input data for an UpSet plot
-#' (filtering/intersection results) for the somatic-germline
-#' classification procedure
-#'
-#' param calls unfiltered calls (germline + somatic)
-#' param config config
-#'
-#' return upset data
-#'
-#' export
-#' make_upset_plot_data <- function(calls, config) {
-#'
-#'   columns <- c()
-#'   if (config[["tumor_only"]][["exclude_pon"]] == TRUE) {
-#'     columns <- c(columns, "STATUS_PON")
-#'   }
-#'   if (config[["tumor_only"]][["exclude_likely_hom_germline"]] == TRUE) {
-#'     columns <- c(columns, "STATUS_GERMLINE_HOM")
-#'   }
-#'   if (config[["tumor_only"]][["exclude_likely_het_germline"]] == TRUE) {
-#'     columns <- c(columns, "STATUS_GERMLINE_HET")
-#'   }
-#'   if (config[["tumor_only"]][["exclude_dbsnp_nonsomatic"]] == TRUE) {
-#'     columns <- c(columns, "STATUS_DBSNP")
-#'   }
-#'   assertable::assert_colnames(
-#'     calls, c("VAR_ID",
-#'              "gnomADe_AF_ABOVE_TOLERATED",
-#'              "STATUS_CLINVAR_GERMLINE"),
-#'     only_colnames = F, quiet = T)
-#'   df <- dplyr::select(calls, .data$VAR_ID,
-#'                       .data$gnomADe_AF_ABOVE_TOLERATED,
-#'                       .data$STATUS_CLINVAR_GERMLINE)
-#'   for (c in columns) {
-#'     if (c %in% colnames(calls)) {
-#'       df[, c] <- calls[, c]
-#'     }
-#'   }
-#'
-#'   for (v in colnames(df)) {
-#'     if (v != "VAR_ID") {
-#'       df[, v] <- as.integer(df[, v])
-#'     }
-#'   }
-#'   df <- df |>
-#'     dplyr::rename(
-#'       gnomAD = .data$gnomADe_AF_ABOVE_TOLERATED,
-#'       ClinVar = .data$STATUS_CLINVAR_GERMLINE)
-#'   if ("STATUS_PON" %in% colnames(df)) {
-#'     df <- dplyr::rename(df, Panel_Of_Normals = .data$STATUS_PON)
-#'   }
-#'   if ("STATUS_GERMLINE_HOM" %in% colnames(df)) {
-#'     df <- dplyr::rename(df, HomAF = .data$STATUS_GERMLINE_HOM)
-#'   }
-#'   if ("STATUS_GERMLINE_HET" %in% colnames(df)) {
-#'     df <- dplyr::rename(df, HetAF = .data$STATUS_GERMLINE_HET)
-#'   }
-#'   if ("STATUS_DBSNP" %in% colnames(df)) {
-#'     df <- dplyr::rename(df, dbSNP = .data$STATUS_DBSNP)
-#'   }
-#'   return(df)
-#'
-#' }
-#'
-#' #' #' Function that makes an upset calls for germline-filtered variants
-#' #' classification procedure
-#' #'
-#' #' param upset_data unfiltered calls (germline + somatic)
-#' #'
-#' #' return p
-#' #'
-#' #' export
-#' upset_plot_tumor_only <- function(upset_data) {
-#'
-#'   isets <- c()
-#'   all_negative_filters <- c()
-#'   for (c in colnames(upset_data)) {
-#'     if (c != "VAR_ID") {
-#'       if (length(unique(upset_data[, c] == 1)) == 1) {
-#'         if (unique(upset_data[, c] == 1) == T) {
-#'           isets <- c(isets, c)
-#'         }else{
-#'           all_negative_filters <- c(all_negative_filters, c)
-#'         }
-#'       }else{
-#'         isets <- c(isets, c)
-#'       }
-#'     }
-#'   }
-#'
-#'   for (m in all_negative_filters) {
-#'     upset_data[, m] <- NULL
-#'   }
-#'
-#'   p <- UpSetR::upset(upset_data, sets = isets,
-#'                      sets.bar.color = "#56B4E9",
-#'                      order.by = "freq", nintersects = 20,
-#'                      text.scale = 1.5, show.numbers = T,
-#'                      point.size = 6, color.pal = "Blues",
-#'                      empty.intersections = "on")
-#'   return(p)
-#'
-#' }
 
-#' Function that generates variant filtering statistics (i.e. removal of
-#' likely non-somatic/germline events) for callsets coming from
-#' tumor-only sequencing
+
+#' Function that sets gnomAD_AF_ABOVE_TOLERATED to TRUE for variants
+#' if any gnomAD population frequency exceeds max_tolerated_af
 #'
-#' #' param callset list object with unfiltered calls (callset$variant_unfiltered)
-#' #' param settings list object with PCGR run configuration settings
-#' #'
-#' #' export
-#' tumor_only_vfilter_stats <-
-#'   function(callset = NULL,
-#'            settings = NULL) {
+#' @param sample_calls data frame with variants
+#' @param max_tolerated_af max tolerated germline allele frequency
 #'
-#'     ## raw, unfiltered set of (PASSED) variant calls that
-#'     ## should be subject to filtering
-#'     vcalls <- callset$variant_unfiltered
-#'     to_settings <- settings$conf$somatic_snv$tumor_only
+#' @return sample_calls
 #'
-#'     ## initiate report object with tumor-only variant filter stats
-#'     to_stats <-
-#'       pcgrr::init_tumor_only_content()
-#'
-#'     to_stats[['vfilter']][['unfiltered_n']] <-
-#'       NROW(vcalls)
-#'
-#'     ## Assign statistics to successive filtering levels for
-#'     ## different evidence criteria
-#'     ## excluded germline calls found in gnomAD
-#'     to_stats[["vfilter"]][["gnomad_n_remain"]] <-
-#'       NROW(vcalls) -
-#'       NROW(vcalls[vcalls$SOMATIC_CLASSIFICATION == "GERMLINE_GNOMAD", ])
-#'     # pcgrr::log4r_info(paste0("Excluding coinciding germline variants in ",
-#'     #                          "gnomAD populations"))
-#'     # pcgrr::log4r_info(paste0("Total sample calls remaining: ",
-#'     #                          to_stats$vfilter[["gnomad_n_remain"]]))
-#'
-#'     ## excluded germline calls found in ClinVar
-#'     to_stats$vfilter[["clinvar_n_remain"]] <-
-#'       to_stats$vfilter[["gnomad_n_remain"]] -
-#'       NROW(vcalls[vcalls$SOMATIC_CLASSIFICATION == "GERMLINE_CLINVAR", ])
-#'     # pcgrr::log4r_info(paste0("Excluding coinciding germline variants in ClinVar"))
-#'     # pcgrr::log4r_info(paste0("Total sample calls remaining: ",
-#'     #                          to_stats$vfilter[["clinvar_n_remain"]]))
-#'
-#'
-#'     ## excluded germline calls found in panel of normals (if provided)
-#'     to_stats$vfilter[["pon_n_remain"]] <-
-#'       to_stats$vfilter[["clinvar_n_remain"]]
-#'     if (as.logical(to_settings[["exclude_pon"]]) == TRUE) {
-#'       to_stats$vfilter[["pon_n_remain"]] <-
-#'         to_stats$vfilter[["pon_n_remain"]] -
-#'         NROW(vcalls[vcalls$SOMATIC_CLASSIFICATION == "GERMLINE_PON", ])
-#'       # pcgrr::log4r_info(
-#'       #   paste0("Excluding putative germline variants found in calls ",
-#'       #          "from panel-of-normals (PON)"))
-#'       # pcgrr::log4r_info(
-#'       #   paste0("Total sample calls remaining: ",
-#'       #          to_stats$vfilter[["pon_n_remain"]]))
-#'     }
-#'
-#'     ## excluded germline calls found with 100% allelic fraction
-#'     ## (likely homozygous germline variants)
-#'     to_stats$vfilter[["hom_n_remain"]] <-
-#'       to_stats$vfilter[["pon_n_remain"]]
-#'     if (as.logical(to_settings[["exclude_likely_hom_germline"]]) == TRUE) {
-#'       to_stats$vfilter[["hom_n_remain"]] <-
-#'         to_stats$vfilter[["hom_n_remain"]] -
-#'         NROW(vcalls[vcalls$SOMATIC_CLASSIFICATION == "GERMLINE_HOMOZYGOUS", ])
-#'       # pcgrr::log4r_info(
-#'       #   paste0("Excluding likely homozygous germline variants found ",
-#'       #          "as variants with 100% allelic fraction"))
-#'       # pcgrr::log4r_info(paste0("Total sample calls remaining: ",
-#'       #                          to_stats$vfilter[["hom_n_remain"]]))
-#'     }
-#'
-#'     ## excluded germline calls found as likely heterozygous germline variants
-#'     to_stats$vfilter[["het_n_remain"]] <-
-#'       to_stats$vfilter[["hom_n_remain"]]
-#'     if (as.logical(to_settings[["exclude_likely_het_germline"]]) == TRUE) {
-#'       to_stats$vfilter[["het_n_remain"]] <-
-#'         to_stats$vfilter[["het_n_remain"]] -
-#'         NROW(vcalls[vcalls$SOMATIC_CLASSIFICATION == "GERMLINE_HETEROZYGOUS", ])
-#'       # pcgrr::log4r_info(paste0(
-#'       #   "Excluding likely heterozygous germline variants found as variants ",
-#'       #   "with 40-60% allelic fraction and recorded in gnomAD + dbSNP"))
-#'       # pcgrr::log4r_info(paste0("Total sample calls remaining: ",
-#'       #                          to_stats$vfilter[["het_n_remain"]]))
-#'     }
-#'
-#'     ## excluded calls with dbSNP germline status (if set in config)
-#'     to_stats$vfilter[["dbsnp_n_remain"]] <-
-#'       to_stats$vfilter[["het_n_remain"]]
-#'     if (as.logical(to_settings[["exclude_dbsnp_nonsomatic"]]) == TRUE) {
-#'
-#'       #pcgrr::log4r_info(
-#'       #  paste0("Excluding non-somatically associated dbSNP variants ",
-#'       #         "(dbSNP - not recorded as somatic in ClinVar",
-#'       #         "and not registered in COSMIC or found in TCGA"))
-#'
-#'       to_stats$vfilter[["dbsnp_n_remain"]] <-
-#'         to_stats$vfilter[["dbsnp_n_remain"]] -
-#'         NROW(vcalls[vcalls$SOMATIC_CLASSIFICATION == "GERMLINE_DBSNP", ])
-#'       #pcgrr::log4r_info(paste0("Total sample calls remaining: ",
-#'       #                         to_stats$vfilter[["dbsnp_n_remain"]]))
-#'     }
-#'
-#'     ## excluded non-exonic calls (if set in config)
-#'     to_stats$vfilter[["nonexonic_n_remain"]] <-
-#'       to_stats$vfilter[["dbsnp_n_remain"]]
-#'     if (as.logical(to_settings[["exclude_nonexonic"]]) == TRUE) {
-#'
-#'       #pcgrr::log4r_info(
-#'       #  paste0("Excluding non-somatically associated dbSNP variants ",
-#'       #         "(dbSNP - not recorded as somatic in ClinVar",
-#'       #         "and not registered in COSMIC or found in TCGA"))
-#'
-#'       to_stats$vfilter[["nonexonic_n_remain"]] <-
-#'         to_stats$vfilter[["nonexonic_n_remain"]] -
-#'         NROW(vcalls[vcalls$EXONIC_STATUS == "nonexonic", ])
-#'       #pcgrr::log4r_info(paste0("Total sample calls remaining: ",
-#'       #                         to_stats$vfilter[["dbsnp_n_remain"]]))
-#'     }
-#'
-#'     to_stats[["eval"]] <- TRUE
-#'
-#'     for (db_filter in c("gnomad", "dbsnp", "pon",
-#'                         "clinvar", "hom", "het", "nonexonic")) {
-#'       if (to_stats[["vfilter"]][[paste0(db_filter, "_n_remain")]] > 0 &
-#'           to_stats[["vfilter"]][["unfiltered_n"]] > 0) {
-#'         to_stats[["vfilter"]][[paste0(db_filter, "_frac_remain")]] <-
-#'           round((as.numeric(to_stats[["vfilter"]][[paste0(db_filter,
-#'                                                               "_n_remain")]]) /
-#'                    to_stats[["vfilter"]][["unfiltered_n"]]) * 100, digits = 2)
-#'       }
-#'     }
-#'     return(to_stats)
-#'
-#'   }
+#' @export
+assign_germline_popfreq_status <- function(sample_calls,
+                                           max_tolerated_af = 0.01) {
+
+  if (!("gnomAD_AF_ABOVE_TOLERATED" %in% colnames(sample_calls))) {
+      sample_calls$gnomAD_AF_ABOVE_TOLERATED <- FALSE
+  }
+
+  # Identify exome and genome AF columns
+  exome_cols <-
+    grep("^gnomADe_((NFE|AFR|AMR|SAS|EAS|FIN)_)?AF",
+         names(sample_calls), value = TRUE)
+  genome_cols <-
+    grep("^gnomADg_((NFE|AFR|AMR|SAS|EAS|FIN)_)?AF",
+         names(sample_calls), value = TRUE)
+
+
+  # Function to check max_tolerated_af per row
+  af_exceeds_threshold <- function(row) {
+    exome_vals <- as.numeric(row[exome_cols])
+    genome_vals <- as.numeric(row[genome_cols])
+
+    ## prefer exome AF values over genome AF values (if both are present)
+    ## reason: larger sample size in exome AF values
+    if (!all(is.na(exome_vals))) {
+      return(any(exome_vals > max_tolerated_af, na.rm = TRUE))
+    } else if (!all(is.na(genome_vals))) {
+      return(any(genome_vals > max_tolerated_af, na.rm = TRUE))
+    } else {
+      return(FALSE)  # No AF data available
+    }
+  }
+
+  # Apply to each row
+  sample_calls$gnomAD_AF_ABOVE_TOLERATED <-
+    apply(sample_calls, 1, af_exceeds_threshold)
+
+  return(sample_calls)
+}
 
 
 #' Function that generates a pie chart for germline filtering statistics
@@ -781,7 +730,8 @@ plot_filtering_stats_germline <- function(
     font_size = 15,
     pie_line_width = 3,
     opacity_filtered_categories = 0.4,
-    hole_size_pie = 0.4) {
+    hole_size_pie = 0.4,
+    color_palette = pcgrr::color_palette) {
 
   invisible(assertthat::assert_that(
     !is.null(report),
@@ -817,7 +767,7 @@ plot_filtering_stats_germline <- function(
 
   invisible(assertable::assert_colnames(
     report$content$snv_indel$callset$variant_unfiltered,
-    c("SOMATIC_CLASSIFICATION"), only_colnames = F, quiet = T))
+    c("SOMATIC_CLASSIFICATION"), only_colnames = FALSE, quiet = TRUE))
 
   df <- report$content$snv_indel$callset$variant_unfiltered
 
@@ -825,50 +775,51 @@ plot_filtering_stats_germline <- function(
   filtering_stats[['df']] <- data.frame()
   filtering_stats[['plot']] <- NULL
 
-  if(NROW(df) > 0){
+  if (NROW(df) > 0) {
 
     filtering_stats[['df']] <-
       plyr::count(
         df$SOMATIC_CLASSIFICATION
       ) |>
-      dplyr::arrange(dplyr::desc(freq)) |>
-      dplyr::rename(FILTER = x, FREQUENCY = freq) |>
+      dplyr::arrange(dplyr::desc(.data$freq)) |>
+      dplyr::rename(FILTER = .data$x, FREQUENCY = .data$freq) |>
       dplyr::mutate(FILTER = stringr::str_replace_all(
-        FILTER, "\\|", ", ")) |>
+        .data$FILTER, "\\|", ", ")) |>
       dplyr::mutate(FILTER = dplyr::if_else(
-        !(FILTER %in% pcgrr::germline_filter_levels) & FILTER != "SOMATIC",
+        !(.data$FILTER %in% pcgrr::germline_filter_levels) &
+          .data$FILTER != "SOMATIC",
         "MULTIPLE FILTERS",
-        FILTER
+        .data$FILTER
       )) |>
-      dplyr::group_by(FILTER) |>
-      dplyr::reframe(FREQUENCY = sum(FREQUENCY)) |>
-      dplyr::arrange(dplyr::desc(FREQUENCY)) |>
+      dplyr::group_by(.data$FILTER) |>
+      dplyr::reframe(FREQUENCY = sum(.data$FREQUENCY)) |>
+      dplyr::arrange(dplyr::desc(.data$FREQUENCY)) |>
       dplyr::mutate(FILTER = factor(
-        FILTER, levels = pcgrr::germline_filter_levels)) |>
+        .data$FILTER, levels = pcgrr::germline_filter_levels)) |>
       dplyr::mutate(PERCENT = scales::percent(
-        FREQUENCY / sum(FREQUENCY), accuracy = 0.1))
+        .data$FREQUENCY / sum(.data$FREQUENCY), accuracy = 0.1))
 
     germline_filters <- unique(filtering_stats[['df']]$FILTER)
     germline_filters <- c("SOMATIC", setdiff(germline_filters, "SOMATIC"))
-    hex_colors_germline <- head(
-      pcgrr::color_palette$tier$values,
+    hex_colors_germline <- utils::head(
+      color_palette$multi$values,
       length(germline_filters))
 
-    if(length(germline_filters) == 2){
+    if (length(germline_filters) == 2) {
       plot_margin_bottom <- 100
     }
 
     rgba_colors <- c()
     i <- 1
-    while(i <= length(germline_filters)){
+    while(i <= length(germline_filters)) {
       alpha <- opacity_filtered_categories
       ## full opacity for 'SOMATIC' category
-      if(i == 1){
+      if (i == 1) {
         alpha <- 1
       }
       rgba_colors <- c(
         rgba_colors,
-        pcgrr::hex_to_rgba(
+        hex_to_rgba(
           hex_colors_germline[i],
           alpha = alpha))
       i <- i + 1
@@ -945,7 +896,8 @@ plot_filtering_stats_exonic <- function(
     font_size = 15,
     pie_line_width = 3,
     opacity_filtered_categories = 0.4,
-    hole_size_pie = 0.4) {
+    hole_size_pie = 0.4,
+    color_palette = pcgrr::color_palette) {
 
   invisible(assertthat::assert_that(
     !is.null(report),
@@ -982,7 +934,7 @@ plot_filtering_stats_exonic <- function(
   assertable::assert_colnames(
     report$content$snv_indel$callset$variant_unfiltered,
     c("EXONIC_STATUS","SOMATIC_CLASSIFICATION"),
-    only_colnames = F, quiet = T)
+    only_colnames = FALSE, quiet = TRUE)
 
   df <- report$content$snv_indel$callset$variant_unfiltered |>
     dplyr::filter(.data$SOMATIC_CLASSIFICATION == "SOMATIC")
@@ -991,23 +943,25 @@ plot_filtering_stats_exonic <- function(
   filtering_stats[['df']] <- data.frame()
   filtering_stats[['plot']] <- NULL
 
-  if(NROW(df) > 0){
+  if (NROW(df) > 0) {
 
     filtering_stats[['df']] <-
       ## Exonic status can be either of 'exonic' or 'nonexonic'
       plyr::count(
         df$EXONIC_STATUS) |>
-      dplyr::arrange(dplyr::desc(freq)) |>
-      dplyr::rename(FILTER = x, FREQUENCY = freq) |>
-      dplyr::mutate(FILTER = toupper(paste0("SOMATIC - ", FILTER))) |>
-      dplyr::group_by(FILTER) |>
-      dplyr::reframe(FREQUENCY = sum(FREQUENCY)) |>
-      dplyr::arrange(dplyr::desc(FREQUENCY)) |>
+      dplyr::arrange(dplyr::desc(.data$freq)) |>
+      dplyr::rename(FILTER = .data$x,
+                    FREQUENCY = .data$freq) |>
+      dplyr::mutate(FILTER = toupper(
+        paste0("SOMATIC - ", .data$FILTER))) |>
+      dplyr::group_by(.data$FILTER) |>
+      dplyr::reframe(FREQUENCY = sum(.data$FREQUENCY)) |>
+      dplyr::arrange(dplyr::desc(.data$FREQUENCY)) |>
       dplyr::mutate(PERCENT = scales::percent(
-        FREQUENCY / sum(FREQUENCY), accuracy = 0.1))
+        .data$FREQUENCY / sum(.data$FREQUENCY), accuracy = 0.1))
 
     ## if either category is zero, add a row with zero frequency
-    if(!("SOMATIC - EXONIC" %in% filtering_stats[['df']]$FILTER)){
+    if (!("SOMATIC - EXONIC" %in% filtering_stats[['df']]$FILTER)) {
       filtering_stats[['df']] <- dplyr::bind_rows(
         filtering_stats[['df']],
         data.frame(
@@ -1015,7 +969,7 @@ plot_filtering_stats_exonic <- function(
           FREQUENCY = 0,
           PERCENT = "0.0%"))
     }
-    if(!("SOMATIC - NONEXONIC" %in% filtering_stats[['df']]$FILTER)){
+    if (!("SOMATIC - NONEXONIC" %in% filtering_stats[['df']]$FILTER)) {
       filtering_stats[['df']] <- dplyr::bind_rows(
         filtering_stats[['df']],
         data.frame(
@@ -1029,9 +983,10 @@ plot_filtering_stats_exonic <- function(
       levels = pcgrr::exonic_filter_levels)
 
     rgba_colors <- c(
-      pcgrr::hex_to_rgba(pcgrr::color_palette$tier$values[1], alpha = 1),
-      pcgrr::hex_to_rgba(
-        pcgrr::color_palette$tier$values[2],
+      hex_to_rgba(
+        color_palette$multi$values[1], alpha = 1),
+      hex_to_rgba(
+        color_palette$multi$values[2],
         alpha = opacity_filtered_categories
       ))
 
@@ -1085,7 +1040,7 @@ plot_filtering_stats_exonic <- function(
 #'
 #' @export
 #'
-get_tumor_only_filtering_criteria <- function(conf){
+get_tumor_only_filtering_criteria <- function(conf) {
 
   invisible(
     assertthat::assert_that(
@@ -1105,24 +1060,24 @@ get_tumor_only_filtering_criteria <- function(conf){
   )
 
   criteria <- c("gnomAD")
-  if(as.logical(
-    conf$somatic_snv$tumor_only$exclude_clinvar_germline) == TRUE){
+  if (as.logical(
+    conf$somatic_snv$tumor_only$exclude_clinvar_germline) == TRUE) {
     criteria <- c(criteria, "ClinVar (germline)")
   }
-  if(as.logical(
-    conf$somatic_snv$tumor_only$exclude_pon) == TRUE){
+  if (as.logical(
+    conf$somatic_snv$tumor_only$exclude_pon) == TRUE) {
     criteria <- c(criteria, "Panel of Normals")
   }
-  if(as.logical(
-    conf$somatic_snv$tumor_only$exclude_likely_hom_germline) == TRUE){
+  if (as.logical(
+    conf$somatic_snv$tumor_only$exclude_likely_hom_germline) == TRUE) {
     criteria <- c(criteria, "Likely germline (Homozygous AF)")
   }
-  if(as.logical(
-    conf$somatic_snv$tumor_only$exclude_likely_het_germline) == TRUE){
+  if (as.logical(
+    conf$somatic_snv$tumor_only$exclude_likely_het_germline) == TRUE) {
     criteria <- c(criteria, "Likely germline (Heterozygous AF)")
   }
-  if(as.logical(
-    conf$somatic_snv$tumor_only$exclude_dbsnp_nonsomatic) == TRUE){
+  if (as.logical(
+    conf$somatic_snv$tumor_only$exclude_dbsnp_nonsomatic) == TRUE) {
     criteria <- c(criteria, "dbSNP (non-somatic)")
   }
 
