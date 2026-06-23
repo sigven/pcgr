@@ -56,6 +56,14 @@ PCGR originates from the [Norwegian Cancer Genomics Consortium (NCGC)](https://c
 
 ### Top News
 
+- *June 23rd 2026*: **2.3.0 release**
+  - Data/software updates:
+    - Ensembl VEP `v115` / GENCODE v49
+    - ClinVar (2026-06)
+    - CIViC (2026-06-20)
+    - and more
+  - [CHANGELOG](https://sigven.github.io/pcgr/articles/CHANGELOG.html)
+
 - *September 17th 2025:* **2.2.5 release**
   - fixed failing support for AD/AF filtering, adding AD filtering
   - skip processing when no PASS variants detected in input VCF
