@@ -12,7 +12,7 @@ ARG MINI_URL=https://github.com/conda-forge/miniforge/releases/download/${MINI_V
 # install core pkgs, mambaforge
 RUN apt-get update && \
     apt-get install --yes --no-install-recommends \
-    bash bzip2 curl less wget zip ca-certificates && \
+    bash bzip2 curl less wget zip ca-certificates jq && \
     apt-get clean && \
     curl --silent -L "${MINI_URL}" -o "mambaforge.sh" && \
     /bin/bash mambaforge.sh -b -p /opt/mambaforge/ && \

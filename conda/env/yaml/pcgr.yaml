@@ -6,13 +6,14 @@ channels:
   - bioconda
 
 dependencies:
-  - pcgr ==2.3.0 # bump
+  - pcgr ==2.3.0.9001 # bump
   - bioconda::bedtools
   - bioconda::bcftools
   - bioconda::ensembl-vep ==115.1
   - conda-forge::pandoc
   - bioconda::perl-bio-bigfile
   - conda-forge::perl-compress-raw-zlib
+  - bioconda::samtools >=1.0
   - bioconda::vcfanno
   - bioconda::vt
   - bioconda::vcf2maf
