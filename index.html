@@ -35,7 +35,7 @@
 
     <a class="navbar-brand me-2" href="index.html">PCGR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -80,7 +80,7 @@
 </div>
 <p>The Personal Cancer Genome Reporter (PCGR) is a stand-alone software workflow for functional annotation and translation of individual tumor genomes for precision cancer medicine. It interprets somatic SNVs/InDels and copy number aberrations, RNA fusions, and bulk RNA-seq expression data. The software classifies variants with respect to predicted <em>oncogenicity</em>, and clinical <em>actionability</em>. Interactive HTML output reports allow the user to interrogate the clinical impact of the molecular findings in an individual tumor.</p>
 <ul>
-<li>Multi-omic interpretation</li>
+<li>Multi-omic data interpretation</li>
 <li>Variant classification
 <ul>
 <li>according to <em>oncogenicity</em>: evaluating the oncogenic potential of somatic DNA aberrations (<a href="https://pubmed.ncbi.nlm.nih.gov/35101336/" class="external-link">ClinGen/CGC/VICC guidelines</a>)</li>
@@ -141,11 +141,18 @@ document.getElementById('pcgrCarousel').querySelector('.carousel-inner').addEven
 bootstrap.Carousel.getOrCreateInstance(document.getElementById('pcgrCarousel')).next();
 });
 </script><p><br><br></p>
-<p>PCGR originates from the <a href="https://cancergenomics.no" class="external-link">Norwegian Cancer Genomics Consortium (NCGC)</a>, at the <a href="https://radium.no" class="external-link">Institute for Cancer Research, Oslo University Hospital, Norway</a>.</p>
+<p>PCGR originates from the <a href="https://radium.no" class="external-link">Institute for Cancer Research, Oslo University Hospital, Norway</a>.</p>
 <div class="section level3">
 <h3 id="top-news">Top News<a class="anchor" aria-label="anchor" href="#top-news"></a>
 </h3>
 <ul>
+<li>
+<em>July 10th 2026</em>: <strong>2.3.1 release</strong>
+<ul>
+<li>patch to fix <a href="https://github.com/sigven/pcgr/issues/297" class="external-link">issue #297</a>
+</li>
+</ul>
+</li>
 <li>
 <em>June 23rd 2026</em>: <strong>2.3.0 release</strong>
 <ul>
@@ -371,7 +378,7 @@ bootstrap.Carousel.getOrCreateInstance(document.getElementById('pcgrCarousel')).
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

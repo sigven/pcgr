@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.3.1
+
+- Date: **2026-07-10**
+- Patch release to fix a bug with samtools version for vcf2maf
+  ([issue297](https://github.com/sigven/pcgr/issues/297))
+
 ## v2.3.0
 
 - Date: **2026-06-22**
