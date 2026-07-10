@@ -8,7 +8,7 @@
 
 The Personal Cancer Genome Reporter (PCGR) is a stand-alone software workflow for functional annotation and translation of individual tumor genomes for precision cancer medicine. It interprets somatic SNVs/InDels and copy number aberrations, RNA fusions, and bulk RNA-seq expression data. The software classifies variants both with respect to _oncogenicity_, and _actionability_. Interactive HTML output reports allow the user to interrogate the clinical impact of the molecular findings in an individual tumor.
 
-- Multi-omic interpretation
+- Multi-omic data interpretation
 - Variant classification
   - according to *oncogenicity*: evaluating the oncogenic potential of somatic DNA aberrations ([VICC/CGC/ClinGen guidelines](https://pubmed.ncbi.nlm.nih.gov/35101336/))
   - according to *actionability*: mapping the therapeutic, diagnostic, and prognostic implications of somatic DNA aberrations ([AMP/ASCO/CAP guidelines](https://pubmed.ncbi.nlm.nih.gov/27993330/))
@@ -32,9 +32,12 @@ Example screenshots from the [quarto](https://quarto.org)-based cancer genome re
   </tr>
 </table>
 
-PCGR originates from the [Norwegian Cancer Genomics Consortium (NCGC)](https://cancergenomics.no), at the [Institute for Cancer Research, Oslo University Hospital, Norway](https://radium.no).
+PCGR originates from the [Institute for Cancer Research, Oslo University Hospital, Norway](https://radium.no).
 
 ### Top News
+
+- *July 10th 2026*: **2.3.1 release**
+  - patch to fix [issue #297](https://github.com/sigven/pcgr/issues/297)
 
 - *June 23rd 2026*: **2.3.0 release**
   - Data/software updates:
