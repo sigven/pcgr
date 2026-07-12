@@ -9,7 +9,7 @@ data. The software classifies variants with respect to predicted
 reports allow the user to interrogate the clinical impact of the
 molecular findings in an individual tumor.
 
-- Multi-omic interpretation
+- Multi-omic data interpretation
 - Variant classification
   - according to *oncogenicity*: evaluating the oncogenic potential of
     somatic DNA aberrations ([ClinGen/CGC/VICC
@@ -58,12 +58,14 @@ usual):
   
   
 
-PCGR originates from the [Norwegian Cancer Genomics Consortium
-(NCGC)](https://cancergenomics.no), at the [Institute for Cancer
-Research, Oslo University Hospital, Norway](https://radium.no).
+PCGR originates from the [Institute for Cancer Research, Oslo University
+Hospital, Norway](https://radium.no).
 
 ### Top News
 
+- *July 10th 2026*: **2.3.1 release**
+  - patch to fix [issue
+    \#297](https://github.com/sigven/pcgr/issues/297)
 - *June 23rd 2026*: **2.3.0 release**
   - Data/software updates:
     - Ensembl VEP `v115` / GENCODE v49
