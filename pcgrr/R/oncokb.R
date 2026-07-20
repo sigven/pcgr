@@ -1130,16 +1130,25 @@ process_oncokb_maf <-
 
     # Process HGVSp file (protein changes)
     if (!is.null(maf_file_hgvsp) && file.exists(maf_file_hgvsp)) {
-      # Force character typing for all columns rather than relying on
-      # readr's per-file column type guessing: the HGVSp and HGVSg MAF
-      # files are read independently, so a sparsely populated pass-through
-      # column (e.g. MUTATION_EFFECT_CITATIONS) can be guessed as a
-      # different type (character/double/logical) in each file, which
-      # later breaks dplyr::bind_rows() when rows from both files are
-      # combined into all_variant_annotations.
+      # Force character typing for all columns (except the known boolean
+      # flag columns) rather than relying on readr's per-file column type
+      # guessing: the HGVSp and HGVSg MAF files are read independently, so
+      # a sparsely populated pass-through column (e.g.
+      # MUTATION_EFFECT_CITATIONS) can be guessed as a different type
+      # (character/double/logical) in each file, which later breaks
+      # dplyr::bind_rows() when rows from both files are combined into
+      # all_variant_annotations. ANNOTATED/GENE_IN_ONCOKB/VARIANT_IN_ONCOKB
+      # are kept as logical since they're compared with `== TRUE` below;
+      # forcing them to character would make that filter match nothing
+      # (OncoKB's MafAnnotator writes Python-style "True"/"False", and
+      # "True" == TRUE is FALSE in R, not a match).
       maf_hgvsp <- readr::read_tsv(
         maf_file_hgvsp, show_col_types = FALSE,
-        col_types = readr::cols(.default = readr::col_character()))
+        col_types = readr::cols(
+          ANNOTATED = readr::col_logical(),
+          GENE_IN_ONCOKB = readr::col_logical(),
+          VARIANT_IN_ONCOKB = readr::col_logical(),
+          .default = readr::col_character()))
 
       # Filter for variants in OncoKB genes regardless of ANNOTATED flag:
       # the MAF annotator batch endpoint misses variants covered only by gene-level
@@ -1287,10 +1296,16 @@ process_oncokb_maf <-
     if (!is.null(maf_file_hgvsg) && file.exists(maf_file_hgvsg)) {
       # Same rationale as the HGVSp read above: force character typing so
       # this file's per-column type guesses can't diverge from the HGVSp
-      # file's and break the later dplyr::bind_rows() of both.
+      # file's and break the later dplyr::bind_rows() of both, while
+      # keeping the boolean flag columns logical so `== TRUE` filters
+      # below still work.
       maf_hgvsg <- readr::read_tsv(
         maf_file_hgvsg, show_col_types = FALSE,
-        col_types = readr::cols(.default = readr::col_character()))
+        col_types = readr::cols(
+          ANNOTATED = readr::col_logical(),
+          GENE_IN_ONCOKB = readr::col_logical(),
+          VARIANT_IN_ONCOKB = readr::col_logical(),
+          .default = readr::col_character()))
 
       # Filter for variants in OncoKB genes without a protein change (HGVSg path),
       # regardless of ANNOTATED flag — same reasoning as HGVSp path above
