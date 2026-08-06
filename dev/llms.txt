@@ -695,6 +695,9 @@ sigven AT ifi.uio.no
   with variant records
 - [`strip_html()`](https://sigven.github.io/pcgr/dev/reference/strip_html.md)
   : Strip HTML tags
+- [`sync_biomarker_evidence()`](https://sigven.github.io/pcgr/dev/reference/sync_biomarker_evidence.md)
+  : Re-synchronize biomarker evidence items/classifications with a
+  (possibly further-filtered) variant set
 - [`table_display_cols`](https://sigven.github.io/pcgr/dev/reference/table_display_cols.md)
   : HTML Table display columns
 - [`tcga_cohorts`](https://sigven.github.io/pcgr/dev/reference/tcga_cohorts.md)
