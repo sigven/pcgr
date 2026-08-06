@@ -372,6 +372,19 @@ load_somatic_snv_indel <- function(
     }
   }
 
+  ## Re-sync biomarker evidence items/classifications with the variant set
+  ## as it stands after all filtering above (allelic depth/fraction, and -
+  ## for tumor-only input - germline/non-exonic filtering). Biomarker
+  ## matching was performed once, early, inside load_dna_variants(), against
+  ## the variant set as it existed prior to this filtering - without this
+  ## step, evidence items for variants removed above remain orphaned in
+  ## 'bm_evidence' (see https://github.com/sigven/pcgr/issues/302)
+  if ("bm_evidence" %in% names(callset)) {
+    callset[['bm_evidence']] <- sync_biomarker_evidence(
+      bm_evidence = callset[['bm_evidence']],
+      var_df = callset[['variant']])
+  }
+
   if (NROW(callset[['variant']]) > 0) {
     callset[['variant']] <- callset[['variant']] |>
       dplyr::arrange(
