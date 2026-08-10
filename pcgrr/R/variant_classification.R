@@ -281,6 +281,82 @@ assign_amp_asco_cap_tiers <- function(
 
 }
 
+#' Re-synchronize biomarker evidence items/classifications with a
+#' (possibly further-filtered) variant set
+#'
+#' Biomarker evidence matching (\code{map_biomarker_data()},
+#' \code{assign_amp_asco_cap_tiers()}) is performed once, early, against
+#' the variant set as it existed right after annotation. Callers may go on
+#' to remove variants from that set afterwards (e.g. allelic depth/fraction
+#' filtering via \code{filter_read_support()}, or germline/non-exonic
+#' filtering for tumor-only input). Without re-syncing, evidence items for
+#' variants removed by such downstream filtering remain "orphaned" -
+#' present in \code{bm_evidence} but absent from the variant set - which
+#' surfaces as biomarker-matched variants missing from the variant listing
+#' in the report while still appearing in the biomarker evidence listing
+#' (see <https://github.com/sigven/pcgr/issues/302>).
+#'
+#' @param bm_evidence list with biomarker evidence data (as initialized by
+#' \code{init_biomarker_content()}), i.e. top-level 'eitems'/'classification'
+#' data frames plus one sub-list per clinical significance category, each
+#' with its own 'eitems'/'classification' data frames
+#' @param var_df data frame with the final (filtered) variant set
+#'
+#' @return bm_evidence list, with all 'eitems'/'classification' data frames
+#' limited to records matching a variant in var_df
+#'
+#' @export
+sync_biomarker_evidence <- function(bm_evidence = NULL, var_df = NULL) {
+
+  invisible(assertthat::assert_that(
+    is.list(bm_evidence),
+    msg = "Argument 'bm_evidence' needs to be of type list"))
+  invisible(assertthat::assert_that(
+    is.data.frame(var_df),
+    msg = "Argument 'var_df' needs to be of type data.frame"))
+
+  join_cols <- intersect(
+    c("VAR_ID", "VARIANT_CLASS", "ENTREZGENE"),
+    colnames(var_df))
+
+  if (length(join_cols) == 0 || NROW(var_df) == 0) {
+    return(bm_evidence)
+  }
+
+  variant_keys <- var_df |>
+    dplyr::select(dplyr::all_of(join_cols)) |>
+    dplyr::distinct()
+
+  sync_df <- function(df) {
+    if (is.data.frame(df) && NROW(df) > 0 &&
+        all(join_cols %in% colnames(df))) {
+      return(dplyr::semi_join(df, variant_keys, by = join_cols))
+    }
+    return(df)
+  }
+
+  for (elem in c("eitems", "classification")) {
+    if (elem %in% names(bm_evidence)) {
+      bm_evidence[[elem]] <- sync_df(bm_evidence[[elem]])
+    }
+  }
+
+  for (clnsig in names(bm_evidence)) {
+    if (is.list(bm_evidence[[clnsig]]) &&
+        !is.data.frame(bm_evidence[[clnsig]])) {
+      for (elem in c("eitems", "classification")) {
+        if (elem %in% names(bm_evidence[[clnsig]])) {
+          bm_evidence[[clnsig]][[elem]] <-
+            sync_df(bm_evidence[[clnsig]][[elem]])
+        }
+      }
+    }
+  }
+
+  return(bm_evidence)
+
+}
+
 #' Assign tiers of clinical significance (AMP/ASCO/CAP framework) to
 #' somatic CNAs
 #'
