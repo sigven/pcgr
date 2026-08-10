@@ -63,6 +63,10 @@ Hospital, Norway](https://radium.no).
 
 ### Top News
 
+- *August 10th 2026*: **2.3.2 release**
+  - patch to fix [issue
+    \#300](https://github.com/sigven/pcgr/issues/300) and [issue
+    \#302](https://github.com/sigven/pcgr/issues/302)
 - *July 10th 2026*: **2.3.1 release**
   - patch to fix [issue
     \#297](https://github.com/sigven/pcgr/issues/297)
