@@ -561,10 +561,11 @@ load_cpsr_classified_variants <- function(
 
   if (NROW(callset[['variant_display']]) > 0) {
     callset[['variant_display']] <- callset[['variant_display']] |>
-      dplyr::filter((.data$CLINICAL_SIGNIFICANCE == "Pathogenic" |
-                      .data$CLINICAL_SIGNIFICANCE == "Likely Pathogenic" |
-                      .data$CLINICAL_SIGNIFICANCE == "VUS") &
-                      .data$CODING_STATUS == "coding")|>
+      dplyr::filter(
+        .data$CLINICAL_SIGNIFICANCE == "Pathogenic" |
+        .data$CLINICAL_SIGNIFICANCE == "Likely Pathogenic" |
+        (.data$CLINICAL_SIGNIFICANCE == "VUS" &
+           .data$CODING_STATUS == "coding")) |>
       dplyr::distinct()
     if (ignore_vus == TRUE) {
       callset[['variant_display']] <- callset[['variant_display']] |>
