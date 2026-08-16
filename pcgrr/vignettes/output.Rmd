@@ -198,9 +198,8 @@ A VCF file containing annotated, somatic calls (single nucleotide variants and i
 | `MUTATION_HOTSPOT_CANCERTYPE` | hotspot-associated cancer types (from cancerhotspots.org) |
 | `PFAM_DOMAIN` | Pfam domain identifier (from VEP) |
 | `INTOGEN_DRIVER_MUT` | Indicates if existing variant is predicted as driver mutation from IntoGen Catalog of Driver Mutations |
-| `EFFECT_PREDICTIONS` | In silico predictions of variant effect on protein function and pre-mRNA splicing from [database of non-synonymous functional predictions - dbNSFP v5.0](https://www.dbnsfp.org/). Predicted effects are provided by different sources/algorithms (separated by `&`), `T` = Tolerated, `N` = Neutral, `D` = Damaging |
-| `SPLICE_EFFECT` | Effect of splicing, from MutSpliceDB and/or MaxEntScan. Format: <ENTREZGENE>|<SYMBOL>|<REFSEQ_TRANSCRIPT_ID>|<HGVSc>|<EFFECT><AFFECTED_EXONS>|<SOURCE> (MutSpliceDB), 
-MES|<SCORE_DIFF>|<SCORE_REF>|<SCORE_ALT>|EFFECT (MaxEntScan). |
+| `EFFECT_PREDICTIONS` | In silico predictions of variant effect on protein function and pre-mRNA splicing from [database of non-synonymous functional predictions - dbNSFP](https://www.dbnsfp.org/). Predicted effects are provided by different sources/algorithms (separated by `&`), `T` = Tolerated, `N` = Neutral, `D` = Damaging |
+| `SPLICE_EFFECT` | Effect of splicing, from MutSpliceDB and/or MaxEntScan, combined into a single comma-separated string. MutSpliceDB component format: `<ENTREZGENE>|<SYMBOL>|<REFSEQ_TRANSCRIPT_ID>|<HGVSc>|<EFFECT>|<AFFECTED_EXONS>|<SOURCE>`. MaxEntScan component format: `MaxEntScan|<stratum>|<evidence_tier>` (see `MAXENTSCAN` below for details) |
 | `DBNSFP_BAYESDEL_ADDAF` | predicted effect from BayesDel (dbNSFP) |
 | `DBNSFP_LIST_S2` | predicted effect from LIST-S2 (dbNSFP) |
 | `DBNSFP_SIFT` | predicted effect from SIFT (dbNSFP) |
@@ -308,7 +307,7 @@ The following variables are included in the TSV file (VCF tags issued by the use
 | 14. `HGVSp` | HGVS protein sequence name |
 | 15. `HGVSP` | Protein change in one-letter amino-acid HGVS notation (HGVSp_short) |
 | 16. `SPLICE_EFFECT` | Splice effect annotations from MutSpliceDB and MaxEntScan (see details above) |
-| 17. `MAXENTSCAN` | MaxEntScan splice site impact summary. Format: `MaxEntScan|<stratum>|<evidence_tier>` |
+| 17. `MAXENTSCAN` | MaxEntScan splice site impact summary for canonical (±1/±2 bp) and non-canonical (donor +3 to +6, acceptor -3 to -20) splice positions. Format: `MaxEntScan|<stratum>|<evidence_tier>`. `<stratum>` identifies the splice-site position category (e.g. `Donor_+5`, `Acceptor_PPT_Close`, `Canonical_Site`). `<evidence_tier>` reflects predicted impact strength, from strongest to weakest: `Strong` > `Moderate` > `Supporting` > `No_Call` > `Uninformative` (`.` for canonical sites, which are always high-confidence). Only variants with a `Strong` tier at non-canonical positions are additionally flagged as loss-of-function |
 | 18. `EFFECT_PREDICTIONS` | Variant effect predictions - from dbNSFP |
 | 19. `EXON` | Exon number (out of total number of exons) |
 | 20. `CONSEQUENCE` | Variant consequence - from VEP |
