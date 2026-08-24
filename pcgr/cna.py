@@ -668,7 +668,7 @@ def append_twohit_candidates(cna_df: pd.DataFrame,
                 else pd.Series(True, index=snv_df_germline.index)
             )
             pathogenic_lof_germline = snv_df_germline[
-                snv_df_germline['CLASSIFICATION'].isin(['Pathogenic', 'Likely_Pathogenic']) &
+                snv_df_germline['CLASSIFICATION'].isin(['Pathogenic', 'Likely_Pathogenic','Likely Pathogenic']) &
                 snv_df_germline['LOSS_OF_FUNCTION'].isin(_truthy) &
                 het_mask
             ].copy()
@@ -709,12 +709,13 @@ def _annotate_amplifications(
 ) -> tuple[pd.DataFrame, float]:
     """
     Mark amplification segments and compute the effective amplification threshold.
-    Adds columns: amp_cond, total_cn, fold_change, aberration_key (for amplifications).
+    Adds columns: amp_cond, total_cn, fold_change.
     Returns (df, effective_amp_threshold).
     NOTE: total_cn is retained for use by _annotate_gains; caller must drop it afterwards.
+    Segment-level only - does not require gene annotation (no aberration_key here;
+    see _compute_aberration_keys(), applied after gene-transcript join).
     """
     relative_threshold_value = round(tumor_ploidy * amp_threshold_relative, 1)
-    df['aberration_key'] = 'nan'
     df['amp_cond'] = False
     df['total_cn'] = df['n_major'] + df['n_minor']
     df['fold_change'] = (df['total_cn'] / tumor_ploidy).round(4)
@@ -743,9 +744,6 @@ def _annotate_amplifications(
         effective_amp_threshold = float(max(amp_threshold_absolute, relative_threshold_value))
     logger.info(f"Effective amplification threshold: CN >= {effective_amp_threshold}")
 
-    df.loc[df['amp_cond'], 'aberration_key'] = \
-        df.loc[df['amp_cond'], 'entrezgene'].astype(str) + '_amplification'
-
     return df, effective_amp_threshold
 
 
@@ -760,8 +758,9 @@ def _annotate_gains(
     """
     Mark gain segments (above gain threshold but below amplification threshold).
     Requires amp_cond and total_cn columns from _annotate_amplifications.
-    Adds: gain_cond, aberration_key (for gains).
-    Drops: total_cn.
+    Adds: gain_cond. Drops: total_cn.
+    Segment-level only - does not require gene annotation (no aberration_key here;
+    see _compute_aberration_keys(), applied after gene-transcript join).
     """
     relative_gain_threshold_value = round(tumor_ploidy * gain_threshold_relative, 1)
     df['gain_cond'] = False
@@ -786,9 +785,6 @@ def _annotate_gains(
     df['gain_cond'] = df['gain_cond'] & ~df['amp_cond']
     df = df.drop(columns=['total_cn'])
 
-    df.loc[df['gain_cond'], 'aberration_key'] = \
-        df.loc[df['gain_cond'], 'entrezgene'].astype(str) + '_gain'
-
     return df
 
 
@@ -803,8 +799,10 @@ def _annotate_deletions(
 ) -> tuple[pd.DataFrame, int]:
     """
     Mark homozygous, heterozygous, and hemizygous deletion segments.
-    Adds: homloss_cond, hetloss_cond, hemloss_cond, aberration_key (for ablations).
+    Adds: homloss_cond, hetloss_cond, hemloss_cond.
     Returns (df, baseline_cn).
+    Segment-level only - does not require gene annotation (no aberration_key here;
+    see _compute_aberration_keys(), applied after gene-transcript join).
     """
     baseline_cn = round(tumor_ploidy)
     relative_del_threshold_value = round(tumor_ploidy * del_threshold_relative, 1)
@@ -860,12 +858,6 @@ def _annotate_deletions(
             )
         df.loc[_sex_hetloss, "hetloss_cond"] = True
 
-    # Aberration keys for ablations (used for biomarker matching)
-    df.loc[df['homloss_cond'], 'aberration_key'] = \
-        df.loc[df['homloss_cond'], 'entrezgene'].astype(str) + '_ablation'
-    df.loc[df['hemloss_cond'], 'aberration_key'] = \
-        df.loc[df['hemloss_cond'], 'entrezgene'].astype(str) + '_ablation'
-
     return df, baseline_cn
 
 
@@ -880,6 +872,27 @@ def _assign_variant_class(df: pd.DataFrame) -> pd.DataFrame:
     df.loc[df['homloss_cond'], 'variant_class'] = 'homdel'
     df.loc[df['hetloss_cond'], 'variant_class'] = 'hetdel'
     df.loc[df['hemloss_cond'], 'variant_class'] = 'hemdel'
+    return df
+
+
+def _compute_aberration_keys(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Compute the 'aberration_key' column used for CNA biomarker matching.
+    Requires gene-level 'entrezgene' plus the condition flags set by
+    _annotate_amplifications/_annotate_gains/_annotate_deletions
+    (amp_cond, gain_cond, homloss_cond, hemloss_cond). Must therefore be called
+    on the gene-transcript-joined frame, after those condition columns have been
+    carried over (e.g. via join) from the segment-level annotation pass.
+    """
+    df['aberration_key'] = 'nan'
+    df.loc[df['amp_cond'], 'aberration_key'] = \
+        df.loc[df['amp_cond'], 'entrezgene'].astype(str) + '_amplification'
+    df.loc[df['gain_cond'], 'aberration_key'] = \
+        df.loc[df['gain_cond'], 'entrezgene'].astype(str) + '_gain'
+    df.loc[df['homloss_cond'], 'aberration_key'] = \
+        df.loc[df['homloss_cond'], 'entrezgene'].astype(str) + '_ablation'
+    df.loc[df['hemloss_cond'], 'aberration_key'] = \
+        df.loc[df['hemloss_cond'], 'entrezgene'].astype(str) + '_ablation'
     return df
 
 
@@ -982,16 +995,20 @@ def annotate_cna_segments(input_cna_segment_fname: str,
 
     Returns:
         dict with keys:
-            'status': 0 if successful, -1 if error
+            'status': 0 if successful, -1 if error (no valid input segments at all)
             'amp_threshold_effective': the resolved effective amplification threshold (float or None on error)
             'tumor_ploidy': the ploidy value actually used (float or None on error)
             'tumor_ploidy_source': 'provided', 'estimated', or 'NA' on error
+            'gene_annotations_empty': True if no segment overlapped a protein-coding
+                transcript (gene-level output/file is empty/not written), even though
+                'status' is still 0 and segment-level output was written successfully
     """
     _error_result = {
         'status': -1,
         'amp_threshold_effective': None,
         'tumor_ploidy': tumor_ploidy,
         'tumor_ploidy_source': 'NA',
+        'gene_annotations_empty': False,
     }
     
     #logger = getlogger("pcgr-annotate-cna-segments")
@@ -1086,33 +1103,33 @@ def annotate_cna_segments(input_cna_segment_fname: str,
     
     ## annotate segments with cytobands
     cna_query_segment_df = annotate_cytoband(cna_query_segment_bed, output_dir, refdata_assembly_dir, logger)
-    
+
     cna_query_segment_df['chromosome2'] = cna_query_segment_df['chromosome'].astype(object)
     cna_query_segment_df.loc[cna_query_segment_df['chromosome2'] == "X","chromosome2"] = 23
     cna_query_segment_df.loc[cna_query_segment_df['chromosome2'] == "Y","chromosome2"] = 24
     cna_query_segment_df['chromosome2'] = cna_query_segment_df['chromosome2'].astype(int)
-        
+
     cna_query_segment_df = cna_query_segment_df.sort_values(['chromosome2','segment_start'], ascending=True)
 
     cna_query_segment_df = cna_query_segment_df.drop(columns=['chromosome2'])
 
-    ## annotate with protein-coding transcripts
-    cna_query_segment_bed = pybedtools.BedTool.from_dataframe(cna_query_segment_df)
-    temp_files.append(cna_query_segment_bed.fn)
-
-    cna_query_segment_df = annotate_transcripts(
-       cna_query_segment_bed, output_dir, refdata_assembly_dir, transcript_overlap_fraction=transcript_overlap_fraction, logger=logger)
-    
-    if cna_query_segment_df.empty is True:
-        warn_msg = "Could not find any protein-coding gene annotations for input CNA segments - omitting gene-level annotations"
-        warn_message(warn_msg, logger)
-        return _error_result
-    cna_query_segment_df['segment_length_mb'] = \
-        ((cna_query_segment_df['segment_end'] - cna_query_segment_df['segment_start']) / 1e6).astype(float).round(4)
-    
-    ## load copy-number biomarker evidence
-    biomarkers = load_all_biomarkers(
-        logger, refdata_assembly_dir, biomarker_vartype = 'CNA', biomarker_variant_origin = 'Somatic')
+    ## Build the full segment-level dataframe (one row per INPUT segment, independent of
+    ## gene/transcript overlap) by parsing the cytoband-encoded 'segment_name' column
+    ## (format: segment_id|n_major|n_minor|chromosome_arm|cytoband|event_type). Segment-
+    ## level classification (LOH, variant class) must not be gated on gene-transcript
+    ## overlap - a segment with no overlapping gene is still a real CNA/LOH event and
+    ## should appear in the genome-wide segment report (see PCGR issue: small/gene-poor
+    ## segments silently disappearing from the report and log).
+    segment_level_annotations = \
+        cna_query_segment_df['segment_name'].str.split('\\|', expand=True)
+    segment_level_annotations.columns = [
+        'segment_id', 'n_major', 'n_minor', 'chromosome_arm', 'cytoband', 'event_type']
+    cna_segment_level_df = pd.concat(
+        [cna_query_segment_df[['chromosome', 'segment_start', 'segment_end']].reset_index(drop=True),
+         segment_level_annotations.reset_index(drop=True)], axis=1)
+    cna_segment_level_df = cna_segment_level_df.astype({'n_major': 'int', 'n_minor': 'int'})
+    cna_segment_level_df['segment_length_mb'] = \
+        ((cna_segment_level_df['segment_end'] - cna_segment_level_df['segment_start']) / 1e6).astype(float).round(4)
 
     ## Determine amplification threshold based on mode
     #if threshold_mode == "relative" or threshold_mode == "combined":
@@ -1151,47 +1168,86 @@ def annotate_cna_segments(input_cna_segment_fname: str,
                 f"lower '--cna_del_threshold_absolute' or use '--cna_threshold_mode relative'",
                 logger)
 
-    cna_query_segment_df, effective_amplification_threshold = _annotate_amplifications(
-        cna_query_segment_df, tumor_ploidy,
+    ## Classify segments (amplification/gain/deletion/LOH/variant class) once, on the
+    ## full segment-level frame - independent of gene-transcript overlap.
+    cna_segment_level_df, effective_amplification_threshold = _annotate_amplifications(
+        cna_segment_level_df, tumor_ploidy,
         amp_threshold_absolute, amp_threshold_relative, threshold_mode, logger)
-    cna_query_segment_df = _annotate_gains(
-        cna_query_segment_df, tumor_ploidy,
+    cna_segment_level_df = _annotate_gains(
+        cna_segment_level_df, tumor_ploidy,
         gain_threshold_absolute, gain_threshold_relative, threshold_mode, logger)
-    cna_query_segment_df, baseline_cn = _annotate_deletions(
-        cna_query_segment_df, tumor_ploidy,
+    cna_segment_level_df, baseline_cn = _annotate_deletions(
+        cna_segment_level_df, tumor_ploidy,
         del_threshold_absolute, del_threshold_relative, threshold_mode, sex, logger)
-    cna_query_segment_df = _assign_variant_class(cna_query_segment_df)
-    cna_query_segment_df = _annotate_loh(cna_query_segment_df, baseline_cn, sex, logger)
+    cna_segment_level_df = _assign_variant_class(cna_segment_level_df)
+    cna_segment_level_df = _annotate_loh(cna_segment_level_df, baseline_cn, sex, logger)
 
-    ## Append actionability evidence to input amplifications (column 'biomarker_match')
-    #cna_query_segment_df = cna_query_segment_df.merge(
-    #    cna_actionable_df, left_on=["aberration_key"], right_on=["aberration_key"], how="left")
-    cna_query_segment_df = cna_query_segment_df.merge(
-        biomarkers['actionable_df'], left_on=["aberration_key"], right_on=["aberration_key"], how="left")
-    cna_query_segment_df.drop(['amp_cond', 'gain_cond', 'hetloss_cond', 'homloss_cond', 'hemloss_cond', 'aberration_key'], axis=1, inplace=True)
-    cna_query_segment_df.loc[cna_query_segment_df['biomarker_match'].isnull(),"biomarker_match"] = '.'
-    
+    ## Write segment-level output (feeds the report's genome-wide CN segment view) from
+    ## the full, ungated segment set - every input segment is represented here regardless
+    ## of whether it overlaps a protein-coding gene.
+    segments_out = cna_segment_level_df[['chromosome', 'segment_start', 'segment_end']].copy()
+    segments_out.columns = ['CHROM', 'SEGMENT_START', 'SEGMENT_END']
+    segments_out['SEGMENT_NAME'] = (
+        cna_segment_level_df['segment_id'].astype(str)
+        .str.cat(cna_segment_level_df['n_major'].astype(str), sep='|')
+        .str.cat(cna_segment_level_df['n_minor'].astype(str), sep='|')
+        .str.cat(cna_segment_level_df['chromosome_arm'].astype(str), sep='|')
+        .str.cat(cna_segment_level_df['cytoband'].astype(str), sep='|')
+        .str.cat(cna_segment_level_df['event_type'].astype(str), sep='|')
+        .str.cat(cna_segment_level_df['variant_class'].astype(str), sep='|')
+        .str.cat(cna_segment_level_df['loh'].astype(str).replace('.', ''), sep='|')
+    )
+    segments_out.drop_duplicates(inplace=True)
+    segments_out.to_csv(output_segment_fname, sep="\t", header=True, index=False)
+
+    ## annotate with protein-coding transcripts (gene-level output only - segments with
+    ## no qualifying transcript overlap are legitimately absent from this frame, but this
+    ## no longer gates segment-level reporting above)
+    cna_query_segment_bed = pybedtools.BedTool.from_dataframe(cna_query_segment_df)
+    temp_files.append(cna_query_segment_bed.fn)
+
+    cna_query_segment_df = annotate_transcripts(
+       cna_query_segment_bed, output_dir, refdata_assembly_dir, transcript_overlap_fraction=transcript_overlap_fraction, logger=logger)
+
+    gene_annotations_empty = bool(cna_query_segment_df.empty)
+    if gene_annotations_empty:
+        warn_msg = "Could not find any protein-coding gene annotations for input CNA segments - omitting gene-level annotations"
+        warn_message(warn_msg, logger)
+    else:
+        ## Bring over the precomputed segment-level classification instead of
+        ## recomputing amp/gain/del/LOH on the (segment x transcript) gene-level frame.
+        classification_cols = [
+            'segment_id', 'segment_length_mb', 'variant_class', 'loh',
+            'amp_cond', 'gain_cond', 'hetloss_cond', 'homloss_cond', 'hemloss_cond']
+        cna_query_segment_df = cna_query_segment_df.merge(
+            cna_segment_level_df[classification_cols], on='segment_id', how='left')
+        cna_query_segment_df = _compute_aberration_keys(cna_query_segment_df)
+
+        ## load copy-number biomarker evidence
+        biomarkers = load_all_biomarkers(
+            logger, refdata_assembly_dir, biomarker_vartype = 'CNA', biomarker_variant_origin = 'Somatic')
+
+        ## Append actionability evidence to input amplifications (column 'biomarker_match')
+        cna_query_segment_df = cna_query_segment_df.merge(
+            biomarkers['actionable_df'], left_on=["aberration_key"], right_on=["aberration_key"], how="left")
+        cna_query_segment_df.drop(['amp_cond', 'gain_cond', 'hetloss_cond', 'homloss_cond', 'hemloss_cond', 'aberration_key'], axis=1, inplace=True)
+        cna_query_segment_df.loc[cna_query_segment_df['biomarker_match'].isnull(),"biomarker_match"] = '.'
+
     ## remove all temporary files
     for fname in temp_files:
         remove_file(fname)
-    
+
+    if gene_annotations_empty:
+        return {
+            'status': 0,
+            'amp_threshold_effective': float(effective_amplification_threshold),
+            'tumor_ploidy': float(tumor_ploidy),
+            'tumor_ploidy_source': tumor_ploidy_source,
+            'gene_annotations_empty': True,
+        }
+
     cna_query_segment_df.columns = [col.upper() for col in cna_query_segment_df.columns]
     #cna_query_segment_df.columns = map(str.upper, cna_query_segment_df.columns)
-
-    segments_out = cna_query_segment_df[['CHROMOSOME','SEGMENT_START','SEGMENT_END']].copy()
-    segments_out['SEGMENT_NAME'] = (
-        cna_query_segment_df['SEGMENT_ID'].astype(str)
-        .str.cat(cna_query_segment_df['N_MAJOR'].astype(str), sep='|')
-        .str.cat(cna_query_segment_df['N_MINOR'].astype(str), sep='|')
-        .str.cat(cna_query_segment_df['CHROMOSOME_ARM'].astype(str), sep='|')
-        .str.cat(cna_query_segment_df['CYTOBAND'].astype(str), sep='|')
-        .str.cat(cna_query_segment_df['EVENT_TYPE'].astype(str), sep='|')
-        .str.cat(cna_query_segment_df['VARIANT_CLASS'].astype(str), sep='|')
-        .str.cat(cna_query_segment_df['LOH'].astype(str).replace('.', ''), sep='|')
-    )
-    segments_out = segments_out.rename(columns={'CHROMOSOME': 'CHROM'})
-    segments_out.drop_duplicates(inplace=True)
-    segments_out.to_csv(output_segment_fname, sep="\t", header=True, index=False)
 
     cna_query_segment_df.rename(columns = {
         'CHROMOSOME':'CHROM',
@@ -1203,7 +1259,7 @@ def annotate_cna_segments(input_cna_segment_fname: str,
         cna_query_segment_df['VAR_ID'].str.cat(
             cna_query_segment_df['CN_MAJOR'].astype(str), sep=":").str.cat(
                 cna_query_segment_df['CN_MINOR'].astype(str), sep=":")
-    
+
     cna_query_segment_df['SAMPLE_ID'] = sample_id
     cna_query_segment_df['TUMOR_PLOIDY'] = float(tumor_ploidy)
     cna_query_segment_df['TUMOR_PLOIDY_SOURCE'] = tumor_ploidy_source
@@ -1226,6 +1282,7 @@ def annotate_cna_segments(input_cna_segment_fname: str,
         'amp_threshold_effective': float(effective_amplification_threshold),
         'tumor_ploidy': float(tumor_ploidy),
         'tumor_ploidy_source': tumor_ploidy_source,
+        'gene_annotations_empty': False,
     }
 
 

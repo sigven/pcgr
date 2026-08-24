@@ -833,6 +833,11 @@ def run_pcgr(input_data, output_data, conf_options):
             yaml_data['conf']['sample_properties']['tumor_ploidy_source'] = cna_annotation['tumor_ploidy_source']
             if cna_annotation['tumor_ploidy'] is not None:
                 yaml_data['conf']['sample_properties']['tumor_ploidy'] = cna_annotation['tumor_ploidy']
+            # Segment-level output is always produced on success. Gene-level output is a
+            # separate concern - it's only skipped if no segment overlapped a
+            # protein-coding transcript (rare, e.g. all-intergenic segment set).
+            if cna_annotation.get('gene_annotations_empty', False):
+                yaml_data['molecular_data']['fname_cna_gene_tsv'] = "None"
         else:
             yaml_data['molecular_data']['fname_cna_gene_tsv'] = "None"
             yaml_data['molecular_data']['fname_cna_segment_tsv'] = "None"
