@@ -567,14 +567,15 @@ def run_pcgr(input_data, output_data, conf_options):
                 debug = debug
             )
 
-            # Generate OncoKB-compliant MAF input file
-            logger.info('Generating OncoKB-API compliant MAF input file')
-            generate_oncokb_maf_input(
-                maf_fname = output_maf,
-                output_fname = oncokb_input_maf,
-                oncokb_maf_query_all = bool(conf_options['oncokb']['maf_query_all']),
-                logger = logger
-            )
+            # Generate OncoKB-compliant MAF input file (only needed when OncoKB annotation will actually run)
+            if conf_options.get('oncokb', {}).get('api_token'):
+                logger.info('Generating OncoKB-API compliant MAF input file')
+                generate_oncokb_maf_input(
+                    maf_fname = output_maf,
+                    output_fname = oncokb_input_maf,
+                    oncokb_maf_query_all = bool(conf_options['oncokb']['maf_query_all']),
+                    logger = logger
+                )
 
             if not debug:
                 remove_file(vep_vcf_reheadered)
@@ -824,6 +825,7 @@ def run_pcgr(input_data, output_data, conf_options):
             tumor_ploidy = yaml_data['conf']['sample_properties']['tumor_ploidy'] if yaml_data['conf']['sample_properties']['tumor_ploidy'] != 'NA' else None,
             tumor_purity = yaml_data['conf']['sample_properties']['tumor_purity'] if yaml_data['conf']['sample_properties']['tumor_purity'] != 'NA' else None,
             expression_data = expression_data,
+            run_oncokb = bool(conf_options.get('oncokb', {}).get('api_token')),
             logger = logger)
         if cna_annotation['status'] == 0:
             logger.info('Finished pcgr-annotate-cna-segments')
@@ -854,10 +856,11 @@ def run_pcgr(input_data, output_data, conf_options):
         fusion_annotation = cna.annotate_fusions(
             input_fusion_fname = input_rna_fusion,
             output_fusion_fname = output_data['rna_fusion'],
-            oncokb_input_fname = oncokb_input_fusion_tsv, 
+            oncokb_input_fname = oncokb_input_fusion_tsv,
             build = yaml_data['genome_assembly'],
-            sample_id = yaml_data['sample_id'],           
-            refdata_assembly_dir = input_data['refdata_assembly_dir'],            
+            sample_id = yaml_data['sample_id'],
+            refdata_assembly_dir = input_data['refdata_assembly_dir'],
+            run_oncokb = bool(conf_options.get('oncokb', {}).get('api_token')),
             logger = logger)
         if fusion_annotation == 0:
             logger.info('Finished pcgr-annotate-rna-fusion')

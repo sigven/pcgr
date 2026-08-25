@@ -227,8 +227,12 @@ def is_valid_rna_fusion(rna_fusion_file, logger):
             return error_message(f"Optional 'Score' column cannot be of type '{rna_fusion_dataframe['Score'].dtype}'", logger)
 
     gene_pattern = re.compile(r'^[A-Za-z0-9][A-Za-z0-9._-]*$')
-    # Accept both bare (2:42264731) and chr-prefixed (chr2:42264731) formats
-    bp_pattern   = re.compile(r'^(chr)?([1-9]|1[0-9]|2[0-2]|X|Y|MT):\d+$')
+    # Structural check only - <contig>:<position>, contig may be any non-whitespace
+    # token (bare '2:42264731', chr-prefixed 'chr2:42264731', or an ALT/decoy/random
+    # contig such as 'chr1_KI270711v1_random:11083'). Restriction to primary/nuclear
+    # contigs is applied downstream (annotate_fusions()), which drops - rather than
+    # fatally rejects - fusion records on non-primary contigs.
+    bp_pattern   = re.compile(r'^[^\s:]+:\d+$')
     empty_partner_fusions = []
 
     for _, rec in rna_fusion_dataframe.iterrows():
@@ -239,32 +243,42 @@ def is_valid_rna_fusion(rna_fusion_file, logger):
 
         if '--' not in fusion_gene and '::' not in fusion_gene:
             return error_message(
-                f"RNA fusion gene '{fusion_gene}' missing mandatory '--' or '::' separator", logger)
+                f"RNA fusion file ({rna_fusion_file}): fusion gene '{fusion_gene}' "
+                f"missing mandatory '--' or '::' separator", logger)
 
         genes = fusion_gene.split('--') if '--' in fusion_gene else fusion_gene.split('::')
         if len(genes) != 2:
             return error_message(
-                f"RNA fusion gene '{fusion_gene}' does not have exactly two parts", logger)
+                f"RNA fusion file ({rna_fusion_file}): fusion gene '{fusion_gene}' "
+                f"does not have exactly two parts", logger)
 
         for g in genes:
             if g in ('', 'v'):
                 empty_partner_fusions.append(fusion_gene)
             else:
                 if not gene_pattern.match(g):
-                    return error_message(f"Invalid gene symbol '{g}' in fusion '{fusion_gene}'", logger)
+                    return error_message(
+                        f"RNA fusion file ({rna_fusion_file}): invalid gene symbol "
+                        f"'{g}' in fusion '{fusion_gene}'", logger)
                 if g.isdigit():
-                    return error_message(f"Gene name '{g}' cannot be all digits", logger)
+                    return error_message(
+                        f"RNA fusion file ({rna_fusion_file}): gene name '{g}' "
+                        f"cannot be all digits", logger)
 
         if not bp_pattern.match(str(left_bp)):
             return error_message(
-                f"Invalid LeftBreakpoint: '{left_bp}' - expected format <chrom>:<position> "
+                f"RNA fusion file ({rna_fusion_file}): invalid LeftBreakpoint: '{left_bp}' - "
+                f"expected format <chrom>:<position> "
                 f"(e.g. '2:42264731' or 'chr2:42264731')", logger)
         if not bp_pattern.match(str(right_bp)):
             return error_message(
-                f"Invalid RightBreakpoint: '{right_bp}' - expected format <chrom>:<position> "
+                f"RNA fusion file ({rna_fusion_file}): invalid RightBreakpoint: '{right_bp}' - "
+                f"expected format <chrom>:<position> "
                 f"(e.g. '2:29223528' or 'chr2:29223528')", logger)
         if int(split_reads) < 0:
-            return error_message(f"SplitReads cannot be negative - found '{split_reads}'", logger)
+            return error_message(
+                f"RNA fusion file ({rna_fusion_file}): SplitReads cannot be negative - "
+                f"found '{split_reads}'", logger)
 
     if empty_partner_fusions:
         n = len(empty_partner_fusions)

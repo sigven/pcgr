@@ -351,6 +351,7 @@ def annotate_fusions(input_fusion_fname: str,
                      sample_id: str,
                      build: str,
                      refdata_assembly_dir: str,
+                     run_oncokb: bool = False,
                      logger: Optional[logging.Logger] = None) -> int:
     """
     Annotate gene fusions in a given fusion file.
@@ -360,6 +361,9 @@ def annotate_fusions(input_fusion_fname: str,
         sample_id: Sample identifier
         build: Genome build version
         refdata_assembly_dir (str): Path to the build-specific PCGR database directory.
+        run_oncokb (bool, optional): Whether an OncoKB API token is configured for this run.
+            The OncoKB input file is only generated when True, since it is otherwise never
+            consumed. Defaults to False.
         logger (logging.Logger, optional): Logger. Defaults to None.
     Returns:
         int: 0 if successful.
@@ -369,6 +373,35 @@ def annotate_fusions(input_fusion_fname: str,
 
     check_file_exists(input_fusion_fname, logger = logger)
     fusion_df = pd.read_csv(input_fusion_fname, sep="\t", na_values=".")
+
+    ## Fusion callers occasionally report a breakpoint on an ALT/decoy/random
+    ## contig (e.g. 'chr1_KI270711v1_random') when a supporting read maps
+    ## ambiguously. Such fusions cannot be placed on a cytoband or linked out
+    ## in the report, so they are dropped here (with a warning) rather than
+    ## treated as fatal input errors - mirroring how the CNA/VCF pipelines
+    ## silently restrict calls to nuclear chromosomes (1-22/X/Y/M) rather than
+    ## aborting the whole run over a single non-primary-contig record.
+    if 'LeftBreakpoint' in fusion_df.columns and 'RightBreakpoint' in fusion_df.columns:
+        def _breakpoint_chrom(breakpoint):
+            chrom = str(breakpoint).split(':', 1)[0]
+            if chrom.startswith('chr'):
+                chrom = chrom[3:]
+            return 'M' if chrom == 'MT' else chrom
+
+        on_primary_contig = (
+            fusion_df['LeftBreakpoint'].apply(_breakpoint_chrom).isin(nuclear_chromosomes) &
+            fusion_df['RightBreakpoint'].apply(_breakpoint_chrom).isin(nuclear_chromosomes)
+        )
+        n_dropped = int((~on_primary_contig).sum())
+        if n_dropped > 0:
+            dropped_examples = fusion_df.loc[~on_primary_contig, 'FusionGene'].astype(str).head(2).tolist()
+            examples = ', '.join(f"'{f}'" for f in dropped_examples)
+            suffix = f" (and {n_dropped - 2} more)" if n_dropped > 2 else ""
+            warn_message(
+                f"Dropped {n_dropped} fusion record(s) with a breakpoint on a non-primary "
+                f"contig (ALT/decoy/random): {examples}{suffix}", logger)
+            fusion_df = fusion_df[on_primary_contig].reset_index(drop=True)
+
     if 'FusionGene' in fusion_df.columns:
         fusion_df['aberration_key'] = (
             fusion_df['FusionGene'].fillna('').str.replace('--', '::', regex=False).apply(
@@ -441,8 +474,9 @@ def annotate_fusions(input_fusion_fname: str,
         fname = output_fusion_fname,
         col_sep = "\t")
 
-    # Generate OncoKB input file
-    generate_oncokb_fusion_input(fusion_df, oncokb_input_fname, logger)
+    # Generate OncoKB input file (only needed when OncoKB annotation will actually run)
+    if run_oncokb:
+        generate_oncokb_fusion_input(fusion_df, oncokb_input_fname, logger)
 
     return 0
 
@@ -955,6 +989,7 @@ def annotate_cna_segments(input_cna_segment_fname: str,
                           tumor_ploidy: Optional[float] = None,
                           tumor_purity: Optional[float] = None,
                           expression_data: Optional[dict] = None,
+                          run_oncokb: bool = False,
                           logger: Optional[logging.Logger] = None) -> dict:
     """
     Annotate copy number aberrations in a given segment file with ploidy-aware thresholds.
@@ -964,6 +999,9 @@ def annotate_cna_segments(input_cna_segment_fname: str,
         output_segment_gene_fname (str): File name of the annotated transcript-level output file.
         output_segment_fname (str): File name of the annotated segment-level output file.
         oncokb_input_fname: str, File name of the OncoKB CNA input file to be generated.
+        run_oncokb (bool, optional): Whether an OncoKB API token is configured for this run.
+            The OncoKB input file is only generated when True, since it is otherwise never
+            consumed. Defaults to False.
         output_dir (str): Path to the output directory.
         refdata_assembly_dir (str): Path to the build-specific PCGR database directory.
         build (str): Genome assembly build of input data.
@@ -1274,8 +1312,9 @@ def annotate_cna_segments(input_cna_segment_fname: str,
 
     cna_query_segment_df.to_csv(output_segment_gene_fname, sep="\t", header=True, index=False)
 
-    # Generate OncoKB input file
-    generate_oncokb_cna_input(cna_query_segment_df, oncokb_input_fname, logger)
+    # Generate OncoKB input file (only needed when OncoKB annotation will actually run)
+    if run_oncokb:
+        generate_oncokb_cna_input(cna_query_segment_df, oncokb_input_fname, logger)
 
     return {
         'status': 0,
