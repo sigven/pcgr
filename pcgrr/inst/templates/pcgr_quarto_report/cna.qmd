@@ -145,11 +145,32 @@ plotly::ggplotly(cna_plot_relative, tooltip = c("y", "z")) |>
 
 ### Potentially oncogenic events
 
+```{r cna_oncogenic_gain_threshold}
+#| echo: false
+#| eval: true
+
+## Computed independently of the plot chunks above (which may not execute, e.g.
+## when there are no gene-level CNA annotations) to safely support the bullet
+## text below regardless of whether a CN profile plot was rendered.
+gain_threshold_effective_display <-
+  pcg_report$settings$conf$somatic_cna$gain_threshold_absolute
+if (as.character(pcg_report$settings$conf$somatic_cna$threshold_mode) == "relative") {
+  tumor_ploidy_display <- pcg_report$settings$conf$sample_properties$tumor_ploidy
+  if (is.na(tumor_ploidy_display) || tumor_ploidy_display == "NA") {
+    tumor_ploidy_display <- 2
+  }
+  gain_threshold_effective_display <-
+    as.numeric(tumor_ploidy_display) *
+    as.numeric(pcg_report$settings$conf$somatic_cna$gain_threshold_relative)
+}
+gain_threshold_effective_display <- as.numeric(gain_threshold_effective_display)
+```
+
 Here we show all protein-coding genes subject to copy number alteration that may potentially have oncogenic effects. Specifically, we list
 
- * [Proto-oncogenes](#documentation) subject to copy-number __amplification__ (total copy number >= __`r pcg_report$settings$conf$somatic_cna$amp_threshold_effective`__ (effective amplification threshold, user-configurable))
+ * [Proto-oncogenes](#documentation) subject to copy-number __amplification__ (total copy number >= __`r pcg_report$settings$conf$somatic_cna$amp_threshold_effective`__ (effective amplification threshold, user-configurable)) or __gain__ (total copy number >= __`r gain_threshold_effective_display`__)
  * [Tumor suppressor](#documentation) genes subject to __deep deletions__ (homozygous/hemizygous deletions; total copy number = __0__), and __shallow deletions__ (heterozygous deletions; total copy number less than baseline ploidy (__`r pcg_report$settings$conf$sample_properties$tumor_ploidy`__))
- * Other clinically actionable genes subject to amplification
+ * Other clinically actionable genes subject to amplification or gain
 
 Gene symbols are color-coded according to their strength of association to cancer (here, specifically __`r pcg_report$settings$conf$sample_properties$site`__ cancers), from <span style="background-color:`r pcgrr::color_palette$cancer_assoc$values[1]`; padding:2x; color:white"><b>&nbsp; weak associations &nbsp; </b></span>&nbsp; to <span style="background-color:`r pcgrr::color_palette$cancer_assoc$values[length(pcgrr::color_palette$cancer_assoc$values)]`; padding:2x; color:white"><b>&nbsp; strong associations &nbsp; </b></span> [@Ochoa2021-jc;@Nakken2023-ol].
 
