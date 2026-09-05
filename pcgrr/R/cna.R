@@ -1,30 +1,3 @@
-#' Pad segments narrower than a minimum width for genome-wide plot legibility
-#'
-#' Widens (symmetrically, around the segment midpoint) any segment whose
-#' genome-coordinate width is below \code{min_width_bp}, so it remains visible
-#' as a rendered mark on a genome-wide plot. Padding is clamped to the
-#' segment's own chromosome boundaries (\code{genome_start}/\code{genome_end})
-#' so it cannot visually bleed into a neighboring chromosome. Purely cosmetic:
-#' does not touch SEGMENT_START/SEGMENT_END or any other reported column -
-#' only the SegmentStart/SegmentEnd columns used for plot x-coordinates.
-#'
-#' @param df data frame with SegmentStart, SegmentEnd, genome_start, genome_end
-#' @param min_width_bp numeric minimum plotted width in genome-coordinate bp.
-#'   Default 1e7 (10 Mb, ~0.3% of the human genome).
-#'
-#' @return df with SegmentStart/SegmentEnd widened where needed
-#'
-widen_short_segments_for_plot <- function(df, min_width_bp = 1e7) {
-  df |>
-    dplyr::mutate(
-      .pad = pmax(min_width_bp - (.data$SegmentEnd - .data$SegmentStart), 0) / 2,
-      SegmentStart = pmax(.data$SegmentStart - .data$.pad, .data$genome_start),
-      SegmentEnd   = pmin(.data$SegmentEnd + .data$.pad, .data$genome_end)
-    ) |>
-    dplyr::select(-".pad")
-}
-
-
 #' Plot allele-specific copy number segments (absolute copies)
 #'
 #' Function that plots allele-specific copy number segments
@@ -283,6 +256,9 @@ plot_cna_segments_absolute <- function(
       # ),
       SegmentStart = .data$genome_start + .data$SEGMENT_START,
       SegmentEnd = .data$genome_start + .data$SEGMENT_END,
+      SegmentMid = .data$genome_start +
+        (.data$SEGMENT_START + .data$SEGMENT_END) / 2,
+      SegmentWidthBp = .data$SEGMENT_END - .data$SEGMENT_START,
       SegmentInfo = paste0(paste(
         .data$CHROM, paste(
           scales::comma(.data$SEGMENT_START),
@@ -290,7 +266,6 @@ plot_cna_segments_absolute <- function(
           sep = "-"),
         sep = ":"), " (",.data$segsize,")<br> - ",
         .data$CYTOBAND, " (", .data$EVENT_TYPE,")")) |>
-    widen_short_segments_for_plot() |>
     dplyr::select(
       -c("genome_start","EVENT_TYPE","segsize")) |>
     dplyr::distinct()
@@ -367,6 +342,13 @@ plot_cna_segments_absolute <- function(
 
   low = min(reference_coordinates$genome_start)
   upp = max(reference_coordinates$genome_end)
+
+  ## Focal / short segments render below one pixel on a genome-wide x-axis and
+  ## disappear. Rather than inflating their plotted width (which distorts extent
+  ## and makes neighbouring focal events overlap), mark the true midpoint of any
+  ## sub-resolution segment with a point. Threshold ~0.25% of the genome span.
+  min_visible_bp <- (upp - low) / 400
+
   y_max <- max(unique(cna_segments_global$CN_TOTAL))
 
   y_max_display <- y_max + 1
@@ -505,6 +487,25 @@ plot_cna_segments_absolute <- function(
         y = .data$CN_TOTAL,
         yend = .data$CN_TOTAL,
         colour = .data$SegmentClass), linewidth = 1.6) +
+    ## Point mark at the true midpoint for sub-resolution (focal / short) segments
+    ## so they stay visible without inflating their plotted genomic extent
+    ggplot2::geom_point(
+      data = cna_segments_global |>
+        dplyr::filter(.data$SegmentWidthBp < min_visible_bp),
+      ggplot2::aes(
+        x = .data$SegmentMid,
+        y = .data$CN_TOTAL,
+        colour = .data$SegmentClass,
+        z = .data$SegmentInfo), size = 1.6, show.legend = FALSE) +
+    ## Emphasise focal amplifications / gains of oncogenes with a larger triangle
+    ggplot2::geom_point(
+      data = cna_segments_global |>
+        dplyr::filter(!is.na(.data$ONC_AMPL) | !is.na(.data$ONC_GAIN)),
+      ggplot2::aes(
+        x = .data$SegmentMid,
+        y = .data$CN_TOTAL,
+        colour = .data$SegmentClass,
+        z = .data$SegmentInfo), shape = 17, size = 2.8, show.legend = FALSE) +
     ggplot2::scale_color_manual(
       breaks = leg_breaks_abs,
       values = leg_colors_abs,
@@ -763,6 +764,9 @@ plot_cna_segments_relative <-
       dplyr::mutate(
         SegmentStart = .data$genome_start + .data$SEGMENT_START,
         SegmentEnd   = .data$genome_start + .data$SEGMENT_END,
+        SegmentMid   = .data$genome_start +
+          (.data$SEGMENT_START + .data$SEGMENT_END) / 2,
+        SegmentWidthBp = .data$SEGMENT_END - .data$SEGMENT_START,
         SegmentInfo  = paste0(
           paste(.data$CHROM,
                 paste(scales::comma(.data$SEGMENT_START),
@@ -773,7 +777,6 @@ plot_cna_segments_relative <-
           .data$CYTOBAND, " (", .data$EVENT_TYPE, ")")
         #"<br> - log\u2082FC: ", round(.data$Log2FC, 3))
       ) |>
-      widen_short_segments_for_plot() |>
       dplyr::select(-c("genome_start", "EVENT_TYPE", "segsize")) |>
       dplyr::distinct()
 
@@ -840,6 +843,10 @@ plot_cna_segments_relative <-
 
     low <- min(reference_coordinates$genome_start)
     upp <- max(reference_coordinates$genome_end)
+
+    ## Sub-resolution (focal / short) segments are marked with a point at their
+    ## true midpoint rather than inflating plotted width (see plot_cna_segments_absolute)
+    min_visible_bp <- (upp - low) / 400
 
     ## Y-axis limits and breaks
     y_min_data <- min(cna_segments_global$Log2FC, na.rm = TRUE)
@@ -969,6 +976,29 @@ plot_cna_segments_relative <-
           yend   = .data$Log2FC,
           colour = .data$SegmentClass),
         linewidth = 1.6
+      ) +
+      ## Point mark at the true midpoint for sub-resolution (focal / short)
+      ## segments so they stay visible without inflating plotted extent
+      ggplot2::geom_point(
+        data = cna_segments_global |>
+          dplyr::filter(.data$SegmentWidthBp < min_visible_bp),
+        ggplot2::aes(
+          x      = .data$SegmentMid,
+          y      = .data$Log2FC,
+          colour = .data$SegmentClass,
+          z      = .data$SegmentInfo),
+        size = 1.6, show.legend = FALSE
+      ) +
+      ## Emphasise focal amplifications / gains of oncogenes with a larger triangle
+      ggplot2::geom_point(
+        data = cna_segments_global |>
+          dplyr::filter(!is.na(.data$ONC_AMPL) | !is.na(.data$ONC_GAIN)),
+        ggplot2::aes(
+          x      = .data$SegmentMid,
+          y      = .data$Log2FC,
+          colour = .data$SegmentClass,
+          z      = .data$SegmentInfo),
+        shape = 17, size = 2.8, show.legend = FALSE
       ) +
       ggplot2::scale_color_manual(
         breaks = leg_breaks,
