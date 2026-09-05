@@ -175,5 +175,7 @@ export(write_processed_vcf)
 export(write_report_excel)
 export(write_report_html)
 export(write_report_tsv)
-importFrom(rlang,":=")
-importFrom(rlang,.data)
+importFrom(rlang,
+  ":=",
+  .data
+)

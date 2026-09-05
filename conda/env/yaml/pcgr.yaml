@@ -9,7 +9,7 @@ dependencies:
   - pcgr ==2.3.2 # bump
   - bioconda::bedtools
   - bioconda::bcftools
-  - bioconda::ensembl-vep ==115.1
+  - bioconda::ensembl-vep ==116.2
   - conda-forge::pandoc
   - bioconda::perl-bio-bigfile
   - conda-forge::perl-compress-raw-zlib

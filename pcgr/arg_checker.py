@@ -213,8 +213,7 @@ def verify_args(arg_dict, logger = None):
         uuid_pattern = r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
         if not re.match(uuid_pattern, str(arg_dict['oncokb_api_token']), re.IGNORECASE):
             err_msg = (
-                f"OncoKB API token ('--oncokb_api_token') does not match the expected UUID format "
-                f"(e.g. 'c3f8a1d2-7b4e-49c0-85f1-2e6d0a9b3c7e')"
+                f"OncoKB API token ('--oncokb_api_token') does not match the expected UUID format"
             )
             error_message(err_msg, logger)
 

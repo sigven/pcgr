@@ -4,7 +4,7 @@ from pcgr._version import __version__
 
 ## Version - software and bundle
 PCGR_VERSION = __version__
-DB_VERSION = '20260620'  # database build version (date-based)
+DB_VERSION = '20260909'  # database build version (date-based)
 
 ## Miscellaneous settings
 NCBI_BUILD_MAF = 'GRCh38'
@@ -18,7 +18,7 @@ MINIMUM_N_MUT_SIGNATURE = 100
 MAX_SIGNATURE_PREVALENCE = 20
 
 ## GENCODE versions
-GENCODE_VERSION = {'grch38': 49,'grch37': 19}
+GENCODE_VERSION = {'grch38': 50,'grch37': 19}
 
 ## vcfanno settings
 VCFANNO_MAX_PROC = 15
@@ -28,7 +28,7 @@ NA_INTEGER = -99999
 NA_FLOAT = -99999.99
 
 ## VEP settings/versions
-VEP_VERSION = '115'
+VEP_VERSION = '116'
 VEP_ASSEMBLY = {'grch38': 'GRCh38','grch37': 'GRCh37'}
 VEP_MIN_FORKS = 1
 VEP_MAX_FORKS = 8
