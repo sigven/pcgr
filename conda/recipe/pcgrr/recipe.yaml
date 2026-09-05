@@ -107,7 +107,7 @@ about:
     Personal Cancer Genome ReporteR. Functions, tools and utilities for the
     generation of clinical cancer genome reports with PCGR.
   license: MIT
-  license_file: LICENSE.md
+  license_file: LICENSE
   repository: https://github.com/sigven/pcgr/tree/main/pcgrr
   documentation: https://sigven.github.io/pcgr
 
