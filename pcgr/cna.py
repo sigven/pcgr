@@ -1255,7 +1255,7 @@ def annotate_cna_segments(input_cna_segment_fname: str,
         ## Bring over the precomputed segment-level classification instead of
         ## recomputing amp/gain/del/LOH on the (segment x transcript) gene-level frame.
         classification_cols = [
-            'segment_id', 'segment_length_mb', 'variant_class', 'loh',
+            'segment_id', 'segment_length_mb', 'fold_change', 'variant_class', 'loh',
             'amp_cond', 'gain_cond', 'hetloss_cond', 'homloss_cond', 'hemloss_cond']
         cna_query_segment_df = cna_query_segment_df.merge(
             cna_segment_level_df[classification_cols], on='segment_id', how='left')
