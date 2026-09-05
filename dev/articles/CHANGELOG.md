@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.3.2
+
+- Date: **2026-08-10**
+- Patch release to fix [issue
+  \#300](https://github.com/sigven/pcgr/issues/300) and [issue
+  \#302](https://github.com/sigven/pcgr/issues/302)
+
 ## v2.3.1
 
 - Date: **2026-07-10**

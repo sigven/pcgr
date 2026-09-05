@@ -519,6 +519,9 @@
 - [`variant_db_url`](https://sigven.github.io/pcgr/dev/reference/variant_db_url.md)
   : List of URLS and variant identifiers for variant/gene/protein domain
   databases
+- [`widen_short_segments_for_plot()`](https://sigven.github.io/pcgr/dev/reference/widen_short_segments_for_plot.md)
+  : Pad segments narrower than a minimum width for genome-wide plot
+  legibility
 - [`write_processed_vcf()`](https://sigven.github.io/pcgr/dev/reference/write_processed_vcf.md)
   : Function that writes a VCF intended for mutational signature
   analysis

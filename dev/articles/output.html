@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.1.9002</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9003</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -928,116 +928,115 @@ IntoGen Catalog of Driver Mutations</td>
 <td><code>EFFECT_PREDICTIONS</code></td>
 <td>In silico predictions of variant effect on protein function and
 pre-mRNA splicing from <a href="https://www.dbnsfp.org/" class="external-link">database of
-non-synonymous functional predictions - dbNSFP v5.0</a>. Predicted
-effects are provided by different sources/algorithms (separated by
+non-synonymous functional predictions - dbNSFP</a>. Predicted effects
+are provided by different sources/algorithms (separated by
 <code>&amp;</code>), <code>T</code> = Tolerated, <code>N</code> =
 Neutral, <code>D</code> = Damaging</td>
 </tr>
 <tr class="odd">
 <td><code>SPLICE_EFFECT</code></td>
-<td>Effect of splicing, from MutSpliceDB and/or MaxEntScan. Format:
-<entrezgene></entrezgene>
-</td>
+<td>Effect of splicing, from MutSpliceDB and/or MaxEntScan, combined
+into a single comma-separated string. MutSpliceDB component format:
+<code>&lt;ENTREZGENE&gt;|&lt;SYMBOL&gt;|&lt;REFSEQ_TRANSCRIPT_ID&gt;|&lt;HGVSc&gt;|&lt;EFFECT&gt;|&lt;AFFECTED_EXONS&gt;|&lt;SOURCE&gt;</code>.
+MaxEntScan component format:
+<code>MaxEntScan|&lt;stratum&gt;|&lt;evidence_tier&gt;</code> (see
+<code>MAXENTSCAN</code> below for details)</td>
 </tr>
 <tr class="even">
-<td>MES</td>
-<td><score_diff></score_diff></td>
-</tr>
-<tr class="odd">
 <td><code>DBNSFP_BAYESDEL_ADDAF</code></td>
 <td>predicted effect from BayesDel (dbNSFP)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>DBNSFP_LIST_S2</code></td>
 <td>predicted effect from LIST-S2 (dbNSFP)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>DBNSFP_SIFT</code></td>
 <td>predicted effect from SIFT (dbNSFP)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>DBNSFP_POLYPHEN2_HVAR</code></td>
 <td>predicted effect from PolyPhen2 (dbNSFP)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>DBNSFP_PROVEAN</code></td>
 <td>predicted effect from PROVEAN (dbNSFP)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>DBNSFP_MUTATIONTASTER</code></td>
 <td>predicted effect from MUTATIONTASTER (dbNSFP)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>DBNSFP_MUTATIONASSESSOR</code></td>
 <td>predicted effect from MUTATIONASSESSOR (dbNSFP)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>DBNSFP_M_CAP</code></td>
 <td>predicted effect from M-CAP (dbNSFP)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>DBNSFP_MUTPRED</code></td>
 <td>score from MUTPRED (dbNSFP)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>DBNSFP_CLINPRED</code></td>
 <td>predicted effect from ClinPred (dbNSFP)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>DBNSFP_FATHMM</code></td>
 <td>predicted effect from FATHMM-XF (dbNSFP)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>DBNSFP_PRIMATEAI</code></td>
 <td>predicted effect from PRIMATEAI (dbNSFP)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>DBNSFP_DEOGEN2</code></td>
 <td>predicted effect from DEOGEN2 (dbNSFP)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>DBNSFP_PHACTBOOST</code></td>
 <td>predicted effect from PHACTboost (dbNSFP)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>DBNSFP_ALPHA_MISSENSE</code></td>
 <td>predicted effect from AlphaMissense (dbNSFP)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>DBNSFP_MUTFORMER</code></td>
 <td>predicted effect from MutFormer (dbNSFP)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>DBNSFP_ESM1B</code></td>
 <td>predicted effect from ESM1b (dbNSFP)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>DBNSFP_GERP</code></td>
 <td>evolutionary constraint measure from GERP (dbNSFP)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>DBNSFP_CADD</code></td>
 <td>Combined Annotation Dependent Depletion (CADD) score (dbNSFP)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>DBNSFP_VEST4</code></td>
 <td>VEST4 score (dbNSFP)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>DBNSFP_FATHMM_XF</code></td>
 <td>predicted effect from FATHMM-XF (dbNSFP)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>DBNSFP_META_RNN</code></td>
 <td>predicted effect from ensemble prediction (deep learning -
 dbNSFP)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>DBNSFP_SPLICE_SITE_RF</code></td>
 <td>predicted effect of splice site disruption, using random forest
 (dbscSNV)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>DBNSFP_SPLICE_SITE_ADA</code></td>
 <td>predicted effect of splice site disruption, using boosting
 (dbscSNV)</td>
@@ -1400,9 +1399,19 @@ details above)</td>
 <tr class="odd">
 <td>17. <code>MAXENTSCAN</code>
 </td>
-<td>MaxEntScan splice site impact summary. Format:
-<code>MaxEntScan|&lt;stratum&gt;|&lt;evidence_tier&gt;</code>
-</td>
+<td>MaxEntScan splice site impact summary for canonical (±1/±2 bp) and
+non-canonical (donor +3 to +6, acceptor -3 to -20) splice positions.
+Format: <code>MaxEntScan|&lt;stratum&gt;|&lt;evidence_tier&gt;</code>.
+<code>&lt;stratum&gt;</code> identifies the splice-site position
+category (e.g. <code>Donor_+5</code>, <code>Acceptor_PPT_Close</code>,
+<code>Canonical_Site</code>). <code>&lt;evidence_tier&gt;</code>
+reflects predicted impact strength, from strongest to weakest:
+<code>Strong</code> &gt; <code>Moderate</code> &gt;
+<code>Supporting</code> &gt; <code>No_Call</code> &gt;
+<code>Uninformative</code> (<code>.</code> for canonical sites, which
+are always high-confidence). Only variants with a <code>Strong</code>
+tier at non-canonical positions are additionally flagged as
+loss-of-function</td>
 </tr>
 <tr class="even">
 <td>18. <code>EFFECT_PREDICTIONS</code>

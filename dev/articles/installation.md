@@ -60,13 +60,13 @@ mv data/ ${BUNDLE_VERSION}
 
 [VEP](https://www.ensembl.org/info/docs/tools/vep/index.html) requires a
 data cache which is available from the Ensembl [FTP
-site](https://ftp.ensembl.org/pub/release-115/variation/indexed_vep_cache/)
+site](https://ftp.ensembl.org/pub/release-116/variation/indexed_vep_cache/)
 (search there for files starting with `homo_sapiens_vep_`). The latest
-Ensembl VEP version we support is **v115**.
+Ensembl VEP version we support is **v116**.
 
 #### Bash Example
 
-    VEP_VERSION="115"
+    VEP_VERSION="116"
 
 ``` bash
 GENOME="GRCh38" # or "GRCh37"
@@ -77,7 +77,7 @@ gzip -dc ${CACHE} | tar xvf -
 ```
 
 **Important**: PCGR needs to be pointed to the *parent* directory
-containing the downloaded `homo_sapiens/115_GRCh3x/` cache.
+containing the downloaded `homo_sapiens/116_GRCh3x/` cache.
 Historically, this parent directory has been named `.vep`, but the name
 of this directory can be arbitrarily set.
 
@@ -108,7 +108,7 @@ the time is spent on downloading the `{BSgenome.Hsapiens.UCSC.hg19}` and
 `{BSgenome.Hsapiens.UCSC.hg38}` R packages (which happens at the very
 end of the conda environment creation).
 
-    PCGR_VERSION="2.3.1.9002"
+    PCGR_VERSION="2.3.2.9003"
 
 ``` bash
 # set up variables
@@ -129,9 +129,9 @@ pcgr --help
 
 The PCGR Docker image is available from the GitHub Container Registry at
 <https://github.com/sigven/pcgr/pkgs/container/pcgr>. Pull the latest
-**v2.3.1.9002** image with:
+**v2.3.2.9003** image with:
 
-    docker pull ghcr.io/sigven/pcgr:2.3.1.9002
+    docker pull ghcr.io/sigven/pcgr:2.3.2.9003
 
 #### Example Run
 
@@ -152,7 +152,7 @@ structure:
 
 &nbsp;
 
-    PCGR_VERSION="2.3.1.9002"
+    PCGR_VERSION="2.3.2.9003"
     BUNDLE_VERSION="20260620"
 
 ``` bash
@@ -184,18 +184,18 @@ for Singularity/Apptainer below, see also [issue
 ### C. Singularity/Apptainer
 
 The PCGR Singularity/Apptainer image is available on [GitHub Container
-Registry](https://ghcr.io/sigven/pcgr). Pull the latest **v2.3.1.9002**
+Registry](https://ghcr.io/sigven/pcgr). Pull the latest **v2.3.2.9003**
 image with:
 
-    apptainer pull oras://ghcr.io/sigven/pcgr:2.3.1.9002.singularity
+    apptainer pull oras://ghcr.io/sigven/pcgr:2.3.2.9003.singularity
 
 This will download a Singularity Image File (SIF) called
-**pcgr_2.3.1.9002.singularity.sif** that can be run with Singularity or
+**pcgr_2.3.2.9003.singularity.sif** that can be run with Singularity or
 Apptainer.
 
 #### Example Run
 
-    PCGR_VERSION="2.3.1.9002"
+    PCGR_VERSION="2.3.2.9003"
     BUNDLE_VERSION="20260620"
 
 ``` bash
