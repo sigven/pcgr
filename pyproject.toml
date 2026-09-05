@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pcgr"
-version = "2.3.2.9002" # bump
+version = "2.3.2" # bump
 description = "Personal Cancer Genome Reporter (PCGR) - variant interpretation for precision cancer medicine"
 authors = [
     {name = "Sigve Nakken", email = "sigven@gmail.com"},
@@ -16,7 +16,7 @@ maintainers = [
     ]
 readme = "README.md"
 license = "MIT"
-license-files = ["LICENSE"]
+license-files = ["LICENSE.md"]
 keywords = ["cancer", "genomics", "pcgr"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
