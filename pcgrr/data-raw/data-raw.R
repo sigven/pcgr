@@ -1098,6 +1098,12 @@ table_display_cols[['cna_other_oncogenic']] <-
     "CN_MAJOR",
     "CN_MINOR",
     "TARGETED_INHIBITORS_ALL",
+    "MUTATION_EFFECT_OKB",
+    "MUTATION_EFFECT_DESCRIPTION_OKB",
+    "MUTATION_EFFECT_CITATIONS_OKB",
+    "ONCOGENICITY_OKB",
+    "TUMOR_TYPE_SUMMARY_OKB",
+    "VARIANT_SUMMARY_OKB",
     "GENOME_VERSION")
 
 ####----SNV/Indel - germline filtered-----#####

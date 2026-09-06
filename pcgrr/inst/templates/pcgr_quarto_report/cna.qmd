@@ -178,6 +178,8 @@ Here we show all protein-coding genes subject to copy number alteration that may
 
 Gene symbols are color-coded according to their strength of association to cancer (here, specifically __`r pcg_report$settings$conf$sample_properties$site`__ cancers), from <span style="background-color:`r pcgrr::color_palette$cancer_assoc$values[1]`; padding:2x; color:white"><b>&nbsp; weak associations &nbsp; </b></span>&nbsp; to <span style="background-color:`r pcgrr::color_palette$cancer_assoc$values[length(pcgrr::color_palette$cancer_assoc$values)]`; padding:2x; color:white"><b>&nbsp; strong associations &nbsp; </b></span> [@Ochoa2021-jc;@Nakken2023-ol].
 
+Where OncoKB curation is available, the __Genename__ cell is tinted (with a colored left border) according to the OncoKB oncogenicity classification &ndash; <span style="background-color:`r pcgrr::color_palette$oncogenicity$values[1]`; padding:2x; color:white"><b>&nbsp; Oncogenic &nbsp; </b></span>&nbsp; or <span style="background-color:`r pcgrr::color_palette$oncogenicity$values[2]`; padding:2x; color:white"><b>&nbsp; Likely Oncogenic &nbsp; </b></span>. The full set of OncoKB annotations (mutation effect, tumor-type / variant summaries, citations) is available by expanding a table row.
+
 
 <br>
 
@@ -200,14 +202,23 @@ symbol_rank_col <- if (
 ) "GLOBAL_ASSOC_RANK" else "TISSUE_ASSOC_RANK"
 
 primary_cols <- c(
-  "SYMBOL", 
-  "GENENAME", 
-  "VARIANT_CLASS_DISPLAY", 
+  "SYMBOL",
+  "GENENAME",
+  "VARIANT_CLASS_DISPLAY",
   "EVENT_TYPE",
-  "CN_TOTAL", 
-  "CYTOBAND", 
+  "CN_TOTAL",
+  "CYTOBAND",
   "SEGMENT_LENGTH_MB"
 )
+
+## Genename cell is tinted by OncoKB oncogenicity (ONCOGENICITY_OKB) when the
+## gene/event is OncoKB-curated as (Likely) Oncogenic - a quick visual cue that
+## curated OncoKB evidence exists for the row. Full _OKB fields stay in row
+## details. When no OncoKB token was supplied the column is all-NA -> no tint.
+onc_okb_levels <- pcgrr::color_palette$oncogenicity$levels
+onc_okb_colors <- pcgrr::color_palette$oncogenicity$values
+has_okb_onc <- "ONCOGENICITY_OKB" %in% colnames(oncogenic_events) &&
+  any(!is.na(oncogenic_events$ONCOGENICITY_OKB))
 
 vc_levels <- 
   pcgrr::color_palette$cna_variant_class$levels_display
@@ -223,7 +234,15 @@ col_defs <- list(
     minWidth = 90
   ),
   GENENAME = reactable::colDef(
-    name = "Genename", minWidth = 150),
+    name = "Genename", minWidth = 150,
+    style = if (has_okb_onc) function(value, index) {
+      onc <- oncogenic_events$ONCOGENICITY_OKB[index]
+      bg <- onc_okb_colors[match(onc, onc_okb_levels)]
+      if (length(onc) == 0 || is.na(onc) || is.na(bg)) return(NULL)
+      list(
+        borderLeft = paste0("4px solid ", bg),
+        background = paste0(bg, "1A"))
+    } else NULL),
   VARIANT_CLASS_DISPLAY = reactable::colDef(
     name = "Variant Class",
     align = "center",
