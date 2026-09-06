@@ -76,6 +76,8 @@ plotly::ggplotly(cna_plot, tooltip = c("y","z")) |>
 
 ```
 
+<span style="font-size:11px; color:#6c6c6c;">Segments too short to render as a bar at whole-genome scale are drawn as a point at their midpoint; triangles (&#9650;) mark focal amplifications or gains of proto-oncogenes. Hover any mark for exact coordinates and affected genes.</span>
+
 #### Relative copy number profile
 
 ```{r plot_cna_relative}
@@ -136,6 +138,8 @@ plotly::ggplotly(cna_plot_relative, tooltip = c("y", "z")) |>
     margin = p_margin)
 
 ```
+
+<span style="font-size:11px; color:#6c6c6c;">Segments too short to render as a bar at whole-genome scale are drawn as a point at their midpoint; triangles (&#9650;) mark focal amplifications or gains of proto-oncogenes. Hover any mark for exact coordinates and affected genes.</span>
 
 :::
 
