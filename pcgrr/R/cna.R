@@ -1105,19 +1105,32 @@ get_oncogenic_cna_events <- function(cna_df_display = NULL, table_display_cols =
       oncogene_ampl_gain_variants,
       tsgene_loss_variants
     ) |>
+    ## Default ordering: OncoKB-curated Oncogenic / Likely Oncogenic events
+    ## first (when OncoKB annotation is available), then by the existing
+    ## CN / cancer-association ranking. All-NA (no OncoKB token) leaves the
+    ## prior order untouched.
+    dplyr::mutate(
+      .okb_onc_rank = dplyr::case_when(
+        .data$ONCOGENICITY_OKB == "Oncogenic"        ~ 1L,
+        .data$ONCOGENICITY_OKB == "Likely Oncogenic" ~ 2L,
+        TRUE                                         ~ 3L
+      )
+    ) |>
     dplyr::select(
       dplyr::any_of(
-        table_display_cols$cna_other_oncogenic
+        c(table_display_cols$cna_other_oncogenic, ".okb_onc_rank")
       )
     ) |>
     append_styled_cna_vclass(
       colname = "VARIANT_CLASS_DISPLAY"
     ) |>
     dplyr::arrange(
+      .data$.okb_onc_rank,
       .data$CN_TOTAL,
       dplyr::desc(.data$TISSUE_ASSOC_RANK),
-      dplyr::desc(.data$GLOBAL_ASSOC_RANK),
-    )
+      dplyr::desc(.data$GLOBAL_ASSOC_RANK)
+    ) |>
+    dplyr::select(-".okb_onc_rank")
 
   if ("SEGMENT_LENGTH_MB" %in% colnames(cna_oncogenic_events)) {
     cna_oncogenic_events <- cna_oncogenic_events |>
