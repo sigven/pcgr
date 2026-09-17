@@ -33,7 +33,7 @@ def get_args():
     optional_panel.add_argument('--panel_id',dest = "virtual_panel_id",type = str, default = "-1", help="Comma-separated string with identifier(s) of predefined virtual cancer predisposition gene panels,\nchoose any combination of the following identifiers (GEP = Genomics England PanelApp):\n" + str(pcgr_vars.panels_help_display))
     optional_panel.add_argument('--custom_list',dest = "custom_list",help="Provide custom list of genes from virtual panel 0 (single-column .txt/.tsv file with Ensembl gene identifiers),\n alternative to predefined panels provided with --panel_id)")
     optional_panel.add_argument('--custom_list_name',dest = "custom_list_name", default="None", help="Set name for custom made panel/list (single word - no whitespace), will be displayed in the report")
-    optional_panel.add_argument('--diagnostic_grade_only', action="store_true",help="For panel_id's 1-44 (Genomics England PanelApp) - consider genes with a GREEN status only, default: %(default)s")
+    optional_panel.add_argument('--diagnostic_grade_only', action="store_true",help="For panel_id's 1-43 (Genomics England PanelApp) - consider genes with a GREEN status only, default: %(default)s")
 
     optional_other.add_argument('--force_overwrite', action = "store_true", help='By default, the script will fail with an error if any output file already exists.\n You can force the overwrite of existing result files by using this flag, default: %(default)s')
     optional_other.add_argument('--version', action='version', version=str(utils.get_cpsr_version()))
@@ -47,7 +47,7 @@ def get_args():
     optional_classification.add_argument('--secondary_findings', action='store_true',dest='secondary_findings',default=False, help='Include variants found in ACMG-recommended list for secondary findings (v3.2), default: %(default)s')
     optional_classification.add_argument('--pgx_findings', action='store_true',dest='pgx_findings',default=False, help='Report overlap with variants associated with chemotherapy toxicity (PgX findings, CPIC), default: %(default)s')
     optional_classification.add_argument('--gwas_findings', action='store_true',dest='gwas_findings',default=False, help='Report overlap with low to moderate cancer risk variants (tag SNPs) identified from genome-wide association studies, default: %(default)s')    
-    optional_classification.add_argument('--max_af_gnomad', type = float, default = 0.9, dest = 'max_af_gnomad', help='Ignore reporting novel variants with gnomAD maximum allele frequency (AF) across populations greater than this value, default: %(default)s')
+    optional_classification.add_argument('--max_af_gnomad', type = float, default = 0.1, dest = 'max_af_gnomad', help='Ignore reporting novel variants with gnomAD maximum allele frequency (AF) across populations greater than this value, default: %(default)s')
     optional_classification.add_argument('--clinvar_trust_level', type=int, choices=[0,1,2,3,4], default=0, dest='clinvar_trust_level',help='Level of trust/authority assigned to CPSR-based variant classification relative to existing ClinVar records: \n' + pcgr_vars.clinvar_trust_levels_help_display + '\n(default: %(default)s)')
     optional_classification.add_argument('--clinvar_report_noncancer', action='store_true', help='Report also ClinVar-classified variants attributed to phenotypes/conditions NOT directly related to tumor development, default: %(default)s')
     
