@@ -1,6 +1,7 @@
 # Write messages to logs at a given priority level
 
-See [`log4r::levellog()`](https://rdrr.io/pkg/log4r/man/levellog.html)
+See
+[`log4r::levellog()`](https://log4r.r-lib.org/reference/log4r-deprecated.html)
 
 ## Usage
 
