@@ -47,6 +47,7 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/bm_categories.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/bm_evidence.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/bp_junction_transcript_overlap.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/build_germline_col_defs.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/build_oncogenicity_col_defs.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/build_rt_row_details.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/build_twohit_display_data.html</loc></url>
@@ -172,14 +173,19 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/process_oncokb_fusion.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/process_oncokb_maf.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/remove_cols_from_df.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/render_acmg_pills_cell.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/render_actble_bm_table.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/render_alteration_cell.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/render_alteration_classification_style.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/render_alteration_clinvar_style.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/render_bar_cell.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/render_classification_cell.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/render_diagn_bm_table.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/render_diagnosis.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/render_evidence_desc_cell.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/render_evidence_level_cell.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/render_genotype_style.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/render_moi_cell.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/render_oncogenicity_cell.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/render_progn_bm_table.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/render_prognostic_outcome.html</loc></url>
