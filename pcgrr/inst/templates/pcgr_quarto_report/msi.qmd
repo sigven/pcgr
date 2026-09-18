@@ -68,6 +68,50 @@ if (!is.na(frac_indels_sd)){
   sd_note <- paste0(" (expected ±", frac_indels_sd, " at this mutation count)")
 }
 
+## ---- Determine SYMBOL style column based on tumor site ----
+mmr_symbol_rank_col <- if (
+  pcg_report$settings$conf$sample_properties$site == "Any") {
+  "GLOBAL_ASSOC_RANK"
+} else {
+  "TISSUE_ASSOC_RANK"
+}
+
+mmr_primary_cols <- c(
+  "SYMBOL", "ALTERATION", "CONSEQUENCE",
+  "ONCOGENICITY", "VAF_TUMOR", "DP_TUMOR"
+)
+
+## ---- Germline Lynch syndrome findings (MLH1/MSH2/MSH6/PMS2/EPCAM) ----
+## Shown as a second tab alongside the somatic MMR/POL variants, only when
+## germline variants (CPSR) were provided as input
+germline_eval <- isTRUE(pcg_report$content$germline_classified$eval)
+
+if (germline_eval) {
+  lynch_genes <- c("MLH1", "MSH2", "MSH6", "PMS2", "EPCAM")
+  germline_primary_cols <- c(
+    "SYMBOL", "ALTERATION", "CONSEQUENCE", "GENOTYPE",
+    "CLINICAL_SIGNIFICANCE", "ACMG_CODE", "CPG_MOI"
+  )
+
+  germline_mmr_variants <-
+    pcg_report$content$germline_classified$callset$variant_display |>
+    dplyr::filter(
+      .data$SYMBOL %in% lynch_genes &
+        .data$CLINICAL_SIGNIFICANCE %in% c("Pathogenic", "Likely Pathogenic")) |>
+    dplyr::relocate(dplyr::any_of(germline_primary_cols))
+
+  ## DP_CONTROL is set to -1 when CPSR is run without a matched control
+  ## sample - drop it so a sentinel value does not surface in row details
+  ## (mirrors the same logic in germline.qmd)
+  germline_has_control_depth <-
+    "DP_CONTROL" %in% colnames(germline_mmr_variants) &&
+    any(germline_mmr_variants$DP_CONTROL >= 0, na.rm = TRUE)
+  if (!germline_has_control_depth &&
+     "DP_CONTROL" %in% colnames(germline_mmr_variants)) {
+    germline_mmr_variants$DP_CONTROL <- NULL
+  }
+}
+
 ## Display probability in the direction of the predicted class so the value
 ## box always supports rather than contradicts the stated conclusion:
 ##   MSS prediction   -> show P(MSS) = 1 - P(MSI-H)
@@ -130,46 +174,102 @@ bslib::page_fillable(
   ),
   bslib::card(
     full_screen = TRUE,
-    height = "350px",
+    height = "410px",
     bslib::card_header(
       class = "bg-dark",
       paste0("Fraction of coding indel variants - ",
              pcg_report$settings$sample_id)),
-    indel_fract_plot_plotly
-  ),
-
-  bslib::card(
-    bslib::card_header(
-      class = "bg-dark",
-      paste0("Somatic coding mutations in MMR genes - ",
-               pcg_report$settings$sample_id)
-    ),
-    bslib::card_body(
-      height = 60 + min(500, NROW(msi_content[['mmr_pol_variants']]) * 100),
-      if (NROW(msi_content[['mmr_pol_variants']]) > 0) {
-        DT::datatable(
-          msi_content[['mmr_pol_variants']],
-          extensions = "Responsive",
-          options = list(
-            pageLength = 8,
-            dom = 'tp'),
-          escape = FALSE) |>
-          DT::formatStyle(
-            color = "white",
-            "ONCOGENICITY",
-            "ONCOGENICITY",
-            backgroundColor =
-              DT::styleEqual(
-                pcgrr::color_palette$oncogenicity$levels,
-                pcgrr::color_palette$oncogenicity$values
-              )
-          )
-      }else{
-        "No somatic coding mutations found in MMR genes"
-      }
+    indel_fract_plot_plotly,
+    bslib::card_footer(
+      class = "text-muted",
+      style = "font-size: 0.85em;",
+      "Histogram of the somatic indel fraction (indels / all coding SNVs+indels) across the ",
+      "TCGA reference cohort used to train the MSI classifier, split by each sample's confirmed ",
+      "MSI status (MSS: microsatellite stable, blue; MSI-H: microsatellite instability-high, gold). ",
+      "The dotted vertical line marks this sample's own indel fraction for comparison."
     )
   )
 )
+```
+
+#### Coding mutations in MMR genes
+
+Somatic coding mutations are shown below for the mismatch repair (and DNA polymerase proofreading) genes `r paste(c("MLH1","MLH3","MSH2","MSH3","MSH6","PMS1","PMS2","POLD1","POLE"), collapse = ", ")`. `r ifelse(isTRUE(pcg_report$content$germline_classified$eval), "A second tab lists any pathogenic/likely pathogenic __germline__ variants (from CPSR) found in the core Lynch syndrome genes (MLH1, MSH2, MSH6, PMS2, EPCAM).", "")`
+
+```{r mmr_open_tabset}
+#| echo: false
+#| eval: !expr germline_eval
+#| output: asis
+
+cat("\n::: {.panel-tabset}\n\n##### Somatic\n\n")
+```
+
+```{r mmr_somatic_table}
+#| echo: false
+#| output: asis
+
+if (NROW(msi_content[['mmr_pol_variants']]) > 0) {
+  reactable::reactable(
+    msi_content[['mmr_pol_variants']],
+    columns = pcgrr::build_oncogenicity_col_defs(
+      data = msi_content[['mmr_pol_variants']],
+      primary_cols = mmr_primary_cols,
+      symbol_rank_col = mmr_symbol_rank_col),
+    defaultColDef = reactable::colDef(html = TRUE),
+    details = pcgrr::build_rt_row_details(mmr_primary_cols),
+    searchable = FALSE,
+    striped = TRUE,
+    highlight = TRUE,
+    compact = TRUE,
+    wrap = TRUE,
+    defaultPageSize = 8,
+    theme = pcgrr::rt_theme())
+} else {
+  cat("No somatic coding mutations found in MMR genes\n\n")
+}
+```
+
+```{r mmr_open_germline_tab}
+#| echo: false
+#| eval: !expr germline_eval
+#| output: asis
+
+cat("\n##### Germline\n\n")
+```
+
+```{r mmr_germline_table}
+#| echo: false
+#| eval: !expr germline_eval
+#| output: asis
+
+if (NROW(germline_mmr_variants) > 0) {
+  reactable::reactable(
+    germline_mmr_variants,
+    columns = pcgrr::build_germline_col_defs(
+      data = germline_mmr_variants,
+      primary_cols = germline_primary_cols,
+      has_control_depth = germline_has_control_depth),
+    defaultColDef = reactable::colDef(html = TRUE),
+    details = pcgrr::build_rt_row_details(
+      germline_primary_cols, styling_cols = character(0)),
+    searchable = FALSE,
+    striped = TRUE,
+    highlight = TRUE,
+    compact = TRUE,
+    wrap = TRUE,
+    defaultPageSize = 8,
+    theme = pcgrr::rt_theme())
+} else {
+  cat("No pathogenic/likely pathogenic germline variants found in MLH1, MSH2, MSH6, PMS2, or EPCAM\n\n")
+}
+```
+
+```{r mmr_close_tabset}
+#| echo: false
+#| eval: !expr germline_eval
+#| output: asis
+
+cat("\n:::\n\n")
 ```
 
 <br><br>

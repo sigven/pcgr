@@ -59,58 +59,63 @@ if (has_control_depth) {
     low_depth_threshold,
     'X) are flagged with an orange marker on the genotype - interpret their classification with caution<br>'), sep = "\n")
   cat('<br>')
+} else if ("DP_CONTROL" %in% colnames(germline_calls$variant_display)) {
+  ## DP_CONTROL carries no information without a matched control sample -
+  ## drop it so a sentinel value (-1) does not surface in the row details
+  germline_calls$variant_display$DP_CONTROL <- NULL
 }
 
-germline_dt <- DT::datatable(
-  germline_calls$variant_display,
-  escape = FALSE,
-  extensions = c("Buttons","Responsive"),
-  options = list(
-    pageLength = 10,
-    scrollCollapse = TRUE,
-    buttons = c('csv','excel'),
-    dom = 'Bfrtip'
-  )) |>
-  DT::formatStyle(
-    columns = c("SYMBOL","ALTERATION"),
-    valueColumns = c("CLINICAL_SIGNIFICANCE"),
-    color = "white",
-    backgroundColor =
-      DT::styleEqual(
-        c("Pathogenic", "Likely Pathogenic","VUS"),
-        c("#9E0142","#D53E4F","#000000")
-      )
-  )
+## Some cancer predisposition genes (e.g. the mismatch repair genes,
+## BRCA1) are linked to more than one inheritance mode, as monoallelic vs.
+## biallelic pathogenic variants cause distinct conditions (e.g. Lynch
+## syndrome vs. CMMRD for PMS2/MSH6) - flag this explicitly, and only when
+## relevant for the variants at hand
+has_dual_moi <- "CPG_MOI" %in% colnames(germline_calls$variant_display) &&
+  any(stringr::str_detect(
+    germline_calls$variant_display$CPG_MOI, "/"), na.rm = TRUE)
 
-if (has_control_depth) {
-  germline_dt <- germline_dt |>
-    DT::formatStyle(
-      columns = "GENOTYPE",
-      valueColumns = "DP_CONTROL",
-      `border-left` = DT::styleInterval(
-        c(0, low_depth_threshold), c("none", "4px solid #E69F00", "none")),
-      fontWeight = DT::styleInterval(
-        c(0, low_depth_threshold), c("normal", "bold", "normal"))
-    )
+if (has_dual_moi) {
+  cat(paste0(
+    '<b>NOTE</b> - for a subset of genes, <i>Inheritance</i> combines two ',
+    'modes (e.g. "AD/AR"): a heterozygous finding (see <i>Genotype</i>) ',
+    'typically reflects the dominant condition, while a homozygous/',
+    'biallelic finding may reflect a distinct, recessive condition<br>'),
+    sep = "\n")
+  cat('<br>')
 }
 
-bslib::page_fillable(
-  bslib::card(
-    bslib::card_header(
-      class = "bg-dark",
-      paste0("Germline variants - ",
-               pcg_report[['content']][['germline_classified']]$sample_id)
-    ),
-    bslib::card_body(
-      height = min(500, 150 + NROW(germline_calls$variant_display) * 80),
-      if (NROW(germline_calls$variant_display) > 0) {
-        germline_dt
-      }else{
-        "NO cancer-predisposing variants of clinical significance were found in the query case (CPSR report)."
-      }
-    )
-  )
+germline_primary_cols <- c(
+  "SYMBOL", "ALTERATION", "CONSEQUENCE", "GENOTYPE",
+  "CLINICAL_SIGNIFICANCE", "ACMG_CODE", "CPG_MOI"
 )
+
+## reactable renders visible columns in the underlying data frame's
+## column order (not the order of the colDef list) - relocate the
+## primary columns to the front, in the intended display order
+germline_calls$variant_display <- germline_calls$variant_display |>
+  dplyr::relocate(dplyr::any_of(germline_primary_cols))
+
+if (NROW(germline_calls$variant_display) > 0) {
+  reactable::reactable(
+    germline_calls$variant_display,
+    columns = pcgrr::build_germline_col_defs(
+      data = germline_calls$variant_display,
+      primary_cols = germline_primary_cols,
+      has_control_depth = has_control_depth),
+    defaultColDef = reactable::colDef(html = TRUE),
+    details = pcgrr::build_rt_row_details(
+      germline_primary_cols,
+      styling_cols = character(0)),
+    searchable = TRUE,
+    striped = TRUE,
+    highlight = TRUE,
+    compact = TRUE,
+    wrap = TRUE,
+    defaultPageSize = 10,
+    theme = pcgrr::rt_theme())
+} else {
+  cat("NO cancer-predisposing variants of clinical significance were found in the query case (CPSR report).")
+}
 
 
 ```

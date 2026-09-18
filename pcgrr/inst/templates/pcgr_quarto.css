@@ -302,6 +302,26 @@ h2, #TOC>ul>li {
 /* Evidence description */
 .rt-evidence-desc { font-size: 0.90em; }
 
+/* ACMG criteria pills (germline findings) — one pill per pipe-separated
+   code; color communicates pathogenic (P*) vs benign (B*) evidence */
+.rt-acmg-cell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.rt-acmg-pill {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 10px;
+  font-size: 0.85em;
+  font-weight: 600;
+  white-space: nowrap;
+  color: white;
+}
+.rt-acmg-pill--path   { background-color: #D53E4F; }
+.rt-acmg-pill--benign { background-color: #077009; }
+.rt-acmg-pill--other  { background-color: #868686; }
+
 /* Oncogenicity + cancer hotspot logo */
 .rt-hotspot-wrap {
   display: flex;

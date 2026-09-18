@@ -102,24 +102,47 @@ Be aware of the nature of the _reference dataset_ (TCGA), which must be taken in
 ```{r tmb_reference_comparison_plot}
 
 tmb_plot <- pcgrr::plot_tmb_primary_site_tcga(
-  pcg_report$content$tmb$tmb_reference, 
-  p_site = 
-    pcg_report$settings$conf$sample_properties$site, 
-  tmb_estimates = 
+  pcg_report$content$tmb$tmb_reference,
+  p_site =
+    pcg_report$settings$conf$sample_properties$site,
+  tmb_estimates =
     pcg_report$content$tmb$sample_estimate,
-  tmb_display_type = 
+  tmb_display_type =
     pcg_report$settings$conf$somatic_snv$tmb$tmb_display,
-  tumor_only = 
+  tumor_only =
     as.logical(pcg_report$settings$conf$assay_properties$vcf_tumor_only))
 
+## Highlight color used for the query sample's primary site in the plot
+## differs by assay type (color_palette$report_color) - name it correctly
+## in the caption rather than hardcoding a single color
+tmb_highlight_color_name <- if (isTRUE(as.logical(
+  pcg_report$settings$conf$assay_properties$vcf_tumor_only))) {
+  "blue"
+} else {
+  "purple"
+}
 
 bslib::card(
     full_screen = TRUE,
-    height = "850px",
+    height = "900px",
     bslib::card_header(
-      class = "bg-dark", 
+      class = "bg-dark",
       paste0("TMB reference cohorts comparison - ",
              pcg_report$settings$sample_id)),
-    plotly::ggplotly(tmb_plot)
+    plotly::ggplotly(tmb_plot),
+    bslib::card_footer(
+      class = "text-muted",
+      style = "font-size: 0.85em;",
+      paste0(
+        "Each row shows the distribution of tumor mutational burden (TMB, log10 mutations/Mb) ",
+        "among TCGA samples of a given primary tumor site (box: interquartile range; violin: ",
+        "full distribution shape), sorted by descending median TMB. The row highlighted in ",
+        tmb_highlight_color_name, " corresponds to the query sample's primary site (",
+        pcg_report$settings$conf$sample_properties$site,
+        "). The dashed vertical line marks this sample's own TMB estimate for comparison ",
+        "across all sites. Note: the TMB axis is log10-scaled - axis labels indicate the ",
+        "power of ten (e.g. \"1\" = 10 mutations/Mb)."
+      )
+    )
   )
 ```
