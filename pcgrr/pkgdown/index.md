@@ -174,6 +174,40 @@ Sigve Nakken, Ghislain Fournous, Daniel Vodák, Lars Birger Aaasheim, Ola Mykleb
 Sigve Nakken, Vladislav Saveliev, Oliver Hofmann, Pål Møller, Ola Myklebost, and Eivind Hovig. **Cancer Predisposition Sequencing Reporter (CPSR): a flexible variant report engine for high-throughput germline screening in cancer** (2021). *Int J Cancer*. [doi:[10.1002/ijc.33749](doi:%5B10.1002/ijc.33749)](https://doi.org/10.1002/ijc.33749)
 
 
+## Acknowledgements
+
+The development of PCGR benefits from ongoing collaborations with the following research groups:
+
+<table>
+<tr>
+<td valign="middle" style="padding:16px">
+<b>Hofmann group</b> (<a href="https://genomic-cancer-medicine.unimelb.edu.au/">Collaborative Centre for Genomic Cancer Medicine</a>, University of Melbourne and Peter MacCallum Cancer Centre)<br>
+<i>Peter Diakumis, Oliver Hofmann</i>
+<ul>
+<li>Software structure and design, Conda environment setup, containerised deployment (Docker, Singularity), GH workflows</li>
+</ul>
+</td>
+<td align="center" valign="middle" width="150" style="padding:16px">
+<a href="https://www.unimelb.edu.au/"><img src="img/unimelb_logo.svg" width="60" alt="University of Melbourne"/></a><br><br>
+<a href="https://www.petermac.org/"><img src="img/petermac_logo.png" width="120" alt="Peter MacCallum Cancer Centre"/></a>
+</td>
+</tr>
+<tr>
+<td valign="middle" style="padding:16px">
+<b>Pietiäinen group</b> (<a href="https://www.fimm.fi/">Institute for Molecular Medicine Finland (FIMM)</a>, University of Helsinki, and the <a href="https://ican.fi/">iCAN Digital Precision Cancer Medicine Flagship</a>)<br>
+<i>Tamara Luck, Romika Kumari, Vilja Pietiäinen</i>
+<ul>
+<li>RNA fusion handling, CNA analysis, general feature improvements</li>
+</ul>
+</td>
+<td align="center" valign="middle" width="150" style="padding:16px">
+<a href="https://www.fimm.fi/"><img src="img/FiMM_HiLIFE_UNIT_rgb_black.png" width="90" alt="FIMM"/></a><br><br>
+<a href="https://ican.fi/"><img src="img/iCAN-LOGO-HORIZONTAL-BLUE.png" width="120" alt="iCAN"/></a>
+</td>
+</tr>
+</table>
+
+
 ## Contact
 
 sigven AT ifi.uio.no
