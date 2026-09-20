@@ -14,6 +14,10 @@ The MSI classifier was trained using __N = 575__ exome-sequenced TCGA tumor samp
 msi_content <- pcg_report[['content']][['msi']][['prediction']]
 msi_stats    <- msi_content[['msi_stats']]
 
+## Core mismatch repair genes, used for both the somatic and germline tabs
+## (EPCAM: germline deletions silence MSH2, as in Lynch syndrome)
+core_mmr_genes <- c("MLH1", "MSH2", "MSH6", "PMS2", "EPCAM")
+
 coding_variant_set <-
   pcg_report$content$snv_indel$callset$variant_display |>
   dplyr::filter(.data$CODING_STATUS == "coding") |>
@@ -39,6 +43,13 @@ if (NROW(msi_content[['mmr_pol_variants']]) > 0 &
         coding_variant_set, by = "GENOMIC_CHANGE"
       )
   }
+}
+
+## Restrict displayed somatic variants to the core MMR genes (the MSI classifier
+## itself also considers MLH3, MSH3, PMS1, POLD1 and POLE as features)
+if ("SYMBOL" %in% colnames(msi_content[['mmr_pol_variants']])) {
+  msi_content[['mmr_pol_variants']] <- msi_content[['mmr_pol_variants']] |>
+    dplyr::filter(.data$SYMBOL %in% core_mmr_genes)
 }
 
 indel_frac_plot <- pcgrr::msi_indel_fraction_plot(
@@ -81,13 +92,12 @@ mmr_primary_cols <- c(
   "ONCOGENICITY", "VAF_TUMOR", "DP_TUMOR"
 )
 
-## ---- Germline Lynch syndrome findings (MLH1/MSH2/MSH6/PMS2/EPCAM) ----
-## Shown as a second tab alongside the somatic MMR/POL variants, only when
+## ---- Germline findings in the core MMR genes ----
+## Shown as a second tab alongside the somatic MMR variants, only when
 ## germline variants (CPSR) were provided as input
 germline_eval <- isTRUE(pcg_report$content$germline_classified$eval)
 
 if (germline_eval) {
-  lynch_genes <- c("MLH1", "MSH2", "MSH6", "PMS2", "EPCAM")
   germline_primary_cols <- c(
     "SYMBOL", "ALTERATION", "CONSEQUENCE", "GENOTYPE",
     "CLINICAL_SIGNIFICANCE", "ACMG_CODE", "CPG_MOI"
@@ -96,7 +106,7 @@ if (germline_eval) {
   germline_mmr_variants <-
     pcg_report$content$germline_classified$callset$variant_display |>
     dplyr::filter(
-      .data$SYMBOL %in% lynch_genes &
+      .data$SYMBOL %in% core_mmr_genes &
         .data$CLINICAL_SIGNIFICANCE %in% c("Pathogenic", "Likely Pathogenic")) |>
     dplyr::relocate(dplyr::any_of(germline_primary_cols))
 
@@ -194,7 +204,7 @@ bslib::page_fillable(
 
 #### Coding mutations in MMR genes
 
-Somatic coding mutations are shown below for the mismatch repair (and DNA polymerase proofreading) genes `r paste(c("MLH1","MLH3","MSH2","MSH3","MSH6","PMS1","PMS2","POLD1","POLE"), collapse = ", ")`. `r ifelse(isTRUE(pcg_report$content$germline_classified$eval), "A second tab lists any pathogenic/likely pathogenic __germline__ variants (from CPSR) found in the core Lynch syndrome genes (MLH1, MSH2, MSH6, PMS2, EPCAM).", "")`
+Somatic coding mutations in the core mismatch repair genes (`r paste(core_mmr_genes, collapse = ", ")`) are shown below. `r ifelse(isTRUE(pcg_report$content$germline_classified$eval), "A second tab lists any pathogenic/likely pathogenic __germline__ variants (from CPSR) found in the same genes.", "")`
 
 ```{r mmr_open_tabset}
 #| echo: false
@@ -225,7 +235,7 @@ if (NROW(msi_content[['mmr_pol_variants']]) > 0) {
     defaultPageSize = 8,
     theme = pcgrr::rt_theme())
 } else {
-  cat("No somatic coding mutations found in MMR genes\n\n")
+  cat("No somatic coding mutations found in the core MMR genes\n\n")
 }
 ```
 
@@ -260,7 +270,7 @@ if (NROW(germline_mmr_variants) > 0) {
     defaultPageSize = 8,
     theme = pcgrr::rt_theme())
 } else {
-  cat("No pathogenic/likely pathogenic germline variants found in MLH1, MSH2, MSH6, PMS2, or EPCAM\n\n")
+  cat("No pathogenic/likely pathogenic germline variants found in the core MMR genes\n\n")
 }
 ```
 
