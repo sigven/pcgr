@@ -52,7 +52,18 @@ bootstrap.Carousel.getOrCreateInstance(document.getElementById('pcgrCarousel')).
 
 <br><br>
 
-PCGR originates from the [Institute for Cancer Research, Oslo University Hospital, Norway](https://radium.no).
+<hr>
+
+<table>
+<tr>
+<td valign="middle" style="padding:16px">
+<b>PCGR originates from</b> the <a href="https://ous-research.no/tumorbiology/">Department of Tumor Biology</a>, <a href="https://radium.no">Institute for Cancer Research</a>, Oslo University Hospital, Norway.
+</td>
+<td align="center" valign="middle" width="240" style="padding:16px">
+<a href="https://ous-research.no/tumorbiology/"><img src="img/ous_logo.png" width="200" alt="Oslo University Hospital"/></a>
+</td>
+</tr>
+</table>
 
 ### Top News
 
