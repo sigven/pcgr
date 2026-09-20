@@ -205,6 +205,13 @@ Myklebost, and Eivind Hovig. **Cancer Predisposition Sequencing Reporter
 screening in cancer** (2021). *Int J Cancer*.
 [doi:\[10.1002/ijc.33749\](doi:%5B10.1002/ijc.33749)](https://doi.org/10.1002/ijc.33749)
 
+## Acknowledgements
+
+The development of PCGR benefits from ongoing collaborations with the
+following research groups:
+
+[TABLE]
+
 ## Contact
 
 sigven AT ifi.uio.no
