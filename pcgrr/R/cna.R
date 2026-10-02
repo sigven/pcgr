@@ -146,7 +146,7 @@ plot_cna_segments_absolute <- function(
           .data$SEGMENT_END) |>
         dplyr::summarise(
           ONC_AMPL = paste(
-            utils::head(.data$SYMBOL, 3), collapse = ", "),
+            utils::head(unique(.data$SYMBOL), 3), collapse = ", "),
           .groups = "drop")
     }
 
@@ -164,7 +164,7 @@ plot_cna_segments_absolute <- function(
           .data$SEGMENT_END) |>
         dplyr::summarise(
           ONC_GAIN = paste(
-            utils::head(.data$SYMBOL, 3), collapse = ", "),
+            utils::head(unique(.data$SYMBOL), 3), collapse = ", "),
           .groups = "drop")
     }
 
@@ -186,7 +186,7 @@ plot_cna_segments_absolute <- function(
           .data$SEGMENT_END) |>
         dplyr::summarise(
           TSG_LOSS = paste(
-            utils::head(.data$SYMBOL, 3), collapse = ", "),
+            utils::head(unique(.data$SYMBOL), 3), collapse = ", "),
           .groups = "drop")
     }
 
@@ -207,7 +207,7 @@ plot_cna_segments_absolute <- function(
           .data$SEGMENT_END) |>
         dplyr::summarise(
           TSG_HET_LOSS = paste(
-            utils::head(.data$SYMBOL, 3), collapse = ", "),
+            utils::head(unique(.data$SYMBOL), 3), collapse = ", "),
           .groups = "drop")
     }
 
@@ -496,7 +496,7 @@ plot_cna_segments_absolute <- function(
         x = .data$SegmentMid,
         y = .data$CN_TOTAL,
         colour = .data$SegmentClass,
-        z = .data$SegmentInfo), size = 1.6, show.legend = FALSE) +
+        z = .data$SegmentInfo), size = 1.0, show.legend = FALSE) +
     ## Emphasise focal amplifications / gains of oncogenes with a larger triangle
     ggplot2::geom_point(
       data = cna_segments_global |>
@@ -505,7 +505,17 @@ plot_cna_segments_absolute <- function(
         x = .data$SegmentMid,
         y = .data$CN_TOTAL,
         colour = .data$SegmentClass,
-        z = .data$SegmentInfo), shape = 17, size = 2.8, show.legend = FALSE) +
+        z = .data$SegmentInfo), shape = 17, size = 1.8, show.legend = FALSE) +
+    ## Emphasise deep deletions of tumor suppressor genes with a downward-pointing triangle
+    ggplot2::geom_point(
+      data = cna_segments_global |>
+        dplyr::filter(!is.na(.data$TSG_LOSS)),
+      ggplot2::aes(
+        x = .data$SegmentMid,
+        y = .data$CN_TOTAL,
+        z = .data$SegmentInfo),
+      shape = 25, size = 1.8, colour = homdel_color_abs,
+      fill = homdel_color_abs, show.legend = FALSE) +
     ggplot2::scale_color_manual(
       breaks = leg_breaks_abs,
       values = leg_colors_abs,
@@ -662,7 +672,7 @@ plot_cna_segments_relative <-
           dplyr::group_by(
             .data$CHROM, .data$SEGMENT_START, .data$SEGMENT_END) |>
           dplyr::summarise(
-            ONC_AMPL = paste(utils::head(.data$SYMBOL, 3), collapse = ", "),
+            ONC_AMPL = paste(utils::head(unique(.data$SYMBOL), 3), collapse = ", "),
             .groups = "drop")
       }
 
@@ -678,7 +688,7 @@ plot_cna_segments_relative <-
             .data$SEGMENT_START,
             .data$SEGMENT_END) |>
           dplyr::summarise(
-            ONC_GAIN = paste(utils::head(.data$SYMBOL, 3), collapse = ", "),
+            ONC_GAIN = paste(utils::head(unique(.data$SYMBOL), 3), collapse = ", "),
             .groups = "drop")
       }
 
@@ -695,7 +705,7 @@ plot_cna_segments_relative <-
             .data$SEGMENT_START,
             .data$SEGMENT_END) |>
           dplyr::summarise(
-            TSG_LOSS = paste(utils::head(.data$SYMBOL, 3), collapse = ", "),
+            TSG_LOSS = paste(utils::head(unique(.data$SYMBOL), 3), collapse = ", "),
             .groups = "drop")
       }
 
@@ -712,7 +722,7 @@ plot_cna_segments_relative <-
             .data$SEGMENT_END) |>
           dplyr::summarise(
             TSG_HET_LOSS = paste(
-              utils::head(.data$SYMBOL, 3), collapse = ", "),
+              utils::head(unique(.data$SYMBOL), 3), collapse = ", "),
             .groups = "drop")
       }
     }
@@ -987,7 +997,7 @@ plot_cna_segments_relative <-
           y      = .data$Log2FC,
           colour = .data$SegmentClass,
           z      = .data$SegmentInfo),
-        size = 1.6, show.legend = FALSE
+        size = 1.0, show.legend = FALSE
       ) +
       ## Emphasise focal amplifications / gains of oncogenes with a larger triangle
       ggplot2::geom_point(
@@ -998,7 +1008,18 @@ plot_cna_segments_relative <-
           y      = .data$Log2FC,
           colour = .data$SegmentClass,
           z      = .data$SegmentInfo),
-        shape = 17, size = 2.8, show.legend = FALSE
+        shape = 17, size = 1.8, show.legend = FALSE
+      ) +
+      ## Emphasise deep deletions of tumor suppressor genes with a downward-pointing triangle
+      ggplot2::geom_point(
+        data = cna_segments_global |>
+          dplyr::filter(!is.na(.data$TSG_LOSS)),
+        ggplot2::aes(
+          x = .data$SegmentMid,
+          y = .data$Log2FC,
+          z = .data$SegmentInfo),
+        shape = 25, size = 1.8, colour = homdel_color,
+        fill = homdel_color, show.legend = FALSE
       ) +
       ggplot2::scale_color_manual(
         breaks = leg_breaks,

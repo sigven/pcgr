@@ -8,8 +8,10 @@ vstats <- pcg_report$content$cna$vstats
 tumor_site <- pcg_report$settings$conf$sample_properties$site
 cs <- pcgrr::color_palette$bm_callout
 
-```
+cna_conf <- pcg_report$settings$conf$somatic_cna
+estimate_hrd <- isTRUE(as.logical(cna_conf$estimate_hrd))
 
+```
 
 <br>
 
@@ -76,7 +78,11 @@ plotly::ggplotly(cna_plot, tooltip = c("y","z")) |>
 
 ```
 
-<span style="font-size:11px; color:#6c6c6c;">Segments too short to render as a bar at whole-genome scale are drawn as a point at their midpoint; triangles (&#9650;) mark focal amplifications or gains of proto-oncogenes. Hover any mark for exact coordinates and affected genes.</span>
+::: {.callout-note}
+## Note - reading the copy number profile
+
+Segments too short to render as a bar at whole-genome scale are drawn as a point at their midpoint. Triangles mark segments affecting cancer genes: &#9650; amplifications or gains of proto-oncogenes, and &#9660; deep deletions of tumor suppressor genes. Hover any mark for exact coordinates and affected genes.
+:::
 
 #### Relative copy number profile
 
@@ -139,7 +145,11 @@ plotly::ggplotly(cna_plot_relative, tooltip = c("y", "z")) |>
 
 ```
 
-<span style="font-size:11px; color:#6c6c6c;">Segments too short to render as a bar at whole-genome scale are drawn as a point at their midpoint; triangles (&#9650;) mark focal amplifications or gains of proto-oncogenes. Hover any mark for exact coordinates and affected genes.</span>
+::: {.callout-note}
+## Note - reading the copy number profile
+
+Segments too short to render as a bar at whole-genome scale are drawn as a point at their midpoint. Triangles mark segments affecting cancer genes: &#9650; amplifications or gains of proto-oncogenes, and &#9660; deep deletions of tumor suppressor genes. Hover any mark for exact coordinates and affected genes.
+:::
 
 :::
 
@@ -658,6 +668,113 @@ cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$diagnostic
 
 :::
 
+<br>
+
+```{r hrd_score}
+#| echo: false
+#| eval: !expr estimate_hrd
+#| output: asis
+
+genome_doubled <- isTRUE(as.logical(cna_conf$genome_doubled))
+wgd_fraction <- cna_conf$wgd_fraction
+
+cat("\n### Homologous recombination deficiency (HRD) score\n\n")
+
+cat(
+  "Homologous recombination deficiency (HRD) leaves characteristic _scars_ in the tumor genome. ",
+  "The HRD score shown here is the **sum of three genomic scar measures**, all derived from the ",
+  "allele-specific copy number segments:\n\n",
+  "* **HRD-LOH** - the number of loss-of-heterozygosity (LOH) regions longer than 15 Mb that do not span a whole chromosome ",
+  "([Abkevich et al. 2012](https://pubmed.ncbi.nlm.nih.gov/23047548/))\n",
+  "* **LST (large-scale state transitions)** - the number of chromosomal breakpoints between adjacent regions of at least 10 Mb ",
+  "([Popova et al. 2012](https://pubmed.ncbi.nlm.nih.gov/22933060/))\n",
+  "* **TAI (telomeric allelic imbalance)** - the number of regions with allelic imbalance that extend to the telomere without crossing the centromere ",
+  "([Birkbak et al. 2012](https://pubmed.ncbi.nlm.nih.gov/22576213/))\n\n",
+  "The implementation follows the scarHRD algorithm ",
+  "([Sztupinszki et al. 2018](https://pubmed.ncbi.nlm.nih.gov/29978035/)), and is computed on autosomes only.\n\n",
+  sep = ""
+)
+
+hrd_conf <- pcg_report$settings$conf$somatic_cna
+
+bslib::layout_columns(
+  col_widths = c(3, 3, 3, 3),
+  height = "160px",
+  bslib::value_box(
+    title = "HRD-LOH",
+    value = hrd_conf$hrd_loh,
+    #"LOH regions > 15 Mb",
+    showcase = NULL,
+    theme = "dark"
+  ),
+  bslib::value_box(
+    title = "LST",
+    value = hrd_conf$hrd_lst,
+    showcase = NULL,
+    theme = "dark"
+  ),
+  bslib::value_box(
+    title = "TAI",
+    value = hrd_conf$hrd_tai,
+    showcase = NULL,
+    theme = "dark"
+  ),
+  bslib::value_box(
+    title = "HRD score (sum)",
+    value = hrd_conf$hrd_sum,
+    showcase = NULL,
+    theme = "dark"
+  )
+)
+
+cat("\n\n")
+
+lenz2023 <- "[Lenz et al. 2023](https://pubmed.ncbi.nlm.nih.gov/37589839/)"
+rempel2022 <- "[Rempel et al. 2022](https://pubmed.ncbi.nlm.nih.gov/35681079/)"
+telli2016 <- "[Telli et al. 2016](https://pubmed.ncbi.nlm.nih.gov/26957554/)"
+marquard2015 <- "[Marquard et al. 2015](https://pubmed.ncbi.nlm.nih.gov/26015868/)"
+popova2012 <- "[Popova et al. 2012](https://pubmed.ncbi.nlm.nih.gov/22933060/)"
+bielski2018 <- "[Bielski et al. 2018](https://pubmed.ncbi.nlm.nih.gov/30013179/)"
+
+if (tumor_site == "Ovary/Fallopian Tube") {
+  cat("::: {.callout-note}\n## Note - interpretation (ovarian cancer)\n\n",
+      "In ovarian cancer, a score of 42 or above is the threshold used by the Myriad myChoice CDx assay, an FDA-approved companion diagnostic, ",
+      "to define HRD-positive tumors (a lower threshold of 33 has also been explored) (", lenz2023, "). ",
+      "The three component scores were originally developed on SNP-array data (", marquard2015, "). In TCGA ovarian tumors, scores derived ",
+      "from whole-exome sequencing correlated strongly with array-derived scores (R = 0.87), but were slightly higher (by 4%) (", rempel2022, "), ",
+      "and thresholds have not been formally established for sequencing-derived scores. ",
+      "**The score shown here is intended for research use only and is not a validated diagnostic measure.**",
+      "\n:::\n\n", sep = "")
+} else if (tumor_site == "Breast") {
+  cat("::: {.callout-note}\n## Note - interpretation (breast cancer)\n\n",
+      "In triple-negative breast cancer (TNBC), homologous recombination deficiency (defined as a score of 42 or above, or a BRCA1/2 mutation) ",
+      "was associated with response to platinum-based neoadjuvant therapy (", telli2016, "), and thresholds of both 42 and 33 were significant ",
+      "predictors of response (", lenz2023, "). In ER-positive breast cancer, the scores of BRCA1/2-deficient tumors were lower than in ovarian cancer, ",
+      "and the ovarian cancer thresholds do not appear appropriate (", lenz2023, "). The breast cancer subtype is not taken into account here. ",
+      "**The score shown here is intended for research use only and is not a validated diagnostic measure.**",
+      "\n:::\n\n", sep = "")
+} else {
+  cat("::: {.callout-warning}\n## Caution - interpretation (", tumor_site, ")\n\n",
+      "Genomic scar scores have not been validated as markers of HRD outside ovarian cancer and TNBC. Pan-cancer, subsets of high-scoring tumors ",
+      "exist in most cancer types, including those for which platinum-based chemotherapy is not standard therapy (", marquard2015, "). ",
+      "The score separates tumors with biallelic BRCA1/2 inactivation well (AUC = 0.89), but tumors with monoallelic BRCA1/2 alterations poorly ",
+      "(AUC = 0.53), and the authors argue for interpreting it together with the mutational status of HRR genes (", rempel2022, "). ",
+      "The scar measures are also influenced by ploidy: LST was originally defined with ploidy-specific cutoffs (", popova2012, "), whereas the ",
+      "HRD score is an unweighted sum of the three measures (", telli2016, "). A high score should therefore not, on its own, be interpreted as ",
+      "evidence of HRD or of sensitivity to PARP inhibitors. **The score shown here is intended for research use only.**",
+      "\n:::\n\n", sep = "")
+}
+
+if (genome_doubled) {
+  cat("::: {.callout-warning}\n## Caution - genome doubling\n\n",
+      "This tumor is classified as having undergone whole-genome doubling (", round(100 * wgd_fraction), "% of the autosomal genome has a major ",
+      "allele copy number of two or more; criterion of ", bielski2018, "). Genome doubling is common in advanced cancers (nearly 30%) and ",
+      "associated with TP53 mutation (", bielski2018, "), and ploidy influences the scar measures (", popova2012, "). The interpretability of ",
+      "the HRD score is therefore limited in this tumor.",
+      "\n:::\n\n", sep = "")
+}
+
+```
 
 <br>
 <br>

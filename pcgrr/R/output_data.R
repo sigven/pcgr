@@ -121,7 +121,9 @@ get_settings_sheet <- function(report = NULL) {
       data.frame(SECTION = "CNA", PARAMETER = "Heterozygous deletion threshold - absolute",
                  VALUE = as.character(conf$somatic_cna$del_threshold_absolute)),
       data.frame(SECTION = "CNA", PARAMETER = "Heterozygous deletion threshold - relative",
-                 VALUE = as.character(conf$somatic_cna$del_threshold_relative))
+                 VALUE = as.character(conf$somatic_cna$del_threshold_relative)),
+      data.frame(SECTION = "CNA", PARAMETER = "Genomic instability (HRD) score estimated",
+                 VALUE = as.character(as.logical(conf$somatic_cna$estimate_hrd)))
     ))
   }
 
@@ -423,6 +425,23 @@ get_excel_sheets <- function(report = NULL) {
             "TARGETED_INHIBITORS_ALL",
             "ENSEMBL_GENE_ID")))
     }
+  }
+
+  ## CNA summary - sample-level scores derived from the copy number segments
+  ## (same content as the .cna_summary.tsv file)
+  if (isTRUE(report$content$cna$eval)) {
+    cna_conf <- report$settings$conf$somatic_cna
+    na_if_null <- function(x) if (is.null(x)) NA else x
+    excel_sheets[['CNA_SUMMARY']] <- data.frame(
+      SAMPLE_ID = report$settings$sample_id,
+      FRACTION_GENOME_ALTERED = na_if_null(cna_conf$fraction_genome_altered),
+      WGD_FRACTION = na_if_null(cna_conf$wgd_fraction),
+      GENOME_DOUBLED = if (is.null(cna_conf$genome_doubled)) NA else as.logical(cna_conf$genome_doubled),
+      HRD_LOH = na_if_null(cna_conf$hrd_loh),
+      HRD_LST = na_if_null(cna_conf$hrd_lst),
+      HRD_TAI = na_if_null(cna_conf$hrd_tai),
+      HRD_SUM = na_if_null(cna_conf$hrd_sum)
+    )
   }
 
   ## Copy number alterations

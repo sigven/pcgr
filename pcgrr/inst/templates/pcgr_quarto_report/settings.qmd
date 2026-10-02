@@ -287,6 +287,7 @@ cat(glue::glue("* Heterozygous deletion threshold (absolute): __{conf$somatic_cn
 cat(glue::glue("* Heterozygous deletion threshold (relative): __{conf$somatic_cna$del_threshold_relative}__"), "\n")
 cat(glue::glue("* Tumor ploidy: __{tumor_ploidy}__"), "\n")
 cat(glue::glue("* Tumor purity: __{tumor_purity}__"), "\n")
+cat(glue::glue("* Genomic instability (HRD) score estimated: __{as.logical(conf$somatic_cna[['estimate_hrd']])}__"), "\n")
 ```
 
 ```{r expression_settings}

@@ -468,6 +468,19 @@ def verify_args(arg_dict, logger = None):
             err_msg = f"Minimum percent overlap between copy number segment and gene transcript ('--cna_transcript_overlap_pct' = {arg_dict['cna_transcript_overlap_pct']}) must be within (0, 100]"
             error_message(err_msg, logger)
 
+        if arg_dict['estimate_hrd'] is True:
+            if arg_dict['assay'] == 'TARGETED':
+                err_msg = ("Genomic instability ('--estimate_hrd') scoring requires genome-wide copy number data and is not "
+                           "supported for TARGETED sequencing assays ('--assay TARGETED')")
+                error_message(err_msg, logger)
+            if arg_dict['tumor_only'] is True:
+                err_msg = ("Genomic instability ('--estimate_hrd') scoring requires a matched control sample and is not "
+                           "supported in tumor-only mode ('--tumor_only')")
+                error_message(err_msg, logger)
+    elif arg_dict['estimate_hrd'] is True:
+        err_msg = "Genomic instability scoring ('--estimate_hrd') requires copy number segment input ('--input_cna')"
+        error_message(err_msg, logger)
+
     return(arg_dict)
 
 
@@ -503,6 +516,7 @@ def define_output_files(arg_dict, cpsr = False):
             output_data[otype] = f"{output_prefix}.{otype}.tsv.gz"        
         output_data['maf'] = f"{output_prefix}.maf"
         output_data['tmb'] = f"{output_prefix}.tmb.tsv"
+        output_data['cna_summary'] = f"{output_prefix}.cna_summary.tsv"
     else:
         output_data['classification'] = f"{output_prefix}.classification.tsv.gz"
     
@@ -515,7 +529,7 @@ def define_output_files(arg_dict, cpsr = False):
     
     if not cpsr:
         for otype in ['cna_gene', 'cna_segment','expression', 'expression_outliers', 'snv_indel_ann',
-                      'expression_similarity', 'maf', 'tmb', 'msigs', 'rna_fusion']:
+                      'expression_similarity', 'maf', 'tmb', 'cna_summary', 'msigs', 'rna_fusion']:
             # if annotated output cna segments exist and overwrite not set
             if os.path.exists(output_data[otype]) and arg_dict["force_overwrite"] is False:
                 err_msg = "Output files (e.g. " + str(output_data[otype]) + \
