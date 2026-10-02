@@ -4,7 +4,7 @@ Here, we perform a comparison of the sample's raw mutational spectrum to each of
 
 ```{r highlight_signatures}
 #| echo: false
-#| eval: !expr as.logical(pcg_report$settings$conf$somatic_snv$mutational_signatures$all_reference_signatures) == FALSE & as.logical(pcg_report$settings$conf$somatic_snv$mutational_signatures$no_prevalence_data) == FALSE
+#| eval: !expr isFALSE(as.logical(pcg_report$settings$conf$somatic_snv$mutational_signatures$all_reference_signatures)) & isFALSE(as.logical(pcg_report$content$mutational_signatures$result$no_site_prevalence))
 #| output: asis
 
 cat('\n::: {.callout-note}\n## Site-specific signatures\n\n',

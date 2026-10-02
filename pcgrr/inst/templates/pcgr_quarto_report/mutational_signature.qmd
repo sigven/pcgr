@@ -110,8 +110,8 @@ if ("SIGNATURE_ID" %in% colnames(dat) &
 
 ```{r t3}
 #| output: asis 
-#| eval: !expr missing_data_no_refit == FALSE & (as.logical(no_site_prevalence) == FALSE & as.logical(msig_conf$all_reference_signatures) == TRUE)
-cat("For this analysis, '--all_reference_signatures' have been turned on, which means that all reference signatures (n = 67) have been considered during refitting of the mutational profile with reference signatures",sep="\n")
+#| eval: !expr missing_data_no_refit == FALSE & as.logical(msig_conf$all_reference_signatures) == TRUE
+cat(paste0("For this analysis, all reference signatures (n = ", msig_content$result$n_reference_signatures, ") have been considered during refitting of the mutational profile with reference signatures (default behavior - use '--tumor_type_reference_signatures' to instead restrict refitting to signatures already attributed to the tumor type)"),sep="\n")
 htmltools::br()
 
 ```
@@ -122,7 +122,7 @@ htmltools::br()
 cat(paste0(
   "The primary site of the input sample, '<b>", 
   conf$sample_properties$site, 
-  "</b>', is not yet attributed with specific reference signatures, which means that all reference signatures (n = 67) have been considered during refitting of the mutational profile with reference signatures"),sep="\n")
+  "</b>', is not yet attributed with specific reference signatures, which means that all reference signatures (n = ", msig_content$result$n_reference_signatures, ") have been considered during refitting of the mutational profile with reference signatures"),sep="\n")
 htmltools::br()
 
 ```
@@ -147,13 +147,29 @@ cat("<br><br>")
 ```
 
 ```{r signature_suboptimal_fit_warning}
-#| eval: !expr isFALSE(missing_data_no_refit) & isTRUE(poor_sig_fit)
+#| eval: !expr isFALSE(missing_data_no_refit) & isTRUE(poor_sig_fit) & as.logical(msig_conf$all_reference_signatures) == FALSE
 #| output: asis
 
 cat("\n\n::: {.callout-important}\n\n## Suboptimal fit of mutational profile\n\n ",
     "\nReconstruction of the input mutational profile with the selected COSMIC reference",
     " signatures resulted in a sub-optimal fit (cosine similarity < 0.9). ",
-    "A re-run with all reference signatures included is warranted (option `--all_reference_signatures`)",
+    "A re-run with all reference signatures included is warranted (i.e. remove the ",
+    "`--tumor_type_reference_signatures` option used for this analysis)",
+    "\n\n:::\n\n", sep="")
+
+
+```
+
+```{r signature_suboptimal_fit_warning_all_sigs}
+#| eval: !expr isFALSE(missing_data_no_refit) & isTRUE(poor_sig_fit) & as.logical(msig_conf$all_reference_signatures) == TRUE
+#| output: asis
+
+cat("\n\n::: {.callout-important}\n\n## Suboptimal fit of mutational profile\n\n ",
+    "\nReconstruction of the input mutational profile with the full set of COSMIC reference",
+    " signatures still resulted in a sub-optimal fit (cosine similarity < 0.9). ",
+    "This may reflect a low/noisy mutation count, sequencing artefacts, or mutational ",
+    "processes not well-represented among the COSMIC reference signatures - interpret the ",
+    "signature contributions shown below with caution",
     "\n\n:::\n\n", sep="")
 
 

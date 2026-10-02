@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from pcgr import pcgr_vars, arg_checker, utils, cna
+from pcgr import pcgr_vars, arg_checker, utils, cna, hrd
 from pcgr.utils import getlogger, check_subprocess, remove_file, random_id_generator, pd_to_csv, error_message
 from pcgr.config import populate_config_data, create_config, verify_oncotree_code
 from pcgr.maf import update_maf, generate_oncokb_maf_input, add_var_id_to_vcf, append_oncokb_snv_annotations
@@ -174,8 +174,10 @@ def cli():
                                      help = "Estimate relative contributions of reference mutational signatures in query sample (re-fitting), default: %(default)s")
     optional_signatures.add_argument("--min_mutations_signatures", type=int, default=200, dest="min_mutations_signatures", 
                                      help = "Minimum number of SNVs required for re-fitting of mutational signatures (SBS) (default: %(default)s, minimum n = 100)")
-    optional_signatures.add_argument("--all_reference_signatures", action="store_true", 
-                                     help = "Use _all_ reference mutational signatures (SBS) during signature re-fitting rather than only those already attributed to the tumor type (default: %(default)s)")
+    optional_signatures.add_argument("--tumor_type_reference_signatures", action="store_true",
+                                     help = "Restrict signature re-fitting to reference mutational signatures (SBS) already attributed to the "
+                                            "tumor type, rather than the full reference set - default: %(default)s (i.e. _all_ reference "
+                                            "signatures are used by default)")
     optional_signatures.add_argument("--include_artefact_signatures", action="store_true", 
                                      help = "Include sequencing artefacts in the collection of reference signatures (default: %(default)s")
     optional_signatures.add_argument("--prevalence_reference_signatures", type=float, default=0.1, 
@@ -201,6 +203,9 @@ def cli():
                               help = "Fold-change below tumor ploidy threshold for heterozygous deletion calls (default: %(default)s)")
     optional_cna.add_argument("--cna_transcript_overlap_pct", type = float, default = 50, dest="cna_transcript_overlap_pct",
                               help = "Mean percent overlap between copy number segment and gene transcripts for reporting of gains/losses in tumor suppressor genes/oncogenes, (default: %(default)s)")
+    optional_cna.add_argument("--estimate_hrd", action="store_true",
+                              help = ("Estimate a genomic instability ('HRD') score (HRD-LOH + LST + TAI) from the allele-specific "
+                                      "copy number segments (default: %(default)s)"))
 
     optional_rna.add_argument("--fusion_min_split_reads", type=int, default=3, dest="fusion_min_split_reads", 
                               help = "Minimum number of split reads supporting a fusion event (default: %(default)s, minimum: 2)")
@@ -840,6 +845,57 @@ def run_pcgr(input_data, output_data, conf_options):
             # protein-coding transcript (rare, e.g. all-intergenic segment set).
             if cna_annotation.get('gene_annotations_empty', False):
                 yaml_data['molecular_data']['fname_cna_gene_tsv'] = "None"
+
+            # PCGR|CNA summary - sample-level scores derived from the allele-specific CNA segments:
+            #  - fraction of genome altered (always computed)
+            #  - opt-in genomic instability ('HRD') score: research use only, guardrails for
+            #    assay type/tumor-only enforced in arg_checker.py (so reaching this point with
+            #    estimate_hrd = 1 means paired WGS/WES data is available)
+            logger = getlogger("pcgr-cna-summary")
+            chromsizes_fname = os.path.join(
+                input_data['refdata_assembly_dir'], 'chromsize.' + yaml_data['genome_assembly'] + '.tsv')
+            cna_summary = {
+                'SAMPLE_ID': yaml_data['sample_id'],
+                'FRACTION_GENOME_ALTERED': None, 'WGD_FRACTION': None, 'GENOME_DOUBLED': None,
+                'HRD_LOH': None, 'HRD_LST': None, 'HRD_TAI': None, 'HRD_SUM': None}
+
+            try:
+                cna_segments_df = pd.read_csv(input_cna, sep="\t", na_values=".")
+                chrom_arms = hrd.read_chrom_arms(chromsizes_fname, logger = logger)
+                fga = hrd.calc_fraction_genome_altered(cna_segments_df, chrom_arms = chrom_arms, logger = logger)
+                if fga is not None:
+                    yaml_data['conf']['somatic_cna']['fraction_genome_altered'] = fga
+                    cna_summary['FRACTION_GENOME_ALTERED'] = fga
+                wgd = hrd.calc_genome_doubling(cna_segments_df, chrom_arms = chrom_arms, logger = logger)
+                if wgd is not None:
+                    yaml_data['conf']['somatic_cna']['wgd_fraction'] = wgd['wgd_fraction']
+                    yaml_data['conf']['somatic_cna']['genome_doubled'] = int(wgd['genome_doubled'])
+                    cna_summary['WGD_FRACTION'] = wgd['wgd_fraction']
+                    cna_summary['GENOME_DOUBLED'] = 'TRUE' if wgd['genome_doubled'] else 'FALSE'
+            except Exception as e:
+                logger.warning(f"Estimation of fraction of genome altered/genome doubling failed - omitting: {e}")
+
+            if yaml_data['conf']['somatic_cna']['estimate_hrd'] == 1:
+                logger.info('PCGR - HRD ANALYSIS SECTION: Estimation of HRD score (HRD-LOH, LST, TAI) from allele-specific CNA segments')
+                try:
+                    hrd_result = hrd.compute_genomic_instability_score(
+                        input_cna_segment_fname = input_cna,
+                        chromsizes_fname = chromsizes_fname,
+                        logger = logger)
+                    for yaml_key, result_key, tsv_key in [
+                            ('hrd_loh', 'hrd_loh', 'HRD_LOH'), ('hrd_lst', 'lst', 'HRD_LST'),
+                            ('hrd_tai', 'tai', 'HRD_TAI'), ('hrd_sum', 'hrd_sum', 'HRD_SUM')]:
+                        yaml_data['conf']['somatic_cna'][yaml_key] = hrd_result[result_key]
+                        cna_summary[tsv_key] = hrd_result[result_key]
+                    logger.info('Finished pcgr-hrd')
+                except Exception as e:
+                    logger.warning(f"HRD scoring ('--estimate_hrd') failed - omitting from report: {e}")
+                    yaml_data['conf']['somatic_cna']['estimate_hrd'] = 0
+
+            pd_to_csv(
+                pd.DataFrame([{k: ('.' if v is None else str(v)) for k, v in cna_summary.items()}]),
+                output_data['cna_summary'], compression = None)
+            print('----')
         else:
             yaml_data['molecular_data']['fname_cna_gene_tsv'] = "None"
             yaml_data['molecular_data']['fname_cna_segment_tsv'] = "None"

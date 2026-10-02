@@ -256,6 +256,7 @@ init_mutsignature_content <- function() {
   rep[["result"]][["mut_mat"]] <- NULL
   rep[["result"]][["chromosomes"]] <- NULL
   rep[["result"]][["no_site_prevalence"]] <- FALSE
+  rep[["result"]][["n_reference_signatures"]] <- 0
   rep[["result"]][["tsv"]] <- data.frame()
   rep[["result"]][["contributions"]] <- list()
   rep[["result"]][["contributions"]][["per_signature"]] <- data.frame()

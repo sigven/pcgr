@@ -186,6 +186,18 @@ An additional option controls which genes are considered affected by a CNA event
 
 * `--cna_transcript_overlap_pct <value>` — minimum mean percent overlap between the copy number segment and gene transcripts required to report a gene as affected (default: 50)
 
+The fraction of the genome altered (cBioPortal definition: autosomal segments with total copy number other than 2)
+is always reported in the CNA section of the report, and in the `cna_summary.tsv` output file.
+
+A separate, opt-in option estimates a homologous recombination deficiency (HRD) score from the same allele-specific
+copy number segments:
+
+* `--estimate_hrd` — compute HRD-LOH + LST + TAI (following the scarHRD/Sztupinszki et al. algorithm)
+  from the CNA segments, shown in the CNA section of the report. **Research use only** - not a
+  validated diagnostic measure, and only clinically thresholded (as the Myriad myChoice CDx assay) for
+  ovarian cancer. Requires paired tumor-control WGS/WES data - not supported with `--tumor_only` or
+  `--assay TARGETED`.
+
 ### OncoKB biomarker integration
 
 PCGR can optionally query the [OncoKB](https://www.oncokb.org) precision oncology knowledge base to annotate SNVs/InDels, copy number alterations and fusions with functional annotations and clinical actionability evidence. To enable this, provide a valid OncoKB API token:
@@ -408,9 +420,10 @@ Mutational signature options:
   --min_mutations_signatures MIN_MUTATIONS_SIGNATURES
                         Minimum number of SNVs required for signature re-fitting (SBS)
                         (default: 200, minimum n = 100)
-  --all_reference_signatures
-                        Use all reference mutational signatures (SBS) during re-fitting rather than
-                        only those attributed to the tumor type (default: False)
+  --tumor_type_reference_signatures
+                        Restrict signature re-fitting to reference mutational signatures (SBS) already
+                        attributed to the tumor type, rather than the full reference set - default: False
+                        (i.e. all reference signatures are used by default)
   --include_artefact_signatures
                         Include sequencing artefacts in the reference signature collection
                         (default: False)
@@ -440,6 +453,9 @@ Somatic CNA analysis options:
   --cna_transcript_overlap_pct CNA_TRANSCRIPT_OVERLAP_PCT
                         Minimum mean percent overlap between copy number segment and gene transcripts
                         for reporting of gains/losses in oncogenes/tumor suppressors (default: 50)
+  --estimate_hrd        Estimate a genomic instability ('HRD') score (HRD-LOH + LST + TAI) from the
+                        allele-specific copy number segments - research use only, requires paired
+                        WGS/WES data, default: False
 
 RNA expression and fusion options:
   --fusion_min_split_reads FUSION_MIN_SPLIT_READS

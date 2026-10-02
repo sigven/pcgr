@@ -135,6 +135,7 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
             'gain_threshold_relative': float(arg_dict['cna_gain_threshold_relative']),
             'del_threshold_absolute': int(arg_dict['cna_del_threshold_absolute']),
             'del_threshold_relative': float(arg_dict['cna_del_threshold_relative']),
+            'estimate_hrd': int(arg_dict['estimate_hrd']),
         }
         
         conf_options['germline'] = {
@@ -207,7 +208,10 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
         conf_options['somatic_snv']['mutational_signatures'] = {
             'run': int(arg_dict['estimate_signatures']),
             'mutation_limit': int(arg_dict['min_mutations_signatures']),
-            'all_reference_signatures': int(arg_dict['all_reference_signatures']),
+            ## Default behaviour (as of v2.3.3) is to use ALL reference signatures during
+            ## re-fitting; '--tumor_type_reference_signatures' opts into the previous
+            ## default of restricting to signatures already attributed to the tumor type
+            'all_reference_signatures': int(not arg_dict['tumor_type_reference_signatures']),
             'include_artefact_signatures': int(arg_dict['include_artefact_signatures']),
             'prevalence_reference_signatures': float(arg_dict['prevalence_reference_signatures'])
         }
