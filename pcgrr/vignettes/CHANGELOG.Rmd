@@ -48,13 +48,13 @@ pdiakumis <- user("pdiakumis")
 
 ## v2.3.3
 
-- Date: **2026-09-20**
-- Data bundle update (`20260915`) and software updates
+- Date: **2026-10-05**
+- Data bundle update (`20261001`) and software updates
   - Ensembl VEP `v116.2` / GENCODE v50 (GRCh38; v19 for GRCh37)
-  - ClinVar (2026-09)
-  - CIViC (2026-09-15)
+  - ClinVar (2026-10)
+  - CIViC (2026-10-01)
   - UniProt/SwissProt KnowledgeBase (2026_03)
-  - Open Targets Platform (2026.06)
+  - Open Targets Platform (2026.09)
 
 ### Added / improved
 
@@ -72,11 +72,10 @@ pdiakumis <- user("pdiakumis")
     - OncoKB columns shown in the CNA table, with oncogenic cases highlighted
     - CNA records ordered by oncogenicity by default
     - Focal copy number segments are marked with a point (and a triangle for focal oncogene gains/amplifications) rather than being widened, keeping segment positions and extents true to the data; explained in the plot caption
-- **Fraction of genome altered** (cBioPortal definition) and **whole-genome doubling status** (Bielski et al. 2018 criterion: at least 50% of the autosomal genome with a major allele copy number of two or more) are now derived from the allele-specific copy number segments, and reported in the `cna_summary.tsv` output file
+- **Fraction of genome altered (FGA)** and **whole-genome doubling status (WGD)** are now derived from the allele-specific copy number segments, and reported in the `cna_summary.tsv` output file
 - **HRD score** - new, opt-in `--estimate_hrd` option
-  - Estimates HRD-LOH + LST + TAI from the allele-specific CNA segments, following the scarHRD/Sztupinszki et al. algorithm - shown in a dedicated subsection at the end of the CNA section, with an explanation of each measure and tumor-type-aware interpretation notes
+  - Estimates HRD-LOH + LST + TAI from the allele-specific CNA segments, following the [scarHRD/Sztupinszki et al. algorithm](https://github.com/sztup/scarHRD) - shown in a dedicated subsection at the end of the CNA section, with an explanation of each measure and tumor-type-aware interpretation notes
   - **Research use only** - not a validated diagnostic measure, and only clinically thresholded (Myriad myChoice CDx, sum &ge; 42) for ovarian cancer
-  - Sample-level CNA scores (fraction of genome altered, and HRD score components) are written to the new `cna_summary.tsv` output file, and to a `CNA_SUMMARY` sheet in the Excel workbook
   - Requires paired tumor-control data with genome-wide CNA segments (`--input_cna`); not supported with `--tumor_only` or `--assay TARGETED` (enforced as an argument-validation error)
 
 ### Changed

@@ -390,11 +390,15 @@ def calc_fraction_genome_altered(
         logger: Optional[logging.Logger] = None) -> Optional[float]:
     """
     Fraction of the (autosomal, segmented) genome with an altered total copy
-    number, following the definition used by cBioPortal (the fraction of the
-    genome with an absolute log2 copy-number ratio above 0.2 relative to a
-    diploid baseline). For integer total copy numbers this is equivalent to
-    "total copy number != 2" (adjacent integer states differ by at least
-    log2(3/2) = 0.58), which is what is implemented here.
+    number, adapted from the cBioPortal definition (cbioportal-core,
+    FractionGenomeAlteredCalculator: segment length with |segment mean log2
+    ratio| >= 0.2, divided by the total segment length, per sample). For
+    integer total copy numbers this is equivalent to "total copy number != 2"
+    (adjacent integer states differ by at least log2(3/2) = 0.58), which is
+    what is implemented here. Differences to cBioPortal: the input here is
+    purity-adjusted allele-specific integer copy number rather than raw
+    segment means (low-level gains/losses in impure tumors may fall below 0.2
+    in the latter), and cBioPortal applies no chromosome filter at import.
 
     Notes:
       - the baseline is diploid (not the tumor ploidy), as in cBioPortal -

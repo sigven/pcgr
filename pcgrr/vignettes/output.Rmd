@@ -497,8 +497,8 @@ Sample-level scores derived from the allele-specific copy number segments are pr
 | Variable | Description |
 |----------|-------------|
 | 1. `SAMPLE_ID` | Sample identifier |
-| 2. `FRACTION_GENOME_ALTERED` | Fraction of the segmented autosomal genome with a total copy number different from 2 (diploid), following the definition used by [cBioPortal](https://www.cbioportal.org) (absolute log2 copy-number ratio > 0.2 relative to a diploid baseline). Note that the value approaches 1 in near-tetraploid/genome-doubled tumors |
-| 3. `WGD_FRACTION` | Fraction of the segmented autosomal genome with a major allele copy number of two or more |
+| 2. `FRACTION_GENOME_ALTERED` | Fraction of the segmented autosomal genome (chromosomes 1-22) with a total copy number (`nMajor` + `nMinor`) different from 2. This adapts the [cBioPortal](https://www.cbioportal.org) fraction-genome-altered metric (genome fraction with an absolute segment mean log2 ratio of at least 0.2) to integer copy numbers: a diploid baseline is used rather than the tumor ploidy, so the value approaches 1 in near-tetraploid/genome-doubled tumors |
+| 3. `WGD_FRACTION` | Fraction of the segmented autosomal genome with a major allele copy number (`nMajor`) of two or more |
 | 4. `GENOME_DOUBLED` | Whole-genome doubling status (`TRUE`/`FALSE`): `TRUE` when `WGD_FRACTION` is at least 0.5, following [Bielski et al. 2018](https://pubmed.ncbi.nlm.nih.gov/30013179/) |
 | 5. `HRD_LOH` | _(`--estimate_hrd` only)_ Number of loss-of-heterozygosity regions longer than 15 Mb that do not span a whole chromosome |
 | 6. `HRD_LST` | _(`--estimate_hrd` only)_ Number of large-scale state transitions - chromosomal breakpoints between adjacent regions of at least 10 Mb |
