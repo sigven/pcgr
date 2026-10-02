@@ -881,6 +881,7 @@ def run_pcgr(input_data, output_data, conf_options):
                     hrd_result = hrd.compute_genomic_instability_score(
                         input_cna_segment_fname = input_cna,
                         chromsizes_fname = chromsizes_fname,
+                        build = yaml_data['genome_assembly'],
                         logger = logger)
                     for yaml_key, result_key, tsv_key in [
                             ('hrd_loh', 'hrd_loh', 'HRD_LOH'), ('hrd_lst', 'lst', 'HRD_LST'),

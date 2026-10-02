@@ -446,6 +446,8 @@ Copy number segments are intersected with the genomic coordinates of all transcr
 - `<sample_id>.pcgr.<genome_assembly>.cna_gene_ann.tsv.gz`
   - This file is organized according to the _affected transcripts_ (i.e. one line/record per affected transcript, segments not overlapping with any transcripts will thus not be included in this files).
 
+Note that a second file, `<sample_id>.pcgr.<genome_assembly>.cna_gene.tsv.gz`, is also written to the output directory. This is a pipeline intermediate (copy number segments mapped to overlapping transcripts and genes, with `BIOMARKER_MATCH` in raw format, and two-hit candidate flags and OncoKB columns appended when available) that is read when generating the report. The `cna_gene_ann.tsv.gz` file described here is the final annotated result and should be used for downstream analysis.
+
 The format of the compressed `cna_gene_ann.tsv.gz` is the following. Columns suffixed with `_OKB` are only present when OncoKB annotation is enabled via `--oncokb_api_token`. Note that `HOTSPOT_OKB` and `VUS_OKB` are not included for CNA output.
 
 | Variable | Description |
@@ -514,6 +516,8 @@ Missing values (e.g. the HRD columns when `--estimate_hrd` is not set) are denot
 Detected RNA fusions are annotated with gene-level cancer relevance, Mitelman database evidence, and clinical actionability. The output file has the following naming convention:
 
 - `<sample_id>.pcgr.<genome_assembly>.fusion_ann.tsv.gz`
+
+Note that a second file, `<sample_id>.pcgr.<genome_assembly>.rna_fusion.tsv.gz`, is also written to the output directory. This is a pipeline intermediate (the input fusion calls matched against biomarker evidence, with `BIOMARKER_MATCH` in raw format, and OncoKB columns appended when enabled) that is read when generating the report. The `fusion_ann.tsv.gz` file described here is the final annotated result and should be used for downstream analysis.
 
 Columns suffixed with `_OKB` are only present when OncoKB annotation is enabled via `--oncokb_api_token`. Note that `HOTSPOT_OKB` and `VUS_OKB` are not included for fusion output.
 
