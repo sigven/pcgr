@@ -22,14 +22,16 @@ breast cancer", npj Breast Cancer 2018 (https://doi.org/10.1038/s41523-018-0066-
 Fidelity to scarHRD: the three scores reproduce scarHRD (v0.1.1) exactly on
 the scarHRD example file (examples/test2.txt: HRD-LOH 25, TAI 35, LST 33,
 sum 93) and on 160 randomly sampled TCGA ASCAT3 profiles (BRCA/OV/PRAD/PAAD;
-160/160 identical for all three scores when scarHRD's own centromere
-coordinates are used). Two details matter for exact agreement:
-  - scarHRD's centromere coordinates (its 'chrominfo' tables, embedded below as
-    SCARHRD_CENTROMERES) differ from the coordinates in PCGR's chromsize file;
-    using the latter changes LST in ~15% of samples (by up to 2) and TAI in
-    ~35% (by up to 4). The scar scores therefore use scarHRD's coordinates
-    (see scarhrd_chrom_arms()); PCGR's chromsize file is used for chromosome
-    lengths only (FGA/WGD).
+160/160 identical for all three scores when scarHRD's centromere definition
+is used). Two details matter for exact agreement:
+  - scarHRD defines the centromere of each chromosome as the span of the
+    cytoband 'acen' (centromeric) bands (first start to last end). These are
+    wider than, and differ from, the centromere-model coordinates in PCGR's
+    chromsize file; using the latter changes LST in ~15% of samples (by up to 2)
+    and TAI in ~35% (by up to 4). The scar scores therefore use the 'acen'
+    bands, read from the cytoband file in the PCGR data bundle (see
+    scarhrd_chrom_arms()); the chromsize file is used for chromosome lengths
+    only (FGA/WGD).
   - TAI follows calc.ai_new() including its minimum segment size (1 Mb) and
     its per-chromosome "local ploidy" rule for deciding whether a segment is
     balanced (see calc_tai()).
@@ -55,44 +57,36 @@ LST_MIN_ARM_SEGMENT_MB = 3.0
 
 MYRIAD_HRD_POSITIVE_THRESHOLD = 42
 
-## Centromere coordinates (start, end) used by scarHRD (its 'chrominfo_grch37' /
-## 'chrominfo_grch38' tables; scarHRD is MIT-licensed). They differ from the
-## coordinates in PCGR's chromsize file, and are used for LST/TAI so that the
-## scores are identical to those from scarHRD.
-SCARHRD_CENTROMERES = {
-    'grch38': {
-        '1': (121700000, 125100000), '2': (91800000, 96000000), '3': (87800000, 94000000),
-        '4': (48200000, 51800000), '5': (46100000, 51400000), '6': (58500000, 62600000),
-        '7': (58100000, 62100000), '8': (43200000, 47200000), '9': (42200000, 45500000),
-        '10': (38000000, 41600000), '11': (51000000, 55800000), '12': (33200000, 37800000),
-        '13': (16500000, 18900000), '14': (16100000, 18200000), '15': (17500000, 20500000),
-        '16': (35300000, 38400000), '17': (22700000, 27400000), '18': (15400000, 21500000),
-        '19': (24200000, 28100000), '20': (25700000, 30400000), '21': (10900000, 13000000),
-        '22': (13700000, 17400000)
-    },
-    'grch37': {
-        '1': (121500000, 128900000), '2': (90500000, 96800000), '3': (87900000, 93900000),
-        '4': (48200000, 52700000), '5': (46100000, 50700000), '6': (58700000, 63300000),
-        '7': (58000000, 61700000), '8': (43100000, 48100000), '9': (47300000, 50700000),
-        '10': (38000000, 42300000), '11': (51600000, 55700000), '12': (33300000, 38200000),
-        '13': (16300000, 19500000), '14': (16100000, 19100000), '15': (15800000, 20700000),
-        '16': (34600000, 38600000), '17': (22200000, 25800000), '18': (15400000, 19000000),
-        '19': (24400000, 28600000), '20': (25600000, 29400000), '21': (10900000, 14300000),
-        '22': (12200000, 17900000)
-    },
-}
+def read_cytoband_centromeres(cytoband_fname: str, logger: Optional[logging.Logger] = None) -> dict:
+    """
+    Read centromere coordinates from the cytoband file in the PCGR data bundle
+    ('<refdata_assembly_dir>/misc/tsv/cytoband/cytoband.tsv.gz'). As in scarHRD,
+    the centromere of a chromosome is the span of its cytoband 'acen'
+    (centromeric) bands, i.e. the smallest start and largest end among these.
+
+    Returns a dict keyed by chromosome name (without 'chr' prefix), with
+    (centromere_start, centromere_end) tuples, e.g. {'1': (121700000, 125100000), ...}
+    """
+    if logger is None:
+        logger = logging.getLogger("pcgr-hrd")
+    check_file_exists(cytoband_fname, logger=logger)
+
+    cytoband = pd.read_csv(cytoband_fname, sep="\t", usecols=['chrom', 'start', 'end', 'gieStain'])
+    acen = cytoband[cytoband['gieStain'] == 'acen'].copy()
+    acen['chrom'] = acen['chrom'].astype(str).str.replace("^(C|c)hr", "", regex=True)
+    spans = acen.groupby('chrom').agg(start=('start', 'min'), end=('end', 'max'))
+    return {chrom: (int(row['start']), int(row['end'])) for chrom, row in spans.iterrows()}
 
 
-def scarhrd_chrom_arms(chrom_arms: dict, build: str) -> dict:
+def scarhrd_chrom_arms(chrom_arms: dict, cytoband_fname: str, logger: Optional[logging.Logger] = None) -> dict:
     """
     Return a copy of 'chrom_arms' (see read_chrom_arms) in which the centromere
-    coordinates of chromosomes 1-22 are replaced by those used by scarHRD for the
-    given genome build ('grch37' or 'grch38'); chromosome lengths are unchanged.
+    coordinates are replaced by the cytoband 'acen' spans used by scarHRD (see
+    read_cytoband_centromeres); chromosome lengths are unchanged.
     """
-    if build not in SCARHRD_CENTROMERES:
-        raise ValueError(f"Unsupported genome build for scarHRD centromere coordinates: '{build}'")
+    centromeres = read_cytoband_centromeres(cytoband_fname, logger=logger)
     arms = {c: dict(v) for c, v in chrom_arms.items()}
-    for chrom, (cstart, cend) in SCARHRD_CENTROMERES[build].items():
+    for chrom, (cstart, cend) in centromeres.items():
         if chrom in arms:
             arms[chrom]['centromere_start'] = cstart
             arms[chrom]['centromere_end'] = cend
@@ -505,7 +499,7 @@ def compute_genomic_instability_score(
         input_cna_segment_fname: str,
         chromsizes_fname: str,
         tumor_ploidy: Optional[float] = None,
-        build: Optional[str] = None,
+        cytoband_fname: Optional[str] = None,
         logger: Optional[logging.Logger] = None) -> dict:
     """
     Compute the combined genomic instability ("HRD") score - HRD-LOH + LST +
@@ -522,8 +516,9 @@ def compute_genomic_instability_score(
             This adjustment is present in scarHRD's source but is not the
             widely-cited/clinically-thresholded score (that is the plain,
             unweighted sum - see MYRIAD_HRD_POSITIVE_THRESHOLD).
-        build: genome build ('grch37' or 'grch38'). If given, scarHRD's centromere
-            coordinates for that build are used for LST/TAI, which gives results
+        cytoband_fname: path to the cytoband file of the PCGR data bundle
+            ('misc/tsv/cytoband/cytoband.tsv.gz'). If given, the cytoband 'acen'
+            bands are used as centromeres for LST/TAI, which gives results
             identical to scarHRD. If None, the centromere coordinates in the
             chromsize file are used (results may differ slightly from scarHRD).
         logger: optional logger instance.
@@ -545,8 +540,8 @@ def compute_genomic_instability_score(
     cna_df = pd.read_csv(input_cna_segment_fname, sep="\t", na_values=".")
 
     chrom_arms = read_chrom_arms(chromsizes_fname, logger=logger)
-    if build is not None:
-        chrom_arms = scarhrd_chrom_arms(chrom_arms, build)
+    if cytoband_fname is not None:
+        chrom_arms = scarhrd_chrom_arms(chrom_arms, cytoband_fname, logger=logger)
 
     hrd_loh = calc_hrd_loh(cna_df, logger=logger)
     lst = calc_lst(cna_df, chrom_arms, logger=logger)
@@ -581,12 +576,13 @@ if __name__ == "__main__":
     parser.add_argument("cna_segment_file", help="TSV with columns Chromosome, Start, End, nMajor, nMinor")
     parser.add_argument("chromsizes_file", help="PCGR chromsize.<build>.tsv reference file")
     parser.add_argument("--ploidy", type=float, default=None, help="Tumor ploidy (optional)")
-    parser.add_argument("--build", choices=sorted(SCARHRD_CENTROMERES), default="grch38",
-                        help="Genome build (selects scarHRD centromere coordinates for LST/TAI; default: grch38)")
+    parser.add_argument("--cytoband_file", default=None,
+                        help="PCGR cytoband file (misc/tsv/cytoband/cytoband.tsv.gz) - use cytoband 'acen' bands "
+                             "as centromeres for LST/TAI, for results identical to scarHRD")
     args = parser.parse_args()
 
     res = compute_genomic_instability_score(
-        args.cna_segment_file, args.chromsizes_file, tumor_ploidy=args.ploidy, build=args.build)
+        args.cna_segment_file, args.chromsizes_file, tumor_ploidy=args.ploidy, cytoband_fname=args.cytoband_file)
     for k, v in res.items():
         print(f"{k}\t{v}")
     fga = calc_fraction_genome_altered(
