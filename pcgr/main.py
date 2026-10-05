@@ -161,8 +161,8 @@ def cli():
     optional_tmb_msi.add_argument("--tmb_display", dest="tmb_display", default="coding_and_silent", choices=["coding_and_silent", "coding_non_silent", "missense_only"], 
                                   help = "Type of TMB measure to show in report, default: %(default)s")
     optional_tmb_msi.add_argument("--tmb_high_threshold", dest="tmb_high_threshold", type=float, default=10.0, 
-                                  help = ("Threshold (mutations/Mb) for classifying the tumor as TMB-high, applied to the TMB measure shown in the report (--tmb_display), "
-                                          "default: %(default)s (FDA/OncoKB definition of TMB-H)"))
+                                  help = ("Threshold (mutations/Mb) for classifying the tumor as TMB-High, applied to the TMB measure shown in the report (--tmb_display), "
+                                          "default: %(default)s"))
     optional_tmb_msi.add_argument("--tmb_dp_min", dest="tmb_dp_min", default=None, 
                                   help = "If VCF INFO tag for sequencing depth (tumor) is specified and found, set minimum required sequencing depth for TMB calculation: default: %(default)s")
     optional_tmb_msi.add_argument("--tmb_af_min", dest="tmb_af_min", default=None, 

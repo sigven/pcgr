@@ -77,6 +77,8 @@ pdiakumis <- user("pdiakumis")
   - Estimates HRD-LOH + LST + TAI from the allele-specific CNA segments, following the [scarHRD/Sztupinszki et al. algorithm](https://github.com/sztup/scarHRD) - shown in a dedicated subsection at the end of the CNA section, with an explanation of each measure and tumor-type-aware interpretation notes
   - **Research use only** - not a validated diagnostic measure, and only clinically thresholded (Myriad myChoice CDx, sum &ge; 42) for ovarian cancer
   - Requires paired tumor-control data with genome-wide CNA segments (`--input_cna`); not supported with `--tumor_only` or `--assay TARGETED` (enforced as an argument-validation error)
+- **TMB-high** - new `--tmb_high_threshold` option (default: 10 mutations/Mb, the FDA/OncoKB definition of TMB-H), applied to the TMB measure shown in the report (`--tmb_display`). The resulting call is available in the report data and the TMB sheet of the Excel output (`TMB_HIGH`), as a basis for TMB-H biomarker matching
+- **Biomarker evidence for MSI-High and TMB-High** - when the tumor is classified as MSI-high or TMB-high (see `--tmb_high_threshold`), therapeutic biomarker evidence is retrieved from CIViC and (if `--oncokb_api_token` is provided) OncoKB, classified into AMP/ASCO/CAP tiers, and shown in the MSI and TMB sections of the report with the same table layout as for other variant types (source icons indicate evidence from CIViC/OncoKB). The evidence is also available in the `MSI_BIOMARKER`/`TMB_BIOMARKER` sheets of the Excel output
 
 ### Changed
 

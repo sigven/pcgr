@@ -154,6 +154,8 @@ If tags for allelic support is provided in the VCF and configured by the user, u
 - `--tmb_dp_min <value>`
 - `--tmb_af_min <value>`
 
+The threshold for classifying a tumor as TMB-high (`--tmb_high_threshold <value>`, in mutations/Mb) is applied to the TMB measure shown in the report (`--tmb_display`). The default (10 mutations/Mb) corresponds to the FDA/OncoKB definition of TMB-H, and can be changed by the user.
+
 ### Large input sets (VCF)
 
 For input VCF files with > 500,000 variants, note that these will be subject to filtering prior to the final step in PCGR (step 4: reporting). For such scenarios, raw input sets will be filtered according to consequence type, in the sense that intergenic/intronic/upstream/downstream gene variants will be excluded prior to reporting. This is a necessary step to avoid memory issues etc. during processing with the PCGR R package.
@@ -404,6 +406,10 @@ Tumor mutational burden (TMB) and MSI options:
                         size, default: False
   --tmb_display {coding_and_silent,coding_non_silent,missense_only}
                         Type of TMB measure to show in report, default: coding_and_silent
+  --tmb_high_threshold TMB_HIGH_THRESHOLD
+                        Threshold (mutations/Mb) for classifying the tumor as TMB-high, applied to the TMB
+                        measure shown in the report (--tmb_display), default: 10.0 (FDA/OncoKB definition of
+                        TMB-H)
   --tmb_dp_min TMB_DP_MIN
                         Minimum sequencing depth (tumor) for TMB calculation (default: None)
   --tmb_af_min TMB_AF_MIN

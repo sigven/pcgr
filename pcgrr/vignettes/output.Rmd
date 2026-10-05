@@ -628,7 +628,7 @@ The Excel workbook has the following naming convention:
 
 - `<sample_id>.pcgr.<genome_assembly>.xlsx`
 
-It contains up to 17 sheets, each populated conditionally on the type of input data provided and the analysis performed. Sheets with no data are omitted entirely. Any sheet exceeding 30,000 rows is truncated to the first 30,000 rows (a warning is emitted in that case; the full data is always available in the corresponding TSV file).
+It contains up to 19 sheets, each populated conditionally on the type of input data provided and the analysis performed. Sheets with no data are omitted entirely. Any sheet exceeding 30,000 rows is truncated to the first 30,000 rows (a warning is emitted in that case; the full data is always available in the corresponding TSV file).
 
 The table below describes each sheet, when it is included, and any filtering or content restrictions applied to keep the workbook manageable.
 
@@ -641,6 +641,8 @@ The table below describes each sheet, when it is included, and any filtering or 
 | `SOMATIC_SNV_INDEL_BIOMARKER` | `--input_vcf` provided and biomarker hits exist | One row per biomarker evidence item matched to a somatic SNV/InDel. A `TIER` column encodes evidence category and actionability tier (e.g. `T1`/`T2`/`T3` = therapeutic sensitivity, `R1`/`R2`/`R3` = therapeutic resistance, `PP1`–`PP2` = poor prognosis, `PB1`–`PB2` = better prognosis, `D1`–`D2` = diagnostic positive). Diagnostic-negative evidence is excluded |
 | `SOMATIC_CNA` | `--input_cna` provided | CNA gene-level annotations using the same columns as the TSV output, minus `BIOMARKER_MATCH`. **Filtered** to genes with a non-missing `ACTIONABILITY_TIER` |
 | `CNA_SUMMARY` | `--input_cna` provided | Sample-level scores derived from the copy number segments - fraction of genome altered and (with `--estimate_hrd`) the HRD score components (same content as the `.cna_summary.tsv` file) |
+| `MSI_BIOMARKER` | tumor classified as MSI-High | Biomarker evidence items (CIViC; OncoKB if enabled) for MSI-High, with AMP/ASCO/CAP tier |
+| `TMB_BIOMARKER` | tumor classified as TMB-High | Biomarker evidence items (CIViC; OncoKB if enabled) for TMB-High, with AMP/ASCO/CAP tier |
 | `SOMATIC_CNA_BIOMARKER` | `--input_cna` provided and biomarker hits exist | One row per biomarker evidence item matched to a somatic CNA, using the same `TIER` encoding and sorting as `SOMATIC_SNV_INDEL_BIOMARKER` |
 | `RNA_FUSION` | `--input_rna_fusion` provided | RNA fusion annotations using the same columns as the TSV output, minus `BIOMARKER_MATCH`. **Filtered** to fusions with a non-missing `ACTIONABILITY_TIER` |
 | `RNA_FUSION_BIOMARKER` | `--input_rna_fusion` provided and biomarker hits exist | One row per biomarker evidence item matched to an RNA fusion, using the same `TIER` encoding and sorting as `SOMATIC_SNV_INDEL_BIOMARKER` |
