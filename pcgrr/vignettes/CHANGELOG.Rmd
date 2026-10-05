@@ -48,11 +48,11 @@ pdiakumis <- user("pdiakumis")
 
 ## v2.3.3
 
-- Date: **2026-10-05**
-- Data bundle update (`20261001`) and software updates
+- Date: **2026-10-XX**
+- Data bundle update (`20261005`) and software updates
   - Ensembl VEP `v116.2` / GENCODE v50 (GRCh38; v19 for GRCh37)
   - ClinVar (2026-10)
-  - CIViC (2026-10-01)
+  - CIViC (2026-10-05)
   - UniProt/SwissProt KnowledgeBase (2026_03)
   - Open Targets Platform (2026.09)
 
