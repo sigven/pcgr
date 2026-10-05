@@ -146,3 +146,73 @@ bslib::card(
     )
   )
 ```
+
+```{r tmb_biomarker_header}
+#| echo: false
+#| eval: !expr isFALSE(is.null(pcg_report$content$tmb$callset))
+#| output: asis
+
+cs <- pcgrr::color_palette$bm_callout
+cat("<br>\n\n### Biomarker evidence for TMB-High\n\n")
+cat("The tumor mutational burden (", round(tmb_estimate$TMB_ESTIMATE, 1),
+    " mutations/Mb, ", algo, ") is at or above the threshold for TMB-High (",
+    pcg_report$content$tmb$tmb_high_threshold,
+    " mutations/Mb). Therapeutic implications of TMB-High were retrieved from ", bm_db_label,
+    ", and are classified according to the strength of evidence for the tumor type (",
+    pcg_report$settings$conf$sample_properties$site, "), following AMP/ASCO/CAP guidelines. ",
+    "Expand a row for details on the underlying evidence items.\n\n", sep = "")
+```
+
+```{r tmb_biomarker_sensitivity}
+#| echo: false
+#| output: asis
+#| eval: !expr isFALSE(is.null(pcg_report$content$tmb$callset)) && any(pcg_report$content$tmb$callset$variant_display$ACTIONABILITY_TIER %in% c(1,2,3))
+
+rctbl_recs <- pcgrr::prep_actble_display_tbl(
+  rep = pcg_report,
+  tier = c(1,2,3),
+  etype_for_tiering = c("predictive"),
+  clnsig = "therapeutic_sensitivity",
+  variant_category = 'tmb')
+
+result_table <-
+  pcgrr::render_actble_bm_table(
+    rctbl_recs = rctbl_recs,
+    variant_category = 'tmb',
+    clnsig = "therapeutic_sensitivity"
+  )
+
+result_table
+```
+
+```{r tmb_biomarker_sensitivity_none}
+#| echo: false
+#| output: asis
+#| eval: !expr isFALSE(is.null(pcg_report$content$tmb$callset)) && !any(pcg_report$content$tmb$callset$variant_display$ACTIONABILITY_TIER %in% c(1,2,3))
+
+cs <- pcgrr::color_palette$bm_callout
+cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$therapeutic_sensitivity$border, "; background:", cs$therapeutic_sensitivity$bg, "; border-radius:0 4px 4px 0; color:", cs$therapeutic_sensitivity$text, "; font-size:0.92em;'>Based on available data in ", bm_db_label, ", no therapeutic sensitivity biomarkers (Tier 1&ndash;3) were identified for TMB-High in this tumor sample.</div>"))
+```
+
+```{r tmb_biomarker_resistance}
+#| echo: false
+#| output: asis
+#| eval: !expr isFALSE(is.null(pcg_report$content$tmb$callset)) && NROW(pcg_report$content$tmb$callset$bm_evidence$therapeutic_resistance$classification) > 0
+
+rctbl_recs <- pcgrr::prep_actble_display_tbl(
+  rep = pcg_report,
+  tier = c(1,2,3),
+  clnsig = "therapeutic_resistance",
+  variant_category = 'tmb')
+
+result_table <-
+  pcgrr::render_actble_bm_table(
+    rctbl_recs = rctbl_recs,
+    variant_category = 'tmb',
+    clnsig = "therapeutic_resistance"
+  )
+
+if (!is.null(result_table)) {
+  result_table
+}
+```

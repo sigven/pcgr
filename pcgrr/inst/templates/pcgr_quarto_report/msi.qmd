@@ -282,4 +282,77 @@ if (NROW(germline_mmr_variants) > 0) {
 cat("\n:::\n\n")
 ```
 
+```{r msi_biomarker_header}
+#| echo: false
+#| eval: !expr isFALSE(is.null(pcg_report$content$msi$callset))
+#| output: asis
+
+cs <- pcgrr::color_palette$bm_callout
+msi_stats_bm <- pcg_report$content$msi$prediction$msi_stats
+cat("<br>\n\n### Biomarker evidence for MSI-High\n\n")
+cat("The tumor was classified as MSI-High",
+    if (!is.null(msi_stats_bm$prob_msi_h) && !is.na(msi_stats_bm$prob_msi_h)) {
+      paste0(" (P(MSI-H) = ", round(msi_stats_bm$prob_msi_h, 3),
+             if (!is.null(msi_stats_bm$confidence_tier)) paste0(", confidence tier: ", msi_stats_bm$confidence_tier) else "", ")")
+    } else "",
+    ". Therapeutic implications of MSI-High were retrieved from ", bm_db_label,
+    ", and are classified according to the strength of evidence for the tumor type (",
+    pcg_report$settings$conf$sample_properties$site, "), following AMP/ASCO/CAP guidelines. ",
+    "Expand a row for details on the underlying evidence items.\n\n", sep = "")
+```
+
+```{r msi_biomarker_sensitivity}
+#| echo: false
+#| output: asis
+#| eval: !expr isFALSE(is.null(pcg_report$content$msi$callset)) && any(pcg_report$content$msi$callset$variant_display$ACTIONABILITY_TIER %in% c(1,2,3))
+
+rctbl_recs <- pcgrr::prep_actble_display_tbl(
+  rep = pcg_report,
+  tier = c(1,2,3),
+  etype_for_tiering = c("predictive"),
+  clnsig = "therapeutic_sensitivity",
+  variant_category = 'msi')
+
+result_table <-
+  pcgrr::render_actble_bm_table(
+    rctbl_recs = rctbl_recs,
+    variant_category = 'msi',
+    clnsig = "therapeutic_sensitivity"
+  )
+
+result_table
+```
+
+```{r msi_biomarker_sensitivity_none}
+#| echo: false
+#| output: asis
+#| eval: !expr isFALSE(is.null(pcg_report$content$msi$callset)) && !any(pcg_report$content$msi$callset$variant_display$ACTIONABILITY_TIER %in% c(1,2,3))
+
+cs <- pcgrr::color_palette$bm_callout
+cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$therapeutic_sensitivity$border, "; background:", cs$therapeutic_sensitivity$bg, "; border-radius:0 4px 4px 0; color:", cs$therapeutic_sensitivity$text, "; font-size:0.92em;'>Based on available data in ", bm_db_label, ", no therapeutic sensitivity biomarkers (Tier 1&ndash;3) were identified for MSI-High in this tumor sample.</div>"))
+```
+
+```{r msi_biomarker_resistance}
+#| echo: false
+#| output: asis
+#| eval: !expr isFALSE(is.null(pcg_report$content$msi$callset)) && NROW(pcg_report$content$msi$callset$bm_evidence$therapeutic_resistance$classification) > 0
+
+rctbl_recs <- pcgrr::prep_actble_display_tbl(
+  rep = pcg_report,
+  tier = c(1,2,3),
+  clnsig = "therapeutic_resistance",
+  variant_category = 'msi')
+
+result_table <-
+  pcgrr::render_actble_bm_table(
+    rctbl_recs = rctbl_recs,
+    variant_category = 'msi',
+    clnsig = "therapeutic_resistance"
+  )
+
+if (!is.null(result_table)) {
+  result_table
+}
+```
+
 <br><br>

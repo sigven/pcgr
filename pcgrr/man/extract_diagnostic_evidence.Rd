@@ -22,7 +22,7 @@ extract_diagnostic_evidence(
 \item{alteration}{Alteration description
 (e.g., HGVSp short format for SNVs/InDels)}
 
-\item{vartype}{Variant type (e.g., "snv_indel", "fusion", "cna")}
+\item{vartype}{Variant type (e.g., "snv_indel", "fusion", "cna", "msi", "tmb")}
 
 \item{oncotree_code}{OncoTree code for tumor type
 (e.g., "BRCA" for breast cancer)}

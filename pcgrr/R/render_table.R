@@ -939,7 +939,7 @@ render_actble_bm_table <- function(
         "ACTIONABILITY_TIER",
         "BM_TOP_MAPPING_CONFIDENCE",
         "CN_TOTAL")
-  } else if(variant_category == "fusion"){
+  } else if(variant_category %in% c("fusion", "msi", "tmb")){
     required_cols <-
       c("VAR_ID",
         "ENTREZGENE",
@@ -949,7 +949,7 @@ render_actble_bm_table <- function(
   } else {
     log4r_fatal(
       paste0("Invalid variant_category: ", variant_category,
-             ". Must be one of 'snv_indel', 'cna', or 'fusion'."))
+             ". Must be one of 'snv_indel', 'cna', 'fusion', 'msi', or 'tmb'."))
   }
 
   if (NROW(rctbl_recs$main) == 0) {
@@ -990,7 +990,7 @@ render_actble_bm_table <- function(
     borderRight = "1px solid rgba(255,255,255,0.3)"
   )
 
-  if(variant_category == "fusion"){
+  if(variant_category %in% c("fusion", "msi", "tmb")){
     main_cols <-  list(
       SAMPLE_ALTERATION = reactable::colDef(
         name = "Alteration",

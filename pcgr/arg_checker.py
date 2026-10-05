@@ -321,6 +321,11 @@ def verify_args(arg_dict, logger = None):
                 )
                 error_message(err_msg, logger)
 
+        # TMB: check that threshold for TMB-high is positive
+        if float(arg_dict['tmb_high_threshold']) <= 0:
+            err_msg = f"Threshold for TMB-high ('tmb_high_threshold' = {arg_dict['tmb_high_threshold']}) must be > 0 (mutations/Mb)"
+            error_message(err_msg, logger)
+
         # TMB: check that minimum/maximum depth/allelic fractions are set correctly
         if arg_dict['tmb_dp_min'] is not None:
             if int(arg_dict['tmb_dp_min']) <= 0:

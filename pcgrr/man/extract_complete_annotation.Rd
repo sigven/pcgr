@@ -22,7 +22,7 @@ extract_complete_annotation(
 \item{alteration}{alteration description
 (e.g., HGVSp short format for SNVs/InDels)}
 
-\item{vartype}{variant type (e.g., "snv_indel", "fusion", "cna")}
+\item{vartype}{variant type (e.g., "snv_indel", "fusion", "cna", "msi", "tmb")}
 
 \item{oncotree_code}{OncoTree code for tumor type}
 

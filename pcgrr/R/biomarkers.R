@@ -12,7 +12,7 @@
 #' A-level evidence, for tier 2: only evidence items with B-level evidence).
 #' If FALSE, all evidence items associated with each variant, not only
 #' the tier-defining evidence items, will be considered for display in the report.
-#' @param variant_category cna, snv_indel, or fusion
+#' @param variant_category cna, snv_indel, fusion, msi, or tmb
 #'
 #' @export
 #'
@@ -37,9 +37,9 @@ prep_actble_display_tbl <- function(
   }
 
   ## check variant_category is valid
-  if (!variant_category %in% c("snv_indel", "cna", "fusion")) {
+  if (!variant_category %in% c("snv_indel", "cna", "fusion", "msi", "tmb")) {
     log4r_fatal(
-      "variant_category must be one of 'snv_indel', 'cna', or 'fusion'")
+      "variant_category must be one of 'snv_indel', 'cna', 'fusion', 'msi', or 'tmb'")
   }
 
   if (!"callset" %in% names(rep$content[[variant_category]])) {
@@ -1259,6 +1259,9 @@ map_biomarker_data <- function(
               relationship = "many-to-many") |>
             dplyr::rename("BIOMARKER_MATCH" = "BIOMARKER_MATCHTYPE") |>
             dplyr::mutate(BIOMARKER_RESOLUTION = dplyr::case_when(
+              ## complex biomarkers (MSI-H, TMB-H)
+              stringr::str_detect(
+                .data$BIOMARKER_MATCH,"by_(msi|tmb)") ~ "biomarker",
               stringr::str_detect(
                 .data$BIOMARKER_MATCH,"by_fusion") ~ "fusion",
               stringr::str_detect(

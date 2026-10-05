@@ -23,7 +23,10 @@ nocite: |
   @Bailey2018-os, @Fernandez2019-mk,
   @Nakken2018-lb, @Brady2022-hr,
   @Levatic2022-hk, @Horak2022-uh,
-  @Antonello2024-ri
+  @Antonello2024-ri, Bielski2018-pz,
+  @Popova2012-yi, @Marquard2015-pg,
+  @Telli2016-hr, @Rempel2022-xk,
+  @Lenz2023-sp
 format: 
   html:
     theme: cosmos

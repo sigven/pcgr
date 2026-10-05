@@ -23,7 +23,7 @@ clean_oncokb_evidence(
 
 \item{alteration}{name of alteration}
 
-\item{vartype}{variant type (e.g., "snv_indel", "fusion", "cna")}
+\item{vartype}{variant type (e.g., "snv_indel", "fusion", "cna", "msi", "tmb")}
 
 \item{profile_name}{molecular profile name (for display)}
 

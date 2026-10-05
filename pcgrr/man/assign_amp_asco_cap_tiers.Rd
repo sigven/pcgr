@@ -14,7 +14,7 @@ assign_amp_asco_cap_tiers(
 )
 }
 \arguments{
-\item{vartype}{variant type ('snv_indel', 'cna', 'fusion')}
+\item{vartype}{variant type ('snv_indel', 'cna', 'fusion', 'msi', 'tmb')}
 
 \item{clinical_significance}{character indicate the clinical significance
 types of evidence used for tiering of predictive evidence. Possible values:

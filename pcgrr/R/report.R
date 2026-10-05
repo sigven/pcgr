@@ -234,6 +234,8 @@ init_tmb_content <- function(ref_data = NULL) {
   rep[["eval"]] <- FALSE
   rep[["sample_estimate"]] <- data.frame()
   rep[["tmb_reference"]] <- ref_data$misc$tmb
+  rep[["tmb_high"]] <- NA
+  rep[["tmb_high_threshold"]] <- NA
 
   return(rep)
 }

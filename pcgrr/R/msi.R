@@ -441,6 +441,22 @@ generate_report_data_msi <- function(
   return(pcg_report_msi)
 }
 
+#' Function that tells if the MSI status of the sample is MSI-high
+#'
+#' @param msi_content MSI report element (as returned by
+#' \code{generate_report_data_msi})
+#' @return logical
+#'
+#' @export
+msi_status_is_high <- function(msi_content = NULL) {
+  predicted_class <- msi_content[["prediction"]][["msi_stats"]][["predicted_class"]]
+  if (is.null(predicted_class) || length(predicted_class) != 1 ||
+      is.na(predicted_class)) {
+    return(FALSE)
+  }
+  return(stringr::str_detect(predicted_class, "^MSI"))
+}
+
 #' Function that plots the indel fraction for a given sample and
 #' contrasts this with the distribution for MSI-H/MSS samples from TCGA
 #'

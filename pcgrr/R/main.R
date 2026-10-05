@@ -171,6 +171,15 @@ generate_report <-
             rep,
             pcg_report_msi,
             a_elem = "msi")
+
+        ## If MSI-H, map biomarker evidence (CIViC, OncoKB) for the biomarker
+        if (msi_status_is_high(pcg_report_msi)) {
+          rep[["content"]][["msi"]][["callset"]] <-
+            generate_report_data_complex_biomarker(
+              biomarker = "MSI-H",
+              ref_data = ref_data,
+              settings = settings)
+        }
       }
 
       ## Generate report contents for analysis of
@@ -186,6 +195,19 @@ generate_report <-
           pcg_report_tmb[["eval"]]
         rep[["content"]][["tmb"]][["sample_estimate"]] <-
           pcg_report_tmb[["sample_estimate"]]
+        rep[["content"]][["tmb"]][["tmb_high_threshold"]] <-
+          pcg_report_tmb[["tmb_high_threshold"]]
+        rep[["content"]][["tmb"]][["tmb_high"]] <-
+          pcg_report_tmb[["tmb_high"]]
+
+        ## If TMB-high, map biomarker evidence (CIViC, OncoKB) for the biomarker
+        if (isTRUE(pcg_report_tmb[["tmb_high"]])) {
+          rep[["content"]][["tmb"]][["callset"]] <-
+            generate_report_data_complex_biomarker(
+              biomarker = "TMB-H",
+              ref_data = ref_data,
+              settings = settings)
+        }
 
       }
     }else if (!is.null(callset_snv)) {
@@ -1122,11 +1144,14 @@ write_report_excel <- function(report = NULL) {
                 'SOMATIC_SNV_INDEL_BIOMARKER',
                 'SOMATIC_CNA',
                 'SOMATIC_CNA_BIOMARKER',
+                'CNA_SUMMARY',
                 'RNA_FUSION',
                 'RNA_FUSION_BIOMARKER',
                 'GERMLINE_SNV_INDEL',
                 'TMB',
+                'TMB_BIOMARKER',
                 'MSI',
+                'MSI_BIOMARKER',
                 'MUTATIONAL_SIGNATURE',
                 'KATAEGIS_EVENTS',
                 'RNA_EXPRESSION_OUTLIERS',

@@ -250,6 +250,7 @@ if (length(allelic_filter_items) > 0) {
 }
 cat(glue::glue("* Mutational burden estimation: __{mutational_burden}__"), "\n")
 cat(glue::glue("  * TMB algorithm: __TMB_{conf$somatic_snv[['tmb']][['tmb_display']]}__"), "\n")
+cat(glue::glue("  * TMB-high threshold: __{conf$somatic_snv[['tmb']][['tmb_high_threshold']]} mutations/Mb__"), "\n")
 ```
 
 :::

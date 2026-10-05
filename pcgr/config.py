@@ -194,6 +194,7 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
         conf_options['somatic_snv']['tmb'] = {
             'run': int(arg_dict['estimate_tmb']), 
             'tmb_display': arg_dict['tmb_display'],           
+            'tmb_high_threshold': float(arg_dict['tmb_high_threshold']),
             'tmb_dp_min': tmb_dp_min,
             'tmb_af_min': tmb_af_min,
             'tmb_ad_min': tmb_ad_min

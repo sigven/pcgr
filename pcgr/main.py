@@ -160,6 +160,9 @@ def cli():
                                   help = "Estimate tumor mutational burden from the total number of somatic mutations and target region size, default: %(default)s")
     optional_tmb_msi.add_argument("--tmb_display", dest="tmb_display", default="coding_and_silent", choices=["coding_and_silent", "coding_non_silent", "missense_only"], 
                                   help = "Type of TMB measure to show in report, default: %(default)s")
+    optional_tmb_msi.add_argument("--tmb_high_threshold", dest="tmb_high_threshold", type=float, default=10.0, 
+                                  help = ("Threshold (mutations/Mb) for classifying the tumor as TMB-high, applied to the TMB measure shown in the report (--tmb_display), "
+                                          "default: %(default)s (FDA/OncoKB definition of TMB-H)"))
     optional_tmb_msi.add_argument("--tmb_dp_min", dest="tmb_dp_min", default=None, 
                                   help = "If VCF INFO tag for sequencing depth (tumor) is specified and found, set minimum required sequencing depth for TMB calculation: default: %(default)s")
     optional_tmb_msi.add_argument("--tmb_af_min", dest="tmb_af_min", default=None, 
@@ -854,6 +857,8 @@ def run_pcgr(input_data, output_data, conf_options):
             logger = getlogger("pcgr-cna-summary")
             chromsizes_fname = os.path.join(
                 input_data['refdata_assembly_dir'], 'chromsize.' + yaml_data['genome_assembly'] + '.tsv')
+            cytoband_fname = os.path.join(
+                input_data['refdata_assembly_dir'], 'misc', 'tsv', 'cytoband', 'cytoband.tsv.gz')
             cna_summary = {
                 'SAMPLE_ID': yaml_data['sample_id'],
                 'FRACTION_GENOME_ALTERED': None, 'WGD_FRACTION': None, 'GENOME_DOUBLED': None,
@@ -881,7 +886,7 @@ def run_pcgr(input_data, output_data, conf_options):
                     hrd_result = hrd.compute_genomic_instability_score(
                         input_cna_segment_fname = input_cna,
                         chromsizes_fname = chromsizes_fname,
-                        build = yaml_data['genome_assembly'],
+                        cytoband_fname = cytoband_fname,
                         logger = logger)
                     for yaml_key, result_key, tsv_key in [
                             ('hrd_loh', 'hrd_loh', 'HRD_LOH'), ('hrd_lst', 'lst', 'HRD_LST'),

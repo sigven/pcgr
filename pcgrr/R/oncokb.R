@@ -18,13 +18,46 @@ oncokb_extract_field <- function(x) {
 }
 
 
+#' Resolution of the biomarker mapping, for OncoKB evidence items
+#'
+#' @param vartype variant type ("snv_indel", "fusion", "cna", "msi" or "tmb")
+#' @param match_by Matching strategy for SNVs/InDels (e.g., "hgvsp", "genomic")
+#' @return character
+#' @noRd
+oncokb_bm_resolution <- function(vartype = NA, match_by = "hgvsp") {
+  switch(
+    vartype,
+    "snv_indel" = match_by,
+    "fusion" = "fusion",
+    "cna" = "gene",
+    ## complex biomarkers (MSI-H, TMB-H) are not tied to a gene
+    "msi" = "biomarker",
+    "tmb" = "biomarker"
+  )
+}
+
+#' Display name of the molecular profile, for OncoKB evidence items
+#'
+#' @param gene gene symbol (or "Other Biomarkers" for MSI-H/TMB-H)
+#' @param alteration alteration description
+#' @param vartype variant type ("snv_indel", "fusion", "cna", "msi" or "tmb")
+#' @return character
+#' @noRd
+oncokb_profile_name <- function(gene = NA, alteration = NA, vartype = NA) {
+  ## complex biomarkers: the pseudo-gene 'Other Biomarkers' is omitted
+  if (vartype %in% c("msi", "tmb")) {
+    return(c("msi" = "MSI-High", "tmb" = "TMB-High")[[vartype]])
+  }
+  paste(gene, alteration, sep = " - ")
+}
+
 #' Clean extracted evidence data from OncoKB
 #'
 #' @param evidence_df data.frame with OncoKB evidence
 #' @param gene gene symbol
 #' @param oncokb_root_gene root gene symbol from OncoKB annotation (for reference)
 #' @param alteration name of alteration
-#' @param vartype variant type (e.g., "snv_indel", "fusion", "cna")
+#' @param vartype variant type (e.g., "snv_indel", "fusion", "cna", "msi", "tmb")
 #' @param profile_name molecular profile name (for display)
 #' @param oncotree_code OncoTree code for tumor type
 #'
@@ -118,7 +151,8 @@ clean_oncokb_evidence <- function(
       BM_MOLECULAR_PROFILE = dplyr::case_when(
         vartype != "fusion" &
           .data$BM_VARIANT_ORIGIN == "Somatic" ~ paste0(
-          "<a href='https://www.oncokb.org/gene/",gene,
+          "<a href='https://www.oncokb.org/gene/",
+          utils::URLencode(gene, reserved = TRUE),
           "/somatic/", alteration, "/",
           oncotree_code, "' target='_blank'>",
           .data$BM_MOLECULAR_PROFILE, "</a>"),
@@ -164,7 +198,7 @@ clean_oncokb_evidence <- function(
 #' @param gene Gene symbol (e.g., "BRAF")
 #' @param alteration Alteration description
 #' (e.g., HGVSp short format for SNVs/InDels)
-#' @param vartype Variant type (e.g., "snv_indel", "fusion", "cna")
+#' @param vartype Variant type (e.g., "snv_indel", "fusion", "cna", "msi", "tmb")
 #' @param oncotree_code OncoTree code for tumor type (e.g., "BRCA" for breast cancer)
 #' @param variant_id Variant identifier for tracking
 #' @param match_by Matching strategy for SNVs/InDels (e.g., "hgvsp", "genomic")
@@ -184,14 +218,9 @@ extract_therapeutic_evidence <-
 
     alteration2 <- stringr::str_replace(
       alteration,"p\\.","")
-    profile_name <- paste(gene, alteration, sep = " - ")
+    profile_name <- oncokb_profile_name(gene, alteration, vartype)
 
-    bmresolution = switch(
-      vartype,
-      "snv_indel" = match_by,
-      "fusion" = "fusion",
-      "cna" = "gene"
-    )
+    bmresolution <- oncokb_bm_resolution(vartype, match_by)
 
     therapeutic_df <- data.frame()
     if (is.null(oncokb_annotation$treatments) ||
@@ -313,7 +342,7 @@ extract_therapeutic_evidence <-
 #' @param gene Gene symbol (e.g., "BRAF")
 #' @param alteration Alteration description
 #' (e.g., HGVSp short format for SNVs/InDels)
-#' @param vartype Variant type (e.g., "snv_indel", "fusion", "cna")
+#' @param vartype Variant type (e.g., "snv_indel", "fusion", "cna", "msi", "tmb")
 #' @param oncotree_code OncoTree code for tumor type
 #' (e.g., "BRCA" for breast cancer)
 #' @param variant_id Variant identifier
@@ -330,7 +359,7 @@ extract_diagnostic_evidence <- function(
     match_by = "hgvsp") {
 
   alteration2 <- stringr::str_replace(alteration, "p\\.", "")
-  profile_name <- paste(gene, alteration, sep = " - ")
+  profile_name <- oncokb_profile_name(gene, alteration, vartype)
 
   diagnostic_df <- data.frame()
   if (is.null(oncokb_annotation$diagnosticImplications) ||
@@ -343,12 +372,7 @@ extract_diagnostic_evidence <- function(
     variant_origin <- "Germline"
   }
 
-  bmresolution = switch(
-    vartype,
-    "snv_indel" = match_by,
-    "fusion" = "fusion",
-    "cna" = "gene"
-  )
+  bmresolution <- oncokb_bm_resolution(vartype, match_by)
 
   diagnostic_df <-
     purrr::map_df(oncokb_annotation$diagnosticImplications, function(dx) {
@@ -438,7 +462,7 @@ extract_diagnostic_evidence <- function(
 #' @param oncokb_annotation OncoKB annotation list
 #' @param gene Gene symbol (e.g., "BRAF")
 #' @param alteration Alteration description
-#' @param vartype Variant type (e.g., "snv_indel", "fusion", "cna")
+#' @param vartype Variant type (e.g., "snv_indel", "fusion", "cna", "msi", "tmb")
 #' (e.g., HGVSp short format for SNVs/InDels)
 #' @param oncotree_code OncoTree code for tumor type
 #' (e.g., "BRCA" for breast cancer)
@@ -456,7 +480,7 @@ extract_prognostic_evidence <- function(
     match_by = "hgvsp") {
 
   alteration2 <- stringr::str_replace(alteration, "p\\.", "")
-  profile_name <- paste(gene, alteration, sep = " - ")
+  profile_name <- oncokb_profile_name(gene, alteration, vartype)
 
   prognostic_df <- data.frame()
   if (is.null(oncokb_annotation$prognosticImplications) ||
@@ -469,12 +493,7 @@ extract_prognostic_evidence <- function(
     variant_origin <- "Germline"
   }
 
-  bmresolution = switch(
-    vartype,
-    "snv_indel" = match_by,
-    "fusion" = "fusion",
-    "cna" = "gene"
-  )
+  bmresolution <- oncokb_bm_resolution(vartype, match_by)
 
   prognostic_df <-
     purrr::map_df(oncokb_annotation$prognosticImplications, function(px) {
@@ -664,7 +683,7 @@ extract_prognostic_evidence <- function(
 #' @param gene gene symbol / gene fusion
 #' @param alteration alteration description
 #' (e.g., HGVSp short format for SNVs/InDels)
-#' @param vartype variant type (e.g., "snv_indel", "fusion", "cna")
+#' @param vartype variant type (e.g., "snv_indel", "fusion", "cna", "msi", "tmb")
 #' @param oncotree_code OncoTree code for tumor type
 #' @param variant_id Variant identifier
 #' @param match_by Matching strategy for SNVs/InDels (e.g., "hgvsp", "genomic")
@@ -1083,6 +1102,223 @@ fetch_oncokb_cna_annotation <- function(
 
   return(annotation)
 }
+
+
+#' Fetch OncoKB annotation for a complex biomarker (MSI-H or TMB-H)
+#'
+#' Microsatellite instability-high (MSI-H) and tumor mutational burden-high
+#' (TMB-H) are annotated by OncoKB as "atypical alterations", through the
+#' protein change endpoint. No gene is provided - OncoKB maps these
+#' biomarkers to the pseudo-gene "Other Biomarkers". The response has the same
+#' structure as for other alteration types (summaries, treatments with levels
+#' of evidence). The evidence extraction helpers
+#' (e.g. \code{extract_complete_annotation}) support these biomarkers with
+#' \code{vartype = "msi"} or \code{vartype = "tmb"}.
+#'
+#' @param biomarker Complex biomarker, either "MSI-H" or "TMB-H"
+#' @param oncotree_code OncoTree code/name (e.g., "COADREAD", "BLCA")
+#' @param oncokb_token OncoKB API token
+#' @param base_api_url Optional base URL for OncoKB API (default: oncokb_base_api_url)
+#' @return List containing the complete JSON response from OncoKB API
+#'
+#' @export
+#'
+fetch_oncokb_biomarker_annotation <-
+  function(
+    biomarker = "MSI-H",
+    oncotree_code = NULL,
+    oncokb_token = NULL,
+    base_api_url = NULL) {
+
+    # Validate inputs
+    if (missing(oncokb_token) ||
+        is.null(oncokb_token) ||
+        oncokb_token == "") {
+      stop("OncoKB token is required. Obtain from https://www.oncokb.org/account/settings")
+    }
+
+    if (!(length(biomarker) == 1 && biomarker %in% c("MSI-H", "TMB-H"))) {
+      stop("Invalid biomarker - must be either 'MSI-H' or 'TMB-H'")
+    }
+
+    # API endpoint
+    base_url <- if (is.null(base_api_url)) {
+      glue::glue("{oncokb_base_api_url}mutations/byProteinChange")
+    } else {
+      glue::glue("{base_api_url}mutations/byProteinChange")
+    }
+
+    # Build query parameters (no gene - mapped to 'Other Biomarkers' by OncoKB)
+    query_params <- list(
+      alteration = biomarker,
+      tumorType = oncotree_code
+    )
+
+    if (is.null(oncotree_code) ||
+        length(oncotree_code) == 0 ||
+        is.na(oncotree_code)) {
+      query_params <- list(alteration = biomarker)
+    }
+
+    # Make API request
+    response <- tryCatch({
+      httr::GET(
+        url = base_url,
+        query = query_params,
+        httr::add_headers(
+          Authorization = paste("Bearer", oncokb_token),
+          Accept = "application/json"
+        ),
+        httr::timeout(30)
+      )
+    }, error = function(e) {
+      warning(sprintf("API request failed for %s: %s",
+                      biomarker, e$message))
+      return(NULL)
+    })
+
+    # Check response status
+    if (is.null(response)) {
+      return(NULL)
+    }
+
+    if (httr::status_code(response) != 200) {
+      warning(sprintf(
+        "OncoKB API returned status %d for %s in %s: %s",
+        httr::status_code(response),
+        biomarker,
+        oncotree_code,
+        httr::content(response, "text", encoding = "UTF-8")
+      ))
+      return(NULL)
+    }
+
+    # Parse JSON response
+    json_content <-
+      httr::content(response, "text", encoding = "UTF-8")
+    annotation <-
+      jsonlite::fromJSON(json_content, simplifyVector = FALSE)
+
+    return(annotation)
+  }
+
+
+#' Fetch OncoKB annotation for MSI-H (microsatellite instability-high)
+#'
+#' @param oncotree_code OncoTree code/name (e.g., "COADREAD", "BLCA")
+#' @param oncokb_token OncoKB API token
+#' @param base_api_url Optional base URL for OncoKB API (default: oncokb_base_api_url)
+#' @return List containing the complete JSON response from OncoKB API
+#'
+#' @export
+#'
+fetch_oncokb_msi_annotation <-
+  function(
+    oncotree_code = NULL,
+    oncokb_token = NULL,
+    base_api_url = NULL) {
+
+    fetch_oncokb_biomarker_annotation(
+      biomarker = "MSI-H",
+      oncotree_code = oncotree_code,
+      oncokb_token = oncokb_token,
+      base_api_url = base_api_url)
+  }
+
+
+#' Fetch OncoKB annotation for TMB-H (tumor mutational burden-high)
+#'
+#' @param oncotree_code OncoTree code/name (e.g., "COADREAD", "BLCA")
+#' @param oncokb_token OncoKB API token
+#' @param base_api_url Optional base URL for OncoKB API (default: oncokb_base_api_url)
+#' @return List containing the complete JSON response from OncoKB API
+#'
+#' @export
+#'
+fetch_oncokb_tmb_annotation <-
+  function(
+    oncotree_code = NULL,
+    oncokb_token = NULL,
+    base_api_url = NULL) {
+
+    fetch_oncokb_biomarker_annotation(
+      biomarker = "TMB-H",
+      oncotree_code = oncotree_code,
+      oncokb_token = oncokb_token,
+      base_api_url = base_api_url)
+  }
+
+
+#' Get OncoKB therapeutic evidence items for a complex biomarker
+#' (MSI-H or TMB-H)
+#'
+#' Queries the OncoKB API for the biomarker and returns the evidence items
+#' in the PCGR biomarker evidence data model (columns with prefix
+#' \code{BM_}), as for other alteration types.
+#'
+#' @param biomarker Complex biomarker, either "MSI-H" or "TMB-H"
+#' @param oncotree_code OncoTree code of the tumor (NULL/NA: query not
+#' restricted to a tumor type)
+#' @param oncokb_token OncoKB API token
+#' @param base_api_url Optional base URL for OncoKB API (default: oncokb_base_api_url)
+#' @return Data frame with evidence items (empty if none, or if the query failed)
+#'
+#' @export
+#'
+fetch_oncokb_biomarker_eitems <-
+  function(
+    biomarker = "MSI-H",
+    oncotree_code = NULL,
+    oncokb_token = NULL,
+    base_api_url = NULL) {
+
+    if (is.null(oncotree_code) || length(oncotree_code) == 0 ||
+        is.na(oncotree_code) || oncotree_code %in% c("", "None", "NA")) {
+      oncotree_code <- NULL
+    }
+
+    annotation <- tryCatch(
+      fetch_oncokb_biomarker_annotation(
+        biomarker = biomarker,
+        oncotree_code = oncotree_code,
+        oncokb_token = oncokb_token,
+        base_api_url = base_api_url),
+      error = function(e) {
+        warning(sprintf("OncoKB query for %s failed: %s", biomarker, e$message))
+        NULL
+      })
+
+    if (is.null(annotation)) {
+      return(data.frame())
+    }
+
+    props <- complex_biomarker_properties(biomarker)
+    eitems <- extract_complete_annotation(
+      annotation,
+      gene = "Other Biomarkers",
+      alteration = biomarker,
+      vartype = props$vartype,
+      oncotree_code = if (is.null(oncotree_code)) "" else oncotree_code,
+      variant_id = props$var_id,
+      match_by = "alteration")
+
+    if (NROW(eitems) == 0) {
+      return(data.frame())
+    }
+
+    ## predictive evidence only (therapeutic sensitivity/resistance)
+    eitems <- eitems |>
+      dplyr::filter(.data$BM_EVIDENCE_TYPE == "Predictive") |>
+      dplyr::mutate(
+        VARIANT_CLASS = props$vartype,
+        ENTREZGENE = props$entrezgene,
+        BM_MATCH = paste0("by_", props$vartype)) |>
+      dplyr::select(
+        c("VAR_ID", "VARIANT_CLASS", "ENTREZGENE", "BM_SOURCE_DB"),
+        dplyr::everything())
+
+    return(as.data.frame(eitems))
+  }
 
 
 #' Process OncoKB MAF output files (both HGVSp and HGVSg) and fetch complete annotations

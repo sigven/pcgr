@@ -690,34 +690,37 @@ cat(
   "([Popova et al. 2012](https://pubmed.ncbi.nlm.nih.gov/22933060/))\n",
   "* **TAI (telomeric allelic imbalance)** - the number of regions with allelic imbalance that extend to the telomere without crossing the centromere ",
   "([Birkbak et al. 2012](https://pubmed.ncbi.nlm.nih.gov/22576213/))\n\n",
-  "The implementation follows the scarHRD algorithm ",
+  "The implementation follows the [**scarHRD**](https://github.com/sztup/scarHRD) algorithm ",
   "([Sztupinszki et al. 2018](https://pubmed.ncbi.nlm.nih.gov/29978035/)), and is computed on autosomes only.\n\n",
   sep = ""
 )
 
 hrd_conf <- pcg_report$settings$conf$somatic_cna
 
+## component scores in a toned-down style, so that the focus is on the sum
+component_theme <- bslib::value_box_theme(bg = "#ced4da", fg = "#212529")
+
 bslib::layout_columns(
   col_widths = c(3, 3, 3, 3),
-  height = "160px",
+  height = "110px",
   bslib::value_box(
     title = "HRD-LOH",
     value = hrd_conf$hrd_loh,
     #"LOH regions > 15 Mb",
     showcase = NULL,
-    theme = "dark"
+    theme = component_theme
   ),
   bslib::value_box(
     title = "LST",
     value = hrd_conf$hrd_lst,
     showcase = NULL,
-    theme = "dark"
+    theme = component_theme
   ),
   bslib::value_box(
     title = "TAI",
     value = hrd_conf$hrd_tai,
     showcase = NULL,
-    theme = "dark"
+    theme = component_theme
   ),
   bslib::value_box(
     title = "HRD score (sum)",
@@ -728,6 +731,11 @@ bslib::layout_columns(
 )
 
 cat("\n\n")
+
+cat("**How to read the score:** the score counts genomic scars, so a higher score means more scarring and a higher likelihood of HRD ",
+    "(in ovarian cancer, also of benefit from PARP inhibitors). There is no fixed upper limit - scores typically range from 0 to about 100 ",
+    "in TCGA tumors, with near-diploid, stable genomes scoring close to 0. A score of 42 or above is the established cutoff for HRD-positive ",
+    "tumors in ovarian cancer only (see the note below); no cutoff has been validated in other cancer types.\n\n", sep = "")
 
 lenz2023 <- "[Lenz et al. 2023](https://pubmed.ncbi.nlm.nih.gov/37589839/)"
 rempel2022 <- "[Rempel et al. 2022](https://pubmed.ncbi.nlm.nih.gov/35681079/)"
@@ -755,8 +763,8 @@ if (tumor_site == "Ovary/Fallopian Tube") {
       "\n:::\n\n", sep = "")
 } else {
   cat("::: {.callout-warning}\n## Caution - interpretation (", tumor_site, ")\n\n",
-      "Genomic scar scores have not been validated as markers of HRD outside ovarian cancer and TNBC. Pan-cancer, subsets of high-scoring tumors ",
-      "exist in most cancer types, including those for which platinum-based chemotherapy is not standard therapy (", marquard2015, "). ",
+      "Genomic scar scores have not been validated as markers of HRD outside ovarian cancer and triple-negative breast cancer. Subsets of high-scoring tumors ",
+      "exist in most cancer types, including those types for which platinum-based chemotherapy is not standard therapy (", marquard2015, "). ",
       "The score separates tumors with biallelic BRCA1/2 inactivation well (AUC = 0.89), but tumors with monoallelic BRCA1/2 alterations poorly ",
       "(AUC = 0.53), and the authors argue for interpreting it together with the mutational status of HRR genes (", rempel2022, "). ",
       "The scar measures are also influenced by ploidy: LST was originally defined with ploidy-specific cutoffs (", popova2012, "), whereas the ",

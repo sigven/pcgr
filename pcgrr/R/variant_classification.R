@@ -9,7 +9,7 @@
 #' tumor suppressor genes (e.g. low MAF, coding status), which are used to
 #' assign tier 3 status to variants with uncertain clinical significance.
 #'
-#' @param vartype variant type ('snv_indel', 'cna', 'fusion')
+#' @param vartype variant type ('snv_indel', 'cna', 'fusion', 'msi', 'tmb')
 #' @param clinical_significance character indicate the clinical significance
 #' types of evidence used for tiering of predictive evidence. Possible values:
 #' "therapeutic_sensitivity", "therapeutic_resistance", "prognostic_poor",
@@ -39,9 +39,9 @@ assign_amp_asco_cap_tiers <- function(
     msg = paste0("Argument var_df needs be of type data.frame")))
   invisible(
     assertthat::assert_that(
-      vartype %in% c("snv_indel", "cna", "fusion"),
+      vartype %in% c("snv_indel", "cna", "fusion", "msi", "tmb"),
       msg = paste0("Argument 'vartype' needs to be one of
-                   'snv_indel', 'cna' or 'fusion'"))
+                   'snv_indel', 'cna', 'fusion', 'msi' or 'tmb'"))
   )
 
   ## check that clinical_significance is a character of length 1
@@ -159,6 +159,15 @@ assign_amp_asco_cap_tiers <- function(
     }else{
       if (vartype == "fusion") {
         variants_tier_classified <- assign_variant_tiers_fusion(
+          biomarker_items = biomarker_items,
+          biomarker_mapping_confidence = biomarker_mapping_confidence,
+          var_df = var_df,
+          etype_for_tiering = etype_for_tiering,
+          primary_site = primary_site
+        )
+      }
+      if (vartype %in% c("msi", "tmb")) {
+        variants_tier_classified <- assign_variant_tiers_complex_biomarker(
           biomarker_items = biomarker_items,
           biomarker_mapping_confidence = biomarker_mapping_confidence,
           var_df = var_df,
@@ -625,6 +634,105 @@ assign_variant_tiers_fusion <- function(
       as.integer(3),
       as.integer(.data$ACTIONABILITY_TIER)
     )) |>
+    dplyr::mutate(ACTIONABILITY_TIER = dplyr::if_else(
+      is.na(.data$ACTIONABILITY_TIER),
+      as.integer(5),
+      as.integer(.data$ACTIONABILITY_TIER))) |>
+    dplyr::arrange(.data$ACTIONABILITY_TIER) |>
+    dplyr::distinct() |>
+    dplyr::mutate(
+      ACTIONABILITY = dplyr::case_when(
+        ACTIONABILITY_TIER == 1 ~ "Strong significance",
+        ACTIONABILITY_TIER == 2 ~ "Potential significance",
+        ACTIONABILITY_TIER == 3 ~ "Uncertain significance",
+        TRUE ~ as.character(NA)
+      )
+    ) |>
+    dplyr::select(
+      c("VAR_ID",
+        "VARIANT_CLASS",
+        "ENTREZGENE",
+        "ACTIONABILITY_TIER",
+        "ACTIONABILITY")
+    )
+
+  return(variants_tier_classified)
+
+}
+
+#' AMP/ASCO/CAP tier classification for complex biomarkers (MSI-H, TMB-H)
+#'
+#' Assigns a tier of clinical significance to a complex biomarker (MSI-high
+#' or TMB-high), based exclusively on the strength and tumor type specificity
+#' of the biomarker evidence items (CIViC, OncoKB). The biomarker is not tied to
+#' a gene, and there are no variant properties to consider (as for e.g.
+#' oncogenes in fusion partners) - biomarkers without matching evidence are
+#' assigned tier 5.
+#'
+#' @param primary_site primary tumor site
+#' @param biomarker_mapping_confidence confidence level of biomarker mapping
+#' (e.g. 'high' or 'medium')
+#' @param var_df data frame with the biomarker record (VAR_ID, VARIANT_CLASS,
+#' ENTREZGENE)
+#' @param etype_for_tiering evidence type(s) used for tiering (e.g. 'predictive')
+#' @param biomarker_items data frame with biomarker evidence items
+#'
+#' @export
+assign_variant_tiers_complex_biomarker <- function(
+    primary_site = "Any",
+    biomarker_mapping_confidence = "medium",
+    var_df = NULL,
+    etype_for_tiering = c("predictive"),
+    biomarker_items = NULL) {
+
+  invisible(assertthat::assert_that(
+    !is.null(var_df) & is.data.frame(var_df),
+    msg = paste0("Argument var_df needs be of type data.frame")))
+
+  invisible(assertable::assert_colnames(
+    var_df, c("VAR_ID",
+              "VARIANT_CLASS",
+              "ENTREZGENE"),
+    only_colnames = FALSE, quiet = TRUE))
+
+  invisible(assertthat::assert_that(
+    primary_site %in% tumor_sites,
+    msg = paste0("Argument 'primary_site' needs to be one of: ",
+                 paste0(tumor_sites, collapse = ", ")))
+  )
+
+  invisible(assertthat::assert_that(
+    !is.null(biomarker_items) & is.data.frame(biomarker_items),
+    msg = paste0("Argument 'biomarker_items' needs be of type data.frame")))
+
+  variants_tier_classified <- data.frame()
+
+  if (primary_site != "Any") {
+    variants_tier_classified <- assign_variant_top_tiers_ttspecific(
+      biomarker_items = biomarker_items,
+      biomarker_mapping_confidence = biomarker_mapping_confidence,
+      var_df = var_df,
+      etype_for_tiering = etype_for_tiering,
+      primary_site = primary_site
+    )
+  }else{
+    variants_tier_classified <- assign_variant_top_tiers_ttagnostic(
+      biomarker_items = biomarker_items,
+      biomarker_mapping_confidence = biomarker_mapping_confidence,
+      var_df = var_df,
+      etype_for_tiering = etype_for_tiering
+    )
+  }
+
+  invisible(assertable::assert_colnames(
+    variants_tier_classified,
+    c("VAR_ID",
+      "VARIANT_CLASS",
+      "ENTREZGENE",
+      "ACTIONABILITY_TIER"),
+    only_colnames = TRUE, quiet = TRUE))
+
+  variants_tier_classified <- variants_tier_classified |>
     dplyr::mutate(ACTIONABILITY_TIER = dplyr::if_else(
       is.na(.data$ACTIONABILITY_TIER),
       as.integer(5),
@@ -1318,9 +1426,9 @@ assign_bm_tier_support_ttspecific <- function(
   invisible(
     assertthat::assert_that(
       !is.null(vartype) & is.character(vartype),
-      vartype %in% c("snv_indel", "cna", "fusion"),
+      vartype %in% c("snv_indel", "cna", "fusion", "msi", "tmb"),
       msg = paste0("Argument 'vartype' needs to be one of
-                   'snv_indel', 'cna' or 'fusion'"))
+                   'snv_indel', 'cna', 'fusion', 'msi' or 'tmb'"))
   )
 
   invisible(assertthat::assert_that(
@@ -1550,9 +1658,9 @@ assign_bm_tier_support_ttagnostic <- function(
   invisible(
     assertthat::assert_that(
       !is.null(vartype) & is.character(vartype),
-      vartype %in% c("snv_indel", "cna", "fusion"),
+      vartype %in% c("snv_indel", "cna", "fusion", "msi", "tmb"),
       msg = paste0("Argument 'vartype' needs to be one of
-                   'snv_indel', 'cna' or 'fusion'"))
+                   'snv_indel', 'cna', 'fusion', 'msi' or 'tmb'"))
   )
 
   invisible(assertthat::assert_that(

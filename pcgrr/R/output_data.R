@@ -52,6 +52,9 @@ get_settings_sheet <- function(report = NULL) {
                  VALUE = if (isTRUE(report$content$tmb$eval)) "ON" else "OFF"),
       data.frame(SECTION = "SNV/InDel", PARAMETER = "TMB algorithm",
                  VALUE = paste0("TMB_", conf$somatic_snv$tmb$tmb_display)),
+      data.frame(SECTION = "SNV/InDel", PARAMETER = "TMB-high threshold (mutations/Mb)",
+                 VALUE = as.character(
+                   conf$somatic_snv$tmb$tmb_high_threshold %||% 10)),
       data.frame(SECTION = "SNV/InDel", PARAMETER = "Mutational signatures estimation",
                  VALUE = if (isTRUE(report$content$mutational_signatures$eval)) "ON" else "OFF"),
       data.frame(SECTION = "SNV/InDel", PARAMETER = "Signatures - min mutations required",
@@ -351,6 +354,51 @@ get_excel_sheets <- function(report = NULL) {
       colnames(report$content$tmb$sample_estimate) <-
         toupper(colnames(report$content$tmb$sample_estimate))
       excel_sheets[['TMB']] <- report$content$tmb$sample_estimate
+    }
+  }
+
+  ## Biomarker evidence for complex biomarkers (MSI-H, TMB-H)
+  for (biomarker in c("msi", "tmb")) {
+    bm_callset <- report$content[[biomarker]]$callset
+    if (is.null(bm_callset)) {
+      next
+    }
+    bm_sheet <- data.frame()
+    for (clnsig in c("therapeutic_sensitivity", "therapeutic_resistance")) {
+      eitems <- bm_callset$bm_evidence[[clnsig]]$eitems
+      if (NROW(eitems) == 0) {
+        next
+      }
+      bm_sheet <- dplyr::bind_rows(
+        bm_sheet,
+        eitems |>
+          dplyr::mutate(
+            TIER = paste0(
+              dplyr::if_else(
+                clnsig == "therapeutic_sensitivity", "T", "R"),
+              .data$ACTIONABILITY_TIER)) |>
+          dplyr::select(
+            -dplyr::any_of(
+              c("BM_VARIANT_ID",
+                "ACTIONABILITY_TIER",
+                "BM_REFERENCE",
+                "BM_EVIDENCE_LEVEL_FULL",
+                "BM_EVIDENCE_DIRECTION"))) |>
+          dplyr::mutate(
+            BM_MOLECULAR_PROFILE = strip_html(.data$BM_MOLECULAR_PROFILE),
+            SAMPLE_ID = report$settings$sample_id) |>
+          dplyr::left_join(
+            dplyr::select(
+              bm_callset$variant,
+              c("VAR_ID", "VARIANT_CLASS", "SAMPLE_ALTERATION")),
+            by = c("VAR_ID", "VARIANT_CLASS")) |>
+          dplyr::select(
+            c("SAMPLE_ID", "VARIANT_CLASS", "VAR_ID",
+              "SAMPLE_ALTERATION", "TIER"),
+            dplyr::everything()))
+    }
+    if (NROW(bm_sheet) > 0) {
+      excel_sheets[[paste0(toupper(biomarker), "_BIOMARKER")]] <- bm_sheet
     }
   }
 
