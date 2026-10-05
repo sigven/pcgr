@@ -39,6 +39,7 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/assign_somatic_classification.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/assign_somatic_germline_evidence.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/assign_variant_tiers_cna.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/assign_variant_tiers_complex_biomarker.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/assign_variant_tiers_fusion.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/assign_variant_tiers_snv_indel.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/assign_variant_top_tiers_ttagnostic.html</loc></url>
@@ -74,15 +75,20 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/extract_diagnostic_evidence.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/extract_prognostic_evidence.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/extract_therapeutic_evidence.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/fetch_oncokb_biomarker_annotation.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/fetch_oncokb_biomarker_eitems.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/fetch_oncokb_cna_annotation.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/fetch_oncokb_fusion_annotation.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/fetch_oncokb_genomic_annotation.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/fetch_oncokb_hgvsp_annotation.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/fetch_oncokb_msi_annotation.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/fetch_oncokb_tmb_annotation.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/filter_maf_file.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/filter_read_support.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/fusion_doc_note.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/generate_annotation_link.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/generate_report.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/generate_report_data_complex_biomarker.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/generate_report_data_expression.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/generate_report_data_fusion.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/generate_report_data_kataegis.html</loc></url>
@@ -147,6 +153,7 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/msi_doc_note.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/msi_indel_fraction_plot.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/msi_indel_load_plot.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/msi_status_is_high.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/mutational_signatures_doc_note.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/oncogenicity_criteria.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/oncogenicity_doc_note.html</loc></url>

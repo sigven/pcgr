@@ -27,7 +27,7 @@ assign_amp_asco_cap_tiers(
 
 - vartype:
 
-  variant type ('snv_indel', 'cna', 'fusion')
+  variant type ('snv_indel', 'cna', 'fusion', 'msi', 'tmb')
 
 - clinical_significance:
 

@@ -58,8 +58,11 @@ usual):
   
   
 
-PCGR originates from the [Institute for Cancer Research, Oslo University
-Hospital, Norway](https://radium.no).
+------------------------------------------------------------------------
+
+|  |  |
+|----|:--:|
+| **PCGR originates from** the [Department of Tumor Biology](https://ous-research.no/tumorbiology/), [Institute for Cancer Research](https://radium.no), Oslo University Hospital, Norway. | [![Oslo University Hospital](img/ous_logo.png)](https://ous-research.no/tumorbiology/) |
 
 ### Top News
 

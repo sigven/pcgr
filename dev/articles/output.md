@@ -511,6 +511,15 @@ follows:
     overlapping with any transcripts will thus not be included in this
     files).
 
+Note that a second file,
+`<sample_id>.pcgr.<genome_assembly>.cna_gene.tsv.gz`, is also written to
+the output directory. This is a pipeline intermediate (copy number
+segments mapped to overlapping transcripts and genes, with
+`BIOMARKER_MATCH` in raw format, and two-hit candidate flags and OncoKB
+columns appended when available) that is read when generating the
+report. The `cna_gene_ann.tsv.gz` file described here is the final
+annotated result and should be used for downstream analysis.
+
 The format of the compressed `cna_gene_ann.tsv.gz` is the following.
 Columns suffixed with `_OKB` are only present when OncoKB annotation is
 enabled via `--oncokb_api_token`. Note that `HOTSPOT_OKB` and `VUS_OKB`
@@ -556,6 +565,29 @@ are not included for CNA output.
 | 36\. `BIOMARKER_MATCH` | Biomarker match |
 | 37\. `TARGETED_INHIBITORS_ALL2` | Molecularly targeted inhibitors - indicated for any tumor type |
 
+#### 2. Sample-level CNA summary (TSV)
+
+Sample-level scores derived from the allele-specific copy number
+segments are provided in a separate, single-row TSV file (the
+per-segment and per-transcript files above hold one record per
+segment/transcript, and thus have no place for sample-level values):
+
+- `<sample_id>.pcgr.<genome_assembly>.cna_summary.tsv`
+
+| Variable | Description |
+|----|----|
+| 1\. `SAMPLE_ID` | Sample identifier |
+| 2\. `FRACTION_GENOME_ALTERED` | Fraction of the segmented autosomal genome (chromosomes 1-22) with a total copy number (`nMajor` + `nMinor`) different from 2. This adapts the [cBioPortal](https://www.cbioportal.org) fraction-genome-altered metric (genome fraction with an absolute segment mean log2 ratio of at least 0.2) to integer copy numbers: a diploid baseline is used rather than the tumor ploidy, so the value approaches 1 in near-tetraploid/genome-doubled tumors |
+| 3\. `WGD_FRACTION` | Fraction of the segmented autosomal genome with a major allele copy number (`nMajor`) of two or more |
+| 4\. `GENOME_DOUBLED` | Whole-genome doubling status (`TRUE`/`FALSE`): `TRUE` when `WGD_FRACTION` is at least 0.5, following [Bielski et al. 2018](https://pubmed.ncbi.nlm.nih.gov/30013179/) |
+| 5\. `HRD_LOH` | *(`--estimate_hrd` only)* Number of loss-of-heterozygosity regions longer than 15 Mb that do not span a whole chromosome |
+| 6\. `HRD_LST` | *(`--estimate_hrd` only)* Number of large-scale state transitions - chromosomal breakpoints between adjacent regions of at least 10 Mb |
+| 7\. `HRD_TAI` | *(`--estimate_hrd` only)* Number of telomeric allelic imbalances - regions with allelic imbalance extending to the telomere without crossing the centromere |
+| 8\. `HRD_SUM` | *(`--estimate_hrd` only)* Sum of `HRD_LOH`, `HRD_LST` and `HRD_TAI` (research use only - see [running PCGR](https://sigven.github.io/pcgr/dev/articles/running.md)) |
+
+Missing values (e.g. the HRD columns when `--estimate_hrd` is not set)
+are denoted `.`.
+
 ### RNA fusions
 
 #### Tab-separated values (TSV)
@@ -565,6 +597,15 @@ Mitelman database evidence, and clinical actionability. The output file
 has the following naming convention:
 
 - `<sample_id>.pcgr.<genome_assembly>.fusion_ann.tsv.gz`
+
+Note that a second file,
+`<sample_id>.pcgr.<genome_assembly>.rna_fusion.tsv.gz`, is also written
+to the output directory. This is a pipeline intermediate (the input
+fusion calls matched against biomarker evidence, with `BIOMARKER_MATCH`
+in raw format, and OncoKB columns appended when enabled) that is read
+when generating the report. The `fusion_ann.tsv.gz` file described here
+is the final annotated result and should be used for downstream
+analysis.
 
 Columns suffixed with `_OKB` are only present when OncoKB annotation is
 enabled via `--oncokb_api_token`. Note that `HOTSPOT_OKB` and `VUS_OKB`
@@ -685,7 +726,7 @@ The Excel workbook has the following naming convention:
 
 - `<sample_id>.pcgr.<genome_assembly>.xlsx`
 
-It contains up to 16 sheets, each populated conditionally on the type of
+It contains up to 19 sheets, each populated conditionally on the type of
 input data provided and the analysis performed. Sheets with no data are
 omitted entirely. Any sheet exceeding 30,000 rows is truncated to the
 first 30,000 rows (a warning is emitted in that case; the full data is
@@ -703,6 +744,9 @@ manageable.
 | `SOMATIC_SNV_INDEL` | `--input_vcf` provided | Somatic SNV/InDel annotations using the same columns as the TSV output, minus `BIOMARKER_MATCH` and `VEP_ALL_CSQ`. **Filtered** to exonic variants (`EXONIC_STATUS == "exonic"`) plus any non-exonic variant with an actionability tier ≤ 3. User-retained VCF INFO tags (`--retained_info_tags`) are appended as additional columns. `HGVSP` is renamed to `HGVSp_short` to avoid column name conflicts |
 | `SOMATIC_SNV_INDEL_BIOMARKER` | `--input_vcf` provided and biomarker hits exist | One row per biomarker evidence item matched to a somatic SNV/InDel. A `TIER` column encodes evidence category and actionability tier (e.g. `T1`/`T2`/`T3` = therapeutic sensitivity, `R1`/`R2`/`R3` = therapeutic resistance, `PP1`–`PP2` = poor prognosis, `PB1`–`PB2` = better prognosis, `D1`–`D2` = diagnostic positive). Diagnostic-negative evidence is excluded |
 | `SOMATIC_CNA` | `--input_cna` provided | CNA gene-level annotations using the same columns as the TSV output, minus `BIOMARKER_MATCH`. **Filtered** to genes with a non-missing `ACTIONABILITY_TIER` |
+| `CNA_SUMMARY` | `--input_cna` provided | Sample-level scores derived from the copy number segments - fraction of genome altered and (with `--estimate_hrd`) the HRD score components (same content as the `.cna_summary.tsv` file) |
+| `MSI_BIOMARKER` | tumor classified as MSI-High | Biomarker evidence items (CIViC; OncoKB if enabled) for MSI-High, with AMP/ASCO/CAP tier |
+| `TMB_BIOMARKER` | tumor classified as TMB-High | Biomarker evidence items (CIViC; OncoKB if enabled) for TMB-High, with AMP/ASCO/CAP tier |
 | `SOMATIC_CNA_BIOMARKER` | `--input_cna` provided and biomarker hits exist | One row per biomarker evidence item matched to a somatic CNA, using the same `TIER` encoding and sorting as `SOMATIC_SNV_INDEL_BIOMARKER` |
 | `RNA_FUSION` | `--input_rna_fusion` provided | RNA fusion annotations using the same columns as the TSV output, minus `BIOMARKER_MATCH`. **Filtered** to fusions with a non-missing `ACTIONABILITY_TIER` |
 | `RNA_FUSION_BIOMARKER` | `--input_rna_fusion` provided and biomarker hits exist | One row per biomarker evidence item matched to an RNA fusion, using the same `TIER` encoding and sorting as `SOMATIC_SNV_INDEL_BIOMARKER` |

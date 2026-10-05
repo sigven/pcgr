@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9006</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9007</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -231,6 +231,13 @@
 
         </dt>
         <dd>Assign tiers of clinical significance (AMP/ASCO/CAP framework) to somatic CNAs</dd>
+
+        <dt>
+
+          <code><a href="assign_variant_tiers_complex_biomarker.html">assign_variant_tiers_complex_biomarker()</a></code>
+
+        </dt>
+        <dd>AMP/ASCO/CAP tier classification for complex biomarkers (MSI-H, TMB-H)</dd>
 
         <dt>
 
@@ -479,6 +486,20 @@
 
         <dt>
 
+          <code><a href="fetch_oncokb_biomarker_annotation.html">fetch_oncokb_biomarker_annotation()</a></code>
+
+        </dt>
+        <dd>Fetch OncoKB annotation for a complex biomarker (MSI-H or TMB-H)</dd>
+
+        <dt>
+
+          <code><a href="fetch_oncokb_biomarker_eitems.html">fetch_oncokb_biomarker_eitems()</a></code>
+
+        </dt>
+        <dd>Get OncoKB therapeutic evidence items for a complex biomarker (MSI-H or TMB-H)</dd>
+
+        <dt>
+
           <code><a href="fetch_oncokb_cna_annotation.html">fetch_oncokb_cna_annotation()</a></code>
 
         </dt>
@@ -504,6 +525,20 @@
 
         </dt>
         <dd>Fetch OncoKB annotation for SNV/InDel via protein change</dd>
+
+        <dt>
+
+          <code><a href="fetch_oncokb_msi_annotation.html">fetch_oncokb_msi_annotation()</a></code>
+
+        </dt>
+        <dd>Fetch OncoKB annotation for MSI-H (microsatellite instability-high)</dd>
+
+        <dt>
+
+          <code><a href="fetch_oncokb_tmb_annotation.html">fetch_oncokb_tmb_annotation()</a></code>
+
+        </dt>
+        <dd>Fetch OncoKB annotation for TMB-H (tumor mutational burden-high)</dd>
 
         <dt>
 
@@ -539,6 +574,13 @@
 
         </dt>
         <dd>Function that generates all contents of the cancer genome report (PCGR)</dd>
+
+        <dt>
+
+          <code><a href="generate_report_data_complex_biomarker.html">generate_report_data_complex_biomarker()</a></code>
+
+        </dt>
+        <dd>Function that generates biomarker data for a complex biomarker (MSI-H or TMB-H) for the PCGR report</dd>
 
         <dt>
 
@@ -980,6 +1022,13 @@
 
         </dt>
         <dd>Function that plots the indel load for a given sample and contrasts this with the distribution for MSI-H/MSS samples from TCGA</dd>
+
+        <dt>
+
+          <code><a href="msi_status_is_high.html">msi_status_is_high()</a></code>
+
+        </dt>
+        <dd>Function that tells if the MSI status of the sample is MSI-high</dd>
 
         <dt>
 

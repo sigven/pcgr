@@ -77,6 +77,9 @@
 - [`assign_variant_tiers_cna()`](https://sigven.github.io/pcgr/dev/reference/assign_variant_tiers_cna.md)
   : Assign tiers of clinical significance (AMP/ASCO/CAP framework) to
   somatic CNAs
+- [`assign_variant_tiers_complex_biomarker()`](https://sigven.github.io/pcgr/dev/reference/assign_variant_tiers_complex_biomarker.md)
+  : AMP/ASCO/CAP tier classification for complex biomarkers (MSI-H,
+  TMB-H)
 - [`assign_variant_tiers_fusion()`](https://sigven.github.io/pcgr/dev/reference/assign_variant_tiers_fusion.md)
   : Assign tiers of clinical significance (AMP/ASCO/CAP framework) to
   RNA fusions
@@ -169,6 +172,11 @@
   : Extract prognostic implications from OncoKB annotation
 - [`extract_therapeutic_evidence()`](https://sigven.github.io/pcgr/dev/reference/extract_therapeutic_evidence.md)
   : Extract therapeutic evidence items from OncoKB annotation
+- [`fetch_oncokb_biomarker_annotation()`](https://sigven.github.io/pcgr/dev/reference/fetch_oncokb_biomarker_annotation.md)
+  : Fetch OncoKB annotation for a complex biomarker (MSI-H or TMB-H)
+- [`fetch_oncokb_biomarker_eitems()`](https://sigven.github.io/pcgr/dev/reference/fetch_oncokb_biomarker_eitems.md)
+  : Get OncoKB therapeutic evidence items for a complex biomarker (MSI-H
+  or TMB-H)
 - [`fetch_oncokb_cna_annotation()`](https://sigven.github.io/pcgr/dev/reference/fetch_oncokb_cna_annotation.md)
   : Fetch OncoKB annotation for copy number alteration
 - [`fetch_oncokb_fusion_annotation()`](https://sigven.github.io/pcgr/dev/reference/fetch_oncokb_fusion_annotation.md)
@@ -177,6 +185,10 @@
   : Fetch OncoKB annotation for SNV/InDel via genomic change
 - [`fetch_oncokb_hgvsp_annotation()`](https://sigven.github.io/pcgr/dev/reference/fetch_oncokb_hgvsp_annotation.md)
   : Fetch OncoKB annotation for SNV/InDel via protein change
+- [`fetch_oncokb_msi_annotation()`](https://sigven.github.io/pcgr/dev/reference/fetch_oncokb_msi_annotation.md)
+  : Fetch OncoKB annotation for MSI-H (microsatellite instability-high)
+- [`fetch_oncokb_tmb_annotation()`](https://sigven.github.io/pcgr/dev/reference/fetch_oncokb_tmb_annotation.md)
+  : Fetch OncoKB annotation for TMB-H (tumor mutational burden-high)
 - [`filter_maf_file()`](https://sigven.github.io/pcgr/dev/reference/filter_maf_file.md)
   : Function that takes a MAF file generated with vcf2maf and filters
   out variants that are presumably germline (tumor-only run)
@@ -191,6 +203,9 @@
 - [`generate_report()`](https://sigven.github.io/pcgr/dev/reference/generate_report.md)
   : Function that generates all contents of the cancer genome report
   (PCGR)
+- [`generate_report_data_complex_biomarker()`](https://sigven.github.io/pcgr/dev/reference/generate_report_data_complex_biomarker.md)
+  : Function that generates biomarker data for a complex biomarker
+  (MSI-H or TMB-H) for the PCGR report
 - [`generate_report_data_expression()`](https://sigven.github.io/pcgr/dev/reference/generate_report_data_expression.md)
   : Function that generates expression data for PCGR report
 - [`generate_report_data_fusion()`](https://sigven.github.io/pcgr/dev/reference/generate_report_data_fusion.md)
@@ -346,6 +361,8 @@
 - [`msi_indel_load_plot()`](https://sigven.github.io/pcgr/dev/reference/msi_indel_load_plot.md)
   : Function that plots the indel load for a given sample and contrasts
   this with the distribution for MSI-H/MSS samples from TCGA
+- [`msi_status_is_high()`](https://sigven.github.io/pcgr/dev/reference/msi_status_is_high.md)
+  : Function that tells if the MSI status of the sample is MSI-high
 - [`mutational_signatures_doc_note()`](https://sigven.github.io/pcgr/dev/reference/mutational_signatures_doc_note.md)
   : Get documentation string for mutational signatures analysis
 - [`oncogenicity_criteria`](https://sigven.github.io/pcgr/dev/reference/oncogenicity_criteria.md)

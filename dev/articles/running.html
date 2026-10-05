@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9006</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9007</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -289,6 +289,12 @@ requirements for sequencing coverage and allelic fraction, i.e.:</p>
 <li><code>--tmb_dp_min &lt;value&gt;</code></li>
 <li><code>--tmb_af_min &lt;value&gt;</code></li>
 </ul>
+<p>The threshold for classifying a tumor as TMB-high
+(<code>--tmb_high_threshold &lt;value&gt;</code>, in mutations/Mb) is
+applied to the TMB measure shown in the report
+(<code>--tmb_display</code>). The default (10 mutations/Mb) corresponds
+to the FDA/OncoKB definition of TMB-H, and can be changed by the
+user.</p>
 </div>
 <div class="section level3">
 <h3 id="large-input-sets-vcf">Large input sets (VCF)<a class="anchor" aria-label="anchor" href="#large-input-sets-vcf"></a>
@@ -384,6 +390,23 @@ a CNA event:</p>
 <code>--cna_transcript_overlap_pct &lt;value&gt;</code> — minimum
 mean percent overlap between the copy number segment and gene
 transcripts required to report a gene as affected (default: 50)</li>
+</ul>
+<p>The fraction of the genome altered (adapted from the cBioPortal
+definition: autosomal segments with total copy number other than 2) is
+always calculated and can be found in the <code>cna_summary.tsv</code>
+output file.</p>
+<p>A separate, opt-in option estimates a homologous recombination
+deficiency (HRD) score from the same allele-specific copy number
+segments:</p>
+<ul>
+<li>
+<code>--estimate_hrd</code> — compute HRD-LOH + LST + TAI (following
+the scarHRD/Sztupinszki et al. algorithm) from the CNA segments, shown
+in the CNA section of the report. <strong>Research use only</strong> -
+not a validated diagnostic measure, and only clinically thresholded (as
+the Myriad myChoice CDx assay) for ovarian cancer. Requires paired
+tumor-control WGS/WES data - not supported with
+<code>--tumor_only</code> or <code>--assay TARGETED</code>.</li>
 </ul>
 </div>
 <div class="section level3">
@@ -628,6 +651,10 @@ Tumor mutational burden (TMB) and MSI options:
                         size, default: False
   --tmb_display {coding_and_silent,coding_non_silent,missense_only}
                         Type of TMB measure to show in report, default: coding_and_silent
+  --tmb_high_threshold TMB_HIGH_THRESHOLD
+                        Threshold (mutations/Mb) for classifying the tumor as TMB-high, applied to the TMB
+                        measure shown in the report (--tmb_display), default: 10.0 (FDA/OncoKB definition of
+                        TMB-H)
   --tmb_dp_min TMB_DP_MIN
                         Minimum sequencing depth (tumor) for TMB calculation (default: None)
   --tmb_af_min TMB_AF_MIN
@@ -644,9 +671,10 @@ Mutational signature options:
   --min_mutations_signatures MIN_MUTATIONS_SIGNATURES
                         Minimum number of SNVs required for signature re-fitting (SBS)
                         (default: 200, minimum n = 100)
-  --all_reference_signatures
-                        Use all reference mutational signatures (SBS) during re-fitting rather than
-                        only those attributed to the tumor type (default: False)
+  --tumor_type_reference_signatures
+                        Restrict signature re-fitting to reference mutational signatures (SBS) already
+                        attributed to the tumor type, rather than the full reference set - default: False
+                        (i.e. all reference signatures are used by default)
   --include_artefact_signatures
                         Include sequencing artefacts in the reference signature collection
                         (default: False)
@@ -676,6 +704,9 @@ Somatic CNA analysis options:
   --cna_transcript_overlap_pct CNA_TRANSCRIPT_OVERLAP_PCT
                         Minimum mean percent overlap between copy number segment and gene transcripts
                         for reporting of gains/losses in oncogenes/tumor suppressors (default: 50)
+  --estimate_hrd        Estimate a genomic instability ('HRD') score (HRD-LOH + LST + TAI) from the
+                        allele-specific copy number segments - research use only, requires paired
+                        WGS/WES data, default: False
 
 RNA expression and fusion options:
   --fusion_min_split_reads FUSION_MIN_SPLIT_READS
@@ -813,36 +844,52 @@ affected transcript</td>
 </tr>
 <tr class="even">
 <td>8</td>
-<td><strong>&lt;sample_id&gt;.pcgr.grch37.cna_gene_ann.tsv.gz</strong></td>
-<td>Tab-separated values file with annotated gene copy number alteration
-events, including actionability assessment</td>
+<td><strong>&lt;sample_id&gt;.pcgr.grch37.cna_summary.tsv</strong></td>
+<td>Tab-separated values file with summary information on sample-level
+copy number alteration statistics, including fraction of genome altered
+(FGA) and whole-genome doubling (WGD) status</td>
 </tr>
 <tr class="odd">
 <td>9</td>
-<td><strong>&lt;sample_id&gt;.pcgr.grch37.fusion_ann.tsv.gz</strong></td>
-<td>Tab-separated values file with annotated RNA fusion events,
-including actionability assessment</td>
+<td><strong>&lt;sample_id&gt;.pcgr.grch37.cna_gene_ann.tsv.gz</strong></td>
+<td>Tab-separated values file with annotated gene copy number alteration
+events, including actionability assessment. Note that a file named
+<code>&lt;sample_id&gt;.pcgr.grch37.cna_gene.tsv.gz</code> is also
+written - this is a pipeline intermediate (segments mapped to
+overlapping transcripts/genes, with raw biomarker matches), and
+<code>cna_gene_ann.tsv.gz</code> is the file to use for downstream
+analysis</td>
 </tr>
 <tr class="even">
 <td>10</td>
+<td><strong>&lt;sample_id&gt;.pcgr.grch37.fusion_ann.tsv.gz</strong></td>
+<td>Tab-separated values file with annotated RNA fusion events,
+including actionability assessment. Note that a file named
+<code>&lt;sample_id&gt;.pcgr.grch37.rna_fusion.tsv.gz</code> is also
+written - this is a pipeline intermediate (input fusions matched against
+biomarker evidence), and <code>fusion_ann.tsv.gz</code> is the file to
+use for downstream analysis</td>
+</tr>
+<tr class="odd">
+<td>11</td>
 <td><strong>&lt;sample_id&gt;.pcgr.grch37.tmb.tsv</strong></td>
 <td>Tab-separated values file with information on tumor mutational
 burden (TMB) estimates</td>
 </tr>
-<tr class="odd">
-<td>11</td>
+<tr class="even">
+<td>12</td>
 <td><strong>&lt;sample_id&gt;.pcgr.grch37.maf</strong></td>
 <td>Annotated SNVs/InDels, converted to the Mutation Annotation Format
 (MAF)</td>
 </tr>
-<tr class="even">
-<td>12</td>
+<tr class="odd">
+<td>13</td>
 <td><strong>&lt;sample_id&gt;.pcgr.grch37.msigs.tsv.gz</strong></td>
 <td>Tab-separated values file with information on the contribution of
 mutational signatures in the tumor sample</td>
 </tr>
-<tr class="odd">
-<td>13</td>
+<tr class="even">
+<td>14</td>
 <td><strong>&lt;sample_id&gt;.pcgr.grch37.snv_indel_ann.tsv.gz</strong></td>
 <td>Tab-separated values file with key SNV/InDel variant annotations,
 including oncogenicity and clinical actionability assessment</td>

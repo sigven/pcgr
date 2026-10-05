@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9006</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9007</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -1966,6 +1966,15 @@ files).</li>
 </ul>
 </li>
 </ul>
+<p>Note that a second file,
+<code>&lt;sample_id&gt;.pcgr.&lt;genome_assembly&gt;.cna_gene.tsv.gz</code>,
+is also written to the output directory. This is a pipeline intermediate
+(copy number segments mapped to overlapping transcripts and genes, with
+<code>BIOMARKER_MATCH</code> in raw format, and two-hit candidate flags
+and OncoKB columns appended when available) that is read when generating
+the report. The <code>cna_gene_ann.tsv.gz</code> file described here is
+the final annotated result and should be used for downstream
+analysis.</p>
 <p>The format of the compressed <code>cna_gene_ann.tsv.gz</code> is the
 following. Columns suffixed with <code>_OKB</code> are only present when
 OncoKB annotation is enabled via <code>--oncokb_api_token</code>. Note
@@ -2201,6 +2210,94 @@ of transcript overlap</td>
 </tbody>
 </table>
 </div>
+<div class="section level4">
+<h4 id="sample-level-cna-summary-tsv">2. Sample-level CNA summary (TSV)<a class="anchor" aria-label="anchor" href="#sample-level-cna-summary-tsv"></a>
+</h4>
+<p>Sample-level scores derived from the allele-specific copy number
+segments are provided in a separate, single-row TSV file (the
+per-segment and per-transcript files above hold one record per
+segment/transcript, and thus have no place for sample-level values):</p>
+<ul>
+<li><code>&lt;sample_id&gt;.pcgr.&lt;genome_assembly&gt;.cna_summary.tsv</code></li>
+</ul>
+<table class="table">
+<colgroup>
+<col width="43%">
+<col width="56%">
+</colgroup>
+<thead><tr class="header">
+<th>Variable</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>1. <code>SAMPLE_ID</code>
+</td>
+<td>Sample identifier</td>
+</tr>
+<tr class="even">
+<td>2. <code>FRACTION_GENOME_ALTERED</code>
+</td>
+<td>Fraction of the segmented autosomal genome (chromosomes 1-22) with a
+total copy number (<code>nMajor</code> + <code>nMinor</code>) different
+from 2. This adapts the <a href="https://www.cbioportal.org" class="external-link">cBioPortal</a> fraction-genome-altered
+metric (genome fraction with an absolute segment mean log2 ratio of at
+least 0.2) to integer copy numbers: a diploid baseline is used rather
+than the tumor ploidy, so the value approaches 1 in
+near-tetraploid/genome-doubled tumors</td>
+</tr>
+<tr class="odd">
+<td>3. <code>WGD_FRACTION</code>
+</td>
+<td>Fraction of the segmented autosomal genome with a major allele copy
+number (<code>nMajor</code>) of two or more</td>
+</tr>
+<tr class="even">
+<td>4. <code>GENOME_DOUBLED</code>
+</td>
+<td>Whole-genome doubling status (<code>TRUE</code>/<code>FALSE</code>):
+<code>TRUE</code> when <code>WGD_FRACTION</code> is at least 0.5,
+following <a href="https://pubmed.ncbi.nlm.nih.gov/30013179/" class="external-link">Bielski et
+al. 2018</a>
+</td>
+</tr>
+<tr class="odd">
+<td>5. <code>HRD_LOH</code>
+</td>
+<td>
+<em>(<code>--estimate_hrd</code> only)</em> Number of
+loss-of-heterozygosity regions longer than 15 Mb that do not span a
+whole chromosome</td>
+</tr>
+<tr class="even">
+<td>6. <code>HRD_LST</code>
+</td>
+<td>
+<em>(<code>--estimate_hrd</code> only)</em> Number of large-scale
+state transitions - chromosomal breakpoints between adjacent regions of
+at least 10 Mb</td>
+</tr>
+<tr class="odd">
+<td>7. <code>HRD_TAI</code>
+</td>
+<td>
+<em>(<code>--estimate_hrd</code> only)</em> Number of telomeric
+allelic imbalances - regions with allelic imbalance extending to the
+telomere without crossing the centromere</td>
+</tr>
+<tr class="even">
+<td>8. <code>HRD_SUM</code>
+</td>
+<td>
+<em>(<code>--estimate_hrd</code> only)</em> Sum of
+<code>HRD_LOH</code>, <code>HRD_LST</code> and <code>HRD_TAI</code>
+(research use only - see <a href="running.html">running PCGR</a>)</td>
+</tr>
+</tbody>
+</table>
+<p>Missing values (e.g. the HRD columns when <code>--estimate_hrd</code>
+is not set) are denoted <code>.</code>.</p>
+</div>
 </div>
 <div class="section level3">
 <h3 id="rna-fusions">RNA fusions<a class="anchor" aria-label="anchor" href="#rna-fusions"></a>
@@ -2214,6 +2311,14 @@ has the following naming convention:</p>
 <ul>
 <li><code>&lt;sample_id&gt;.pcgr.&lt;genome_assembly&gt;.fusion_ann.tsv.gz</code></li>
 </ul>
+<p>Note that a second file,
+<code>&lt;sample_id&gt;.pcgr.&lt;genome_assembly&gt;.rna_fusion.tsv.gz</code>,
+is also written to the output directory. This is a pipeline intermediate
+(the input fusion calls matched against biomarker evidence, with
+<code>BIOMARKER_MATCH</code> in raw format, and OncoKB columns appended
+when enabled) that is read when generating the report. The
+<code>fusion_ann.tsv.gz</code> file described here is the final
+annotated result and should be used for downstream analysis.</p>
 <p>Columns suffixed with <code>_OKB</code> are only present when OncoKB
 annotation is enabled via <code>--oncokb_api_token</code>. Note that
 <code>HOTSPOT_OKB</code> and <code>VUS_OKB</code> are not included for
@@ -2680,7 +2785,7 @@ subtype)</td>
 <ul>
 <li><code>&lt;sample_id&gt;.pcgr.&lt;genome_assembly&gt;.xlsx</code></li>
 </ul>
-<p>It contains up to 16 sheets, each populated conditionally on the type
+<p>It contains up to 19 sheets, each populated conditionally on the type
 of input data provided and the analysis performed. Sheets with no data
 are omitted entirely. Any sheet exceeding 30,000 rows is truncated to
 the first 30,000 rows (a warning is emitted in that case; the full data
@@ -2755,6 +2860,26 @@ with a non-missing <code>ACTIONABILITY_TIER</code>
 </td>
 </tr>
 <tr class="odd">
+<td><code>CNA_SUMMARY</code></td>
+<td>
+<code>--input_cna</code> provided</td>
+<td>Sample-level scores derived from the copy number segments - fraction
+of genome altered and (with <code>--estimate_hrd</code>) the HRD score
+components (same content as the <code>.cna_summary.tsv</code> file)</td>
+</tr>
+<tr class="even">
+<td><code>MSI_BIOMARKER</code></td>
+<td>tumor classified as MSI-High</td>
+<td>Biomarker evidence items (CIViC; OncoKB if enabled) for MSI-High,
+with AMP/ASCO/CAP tier</td>
+</tr>
+<tr class="odd">
+<td><code>TMB_BIOMARKER</code></td>
+<td>tumor classified as TMB-High</td>
+<td>Biomarker evidence items (CIViC; OncoKB if enabled) for TMB-High,
+with AMP/ASCO/CAP tier</td>
+</tr>
+<tr class="even">
 <td><code>SOMATIC_CNA_BIOMARKER</code></td>
 <td>
 <code>--input_cna</code> provided and biomarker hits exist</td>
@@ -2763,7 +2888,7 @@ the same <code>TIER</code> encoding and sorting as
 <code>SOMATIC_SNV_INDEL_BIOMARKER</code>
 </td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>RNA_FUSION</code></td>
 <td>
 <code>--input_rna_fusion</code> provided</td>
@@ -2772,7 +2897,7 @@ minus <code>BIOMARKER_MATCH</code>. <strong>Filtered</strong> to fusions
 with a non-missing <code>ACTIONABILITY_TIER</code>
 </td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>RNA_FUSION_BIOMARKER</code></td>
 <td>
 <code>--input_rna_fusion</code> provided and biomarker hits
@@ -2782,20 +2907,20 @@ the same <code>TIER</code> encoding and sorting as
 <code>SOMATIC_SNV_INDEL_BIOMARKER</code>
 </td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>TMB</code></td>
 <td>
 <code>--input_vcf</code> provided</td>
 <td>Tumor mutational burden estimates (same content as the
 <code>.tmb.tsv</code> file)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>MSI</code></td>
 <td>
 <code>--input_vcf</code> provided and MSI estimation enabled</td>
 <td>MSI classifier statistics and predicted stability status</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>MUTATIONAL_SIGNATURE</code></td>
 <td>
 <code>--input_vcf</code> provided and signature estimation
@@ -2803,13 +2928,13 @@ enabled</td>
 <td>Mutational signature contributions (same content as the
 <code>.msigs.tsv.gz</code> file)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>KATAEGIS_EVENTS</code></td>
 <td>
 <code>--input_vcf</code> provided and kataegis events detected</td>
 <td>Kataegis loci identified from the somatic mutation profile</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>RNA_EXPRESSION_OUTLIERS</code></td>
 <td>
 <code>--input_rna_expression</code> provided and outlier detection
@@ -2819,7 +2944,7 @@ A subset of display-only columns (<code>GENENAME</code>,
 <code>CANCERGENE_EVIDENCE</code>, <code>TARGETED_INHIBITORS_ALL</code>,
 <code>ENSEMBL_GENE_ID</code>) are removed to reduce width</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>RNA_IMMUNE_CONTEXTURE</code></td>
 <td>
 <code>--input_rna_expression</code> provided</td>

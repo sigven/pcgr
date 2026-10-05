@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9006</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9007</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -84,6 +84,158 @@
 
     
     
+<div class="section level2">
+<h2 id="v2-3-3">v2.3.3<a class="anchor" aria-label="anchor" href="#v2-3-3"></a>
+</h2>
+<ul>
+<li>Date: <strong>2026-10-XX</strong>
+</li>
+<li>Data bundle update (<code>20261005</code>) and software updates
+<ul>
+<li>Ensembl VEP <code>v116.2</code> / GENCODE v50 (GRCh38; v19 for
+GRCh37)</li>
+<li>ClinVar (2026-10)</li>
+<li>CIViC (2026-10-05)</li>
+<li>UniProt/SwissProt KnowledgeBase (2026_03)</li>
+<li>Open Targets Platform (2026.09)</li>
+</ul>
+</li>
+</ul>
+<div class="section level3">
+<h3 id="added-improved">Added / improved<a class="anchor" aria-label="anchor" href="#added-improved"></a>
+</h3>
+<ul>
+<li>
+<strong>HTML report tables and figures</strong>
+<ul>
+<li>Germline findings table now uses <a href="https://glin.github.io/reactable/" class="external-link">reactable</a> (in place of DT),
+with a compact main row (gene, alteration, consequence, genotype,
+classification, ACMG criteria, inheritance) and expandable row details
+<ul>
+<li>ACMG criteria are shown as color-coded pills (pathogenic/benign
+evidence), with a hover tooltip describing each criterion</li>
+<li>Cancer predisposition gene mode of inheritance
+(<code>CPG_MOI</code>) shown as <em>Inheritance</em>, with the full
+name(s) available on hover</li>
+<li>Low-depth genotypes (when a matched control depth is available) are
+flagged</li>
+</ul>
+</li>
+<li>MSI section
+<ul>
+<li>Coding mutations in MMR genes now shown in a reactable table</li>
+<li>New <em>Germline</em> tab (shown when germline CPSR results are
+provided) listing pathogenic/likely pathogenic variants in
+<code>MLH1</code>, <code>MSH2</code>, <code>MSH6</code>,
+<code>PMS2</code> and <code>EPCAM</code>, next to the <em>Somatic</em>
+tab</li>
+<li>Added a description of the indel fraction histogram (TCGA MSS/MSI-H
+reference distributions)</li>
+</ul>
+</li>
+<li>TMB section: added a description of the TCGA reference cohort
+comparison plot</li>
+<li>CNA section
+<ul>
+<li>OncoKB columns shown in the CNA table, with oncogenic cases
+highlighted</li>
+<li>CNA records ordered by oncogenicity by default</li>
+<li>Focal copy number segments are marked with a point (and a triangle
+for focal oncogene gains/amplifications) rather than being widened,
+keeping segment positions and extents true to the data; explained in the
+plot caption</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<strong>Fraction of genome altered (FGA)</strong> and
+<strong>whole-genome doubling status (WGD)</strong> are now derived from
+the allele-specific copy number segments, and reported in the
+<code>cna_summary.tsv</code> output file</li>
+<li>
+<strong>HRD score</strong> - new, opt-in <code>--estimate_hrd</code>
+option
+<ul>
+<li>Estimates HRD-LOH + LST + TAI from the allele-specific CNA segments,
+following the <a href="https://github.com/sztup/scarHRD" class="external-link">scarHRD/Sztupinszki et
+al. algorithm</a> - shown in a dedicated subsection at the end of the
+CNA section, with an explanation of each measure and tumor-type-aware
+interpretation notes</li>
+<li>
+<strong>Research use only</strong> - not a validated diagnostic
+measure, and only clinically thresholded (Myriad myChoice CDx, sum ≥ 42)
+for ovarian cancer</li>
+<li>Requires paired tumor-control data with genome-wide CNA segments
+(<code>--input_cna</code>); not supported with <code>--tumor_only</code>
+or <code>--assay TARGETED</code> (enforced as an argument-validation
+error)</li>
+</ul>
+</li>
+<li>
+<strong>TMB-high</strong> - new <code>--tmb_high_threshold</code>
+option (default: 10 mutations/Mb, the FDA/OncoKB definition of TMB-H),
+applied to the TMB measure shown in the report
+(<code>--tmb_display</code>). The resulting call is available in the
+report data and the TMB sheet of the Excel output
+(<code>TMB_HIGH</code>), as a basis for TMB-H biomarker matching</li>
+<li>
+<strong>Biomarker evidence for MSI-High and TMB-High</strong> - when
+the tumor is classified as MSI-high or TMB-high (see
+<code>--tmb_high_threshold</code>), therapeutic biomarker evidence is
+retrieved from CIViC and (if <code>--oncokb_api_token</code> is
+provided) OncoKB, classified into AMP/ASCO/CAP tiers, and shown in the
+MSI and TMB sections of the report with the same table layout as for
+other variant types (source icons indicate evidence from CIViC/OncoKB).
+The evidence is also available in the
+<code>MSI_BIOMARKER</code>/<code>TMB_BIOMARKER</code> sheets of the
+Excel output</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="changed">Changed<a class="anchor" aria-label="anchor" href="#changed"></a>
+</h3>
+<ul>
+<li>Non-coding pathogenic/likely pathogenic germline variants are now
+retained in the germline findings of the PCGR report (only VUS are
+restricted to coding variants)</li>
+<li>Mutational signature re-fitting now uses <em>all</em> reference
+signatures (SBS) by default, rather than only those already attributed
+to the tumor type. The previous default behavior is available via the
+new <code>--tumor_type_reference_signatures</code> option (replaces
+<code>--all_reference_signatures</code>, which is removed)</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="fixed">Fixed<a class="anchor" aria-label="anchor" href="#fixed"></a>
+</h3>
+<ul>
+<li>Crash in transcript selection with VEP 116, which reports APPRIS
+annotations without a numeric grade
+(<code>PM</code>/<code>AM</code>)</li>
+<li>Guarded integer coercion of
+<code>INTRON_POSITION</code>/<code>EXON_POSITION</code> in oncogenicity
+scoring
+(<a href="https://github.com/sigven/pcgr/issues/308" class="external-link">issue308</a>)</li>
+<li>Segment-level CNA annotations (amplification/gain/deletion/LOH) are
+no longer gated on gene overlap</li>
+<li>Gene symbols were repeated (once per transcript) in the hover text
+of the copy number profile plots,
+e.g. <code>PTEN, PTEN, PTEN</code>
+</li>
+<li>
+<code>FOLD_CHANGE</code> is carried through to the gene-level CNA
+output, fixing a failure when loading somatic CNA data</li>
+<li>RNA fusions with a breakpoint on an ALT/decoy contig are dropped
+with a warning rather than aborting the run</li>
+<li>OncoKB input files are only generated when OncoKB annotation will
+run</li>
+<li>Corrected documentation of the <code>SPLICE_EFFECT</code> output
+format, and the <code>--diagnostic_grade_only</code> help text for CPSR
+(Genomics England panel ids 1-43)</li>
+</ul>
+</div>
+</div>
 <div class="section level2">
 <h2 id="v2-3-2">v2.3.2<a class="anchor" aria-label="anchor" href="#v2-3-2"></a>
 </h2>
@@ -287,7 +439,7 @@ columns</li>
 </ul>
 </div>
 <div class="section level3">
-<h3 id="changed">Changed<a class="anchor" aria-label="anchor" href="#changed"></a>
+<h3 id="changed-1">Changed<a class="anchor" aria-label="anchor" href="#changed-1"></a>
 </h3>
 <ul>
 <li>Variant tier classification with respect to actionability is now
@@ -977,7 +1129,7 @@ tool does not support compressed VCFs - see <a href="https://github.com/mskcc/vc
 </li>
 </ul>
 <div class="section level5">
-<h5 id="fixed">Fixed<a class="anchor" aria-label="anchor" href="#fixed"></a>
+<h5 id="fixed-1">Fixed<a class="anchor" aria-label="anchor" href="#fixed-1"></a>
 </h5>
 <ul>
 <li>Bug in clinical trials sorting,
@@ -995,7 +1147,7 @@ tool does not support compressed VCFs - see <a href="https://github.com/mskcc/vc
 </li>
 </ul>
 <div class="section level5">
-<h5 id="fixed-1">Fixed<a class="anchor" aria-label="anchor" href="#fixed-1"></a>
+<h5 id="fixed-2">Fixed<a class="anchor" aria-label="anchor" href="#fixed-2"></a>
 </h5>
 <ul>
 <li>JSON output for CPSR,
@@ -1013,7 +1165,7 @@ tool does not support compressed VCFs - see <a href="https://github.com/mskcc/vc
 </li>
 </ul>
 <div class="section level5">
-<h5 id="fixed-2">Fixed<a class="anchor" aria-label="anchor" href="#fixed-2"></a>
+<h5 id="fixed-3">Fixed<a class="anchor" aria-label="anchor" href="#fixed-3"></a>
 </h5>
 <ul>
 <li>Writing to JSON crashes when size of input VCF is huge (variants in
@@ -1067,7 +1219,7 @@ refitting procedure for a given tumor type</li>
 </ul>
 </div>
 <div class="section level5">
-<h5 id="changed-1">Changed<a class="anchor" aria-label="anchor" href="#changed-1"></a>
+<h5 id="changed-2">Changed<a class="anchor" aria-label="anchor" href="#changed-2"></a>
 </h5>
 <ul>
 <li>Complete restructure of Python and R components.Installation now
@@ -1101,7 +1253,7 @@ GENCODE</p></li>
 ++</p></li>
 </ul>
 <div class="section level5">
-<h5 id="changed-2">Changed<a class="anchor" aria-label="anchor" href="#changed-2"></a>
+<h5 id="changed-3">Changed<a class="anchor" aria-label="anchor" href="#changed-3"></a>
 </h5>
 <ul>
 <li>TOML-based configuration for PCGR is abandoned, all options to PCGR
@@ -1203,7 +1355,7 @@ signatures (COSMIC v3.2)</li>
 </ul>
 </div>
 <div class="section level5">
-<h5 id="fixed-3">Fixed<a class="anchor" aria-label="anchor" href="#fixed-3"></a>
+<h5 id="fixed-4">Fixed<a class="anchor" aria-label="anchor" href="#fixed-4"></a>
 </h5>
 <ul>
 <li>Bug in writing (large) report contents to JSON (issue <a href="https://github.com/sigven/pcgr/issues/118" class="external-link">#118</a>)</li>
@@ -1261,7 +1413,7 @@ pinning of all package dependencies</li>
 </ul>
 </div>
 <div class="section level5">
-<h5 id="changed-3">Changed<a class="anchor" aria-label="anchor" href="#changed-3"></a>
+<h5 id="changed-4">Changed<a class="anchor" aria-label="anchor" href="#changed-4"></a>
 </h5>
 <ul>
 <li>Removed DisGeNET annotations from output (associations from Open
@@ -1291,7 +1443,7 @@ UniProt KB, dbNSFP, Pfam, KEGG, Open Targets Platform</p></li>
 <li><p>Software updates: VEP 101</p></li>
 </ul>
 <div class="section level5">
-<h5 id="fixed-4">Fixed<a class="anchor" aria-label="anchor" href="#fixed-4"></a>
+<h5 id="fixed-5">Fixed<a class="anchor" aria-label="anchor" href="#fixed-5"></a>
 </h5>
 <ul>
 <li>An extra comma was mistakenly present in the template for tier 2
@@ -1302,7 +1454,7 @@ variants, issue <a href="https://github.com/sigven/pcgr/issues/96" class="extern
 </ul>
 </div>
 <div class="section level5">
-<h5 id="changed-4">Changed<a class="anchor" aria-label="anchor" href="#changed-4"></a>
+<h5 id="changed-5">Changed<a class="anchor" aria-label="anchor" href="#changed-5"></a>
 </h5>
 <ul>
 <li>All arguments to <code>pcgr.py</code> is now non-positional</li>
@@ -1412,7 +1564,7 @@ CancerMine</p></li>
 <li><p>Software updates: VEP 98.2, vcf2tsv</p></li>
 </ul>
 <div class="section level5">
-<h5 id="fixed-5">Fixed<a class="anchor" aria-label="anchor" href="#fixed-5"></a>
+<h5 id="fixed-6">Fixed<a class="anchor" aria-label="anchor" href="#fixed-6"></a>
 </h5>
 <ul>
 <li>More improved mapping between Ensembl transcripts and UniProt
@@ -1428,7 +1580,7 @@ tables</li>
 </ul>
 </div>
 <div class="section level5">
-<h5 id="changed-5">Changed<a class="anchor" aria-label="anchor" href="#changed-5"></a>
+<h5 id="changed-6">Changed<a class="anchor" aria-label="anchor" href="#changed-6"></a>
 </h5>
 <ul>
 <li>Option <em>target_size_mb</em> in pcgr.py replaces
@@ -1450,7 +1602,7 @@ CIViC, CancerMine, UniProt KB</p></li>
 LOFTEE (VEP plugin) <a href="https://github.com/konradjk/loftee/releases" class="external-link">1.0.3</a></p></li>
 </ul>
 <div class="section level5">
-<h5 id="fixed-6">Fixed<a class="anchor" aria-label="anchor" href="#fixed-6"></a>
+<h5 id="fixed-7">Fixed<a class="anchor" aria-label="anchor" href="#fixed-7"></a>
 </h5>
 <ul>
 <li>Bug in concatenation of clinical evidence items from different
@@ -1506,7 +1658,7 @@ types</li>
 </li>
 </ul>
 <div class="section level5">
-<h5 id="fixed-7">Fixed<a class="anchor" aria-label="anchor" href="#fixed-7"></a>
+<h5 id="fixed-8">Fixed<a class="anchor" aria-label="anchor" href="#fixed-8"></a>
 </h5>
 <ul>
 <li>Bug in value box for Tier 2 variants (new line carriage) <a href="https://github.com/sigven/pcgr/issues/73" class="external-link">Issue #73</a>
@@ -1664,7 +1816,7 @@ review</li>
 </ul>
 </div>
 <div class="section level5">
-<h5 id="changed-6">Changed<a class="anchor" aria-label="anchor" href="#changed-6"></a>
+<h5 id="changed-7">Changed<a class="anchor" aria-label="anchor" href="#changed-7"></a>
 </h5>
 <ul>
 <li>Moved from <a href="https://www.intogen.org/" class="external-link">IntoGen’s driver
@@ -1690,7 +1842,7 @@ script (<code>--no_vcf_validate</code>)</li>
 </li>
 </ul>
 <div class="section level5">
-<h5 id="fixed-8">Fixed<a class="anchor" aria-label="anchor" href="#fixed-8"></a>
+<h5 id="fixed-9">Fixed<a class="anchor" aria-label="anchor" href="#fixed-9"></a>
 </h5>
 <ul>
 <li>Bug in assignment of variants to tier1/tier2 <a href="https://github.com/sigven/pcgr/issues/61" class="external-link">Issue #61</a>
@@ -1766,7 +1918,7 @@ TSV/JSON</li>
 </ul>
 </div>
 <div class="section level5">
-<h5 id="changed-7">Changed<a class="anchor" aria-label="anchor" href="#changed-7"></a>
+<h5 id="changed-8">Changed<a class="anchor" aria-label="anchor" href="#changed-8"></a>
 </h5>
 <ul>
 <li>Changed CANCER_MUTATION_HOTSPOT to MUTATION_HOTSPOT</li>
@@ -1790,7 +1942,7 @@ CancerMine</li>
 </li>
 </ul>
 <div class="section level5">
-<h5 id="fixed-9">Fixed<a class="anchor" aria-label="anchor" href="#fixed-9"></a>
+<h5 id="fixed-10">Fixed<a class="anchor" aria-label="anchor" href="#fixed-10"></a>
 </h5>
 <ul>
 <li>Bug in copy number annotation (broad/focal)</li>
@@ -1805,7 +1957,7 @@ CancerMine</li>
 </li>
 </ul>
 <div class="section level5">
-<h5 id="fixed-10">Fixed<a class="anchor" aria-label="anchor" href="#fixed-10"></a>
+<h5 id="fixed-11">Fixed<a class="anchor" aria-label="anchor" href="#fixed-11"></a>
 </h5>
 <ul>
 <li>Bug in copy number segment display (missing variable initalization,
@@ -1844,7 +1996,7 @@ dataset</li>
 </li>
 </ul>
 <div class="section level5">
-<h5 id="fixed-11">Fixed<a class="anchor" aria-label="anchor" href="#fixed-11"></a>
+<h5 id="fixed-12">Fixed<a class="anchor" aria-label="anchor" href="#fixed-12"></a>
 </h5>
 <ul>
 <li>Bug in tier assignment ‘pcgr_acmg’ (case for no variants in
@@ -2077,7 +2229,7 @@ the next release</li>
 </ul>
 </div>
 <div class="section level5">
-<h5 id="changed-8">Changed<a class="anchor" aria-label="anchor" href="#changed-8"></a>
+<h5 id="changed-9">Changed<a class="anchor" aria-label="anchor" href="#changed-9"></a>
 </h5>
 <ul>
 <li>HTML report sections

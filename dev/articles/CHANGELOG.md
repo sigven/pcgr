@@ -1,5 +1,107 @@
 # Changelog
 
+## v2.3.3
+
+- Date: **2026-10-XX**
+- Data bundle update (`20261005`) and software updates
+  - Ensembl VEP `v116.2` / GENCODE v50 (GRCh38; v19 for GRCh37)
+  - ClinVar (2026-10)
+  - CIViC (2026-10-05)
+  - UniProt/SwissProt KnowledgeBase (2026_03)
+  - Open Targets Platform (2026.09)
+
+### Added / improved
+
+- **HTML report tables and figures**
+  - Germline findings table now uses
+    [reactable](https://glin.github.io/reactable/) (in place of DT),
+    with a compact main row (gene, alteration, consequence, genotype,
+    classification, ACMG criteria, inheritance) and expandable row
+    details
+    - ACMG criteria are shown as color-coded pills (pathogenic/benign
+      evidence), with a hover tooltip describing each criterion
+    - Cancer predisposition gene mode of inheritance (`CPG_MOI`) shown
+      as *Inheritance*, with the full name(s) available on hover
+    - Low-depth genotypes (when a matched control depth is available)
+      are flagged
+  - MSI section
+    - Coding mutations in MMR genes now shown in a reactable table
+    - New *Germline* tab (shown when germline CPSR results are provided)
+      listing pathogenic/likely pathogenic variants in `MLH1`, `MSH2`,
+      `MSH6`, `PMS2` and `EPCAM`, next to the *Somatic* tab
+    - Added a description of the indel fraction histogram (TCGA
+      MSS/MSI-H reference distributions)
+  - TMB section: added a description of the TCGA reference cohort
+    comparison plot
+  - CNA section
+    - OncoKB columns shown in the CNA table, with oncogenic cases
+      highlighted
+    - CNA records ordered by oncogenicity by default
+    - Focal copy number segments are marked with a point (and a triangle
+      for focal oncogene gains/amplifications) rather than being
+      widened, keeping segment positions and extents true to the data;
+      explained in the plot caption
+- **Fraction of genome altered (FGA)** and **whole-genome doubling
+  status (WGD)** are now derived from the allele-specific copy number
+  segments, and reported in the `cna_summary.tsv` output file
+- **HRD score** - new, opt-in `--estimate_hrd` option
+  - Estimates HRD-LOH + LST + TAI from the allele-specific CNA segments,
+    following the [scarHRD/Sztupinszki et
+    al. algorithm](https://github.com/sztup/scarHRD) - shown in a
+    dedicated subsection at the end of the CNA section, with an
+    explanation of each measure and tumor-type-aware interpretation
+    notes
+  - **Research use only** - not a validated diagnostic measure, and only
+    clinically thresholded (Myriad myChoice CDx, sum ≥ 42) for ovarian
+    cancer
+  - Requires paired tumor-control data with genome-wide CNA segments
+    (`--input_cna`); not supported with `--tumor_only` or
+    `--assay TARGETED` (enforced as an argument-validation error)
+- **TMB-high** - new `--tmb_high_threshold` option (default: 10
+  mutations/Mb, the FDA/OncoKB definition of TMB-H), applied to the TMB
+  measure shown in the report (`--tmb_display`). The resulting call is
+  available in the report data and the TMB sheet of the Excel output
+  (`TMB_HIGH`), as a basis for TMB-H biomarker matching
+- **Biomarker evidence for MSI-High and TMB-High** - when the tumor is
+  classified as MSI-high or TMB-high (see `--tmb_high_threshold`),
+  therapeutic biomarker evidence is retrieved from CIViC and (if
+  `--oncokb_api_token` is provided) OncoKB, classified into AMP/ASCO/CAP
+  tiers, and shown in the MSI and TMB sections of the report with the
+  same table layout as for other variant types (source icons indicate
+  evidence from CIViC/OncoKB). The evidence is also available in the
+  `MSI_BIOMARKER`/`TMB_BIOMARKER` sheets of the Excel output
+
+### Changed
+
+- Non-coding pathogenic/likely pathogenic germline variants are now
+  retained in the germline findings of the PCGR report (only VUS are
+  restricted to coding variants)
+- Mutational signature re-fitting now uses *all* reference signatures
+  (SBS) by default, rather than only those already attributed to the
+  tumor type. The previous default behavior is available via the new
+  `--tumor_type_reference_signatures` option (replaces
+  `--all_reference_signatures`, which is removed)
+
+### Fixed
+
+- Crash in transcript selection with VEP 116, which reports APPRIS
+  annotations without a numeric grade (`PM`/`AM`)
+- Guarded integer coercion of `INTRON_POSITION`/`EXON_POSITION` in
+  oncogenicity scoring
+  ([issue308](https://github.com/sigven/pcgr/issues/308))
+- Segment-level CNA annotations (amplification/gain/deletion/LOH) are no
+  longer gated on gene overlap
+- Gene symbols were repeated (once per transcript) in the hover text of
+  the copy number profile plots, e.g. `PTEN, PTEN, PTEN`
+- `FOLD_CHANGE` is carried through to the gene-level CNA output, fixing
+  a failure when loading somatic CNA data
+- RNA fusions with a breakpoint on an ALT/decoy contig are dropped with
+  a warning rather than aborting the run
+- OncoKB input files are only generated when OncoKB annotation will run
+- Corrected documentation of the `SPLICE_EFFECT` output format, and the
+  `--diagnostic_grade_only` help text for CPSR (Genomics England panel
+  ids 1-43)
+
 ## v2.3.2
 
 - Date: **2026-08-10**

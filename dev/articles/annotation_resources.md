@@ -21,14 +21,14 @@
 - [Cancer Hotspots](http://cancerhotspots.org) - a resource for
   statistically significant mutations in cancer (v2/v3, 2017/2026)
 - [TCGA](https://portal.gdc.cancer.gov/) - somatic mutations discovered
-  across 33 tumor type cohorts (release 45.0, December 2025)
+  across 33 tumor type cohorts (release 46.0, August 2026)
 
 ### Variant databases of clinical utility
 
 - [ClinVar](http://www.ncbi.nlm.nih.gov/clinvar/) - database of
-  clinically related variants (September 2026)
+  clinically related variants (October 2026)
 - [CIViC](https://civicdb.org) - clinical interpretations of variants in
-  cancer (September 15th 2026)
+  cancer (October 5th 2026)
 - [CGI](http://www.cancergenomeinterpreter.org/biomarkers) - Cancer
   Genome Interpreter Cancer Biomarkers Database (CGI) (October 18th
   2022)
@@ -47,7 +47,7 @@
 - [Open Targets Platform](https://www.targetvalidation.org/) - Database
   on disease-target associations, molecularly targeted drugs and
   tractability aggregated from multiple sources (literature, pathways,
-  mutations) (2026.06)
+  mutations) (2026.09)
 
 ### Notes on variant annotation datasets
 
