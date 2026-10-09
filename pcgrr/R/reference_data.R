@@ -397,6 +397,24 @@ load_reference_data <- function(
   colnames(pcgr_ref_data[['variant']][['gwas']]) <-
     toupper(colnames(pcgr_ref_data[['variant']][['gwas']]))
 
+  #####--F. Pharmacogenomic alleles/guidelines (CPIC)--#####
+  ## - optional, not present in bundles prior to Oct 2026
+  for (pgx_tbl in c("pgx_allele", "pgx_phenotype", "pgx_guideline")) {
+    pgx_tsv_fname <-
+      file.path(
+        pcgr_db_assembly_dir, "variant", "tsv", "pgx",
+        paste0(pgx_tbl, ".tsv.gz")
+      )
+    if (file.exists(pgx_tsv_fname)) {
+      pcgr_ref_data[['variant']][[pgx_tbl]] <- as.data.frame(
+        readr::read_tsv(
+          pgx_tsv_fname,
+          na = c("."),
+          col_types = readr::cols(.default = "c"),
+          show_col_types = FALSE))
+    }
+  }
+
 
   pcgr_ref_data[['variant']][['varstats']] <- list()
   ## Get variant statistics
@@ -589,15 +607,23 @@ load_reference_data <- function(
   ####-- 9. Metadata ####
   pcgr_ref_data[['metadata']] <- data.frame()
   for (dtype in c('gene','gwas','hotspot','other',
-                 'phenotype','biomarker','drug')) {
+                 'phenotype','biomarker','drug','pgx')) {
 
     fname <- file.path(
       pcgr_db_assembly_dir, ".METADATA", "tsv",
       paste0(dtype,"_metadata.tsv")
     )
+    ## pharmacogenomic (CPIC) metadata - optional, not present in
+    ## bundles prior to Oct 2026
+    if (dtype == "pgx" && !file.exists(fname)) {
+      next
+    }
     check_file_exists(fname)
+    ## source_version as character - date-like versions (e.g. CPIC
+    ## '2026-08-03') are otherwise parsed as dates
     metadata_dtype <- as.data.frame(
       readr::read_tsv(fname, show_col_types = FALSE,
+                      col_types = readr::cols(source_version = "c"),
                       guess_max = 100000)) |>
       dplyr::mutate(datatype = dtype) |>
       dplyr::mutate(wflow = dplyr::case_when(

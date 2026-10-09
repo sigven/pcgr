@@ -169,6 +169,29 @@ def is_integer(n):
     else:
         return float(n).is_integer()
 
+## Optional column in the CNA segment input: TRUE if the total copy number of a segment
+## is observed, but the major/minor allele split (nMajor/nMinor) is imputed
+CNA_IMPUTED_COLUMN = 'nMajor_nMinor_Imputed'
+CNA_IMPUTED_TRUE_VALUES = {'TRUE', 'T', '1', '1.0'}
+CNA_IMPUTED_FALSE_VALUES = {'FALSE', 'F', '0', '0.0'}
+
+def get_cna_imputed_flag(cna_df: pd.DataFrame) -> pd.Series:
+    """
+    Return a boolean Series (aligned to 'cna_df') from the optional CNA input column
+    'nMajor_nMinor_Imputed' (TRUE/FALSE or 1/0, case-insensitive). A missing column means
+    no segment is imputed. Raises a ValueError for any other (or missing) value.
+    """
+    if CNA_IMPUTED_COLUMN not in cna_df.columns:
+        return pd.Series(False, index=cna_df.index)
+    values = cna_df[CNA_IMPUTED_COLUMN].astype(str).str.strip().str.upper()
+    invalid = values[~values.isin(CNA_IMPUTED_TRUE_VALUES | CNA_IMPUTED_FALSE_VALUES)]
+    if len(invalid) > 0:
+        raise ValueError(
+            f"Column '{CNA_IMPUTED_COLUMN}' contains invalid value(s): "
+            f"{', '.join(sorted(set(cna_df.loc[invalid.index, CNA_IMPUTED_COLUMN].astype(str))))} "
+            f"- allowed values are TRUE/FALSE or 1/0")
+    return values.isin(CNA_IMPUTED_TRUE_VALUES)
+
 def get_cpsr_version():
     # use pcgrr's Rscript to grab cpsr's R pkg version
     # NOTE: this relies on the pcgrr conda env being named the default pcgrr. If

@@ -104,6 +104,10 @@ plot_cna_segments_absolute <- function(
     quiet = T
   )
 
+  ## Segments with observed total copy number, but imputed major/minor split
+  ## (optional input column 'nMajor_nMinor_Imputed')
+  cna_segment <- append_cna_imputed_flag(cna_segment)
+
 
   ## Identify segments that involve oncogene amplification/gain or
   ## tumor suppressor loss (homozygous or heterozygous)
@@ -221,7 +225,8 @@ plot_cna_segments_absolute <- function(
     dplyr::select(
       c("CHROM", "SEGMENT_START", "SEGMENT_END",
         "CYTOBAND","CN_MINOR",
-        "CN_TOTAL","EVENT_TYPE","VARIANT_CLASS")) |>
+        "CN_TOTAL","EVENT_TYPE","VARIANT_CLASS",
+        "CN_MAJOR_MINOR_IMPUTED")) |>
     # dplyr::left_join(
     #   dplyr::select(
     #     cna_gene, c("CHROM", "SEGMENT_START", "SEGMENT_END",
@@ -266,6 +271,7 @@ plot_cna_segments_absolute <- function(
           sep = "-"),
         sep = ":"), " (",.data$segsize,")<br> - ",
         .data$CYTOBAND, " (", .data$EVENT_TYPE,")")) |>
+    append_cna_imputed_info() |>
     dplyr::select(
       -c("genome_start","EVENT_TYPE","segsize")) |>
     dplyr::distinct()
@@ -409,6 +415,16 @@ plot_cna_segments_absolute <- function(
       stats::setNames(amp_color_abs, amp_line_label_abs))
     leg_breaks_abs <- c(leg_breaks_abs, amp_line_label_abs)
   }
+  ## Minor copy number of segments with imputed major/minor split - lighter colour
+  minor_cn_imputed_label <- "Minor copy number (imputed)"
+  if (any(cna_segments_global$CN_MAJOR_MINOR_IMPUTED)) {
+    leg_colors_abs <- c(
+      leg_colors_abs,
+      stats::setNames("#A6DBA0", minor_cn_imputed_label))
+    leg_breaks_abs <- append(
+      leg_breaks_abs, minor_cn_imputed_label,
+      after = match("Minor copy number", leg_breaks_abs))
+  }
 
   y_axis_interval <- 1
   y_breaks <- seq(0, y_max_display, by = y_axis_interval)
@@ -473,7 +489,10 @@ plot_cna_segments_absolute <- function(
   cna_plot <- cna_plot +
     ggplot2::geom_segment(
       data = cna_segments_global |>
-        dplyr::mutate(Track = "Minor copy number"),
+        dplyr::mutate(Track = dplyr::if_else(
+          .data$CN_MAJOR_MINOR_IMPUTED,
+          minor_cn_imputed_label,
+          "Minor copy number")),
       ggplot2::aes(
         x = .data$SegmentStart,
         xend = .data$SegmentEnd,
@@ -736,6 +755,7 @@ plot_cna_segments_relative <-
     ## Prepare segment data: compute log2(CN_TOTAL / ploidy)
     ## Cap CN_TOTAL at 0.1 to avoid log2(0) = -Inf for homozygous deletions
     cna_segments_global <- cna_segment |>
+      append_cna_imputed_flag() |>
       dplyr::select(
         c("CHROM",
           "SEGMENT_START",
@@ -743,7 +763,8 @@ plot_cna_segments_relative <-
           "CYTOBAND",
           "EVENT_TYPE",
           "VARIANT_CLASS",
-          "CN_TOTAL")) |>
+          "CN_TOTAL",
+          "CN_MAJOR_MINOR_IMPUTED")) |>
       dplyr::mutate(CHROM = paste0("chr", .data$CHROM)) |>
       dplyr::left_join(
         dplyr::select(
@@ -787,6 +808,7 @@ plot_cna_segments_relative <-
           .data$CYTOBAND, " (", .data$EVENT_TYPE, ")")
         #"<br> - log\u2082FC: ", round(.data$Log2FC, 3))
       ) |>
+      append_cna_imputed_info() |>
       dplyr::select(-c("genome_start", "EVENT_TYPE", "segsize")) |>
       dplyr::distinct()
 
@@ -1476,4 +1498,42 @@ build_twohit_display_data <- function(
   result$nested <- nested_df
 
   return(result)
+}
+
+
+#' Append flag for segments with imputed allele-specific copy number
+#'
+#' Ensures that column 'CN_MAJOR_MINOR_IMPUTED' is present (logical) in a
+#' data frame with copy number segments - segments with an observed total
+#' copy number, but imputed major/minor split (optional input column
+#' 'nMajor_nMinor_Imputed'). A missing column (or NA) means not imputed.
+#'
+#' @param cna_segment data frame with copy number segments
+#'
+#' @keywords internal
+append_cna_imputed_flag <- function(cna_segment = NULL) {
+  if (!("CN_MAJOR_MINOR_IMPUTED" %in% colnames(cna_segment))) {
+    cna_segment$CN_MAJOR_MINOR_IMPUTED <- FALSE
+  }
+  cna_segment |>
+    dplyr::mutate(
+      CN_MAJOR_MINOR_IMPUTED = dplyr::if_else(
+        is.na(.data$CN_MAJOR_MINOR_IMPUTED),
+        FALSE,
+        as.logical(.data$CN_MAJOR_MINOR_IMPUTED)))
+}
+
+#' Append note on imputed allele-specific copy number to segment hover info
+#'
+#' @param cna_segments data frame with copy number segments, with
+#' columns 'SegmentInfo' and 'CN_MAJOR_MINOR_IMPUTED'
+#'
+#' @keywords internal
+append_cna_imputed_info <- function(cna_segments = NULL) {
+  cna_segments |>
+    dplyr::mutate(SegmentInfo = dplyr::if_else(
+      .data$CN_MAJOR_MINOR_IMPUTED,
+      paste0(.data$SegmentInfo,
+             "<br> - Major/minor copy number imputed (total copy number observed)"),
+      .data$SegmentInfo))
 }

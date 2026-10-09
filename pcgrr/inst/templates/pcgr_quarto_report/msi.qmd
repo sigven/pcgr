@@ -164,7 +164,9 @@ bslib::page_fillable(
     height = "140px",
     bslib::value_box(
       title = "MSI status",
-      value = msi_stats[['predicted_class']],
+      value = stringr::str_replace(
+        msi_stats[['predicted_class']],
+        "MSI.H","MSI-H"),
       showcase = NULL,
       theme = status_box_theme
     ),
@@ -201,6 +203,8 @@ bslib::page_fillable(
   )
 )
 ```
+
+<br>
 
 #### Coding mutations in MMR genes
 

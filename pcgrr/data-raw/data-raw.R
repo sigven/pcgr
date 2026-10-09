@@ -429,7 +429,8 @@ data_coltype_defs[['cna_somatic_segment_raw']] <- readr::cols_only(
   CHROM = readr::col_character(),
   SEGMENT_START = readr::col_double(),
   SEGMENT_END = readr::col_double(),
-  SEGMENT_NAME = readr::col_character()
+  SEGMENT_NAME = readr::col_character(),
+  CN_MAJOR_MINOR_IMPUTED = readr::col_logical()
 )
 
 ####----CNA genes ----####
@@ -441,6 +442,7 @@ data_coltype_defs[['cna_somatic_gene_raw']] <- readr::cols_only(
   VARIANT_CLASS = readr::col_character(),
   CN_MAJOR = readr::col_integer(),
   CN_MINOR = readr::col_integer(),
+  CN_MAJOR_MINOR_IMPUTED = readr::col_logical(),
   CHROMOSOME_ARM = readr::col_character(),
   CYTOBAND = readr::col_character(),
   EVENT_TYPE = readr::col_character(),
@@ -854,6 +856,7 @@ tsv_cols[['cna']] <-
     'GENOME_VERSION',
     'CN_MAJOR',
     'CN_MINOR',
+    'CN_MAJOR_MINOR_IMPUTED',
     'LOH',
     "TWOHIT_CANDIDATE_SOMATIC",
     "TWOHIT_CANDIDATE_GERMLINE",
@@ -1097,6 +1100,7 @@ table_display_cols[['cna_other_oncogenic']] <-
     "LOH",
     "CN_MAJOR",
     "CN_MINOR",
+    "CN_MAJOR_MINOR_IMPUTED",
     "TARGETED_INHIBITORS_ALL",
     "MUTATION_EFFECT_OKB",
     "MUTATION_EFFECT_DESCRIPTION_OKB",

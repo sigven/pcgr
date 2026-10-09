@@ -18,6 +18,7 @@ from pcgr.annoutils import read_infotag_file, read_vcfanno_tag_file
 from pcgr.utils import (
     error_message, warn_message,
     random_id_generator, remove_file, check_subprocess,
+    CNA_IMPUTED_COLUMN, get_cna_imputed_flag,
 )
 from pcgr import pcgr_vars
 
@@ -146,7 +147,8 @@ def collect_workflow_info_tags(refdata_assembly_dir, workflow, logger):
 def is_valid_cna(input_cna_segment_fname, logger):
     """
     Check whether the CNA segment file (tab-separated) has the required columns,
-    correct data types, and valid coordinate ranges.
+    correct data types, and valid coordinate ranges. The optional column
+    'nMajor_nMinor_Imputed' must contain TRUE/FALSE or 1/0.
     """
     cna_reader = csv.DictReader(open(input_cna_segment_fname, 'r'), delimiter='\t')
 
@@ -175,6 +177,17 @@ def is_valid_cna(input_cna_segment_fname, logger):
         if cna_dataframe[elem].dtype.kind not in 'if':
             err_msg = f'Copy number segment file contains non-float/integer values for column: "{elem}"'
             return error_message(err_msg, logger)
+
+    ## Optional column - segments with observed total copy number, but imputed nMajor/nMinor split
+    try:
+        n_imputed = int(get_cna_imputed_flag(cna_dataframe).sum())
+    except ValueError as e:
+        return error_message(f'Copy number segment file: {e}', logger)
+    if CNA_IMPUTED_COLUMN in cna_dataframe.columns:
+        logger.info(
+            f"Copy number segment file: n = {n_imputed} of {len(cna_dataframe)} segments have an imputed "
+            f"allele-specific copy number ('{CNA_IMPUTED_COLUMN}' = TRUE) - these are skipped for "
+            f"allele-specific analyses (HRD scores, genome doubling)")
 
     for rec in cna_reader:
         if int(rec['End']) < int(rec['Start']):

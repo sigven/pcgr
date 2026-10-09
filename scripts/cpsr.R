@@ -50,4 +50,11 @@ if(!is.null(cps_report)){
     pcgrr::log4r_info("Skipping HTML report generation (option '--no_html' set to TRUE)")
   }
 
+  ## PDF report (Quarto/Typst) - optional ('--pdf')
+  if(isTRUE(as.logical(cps_report$settings$conf$other$pdf))){
+    cpsr::write_cpsr_output(
+      cps_report,
+      output_format = 'pdf')
+  }
+
 }

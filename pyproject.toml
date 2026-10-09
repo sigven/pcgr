@@ -16,7 +16,7 @@ maintainers = [
     ]
 readme = "README.md"
 license = "MIT"
-license-files = ["LICENSE.md"]
+license-files = ["LICENSE.md", "THIRD_PARTY_LICENSES.md"]
 keywords = ["cancer", "genomics", "pcgr"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",

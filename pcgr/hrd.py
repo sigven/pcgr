@@ -10,10 +10,13 @@ and genomic instability ("HRD scar") scores:
   - LST      (Large-scale state transitions; Popova et al., Cancer Res 2012)
   - TAI      (Telomeric allelic imbalance; Birkbak et al., Cancer Discov 2012)
 
-This is a from-scratch Python port of the algorithms as implemented in the
+This is a Python port (translation) of the algorithms as implemented in the
 scarHRD R package (https://github.com/sztup/scarHRD, calc.hrd.R/calc.lst.R/
-calc.ai_new.R), so that the scores can be computed without installing scarHRD
-(which hard-depends on the 'sequenza' R package, only distributed via Bitbucket).
+calc.ai_new.R, shrink.seg.ai.R, preprocess.hrd.R), so that the scores can be
+computed without installing scarHRD (which hard-depends on the 'sequenza' R
+package, only distributed via Bitbucket). scarHRD is Copyright (c) 2020 Zsofia
+Sztupinszki, and is distributed under the MIT License - see the notice below
+this docstring, and THIRD_PARTY_LICENSES.md in the root of the PCGR repository.
 
 Reference: Sztupinszki et al., "Migrating the SNP array-based homologous
 recombination deficiency measures to next generation sequencing data of
@@ -38,7 +41,48 @@ is used). Two details matter for exact agreement:
 
 All three scores are computed on autosomes only (1-22), matching scarHRD,
 which drops sex chromosomes entirely before scoring.
+
+Segments flagged in the optional input column 'nMajor_nMinor_Imputed' (total
+copy number observed, major/minor split imputed) have an unknown allele-
+specific state. They are not dropped for HRD-LOH/LST/TAI (dropping them would
+make their neighbours adjacent, creating or hiding state transitions), but
+treated as unknown: they never merge with neighbouring segments, are never
+counted as LOH/imbalanced, and transitions into or out of them are not
+counted. Short imputed segments are still removed by the (state-independent)
+minimum segment size filters of LST/TAI, as any other segment. Imputed
+segments are excluded from the segment coverage check and the genome doubling
+call, but included in the fraction of genome altered (total copy number).
 """
+
+## ----------------------------------------------------------------------------
+## Third-party notice: the algorithms implemented in this module (HRD-LOH, LST,
+## TAI and the segment shrinking/preprocessing steps) are a Python port of the
+## scarHRD R package (https://github.com/sztup/scarHRD), which is licensed as
+## follows:
+##
+## MIT License
+##
+## Copyright (c) 2020 Zsofia Sztupinszki
+##
+## Permission is hereby granted, free of charge, to any person obtaining a copy
+## of this software and associated documentation files (the "Software"), to deal
+## in the Software without restriction, including without limitation the rights
+## to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+## copies of the Software, and to permit persons to whom the Software is
+## furnished to do so, subject to the following conditions:
+##
+## The above copyright notice and this permission notice shall be included in all
+## copies or substantial portions of the Software.
+##
+## THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+## IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+## FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+## AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+## LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+## OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+## SOFTWARE.
+## ----------------------------------------------------------------------------
+
 
 import logging
 import os
@@ -46,7 +90,7 @@ from typing import Optional
 
 import pandas as pd
 
-from pcgr.utils import check_file_exists, error_message
+from pcgr.utils import check_file_exists, error_message, get_cna_imputed_flag
 
 AUTOSOMES = [str(i) for i in range(1, 23)]
 
@@ -56,6 +100,12 @@ LST_GAP_LIMIT_MB = 3.0
 LST_MIN_ARM_SEGMENT_MB = 3.0
 
 MYRIAD_HRD_POSITIVE_THRESHOLD = 42
+
+## Minimum fraction of the autosomal genome that the copy number segments must
+## span for the HRD scar scores to be meaningful. Genome-wide profiles (WGS, WES
+## with genome-wide segmentation) span ~90% or more; profiles of targeted gene
+## panels span only a tiny fraction.
+HRD_MIN_AUTOSOMAL_COVERAGE = 0.5
 
 def read_cytoband_centromeres(cytoband_fname: str, logger: Optional[logging.Logger] = None) -> dict:
     """
@@ -119,12 +169,14 @@ def read_chrom_arms(chromsizes_fname: str, logger: Optional[logging.Logger] = No
     return chrom_arms
 
 
-def _prepare_segments(cna_df: pd.DataFrame, logger: logging.Logger) -> pd.DataFrame:
+def _prepare_segments(cna_df: pd.DataFrame, logger: logging.Logger, exclude_imputed: bool = False) -> pd.DataFrame:
     """
     Common preprocessing shared by all three scores:
       - restrict to autosomes 1-22 (sex chromosomes excluded, as in scarHRD)
       - ensure nMajor >= nMinor per segment (scarHRD swaps if not)
       - sort by chromosome/start
+      - add boolean column 'Imputed' from the optional input column
+        'nMajor_nMinor_Imputed' (segments are dropped if 'exclude_imputed')
     Expects columns: Chromosome, Start, End, nMajor, nMinor (same schema as
     used elsewhere in pcgr/cna.py for the user-supplied CNA segment file).
     """
@@ -135,6 +187,9 @@ def _prepare_segments(cna_df: pd.DataFrame, logger: logging.Logger) -> pd.DataFr
             f"{required - set(cna_df.columns)}", logger)
 
     seg = cna_df[['Chromosome', 'Start', 'End', 'nMajor', 'nMinor']].copy()
+    seg['Imputed'] = get_cna_imputed_flag(cna_df)
+    if exclude_imputed:
+        seg = seg[~seg['Imputed']].copy()
     seg['Chromosome'] = seg['Chromosome'].astype(str).str.replace("^(C|c)hr", "", regex=True)
     seg = seg[seg['Chromosome'].isin(AUTOSOMES)].copy()
 
@@ -158,6 +213,8 @@ def _shrink(seg: pd.DataFrame) -> pd.DataFrame:
     already sorted by Start, single chromosome/arm) that share an identical
     (nMajor, nMinor) allele-specific copy number state into a single segment
     spanning from the first segment's Start to the last segment's End.
+    Imputed segments (unknown allele-specific state) never merge with
+    non-imputed neighbours; consecutive imputed segments merge with each other.
     """
     if len(seg) <= 1:
         return seg.reset_index(drop=True)
@@ -165,8 +222,11 @@ def _shrink(seg: pd.DataFrame) -> pd.DataFrame:
     seg = seg.reset_index(drop=True)
     group_id = [0]
     for i in range(1, len(seg)):
-        same_state = (seg.loc[i, 'nMajor'] == seg.loc[i - 1, 'nMajor'] and
-                      seg.loc[i, 'nMinor'] == seg.loc[i - 1, 'nMinor'])
+        if seg.loc[i, 'Imputed'] or seg.loc[i - 1, 'Imputed']:
+            same_state = bool(seg.loc[i, 'Imputed'] and seg.loc[i - 1, 'Imputed'])
+        else:
+            same_state = (seg.loc[i, 'nMajor'] == seg.loc[i - 1, 'nMajor'] and
+                          seg.loc[i, 'nMinor'] == seg.loc[i - 1, 'nMinor'])
         group_id.append(group_id[-1] if same_state else group_id[-1] + 1)
     seg['_group'] = group_id
 
@@ -175,8 +235,69 @@ def _shrink(seg: pd.DataFrame) -> pd.DataFrame:
         Start=('Start', 'min'),
         End=('End', 'max'),
         nMajor=('nMajor', 'first'),
-        nMinor=('nMinor', 'first'))
+        nMinor=('nMinor', 'first'),
+        Imputed=('Imputed', 'first'))
     return merged.drop(columns=[c for c in merged.columns if c == '_group'], errors='ignore')
+
+
+def calc_autosomal_segment_coverage(
+        cna_df: pd.DataFrame,
+        chrom_arms: dict,
+        logger: Optional[logging.Logger] = None) -> float:
+    """
+    Fraction of the autosomal genome (chromosomes 1-22) that is spanned by the
+    copy number segments with an observed (non-imputed) allele-specific copy
+    number (overlapping segments are counted once, segments are clipped to
+    chromosome lengths).
+    """
+    if logger is None:
+        logger = logging.getLogger("pcgr-hrd")
+    seg = _prepare_segments(cna_df, logger, exclude_imputed=True)
+    if len(seg) == 0:
+        return 0.0
+    seg = _clip_segments_to_chromosomes(seg, chrom_arms)
+
+    genome_length = sum(
+        chrom_arms[c]['length'] for c in AUTOSOMES if c in chrom_arms)
+    if genome_length <= 0:
+        return 0.0
+
+    covered = 0
+    for chrom, chrom_seg in seg.groupby('Chromosome'):
+        current_start, current_end = None, None
+        for start, end in sorted(zip(chrom_seg['Start'], chrom_seg['End'])):
+            if current_end is None or start > current_end:
+                if current_end is not None:
+                    covered += current_end - current_start
+                current_start, current_end = start, end
+            else:
+                current_end = max(current_end, end)
+        if current_end is not None:
+            covered += current_end - current_start
+    return round(float(covered / genome_length), 4)
+
+
+def check_segment_coverage(
+        cna_df: pd.DataFrame,
+        chrom_arms: dict,
+        min_coverage: float = HRD_MIN_AUTOSOMAL_COVERAGE,
+        logger: Optional[logging.Logger] = None) -> float:
+    """
+    Check that the copy number segments span (at least 'min_coverage' of) the
+    autosomal genome, as required for the HRD scar scores. Raises a ValueError
+    if not, e.g. for copy number segments from targeted gene panels.
+
+    Returns the autosomal segment coverage (fraction).
+    """
+    coverage = calc_autosomal_segment_coverage(cna_df, chrom_arms, logger=logger)
+    if coverage < min_coverage:
+        raise ValueError(
+            f"The copy number segments (with observed, non-imputed allele-specific copy number) "
+            f"span only {coverage * 100:.1f}% of the autosomal genome "
+            f"(minimum required for genomic instability scoring: {min_coverage * 100:.0f}%) - "
+            f"the HRD scar scores (HRD-LOH, LST, TAI) require genome-wide copy number segments "
+            f"(e.g. from WGS/WES), and are not meaningful for targeted sequencing")
+    return coverage
 
 
 def calc_hrd_loh(
@@ -207,7 +328,9 @@ def calc_hrd_loh(
         ## whole-chromosome LOH (every segment on the chromosome is LOH) is
         ## excluded entirely - attributable to chromosome-level aneuploidy,
         ## not a focal HR-deficiency "scar"
-        whole_chrom_loh = bool((chrom_seg['nMinor'] == 0).all())
+        ## (judged on segments with an observed allele-specific state only)
+        known_seg = chrom_seg[~chrom_seg['Imputed']]
+        whole_chrom_loh = len(known_seg) > 0 and bool((known_seg['nMinor'] == 0).all())
         if whole_chrom_loh:
             continue
 
@@ -219,7 +342,7 @@ def calc_hrd_loh(
 
         chrom_seg = _shrink(chrom_seg)
 
-        loh = chrom_seg[(chrom_seg['nMinor'] == 0) & (chrom_seg['nMajor'] != 0)]
+        loh = chrom_seg[(chrom_seg['nMinor'] == 0) & (chrom_seg['nMajor'] != 0) & ~chrom_seg['Imputed']]
         loh = loh[(loh['End'] - loh['Start']) > size_limit_bp]
         n_loh_regions += len(loh)
 
@@ -270,7 +393,8 @@ def _count_lst_transitions(arm_seg: pd.DataFrame, seg_size_limit_bp: float, gap_
     if len(arm_seg) < 2:
         return 0
     arm_seg = arm_seg.reset_index(drop=True)
-    is_long = (arm_seg['End'] - arm_seg['Start']) >= seg_size_limit_bp
+    ## transitions into/out of imputed segments (unknown state) are not counted
+    is_long = ((arm_seg['End'] - arm_seg['Start']) >= seg_size_limit_bp) & ~arm_seg['Imputed']
     n_lst = 0
     for k in range(1, len(arm_seg)):
         if is_long.iloc[k] and is_long.iloc[k - 1]:
@@ -373,7 +497,8 @@ def calc_tai(
     seg = pd.concat(parts, ignore_index=True)
 
     ## distinct non-zero minor allele copy numbers, in order of appearance
-    minor_cn_values = [v for v in dict.fromkeys(seg['nMinor'].tolist()) if v != 0]
+    ## (imputed segments do not take part in the local ploidy vote)
+    minor_cn_values = [v for v in dict.fromkeys(seg.loc[~seg['Imputed'], 'nMinor'].tolist()) if v != 0]
 
     n_tai = 0
     for chrom, chrom_seg in seg.groupby('Chromosome', sort=False):
@@ -386,7 +511,7 @@ def calc_tai(
 
         seg_len = chrom_seg['End'] - chrom_seg['Start']
         length_by_minor_cn = {
-            v: float(seg_len[chrom_seg['nMinor'] == v].sum()) for v in minor_cn_values}
+            v: float(seg_len[(chrom_seg['nMinor'] == v) & ~chrom_seg['Imputed']].sum()) for v in minor_cn_values}
         if length_by_minor_cn:
             ploidy = max(length_by_minor_cn, key=length_by_minor_cn.get)
         else:
@@ -397,6 +522,8 @@ def calc_tai(
         else:
             balanced = ((chrom_seg['nMajor'] + chrom_seg['nMinor']) == ploidy) & (chrom_seg['nMinor'] != 0)
             imbalanced = ~balanced
+        ## telomeric imputed segments (unknown state) are not counted
+        imbalanced = imbalanced & ~chrom_seg['Imputed']
 
         if imbalanced.iloc[0] and chrom_seg['End'].iloc[0] < chrom_arms[chrom]['centromere_start']:
             n_tai += 1
@@ -437,11 +564,12 @@ def calc_genome_doubling(
 
     Returns a dict with 'wgd_fraction' (fraction of the segmented autosomal
     genome with major allele copy number >= 2) and 'genome_doubled' (bool),
-    or None if no usable segments are present.
+    or None if no usable segments are present. Segments with an imputed
+    allele-specific copy number are excluded (numerator and denominator).
     """
     if logger is None:
         logger = logging.getLogger("pcgr-hrd")
-    seg = _clip_segments_to_chromosomes(_prepare_segments(cna_df, logger), chrom_arms)
+    seg = _clip_segments_to_chromosomes(_prepare_segments(cna_df, logger, exclude_imputed=True), chrom_arms)
     if len(seg) == 0:
         return None
     seg_length = (seg['End'] - seg['Start']).clip(lower=0)
@@ -543,6 +671,8 @@ def compute_genomic_instability_score(
     if cytoband_fname is not None:
         chrom_arms = scarhrd_chrom_arms(chrom_arms, cytoband_fname, logger=logger)
 
+    check_segment_coverage(cna_df, chrom_arms, logger=logger)
+
     hrd_loh = calc_hrd_loh(cna_df, logger=logger)
     lst = calc_lst(cna_df, chrom_arms, logger=logger)
     tai = calc_tai(cna_df, chrom_arms, logger=logger)
@@ -560,8 +690,13 @@ def compute_genomic_instability_score(
         'tai': tai,
         'hrd_sum': hrd_sum,
         'hrd_sum_ploidy_adjusted': hrd_sum_ploidy_adjusted,
-        'n_segments_used': int(len(seg_used)),
+        'n_segments_used': int((~seg_used['Imputed']).sum()),
+        'n_segments_imputed': int(seg_used['Imputed'].sum()),
     }
+    if result['n_segments_imputed'] > 0:
+        logger.info(
+            f"Genomic instability score: n = {result['n_segments_imputed']} autosomal segment(s) with imputed "
+            f"allele-specific copy number treated as unknown state")
     logger.info(
         f"Genomic instability score: HRD-LOH={hrd_loh}, LST={lst}, TAI={tai}, "
         f"sum={hrd_sum} (Myriad HRD-positive threshold: >= {MYRIAD_HRD_POSITIVE_THRESHOLD}, ovarian cancer only)")

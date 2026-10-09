@@ -95,6 +95,14 @@ Here, _Chromosome_, _Start_, and _End_ denote the chromosomal segment, while _nM
       1 3552451 4593614 1 1
       1 4593663 6433129 2 1
 
+Optionally, the file may contain a column `nMajor_nMinor_Imputed` (values `TRUE`/`FALSE`, or `1`/`0`), flagging segments where the total copy number is observed, but the split into major and minor copy number is imputed (e.g. by a downstream rescue step for segments that the allele-specific caller left unresolved). If the column is absent, no segments are considered imputed. Imputed segments are handled as follows:
+
+* total copy number-based analyses (amplification/gain/deletion calls, fraction of genome altered, tumor ploidy estimation) use them as any other segment
+* loss-of-heterozygosity (LOH) is not called for imputed segments (and they are thus not considered for two-hit candidates)
+* they are excluded from the whole-genome doubling call, and from the autosomal segment coverage requirement of `--estimate_hrd`
+* for the HRD scores (`--estimate_hrd`), they are treated as segments of _unknown_ allele-specific state (rather than being dropped, which would make their neighbouring segments adjacent): they are never merged with their neighbours, and never counted as LOH/allelic imbalance or as part of a state transition
+* they are flagged in the output (`CN_MAJOR_MINOR_IMPUTED`) and drawn with a lighter minor copy number track in the copy number profile plot of the report
+
 Importantly, you can configure predefined thresholds for segments that are considered to be high-level copy-number amplifications through the following option:
 
 * `--n_copy_gain`: minimum (total) copy number for a segment to be considered an amplification, _default 6_

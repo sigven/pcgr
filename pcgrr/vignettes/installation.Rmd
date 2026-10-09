@@ -16,7 +16,7 @@ require(glue, include.only = "glue")
 ```{r vars, echo=FALSE}
 Sys.setenv(VEP_VERSION = "116")
 Sys.setenv(PCGR_VERSION = "2.3.2.9007")
-Sys.setenv(BUNDLE_VERSION = "20260915")
+Sys.setenv(BUNDLE_VERSION = "20261007")
 VEP_VERSION <- Sys.getenv("VEP_VERSION")
 PCGR_VERSION <- Sys.getenv("PCGR_VERSION")
 BUNDLE_VERSION <- Sys.getenv("BUNDLE_VERSION")
@@ -41,7 +41,7 @@ PCGR requires the following data to run successfully:
 PCGR supports both the GRCh37 and GRCh38 human genome assemblies. All the data above
 need to match the chosen assembly.
 
-### 1. Reference Bundle
+### 1. Reference bundle
 
 Reference bundles are generated semi-automatically (by the PCGR author) and
 are versioned based on their release date. Keep in mind that the bundles support
@@ -58,7 +58,7 @@ indicates the bundle version for reporting purposes.
 
 **Tip 2**: The `data/grch3x/data_overview.grch3x.html` file provides a report with an overview and statistics of the key resources included in the reference bundle.
 
-#### Bash Example
+#### Bash example
 
 ```{bash echo=FALSE}
 echo "BUNDLE_VERSION=\"${BUNDLE_VERSION}\""
@@ -74,7 +74,7 @@ mkdir ${BUNDLE_VERSION}
 mv data/ ${BUNDLE_VERSION}
 ```
 
-### 2. VEP Cache
+### 2. VEP cache
 
 [VEP][vep-web] requires a data cache which is available from the Ensembl
 [FTP site][ensembl-ftp] (search there for files starting with `homo_sapiens_vep_`).
@@ -103,7 +103,7 @@ the downloaded ``r glue::glue("homo_sapiens/{VEP_VERSION}_GRCh3x/")`` cache.
 Historically, this parent directory has been named `.vep`, but the name of this
 directory can be arbitrarily set.
 
-### 3. Sample Inputs
+### 3. Sample inputs
 
 See the [Inputs](input.html) article.
 
@@ -161,7 +161,7 @@ glue("docker pull ghcr.io/sigven/pcgr:{PCGR_VERSION}")
 # docker pull --platform=amd64 ghcr.io/sigven/pcgr:${PCGR_VERSION}
 ```
 
-#### Example Run
+#### Example run
 
 In the example below, we assume that you have the following directory structure:
 
@@ -213,7 +213,7 @@ glue("apptainer pull oras://ghcr.io/sigven/pcgr:{PCGR_VERSION}.singularity")
 This will download a Singularity Image File (SIF) called **`r glue("pcgr_{PCGR_VERSION}.singularity.sif")`**
 that can be run with Singularity or Apptainer.
 
-#### Example Run
+#### Example run
 
 ```{bash echo=FALSE}
 echo "PCGR_VERSION=\"${PCGR_VERSION}\""

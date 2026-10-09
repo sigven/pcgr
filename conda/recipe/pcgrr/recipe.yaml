@@ -48,6 +48,7 @@ requirements:
     - r-reshape2
     - r-rlang
     - r-rrapply
+    - r-tinytable
     - bioconductor-s4vectors
     - r-scales
     - r-shiny
@@ -89,6 +90,7 @@ requirements:
     - r-reshape2
     - r-rlang
     - r-rrapply
+    - r-tinytable
     - bioconductor-s4vectors
     - r-scales
     - r-shiny

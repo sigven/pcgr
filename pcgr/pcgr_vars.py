@@ -4,7 +4,7 @@ from pcgr._version import __version__
 
 ## Version - software and bundle
 PCGR_VERSION = __version__
-DB_VERSION = '20261005'  # database build version (date-based)
+DB_VERSION = '20261007'  # database build version (date-based)
 
 ## Miscellaneous settings
 NCBI_BUILD_MAF = 'GRCh38'
@@ -179,13 +179,13 @@ GE_panels = {
 # '0 = ClinVar trusted (override conflicted records only), ' +
 #             '1 = Override zero gold star ClinVar records, ' +
 #             '2 = Override zero- and single gold star ClinVar records, ' +
-#             '3 = Override low-star and non-cancer-phenotype ClinVar records, ' +
+#             '3 = Override zero- and single gold star ClinVar records, and ClinVar records with non-cancer phenotypes, ' +
 #             '4 = CPSR always classifies
 clinvar_trust_levels = {
     0: "ClinVar trusted (override conflicted records only)",
     1: "Override zero gold star ClinVar records",
     2: "Override zero- and single gold star ClinVar records",
-    3: "Override low-star and non-cancer-phenotype ClinVar records",
+    3: "Override zero- and single gold star ClinVar records, and ClinVar records with non-cancer phenotypes",
     4: "CPSR always classifies"
 }
 

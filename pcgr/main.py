@@ -431,6 +431,20 @@ def run_pcgr(input_data, output_data, conf_options):
             f'{"--keep_uncompressed" if run_vcf2maf else ""} '
             )
     check_subprocess(logger, vcf_validate_command, debug)
+
+    # Genomic instability ('HRD') scoring requires genome-wide copy number segments - stop early
+    # if the input segments do not span (most of) the autosomal genome (e.g. from a gene panel)
+    if conf_options.get('somatic_cna', {}).get('estimate_hrd', 0) == 1:
+        try:
+            hrd_chrom_arms = hrd.read_chrom_arms(
+                os.path.join(input_data['refdata_assembly_dir'], 'chromsize.' + genome_assembly + '.tsv'),
+                logger = logger)
+            hrd_coverage = hrd.check_segment_coverage(
+                pd.read_csv(input_cna, sep="\t", na_values="."), hrd_chrom_arms, logger = logger)
+            logger.info(f"Copy number segments span {hrd_coverage * 100:.1f}% of the autosomal genome (required for '--estimate_hrd')")
+        except ValueError as e:
+            error_message(f"'--estimate_hrd' - {e}", logger)
+
     logger.info('Finished pcgr-validate-input-arguments')
     print('----')
 

@@ -60,6 +60,7 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
             'vcfanno_n_proc': int(arg_dict['vcfanno_n_proc']),                                          
             'no_reporting': int(arg_dict['no_reporting']),
             'no_html': int(arg_dict['no_html']),
+            'pdf': int(arg_dict.get('pdf', False)),
             'retained_vcf_info_tags': str(arg_dict['retained_info_tags']),
             'show_noncoding': not int(arg_dict['ignore_noncoding']),
             'force_overwrite': int(arg_dict['force_overwrite'])
@@ -228,6 +229,8 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
     if workflow == "CPSR":        
         conf_options['sample_properties']['phenotype'] = 'None'
         conf_options['sample_properties']['site'] = 'Hereditary (blood)'
+        conf_options['sample_properties']['sex'] = str(arg_dict['sex']) \
+            if arg_dict.get('sex') is not None else 'UNKNOWN'
         conf_options['sample_properties']['gt_detected'] = 0
         conf_options['sample_properties']['dp_detected'] = 0
         
@@ -253,7 +256,7 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
                 0: 'ClinVar trusted (override conflicted records only)',
                 1: 'Override zero-star ClinVar records',
                 2: 'Override zero- and single-star ClinVar records',
-                3: 'Override low-star and non-cancer-phenotype records',
+                3: 'Override zero- and single-star ClinVar records, and records with non-cancer phenotypes',
                 4: 'CPSR always classifies'
             }[int(arg_dict['clinvar_trust_level'])],
             'clinvar_report_noncancer': int(arg_dict['clinvar_report_noncancer'])

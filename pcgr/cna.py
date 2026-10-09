@@ -12,7 +12,7 @@ from typing import Optional, cast
 from pybedtools import BedTool
 from pcgr import pcgr_vars
 from pcgr.annoutils import nuclear_chromosomes
-from pcgr.utils import error_message, warn_message, check_file_exists, remove_file, pd_to_csv
+from pcgr.utils import error_message, warn_message, check_file_exists, remove_file, pd_to_csv, get_cna_imputed_flag
 from pcgr.biomarker import load_all_biomarkers
 from pcgr.expression import integrate_variant_expression
 
@@ -940,11 +940,14 @@ def _annotate_loh(
     Annotate Loss of Heterozygosity (LOH) subtypes.
     LOH: n_minor == 0 and n_major > 0 (complete loss of one allele).
     Subtypes: copy_neutral, deletion, amplification (based on n_major vs baseline).
+    Segments with an imputed major/minor split (cn_major_minor_imputed) are not called.
     Adds: loh column.
     """
     df['loh'] = '.'
 
     loh_base = (df['n_minor'] == 0) & (df['n_major'] > 0)
+    if 'cn_major_minor_imputed' in df.columns:
+        loh_base = loh_base & ~df['cn_major_minor_imputed']
 
     # Autosomes
     _auto = loh_base & df['chromosome'].isin(pcgr_vars.AUTOSOMES)
@@ -1065,8 +1068,13 @@ def annotate_cna_segments(input_cna_segment_fname: str,
         err_msg = f"Could not find required columns in CNA segment file: {input_cna_segment_fname} - exiting."
         error_message(err_msg, logger)
     
+    ## Optional column: segments with observed total copy number, but imputed nMajor/nMinor split
+    try:
+        cna_imputed_flag = get_cna_imputed_flag(cna_query_segment_df)
+    except ValueError as e:
+        error_message(f"CNA segment file {input_cna_segment_fname}: {e}", logger)
     cna_query_segment_df = cna_query_segment_df[['Chromosome', 'Start','End','nMajor','nMinor']]
-    
+
     ## round nMajor and nMinor to integers
     cna_query_segment_df['nMajor'] = cna_query_segment_df['nMajor'].round(0).astype(int)
     cna_query_segment_df['nMinor'] = cna_query_segment_df['nMinor'].round(0).astype(int)
@@ -1092,7 +1100,11 @@ def annotate_cna_segments(input_cna_segment_fname: str,
         'chr' + cna_query_segment_df['Chromosome'].str.cat(
             cna_query_segment_df['Start'].astype(str), sep = ":").str.cat(
                 cna_query_segment_df['End'].astype(str), sep='-')
-    
+
+    ## Imputed flag per segment_id, joined back onto segment- and gene-level annotations below
+    segment_imputed = \
+        cna_imputed_flag.loc[cna_query_segment_df.index].groupby(cna_query_segment_df['segment_id']).any()
+
     ## Create Name column of BED file
     cna_query_segment_df["Name"] = \
         cna_query_segment_df["segment_id"].str.cat(
@@ -1166,6 +1178,8 @@ def annotate_cna_segments(input_cna_segment_fname: str,
         [cna_query_segment_df[['chromosome', 'segment_start', 'segment_end']].reset_index(drop=True),
          segment_level_annotations.reset_index(drop=True)], axis=1)
     cna_segment_level_df = cna_segment_level_df.astype({'n_major': 'int', 'n_minor': 'int'})
+    cna_segment_level_df['cn_major_minor_imputed'] = \
+        cna_segment_level_df['segment_id'].map(segment_imputed).fillna(False).astype(bool)
     cna_segment_level_df['segment_length_mb'] = \
         ((cna_segment_level_df['segment_end'] - cna_segment_level_df['segment_start']) / 1e6).astype(float).round(4)
 
@@ -1235,6 +1249,7 @@ def annotate_cna_segments(input_cna_segment_fname: str,
         .str.cat(cna_segment_level_df['variant_class'].astype(str), sep='|')
         .str.cat(cna_segment_level_df['loh'].astype(str).replace('.', ''), sep='|')
     )
+    segments_out['CN_MAJOR_MINOR_IMPUTED'] = cna_segment_level_df['cn_major_minor_imputed'].values
     segments_out.drop_duplicates(inplace=True)
     segments_out.to_csv(output_segment_fname, sep="\t", header=True, index=False)
 
@@ -1256,7 +1271,7 @@ def annotate_cna_segments(input_cna_segment_fname: str,
         ## recomputing amp/gain/del/LOH on the (segment x transcript) gene-level frame.
         classification_cols = [
             'segment_id', 'segment_length_mb', 'fold_change', 'variant_class', 'loh',
-            'amp_cond', 'gain_cond', 'hetloss_cond', 'homloss_cond', 'hemloss_cond']
+            'cn_major_minor_imputed', 'amp_cond', 'gain_cond', 'hetloss_cond', 'homloss_cond', 'hemloss_cond']
         cna_query_segment_df = cna_query_segment_df.merge(
             cna_segment_level_df[classification_cols], on='segment_id', how='left')
         cna_query_segment_df = _compute_aberration_keys(cna_query_segment_df)

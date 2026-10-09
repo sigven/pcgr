@@ -524,6 +524,7 @@ def define_output_files(arg_dict, cpsr = False):
         output_data['cna_summary'] = f"{output_prefix}.cna_summary.tsv"
     else:
         output_data['classification'] = f"{output_prefix}.classification.tsv.gz"
+        output_data['pdf'] = f"{output_prefix}.pdf"
     
     
     for otype in ['vcf', 'vcf_pass','vcf2tsv', 'html', 'xlsx','yaml']:
@@ -541,7 +542,7 @@ def define_output_files(arg_dict, cpsr = False):
                     ") already exist - please specify different sample_id or add option --force_overwrite"
                 error_message(err_msg, logger)
     else:
-        for otype in ['classification']:
+        for otype in ['classification', 'pdf']:
             # if annotated output cna segments exist and overwrite not set
             if os.path.exists(output_data[otype]) and arg_dict["force_overwrite"] is False:
                 err_msg = "Output files (e.g. " + str(output_data[otype]) + \

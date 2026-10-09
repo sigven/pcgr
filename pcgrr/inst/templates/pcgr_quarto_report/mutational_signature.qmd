@@ -237,21 +237,24 @@ pie_aetiologies <- plotly::plot_ly(
     values = ~prop_group,
     textinfo = "percent",
     type = 'pie',
-    hole = hole_size) |>
+    hole = hole_size,
+    ## reserve the left part of the plot area for the pie, and place the legend
+    ## to the right of it (a legend below the pie overlaps/clips the pie when
+    ## the legend wraps onto multiple lines in narrow cards)
+    domain = list(x = c(0, 0.62), y = c(0, 1))) |>
   plotly::layout(
-    ## legend at the bottom
     legend = list(
-      orientation = "h",
+      orientation = "v",
       font = t,
-      x = 0.5,
-      xanchor = "center",
-      y = -0.05,
-      yanchor = "top"),
+      x = 0.68,
+      xanchor = "left",
+      y = 0.5,
+      yanchor = "middle"),
     margin = list(
       l = 20,  # left margin
       r = 20,  # right margin
-      b = 5,   # bottom margin
-      t = 30   # top margin
+      b = 20,  # bottom margin
+      t = 20   # top margin
     ))
 
 bslib::page_fillable(

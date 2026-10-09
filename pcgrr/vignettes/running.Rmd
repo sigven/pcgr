@@ -198,7 +198,8 @@ copy number segments:
   from the CNA segments, shown in the CNA section of the report. **Research use only** - not a
   validated diagnostic measure, and only clinically thresholded (as the Myriad myChoice CDx assay) for
   ovarian cancer. Requires paired tumor-control WGS/WES data - not supported with `--tumor_only` or
-  `--assay TARGETED`.
+  `--assay TARGETED`. The CNA segments must be genome-wide, i.e. span at least 50% of the autosomal
+  genome (checked at the start of the run).
 
 ### OncoKB biomarker integration
 
