@@ -107,6 +107,12 @@ for(i in 1:NROW(ref_datasets)) {
 
 ### Report content
 
+::: {.callout-note title="Key findings summary" collapse="true"}
+
+`r pcgrr::key_findings_doc_note()`
+
+:::
+
 ::: {.callout-note title="Variant oncogenicity classification" collapse="true"}
 
 `r pcgrr::oncogenicity_doc_note()`

@@ -1,0 +1,241 @@
+## Mutational signatures
+
+```{r signatures_pdf_setup}
+#| echo: false
+#| eval: true
+
+msig_pdf <- pcg_report$content$mutational_signatures
+msig_conf_pdf <- pcg_report$settings$conf$somatic_snv$mutational_signatures
+no_refit_pdf <- isFALSE(msig_pdf$eval) || isTRUE(msig_pdf$missing_data)
+n_sbs_pdf <- NROW(msig_pdf$variant_set$all)
+all_refsigs_pdf <- isTRUE(as.logical(msig_conf_pdf$all_reference_signatures))
+no_site_prev_pdf <- isTRUE(as.logical(msig_pdf$result$no_site_prevalence))
+fit_pdf <- msig_pdf$result$goodness_of_fit
+poor_fit_pdf <- !no_refit_pdf && is.list(fit_pdf) &&
+  isTRUE(fit_pdf$estimate < 0.9)
+contributions_pdf <- msig_pdf$result$contributions
+
+signatures_caption_pdf <- paste0(
+  "Relative contribution of the top reference signatures (COSMIC) to the ",
+  "mutational profile of ", pcg_report$settings$sample_id, ", with bootstrap ",
+  "confidence intervals.")
+aetiology_caption_pdf <- paste0(
+  "Relative contribution of signatures per proposed aetiology.")
+profile_caption_pdf <- paste0(
+  "Raw mutational spectrum of single base substitutions (SBS) in their ",
+  "trinucleotide context - not considering signature refitting.")
+indel_caption_pdf <- paste0(
+  "Raw mutational spectrum of insertions/deletions (ID) by context.")
+```
+
+The **MutationalPatterns** package is used to estimate the relative contribution of [known mutational signatures](https://cancer.sanger.ac.uk/signatures/) in **`r pcg_report$settings$sample_id`**: the optimal linear combination of reference signatures that most closely reconstructs the spectrum of single base substitutions (SBS) in the tumor is determined (*signature refitting*), and a bootstrapping approach is used to estimate the uncertainty of the signature contributions.
+
+```{r signatures_pdf_missing}
+#| echo: false
+#| output: asis
+#| eval: !expr no_refit_pdf
+cat(pcgrr:::note_box_pdf(paste0(
+  "There are too few variants (**N = ", n_sbs_pdf, "**) in the tumor sample ",
+  "for reliable refitting of mutational signatures."),
+  title = "Limited variant data - refitting analysis omitted",
+  kind = "warning"))
+```
+
+```{r signatures_pdf_reference}
+#| echo: false
+#| output: asis
+#| eval: !expr isFALSE(no_refit_pdf)
+
+n_ref <- msig_pdf$result$n_reference_signatures
+if (all_refsigs_pdf) {
+  cat("All reference signatures (**n = ", n_ref, "**) were considered for ",
+      "refitting (default - use `--tumor_type_reference_signatures` to ",
+      "restrict refitting to signatures attributed to the tumor type). ",
+      sep = "")
+} else if (no_site_prev_pdf) {
+  cat("The primary site of the sample (**",
+      pcg_report$settings$conf$sample_properties$site, "**) is not yet ",
+      "attributed with specific reference signatures - all reference ",
+      "signatures (**n = ", n_ref, "**) were considered for refitting. ",
+      sep = "")
+} else {
+  ref <- msig_pdf$result$reference_data
+  ids <- if ("SIGNATURE_ID" %in% colnames(ref))
+    unique(ref$SIGNATURE_ID) else character()
+  cat("Reference signatures previously attributed to **",
+      pcg_report$settings$conf$sample_properties$site, "** cancers were ",
+      "considered for refitting (**n = ", length(ids), "**: ",
+      paste(ids, collapse = ", "), "). ", sep = "")
+}
+cat("A total of **n = ", format(n_sbs_pdf, big.mark = ","), "** SNVs were ",
+    "used for the mutational signature analysis of this tumor.\n\n", sep = "")
+```
+
+```{r signatures_pdf_poor_fit}
+#| echo: false
+#| output: asis
+#| eval: !expr poor_fit_pdf
+cat(pcgrr:::note_box_pdf(
+  if (all_refsigs_pdf) paste0(
+    "Reconstruction of the mutational profile with the full set of COSMIC ",
+    "reference signatures resulted in a sub-optimal fit (cosine similarity ",
+    "< 0.9). This may reflect a low/noisy mutation count, sequencing ",
+    "artefacts, or mutational processes not well represented among the ",
+    "reference signatures - interpret the signature contributions with caution.")
+  else paste0(
+    "Reconstruction of the mutational profile with the selected COSMIC ",
+    "reference signatures resulted in a sub-optimal fit (cosine similarity ",
+    "< 0.9). A re-run with all reference signatures is warranted (i.e. ",
+    "without the `--tumor_type_reference_signatures` option)."),
+  title = "Suboptimal fit of mutational profile", kind = "warning"))
+```
+
+```{r signatures_pdf_kpis}
+#| echo: false
+#| output: asis
+#| eval: !expr isFALSE(no_refit_pdf)
+
+col_high <- pcgrr::color_palette$oncogenicity$values[1]
+cat(pcgrr:::kpi_row_pdf(list(
+  list(title = "Dominant aetiologies",
+       value = paste(utils::head(contributions_pdf$per_group$group, 2),
+                     collapse = " · ")),
+  list(title = "Goodness of signature fit",
+       value = paste0(round(fit_pdf$estimate * 100, 1), "%"),
+       sub = "Cosine similarity, reconstructed vs. observed profile",
+       color = if (poor_fit_pdf) col_high else NULL),
+  list(title = "SNVs analyzed", value = format(n_sbs_pdf, big.mark = ",")))))
+```
+
+```{r signatures_pdf_contribution_plot}
+#| echo: false
+#| eval: !expr isFALSE(no_refit_pdf)
+#| fig-width: 7
+#| fig-height: 2.9
+#| fig-cap: !expr signatures_caption_pdf
+
+pcgrr::plot_signature_contributions(
+  signature_contributions = contributions_pdf)[["ggplot"]] |>
+  pcgrr:::pdf_plot_theme(base_size = 8) +
+  ggplot2::theme(
+    axis.title.y = ggplot2::element_text(family = "sans", size = 8),
+    axis.text.x = ggplot2::element_blank(),
+    legend.key.size = grid::unit(0.32, "cm")) +
+  ggplot2::guides(fill = ggplot2::guide_legend(nrow = 2))
+```
+
+```{r signatures_pdf_aetiology_plot}
+#| echo: false
+#| eval: !expr isFALSE(no_refit_pdf) && NROW(contributions_pdf$per_group) > 0
+#| fig-width: 3.4
+#| fig-height: 1.8
+#| out-width: 49%
+#| fig-cap: !expr aetiology_caption_pdf
+
+pg <- contributions_pdf$per_group
+pcgrr:::pie_chart_pdf(
+  data.frame(group = pg$group, N = pg$prop_group,
+             Pct = pg$prop_group / sum(pg$prop_group) * 100),
+  category = "group", title = NULL, center_label = "",
+  show_counts = FALSE)
+```
+
+```{r signatures_pdf_table_heading}
+#| echo: false
+#| output: asis
+#| eval: !expr isFALSE(no_refit_pdf) && NROW(contributions_pdf$per_signature) > 0
+cat("### Signature contributions\n\n")
+```
+
+```{r signatures_pdf_table}
+#| echo: false
+#| eval: !expr isFALSE(no_refit_pdf) && NROW(contributions_pdf$per_signature) > 0
+pcgrr:::signature_table_pdf(
+  contributions_pdf$per_signature, color = report_color)
+```
+
+### Raw mutational spectrum
+
+As a background perspective, the raw mutational spectrum of the sample is shown below, i.e. not considering the signature refitting analysis.
+
+```{r signatures_pdf_profile}
+#| echo: false
+#| eval: !expr isFALSE(is.null(msig_pdf$result$mut_mat))
+#| fig-width: 7
+#| fig-height: 2.6
+#| fig-cap: !expr profile_caption_pdf
+
+catalogue_mat <- msig_pdf$result$mut_mat
+y_max <- ceiling(max(catalogue_mat[, 1] / sum(catalogue_mat[, 1])) / 0.05) * 0.05
+MutationalPatterns::plot_96_profile(
+  catalogue_mat,
+  colors = utils::head(pcgrr::color_palette$multi$values, 6),
+  ymax = y_max) +
+  ggplot2::theme(
+    text = ggplot2::element_text(family = "sans", size = 7),
+    ## 96 trinucleotide contexts are not legible at page width
+    axis.text.x = ggplot2::element_blank(),
+    axis.ticks.x = ggplot2::element_blank(),
+    axis.text.y = ggplot2::element_text(size = 6),
+    strip.text = ggplot2::element_text(size = 7))
+```
+
+```{r signatures_pdf_profile_missing}
+#| echo: false
+#| output: asis
+#| eval: !expr is.null(msig_pdf$result$mut_mat)
+cat(pcgrr:::no_findings_pdf(
+  "No SNVs/single base substitutions were found in this sample.",
+  title = "No SNVs"))
+```
+
+```{r signatures_pdf_indels}
+#| echo: false
+#| eval: !expr isFALSE(is.null(msig_pdf$result$indel_counts))
+#| fig-width: 7
+#| fig-height: 2.6
+#| fig-cap: !expr indel_caption_pdf
+
+MutationalPatterns::plot_indel_contexts(
+  counts = msig_pdf$result$indel_counts, condensed = TRUE) +
+  ggplot2::theme(
+    legend.position = "none",
+    text = ggplot2::element_text(family = "sans", size = 7),
+    axis.text.x = ggplot2::element_text(size = 5),
+    strip.text = ggplot2::element_text(size = 6))
+```
+
+### Signature similarity
+
+```{r signatures_pdf_similarity}
+#| echo: false
+#| output: asis
+#| eval: true
+
+sim_pdf <- msig_pdf$result$signature_similarity
+if (is.null(sim_pdf) || NROW(sim_pdf) == 0) {
+  cat(pcgrr:::note_box_pdf(paste0(
+    "There are too few somatic variants (**N = ", n_sbs_pdf, "**) in the ",
+    "tumor sample for a similarity analysis of mutational signatures (a ",
+    "minimum of 30 SNVs is required)."),
+    title = "Limited variant data - similarity analysis omitted",
+    kind = "warning"))
+} else {
+  cat("The raw mutational spectrum of the sample (frequencies of ",
+      "trinucleotide contexts) is compared to each of the reference ",
+      "signatures (SBS) in COSMIC. The cosine similarity ranges from 0 to ",
+      "1 (perfect match); the ten most similar signatures are shown",
+      if (!all_refsigs_pdf && !no_site_prev_pdf) paste0(
+        ", with signatures attributed to ",
+        pcg_report$settings$conf$sample_properties$site,
+        " cancers highlighted"),
+      ".\n\n", sep = "")
+}
+```
+
+```{r signatures_pdf_similarity_table}
+#| echo: false
+#| eval: !expr NROW(msig_pdf$result$signature_similarity) > 0
+pcgrr:::signature_similarity_table_pdf(
+  msig_pdf$result$signature_similarity, n = 10, color = report_color)
+```

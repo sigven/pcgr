@@ -1,0 +1,323 @@
+## Key findings ("highlights") of a PCGR report, as a short templated text -
+## the most critical findings (actionable alterations) first, supported by
+## other findings (oncogenic SNV/InDel variants, composite genomic
+## biomarkers, copy number variants, mutational signatures, germline and
+## transcriptome findings). Markdown output, for use in both the PDF and HTML reports.
+
+#' Escape markdown emphasis characters in plain text (e.g. 'p.R1450*')
+#'
+#' @param x character vector
+#' @keywords internal
+md_escape_hl <- function(x) {
+  stringr::str_replace_all(x, "([\\\\*_`\\[\\]<>])", "\\\\\\1")
+}
+
+#' Deterministic ordering of gene-level records: cancer association ranks
+#' (TISSUE_ASSOC_RANK, then GLOBAL_ASSOC_RANK; highest first - as in the
+#' variant tables of the report), then optional extra keys, then SYMBOL
+#'
+#' @param d data frame with column SYMBOL (rank columns optional)
+#' @param first optional leading sort keys (numeric, larger = first)
+#' @param then optional sort keys applied after the ranks (larger = first)
+#' @return row order (integer)
+#' @keywords internal
+rank_order_hl <- function(d, first = NULL, then = NULL) {
+  num <- function(x) if (is.null(x)) rep(0, NROW(d)) else
+    dplyr::coalesce(suppressWarnings(as.numeric(x)), 0)
+  keys <- c(lapply(first, function(k) -num(k)),
+            list(-num(d$TISSUE_ASSOC_RANK), -num(d$GLOBAL_ASSOC_RANK)),
+            lapply(then, function(k) -num(k)),
+            list(as.character(d$SYMBOL)))
+  do.call(order, unname(keys))
+}
+
+#' Percentile as ordinal number ('99th'), rounded and kept within 1-99
+#'
+#' @param x percentile(s) (0-100)
+#' @keywords internal
+ordinal_hl <- function(x) {
+  n <- as.integer(pmin(pmax(round(x), 1), 99))
+  suffix <- ifelse(n %% 100 %in% 11:13, "th",
+                   c("th", "st", "nd", "rd", rep("th", 6))[n %% 10 + 1])
+  paste0(n, suffix)
+}
+
+#' Compact list of items ('A, B, C +k more')
+#'
+#' @param x items (character)
+#' @param max_show maximum number of items shown
+#' @keywords internal
+fmt_list_hl <- function(x, max_show = 5) {
+  x <- unique(x[!is.na(x) & x != ""])
+  n <- length(x)
+  if (n == 0) return("")
+  s <- paste(utils::head(x, max_show), collapse = ", ")
+  if (n > max_show) s <- paste0(s, " (+", n - max_show, " more)")
+  s
+}
+
+#' Somatic alterations with an actionability tier (SNVs/InDels, CNAs, RNA
+#' fusions) as display labels
+#'
+#' @param report PCGR report object
+#' @param tier actionability tiers
+#'
+#' @return data frame with LABEL, SYMBOL, ALTERATION and ACTIONABILITY_TIER
+#' @keywords internal
+tiered_alterations_hl <- function(report, tier = c(1, 2)) {
+  content <- report$content
+  recs <- list()
+  snv <- content$snv_indel$callset$variant
+  if (isTRUE(content$snv_indel$eval) && NROW(snv) > 0 &&
+      all(c("SYMBOL", "ALTERATION", "ACTIONABILITY_TIER") %in% colnames(snv))) {
+    recs$snv <- data.frame(
+      SYMBOL = snv$SYMBOL, ALTERATION = strip_html_pdf(snv$ALTERATION),
+      TISSUE_ASSOC_RANK = snv$TISSUE_ASSOC_RANK,
+      GLOBAL_ASSOC_RANK = snv$GLOBAL_ASSOC_RANK,
+      ACTIONABILITY_TIER = suppressWarnings(as.integer(snv$ACTIONABILITY_TIER)))
+  }
+  cna <- content$cna$callset$variant
+  if (isTRUE(content$cna$eval) && NROW(cna) > 0 &&
+      all(c("SYMBOL", "VARIANT_CLASS", "ACTIONABILITY_TIER") %in% colnames(cna))) {
+    recs$cna <- data.frame(
+      SYMBOL = cna$SYMBOL,
+      TISSUE_ASSOC_RANK = cna$TISSUE_ASSOC_RANK,
+      GLOBAL_ASSOC_RANK = cna$GLOBAL_ASSOC_RANK,
+      ALTERATION = dplyr::case_when(
+        cna$VARIANT_CLASS %in% c("homdel", "hemdel", "hetdel") ~ "loss",
+        .default = as.character(cna$VARIANT_CLASS)),
+      ACTIONABILITY_TIER = suppressWarnings(as.integer(cna$ACTIONABILITY_TIER)))
+  }
+  fus <- content$fusion$callset$variant
+  if (isTRUE(content$fusion$eval) && NROW(fus) > 0) {
+    f <- fusion_tier_records_pdf(fus)
+    if (NROW(f) > 0) recs$fusion <- f[, c("SYMBOL", "ALTERATION",
+                                          "ACTIONABILITY_TIER")]
+  }
+  d <- dplyr::bind_rows(recs)
+  if (NROW(d) == 0) {
+    return(data.frame(LABEL = character(), SYMBOL = character(),
+                      ALTERATION = character(), ACTIONABILITY_TIER = integer()))
+  }
+  d <- d[!is.na(d$ACTIONABILITY_TIER) & d$ACTIONABILITY_TIER %in% tier, ,
+         drop = FALSE]
+  d <- dplyr::distinct(d)
+  ## tier (1 before 2), then cancer association ranks, then symbol
+  d <- d[do.call(order, list(
+    d$ACTIONABILITY_TIER,
+    -dplyr::coalesce(as.numeric(d$TISSUE_ASSOC_RANK), 0),
+    -dplyr::coalesce(as.numeric(d$GLOBAL_ASSOC_RANK), 0),
+    d$SYMBOL, d$ALTERATION)), , drop = FALSE]
+  d$LABEL <- paste0("**", md_escape_hl(d$SYMBOL), "** ",
+                    md_escape_hl(d$ALTERATION))
+  d
+}
+
+#' Key findings of a PCGR report (highlights) as markdown
+#'
+#' The most critical findings come first: somatic alterations of strong or
+#' potential clinical significance (AMP/ASCO/CAP Tier 1/2). These are
+#' followed by supporting findings, each included only when informative:
+#' oncogenic/likely oncogenic SNV/InDel variants, composite genomic
+#' biomarkers (TMB, MSI), copy number variants (amplified proto-oncogenes,
+#' deleted tumor suppressors, genome doubling, HRD score), mutational
+#' signatures, kataegis, germline findings (CPSR), and transcriptome findings
+#' (RNA fusions, expression outliers).
+#'
+#' @param report PCGR report object
+#' @param max_show maximum number of items listed per finding
+#'
+#' @return list with 'lead' (markdown on actionable alterations) and
+#' 'supporting' (markdown bullet list, "" if none)
+#' @export
+report_highlights <- function(report, max_show = 5) {
+  content <- report$content
+  conf <- report$settings$conf
+
+  ## --- Lead: actionable alterations ---
+  lead <- c()
+  actionable <- tiered_alterations_hl(report, tier = c(1, 2))
+  ## one list item per tier
+  tier_item <- function(t, desc) {
+    lbl <- actionable$LABEL[actionable$ACTIONABILITY_TIER == t]
+    if (length(lbl) == 0) return(NULL)
+    paste0("- **Tier ", t, "** (", desc, "): ", fmt_list_hl(lbl, max_show))
+  }
+  if (NROW(actionable) > 0) {
+    lead <- c(lead, paste0(
+      "**Actionable alterations** (AMP/ASCO/CAP)\n\n",
+      paste(c(tier_item(1, "strong clinical significance"),
+              tier_item(2, "potential clinical significance")),
+            collapse = "\n")))
+  } else if (isTRUE(content$snv_indel$eval) || isTRUE(content$cna$eval) ||
+             isTRUE(content$fusion$eval)) {
+    lead <- c(lead, paste0(
+      "**No actionable alterations** of strong or potential clinical ",
+      "significance (AMP/ASCO/CAP Tier 1/2) were identified."))
+  }
+
+  ## --- Supporting findings ---
+  supporting <- c()
+
+  ## SNV/InDel variants - number of oncogenic / likely oncogenic variants,
+  ## with the first max_show listed (oncogenicity score, then cancer
+  ## association ranks, then symbol)
+  snv <- content$snv_indel$callset$variant
+  if (isTRUE(content$snv_indel$eval) && NROW(snv) > 0 &&
+      all(c("SYMBOL", "ALTERATION", "ONCOGENICITY") %in% colnames(snv))) {
+    onc_class <- tolower(stringr::str_replace_all(snv$ONCOGENICITY, "_", " "))
+    onc <- snv[onc_class %in% c("oncogenic", "likely oncogenic"), ,
+               drop = FALSE]
+    if (NROW(onc) > 0) {
+      onc <- onc[rank_order_hl(onc, first = list(onc$ONCOGENICITY_SCORE)), ,
+                 drop = FALSE]
+      labels <- unique(paste0("**", md_escape_hl(onc$SYMBOL), "** ",
+                              md_escape_hl(strip_html_pdf(onc$ALTERATION))))
+      supporting <- c(supporting, paste0(
+        "**SNV/InDel variants:** **n = ", length(labels),
+        "** oncogenic/likely oncogenic - ", fmt_list_hl(labels, max_show)))
+    }
+  }
+
+  ## composite genomic biomarkers - shown as pills (below the actionable
+  ## alterations) only when positive (TMB-high, MSI-high); none otherwise
+  pills <- character()
+  if (isTRUE(content$tmb$eval) && isTRUE(content$tmb$tmb_high)) {
+    est <- content$tmb$sample_estimate
+    tmb_display <- conf$somatic_snv$tmb$tmb_display
+    if (NROW(est) > 0 && "TMB_MEASURE" %in% colnames(est)) {
+      est <- est[est$TMB_MEASURE == paste0("TMB_", tmb_display), , drop = FALSE]
+    }
+    pills <- c(pills, if (NROW(est) > 0) paste0(
+      "TMB-high (", round(est$TMB_ESTIMATE[1], 1), " mut/Mb)") else "TMB-high")
+  }
+  if (isTRUE(content$msi$eval) && !isTRUE(content$msi$missing_data)) {
+    cls <- content$msi$prediction$msi_stats$predicted_class
+    if (length(cls) == 1 && !is.na(cls) && !grepl("^MSS", cls)) {
+      pills <- c(pills, "MSI-high")
+    }
+  }
+
+  ## copy number features
+  if (isTRUE(content$cna$eval)) {
+    cna <- content$cna$callset$variant
+    cn <- c()
+    if (NROW(cna) > 0 && all(c("SYMBOL", "VARIANT_CLASS") %in% colnames(cna))) {
+      ranked <- function(d) unique(d$SYMBOL[rank_order_hl(d)])
+      amp_onc <- ranked(cna[cna$VARIANT_CLASS == "amplification" &
+                              cna$ONCOGENE %in% TRUE, , drop = FALSE])
+      del_tsg <- ranked(cna[cna$VARIANT_CLASS %in% c("homdel", "hemdel") &
+                              cna$TUMOR_SUPPRESSOR %in% TRUE, , drop = FALSE])
+      if (length(unique(amp_onc)) > 0) {
+        cn <- c(cn, paste0("amplified proto-oncogenes: ",
+                           fmt_list_hl(amp_onc, max_show)))
+      }
+      if (length(unique(del_tsg)) > 0) {
+        cn <- c(cn, paste0("deep deletions of tumor suppressors: ",
+                           fmt_list_hl(del_tsg, max_show)))
+      }
+    }
+    cna_conf <- conf$somatic_cna
+    if (isTRUE(as.logical(cna_conf$genome_doubled))) {
+      cn <- c(cn, "whole-genome doubling")
+    }
+    if (isTRUE(as.logical(cna_conf$estimate_hrd)) && !is.null(cna_conf$hrd_sum)) {
+      cn <- c(cn, paste0("HRD score ", cna_conf$hrd_sum))
+    }
+    if (length(cn) > 0) {
+      supporting <- c(supporting, paste0(
+        "**Copy number variants:** ", paste(cn, collapse = "; ")))
+    }
+  }
+
+  ## mutational signatures - dominant proposed aetiologies
+  msig <- content$mutational_signatures
+  if (isTRUE(msig$eval) && !isTRUE(msig$missing_data)) {
+    pg <- msig$result$contributions$per_group
+    if (NROW(pg) > 0 && all(c("group", "prop_group") %in% colnames(pg))) {
+      pg <- pg[!pg$group %in% c("Unknown", "Other"), , drop = FALSE]
+      pg <- utils::head(pg[order(-pg$prop_group, as.character(pg$group)), , drop = FALSE], 2)
+      if (NROW(pg) > 0) {
+        supporting <- c(supporting, paste0(
+          "**Mutational signatures:** dominant aetiologies ",
+          paste0(md_escape_hl(pg$group), " (", round(100 * pg$prop_group), "%)",
+                 collapse = ", ")))
+      }
+    }
+  }
+  if (isTRUE(content$kataegis$eval) && NROW(content$kataegis$events) > 0) {
+    supporting <- c(supporting, paste0(
+      "**Kataegis:** ", NROW(content$kataegis$events),
+      " potential event(s) of localized hypermutation"))
+  }
+
+  ## germline findings (CPSR)
+  if (isTRUE(content$germline_classified$eval)) {
+    gv <- content$germline_classified$callset$variant_display
+    plp <- if (NROW(gv) > 0 && "CLINICAL_SIGNIFICANCE" %in% colnames(gv))
+      gv[gv$CLINICAL_SIGNIFICANCE %in% c("Pathogenic", "Likely Pathogenic"), ,
+         drop = FALSE] else data.frame()
+    ## pathogenic before likely pathogenic, then cancer association ranks
+    if (NROW(plp) > 0) {
+      plp <- plp[rank_order_hl(
+        plp, first = list(plp$CLINICAL_SIGNIFICANCE == "Pathogenic")), ,
+        drop = FALSE]
+    }
+    supporting <- c(supporting, paste0(
+      "**Germline (CPSR):** ",
+      if (NROW(plp) > 0) paste0(
+        "pathogenic/likely pathogenic ",
+        fmt_list_hl(paste0("**", md_escape_hl(plp$SYMBOL), "** ",
+                           md_escape_hl(strip_html_pdf(plp$ALTERATION))),
+                    max_show)) else
+          "no pathogenic/likely pathogenic variants in cancer predisposition genes"))
+  }
+
+  ## transcriptome findings - fusions with proto-oncogene partners and
+  ## expression outliers in cancer genes
+  rna <- c()
+  if (isTRUE(content$fusion$eval)) {
+    fd <- content$fusion$callset$variant_display
+    if (NROW(fd) > 0) {
+      ## fusions ordered by number of split reads (highest first), then name
+      fd <- fd[order(-dplyr::coalesce(as.numeric(fd$SPLIT_READS), 0),
+                     as.character(fd$FUSION_GENE)), , drop = FALSE]
+      onc_fus <- strip_html_pdf(fd$FUSION_GENE2[
+        fd$ONCOGENE_5P %in% TRUE | fd$ONCOGENE_3P %in% TRUE])
+      rna <- c(rna, paste0(
+        NROW(fd), " RNA fusion(s)",
+        if (length(onc_fus) > 0) paste0(
+          ", with proto-oncogene partners: ", fmt_list_hl(onc_fus, max_show))))
+    }
+  }
+  if (isTRUE(content$expression$eval) && NROW(content$expression$outliers) > 0) {
+    out <- content$expression$outliers
+    ## cancer association ranks first, then |Z-score|
+    top <- function(d) {
+      d <- d[rank_order_hl(d, then = list(abs(d$Z_SCORE))), , drop = FALSE]
+      paste0(d$SYMBOL, " (", ordinal_hl(d$PERCENTILE), " pctile)")
+    }
+    high <- out[out$EXPR_OUTLIER %in% "Increased expression" &
+                  out$ONCOGENE %in% TRUE, , drop = FALSE]
+    low <- out[out$EXPR_OUTLIER %in% "Reduced expression" &
+                 out$TUMOR_SUPPRESSOR %in% TRUE, , drop = FALSE]
+    if (NROW(high) > 0) {
+      rna <- c(rna, paste0("overexpressed proto-oncogenes: ",
+                           fmt_list_hl(top(high), max_show)))
+    }
+    if (NROW(low) > 0) {
+      rna <- c(rna, paste0("underexpressed tumor suppressors: ",
+                           fmt_list_hl(top(low), max_show)))
+    }
+  }
+  if (length(rna) > 0) {
+    supporting <- c(supporting, paste0(
+      "**Transcriptome findings:** ", paste(rna, collapse = "; ")))
+  }
+
+  list(
+    lead = paste(lead, collapse = "\n\n"),
+    pills = pills,
+    supporting = if (length(supporting) > 0)
+      paste0("- ", supporting, collapse = "\n") else "")
+}

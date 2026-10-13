@@ -653,13 +653,14 @@ def compute_genomic_instability_score(
 
     Returns:
         dict with keys: hrd_loh, lst, tai, hrd_sum, hrd_sum_ploidy_adjusted
-        (None if tumor_ploidy not given), n_segments_used.
+        (None if tumor_ploidy not given), n_segments_used, n_segments_imputed.
 
-    NOTE: this score is only validated for whole-genome/whole-exome,
-    paired tumor-normal data, and (per Myriad's assay) primarily for
-    ovarian cancer - see caveats discussed with the user before using this
-    beyond a research-use, non-diagnostic context. It is not meaningful for
-    tumor-only or targeted panel sequencing.
+    NOTE: this score is only validated for whole-genome/whole-exome copy
+    number segments called with a matched control, and (per Myriad's assay)
+    primarily for ovarian cancer - research use only, non-diagnostic. It is
+    not meaningful for targeted panel sequencing. Without a matched control,
+    germline runs of homozygosity are indistinguishable from somatic LOH and
+    may inflate HRD-LOH (and TAI).
     """
     if logger is None:
         logger = logging.getLogger("pcgr-hrd")

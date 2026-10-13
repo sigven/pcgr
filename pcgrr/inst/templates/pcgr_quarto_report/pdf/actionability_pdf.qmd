@@ -1,0 +1,91 @@
+```{=typst}
+#pagebreak(weak: true)
+```
+
+# Clinical actionability
+
+```{r actionability_pdf_setup}
+#| echo: false
+#| eval: true
+
+## somatic SNVs/InDels and CNAs with an actionability tier (AMP/ASCO/CAP)
+tier_cols <- c("SYMBOL", "ENSEMBL_GENE_ID", "ALTERATION", "CONSEQUENCE", "VARIANT_CLASS",
+               "ACTIONABILITY_TIER", "ONCOGENICITY", "VAF_TUMOR",
+               "MUTATION_HOTSPOT_CANCERTYPE")
+actionable_pdf <- dplyr::bind_rows(
+  if (isTRUE(pcg_report$content$snv_indel$eval))
+    pcg_report$content$snv_indel$callset$variant |>
+      dplyr::select(dplyr::any_of(tier_cols)) |>
+      dplyr::mutate(dplyr::across(dplyr::everything(), as.character)),
+  ## CNAs: copy number event as the alteration (amplification/gain, or
+  ## loss for deletions), variant class 'CNA'
+  if (isTRUE(pcg_report$content$cna$eval))
+    pcg_report$content$cna$callset$variant |>
+      dplyr::select(dplyr::any_of(tier_cols)) |>
+      dplyr::mutate(dplyr::across(dplyr::everything(), as.character)) |>
+      dplyr::mutate(
+        ALTERATION = dplyr::case_when(
+          .data$VARIANT_CLASS %in% c("homdel", "hemdel", "hetdel") ~ "loss",
+          .default = .data$VARIANT_CLASS),
+        VARIANT_CLASS = "CNA"),
+  if (isTRUE(pcg_report$content$fusion$eval))
+    pcgrr:::fusion_tier_records_pdf(pcg_report$content$fusion$callset$variant) |>
+      dplyr::mutate(dplyr::across(dplyr::everything(), as.character)))
+if (!"ACTIONABILITY_TIER" %in% colnames(actionable_pdf)) {
+  actionable_pdf$ACTIONABILITY_TIER <- character(NROW(actionable_pdf))
+}
+actionable_pdf <- actionable_pdf |>
+  dplyr::filter(.data$ACTIONABILITY_TIER %in% c("1", "2")) |>
+  dplyr::arrange(.data$ACTIONABILITY_TIER, .data$SYMBOL)
+n_actionable_pdf <- NROW(actionable_pdf)
+```
+
+Somatic aberrations (SNVs/InDels, copy number aberrations and RNA fusions) in the tumor sample have been classified into tiers of *clinical actionability*, adopting the AMP/ASCO/CAP guidelines. Tier 1 and Tier 2 aberrations (strong and potential clinical significance) are listed below.
+
+## Tier 1 & 2 aberrations
+
+```{r actionable_table}
+#| echo: false
+#| eval: !expr n_actionable_pdf > 0
+
+actionable_pdf |>
+  pcgrr:::variant_table_pdf(color = report_color)
+```
+
+```{r actionable_hotspot_legend}
+#| echo: false
+#| output: asis
+#| eval: !expr n_actionable_pdf > 0
+cat(pcgrr:::hotspot_legend_pdf(actionable_pdf))
+```
+
+```{r actionable_none_msg}
+#| echo: false
+#| output: asis
+#| eval: !expr n_actionable_pdf == 0
+cat(pcgrr:::no_findings_pdf(paste0(
+  "No somatic aberrations of strong or potential clinical significance ",
+  "(Tier 1/2) were identified in this tumor sample.")))
+```
+
+## Biomarker evidence
+
+```{r actionability_evidence_intro}
+#| echo: false
+#| output: asis
+cat("Matched therapeutic biomarker evidence (", pcgrr:::bm_db_label_pdf(pcg_report),
+    ") for the Tier 1 and Tier 2 aberrations listed above. Per alteration, ",
+    "matched therapies (in bold) are listed with the tumor types of the ",
+    "underlying evidence, together with the evidence levels and sources. ",
+    "Only tier-defining evidence items are shown for therapeutic sensitivity; ",
+    "details on each evidence item are available in the HTML report.\n\n",
+    sep = "")
+cat(pcgrr:::bm_source_legend_pdf())
+```
+
+```{r actionability_evidence_tables}
+#| echo: false
+#| output: asis
+cat(pcgrr:::bm_evidence_section_pdf(
+  pcg_report, tier = c(1, 2), color = report_color))
+```

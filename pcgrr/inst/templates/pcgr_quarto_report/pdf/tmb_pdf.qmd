@@ -1,0 +1,151 @@
+## Tumor mutational burden
+
+```{r tmb_pdf_setup}
+#| echo: false
+#| eval: true
+
+tmb_conf_pdf <- pcg_report$settings$conf$somatic_snv$tmb
+tmb_display_pdf <- tmb_conf_pdf$tmb_display
+tmb_estimate_pdf <- pcg_report$content$tmb$sample_estimate |>
+  dplyr::filter(.data$TMB_MEASURE == paste0("TMB_", tmb_display_pdf))
+tmb_algo_pdf <- dplyr::case_when(
+  tmb_display_pdf == "coding_and_silent" ~ "Coding and silent",
+  tmb_display_pdf == "coding_non_silent" ~ "Coding non-silent",
+  .default = "Missense only")
+tmb_threshold_pdf <- pcg_report$content$tmb$tmb_high_threshold
+tmb_high_pdf <- isTRUE(pcg_report$content$tmb$tmb_high)
+sample_props_pdf <- pcg_report$settings$conf$sample_properties
+tmb_plot_caption_pdf <- paste0(
+  "Distribution of tumor mutational burden (TMB, log10 mutations/Mb) among ",
+  "TCGA samples per primary tumor site (box: interquartile range; violin: ",
+  "full distribution), sorted by descending median TMB. The highlighted row ",
+  "corresponds to the query sample's primary site (", sample_props_pdf$site,
+  "); the dashed line marks the TMB estimate of this sample. Axis labels ",
+  "indicate the power of ten (e.g. 1 = 10 mutations/Mb).")
+```
+
+PCGR can estimate TMB in different manners, depending on the type of variants included in the calculation (*coding_non_silent*, *coding_and_silent*, and *missense_only*, see the documentation). Results from the method configured by the user (**`r tmb_algo_pdf`**) are shown here.
+
+```{r tmb_pdf_filtering}
+#| echo: false
+#| output: asis
+#| eval: true
+
+dp_filter <- isTRUE(sample_props_pdf$dp_tumor_detected) &&
+  isTRUE(tmb_conf_pdf$tmb_dp_min > 0)
+af_filter <- isTRUE(sample_props_pdf$vaf_tumor_detected) &&
+  isTRUE(tmb_conf_pdf$tmb_af_min > 0)
+if (dp_filter || af_filter) {
+  cat("For TMB calculation, requirements for sequencing depth and/or ",
+      "variant allele frequency (VAF) have been applied to filter out ",
+      "low-quality variants",
+      if (dp_filter) paste0(" (minimum depth: **", tmb_conf_pdf$tmb_dp_min, "**)"),
+      if (af_filter) paste0(" (minimum VAF: **", tmb_conf_pdf$tmb_af_min, "**)"),
+      ".\n\n", sep = "")
+} else {
+  cat("No dedicated filtering of variants based on sequencing depth or ",
+      "variant allele frequency (VAF) has been applied for TMB ",
+      "calculation.\n\n", sep = "")
+}
+```
+
+```{r tmb_pdf_kpis}
+#| echo: false
+#| output: asis
+#| eval: !expr NROW(tmb_estimate_pdf) == 1
+
+col_high <- pcgrr::color_palette$oncogenicity$values[1]
+cat(pcgrr:::kpi_row_pdf(list(
+  ## box color: dark (TMB below the TMB-high threshold) or red (TMB-high)
+  list(title = "TMB estimate",
+       value = paste(round(tmb_estimate_pdf$TMB_ESTIMATE, 2),
+                     stringr::str_replace(tmb_estimate_pdf$TMB_UNIT,
+                                          "^mutations/", "mut/")),
+       sub = paste0("N = ", tmb_estimate_pdf$TMB_N_VARIANTS, " variants",
+                    if (tmb_high_pdf) paste0(" · TMB-high (>= ",
+                                             tmb_threshold_pdf, " mut/Mb)")),
+       color = if (tmb_high_pdf) col_high else NULL),
+  list(title = "TMB algorithm", value = tmb_algo_pdf,
+       sub = paste0("TMB-high threshold: ", tmb_threshold_pdf, " mut/Mb")),
+  list(title = "Effective target size",
+       value = paste(pcg_report$settings$conf$assay_properties$effective_target_size_mb,
+                     "Mb")))))
+```
+
+### TMB reference cohorts comparison
+
+```{r tmb_pdf_reference_plot}
+#| echo: false
+#| eval: !expr NROW(pcg_report$content$tmb$tmb_reference) > 0
+#| fig-width: 7
+#| fig-height: 6.2
+#| fig-cap: !expr tmb_plot_caption_pdf
+
+tumor_only_pdf <- isTRUE(as.logical(
+  pcg_report$settings$conf$assay_properties$vcf_tumor_only))
+tmb_plot_pdf <- pcgrr::plot_tmb_primary_site_tcga(
+  pcg_report$content$tmb$tmb_reference,
+  p_site = sample_props_pdf$site,
+  tmb_estimates = pcg_report$content$tmb$sample_estimate,
+  tmb_display_type = tmb_display_pdf,
+  tumor_only = tumor_only_pdf)
+pcgrr:::pdf_plot_theme(tmb_plot_pdf, base_size = 8)
+```
+
+```{r tmb_pdf_reference_note}
+#| echo: false
+#| output: asis
+cat(pcgrr:::note_box_pdf(paste0(
+  "Be aware of the nature of the reference dataset (TCGA), which must be ",
+  "taken into account during TMB interpretation of the query sample:\n\n",
+  "- TCGA tumor samples are sequenced with a mean coverage of approximately 100X\n",
+  "- TCGA somatic mutation calls are based on a consensus among variant ",
+  "callers (each variant supported by a minimum of two algorithms)\n",
+  "- TCGA somatic mutation calls are based on paired tumor-control ",
+  "sequencing (tumor-only sequencing frequently produces higher numbers ",
+  "due to more noise)\n",
+  "- TCGA somatic mutation calls used for TMB calculation have been ",
+  "filtered for sequencing depth (minimum DP = 30) and variant allele ",
+  "frequency (minimum VAF = 0.05)"),
+  title = "TMB reference comparison"))
+```
+
+```{r tmb_pdf_biomarkers}
+#| echo: false
+#| output: asis
+#| eval: !expr isFALSE(is.null(pcg_report$content$tmb$callset))
+
+cat("### Biomarker evidence for TMB-High\n\n")
+cat("The tumor mutational burden (", round(tmb_estimate_pdf$TMB_ESTIMATE, 1),
+    " mutations/Mb, ", tmb_algo_pdf, ") is at or above the threshold for ",
+    "TMB-High (", tmb_threshold_pdf, " mutations/Mb). Therapeutic ",
+    "implications of TMB-High were retrieved from ",
+    pcgrr:::bm_db_label_pdf(pcg_report), ", and are classified according ",
+    "to the strength of evidence for the tumor type (", sample_props_pdf$site,
+    "), following AMP/ASCO/CAP guidelines.\n\n", sep = "")
+```
+
+```{r tmb_pdf_bm_sensitivity}
+#| echo: false
+#| eval: !expr isFALSE(is.null(pcg_report$content$tmb$callset))
+
+tmb_bm_pdf <- pcgrr:::bm_evidence_tables_pdf(
+  pcg_report, variant_category = "tmb", color = report_color)
+tmb_bm_pdf$sensitivity
+```
+
+```{r tmb_pdf_bm_sensitivity_none}
+#| echo: false
+#| output: asis
+#| eval: !expr isFALSE(is.null(pcg_report$content$tmb$callset)) && is.null(tmb_bm_pdf$sensitivity)
+cat(pcgrr:::no_findings_pdf(paste0(
+  "Based on available data in ", pcgrr:::bm_db_label_pdf(pcg_report),
+  ", no therapeutic sensitivity biomarkers (Tier 1-3) were identified for ",
+  "TMB-High in this tumor sample.")))
+```
+
+```{r tmb_pdf_bm_resistance}
+#| echo: false
+#| eval: !expr isFALSE(is.null(pcg_report$content$tmb$callset)) && !is.null(tmb_bm_pdf$resistance)
+tmb_bm_pdf$resistance
+```

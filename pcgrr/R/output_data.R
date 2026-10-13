@@ -302,7 +302,15 @@ get_excel_sheets <- function(report = NULL) {
       ),
       data.frame(
         SAMPLE_ID = sample_id, CATEGORY = 'SAMPLE',
+        PROPERTY = 'AGE_AT_DIAGNOSIS', VALUE = NA
+      ),
+      data.frame(
+        SAMPLE_ID = sample_id, CATEGORY = 'SAMPLE',
         PROPERTY = 'TUMOR_PURITY', VALUE = NA
+      ),
+      data.frame(
+        SAMPLE_ID = sample_id, CATEGORY = 'SAMPLE',
+        PROPERTY = 'TUMOR_PURITY_SOURCE', VALUE = NA
       ),
       data.frame(
         SAMPLE_ID = sample_id, CATEGORY = 'SAMPLE',
@@ -330,12 +338,18 @@ get_excel_sheets <- function(report = NULL) {
     )
   }
 
-  for (elem in c('SITE','SEX','TUMOR_PURITY','TUMOR_PLOIDY','TUMOR_PLOIDY_SOURCE')) {
+  for (elem in c('SITE','SEX','TUMOR_PURITY','TUMOR_PURITY_SOURCE',
+                 'TUMOR_PLOIDY','TUMOR_PLOIDY_SOURCE')) {
     if (tolower(elem) %in% names(report$content$sample_properties)) {
         sample_assay[sample_assay$PROPERTY == elem, 'VALUE'] <-
           report$content$sample_properties[[tolower(elem)]]
       }
     }
+  ## age of the subject at diagnosis ('--age'; 'NA' if not provided)
+  if ('age' %in% names(report$content$sample_properties)) {
+    sample_assay[sample_assay$PROPERTY == 'AGE_AT_DIAGNOSIS', 'VALUE'] <-
+      report$content$sample_properties[['age']]
+  }
 
   if (dna_data_present) {
     for (elem in c('TYPE','MODE','EFFECTIVE_TARGET_SIZE_MB')) {

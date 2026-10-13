@@ -782,6 +782,14 @@ if (genome_doubled) {
       "\n:::\n\n", sep = "")
 }
 
+if (isTRUE(as.logical(pcg_report$settings$conf$assay_properties$vcf_tumor_only))) {
+  cat("::: {.callout-warning}\n## Caution - tumor-only analysis\n\n",
+      "This sample was analyzed in tumor-only mode. The HRD score is derived from the copy number segments only, and is reliable only if ",
+      "these were called with a matched control sample. Without a matched control, germline runs of homozygosity (common in some populations, ",
+      "and with parental relatedness) cannot be distinguished from somatic loss-of-heterozygosity, and may inflate HRD-LOH (and TAI).",
+      "\n:::\n\n", sep = "")
+}
+
 ```
 
 <br>

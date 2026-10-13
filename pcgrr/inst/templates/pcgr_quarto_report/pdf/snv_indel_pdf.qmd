@@ -1,0 +1,97 @@
+```{=typst}
+#pagebreak(weak: true)
+```
+
+# Somatic SNVs/InDels
+
+```{r snv_indel_pdf_setup}
+#| echo: false
+#| eval: true
+
+vstats_pdf <- pcg_report$content$snv_indel$vstats
+snv_pdf <- pcg_report$content$snv_indel$callset$variant
+oncogenic_pdf <- if ("ONCOGENICITY" %in% colnames(snv_pdf)) {
+  snv_pdf |>
+    dplyr::filter(
+      tolower(stringr::str_replace_all(.data$ONCOGENICITY, "_", " ")) %in%
+        c("oncogenic", "likely oncogenic"))
+} else snv_pdf[0, , drop = FALSE]
+if ("ONCOGENICITY_SCORE" %in% colnames(oncogenic_pdf)) {
+  oncogenic_pdf <- oncogenic_pdf |>
+    dplyr::arrange(dplyr::desc(.data$ONCOGENICITY_SCORE))
+}
+n_oncogenic_pdf <- NROW(oncogenic_pdf)
+```
+
+## Variant statistics
+
+```{r snv_indel_stats_kpis}
+#| echo: false
+#| output: asis
+#| eval: true
+
+stat_or_na <- function(x) if (is.null(x)) "N/A" else as.character(x)
+cat(pcgrr:::kpi_row_pdf(list(
+  list(title = "Somatic variants (total)", value = stat_or_na(vstats_pdf$n_var)),
+  list(title = "SNVs", value = stat_or_na(vstats_pdf$n_var_snv)),
+  list(title = "InDels", value = stat_or_na(vstats_pdf$n_var_indel)),
+  list(title = "Protein-coding variants",
+       value = stat_or_na(vstats_pdf$n_var_coding)))))
+```
+
+```{r snv_indel_stats_plots}
+#| echo: false
+#| eval: !expr isTRUE(vstats_pdf$n_var > 0)
+#| fig-width: 3.4
+#| fig-height: 1.8
+#| layout-ncol: 2
+
+varstats_plots_pdf <- pcgrr:::varstats_plots_pdf(pcg_report)
+for (p in varstats_plots_pdf) print(p)
+```
+
+## Oncogenic and likely oncogenic variants
+
+```{r oncogenic_table}
+#| echo: false
+#| eval: !expr n_oncogenic_pdf > 0
+
+oncogenic_pdf |>
+  utils::head(max_variants_pdf) |>
+  pcgrr:::variant_table_pdf(color = report_color, variant_class = FALSE)
+```
+
+```{r oncogenic_hotspot_legend}
+#| echo: false
+#| output: asis
+#| eval: !expr n_oncogenic_pdf > 0
+cat(pcgrr:::hotspot_legend_pdf(utils::head(oncogenic_pdf, max_variants_pdf)))
+```
+
+```{r oncogenic_capped_msg}
+#| echo: false
+#| output: asis
+#| eval: !expr n_oncogenic_pdf > max_variants_pdf
+cat(
+  "\n*Showing ", max_variants_pdf, " of ", n_oncogenic_pdf, " oncogenic/",
+  "likely oncogenic variants (highest oncogenicity score first) - the ",
+  "complete list is available in the Excel output.*\n\n", sep = "")
+```
+
+```{r oncogenic_none_msg}
+#| echo: false
+#| output: asis
+#| eval: !expr n_oncogenic_pdf == 0
+cat(pcgrr:::no_findings_pdf(
+  "No oncogenic or likely oncogenic SNVs/InDels were found in this tumor sample."))
+```
+
+## Variant filtering
+
+```{r snv_indel_filtering_placeholder}
+#| echo: false
+#| output: asis
+cat(pcgrr:::placeholder_pdf(paste0(
+  "Summary of variant filtering (tumor-only: germline filtering steps; ",
+  "tumor-control: allelic support thresholds).")))
+```

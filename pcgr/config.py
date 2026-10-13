@@ -60,7 +60,7 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
             'vcfanno_n_proc': int(arg_dict['vcfanno_n_proc']),                                          
             'no_reporting': int(arg_dict['no_reporting']),
             'no_html': int(arg_dict['no_html']),
-            'pdf': int(arg_dict.get('pdf', False)),
+            'no_pdf': int(arg_dict['no_pdf']),
             'retained_vcf_info_tags': str(arg_dict['retained_info_tags']),
             'show_noncoding': not int(arg_dict['ignore_noncoding']),
             'force_overwrite': int(arg_dict['force_overwrite'])
@@ -78,7 +78,12 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
             arg_dict['tumor_ploidy'] is None else float(arg_dict['tumor_ploidy'])
         conf_options['sample_properties']['tumor_ploidy_source'] = 'NA' if \
             arg_dict['tumor_ploidy'] is None else 'provided'
+        ## tumor purity is not estimated by PCGR - user-provided only
+        conf_options['sample_properties']['tumor_purity_source'] = 'NA' if \
+            arg_dict['tumor_purity'] is None else 'provided'
         conf_options['sample_properties']['sex'] = 'UNKNOWN'
+        conf_options['sample_properties']['age'] = 'NA' if \
+            arg_dict.get('age') is None else int(arg_dict['age'])
         conf_options['sample_properties']['site'] = str(pcgr_vars.tsites[arg_dict['tsite']])
         conf_options['sample_properties']['site2'] = str(pcgr_vars.tsites[arg_dict['tsite']]).replace(" ","_").replace("/","@")
         for prop in ['dp_control_detected', 'vaf_control_detected', 'dp_tumor_detected', 'vaf_tumor_detected']:
@@ -231,6 +236,8 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
         conf_options['sample_properties']['site'] = 'Hereditary (blood)'
         conf_options['sample_properties']['sex'] = str(arg_dict['sex']) \
             if arg_dict.get('sex') is not None else 'UNKNOWN'
+        conf_options['sample_properties']['age'] = 'NA' if \
+            arg_dict.get('age') is None else int(arg_dict['age'])
         conf_options['sample_properties']['gt_detected'] = 0
         conf_options['sample_properties']['dp_detected'] = 0
         

@@ -1,4 +1,6 @@
-## Settings
+<!-- clear the floated logo, so that the overview cards span the full width -->
+<div style="clear: both;"></div>
+<hr style="margin: 0.5em 0 1em 0;">
 
 ```{r on_off_settings}
 #| echo: false
@@ -32,6 +34,11 @@ sample_name <- pcg_report[['settings']][['sample_id']]
 assay_type <- conf$assay_properties$type
 tumor_site <- conf$sample_properties$site
 sex <- conf$sample_properties$sex
+age <- conf$sample_properties$age
+if (!is.null(age) && length(age) == 1 && !is.na(age) &&
+    !age %in% c("NA", "None")) {
+  sex <- paste0(sex, " / ", age, " years")
+}
 assay_mode <- conf$assay_properties$mode
 genome_assembly <- pcg_report[['settings']][['genome_assembly']]
 tumor_ploidy <- "N/A"
@@ -50,6 +57,12 @@ tumor_purity <- "N/A"
 if (!is.na(conf$sample_properties$tumor_purity) &
    conf$sample_properties$tumor_purity != "NA") {
   tumor_purity <- conf$sample_properties$tumor_purity
+  if (!is.null(conf$sample_properties$tumor_purity_source) &&
+      !is.na(conf$sample_properties$tumor_purity_source) &&
+      conf$sample_properties$tumor_purity_source != "NA") {
+    tumor_purity <- paste0(
+      tumor_purity, " (", conf$sample_properties$tumor_purity_source, ")")
+  }
 }
 
 target_size <- conf$assay_properties$effective_target_size_mb
@@ -167,7 +180,7 @@ bslib::layout_column_wrap(
       bg = report_color, fg = "#fff")
   ),
   bslib::value_box(
-    title = "Sex",
+    title = "Sex / age",
     value = sex,
     showcase = NULL,
     theme = bslib::value_box_theme(
@@ -190,6 +203,35 @@ bslib::layout_column_wrap(
 )
 ```
 
+
+```{r key_findings}
+#| output: asis
+#| echo: false
+#| eval: true
+
+## styled as a panel, mirroring the PDF report (kf-* classes, see pcgr_quarto.css)
+hl <- pcgrr::report_highlights(pcg_report)
+cat(paste0("\n::: {.kf-panel style=\"--kf-color: ", report_color, "\"}\n\n"))
+cat("\n<div class=\"kf-title\"><span class=\"kf-title-text\">Key findings</span></div>\n\n")
+cat("::: {.kf-lead}\n\n")
+cat(hl$lead, sep = "\n\n")
+cat("\n\n")
+## positive composite biomarkers (TMB-high, MSI-high) as pills - none
+## otherwise
+if (length(hl$pills) > 0) {
+  cat("<div class='pcgr-biomarker-pills'>",
+      paste0("<span class='pcgr-biomarker-pill'>",
+             htmltools::htmlEscape(hl$pills), "</span>", collapse = ""),
+      "</div>\n\n", sep = "")
+}
+cat(":::\n\n")
+if (nzchar(hl$supporting)) {
+  cat("::: {.kf-support}\n\n")
+  cat(hl$supporting, "\n\n")
+  cat(":::\n\n")
+}
+cat(":::\n\n")
+```
 
 ::: {.callout-note collapse="true"}
 

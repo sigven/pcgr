@@ -25,7 +25,7 @@ def get_args():
     parser._action_groups.pop()
     required = parser.add_argument_group('Required arguments')
     optional_panel = parser.add_argument_group("Panel options")
-    optional_sample = parser.add_argument_group("Sample options")
+    optional_sample = parser.add_argument_group("Subject options")
     optional_classification = parser.add_argument_group("Variant classification options")
     optional_vep = parser.add_argument_group('VEP options')
     optional_vcfanno = parser.add_argument_group('vcfanno options')
@@ -40,7 +40,7 @@ def get_args():
     optional_other.add_argument('--version', action='version', version=str(utils.get_cpsr_version()))
     optional_other.add_argument('--no_reporting',action="store_true",help="Run functional variant annotation on VCF through VEP/vcfanno, omit classification/report generation (STEP 4), default: %(default)s")
     optional_other.add_argument("--no_html", action="store_true", help="Do not generate HTML report (default: %(default)s)")
-    optional_other.add_argument("--pdf", action="store_true", help="Generate a PDF report (Quarto/Typst) in addition to the HTML report (default: %(default)s)")
+    optional_other.add_argument("--no_pdf", action="store_true", help="Do not generate PDF report (Quarto/Typst) (default: %(default)s)")
     optional_other.add_argument('--retained_info_tags', dest ='retained_info_tags', default='None', help='Comma-separated string of VCF INFO tags from query VCF that should be kept in CPSR output TSV')
     optional_other.add_argument('--ignore_noncoding', action='store_true',dest='ignore_noncoding',default=False,help='Ignore non-coding (i.e. non protein-altering) variants in report, default: %(default)s')
     optional_other.add_argument("--debug", action="store_true", help="Print full commands to log")
@@ -49,6 +49,8 @@ def get_args():
     optional_sample.add_argument("--sex", dest="sex", choices=["FEMALE", "MALE", "UNKNOWN"], default="UNKNOWN",
                                  help="Sex of sample - used for interpretation of X-linked pharmacogenomic findings (G6PD),\n" + \
                                      "i.e. hemizygous (MALE) vs. diploid (FEMALE) genotypes (default: %(default)s)")
+    optional_sample.add_argument("--age", dest="age", type=int,
+                                 help="Age of the subject (whole years) at the time of testing (default: %(default)s)")
 
     optional_classification.add_argument('--secondary_findings', action='store_true',dest='secondary_findings',default=False, help='Include variants found in ACMG-recommended list for secondary findings (v3.2), default: %(default)s')
     optional_classification.add_argument('--pgx_findings', action='store_true',dest='pgx_findings',default=False, help='Report overlap with variants associated with chemotherapy toxicity (PgX findings, CPIC), default: %(default)s')
@@ -176,6 +178,7 @@ def run_cpsr(conf_options, input_data, output_data):
         logger = getlogger("cpsr-settings")
         logger.info("--- Cancer Predisposition Sequencing Reporter workflow ----")
         logger.info(f"Sample name: {conf_options['sample_id']}")
+        logger.info(f"Sex / Age: {conf_options['sample_properties']['sex']} / {conf_options['sample_properties']['age']}")
         if not input_customlist == 'None':
             logger.info(f"Virtual gene panel: custom-made list from panel 0: {input_customlist}")
         else:

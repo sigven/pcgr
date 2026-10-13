@@ -1,0 +1,42 @@
+```{=typst}
+#pagebreak(weak: true)
+```
+
+# Mutational features
+
+```{r signatures_pdf}
+#| child: 'pcgr_quarto_report/pdf/signatures_pdf.qmd'
+#| eval: !expr isTRUE(pcg_report$content$mutational_signatures$eval)
+```
+
+```{r kataegis_pdf}
+#| echo: false
+#| output: asis
+#| eval: !expr isTRUE(pcg_report$content$kataegis$eval)
+
+kataegis_events_pdf <- pcg_report$content$kataegis$events
+cat("## Kataegis\n\n")
+cat("Kataegis describes a pattern of localized hypermutation identified in ",
+    "some cancer genomes, in which a large number of highly-patterned base ",
+    "substitutions occur in a small region of DNA. It is prevalent in breast ",
+    "cancers, and also found in lung, cervical, head and neck, and bladder ",
+    "cancers (associated with APOBEC mutational signatures). PCGR implements ",
+    "the kataegis detection algorithm of the [KataegisPortal R package]",
+    "(https://github.com/MeichunCai/KataegisPortal).\n\n",
+    "- **Weight (C>X)**: proportion of C>X mutations in the region\n",
+    "- **Confidence** (0-3): **0** - a hypermutation with weight C>X < 0.8; ",
+    "**1** - one hypermutation with weight C>X >= 0.8 in a chromosome; ",
+    "**2** - two such hypermutations in a chromosome; **3** - three or more ",
+    "such hypermutations in a chromosome (high confidence)\n\n", sep = "")
+if (NROW(kataegis_events_pdf) == 0) {
+  cat(pcgrr:::no_findings_pdf(
+    "No potential kataegis events were identified in this tumor sample."))
+}
+```
+
+```{r kataegis_pdf_table}
+#| echo: false
+#| eval: !expr isTRUE(pcg_report$content$kataegis$eval) && NROW(pcg_report$content$kataegis$events) > 0
+pcgrr:::kataegis_table_pdf(
+  pcg_report$content$kataegis$events, color = report_color)
+```

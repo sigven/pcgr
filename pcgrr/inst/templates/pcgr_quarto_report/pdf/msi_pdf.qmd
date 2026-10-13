@@ -1,0 +1,207 @@
+## MSI status
+
+Microsatellite instability (MSI) is the result of impaired DNA mismatch repair and constitutes a cellular phenotype of clinical significance in many cancer types, most prominently colorectal, stomach, endometrial, and ovarian cancers. PCGR uses a statistical MSI classifier that only considers features of the somatic mutation profile (e.g. *fraction of indels*, *load of indels*, *mutations in MMR genes*) to separate *MSI-H* (MSI-high) from *MSS* (microsatellite stable) tumors. The classifier was trained on **N = 575** exome-sequenced TCGA tumor samples with known MSI status, with a positive predictive value of 97.9% and a negative predictive value of 99.3% on an independent test set (**N = 245** samples).
+
+```{r msi_pdf_missing}
+#| echo: false
+#| output: asis
+#| eval: !expr isTRUE(pcg_report$content$msi$missing_data)
+cat(pcgrr:::no_findings_pdf(
+  "Insufficient data for MSI prediction in this tumor sample.",
+  title = "Not determined"))
+```
+
+```{r msi_pdf_setup}
+#| echo: false
+#| eval: !expr isFALSE(pcg_report$content$msi$missing_data)
+
+msi_content_pdf <- pcg_report$content$msi$prediction
+msi_stats_pdf <- msi_content_pdf$msi_stats
+
+## core mismatch repair genes (as in the HTML report)
+core_mmr_genes_pdf <- c("MLH1", "MSH2", "MSH6", "PMS2", "EPCAM")
+
+prob_msi_h_pdf <- msi_stats_pdf[["prob_msi_h"]]
+confidence_tier_pdf <- msi_stats_pdf[["confidence_tier"]]
+is_msi_h_pdf <-
+  msi_stats_pdf[["predicted_class"]] != "MSS (Microsatellite stable)"
+uncertain_pdf <- isTRUE(confidence_tier_pdf == "Uncertain")
+low_mut_pdf <- isTRUE(pcg_report$content$msi$low_mutation_warning)
+
+## probability in the direction of the predicted class
+prob_display_pdf <- if (is_msi_h_pdf) prob_msi_h_pdf else
+  round(1 - prob_msi_h_pdf, 3)
+prob_label_pdf <- if (is_msi_h_pdf) "Prediction probability P(MSI-H)" else
+  "Prediction probability P(MSS)"
+
+## somatic coding variants in the core MMR genes
+snv_display_pdf <- pcg_report$content$snv_indel$callset$variant_display
+mmr_somatic_pdf <- if (all(c("SYMBOL", "CODING_STATUS") %in%
+                             colnames(snv_display_pdf))) {
+  snv_display_pdf |>
+    dplyr::filter(.data$CODING_STATUS == "coding" &
+                    .data$SYMBOL %in% core_mmr_genes_pdf)
+} else snv_display_pdf[0, , drop = FALSE]
+
+## pathogenic/likely pathogenic germline variants in the core MMR genes
+germline_eval_pdf <- isTRUE(pcg_report$content$germline_classified$eval)
+mmr_germline_pdf <- data.frame()
+if (germline_eval_pdf) {
+  mmr_germline_pdf <-
+    pcg_report$content$germline_classified$callset$variant_display |>
+    dplyr::filter(
+      .data$SYMBOL %in% core_mmr_genes_pdf &
+        .data$CLINICAL_SIGNIFICANCE %in% c("Pathogenic", "Likely Pathogenic"))
+}
+
+msi_plot_caption_pdf <- paste0(
+  "Somatic indel fraction (indels / all coding SNVs+indels) across the TCGA ",
+  "reference cohort used to train the MSI classifier, by confirmed MSI ",
+  "status (MSS: microsatellite stable; MSI-H: microsatellite ",
+  "instability-high). The dotted line marks the indel fraction of this sample.")
+```
+
+```{r msi_pdf_warning}
+#| echo: false
+#| output: asis
+#| eval: !expr isFALSE(pcg_report$content$msi$missing_data) && (low_mut_pdf || uncertain_pdf)
+
+warning_lines <- c()
+if (low_mut_pdf) {
+  sd_note <- if (!is.na(msi_stats_pdf[["frac_indels_expected_sd"]]))
+    paste0(" (expected ±", msi_stats_pdf[["frac_indels_expected_sd"]],
+           " at this mutation count)") else ""
+  warning_lines <- c(warning_lines, paste0(
+    "This sample has only **n = ", msi_stats_pdf[["n_calls"]],
+    "** exonic variants after quality filtering, below the classifier ",
+    "training threshold of n = 100. Feature estimates may be unstable",
+    sd_note, "."))
+}
+if (uncertain_pdf) {
+  warning_lines <- c(warning_lines, paste0(
+    "The predicted probability P(MSI-H) = ", prob_msi_h_pdf,
+    " falls in the uncertain range (0.10-0.90). Consider orthogonal MSI ",
+    "assay confirmation."))
+}
+cat(pcgrr:::note_box_pdf(
+  paste(warning_lines, collapse = "\n\n"),
+  title = "Low-confidence MSI prediction", kind = "warning"))
+```
+
+```{r msi_pdf_kpis}
+#| echo: false
+#| output: asis
+#| eval: !expr isFALSE(pcg_report$content$msi$missing_data)
+
+col_status <- if (uncertain_pdf) pcgrr::color_palette$warning else if
+  (is_msi_h_pdf) pcgrr::color_palette$oncogenicity$values[1] else NULL
+cat(pcgrr:::kpi_row_pdf(list(
+  list(title = "MSI status",
+       value = if (is_msi_h_pdf) "MSI-H" else "MSS",
+       sub = stringr::str_replace(
+         msi_stats_pdf[["predicted_class"]], "^[^(]+\\((.*)\\)$", "\\1"),
+       color = col_status),
+  list(title = prob_label_pdf, value = as.character(prob_display_pdf),
+       sub = paste0("Confidence: ", confidence_tier_pdf),
+       color = col_status),
+  list(title = "Coding indel mutational burden",
+       value = paste0(round(msi_stats_pdf[["tmb_indel"]], 2), " /Mb"),
+       sub = paste0("Indel fraction: ",
+                    round(msi_stats_pdf[["frac_indels"]], 3))))))
+```
+
+```{r msi_pdf_indel_plot}
+#| echo: false
+#| eval: !expr isFALSE(pcg_report$content$msi$missing_data) && NROW(msi_content_pdf$tcga_dataset) > 0
+#| fig-width: 7
+#| fig-height: 2.8
+#| fig-cap: !expr msi_plot_caption_pdf
+
+pcgrr::msi_indel_fraction_plot(
+  msi_content_pdf$tcga_dataset, msi_stats_pdf[["frac_indels"]]) |>
+  pcgrr:::pdf_plot_theme(base_size = 8) +
+  ggplot2::theme(axis.title.y = ggplot2::element_text(family = "sans", size = 8))
+```
+
+```{r msi_pdf_mmr_intro}
+#| echo: false
+#| output: asis
+#| eval: !expr isFALSE(pcg_report$content$msi$missing_data)
+cat("### Coding mutations in MMR genes\n\n")
+cat("Somatic coding mutations in the core mismatch repair genes (",
+    paste(core_mmr_genes_pdf, collapse = ", "), ")",
+    if (germline_eval_pdf)
+      ", and pathogenic/likely pathogenic germline variants (CPSR) in the same genes",
+    ".\n\n", sep = "")
+```
+
+```{r msi_pdf_mmr_somatic}
+#| echo: false
+#| eval: !expr isFALSE(pcg_report$content$msi$missing_data) && NROW(mmr_somatic_pdf) > 0
+mmr_somatic_pdf |>
+  pcgrr:::variant_table_pdf(color = report_color, variant_class = FALSE)
+```
+
+```{r msi_pdf_mmr_somatic_none}
+#| echo: false
+#| output: asis
+#| eval: !expr isFALSE(pcg_report$content$msi$missing_data) && NROW(mmr_somatic_pdf) == 0
+cat(pcgrr:::no_findings_pdf(
+  "No somatic coding mutations found in the core MMR genes.",
+  title = "Somatic"))
+```
+
+```{r msi_pdf_mmr_germline}
+#| echo: false
+#| eval: !expr isFALSE(pcg_report$content$msi$missing_data) && germline_eval_pdf && NROW(mmr_germline_pdf) > 0
+mmr_germline_pdf |>
+  pcgrr:::variant_table_pdf(color = report_color, variant_class = FALSE)
+```
+
+```{r msi_pdf_mmr_germline_none}
+#| echo: false
+#| output: asis
+#| eval: !expr isFALSE(pcg_report$content$msi$missing_data) && germline_eval_pdf && NROW(mmr_germline_pdf) == 0
+cat(pcgrr:::no_findings_pdf(
+  "No pathogenic/likely pathogenic germline variants found in the core MMR genes.",
+  title = "Germline"))
+```
+
+```{r msi_pdf_biomarkers}
+#| echo: false
+#| output: asis
+#| eval: !expr isFALSE(is.null(pcg_report$content$msi$callset))
+
+cat("### Biomarker evidence for MSI-High\n\n")
+cat("The tumor was classified as MSI-High (P(MSI-H) = ",
+    round(pcg_report$content$msi$prediction$msi_stats$prob_msi_h, 3), "). ",
+    "Therapeutic implications of MSI-High were retrieved from ",
+    pcgrr:::bm_db_label_pdf(pcg_report), ", and are classified according ",
+    "to the strength of evidence for the tumor type (",
+    pcg_report$settings$conf$sample_properties$site,
+    "), following AMP/ASCO/CAP guidelines.\n\n", sep = "")
+```
+
+```{r msi_pdf_bm_sensitivity}
+#| echo: false
+#| eval: !expr isFALSE(is.null(pcg_report$content$msi$callset))
+msi_bm_pdf <- pcgrr:::bm_evidence_tables_pdf(
+  pcg_report, variant_category = "msi", color = report_color)
+msi_bm_pdf$sensitivity
+```
+
+```{r msi_pdf_bm_sensitivity_none}
+#| echo: false
+#| output: asis
+#| eval: !expr isFALSE(is.null(pcg_report$content$msi$callset)) && is.null(msi_bm_pdf$sensitivity)
+cat(pcgrr:::no_findings_pdf(paste0(
+  "Based on available data in ", pcgrr:::bm_db_label_pdf(pcg_report),
+  ", no therapeutic sensitivity biomarkers (Tier 1-3) were identified for ",
+  "MSI-High in this tumor sample.")))
+```
+
+```{r msi_pdf_bm_resistance}
+#| echo: false
+#| eval: !expr isFALSE(is.null(pcg_report$content$msi$callset)) && !is.null(msi_bm_pdf$resistance)
+msi_bm_pdf$resistance
+```

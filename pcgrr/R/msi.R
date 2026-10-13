@@ -469,9 +469,11 @@ msi_status_is_high <- function(msi_content = NULL) {
 
 msi_indel_fraction_plot <- function(tcga_msi_dataset, indel_fraction, color_palette = pcgrr::color_palette) {
 
+  ## MSI-high samples are labelled 'MSI-H' in the TCGA dataset ('MSI.H'
+  ## kept for older datasets)
   color_vec <- utils::head(
-    color_palette[["multi"]][["values"]], 2)
-  names(color_vec) <- c("MSS", "MSI.H")
+    color_palette[["multi"]][["values"]], 2)[c(1, 2, 2)]
+  names(color_vec) <- c("MSS", "MSI-H", "MSI.H")
 
   p <- ggplot2::ggplot(data = tcga_msi_dataset) +
     ggplot2::geom_histogram(

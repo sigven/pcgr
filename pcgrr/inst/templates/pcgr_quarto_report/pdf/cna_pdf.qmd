@@ -1,0 +1,227 @@
+```{=typst}
+#pagebreak(weak: true)
+```
+
+# Somatic copy number aberrations
+
+```{r cna_pdf_setup}
+#| echo: false
+#| eval: true
+
+cna_pdf <- pcg_report$content$cna$callset$variant
+cna_classes_pdf <- c("amplification", "homdel", "hemdel")
+cna_key_pdf <- if ("VARIANT_CLASS" %in% colnames(cna_pdf)) {
+  cna_pdf |>
+    dplyr::filter(.data$VARIANT_CLASS %in% cna_classes_pdf)
+} else cna_pdf[0, , drop = FALSE]
+cna_key_pdf <- cna_key_pdf |>
+  dplyr::filter(
+    dplyr::if_any(dplyr::any_of(c("ONCOGENE", "TUMOR_SUPPRESSOR")),
+                  ~ .x %in% TRUE))
+n_cna_key_pdf <- NROW(cna_key_pdf)
+```
+
+Listed below are amplifications and deep deletions affecting known proto-oncogenes or tumor suppressor genes.
+
+## Amplifications and deep deletions in cancer genes
+
+```{r cna_key_table}
+#| echo: false
+#| eval: !expr n_cna_key_pdf > 0
+
+cna_key_pdf |>
+  utils::head(max_variants_pdf) |>
+  dplyr::select(dplyr::any_of(c(
+    "SYMBOL", "ENSEMBL_GENE_ID", "VARIANT_CLASS", "CN_TOTAL", "CYTOBAND",
+    "ACTIONABILITY_TIER"))) |>
+  pcgrr:::variant_table_pdf(color = report_color)
+```
+
+```{r cna_key_none_msg}
+#| echo: false
+#| output: asis
+#| eval: !expr n_cna_key_pdf == 0
+cat(pcgrr:::no_findings_pdf(paste0(
+  "No amplifications or deep deletions affecting proto-oncogenes or ",
+  "tumor suppressor genes were found in this tumor sample.")))
+```
+
+## Copy number profile
+
+```{r cna_profile_setup}
+#| echo: false
+#| eval: true
+
+cna_conf_pdf <- pcg_report$settings$conf$somatic_cna
+sp_pdf <- pcg_report$settings$conf$sample_properties
+cna_plot_pdf <- pcgrr:::cna_plot_settings_pdf(pcg_report)
+cna_segments_pdf <- pcg_report$content$cna$callset$segment
+has_profile_pdf <- NROW(cna_segments_pdf) > 0 &&
+  NROW(pcg_report$settings$chrom_coordinates) > 0
+genome_doubled_pdf <- isTRUE(as.logical(cna_conf_pdf$genome_doubled))
+na_or <- function(x, f = identity) {
+  if (is.null(x) || length(x) == 0 || is.na(x) || x %in% "NA") "N/A" else f(x)
+}
+
+ploidy_source_pdf <- na_or(sp_pdf$tumor_ploidy_source)
+cna_absolute_caption_pdf <- paste0(
+  "Absolute copy number profile: total copy number per segment. Dotted ",
+  "lines (see legend) indicate the tumor ploidy (",
+  cna_plot_pdf$tumor_ploidy, ") and the effective thresholds for ",
+  "gain, deletion and amplification (threshold mode: ",
+  cna_plot_pdf$threshold_mode, "). Segments too short to render as a bar ",
+  "at whole-genome scale are drawn as a point at their midpoint; triangles ",
+  "mark amplifications/gains of proto-oncogenes (up) and deep deletions of ",
+  "tumor suppressor genes (down).")
+cna_relative_caption_pdf <- paste0(
+  "Relative copy number profile: copy number per segment relative to the ",
+  "tumor ploidy, with the corresponding thresholds as dotted lines.")
+```
+
+```{r cna_profile_kpis}
+#| echo: false
+#| output: asis
+#| eval: true
+
+cat(pcgrr:::kpi_row_pdf(list(
+  list(title = "Tumor ploidy",
+       value = as.character(cna_plot_pdf$tumor_ploidy),
+       sub = if (ploidy_source_pdf == "N/A")
+         "Not available - diploid assumed" else
+           paste0("Source: ", ploidy_source_pdf)),
+  list(title = "Fraction of genome altered",
+       value = na_or(cna_conf_pdf$fraction_genome_altered,
+                     function(x) paste0(round(100 * as.numeric(x), 1), "%"))),
+  list(title = "Whole-genome doubling",
+       value = if (is.null(cna_conf_pdf$genome_doubled)) "N/A" else
+         if (genome_doubled_pdf) "Yes" else "No",
+       sub = na_or(cna_conf_pdf$wgd_fraction, function(x) paste0(
+         round(100 * as.numeric(x)), "% of genome with major CN >= 2")),
+       color = if (genome_doubled_pdf) pcgrr::color_palette$warning else NULL),
+  list(title = "Amplification threshold",
+       value = paste0("CN >= ", cna_plot_pdf$amp_threshold_effective),
+       sub = paste0("Threshold mode: ", cna_plot_pdf$threshold_mode)))))
+```
+
+```{r cna_profile_absolute}
+#| echo: false
+#| eval: !expr has_profile_pdf
+#| fig-width: 7
+#| fig-height: 3.4
+#| fig-cap: !expr cna_absolute_caption_pdf
+
+pcgrr::plot_cna_segments_absolute(
+  chrom_coordinates = pcg_report$settings$chrom_coordinates,
+  cna_segment = cna_segments_pdf,
+  cna_gene = pcg_report$content$cna$callset$variant,
+  tumor_ploidy = cna_plot_pdf$tumor_ploidy,
+  amp_threshold_effective = cna_plot_pdf$amp_threshold_effective,
+  threshold_mode = cna_plot_pdf$threshold_mode,
+  gain_threshold_effective = cna_plot_pdf$gain_threshold_effective,
+  del_threshold_effective = cna_plot_pdf$del_threshold_effective) |>
+  pcgrr:::pdf_plot_theme(base_size = 7) +
+  ggplot2::theme(
+    axis.title.y = ggplot2::element_text(family = "sans", size = 7),
+    legend.key.size = grid::unit(0.3, "cm"),
+    legend.text = ggplot2::element_text(family = "sans", size = 6)) +
+  ggplot2::guides(colour = ggplot2::guide_legend(nrow = 2),
+                  fill = ggplot2::guide_legend(nrow = 2))
+```
+
+```{r cna_profile_relative}
+#| echo: false
+#| eval: !expr has_profile_pdf
+#| fig-width: 7
+#| fig-height: 3
+#| fig-cap: !expr cna_relative_caption_pdf
+
+pcgrr::plot_cna_segments_relative(
+  chrom_coordinates = pcg_report$settings$chrom_coordinates,
+  cna_segment = cna_segments_pdf,
+  cna_gene = pcg_report$content$cna$callset$variant,
+  tumor_ploidy = cna_plot_pdf$tumor_ploidy,
+  amp_threshold_effective = cna_plot_pdf$amp_threshold_effective,
+  threshold_mode = cna_plot_pdf$threshold_mode,
+  gain_threshold_effective = cna_plot_pdf$gain_threshold_effective,
+  del_threshold_effective = cna_plot_pdf$del_threshold_effective) |>
+  pcgrr:::pdf_plot_theme(base_size = 7) +
+  ggplot2::theme(
+    axis.title.y = ggplot2::element_text(family = "sans", size = 7),
+    legend.key.size = grid::unit(0.3, "cm"),
+    legend.text = ggplot2::element_text(family = "sans", size = 6)) +
+  ggplot2::guides(colour = ggplot2::guide_legend(nrow = 2),
+                  fill = ggplot2::guide_legend(nrow = 2))
+```
+
+```{r cna_profile_missing}
+#| echo: false
+#| output: asis
+#| eval: !expr isFALSE(has_profile_pdf)
+cat(pcgrr:::no_findings_pdf(
+  "No copy number segments available for a genome-wide profile.",
+  title = "Not available"))
+```
+
+```{r cna_hrd_pdf}
+#| echo: false
+#| output: asis
+#| eval: !expr isTRUE(as.logical(cna_conf_pdf$estimate_hrd))
+
+site_pdf <- sp_pdf$site
+cat("## Homologous recombination deficiency (HRD) score\n\n")
+cat("The HRD score is the **sum of three genomic scar measures** derived ",
+    "from the allele-specific copy number segments (autosomes only, ",
+    "following the scarHRD algorithm): **HRD-LOH** (loss-of-heterozygosity ",
+    "regions > 15 Mb not spanning a whole chromosome), **LST** (large-scale ",
+    "state transitions between adjacent regions of at least 10 Mb), and ",
+    "**TAI** (telomeric allelic imbalance).\n\n", sep = "")
+cat(pcgrr:::kpi_row_pdf(list(
+  list(title = "HRD-LOH", value = as.character(cna_conf_pdf$hrd_loh),
+       color = "#868e96"),
+  list(title = "LST", value = as.character(cna_conf_pdf$hrd_lst),
+       color = "#868e96"),
+  list(title = "TAI", value = as.character(cna_conf_pdf$hrd_tai),
+       color = "#868e96"),
+  list(title = "HRD score (sum)", value = as.character(cna_conf_pdf$hrd_sum)))))
+cat("A higher score means more genomic scarring and a higher likelihood of ",
+    "HRD; scores typically range from 0 to about 100 in TCGA tumors. A score ",
+    "of 42 or above is the established cutoff for HRD-positive tumors in ",
+    "ovarian cancer only; no cutoff has been validated in other cancer types.",
+    "\n\n", sep = "")
+interp <- if (site_pdf == "Ovary/Fallopian Tube") {
+  list(title = "Interpretation (ovarian cancer)", kind = "note", text = paste0(
+    "In ovarian cancer, a score of 42 or above is the threshold of the ",
+    "Myriad myChoice CDx assay (FDA-approved companion diagnostic) for ",
+    "HRD-positive tumors. Thresholds have not been formally established for ",
+    "sequencing-derived scores. **For research use only - not a validated ",
+    "diagnostic measure.**"))
+} else if (site_pdf == "Breast") {
+  list(title = "Interpretation (breast cancer)", kind = "note", text = paste0(
+    "In triple-negative breast cancer, HRD (score >= 42 or BRCA1/2 ",
+    "mutation) was associated with response to platinum-based neoadjuvant ",
+    "therapy; in ER-positive breast cancer, the ovarian cancer thresholds do ",
+    "not appear appropriate. The breast cancer subtype is not taken into ",
+    "account here. **For research use only - not a validated diagnostic ",
+    "measure.**"))
+} else {
+  list(title = paste0("Caution - interpretation (", site_pdf, ")"),
+       kind = "warning", text = paste0(
+    "Genomic scar scores have not been validated as markers of HRD outside ",
+    "ovarian cancer and triple-negative breast cancer. The score separates ",
+    "tumors with biallelic BRCA1/2 inactivation well, but tumors with ",
+    "monoallelic alterations poorly, and should be interpreted together ",
+    "with the mutational status of HRR genes. Scar measures are also ",
+    "influenced by ploidy. A high score should not, on its own, be ",
+    "interpreted as evidence of HRD or of sensitivity to PARP inhibitors. ",
+    "**For research use only.**"))
+}
+cat(pcgrr:::note_box_pdf(interp$text, title = interp$title, kind = interp$kind))
+if (genome_doubled_pdf) {
+  cat(pcgrr:::note_box_pdf(paste0(
+    "This tumor is classified as having undergone whole-genome doubling (",
+    round(100 * as.numeric(cna_conf_pdf$wgd_fraction)), "% of the autosomal ",
+    "genome has a major allele copy number of two or more). Ploidy ",
+    "influences the scar measures - interpret the HRD score with caution."),
+    title = "Caution - genome doubling", kind = "warning"))
+}
+```

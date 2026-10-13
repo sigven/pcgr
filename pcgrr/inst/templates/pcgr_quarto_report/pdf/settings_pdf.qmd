@@ -1,0 +1,220 @@
+```{=typst}
+#pagebreak(weak: true)
+```
+
+# Analysis configuration & data sources
+
+This report was generated with _PCGR_ v`r pcg_report$settings$software$pcgr_version`, using the following key settings.
+
+```{r settings_pdf_lists}
+#| echo: false
+#| output: asis
+#| eval: true
+
+conf <- pcg_report$settings$conf
+sp <- conf$sample_properties
+val <- function(x) {
+  if (is.null(x) || length(x) == 0 || all(is.na(x) | x %in% "NA")) "N/A" else
+    paste(as.character(x), collapse = ", ")
+}
+on_off <- function(x) if (isTRUE(x)) "ON" else "OFF"
+## value with its source (provided by the user, or estimated by PCGR)
+with_source <- function(x, src) {
+  if (val(x) == "N/A") return("N/A")
+  if (val(src) == "N/A") val(x) else paste0(val(x), " (", src, ")")
+}
+## markdown bullet (level 1 or 2) with value in bold
+item <- function(label, value, level = 1) {
+  paste0(if (level == 2) "    - " else "- ", label, ": **",
+         stringr::str_replace_all(val(value), "([*_])", "\\\\\\1"), "**")
+}
+heading <- function(x) c("", paste0("**", x, "**"), "")
+
+gencode_meta <- pcg_report$settings$reference_data$source_metadata
+gencode_version <- if (is.data.frame(gencode_meta)) {
+  gencode_meta$source_version[gencode_meta$source_abbreviation == "gencode"]
+} else NULL
+transcript_set <- paste0(
+  "GENCODE - ",
+  if (isTRUE(as.logical(conf$vep$vep_gencode_basic)))
+    "basic set" else "all transcripts",
+  if (length(gencode_version) == 1) paste0(" (v", gencode_version, ")"))
+
+left <- c(
+  heading("General"),
+  item("Genome assembly", pcg_report$settings$genome_assembly),
+  item("Variant actionability guidelines", "AMP/ASCO/CAP"),
+  item("Variant oncogenicity guidelines", "ClinGen/CGC/VICC"),
+  item("Biomarker sources", pcgrr:::bm_db_label_pdf(pcg_report)),
+  item("Tumor site", sp$site),
+  item("Subject sex", sp$sex),
+  item("Age at diagnosis (years)", sp$age))
+right <- c()
+
+if (isTRUE(pcg_report$content$snv_indel$eval)) {
+  as_conf <- conf$somatic_snv$allelic_support
+  tag_ok <- function(tag) !is.null(tag) && !identical(tag, "_NA_")
+  allelic <- c(
+    if (tag_ok(as_conf$tumor_dp_tag) && !is.null(as_conf$tumor_dp_min))
+      item("Minimum sequencing depth (DP) tumor", as_conf$tumor_dp_min, 2),
+    if (tag_ok(as_conf$tumor_af_tag) && !is.null(as_conf$tumor_af_min))
+      item("Minimum allelic fraction (AF) tumor", as_conf$tumor_af_min, 2),
+    if (tag_ok(as_conf$tumor_dp_tag) && tag_ok(as_conf$tumor_af_tag) &&
+        !is.null(as_conf$tumor_ad_min))
+      item("Minimum allelic depth (AD) tumor", as_conf$tumor_ad_min, 2),
+    if (tag_ok(as_conf$control_dp_tag) && !is.null(as_conf$control_dp_min))
+      item("Minimum sequencing depth (DP) control", as_conf$control_dp_min, 2),
+    if (tag_ok(as_conf$control_af_tag) && !is.null(as_conf$control_af_max))
+      item("Maximum allelic fraction (AF) control", as_conf$control_af_max, 2),
+    if (tag_ok(as_conf$control_dp_tag) && tag_ok(as_conf$control_af_tag) &&
+        !is.null(as_conf$control_ad_max))
+      item("Maximum allelic depth (AD) control", as_conf$control_ad_max, 2))
+  left <- c(
+    left,
+    heading("SNV/InDel settings"),
+    item("Sequencing assay mode", conf$assay_properties$mode),
+    item("Sequencing assay type", conf$assay_properties$type),
+    item("Coding target size", paste0(
+      val(conf$assay_properties$effective_target_size_mb), " Mb")),
+    item("Show noncoding variants", as.logical(conf$other$show_noncoding)),
+    item("MSI prediction", on_off(pcg_report$content$msi$eval)),
+    item("Include germline findings",
+         on_off(pcg_report$content$germline_classified$eval)),
+    "- Variant Effect Predictor (VEP) settings",
+    item("Transcript set", transcript_set, 2),
+    item("Transcript pick order",
+         stringr::str_replace_all(val(conf$vep$vep_pick_order), ",", ", "), 2),
+    item("Regulatory regions annotation", as.logical(conf$vep$vep_regulatory), 2),
+    item("Buffer size", conf$vep$vep_buffer_size, 2),
+    item("Number of forks", conf$vep$vep_n_forks, 2),
+    if (length(allelic) > 0) c("- Allelic support filtering (SNVs/InDels)", allelic),
+    item("Mutational burden estimation", on_off(pcg_report$content$tmb$eval)),
+    item("TMB algorithm", paste0("TMB_", val(conf$somatic_snv$tmb$tmb_display)), 2),
+    item("TMB-high threshold", paste0(
+      val(conf$somatic_snv$tmb$tmb_high_threshold), " mut/Mb"), 2))
+  sig <- conf$somatic_snv$mutational_signatures
+  right <- c(
+    right,
+    heading("SNV/InDel settings (continued)"),
+    item("Mutational signatures estimation",
+         on_off(pcg_report$content$mutational_signatures$eval)),
+    item("Minimum number of mutations required", sig$mutation_limit, 2),
+    item("All reference signatures", as.logical(sig$all_reference_signatures), 2),
+    item("Inclusion of artefact signatures",
+         as.logical(sig$include_artefact_signatures), 2),
+    item("Minimum tumor-type prevalence (percent) of reference signatures",
+         sig$prevalence_reference_signatures, 2))
+}
+if (isTRUE(pcg_report$content$cna$eval)) {
+  cna <- conf$somatic_cna
+  right <- c(
+    right,
+    heading("CNA settings"),
+    item("CNA thresholding mode", cna$threshold_mode),
+    item("Amplification threshold (absolute)", cna$amp_threshold_absolute),
+    item("Amplification threshold (relative)", cna$amp_threshold_relative),
+    item("Effective amplification threshold", cna$amp_threshold_effective),
+    item("Gain threshold (absolute)", cna$gain_threshold_absolute),
+    item("Gain threshold (relative)", cna$gain_threshold_relative),
+    item("Heterozygous deletion threshold (absolute)", cna$del_threshold_absolute),
+    item("Heterozygous deletion threshold (relative)", cna$del_threshold_relative),
+    item("Tumor ploidy", with_source(sp$tumor_ploidy, sp$tumor_ploidy_source)),
+    item("Tumor purity", with_source(sp$tumor_purity, sp$tumor_purity_source)),
+    item("Genomic instability (HRD) score estimated",
+         as.logical(cna$estimate_hrd)))
+}
+if (isTRUE(pcg_report$content$expression$eval)) {
+  right <- c(
+    right,
+    heading("Expression settings"),
+    item("RNA expression similarity analysis",
+         on_off(as.logical(conf$expression$similarity_analysis))))
+}
+if (isTRUE(pcg_report$content$fusion$eval)) {
+  right <- c(
+    right,
+    heading("RNA fusion settings"),
+    item("Minimum split reads required", conf$rna_fusion$min_split_reads))
+}
+
+cat("```{=typst}\n#block(width: 100%, inset: (x: 10pt, y: 6pt), radius: 3pt, ",
+    "stroke: (left: 3pt + pcgr-main), fill: pcgr-stripe)[\n",
+    "#set text(size: 8pt)\n#set par(leading: 0.5em, justify: false)\n",
+    "#set list(spacing: 0.5em)\n",
+    "#grid(columns: (1fr, 1fr), column-gutter: 1.6em)[\n```\n\n",
+    paste(left, collapse = "\n"),
+    "\n\n```{=typst}\n][\n```\n\n",
+    paste(right, collapse = "\n"),
+    "\n\n```{=typst}\n]\n]\n```\n\n", sep = "")
+```
+
+## Data sources and versions
+
+```{r data_versions_pdf}
+#| echo: false
+#| output: asis
+#| eval: true
+
+## datasets as listed in the HTML report (Documentation), in two columns
+## with a smaller font
+ref_datasets <- pcg_report$settings$reference_data$source_metadata
+if (is.data.frame(ref_datasets) && NROW(ref_datasets) > 0) {
+  if ("wflow" %in% colnames(ref_datasets)) {
+    ref_datasets <- ref_datasets[
+      stringr::str_detect(ref_datasets$wflow, "pcgr"), , drop = FALSE]
+  }
+  ## sources registered with several source types are listed once (as in
+  ## the HTML report)
+  if ("source_type" %in% colnames(ref_datasets)) {
+    st <- ref_datasets$source_type
+    sa <- ref_datasets$source_abbreviation
+    ref_datasets <- ref_datasets[
+      !((sa == "dbnsfp" & st %in% "gene") |
+          (sa == "depmap" & !st %in% "other") |
+          (sa == "tcga_pancan_2018" & st %in% "phenotype")), , drop = FALSE]
+  }
+
+  ## markdown special characters in free text
+  md_escape <- function(x) {
+    stringr::str_replace_all(x, "([\\\\`*_\\[\\]<>#@$])", "\\\\\\1")
+  }
+  entries <- vapply(seq_len(NROW(ref_datasets)), function(i) {
+    d <- ref_datasets[i, ]
+    name <- if (!is.na(d$source_url))
+      paste0("[", md_escape(d$source), "](", d$source_url, ")") else
+        md_escape(d$source)
+    version <- if (!is.na(d$source_version))
+      paste0(" (**", md_escape(d$source_version), "**)") else ""
+    license <- if (is.na(d$source_license)) "" else {
+      lic <- md_escape(d$source_license)
+      if (!is.na(d$source_license_url))
+        lic <- paste0("[", lic, "](", d$source_license_url, ")")
+      paste0(" - ", lic)
+    }
+    paste0("- **", name, "**", version, " - ",
+           md_escape(d$source_description), license)
+  }, character(1))
+
+  ## two balanced columns (split by text length)
+  cum_len <- cumsum(nchar(entries))
+  n_left <- max(1, which.min(abs(cum_len - cum_len[length(cum_len)] / 2)))
+  col_left <- entries[seq_len(n_left)]
+  col_right <- entries[-seq_len(n_left)]
+
+  cat(
+    "PCGR data bundle version: **",
+    pcg_report$settings$reference_data$version, "**.\n\n",
+    "```{=typst}\n#block[\n#set text(size: 7pt, hyphenate: false)\n",
+    "#set par(leading: 0.45em, justify: false)\n",
+    "#set list(spacing: 0.45em)\n",
+    "#grid(columns: (1fr, 1fr), column-gutter: 1.4em)[\n```\n\n",
+    paste(col_left, collapse = "\n"),
+    "\n\n```{=typst}\n][\n```\n\n",
+    paste(col_right, collapse = "\n"),
+    "\n\n```{=typst}\n]\n]\n```\n\n",
+    sep = "")
+} else {
+  cat(pcgrr:::no_findings_pdf(
+    "Reference data source metadata not available.", title = "N/A"))
+}
+```

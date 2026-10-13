@@ -1,0 +1,70 @@
+```{=typst}
+#pagebreak(weak: true)
+```
+
+# Appendix: Documentation
+
+```{=typst}
+// appendix: smaller text than the report sections, subsections in frames
+#set text(size: 8.5pt)
+#show table: set text(size: 7.5pt)
+#let pcgr-doc-box(body) = block(
+  width: 100%, breakable: true, inset: (x: 10pt, top: 8pt, bottom: 9pt),
+  radius: 3pt, stroke: 0.6pt + luma(200), fill: luma(250),
+  above: 0.9em, below: 0.9em, body)
+```
+
+This report is intended for interpretation of multi-omics data from a single human tumor sample. The documentation is also available in the HTML report, and at the [PCGR documentation website](https://sigven.github.io/pcgr).
+
+```{r documentation_pdf_notes}
+#| echo: false
+#| output: asis
+#| eval: true
+
+## documentation notes as in the HTML report (Documentation - Report
+## content), each in a frame
+doc_box <- function(title, ...) {
+  cat("```{=typst}\n#pcgr-doc-box[\n```\n\n",
+      "### ", title, "\n\n",
+      paste(vapply(list(...), pcgrr:::doc_note_pdf, character(1)),
+            collapse = "\n\n"),
+      "\n\n```{=typst}\n]\n```\n\n", sep = "")
+}
+doc_box("Key findings summary", pcgrr::key_findings_doc_note())
+doc_box("Sample and subject properties", paste0(
+  "- **Age** refers to the age of the subject (in whole years) at ",
+  "diagnosis, as provided with the `--age` option\n",
+  "- **Sex** of the subject is provided with the `--sex` option, and is ",
+  "used for the annotation of copy number losses on the sex chromosomes\n",
+  "- **Tumor purity** and **tumor ploidy** are shown with their source: ",
+  "*provided* - values estimated with other tools (e.g. ASCAT) and provided ",
+  "with `--tumor_purity` / `--tumor_ploidy`; *estimated* - tumor ploidy ",
+  "estimated by PCGR from the copy number segments (genome-wide weighted ",
+  "median) when not provided. Tumor purity is never estimated by PCGR"))
+doc_box("Variant oncogenicity classification",
+        pcgrr::oncogenicity_doc_note(),
+        "**A note on variant loss-of-function annotation**",
+        pcgrr::lof_doc_note())
+doc_box("Variant actionability classification", pcgrr::actionability_doc_note())
+doc_box("Mutational signature analysis", pcgrr::mutational_signatures_doc_note())
+doc_box("Tumor mutational burden (TMB) analysis", pcgrr::tmb_doc_note())
+doc_box("MSI classification", pcgrr::msi_doc_note())
+doc_box("RNA fusion analysis", pcgrr::fusion_doc_note())
+doc_box("Gene expression analysis", pcgrr::expression_doc_note())
+doc_box("Two-hit detection", pcgrr::twohit_doc_note())
+```
+
+## References
+
+::: {#refs}
+:::
+
+```{=typst}
+#pagebreak(weak: true)
+// own section - body text size as in the report sections (not the appendix)
+#set text(size: 10pt)
+```
+
+# Medical disclaimer
+
+*The information contained in this cancer genome report is intended for research purposes only. We make no representations or warranties of any kind, expressed or implied, about the completeness, accuracy, reliability, suitability or availability with respect to the sequencing report or the information, products, services, for interpretation or use in clinical practice, or otherwise contained in the report for any purpose. Any reliance you place on information in the report is therefore strictly at your own risk. In no event will we be liable for any loss or damage including without limitation, indirect or consequential loss or damage, or any loss or damage whatsoever arising from loss of data or profits arising out of, or in connection with, the use of this genome report.*

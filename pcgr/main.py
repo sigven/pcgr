@@ -36,6 +36,7 @@ def cli():
     optional_input = parser.add_argument_group(
         "Molecular input data",
         "At least one input type must be provided")
+    optional_subject = parser.add_argument_group("Subject options")
     optional_sample = parser.add_argument_group("Tumor sample options")
     optional_snv_indel = parser.add_argument_group(
         "Somatic SNV/InDel options",
@@ -78,8 +79,10 @@ def cli():
     optional_input.add_argument("--input_rna_expression", dest = "input_rna_exp", 
                                 help = "File with bulk RNA expression counts (TPM) of transcripts in tumor (tab-separated values)")
 
-    optional_sample.add_argument("--sex", dest="sex", choices=["FEMALE", "MALE", "UNKNOWN"], default="UNKNOWN", 
-                                 help = "Sex of cancer case/sample (default: %(default)s)")
+    optional_subject.add_argument("--sex", dest="sex", choices=["FEMALE", "MALE", "UNKNOWN"], default="UNKNOWN", 
+                                  help = "Sex of the subject (default: %(default)s)")
+    optional_subject.add_argument("--age", dest="age", type=int, 
+                                  help = "Age of the subject (whole years) at diagnosis (default: %(default)s)")
     optional_sample.add_argument("--tumor_site", dest="tsite", type=int, default=0, 
                                  help = "Optional integer code to specify primary tumor type/site of query sample,\nchoose any of the following identifiers:\n" + str(pcgr_vars.tumor_sites) + "\n(default: %(default)s - any tumor type)")
     optional_sample.add_argument("--tumor_purity", type=float, dest="tumor_purity", 
@@ -240,6 +243,8 @@ def cli():
                                 help = "Run functional variant annotation on VCF through VEP/vcfanno, omit other analyses\n(i.e. Tier assignment/MSI/TMB/Signatures etc. and report generation (STEP 4), default: %(default)s")
     optional_other.add_argument("--no_html", action="store_true", 
                                 help = "Do not generate HTML report (default: %(default)s)")
+    optional_other.add_argument("--no_pdf", action="store_true", 
+                                help = "Do not generate PDF report (Quarto/Typst) (default: %(default)s)")
     optional_other.add_argument("--debug", action="store_true", 
                                 help = "Print full commands to log")
     optional_other.add_argument("--pcgrr_conda", default="pcgrr", 
@@ -865,9 +870,9 @@ def run_pcgr(input_data, output_data, conf_options):
 
             # PCGR|CNA summary - sample-level scores derived from the allele-specific CNA segments:
             #  - fraction of genome altered (always computed)
-            #  - opt-in genomic instability ('HRD') score: research use only, guardrails for
-            #    assay type/tumor-only enforced in arg_checker.py (so reaching this point with
-            #    estimate_hrd = 1 means paired WGS/WES data is available)
+            #  - opt-in genomic instability ('HRD') score: research use only, derived from the
+            #    CNA segments only (arg_checker.py rejects TARGETED assays, and warns for
+            #    '--tumor_only', since the segments may still be called with a matched control)
             logger = getlogger("pcgr-cna-summary")
             chromsizes_fname = os.path.join(
                 input_data['refdata_assembly_dir'], 'chromsize.' + yaml_data['genome_assembly'] + '.tsv')

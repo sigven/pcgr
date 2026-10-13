@@ -157,6 +157,21 @@ expression_doc_note <- function() {
 }
 
 
+#' Get documentation string for the key findings summary
+#'
+#' @return A documentation string
+#'
+#' @export
+#'
+key_findings_doc_note <- function() {
+
+  doc_md_file <- system.file(
+    "templates", "doc_notes_md", "key_findings.md", package = "pcgrr")
+  paste0(readLines(doc_md_file, warn = FALSE), collapse = "\n")
+
+}
+
+
 #' Get documentation string for RNA fusion analysis
 #'
 #' @return A documentation string

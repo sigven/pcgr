@@ -1,0 +1,15 @@
+```{=typst}
+#pagebreak(weak: true)
+```
+
+# Composite genomic biomarkers
+
+```{r tmb_pdf}
+#| child: 'pcgr_quarto_report/pdf/tmb_pdf.qmd'
+#| eval: !expr isTRUE(pcg_report$content$tmb$eval)
+```
+
+```{r msi_pdf}
+#| child: 'pcgr_quarto_report/pdf/msi_pdf.qmd'
+#| eval: !expr isTRUE(pcg_report$content$msi$eval)
+```

@@ -1,0 +1,117 @@
+```{=typst}
+#pagebreak(weak: true)
+```
+
+# Germline findings
+
+```{r germline_pdf_setup}
+#| echo: false
+#| eval: true
+
+germline_pdf <- pcg_report$content$germline_classified
+germline_vars_pdf <- germline_pdf$callset$variant_display
+if (is.null(germline_vars_pdf)) germline_vars_pdf <- data.frame()
+show_vus_pdf <- !isTRUE(as.logical(pcg_report$settings$conf$germline$ignore_vus))
+max_vus_germline_pdf <- 20
+
+clnsig_pdf <- if ("CLINICAL_SIGNIFICANCE" %in% colnames(germline_vars_pdf))
+  germline_vars_pdf$CLINICAL_SIGNIFICANCE else character()
+germline_plp_pdf <- germline_vars_pdf[
+  clnsig_pdf %in% c("Pathogenic", "Likely Pathogenic"), , drop = FALSE]
+germline_vus_pdf <- germline_vars_pdf[clnsig_pdf %in% "VUS", , drop = FALSE]
+
+## virtual gene panel screened with CPSR
+panel_pdf <- germline_pdf$panel_info
+panel_desc_pdf <- if (is.null(panel_pdf$description)) "N/A" else
+  panel_pdf$description
+if (!is.null(panel_pdf$description_trait) &&
+    !any(panel_pdf$panel_id %in% c("-1", "0"))) {
+  panel_desc_pdf <- paste0(panel_desc_pdf, ": ", panel_pdf$description_trait)
+}
+panel_md_pdf <- if (!is.null(panel_pdf$url) && !any(panel_pdf$panel_id %in% "-1") &&
+                    !grepl(",", panel_pdf$url)) {
+  paste0("[", pcgrr:::doc_note_pdf(panel_desc_pdf), "](", panel_pdf$url, ")")
+} else pcgrr:::doc_note_pdf(panel_desc_pdf)
+
+has_control_depth_pdf <- "DP_CONTROL" %in% colnames(germline_vars_pdf) &&
+  any(suppressWarnings(as.numeric(germline_vars_pdf$DP_CONTROL)) >= 0,
+      na.rm = TRUE)
+has_dual_moi_pdf <- "CPG_MOI" %in% colnames(germline_vars_pdf) &&
+  any(grepl("/", germline_vars_pdf$CPG_MOI))
+```
+
+```{r germline_pdf_intro}
+#| echo: false
+#| output: asis
+cat("Based on a germline variant analysis of the case with the [Cancer ",
+    "Predisposition Sequencing Reporter (CPSR)](https://github.com/sigven/cpsr), ",
+    "variants of clinical significance in cancer predisposition genes are ",
+    "listed below - both novel (not recorded in ClinVar) and those with ",
+    "existing classifications in ClinVar.\n\n",
+    "- Virtual panel of cancer predisposition genes screened: ", panel_md_pdf, "\n",
+    "- All variants classified as Pathogenic or Likely Pathogenic are listed, ",
+    "regardless of coding status\n",
+    "- Variants of uncertain significance (VUS) are ",
+    if (show_vus_pdf) paste0(
+      "**also shown**, limited to a focused subset of protein-coding VUS ",
+      "(at most ", max_vus_germline_pdf, ") - **not** the complete set of VUS ",
+      "identified by CPSR") else "**not included**",
+    "\n\n", sep = "")
+if (has_dual_moi_pdf) {
+  cat(pcgrr:::note_box_pdf(paste0(
+    "For a subset of genes, *Inheritance* combines two modes (e.g. AD/AR): a ",
+    "heterozygous finding typically reflects the dominant condition, while a ",
+    "homozygous/biallelic finding may reflect a distinct, recessive condition."),
+    title = "Mode of inheritance"))
+}
+if (has_control_depth_pdf) {
+  cat("*Variants with a low sequencing depth (< 10X) are flagged in the ",
+      "Genotype column - interpret their classification with caution.*\n\n",
+      sep = "")
+}
+```
+
+## Pathogenic and Likely Pathogenic variants
+
+```{r germline_pdf_plp}
+#| echo: false
+#| eval: !expr NROW(germline_plp_pdf) > 0
+pcgrr:::germline_table_pdf(germline_plp_pdf, color = report_color)
+```
+
+```{r germline_pdf_plp_none}
+#| echo: false
+#| output: asis
+#| eval: !expr NROW(germline_plp_pdf) == 0
+cat(pcgrr:::no_findings_pdf(paste0(
+  "No pathogenic or likely pathogenic germline variants were found in the ",
+  "virtual panel of cancer predisposition genes (CPSR).")))
+```
+
+```{r germline_pdf_vus_heading}
+#| echo: false
+#| output: asis
+#| eval: !expr show_vus_pdf
+cat("## Variants of Uncertain Significance\n\n")
+if (NROW(germline_vus_pdf) == 0) {
+  cat(pcgrr:::no_findings_pdf(paste0(
+    "No protein-coding variants of uncertain significance were found in the ",
+    "virtual panel of cancer predisposition genes (CPSR).")))
+}
+```
+
+```{r germline_pdf_vus}
+#| echo: false
+#| eval: !expr show_vus_pdf && NROW(germline_vus_pdf) > 0
+pcgrr:::germline_table_pdf(
+  utils::head(germline_vus_pdf, max_vus_germline_pdf), color = report_color)
+```
+
+```{r germline_pdf_vus_capped}
+#| echo: false
+#| output: asis
+#| eval: !expr show_vus_pdf && NROW(germline_vus_pdf) > max_vus_germline_pdf
+cat("\n*Showing ", max_vus_germline_pdf, " of ", NROW(germline_vus_pdf),
+    " variants of uncertain significance - the complete list is available ",
+    "in the CPSR report.*\n\n", sep = "")
+```

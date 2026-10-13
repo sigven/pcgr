@@ -250,6 +250,8 @@ def verify_args(arg_dict, logger = None):
             err_msg = f"Tumor ploidy value ('--tumor_ploidy' = {arg_dict['tumor_ploidy']}) must be > 0"
             error_message(err_msg, logger)
 
+    verify_subject_age(arg_dict, logger)
+
     ## VCF-dependent validations - only check when input VCF is provided
     if arg_dict['input_vcf'] is not None:
 
@@ -478,10 +480,14 @@ def verify_args(arg_dict, logger = None):
                 err_msg = ("Genomic instability ('--estimate_hrd') scoring requires genome-wide copy number data and is not "
                            "supported for TARGETED sequencing assays ('--assay TARGETED')")
                 error_message(err_msg, logger)
+            ## HRD scores are derived from the CNA segments only - '--tumor_only' concerns the SNV/InDel calls,
+            ## and the CNA segments may well have been called with a matched control
             if arg_dict['tumor_only'] is True:
-                err_msg = ("Genomic instability ('--estimate_hrd') scoring requires a matched control sample and is not "
-                           "supported in tumor-only mode ('--tumor_only')")
-                error_message(err_msg, logger)
+                warn_msg = ("Genomic instability ('--estimate_hrd') scoring in tumor-only mode ('--tumor_only'): the HRD "
+                            "score is only reliable if the copy number segments were called with a matched control - "
+                            "without one, germline runs of homozygosity are indistinguishable from somatic LOH, and "
+                            "may inflate HRD-LOH (and TAI)")
+                warn_message(warn_msg, logger)
     elif arg_dict['estimate_hrd'] is True:
         err_msg = "Genomic instability scoring ('--estimate_hrd') requires copy number segment input ('--input_cna')"
         error_message(err_msg, logger)
@@ -514,6 +520,7 @@ def define_output_files(arg_dict, cpsr = False):
     output_data['html'] = f"{output_prefix}.html"
     output_data['xlsx'] = f"{output_prefix}.xlsx"
     output_data['yaml']= f"{output_prefix}.conf.yaml"
+    output_data['pdf'] = f"{output_prefix}.pdf"
     
     if not cpsr:
         for otype in ['cna_gene','cna_segment','expression','expression_outliers',
@@ -524,10 +531,9 @@ def define_output_files(arg_dict, cpsr = False):
         output_data['cna_summary'] = f"{output_prefix}.cna_summary.tsv"
     else:
         output_data['classification'] = f"{output_prefix}.classification.tsv.gz"
-        output_data['pdf'] = f"{output_prefix}.pdf"
     
     
-    for otype in ['vcf', 'vcf_pass','vcf2tsv', 'html', 'xlsx','yaml']:
+    for otype in ['vcf', 'vcf_pass','vcf2tsv', 'html', 'xlsx','yaml','pdf']:
         if os.path.exists(output_data[otype]) and arg_dict["force_overwrite"] is False:
             err_msg = "Output files (e.g. " + str(output_data[otype]) + \
                 ") already exist - please specify different sample_id or add option --force_overwrite"
@@ -542,7 +548,7 @@ def define_output_files(arg_dict, cpsr = False):
                     ") already exist - please specify different sample_id or add option --force_overwrite"
                 error_message(err_msg, logger)
     else:
-        for otype in ['classification', 'pdf']:
+        for otype in ['classification']:
             # if annotated output cna segments exist and overwrite not set
             if os.path.exists(output_data[otype]) and arg_dict["force_overwrite"] is False:
                 err_msg = "Output files (e.g. " + str(output_data[otype]) + \
@@ -873,6 +879,15 @@ def verify_required_args(arg_dict: dict, logger = None):
     
 ##---- CPSR ----##
 
+def verify_subject_age(arg_dict, logger = None):
+    """
+    Check that the age of the subject ('--age', PCGR/CPSR) is within [0, 120]
+    """
+    if arg_dict.get('age') is not None:
+        if not (0 <= int(arg_dict['age']) <= 120):
+            err_msg = f"Subject age ('--age' = {arg_dict['age']}) must be within [0, 120]"
+            error_message(err_msg, logger)
+
 def verify_args_cpsr(arg_dict):
 
     logger = getlogger('cpsr-validate-input-arguments-a')
@@ -894,6 +909,7 @@ def verify_args_cpsr(arg_dict):
     if arg_dict['max_af_gnomad'] <= 0.05 or arg_dict['max_af_gnomad'] > 1:
         err_msg = f"AF gnomAD threshold must be greater than 0.05 and below 1, current value is {arg_dict['max_af_gnomad']}"
         error_message(err_msg,logger)
+    verify_subject_age(arg_dict, logger)
     #if arg_dict['maf_upper_threshold'] <= 0 or arg_dict['maf_upper_threshold'] > 1:
     #    err_msg = f"MAF upper threshold must be greater than 0 and below 1, current value is {arg_dict['maf_upper_threshold']}"
     #    error_message(err_msg,logger)
