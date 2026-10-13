@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9007</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9008</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -226,6 +226,33 @@ file that is formatted correctly according to PCGR’s requirements:</p>
   1 3218329 3550598 1 0
   1 3552451 4593614 1 1
   1 4593663 6433129 2 1</code></pre>
+<p>Optionally, the file may contain a column
+<code>nMajor_nMinor_Imputed</code> (values
+<code>TRUE</code>/<code>FALSE</code>, or <code>1</code>/<code>0</code>),
+flagging segments where the total copy number is observed, but the split
+into major and minor copy number is imputed (e.g. by a downstream rescue
+step for segments that the allele-specific caller left unresolved). If
+the column is absent, no segments are considered imputed. Imputed
+segments are handled as follows:</p>
+<ul>
+<li>total copy number-based analyses (amplification/gain/deletion calls,
+fraction of genome altered, tumor ploidy estimation) use them as any
+other segment</li>
+<li>loss-of-heterozygosity (LOH) is not called for imputed segments (and
+they are thus not considered for two-hit candidates)</li>
+<li>they are excluded from the whole-genome doubling call, and from the
+autosomal segment coverage requirement of
+<code>--estimate_hrd</code>
+</li>
+<li>for the HRD scores (<code>--estimate_hrd</code>), they are treated
+as segments of <em>unknown</em> allele-specific state (rather than being
+dropped, which would make their neighbouring segments adjacent): they
+are never merged with their neighbours, and never counted as LOH/allelic
+imbalance or as part of a state transition</li>
+<li>they are flagged in the output (<code>CN_MAJOR_MINOR_IMPUTED</code>)
+and drawn with a lighter minor copy number track in the copy number
+profile plot of the report</li>
+</ul>
 <p>Importantly, you can configure predefined thresholds for segments
 that are considered to be high-level copy-number amplifications through
 the following option:</p>

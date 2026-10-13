@@ -270,9 +270,14 @@ segments:
   scarHRD/Sztupinszki et al. algorithm) from the CNA segments, shown in
   the CNA section of the report. **Research use only** - not a validated
   diagnostic measure, and only clinically thresholded (as the Myriad
-  myChoice CDx assay) for ovarian cancer. Requires paired tumor-control
-  WGS/WES data - not supported with `--tumor_only` or
-  `--assay TARGETED`.
+  myChoice CDx assay) for ovarian cancer. Requires genome-wide (WGS/WES)
+  CNA segments - not supported with `--assay TARGETED`, and the segments
+  must span at least 50% of the autosomal genome (checked at the start
+  of the run). The score is derived from the CNA segments only, so it is
+  allowed with `--tumor_only` (which concerns the SNV/InDel calls), with
+  a warning: it is reliable only if the CNA segments were called with a
+  matched control, since germline runs of homozygosity are otherwise
+  indistinguishable from somatic LOH, and may inflate HRD-LOH (and TAI).
 
 ### OncoKB biomarker integration
 
@@ -411,9 +416,12 @@ SNV/InDel analysis options:
   --vep_regulatory      Add VEP regulatory annotations (VEP option '--regulatory'), default: False
   --vep_gencode_basic   Consider basic GENCODE transcript set only (VEP option '--gencode_basic')
 
-Tumor sample options:
+Subject options:
   --sex {FEMALE,MALE,UNKNOWN}
-                        Sex of cancer case/sample (default: UNKNOWN)
+                        Sex of the subject (default: UNKNOWN)
+  --age AGE             Age of the subject (whole years) at diagnosis (default: None)
+
+Tumor sample options:
   --tumor_site TSITE    Optional integer code to specify primary tumor type/site of query sample,
                         choose any of the following identifiers:
                         0 = Any
@@ -563,8 +571,8 @@ Somatic CNA analysis options:
                         Minimum mean percent overlap between copy number segment and gene transcripts
                         for reporting of gains/losses in oncogenes/tumor suppressors (default: 50)
   --estimate_hrd        Estimate a genomic instability ('HRD') score (HRD-LOH + LST + TAI) from the
-                        allele-specific copy number segments - research use only, requires paired
-                        WGS/WES data, default: False
+                        allele-specific copy number segments - research use only, requires
+                        genome-wide (WGS/WES) segments, default: False
 
 RNA expression and fusion options:
   --fusion_min_split_reads FUSION_MIN_SPLIT_READS
@@ -607,6 +615,7 @@ Other options:
   --no_reporting        Run VEP/vcfanno annotation only; skip tier assignment, MSI, TMB, signatures,
                         and report generation (default: False)
   --no_html             Do not generate HTML report (default: False)
+  --no_pdf              Do not generate PDF report (Quarto/Typst) (default: False)
   --debug               Print full commands to log
   --pcgrr_conda PCGRR_CONDA
                         pcgrr conda environment name (default: pcgrr)

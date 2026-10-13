@@ -20,20 +20,20 @@ PCGR requires the following data to run successfully:
 PCGR supports both the GRCh37 and GRCh38 human genome assemblies. All
 the data above need to match the chosen assembly.
 
-### 1. Reference Bundle
+### 1. Reference bundle
 
 Reference bundles are generated semi-automatically (by the PCGR author)
 and are versioned based on their release date. Keep in mind that the
 bundles support only certain Ensembl VEP versions, and importantly also
 specific software versions of PCGR. Upgrading the PCGR software without
 upgrading the bundle specified here is thus *not* a recommended
-installation strategy. The latest (**v20260915**) genome-specific
+installation strategy. The latest (**v20261013**) genome-specific
 bundles can be downloaded directly from below (size: ~7.1Gb per bundle):
 
 | Assembly | Download Link |
 |:---|:---|
-| GRCh38 | <https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20260915.grch38.tgz> |
-| GRCh37 | <https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20260915.grch37.tgz> |
+| GRCh38 | <https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20261013.grch38.tgz> |
+| GRCh37 | <https://insilico.hpc.uio.no/pcgr/pcgr_ref_data.20261013.grch37.tgz> |
 
 **Tip 1**: The `data/grch3x/.PCGR_BUNDLE_VERSION` file within the
 downloaded bundle indicates the bundle version for reporting purposes.
@@ -42,9 +42,9 @@ downloaded bundle indicates the bundle version for reporting purposes.
 report with an overview and statistics of the key resources included in
 the reference bundle.
 
-#### Bash Example
+#### Bash example
 
-    BUNDLE_VERSION="20260915"
+    BUNDLE_VERSION="20261013"
 
 ``` bash
 GENOME="grch38" # or "grch37"
@@ -56,7 +56,7 @@ mkdir ${BUNDLE_VERSION}
 mv data/ ${BUNDLE_VERSION}
 ```
 
-### 2. VEP Cache
+### 2. VEP cache
 
 [VEP](https://www.ensembl.org/info/docs/tools/vep/index.html) requires a
 data cache which is available from the Ensembl [FTP
@@ -81,7 +81,7 @@ containing the downloaded `homo_sapiens/116_GRCh3x/` cache.
 Historically, this parent directory has been named `.vep`, but the name
 of this directory can be arbitrarily set.
 
-### 3. Sample Inputs
+### 3. Sample inputs
 
 See the [Inputs](https://sigven.github.io/pcgr/dev/articles/input.md)
 article.
@@ -108,7 +108,7 @@ the time is spent on downloading the `{BSgenome.Hsapiens.UCSC.hg19}` and
 `{BSgenome.Hsapiens.UCSC.hg38}` R packages (which happens at the very
 end of the conda environment creation).
 
-    PCGR_VERSION="2.3.2.9007"
+    PCGR_VERSION="2.3.2.9008"
 
 ``` bash
 # set up variables
@@ -129,11 +129,11 @@ pcgr --help
 
 The PCGR Docker image is available from the GitHub Container Registry at
 <https://github.com/sigven/pcgr/pkgs/container/pcgr>. Pull the latest
-**v2.3.2.9007** image with:
+**v2.3.2.9008** image with:
 
-    docker pull ghcr.io/sigven/pcgr:2.3.2.9007
+    docker pull ghcr.io/sigven/pcgr:2.3.2.9008
 
-#### Example Run
+#### Example run
 
 In the example below, we assume that you have the following directory
 structure:
@@ -142,7 +142,7 @@ structure:
 - `/Users/you/dir1/VEP_cache` - the directory where you have downloaded
   the [VEP cache](#vep-cache) (**Note**: this directory should contain
   the `homo_sapiens` directory as its child directory
-- `/Users/you/dir1/20260915` - the directory where you have downloaded
+- `/Users/you/dir1/20261013` - the directory where you have downloaded
   the PCGR reference bundle (**Note**: this directory should contain a
   directory named `data` as its child directory)
 - `/Users/you/dir1/pcgr_inputs` - the directory where you have your
@@ -152,8 +152,8 @@ structure:
 
 &nbsp;
 
-    PCGR_VERSION="2.3.2.9007"
-    BUNDLE_VERSION="20260915"
+    PCGR_VERSION="2.3.2.9008"
+    BUNDLE_VERSION="20261013"
 
 ``` bash
 docker container run -it --rm \
@@ -184,19 +184,19 @@ for Singularity/Apptainer below, see also [issue
 ### C. Singularity/Apptainer
 
 The PCGR Singularity/Apptainer image is available on [GitHub Container
-Registry](https://ghcr.io/sigven/pcgr). Pull the latest **v2.3.2.9007**
+Registry](https://ghcr.io/sigven/pcgr). Pull the latest **v2.3.2.9008**
 image with:
 
-    apptainer pull oras://ghcr.io/sigven/pcgr:2.3.2.9007.singularity
+    apptainer pull oras://ghcr.io/sigven/pcgr:2.3.2.9008.singularity
 
 This will download a Singularity Image File (SIF) called
-**pcgr_2.3.2.9007.singularity.sif** that can be run with Singularity or
+**pcgr_2.3.2.9008.singularity.sif** that can be run with Singularity or
 Apptainer.
 
-#### Example Run
+#### Example run
 
-    PCGR_VERSION="2.3.2.9007"
-    BUNDLE_VERSION="20260915"
+    PCGR_VERSION="2.3.2.9008"
+    BUNDLE_VERSION="20261013"
 
 ``` bash
 apptainer exec \

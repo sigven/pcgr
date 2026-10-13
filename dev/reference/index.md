@@ -307,6 +307,8 @@
 - [`kataegis_input()`](https://sigven.github.io/pcgr/dev/reference/kataegis_input.md)
   : Function that detects kataegis events from a data frame with genomic
   cooordinates of mutations
+- [`key_findings_doc_note()`](https://sigven.github.io/pcgr/dev/reference/key_findings_doc_note.md)
+  : Get documentation string for the key findings summary
 - [`list_of_list_to_df()`](https://sigven.github.io/pcgr/dev/reference/list_of_list_to_df.md)
   : Helper function to convert list of lists to data.frame
 - [`load_cpsr_classified_variants()`](https://sigven.github.io/pcgr/dev/reference/load_cpsr_classified_variants.md)

@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9007</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9008</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -85,12 +85,12 @@
     
     
 <div class="section level2">
-<h2 id="v2-3-3">v2.3.3<a class="anchor" aria-label="anchor" href="#v2-3-3"></a>
+<h2 id="v2-4-0">v2.4.0<a class="anchor" aria-label="anchor" href="#v2-4-0"></a>
 </h2>
 <ul>
 <li>Date: <strong>2026-10-XX</strong>
 </li>
-<li>Data bundle update (<code>20261005</code>) and software updates
+<li>Data bundle update (<code>20261013</code>) and software updates
 <ul>
 <li>Ensembl VEP <code>v116.2</code> / GENCODE v50 (GRCh38; v19 for
 GRCh37)</li>
@@ -98,6 +98,8 @@ GRCh37)</li>
 <li>CIViC (2026-10-05)</li>
 <li>UniProt/SwissProt KnowledgeBase (2026_03)</li>
 <li>Open Targets Platform (2026.09)</li>
+<li>Pfam - v38.2 - 2026-01</li>
+<li>DepMap - 26.Q3 )</li>
 </ul>
 </li>
 </ul>
@@ -154,22 +156,64 @@ plot caption</li>
 the allele-specific copy number segments, and reported in the
 <code>cna_summary.tsv</code> output file</li>
 <li>
+<strong>PDF report</strong> - a focused PDF report is now generated
+by default (opt out with the new <code>--no_pdf</code> option)
+(Quarto/Typst;
+<code>&lt;sample_id&gt;.pcgr.&lt;genome_assembly&gt;.pdf</code>) in
+addition to the HTML report, with a cover page summarising key findings
+(actionable aberrations, oncogenic variants, TMB, MSI, CNAs) - layout as
+in the CPSR PDF report</li>
+<li>
+<strong>Subject age</strong> - new option <code>--age</code> (age of
+the subject in whole years at diagnosis), listed with <code>--sex</code>
+in a new <em>Subject options</em> group of the command-line interface
+(separate from <em>Tumor sample options</em>). The age is stored in the
+run configuration (<code>sample_properties: age</code>), shown with sex
+on the PDF cover page and in the PDF settings, and listed in the
+SAMPLE_ASSAY sheet of the Excel output
+(<code>AGE_AT_DIAGNOSIS</code>)</li>
+<li>
+<strong>Tumor purity source</strong> - tumor purity is shown with
+its source (<code>provided</code>, as for tumor ploidy) in the HTML and
+PDF reports, and in the SAMPLE_ASSAY sheet of the Excel output
+(<code>TUMOR_PURITY_SOURCE</code>) - purity is never estimated by PCGR,
+whereas ploidy is either <code>provided</code> or <code>estimated</code>
+(from the copy number segments)</li>
+<li>
 <strong>HRD score</strong> - new, opt-in <code>--estimate_hrd</code>
 option
 <ul>
 <li>Estimates HRD-LOH + LST + TAI from the allele-specific CNA segments,
 following the <a href="https://github.com/sztup/scarHRD" class="external-link">scarHRD/Sztupinszki et
-al. algorithm</a> - shown in a dedicated subsection at the end of the
-CNA section, with an explanation of each measure and tumor-type-aware
-interpretation notes</li>
+al. algorithm</a> (implemented as a Python port of scarHRD, MIT License
+- see <code>THIRD_PARTY_LICENSES.md</code>) - shown in a dedicated
+subsection at the end of the CNA section, with an explanation of each
+measure and tumor-type-aware interpretation notes</li>
 <li>
 <strong>Research use only</strong> - not a validated diagnostic
 measure, and only clinically thresholded (Myriad myChoice CDx, sum ≥ 42)
 for ovarian cancer</li>
-<li>Requires paired tumor-control data with genome-wide CNA segments
-(<code>--input_cna</code>); not supported with <code>--tumor_only</code>
-or <code>--assay TARGETED</code> (enforced as an argument-validation
-error)</li>
+</ul>
+</li>
+<li>
+<strong>Imputed allele-specific copy number</strong> - new optional
+column <code>nMajor_nMinor_Imputed</code>
+(<code>TRUE</code>/<code>FALSE</code> or <code>1</code>/<code>0</code>)
+in the CNA segment input, flagging segments with an observed total copy
+number but an imputed major/minor split
+<ul>
+<li>LOH is not called for imputed segments, and they are excluded from
+the whole-genome doubling call and the <code>--estimate_hrd</code>
+segment coverage check</li>
+<li>HRD scores (<code>--estimate_hrd</code>) treat imputed segments as
+unknown allele-specific state - they are not merged with neighbouring
+segments, nor counted as LOH, allelic imbalance or state transitions
+(rather than being dropped, which would make their neighbours
+adjacent)</li>
+<li>Flagged in the segment- and gene-level CNA output
+(<code>CN_MAJOR_MINOR_IMPUTED</code>), in the hover text of the copy
+number profile plots, and with a lighter minor copy number track in the
+absolute copy number plot</li>
 </ul>
 </li>
 <li>

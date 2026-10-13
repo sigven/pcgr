@@ -37,8 +37,8 @@
 
 - [UniProt/SwissProt KnowledgeBase](http://www.uniprot.org) - resource
   on protein sequence and functional information (2026_03)
-- [Pfam](https://www.ebi.ac.uk/interpro/entry/pfam/#table) - database of
-  protein families and domains (v37.0)
+- [Pfam](http://pfam.xfam.org) - database of protein families and
+  domains (v38.2, 2026-01)
 
 ### Knowledge resources on gene and protein targets
 

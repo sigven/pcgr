@@ -532,38 +532,39 @@ are not included for CNA output.
 | 3\. `GENOME_VERSION` | Assembly version, e.g. GRCh38 |
 | 4\. `CN_MAJOR` | Major copy number |
 | 5\. `CN_MINOR` | Minor copy number |
-| 6\. `LOH` | Loss of heterozygosity flag |
-| 7\. `TWOHIT_CANDIDATE_SOMATIC` | Comma-separated somatic loss-of-function variants overlapping the segment (TSG with allele-specific LOH: deletion or copy-neutral). Each entry has the format `VAR_ID;CONSEQUENCE;VAF_FLAG;ALTERATION;VAF_TUMOR;DP_TUMOR;ONCOGENICITY`, where `VAF_FLAG` is one of: `VAF_CONSISTENT` (observed VAF consistent with variant on retained allele given tumor purity), `VAF_LOW` (VAF below purity-adjusted expectation — variant may reside on the deleted allele or be subclonal to the LOH event), or `VAF_UNKNOWN` (tumor purity not provided); `ALTERATION` is the protein-level consequence (or `.` if absent); `VAF_TUMOR` is the allele fraction in the tumor; `DP_TUMOR` is the read depth; and `ONCOGENICITY` is the OncoKB classification (or `.` if OncoKB is not enabled). |
-| 8\. `TWOHIT_CANDIDATE_GERMLINE` | Comma-separated germline pathogenic/likely-pathogenic loss-of-function variants matching by gene symbol (TSG with allele-specific LOH: deletion or copy-neutral; requires CPSR input). Each entry has the format `VAR_ID;CONSEQUENCE`. |
-| 9\. `FOLD_CHANGE` | Fold change of segment copy number relative to tumor ploidy |
-| 10\. `TUMOR_PLOIDY` | Tumor ploidy estimate |
-| 11\. `TUMOR_PLOIDY_SOURCE` | Source of tumor ploidy estimate |
-| 12\. `TUMOR_PURITY` | Tumor purity estimate |
-| 13\. `SEGMENT_LENGTH_MB` | Length of segment in Mb |
-| 14\. `CYTOBAND` | Associated cytoband |
-| 15\. `EVENT_TYPE` | Focal or broad (covering more than 25% of chromosome arm) |
-| 16\. `VARIANT_CLASS` | *amplification*: total copy number \>= user-defined threshold; *homdel*: total copy number equal to zero; *hetdel*: total copy number equal to one; *gain*: copy number gain below amplification threshold; *undefined*: other copy number states |
-| 17\. `VARIANT_CLASS_DISPLAY` | Display label for variant class |
-| 18\. `SYMBOL` | Gene symbol |
-| 19\. `ENTREZGENE` | Entrez gene identifier |
-| 20\. `GENENAME` | Gene name |
-| 21\. `ENSEMBL_GENE_ID` | Ensembl gene identifier |
-| 22\. `TUMOR_SUPPRESSOR` | Flag indicating if gene is tumor suppressor (CancerMine/NCG) |
-| 23\. `TUMOR_SUPPRESSOR_SUPPORT` | Tumor suppressor annotation support (CancerMine/NCG) |
-| 24\. `ONCOGENE` | Flag indicating if gene is oncogene (CancerMine/NCG) |
-| 25\. `ONCOGENE_SUPPORT` | Oncogene annotation support (CancerMine/NCG) |
-| 26\. `MUTATION_EFFECT_OKB` | *(OncoKB only)* OncoKB mutation effect annotation (e.g. Loss-of-function, Gain-of-function) |
-| 27\. `MUTATION_EFFECT_CITATIONS_OKB` | *(OncoKB only)* OncoKB mutation effect citations |
-| 28\. `MUTATION_EFFECT_DESCRIPTION_OKB` | *(OncoKB only)* OncoKB mutation effect description |
-| 29\. `ONCOGENICITY_OKB` | *(OncoKB only)* OncoKB oncogenicity annotation (e.g. Oncogenic, Likely Oncogenic) |
-| 30\. `TUMOR_TYPE_SUMMARY_OKB` | *(OncoKB only)* OncoKB tumor type summary |
-| 31\. `VARIANT_SUMMARY_OKB` | *(OncoKB only)* OncoKB variant summary |
-| 32\. `TRANSCRIPT_OVERLAP` | Comma-separated list of associated transcripts, including percentage of transcript overlap |
-| 33\. `TRANSCRIPT_OVERLAP_PERCENT` | Percentage overlap between copy number segment and transcript |
-| 34\. `ACTIONABILITY_TIER` | Variant actionability tier - AMP/ASCO/CAP |
-| 35\. `ACTIONABILITY` | Variant clinical actionability significance - AMP/ASCO/CAP |
-| 36\. `BIOMARKER_MATCH` | Biomarker match |
-| 37\. `TARGETED_INHIBITORS_ALL2` | Molecularly targeted inhibitors - indicated for any tumor type |
+| 6\. `CN_MAJOR_MINOR_IMPUTED` | `TRUE` if the major/minor split of the segment is imputed (total copy number observed), from the optional input column `nMajor_nMinor_Imputed`. `FALSE` otherwise |
+| 7\. `LOH` | Loss of heterozygosity flag (not called for segments with an imputed major/minor split) |
+| 8\. `TWOHIT_CANDIDATE_SOMATIC` | Comma-separated somatic loss-of-function variants overlapping the segment (TSG with allele-specific LOH: deletion or copy-neutral). Each entry has the format `VAR_ID;CONSEQUENCE;VAF_FLAG;ALTERATION;VAF_TUMOR;DP_TUMOR;ONCOGENICITY`, where `VAF_FLAG` is one of: `VAF_CONSISTENT` (observed VAF consistent with variant on retained allele given tumor purity), `VAF_LOW` (VAF below purity-adjusted expectation — variant may reside on the deleted allele or be subclonal to the LOH event), or `VAF_UNKNOWN` (tumor purity not provided); `ALTERATION` is the protein-level consequence (or `.` if absent); `VAF_TUMOR` is the allele fraction in the tumor; `DP_TUMOR` is the read depth; and `ONCOGENICITY` is the OncoKB classification (or `.` if OncoKB is not enabled). |
+| 9\. `TWOHIT_CANDIDATE_GERMLINE` | Comma-separated germline pathogenic/likely-pathogenic loss-of-function variants matching by gene symbol (TSG with allele-specific LOH: deletion or copy-neutral; requires CPSR input). Each entry has the format `VAR_ID;CONSEQUENCE`. |
+| 10\. `FOLD_CHANGE` | Fold change of segment copy number relative to tumor ploidy |
+| 11\. `TUMOR_PLOIDY` | Tumor ploidy estimate |
+| 12\. `TUMOR_PLOIDY_SOURCE` | Source of tumor ploidy estimate: `provided` (`--tumor_ploidy`, e.g. estimated with ASCAT or other tools) or `estimated` (genome-wide weighted median of the segment copy numbers, estimated by PCGR when `--tumor_ploidy` is not provided) |
+| 13\. `TUMOR_PURITY` | Tumor purity estimate |
+| 14\. `SEGMENT_LENGTH_MB` | Length of segment in Mb |
+| 15\. `CYTOBAND` | Associated cytoband |
+| 16\. `EVENT_TYPE` | Focal or broad (covering more than 25% of chromosome arm) |
+| 17\. `VARIANT_CLASS` | *amplification*: total copy number \>= user-defined threshold; *homdel*: total copy number equal to zero; *hetdel*: total copy number equal to one; *gain*: copy number gain below amplification threshold; *undefined*: other copy number states |
+| 18\. `VARIANT_CLASS_DISPLAY` | Display label for variant class |
+| 19\. `SYMBOL` | Gene symbol |
+| 20\. `ENTREZGENE` | Entrez gene identifier |
+| 21\. `GENENAME` | Gene name |
+| 22\. `ENSEMBL_GENE_ID` | Ensembl gene identifier |
+| 23\. `TUMOR_SUPPRESSOR` | Flag indicating if gene is tumor suppressor (CancerMine/NCG) |
+| 24\. `TUMOR_SUPPRESSOR_SUPPORT` | Tumor suppressor annotation support (CancerMine/NCG) |
+| 25\. `ONCOGENE` | Flag indicating if gene is oncogene (CancerMine/NCG) |
+| 26\. `ONCOGENE_SUPPORT` | Oncogene annotation support (CancerMine/NCG) |
+| 27\. `MUTATION_EFFECT_OKB` | *(OncoKB only)* OncoKB mutation effect annotation (e.g. Loss-of-function, Gain-of-function) |
+| 28\. `MUTATION_EFFECT_CITATIONS_OKB` | *(OncoKB only)* OncoKB mutation effect citations |
+| 29\. `MUTATION_EFFECT_DESCRIPTION_OKB` | *(OncoKB only)* OncoKB mutation effect description |
+| 30\. `ONCOGENICITY_OKB` | *(OncoKB only)* OncoKB oncogenicity annotation (e.g. Oncogenic, Likely Oncogenic) |
+| 31\. `TUMOR_TYPE_SUMMARY_OKB` | *(OncoKB only)* OncoKB tumor type summary |
+| 32\. `VARIANT_SUMMARY_OKB` | *(OncoKB only)* OncoKB variant summary |
+| 33\. `TRANSCRIPT_OVERLAP` | Comma-separated list of associated transcripts, including percentage of transcript overlap |
+| 34\. `TRANSCRIPT_OVERLAP_PERCENT` | Percentage overlap between copy number segment and transcript |
+| 35\. `ACTIONABILITY_TIER` | Variant actionability tier - AMP/ASCO/CAP |
+| 36\. `ACTIONABILITY` | Variant clinical actionability significance - AMP/ASCO/CAP |
+| 37\. `BIOMARKER_MATCH` | Biomarker match |
+| 38\. `TARGETED_INHIBITORS_ALL2` | Molecularly targeted inhibitors - indicated for any tumor type |
 
 #### 2. Sample-level CNA summary (TSV)
 
@@ -740,7 +741,7 @@ manageable.
 |----|----|----|
 | `SETTINGS` | Always | Key parameters used for the analysis, including filtering thresholds |
 | `DATA_VERSIONS` | Always | Version information for all databases used in the annotation and analysis |
-| `SAMPLE_ASSAY` | Always | Sample and assay properties: tumor site, sex, purity, ploidy, assay type (WGS/WES/TARGETED), tumor-normal/tumor-only mode, and effective target size |
+| `SAMPLE_ASSAY` | Always | Sample and assay properties: tumor site, sex, age at diagnosis, purity, ploidy (each with its source - `provided`: value from `--tumor_purity`/`--tumor_ploidy`; `estimated`: ploidy estimated by PCGR from the copy number segments; purity is never estimated by PCGR), assay type (WGS/WES/TARGETED), tumor-normal/tumor-only mode, and effective target size |
 | `SOMATIC_SNV_INDEL` | `--input_vcf` provided | Somatic SNV/InDel annotations using the same columns as the TSV output, minus `BIOMARKER_MATCH` and `VEP_ALL_CSQ`. **Filtered** to exonic variants (`EXONIC_STATUS == "exonic"`) plus any non-exonic variant with an actionability tier ≤ 3. User-retained VCF INFO tags (`--retained_info_tags`) are appended as additional columns. `HGVSP` is renamed to `HGVSp_short` to avoid column name conflicts |
 | `SOMATIC_SNV_INDEL_BIOMARKER` | `--input_vcf` provided and biomarker hits exist | One row per biomarker evidence item matched to a somatic SNV/InDel. A `TIER` column encodes evidence category and actionability tier (e.g. `T1`/`T2`/`T3` = therapeutic sensitivity, `R1`/`R2`/`R3` = therapeutic resistance, `PP1`–`PP2` = poor prognosis, `PB1`–`PB2` = better prognosis, `D1`–`D2` = diagnostic positive). Diagnostic-negative evidence is excluded |
 | `SOMATIC_CNA` | `--input_cna` provided | CNA gene-level annotations using the same columns as the TSV output, minus `BIOMARKER_MATCH`. **Filtered** to genes with a non-missing `ACTIONABILITY_TIER` |

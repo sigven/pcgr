@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9007</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9008</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -2018,12 +2018,21 @@ for CNA output.</p>
 <td>Minor copy number</td>
 </tr>
 <tr class="even">
-<td>6. <code>LOH</code>
+<td>6. <code>CN_MAJOR_MINOR_IMPUTED</code>
 </td>
-<td>Loss of heterozygosity flag</td>
+<td>
+<code>TRUE</code> if the major/minor split of the segment is imputed
+(total copy number observed), from the optional input column
+<code>nMajor_nMinor_Imputed</code>. <code>FALSE</code> otherwise</td>
 </tr>
 <tr class="odd">
-<td>7. <code>TWOHIT_CANDIDATE_SOMATIC</code>
+<td>7. <code>LOH</code>
+</td>
+<td>Loss of heterozygosity flag (not called for segments with an imputed
+major/minor split)</td>
+</tr>
+<tr class="even">
+<td>8. <code>TWOHIT_CANDIDATE_SOMATIC</code>
 </td>
 <td>Comma-separated somatic loss-of-function variants overlapping the
 segment (TSG with allele-specific LOH: deletion or copy-neutral). Each
@@ -2040,51 +2049,55 @@ in the tumor; <code>DP_TUMOR</code> is the read depth; and
 <code>ONCOGENICITY</code> is the OncoKB classification (or
 <code>.</code> if OncoKB is not enabled).</td>
 </tr>
-<tr class="even">
-<td>8. <code>TWOHIT_CANDIDATE_GERMLINE</code>
+<tr class="odd">
+<td>9. <code>TWOHIT_CANDIDATE_GERMLINE</code>
 </td>
 <td>Comma-separated germline pathogenic/likely-pathogenic
 loss-of-function variants matching by gene symbol (TSG with
 allele-specific LOH: deletion or copy-neutral; requires CPSR input).
 Each entry has the format <code>VAR_ID;CONSEQUENCE</code>.</td>
 </tr>
-<tr class="odd">
-<td>9. <code>FOLD_CHANGE</code>
+<tr class="even">
+<td>10. <code>FOLD_CHANGE</code>
 </td>
 <td>Fold change of segment copy number relative to tumor ploidy</td>
 </tr>
-<tr class="even">
-<td>10. <code>TUMOR_PLOIDY</code>
+<tr class="odd">
+<td>11. <code>TUMOR_PLOIDY</code>
 </td>
 <td>Tumor ploidy estimate</td>
 </tr>
-<tr class="odd">
-<td>11. <code>TUMOR_PLOIDY_SOURCE</code>
-</td>
-<td>Source of tumor ploidy estimate</td>
-</tr>
 <tr class="even">
-<td>12. <code>TUMOR_PURITY</code>
+<td>12. <code>TUMOR_PLOIDY_SOURCE</code>
+</td>
+<td>Source of tumor ploidy estimate: <code>provided</code>
+(<code>--tumor_ploidy</code>, e.g. estimated with ASCAT or other tools)
+or <code>estimated</code> (genome-wide weighted median of the segment
+copy numbers, estimated by PCGR when <code>--tumor_ploidy</code> is not
+provided)</td>
+</tr>
+<tr class="odd">
+<td>13. <code>TUMOR_PURITY</code>
 </td>
 <td>Tumor purity estimate</td>
 </tr>
-<tr class="odd">
-<td>13. <code>SEGMENT_LENGTH_MB</code>
+<tr class="even">
+<td>14. <code>SEGMENT_LENGTH_MB</code>
 </td>
 <td>Length of segment in Mb</td>
 </tr>
-<tr class="even">
-<td>14. <code>CYTOBAND</code>
+<tr class="odd">
+<td>15. <code>CYTOBAND</code>
 </td>
 <td>Associated cytoband</td>
 </tr>
-<tr class="odd">
-<td>15. <code>EVENT_TYPE</code>
+<tr class="even">
+<td>16. <code>EVENT_TYPE</code>
 </td>
 <td>Focal or broad (covering more than 25% of chromosome arm)</td>
 </tr>
-<tr class="even">
-<td>16. <code>VARIANT_CLASS</code>
+<tr class="odd">
+<td>17. <code>VARIANT_CLASS</code>
 </td>
 <td>
 <em>amplification</em>: total copy number &gt;= user-defined
@@ -2093,117 +2106,117 @@ threshold; <em>homdel</em>: total copy number equal to zero;
 number gain below amplification threshold; <em>undefined</em>: other
 copy number states</td>
 </tr>
-<tr class="odd">
-<td>17. <code>VARIANT_CLASS_DISPLAY</code>
+<tr class="even">
+<td>18. <code>VARIANT_CLASS_DISPLAY</code>
 </td>
 <td>Display label for variant class</td>
 </tr>
-<tr class="even">
-<td>18. <code>SYMBOL</code>
+<tr class="odd">
+<td>19. <code>SYMBOL</code>
 </td>
 <td>Gene symbol</td>
 </tr>
-<tr class="odd">
-<td>19. <code>ENTREZGENE</code>
+<tr class="even">
+<td>20. <code>ENTREZGENE</code>
 </td>
 <td>Entrez gene identifier</td>
 </tr>
-<tr class="even">
-<td>20. <code>GENENAME</code>
+<tr class="odd">
+<td>21. <code>GENENAME</code>
 </td>
 <td>Gene name</td>
 </tr>
-<tr class="odd">
-<td>21. <code>ENSEMBL_GENE_ID</code>
+<tr class="even">
+<td>22. <code>ENSEMBL_GENE_ID</code>
 </td>
 <td>Ensembl gene identifier</td>
 </tr>
-<tr class="even">
-<td>22. <code>TUMOR_SUPPRESSOR</code>
+<tr class="odd">
+<td>23. <code>TUMOR_SUPPRESSOR</code>
 </td>
 <td>Flag indicating if gene is tumor suppressor (CancerMine/NCG)</td>
 </tr>
-<tr class="odd">
-<td>23. <code>TUMOR_SUPPRESSOR_SUPPORT</code>
+<tr class="even">
+<td>24. <code>TUMOR_SUPPRESSOR_SUPPORT</code>
 </td>
 <td>Tumor suppressor annotation support (CancerMine/NCG)</td>
 </tr>
-<tr class="even">
-<td>24. <code>ONCOGENE</code>
+<tr class="odd">
+<td>25. <code>ONCOGENE</code>
 </td>
 <td>Flag indicating if gene is oncogene (CancerMine/NCG)</td>
 </tr>
-<tr class="odd">
-<td>25. <code>ONCOGENE_SUPPORT</code>
+<tr class="even">
+<td>26. <code>ONCOGENE_SUPPORT</code>
 </td>
 <td>Oncogene annotation support (CancerMine/NCG)</td>
 </tr>
-<tr class="even">
-<td>26. <code>MUTATION_EFFECT_OKB</code>
+<tr class="odd">
+<td>27. <code>MUTATION_EFFECT_OKB</code>
 </td>
 <td>
 <em>(OncoKB only)</em> OncoKB mutation effect annotation
 (e.g. Loss-of-function, Gain-of-function)</td>
 </tr>
-<tr class="odd">
-<td>27. <code>MUTATION_EFFECT_CITATIONS_OKB</code>
+<tr class="even">
+<td>28. <code>MUTATION_EFFECT_CITATIONS_OKB</code>
 </td>
 <td>
 <em>(OncoKB only)</em> OncoKB mutation effect citations</td>
 </tr>
-<tr class="even">
-<td>28. <code>MUTATION_EFFECT_DESCRIPTION_OKB</code>
+<tr class="odd">
+<td>29. <code>MUTATION_EFFECT_DESCRIPTION_OKB</code>
 </td>
 <td>
 <em>(OncoKB only)</em> OncoKB mutation effect description</td>
 </tr>
-<tr class="odd">
-<td>29. <code>ONCOGENICITY_OKB</code>
+<tr class="even">
+<td>30. <code>ONCOGENICITY_OKB</code>
 </td>
 <td>
 <em>(OncoKB only)</em> OncoKB oncogenicity annotation
 (e.g. Oncogenic, Likely Oncogenic)</td>
 </tr>
-<tr class="even">
-<td>30. <code>TUMOR_TYPE_SUMMARY_OKB</code>
+<tr class="odd">
+<td>31. <code>TUMOR_TYPE_SUMMARY_OKB</code>
 </td>
 <td>
 <em>(OncoKB only)</em> OncoKB tumor type summary</td>
 </tr>
-<tr class="odd">
-<td>31. <code>VARIANT_SUMMARY_OKB</code>
+<tr class="even">
+<td>32. <code>VARIANT_SUMMARY_OKB</code>
 </td>
 <td>
 <em>(OncoKB only)</em> OncoKB variant summary</td>
 </tr>
-<tr class="even">
-<td>32. <code>TRANSCRIPT_OVERLAP</code>
+<tr class="odd">
+<td>33. <code>TRANSCRIPT_OVERLAP</code>
 </td>
 <td>Comma-separated list of associated transcripts, including percentage
 of transcript overlap</td>
 </tr>
-<tr class="odd">
-<td>33. <code>TRANSCRIPT_OVERLAP_PERCENT</code>
+<tr class="even">
+<td>34. <code>TRANSCRIPT_OVERLAP_PERCENT</code>
 </td>
 <td>Percentage overlap between copy number segment and transcript</td>
 </tr>
-<tr class="even">
-<td>34. <code>ACTIONABILITY_TIER</code>
+<tr class="odd">
+<td>35. <code>ACTIONABILITY_TIER</code>
 </td>
 <td>Variant actionability tier - AMP/ASCO/CAP</td>
 </tr>
-<tr class="odd">
-<td>35. <code>ACTIONABILITY</code>
+<tr class="even">
+<td>36. <code>ACTIONABILITY</code>
 </td>
 <td>Variant clinical actionability significance - AMP/ASCO/CAP</td>
 </tr>
-<tr class="even">
-<td>36. <code>BIOMARKER_MATCH</code>
+<tr class="odd">
+<td>37. <code>BIOMARKER_MATCH</code>
 </td>
 <td>Biomarker match</td>
 </tr>
-<tr class="odd">
-<td>37. <code>TARGETED_INHIBITORS_ALL2</code>
+<tr class="even">
+<td>38. <code>TARGETED_INHIBITORS_ALL2</code>
 </td>
 <td>Molecularly targeted inhibitors - indicated for any tumor type</td>
 </tr>
@@ -2820,9 +2833,13 @@ analysis</td>
 <tr class="odd">
 <td><code>SAMPLE_ASSAY</code></td>
 <td>Always</td>
-<td>Sample and assay properties: tumor site, sex, purity, ploidy, assay
-type (WGS/WES/TARGETED), tumor-normal/tumor-only mode, and effective
-target size</td>
+<td>Sample and assay properties: tumor site, sex, age at diagnosis,
+purity, ploidy (each with its source - <code>provided</code>: value from
+<code>--tumor_purity</code>/<code>--tumor_ploidy</code>;
+<code>estimated</code>: ploidy estimated by PCGR from the copy number
+segments; purity is never estimated by PCGR), assay type
+(WGS/WES/TARGETED), tumor-normal/tumor-only mode, and effective target
+size</td>
 </tr>
 <tr class="even">
 <td><code>SOMATIC_SNV_INDEL</code></td>
