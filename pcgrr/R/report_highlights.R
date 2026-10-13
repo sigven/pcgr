@@ -108,8 +108,10 @@ tiered_alterations_hl <- function(report, tier = c(1, 2)) {
     -dplyr::coalesce(as.numeric(d$TISSUE_ASSOC_RANK), 0),
     -dplyr::coalesce(as.numeric(d$GLOBAL_ASSOC_RANK), 0),
     d$SYMBOL, d$ALTERATION)), , drop = FALSE]
-  d$LABEL <- paste0("**", md_escape_hl(d$SYMBOL), "** ",
-                    md_escape_hl(d$ALTERATION))
+  ## (paste0() on zero rows would return a single string)
+  d$LABEL <- if (NROW(d) > 0) paste0("**", md_escape_hl(d$SYMBOL), "** ",
+                                     md_escape_hl(d$ALTERATION)) else
+    character()
   d
 }
 
@@ -159,9 +161,10 @@ report_highlights <- function(report, max_show = 5) {
   ## --- Supporting findings ---
   supporting <- c()
 
-  ## SNV/InDel variants - number of oncogenic / likely oncogenic variants,
-  ## with the first max_show listed (oncogenicity score, then cancer
-  ## association ranks, then symbol)
+  ## SNV/InDel variants - number of oncogenic / likely oncogenic variants
+  ## (all, including the actionable ones - their number is stated), with the
+  ## first max_show of those not already listed as actionable (oncogenicity
+  ## score, then cancer association ranks, then symbol)
   snv <- content$snv_indel$callset$variant
   if (isTRUE(content$snv_indel$eval) && NROW(snv) > 0 &&
       all(c("SYMBOL", "ALTERATION", "ONCOGENICITY") %in% colnames(snv))) {
@@ -171,11 +174,21 @@ report_highlights <- function(report, max_show = 5) {
     if (NROW(onc) > 0) {
       onc <- onc[rank_order_hl(onc, first = list(onc$ONCOGENICITY_SCORE)), ,
                  drop = FALSE]
-      labels <- unique(paste0("**", md_escape_hl(onc$SYMBOL), "** ",
-                              md_escape_hl(strip_html_pdf(onc$ALTERATION))))
+      onc_alt <- strip_html_pdf(onc$ALTERATION)
+      key <- paste(onc$SYMBOL, onc_alt)
+      is_actionable <- key %in% paste(actionable$SYMBOL, actionable$ALTERATION)
+      labels <- paste0("**", md_escape_hl(onc$SYMBOL), "** ",
+                       md_escape_hl(onc_alt))
+      n_total <- length(unique(key))
+      n_actionable <- length(unique(key[is_actionable]))
+      other <- unique(labels[!is_actionable])
       supporting <- c(supporting, paste0(
-        "**SNV/InDel variants:** **n = ", length(labels),
-        "** oncogenic/likely oncogenic - ", fmt_list_hl(labels, max_show)))
+        "**SNV/InDel variants:** **n = ", n_total,
+        "** oncogenic/likely oncogenic",
+        if (n_actionable > 0) paste0(
+          " (", if (n_actionable == n_total) "all" else n_actionable,
+          " also actionable, listed above)"),
+        if (length(other) > 0) paste0(" - ", fmt_list_hl(other, max_show))))
     }
   }
 
@@ -222,7 +235,7 @@ report_highlights <- function(report, max_show = 5) {
       cn <- c(cn, "whole-genome doubling")
     }
     if (isTRUE(as.logical(cna_conf$estimate_hrd)) && !is.null(cna_conf$hrd_sum)) {
-      cn <- c(cn, paste0("HRD score ", cna_conf$hrd_sum))
+      cn <- c(cn, paste0("HRD score: ", cna_conf$hrd_sum))
     }
     if (length(cn) > 0) {
       supporting <- c(supporting, paste0(
@@ -230,18 +243,22 @@ report_highlights <- function(report, max_show = 5) {
     }
   }
 
-  ## mutational signatures - dominant proposed aetiologies
+  ## mutational signatures - the (at most two) proposed aetiology groups
+  ## with the largest contributions, each contributing at least 10%
+  ## ('Other' - a mix of unrelated signatures - is not listed)
   msig <- content$mutational_signatures
   if (isTRUE(msig$eval) && !isTRUE(msig$missing_data)) {
     pg <- msig$result$contributions$per_group
     if (NROW(pg) > 0 && all(c("group", "prop_group") %in% colnames(pg))) {
-      pg <- pg[!pg$group %in% c("Unknown", "Other"), , drop = FALSE]
+      pg <- pg[!pg$group %in% "Other" & pg$prop_group >= 0.1, , drop = FALSE]
       pg <- utils::head(pg[order(-pg$prop_group, as.character(pg$group)), , drop = FALSE], 2)
       if (NROW(pg) > 0) {
+        groups <- ifelse(pg$group == "Unknown", "unknown-aetiology",
+                         md_escape_hl(pg$group))
         supporting <- c(supporting, paste0(
-          "**Mutational signatures:** dominant aetiologies ",
-          paste0(md_escape_hl(pg$group), " (", round(100 * pg$prop_group), "%)",
-                 collapse = ", ")))
+          "**Mutational signatures:** largest contributions from ",
+          paste0(groups, " (", round(100 * pg$prop_group), "%)",
+                 collapse = " and "), " signatures"))
       }
     }
   }
@@ -264,13 +281,13 @@ report_highlights <- function(report, max_show = 5) {
         drop = FALSE]
     }
     supporting <- c(supporting, paste0(
-      "**Germline (CPSR):** ",
+      "**Germline findings(CPSR):** ",
       if (NROW(plp) > 0) paste0(
-        "pathogenic/likely pathogenic ",
+        "Pathogenic/likely pathogenic variants in cancer predisposition genes: ",
         fmt_list_hl(paste0("**", md_escape_hl(plp$SYMBOL), "** ",
                            md_escape_hl(strip_html_pdf(plp$ALTERATION))),
                     max_show)) else
-          "no pathogenic/likely pathogenic variants in cancer predisposition genes"))
+          "No pathogenic/likely pathogenic variants in cancer predisposition genes"))
   }
 
   ## transcriptome findings - fusions with proto-oncogene partners and

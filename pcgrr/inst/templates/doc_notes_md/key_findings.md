@@ -11,14 +11,15 @@ same rules, with ties resolved alphabetically by gene symbol.
 
 **Supporting findings** (in this order)
 
-- __SNV/InDel variants__: number of oncogenic / likely oncogenic SNVs/InDels, with the first five listed
-  (oncogenicity score, highest first, then tissue-specific and global cancer association rank);
-  variants that are also listed as actionable are included
+- __SNV/InDel variants__: number of oncogenic / likely oncogenic SNVs/InDels (all, including those
+  listed as actionable - their number is stated), with the first five of the variants *not* already
+  listed as actionable (oncogenicity score, highest first, then tissue-specific and global cancer
+  association rank)
 - __Composite biomarkers__: TMB (value, and whether TMB-high) and MSI status (MSI-H or MSS)
 - __Copy number variants__: amplified proto-oncogenes and deep deletions of tumor suppressors (ordered by
   cancer association rank), whole-genome doubling, HRD score
-- __Mutational signatures__: the two most prominent proposed aetiologies (by contribution), excluding
-  *Unknown* and *Other*
+- __Mutational signatures__: the (at most two) proposed aetiology groups with the largest
+  contributions, each contributing at least 10% (signatures of *Other* aetiologies are not listed)
 - __Kataegis__: number of potential events
 - __Germline (CPSR)__: pathogenic before likely pathogenic variants, then cancer association rank
 - __Transcriptome findings__: number of RNA fusions, with proto-oncogene partners listed by the number of split
