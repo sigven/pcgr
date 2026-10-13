@@ -59,6 +59,7 @@ Imports:
     stringr,
     tibble,
     tidyr,
+    tinytable,
     yaml
 Depends:
     R (>= 4.1)
