@@ -222,6 +222,10 @@ By default, PCGR integrates biomarker evidence from multiple knowledge sources (
 
 * `--oncokb_exclusive`
 
+Intermediate files produced during OncoKB annotation (query inputs, raw annotator output, clinical file and annotator logs - `<sample_id>.pcgr.<genome_assembly>.oncokb*`) are removed once the OncoKB annotations have been integrated into the PCGR output. To keep these files in the output directory, use:
+
+* `--oncokb_keep_files`
+
 <div style="border-left: 4px solid #e69f00; background-color: #fff8e6; padding: 0.75em 1em; margin: 1em 0;">
 **Licensing notice — OncoKB terms of use:** OncoKB is freely accessible for non-commercial research use. However, use of OncoKB data for **commercial purposes or for patient care in a hospital or clinical setting** — including the generation of PCGR reports used to inform diagnostic or therapeutic decisions — requires a separate commercial license from Memorial Sloan Kettering Cancer Center. Users are solely responsible for ensuring that their use of OncoKB through PCGR complies with the [OncoKB Terms of Use](https://www.oncokb.org/terms). If in doubt, contact the OncoKB team at [contact@oncokb.org](mailto:contact@oncokb.org) before use.
 </div>
@@ -504,6 +508,10 @@ Biomarker and tiering options:
                         are filtered out before OncoKB annotation to reduce processing time.
                         Intended for TARGETED/WES assays only - enabling for WGS may result in
                         very long MafAnnotator.py runtimes (default: False)
+  --oncokb_keep_files   Keep intermediate OncoKB annotator files (input queries, raw annotator
+                        output, clinical file and logs) in the output directory. By default,
+                        these files are removed once OncoKB annotations have been integrated
+                        into the PCGR output (default: False)
 
 Other options:
   --force_overwrite     Force overwrite of existing result files (default: False)

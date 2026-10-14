@@ -237,6 +237,9 @@ def cli():
                                     help = "Query OncoKB for all variant classes, including non-coding variants (IGR, Intron, UTR, flanking regions). "
                                            "By default, non-coding variants are filtered out before OncoKB annotation to reduce processing time. "
                                            "Intended for TARGETED/WES assays only - enabling for WGS may result in very long MafAnnotator.py runtimes (default: %(default)s)")
+    optional_biomarker.add_argument("--oncokb_keep_files", action="store_true",
+                                    help = "Keep intermediate OncoKB annotator files (input queries, raw annotator output, clinical file and logs) in the output directory. "
+                                           "By default, these files are removed once OncoKB annotations have been integrated into the PCGR output (default: %(default)s)")
     optional_other.add_argument("--force_overwrite", action="store_true", 
                                 help = "By default, the script will fail with an error if any output file already exists.\nYou can force the overwrite of existing result files by using this flag, default: %(default)s")
     optional_other.add_argument("--no_reporting", action="store_true", 
@@ -355,7 +358,9 @@ def run_pcgr(input_data, output_data, conf_options):
     oncokb_output_maf_hgvsg =         f'{output_prefix}.oncokb_output.maf.hgvsg.txt'
     oncokb_output_maf_hgvsp =         f'{output_prefix}.oncokb_output.maf.hgvsp.txt'
     oncokb_output_cna_tsv =           f'{output_prefix}.oncokb_output.cna.txt'
-    yaml_fname =                      f'{output_prefix}.conf.yaml'
+    oncokb_clinical_tsv =             f'{output_prefix}.oncokb_clinical.txt'
+    oncokb_logs = [f'{output_prefix}.oncokb.{x}.log' for x in ['maf.hgvsp', 'maf.hgvsg', 'fusion', 'cna']]
+    yaml_fname =                     f'{output_prefix}.conf.yaml'
     tmb_fname =                       f'{output_prefix}.tmb.tsv'
 
     # PCGR|Generate YAML file - containing configuration options and paths to first-pass annotation of molecular profile datasets
@@ -1124,13 +1129,30 @@ def run_pcgr(input_data, output_data, conf_options):
         logger.info("Finished PCGR!")
         print('----')
 
-    # Redact OncoKB API token from the YAML config file to avoid credential exposure 
+    # PCGR|clean - remove intermediate OncoKB annotator files (after report generation,
+    # since pcgrr reads the OncoKB output files), unless explicitly kept or debugging
+    remove_oncokb_files = conf_options['oncokb']['run'] == 1 and \
+        not conf_options['oncokb']['keep_files'] and not debug
+    if remove_oncokb_files:
+        for fname in [oncokb_input_maf, oncokb_input_fusion_tsv, oncokb_input_cna_tsv,
+                      oncokb_output_maf_hgvsp, oncokb_output_maf_hgvsg,
+                      oncokb_output_fusion_tsv, oncokb_output_cna_tsv,
+                      oncokb_clinical_tsv] + oncokb_logs:
+            remove_file(fname)
+
+    # Redact OncoKB API token from the YAML config file to avoid credential exposure
     # in shared output files
     if os.path.exists(yaml_fname):
         with open(yaml_fname) as fh:
             yaml_data_redact = yaml.safe_load(fh)
         if isinstance(yaml_data_redact.get('conf', {}).get('oncokb'), dict):
             yaml_data_redact['conf']['oncokb']['api_token'] = None
+        # do not point to OncoKB annotator output files that have been removed
+        if remove_oncokb_files:
+            for key in ['fname_oncokb_output_maf_hgvsg', 'fname_oncokb_output_maf_hgvsp',
+                        'fname_oncokb_output_fusions', 'fname_oncokb_output_cna']:
+                if key in yaml_data_redact.get('molecular_data', {}):
+                    yaml_data_redact['molecular_data'][key] = 'None'
         with open(yaml_fname, "w") as fh:
             fh.write(yaml.dump(yaml_data_redact))
 

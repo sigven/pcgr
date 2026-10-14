@@ -93,6 +93,7 @@ pdiakumis <- user("pdiakumis")
 
 - Non-coding pathogenic/likely pathogenic germline variants are now retained in the germline findings of the PCGR report (only VUS are restricted to coding variants)
 - Mutational signature re-fitting now uses _all_ reference signatures (SBS) by default, rather than only those already attributed to the tumor type. The previous default behavior is available via the new `--tumor_type_reference_signatures` option (replaces `--all_reference_signatures`, which is removed)
+- Intermediate OncoKB annotator files (query inputs, raw annotator output, clinical file and logs) are now removed from the output directory at the end of a run - use the new `--oncokb_keep_files` option (or `--debug`) to keep them
 
 ### Fixed
 
