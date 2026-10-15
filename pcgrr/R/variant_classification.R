@@ -481,15 +481,18 @@ assign_variant_tiers_cna <- function(
              "ENTREZGENE")) |>
 
     dplyr::mutate(
+      ## deleted tumor suppressors / amplified oncogenes without a tier
+      ## (both event types grouped, so that Tier 1/2 classifications are
+      ## not overridden)
       ACTIONABILITY_TIER = dplyr::if_else(
-        (!is.na(.data$TUMOR_SUPPRESSOR) &
-           .data$TUMOR_SUPPRESSOR == TRUE &
-           (.data$VARIANT_CLASS == "homdel" |
-              .data$VARIANT_CLASS == "hemdel" |
-              .data$VARIANT_CLASS == "hetdel")) |
-          (!is.na(.data$ONCOGENE) &
-             .data$ONCOGENE == TRUE &
-             .data$VARIANT_CLASS == "amplification") &
+        ((!is.na(.data$TUMOR_SUPPRESSOR) &
+            .data$TUMOR_SUPPRESSOR == TRUE &
+            (.data$VARIANT_CLASS == "homdel" |
+               .data$VARIANT_CLASS == "hemdel" |
+               .data$VARIANT_CLASS == "hetdel")) |
+           (!is.na(.data$ONCOGENE) &
+              .data$ONCOGENE == TRUE &
+              .data$VARIANT_CLASS == "amplification")) &
           is.na(.data$ACTIONABILITY_TIER),
         as.integer(3),
         as.integer(.data$ACTIONABILITY_TIER))) |>
@@ -622,15 +625,16 @@ assign_variant_tiers_fusion <- function(
       by = c("VAR_ID",
              "VARIANT_CLASS",
              "ENTREZGENE")) |>
+    ## fusions without a tier, with a proto-oncogene partner (5' or 3') and
+    ## recorded in the Mitelman DB
     dplyr::mutate(ACTIONABILITY_TIER = dplyr::if_else(
       is.na(.data$ACTIONABILITY_TIER) &
         ((!is.na(.data$ONCOGENE_3P) &
             .data$ONCOGENE_3P == TRUE) |
            (!is.na(.data$ONCOGENE_5P) &
-              .data$ONCOGENE_5P == TRUE) &
-           (!is.na(MITDB_NUM_EVIDENCE) &
-              .data$MITDB_NUM_EVIDENCE > 0)
-        ),
+              .data$ONCOGENE_5P == TRUE)) &
+        (!is.na(.data$MITDB_NUM_EVIDENCE) &
+           .data$MITDB_NUM_EVIDENCE > 0),
       as.integer(3),
       as.integer(.data$ACTIONABILITY_TIER)
     )) |>
