@@ -1120,9 +1120,6 @@ write_report_html <- function(
 
 }
 
-#' Function that writes key datasets of PCGR object to an Excel workbook
-#'
-#' @param report List object with all PCGR report data, settings etc.
 #' Function that writes contents of PCGR object to a PDF report
 #' (Quarto/Typst-based), focused on key findings
 #'
@@ -1274,6 +1271,9 @@ with_utf8_locale <- function(expr) {
   expr
 }
 
+#' Function that writes key datasets of PCGR object to an Excel workbook
+#'
+#' @param report List object with all PCGR report data, settings etc.
 #' @export
 write_report_excel <- function(report = NULL) {
 

@@ -7,7 +7,8 @@ status) with counts and shares (bars) for the PDF report}
 \usage{
 pdf_table_filter_shares(
   d,
-  retained = c("SOMATIC", "SOMATIC - EXONIC"),
+  retained = retained_filter_classes(),
+  settings = NULL,
   color = pcgrr::color_palette$report_color$values[1]
 )
 }
@@ -16,6 +17,8 @@ pdf_table_filter_shares(
 filtering_summary())}
 
 \item{retained}{classifications retained (in bold)}
+
+\item{settings}{tumor-only settings (conf$somatic_snv$tumor_only)}
 
 \item{color}{main report color (hex)}
 }

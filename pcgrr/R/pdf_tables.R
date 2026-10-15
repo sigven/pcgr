@@ -581,14 +581,15 @@ pdf_table_read_support <- function(
 #' @param d data frame with CLASSIFICATION, N and SHARE (see
 #' filtering_summary())
 #' @param retained classifications retained (in bold)
+#' @param settings tumor-only settings (conf$somatic_snv$tumor_only)
 #' @param color main report color (hex)
 #'
 #' @return tinytable object
 #' @keywords internal
 pdf_table_filter_shares <- function(
-    d, retained = c("SOMATIC", "SOMATIC - EXONIC"),
+    d, retained = retained_filter_classes(), settings = NULL,
     color = pcgrr::color_palette$report_color$values[1]) {
-  desc <- germline_filter_descriptions()
+  desc <- germline_filter_descriptions(settings)
   lbl <- ifelse(d$CLASSIFICATION %in% names(desc),
                 desc[d$CLASSIFICATION], d$CLASSIFICATION)
   keep <- d$CLASSIFICATION %in% retained
@@ -602,8 +603,8 @@ pdf_table_filter_shares <- function(
   tbl <- data.frame(
     Classification = ifelse(keep, paste0("*", typst_escape(lbl), "*"),
                             typst_escape(lbl)),
-    Filter = paste0("#text(size: 7.5pt, fill: luma(90))[",
-                    typst_escape(d$CLASSIFICATION), "]"),
+    Filter = ifelse(keep, "", paste0("#text(size: 7.5pt, fill: luma(90))[",
+                                     typst_escape(d$CLASSIFICATION), "]")),
     Variants = format(d$N, big.mark = ",", trim = TRUE),
     Share = share,
     check.names = FALSE)

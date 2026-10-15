@@ -160,7 +160,7 @@ cat("Without a matched control sample, likely germline variants are ",
     "\n\n", sep = "")
 cat(pcgrr:::tumor_only_settings_markdown(filt_pdf$tumor_only_settings), "\n")
 if (NROW(filt_pdf$germline) > 0) {
-  cat("Classification of the variants (n = ",
+  cat("*Step 1 - germline filters*: classification of the variants (n = ",
       fmt_n(sum(filt_pdf$germline$N)), ") - variants matching more than one ",
       "germline filter are counted as *MULTIPLE FILTERS*:\n\n", sep = "")
 }
@@ -169,15 +169,18 @@ if (NROW(filt_pdf$germline) > 0) {
 ```{r snv_indel_filtering_germline_table}
 #| echo: false
 #| eval: !expr filt_pdf$tumor_only && NROW(filt_pdf$germline) > 0
-pcgrr:::pdf_table_filter_shares(filt_pdf$germline, color = report_color)
+pcgrr:::pdf_table_filter_shares(
+  filt_pdf$germline, settings = filt_pdf$tumor_only_settings,
+  color = report_color)
 ```
 
 ```{r snv_indel_filtering_exonic}
 #| echo: false
 #| output: asis
 #| eval: !expr filt_pdf$tumor_only && NROW(filt_pdf$exonic) > 0
-cat("\nExonic status of the somatic variants (non-exonic variants ",
-    "excluded):\n\n", sep = "")
+cat("\n*Step 2 - exonic status*: classification of the remaining somatic ",
+    "variants (n = ", fmt_n(sum(filt_pdf$exonic$N)), ") - non-exonic ",
+    "variants are excluded:\n\n", sep = "")
 ```
 
 ```{r snv_indel_filtering_exonic_table}

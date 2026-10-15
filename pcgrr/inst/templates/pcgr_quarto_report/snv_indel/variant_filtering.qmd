@@ -6,17 +6,6 @@
 filt_html <- pcgrr:::filtering_summary(pcg_report)
 fmt_n_html <- function(x) format(x, big.mark = ",", trim = TRUE)
 
-filtering_stats <- list()
-if (filt_html$tumor_only && NROW(filt_html$germline) > 0) {
-  filtering_stats[['germline']] <- pcgrr::plot_filtering_stats_germline(
-    report = pcg_report)
-  if (NROW(filt_html$exonic) > 0) {
-    filtering_stats[['exonic']] <- pcgrr::plot_filtering_stats_exonic(
-      report = pcg_report,
-      plot_margin_bottom = 100)
-  }
-}
-
 ## actionable variants removed by filtering - shown as warnings
 filt_warn_html <- function(d, title, intro) {
   if (NROW(d) == 0) return(invisible(NULL))
@@ -78,10 +67,11 @@ if (filt_html$tumor_only) {
   cat(pcgrr:::tumor_only_settings_markdown(filt_html$tumor_only_settings),
       "\n")
   share_md <- function(d) {
-    desc <- pcgrr:::germline_filter_descriptions()
+    desc <- pcgrr:::germline_filter_descriptions(
+      filt_html$tumor_only_settings)
     lbl <- ifelse(d$CLASSIFICATION %in% names(desc),
                   desc[d$CLASSIFICATION], d$CLASSIFICATION)
-    keep <- d$CLASSIFICATION %in% c("SOMATIC", "SOMATIC - EXONIC")
+    keep <- d$CLASSIFICATION %in% pcgrr:::retained_filter_classes()
     bar <- paste0(
       "<span style='display:inline-block;width:120px;height:0.7em;",
       "background:#e4e4e4;border-radius:2px;vertical-align:middle;",
@@ -91,62 +81,25 @@ if (filt_html$tumor_only) {
       "</span>", sprintf("%.1f", 100 * d$SHARE), "%")
     cat("| Classification | Filter | Variants | Share |\n",
         "|:---------------|:-------|---------:|:------|\n",
-        paste0("| ", ifelse(keep, paste0("__", lbl, "__"), lbl), " | `",
-               d$CLASSIFICATION, "` | ", fmt_n_html(d$N), " | ", bar, " |",
+        paste0("| ", ifelse(keep, paste0("__", lbl, "__"), lbl), " | ",
+               ifelse(keep, "", paste0("`", d$CLASSIFICATION, "`")), " | ",
+               fmt_n_html(d$N), " | ", bar, " |",
                collapse = "\n"),
         "\n\n", sep = "")
   }
   if (NROW(filt_html$germline) > 0) {
-    cat("Classification of the variants (n = ",
+    cat("_Step 1 - germline filters_: classification of the variants (n = ",
         fmt_n_html(sum(filt_html$germline$N)), ") - variants matching more ",
         "than one germline filter are counted as _MULTIPLE FILTERS_:\n\n",
         sep = "")
     share_md(filt_html$germline)
   }
   if (NROW(filt_html$exonic) > 0) {
-    cat("Exonic status of the somatic variants (non-exonic variants ",
-        "excluded):\n\n", sep = "")
+    cat("_Step 2 - exonic status_: classification of the remaining somatic ",
+        "variants (n = ", fmt_n_html(sum(filt_html$exonic$N)), ") - ",
+        "non-exonic variants are excluded:\n\n", sep = "")
     share_md(filt_html$exonic)
   }
 }
 cat(":::\n\n")
-```
-
-```{r variant_filtering_pie}
-#| eval: !expr length(filtering_stats) > 0
-#| output: asis
-#| echo: false
-
-if (!is.null(filtering_stats[['exonic']])) {
-
-  bslib::card(
-    full_screen = TRUE,
-    height = "365px",
-    bslib::card_header(
-      class = "bg-dark",
-      paste0("Variant filtering statistics - ",
-             pcg_report$settings$sample_id)),
-    bslib::card_body(
-      bslib::layout_columns(
-        widths = c(6,6),
-        filtering_stats[['germline']]$plot,
-        filtering_stats[['exonic']]$plot
-      )
-    )
-  )
-
-}else{
-  bslib::card(
-    full_screen = TRUE,
-    height = "365px",
-    bslib::card_header(
-      class = "bg-dark",
-      paste0("Variant filtering statistics - ",
-             pcg_report$settings$sample_id)),
-    bslib::card_body(
-      filtering_stats[['germline']]$plot)
-  )
-}
-
-
 ```

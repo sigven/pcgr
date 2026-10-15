@@ -4,7 +4,11 @@
 \alias{germline_filter_descriptions}
 \title{Display labels/descriptions of the tumor-only germline filter categories}
 \usage{
-germline_filter_descriptions()
+germline_filter_descriptions(settings = NULL)
+}
+\arguments{
+\item{settings}{tumor-only settings (conf$somatic_snv$tumor_only), used for
+the gnomAD allele frequency threshold}
 }
 \description{
 Display labels/descriptions of the tumor-only germline filter categories

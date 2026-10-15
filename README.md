@@ -19,18 +19,22 @@ The Personal Cancer Genome Reporter (PCGR) is a stand-alone software workflow fo
 
 PCGR supports both of the most recent human genome assemblies (GRCh37/GRCh38), and accepts variant calls from both tumor-control and tumor-only sequencing assays. Much of the functionality is intended for whole-exome/whole-genome sequencing assays, but you can also apply PCGR to output from targeted sequencing panels. If you are interested in the interrogation of germline variants and their relation to cancer predisposition, we recommend trying the accompanying tool [Cancer Predisposition Sequencing Reporter (CPSR)](https://github.com/sigven/cpsr).
 
-Example screenshots from the [quarto](https://quarto.org)-based cancer genome report by PCGR:
+Example screenshots from the [quarto](https://quarto.org)-based cancer genome report by PCGR (artificial colorectal tumor sample, with more findings than usual):
 
 <table>
   <tr>
-    <td style="padding:16px"><a href="https://github.com/sigven/pcgr/raw/main/pcgrr/pkgdown/assets/img/pcgr_variant_stats.png"><img src="pcgrr/pkgdown/assets/img/pcgr_variant_stats.png" width="380" style="border:1px solid #000;"/></a></td>
     <td style="padding:16px"><a href="https://github.com/sigven/pcgr/raw/main/pcgrr/pkgdown/assets/img/pcgr_actionability.png"><img src="pcgrr/pkgdown/assets/img/pcgr_actionability.png" width="380" style="border:1px solid #000;"/></a></td>
+    <td style="padding:16px"><a href="https://github.com/sigven/pcgr/raw/main/pcgrr/pkgdown/assets/img/pcgr_oncogenicity.png"><img src="pcgrr/pkgdown/assets/img/pcgr_oncogenicity.png" width="380" style="border:1px solid #000;"/></a></td>
   </tr>
   <tr>
-    <td style="padding:16px"><a href="https://github.com/sigven/pcgr/raw/main/pcgrr/pkgdown/assets/img/pcgr_oncogenicity.png"><img src="pcgrr/pkgdown/assets/img/pcgr_oncogenicity.png" width="380" style="border:1px solid #000;"/></a></td>
     <td style="padding:16px"><a href="https://github.com/sigven/pcgr/raw/main/pcgrr/pkgdown/assets/img/pcgr_cna.png"><img src="pcgrr/pkgdown/assets/img/pcgr_cna.png" width="380" style="border:1px solid #000;"/></a></td>
+    <td style="padding:16px"><a href="https://github.com/sigven/pcgr/raw/main/pcgrr/pkgdown/assets/img/pcgr_mutational_signatures.png"><img src="pcgrr/pkgdown/assets/img/pcgr_mutational_signatures.png" width="380" style="border:1px solid #000;"/></a></td>
   </tr>
 </table>
+
+In addition to the interactive HTML report, PCGR produces a static, print-friendly PDF report ([Typst](https://typst.app)-based), opening with a summary of key findings:
+
+<a href="https://github.com/sigven/pcgr/raw/main/pcgrr/pkgdown/assets/img/pcgr_pdf_report.png"><img src="pcgrr/pkgdown/assets/img/pcgr_pdf_report.png" width="792"/></a>
 
 <hr>
 

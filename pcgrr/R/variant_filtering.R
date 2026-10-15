@@ -69,13 +69,17 @@ filtering_summary <- function(report) {
 
 #' Counts and shares of variant classifications (filtering summary)
 #'
+#' Filtered classifications come first, the retained classification
+#' (see retained_filter_classes()) last.
+#'
 #' @param x character vector of classifications
 #' @param levels ordering of classifications (others last)
 #' @keywords internal
 share_table_filtering <- function(x, levels) {
   tab <- table(x)
   d <- data.frame(CLASSIFICATION = names(tab), N = as.integer(tab))
-  d <- d[order(match(d$CLASSIFICATION, levels), -d$N), , drop = FALSE]
+  d <- d[order(d$CLASSIFICATION %in% retained_filter_classes(),
+               match(d$CLASSIFICATION, levels), -d$N), , drop = FALSE]
   d$SHARE <- d$N / sum(d$N)
   rownames(d) <- NULL
   d
@@ -128,17 +132,31 @@ fmt_threshold_filtering <- function(x) {
   stringr::str_replace(x, "^<=", "≤")
 }
 
-#' Display labels/descriptions of the tumor-only germline filter categories
+#' Classifications of variants retained by the tumor-only germline filtering
+#' and exonic status filtering
 #' @keywords internal
-germline_filter_descriptions <- function() {
+retained_filter_classes <- function() {
+  c("SOMATIC", "SOMATIC - EXONIC")
+}
+
+#' Display labels/descriptions of the tumor-only germline filter categories
+#'
+#' @param settings tumor-only settings (conf$somatic_snv$tumor_only), used for
+#' the gnomAD allele frequency threshold
+#' @keywords internal
+germline_filter_descriptions <- function(settings = NULL) {
+  gnomad_af <- settings$gnomad_popmax_af_tolerated
   c("SOMATIC" = "Somatic (retained)",
-    "GERMLINE_GNOMAD" = "Germline - gnomAD population frequency",
-    "GERMLINE_CLINVAR" = "Germline - ClinVar",
-    "GERMLINE_DBSNP" = "Germline - dbSNP (not in TCGA/COSMIC)",
-    "GERMLINE_HET" = "Germline - likely heterozygous (VAF 0.4-0.6)",
-    "GERMLINE_HOM" = "Germline - likely homozygous (VAF = 1)",
-    "GERMLINE_PON" = "Germline - panel-of-normals",
-    "MULTIPLE FILTERS" = "Germline - multiple filters",
+    "GERMLINE_GNOMAD" = if (is.null(gnomad_af))
+      "Germline - in gnomAD (excluded)" else
+        paste0("Germline - in gnomAD with allele frequency > ", gnomad_af,
+               " (excluded)"),
+    "GERMLINE_CLINVAR" = "Germline - ClinVar (excluded)",
+    "GERMLINE_DBSNP" = "Germline - in dbSNP, not in TCGA/COSMIC (excluded)",
+    "GERMLINE_HET" = "Germline - likely heterozygous, VAF 0.4-0.6 (excluded)",
+    "GERMLINE_HOM" = "Germline - likely homozygous, VAF = 1 (excluded)",
+    "GERMLINE_PON" = "Germline - panel-of-normals (excluded)",
+    "MULTIPLE FILTERS" = "Germline - multiple filters (excluded)",
     "SOMATIC - EXONIC" = "Somatic - exonic (retained)",
     "SOMATIC - NONEXONIC" = "Somatic - non-exonic (excluded)")
 }

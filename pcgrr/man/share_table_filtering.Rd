@@ -12,6 +12,7 @@ share_table_filtering(x, levels)
 \item{levels}{ordering of classifications (others last)}
 }
 \description{
-Counts and shares of variant classifications (filtering summary)
+Filtered classifications come first, the retained classification
+(see retained_filter_classes()) last.
 }
 \keyword{internal}
