@@ -129,8 +129,10 @@ tiered_alterations_hl <- function(report, tier = c(1, 2)) {
 #' @param report PCGR report object
 #' @param max_show maximum number of items listed per finding
 #'
-#' @return list with 'lead' (markdown on actionable alterations) and
-#' 'supporting' (markdown bullet list, "" if none)
+#' @return list with 'lead' (markdown on actionable alterations), 'pills'
+#' (positive composite biomarkers), 'warnings' (markdown on actionable
+#' variants removed by variant filtering, "" if none) and 'supporting'
+#' (markdown bullet list, "" if none)
 #' @export
 report_highlights <- function(report, max_show = 5) {
   content <- report$content
@@ -281,7 +283,7 @@ report_highlights <- function(report, max_show = 5) {
         drop = FALSE]
     }
     supporting <- c(supporting, paste0(
-      "**Germline findings(CPSR):** ",
+      "**Germline findings (CPSR):** ",
       if (NROW(plp) > 0) paste0(
         "Pathogenic/likely pathogenic variants in cancer predisposition genes: ",
         fmt_list_hl(paste0("**", md_escape_hl(plp$SYMBOL), "** ",
@@ -332,9 +334,20 @@ report_highlights <- function(report, max_show = 5) {
       "**Transcriptome findings:** ", paste(rna, collapse = "; ")))
   }
 
+  ## actionable variants/mutation hotspots removed by variant filtering
+  ## (depth/allelic support; tumor-only germline filtering)
+  warnings <- character()
+  if (isTRUE(content$snv_indel$eval)) {
+    warnings <- filtering_warnings(filtering_summary(report), max_show)
+  }
+
   list(
     lead = paste(lead, collapse = "\n\n"),
     pills = pills,
+    warnings = if (length(warnings) > 0) paste0(
+      "**Filtered actionable variants** (not considered in this report - ",
+      "see *Variant filtering*)\n\n",
+      paste0("- ", warnings, collapse = "\n")) else "",
     supporting = if (length(supporting) > 0)
       paste0("- ", supporting, collapse = "\n") else "")
 }

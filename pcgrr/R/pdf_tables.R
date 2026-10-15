@@ -323,8 +323,12 @@ pdf_table_fusions <- function(
     fusions, site = "Any", max_rows = 25,
     color = pcgrr::color_palette$report_color$values[1]) {
   d <- utils::head(rank_fusions(fusions, site), max_rows)
+  ## partner genes as Open Targets links - the Ensembl gene id is taken
+  ## from the (HTML) link of the partner in the fusion callset
   partner <- function(gene, oncogene) {
-    paste0(typst_escape(html_to_text(gene)),
+    gene <- as.character(gene)
+    paste0(pdf_gene_link(html_to_text(gene),
+                         stringr::str_extract(gene, "ENSG[0-9]+")),
            ifelse(oncogene %in% TRUE, " (oncogene)", ""))
   }
   tier <- suppressWarnings(as.integer(d$ACTIONABILITY_TIER))
@@ -543,4 +547,66 @@ pdf_table_kataegis <- function(
     tinytable::format_tt(escape = TRUE) |>
     pdf_style_table(color = color) |>
     tinytable::style_tt(j = 1, bold = TRUE)
+}
+
+#' Table of the depth/allelic support filtering steps of SNVs/InDels for the
+#' PDF report (variant filtering section)
+#'
+#' @param steps data frame with STEP, THRESHOLD, APPLIED, NOTE, N_REMOVED and
+#' N_REMAINING (see filter_read_support())
+#' @param color main report color (hex)
+#'
+#' @return tinytable object
+#' @keywords internal
+pdf_table_read_support <- function(
+    steps, color = pcgrr::color_palette$report_color$values[1]) {
+  applied <- as.logical(steps$APPLIED)
+  tbl <- data.frame(
+    Step = typst_escape(steps$STEP),
+    Threshold = typst_escape(fmt_threshold_filtering(steps$THRESHOLD)),
+    Removed = ifelse(
+      applied, format(steps$N_REMOVED, big.mark = ",", trim = TRUE),
+      paste0("#text(fill: luma(110), style: \"italic\")[",
+             typst_escape(steps$NOTE), "]")),
+    Remaining = format(steps$N_REMAINING, big.mark = ",", trim = TRUE),
+    check.names = FALSE)
+  tinytable::tt(tbl, width = c(0.36, 0.14, 0.32, 0.18)) |>
+    pdf_style_table(color = color) |>
+    tinytable::style_tt(j = 4, bold = TRUE)
+}
+
+#' Table of variant classifications (tumor-only germline filtering, exonic
+#' status) with counts and shares (bars) for the PDF report
+#'
+#' @param d data frame with CLASSIFICATION, N and SHARE (see
+#' filtering_summary())
+#' @param retained classifications retained (in bold)
+#' @param color main report color (hex)
+#'
+#' @return tinytable object
+#' @keywords internal
+pdf_table_filter_shares <- function(
+    d, retained = c("SOMATIC", "SOMATIC - EXONIC"),
+    color = pcgrr::color_palette$report_color$values[1]) {
+  desc <- germline_filter_descriptions()
+  lbl <- ifelse(d$CLASSIFICATION %in% names(desc),
+                desc[d$CLASSIFICATION], d$CLASSIFICATION)
+  keep <- d$CLASSIFICATION %in% retained
+  bar_col <- ifelse(keep, color, "#9e9e9e")
+  share <- paste0(
+    '#box(grid(columns: 2, column-gutter: 0.4em, align: horizon, ',
+    'box(width: 2.6cm, height: 0.6em, fill: luma(228), radius: 1pt, ',
+    'clip: true, box(width: ', round(100 * d$SHARE, 1),
+    '%, height: 100%, fill: rgb("', bar_col, '"))), [',
+    sprintf("%.1f", 100 * d$SHARE), '%]))')
+  tbl <- data.frame(
+    Classification = ifelse(keep, paste0("*", typst_escape(lbl), "*"),
+                            typst_escape(lbl)),
+    Filter = paste0("#text(size: 7.5pt, fill: luma(90))[",
+                    typst_escape(d$CLASSIFICATION), "]"),
+    Variants = format(d$N, big.mark = ",", trim = TRUE),
+    Share = share,
+    check.names = FALSE)
+  tinytable::tt(tbl, width = c(0.38, 0.24, 0.12, 0.26)) |>
+    pdf_style_table(color = color)
 }

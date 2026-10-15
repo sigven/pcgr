@@ -423,15 +423,25 @@ df_string_replace <- function(df, strings, pattern,
 #' Function that filters variant set on depth and allelic fraction
 #' according to settings provided by user (tumor and control)
 #'
+#' The filtering summary is attached to the result as attribute
+#' 'read_support_filtering' (see \code{attr()}): a list with 'n_input'
+#' (number of variants before filtering), 'n_retained', 'steps' (data frame
+#' with one row per configured filter: STEP, THRESHOLD, APPLIED, NOTE,
+#' N_REMOVED, N_REMAINING) and 'actionable_removed' (data frame with Tier 1/2
+#' variants and mutation hotspots removed by the filters: SYMBOL, ALTERATION,
+#' CONSEQUENCE, HGVSP, ACTIONABILITY_TIER, MUTATION_HOTSPOT, DP_TUMOR,
+#' VAF_TUMOR)
+#'
 #' @param vcf_df data frame with variants
 #' @param config list with PCGR configuration settings
 #'
-#' @return vcf_df
+#' @return vcf_df (filtered), with attribute 'read_support_filtering'
 #'
 #' @export
 filter_read_support <- function(vcf_df, config = NULL) {
 
   n_before_dp_af_filtering <- nrow(vcf_df)
+  as_conf <- config$somatic_snv$allelic_support
   actionable_or_hotspot_vars <- data.frame()
 
   if ("ACTIONABILITY_TIER" %in% colnames(vcf_df) &
@@ -446,7 +456,10 @@ filter_read_support <- function(vcf_df, config = NULL) {
         (!is.na(.data$ACTIONABILITY_TIER) &
            .data$ACTIONABILITY_TIER <= 2) |
           (!is.na(.data$MUTATION_HOTSPOT))) |>
-      dplyr::select(c("VAR_ID","SYMBOL","CONSEQUENCE","HGVSP")) |>
+      dplyr::select(dplyr::any_of(
+        c("VAR_ID", "SYMBOL", "ALTERATION", "CONSEQUENCE", "HGVSP",
+          "ACTIONABILITY_TIER", "MUTATION_HOTSPOT", "DP_TUMOR",
+          "VAF_TUMOR"))) |>
       dplyr::distinct()
   }
 
@@ -454,9 +467,9 @@ filter_read_support <- function(vcf_df, config = NULL) {
   tumor_filtering_set <- FALSE
   for (col in c("DP_TUMOR","VAF_TUMOR","AD_TUMOR")) {
     if (col %in% colnames(vcf_df)) {
-      if (!is.null(config$somatic_snv$allelic_support$tumor_dp_min) |
-         !is.null(config$somatic_snv$allelic_support$tumor_af_min) |
-         !is.null(config$somatic_snv$allelic_support$tumor_ad_min)) {
+      if (!is.null(as_conf$tumor_dp_min) |
+         !is.null(as_conf$tumor_af_min) |
+         !is.null(as_conf$tumor_ad_min)) {
         tumor_filtering_set <- TRUE
         if (any(is.na(vcf_df[, col]))) {
           log4r_warn(
@@ -472,9 +485,9 @@ filter_read_support <- function(vcf_df, config = NULL) {
   control_filtering_set <- FALSE
   for (col in c("DP_CONTROL","VAF_CONTROL","AD_CONTROL")) {
     if (col %in% colnames(vcf_df)) {
-      if (!is.null(config$somatic_snv$allelic_support$control_dp_min) |
-         !is.null(config$somatic_snv$allelic_support$control_af_max) |
-         !is.null(config$somatic_snv$allelic_support$control_ad_max)) {
+      if (!is.null(as_conf$control_dp_min) |
+         !is.null(as_conf$control_af_max) |
+         !is.null(as_conf$control_ad_max)) {
         control_filtering_set <- TRUE
         if (any(is.na(vcf_df[, col]))) {
           log4r_warn(
@@ -486,102 +499,65 @@ filter_read_support <- function(vcf_df, config = NULL) {
     }
   }
 
+  ## filters in order of application: label, column, threshold (setting),
+  ## direction (minimum/maximum)
+  filters <- list(
+    list(step = "Tumor sequencing depth (DP)", col = "DP_TUMOR",
+         thr = as_conf$tumor_dp_min, op = ">="),
+    list(step = "Tumor allelic fraction (AF)", col = "VAF_TUMOR",
+         thr = as_conf$tumor_af_min, op = ">="),
+    list(step = "Tumor allelic depth (AD)", col = "AD_TUMOR",
+         thr = as_conf$tumor_ad_min, op = ">="),
+    list(step = "Control allelic fraction (AF)", col = "VAF_CONTROL",
+         thr = as_conf$control_af_max, op = "<="),
+    list(step = "Control sequencing depth (DP)", col = "DP_CONTROL",
+         thr = as_conf$control_dp_min, op = ">="),
+    list(step = "Control allelic depth (AD)", col = "AD_CONTROL",
+         thr = as_conf$control_ad_max, op = "<="))
 
-  if ("DP_TUMOR" %in% colnames(vcf_df)) {
-    if (!any(is.na(vcf_df$DP_TUMOR)) &
-        !is.null(config$somatic_snv$allelic_support$tumor_dp_min)) {
-      #cat("DP_TUMOR - Number of rows before filtering - ", nrow(vcf_df), "\n")
-      #cat("DP_TUMOR - Filtering criteria used: ", config$somatic_snv$allelic_support$tumor_dp_min, "\n")
-      vcf_df <- dplyr::filter(
-        vcf_df,
-        .data$DP_TUMOR >= config$somatic_snv$allelic_support$tumor_dp_min)
-      #cat("DP_TUMOR - Number of rows after filtering: ", nrow(vcf_df), "\n")
+  steps <- data.frame()
+  for (f in filters) {
+    if (is.null(f$thr)) next
+    n_in <- nrow(vcf_df)
+    applied <- FALSE
+    note <- ""
+    if (!f$col %in% colnames(vcf_df)) {
+      note <- "not applied - no values in input VCF"
+    } else if (any(is.na(vcf_df[[f$col]]))) {
+      note <- "not applied - missing values for some variants"
+    } else {
+      keep <- if (f$op == ">=") vcf_df[[f$col]] >= f$thr else
+        vcf_df[[f$col]] <= f$thr
+      vcf_df <- vcf_df[keep, , drop = FALSE]
+      applied <- TRUE
     }
-  }
-  if ("VAF_TUMOR" %in% colnames(vcf_df)) {
-    if (!any(is.na(vcf_df$VAF_TUMOR)) &
-        !is.null(config$somatic_snv$allelic_support$tumor_af_min)) {
-      #cat("VAF_TUMOR - Number of rows before filtering - ", nrow(vcf_df), "\n")
-      #cat("VAF_TUMOR - Filtering criteria used: ", config$somatic_snv$allelic_support$tumor_af_min, "\n")
-      vcf_df <- dplyr::filter(
-        vcf_df,
-        .data$VAF_TUMOR >= config$somatic_snv$allelic_support$tumor_af_min)
-      #cat("VAF_TUMOR - Number of rows after filtering: ", nrow(vcf_df), "\n")
-    }
-  }
-  if ("AD_TUMOR" %in% colnames(vcf_df)) {
-
-    if (!any(is.na(vcf_df$AD_TUMOR)) &
-        !is.null(config$somatic_snv$allelic_support$tumor_ad_min)) {
-      #cat("AD_TUMOR - Number of rows before filtering - ", nrow(vcf_df), "\n")
-      #cat("AD_TUMOR - Filtering criteria used: ", config$somatic_snv$allelic_support$tumor_ad_min, "\n")
-      vcf_df <- dplyr::filter(
-        vcf_df,
-        .data$AD_TUMOR >= config$somatic_snv$allelic_support$tumor_ad_min)
-      #cat("AD_TUMOR - Number of rows after filtering: ", nrow(vcf_df), "\n")
-    }
-
-  }
-
-  if ("VAF_CONTROL" %in% colnames(vcf_df)) {
-
-    if (!any(is.na(vcf_df$VAF_CONTROL)) &
-        !is.null(config$somatic_snv$allelic_support$control_af_max)) {
-      #cat("VAF_CONTROL - Number of rows before filtering - ", nrow(vcf_df), "\n")
-      #cat("VAF_CONTROL - Filtering criteria used: ", config$somatic_snv$allelic_support$control_af_max, "\n")
-      vcf_df <- dplyr::filter(
-        vcf_df,
-        .data$VAF_CONTROL <= config$somatic_snv$allelic_support$control_af_max)
-      #cat("VAF_CONTROL - Number of rows after filtering: ", nrow(vcf_df), "\n")
-    }
-
-  }
-  if ("DP_CONTROL" %in% colnames(vcf_df)) {
-    if (!any(is.na(vcf_df$DP_CONTROL)) &
-        !is.null(config$somatic_snv$allelic_support$control_dp_min)) {
-      #cat("Number of rows before filtering - ", nrow(vcf_df), "\n")
-      #cat("DP_CONTROL - Filtering criteria used: ", config$somatic_snv$allelic_support$control_dp_min, "\n")
-      vcf_df <- dplyr::filter(
-        vcf_df,
-        .data$DP_CONTROL >= config$somatic_snv$allelic_support$control_dp_min)
-      #cat("DP_CONTROL - Number of rows after filtering: ", nrow(vcf_df), "\n")
-    }
-  }
-
-  if ("AD_CONTROL" %in% colnames(vcf_df)) {
-    if (!any(is.na(vcf_df$AD_CONTROL)) &
-        !is.null(config$somatic_snv$allelic_support$control_ad_max)) {
-      #cat("AD_CONTROL - Number of rows before filtering - ", nrow(vcf_df), "\n")
-      #cat("AD_CONTROL - Filtering criteria used: ", config$somatic_snv$allelic_support$control_ad_max, "\n")
-      vcf_df <- dplyr::filter(
-        vcf_df,
-        .data$AD_CONTROL <= config$somatic_snv$allelic_support$control_ad_max)
-      #cat("AD_CONTROL - Number of rows after filtering: ", nrow(vcf_df), "\n")
-    }
+    steps <- dplyr::bind_rows(steps, data.frame(
+      STEP = f$step,
+      THRESHOLD = paste(f$op, f$thr),
+      APPLIED = applied,
+      NOTE = note,
+      N_REMOVED = n_in - nrow(vcf_df),
+      N_REMAINING = nrow(vcf_df)))
   }
 
   if (warns_tumor == 0 & tumor_filtering_set == TRUE) {
 
     filtering_criteria_used_tumor <- c()
-    if (!is.null(config$somatic_snv$allelic_support$tumor_dp_min)) {
+    if (!is.null(as_conf$tumor_dp_min)) {
       filtering_criteria_used_tumor <-
         c(filtering_criteria_used_tumor,
-          paste0("min_dp_tumor = ",
-                 config$somatic_snv$allelic_support$tumor_dp_min))
+          paste0("min_dp_tumor = ", as_conf$tumor_dp_min))
     }
-    if (!is.null(config$somatic_snv$allelic_support$tumor_af_min)) {
+    if (!is.null(as_conf$tumor_af_min)) {
       filtering_criteria_used_tumor <-
         c(filtering_criteria_used_tumor,
-          paste0("min_af_tumor = ",
-                 config$somatic_snv$allelic_support$tumor_af_min))
+          paste0("min_af_tumor = ", as_conf$tumor_af_min))
     }
-    if (!is.null(config$somatic_snv$allelic_support$tumor_ad_min)) {
+    if (!is.null(as_conf$tumor_ad_min)) {
       filtering_criteria_used_tumor <-
         c(filtering_criteria_used_tumor,
-          paste0("min_ad_tumor = ",
-                 config$somatic_snv$allelic_support$tumor_ad_min))
+          paste0("min_ad_tumor = ", as_conf$tumor_ad_min))
     }
-
 
     log4r_info(paste0(
       "Tumor variant filtering based on allelic depth/fraction: ",
@@ -592,23 +568,20 @@ filter_read_support <- function(vcf_df, config = NULL) {
   if (warns_control == 0 & control_filtering_set == TRUE) {
 
     filtering_criteria_used_control <- c()
-    if (!is.null(config$somatic_snv$allelic_support$control_dp_min)) {
+    if (!is.null(as_conf$control_dp_min)) {
       filtering_criteria_used_control <-
         c(filtering_criteria_used_control,
-          paste0("min_dp_control = ",
-                 config$somatic_snv$allelic_support$control_dp_min))
+          paste0("min_dp_control = ", as_conf$control_dp_min))
     }
-    if (!is.null(config$somatic_snv$allelic_support$control_af_max)) {
+    if (!is.null(as_conf$control_af_max)) {
       filtering_criteria_used_control <-
         c(filtering_criteria_used_control,
-          paste0("max_af_control = ",
-                 config$somatic_snv$allelic_support$control_af_max))
+          paste0("max_af_control = ", as_conf$control_af_max))
     }
-    if (!is.null(config$somatic_snv$allelic_support$control_ad_max)) {
+    if (!is.null(as_conf$control_ad_max)) {
       filtering_criteria_used_control <-
         c(filtering_criteria_used_control,
-          paste0("max_ad_control = ",
-                 config$somatic_snv$allelic_support$control_ad_max))
+          paste0("max_ad_control = ", as_conf$control_ad_max))
     }
 
     log4r_info(paste0(
@@ -635,6 +608,7 @@ filter_read_support <- function(vcf_df, config = NULL) {
              "check input VCF and/or filtering settings"))
   }
 
+  missed_actionable_vars <- data.frame()
   if (NROW(actionable_or_hotspot_vars) > 0) {
 
     missed_actionable_vars <-
@@ -658,6 +632,13 @@ filter_read_support <- function(vcf_df, config = NULL) {
 
     }
   }
+
+  ## filtering summary, for the variant filtering section of the reports
+  attr(vcf_df, "read_support_filtering") <- list(
+    n_input = n_before_dp_af_filtering,
+    n_retained = nrow(vcf_df),
+    steps = steps,
+    actionable_removed = missed_actionable_vars)
 
   return(vcf_df)
 }

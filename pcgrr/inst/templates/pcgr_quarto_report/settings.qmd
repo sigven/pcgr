@@ -225,6 +225,12 @@ if (length(hl$pills) > 0) {
       "</div>\n\n", sep = "")
 }
 cat(":::\n\n")
+## actionable variants removed by variant filtering
+if (nzchar(hl$warnings)) {
+  cat("::: {.kf-warning}\n\n")
+  cat(hl$warnings, "\n\n")
+  cat(":::\n\n")
+}
 if (nzchar(hl$supporting)) {
   cat("::: {.kf-support}\n\n")
   cat(hl$supporting, "\n\n")

@@ -359,6 +359,21 @@
   }
 ]
 
+// Actionable variants removed by variant filtering (depth/allelic support,
+// tumor-only germline filtering), between the lead and the supporting
+// findings; only emitted by R when such variants exist
+#let pcgr-hl-warning(body) = block(
+  width: 100%, inset: (x: 14pt, y: 10pt), fill: rgb("#fdf5e6"),
+  stroke: (top: 0.75pt + pcgr-rule),
+)[
+  #set text(size: 9.5pt)
+  #set par(justify: false, leading: 0.6em)
+  #set block(spacing: 0.7em)
+  #set list(spacing: 0.6em, marker: text(fill: rgb("#c87f0a"), weight: "bold")[!])
+  #show strong: set text(fill: rgb("#8a5700"))
+  #body
+]
+
 // Contents (level-1 headings, page numbers resolved by Typst) and end of
 // the cover page
 #let pcgr-cover-end() = {

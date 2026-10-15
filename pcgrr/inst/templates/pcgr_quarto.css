@@ -412,6 +412,15 @@ h2, #TOC>ul>li {
   font-size: 1em;
   line-height: 1.5;
 }
+.kf-warning {
+  border-top: 1px solid #cbd5d4;
+  background: #fdf5e6;
+  padding: 0.8em 1.2em 0.2em 1.2em;
+  font-size: 1em;
+  line-height: 1.5;
+}
+.kf-warning strong { color: #8a5700; }
+.kf-panel .kf-warning li::before { content: "!"; color: #c87f0a; }
 .kf-panel ul { list-style: none; padding-left: 0.4em; margin-bottom: 0.6em; }
 .kf-panel ul ul { margin-top: 0.3em; margin-bottom: 0.2em; padding-left: 1.2em; }
 .kf-panel li { position: relative; padding-left: 1.1em; margin-bottom: 0.25em; }

@@ -13,6 +13,11 @@ same rules, with ties resolved alphabetically by gene symbol.
   alterations. Nothing is shown when the tumor is neither TMB-high nor MSI-high (TMB and MSI status
   are reported in full in the *Composite genomic biomarkers* section)
 
+- __Filtered actionable variants__: actionable SNVs/InDels (Tier 1/2) or mutation hotspots that were
+  removed by depth/allelic support filtering, and - for tumor-only input - actionable variants filtered
+  as likely germline, are flagged with a warning (they are not considered elsewhere in the report; see
+  *Variant filtering* in the SNV/InDel section)
+
 **Supporting findings** (in this order)
 
 - __SNV/InDel variants__: number of oncogenic / likely oncogenic SNVs/InDels (all, including those

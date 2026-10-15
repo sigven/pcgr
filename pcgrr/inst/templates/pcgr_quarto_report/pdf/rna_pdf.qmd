@@ -33,8 +33,9 @@ n_site <- if (site_specific) sum(pcgrr:::mitdb_site_count(
   fusions_pdf$MITDB_EVIDENCE, site_rna_pdf) > 0) else 0
 cat("RNA fusion events detected in the sample (**n = ", n_fusions_pdf, "**) ",
     "are annotated with respect to known cancer gene partners (proto-",
-    "oncogenes) and recurrence in the Mitelman Database of chromosome ",
-    "aberrations and gene fusions in cancer. ",
+    "oncogenes) and recurrence in the ",
+    "[Mitelman Database](https://mitelmandatabase.isb-cgc.org/) of ",
+    "chromosome aberrations and gene fusions in cancer. ",
     "Fusions are ranked by actionability tier (AMP/ASCO/CAP), then ",
     if (site_specific) paste0(
       "by the number of Mitelman DB records in ", site_rna_pdf, " cancers (",

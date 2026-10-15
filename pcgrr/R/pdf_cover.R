@@ -86,6 +86,10 @@ pdf_cover_typst <- function(report) {
       "#pcgr-hl-pills((", paste0('"', typst_str(hl$pills), '",', collapse = " "),
       "))\n"),
     "]\n",
+    ## actionable variants removed by variant filtering
+    if (nzchar(hl$warnings)) paste0(
+      "#pcgr-hl-warning[\n```\n\n", hl$warnings, "\n\n",
+      "```{=typst}\n]\n"),
     if (nzchar(hl$supporting)) paste0(
       "#pcgr-hl-support[\n```\n\n", hl$supporting, "\n\n",
       "```{=typst}\n]\n"),

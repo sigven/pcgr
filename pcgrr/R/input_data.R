@@ -263,6 +263,14 @@ load_somatic_snv_indel <- function(
     exclude_non_chrom_variants() |>
     filter_read_support(config = settings$conf)
 
+  ## filtering summaries for the variant filtering section of the reports:
+  ## depth/allelic support filtering (all assays), and - for tumor-only
+  ## input - actionable variants filtered as likely germline (below)
+  callset[['filtering']] <- list(
+    read_support = attr(callset[['variant']], "read_support_filtering"),
+    actionable_germline = data.frame())
+  attr(callset[['variant']], "read_support_filtering") <- NULL
+
 
   ## Tumor-only input
   if (as.logical(settings$conf$assay_properties$vcf_tumor_only) == TRUE) {
@@ -299,6 +307,13 @@ load_somatic_snv_indel <- function(
               .data$SOMATIC_CLASSIFICATION != "SOMATIC")
 
         if (NROW(actionable_filtered) > 0) {
+          callset[['filtering']][['actionable_germline']] <-
+            actionable_filtered |>
+            dplyr::select(dplyr::any_of(
+              c("VAR_ID", "SYMBOL", "ALTERATION", "CONSEQUENCE", "HGVSP",
+                "ACTIONABILITY_TIER", "SOMATIC_CLASSIFICATION",
+                "VAF_TUMOR", "DP_TUMOR", "gnomADe_AF"))) |>
+            dplyr::distinct()
           log4r_warn(
             paste0(
               "A total of n = ", NROW(actionable_filtered),

@@ -36,6 +36,9 @@ typst_str <- function(x) {
 pdf_style_table <- function(tt, color = pcgrr::color_palette$report_color$values[1]) {
   header_col <- grDevices::colorRampPalette(c(color, "black"))(10)[4]
   stripe_col <- grDevices::colorRampPalette(c(color, "white"))(20)[19]
+  ## cell contents centered vertically (rows with pills, logos or bars are
+  ## taller than plain text rows)
+  tt <- tinytable::style_tt(tt, align = "l", alignv = "m")
   tt <- tinytable::style_tt(
     tt, i = 0, background = header_col, color = "white", bold = TRUE)
   n_cols <- ncol(tt@data)

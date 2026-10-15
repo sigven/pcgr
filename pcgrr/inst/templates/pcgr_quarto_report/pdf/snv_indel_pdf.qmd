@@ -103,10 +103,98 @@ cat(pcgrr:::pdf_note(kind = "empty",
 
 ## Variant filtering
 
-```{r snv_indel_filtering_placeholder}
+```{r snv_indel_filtering_setup}
 #| echo: false
 #| output: asis
-cat(pcgrr:::pdf_note(kind = "placeholder", paste0(
-  "Summary of variant filtering (tumor-only: germline filtering steps; ",
-  "tumor-control: allelic support thresholds).")))
+
+filt_pdf <- pcgrr:::filtering_summary(pcg_report)
+fmt_n <- function(x) format(x, big.mark = ",", trim = TRUE)
+if (!is.na(filt_pdf$n_input)) {
+  cat("Of **n = ", fmt_n(filt_pdf$n_input), "** somatic SNVs/InDels in the ",
+      "input VCF, **n = ", fmt_n(filt_pdf$n_reported), "** were retained ",
+      "after filtering and are considered in this report",
+      if (filt_pdf$tumor_only) " (depth/allelic support filtering, then ",
+      if (filt_pdf$tumor_only) "germline filtering of the tumor-only input)",
+      ".\n\n", sep = "")
+}
+cat("### Depth and allelic support\n\n")
+if (NROW(filt_pdf$read_support) == 0) {
+  cat(pcgrr:::pdf_note(kind = "empty", paste0(
+    "No thresholds for sequencing depth or allelic support were set - no ",
+    "variants were filtered on depth/allelic support."),
+    title = "Not applied"))
+} else {
+  cat("Variants were filtered on sequencing depth (DP), allelic fraction ",
+      "(AF) and allelic depth (AD) in the tumor",
+      if (!filt_pdf$tumor_only) " and control", " sample",
+      if (!filt_pdf$tumor_only) "s", ", in the order listed.\n\n", sep = "")
+}
+```
+
+```{r snv_indel_filtering_read_support}
+#| echo: false
+#| eval: !expr NROW(filt_pdf$read_support) > 0
+pcgrr:::pdf_table_read_support(filt_pdf$read_support, color = report_color)
+```
+
+```{r snv_indel_filtering_read_support_warning}
+#| echo: false
+#| output: asis
+#| eval: !expr NROW(filt_pdf$read_support_removed) > 0
+lbl <- pcgrr:::filtered_variant_labels(filt_pdf$read_support_removed)
+cat(pcgrr:::pdf_note(paste0(
+  "The following actionable variants (Tier 1/2) or mutation hotspots did ",
+  "not pass the depth/allelic support thresholds and are not considered ",
+  "in this report - review them and/or the filtering settings:\n\n",
+  paste0("- ", lbl, collapse = "\n")),
+  title = "Actionable variants removed by filtering", kind = "warning"))
+```
+
+```{r snv_indel_filtering_germline}
+#| echo: false
+#| output: asis
+#| eval: !expr filt_pdf$tumor_only
+cat("### Germline filtering (tumor-only)\n\n")
+cat("Without a matched control sample, likely germline variants are ",
+    "excluded from the tumor-only input based on the following settings:",
+    "\n\n", sep = "")
+cat(pcgrr:::tumor_only_settings_markdown(filt_pdf$tumor_only_settings), "\n")
+if (NROW(filt_pdf$germline) > 0) {
+  cat("Classification of the variants (n = ",
+      fmt_n(sum(filt_pdf$germline$N)), ") - variants matching more than one ",
+      "germline filter are counted as *MULTIPLE FILTERS*:\n\n", sep = "")
+}
+```
+
+```{r snv_indel_filtering_germline_table}
+#| echo: false
+#| eval: !expr filt_pdf$tumor_only && NROW(filt_pdf$germline) > 0
+pcgrr:::pdf_table_filter_shares(filt_pdf$germline, color = report_color)
+```
+
+```{r snv_indel_filtering_exonic}
+#| echo: false
+#| output: asis
+#| eval: !expr filt_pdf$tumor_only && NROW(filt_pdf$exonic) > 0
+cat("\nExonic status of the somatic variants (non-exonic variants ",
+    "excluded):\n\n", sep = "")
+```
+
+```{r snv_indel_filtering_exonic_table}
+#| echo: false
+#| eval: !expr filt_pdf$tumor_only && NROW(filt_pdf$exonic) > 0
+pcgrr:::pdf_table_filter_shares(filt_pdf$exonic, color = report_color)
+```
+
+```{r snv_indel_filtering_germline_warning}
+#| echo: false
+#| output: asis
+#| eval: !expr NROW(filt_pdf$germline_removed) > 0
+lbl <- pcgrr:::filtered_variant_labels(filt_pdf$germline_removed)
+cat(pcgrr:::pdf_note(paste0(
+  "The following actionable variants (Tier 1/2) were filtered as likely ",
+  "germline events and are not considered in this report - germline status ",
+  "should be verified (e.g. with a matched control sample):\n\n",
+  paste0("- ", lbl, collapse = "\n")),
+  title = "Actionable variants filtered as likely germline", kind = "warning"))
 ```

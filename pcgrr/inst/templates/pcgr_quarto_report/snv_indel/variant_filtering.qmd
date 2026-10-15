@@ -3,65 +3,121 @@
 #| output: asis
 #| echo: false
 
-to_settings <- pcg_report$settings$conf$somatic_snv$tumor_only
+filt_html <- pcgrr:::filtering_summary(pcg_report)
+fmt_n_html <- function(x) format(x, big.mark = ",", trim = TRUE)
 
 filtering_stats <- list()
-
-filtering_stats[['germline']] <- pcgrr::plot_filtering_stats_germline(
+if (filt_html$tumor_only && NROW(filt_html$germline) > 0) {
+  filtering_stats[['germline']] <- pcgrr::plot_filtering_stats_germline(
     report = pcg_report)
-
-
-if (pcg_report$settings$conf$somatic_snv$tumor_only$exclude_nonexonic == TRUE) {
-
-  filtering_stats[['exonic']] <- pcgrr::plot_filtering_stats_exonic(
-    report = pcg_report,
-    plot_margin_bottom = 100)
+  if (NROW(filt_html$exonic) > 0) {
+    filtering_stats[['exonic']] <- pcgrr::plot_filtering_stats_exonic(
+      report = pcg_report,
+      plot_margin_bottom = 100)
+  }
 }
 
+## actionable variants removed by filtering - shown as warnings
+filt_warn_html <- function(d, title, intro) {
+  if (NROW(d) == 0) return(invisible(NULL))
+  cat("::: {.callout-warning}\n## ", title, "\n\n", intro, "\n\n",
+      paste0("* ", pcgrr:::filtered_variant_labels(d), collapse = "\n"),
+      "\n\n:::\n\n", sep = "")
+}
+filt_warn_html(
+  filt_html$read_support_removed,
+  "Actionable variants removed by depth/allelic support filtering",
+  paste0("The following actionable variants (Tier 1/2) or mutation hotspots ",
+         "did not pass the depth/allelic support thresholds and are not ",
+         "considered in this report - review them and/or the filtering ",
+         "settings:"))
+filt_warn_html(
+  filt_html$germline_removed,
+  "Actionable variants filtered as likely germline",
+  paste0("The following actionable variants (Tier 1/2) were filtered as ",
+         "likely germline events and are not considered in this report - ",
+         "germline status should be verified (e.g. with a matched control ",
+         "sample):"))
 
+## overview and depth/allelic support filtering (all assay modes)
+cat("::: {.callout-note title=\"Variant filtering - SNVs/InDels\" collapse=\"true\"}\n\n")
+if (!is.na(filt_html$n_input)) {
+  cat("Of __n = ", fmt_n_html(filt_html$n_input), "__ somatic SNVs/InDels ",
+      "in the input VCF, __n = ", fmt_n_html(filt_html$n_reported), "__ ",
+      "were retained after filtering and are considered in this report",
+      if (filt_html$tumor_only) paste0(
+        " (depth/allelic support filtering, then germline filtering of the ",
+        "tumor-only input)"), ".\n\n", sep = "")
+}
+cat("**Depth and allelic support**\n\n")
+if (NROW(filt_html$read_support) == 0) {
+  cat("No thresholds for sequencing depth or allelic support were set - no ",
+      "variants were filtered on depth/allelic support.\n\n", sep = "")
+} else {
+  rs <- filt_html$read_support
+  cat("Variants were filtered on sequencing depth (DP), allelic fraction ",
+      "(AF) and allelic depth (AD) in the tumor",
+      if (!filt_html$tumor_only) " and control", " sample",
+      if (!filt_html$tumor_only) "s", ", in the order listed:\n\n", sep = "")
+  cat("| Step | Threshold | Removed | Remaining |\n",
+      "|:-----|:----------|--------:|----------:|\n",
+      paste0("| ", rs$STEP, " | ",
+             pcgrr:::fmt_threshold_filtering(rs$THRESHOLD), " | ",
+             ifelse(as.logical(rs$APPLIED), fmt_n_html(rs$N_REMOVED),
+                    paste0("_", rs$NOTE, "_")), " | __",
+             fmt_n_html(rs$N_REMAINING), "__ |", collapse = "\n"),
+      "\n\n", sep = "")
+}
 
+## tumor-only germline filtering
+if (filt_html$tumor_only) {
+  cat("**Germline filtering (tumor-only)**\n\n")
+  cat("Without a matched control sample, likely germline variants are ",
+      "excluded from the tumor-only input based on the following settings:",
+      "\n\n", sep = "")
+  cat(pcgrr:::tumor_only_settings_markdown(filt_html$tumor_only_settings),
+      "\n")
+  share_md <- function(d) {
+    desc <- pcgrr:::germline_filter_descriptions()
+    lbl <- ifelse(d$CLASSIFICATION %in% names(desc),
+                  desc[d$CLASSIFICATION], d$CLASSIFICATION)
+    keep <- d$CLASSIFICATION %in% c("SOMATIC", "SOMATIC - EXONIC")
+    bar <- paste0(
+      "<span style='display:inline-block;width:120px;height:0.7em;",
+      "background:#e4e4e4;border-radius:2px;vertical-align:middle;",
+      "margin-right:6px'><span style='display:block;height:100%;width:",
+      round(100 * d$SHARE, 1), "%;background:",
+      ifelse(keep, report_color, "#9e9e9e"), ";border-radius:2px'></span>",
+      "</span>", sprintf("%.1f", 100 * d$SHARE), "%")
+    cat("| Classification | Filter | Variants | Share |\n",
+        "|:---------------|:-------|---------:|:------|\n",
+        paste0("| ", ifelse(keep, paste0("__", lbl, "__"), lbl), " | `",
+               d$CLASSIFICATION, "` | ", fmt_n_html(d$N), " | ", bar, " |",
+               collapse = "\n"),
+        "\n\n", sep = "")
+  }
+  if (NROW(filt_html$germline) > 0) {
+    cat("Classification of the variants (n = ",
+        fmt_n_html(sum(filt_html$germline$N)), ") - variants matching more ",
+        "than one germline filter are counted as _MULTIPLE FILTERS_:\n\n",
+        sep = "")
+    share_md(filt_html$germline)
+  }
+  if (NROW(filt_html$exonic) > 0) {
+    cat("Exonic status of the somatic variants (non-exonic variants ",
+        "excluded):\n\n", sep = "")
+    share_md(filt_html$exonic)
+  }
+}
+cat(":::\n\n")
 ```
 
-::: {.callout-note title="Tumor-only filtering settings - SNVs/InDels" collapse="true"}
-
-The SNV/InDel variant filtering has been performed based on the following criteria:
-
-:::: {.columns}
-
-::: {.column width="47.5%"}
-
-* Variant filtering aginst gnomAD (filter *GERMLINE_GNOMAD*): __TRUE__ (not configurable)
-* Maximum allowed gnomAD MAF's for somatic events (configurable) across all populations:
-    * __`r to_settings$gnomad_popmax_af_tolerated`__
-* Variant filtering against ClinVar (filter *GERMLINE_CLINVAR*): __`r as.logical(to_settings$exclude_clinvar_germline)`__
-* Variant filtering against dbSNP (filter *GERMLINE_DBSNP*): __`r as.logical(to_settings$exclude_dbsnp_nonsomatic)`__
-* Variant filtering based on tumor VAF value (likely heterozygous germline event, VAF in 0.4 - 0.6, filter *GERMLINE_HET*): __`r as.logical(to_settings$exclude_likely_het_germline)`__
-
-:::
-
-::: {.column width="5%"}
-<!-- empty column to create gap -->
-:::
-
-::: {.column width="47.5%"}
-
-* Variant filtering based on tumor VAF value (likely homozygous germline event, VAF = 1, filter *GERMLINE_HOM*): __`r as.logical(to_settings$exclude_likely_hom_germline)`__
-* Variant filtering against panel-of-normals (filter *GERMLINE_PON*: __`r as.logical(to_settings$exclude_pon)`__
-* Variant filtering based on exonic regions: __`r as.logical(to_settings$exclude_nonexonic)`__
-
-:::
-
-::::
-
-:::
-
 ```{r variant_filtering_pie}
-#| eval: true
+#| eval: !expr length(filtering_stats) > 0
 #| output: asis
 #| echo: false
 
-
-if (pcg_report$settings$conf$somatic_snv$tumor_only$exclude_nonexonic == TRUE) {
+if (!is.null(filtering_stats[['exonic']])) {
 
   bslib::card(
     full_screen = TRUE,
@@ -94,4 +150,3 @@ if (pcg_report$settings$conf$somatic_snv$tumor_only$exclude_nonexonic == TRUE) {
 
 
 ```
-
