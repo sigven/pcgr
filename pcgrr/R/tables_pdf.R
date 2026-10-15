@@ -219,6 +219,25 @@ fmt_gene_symbols_pdf <- function(symbols, max_show = 3) {
   val
 }
 
+#' Variant allelic fraction as a horizontal bar with the value (Typst
+#' markup), as in the HTML report tables
+#'
+#' @param vaf allelic fractions (numeric or character, 0-1)
+#' @param width bar width (Typst length)
+#'
+#' @return character vector with Typst markup ("" for missing values)
+#' @keywords internal
+vaf_bar_pdf <- function(vaf, width = "1.3cm") {
+  v <- suppressWarnings(as.numeric(vaf))
+  ifelse(
+    is.na(v), "",
+    paste0(
+      '#box(grid(columns: 2, column-gutter: 0.35em, align: horizon, ',
+      'box(width: ', width, ', height: 0.6em, fill: luma(228), radius: 1pt, ',
+      'clip: true, box(width: ', round(100 * pmin(pmax(v, 0), 1), 1),
+      '%, height: 100%, fill: rgb("#5D5165"))), [', sprintf("%.2f", v), ']))'))
+}
+
 #' Variants located in a cancer mutation hotspot (cancerhotspots.org), as
 #' flagged in the HTML report (MUTATION_HOTSPOT_CANCERTYPE)
 #'
@@ -269,13 +288,16 @@ hotspot_legend_pdf <- function(variants) {
 #' @param clnsig 'therapeutic_sensitivity' or 'therapeutic_resistance'
 #' (tier colors)
 #' @param variant_class show the variant class column
+#' @param oncokb show the OncoKB oncogenicity column (ONCOGENICITY_OKB, as
+#' colored pills), when OncoKB annotations are present
 #'
 #' @return tinytable object
 #' @keywords internal
 variant_table_pdf <- function(variants,
                               color = pcgrr::color_palette$report_color$values[1],
                               clnsig = "therapeutic_sensitivity",
-                              variant_class = TRUE) {
+                              variant_class = TRUE,
+                              oncokb = FALSE) {
   cols <- c(
     "Gene" = "SYMBOL",
     "Alteration" = "ALTERATION",
@@ -302,12 +324,24 @@ variant_table_pdf <- function(variants,
   }
   ## variant class not needed where implicit (e.g. SNV/InDel-only tables)
   if (!variant_class) tbl[["Variant class"]] <- NULL
+  ## OncoKB oncogenicity (e.g. CNA table), only when annotated
+  okb <- if ("ONCOGENICITY_OKB" %in% colnames(variants))
+    dplyr::coalesce(as.character(variants$ONCOGENICITY_OKB), "") else NULL
+  if (oncokb && !is.null(okb) && any(okb != "" & okb != ".")) {
+    okb[okb == "."] <- ""
+    tbl[["OncoKB"]] <- oncogenicity_pill_pdf(okb)
+    j_raw <- c(j_raw, which(colnames(tbl) == "OncoKB"))
+  }
   ## consequence terms (e.g. 'splice_region_variant&stop_gained') with
   ## break opportunities, to wrap within narrow columns
   if ("Consequence" %in% colnames(tbl)) {
     tbl[["Consequence"]] <- tbl[["Consequence"]] |>
       stringr::str_replace_all("&", ", ") |>
       stringr::str_replace_all("_", " ")
+  }
+  if ("VAF (tumor)" %in% colnames(tbl)) {
+    tbl[["VAF (tumor)"]] <- vaf_bar_pdf(tbl[["VAF (tumor)"]])
+    j_raw <- c(j_raw, which(colnames(tbl) == "VAF (tumor)"))
   }
   if ("Tier" %in% colnames(tbl)) {
     tbl[["Tier"]] <- tier_pill_pdf(
@@ -317,10 +351,14 @@ variant_table_pdf <- function(variants,
   if ("Oncogenicity" %in% colnames(tbl)) {
     ## oncogenicity pill, followed by the cancer hotspot symbol for variants
     ## located in a mutation hotspot (as in the HTML report)
-    tbl[["Oncogenicity"]] <- paste0(
-      oncogenicity_pill_pdf(tbl[["Oncogenicity"]]),
-      ifelse(is_hotspot_pdf(variants),
-             paste0(" #h(0.3em)", hotspot_symbol_pdf()), ""))
+    ## (pill and symbol in a grid, vertically centered - also when the pill
+    ## text wraps onto two lines)
+    onc_pill <- oncogenicity_pill_pdf(tbl[["Oncogenicity"]])
+    tbl[["Oncogenicity"]] <- ifelse(
+      is_hotspot_pdf(variants) & onc_pill != "",
+      paste0('#box(grid(columns: 2, column-gutter: 0.3em, align: horizon, [',
+             onc_pill, '], image("typst/logo_cancerhotspots.png", height: 1em)))'),
+      onc_pill)
     j_raw <- c(j_raw, which(colnames(tbl) == "Oncogenicity"))
   }
   tt <- tinytable::tt(tbl, width = rep(1, ncol(tbl)) / ncol(tbl))
@@ -373,9 +411,9 @@ pdf_cover_values <- function(report, color_palette = pcgrr::color_palette) {
       with_source(conf$sample_properties$tumor_ploidy,
                   conf$sample_properties$tumor_ploidy_source)),
     sex_age = paste0(
-      na_str(conf$sample_properties$sex), " / ",
-      if (na_str(conf$sample_properties$age) == "N/A") "N/A" else
-        paste(conf$sample_properties$age, "years")),
+      na_str(conf$subject_properties$sex), " / ",
+      if (na_str(conf$subject_properties$age) == "N/A") "N/A" else
+        paste(conf$subject_properties$age, "years")),
     pcgr_version = na_str(report$settings$software$pcgr_version))
 
   v
@@ -938,27 +976,59 @@ cna_plot_settings_pdf <- function(report) {
         as.numeric(cna_conf$del_threshold_absolute))
 }
 
-#' RNA fusion table for the PDF report - fusion events ranked as in the HTML
-#' report (Mitelman recurrence in the primary site, oncogenic partners,
-#' overall recurrence), with actionability tier as colored pills
+#' Number of Mitelman DB records of a fusion in a given tumor site, parsed
+#' from the annotated Mitelman evidence ('<b>Site</b> (<i>n = 3</i>) - ...')
+#'
+#' @param evidence Mitelman evidence per fusion (MITDB_EVIDENCE)
+#' @param site primary tumor site (e.g. 'Colon/Rectum')
+#'
+#' @return integer vector (0 when the site is not recorded)
+#' @keywords internal
+mitdb_site_count_pdf <- function(evidence, site) {
+  if (is.null(site) || site %in% c("Any", "")) {
+    return(rep(0L, length(evidence)))
+  }
+  site_re <- stringr::str_replace_all(site, "([.|()\\^{}+$*?\\[\\]\\\\])",
+                                      "\\\\\\1")
+  m <- stringr::str_match(
+    dplyr::coalesce(evidence, ""),
+    paste0("<b>", site_re, "</b>\\s*\\(<i>n\\s*=\\s*([0-9]+)</i>\\)"))
+  dplyr::coalesce(as.integer(m[, 2]), 0L)
+}
+
+#' Rank RNA fusions for the PDF report: actionability tier (Tier 1 first, no
+#' tier last), then recurrence in the tumor site of the sample (Mitelman
+#' DB), then the number of split reads
 #'
 #' @param fusions data frame with fusions (fusion callset - variant_display)
 #' @param site primary tumor site of the sample
+#'
+#' @return ordered data frame, with column SITE_RECURRENCE
+#' @keywords internal
+rank_fusions_pdf <- function(fusions, site = "Any") {
+  d <- fusions
+  if (NROW(d) == 0) return(d)
+  d$SITE_RECURRENCE <- mitdb_site_count_pdf(d$MITDB_EVIDENCE, site)
+  tier <- suppressWarnings(as.integer(d$ACTIONABILITY_TIER))
+  d[order(dplyr::coalesce(tier, 99L), -d$SITE_RECURRENCE,
+          -dplyr::coalesce(as.numeric(d$SPLIT_READS), 0)), , drop = FALSE]
+}
+
+#' RNA fusion table for the PDF report - fusion events ranked with
+#' rank_fusions_pdf(), with recurrence in the tumor site of the sample and
+#' overall recurrence (Mitelman DB), and actionability tier as colored pills
+#'
+#' @param fusions data frame with fusions (fusion callset - variant_display)
+#' @param site primary tumor site of the sample
+#' @param max_rows maximum number of fusions shown (after ranking)
 #' @param color main report color (hex)
 #'
 #' @return tinytable object
 #' @keywords internal
 fusion_table_pdf <- function(
-    fusions, site = "Any",
+    fusions, site = "Any", max_rows = 25,
     color = pcgrr::color_palette$report_color$values[1]) {
-  d <- fusions
-  site_match <- stringr::str_detect(
-    dplyr::coalesce(d$MITDB_EVIDENCE, ""),
-    stringr::fixed(paste0("<b>", site, "</b>")))
-  d <- d[order(-site_match, -as.integer(d$ONCOGENE_5P %in% TRUE),
-               -as.integer(d$ONCOGENE_3P %in% TRUE),
-               -dplyr::coalesce(as.numeric(d$MITDB_NUM_EVIDENCE), 0)), ,
-         drop = FALSE]
+  d <- utils::head(rank_fusions_pdf(fusions, site), max_rows)
   partner <- function(gene, oncogene) {
     paste0(typst_escape(strip_html_pdf(gene)),
            ifelse(oncogene %in% TRUE, " (oncogene)", ""))
@@ -969,13 +1039,19 @@ fusion_table_pdf <- function(
     `Split reads` = as.character(d$SPLIT_READS),
     `5' partner` = partner(d$FUSION_GENE_5P, d$ONCOGENE_5P),
     `3' partner` = partner(d$FUSION_GENE_3P, d$ONCOGENE_3P),
-    `Breakpoints (5' / 3')` = typst_escape(paste0(
-      strip_html_pdf(d$BREAKPOINT_5P), " / ", strip_html_pdf(d$BREAKPOINT_3P))),
-    `Mitelman DB (n)` = as.character(dplyr::coalesce(
-      as.numeric(d$MITDB_NUM_EVIDENCE), 0)),
-    Tier = tier_pill_pdf(ifelse(tier %in% c(1, 2, 3), tier, NA)),
     check.names = FALSE)
-  tinytable::tt(tbl, width = c(0.18, 0.08, 0.15, 0.15, 0.27, 0.09, 0.08)) |>
+  widths <- c(0.22, 0.09, 0.2, 0.2)
+  ## recurrence in the tumor site of the sample (Mitelman DB)
+  if (!site %in% c("Any", "")) {
+    tbl[[paste0("Mitelman DB - ", typst_escape(site), " (n)")]] <-
+      as.character(d$SITE_RECURRENCE)
+    widths <- c(0.2, 0.08, 0.18, 0.18, 0.13)
+  }
+  tbl[["Mitelman DB - all (n)"]] <- as.character(dplyr::coalesce(
+    as.numeric(d$MITDB_NUM_EVIDENCE), 0))
+  tbl[["Tier"]] <- tier_pill_pdf(ifelse(tier %in% c(1, 2, 3), tier, NA))
+  widths <- c(widths, 0.09, 0.07)
+  tinytable::tt(tbl, width = widths / sum(widths)) |>
     style_tt_header_pdf(color = color) |>
     tinytable::style_tt(j = 1, bold = TRUE)
 }
@@ -1062,7 +1138,7 @@ expression_similarity_table_pdf <- function(
     `Primary site` = pill_pdf(
       primary_site,
       ifelse(primary_site == site, color, pcgrr::color_palette$none)),
-    `Sample type` = typst_escape(col_or_empty("EXT_SAMPLE_TYPE")),
+    `Sample type` = typst_escape(format_sample_type(col_or_empty("EXT_SAMPLE_TYPE"))),
     check.names = FALSE)
   tinytable::tt(tbl, width = c(0.2, 0.12, 0.3, 0.2, 0.18)) |>
     style_tt_header_pdf(color = color) |>
@@ -1104,15 +1180,26 @@ germline_table_pdf <- function(
     if (x %in% colnames(d)) dplyr::coalesce(strip_html_pdf(d[[x]]), "") else
       rep("", NROW(d))
   }
+  gt_raw <- tolower(col_or_empty("GENOTYPE"))
   genotype <- dplyr::case_when(
-    tolower(col_or_empty("GENOTYPE")) == "het" ~ "Heterozygous",
-    tolower(col_or_empty("GENOTYPE")) %in% c("hom", "homalt") ~ "Homozygous",
+    gt_raw %in% c("het", "heterozygous") ~ "Heterozygous",
+    gt_raw %in% c("hom", "homalt", "hom_alt", "homozygous") ~ "Homozygous",
+    gt_raw %in% c("hemi", "hemizygous") ~ "Hemizygous",
     .default = col_or_empty("GENOTYPE"))
+  ## genotype as colored pills - colors as in CPSR (cpsr::color_palette -
+  ## genotypes): heterozygous, homozygous/hemizygous
+  gt_fill <- dplyr::case_when(
+    genotype == "Heterozygous" ~ "#007a74",
+    genotype %in% c("Homozygous", "Hemizygous") ~ "#004c47",
+    .default = "#999999")
+  genotype_md <- pill_pdf(genotype, gt_fill)
   ## DP_CONTROL is -1 when CPSR was run without depth information
   if ("DP_CONTROL" %in% colnames(d)) {
     dp <- suppressWarnings(as.numeric(d$DP_CONTROL))
     low <- !is.na(dp) & dp >= 0 & dp < low_depth_threshold
-    genotype[low] <- paste0(genotype[low], " (low depth: ", dp[low], "X)")
+    genotype_md[low] <- paste0(
+      genotype_md[low], " #linebreak() #text(size: 0.9em, fill: pcgr-muted)[",
+      "low depth (", dp[low], "X)]")
   }
   consequence <- col_or_empty("CONSEQUENCE") |>
     stringr::str_replace_all("&", ", ") |>
@@ -1121,7 +1208,7 @@ germline_table_pdf <- function(
     Gene = gene_link_pdf(col_or_empty("SYMBOL"), d[["ENSEMBL_GENE_ID"]]),
     Alteration = typst_escape(col_or_empty("ALTERATION")),
     Consequence = typst_escape(consequence),
-    Genotype = typst_escape(genotype),
+    Genotype = genotype_md,
     `Clinical significance` = pathogenicity_pill_pdf(
       col_or_empty("CLINICAL_SIGNIFICANCE")),
     `ACMG evidence` = typst_escape(

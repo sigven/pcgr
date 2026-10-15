@@ -16,9 +16,18 @@ oncogenic_pdf <- if ("ONCOGENICITY" %in% colnames(snv_pdf)) {
       tolower(stringr::str_replace_all(.data$ONCOGENICITY, "_", " ")) %in%
         c("oncogenic", "likely oncogenic"))
 } else snv_pdf[0, , drop = FALSE]
-if ("ONCOGENICITY_SCORE" %in% colnames(oncogenic_pdf)) {
-  oncogenic_pdf <- oncogenic_pdf |>
-    dplyr::arrange(dplyr::desc(.data$ONCOGENICITY_SCORE))
+## ranked by actionability tier (Tier 1 first; no tier last), then by
+## oncogenicity score (highest first)
+if (NROW(oncogenic_pdf) > 0) {
+  tier_rank <- if ("ACTIONABILITY_TIER" %in% colnames(oncogenic_pdf))
+    suppressWarnings(as.integer(oncogenic_pdf$ACTIONABILITY_TIER)) else
+      rep(NA_integer_, NROW(oncogenic_pdf))
+  score <- if ("ONCOGENICITY_SCORE" %in% colnames(oncogenic_pdf))
+    suppressWarnings(as.numeric(oncogenic_pdf$ONCOGENICITY_SCORE)) else
+      rep(NA_real_, NROW(oncogenic_pdf))
+  oncogenic_pdf <- oncogenic_pdf[order(
+    dplyr::coalesce(tier_rank, 99L), -dplyr::coalesce(score, -Inf)), ,
+    drop = FALSE]
 }
 n_oncogenic_pdf <- NROW(oncogenic_pdf)
 ```
@@ -52,12 +61,27 @@ for (p in varstats_plots_pdf) print(p)
 
 ## Oncogenic and likely oncogenic variants
 
+```{r oncogenic_intro}
+#| echo: false
+#| output: asis
+cat("The oncogenicity of somatic SNVs/InDels is classified with an ",
+    "implementation of the ClinGen/CGC/VICC standard operating procedure ",
+    "[@Horak2022-uh]: evidence for (oncogenic) and against (benign) each ",
+    "variant is aggregated into an oncogenicity score, which determines the ",
+    "classification (see *Appendix: Documentation - Variant oncogenicity ",
+    "classification*). Listed below are the variants classified as ",
+    "oncogenic or likely oncogenic (**n = ", n_oncogenic_pdf, "**), ranked by ",
+    "actionability tier (AMP/ASCO/CAP), then by oncogenicity score.\n\n",
+    sep = "")
+```
+
 ```{r oncogenic_table}
 #| echo: false
 #| eval: !expr n_oncogenic_pdf > 0
 
+## all oncogenic / likely oncogenic variants (coding and non-coding,
+## actionable or not)
 oncogenic_pdf |>
-  utils::head(max_variants_pdf) |>
   pcgrr:::variant_table_pdf(color = report_color, variant_class = FALSE)
 ```
 
@@ -65,17 +89,7 @@ oncogenic_pdf |>
 #| echo: false
 #| output: asis
 #| eval: !expr n_oncogenic_pdf > 0
-cat(pcgrr:::hotspot_legend_pdf(utils::head(oncogenic_pdf, max_variants_pdf)))
-```
-
-```{r oncogenic_capped_msg}
-#| echo: false
-#| output: asis
-#| eval: !expr n_oncogenic_pdf > max_variants_pdf
-cat(
-  "\n*Showing ", max_variants_pdf, " of ", n_oncogenic_pdf, " oncogenic/",
-  "likely oncogenic variants (highest oncogenicity score first) - the ",
-  "complete list is available in the Excel output.*\n\n", sep = "")
+cat(pcgrr:::hotspot_legend_pdf(oncogenic_pdf))
 ```
 
 ```{r oncogenic_none_msg}

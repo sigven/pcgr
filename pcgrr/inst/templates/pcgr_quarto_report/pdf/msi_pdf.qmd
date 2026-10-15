@@ -98,16 +98,11 @@ col_status <- if (uncertain_pdf) pcgrr::color_palette$warning else if
 cat(pcgrr:::kpi_row_pdf(list(
   list(title = "MSI status",
        value = if (is_msi_h_pdf) "MSI-H" else "MSS",
-       sub = stringr::str_replace(
-         msi_stats_pdf[["predicted_class"]], "^[^(]+\\((.*)\\)$", "\\1"),
        color = col_status),
   list(title = prob_label_pdf, value = as.character(prob_display_pdf),
-       sub = paste0("Confidence: ", confidence_tier_pdf),
        color = col_status),
   list(title = "Coding indel mutational burden",
-       value = paste0(round(msi_stats_pdf[["tmb_indel"]], 2), " /Mb"),
-       sub = paste0("Indel fraction: ",
-                    round(msi_stats_pdf[["frac_indels"]], 3))))))
+       value = paste0(round(msi_stats_pdf[["tmb_indel"]], 2), " /Mb")))))
 ```
 
 ```{r msi_pdf_indel_plot}
@@ -135,6 +130,13 @@ cat("Somatic coding mutations in the core mismatch repair genes (",
     ".\n\n", sep = "")
 ```
 
+```{r msi_pdf_mmr_somatic_heading}
+#| echo: false
+#| output: asis
+#| eval: !expr isFALSE(pcg_report$content$msi$missing_data)
+cat("**Somatic mutations** (tumor) in MMR genes\n\n")
+```
+
 ```{r msi_pdf_mmr_somatic}
 #| echo: false
 #| eval: !expr isFALSE(pcg_report$content$msi$missing_data) && NROW(mmr_somatic_pdf) > 0
@@ -151,11 +153,19 @@ cat(pcgrr:::no_findings_pdf(
   title = "Somatic"))
 ```
 
+```{r msi_pdf_mmr_germline_heading}
+#| echo: false
+#| output: asis
+#| eval: !expr isFALSE(pcg_report$content$msi$missing_data) && germline_eval_pdf
+cat("**Germline variants** (CPSR) in MMR genes - pathogenic/likely pathogenic\n\n")
+```
+
 ```{r msi_pdf_mmr_germline}
 #| echo: false
 #| eval: !expr isFALSE(pcg_report$content$msi$missing_data) && germline_eval_pdf && NROW(mmr_germline_pdf) > 0
-mmr_germline_pdf |>
-  pcgrr:::variant_table_pdf(color = report_color, variant_class = FALSE)
+## styled as the germline findings table (genotype and clinical
+## significance as pills)
+pcgrr:::germline_table_pdf(mmr_germline_pdf, color = report_color)
 ```
 
 ```{r msi_pdf_mmr_germline_none}

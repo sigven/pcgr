@@ -26,12 +26,22 @@ immune_caption_pdf <- paste0(
 #| eval: !expr isTRUE(pcg_report$content$fusion$eval)
 
 cat("## RNA fusions\n\n")
+## ranking as in pcgrr:::rank_fusions_pdf() - described according to the
+## recurrence data available for the tumor site of the sample
+site_specific <- !site_rna_pdf %in% c("Any", "") && n_fusions_pdf > 0
+n_site <- if (site_specific) sum(pcgrr:::mitdb_site_count_pdf(
+  fusions_pdf$MITDB_EVIDENCE, site_rna_pdf) > 0) else 0
 cat("RNA fusion events detected in the sample (**n = ", n_fusions_pdf, "**) ",
-    "are annotated with respect to known cancer gene partners and recurrence ",
-    "in the Mitelman Database of chromosome aberrations and gene fusions in ",
-    "cancer. Fusions are ranked by recurrence in ", site_rna_pdf,
-    " cancers, oncogenic fusion partners, and overall recurrence; the ",
-    "biomarker evidence of actionable fusions is listed under *Clinical ",
+    "are annotated with respect to known cancer gene partners (proto-",
+    "oncogenes) and recurrence in the Mitelman Database of chromosome ",
+    "aberrations and gene fusions in cancer. ",
+    "Fusions are ranked by actionability tier (AMP/ASCO/CAP), then ",
+    if (site_specific) paste0(
+      "by the number of Mitelman DB records in ", site_rna_pdf, " cancers (",
+      if (n_site > 0) paste0(n_site, " of the fusions recorded") else
+        "none of the fusions recorded", "), then "),
+    "by the number of supporting split reads. ",
+    "The biomarker evidence of actionable fusions is listed under *Clinical ",
     "actionability*.\n\n", sep = "")
 n_filt <- fusion_cs_pdf$n_filtered_split_reads
 if (isTRUE(n_filt > 0)) {
@@ -54,7 +64,7 @@ cat(pcgrr:::note_box_pdf(paste0(
 #| echo: false
 #| eval: !expr isTRUE(pcg_report$content$fusion$eval) && n_fusions_pdf > 0
 pcgrr:::fusion_table_pdf(
-  utils::head(fusions_pdf, max_variants_pdf), site = site_rna_pdf,
+  fusions_pdf, site = site_rna_pdf, max_rows = max_variants_pdf,
   color = report_color)
 ```
 

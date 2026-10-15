@@ -102,7 +102,6 @@ cat(pcgrr:::kpi_row_pdf(list(
                      collapse = " · ")),
   list(title = "Goodness of signature fit",
        value = paste0(round(fit_pdf$estimate * 100, 1), "%"),
-       sub = "Cosine similarity, reconstructed vs. observed profile",
        color = if (poor_fit_pdf) col_high else NULL),
   list(title = "SNVs analyzed", value = format(n_sbs_pdf, big.mark = ",")))))
 ```

@@ -1026,3 +1026,16 @@ plotly_pie_chart <- function(
 }
 
 
+
+#' Readable sample type labels of external (reference) samples, e.g.
+#' 'cell_line' - 'Cell line', 'primary_solid_tumor' - 'Primary solid tumor'
+#'
+#' @param x sample types (character)
+#'
+#' @return character vector (NA kept)
+#' @export
+format_sample_type <- function(x) {
+  x <- stringr::str_squish(stringr::str_replace_all(as.character(x), "_", " "))
+  ifelse(is.na(x) | x == "", x,
+         paste0(toupper(substr(x, 1, 1)), tolower(substr(x, 2, nchar(x)))))
+}

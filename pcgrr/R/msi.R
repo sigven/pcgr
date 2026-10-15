@@ -421,12 +421,12 @@ generate_report_data_msi <- function(
       conf_tier <- pcg_report_msi[["prediction"]]$confidence_tier
       if (!is.null(conf_tier) && conf_tier == "High confidence") {
         log4r_info(paste0(
-          "NOTE: n = ", n_calls, " variants — below training threshold ",
+          "NOTE: n = ", n_calls, " variants - below training threshold ",
           "(n < 100), but P(MSI-H) is far from the decision boundary: ",
           "prediction is still high confidence."))
       } else {
         log4r_info(paste0(
-          "WARNING: n = ", n_calls, " variants — below training threshold ",
+          "WARNING: n = ", n_calls, " variants - below training threshold ",
           "(n < 100). Prediction may be less reliable; check confidence tier ",
           "and P(MSI-H) in the report."))
       }

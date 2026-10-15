@@ -273,7 +273,7 @@ col_defs <- list(
   CYTOBAND = reactable::colDef(
     name = "Cytoband", maxWidth = 100),
   SEGMENT_LENGTH_MB = reactable::colDef(
-    name = "Segment (Mb)", maxWidth = 110),
+    name = "Segment size (Mb)", maxWidth = 110),
   GLOBAL_ASSOC_RANK = reactable::colDef(show = FALSE),
   TISSUE_ASSOC_RANK = reactable::colDef(show = FALSE)
 )

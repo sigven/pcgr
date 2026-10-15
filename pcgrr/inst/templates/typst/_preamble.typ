@@ -352,10 +352,10 @@
   #for l in labels {
     // dark (not the oncogenicity/pathogenicity red) - positive composite
     // biomarkers may indicate treatment benefit
-    box(fill: pcgr-dark, radius: 8pt, inset: (x: 8pt, y: 3.5pt))[
-      #text(fill: white, size: 9pt, weight: "bold")[#l]
+    box(fill: pcgr-dark, radius: 10pt, inset: (x: 11pt, y: 5pt))[
+      #text(fill: white, size: 11pt, weight: "bold")[#l]
     ]
-    h(5pt)
+    h(7pt)
   }
 ]
 

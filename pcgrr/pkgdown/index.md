@@ -20,7 +20,7 @@ The Personal Cancer Genome Reporter (PCGR) is a stand-alone software workflow fo
 
 PCGR supports both of the most recent human genome assemblies (GRCh37/GRCh38), and accepts variant calls from both tumor-control and tumor-only sequencing assays. Much of the functionality is intended for whole-exome/whole-genome sequencing assays, but you can also apply PCGR to output from targeted sequencing panels. If you are interested in the interrogation of germline variants and their relation to cancer predisposition, we recommend trying the accompanying tool [Cancer Predisposition Sequencing Reporter (CPSR)](https://github.com/sigven/cpsr).
 
-Seven snapshots of sections in the [quarto](https://quarto.org)-based cancer genome report by PCGR (artificial sample, with more findings than usual):
+Snapshots of sections in the [quarto](https://quarto.org)-based HTML report by PCGR, followed by pages from the accompanying PDF report (artificial colorectal tumor sample, with more findings than usual):
 
 <br><br>
 
@@ -28,20 +28,28 @@ Seven snapshots of sections in the [quarto](https://quarto.org)-based cancer gen
 <div class="carousel-inner">
 <div class="carousel-item active"><img src="img/pcgr_oncogenicity.png" class="d-block w-100" alt="Variant classification - oncogenicity"></div>
 <div class="carousel-item"><img src="img/pcgr_actionability.png" class="d-block w-100" alt="Clinical actionability classification"></div>
-<div class="carousel-item"><img src="img/pcgr_cna.png" class="d-block w-100" alt="Somatic CNAs"></div>
-<div class="carousel-item"><img src="img/pcgr_tmb.png" class="d-block w-100" alt="Tumor mutational burden"></div>
-<div class="carousel-item"><img src="img/pcgr_expression_outliers.png" class="d-block w-100" alt="Gene expression outliers"></div>
 <div class="carousel-item"><img src="img/pcgr_variant_stats.png" class="d-block w-100" alt="Variant statistics"></div>
+<div class="carousel-item"><img src="img/pcgr_cna.png" class="d-block w-100" alt="Somatic CNAs"></div>
 <div class="carousel-item"><img src="img/pcgr_rna_fusions.png" class="d-block w-100" alt="Somatic RNA fusions"></div>
+<div class="carousel-item"><img src="img/pcgr_mutational_signatures.png" class="d-block w-100" alt="Mutational signatures"></div>
+<div class="carousel-item"><img src="img/pcgr_msi.png" class="d-block w-100" alt="MSI status"></div>
+<div class="carousel-item"><img src="img/pcgr_tmb.png" class="d-block w-100" alt="Tumor mutational burden"></div>
+<div class="carousel-item"><img src="img/pcgr_expression_similarity.png" class="d-block w-100" alt="Gene expression - similarity to other tumor samples"></div>
+<div class="carousel-item"><img src="img/pcgr_expression_outliers.png" class="d-block w-100" alt="Gene expression outliers"></div>
+<div class="carousel-item"><img src="img/pcgr_pdf_report.png" class="d-block w-100" alt="PDF report - key findings, clinical actionability, composite biomarkers"></div>
 </div>
 <div class="carousel-indicators">
 <button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Variant classification - oncogenicity"></button>
 <button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="1" aria-label="Clinical actionability classification"></button>
-<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="2" aria-label="Somatic CNAs"></button>
-<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="3" aria-label="Tumor mutational burden"></button>
-<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="4" aria-label="Gene expression outliers"></button>
-<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="5" aria-label="Variant statistics"></button>
-<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="6" aria-label="Somatic RNA fusions"></button>
+<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="2" aria-label="Variant statistics"></button>
+<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="3" aria-label="Somatic CNAs"></button>
+<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="4" aria-label="Somatic RNA fusions"></button>
+<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="5" aria-label="Mutational signatures"></button>
+<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="6" aria-label="MSI status"></button>
+<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="7" aria-label="Tumor mutational burden"></button>
+<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="8" aria-label="Gene expression - similarity to other tumor samples"></button>
+<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="9" aria-label="Gene expression outliers"></button>
+<button type="button" data-bs-target="#pcgrCarousel" data-bs-slide-to="10" aria-label="PDF report"></button>
 </div>
 </div>
 <script>

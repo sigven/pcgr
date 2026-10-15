@@ -31,10 +31,11 @@ PCGR can estimate TMB in different manners, depending on the type of variants in
 #| output: asis
 #| eval: true
 
-dp_filter <- isTRUE(sample_props_pdf$dp_tumor_detected) &&
-  isTRUE(tmb_conf_pdf$tmb_dp_min > 0)
-af_filter <- isTRUE(sample_props_pdf$vaf_tumor_detected) &&
-  isTRUE(tmb_conf_pdf$tmb_af_min > 0)
+## the *_detected flags are stored as 0/1 (as.logical() - isTRUE(1) is FALSE)
+dp_filter <- isTRUE(as.logical(sample_props_pdf$dp_tumor_detected)) &&
+  isTRUE(as.numeric(tmb_conf_pdf$tmb_dp_min) > 0)
+af_filter <- isTRUE(as.logical(sample_props_pdf$vaf_tumor_detected)) &&
+  isTRUE(as.numeric(tmb_conf_pdf$tmb_af_min) > 0)
 if (dp_filter || af_filter) {
   cat("For TMB calculation, requirements for sequencing depth and/or ",
       "variant allele frequency (VAF) have been applied to filter out ",
@@ -61,12 +62,8 @@ cat(pcgrr:::kpi_row_pdf(list(
        value = paste(round(tmb_estimate_pdf$TMB_ESTIMATE, 2),
                      stringr::str_replace(tmb_estimate_pdf$TMB_UNIT,
                                           "^mutations/", "mut/")),
-       sub = paste0("N = ", tmb_estimate_pdf$TMB_N_VARIANTS, " variants",
-                    if (tmb_high_pdf) paste0(" · TMB-high (>= ",
-                                             tmb_threshold_pdf, " mut/Mb)")),
        color = if (tmb_high_pdf) col_high else NULL),
-  list(title = "TMB algorithm", value = tmb_algo_pdf,
-       sub = paste0("TMB-high threshold: ", tmb_threshold_pdf, " mut/Mb")),
+  list(title = "TMB algorithm", value = tmb_algo_pdf),
   list(title = "Effective target size",
        value = paste(pcg_report$settings$conf$assay_properties$effective_target_size_mb,
                      "Mb")))))

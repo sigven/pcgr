@@ -47,8 +47,8 @@ left <- c(
   item("Variant oncogenicity guidelines", "ClinGen/CGC/VICC"),
   item("Biomarker sources", pcgrr:::bm_db_label_pdf(pcg_report)),
   item("Tumor site", sp$site),
-  item("Subject sex", sp$sex),
-  item("Age at diagnosis (years)", sp$age))
+  item("Subject sex", conf$subject_properties$sex),
+  item("Age at diagnosis (years)", conf$subject_properties$age))
 right <- c()
 
 if (isTRUE(pcg_report$content$snv_indel$eval)) {

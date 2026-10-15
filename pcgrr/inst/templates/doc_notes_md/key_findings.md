@@ -8,6 +8,10 @@ same rules, with ties resolved alphabetically by gene symbol.
 - __Actionable alterations__ (AMP/ASCO/CAP Tier 1, then Tier 2) among SNVs/InDels, copy number
   aberrations and RNA fusions. Within a tier: tissue-specific cancer association rank (highest first),
   then global cancer association rank. If none are found, this is stated explicitly.
+- __Composite genomic biomarkers__: a tumor classified as *TMB-high* (with its TMB estimate, in
+  mutations/Mb) and/or *MSI-high* is marked with a highlighted label directly below the actionable
+  alterations. Nothing is shown when the tumor is neither TMB-high nor MSI-high (TMB and MSI status
+  are reported in full in the *Composite genomic biomarkers* section)
 
 **Supporting findings** (in this order)
 
@@ -15,7 +19,6 @@ same rules, with ties resolved alphabetically by gene symbol.
   listed as actionable - their number is stated), with the first five of the variants *not* already
   listed as actionable (oncogenicity score, highest first, then tissue-specific and global cancer
   association rank)
-- __Composite biomarkers__: TMB (value, and whether TMB-high) and MSI status (MSI-H or MSS)
 - __Copy number variants__: amplified proto-oncogenes and deep deletions of tumor suppressors (ordered by
   cancer association rank), whole-genome doubling, HRD score
 - __Mutational signatures__: the (at most two) proposed aetiology groups with the largest

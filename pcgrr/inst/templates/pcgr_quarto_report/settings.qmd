@@ -33,8 +33,8 @@ bm_db_citation <- if (oncokb_active && isTRUE(as.logical(conf$oncokb$exclusive))
 sample_name <- pcg_report[['settings']][['sample_id']]
 assay_type <- conf$assay_properties$type
 tumor_site <- conf$sample_properties$site
-sex <- conf$sample_properties$sex
-age <- conf$sample_properties$age
+sex <- conf$subject_properties$sex
+age <- conf$subject_properties$age
 if (!is.null(age) && length(age) == 1 && !is.na(age) &&
     !age %in% c("NA", "None")) {
   sex <- paste0(sex, " / ", age, " years")
