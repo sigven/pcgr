@@ -45,7 +45,7 @@ left <- c(
   item("Genome assembly", pcg_report$settings$genome_assembly),
   item("Variant actionability guidelines", "AMP/ASCO/CAP"),
   item("Variant oncogenicity guidelines", "ClinGen/CGC/VICC"),
-  item("Biomarker sources", pcgrr:::bm_db_label_pdf(pcg_report)),
+  item("Biomarker sources", pcgrr:::bm_db_label(pcg_report)),
   item("Tumor site", sp$site),
   item("Subject sex", conf$subject_properties$sex),
   item("Age at diagnosis (years)", conf$subject_properties$age))
@@ -214,7 +214,7 @@ if (is.data.frame(ref_datasets) && NROW(ref_datasets) > 0) {
     "\n\n```{=typst}\n]\n]\n```\n\n",
     sep = "")
 } else {
-  cat(pcgrr:::no_findings_pdf(
+  cat(pcgrr:::pdf_note(kind = "empty", 
     "Reference data source metadata not available.", title = "N/A"))
 }
 ```

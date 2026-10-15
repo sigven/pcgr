@@ -1635,5 +1635,51 @@ map_biomarker_data <- function(
 
 }
 
+#' Biomarker databases used for actionability classification (as named in
+#' the HTML report)
+#'
+#' @param report PCGR report object
+#'
+#' @return character, e.g. 'CIViC and CGI'
+#' @keywords internal
+bm_db_label <- function(report) {
+  conf <- report$settings$conf
+  token <- conf$oncokb$api_token
+  oncokb_active <- !is.null(token) && !is.na(token) && token != "None"
+  if (oncokb_active && isTRUE(as.logical(conf$oncokb$exclusive))) {
+    "OncoKB"
+  } else if (oncokb_active) {
+    "CIViC, CGI, and OncoKB"
+  } else {
+    "CIViC and CGI"
+  }
+}
 
+#' Sort evidence levels in the order of color_palette$elevel (A-E, then
+#' OncoKB levels)
+#'
+#' @param levels evidence level codes
+#' @keywords internal
+sort_evidence_levels <- function(levels) {
+  levels[order(match(levels, names(pcgrr::color_palette$elevel)), levels)]
+}
 
+#' Citations of the biomarker databases used for actionability
+#' classification (pandoc citation keys, cf. bm_db_label())
+#'
+#' @param report PCGR report object
+#'
+#' @return character, e.g. '[@Griffith2017-do; @Tamborero2018-aj]'
+#' @keywords internal
+bm_db_citation <- function(report) {
+  conf <- report$settings$conf
+  token <- conf$oncokb$api_token
+  oncokb_active <- !is.null(token) && !is.na(token) && token != "None"
+  if (oncokb_active && isTRUE(as.logical(conf$oncokb$exclusive))) {
+    "[@Chakravarty2017-rd]"
+  } else if (oncokb_active) {
+    "[@Griffith2017-do; @Tamborero2018-aj; @Chakravarty2017-rd]"
+  } else {
+    "[@Griffith2017-do; @Tamborero2018-aj]"
+  }
+}

@@ -26,10 +26,10 @@ immune_caption_pdf <- paste0(
 #| eval: !expr isTRUE(pcg_report$content$fusion$eval)
 
 cat("## RNA fusions\n\n")
-## ranking as in pcgrr:::rank_fusions_pdf() - described according to the
+## ranking as in pcgrr:::rank_fusions() - described according to the
 ## recurrence data available for the tumor site of the sample
 site_specific <- !site_rna_pdf %in% c("Any", "") && n_fusions_pdf > 0
-n_site <- if (site_specific) sum(pcgrr:::mitdb_site_count_pdf(
+n_site <- if (site_specific) sum(pcgrr:::mitdb_site_count(
   fusions_pdf$MITDB_EVIDENCE, site_rna_pdf) > 0) else 0
 cat("RNA fusion events detected in the sample (**n = ", n_fusions_pdf, "**) ",
     "are annotated with respect to known cancer gene partners (proto-",
@@ -50,7 +50,7 @@ if (isTRUE(n_filt > 0)) {
       " supporting split reads ", if (n_filt == 1) "was" else "were",
       " excluded.*\n\n", sep = "")
 }
-cat(pcgrr:::note_box_pdf(paste0(
+cat(pcgrr:::pdf_note(paste0(
   "Quality control of fusion events (e.g. number of supporting reads, frame, ",
   "domain retention, presence in normal tissue) must be performed upstream ",
   "of PCGR - the focus here is on functional annotation and potential ",
@@ -63,7 +63,7 @@ cat(pcgrr:::note_box_pdf(paste0(
 ```{r fusion_pdf_table}
 #| echo: false
 #| eval: !expr isTRUE(pcg_report$content$fusion$eval) && n_fusions_pdf > 0
-pcgrr:::fusion_table_pdf(
+pcgrr:::pdf_table_fusions(
   fusions_pdf, site = site_rna_pdf, max_rows = max_variants_pdf,
   color = report_color)
 ```
@@ -80,7 +80,7 @@ cat("\n*Showing ", max_variants_pdf, " of ", n_fusions_pdf, " fusion events - ",
 #| echo: false
 #| output: asis
 #| eval: !expr isTRUE(pcg_report$content$fusion$eval) && n_fusions_pdf == 0
-cat(pcgrr:::no_findings_pdf(
+cat(pcgrr:::pdf_note(kind = "empty", 
   "No RNA fusion events were found in this sample."))
 ```
 
@@ -103,9 +103,10 @@ cat("Protein-coding gene expression outliers are genes with expression ",
     "absolute Z-score (expression level: ",
     "*log2(TPM + 0.001)*); all outliers are available in the TSV/Excel ",
     "output.\n\n", sep = "")
-cat(pcgrr:::note_box_pdf(paste0(
+cat(pcgrr:::pdf_note(paste0(
   "Comparing expression levels to reference cohorts must be interpreted with ",
-  "caution, given potential biases in RNA sequencing protocols, and that the ",
+  "caution, given potential biases in RNA sequencing protocols ",
+  "[@Zhao2020-ln], and that the ",
   "reference cohorts (TCGA) mainly contain primary tumors. Outliers should ",
   "be considered a starting point for further investigation."),
   title = "Interpretation of expression outliers", kind = "warning"))
@@ -116,11 +117,11 @@ cat(pcgrr:::note_box_pdf(paste0(
 #| output: asis
 #| eval: !expr isTRUE(pcg_report$content$expression$eval)
 outliers_high_pdf <- if (NROW(outliers_pdf) > 0)
-  pcgrr:::expression_outlier_table_pdf(
+  pcgrr:::pdf_table_expression_outliers(
     outliers_pdf, "Increased expression", color = report_color) else NULL
 cat("**Increased expression - proto-oncogenes**\n\n")
 if (is.null(outliers_high_pdf)) {
-  cat(pcgrr:::no_findings_pdf(
+  cat(pcgrr:::pdf_note(kind = "empty", 
     "No proto-oncogenes with increased expression (outliers)."))
 }
 ```
@@ -136,11 +137,11 @@ outliers_high_pdf
 #| output: asis
 #| eval: !expr isTRUE(pcg_report$content$expression$eval)
 outliers_low_pdf <- if (NROW(outliers_pdf) > 0)
-  pcgrr:::expression_outlier_table_pdf(
+  pcgrr:::pdf_table_expression_outliers(
     outliers_pdf, "Reduced expression", color = report_color) else NULL
 cat("**Reduced expression - tumor suppressor genes**\n\n")
 if (is.null(outliers_low_pdf)) {
-  cat(pcgrr:::no_findings_pdf(
+  cat(pcgrr:::pdf_note(kind = "empty", 
     "No tumor suppressor genes with reduced expression (outliers)."))
 }
 ```
@@ -157,7 +158,7 @@ outliers_low_pdf
 #| eval: !expr isTRUE(pcg_report$content$expression$eval) && NROW(immune_pdf) > 0
 cat("### Immune contexture\n\n")
 cat("The relative proportions of immune cell types in the RNA sample are ",
-    "estimated with the quanTIseq algorithm.\n\n", sep = "")
+    "estimated with the quanTIseq algorithm [@Finotello2019-ko].\n\n", sep = "")
 ```
 
 ```{r immune_pdf_plot}
@@ -167,7 +168,7 @@ cat("The relative proportions of immune cell types in the RNA sample are ",
 #| fig-height: 1.8
 #| out-width: 49%
 #| fig-cap: !expr immune_caption_pdf
-pcgrr:::pie_chart_pdf(
+pcgrr:::pdf_plot_donut(
   data.frame(cell_type = immune_pdf$cell_type,
              N = immune_pdf$fraction,
              Pct = immune_pdf$fraction / sum(immune_pdf$fraction) * 100),
@@ -191,7 +192,7 @@ cat("Correlation (Spearman, protein-coding genes) of the expression profile ",
     "highlighted.\n\n", sep = "")
 shown <- 0
 for (src in names(sources)) {
-  tt <- pcgrr:::expression_similarity_table_pdf(
+  tt <- pcgrr:::pdf_table_expression_similarity(
     sources[[src]], site = site_rna_pdf, n = 10, color = report_color)
   if (is.null(tt)) next
   shown <- shown + 1
@@ -199,6 +200,6 @@ for (src in names(sources)) {
       tinytable::save_tt(tt, output = "typst"), "\n```\n\n", sep = "")
 }
 if (shown == 0) {
-  cat(pcgrr:::no_findings_pdf("No expression similarity results available."))
+  cat(pcgrr:::pdf_note(kind = "empty", "No expression similarity results available."))
 }
 ```

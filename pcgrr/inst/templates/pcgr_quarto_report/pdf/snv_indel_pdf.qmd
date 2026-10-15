@@ -40,7 +40,7 @@ n_oncogenic_pdf <- NROW(oncogenic_pdf)
 #| eval: true
 
 stat_or_na <- function(x) if (is.null(x)) "N/A" else as.character(x)
-cat(pcgrr:::kpi_row_pdf(list(
+cat(pcgrr:::pdf_kpi_row(list(
   list(title = "Somatic variants (total)", value = stat_or_na(vstats_pdf$n_var)),
   list(title = "SNVs", value = stat_or_na(vstats_pdf$n_var_snv)),
   list(title = "InDels", value = stat_or_na(vstats_pdf$n_var_indel)),
@@ -55,8 +55,8 @@ cat(pcgrr:::kpi_row_pdf(list(
 #| fig-height: 1.8
 #| layout-ncol: 2
 
-varstats_plots_pdf <- pcgrr:::varstats_plots_pdf(pcg_report)
-for (p in varstats_plots_pdf) print(p)
+pdf_plot_varstats <- pcgrr:::pdf_plot_varstats(pcg_report)
+for (p in pdf_plot_varstats) print(p)
 ```
 
 ## Oncogenic and likely oncogenic variants
@@ -71,7 +71,8 @@ cat("The oncogenicity of somatic SNVs/InDels is classified with an ",
     "classification (see *Appendix: Documentation - Variant oncogenicity ",
     "classification*). Listed below are the variants classified as ",
     "oncogenic or likely oncogenic (**n = ", n_oncogenic_pdf, "**), ranked by ",
-    "actionability tier (AMP/ASCO/CAP), then by oncogenicity score.\n\n",
+    "actionability tier (AMP/ASCO/CAP) [@Li2017-ew], then by oncogenicity ",
+    "score.\n\n",
     sep = "")
 ```
 
@@ -82,21 +83,21 @@ cat("The oncogenicity of somatic SNVs/InDels is classified with an ",
 ## all oncogenic / likely oncogenic variants (coding and non-coding,
 ## actionable or not)
 oncogenic_pdf |>
-  pcgrr:::variant_table_pdf(color = report_color, variant_class = FALSE)
+  pcgrr:::pdf_table_variants(color = report_color, variant_class = FALSE)
 ```
 
 ```{r oncogenic_hotspot_legend}
 #| echo: false
 #| output: asis
 #| eval: !expr n_oncogenic_pdf > 0
-cat(pcgrr:::hotspot_legend_pdf(oncogenic_pdf))
+cat(pcgrr:::pdf_legend("hotspot", oncogenic_pdf))
 ```
 
 ```{r oncogenic_none_msg}
 #| echo: false
 #| output: asis
 #| eval: !expr n_oncogenic_pdf == 0
-cat(pcgrr:::no_findings_pdf(
+cat(pcgrr:::pdf_note(kind = "empty", 
   "No oncogenic or likely oncogenic SNVs/InDels were found in this tumor sample."))
 ```
 
@@ -105,7 +106,7 @@ cat(pcgrr:::no_findings_pdf(
 ```{r snv_indel_filtering_placeholder}
 #| echo: false
 #| output: asis
-cat(pcgrr:::placeholder_pdf(paste0(
+cat(pcgrr:::pdf_note(kind = "placeholder", paste0(
   "Summary of variant filtering (tumor-only: germline filtering steps; ",
   "tumor-control: allelic support thresholds).")))
 ```

@@ -28,13 +28,13 @@ indel_caption_pdf <- paste0(
   "Raw mutational spectrum of insertions/deletions (ID) by context.")
 ```
 
-The **MutationalPatterns** package is used to estimate the relative contribution of [known mutational signatures](https://cancer.sanger.ac.uk/signatures/) in **`r pcg_report$settings$sample_id`**: the optimal linear combination of reference signatures that most closely reconstructs the spectrum of single base substitutions (SBS) in the tumor is determined (*signature refitting*), and a bootstrapping approach is used to estimate the uncertainty of the signature contributions.
+The **MutationalPatterns** package [@Blokzijl2018-nc] is used to estimate the relative contribution of [known mutational signatures](https://cancer.sanger.ac.uk/signatures/) [@Alexandrov2020-gj] in **`r pcg_report$settings$sample_id`**: the optimal linear combination of reference signatures that most closely reconstructs the spectrum of single base substitutions (SBS) in the tumor is determined (*signature refitting*), and a bootstrapping approach is used to estimate the uncertainty of the signature contributions.
 
 ```{r signatures_pdf_missing}
 #| echo: false
 #| output: asis
 #| eval: !expr no_refit_pdf
-cat(pcgrr:::note_box_pdf(paste0(
+cat(pcgrr:::pdf_note(paste0(
   "There are too few variants (**N = ", n_sbs_pdf, "**) in the tumor sample ",
   "for reliable refitting of mutational signatures."),
   title = "Limited variant data - refitting analysis omitted",
@@ -75,7 +75,7 @@ cat("A total of **n = ", format(n_sbs_pdf, big.mark = ","), "** SNVs were ",
 #| echo: false
 #| output: asis
 #| eval: !expr poor_fit_pdf
-cat(pcgrr:::note_box_pdf(
+cat(pcgrr:::pdf_note(
   if (all_refsigs_pdf) paste0(
     "Reconstruction of the mutational profile with the full set of COSMIC ",
     "reference signatures resulted in a sub-optimal fit (cosine similarity ",
@@ -96,7 +96,7 @@ cat(pcgrr:::note_box_pdf(
 #| eval: !expr isFALSE(no_refit_pdf)
 
 col_high <- pcgrr::color_palette$oncogenicity$values[1]
-cat(pcgrr:::kpi_row_pdf(list(
+cat(pcgrr:::pdf_kpi_row(list(
   list(title = "Dominant aetiologies",
        value = paste(utils::head(contributions_pdf$per_group$group, 2),
                      collapse = " · ")),
@@ -132,7 +132,7 @@ pcgrr::plot_signature_contributions(
 #| fig-cap: !expr aetiology_caption_pdf
 
 pg <- contributions_pdf$per_group
-pcgrr:::pie_chart_pdf(
+pcgrr:::pdf_plot_donut(
   data.frame(group = pg$group, N = pg$prop_group,
              Pct = pg$prop_group / sum(pg$prop_group) * 100),
   category = "group", title = NULL, center_label = "",
@@ -149,7 +149,7 @@ cat("### Signature contributions\n\n")
 ```{r signatures_pdf_table}
 #| echo: false
 #| eval: !expr isFALSE(no_refit_pdf) && NROW(contributions_pdf$per_signature) > 0
-pcgrr:::signature_table_pdf(
+pcgrr:::pdf_table_signatures(
   contributions_pdf$per_signature, color = report_color)
 ```
 
@@ -183,7 +183,7 @@ MutationalPatterns::plot_96_profile(
 #| echo: false
 #| output: asis
 #| eval: !expr is.null(msig_pdf$result$mut_mat)
-cat(pcgrr:::no_findings_pdf(
+cat(pcgrr:::pdf_note(kind = "empty", 
   "No SNVs/single base substitutions were found in this sample.",
   title = "No SNVs"))
 ```
@@ -213,7 +213,7 @@ MutationalPatterns::plot_indel_contexts(
 
 sim_pdf <- msig_pdf$result$signature_similarity
 if (is.null(sim_pdf) || NROW(sim_pdf) == 0) {
-  cat(pcgrr:::note_box_pdf(paste0(
+  cat(pcgrr:::pdf_note(paste0(
     "There are too few somatic variants (**N = ", n_sbs_pdf, "**) in the ",
     "tumor sample for a similarity analysis of mutational signatures (a ",
     "minimum of 30 SNVs is required)."),
@@ -222,7 +222,7 @@ if (is.null(sim_pdf) || NROW(sim_pdf) == 0) {
 } else {
   cat("The raw mutational spectrum of the sample (frequencies of ",
       "trinucleotide contexts) is compared to each of the reference ",
-      "signatures (SBS) in COSMIC. The cosine similarity ranges from 0 to ",
+      "signatures (SBS) in COSMIC [@Alexandrov2020-gj]. The cosine similarity ranges from 0 to ",
       "1 (perfect match); the ten most similar signatures are shown",
       if (!all_refsigs_pdf && !no_site_prev_pdf) paste0(
         ", with signatures attributed to ",
@@ -235,6 +235,6 @@ if (is.null(sim_pdf) || NROW(sim_pdf) == 0) {
 ```{r signatures_pdf_similarity_table}
 #| echo: false
 #| eval: !expr NROW(msig_pdf$result$signature_similarity) > 0
-pcgrr:::signature_similarity_table_pdf(
+pcgrr:::pdf_table_signature_similarity(
   msig_pdf$result$signature_similarity, n = 10, color = report_color)
 ```

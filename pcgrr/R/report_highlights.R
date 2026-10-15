@@ -71,7 +71,7 @@ tiered_alterations_hl <- function(report, tier = c(1, 2)) {
   if (isTRUE(content$snv_indel$eval) && NROW(snv) > 0 &&
       all(c("SYMBOL", "ALTERATION", "ACTIONABILITY_TIER") %in% colnames(snv))) {
     recs$snv <- data.frame(
-      SYMBOL = snv$SYMBOL, ALTERATION = strip_html_pdf(snv$ALTERATION),
+      SYMBOL = snv$SYMBOL, ALTERATION = html_to_text(snv$ALTERATION),
       TISSUE_ASSOC_RANK = snv$TISSUE_ASSOC_RANK,
       GLOBAL_ASSOC_RANK = snv$GLOBAL_ASSOC_RANK,
       ACTIONABILITY_TIER = suppressWarnings(as.integer(snv$ACTIONABILITY_TIER)))
@@ -90,7 +90,7 @@ tiered_alterations_hl <- function(report, tier = c(1, 2)) {
   }
   fus <- content$fusion$callset$variant
   if (isTRUE(content$fusion$eval) && NROW(fus) > 0) {
-    f <- fusion_tier_records_pdf(fus)
+    f <- fusion_tier_records(fus)
     if (NROW(f) > 0) recs$fusion <- f[, c("SYMBOL", "ALTERATION",
                                           "ACTIONABILITY_TIER")]
   }
@@ -174,7 +174,7 @@ report_highlights <- function(report, max_show = 5) {
     if (NROW(onc) > 0) {
       onc <- onc[rank_order_hl(onc, first = list(onc$ONCOGENICITY_SCORE)), ,
                  drop = FALSE]
-      onc_alt <- strip_html_pdf(onc$ALTERATION)
+      onc_alt <- html_to_text(onc$ALTERATION)
       key <- paste(onc$SYMBOL, onc_alt)
       is_actionable <- key %in% paste(actionable$SYMBOL, actionable$ALTERATION)
       labels <- paste0("**", md_escape_hl(onc$SYMBOL), "** ",
@@ -285,7 +285,7 @@ report_highlights <- function(report, max_show = 5) {
       if (NROW(plp) > 0) paste0(
         "Pathogenic/likely pathogenic variants in cancer predisposition genes: ",
         fmt_list_hl(paste0("**", md_escape_hl(plp$SYMBOL), "** ",
-                           md_escape_hl(strip_html_pdf(plp$ALTERATION))),
+                           md_escape_hl(html_to_text(plp$ALTERATION))),
                     max_show)) else
           "No pathogenic/likely pathogenic variants in cancer predisposition genes"))
   }
@@ -299,7 +299,7 @@ report_highlights <- function(report, max_show = 5) {
       ## fusions ordered by number of split reads (highest first), then name
       fd <- fd[order(-dplyr::coalesce(as.numeric(fd$SPLIT_READS), 0),
                      as.character(fd$FUSION_GENE)), , drop = FALSE]
-      onc_fus <- strip_html_pdf(fd$FUSION_GENE2[
+      onc_fus <- html_to_text(fd$FUSION_GENE2[
         fd$ONCOGENE_5P %in% TRUE | fd$ONCOGENE_3P %in% TRUE])
       rna <- c(rna, paste0(
         NROW(fd), " RNA fusion(s)",

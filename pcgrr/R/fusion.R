@@ -393,3 +393,62 @@ get_druggable_fusion_partner <- function(
   return(targeted_drugs)
 
 }
+
+#' Actionable RNA fusions as records for the PDF report tables (gene pair
+#' as 'SYMBOL', as for SNVs/InDels and CNAs)
+#'
+#' @param fusions data frame with fusions (fusion callset 'variant')
+#'
+#' @return data frame with SYMBOL, ALTERATION, VARIANT_CLASS and
+#' ACTIONABILITY_TIER (integer)
+#' @keywords internal
+fusion_tier_records <- function(fusions) {
+  if (NROW(fusions) == 0 ||
+      !all(c("FUSION_GENE2", "ACTIONABILITY_TIER") %in% colnames(fusions))) {
+    return(data.frame())
+  }
+  data.frame(
+    SYMBOL = as.character(fusions$FUSION_GENE2),
+    ALTERATION = "fusion",
+    VARIANT_CLASS = as.character(fusions$VARIANT_CLASS),
+    ACTIONABILITY_TIER = suppressWarnings(
+      as.integer(fusions$ACTIONABILITY_TIER)))
+}
+
+#' Number of Mitelman DB records of a fusion in a given tumor site, parsed
+#' from the annotated Mitelman evidence ('<b>Site</b> (<i>n = 3</i>) - ...')
+#'
+#' @param evidence Mitelman evidence per fusion (MITDB_EVIDENCE)
+#' @param site primary tumor site (e.g. 'Colon/Rectum')
+#'
+#' @return integer vector (0 when the site is not recorded)
+#' @keywords internal
+mitdb_site_count <- function(evidence, site) {
+  if (is.null(site) || site %in% c("Any", "")) {
+    return(rep(0L, length(evidence)))
+  }
+  site_re <- stringr::str_replace_all(site, "([.|()\\^{}+$*?\\[\\]\\\\])",
+                                      "\\\\\\1")
+  m <- stringr::str_match(
+    dplyr::coalesce(evidence, ""),
+    paste0("<b>", site_re, "</b>\\s*\\(<i>n\\s*=\\s*([0-9]+)</i>\\)"))
+  dplyr::coalesce(as.integer(m[, 2]), 0L)
+}
+
+#' Rank RNA fusions for the PDF report: actionability tier (Tier 1 first, no
+#' tier last), then recurrence in the tumor site of the sample (Mitelman
+#' DB), then the number of split reads
+#'
+#' @param fusions data frame with fusions (fusion callset - variant_display)
+#' @param site primary tumor site of the sample
+#'
+#' @return ordered data frame, with column SITE_RECURRENCE
+#' @keywords internal
+rank_fusions <- function(fusions, site = "Any") {
+  d <- fusions
+  if (NROW(d) == 0) return(d)
+  d$SITE_RECURRENCE <- mitdb_site_count(d$MITDB_EVIDENCE, site)
+  tier <- suppressWarnings(as.integer(d$ACTIONABILITY_TIER))
+  d[order(dplyr::coalesce(tier, 99L), -d$SITE_RECURRENCE,
+          -dplyr::coalesce(as.numeric(d$SPLIT_READS), 0)), , drop = FALSE]
+}

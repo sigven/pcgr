@@ -1039,3 +1039,23 @@ format_sample_type <- function(x) {
   ifelse(is.na(x) | x == "", x,
          paste0(toupper(substr(x, 1, 1)), tolower(substr(x, 2, nchar(x)))))
 }
+
+#' Annotation values of the display tables (e.g. hyperlinked gene symbols)
+#' as plain text - HTML markup stripped (strip_html()), whitespace collapsed
+#'
+#' @param x character vector
+#' @keywords internal
+html_to_text <- function(x) {
+  stringr::str_squish(strip_html(as.character(x)))
+}
+
+#' Decode escaped Unicode code points ('<U+2019>') in text - written to the
+#' report data when signature annotations are read in a non-UTF-8 locale
+#'
+#' @param x character vector
+#' @keywords internal
+decode_unicode_escapes <- function(x) {
+  stringr::str_replace_all(
+    x, "<U\\+([0-9A-Fa-f]{4,6})>",
+    function(m) intToUtf8(strtoi(stringr::str_sub(m, 4, -2), 16L)))
+}

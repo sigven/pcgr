@@ -41,7 +41,7 @@ if (NROW(cna_key_pdf) > 0) {
 n_cna_key_pdf <- NROW(cna_key_pdf)
 ```
 
-Listed below are potentially oncogenic copy number events: amplifications of known proto-oncogenes, deep deletions of tumor suppressor genes, and - when OncoKB annotation is enabled - events classified as oncogenic or likely oncogenic by OncoKB. Events are ranked by clinical actionability tier (therapeutic), then by copy number.
+Listed below are potentially oncogenic copy number events: amplifications of known proto-oncogenes, deep deletions of tumor suppressor genes, and - when OncoKB annotation is enabled - events classified as oncogenic or likely oncogenic by OncoKB [@Chakravarty2017-rd]. Events are ranked by clinical actionability tier (therapeutic), then by copy number.
 
 ## Amplified proto-oncogenes and deleted tumor suppressors
 
@@ -54,14 +54,14 @@ cna_key_pdf |>
   dplyr::select(dplyr::any_of(c(
     "SYMBOL", "ENSEMBL_GENE_ID", "VARIANT_CLASS", "CN_TOTAL", "CYTOBAND",
     "ACTIONABILITY_TIER", "ONCOGENICITY_OKB"))) |>
-  pcgrr:::variant_table_pdf(color = report_color, oncokb = TRUE)
+  pcgrr:::pdf_table_variants(color = report_color, oncokb = TRUE)
 ```
 
 ```{r cna_key_none_msg}
 #| echo: false
 #| output: asis
 #| eval: !expr n_cna_key_pdf == 0
-cat(pcgrr:::no_findings_pdf(paste0(
+cat(pcgrr:::pdf_note(kind = "empty", paste0(
   "No amplifications of proto-oncogenes or deep deletions of tumor ",
   "suppressor genes were found in this tumor sample.")))
 ```
@@ -74,7 +74,7 @@ cat(pcgrr:::no_findings_pdf(paste0(
 
 cna_conf_pdf <- pcg_report$settings$conf$somatic_cna
 sp_pdf <- pcg_report$settings$conf$sample_properties
-cna_plot_pdf <- pcgrr:::cna_plot_settings_pdf(pcg_report)
+cna_plot_pdf <- pcgrr:::pdf_cna_plot_settings(pcg_report)
 cna_segments_pdf <- pcg_report$content$cna$callset$segment
 has_profile_pdf <- NROW(cna_segments_pdf) > 0 &&
   NROW(pcg_report$settings$chrom_coordinates) > 0
@@ -103,7 +103,7 @@ cna_relative_caption_pdf <- paste0(
 #| output: asis
 #| eval: true
 
-cat(pcgrr:::kpi_row_pdf(list(
+cat(pcgrr:::pdf_kpi_row(list(
   list(title = "Tumor ploidy",
        value = as.character(cna_plot_pdf$tumor_ploidy),
        sub = if (ploidy_source_pdf == "N/A")
@@ -174,7 +174,7 @@ pcgrr::plot_cna_segments_relative(
 #| echo: false
 #| output: asis
 #| eval: !expr isFALSE(has_profile_pdf)
-cat(pcgrr:::no_findings_pdf(
+cat(pcgrr:::pdf_note(kind = "empty", 
   "No copy number segments available for a genome-wide profile.",
   title = "Not available"))
 ```
@@ -190,9 +190,10 @@ cat("The HRD score is the **sum of three genomic scar measures** derived ",
     "from the allele-specific copy number segments (autosomes only, ",
     "following the scarHRD algorithm): **HRD-LOH** (loss-of-heterozygosity ",
     "regions > 15 Mb not spanning a whole chromosome), **LST** (large-scale ",
-    "state transitions between adjacent regions of at least 10 Mb), and ",
+    "state transitions between adjacent regions of at least 10 Mb) ",
+    "[@Popova2012-yi], and ",
     "**TAI** (telomeric allelic imbalance).\n\n", sep = "")
-cat(pcgrr:::kpi_row_pdf(list(
+cat(pcgrr:::pdf_kpi_row(list(
   list(title = "HRD-LOH", value = as.character(cna_conf_pdf$hrd_loh),
        color = "#868e96"),
   list(title = "LST", value = as.character(cna_conf_pdf$hrd_lst),
@@ -203,41 +204,44 @@ cat(pcgrr:::kpi_row_pdf(list(
 cat("A higher score means more genomic scarring and a higher likelihood of ",
     "HRD; scores typically range from 0 to about 100 in TCGA tumors. A score ",
     "of 42 or above is the established cutoff for HRD-positive tumors in ",
-    "ovarian cancer only; no cutoff has been validated in other cancer types.",
+    "ovarian cancer only [@Lenz2023-sp]; no cutoff has been validated in ",
+    "other cancer types [@Marquard2015-pg].",
     "\n\n", sep = "")
 interp <- if (site_pdf == "Ovary/Fallopian Tube") {
   list(title = "Interpretation (ovarian cancer)", kind = "note", text = paste0(
     "In ovarian cancer, a score of 42 or above is the threshold of the ",
     "Myriad myChoice CDx assay (FDA-approved companion diagnostic) for ",
-    "HRD-positive tumors. Thresholds have not been formally established for ",
-    "sequencing-derived scores. **For research use only - not a validated ",
+    "HRD-positive tumors [@Lenz2023-sp]. Thresholds have not been formally ",
+    "established for sequencing-derived scores [@Rempel2022-xk]. **For research use only - not a validated ",
     "diagnostic measure.**"))
 } else if (site_pdf == "Breast") {
   list(title = "Interpretation (breast cancer)", kind = "note", text = paste0(
     "In triple-negative breast cancer, HRD (score >= 42 or BRCA1/2 ",
     "mutation) was associated with response to platinum-based neoadjuvant ",
-    "therapy; in ER-positive breast cancer, the ovarian cancer thresholds do ",
-    "not appear appropriate. The breast cancer subtype is not taken into ",
+    "therapy [@Telli2016-hr]; in ER-positive breast cancer, the ovarian ",
+    "cancer thresholds do not appear appropriate [@Lenz2023-sp]. The breast cancer subtype is not taken into ",
     "account here. **For research use only - not a validated diagnostic ",
     "measure.**"))
 } else {
   list(title = paste0("Caution - interpretation (", site_pdf, ")"),
        kind = "warning", text = paste0(
     "Genomic scar scores have not been validated as markers of HRD outside ",
-    "ovarian cancer and triple-negative breast cancer. The score separates ",
-    "tumors with biallelic BRCA1/2 inactivation well, but tumors with ",
-    "monoallelic alterations poorly, and should be interpreted together ",
-    "with the mutational status of HRR genes. Scar measures are also ",
-    "influenced by ploidy. A high score should not, on its own, be ",
+    "ovarian cancer and triple-negative breast cancer [@Marquard2015-pg]. ",
+    "The score separates tumors with biallelic BRCA1/2 inactivation well, ",
+    "but tumors with monoallelic alterations poorly, and should be ",
+    "interpreted together with the mutational status of HRR genes ",
+    "[@Rempel2022-xk]. Scar measures are also influenced by ploidy ",
+    "[@Popova2012-yi]. A high score should not, on its own, be ",
     "interpreted as evidence of HRD or of sensitivity to PARP inhibitors. ",
     "**For research use only.**"))
 }
-cat(pcgrr:::note_box_pdf(interp$text, title = interp$title, kind = interp$kind))
+cat(pcgrr:::pdf_note(interp$text, title = interp$title, kind = interp$kind))
 if (genome_doubled_pdf) {
-  cat(pcgrr:::note_box_pdf(paste0(
+  cat(pcgrr:::pdf_note(paste0(
     "This tumor is classified as having undergone whole-genome doubling (",
     round(100 * as.numeric(cna_conf_pdf$wgd_fraction)), "% of the autosomal ",
-    "genome has a major allele copy number of two or more). Ploidy ",
+    "genome has a major allele copy number of two or more) ",
+    "[@Bielski2018-pz]. Ploidy ",
     "influences the scar measures - interpret the HRD score with caution."),
     title = "Caution - genome doubling", kind = "warning"))
 }

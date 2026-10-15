@@ -29,7 +29,7 @@ actionable_pdf <- dplyr::bind_rows(
           .default = .data$VARIANT_CLASS),
         VARIANT_CLASS = "CNA"),
   if (isTRUE(pcg_report$content$fusion$eval))
-    pcgrr:::fusion_tier_records_pdf(pcg_report$content$fusion$callset$variant) |>
+    pcgrr:::fusion_tier_records(pcg_report$content$fusion$callset$variant) |>
       dplyr::mutate(dplyr::across(dplyr::everything(), as.character)))
 if (!"ACTIONABILITY_TIER" %in% colnames(actionable_pdf)) {
   actionable_pdf$ACTIONABILITY_TIER <- character(NROW(actionable_pdf))
@@ -40,7 +40,7 @@ actionable_pdf <- actionable_pdf |>
 n_actionable_pdf <- NROW(actionable_pdf)
 ```
 
-Somatic aberrations (SNVs/InDels, copy number aberrations and RNA fusions) in the tumor sample have been classified into tiers of *clinical actionability*, adopting the AMP/ASCO/CAP guidelines. Tier 1 and Tier 2 aberrations (strong and potential clinical significance) are listed below.
+Somatic aberrations (SNVs/InDels, copy number aberrations and RNA fusions) in the tumor sample have been classified into tiers of *clinical actionability*, adopting the AMP/ASCO/CAP guidelines [@Li2017-ew]. Tier 1 and Tier 2 aberrations (strong and potential clinical significance) are listed below.
 
 ## Tier 1 & 2 aberrations
 
@@ -49,21 +49,21 @@ Somatic aberrations (SNVs/InDels, copy number aberrations and RNA fusions) in th
 #| eval: !expr n_actionable_pdf > 0
 
 actionable_pdf |>
-  pcgrr:::variant_table_pdf(color = report_color)
+  pcgrr:::pdf_table_variants(color = report_color)
 ```
 
 ```{r actionable_hotspot_legend}
 #| echo: false
 #| output: asis
 #| eval: !expr n_actionable_pdf > 0
-cat(pcgrr:::hotspot_legend_pdf(actionable_pdf))
+cat(pcgrr:::pdf_legend("hotspot", actionable_pdf))
 ```
 
 ```{r actionable_none_msg}
 #| echo: false
 #| output: asis
 #| eval: !expr n_actionable_pdf == 0
-cat(pcgrr:::no_findings_pdf(paste0(
+cat(pcgrr:::pdf_note(kind = "empty", paste0(
   "No somatic aberrations of strong or potential clinical significance ",
   "(Tier 1/2) were identified in this tumor sample.")))
 ```
@@ -73,19 +73,19 @@ cat(pcgrr:::no_findings_pdf(paste0(
 ```{r actionability_evidence_intro}
 #| echo: false
 #| output: asis
-cat("Matched therapeutic biomarker evidence (", pcgrr:::bm_db_label_pdf(pcg_report),
-    ") for the Tier 1 and Tier 2 aberrations listed above. Per alteration, ",
+cat("Matched therapeutic biomarker evidence (", pcgrr:::bm_db_label(pcg_report),
+    " ", pcgrr:::bm_db_citation(pcg_report), ") for the Tier 1 and Tier 2 aberrations listed above. Per alteration, ",
     "matched therapies (in bold) are listed with the tumor types of the ",
     "underlying evidence, together with the evidence levels and sources. ",
     "Only tier-defining evidence items are shown for therapeutic sensitivity; ",
     "details on each evidence item are available in the HTML report.\n\n",
     sep = "")
-cat(pcgrr:::bm_source_legend_pdf())
+cat(pcgrr:::pdf_legend("bm_sources"))
 ```
 
 ```{r actionability_evidence_tables}
 #| echo: false
 #| output: asis
-cat(pcgrr:::bm_evidence_section_pdf(
+cat(pcgrr:::pdf_section_bm_evidence(
   pcg_report, tier = c(1, 2), color = report_color))
 ```

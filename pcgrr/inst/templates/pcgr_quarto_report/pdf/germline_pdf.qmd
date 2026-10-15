@@ -30,8 +30,8 @@ if (!is.null(panel_pdf$description_trait) &&
 }
 panel_md_pdf <- if (!is.null(panel_pdf$url) && !any(panel_pdf$panel_id %in% "-1") &&
                     !grepl(",", panel_pdf$url)) {
-  paste0("[", pcgrr:::doc_note_pdf(panel_desc_pdf), "](", panel_pdf$url, ")")
-} else pcgrr:::doc_note_pdf(panel_desc_pdf)
+  paste0("[", pcgrr:::doc_note_markdown(panel_desc_pdf), "](", panel_pdf$url, ")")
+} else pcgrr:::doc_note_markdown(panel_desc_pdf)
 
 has_control_depth_pdf <- "DP_CONTROL" %in% colnames(germline_vars_pdf) &&
   any(suppressWarnings(as.numeric(germline_vars_pdf$DP_CONTROL)) >= 0,
@@ -58,7 +58,7 @@ cat("Based on a germline variant analysis of the case with the [Cancer ",
       "identified by CPSR") else "**not included**",
     "\n\n", sep = "")
 if (has_dual_moi_pdf) {
-  cat(pcgrr:::note_box_pdf(paste0(
+  cat(pcgrr:::pdf_note(paste0(
     "For a subset of genes, *Inheritance* combines two modes (e.g. AD/AR): a ",
     "heterozygous finding typically reflects the dominant condition, while a ",
     "homozygous/biallelic finding may reflect a distinct, recessive condition."),
@@ -76,14 +76,14 @@ if (has_control_depth_pdf) {
 ```{r germline_pdf_plp}
 #| echo: false
 #| eval: !expr NROW(germline_plp_pdf) > 0
-pcgrr:::germline_table_pdf(germline_plp_pdf, color = report_color)
+pcgrr:::pdf_table_germline(germline_plp_pdf, color = report_color)
 ```
 
 ```{r germline_pdf_plp_none}
 #| echo: false
 #| output: asis
 #| eval: !expr NROW(germline_plp_pdf) == 0
-cat(pcgrr:::no_findings_pdf(paste0(
+cat(pcgrr:::pdf_note(kind = "empty", paste0(
   "No pathogenic or likely pathogenic germline variants were found in the ",
   "virtual panel of cancer predisposition genes (CPSR).")))
 ```
@@ -94,7 +94,7 @@ cat(pcgrr:::no_findings_pdf(paste0(
 #| eval: !expr show_vus_pdf
 cat("## Variants of Uncertain Significance\n\n")
 if (NROW(germline_vus_pdf) == 0) {
-  cat(pcgrr:::no_findings_pdf(paste0(
+  cat(pcgrr:::pdf_note(kind = "empty", paste0(
     "No protein-coding variants of uncertain significance were found in the ",
     "virtual panel of cancer predisposition genes (CPSR).")))
 }
@@ -103,7 +103,7 @@ if (NROW(germline_vus_pdf) == 0) {
 ```{r germline_pdf_vus}
 #| echo: false
 #| eval: !expr show_vus_pdf && NROW(germline_vus_pdf) > 0
-pcgrr:::germline_table_pdf(
+pcgrr:::pdf_table_germline(
   utils::head(germline_vus_pdf, max_vus_germline_pdf), color = report_color)
 ```
 

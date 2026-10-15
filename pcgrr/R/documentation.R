@@ -216,3 +216,21 @@ twohit_doc_note <- function() {
   return(twohit_vaf_template)
 
 }
+
+#' Convert the HTML elements of a documentation note (markdown with inline
+#' HTML, as used in the HTML report) to markdown, for the PDF report
+#'
+#' @param x documentation note (character)
+#'
+#' @return documentation note with links (<a>) and <b>/<i> as markdown, and
+#' line breaks (<br>) removed
+#' @keywords internal
+doc_note_markdown <- function(x) {
+  x |>
+    ## HTML links as markdown links
+    stringr::str_replace_all(
+      "(?s)<a\\s+href=['\"]([^'\"]+)['\"][^>]*>(.*?)</a>", "[\\2](\\1)") |>
+    stringr::str_replace_all("(?s)<b[^>]*>(.*?)</b>", "**\\1**") |>
+    stringr::str_replace_all("(?s)<i>(.*?)</i>", "*\\1*") |>
+    stringr::str_replace_all("<br\\s*/?>", "")
+}

@@ -26,7 +26,7 @@ This report is intended for interpretation of multi-omics data from a single hum
 doc_box <- function(title, ...) {
   cat("```{=typst}\n#pcgr-doc-box[\n```\n\n",
       "### ", title, "\n\n",
-      paste(vapply(list(...), pcgrr:::doc_note_pdf, character(1)),
+      paste(vapply(list(...), pcgrr:::doc_note_markdown, character(1)),
             collapse = "\n\n"),
       "\n\n```{=typst}\n]\n```\n\n", sep = "")
 }

@@ -56,7 +56,7 @@ if (dp_filter || af_filter) {
 #| eval: !expr NROW(tmb_estimate_pdf) == 1
 
 col_high <- pcgrr::color_palette$oncogenicity$values[1]
-cat(pcgrr:::kpi_row_pdf(list(
+cat(pcgrr:::pdf_kpi_row(list(
   ## box color: dark (TMB below the TMB-high threshold) or red (TMB-high)
   list(title = "TMB estimate",
        value = paste(round(tmb_estimate_pdf$TMB_ESTIMATE, 2),
@@ -92,9 +92,10 @@ pcgrr:::pdf_plot_theme(tmb_plot_pdf, base_size = 8)
 ```{r tmb_pdf_reference_note}
 #| echo: false
 #| output: asis
-cat(pcgrr:::note_box_pdf(paste0(
+cat(pcgrr:::pdf_note(paste0(
   "Be aware of the nature of the reference dataset (TCGA), which must be ",
-  "taken into account during TMB interpretation of the query sample:\n\n",
+  "taken into account during TMB interpretation of the query sample ",
+  "[@Fernandez2019-mk]:\n\n",
   "- TCGA tumor samples are sequenced with a mean coverage of approximately 100X\n",
   "- TCGA somatic mutation calls are based on a consensus among variant ",
   "callers (each variant supported by a minimum of two algorithms)\n",
@@ -117,16 +118,17 @@ cat("The tumor mutational burden (", round(tmb_estimate_pdf$TMB_ESTIMATE, 1),
     " mutations/Mb, ", tmb_algo_pdf, ") is at or above the threshold for ",
     "TMB-High (", tmb_threshold_pdf, " mutations/Mb). Therapeutic ",
     "implications of TMB-High were retrieved from ",
-    pcgrr:::bm_db_label_pdf(pcg_report), ", and are classified according ",
-    "to the strength of evidence for the tumor type (", sample_props_pdf$site,
-    "), following AMP/ASCO/CAP guidelines.\n\n", sep = "")
+    pcgrr:::bm_db_label(pcg_report), " ", pcgrr:::bm_db_citation(pcg_report),
+    ", and are classified according to the strength of evidence for the ",
+    "tumor type (", sample_props_pdf$site,
+    "), following AMP/ASCO/CAP guidelines [@Li2017-ew].\n\n", sep = "")
 ```
 
 ```{r tmb_pdf_bm_sensitivity}
 #| echo: false
 #| eval: !expr isFALSE(is.null(pcg_report$content$tmb$callset))
 
-tmb_bm_pdf <- pcgrr:::bm_evidence_tables_pdf(
+tmb_bm_pdf <- pcgrr:::pdf_bm_evidence(
   pcg_report, variant_category = "tmb", color = report_color)
 tmb_bm_pdf$sensitivity
 ```
@@ -135,8 +137,8 @@ tmb_bm_pdf$sensitivity
 #| echo: false
 #| output: asis
 #| eval: !expr isFALSE(is.null(pcg_report$content$tmb$callset)) && is.null(tmb_bm_pdf$sensitivity)
-cat(pcgrr:::no_findings_pdf(paste0(
-  "Based on available data in ", pcgrr:::bm_db_label_pdf(pcg_report),
+cat(pcgrr:::pdf_note(kind = "empty", paste0(
+  "Based on available data in ", pcgrr:::bm_db_label(pcg_report),
   ", no therapeutic sensitivity biomarkers (Tier 1-3) were identified for ",
   "TMB-High in this tumor sample.")))
 ```
