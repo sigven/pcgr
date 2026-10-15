@@ -178,7 +178,7 @@ def run_cpsr(conf_options, input_data, output_data):
         logger = getlogger("cpsr-settings")
         logger.info("--- Cancer Predisposition Sequencing Reporter workflow ----")
         logger.info(f"Sample name: {conf_options['sample_id']}")
-        logger.info(f"Sex / Age: {conf_options['sample_properties']['sex']} / {conf_options['sample_properties']['age']}")
+        logger.info(f"Subject sex / age: {conf_options['subject_properties']['sex']} / {conf_options['subject_properties']['age']}")
         if not input_customlist == 'None':
             logger.info(f"Virtual gene panel: custom-made list from panel 0: {input_customlist}")
         else:

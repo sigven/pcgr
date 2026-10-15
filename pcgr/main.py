@@ -466,6 +466,7 @@ def run_pcgr(input_data, output_data, conf_options):
         logger.info('Tumor type: Cancer_NOS (Any tumortype)')
     else:
         logger.info(f'Tumor type: {conf_options["sample_properties"]["site"]}')
+    logger.info(f'Subject sex / age: {conf_options["subject_properties"]["sex"]} / {conf_options["subject_properties"]["age"]}')
     
     ## Log information about which molecular input types are being providd as input
     logger.info(f'Molecular input data - somatic SNVs/InDels: {"OFF" if input_vcf == "None" else "ON"}')
@@ -844,7 +845,7 @@ def run_pcgr(input_data, output_data, conf_options):
             output_dir = output_data['dir'],
             build = yaml_data['genome_assembly'],
             sample_id = yaml_data['sample_id'],
-            sex = yaml_data['conf']['sample_properties']['sex'],
+            sex = yaml_data['conf']['subject_properties']['sex'],
             refdata_assembly_dir = input_data['refdata_assembly_dir'],
             amp_threshold_absolute = yaml_data["conf"]['somatic_cna']['amp_threshold_absolute'],
             amp_threshold_relative = yaml_data["conf"]['somatic_cna']['amp_threshold_relative'],

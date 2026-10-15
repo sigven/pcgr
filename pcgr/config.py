@@ -66,6 +66,12 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
             'force_overwrite': int(arg_dict['force_overwrite'])
         }
         conf_options['sample_properties'] = {}
+        ## subject (individual) properties - sex and age at diagnosis
+        conf_options['subject_properties'] = {}
+        conf_options['subject_properties']['sex'] = str(arg_dict['sex']) \
+            if arg_dict.get('sex') is not None else 'UNKNOWN'
+        conf_options['subject_properties']['age'] = 'NA' if \
+            arg_dict.get('age') is None else int(arg_dict['age'])
         conf_options['molecular_data'] = {}
         conf_options['molecular_data']['fname_mut_vcf'] = "None"
         conf_options['molecular_data']['fname_mut_tsv'] = "None"
@@ -81,9 +87,6 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
         ## tumor purity is not estimated by PCGR - user-provided only
         conf_options['sample_properties']['tumor_purity_source'] = 'NA' if \
             arg_dict['tumor_purity'] is None else 'provided'
-        conf_options['sample_properties']['sex'] = 'UNKNOWN'
-        conf_options['sample_properties']['age'] = 'NA' if \
-            arg_dict.get('age') is None else int(arg_dict['age'])
         conf_options['sample_properties']['site'] = str(pcgr_vars.tsites[arg_dict['tsite']])
         conf_options['sample_properties']['site2'] = str(pcgr_vars.tsites[arg_dict['tsite']]).replace(" ","_").replace("/","@")
         for prop in ['dp_control_detected', 'vaf_control_detected', 'dp_tumor_detected', 'vaf_tumor_detected']:
@@ -109,8 +112,6 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
             if arg_dict['tsite'] == 23 or arg_dict['tsite'] == 26:
                 if sex == 'FEMALE':
                     error_message(f"Tumor site '{conf_options['sample_properties']['site']}' is not observed in females - please check the '--sex' option", logger)
-
-            conf_options['sample_properties']['sex'] = str(arg_dict['sex'])
 
         conf_options['other']['vcf2maf'] = 1
 
@@ -235,10 +236,6 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
     if workflow == "CPSR":        
         conf_options['sample_properties']['phenotype'] = 'None'
         conf_options['sample_properties']['site'] = 'Hereditary (blood)'
-        conf_options['sample_properties']['sex'] = str(arg_dict['sex']) \
-            if arg_dict.get('sex') is not None else 'UNKNOWN'
-        conf_options['sample_properties']['age'] = 'NA' if \
-            arg_dict.get('age') is None else int(arg_dict['age'])
         conf_options['sample_properties']['gt_detected'] = 0
         conf_options['sample_properties']['dp_detected'] = 0
         

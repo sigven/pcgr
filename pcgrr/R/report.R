@@ -94,6 +94,7 @@ init_report <- function(yaml_fname = NULL,
     for (a_elem in c("snv_indel",
                      "cna",
                      "sample_properties",
+                     "subject_properties",
                      "assay_properties",
                      "mutational_signatures",
                      "tmb",
@@ -188,6 +189,11 @@ init_report <- function(yaml_fname = NULL,
   if (!is.null(report$settings$conf$sample_properties)) {
     report[['content']][['sample_properties']] <-
       report[['settings']]$conf$sample_properties
+  }
+
+  if (!is.null(report$settings$conf$subject_properties)) {
+    report[['content']][['subject_properties']] <-
+      report[['settings']]$conf$subject_properties
   }
 
   return(report)

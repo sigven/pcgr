@@ -289,7 +289,7 @@ get_excel_sheets <- function(report = NULL) {
     }
   }
 
-  ## initialize sample and assay information
+  ## initialize subject, sample and assay information
   sample_assay <-
     dplyr::bind_rows(
       data.frame(
@@ -297,11 +297,11 @@ get_excel_sheets <- function(report = NULL) {
         PROPERTY = 'SITE', VALUE = NA
       ),
       data.frame(
-        SAMPLE_ID = sample_id, CATEGORY = 'SAMPLE',
+        SAMPLE_ID = sample_id, CATEGORY = 'SUBJECT',
         PROPERTY = 'SEX', VALUE = NA
       ),
       data.frame(
-        SAMPLE_ID = sample_id, CATEGORY = 'SAMPLE',
+        SAMPLE_ID = sample_id, CATEGORY = 'SUBJECT',
         PROPERTY = 'AGE_AT_DIAGNOSIS', VALUE = NA
       ),
       data.frame(
@@ -338,17 +338,21 @@ get_excel_sheets <- function(report = NULL) {
     )
   }
 
-  for (elem in c('SITE','SEX','TUMOR_PURITY','TUMOR_PURITY_SOURCE',
+  for (elem in c('SITE','TUMOR_PURITY','TUMOR_PURITY_SOURCE',
                  'TUMOR_PLOIDY','TUMOR_PLOIDY_SOURCE')) {
     if (tolower(elem) %in% names(report$content$sample_properties)) {
         sample_assay[sample_assay$PROPERTY == elem, 'VALUE'] <-
           report$content$sample_properties[[tolower(elem)]]
       }
     }
-  ## age of the subject at diagnosis ('--age'; 'NA' if not provided)
-  if ('age' %in% names(report$content$sample_properties)) {
+  ## subject sex and age at diagnosis ('--sex', '--age'; 'NA' if not provided)
+  if ('sex' %in% names(report$content$subject_properties)) {
+    sample_assay[sample_assay$PROPERTY == 'SEX', 'VALUE'] <-
+      report$content$subject_properties[['sex']]
+  }
+  if ('age' %in% names(report$content$subject_properties)) {
     sample_assay[sample_assay$PROPERTY == 'AGE_AT_DIAGNOSIS', 'VALUE'] <-
-      report$content$sample_properties[['age']]
+      report$content$subject_properties[['age']]
   }
 
   if (dna_data_present) {
