@@ -23,4 +23,3 @@ Ensembl gene id) in a PDF report table cell (raw Typst markup; the column
 must not be escaped by format_tt()). Symbols without a valid Ensembl gene
 id are shown as plain (escaped) text.
 }
-\keyword{internal}

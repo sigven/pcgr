@@ -9,7 +9,9 @@ typst_escape(x)
 \arguments{
 \item{x}{character vector}
 }
+\value{
+character vector with Typst markup characters escaped
+}
 \description{
 Escape Typst markup characters in plain text
 }
-\keyword{internal}

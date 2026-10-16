@@ -7,13 +7,24 @@ cancer hotspot symbol ('hotspot' - only when at least one of the variants
 is located in a hotspot), or the biomarker evidence source logos
 ('bm_sources')}
 \usage{
-pdf_legend(type = c("hotspot", "bm_sources"), variants = NULL)
+pdf_legend(
+  type = c("hotspot", "bm_sources"),
+  variants = NULL,
+  sources = c("civic", "cgi", "oncokb"),
+  muted = "pcgr-muted"
+)
 }
 \arguments{
 \item{type}{'hotspot' or 'bm_sources'}
 
 \item{variants}{data frame with the variants listed in the table (for
 'hotspot')}
+
+\item{sources}{evidence sources listed (for 'bm_sources'), any of
+'civic', 'cgi' and 'oncokb'}
+
+\item{muted}{text color of the legend: name of a Typst color variable
+(e.g. 'pcgr-muted', as defined in typst/_preamble.typ) or hex color}
 }
 \value{
 character (raw Typst block; "" when there is nothing to explain)
@@ -24,4 +35,3 @@ cancer hotspot symbol ('hotspot' - only when at least one of the variants
 is located in a hotspot), or the biomarker evidence source logos
 ('bm_sources')
 }
-\keyword{internal}

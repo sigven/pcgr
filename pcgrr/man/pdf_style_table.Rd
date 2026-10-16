@@ -4,19 +4,31 @@
 \alias{pdf_style_table}
 \title{Style the header row of a PDF report table}
 \usage{
-pdf_style_table(tt, color = pcgrr::color_palette$report_color$values[1])
+pdf_style_table(
+  tt,
+  color = pcgrr::color_palette$report_color$values[1],
+  header_color = NULL,
+  stripe_color = NULL
+)
 }
 \arguments{
 \item{tt}{tinytable object}
 
-\item{color}{main report color (hex), see pdf_report_color()}
+\item{color}{main report color (hex), see pdf_report_color() - header
+and stripe colors are derived from it (darkened/lightened) unless given
+explicitly}
+
+\item{header_color}{background color of the header row (hex); default:
+main report color, darkened}
+
+\item{stripe_color}{background color of every second body row (hex);
+default: main report color, lightened}
 }
 \value{
 styled tinytable object
 }
 \description{
-Dark header (main report color, darkened) with white, bold text, white
-separator lines between the header columns, and light zebra striping of
-the body rows
+Dark header with white, bold text, white separator lines between the
+header columns, and light zebra striping of the body rows; cell contents
+left-aligned and centered vertically
 }
-\keyword{internal}

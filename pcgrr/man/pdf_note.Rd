@@ -20,7 +20,10 @@ characters are escaped)}
 
 \item{kind}{'note' (callout, main report color), 'warning' (callout,
 amber), 'empty' (grey box for a section without findings), or
-'placeholder' (content not yet implemented)}
+'placeholder' (content not yet implemented). 'note' and 'placeholder'
+use Typst definitions of the PCGR report preamble (pcgr-main,
+pcgr-stripe, pcgr-placeholder()); 'warning' and 'empty' are
+self-contained}
 }
 \value{
 character, to be printed with cat() in a chunk with output 'asis'
@@ -28,4 +31,3 @@ character, to be printed with cat() in a chunk with output 'asis'
 \description{
 Note box in a PDF report section (raw Typst block)
 }
-\keyword{internal}

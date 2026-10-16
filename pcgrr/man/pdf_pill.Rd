@@ -21,4 +21,3 @@ character vector with Typst markup ("" for empty labels)
 Colored pill (rounded box with bold text) in a PDF report table cell -
 raw Typst markup; the column must not be escaped by format_tt()
 }
-\keyword{internal}

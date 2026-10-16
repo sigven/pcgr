@@ -4,19 +4,28 @@
 \alias{pdf_logo}
 \title{Logo of an annotation source (CIViC, CGI, OncoKB, cancerhotspots.org) as
 inline Typst markup - images copied with the templates to the rendering
-directory (typst/logo_*.png); unknown sources as plain text}
+directory (typst/logo_*.png); other sources as plain text}
 \usage{
-pdf_logo(id, height = "1.2em")
+pdf_logo(
+  id,
+  height = "1.2em",
+  sources = c("civic", "cgi", "oncokb", "cancerhotspots")
+)
 }
 \arguments{
-\item{id}{source identifier(s) ('civic', 'cgi', 'oncokb',
-'cancerhotspots')}
+\item{id}{source identifier(s) (e.g. 'civic', 'cgi', 'oncokb',
+'cancerhotspots'; NA as empty string)}
 
 \item{height}{logo height (Typst length)}
+
+\item{sources}{source identifiers with a logo image (typst/logo_\if{html}{\out{<id>}}.png)
+in the rendering directory}
+}
+\value{
+character vector with Typst markup
 }
 \description{
 Logo of an annotation source (CIViC, CGI, OncoKB, cancerhotspots.org) as
 inline Typst markup - images copied with the templates to the rendering
-directory (typst/logo_*.png); unknown sources as plain text
+directory (typst/logo_*.png); other sources as plain text
 }
-\keyword{internal}

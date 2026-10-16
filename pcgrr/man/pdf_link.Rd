@@ -19,4 +19,3 @@ character vector with Typst markup
 Text as a link in a PDF report table cell (raw Typst markup; the column
 must not be escaped by format_tt())
 }
-\keyword{internal}

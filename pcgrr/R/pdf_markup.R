@@ -6,7 +6,9 @@
 #' Escape Typst markup characters in plain text
 #'
 #' @param x character vector
-#' @keywords internal
+#'
+#' @return character vector with Typst markup characters escaped
+#' @export
 typst_escape <- function(x) {
   stringr::str_replace_all(x, "([\\\\#*_\\[\\]<>@$`])", "\\\\\\1")
 }
@@ -14,8 +16,10 @@ typst_escape <- function(x) {
 #' Character vector as Typst string literal content (escapes backslashes
 #' and double quotes), for values passed to Typst functions
 #'
-#' @param x character vector
-#' @keywords internal
+#' @param x character vector (NA as empty string)
+#'
+#' @return character vector, to be placed between double quotes in Typst
+#' @export
 typst_str <- function(x) {
   x <- ifelse(is.na(x), "", as.character(x))
   x <- stringr::str_replace_all(x, stringr::fixed("\\"), "\\\\")
@@ -24,18 +28,31 @@ typst_str <- function(x) {
 
 #' Style the header row of a PDF report table
 #'
-#' Dark header (main report color, darkened) with white, bold text, white
-#' separator lines between the header columns, and light zebra striping of
-#' the body rows
+#' Dark header with white, bold text, white separator lines between the
+#' header columns, and light zebra striping of the body rows; cell contents
+#' left-aligned and centered vertically
 #'
 #' @param tt tinytable object
-#' @param color main report color (hex), see pdf_report_color()
+#' @param color main report color (hex), see pdf_report_color() - header
+#' and stripe colors are derived from it (darkened/lightened) unless given
+#' explicitly
+#' @param header_color background color of the header row (hex); default:
+#' main report color, darkened
+#' @param stripe_color background color of every second body row (hex);
+#' default: main report color, lightened
 #'
 #' @return styled tinytable object
-#' @keywords internal
-pdf_style_table <- function(tt, color = pcgrr::color_palette$report_color$values[1]) {
-  header_col <- grDevices::colorRampPalette(c(color, "black"))(10)[4]
-  stripe_col <- grDevices::colorRampPalette(c(color, "white"))(20)[19]
+#' @export
+pdf_style_table <- function(tt,
+                            color = pcgrr::color_palette$report_color$values[1],
+                            header_color = NULL,
+                            stripe_color = NULL) {
+  header_col <- if (is.null(header_color)) {
+    grDevices::colorRampPalette(c(color, "black"))(10)[4]
+  } else header_color
+  stripe_col <- if (is.null(stripe_color)) {
+    grDevices::colorRampPalette(c(color, "white"))(20)[19]
+  } else stripe_color
   ## cell contents centered vertically (rows with pills, logos or bars are
   ## taller than plain text rows)
   tt <- tinytable::style_tt(tt, align = "l", alignv = "m")
@@ -63,7 +80,7 @@ pdf_style_table <- function(tt, color = pcgrr::color_palette$report_color$values
 #' @param text_color text color(s) (hex)
 #'
 #' @return character vector with Typst markup ("" for empty labels)
-#' @keywords internal
+#' @export
 pdf_pill <- function(label, fill, text_color = "#ffffff") {
   esc <- typst_escape(label)
   ifelse(
@@ -125,7 +142,7 @@ pdf_pill_class <- function(
 #' @param url URL(s); NA for plain (escaped) text
 #'
 #' @return character vector with Typst markup
-#' @keywords internal
+#' @export
 pdf_link <- function(label, url) {
   esc <- typst_escape(label)
   ifelse(is.na(url) | is.na(label) | label == "", esc,
@@ -141,7 +158,7 @@ pdf_link <- function(label, url) {
 #' @param ensembl_gene_id Ensembl gene id(s) (e.g. ENSG00000133703)
 #'
 #' @return character vector with Typst markup
-#' @keywords internal
+#' @export
 pdf_gene_link <- function(symbol, ensembl_gene_id = NULL) {
   symbol <- dplyr::coalesce(as.character(symbol), "")
   if (is.null(ensembl_gene_id)) ensembl_gene_id <- rep(NA_character_, length(symbol))
@@ -186,16 +203,22 @@ is_hotspot_variant <- function(variants) {
 
 #' Logo of an annotation source (CIViC, CGI, OncoKB, cancerhotspots.org) as
 #' inline Typst markup - images copied with the templates to the rendering
-#' directory (typst/logo_*.png); unknown sources as plain text
+#' directory (typst/logo_*.png); other sources as plain text
 #'
-#' @param id source identifier(s) ('civic', 'cgi', 'oncokb',
-#' 'cancerhotspots')
+#' @param id source identifier(s) (e.g. 'civic', 'cgi', 'oncokb',
+#' 'cancerhotspots'; NA as empty string)
 #' @param height logo height (Typst length)
-#' @keywords internal
-pdf_logo <- function(id, height = "1.2em") {
+#' @param sources source identifiers with a logo image (typst/logo_<id>.png)
+#' in the rendering directory
+#'
+#' @return character vector with Typst markup
+#' @export
+pdf_logo <- function(id, height = "1.2em",
+                     sources = c("civic", "cgi", "oncokb", "cancerhotspots")) {
+  id <- dplyr::coalesce(as.character(id), "")
   ids <- tolower(id)
   ifelse(
-    ids %in% c("civic", "cgi", "oncokb", "cancerhotspots"),
+    ids %in% sources,
     paste0('#box(baseline: 20%, image("typst/logo_', ids, '.png", height: ',
            height, '))'),
     typst_escape(id))
@@ -209,10 +232,16 @@ pdf_logo <- function(id, height = "1.2em") {
 #' @param type 'hotspot' or 'bm_sources'
 #' @param variants data frame with the variants listed in the table (for
 #' 'hotspot')
+#' @param sources evidence sources listed (for 'bm_sources'), any of
+#' 'civic', 'cgi' and 'oncokb'
+#' @param muted text color of the legend: name of a Typst color variable
+#' (e.g. 'pcgr-muted', as defined in typst/_preamble.typ) or hex color
 #'
 #' @return character (raw Typst block; "" when there is nothing to explain)
-#' @keywords internal
-pdf_legend <- function(type = c("hotspot", "bm_sources"), variants = NULL) {
+#' @export
+pdf_legend <- function(type = c("hotspot", "bm_sources"), variants = NULL,
+                       sources = c("civic", "cgi", "oncokb"),
+                       muted = "pcgr-muted") {
   type <- match.arg(type)
   if (type == "hotspot") {
     if (!any(is_hotspot_variant(variants))) return("")
@@ -221,13 +250,18 @@ pdf_legend <- function(type = c("hotspot", "bm_sources"), variants = NULL) {
       " Variant located in a cancer mutation hotspot (",
       "#link(\"https://www.cancerhotspots.org\")[cancerhotspots.org])")
   } else {
-    sources <- c(civic = "CIViC", cgi = "CGI", oncokb = "OncoKB")
+    source_names <- c(civic = "CIViC", cgi = "CGI", oncokb = "OncoKB")
+    sources <- tolower(sources)
+    if (length(sources) == 0) return("")
     body <- paste0(
       "Evidence sources: ",
-      paste(pdf_logo(names(sources), "1.2em"), sources, collapse = " #h(0.8em) "))
+      paste(pdf_logo(sources, "1.2em"),
+            dplyr::coalesce(source_names[sources], sources),
+            collapse = " #h(0.8em) "))
   }
+  if (startsWith(muted, "#")) muted <- paste0('rgb("', muted, '")')
   paste0("\n```{=typst}\n#block(above: 0.4em, below: 0.8em)[",
-         "#set text(size: 8.5pt, fill: pcgr-muted)\n", body, "]\n```\n\n")
+         "#set text(size: 8.5pt, fill: ", muted, ")\n", body, "]\n```\n\n")
 }
 
 #' Note box in a PDF report section (raw Typst block)
@@ -239,10 +273,13 @@ pdf_legend <- function(type = c("hotspot", "bm_sources"), variants = NULL) {
 #' 'empty'; not used for 'placeholder')
 #' @param kind 'note' (callout, main report color), 'warning' (callout,
 #' amber), 'empty' (grey box for a section without findings), or
-#' 'placeholder' (content not yet implemented)
+#' 'placeholder' (content not yet implemented). 'note' and 'placeholder'
+#' use Typst definitions of the PCGR report preamble (pcgr-main,
+#' pcgr-stripe, pcgr-placeholder()); 'warning' and 'empty' are
+#' self-contained
 #'
 #' @return character, to be printed with cat() in a chunk with output 'asis'
-#' @keywords internal
+#' @export
 pdf_note <- function(text, title = NULL,
                      kind = c("note", "warning", "empty", "placeholder")) {
   kind <- match.arg(kind)

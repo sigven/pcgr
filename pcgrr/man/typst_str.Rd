@@ -8,10 +8,12 @@ and double quotes), for values passed to Typst functions}
 typst_str(x)
 }
 \arguments{
-\item{x}{character vector}
+\item{x}{character vector (NA as empty string)}
+}
+\value{
+character vector, to be placed between double quotes in Typst
 }
 \description{
 Character vector as Typst string literal content (escapes backslashes
 and double quotes), for values passed to Typst functions
 }
-\keyword{internal}
