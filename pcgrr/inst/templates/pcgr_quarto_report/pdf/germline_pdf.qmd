@@ -2,7 +2,7 @@
 #pagebreak(weak: true)
 ```
 
-# Germline findings
+# Germline findings {#pcgr-germline}
 
 ```{r germline_pdf_setup}
 #| echo: false

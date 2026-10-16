@@ -1,4 +1,4 @@
-## MSI status
+## MSI status {#pcgr-msi}
 
 Microsatellite instability (MSI) is the result of impaired DNA mismatch repair and constitutes a cellular phenotype of clinical significance in many cancer types, most prominently colorectal, stomach, endometrial, and ovarian cancers [@Cortes-Ciriano2017-vl]. PCGR uses a statistical MSI classifier that only considers features of the somatic mutation profile (e.g. *fraction of indels*, *load of indels*, *mutations in MMR genes*) to separate *MSI-H* (MSI-high) from *MSS* (microsatellite stable) tumors. The classifier was trained on **N = 575** exome-sequenced TCGA tumor samples with known MSI status, with a positive predictive value of 97.9% and a negative predictive value of 99.3% on an independent test set (**N = 245** samples).
 

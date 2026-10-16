@@ -347,14 +347,16 @@
 
 // Positive composite genomic biomarkers (e.g. "TMB-high (12.3 mut/Mb)",
 // "MSI-high") as pills, below the actionable alterations (lead section);
-// only emitted by R when at least one biomarker is positive
-#let pcgr-hl-pills(labels) = block(above: 0.9em)[
-  #for l in labels {
+// only emitted by R when at least one biomarker is positive; each pill
+// links to its report section when a target (heading label) is given
+#let pcgr-hl-pills(labels, targets: ()) = block(above: 0.9em)[
+  #for (i, l) in labels.enumerate() {
     // dark (not the oncogenicity/pathogenicity red) - positive composite
     // biomarkers may indicate treatment benefit
-    box(fill: pcgr-dark, radius: 10pt, inset: (x: 11pt, y: 5pt))[
+    let pill = box(fill: pcgr-dark, radius: 10pt, inset: (x: 11pt, y: 5pt))[
       #text(fill: white, size: 11pt, weight: "bold")[#l]
     ]
+    if i < targets.len() { link(label(targets.at(i)), pill) } else { pill }
     h(7pt)
   }
 ]

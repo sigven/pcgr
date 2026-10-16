@@ -59,7 +59,7 @@ pdf_plot_varstats <- pcgrr:::pdf_plot_varstats(pcg_report)
 for (p in pdf_plot_varstats) print(p)
 ```
 
-## Oncogenic and likely oncogenic variants
+## Oncogenic and likely oncogenic variants {#pcgr-oncogenic-variants}
 
 ```{r oncogenic_intro}
 #| echo: false
@@ -101,7 +101,7 @@ cat(pcgrr:::pdf_note(kind = "empty",
   "No oncogenic or likely oncogenic SNVs/InDels were found in this tumor sample."))
 ```
 
-## Variant filtering
+## Variant filtering {#pcgr-variant-filtering}
 
 ```{r snv_indel_filtering_setup}
 #| echo: false

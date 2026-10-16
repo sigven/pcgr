@@ -2,7 +2,7 @@
 #pagebreak(weak: true)
 ```
 
-# Clinical actionability
+# Clinical actionability {#pcgr-actionability}
 
 ```{r actionability_pdf_setup}
 #| echo: false

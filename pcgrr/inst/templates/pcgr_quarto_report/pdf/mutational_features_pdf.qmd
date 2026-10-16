@@ -15,7 +15,7 @@
 #| eval: !expr isTRUE(pcg_report$content$kataegis$eval)
 
 kataegis_events_pdf <- pcg_report$content$kataegis$events
-cat("## Kataegis\n\n")
+cat("## Kataegis {#pcgr-kataegis}\n\n")
 cat("Kataegis describes a pattern of localized hypermutation identified in ",
     "some cancer genomes, in which a large number of highly-patterned base ",
     "substitutions occur in a small region of DNA. It is prevalent in breast ",

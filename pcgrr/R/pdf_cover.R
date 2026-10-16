@@ -75,7 +75,7 @@ pdf_cover_typst <- function(report) {
   args <- paste0("  ", names(v), ': "', vapply(v, typst_str, character(1)),
                  '",', collapse = "\n")
   ## key findings (markdown, see report_highlights()) in a framed box
-  hl <- report_highlights(report)
+  hl <- report_highlights(report, links = TRUE)
   paste0(
     "```{=typst}\n#pcgr-cover(\n", args, "\n)\n",
     "#pcgr-highlights[\n#pcgr-hl-lead[\n```\n\n",
@@ -84,6 +84,7 @@ pdf_cover_typst <- function(report) {
     ## positive composite biomarkers (TMB-high, MSI-high) as pills
     if (length(hl$pills) > 0) paste0(
       "#pcgr-hl-pills((", paste0('"', typst_str(hl$pills), '",', collapse = " "),
+      "), targets: (", paste0('"', hl$pill_targets, '",', collapse = " "),
       "))\n"),
     "]\n",
     ## actionable variants removed by variant filtering

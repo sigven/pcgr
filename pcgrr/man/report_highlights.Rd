@@ -4,16 +4,22 @@
 \alias{report_highlights}
 \title{Key findings of a PCGR report (highlights) as markdown}
 \usage{
-report_highlights(report, max_show = 5)
+report_highlights(report, max_show = 5, links = FALSE)
 }
 \arguments{
 \item{report}{PCGR report object}
 
 \item{max_show}{maximum number of items listed per finding}
+
+\item{links}{finding titles as links to the corresponding report sections
+(PDF report - section labels as in the pcgr_quarto_report/pdf templates,
+e.g. 'pcgr-cna'); each finding is only included when its section is part
+of the report}
 }
 \value{
 list with 'lead' (markdown on actionable alterations), 'pills'
-(positive composite biomarkers), 'warnings' (markdown on actionable
+(positive composite biomarkers), 'pill_targets' (section label per pill),
+'warnings' (markdown on actionable
 variants removed by variant filtering, "" if none) and 'supporting'
 (markdown bullet list, "" if none)
 }

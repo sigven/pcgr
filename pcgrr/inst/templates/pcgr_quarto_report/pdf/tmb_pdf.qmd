@@ -1,4 +1,4 @@
-## Tumor mutational burden
+## Tumor mutational burden {#pcgr-tmb}
 
 ```{r tmb_pdf_setup}
 #| echo: false

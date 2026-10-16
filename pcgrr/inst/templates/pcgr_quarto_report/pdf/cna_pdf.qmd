@@ -2,7 +2,7 @@
 #pagebreak(weak: true)
 ```
 
-# Somatic copy number aberrations
+# Somatic copy number aberrations {#pcgr-cna}
 
 ```{r cna_pdf_setup}
 #| echo: false

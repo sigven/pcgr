@@ -2,7 +2,7 @@
 #pagebreak(weak: true)
 ```
 
-# Transcriptome findings
+# Transcriptome findings {#pcgr-rna}
 
 ```{r rna_pdf_setup}
 #| echo: false

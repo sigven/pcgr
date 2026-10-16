@@ -1,4 +1,4 @@
-## Mutational signatures
+## Mutational signatures {#pcgr-signatures}
 
 ```{r signatures_pdf_setup}
 #| echo: false

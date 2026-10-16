@@ -128,15 +128,24 @@ tiered_alterations_hl <- function(report, tier = c(1, 2)) {
 #'
 #' @param report PCGR report object
 #' @param max_show maximum number of items listed per finding
+#' @param links finding titles as links to the corresponding report sections
+#' (PDF report - section labels as in the pcgr_quarto_report/pdf templates,
+#' e.g. 'pcgr-cna'); each finding is only included when its section is part
+#' of the report
 #'
 #' @return list with 'lead' (markdown on actionable alterations), 'pills'
-#' (positive composite biomarkers), 'warnings' (markdown on actionable
+#' (positive composite biomarkers), 'pill_targets' (section label per pill),
+#' 'warnings' (markdown on actionable
 #' variants removed by variant filtering, "" if none) and 'supporting'
 #' (markdown bullet list, "" if none)
 #' @export
-report_highlights <- function(report, max_show = 5) {
+report_highlights <- function(report, max_show = 5, links = FALSE) {
   content <- report$content
   conf <- report$settings$conf
+  ## markdown link to a section of the PDF report (labelled heading)
+  sec_link <- function(text, id) {
+    if (isTRUE(links)) paste0("[", text, "](#", id, ")") else text
+  }
 
   ## --- Lead: actionable alterations ---
   lead <- c()
@@ -149,14 +158,16 @@ report_highlights <- function(report, max_show = 5) {
   }
   if (NROW(actionable) > 0) {
     lead <- c(lead, paste0(
-      "**Actionable alterations** (AMP/ASCO/CAP)\n\n",
+      sec_link("**Actionable alterations**", "pcgr-actionability"),
+      " (AMP/ASCO/CAP)\n\n",
       paste(c(tier_item(1, "strong clinical significance"),
               tier_item(2, "potential clinical significance")),
             collapse = "\n")))
   } else if (isTRUE(content$snv_indel$eval) || isTRUE(content$cna$eval) ||
              isTRUE(content$fusion$eval)) {
     lead <- c(lead, paste0(
-      "**No actionable alterations** of strong or potential clinical ",
+      sec_link("**No actionable alterations**", "pcgr-actionability"),
+      " of strong or potential clinical ",
       "significance (AMP/ASCO/CAP Tier 1/2) were identified."))
   }
 
@@ -185,7 +196,8 @@ report_highlights <- function(report, max_show = 5) {
       n_actionable <- length(unique(key[is_actionable]))
       other <- unique(labels[!is_actionable])
       supporting <- c(supporting, paste0(
-        "**SNV/InDel variants:** **n = ", n_total,
+        sec_link("**SNV/InDel variants:**", "pcgr-oncogenic-variants"),
+        " **n = ", n_total,
         "** oncogenic/likely oncogenic",
         if (n_actionable > 0) paste0(
           " (", if (n_actionable == n_total) "all" else n_actionable,
@@ -197,6 +209,7 @@ report_highlights <- function(report, max_show = 5) {
   ## composite genomic biomarkers - shown as pills (below the actionable
   ## alterations) only when positive (TMB-high, MSI-high); none otherwise
   pills <- character()
+  pill_targets <- character()
   if (isTRUE(content$tmb$eval) && isTRUE(content$tmb$tmb_high)) {
     est <- content$tmb$sample_estimate
     tmb_display <- conf$somatic_snv$tmb$tmb_display
@@ -205,11 +218,13 @@ report_highlights <- function(report, max_show = 5) {
     }
     pills <- c(pills, if (NROW(est) > 0) paste0(
       "TMB-high (", round(est$TMB_ESTIMATE[1], 1), " mut/Mb)") else "TMB-high")
+    pill_targets <- c(pill_targets, "pcgr-tmb")
   }
   if (isTRUE(content$msi$eval) && !isTRUE(content$msi$missing_data)) {
     cls <- content$msi$prediction$msi_stats$predicted_class
     if (length(cls) == 1 && !is.na(cls) && !grepl("^MSS", cls)) {
       pills <- c(pills, "MSI-high")
+      pill_targets <- c(pill_targets, "pcgr-msi")
     }
   }
 
@@ -241,7 +256,8 @@ report_highlights <- function(report, max_show = 5) {
     }
     if (length(cn) > 0) {
       supporting <- c(supporting, paste0(
-        "**Copy number variants:** ", paste(cn, collapse = "; ")))
+        sec_link("**Copy number variants:**", "pcgr-cna"), " ",
+        paste(cn, collapse = "; ")))
     }
   }
 
@@ -258,7 +274,8 @@ report_highlights <- function(report, max_show = 5) {
         groups <- ifelse(pg$group == "Unknown", "unknown-aetiology",
                          md_escape_hl(pg$group))
         supporting <- c(supporting, paste0(
-          "**Mutational signatures:** largest contributions from ",
+          sec_link("**Mutational signatures:**", "pcgr-signatures"),
+          " largest contributions from ",
           paste0(groups, " (", round(100 * pg$prop_group), "%)",
                  collapse = " and "), " signatures"))
       }
@@ -266,7 +283,8 @@ report_highlights <- function(report, max_show = 5) {
   }
   if (isTRUE(content$kataegis$eval) && NROW(content$kataegis$events) > 0) {
     supporting <- c(supporting, paste0(
-      "**Kataegis:** ", NROW(content$kataegis$events),
+      sec_link("**Kataegis:**", "pcgr-kataegis"), " ",
+      NROW(content$kataegis$events),
       " potential event(s) of localized hypermutation"))
   }
 
@@ -283,7 +301,7 @@ report_highlights <- function(report, max_show = 5) {
         drop = FALSE]
     }
     supporting <- c(supporting, paste0(
-      "**Germline findings (CPSR):** ",
+      sec_link("**Germline findings (CPSR):**", "pcgr-germline"), " ",
       if (NROW(plp) > 0) paste0(
         "Pathogenic/likely pathogenic variants in cancer predisposition genes: ",
         fmt_list_hl(paste0("**", md_escape_hl(plp$SYMBOL), "** ",
@@ -331,7 +349,8 @@ report_highlights <- function(report, max_show = 5) {
   }
   if (length(rna) > 0) {
     supporting <- c(supporting, paste0(
-      "**Transcriptome findings:** ", paste(rna, collapse = "; ")))
+      sec_link("**Transcriptome findings:**", "pcgr-rna"), " ",
+      paste(rna, collapse = "; ")))
   }
 
   ## actionable variants/mutation hotspots removed by variant filtering
@@ -344,9 +363,11 @@ report_highlights <- function(report, max_show = 5) {
   list(
     lead = paste(lead, collapse = "\n\n"),
     pills = pills,
+    pill_targets = pill_targets,
     warnings = if (length(warnings) > 0) paste0(
       "**Filtered actionable variants** (not considered in this report - ",
-      "see *Variant filtering*)\n\n",
+      "see ", sec_link("*Variant filtering*", "pcgr-variant-filtering"),
+      ")\n\n",
       paste0("- ", warnings, collapse = "\n")) else "",
     supporting = if (length(supporting) > 0)
       paste0("- ", supporting, collapse = "\n") else "")
