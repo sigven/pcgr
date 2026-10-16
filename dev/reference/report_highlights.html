@@ -27,7 +27,7 @@ signatures, kataegis, germline findings (CPSR), and transcriptome findings
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9010</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9011</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -76,7 +76,7 @@ signatures, kataegis, germline findings (CPSR), and transcriptome findings
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">report_highlights</span><span class="op">(</span><span class="va">report</span>, max_show <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">report_highlights</span><span class="op">(</span><span class="va">report</span>, max_show <span class="op">=</span> <span class="fl">5</span>, links <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -90,11 +90,19 @@ signatures, kataegis, germline findings (CPSR), and transcriptome findings
 <dt id="arg-max-show">max_show<a class="anchor" aria-label="anchor" href="#arg-max-show"></a></dt>
 <dd><p>maximum number of items listed per finding</p></dd>
 
+
+<dt id="arg-links">links<a class="anchor" aria-label="anchor" href="#arg-links"></a></dt>
+<dd><p>finding titles as links to the corresponding report sections
+(PDF report - section labels as in the pcgr_quarto_report/pdf templates,
+e.g. 'pcgr-cna'); each finding is only included when its section is part
+of the report</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>list with 'lead' (markdown on actionable alterations), 'pills'
-(positive composite biomarkers), 'warnings' (markdown on actionable
+(positive composite biomarkers), 'pill_targets' (section label per pill),
+'warnings' (markdown on actionable
 variants removed by variant filtering, "" if none) and 'supporting'
 (markdown bullet list, "" if none)</p>
     </div>

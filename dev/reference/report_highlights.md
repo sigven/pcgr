@@ -12,7 +12,7 @@ findings (RNA fusions, expression outliers).
 ## Usage
 
 ``` r
-report_highlights(report, max_show = 5)
+report_highlights(report, max_show = 5, links = FALSE)
 ```
 
 ## Arguments
@@ -25,9 +25,17 @@ report_highlights(report, max_show = 5)
 
   maximum number of items listed per finding
 
+- links:
+
+  finding titles as links to the corresponding report sections (PDF
+  report - section labels as in the pcgr_quarto_report/pdf templates,
+  e.g. 'pcgr-cna'); each finding is only included when its section is
+  part of the report
+
 ## Value
 
 list with 'lead' (markdown on actionable alterations), 'pills' (positive
-composite biomarkers), 'warnings' (markdown on actionable variants
-removed by variant filtering, "" if none) and 'supporting' (markdown
-bullet list, "" if none)
+composite biomarkers), 'pill_targets' (section label per pill),
+'warnings' (markdown on actionable variants removed by variant
+filtering, "" if none) and 'supporting' (markdown bullet list, "" if
+none)
