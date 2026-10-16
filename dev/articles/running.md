@@ -307,6 +307,14 @@ to OncoKB only and skip CIViC and CGI, use:
 
 - `--oncokb_exclusive`
 
+Intermediate files produced during OncoKB annotation (query inputs, raw
+annotator output, clinical file and annotator logs -
+`<sample_id>.pcgr.<genome_assembly>.oncokb*`) are removed once the
+OncoKB annotations have been integrated into the PCGR output. To keep
+these files in the output directory, use:
+
+- `--oncokb_keep_files`
+
 **Licensing notice — OncoKB terms of use:** OncoKB is freely accessible
 for non-commercial research use. However, use of OncoKB data for
 **commercial purposes or for patient care in a hospital or clinical
@@ -608,6 +616,10 @@ Biomarker and tiering options:
                         are filtered out before OncoKB annotation to reduce processing time.
                         Intended for TARGETED/WES assays only - enabling for WGS may result in
                         very long MafAnnotator.py runtimes (default: False)
+  --oncokb_keep_files   Keep intermediate OncoKB annotator files (input queries, raw annotator
+                        output, clinical file and logs) in the output directory. By default,
+                        these files are removed once OncoKB annotations have been integrated
+                        into the PCGR output (default: False)
 
 Other options:
   --force_overwrite     Force overwrite of existing result files (default: False)

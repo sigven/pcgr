@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9009</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9010</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -556,6 +556,13 @@
 
         <dt>
 
+          <code><a href="format_sample_type.html">format_sample_type()</a></code>
+
+        </dt>
+        <dd>Readable sample type labels of external (reference) samples, e.g. 'cell_line' - 'Cell line', 'primary_solid_tumor' - 'Primary solid tumor'</dd>
+
+        <dt>
+
           <code><a href="fusion_doc_note.html">fusion_doc_note()</a></code>
 
         </dt>
@@ -1081,6 +1088,55 @@
 
         <dt>
 
+          <code><a href="pdf_gene_link.html">pdf_gene_link()</a></code>
+
+        </dt>
+        <dd>Gene symbols as links to the Open Targets Platform target page (by Ensembl gene id) in a PDF report table cell (raw Typst markup; the column must not be escaped by format_tt()). Symbols without a valid Ensembl gene id are shown as plain (escaped) text.</dd>
+
+        <dt>
+
+          <code><a href="pdf_legend.html">pdf_legend()</a></code>
+
+        </dt>
+        <dd>Legend line printed below a PDF report table (raw Typst block): the cancer hotspot symbol ('hotspot' - only when at least one of the variants is located in a hotspot), or the biomarker evidence source logos ('bm_sources')</dd>
+
+        <dt>
+
+          <code><a href="pdf_link.html">pdf_link()</a></code>
+
+        </dt>
+        <dd>Text as a link in a PDF report table cell (raw Typst markup; the column must not be escaped by format_tt())</dd>
+
+        <dt>
+
+          <code><a href="pdf_logo.html">pdf_logo()</a></code>
+
+        </dt>
+        <dd>Logo of an annotation source (CIViC, CGI, OncoKB, cancerhotspots.org) as inline Typst markup - images copied with the templates to the rendering directory (typst/logo_*.png); other sources as plain text</dd>
+
+        <dt>
+
+          <code><a href="pdf_note.html">pdf_note()</a></code>
+
+        </dt>
+        <dd>Note box in a PDF report section (raw Typst block)</dd>
+
+        <dt>
+
+          <code><a href="pdf_pill.html">pdf_pill()</a></code>
+
+        </dt>
+        <dd>Colored pill (rounded box with bold text) in a PDF report table cell - raw Typst markup; the column must not be escaped by format_tt()</dd>
+
+        <dt>
+
+          <code><a href="pdf_style_table.html">pdf_style_table()</a></code>
+
+        </dt>
+        <dd>Style the header row of a PDF report table</dd>
+
+        <dt>
+
           <code><a href="pkg_exists.html">pkg_exists()</a></code>
 
         </dt>
@@ -1127,13 +1183,6 @@
 
         </dt>
         <dd>Function that makes a plot with TMB boxplots for reference cohorts, highlighting the TMB estimate for a given sample and the cohort/primary site of interest</dd>
-
-        <dt>
-
-          <code><a href="plot_value_boxes.html">plot_value_boxes()</a></code>
-
-        </dt>
-        <dd>Function that plots four value boxes with the most important findings in the cancer genome</dd>
 
         <dt>
 
@@ -1354,6 +1403,13 @@
 
         <dt>
 
+          <code><a href="report_highlights.html">report_highlights()</a></code>
+
+        </dt>
+        <dd>Key findings of a PCGR report (highlights) as markdown</dd>
+
+        <dt>
+
           <code><a href="rna_fusion_recurrence_mitdb.html">rna_fusion_recurrence_mitdb()</a></code>
 
         </dt>
@@ -1480,6 +1536,20 @@
 
         <dt>
 
+          <code><a href="typst_escape.html">typst_escape()</a></code>
+
+        </dt>
+        <dd>Escape Typst markup characters in plain text</dd>
+
+        <dt>
+
+          <code><a href="typst_str.html">typst_str()</a></code>
+
+        </dt>
+        <dd>Character vector as Typst string literal content (escapes backslashes and double quotes), for values passed to Typst functions</dd>
+
+        <dt>
+
           <code><a href="update_report.html">update_report()</a></code>
 
         </dt>
@@ -1519,6 +1589,13 @@
 
         </dt>
         <dd>Function that writes contents of PCGR object to an HTML report (quarto-based)</dd>
+
+        <dt>
+
+          <code><a href="write_report_pdf.html">write_report_pdf()</a></code>
+
+        </dt>
+        <dd>Function that writes contents of PCGR object to a PDF report (Quarto/Typst-based), focused on key findings</dd>
 
         <dt>
 

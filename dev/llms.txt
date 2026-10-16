@@ -34,9 +34,9 @@ predisposition, we recommend trying the accompanying tool [Cancer
 Predisposition Sequencing Reporter
 (CPSR)](https://github.com/sigven/cpsr).
 
-Seven snapshots of sections in the [quarto](https://quarto.org)-based
-cancer genome report by PCGR (artificial sample, with more findings than
-usual):
+Snapshots of sections in the [quarto](https://quarto.org)-based HTML
+report by PCGR, followed by pages from the accompanying PDF report
+(artificial colorectal tumor sample, with more findings than usual):
 
   
   
@@ -45,15 +45,25 @@ usual):
 
 ![Clinical actionability classification](img/pcgr_actionability.png)
 
+![Variant statistics](img/pcgr_variant_stats.png)
+
 ![Somatic CNAs](img/pcgr_cna.png)
+
+![Somatic RNA fusions](img/pcgr_rna_fusions.png)
+
+![Mutational signatures](img/pcgr_mutational_signatures.png)
+
+![MSI status](img/pcgr_msi.png)
 
 ![Tumor mutational burden](img/pcgr_tmb.png)
 
+![Gene expression - similarity to other tumor
+samples](img/pcgr_expression_similarity.png)
+
 ![Gene expression outliers](img/pcgr_expression_outliers.png)
 
-![Variant statistics](img/pcgr_variant_stats.png)
-
-![Somatic RNA fusions](img/pcgr_rna_fusions.png)
+![PDF report - key findings, clinical actionability, composite
+biomarkers](img/pcgr_pdf_report.png)
 
   
   
@@ -416,6 +426,10 @@ sigven AT ifi.uio.no
 - [`filter_read_support()`](https://sigven.github.io/pcgr/dev/reference/filter_read_support.md)
   : Function that filters variant set on depth and allelic fraction
   according to settings provided by user (tumor and control)
+- [`format_sample_type()`](https://sigven.github.io/pcgr/dev/reference/format_sample_type.md)
+  : Readable sample type labels of external (reference) samples, e.g.
+  'cell_line' - 'Cell line', 'primary_solid_tumor' - 'Primary solid
+  tumor'
 - [`fusion_doc_note()`](https://sigven.github.io/pcgr/dev/reference/fusion_doc_note.md)
   : Get documentation string for RNA fusion analysis
 - [`generate_annotation_link()`](https://sigven.github.io/pcgr/dev/reference/generate_annotation_link.md)
@@ -602,6 +616,31 @@ sigven AT ifi.uio.no
 - [`order_variants()`](https://sigven.github.io/pcgr/dev/reference/order_variants.md)
   : Function that orders genomic aberrations according to order of
   chromosomes and chromosomal position
+- [`pdf_gene_link()`](https://sigven.github.io/pcgr/dev/reference/pdf_gene_link.md)
+  : Gene symbols as links to the Open Targets Platform target page (by
+  Ensembl gene id) in a PDF report table cell (raw Typst markup; the
+  column must not be escaped by format_tt()). Symbols without a valid
+  Ensembl gene id are shown as plain (escaped) text.
+- [`pdf_legend()`](https://sigven.github.io/pcgr/dev/reference/pdf_legend.md)
+  : Legend line printed below a PDF report table (raw Typst block): the
+  cancer hotspot symbol ('hotspot' - only when at least one of the
+  variants is located in a hotspot), or the biomarker evidence source
+  logos ('bm_sources')
+- [`pdf_link()`](https://sigven.github.io/pcgr/dev/reference/pdf_link.md)
+  : Text as a link in a PDF report table cell (raw Typst markup; the
+  column must not be escaped by format_tt())
+- [`pdf_logo()`](https://sigven.github.io/pcgr/dev/reference/pdf_logo.md)
+  : Logo of an annotation source (CIViC, CGI, OncoKB,
+  cancerhotspots.org) as inline Typst markup - images copied with the
+  templates to the rendering directory (typst/logo\_\*.png); other
+  sources as plain text
+- [`pdf_note()`](https://sigven.github.io/pcgr/dev/reference/pdf_note.md)
+  : Note box in a PDF report section (raw Typst block)
+- [`pdf_pill()`](https://sigven.github.io/pcgr/dev/reference/pdf_pill.md)
+  : Colored pill (rounded box with bold text) in a PDF report table
+  cell - raw Typst markup; the column must not be escaped by format_tt()
+- [`pdf_style_table()`](https://sigven.github.io/pcgr/dev/reference/pdf_style_table.md)
+  : Style the header row of a PDF report table
 - [`pkg_exists()`](https://sigven.github.io/pcgr/dev/reference/pkg_exists.md)
   : Does R Package Exist
 - [`plot_cna_segments_absolute()`](https://sigven.github.io/pcgr/dev/reference/plot_cna_segments_absolute.md)
@@ -621,9 +660,6 @@ sigven AT ifi.uio.no
   : Function that makes a plot with TMB boxplots for reference cohorts,
   highlighting the TMB estimate for a given sample and the
   cohort/primary site of interest
-- [`plot_value_boxes()`](https://sigven.github.io/pcgr/dev/reference/plot_value_boxes.md)
-  : Function that plots four value boxes with the most important
-  findings in the cancer genome
 - [`plotly_pie_chart()`](https://sigven.github.io/pcgr/dev/reference/plotly_pie_chart.md)
   : Plotly Pie Chart - variant statistics
 - [`pon_status()`](https://sigven.github.io/pcgr/dev/reference/pon_status.md)
@@ -721,6 +757,8 @@ sigven AT ifi.uio.no
 - [`render_tier_cell()`](https://sigven.github.io/pcgr/dev/reference/render_tier_cell.md)
   : Render actionability tier as a styled badge with tier-specific
   colors
+- [`report_highlights()`](https://sigven.github.io/pcgr/dev/reference/report_highlights.md)
+  : Key findings of a PCGR report (highlights) as markdown
 - [`rna_fusion_recurrence_mitdb()`](https://sigven.github.io/pcgr/dev/reference/rna_fusion_recurrence_mitdb.md)
   : Function that checks for recurrence of RNA fusions in Mitelman
   database and annotates with clinical and cytogenetic features
@@ -771,6 +809,11 @@ sigven AT ifi.uio.no
 - [`twohit_doc_note()`](https://sigven.github.io/pcgr/dev/reference/twohit_doc_note.md)
   : Get documentation string for two-hit detection & VAF consistency
   assessment
+- [`typst_escape()`](https://sigven.github.io/pcgr/dev/reference/typst_escape.md)
+  : Escape Typst markup characters in plain text
+- [`typst_str()`](https://sigven.github.io/pcgr/dev/reference/typst_str.md)
+  : Character vector as Typst string literal content (escapes
+  backslashes and double quotes), for values passed to Typst functions
 - [`update_report()`](https://sigven.github.io/pcgr/dev/reference/update_report.md)
   : Function that updates a PCGR/CPSR report object structure
 - [`vaf_plot()`](https://sigven.github.io/pcgr/dev/reference/vaf_plot.md)
@@ -788,6 +831,9 @@ sigven AT ifi.uio.no
 - [`write_report_html()`](https://sigven.github.io/pcgr/dev/reference/write_report_html.md)
   : Function that writes contents of PCGR object to an HTML report
   (quarto-based)
+- [`write_report_pdf()`](https://sigven.github.io/pcgr/dev/reference/write_report_pdf.md)
+  : Function that writes contents of PCGR object to a PDF report
+  (Quarto/Typst-based), focused on key findings
 - [`write_report_tsv()`](https://sigven.github.io/pcgr/dev/reference/write_report_tsv.md)
   : Function that writes contents of PCGR object to various output
   formats (Rmarkdown/flexdashboard HTML reports, JSON, tab-separated

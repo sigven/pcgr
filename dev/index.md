@@ -34,9 +34,9 @@ predisposition, we recommend trying the accompanying tool [Cancer
 Predisposition Sequencing Reporter
 (CPSR)](https://github.com/sigven/cpsr).
 
-Seven snapshots of sections in the [quarto](https://quarto.org)-based
-cancer genome report by PCGR (artificial sample, with more findings than
-usual):
+Snapshots of sections in the [quarto](https://quarto.org)-based HTML
+report by PCGR, followed by pages from the accompanying PDF report
+(artificial colorectal tumor sample, with more findings than usual):
 
   
   
@@ -45,15 +45,25 @@ usual):
 
 ![Clinical actionability classification](img/pcgr_actionability.png)
 
+![Variant statistics](img/pcgr_variant_stats.png)
+
 ![Somatic CNAs](img/pcgr_cna.png)
+
+![Somatic RNA fusions](img/pcgr_rna_fusions.png)
+
+![Mutational signatures](img/pcgr_mutational_signatures.png)
+
+![MSI status](img/pcgr_msi.png)
 
 ![Tumor mutational burden](img/pcgr_tmb.png)
 
+![Gene expression - similarity to other tumor
+samples](img/pcgr_expression_similarity.png)
+
 ![Gene expression outliers](img/pcgr_expression_outliers.png)
 
-![Variant statistics](img/pcgr_variant_stats.png)
-
-![Somatic RNA fusions](img/pcgr_rna_fusions.png)
+![PDF report - key findings, clinical actionability, composite
+biomarkers](img/pcgr_pdf_report.png)
 
   
   

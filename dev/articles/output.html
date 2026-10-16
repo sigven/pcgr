@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9009</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9010</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -2833,8 +2833,10 @@ analysis</td>
 <tr class="odd">
 <td><code>SAMPLE_ASSAY</code></td>
 <td>Always</td>
-<td>Sample and assay properties: tumor site, sex, age at diagnosis,
-purity, ploidy (each with its source - <code>provided</code>: value from
+<td>Subject, sample and assay properties (<code>CATEGORY</code> column:
+<code>SUBJECT</code>, <code>SAMPLE</code> or <code>ASSAY</code>):
+subject sex and age at diagnosis, tumor site, purity, ploidy (each with
+its source - <code>provided</code>: value from
 <code>--tumor_purity</code>/<code>--tumor_ploidy</code>;
 <code>estimated</code>: ploidy estimated by PCGR from the copy number
 segments; purity is never estimated by PCGR), assay type

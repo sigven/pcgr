@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9009</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9010</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -444,6 +444,14 @@ reporting to OncoKB only and skip CIViC and CGI, use:</p>
 <ul>
 <li><code>--oncokb_exclusive</code></li>
 </ul>
+<p>Intermediate files produced during OncoKB annotation (query inputs,
+raw annotator output, clinical file and annotator logs -
+<code>&lt;sample_id&gt;.pcgr.&lt;genome_assembly&gt;.oncokb*</code>) are
+removed once the OncoKB annotations have been integrated into the PCGR
+output. To keep these files in the output directory, use:</p>
+<ul>
+<li><code>--oncokb_keep_files</code></li>
+</ul>
 <div style="border-left: 4px solid #e69f00; background-color: #fff8e6; padding: 0.75em 1em; margin: 1em 0;">
 <p><strong>Licensing notice — OncoKB terms of use:</strong> OncoKB is
 freely accessible for non-commercial research use. However, use of
@@ -752,6 +760,10 @@ Biomarker and tiering options:
                         are filtered out before OncoKB annotation to reduce processing time.
                         Intended for TARGETED/WES assays only - enabling for WGS may result in
                         very long MafAnnotator.py runtimes (default: False)
+  --oncokb_keep_files   Keep intermediate OncoKB annotator files (input queries, raw annotator
+                        output, clinical file and logs) in the output directory. By default,
+                        these files are removed once OncoKB annotations have been integrated
+                        into the PCGR output (default: False)
 
 Other options:
   --force_overwrite     Force overwrite of existing result files (default: False)

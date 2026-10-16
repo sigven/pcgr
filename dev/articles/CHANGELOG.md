@@ -10,7 +10,7 @@
   - UniProt/SwissProt KnowledgeBase (2026_03)
   - Open Targets Platform (2026.09)
   - Pfam - v38.2 - 2026-01
-  - DepMap - 26.Q3 )
+  - DepMap - 26.Q3
 
 ### Added / improved
 
@@ -56,9 +56,11 @@
   years at diagnosis), listed with `--sex` in a new *Subject options*
   group of the command-line interface (separate from *Tumor sample
   options*). The age is stored in the run configuration
-  (`sample_properties: age`), shown with sex on the PDF cover page and
-  in the PDF settings, and listed in the SAMPLE_ASSAY sheet of the Excel
-  output (`AGE_AT_DIAGNOSIS`)
+  (`subject_properties: age`, together with `sex`); in the SAMPLE_ASSAY
+  sheet of the Excel output, sex and age are listed under `CATEGORY` =
+  `SUBJECT`), shown with sex on the PDF cover page and in the PDF
+  settings, and listed in the SAMPLE_ASSAY sheet of the Excel output
+  (`AGE_AT_DIAGNOSIS`)
 - **Tumor purity source** - tumor purity is shown with its source
   (`provided`, as for tumor ploidy) in the HTML and PDF reports, and in
   the SAMPLE_ASSAY sheet of the Excel output (`TUMOR_PURITY_SOURCE`) -
@@ -115,6 +117,10 @@
   tumor type. The previous default behavior is available via the new
   `--tumor_type_reference_signatures` option (replaces
   `--all_reference_signatures`, which is removed)
+- Intermediate OncoKB annotator files (query inputs, raw annotator
+  output, clinical file and logs) are now removed from the output
+  directory at the end of a run - use the new `--oncokb_keep_files`
+  option (or `--debug`) to keep them
 
 ### Fixed
 
