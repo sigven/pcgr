@@ -40,7 +40,7 @@ actionable_pdf <- actionable_pdf |>
 n_actionable_pdf <- NROW(actionable_pdf)
 ```
 
-Somatic aberrations (SNVs/InDels, copy number aberrations and RNA fusions) in the tumor sample have been classified into tiers of *clinical actionability*, adopting the AMP/ASCO/CAP guidelines [@Li2017-ew]. Tier 1 and Tier 2 aberrations (strong and potential clinical significance) are listed below.
+Somatic DNA aberrations (SNVs/InDels, copy number alterations) and RNA fusions identified in the tumor sample have been classified into tiers of *clinical actionability*, adopting the AMP/ASCO/CAP guidelines [@Li2017-ew]. Tier 1 and Tier 2 aberrations reflect strong and potential clinical significance, respectively. 
 
 ## Tier 1 & 2 aberrations
 

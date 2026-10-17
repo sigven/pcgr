@@ -741,7 +741,7 @@ data_coltype_defs[['snv_indel_germline_raw']] <- readr::cols_only(
   DBNSFP_MUTATIONASSESSOR = readr::col_character(),
   DBNSFP_MUTATIONTASTER = readr::col_character(),
   DBNSFP_MUTFORMER = readr::col_character(),
-  DBNSFP_MUTPRED = readr::col_character(),
+  DBNSFP_MUTPRED2 = readr::col_character(),
   DBNSFP_M_CAP = readr::col_character(),
   DBNSFP_PHACTBOOST = readr::col_character(),
   DBNSFP_POLYPHEN2_HVAR = readr::col_character(),

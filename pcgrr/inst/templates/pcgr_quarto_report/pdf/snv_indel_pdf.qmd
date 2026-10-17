@@ -64,10 +64,10 @@ for (p in pdf_plot_varstats) print(p)
 ```{r oncogenic_intro}
 #| echo: false
 #| output: asis
-cat("The oncogenicity of somatic SNVs/InDels is classified with an ",
+cat("The oncogenicity of somatic SNVs/InDels is classified through an ",
     "implementation of the ClinGen/CGC/VICC standard operating procedure ",
-    "[@Horak2022-uh]: evidence for (oncogenic) and against (benign) each ",
-    "variant is aggregated into an oncogenicity score, which determines the ",
+    "[@Horak2022-uh]: evidence _for_ and _against_ an oncogenic nature of a given variant is ",
+    "aggregated into an overall oncogenicity score, which determines its ",
     "classification (see *Appendix: Documentation - Variant oncogenicity ",
     "classification*). Listed below are the variants classified as ",
     "oncogenic or likely oncogenic (**n = ", n_oncogenic_pdf, "**), ranked by ",

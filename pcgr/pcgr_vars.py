@@ -4,7 +4,7 @@ from pcgr._version import __version__
 
 ## Version - software and bundle
 PCGR_VERSION = __version__
-DB_VERSION = '20261013'  # database build version (date-based)
+DB_VERSION = '20261017'  # database build version (date-based)
 
 ## Miscellaneous settings
 NCBI_BUILD_MAF = 'GRCh38'
@@ -373,7 +373,7 @@ DBNSFP_ALGORITHMS = {
     'mutationassessor': 'DBNSFP_MUTATIONASSESSOR',
     'mutationtaster': 'DBNSFP_MUTATIONTASTER',
     'mutformer': 'DBNSFP_MUTFORMER', 
-    'mutpred': 'DBNSFP_MUTPRED',
+    'mutpred2': 'DBNSFP_MUTPRED2',
     'm-cap': 'DBNSFP_M_CAP',
     'polyphen2_hvar': 'DBNSFP_POLYPHEN2_HVAR',
     'phactboost': 'DBNSFP_PHACTBOOST',
