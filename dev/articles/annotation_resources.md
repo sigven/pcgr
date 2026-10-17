@@ -10,7 +10,7 @@
 ### *In silico* predictions of effect of coding variants
 
 - [dBNSFP](https://sites.google.com/site/jpopgen/dbNSFP) - database of
-  non-synonymous functional predictions (v5.3, October 2025)
+  non-synonymous functional predictions (v5.4, August 2026)
 
 ### Variant frequency databases
 

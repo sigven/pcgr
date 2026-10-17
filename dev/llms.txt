@@ -14,9 +14,8 @@ molecular findings in an individual tumor.
   - according to *oncogenicity*: evaluating the oncogenic potential of
     somatic DNA aberrations ([ClinGen/CGC/VICC
     guidelines](https://pubmed.ncbi.nlm.nih.gov/35101336/))
-  - according to *actionability*: mapping the therapeutic, diagnostic,
-    and prognostic implications of somatic DNA aberrations
-    ([AMP/ASCO/CAP
+  - according to *actionability*: prioritizing therapeutic options
+    related to somatic DNA aberrations ([AMP/ASCO/CAP
     guidelines](https://pubmed.ncbi.nlm.nih.gov/27993330/))
 - Tumor mutational burden (TMB) estimation
 - Mutational signature analysis
