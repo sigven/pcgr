@@ -44,24 +44,53 @@ def load_all_biomarkers(
          biomarker_variant_origin = biomarker_variant_origin)
       
       if biomarker_vartype in ['CNA','FUSION']:
+         match_type = 'by_fusion'
+         if biomarker_vartype == 'CNA':
+            match_type = 'by_cna_segment'
          for key in biomarkers[db]['other_gene']:
             biomarker_data = biomarkers[db]['other_gene'][key]
-            match_type = 'by_fusion'
-            if biomarker_vartype == 'CNA':
-               match_type = 'by_cna_segment'
-            biomarker_item = (
-               f"{db}|{biomarker_data[0]['variant_id']}|" 
-               f"{biomarker_data[0]['clinical_evidence_items']}|{match_type}"
-            )
-            if key not in actionable_dict:               
-               actionable_dict[key] = biomarker_item
-            else:
-               actionable_dict[key] = actionable_dict[key] + ',' + biomarker_item
+
+            ## A key may hold several distinct biomarker variants (e.g. a generic
+            ## 'EWSR1::FLI1 Fusion' and an exon-specific 'EWSR1::FLI1 e7::e6'),
+            ## each with its own evidence items - include all of them, one item
+            ## per variant_id (rows are repeated per variant alias)
+            exon_specific_variants = set()
+            if biomarker_vartype == 'FUSION':
+               exon_specific_variants = {
+                  row['variant_id'] for row in biomarker_data
+                  if is_exon_specific_fusion_alias(row['variant_alias'])}
+
+            seen_variants = set()
+            for row in biomarker_data:
+               if row['variant_id'] in seen_variants:
+                  continue
+               seen_variants.add(row['variant_id'])
+               ## PCGR does not resolve the exons involved in fusion breakpoints,
+               ## so exon/transcript-type specific fusion variants cannot be matched
+               if row['variant_id'] in exon_specific_variants:
+                  continue
+               biomarker_item = (
+                  f"{db}|{row['variant_id']}|"
+                  f"{row['clinical_evidence_items']}|{match_type}"
+               )
+               if key not in actionable_dict:
+                  actionable_dict[key] = biomarker_item
+               else:
+                  actionable_dict[key] = actionable_dict[key] + ',' + biomarker_item
             
          biomarkers['actionable_df'] = \
             pd.DataFrame(actionable_dict.items(), columns=['aberration_key', 'biomarker_match'])
 
    return biomarkers
+
+
+def is_exon_specific_fusion_alias(variant_alias: str) -> bool:
+   """
+   Returns True if a fusion biomarker alias denotes a specific exon junction
+   (e.g. 'EWSR1-FLI1 E7-E6', 'EGFR-RAD51 e24-e4') or transcript type
+   (e.g. 'EWSR1-FLI1 TYPE 1'), as opposed to a generic gene-pair fusion.
+   """
+   return bool(re.search(r'\s(e\d+-e\d+|type\s*\d+)$', str(variant_alias), re.IGNORECASE))
 
 
 def load_biomarkers(

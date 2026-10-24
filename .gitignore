@@ -19,6 +19,7 @@ docs/_build/
 *.Rproj
 
 tests
+!/tests/
 conda/pcgr
 conda/pcgrr
 .positai

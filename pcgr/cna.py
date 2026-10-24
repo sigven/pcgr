@@ -1358,10 +1358,13 @@ def annotate_cytoband(
     cytoband_bed = pybedtools.BedTool(cytoband_bed_fname)
         
     tmp = cna_segments_bt.intersect(cytoband_bed, loj=True)        
+    ## chromosome must stay str - without X/Y segments pandas infers int64, and
+    ## the downstream pcgr_vars.AUTOSOMES (str) masks then match nothing
     cytoband_intersect = pd.read_csv(
-        tmp.fn, sep="\t", header=None, 
+        tmp.fn, sep="\t", header=None,
         names=['chromosome','segment_start','segment_end','segment_name',
-                'cytoband_chrom','cytoband_start','cytoband_end','cytoband_name'])
+                'cytoband_chrom','cytoband_start','cytoband_end','cytoband_name'],
+        dtype={'chromosome': str, 'cytoband_chrom': str})
     temp_files.append(tmp.fn)
     tmp1 = cytoband_intersect.groupby(['chromosome','segment_start','segment_end']).first()
     segments_first = tmp1.index.to_frame()
