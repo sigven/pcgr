@@ -4,7 +4,7 @@ from pcgr._version import __version__
 
 ## Version - software and bundle
 PCGR_VERSION = __version__
-DB_VERSION = '20261017'  # database build version (date-based)
+DB_VERSION = '20261022'  # database build version (date-based)
 
 ## Miscellaneous settings
 NCBI_BUILD_MAF = 'GRCh38'
@@ -40,7 +40,7 @@ VEP_PICK_CRITERIA = ['mane_select','mane_plus_clinical','canonical','biotype','c
 EXPRESSION_DB_SOURCES = ['tcga','depmap','treehouse']
 
 ## Autosomes, sex chromosomes and mitochondrial chromosome
-AUTOSOMES = [str(x) for x in range(1,22)]
+AUTOSOMES = [str(x) for x in range(1,23)]
 SEX_CHROMOSOMES = ['X','Y']
 
 ## Sample identifier length (max/min allowed)
