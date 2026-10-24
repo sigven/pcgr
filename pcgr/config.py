@@ -66,7 +66,7 @@ def create_config(arg_dict, workflow = "PCGR", logger=None):
             'force_overwrite': int(arg_dict['force_overwrite'])
         }
         conf_options['sample_properties'] = {}
-        ## subject (individual) properties - sex and age at diagnosis
+        ## subject (individual) properties - sex and age at tumor sampling
         conf_options['subject_properties'] = {}
         conf_options['subject_properties']['sex'] = str(arg_dict['sex']) \
             if arg_dict.get('sex') is not None else 'UNKNOWN'

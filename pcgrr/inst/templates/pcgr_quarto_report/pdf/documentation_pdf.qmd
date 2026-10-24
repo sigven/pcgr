@@ -32,8 +32,8 @@ doc_box <- function(title, ...) {
 }
 doc_box("Key findings summary", pcgrr::key_findings_doc_note())
 doc_box("Sample and subject properties", paste0(
-  "- **Age** refers to the age of the subject (in whole years) at ",
-  "diagnosis, as provided with the `--age` option\n",
+  "- **Age** refers to the age of the subject (in whole years) at the ",
+  "time of tumor sampling, as provided with the `--age` option\n",
   "- **Sex** of the subject is provided with the `--sex` option, and is ",
   "used for the annotation of copy number losses on the sex chromosomes\n",
   "- **Tumor purity** and **tumor ploidy** are shown with their source: ",

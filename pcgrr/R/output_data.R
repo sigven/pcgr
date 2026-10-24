@@ -302,7 +302,7 @@ get_excel_sheets <- function(report = NULL) {
       ),
       data.frame(
         SAMPLE_ID = sample_id, CATEGORY = 'SUBJECT',
-        PROPERTY = 'AGE_AT_DIAGNOSIS', VALUE = NA
+        PROPERTY = 'AGE_AT_SAMPLING', VALUE = NA
       ),
       data.frame(
         SAMPLE_ID = sample_id, CATEGORY = 'SAMPLE',
@@ -345,13 +345,13 @@ get_excel_sheets <- function(report = NULL) {
           report$content$sample_properties[[tolower(elem)]]
       }
     }
-  ## subject sex and age at diagnosis ('--sex', '--age'; 'NA' if not provided)
+  ## subject sex and age at tumor sampling ('--sex', '--age'; 'NA' if not provided)
   if ('sex' %in% names(report$content$subject_properties)) {
     sample_assay[sample_assay$PROPERTY == 'SEX', 'VALUE'] <-
       report$content$subject_properties[['sex']]
   }
   if ('age' %in% names(report$content$subject_properties)) {
-    sample_assay[sample_assay$PROPERTY == 'AGE_AT_DIAGNOSIS', 'VALUE'] <-
+    sample_assay[sample_assay$PROPERTY == 'AGE_AT_SAMPLING', 'VALUE'] <-
       report$content$subject_properties[['age']]
   }
 

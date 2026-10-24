@@ -82,7 +82,7 @@ def cli():
     optional_subject.add_argument("--sex", dest="sex", choices=["FEMALE", "MALE", "UNKNOWN"], default="UNKNOWN", 
                                   help = "Sex of the subject (default: %(default)s)")
     optional_subject.add_argument("--age", dest="age", type=int, 
-                                  help = "Age of the subject (whole years) at diagnosis (default: %(default)s)")
+                                  help = "Age of the subject (whole years) at the time of tumor sampling (default: %(default)s)")
     optional_sample.add_argument("--tumor_site", dest="tsite", type=int, default=0, 
                                  help = "Optional integer code to specify primary tumor type/site of query sample,\nchoose any of the following identifiers:\n" + str(pcgr_vars.tumor_sites) + "\n(default: %(default)s - any tumor type)")
     optional_sample.add_argument("--tumor_purity", type=float, dest="tumor_purity", 
