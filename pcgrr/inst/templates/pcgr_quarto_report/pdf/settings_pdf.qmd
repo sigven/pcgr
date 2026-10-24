@@ -48,7 +48,7 @@ left <- c(
   item("Biomarker sources", pcgrr:::bm_db_label(pcg_report)),
   item("Tumor site", sp$site),
   item("Subject sex", conf$subject_properties$sex),
-  item("Age at diagnosis (years)", conf$subject_properties$age))
+  item("Age at sampling (years)", conf$subject_properties$age))
 right <- c()
 
 if (isTRUE(pcg_report$content$snv_indel$eval)) {
@@ -129,6 +129,10 @@ if (isTRUE(pcg_report$content$expression$eval)) {
     heading("Expression settings"),
     item("RNA expression similarity analysis",
          on_off(as.logical(conf$expression$similarity_analysis))))
+  sim_sources <- pcgrr::expression_similarity_sources(conf)
+  if (length(sim_sources) > 0) {
+    right <- c(right, item("Reference sources", sim_sources, level = 2))
+  }
 }
 if (isTRUE(pcg_report$content$fusion$eval)) {
   right <- c(

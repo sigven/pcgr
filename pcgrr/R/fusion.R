@@ -400,19 +400,24 @@ get_druggable_fusion_partner <- function(
 #' @param fusions data frame with fusions (fusion callset 'variant')
 #'
 #' @return data frame with SYMBOL, ALTERATION, VARIANT_CLASS and
-#' ACTIONABILITY_TIER (integer)
+#' ACTIONABILITY_TIER (integer), and ONCOGENICITY_OKB when OncoKB
+#' annotations are present
 #' @keywords internal
 fusion_tier_records <- function(fusions) {
   if (NROW(fusions) == 0 ||
       !all(c("FUSION_GENE2", "ACTIONABILITY_TIER") %in% colnames(fusions))) {
     return(data.frame())
   }
-  data.frame(
+  recs <- data.frame(
     SYMBOL = as.character(fusions$FUSION_GENE2),
     ALTERATION = "fusion",
     VARIANT_CLASS = as.character(fusions$VARIANT_CLASS),
     ACTIONABILITY_TIER = suppressWarnings(
       as.integer(fusions$ACTIONABILITY_TIER)))
+  if ("ONCOGENICITY_OKB" %in% colnames(fusions)) {
+    recs$ONCOGENICITY_OKB <- as.character(fusions$ONCOGENICITY_OKB)
+  }
+  recs
 }
 
 #' Number of Mitelman DB records of a fusion in a given tumor site, parsed

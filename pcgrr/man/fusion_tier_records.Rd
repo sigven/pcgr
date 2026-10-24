@@ -12,7 +12,8 @@ fusion_tier_records(fusions)
 }
 \value{
 data frame with SYMBOL, ALTERATION, VARIANT_CLASS and
-ACTIONABILITY_TIER (integer)
+ACTIONABILITY_TIER (integer), and ONCOGENICITY_OKB when OncoKB
+annotations are present
 }
 \description{
 Actionable RNA fusions as records for the PDF report tables (gene pair

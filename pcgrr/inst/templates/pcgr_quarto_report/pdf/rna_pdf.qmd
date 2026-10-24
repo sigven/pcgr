@@ -120,7 +120,7 @@ cat(pcgrr:::pdf_note(paste0(
 outliers_high_pdf <- if (NROW(outliers_pdf) > 0)
   pcgrr:::pdf_table_expression_outliers(
     outliers_pdf, "Increased expression", color = report_color) else NULL
-cat("**Increased expression - proto-oncogenes**\n\n")
+cat(pcgrr:::pdf_label("Increased expression - proto-oncogenes"))
 if (is.null(outliers_high_pdf)) {
   cat(pcgrr:::pdf_note(kind = "empty", 
     "No proto-oncogenes with increased expression (outliers)."))
@@ -140,7 +140,7 @@ outliers_high_pdf
 outliers_low_pdf <- if (NROW(outliers_pdf) > 0)
   pcgrr:::pdf_table_expression_outliers(
     outliers_pdf, "Reduced expression", color = report_color) else NULL
-cat("**Reduced expression - tumor suppressor genes**\n\n")
+cat(pcgrr:::pdf_label("Reduced expression - tumor suppressor genes"))
 if (is.null(outliers_low_pdf)) {
   cat(pcgrr:::pdf_note(kind = "empty", 
     "No tumor suppressor genes with reduced expression (outliers)."))
@@ -197,7 +197,7 @@ for (src in names(sources)) {
     sources[[src]], site = site_rna_pdf, n = 10, color = report_color)
   if (is.null(tt)) next
   shown <- shown + 1
-  cat("**", src, "**\n\n```{=typst}\n",
+  cat(pcgrr:::pdf_label(src), "```{=typst}\n",
       tinytable::save_tt(tt, output = "typst"), "\n```\n\n", sep = "")
 }
 if (shown == 0) {

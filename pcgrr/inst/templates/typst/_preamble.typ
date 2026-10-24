@@ -150,24 +150,30 @@
 #show link: set text(fill: pcgr-main)
 
 // ---------------------------------------------------------------------------
-// Heading show rules
+// Heading show rules - headings are sticky (kept on the same page as the
+// content that follows), which the default heading layout provides but a
+// custom show rule does not
 // ---------------------------------------------------------------------------
-#show heading.where(level: 1): it => block(above: 1.6em, below: 0.6em)[
+#show heading.where(level: 1): it => block(sticky: true, above: 1.6em, below: 0.6em)[
   #set text(size: 13pt, weight: "bold", fill: pcgr-main)
   #it.body
   #v(-4pt)
   #line(length: 100%, stroke: 1.2pt + pcgr-main)
 ]
 
-#show heading.where(level: 2): it => block(above: 1.2em, below: 0.4em)[
+#show heading.where(level: 2): it => block(sticky: true, above: 1.2em, below: 0.4em)[
   #set text(size: 11pt, weight: "bold", fill: pcgr-dark)
   #it.body
 ]
 
-#show heading.where(level: 3): it => block(above: 1em, below: 0.3em)[
+#show heading.where(level: 3): it => block(sticky: true, above: 1em, below: 0.3em)[
   #set text(size: 10pt, weight: "bold", fill: pcgr-dark)
   #it.body
 ]
+
+// Table label (e.g. 'Therapeutic sensitivity' above a table) - sticky, so
+// that it is never left alone at the bottom of a page (see pdf_label())
+#let pcgr-label(body) = block(sticky: true, above: 0.9em, below: 0.4em)[#body]
 
 // ---------------------------------------------------------------------------
 // Reusable components
@@ -291,7 +297,7 @@
     row-gutter: 0.6em,
     ..pcgr-meta("Tumor site", tumor_site),
     ..pcgr-meta("Assay", assay),
-    ..pcgr-meta("Sex / age", sex_age),
+    ..pcgr-meta("Sex / age at sampling", sex_age),
     ..pcgr-meta("Tumor purity / ploidy", purity_ploidy),
   )
 

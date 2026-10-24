@@ -311,6 +311,51 @@ pdf_note <- function(text, title = NULL,
     "\n\n```{=typst}\n]\n```\n\n")
 }
 
+#' Label above a table in a PDF report section (e.g. 'Therapeutic
+#' sensitivity') - a sticky block (pcgr-label(), defined in
+#' typst/_preamble.typ), kept on the same page as the table that follows
+#' rather than left alone at the bottom of a page
+#'
+#' @param label label text, in bold (plain text - Typst markup characters
+#' are escaped)
+#' @param suffix optional text following the label, not in bold (plain text)
+#'
+#' @return character, to be printed with cat() in a chunk with output 'asis'
+#' @keywords internal
+pdf_label <- function(label, suffix = NULL) {
+  paste0(
+    "\n```{=typst}\n#pcgr-label[*", typst_escape(label), "*",
+    if (!is.null(suffix)) typst_escape(suffix), "]\n```\n\n")
+}
+
+#' Table with a label above it (pdf_label()) for a PDF report section, as
+#' raw Typst. A sticky label only stays with the start of a breakable
+#' table - when the first row(s) do not fit at the bottom of a page, the
+#' table moves on and the label is left behind. Tables that fit on a page
+#' (at most max_lines lines of text) are therefore kept together with their
+#' label in one unbreakable block; longer tables may break across pages
+#'
+#' @param label label text, in bold (plain text)
+#' @param tt tinytable object
+#' @param n_lines number of text lines of the table body (e.g. rows, plus
+#' extra lines of multi-line cells)
+#' @param max_lines maximum number of lines for a table kept together
+#'
+#' @return character, to be printed with cat() in a chunk with output 'asis'
+#' @keywords internal
+pdf_labelled_table <- function(label, tt, n_lines, max_lines = 35) {
+  table_typst <- tinytable::save_tt(tt, output = "typst")
+  label_typst <- paste0("#pcgr-label[*", typst_escape(label), "*]\n")
+  if (isTRUE(n_lines <= max_lines)) {
+    return(paste0(
+      ## spacing above as for a pcgr-label() (at the start of a block, the
+      ## label's own spacing does not apply)
+      "\n```{=typst}\n#block(breakable: false, width: 100%, above: 0.9em)[\n",
+      label_typst, table_typst, "\n]\n```\n\n"))
+  }
+  paste0("\n```{=typst}\n", label_typst, table_typst, "\n```\n\n")
+}
+
 #' Row of KPI boxes (pcgr-kpi-box(), defined in typst/_preamble.typ) in a
 #' PDF report section - as the bslib value boxes of the HTML report
 #'

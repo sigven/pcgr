@@ -134,7 +134,7 @@ cat("Somatic coding mutations in the core mismatch repair genes (",
 #| echo: false
 #| output: asis
 #| eval: !expr isFALSE(pcg_report$content$msi$missing_data)
-cat("**Somatic mutations** (tumor) in MMR genes\n\n")
+cat(pcgrr:::pdf_label("Somatic mutations", " (tumor) in MMR genes"))
 ```
 
 ```{r msi_pdf_mmr_somatic}
@@ -157,7 +157,7 @@ cat(pcgrr:::pdf_note(kind = "empty",
 #| echo: false
 #| output: asis
 #| eval: !expr isFALSE(pcg_report$content$msi$missing_data) && germline_eval_pdf
-cat("**Germline variants** (CPSR) in MMR genes - pathogenic/likely pathogenic\n\n")
+cat(pcgrr:::pdf_label("Germline variants", " (CPSR) in MMR genes - pathogenic/likely pathogenic"))
 ```
 
 ```{r msi_pdf_mmr_germline}

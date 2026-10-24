@@ -91,14 +91,17 @@ pdf_table_variants <- function(variants,
     tinytable::style_tt(j = 1, bold = TRUE)
 }
 
-#' Biomarker evidence table (therapeutic sensitivity/resistance) for the PDF
-#' report - one row per matched alteration, with tier, matched therapies
-#' (tumor types), and evidence sources (cf. render_actble_bm_table() of the
-#' HTML report)
+#' Biomarker evidence table (therapeutic sensitivity/resistance, prognostic
+#' or diagnostic) for the PDF report - one row per matched alteration, with
+#' tier, matched therapies / outcomes / diagnostic evidence (tumor types),
+#' and evidence sources (cf. render_actble_bm_table() of the HTML report)
 #'
 #' @param rctbl_recs list with 'main' data frame, from
-#' prep_actble_display_tbl()
-#' @param clnsig 'therapeutic_sensitivity' or 'therapeutic_resistance'
+#' prep_actble_display_tbl(), prep_progn_display_tbl() or
+#' prep_diagn_display_tbl()
+#' @param clnsig evidence type - 'therapeutic_sensitivity',
+#' 'therapeutic_resistance', 'prognostic_poor', 'prognostic_better',
+#' 'diagnostic_positive' or 'diagnostic_negative' (tier colors)
 #' @param color main report color (hex)
 #'
 #' @return tinytable object, or NULL if there are no evidence records
@@ -116,9 +119,19 @@ pdf_table_bm_evidence <- function(
   sources <- vapply(strsplit(dplyr::coalesce(recs$BM_SOURCES, ""), "\\|"),
                     function(s) paste(pdf_logo(s, "1.4em"), collapse = " "),
                     character(1))
-  ## matched therapies: '<b>therapy</b> (tumor types) | ...' - therapy in
+  ## evidence summary per evidence type: matched therapies, prognostic
+  ## outcome, or diagnostic evidence
+  summary_col <- intersect(
+    c("THERAPY_MATCH", "PROGNOSTIC_OUTCOME", "DIAGNOSTIC_EVIDENCE"),
+    colnames(recs))[1]
+  summary_name <- switch(
+    summary_col,
+    THERAPY_MATCH = "Therapy (tumor types)",
+    PROGNOSTIC_OUTCOME = "Outcome (tumor types)",
+    DIAGNOSTIC_EVIDENCE = "Diagnostic evidence (tumor types)")
+  ## '<b>therapy/outcome</b> (tumor types) | ...' - therapy/outcome in
   ## bold, one match per line
-  therapy <- vapply(recs$THERAPY_MATCH, function(x) {
+  therapy <- vapply(recs[[summary_col]], function(x) {
     x <- stringr::str_replace(x, "^ - ", "")
     m <- strsplit(x, " \\| ")[[1]]
     m <- vapply(m, function(y) {
@@ -152,13 +165,18 @@ pdf_table_bm_evidence <- function(
   tbl <- data.frame(
     Alteration = typst_escape(html_to_text(recs$SAMPLE_ALTERATION)),
     Tier = pdf_pill_class(type = "tier", recs$ACTIONABILITY_TIER, clnsig = clnsig),
-    `Therapy (tumor types)` = therapy,
+    Summary = therapy,
     `Evidence level` = levels,
     Sources = sources,
     check.names = FALSE)
-  tinytable::tt(tbl, width = c(0.2, 0.07, 0.48, 0.12, 0.13)) |>
+  colnames(tbl)[3] <- summary_name
+  tt <- tinytable::tt(tbl, width = c(0.2, 0.07, 0.48, 0.12, 0.13)) |>
     pdf_style_table(color = color) |>
     tinytable::style_tt(j = 1, bold = TRUE)
+  ## number of text lines (one per matched therapy/outcome) - see
+  ## pdf_labelled_table()
+  attr(tt, "n_lines") <- sum(stringr::str_count(therapy, "#linebreak\\(\\)") + 1)
+  tt
 }
 
 #' Biomarker evidence tables (therapeutic sensitivity: Tier 1-3, predictive
@@ -220,10 +238,6 @@ pdf_section_bm_evidence <- function(
   categories <- c(snv_indel = "SNVs/InDels",
                   cna = "Copy number aberrations",
                   fusion = "RNA fusions")
-  raw_tt <- function(x) {
-    paste0("\n```{=typst}\n", tinytable::save_tt(x, output = "typst"),
-           "\n```\n\n")
-  }
   out <- c()
   for (cat_id in names(categories)) {
     if (!isTRUE(report$content[[cat_id]]$eval)) next
@@ -232,16 +246,79 @@ pdf_section_bm_evidence <- function(
     if (is.null(tbls$sensitivity) && is.null(tbls$resistance)) next
     out <- c(out, paste0("### ", categories[[cat_id]], "\n\n"))
     if (!is.null(tbls$sensitivity)) {
-      out <- c(out, "**Therapeutic sensitivity**\n\n", raw_tt(tbls$sensitivity))
+      out <- c(out, pdf_labelled_table(
+        "Therapeutic sensitivity", tbls$sensitivity,
+        n_lines = attr(tbls$sensitivity, "n_lines")))
     }
     if (!is.null(tbls$resistance)) {
-      out <- c(out, "**Therapeutic resistance**\n\n", raw_tt(tbls$resistance))
+      out <- c(out, pdf_labelled_table(
+        "Therapeutic resistance", tbls$resistance,
+        n_lines = attr(tbls$resistance, "n_lines")))
     }
   }
   if (length(out) == 0) {
     return(pdf_note(kind = "empty", paste0(
       "Based on available data in ", bm_db_label(report),
       ", no therapeutic biomarker evidence (Tier ",
+      paste(tier, collapse = "/"), ") was found for somatic aberrations ",
+      "in this tumor sample.")))
+  }
+  paste(out, collapse = "")
+}
+
+#' Prognostic and diagnostic biomarker evidence of Tier 1/2 aberrations
+#' (SNVs/InDels, CNAs, RNA fusions) for the PDF report - one table per
+#' variant category and evidence type (poor/better outcome, diagnosis
+#' supported), same evidence selection as the prognostic and diagnostic
+#' tabs of the HTML report
+#'
+#' @param report PCGR report object
+#' @param tier tiers to include
+#' @param color main report color (hex)
+#'
+#' @return markdown with raw Typst tables (character), to be printed with
+#' cat() in a chunk with output 'asis'
+#' @keywords internal
+pdf_section_progn_diagn <- function(
+    report, tier = c(1, 2),
+    color = pcgrr::color_palette$report_color$values[1]) {
+  categories <- c(snv_indel = "SNVs/InDels",
+                  cna = "Copy number aberrations",
+                  fusion = "RNA fusions")
+  evidence_types <- c(
+    prognostic_poor = "Prognostic - poor outcome",
+    prognostic_better = "Prognostic - better outcome",
+    diagnostic_positive = "Diagnostic - supporting diagnosis")
+  out <- c()
+  for (cat_id in names(categories)) {
+    if (!isTRUE(report$content[[cat_id]]$eval)) next
+    bm_evidence <- report$content[[cat_id]]$callset$bm_evidence
+    tbls <- list()
+    for (clnsig in names(evidence_types)) {
+      cls <- bm_evidence[[clnsig]]$classification
+      if (NROW(cls) == 0 || !any(cls$ACTIONABILITY_TIER %in% tier)) next
+      recs <- if (startsWith(clnsig, "prognostic")) {
+        pcgrr::prep_progn_display_tbl(
+          rep = report, tier = tier, etype_for_tiering = "prognostic",
+          clnsig = clnsig, variant_category = cat_id)
+      } else {
+        pcgrr::prep_diagn_display_tbl(
+          rep = report, tier = tier, etype_for_tiering = "diagnostic",
+          clnsig = clnsig, variant_category = cat_id)
+      }
+      tbl <- pdf_table_bm_evidence(recs, clnsig = clnsig, color = color)
+      if (!is.null(tbl)) {
+        tbls[[clnsig]] <- pdf_labelled_table(
+          evidence_types[[clnsig]], tbl, n_lines = attr(tbl, "n_lines"))
+      }
+    }
+    if (length(tbls) == 0) next
+    out <- c(out, paste0("### ", categories[[cat_id]], "\n\n"), unlist(tbls))
+  }
+  if (length(out) == 0) {
+    return(pdf_note(kind = "empty", paste0(
+      "Based on available data in ", bm_db_label(report),
+      ", no prognostic or diagnostic biomarker evidence (Tier ",
       paste(tier, collapse = "/"), ") was found for somatic aberrations ",
       "in this tumor sample.")))
   }

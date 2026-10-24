@@ -5,12 +5,21 @@
 \title{Somatic alterations with an actionability tier (SNVs/InDels, CNAs, RNA
 fusions) as display labels}
 \usage{
-tiered_alterations_hl(report, tier = c(1, 2))
+tiered_alterations_hl(
+  report,
+  tier = c(1, 2),
+  clnsig = "therapeutic_sensitivity"
+)
 }
 \arguments{
 \item{report}{PCGR report object}
 
 \item{tier}{actionability tiers}
+
+\item{clnsig}{type of biomarker evidence the tiers refer to -
+'therapeutic_sensitivity' (default, the tier of each variant record), or
+e.g. 'prognostic_poor', 'prognostic_better', 'diagnostic_positive' (tiers
+from the corresponding bm_evidence classification of each callset)}
 }
 \value{
 data frame with LABEL, SYMBOL, ALTERATION and ACTIONABILITY_TIER

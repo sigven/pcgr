@@ -8,9 +8,12 @@
 #| echo: false
 #| eval: true
 
-## somatic SNVs/InDels and CNAs with an actionability tier (AMP/ASCO/CAP)
+## somatic SNVs/InDels and CNAs with an actionability tier (AMP/ASCO/CAP) -
+## no VAF (SNVs/InDels only, see the SNV/InDel section); OncoKB-curated
+## oncogenicity (all variant types, when OncoKB annotations are present)
+## next to PCGR's ClinGen/CGC/VICC oncogenicity (SNVs/InDels)
 tier_cols <- c("SYMBOL", "ENSEMBL_GENE_ID", "ALTERATION", "CONSEQUENCE", "VARIANT_CLASS",
-               "ACTIONABILITY_TIER", "ONCOGENICITY", "VAF_TUMOR",
+               "ACTIONABILITY_TIER", "ONCOGENICITY", "ONCOGENICITY_OKB",
                "MUTATION_HOTSPOT_CANCERTYPE")
 actionable_pdf <- dplyr::bind_rows(
   if (isTRUE(pcg_report$content$snv_indel$eval))
@@ -38,6 +41,8 @@ actionable_pdf <- actionable_pdf |>
   dplyr::filter(.data$ACTIONABILITY_TIER %in% c("1", "2")) |>
   dplyr::arrange(.data$ACTIONABILITY_TIER, .data$SYMBOL)
 n_actionable_pdf <- NROW(actionable_pdf)
+okb_actionable_pdf <- "ONCOGENICITY_OKB" %in% colnames(actionable_pdf) &&
+  any(!actionable_pdf$ONCOGENICITY_OKB %in% c(NA, "", "."))
 ```
 
 Somatic DNA aberrations (SNVs/InDels, copy number alterations) and RNA fusions identified in the tumor sample have been classified into tiers of *clinical actionability*, adopting the AMP/ASCO/CAP guidelines [@Li2017-ew]. Tier 1 and Tier 2 aberrations reflect strong and potential clinical significance, respectively. 
@@ -49,7 +54,17 @@ Somatic DNA aberrations (SNVs/InDels, copy number alterations) and RNA fusions i
 #| eval: !expr n_actionable_pdf > 0
 
 actionable_pdf |>
-  pcgrr:::pdf_table_variants(color = report_color)
+  pcgrr:::pdf_table_variants(color = report_color, oncokb = TRUE)
+```
+
+```{r actionable_oncogenicity_note}
+#| echo: false
+#| output: asis
+#| eval: !expr n_actionable_pdf > 0 && okb_actionable_pdf
+cat(paste0(
+  "*Oncogenicity*: classification by PCGR (ClinGen/CGC/VICC guidelines, ",
+  "SNVs/InDels); *OncoKB*: oncogenicity as curated by OncoKB ",
+  "(SNVs/InDels, copy number alterations and RNA fusions).\n\n"))
 ```
 
 ```{r actionable_hotspot_legend}

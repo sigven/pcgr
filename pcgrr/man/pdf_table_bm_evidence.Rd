@@ -2,10 +2,10 @@
 % Please edit documentation in R/pdf_tables.R
 \name{pdf_table_bm_evidence}
 \alias{pdf_table_bm_evidence}
-\title{Biomarker evidence table (therapeutic sensitivity/resistance) for the PDF
-report - one row per matched alteration, with tier, matched therapies
-(tumor types), and evidence sources (cf. render_actble_bm_table() of the
-HTML report)}
+\title{Biomarker evidence table (therapeutic sensitivity/resistance, prognostic
+or diagnostic) for the PDF report - one row per matched alteration, with
+tier, matched therapies / outcomes / diagnostic evidence (tumor types),
+and evidence sources (cf. render_actble_bm_table() of the HTML report)}
 \usage{
 pdf_table_bm_evidence(
   rctbl_recs,
@@ -15,9 +15,12 @@ pdf_table_bm_evidence(
 }
 \arguments{
 \item{rctbl_recs}{list with 'main' data frame, from
-prep_actble_display_tbl()}
+prep_actble_display_tbl(), prep_progn_display_tbl() or
+prep_diagn_display_tbl()}
 
-\item{clnsig}{'therapeutic_sensitivity' or 'therapeutic_resistance'}
+\item{clnsig}{evidence type - 'therapeutic_sensitivity',
+'therapeutic_resistance', 'prognostic_poor', 'prognostic_better',
+'diagnostic_positive' or 'diagnostic_negative' (tier colors)}
 
 \item{color}{main report color (hex)}
 }
@@ -25,9 +28,9 @@ prep_actble_display_tbl()}
 tinytable object, or NULL if there are no evidence records
 }
 \description{
-Biomarker evidence table (therapeutic sensitivity/resistance) for the PDF
-report - one row per matched alteration, with tier, matched therapies
-(tumor types), and evidence sources (cf. render_actble_bm_table() of the
-HTML report)
+Biomarker evidence table (therapeutic sensitivity/resistance, prognostic
+or diagnostic) for the PDF report - one row per matched alteration, with
+tier, matched therapies / outcomes / diagnostic evidence (tumor types),
+and evidence sources (cf. render_actble_bm_table() of the HTML report)
 }
 \keyword{internal}

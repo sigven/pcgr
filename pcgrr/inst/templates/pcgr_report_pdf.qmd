@@ -71,6 +71,11 @@ cat(pcgrr:::pdf_cover_typst(pcg_report))
 #| eval: !expr isTRUE(pcg_report$content$snv_indel$eval) || isTRUE(pcg_report$content$cna$eval) || isTRUE(pcg_report$content$fusion$eval)
 ```
 
+```{r diagn_progn_pdf}
+#| child: 'pcgr_quarto_report/pdf/diagn_progn_pdf.qmd'
+#| eval: !expr isTRUE(pcg_report$content$snv_indel$eval) || isTRUE(pcg_report$content$cna$eval) || isTRUE(pcg_report$content$fusion$eval)
+```
+
 ```{r snv_indel_pdf}
 #| child: 'pcgr_quarto_report/pdf/snv_indel_pdf.qmd'
 #| eval: !expr isTRUE(pcg_report$content$snv_indel$eval)
