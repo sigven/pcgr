@@ -164,6 +164,9 @@
 - [`expression_doc_note()`](https://sigven.github.io/pcgr/dev/reference/expression_doc_note.md)
   : Get documentation string for RNA expression analysis (outlier,
   similarity)
+- [`expression_similarity_sources()`](https://sigven.github.io/pcgr/dev/reference/expression_similarity_sources.md)
+  : Reference sources of the expression similarity analysis, as display
+  labels (run configuration / report settings)
 - [`extract_complete_annotation()`](https://sigven.github.io/pcgr/dev/reference/extract_complete_annotation.md)
   : Extract mutation effect information
 - [`extract_diagnostic_evidence()`](https://sigven.github.io/pcgr/dev/reference/extract_diagnostic_evidence.md)
@@ -359,6 +362,10 @@
   gnomAD populations
 - [`mkdir()`](https://sigven.github.io/pcgr/dev/reference/mkdir.md) :
   Create directory
+- [`moi_display_text()`](https://sigven.github.io/pcgr/dev/reference/moi_display_text.md)
+  : CPG_MOI (mode of inheritance) code(s) with their full names, for
+  display in the row details of the germline findings table (e.g.
+  'AD/AR' -\> 'AD/AR (autosomal dominant / autosomal recessive)')
 - [`msi_doc_note()`](https://sigven.github.io/pcgr/dev/reference/msi_doc_note.md)
   : Get documentation string for MSI status prediction
 - [`msi_indel_fraction_plot()`](https://sigven.github.io/pcgr/dev/reference/msi_indel_fraction_plot.md)
@@ -375,6 +382,8 @@
   : Oncogenicity criteria (ClinGen/CGC/VICC)
 - [`oncogenicity_doc_note()`](https://sigven.github.io/pcgr/dev/reference/oncogenicity_doc_note.md)
   : Get documentation string for oncogenicity annotation
+- [`oncogenicity_sort_value()`](https://sigven.github.io/pcgr/dev/reference/oncogenicity_sort_value.md)
+  : Oncogenicity classification as a sortable table value
 - [`oncokb_annotations`](https://sigven.github.io/pcgr/dev/reference/oncokb_annotations.md)
   : Character vector with OncoKB annotations coming from the
   MafAnnotator / FusionAnnotator / CnaAnnnotator tools in the PCGR

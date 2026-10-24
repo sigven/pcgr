@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9012</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9013</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -90,7 +90,7 @@
 <ul>
 <li>Date: <strong>2026-10-XX</strong>
 </li>
-<li>Data bundle update (<code>20261017</code>) and software updates
+<li>Data bundle update (<code>20261022</code>) and software updates
 <ul>
 <li>Ensembl VEP <code>v116.3</code> / GENCODE v50 (GRCh38; v19 for
 GRCh37)</li>
@@ -116,7 +116,42 @@ with a compact main row (gene, alteration, consequence, genotype,
 classification, ACMG criteria, inheritance) and expandable row details
 <ul>
 <li>ACMG criteria are shown as color-coded pills (pathogenic/benign
-evidence), with a hover tooltip describing each criterion</li>
+evidence), with a hover tooltip describing each criterion and its
+contribution to the CPSR pathogenicity score</li>
+<li>Cancer predisposition gene mode of inheritance moved from the main
+row to the expandable row details (<em>Inheritance</em>, with the
+abbreviations spelled out), keeping the main row compact</li>
+<li>New <em>gnomAD AF</em> column (exome allele frequency, genome
+frequency as fallback; both on hover), read from the CPSR classification
+output (<code>gnomADe_AF</code>, <code>gnomADg_AF</code>), to aid in
+interpreting the frequency-based ACMG criteria and discrepancies between
+ClinVar and CPSR classifications</li>
+</ul>
+</li>
+<li>Run configuration / report settings (HTML and PDF): the reference
+sources used for the expression similarity analysis (TCGA, DepMap,
+Treehouse) are listed under <em>Expression settings</em>
+</li>
+<li>SNV/InDel section: the variant statistics donut charts (coding
+status, variant type, consequence) are placed in a collapsed
+callout</li>
+<li>RNA fusion table: fusions classified as Oncogenic/Likely Oncogenic
+by OncoKB are listed first, with the <em>Fusion gene</em> cell tinted by
+oncogenicity (as for the CNA table)</li>
+<li>Key findings: prognostic (poor/better outcome) and diagnostic
+biomarkers (AMP/ASCO/CAP Tier 1/2) among SNVs/InDels, CNAs and RNA
+fusions are listed as supporting findings (HTML report and PDF
+cover)</li>
+<li>Report header: assay mode (tumor-control/tumor-only) shown as a
+title badge next to assay type and genome assembly; data input status
+shown as a compact row of chips (including <em>Germline variants
+(CPSR)</em>), marked included/not included by icon and hover text in
+addition to color; sex/age always shown as <code>SEX / AGE</code>
+(<code>N/A</code> when age is not provided)</li>
+<li>Potential two-hit events: wording reflects whether germline (CPSR)
+variants were provided, with a warning when they were not (only somatic
+variants are then considered)
+<ul>
 <li>Cancer predisposition gene mode of inheritance
 (<code>CPG_MOI</code>) shown as <em>Inheritance</em>, with the full
 name(s) available on hover</li>
@@ -157,6 +192,25 @@ plot caption</li>
 the allele-specific copy number segments, and reported in the
 <code>cna_summary.tsv</code> output file</li>
 <li>
+<strong>PDF report</strong> - new section <em>Diagnostic and
+prognostic biomarkers</em> (after <em>Clinical actionability</em>): Tier
+1/2 prognostic (poor/better outcome) and diagnostic biomarker evidence
+for SNVs/InDels, CNAs and RNA fusions, per variant category, with
+evidence levels and sources; key findings on the cover link to this
+section</li>
+<li>
+<strong>PDF report</strong> - section headings and table labels are
+kept on the same page as the table that follows (no headings left alone
+at the bottom of a page); tables that fit on a page are kept together
+with their label</li>
+<li>
+<strong>PDF report</strong> - Tier 1/2 aberrations table:
+OncoKB-curated oncogenicity shown in a separate <em>OncoKB</em> column
+for SNVs/InDels, CNAs and RNA fusions (when OncoKB annotations are
+present), next to PCGR’s ClinGen/CGC/VICC oncogenicity (SNVs/InDels);
+VAF column dropped (SNVs/InDels only - shown in the SNV/InDel
+section)</li>
+<li>
 <strong>PDF report</strong> - a focused PDF report is now generated
 by default (opt out with the new <code>--no_pdf</code> option)
 (Quarto/Typst;
@@ -166,15 +220,16 @@ addition to the HTML report, with a cover page summarising key findings
 in the CPSR PDF report</li>
 <li>
 <strong>Subject age</strong> - new option <code>--age</code> (age of
-the subject in whole years at diagnosis), listed with <code>--sex</code>
-in a new <em>Subject options</em> group of the command-line interface
-(separate from <em>Tumor sample options</em>). The age is stored in the
-run configuration (<code>subject_properties: age</code>, together with
-<code>sex</code>); in the SAMPLE_ASSAY sheet of the Excel output, sex
-and age are listed under <code>CATEGORY</code> = <code>SUBJECT</code>),
-shown with sex on the PDF cover page and in the PDF settings, and listed
-in the SAMPLE_ASSAY sheet of the Excel output
-(<code>AGE_AT_DIAGNOSIS</code>)</li>
+the subject in whole years at the time of tumor sampling), listed with
+<code>--sex</code> in a new <em>Subject options</em> group of the
+command-line interface (separate from <em>Tumor sample options</em>).
+The age is stored in the run configuration
+(<code>subject_properties: age</code>, together with <code>sex</code>);
+in the SAMPLE_ASSAY sheet of the Excel output, sex and age are listed
+under <code>CATEGORY</code> = <code>SUBJECT</code>), shown with sex on
+the PDF cover page and in the PDF settings, and listed in the
+SAMPLE_ASSAY sheet of the Excel output
+(<code>AGE_AT_SAMPLING</code>)</li>
 <li>
 <strong>Tumor purity source</strong> - tumor purity is shown with
 its source (<code>provided</code>, as for tumor ploidy) in the HTML and
@@ -280,8 +335,21 @@ e.g. <code>PTEN, PTEN, PTEN</code>
 output, fixing a failure when loading somatic CNA data</li>
 <li>RNA fusions with a breakpoint on an ALT/decoy contig are dropped
 with a warning rather than aborting the run</li>
+<li>RNA fusion and CNA biomarker matching only used evidence from the
+first biomarker variant per fusion/gene key, missing e.g. the diagnostic
+CIViC evidence for EWSR1::FLI1 in Ewing sarcoma. All biomarker variants
+per key are now considered, while exon-specific fusion variants
+(e.g. <code>EWSR1::FLI1 e7::e6</code>) are skipped, since fusion exons
+are not resolved</li>
 <li>OncoKB input files are only generated when OncoKB annotation will
 run</li>
+<li>Sorting the <em>Oncogenicity</em> column of the SNV/InDel (and MMR
+variant) tables ordered the classes alphabetically (Benign first) - now
+ordered by oncogenicity (Oncogenic first)</li>
+<li>Formulas in the expression outlier and two-hit VAF consistency
+descriptions were shown as raw LaTeX (e.g. <code>\times</code>) when
+MathJax could not be embedded (e.g. offline/container rendering) - now
+written as plain text</li>
 <li>Corrected documentation of the <code>SPLICE_EFFECT</code> output
 format, and the <code>--diagnostic_grade_only</code> help text for CPSR
 (Genomics England panel ids 1-43)</li>

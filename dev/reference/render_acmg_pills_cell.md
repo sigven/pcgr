@@ -6,8 +6,9 @@ codes (PVS/PS/PM/PP\*) are colored to match the "Pathogenic" tone of
 `color_palette$pathogenicity`, benign evidence codes (BA/BS/BP\*) are
 colored to match its "Benign" tone, and any other/unrecognized code
 falls back to a neutral gray pill. Each pill carries a hover tooltip
-with a condensed description of the evidence code, sourced from
-`acmg_evidence_descriptions`.
+with a condensed description of the evidence code and its contribution
+to the CPSR pathogenicity score, sourced from
+`acmg_evidence_descriptions` and `acmg_evidence_scores`.
 
 ## Usage
 

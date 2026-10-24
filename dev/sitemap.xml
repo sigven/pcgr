@@ -14,6 +14,7 @@
 <url><loc>https://sigven.github.io/pcgr/dev/articles/variant_classification.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/authors.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/index.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/acmg_pill_tooltip.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/actionability_doc_note.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/af_distribution.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/append_alteration_name.html</loc></url>
@@ -77,6 +78,7 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/exonic_filter_levels.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/export_quarto_evars.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/expression_doc_note.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/expression_similarity_sources.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/extract_complete_annotation.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/extract_diagnostic_evidence.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/extract_prognostic_evidence.html</loc></url>
@@ -169,6 +171,7 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/md_escape_hl.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/mitdb_site_count.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/mkdir.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/moi_display_text.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/msi_doc_note.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/msi_indel_fraction_plot.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/msi_indel_load_plot.html</loc></url>
@@ -176,6 +179,7 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/mutational_signatures_doc_note.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/oncogenicity_criteria.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/oncogenicity_doc_note.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/oncogenicity_sort_value.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/oncokb_annotations.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/oncokb_base_api_url.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/oncokb_extract_field.html</loc></url>
@@ -187,6 +191,8 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/pdf_cover_values.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/pdf_gene_link.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/pdf_kpi_row.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/pdf_label.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/pdf_labelled_table.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/pdf_legend.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/pdf_link.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/pdf_logo.html</loc></url>
@@ -198,6 +204,7 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/pdf_plot_varstats.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/pdf_report_color.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/pdf_section_bm_evidence.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/pdf_section_progn_diagn.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/pdf_style_table.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/pdf_table_bm_evidence.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/pdf_table_expression_outliers.html</loc></url>
@@ -243,6 +250,7 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/render_evidence_desc_cell.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/render_evidence_level_cell.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/render_genotype_style.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/render_gnomad_af_cell.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/render_moi_cell.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/render_oncogenicity_cell.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/render_progn_bm_table.html</loc></url>

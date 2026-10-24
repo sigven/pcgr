@@ -1,9 +1,9 @@
-# Biomarker evidence table (therapeutic sensitivity/resistance) for the PDF report - one row per matched alteration, with tier, matched therapies (tumor types), and evidence sources (cf. render_actble_bm_table() of the HTML report)
+# Biomarker evidence table (therapeutic sensitivity/resistance, prognostic or diagnostic) for the PDF report - one row per matched alteration, with tier, matched therapies / outcomes / diagnostic evidence (tumor types), and evidence sources (cf. render_actble_bm_table() of the HTML report)
 
-Biomarker evidence table (therapeutic sensitivity/resistance) for the
-PDF report - one row per matched alteration, with tier, matched
-therapies (tumor types), and evidence sources (cf.
-render_actble_bm_table() of the HTML report)
+Biomarker evidence table (therapeutic sensitivity/resistance, prognostic
+or diagnostic) for the PDF report - one row per matched alteration, with
+tier, matched therapies / outcomes / diagnostic evidence (tumor types),
+and evidence sources (cf. render_actble_bm_table() of the HTML report)
 
 ## Usage
 
@@ -19,11 +19,14 @@ pdf_table_bm_evidence(
 
 - rctbl_recs:
 
-  list with 'main' data frame, from prep_actble_display_tbl()
+  list with 'main' data frame, from prep_actble_display_tbl(),
+  prep_progn_display_tbl() or prep_diagn_display_tbl()
 
 - clnsig:
 
-  'therapeutic_sensitivity' or 'therapeutic_resistance'
+  evidence type - 'therapeutic_sensitivity', 'therapeutic_resistance',
+  'prognostic_poor', 'prognostic_better', 'diagnostic_positive' or
+  'diagnostic_negative' (tier colors)
 
 - color:
 

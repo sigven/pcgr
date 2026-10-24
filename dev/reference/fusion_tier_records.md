@@ -18,4 +18,4 @@ fusion_tier_records(fusions)
 ## Value
 
 data frame with SYMBOL, ALTERATION, VARIANT_CLASS and ACTIONABILITY_TIER
-(integer)
+(integer), and ONCOGENICITY_OKB when OncoKB annotations are present
