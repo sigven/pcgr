@@ -104,3 +104,24 @@ generate_report_data_expression <-
 }
 
 
+
+#' Reference sources of the expression similarity analysis, as display
+#' labels (run configuration / report settings)
+#'
+#' @param conf PCGR run configuration (settings - conf); the sources are
+#' the names of conf - expression - similarity_db ('--expression_sim_db')
+#'
+#' @return character vector of source labels (in the order TCGA, DepMap,
+#' Treehouse), empty if the similarity analysis is not run
+#' @export
+expression_similarity_sources <- function(conf) {
+  if (!isTRUE(as.logical(conf$expression$similarity_analysis))) {
+    return(character())
+  }
+  source_labels <- c(
+    tcga = "TCGA (primary tumors)",
+    depmap = "DepMap (cancer cell lines)",
+    treehouse = "Treehouse (pediatric tumors)")
+  unname(source_labels[intersect(
+    names(source_labels), names(conf$expression$similarity_db))])
+}

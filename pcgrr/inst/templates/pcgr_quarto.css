@@ -109,7 +109,7 @@ h2, #TOC>ul>li {
 }
 
 .green {
-  background: #3fad46;
+  background: #35814a;
   border-radius: 5px;
 
 }
@@ -457,3 +457,59 @@ h2, #TOC>ul>li {
   border-radius: 12px;
   margin-right: 6px;
 }
+
+/* Data input status (report header), as a compact row of chips - filled
+   when the data type was included, outlined when not */
+.pcgr-input-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin: 0 0 1em 0;
+}
+.pcgr-input-chips-label {
+  font-size: 0.8em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #6c757d;
+  margin-right: 4px;
+}
+.pcgr-input-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.88em;
+  font-weight: 500;
+  padding: 3px 11px;
+  border-radius: 999px;
+  border: 1.5px solid var(--chip-color);
+  white-space: nowrap;
+}
+.pcgr-input-chip--on {
+  background-color: var(--chip-color);
+  color: #fff;
+}
+.pcgr-input-chip--off {
+  background-color: transparent;
+  color: #757575;
+  border-style: dashed;
+}
+.pcgr-input-chip-icon {
+  font-weight: 700;
+}
+
+/* Report footer (PCGR logo + attribution) */
+.pcgr-report-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 2em;
+  padding-top: 0.8em;
+  border-top: 1px solid #d6d6d6;
+  font-size: 0.85em;
+  color: #555555;
+}
+.pcgr-report-footer a { color: inherit; }
+.pcgr-report-footer img { display: block; margin: 0; }

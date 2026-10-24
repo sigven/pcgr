@@ -246,7 +246,7 @@ for (c in c("pathogenicity",
     color_palette[[c]] <- "#868686"
   }
   if (c == "success") {
-    color_palette[[c]] <- "#00a65a"
+    color_palette[[c]] <- "#35814a"
   }
   if (c == 'expression_outlier_high'){
     color_palette[[c]][["breaks"]] <- c(96,97,98,99)
@@ -818,6 +818,9 @@ data_coltype_defs[['snv_indel_germline_cpsr']] <- readr::cols_only(
   CLINVAR_GOLD_STARS = readr::col_integer(),
   CLINVAR_VARIANT_ORIGIN = readr::col_character(),
   DBSNP_RSID = readr::col_character(),
+  gnomADe_AF = readr::col_number(),
+  gnomADg_AF = readr::col_number(),
+  CPG_MOI = readr::col_character(),
   ASSERTION_AUTHORITY = readr::col_character(),
   ASSERTION_RATIONALE = readr::col_character(),
   CPSR_CLASSIFICATION = readr::col_character(),

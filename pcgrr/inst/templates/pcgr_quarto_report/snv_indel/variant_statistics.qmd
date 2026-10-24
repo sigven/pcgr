@@ -45,6 +45,10 @@ varstats_plots_plotly[['variant_class']] <-
 
 ```
 
+::: {.callout-note collapse="true" #varstats-callout}
+
+## Variant statistics - coding status, variant type and consequence
+
 ```{r display_varstats}
 #| output: asis
 #| echo: false
@@ -104,6 +108,22 @@ bslib::page_fillable(
 )
 
 
+```
+
+:::
+
+```{=html}
+<script>
+// the variant statistics charts are drawn while their callout is collapsed
+// (zero size) - resize them once the callout is expanded
+document.addEventListener("DOMContentLoaded", function() {
+  var callout = document.getElementById("varstats-callout");
+  if (!callout) return;
+  callout.addEventListener("shown.bs.collapse", function() {
+    window.dispatchEvent(new Event("resize"));
+  });
+});
+</script>
 ```
 
 

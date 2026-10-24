@@ -140,8 +140,13 @@ if (NROW(coding_variant_set[!is.na(coding_variant_set$ONCOGENICITY) &
     dplyr::arrange(dplyr::desc(onc_vus_path_clinvar),
                    dplyr::desc(ONCOGENICITY_SCORE))
   coding_variant_set$onc_vus_path_clinvar <- NULL
-  
+
 }
+
+## rank-prefixed oncogenicity, so that sorting the column orders the
+## classes by oncogenicity rather than alphabetically
+coding_variant_set$ONCOGENICITY <-
+  pcgrr::oncogenicity_sort_value(coding_variant_set$ONCOGENICITY)
 
 coding_variants_shared <-
   crosstalk::SharedData$new(coding_variant_set)
@@ -295,8 +300,11 @@ if (NROW(noncoding_variant_set[!is.na(noncoding_variant_set$ONCOGENICITY) &
     dplyr::arrange(dplyr::desc(onc_vus_path_clinvar),
                    dplyr::desc(ONCOGENICITY_SCORE))
   noncoding_variant_set$onc_vus_path_clinvar <- NULL
-  
+
 }
+
+noncoding_variant_set$ONCOGENICITY <-
+  pcgrr::oncogenicity_sort_value(noncoding_variant_set$ONCOGENICITY)
 
 noncoding_variants_shared <-
   crosstalk::SharedData$new(noncoding_variant_set)

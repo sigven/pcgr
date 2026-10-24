@@ -26,6 +26,7 @@ if (pcg_report[['content']][['germline_classified']][['panel_info']][['panel_id'
 * Based on a germline variant analysis of the query case using the [Cancer Predisposition Sequencing Reporter (CPSR)](https://github.com/sigven/cpsr), we here list the variants of clinical significance in cancer predisposition genes, both novel (not recorded in ClinVar), and those with existing classifications in ClinVar.
     * Virtual panel of cancer predisposition genes screened: `r panel_link`
     * All variants classified as Pathogenic or Likely Pathogenic are listed here, regardless of coding status
+    * _gnomAD AF_ shows the overall allele frequency in gnomAD exomes (genomes for variants not covered by exomes), with both values on hover. Note that CPSR's frequency-based ACMG criteria (PM2, BA1, BS1) use gene-specific thresholds on _population-maximum_ frequencies, which can be higher than the overall frequency shown
     * Variants of uncertain significance (VUS) are `r ifelse(!pcg_report$settings$conf$germline$ignore_vus, "__also shown__, but limited to a focused subset of protein-coding VUS (missense, nonsense, frameshift, essential splice site etc.) - __not__ the complete set of VUS identified by CPSR", "__not included__ in this list")`
 
 
@@ -76,7 +77,8 @@ has_dual_moi <- "CPG_MOI" %in% colnames(germline_calls$variant_display) &&
 
 if (has_dual_moi) {
   cat(paste0(
-    '<b>NOTE</b> - for a subset of genes, <i>Inheritance</i> combines two ',
+    '<b>NOTE</b> - for a subset of genes, the mode of inheritance ',
+    '(<i>Inheritance</i>, in the row details) combines two ',
     'modes (e.g. "AD/AR"): a heterozygous finding (see <i>Genotype</i>) ',
     'typically reflects the dominant condition, while a homozygous/',
     'biallelic finding may reflect a distinct, recessive condition<br>'),
@@ -84,9 +86,30 @@ if (has_dual_moi) {
   cat('<br>')
 }
 
+## population frequency shown next to the ACMG criteria, to aid in
+## interpreting the frequency-based criteria (PM2, BA1, BS1) - exome AF,
+## with genome AF as fallback (e.g. for non-coding variants). CPSR records
+## variants absent from gnomAD with AF = 0, treated as missing here
+if (all(c("gnomADe_AF", "gnomADg_AF") %in%
+        colnames(germline_calls$variant_display))) {
+  present_af <- function(x) dplyr::if_else(!is.na(x) & x > 0, x, NA_real_)
+  germline_calls$variant_display <- germline_calls$variant_display |>
+    dplyr::mutate(
+      GNOMAD_AF = dplyr::coalesce(
+        present_af(.data$gnomADe_AF), present_af(.data$gnomADg_AF)))
+}
+
+## mode of inheritance in the row details (keeps the main row compact),
+## with the abbreviated code(s) spelled out
+if ("CPG_MOI" %in% colnames(germline_calls$variant_display)) {
+  germline_calls$variant_display <- germline_calls$variant_display |>
+    dplyr::mutate(INHERITANCE = pcgrr::moi_display_text(.data$CPG_MOI)) |>
+    dplyr::select(-"CPG_MOI")
+}
+
 germline_primary_cols <- c(
   "SYMBOL", "ALTERATION", "CONSEQUENCE", "GENOTYPE",
-  "CLINICAL_SIGNIFICANCE", "ACMG_CODE", "CPG_MOI"
+  "CLINICAL_SIGNIFICANCE", "ACMG_CODE", "GNOMAD_AF"
 )
 
 ## reactable renders visible columns in the underlying data frame's

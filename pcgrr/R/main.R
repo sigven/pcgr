@@ -1049,10 +1049,17 @@ write_report_html <- function(
           isTRUE(report$content$snv_indel$eval) ||
           isTRUE(report$content$cna$eval)
 
+        ## assay mode worded as on the PDF cover (pcgrr:::pdf_cover_values)
+        assay_mode_display <-
+          if (isTRUE(as.logical(settings$conf$assay_properties$vcf_tumor_only)))
+            "Tumor-only" else "Tumor-control"
+
         assay_build_badges <- if (dna_data_present) {
           paste0(
             "<span class='pcgr-assay-badge'>",
             settings$conf$assay_properties$type,
+            "</span><span class='pcgr-assay-badge'>",
+            assay_mode_display,
             "</span><span class='pcgr-assay-badge'>",
             genome_assembly_display,
             "</span>")

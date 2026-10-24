@@ -20,6 +20,11 @@ same rules, with ties resolved alphabetically by gene symbol.
 
 **Supporting findings** (in this order)
 
+- __Prognostic biomarkers__: alterations (SNVs/InDels, copy number aberrations, RNA fusions) with
+  AMP/ASCO/CAP Tier 1/2 evidence of poor or better outcome, each with its tier (Tier 1 first, then
+  cancer association rank)
+- __Diagnostic biomarkers__: alterations with Tier 1/2 evidence supporting a diagnosis, each with
+  its tier (ordered as for prognostic biomarkers)
 - __SNV/InDel variants__: number of oncogenic / likely oncogenic SNVs/InDels (all, including those
   listed as actionable - their number is stated), with the first five of the variants *not* already
   listed as actionable (oncogenicity score, highest first, then tissue-specific and global cancer

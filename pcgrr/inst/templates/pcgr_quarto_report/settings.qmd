@@ -1,5 +1,3 @@
-<!-- clear the floated logo, so that the overview cards span the full width -->
-<div style="clear: both;"></div>
 <hr style="margin: 0.5em 0 1em 0;">
 
 ```{r on_off_settings}
@@ -35,9 +33,12 @@ assay_type <- conf$assay_properties$type
 tumor_site <- conf$sample_properties$site
 sex <- conf$subject_properties$sex
 age <- conf$subject_properties$age
+## mirrors the PDF cover (pcgrr:::pdf_cover_values) - always 'SEX / AGE'
 if (!is.null(age) && length(age) == 1 && !is.na(age) &&
     !age %in% c("NA", "None")) {
   sex <- paste0(sex, " / ", age, " years")
+} else {
+  sex <- paste0(sex, " / N/A")
 }
 assay_mode <- conf$assay_properties$mode
 genome_assembly <- pcg_report[['settings']][['genome_assembly']]
@@ -119,47 +120,34 @@ if (as.logical(pcg_report[["settings"]][["conf"]][["vep"]][["vep_gencode_basic"]
 }
 ```
 
-<br><br>
-
 ```{r input_data_indicators}
 #| output: asis
 #| echo: false
 #| eval: true
 
-bslib::layout_column_wrap(
-  width = 1/4,
-  height = 90,
-  bslib::value_box(
-    title = "Data input",
-    value = "Somatic SNVs/InDels",
-    showcase = NULL,
-    #showcase = bsicons::bs_icon(
-    #  if (snv_indel_eval) "check-square" else "x-square", size = "0.4em"),
-    #showcase_layout = "top right",
-    theme = bslib::value_box_theme(
-      bg = if (snv_indel_eval) success_color else none_color, fg = "#fff")
-  ),
-  bslib::value_box(
-    title = "Data input",
-    value = "Somatic CNAs",
-    showcase = NULL,
-    theme = bslib::value_box_theme(
-      bg = if (cna_eval) success_color else none_color, fg = "#fff")
-  ),
-  bslib::value_box(
-    title = "Data input",
-    value = "RNA fusions",
-    showcase = NULL,
-    theme = bslib::value_box_theme(
-      bg = if (fusion_eval) success_color else none_color, fg = "#fff")
-  ),
-  bslib::value_box(
-    title = "Data input",
-    value = "Gene expression",
-    showcase = NULL,
-    theme = bslib::value_box_theme(
-      bg = if (expression_eval) success_color else none_color, fg = "#fff")
-  )
+## compact row of data input chips - status is marked by icon and hover
+## text (not only color-coded), for print and color vision deficiencies
+input_chip <- function(label, included) {
+  included <- isTRUE(included)
+  htmltools::span(
+    class = paste0("pcgr-input-chip pcgr-input-chip--",
+                   if (included) "on" else "off"),
+    style = paste0("--chip-color: ",
+                   if (included) success_color else none_color),
+    title = paste0(label, if (included) ": included" else ": not included"),
+    htmltools::span(class = "pcgr-input-chip-icon",
+                    if (included) "✓" else "✕"),
+    label)
+}
+
+htmltools::div(
+  class = "pcgr-input-chips",
+  htmltools::span(class = "pcgr-input-chips-label", "Data input"),
+  input_chip("Somatic SNVs/InDels", snv_indel_eval),
+  input_chip("Somatic CNAs", cna_eval),
+  input_chip("Germline variants (CPSR)", include_germline_findings == 'ON'),
+  input_chip("RNA fusions", fusion_eval),
+  input_chip("Gene expression", expression_eval)
 )
 ```
 
@@ -180,7 +168,7 @@ bslib::layout_column_wrap(
       bg = report_color, fg = "#fff")
   ),
   bslib::value_box(
-    title = "Sex / age",
+    title = "Sex / age at sampling",
     value = sex,
     showcase = NULL,
     theme = bslib::value_box_theme(
@@ -345,6 +333,10 @@ cat(glue::glue("* Genomic instability (HRD) score estimated: __{as.logical(conf$
 #| eval: !expr as.logical(pcg_report$content$expression$eval) == TRUE
 cat("\n**Expression settings**\n\n")
 cat(glue::glue("* RNA expression similarity analysis: __{rna_expression_similarity}__"), "\n")
+sim_sources <- pcgrr::expression_similarity_sources(conf)
+if (length(sim_sources) > 0) {
+  cat(glue::glue("  * Reference sources: __{paste(sim_sources, collapse = ', ')}__"), "\n")
+}
 ```
 
 ```{r fusion_settings}

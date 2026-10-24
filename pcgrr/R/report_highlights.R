@@ -61,13 +61,38 @@ fmt_list_hl <- function(x, max_show = 5) {
 #'
 #' @param report PCGR report object
 #' @param tier actionability tiers
+#' @param clnsig type of biomarker evidence the tiers refer to -
+#' 'therapeutic_sensitivity' (default, the tier of each variant record), or
+#' e.g. 'prognostic_poor', 'prognostic_better', 'diagnostic_positive' (tiers
+#' from the corresponding bm_evidence classification of each callset)
 #'
 #' @return data frame with LABEL, SYMBOL, ALTERATION and ACTIONABILITY_TIER
 #' @keywords internal
-tiered_alterations_hl <- function(report, tier = c(1, 2)) {
+tiered_alterations_hl <- function(report, tier = c(1, 2),
+                                  clnsig = "therapeutic_sensitivity") {
   content <- report$content
+  ## variant records of a callset, with ACTIONABILITY_TIER according to clnsig
+  ## (fusions are matched on VAR_ID/VARIANT_CLASS only, as their ENTREZGENE
+  ## differs between variant and evidence records - see
+  ## prep_actble_display_tbl())
+  variant_tiers <- function(category) {
+    callset <- content[[category]]$callset
+    v <- callset$variant
+    if (clnsig == "therapeutic_sensitivity" || NROW(v) == 0) return(v)
+    cls <- callset$bm_evidence[[clnsig]]$classification
+    if (NROW(cls) == 0) return(v[0, , drop = FALSE])
+    join_cols <- c("VAR_ID", "VARIANT_CLASS",
+                   if (category != "fusion") "ENTREZGENE")
+    if (!all(join_cols %in% colnames(cls)) ||
+        !all(join_cols %in% colnames(v))) return(v[0, , drop = FALSE])
+    dplyr::inner_join(
+      dplyr::select(v, -dplyr::any_of("ACTIONABILITY_TIER")),
+      dplyr::distinct(dplyr::select(
+        cls, dplyr::all_of(c(join_cols, "ACTIONABILITY_TIER")))),
+      by = join_cols, relationship = "many-to-many")
+  }
   recs <- list()
-  snv <- content$snv_indel$callset$variant
+  snv <- variant_tiers("snv_indel")
   if (isTRUE(content$snv_indel$eval) && NROW(snv) > 0 &&
       all(c("SYMBOL", "ALTERATION", "ACTIONABILITY_TIER") %in% colnames(snv))) {
     recs$snv <- data.frame(
@@ -76,7 +101,7 @@ tiered_alterations_hl <- function(report, tier = c(1, 2)) {
       GLOBAL_ASSOC_RANK = snv$GLOBAL_ASSOC_RANK,
       ACTIONABILITY_TIER = suppressWarnings(as.integer(snv$ACTIONABILITY_TIER)))
   }
-  cna <- content$cna$callset$variant
+  cna <- variant_tiers("cna")
   if (isTRUE(content$cna$eval) && NROW(cna) > 0 &&
       all(c("SYMBOL", "VARIANT_CLASS", "ACTIONABILITY_TIER") %in% colnames(cna))) {
     recs$cna <- data.frame(
@@ -88,7 +113,7 @@ tiered_alterations_hl <- function(report, tier = c(1, 2)) {
         .default = as.character(cna$VARIANT_CLASS)),
       ACTIONABILITY_TIER = suppressWarnings(as.integer(cna$ACTIONABILITY_TIER)))
   }
-  fus <- content$fusion$callset$variant
+  fus <- variant_tiers("fusion")
   if (isTRUE(content$fusion$eval) && NROW(fus) > 0) {
     f <- fusion_tier_records(fus)
     if (NROW(f) > 0) recs$fusion <- f[, c("SYMBOL", "ALTERATION",
@@ -102,6 +127,11 @@ tiered_alterations_hl <- function(report, tier = c(1, 2)) {
   d <- d[!is.na(d$ACTIONABILITY_TIER) & d$ACTIONABILITY_TIER %in% tier, ,
          drop = FALSE]
   d <- dplyr::distinct(d)
+  ## fusion records carry no cancer association ranks - absent when only
+  ## fusions are tiered
+  for (rank_col in c("TISSUE_ASSOC_RANK", "GLOBAL_ASSOC_RANK")) {
+    if (!rank_col %in% colnames(d)) d[[rank_col]] <- rep(NA_real_, NROW(d))
+  }
   ## tier (1 before 2), then cancer association ranks, then symbol
   d <- d[do.call(order, list(
     d$ACTIONABILITY_TIER,
@@ -120,6 +150,7 @@ tiered_alterations_hl <- function(report, tier = c(1, 2)) {
 #' The most critical findings come first: somatic alterations of strong or
 #' potential clinical significance (AMP/ASCO/CAP Tier 1/2). These are
 #' followed by supporting findings, each included only when informative:
+#' prognostic and diagnostic biomarkers (Tier 1/2),
 #' oncogenic/likely oncogenic SNV/InDel variants, composite genomic
 #' biomarkers (TMB, MSI), copy number variants (amplified proto-oncogenes,
 #' deleted tumor suppressors, genome doubling, HRD score), mutational
@@ -173,6 +204,34 @@ report_highlights <- function(report, max_show = 5, links = FALSE) {
 
   ## --- Supporting findings ---
   supporting <- c()
+
+  ## prognostic and diagnostic biomarkers (AMP/ASCO/CAP Tier 1/2) - one
+  ## finding per evidence type, listing alterations with their tier; only
+  ## included when any such evidence is found
+  bm_items <- function(types) {
+    items <- c()
+    for (desc in names(types)) {
+      d <- tiered_alterations_hl(report, tier = c(1, 2), clnsig = types[[desc]])
+      if (NROW(d) == 0) next
+      d <- d[!duplicated(d$LABEL), , drop = FALSE]
+      items <- c(items, paste0(desc, ": ", fmt_list_hl(
+        paste0(d$LABEL, " (Tier ", d$ACTIONABILITY_TIER, ")"), max_show)))
+    }
+    items
+  }
+  progn <- bm_items(c("poor outcome" = "prognostic_poor",
+                      "better outcome" = "prognostic_better"))
+  if (length(progn) > 0) {
+    supporting <- c(supporting, paste0(
+      sec_link("**Prognostic biomarkers:**", "pcgr-diagn-progn"), " ",
+      paste(progn, collapse = "; ")))
+  }
+  diagn <- bm_items(c("supporting diagnosis" = "diagnostic_positive"))
+  if (length(diagn) > 0) {
+    supporting <- c(supporting, paste0(
+      sec_link("**Diagnostic biomarkers:**", "pcgr-diagn-progn"), " ",
+      paste(diagn, collapse = "; ")))
+  }
 
   ## SNV/InDel variants - number of oncogenic / likely oncogenic variants
   ## (all, including the actionable ones - their number is stated), with the

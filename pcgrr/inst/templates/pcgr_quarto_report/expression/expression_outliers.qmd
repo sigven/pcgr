@@ -3,7 +3,7 @@
 Here, we show the protein-coding gene expression outliers identified in the RNA input sample, as compared to the selected reference cohort. We consider expression outliers as genes with expression levels (specifically log-transformed TPM values, see below) located at the extreme ends of the distributions observed in the reference cohort, specifically those with:
 
 1) An expression level in the top or bottom percentiles (i.e. above 95 or below 5), _and_
-2) An expression level that is more than $Q3 + 1.5 \times IQR$ (increased expression) or less than $Q1 - 1.5 \times IQR$ (decreased expression), _and_
+2) An expression level that is more than _Q3 + 1.5 × IQR_ (increased expression) or less than _Q1 − 1.5 × IQR_ (decreased expression), _and_
 3) An expression level with a Z-score above 2 or below -2
 
 __TPM__: Transcripts per Million

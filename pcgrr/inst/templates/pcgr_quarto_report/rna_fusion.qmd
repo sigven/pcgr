@@ -63,16 +63,32 @@ cat(paste0(
 #| output: asis
 #| echo: false
 
-fusion_events <- callset$variant_display |>
+## Fusion gene cell is tinted by OncoKB oncogenicity (ONCOGENICITY_OKB) when
+## the fusion is OncoKB-curated as (Likely) Oncogenic - as for the CNA table.
+## When no OncoKB token was supplied the column is absent/all-NA -> no tint.
+onc_okb_levels <- pcgrr::color_palette$oncogenicity$levels
+onc_okb_colors <- pcgrr::color_palette$oncogenicity$values
+fusion_events <- callset$variant_display
+if (!"ONCOGENICITY_OKB" %in% colnames(fusion_events)) {
+  fusion_events$ONCOGENICITY_OKB <- NA_character_
+}
+has_okb_onc <- any(
+  fusion_events$ONCOGENICITY_OKB %in% c("Oncogenic", "Likely Oncogenic"))
+
+fusion_events <- fusion_events |>
   dplyr::mutate(
     PRIMARY_SITE_MATCH = dplyr::if_else(
       stringr::str_detect(
-        .data$MITDB_EVIDENCE, 
+        .data$MITDB_EVIDENCE,
         glue::glue("<b>{pcg_report$settings$conf$sample_properties$site}</b>")),
       TRUE,FALSE,FALSE
-    )
+    ),
+    ## OncoKB (Likely) Oncogenic fusions first
+    OKB_ONC_RANK = dplyr::coalesce(
+      match(.data$ONCOGENICITY_OKB, c("Oncogenic", "Likely Oncogenic")), 3L)
   ) |>
   dplyr::arrange(
+    OKB_ONC_RANK,
     dplyr::desc(PRIMARY_SITE_MATCH),
     dplyr::desc(ONCOGENE_5P),
     dplyr::desc(ONCOGENE_3P),
@@ -82,7 +98,20 @@ fusion_events <- callset$variant_display |>
        "SAMPLE_ALTERATION",
        "GLOBAL_ASSOC_RANK","ACTIONABILITY_TIER",
        "ACTIONABILITY",
-       "PRIMARY_SITE_MATCH")))
+       "PRIMARY_SITE_MATCH",
+       "OKB_ONC_RANK")))
+
+if (has_okb_onc) {
+  cat(paste0(
+    "<p>The <b>Fusion gene</b> cell is tinted (with a colored left border) ",
+    "according to the OncoKB oncogenicity classification &ndash; ",
+    "<span style='background-color:", onc_okb_colors[1],
+    "; color:white'><b>&nbsp; Oncogenic &nbsp;</b></span>&nbsp; or ",
+    "<span style='background-color:", onc_okb_colors[2],
+    "; color:white'><b>&nbsp; Likely Oncogenic &nbsp;</b></span>, and these ",
+    "fusions are listed first. The full set of OncoKB annotations is ",
+    "available by expanding a table row.</p>\n\n"))
+}
 
 fusion_events_shared <- crosstalk::SharedData$new(
   fusion_events)
@@ -112,8 +141,16 @@ primary_cols <- c(
 col_defs <- list(
   FUSION_GENE2 = reactable::colDef(
     name = "Fusion gene",
-    #style = pcgrr::render_symbol_assoc_style(
-    #  dt_other_oncogenic, rank_col = symbol_rank_col),
+    style = if (has_okb_onc) function(value, index) {
+      onc <- fusion_events$ONCOGENICITY_OKB[index]
+      bg <- onc_okb_colors[match(onc, onc_okb_levels)]
+      if (length(onc) == 0 || is.na(onc) || is.na(bg) ||
+          !onc %in% c("Oncogenic", "Likely Oncogenic")) return(NULL)
+      list(
+        borderLeft = paste0("4px solid ", bg),
+        background = paste0(bg, "1A"),
+        fontWeight = "bold")
+    } else NULL,
     minWidth = 130
   ),
   SPLIT_READS = reactable::colDef(name = "Split Reads", minWidth = 90),

@@ -100,7 +100,7 @@ germline_eval <- isTRUE(pcg_report$content$germline_classified$eval)
 if (germline_eval) {
   germline_primary_cols <- c(
     "SYMBOL", "ALTERATION", "CONSEQUENCE", "GENOTYPE",
-    "CLINICAL_SIGNIFICANCE", "ACMG_CODE", "CPG_MOI"
+    "CLINICAL_SIGNIFICANCE", "ACMG_CODE"
   )
 
   germline_mmr_variants <-
@@ -109,6 +109,12 @@ if (germline_eval) {
       .data$SYMBOL %in% core_mmr_genes &
         .data$CLINICAL_SIGNIFICANCE %in% c("Pathogenic", "Likely Pathogenic")) |>
     dplyr::relocate(dplyr::any_of(germline_primary_cols))
+  ## mode of inheritance in the row details (as in the germline findings)
+  if ("CPG_MOI" %in% colnames(germline_mmr_variants)) {
+    germline_mmr_variants <- germline_mmr_variants |>
+      dplyr::mutate(INHERITANCE = pcgrr::moi_display_text(.data$CPG_MOI)) |>
+      dplyr::select(-"CPG_MOI")
+  }
 
   ## DP_CONTROL is set to -1 when CPSR is run without a matched control
   ## sample - drop it so a sentinel value does not surface in row details
@@ -223,6 +229,11 @@ cat("\n::: {.panel-tabset}\n\n##### Somatic\n\n")
 #| output: asis
 
 if (NROW(msi_content[['mmr_pol_variants']]) > 0) {
+  if ("ONCOGENICITY" %in% colnames(msi_content[['mmr_pol_variants']])) {
+    msi_content[['mmr_pol_variants']]$ONCOGENICITY <-
+      pcgrr::oncogenicity_sort_value(
+        msi_content[['mmr_pol_variants']]$ONCOGENICITY)
+  }
   reactable::reactable(
     msi_content[['mmr_pol_variants']],
     columns = pcgrr::build_oncogenicity_col_defs(

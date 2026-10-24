@@ -322,7 +322,31 @@ htmltools::br()
 
 ### Potential two-hit events
 
-For tumor suppressor genes (TSGs) subject to loss-of-heterozygosity (LOH) – either a deletion or copy-neutral LOH event – we show any co-occurring somatic or germline loss-of-function SNV/InDels that may constitute a _two-hit_ inactivation of the gene. 
+```{r twohit_germline_included}
+#| echo: false
+#| eval: true
+
+twohit_germline_included <-
+  isTRUE(as.logical(pcg_report$content$germline_classified$eval))
+twohit_lof_origin <- if (twohit_germline_included) "somatic or germline" else "somatic"
+```
+
+For tumor suppressor genes (TSGs) subject to loss-of-heterozygosity (LOH) – either a deletion or copy-neutral LOH event – we show any co-occurring `r twohit_lof_origin` loss-of-function SNV/InDels that may constitute a _two-hit_ inactivation of the gene.
+
+```{r twohit_germline_missing_warn}
+#| echo: false
+#| output: asis
+
+if (!twohit_germline_included) {
+  cat("::: {.callout-warning}\n\n")
+  cat("## Germline variants not included\n\n")
+  cat("No germline variant data (CPSR output) was provided for this sample, so only ",
+      "_somatic_ loss-of-function variants are considered here. Germline two-hit events ",
+      "(LOH of a gene with an inherited pathogenic variant) cannot be detected. ",
+      "Re-run PCGR with `--input_cpsr` and `--input_cpsr_yaml` to include them.\n\n", sep = "")
+  cat(":::\n\n")
+}
+```
 
 <br>
 
@@ -341,9 +365,9 @@ annotation strategy. Specifically, evidence from curated sources (e.g. OncoKB) m
 
 For somatic candidates, the **VAF consistency** column indicates whether the observed tumor VAF is consistent with the variant residing on the _retained_ (major) allele of the LOH segment. The expected VAF of a clonal mutation is derived from the purity-adjusted mixture model ([Carter et al., Nat Biotechnol 2012](https://doi.org/10.1038/nbt.2203)):
 
-$$\text{VAF}_{\text{expected}} = \frac{p \times n_{\text{mut}}}{p \times n_{\text{total}} + 2 \times (1 - p)}$$
+`VAF_expected = (p × n_mut) / (p × n_total + 2 × (1 − p))`
 
-where $p$ is tumor purity, $n_{\text{mut}}$ is the number of mutant allele copies on the retained allele (1 for deletion LOH; lower-bound of 1 for copy-neutral LOH), and $n_{\text{total}}$ is the total copy number of the segment. A variant is considered consistent if the observed tumor VAF falls within a tolerance of ±0.15 of the expected VAF.
+where `p` is tumor purity, `n_mut` is the number of mutant allele copies on the retained allele (1 for deletion LOH; lower-bound of 1 for copy-neutral LOH), and `n_total` is the total copy number of the segment. A variant is considered consistent if the observed tumor VAF falls within a tolerance of ±0.15 of the expected VAF.
 
 - **VAF_CONSISTENT**: observed VAF ≥ expected − tolerance → variant likely on the retained allele
 - **VAF_LOW**: observed VAF below expectation → variant may reside on the _deleted_ allele, or be subclonal relative to the LOH event; interpret with caution
@@ -473,8 +497,8 @@ htmltools::div(
     "padding:10px 16px;border-radius:4px;margin:6px 0;",
     "font-size:0.95em;"),
   htmltools::strong("No potential two-hit events identified."),
-  " No tumor suppressor genes with LOH were found to carry co-occurring",
-  " somatic or germline loss-of-function variants."
+  " No tumor suppressor genes with LOH were found to carry co-occurring ",
+  twohit_lof_origin, " loss-of-function variants."
 )
 
 ```
