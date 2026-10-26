@@ -9,8 +9,8 @@ same rules, with ties resolved alphabetically by gene symbol.
   aberrations and RNA fusions. Within a tier: tissue-specific cancer association rank (highest first),
   then global cancer association rank. If none are found, this is stated explicitly.
 - __Composite genomic biomarkers__: a tumor classified as *TMB-high* (with its TMB estimate, in
-  mutations/Mb) and/or *MSI-high* is marked with a highlighted label directly below the actionable
-  alterations. Nothing is shown when the tumor is neither TMB-high nor MSI-high (TMB and MSI status
+  mutations/Mb) and/or *MSI-high* (high-confidence predictions only, P(MSI-H) >= 0.9) is marked with
+  a highlighted label directly below the actionable alterations. Nothing is shown when the tumor is neither TMB-high nor MSI-high (TMB and MSI status
   are reported in full in the *Composite genomic biomarkers* section)
 
 - __Filtered actionable variants__: actionable SNVs/InDels (Tier 1/2) or mutation hotspots that were

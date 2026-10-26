@@ -932,6 +932,8 @@ load_dna_variants <- function(
               settings$conf$oncokb$api_token,
             oncotree_code =
               settings$conf$oncokb$oncotree_code,
+            all_tumor_types =
+              isTRUE(settings$conf$oncokb$all_tumor_types == 1),
             var_calls = results[['variant']])
 
         if(NROW(oncokb_results$eitems) > 0){
@@ -973,6 +975,8 @@ load_dna_variants <- function(
               settings$conf$oncokb$api_token,
             oncotree_code =
               settings$conf$oncokb$oncotree_code,
+            all_tumor_types =
+              isTRUE(settings$conf$oncokb$all_tumor_types == 1),
             var_calls = results[['variant']])
 
         if(NROW(oncokb_results$eitems) > 0){
@@ -1004,7 +1008,11 @@ load_dna_variants <- function(
             clinical_significance = clnsig,
             biomarker_mapping_confidence = "medium",
             biomarker_items =
-              results$bm_evidence$eitems
+              results$bm_evidence$eitems,
+            oncotree_lineage =
+              settings$conf$oncokb$oncotree_lineage,
+            sources_not_tiered =
+              biomarker_sources_not_tiered(settings)
           )
       }
 
@@ -2128,6 +2136,8 @@ load_rna_fusions <- function(
               settings$conf$oncokb$api_token,
             oncotree_code =
               settings$conf$oncokb$oncotree_code,
+            all_tumor_types =
+              isTRUE(settings$conf$oncokb$all_tumor_types == 1),
             var_calls = results[['variant']])
 
         if(NROW(oncokb_results$eitems) > 0){
@@ -2157,7 +2167,11 @@ load_rna_fusions <- function(
           clinical_significance = clnsig,
           biomarker_mapping_confidence = "medium",
           biomarker_items =
-            results$bm_evidence$eitems
+            results$bm_evidence$eitems,
+          oncotree_lineage =
+            settings$conf$oncokb$oncotree_lineage,
+          sources_not_tiered =
+            biomarker_sources_not_tiered(settings)
         )
     }
 

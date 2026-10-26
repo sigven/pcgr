@@ -452,9 +452,9 @@ ONCOKB_COLS = {
 }
 
 ## Mapping from PCGR VARIANT_CLASS to OncoKB Copy_Number_Alteration values
+## hetdel/hemdel are not mapped: OncoKB 'Loss' is rejected by CnaAnnotator unless
+## run with gain/loss annotation (-z), and OncoKB curates (homozygous) 'Deletion' only
 VARIANT_CLASS_TO_OKB_CNA = {
     'amplification': 'Amplification',
     'homdel':        'Deletion',
-    'hetdel':        'Loss',
-    'hemdel':        'Loss',
 }

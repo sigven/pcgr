@@ -172,13 +172,18 @@ generate_report <-
             pcg_report_msi,
             a_elem = "msi")
 
-        ## If MSI-H, map biomarker evidence (CIViC, OncoKB) for the biomarker
-        if (msi_status_is_high(pcg_report_msi)) {
+        ## If MSI-H (high confidence), map biomarker evidence (CIViC, OncoKB)
+        ## for the biomarker - not shown for uncertain MSI-H predictions
+        if (msi_status_is_high(pcg_report_msi, high_confidence_only = TRUE)) {
           rep[["content"]][["msi"]][["callset"]] <-
             generate_report_data_complex_biomarker(
               biomarker = "MSI-H",
               ref_data = ref_data,
               settings = settings)
+        } else if (msi_status_is_high(pcg_report_msi)) {
+          log4r_info(paste0(
+            "MSI-H prediction is uncertain (0.1 < P(MSI-H) < 0.9) - ",
+            "skipping biomarker evidence for MSI-H"))
         }
       }
 

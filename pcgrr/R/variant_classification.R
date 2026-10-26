@@ -24,6 +24,11 @@
 #' relationship
 #' @param var_df data frame with variants (SNVs/InDels, CNAs, fusions)
 #' @param biomarker_items data frame with biomarker evidence items
+#' @param oncotree_lineage OncoTree names of the OncoTree code used for OncoKB
+#' queries and its ancestors (OncoKB evidence for these cancer types is
+#' considered evidence for the primary site of the query tumor)
+#' @param sources_not_tiered biomarker sources (BM_SOURCE_DB, e.g. 'cgi') whose
+#' evidence items are shown for tiered variants, but not used for tier assignment
 #'
 #' @export
 assign_amp_asco_cap_tiers <- function(
@@ -32,7 +37,9 @@ assign_amp_asco_cap_tiers <- function(
     primary_site = "Any",
     biomarker_mapping_confidence = "medium",
     var_df = NULL,
-    biomarker_items = NULL) {
+    biomarker_items = NULL,
+    oncotree_lineage = NULL,
+    sources_not_tiered = NULL) {
 
   invisible(assertthat::assert_that(
     !is.null(var_df) & is.data.frame(var_df),
@@ -131,6 +138,27 @@ assign_amp_asco_cap_tiers <- function(
     }
   }
 
+  ## OncoKB catch-all cancer types for liquid (solid) tumors only are not
+  ## pan-cancer evidence for a solid (liquid) query tumor
+  biomarker_items <- oncokb_resolve_catchall_sites(
+    biomarker_items = biomarker_items,
+    primary_site = primary_site)
+
+  ## OncoKB evidence for the queried OncoTree code (and its ancestors) is
+  ## evidence for the query tumor's site, also when the code's site differs
+  biomarker_items <- oncokb_resolve_lineage_sites(
+    biomarker_items = biomarker_items,
+    primary_site = primary_site,
+    oncotree_lineage = oncotree_lineage)
+
+  ## Evidence items from sources not used for tier assignment (e.g. CGI when
+  ## OncoKB is run) are shown for tiered variants, but do not define tiers
+  tiering_items <- biomarker_items
+  if (NROW(biomarker_items) > 0 && length(sources_not_tiered) > 0) {
+    tiering_items <- biomarker_items |>
+      dplyr::filter(!(.data$BM_SOURCE_DB %in% sources_not_tiered))
+  }
+
   if (NROW(biomarker_items) == 0) {
     log4r_debug(
       paste0("No biomarker evidence items with specified confidence ",
@@ -141,7 +169,7 @@ assign_amp_asco_cap_tiers <- function(
   if (vartype == "snv_indel") {
 
     variants_tier_classified <- assign_variant_tiers_snv_indel(
-      biomarker_items = biomarker_items,
+      biomarker_items = tiering_items,
       biomarker_mapping_confidence = biomarker_mapping_confidence,
       var_df = var_df,
       etype_for_tiering = etype_for_tiering,
@@ -150,7 +178,7 @@ assign_amp_asco_cap_tiers <- function(
   }else{
     if (vartype == "cna") {
       variants_tier_classified <- assign_variant_tiers_cna(
-        biomarker_items = biomarker_items,
+        biomarker_items = tiering_items,
         biomarker_mapping_confidence = biomarker_mapping_confidence,
         var_df = var_df,
         etype_for_tiering = etype_for_tiering,
@@ -159,7 +187,7 @@ assign_amp_asco_cap_tiers <- function(
     }else{
       if (vartype == "fusion") {
         variants_tier_classified <- assign_variant_tiers_fusion(
-          biomarker_items = biomarker_items,
+          biomarker_items = tiering_items,
           biomarker_mapping_confidence = biomarker_mapping_confidence,
           var_df = var_df,
           etype_for_tiering = etype_for_tiering,
@@ -168,7 +196,7 @@ assign_amp_asco_cap_tiers <- function(
       }
       if (vartype %in% c("msi", "tmb")) {
         variants_tier_classified <- assign_variant_tiers_complex_biomarker(
-          biomarker_items = biomarker_items,
+          biomarker_items = tiering_items,
           biomarker_mapping_confidence = biomarker_mapping_confidence,
           var_df = var_df,
           etype_for_tiering = etype_for_tiering,
@@ -218,6 +246,10 @@ assign_amp_asco_cap_tiers <- function(
       etype_for_tiering = etype_for_tiering
     )
   }
+
+  biomarker_items <- set_bm_support_sources_not_tiered(
+    biomarker_items = biomarker_items,
+    sources_not_tiered = sources_not_tiered)
 
   results_amp_asco <- list()
   results_amp_asco[['bm_evidence']] <- list()
@@ -1778,4 +1810,43 @@ assign_bm_tier_support_ttagnostic <- function(
 
   return(biomarker_items)
 
+}
+
+
+#' Evidence items from sources that are not used for tier assignment
+#'
+#' Evidence items from sources not used for tier assignment (e.g. CGI when
+#' OncoKB is run) are kept as additional support for variants with a tier
+#' (assigned from the other sources), and dropped for variants without a tier.
+#'
+#' @param biomarker_items data frame with biomarker evidence items, with
+#' ACTIONABILITY_TIER and BM_ACTIONABILITY_SUPPORT assigned
+#' @param sources_not_tiered biomarker sources (BM_SOURCE_DB) not used for
+#' tier assignment
+#' @return data frame with biomarker evidence items
+#'
+#' @export
+#'
+set_bm_support_sources_not_tiered <- function(
+    biomarker_items = NULL,
+    sources_not_tiered = NULL) {
+
+  if (NROW(biomarker_items) == 0 ||
+      length(sources_not_tiered) == 0 ||
+      !all(c("BM_SOURCE_DB", "ACTIONABILITY_TIER", "BM_ACTIONABILITY_SUPPORT") %in%
+           colnames(biomarker_items))) {
+    return(biomarker_items)
+  }
+
+  not_tiered <- biomarker_items$BM_SOURCE_DB %in% sources_not_tiered
+  biomarker_items <- biomarker_items[
+    !(not_tiered & is.na(biomarker_items$ACTIONABILITY_TIER)), , drop = FALSE]
+  not_tiered <- biomarker_items$BM_SOURCE_DB %in% sources_not_tiered
+  ## 'other': e.g. strong pan-cancer evidence for a variant with a tier 2
+  ## from the other sources, which the support rules do not cover
+  not_additional <- !is.na(biomarker_items$BM_ACTIONABILITY_SUPPORT) &
+    biomarker_items$BM_ACTIONABILITY_SUPPORT %in% c("tier-defining", "other")
+  biomarker_items$BM_ACTIONABILITY_SUPPORT[not_tiered & not_additional] <- "additional"
+
+  biomarker_items
 }

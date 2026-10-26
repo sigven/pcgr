@@ -279,12 +279,11 @@ report_highlights <- function(report, max_show = 5, links = FALSE) {
       "TMB-high (", round(est$TMB_ESTIMATE[1], 1), " mut/Mb)") else "TMB-high")
     pill_targets <- c(pill_targets, "pcgr-tmb")
   }
-  if (isTRUE(content$msi$eval) && !isTRUE(content$msi$missing_data)) {
-    cls <- content$msi$prediction$msi_stats$predicted_class
-    if (length(cls) == 1 && !is.na(cls) && !grepl("^MSS", cls)) {
-      pills <- c(pills, "MSI-high")
-      pill_targets <- c(pill_targets, "pcgr-msi")
-    }
+  ## MSI-high only for high-confidence predictions
+  if (isTRUE(content$msi$eval) && !isTRUE(content$msi$missing_data) &&
+      msi_status_is_high(content$msi, high_confidence_only = TRUE)) {
+    pills <- c(pills, "MSI-high")
+    pill_targets <- c(pill_targets, "pcgr-msi")
   }
 
   ## copy number features

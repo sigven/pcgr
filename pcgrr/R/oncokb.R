@@ -712,6 +712,175 @@ extract_complete_annotation <- function(
 }
 
 
+#' Primary site of OncoKB catch-all cancer types, relative to the query tumor
+#'
+#' OncoKB's catch-all cancer types (e.g. 'All Solid Tumors', 'All Liquid
+#' Tumors', 'All Tumors') have no tissue, and their evidence items are
+#' extracted with BM_PRIMARY_SITE = 'Any' (pan-cancer). Catch-alls restricted
+#' to liquid tumors are relabelled 'Liquid tumors' for a solid query tumor,
+#' and catch-alls restricted to solid tumors 'Solid tumors' for a liquid
+#' query tumor (Lymphoid/Myeloid), so that tier assignment treats them as
+#' evidence from other tumor sites rather than as pan-cancer evidence.
+#'
+#' @param biomarker_items data.frame with biomarker evidence items
+#' @param primary_site primary site of query tumor
+#' @return data.frame with biomarker evidence items
+#' @export
+oncokb_resolve_catchall_sites <- function(
+    biomarker_items = NULL,
+    primary_site = "Any") {
+
+  if (NROW(biomarker_items) == 0 ||
+      primary_site == "Any" ||
+      !all(c("BM_SOURCE_DB", "BM_PRIMARY_SITE", "BM_CANCER_TYPE") %in%
+           colnames(biomarker_items))) {
+    return(biomarker_items)
+  }
+
+  liquid_catchalls <- c("All Liquid Tumors", "Other Liquid Tumor Types")
+  solid_catchalls <- c("All Solid Tumors", "Other Solid Tumor Types")
+  liquid_query <- primary_site %in% c("Lymphoid", "Myeloid")
+
+  biomarker_items |>
+    dplyr::mutate(BM_PRIMARY_SITE = dplyr::case_when(
+      .data$BM_SOURCE_DB == "oncokb" &
+        .data$BM_PRIMARY_SITE == "Any" &
+        .data$BM_CANCER_TYPE %in% liquid_catchalls &
+        !liquid_query ~ "Liquid tumors",
+      .data$BM_SOURCE_DB == "oncokb" &
+        .data$BM_PRIMARY_SITE == "Any" &
+        .data$BM_CANCER_TYPE %in% solid_catchalls &
+        liquid_query ~ "Solid tumors",
+      TRUE ~ as.character(.data$BM_PRIMARY_SITE)
+    ))
+}
+
+
+#' Primary site of OncoKB evidence for the queried OncoTree code
+#'
+#' OncoKB evidence items are tiered by their primary site (OncoTree tissue of
+#' the cancer type). When the OncoTree code used for OncoKB queries has
+#' another primary site than the query tumor (e.g. 'MPNST' (Peripheral Nervous
+#' System) for tumor site 'Soft Tissue'), the evidence for the code's own
+#' cancer type would be considered evidence from another tumor site. Items
+#' whose cancer type is in the lineage of the OncoTree code (the code itself,
+#' or one of its ancestors, e.g. 'Nerve Sheath Tumor') are therefore assigned
+#' the primary site of the query tumor.
+#'
+#' @param biomarker_items data.frame with biomarker evidence items
+#' @param primary_site primary site of query tumor
+#' @param oncotree_lineage character vector with OncoTree names of the
+#' queried OncoTree code and its ancestors
+#' @return data.frame with biomarker evidence items
+#' @export
+oncokb_resolve_lineage_sites <- function(
+    biomarker_items = NULL,
+    primary_site = "Any",
+    oncotree_lineage = NULL) {
+
+  oncotree_lineage <- unlist(oncotree_lineage)
+  if (NROW(biomarker_items) == 0 ||
+      primary_site == "Any" ||
+      length(oncotree_lineage) == 0 ||
+      !all(c("BM_SOURCE_DB", "BM_PRIMARY_SITE", "BM_CANCER_TYPE") %in%
+           colnames(biomarker_items))) {
+    return(biomarker_items)
+  }
+
+  biomarker_items |>
+    dplyr::mutate(BM_PRIMARY_SITE = dplyr::if_else(
+      .data$BM_SOURCE_DB == "oncokb" &
+        !is.na(.data$BM_CANCER_TYPE) &
+        .data$BM_CANCER_TYPE %in% oncotree_lineage,
+      primary_site,
+      as.character(.data$BM_PRIMARY_SITE)
+    ))
+}
+
+
+#' Biomarker sources not used for tier assignment
+#'
+#' When OncoKB is run, CGI evidence items are shown, but not used for tier
+#' assignment: the CGI biomarker set is no longer updated, and is partly
+#' mapped to generic cancer types (e.g. 'Cancer'), which would otherwise be
+#' considered pan-cancer evidence. CIViC and OncoKB are used on equal terms.
+#'
+#' @param settings PCGR run/configuration settings
+#' @return character vector with sources (BM_SOURCE_DB), or NULL
+#' @export
+biomarker_sources_not_tiered <- function(settings = NULL) {
+  if (isTRUE(as.numeric(settings$conf$oncokb$run) == 1)) {
+    return("cgi")
+  }
+  NULL
+}
+
+
+#' Whether OncoKB should also be queried without a tumor type
+#'
+#' When OncoKB is queried with a tumor type, it returns the treatments for that
+#' tumor type, plus only a subset of the evidence for other tumor types
+#' (re-leveled according to OncoKB's level propagation rules). A second query
+#' without tumor type returns the evidence for all tumor types, at their
+#' original levels. The second query is only needed when the first query was
+#' restricted to a tumor type.
+#'
+#' @param all_tumor_types logical/integer, retrieve evidence for all tumor types
+#' @param oncotree_code OncoTree code used for the tumor type specific query
+#' @return logical
+#' @export
+oncokb_query_all_tumor_types <- function(
+    all_tumor_types = FALSE,
+    oncotree_code = NULL) {
+
+  isTRUE(as.logical(all_tumor_types)) &&
+    !is.null(oncotree_code) &&
+    length(oncotree_code) == 1 &&
+    !is.na(oncotree_code) &&
+    !(oncotree_code %in% c("", "None", "NA"))
+}
+
+
+#' Add OncoKB evidence items for other tumor types
+#'
+#' Combines evidence items from a tumor type specific OncoKB query with
+#' evidence items from a query without tumor type. Items from the tumor type
+#' specific query take precedence: items from the query without tumor type
+#' are only added if no item for the same variant, evidence type, clinical
+#' significance, cancer type and therapy was returned by the tumor type
+#' specific query. Each added item is labelled by its cancer type/primary site
+#' (BM_CANCER_TYPE/BM_PRIMARY_SITE), which is what tier assignment relies on.
+#'
+#' @param evidence_df evidence items from tumor type specific query
+#' @param evidence_df_all evidence items from query without tumor type
+#' @return data.frame with combined evidence items
+#' @export
+merge_oncokb_evidence_all_tumor_types <- function(
+    evidence_df = data.frame(),
+    evidence_df_all = data.frame()) {
+
+  if (NROW(evidence_df_all) == 0) {
+    return(evidence_df)
+  }
+  if (NROW(evidence_df) == 0) {
+    return(evidence_df_all)
+  }
+
+  join_cols <- intersect(
+    c("VAR_ID",
+      "BM_EVIDENCE_TYPE",
+      "BM_CLINICAL_SIGNIFICANCE",
+      "BM_CANCER_TYPE",
+      "BM_THERAPEUTIC_CONTEXT"),
+    intersect(colnames(evidence_df), colnames(evidence_df_all)))
+
+  dplyr::bind_rows(
+    evidence_df,
+    dplyr::anti_join(
+      evidence_df_all, evidence_df, by = join_cols))
+}
+
+
 #' Fetch OncoKB annotation for SNV/InDel via protein change
 #'
 #' @param hugo_symbol Gene symbol (e.g., "BRAF")
@@ -1261,6 +1430,8 @@ fetch_oncokb_tmb_annotation <-
 #' restricted to a tumor type)
 #' @param oncokb_token OncoKB API token
 #' @param base_api_url Optional base URL for OncoKB API (default: oncokb_base_api_url)
+#' @param all_tumor_types logical, also add evidence for other tumor types
+#' (second query without tumor type, see \code{oncokb_query_all_tumor_types})
 #' @return Data frame with evidence items (empty if none, or if the query failed)
 #'
 #' @export
@@ -1270,37 +1441,45 @@ fetch_oncokb_biomarker_eitems <-
     biomarker = "MSI-H",
     oncotree_code = NULL,
     oncokb_token = NULL,
-    base_api_url = NULL) {
+    base_api_url = NULL,
+    all_tumor_types = FALSE) {
 
     if (is.null(oncotree_code) || length(oncotree_code) == 0 ||
         is.na(oncotree_code) || oncotree_code %in% c("", "None", "NA")) {
       oncotree_code <- NULL
     }
 
-    annotation <- tryCatch(
-      fetch_oncokb_biomarker_annotation(
-        biomarker = biomarker,
-        oncotree_code = oncotree_code,
-        oncokb_token = oncokb_token,
-        base_api_url = base_api_url),
-      error = function(e) {
-        warning(sprintf("OncoKB query for %s failed: %s", biomarker, e$message))
-        NULL
-      })
+    props <- complex_biomarker_properties(biomarker)
 
-    if (is.null(annotation)) {
-      return(data.frame())
+    fetch_eitems <- function(tumor_type = NULL) {
+      annotation <- tryCatch(
+        fetch_oncokb_biomarker_annotation(
+          biomarker = biomarker,
+          oncotree_code = tumor_type,
+          oncokb_token = oncokb_token,
+          base_api_url = base_api_url),
+        error = function(e) {
+          warning(sprintf("OncoKB query for %s failed: %s", biomarker, e$message))
+          NULL
+        })
+      if (is.null(annotation)) {
+        return(data.frame())
+      }
+      extract_complete_annotation(
+        annotation,
+        gene = "Other Biomarkers",
+        alteration = biomarker,
+        vartype = props$vartype,
+        oncotree_code = if (is.null(tumor_type)) "" else tumor_type,
+        variant_id = props$var_id,
+        match_by = "alteration")
     }
 
-    props <- complex_biomarker_properties(biomarker)
-    eitems <- extract_complete_annotation(
-      annotation,
-      gene = "Other Biomarkers",
-      alteration = biomarker,
-      vartype = props$vartype,
-      oncotree_code = if (is.null(oncotree_code)) "" else oncotree_code,
-      variant_id = props$var_id,
-      match_by = "alteration")
+    eitems <- fetch_eitems(oncotree_code)
+    if (oncokb_query_all_tumor_types(all_tumor_types, oncotree_code)) {
+      eitems <- merge_oncokb_evidence_all_tumor_types(
+        eitems, fetch_eitems(NULL))
+    }
 
     if (NROW(eitems) == 0) {
       return(data.frame())
@@ -1331,6 +1510,9 @@ fetch_oncokb_biomarker_eitems <-
 #' @param oncokb_base_api_url Optional base URL for OncoKB API (default: oncokb_base_api_url)
 #' @param rate_limiting_delay Delay in seconds between API calls to respect rate limits
 #' (default: 1 second)
+#' @param all_tumor_types logical, also add evidence for other tumor types
+#' (second query without tumor type per variant, see
+#' \code{oncokb_query_all_tumor_types})
 #' @return Data frame with variant information and corresponding JSON annotations
 #' @export
 process_oncokb_maf <-
@@ -1341,7 +1523,11 @@ process_oncokb_maf <-
     oncotree_code = NULL,
     oncokb_token = NULL,
     oncokb_base_api_url = NULL,
-    rate_limiting_delay = 1) {
+    rate_limiting_delay = 1,
+    all_tumor_types = FALSE) {
+
+    query_all_tumor_types <- oncokb_query_all_tumor_types(
+      all_tumor_types, oncotree_code)
 
     # Validate that at least one MAF file is provided
     if (is.null(maf_file_hgvsp) && is.null(maf_file_hgvsg)) {
@@ -1492,6 +1678,24 @@ process_oncokb_maf <-
               vartype = "snv_indel",
               variant_id = var$VAR_ID)
 
+            if (query_all_tumor_types) {
+              Sys.sleep(rate_limiting_delay)
+              evidence_df <- merge_oncokb_evidence_all_tumor_types(
+                evidence_df,
+                extract_complete_annotation(
+                  oncokb_annotation = fetch_oncokb_hgvsp_annotation(
+                    hugo_symbol = var$SYMBOL,
+                    protein_change = var$HGVSp_Short,
+                    oncotree_code = NULL,
+                    oncokb_token = oncokb_token,
+                    reference_genome = "GRCh38"),
+                  gene = var$SYMBOL,
+                  oncotree_code = "",
+                  alteration = var$ALTERATION,
+                  vartype = "snv_indel",
+                  variant_id = var$VAR_ID))
+            }
+
             if(NROW(evidence_df) > 0){
 
               evidence_df <- evidence_df |>
@@ -1637,6 +1841,25 @@ process_oncokb_maf <-
               variant_id = var$VAR_ID,
               match_by = "genomic")
 
+            if (query_all_tumor_types) {
+              Sys.sleep(rate_limiting_delay)
+              evidence_df <- merge_oncokb_evidence_all_tumor_types(
+                evidence_df,
+                extract_complete_annotation(
+                  oncokb_annotation = fetch_oncokb_genomic_annotation(
+                    hgvsg = var$HGVSg,
+                    oncotree_code = NULL,
+                    variant_origin = "somatic",
+                    oncokb_token = oncokb_token,
+                    reference_genome = "GRCh38"),
+                  gene = var$SYMBOL,
+                  oncotree_code = "",
+                  alteration = var$ALTERATION,
+                  vartype = "snv_indel",
+                  variant_id = var$VAR_ID,
+                  match_by = "genomic"))
+            }
+
             if(NROW(evidence_df) > 0){
 
               evidence_df <- evidence_df |>
@@ -1685,6 +1908,9 @@ process_oncokb_maf <-
 #' @param oncokb_token OncoKB API token
 #' @param rate_limiting_delay Delay in seconds between API calls to respect rate limits
 #' (default: 1 second)
+#' @param all_tumor_types logical, also add evidence for other tumor types
+#' (second query without tumor type per variant, see
+#' \code{oncokb_query_all_tumor_types})
 #' @return List with fusion information and corresponding JSON annotations
 #' @export
 process_oncokb_fusion <-
@@ -1693,7 +1919,11 @@ process_oncokb_fusion <-
     var_calls = NULL,
     oncotree_code = NULL,
     oncokb_token = NULL,
-    rate_limiting_delay = 1) {
+    rate_limiting_delay = 1,
+    all_tumor_types = FALSE) {
+
+    query_all_tumor_types <- oncokb_query_all_tumor_types(
+      all_tumor_types, oncotree_code)
 
 
     all_biomarker_evidence <- data.frame()
@@ -1805,6 +2035,24 @@ process_oncokb_fusion <-
           vartype = "fusion",
           variant_id = fusion$VAR_ID)
 
+        if (query_all_tumor_types) {
+          Sys.sleep(rate_limiting_delay)
+          evidence_df <- merge_oncokb_evidence_all_tumor_types(
+            evidence_df,
+            extract_complete_annotation(
+              oncokb_annotation = fetch_oncokb_fusion_annotation(
+                hugo_symbol_a = gene_a,
+                hugo_symbol_b = gene_b,
+                oncotree_code = NULL,
+                oncokb_token = oncokb_token,
+                is_functional_fusion = TRUE),
+              gene = fusion$Fusion,
+              oncotree_code = "",
+              alteration = "Fusion",
+              vartype = "fusion",
+              variant_id = fusion$VAR_ID))
+        }
+
         if(NROW(evidence_df) > 0){
 
           evidence_df <- evidence_df |>
@@ -1847,6 +2095,9 @@ process_oncokb_fusion <-
 #' @param var_calls Data frame with variant calls (used for mapping of variant alteration)
 #' @param rate_limiting_delay Delay in seconds between API calls to respect rate
 #' limits (default: 1 seconds)
+#' @param all_tumor_types logical, also add evidence for other tumor types
+#' (second query without tumor type per variant, see
+#' \code{oncokb_query_all_tumor_types})
 #' @return List with CNA information and corresponding JSON annotations
 #' @export
 process_oncokb_cna <-
@@ -1855,7 +2106,11 @@ process_oncokb_cna <-
     oncotree_code = NULL,
     oncokb_token = NULL,
     var_calls = NULL,
-    rate_limiting_delay = 1) {
+    rate_limiting_delay = 1,
+    all_tumor_types = FALSE) {
+
+    query_all_tumor_types <- oncokb_query_all_tumor_types(
+      all_tumor_types, oncotree_code)
 
 
     assertthat::assert_that(
@@ -1960,6 +2215,24 @@ process_oncokb_cna <-
           alteration = stringr::str_to_title(
             cna$VARIANT_CLASS),
           variant_id = cna$VAR_ID)
+
+        if (query_all_tumor_types) {
+          Sys.sleep(rate_limiting_delay)
+          evidence_df <- merge_oncokb_evidence_all_tumor_types(
+            evidence_df,
+            extract_complete_annotation(
+              oncokb_annotation = fetch_oncokb_cna_annotation(
+                hugo_symbol = cna$Hugo_Symbol,
+                cna_type = cna$Copy_Number_Alteration,
+                oncotree_code = NULL,
+                oncokb_token = oncokb_token),
+              gene = cna$Hugo_Symbol,
+              oncotree_code = "",
+              vartype = "cna",
+              alteration = stringr::str_to_title(
+                cna$VARIANT_CLASS),
+              variant_id = cna$VAR_ID))
+        }
 
         if(NROW(evidence_df) > 0){
 

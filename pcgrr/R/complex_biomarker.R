@@ -167,7 +167,8 @@ generate_report_data_complex_biomarker <- function(
     okb_eitems <- fetch_oncokb_biomarker_eitems(
       biomarker = biomarker,
       oncotree_code = settings$conf$oncokb$oncotree_code,
-      oncokb_token = settings$conf$oncokb$api_token)
+      oncokb_token = settings$conf$oncokb$api_token,
+      all_tumor_types = isTRUE(settings$conf$oncokb$all_tumor_types == 1))
     if (NROW(okb_eitems) > 0) {
       callset[["bm_evidence"]][["eitems"]] <- dplyr::bind_rows(
         callset[["bm_evidence"]][["eitems"]],
@@ -184,7 +185,9 @@ generate_report_data_complex_biomarker <- function(
       primary_site = primary_site,
       clinical_significance = clnsig,
       biomarker_mapping_confidence = "medium",
-      biomarker_items = callset[["bm_evidence"]][["eitems"]])
+      biomarker_items = callset[["bm_evidence"]][["eitems"]],
+      oncotree_lineage = settings$conf$oncokb$oncotree_lineage,
+      sources_not_tiered = biomarker_sources_not_tiered(settings))
 
     for (elem in c("classification", "eitems")) {
       callset[["bm_evidence"]][[clnsig]][[elem]] <-

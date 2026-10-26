@@ -418,7 +418,7 @@ generate_report_data_msi <- function(
 
     if (n_calls < 100) {
       pcg_report_msi[["low_mutation_warning"]] <- TRUE
-      conf_tier <- pcg_report_msi[["prediction"]]$confidence_tier
+      conf_tier <- pcg_report_msi[["prediction"]][["msi_stats"]]$confidence_tier
       if (!is.null(conf_tier) && conf_tier == "High confidence") {
         log4r_info(paste0(
           "NOTE: n = ", n_calls, " variants - below training threshold ",
@@ -445,16 +445,24 @@ generate_report_data_msi <- function(
 #'
 #' @param msi_content MSI report element (as returned by
 #' \code{generate_report_data_msi})
+#' @param high_confidence_only logical, if TRUE, return TRUE only if the
+#' MSI-H prediction is also of high confidence (P(MSI-H) >= 0.9)
 #' @return logical
 #'
 #' @export
-msi_status_is_high <- function(msi_content = NULL) {
-  predicted_class <- msi_content[["prediction"]][["msi_stats"]][["predicted_class"]]
+msi_status_is_high <- function(msi_content = NULL,
+                               high_confidence_only = FALSE) {
+  msi_stats <- msi_content[["prediction"]][["msi_stats"]]
+  predicted_class <- msi_stats[["predicted_class"]]
   if (is.null(predicted_class) || length(predicted_class) != 1 ||
       is.na(predicted_class)) {
     return(FALSE)
   }
-  return(stringr::str_detect(predicted_class, "^MSI"))
+  is_high <- stringr::str_detect(predicted_class, "^MSI")
+  if (is_high && high_confidence_only) {
+    is_high <- isTRUE(msi_stats[["confidence_tier"]] == "High confidence")
+  }
+  return(is_high)
 }
 
 #' Function that plots the indel fraction for a given sample and

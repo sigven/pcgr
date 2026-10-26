@@ -2,7 +2,7 @@
 
 from pcgr import pcgr_vars, arg_checker, utils, cna, hrd
 from pcgr.utils import getlogger, check_subprocess, remove_file, random_id_generator, pd_to_csv, error_message
-from pcgr.config import populate_config_data, create_config, verify_oncotree_code
+from pcgr.config import populate_config_data, create_config, verify_oncotree_code, get_oncotree_lineage
 from pcgr.maf import update_maf, generate_oncokb_maf_input, add_var_id_to_vcf, append_oncokb_snv_annotations
 from pcgr.cna import append_oncokb_fusion_annotations, append_oncokb_cna_annotations
 from pcgr.oncogenicity import refine_oncogenicity_with_oncokb
@@ -231,6 +231,11 @@ def cli():
                                     help = "Oncokb API token (default: ")
     optional_biomarker.add_argument("--oncokb_oncotree_code", dest="oncokb_oncotree_code",
                                     help = "OncoKB oncotree code (default: %(default)s)")
+    optional_biomarker.add_argument("--oncokb_tumor_type_only", action="store_true",
+                                    help = "Limit OncoKB evidence to what OncoKB returns for the tumor type (--oncokb_oncotree_code, or the OncoTree code "
+                                           "of --tumor_site). By default, OncoKB is also queried without tumor type, adding evidence for other tumor types "
+                                           "(labelled by cancer type, tiered as evidence from other tumor sites, as for CIViC/CGI) - this halves the number "
+                                           "of OncoKB web API queries (default: %(default)s)")
     optional_biomarker.add_argument("--oncokb_exclusive", action="store_true",
                                     help = "Limit biomarker reporting to OncoKB only - skip CIViC and CGI sources (default: %(default)s)")
     optional_biomarker.add_argument("--oncokb_maf_query_all", action="store_true",
@@ -995,6 +1000,10 @@ def run_pcgr(input_data, output_data, conf_options):
 
             ## update conf with resolved oncotree code (even if None) for record-keeping and downstream use
             yaml_data['conf']['oncokb']['oncotree_code'] = oncotree_code
+            ## OncoTree names of the code and its ancestors - OncoKB evidence for these cancer types
+            ## is tiered as evidence for the PCGR tumor site (relevant when the code's site differs)
+            yaml_data['conf']['oncokb']['oncotree_lineage'] = \
+                get_oncotree_lineage(oncotree_code, input_data["refdata_assembly_dir"])
 
         # Map genome assembly to OncoKB reference genome format
         reference_genome = "GRCh38" if yaml_data['genome_assembly'] == "grch38" else "GRCh37"

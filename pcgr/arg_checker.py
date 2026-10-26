@@ -225,6 +225,11 @@ def verify_args(arg_dict, logger = None):
         )
         error_message(err_msg, logger)
 
+    # OncoKB: warn if --oncokb_tumor_type_only is set without a token (no effect)
+    if arg_dict.get('oncokb_tumor_type_only') is True and arg_dict.get('oncokb_api_token') is None:
+        warn_message(
+            "'--oncokb_tumor_type_only' is set but no OncoKB API token was provided - option is ignored", logger)
+
     # OncoKB: warn if --oncokb_maf_query_all is enabled for WGS (intended for TARGETED/WES only)
     if arg_dict.get('oncokb_maf_query_all') is True and arg_dict.get('assay') == 'WGS':
         warn_msg = (
