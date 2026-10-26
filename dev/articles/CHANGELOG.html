@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9013</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9014</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -283,15 +283,28 @@ report data and the TMB sheet of the Excel output
 (<code>TMB_HIGH</code>), as a basis for TMB-H biomarker matching</li>
 <li>
 <strong>Biomarker evidence for MSI-High and TMB-High</strong> - when
-the tumor is classified as MSI-high or TMB-high (see
-<code>--tmb_high_threshold</code>), therapeutic biomarker evidence is
-retrieved from CIViC and (if <code>--oncokb_api_token</code> is
-provided) OncoKB, classified into AMP/ASCO/CAP tiers, and shown in the
-MSI and TMB sections of the report with the same table layout as for
-other variant types (source icons indicate evidence from CIViC/OncoKB).
-The evidence is also available in the
-<code>MSI_BIOMARKER</code>/<code>TMB_BIOMARKER</code> sheets of the
+the tumor is classified as MSI-high (high-confidence predictions only,
+P(MSI-H) &gt;= 0.9, which also applies to the <em>MSI-high</em> label in
+the key findings) or TMB-high (see <code>--tmb_high_threshold</code>),
+therapeutic biomarker evidence is retrieved from CIViC and (if
+<code>--oncokb_api_token</code> is provided) OncoKB, classified into
+AMP/ASCO/CAP tiers, and shown in the MSI and TMB sections of the report
+with the same table layout as for other variant types (source icons
+indicate evidence from CIViC/OncoKB). The evidence is also available in
+the <code>MSI_BIOMARKER</code>/<code>TMB_BIOMARKER</code> sheets of the
 Excel output</li>
+<li>
+<strong>OncoKB evidence for other tumor types</strong> - OncoKB
+queries for a tumor type return the treatments for that tumor type, but
+only a subset of the evidence for other tumor types (re-leveled by
+OncoKB’s level propagation rules), whereas CIViC/CGI evidence is
+retrieved across all cancer types. Each SNV/InDel, CNA, RNA fusion and
+MSI-H/TMB-H biomarker is now also queried without tumor type, and
+evidence for other tumor types that is not already returned for the
+tumor type is added - labelled by its cancer type and tiered as
+other-site evidence, as for CIViC/CGI. This doubles the number of OncoKB
+web API queries; use the new <code>--oncokb_tumor_type_only</code>
+option for the previous behavior</li>
 </ul>
 </div>
 <div class="section level3">
@@ -306,6 +319,26 @@ signatures (SBS) by default, rather than only those already attributed
 to the tumor type. The previous default behavior is available via the
 new <code>--tumor_type_reference_signatures</code> option (replaces
 <code>--all_reference_signatures</code>, which is removed)</li>
+<li>A valid <code>--oncokb_oncotree_code</code> whose OncoTree primary
+site differs from <code>--tumor_site</code> (e.g. <code>MPNST</code>
+with tumor site <em>Soft Tissue</em>) is now used for OncoKB queries
+(with a warning), rather than being replaced by the site-level OncoTree
+code (e.g. <code>SOFT_TISSUE</code>). OncoKB evidence for the code’s
+cancer type and its OncoTree ancestors (e.g. <em>Malignant Peripheral
+Nerve Sheath Tumor</em>, <em>Nerve Sheath Tumor</em>) is tiered as
+evidence for <code>--tumor_site</code>, while other OncoKB evidence for
+the code’s primary site (e.g. <em>Neuroblastoma</em>) is tiered as
+evidence from another tumor site</li>
+<li>When OncoKB is used (<code>--oncokb_api_token</code>), CGI biomarker
+evidence is no longer used for tier assignment - it is still shown (as
+additional evidence) for variants that are tiered from CIViC/OncoKB
+evidence, which are used on equal terms. The CGI biomarker set is no
+longer updated, and is partly mapped to generic cancer types
+(e.g. <em>Cancer</em>) that count as pan-cancer evidence</li>
+<li>Heterozygous/hemizygous deletions
+(<code>hetdel</code>/<code>hemdel</code>) are no longer submitted to the
+OncoKB CNA annotator as <code>Loss</code> events, which it rejected
+(OncoKB curates homozygous <code>Deletion</code> only)</li>
 <li>Intermediate OncoKB annotator files (query inputs, raw annotator
 output, clinical file and logs) are now removed from the output
 directory at the end of a run - use the new
@@ -343,6 +376,13 @@ per key are now considered, while exon-specific fusion variants
 are not resolved</li>
 <li>OncoKB input files are only generated when OncoKB annotation will
 run</li>
+<li>OncoKB evidence for the catch-all cancer types <em>All Liquid
+Tumors</em>/<em>Other Liquid Tumor Types</em> was treated as pan-cancer
+evidence (Tier 1 for levels 1-3B) for solid tumors, as these cancer
+types have no tissue. It is now treated as evidence from another tumor
+site (shown as <em>Liquid tumors</em>), and likewise <em>All Solid
+Tumors</em>/<em>Other Solid Tumor Types</em> for lymphoid/myeloid tumors
+(<em>Solid tumors</em>). <em>All Tumors</em> remains pan-cancer</li>
 <li>Sorting the <em>Oncogenicity</em> column of the SNV/InDel (and MMR
 variant) tables ordered the classes alphabetically (Benign first) - now
 ordered by oncogenicity (Oncogenic first)</li>

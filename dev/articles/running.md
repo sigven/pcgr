@@ -299,11 +299,31 @@ To specify the tumor type for OncoKB queries, provide the relevant
 If no OncoTree code is provided, PCGR will map the primary tumor site to
 its corresponding OncoTree code based on a predefined mapping. If the
 tumor site is set to “Any” (code 0), OncoKB queries will be performed
-without specifying a tumor type.
+without specifying a tumor type. A recognized OncoTree code is used even
+if its OncoTree primary site differs from `--tumor_site` (a warning is
+issued). In that case, OncoKB evidence for the code’s cancer type and
+its OncoTree ancestors is tiered as evidence for `--tumor_site`, while
+other evidence is tiered relative to `--tumor_site` as usual.
+
+When queried for a tumor type, OncoKB returns the treatments for that
+tumor type, but only a subset of its evidence for other tumor types.
+PCGR therefore also queries OncoKB without tumor type, and adds the
+evidence for other tumor types (labelled by cancer type, and tiered as
+evidence from other tumor sites - as for CIViC/CGI, which are matched
+across all cancer types). To limit OncoKB evidence to what is returned
+for the tumor type (which halves the number of OncoKB web API queries),
+use:
+
+- `--oncokb_tumor_type_only`
 
 By default, PCGR integrates biomarker evidence from multiple knowledge
-sources (CIViC, CGI, OncoKB). If you want to limit biomarker reporting
-to OncoKB only and skip CIViC and CGI, use:
+sources (CIViC, CGI, OncoKB). When OncoKB is used, CGI evidence is still
+shown for variants with a tier, but tiers are assigned from CIViC and
+OncoKB evidence only (on equal terms): the CGI biomarker set is no
+longer updated, and is partly mapped to generic cancer types
+(e.g. *Cancer*), which would otherwise count as pan-cancer evidence. If
+you want to limit biomarker reporting to OncoKB only and skip CIViC and
+CGI, use:
 
 - `--oncokb_exclusive`
 
@@ -609,6 +629,12 @@ Biomarker and tiering options:
   --oncokb_oncotree_code ONCOKB_ONCOTREE_CODE
                         OncoTree code specifying the tumor type for OncoKB queries (default: None)
   --oncokb_exclusive    Limit biomarker reporting to OncoKB only - skip CIViC and CGI sources
+                        (default: False)
+  --oncokb_tumor_type_only
+                        Limit OncoKB evidence to what OncoKB returns for the tumor type. By
+                        default, OncoKB is also queried without tumor type, adding evidence for
+                        other tumor types (labelled by cancer type, tiered as evidence from other
+                        tumor sites) - this halves the number of OncoKB web API queries
                         (default: False)
   --oncokb_maf_query_all
                         Query OncoKB for all variant classes, including non-coding variants

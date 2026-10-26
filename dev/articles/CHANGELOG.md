@@ -144,13 +144,26 @@
   available in the report data and the TMB sheet of the Excel output
   (`TMB_HIGH`), as a basis for TMB-H biomarker matching
 - **Biomarker evidence for MSI-High and TMB-High** - when the tumor is
-  classified as MSI-high or TMB-high (see `--tmb_high_threshold`),
-  therapeutic biomarker evidence is retrieved from CIViC and (if
-  `--oncokb_api_token` is provided) OncoKB, classified into AMP/ASCO/CAP
-  tiers, and shown in the MSI and TMB sections of the report with the
-  same table layout as for other variant types (source icons indicate
-  evidence from CIViC/OncoKB). The evidence is also available in the
+  classified as MSI-high (high-confidence predictions only, P(MSI-H) \>=
+  0.9, which also applies to the *MSI-high* label in the key findings)
+  or TMB-high (see `--tmb_high_threshold`), therapeutic biomarker
+  evidence is retrieved from CIViC and (if `--oncokb_api_token` is
+  provided) OncoKB, classified into AMP/ASCO/CAP tiers, and shown in the
+  MSI and TMB sections of the report with the same table layout as for
+  other variant types (source icons indicate evidence from
+  CIViC/OncoKB). The evidence is also available in the
   `MSI_BIOMARKER`/`TMB_BIOMARKER` sheets of the Excel output
+- **OncoKB evidence for other tumor types** - OncoKB queries for a tumor
+  type return the treatments for that tumor type, but only a subset of
+  the evidence for other tumor types (re-leveled by OncoKB’s level
+  propagation rules), whereas CIViC/CGI evidence is retrieved across all
+  cancer types. Each SNV/InDel, CNA, RNA fusion and MSI-H/TMB-H
+  biomarker is now also queried without tumor type, and evidence for
+  other tumor types that is not already returned for the tumor type is
+  added - labelled by its cancer type and tiered as other-site evidence,
+  as for CIViC/CGI. This doubles the number of OncoKB web API queries;
+  use the new `--oncokb_tumor_type_only` option for the previous
+  behavior
 
 ### Changed
 
@@ -162,6 +175,24 @@
   tumor type. The previous default behavior is available via the new
   `--tumor_type_reference_signatures` option (replaces
   `--all_reference_signatures`, which is removed)
+- A valid `--oncokb_oncotree_code` whose OncoTree primary site differs
+  from `--tumor_site` (e.g. `MPNST` with tumor site *Soft Tissue*) is
+  now used for OncoKB queries (with a warning), rather than being
+  replaced by the site-level OncoTree code (e.g. `SOFT_TISSUE`). OncoKB
+  evidence for the code’s cancer type and its OncoTree ancestors
+  (e.g. *Malignant Peripheral Nerve Sheath Tumor*, *Nerve Sheath Tumor*)
+  is tiered as evidence for `--tumor_site`, while other OncoKB evidence
+  for the code’s primary site (e.g. *Neuroblastoma*) is tiered as
+  evidence from another tumor site
+- When OncoKB is used (`--oncokb_api_token`), CGI biomarker evidence is
+  no longer used for tier assignment - it is still shown (as additional
+  evidence) for variants that are tiered from CIViC/OncoKB evidence,
+  which are used on equal terms. The CGI biomarker set is no longer
+  updated, and is partly mapped to generic cancer types (e.g. *Cancer*)
+  that count as pan-cancer evidence
+- Heterozygous/hemizygous deletions (`hetdel`/`hemdel`) are no longer
+  submitted to the OncoKB CNA annotator as `Loss` events, which it
+  rejected (OncoKB curates homozygous `Deletion` only)
 - Intermediate OncoKB annotator files (query inputs, raw annotator
   output, clinical file and logs) are now removed from the output
   directory at the end of a run - use the new `--oncokb_keep_files`
@@ -189,6 +220,13 @@
   fusion variants (e.g. `EWSR1::FLI1 e7::e6`) are skipped, since fusion
   exons are not resolved
 - OncoKB input files are only generated when OncoKB annotation will run
+- OncoKB evidence for the catch-all cancer types *All Liquid
+  Tumors*/*Other Liquid Tumor Types* was treated as pan-cancer evidence
+  (Tier 1 for levels 1-3B) for solid tumors, as these cancer types have
+  no tissue. It is now treated as evidence from another tumor site
+  (shown as *Liquid tumors*), and likewise *All Solid Tumors*/*Other
+  Solid Tumor Types* for lymphoid/myeloid tumors (*Solid tumors*). *All
+  Tumors* remains pan-cancer
 - Sorting the *Oncogenicity* column of the SNV/InDel (and MMR variant)
   tables ordered the classes alphabetically (Benign first) - now ordered
   by oncogenicity (Oncogenic first)

@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9013</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9014</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -55,7 +55,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">msi_status_is_high</span><span class="op">(</span>msi_content <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">msi_status_is_high</span><span class="op">(</span>msi_content <span class="op">=</span> <span class="cn">NULL</span>, high_confidence_only <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -65,6 +65,11 @@
 <dl><dt id="arg-msi-content">msi_content<a class="anchor" aria-label="anchor" href="#arg-msi-content"></a></dt>
 <dd><p>MSI report element (as returned by
 <code>generate_report_data_msi</code>)</p></dd>
+
+
+<dt id="arg-high-confidence-only">high_confidence_only<a class="anchor" aria-label="anchor" href="#arg-high-confidence-only"></a></dt>
+<dd><p>logical, if TRUE, return TRUE only if the
+MSI-H prediction is also of high confidence (P(MSI-H) &gt;= 0.9)</p></dd>
 
 </dl></div>
     <div class="section level2">
