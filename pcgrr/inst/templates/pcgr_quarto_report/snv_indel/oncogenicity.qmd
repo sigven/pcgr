@@ -112,8 +112,24 @@ coding_variant_set <-
       "NA ",""
     )
   )
-  
 
+## show dbNSFP effect predictions (row details) for missense
+## variants only, skipping algorithms without a prediction
+if ("PREDICTED_EFFECT" %in% colnames(coding_variant_set)) {
+  coding_variant_set <- coding_variant_set |>
+    dplyr::mutate(
+      PREDICTED_EFFECT = dplyr::if_else(
+        !is.na(.data$CONSEQUENCE) &
+          stringr::str_detect(.data$CONSEQUENCE, "missense_variant"),
+        vapply(
+          strsplit(.data$PREDICTED_EFFECT, ", "),
+          function(p) {
+            p <- p[!is.na(p) & !endsWith(p, ":NA")]
+            if (length(p) == 0) NA_character_ else paste(p, collapse = ", ")
+          },
+          character(1)),
+        NA_character_))
+}
 
 
 ## sort VUS by presence of pathogenic clinvar classification (if any)
@@ -244,6 +260,7 @@ noncoding_variant_set <-
         "MUTATION_HOTSPOT_CANCERTYPE",
         "TARGETED_INHIBITORS",
         "TARGETED_INHIBITORS_ALL",
+        "PREDICTED_EFFECT",
         "VEP_ALL_CSQ"))) |>
   dplyr::select(
     dplyr::any_of(c(

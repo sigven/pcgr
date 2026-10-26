@@ -8,7 +8,7 @@ mutationtaster	http://www.mutationtaster.org	MutationTaster
 sift	https://sift.bii.a-star.edu.sg/	SIFT
 lrt	http://www.genetics.wustl.edu/jflab/lrt_query.html	LRT
 provean	http://provean.jcvi.org/index.php	PROVEAN
-mutpred	http://mutpred.mutdb.org	MutPred
+mutpred2	http://mutpred.mutdb.org	MutPred2
 m-cap	http://bejerano.stanford.edu/MCAP/	M-CAP
 splice_site_rf	http://nar.oxfordjournals.org/content/42/22/13534	Splice site effect (Random forest)
 splice_site_ada	http://nar.oxfordjournals.org/content/42/22/13534	Splice site effect (Adaptive boosting)

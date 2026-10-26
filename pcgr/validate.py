@@ -186,8 +186,8 @@ def is_valid_cna(input_cna_segment_fname, logger):
     if CNA_IMPUTED_COLUMN in cna_dataframe.columns:
         logger.info(
             f"Copy number segment file: n = {n_imputed} of {len(cna_dataframe)} segments have an imputed "
-            f"allele-specific copy number ('{CNA_IMPUTED_COLUMN}' = TRUE) - these are skipped for "
-            f"allele-specific analyses (HRD scores, genome doubling)")
+            f"allele-specific copy number") #('{CNA_IMPUTED_COLUMN}' = TRUE) - these are skipped for "
+            #f"allele-specific analyses (HRD scores, genome doubling)")
 
     for rec in cna_reader:
         if int(rec['End']) < int(rec['Start']):
