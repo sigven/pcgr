@@ -31,10 +31,16 @@ append_annotation_links <- function(
     if (!name %in% skip) {
       group_by_var <- c("VAR_ID","ENTREZGENE")
       if (vartype == "cna") {
-        group_by_var <- c("VAR_ID",
-                          "ENTREZGENE",
-                          "TRANSCRIPT_START",
-                          "TRANSCRIPT_END")
+        ## links must be generated per transcript - transcripts sharing
+        ## coordinates would otherwise all receive each other's links
+        tx_col <- intersect(
+          c("ENSEMBL_TRANSCRIPT_ID_RAW", "ENSEMBL_TRANSCRIPT_ID"),
+          colnames(var_data_df))
+        group_by_var <- unique(c("VAR_ID",
+                                 "ENTREZGENE",
+                                 "TRANSCRIPT_START",
+                                 "TRANSCRIPT_END",
+                                 utils::head(tx_col, 1)))
       }
       if (vartype == "exp") {
         group_by_var <- "ENTREZGENE"
@@ -63,9 +69,7 @@ append_annotation_links <- function(
                 dplyr::rename(
                   annotation_links,
                   !!rlang::sym(name) := "link"),
-                by = c("VAR_ID","ENTREZGENE",
-                       "TRANSCRIPT_START",
-                       "TRANSCRIPT_END"))
+                by = group_by_var)
           }else{
             if (vartype == "exp") {
               var_data_df <- var_data_df |>
@@ -1217,7 +1221,8 @@ generate_annotation_link <- function(
                               link_display_var))
     tmp_df <- var_df[, selected_vars]
     tmp_df <- tmp_df[!is.na(tmp_df[, link_key_var]) &
-                       !is.na(tmp_df[, link_display_var]), ] |>
+                       !is.na(tmp_df[, link_display_var]) &
+                       as.character(tmp_df[[link_key_var]]) != "", ] |>
       dplyr::distinct()
 
 
@@ -1242,10 +1247,7 @@ generate_annotation_link <- function(
           df_annotation_links <- as.data.frame(
             df_annotation_links |>
               dplyr::group_by(
-                .data$VAR_ID,
-                .data$ENTREZGENE,
-                .data$TRANSCRIPT_START,
-                .data$TRANSCRIPT_END) |>
+                dplyr::across(dplyr::all_of(group_by_var))) |>
               dplyr::summarise(
                 link = unlist(
                   paste(

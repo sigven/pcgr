@@ -428,8 +428,16 @@ get_excel_sheets <- function(report = NULL) {
           colnames(report$content$mutational_signatures$result$tsv) <-
             toupper(colnames(report$content$mutational_signatures$result$tsv))
 
+          ## max four decimals (unrounded values are in the TSV)
           excel_sheets[['MUTATIONAL_SIGNATURE']] <-
-            report$content$mutational_signatures$result$tsv
+            report$content$mutational_signatures$result$tsv |>
+            dplyr::mutate(
+              dplyr::across(
+                dplyr::any_of(
+                  c("PROP_SIGNATURE",
+                    "PROP_SIGNATURE_CI_LOWER",
+                    "PROP_SIGNATURE_CI_UPPER")),
+                ~ round(.x, 4)))
         }
       }
     }

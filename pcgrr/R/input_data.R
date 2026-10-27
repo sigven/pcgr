@@ -154,6 +154,10 @@ load_somatic_cna <- function(
       append_annotation_links(
         vartype = "cna"
       ) |>
+      dplyr::mutate(
+        dplyr::across(
+          dplyr::any_of(c("ENSEMBL_TRANSCRIPT_ID", "REFSEQ_TRANSCRIPT_ID")),
+          ~ dplyr::if_else(is.na(.x), "", as.character(.x)))) |>
       tidyr::unite(
         "TRANSCRIPT_OVERLAP",
         c("ENSEMBL_TRANSCRIPT_ID",
