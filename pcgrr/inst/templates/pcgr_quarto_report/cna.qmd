@@ -348,8 +348,6 @@ if (!twohit_germline_included) {
 }
 ```
 
-<br>
-
 ::: {.callout-note}
 
 ## Note - loss-of-function annotation
@@ -359,7 +357,7 @@ annotation strategy. Specifically, evidence from curated sources (e.g. OncoKB) m
 
 :::
 
-::: {.callout-note collapse="true"}
+::: {.callout-note}
 
 ## Note - VAF consistency assessment
 
@@ -508,7 +506,7 @@ htmltools::div(
 ### Clinical actionability classification
 
 Genes subject to copy number aberrations in the tumor sample have been assessed for
-_clinical actionability_ through an implementation of AMP/ASCO/CAP guidelines [@Li2017-ew]. We use `r bm_db_label` `r bm_db_citation` as the underlying sources for actionable variants (versions indicated below).
+_clinical actionability_ through an implementation of AMP/ASCO/CAP guidelines [@Li2017-ew]. We use `r bm_db_label` `r bm_db_citation` as the underlying sources for actionable variants (versions indicated below). `r bm_db_tier_note`
 
 The table below indicates which variants have been classified into _tiers of clinical significance_ according to AMP/ASCO/CAP criteria.
 
@@ -556,7 +554,7 @@ result_table
 #| echo: false
 #| output: asis
 #| eval: !expr isTRUE(vstats$therapeutic_sensitivity$tier1$n_gene == 0) && isTRUE(vstats$therapeutic_sensitivity$tier2$n_gene == 0) && isTRUE(vstats$therapeutic_sensitivity$tier3$n_gene == 0)
-cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$therapeutic_sensitivity$border, "; background:", cs$therapeutic_sensitivity$bg, "; border-radius:0 4px 4px 0; color:", cs$therapeutic_sensitivity$text, "; font-size:0.92em;'>Based on available data in ", bm_db_label, ", no therapeutic sensitivity biomarkers (Tier 1&ndash;3) were identified among CNAs in this tumor sample.</div>"))
+cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$therapeutic_sensitivity$border, "; background:", cs$therapeutic_sensitivity$bg, "; border-radius:0 4px 4px 0; color:", cs$therapeutic_sensitivity$text, "; font-size:0.92em;'>Based on available data in ", bm_db_tier_label, ", no therapeutic sensitivity biomarkers (Tier 1&ndash;3) were identified among CNAs in this tumor sample.</div>"))
 ```
 
 <br>
@@ -580,7 +578,7 @@ result_table <-
   )
 
 if (is.null(result_table)) {
-  cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$therapeutic_resistance$border, "; background:", cs$therapeutic_resistance$bg, "; border-radius:0 4px 4px 0; color:", cs$therapeutic_resistance$text, "; font-size:0.92em;'>Based on available data in ", bm_db_label, ", no therapeutic resistance biomarkers for ", tumor_site, " cancers were identified among CNAs in this tumor sample.</div>"))
+  cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$therapeutic_resistance$border, "; background:", cs$therapeutic_resistance$bg, "; border-radius:0 4px 4px 0; color:", cs$therapeutic_resistance$text, "; font-size:0.92em;'>Based on available data in ", bm_db_tier_label, ", no therapeutic resistance biomarkers for ", tumor_site, " cancers were identified among CNAs in this tumor sample.</div>"))
 } else {
   result_table
 }
@@ -591,18 +589,21 @@ if (is.null(result_table)) {
 #| echo: false
 #| output: asis
 #| eval: !expr isTRUE(vstats$therapeutic_resistance$tier1$n_gene == 0) && isTRUE(vstats$therapeutic_resistance$tier2$n_gene == 0) && isTRUE(vstats$therapeutic_resistance$tier3$n_gene == 0)
-cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$therapeutic_resistance$border, "; background:", cs$therapeutic_resistance$bg, "; border-radius:0 4px 4px 0; color:", cs$therapeutic_resistance$text, "; font-size:0.92em;'>Based on available data in ", bm_db_label, ", no therapeutic resistance biomarkers for ", tumor_site, " cancers were identified among CNAs in this tumor sample.</div>"))
+cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$therapeutic_resistance$border, "; background:", cs$therapeutic_resistance$bg, "; border-radius:0 4px 4px 0; color:", cs$therapeutic_resistance$text, "; font-size:0.92em;'>Based on available data in ", bm_db_tier_label, ", no therapeutic resistance biomarkers for ", tumor_site, " cancers were identified among CNAs in this tumor sample.</div>"))
 ```
 
 #### Prognostic biomarkers
 
+`r pcgrr::progn_diagn_tier_note(pcg_report)`
+
 ```{r tier1_2_poor_prognosis_variants_cna}
 #| echo: false
 #| output: asis
-#| eval: !expr isTRUE(vstats$prognostic_poor$tier1$n_gene > 0) || isTRUE(vstats$prognostic_poor$tier2$n_gene > 0)
+#| eval: !expr pcgrr::has_progn_diagn_evidence(pcg_report, "cna", "prognostic_poor")
 
 rctbl_recs <- pcgrr::prep_progn_display_tbl(
   rep = pcg_report,
+tier = pcgrr::progn_diagn_tiers(pcg_report),
   etype_for_tiering = c("prognostic"),
   variant_category = 'cna',
   clnsig = "prognostic_poor")
@@ -621,8 +622,8 @@ result_table
 ```{r}
 #| echo: false
 #| output: asis
-#| eval: !expr isTRUE(vstats$prognostic_poor$tier1$n_gene == 0) && isTRUE(vstats$prognostic_poor$tier2$n_gene == 0)
-cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$prognostic_poor$border, "; background:", cs$prognostic_poor$bg, "; border-radius:0 4px 4px 0; color:", cs$prognostic_poor$text, "; font-size:0.92em;'>Based on available data in ", bm_db_label, ", no poor outcome biomarkers for ", tumor_site, " cancers were identified among CNAs in this tumor sample.</div>"))
+#| eval: !expr isFALSE(pcgrr::has_progn_diagn_evidence(pcg_report, "cna", "prognostic_poor"))
+cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$prognostic_poor$border, "; background:", cs$prognostic_poor$bg, "; border-radius:0 4px 4px 0; color:", cs$prognostic_poor$text, "; font-size:0.92em;'>Based on available data in ", bm_db_tier_label, ", no poor outcome biomarkers for ", tumor_site, " cancers were identified among CNAs in this tumor sample.</div>"))
 ```
 
 <br>
@@ -630,10 +631,11 @@ cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$prognostic
 ```{r tier1_2_better_prognosis_variants_cna}
 #| echo: false
 #| output: asis
-#| eval: !expr isTRUE(vstats$prognostic_better$tier1$n_gene > 0) || isTRUE(vstats$prognostic_better$tier2$n_gene > 0)
+#| eval: !expr pcgrr::has_progn_diagn_evidence(pcg_report, "cna", "prognostic_better")
 
 rctbl_recs <- pcgrr::prep_progn_display_tbl(
   rep = pcg_report,
+tier = pcgrr::progn_diagn_tiers(pcg_report),
   etype_for_tiering = c("prognostic"),
   variant_category = 'cna',
   clnsig = "prognostic_better")
@@ -652,19 +654,22 @@ result_table
 ```{r}
 #| echo: false
 #| output: asis
-#| eval: !expr isTRUE(vstats$prognostic_better$tier1$n_gene == 0) && isTRUE(vstats$prognostic_better$tier2$n_gene == 0)
-cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$prognostic_better$border, "; background:", cs$prognostic_better$bg, "; border-radius:0 4px 4px 0; color:", cs$prognostic_better$text, "; font-size:0.92em;'>Based on available data in ", bm_db_label, ", no better outcome biomarkers for ", tumor_site, " cancers were identified among CNAs in this tumor sample.</div>"))
+#| eval: !expr isFALSE(pcgrr::has_progn_diagn_evidence(pcg_report, "cna", "prognostic_better"))
+cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$prognostic_better$border, "; background:", cs$prognostic_better$bg, "; border-radius:0 4px 4px 0; color:", cs$prognostic_better$text, "; font-size:0.92em;'>Based on available data in ", bm_db_tier_label, ", no better outcome biomarkers for ", tumor_site, " cancers were identified among CNAs in this tumor sample.</div>"))
 ```
 
 #### Diagnostic biomarkers
 
+`r pcgrr::progn_diagn_tier_note(pcg_report)`
+
 ```{r tier1_2_diagnostic_variants_cna}
 #| echo: false
 #| output: asis
-#| eval: !expr isTRUE(vstats$diagnostic_positive$tier1$n_gene > 0) || isTRUE(vstats$diagnostic_positive$tier2$n_gene > 0)
+#| eval: !expr pcgrr::has_progn_diagn_evidence(pcg_report, "cna", "diagnostic_positive")
 
 rctbl_recs <- pcgrr::prep_diagn_display_tbl(
   rep = pcg_report,
+tier = pcgrr::progn_diagn_tiers(pcg_report),
   etype_for_tiering = c("diagnostic"),
   variant_category = 'cna',
   clnsig = "diagnostic_positive")
@@ -683,8 +688,8 @@ result_table
 ```{r}
 #| echo: false
 #| output: asis
-#| eval: !expr isTRUE(vstats$diagnostic_positive$tier1$n_gene == 0) && isTRUE(vstats$diagnostic_positive$tier2$n_gene == 0)
-cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$diagnostic_positive$border, "; background:", cs$diagnostic_positive$bg, "; border-radius:0 4px 4px 0; color:", cs$diagnostic_positive$text, "; font-size:0.92em;'>Based on available data in ", bm_db_label, ", no diagnostic biomarkers for ", tumor_site, " cancers were identified among CNAs in this tumor sample.</div>"))
+#| eval: !expr isFALSE(pcgrr::has_progn_diagn_evidence(pcg_report, "cna", "diagnostic_positive"))
+cat(paste0("<div style='padding:8px 14px; border-left:4px solid ", cs$diagnostic_positive$border, "; background:", cs$diagnostic_positive$bg, "; border-radius:0 4px 4px 0; color:", cs$diagnostic_positive$text, "; font-size:0.92em;'>Based on available data in ", bm_db_tier_label, ", no diagnostic biomarkers for ", tumor_site, " cancers were identified among CNAs in this tumor sample.</div>"))
 ```
 
 

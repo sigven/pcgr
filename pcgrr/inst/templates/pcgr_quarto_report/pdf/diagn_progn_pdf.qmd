@@ -11,11 +11,15 @@ cat("Somatic DNA aberrations (SNVs/InDels, copy number alterations) and RNA ",
     "fusions with diagnostic or prognostic biomarker evidence (",
     pcgrr:::bm_db_label(pcg_report), " ", pcgrr:::bm_db_citation(pcg_report),
     "), classified into tiers according to the AMP/ASCO/CAP guidelines ",
-    "[@Li2017-ew] - Tier 1 and Tier 2 aberrations are shown. Per alteration, ",
+    "[@Li2017-ew] - ",
+    if (3L %in% pcgrr::progn_diagn_tiers(pcg_report))
+      "Tier 1, Tier 2 and Tier 3" else "Tier 1 and Tier 2",
+    " aberrations are shown. Per alteration, ",
     "the prognostic outcome or diagnostic evidence (in bold) is listed with ",
     "the tumor types of the underlying evidence, together with the evidence ",
     "levels and sources; details on each evidence item are available in the ",
-    "HTML report.\n\n", sep = "")
+    "HTML report. ", pcgrr:::bm_db_tier_note(pcg_report), " ",
+    pcgrr::progn_diagn_tier_note(pcg_report), "\n\n", sep = "")
 cat(pcgrr:::pdf_legend("bm_sources"))
 ```
 
@@ -23,5 +27,6 @@ cat(pcgrr:::pdf_legend("bm_sources"))
 #| echo: false
 #| output: asis
 cat(pcgrr:::pdf_section_progn_diagn(
-  pcg_report, tier = c(1, 2), color = report_color))
+  pcg_report, tier = pcgrr::progn_diagn_tiers(pcg_report),
+  color = report_color))
 ```

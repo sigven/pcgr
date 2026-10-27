@@ -9,7 +9,8 @@ fetch_oncokb_biomarker_eitems(
   biomarker = "MSI-H",
   oncotree_code = NULL,
   oncokb_token = NULL,
-  base_api_url = NULL
+  base_api_url = NULL,
+  all_tumor_types = FALSE
 )
 }
 \arguments{
@@ -21,6 +22,9 @@ restricted to a tumor type)}
 \item{oncokb_token}{OncoKB API token}
 
 \item{base_api_url}{Optional base URL for OncoKB API (default: oncokb_base_api_url)}
+
+\item{all_tumor_types}{logical, also add evidence for other tumor types
+(second query without tumor type, see \code{oncokb_query_all_tumor_types})}
 }
 \value{
 Data frame with evidence items (empty if none, or if the query failed)

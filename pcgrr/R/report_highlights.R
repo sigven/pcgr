@@ -79,7 +79,13 @@ tiered_alterations_hl <- function(report, tier = c(1, 2),
     callset <- content[[category]]$callset
     v <- callset$variant
     if (clnsig == "therapeutic_sensitivity" || NROW(v) == 0) return(v)
-    cls <- callset$bm_evidence[[clnsig]]$classification
+    ## tiers from the evidence items of this type (the tier classification
+    ## also holds variants with a Tier 3 by gene role only, without evidence)
+    cls <- callset$bm_evidence[[clnsig]]$eitems
+    if (NROW(cls) > 0 && "BM_EVIDENCE_TYPE" %in% colnames(cls)) {
+      cls <- cls[tolower(cls$BM_EVIDENCE_TYPE) %in% sub("_.*$", "", clnsig), ,
+                 drop = FALSE]
+    }
     if (NROW(cls) == 0) return(v[0, , drop = FALSE])
     join_cols <- c("VAR_ID", "VARIANT_CLASS",
                    if (category != "fusion") "ENTREZGENE")
@@ -150,7 +156,8 @@ tiered_alterations_hl <- function(report, tier = c(1, 2),
 #' The most critical findings come first: somatic alterations of strong or
 #' potential clinical significance (AMP/ASCO/CAP Tier 1/2). These are
 #' followed by supporting findings, each included only when informative:
-#' prognostic and diagnostic biomarkers (Tier 1/2),
+#' prognostic and diagnostic biomarkers (Tier 1/2; also Tier 3 without a
+#' primary site, see progn_diagn_tiers()),
 #' oncogenic/likely oncogenic SNV/InDel variants, composite genomic
 #' biomarkers (TMB, MSI), copy number variants (amplified proto-oncogenes,
 #' deleted tumor suppressors, genome doubling, HRD score), mutational
@@ -205,13 +212,15 @@ report_highlights <- function(report, max_show = 5, links = FALSE) {
   ## --- Supporting findings ---
   supporting <- c()
 
-  ## prognostic and diagnostic biomarkers (AMP/ASCO/CAP Tier 1/2) - one
+  ## prognostic and diagnostic biomarkers (AMP/ASCO/CAP Tier 1/2, and Tier 3
+  ## when no primary site is set - see progn_diagn_tiers()) - one
   ## finding per evidence type, listing alterations with their tier; only
   ## included when any such evidence is found
   bm_items <- function(types) {
     items <- c()
     for (desc in names(types)) {
-      d <- tiered_alterations_hl(report, tier = c(1, 2), clnsig = types[[desc]])
+      d <- tiered_alterations_hl(
+        report, tier = progn_diagn_tiers(report), clnsig = types[[desc]])
       if (NROW(d) == 0) next
       d <- d[!duplicated(d$LABEL), , drop = FALSE]
       items <- c(items, paste0(desc, ": ", fmt_list_hl(

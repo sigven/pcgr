@@ -25,6 +25,8 @@ same rules, with ties resolved alphabetically by gene symbol.
   cancer association rank)
 - __Diagnostic biomarkers__: alterations with Tier 1/2 evidence supporting a diagnosis, each with
   its tier (ordered as for prognostic biomarkers)
+- When no primary tumor site is specified, prognostic and diagnostic evidence from any tumor type is
+  considered, and Tier 3 evidence (weak evidence - levels C/D/E) is also listed
 - __SNV/InDel variants__: number of oncogenic / likely oncogenic SNVs/InDels (all, including those
   listed as actionable - their number is stated), with the first five of the variants *not* already
   listed as actionable (oncogenicity score, highest first, then tissue-specific and global cancer

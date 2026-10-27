@@ -422,8 +422,10 @@ prep_progn_display_tbl <- function(
   if (is.null(rep)) {
     log4r_fatal("report object is NULL")
   }
-  if (!is.numeric(tier) || !all(tier %in% c(1, 2)) || length(tier) == 0) {
-    log4r_fatal("tier must be a non-empty integer vector with values in {1, 2}")
+  ## Tier 3 (weak evidence) is included when no primary site is set - see
+  ## progn_diagn_tiers()
+  if (!is.numeric(tier) || !all(tier %in% c(1, 2, 3)) || length(tier) == 0) {
+    log4r_fatal("tier must be a non-empty integer vector with values in {1, 2, 3}")
   }
   tier <- as.integer(unique(tier))
   if (!variant_category %in% names(rep$content)) {
@@ -763,8 +765,10 @@ prep_diagn_display_tbl <- function(
   if (is.null(rep)) {
     log4r_fatal("report object is NULL")
   }
-  if (!is.numeric(tier) || !all(tier %in% c(1, 2)) || length(tier) == 0) {
-    log4r_fatal("tier must be a non-empty integer vector with values in {1, 2}")
+  ## Tier 3 (weak evidence) is included when no primary site is set - see
+  ## progn_diagn_tiers()
+  if (!is.numeric(tier) || !all(tier %in% c(1, 2, 3)) || length(tier) == 0) {
+    log4r_fatal("tier must be a non-empty integer vector with values in {1, 2, 3}")
   }
   tier <- as.integer(unique(tier))
   if (!variant_category %in% names(rep$content)) {
@@ -1635,24 +1639,84 @@ map_biomarker_data <- function(
 
 }
 
+#' Mode of biomarker database use - 'oncokb_only' (--oncokb_exclusive),
+#' 'all' (CIViC, CGI and OncoKB) or 'no_oncokb' (CIViC and CGI)
+#'
+#' @param report PCGR report object
+#'
+#' @return character
+#' @keywords internal
+bm_db_mode <- function(report) {
+  conf <- report$settings$conf
+  ## same flag as biomarker_sources_not_tiered() - the API token is not
+  ## kept in the configuration file written to the output directory
+  oncokb_active <- isTRUE(as.numeric(conf$oncokb$run) == 1)
+  if (oncokb_active && isTRUE(as.logical(conf$oncokb$exclusive))) {
+    "oncokb_only"
+  } else if (oncokb_active) {
+    "all"
+  } else {
+    "no_oncokb"
+  }
+}
+
 #' Biomarker databases used for actionability classification (as named in
 #' the HTML report)
 #'
 #' @param report PCGR report object
+#' @param fusion logical, RNA fusions (CGI evidence is never used for fusions)
 #'
 #' @return character, e.g. 'CIViC and CGI'
 #' @keywords internal
-bm_db_label <- function(report) {
-  conf <- report$settings$conf
-  token <- conf$oncokb$api_token
-  oncokb_active <- !is.null(token) && !is.na(token) && token != "None"
-  if (oncokb_active && isTRUE(as.logical(conf$oncokb$exclusive))) {
+bm_db_label <- function(report, fusion = FALSE) {
+  mode <- bm_db_mode(report)
+  if (mode == "oncokb_only") {
     "OncoKB"
-  } else if (oncokb_active) {
-    "CIViC, CGI, and OncoKB"
+  } else if (mode == "all") {
+    if (fusion) "CIViC and OncoKB" else "CIViC, CGI, and OncoKB"
   } else {
-    "CIViC and CGI"
+    if (fusion) "CIViC" else "CIViC and CGI"
   }
+}
+
+#' Biomarker databases whose evidence items define actionability tiers -
+#' when OncoKB is run, CGI evidence is shown for tiered aberrations, but not
+#' used for tier assignment (cf. biomarker_sources_not_tiered()). Used in
+#' messages on the absence of biomarker evidence.
+#'
+#' @param report PCGR report object
+#' @param fusion logical, RNA fusions (CGI evidence is never used for fusions)
+#'
+#' @return character, e.g. 'CIViC and OncoKB'
+#' @keywords internal
+bm_db_tier_label <- function(report, fusion = FALSE) {
+  mode <- bm_db_mode(report)
+  if (mode == "oncokb_only") {
+    "OncoKB"
+  } else if (mode == "all") {
+    "CIViC and OncoKB"
+  } else {
+    if (fusion) "CIViC" else "CIViC and CGI"
+  }
+}
+
+#' Sentence on the biomarker databases used for tier assignment, appended
+#' to the actionability introductions (empty unless CGI is shown, but not
+#' used for tier assignment)
+#'
+#' @param report PCGR report object
+#' @param fusion logical, RNA fusions (CGI evidence is never used for fusions)
+#'
+#' @return character
+#' @keywords internal
+bm_db_tier_note <- function(report, fusion = FALSE) {
+  if (fusion || bm_db_mode(report) != "all") {
+    return("")
+  }
+  paste0(
+    "Tiers are assigned from CIViC and OncoKB evidence; CGI evidence is ",
+    "shown as additional support for tiered aberrations, but does not ",
+    "define a tier on its own.")
 }
 
 #' Sort evidence levels in the order of color_palette$elevel (A-E, then
@@ -1668,18 +1732,90 @@ sort_evidence_levels <- function(levels) {
 #' classification (pandoc citation keys, cf. bm_db_label())
 #'
 #' @param report PCGR report object
+#' @param fusion logical, RNA fusions (CGI evidence is never used for fusions)
 #'
 #' @return character, e.g. '[@Griffith2017-do; @Tamborero2018-aj]'
 #' @keywords internal
-bm_db_citation <- function(report) {
-  conf <- report$settings$conf
-  token <- conf$oncokb$api_token
-  oncokb_active <- !is.null(token) && !is.na(token) && token != "None"
-  if (oncokb_active && isTRUE(as.logical(conf$oncokb$exclusive))) {
+bm_db_citation <- function(report, fusion = FALSE) {
+  mode <- bm_db_mode(report)
+  if (mode == "oncokb_only") {
     "[@Chakravarty2017-rd]"
-  } else if (oncokb_active) {
-    "[@Griffith2017-do; @Tamborero2018-aj; @Chakravarty2017-rd]"
+  } else if (mode == "all") {
+    if (fusion) {
+      "[@Griffith2017-do; @Chakravarty2017-rd]"
+    } else {
+      "[@Griffith2017-do; @Tamborero2018-aj; @Chakravarty2017-rd]"
+    }
   } else {
-    "[@Griffith2017-do; @Tamborero2018-aj]"
+    if (fusion) "[@Griffith2017-do]" else "[@Griffith2017-do; @Tamborero2018-aj]"
   }
+}
+
+#' Actionability tiers of prognostic and diagnostic biomarker evidence shown
+#' in the reports (HTML/PDF sections, key findings)
+#'
+#' With a primary site, Tier 1/2 evidence is shown (evidence matching the
+#' primary site). Without a primary site (site 'Any'), evidence from any
+#' tumor type is considered, for which weak evidence (levels C/D/E) is always
+#' Tier 3 - Tier 3 evidence is then also shown.
+#'
+#' @param report PCGR report object
+#'
+#' @return integer vector of tiers
+#' @export
+progn_diagn_tiers <- function(report) {
+  site <- report$settings$conf$sample_properties$site
+  if (is.null(site) || isTRUE(site == "Any")) c(1L, 2L, 3L) else c(1L, 2L)
+}
+
+#' Whether there is prognostic or diagnostic biomarker evidence to show for
+#' a variant category (tiers as given by progn_diagn_tiers()) - based on the
+#' evidence items, as the tier classification also holds variants with a
+#' Tier 3 by gene role only (no evidence of this type)
+#'
+#' @param report PCGR report object
+#' @param variant_category 'snv_indel', 'cna' or 'fusion'
+#' @param clnsig 'prognostic_poor', 'prognostic_better',
+#' 'diagnostic_positive' or 'diagnostic_negative'
+#'
+#' @return logical
+#' @export
+has_progn_diagn_evidence <- function(report, variant_category, clnsig) {
+  bm_evidence <- report$content[[variant_category]]$callset$bm_evidence
+  if (!isTRUE(report$content[[variant_category]]$eval) ||
+      !clnsig %in% names(bm_evidence) ||
+      NROW(bm_evidence[[clnsig]]$classification) == 0) {
+    return(FALSE)
+  }
+  tiers <- progn_diagn_tiers(report)
+  if (!any(bm_evidence[[clnsig]]$classification$ACTIONABILITY_TIER %in% tiers)) {
+    return(FALSE)
+  }
+  prep <- if (startsWith(clnsig, "prognostic")) {
+    prep_progn_display_tbl
+  } else {
+    prep_diagn_display_tbl
+  }
+  recs <- prep(
+    rep = report, tier = tiers,
+    etype_for_tiering = sub("_.*$", "", clnsig),
+    clnsig = clnsig, variant_category = variant_category)
+  NROW(recs$main) > 0
+}
+
+#' Note on the tiers of prognostic/diagnostic biomarker evidence shown, for
+#' reports without a primary site (see progn_diagn_tiers())
+#'
+#' @param report PCGR report object
+#'
+#' @return character ('' when a primary site is set)
+#' @export
+progn_diagn_tier_note <- function(report) {
+  if (!3L %in% progn_diagn_tiers(report)) {
+    return("")
+  }
+  paste0(
+    "As no primary tumor site was specified, prognostic and diagnostic ",
+    "biomarker evidence from any tumor type is shown, including Tier 3 ",
+    "(weak evidence - levels C/D/E).")
 }

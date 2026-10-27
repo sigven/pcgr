@@ -291,12 +291,22 @@ assign_amp_asco_cap_tiers <- function(
 
     if(NROW(biomarker_items) > 0 &
        NROW(variants_tier_classified) > 0){
+      ## variants need a matching-site item from a source used for tier
+      ## assignment - items from sources not used for tiering (e.g. CGI when
+      ## OncoKB is run) cannot keep a variant whose tier was set by evidence
+      ## from other sites only (which is not shown)
+      tiering_site_items <- biomarker_items |>
+        dplyr::filter(!(.data$BM_SOURCE_DB %in% sources_not_tiered))
       variants_tier_classified <- variants_tier_classified |>
         dplyr::filter(
-          .data$VAR_ID %in% biomarker_items$VAR_ID &
-            .data$ENTREZGENE %in% biomarker_items$ENTREZGENE &
-            .data$VARIANT_CLASS %in% biomarker_items$VARIANT_CLASS
+          .data$VAR_ID %in% tiering_site_items$VAR_ID &
+            .data$ENTREZGENE %in% tiering_site_items$ENTREZGENE &
+            .data$VARIANT_CLASS %in% tiering_site_items$VARIANT_CLASS
         )
+      biomarker_items <- biomarker_items |>
+        dplyr::semi_join(
+          variants_tier_classified,
+          by = c("VAR_ID", "VARIANT_CLASS"))
 
       ## log remaining rows in variants_tier_classified after filtering for primary site match
       # log4r_info(paste0(

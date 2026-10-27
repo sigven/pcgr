@@ -5,10 +5,12 @@
 \title{Citations of the biomarker databases used for actionability
 classification (pandoc citation keys, cf. bm_db_label())}
 \usage{
-bm_db_citation(report)
+bm_db_citation(report, fusion = FALSE)
 }
 \arguments{
 \item{report}{PCGR report object}
+
+\item{fusion}{logical, RNA fusions (CGI evidence is never used for fusions)}
 }
 \value{
 character, e.g. '\link{@Griffith2017-do; @Tamborero2018-aj}'

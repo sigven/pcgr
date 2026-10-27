@@ -258,7 +258,7 @@ pdf_section_bm_evidence <- function(
   }
   if (length(out) == 0) {
     return(pdf_note(kind = "empty", paste0(
-      "Based on available data in ", bm_db_label(report),
+      "Based on available data in ", bm_db_tier_label(report),
       ", no therapeutic biomarker evidence (Tier ",
       paste(tier, collapse = "/"), ") was found for somatic aberrations ",
       "in this tumor sample.")))
@@ -317,7 +317,7 @@ pdf_section_progn_diagn <- function(
   }
   if (length(out) == 0) {
     return(pdf_note(kind = "empty", paste0(
-      "Based on available data in ", bm_db_label(report),
+      "Based on available data in ", bm_db_tier_label(report),
       ", no prognostic or diagnostic biomarker evidence (Tier ",
       paste(tier, collapse = "/"), ") was found for somatic aberrations ",
       "in this tumor sample.")))

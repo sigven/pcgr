@@ -5,10 +5,12 @@
 \title{Biomarker databases used for actionability classification (as named in
 the HTML report)}
 \usage{
-bm_db_label(report)
+bm_db_label(report, fusion = FALSE)
 }
 \arguments{
 \item{report}{PCGR report object}
+
+\item{fusion}{logical, RNA fusions (CGI evidence is never used for fusions)}
 }
 \value{
 character, e.g. 'CIViC and CGI'

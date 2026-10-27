@@ -10,23 +10,15 @@ mutational_burden <- 'ON'
 
 conf <- pcg_report$settings$conf
 
-oncokb_active <- !is.null(conf$oncokb$api_token) &&
-  !is.na(conf$oncokb$api_token) &&
-  conf$oncokb$api_token != "None"
-bm_db_label <- if (oncokb_active && isTRUE(as.logical(conf$oncokb$exclusive))) {
-  "OncoKB"
-} else if (oncokb_active) {
-  "CIViC, CGI, and OncoKB"
-} else {
-  "CIViC and CGI"
-}
-bm_db_citation <- if (oncokb_active && isTRUE(as.logical(conf$oncokb$exclusive))) {
-  "[@Chakravarty2017-rd]"
-} else if (oncokb_active) {
-  "[@Griffith2017-do;@Tamborero2018-aj;@Chakravarty2017-rd]"
-} else {
-  "[@Griffith2017-do;@Tamborero2018-aj]"
-}
+## biomarker databases shown (bm_db_label) and used for tier assignment
+## (bm_db_tier_label - CGI is not used when OncoKB is run, nor for fusions)
+bm_db_label <- pcgrr:::bm_db_label(pcg_report)
+bm_db_citation <- pcgrr:::bm_db_citation(pcg_report)
+bm_db_tier_label <- pcgrr:::bm_db_tier_label(pcg_report)
+bm_db_tier_note <- pcgrr:::bm_db_tier_note(pcg_report)
+bm_db_label_fusion <- pcgrr:::bm_db_label(pcg_report, fusion = TRUE)
+bm_db_citation_fusion <- pcgrr:::bm_db_citation(pcg_report, fusion = TRUE)
+bm_db_tier_label_fusion <- pcgrr:::bm_db_tier_label(pcg_report, fusion = TRUE)
 
 sample_name <- pcg_report[['settings']][['sample_id']]
 assay_type <- conf$assay_properties$type

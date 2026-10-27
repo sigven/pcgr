@@ -121,7 +121,8 @@ cat("The tumor mutational burden (", round(tmb_estimate_pdf$TMB_ESTIMATE, 1),
     pcgrr:::bm_db_label(pcg_report), " ", pcgrr:::bm_db_citation(pcg_report),
     ", and are classified according to the strength of evidence for the ",
     "tumor type (", sample_props_pdf$site,
-    "), following AMP/ASCO/CAP guidelines [@Li2017-ew].\n\n", sep = "")
+    "), following AMP/ASCO/CAP guidelines [@Li2017-ew]. ",
+    pcgrr:::bm_db_tier_note(pcg_report), "\n\n", sep = "")
 ```
 
 ```{r tmb_pdf_bm_sensitivity}
@@ -138,7 +139,7 @@ tmb_bm_pdf$sensitivity
 #| output: asis
 #| eval: !expr isFALSE(is.null(pcg_report$content$tmb$callset)) && is.null(tmb_bm_pdf$sensitivity)
 cat(pcgrr:::pdf_note(kind = "empty", paste0(
-  "Based on available data in ", pcgrr:::bm_db_label(pcg_report),
+  "Based on available data in ", pcgrr:::bm_db_tier_label(pcg_report),
   ", no therapeutic sensitivity biomarkers (Tier 1-3) were identified for ",
   "TMB-High in this tumor sample.")))
 ```

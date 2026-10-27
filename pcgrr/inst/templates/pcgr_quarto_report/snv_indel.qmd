@@ -1,6 +1,5 @@
 ## Somatic SNVs/InDels
 
-<br>
 
 ```{r key_snv_indel_numbers}
 #| echo: false

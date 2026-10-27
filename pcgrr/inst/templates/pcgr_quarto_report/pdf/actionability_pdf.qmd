@@ -93,7 +93,8 @@ cat("Matched therapeutic biomarker evidence (", pcgrr:::bm_db_label(pcg_report),
     "matched therapies (in bold) are listed with the tumor types of the ",
     "underlying evidence, together with the evidence levels and sources. ",
     "Only tier-defining evidence items are shown for therapeutic sensitivity; ",
-    "details on each evidence item are available in the HTML report.\n\n",
+    "details on each evidence item are available in the HTML report. ",
+    pcgrr:::bm_db_tier_note(pcg_report), "\n\n",
     sep = "")
 cat(pcgrr:::pdf_legend("bm_sources"))
 ```
