@@ -1935,7 +1935,18 @@ load_rna_fusions <- function(
       dplyr::mutate(num_sort = as.numeric(
         stringr::str_extract(.data$VAR_ID, "\\d+"))) |>
       dplyr::arrange(.data$num_sort) |>
-      dplyr::select(-c("num_sort"))
+      dplyr::select(-c("num_sort")) |>
+      ## fusion name with partners revealed from the breakpoints
+      ## (e.g. '--ALK' -> 'EML4::ALK')
+      dplyr::mutate(
+        FUSION_GENE2 = paste0(
+          dplyr::coalesce(
+            as.character(.data$FUSION_GENE_5P),
+            stringr::str_extract(.data$FUSION_GENE2, "^[^:]*")),
+          "::",
+          dplyr::coalesce(
+            as.character(.data$FUSION_GENE_3P),
+            stringr::str_extract(.data$FUSION_GENE2, "[^:]*$"))))
 
 
     if (NROW(results[['variant']]) == 0) {

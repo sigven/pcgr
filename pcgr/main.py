@@ -182,7 +182,7 @@ def cli():
                                      help = "Minimum number of SNVs required for re-fitting of mutational signatures (SBS) (default: %(default)s, minimum n = 100)")
     optional_signatures.add_argument("--tumor_type_reference_signatures", action="store_true",
                                      help = "Restrict signature re-fitting to reference mutational signatures (SBS) already attributed to the "
-                                            "tumor type, rather than the full reference set - default: %(default)s (i.e. _all_ reference "
+                                            "tumor type,\nrather than the full reference set - default: %(default)s (i.e. _all_ reference "
                                             "signatures are used by default)")
     optional_signatures.add_argument("--include_artefact_signatures", action="store_true", 
                                      help = "Include sequencing artefacts in the collection of reference signatures (default: %(default)s")
@@ -228,22 +228,22 @@ def cli():
                                    help = "Do not show variants of uncertain significance (VUS) in the germline section of the HTML report (default: %(default)s)")
 
     optional_biomarker.add_argument("--oncokb_api_token", dest="oncokb_api_token", default = None,
-                                    help = "Oncokb API token (default: ")
+                                    help = "Oncokb API token (default: %(default)s)")
     optional_biomarker.add_argument("--oncokb_oncotree_code", dest="oncokb_oncotree_code",
                                     help = "OncoKB oncotree code (default: %(default)s)")
     optional_biomarker.add_argument("--oncokb_tumor_type_only", action="store_true",
                                     help = "Limit OncoKB evidence to what OncoKB returns for the tumor type (--oncokb_oncotree_code, or the OncoTree code "
-                                           "of --tumor_site). By default, OncoKB is also queried without tumor type, adding evidence for other tumor types "
-                                           "(labelled by cancer type, tiered as evidence from other tumor sites, as for CIViC/CGI) - this halves the number "
+                                           "of --tumor_site).\nBy default, OncoKB is also queried without tumor type, adding evidence for other tumor types "
+                                           "(labelled by cancer type,\ntiered as evidence from other tumor sites, as for CIViC/CGI) - this halves the number "
                                            "of OncoKB web API queries (default: %(default)s)")
     optional_biomarker.add_argument("--oncokb_exclusive", action="store_true",
                                     help = "Limit biomarker reporting to OncoKB only - skip CIViC and CGI sources (default: %(default)s)")
     optional_biomarker.add_argument("--oncokb_maf_query_all", action="store_true",
-                                    help = "Query OncoKB for all variant classes, including non-coding variants (IGR, Intron, UTR, flanking regions). "
-                                           "By default, non-coding variants are filtered out before OncoKB annotation to reduce processing time. "
+                                    help = "Query OncoKB for all variant classes, including non-coding variants (IGR, Intron, UTR, flanking regions).\n"
+                                           "By default, non-coding variants are filtered out before OncoKB annotation to reduce processing time.\n"
                                            "Intended for TARGETED/WES assays only - enabling for WGS may result in very long MafAnnotator.py runtimes (default: %(default)s)")
     optional_biomarker.add_argument("--oncokb_keep_files", action="store_true",
-                                    help = "Keep intermediate OncoKB annotator files (input queries, raw annotator output, clinical file and logs) in the output directory. "
+                                    help = "Keep intermediate OncoKB annotator files (input queries, raw annotator output, clinical file and logs) in the output\ndirectory. "
                                            "By default, these files are removed once OncoKB annotations have been integrated into the PCGR output (default: %(default)s)")
     optional_other.add_argument("--force_overwrite", action="store_true", 
                                 help = "By default, the script will fail with an error if any output file already exists.\nYou can force the overwrite of existing result files by using this flag, default: %(default)s")

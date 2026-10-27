@@ -23,18 +23,18 @@ Example screenshots from the [quarto](https://quarto.org)-based cancer genome re
 
 <table>
   <tr>
-    <td style="padding:16px"><a href="https://github.com/sigven/pcgr/raw/main/pcgrr/pkgdown/assets/img/pcgr_actionability.png"><img src="pcgrr/pkgdown/assets/img/pcgr_actionability.png" width="380" style="border:1px solid #000;"/></a></td>
-    <td style="padding:16px"><a href="https://github.com/sigven/pcgr/raw/main/pcgrr/pkgdown/assets/img/pcgr_oncogenicity.png"><img src="pcgrr/pkgdown/assets/img/pcgr_oncogenicity.png" width="380" style="border:1px solid #000;"/></a></td>
+    <td style="padding:16px"><a href="pcgrr/pkgdown/assets/img/pcgr_actionability.png"><img src="pcgrr/pkgdown/assets/img/pcgr_actionability.png" width="380" style="border:1px solid #000;"/></a></td>
+    <td style="padding:16px"><a href="pcgrr/pkgdown/assets/img/pcgr_oncogenicity.png"><img src="pcgrr/pkgdown/assets/img/pcgr_oncogenicity.png" width="380" style="border:1px solid #000;"/></a></td>
   </tr>
   <tr>
-    <td style="padding:16px"><a href="https://github.com/sigven/pcgr/raw/main/pcgrr/pkgdown/assets/img/pcgr_cna.png"><img src="pcgrr/pkgdown/assets/img/pcgr_cna.png" width="380" style="border:1px solid #000;"/></a></td>
-    <td style="padding:16px"><a href="https://github.com/sigven/pcgr/raw/main/pcgrr/pkgdown/assets/img/pcgr_mutational_signatures.png"><img src="pcgrr/pkgdown/assets/img/pcgr_mutational_signatures.png" width="380" style="border:1px solid #000;"/></a></td>
+    <td style="padding:16px"><a href="pcgrr/pkgdown/assets/img/pcgr_cna.png"><img src="pcgrr/pkgdown/assets/img/pcgr_cna.png" width="380" style="border:1px solid #000;"/></a></td>
+    <td style="padding:16px"><a href="pcgrr/pkgdown/assets/img/pcgr_mutational_signatures.png"><img src="pcgrr/pkgdown/assets/img/pcgr_mutational_signatures.png" width="380" style="border:1px solid #000;"/></a></td>
   </tr>
 </table>
 
 In addition to the interactive HTML report, PCGR produces a static, print-friendly PDF report ([Typst](https://typst.app)-based), opening with a summary of key findings:
 
-<a href="https://github.com/sigven/pcgr/raw/main/pcgrr/pkgdown/assets/img/pcgr_pdf_report.png"><img src="pcgrr/pkgdown/assets/img/pcgr_pdf_report.png" width="792"/></a>
+<a href="pcgrr/pkgdown/assets/img/pcgr_pdf_report.png"><img src="pcgrr/pkgdown/assets/img/pcgr_pdf_report.png" width="792"/></a>
 
 <hr>
 
