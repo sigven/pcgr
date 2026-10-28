@@ -48,9 +48,13 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/assign_variant_top_tiers_ttagnostic.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/assign_variant_top_tiers_ttspecific.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/biomarker_evidence.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/biomarker_sources_not_tiered.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/bm_categories.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/bm_db_citation.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/bm_db_label.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/bm_db_mode.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/bm_db_tier_label.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/bm_db_tier_note.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/bm_evidence.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/bp_junction_transcript_overlap.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/build_germline_col_defs.html</loc></url>
@@ -124,6 +128,7 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/get_tumor_only_filtering_criteria.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/get_valid_chromosomes.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/grpmax_faf_nc_gnomad.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/has_progn_diagn_evidence.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/het_af_germline_status.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/hex_to_rgba.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/hom_af_status.html</loc></url>
@@ -169,6 +174,7 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/map_biomarker_data.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/max_af_gnomad.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/md_escape_hl.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/merge_oncokb_evidence_all_tumor_types.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/mitdb_site_count.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/mkdir.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/moi_display_text.html</loc></url>
@@ -183,6 +189,9 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/oncokb_annotations.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/oncokb_base_api_url.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/oncokb_extract_field.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/oncokb_query_all_tumor_types.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/oncokb_resolve_catchall_sites.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/oncokb_resolve_lineage_sites.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/order_variants.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/ordinal_hl.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/pdf_bm_evidence.html</loc></url>
@@ -235,6 +244,8 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/process_oncokb_cna.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/process_oncokb_fusion.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/process_oncokb_maf.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/progn_diagn_tier_note.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/progn_diagn_tiers.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/rank_fusions.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/rank_order_hl.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/remove_cols_from_df.html</loc></url>
@@ -263,6 +274,7 @@
 <url><loc>https://sigven.github.io/pcgr/dev/reference/retained_filter_classes.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/rna_fusion_recurrence_mitdb.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/rt_theme.html</loc></url>
+<url><loc>https://sigven.github.io/pcgr/dev/reference/set_bm_support_sources_not_tiered.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/share_table_filtering.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/sort_chromosomal_segments.html</loc></url>
 <url><loc>https://sigven.github.io/pcgr/dev/reference/sort_evidence_levels.html</loc></url>

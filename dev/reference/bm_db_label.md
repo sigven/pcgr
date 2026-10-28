@@ -6,7 +6,7 @@ the HTML report)
 ## Usage
 
 ``` r
-bm_db_label(report)
+bm_db_label(report, fusion = FALSE)
 ```
 
 ## Arguments
@@ -14,6 +14,10 @@ bm_db_label(report)
 - report:
 
   PCGR report object
+
+- fusion:
+
+  logical, RNA fusions (CGI evidence is never used for fusions)
 
 ## Value
 

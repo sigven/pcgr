@@ -17,7 +17,7 @@ BM_), as for other alteration types."><meta property="og:image" content="https:/
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9014</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9015</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,7 +65,8 @@ in the PCGR biomarker evidence data model (columns with prefix
 <span>  biomarker <span class="op">=</span> <span class="st">"MSI-H"</span>,</span>
 <span>  oncotree_code <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  oncokb_token <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  base_api_url <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  base_api_url <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  all_tumor_types <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -88,6 +89,11 @@ restricted to a tumor type)</p></dd>
 
 <dt id="arg-base-api-url">base_api_url<a class="anchor" aria-label="anchor" href="#arg-base-api-url"></a></dt>
 <dd><p>Optional base URL for OncoKB API (default: oncokb_base_api_url)</p></dd>
+
+
+<dt id="arg-all-tumor-types">all_tumor_types<a class="anchor" aria-label="anchor" href="#arg-all-tumor-types"></a></dt>
+<dd><p>logical, also add evidence for other tumor types
+(second query without tumor type, see <code>oncokb_query_all_tumor_types</code>)</p></dd>
 
 </dl></div>
     <div class="section level2">

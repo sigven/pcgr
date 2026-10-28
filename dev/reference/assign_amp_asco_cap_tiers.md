@@ -19,7 +19,9 @@ assign_amp_asco_cap_tiers(
   primary_site = "Any",
   biomarker_mapping_confidence = "medium",
   var_df = NULL,
-  biomarker_items = NULL
+  biomarker_items = NULL,
+  oncotree_lineage = NULL,
+  sources_not_tiered = NULL
 )
 ```
 
@@ -57,3 +59,14 @@ assign_amp_asco_cap_tiers(
 - biomarker_items:
 
   data frame with biomarker evidence items
+
+- oncotree_lineage:
+
+  OncoTree names of the OncoTree code used for OncoKB queries and its
+  ancestors (OncoKB evidence for these cancer types is considered
+  evidence for the primary site of the query tumor)
+
+- sources_not_tiered:
+
+  biomarker sources (BM_SOURCE_DB, e.g. 'cgi') whose evidence items are
+  shown for tiered variants, but not used for tier assignment

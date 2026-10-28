@@ -33,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9014</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9015</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -142,6 +142,11 @@ oncogenicity (as for the CNA table)</li>
 biomarkers (AMP/ASCO/CAP Tier 1/2) among SNVs/InDels, CNAs and RNA
 fusions are listed as supporting findings (HTML report and PDF
 cover)</li>
+<li>Prognostic and diagnostic biomarkers without a primary tumor site
+(<code>--tumor_site 0</code>): evidence from any tumor type is
+considered, and Tier 3 evidence (levels C/D/E) is also shown - in the
+HTML report (SNV/InDel, CNA and RNA fusion sections), the PDF report and
+the key findings</li>
 <li>Report header: assay mode (tumor-control/tumor-only) shown as a
 title badge next to assay type and genome assembly; data input status
 shown as a compact row of chips (including <em>Germline variants
@@ -191,25 +196,6 @@ plot caption</li>
 <strong>whole-genome doubling status (WGD)</strong> are now derived from
 the allele-specific copy number segments, and reported in the
 <code>cna_summary.tsv</code> output file</li>
-<li>
-<strong>PDF report</strong> - new section <em>Diagnostic and
-prognostic biomarkers</em> (after <em>Clinical actionability</em>): Tier
-1/2 prognostic (poor/better outcome) and diagnostic biomarker evidence
-for SNVs/InDels, CNAs and RNA fusions, per variant category, with
-evidence levels and sources; key findings on the cover link to this
-section</li>
-<li>
-<strong>PDF report</strong> - section headings and table labels are
-kept on the same page as the table that follows (no headings left alone
-at the bottom of a page); tables that fit on a page are kept together
-with their label</li>
-<li>
-<strong>PDF report</strong> - Tier 1/2 aberrations table:
-OncoKB-curated oncogenicity shown in a separate <em>OncoKB</em> column
-for SNVs/InDels, CNAs and RNA fusions (when OncoKB annotations are
-present), next to PCGR’s ClinGen/CGC/VICC oncogenicity (SNVs/InDels);
-VAF column dropped (SNVs/InDels only - shown in the SNV/InDel
-section)</li>
 <li>
 <strong>PDF report</strong> - a focused PDF report is now generated
 by default (opt out with the new <code>--no_pdf</code> option)
@@ -334,7 +320,15 @@ evidence is no longer used for tier assignment - it is still shown (as
 additional evidence) for variants that are tiered from CIViC/OncoKB
 evidence, which are used on equal terms. The CGI biomarker set is no
 longer updated, and is partly mapped to generic cancer types
-(e.g. <em>Cancer</em>) that count as pan-cancer evidence</li>
+(e.g. <em>Cancer</em>) that count as pan-cancer evidence. For
+resistance, prognostic and diagnostic evidence (shown for the tumor site
+only), a variant needs matching-site CIViC/OncoKB evidence - CGI-only
+evidence (e.g. TP53 mutations and MDM2 inhibitor resistance in
+liposarcoma) is no longer reported. The report states this in the
+actionability introductions, and messages on the absence of biomarker
+evidence name the databases used for tier assignment (<em>CIViC and
+OncoKB</em>; CGI is not named for RNA fusions, for which CGI evidence is
+not used)</li>
 <li>Heterozygous/hemizygous deletions
 (<code>hetdel</code>/<code>hemdel</code>) are no longer submitted to the
 OncoKB CNA annotator as <code>Loss</code> events, which it rejected
@@ -368,6 +362,15 @@ e.g. <code>PTEN, PTEN, PTEN</code>
 output, fixing a failure when loading somatic CNA data</li>
 <li>RNA fusions with a breakpoint on an ALT/decoy contig are dropped
 with a warning rather than aborting the run</li>
+<li>RNA fusions called with a missing partner (e.g. <code>--ALK</code>,
+<code>FGFR2--</code>) are named with the partner revealed from the
+breakpoint (e.g. <code>FGFR2::CLSTN2</code>) - previously the name kept
+the input form (<code>FGFR2::</code>), while the 5’/3’ partner columns
+showed the revealed partner</li>
+<li>CNA table (HTML): the <em>Transcript overlap</em> column listed each
+transcript’s links repeatedly when several transcripts of a gene share
+coordinates, and showed empty links for transcripts without a RefSeq
+identifier</li>
 <li>RNA fusion and CNA biomarker matching only used evidence from the
 first biomarker variant per fusion/gene key, missing e.g. the diagnostic
 CIViC evidence for EWSR1::FLI1 in Ewing sarcoma. All biomarker variants

@@ -6,7 +6,7 @@ classification (pandoc citation keys, cf. bm_db_label())
 ## Usage
 
 ``` r
-bm_db_citation(report)
+bm_db_citation(report, fusion = FALSE)
 ```
 
 ## Arguments
@@ -14,6 +14,10 @@ bm_db_citation(report)
 - report:
 
   PCGR report object
+
+- fusion:
+
+  logical, RNA fusions (CGI evidence is never used for fusions)
 
 ## Value
 

@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9014</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9015</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,7 +60,8 @@
 <span>  var_calls <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  oncotree_code <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  oncokb_token <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  rate_limiting_delay <span class="op">=</span> <span class="fl">1</span></span>
+<span>  rate_limiting_delay <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  all_tumor_types <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -87,6 +88,12 @@
 <dt id="arg-rate-limiting-delay">rate_limiting_delay<a class="anchor" aria-label="anchor" href="#arg-rate-limiting-delay"></a></dt>
 <dd><p>Delay in seconds between API calls to respect rate limits
 (default: 1 second)</p></dd>
+
+
+<dt id="arg-all-tumor-types">all_tumor_types<a class="anchor" aria-label="anchor" href="#arg-all-tumor-types"></a></dt>
+<dd><p>logical, also add evidence for other tumor types
+(second query without tumor type per variant, see
+<code>oncokb_query_all_tumor_types</code>)</p></dd>
 
 </dl></div>
     <div class="section level2">

@@ -27,7 +27,7 @@ assign tier 3 status to variants with uncertain clinical significance."><meta pr
 
     <a class="navbar-brand me-2" href="../index.html">PCGR</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9014</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.3.2.9015</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -82,7 +82,9 @@ assign tier 3 status to variants with uncertain clinical significance.</p>
 <span>  primary_site <span class="op">=</span> <span class="st">"Any"</span>,</span>
 <span>  biomarker_mapping_confidence <span class="op">=</span> <span class="st">"medium"</span>,</span>
 <span>  var_df <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  biomarker_items <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  biomarker_items <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  oncotree_lineage <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  sources_not_tiered <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -121,6 +123,17 @@ relationship</p></dd>
 
 <dt id="arg-biomarker-items">biomarker_items<a class="anchor" aria-label="anchor" href="#arg-biomarker-items"></a></dt>
 <dd><p>data frame with biomarker evidence items</p></dd>
+
+
+<dt id="arg-oncotree-lineage">oncotree_lineage<a class="anchor" aria-label="anchor" href="#arg-oncotree-lineage"></a></dt>
+<dd><p>OncoTree names of the OncoTree code used for OncoKB
+queries and its ancestors (OncoKB evidence for these cancer types is
+considered evidence for the primary site of the query tumor)</p></dd>
+
+
+<dt id="arg-sources-not-tiered">sources_not_tiered<a class="anchor" aria-label="anchor" href="#arg-sources-not-tiered"></a></dt>
+<dd><p>biomarker sources (BM_SOURCE_DB, e.g. 'cgi') whose
+evidence items are shown for tiered variants, but not used for tier assignment</p></dd>
 
 </dl></div>
 
