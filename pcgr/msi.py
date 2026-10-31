@@ -129,9 +129,9 @@ def _hint_for_wrong_file(header: list, expected_caller: str) -> str:
     """Suggest the likely cause when a file does not match the expected caller."""
     first = header[0] if header else ''
     if first.startswith('Average Metric Value'):
-        return " This looks like a MANTIS status file ('--input_msi_caller mantis')."
+        return " This looks like a MANTIS status file, which is not supported as a caller - please use the generic format."
     if first == 'Total_Number_of_Sites' and expected_caller != 'msisensor-pro':
-        return " This looks like an MSIsensor-pro summary file ('--input_msi_caller msisensor-pro')."
+        return " This looks like an MSIsensor-pro summary file - please specify '--input_msi_caller msisensor-pro'."
     if first == 'chromosome' and 'location' in header:
         return (" This looks like a locus-level MSIsensor-pro file (_all/_unstable) - "
                 "please provide the summary file (header: " + ', '.join(MSISENSOR_PRO_SUMMARY_HEADER) + ").")
@@ -166,7 +166,8 @@ def parse_msi_generic(fname: str, logger: Optional[logging.Logger] = None) -> di
     missing = [c for c in ('MSI_STATUS', 'MSI_CALLER') if c not in header]
     if missing:
         raise MsiInputError(
-            f"Missing required column(s) in MSI file ({os.path.basename(fname)}): {', '.join(missing)}."
+            f"Missing required column(s) in MSI file ({os.path.basename(fname)}): {', '.join(missing)} "
+            "(required for the generic format, which is read unless '--input_msi_caller' says otherwise)."
             + _hint_for_wrong_file(header, 'generic'))
     if len(set(header)) != len(header):
         raise MsiInputError(f"Duplicated column names in MSI file ({os.path.basename(fname)})")

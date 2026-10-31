@@ -235,7 +235,12 @@ pie_aetiologies <- plotly::plot_ly(
     msig_content$result$contributions$per_group, 
     labels =~ factor(group),
     values = ~prop_group,
-    textinfo = "percent",
+    ## show the fitted proportions as they are (consistent with the signature
+    ## contribution table/key findings) - the default 'percent' renormalises
+    ## the slices to sum to 100%, whereas the fitted proportions may sum to < 1
+    text = ~paste0(round(100 * prop_group, 1), "%"),
+    textinfo = "text",
+    hoverinfo = "label+text",
     type = 'pie',
     hole = hole_size,
     ## reserve the left part of the plot area for the pie, and place the legend
