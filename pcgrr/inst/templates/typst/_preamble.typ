@@ -314,12 +314,17 @@
   text(fill: pcgr-main, size: 8pt, weight: "bold")[#sym.bullet],
   text(fill: pcgr-main, weight: "bold")[–],
 )
+//
+// The panel may continue on the next page (long findings lists): the title
+// band sticks to the lead section, and the lead section (actionable
+// alterations, composite biomarkers) is never split - only the filtering
+// warnings and supporting findings may break across pages
 #let pcgr-highlights(body) = block(
-  width: 100%, breakable: false, clip: true, radius: 5pt,
+  width: 100%, breakable: true, clip: true, radius: 5pt,
   stroke: 1pt + pcgr-main, fill: white,
 )[
   #set block(spacing: 0pt)
-  #block(width: 100%, fill: pcgr-main, inset: (x: 14pt, y: 8pt))[
+  #block(width: 100%, fill: pcgr-main, inset: (x: 14pt, y: 8pt), sticky: true)[
     #set text(fill: white)
     #grid(
       columns: (auto, 1fr), column-gutter: 8pt, align: horizon,
@@ -331,6 +336,7 @@
 ]
 #let pcgr-hl-lead(body) = block(
   width: 100%, inset: (x: 14pt, y: 12pt), fill: pcgr-main.lighten(90%),
+  breakable: false,
 )[
   #set text(size: 10.5pt)
   #set par(justify: false, leading: 0.62em)
@@ -386,11 +392,13 @@
 // the cover page
 #let pcgr-cover-end() = {
   v(0.6cm)
-  pcgr-cover-heading[Contents]
-  v(0.2cm)
-  {
-    set text(size: 10pt)
-    outline(title: none, depth: 1, indent: 0pt)
-  }
+  // heading kept with the list (moves to the next page together when the
+  // key findings fill the cover page)
+  block(breakable: false)[
+    #pcgr-cover-heading[Contents]
+    #v(0.2cm)
+    #set text(size: 10pt)
+    #outline(title: none, depth: 1, indent: 0pt)
+  ]
   pagebreak()
 }

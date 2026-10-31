@@ -211,4 +211,11 @@ jobs:
           cp pcgrr/DESCRIPTION . # hack for pkgdown to work
           printf "pcgrr version:\n"
           Rscript -e "packageVersion('pcgrr')"
-          Rscript -e "pkgdown::deploy_to_branch(pkg = 'pcgrr', commit_message = 'Built PCGR website: https://sigven.github.io/pcgr/', branch = 'gh-pages', new_process = FALSE)"
+          # pkgdown fetches JS/CSS dependencies (e.g. from cdnjs) - allow longer
+          # downloads than R's default 60 s, and retry on transient failures
+          for attempt in 1 2 3; do
+            Rscript -e "options(timeout = 300); pkgdown::deploy_to_branch(pkg = 'pcgrr', commit_message = 'Built PCGR website: https://sigven.github.io/pcgr/', branch = 'gh-pages', new_process = FALSE)" && break
+            if [[ ${attempt} -eq 3 ]]; then exit 1; fi
+            echo "Website publish failed (attempt ${attempt}) - retrying in 30 s"
+            sleep 30
+          done
